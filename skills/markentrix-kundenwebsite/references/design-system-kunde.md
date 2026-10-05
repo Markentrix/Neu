@@ -3,6 +3,7 @@
 Ziel: erkennbar die Marke des Kunden, hochwertig, konsistent, zugänglich, schnell.
 
 ## Token-Ableitung aus Kunden-CI
+0. **Keine CI vorhanden?** Mini-CI nur als Vorschlag für Demo/Website; Logo/Farb-/Schriftwelt als Leistung anbieten (CI BASIC 1.290 €, CI BUSINESS 2.490 €, CI PREMIUM 4.490 €; 500 € Kombivorteil mit Website laut Preisliste).
 1. **Primärfarbe** vom Kunden. Kontrast prüfen: als Textfarbe auf Weiß ≥ 4.5:1, sonst abdunkeln (`--brand-ink`). Als Button-Fläche: Textfarbe (weiß oder dunkel) mit ≥ 4.5:1 wählen.
 2. **Neutralskala** (Hintergründe, Linien, Text) aus der Primärfarbe oder neutral ableiten, 8–10 Stufen. Text nie reines Schwarz auf reinem Weiß, aber ≥ 7:1 für Fließtext anstreben.
 3. **Akzent** sparsam (≤ 10 %) für CTA/Highlights. Status: Erfolg, Fehler (≥ 4.5:1).

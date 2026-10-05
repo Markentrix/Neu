@@ -21,11 +21,11 @@ Neue Website, Relaunch, Onepager, Kampagnen-Landingpage, Leistungsseite, Danke-/
 6. **Performance-Budget** (Abschnitt 7) erreicht oder Abweichung begründet.
 7. **Rechtliche Pflichtseiten** (Impressum, Datenschutz, ggf. Barrierefreiheitserklärung) mit **Daten des Kunden**, nie erfunden. Rechtstexte aus Generator/Anwalt, Freigabe durch Kunden. Keine Rechtsberatung.
 8. **Nach außen nur Markentrix als Agentur:** nie Tool-/Modellnamen (Claude, Higgsfield, n8n …) im Code, Footer, Meta, Übergabe. Credit-Link „Website von Markentrix“ nur wenn vertraglich vereinbart, dezent, `rel` passend.
-9. **Kundeneigentum:** Domain, Hosting-Konto, Zugänge, Quellcode gehören dem Kunden bzw. werden vollständig übergeben (laut Vertrag). Keine Abhängigkeit, die nur Markentrix lösen kann, ohne es zu sagen.
+9. **Kundeneigentum & Hosting:** Die Domain wird auf den Kunden registriert. In der Pflege hostet Markentrix (Preisliste: Hosting, Updates, Sicherung inklusive), daher AV-Vertrag und transparente Regelung für Export/Umzug des Codes. Keine versteckte Abhängigkeit, die nur Markentrix lösen kann.
 10. **Kein Dark-Pattern:** Ablehnen = Akzeptieren, keine Fake-Verknappung, keine vorangekreuzten Haken.
 11. **Demo für jeden Kunden, aber sauber:** Jede Anfrage bekommt eine eigene Demo (Phase 1b) als gekennzeichneter Entwurf: `noindex`, passwortgeschützt, keine erfundenen Inhalte, keine fremden Rechte, kein Tracking, Löschfrist. Regeln in `demo-website.md`.
 12. **Dokumente für den Kunden** (Briefing, Angebot) stehen in **Markentrix-CI**, die Website in **Kunden-CI**. Preise nur aus der aktuellen Preisliste, nie erfunden.
-13. **Preise/Leistung der Markentrix-Angebote** (z. B. Websites ab 1.290 €) nur laut aktueller Preisliste in Angeboten, nie auf Kundenseiten.
+13. **Preise und Pakete** nur laut Preisliste (`pakete-preise.md`), in Angeboten, nie auf Kundenseiten, nie rabattiert ohne Freigabe. Paketumfang (LANDING START/LANDING/BUSINESS WEB/WEB + FUNNEL) bestimmt die Tiefe, nicht die Qualitätsstandards.
 
 ## 3. Arbeitsablauf (Agentur-Pipeline)
 | Phase | Ergebnis | Referenz |
@@ -33,7 +33,7 @@ Neue Website, Relaunch, Onepager, Kampagnen-Landingpage, Leistungsseite, Danke-/
 | 0 Intake | ausgefülltes Briefing (Markentrix-CI-Dokument), Asset-/Zugangsliste | `briefing-intake.md`, `angebot-briefing-dokumente.md` |
 | 1 Strategie | Ziel, Zielgruppe, USP, Wettbewerbs-Check, Sitemap, KPI | `briefing-intake.md`, `branchen.md` |
 | 1b **Demo (Pflicht)** | individuelle Demo-Website für diesen Kunden, vor/mit Angebot | `demo-website.md` |
-| 1c Angebot | Angebot in Markentrix-CI mit Demo-Link | `angebot-briefing-dokumente.md` |
+| 1c Angebot | Angebot in Markentrix-CI mit Paket, Demo-Link, Preisliste | `angebot-briefing-dokumente.md`, `pakete-preise.md` |
 | 2 Design-System | Kunden-Tokens, Typo, Komponenten, Bildsprache | `design-system-kunde.md` |
 | 3 Copy | Texte pro Seite, SEO-Keywords, CTAs, freigegeben | `conversion-landingpage.md` |
 | 4 Umsetzung | Code aus Starter, Animation, Formulare, Consent | `animation.md`, `dsgvo-recht.md` |
@@ -87,4 +87,4 @@ LCP ≤ 2,0 s · INP ≤ 150 ms · CLS ≤ 0,05 · TTFB ≤ 0,6 s · Lighthouse 
 Kurz und ehrlich: Umfang, Messwerte (Lab/Feld getrennt), offene Punkte (z. B. anwaltliche Prüfung, fehlende Inhalte), Zugänge/Eigentum, Pflegehinweise, Empfehlung Pflegepaket. Absender „Ihr Markentrix-Team“. Vorlagen: `assets/dokumente/angebot.html`, `assets/dokumente/briefing.html` (A4, Markentrix-CI, als PDF exportierbar). Siehe `abnahme-uebergabe.md`.
 
 ## 10. Referenzen
-`briefing-intake.md` · `branchen.md` · `demo-website.md` · `angebot-briefing-dokumente.md` · `design-system-kunde.md` · `conversion-landingpage.md` · `animation.md` · `performance.md` · `barrierefreiheit.md` · `dsgvo-recht.md` · `seo.md` · `abnahme-uebergabe.md`
+`briefing-intake.md` · `branchen.md` · `pakete-preise.md` · `demo-website.md` · `angebot-briefing-dokumente.md` · `design-system-kunde.md` · `conversion-landingpage.md` · `animation.md` · `performance.md` · `barrierefreiheit.md` · `dsgvo-recht.md` · `seo.md` · `abnahme-uebergabe.md`
