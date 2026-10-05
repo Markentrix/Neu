@@ -1,0 +1,21 @@
+/* Markentrix Design Tokens – CI 2026 White Light Premium */
+@font-face{font-family:"Space Grotesk";src:url("fonts/SpaceGrotesk-Variable.woff2") format("woff2");font-weight:500 700;font-display:swap}
+@font-face{font-family:"Inter";src:url("fonts/Inter-Variable.woff2") format("woff2");font-weight:400 600;font-display:swap}
+
+:root{
+  --soft-white:#F8FAFC; --white:#FFFFFF; --navy:#0B1020; --black:#05070B;
+  --cyan:#28C7F7; --blue:#1E9BFF; --violet:#8B5CF6; --magenta:#D85CFF;
+  --cool-gray:#B8C0CC; --muted:#667085;
+  --link:#0B5FB5;               /* abgedunkeltes Blue, >= 4.5:1 auf Weiß */
+  --grad-cta:linear-gradient(135deg,var(--cyan),var(--blue));
+  --font-head:"Space Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --fs-0:clamp(1rem,.96rem + .2vw,1.125rem);
+  --fs-1:clamp(1.25rem,1.1rem + .6vw,1.5rem);
+  --fs-2:clamp(1.75rem,1.4rem + 1.6vw,2.75rem);
+  --fs-3:clamp(2.25rem,1.6rem + 3vw,4rem);
+  --space:clamp(1rem,.8rem + 1vw,1.5rem); --section:clamp(3.5rem,2.5rem + 5vw,7rem);
+  --radius:14px; --maxw:1120px;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  color-scheme:light;
+}

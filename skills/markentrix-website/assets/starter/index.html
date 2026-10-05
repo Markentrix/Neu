@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mehr Anfragen. Weniger Aufwand. | Markentrix Celle</title>
+<meta name="description" content="KI-Automatisierung und Social-Media-Werbung für lokale Unternehmen. Markentrix aus Celle: Automatisierung. Werbung. Wachstum.">
+<link rel="canonical" href="https://markentrix.de/">
+<meta name="theme-color" content="#F8FAFC">
+<meta property="og:title" content="Markentrix – Mehr Anfragen. Weniger Aufwand.">
+<meta property="og:description" content="KI-Automatisierung und Social-Media-Werbung für lokale Unternehmen.">
+<meta property="og:type" content="website"><meta property="og:image" content="https://markentrix.de/assets/og.jpg">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/SpaceGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="main.css">
+<script src="main.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="site"><div class="wrap">
+  <a href="/" aria-label="Markentrix, zur Startseite"><strong style="font-family:var(--font-head)">Markentrix</strong><!-- Logo-SVG laut CI einsetzen --></a>
+  <a class="btn" href="#kontakt">Marketing-Check anfragen</a>
+</div></header>
+
+<main id="main">
+  <section class="hero"><div class="wrap">
+    <p class="eyebrow">Automatisierung. Werbung. Wachstum.</p>
+    <h1>Mehr Anfragen für Ihren Betrieb. Weniger Aufwand im Büro.</h1>
+    <p>[PLATZHALTER – Subline mit freigegebenem Nutzenversprechen für die Zielgruppe]</p>
+    <a class="btn" href="#kontakt">Marketing-Check anfragen</a>
+    <svg class="curve" viewBox="0 0 400 120" role="img" aria-label="Aufsteigende Wachstumskurve" width="400" height="120">
+      <defs><linearGradient id="cg"><stop offset="0" stop-color="#28C7F7"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>
+      <path pathLength="1" d="M5 105 C 90 100, 140 80, 200 60 S 330 20, 395 8"/>
+    </svg>
+  </div></section>
+
+  <section aria-labelledby="leistungen"><div class="wrap">
+    <h2 id="leistungen" data-reveal>Ein System statt Einzelmaßnahmen</h2>
+    <div class="grid">
+      <article class="card" data-reveal><h3>KI-Automatisierung</h3><p>Anfragen vorqualifizieren, E-Mails automatisch beantworten, Termine koordinieren.</p></article>
+      <article class="card" data-reveal><h3>Social-Media-Werbung</h3><p>Meta-Ads-Strategie, Lead-Kampagnen, Retargeting, A/B-Tests.</p></article>
+      <article class="card" data-reveal><h3>Lokale Sichtbarkeit</h3><p>Google-Profil, lokale SEO-Grundlagen, Bewertungsstrategie.</p></article>
+    </div>
+  </div></section>
+
+  <section id="kontakt" aria-labelledby="kontakt-h"><div class="wrap">
+    <h2 id="kontakt-h">Marketing-Check anfragen</h2>
+    <form method="post" action="/anfrage" novalidate>
+      <div><label for="name">Name</label><input id="name" name="name" autocomplete="name" required></div>
+      <div><label for="mail">E-Mail</label><input id="mail" name="mail" type="email" autocomplete="email" required aria-describedby="mail-h"><span id="mail-h" class="hint">Wir antworten per E-Mail.</span></div>
+      <div><label for="msg">Ihr Anliegen <span class="hint">(optional)</span></label><textarea id="msg" name="msg" rows="4"></textarea></div>
+      <div class="hp" aria-hidden="true"><label for="website">Nicht ausfüllen</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+      <p class="hint">Ihre Angaben verwenden wir nur zur Bearbeitung Ihrer Anfrage. Mehr in der <a href="/datenschutz">Datenschutzerklärung</a>.</p>
+      <button class="btn" type="submit">Marketing-Check anfragen</button>
+      <p role="status" aria-live="polite" id="form-status"></p>
+    </form>
+  </div></section>
+</main>
+
+<footer class="site"><div class="wrap">
+  <p>Markentrix · Celle, Niedersachsen · <a href="mailto:info@markentrix.de">info@markentrix.de</a></p>
+  <p><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></p>
+</div></footer>
+</body>
+</html>
