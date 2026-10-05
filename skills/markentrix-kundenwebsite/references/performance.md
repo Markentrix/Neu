@@ -6,6 +6,16 @@ Ziele und Budget stehen im SKILL (Abschnitt 6). Hier die Rezepte. Immer erst mes
 - Lab: Lighthouse (mobil, gedrosselt), WebPageTest. Feld: PageSpeed Insights/CrUX, Search Console (Core Web Vitals). Lab ≠ Feld, getrennt berichten.
 - Chrome DevTools: Performance-Panel für INP/Long Tasks, Network-Panel für Requests (0 Drittanbieter vor Consent).
 
+## Praxis-Erkenntnisse aus der ersten Demo (HOLZWERK, gemessen mit gedrosseltem Chrome)
+- **Mit realer Drosselung messen** (`lighthouse --throttling-method=devtools`, Slow 4G, 4x CPU). Die Standard-Simulation war zu optimistisch (LCP 2,3 s simuliert, real 3,0 s).
+- **Heading-Schrift inline einbetten** (Latin-Subset als Base64 im kritischen CSS, ca. 25 KB): kein Schrift-Tausch, kein Layout-Shift (CLS 0,085 → 0,03), kein zusätzlicher Request. Body-Schrift: `font-display: optional` + Preload.
+- **Schriften auf benötigte Zeichen subsetten** (`pyftsubset`, Latin-Basis + ä ö ü ß „ “ – € · →), spart ca. 45 %.
+- **Hero-Bild responsiv** (`srcset` 480/720/840 + `sizes`, Preload mit `imagesrcset`), mobil ca. 33–63 KB statt 90 KB. `fetchpriority="high"`, nie lazy.
+- **Hero-Animation ohne Transparenz-Start:** `opacity:0` auf LCP-Elementen verzögert LCP. Nur `transform` animieren.
+- **Kritisches CSS inline** (minifiziert, < 15 KB), keine render-blockierende CSS-Datei.
+- Bilder unter dem Fold konkurrieren trotz `loading="lazy"` mit dem Hero, wenn sie nahe liegen: Hero klein halten, andere Bilder `fetchpriority="low"`.
+- Sticky Header und Demo-Leiste nicht beide `sticky` (mobil mehrzeilig, überdeckt den Header).
+
 ## LCP (Largest Contentful Paint)
 - LCP-Element identifizieren (meist Hero-Bild oder Headline). Hero-Bild: `fetchpriority="high"`, **nicht** lazy, per `<link rel="preload" as="image" imagesrcset=… imagesizes=…>` wenn es per CSS geladen wird.
 - Bildgrößen exakt (`srcset` + `sizes`), AVIF → WebP → JPG, Qualität 60–75, Ziel Hero ≤ 100 KB mobil. Alternative: reine CSS/SVG-Grafik (Wachstumskurve als Inline-SVG).

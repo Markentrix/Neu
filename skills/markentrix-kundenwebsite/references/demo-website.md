@@ -22,6 +22,9 @@ Nach dem Erstgespräch/Briefing-Kurzcheck, vor dem Angebot (oder gemeinsam mit i
 7. **Aufräumen:** Demo wird nach vereinbarter Frist (z. B. 30 Tage) ohne Auftrag gelöscht. Dem Kunden mitteilen.
 8. Nach außen nur Markentrix, keine Tool-/Modellnamen.
 
+## Ablage und Referenzbeispiel
+Demos liegen im Repo unter `demos/<kunde>/` mit eigener `README.md` (Grundlage, Messwerte, offene Punkte). Erstes Beispiel: `demos/holzwerk-celle/` (Handwerk, Altbau-Relaunch von holzwerk-celle.de). Bei Relaunch zuerst die bestehende Seite auswerten (Struktur, Texte, Bilder, Drittanbieter, Technik) und im README als Befund festhalten.
+
 ## Ablauf
 1. Öffentlichen Auftritt, Google-Profil, 3 Wettbewerber ansehen (10 min), USP und Schwäche der aktuellen Seite notieren.
 2. Hero-Aussage und Struktur festlegen (ein Ziel, ein CTA).
