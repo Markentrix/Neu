@@ -47,7 +47,7 @@ Nur fehlende Angaben beim Auftraggeber erfragen, den Rest mit begründeten Defau
 ## 4. Standard-Stack
 - Statische Seiten ≤ 10 Seiten: reines HTML/CSS/JS aus `assets/starter/` oder Astro. Mehr Seiten/Redakteursbedarf: Astro + Markdown/Headless-CMS (EU-Hosting) oder WordPress nur auf Kundenwunsch (dann Hardening, Caching, kein Page-Builder-Ballast, Plugin-Minimum, DSGVO-Plugins prüfen).
 - Kein SPA-Zwang, Inhalte im HTML ausgeliefert. Progressive Enhancement.
-- Hosting: Hetzner (nur EU-Rechenzentrum), HTTPS, AVV, Backup, Security-Header (`performance.md`). Formularversand serverseitig/über AVV-Dienst, Spam-Schutz ohne reCAPTCHA.
+- Hosting: Hetzner, Serverstandort Nürnberg, HTTPS, AVV, Backup, Security-Header (`performance.md`). Formularversand serverseitig/über AVV-Dienst, Spam-Schutz ohne reCAPTCHA.
 - Versionskontrolle (Git), Staging getrennt von Live, `noindex` auf Staging.
 
 ## 5. Agentur-Qualitätsmerkmale (Unterschied zu Baukasten-Seiten)

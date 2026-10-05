@@ -7,7 +7,7 @@
 
 <h2>Parteien</h2>
 <table><tr><th>Verantwortlicher (Kunde)</th><td class="ph">[Firma, Anschrift, Vertreter]</td></tr>
-<tr><th>Auftragsverarbeiter</th><td>Markentrix, Heinrich-Hüfig-Str. 1 · 29227 Celle <span class="ph">[Rechtsform, Vertreter]</span></td></tr></table>
+<tr><th>Auftragsverarbeiter</th><td>Markentrix (Einzelunternehmen), Inhaber Christian Wien, <span class="ph">Heinrich-Hüfig-Str. 1 [Schreibweise prüfen: Hüfig/Hüdig]</span> · 29227 Celle</td></tr></table>
 
 <h2>1. Gegenstand und Dauer</h2>
 <p>Markentrix hostet und betreut die Website des Verantwortlichen (Hosting, Updates, Sicherung, kleine Inhaltsänderungen, technische Betreuung) und verarbeitet dabei personenbezogene Daten im Auftrag. Grundlage ist das Angebot <span class="ph">[Nr.]</span>. Der Vertrag gilt für die Dauer der Pflegeleistung und endet mit ihr.</p>
@@ -19,13 +19,13 @@
 <li>Verarbeitung nur auf dokumentierte Weisung des Verantwortlichen; ist eine Weisung rechtswidrig, weist Markentrix darauf hin.</li>
 <li>Vertraulichkeit: Beschäftigte sind zur Vertraulichkeit verpflichtet.</li>
 <li>Technische und organisatorische Maßnahmen nach Art. 32 DSGVO gemäß Anlage 1.</li>
-<li>Unterauftragnehmer nur mit Genehmigung; die genehmigten Unterauftragnehmer stehen in Anlage 2. Änderungen werden vorab mitgeteilt, Einspruch ist möglich. Unterauftragnehmer werden vertraglich gleichwertig verpflichtet.</li>
+<li>Unterauftragnehmer nur mit Genehmigung; die genehmigten Unterauftragnehmer stehen in Anlage 2. Änderungen werden rechtzeitig vorab mitgeteilt; der Verantwortliche kann innerhalb von 14 Tagen aus wichtigem datenschutzrechtlichem Grund widersprechen, sonst gilt die Änderung als genehmigt. Unterauftragnehmer werden vertraglich gleichwertig verpflichtet.</li>
 <li>Unterstützung bei Betroffenenrechten (Auskunft, Berichtigung, Löschung, Einschränkung, Übertragbarkeit, Widerspruch).</li>
 <li>Unterstützung bei Pflichten nach Art. 32–36 DSGVO (Sicherheit, Datenpannen, Datenschutz-Folgenabschätzung).</li>
-<li>Meldung von Verletzungen des Schutzes personenbezogener Daten unverzüglich, spätestens <span class="ph">[24]</span> Stunden nach Kenntnis.</li>
+<li>Meldung von Verletzungen des Schutzes personenbezogener Daten unverzüglich nach Kenntnis, auch wenn sie bei einem Unterauftragnehmer (z. B. Hetzner) auftreten und Markentrix gemeldet werden.</li>
 <li>Löschung oder Rückgabe aller Daten nach Vertragsende nach Wahl des Verantwortlichen, Löschbestätigung auf Wunsch; gesetzliche Aufbewahrungspflichten bleiben unberührt.</li>
 <li>Nachweise und Kontrollen: Markentrix stellt die erforderlichen Informationen zum Nachweis bereit und ermöglicht Überprüfungen nach rechtzeitiger Anmeldung.</li>
-<li>Verarbeitung ausschließlich in der EU/im EWR (Hetzner-Rechenzentren in Deutschland/Finnland, keine US-Standorte); Drittlandübermittlung nur bei Vorliegen der Voraussetzungen der Art. 44 ff. DSGVO <span class="ph">[prüfen]</span>.</li></ol>
+<li>Verarbeitung ausschließlich in der EU/im EWR (Serverstandort Nürnberg, Deutschland; keine Server in den USA oder Singapur); Drittlandübermittlung nur bei Vorliegen der Voraussetzungen der Art. 44 ff. DSGVO <span class="ph">[prüfen]</span>.</li></ol>
 <h2>4. Pflichten des Verantwortlichen</h2>
 <p>Der Verantwortliche ist für die Rechtmäßigkeit der Verarbeitung und für seine Rechtstexte (Impressum, Datenschutzerklärung, AGB) verantwortlich und informiert Markentrix über relevante Änderungen. Eigene Dienste (z. B. Terminbuchungstool) schließt er in eigenem Namen mit dem Anbieter ab.</p>
 <h2>5. Haftung, Schlussbestimmungen</h2>
@@ -35,6 +35,7 @@
 <table><tr><th>Bereich</th><th>Maßnahme <span class="ph">[an Realität anpassen]</span></th></tr>
 <tr><td>Zutritt/Zugang</td><td>Zutrittskontrolle Rechenzentrum durch Hoster, Passwortrichtlinie, Zwei-Faktor-Authentifizierung, Passwort-Manager</td></tr>
 <tr><td>Zugriff</td><td>Rollen und Rechte nach Need-to-know, Protokollierung von Admin-Zugriffen</td></tr>
+<tr><td>Rechenzentrum (Hetzner)</td><td>Zertifizierung ISO 27001 und BSI C5 Typ 2 Testat; Maßnahmen laut Hetzner-TOM (hetzner.com/de/AV/TOM.pdf, jeweils aktuelle Fassung)</td></tr>
 <tr><td>Weitergabe</td><td>Verschlüsselung (TLS, HSTS), Versand von Zugangsdaten nur über sichere Wege</td></tr>
 <tr><td>Eingabe/Integrität</td><td>Versionierung (Git), nachvollziehbare Änderungen</td></tr>
 <tr><td>Verfügbarkeit</td><td>Regelmäßige Sicherung, Wiederherstellungstest, Monitoring, Updates/Patches</td></tr>
@@ -42,8 +43,8 @@
 <tr><td>Organisation</td><td>Verpflichtung auf Vertraulichkeit, Datenschutzunterweisung, Incident-Prozess, Löschkonzept (Logs <span class="ph">[7]</span> Tage)</td></tr></table>
 <h2>Anlage 2: Unterauftragnehmer</h2>
 <table><tr><th>Dienst</th><th>Anbieter, Sitz</th><th>Leistung / Standort der Daten</th></tr>
-<tr><td>Hosting (Server)</td><td>Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen</td><td>Rechenzentrum in der EU <span class="ph">[Standort: Nürnberg / Falkenstein / Helsinki – festlegen]</span>; AV-Vertrag zwischen Markentrix und Hetzner liegt vor</td></tr>
+<tr><td>Hosting (Server)</td><td>Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen</td><td>Serverstandort Nürnberg (Deutschland). Hetzner verarbeitet Serverdaten bei EU-Standort ausschließlich in der EU, Support innerhalb der EU. Subunternehmer von Hetzner nach Anlage 3 des Hetzner-AV-Vertrags (Version 1.2, Stand 16.02.2026). AV-Vertrag Markentrix–Hetzner vom 05.10.2026</td></tr>
 <tr><td>E-Mail/Formularversand</td><td class="ph">[Anbieter, Sitz]</td><td class="ph">[EU]</td></tr>
 <tr><td>Backup</td><td class="ph">[Anbieter, Sitz]</td><td class="ph">[EU]</td></tr></table>
 <div class="sign"><div>Ort, Datum, Unterschrift Verantwortlicher</div><div>Ort, Datum, Unterschrift Markentrix</div></div>
-<footer><span>Markentrix · Heinrich-Hüfig-Str. 1 · 29227 Celle · markentrix.de · info@markentrix.de</span><span>AV-Vertrag Art. 28 DSGVO</span></footer></body></html>
+<footer><span>Markentrix · <span class="ph">Heinrich-Hüfig-Str. 1 [Schreibweise prüfen: Hüfig/Hüdig]</span> · 29227 Celle · markentrix.de · info@markentrix.de</span><span>AV-Vertrag Art. 28 DSGVO</span></footer></body></html>
