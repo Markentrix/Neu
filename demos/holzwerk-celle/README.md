@@ -2,6 +2,8 @@
 
 Entwurf von Markentrix nach Skill `markentrix-kundenwebsite`. **Nicht veröffentlichen**, solange nicht freigegeben: `noindex`, Demo-Leiste, kein Tracking, keine Drittanbieter, Formular ohne Funktion.
 
+Online-Vorschau (05.10.2026): Netlify-Projekt `hw-demo-7i85te2dug` im Team „Markentrix“ (Free-Tarif, kein Passwortschutz), unlistbare Adresse, `noindex` per Meta-Tag und Header. Link nur an den Kunden geben. **Löschen nach 30 Tagen ohne Auftrag** (Netlify: Project settings → Delete). Deploy-Inhalt: HTML, `assets/`, `favicon.svg`, `robots.txt`, `_headers` (ohne `build/`, `preview/`, README).
+
 Start lokal: `python3 -m http.server 8765` im Ordner, dann `http://127.0.0.1:8765/`.
 
 ## Grundlage
