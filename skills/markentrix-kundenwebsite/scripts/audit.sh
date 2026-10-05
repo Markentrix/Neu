@@ -29,6 +29,7 @@ for f in "${html[@]}"; do
   grep -q 'impressum' "$f" || W "$f: kein Impressum-Link"
   grep -q 'datenschutz' "$f" || W "$f: kein Datenschutz-Link"
   grep -q 'PLATZHALTER' "$f" && W "$f: Platzhalter noch vorhanden (nicht live!)"
+  if grep -q 'data-demo' "$f"; then grep -qi 'noindex' "$f" || F "$f: Demo ohne noindex"; W "$f: Demo-Modus aktiv (vor Livegang entfernen)"; else grep -qi 'name="robots"[^>]*noindex' "$f" && W "$f: noindex aktiv (nur Staging/Demo)"; fi
   grep -qE 'tabindex="[1-9]' "$f" && F "$f: positives tabindex"
   grep -qE 'href="#"' "$f" && W "$f: leerer Link href=\"#\""
   grep -qE 'target="_blank"' "$f" && ! grep -q 'noopener' "$f" && W "$f: target=_blank ohne rel=noopener"

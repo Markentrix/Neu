@@ -1,0 +1,21 @@
+/* Markentrix-CI für Angebots-/Briefing-Dokumente (A4). Schriften selbst hosten (fonts/), sonst System-Fallback. */
+:root{--soft:#F8FAFC;--white:#fff;--navy:#0B1020;--cyan:#28C7F7;--blue:#1E9BFF;--muted:#667085;--line:#E6EAF0;--grad:linear-gradient(135deg,#28C7F7,#1E9BFF)}
+@page{size:A4;margin:18mm 16mm 20mm}
+*{box-sizing:border-box}
+body{margin:0;font:400 10.5pt/1.55 Inter,system-ui,"Segoe UI",sans-serif;color:var(--navy);background:var(--white)}
+h1,h2,h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;letter-spacing:-.01em;margin:0 0 .4em}
+h1{font-size:26pt;font-weight:700;line-height:1.1} h2{font-size:14pt;font-weight:700;margin-top:1.4em;padding-top:.6em;border-top:2px solid var(--navy)} h3{font-size:11pt;font-weight:600}
+.brand{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid transparent;border-image:var(--grad) 1;padding-bottom:8pt;margin-bottom:22pt}
+.brand strong{font:700 14pt "Space Grotesk",sans-serif}.brand span{color:var(--muted);font-size:9pt}
+.lead{font-size:12pt;color:var(--muted);max-width:60ch}
+table{width:100%;border-collapse:collapse;margin:.6em 0}th,td{padding:6pt 8pt;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--soft);font-weight:600} td.n,th.n{text-align:right;white-space:nowrap}
+.box{background:var(--soft);border:1px solid var(--line);border-radius:8pt;padding:10pt 12pt;margin:.8em 0}
+.ph{background:#FFF7D6;padding:0 3pt;border-radius:3pt} /* PLATZHALTER sichtbar */
+.field{border-bottom:1px solid var(--navy);min-height:16pt;margin:3pt 0 9pt}
+label{font-size:9pt;color:var(--muted);display:block}
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:24pt;margin-top:28pt}.sign div{border-top:1px solid var(--navy);padding-top:4pt;font-size:9pt;color:var(--muted)}
+footer{margin-top:28pt;padding-top:8pt;border-top:1px solid var(--line);color:var(--muted);font-size:8.5pt}
+.cta{display:inline-block;background:var(--grad);color:var(--navy);font:600 10.5pt "Space Grotesk",sans-serif;padding:7pt 16pt;border-radius:99pt;text-decoration:none}
+section{break-inside:avoid-page}
+@media print{.noprint{display:none}}

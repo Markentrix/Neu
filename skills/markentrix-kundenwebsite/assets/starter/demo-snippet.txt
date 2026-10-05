@@ -1,0 +1,5 @@
+<!-- DEMO-MODUS: in <head> einfügen -->
+<meta name="robots" content="noindex, nofollow">
+<!-- DEMO-MODUS: direkt nach <body> einfügen; beim Livegang entfernen -->
+<div class="demo-bar" data-demo role="note">Designvorschlag für [Firmenname] – nicht veröffentlicht. Texte und Bilder sind Platzhalter bzw. Vorschläge.</div>
+<style>.demo-bar{position:sticky;top:0;z-index:200;background:#0B1020;color:#fff;font:500 .875rem/1.4 system-ui,sans-serif;padding:.5rem 1rem;text-align:center}</style>
