@@ -25,7 +25,7 @@ Neue Website, Relaunch, Onepager, Kampagnen-Landingpage, Leistungsseite, Danke-/
 10. **Kein Dark-Pattern:** Ablehnen = Akzeptieren, keine Fake-Verknappung, keine vorangekreuzten Haken.
 11. **Demo für jeden Kunden, aber sauber:** Jede Anfrage bekommt eine eigene Demo (Phase 1b) als gekennzeichneter Entwurf: `noindex`, passwortgeschützt, keine erfundenen Inhalte, keine fremden Rechte, kein Tracking, Löschfrist. Regeln in `demo-website.md`.
 12. **Dokumente für den Kunden** (Briefing, Angebot) stehen in **Markentrix-CI**, die Website in **Kunden-CI**. Preise nur aus der aktuellen Preisliste, nie erfunden.
-13. **Preise und Pakete** nur laut Preisliste (`pakete-preise.md`), in Angeboten, nie auf Kundenseiten, nie rabattiert ohne Freigabe. Paketumfang (LANDING START/LANDING/BUSINESS WEB/WEB + FUNNEL) bestimmt die Tiefe, nicht die Qualitätsstandards.
+13. **AGB von Markentrix** liefert der Inhaber, nie selbst formulieren. **Preise und Pakete** nur laut Preisliste (`pakete-preise.md`), in Angeboten, nie auf Kundenseiten, nie rabattiert ohne Freigabe. Paketumfang (LANDING START/LANDING/BUSINESS WEB/WEB + FUNNEL) bestimmt die Tiefe, nicht die Qualitätsstandards.
 
 ## 3. Arbeitsablauf (Agentur-Pipeline)
 | Phase | Ergebnis | Referenz |
@@ -47,7 +47,7 @@ Nur fehlende Angaben beim Auftraggeber erfragen, den Rest mit begründeten Defau
 ## 4. Standard-Stack
 - Statische Seiten ≤ 10 Seiten: reines HTML/CSS/JS aus `assets/starter/` oder Astro. Mehr Seiten/Redakteursbedarf: Astro + Markdown/Headless-CMS (EU-Hosting) oder WordPress nur auf Kundenwunsch (dann Hardening, Caching, kein Page-Builder-Ballast, Plugin-Minimum, DSGVO-Plugins prüfen).
 - Kein SPA-Zwang, Inhalte im HTML ausgeliefert. Progressive Enhancement.
-- Hosting EU, HTTPS, AVV, Backup, Security-Header (`performance.md`). Formularversand serverseitig/über AVV-Dienst, Spam-Schutz ohne reCAPTCHA.
+- Hosting: Hetzner (nur EU-Rechenzentrum), HTTPS, AVV, Backup, Security-Header (`performance.md`). Formularversand serverseitig/über AVV-Dienst, Spam-Schutz ohne reCAPTCHA.
 - Versionskontrolle (Git), Staging getrennt von Live, `noindex` auf Staging.
 
 ## 5. Agentur-Qualitätsmerkmale (Unterschied zu Baukasten-Seiten)
