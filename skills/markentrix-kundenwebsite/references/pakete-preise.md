@@ -26,7 +26,14 @@ Immer gegen die aktuelle Preisliste im Projekt „Markentrix“ prüfen. Alle Pr
 | Funnel (Strecke, Danke-Seiten, Messung) | – | Danke-Seite | – | enthalten |
 
 Qualitätsstandards (Performance, A11y, DSGVO, SEO-Basis, Tests) gelten in **allen** Paketen. Der Unterschied liegt in Umfang und Individualisierung, nie in Recht oder Barrierefreiheit.
-**Vor Angebot klären/bestätigen (Preisliste ist hier offen):** ob Impressum, Datenschutz und 404 als Inhaltsseiten zählen · was „Bilder“ bei BUSINESS WEB/LANDING genau meint (Auswahl lizenzierter Bilder, kein Fotoshooting) · ab wann die 12 Pflegemonate laufen (Livegang) · ob Fremdlizenzen (Fotos, Schriften, Buchungstool) enthalten sind.
+## Festlegungen (vom Inhaber bestätigt, Preisstand 01.10.2026)
+- **Inhaltsseiten:** Impressum, Datenschutz und 404 zählen **nicht** mit.
+- **Bilder:** Markentrix besorgt/erstellt die Bilder (Auswahl, Lizenzklärung, ggf. KI-Bilder nach CI-Bildrichtlinie). **Fotos** (Betrieb, Team, Arbeit) kann Markentrix machen oder der Kunde liefert sie; ein Fotoshooting durch Markentrix ist Zusatzleistung, Preis individuell und vorab schriftlich vereinbart (steht nicht in der Preisliste, nie Preis erfinden).
+- **Pflege:** 12 Monate Mindestlaufzeit ab Livegang.
+- **Lizenzen:** Schriften und Bildlizenzen sind im Projektpreis enthalten. Markentrix dokumentiert die Lizenznachweise je Bild/Schrift in der Übergabe.
+- **Buchungstool:** Die Terminbuchung (LANDING) wird eingebunden, die Tool-Kosten/-Lizenz trägt der Kunde und sind **nicht** enthalten. Tool-Anbieter braucht eigenen AVV des Kunden und kommt in die Datenschutzerklärung/ggf. den Consent.
+- **Rechtstexte:** Impressum, Datenschutzerklärung, AGB und weitere Rechtstexte der Kundenseite erstellt der Kunde (Generator/Anwalt) und liefert sie an Markentrix. Anschrift, Register, USt-IdNr. liefert der Kunde. Markentrix bindet ein und prüft nur auf Vollständigkeit der Pflichtangaben und zur Seite passende Dienste, keine inhaltliche Rechtsprüfung.
+- **AVV:** Markentrix erstellt den AV-Vertrag (Vorlage `assets/dokumente/avv.html`).
 
 ## Hosting und Eigentum
 In der Pflege hostet Markentrix: Markentrix ist dann Auftragsverarbeiter (AV-Vertrag, Unterauftragnehmer benennen). Domain bleibt beim Kunden (Registrierung auf den Kunden). Übergabe/Export des Quellcodes und Umzug laut Vertrag zu klären (nach Abnahme oder bei Ende der Pflege), nie stillschweigend blockieren.

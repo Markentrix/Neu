@@ -5,7 +5,7 @@ Staging-Link mit Passwortschutz und `noindex`. Ein Ansprechpartner beim Kunden b
 Vor Versand an Kunden: Qualitäts-Gate (SKILL Abschnitt 8) komplett.
 
 ## Freigabe
-Schriftliche Freigabe (E-Mail genügt) für: Design, Texte/Claims, Bilder/Rechte, Impressum/Datenschutz-Angaben, Tracking-Entscheidung. Erst danach Livegang.
+Schriftliche Freigabe (E-Mail genügt) für: Design, Texte/Claims, Bilder/Rechte (inkl. Lizenznachweis-Liste), vom Kunden gelieferte Rechtstexte, Tracking-Entscheidung. Ohne gelieferte Rechtstexte und unterschriebenen AV-Vertrag kein Livegang. Erst danach Livegang.
 
 ## Livegang-Checkliste
 1. Backup, DNS-TTL vorher senken, Zielhosting prüfen (HTTPS, HSTS, Header).

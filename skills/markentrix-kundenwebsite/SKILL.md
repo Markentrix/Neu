@@ -19,7 +19,7 @@ Neue Website, Relaunch, Onepager, Kampagnen-Landingpage, Leistungsseite, Danke-/
 4. **Kein Tracking, keine Drittanbieter vor Einwilligung.** Standard: alles selbst gehostet (Schriften, Icons, Skripte), Karten/Videos nur per Zwei-Klick.
 5. **Barrierefrei:** WCAG 2.2 AA, Tastatur komplett, Kontrast geprüft, Reduced-Motion.
 6. **Performance-Budget** (Abschnitt 7) erreicht oder Abweichung begründet.
-7. **Rechtliche Pflichtseiten** (Impressum, Datenschutz, ggf. Barrierefreiheitserklärung) mit **Daten des Kunden**, nie erfunden. Rechtstexte aus Generator/Anwalt, Freigabe durch Kunden. Keine Rechtsberatung.
+7. **Rechtliche Pflichtseiten** (Impressum, Datenschutz, AGB, ggf. Barrierefreiheitserklärung): Der **Kunde** erstellt und liefert die Texte samt Anschrift, Register und USt-IdNr.; Markentrix bindet sie ein und prüft nur Vollständigkeit der Pflichtangaben und Passung zu den genutzten Diensten (keine Rechtsberatung, im Hand-off so benennen). Nie Rechtsdaten erfinden, ohne gelieferte Texte kein Livegang. Den **AV-Vertrag erstellt Markentrix** (`assets/dokumente/avv.html`).
 8. **Nach außen nur Markentrix als Agentur:** nie Tool-/Modellnamen (Claude, Higgsfield, n8n …) im Code, Footer, Meta, Übergabe. Credit-Link „Website von Markentrix“ nur wenn vertraglich vereinbart, dezent, `rel` passend.
 9. **Kundeneigentum & Hosting:** Die Domain wird auf den Kunden registriert. In der Pflege hostet Markentrix (Preisliste: Hosting, Updates, Sicherung inklusive), daher AV-Vertrag und transparente Regelung für Export/Umzug des Codes. Keine versteckte Abhängigkeit, die nur Markentrix lösen kann.
 10. **Kein Dark-Pattern:** Ablehnen = Akzeptieren, keine Fake-Verknappung, keine vorangekreuzten Haken.
@@ -79,12 +79,13 @@ LCP ≤ 2,0 s · INP ≤ 150 ms · CLS ≤ 0,05 · TTFB ≤ 0,6 s · Lighthouse 
 - [ ] Netzwerk-Tab: 0 Drittanbieter vor Consent
 - [ ] Formular Ende-zu-Ende (Zustellung beim Kunden, Bestätigung, Fehlerfall, Spam-Test)
 - [ ] Alle Texte/Claims/Bilder vom Kunden freigegeben, keine Platzhalter, keine Lorem-Texte
-- [ ] Impressum/Datenschutz mit Kundendaten, Consent-Lösung passend zu genutzten Diensten
+- [ ] Vom Kunden gelieferte Rechtstexte eingebunden und auf Vollständigkeit/Passung zu den Diensten geprüft; Consent-Lösung passend; AV-Vertrag unterschrieben (bei Hosting/Pflege)
+- [ ] Lizenznachweise für alle Bilder und Schriften dokumentiert
 - [ ] Redirect-Map (Relaunch), Sitemap, robots, OG-Bilder, Favicons, 404
 - [ ] Backup, Staging `noindex` entfernt erst beim Livegang
 
 ## 9. Hand-off an Kunde und intern
-Kurz und ehrlich: Umfang, Messwerte (Lab/Feld getrennt), offene Punkte (z. B. anwaltliche Prüfung, fehlende Inhalte), Zugänge/Eigentum, Pflegehinweise, Empfehlung Pflegepaket. Absender „Ihr Markentrix-Team“. Vorlagen: `assets/dokumente/angebot.html`, `assets/dokumente/briefing.html` (A4, Markentrix-CI, als PDF exportierbar). Siehe `abnahme-uebergabe.md`.
+Kurz und ehrlich: Umfang, Messwerte (Lab/Feld getrennt), offene Punkte (z. B. anwaltliche Prüfung, fehlende Inhalte), Zugänge/Eigentum, Pflegehinweise, Empfehlung Pflegepaket. Absender „Ihr Markentrix-Team“. Vorlagen: `assets/dokumente/angebot.html`, `briefing.html`, `avv.html` (A4, Markentrix-CI, als PDF exportierbar). Siehe `abnahme-uebergabe.md`.
 
 ## 10. Referenzen
 `briefing-intake.md` · `branchen.md` · `pakete-preise.md` · `demo-website.md` · `angebot-briefing-dokumente.md` · `design-system-kunde.md` · `conversion-landingpage.md` · `animation.md` · `performance.md` · `barrierefreiheit.md` · `dsgvo-recht.md` · `seo.md` · `abnahme-uebergabe.md`

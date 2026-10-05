@@ -15,7 +15,7 @@ Nach dem Erstgespräch/Briefing-Kurzcheck, vor dem Angebot (oder gemeinsam mit i
 ## Inhalte und Recht (Hard Gates für Demos)
 1. **Als Entwurf gekennzeichnet:** sichtbarer Hinweis „Designvorschlag für [Firma] – nicht veröffentlicht“ (Demo-Leiste), `noindex, nofollow`, keine Veröffentlichung in Suchmaschinen.
 2. **Zugriff begrenzt:** unlistbare URL + Passwortschutz oder Token-Link, nur an den Ansprechpartner. Kein Teilen in Social Media ohne Kundenfreigabe.
-3. **Keine fremden Rechte verletzen:** Texte/Fotos/Logos des Kunden nur aus öffentlichen Quellen als Anschauung nutzen, wenn der Kunde zustimmt oder es offenkundig sein eigenes Material ist; Kundenlogo nur vom Kunden bzw. sinngemäß aus seinem Auftritt zur Ansicht. Keine fremden Marken, keine Bilder Dritter. Stock/KI-Bilder markieren (`Platzhalterbild`).
+3. **Keine fremden Rechte verletzen:** Texte/Fotos/Logos des Kunden nur aus öffentlichen Quellen als Anschauung nutzen, wenn der Kunde zustimmt oder es offenkundig sein eigenes Material ist; Kundenlogo nur vom Kunden bzw. sinngemäß aus seinem Auftritt zur Ansicht. Keine fremden Marken, keine Bilder Dritter. Stock/KI-Bilder markieren (`Platzhalterbild`); Lizenz für Demo-Bilder klären, KI-Bilder nach CI-Bildrichtlinie.
 4. **Nichts erfinden:** keine erfundenen Bewertungen, Zahlen, Referenzen, Teamfotos. Platzhalter sichtbar kennzeichnen. Texte als „Textvorschlag“.
 5. **Kein Tracking, keine Drittanbieter, kein Formularversand an Dritte.** Formular in der Demo funktionslos mit Hinweis oder an Test-Postfach.
 6. **Keine Personendaten** von Mitarbeitern/Kunden des Interessenten ohne Einwilligung.

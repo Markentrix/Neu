@@ -7,7 +7,8 @@
 **Angebot:** Top-3-Leistungen (nach Marge), Preismodell (Preise zeigen ja/nein), USP (belegbar), Qualifikationen/Zertifikate (mit Nachweis), echte Referenzen/Bewertungen (freigegeben).
 **Wettbewerb:** 3 Lokalmitbewerber + 2 Vorbilder, was gefällt/missfällt.
 **Marke:** Logo (Vektor), Farben, Schrift, Tonalität, Anrede (Du/Sie), No-Gos. Fehlt CI: Mini-CI-Vorschlag.
-**Inhalte:** vorhandene Texte, Fotos (Betrieb, Team, Arbeit, Produkte), Videos, Downloads. Fotoshooting nötig?
+**Inhalte:** vorhandene Texte, Fotos (Betrieb, Team, Arbeit, Produkte), Videos, Downloads. Fotos: macht Markentrix (Zusatzleistung, Preis vorab vereinbaren) oder liefert der Kunde?
+**Rechtstexte:** Kunde liefert Impressum, Datenschutz, AGB sowie Anschrift, Register, USt-IdNr. (Termin festlegen, Livegang hängt davon ab).
 **Technik:** Domain/Registrar, Hosting, bestehende Website (Relaunch → Analyse, URLs, Rankings), E-Mail-Provider, Tools (CRM, Terminbuchung, Shop), gewünschte Integrationen, Tracking ja/nein.
 **Pflege:** wer ändert Inhalte, wie oft, Schulung/Pflegepaket.
 **Freigaben:** wer entscheidet, Feedbackweg (ein Ansprechpartner, gebündelt), Anzahl Korrekturrunden.
