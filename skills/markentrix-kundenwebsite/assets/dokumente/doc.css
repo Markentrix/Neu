@@ -20,5 +20,5 @@ label{font-size:9pt;color:var(--muted);display:block}
 .sign{display:grid;grid-template-columns:1fr 1fr;gap:24pt;margin-top:28pt}.sign div{border-top:1px solid var(--navy);padding-top:4pt;font-size:9pt;color:var(--muted)}
 footer{margin-top:28pt;padding-top:8pt;border-top:1px solid var(--line);color:var(--muted);font-size:8.5pt}
 .cta{display:inline-block;background:var(--grad);color:var(--navy);font:600 10.5pt "Space Grotesk",sans-serif;padding:7pt 16pt;border-radius:99pt;text-decoration:none}
-h2{break-after:avoid}table,.box,.sign{break-inside:avoid}tr{break-inside:avoid}
+h2{break-after:avoid}.box,.sign{break-inside:avoid}tr{break-inside:avoid}
 @media print{.noprint{display:none}}

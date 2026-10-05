@@ -7,6 +7,9 @@ Vorlagen (A4, druckfertig, als PDF aus Browser exportierbar): `assets/dokumente/
 ## Briefing-Dokument (vom Kunden auszufüllen)
 Struktur = `briefing-intake.md`: Unternehmen/Impressumsdaten, Ziel/KPI, Zielgruppe, Angebot/USP, Wettbewerb, Marke/CI, Inhalte, Technik/Zugänge, Pflege, Freigaben. Kurz halten (3–4 Seiten), Ausfüllhilfen und Beispiele, Pflichtfelder markiert. Hinweis zum Datenschutz (Verarbeitung der Angaben zur Projektbearbeitung). Rückgabe an info@markentrix.de.
 
+## Domain-&-Technik-Checkliste (Anlage, Pflicht)
+`assets/dokumente/domain-checkliste.html` geht mit Angebot und Briefing an **jeden** Kunden: Domain/Registrar/Inhaber, DNS-Zugang und -Stand, DNSSEC/CAA, E-Mail (MX/SPF/DKIM), bisherige Website, Vollmacht, Wunschtermin, plus was wir liefern (Server-IP v4/v6, www, ggf. Nameserver). Prozess intern: `domain-hosting-umzug.md`.
+
 ## Angebot
 Inhalt in dieser Reihenfolge:
 1. **Deckblatt:** Titel „Angebot Website [Kunde]“, Datum, Angebotsnummer, Gültigkeit (z. B. 30 Tage), Ansprechpartner.

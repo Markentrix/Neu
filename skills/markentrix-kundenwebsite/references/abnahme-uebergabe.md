@@ -8,6 +8,8 @@ Vor Versand an Kunden: Qualitäts-Gate (SKILL Abschnitt 8) komplett.
 Schriftliche Freigabe (E-Mail genügt) für: Design, Texte/Claims, Bilder/Rechte (inkl. Lizenznachweis-Liste), vom Kunden gelieferte Rechtstexte, Tracking-Entscheidung. Ohne gelieferte Rechtstexte und unterschriebenen AV-Vertrag kein Livegang. Erst danach Livegang.
 
 ## Livegang-Checkliste
+(Details zu DNS/Umzug: `domain-hosting-umzug.md`)
+0. Domain-Checkliste und Vollmacht liegen vor, Zonenstand gesichert, Rollback-Plan, altes Hosting bleibt bis nach der Beobachtungszeit aktiv.
 1. Backup, DNS-TTL vorher senken, Zielhosting prüfen (HTTPS, HSTS, Header).
 2. Relaunch: Redirect-Map (301) aktiv, alte URLs getestet.
 3. `noindex` entfernen, `robots.txt` und `sitemap.xml` live, Search Console + Bing verifizieren, Sitemap einreichen.

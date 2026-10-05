@@ -30,7 +30,7 @@ Neue Website, Relaunch, Onepager, Kampagnen-Landingpage, Leistungsseite, Danke-/
 ## 3. Arbeitsablauf (Agentur-Pipeline)
 | Phase | Ergebnis | Referenz |
 |---|---|---|
-| 0 Intake | ausgefülltes Briefing (Markentrix-CI-Dokument), Asset-/Zugangsliste | `briefing-intake.md`, `angebot-briefing-dokumente.md` |
+| 0 Intake | ausgefülltes Briefing, **Domain-&-Technik-Checkliste mit Vollmacht**, Asset-/Zugangsliste | `briefing-intake.md`, `domain-hosting-umzug.md`, `angebot-briefing-dokumente.md` |
 | 1 Strategie | Ziel, Zielgruppe, USP, Wettbewerbs-Check, Sitemap, KPI | `briefing-intake.md`, `branchen.md` |
 | 1b **Demo (Pflicht)** | individuelle Demo-Website für diesen Kunden, vor/mit Angebot | `demo-website.md` |
 | 1c Angebot | Angebot in Markentrix-CI mit Paket, Demo-Link, Preisliste | `angebot-briefing-dokumente.md`, `pakete-preise.md` |
@@ -82,10 +82,11 @@ LCP ≤ 2,0 s · INP ≤ 150 ms · CLS ≤ 0,05 · TTFB ≤ 0,6 s · Lighthouse 
 - [ ] Vom Kunden gelieferte Rechtstexte eingebunden und auf Vollständigkeit/Passung zu den Diensten geprüft; Consent-Lösung passend; AV-Vertrag unterschrieben (bei Hosting/Pflege)
 - [ ] Lizenznachweise für alle Bilder und Schriften dokumentiert
 - [ ] Redirect-Map (Relaunch), Sitemap, robots, OG-Bilder, Favicons, 404
+- [ ] Domain/DNS-Angaben und Vollmacht liegen vor, Zonenstand gesichert, MX/SPF/DKIM-Plan, DNSSEC/CAA geklärt, TTL-Plan, Rollback bereit (`domain-hosting-umzug.md`)
 - [ ] Backup, Staging `noindex` entfernt erst beim Livegang
 
 ## 9. Hand-off an Kunde und intern
-Kurz und ehrlich: Umfang, Messwerte (Lab/Feld getrennt), offene Punkte (z. B. anwaltliche Prüfung, fehlende Inhalte), Zugänge/Eigentum, Pflegehinweise, Empfehlung Pflegepaket. Absender „Ihr Markentrix-Team“. Vorlagen: `assets/dokumente/angebot.html`, `briefing.html`, `avv.html` (A4, Markentrix-CI, als PDF exportierbar). Siehe `abnahme-uebergabe.md`.
+Kurz und ehrlich: Umfang, Messwerte (Lab/Feld getrennt), offene Punkte (z. B. anwaltliche Prüfung, fehlende Inhalte), Zugänge/Eigentum, Pflegehinweise, Empfehlung Pflegepaket. Absender „Ihr Markentrix-Team“. Vorlagen: `assets/dokumente/angebot.html`, `briefing.html`, `avv.html`, `domain-checkliste.html` (A4, Markentrix-CI, als PDF exportierbar). Siehe `abnahme-uebergabe.md`.
 
 ## 10. Referenzen
-`briefing-intake.md` · `branchen.md` · `pakete-preise.md` · `demo-website.md` · `angebot-briefing-dokumente.md` · `design-system-kunde.md` · `conversion-landingpage.md` · `animation.md` · `performance.md` · `barrierefreiheit.md` · `dsgvo-recht.md` · `seo.md` · `abnahme-uebergabe.md`
+`briefing-intake.md` · `branchen.md` · `domain-hosting-umzug.md` · `pakete-preise.md` · `demo-website.md` · `angebot-briefing-dokumente.md` · `design-system-kunde.md` · `conversion-landingpage.md` · `animation.md` · `performance.md` · `barrierefreiheit.md` · `dsgvo-recht.md` · `seo.md` · `abnahme-uebergabe.md`

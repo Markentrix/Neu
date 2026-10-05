@@ -1,0 +1,71 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Domain und Technik – Checkliste – Markentrix</title><link rel="stylesheet" href="doc.css">
+<style>td.c{width:20pt;text-align:center}.small{font-size:9pt;color:var(--muted)}</style></head><body>
+<div class="brand"><img src="logo-light.png" alt="Markentrix" width="880" height="250"><span>Automatisierung. Werbung. Wachstum.</span></div>
+<p style="font:700 10pt 'Space Grotesk',sans-serif;color:#1E9BFF;margin:0">ANLAGE ZU ANGEBOT UND BRIEFING</p>
+<h1>Domain und Technik: Das brauchen wir von Ihnen</h1>
+<p class="lead">Damit Ihre neue Website auf unserem Server (Hetzner, Nürnberg) unter Ihrer Adresse erreichbar ist und Ihre E-Mails weiter funktionieren, brauchen wir die folgenden Angaben. Haken Sie ab, was Sie uns schicken. Unsicher? Rufen Sie kurz an, wir finden es gemeinsam heraus.</p>
+<div class="box"><strong>Zugangsdaten bitte nie per normaler E-Mail senden.</strong> Wir nennen Ihnen einen sicheren Weg (z. B. Freigabe über einen Passwort-Manager oder verschlüsselter Link). Wo möglich, richten Sie uns lieber einen eigenen Zugang mit eingeschränkten Rechten ein statt Ihr Passwort zu teilen. Nach Projektende ändern Sie die Passwörter.</div>
+
+<h2>A. Domain (Ihre Internetadresse)</h2>
+<table><tr><th class="c"></th><th>Was wir brauchen</th><th>Wo Sie es finden / wozu</th></tr>
+<tr><td class="c">☐</td><td><strong>Domainname(n)</strong> inkl. Endung, auch Zusatzdomains (z. B. .com, Schreibvarianten)</td><td>Ihre bisherige Webadresse. Wir legen fest, welche Domain die Hauptadresse ist und welche weiterleiten.</td></tr>
+<tr><td class="c">☐</td><td><strong>Anbieter der Domain</strong> (Registrar), z. B. IONOS, Strato, Telekom, GoDaddy, Hetzner …</td><td>Rechnung oder Vertragsmail zur Domain. Davon hängt ab, wie wir die DNS-Einstellungen ändern.</td></tr>
+<tr><td class="c">☐</td><td><strong>Domain-Inhaber</strong> (Name und Anschrift im Domainvertrag)</td><td>Muss zu Ihrem Impressum passen. Steht die Domain auf eine Agentur oder Privatperson, klären wir einen Inhaberwechsel auf Sie.</td></tr>
+<tr><td class="c">☐</td><td><strong>Ihr Zugang zur Domainverwaltung</strong> oder ein von Ihnen eingerichteter Zusatzzugang für Markentrix</td><td>Kundencenter des Domain-Anbieters. Nötig, um die Adresse auf unseren Server zu richten.</td></tr>
+<tr><td class="c">☐</td><td><strong>Zwei-Faktor-Anmeldung:</strong> Wer erhält den Bestätigungscode? Wir stimmen die Übergabe am Telefon ab.</td><td>Ohne den Code kommen wir nicht in die Verwaltung.</td></tr>
+<tr><td class="c">☐</td><td><strong>Kündigungsstand des alten Hostings</strong>: Wann endet der Vertrag? Bitte noch nicht kündigen.</td><td>Das alte Hosting bleibt bis zum erfolgreichen Livegang bestehen (Rückfallebene).</td></tr></table>
+
+<h2>B. DNS-Einstellungen (das „Telefonbuch“ Ihrer Domain)</h2>
+<table><tr><th class="c"></th><th>Was wir brauchen</th><th>Wo Sie es finden / wozu</th></tr>
+<tr><td class="c">☐</td><td><strong>Aktuelle DNS-Einträge</strong> als Screenshot oder Export (Liste aller A-, AAAA-, CNAME-, MX-, TXT-, SRV-Einträge)</td><td>Bereich „DNS“, „Domainverwaltung“ oder „Nameserver“ im Kundencenter. Wir sichern den Stand, damit nichts verloren geht und wir jederzeit zurück können.</td></tr>
+<tr><td class="c">☐</td><td><strong>Aktuelle Nameserver</strong> (z. B. ns1.… / ns2.…)</td><td>Gleiche Stelle. Zeigt, wo die DNS-Einträge tatsächlich gepflegt werden.</td></tr>
+<tr><td class="c">☐</td><td><strong>DNSSEC aktiv?</strong> ja / nein / weiß nicht</td><td>Bei aktivem DNSSEC kann eine falsche Umstellung die Domain unerreichbar machen. Wir stimmen den Ablauf vorab ab.</td></tr>
+<tr><td class="c">☐</td><td><strong>CAA-Einträge</strong> vorhanden? (falls sichtbar)</td><td>Können die Ausstellung unseres SSL-Zertifikats blockieren.</td></tr>
+<tr><td class="c">☐</td><td><strong>Bestehende Subdomains</strong> (z. B. shop., mail., termin.) und wohin sie zeigen</td><td>Diese müssen beim Umzug unverändert weiterlaufen.</td></tr></table>
+
+<h2>C. E-Mail (darf beim Umzug nicht ausfallen)</h2>
+<table><tr><th class="c"></th><th>Was wir brauchen</th><th>Wo Sie es finden / wozu</th></tr>
+<tr><td class="c">☐</td><td><strong>Wo liegt Ihr E-Mail-Postfach?</strong> (Domain-Anbieter, Microsoft 365, Google Workspace, anderer Anbieter)</td><td>Die MX-Einträge bleiben unverändert, damit Ihre E-Mails weiterlaufen. Wir ändern sie nur nach Absprache.</td></tr>
+<tr><td class="c">☐</td><td><strong>SPF-, DKIM-, DMARC-Einträge</strong> (TXT-Einträge in der DNS-Liste)</td><td>Damit Nachrichten aus Ihrem Kontaktformular zugestellt werden und nicht im Spam landen, ergänzen wir Einträge gemeinsam mit Ihrem E-Mail-Anbieter.</td></tr>
+<tr><td class="c">☐</td><td><strong>E-Mail-Adresse für Anfragen</strong> aus dem Formular und für das Impressum</td><td>Muss erreichbar sein und regelmäßig gelesen werden.</td></tr></table>
+
+<h2>D. Bisherige Website (bei Relaunch)</h2>
+<table><tr><th class="c"></th><th>Was wir brauchen</th><th>Wo Sie es finden / wozu</th></tr>
+<tr><td class="c">☐</td><td><strong>Zugang zur bisherigen Website</strong> (CMS-Login, z. B. WordPress, oder Hosting-Zugang per SFTP/Kundencenter)</td><td>Zur Sicherung von Texten, Bildern, Downloads und zur Liste der bisherigen Seiten-URLs.</td></tr>
+<tr><td class="c">☐</td><td><strong>Bisherige Seitenadressen</strong> (URLs), die gut gefunden werden</td><td>Wir leiten sie dauerhaft auf die neuen Seiten um, damit Sie keine Platzierungen verlieren.</td></tr>
+<tr><td class="c">☐</td><td><strong>Zugang zu Google Search Console und Google-Unternehmensprofil</strong> (falls vorhanden)</td><td>Für Einreichung der Sitemap, Prüfung der Umstellung und Abgleich Ihrer Firmendaten.</td></tr>
+<tr><td class="c">☐</td><td><strong>Eingebundene Dienste</strong> (Terminbuchung, Shop, Newsletter, Karten, Statistik) und deren Zugänge</td><td>Damit wir sie sauber und datenschutzkonform einbinden. Kosten des Buchungstools tragen Sie.</td></tr></table>
+
+<h2>E. Vollmacht und Ansprechpartner</h2>
+<table><tr><th class="c"></th><th>Was wir brauchen</th></tr>
+<tr><td class="c">☐</td><td><strong>Kurze Bestätigung in Textform</strong>, dass Markentrix die DNS-Einstellungen Ihrer Domain für den Umzug ändern darf (Vorlage unten).</td></tr>
+<tr><td class="c">☐</td><td><strong>Ansprechpartner</strong> beim Domain- bzw. E-Mail-Anbieter oder Ihrer IT, falls es Rückfragen gibt (Name, Telefon).</td></tr>
+<tr><td class="c">☐</td><td><strong>Wunschtermin für den Livegang</strong> (möglichst nicht vor Feiertagen, Betriebsferien oder Aktionen).</td></tr></table>
+
+<h2>Das bekommen Sie von uns</h2>
+<table><tr><th>Angabe</th><th>Inhalt (wir tragen sie projektbezogen ein)</th></tr>
+<tr><td>IPv4-Adresse unseres Servers (A-Eintrag)</td><td class="ph">[IPv4 des Hetzner-Servers]</td></tr>
+<tr><td>IPv6-Adresse (AAAA-Eintrag)</td><td class="ph">[IPv6 des Hetzner-Servers]</td></tr>
+<tr><td>www-Eintrag (CNAME oder A)</td><td class="ph">[Ziel, z. B. Hauptdomain]</td></tr>
+<tr><td>Nameserver (nur wenn wir die DNS-Verwaltung übernehmen)</td><td class="ph">[Nameserver aus Hetzner DNS]</td></tr>
+<tr><td>Ggf. TXT-Einträge (Verifizierung, SPF für Formular-Mails)</td><td class="ph">[Werte projektbezogen]</td></tr>
+<tr><td>Zeitplan und Zeitpunkt der Umstellung</td><td class="ph">[Datum, Uhrzeit]</td></tr></table>
+<p class="small">Wir empfehlen, die Domain beim jetzigen Anbieter zu lassen und nur die Einträge (A, AAAA, www) auf unseren Server zu richten. Ihre Domain und Ihre E-Mails bleiben so bei Ihnen. Ein Domain-Umzug (Transfer) mit Auth-Code ist nicht nötig, außer Sie wünschen ihn.</p>
+
+<h2>Ablauf der Umstellung</h2>
+<ol><li>Wir sichern den heutigen DNS-Stand und testen Ihre neue Website auf unserem Server vorab, ohne dass Besucher etwas merken.</li>
+<li>Einige Tage vorher verkürzen wir die Gültigkeitsdauer (TTL) der Einträge, damit die Umstellung schnell wirkt.</li>
+<li>Zum vereinbarten Termin richten wir die Einträge auf unseren Server. Das SSL-Zertifikat (HTTPS) stellen wir aus.</li>
+<li>Wir prüfen Website, Formular, E-Mail-Zustellung und Weiterleitungen. Bei Problemen stellen wir den alten Stand wieder her.</li>
+<li>Erst nach erfolgreichem Livegang können Sie das alte Hosting kündigen.</li></ol>
+
+<h2>Bitte nicht</h2>
+<ul><li>Das alte Hosting oder den Domainvertrag vor dem Livegang kündigen.</li>
+<li>Die Domain ohne Absprache zu einem anderen Anbieter umziehen oder die Nameserver ändern.</li>
+<li>Bestehende E-Mail-Einträge (MX, SPF, DKIM) löschen oder ändern.</li></ul>
+
+<h2>Bestätigung (Vorlage)</h2>
+<p>Hiermit bestätige ich, dass ich Inhaber der Domain(s) <span class="ph">[Domainname(n)]</span> bin bzw. zur Verwaltung berechtigt bin, und beauftrage Markentrix, die DNS-Einstellungen dieser Domain für die Einrichtung der neuen Website auf dem Server von Markentrix zu ändern. Die bisherigen Einstellungen wurden mir gesichert zur Verfügung gestellt.</p>
+<div class="sign"><div>Ort, Datum, Unterschrift <span class="ph">[Kunde]</span></div><div>Name in Druckschrift, Firma</div></div>
+<footer><span>Markentrix · <span class="ph">Heinrich-Hüfig-Str. 1 [Schreibweise prüfen: Hüfig/Hüdig]</span> · 29227 Celle · markentrix.de · info@markentrix.de</span><span>Domain und Technik</span></footer></body></html>
