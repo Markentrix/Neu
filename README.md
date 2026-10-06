@@ -10,6 +10,9 @@ Statische Website, kein Build nötig. Alle Dateien in dasselbe Verzeichnis des W
 - SEO/GEO: `robots.txt`, `sitemap.xml`, `llms.txt`, `manifest.webmanifest`, Schema.org JSON-LD (BarOrPub, FAQPage, ReserveAction …), Geo-Meta-Tags, `404.html`
 - `.htaccess` – Kompression, Caching, Sicherheits-Header (nur Apache)
 
+## Weiterentwickeln
+Quelldateien: `styles.css`, `app.js`, `fonts/fonts.css`. Nach Änderungen `bash tools/build.sh` ausführen (Node.js nötig): erzeugt `app.min.js`, `styles.min.css` und bindet das CSS in `index.html` ein.
+
 ## Nach dem Livegang
 1. Domain in Google Search Console eintragen, `sitemap.xml` einreichen
 2. Google-Unternehmensprofil (Name, Adresse, Telefon, Zeiten) identisch zur Website pflegen

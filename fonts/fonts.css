@@ -2,3 +2,6 @@
 @font-face{font-family:'Monoton';font-style:normal;font-weight:400;font-display:swap;src:url(monoton.woff2) format('woff2')}
 @font-face{font-family:'Outfit';font-style:normal;font-weight:300 800;font-display:swap;src:url(outfit.woff2) format('woff2')}
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(spacegrotesk.woff2) format('woff2')}
+/* Ersatzschriften mit angepassten Metriken: verhindert Layout-Sprünge beim Schriftwechsel (CLS) */
+@font-face{font-family:'Outfit Fallback';src:local('Arial'),local('Helvetica Neue'),local('Liberation Sans');size-adjust:97%;ascent-override:103%;descent-override:26.8%;line-gap-override:0%}
+@font-face{font-family:'Space Grotesk Fallback';src:local('Arial'),local('Helvetica Neue'),local('Liberation Sans');size-adjust:103%;ascent-override:95.5%;descent-override:28.3%;line-gap-override:0%}

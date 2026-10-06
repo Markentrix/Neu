@@ -51,7 +51,7 @@
     st.textContent = msg;
     st.classList.toggle('open', !!openNow);
     dot.classList.toggle('on', !!openNow);
-    txt.textContent = openNow ? 'Jetzt geöffnet · Celle' : 'Bar · Celle';
+    txt.textContent = openNow ? 'Jetzt geöffnet · Celle' : msg.replace('Wieder geöffnet', 'Nächste Zeitreise').replace(' geöffnet', '');
     const today = openNow && !(OPEN[day] && min >= 1200) ? prev : day;
     $$('#hours tr').forEach(li => li.classList.toggle('today', +li.dataset.d === today));
   }
