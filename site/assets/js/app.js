@@ -21,6 +21,10 @@
   /* Qty stepper */
   $$('.qty').forEach(function(w){var i=$('input',w);w.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var v=parseInt(i.value,10)||1;v+=b.getAttribute('data-d')==='+'?1:-1;i.value=Math.min(20,Math.max(1,v))})});
 
+  /* Gallery */
+  var gm=$('#gmain');
+  $$('.thumbs button').forEach(function(b){b.addEventListener('click',function(){var im=$('img',b),m=$('img',gm);m.srcset='';m.sizes='';m.src=im.getAttribute('data-big');m.alt=im.alt;$$('.thumbs button').forEach(function(x){x.removeAttribute('aria-current')});b.setAttribute('aria-current','true')})});
+
   /* Mobile menu */
   var mb=$('#menuBtn'),nav=$('#nav');
   if(mb&&nav)mb.addEventListener('click',function(){var o=nav.classList.toggle('open');mb.setAttribute('aria-expanded',o)});
@@ -57,7 +61,7 @@
     var sum=$('#sum'),co=$('#tocheckout');
     if(!c.length){cl.innerHTML='<div class="empty"><h2>Ihr Warenkorb ist leer</h2><p>Stöbern Sie in unseren Kategorien oder lassen Sie sich beraten.</p><a class="btn btn-cta" href="index.html#kategorien">Zu den Kategorien</a></div>';if(sum)sum.hidden=true;return}
     if(sum)sum.hidden=false;
-    cl.innerHTML=c.map(function(l){var p=prod(l.id);return '<div class="cart-row"><div class="thumb tone-'+p.tone+'"><svg class="ico" aria-hidden="true"><use href="#i-'+p.icon+'"/></svg></div><div><h3><a href="'+p.u+'">'+p.name+'</a></h3><small>'+(p.from?'Preis ab · ':'')+eur(p.price)+' / Stück</small><br><button class="rm" data-rm="'+p.id+'">Entfernen</button></div><div class="qty" data-q="'+p.id+'"><button type="button" data-d="-" aria-label="Menge verringern">−</button><input value="'+l.q+'" readonly aria-label="Menge"><button type="button" data-d="+" aria-label="Menge erhöhen">+</button></div><strong>'+eur(p.price*l.q)+'</strong></div>'}).join('');
+    cl.innerHTML=c.map(function(l){var p=prod(l.id);return '<div class="cart-row"><div class="thumb">'+(p.img?'<img src="'+p.img+'" alt="" width="80" height="80">':'<svg class="ico" aria-hidden="true"><use href="#i-'+p.icon+'"/></svg>')+'</div><div><h3><a href="'+p.u+'">'+p.name+'</a></h3><small>'+(p.from?'Preis ab · ':'')+eur(p.price)+' / Stück</small><br><button class="rm" data-rm="'+p.id+'">Entfernen</button></div><div class="qty" data-q="'+p.id+'"><button type="button" data-d="-" aria-label="Menge verringern">−</button><input value="'+l.q+'" readonly aria-label="Menge"><button type="button" data-d="+" aria-label="Menge erhöhen">+</button></div><strong>'+eur(p.price*l.q)+'</strong></div>'}).join('');
     var t=totals();$('#t-sub').textContent=eur(t);$('#t-tot').textContent=eur(t);$('#t-vat').textContent=eur(t-t/1.19);
   }
   document.addEventListener('click',function(e){

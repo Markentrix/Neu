@@ -46,7 +46,7 @@ def ic(n, cls=""):
 SPRITE = '<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">' + "".join(
     f'<symbol id="i-{k}" viewBox="0 0 24 24">{v}</symbol>' for k, v in ICONS.items()) + "</svg>"
 
-LOGO = '<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#0B5D4B"/><path d="M8 29h3l2-7h17l5 7h5v5H8z" fill="#fff"/><circle cx="16" cy="35" r="4" fill="#F97316" stroke="#0B5D4B" stroke-width="2"/><circle cx="34" cy="35" r="4" fill="#F97316" stroke="#0B5D4B" stroke-width="2"/><path d="M16 22l2-6h10l2 6" fill="none" stroke="#7EE7B7" stroke-width="2"/></svg>'
+LOGO = '<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#008C45"/><path d="M8 29h3l2-7h17l5 7h5v5H8z" fill="#fff"/><circle cx="16" cy="35" r="4" fill="#CD212A" stroke="#fff" stroke-width="2"/><circle cx="34" cy="35" r="4" fill="#CD212A" stroke="#fff" stroke-width="2"/><path d="M16 22l2-6h10l2 6" fill="none" stroke="#F4F5F0" stroke-width="2"/></svg>'
 
 CAT = {c["slug"]: c for c in CATEGORIES}
 for p in PRODUCTS:
@@ -54,10 +54,43 @@ for p in PRODUCTS:
     p["tone"] = CAT[p["cat"]]["tone"]; p["icon"] = CAT[p["cat"]]["icon"]
 PBYC = {c["slug"]: [p for p in PRODUCTS if p["cat"] == c["slug"]] for c in CATEGORIES}
 
+# ---------- Bilder (Originalfotos von italiacamper24.de, als WebP 500/1000 px) ----------
+IMGS = {  # key: (Dateibasis, alt, Breite, Höhe)
+ "ahk": ("ahk-chassis", "Anhängerkupplung variabel für Wohnmobil", 1000, 1000),
+ "ahk-teile": ("ahk-variabel", "Anhängerkupplung mit Montagesatz für Reisemobil", 1000, 1000),
+ "ahk-wm": ("wohnmobil-ahk", "Anhängerkupplung Montagematerial Wohnmobil", 1000, 1000),
+ "ahk-rahmen": ("ahk-rahmen", "Anhängerkupplung inklusive Rahmenverlängerung für Wohnmobil", 1000, 1000),
+ "rahmen": ("rahmenverlaengerung", "Rahmenverlängerung für Wohnmobil-Chassis", 1000, 990),
+ "esatz": ("elektrosatz", "Elektrokabelsatz 13-polig für Anhängerkupplung", 1000, 1000),
+ "esatz2": ("ahk-montiert", "Elektrosatz für Anhängerkupplung am Wohnmobil", 1000, 1000),
+ "luft": ("luftfederung", "Zusatzluftfederung Z6 für Wohnmobil und Kastenwagen", 1000, 987),
+ "kurbel": ("kurbelstuetze", "ALU-Matic Kurbelstütze für Wohnmobil", 1000, 1000),
+ "kurbel2": ("kurbel-hero", "ALU-Matic Kurbelstützen Set", 1000, 1000),
+ "hub": ("huebstuetzen", "Hydraulische Hubstützen für Wohnmobil", 1000, 750),
+ "heck": ("hecktraeger", "Heckträger am Wohnmobil montiert", 1000, 987),
+ "porta": ("portamoto", "Portamoto Motorradträger am Wohnmobil", 1000, 987),
+ "moto": ("motorradanhaenger", "Motorradanhänger am Wohnmobil mit Roller", 1000, 1000),
+ "robot": ("robot-trolley", "Robot Trolley Rangierhilfe für Wohnmobil", 1000, 1000),
+ "klima": ("klima", "Dachklimaanlage für Wohnmobile – Luftführung und Kühlung im Reisemobil", 1000, 571),
+ "garage": ("garagenhalterung", "Trittstufe und Garagenhalterung für Wohnmobil", 1000, 987),
+}
+PIMG = {"anhaengerkupplung-variabel-12-5-kn": ["ahk", "ahk-teile", "esatz"], "anhaengerkupplung-mit-rahmenverlaengerung": ["ahk-rahmen", "rahmen", "esatz2"],
+        "luftfederung-z6-komfort-paket": ["luft"], "alu-matic-kurbelstuetze": ["kurbel", "kurbel2"], "hecktraeger-lastentraeger": ["heck", "porta"],
+        "hydraulik-stuetzen": ["hub"], "motorradanhaenger-angebot": ["moto", "porta"], "rangierhilfe-mover": ["robot"], "dachklimaanlage": ["klima"], "trittstufe-garagenhalterung": ["garage"]}
+CIMG = {"anhaengerkupplung": "ahk", "hecktraeger": "heck", "luftfederung": "luft", "stuetzensysteme": "kurbel", "motorradanhaenger": "moto", "rangierhilfe": "robot", "klimaanlagen": "klima", "trittstufen": "garage"}
+def img(key, cls="photo", sizes="(max-width:860px) 50vw, 280px", lazy=True, alt=None):
+    b, a, w, h = IMGS[key]
+    return (f'<img class="{cls}" src="assets/img/{b}-500.webp" srcset="assets/img/{b}-500.webp 500w, assets/img/{b}-1000.webp 1000w" sizes="{sizes}" '
+            f'width="{w}" height="{h}" alt="{esc(alt or a)}" {"loading=lazy decoding=async" if lazy else "fetchpriority=high"}>')
+def art(p):
+    k = PIMG.get(p["slug"])
+    if k: return f'<div class="art">{img(k[0])}', True
+    return f'<div class="art noimg tone-{p["tone"]}">{ic(p["icon"])}', False
+
 def jld(*objs):
     return "".join(f'<script type="application/ld+json">{json.dumps(o, ensure_ascii=False)}</script>' for o in objs)
 
-ORG = {"@context": "https://schema.org", "@type": "AutomotiveBusiness", "@id": U + "/#org", "name": SITE["name"], "url": U + "/",
+ORG = {"@context": "https://schema.org", "@type": "AutomotiveBusiness", "@id": U + "/#org", "name": SITE["name"], "url": U + "/", "logo": U + "/assets/img/logo-520.webp", "image": [U + "/assets/img/og.jpg"],
        "telephone": SITE["phone"], "email": SITE["email"], "foundingDate": str(SITE["since"]),
        "description": "Fachhändler und Montagebetrieb für Wohnmobil-Nachrüstung: Anhängerkupplungen, Luftfederung, Stützensysteme, Heckträger.",
        "priceRange": "€€", "areaServed": {"@type": "Country", "name": "Deutschland"},
@@ -81,6 +114,11 @@ def faq_html(faq, schema=True):
         {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}
     return h, s
 
+def catart(c):
+    k = CIMG.get(c["slug"])
+    if k: return f'<div class="cat-art pic">{img(k, sizes="(max-width:860px) 100vw, 380px")}</div>'
+    return f'<div class="cat-art tone-{c["tone"]}">{ic(c["icon"])}</div>'
+
 def card(p, i=0):
     price = p["price"]
     if price:
@@ -90,7 +128,7 @@ def card(p, i=0):
         pr = '<div class="price ask">Preis auf Anfrage</div>'
         btn = f'<a class="btn btn-out btn-block" href="kontakt.html?produkt={esc(p["name"])}">Angebot anfordern</a>'
     tag = f'<span class="tag{" sale" if p["old"] else ""}">{esc(p["badge"])}</span>'
-    return (f'<article class="card" data-price="{price or ""}" data-i="{i}"><div class="art tone-{p["tone"]}">{tag}{ic(p["icon"])}</div>'
+    return (f'<article class="card" data-price="{price or ""}" data-i="{i}">{art(p)[0]}{tag}</div>'
             f'<div class="body"><h3><a href="{p["url"]}">{esc(p["name"])}</a></h3><p class="sub">{esc(p["short"])}</p>{pr}<div class="foot">{btn}</div></div></article>')
 
 NAV = [({"Anhängerkupplung":"Anhängerkupplung","Heckträger":"Heckträger","Luftfederung":"Luftfederung","Stützensysteme":"Stützen","Motorradanhänger":"Motorradanhänger","Räder":"Räder","Klimaanlagen":"Klima","Rangierhilfe":"Rangierhilfe","Trittstufen":"Trittstufen"}[c["name"].split(" &")[0]], f'{c["slug"]}.html') for c in CATEGORIES]
@@ -108,16 +146,16 @@ def page(fname, title, desc, body, schemas=(), crumb_items=None, og_type="websit
     html_ = f'''<!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title><meta name="description" content="{esc(desc)}">
-<link rel="canonical" href="{canon}">{'<meta name="robots" content="noindex,follow">' if noindex else '<meta name="robots" content="index,follow,max-image-preview:large">'}
-<meta property="og:type" content="{og_type}"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(desc)}"><meta property="og:url" content="{canon}"><meta property="og:locale" content="de_DE"><meta property="og:site_name" content="{SITE['name']}">
-<meta name="theme-color" content="#0B5D4B"><meta name="geo.region" content="DE"><link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="{canon}"><link rel="alternate" hreflang="de-DE" href="{canon}"><link rel="alternate" hreflang="x-default" href="{canon}">{'<meta name="robots" content="noindex,follow">' if noindex else '<meta name="robots" content="index,follow,max-image-preview:large">'}
+<meta property="og:type" content="{og_type}"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(desc)}"><meta property="og:url" content="{canon}"><meta property="og:locale" content="de_DE"><meta property="og:image" content="{U}/assets/img/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta property="og:site_name" content="{SITE['name']}">
+<meta name="theme-color" content="#007A3D"><meta name="geo.region" content="DE"><link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Rubik:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="assets/css/style.css">{extra_head}{jld(*sch)}</head>
 <body>{SPRITE}<a class="skip" href="#main">Zum Inhalt springen</a>
 <div class="topbar"><div class="wrap"><ul><li>{ic("truck")} Versandkostenfrei in Deutschland</li><li>{ic("shield")} EG-Typgenehmigung · keine TÜV-Abnahme*</li><li>{ic("star")} {SITE['rating']} / 5 bei Google</li></ul>
 <span>{ic("phone")} <a href="tel:{SITE['phone_href']}">{SITE['phone']}</a></span></div></div>
-<header class="header"><div class="wrap"><a class="logo" href="index.html" aria-label="Italia Camper 24 – Startseite">{LOGO}<span>Italia Camper <b>24</b></span></a>
+<header class="header"><div class="tri"></div><div class="wrap"><a class="logo" href="index.html" aria-label="Italia Camper 24 – Startseite"><img class="logo-img" src="assets/img/logo-260.webp" srcset="assets/img/logo-260.webp 260w, assets/img/logo-520.webp 520w" sizes="200px" width="260" height="115" alt="Italia Camper 24"></a>
 <form class="search" role="search" action="suche.html">{ic("search")}<label class="sr" for="q">Shop durchsuchen</label><input id="q" name="q" type="search" placeholder="Suchen: Anhängerkupplung, Luftfederung …" autocomplete="off"><ul class="suggest" id="suggest"></ul></form>
 <div class="hdr-actions"><a class="icon-btn hdr-phone" href="tel:{SITE['phone_href']}" aria-label="Anrufen">{ic("phone")}<span>Beratung</span></a>
 <a class="icon-btn" href="warenkorb.html" aria-label="Warenkorb">{ic("cart")}<span class="badge" data-cart-badge data-n="0"></span></a>
@@ -134,8 +172,8 @@ def page(fname, title, desc, body, schemas=(), crumb_items=None, og_type="websit
 
 def footer():
     col = lambda items: "".join(f'<li><a href="{u}">{esc(t)}</a></li>' for t, u in items)
-    return f'''<footer class="footer"><div class="wrap"><div class="cols">
-<div><a class="logo" href="index.html" style="color:#fff">{LOGO}<span>Italia Camper <b style="color:#FDBA74">24</b></span></a>
+    return f'''<div class="tri thick"></div><footer class="footer"><div class="wrap"><div class="cols">
+<div><a class="logo-chip" href="index.html" aria-label="Italia Camper 24"><img src="assets/img/logo-260.webp" width="260" height="115" alt="Italia Camper 24" loading="lazy"></a>
 <p style="margin-top:14px">Ihr Spezialist für Wohnmobil-Nachrüstung seit {SITE['since']}. Über 100 Produkte mit EG-Typgenehmigung – mit Montage an zwei Standorten.</p>
 <p>{ic("phone")} <a href="tel:{SITE['phone_href']}">{SITE['phone']}</a><br>{ic("mail")} <a href="mailto:{SITE['email']}">{SITE['email']}</a></p>
 <div class="pay" aria-label="Zahlarten"><span>PayPal</span><span>Visa</span><span>Mastercard</span><span>Überweisung</span><span>Rechnung</span></div></div>
@@ -145,7 +183,7 @@ def footer():
 </div><div class="bottom"><span>© {datetime.date.today().year} {SITE['name']} · Alle Preise inkl. gesetzl. MwSt., versandkostenfrei innerhalb Deutschlands.</span><span>* Bei Produkten mit EG-Typgenehmigung; Einzelheiten je Fahrzeug im Beratungsgespräch.</span></div></div></footer>'''
 
 JS_DATA = {"mail": SITE["email"],
-           "products": [{"id": p["slug"], "name": p["name"], "price": p["price"], "from": p["from_"], "u": p["url"], "tone": p["tone"], "icon": p["icon"]} for p in PRODUCTS],
+           "products": [{"id": p["slug"], "name": p["name"], "price": p["price"], "from": p["from_"], "u": p["url"], "tone": p["tone"], "icon": p["icon"], "img": (f"assets/img/{IMGS[PIMG[p['slug']][0]][0]}-500.webp" if p["slug"] in PIMG else "")} for p in PRODUCTS],
            "pages": []}
 def reg(title, url, kind, kw=""):
     JS_DATA["pages"].append({"t": title, "u": url, "c": kind, "k": kw})
@@ -170,7 +208,7 @@ def brand_options():
 # ================= STARTSEITE =================
 def home():
     feats = [p for p in PRODUCTS if p["price"]]
-    cats = "".join(f'<a class="cat" href="{c["slug"]}.html"><div class="cat-art tone-{c["tone"]}">{ic(c["icon"])}</div><div class="cat-body"><h3>{esc(c["name"])}</h3><p>{esc(c["short"])}</p><span class="more">Ansehen {ic("arrow")}</span></div></a>' for c in CATEGORIES)
+    cats = "".join(f'<a class="cat" href="{c["slug"]}.html">{catart(c)}<div class="cat-body"><h3>{esc(c["name"])}</h3><p>{esc(c["short"])}</p><span class="more">Ansehen {ic("arrow")}</span></div></a>' for c in CATEGORIES)
     brands = "".join(f'<a class="chip" href="fahrzeug-{b["slug"]}.html">{esc(b["name"])}</a>' for b in BRANDS)
     faq, fs = faq_html(FAQ_GENERAL)
     locs = "".join(f'<div class="loc"><h3>{ic("pin")} {l["city"]}</h3><p>{l["plz"]} {l["city"]}, {l["region"]}</p><a class="btn btn-out" href="standort-{l["slug"]}.html">Montage in {l["city"]}</a></div>' for l in LOCATIONS)
@@ -178,6 +216,7 @@ def home():
 <h1>Anhängerkupplung, Luftfederung &amp; Stützen für Ihr Wohnmobil</h1>
 <p class="lead">Über 100 Produkte mit EG-Typgenehmigung, persönliche Fachberatung und Montage an zwei Standorten. Versandkostenfrei in ganz Deutschland.</p>
 <div class="cta-row"><a class="btn btn-cta btn-lg" href="anhaengerkupplung.html">Anhängerkupplungen ansehen {ic("arrow")}</a><a class="btn btn-ghost btn-lg" href="kontakt.html">Beratung anfordern</a></div>
+<div class="hero-pics">{"".join(f'<a href="{u}" aria-label="{esc(IMGS[k][1])}">{img(k, sizes="180px", lazy=False if k=="ahk" else True)}</a>' for k,u in (("ahk","anhaengerkupplung.html"),("luft","luftfederung.html"),("kurbel","stuetzensysteme.html")))}</div>
 <ul class="ticks"><li>{ic("check")} Festpreise</li><li>{ic("check")} 2–4 Werktage Lieferzeit</li><li>{ic("check")} {SITE['rating']} / 5 Google-Bewertung</li></ul></div>
 <form class="finder" id="finder"  novalidate><h2>Fahrzeugfinder</h2><p>Wählen Sie Ihr Basisfahrzeug und sehen Sie passendes Zubehör.</p>
 <label for="marke">Fahrzeugmarke</label><select id="marke" name="marke" required>{brand_options()}</select>
@@ -213,10 +252,19 @@ def category(c):
 <div class="grid three" id="prodgrid">{grid}</div>
 <div style="margin-top:48px"><h2>Worauf Sie beim Kauf achten sollten</h2><p>{esc(c["intro"])} Nennen Sie uns Fahrzeug und Baujahr, wir prüfen Passung, Gewichte und Zulassung, bevor Sie bestellen. Montage ist an den Standorten <a href="standort-bohmte.html">Bohmte</a> und <a href="standort-diez.html">Diez</a> möglich.</p>
 <h2>Häufige Fragen</h2>{faq}</div></div></div>{band()}'''
-    page(f'{c["slug"]}.html', f'{c["h1"]} kaufen | Italia Camper 24', c["meta"], body, [fs, itemlist],
+    page(f'{c["slug"]}.html', f'{c["name"]} kaufen | Italia Camper 24', c["meta"], body, [fs, itemlist],
          [("Startseite", "index.html"), (c["name"], None)], prio="0.9", nav_cur=f'{c["slug"]}.html')
 
 # ================= PRODUKT =================
+def gallery(p):
+    ks = PIMG.get(p["slug"])
+    if not ks:
+        return f'<div class="gallery tone-{p["tone"]}" role="img" aria-label="{esc(p["name"])}" style="color:#fff;background:linear-gradient(135deg,var(--green-700),var(--green-600))">{ic(p["icon"])}</div>'
+    main = f'<div class="gallery" id="gmain">{img(ks[0], sizes="(max-width:860px) 100vw, 560px", lazy=False, alt=p["name"])}</div>'
+    if len(ks) == 1: return main
+    th = "".join(f'<button type="button" data-g="{k}" aria-label="Bild {i+1} anzeigen"{" aria-current=true" if i==0 else ""}><img src="assets/img/{IMGS[k][0]}-500.webp" data-big="assets/img/{IMGS[k][0]}-1000.webp" width="76" height="76" alt="{esc(IMGS[k][1])}" loading=lazy></button>' for i, k in enumerate(ks))
+    return main + f'<div class="thumbs" aria-label="Weitere Bilder">{th}</div>'
+
 def product(p):
     c = CAT[p["cat"]]
     faq, fs = faq_html(c["faq"][:2] + [FAQ_GENERAL[0]])
@@ -231,7 +279,7 @@ def product(p):
         buy = f'<div class="buyrow"><a class="btn btn-cta btn-lg" href="kontakt.html?produkt={esc(p["name"])}">Angebot anfordern</a><a class="btn btn-out btn-lg" href="tel:{SITE["phone_href"]}">{ic("phone")} Anrufen</a></div>'
         mb = f'<div class="mbar"><a class="btn btn-cta" href="kontakt.html?produkt={esc(p["name"])}">Angebot anfordern</a><a class="btn btn-out" href="tel:{SITE["phone_href"]}">Anrufen</a></div>'
     prod_s = {"@context": "https://schema.org", "@type": "Product", "name": p["name"], "description": p["desc"], "category": c["name"],
-              "brand": {"@type": "Brand", "name": SITE["name"]}, "sku": p["slug"], "url": f'{U}/{p["url"]}'}
+              "image": [f"{U}/assets/img/{IMGS[k][0]}-1000.webp" for k in PIMG.get(p["slug"], [])] or [U + "/assets/img/og.jpg"], "brand": {"@type": "Brand", "name": SITE["name"]}, "sku": p["slug"], "url": f'{U}/{p["url"]}'}
     if pr:
         prod_s["offers"] = {"@type": "Offer", "priceCurrency": "EUR", "price": f"{pr:.2f}", "url": f'{U}/{p["url"]}', "availability": "https://schema.org/InStock",
                             "itemCondition": "https://schema.org/NewCondition", "priceValidUntil": f"{datetime.date.today().year + 1}-12-31",
@@ -241,7 +289,7 @@ def product(p):
                                                 "deliveryTime": {"@type": "ShippingDeliveryTime", "transitTime": {"@type": "QuantitativeValue", "minValue": 2, "maxValue": 4, "unitCode": "DAY"}}}}
     specs = "".join(f"<tr><th>{esc(a)}</th><td>{esc(b)}</td></tr>" for a, b in p["specs"])
     ticks = "".join(f'<li>{ic("check")} {esc(b)}</li>' for b in p["bullets"])
-    body = f'''<div class="wrap pdp"><div><div class="gallery tone-{p["tone"]}" role="img" aria-label="{esc(p["name"])} – Produktsymbol">{ic(p["icon"])}<span class="note">Produktfoto folgt – Symbolbild</span></div></div>
+    body = f'''<div class="wrap pdp"><div>{gallery(p)}</div>
 <div><p style="margin:0"><a href="{c["slug"]}.html">{esc(c["name"])}</a></p><h1 style="font-size:clamp(1.6rem,3vw,2.2rem)">{esc(p["name"])}</h1>{stars()}
 <p style="margin-top:12px">{esc(p["short"])}</p>
 <div class="buybox">{price}{buy}<ul class="meta-list"><li>{ic("truck")} Versandkostenfrei, Lieferzeit 2–4 Werktage</li><li>{ic("shield")} EG-Typgenehmigung, Gutachten inklusive*</li><li>{ic("wrench")} Montage in Bohmte &amp; Diez möglich</li><li>{ic("headset")} Passt es? Wir prüfen es vorab: <a href="tel:{SITE['phone_href']}">{SITE['phone']}</a></li></ul></div>
@@ -252,7 +300,7 @@ def product(p):
 <details><summary>Lieferung, Montage &amp; Rückgabe</summary><div><p>Versandkostenfrei innerhalb Deutschlands in 2–4 Werktagen. Montage nach Terminvereinbarung zum Festpreis in <a href="standort-bohmte.html">Bohmte</a> oder <a href="standort-diez.html">Diez</a>. Es gelten die gesetzlichen Widerrufsrechte, siehe <a href="widerruf.html">Widerrufsbelehrung</a>.</p></div></details>
 <h2 style="margin-top:32px">Fragen zum Produkt</h2>{faq}</div>
 <section class="soft"><div class="wrap"><h2>Das könnte Sie auch interessieren</h2><div class="grid">{"".join(card(x,i) for i,x in enumerate(rel))}</div></div></section>'''
-    page(p["url"], f'{p["name"]}{" ab "+eur(pr) if pr else ""} | Italia Camper 24',
+    page(p["url"], (f'{p["name"]}{" ab "+eur(pr) if pr else ""} | Italia Camper 24' if len(p["name"])<38 else f'{p["name"]} ab {eur(pr)}' if pr else f'{p["name"]} | Italia Camper 24'),
          f'{p["name"]}: {p["short"]} {"Ab " + eur(pr) + ", " if pr else ""}versandkostenfrei, Montage in Bohmte & Diez.'[:160], body, [fs, prod_s],
          [("Startseite", "index.html"), (c["name"], f'{c["slug"]}.html'), (p["name"], None)], og_type="product", prio="0.8", mbar=mb)
 
@@ -263,7 +311,7 @@ def brand(b):
            (f"Brauche ich für den {b['name']} eine TÜV-Abnahme nach dem Einbau einer Anhängerkupplung?", "Bei Kupplungen mit EG-Typgenehmigung liegt das EG-Gutachten bei und eine TÜV-Abnahme ist in der Regel nicht nötig. Wir sagen Ihnen vorab, was für Ihr Fahrzeug gilt."),
            (f"Kann ich meinen {b['name']} bei Ihnen umrüsten lassen?", "Ja, an unseren Standorten Bohmte (Niedersachsen) und Diez (Rheinland-Pfalz) nach Terminvereinbarung zum Festpreis.")]
     fh, fs = faq_html(faq)
-    cats = "".join(f'<a class="cat" href="{c["slug"]}.html"><div class="cat-art tone-{c["tone"]}">{ic(c["icon"])}</div><div class="cat-body"><h3>{esc(c["name"])}</h3><p>{esc(c["short"])}</p></div></a>' for c in CATEGORIES)
+    cats = "".join(f'<a class="cat" href="{c["slug"]}.html">{catart(c)}<div class="cat-body"><h3>{esc(c["name"])}</h3><p>{esc(c["short"])}</p></div></a>' for c in CATEGORIES)
     body = f'''<div class="page-head"><div class="wrap"><h1>Wohnmobil-Zubehör für {esc(b["name"])}</h1><p>{esc(b["note"])} {esc(b["same"])}</p></div></div>
 <section><div class="wrap"><div class="answer"><strong>Kurz gesagt:</strong> Italia Camper 24 rüstet den {esc(b["name"])} mit Anhängerkupplung, Luftfederung, Stützen, Heckträger und mehr nach – mit EG-Typgenehmigung, Festpreis und Montage in Bohmte und Diez.</div>
 <h2>Nachrüst-Kategorien für den {esc(b["name"])}</h2><div class="cats">{cats}</div></div></section>
@@ -288,7 +336,7 @@ def location(l):
 <h2>Das montieren wir in {l["city"]}</h2><ul class="ticks">{"".join(f'<li>{ic("check")} {esc(c["name"])}</li>' for c in CATEGORIES)}</ul></div>
 <div class="panel"><h2>Termin anfragen</h2><p>Nennen Sie uns Fahrzeug, Baujahr und Wunschprodukt – wir melden uns mit Terminvorschlag und Festpreis.</p><a class="btn btn-cta btn-lg btn-block" href="kontakt.html?produkt=Montage {l["city"]}">Termin anfragen</a><p style="margin-top:16px">{ic("phone")} <a style="color:#fff" href="tel:{SITE['phone_href']}">{SITE['phone']}</a></p></div></div></section>
 <section class="soft"><div class="wrap" style="max-width:860px"><h2>Fragen zur Montage in {l["city"]}</h2>{fh}</div></section>{band()}'''
-    page(f'standort-{l["slug"]}.html', f'Wohnmobil Zubehör einbauen in {l["city"]} ({l["region"]}) | Italia Camper 24',
+    page(f'standort-{l["slug"]}.html', f'Wohnmobil-Montage {l["city"]} | Italia Camper 24',
          f'Montage von Anhängerkupplung, Luftfederung & Stützen in {l["plz"]} {l["city"]}. Festpreis, EG-Typgenehmigung, Termin nach Absprache.', body, [fs, lb],
          [("Startseite", "index.html"), ("Montage-Service", "montage-service.html"), (l["city"], None)], prio="0.8")
 
