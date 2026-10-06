@@ -18,3 +18,13 @@
       .catch(function(){msg.className='msg err';msg.textContent='Senden nicht möglich. Bitte rufen Sie uns an: 05141 21 44 21'});
   });
 })();
+(function(){
+  var el=document.getElementById('state');if(!el)return;
+  try{
+    var p=new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',weekday:'short',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()),o={};
+    p.forEach(function(x){o[x.type]=x.value});
+    var m=(+o.hour)*60+(+o.minute),sun=/^So/.test(o.weekday);
+    if(!sun&&m>=660&&m<1200){el.className='state open';el.textContent='Jetzt geöffnet bis 20 Uhr'}
+    else{el.className='state closed';el.textContent=sun?'Heute Ruhetag':(m<660?'Öffnet heute um 11 Uhr':'Heute geschlossen')}
+  }catch(e){}
+})();
