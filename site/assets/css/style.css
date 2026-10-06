@@ -239,3 +239,5 @@ table.spec{width:100%;border-collapse:collapse}.spec th,.spec td{text-align:left
 .card .art:not(.noimg) .photo{height:100%}
 .cat-art.pic{display:block;overflow:hidden}
 .footer .logo-chip img{height:56px}
+.loc{color:var(--ink)}.loc h3{color:var(--green-900);display:flex;gap:8px;align-items:center}.loc p{color:var(--ink-2)}
+.panel .loc a.btn{color:var(--green-800)}.panel .loc a.btn:hover{color:var(--green-900)}
