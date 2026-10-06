@@ -2,6 +2,7 @@
 # Erzeugt die minimierten Produktiv-Dateien. Nach jeder Änderung an styles.css / app.js ausführen:  bash tools/build.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
+python3 tools/events.py
 npx -y esbuild app.js --minify --target=es2019 --outfile=app.min.js --log-level=warning
 npx -y esbuild styles.css --minify --outfile=styles.min.css --log-level=warning
 python3 - <<'PY'

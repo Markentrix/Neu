@@ -77,6 +77,14 @@
     })(t0);
   }
 
+  /* ---------- Events: vergangene Termine ausblenden ---------- */
+  (() => {
+    const t = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date());
+    let left = 0;
+    $$('#eventList .event[data-date]').forEach(li => { if (li.dataset.date < t) li.hidden = true; else left++; });
+    $('#eventsEmpty').hidden = left > 0;
+  })();
+
   /* ---------- Lightbox ---------- */
   const lb = $('#lb');
   $$('.gallery button').forEach(b => b.addEventListener('click', () => {
