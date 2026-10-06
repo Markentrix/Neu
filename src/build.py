@@ -700,6 +700,7 @@ def system_files():
     llm += ["", "## Service", f"- [Montage-Service]({U}/montage-service.html)", f"- [Versand & Zahlung]({U}/versand-zahlung.html)", f"- [FAQ]({U}/faq.html)", f"- [Ratgeber]({U}/ratgeber.html)", f"- Telefon: {SITE['phone']} (24 h)", f"- WhatsApp: https://wa.me/{SITE['wa']}", f"- E-Mail: {SITE['email']}"]
     open(os.path.join(OUT, "llms.txt"), "w").write("\n".join(llm) + "\n")
     open(os.path.join(OUT, "assets", "favicon.svg"), "w").write(LOGO_SVG)
+    open(os.path.join(OUT, ".version"), "w").write(datetime.datetime.now().isoformat())
     js = "window.IC_IDX=" + json.dumps(IDX, ensure_ascii=False, separators=(",", ":")) + ";window.IC_MAIL=" + json.dumps(SITE["email"]) + ";window.IC_WA=" + json.dumps(SITE["wa"]) + ";"
     open(os.path.join(OUT, "assets", "js", "catalog-index.js"), "w", encoding="utf-8").write(js)
 
