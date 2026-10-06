@@ -406,7 +406,7 @@ def guide(fn_, title, desc, h1, lead, sections, faqs, crumb):
 <section><div class="wrap prose-wrap"><article class="prose"><p class="note">Von Motorradhandel-Celle · Stand: <time datetime="{seo.TODAY}">{seo.TODAY[8:]}.{seo.TODAY[5:7]}.{seo.TODAY[:4]}</time> · Allgemeine Hinweise, Herstellerangaben haben Vorrang. <span class="ph-note">[Inhalt vom Händler prüfen und freigeben]</span></p>
 <nav aria-label="Inhalt" class="toc"><strong>Inhalt</strong><ul>{toc}</ul></nav>{secs}
 <h2 id="haeufige-fragen">Häufige Fragen</h2>{faq_html(faqs)}</article></div></section>""" + cta_dark(pfx='../')
-    layout(fn_, title, desc, body, sub=True, fold=1, kind='Article', crumbs=[('Ratgeber', None), (crumb, None)], nodes=[seo.article(fn_, h1, desc, f'{seo.DOMAIN}/assets/og/default.jpg'), seo.faq(fn_, faqs)])
+    layout(fn_, title, desc, body, sub=True, fold=1, kind='Article', crumbs=[(crumb, None)], nodes=[seo.article(fn_, h1, desc, f'{seo.DOMAIN}/assets/og/default.jpg'), seo.faq(fn_, faqs)])
 guide('ratgeber/gebrauchtes-motorrad-kaufen.html', 'Motorrad gebraucht kaufen: Checkliste | Motorradhandel-Celle', 'Gebrauchtes Motorrad kaufen: Checkliste für Papiere, Technik, Probefahrt und Kaufvertrag. Praktische Tipps vom Motorradhändler in Celle.',
  'Gebrauchtes Motorrad kaufen: Die Checkliste', 'Worauf Sie beim Kauf eines gebrauchten Motorrads vom Händler achten sollten: Papiere, Zustand, Probefahrt und Vertrag.',
  [('Vor dem Termin', '<p>Legen Sie Ihr Budget inklusive Nebenkosten fest: Versicherung, Steuer, Schutzkleidung und Wartung. Prüfen Sie, ob das Motorrad zu Ihrem Führerschein passt, und informieren Sie sich über bekannte Schwachstellen des Modells.</p>'),
