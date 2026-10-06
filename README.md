@@ -1,11 +1,25 @@
-# Italia Camper 24 – Shop-Redesign (Tricolore)
+# Italia Camper 24 – kompletter Shop (Tricolore-Redesign)
 
-Statischer Multi-Page-Shop mit dem **kompletten Sortiment** von italiacamper24.de (338 Produktseiten, 46 Ersatzteile, 16 Kategorien),
-Fahrzeugfinder (8 Basisfahrzeuge × Baureihen, 32 Wohnmobil-Hersteller), Warenkorb/Kasse (Demo), Ratgeber, Bewertungen, Rechtstexte.
+Vollwertiger Online-Shop mit **338 Produktseiten** (gesamtes Original-Sortiment), Fahrzeugfinder, Kasse, Kundenkonto, Admin-Bereich,
+Zahlung per **PayPal, Kreditkarte/Apple Pay/Google Pay (Stripe), Überweisung und Rechnung**, E-Mails, Rechnungs-PDF – zum Betrieb auf dem **eigenen Hetzner-Server**.
 
-    python3 src/build.py                      # baut site/ neu (Sitemap, JSON-LD, llms.txt, Suchindex)
-    python3 tools/extract.py <crawl>          # liest gecrawlte Originalseiten aus
-    python3 tools/normalize.py <crawl>        # -> src/catalog.json (Kategorien, Fahrzeug-Zuordnung)
-    python3 tools/fetch_images.py             # lädt/komprimiert Produktbilder (WebP)
+| Ordner | Inhalt |
+|---|---|
+| `site/` | fertig generierte Seiten (HTML/CSS/JS/Bilder, Sitemap, llms.txt) |
+| `src/` | Seitengenerator (`build.py`), Katalog (`catalog.json`), Inhalte |
+| `server/` | Shop-Backend (Node 22, SQLite, Express) inkl. Admin (`/admin/`) und 12 E2E-Tests |
+| `tools/` | Import vom Original (Crawl → Katalog, Bilder, 301-Weiterleitungen) |
+| `deploy/`, `Dockerfile`, `docker-compose.yml` | Betrieb mit Docker + Caddy (automatisches HTTPS) |
+| `docs/HETZNER.md` | **Schritt-für-Schritt-Anleitung für den Server** + Go-Live-Checkliste |
 
-Offen für den Live-Betrieb: Anbindung von Kasse/Zahlung an ein Shop-System, Prüfung der automatischen Fahrzeug-Zuordnung (Baureihen) durch den Betreiber.
+## Lokal ausprobieren
+```bash
+cd server && npm install
+cp ../.env.example ../.env     # ADMIN_EMAIL / ADMIN_PASSWORD eintragen
+npm start                      # http://localhost:3000   Admin: http://localhost:3000/admin/
+npm test                       # 12 End-to-End-Tests (simulierte Stripe/PayPal-Server)
+```
+Ohne Stripe-/PayPal-Schlüssel werden diese Zahlarten automatisch ausgeblendet; Überweisung und Rechnung funktionieren sofort.
+
+## Seiten neu erzeugen
+`python3 src/build.py` (oder im Admin: *Produkte & Preise → Shop-Seiten neu generieren*, berücksichtigt geänderte Preise).

@@ -181,7 +181,7 @@ details>div{padding:0 18px 14px;color:var(--ink-2)}
 .footer{background:var(--green-900);color:#CDE6DC;padding:52px 0 24px}.footer a{color:#fff;text-decoration:none}.footer a:hover{text-decoration:underline}
 .footer .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}.footer h3{color:#fff;font-size:1rem}.footer ul{list-style:none;margin:0;padding:0}.footer li{padding:5px 0}
 .logo-chip{display:inline-block;background:#fff;border-radius:12px;padding:8px 14px}.logo-chip img{height:56px;width:auto;display:block}
-.pay{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pay span{border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:5px 10px;font:600 .8rem var(--f-h);color:#E6F5EF}
+.paychips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.paychips span{border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:5px 10px;font:600 .8rem var(--f-h);color:#E6F5EF}
 .footer .bottom{border-top:1px solid rgba(255,255,255,.15);margin-top:32px;padding-top:20px;font-size:.88rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);background:var(--green-900);color:#fff;padding:14px 22px;border-radius:12px;box-shadow:var(--sh-h);opacity:0;pointer-events:none;transition:.25s;z-index:200;display:flex;gap:14px;align-items:center;max-width:92vw}
 .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}.toast a{color:#FFC5C8;font-weight:700;white-space:nowrap}

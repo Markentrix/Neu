@@ -1,7 +1,9 @@
 'use strict';
 const path = require('path');
-const env = process.env;
 const root = path.resolve(__dirname, '..');
+// einfache .env-Unterstützung (ohne Abhängigkeit) für lokalen Betrieb; Docker übergibt die Variablen direkt
+try { require('fs').readFileSync(path.join(root, '.env'), 'utf8').split('\n').forEach(l => { const m = l.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*(?:#.*)?$/); if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^["']|["']$/g, ''); }); } catch (e) { }
+const env = process.env;
 const c = {
   port: +env.PORT || 3000,
   baseUrl: (env.BASE_URL || 'http://localhost:3000').replace(/\/$/, ''),

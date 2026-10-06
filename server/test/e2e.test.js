@@ -121,3 +121,7 @@ test('Formulare: Anfrage speichern, Honeypot, Pflichtfelder', async () => {
   assert.equal((await api('/api/forms/kontakt', { method: 'POST', body: { name: 'Bot', email: 'b@b.de', nachricht: 'x', dsgvo: true, website: 'spam' } })).json.ok, true);
   assert.equal(ctx.db.all('SELECT 1 FROM forms').length, 1);
 });
+test('301-Weiterleitung alter Jimdo-URLs', async () => {
+  const r = await api('/produkte/alu-matic-st%C3%BCtzen/', { c: false }); assert.equal(r.status, 301); assert.equal(r.headers.get('location'), '/produkt-alu-matic-stuetzen.html');
+  assert.equal((await api('/anh%C3%A4ngerkupplung/', { c: false })).headers.get('location'), '/anhaengerkupplung.html');
+});

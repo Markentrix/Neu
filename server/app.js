@@ -17,6 +17,9 @@ function create(opts = {}) {
     next();
   });
   app.get('/healthz', (req, res) => { try { db.get('SELECT 1'); res.json({ ok: true }); } catch (e) { res.status(500).json({ ok: false }); } });
+  // 301-Weiterleitungen alter Jimdo-URLs (SEO-Migration)
+  let redirects = {}; try { redirects = JSON.parse(fs.readFileSync(path.join(__dirname, 'redirects.json'), 'utf8')); } catch (e) { }
+  app.use((req, res, next) => { if (req.method !== 'GET') return next(); const k = req.path.endsWith('/') || redirects[req.path] ? req.path : req.path; const t = redirects[k] || redirects[k.replace(/\/?$/, '/')]; if (t) return res.redirect(301, t); next(); });
   app.use(A.loader(db));
   const ctx = { db, catalog, orders, mail };
   const json = express.json({ limit: '100kb' });
