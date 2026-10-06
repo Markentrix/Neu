@@ -12,6 +12,9 @@ Erstes Beispiel: `demos/motorradhandel-celle/`. Ziel solcher Seiten: Besucher in
 7. **Einwände beantworten** (FAQ): Probefahrt, Inzahlungnahme, Finanzierung, Verfügbarkeit, Wunschsuche, Gewährleistung (Formulierung immer vom Kunden).
 8. **Preise** nur wie vom Händler angegeben (VB, brutto/Differenzbesteuerung klären, PAngV beachten), Stand nennen.
 
+## Saison-Kampagnen
+Saisonale Themen (Winterlager, Saisonstart, Frühjahrs-Check, Hauptuntersuchung) bekommen: Banner über dem Header, Hero-Link, Streifen direkt unter dem Hero, Eintrag in der Navigation, eigene Seite mit Anfrage und FAQ. Per Schalter an/aus (`WINTER` im Build-Skript), damit die Seite im Frühjahr nicht veraltet wirkt. Aussagen zu Preisen, Leistungen und Kapazität nur vom Kunden, sonst Platzhalter. Beispiel: `demos/motorradhandel-celle/ueberwintern.html`.
+
 ## Daten und Pflege
 Bestand liegt als Datensatz (`assets/bestand.json` bzw. Liste im Build-Skript). Für den Livebetrieb Pflegeweg vereinbaren (Tabelle/CMS, Händler-Import, Export nach Mobile.de-Format), sonst veraltet der Bestand und die Seite verkauft nichts. Als Zusatzleistung anbieten.
 

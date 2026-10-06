@@ -8,7 +8,8 @@ Start lokal: `python3 -m http.server 8766` im Ordner, dann `http://127.0.0.1:876
 Inhalte, Kontaktdaten, Leistungen, Fahrzeuge, Preise und Fotos stammen von motorradhandel-celle.de (Stand 06.10.2026). Texte sind gekürzte Vorschläge. Die alte Seite ist ein WebPlus-Tabellenlayout mit Text in Bildern, 26 Seiten, ohne mobile Darstellung, mit YouTube-Links und Verweisen auf speedrad.de.
 
 ## Aufbau
-**Inhaltsseiten:** Start, Motorräder (Bestand mit Filter und Sortierung), Motorrad verkaufen (Ankauf), Service & Finanzierung, Über uns, Kontakt (Probefahrt, Wunschsuche). **Verkaufsstrecke:** 16 Fahrzeug-Detailseiten mit Probefahrt-Formular, Danke-Seite. Dazu Impressum, Datenschutz, 404.
+**Inhaltsseiten:** Start, Motorräder (Bestand mit Filter und Sortierung), Überwintern (Winterlager), Motorrad verkaufen (Ankauf), Service & Finanzierung, Über uns, Kontakt (Probefahrt, Wunschsuche). **Verkaufsstrecke:** 16 Fahrzeug-Detailseiten mit Probefahrt-Formular, Danke-Seite. Dazu Impressum, Datenschutz, 404.
+**Saison-Kampagne Winterlager** (Schalter `WINTER` in `build/build.py`): Banner auf jeder Seite, Hero-Link und Streifen auf der Startseite, „Überwintern“ in der Navigation und als erste Leistung, eigene Seite `ueberwintern.html` mit Ablauf, Konditionen (Platzhalter), Winterplatz-Formular und FAQ, Querverweise zu Verkauf in Kommission und Inzahlungnahme. Im Frühjahr Schalter ausstellen oder durch eine Saisonstart-Kampagne ersetzen.
 **Verkaufs-Bausteine:** Suchfilter im Hero, Preis-Kacheln, Highlights, Probefahrt je Fahrzeug, Anrufen/WhatsApp, mobile Aktionsleiste, Ankauf-Strecke, Inzahlungnahme/Finanzierung-Häkchen, FAQ, ehrlicher Hinweis „Zwischenverkauf vorbehalten“.
 **Design (Vorschlag, keine CI vorhanden):** Schwarz, Signalrot #C8102E, Barlow Condensed (Überschriften) und Inter, selbst gehostet. Logo/Wortmarke ist ein Platzhalter-Entwurf von Markentrix, kein Kundenlogo.
 
@@ -16,6 +17,7 @@ Inhalte, Kontaktdaten, Leistungen, Fahrzeuge, Preise und Fotos stammen von motor
 Start, Bestand, Detailseite, Ankauf: Performance 100 · Barrierefreiheit 100 · Best Practices 100 · LCP 1,0–1,9 s · CLS ≤ 0,04. Labordaten, kein Feldwert. Filter-Logik, Leer-Zustand und alle Links geprüft. Audit-Skript: 0 FAIL.
 
 ## Offen vor einer Veröffentlichung (Kunde klären)
+0. **Winterlager-Konditionen:** Auf der alten Seite steht nur „Gern kann Ihr Bike auch bei uns überwintern“. Preis, Zeitraum, Leistungen (z. B. Batteriepflege), Versicherung/Haftung, Bringen/Abholen und Anzahl Plätze sind **Platzhalter** und müssen vom Kunden kommen. Keine Kapazitäts- oder Verknappungsaussage ohne Beleg.
 1. **Bestand aktuell?** 20 Fahrzeuge standen auf der alten Seite, 16 sind übernommen. Nicht übernommen: Yamaha YZF-R1 (2004), Suzuki DR 650, Yamaha R6 RJ03, Honda „Auswahl“ (keine oder zu kleine Fotos, 160–260 px). Preise, Kilometer, Verfügbarkeit bestätigen lassen. **Pflegeweg für den Bestand festlegen**, sonst veraltet die Seite.
 2. **Fotos sind der Engpass:** nur 250–400 px breit, uneinheitlich, teils mit Nummernschildern und Passanten. Empfehlung: neues Fotoset je Fahrzeug (Zusatzleistung, Preis vorab vereinbaren). Bildrechte und Personen/Kennzeichen prüfen.
 3. **Zuordnung Foto zu Fahrzeug** prüfen (Honda CBR 600 RR: Foto von Unterseite der alten Seite übernommen; einzelne Galeriebilder der alten Seite gehören evtl. zu anderen Fahrzeugen).

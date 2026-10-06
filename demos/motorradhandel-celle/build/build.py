@@ -50,7 +50,9 @@ json.dump(BIKES, open('assets/bestand.json', 'w'), ensure_ascii=False, indent=1)
 BRANDS = sorted({b['brand'] for b in BIKES}); TYPES = ['Sportler', 'Naked Bike', 'Reise & Enduro', 'Allrounder', 'Roller']
 N = len(BIKES)
 
-NAV = [('Motorräder', 'motorraeder.html'), ('Motorrad verkaufen', 'ankauf.html'), ('Service & Finanzierung', 'service.html'), ('Über uns', 'ueber-uns.html'), ('Kontakt', 'kontakt.html')]
+WINTER = True   # Saison-Schalter: Winterlager-Kampagne (Banner, Startseiten-Streifen, Hero-Link). Im Frühjahr auf False oder durch Saisonstart-Kampagne ersetzen.
+SNOW = '<svg class="snow" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/><path d="M9 4l3 2 3-2M9 20l3-2 3 2M4 9.5l3.2.4-.9-3.1M20 14.5l-3.2-.4.9 3.1M4 14.5l3.2-.4-.9 3.1M20 9.5l-3.2.4.9-3.1"/></g></svg>'
+NAV = [('Motorräder', 'motorraeder.html'), ('Überwintern', 'ueberwintern.html'), ('Verkaufen', 'ankauf.html'), ('Service & Finanzierung', 'service.html'), ('Über uns', 'ueber-uns.html'), ('Kontakt', 'kontakt.html')]
 
 def no_reveal_above_fold(body, n):
     parts = body.split('</section>')
@@ -62,8 +64,8 @@ def layout(fn, title, desc, body, sub=False, active=None, ld='', fold=1, probe='
     body = no_reveal_above_fold(body, fold)
     nav = ''.join(f'<li><a href="{p}{h}"' + (' aria-current="page"' if h == active else '') + f'>{esc(t)}</a></li>' for t, h in NAV)
     foot = ''.join(f'<li><a href="{p}{h}">{esc(t)}</a></li>' for t, h in NAV)
-    page = f'''<!doctype html>
-<html lang="de">
+    season_bar = (f'<a class="season" href="{p}ueberwintern.html">{SNOW}<span><b>Winterlager:</b> Ihr Motorrad überwintert bei uns.</span><u>Winterplatz anfragen</u></a>\n' if WINTER else '')
+    page = f'''<!doctype html>\n<html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
@@ -81,7 +83,7 @@ def layout(fn, title, desc, body, sub=False, active=None, ld='', fold=1, probe='
 <body>
 <a class="skip" href="#main">Zum Inhalt springen</a>
 <div class="demo-bar" data-demo role="note">Designvorschlag von Markentrix für Motorradhandel-Celle · nicht veröffentlicht · Bestand und Preise laut bisheriger Website <span class="ph-note">[Aktualität vom Kunden bestätigen]</span></div>
-<header class="site"><div class="wrap">
+{season_bar}<header class="site"><div class="wrap">
   <a class="brand" href="{p}index.html" aria-label="Motorradhandel-Celle, zur Startseite"><i aria-hidden="true"></i><span>Motorradhandel<small>CELLE · ALTENHAGEN</small></span></a>
   <nav class="main" id="nav" aria-label="Hauptnavigation" data-open="false"><ul>{nav}</ul></nav>
   <div class="hdr-cta"><a class="btn ghost sm" href="tel:{PHONE_TEL}">{PHONE_TXT}</a><a class="btn sm" href="{p}{probe}">Probefahrt anfragen</a><button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menü</button></div>
@@ -140,6 +142,8 @@ opt_m = ''.join(f'<option>{esc(x)}</option>' for x in BRANDS); opt_t = ''.join(f
 col = [('a', 'kawasaki-z1000-2015-1.webp', 'Kawasaki Z 1000', 'Grüne Kawasaki Z 1000 vor der Verkaufshalle'), ('b', 'honda-crf1000-dct-a-2.webp', 'Honda CRF 1000', 'Honda CRF 1000 Africa Twin Seitenansicht'), ('c', 'suzuki-gsxr750-k1-1.webp', 'Suzuki GSX-R', 'Gelbe Suzuki GSX-R 750'), ('d', 'kawasaki-zx10r-2005-1.webp', 'Kawasaki ZX-10R', 'Kawasaki ZX-10R in Silber')]
 FP = ' fetchpriority="high"'
 collage = ''.join('<figure class="%s"><img src="assets/img/%s" width="%d" height="%d" alt="%s"%s><figcaption>%s</figcaption></figure>' % (c, f, isize(f)[0], isize(f)[1], esc(a), FP if c == 'a' else '', esc(cap)) for c, f, cap, a in col)
+hero_winter = (f'<p class="hero-winter"><a href="ueberwintern.html">{SNOW}<span>Winterzeit: Motorrad bei uns überwintern lassen</span><b aria-hidden="true">→</b></a></p>' if WINTER else '')
+winter_strip = (f'''<section class="winter-strip" aria-labelledby="ws-h"><div class="wrap"><div class="ws" data-reveal><div class="ws-t"><p class="eyebrow">{SNOW} Winterlager</p><h2 id="ws-h">Ihr Motorrad überwintert bei uns.</h2><p>Die Saison ist vorbei? Stellen Sie Ihr Motorrad für den Winter bei uns ein und holen Sie es im Frühjahr wieder ab. Fragen Sie jetzt Ihren Winterplatz an.</p><div class="acts"><a class="btn ice" href="ueberwintern.html#winterplatz">Winterplatz anfragen</a><a class="btn ghost" href="tel:{PHONE_TEL}">Anrufen</a></div></div><ul class="ws-l"><li><b>Überwintern bei uns</b><span>Ihr Bike kann bei uns überwintern.</span></li><li><b>Im Winter verkaufen</b><span>Stellen Sie es in unsere Verkaufshalle und verkaufen Sie selbst oder in Kommission.</span></li><li><b>Im Frühjahr wechseln</b><span>Inzahlungnahme und Finanzierung auf Anfrage.</span></li></ul></div></div></section>\n''' if WINTER else '')
 home = f'''<section class="hero"><div class="wrap"><div class="grid">
 <div><p class="eyebrow">Motorradhandel in Celle · Altenhagen</p>
 <h1>Motorrad kaufen in Celle. <span>Direkt vom Händler.</span></h1>
@@ -149,10 +153,10 @@ home = f'''<section class="hero"><div class="wrap"><div class="grid">
 <div><label for="h-t">Art</label><select id="h-t" name="typ"><option value="">Alle</option>{opt_t}</select></div>
 <div><label for="h-p">Preis bis</label><select id="h-p" name="preis"><option value="">Egal</option><option value="2000">2.000 €</option><option value="4000">4.000 €</option><option value="6000">6.000 €</option><option value="10000">10.000 €</option></select></div>
 <button class="btn" type="submit">Zeigen</button></form>
-<ul class="chips"><li>Probefahrt nach Terminabsprache</li><li>Inzahlungnahme möglich</li><li>Finanzierung auf Anfrage</li><li>17 Jahre Erfahrung</li></ul></div>
+<ul class="chips"><li>Probefahrt nach Terminabsprache</li><li>Inzahlungnahme möglich</li><li>Finanzierung auf Anfrage</li><li>17 Jahre Erfahrung</li></ul>{hero_winter}</div>
 <div class="collage" aria-label="Auswahl aus dem Bestand"><div class="count"><b>{N}</b>Motorräder<br>im Bestand</div>{collage}</div>
 </div></div></section>
-
+{winter_strip}
 <section style="padding-block:clamp(2.5rem,1.5rem + 3vw,4.5rem) 0"><div class="wrap"><div class="tiles">
 <a class="tile" href="motorraeder.html?preis=2000" data-reveal><b>Bis 2.000 €</b><span>{by_price(0, 2000)} Motorräder, günstiger Einstieg</span></a>
 <a class="tile" href="motorraeder.html?preis=4000" data-reveal style="--d:.06s"><b>Bis 4.000 €</b><span>{by_price(0, 4000)} Motorräder, beliebte Sportler</span></a>
@@ -177,7 +181,7 @@ home = f'''<section class="hero"><div class="wrap"><div class="grid">
 
 <section aria-labelledby="svc-h"><div class="wrap">
 <div class="head" data-reveal><div><p class="eyebrow">Mehr als ein Händler</p><h2 id="svc-h">Alles rund um Ihr Motorrad.</h2></div><p><a href="service.html">Alle Leistungen ansehen</a></p></div>
-<div class="svc">{''.join(f'<article data-reveal style="--d:{i%3*.06}s"><div class="ic"></div><h3>{h}</h3><p>{t}</p></article>' for i, (h, t) in enumerate([('Inzahlungnahme', 'Wir nehmen Ihr Motorrad beim Kauf in Zahlung.'), ('Finanzierung', 'Auf Anfrage vermitteln wir Finanzierungen.'), ('Ankauf', 'Wir kaufen alles von Aprilia bis Zündapp.'), ('Kommission', 'Ihr Bike steht in unserer Verkaufshalle, wir verkaufen in Ihrem Auftrag.'), ('Überwintern', 'Ihr Motorrad kann bei uns überwintern.'), ('Import & Wunschsuche', 'Was nicht im Bestand ist, besorgen wir auf Wunsch. Wir importieren regelmäßig Motorräder.')]))}</div></div></section>
+<div class="svc">{''.join(f'<article data-reveal style="--d:{i%3*.06}s"><div class="ic"></div><h3>{h}</h3><p>{t}</p></article>' for i, (h, t) in enumerate([('Überwintern', 'Ihr Motorrad kann bei uns überwintern. <a href="ueberwintern.html">Winterplatz anfragen</a>'), ('Inzahlungnahme', 'Wir nehmen Ihr Motorrad beim Kauf in Zahlung.'), ('Finanzierung', 'Auf Anfrage vermitteln wir Finanzierungen.'), ('Ankauf', 'Wir kaufen alles von Aprilia bis Zündapp.'), ('Kommission', 'Ihr Bike steht in unserer Verkaufshalle, wir verkaufen in Ihrem Auftrag.'), ('Import & Wunschsuche', 'Was nicht im Bestand ist, besorgen wir auf Wunsch. Wir importieren regelmäßig Motorräder.')]))}</div></div></section>
 
 <section class="dark" aria-labelledby="halle-h"><div class="wrap split">
 <div data-reveal><p class="eyebrow">Verkaufshalle</p><h2 id="halle-h">Kommen Sie vorbei.</h2>
@@ -189,6 +193,7 @@ home = f'''<section class="hero"><div class="wrap"><div class="grid">
 
 <section aria-labelledby="faq-h"><div class="wrap" style="max-width:56rem"><div class="head" data-reveal><div><p class="eyebrow">Gut zu wissen</p><h2 id="faq-h">Häufige Fragen</h2></div></div>
 <div class="faq" data-reveal>
+<details><summary>Kann mein Motorrad bei Ihnen überwintern?</summary><div>Ja, Ihr Bike kann bei uns überwintern. Fragen Sie Ihren Winterplatz an, wir stimmen Zeitraum und Konditionen mit Ihnen ab. <a href="ueberwintern.html">Zum Winterlager</a></div></details>
 <details><summary>Kann ich ein Motorrad probefahren?</summary><div>Ja. Bitte sprechen Sie vorher einen Termin ab, per Telefon oder über die Anfrage auf der Fahrzeugseite.</div></details>
 <details><summary>Nehmen Sie mein altes Motorrad in Zahlung?</summary><div>Auf Wunsch ja. Nennen Sie uns Modell, Baujahr, Kilometerstand und schicken Sie Fotos.</div></details>
 <details><summary>Gibt es eine Finanzierung?</summary><div>Auf Anfrage vermitteln wir Finanzierungen. Sprechen Sie uns an.</div></details>
@@ -242,6 +247,7 @@ ank = f'''<section class="page-hero"><div class="wrap"><p class="eyebrow">Motorr
 <h2>Ihre Möglichkeiten</h2><ul class="svc" style="grid-template-columns:1fr;list-style:none;padding:0;margin:0">
 <li><article><div class="ic"></div><h3>Ankauf</h3><p>Wir kaufen Ihr Motorrad an und machen Ihnen ein Angebot.</p></article></li>
 <li><article><div class="ic"></div><h3>Inzahlungnahme</h3><p>Sie kaufen ein Motorrad bei uns, wir nehmen Ihr altes in Zahlung.</p></article></li>
+<li><article><div class="ic"></div><h3>Überwintern und verkaufen</h3><p>Ihr Bike kann bei uns überwintern oder im Winter in unserer Verkaufshalle stehen. <a href="ueberwintern.html">Zum Winterlager</a></p></article></li>
 <li><article><div class="ic"></div><h3>Kommission</h3><p>Ihr Bike steht in unserer Verkaufshalle. Sie verkaufen es selbst von hier oder in Kommission in Ihrem Auftrag.</p></article></li></ul></div>
 <div data-reveal style="--d:.08s"><form class="card-f" id="verkauf" method="get" action="danke.html" data-demo-form data-next="danke.html" novalidate><h2 style="font-size:1.8rem;margin:0">Angebot anfordern</h2><p style="font-size:1rem">Je genauer Ihre Angaben, desto schneller können wir Ihnen ein Angebot machen.</p>
 <div class="form-2"><div><label for="v-mo">Marke und Modell</label><input id="v-mo" name="modell" type="text" required></div><div><label for="v-ez">Erstzulassung / Baujahr</label><input id="v-ez" name="ez" type="text" required></div></div>
@@ -254,13 +260,42 @@ ank = f'''<section class="page-hero"><div class="wrap"><p class="eyebrow">Motorr
 <p>Ihre Angaben und Fotos verwenden wir nur zur Bearbeitung Ihrer Anfrage. Mehr in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p><button class="btn" type="submit">Angebot anfordern</button><p class="status" role="status" aria-live="polite"></p></form></div></div></section>''' + cta_dark('Lieber direkt sprechen?', 'Rufen Sie uns an, gern auch abends. Wir sind für Sie da.')
 layout('ankauf.html', 'Motorrad verkaufen in Celle: Ankauf & Inzahlungnahme | Motorradhandel-Celle', 'Wir kaufen Ihr Motorrad an, von Aprilia bis Zündapp. Ankauf, Inzahlungnahme und Kommission in Celle. Jetzt Angebot anfordern.', ank, active='ankauf.html', fold=1)
 
+# ================= ÜBERWINTERN =================
+ph = lambda t: f'<span class="ph-note">[{t}]</span>'
+cond = ''.join(f'<tr><th>{a}</th><td>{ph(b)}</td></tr>' for a, b in [('Einlagerungszeitraum', 'z. B. Oktober bis April, vom Kunden festlegen'), ('Preis', 'pro Monat oder pauschal je Saison, vom Kunden'), ('Leistungen im Winterlager', 'z. B. Batteriepflege, Winter-Check: vom Kunden bestätigen'), ('Versicherung und Haftung', 'vom Kunden / Anwalt formulieren'), ('Bringen und Abholen', 'Termin, ggf. Transport: vom Kunden'), ('Anzahl Winterplätze', 'Kapazität vom Kunden, nur nennen wenn belegbar')])
+wint = f'''<section class="page-hero winter-hero"><div class="wrap"><p class="eyebrow">{SNOW} Winterlager</p><h1>Ihr Motorrad überwintert bei uns.</h1><p>Die Saison ist vorbei, Ihr Motorrad braucht einen Platz? Wir stellen es für den Winter ein. Fragen Sie jetzt Ihren Winterplatz an, wir melden uns bei Ihnen.</p><div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.6rem"><a class="btn ice" href="#winterplatz">Winterplatz anfragen</a><a class="btn ghost" href="tel:{PHONE_TEL}">Anrufen: {PHONE_TXT}</a></div></div></section>
+<section><div class="wrap"><div class="svc" style="grid-template-columns:repeat(3,1fr)">
+<article data-reveal><div class="ic ice"></div><h2 style="font-size:1.5rem">Bei uns überwintern</h2><p>Gern kann Ihr Bike bei uns überwintern. Sie bringen es vorbei und holen es im Frühjahr wieder ab.</p></article>
+<article data-reveal style="--d:.06s"><div class="ic ice"></div><h2 style="font-size:1.5rem">Im Winter verkaufen</h2><p>Oder Ihr Bike steht in unserer Verkaufshalle: Sie verkaufen es selbst von dort oder in Kommission in Ihrem Auftrag.</p></article>
+<article data-reveal style="--d:.12s"><div class="ic ice"></div><h2 style="font-size:1.5rem">Im Frühjahr wechseln</h2><p>Sie möchten ein anderes Motorrad? Wir nehmen Ihr Bike in Zahlung und vermitteln auf Anfrage Finanzierungen. <a href="motorraeder.html">Bestand ansehen</a></p></article></div></div></section>
+<section class="alt" style="padding-top:0"><div class="wrap"><div class="head" data-reveal><div><p class="eyebrow">So läuft es ab</p><h2>In vier Schritten durch den Winter.</h2></div><p>Wir sprechen alles persönlich ab.</p></div>
+<ol class="steps"><li data-reveal><h3>Winterplatz anfragen</h3><p>Modell und gewünschten Zeitraum nennen, per Formular oder Telefon.</p></li><li data-reveal style="--d:.07s"><h3>Konditionen abstimmen</h3><p>Wir sprechen Preis, Leistungen und Übergabetermin mit Ihnen ab.</p></li><li data-reveal style="--d:.14s"><h3>Motorrad bringen</h3><p>Sie bringen Ihr Bike zum vereinbarten Termin zu uns.</p></li><li data-reveal style="--d:.21s"><h3>Im Frühjahr abholen</h3><p>Zum Saisonstart holen Sie Ihr Motorrad wieder ab.</p></li></ol></div></section>
+<section><div class="wrap split" style="align-items:start"><div data-reveal id="konditionen"><p class="eyebrow">Konditionen</p><h2>Was Sie wissen müssen.</h2><p>Die genauen Konditionen stimmen wir persönlich mit Ihnen ab.</p><table class="spec-t">{cond}</table></div>
+<div data-reveal style="--d:.08s" id="winterplatz"><form class="card-f" id="winterform" method="get" action="danke.html" data-demo-form data-next="danke.html" novalidate><h2 style="font-size:1.8rem;margin:0">Winterplatz anfragen</h2><p style="font-size:1rem">Wir melden uns bei Ihnen und sprechen Zeitraum und Konditionen ab.</p>
+<div class="form-2"><div><label for="w-n">Name</label><input id="w-n" name="name" type="text" autocomplete="name" required></div><div><label for="w-t">Telefon</label><input id="w-t" name="telefon" type="tel" autocomplete="tel" required></div></div>
+<div class="form-2"><div><label for="w-m">Marke und Modell</label><input id="w-m" name="modell" type="text" required></div><div><label for="w-z">Zeitraum <span class="hint">(von bis)</span></label><input id="w-z" name="zeitraum" type="text" placeholder="z. B. November bis April"></div></div>
+<div><label for="w-e">E-Mail <span class="hint">(optional)</span></label><input id="w-e" name="mail" type="email" autocomplete="email"></div>
+<div><label for="w-b">Besonderheiten oder Wünsche <span class="hint">(optional)</span></label><textarea id="w-b" name="nachricht" rows="3"></textarea></div>
+<div class="chk"><input id="w-k" name="kommission" type="checkbox"><label for="w-k" style="margin:0;font-weight:500">Ich möchte das Motorrad im Winter zusätzlich zum Verkauf anbieten (Kommission).</label></div>
+<div class="chk"><input id="w-i" name="wechsel" type="checkbox"><label for="w-i" style="margin:0;font-weight:500">Ich möchte im Frühjahr ein anderes Motorrad kaufen (Inzahlungnahme).</label></div>
+<div class="hp" aria-hidden="true"><label for="w-w">Nicht ausfüllen</label><input id="w-w" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+<p>Ihre Angaben verwenden wir nur zur Bearbeitung Ihrer Anfrage. Mehr in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p><button class="btn ice" type="submit">Winterplatz anfragen</button><p class="status" role="status" aria-live="polite"></p></form></div></div></section>
+<section class="alt"><div class="wrap" style="max-width:56rem"><div class="head" data-reveal><div><p class="eyebrow">Gut zu wissen</p><h2>Häufige Fragen zum Winterlager</h2></div></div><div class="faq" data-reveal>
+<details><summary>Kann mein Motorrad bei Ihnen überwintern?</summary><div>Ja, Ihr Bike kann bei uns überwintern. Fragen Sie Ihren Winterplatz an, wir stimmen alles mit Ihnen ab.</div></details>
+<details><summary>Was kostet das Überwintern?</summary><div>{ph('Preis vom Kunden')}</div></details>
+<details><summary>Wann kann ich mein Motorrad bringen und wieder abholen?</summary><div>Das sprechen wir mit Ihnen ab. {ph('Zeiten vom Kunden')}</div></details>
+<details><summary>Kann ich mein Motorrad im Winter verkaufen?</summary><div>Ja. Es kann in unserer Verkaufshalle stehen, Sie verkaufen selbst von dort oder in Kommission in Ihrem Auftrag. Wir kaufen Ihr Motorrad auch an. <a href="ankauf.html">Mehr zum Verkauf</a></div></details>
+<details><summary>Wie ist mein Motorrad versichert?</summary><div>{ph('Versicherung und Haftung vom Kunden')}</div></details>
+</div></div></section>''' + cta_dark('Winterplatz sichern.', 'Rufen Sie kurz an oder senden Sie die Anfrage. Wir sprechen Zeitraum und Konditionen mit Ihnen ab.')
+layout('ueberwintern.html', 'Motorrad überwintern in Celle: Winterlager | Motorradhandel-Celle', 'Ihr Motorrad überwintert bei uns: Winterlager in Celle-Altenhagen. Winterplatz anfragen, im Winter verkaufen oder im Frühjahr wechseln.', wint, active='ueberwintern.html', fold=1)
+
 # ================= SERVICE =================
 svc = '<section class="page-hero"><div class="wrap"><p class="eyebrow">Service & Finanzierung</p><h1>Mehr als ein Händler.</h1><p>Wir verkaufen, kaufen an, nehmen in Zahlung, vermitteln Finanzierungen und besorgen Ihr Wunschmotorrad.</p></div></section><section><div class="wrap"><div class="svc">' + ''.join(f'<article id="{i}" data-reveal style="--d:{n%3*.06}s"><div class="ic"></div><h3>{h}</h3><p>{t}</p></article>' for n, (i, h, t) in enumerate([
  ('inzahlungnahme', 'Inzahlungnahme', 'Sie kaufen bei uns, wir nehmen Ihr Motorrad in Zahlung. Schicken Sie uns Modell, Baujahr, Kilometerstand und Fotos.'),
  ('finanzierung', 'Finanzierung', 'Auf Anfrage vermitteln wir Finanzierungen. Sprechen Sie uns an. <span class="ph-note">[Partnerbank und Konditionen vom Kunden]</span>'),
  ('ankauf', 'Ankauf', 'Wir kaufen alles von Aprilia bis Zündapp, auch wenn Sie kein Motorrad bei uns kaufen.'),
  ('kommission', 'Kommissionsverkauf', 'Ihr Bike steht in unserer Verkaufshalle. Sie verkaufen es selbst von dort oder in Kommission in Ihrem Auftrag.'),
- ('ueberwintern', 'Überwintern', 'Ihr Motorrad kann bei uns überwintern. <span class="ph-note">[Konditionen vom Kunden]</span>'),
+ ('ueberwintern', 'Überwintern', 'Ihr Motorrad kann bei uns überwintern. <span class="ph-note">[Konditionen vom Kunden]</span> <a href="ueberwintern.html">Winterplatz anfragen</a>'),
  ('import', 'Import & Wunschsuche', 'Was nicht im Bestand ist, besorgen wir auf Wunsch. Wir importieren regelmäßig Motorräder nach Deutschland.'),
  ('zubehoer', 'Zubehör & Helme', 'Bitte vorher anrufen. <span class="ph-note">[Sortiment vom Kunden]</span>'),
  ('werkstatt', 'Werkstatt & Service', '<span class="ph-note">[Leistungsumfang der Werkstatt vom Kunden bestätigen]</span>'),
