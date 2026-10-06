@@ -5,6 +5,7 @@ Gemeinsam: Telefon-Button mobil, Öffnungszeiten, Anfahrt, Einzugsgebiet, echte 
 | Branche | Hauptziel | Pflicht-Sektionen | Besonderes / Recht |
 |---|---|---|---|
 | Handwerk (Elektro, SHK, Dach, Maler, Tischler) | Anfrage/Angebot | Leistungen, Referenzprojekte (freigegeben), Ablauf, Einzugsgebiet, Notdienst, Förderung (nur belegbar) | Meisterbetrieb nur mit Eintragung; Fotoanfrage-Formular (Upload mit Datenschutz-Hinweis) |
+| Motorrad-/Kfz-Händler mit Bestand | Probefahrt, Anfrage, Ankauf | Bestand mit Filter, Detailseiten, Probefahrt-Formular, Ankauf/Inzahlungnahme, Finanzierung, Wunschsuche | Siehe `verkauf-haendler.md`; Preisangaben (PAngV, Differenzbesteuerung), Gewährleistung vom Kunden; keine Fake-Verknappung |
 | Kfz-Werkstatt | Termin | Leistungen, Terminbuchung, HU/AU, Marken, Preise-ab (falls erlaubt), Anfahrt | PAngV bei Preisangaben; Terminbuchung per EU-Dienst/AVV |
 | Arzt/Zahnarzt/Therapie/Physio | Termin/Vertrauen | Leistungen, Team, Sprechzeiten, Anfahrt/Barrierefreiheit der Praxis, Terminlink | **HWG**: keine Heilversprechen, keine Vorher-Nachher ohne Prüfung, Berufsordnung; Impressum mit Kammer/Aufsicht; Patienten-Datenschutz besonders sensibel (Art. 9) |
 | Kanzlei/Steuer/Berater | Erstgespräch | Rechtsgebiete, Team, Ablauf, Honorar-Info | Berufsrecht (BORA/StBerG): Werbung sachlich, keine Erfolgsgarantie; „Sie“ |
