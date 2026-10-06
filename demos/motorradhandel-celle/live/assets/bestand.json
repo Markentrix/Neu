@@ -1,0 +1,343 @@
+[
+ {
+  "slug": "kawasaki-z1000-2015",
+  "brand": "Kawasaki",
+  "model": "Z 1000",
+  "ez": "07/2015",
+  "year": 2015,
+  "km": 7254,
+  "price": 9899,
+  "typ": "Naked Bike",
+  "n": 2,
+  "hl": "Jüngstes Modell im Bestand",
+  "pos": 0,
+  "name": "Kawasaki Z 1000",
+  "alts": [
+   "Kawasaki Z 1000, Foto 1 von 2",
+   "Kawasaki Z 1000, Foto 2 von 2"
+  ],
+  "img": [
+   "kawasaki-z1000-2015-1.webp",
+   "kawasaki-z1000-2015-2.webp"
+  ]
+ },
+ {
+  "slug": "honda-crf1000-dct-b",
+  "brand": "Honda",
+  "model": "CRF 1000 DCT",
+  "ez": "04/2017",
+  "year": 2017,
+  "km": 12832,
+  "price": 9999,
+  "typ": "Reise & Enduro",
+  "n": 1,
+  "hl": "Wenig Kilometer",
+  "pos": 1,
+  "name": "Honda CRF 1000 DCT",
+  "alts": [
+   "Honda CRF 1000 DCT, Foto 1 von 1"
+  ],
+  "img": [
+   "honda-crf1000-dct-b-1.webp"
+  ]
+ },
+ {
+  "slug": "honda-crf1000-dct-a",
+  "brand": "Honda",
+  "model": "CRF 1000 DCT",
+  "ez": "04/2017",
+  "year": 2017,
+  "km": 35332,
+  "price": 8899,
+  "typ": "Reise & Enduro",
+  "n": 2,
+  "pos": 2,
+  "name": "Honda CRF 1000 DCT",
+  "alts": [
+   "Honda CRF 1000 DCT, Foto 1 von 2",
+   "Honda CRF 1000 DCT, Foto 2 von 2"
+  ],
+  "img": [
+   "honda-crf1000-dct-a-1.webp",
+   "honda-crf1000-dct-a-2.webp"
+  ]
+ },
+ {
+  "slug": "kawasaki-z1000-abs",
+  "brand": "Kawasaki",
+  "model": "Z 1000 ABS",
+  "ez": "04/2010",
+  "year": 2010,
+  "km": 4232,
+  "price": 6799,
+  "typ": "Naked Bike",
+  "n": 3,
+  "hl": "Nur 4.232 km",
+  "pos": 3,
+  "name": "Kawasaki Z 1000 ABS",
+  "alts": [
+   "Kawasaki Z 1000 ABS, Foto 1 von 3",
+   "Kawasaki Z 1000 ABS, Foto 2 von 3",
+   "Kawasaki Z 1000 ABS, Foto 3 von 3"
+  ],
+  "img": [
+   "kawasaki-z1000-abs-1.webp",
+   "kawasaki-z1000-abs-2.webp",
+   "kawasaki-z1000-abs-3.webp"
+  ]
+ },
+ {
+  "slug": "kawasaki-zx10r-2005",
+  "brand": "Kawasaki",
+  "model": "ZX-10R",
+  "ez": "07/2005",
+  "year": 2005,
+  "km": 12254,
+  "price": 5899,
+  "typ": "Sportler",
+  "n": 1,
+  "pos": 4,
+  "name": "Kawasaki ZX-10R",
+  "alts": [
+   "Kawasaki ZX-10R, Foto 1 von 1"
+  ],
+  "img": [
+   "kawasaki-zx10r-2005-1.webp"
+  ]
+ },
+ {
+  "slug": "honda-cbr1000rr-2006",
+  "brand": "Honda",
+  "model": "CBR 1000 RR",
+  "ez": "04/2006",
+  "year": 2006,
+  "km": 31432,
+  "price": 4599,
+  "typ": "Sportler",
+  "n": 3,
+  "pos": 5,
+  "name": "Honda CBR 1000 RR",
+  "alts": [
+   "Honda CBR 1000 RR, Foto 1 von 3",
+   "Honda CBR 1000 RR, Foto 2 von 3",
+   "Honda CBR 1000 RR, Foto 3 von 3"
+  ],
+  "img": [
+   "honda-cbr1000rr-2006-1.webp",
+   "honda-cbr1000rr-2006-2.webp",
+   "honda-cbr1000rr-2006-3.webp"
+  ]
+ },
+ {
+  "slug": "suzuki-gsxr750-k5",
+  "brand": "Suzuki",
+  "model": "GSX-R 750 K5",
+  "ez": "04/2005",
+  "year": 2005,
+  "km": 22432,
+  "price": 3999,
+  "typ": "Sportler",
+  "n": 1,
+  "pos": 6,
+  "name": "Suzuki GSX-R 750 K5",
+  "alts": [
+   "Suzuki GSX-R 750 K5, Foto 1 von 1"
+  ],
+  "img": [
+   "suzuki-gsxr750-k5-1.webp"
+  ]
+ },
+ {
+  "slug": "yamaha-yzf-r6-silver",
+  "brand": "Yamaha",
+  "model": "YZF-R6 RJ05 Silver Edition",
+  "ez": "04/2003",
+  "year": 2003,
+  "km": 32183,
+  "price": 3499,
+  "typ": "Sportler",
+  "n": 2,
+  "pos": 7,
+  "name": "Yamaha YZF-R6 RJ05 Silver Edition",
+  "alts": [
+   "Yamaha YZF-R6 RJ05 Silver Edition, Foto 1 von 2",
+   "Yamaha YZF-R6 RJ05 Silver Edition, Foto 2 von 2"
+  ],
+  "img": [
+   "yamaha-yzf-r6-silver-1.webp",
+   "yamaha-yzf-r6-silver-2.webp"
+  ]
+ },
+ {
+  "slug": "triumph-speed-triple-955",
+  "brand": "Triumph",
+  "model": "Speed Triple 955",
+  "ez": "05/2001",
+  "year": 2001,
+  "km": 20632,
+  "price": 3390,
+  "typ": "Naked Bike",
+  "n": 1,
+  "pos": 8,
+  "name": "Triumph Speed Triple 955",
+  "alts": [
+   "Triumph Speed Triple 955, Foto 1 von 1"
+  ],
+  "img": [
+   "triumph-speed-triple-955-1.webp"
+  ]
+ },
+ {
+  "slug": "honda-cbr600rr-2004",
+  "brand": "Honda",
+  "model": "CBR 600 RR",
+  "ez": "04/2004",
+  "year": 2004,
+  "km": 19432,
+  "price": 3670,
+  "typ": "Sportler",
+  "n": 1,
+  "pos": 9,
+  "name": "Honda CBR 600 RR",
+  "alts": [
+   "Honda CBR 600 RR, Foto 1 von 1"
+  ],
+  "img": [
+   "honda-cbr600rr-2004-1.webp"
+  ]
+ },
+ {
+  "slug": "suzuki-gsxr750-k1",
+  "brand": "Suzuki",
+  "model": "GSX-R 750 K1",
+  "ez": "04/2001",
+  "year": 2001,
+  "km": 26867,
+  "price": 2899,
+  "typ": "Sportler",
+  "n": 3,
+  "hl": "Mehrfach vorhanden",
+  "pos": 10,
+  "name": "Suzuki GSX-R 750 K1",
+  "alts": [
+   "Suzuki GSX-R 750 K1, Foto 1 von 3",
+   "Suzuki GSX-R 750 K1, Foto 2 von 3",
+   "Suzuki GSX-R 750 K1, Foto 3 von 3"
+  ],
+  "img": [
+   "suzuki-gsxr750-k1-1.webp",
+   "suzuki-gsxr750-k1-2.webp",
+   "suzuki-gsxr750-k1-3.webp"
+  ]
+ },
+ {
+  "slug": "honda-varadero-xl1000v",
+  "brand": "Honda",
+  "model": "XL 1000 V Varadero",
+  "ez": "04/2000",
+  "year": 2000,
+  "km": 34645,
+  "price": 2999,
+  "typ": "Reise & Enduro",
+  "n": 3,
+  "pos": 11,
+  "name": "Honda XL 1000 V Varadero",
+  "alts": [
+   "Honda XL 1000 V Varadero, Foto 1 von 3",
+   "Honda XL 1000 V Varadero, Foto 2 von 3",
+   "Honda XL 1000 V Varadero, Foto 3 von 3"
+  ],
+  "img": [
+   "honda-varadero-xl1000v-1.webp",
+   "honda-varadero-xl1000v-2.webp",
+   "honda-varadero-xl1000v-3.webp"
+  ]
+ },
+ {
+  "slug": "yamaha-yzf-r1-2000",
+  "brand": "Yamaha",
+  "model": "YZF-R1",
+  "ez": "04/2000",
+  "year": 2000,
+  "km": 22967,
+  "price": 1999,
+  "typ": "Sportler",
+  "n": 2,
+  "hl": "Günstiger Einstieg",
+  "pos": 12,
+  "name": "Yamaha YZF-R1",
+  "alts": [
+   "Yamaha YZF-R1, Foto 1 von 2",
+   "Yamaha YZF-R1, Foto 2 von 2"
+  ],
+  "img": [
+   "yamaha-yzf-r1-2000-1.webp",
+   "yamaha-yzf-r1-2000-2.webp"
+  ]
+ },
+ {
+  "slug": "bmw-f650-cr",
+  "brand": "BMW",
+  "model": "F 650 CR",
+  "ez": "04/1996",
+  "year": 1996,
+  "km": 32432,
+  "price": 1699,
+  "typ": "Allrounder",
+  "n": 2,
+  "pos": 13,
+  "name": "BMW F 650 CR",
+  "alts": [
+   "BMW F 650 CR, Foto 1 von 2",
+   "BMW F 650 CR, Foto 2 von 2"
+  ],
+  "img": [
+   "bmw-f650-cr-1.webp",
+   "bmw-f650-cr-2.webp"
+  ]
+ },
+ {
+  "slug": "piaggio-hexagon-sport",
+  "brand": "Piaggio",
+  "model": "Hexagon 125 LX Sport",
+  "ez": "04/1998",
+  "year": 1998,
+  "km": 14053,
+  "price": 899,
+  "typ": "Roller",
+  "n": 2,
+  "pos": 14,
+  "name": "Piaggio Hexagon 125 LX Sport",
+  "alts": [
+   "Piaggio Hexagon 125 LX Sport, Foto 1 von 2",
+   "Piaggio Hexagon 125 LX Sport, Foto 2 von 2"
+  ],
+  "img": [
+   "piaggio-hexagon-sport-1.webp",
+   "piaggio-hexagon-sport-2.webp"
+  ]
+ },
+ {
+  "slug": "piaggio-hexagon-lx",
+  "brand": "Piaggio",
+  "model": "Hexagon 125 LX",
+  "ez": "04/1998",
+  "year": 1998,
+  "km": 22053,
+  "price": 899,
+  "typ": "Roller",
+  "n": 3,
+  "pos": 15,
+  "name": "Piaggio Hexagon 125 LX",
+  "alts": [
+   "Piaggio Hexagon 125 LX, Foto 1 von 3",
+   "Piaggio Hexagon 125 LX, Foto 2 von 3",
+   "Piaggio Hexagon 125 LX, Foto 3 von 3"
+  ],
+  "img": [
+   "piaggio-hexagon-lx-1.webp",
+   "piaggio-hexagon-lx-2.webp",
+   "piaggio-hexagon-lx-3.webp"
+  ]
+ }
+]

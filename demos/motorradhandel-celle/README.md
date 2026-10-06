@@ -8,10 +8,13 @@ Start lokal: `python3 -m http.server 8766` im Ordner, dann `http://127.0.0.1:876
 Inhalte, Kontaktdaten, Leistungen, Fahrzeuge, Preise und Fotos stammen von motorradhandel-celle.de (Stand 06.10.2026). Texte sind gekürzte Vorschläge. Die alte Seite ist ein WebPlus-Tabellenlayout mit Text in Bildern, 26 Seiten, ohne mobile Darstellung, mit YouTube-Links und Verweisen auf speedrad.de.
 
 ## Aufbau
-**Inhaltsseiten:** Start, Motorräder (Bestand mit Filter und Sortierung), Überwintern (Winterlager), Motorrad verkaufen (Ankauf), Service & Finanzierung, Über uns, Kontakt (Probefahrt, Wunschsuche). **Verkaufsstrecke:** 16 Fahrzeug-Detailseiten mit Probefahrt-Formular, Danke-Seite. Dazu Impressum, Datenschutz, 404.
+**SEO-Seiten:** 5 Marken- und 4 Arten-Seiten, 2 Ratgeber (Gebrauchtkauf, Überwintern). **Inhaltsseiten:** Start, Motorräder (Bestand mit Filter und Sortierung), Überwintern (Winterlager), Motorrad verkaufen (Ankauf), Service & Finanzierung, Über uns, Kontakt (Probefahrt, Wunschsuche). **Verkaufsstrecke:** 16 Fahrzeug-Detailseiten mit Probefahrt-Formular, Danke-Seite. Dazu Impressum, Datenschutz, 404.
 **Saison-Kampagne Winterlager** (Schalter `WINTER` in `build/build.py`): Banner auf jeder Seite, Hero-Link und Streifen auf der Startseite, „Überwintern“ in der Navigation und als erste Leistung, eigene Seite `ueberwintern.html` mit Ablauf, Konditionen (Platzhalter), Winterplatz-Formular und FAQ, Querverweise zu Verkauf in Kommission und Inzahlungnahme. Im Frühjahr Schalter ausstellen oder durch eine Saisonstart-Kampagne ersetzen.
 **Verkaufs-Bausteine:** Suchfilter im Hero, Preis-Kacheln, Highlights, Probefahrt je Fahrzeug, Anrufen/WhatsApp, mobile Aktionsleiste, Ankauf-Strecke, Inzahlungnahme/Finanzierung-Häkchen, FAQ, ehrlicher Hinweis „Zwischenverkauf vorbehalten“.
 **Design (Vorschlag, keine CI vorhanden):** Schwarz, Signalrot #C8102E, Barlow Condensed (Überschriften) und Inter, selbst gehostet. Logo/Wortmarke ist ein Platzhalter-Entwurf von Markentrix, kein Kundenlogo.
+
+## SEO und GEO
+Details, Keyword-Zuordnung, Go-live- und Nachsorge-Checkliste und KI-Testfragen: **`SEO-GEO.md`**. Live-Build mit Indexierung: `python3 build/build.py --live` (schreibt nach `live/`), Prüfer: `python3 build/check_seo.py [ordner] [--live]` (Demo: 0 FAIL, 0 WARN; Live: 0 FAIL, offene Platzhalter werden gemeldet). Live-Build gemessen (Lighthouse mobil gedrosselt, Start, Bestand, Fahrzeug, Überwintern): Performance, Barrierefreiheit, Best Practices und SEO je **100**.
 
 ## Messung (Lighthouse 12, mobil, Slow 4G + 4x CPU)
 Start, Bestand, Detailseite, Ankauf: Performance 100 · Barrierefreiheit 100 · Best Practices 100 · LCP 1,0–1,9 s · CLS ≤ 0,04. Labordaten, kein Feldwert. Filter-Logik, Leer-Zustand und alle Links geprüft. Audit-Skript: 0 FAIL.

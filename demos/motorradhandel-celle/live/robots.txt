@@ -1,0 +1,24 @@
+# Suchmaschinen und KI-Suche dürfen alles Öffentliche lesen.
+User-agent: *
+Allow: /
+Disallow: /danke.html
+
+# KI-Such- und Antwortdienste ausdrücklich erlaubt (Entscheidung des Inhabers; Training separat sperrbar, z. B. GPTBot, Google-Extended, CCBot).
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: GPTBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://motorradhandel-celle.de/sitemap.xml
