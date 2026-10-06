@@ -1,10 +1,10 @@
 # Pizzeria Molise Celle
 
-> Italienische Pizzeria in der Altstadt von Celle (Piltzergasse, 29221 Celle). Pizza, Pasta, Flammkuchen, Handpizza zum Mitnehmen. Vegetarische und vegane Optionen. Online-Tischreservierung.
+> Italienische Pizzeria in der Altstadt von Celle (Piltzergasse, 29221 Celle). Pizza, Pasta, Flammkuchen, Handpizza zum Mitnehmen. Vegetarische und vegane Gerichte. Telefon 05141 21 44 21. Mo–Sa 11:00–20:00, Sonntag Ruhetag.
 
-- Adresse: Piltzergasse, 29221 Celle, Niedersachsen, Deutschland
-- Telefon: +49 5141 214421
-- Öffnungszeiten: Mo–Sa 11:00–20:00, So geschlossen
-- Preisniveau: günstig bis moderat (Pizza ab 5,50 €, Pasta ab 7,50 €)
-- Reservierung: https://www.pizzeria-molise-celle.de/#reservieren
-- Speisekarte: https://www.pizzeria-molise-celle.de/#speisekarte
+## Seiten
+- [Startseite und Reservierung](https://www.pizzeria-molise-celle.de/): Überblick, Tisch reservieren, FAQ
+- [Speisekarte](https://www.pizzeria-molise-celle.de/speisekarte.html): Pizza ab 5,50 €, Pasta, Flammkuchen, Salate
+- [Pizza zum Mitnehmen](https://www.pizzeria-molise-celle.de/pizza-zum-mitnehmen.html): Handpizza am Straßenfenster, ab 4 €
+- [Vegetarisch und vegan](https://www.pizzeria-molise-celle.de/vegetarisch-vegan.html): fleischlose Gerichte
+- [Anfahrt und Öffnungszeiten](https://www.pizzeria-molise-celle.de/italiener-celle-altstadt.html): Lage, Route, Zeiten
