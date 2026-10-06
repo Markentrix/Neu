@@ -28,7 +28,7 @@ function page({file,title,desc,h1,eyebrow,lead,body,home,ld,noindex,hero}){
 <title>${title}</title><meta name="description" content="${desc}">
 <meta name="robots" content="${noindex?'noindex,follow':'index,follow,max-image-preview:large,max-snippet:-1'}">
 <link rel="canonical" href="${url}">
-<meta name="theme-color" content="#faf9f6"><meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#faf9f6"><meta name="color-scheme" content="light">
 <meta name="geo.region" content="DE-NI"><meta name="geo.placename" content="Celle"><meta name="geo.position" content="52.6256;10.0804"><meta name="ICBM" content="52.6256, 10.0804">
 <meta property="og:type" content="website"><meta property="og:locale" content="de_DE"><meta property="og:site_name" content="Pizzeria Molise Celle"><meta property="og:title" content="${title}"><meta property="og:description" content="${desc}"><meta property="og:url" content="${url}"><meta property="og:image" content="${BASE}/assets/og.png"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">

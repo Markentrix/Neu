@@ -1,8 +1,7 @@
 @font-face{font-family:"Bricolage Grotesque";src:url(fonts/bricolage.woff2) format("woff2");font-weight:500 700;font-display:swap}
 @font-face{font-family:"Instrument Sans";src:url(fonts/instrument.woff2) format("woff2");font-weight:400 600;font-display:swap}
-:root{--bg:#faf9f6;--ink:#15130f;--mute:#5a554d;--line:#dedad1;--accent:#c42f1b;--band:#15130f;--on-band:#f3efe6;--band-mute:#bdb7aa;--band-line:#3a362f;--accent-band:#ff7a5f;
+:root{--bg:#faf9f6;--ink:#15130f;--mute:#5a554d;--line:#dedad1;--accent:#c42f1b;--band:#f1ebdf;--on-band:#15130f;--band-mute:#5a554d;--band-line:#dcd5c5;--accent-band:#c42f1b;color-scheme:light;
 --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;--body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
-@media(prefers-color-scheme:dark){:root{--bg:#141210;--ink:#f3efe6;--mute:#b4ada0;--line:#34302a;--accent:#ff7a5f;--band:#1e1b17;--band-line:#3a362f;color-scheme:dark}}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;line-height:1.04;letter-spacing:-.02em;text-wrap:balance}
@@ -60,13 +59,13 @@ cite{font-style:normal;font-size:.88rem;color:var(--mute)}
 .band .split{align-items:start}.tel{font:600 clamp(1.7rem,4vw,2.4rem) var(--display);letter-spacing:-.02em;text-decoration:none;color:var(--accent-band);display:inline-block;margin-top:22px}
 form{display:grid;gap:22px}.g{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 label{display:grid;gap:4px;font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--band-mute);min-width:0}
-input,select,textarea{font:400 1.05rem var(--body);letter-spacing:0;text-transform:none;color:var(--on-band);background:transparent;border:0;border-bottom:1.5px solid var(--band-mute);border-radius:0;padding:10px 0;width:100%;min-width:0}
+input,select,textarea{font:400 1.05rem var(--body);letter-spacing:0;text-transform:none;color:var(--on-band);background:transparent;border:0;border-bottom:1.5px solid #8a8377;border-radius:0;padding:10px 0;width:100%;min-width:0}
 select option{color:#15130f;background:#fff}
 input:focus,select:focus,textarea:focus{outline:0;border-bottom-color:var(--accent-band)}
-input[type=date]{color-scheme:dark}
+
 .check{display:flex;gap:12px;align-items:flex-start;text-transform:none;letter-spacing:0;font-weight:400;font-size:.9rem}.check input{width:auto;margin-top:5px}
-.hp{position:absolute;left:-9999px}.msg{margin:0;min-height:1.4em}.msg.ok{color:#8bd6a0}.msg.err{color:var(--accent-band)}.hint{font-size:.9rem;color:var(--band-mute);margin:0}
-.band .btn{background:var(--accent-band);border-color:var(--accent-band);color:#15130f;justify-self:start}.band .btn:hover{background:transparent;color:var(--accent-band)}
+.hp{position:absolute;left:-9999px}.msg{margin:0;min-height:1.4em}.msg.ok{color:#2e7d4a}.msg.err{color:var(--accent-band)}.hint{font-size:.9rem;color:var(--band-mute);margin:0}
+.band .btn{background:var(--accent-band);border-color:var(--accent-band);color:#fff;justify-self:start}.band .btn:hover{background:transparent;color:var(--accent-band)}
 /* FAQ */
 details{border-bottom:1px solid var(--line);padding:18px 0}details:first-of-type{border-top:1px solid var(--line)}
 summary{cursor:pointer;font:600 1.1rem var(--display);letter-spacing:-.01em;list-style:none;display:flex;justify-content:space-between;gap:16px}
