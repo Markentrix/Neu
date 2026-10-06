@@ -1,0 +1,10 @@
+{
+  "name": "italiacamper24-shop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shop-Backend für Italia Camper 24 (Node 22, SQLite, Stripe, PayPal)",
+  "main": "index.js",
+  "engines": { "node": ">=22.13" },
+  "scripts": { "start": "node --disable-warning=ExperimentalWarning index.js", "test": "node --disable-warning=ExperimentalWarning --test test/e2e.test.js" },
+  "dependencies": { "express": "^4.21.2", "nodemailer": "^6.9.16", "pdfkit": "^0.15.2" }
+}
