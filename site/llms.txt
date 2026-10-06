@@ -1,31 +1,42 @@
 # Italia Camper 24
 
-> Fachhändler und Montagebetrieb für Wohnmobil-Nachrüstung seit 2017: Anhängerkupplungen, Luftfederung, Stützensysteme, Heckträger. Versandkostenfrei in Deutschland, Montage in Bohmte (49163) und Diez (65582).
+> Fachhändler und Montagebetrieb für Wohnmobil-Nachrüstung seit 2017: fahrzeugspezifische Anhängerkupplungen (Fiat Ducato, Citroën Jumper, Peugeot Boxer, Mercedes Sprinter, Ford Transit, Renault Master, Iveco Daily und über 177 Wohnmobil-Modelle), Luftfederung, Stützensysteme, Heckträger, Rangierhilfen. Versandkostenfrei in Deutschland, Montage in Bohmte (49163) und Diez (65582). Inhaberin: Felicia Grieco.
 
-## Wichtige Seiten
-- [Anhängerkupplung](https://www.italiacamper24.de/anhaengerkupplung.html): Für Wohnmobil & Kastenwagen – mit EG-Typgenehmigung
-- [Heckträger & Lastenträger](https://www.italiacamper24.de/hecktraeger.html): Fahrräder, E-Bikes, Gepäck sicher am Heck
-- [Luftfederung & Kompressor](https://www.italiacamper24.de/luftfederung.html): Mehr Komfort, mehr Stabilität, mehr Zuladung
-- [Stützensysteme](https://www.italiacamper24.de/stuetzensysteme.html): Kurbel-, Hydraulik- und Hubstützen
-- [Motorradanhänger](https://www.italiacamper24.de/motorradanhaenger.html): Das Motorrad immer dabei
-- [Räder & Felgen](https://www.italiacamper24.de/raeder-felgen.html): Felgen und Kompletträder für Reisemobile
-- [Klimaanlagen](https://www.italiacamper24.de/klimaanlagen.html): Dachklimaanlagen für kühle Sommernächte
-- [Rangierhilfe](https://www.italiacamper24.de/rangierhilfe.html): Mover & Rangierhilfen für Anhänger und Fahrzeuge
-- [Trittstufen & Garagenhalterungen](https://www.italiacamper24.de/trittstufen.html): Bequemer Einstieg, sichere Halterung
+## Kategorien
+- [Anhängerkupplung](https://www.italiacamper24.de/anhaengerkupplung.html): Fahrzeugspezifisch für Wohnmobil & Kastenwagen – mit EG-Typgenehmigung
+- [Rahmenverlängerung](https://www.italiacamper24.de/rahmenverlaengerung.html): Tragfähige Grundlage für Kupplung & Heckträger
+- [Elektrosätze](https://www.italiacamper24.de/elektrosaetze.html): 13-polig, fahrzeugspezifisch, Plug-and-Play
+- [Rasterplatten](https://www.italiacamper24.de/rasterplatten.html): Höhenverstellung für AHK und Heckträger
+- [Heckträger](https://www.italiacamper24.de/hecktraeger.html): Motorrad-, Fahrrad- und Lastenträger fürs Heck
+- [Motorradanhänger](https://www.italiacamper24.de/motorradanhaenger.html): Nachläufer für Roller und Motorrad
+- [Räder & Felgen](https://www.italiacamper24.de/raeder-felgen.html): Borbet CW5 Kompletträder auf Anfrage
+- [Frontscheibe](https://www.italiacamper24.de/frontscheibe.html): Scheibentausch & Steinschlagreparatur
+- [Klimaanlagen](https://www.italiacamper24.de/klimaanlagen.html): Dometic FreshJet inkl. Einbau zum Festpreis
+- [Rangierhilfe](https://www.italiacamper24.de/rangierhilfe.html): Robot Trolley – Rangieren per Fernbedienung
+- [Luftfederung & Kompressor](https://www.italiacamper24.de/luftfederung.html): Zusatzluftfederung Z6, Z8, E-Suspension per App
+- [Stützensysteme](https://www.italiacamper24.de/stuetzensysteme.html): Hydraulik-, Hub- und Kurbelstützen, Keile, Nivellierkissen
+- [Trittstufen](https://www.italiacamper24.de/trittstufen.html): Freistufen für Ducato, Jumper & Boxer
+- [Garagenhalterung](https://www.italiacamper24.de/garagenhalterung.html): Roller- und Motorradhalterung für die Heckgarage
+- [Zubehör](https://www.italiacamper24.de/zubehoer.html): Gaswarner, Thermomatten, Matratzen, Bike Lift u. v. m.
+- [Ersatzteile](https://www.italiacamper24.de/ersatzteile.html): Ersatzteile für AHK-Variabel, Luftfederung und Träger
 
 ## Fahrzeuge
 - [Fiat Ducato](https://www.italiacamper24.de/fahrzeug-fiat-ducato.html)
 - [Citroën Jumper](https://www.italiacamper24.de/fahrzeug-citroen-jumper.html)
 - [Peugeot Boxer](https://www.italiacamper24.de/fahrzeug-peugeot-boxer.html)
-- [Mercedes Sprinter](https://www.italiacamper24.de/fahrzeug-mercedes-sprinter.html)
-- [VW Crafter](https://www.italiacamper24.de/fahrzeug-vw-crafter.html)
-- [MAN TGE](https://www.italiacamper24.de/fahrzeug-man-tge.html)
+- [Mercedes-Benz Sprinter](https://www.italiacamper24.de/fahrzeug-mercedes-sprinter.html)
 - [Ford Transit](https://www.italiacamper24.de/fahrzeug-ford-transit.html)
+- [Renault Master / Opel Movano / Nissan Interstar](https://www.italiacamper24.de/fahrzeug-renault-master.html)
+- [Iveco Daily](https://www.italiacamper24.de/fahrzeug-iveco-daily.html)
+- [VW Crafter / LT / MAN TGE](https://www.italiacamper24.de/fahrzeug-vw-crafter.html)
+- [Wohnmobil-Hersteller](https://www.italiacamper24.de/hersteller.html)
+- [Fahrzeugfinder](https://www.italiacamper24.de/fahrzeugfinder.html)
 
 ## Service
 - [Montage-Service](https://www.italiacamper24.de/montage-service.html)
 - [Versand & Zahlung](https://www.italiacamper24.de/versand-zahlung.html)
 - [FAQ](https://www.italiacamper24.de/faq.html)
 - [Ratgeber](https://www.italiacamper24.de/ratgeber.html)
-- Telefon: +49 151 404 790 19
+- Telefon: +49 (0) 151 404 790 19 (24 h)
+- WhatsApp: https://wa.me/4915140479019
 - E-Mail: info@italiacamper24.de
