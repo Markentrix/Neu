@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /warenkorb.html
+Disallow: /kasse.html
+Disallow: /suche.html
+
+Sitemap: https://www.italiacamper24.de/sitemap.xml
