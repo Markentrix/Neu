@@ -35,6 +35,13 @@ for f, u, _ in log:
             if k[1] in seen: continue
             seen.add(k[1]); body2.append(k)
         body = body2[:150]
+    docs = []
+    for a in soup.select("#content_area a[href]"):
+        h = a["href"]; hp = urllib.parse.unquote(h.split("?")[0])
+        if (("/app/download/" in hp and hp.lower().endswith((".pdf", ".docx", ".doc"))) or hp.lower().endswith(".pdf")) and "reimo.com" not in hp and "Datenschutz" not in hp and "AGB" not in hp and "Widerruf" not in hp:
+            full = h if h.startswith("http") else "https://www.italiacamper24.de" + h
+            nm = hp.rsplit("/", 1)[-1].replace("+", " ")
+            if not any(d["url"] == full for d in docs): docs.append({"url": full, "name": re.sub(r"\.pdf$", "", nm, flags=re.I)})
     for pm in soup.select("div.j-product"):
         pr = pm.select_one("[itemprop=price]")
         price = float(pr["content"]) if pr and pr.get("content") else eur(pr.get_text() if pr else "")
@@ -57,7 +64,7 @@ for f, u, _ in log:
             if t: variants.append({"t": t, "p": eur(t)})
         w = pm.select_one(".j-product-weight"); dl = pm.select_one(".j-product-delivery-time")
         desc = []
-        out.append({"url": u, "title": title, "body": body, "meta": md["content"] if md and md.get("content") else "", "name": name, "price": price,
+        out.append({"url": u, "title": title, "docs": docs, "body": body, "meta": md["content"] if md and md.get("content") else "", "name": name, "price": price,
                     "old": oldp, "variants": variants, "images": imgs, "weight": w.get_text(strip=True) if w else "",
                     "delivery": " ".join(dl.get_text().split()) if dl else "", "desc": desc})
 json.dump(out, open(f"{d}/catalog_raw.json", "w"), ensure_ascii=False, indent=1)

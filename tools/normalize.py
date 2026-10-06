@@ -153,7 +153,7 @@ for url, blocks in pages.items():
         "old": p0["old"], "variants": variants, "options": opts,
         "montage": [{"name": clean(m["name"]), "price": m["price"], "variants": [{"t": re.sub(r"\s*[\d\.]+,\d{2} €\s*$", "", clean(v["t"])), "p": v["p"] or m["price"]} for v in m["variants"]]} for m in mont if m["price"]],
         "images": p0["images"][:4] + [i for b in nb[1:3] for i in b["images"][:1] if i not in p0["images"][:4]], "weight": p0["weight"], "delivery": p0["delivery"],
-        "title": clean(re.sub(r"\s*[-–|]\s*Italia Camper 24\s*$", "", p0["title"])), "meta": clean(p0["meta"]), "body": body[:60], "specs": specs_of(body),
+        "docs": p0.get("docs", []), "title": clean(re.sub(r"\s*[-–|]\s*Italia Camper 24\s*$", "", p0["title"])), "meta": clean(p0["meta"]), "body": body[:60], "specs": specs_of(body),
         "makes": makes, "series": series, "coach": list(coach) if coach else None})
 cats = collections.Counter(p["cat"] for p in products)
 print(len(products), "Produkte;", len(parts), "Ersatzteile"); print(cats)

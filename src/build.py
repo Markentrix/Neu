@@ -10,6 +10,7 @@ esc = html.escape
 CAT_J = json.load(open(f"{HERE}/catalog.json")); IMAP = json.load(open(f"{HERE}/imagemap.json"))
 BLOG = json.load(open(f"{HERE}/content/blog_posts.json")); LEGAL = json.load(open(f"{HERE}/content/legal.json")); REVIEWS = json.load(open(f"{HERE}/content/reviews.json"))
 PRODUCTS = CAT_J["products"]; PARTS = CAT_J["parts"]
+DOCMAP = json.load(open(f"{HERE}/docmap.json")) if os.path.exists(f"{HERE}/docmap.json") else {}
 # Preis-/Aktiv-Overrides aus dem Admin-Bereich (server/ schreibt IC_OVERRIDES=data/overrides.json)
 def apply_overrides(path):
     ov = json.load(open(path)); hidden = set()
@@ -350,6 +351,11 @@ def product_page(p):
     veh = veh_labels(p)
     intro = f'<p class="lead-p"><strong>{esc(name)}</strong> – {esc(CAT[p["cat"]]["short"].rstrip("."))}. Passend für: {esc(veh)}.{" Preis ab " + eur(p["disp"]) + " inkl. MwSt., versandkostenfrei." if p["disp"] else ""} Montage in Bohmte und Diez nach Terminvereinbarung möglich.</p>'
     more = f'<details><summary>Allgemeine Hinweise zu Auswahl, Anhängelast &amp; Einbau</summary><div>{render_blocks(boiler_items, limit=12)}</div></details>' if boiler_items else ""
+    docs = []; seen_f = set()
+    for d in p.get("docs", []):
+        m = DOCMAP.get(d["url"])
+        if m and m["file"] not in seen_f and m["file"].lower().endswith((".pdf", ".docx")): seen_f.add(m["file"]); docs.append((re.sub(r"\s+", " ", d["name"]).strip(), m["file"], m["kb"]))
+    docs_html = ("<section class=\"pblock\"><h2>Anleitungen &amp; Downloads</h2><ul class=\"dl\">" + "".join(f'<li><a href="downloads/{f}" target="_blank" rel="noopener">{ic("download")} {esc(n)}</a> <span class="small">{"PDF" if f.lower().endswith(".pdf") else "DOCX"} · {kb/1024:.1f} MB</span></li>' if kb >= 1024 else f'<li><a href="downloads/{f}" target="_blank" rel="noopener">{ic("download")} {esc(n)}</a> <span class="small">{"PDF" if f.lower().endswith(".pdf") else "DOCX"} · {kb} KB</span></li>' for n, f, kb in docs[:8]) + "</ul></section>") if docs else ""
     specs = list(p["specs"])
     if p["weight"]: specs.append(["Gewicht", p["weight"]])
     specs.append(["Lieferzeit", delivery.replace(" - ", "–")]); specs.append(["Versand", "kostenfrei innerhalb Deutschlands"])
@@ -368,7 +374,7 @@ def product_page(p):
     rel = related(p)
     relh = f'<section class="soft"><div class="wrap"><h2>Das könnte Sie auch interessieren</h2><div class="grid">{"".join(card(x, i) for i, x in enumerate(rel))}</div></div></section>' if rel else ""
     body = f'''<div class="wrap pdp"><div>{gal}</div><div><p class="eyebrow"><a href="{c["slug"]}.html">{esc(c["name"])}</a>{" · " + esc(p["coach"][0]) if p["coach"] else ""}</p><h1>{esc(name)}</h1>{stars()}{buybox}</div></div>
-<div class="wrap pcontent"><section class="pblock">{intro}{desc_html}{more}</section>{opts_html}<section class="pblock"><h2>Technische Daten &amp; Lieferung</h2>{specs_html}</section>{pass_html}<section class="pblock"><h2>Fragen &amp; Antworten</h2>{fh}</section></div>{relh}'''
+<div class="wrap pcontent"><section class="pblock">{intro}{desc_html}{more}</section>{opts_html}{docs_html}<section class="pblock"><h2>Technische Daten &amp; Lieferung</h2>{specs_html}</section>{pass_html}<section class="pblock"><h2>Fragen &amp; Antworten</h2>{fh}</section></div>{relh}'''
     # Schema
     ps = {"@context": "https://schema.org", "@type": "Product", "@id": f'{U}/{p["url"]}#product', "name": name, "description": short(p["meta"] or intro, 300), "category": c["name"], "sku": p["slug"],
           "url": f'{U}/{p["url"]}', "brand": {"@type": "Brand", "name": SITE["name"]},
