@@ -128,31 +128,23 @@ function renderCart(){
   var t=totals();$('#t-sub').textContent=eur(t);$('#t-tot').textContent=eur(t);$('#t-vat').textContent=eur(t-t/1.19)}
 renderCart();badge();
 
-/* Kasse */
-var ck=$('#checkout');
-if(ck){
-  var c=load(),ol=$('#orderlines');
-  if(!c.length){ck.hidden=true;$('#cohint').hidden=false}else{
-    c.forEach(function(l){var d=document.createElement('div');d.style.cssText='display:flex;justify-content:space-between;gap:8px;padding:4px 0';var s=document.createElement('span');s.textContent=l.q+' × '+l.name;var st=document.createElement('strong');st.textContent=eur(l.price*l.q);d.appendChild(s);d.appendChild(st);ol.appendChild(d)});
-    $('#o-tot').textContent=eur(totals())}
-  function validate(f){var ok=true;$$('[required]',f).forEach(function(x){var bad=!x.checkValidity();x.classList.toggle('invalid',bad);if(bad&&ok){x.focus();ok=false}});return ok}
-  ck.addEventListener('submit',function(e){e.preventDefault();if(!validate(ck))return;
-    var d={};$$('input,select,textarea',ck).forEach(function(f){if(f.name)d[f.name]=f.type==='checkbox'?(f.checked?'ja':'nein'):f.value});
-    var lines=load().map(function(l){return l.q+' x '+l.name+' = '+eur(l.price*l.q)}).join('\n');
-    var body='Bestellanfrage\n\n'+lines+'\nGesamt: '+eur(totals())+'\n\nName: '+d.vorname+' '+d.nachname+'\nAdresse: '+d.strasse+', '+d.plz+' '+d.ort+'\nE-Mail: '+d.email+'\nTelefon: '+d.tel+'\nFahrzeug: '+d.fahrzeug+'\nZahlart: '+d.zahlart+'\nAnmerkung: '+d.note;
-    var btn=$('button[type=submit]',ck);btn.disabled=true;location.href='mailto:'+window.IC_MAIL+'?subject='+encodeURIComponent('Bestellanfrage italiacamper24.de')+'&body='+encodeURIComponent(body);
-    setTimeout(function(){btn.disabled=false;$('#done').hidden=false},600)});
-  $$('input,select',ck).forEach(function(f){f.addEventListener('blur',function(){if(f.required)f.classList.toggle('invalid',!f.checkValidity())})});
-}
-/* Anfrage-/Kontaktformulare */
+/* Anfrage-/Kontaktformulare: per API, Fallback mailto (Vorschau ohne Server) */
 ['quoteform','contactform'].forEach(function(id){
   var f=document.getElementById(id);if(!f)return;
   var u=new URLSearchParams(location.search),pr=u.get('produkt');if(pr){var m=$('[name=nachricht]',f);m.value='Ich interessiere mich für: '+pr+'\n\nFahrzeug / Baujahr:\n'}
-  function data(){var d={};$$('input,select,textarea',f).forEach(function(x){if(x.name)d[x.name]=x.value});return d}
-  function txt(d){return (d.nachricht||'')+'\n\nProdukt: '+(d.produkt||d.betreff||'-')+'\nFahrzeug: '+(d.fzg||'-')+' '+(d.bj||'')+'\n\n'+d.name+'\n'+d.email+'\n'+(d.tel||'')}
+  function data(){var d={};$$('input,select,textarea',f).forEach(function(x){if(x.name)d[x.name]=x.type==='checkbox'?x.checked:x.value});return d}
+  function txt(d){return (d.nachricht||'')+'\n\nProdukt: '+(d.produkt||'-')+'\nFahrzeug: '+(d.fzg||'-')+' '+(d.bj||'')+'\n\n'+d.name+'\n'+d.email+'\n'+(d.tel||'')}
   f.addEventListener('submit',function(e){e.preventDefault();var ok=true;$$('[required]',f).forEach(function(x){var bad=!x.checkValidity();x.classList.toggle('invalid',bad);if(bad&&ok){x.focus();ok=false}});if(!ok)return;
-    location.href='mailto:'+window.IC_MAIL+'?subject='+encodeURIComponent('Anfrage italiacamper24.de')+'&body='+encodeURIComponent(txt(data()));$('#sent').hidden=false});
+    var d=data(),btn=$('button[type=submit]',f),err=$('#ferr');if(err)err.hidden=true;
+    if(location.protocol==='file:'){location.href='mailto:'+window.IC_MAIL+'?subject='+encodeURIComponent('Anfrage italiacamper24.de')+'&body='+encodeURIComponent(txt(d));$('#sent').hidden=false;return}
+    btn.disabled=true;
+    fetch('/api/forms/'+(id==='contactform'?'kontakt':'angebot'),{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'ic'},body:JSON.stringify(d)}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j}})}).then(function(r){
+      btn.disabled=false;if(r.ok){$('#sent').hidden=false;f.reset();$('#sent').scrollIntoView({behavior:'smooth',block:'center'})}else if(err){err.textContent=r.j.error||'Fehler beim Senden.';err.hidden=false}}).catch(function(){btn.disabled=false;if(err){err.textContent='Verbindungsfehler – bitte rufen Sie uns an oder nutzen Sie WhatsApp.';err.hidden=false}})});
   var wa=$('#wa-send');if(wa)wa.addEventListener('click',function(){wa.href='https://wa.me/'+window.IC_WA+'?text='+encodeURIComponent(txt(data()))});
 });
+/* Hinweis zu technisch notwendiger Speicherung (kein Tracking, keine Cookies von Drittanbietern) */
+try{if(!localStorage.getItem('ic24_notice')&&location.protocol!=='file:'){var n=document.createElement('div');n.className='cookie';n.setAttribute('role','region');n.setAttribute('aria-label','Hinweis zur Datenspeicherung');
+  n.innerHTML='<p>Wir verwenden nur technisch notwendige Speicherung (Warenkorb, Anmeldung). Kein Tracking, keine Werbe-Cookies. <a href="datenschutz.html">Datenschutz</a></p><button class="btn btn-pri btn-sm" type="button">Verstanden</button>';
+  $('button',n).addEventListener('click',function(){try{localStorage.setItem('ic24_notice','1')}catch(e){}n.remove()});document.body.appendChild(n)}}catch(e){}
 badge();
 })();

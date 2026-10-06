@@ -4,12 +4,38 @@ Quellen: src/catalog.json (tools/extract.py + tools/normalize.py), src/imagemap.
 import json, os, re, html, datetime, collections, urllib.parse
 from data import *
 
-HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "..", "site")
+HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.environ.get("IC_OUT") or os.path.join(HERE, "..", "site")
 U = SITE["url"]; TODAY = datetime.date.today().isoformat(); YEAR = datetime.date.today().year
 esc = html.escape
 CAT_J = json.load(open(f"{HERE}/catalog.json")); IMAP = json.load(open(f"{HERE}/imagemap.json"))
 BLOG = json.load(open(f"{HERE}/content/blog_posts.json")); LEGAL = json.load(open(f"{HERE}/content/legal.json")); REVIEWS = json.load(open(f"{HERE}/content/reviews.json"))
 PRODUCTS = CAT_J["products"]; PARTS = CAT_J["parts"]
+# Preis-/Aktiv-Overrides aus dem Admin-Bereich (server/ schreibt IC_OVERRIDES=data/overrides.json)
+def apply_overrides(path):
+    ov = json.load(open(path)); hidden = set()
+    for p in PRODUCTS:
+        o = ov.get(p["slug"])
+        if o:
+            if o.get("price"): p["price"] = o["price"]
+            if o.get("active") is False: hidden.add(p["slug"])
+        for k, v in enumerate(p["variants"]):
+            x = ov.get(f'{p["slug"]}~v{k}')
+            if x and x.get("price"): v["p"] = x["price"]
+        for k, v in enumerate(p["options"]):
+            x = ov.get(f'{p["slug"]}~o{k}')
+            if x and x.get("price"): v["price"] = x["price"]
+        for m in p["montage"][:1]:
+            for k, v in enumerate(m["variants"] or []):
+                x = ov.get(f'{p["slug"]}~m{k}')
+                if x and x.get("price"): v["p"] = x["price"]
+        prices = [p["price"]] + [v["p"] for v in p["variants"]] + [o["price"] for o in p["options"] if not o.get("extra")]
+        prices = [x for x in prices if x]
+        if prices: p["low"] = min(prices); p["from"] = bool(p["variants"] and len({v["p"] for v in p["variants"]}) > 1) or (p["low"] != max(prices))
+    for k, q in enumerate(PARTS):
+        x = ov.get(f"ersatzteil-{k}")
+        if x and x.get("price"): q["price"] = x["price"]
+    PRODUCTS[:] = [p for p in PRODUCTS if p["slug"] not in hidden]
+if os.environ.get("IC_OVERRIDES") and os.path.exists(os.environ["IC_OVERRIDES"]): apply_overrides(os.environ["IC_OVERRIDES"])
 CAT = {c["slug"]: c for c in CATEGORIES}
 PAGES = []  # (datei, priorität)
 EMOJI = re.compile("[\U0001F000-\U0001FAFF☀-➿⬀-⯿️‍﻿]")
@@ -56,7 +82,7 @@ ICONS = {
  "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>', "headset": '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2" y="14" width="5" height="6" rx="2"/><rect x="17" y="14" width="5" height="6" rx="2"/>',
  "book": '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V22h16"/>', "chat": '<path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/>',
  "car": '<path d="M5 17h14M3 13l2-6h14l2 6v4h-3M3 13v4h3"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/>',
- "chev": '<path d="M6 9l6 6 6-6"/>', "download": '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>', "filter": '<path d="M3 5h18l-7 8v6l-4 2v-8z"/>', "van": '<path d="M2 16V8a2 2 0 0 1 2-2h10l5 5h3v5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+ "chev": '<path d="M6 9l6 6 6-6"/>', "user": '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>', "lock": '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>', "download": '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>', "filter": '<path d="M3 5h18l-7 8v6l-4 2v-8z"/>', "van": '<path d="M2 16V8a2 2 0 0 1 2-2h10l5 5h3v5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
 }
 def ic(n, cls=""): return f'<svg class="ico {cls}" aria-hidden="true"><use href="#i-{n}"/></svg>'
 SPRITE = '<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">' + "".join(f'<symbol id="i-{k}" viewBox="0 0 24 24">{v}</symbol>' for k, v in ICONS.items()) + "</svg>"
@@ -135,6 +161,7 @@ def faq_html(faq):
     h = "".join(f"<details><summary>{esc(q)}</summary><div><p>{esc(a)}</p></div></details>" for q, a in faq)
     return h, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}
 
+SHOPJS = {"kasse.html", "konto.html", "bestellung.html", "passwort-vergessen.html", "passwort-zuruecksetzen.html"}
 NAV_MAIN = [("anhaengerkupplung", "Anhängerkupplung"), ("hecktraeger", "Heckträger"), ("luftfederung", "Luftfederung"), ("stuetzensysteme", "Stützen")]
 NAV_MORE = [c for c in CATEGORIES if c["slug"] not in {n[0] for n in NAV_MAIN}]
 
@@ -166,13 +193,14 @@ def page(fname, title, desc, body, schemas=(), crumb_items=None, og_type="websit
 <header class="header"><div class="tri"></div><div class="wrap"><a class="logo" href="index.html" aria-label="Italia Camper 24 – Startseite"><img class="logo-img" src="assets/img/logo-260.webp" srcset="assets/img/logo-260.webp 260w, assets/img/logo-520.webp 520w" sizes="170px" width="260" height="115" alt="Italia Camper 24"></a>
 <form class="search" role="search" action="suche.html">{ic("search")}<label class="sr" for="q">Shop durchsuchen</label><input id="q" name="q" type="search" placeholder="Suchen: Anhängerkupplung Ducato, Luftfederung …" autocomplete="off" aria-controls="suggest"><ul class="suggest" id="suggest"></ul></form>
 <div class="hdr-actions"><a class="icon-btn hdr-phone" href="tel:{SITE['phone_href']}" aria-label="Anrufen">{ic("phone")}<span>Beratung</span></a>
+<a class="icon-btn" href="konto.html" aria-label="Kundenkonto">{ic("user")}<span class="hdr-acc">Konto</span></a>
 <a class="icon-btn" href="warenkorb.html" aria-label="Warenkorb">{ic("cart")}<span class="badge" data-cart-badge data-n="0"></span></a>
 <button class="icon-btn menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav" aria-label="Menü">{ic("menu")}</button></div></div>
 <nav class="nav" id="nav" aria-label="Hauptnavigation"><div class="wrap"><ul><li class="finder-link"><a href="fahrzeugfinder.html"{" aria-current=page" if nav_cur == "fahrzeugfinder.html" else ""}>{ic("car")} Fahrzeugfinder</a></li>{nav}
 <li class="dd"><details><summary>Weitere Kategorien {ic("chev")}</summary><ul>{more}</ul></details></li><li><a href="ratgeber.html">Ratgeber</a></li><li><a href="montage-service.html">Montage</a></li><li class="nav-cta"><a href="angebot-anfordern.html">Angebot anfordern</a></li></ul></div></nav></header>
 {bc}<main id="main">{body}</main>
 {footer()}<div class="toast" id="toast" role="status" aria-live="polite"></div>{mbar}
-<script src="assets/js/catalog-index.js" defer></script><script src="assets/js/app.js" defer></script></body></html>'''
+<script src="assets/js/catalog-index.js" defer></script><script src="assets/js/app.js" defer></script>{'<script src="assets/js/shop.js" defer></script>' if fname in SHOPJS else ''}</body></html>'''
     write(fname, html_, prio, not noindex)
 
 def footer():
@@ -181,10 +209,10 @@ def footer():
 <div><a class="logo-chip" href="index.html" aria-label="Italia Camper 24"><img src="assets/img/logo-260.webp" width="260" height="115" alt="Italia Camper 24" loading="lazy"></a>
 <p style="margin-top:14px">Ihr Spezialist für Wohnmobil-Nachrüstung seit {SITE['since']}. Fahrzeugspezifische Anhängerkupplungen, Luftfederung, Stützen und Träger – mit Montageservice in Bohmte und Diez.</p>
 <p>{ic("phone")} <a href="tel:{SITE['phone_href']}">{SITE['phone']}</a><br>{ic("chat")} <a href="https://wa.me/{SITE['wa']}" rel="noopener">WhatsApp</a><br>{ic("mail")} <a href="mailto:{SITE['email']}">{SITE['email']}</a></p>
-<div class="pay" aria-label="Zahlarten"><span>PayPal</span><span>Visa</span><span>Mastercard</span><span>Lastschrift</span><span>Überweisung</span></div></div>
+<div class="pay" aria-label="Zahlarten"><span>PayPal</span><span>Visa</span><span>Mastercard</span><span>Apple Pay</span><span>Google Pay</span><span>Überweisung</span><span>Rechnung</span></div></div>
 <div><h3>Sortiment</h3><ul>{col([(c["name"], c["slug"] + ".html") for c in CATEGORIES[:9]])}</ul></div>
 <div><h3>Fahrzeuge &amp; Service</h3><ul>{col([("Fahrzeugfinder","fahrzeugfinder.html")]+[(v[0], f"fahrzeug-{k}.html") for k, v in list(BASES.items())[:5]]+[("Wohnmobil-Hersteller","hersteller.html"),("Montage-Service","montage-service.html"),("Versand & Zahlung","versand-zahlung.html"),("Bewertungen","bewertungen.html"),("Ratgeber","ratgeber.html"),("Kontakt","kontakt.html")])}</ul></div>
-<div><h3>Rechtliches</h3><ul>{col([("Impressum","impressum.html"),("AGB","agb.html"),("Widerrufsbelehrung","widerruf.html"),("Datenschutz","datenschutz.html"),("Standort Bohmte","standort-bohmte.html"),("Standort Diez","standort-diez.html"),("Über uns","ueber-uns.html")])}</ul></div>
+<div><h3>Rechtliches</h3><ul>{col([("Impressum","impressum.html"),("AGB","agb.html"),("Widerrufsbelehrung","widerruf.html"),("Datenschutz","datenschutz.html"),("Kundenkonto","konto.html"),("Standort Bohmte","standort-bohmte.html"),("Standort Diez","standort-diez.html"),("Über uns","ueber-uns.html")])}</ul></div>
 </div><div class="bottom"><span>© {YEAR} {SITE['name']} · {SITE['owner']} · {SITE['street']}, {SITE['plz']} {SITE['city']}</span><span>Alle Preise inkl. gesetzl. MwSt. Versandkostenfrei innerhalb Deutschlands.</span></div></div></footer>'''
 
 # ---------- Bausteine ----------
@@ -576,7 +604,7 @@ def info_pages():
     simple("faq.html", "Häufige Fragen (FAQ) | Italia Camper 24", "Antworten zu Lieferung, Zahlung, EG-Typgenehmigung, Montage und Widerruf bei Italia Camper 24.", "Häufige Fragen", faq + f'<p style="margin-top:24px"><a class="btn btn-cta" href="kontakt.html">Weitere Frage stellen</a></p>', "0.6", schemas=[fs])
     v = LEGAL["infos-zu-versand-und-bezahlmethoden"]
     simple("versand-zahlung.html", "Versand & Zahlung | Italia Camper 24", "Versandkostenfrei in Deutschland, Lieferung nach Österreich, Zahlung per PayPal oder Überweisung – alle Infos zu Versand und Bezahlung.", "Versand & Zahlung",
-           f'<div class="answer"><strong>Kurz gesagt:</strong> Versand kostenlos innerhalb Deutschlands, Lieferzeit meist 2–7 Werktage, Zahlung per PayPal (inkl. Kreditkarte, Lastschrift, Überweisung) oder Überweisung.</div><div class="prose">{render_blocks(v["body"], limit=40)}</div>', "0.6")
+           f'<div class="answer"><strong>Kurz gesagt:</strong> Versand kostenlos innerhalb Deutschlands und nach Österreich, Lieferzeit meist 2–7 Werktage. Zahlung per PayPal, Kreditkarte, Apple Pay, Google Pay, Überweisung (Vorkasse) oder Rechnung.</div><h2>Zahlarten im Überblick</h2><ul class="ticks"><li>{ic("check")} <strong>PayPal</strong> – inkl. Kreditkarte und Lastschrift über PayPal</li><li>{ic("check")} <strong>Kreditkarte, Apple Pay, Google Pay</strong> – sicher über Stripe</li><li>{ic("check")} <strong>Überweisung (Vorkasse)</strong> – Versand nach Zahlungseingang</li><li>{ic("check")} <strong>Rechnung</strong> – nach kurzer Prüfung, zahlbar innerhalb von 14 Tagen</li></ul><div class="prose">{render_blocks(v["body"], limit=40)}</div>', "0.6")
     locs = "".join(f'<div class="loc"><h3>{ic("pin")} {l["city"]}</h3><p>{esc(l["text"])}</p><a class="btn btn-out" href="standort-{l["slug"]}.html">Mehr zum Standort</a></div>' for l in LOCATIONS)
     simple("montage-service.html", "Montage-Service Bohmte & Diez | Italia Camper 24", "Wohnmobil-Zubehör einbauen lassen: Werkstätten in Bohmte und Diez, Festpreis, Termin nach Absprache. Anhängerkupplung, Luftfederung, Stützen, Klima.", "Montage-Service",
            f'<div class="answer"><strong>Kurz gesagt:</strong> Wir bauen Ihr Zubehör in zwei Werkstätten ein – in Bohmte (Niedersachsen) und Diez (Rheinland-Pfalz), nach Termin und zum Festpreis. Montage lässt sich direkt beim Produkt dazubuchen.</div><div class="locs">{locs}</div><h2>So läuft es ab</h2><ol class="numlist"><li>Produkt wählen und beim Kauf „Montage dazubuchen“ anhaken – oder Angebot anfordern</li><li>Terminvorschlag per Telefon oder WhatsApp erhalten</li><li>Fahrzeug bringen, nach wenigen Stunden montiert abholen</li></ol><p><a class="btn btn-cta btn-lg" href="angebot-anfordern.html">Montage-Termin anfragen</a></p>', "0.8")
@@ -615,30 +643,52 @@ def forms():
 <div><label for="bj">Baujahr / Typ / Modell</label><input id="bj" name="bj" placeholder="z. B. Ducato X250, 2014 · Bürstner Nexxo T 690 G"></div>
 <div class="full"><label for="nachricht">Ihre Nachricht</label><textarea id="nachricht" name="nachricht" placeholder="Was möchten Sie nachrüsten? Foto vom Heckunterbau bitte per WhatsApp senden."></textarea></div>
 <div class="full"><label class="chk"><input type="checkbox" name="dsgvo" required> <span>Ich habe die <a href="datenschutz.html">Datenschutzerklärung</a> gelesen und bin mit der Verarbeitung meiner Angaben zur Bearbeitung der Anfrage einverstanden. *</span></label><div class="err">Bitte zustimmen.</div></div>
-<div class="full btnrow"><button class="btn btn-cta btn-lg" type="submit">Anfrage per E-Mail senden</button><a class="btn btn-out btn-lg" id="wa-send" href="https://wa.me/{SITE['wa']}" rel="noopener">{ic("chat")} Per WhatsApp senden</a></div><p id="sent" hidden class="notice">Ihr E-Mail-Programm wurde geöffnet – bitte senden Sie die Nachricht dort ab.</p></form>'''
+<div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div><div class="full btnrow"><button class="btn btn-cta btn-lg" type="submit">Anfrage senden</button><a class="btn btn-out btn-lg" id="wa-send" href="https://wa.me/{SITE['wa']}" rel="noopener">{ic("chat")} Per WhatsApp senden</a></div><p id="sent" hidden class="notice ok">Vielen Dank! Wir haben Ihre Anfrage erhalten und melden uns schnellstmöglich.</p><p id="ferr" hidden class="notice"></p></form>'''
     simple("angebot-anfordern.html", "Angebot anfordern – schnell & unverbindlich | Italia Camper 24", "Unverbindliches Angebot für Anhängerkupplung, Luftfederung, Stützen & Co. anfordern – mit Fahrzeugdaten, wir antworten schnell.", "Angebot anfordern",
            f'<p>Damit wir Ihnen ein passgenaues Angebot erstellen können, benötigen wir nur wenige Angaben zu Fahrzeug und Wunschprodukt. <strong>Tipp:</strong> Ein Foto vom Heckunterbau und vom Fahrzeugschein macht das Angebot schneller und präziser – senden Sie es gern per WhatsApp.</p>{form}', "0.8")
     simple("kontakt.html", "Kontakt & Beratung | Italia Camper 24", f"Kontakt zu Italia Camper 24: Telefon {SITE['phone']}, WhatsApp und E-Mail. Auch am Wochenende erreichbar.", "Kontakt & Beratung",
-           f'<div class="contact-cards"><a class="loc" href="tel:{SITE["phone_href"]}"><h3>{ic("phone")} Telefon</h3><p>{SITE["phone"]}<br><small>24 Stunden, 365 Tage erreichbar</small></p></a><a class="loc" href="https://wa.me/{SITE["wa"]}" rel="noopener"><h3>{ic("chat")} WhatsApp</h3><p>Foto vom Fahrzeugschein senden – wir prüfen kostenlos.</p></a><a class="loc" href="mailto:{SITE["email"]}"><h3>{ic("mail")} E-Mail</h3><p>{SITE["email"]}</p></a></div><p><strong>{SITE["name"]}</strong> · {SITE["owner"]}<br>{SITE["street"]}, {SITE["plz"]} {SITE["city"]}<br>Werkstätten: Bohmte (49163) &amp; Diez (65582)</p><h2>Nachricht senden</h2>{form.replace("quoteform", "contactform").replace("Anfrage per E-Mail senden", "Nachricht senden")}', "0.7")
+           f'<div class="contact-cards"><a class="loc" href="tel:{SITE["phone_href"]}"><h3>{ic("phone")} Telefon</h3><p>{SITE["phone"]}<br><small>24 Stunden, 365 Tage erreichbar</small></p></a><a class="loc" href="https://wa.me/{SITE["wa"]}" rel="noopener"><h3>{ic("chat")} WhatsApp</h3><p>Foto vom Fahrzeugschein senden – wir prüfen kostenlos.</p></a><a class="loc" href="mailto:{SITE["email"]}"><h3>{ic("mail")} E-Mail</h3><p>{SITE["email"]}</p></a></div><p><strong>{SITE["name"]}</strong> · {SITE["owner"]}<br>{SITE["street"]}, {SITE["plz"]} {SITE["city"]}<br>Werkstätten: Bohmte (49163) &amp; Diez (65582)</p><h2>Nachricht senden</h2>{form.replace("quoteform", "contactform").replace("Anfrage senden", "Nachricht senden")}', "0.7")
 
 def cart_pages():
     body = f'''<div class="page-head"><div class="wrap"><h1>Warenkorb</h1></div></div><div class="wrap two"><div id="cartlist" aria-live="polite"></div>
 <aside class="summary" id="sum" hidden><h2>Zusammenfassung</h2><dl><div><dt>Zwischensumme</dt><dd id="t-sub">–</dd></div><div><dt>Versand</dt><dd>kostenlos</dd></div><div><dt>darin enth. MwSt. 19 %</dt><dd id="t-vat">–</dd></div><div class="total"><dt>Gesamt</dt><dd id="t-tot">–</dd></div></dl>
 <a class="btn btn-cta btn-lg btn-block" href="kasse.html" style="margin-top:16px">Zur Kasse</a><ul class="meta-list"><li>{ic("shield")} Sichere Bestellung</li><li>{ic("truck")} Versandkostenfrei, Lieferzeit meist 2–7 Werktage</li><li>{ic("headset")} Fragen? {SITE['phone']}</li></ul></aside></div>'''
     page("warenkorb.html", "Warenkorb | Italia Camper 24", "Ihr Warenkorb bei Italia Camper 24", body, [], noindex=True)
-    f = lambda i, l, t="text", req=True, ac="", full=False: f'<div{" class=full" if full else ""}><label for="{i}">{l}{" *" if req else ""}</label><input id="{i}" name="{i}" type="{t}"{" required" if req else ""}{f" autocomplete={ac}" if ac else ""}><div class="err">Bitte ausfüllen.</div></div>'
-    body = f'''<div class="page-head"><div class="wrap"><h1>Kasse</h1></div></div><div class="wrap two"><div><p id="cohint" hidden>Ihr Warenkorb ist leer. <a href="index.html">Zum Shop</a></p>
-<form id="checkout" novalidate><h2>Ihre Daten</h2><div class="form-grid">{f("vorname","Vorname",ac="given-name")}{f("nachname","Nachname",ac="family-name")}{f("strasse","Straße &amp; Hausnummer",ac="street-address",full=True)}{f("plz","PLZ",ac="postal-code")}{f("ort","Ort",ac="address-level2")}{f("email","E-Mail","email",ac="email")}{f("tel","Telefon (für Rückfragen)","tel",False,"tel")}{f("fahrzeug","Fahrzeug &amp; Baujahr (zur Passungsprüfung)",full=True)}</div>
-<h2 style="margin-top:28px">Zahlart</h2><div class="form-grid"><div class="full"><label for="zahlart">Zahlart</label><select id="zahlart" name="zahlart"><option>PayPal (inkl. Kreditkarte, Lastschrift)</option><option>Überweisung</option></select></div>
-<div class="full"><label for="note">Anmerkung</label><textarea id="note" name="note"></textarea></div>
-<div class="full"><label class="chk"><input type="checkbox" name="agb" required> <span>Ich habe die <a href="agb.html">AGB</a>, die <a href="widerruf.html">Widerrufsbelehrung</a> und die <a href="datenschutz.html">Datenschutzerklärung</a> gelesen. *</span></label><div class="err">Bitte zustimmen.</div></div></div>
-<div class="notice">Demo-Checkout: Die Bestellung wird als Anfrage an unser Team übermittelt. Für den Live-Betrieb wird die Kasse an das Shop-System (Zahlung, Bestellbestätigung) angebunden.</div>
-<button class="btn btn-cta btn-lg btn-block" type="submit">Verbindlich anfragen</button><p id="done" hidden class="notice">Danke! Bitte senden Sie die vorbereitete E-Mail in Ihrem Mailprogramm ab.</p></form></div>
-<aside class="summary"><h2>Ihre Bestellung</h2><div id="orderlines"></div><div class="total" style="display:flex;justify-content:space-between;border-top:2px solid var(--line);margin-top:8px;padding-top:12px;font:700 1.25rem var(--f-h)"><span>Gesamt</span><span id="o-tot">–</span></div><small>inkl. MwSt., versandkostenfrei</small></aside></div>'''
-    page("kasse.html", "Kasse | Italia Camper 24", "Kasse", body, [], noindex=True)
+    checkout_pages()
     body = f'''<div class="page-head"><div class="wrap"><h1 id="sh">Suche</h1><p id="sq"></p></div></div><div class="wrap" style="padding:28px 16px 56px"><form class="search big" role="search" action="suche.html">{ic("search")}<label class="sr" for="q2">Suchbegriff</label><input id="q2" name="q" type="search" placeholder="z. B. Anhängerkupplung Ducato 250" autocomplete="off"></form><div class="grid" id="sres" style="margin-top:28px"></div><p id="snone" hidden class="empty">Keine Treffer. Schreiben Sie uns – wir finden das passende Teil: <a href="angebot-anfordern.html">Angebot anfordern</a></p></div>'''
     page("suche.html", "Suche | Italia Camper 24", "Shop durchsuchen", body, [], noindex=True)
     page("404.html", "404 – Seite nicht gefunden | Italia Camper 24", "Seite nicht gefunden", f'<div class="wrap" style="text-align:center;padding:80px 16px"><h1>Seite nicht gefunden</h1><p>Die Seite gibt es leider nicht (mehr). Nutzen Sie den Fahrzeugfinder oder die Suche.</p><a class="btn btn-cta btn-lg" href="fahrzeugfinder.html">Zum Fahrzeugfinder</a></div>', [], noindex=True)
+
+def checkout_pages():
+    def f(i, l, t="text", req=True, ac="", full=False, pre=""):
+        return f'<div{" class=full" if full else ""}><label for="{pre}{i}">{l}{" *" if req else ""}</label><input id="{pre}{i}" name="{pre}{i}" type="{t}"{" required" if req else ""}{f" autocomplete={ac}" if ac else ""}><div class="err">Bitte ausfüllen.</div></div>'
+    def addr_fields(pre, ac):
+        return (f(f"first", "Vorname", ac=f"{ac}given-name", pre=pre) + f("last", "Nachname", ac=f"{ac}family-name", pre=pre) + f("company", "Firma (optional)", req=False, ac=f"{ac}organization", full=True, pre=pre)
+                + f("street", "Straße &amp; Hausnummer", ac=f"{ac}street-address", full=True, pre=pre) + f("zip", "PLZ", ac=f"{ac}postal-code", pre=pre) + f("city", "Ort", ac=f"{ac}address-level2", pre=pre)
+                + f'<div class="full"><label for="{pre}country">Land</label><select id="{pre}country" name="{pre}country"><option value="DE">Deutschland</option><option value="AT">Österreich</option></select></div>')
+    body = f'''<div class="page-head"><div class="wrap"><h1>Kasse</h1><p>{ic("lock")} Sichere Bestellung – Ihre Daten werden verschlüsselt übertragen.</p></div></div>
+<div class="wrap two" id="kasse"><div><p id="cohint" hidden class="empty">Ihr Warenkorb ist leer. <a href="fahrzeugfinder.html">Zum Fahrzeugfinder</a></p><p id="offline" hidden class="notice">Vorschau-Modus: Für Bestellungen muss die Seite über den Shop-Server aufgerufen werden.</p>
+<form id="checkout" novalidate><div id="loginhint" class="notice-box" hidden>{ic("user")} Sie haben schon ein Konto? <a href="konto.html?next=kasse">Jetzt anmelden</a> und Ihre Daten übernehmen.</div>
+<h2>1 · Kontakt &amp; Rechnungsadresse</h2><div class="form-grid">{f("email","E-Mail","email",ac="email",pre="c-")}{f("phone","Telefon (für Rückfragen)","tel",False,"tel",pre="c-")}{addr_fields("b-","billing ")}</div>
+<label class="chk"><input type="checkbox" id="diffship"> <span>Lieferadresse weicht ab</span></label><div id="shipbox" hidden><div class="form-grid">{addr_fields("s-","shipping ")}</div></div>
+<div class="form-grid"><div class="full"><label for="vehicle">Fahrzeug &amp; Baujahr (zur Passungsprüfung, optional)</label><input id="vehicle" name="vehicle" placeholder="z. B. Fiat Ducato X250, 2014 · Bürstner Nexxo T 690 G"></div></div>
+<h2 style="margin-top:28px">2 · Zahlart</h2><div id="paymethods" class="paygrid" role="radiogroup" aria-label="Zahlart"></div>
+<h2 style="margin-top:28px">3 · Abschluss</h2><div class="form-grid"><div class="full"><label for="note">Anmerkung zur Bestellung (optional)</label><textarea id="note" name="note"></textarea></div>
+<div class="full" id="accbox"><label class="chk"><input type="checkbox" id="mkacc"> <span>Kundenkonto anlegen (Bestellungen &amp; Rechnungen jederzeit einsehen)</span></label><div id="pwbox" hidden><label for="pw">Passwort (mind. 8 Zeichen)</label><input id="pw" type="password" autocomplete="new-password" minlength="8"></div></div>
+<div class="full"><label class="chk"><input type="checkbox" id="accept" required> <span>Ich habe die <a href="agb.html" target="_blank" rel="noopener">AGB</a>, die <a href="widerruf.html" target="_blank" rel="noopener">Widerrufsbelehrung</a> und die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen und akzeptiere sie. *</span></label><div class="err">Bitte zustimmen.</div></div></div>
+<p id="cerr" class="notice" hidden role="alert"></p><button class="btn btn-cta btn-lg btn-block" id="placeorder" type="submit">{ic("lock")} Zahlungspflichtig bestellen</button></form></div>
+<aside class="summary"><h2>Ihre Bestellung</h2><div id="orderlines"></div><div class="coupon"><label for="coupon" class="sr">Gutscheincode</label><input id="coupon" placeholder="Gutscheincode" autocomplete="off"><button type="button" class="btn btn-out btn-sm" id="applycoupon">Einlösen</button></div><p id="cpmsg" class="small" hidden></p>
+<dl><div><dt>Zwischensumme</dt><dd id="o-sub">–</dd></div><div id="o-disc-row" hidden><dt>Rabatt</dt><dd id="o-disc">–</dd></div><div><dt>Versand</dt><dd id="o-ship">kostenlos</dd></div><div><dt>darin MwSt. 19 %</dt><dd id="o-vat">–</dd></div><div class="total"><dt>Gesamt</dt><dd id="o-tot">–</dd></div></dl>
+<ul class="meta-list"><li>{ic("truck")} Versandkostenfrei, Lieferzeit meist 2–7 Werktage</li><li>{ic("shield")} 14 Tage Widerrufsrecht</li><li>{ic("headset")} Fragen? {SITE["phone"]}</li></ul></aside></div>'''
+    page("kasse.html", "Kasse | Italia Camper 24", "Kasse", body, [], noindex=True)
+    body = f'''<div class="page-head"><div class="wrap"><h1 id="ohead">Ihre Bestellung</h1><p id="osub"></p></div></div><div class="wrap" style="padding:28px 16px 56px"><div id="oview" aria-live="polite"><p class="empty">Bestellung wird geladen …</p></div></div>'''
+    page("bestellung.html", "Bestellstatus | Italia Camper 24", "Ihr Bestellstatus", body, [], noindex=True)
+    body = f'''<div class="page-head"><div class="wrap"><h1>Kundenkonto</h1><p>Bestellungen, Rechnungen und Adressen an einem Ort.</p></div></div><div class="wrap" style="padding:28px 16px 56px;max-width:980px"><div id="acc"><p class="empty">Wird geladen …</p></div></div>'''
+    page("konto.html", "Kundenkonto | Italia Camper 24", "Kundenkonto: Bestellungen und Rechnungen", body, [], noindex=True)
+    body = f'''<div class="page-head"><div class="wrap"><h1>Passwort vergessen?</h1><p>Wir senden Ihnen einen Link zum Zurücksetzen.</p></div></div><div class="wrap" style="padding:28px 16px 56px;max-width:560px"><form id="forgot" novalidate><label for="fe">E-Mail</label><input id="fe" type="email" required autocomplete="email"><div class="err">Bitte gültige E-Mail angeben.</div><button class="btn btn-cta btn-lg btn-block" style="margin-top:16px">Link anfordern</button><p id="fmsg" class="notice ok" hidden>Wenn ein Konto zu dieser E-Mail existiert, haben wir Ihnen einen Link gesendet.</p></form></div>'''
+    page("passwort-vergessen.html", "Passwort vergessen | Italia Camper 24", "Passwort zurücksetzen", body, [], noindex=True)
+    body = f'''<div class="page-head"><div class="wrap"><h1>Neues Passwort</h1></div></div><div class="wrap" style="padding:28px 16px 56px;max-width:560px"><form id="reset" novalidate><label for="rp">Neues Passwort (mind. 8 Zeichen)</label><input id="rp" type="password" required minlength="8" autocomplete="new-password"><div class="err">Mindestens 8 Zeichen.</div><button class="btn btn-cta btn-lg btn-block" style="margin-top:16px">Passwort speichern</button><p id="rmsg" class="notice" hidden></p></form></div>'''
+    page("passwort-zuruecksetzen.html", "Neues Passwort | Italia Camper 24", "Neues Passwort vergeben", body, [], noindex=True)
 
 def system_files():
     urls = "".join(f'<url><loc>{U}/{"" if f == "index.html" else f}</loc><lastmod>{TODAY}</lastmod><priority>{p}</priority></url>' for f, p in PAGES)

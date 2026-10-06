@@ -1,0 +1,11 @@
+# Automatisches HTTPS (Let's Encrypt). DOMAIN kommt aus .env, z. B. www.italiacamper24.de
+# Tipp: Zusätzlich einen zweiten Block "italiacamper24.de { redir https://www.italiacamper24.de{uri} permanent }" ergänzen,
+# wenn die Domain ohne www erreichbar sein soll.
+{$DOMAIN} {
+	encode zstd gzip
+	header -Server
+	request_body {
+		max_size 2MB
+	}
+	reverse_proxy app:3000
+}

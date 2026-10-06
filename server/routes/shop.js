@@ -42,6 +42,11 @@ module.exports = (ctx) => {
     if (o.payment_status === 'bezahlt' || o.payment_method === 'invoice') o = orders.ensureInvoice(o);
     const pdf = await invoice.build(o, cfg.bank); res.setHeader('Content-Type', 'application/pdf'); res.setHeader('Content-Disposition', `inline; filename="${o.invoice_no || o.number}.pdf"`); res.send(pdf);
   }));
+  r.post('/api/order/:n/cancel', wrap((req, res) => {
+    const o = orders.get(req.params.n); if (!o || o.token !== req.query.t) return res.status(404).json({ error: 'Nicht gefunden' });
+    if (o.payment_status === 'offen' && ['card', 'paypal'].includes(o.payment_method) && o.status === 'neu') { db.run("UPDATE orders SET status='storniert', payment_status='fehlgeschlagen' WHERE id=?", o.id); orders.event(o.id, 'status', 'Zahlung abgebrochen – Bestellung storniert'); }
+    res.json({ ok: true });
+  }));
   // PayPal-Rückkehr: Zahlung einziehen
   r.get('/api/paypal/return', wrap(async (req, res) => {
     const o = orders.get(String(req.query.n || '')); if (!o || o.token !== req.query.t) return res.redirect('/bestellung.html?error=1');
