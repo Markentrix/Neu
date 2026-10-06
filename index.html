@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bar Zeitreise Celle · Cocktails & Party der 70er, 80er & 90er</title>
+<meta name="description" content="Bar Zeitreise in Celle: Cocktails, Disco-Beats, Synthie-Pop & Eurodance. Freitag & Samstag ab 20 Uhr. Auch für private Feiern buchbar.">
+<meta name="theme-color" content="#0b0614">
+<meta property="og:title" content="Bar Zeitreise Celle – Deine Reise durch die 70er bis 90er">
+<meta property="og:description" content="Cocktails, Beats & das Gefühl von damals. Fr & Sa ab 20 Uhr in Celle.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BarOrPub","name":"Bar Zeitreise","description":"Bar mit Musik der 70er, 80er und 90er in Celle","telephone":"+4917610383288","address":{"@type":"PostalAddress","streetAddress":"Hehlentorstraße 16","postalCode":"29221","addressLocality":"Celle","addressCountry":"DE"},"geo":{"@type":"GeoCoordinates","latitude":52.6255,"longitude":10.079},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Friday","Saturday"],"opens":"20:00","closes":"01:00"}],"sameAs":["https://www.instagram.com/projekt_zeitreise_/","https://www.facebook.com/people/Projekt-Zeitreise/61571517680945/"]}
+</script>
+</head>
+<body data-era="80">
+<a class="skip" href="#main">Zum Inhalt springen</a>
+
+<!-- Party-Modus Ebenen -->
+<div class="party-fx" aria-hidden="true">
+  <div class="lasers"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="discoball"><span></span></div>
+  <div class="floor"></div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<header class="nav" id="top">
+  <a class="logo" href="#top" aria-label="Bar Zeitreise – Start">Zeitreise</a>
+  <nav aria-label="Hauptmenü">
+    <a href="#story">Story</a>
+    <a href="#jahrzehnte">Jahrzehnte</a>
+    <a href="#abende">Abende</a>
+    <a href="#zeiten">Zeiten</a>
+    <a href="#feiern">Feiern</a>
+    <a href="#anfahrt">Anfahrt</a>
+  </nav>
+  <div class="nav-actions">
+    <button class="party-btn" id="partyBtn" aria-pressed="false">
+      <span class="dot"></span><span class="lbl">Party-Modus</span>
+    </button>
+    <button class="sound-btn" id="soundBtn" aria-pressed="false" aria-label="Beat ein/aus" hidden>♪</button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="sun" aria-hidden="true"></div>
+  <div class="hero-in">
+    <p class="eyebrow"><span id="liveDot" class="live"></span><span id="liveText">Bar · Celle</span></p>
+    <h1 class="neon">Zeit<wbr>reise</h1>
+    <p class="lead">Dein Soundtrack der <b>70er</b>, <b>80er</b> &amp; <b>90er</b>.<br>Cocktails, Beats &amp; das Gefühl von damals.</p>
+    <div class="cta">
+      <a class="btn primary" href="#feiern">Tisch reservieren</a>
+      <a class="btn ghost" href="#zeiten">Öffnungszeiten</a>
+    </div>
+    <div class="decades" role="group" aria-label="Jahrzehnt wählen">
+      <button data-era="70">70er</button>
+      <button data-era="80" class="on">80er</button>
+      <button data-era="90">90er</button>
+    </div>
+  </div>
+  <a class="scroll" href="#story" aria-label="Weiter scrollen"><span></span></a>
+</section>
+
+<div class="marquee" aria-hidden="true">
+  <div class="track">
+    <span>Disco ★ Synthie-Pop ★ Grunge ★ Eurodance ★ Cocktails ★ Celle ★ Fr &amp; Sa ab 20 Uhr ★ </span>
+    <span>Disco ★ Synthie-Pop ★ Grunge ★ Eurodance ★ Cocktails ★ Celle ★ Fr &amp; Sa ab 20 Uhr ★ </span>
+  </div>
+</div>
+
+<!-- STORY -->
+<section id="story" class="sec">
+  <div class="wrap two">
+    <div class="reveal">
+      <p class="kicker">Die Story</p>
+      <h2>Der Name ist <em>Programm</em></h2>
+      <p>Willkommen in der <strong>Zeitreise</strong> – Celles einzigartiger Bar, die dich Abend für Abend zurück in die goldenen Jahrzehnte der Musik entführt. Von <strong>Disco-Beats der 70er</strong> über <strong>Synthie-Pop der 80er</strong> bis hin zu den <strong>Grunge- und Eurodance-Hits der 90er</strong> – hier wird jeder Song zur Erinnerung.</p>
+      <p>Ob legendäre Partynächte, After-Work-Drinks oder einfach nur gute Vibes mit Freunden: Bei uns trifft nostalgischer Charme auf moderne Bar-Kultur.</p>
+    </div>
+    <div class="stats reveal">
+      <div><b data-count="3">0</b><span>Jahrzehnte Musik</span></div>
+      <div><b data-count="2">0</b><span>Partynächte pro Woche</span></div>
+      <div><b data-count="100">0</b><span>% Gute Laune</span></div>
+      <div><b data-count="1">0</b><span>Zeitmaschine in Celle</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- JAHRZEHNTE -->
+<section id="jahrzehnte" class="sec alt">
+  <div class="wrap">
+    <p class="kicker">Wähle dein Jahrzehnt</p>
+    <h2>Wohin soll die <em>Reise</em> gehen?</h2>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-era="70" aria-selected="false">1970er</button>
+      <button role="tab" data-era="80" aria-selected="true">1980er</button>
+      <button role="tab" data-era="90" aria-selected="false">1990er</button>
+    </div>
+    <div class="era-panels">
+      <article class="era" data-era-panel="70" hidden>
+        <div class="era-big">70</div>
+        <div>
+          <h3>Disco Fever</h3>
+          <p>Glitzerkugel, Schlaghosen, Funk-Bässe. Wir spielen ABBA, Bee Gees, Donna Summer, Boney M. – Tanzfläche garantiert voll.</p>
+          <ul class="chips"><li>Funk</li><li>Disco</li><li>Soul</li><li>Glam</li></ul>
+          <p class="drink">🍹 Signature: <b>Golden Sunrise</b> – Tequila, Orange, Grenadine</p>
+        </div>
+      </article>
+      <article class="era" data-era-panel="80">
+        <div class="era-big">80</div>
+        <div>
+          <h3>Neon &amp; Synthie</h3>
+          <p>Retro-Wave, Haarspray und Synthesizer. Madonna, Depeche Mode, a-ha, Michael Jackson, Falco – laut mitsingen erlaubt.</p>
+          <ul class="chips"><li>Synthie-Pop</li><li>New Wave</li><li>Italo</li><li>NDW</li></ul>
+          <p class="drink">🍸 Signature: <b>Miami Vice</b> – Rum, Kokos, Erdbeere</p>
+        </div>
+      </article>
+      <article class="era" data-era-panel="90" hidden>
+        <div class="era-big">90</div>
+        <div>
+          <h3>Rave &amp; Grunge</h3>
+          <p>Eurodance, Boybands, Britpop und Grunge. Backstreet Boys, Nirvana, Snap!, Culture Beat – bis die Sohlen glühen.</p>
+          <ul class="chips"><li>Eurodance</li><li>Grunge</li><li>Britpop</li><li>Hip-Hop</li></ul>
+          <p class="drink">🥃 Signature: <b>Cyber Mule</b> – Vodka, Ginger Beer, Limette</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ABENDE -->
+<section id="abende" class="sec">
+  <div class="wrap">
+    <p class="kicker">Was dich erwartet</p>
+    <h2>Mehr als nur <em>eine Bar</em></h2>
+    <div class="cards">
+      <article class="card reveal"><div class="ico">🍸</div><h3>Cocktails</h3><p>Klassiker und Retro-Kreationen, frisch gemixt – von Long Drinks bis Shots.</p></article>
+      <article class="card reveal"><div class="ico">🪩</div><h3>Partynächte</h3><p>Freitag &amp; Samstag: Die besten Hits dreier Jahrzehnte, Tanzfläche inklusive.</p></article>
+      <article class="card reveal"><div class="ico">🥂</div><h3>After-Work &amp; Freunde</h3><p>Entspannte Vibes, gute Gespräche, Musik zum Abschalten und Mitsummen.</p></article>
+      <article class="card reveal"><div class="ico">🎤</div><h3>Live-Events</h3><p>Themenabende und Specials – aktuelle Termine gibt's auf Instagram.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- GALERIE -->
+<section class="sec alt">
+  <div class="wrap">
+    <p class="kicker">Einblicke</p>
+    <h2>Impressionen</h2>
+    <!-- Eigene Fotos: <img src="..." alt="..."> in die Kacheln setzen, sie überdecken die Farbverläufe -->
+    <div class="gallery">
+      <figure class="g1"><figcaption>Bar &amp; Cocktails</figcaption></figure>
+      <figure class="g2"><figcaption>Sound &amp; Music</figcaption></figure>
+      <figure class="g3"><figcaption>Disco Vibes</figcaption></figure>
+      <figure class="g4"><figcaption>Live Events</figcaption></figure>
+      <figure class="g5"><figcaption>Atmosphere</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ZEITEN -->
+<section id="zeiten" class="sec">
+  <div class="wrap two">
+    <div class="reveal">
+      <p class="kicker">Wann geht's los?</p>
+      <h2>Öffnungs<em>zeiten</em></h2>
+      <div class="status" id="status">…</div>
+      <p class="muted">* Änderungen bei Events möglich – schaut auf Instagram für Updates!</p>
+    </div>
+    <ul class="hours reveal" id="hours">
+      <li data-d="1"><span>Montag</span><em>Geschlossen</em></li>
+      <li data-d="2"><span>Dienstag</span><em>Geschlossen</em></li>
+      <li data-d="3"><span>Mittwoch</span><em>Geschlossen</em></li>
+      <li data-d="4"><span>Donnerstag</span><em>Geschlossen</em></li>
+      <li data-d="5" class="open"><span>Freitag</span><em>20:00 – 01:00</em></li>
+      <li data-d="6" class="open"><span>Samstag</span><em>20:00 – 01:00</em></li>
+      <li data-d="0"><span>Sonntag</span><em>Geschlossen</em></li>
+    </ul>
+  </div>
+</section>
+
+<!-- PRIVATE FEIER -->
+<section id="feiern" class="sec alt">
+  <div class="wrap two">
+    <div class="reveal">
+      <p class="kicker">Reservierung &amp; Events</p>
+      <h2>Deine Feier in der <em>Zeitreise</em></h2>
+      <p>Die Zeitreise kann nach Absprache auch exklusiv für deine private Feier gebucht werden – ob <strong>Geburtstag, Firmen-Event oder Motto-Party</strong>. Oder reserviere einfach einen Tisch für Freitag oder Samstag.</p>
+      <ul class="ticks"><li>Exklusive Buchung möglich</li><li>Motto-Partys der 70er, 80er &amp; 90er</li><li>Antwort meist am selben Tag</li></ul>
+    </div>
+    <form class="form reveal" id="bookForm">
+      <label>Name<input name="name" required autocomplete="name" placeholder="Dein Name"></label>
+      <div class="row">
+        <label>Datum<input type="date" name="date" required></label>
+        <label>Personen<input type="number" name="pers" min="1" max="200" value="4" required></label>
+      </div>
+      <label>Anlass
+        <select name="type"><option>Tischreservierung</option><option>Geburtstag</option><option>Firmen-Event</option><option>Motto-Party</option><option>Sonstiges</option></select>
+      </label>
+      <label>Nachricht<textarea name="msg" rows="3" placeholder="Wünsche, Motto, Uhrzeit …"></textarea></label>
+      <button class="btn primary" type="submit">Per WhatsApp anfragen</button>
+      <p class="muted small">Öffnet WhatsApp mit deiner vorbereiteten Anfrage. Lieber anrufen? <a href="tel:+4917610383288">0176 / 10383288</a></p>
+    </form>
+  </div>
+</section>
+
+<!-- INSTAGRAM -->
+<section class="sec insta">
+  <div class="wrap center reveal">
+    <p class="kicker">Folge uns</p>
+    <h2>Immer <em>live dabei</em></h2>
+    <p>Events, Specials und Spontan-Änderungen der Öffnungszeiten – alles auf Instagram.</p>
+    <a class="btn primary" href="https://www.instagram.com/projekt_zeitreise_/" target="_blank" rel="noopener">@projekt_zeitreise_</a>
+    <a class="btn ghost" href="https://www.facebook.com/people/Projekt-Zeitreise/61571517680945/" target="_blank" rel="noopener">Facebook</a>
+  </div>
+</section>
+
+<!-- ANFAHRT -->
+<section id="anfahrt" class="sec">
+  <div class="wrap two">
+    <div class="reveal">
+      <p class="kicker">Finde uns</p>
+      <h2>An<em>fahrt</em></h2>
+      <address>
+        <p><b>Bar Zeitreise</b><br>Hehlentorstraße 16<br>29221 Celle</p>
+        <p><a href="tel:+4917610383288">0176 / 10383288</a></p>
+        <p><a href="https://www.instagram.com/projekt_zeitreise_/" target="_blank" rel="noopener">@projekt_zeitreise_</a></p>
+      </address>
+      <a class="btn primary" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=Hehlentorstra%C3%9Fe+16+29221+Celle">Route planen</a>
+    </div>
+    <div class="map reveal">
+      <iframe title="Karte Bar Zeitreise" loading="lazy" referrerpolicy="no-referrer" src="https://www.openstreetmap.org/export/embed.html?bbox=10.0755%2C52.6235%2C10.0825%2C52.6275&layer=mapnik&marker=52.6255%2C10.079"></iframe>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="logo">Zeitreise</div>
+  <p>Bar Zeitreise · Hehlentorstraße 16 · 29221 Celle</p>
+  <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+  <p class="muted">© 2025 Bar Zeitreise. Alle Rechte vorbehalten.</p>
+</footer>
+
+<!-- Mobile Schnellaktionen -->
+<div class="dock">
+  <a href="tel:+4917610383288">📞 Anrufen</a>
+  <a href="#feiern">🥂 Reservieren</a>
+  <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=Hehlentorstra%C3%9Fe+16+29221+Celle">📍 Route</a>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
