@@ -140,11 +140,6 @@ h1{margin:0}
 /* FORM */
 .ticks{list-style:none;padding:0;margin-top:1.4rem;display:grid;gap:.6rem}
 .ticks li::before{content:"✓";color:var(--b);font-weight:800;margin-right:.7rem}
-.form{display:grid;gap:1rem;padding:clamp(1.4rem,3vw,2.2rem);border-radius:26px;border:1px solid var(--line);background:var(--glass)}
-.form label{display:grid;gap:.35rem;font:600 .85rem var(--fs);color:var(--mute)}
-.form .row{display:grid;grid-template-columns:1.4fr 1fr;gap:1rem}
-.form input,.form select,.form textarea{font:400 1rem var(--fb);padding:.8rem 1rem;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);color-scheme:dark;width:100%}
-.form input:focus,.form select:focus,.form textarea:focus{border-color:var(--b);outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--b) 30%,transparent)}
 
 /* INSTA */
 .insta{background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--a) 30%,transparent),transparent 60%)}
@@ -318,3 +313,12 @@ body.party .party-fx,body.party #confetti{animation:fadein .6s both}
 .sound-btn{min-width:44px;justify-content:center}
 .decades button,.tabs button{min-height:44px}
 @media (max-width:860px){.eyebrow{letter-spacing:.12em;font-size:.74rem;max-width:100%;white-space:nowrap}}
+
+/* Kontaktkarten */
+.contact{display:grid;gap:1rem}
+.c-card{display:flex;align-items:center;gap:1.1rem;padding:1.3rem 1.5rem;border-radius:22px;border:1px solid var(--line);background:var(--glass);color:var(--ink);text-decoration:none;transition:.25s}
+.c-card:hover{transform:translateX(6px);border-color:var(--a);box-shadow:0 14px 40px -18px var(--a)}
+.c-ico{font-size:1.9rem;filter:drop-shadow(0 0 12px var(--a))}
+.c-card b{display:block;font:700 1.15rem var(--fs)}
+.c-card small{color:var(--mute);font-size:.95rem}
+.strip img{height:auto;aspect-ratio:1/1}

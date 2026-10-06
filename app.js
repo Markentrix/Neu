@@ -94,18 +94,6 @@
     $('#map').append(f); $('#map').classList.add('on');
   });
 
-  /* ---------- Reservierung via WhatsApp ---------- */
-  const today = new Date().toISOString().slice(0, 10);
-  const dateInput = $('#bookForm [name=date]');
-  dateInput.min = today;
-  $('#bookForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const f = Object.fromEntries(new FormData(e.target));
-    const d = new Date(f.date + 'T12:00').toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-    const text = `Hallo Zeitreise-Team! Anfrage: ${f.type}\nName: ${f.name}\nDatum: ${d}\nPersonen: ${f.pers}` + (f.msg ? `\nNachricht: ${f.msg}` : '');
-    open('https://wa.me/4917610383288?text=' + encodeURIComponent(text), '_blank', 'noopener');
-  });
-
   /* ---------- PARTY-MODUS ---------- */
   const partyBtn = $('#partyBtn'), soundBtn = $('#soundBtn'), cv = $('#confetti');
   const ctx2d = cv.getContext('2d');
