@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://bar-zeitreise.de/</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://bar-zeitreise.de/"/>
+    <image:image><image:loc>https://bar-zeitreise.de/img/zeitreise-bar-celle-neonschild-eingang-1200.webp</image:loc><image:title>Neonschild am Eingang der Bar Zeitreise in Celle</image:title></image:image>
+    <image:image><image:loc>https://bar-zeitreise.de/img/partynacht-tanzflaeche-bar-zeitreise-celle-1200.webp</image:loc><image:title>Partynacht auf der Tanzfläche der Bar Zeitreise in Celle</image:title></image:image>
+    <image:image><image:loc>https://bar-zeitreise.de/img/bar-zeitreise-celle-theke-discokugel-1200.webp</image:loc><image:title>Theke mit Discokugel in der Bar Zeitreise in Celle</image:title></image:image>
+    <image:image><image:loc>https://bar-zeitreise.de/img/dj-pult-bar-zeitreise-celle-1200.webp</image:loc><image:title>DJ-Pult in der Bar Zeitreise in Celle</image:title></image:image>
+    <image:image><image:loc>https://bar-zeitreise.de/img/gaeste-theke-bar-zeitreise-celle-1200.webp</image:loc><image:title>Gäste an der Theke der Bar Zeitreise in Celle</image:title></image:image>
+  </url>
+</urlset>

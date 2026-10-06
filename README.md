@@ -1,8 +1,16 @@
-# Bar Zeitreise – Redesign
+# Bar Zeitreise Celle – Redesign
 
-Statischer One-Pager (index.html, styles.css, app.js), kein Build nötig: einfach `index.html` öffnen oder hochladen.
+Statische Website, kein Build nötig. Alle Dateien in dasselbe Verzeichnis des Webspace hochladen (Startseite: `index.html`).
 
-- Jahrzehnt-Umschalter (70er/80er/90er) ändert Farbwelt und Inhalte
-- Party-Modus: Discokugel, Laser, Konfetti, Beat-Puls, optionaler Synth-Beat (♪)
-- Live-Öffnungsstatus (Fr/Sa 20–01 Uhr), Reservierung per WhatsApp, Mobile-Schnellleiste
-- Offen: echte Fotos in die Galerie (`<img>` in `.gallery figure`), `impressum.html` und `datenschutz.html` von der alten Seite übernehmen
+## Inhalt
+- `index.html`, `styles.css`, `app.js` – One-Pager mit Party-Modus, Jahrzehnt-Umschalter, Live-Öffnungsstatus, WhatsApp-Reservierung, FAQ
+- `impressum.html`, `datenschutz.html` – Texte der alten Seite (Datenschutz um WhatsApp-Formular und lokale Schriften ergänzt)
+- `img/` – echte Fotos der Originalseite als WebP (640/1200 px) + `og-bar-zeitreise-celle.jpg`
+- `fonts/` – selbst gehostete Schriften (kein Google-Fonts-Aufruf, DSGVO)
+- SEO/GEO: `robots.txt`, `sitemap.xml`, `llms.txt`, `manifest.webmanifest`, Schema.org JSON-LD (BarOrPub, FAQPage, ReserveAction …), Geo-Meta-Tags, `404.html`
+- `.htaccess` – Kompression, Caching, Sicherheits-Header (nur Apache)
+
+## Nach dem Livegang
+1. Domain in Google Search Console eintragen, `sitemap.xml` einreichen
+2. Google-Unternehmensprofil (Name, Adresse, Telefon, Zeiten) identisch zur Website pflegen
+3. Schema prüfen: https://search.google.com/test/rich-results

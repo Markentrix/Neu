@@ -13,7 +13,7 @@
   function setEra(e) {
     body.dataset.era = e;
     $$('[data-era-panel]').forEach(p => p.hidden = p.dataset.eraPanel !== e);
-    $$('.tabs [data-era]').forEach(b => b.setAttribute('aria-selected', b.dataset.era === e));
+    $$('.tabs [data-era]').forEach(b => b.setAttribute('aria-pressed', b.dataset.era === e));
     $$('.decades [data-era]').forEach(b => b.classList.toggle('on', b.dataset.era === e));
     store.set('zr-era', e);
   }
@@ -53,7 +53,7 @@
     dot.classList.toggle('on', !!openNow);
     txt.textContent = openNow ? 'Jetzt geöffnet · Celle' : 'Bar · Celle';
     const today = openNow && !(OPEN[day] && min >= 1200) ? prev : day;
-    $$('#hours li').forEach(li => li.classList.toggle('today', +li.dataset.d === today));
+    $$('#hours tr').forEach(li => li.classList.toggle('today', +li.dataset.d === today));
   }
   updateStatus();
   setInterval(updateStatus, 60000);
@@ -77,6 +77,23 @@
     })(t0);
   }
 
+  /* ---------- Lightbox ---------- */
+  const lb = $('#lb');
+  $$('.gallery button').forEach(b => b.addEventListener('click', () => {
+    const img = $('img', lb); img.src = b.dataset.full; img.alt = $('img', b).alt;
+    lb.showModal();
+  }));
+  lb.addEventListener('click', e => { if (e.target !== $('img', lb)) lb.close(); });
+
+  /* ---------- Karte erst nach Klick laden (DSGVO) ---------- */
+  $('#mapBtn').addEventListener('click', () => {
+    const f = document.createElement('iframe');
+    f.title = 'Karte: Bar Zeitreise, Hehlentorstraße 16, Celle';
+    f.referrerPolicy = 'no-referrer';
+    f.src = 'https://www.openstreetmap.org/export/embed.html?bbox=10.0755%2C52.6235%2C10.0825%2C52.6275&layer=mapnik&marker=52.6255%2C10.079';
+    $('#map').append(f); $('#map').classList.add('on');
+  });
+
   /* ---------- Reservierung via WhatsApp ---------- */
   const today = new Date().toISOString().slice(0, 10);
   const dateInput = $('#bookForm [name=date]');
@@ -96,7 +113,7 @@
   const BPM = 118, STEP = 60 / BPM;
 
   function resize() { cv.width = innerWidth; cv.height = innerHeight; }
-  addEventListener('resize', resize); resize();
+  addEventListener('resize', () => partyOn && resize());
 
   function burst(n = 120) {
     const cols = ['#ff2fb3', '#2ff3ff', '#ffd23f', '#7cff4f', '#a855ff', '#fff'];
@@ -134,7 +151,7 @@
     soundBtn.hidden = !on;
     if (on) {
       beatT = performance.now() / 1000;
-      burst(160); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+      resize(); burst(160); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
     } else {
       setSound(false);
     }
