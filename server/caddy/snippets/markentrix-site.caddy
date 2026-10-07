@@ -1,0 +1,71 @@
+# Konfiguration der Markentrix-Website (statisches dist/).
+# Entspricht nginx-markentrix.conf + _headers + netlify.toml aus dem Website-Projekt.
+# Verwendung in einem Site-Block:  root * /srv/sites/markentrix  +  import markentrix_site
+(markentrix_site) {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), interest-cohort=()"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		Cross-Origin-Opener-Policy "same-origin"
+		Content-Security-Policy "frame-ancestors 'none'"
+		-Server
+	}
+
+	# Interne Dateien aus dist/ nicht ausliefern
+	@hidden path /_headers /_redirects /*.md /.* /404 /404.html
+	handle @hidden {
+		error 404
+	}
+
+	# Alte Dateipfade -> sprechende URLs (301)
+	redir "/Markentrix Website.dc.html" / 301
+	redir /Leistungen-KI-Automatisierung.dc.html /leistungen/ki-automatisierung 301
+	redir /Leistungen-Marketing.dc.html /leistungen/marketing 301
+	redir /Leistungen-Webdesign.dc.html /leistungen/webdesign 301
+	redir /Preise.dc.html /preise 301
+	redir /Prozess.dc.html /prozess 301
+	redir /Ueber-uns.dc.html /ueber-uns 301
+	redir /Referenzen.dc.html /referenzen 301
+	redir /FAQ.dc.html /faq 301
+	redir /ROI-Rechner.dc.html /roi-rechner 301
+	redir /Kontakt.dc.html /kontakt 301
+	redir /Impressum.dc.html /impressum 301
+	redir /Datenschutz.dc.html /datenschutz 301
+	redir /AGB.dc.html /agb 301
+	redir "/KI-Checkliste Markentrix.dc.html" /ki-checkliste 301
+	redir /KI-Marketing-Celle.dc.html /ki-marketing-celle 301
+	redir /KI-Marketing-Hannover.dc.html /ki-marketing-hannover 301
+	redir /KI-Marketing-Braunschweig.dc.html /ki-marketing-braunschweig 301
+	redir /KI-Marketing-Gifhorn.dc.html /ki-marketing-gifhorn 301
+
+	# Ehemaliger Kundenbereich -> externes Portal (wird beim CRM-Umzug angepasst)
+	redir /kunden-dashboard https://markentrix.netlify.app/ 301
+	redir /Kunden-Dashboard.dc.html https://markentrix.netlify.app/ 301
+
+	# /preise.html -> /preise, /index.html -> /
+	redir /index.html / 301
+	@dothtml {
+		path_regexp dothtml ^/(.+)\.html$
+		not path /404.html
+	}
+	redir @dothtml /{re.dothtml.1} 301
+
+	# Caching
+	@longcache path /assets/* /fonts/* /leistungen/fonts/*
+	header @longcache Cache-Control "public, max-age=31536000, immutable"
+	@imgcache path /img/*
+	header @imgcache Cache-Control "public, max-age=2592000"
+
+	# /preise -> preise.html, /leistungen/webdesign -> leistungen/webdesign.html
+	try_files {path} {path}.html {path}/index.html
+	file_server
+
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
+}

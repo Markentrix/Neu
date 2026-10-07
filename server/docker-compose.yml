@@ -10,6 +10,7 @@ services:
       ACME_EMAIL: ${ACME_EMAIL}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/snippets:/etc/caddy/snippets:ro
       - /srv/caddy-sites:/etc/caddy/sites:ro   # pro Domain eine .caddy-Datei
       - /srv/sites:/srv/sites:ro               # statische Websites
       - caddy_data:/data                       # Zertifikate (nicht löschen!)

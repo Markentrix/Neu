@@ -2,5 +2,8 @@
 	email {$ACME_EMAIL}
 }
 
+# Wiederverwendbare Konfigurationsbausteine (z.B. die Markentrix-Website)
+import /etc/caddy/snippets/*.caddy
+
 # Jede Domain = eine Datei in /srv/caddy-sites (erzeugt von scripts/add-site.sh)
 import /etc/caddy/sites/*.caddy
