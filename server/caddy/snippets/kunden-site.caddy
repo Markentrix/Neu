@@ -1,0 +1,52 @@
+# Gemeinsame Konfiguration für statische KUNDEN-Websites.
+# Verwendung in einem Site-Block (erzeugt von scripts/kunde-anlegen.sh):
+#   kunde.de {
+#       root * /srv/sites/kunden/MX-1007
+#       import kunden_site
+#   }
+(kunden_site) {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), interest-cohort=()"
+		# Bewusst ohne "preload"/"includeSubDomains": Die Domain gehört dem Kunden.
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Interne/versteckte Dateien nicht ausliefern (.well-known bleibt erreichbar)
+	@hidden {
+		path /_headers /_redirects /*.md /.* /404 /404.html
+		not path /.well-known/*
+	}
+	handle @hidden {
+		error 404
+	}
+
+	# /seite.html -> /seite, /index.html -> /
+	redir /index.html / 301
+	@dothtml {
+		path_regexp dothtml ^/(.+)\.html$
+		not path /404.html
+	}
+	redir @dothtml /{re.dothtml.1} 301
+
+	# Caching
+	@longcache path /assets/* /fonts/*
+	header @longcache Cache-Control "public, max-age=31536000, immutable"
+	@imgcache path /img/* /images/*
+	header @imgcache Cache-Control "public, max-age=2592000"
+
+	# /preise -> preise.html, /ordner -> ordner/index.html
+	try_files {path} {path}.html {path}/index.html
+	file_server
+
+	# Eigene 404-Seite, falls der Kunde eine 404.html mitliefert
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
+}

@@ -15,14 +15,24 @@ OWN_DOMAIN=markentrix.de ACME_EMAIL=info@markentrix.de bash bootstrap.sh
 ```
 Danach: Login nur noch als `deploy` (Root/Passwort-Login ist aus). Test: `https://markentrix.de`.
 
-## 3. Kundenwebsite anlegen
+## 3. Kundenwebsite anlegen (statisch, nach Kundennummer)
+Jeder Kunde hat einen Ordner `/srv/sites/kunden/<Kundennummer>` (z.B. `MX-1007`). Pro Domain gibt es eine
+Caddy-Datei; alle nutzen die gemeinsame Vorlage `caddy/snippets/kunden-site.caddy`
+(Sicherheits-Header, saubere URLs, versteckte Dateien gesperrt, Caching, eigene 404.html).
 ```bash
 ssh deploy@<server-ip>
-/opt/neu/server/scripts/add-site.sh kunde.de          # statische Seite, Platzhalter
-rsync -av ./build/ deploy@<server-ip>:/srv/sites/kunde.de/   # Inhalte hochladen
+cd /opt/neu/server/scripts
+./kunde-anlegen.sh MX-1007 mx-1007.vorschau.markentrix.de --vorschau --passwort   # Vorschau: noindex + Passwort
+./kunde-anlegen.sh MX-1007 kunde.de                                               # Live-Domain (+ www-Weiterleitung)
+./kunden-liste.sh                                                                 # Überblick
+./kunde-entfernen.sh MX-1007 mx-1007.vorschau.markentrix.de                       # nur diese Domain (Vorschau) entfernen
+./kunde-entfernen.sh MX-1007 --alles                                              # alle Domains + Dateien -> /srv/backups/removed
 ```
-Vorher DNS des Kunden auf die Server-IP zeigen lassen (sonst kein Zertifikat).
-Entfernen: `scripts/remove-site.sh kunde.de`.
+Hochladen vom PC: `pc/kunde-veroeffentlichen.bat` (Ordner der Kundenseite auf die Datei ziehen, Kundennummer eingeben).
+Vorher muss der DNS-Eintrag der Domain auf die Server-IP zeigen (sonst kein Zertifikat).
+Vorschau-Adressen unter `*.vorschau.markentrix.de` brauchen je einen A-Eintrag (oder einen Wildcard-Eintrag `*.vorschau`).
+Zugriffsprotokolle (IP-Adressen) schreibt Caddy in dieser Konfiguration nicht; Kundenverträge (AVV) trotzdem prüfen.
+Ohne Kundennummer / für Apps: `scripts/add-site.sh` (siehe unten).
 
 ## 4. Apps (CRM-OS, Agenten – nächster Schritt)
 Container ins Docker-Netz `web` hängen und veröffentlichen:
