@@ -345,3 +345,62 @@ body.party .party-fx,body.party #confetti{animation:fadein .6s both}
 .events-empty[hidden]{display:none}
 @media (max-width:700px){.event,.event:has(.ev-img){grid-template-columns:1fr}.ev-date{aspect-ratio:auto;grid-auto-flow:column;gap:.6rem;justify-content:start;padding:.5rem 1rem;min-width:0;border-radius:14px;justify-self:start}.ev-date b{font-size:1.4rem}}
 .event[hidden]{display:none}
+
+/* ===== ANIMATIONEN ===== */
+/* Neon schaltet sich einmalig ein */
+@keyframes neonOn{0%{opacity:.82}10%{opacity:1}16%{opacity:.78}24%,100%{opacity:1}}
+.neon{animation:neonOn 1.2s ease-out 1}
+/* Scroll-getriebene Effekte (nur Browser mit Unterstützung, rein transform/opacity) */
+.progress{display:none}
+@supports (animation-timeline:scroll()){
+  .progress{display:block;position:fixed;inset:0 0 auto;height:3px;z-index:60;transform-origin:0 50%;background:linear-gradient(90deg,var(--a),var(--c),var(--b));box-shadow:0 0 12px var(--a);animation:prog linear both;animation-timeline:scroll(root)}
+  @keyframes prog{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .hero-img{animation:par linear both;animation-timeline:scroll(root);animation-range:0 100svh}
+  @keyframes par{to{transform:translateY(6%) scale(1.15)}}
+}
+/* gestaffeltes Einblenden */
+.cards .reveal:nth-child(2){transition-delay:.12s}.cards .reveal:nth-child(3){transition-delay:.24s}.cards .reveal:nth-child(4){transition-delay:.36s}
+/* Sprachlink */
+.lang{font:700 .8rem var(--fs);letter-spacing:.1em;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:.6rem .8rem;min-height:44px;display:inline-flex;align-items:center;transition:.2s}
+.lang:hover{border-color:var(--b);color:var(--b)}
+/* Countdown */
+.countdown{margin:1.8rem auto 0;min-height:7.2rem}
+.cd-label{font:700 .8rem var(--fs);letter-spacing:.22em;text-transform:uppercase;color:var(--mute);margin-bottom:.7rem}
+.cd-boxes{display:inline-grid;grid-template-columns:repeat(4,minmax(64px,1fr));gap:.6rem}
+.cd-boxes div{padding:.7rem .4rem;border-radius:16px;border:1px solid var(--line);background:rgba(11,6,20,.55);min-width:64px}
+.cd-boxes b{display:block;font:800 clamp(1.5rem,5vw,2.2rem)/1 var(--fb);font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 14px var(--a)}
+.cd-boxes span{font:600 .7rem var(--fs);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.countdown.open .cd-label{color:#3dff7a}
+.countdown.open .cd-boxes div{border-color:#3dff7a55}
+/* Zeitmaschine */
+.timewarp{height:230vh;position:relative;background:var(--bg)}
+.tw-in{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:center;overflow:hidden;isolation:isolate;text-align:center;padding:5rem 1rem 3rem}
+.tw-imgs{position:absolute;inset:0;z-index:-2}
+.tw-imgs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s;filter:saturate(1.1)}
+.tw-imgs img.on{opacity:.38}
+.tw-in::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 55%,color-mix(in srgb,var(--a) 28%,transparent),transparent 60%),linear-gradient(180deg,var(--bg),rgba(11,6,20,.35) 30%,rgba(11,6,20,.35) 70%,var(--bg))}
+.timewarp[data-tw="70"]{--a:#ff8a1f;--b:#ffd23f;--c:#ff4d6d}
+.timewarp[data-tw="80"]{--a:#ff2fb3;--b:#2ff3ff;--c:#ffd23f}
+.timewarp[data-tw="90"]{--a:#7cff4f;--b:#a855ff;--c:#2ff3ff}
+.tw-year{font:clamp(4.2rem,22vw,13rem)/1 var(--fh);color:#fff;text-shadow:0 0 8px #fff,0 0 36px var(--a),0 0 90px var(--a);font-variant-numeric:tabular-nums;margin:.4rem 0 1.2rem}
+.tw-eras{list-style:none;padding:0;display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.tw-eras li{display:grid;gap:.1rem;padding:.7rem 1.3rem;border-radius:18px;border:1px solid var(--line);background:rgba(11,6,20,.55);opacity:.55;transition:.4s}
+.tw-eras li.on{opacity:1;border-color:var(--a);box-shadow:0 0 34px -8px var(--a)}
+.tw-eras b{font:800 1.15rem var(--fb)}
+.tw-eras span{font:600 .85rem var(--fs);color:var(--b)}
+.tw-hint{margin-top:1.6rem;font:600 .85rem var(--fs);color:var(--mute);letter-spacing:.08em;animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{50%{translate:0 6px}}
+.tw-bar{position:absolute;left:8%;right:8%;bottom:2.2rem;height:4px;border-radius:4px;background:var(--line)}
+.tw-bar i{display:block;height:100%;width:100%;border-radius:4px;background:linear-gradient(90deg,var(--a),var(--c));transform-origin:0 50%;transform:scaleX(var(--p,0));box-shadow:0 0 14px var(--a)}
+@media (max-width:860px){.timewarp{height:190vh}}
+@media (prefers-reduced-motion:reduce){.timewarp{height:auto}.tw-in{position:static;height:auto;min-height:70vh}.tw-eras li{opacity:1}.tw-bar,.tw-hint{display:none}}
+/* Party: Equalizer + Spotlight */
+.party-btn .eq{display:none;gap:2px;align-items:flex-end;height:12px}
+.party-btn .eq i{width:3px;height:100%;background:#000;border-radius:1px;transform-origin:bottom;animation:eq .7s ease-in-out infinite alternate}
+.party-btn .eq i:nth-child(2){animation-delay:-.25s}.party-btn .eq i:nth-child(3){animation-delay:-.5s}
+@keyframes eq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+body.party .party-btn .eq{display:inline-flex}body.party .party-btn .dot{display:none}
+.spot{position:absolute;inset:0;background:radial-gradient(circle 190px at var(--mx,50%) var(--my,40%),rgba(255,255,255,.2),transparent 70%);mix-blend-mode:screen}
+/* Galerie: Polaroid-Hover */
+.gallery figure:nth-child(even):hover{transform:scale(1.03) rotate(.7deg)}
+.lead,.pitch,.final p,.lede{text-wrap:balance}

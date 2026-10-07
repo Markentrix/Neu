@@ -4,6 +4,22 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const body = document.body;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EN = document.documentElement.lang === 'en';
+  const T = EN ? {
+    days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    open: '● Open now – until 1 am', openShort: 'Open now · Celle',
+    today: 'Open tonight from 8 pm', tomorrow: 'Open tomorrow from 8 pm', again: d => `Next opening: ${d} from 8 pm`, next: d => `Next time travel: ${d}`,
+    nextToday: 'Next time travel: tonight from 8 pm', nextTomorrow: 'Next time travel: tomorrow from 8 pm', idle: 'Bar · Celle',
+    party: 'Party mode', partyOff: 'Party off', map: 'Map: Bar Zeitreise, Hehlentorstraße 16, Celle',
+    cdNext: 'Next time travel in', cdOpen: 'Open now – closing in'
+  } : {
+    days: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+    open: '● Jetzt geöffnet – bis 01:00 Uhr', openShort: 'Jetzt geöffnet · Celle',
+    today: 'Heute ab 20:00 Uhr geöffnet', tomorrow: 'Morgen ab 20:00 Uhr geöffnet', again: d => `Wieder geöffnet: ${d} ab 20:00 Uhr`, next: d => `Nächste Zeitreise: ${d}`,
+    nextToday: 'Nächste Zeitreise: heute ab 20:00 Uhr', nextTomorrow: 'Nächste Zeitreise: morgen ab 20:00 Uhr', idle: 'Bar · Celle',
+    party: 'Party-Modus', partyOff: 'Party aus', map: 'Karte: Bar Zeitreise, Hehlentorstraße 16, Celle',
+    cdNext: 'Nächste Zeitreise in', cdOpen: 'Jetzt geöffnet – schließt in'
+  };
   const store = {
     get: k => { try { return localStorage.getItem(k); } catch { return null; } },
     set: (k, v) => { try { localStorage.setItem(k, v); } catch {} }
@@ -23,40 +39,89 @@
 
   /* ---------- Öffnungsstatus (Fr/Sa 20–01 Uhr, Europe/Berlin) ---------- */
   const OPEN = { 5: 1, 6: 1 }; // Tage mit Öffnung; Ende am Folgetag 01:00
-  const DAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  const DAYS = T.days;
   function berlinNow() {
     const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Europe/Berlin', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+      timeZone: 'Europe/Berlin', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     }).formatToParts(new Date()).map(x => [x.type, x.value]));
     const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(p.weekday);
-    return { day, min: (+p.hour % 24) * 60 + +p.minute };
+    const min = (+p.hour % 24) * 60 + +p.minute;
+    return { day, min, sec: min * 60 + +p.second };
   }
   function updateStatus() {
     const { day, min } = berlinNow();
     const prev = (day + 6) % 7;
     const openNow = (OPEN[day] && min >= 1200) || (OPEN[prev] && min < 60);
     const st = $('#status'), dot = $('#liveDot'), txt = $('#liveText');
-    let msg;
+    let msg, short;
     if (openNow) {
-      msg = '● Jetzt geöffnet – bis 01:00 Uhr';
+      msg = T.open; short = T.openShort;
     } else {
       let add = 0;
       for (let i = 0; i < 8; i++) {
         const d = (day + i) % 7;
         if (OPEN[d] && (i > 0 || min < 1200)) { add = i; break; }
       }
-      const d = (day + add) % 7;
-      msg = add === 0 ? 'Heute ab 20:00 Uhr geöffnet' : add === 1 ? 'Morgen ab 20:00 Uhr geöffnet' : `Wieder geöffnet: ${DAYS[d]} ab 20:00 Uhr`;
+      const d = DAYS[(day + add) % 7];
+      msg = add === 0 ? T.today : add === 1 ? T.tomorrow : T.again(d);
+      short = add === 0 ? T.nextToday : add === 1 ? T.nextTomorrow : T.next(`${d}${EN ? ' from 8 pm' : ' ab 20:00 Uhr'}`);
     }
     st.textContent = msg;
     st.classList.toggle('open', !!openNow);
     dot.classList.toggle('on', !!openNow);
-    txt.textContent = openNow ? 'Jetzt geöffnet · Celle' : msg.replace('Wieder geöffnet', 'Nächste Zeitreise').replace(' geöffnet', '');
+    txt.textContent = short;
     const today = openNow && !(OPEN[day] && min >= 1200) ? prev : day;
     $$('#hours tr').forEach(li => li.classList.toggle('today', +li.dataset.d === today));
   }
   updateStatus();
   setInterval(updateStatus, 60000);
+
+  /* ---------- Countdown bis Öffnung / Schließung ---------- */
+  const cd = $('#countdown');
+  if (cd) {
+    const W = 604800, H = 3600;
+    const spans = [[5 * 86400 + 20 * H, 6 * 86400 + H], [6 * 86400 + 20 * H, 7 * 86400 + H]];
+    const pad = n => String(n).padStart(2, '0');
+    const tick = () => {
+      const { day, sec } = berlinNow();
+      const now = day * 86400 + sec;
+      let open = false, target = Infinity;
+      for (const off of [0, W]) for (const [s, e] of spans) {
+        if (now + off >= s && now + off < e) { open = true; target = e - (now + off); }
+        else if (!open && s > now + off) target = Math.min(target, s - (now + off));
+      }
+      if (!open) for (const [s] of spans) if (s > now) target = Math.min(target, s - now);
+      const d = Math.floor(target / 86400), h = Math.floor(target % 86400 / H), m = Math.floor(target % H / 60), s2 = target % 60;
+      $('#cdD').textContent = pad(d); $('#cdH').textContent = pad(h); $('#cdM').textContent = pad(m); $('#cdS').textContent = pad(s2);
+      $('#cdLabel').textContent = open ? T.cdOpen : T.cdNext;
+      cd.classList.toggle('open', open);
+    };
+    tick(); setInterval(tick, 1000);
+  }
+
+  /* ---------- Zeitmaschine: Jahre laufen beim Scrollen ---------- */
+  const tw = $('#zeitreise');
+  if (tw && !reduce) {
+    const yearEl = $('#twYear'), fill = $('#twFill'), imgs = $$('.tw-imgs img', tw), lis = $$('.tw-eras li', tw);
+    let near = false, queued = false, lastYear = 0;
+    new IntersectionObserver(es => { near = es[0].isIntersecting; if (near) onScroll(); }, { rootMargin: '20% 0px' }).observe(tw);
+    const paint = () => {
+      queued = false;
+      const r = tw.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)));
+      const year = 1970 + Math.min(29, Math.floor(p * 30));
+      fill.style.setProperty('--p', p.toFixed(3));
+      if (year === lastYear) return;
+      lastYear = year; yearEl.textContent = year;
+      const era = year < 1980 ? 0 : year < 1990 ? 1 : 2;
+      tw.dataset.tw = ['70', '80', '90'][era];
+      imgs.forEach((im, i) => im.classList.toggle('on', i === era));
+      lis.forEach((li, i) => li.classList.toggle('on', i === era));
+    };
+    function onScroll() { if (near && !queued) { queued = true; requestAnimationFrame(paint); } }
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+  }
 
   /* ---------- Reveal + Zähler ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => {
@@ -96,7 +161,7 @@
   /* ---------- Karte erst nach Klick laden (DSGVO) ---------- */
   $('#mapBtn').addEventListener('click', () => {
     const f = document.createElement('iframe');
-    f.title = 'Karte: Bar Zeitreise, Hehlentorstraße 16, Celle';
+    f.title = T.map;
     f.referrerPolicy = 'no-referrer';
     f.src = 'https://www.openstreetmap.org/export/embed.html?bbox=10.0755%2C52.6235%2C10.0825%2C52.6275&layer=mapnik&marker=52.6255%2C10.079';
     $('#map').append(f); $('#map').classList.add('on');
@@ -143,7 +208,7 @@
     partyOn = on;
     body.classList.toggle('party', on);
     partyBtn.setAttribute('aria-pressed', on);
-    $('.lbl', partyBtn).textContent = on ? 'Party aus' : 'Party-Modus';
+    $('.lbl', partyBtn).textContent = on ? T.partyOff : T.party;
     soundBtn.hidden = !on;
     if (on) {
       beatT = performance.now() / 1000;
@@ -152,7 +217,14 @@
       setSound(false);
     }
   }
-  partyBtn.addEventListener('click', () => setParty(!partyOn));
+  const spot = $('#spot');
+  let spotQ = false, sx = 0, sy = 0;
+  addEventListener('pointermove', e => {
+    if (!partyOn || reduce || spotQ) return;
+    sx = e.clientX; sy = e.clientY; spotQ = true;
+    requestAnimationFrame(() => { spotQ = false; spot.style.setProperty('--mx', sx + 'px'); spot.style.setProperty('--my', sy + 'px'); });
+  }, { passive: true });
+  partyBtn.addEventListener('click', () => { setParty(!partyOn); if (partyOn && navigator.vibrate) navigator.vibrate([40, 30, 40]); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && partyOn) setParty(false); });
   // Reduzierte Bewegung: Party-Modus nur als Farbwechsel ohne Dauer-Animation (CSS erledigt das)
 
