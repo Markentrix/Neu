@@ -10,7 +10,7 @@ const cfg={name:C.name,phone:C.phone,wa:C.whatsapp,maxPersons:C.maxPersons,close
 cfg.openLabel=C.hours.open.replace(':00','')+' Uhr';
 const img=(n,alt,eager)=>`<img src="assets/img/${n}.svg" width="600" height="400" alt="${alt}" loading="${eager?'eager':'lazy'}" decoding="async"${eager?' fetchpriority="high"':''}>`;
 const tag=t=>t?`<span class="tag">${t}</span>`:'';
-const item=([n,d,p,t])=>`<div class="it"><h4>${n}${tag(t)}</h4><span class="pr">${p}</span>${d?`<p>${d}</p>`:''}</div>`;
+const item=([n,d,p,t])=>`<div class="it"><h3>${n}${tag(t)}</h3><span class="pr">${p}</span>${d?`<p>${d}</p>`:''}</div>`;
 const place=`${C.street}, ${C.zip} ${C.city}`;
 const ld={"@context":"https://schema.org","@type":["Restaurant","Pizzeria"],"name":C.name,"url":C.base+"/","telephone":"+"+C.whatsapp.replace(/^\+/,''),"acceptsReservations":"True","servesCuisine":"Italienisch","address":{"@type":"PostalAddress","streetAddress":C.street,"postalCode":C.zip,"addressLocality":C.city,"addressCountry":"DE"}};
 const html=`<!doctype html>
@@ -26,26 +26,24 @@ const html=`<!doctype html>
 <main id="main">
 <section class="w hero"><div><p class="status" id="status">${C.hours.text}</p>
 <h1>${C.headline.map((l,i)=>`<span${i===C.highlight?' class="hl"':''}>${l}</span>`).join('')}</h1>
-<p class="lead">${C.lead}</p><ul class="chips"><li>Pizza ab 5,50 €</li><li>Handpizza ab 4 €</li><li>Vegetarisch &amp; vegan</li></ul></div>
-<div class="photo">${img(C.dishes[0].img,C.dishes[0].alt,true)}<div class="sticker" aria-hidden="true"><div><b>${C.dishes[0].price}</b>${C.dishes[0].name}</div></div></div></section>
+<p class="lead">${C.lead}</p></div>
+<div class="photo">${img(C.hero.img,C.hero.alt,true)}<div class="sticker" aria-hidden="true"><div><b>${C.hero.stickerPrice}</b>${C.hero.stickerName}</div></div></div></section>
 
-<section class="res" id="reservieren"><div class="w rbox"><div><h2>Tisch<br>reservieren</h2><p>In drei Schritten. Wir bestätigen telefonisch.</p></div>
-<form id="rf" name="reservierung" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-<input type="hidden" name="form-name" value="reservierung"><input type="hidden" name="datum"><input type="hidden" name="zeit"><input type="hidden" name="personen" value="2">
-<p class="hp" aria-hidden="true"><label>Nicht ausfüllen<input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
-<fieldset><legend>1 · Tag</legend><div class="opts" id="dates"></div><div style="margin-top:10px"><label class="f">Anderer Tag<input type="date" name="anderes" style="max-width:220px"></label></div></fieldset>
-<fieldset><legend>2 · Uhrzeit</legend><div class="opts" id="times"></div></fieldset>
-<fieldset><legend>3 · Personen</legend><div class="step"><button type="button" id="pm" aria-label="Eine Person weniger">−</button><output id="pv" aria-live="polite">2 Personen</output><button type="button" id="pp" aria-label="Eine Person mehr">+</button></div></fieldset>
-<div class="fields"><label class="f">Name<input class="t" type="text" name="name" autocomplete="name" required></label><label class="f">Telefon<input class="t" type="tel" name="telefon" autocomplete="tel" required></label></div>
+<section class="w resw" id="reservieren" aria-label="Tisch reservieren"><form id="rf" name="reservierung" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+<input type="hidden" name="form-name" value="reservierung"><p class="hp" aria-hidden="true"><label>Nicht ausfüllen<input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+<div class="rrow"><strong class="rt">Tisch reservieren</strong>
+<label class="f">Tag<select name="datum" id="fd" required></select></label>
+<label class="f">Uhrzeit<select name="zeit" id="fz" required></select></label>
+<label class="f">Personen<select name="personen" id="fp" required></select></label>
+<button class="btn sm" type="button" id="next">Weiter</button></div>
+<div class="rmore" id="more" hidden><label class="f">Name<input class="t" type="text" name="name" autocomplete="name" required></label><label class="f">Telefon<input class="t" type="tel" name="telefon" autocomplete="tel" required></label>
+<button class="btn sm" type="submit">Anfrage senden</button>
 <label class="chk"><input type="checkbox" name="datenschutz" required><span>Ich stimme der Verarbeitung meiner Angaben zur Reservierung zu (<a href="datenschutz.html">Datenschutz</a>).</span></label>
-<p class="sum" id="sum" aria-live="polite">Bitte Tag und Uhrzeit wählen.</p>
-<div class="act"><button class="btn" type="submit">Reservierung anfragen</button><a class="btn alt" id="wa" href="https://wa.me/${C.whatsapp}" rel="noopener">Per WhatsApp</a></div><p class="msg" id="msg" role="status" aria-live="polite"></p></form></div></section>
+<a class="wa" id="wa" href="https://wa.me/${C.whatsapp}" rel="noopener">Lieber per WhatsApp</a></div>
+<p class="msg" id="msg" role="status" aria-live="polite"></p></form></section>
 
-<section class="sec"><div class="w"><h2>Das geht immer</h2><p class="sub">Vier Klassiker, die bei uns am häufigsten über den Tisch gehen.</p>
-<div class="rail">${C.dishes.map(d=>`<article class="card">${img(d.img,d.alt)}<div><h3>${d.name}</h3><p>${d.text}</p><b>${d.price}</b></div></article>`).join('')}</div></div></section>
-
-<section class="menuwrap" id="karte"><nav class="nav2" aria-label="Kategorien">${C.menu.map(m=>`<a href="#${m.id}">${m.title}</a>`).join('')}</nav>
-<div class="w">${C.menu.map(m=>`<div class="cat" id="${m.id}"><h3>${m.title}</h3><div class="list">${m.items.map(item).join('')}</div></div>`).join('')}<p class="sub" style="padding-block:20px 56px;margin:0">Preise nach Stand März 2024, Änderungen vorbehalten. Bei Allergien fragen Sie bitte das Team.</p></div></section>
+<section class="menuwrap" id="karte"><nav class="nav2" aria-label="Kategorien"><span class="nt">Speisekarte</span>${C.menu.map(m=>`<a href="#${m.id}">${m.title}</a>`).join('')}</nav>
+<div class="w">${C.menu.map((m,i)=>`<section class="cat" id="${m.id}"><div class="cimg"><h2>${m.title}</h2>${img(m.img,m.alt)}<p>${m.note}</p></div><div class="list">${m.items.map(item).join('')}</div></section>`).join('')}<p class="foot-note">Preise nach Stand März 2024, Änderungen vorbehalten. Bei Allergien fragen Sie bitte das Team.</p></div></section>
 
 <section class="take" id="mitnehmen"><div class="w grid"><div><h2>Pizza<br>zum Mitnehmen</h2><p>Handpizza und Pizza vom Blech direkt am Straßenfenster. Ab 4 Euro, schnell und warm.</p><a class="btn" href="tel:${C.phoneHref}">${C.phone}</a></div><div>${img('fenster','Illustration: Straßenfenster mit grün-weiß-roter Markise')}</div></div></section>
 
