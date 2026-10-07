@@ -1,0 +1,35 @@
+{
+  "name": "Pizzeria Molise",
+  "city": "Celle",
+  "district": "Altstadt",
+  "street": "Piltzergasse",
+  "zip": "29221",
+  "phone": "05141 21 44 21",
+  "phoneHref": "+495141214421",
+  "whatsapp": "495141214421",
+  "indexable": false,
+  "base": "https://www.pizzeria-molise-celle.de",
+  "headline": ["Heute schon", "Pizza", "gehabt?"],
+  "highlight": 1,
+  "lead": "Frisch aus dem Ofen in der Piltzergasse. Am Tisch genießen oder als Handpizza mitnehmen.",
+  "hours": { "open": "11:00", "close": "20:00", "closedDay": "So", "text": "Mo–Sa 11–20 Uhr" },
+  "slots": { "from": "11:30", "to": "19:30", "stepMin": 30 },
+  "maxPersons": 8,
+  "dishes": [
+    { "name": "Margherita", "text": "Tomaten, Mozzarella, Basilikum", "price": "5,50 €", "img": "pizza", "alt": "Illustration: Pizza Margherita" },
+    { "name": "Calzone", "text": "Salami, Schinken, Champignons", "price": "8,50 €", "img": "calzone", "alt": "Illustration: Calzone" },
+    { "name": "Spaghetti Carbonara", "text": "Ei, Speck, Parmesan", "price": "7,50 €", "img": "pasta", "alt": "Illustration: Spaghetti" },
+    { "name": "Pizza vom Blech", "text": "Handpizza zum Mitnehmen", "price": "ab 4,00 €", "img": "fenster", "alt": "Illustration: Straßenfenster mit Pizzastück" }
+  ],
+  "menu": [
+    { "id": "pizza", "title": "Pizza", "items": [["Margherita","Tomaten, Mozzarella","5,50 €"],["Funghi","Champignons","6,50 €","vegetarisch"],["Prosciutto","Schinken","7,50 €"],["Hawaii","Schinken, Ananas","8,00 €"],["Calzone","Salami, Schinken, Champignons","8,50 €"],["Spezialpizzen","Hausspezialitäten","bis 10,50 €"],["Pizza vom Blech","Handpizza zum Mitnehmen","ab 4,00 €"]] },
+    { "id": "pasta", "title": "Pasta", "items": [["Spaghetti Carbonara","Ei, Speck, Parmesan","7,50 €"],["Pasta mit Meeresfrüchten","Frutti di Mare","bis 9,50 €"],["Lasagne","Überbacken","ab 8,00 €"],["Tortellini","Überbacken","bis 8,50 €"]] },
+    { "id": "flamm", "title": "Flammkuchen", "items": [["Flammkuchen klassisch","Crème fraîche, Zwiebeln, Speck","ab 5,00 €"],["Flammkuchen Spezial","Wechselnde Beläge, auch vegetarisch","bis 11,00 €"]] },
+    { "id": "salat", "title": "Salat & Antipasti", "items": [["Bruschetta al Pomodoro","","3,00 €","vegan"],["Insalata Mista","Eisberg, Tomaten, Gurken","4,50 €"],["Insalata Molise","Oliven, Zwiebeln, Mozzarella, Mais","7,00 €"],["Insalata Pollo","Hähnchenbrust, Feta, Rucola, Mais","7,50 €"],["Antipasti misti","Gemischte Platte mit Pizzabrot","12,00 €"]] }
+  ],
+  "faq": [
+    ["Wie reserviere ich einen Tisch?","Wählen Sie oben Tag, Uhrzeit und Personenzahl. Wir bestätigen Ihre Anfrage telefonisch. Ab 8 Personen bitte anrufen."],
+    ["Gibt es Pizza zum Mitnehmen?","Ja, am Straßenfenster gibt es Handpizza und Pizza vom Blech ab 4 Euro."],
+    ["Gibt es vegetarische und vegane Gerichte?","Ja, sie sind auf der Karte gekennzeichnet."]
+  ]
+}
