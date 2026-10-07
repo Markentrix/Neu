@@ -62,7 +62,13 @@ def render(lang):
             'organizer': {'@id': 'https://bar-zeitreise.de/#bar'},
             'url': 'https://bar-zeitreise.de/' + ('en/' if en else '') + '#events',
             'inLanguage': 'en' if en else 'de-DE',
+            'typicalAgeRange': '18-',
         }
+        if ev.get('free') is True:
+            o['isAccessibleForFree'] = True
+            o['offers'] = {'@type': 'Offer', 'price': 0, 'priceCurrency': 'EUR', 'availability': 'https://schema.org/InStock', 'url': 'https://bar-zeitreise.de/' + ('en/' if en else '') + '#events'}
+        elif ev.get('price') is not None:
+            o['offers'] = {'@type': 'Offer', 'price': ev['price'], 'priceCurrency': 'EUR', 'availability': 'https://schema.org/InStock', 'url': 'https://bar-zeitreise.de/' + ('en/' if en else '') + '#events'}
         if desc_t: o['description'] = desc_t
         o['image'] = ['https://bar-zeitreise.de/' + ev['image'].lstrip('/')] if ev.get('image') else ['https://bar-zeitreise.de/img/og-bar-zeitreise-celle.jpg']
         ld.append(o)

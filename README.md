@@ -27,7 +27,7 @@ Termine stehen in `events.json` (Liste, Standard: leer `[]`). Beispiel:
   }
 ]
 ```
-Pflicht: `title`, `date` (JJJJ-MM-TT). Alles andere optional (Standard 20:00–01:00 Uhr). Danach `bash tools/build.sh` ausführen: erzeugt die Event-Karten und die Google-Event-Daten (Schema.org). Optional für die englische Seite: `title_en`, `description_en`, `tag_en`, `image_alt_en`. Vergangene Termine blendet die Seite automatisch aus; ohne Termine erscheint ein Hinweis auf Instagram. Ohne Node.js: `events.json` einfach an den Entwickler schicken.
+Pflicht: `title`, `date` (JJJJ-MM-TT). Alles andere optional (Standard 20:00–01:00 Uhr). Danach `bash tools/build.sh` ausführen: erzeugt die Event-Karten und die Google-Event-Daten (Schema.org). Optional: `"free": true` (Eintritt frei) oder `"price": 5` (Euro) für Google; alle Events gelten als „ab 18“. Optional für die englische Seite: `title_en`, `description_en`, `tag_en`, `image_alt_en`. Vergangene Termine blendet die Seite automatisch aus; ohne Termine erscheint ein Hinweis auf Instagram. Ohne Node.js: `events.json` einfach an den Entwickler schicken.
 
 ## Weiterentwickeln
 Quelldateien: `styles.css`, `app.js`, `fonts/fonts.css`. Nach Änderungen `bash tools/build.sh` ausführen (Node.js nötig): erzeugt `app.min.js`, `styles.min.css` und bindet das CSS in `index.html` ein.
