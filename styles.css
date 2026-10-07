@@ -409,10 +409,7 @@ body.party .party-btn .eq{display:inline-flex}body.party .party-btn .dot{display
 .routes a:hover{border-color:var(--b);color:var(--b);transform:translateY(-2px)}
 
 /* Design-by-Credit */
-.credit{display:flex;align-items:center;justify-content:center;gap:.7rem;margin-top:.8rem;color:var(--mute);font:600 .8rem var(--fs);letter-spacing:.06em}
-.credit-logo{display:inline-flex;background:#fff;border-radius:12px;padding:.25rem .65rem;transition:transform .2s,box-shadow .2s}
-.credit-logo:hover{transform:translateY(-2px);box-shadow:0 8px 24px -8px var(--a)}
-.credit-logo img{display:block;height:26px;width:auto}
-.wd{display:inline-flex;background:#fff;border-radius:14px;padding:.4rem .9rem;margin-top:.4rem}
+.wd{display:inline-flex;background:#fff;border-radius:14px;padding:.4rem .9rem;margin-top:.4rem;transition:transform .2s,box-shadow .2s}
+.wd:hover{transform:translateY(-2px);box-shadow:0 8px 24px -8px var(--a)}
 .wd img{display:block;height:34px;width:auto}
 #webdesign{scroll-margin-top:90px}
