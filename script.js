@@ -1,6 +1,6 @@
 // ---- Konfiguration ---------------------------------------------------------
 // TODO: E-Mail-Adresse der Fleischerei eintragen, an die Bestellungen gehen.
-const ORDER_EMAIL = "bestellung@example.de";
+const ORDER_EMAIL = "bestellung@example.de" /* Platzhalter */;
 
 // Öffnungszeiten: 0 = Sonntag … 6 = Samstag, Zeiten in Minuten ab Mitternacht
 const m = (h, min = 0) => h * 60 + min;
@@ -23,6 +23,15 @@ const nav = $("#nav");
 toggle.addEventListener("click", () => {
   const open = nav.classList.toggle("open");
   toggle.setAttribute("aria-expanded", open);
+  toggle.setAttribute("aria-label", open ? "Menü schließen" : "Menü öffnen");
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && nav.classList.contains("open")) {
+    nav.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-label", "Menü öffnen");
+    toggle.focus();
+  }
 });
 nav.addEventListener("click", (e) => {
   if (e.target.closest("a")) {
@@ -158,6 +167,7 @@ function validate() {
   if (!msg && d && HOURS[d.getDay()].length === 0) msg = `Am ${DAYS[d.getDay()]} ist geschlossen – bitte einen anderen Abholtag wählen (Di–Fr).`;
   errorEl.hidden = !msg;
   errorEl.textContent = msg;
+  if (msg) errorEl.focus();
   return !msg;
 }
 
@@ -166,17 +176,24 @@ form.addEventListener("submit", (e) => {
   if (!validate()) return;
   const { feier, text } = buildMessage();
   const subject = `${feier ? "Feier-Anfrage" : "Vorbestellung"} – ${form.elements.name.value.trim()}`;
-  location.href = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+  $("#resultText").textContent = text;
+  $("#mailShow").textContent = ORDER_EMAIL;
+  $("#mailLink").href = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+  $("#result").hidden = false;
+  $("#result").focus();
+  $("#result").scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
 
 $("#copyBtn").addEventListener("click", async () => {
-  if (!validate()) return;
   const btn = $("#copyBtn");
   try {
-    await navigator.clipboard.writeText(buildMessage().text);
+    await navigator.clipboard.writeText($("#resultText").textContent);
     btn.textContent = "Kopiert ✓";
   } catch {
-    btn.textContent = "Kopieren nicht möglich";
+    const r = document.createRange();
+    r.selectNodeContents($("#resultText"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent = "Text markiert – jetzt kopieren";
   }
   setTimeout(() => (btn.textContent = "Text kopieren"), 2500);
 });
