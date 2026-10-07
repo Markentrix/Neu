@@ -1,0 +1,27 @@
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /srv/caddy-sites:/etc/caddy/sites:ro   # pro Domain eine .caddy-Datei
+      - /srv/sites:/srv/sites:ro               # statische Websites
+      - caddy_data:/data                       # Zertifikate (nicht löschen!)
+      - caddy_config:/config
+    networks: [web]
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+# Gemeinsames Netz: spätere Apps (CRM-OS, Agenten) hängen sich hier ein und
+# werden per Caddy-Snippet über `reverse_proxy <container>:<port>` veröffentlicht.
+networks:
+  web:
+    external: true

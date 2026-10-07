@@ -1,0 +1,6 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# Jede Domain = eine Datei in /srv/caddy-sites (erzeugt von scripts/add-site.sh)
+import /etc/caddy/sites/*.caddy
