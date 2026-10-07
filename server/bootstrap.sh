@@ -15,7 +15,11 @@ apt-get upgrade -y
 apt-get install -y ca-certificates curl git ufw fail2ban unattended-upgrades rsync
 
 # --- Docker (offizielles Repo-Skript) ---
-command -v docker >/dev/null || curl -fsSL https://get.docker.com | sh
+if ! command -v docker >/dev/null; then
+  curl -fsSL https://get.docker.com | sh || apt-get install -y docker.io docker-compose-v2
+fi
+docker compose version >/dev/null 2>&1 || apt-get install -y docker-compose-v2 || apt-get install -y docker-compose-plugin
+systemctl enable --now docker
 
 # --- Deploy-User (kein Root-Login mehr nötig) ---
 if ! id "$DEPLOY_USER" >/dev/null 2>&1; then
