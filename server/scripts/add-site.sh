@@ -32,10 +32,11 @@ $DOMAIN {
 $HEADERS
 	file_server
 }
-www.$DOMAIN {
-	redir https://$DOMAIN{uri} permanent
-}
 CADDY
+  # www-Weiterleitung nur für Hauptdomains (kunde.de), nicht für Subdomains (test.kunde.de)
+  if [ "$(tr -cd . <<<"$DOMAIN" | wc -c)" -eq 1 ]; then
+    printf 'www.%s {\n\tredir https://%s{uri} permanent\n}\n' "$DOMAIN" "$DOMAIN" >> "$SNIP"
+  fi
 fi
 
 cd "$SERVER_DIR"
