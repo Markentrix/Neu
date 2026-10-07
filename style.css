@@ -323,3 +323,5 @@ main:focus{outline:none}
 .qa p{margin:0;padding:0 20px 20px;color:var(--muted)}
 .hours caption{caption-side:top}
 @media (forced-colors:active){.btn,.dock a{border:2px solid ButtonText}}
+
+.hero .eyebrow{color:var(--ink)}
