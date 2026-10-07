@@ -325,3 +325,38 @@ main:focus{outline:none}
 @media (forced-colors:active){.btn,.dock a{border:2px solid ButtonText}}
 
 .hero .eyebrow{color:var(--ink)}
+
+/* ---- Mobil: kleinere Schrift ---- */
+@media (max-width:600px){
+  body{font-size:15px;line-height:1.55}
+  h1{font-size:clamp(1.7rem,7.4vw,2.1rem);line-height:1.12}
+  h2{font-size:clamp(1.4rem,6vw,1.7rem)}
+  h3{font-size:1.02rem}
+  .lead{font-size:1rem}
+  .section-lead{font-size:.95rem}
+  .eyebrow{font-size:.8rem;padding:6px 12px;margin-bottom:16px}
+  .kicker{font-size:.7rem}
+  .brand-text strong{font-size:.98rem}
+  .brand-text small{font-size:.7rem}
+  .brand-mark{width:36px;height:36px;font-size:1.1rem}
+  .trust{font-size:.85rem;margin-top:22px}
+  .hero-card h2{font-size:.72rem}
+  #todayHours{font-size:1.35rem}
+  .tel{font-size:1.25rem}
+  .usp p,.card p,.steps span,.qa p{font-size:.88rem}
+  .card h3{font-size:1.1rem}
+  .tag{font-size:.65rem;margin-top:14px}
+  .btn{font-size:.95rem;min-height:48px;padding:12px 22px}
+  .form label,.label{font-size:.82rem}
+  input,select,textarea{font-size:16px}
+  .check{font-size:.82rem!important}
+  .hours th,.hours td{font-size:.88rem}
+  .hours tr.today th,.hours tr.today td{font-size:.88rem}
+  .big{font-size:3.2rem}
+  address{font-size:1rem}
+  .qa summary{font-size:.95rem;padding:15px 46px 15px 16px;min-height:50px}
+  .nav a{font-size:.95rem}
+  .dock a{font-size:.95rem;min-height:48px}
+  .note,.site-footer{font-size:.8rem}
+  .mapcard strong{font-size:1.15rem}
+}
