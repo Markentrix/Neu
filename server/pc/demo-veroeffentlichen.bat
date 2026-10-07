@@ -9,10 +9,10 @@ set "PAKET=%TEMP%\demo-dist.tar"
 set "LINK="
 
 echo.
-set /p "ID=Kundennummer (z.B. MX-1007): "
-echo %ID%| findstr /r /x "MX-[0-9][0-9][0-9][0-9]*" >nul
+set /p "ID=Name der Demo (z.B. mueller-kfz, nur kleine Buchstaben, Ziffern, Bindestrich): "
+echo %ID%| findstr /r /x "[a-z0-9][a-z0-9-]*[a-z0-9]" >nul
 if errorlevel 1 (
-  echo FEHLER: "%ID%" ist keine gueltige Kundennummer. Erwartet wird z.B. MX-1007.
+  echo FEHLER: "%ID%" ist kein gueltiger Name. Beispiel: mueller-kfz
   pause
   exit /b 1
 )
@@ -30,7 +30,7 @@ if not exist "%SRC%\index.html" (
 )
 
 echo.
-echo Demo fuer %ID% wird hochgeladen aus:
+echo Demo "%ID%" wird hochgeladen aus:
 echo   %SRC%
 echo.
 choice /c JN /m "Jetzt hochladen (J = ja, N = abbrechen)"
@@ -65,7 +65,7 @@ if errorlevel 1 (
 )
 
 echo [3/3] Dateien werden aktiviert ...
-ssh %SERVER% "tar -xf ~/demo-dist.tar -C /srv/sites/kunden/%ID% && rm ~/demo-dist.tar"
+ssh %SERVER% "tar -xf ~/demo-dist.tar -C /srv/sites/demos/%ID% && rm ~/demo-dist.tar"
 if errorlevel 1 (
   echo FEHLER auf dem Server. Bitte die Meldung oben ansehen.
   del "%PAKET%" >nul 2>&1
@@ -77,7 +77,7 @@ del "%PAKET%" >nul 2>&1
 echo %LINK%| clip
 echo.
 echo ============================================================
-echo  Fertig. Der Demo-Link fuer %ID% (liegt in der Zwischenablage):
+echo  Fertig. Der Demo-Link fuer "%ID%" (liegt in der Zwischenablage):
 echo.
 echo    %LINK%
 echo.
