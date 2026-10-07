@@ -81,4 +81,24 @@ footer .w{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}foo
  .bar nav a:not(.btn){display:none}.three{grid-template-columns:1fr}.three>*,.three>*+*{padding:20px 0;border-left:0;border-bottom:1px solid var(--line)}
  .qs,.g{grid-template-columns:1fr}.sec{padding-block:52px}.band{padding-block:56px}
  .sticky{display:block;position:fixed;left:16px;right:16px;bottom:14px;z-index:30;background:var(--accent);color:#fff;text-align:center;padding:15px;border-radius:3px;font-weight:600;text-decoration:none;box-shadow:0 6px 20px #0004}body{padding-bottom:84px}}
+
+/* Bewegung: dezent, nur Verbesserung */
+:root{interpolate-size:allow-keywords}
+a,.btn,.three b,.route{transition:color .18s,background-color .18s,border-color .18s}
+.btn{transition:background-color .18s,color .18s,transform .18s}.btn:active{transform:translateY(1px)}
+.bar nav a:not(.btn){background:linear-gradient(currentColor,currentColor) 0 100%/0 1.5px no-repeat;transition:background-size .22s;text-decoration:none}
+.bar nav a:not(.btn):hover{background-size:100% 1.5px;text-decoration:none}
+.it{transition:padding-left .2s}.it:hover{padding-left:6px}
+input,select,textarea{transition:border-color .18s}
+summary:after{transition:transform .25s}details[open] summary:after{transform:rotate(180deg)}
+details::details-content{block-size:0;overflow:clip;transition:block-size .3s ease,content-visibility .3s allow-discrete}
+details[open]::details-content{block-size:auto}
+.state.open:before{animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #2e8b4f66}70%,100%{box-shadow:0 0 0 8px #2e8b4f00}}
+@keyframes rise{from{opacity:.01;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hero h1,.page-hero h1{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+.hero .lead,.page-hero .lead{animation:rise .55s .08s cubic-bezier(.2,.7,.2,1) both}
+.hero .row{animation:rise .55s .16s cubic-bezier(.2,.7,.2,1) both}
+.tafel{animation:rise .55s .24s cubic-bezier(.2,.7,.2,1) both}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
