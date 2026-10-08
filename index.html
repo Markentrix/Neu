@@ -7,7 +7,8 @@
 <meta name="description" content="Fleischerei Klaus Wolter in Nienhagen (Dorfstraße 51): frisches Fleisch und Wurst, online vorbestellen, Partyservice für Feiern. Öffnungszeiten, Telefon 05144 2632.">
 <link rel="canonical" href="https://www.example.de/">
 <meta name="robots" content="index,follow,max-image-preview:large">
-<meta name="theme-color" content="#c8202f">
+<meta name="theme-color" content="#b3202e">
+<meta name="color-scheme" content="light">
 <meta name="geo.region" content="DE-NI">
 <meta name="geo.placename" content="Nienhagen">
 <meta property="og:type" content="website">
@@ -17,8 +18,6 @@
 <meta property="og:description" content="Frisch vom Fleischer: Vorbestellung und Partyservice in Nienhagen. Dorfstraße 51, Telefon 05144 2632.">
 <meta property="og:url" content="https://www.example.de/">
 <meta name="twitter:card" content="summary">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css">
 <script type="application/ld+json">
 {
@@ -115,6 +114,14 @@
       "@type": "Answer",
       "text": "Ja, am Laden steht ein Verkaufsautomat mit einer Auswahl an Produkten."
      }
+    },
+    {
+     "@type": "Question",
+     "name": "Wo erfahre ich Allergene und Zusatzstoffe?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Auskunft zu Allergenen und Zusatzstoffen erhalten Sie im Laden oder telefonisch unter 05144 2632."
+     }
     }
    ]
   }
@@ -123,51 +130,46 @@
 </script>
 </head>
 <body>
-
-
 <a class="skip" href="#main">Zum Inhalt springen</a>
 
-<header class="site-header" role="banner">
+<header class="site-header">
   <div class="wrap bar">
     <a class="brand" href="#top" aria-label="Fleischerei Klaus Wolter, Nienhagen – zur Startseite">
-      <span class="brand-mark" aria-hidden="true">W</span>
+      <span class="brand-mark" aria-hidden="true">KW</span>
       <span class="brand-text"><strong>Klaus Wolter</strong><small>Fleischerei · Nienhagen</small></span>
     </a>
-    <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
     <nav id="nav" class="nav" aria-label="Hauptnavigation">
       <a href="#sortiment">Sortiment</a>
-      <a href="#feiern">Feiern & Partyservice</a>
+      <a href="#feiern">Feiern</a>
       <a href="#oeffnungszeiten">Öffnungszeiten</a>
       <a href="#faq">Fragen</a>
       <a href="#kontakt">Kontakt</a>
-      <a class="btn btn-small" href="#vorbestellung">Vorbestellen</a>
+      <a class="btn" href="#vorbestellung">Vorbestellen</a>
     </nav>
   </div>
 </header>
 
 <main id="main" tabindex="-1">
 
-<!-- HERO -->
-<section class="hero" id="top" aria-labelledby="hero-h">
+<section class="hero on-dark" id="top" aria-labelledby="hero-h">
   <div class="wrap hero-grid">
-    <div class="hero-copy">
+    <div>
       <p class="eyebrow"><span id="statusDot" class="dot" aria-hidden="true"></span><span id="statusText" role="status" aria-live="polite">Öffnungszeiten werden geladen …</span></p>
-      <h1 id="hero-h">Fleischerei in Nienhagen: <em>frisch vom Fleischer</em></h1>
-      <p class="lead">Fleisch und Wurst mit Handwerk gemacht. Bestellen Sie bequem vor und holen Sie in der Dorfstraße ab, oder lassen Sie uns Ihre Feier versorgen.</p>
+      <h1 id="hero-h">Fleischerei in Nienhagen: <em>Handwerk, das man schmeckt</em></h1>
+      <p class="lead">Frisches Fleisch und Wurst aus der Dorfstraße. Bestellen Sie bequem vor und holen Sie ab, oder lassen Sie uns Ihre Feier versorgen.</p>
       <div class="cta-row">
-        <a class="btn btn-light" href="#vorbestellung">Jetzt vorbestellen</a>
-        <a class="btn btn-ghost" href="#feiern">Feier planen</a>
+        <a class="btn btn-white" href="#vorbestellung">Jetzt vorbestellen</a>
+        <a class="btn btn-line-w" href="#feiern">Feier planen</a>
       </div>
       <ul class="trust">
-        <li><span class="stars" aria-hidden="true">★★★★★</span> <strong>4,7</strong> bei Google <small>(46 Bewertungen)</small></li>
-        <li>Rund um die Uhr: <strong>Automat</strong> am Laden</li>
+        <li><span class="stars" aria-hidden="true">★★★★★</span> <strong>4,7</strong> bei Google (46 Bewertungen)</li>
+        <li><strong>Automat</strong> am Laden</li>
       </ul>
     </div>
     <aside class="hero-card" aria-labelledby="quick-h">
       <h2 id="quick-h">Heute bei uns</h2>
-      <p class="today" id="todayHours">–</p>
+      <p id="todayHours">–</p>
       <hr>
       <p><strong>Adresse</strong><br>Dorfstraße 51<br>29336 Nienhagen</p>
       <p><strong>Telefon</strong><br><a href="tel:+4951442632" class="tel">05144 2632</a></p>
@@ -176,79 +178,75 @@
   </div>
 </section>
 
-<!-- USP -->
 <section class="usp" aria-labelledby="usp-h">
   <h2 id="usp-h" class="sr">Ihre Vorteile bei der Fleischerei Klaus Wolter</h2>
   <div class="wrap usp-grid">
-    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c4 0 8 3 8 8s-4 9-8 9-8-3-8-8 4-9 8-9z"/><circle cx="12" cy="12" r="2.5"/></svg><h3>Frisch vom Fleischer</h3><p>Fleisch und Wurst direkt aus dem Fachgeschäft statt aus dem Kühlregal.</p></div>
-    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8a3 3 0 016 0"/></svg><h3>Vorbestellen &amp; abholen</h3><p>Wunschzettel online abschicken – wir legen alles zum Abholtermin bereit.</p></div>
-    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l5-14 9 9-14 5z"/><path d="M14 4v2M19 9h2M18 4l-1 1"/></svg><h3>Für jede Feier</h3><p>Grillabend, Geburtstag, Hochzeit oder Vereinsfest – wir beraten persönlich.</p></div>
-    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>Automat am Laden</h3><p>Auch außerhalb der Öffnungszeiten bekommen Sie Ausgewähltes am Verkaufsautomaten.</p></div>
+    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3c4 0 8 3 8 8s-4 9-8 9-8-3-8-8 4-9 8-9z"/><circle cx="12" cy="12" r="2.5"/></svg><h3>Frisch vom Fleischer</h3><p>Fleisch und Wurst direkt aus dem Fachgeschäft.</p></div>
+    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8a3 3 0 016 0"/></svg><h3>Vorbestellen &amp; abholen</h3><p>Wunschliste senden, wir legen alles bereit.</p></div>
+    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20l5-14 9 9-14 5z"/><path d="M14 4v2M19 9h2M18 4l-1 1"/></svg><h3>Für jede Feier</h3><p>Grillabend, Geburtstag, Hochzeit oder Vereinsfest.</p></div>
+    <div><svg class="ico" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>Automat am Laden</h3><p>Auch außerhalb der Öffnungszeiten.</p></div>
   </div>
 </section>
 
-<!-- SORTIMENT -->
-<section class="section" id="sortiment">
+<section class="section" id="sortiment" aria-labelledby="sortiment-h">
   <div class="wrap">
-    <p class="kicker">Unser Sortiment</p>
-    <h2>Was bei uns über die Theke geht</h2>
-    <p class="section-lead">Die aktuelle Auswahl wechselt je nach Tag und Saison. Fragen Sie im Laden oder telefonisch nach Ihrem Wunsch – wir machen es möglich.</p>
+    <p class="kicker">Sortiment</p>
+    <h2 id="sortiment-h">Was bei uns über die Theke geht</h2>
+    <p class="section-lead">Die Auswahl wechselt je nach Tag und Saison. Fragen Sie im Laden oder telefonisch nach Ihrem Wunsch.</p>
     <div class="cards">
-      <article class="card"><span class="tag">Theke</span><h3>Frischfleisch</h3><p>Schwein, Rind und Geflügel – Braten, Schnitzel, Gulasch, Hackfleisch und Kotelett zum Wunschgewicht.</p></article>
-      <article class="card"><span class="tag">Theke</span><h3>Wurst &amp; Aufschnitt</h3><p>Brüh-, Koch- und Rohwurst sowie Aufschnitt für Frühstück, Abendbrot und Brotzeit.</p></article>
-      <article class="card"><span class="tag">Grill</span><h3>Grillen</h3><p>Steaks, Bratwurst, Nackensteaks, Spieße und Marinaden für den perfekten Grillabend.</p></article>
-      <article class="card"><span class="tag">Vorrat</span><h3>Gläser &amp; Konserven</h3><p>Hausgemachtes im Glas – praktisch für Vorrat und Mitbringsel.</p></article>
-      <article class="card"><span class="tag">Tagesangebot</span><h3>Warme Küche</h3><p>Fragen Sie nach Mittagstisch und Tagesangeboten im Laden.</p></article>
-      <article class="card"><span class="tag">Präsent</span><h3>Geschenkideen</h3><p>Präsentkörbe und Wurstpakete nach Ihren Wünschen zusammengestellt.</p></article>
+      <article class="card"><h3>Frischfleisch</h3><p>Schwein, Rind und Geflügel: Braten, Schnitzel, Gulasch, Hackfleisch und Kotelett zum Wunschgewicht.</p><span class="tag">Theke</span></article>
+      <article class="card"><h3>Wurst &amp; Aufschnitt</h3><p>Brüh-, Koch- und Rohwurst sowie Aufschnitt für Frühstück, Abendbrot und Brotzeit.</p><span class="tag">Theke</span></article>
+      <article class="card"><h3>Grillen</h3><p>Steaks, Bratwurst, Nackensteaks, Spieße und Marinaden für den Grillabend.</p><span class="tag">Grill</span></article>
+      <article class="card"><h3>Gläser &amp; Konserven</h3><p>Hausgemachtes im Glas, praktisch für Vorrat und Mitbringsel.</p><span class="tag">Vorrat</span></article>
+      <article class="card"><h3>Warme Küche</h3><p>Fragen Sie nach Mittagstisch und Tagesangeboten im Laden.</p><span class="tag">Tagesangebot</span></article>
+      <article class="card"><h3>Geschenkideen</h3><p>Präsentkörbe und Wurstpakete nach Ihren Wünschen zusammengestellt.</p><span class="tag">Präsent</span></article>
     </div>
-    <p class="note">Hinweis: Preise und Tagesangebote erfahren Sie im Laden oder telefonisch unter <a href="tel:+4951442632">05144 2632</a>.</p>
+    <p class="note">Preise, Tagesangebote sowie Auskunft zu Allergenen und Zusatzstoffen erhalten Sie im Laden oder telefonisch unter <a href="tel:+4951442632">05144 2632</a>.</p>
   </div>
 </section>
 
-<!-- FEIERN -->
-<section class="section feiern" id="feiern">
+<section class="section feiern on-dark" id="feiern" aria-labelledby="feiern-h">
   <div class="wrap feiern-grid">
     <div>
-      <p class="kicker light">Feiern &amp; Partyservice</p>
-      <h2>Ihr Fest – unser Handwerk.</h2>
-      <p>Egal ob 20 oder 200 Gäste: Wir stellen Platten, Buffets und Grillpakete nach Ihren Wünschen zusammen. Planen Sie rechtzeitig – am besten <strong>mindestens eine Woche</strong> vorher, bei größeren Feiern gern früher.</p>
+      <p class="kicker">Feiern &amp; Partyservice</p>
+      <h2 id="feiern-h">Ihr Fest. Unser Handwerk.</h2>
+      <p>Ob 20 oder 200 Gäste: Wir stellen Platten, Buffets und Grillpakete nach Ihren Wünschen zusammen. Planen Sie am besten <strong>mindestens eine Woche</strong> im Voraus, bei größeren Feiern früher.</p>
       <ul class="checks">
-        <li>Kalte &amp; warme Platten</li>
+        <li>Kalte und warme Platten</li>
         <li>Grillpakete für Gartenfeste</li>
         <li>Buffet-Beratung nach Personenzahl</li>
-        <li>Abholung oder nach Absprache Lieferung</li>
+        <li>Abholung oder Lieferung nach Absprache</li>
         <li>Vereins- und Firmenfeiern</li>
       </ul>
-      <a class="btn btn-light" href="#vorbestellung" data-type="feier">Feier anfragen</a>
+      <a class="btn btn-white" href="#vorbestellung" data-type="feier">Feier anfragen</a>
     </div>
     <div class="steps">
       <h3>So einfach geht's</h3>
       <ol>
         <li><strong>Anfrage senden</strong><span>Anlass, Datum und Personenzahl angeben.</span></li>
-        <li><strong>Persönliche Beratung</strong><span>Wir melden uns und stimmen Menge &amp; Auswahl ab.</span></li>
-        <li><strong>Abholen &amp; feiern</strong><span>Alles frisch zum vereinbarten Termin.</span></li>
+        <li><strong>Persönliche Beratung</strong><span>Wir melden uns und stimmen Menge und Auswahl ab.</span></li>
+        <li><strong>Abholen und feiern</strong><span>Alles frisch zum vereinbarten Termin.</span></li>
       </ol>
     </div>
   </div>
 </section>
 
-<!-- VORBESTELLUNG -->
-<section class="section" id="vorbestellung">
-  <div class="wrap narrow">
+<section class="section" id="vorbestellung" aria-labelledby="vorbestellung-h">
+  <div class="narrow">
     <p class="kicker">Vorbestellung</p>
-    <h2>Bestellen Sie vor – wir halten es bereit</h2>
+    <h2 id="vorbestellung-h">Bestellen Sie vor, wir halten es bereit</h2>
     <p class="section-lead">Für den Einkauf oder Ihre Feier. Wir bestätigen Ihre Bestellung telefonisch oder per E-Mail.</p>
 
     <form id="orderForm" class="form" novalidate aria-label="Vorbestellung und Feier-Anfrage">
-      <fieldset class="seg">
+      <fieldset class="seg" style="min-width:0">
         <legend class="sr">Art der Bestellung</legend>
         <label><input type="radio" name="type" value="Vorbestellung" checked><span>Vorbestellung zum Abholen</span></label>
         <label><input type="radio" name="type" value="Feier / Partyservice"><span>Feier / Partyservice</span></label>
       </fieldset>
 
       <div class="grid2">
-        <label>Name*<input name="name" aria-required="true" autocomplete="name" required></label>
-        <label>Telefon*<input name="phone" aria-required="true" type="tel" autocomplete="tel" required></label>
+        <label>Name*<input name="name" autocomplete="name" required aria-required="true"></label>
+        <label>Telefon*<input name="phone" type="tel" autocomplete="tel" required aria-required="true"></label>
         <label>E-Mail <small>(optional)</small><input name="email" type="email" autocomplete="email"></label>
         <label>Wunschtermin*<input name="date" type="date" required aria-required="true"></label>
         <label>Uhrzeit der Abholung
@@ -260,35 +258,29 @@
             <option>16:00–18:00</option>
           </select>
         </label>
-        <label id="guestsField" hidden>Personenzahl
-          <input name="guests" type="number" min="1" inputmode="numeric" placeholder="z. B. 30">
-        </label>
+        <label id="guestsField" hidden>Personenzahl<input name="guests" type="number" min="1" inputmode="numeric" placeholder="z. B. 30"></label>
       </div>
 
-      <label id="occasionField" hidden>Anlass
-        <input name="occasion" placeholder="z. B. Geburtstag, Hochzeit, Grillfest">
-      </label>
+      <label id="occasionField" hidden>Anlass<input name="occasion" placeholder="z. B. Geburtstag, Hochzeit, Grillfest"></label>
 
       <div id="itemsBlock">
-        <p class="label">Ihre Wunschliste</p>
-        <div id="items" class="items"></div>
+        <p class="label" id="items-label">Ihre Wunschliste</p>
+        <div id="items" class="items" role="group" aria-labelledby="items-label"></div>
         <button type="button" class="btn btn-ghost btn-small" id="addItem">+ Weiteren Artikel hinzufügen</button>
       </div>
 
       <label>Anmerkungen / Wünsche
-        <textarea name="notes" rows="4" placeholder="z. B. Schnitzel dünn geschnitten, Allergien, Verpackung für Gefrierschrank …"></textarea>
+        <textarea name="notes" rows="4" placeholder="z. B. Schnitzel dünn geschnitten, Allergien, Verpackung für Gefrierschrank"></textarea>
       </label>
 
-      <label class="check"><input type="checkbox" name="privacy" required>
-        <span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung verwendet werden.*</span>
+      <label class="check"><input type="checkbox" name="privacy" required aria-required="true">
+        <span>Ich habe die <a href="datenschutz.html">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung verwendet werden.*</span>
       </label>
 
       <p class="form-error" id="formError" role="alert" tabindex="-1" hidden></p>
 
-      <div class="cta-row">
-        <button class="btn" type="submit">Bestellung zusammenstellen</button>
-      </div>
-      <p class="note">Ihre Bestellung wird als fertiger Text angezeigt. Senden Sie ihn per E-Mail an die Fleischerei oder geben Sie ihn telefonisch unter <strong>05144 2632</strong> durch.</p>
+      <div class="cta-row" style="margin-top:0"><button class="btn" type="submit">Bestellung zusammenstellen</button></div>
+      <p class="note" style="margin:0">Ihre Bestellung wird als fertiger Text angezeigt. Senden Sie ihn per E-Mail an die Fleischerei oder geben Sie ihn telefonisch unter <strong>05144 2632</strong> durch. Pflichtfelder sind mit * markiert.</p>
     </form>
     <div id="result" class="result" hidden role="region" aria-labelledby="result-h" tabindex="-1">
       <h3 id="result-h">Ihre Bestellung</h3>
@@ -299,12 +291,11 @@
   </div>
 </section>
 
-<!-- ÖFFNUNGSZEITEN -->
-<section class="section tint" id="oeffnungszeiten">
+<section class="section hours-sec" id="oeffnungszeiten" aria-labelledby="hours-h">
   <div class="wrap hours-grid">
     <div>
       <p class="kicker">Öffnungszeiten</p>
-      <h2>Wann Sie uns antreffen</h2>
+      <h2 id="hours-h">Wann Sie uns antreffen</h2>
       <table class="hours" id="hoursTable">
         <caption class="sr">Öffnungszeiten der Fleischerei Klaus Wolter</caption>
         <tbody>
@@ -317,32 +308,37 @@
           <tr data-day="0"><th scope="row">Sonntag</th><td class="closed">Geschlossen</td></tr>
         </tbody>
       </table>
-      <p class="note">An Feiertagen können die Zeiten abweichen. Außerhalb der Zeiten: Automat am Laden.</p>
+      <p class="note">An Feiertagen können die Zeiten abweichen. Außerhalb der Zeiten steht der Automat am Laden bereit.</p>
     </div>
     <div class="reviews" role="group" aria-label="Google-Bewertung">
       <p class="big"><span class="sr">Bewertung: </span>4,7 <span class="stars" aria-hidden="true">★</span><span class="sr"> von 5 Sternen</span></p>
       <p>Durchschnittliche Google-Bewertung aus 46 Rezensionen.</p>
-      <a class="btn btn-ghost" href="https://www.google.com/search?q=fleischer+nienhagen+Klaus+Wolter" target="_blank" rel="noopener noreferrer">Bewertungen ansehen<span class="sr"> (öffnet in neuem Tab)</span></a>
+      <a class="btn btn-ghost" href="https://www.google.com/search?q=fleischer+nienhagen+Klaus+Wolter" target="_blank" rel="noopener noreferrer">Bewertungen ansehen<span class="sr"> (öffnet in neuem Tab, Google)</span></a>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
 <section class="section" id="faq" aria-labelledby="faq-h">
   <div class="narrow">
     <p class="kicker">Häufige Fragen</p>
     <h2 id="faq-h">Gut zu wissen</h2>
-    <div class="faq"><details class="qa"><summary>Wann hat die Fleischerei Klaus Wolter in Nienhagen geöffnet?</summary><p>Dienstag, Donnerstag und Freitag von 08:00 bis 13:00 und von 14:00 bis 18:00 Uhr. Mittwoch von 08:00 bis 13:00 Uhr. Samstag, Sonntag und Montag ist geschlossen.</p></details><details class="qa"><summary>Wo finde ich die Fleischerei?</summary><p>Die Fleischerei Klaus Wolter befindet sich in der Dorfstraße 51 in 29336 Nienhagen.</p></details><details class="qa"><summary>Kann ich Fleisch und Wurst vorbestellen?</summary><p>Ja. Über das Vorbestellformular auf dieser Seite oder telefonisch unter 05144 2632. Sie nennen Wunschtermin und Artikel, die Fleischerei bereitet alles zur Abholung vor.</p></details><details class="qa"><summary>Übernimmt die Fleischerei Partyservice für Feiern?</summary><p>Ja, für Geburtstage, Hochzeiten, Grillabende, Vereins- und Firmenfeiern. Planen Sie am besten mindestens eine Woche im Voraus und senden Sie eine Feier-Anfrage mit Datum und Personenzahl.</p></details><details class="qa"><summary>Gibt es auch außerhalb der Öffnungszeiten etwas zu kaufen?</summary><p>Ja, am Laden steht ein Verkaufsautomat mit einer Auswahl an Produkten.</p></details></div>
+    <div class="faq">
+      <details class="qa"><summary>Wann hat die Fleischerei Klaus Wolter in Nienhagen geöffnet?</summary><p>Dienstag, Donnerstag und Freitag von 08:00 bis 13:00 und von 14:00 bis 18:00 Uhr. Mittwoch von 08:00 bis 13:00 Uhr. Samstag, Sonntag und Montag ist geschlossen.</p></details>
+      <details class="qa"><summary>Wo finde ich die Fleischerei?</summary><p>Die Fleischerei Klaus Wolter befindet sich in der Dorfstraße 51 in 29336 Nienhagen.</p></details>
+      <details class="qa"><summary>Kann ich Fleisch und Wurst vorbestellen?</summary><p>Ja. Über das Vorbestellformular auf dieser Seite oder telefonisch unter 05144 2632. Sie nennen Wunschtermin und Artikel, die Fleischerei bereitet alles zur Abholung vor.</p></details>
+      <details class="qa"><summary>Übernimmt die Fleischerei Partyservice für Feiern?</summary><p>Ja, für Geburtstage, Hochzeiten, Grillabende, Vereins- und Firmenfeiern. Planen Sie am besten mindestens eine Woche im Voraus und senden Sie eine Feier-Anfrage mit Datum und Personenzahl.</p></details>
+      <details class="qa"><summary>Gibt es auch außerhalb der Öffnungszeiten etwas zu kaufen?</summary><p>Ja, am Laden steht ein Verkaufsautomat mit einer Auswahl an Produkten.</p></details>
+      <details class="qa"><summary>Wo erfahre ich Allergene und Zusatzstoffe?</summary><p>Auskunft zu Allergenen und Zusatzstoffen erhalten Sie im Laden oder telefonisch unter 05144 2632.</p></details>
+      </div>
   </div>
 </section>
 
-<!-- KONTAKT -->
-<section class="section" id="kontakt">
+<section class="section" id="kontakt" aria-labelledby="kontakt-h" style="padding-top:0">
   <div class="wrap contact-grid">
     <div>
       <p class="kicker">Kontakt</p>
-      <h2>Besuchen Sie uns</h2>
-      <address itemscope itemtype="https://schema.org/PostalAddress">
+      <h2 id="kontakt-h">Besuchen Sie uns</h2>
+      <address>
         <strong>Fleischerei Klaus Wolter</strong><br>
         Dorfstraße 51<br>
         29336 Nienhagen
@@ -350,11 +346,11 @@
       <p><a class="tel" href="tel:+4951442632">05144 2632</a></p>
       <div class="cta-row">
         <a class="btn" href="tel:+4951442632">Anrufen</a>
-        <a class="btn btn-ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=Dorfstra%C3%9Fe+51%2C+29336+Nienhagen">Route planen<span class="sr"> (öffnet in neuem Tab)</span></a>
+        <a class="btn btn-ghost" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/dir/?api=1&amp;destination=Dorfstra%C3%9Fe+51%2C+29336+Nienhagen">Route planen<span class="sr"> (öffnet in neuem Tab, Google Maps)</span></a>
       </div>
     </div>
-    <a class="mapcard" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Dorfstra%C3%9Fe+51%2C+29336+Nienhagen" aria-label="Standort in Google Maps öffnen">
-      <svg class="ico" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+    <a class="mapcard" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&amp;query=Dorfstra%C3%9Fe+51%2C+29336+Nienhagen">
+      <svg class="ico" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
       <strong>Dorfstraße 51</strong>
       <span>29336 Nienhagen</span>
       <small>In Google Maps öffnen<span class="sr"> (neuer Tab)</span> →</small>
@@ -364,9 +360,9 @@
 
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer on-dark">
   <div class="wrap foot">
-    <p>© <span id="year"></span> Fleischerei Klaus Wolter · Dorfstraße 51 · 29336 Nienhagen</p>
+    <p>© <span id="year">2026</span> Fleischerei Klaus Wolter · Dorfstraße 51 · 29336 Nienhagen</p>
     <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
   </div>
 </footer>
@@ -377,6 +373,5 @@
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
