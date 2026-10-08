@@ -1,20 +1,21 @@
 # MKT | VIDEO | A | Lokal | H1 | 25s | v1 | 2026-10-08
 
-Thema: Websites · Typ A (Problem → System) · 25 s = 2 Clips · Anrede Sie · Preis ja (eine Zahl, netto) · CTA: Website-Check anfragen
+Thema: Websites · Typ A (Problem → System) · 25 s = 1 Clip (Seedance 2.5, bis 30 s am Stück) · Anrede Sie · Preis ja (eine Zahl, netto) · CTA: Website-Check anfragen
 
 ## Annahmen
 - Preisstand laut Skill-Allowlist 01.10.2026: „Websites ab 1.290 €“. Die aktuelle Preisliste liegt nicht in diesem Repo, Stand vor Produktion bestätigen.
 - CTA „Website-Check anfragen“ ist nicht in der Allowlist; Freigabe durch Markentrix erforderlich. Alternative aus der CI: „Marketing-Check anfragen“.
-- Host: neue, feste generierte Person aus `output/host-kandidaten/`, Freigabe erforderlich.
+- Modell: Seedance 2.5 (Vorgabe Markentrix), alternativ Kling 3.0 (max. 15 s, dann 2 Clips).
+- Host: Option 1 = Text-zu-Video, Host wird im Prompt beschrieben, erster Frame wird danach als Serien-Referenz eingefroren. Option 2 = vorher freigegebenes Host-Bild als Referenz (reference-to-video). Freigabe erforderlich.
 
 ## Skript (gesprochen, 53 Wörter, ~25 s)
 
-**Clip 1 (0–12 s, 24 Wörter)**
+**Teil 1 (0–12 s, 24 Wörter)**
 Ihre Website ist online. Anfragen bleiben aus.
 Sichtbarkeit allein reicht nicht. Entscheidend ist, ob daraus Anfragen entstehen.
 Wir bauen Websites mit einem Ziel: der Anfrage.
 
-**Clip 2 (12–25 s, 29 Wörter)**
+**Teil 2 (12–25 s, 29 Wörter)**
 Markentrix verbindet dazu Ihr Google-Profil und passende Werbung. Ein System statt Einzelmaßnahmen.
 Websites gibt es ab eintausendzweihundertneunzig Euro netto.
 Fordern Sie jetzt Ihren Website-Check an.
@@ -52,13 +53,13 @@ Helles Büro mit Fensterlicht, neutraler Hintergrund ohne Bildschirme, Schilder 
 ## Kosten (Listenpreis, Obergrenze)
 | Posten | Modell | Betrag |
 |---|---|---|
-| Testclip Aussprache 5 s | Seedance 2.0 | 0,70 USD |
-| Clip 1, 12 s | Seedance 2.0 | 1,69 USD |
-| Clip 2, 13 s | Seedance 2.0 | 1,83 USD |
-| Reserve 1 Neurender | Seedance 2.0 | 1,83 USD |
-| Summe | | ca. 6,05 USD |
+| Testclip Aussprache 5 s | Seedance 2.5 | 1,03 USD |
+| Spot 25 s, ein Clip | Seedance 2.5 | 5,14 USD |
+| Reserve 1 Neurender | Seedance 2.5 | 5,14 USD |
+| Summe | | ca. 11,30 USD |
+| Alternative Kling 3.0: 2 × 13 s | Kling 3.0 Pro | 2,18 USD je Durchlauf |
 
-## Endcard (2,5 s, nach Clip 2)
+## Endcard (2,5 s, nach dem Clip)
 Headline „Mehr Anfragen. Weniger Aufwand.“ · Subline „KI-Automatisierung & Social-Media-Werbung für lokale Unternehmen.“ · CTA „Website-Check anfragen →“ (Cyan→Blue) · Logo hell · markentrix.de · Hinweis „KI-generiert“.
 
 ## Status

@@ -94,6 +94,22 @@ MODELS: Dict[str, ModelSpec] = {
         defaults={"duration": 5, "resolution": "1080p", "aspect_ratio": "9:16", "generate_audio": True},
         required=(), required_any=("image_urls", "video_urls"), duration_range=(4, 30),
     ),
+    "seedance25-t2v": ModelSpec(
+        key="seedance25-t2v",
+        path="/bytedance/seedance-2.5/text-to-video",
+        kind="video", unit="second", list_price_usd=0.2057,
+        description="Seedance 2.5, Text zu Video mit Ton, 4-30 s, Host wird im Prompt beschrieben",
+        defaults={"duration": 5, "resolution": "1080p", "aspect_ratio": "9:16", "generate_audio": True},
+        required=("prompt",), duration_range=(4, 30),
+    ),
+    "seedance25-i2v": ModelSpec(
+        key="seedance25-i2v",
+        path="/bytedance/seedance-2.5/image-to-video",
+        kind="video", unit="second", list_price_usd=0.2057,
+        description="Seedance 2.5, Startbild zu Video mit Ton, 4-30 s (Format folgt dem Bild)",
+        defaults={"duration": 5, "resolution": "1080p", "generate_audio": True},
+        required=("image_url",), duration_range=(4, 30),
+    ),
     "kling3-std-i2v": ModelSpec(
         key="kling3-std-i2v",
         path="/kling-video/v3.0/std/image-to-video",

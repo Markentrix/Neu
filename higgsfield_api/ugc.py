@@ -19,12 +19,12 @@ from .client import HiggsfieldClient
 from .pricing import estimate_cost
 
 HOST_LOOK = (
-    "Realistic smartphone-style portrait of one adult person aged about 35, "
-    "well-groomed, grounded and professional, plain navy or white or grey clothing "
-    "without logos or text, no lanyard, no badge, no jewelry with text, calm direct look "
-    "with a slight smile, natural daylight, bright tidy office with window light, soft "
-    "neutral background without screens, brand logos, posters or signs, no text anywhere, "
-    "no neon, no dark look, vertical framing, head and shoulders, looking at the camera"
+    "Candid smartphone portrait of one adult person aged about 35, well-groomed, "
+    "grounded and professional, wearing a plain solid navy crew-neck sweater with a bare "
+    "collar and empty chest, nothing around the neck, bare hands out of frame. "
+    "Standing in front of a smooth plain light grey wall lit by soft daylight from a "
+    "window on the side, empty wall behind, calm direct look with a slight smile, "
+    "natural skin, vertical framing, head and shoulders, looking at the camera"
 )
 
 
@@ -62,15 +62,27 @@ def create_host(client: HiggsfieldClient, out_dir: str | Path = "output/host",
     return meta
 
 
-def talking_clip(client: HiggsfieldClient, host_image_url: str, script: str, scene: str,
-                 duration: int = 15, model: str = "seedance2-ref",
+HOST_IN_PROMPT = (
+    "Eine erwachsene Person um 35, gepflegt, bodenständig-professionell, einfarbiger "
+    "dunkelblauer Pullover ohne Aufdruck, nichts um den Hals, vor einer glatten hellgrauen "
+    "Wand mit weichem Fensterlicht von der Seite"
+)
+
+
+def talking_clip(client: HiggsfieldClient, host_image_url: Optional[str], script: str, scene: str,
+                 duration: int = 15, model: str = "seedance25-ref",
                  audio_url: Optional[str] = None, out_dir: str | Path = "output",
                  name: Optional[str] = None, dry_run: bool = False,
                  on_update=None) -> Dict[str, Any]:
     """Rendert einen Sprecher-Clip. host_image_url muss öffentlich erreichbar sein
     (Upload über client.upload() liefert eine passende URL)."""
     prompt = build_dialogue_prompt(script, scene)
-    if model.startswith("seedance") and model.endswith("-ref"):
+    if not host_image_url:
+        # Text-zu-Video: Host wird im Prompt beschrieben, erster Frame wird danach Referenz.
+        prompt = f"{HOST_IN_PROMPT}. {prompt}"
+        params: Dict[str, Any] = {"prompt": prompt, "duration": duration,
+                                  "aspect_ratio": "9:16", "resolution": "1080p", "generate_audio": True}
+    elif model.startswith("seedance") and model.endswith("-ref"):
         params: Dict[str, Any] = {"prompt": prompt, "image_urls": [host_image_url],
                                   "duration": duration, "aspect_ratio": "9:16",
                                   "resolution": "1080p", "generate_audio": True}

@@ -101,8 +101,8 @@ def cmd_host(args):
 
 def cmd_clip(args):
     c = HiggsfieldClient()
-    host = args.host
-    if not host.startswith("http"):
+    host = None if args.host in ("-", "none", "") else args.host
+    if host and not host.startswith("http"):
         print("Lade Host-Bild hoch ...", file=sys.stderr)
         host = c.upload(host)
     audio = args.audio
@@ -177,11 +177,11 @@ def main(argv=None):
     ph.set_defaults(fn=cmd_host)
 
     pc = sub.add_parser("clip", help="Sprecher-Clip mit deutschem Text rendern")
-    pc.add_argument("host", help="Host-Bild: lokale Datei oder URL")
+    pc.add_argument("host", help="Host-Bild: lokale Datei oder URL; '-' = kein Bild, Host im Prompt (nur seedance25-t2v)")
     pc.add_argument("script", help="gesprochener Text, wörtlich")
     pc.add_argument("--scene", default="Helles Büro mit Fensterlicht, ruhiger Hintergrund")
     pc.add_argument("--duration", type=int, default=15)
-    pc.add_argument("--model", default="seedance2-ref", help="seedance2-ref, seedance25-ref, kling3-std-i2v, kling3-pro-i2v")
+    pc.add_argument("--model", default="seedance25-ref", help="seedance25-ref, seedance25-t2v, kling3-std-i2v, kling3-pro-i2v, seedance2-ref")
     pc.add_argument("--audio", help="eigene Tonspur (wav/mp4) als Datei oder URL, nur Seedance")
     pc.add_argument("--out", default="output"); pc.add_argument("--name"); pc.add_argument("--dry-run", action="store_true")
     pc.set_defaults(fn=cmd_clip)
