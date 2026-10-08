@@ -1,4 +1,5 @@
 (function(){
+  var hd=document.querySelector('.top');function hh(){if(hd)document.documentElement.style.setProperty('--hh',hd.offsetHeight+'px')}hh();addEventListener('resize',hh);addEventListener('load',hh);
   var C=window.RES_CFG,DEMO=false;
   var f=document.getElementById('rf');if(!f)return;
   var fd=document.getElementById('fd'),fz=document.getElementById('fz'),fp=document.getElementById('fp'),more=document.getElementById('more'),next=document.getElementById('next'),msg=document.getElementById('msg');
