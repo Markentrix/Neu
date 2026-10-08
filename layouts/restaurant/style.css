@@ -74,3 +74,15 @@ footer{border-top:2px solid var(--ink);padding-block:26px;font-size:.9rem;color:
  .dock{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:fixed;left:12px;right:12px;bottom:12px;z-index:40}
  .dock a{text-align:center;padding:11px 14px}body{padding-bottom:84px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+/* Unterseiten */
+.phero{padding-block:36px 40px;max-width:860px}.phero h1{font-size:clamp(2.8rem,8vw,5.6rem);margin-bottom:18px}.phero .lead{margin:0}
+.crumb{font-size:.88rem;color:var(--mute);margin:0 0 18px}
+.pgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;padding-block:44px 64px;border-top:2px solid var(--ink);align-items:start}
+.pgrid>*{min-width:0}.pgrid h2{font-size:clamp(2rem,4.5vw,3rem);margin-bottom:14px}
+.prose p{margin:0 0 16px;max-width:60ch;color:var(--mute)}.prose strong{color:var(--ink)}.prose a{color:var(--ink);font-weight:600}
+.pimg{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border:2px solid var(--ink);border-radius:10px;box-shadow:5px 5px 0 var(--ink)}
+.linkrow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding-block:8px 64px}.linkrow a{display:block;border:2px solid var(--ink);border-radius:12px;padding:18px;text-decoration:none;background:#fff;box-shadow:3px 3px 0 var(--ink)}
+.linkrow b{display:block;font:400 1.5rem var(--display);text-transform:uppercase;margin-bottom:2px}.linkrow span{color:var(--mute);font-size:.94rem}.linkrow a:hover{background:var(--butter)}
+.ctab{background:var(--butter);border-block:2px solid var(--ink)}.ctab .w{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-block:26px}.ctab strong{font:400 clamp(1.8rem,5vw,2.6rem) var(--display);text-transform:uppercase}
+.faqs details{border-bottom:2px solid var(--line);padding:12px 0}.faqs summary{cursor:pointer;font-weight:600}.faqs p{margin:8px 0 0;color:var(--mute)}
+@media(max-width:860px){.pgrid{grid-template-columns:1fr;gap:26px;padding-block:32px 48px}.linkrow{grid-template-columns:1fr}}

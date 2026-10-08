@@ -7,7 +7,7 @@
   "phone": "05141 21 44 21",
   "phoneHref": "+495141214421",
   "whatsapp": "495141214421",
-  "indexable": false,
+  "indexable": true,
   "base": "https://www.pizzeria-molise-celle.de",
   "headline": [
     "Heute schon",
@@ -169,8 +169,12 @@
   ],
   "faq": [
     [
-      "Wie reserviere ich einen Tisch?",
-      "Wählen Sie oben Tag, Uhrzeit und Personenzahl. Wir bestätigen Ihre Anfrage telefonisch. Ab 8 Personen bitte anrufen."
+      "Wie reserviere ich einen Tisch in der Pizzeria Molise?",
+      "Wählen Sie auf der Startseite Tag, Uhrzeit und Personenzahl und senden Sie die Anfrage ab. Wir bestätigen telefonisch. Ab 8 Personen rufen Sie uns bitte unter 05141 21 44 21 an."
+    ],
+    [
+      "Wo finde ich die Pizzeria Molise in Celle?",
+      "In der Piltzergasse in der Altstadt von Celle (29221), wenige Schritte vom Großen Plan entfernt."
     ],
     [
       "Gibt es Pizza zum Mitnehmen?",
@@ -178,7 +182,11 @@
     ],
     [
       "Gibt es vegetarische und vegane Gerichte?",
-      "Ja, sie sind auf der Karte gekennzeichnet."
+      "Ja, vegetarische und vegane Gerichte sind auf der Speisekarte gekennzeichnet."
+    ],
+    [
+      "Welche Öffnungszeiten hat die Pizzeria Molise?",
+      "Montag bis Samstag von 11:00 bis 20:00 Uhr. Sonntag ist Ruhetag."
     ]
   ],
   "hero": {
@@ -186,5 +194,9 @@
     "alt": "Pizza Margherita mit Mozzarella und Basilikum",
     "stickerName": "Margherita",
     "stickerPrice": "5,50 €"
+  },
+  "seo": {
+    "title": "Pizzeria Molise Celle | Pizza & Pasta in der Altstadt, Tisch reservieren",
+    "description": "Pizzeria Molise in der Celler Altstadt: Pizza, Pasta, Flammkuchen und Handpizza zum Mitnehmen. Speisekarte ansehen und online Tisch reservieren oder anrufen: 05141 21 44 21."
   }
 }
