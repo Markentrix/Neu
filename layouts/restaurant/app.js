@@ -12,7 +12,7 @@
   function opt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}
   function ok(t){msg.className='msg ok';msg.innerHTML='<svg class="okc" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7 12.5l3.2 3.2L17 8.8"/></svg>';var s=document.createElement('span');s.textContent=t;msg.appendChild(s)}
   var now=berlin();
-  function times(){var iso=fd.value,keep=fz.value;fz.textContent='';opt(fz,'','Wählen');for(var m=C.from;m<=C.to;m+=C.step){if(iso===now.iso&&m<now.min+30)continue;opt(fz,hm(m),hm(m)+' Uhr')}if(keep)fz.value=keep}
+  function times(){var iso=fd.value,keep=fz.value;fz.textContent='';opt(fz,'','Wählen');for(var m=C.from;m<=C.to;m+=C.step){if(iso===now.iso&&m<now.min+30)continue;opt(fz,hm(m),hm(m))}if(keep)fz.value=keep}
   opt(fd,'','Wählen');
   for(var n=0,added=0;n<14&&added<10;n++){var iso=addDays(now.iso,n);if(dow(iso)===C.closedDow)continue;if(n===0&&now.min+30>C.to)continue;opt(fd,iso,n===0?'Heute':n===1?'Morgen':fmt(iso));added++}
   fd.addEventListener('change',times);times();
