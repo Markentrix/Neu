@@ -2,8 +2,10 @@
 
 Pfade und Parameter stammen aus https://docs.higgsfield.ai/docs/openapi.json.
 Preise sind Listenpreise in US-Dollar von https://higgsfield.ai/higgsfield-api
-(Stand Oktober 2026). Das eigene Konto hat meist einen Rabatt von 15 bis 50
-Prozent, die Schätzung ist also eine Obergrenze. Verbindlich ist nur die
+(Stand Oktober 2026). Seedance rechnet nach Pixeln mal Sekunden ab, deshalb
+gilt dort ein Preis je Auflösung (price_by_resolution); 9:16 und 16:9 kosten
+gleich. Das eigene Konto hat meist einen Rabatt von 15 bis 50 Prozent, die
+Schätzung ist also eine Obergrenze. Verbindlich ist nur die
 Abrechnung in der Konsole: https://console.higgsfield.ai
 """
 
@@ -24,6 +26,7 @@ class ModelSpec:
     duration_options: Optional[tuple] = None   # feste Werte, z.B. (5, 10)
     duration_range: Optional[tuple] = None     # (min, max) in Sekunden
     required_any: tuple = ()                   # mindestens eines dieser Felder
+    price_by_resolution: Optional[Dict[str, float]] = None  # USD/s je "resolution"-Wert
 
 
 MODELS: Dict[str, ModelSpec] = {
@@ -77,6 +80,7 @@ MODELS: Dict[str, ModelSpec] = {
         description="Seedance 2.0, Referenzbilder (Host) + optional Audio zu Video mit Ton, 4-15 s",
         defaults={"duration": 5, "resolution": "1080p", "aspect_ratio": "9:16", "generate_audio": True},
         required=(), required_any=("image_urls", "video_urls"), duration_range=(4, 15),
+        price_by_resolution={"480p": 0.1407, "720p": 0.3163, "1080p": 0.7782, "4k": 3.11},  # >480p geschätzt
     ),
     "seedance2-i2v": ModelSpec(
         key="seedance2-i2v",
@@ -85,35 +89,39 @@ MODELS: Dict[str, ModelSpec] = {
         description="Seedance 2.0, Startbild zu Video mit Ton, 4-15 s (Format folgt dem Bild)",
         defaults={"duration": 5, "resolution": "1080p", "generate_audio": True},
         required=("image_url",), duration_range=(4, 15),
+        price_by_resolution={"480p": 0.1407, "720p": 0.3163, "1080p": 0.7782, "4k": 3.11},  # >480p geschätzt
     ),
     "seedance25-ref": ModelSpec(
         key="seedance25-ref",
         path="/bytedance/seedance-2.5/reference-to-video",
-        kind="video", unit="second", list_price_usd=0.2057,
+        kind="video", unit="second", list_price_usd=0.2056,
         description="Seedance 2.5, Referenzbilder + optional Audio zu Video mit Ton, 4-30 s",
         defaults={"duration": 5, "resolution": "1080p", "aspect_ratio": "9:16", "generate_audio": True},
         required=(), required_any=("image_urls", "video_urls"), duration_range=(4, 30),
+        price_by_resolution={"480p": 0.2056, "720p": 0.4622, "1080p": 1.1372},
     ),
     "seedance25-t2v": ModelSpec(
         key="seedance25-t2v",
         path="/bytedance/seedance-2.5/text-to-video",
-        kind="video", unit="second", list_price_usd=0.2057,
+        kind="video", unit="second", list_price_usd=0.2056,
         description="Seedance 2.5, Text zu Video mit Ton, 4-30 s, Host wird im Prompt beschrieben",
         defaults={"duration": 5, "resolution": "1080p", "aspect_ratio": "9:16", "generate_audio": True},
         required=("prompt",), duration_range=(4, 30),
+        price_by_resolution={"480p": 0.2056, "720p": 0.4622, "1080p": 1.1372},
     ),
     "seedance25-i2v": ModelSpec(
         key="seedance25-i2v",
         path="/bytedance/seedance-2.5/image-to-video",
-        kind="video", unit="second", list_price_usd=0.2057,
+        kind="video", unit="second", list_price_usd=0.2056,
         description="Seedance 2.5, Startbild zu Video mit Ton, 4-30 s (Format folgt dem Bild)",
         defaults={"duration": 5, "resolution": "1080p", "generate_audio": True},
         required=("image_url",), duration_range=(4, 30),
+        price_by_resolution={"480p": 0.2056, "720p": 0.4622, "1080p": 1.1372},
     ),
     "kling3-std-i2v": ModelSpec(
         key="kling3-std-i2v",
         path="/kling-video/v3.0/std/image-to-video",
-        kind="video", unit="second", list_price_usd=0.084,
+        kind="video", unit="second", list_price_usd=0.063,
         description="Kling 3.0 Standard, Startbild zu Video mit nativem Ton, 3-15 s",
         defaults={"duration": 5, "sound": "on", "cfg_scale": 0.5},
         required=("prompt", "image_url"), duration_range=(3, 15),
