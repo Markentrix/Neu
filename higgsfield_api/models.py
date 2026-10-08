@@ -139,8 +139,8 @@ MODELS: Dict[str, ModelSpec] = {
         key="soul",
         path="/higgsfield-ai/soul/standard",
         kind="image", unit="image", list_price_usd=0.0938,
-        description="Higgsfield SOUL Standard, Text zu Bild, 2K oder 4K",
-        defaults={"num_images": 1, "resolution": "2K", "aspect_ratio": "4:3"},
+        description="Higgsfield SOUL Standard, Text zu Bild, 720p oder 1080p",
+        defaults={"num_images": 1, "resolution": "1080p", "aspect_ratio": "4:3"},
         required=("prompt",),
     ),
 }

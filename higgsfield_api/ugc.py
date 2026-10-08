@@ -21,7 +21,7 @@ from .pricing import estimate_cost
 HOST_LOOK = (
     "Candid smartphone portrait of one adult person aged about 35, well-groomed, "
     "grounded and professional, wearing a plain solid navy crew-neck sweater with a bare "
-    "collar and empty chest, nothing around the neck, bare hands out of frame. "
+    "collar and empty chest, nothing around the neck, hands out of frame. "
     "Standing in front of a smooth plain light grey wall lit by soft daylight from a "
     "window on the side, empty wall behind, calm direct look with a slight smile, "
     "natural skin, vertical framing, head and shoulders, looking at the camera"

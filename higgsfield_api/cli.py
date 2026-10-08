@@ -151,7 +151,7 @@ def main(argv=None):
         p.add_argument("prompt")
         p.add_argument("--duration", type=int)
         p.add_argument("--aspect", help="z.B. 9:16")
-        p.add_argument("--resolution", help="2K oder 4K (nur Bild)")
+        p.add_argument("--resolution", help="720p oder 1080p (nur Bild)")
         p.add_argument("--num-images", dest="num_images", type=int)
         p.add_argument("--cfg-scale", dest="cfg_scale", type=float)
         p.add_argument("--negative-prompt", dest="negative_prompt")
