@@ -22,6 +22,7 @@ from higgsfield_api.ugc import talking_clip  # noqa: E402
 OUT = ROOT / "output" / "website-spot"
 NAME = "MKT_VIDEO_A_Lokal_H1_25s_v1_2026-10-08"
 MODEL = "seedance25-ref"
+RESOLUTION = "720p"   # 1080p kostet 2,5x (Pixel-Abrechnung), Freigabe Markentrix: 720p
 SCENE = ("Helles Büro, der Sprecher steht vor einer glatten hellen Wand mit weichem "
          "Fensterlicht von der Seite, keine Bildschirme, keine Schilder")
 SCRIPT = (
@@ -36,9 +37,12 @@ SCRIPT_TEST = "Ihre Website ist online. Anfragen bleiben aus. Marken-Trix baut d
 SUBTITLES = [
     "Ihre Website ist online. Anfragen bleiben aus.",
     "Sichtbarkeit allein reicht nicht.",
-    "Entscheidend ist, ob daraus Anfragen entstehen.",
-    "Wir bauen Websites mit einem Ziel: der Anfrage.",
-    "Markentrix verbindet dazu Ihr Google-Profil und passende Werbung.",
+    "Entscheidend ist,",
+    "ob daraus Anfragen entstehen.",
+    "Wir bauen Websites",
+    "mit einem Ziel: der Anfrage.",
+    "Markentrix verbindet dazu",
+    "Ihr Google-Profil und passende Werbung.",
     "Ein System statt Einzelmaßnahmen.",
     "Websites ab 1.290 € netto.",
     "Fordern Sie jetzt Ihren Website-Check an.",
@@ -73,7 +77,7 @@ def _progress(st, _d):
 def step_test():
     c = HiggsfieldClient()
     url = _host_url(c)
-    res = talking_clip(c, url, SCRIPT_TEST, SCENE, duration=5, model=MODEL,
+    res = talking_clip(c, url, SCRIPT_TEST, SCENE, duration=5, model=MODEL, resolution=RESOLUTION,
                        out_dir=OUT, name="test-aussprache", on_update=_progress)
     print(json.dumps(res["estimate"], indent=1))
     video = res["files"][0]
@@ -87,7 +91,7 @@ def step_test():
 def step_spot():
     c = HiggsfieldClient()
     url = _host_url(c)
-    res = talking_clip(c, url, SCRIPT, SCENE, duration=25, model=MODEL,
+    res = talking_clip(c, url, SCRIPT, SCENE, duration=25, model=MODEL, resolution=RESOLUTION,
                        out_dir=OUT, name=NAME + "_master", on_update=_progress)
     (OUT / "spot-result.json").write_text(json.dumps(res, indent=2, ensure_ascii=False))
     video = res["files"][0]
@@ -99,24 +103,60 @@ def step_spot():
     print("Gehört:", " ".join(s["text"] for s in segs))
 
 
+def _norm(t):
+    import re
+    return re.sub(r"[^a-zäöüß0-9 ]", "", t.lower().replace("ß", "ss"))
+
+
 def _srt_from_transcript(duration):
-    """Untertitel aus dem Skript, Zeiten aus der Transkription (gleichmäßig je Block)."""
+    """Untertitel aus dem Skript; Zeiten aus den Transkript-Segmenten: jeder Block wird
+    dem Segment zugeordnet, das die meisten seiner Wörter enthält, Segmente mit mehreren
+    Blöcken werden anteilig nach Wortzahl geteilt."""
     srt = OUT / "untertitel.srt"
     tpath = OUT / "transkript.json"
     segs = json.loads(tpath.read_text()) if tpath.exists() else []
-    speech_start = segs[0]["start"] if segs else 0.0
-    speech_end = segs[-1]["end"] if segs else duration
-    per = (speech_end - speech_start) / len(SUBTITLES)
+    if not segs:
+        segs = [{"start": 0.0, "end": duration, "text": " ".join(SUBTITLES)}]
+    assign = []
+    last = 0
+    for text in SUBTITLES:
+        words = set(_norm(text).split())
+        best, score = last, -1
+        for i in range(last, len(segs)):
+            sw = set(_norm(segs[i]["text"]).split())
+            sc = len(words & sw) - 0.01 * (i - last)
+            if sc > score:
+                best, score = i, sc
+        assign.append(best)
+        last = best
+    times = []
+    for i, seg in enumerate(segs):
+        idx = [k for k, a in enumerate(assign) if a == i]
+        if not idx:
+            continue
+        total = sum(len(SUBTITLES[k].split()) for k in idx)
+        t = seg["start"]
+        for k in idx:
+            share = (seg["end"] - seg["start"]) * len(SUBTITLES[k].split()) / total
+            times.append((k, t, t + share - 0.05))
+            t += share
+    times.sort()
 
     def ts(t):
         m, s = divmod(max(t, 0), 60)
         return f"00:{int(m):02}:{int(s):02},{int((s % 1) * 1000):03}"
 
     lines = []
-    for i, text in enumerate(SUBTITLES, 1):
-        a, b = speech_start + (i - 1) * per, speech_start + i * per - 0.05
-        lines += [str(i), f"{ts(a)} --> {ts(b)}", text, ""]
+    n = 0
+    hook_end = 3.0
+    for k, a, b in times:
+        if k == 0:
+            hook_end = b + 0.05  # Block 1 trägt die Hook-Plate, kein doppelter Text
+            continue
+        n += 1
+        lines += [str(n), f"{ts(a)} --> {ts(b)}", SUBTITLES[k], ""]
     srt.write_text("\n".join(lines), encoding="utf-8")
+    srt.with_suffix(".json").write_text(json.dumps({"hook_end": round(hook_end, 2)}))
     return srt
 
 
@@ -127,11 +167,14 @@ def step_post():
     logo = _asset("markentrix-logo-light", ("svg", "png"))
     info = post.probe(master)
     srt = _srt_from_transcript(info["duration"])
-    hook_png = brand.hook_plate(HOOK, OUT / "hook-plate.png")
+    hook_png = brand.hook_plate(HOOK, OUT / "hook-plate.png", width=info["width"])
     end_png = brand.endcard(OUT / "endcard.png", logo_path=logo, cta=CTA)
-    v1 = post.burn_subtitles(master, srt, OUT / "_step1_subs.mp4")
-    v2 = post.overlay_png(v1, hook_png, OUT / "_step2_hook.mp4", start=0, end=3, y="260")
-    final = post.append_endcard(v2, end_png, OUT / f"{NAME}.mp4", seconds=2.5)
+    hook_end = json.loads(srt.with_suffix(".json").read_text())["hook_end"]
+    v1 = post.burn_subtitles(master, srt, OUT / "_step1_subs.mp4", size=14)
+    # Hook-Plate unter dem Kinn (Kopf sitzt oben im Bild), solange der Hook gesprochen wird
+    v2 = post.overlay_png(v1, hook_png, OUT / "_step2_hook.mp4", start=0, end=hook_end, y="0.50*H")
+    v3 = post.append_endcard(v2, end_png, OUT / "_step3_endcard.mp4", seconds=2.5)
+    final = post.loudnorm(v3, OUT / f"{NAME}.mp4")
     print("Final:", final, post.probe(final))
     frames = post.qa_frames(final, OUT / "qa-final", every=2)
     print("QA-Frames final:", len(frames))

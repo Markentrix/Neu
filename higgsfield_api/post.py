@@ -58,10 +58,12 @@ def make_srt(script: str, duration: float, out_path: str | Path, max_words: int 
 
 
 def burn_subtitles(video: str | Path, srt: str | Path, out_path: str | Path,
-                   font: str = "Inter", size: int = 16, margin_v: int = 380) -> Path:
-    """Brennt Untertitel ein, oberhalb der unteren Safe Area (9:16: 330 px)."""
+                   font: str = "Inter", size: int = 17, bottom_frac: float = 0.19) -> Path:
+    """Brennt Untertitel ein. bottom_frac = Abstand vom unteren Rand als Anteil der
+    Höhe (9:16 Safe Area 330/1920 = 0,17). libass rechnet in 288 Einheiten Höhe."""
+    margin_v = round(bottom_frac * 288)
     style = (f"FontName={font},FontSize={size},PrimaryColour=&H00FFFFFF,OutlineColour=&H00201A0B,"
-             f"BorderStyle=1,Outline=2,Shadow=0,Alignment=2,MarginV={margin_v}")
+             f"BorderStyle=1,Outline=2,Shadow=0,Alignment=2,MarginV={margin_v},MarginL=20,MarginR=20")
     srt_path = str(srt).replace("\\", "/").replace(":", "\\:")
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(video),
           "-vf", f"subtitles='{srt_path}':force_style='{style}'",
@@ -70,11 +72,22 @@ def burn_subtitles(video: str | Path, srt: str | Path, out_path: str | Path,
 
 
 def overlay_png(video: str | Path, png: str | Path, out_path: str | Path,
-                start: float = 0.0, end: float = 3.0, x: str = "(W-w)/2", y: str = "260") -> Path:
-    """Legt ein PNG (z.B. Hook-Plate, KI-Icon) für ein Zeitfenster über das Video."""
+                start: float = 0.0, end: float = 3.0, x: str = "(W-w)/2", y: str = "0.14*H",
+                fit_width: bool = True) -> Path:
+    """Legt ein PNG (z.B. Hook-Plate, KI-Icon) für ein Zeitfenster über das Video.
+    y darf Ausdrücke mit H (Videohöhe) enthalten; fit_width skaliert das PNG auf Videobreite."""
+    pre = "[1:v][0:v]scale2ref=w=iw:h=ow/mdar[ov][base];[base][ov]" if fit_width else "[0:v][1:v]"
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(video), "-i", str(png),
-          "-filter_complex", f"[0:v][1:v]overlay={x}:{y}:enable='between(t,{start},{end})'",
+          "-filter_complex", f"{pre}overlay={x}:{y}:enable='between(t,{start},{end})'",
           "-c:a", "copy", str(out_path)])
+    return Path(out_path)
+
+
+def loudnorm(video: str | Path, out_path: str | Path, target_i: float = -16.0, tp: float = -1.5) -> Path:
+    """Einheitliche Lautheit (EBU R128), Ziel -16 LUFS für Social."""
+    _run(["ffmpeg", "-y", "-v", "error", "-i", str(video),
+          "-af", f"loudnorm=I={target_i}:TP={tp}:LRA=11", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
+          str(out_path)])
     return Path(out_path)
 
 

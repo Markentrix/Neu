@@ -73,7 +73,7 @@ def talking_clip(client: HiggsfieldClient, host_image_url: Optional[str], script
                  duration: int = 15, model: str = "seedance25-ref",
                  audio_url: Optional[str] = None, out_dir: str | Path = "output",
                  name: Optional[str] = None, dry_run: bool = False,
-                 on_update=None) -> Dict[str, Any]:
+                 on_update=None, resolution: str = "1080p") -> Dict[str, Any]:
     """Rendert einen Sprecher-Clip. host_image_url muss öffentlich erreichbar sein
     (Upload über client.upload() liefert eine passende URL)."""
     prompt = build_dialogue_prompt(script, scene)
@@ -81,11 +81,11 @@ def talking_clip(client: HiggsfieldClient, host_image_url: Optional[str], script
         # Text-zu-Video: Host wird im Prompt beschrieben, erster Frame wird danach Referenz.
         prompt = f"{HOST_IN_PROMPT}. {prompt}"
         params: Dict[str, Any] = {"prompt": prompt, "duration": duration,
-                                  "aspect_ratio": "9:16", "resolution": "1080p", "generate_audio": True}
+                                  "aspect_ratio": "9:16", "resolution": resolution, "generate_audio": True}
     elif model.startswith("seedance") and model.endswith("-ref"):
         params: Dict[str, Any] = {"prompt": prompt, "image_urls": [host_image_url],
                                   "duration": duration, "aspect_ratio": "9:16",
-                                  "resolution": "1080p", "generate_audio": True}
+                                  "resolution": resolution, "generate_audio": True}
         if audio_url:
             params["audio_urls"] = [audio_url]
     else:

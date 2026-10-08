@@ -102,9 +102,9 @@ def hook_plate(text: str, out_path: str | Path, width: int = 1080) -> Path:
     """Hook-Plate: Space Grotesk Bold, Navy auf hellem Band, max. 2 Zeilen, transparent."""
     html = f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {_font_face()}
-html,body{{margin:0;width:{width}px;height:400px;background:transparent;}}
-.band{{position:absolute;left:60px;right:60px;top:20px;background:rgba(255,255,255,0.96);
-  border:1px solid {CI['cool_gray']};border-radius:28px;padding:40px 48px;text-align:center;}}
-.band div{{font:700 64px/1.15 'Space Grotesk';color:{CI['navy']};}}
+html,body{{margin:0;width:{width}px;height:{round(width*0.37)}px;background:transparent;}}
+.band{{position:absolute;left:{round(width*0.055)}px;right:{round(width*0.055)}px;top:{round(width*0.02)}px;background:rgba(255,255,255,0.96);
+  border:1px solid {CI['cool_gray']};border-radius:{round(width*0.026)}px;padding:{round(width*0.037)}px {round(width*0.044)}px;text-align:center;}}
+.band div{{font:700 {round(width*0.059)}px/1.15 'Space Grotesk';color:{CI['navy']};}}
 </style></head><body><div class="band"><div>{text}</div></div></body></html>"""
-    return render_html(html, out_path, width, 400, transparent=True)
+    return render_html(html, out_path, width, round(width * 0.37), transparent=True)
