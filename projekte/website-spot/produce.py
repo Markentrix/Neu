@@ -28,11 +28,11 @@ SCRIPT = (
     "Ihre Website ist online. Anfragen bleiben aus. "
     "Sichtbarkeit allein reicht nicht. Entscheidend ist, ob daraus Anfragen entstehen. "
     "Wir bauen Websites mit einem Ziel: der Anfrage. "
-    "Mar-ken-triks verbindet dazu Ihr Google-Profil und passende Werbung. Ein System statt Einzelmaßnahmen. "
+    "Marken-Trix verbindet dazu Ihr Google-Profil und passende Werbung. Ein System statt Einzelmaßnahmen. "
     "Websites gibt es ab eintausendzweihundertneunzig Euro netto. "
     "Fordern Sie jetzt Ihren Website-Check an."
 )
-SCRIPT_TEST = "Ihre Website ist online. Anfragen bleiben aus. Mar-ken-triks baut daraus ein System."
+SCRIPT_TEST = "Ihre Website ist online. Anfragen bleiben aus. Marken-Trix baut daraus ein System."
 SUBTITLES = [
     "Ihre Website ist online. Anfragen bleiben aus.",
     "Sichtbarkeit allein reicht nicht.",

@@ -20,7 +20,7 @@ Markentrix verbindet dazu Ihr Google-Profil und passende Werbung. Ein System sta
 Websites gibt es ab eintausendzweihundertneunzig Euro netto.
 Fordern Sie jetzt Ihren Website-Check an.
 
-Sprechfassung für das Modell: „Markentrix“ → „Mar-ken-triks“; Zahl ausgeschrieben.
+Sprechfassung für das Modell: „Markentrix“ → „Marken-Trix“ (getestet, „Mar-ken-triks“ wird falsch gesprochen); Zahl ausgeschrieben.
 
 ## Allowlist-Prüfung
 | Aussage | Quelle |
