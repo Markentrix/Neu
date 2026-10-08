@@ -277,15 +277,23 @@
         <span>Ich habe die <a href="datenschutz.html">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung verwendet werden.*</span>
       </label>
 
+      <div class="hp" aria-hidden="true"><label>Bitte leer lassen<input name="website" tabindex="-1" autocomplete="off"></label></div>
+
       <p class="form-error" id="formError" role="alert" tabindex="-1" hidden></p>
 
-      <div class="cta-row" style="margin-top:0"><button class="btn" type="submit">Bestellung zusammenstellen</button></div>
-      <p class="note" style="margin:0">Ihre Bestellung wird als fertiger Text angezeigt. Senden Sie ihn per E-Mail an die Fleischerei oder geben Sie ihn telefonisch unter <strong>05144 2632</strong> durch. Pflichtfelder sind mit * markiert.</p>
+      <div class="cta-row" style="margin-top:0"><button class="btn" type="submit" id="submitBtn">Verbindlich vorbestellen</button></div>
+      <p class="note" id="formNote" style="margin:0">Wir melden uns zur Bestätigung telefonisch oder per E-Mail. Der Preis wird erst im Laden berechnet. Pflichtfelder sind mit * markiert.</p>
     </form>
+    <div id="success" class="result success" hidden role="status" tabindex="-1">
+      <h3>Vielen Dank, Ihre Bestellung ist eingegangen.</h3>
+      <p>Ihre Bestellnummer: <strong id="refShow"></strong></p>
+      <p>Wir bestätigen Ihre Bestellung telefonisch oder per E-Mail. Bei Fragen erreichen Sie uns unter <strong>05144 2632</strong>.</p>
+      <div class="cta-row"><button class="btn btn-ghost" type="button" id="newOrder">Weitere Bestellung aufgeben</button></div>
+    </div>
     <div id="result" class="result" hidden role="region" aria-labelledby="result-h" tabindex="-1">
       <h3 id="result-h">Ihre Bestellung</h3>
       <pre id="resultText"></pre>
-      <p>Diese Bestellung ist noch nicht abgeschickt. Kopieren Sie den Text und senden Sie ihn an <strong id="mailShow"></strong>, oder rufen Sie an: <strong>05144 2632</strong>.</p>
+      <p>Diese Bestellung ist noch nicht bei uns angekommen. Kopieren Sie den Text und senden Sie ihn an <strong id="mailShow"></strong>, oder rufen Sie an: <strong>05144 2632</strong>.</p>
       <div class="cta-row"><button class="btn" type="button" id="copyBtn">Text kopieren</button><a class="btn btn-ghost" id="mailLink" href="#">E-Mail öffnen</a></div>
     </div>
   </div>
@@ -372,6 +380,7 @@
   <a class="dock-order" href="#vorbestellung">Vorbestellen</a>
 </div>
 
+<script src="config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

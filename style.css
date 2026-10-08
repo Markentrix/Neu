@@ -233,3 +233,8 @@ address{font-style:normal;font-size:1.05rem;margin:12px 0}
 @media (forced-colors:active){.btn,.dock a{border:2px solid ButtonText}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{.site-header,.dock{display:none}}
+
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.success{border-color:var(--green)}
+.success h3{color:var(--green)}
+.btn[disabled]{opacity:.6;cursor:progress}

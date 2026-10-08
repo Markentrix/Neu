@@ -1,6 +1,9 @@
 // ---- Konfiguration ---------------------------------------------------------
 // TODO: E-Mail-Adresse der Fleischerei eintragen, an die Bestellungen gehen.
-const ORDER_EMAIL = "bestellung@example.de" /* Platzhalter */;
+// Einstellungen stehen in config.js (E-Mail, optionaler Bestell-Endpunkt).
+const CFG = window.SITE_CONFIG || {};
+const ORDER_EMAIL = CFG.orderEmail || "bestellung@example.de";
+const ORDER_ENDPOINT = (CFG.orderEndpoint || "").trim(); // leer = Fallback ohne Server
 
 // Öffnungszeiten: 0 = Sonntag … 6 = Samstag, Zeiten in Minuten ab Mitternacht
 const m = (h, min = 0) => h * 60 + min;
@@ -171,17 +174,116 @@ function validate() {
   return !msg;
 }
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  if (!validate()) return;
-  const { feier, text } = buildMessage();
-  const subject = `${feier ? "Feier-Anfrage" : "Vorbestellung"} – ${form.elements.name.value.trim()}`;
+// ---- Bestellung senden ------------------------------------------------------
+// Ohne ORDER_ENDPOINT: fertiger Text zum Kopieren / per E-Mail (Fallback).
+// Mit ORDER_ENDPOINT: JSON-POST an das Backend (siehe docs/bestellung-backend.md).
+const formStart = Date.now();
+const submitBtn = $("#submitBtn");
+const SUBMIT_LABEL = ORDER_ENDPOINT ? "Verbindlich vorbestellen" : "Bestellung zusammenstellen";
+submitBtn.textContent = SUBMIT_LABEL;
+if (!ORDER_ENDPOINT) {
+  const n = $("#formNote");
+  if (n) n.innerHTML = "Ihre Bestellung wird als fertiger Text angezeigt. Senden Sie ihn per E-Mail an die Fleischerei oder geben Sie ihn telefonisch unter <strong>05144 2632</strong> durch. Pflichtfelder sind mit * markiert.";
+}
+
+function newRef() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `KW-${String(d.getFullYear()).slice(2)}${p(d.getMonth() + 1)}${p(d.getDate())}-${rnd}`;
+}
+
+function buildPayload() {
+  const f = form.elements;
+  const feier = f.type.value === "Feier / Partyservice";
+  return {
+    ref: newRef(),
+    type: feier ? "feier" : "vorbestellung",
+    name: f.name.value.trim(),
+    phone: f.phone.value.trim(),
+    email: f.email.value.trim() || null,
+    date: f.date.value,
+    time: f.time.value || null,
+    guests: feier && f.guests.value ? Number(f.guests.value) : null,
+    occasion: feier ? f.occasion.value.trim() || null : null,
+    items: [...itemsEl.children].map((r) => ({
+      name: r.querySelector('[name="item"]').value.trim(),
+      qty: r.querySelector('[name="qty"]').value ? Number(r.querySelector('[name="qty"]').value) : null,
+      unit: r.querySelector('[name="unit"]').value,
+    })).filter((i) => i.name),
+    notes: f.notes.value.trim() || null,
+    consent: true,
+    consentAt: new Date().toISOString(),
+    // Spam-Schutz: Honeypot (muss leer sein) und Ausfüllzeit in Sekunden
+    hp: f.website ? f.website.value : "",
+    fillSeconds: Math.round((Date.now() - formStart) / 1000),
+  };
+}
+
+function showFallback(text, subject) {
   $("#resultText").textContent = text;
   $("#mailShow").textContent = ORDER_EMAIL;
   $("#mailLink").href = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
   $("#result").hidden = false;
   $("#result").focus();
   $("#result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function showSuccess(ref) {
+  $("#refShow").textContent = ref;
+  $("#success").hidden = false;
+  $("#result").hidden = true;
+  form.hidden = true;
+  $("#success").focus();
+  $("#success").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+  const { feier, text } = buildMessage();
+  const subject = `${feier ? "Feier-Anfrage" : "Vorbestellung"} – ${form.elements.name.value.trim()}`;
+
+  if (!ORDER_ENDPOINT) { showFallback(text, subject); return; }
+
+  const payload = buildPayload();
+  if (payload.hp) return; // Bot: stillschweigend verwerfen
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Wird gesendet …";
+  errorEl.hidden = true;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 15000);
+    const res = await fetch(ORDER_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    let ref = payload.ref;
+    try { ref = (await res.json()).ref || ref; } catch {}
+    showSuccess(ref);
+  } catch {
+    errorEl.textContent = "Die Bestellung konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder nutzen Sie den Text unten bzw. rufen Sie an: 05144 2632.";
+    errorEl.hidden = false;
+    errorEl.focus();
+    showFallback(text, subject);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = SUBMIT_LABEL;
+  }
+});
+
+$("#newOrder").addEventListener("click", () => {
+  form.reset();
+  syncType();
+  itemsEl.innerHTML = "";
+  addItem(); addItem();
+  form.hidden = false;
+  $("#success").hidden = true;
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 $("#copyBtn").addEventListener("click", async () => {
