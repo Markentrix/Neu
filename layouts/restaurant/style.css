@@ -202,3 +202,18 @@ a,button,select,summary,label{touch-action:manipulation}
 }
 @media(max-width:600px){.nav2 a{min-width:44px;justify-content:center}}
 @media(max-width:360px){.nav2{padding:8px 4px;gap:2px}.nav2 a{padding:4px 5px}}
+/* Mobil: Reservierung kleiner */
+@media(max-width:600px){
+ #rf{padding:10px 12px;box-shadow:3px 3px 0 var(--ink);border-radius:12px}
+ .rt{font-size:1.1rem;margin-bottom:6px;padding-bottom:0}
+ label.f{font-size:.68rem;gap:2px;letter-spacing:.06em}
+ select,input.t{height:40px;padding-block:6px;border-width:1.5px;border-radius:8px}
+ .rrow{gap:6px 6px}
+ .rrow .btn{min-height:40px;padding:8px 14px;font-size:.92rem;margin-top:2px;box-shadow:2px 2px 0 var(--ink)}
+ .rmore{gap:8px;margin-top:8px;padding-top:8px}
+ .rmore .btn{min-height:40px}
+ .chk{font-size:.8rem}
+ .bar .btn{padding:8px 12px;min-height:40px;font-size:.84rem;box-shadow:2px 2px 0 var(--ink)}
+ .resw{margin-top:10px}
+}
+@media(max-width:360px){label.f{font-size:.64rem;letter-spacing:.02em}.rt{font-size:1.05rem}}
