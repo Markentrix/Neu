@@ -9,7 +9,12 @@
   "whatsapp": "495141214421",
   "indexable": true,
   "base": "https://www.pizzeria-molise-celle.de",
-  "headline": "Heute schon <span class=\"hl\">Pizza</span> gehabt?",
+  "headline": [
+    "Heute schon",
+    "Pizza",
+    "gehabt?"
+  ],
+  "highlight": 1,
   "lead": "Frisch aus dem Ofen in der Piltzergasse. Am Tisch genießen oder als Handpizza mitnehmen.",
   "hours": {
     "open": "11:00",
@@ -188,9 +193,7 @@
     "img": "pizza",
     "alt": "Pizza Margherita mit Mozzarella und Basilikum",
     "stickerName": "Margherita",
-    "stickerPrice": "5,50 €",
-    "img2": "pasta",
-    "alt2": "Spaghetti Carbonara mit Pancetta und Pecorino"
+    "stickerPrice": "5,50 €"
   },
   "seo": {
     "title": "Pizzeria Molise Celle | Pizza & Pasta in der Altstadt, Tisch reservieren",
