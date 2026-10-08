@@ -1,0 +1,21 @@
+{
+  "name": "ElbDetail – Fahrzeugaufbereitung Celle",
+  "short_name": "ElbDetail",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#1e2229",
+  "theme_color": "#1e2229",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
