@@ -238,3 +238,17 @@ address{font-style:normal;font-size:1.05rem;margin:12px 0}
 .success{border-color:var(--ink)}
 .success h3{color:var(--ink)}
 .btn[disabled]{opacity:.6;cursor:progress}
+
+/* Kopfzeile schwarz */
+.site-header{background:#111;border-bottom:1px solid #2a2a2a;backdrop-filter:none}
+.site-header .brand{color:#fff}
+.site-header .brand-text small{color:#c9c9c9}
+.site-header .brand-mark{border-color:#fff;color:#fff}
+.nav-toggle span{background:#fff}
+.nav{background:#111;border-bottom:1px solid #2a2a2a}
+.nav a{color:#fff;border-bottom-color:#2a2a2a}
+.nav a.btn{background:var(--red);border:0;color:#fff}
+.site-header :focus-visible{outline-color:#fff;box-shadow:0 0 0 6px #111}
+.site-header .btn-ghost{color:#fff;border-color:#fff}
+.site-header .btn-ghost:hover{background:#fff;color:#111}
+@media (min-width:900px){.nav{border:0;background:none}.nav a{border:0;color:#d6d6d6}.nav a:hover{color:#fff}.nav a.btn{color:#fff}}
