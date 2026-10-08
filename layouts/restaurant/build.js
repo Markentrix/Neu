@@ -58,10 +58,13 @@ const subpage=(o)=>({noindex:false,...o,body:`<div class="w"><div class="phero">
 const pages=[];
 // ---------- Startseite
 pages.push({file:'index.html',home:true,title:C.seo.title,desc:C.seo.description,h1:C.name,body:`
-<section class="w hero"><div><p class="status" id="status">${C.hours.text}</p>
-<h1>${C.headline.map((l,i)=>`<span${i===C.highlight?' class="hl"':''}>${l}</span>`).join('')}</h1>
-<p class="lead">${C.lead}</p></div>
-<div class="photo">${img(C.hero.img,C.hero.alt,true)}<div class="sticker" aria-hidden="true"><div><b>${C.hero.stickerPrice}</b>${C.hero.stickerName}</div></div></div></section>
+<section class="hero2" aria-label="Willkommen"><div class="h-photos">${img(C.hero.img,C.hero.alt,true)}${img(C.hero.img2,C.hero.alt2,true)}</div>
+<div class="h-wrap" aria-hidden="true"><div class="h-panel"></div></div>
+<div class="w h-body"><p class="status" id="status">${C.hours.text}</p>
+<h1>${C.headline}</h1>
+<p class="lead">${C.lead}</p>
+<div class="cta"><a class="btn" href="#reservieren">Tisch reservieren</a><a class="btn alt" href="#karte">Speisekarte</a></div></div>
+<div class="sticker" aria-hidden="true"><div><b>${C.hero.stickerPrice}</b>${C.hero.stickerName}</div></div></section>
 <section class="w resw" id="reservieren" aria-label="Tisch reservieren"><form id="rf" name="reservierung" method="POST" action="/danke.html" data-netlify="true" netlify-honeypot="bot-field">
 <input type="hidden" name="form-name" value="reservierung"><p class="hp" aria-hidden="true"><label>Nicht ausfüllen<input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
 <div class="rrow"><strong class="rt">Tisch reservieren</strong>
