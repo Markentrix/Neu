@@ -217,3 +217,8 @@ a,button,select,summary,label{touch-action:manipulation}
  .resw{margin-top:10px}
 }
 @media(max-width:360px){label.f{font-size:.64rem;letter-spacing:.02em}.rt{font-size:1.05rem}}
+
+@media(max-width:600px){
+ .cimg img{aspect-ratio:16/10}
+ .cat{padding-block:26px 22px;border-bottom:2px solid var(--ink)}
+}
