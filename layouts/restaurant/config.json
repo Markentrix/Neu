@@ -33,7 +33,7 @@
       "id": "pizza",
       "title": "Pizza",
       "img": "pizza",
-      "alt": "Illustration: Pizza Margherita",
+      "alt": "Pizza Margherita mit Mozzarella und Basilikum",
       "note": "Aus dem Ofen, rund oder vom Blech.",
       "items": [
         [
@@ -78,7 +78,7 @@
       "id": "pasta",
       "title": "Pasta",
       "img": "pasta",
-      "alt": "Illustration: Teller Spaghetti",
+      "alt": "Spaghetti Carbonara mit Pancetta und Pecorino",
       "note": "Klassisch und überbacken.",
       "items": [
         [
@@ -107,7 +107,7 @@
       "id": "flamm",
       "title": "Flammkuchen",
       "img": "flammkuchen",
-      "alt": "Illustration: Flammkuchen auf Holzbrett",
+      "alt": "Flammkuchen mit Crème fraîche, Zwiebeln und Speck",
       "note": "Dünn und knusprig.",
       "items": [
         [
@@ -126,7 +126,7 @@
       "id": "salat",
       "title": "Salate",
       "img": "salat",
-      "alt": "Illustration: gemischter Salat",
+      "alt": "Gemischter Salat mit Tomaten, Gurken, Oliven und Mozzarella",
       "note": "Frisch und knackig.",
       "items": [
         [
@@ -150,7 +150,7 @@
       "id": "antipasti",
       "title": "Antipasti",
       "img": "antipasti",
-      "alt": "Illustration: Antipasti-Brett mit Bruschetta, Oliven und Salami",
+      "alt": "Antipasti-Platte mit Bruschetta, Salami, Käse und Oliven",
       "note": "Zum Teilen und Anfangen.",
       "items": [
         [
@@ -183,7 +183,7 @@
   ],
   "hero": {
     "img": "pizza",
-    "alt": "Illustration: Pizza Margherita",
+    "alt": "Pizza Margherita mit Mozzarella und Basilikum",
     "stickerName": "Margherita",
     "stickerPrice": "5,50 €"
   }

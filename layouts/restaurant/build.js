@@ -8,7 +8,8 @@ const mins=s=>{const[a,b]=s.split(':');return +a*60+ +b};
 const cfg={name:C.name,phone:C.phone,wa:C.whatsapp,maxPersons:C.maxPersons,closedDow:['So','Mo','Di','Mi','Do','Fr','Sa'].indexOf(C.hours.closedDay),
  from:mins(C.slots.from),to:mins(C.slots.to),step:C.slots.stepMin,open:mins(C.hours.open),close:mins(C.hours.close),openLabel:C.hours.open.replace(':00',''),closeLabel:C.hours.close.replace(':00','')+' Uhr'};
 cfg.openLabel=C.hours.open.replace(':00','')+' Uhr';
-const img=(n,alt,eager)=>`<img src="assets/img/${n}.svg" width="600" height="400" alt="${alt}" loading="${eager?'eager':'lazy'}" decoding="async"${eager?' fetchpriority="high"':''}>`;
+const ext=n=>fs.existsSync(path.join(here,'../../site/assets/img/'+n+'.webp'))?'webp':'svg';
+const img=(n,alt,eager)=>`<img src="assets/img/${n}.${ext(n)}" width="${ext(n)==='webp'?960:600}" height="${ext(n)==='webp'?640:400}" alt="${alt}" loading="${eager?'eager':'lazy'}" decoding="async"${eager?' fetchpriority="high"':''}>`;
 const tag=t=>t?`<span class="tag">${t}</span>`:'';
 const item=([n,d,p,t])=>`<div class="it"><h3>${n}${tag(t)}</h3><span class="pr">${p}</span>${d?`<p>${d}</p>`:''}</div>`;
 const place=`${C.street}, ${C.zip} ${C.city}`;
