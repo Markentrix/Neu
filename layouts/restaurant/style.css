@@ -148,3 +148,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 }
 @media(max-width:360px){.cimg h2{font-size:1.7rem}.hero h1{font-size:2rem}.nav2 a{padding-inline:13px}}
+
+/* Mobil: Reiter, immer nur eine Kategorie */
+@media(max-width:600px){
+ .js-tabs .cat:not(.on){display:none}
+ .js-tabs .cat{padding-block:16px 6px;border-bottom:0}
+ .js-tabs .cimg h2{font-size:1.6rem;margin-bottom:8px}
+ .js-tabs .cimg img{aspect-ratio:5/2}
+ .js-tabs .foot-note{padding-top:6px}
+ .nav2 a{min-height:42px}
+}
