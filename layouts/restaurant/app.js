@@ -47,3 +47,12 @@
   var ph=document.querySelector('.photo'),tick=false;
   if(ph){addEventListener('scroll',function(){if(tick)return;tick=true;requestAnimationFrame(function(){var y=Math.min(scrollY,700);ph.style.setProperty('--py',(y*.05).toFixed(1)+'px');tick=false})},{passive:true})}
 })();
+
+(function(){
+  var nav=document.querySelector('.nav2');if(!nav||!('IntersectionObserver' in window))return;
+  var links={};nav.querySelectorAll('a').forEach(function(l){links[l.getAttribute('href').slice(1)]=l});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;
+    Object.keys(links).forEach(function(k){links[k].removeAttribute('aria-current')});
+    var l=links[e.target.id];if(l){l.setAttribute('aria-current','true');nav.scrollTo({left:l.offsetLeft-nav.clientWidth/2+l.offsetWidth/2,behavior:'smooth'})}})},{rootMargin:'-35% 0px -60% 0px'});
+  document.querySelectorAll('.cat').forEach(function(c){io.observe(c)});
+})();
