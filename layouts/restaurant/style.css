@@ -67,6 +67,7 @@ select,input.t{font:500 1rem var(--body);letter-spacing:0;text-transform:none;pa
 .info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:36px;padding-block:56px}.info>*{min-width:0}
 .info h3{font-size:1.7rem;margin-bottom:10px}.info address{font-style:normal}.hrs{border-collapse:collapse}.hrs th{text-align:left;font-weight:400;color:var(--mute);padding:3px 22px 3px 0}.hrs td{font-variant-numeric:tabular-nums;font-weight:600}
 details{border-bottom:2px solid var(--line);padding:11px 0}summary{cursor:pointer;font-weight:600}details p{margin:8px 0 0;color:var(--mute)}
+footer nav{display:flex;gap:6px 16px;flex-wrap:wrap}
 footer{border-top:2px solid var(--ink);padding-block:26px;font-size:.9rem;color:var(--mute)}footer .w{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .dock{display:none}
 @media(max-width:860px){
@@ -176,3 +177,28 @@ select{-webkit-appearance:none;appearance:none;background:#fff url("data:image/s
  .nav2{padding:8px 6px;gap:3px}.nav2 a{padding:4px 6px;font-size:.66rem}
  #rf{padding:12px}
 }
+
+/* Mobil: Feinschliff */
+*{-webkit-tap-highlight-color:transparent}
+a,button,select,summary,label{touch-action:manipulation}
+.faqs summary,details summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.faqs summary::-webkit-details-marker,details summary::-webkit-details-marker{display:none}
+.faqs summary:after{content:"+";font:400 1.6rem/1 var(--display);flex:none;transition:transform .25s}
+.faqs details[open] summary:after{content:"–"}
+@media(max-width:600px){
+ /* Hero kompakt: Reservierung früh erreichbar */
+ .hero{gap:16px;padding-block:16px 24px}
+ .hero .status{margin-bottom:14px}
+ .hero h1{margin-bottom:10px}
+ .hero .lead{font-size:.98rem;margin-bottom:0}
+ .photo{max-width:none;margin:0 0 6px;padding-inline:6px}
+ .photo img{aspect-ratio:16/9;box-shadow:5px 5px 0 var(--ink)}
+ .photo .sticker{left:-2px;bottom:-14px}
+ .resw{margin-top:12px}
+ /* Fußzeile: zwei Spalten statt loser Zeilen */
+ footer .w{display:grid;gap:6px}
+ footer nav{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+ footer nav a{min-height:42px}
+}
+@media(max-width:600px){.nav2 a{min-width:44px;justify-content:center}}
+@media(max-width:360px){.nav2{padding:8px 4px;gap:2px}.nav2 a{padding:4px 5px}}

@@ -44,7 +44,7 @@ function shell(p){
 <a class="skip" href="#main">Zum Inhalt springen</a>
 <header class="top"><div class="tape"></div><div class="w bar"><a class="logo" href="${b||'./'}">${C.name}</a><nav aria-label="Hauptnavigation">${NAVL.map(([h,t])=>`<a href="${href(h)}">${t}</a>`).join('')}<a class="tel" href="tel:${TELH}">${TEL}</a><a class="btn sm" href="${b}#reservieren">Tisch reservieren</a></nav></div></header>
 <main id="main">${p.body}</main>
-<footer><div class="tape"></div><div class="w" style="padding-top:22px"><span>${C.name} · ${place}</span><nav aria-label="Fußzeile" style="display:flex;gap:16px;flex-wrap:wrap"><a href="${b}#karte">Speisekarte</a><a href="pizza-zum-mitnehmen.html">Zum Mitnehmen</a><a href="vegetarisch-vegan.html">Vegetarisch &amp; vegan</a><a href="italiener-celle-altstadt.html">Anfahrt</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav></div></footer>
+<footer><div class="tape"></div><div class="w" style="padding-top:22px"><span>${C.name} · ${place}</span><nav aria-label="Fußzeile"><a href="${b}#karte">Speisekarte</a><a href="pizza-zum-mitnehmen.html">Zum Mitnehmen</a><a href="vegetarisch-vegan.html">Vegetarisch &amp; vegan</a><a href="italiener-celle-altstadt.html">Anfahrt</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav></div></footer>
 <div class="dock"><a class="btn" href="${b}#reservieren">Reservieren</a><a class="btn alt" href="tel:${TELH}">Anrufen</a></div>
 ${home?`<script>window.RES_CFG=${JSON.stringify(cfg)};${js}</script>`:`<script>(function(){var h=document.querySelector('.top');function f(){document.documentElement.style.setProperty('--hh',h.offsetHeight+'px')}f();addEventListener('resize',f)})()</script>`}
 </body></html>`;
