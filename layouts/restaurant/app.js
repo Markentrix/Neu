@@ -16,7 +16,7 @@
   opt(fd,'','Wählen');
   for(var n=0,added=0;n<14&&added<10;n++){var iso=addDays(now.iso,n);if(dow(iso)===C.closedDow)continue;if(n===0&&now.min+30>C.to)continue;opt(fd,iso,n===0?'Heute':n===1?'Morgen':fmt(iso));added++}
   fd.addEventListener('change',times);times();
-  for(var p=1;p<=C.maxPersons;p++)opt(fp,p,p+(p===1?' Person':' Personen'));fp.value='2';
+  for(var p=1;p<=C.maxPersons;p++)opt(fp,p,String(p));fp.value='2';
   next.addEventListener('click',function(){
     if(!fd.value||!fz.value){msg.className='msg err';msg.textContent='Bitte Tag und Uhrzeit wählen.';(fd.value?fz:fd).focus();return}
     msg.className='msg';msg.textContent=fmt(fd.value)+' um '+fz.value+' Uhr für '+fp.value+(fp.value==='1'?' Person':' Personen');
