@@ -222,3 +222,6 @@ a,button,select,summary,label{touch-action:manipulation}
  .cimg img{aspect-ratio:16/10}
  .cat{padding-block:26px 22px;border-bottom:2px solid var(--ink)}
 }
+
+.legal h2{font-size:1.6rem;margin:28px 0 8px}.legal p{margin:0 0 12px}.legal{padding-bottom:64px;max-width:760px}
+.draftnote{background:var(--butter);border:2px solid var(--ink);border-radius:10px;padding:12px 16px;color:var(--ink)!important}

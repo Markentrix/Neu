@@ -7,3 +7,6 @@
 - [Pizza zum Mitnehmen](https://www.pizzeria-molise-celle.de/pizza-zum-mitnehmen.html): Handpizza am Straßenfenster, ab 4 €
 - [Vegetarisch und vegan](https://www.pizzeria-molise-celle.de/vegetarisch-vegan.html): fleischlose Gerichte
 - [Anfahrt und Öffnungszeiten](https://www.pizzeria-molise-celle.de/italiener-celle-altstadt.html): Lage, Route, Zeiten
+
+## Optional
+- [Vollständige Angaben mit Speisekarte als Text](https://www.pizzeria-molise-celle.de/llms-full.txt)
