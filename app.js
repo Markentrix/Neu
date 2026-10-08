@@ -82,7 +82,10 @@
     const W = 604800, H = 3600;
     const spans = [[5 * 86400 + 20 * H, 6 * 86400 + H], [6 * 86400 + 20 * H, 7 * 86400 + H]];
     const pad = n => String(n).padStart(2, '0');
+    const els = ['#cdD', '#cdH', '#cdM', '#cdS'].map(q => $(q)), lab = $('#cdLabel');
+    const put = (el, v) => { if (el.textContent !== v) el.textContent = v; };
     const tick = () => {
+      if (document.hidden) return;
       const { day, sec } = berlinNow();
       const now = day * 86400 + sec;
       let open = false, target = Infinity;
@@ -92,8 +95,8 @@
       }
       if (!open) for (const [s] of spans) if (s > now) target = Math.min(target, s - now);
       const d = Math.floor(target / 86400), h = Math.floor(target % 86400 / H), m = Math.floor(target % H / 60), s2 = target % 60;
-      $('#cdD').textContent = pad(d); $('#cdH').textContent = pad(h); $('#cdM').textContent = pad(m); $('#cdS').textContent = pad(s2);
-      $('#cdLabel').textContent = open ? T.cdOpen : T.cdNext;
+      [d, h, m, s2].forEach((v, i) => put(els[i], pad(v)));
+      put(lab, open ? T.cdOpen : T.cdNext);
       cd.classList.toggle('open', open);
     };
     tick(); setInterval(tick, 1000);
@@ -103,12 +106,13 @@
   const tw = $('#zeitreise');
   if (tw && !reduce) {
     const yearEl = $('#twYear'), fill = $('#twFill'), imgs = $$('.tw-imgs img', tw), lis = $$('.tw-eras li', tw);
-    let near = false, queued = false, lastYear = 0;
-    new IntersectionObserver(es => { near = es[0].isIntersecting; if (near) onScroll(); }, { rootMargin: '20% 0px' }).observe(tw);
+    let near = false, queued = false, lastYear = 0, top = 0, span = 1;
+    const measure = () => { top = tw.getBoundingClientRect().top + scrollY; span = Math.max(1, tw.offsetHeight - innerHeight); };
+    measure();
+    new IntersectionObserver(es => { near = es[0].isIntersecting; if (near) { measure(); onScroll(); } }, { rootMargin: '20% 0px' }).observe(tw);
     const paint = () => {
       queued = false;
-      const r = tw.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)));
+      const p = Math.min(1, Math.max(0, (scrollY - top) / span));
       const year = 1970 + Math.min(29, Math.floor(p * 30));
       fill.style.setProperty('--p', p.toFixed(3));
       if (year === lastYear) return;
@@ -120,8 +124,13 @@
     };
     function onScroll() { if (near && !queued) { queued = true; requestAnimationFrame(paint); } }
     addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('resize', onScroll);
+    addEventListener('resize', () => { measure(); onScroll(); });
+    addEventListener('load', measure);
   }
+
+  /* ---------- Dauer-Animationen nur im Sichtbereich ---------- */
+  const offIO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)), { rootMargin: '100px 0px' });
+  $$('.hero, .marquee, .timewarp').forEach(el => offIO.observe(el));
 
   /* ---------- Reveal + Zähler ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => {
@@ -172,6 +181,7 @@
   const ctx2d = cv.getContext('2d');
   let soundOn = false, partyOn = false, raf = 0, parts = [], beatT = 0, lastBeat = 0;
   const BPM = 118, STEP = 60 / BPM;
+  const LITE = matchMedia('(max-width: 860px)').matches; // schwächere Geräte: weniger Konfetti
 
   function resize() { cv.width = innerWidth; cv.height = innerHeight; }
   addEventListener('resize', () => partyOn && resize());
@@ -194,7 +204,7 @@
     const phase = ((now - beatT) / STEP) % 1;
     const pulse = partyOn ? Math.pow(1 - (phase < 0 ? phase + 1 : phase), 3) : 0;
     body.style.setProperty('--beat', pulse.toFixed(3));
-    if (partyOn && parts.length < 90 && Math.floor((now - beatT) / STEP / 8) !== lastBeat) { lastBeat = Math.floor((now - beatT) / STEP / 8); burst(40); }
+    if (partyOn && parts.length < (LITE ? 40 : 90) && Math.floor((now - beatT) / STEP / 8) !== lastBeat) { lastBeat = Math.floor((now - beatT) / STEP / 8); burst(LITE ? 20 : 40); }
     parts = parts.filter(p => p.y < cv.height + 20);
     for (const p of parts) {
       p.x += p.vx + Math.sin(p.y / 40); p.y += p.vy; p.r += p.vr;
@@ -212,7 +222,7 @@
     soundBtn.hidden = !on;
     if (on) {
       beatT = performance.now() / 1000;
-      resize(); burst(160); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+      resize(); burst(LITE ? 70 : 160); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
     } else {
       setSound(false);
     }
