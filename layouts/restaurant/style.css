@@ -36,8 +36,10 @@ a{color:inherit;text-underline-offset:3px}.w{max-width:1160px;margin-inline:auto
 .rt{font:400 1.45rem var(--display);text-transform:uppercase;letter-spacing:.02em;padding-bottom:6px;white-space:nowrap}
 label.f{display:grid;gap:3px;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;min-width:0}
 select,input.t{font:500 1rem var(--body);letter-spacing:0;text-transform:none;padding:9px 10px;border:2px solid var(--ink);border-radius:8px;background:#fff;color:var(--ink);width:100%;min-width:0;height:44px}
-.rmore{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:14px;align-items:end;padding-top:12px;border-top:2px dotted var(--line)}
-.rmore[hidden]{display:none}
+.rwrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.2,.8,.2,1)}.rwrap.open{grid-template-rows:1fr}
+.rwrap>.rmore{min-height:0;overflow:hidden;visibility:hidden;transition:visibility 0s .4s}.rwrap.open>.rmore{visibility:visible;transition-delay:0s}
+.rmore{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:14px;align-items:end;margin-top:12px;padding-top:12px;border-top:2px dotted var(--line)}
+
 .chk{grid-column:1/-1;display:flex;gap:10px;align-items:flex-start;font-size:.85rem;font-weight:400;text-transform:none;letter-spacing:0}.chk input{margin-top:3px}
 .wa{grid-column:1/-1;font-size:.9rem;font-weight:600}
 .hp{position:absolute;left:-9999px}.msg{margin:0;font-weight:600;font-size:.92rem}.msg:empty{display:none}.msg.ok{color:var(--green-t)}.msg.err{color:var(--red)}
@@ -86,3 +88,19 @@ footer{border-top:2px solid var(--ink);padding-block:26px;font-size:.9rem;color:
 .ctab{background:var(--butter);border-block:2px solid var(--ink)}.ctab .w{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-block:26px}.ctab strong{font:400 clamp(1.8rem,5vw,2.6rem) var(--display);text-transform:uppercase}
 .faqs details{border-bottom:2px solid var(--line);padding:12px 0}.faqs summary{cursor:pointer;font-weight:600}.faqs p{margin:8px 0 0;color:var(--mute)}
 @media(max-width:860px){.pgrid{grid-template-columns:1fr;gap:26px;padding-block:32px 48px}.linkrow{grid-template-columns:1fr}}
+
+/* Bewegung */
+.photo{transform:translate3d(0,var(--py,0px),0)}
+@keyframes land{from{opacity:.01;transform:rotate(-5deg) translateY(20px) scale(.96)}to{opacity:1;transform:rotate(2.5deg)}}
+@keyframes pop{0%{transform:scale(.2) rotate(-26deg);opacity:.01}65%{transform:scale(1.14) rotate(-4deg);opacity:1}100%{transform:scale(1) rotate(-8deg);opacity:1}}
+.photo img{animation:land .8s cubic-bezier(.2,.8,.2,1) both}
+.sticker{animation:pop .55s .6s cubic-bezier(.3,1.4,.5,1) both}
+.rrow .btn.gone{opacity:0;pointer-events:none;transition:opacity .2s}
+.okc{width:22px;height:22px;margin-right:8px;vertical-align:-5px;fill:none;stroke:var(--green-t);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.okc circle{stroke-dasharray:63;animation:draw .5s ease-out both}.okc path{stroke-dasharray:20;animation:draw2 .35s .35s ease-out both}
+@keyframes draw{from{stroke-dashoffset:63}to{stroke-dashoffset:0}}@keyframes draw2{from{stroke-dashoffset:20}to{stroke-dashoffset:0}}
+/* Karte läuft beim Scrollen ein (nur mit Skript, sonst alles sichtbar) */
+.cimg>*,.it{transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i,0)*70ms)}
+.js-rv .cat:not(.in) .cimg>*,.js-rv .cat:not(.in) .it{opacity:0;transform:translateY(18px)}
+.cimg>h2{--i:0}.cimg>img{--i:1}.cimg>p{--i:2}
+.it:nth-child(1){--i:2}.it:nth-child(2){--i:3}.it:nth-child(3){--i:4}.it:nth-child(4){--i:5}.it:nth-child(5){--i:6}.it:nth-child(6){--i:7}.it:nth-child(7){--i:8}

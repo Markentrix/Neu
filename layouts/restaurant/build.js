@@ -67,10 +67,10 @@ pages.push({file:'index.html',home:true,title:C.seo.title,desc:C.seo.description
 <div class="rrow"><strong class="rt">Tisch reservieren</strong>
 <label class="f">Tag<select name="datum" id="fd" required></select></label><label class="f">Uhrzeit<select name="zeit" id="fz" required></select></label><label class="f">Personen<select name="personen" id="fp" required></select></label>
 <button class="btn sm" type="button" id="next">Weiter</button></div>
-<div class="rmore" id="more" hidden><label class="f">Name<input class="t" type="text" name="name" autocomplete="name" required></label><label class="f">Telefon<input class="t" type="tel" name="telefon" autocomplete="tel" required></label>
+<div class="rwrap" id="rw"><div class="rmore" id="more"><label class="f">Name<input class="t" type="text" name="name" autocomplete="name" required></label><label class="f">Telefon<input class="t" type="tel" name="telefon" autocomplete="tel" required></label>
 <button class="btn sm" type="submit">Anfrage senden</button>
 <label class="chk"><input type="checkbox" name="datenschutz" required><span>Ich stimme der Verarbeitung meiner Angaben zur Reservierung zu (<a href="datenschutz.html">Datenschutz</a>).</span></label>
-<a class="wa" id="wa" href="https://wa.me/${C.whatsapp}" rel="noopener">Lieber per WhatsApp</a></div>
+<a class="wa" id="wa" href="https://wa.me/${C.whatsapp}" rel="noopener">Lieber per WhatsApp</a></div></div>
 <p class="msg" id="msg" role="status" aria-live="polite"></p></form></section>
 <section class="menuwrap" id="karte"><nav class="nav2" aria-label="Kategorien"><span class="nt">Speisekarte</span>${C.menu.map(m=>`<a href="#${m.id}">${m.title}</a>`).join('')}</nav>
 <div class="w">${C.menu.map(m=>`<section class="cat" id="${m.id}"><div class="cimg"><h2>${m.title}</h2>${img(m.img,m.alt)}<p>${m.note}</p></div><div class="list">${m.items.map(item).join('')}</div></section>`).join('')}<p class="foot-note">Preise nach Stand März 2024, Änderungen vorbehalten. Bei Allergien fragen Sie bitte das Team.</p></div></section>
