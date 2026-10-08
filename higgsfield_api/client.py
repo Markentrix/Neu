@@ -108,8 +108,14 @@ class HiggsfieldClient:
         missing = [r for r in spec.required if not merged.get(r)]
         if missing:
             raise ValueError(f"{spec.key}: Pflichtfelder fehlen: {', '.join(missing)}")
+        if spec.required_any and not any(merged.get(k) for k in spec.required_any):
+            raise ValueError(f"{spec.key}: eines dieser Felder ist Pflicht: {', '.join(spec.required_any)}")
         if spec.duration_options and merged.get("duration") not in spec.duration_options:
             raise ValueError(f"{spec.key}: duration muss eine von {spec.duration_options} sein")
+        if spec.duration_range:
+            lo, hi = spec.duration_range
+            if not lo <= int(merged.get("duration", lo)) <= hi:
+                raise ValueError(f"{spec.key}: duration muss zwischen {lo} und {hi} s liegen")
         return merged
 
     def submit(self, model: ModelSpec | str, webhook_url: Optional[str] = None,

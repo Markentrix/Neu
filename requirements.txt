@@ -1,1 +1,4 @@
 requests>=2.31
+# optional, für das Aussprache-Gate (python -m higgsfield_api transcribe):
+faster-whisper>=1.0
+numpy

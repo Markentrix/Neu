@@ -15,7 +15,7 @@ def estimate_cost(model: "ModelSpec | str", params: Dict[str, Any]) -> Dict[str,
     if spec.unit == "second":
         units = int(merged.get("duration", spec.defaults.get("duration", 0)))
     else:
-        units = int(merged.get("num_images", 1))
+        units = int(merged.get("num_images") or merged.get("batch_size") or 1)
     list_total = round(units * spec.list_price_usd, 4)
     return {
         "model": spec.key,

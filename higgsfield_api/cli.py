@@ -6,6 +6,10 @@ Beispiele:
   python -m higgsfield_api video hailuo-t2v "Produkt auf Holztisch, Kamerafahrt" --duration 6
   python -m higgsfield_api video kling-std-i2v "sanfte Bewegung" --image ./foto.jpg
   python -m higgsfield_api image soul "Portrait, weiches Tageslicht" --aspect 9:16
+  python -m higgsfield_api host                       # Host-Bild für UGC-Serie
+  python -m higgsfield_api clip output/host/<id>.png "Anfragen kommen. Und gehen wieder unter. ..." --duration 15
+  python -m higgsfield_api frames output/clip.mp4     # QA-Standbilder
+  python -m higgsfield_api transcribe output/clip.mp4 --script "..."   # Aussprache prüfen
   python -m higgsfield_api status <request_id>
   python -m higgsfield_api check
 """
@@ -17,6 +21,7 @@ import sys
 from .client import HiggsfieldClient, HiggsfieldError
 from .models import MODELS, get_model
 from .pricing import estimate_cost, format_estimate
+from . import ugc, post
 
 
 def _progress(st, _data):
@@ -83,6 +88,47 @@ def _run_generation(args, kind):
                       "urls": c.output_urls(result), "estimate": est}, indent=2, ensure_ascii=False))
 
 
+def cmd_host(args):
+    c = HiggsfieldClient()
+    if args.dry_run:
+        body = c.build_params("soul2", prompt=args.look or ugc.HOST_LOOK, batch_size=args.batch)
+        print(json.dumps({"body": body, "estimate": estimate_cost("soul2", body)}, indent=2, ensure_ascii=False))
+        return
+    meta = ugc.create_host(c, out_dir=args.out, look=args.look or ugc.HOST_LOOK,
+                           seed=args.seed, batch_size=args.batch)
+    print(json.dumps(meta, indent=2, ensure_ascii=False))
+
+
+def cmd_clip(args):
+    c = HiggsfieldClient()
+    host = args.host
+    if not host.startswith("http"):
+        print("Lade Host-Bild hoch ...", file=sys.stderr)
+        host = c.upload(host)
+    audio = args.audio
+    if audio and not audio.startswith("http"):
+        print("Lade Tonspur hoch ...", file=sys.stderr)
+        audio = c.upload(audio)
+    res = ugc.talking_clip(c, host, args.script, args.scene, duration=args.duration,
+                           model=args.model, audio_url=audio, out_dir=args.out,
+                           name=args.name, dry_run=args.dry_run, on_update=_progress)
+    print(json.dumps(res, indent=2, ensure_ascii=False))
+
+
+def cmd_frames(args):
+    frames = post.qa_frames(args.video, args.out, every=args.every)
+    print(json.dumps({"probe": post.probe(args.video), "frames": [str(f) for f in frames]}, indent=2))
+
+
+def cmd_transcribe(args):
+    segs = post.transcribe(args.video, language=args.language)
+    for s in segs:
+        print(f"[{s['start']:.1f}-{s['end']:.1f}] {s['text']}")
+    if args.script:
+        print("\nSkript:   ", " ".join(args.script.split()))
+        print("Gehört:   ", " ".join(s["text"] for s in segs))
+
+
 def cmd_status(args):
     c = HiggsfieldClient()
     data = c.status(args.request_id)
@@ -123,6 +169,30 @@ def main(argv=None):
 
     pi = sub.add_parser("image", help="Bild erzeugen"); gen_args(pi)
     pi.set_defaults(fn=lambda a: _run_generation(a, "image"))
+
+    ph = sub.add_parser("host", help="Host-Bild (SOUL V2, 9:16) erzeugen")
+    ph.add_argument("--look", help="eigener Look-Prompt, sonst Markentrix-Standard")
+    ph.add_argument("--seed", type=int); ph.add_argument("--batch", type=int, default=1, choices=[1, 4])
+    ph.add_argument("--out", default="output/host"); ph.add_argument("--dry-run", action="store_true")
+    ph.set_defaults(fn=cmd_host)
+
+    pc = sub.add_parser("clip", help="Sprecher-Clip mit deutschem Text rendern")
+    pc.add_argument("host", help="Host-Bild: lokale Datei oder URL")
+    pc.add_argument("script", help="gesprochener Text, wörtlich")
+    pc.add_argument("--scene", default="Helles Büro mit Fensterlicht, ruhiger Hintergrund")
+    pc.add_argument("--duration", type=int, default=15)
+    pc.add_argument("--model", default="seedance2-ref", help="seedance2-ref, seedance25-ref, kling3-std-i2v, kling3-pro-i2v")
+    pc.add_argument("--audio", help="eigene Tonspur (wav/mp4) als Datei oder URL, nur Seedance")
+    pc.add_argument("--out", default="output"); pc.add_argument("--name"); pc.add_argument("--dry-run", action="store_true")
+    pc.set_defaults(fn=cmd_clip)
+
+    pf = sub.add_parser("frames", help="QA-Standbilder aus einem Video ziehen")
+    pf.add_argument("video"); pf.add_argument("--out", default="output/qa"); pf.add_argument("--every", type=float, default=1.0)
+    pf.set_defaults(fn=cmd_frames)
+
+    pt = sub.add_parser("transcribe", help="Tonspur transkribieren (Aussprache-Gate)")
+    pt.add_argument("video"); pt.add_argument("--language", default="de"); pt.add_argument("--script", help="Soll-Text zum Vergleich")
+    pt.set_defaults(fn=cmd_transcribe)
 
     ps = sub.add_parser("status", help="Status abfragen, optional herunterladen")
     ps.add_argument("request_id"); ps.add_argument("--download", action="store_true"); ps.add_argument("--out", default="output")
