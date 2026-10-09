@@ -20,10 +20,6 @@
     party: 'Party-Modus', partyOff: 'Party aus', map: 'Karte: Bar Zeitreise, Hehlentorstraße 16, Celle',
     cdNext: 'Nächste Zeitreise in', cdOpen: 'Jetzt geöffnet – schließt in'
   };
-  const store = {
-    get: k => { try { return localStorage.getItem(k); } catch { return null; } },
-    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} }
-  };
 
   /* ---------- Jahrzehnt-Umschalter ---------- */
   function setEra(e) {
@@ -31,11 +27,9 @@
     $$('[data-era-panel]').forEach(p => p.hidden = p.dataset.eraPanel !== e);
     $$('.tabs [data-era]').forEach(b => b.setAttribute('aria-pressed', b.dataset.era === e));
     $$('.decades [data-era]').forEach(b => b.classList.toggle('on', b.dataset.era === e));
-    store.set('zr-era', e);
   }
   $$('[data-era]').forEach(b => b.matches('button') && b.addEventListener('click', () => setEra(b.dataset.era)));
-  const saved = store.get('zr-era');
-  setEra(['70', '80', '90'].includes(saved) ? saved : '80');
+  setEra('80');
 
   /* ---------- Öffnungsstatus (Fr/Sa 20–01 Uhr, Europe/Berlin) ---------- */
   const OPEN = { 5: 1, 6: 1 }; // Tage mit Öffnung; Ende am Folgetag 01:00
