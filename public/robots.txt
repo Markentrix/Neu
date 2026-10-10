@@ -1,0 +1,5 @@
+# robots.txt für https://psschneider.de
+User-agent: *
+Allow: /
+
+Sitemap: https://psschneider.de/sitemap.xml
