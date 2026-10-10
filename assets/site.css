@@ -1,8 +1,8 @@
 /* ==========================================================================
    PS Schneider – Sachverständiger für Fahrzeugtechnik, Celle
    Layout: „Schadenakte“ – linksbündiges Raster, Abschnitte wie Aktenblätter
-   mit Feldbeschriftungen in Mono. Ein einziger Akzent: das Amber des
-   Warndreiecks. Alles andere bleibt ruhig in Graphit und kühlem Papierweiß.
+   mit Feldbeschriftungen in Mono. Farben nach dem Logo: Schwarz und
+   Signalrot. Alles andere bleibt ruhig in Graphit und kühlem Papierweiß.
    ========================================================================== */
 
 @font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/Barlow-400.woff2') format('woff2');}
@@ -16,18 +16,18 @@
   --bg: #F3F4F6;
   --surface: #FFFFFF;
   --surface-2: #E9ECF0;
-  --fg: #171B21;
-  --muted: #5A6370;
+  --fg: #141518;
+  --muted: #5B6168;
   --line: #D5DAE1;
-  --accent: #C98A12;
-  --accent-strong: #A86F05;
-  --accent-soft: #FBF1DA;
-  --on-accent: #171B21;
-  --deep: #1B222C;
+  --accent: #D71A21;
+  --accent-strong: #B5141A;
+  --accent-soft: #FBE7E8;
+  --on-accent: #FFFFFF;
+  --deep: #141518;
   --deep-fg: #EEF1F5;
   --deep-muted: #A7B0BC;
-  --deep-line: #303A47;
-  --danger: #B3261E;
+  --deep-line: #2E3034;
+  --danger: #B5141A;
   --shadow: 0 1px 2px rgba(23, 27, 33, .06), 0 12px 32px -16px rgba(23, 27, 33, .25);
 
   --font-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
@@ -48,15 +48,15 @@
     --fg: #EDF0F4;
     --muted: #A3ACB8;
     --line: #2E3641;
-    --accent: #E3A52C;
-    --accent-strong: #F2BB4A;
-    --accent-soft: #2B2410;
-    --on-accent: #14181D;
-    --deep: #0C0F13;
+    --accent: #E8373E;
+    --accent-strong: #F26A6F;
+    --accent-soft: #3A1A1C;
+    --on-accent: #FFFFFF;
+    --deep: #0B0C0E;
     --deep-fg: #EDF0F4;
     --deep-muted: #9AA3AF;
     --deep-line: #262D37;
-    --danger: #F28B82;
+    --danger: #F26A6F;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -16px rgba(0, 0, 0, .7);
     color-scheme: dark;
   }
@@ -68,15 +68,15 @@
   --fg: #EDF0F4;
   --muted: #A3ACB8;
   --line: #2E3641;
-  --accent: #E3A52C;
-  --accent-strong: #F2BB4A;
-  --accent-soft: #2B2410;
-  --on-accent: #14181D;
-  --deep: #0C0F13;
+  --accent: #E8373E;
+  --accent-strong: #F26A6F;
+  --accent-soft: #3A1A1C;
+  --on-accent: #FFFFFF;
+  --deep: #0B0C0E;
   --deep-fg: #EDF0F4;
   --deep-muted: #9AA3AF;
   --deep-line: #262D37;
-  --danger: #F28B82;
+  --danger: #F26A6F;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -16px rgba(0, 0, 0, .7);
   color-scheme: dark;
 }
@@ -156,15 +156,17 @@ button { font: inherit; }
   border-bottom: 1px solid var(--line);
 }
 .site-header .wrap { display: flex; align-items: center; gap: 24px; min-height: 72px; }
-.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex: none; }
-.brand-mark {
-  width: 44px; height: 44px; border-radius: 5px; background: var(--deep); color: var(--deep-fg);
-  display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 22px;
-  letter-spacing: .02em; border-bottom: 3px solid var(--accent);
+.brand { display: flex; align-items: center; text-decoration: none; flex: none; }
+.logo { display: block; height: 52px; width: auto; }
+.logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-light { display: none; }
+  :root:not([data-theme="light"]) .logo-dark { display: block; }
 }
-.brand-text { display: grid; line-height: 1.1; }
-.brand-name { font-family: var(--font-display); font-weight: 700; font-size: 21px; letter-spacing: .01em; }
-.brand-sub { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+:root[data-theme="dark"] .logo-light { display: none; }
+:root[data-theme="dark"] .logo-dark { display: block; }
+.deep .logo-light { display: none; }
+.deep .logo-dark { display: block; }
 .primary-nav { margin-left: auto; }
 .primary-nav ul { list-style: none; display: flex; gap: 4px; }
 .primary-nav a {
@@ -184,9 +186,10 @@ button { font: inherit; }
 
 @media (max-width: 1100px) {
   .primary-nav a { font-size: 14.5px; padding-inline: 8px; }
-  .brand-sub { display: none; }
+  .logo { height: 44px; }
 }
 @media (max-width: 820px) {
+  .logo { height: 40px; }
   .nav-toggle { display: grid; }
   .header-cta { display: none; }
   .primary-nav {
@@ -203,7 +206,7 @@ button { font: inherit; }
 .hero { padding-block: clamp(40px, 7vw, 96px) clamp(40px, 6vw, 72px); }
 .hero .wrap { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
 .hero-copy { display: grid; gap: 22px; min-width: 0; }
-.hero-copy h1 em { font-style: normal; color: var(--accent-strong); }
+.hero-copy h1 em { font-style: normal; color: var(--accent); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .hero-note { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; color: var(--muted); max-width: 56ch; }
 .hero-note svg { width: 20px; height: 20px; flex: none; color: var(--accent-strong); margin-top: 2px; }
@@ -408,6 +411,7 @@ button { font: inherit; }
 .site-footer .wrap { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 32px; }
 .site-footer .col { display: grid; gap: 8px; align-content: start; min-width: 0; }
 .site-footer .col strong { color: var(--fg); font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+.site-footer .logo { height: 44px; margin-bottom: 6px; }
 .site-footer a { text-decoration: none; }
 .site-footer a:hover { color: var(--accent-strong); text-decoration: underline; }
 .site-footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 18px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13.5px; }

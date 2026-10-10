@@ -13,6 +13,7 @@ Neue Website für Patric Schneider, Sachverständiger für Fahrzeugtechnik in Ce
 | `assets/site.css` | Design-Tokens, Layout, Light/Dark Mode |
 | `assets/fonts/` | Selbst gehostete Schriften (Barlow, Barlow Condensed, IBM Plex Mono), keine Google-Server |
 | `assets/portrait.jpg` | Porträtfoto |
+| `assets/logo.png`, `assets/logo-dark.png` | Logo mit transparentem Hintergrund, helle Variante für dunkle Flächen |
 
 ## Betrieb
 
