@@ -77,6 +77,42 @@ def abs_url(slug):
     return DOMAIN + "/" + (slug + "/" if slug else "")
 
 
+# Weiche Trennstellen für lange Wörter in Überschriften, damit sie auf schmalen Handys umbrechen.
+SHY = {
+    "Wiederbeschaffungswert": "Wieder\u00adbeschaffungs\u00adwert",
+    "Wiederbeschaffungsaufwand": "Wieder\u00adbeschaffungs\u00adaufwand",
+    "Beweissicherungsgutachten": "Beweis\u00adsicherungs\u00adgutachten",
+    "Haftpflichtschaden": "Haft\u00adpflicht\u00adschaden",
+    "Haftpflichtversicherung": "Haft\u00adpflicht\u00adversicherung",
+    "Sachverständigenorganisation": "Sach\u00adverständigen\u00adorganisation",
+    "Restwertermittlung": "Rest\u00adwert\u00adermittlung",
+    "Nutzungsausfall": "Nutzungs\u00adausfall",
+    "Leasingrücknahme": "Leasing\u00adrück\u00adnahme",
+    "Unfallanalytisches": "Unfall\u00adanalytisches",
+    "Kraftfahrzeugtechniker": "Kraft\u00adfahrzeug\u00adtechniker",
+    "Kraftfahrzeugwesen": "Kraft\u00adfahrzeug\u00adwesen",
+    "Wertminderung": "Wert\u00adminderung",
+    "Schadenregulierung": "Schaden\u00adregulierung",
+    "Schadensabwicklung": "Schadens\u00adabwicklung",
+    "Fahrzeugtechnik": "Fahrzeug\u00adtechnik",
+    "Oldtimer-Wertgutachten": "Oldtimer-Wert\u00adgutachten",
+    "Gutachterkosten": "Gutachter\u00adkosten",
+    "Unfallgeschädigte": "Unfall\u00adgeschädigte",
+    "Rechtsstreitigkeiten": "Rechtsstreitig\u00adkeiten",
+}
+_SHY_RE = re.compile("|".join(sorted(map(re.escape, SHY), key=len, reverse=True)))
+_HEAD_RE = re.compile(r"(<(h[123]|strong)\b[^>]*>)(.*?)(</\2>)", re.S)
+
+
+def soften(markup):
+    """Fügt in Überschriften unsichtbare Trennstellen ein, nur im Text, nie in Tags oder Adressen."""
+    def fix(m):
+        parts = re.split(r"(<[^>]+>)", m.group(3))
+        parts = [x if x.startswith("<") else _SHY_RE.sub(lambda w: SHY[w.group(0)], x) for x in parts]
+        return m.group(1) + "".join(parts) + m.group(4)
+    return _HEAD_RE.sub(fix, markup)
+
+
 LINK_RE = re.compile(r"\[\[([^|\]]+)\|([^\]]+)\]\]")
 
 
@@ -297,7 +333,7 @@ def page_html(*, slug, d, title, desc, body, graph=None, noindex=False, canonica
 <meta name="twitter:title" content="{esc(og_title or title)}">
 <meta name="twitter:description" content="{esc(desc)}">
 <meta name="twitter:image" content="{og}">'''
-    return f'''<!DOCTYPE html>
+    return soften(f'''<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
@@ -327,7 +363,7 @@ def page_html(*, slug, d, title, desc, body, graph=None, noindex=False, canonica
 <script src="{asset("site.js", d)}" defer></script>
 </body>
 </html>
-'''
+''')
 
 
 # ---------------------------------------------------------------- Bausteine
@@ -464,17 +500,17 @@ def contact_section(d, h2="Fragen Sie unverbindlich an", wrap_class="section con
       <div class="row">
         <div class="field">
           <label for="f-name">Name <span class="req" aria-hidden="true">*</span></label>
-          <input type="text" id="f-name" name="name" autocomplete="name" required>
+          <input type="text" id="f-name" name="name" autocomplete="name" autocapitalize="words" enterkeyhint="next" required>
         </div>
         <div class="field">
           <label for="f-phone">Telefon</label>
-          <input type="tel" id="f-phone" name="phone" autocomplete="tel">
+          <input type="tel" id="f-phone" name="phone" autocomplete="tel" inputmode="tel" enterkeyhint="next">
         </div>
       </div>
       <div class="row">
         <div class="field">
           <label for="f-email">E-Mail <span class="req" aria-hidden="true">*</span></label>
-          <input type="email" id="f-email" name="email" autocomplete="email" required>
+          <input type="email" id="f-email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" enterkeyhint="next" required>
         </div>
         <div class="field">
           <label for="f-subject">Anliegen <span class="req" aria-hidden="true">*</span></label>
