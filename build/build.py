@@ -528,6 +528,9 @@ def page_html(*, slug, d, title, desc, body, key=None, graph=None, noindex=False
                   f'<span class="draft-long">· {T("Nur zur Ansicht, keine Weitergabe oder Veröffentlichung", "For viewing only, no distribution or publication")}</span></div>\n'
                   '<div class="draft-wm" aria-hidden="true"></div>\n')) if DRAFT else ""
     draft_js = f'\n<script src="{asset("draft.js", d)}" defer></script>' if DRAFT else ""
+    draft_end = (f'<div class="draft-end" role="note"><strong>© {TODAY.year} {OWNER}. {T("Alle Rechte vorbehalten.", "All rights reserved.")}</strong>'
+                 f'{T("Entwurf zur Ansicht. Nutzung, Vervielfältigung, Bearbeitung oder Weitergabe nur mit schriftlicher Zustimmung von " + OWNER + ".", "Draft for viewing. Use, copying, editing or distribution only with the written consent of " + OWNER + ".")}</div>\n'
+                 f'<div class="draft-badge" aria-hidden="true"><b>{T("ENTWURF", "DRAFT")}</b>© {TODAY.year} {OWNER}</div>\n') if DRAFT else ""
     form_js = f'\n<script src="{asset("form.js", d)}" defer></script>' if 'id="contact-form"' in body else ""
     og = DOMAIN + "/assets/og-image.jpg"
     ld_block = ld(graph) if graph else ""
@@ -579,7 +582,7 @@ def page_html(*, slug, d, title, desc, body, key=None, graph=None, noindex=False
 <main id="main">
 {body}
 </main>
-{footer(d)}
+{draft_end}{footer(d)}
 {action_bar(d)}
 <script src="{asset("site.js", d)}" defer></script>{form_js}{draft_js}
 </body>
