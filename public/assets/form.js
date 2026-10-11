@@ -22,7 +22,7 @@
     photo: 'Photo ', countOf: ' of ', photosSelected: ' photos selected', none: 'No photos selected yet',
     badType: ' is not a supported format. Please choose JPG, PNG or WebP.', tooBig: ' is too large.',
     unreadable: ' could not be read. Please choose a JPG or PNG.', limit: 'A maximum of ' , limitEnd: ' photos is possible.',
-    name: 'Please enter your name.', email: 'Please enter a valid email address.', subject: 'Please choose your topic.',
+    phone: 'We need your phone number to call you back.', name: 'Please enter your name.', email: 'Please enter a valid email address.', subject: 'Please choose your topic.',
     message: 'Please briefly say what it is about.', consent: 'Please agree to the privacy policy.',
     failed: 'The enquiry could not be sent.', conn: 'The connection failed.', mb: ' MB', dec: '.', open: '\u201c', close: '\u201d'
   } : {
@@ -31,7 +31,7 @@
     photo: 'Foto ', countOf: ' von ', photosSelected: ' Fotos ausgewählt', none: 'Noch keine Fotos ausgewählt',
     badType: ' hat kein unterstütztes Format. Bitte JPG, PNG oder WebP wählen.', tooBig: ' ist zu groß.',
     unreadable: ' konnte nicht gelesen werden. Bitte wählen Sie ein JPG oder PNG.', limit: 'Es sind höchstens ', limitEnd: ' Fotos möglich.',
-    name: 'Bitte geben Sie Ihren Namen an.', email: 'Bitte geben Sie eine gültige E-Mail-Adresse an.', subject: 'Bitte wählen Sie Ihr Anliegen.',
+    phone: 'Für einen Rückruf brauchen wir Ihre Telefonnummer.', name: 'Bitte geben Sie Ihren Namen an.', email: 'Bitte geben Sie eine gültige E-Mail-Adresse an.', subject: 'Bitte wählen Sie Ihr Anliegen.',
     message: 'Bitte schreiben Sie kurz, worum es geht.', consent: 'Bitte stimmen Sie der Datenschutzerklärung zu.',
     failed: 'Die Anfrage konnte nicht gesendet werden.', conn: 'Die Verbindung hat nicht geklappt.', mb: ' MB', dec: ',', open: '\u201e', close: '\u201c'
   };
@@ -48,7 +48,7 @@
   var busy = false;
 
   var FIELDS = {
-    name: 'f-name', email: 'f-email', subject: 'f-subject', message: 'f-message', consent: 'f-consent'
+    name: 'f-name', phone: 'f-phone', email: 'f-email', subject: 'f-subject', message: 'f-message', consent: 'f-consent'
   };
 
   /* ---------------------------------------------------------------- Hilfen */
@@ -225,9 +225,15 @@
 
   /* ---------------------------------------------------------------- Prüfen und senden */
 
+  function pref() {
+    var r = form.querySelector('input[name="pref"]:checked');
+    return r ? r.value : 'email';
+  }
+
   function validate() {
     var errs = {};
     if (!$('f-name').value.trim()) errs.name = M.name;
+    if (pref() === 'callback' && $('f-phone').value.replace(/\D/g, '').length < 6) errs.phone = M.phone;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('f-email').value.trim())) errs.email = M.email;
     if (!$('f-subject').value) errs.subject = M.subject;
     if ($('f-message').value.trim().length < 5) errs.message = M.message;
@@ -237,7 +243,7 @@
 
   function showErrors(errs) {
     var first = null;
-    ['name', 'email', 'subject', 'message', 'photos', 'consent'].forEach(function (f) {
+    ['name', 'phone', 'email', 'subject', 'message', 'photos', 'consent'].forEach(function (f) {
       if (errs[f]) {
         setError(f, errs[f]);
         if (!first) first = f;
@@ -249,13 +255,16 @@
     }
   }
 
-  function success(ref) {
+  function success(ref, confirmed) {
+    var callback = pref() === 'callback';
     photos.forEach(function (p) { URL.revokeObjectURL(p.url); });
     photos = [];
     renderPhotos();
     form.reset();
     form.hidden = true;
     $('success-ref').textContent = ref;
+    $('success-callback').hidden = !callback;
+    $('success-confirmed').hidden = !confirmed;
     var box = $('form-success');
     box.hidden = false;
     box.focus();
@@ -272,7 +281,7 @@
     setBusy(true);
     var run;
     if (DEMO) {
-      run = sleep(800).then(function () { success('DEMO-0000'); });
+      run = sleep(800).then(function () { success('DEMO-0000', false); });
     } else {
       run = fetchToken().then(function () {
         var wait = MIN_TOKEN_AGE_MS - (Date.now() - tokenAt);
@@ -284,6 +293,9 @@
         fd.append('phone', $('f-phone').value.trim());
         fd.append('subject', $('f-subject').value);
         fd.append('message', $('f-message').value.trim());
+        fd.append('plate', $('f-plate').value.trim());
+        fd.append('insurer', $('f-insurer').value.trim());
+        fd.append('pref', pref());
         fd.append('consent', '1');
         fd.append('lang', LANG);
         fd.append('token', token);
@@ -298,7 +310,7 @@
           });
       }).then(function (res) {
         var j = res.json || {};
-        if (res.status === 200 && j.ok) { success(j.ref || ''); return; }
+        if (res.status === 200 && j.ok) { success(j.ref || '', !!j.confirmed); return; }
         if (j.errors && Object.keys(j.errors).some(function (k) { return k !== 'general'; })) {
           showErrors(j.errors);
           return;

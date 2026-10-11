@@ -69,9 +69,19 @@ RedirectMatch 301 ^/kontakt/datenschutz/index\.php/?$ /datenschutz/
   ExpiresByType font/woff2 "access plus 1 year"
   ExpiresByType image/png "access plus 1 month"
   ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/avif "access plus 1 month"
   ExpiresByType image/svg+xml "access plus 1 month"
   ExpiresByType image/x-icon "access plus 1 month"
   ExpiresByType text/css "access plus 1 week"
   ExpiresByType application/javascript "access plus 1 week"
   ExpiresByType text/html "access plus 5 minutes"
+</IfModule>
+
+# Dateien mit ?v=Prüfsumme in der Adresse ändern sich nie unter derselben Adresse: ein Jahr, ohne Nachfrage
+<IfModule mod_setenvif.c>
+  SetEnvIfExpr "%{QUERY_STRING} =~ /^v=[0-9a-f]{8}$/" versioned
+</IfModule>
+<IfModule mod_headers.c>
+  Header onsuccess set Cache-Control "public, max-age=31536000, immutable" env=versioned
 </IfModule>

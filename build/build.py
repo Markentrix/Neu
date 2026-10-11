@@ -15,6 +15,7 @@ content.py (Deutsch) und content_en.py (Englisch).
 import argparse
 import copy
 import datetime
+import hashlib
 import html
 import json
 import math
@@ -99,8 +100,17 @@ def u(slug, depth):
     return "/" + (slug + "/" if slug else "")
 
 
+_HASHES = {}
+
+
 def asset(name, depth):
-    return ("../" * depth if PREVIEW else "/") + "assets/" + name
+    """Adresse einer Datei in assets/. Mit ?v=Prüfsumme, damit Änderungen sofort ankommen und lange gecacht werden darf."""
+    if name not in _HASHES:
+        f = PUBLIC / "assets" / name
+        # Schriften werden auch aus site.css geladen, dort ohne Prüfsumme: gleiche Adresse, sonst lädt der Browser sie doppelt
+        _HASHES[name] = hashlib.sha1(f.read_bytes()).hexdigest()[:8] if f.is_file() and not name.startswith("fonts/") else ""
+    q = f"?v={_HASHES[name]}" if _HASHES[name] else ""
+    return ("../" * depth if PREVIEW else "/") + "assets/" + name + q
 
 
 def rootfile(name, depth):
@@ -389,10 +399,32 @@ def nav_items():
 
 
 def logo_imgs(d):
+    """Logo als <picture>: im dunklen Modus die helle Schrift, moderne Formate zuerst, PNG als Ersatz."""
     alt = T("PS Schneider – Sachverständiger für Fahrzeugtechnik", "PS Schneider – vehicle engineering expert")
-    return (f'<img class="logo logo-light" src="{asset("logo.png", d)}" '
-            f'alt="{alt}" width="546" height="152">'
-            f'<img class="logo logo-dark" src="{asset("logo-dark.png", d)}" alt="" width="546" height="152">')
+
+    def srcset(base):
+        return ", ".join(f'{asset(f"{base}-{w}.webp", d)} {i}x' for i, w in enumerate((187, 374, 546), 1))
+    return (f'<picture>'
+            f'<source media="(prefers-color-scheme: dark)" type="image/webp" srcset="{srcset("logo-dark")}">'
+            f'<source media="(prefers-color-scheme: dark)" srcset="{asset("logo-dark.png", d)}">'
+            f'<source type="image/webp" srcset="{srcset("logo")}">'
+            f'<img class="logo" src="{asset("logo.png", d)}" alt="{alt}" width="546" height="152" decoding="async">'
+            f'</picture>')
+
+
+def portrait_picture(d, alt, lazy=False):
+    """Porträt in AVIF, WebP und JPEG, in zwei Breiten."""
+    sizes = "(max-width: 820px) 100vw, 430px"
+
+    def ss(ext):
+        return f'{asset(f"portrait-360.{ext}", d)} 360w, {asset(f"portrait-543.{ext}", d)} 543w'
+    attrs = 'loading="lazy" decoding="async"' if lazy else 'fetchpriority="high"'
+    return (f'<picture>'
+            f'<source type="image/avif" srcset="{ss("avif")}" sizes="{sizes}">'
+            f'<source type="image/webp" srcset="{ss("webp")}" sizes="{sizes}">'
+            f'<img src="{asset("portrait.jpg", d)}" srcset="{asset("portrait-360.jpg", d)} 360w, {asset("portrait.jpg", d)} 543w" '
+            f'sizes="{sizes}" alt="{alt}" width="543" height="618" {attrs}>'
+            f'</picture>')
 
 
 def lang_switch(d, key):
@@ -473,7 +505,7 @@ def action_bar(d):
 </nav>'''
 
 
-def page_html(*, slug, d, title, desc, body, key=None, graph=None, noindex=False, canonical_slug=None, og_title=None):
+def page_html(*, slug, d, title, desc, body, key=None, graph=None, noindex=False, canonical_slug=None, og_title=None, head_extra=""):
     if len(title) > 66:
         print(f"  Hinweis: Titel mit {len(title)} Zeichen: {title}", file=sys.stderr)
     if len(desc) > 165:
@@ -537,7 +569,7 @@ def page_html(*, slug, d, title, desc, body, key=None, graph=None, noindex=False
 <link rel="icon" href="{rootfile("icon-192.png", d)}" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="{rootfile("apple-touch-icon.png", d)}">
 <link rel="preload" href="{asset("fonts/BarlowCondensed-700.woff2", d)}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{asset("fonts/Barlow-400.woff2", d)}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{asset("fonts/Barlow-400.woff2", d)}" as="font" type="font/woff2" crossorigin>{head_extra}
 <link rel="stylesheet" href="{asset("site.css", d)}">{draft_css}
 {ld_block}
 </head>
@@ -760,6 +792,7 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
         <div class="field">
           <label for="f-phone">{T("Telefon", "Phone")}</label>
           <input type="tel" id="f-phone" name="phone" autocomplete="tel" inputmode="tel" enterkeyhint="next" maxlength="40">
+          <p class="field-error" id="err-phone" hidden></p>
         </div>
       </div>
       <div class="row">
@@ -778,6 +811,24 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
           <p class="field-error" id="err-subject" hidden></p>
         </div>
       </div>
+      <div class="row">
+        <div class="field">
+          <label for="f-plate">{T("Kennzeichen", "Number plate")} <span class="opt">{T("optional", "optional")}</span></label>
+          <input type="text" id="f-plate" name="plate" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next" maxlength="15" placeholder="CE AB 123">
+        </div>
+        <div class="field">
+          <label for="f-insurer">{T("Versicherung", "Insurer")} <span class="opt">{T("optional", "optional")}</span></label>
+          <input type="text" id="f-insurer" name="insurer" autocomplete="off" enterkeyhint="next" maxlength="80" placeholder="{T("Gegnerische Versicherung, falls bekannt", "The other party's insurer, if known")}">
+        </div>
+      </div>
+      <fieldset class="field choice">
+        <legend>{T("Wie sollen wir antworten?", "How should we reply?")}</legend>
+        <div class="choice-row">
+          <label><input type="radio" name="pref" value="email" checked><span>{T("Per E-Mail", "By email")}</span></label>
+          <label><input type="radio" name="pref" value="callback"><span>{T("Per Rückruf", "Call me back")}</span></label>
+        </div>
+        <span class="help">{T("Für einen Rückruf tragen Sie bitte oben Ihre Telefonnummer ein.", "For a call back, please enter your phone number above.")}</span>
+      </fieldset>
       <div class="field">
         <label for="f-message">{T("Nachricht", "Message")} {required}</label>
         <textarea id="f-message" name="message" maxlength="5000" required placeholder="{T("Kurz: Was ist passiert, welches Fahrzeug, wann passt Ihnen ein Termin?", "Briefly: what happened, which vehicle, when would an appointment suit you?")}"></textarea>
@@ -818,6 +869,8 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
     <div class="form-success" id="form-success" tabindex="-1" hidden>
       <h3>{T("Danke, Ihre Anfrage ist eingegangen.", "Thank you, we have received your enquiry.")}</h3>
       <p>{success}</p>
+      <p id="success-callback" hidden>{T("Sie haben einen Rückruf gewünscht. Wir rufen Sie unter der angegebenen Nummer an.", "You asked for a call back. We will call you on the number you gave.")}</p>
+      <p id="success-confirmed" hidden>{T("Eine Bestätigung ist unterwegs an Ihre E-Mail-Adresse. Schauen Sie bei Bedarf im Spam-Ordner nach.", "A confirmation is on its way to your email address. Please check your spam folder if you do not see it.")}</p>
       <p><button class="btn btn-secondary" type="button" id="form-again">{T("Weitere Anfrage senden", "Send another enquiry")}</button></p>
     </div>
     </div>
@@ -911,7 +964,7 @@ def build_home():
       </div>
       <div class="hero-visual">
         <figure class="portrait">
-          <img src="{asset("portrait.jpg", d)}" alt="{T("Patric Schneider, Kfz-Sachverständiger in Celle", "Patric Schneider, vehicle expert in Celle")}" width="543" height="618" fetchpriority="high">
+          {portrait_picture(d, T("Patric Schneider, Kfz-Sachverständiger in Celle", "Patric Schneider, vehicle expert in Celle"))}
         </figure>
         <div class="id-card">
           <div>
@@ -983,7 +1036,7 @@ def build_home():
   <section class="section deep about" id="ueber-mich" aria-labelledby="about-title">
     <div class="wrap">
       <figure class="about-photo">
-        <img src="{asset("portrait.jpg", d)}" alt="{T("Patric Schneider im Porträt", "Portrait of Patric Schneider")}" width="543" height="618" loading="lazy">
+        {portrait_picture(d, T("Patric Schneider im Porträt", "Portrait of Patric Schneider"), lazy=True)}
       </figure>
       <div class="about-copy">
         <p class="eyebrow">{T("Über mich", "About me")}</p>
@@ -1061,7 +1114,11 @@ def build_home():
   {contact_compact(d)}
 '''
     graph = [business_node(), person_node(), website_node(), faq_node(faq)]
-    return dict(slug=slug, d=d, key="home",
+    # Das große Bild oben gehört zum Wichtigsten beim Laden: früh anfordern (nur Browser mit AVIF)
+    preload = (f'\n<link rel="preload" as="image" type="image/avif" fetchpriority="high" '
+               f'imagesrcset="{asset("portrait-360.avif", d)} 360w, {asset("portrait-543.avif", d)} 543w" '
+               f'imagesizes="(max-width: 820px) 100vw, 430px">')
+    return dict(slug=slug, d=d, key="home", head_extra=preload,
                 title=T("Kfz-Gutachter Celle | Unabhängiger Sachverständiger PS Schneider",
                         "Vehicle Expert Celle | Independent Expert PS Schneider"),
                 desc=T("Unabhängiger Kfz-Sachverständiger in Celle: Unfallgutachten, Wertgutachten, Beweissicherung, Leasingrückgabe, Restwert. Patric Schneider, Kfz-Meister.",
@@ -1760,11 +1817,13 @@ def build_datenschutz():
       <p>When you visit the website, the web server automatically processes information transmitted by your browser: shortened IP address, date and time, page requested, amount of data transferred, browser type and operating system. This data serves the security and stability of the website and is deleted after <span class="todo">enter period, 7 days recommended</span>. The legal basis is Art. 6(1)(f) GDPR (legitimate interest in the secure operation of the site).</p>
 
       <h2>4. Contact form and damage photos</h2>
-      <p>If you use the contact form, we transmit your details to our server in encrypted form (HTTPS): name, email address, topic, message and, if you wish, your phone number and up to five photos. Name, email address, topic and message are required so that we can answer your enquiry.</p>
+      <p>If you use the contact form, we transmit your details to our server in encrypted form (HTTPS): name, email address, topic, message and whether we should reply by email or call you back. Phone number, number plate, insurer and up to five photos are optional. The phone number is only required for a call back. Name, email address, topic and message are required so that we can answer your enquiry.</p>
       <h3>Photos</h3>
       <p>Photos are already reduced in size in your browser. The server reduces them again and removes metadata such as the location where the photo was taken. Please do not upload photos in which people can be recognised.</p>
       <h3>Forwarding and deletion</h3>
       <p>The server forwards your enquiry with the photos by email to our mailbox. The transmission to the mail server is encrypted. Mailbox provider: <span class="todo">enter name and address of the provider, check data processing agreement</span> After successful delivery, the enquiry and photos are deleted from the server. If delivery fails for technical reasons, the enquiry is kept safe for 14 days at most so that it is not lost, and is then deleted.</p>
+      <h3>Confirmation by email</h3>
+      <p>After you send the form, the server automatically sends a short confirmation with your reference number to the email address you entered. It contains none of your other input. So that nothing is sent to the same address repeatedly, we do not store the address in plain text but only a hash with a secret key, which is deleted after two days at most. The legal basis is Art. 6(1)(b) GDPR.</p>
       <h3>Protection against abuse</h3>
       <p>To prevent the form from being abused by automated programs, we limit the number of enquiries per connection. For this we do not store your IP address in plain text but only a hash with a secret key, which is deleted after two days at most. We also check a field that is invisible to people and a time-limited form token. Both work without cookies and without third-party services.</p>
       <h3>Log</h3>
@@ -1818,11 +1877,13 @@ def build_datenschutz():
       <p>Beim Aufruf der Website verarbeitet der Webserver automatisch Informationen, die Ihr Browser übermittelt: gekürzte IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, übertragene Datenmenge, Browsertyp und Betriebssystem. Diese Daten dienen der Sicherheit und Stabilität der Website und werden nach <span class="todo">Dauer eintragen, empfohlen 7 Tage</span> gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
 
       <h2>4. Kontaktformular und Schadenfotos</h2>
-      <p>Wenn Sie das Kontaktformular nutzen, übertragen wir Ihre Angaben verschlüsselt (HTTPS) an unseren Server: Name, E-Mail-Adresse, Anliegen, Nachricht, auf Wunsch Ihre Telefonnummer und bis zu fünf Fotos. Die Angabe von Name, E-Mail-Adresse, Anliegen und Nachricht ist erforderlich, damit wir Ihre Anfrage beantworten können.</p>
+      <p>Wenn Sie das Kontaktformular nutzen, übertragen wir Ihre Angaben verschlüsselt (HTTPS) an unseren Server: Name, E-Mail-Adresse, Anliegen, Nachricht und die Angabe, ob wir Ihnen per E-Mail antworten oder Sie zurückrufen sollen. Freiwillig sind Telefonnummer, Kennzeichen, Versicherung und bis zu fünf Fotos. Die Telefonnummer ist nur für einen Rückruf erforderlich. Die Angabe von Name, E-Mail-Adresse, Anliegen und Nachricht ist erforderlich, damit wir Ihre Anfrage beantworten können.</p>
       <h3>Fotos</h3>
       <p>Fotos werden schon in Ihrem Browser verkleinert. Der Server verkleinert sie erneut und entfernt dabei Metadaten wie den Aufnahmeort. Bitte laden Sie keine Fotos hoch, auf denen Personen erkennbar sind.</p>
       <h3>Weiterleitung und Löschung</h3>
       <p>Der Server leitet Ihre Anfrage mit den Fotos per E-Mail an unser Postfach weiter. Die Übertragung zum Mailserver ist verschlüsselt. Postfachanbieter: <span class="todo">Name und Anschrift des Anbieters eintragen, Auftragsverarbeitung prüfen</span> Nach erfolgreichem Versand werden Anfrage und Fotos auf dem Server gelöscht. Schlägt der Versand technisch fehl, bleibt die Anfrage höchstens 14 Tage gesichert, damit sie nicht verloren geht, und wird dann gelöscht.</p>
+      <h3>Bestätigung per E-Mail</h3>
+      <p>Nach dem Absenden schickt der Server automatisch eine kurze Bestätigung mit Ihrer Referenznummer an die E-Mail-Adresse, die Sie angegeben haben. Sie enthält keine Ihrer sonstigen Eingaben. Damit an dieselbe Adresse nicht mehrfach versendet wird, speichern wir die Adresse nicht im Klartext, sondern nur einen Hash mit geheimem Schlüssel, der nach höchstens zwei Tagen gelöscht wird. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
       <h3>Schutz vor Missbrauch</h3>
       <p>Damit das Formular nicht von automatischen Programmen missbraucht wird, begrenzen wir die Zahl der Anfragen pro Verbindung. Dafür speichern wir Ihre IP-Adresse nicht im Klartext, sondern nur einen Hash mit geheimem Schlüssel, der nach höchstens zwei Tagen gelöscht wird. Außerdem prüfen wir ein für Menschen unsichtbares Feld und ein zeitlich begrenztes Formular-Token. Beides arbeitet ohne Cookies und ohne Dienste Dritter.</p>
       <h3>Protokoll</h3>
@@ -1963,11 +2024,21 @@ def htaccess():
         '  ExpiresByType font/woff2 "access plus 1 year"',
         '  ExpiresByType image/png "access plus 1 month"',
         '  ExpiresByType image/jpeg "access plus 1 month"',
+        '  ExpiresByType image/webp "access plus 1 month"',
+        '  ExpiresByType image/avif "access plus 1 month"',
         '  ExpiresByType image/svg+xml "access plus 1 month"',
         '  ExpiresByType image/x-icon "access plus 1 month"',
         '  ExpiresByType text/css "access plus 1 week"',
         '  ExpiresByType application/javascript "access plus 1 week"',
         '  ExpiresByType text/html "access plus 5 minutes"',
+        "</IfModule>",
+        "",
+        "# Dateien mit ?v=Prüfsumme in der Adresse ändern sich nie unter derselben Adresse: ein Jahr, ohne Nachfrage",
+        "<IfModule mod_setenvif.c>",
+        '  SetEnvIfExpr "%{QUERY_STRING} =~ /^v=[0-9a-f]{8}$/" versioned',
+        "</IfModule>",
+        "<IfModule mod_headers.c>",
+        '  Header onsuccess set Cache-Control "public, max-age=31536000, immutable" env=versioned',
         "</IfModule>",
         "",
     ]
@@ -1984,6 +2055,15 @@ map $remote_addr $ip_gekuerzt {{
     ~(?P<ip>\\d+\\.\\d+\\.\\d+)\\.\\d+$  $ip.0;
     ~(?P<ip>[^:]+:[^:]+):         $ip::;
     default                       0.0.0.0;
+}}
+# Dateien mit ?v=... in der Adresse: ein Jahr, sonst eine Woche
+map $arg_v $asset_expires {{
+    ""      7d;
+    default 1y;
+}}
+map $arg_v $asset_cache {{
+    ""      "public";
+    default "public, immutable";
 }}
 log_format gekuerzt '$ip_gekuerzt [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
 
@@ -2047,10 +2127,10 @@ server {{
     gzip on;
     gzip_types text/css application/javascript application/json image/svg+xml application/xml;
 
-    # Zwischenspeicher im Browser
-    location ~* \\.(woff2)$ {{ expires 1y; add_header Cache-Control "public"; }}
-    location ~* \\.(png|jpg|svg|ico)$ {{ expires 30d; add_header Cache-Control "public"; }}
-    location ~* \\.(css|js)$ {{ expires 7d; add_header Cache-Control "public"; }}
+    # Zwischenspeicher im Browser. Dateien mit ?v=Prüfsumme (so erzeugt sie build.py) dürfen ein Jahr liegen bleiben.
+    location ^~ /assets/fonts/ {{ expires 1y; add_header Cache-Control "public, immutable"; }}
+    location ^~ /assets/ {{ expires $asset_expires; add_header Cache-Control $asset_cache; }}
+    location ~* \\.(png|jpg|svg|ico|webp|avif)$ {{ expires 30d; add_header Cache-Control "public"; }}
 }}
 '''
 
@@ -2144,7 +2224,7 @@ def main():
         for p in pages:
             slug = p["slug"]
             html_text = page_html(slug=slug, d=p["d"], title=p["title"], desc=p["desc"], body=p["body"], key=p.get("key"),
-                                  graph=p.get("graph"), noindex=p.get("noindex", False))
+                                  graph=p.get("graph"), noindex=p.get("noindex", False), head_extra=p.get("head_extra", ""))
             rel = "404.html" if slug == "404" else ("index.html" if slug == "" else f"{slug}/index.html")
             write(out, rel, html_text)
             count += 1

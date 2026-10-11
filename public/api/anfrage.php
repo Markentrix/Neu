@@ -73,6 +73,12 @@ function config(): array
         'rate_per_hour' => 5,
         'rate_per_day' => 15,
         'keep_failed_days' => 14,
+        // Bestätigung an den Absender der Anfrage (feste Texte, ohne seine Eingaben)
+        'confirm_customer' => true,
+        'confirm_per_address_day' => 2,
+        'sign_name' => 'PS Schneider – Sachverständiger für Fahrzeugtechnik',
+        'sign_address' => 'Im Röthel 43, 29225 Celle',
+        'sign_phone' => '0172 517 81 50',
     ];
     $cfg = array_replace_recursive($defaults, $user);
     foreach (['secret', 'mail_to', 'mail_from'] as $k) {
@@ -146,18 +152,20 @@ function client_ip(array $cfg): string
     return $ip;
 }
 
-function rate_file(array $cfg): string
+function rate_file(array $cfg, string $who = ''): string
 {
-    $key = hash_hmac('sha256', client_ip($cfg) . '|' . gmdate('Y-m-d'), $cfg['secret']);
+    $key = hash_hmac('sha256', ($who !== '' ? $who : client_ip($cfg)) . '|' . gmdate('Y-m-d'), $cfg['secret']);
     $dir = private_dir() . '/ratelimit';
     ensure_dir($dir);
     return $dir . '/' . $key . '.json';
 }
 
 /** Gibt zurück, ob noch Anfragen erlaubt sind. Mit $record = true wird ein Versuch gezählt. */
-function rate_limit(array $cfg, bool $record): bool
+function rate_limit(array $cfg, bool $record, string $who = '', int $perHour = 0, int $perDay = 0): bool
 {
-    $fh = fopen(rate_file($cfg), 'c+');
+    $perHour = $perHour > 0 ? $perHour : (int)$cfg['rate_per_hour'];
+    $perDay = $perDay > 0 ? $perDay : (int)$cfg['rate_per_day'];
+    $fh = fopen(rate_file($cfg, $who), 'c+');
     if ($fh === false) {
         return true; // lieber Anfragen annehmen als sie wegen eines Speicherfehlers zu verlieren
     }
@@ -167,7 +175,7 @@ function rate_limit(array $cfg, bool $record): bool
     $now = time();
     $times = array_values(array_filter($times, static fn($t) => is_int($t) && $t > $now - 86400));
     $lastHour = count(array_filter($times, static fn($t) => $t > $now - 3600));
-    $allowed = $lastHour < (int)$cfg['rate_per_hour'] && count($times) < (int)$cfg['rate_per_day'];
+    $allowed = $lastHour < $perHour && count($times) < $perDay;
     if ($allowed && $record) {
         $times[] = $now;
         ftruncate($fh, 0);
@@ -248,6 +256,13 @@ function multi_line(mixed $v, int $max): string
     return cut(trim($v), $max);
 }
 
+/** Kennzeichen: nur Buchstaben, Ziffern, Leerzeichen und Bindestrich, in Großbuchstaben. */
+function plate_clean(mixed $v): string
+{
+    $v = preg_replace('/[^\p{L}0-9 \-]/u', '', one_line($v, 15)) ?? '';
+    return function_exists('mb_strtoupper') ? mb_strtoupper(trim($v), 'UTF-8') : strtoupper(trim($v));
+}
+
 function validate_fields(array $cfg): array
 {
     $e = [];
@@ -257,6 +272,9 @@ function validate_fields(array $cfg): array
         'phone' => preg_replace('/[^0-9+\-\/() ]/', '', one_line($_POST['phone'] ?? '', 40)) ?? '',
         'subject' => one_line($_POST['subject'] ?? '', 80),
         'message' => multi_line($_POST['message'] ?? '', (int)$cfg['max_message_chars']),
+        'plate' => plate_clean($_POST['plate'] ?? ''),
+        'insurer' => one_line($_POST['insurer'] ?? '', 80),
+        'pref' => ($_POST['pref'] ?? '') === 'callback' ? 'callback' : 'email',
     ];
     if ($d['name'] === '') {
         $e['name'] = tr('Bitte geben Sie Ihren Namen an.', 'Please enter your name.');
@@ -269,6 +287,9 @@ function validate_fields(array $cfg): array
     }
     if (strlen($d['message']) < 5) {
         $e['message'] = tr('Bitte schreiben Sie kurz, worum es geht.', 'Please briefly say what it is about.');
+    }
+    if ($d['pref'] === 'callback' && strlen((string)preg_replace('/\D/', '', $d['phone'])) < 6) {
+        $e['phone'] = tr('Für einen Rückruf brauchen wir Ihre Telefonnummer.', 'We need your phone number to call you back.');
     }
     if (($_POST['consent'] ?? '') !== '1') {
         $e['consent'] = tr('Bitte stimmen Sie der Datenschutzerklärung zu.', 'Please agree to the privacy policy.');
@@ -391,6 +412,9 @@ function build_message(array $cfg, array $d, array $photos, string $ref): array
         'Name:     ' . $d['name'],
         'E-Mail:   ' . $d['email'],
         'Telefon:  ' . ($d['phone'] !== '' ? $d['phone'] : 'nicht angegeben'),
+        'Kennzeichen: ' . ($d['plate'] !== '' ? $d['plate'] : 'nicht angegeben'),
+        'Versicherung: ' . ($d['insurer'] !== '' ? $d['insurer'] : 'nicht angegeben'),
+        'Gewünschte Antwort: ' . ($d['pref'] === 'callback' ? 'RÜCKRUF unter ' . $d['phone'] : 'per E-Mail'),
         '',
         'Nachricht:',
         $d['message'],
@@ -405,7 +429,7 @@ function build_message(array $cfg, array $d, array $photos, string $ref): array
 
     $boundary = '=_pss_' . bin2hex(random_bytes(12));
     $domain = mail_domain($cfg['mail_from']);
-    $subject = cut('Anfrage' . (is_en() ? ' [EN]' : '') . ': ' . $d['subject'] . ' – ' . $d['name'], 150);
+    $subject = cut('Anfrage' . ($d['pref'] === 'callback' ? ' [RÜCKRUF]' : '') . (is_en() ? ' [EN]' : '') . ': ' . $d['subject'] . ' – ' . $d['name'], 150);
     $headers = [
         'Date' => date('r'),
         'From' => encode_header((string)$cfg['mail_from_name']) . ' <' . $cfg['mail_from'] . '>',
@@ -434,6 +458,44 @@ function build_message(array $cfg, array $d, array $photos, string $ref): array
     }
     $body .= "--$boundary--\r\n";
     return ['headers' => $headers, 'body' => $body];
+}
+
+/** Feste Bestätigung an den Absender. Enthält keine seiner Eingaben außer der Referenz. */
+function build_confirmation(array $cfg, array $d, string $ref): array
+{
+    $next = $d['pref'] === 'callback'
+        ? tr('Wir rufen Sie unter der angegebenen Nummer zurück.', 'We will call you back on the number you gave.')
+        : tr('Wir antworten Ihnen per E-Mail.', 'We will reply to you by email.');
+    $lines = is_en() ? [
+        'Hello,', '',
+        'Thank you for your enquiry. It has reached us.', "Your reference: $ref", '',
+        $next, '',
+        'If your vehicle has just been damaged, please call directly: ' . $cfg['sign_phone'], '',
+        $cfg['sign_name'], $cfg['sign_address'], '',
+        'This message was created automatically. You received it because your email address was entered in our contact form. If that was not you, you can ignore this message.',
+    ] : [
+        'Guten Tag,', '',
+        'vielen Dank für Ihre Anfrage. Sie ist bei uns eingegangen.', "Ihre Referenz: $ref", '',
+        $next, '',
+        'Bei einem akuten Schaden rufen Sie bitte direkt an: ' . $cfg['sign_phone'], '',
+        $cfg['sign_name'], $cfg['sign_address'], '',
+        'Diese Nachricht wurde automatisch erstellt. Sie erhalten sie, weil Ihre E-Mail-Adresse in unserem Kontaktformular angegeben wurde. Waren Sie das nicht, können Sie diese Nachricht ignorieren.',
+    ];
+    $text = implode("\r\n", $lines) . "\r\n";
+    $headers = [
+        'Date' => date('r'),
+        'From' => encode_header((string)$cfg['mail_from_name']) . ' <' . $cfg['mail_from'] . '>',
+        'To' => $d['email'],
+        'Reply-To' => $cfg['mail_to'],
+        'Subject' => encode_header(tr("Ihre Anfrage bei PS Schneider, Referenz $ref", "Your enquiry to PS Schneider, reference $ref")),
+        'Message-ID' => '<' . $ref . '.c.' . time() . '@' . mail_domain($cfg['mail_from']) . '>',
+        'Auto-Submitted' => 'auto-replied',
+        'MIME-Version' => '1.0',
+        'Content-Type' => 'text/plain; charset=UTF-8',
+        'Content-Transfer-Encoding' => 'base64',
+        'X-Mailer' => 'psschneider-formular',
+    ];
+    return ['headers' => $headers, 'body' => chunk_split(base64_encode($text), 76, "\r\n")];
 }
 
 final class Smtp
@@ -523,7 +585,7 @@ final class Smtp
     }
 }
 
-function deliver(array $cfg, array $msg): void
+function deliver(array $cfg, array $msg, ?string $to = null): void
 {
     if ($cfg['transport'] === 'mail') {
         $h = $msg['headers'];
@@ -538,7 +600,7 @@ function deliver(array $cfg, array $msg): void
     }
     $raw = implode("\r\n", array_map(static fn($k, $v) => "$k: $v", array_keys($msg['headers']), $msg['headers']))
         . "\r\n\r\n" . $msg['body'];
-    (new Smtp($cfg['smtp']))->send($cfg['mail_from'], $cfg['mail_to'], $raw);
+    (new Smtp($cfg['smtp']))->send($cfg['mail_from'], $to ?? $cfg['mail_to'], $raw);
 }
 
 /* ------------------------------------------------------------------ Aufräumen */
@@ -748,7 +810,17 @@ try {
     deliver($cfg, build_message($cfg, $data, $photos, $ref));
     remove_dir($dir); // nichts aufheben, was nicht gebraucht wird
     log_line('ok', "ref=$ref fotos=" . count($photos));
-    respond(200, ['ok' => true, 'ref' => $ref]);
+    // Bestätigung an den Absender: nur wenn erlaubt, begrenzt pro Adresse, und nie ein Grund, die Anfrage abzulehnen
+    $confirmed = false;
+    if ($cfg['confirm_customer'] && rate_limit($cfg, true, 'mail|' . strtolower($data['email']), 1, (int)$cfg['confirm_per_address_day'])) {
+        try {
+            deliver($cfg, build_confirmation($cfg, $data, $ref), $data['email']);
+            $confirmed = true;
+        } catch (Throwable $e) {
+            log_line('bestaetigung_fehler', "ref=$ref " . cut(preg_replace('/[^\x20-\x7E]/', '?', $e->getMessage()) ?? '', 120));
+        }
+    }
+    respond(200, ['ok' => true, 'ref' => $ref, 'confirmed' => $confirmed]);
 } catch (Throwable $e) {
     // Die Anfrage bleibt zur Wiederherstellung für keep_failed_days Tage im Ordner inbox.
     log_line('mail_fehler', "ref=$ref " . cut(preg_replace('/[^\x20-\x7E]/', '?', $e->getMessage()) ?? '', 200));

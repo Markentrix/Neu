@@ -40,7 +40,7 @@ def write_config(priv, sink_port, **over):
         "smtp": {"host": "127.0.0.1", "port": sink_port, "secure": "starttls", "user": "anfragen@psschneider.de",
                  "pass": "geheim", "verify_peer": False, "timeout": 5},
         "allowed_origins": [], "min_seconds": 1, "rate_per_hour": 1000, "rate_per_day": 1000,
-        "max_photo_mb": 3, "keep_failed_days": 0,
+        "max_photo_mb": 3, "keep_failed_days": 0, "confirm_customer": False,
     }
     cfg.update(over)
     os.makedirs(priv, exist_ok=True)
@@ -317,6 +317,38 @@ def main():
         check("Nach drei Anfragen pro Stunde kommt 429", codes == [200, 200, 200, 429, 429], str(codes))
         rl = os.path.join(srv.priv, "ratelimit")
         check("Mengenzähler enthält keine Klartext-IP", all("127.0.0.1" not in f and "127.0.0.1" not in open(os.path.join(rl, f)).read() for f in os.listdir(rl)))
+        srv.stop()
+
+        print("\nKennzeichen, Versicherung, Rückruf und Bestätigung")
+        srv = Server(8105, sink.port, confirm_customer=True, confirm_per_address_day=2)
+        tok = srv.token()
+        time.sleep(1.3)
+        n = len(sink.messages)
+        st, j = srv.post(fields(tok, pref="callback", phone=""))
+        check("Rückruf ohne Telefonnummer: 400 mit Fehler am Feld phone", st == 400 and "phone" in j.get("errors", {}), f"{st} {j}")
+        st, j = srv.post(fields(tok, pref="callback", phone="12", lang="en"))
+        check("Rückruf mit zu kurzer Nummer: englischer Fehler", st == 400 and "call you back" in j.get("errors", {}).get("phone", ""), f"{st} {j}")
+        check("Bei Fehlern wird nichts verschickt", len(sink.messages) == n)
+        st, j = srv.post(fields(tok, pref="callback", phone="0511 123456", plate="ce ab-123<script>", insurer="HUK-Coburg"))
+        check("Anfrage mit Rückruf: 200 und Bestätigung gemeldet", st == 200 and j.get("ok") and j.get("confirmed") is True, f"{st} {j}")
+        check("Zwei Mails: Anfrage und Bestätigung", len(sink.messages) == n + 2, str(len(sink.messages) - n))
+        op, cf = parse(sink, -2), parse(sink, -1)
+        opb = op.get_body(preferencelist=("plain",)).get_content()
+        check("Mail an den Betreiber: Kennzeichen bereinigt, Versicherung, Rückruf", "Kennzeichen: CE AB-123" in opb and "<" not in opb.split("Kennzeichen:")[1].split("\n")[0]
+              and "Versicherung: HUK-Coburg" in opb and "RÜCKRUF unter 0511 123456" in opb, opb)
+        check("Betreff trägt [RÜCKRUF]", "[RÜCKRUF]" in op["Subject"], op["Subject"])
+        cfb = cf.get_body(preferencelist=("plain",)).get_content()
+        check("Bestätigung geht an den Absender, Antworten an das Postfach", sink.messages[-1]["to"] == ["max@example.de"] and cf["To"] == "max@example.de" and cf["Reply-To"] == "info@psschneider.de", f"{sink.messages[-1]['to']} {cf['To']}")
+        check("Bestätigung: Referenz, Rückrufhinweis, Auto-Submitted", j["ref"] in cfb and "zurück" in cfb and cf["Auto-Submitted"] == "auto-replied", cfb)
+        check("Bestätigung enthält keine Eingaben des Absenders", "Max Müller" not in cfb and "Auffahrunfall" not in cfb and "HUK" not in cfb and "0511" not in cfb)
+        st, j = srv.post(fields(tok))
+        check("Zweite Anfrage derselben Adresse: angenommen, aber ohne weitere Bestätigung", st == 200 and j.get("confirmed") is False and len(sink.messages) == n + 3, f"{st} {j} {len(sink.messages) - n}")
+        st, j = srv.post(fields(tok, email="Jane@Example.com", lang="en", pref="foo"))
+        cf = parse(sink, -1)
+        check("Englische Bestätigung, unbekannte Auswahl gilt als E-Mail", st == 200 and j.get("confirmed") and "Thank you for your enquiry" in cf.get_body(preferencelist=("plain",)).get_content()
+              and "reply to you by email" in cf.get_body(preferencelist=("plain",)).get_content() and str(cf["Subject"]).startswith("Your enquiry"), f"{st} {j} {cf['Subject']}")
+        st, j = srv.post(fields(tok, email="Jane@Example.com", lang="en"))
+        check("Adresse in anderer Schreibweise zählt als dieselbe (Begrenzung)", st == 200 and j.get("confirmed") is False, str(j))
         srv.stop()
 
         print("\nSehr große Anfrage")

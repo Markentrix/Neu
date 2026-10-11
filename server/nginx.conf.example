@@ -7,6 +7,15 @@ map $remote_addr $ip_gekuerzt {
     ~(?P<ip>[^:]+:[^:]+):         $ip::;
     default                       0.0.0.0;
 }
+# Dateien mit ?v=... in der Adresse: ein Jahr, sonst eine Woche
+map $arg_v $asset_expires {
+    ""      7d;
+    default 1y;
+}
+map $arg_v $asset_cache {
+    ""      "public";
+    default "public, immutable";
+}
 log_format gekuerzt '$ip_gekuerzt [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
 
 server {
@@ -80,8 +89,8 @@ server {
     gzip on;
     gzip_types text/css application/javascript application/json image/svg+xml application/xml;
 
-    # Zwischenspeicher im Browser
-    location ~* \.(woff2)$ { expires 1y; add_header Cache-Control "public"; }
-    location ~* \.(png|jpg|svg|ico)$ { expires 30d; add_header Cache-Control "public"; }
-    location ~* \.(css|js)$ { expires 7d; add_header Cache-Control "public"; }
+    # Zwischenspeicher im Browser. Dateien mit ?v=Prüfsumme (so erzeugt sie build.py) dürfen ein Jahr liegen bleiben.
+    location ^~ /assets/fonts/ { expires 1y; add_header Cache-Control "public, immutable"; }
+    location ^~ /assets/ { expires $asset_expires; add_header Cache-Control $asset_cache; }
+    location ~* \.(png|jpg|svg|ico|webp|avif)$ { expires 30d; add_header Cache-Control "public"; }
 }

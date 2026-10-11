@@ -59,6 +59,14 @@ return [
     'rate_per_hour' => 5,      // Anfragen pro Verbindung und Stunde
     'rate_per_day' => 15,      // und pro Tag
 
+    // Automatische Bestätigung an den Absender der Anfrage (feste Texte mit Referenznummer, ohne seine Eingaben).
+    // Höchstens so viele pro E-Mail-Adresse und Tag. Mit 'confirm_customer' => false abschalten.
+    'confirm_customer' => true,
+    'confirm_per_address_day' => 2,
+    'sign_name' => 'PS Schneider – Sachverständiger für Fahrzeugtechnik',
+    'sign_address' => 'Im Röthel 43, 29225 Celle',
+    'sign_phone' => '0172 517 81 50',
+
     // Nur wenn der Versand fehlschlägt, wird die Anfrage so lange zwischengespeichert (Tage)
     'keep_failed_days' => 14,
 ];

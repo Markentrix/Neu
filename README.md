@@ -181,13 +181,25 @@ Das Formular auf `/kontakt/` sendet an `public/api/anfrage.php`. Der Endpunkt pr
 
 Schlägt der Versand fehl, sieht der Besucher eine Meldung mit Telefon und E-Mail. Im Protokoll steht dann `mail_fehler`. Das sollte jemand beobachten, zum Beispiel per Monitoring auf diese Zeile.
 
+### Felder, Rückruf und Bestätigung
+
+Das Formular fragt zusätzlich freiwillig nach Kennzeichen und Versicherung und lässt wählen, ob per E-Mail geantwortet oder zurückgerufen werden soll. Für den Rückruf ist die Telefonnummer Pflicht. In der Mail an das Postfach stehen diese Angaben, bei Rückruf trägt der Betreff `[RÜCKRUF]`.
+
+Nach dem Senden geht automatisch eine kurze Bestätigung an die angegebene Adresse. Sie enthält nur die Referenznummer und feste Texte, keine Eingaben des Absenders, und ist pro Adresse auf `confirm_per_address_day` begrenzt (Standard 2 pro Tag, höchstens 1 pro Stunde). Ein Fehler beim Versand der Bestätigung lässt die Anfrage nicht scheitern. Abschalten mit `'confirm_customer' => false` in `private/config.php`. Name, Adresse und Telefon in der Signatur stehen dort unter `sign_name`, `sign_address`, `sign_phone`. Die Datenschutzerklärung beschreibt die Bestätigung.
+
+### Bilder und Ladezeit
+
+Porträt und Logos liegen zusätzlich als AVIF und WebP in zwei bis drei Größen vor, das Original bleibt als Ersatz für alte Browser. Neu erzeugen nach einer Änderung von Logo oder Porträt: `pip install pillow` und `python3 build/make-images.py`. Die Startseite lädt damit auf dem Handy rund 30 statt 145 KB Bilder.
+
+`build.py` hängt an Dateien in `assets/` eine Prüfsumme an (`site.css?v=1a2b3c4d`). Geänderte Dateien kommen so sofort bei den Besuchern an, deshalb dürfen sie ein Jahr zwischengespeichert werden. Die mitgelieferte `.htaccess` und die nginx-Vorlage sind darauf eingerichtet. Wer eine eigene Konfiguration nutzt, sollte Adressen mit `?v=` entsprechend lange cachen.
+
 ### Tests
 
 ```
 python3 server/tests/test_form.py
 ```
 
-Der Test startet einen lokalen PHP-Server und einen Test-Mailserver mit Verschlüsselung und prüft 65 Fälle: normale Anfragen, Fotos mit Standortdaten, getarnte Dateien, zu große Anfragen, Spam-Versuche, Header-Einschleusung, Mengenbegrenzung und Versandfehler. Voraussetzung: `php` mit `gd`, `openssl` und `pip install pillow`.
+Der Test startet einen lokalen PHP-Server und einen Test-Mailserver mit Verschlüsselung und prüft 78 Fälle: normale Anfragen, Fotos mit Standortdaten, getarnte Dateien, zu große Anfragen, Spam-Versuche, Header-Einschleusung, Mengenbegrenzung und Versandfehler. Voraussetzung: `php` mit `gd`, `openssl` und `pip install pillow`.
 
 ### Vorschau und Entwurf
 

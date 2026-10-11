@@ -16,8 +16,8 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/assets/fonts/BarlowCondensed-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Barlow-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="stylesheet" href="/assets/draft.css">
+<link rel="stylesheet" href="/assets/site.css?v=e49e312f">
+<link rel="stylesheet" href="/assets/draft.css?v=828aa620">
 
 </head>
 <body>
@@ -26,7 +26,7 @@
 <div class="draft-wm" aria-hidden="true"></div>
 <header class="site-header" id="top">
   <div class="wrap">
-    <a class="brand" href="/en/" aria-label="PS Schneider, home page"><img class="logo logo-light" src="/assets/logo.png" alt="PS Schneider – vehicle engineering expert" width="546" height="152"><img class="logo logo-dark" src="/assets/logo-dark.png" alt="" width="546" height="152"></a>
+    <a class="brand" href="/en/" aria-label="PS Schneider, home page"><picture><source media="(prefers-color-scheme: dark)" type="image/webp" srcset="/assets/logo-dark-187.webp?v=ebe01ac7 1x, /assets/logo-dark-374.webp?v=a35ea0f6 2x, /assets/logo-dark-546.webp?v=53d34a33 3x"><source media="(prefers-color-scheme: dark)" srcset="/assets/logo-dark.png?v=17ff60ae"><source type="image/webp" srcset="/assets/logo-187.webp?v=0531917d 1x, /assets/logo-374.webp?v=afaeabcb 2x, /assets/logo-546.webp?v=196f6921 3x"><img class="logo" src="/assets/logo.png?v=f1bc95c3" alt="PS Schneider – vehicle engineering expert" width="546" height="152" decoding="async"></picture></a>
     <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
       <ul>
         <li><a href="/en/services/">Services</a></li><li><a href="/en/guide/">Guide</a></li><li><a href="/en/#ueber-mich">About me</a></li><li><a href="/en/accident-checklist/">Accident checklist</a></li><li><a href="/en/#faq">FAQ</a></li><li><a href="/en/contact/">Contact</a></li>
@@ -57,11 +57,13 @@
       <p>When you visit the website, the web server automatically processes information transmitted by your browser: shortened IP address, date and time, page requested, amount of data transferred, browser type and operating system. This data serves the security and stability of the website and is deleted after <span class="todo">enter period, 7 days recommended</span>. The legal basis is Art. 6(1)(f) GDPR (legitimate interest in the secure operation of the site).</p>
 
       <h2>4. Contact form and damage photos</h2>
-      <p>If you use the contact form, we transmit your details to our server in encrypted form (HTTPS): name, email address, topic, message and, if you wish, your phone number and up to five photos. Name, email address, topic and message are required so that we can answer your enquiry.</p>
+      <p>If you use the contact form, we transmit your details to our server in encrypted form (HTTPS): name, email address, topic, message and whether we should reply by email or call you back. Phone number, number plate, insurer and up to five photos are optional. The phone number is only required for a call back. Name, email address, topic and message are required so that we can answer your enquiry.</p>
       <h3>Photos</h3>
       <p>Photos are already reduced in size in your browser. The server reduces them again and removes metadata such as the location where the photo was taken. Please do not upload photos in which people can be recognised.</p>
       <h3>Forwarding and deletion</h3>
       <p>The server forwards your enquiry with the photos by email to our mailbox. The transmission to the mail server is encrypted. Mailbox provider: <span class="todo">enter name and address of the provider, check data processing agreement</span> After successful delivery, the enquiry and photos are deleted from the server. If delivery fails for technical reasons, the enquiry is kept safe for 14 days at most so that it is not lost, and is then deleted.</p>
+      <h3>Confirmation by email</h3>
+      <p>After you send the form, the server automatically sends a short confirmation with your reference number to the email address you entered. It contains none of your other input. So that nothing is sent to the same address repeatedly, we do not store the address in plain text but only a hash with a secret key, which is deleted after two days at most. The legal basis is Art. 6(1)(b) GDPR.</p>
       <h3>Protection against abuse</h3>
       <p>To prevent the form from being abused by automated programs, we limit the number of enquiries per connection. For this we do not store your IP address in plain text but only a hash with a secret key, which is deleted after two days at most. We also check a field that is invisible to people and a time-limited form token. Both work without cookies and without third-party services.</p>
       <h3>Log</h3>
@@ -107,7 +109,7 @@
 <footer class="site-footer">
   <div class="wrap">
     <div class="col">
-      <img class="logo logo-light" src="/assets/logo.png" alt="PS Schneider – vehicle engineering expert" width="546" height="152"><img class="logo logo-dark" src="/assets/logo-dark.png" alt="" width="546" height="152">
+      <picture><source media="(prefers-color-scheme: dark)" type="image/webp" srcset="/assets/logo-dark-187.webp?v=ebe01ac7 1x, /assets/logo-dark-374.webp?v=a35ea0f6 2x, /assets/logo-dark-546.webp?v=53d34a33 3x"><source media="(prefers-color-scheme: dark)" srcset="/assets/logo-dark.png?v=17ff60ae"><source type="image/webp" srcset="/assets/logo-187.webp?v=0531917d 1x, /assets/logo-374.webp?v=afaeabcb 2x, /assets/logo-546.webp?v=196f6921 3x"><img class="logo" src="/assets/logo.png?v=f1bc95c3" alt="PS Schneider – vehicle engineering expert" width="546" height="152" decoding="async"></picture>
       <span>Master motor vehicle technician Patric Schneider</span>
       <span>Im Röthel 43 · 29225 Celle</span>
     </div>
@@ -142,7 +144,7 @@
   <a href="https://wa.me/491725178150" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 21l2.2-5.2A8.5 8.5 0 1 1 21 11.5z"/><path d="M9.5 9.2c.3 1.6 1.9 3.5 3.6 4.3l1.2-1.2 1.9.8v1.6c-3.6.5-7.7-3.3-7.9-7.1h1.7l.8 1.8-1.3 1z"/></svg>WhatsApp</a>
   <a href="/en/contact/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Enquiry</a>
 </nav>
-<script src="/assets/site.js" defer></script>
-<script src="/assets/draft.js" defer></script>
+<script src="/assets/site.js?v=73513148" defer></script>
+<script src="/assets/draft.js?v=f066935c" defer></script>
 </body>
 </html>
