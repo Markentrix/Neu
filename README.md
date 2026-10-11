@@ -54,6 +54,8 @@ Beide Skripte brauchen nur Python 3. Nach jeder Änderung `build.py` ausführen 
 | `/` | Startseite |
 | `/leistungen/` | Übersicht aller Leistungen |
 | `/leistungen/…` | Sechs Unterseiten, je eine pro Gutachten |
+| `/ratgeber/` | Übersicht der Ratgeber-Artikel |
+| `/ratgeber/…` | Fünf Artikel zu Wertminderung, Totalschaden, Mietwagen, Gutachterkosten und Oldtimer |
 | `/gruende-fuer-ein-gutachten/` | Vergleich Kostenvoranschlag und Gutachten |
 | `/unfall-checkliste/` | Interaktive Checkliste |
 | `/kontakt/` | Kontaktformular und Daten |
@@ -71,12 +73,18 @@ Das Vorschaubild neu erzeugen: `node build/make-og.js` (braucht Playwright).
 - Adresse klären: Startseite „Im Röthel 43“, altes Impressum „Am Röthel 43“.
 
 **Inhalte, die nicht von der alten Website stammen, bitte fachlich prüfen**
+- Alle fünf Ratgeber-Artikel, besonders die rechtlichen Aussagen: Wertminderung auch bei fiktiver Abrechnung, Wiederbeschaffungsaufwand, Faustregel von etwa 130 Prozent, Mietwagen und Nutzungsausfall, Honorar nach Schadenhöhe, Versicherer-Anforderungen bei Oldtimern.
+- Das Beispiel mit angenommenen Zahlen (8.000 Euro und 2.000 Euro) im Artikel zum Totalschaden.
 - Unterseite „Unfallanalytisches Gutachten“ und ihr Umfang.
 - Aussage zu Bagatellschäden (etwa 750 bis 1.000 Euro) auf der Haftpflicht-Seite und im Vergleich.
 - Einsatzgebiet „Celle und Umgebung“ und „Besichtigung nach Absprache“.
 - Tipps unter „In den Tagen danach“ auf der Checklisten-Seite.
 - Hinweise zu Wertgutachten (Kauf, Verkauf, Oldtimer) und zur Totalschaden-Definition.
 - Autorenzeile „Von Patric Schneider“ auf den Unterseiten.
+
+**Neue Artikel schreiben:** In `build/content.py` unter `ARTICLES` einen Eintrag nach dem Muster der vorhandenen ergänzen, `build.py` ausführen, fertig. Die Seite landet automatisch in Navigation, Übersicht und Sitemap. Veröffentlichungsdatum fest eintragen.
+
+**Ortsseiten** für Städte im Einsatzgebiet gibt es noch nicht. Sie lohnen sich nur für Orte, in denen Termine angeboten werden. Das Einsatzgebiet ist bisher nicht festgelegt.
 
 **Für bessere Auffindbarkeit (außerhalb des Codes)**
 - Google-Unternehmensprofil mit Kategorie „Kfz-Gutachter“ anlegen und mit Adresse, Telefon, Öffnungszeiten und Website pflegen.

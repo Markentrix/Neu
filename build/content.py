@@ -72,7 +72,7 @@ SERVICES = [
             ("Wie schnell erhalte ich das Gutachten?",
              "Den Besichtigungstermin vereinbare ich kurzfristig und erstelle das Gutachten zügig, damit die Wartezeit bis zur Reparatur oder zum Ersatzfahrzeug möglichst kurz bleibt."),
         ],
-        "related": ["leistungen/restwertermittlung", "gruende-fuer-ein-gutachten", "unfall-checkliste"],
+        "related": ["leistungen/restwertermittlung", "ratgeber/wertminderung-nach-unfall", "ratgeber/mietwagen-nutzungsausfall-nach-unfall"],
     },
     {
         "slug": "leistungen/beweissicherungsgutachten",
@@ -204,7 +204,7 @@ SERVICES = [
             ("Für welche Fahrzeugarten erstellen Sie Wertgutachten?",
              "Für Pkw, Lkw, Nutzfahrzeuge, Motorräder, Oldtimer und Elektrofahrräder."),
         ],
-        "related": ["leistungen/beweissicherungsgutachten", "leistungen/leasingruecknahme-gutachten", "leistungen/restwertermittlung"],
+        "related": ["ratgeber/oldtimer-wertgutachten", "leistungen/beweissicherungsgutachten", "leistungen/leasingruecknahme-gutachten"],
     },
     {
         "slug": "leistungen/restwertermittlung",
@@ -241,7 +241,7 @@ SERVICES = [
             ("Wann liegt ein Totalschaden vor?",
              "Von einem Totalschaden spricht man, wenn eine Reparatur technisch nicht möglich oder wirtschaftlich nicht sinnvoll ist, in der Regel weil die Reparaturkosten den Wiederbeschaffungswert übersteigen."),
         ],
-        "related": ["leistungen/haftpflichtschaden-gutachten", "leistungen/wertgutachten", "unfall-checkliste"],
+        "related": ["leistungen/haftpflichtschaden-gutachten", "ratgeber/totalschaden-restwert-wiederbeschaffungswert", "leistungen/wertgutachten"],
     },
     {
         "slug": "leistungen/unfallanalytisches-gutachten",
@@ -334,4 +334,207 @@ CHECKLIST = [
     ("Daten mit dem Unfallgegner austauschen", "Name, Anschrift, Kennzeichen, Versicherung."),
     ("Fotos und Notizen zum Unfallhergang", "Fahrzeugpositionen, Schäden, Umgebung. Kontaktdaten von Zeugen notieren."),
     ("Sachverständigen kontaktieren", "Rufen Sie uns so früh wie möglich an. Wir stehen Ihnen bei der Schadenabwicklung zur Seite."),
+]
+
+
+# ---------------------------------------------------------------------------
+# Ratgeber-Artikel. Veröffentlichungsdatum fest eintragen, damit es sich beim
+# Neubauen der Seite nicht ändert. Bei inhaltlichen Änderungen "modified" anpassen.
+# ---------------------------------------------------------------------------
+ARTICLES = [
+    {
+        "slug": "ratgeber/wertminderung-nach-unfall",
+        "short": "Wertminderung nach einem Unfall",
+        "published": "2026-10-11", "modified": "2026-10-11",
+        "title": "Wertminderung nach Unfall: Das steht Ihnen zu | PS Schneider",
+        "desc": "Merkantile Wertminderung nach einem Unfall erklärt: wann sie entsteht, wer sie zahlt und warum sie im Kfz-Gutachten beziffert werden sollte.",
+        "h1": "Wertminderung nach einem Unfall: Was Ihnen zusteht",
+        "lede": "Auch ein perfekt repariertes Fahrzeug ist nach einem Unfall oft weniger wert als vorher. Dieser Verlust gehört zu Ihrem Schaden.",
+        "summary": "Die merkantile Wertminderung ist der Wertverlust, der trotz fachgerechter Reparatur bleibt, weil Käufer ein Unfallfahrzeug niedriger bewerten. Bei einem unverschuldeten Unfall können Sie sie zusätzlich zu den Reparaturkosten von der gegnerischen Versicherung verlangen. Ob sie anfällt und wie hoch sie ist, hängt von Alter, Laufleistung und Schwere des Schadens ab. Das Gutachten beziffert sie.",
+        "sections": [
+            {"h2": "Was ist die Wertminderung?", "body": [
+                "Nach einem Unfall lässt sich ein Fahrzeug meist reparieren. Trotzdem bleibt ein Makel: Beim Verkauf muss der Schaden angegeben werden, und viele Käufer zahlen für ein Unfallfahrzeug weniger. Diesen Minderwert nennt man merkantile Wertminderung.",
+                "Davon zu unterscheiden ist die technische Wertminderung. Sie liegt vor, wenn nach der Reparatur tatsächlich Mängel zurückbleiben, etwa weil sich ein Bauteil nicht vollständig wiederherstellen ließ.",
+            ]},
+            {"h2": "Wann entsteht sie?", "body": [
+                "Ob und wie stark ein Fahrzeug an Wert verliert, hängt vom Einzelfall ab. Typische Faktoren sind:",
+                ("ul", [
+                    "Das Fahrzeug ist noch relativ jung",
+                    "Die Laufleistung ist noch gering",
+                    "Der Schaden war erheblich, etwa an tragenden oder sicherheitsrelevanten Teilen",
+                    "Das Fahrzeug war vorher unfallfrei",
+                ]),
+                "Bei älteren Fahrzeugen mit hoher Laufleistung und bei kleinen Schäden fällt sie oft gering aus oder entfällt.",
+            ]},
+            {"h2": "Wer zahlt die Wertminderung?", "body": [
+                "Bei einem unverschuldeten Unfall gehört die Wertminderung zum Schaden. Sie ist neben den Reparaturkosten ein eigener Posten, den Sie von der Haftpflichtversicherung des Unfallverursachers verlangen können. Das gilt auch, wenn Sie nicht reparieren lassen und fiktiv abrechnen.",
+            ]},
+            {"h2": "Warum das Gutachten wichtig ist", "body": [
+                "Ein Kostenvoranschlag enthält keine Wertminderung. Ein Kfz-Gutachten beziffert sie nachvollziehbar, zusammen mit Reparaturkosten, Reparaturdauer und gegebenenfalls Restwert. So haben Sie eine belastbare Grundlage für Ihre Forderung. Mehr dazu unter [[leistungen/haftpflichtschaden-gutachten|Haftpflichtschaden-Gutachten]].",
+            ]},
+        ],
+        "faq": [
+            ("Wird die Wertminderung auch ohne Reparatur gezahlt?",
+             "Ja. Auch bei der fiktiven Abrechnung können Sie die Wertminderung verlangen. Sie ist im Gutachten gesondert ausgewiesen."),
+            ("Gibt es einen festen Prozentsatz?",
+             "Nein. Die Höhe wird im Einzelfall anhand von Fahrzeugalter, Laufleistung, Fahrzeugwert und Schadenumfang ermittelt."),
+            ("Entsteht Wertminderung auch bei kleinen Schäden?",
+             "Bei Bagatellschäden und bei älteren Fahrzeugen oft nicht oder nur gering. Ich sage Ihnen vorab ehrlich, ob sich ein Gutachten lohnt."),
+        ],
+        "related": ["leistungen/haftpflichtschaden-gutachten", "ratgeber/totalschaden-restwert-wiederbeschaffungswert", "ratgeber/kfz-gutachten-kosten"],
+    },
+    {
+        "slug": "ratgeber/totalschaden-restwert-wiederbeschaffungswert",
+        "short": "Totalschaden: Restwert und Wiederbeschaffungswert",
+        "published": "2026-10-11", "modified": "2026-10-11",
+        "title": "Totalschaden: Restwert und Wiederbeschaffungswert | PS Schneider",
+        "desc": "Totalschaden nach Unfall: Was Restwert und Wiederbeschaffungswert bedeuten, wie sich der Ersatzbetrag ergibt und wann eine Reparatur trotzdem möglich ist.",
+        "h1": "Totalschaden: Restwert und Wiederbeschaffungswert erklärt",
+        "lede": "Bei einem Totalschaden entscheiden zwei Werte darüber, was Sie bekommen und welche Möglichkeiten Sie haben.",
+        "summary": "Der Wiederbeschaffungswert ist der Preis für ein gleichwertiges gebrauchtes Fahrzeug. Der Restwert ist der Wert des beschädigten Fahrzeugs. Behalten oder verwerten Sie das Fahrzeug selbst, ergibt sich der Ersatzbetrag in der Regel aus der Differenz beider Werte. Ein Gutachten stellt beide Werte fest.",
+        "sections": [
+            {"h2": "Wann liegt ein Totalschaden vor?", "body": [
+                "Von einem Totalschaden spricht man, wenn sich eine Reparatur technisch nicht mehr durchführen lässt oder wirtschaftlich nicht sinnvoll ist. Wirtschaftlich nicht sinnvoll ist sie in der Regel dann, wenn die Reparaturkosten über dem Wiederbeschaffungswert liegen.",
+            ]},
+            {"h2": "Die drei Begriffe", "body": [
+                ("ul", [
+                    "Wiederbeschaffungswert: der Betrag, den Sie für ein gleichwertiges gebrauchtes Fahrzeug am regionalen Markt zahlen müssten",
+                    "Restwert: der Wert, den das beschädigte Fahrzeug im unreparierten Zustand noch hat, etwa beim Verkauf an einen Restwertaufkäufer",
+                    "Wiederbeschaffungsaufwand: Wiederbeschaffungswert minus Restwert, in der Regel der Betrag, den die Versicherung zahlt, wenn Sie das Fahrzeug behalten oder selbst verwerten",
+                ]),
+                ("callout", "Beispiel mit angenommenen Zahlen: Liegt der Wiederbeschaffungswert bei 8.000 Euro und der Restwert bei 2.000 Euro, beträgt der Wiederbeschaffungsaufwand 6.000 Euro."),
+            ]},
+            {"h2": "Reparieren trotz Totalschaden?", "body": [
+                "In engen Grenzen kann eine Reparatur trotzdem möglich sein, wenn sie vollständig und fachgerecht erfolgt. Als Faustregel wird häufig eine Grenze von etwa 130 Prozent des Wiederbeschaffungswerts genannt. Ob das in Ihrem Fall gilt, hängt von den Umständen ab. Klären Sie es vor der Reparatur.",
+            ]},
+            {"h2": "Wie der Restwert ermittelt wird", "body": [
+                "Der Restwert ergibt sich aus Angeboten am Markt. Ich hole auf Wunsch regionale oder europaweite Angebote ein. Sie entscheiden danach risikofrei, ob Sie eines annehmen. Mehr dazu unter [[leistungen/restwertermittlung|Restwertermittlung]].",
+            ]},
+        ],
+        "faq": [
+            ("Was bekomme ich bei einem Totalschaden ausgezahlt?",
+             "In der Regel den Wiederbeschaffungswert abzüglich des Restwerts, sofern Sie das Fahrzeug behalten oder selbst verwerten. Die genauen Beträge nennt das Gutachten."),
+            ("Muss ich ein Restwertangebot annehmen?",
+             "Nein. Sie entscheiden, ob Sie ein Angebot annehmen. Lassen Sie sich vorher beraten, wie sich das auf die Abrechnung auswirkt."),
+            ("Wer stellt fest, ob ein Totalschaden vorliegt?",
+             "Das Gutachten. Es nennt die Reparaturkosten, den Wiederbeschaffungswert und den Restwert und bildet damit die Grundlage für Ihre Entscheidung."),
+        ],
+        "related": ["leistungen/restwertermittlung", "leistungen/haftpflichtschaden-gutachten", "ratgeber/mietwagen-nutzungsausfall-nach-unfall"],
+    },
+    {
+        "slug": "ratgeber/mietwagen-nutzungsausfall-nach-unfall",
+        "short": "Mietwagen oder Nutzungsausfall",
+        "published": "2026-10-11", "modified": "2026-10-11",
+        "title": "Mietwagen oder Nutzungsausfall nach einem Unfall | PS Schneider",
+        "desc": "Unverschuldeter Unfall: Anspruch auf Mietwagen oder Nutzungsausfall für die Reparaturdauer. Was gilt, wer zahlt und welche Rolle das Gutachten spielt.",
+        "h1": "Mietwagen oder Nutzungsausfall nach einem unverschuldeten Unfall",
+        "lede": "Solange Ihr Fahrzeug in der Werkstatt steht oder ersetzt werden muss, haben Sie in der Regel Anspruch auf einen Ausgleich.",
+        "summary": "Nach einem unverschuldeten Unfall können Sie für die Dauer der Reparatur oder der Ersatzbeschaffung entweder einen Mietwagen nehmen oder eine Nutzungsausfallentschädigung verlangen. Die Dauer ergibt sich aus dem Gutachten. Die Kosten trägt in der Regel die gegnerische Versicherung.",
+        "sections": [
+            {"h2": "Zwei Möglichkeiten", "body": [
+                ("ul", [
+                    "Mietwagen: Sie mieten ein vergleichbares Fahrzeug. Die erforderlichen Kosten ersetzt in der Regel die Versicherung des Unfallverursachers.",
+                    "Nutzungsausfall: Sie verzichten auf einen Mietwagen und erhalten für jeden Tag ohne Fahrzeug eine pauschale Entschädigung, die sich nach dem Fahrzeugtyp richtet.",
+                ]),
+            ]},
+            {"h2": "Wie lange gilt der Anspruch?", "body": [
+                "Maßgeblich ist die Dauer der Reparatur oder, bei einem Totalschaden, die Zeit für die Beschaffung eines Ersatzfahrzeugs. Das Gutachten nennt die voraussichtliche Reparaturdauer und die Ausfallzeit. Es ist damit die Grundlage für diesen Anspruch.",
+            ]},
+            {"h2": "Worauf Sie achten sollten", "body": [
+                ("ul", [
+                    "Wählen Sie ein Mietfahrzeug, das Ihrem eigenen entspricht. Ein deutlich teureres Fahrzeug wird in der Regel nicht vollständig ersetzt.",
+                    "Sprechen Sie Mietwagen und Dauer mit Ihrem Sachverständigen oder Rechtsanwalt ab, bevor Sie unterschreiben.",
+                    "Beauftragen Sie die Reparatur zeitnah. Die Ausfallzeit sollte angemessen bleiben.",
+                    "Nutzungsausfall gibt es nur, wenn Sie das Fahrzeug tatsächlich genutzt hätten und es nicht nutzen konnten.",
+                ]),
+                ("callout", "Ob und in welcher Höhe im Einzelfall ein Anspruch besteht, hängt von den Umständen ab. Bei Streit mit der Versicherung hilft Ihr Rechtsanwalt."),
+            ]},
+        ],
+        "faq": [
+            ("Wer zahlt den Mietwagen?",
+             "Bei einem unverschuldeten Unfall in der Regel die Haftpflichtversicherung des Unfallverursachers, soweit die Kosten erforderlich sind."),
+            ("Was ist besser, Mietwagen oder Nutzungsausfall?",
+             "Das hängt davon ab, ob Sie täglich auf ein Auto angewiesen sind. Wer ohne Fahrzeug zurechtkommt, wählt oft die pauschale Entschädigung. Wer regelmäßig fährt, braucht den Mietwagen."),
+            ("Steht die Reparaturdauer im Gutachten?",
+             "Ja. Das Gutachten nennt die voraussichtliche Reparaturdauer und die Ausfallzeit. Bei Totalschaden ist das die Zeit, die für Ersatz anzusetzen ist."),
+        ],
+        "related": ["leistungen/haftpflichtschaden-gutachten", "ratgeber/wertminderung-nach-unfall", "unfall-checkliste"],
+    },
+    {
+        "slug": "ratgeber/kfz-gutachten-kosten",
+        "short": "Was kostet ein Kfz-Gutachten?",
+        "published": "2026-10-11", "modified": "2026-10-11",
+        "title": "Was kostet ein Kfz-Gutachten und wer zahlt es? | PS Schneider",
+        "desc": "Kosten eines Kfz-Gutachtens: Wer im Haftpflichtfall zahlt, wovon das Honorar abhängt und bei welchen Gutachten Sie ein individuelles Angebot erhalten.",
+        "h1": "Was kostet ein Kfz-Gutachten und wer zahlt es?",
+        "lede": "Die wichtigste Antwort zuerst: Nach einem unverschuldeten Unfall müssen Sie das Gutachten in der Regel nicht selbst bezahlen.",
+        "summary": "Im Haftpflichtfall werden die Gutachtenkosten dem Schaden zugerechnet und von der Versicherung des Unfallverursachers getragen. Bei Unfallschäden richtet sich das Honorar häufig nach der Schadenhöhe. Bei Wert-, Beweissicherungs- und Leasingrücknahme-Gutachten erhalten Sie vorab ein individuelles Angebot.",
+        "sections": [
+            {"h2": "Nach einem unverschuldeten Unfall", "body": [
+                "Im Haftpflichtfall werden die Kosten für das Gutachten dem entstandenen Schaden zugerechnet. In der Regel übernimmt sie die Haftpflichtversicherung des Unfallverursachers. Sie haben das Recht, einen unabhängigen Sachverständigen Ihrer Wahl zu beauftragen.",
+                "Versicherungen verweisen gern auf einen Kostenvoranschlag und darauf, dass Sie den Sachverständigen selbst bezahlen müssten. Im Haftpflichtfall ist das in der Regel nicht so. Die Gründe finden Sie unter [[gruende-fuer-ein-gutachten|Gründe für ein Kfz-Gutachten]].",
+                ("callout", "Bei reinen Bagatellschäden lohnt sich ein Gutachten oft nicht. Das sage ich Ihnen ehrlich, bevor Sie einen Auftrag erteilen."),
+            ]},
+            {"h2": "Bei selbstverschuldetem Unfall", "body": [
+                "Haben Sie den Unfall selbst verursacht, gibt es keinen Unfallgegner, der das Gutachten zahlt. Dann tragen Sie die Kosten in der Regel selbst. Prüfen Sie vorher, ob Ihre Kaskoversicherung ein eigenes Verfahren vorgibt.",
+            ]},
+            {"h2": "Wovon das Honorar abhängt", "body": [
+                "Bei Unfallschäden richtet sich das Honorar häufig nach der Höhe des Schadens. Bei Wert-, Beweissicherungs- und Leasingrücknahme-Gutachten hängt es vom Aufwand ab, etwa von Fahrzeugart und Umfang der Dokumentation.",
+            ]},
+            {"h2": "So erhalten Sie ein Angebot", "body": [
+                "Rufen Sie an oder schreiben Sie mir kurz, worum es geht. Bei Gutachten, die Sie selbst zahlen, erhalten Sie vorab ein individuelles Angebot. Die Übersicht aller Gutachten finden Sie unter [[leistungen|Leistungen]].",
+            ]},
+        ],
+        "faq": [
+            ("Lohnt sich ein Gutachten bei kleinen Schäden?",
+             "Meist nicht. Bei reinen Bagatellschäden reicht oft ein Kostenvoranschlag. Bei größeren Schäden, Totalschaden oder strittiger Haftung lohnt sich ein Gutachten fast immer."),
+            ("Kürzt die Versicherung manchmal die Gutachterkosten?",
+             "Kürzungen kommen vor. Lassen Sie sich in diesem Fall von Ihrem Rechtsanwalt beraten."),
+            ("Muss ich den Gutachter der Versicherung nehmen?",
+             "Nein. Als Geschädigter dürfen Sie einen unabhängigen Sachverständigen Ihrer Wahl beauftragen."),
+        ],
+        "related": ["leistungen/haftpflichtschaden-gutachten", "gruende-fuer-ein-gutachten", "leistungen"],
+    },
+    {
+        "slug": "ratgeber/oldtimer-wertgutachten",
+        "short": "Oldtimer-Wertgutachten",
+        "published": "2026-10-11", "modified": "2026-10-11",
+        "title": "Oldtimer-Wertgutachten: Wann es sich lohnt | PS Schneider",
+        "desc": "Wertgutachten für Oldtimer: Wann es sinnvoll ist, was darin steht und wie es bei Kauf, Verkauf, Versicherung und Erbfall hilft. Kfz-Sachverständiger in Celle.",
+        "h1": "Oldtimer-Wertgutachten: Wann es sich lohnt",
+        "lede": "Der Wert eines Oldtimers lässt sich nicht aus einer Liste ablesen. Ein Gutachten macht ihn nachvollziehbar.",
+        "summary": "Ein Wertgutachten ermittelt den realen Marktwert Ihres Oldtimers und dokumentiert Zustand, Ausstattung sowie Vor- und Altschäden. Es hilft beim Kauf und Verkauf, bei der Absicherung gegenüber der Versicherung und überall dort, wo ein belegter Wert gebraucht wird.",
+        "sections": [
+            {"h2": "Warum Oldtimer besonders sind", "body": [
+                "Bei Oldtimern bestimmen Zustand, Originalität, Historie und Seltenheit den Preis. Zwei scheinbar gleiche Fahrzeuge können sich im Wert deutlich unterscheiden. Pauschale Preislisten stoßen hier an Grenzen.",
+            ]},
+            {"h2": "Wann sich ein Wertgutachten lohnt", "body": [
+                ("ul", [
+                    "Beim Kauf, um den Preis einzuordnen und verborgene Mängel zu erkennen",
+                    "Beim Verkauf, um den Preis zu belegen und Interessenten Transparenz zu bieten",
+                    "Zur Absicherung, denn Versicherer verlangen für Oldtimer häufig einen Nachweis über Wert und Zustand",
+                    "Bei einem Erbfall oder einer Vermögensauseinandersetzung",
+                    "Vor einem Schaden, um den Zustand dokumentiert zu haben",
+                ]),
+            ]},
+            {"h2": "Was im Gutachten steht", "body": [
+                ("ul", [
+                    "Der ermittelte Wert des Fahrzeugs",
+                    "Der Zustand, schriftlich und mit Fotos belegt",
+                    "Sonderausstattung und Besonderheiten",
+                    "Vor- und Altschäden",
+                ]),
+                "Mehr zum Ablauf finden Sie unter [[leistungen/wertgutachten|Wertgutachten]]. Vereinbaren Sie gern einen Termin.",
+            ]},
+        ],
+        "faq": [
+            ("Wie lange gilt ein Wertgutachten?",
+             "Ein Gutachten beschreibt den Wert zum Zeitpunkt der Begutachtung. Weil sich Markt und Zustand ändern, sollte es nach längerer Zeit aktualisiert werden."),
+            ("Was kostet ein Wertgutachten für einen Oldtimer?",
+             "Das hängt vom Aufwand ab. Sie erhalten vorab ein individuelles Angebot."),
+            ("Erstellen Sie auch Gutachten für Motorräder?",
+             "Ja. Wertgutachten erstelle ich für Pkw, Lkw, Nutzfahrzeuge, Motorräder, Oldtimer und Elektrofahrräder."),
+        ],
+        "related": ["leistungen/wertgutachten", "leistungen/beweissicherungsgutachten", "ratgeber/kfz-gutachten-kosten"],
+    },
 ]

@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from content import BIZ, SERVICES, REASONS, COMPARE_ROWS, HOME_FAQ, CHECKLIST  # noqa: E402
+from content import BIZ, SERVICES, ARTICLES, REASONS, COMPARE_ROWS, HOME_FAQ, CHECKLIST  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
@@ -28,6 +28,12 @@ MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August"
 STAND = f"{MONTHS[TODAY.month - 1]} {TODAY.year}"
 
 PREVIEW = False  # wird in main() gesetzt
+
+
+def de_month(iso):
+    """'2026-10-11' -> 'Oktober 2026'"""
+    y, m, _ = iso.split("-")
+    return f"{MONTHS[int(m) - 1]} {y}"
 
 # Alte Adresse (psschneider.de bisher) -> neue Adresse. Wird zu 301-Weiterleitungen.
 REDIRECTS = [
@@ -186,7 +192,7 @@ def breadcrumb_node(trail):
 
 NAV = [
     ("Leistungen", "leistungen", "leistungen"),
-    ("Warum ein Gutachten", "gruende-fuer-ein-gutachten", "gruende-fuer-ein-gutachten"),
+    ("Ratgeber", "ratgeber", "ratgeber"),
     ("Über mich", "", "#ueber-mich"),
     ("Unfall-Checkliste", "unfall-checkliste", "unfall-checkliste"),
     ("Fragen", "", "#faq"),
@@ -245,6 +251,7 @@ def footer(d):
       <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>
       <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a>
       <a href="https://wa.me/{BIZ["phone_tel"].lstrip("+")}" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="{u("ratgeber", d)}">Ratgeber</a>
       <a href="{u("gruende-fuer-ein-gutachten", d)}">Gründe für ein Gutachten</a>
       <a href="{u("unfall-checkliste", d)}">Unfall-Checkliste</a>
       <a href="{u("kontakt", d)}">Anfrage senden</a>
@@ -336,11 +343,11 @@ def crumbs(trail, d):
     return f'<nav class="crumbs" aria-label="Brotkrumen"><ol>{"".join(parts)}</ol></nav>'
 
 
-def page_hero(trail, d, tag, h1, lede, byline=True):
+def page_hero(trail, d, tag, h1, lede, byline=True, stand=None):
     by = ""
     if byline:
         by = (f'<p class="byline"><span>Von <strong>{BIZ["person"]}</strong>, {BIZ["role"]}, {BIZ["craft"]}</span>'
-              f'<span>Stand: {STAND}</span></p>')
+              f'<span>Stand: {stand or STAND}</span></p>')
     return f'''<section class="page-hero">
   <div class="wrap">
     {crumbs(trail, d)}
@@ -404,7 +411,10 @@ def cta_band(d, title="Unfall passiert? Rufen Sie an.", text="Ich berate Sie unv
 
 def related(slugs, d):
     by_slug = {s["slug"]: s for s in SERVICES}
+    by_slug.update({a["slug"]: a for a in ARTICLES})
     extra = {
+        "leistungen": ("Alle Leistungen", "Sechs Gutachten im Überblick und welches zu Ihrer Situation passt."),
+        "ratgeber": ("Ratgeber", "Antworten auf häufige Fragen nach dem Unfall."),
         "gruende-fuer-ein-gutachten": ("Gründe für ein Kfz-Gutachten", "Warum ein Gutachten mehr bringt als ein Kostenvoranschlag."),
         "unfall-checkliste": ("Unfall-Checkliste", "Die ersten Schritte nach einem Unfall zum Abhaken."),
         "kontakt": ("Kontakt", "Anfrage senden oder direkt anrufen."),
@@ -656,6 +666,18 @@ def build_home():
     </div>
   </section>
 
+  <section class="section" id="ratgeber" aria-labelledby="ratgeber-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Ratgeber</p>
+        <h2 id="ratgeber-title">Antworten auf die häufigsten Fragen nach dem Unfall</h2>
+        <p class="lede">Wertminderung, Totalschaden, Mietwagen und Kosten verständlich erklärt.</p>
+      </div>
+      {related([a["slug"] for a in ARTICLES[:3]], d)}
+      <p class="more-row"><a class="btn btn-secondary" href="{u("ratgeber", d)}">Alle Ratgeber ansehen →</a></p>
+    </div>
+  </section>
+
   <section class="section section--surface" id="faq" aria-labelledby="faq-title">
     <div class="wrap">
       <div class="section-head">
@@ -772,6 +794,97 @@ def build_leistungen():
                 body=body, graph=graph)
 
 
+def build_article(a):
+    d = a["slug"].count("/") + 1
+    trail = [("Ratgeber", "ratgeber"), (a["short"], a["slug"])]
+    secs = []
+    for sec in a["sections"]:
+        secs.append(f'''<section>
+        <h2>{esc(sec["h2"])}</h2>
+        {render_blocks(sec["body"], d)}
+      </section>''')
+    body = f'''
+  {page_hero(trail, d, "Ratgeber", a["h1"], a["lede"], stand=de_month(a["modified"]))}
+
+  <div class="wrap page-grid">
+    <article class="prose">
+      <div class="summary">
+        <p class="summary-label">Kurz gesagt</p>
+        <p>{rich(a["summary"], d)}</p>
+      </div>
+      {"".join(secs)}
+      <p class="disclaimer">Dieser Beitrag ist eine allgemeine Information und keine Rechtsberatung. Wie sich ein Schaden im Einzelfall abwickelt, hängt von den Umständen ab. Bei rechtlichen Fragen berät Sie Ihr Rechtsanwalt.</p>
+    </article>
+    {side_cta(d)}
+  </div>
+
+  <section class="section section--surface" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="faq-title">Häufige Fragen</h2></div>
+      {faq_section(a["faq"], d, open_first=True)}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rel-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="rel-title">Weiterlesen</h2></div>
+      {related(a["related"], d)}
+    </div>
+  </section>
+
+  {cta_band(d)}
+'''
+    url = abs_url(a["slug"])
+    graph = [
+        {"@type": "Article", "@id": url + "#article", "headline": a["h1"], "description": a["desc"],
+         "datePublished": a["published"], "dateModified": a["modified"], "inLanguage": "de-DE",
+         "mainEntityOfPage": url, "image": DOMAIN + "/assets/og-image.jpg",
+         "author": {"@type": "Person", "@id": DOMAIN + "/#person", "name": BIZ["person"],
+                    "jobTitle": BIZ["role"] + ", " + BIZ["craft"]},
+         "publisher": business_ref()},
+        breadcrumb_node([("Ratgeber", "ratgeber"), (a["short"], a["slug"])]),
+        faq_node(a["faq"]),
+    ]
+    return dict(slug=a["slug"], d=d, title=a["title"], desc=a["desc"], body=body, graph=graph)
+
+
+def build_ratgeber_index():
+    d = 1
+    items = []
+    for a in ARTICLES:
+        items.append(f'''<li>
+          <h2><a href="{u(a["slug"], d)}">{esc(a["short"])}</a></h2>
+          <p>{esc(a["lede"])}</p>
+          <span class="more" aria-hidden="true">Lesen →</span>
+        </li>''')
+    body = f'''
+  {page_hero([("Ratgeber", "ratgeber")], d, "Ratgeber", "Ratgeber zum Kfz-Gutachten: Antworten nach dem Unfall",
+             "Was nach einem Unfall zählt, in verständlicher Sprache: Wertminderung, Totalschaden, Mietwagen, Kosten und Oldtimer-Bewertung.", byline=False)}
+
+  <section class="section" aria-labelledby="liste-title">
+    <div class="wrap">
+      <h2 class="visually-hidden" id="liste-title">Alle Beiträge</h2>
+      <ul class="guide-list">
+        {"".join(items)}
+      </ul>
+      <p class="more-row">Direkt nach einem Unfall? Die <a href="{u("unfall-checkliste", d)}">Unfall-Checkliste</a> führt Sie durch die ersten Schritte.</p>
+    </div>
+  </section>
+
+  {cta_band(d, "Ihre Frage ist nicht dabei?", "Schildern Sie mir Ihre Situation. Ich antworte unverbindlich und sage Ihnen ehrlich, was sinnvoll ist.")}
+'''
+    graph = [breadcrumb_node([("Ratgeber", "ratgeber")]),
+             {"@type": "CollectionPage", "name": "Ratgeber zum Kfz-Gutachten", "url": abs_url("ratgeber"),
+              "about": {"@id": DOMAIN + "/#business"},
+              "mainEntity": {"@type": "ItemList", "itemListElement": [
+                  {"@type": "ListItem", "position": i + 1, "name": a["short"], "url": abs_url(a["slug"])}
+                  for i, a in enumerate(ARTICLES)]}}]
+    return dict(slug="ratgeber", d=d,
+                title="Ratgeber Kfz-Gutachten und Unfall | PS Schneider",
+                desc="Ratgeber vom Kfz-Sachverständigen in Celle: Wertminderung, Totalschaden, Mietwagen, Gutachterkosten und Oldtimer-Wertgutachten verständlich erklärt.",
+                body=body, graph=graph)
+
+
 def build_gruende():
     d = 1
     secs = []
@@ -810,7 +923,7 @@ def build_gruende():
   <section class="section" aria-labelledby="rel-title">
     <div class="wrap">
       <div class="section-head"><h2 id="rel-title">Passende Leistungen</h2></div>
-      {related(["leistungen/haftpflichtschaden-gutachten", "leistungen/restwertermittlung", "unfall-checkliste"], d)}
+      {related(["leistungen/haftpflichtschaden-gutachten", "ratgeber/kfz-gutachten-kosten", "unfall-checkliste"], d)}
     </div>
   </section>
 
@@ -1188,6 +1301,7 @@ def main():
 
     pages = [build_home(), build_leistungen()]
     pages += [build_service(s) for s in SERVICES]
+    pages += [build_ratgeber_index()] + [build_article(a) for a in ARTICLES]
     pages += [build_gruende(), build_checkliste(), build_kontakt(), build_impressum(), build_datenschutz(), build_404()]
 
     indexable = []
