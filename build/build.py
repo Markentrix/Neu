@@ -161,6 +161,11 @@ prepare_towns()
 PAGE_TOWNS = [t for t in TOWNS if t.get("page")]
 
 
+def in_region(region):
+    """'im Landkreis Celle', aber 'in der Region Hannover'."""
+    return f"in der {region}" if region.startswith("Region ") else f"im {region}"
+
+
 def area_served():
     c_lat, c_lon = AREA["center"]
     return [{"@type": "City", "name": "Celle"},
@@ -1150,7 +1155,7 @@ def build_town(t):
         ("Wer zahlt das Gutachten nach einem unverschuldeten Unfall?",
          "In der Regel die Haftpflichtversicherung des Unfallverursachers. Sie haben das Recht, den Sachverständigen frei zu wählen."),
     ]
-    near_links = "".join(f'<li><a href="{u(o["slug"], d)}"><strong>{esc(o["name"])}</strong><span>{esc(o["kind"])} im {esc(o["region"])}</span></a></li>' for o in near)
+    near_links = "".join(f'<li><a href="{u(o["slug"], d)}"><strong>{esc(o["name"])}</strong><span>{esc(o["kind"])} {esc(in_region(o["region"]))}</span></a></li>' for o in near)
     body = f'''
   {page_hero(trail, d, "Einsatzgebiet", f"Kfz-Gutachter in {name}",
              f"Unabhängige Kfz-Gutachten für {name} und Umgebung. {name} liegt rund {t['dist']} Kilometer Luftlinie von Celle entfernt im {t['dir']}, mitten in meinem Einsatzgebiet.", byline=False)}
@@ -1159,7 +1164,7 @@ def build_town(t):
     <article class="prose">
       <section>
         <h2>Gutachten für {esc(name)}</h2>
-        <p>{esc(name)} ({esc(t["kind"])} im {esc(region)}) gehört zu meinem Einsatzgebiet im {esc(AREA["label"])}. Wurde Ihr Fahrzeug in {esc(name)} oder Umgebung beschädigt, oder möchten Sie dort ein Fahrzeug bewerten lassen, erstelle ich Ihnen ein unabhängiges Gutachten.</p>
+        <p>{esc(name)} ({esc(t["kind"])} {esc(in_region(region))}) gehört zu meinem Einsatzgebiet im {esc(AREA["label"])}. Wurde Ihr Fahrzeug in {esc(name)} oder Umgebung beschädigt, oder möchten Sie dort ein Fahrzeug bewerten lassen, erstelle ich Ihnen ein unabhängiges Gutachten.</p>
         <ul>{services}</ul>
       </section>
       <section>
