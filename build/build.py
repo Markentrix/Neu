@@ -28,6 +28,9 @@ MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August"
 STAND = f"{MONTHS[TODAY.month - 1]} {TODAY.year}"
 
 PREVIEW = False  # wird in main() gesetzt
+DRAFT = True     # Entwurfsmodus von Markentrix; mit --final ausschalten
+OWNER = "Markentrix"
+DRAFT_ASSETS = Path(__file__).resolve().parent / "draft_assets"
 
 
 def de_month(iso):
@@ -293,7 +296,7 @@ def footer(d):
       <a href="{u("kontakt", d)}">Anfrage senden</a>
     </div>
     <div class="legal">
-      <span>© <span data-year>{TODAY.year}</span> {BIZ["person"]}</span>
+      <span>© <span data-year>{TODAY.year}</span> {BIZ["person"]}{f" · Gestaltung und Umsetzung © {TODAY.year} {OWNER}" if DRAFT else ""}</span>
       <span><a href="{u("impressum", d)}">Impressum</a> · <a href="{u("datenschutz", d)}">Datenschutzerklärung</a></span>
     </div>
   </div>
@@ -313,8 +316,20 @@ def page_html(*, slug, d, title, desc, body, graph=None, noindex=False, canonica
         print(f"  Hinweis: Titel mit {len(title)} Zeichen: {title}", file=sys.stderr)
     if len(desc) > 165:
         print(f"  Hinweis: Beschreibung mit {len(desc)} Zeichen: {slug or 'start'}", file=sys.stderr)
+    noindex = noindex or DRAFT
     canon = abs_url(slug if canonical_slug is None else canonical_slug)
-    robots = "noindex, follow" if noindex else "index, follow, max-image-preview:large, max-snippet:-1"
+    if DRAFT:
+        robots = "noindex, nofollow, noarchive, nosnippet, noimageindex"
+    else:
+        robots = "noindex, follow" if noindex else "index, follow, max-image-preview:large, max-snippet:-1"
+    draft_comment = (f"<!-- © {TODAY.year} {OWNER}. Alle Rechte vorbehalten. Entwurf zur Ansicht. "
+                     "Nutzung, Vervielfältigung, Bearbeitung oder Weitergabe nur mit schriftlicher Zustimmung. -->\n") if DRAFT else ""
+    draft_meta = f'\n<meta name="copyright" content="© {TODAY.year} {OWNER}. Alle Rechte vorbehalten.">' if DRAFT else ""
+    draft_css = f'\n<link rel="stylesheet" href="{asset("draft.css", d)}">' if DRAFT else ""
+    draft_top = (f'<div class="draft-bar" role="note"><strong>Entwurf</strong>'
+                 f'<span>© {TODAY.year} {OWNER}</span><span class="draft-mid">· Alle Rechte vorbehalten</span><span class="draft-long">· Nur zur Ansicht, keine Weitergabe oder Veröffentlichung</span></div>\n'
+                 '<div class="draft-wm" aria-hidden="true"></div>\n') if DRAFT else ""
+    draft_js = f'\n<script src="{asset("draft.js", d)}" defer></script>' if DRAFT else ""
     og = DOMAIN + "/assets/og-image.jpg"
     ld_block = ld(graph) if graph else ""
     canon_tag = "" if noindex else f'<link rel="canonical" href="{canon}">'
@@ -334,7 +349,7 @@ def page_html(*, slug, d, title, desc, body, graph=None, noindex=False, canonica
 <meta name="twitter:description" content="{esc(desc)}">
 <meta name="twitter:image" content="{og}">'''
     return soften(f'''<!DOCTYPE html>
-<html lang="de">
+{draft_comment}<html lang="de">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -343,24 +358,24 @@ def page_html(*, slug, d, title, desc, body, graph=None, noindex=False, canonica
 <meta name="robots" content="{robots}">
 {canon_tag}
 <meta name="theme-color" content="#D71A21">
-<meta name="format-detection" content="telephone=no">{og_tags}
+<meta name="format-detection" content="telephone=no">{draft_meta}{og_tags}
 <link rel="icon" href="{rootfile("favicon.ico", d)}" sizes="48x48">
 <link rel="icon" href="{rootfile("icon-192.png", d)}" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="{rootfile("apple-touch-icon.png", d)}">
 <link rel="preload" href="{asset("fonts/BarlowCondensed-700.woff2", d)}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{asset("fonts/Barlow-400.woff2", d)}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{asset("site.css", d)}">
+<link rel="stylesheet" href="{asset("site.css", d)}">{draft_css}
 {ld_block}
 </head>
 <body>
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
-{header(d, slug)}
+{draft_top}{header(d, slug)}
 <main id="main">
 {body}
 </main>
 {footer(d)}
 {action_bar(d)}
-<script src="{asset("site.js", d)}" defer></script>
+<script src="{asset("site.js", d)}" defer></script>{draft_js}
 </body>
 </html>
 ''')
@@ -1204,6 +1219,7 @@ def htaccess():
         "",
         "# --- Sicherheit ---",
         "<IfModule mod_headers.c>",
+        *(['  Header always set X-Robots-Tag "noindex, nofollow, noarchive"'] if DRAFT else []),
         '  Header always set X-Content-Type-Options "nosniff"',
         '  Header always set Referrer-Policy "strict-origin-when-cross-origin"',
         '  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"',
@@ -1295,6 +1311,8 @@ server {{
 
 
 def robots():
+    if DRAFT:
+        return "# Entwurf von Markentrix: nicht für Suchmaschinen.\nUser-agent: *\nDisallow: /\n"
     return f"""# robots.txt für {DOMAIN}
 User-agent: *
 Allow: /
@@ -1324,7 +1342,17 @@ def main():
     global PREVIEW
     ap = argparse.ArgumentParser()
     ap.add_argument("--preview", metavar="DIR", help="Vorschau mit relativen Links in DIR erzeugen")
+    ap.add_argument("--final", action="store_true", help="Endversion ohne Entwurfsmodus (Urheberrechtsvermerk, Wasserzeichen, Sperren)")
     args = ap.parse_args()
+    global DRAFT
+    DRAFT = not args.final
+    # Entwurfsdateien in public/assets bereitstellen oder entfernen
+    for name in ("draft.css", "draft.js"):
+        target = PUBLIC / "assets" / name
+        if DRAFT:
+            shutil.copyfile(DRAFT_ASSETS / name, target)
+        elif target.exists():
+            target.unlink()
 
     if args.preview:
         PREVIEW = True
@@ -1355,8 +1383,13 @@ def main():
         if not p.get("noindex"):
             indexable.append(slug)
 
-    if not PREVIEW:
+    if not PREVIEW and DRAFT:
+        for stale in ("sitemap.xml",):
+            if (out / stale).exists():
+                (out / stale).unlink()
+    if not PREVIEW and not DRAFT:
         write(out, "sitemap.xml", sitemap(indexable))
+    if not PREVIEW:
         write(out, "robots.txt", robots())
         write(out, ".htaccess", htaccess())
         write(ROOT / "server", "nginx.conf.example", nginx_conf())

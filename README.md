@@ -3,9 +3,29 @@
 Website von Patric Schneider, Sachverständiger für Fahrzeugtechnik in Celle (https://psschneider.de).
 Statische Seiten ohne Datenbank, ohne Cookies, ohne Tracking, ohne externe Einbindungen.
 
+## Entwurfsmodus und Urheberrecht (Markentrix)
+
+Die Seite wird standardmäßig als **Entwurf** gebaut. Das ist die Version zum Zeigen:
+
+- Sichtbarer Banner „Entwurf · © Markentrix · Alle Rechte vorbehalten“ und Wasserzeichen über jeder Seite
+- Urheberrechtsvermerk im Quelltext, im Metadatenfeld und in der Fußzeile
+- Sperre für Suchmaschinen (`noindex`, `robots.txt`, Header), damit der Entwurf nirgends auftaucht
+- Hürden für Gelegenheitskopierer: keine Textauswahl, kein Rechtsklick, kein Bildziehen, Zwischenablage zeigt nur den Hinweis, Ausdruck gesperrt. Eingabefelder bleiben normal nutzbar.
+
+**Endversion für den Kunden, ohne jede Kennzeichnung:**
+
+```
+python3 build/build.py --final
+python3 build/check.py
+```
+
+Der Prüfer meldet dann, wenn noch Entwurfsdateien oder das Wort „Markentrix“ im Ordner `public/` liegen. Erst danach den Ordner übergeben.
+
+**Grenzen:** Ein technischer Vollschutz ist bei Webseiten nicht möglich. Quelltext, Entwicklerwerkzeuge, „Seite speichern“ und Screenshots lassen sich nicht verhindern. Der Entwurfsmodus macht Kopieren unbequem und Herkunft nachweisbar. Sicherer ist es, dem Kunden nur den privaten Vorschau-Link oder eine Bildschirmfreigabe zu zeigen und den Code erst nach Zahlung und schriftlicher Rechteübertragung zu übergeben. Siehe `COPYRIGHT.md`.
+
 ## Auf den eigenen Server legen
 
-1. Den **Inhalt des Ordners `public/`** in das Webroot des Servers kopieren (die Datei `.htaccess` ist versteckt, bitte mitkopieren).
+1. Die **Endversion** bauen (`python3 build/build.py --final`) und den **Inhalt des Ordners `public/`** in das Webroot des Servers kopieren (die Datei `.htaccess` ist versteckt, bitte mitkopieren).
 2. Die Domain `psschneider.de` auf dieses Webroot zeigen lassen, HTTPS einrichten.
 3. **Apache:** `.htaccess` liegt schon im Ordner. `AllowOverride All` muss für das Webroot gesetzt sein. Module: `mod_alias`, `mod_headers`, `mod_expires`, `mod_deflate`.
    **nginx:** Beispiel in `server/nginx.conf.example`, Pfade und Zertifikate anpassen.
@@ -39,7 +59,8 @@ Getestet mit Apache (alle Weiterleitungen, keine Schleifen, 404-Seite, Header, K
 Alles liegt in `build/`. Texte stehen in `build/content.py`, Aufbau und Seitenvorlagen in `build/build.py`, Design in `public/assets/site.css`.
 
 ```
-python3 build/build.py     # erzeugt alle Seiten in public/
+python3 build/build.py     # erzeugt alle Seiten in public/ als Entwurf (mit Markentrix-Vermerk)
+python3 build/build.py --final   # Endversion ohne Vermerk, für die Übergabe
 python3 build/check.py     # prüft Links, Titel, Überschriften, Sitemap, Inline-Code
 ```
 

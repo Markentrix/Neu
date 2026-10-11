@@ -188,18 +188,42 @@ for url, (f, p) in pages.items():
                 errors.append(f"{where}: Anker fehlt: {href}")
 
 # Sitemap
-sm = (PUBLIC / "sitemap.xml").read_text(encoding="utf-8")
-locs = set(re.findall(r"<loc>([^<]+)</loc>", sm))
-for url, (f, p) in pages.items():
-    full = DOMAIN + url
-    noindex = "noindex" in p.meta.get("robots", "")
-    if noindex and full in locs:
-        errors.append(f"Sitemap enthält noindex-Seite {full}")
-    if not noindex and full not in locs:
-        errors.append(f"Sitemap fehlt: {full}")
-for loc in locs:
-    if loc.replace(DOMAIN, "") not in pages:
-        errors.append(f"Sitemap verweist auf fehlende Seite {loc}")
+all_noindex = all("noindex" in p.meta.get("robots", "") for _, (f, p) in pages.items())
+sm_file = PUBLIC / "sitemap.xml"
+if all_noindex:
+    draft = True
+    if sm_file.exists():
+        errors.append("Entwurfsmodus, aber sitemap.xml vorhanden")
+else:
+    draft = False
+    sm = sm_file.read_text(encoding="utf-8")
+    locs = set(re.findall(r"<loc>([^<]+)</loc>", sm))
+    for url, (f, p) in pages.items():
+        full = DOMAIN + url
+        noindex = "noindex" in p.meta.get("robots", "")
+        if noindex and full in locs:
+            errors.append(f"Sitemap enthält noindex-Seite {full}")
+        if not noindex and full not in locs:
+            errors.append(f"Sitemap fehlt: {full}")
+    for loc in locs:
+        if loc.replace(DOMAIN, "") not in pages:
+            errors.append(f"Sitemap verweist auf fehlende Seite {loc}")
+
+# Entwurfsdateien müssen zum Modus passen
+for name in ("draft.css", "draft.js"):
+    exists = (PUBLIC / "assets" / name).exists()
+    if draft and not exists:
+        errors.append(f"Entwurfsmodus, aber assets/{name} fehlt")
+    if not draft and exists:
+        errors.append(f"Endversion, aber assets/{name} liegt noch im Ordner")
+if draft:
+    for url, (f, p) in pages.items():
+        if "Markentrix" not in p.meta.get("copyright", ""):
+            errors.append(f"{url}: Urheberrechtsvermerk fehlt")
+else:
+    for f in PUBLIC.rglob("*.html"):
+        if "Markentrix" in f.read_text(encoding="utf-8"):
+            errors.append(f"Endversion enthält noch 'Markentrix': {f.relative_to(PUBLIC)}")
 
 # Weiterleitungen
 for old, new in REDIRECTS:
@@ -207,8 +231,11 @@ for old, new in REDIRECTS:
         errors.append(f"Weiterleitung {old} -> {new}: Ziel fehlt")
 
 rob = (PUBLIC / "robots.txt").read_text(encoding="utf-8")
-if "Sitemap:" not in rob:
+if draft and "Disallow: /" not in rob:
+    errors.append("Entwurfsmodus, aber robots.txt erlaubt Suchmaschinen")
+if not draft and "Sitemap:" not in rob:
     errors.append("robots.txt ohne Sitemap")
+print("Modus:", "Entwurf (Markentrix)" if draft else "Endversion")
 
 print(f"{len(pages)} Seiten geprüft.")
 for w in warnings:

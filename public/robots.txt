@@ -1,5 +1,3 @@
-# robots.txt für https://psschneider.de
+# Entwurf von Markentrix: nicht für Suchmaschinen.
 User-agent: *
-Allow: /
-
-Sitemap: https://psschneider.de/sitemap.xml
+Disallow: /
