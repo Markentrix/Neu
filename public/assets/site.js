@@ -6,25 +6,17 @@
   /* Texte in der Sprache der Seite (html lang) */
   var EN = document.documentElement.lang === 'en';
   var TXT = EN
-    ? { menuClose: 'Close menu', menuOpen: 'Open menu', copied: 'copied', copy: 'copy', done: ' done', of: ' of ', well: '. Well done.' }
-    : { menuClose: 'Menü schließen', menuOpen: 'Menü öffnen', copied: 'kopiert', copy: 'kopieren', done: ' erledigt', of: ' von ', well: '. Gut gemacht.' };
+    ? { copied: 'copied', copy: 'copy', done: ' done', of: ' of ', well: '. Well done.' }
+    : { copied: 'kopiert', copy: 'kopieren', done: ' erledigt', of: ' von ', well: '. Gut gemacht.' };
 
   /* Jahr im Footer */
   $$('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
 
-  /* Mobile Navigation */
-  var header = $('.site-header'), toggle = $('.nav-toggle');
-  if (header && toggle) {
-    var setOpen = function (open) {
-      header.setAttribute('data-open', open ? 'true' : 'false');
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.setAttribute('aria-label', open ? TXT.menuClose : TXT.menuOpen);
-    };
-    toggle.addEventListener('click', function () {
-      setOpen(header.getAttribute('data-open') !== 'true');
-    });
-    $$('.primary-nav a').forEach(function (a) { a.addEventListener('click', function () { setOpen(false); }); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+  /* Navigationsleiste auf dem Handy: aktuelle Seite in Sicht scrollen */
+  var cur = $('.primary-nav a[aria-current="page"]');
+  var bar = $('.primary-nav');
+  if (cur && bar && bar.scrollWidth > bar.clientWidth) {
+    bar.scrollLeft = Math.max(0, cur.offsetLeft - 16);
   }
 
   /* Auf schmalen Bildschirmen sind alle Fragen zunächst zugeklappt, das verkürzt die Seite */

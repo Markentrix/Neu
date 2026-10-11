@@ -421,9 +421,6 @@ def header(d, slug, key=None):
     return f'''<header class="site-header" id="top">
   <div class="wrap">
     <a class="brand" href="{u(S("home"), d)}" aria-label="{T("PS Schneider, zur Startseite", "PS Schneider, home page")}">{logo_imgs(d)}</a>
-    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="{T("Menü öffnen", "Open menu")}">
-      <span class="ic-menu">{svg("menu")}</span><span class="ic-close">{svg("close")}</span>
-    </button>
     <nav class="primary-nav" id="primary-nav" aria-label="{T("Hauptnavigation", "Main navigation")}">
       <ul>
         {"".join(items)}
