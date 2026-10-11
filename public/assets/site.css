@@ -193,7 +193,7 @@ button { font: inherit; }
   .logo { height: 44px; }
 }
 @media (max-width: 1080px) {
-  /* Handy und Tablet: Logo und Sprache oben, darunter eine Leiste, die seitlich gewischt wird (wie in Shop-Apps) */
+  /* Handy und Tablet: Logo und Sprache oben, darunter alle Menüpunkte kompakt in ein bis zwei Zeilen */
   .site-header { position: relative; top: auto; }
   .site-header .wrap {
     display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand lang" "nav nav";
@@ -204,21 +204,17 @@ button { font: inherit; }
   .lang-switch { grid-area: lang; }
   .lang-switch a { min-width: 44px; min-height: 44px; }
   .header-cta { display: none; }
-  .primary-nav {
-    grid-area: nav; margin: 0 calc(-1 * var(--gutter)); min-width: 0;
-    overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity; overscroll-behavior-x: contain;
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-  }
-  .primary-nav::-webkit-scrollbar { display: none; }
-  .primary-nav ul { flex-wrap: nowrap; gap: 8px; width: max-content; padding: 4px calc(var(--gutter) + 20px) 10px var(--gutter); }
-  .primary-nav li { scroll-snap-align: start; scroll-margin-left: var(--gutter); }
+  .primary-nav { grid-area: nav; min-width: 0; }
+  .primary-nav ul { flex-wrap: wrap; gap: 6px; padding: 2px 0 10px; }
   .primary-nav a {
-    display: flex; align-items: center; min-height: 44px; padding: 0 16px; font-size: 15.5px;
+    display: flex; align-items: center; min-height: 40px; padding: 0 13px; font-size: 14.5px;
     background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
   }
   .primary-nav a[aria-current="page"] { box-shadow: none; border-radius: 999px; background: var(--accent); border-color: var(--accent); color: #fff; }
+}
+@media (max-width: 380px) {
+  .primary-nav ul { gap: 5px; }
+  .primary-nav a { font-size: 13.5px; padding: 0 10px; min-height: 38px; }
 }
 
 /* ---------- Hero ---------- */

@@ -12,13 +12,6 @@
   /* Jahr im Footer */
   $$('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
 
-  /* Navigationsleiste auf dem Handy: aktuelle Seite in Sicht scrollen */
-  var cur = $('.primary-nav a[aria-current="page"]');
-  var bar = $('.primary-nav');
-  if (cur && bar && bar.scrollWidth > bar.clientWidth) {
-    bar.scrollLeft = Math.max(0, cur.offsetLeft - 16);
-  }
-
   /* Auf schmalen Bildschirmen sind alle Fragen zunächst zugeklappt, das verkürzt die Seite */
   if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) {
     $$('.faq details[open]').forEach(function (d) { d.removeAttribute('open'); });
