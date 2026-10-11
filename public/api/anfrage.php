@@ -105,6 +105,21 @@ function log_line(string $status, string $extra = ''): void
     }
 }
 
+/* ------------------------------------------------------------------ Sprache der Meldungen */
+
+$GLOBALS['pss_lang'] = 'de';
+
+/** Wählt den deutschen oder englischen Text, je nach Sprache der Seite, von der das Formular kam. */
+function tr(string $de, string $en): string
+{
+    return $GLOBALS['pss_lang'] === 'en' ? $en : $de;
+}
+
+function is_en(): bool
+{
+    return $GLOBALS['pss_lang'] === 'en';
+}
+
 /* ------------------------------------------------------------------ Antworten */
 
 function respond(int $code, array $data): never
@@ -174,17 +189,17 @@ function token_error(array $cfg, string $token): ?string
 {
     $parts = explode('.', $token);
     if (count($parts) !== 2 || !ctype_digit($parts[0])) {
-        return 'Bitte laden Sie die Seite neu und versuchen Sie es erneut.';
+        return tr('Bitte laden Sie die Seite neu und versuchen Sie es erneut.', 'Please reload the page and try again.');
     }
     if (!hash_equals(hash_hmac('sha256', $parts[0], $cfg['secret']), $parts[1])) {
-        return 'Bitte laden Sie die Seite neu und versuchen Sie es erneut.';
+        return tr('Bitte laden Sie die Seite neu und versuchen Sie es erneut.', 'Please reload the page and try again.');
     }
     $age = time() - (int)$parts[0];
     if ($age < (int)$cfg['min_seconds']) {
-        return 'Das ging zu schnell. Bitte warten Sie einen Moment und senden Sie erneut.';
+        return tr('Das ging zu schnell. Bitte warten Sie einen Moment und senden Sie erneut.', 'That was too fast. Please wait a moment and send again.');
     }
     if ($age > 7200) {
-        return 'Das Formular ist abgelaufen. Bitte laden Sie die Seite neu.';
+        return tr('Das Formular ist abgelaufen. Bitte laden Sie die Seite neu.', 'The form has expired. Please reload the page.');
     }
     return null;
 }
@@ -244,19 +259,19 @@ function validate_fields(array $cfg): array
         'message' => multi_line($_POST['message'] ?? '', (int)$cfg['max_message_chars']),
     ];
     if ($d['name'] === '') {
-        $e['name'] = 'Bitte geben Sie Ihren Namen an.';
+        $e['name'] = tr('Bitte geben Sie Ihren Namen an.', 'Please enter your name.');
     }
     if ($d['email'] === '' || !filter_var($d['email'], FILTER_VALIDATE_EMAIL)) {
-        $e['email'] = 'Bitte geben Sie eine gültige E-Mail-Adresse an.';
+        $e['email'] = tr('Bitte geben Sie eine gültige E-Mail-Adresse an.', 'Please enter a valid email address.');
     }
     if ($d['subject'] === '') {
-        $e['subject'] = 'Bitte wählen Sie Ihr Anliegen.';
+        $e['subject'] = tr('Bitte wählen Sie Ihr Anliegen.', 'Please choose your topic.');
     }
     if (strlen($d['message']) < 5) {
-        $e['message'] = 'Bitte schreiben Sie kurz, worum es geht.';
+        $e['message'] = tr('Bitte schreiben Sie kurz, worum es geht.', 'Please briefly say what it is about.');
     }
     if (($_POST['consent'] ?? '') !== '1') {
-        $e['consent'] = 'Bitte stimmen Sie der Datenschutzerklärung zu.';
+        $e['consent'] = tr('Bitte stimmen Sie der Datenschutzerklärung zu.', 'Please agree to the privacy policy.');
     }
     return [$d, $e];
 }
@@ -286,32 +301,34 @@ function normalize_files(string $field): array
 function process_photo(array $file, string $dest, array $cfg): ?string
 {
     $label = one_line($file['name'], 60);
+    $q = static fn(string $t): string => is_en() ? "\u{201C}$t\u{201D}" : "\u{201E}$t\u{201C}";
+    $name = $q($label);
     if ($file['error'] !== UPLOAD_ERR_OK) {
         return in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
-            ? "„{$label}“ ist zu groß."
-            : "„{$label}“ konnte nicht hochgeladen werden.";
+            ? $name . tr(' ist zu groß.', ' is too large.')
+            : $name . tr(' konnte nicht hochgeladen werden.', ' could not be uploaded.');
     }
     if ($file['size'] > (int)$cfg['max_photo_mb'] * 1024 * 1024) {
-        return "„{$label}“ ist zu groß (höchstens {$cfg['max_photo_mb']} MB).";
+        return $name . tr(" ist zu groß (höchstens {$cfg['max_photo_mb']} MB).", " is too large (maximum {$cfg['max_photo_mb']} MB).");
     }
     if (!is_uploaded_file($file['tmp'])) {
-        return "„{$label}“ konnte nicht verarbeitet werden.";
+        return $name . tr(' konnte nicht verarbeitet werden.', ' could not be processed.');
     }
     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp']);
     if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-        return "„{$label}“ hat ein nicht unterstütztes Format. Erlaubt sind JPG, PNG und WebP.";
+        return $name . tr(' hat ein nicht unterstütztes Format. Erlaubt sind JPG, PNG und WebP.', ' is not a supported format. JPG, PNG and WebP are allowed.');
     }
     $info = @getimagesize($file['tmp']);
     if ($info === false || $info[0] < 1 || $info[1] < 1) {
-        return "„{$label}“ ist kein gültiges Bild.";
+        return $name . tr(' ist kein gültiges Bild.', ' is not a valid image.');
     }
     if ($info[0] > 16000 || $info[1] > 16000 || $info[0] * $info[1] > 60_000_000) {
-        return "„{$label}“ hat zu viele Pixel.";
+        return $name . tr(' hat zu viele Pixel.', ' has too many pixels.');
     }
     $raw = @file_get_contents($file['tmp']);
     $img = $raw === false ? false : @imagecreatefromstring($raw);
     if ($img === false) {
-        return "„{$label}“ konnte nicht gelesen werden.";
+        return $name . tr(' konnte nicht gelesen werden.', ' could not be read.');
     }
 
     // Ausrichtung aus den Metadaten übernehmen, bevor diese entfernt werden
@@ -341,7 +358,7 @@ function process_photo(array $file, string $dest, array $cfg): ?string
     $ok = imagejpeg($out, $dest, (int)$cfg['jpeg_quality']);
     unset($img, $out);
     if (!$ok || !is_file($dest) || filesize($dest) < 100) {
-        return "„{$label}“ konnte nicht verarbeitet werden.";
+        return $name . tr(' konnte nicht verarbeitet werden.', ' could not be processed.');
     }
     @chmod($dest, 0640);
     return null;
@@ -380,6 +397,7 @@ function build_message(array $cfg, array $d, array $photos, string $ref): array
         '',
         $photos ? 'Fotos: ' . count($photos) . ' Anhang/Anhänge (verkleinert, ohne Standortdaten)' : 'Fotos: keine',
         'Datenschutzerklärung zugestimmt: ja',
+        ...(is_en() ? ['Sprache der Seite: Englisch. Bitte möglichst auf Englisch antworten.'] : []),
         '',
         'Antworten Sie direkt auf diese E-Mail. Die Antwort geht an ' . $d['email'] . '.',
     ];
@@ -387,7 +405,7 @@ function build_message(array $cfg, array $d, array $photos, string $ref): array
 
     $boundary = '=_pss_' . bin2hex(random_bytes(12));
     $domain = mail_domain($cfg['mail_from']);
-    $subject = cut('Anfrage: ' . $d['subject'] . ' – ' . $d['name'], 150);
+    $subject = cut('Anfrage' . (is_en() ? ' [EN]' : '') . ': ' . $d['subject'] . ' – ' . $d['name'], 150);
     $headers = [
         'Date' => date('r'),
         'From' => encode_header((string)$cfg['mail_from_name']) . ' <' . $cfg['mail_from'] . '>',
@@ -645,7 +663,7 @@ try {
     $cfg = config();
 } catch (Throwable $e) {
     error_log('anfrage.php: ' . $e->getMessage());
-    respond(500, ['ok' => false, 'error' => 'Das Formular ist gerade nicht verfügbar. Bitte rufen Sie an oder schreiben Sie eine E-Mail.']);
+    respond(500, ['ok' => false, 'error' => tr('Das Formular ist gerade nicht verfügbar. Bitte rufen Sie an oder schreiben Sie eine E-Mail.', 'The form is not available at the moment. Please call or send an email.')]);
 }
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -654,26 +672,29 @@ if ($method === 'GET') {
     if (($_GET['aktion'] ?? '') === 'token') {
         respond(200, ['token' => token_issue($cfg)]);
     }
-    respond(405, ['ok' => false, 'error' => 'Nur POST erlaubt.']);
+    respond(405, ['ok' => false, 'error' => 'POST only.']);
 }
 if ($method !== 'POST') {
-    respond(405, ['ok' => false, 'error' => 'Nur POST erlaubt.']);
+    respond(405, ['ok' => false, 'error' => 'POST only.']);
 }
+
+// Sprache der Seite, von der das Formular kam (nur für die Meldungen)
+$GLOBALS['pss_lang'] = ($_POST['lang'] ?? '') === 'en' ? 'en' : 'de';
 
 if (!origin_allowed($cfg)) {
     log_line('abgelehnt', 'herkunft');
-    respond(403, ['ok' => false, 'error' => 'Anfrage nicht zulässig.']);
+    respond(403, ['ok' => false, 'error' => tr('Anfrage nicht zulässig.', 'Request not allowed.')]);
 }
 
 // Zu große Anfragen kommen bei PHP ohne Inhalt an
 if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0 && empty($_POST) && empty($_FILES)) {
     log_line('abgelehnt', 'zu_gross');
-    respond(413, ['ok' => false, 'error' => 'Die Fotos sind zusammen zu groß. Bitte senden Sie weniger oder kleinere Fotos.', 'errors' => ['photos' => 'Die Fotos sind zusammen zu groß.']]);
+    respond(413, ['ok' => false, 'error' => tr('Die Fotos sind zusammen zu groß. Bitte senden Sie weniger oder kleinere Fotos.', 'The photos together are too large. Please send fewer or smaller photos.'), 'errors' => ['photos' => tr('Die Fotos sind zusammen zu groß.', 'The photos together are too large.')]]);
 }
 
 if (!rate_limit($cfg, false)) {
     log_line('abgelehnt', 'zu_viele');
-    respond(429, ['ok' => false, 'error' => 'Zu viele Anfragen von Ihrer Verbindung. Bitte versuchen Sie es später erneut oder rufen Sie an.']);
+    respond(429, ['ok' => false, 'error' => tr('Zu viele Anfragen von Ihrer Verbindung. Bitte versuchen Sie es später erneut oder rufen Sie an.', 'Too many requests from your connection. Please try again later or call.')]);
 }
 
 // Köderfeld: Menschen sehen es nicht. Bots bekommen scheinbar Erfolg.
@@ -691,10 +712,10 @@ if ($tokenError !== null) {
 [$data, $errors] = validate_fields($cfg);
 $files = normalize_files('photos');
 if (count($files) > (int)$cfg['max_photos']) {
-    $errors['photos'] = 'Bitte senden Sie höchstens ' . $cfg['max_photos'] . ' Fotos.';
+    $errors['photos'] = tr('Bitte senden Sie höchstens ' . $cfg['max_photos'] . ' Fotos.', 'Please send no more than ' . $cfg['max_photos'] . ' photos.');
 }
 if ($errors) {
-    respond(400, ['ok' => false, 'error' => 'Bitte prüfen Sie Ihre Angaben.', 'errors' => $errors]);
+    respond(400, ['ok' => false, 'error' => tr('Bitte prüfen Sie Ihre Angaben.', 'Please check your details.'), 'errors' => $errors]);
 }
 
 rate_limit($cfg, true);
@@ -705,7 +726,7 @@ try {
     ensure_dir($dir);
 } catch (Throwable $e) {
     error_log('anfrage.php: ' . $e->getMessage());
-    respond(500, ['ok' => false, 'error' => 'Das Formular ist gerade nicht verfügbar. Bitte rufen Sie an oder schreiben Sie eine E-Mail.']);
+    respond(500, ['ok' => false, 'error' => tr('Das Formular ist gerade nicht verfügbar. Bitte rufen Sie an oder schreiben Sie eine E-Mail.', 'The form is not available at the moment. Please call or send an email.')]);
 }
 
 $photos = [];
@@ -731,5 +752,5 @@ try {
 } catch (Throwable $e) {
     // Die Anfrage bleibt zur Wiederherstellung für keep_failed_days Tage im Ordner inbox.
     log_line('mail_fehler', "ref=$ref " . cut(preg_replace('/[^\x20-\x7E]/', '?', $e->getMessage()) ?? '', 200));
-    respond(502, ['ok' => false, 'error' => 'Die Anfrage konnte technisch nicht zugestellt werden. Bitte rufen Sie an oder schreiben Sie direkt eine E-Mail.', 'ref' => $ref]);
+    respond(502, ['ok' => false, 'error' => tr('Die Anfrage konnte technisch nicht zugestellt werden. Bitte rufen Sie an oder schreiben Sie direkt eine E-Mail.', 'The enquiry could not be delivered for technical reasons. Please call or send an email directly.'), 'ref' => $ref]);
 }

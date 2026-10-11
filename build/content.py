@@ -25,6 +25,7 @@ BIZ = {
 SERVICES = [
     {
         "slug": "leistungen/haftpflichtschaden-gutachten",
+        "key": "haftpflicht",
         "short": "Haftpflichtschaden-Gutachten",
         "tag": "Unfallschaden",
         "icon": "car",
@@ -76,6 +77,7 @@ SERVICES = [
     },
     {
         "slug": "leistungen/beweissicherungsgutachten",
+        "key": "beweis",
         "short": "Beweissicherungsgutachten",
         "tag": "Gebrauchtwagen und Werkstatt",
         "icon": "search",
@@ -121,6 +123,7 @@ SERVICES = [
     },
     {
         "slug": "leistungen/leasingruecknahme-gutachten",
+        "key": "leasing",
         "short": "Leasingrücknahme-Gutachten",
         "tag": "Leasingende",
         "icon": "key",
@@ -164,6 +167,7 @@ SERVICES = [
     },
     {
         "slug": "leistungen/wertgutachten",
+        "key": "wert",
         "short": "Wertgutachten",
         "tag": "An- und Verkauf, Oldtimer",
         "icon": "tag",
@@ -208,6 +212,7 @@ SERVICES = [
     },
     {
         "slug": "leistungen/restwertermittlung",
+        "key": "restwert",
         "short": "Restwertermittlung",
         "tag": "Totalschaden",
         "icon": "euro",
@@ -245,6 +250,7 @@ SERVICES = [
     },
     {
         "slug": "leistungen/unfallanalytisches-gutachten",
+        "key": "analyse",
         "short": "Unfallanalytisches Gutachten",
         "tag": "Rechtsstreit",
         "icon": "chart",
@@ -344,6 +350,7 @@ CHECKLIST = [
 ARTICLES = [
     {
         "slug": "ratgeber/wertminderung-nach-unfall",
+        "key": "wertminderung",
         "short": "Wertminderung nach einem Unfall",
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Wertminderung nach Unfall: Das steht Ihnen zu | PS Schneider",
@@ -385,6 +392,7 @@ ARTICLES = [
     },
     {
         "slug": "ratgeber/totalschaden-restwert-wiederbeschaffungswert",
+        "key": "totalschaden",
         "short": "Totalschaden: Restwert und Wiederbeschaffungswert",
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Totalschaden: Restwert und Wiederbeschaffungswert | PS Schneider",
@@ -423,6 +431,7 @@ ARTICLES = [
     },
     {
         "slug": "ratgeber/mietwagen-nutzungsausfall-nach-unfall",
+        "key": "mietwagen",
         "short": "Mietwagen oder Nutzungsausfall",
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Mietwagen oder Nutzungsausfall nach einem Unfall | PS Schneider",
@@ -462,6 +471,7 @@ ARTICLES = [
     },
     {
         "slug": "ratgeber/kfz-gutachten-kosten",
+        "key": "kosten",
         "short": "Was kostet ein Kfz-Gutachten?",
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Was kostet ein Kfz-Gutachten und wer zahlt es? | PS Schneider",
@@ -497,6 +507,7 @@ ARTICLES = [
     },
     {
         "slug": "ratgeber/oldtimer-wertgutachten",
+        "key": "oldtimer",
         "short": "Oldtimer-Wertgutachten",
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Oldtimer-Wertgutachten: Wann es sich lohnt | PS Schneider",

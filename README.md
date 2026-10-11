@@ -83,6 +83,19 @@ Beide Skripte brauchen nur Python 3. Nach jeder Änderung `build.py` ausführen 
 | `/unfall-checkliste/` | Interaktive Checkliste |
 | `/kontakt/` | Kontaktformular und Daten |
 | `/impressum/`, `/datenschutz/` | Rechtliches, nicht in Suchmaschinen indexiert |
+| `/en/…` | Englische Fassung aller Seiten, siehe Abschnitt „Zweisprachig“ |
+
+## Zweisprachig: Deutsch und Englisch
+
+Jede Seite gibt es auch auf Englisch unter `/en/` (zum Beispiel `/en/services/`, `/en/service-area/`, `/en/contact/`). Deutsch bleibt die Hauptsprache im Wurzelverzeichnis, damit die bestehenden Adressen und Weiterleitungen unverändert bleiben.
+
+- Texte: Deutsch in `build/content.py`, Englisch in `build/content_en.py` (gleiche Schlüssel und Struktur). Texte direkt im Code stehen als Paar `T("deutsch", "english")` in `build/build.py`.
+- Jede Seite hat einen sprachneutralen `key`. Daraus entstehen der Sprachumschalter DE | EN im Kopfbereich, die `hreflang`-Verweise in jeder Seite und die Sprachverweise in der `sitemap.xml`.
+- Der Umschalter führt immer zur gleichen Seite in der anderen Sprache. Es gibt bewusst keine automatische Weiterleitung nach Browsersprache, weil Suchmaschinen sonst Seiten nicht vollständig erfassen.
+- Rechtstexte: Die englischen Fassungen von Impressum und Datenschutzerklärung sind Übersetzungen zur Orientierung. Rechtlich maßgeblich ist die deutsche Fassung. Beide Fassungen müssen vor dem Livegang geprüft werden.
+- Das Kontaktformular sendet die Sprache mit. Fehlermeldungen kommen in der Sprache der Seite. Die E-Mail an das Postfach bleibt deutsch, trägt bei englischen Anfragen `[EN]` im Betreff und weist darauf hin, dass möglichst auf Englisch geantwortet werden soll.
+- Die 404-Seite ist eine Datei für beide Sprachen und verweist auf die englische Startseite.
+- `check.py` prüft zusätzlich: `lang` passt zum Pfad, keine Links in die andere Sprache ohne Umschalter, Umschalter und `hreflang` sind gegenseitig, und englische Seiten enthalten keinen deutschen Text.
 
 Technisch enthalten: eigene Titel und Beschreibungen pro Seite, Canonical, Open-Graph-Vorschaubild, strukturierte Daten (Unternehmen, Person, Leistungen, FAQ, Brotkrumen), `sitemap.xml`, `robots.txt`, Favicons, eigene 404-Seite, strenge Sicherheitsrichtlinie (kein Inline-Code), selbst gehostete Schriften.
 
@@ -174,7 +187,7 @@ Schlägt der Versand fehl, sieht der Besucher eine Meldung mit Telefon und E-Mai
 python3 server/tests/test_form.py
 ```
 
-Der Test startet einen lokalen PHP-Server und einen Test-Mailserver mit Verschlüsselung und prüft 56 Fälle: normale Anfragen, Fotos mit Standortdaten, getarnte Dateien, zu große Anfragen, Spam-Versuche, Header-Einschleusung, Mengenbegrenzung und Versandfehler. Voraussetzung: `php` mit `gd`, `openssl` und `pip install pillow`.
+Der Test startet einen lokalen PHP-Server und einen Test-Mailserver mit Verschlüsselung und prüft 65 Fälle: normale Anfragen, Fotos mit Standortdaten, getarnte Dateien, zu große Anfragen, Spam-Versuche, Header-Einschleusung, Mengenbegrenzung und Versandfehler. Voraussetzung: `php` mit `gd`, `openssl` und `pip install pillow`.
 
 ### Vorschau und Entwurf
 

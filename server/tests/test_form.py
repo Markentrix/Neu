@@ -220,6 +220,28 @@ def main():
             st, j = srv.post(fields(tok, **over))
             check(f"{label}: 400 mit Feldfehler", st == 400 and field in j.get("errors", {}), f"{st} {j}")
         check("Bei Fehlern wird keine Mail verschickt", len(sink.messages) == n)
+
+        print("\nEnglische Seite (lang=en)")
+        n = len(sink.messages)
+        for label, over, field, text in [
+            ("Name missing", {"name": ""}, "name", "Please enter your name"), ("Email invalid", {"email": "kaputt"}, "email", "valid email"),
+            ("Message too short", {"message": "hi"}, "message", "briefly"), ("Consent missing", {"consent": ""}, "consent", "privacy policy"),
+        ]:
+            st, j = srv.post(fields(tok, lang="en", **over))
+            check(f"{label}: 400 with English field error", st == 400 and text in j.get("errors", {}).get(field, ""), f"{st} {j}")
+        st, j = srv.post(fields(tok, lang="en"), [("notes.txt", b"hello", "text/plain")])
+        check("English photo error uses English quotes and text", st == 400 and "\u201cnotes.txt\u201d is not a supported format" in j.get("error", ""), f"{st} {j}")
+        st, j = srv.post(fields(tok, lang="xx\r\nBcc: x@y.de", name=""))
+        check("Unbekannte Sprache fällt auf Deutsch zurück", st == 400 and "Namen" in j.get("errors", {}).get("name", ""), f"{st} {j}")
+        check("Bei Fehlern wird keine Mail verschickt (englisch)", len(sink.messages) == n)
+        st, j = srv.post(fields(tok, lang="en", subject="Valuation report", message="Hello, I would like a valuation of my classic car."))
+        m = parse(sink)
+        body = m.get_body(preferencelist=("plain",)).get_content()
+        check("Englische Anfrage: 200, Betreff mit [EN], Hinweis zur Antwortsprache", st == 200 and "[EN]" in m["Subject"] and "Englisch" in body, f"{st} {j} {m['Subject']}")
+        st, j = srv.post(fields(tok))
+        m = parse(sink)
+        check("Deutsche Anfrage hat kein [EN] im Betreff", st == 200 and "[EN]" not in m["Subject"] and "Englisch" not in m.get_body(preferencelist=("plain",)).get_content())
+        time.sleep(0.2)
         st, j = srv.post(fields(tok, name="Max\r\nBcc: boese@example.com", subject="Test\r\nBcc: x@y.de"))
         m = parse(sink)
         check("Kopfzeilen-Einschleusung: Anfrage geht durch, aber ohne Bcc-Zeile", st == 200 and m["Bcc"] is None, f"{st} {list(m.keys())}")

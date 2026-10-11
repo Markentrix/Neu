@@ -23,6 +23,18 @@
 :root[data-theme="dark"] {
   --wm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='260' viewBox='0 0 380 260'%3E%3Cg transform='rotate(-24 190 130)' fill='%23ffffff' fill-opacity='0.085' font-family='Arial,Helvetica,sans-serif' font-weight='700'%3E%3Ctext x='190' y='122' font-size='24' text-anchor='middle' letter-spacing='3'%3E%C2%A9 MARKENTRIX%3C/text%3E%3Ctext x='190' y='152' font-size='15' text-anchor='middle' letter-spacing='4'%3EENTWURF %C2%B7 NICHT KOPIEREN%3C/text%3E%3C/g%3E%3C/svg%3E");
 }
+/* Englische Seiten: Wasserzeichen auf Englisch */
+:root:lang(en) {
+  --wm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='260' viewBox='0 0 380 260'%3E%3Cg transform='rotate(-24 190 130)' fill='%23141518' fill-opacity='0.075' font-family='Arial,Helvetica,sans-serif' font-weight='700'%3E%3Ctext x='190' y='122' font-size='24' text-anchor='middle' letter-spacing='3'%3E%C2%A9 MARKENTRIX%3C/text%3E%3Ctext x='190' y='152' font-size='15' text-anchor='middle' letter-spacing='4'%3EDRAFT %C2%B7 DO NOT COPY%3C/text%3E%3C/g%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):lang(en) {
+    --wm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='260' viewBox='0 0 380 260'%3E%3Cg transform='rotate(-24 190 130)' fill='%23ffffff' fill-opacity='0.085' font-family='Arial,Helvetica,sans-serif' font-weight='700'%3E%3Ctext x='190' y='122' font-size='24' text-anchor='middle' letter-spacing='3'%3E%C2%A9 MARKENTRIX%3C/text%3E%3Ctext x='190' y='152' font-size='15' text-anchor='middle' letter-spacing='4'%3EDRAFT %C2%B7 DO NOT COPY%3C/text%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+:root[data-theme="dark"]:lang(en) {
+  --wm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='260' viewBox='0 0 380 260'%3E%3Cg transform='rotate(-24 190 130)' fill='%23ffffff' fill-opacity='0.085' font-family='Arial,Helvetica,sans-serif' font-weight='700'%3E%3Ctext x='190' y='122' font-size='24' text-anchor='middle' letter-spacing='3'%3E%C2%A9 MARKENTRIX%3C/text%3E%3Ctext x='190' y='152' font-size='15' text-anchor='middle' letter-spacing='4'%3EDRAFT %C2%B7 DO NOT COPY%3C/text%3E%3C/g%3E%3C/svg%3E");
+}
 .draft-wm {
   position: fixed; inset: 0; z-index: 9000; pointer-events: none;
   background-image: var(--wm); background-size: 380px 260px;
@@ -37,4 +49,5 @@ img { -webkit-user-drag: none; user-drag: none; }
 @media print {
   body > * { display: none !important; }
   body::before { content: "© Markentrix. Entwurf zur Ansicht. Ausdruck und Weitergabe nicht gestattet."; display: block; font: 16px Arial, sans-serif; padding: 40px; }
+  html:lang(en) body::before { content: "© Markentrix. Draft for viewing. Printing and distribution are not permitted."; }
 }

@@ -2,7 +2,9 @@
    Ein technischer Vollschutz ist bei Webseiten nicht möglich. */
 (function () {
   'use strict';
-  var NOTICE = '© Markentrix. Entwurf zur Ansicht. Kopieren und Weitergabe nicht gestattet.';
+  var NOTICE = document.documentElement.lang === 'en'
+    ? '© Markentrix. Draft for viewing. Copying and distribution are not permitted.'
+    : '© Markentrix. Entwurf zur Ansicht. Kopieren und Weitergabe nicht gestattet.';
   var isField = function (t) {
     var el = t && t.nodeType === 3 ? t.parentElement : t;
     return !!(el && el.closest && el.closest('input, textarea, select'));

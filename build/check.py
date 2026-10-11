@@ -38,9 +38,22 @@ class Page(HTMLParser):
         self._buf = ""
         self.headings = []
         self._h = None
+        self.lang = None
+        self.alts = {}      # hreflang -> href (link rel=alternate)
+        self.anchors = []   # (href, hreflang)
+        self.text = []
+        self._skip = 0
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
+        if tag == "html":
+            self.lang = a.get("lang")
+        if tag in ("script", "style"):
+            self._skip += 1
+        if tag == "link" and a.get("rel") == "alternate" and a.get("hreflang"):
+            self.alts[a["hreflang"]] = a.get("href")
+        if tag == "a" and a.get("href"):
+            self.anchors.append((a["href"], a.get("hreflang")))
         if "id" in a:
             self.ids.add(a["id"])
         if "style" in a:
@@ -77,6 +90,8 @@ class Page(HTMLParser):
                 self.inline_script += 1
 
     def handle_endtag(self, tag):
+        if tag in ("script", "style") and self._skip:
+            self._skip -= 1
         if tag == "title":
             self._in_title = False
         if tag == "script" and self._script == "ld":
@@ -90,6 +105,8 @@ class Page(HTMLParser):
             self._h = None
 
     def handle_data(self, data):
+        if not self._skip:
+            self.text.append(data)
         if self._in_title:
             self.title += data
         if self._script == "ld":
@@ -187,6 +204,65 @@ for url, (f, p) in pages.items():
             if tgt and pu.fragment not in tgt[1].ids:
                 errors.append(f"{where}: Anker fehlt: {href}")
 
+# Sprachen: html lang passt zum Pfad, Links bleiben in der Sprache, Umschalter und hreflang sind gegenseitig
+GERMAN_WORDS = re.compile(r"\b(und|der|die|das|nicht|Sie|ist|für|mit|eine|oder|wird|auch|bei|Ihr|Ihre|Ihren)\b")
+
+
+def page_lang(url):
+    return "en" if url == "/en/" or url.startswith("/en/") else "de"
+
+
+def switch_target(p):
+    """Ziel des Umschalters zur anderen Sprache (Link mit hreflang)."""
+    for href, hl in p.anchors:
+        if hl and hl != p.lang and urlparse(href).path:
+            return urlparse(href).path
+    return None
+
+
+for url, (f, p) in pages.items():
+    if url == "/404.html":
+        continue
+    lang = page_lang(url)
+    if p.lang != lang:
+        errors.append(f"{url}: html lang={p.lang} statt {lang}")
+    for href, hl in p.anchors:
+        if re.match(r"^(mailto:|tel:|https?://|#)", href):
+            continue
+        path = urlparse(href).path
+        if not path or path.startswith(("/assets/", "/api/")):
+            continue
+        if hl and hl != lang:
+            continue
+        if page_lang(path) != lang:
+            errors.append(f"{url}: Link in die andere Sprache ohne Umschalter: {href}")
+    if lang == "en":
+        txt = " ".join(p.text)
+        hits = GERMAN_WORDS.findall(txt)
+        if len(hits) >= 4:
+            errors.append(f"{url}: englische Seite enthält deutschen Text ({len(hits)} Treffer, z. B. {sorted(set(hits))[:5]})")
+    other = switch_target(p)
+    if other is None:
+        errors.append(f"{url}: Sprachumschalter fehlt")
+    else:
+        if page_lang(other) == lang or resolve(other) is None:
+            errors.append(f"{url}: Sprachumschalter zeigt auf {other}")
+        else:
+            back = pages.get(other)
+            if back and switch_target(back[1]) != url:
+                errors.append(f"{url}: Sprachumschalter ist nicht gegenseitig ({other})")
+    noindex = "noindex" in p.meta.get("robots", "")
+    if not noindex:
+        want = {"x-default"} | {"de", "en"}
+        if set(p.alts) != want:
+            errors.append(f"{url}: hreflang unvollständig: {sorted(p.alts)}")
+        elif other is not None:
+            de_url = url if lang == "de" else other
+            en_url = url if lang == "en" else other
+            exp = {"de": DOMAIN + de_url, "en": DOMAIN + en_url, "x-default": DOMAIN + de_url}
+            if p.alts != exp:
+                errors.append(f"{url}: hreflang {p.alts} statt {exp}")
+
 # Sitemap
 all_noindex = all("noindex" in p.meta.get("robots", "") for _, (f, p) in pages.items())
 sm_file = PUBLIC / "sitemap.xml"
@@ -205,6 +281,11 @@ else:
             errors.append(f"Sitemap enthält noindex-Seite {full}")
         if not noindex and full not in locs:
             errors.append(f"Sitemap fehlt: {full}")
+    for loc in set(re.findall(r'hreflang="[^"]+" href="([^"]+)"', sm)):
+        if loc not in locs:
+            errors.append(f"Sitemap: hreflang-Adresse {loc} fehlt als eigener Eintrag")
+    if sm.count("<url>") * 3 != sm.count("<xhtml:link"):
+        errors.append("Sitemap: nicht jede Seite hat drei Sprachverweise")
     for loc in locs:
         if loc.replace(DOMAIN, "") not in pages:
             errors.append(f"Sitemap verweist auf fehlende Seite {loc}")

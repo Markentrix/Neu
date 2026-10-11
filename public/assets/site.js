@@ -3,6 +3,11 @@
   'use strict';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  /* Texte in der Sprache der Seite (html lang) */
+  var EN = document.documentElement.lang === 'en';
+  var TXT = EN
+    ? { menuClose: 'Close menu', menuOpen: 'Open menu', copied: 'copied', copy: 'copy', done: ' done', of: ' of ', well: '. Well done.' }
+    : { menuClose: 'Menü schließen', menuOpen: 'Menü öffnen', copied: 'kopiert', copy: 'kopieren', done: ' erledigt', of: ' von ', well: '. Gut gemacht.' };
 
   /* Jahr im Footer */
   $$('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
@@ -13,7 +18,7 @@
     var setOpen = function (open) {
       header.setAttribute('data-open', open ? 'true' : 'false');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.setAttribute('aria-label', open ? 'Menü schließen' : 'Menü öffnen');
+      toggle.setAttribute('aria-label', open ? TXT.menuClose : TXT.menuOpen);
     };
     toggle.addEventListener('click', function () {
       setOpen(header.getAttribute('data-open') !== 'true');
@@ -32,8 +37,8 @@
     btn.addEventListener('click', function () {
       var text = btn.getAttribute('data-copy') || '';
       var done = function () {
-        btn.textContent = 'kopiert';
-        setTimeout(function () { btn.textContent = 'kopieren'; }, 1600);
+        btn.textContent = TXT.copied;
+        setTimeout(function () { btn.textContent = TXT.copy; }, 1600);
       };
       var fallback = function () {
         var row = btn.closest('li');
@@ -72,7 +77,7 @@
     };
     var update = function () {
       var n = boxes.filter(function (b) { return b.checked; }).length;
-      if (progress) progress.textContent = n + ' von ' + boxes.length + ' erledigt' + (n === boxes.length ? '. Gut gemacht.' : '');
+      if (progress) progress.textContent = n + TXT.of + boxes.length + TXT.done + (n === boxes.length ? TXT.well : '');
     };
     boxes.forEach(function (b) { b.addEventListener('change', function () { save(); update(); }); });
     var reset = $('#checklist-reset');

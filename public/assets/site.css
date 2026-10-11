@@ -176,6 +176,17 @@ button { font: inherit; }
 .primary-nav a:hover { background: var(--surface-2); }
 .primary-nav a[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--accent); border-radius: 0; }
 .header-cta { flex: none; }
+.lang-switch {
+  display: inline-flex; flex: none; border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; background: var(--surface);
+}
+.lang-switch a {
+  display: grid; place-items: center; min-width: 40px; min-height: 40px; padding: 0 6px;
+  font-weight: 700; font-size: 14px; letter-spacing: .04em; color: var(--fg); text-decoration: none;
+}
+.lang-switch a + a { border-left: 1px solid var(--line); }
+.lang-switch a:hover { background: var(--surface-2); }
+.lang-switch a[aria-current="true"] { background: var(--accent); color: #fff; }
 .nav-toggle {
   display: none; margin-left: auto; width: 44px; height: 44px; border: 1px solid var(--line);
   border-radius: var(--radius); background: var(--surface); color: var(--fg); cursor: pointer; place-items: center;
@@ -191,7 +202,10 @@ button { font: inherit; }
 }
 @media (max-width: 1080px) {
   .logo { height: 44px; }
-  .nav-toggle { display: grid; }
+  .site-header .wrap { gap: 10px; }
+  .lang-switch { order: 2; margin-left: auto; }
+  .lang-switch a { min-width: 44px; min-height: 44px; }
+  .nav-toggle { display: grid; order: 3; margin-left: 0; }
   .header-cta { display: none; }
   .primary-nav {
     display: none; position: absolute; left: 0; right: 0; top: 100%;
@@ -581,7 +595,7 @@ h1, h2, h3, .lbl, .lede, .crumbs, .service p, .steps p, .reasons p, .summary p, 
 .trust li, .trust .lbl, .trust .num { min-width: 0; }
 
 /* Tippflächen mindestens 44 px */
-.crumbs a { display: inline-block; padding-block: 11px; }
+.crumbs a { display: inline-block; padding-block: 11px; min-width: 44px; }
 .crumbs ol { gap: 0 8px; }
 .site-footer .col a { display: block; padding-block: 8px; }
 .site-footer .legal a { display: inline-block; padding-block: 12px; }
@@ -783,3 +797,7 @@ h1, h2, h3, .lbl, .lede, .crumbs, .service p, .steps p, .reasons p, .summary p, 
 
 /* Das ausgeblendete Dateifeld darf von der allgemeinen Feldregel (Breite 100 %) nicht verbreitert werden */
 .field .file-input { width: 1px; height: 1px; padding: 0; border: 0; margin: -1px; }
+
+/* ---------- Englischer Hinweis auf der 404-Seite ---------- */
+.notfound-en { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
+.notfound-en h2 { font-size: clamp(22px, 3vw, 30px); }

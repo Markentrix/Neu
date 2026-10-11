@@ -13,6 +13,28 @@
   var PHONE = form.getAttribute('data-phone') || '';
   var PHONE_TEL = form.getAttribute('data-phone-tel') || '';
   var MAIL = form.getAttribute('data-email') || '';
+  var EN = document.documentElement.lang === 'en';
+  var LANG = EN ? 'en' : 'de';
+  /* Texte in der Sprache der Seite */
+  var M = EN ? {
+    alsoReach: ' You can also reach us by phone on ', orMail: ' or by email at ',
+    sending: 'Sending …', send: 'Send enquiry', preparing: 'Preparing photos …',
+    photo: 'Photo ', countOf: ' of ', photosSelected: ' photos selected', none: 'No photos selected yet',
+    badType: ' is not a supported format. Please choose JPG, PNG or WebP.', tooBig: ' is too large.',
+    unreadable: ' could not be read. Please choose a JPG or PNG.', limit: 'A maximum of ' , limitEnd: ' photos is possible.',
+    name: 'Please enter your name.', email: 'Please enter a valid email address.', subject: 'Please choose your topic.',
+    message: 'Please briefly say what it is about.', consent: 'Please agree to the privacy policy.',
+    failed: 'The enquiry could not be sent.', conn: 'The connection failed.', mb: ' MB', dec: '.', open: '\u201c', close: '\u201d'
+  } : {
+    alsoReach: ' Sie erreichen uns auch telefonisch unter ', orMail: ' oder per E-Mail an ',
+    sending: 'Wird gesendet …', send: 'Anfrage senden', preparing: 'Fotos werden vorbereitet …',
+    photo: 'Foto ', countOf: ' von ', photosSelected: ' Fotos ausgewählt', none: 'Noch keine Fotos ausgewählt',
+    badType: ' hat kein unterstütztes Format. Bitte JPG, PNG oder WebP wählen.', tooBig: ' ist zu groß.',
+    unreadable: ' konnte nicht gelesen werden. Bitte wählen Sie ein JPG oder PNG.', limit: 'Es sind höchstens ', limitEnd: ' Fotos möglich.',
+    name: 'Bitte geben Sie Ihren Namen an.', email: 'Bitte geben Sie eine gültige E-Mail-Adresse an.', subject: 'Bitte wählen Sie Ihr Anliegen.',
+    message: 'Bitte schreiben Sie kurz, worum es geht.', consent: 'Bitte stimmen Sie der Datenschutzerklärung zu.',
+    failed: 'Die Anfrage konnte nicht gesendet werden.', conn: 'Die Verbindung hat nicht geklappt.', mb: ' MB', dec: ',', open: '\u201e', close: '\u201c'
+  };
   var MAX_PHOTOS = 5;
   var MAX_EDGE = 2000;
   var MAX_ORIGINAL_BYTES = 30 * 1024 * 1024;
@@ -33,7 +55,7 @@
 
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
-  function kb(n) { return n >= 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  function kb(n) { return n >= 1048576 ? (n / 1048576).toFixed(1).replace('.', M.dec) + M.mb : Math.max(1, Math.round(n / 1024)) + ' KB'; }
 
   function setError(field, text) {
     var err = $('err-' + field);
@@ -76,7 +98,7 @@
     form.classList.toggle('is-sending', on);
     var btn = form.querySelector('button[type="submit"]');
     btn.disabled = on;
-    btn.textContent = on ? (label || 'Wird gesendet …') : 'Anfrage senden';
+    btn.textContent = on ? (label || M.sending) : M.send;
   }
 
   /* ---------------------------------------------------------------- Token (Schutz vor automatischen Absendern) */
@@ -134,15 +156,15 @@
     photos.forEach(function (p, i) {
       var li = document.createElement('li');
       var img = document.createElement('img');
-      img.src = p.url; img.alt = 'Foto ' + (i + 1); img.width = 160; img.height = 120;
+      img.src = p.url; img.alt = M.photo + (i + 1); img.width = 160; img.height = 120;
       var meta = document.createElement('div');
       meta.className = 'meta';
-      var nm = document.createElement('span'); nm.textContent = 'Foto ' + (i + 1);
+      var nm = document.createElement('span'); nm.textContent = M.photo + (i + 1);
       var sz = document.createElement('span'); sz.textContent = kb(p.blob.size);
       meta.appendChild(nm); meta.appendChild(sz);
       var rm = document.createElement('button');
       rm.type = 'button'; rm.className = 'rm';
-      rm.setAttribute('aria-label', 'Foto ' + (i + 1) + ' entfernen');
+      rm.setAttribute('aria-label', EN ? 'Remove photo ' + (i + 1) : 'Foto ' + (i + 1) + ' entfernen');
       rm.innerHTML = '<span aria-hidden="true">×</span>';
       rm.addEventListener('click', function () {
         URL.revokeObjectURL(p.url);
@@ -153,7 +175,7 @@
       li.appendChild(img); li.appendChild(meta); li.appendChild(rm);
       list.appendChild(li);
     });
-    $('dz-count').textContent = photos.length ? photos.length + ' von ' + MAX_PHOTOS + ' Fotos ausgewählt' : 'Noch keine Fotos ausgewählt';
+    $('dz-count').textContent = photos.length ? photos.length + M.countOf + MAX_PHOTOS + M.photosSelected : M.none;
   }
 
   function addFiles(fileList) {
@@ -167,21 +189,21 @@
         if (problems.indexOf('limit') < 0) problems.push('limit');
         return;
       }
-      if (TYPES.indexOf(f.type) < 0) { problems.push('„' + f.name + '“ hat kein unterstütztes Format. Bitte JPG, PNG oder WebP wählen.'); return; }
-      if (f.size > MAX_ORIGINAL_BYTES) { problems.push('„' + f.name + '“ ist zu groß.'); return; }
+      if (TYPES.indexOf(f.type) < 0) { problems.push(M.open + f.name + M.close + M.badType); return; }
+      if (f.size > MAX_ORIGINAL_BYTES) { problems.push(M.open + f.name + M.close + M.tooBig); return; }
       queue.push(f);
     });
-    setBusy(true, 'Fotos werden vorbereitet …');
+    setBusy(true, M.preparing);
     return queue.reduce(function (chain, f) {
       return chain.then(function () {
         return compress(f).then(function (blob) {
           photos.push({ blob: blob, url: URL.createObjectURL(blob) });
         }).catch(function () {
-          problems.push('„' + f.name + '“ konnte nicht gelesen werden. Bitte wählen Sie ein JPG oder PNG.');
+          problems.push(M.open + f.name + M.close + M.unreadable);
         });
       });
     }, Promise.resolve()).then(function () {
-      problems = problems.map(function (p) { return p === 'limit' ? 'Es sind höchstens ' + MAX_PHOTOS + ' Fotos möglich.' : p; });
+      problems = problems.map(function (p) { return p === 'limit' ? M.limit + MAX_PHOTOS + M.limitEnd : p; });
       if (problems.length) setError('photos', problems.join(' '));
       renderPhotos();
     }).then(function () { setBusy(false); });
@@ -205,11 +227,11 @@
 
   function validate() {
     var errs = {};
-    if (!$('f-name').value.trim()) errs.name = 'Bitte geben Sie Ihren Namen an.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('f-email').value.trim())) errs.email = 'Bitte geben Sie eine gültige E-Mail-Adresse an.';
-    if (!$('f-subject').value) errs.subject = 'Bitte wählen Sie Ihr Anliegen.';
-    if ($('f-message').value.trim().length < 5) errs.message = 'Bitte schreiben Sie kurz, worum es geht.';
-    if (!$('f-consent').checked) errs.consent = 'Bitte stimmen Sie der Datenschutzerklärung zu.';
+    if (!$('f-name').value.trim()) errs.name = M.name;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('f-email').value.trim())) errs.email = M.email;
+    if (!$('f-subject').value) errs.subject = M.subject;
+    if ($('f-message').value.trim().length < 5) errs.message = M.message;
+    if (!$('f-consent').checked) errs.consent = M.consent;
     return errs;
   }
 
@@ -263,6 +285,7 @@
         fd.append('subject', $('f-subject').value);
         fd.append('message', $('f-message').value.trim());
         fd.append('consent', '1');
+        fd.append('lang', LANG);
         fd.append('token', token);
         fd.append('website', $('f-website').value);
         photos.forEach(function (p, i) { fd.append('photos[]', p.blob, 'foto-' + (i + 1) + '.jpg'); });
@@ -282,11 +305,11 @@
         }
         // Token abgelaufen oder zu schnell: neues holen, damit ein erneuter Versuch klappt
         token = ''; tokenRequest = null; fetchToken();
-        showGeneral(j.error || 'Die Anfrage konnte nicht gesendet werden.', res.status >= 500 || res.status === 403 || res.status === 429);
+        showGeneral(j.error || M.failed, res.status >= 500 || res.status === 403 || res.status === 429);
       });
     }
     run.catch(function () {
-      showGeneral('Die Verbindung hat nicht geklappt.', true);
+      showGeneral(M.conn, true);
     }).then(function () { setBusy(false); });
   });
 
