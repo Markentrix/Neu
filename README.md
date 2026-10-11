@@ -75,6 +75,8 @@ Beide Skripte brauchen nur Python 3. Nach jeder Änderung `build.py` ausführen 
 | `/` | Startseite |
 | `/leistungen/` | Übersicht aller Leistungen |
 | `/leistungen/…` | Sechs Unterseiten, je eine pro Gutachten |
+| `/einsatzgebiet/` | Einsatzgebiet Landkreis Celle und Umkreis von 50 Kilometern mit Schema und Ortsliste |
+| `/einsatzgebiet/…` | Acht Ortsseiten: Bergen, Hambühren, Wietze, Hannover, Burgdorf, Gifhorn, Walsrode, Soltau |
 | `/ratgeber/` | Übersicht der Ratgeber-Artikel |
 | `/ratgeber/…` | Fünf Artikel zu Wertminderung, Totalschaden, Mietwagen, Gutachterkosten und Oldtimer |
 | `/gruende-fuer-ein-gutachten/` | Vergleich Kostenvoranschlag und Gutachten |
@@ -98,14 +100,17 @@ Das Vorschaubild neu erzeugen: `node build/make-og.js` (braucht Playwright).
 - Das Beispiel mit angenommenen Zahlen (8.000 Euro und 2.000 Euro) im Artikel zum Totalschaden.
 - Unterseite „Unfallanalytisches Gutachten“ und ihr Umfang.
 - Aussage zu Bagatellschäden (etwa 750 bis 1.000 Euro) auf der Haftpflicht-Seite und im Vergleich.
-- Einsatzgebiet „Celle und Umgebung“ und „Besichtigung nach Absprache“.
+- Einsatzgebiet „Landkreis Celle und Umkreis von 50 Kilometern“, die Ortsliste und die Entfernungen auf den Ortsseiten.
+- Aussage „Besichtigung nach Absprache“ und wo Besichtigungen stattfinden.
 - Tipps unter „In den Tagen danach“ auf der Checklisten-Seite.
 - Hinweise zu Wertgutachten (Kauf, Verkauf, Oldtimer) und zur Totalschaden-Definition.
 - Autorenzeile „Von Patric Schneider“ auf den Unterseiten.
 
 **Neue Artikel schreiben:** In `build/content.py` unter `ARTICLES` einen Eintrag nach dem Muster der vorhandenen ergänzen, `build.py` ausführen, fertig. Die Seite landet automatisch in Navigation, Übersicht und Sitemap. Veröffentlichungsdatum fest eintragen.
 
-**Ortsseiten** für Städte im Einsatzgebiet gibt es noch nicht. Sie lohnen sich nur für Orte, in denen Termine angeboten werden. Das Einsatzgebiet ist bisher nicht festgelegt.
+**Orte ändern:** In `build/content.py` unter `TOWNS` stehen alle Orte. Mit `"page": True` und Koordinaten bekommt ein Ort eine eigene Seite, Entfernung und Himmelsrichtung berechnet der Generator selbst. Der Radius steht unter `AREA`. Entfernungen sind Luftlinie ab Celle und beruhen auf groben Koordinaten.
+
+**Zu viele Ortsseiten schaden:** Seiten, die sich nur im Ortsnamen unterscheiden, bewertet Google schlecht. Deshalb gibt es nur acht. Weitere Orte lohnen sich erst, wenn es echte Inhalte dazu gibt, zum Beispiel Fotos von Einsätzen oder Kundenstimmen aus dem Ort.
 
 **Für bessere Auffindbarkeit (außerhalb des Codes)**
 - Google-Unternehmensprofil mit Kategorie „Kfz-Gutachter“ anlegen und mit Adresse, Telefon, Öffnungszeiten und Website pflegen.

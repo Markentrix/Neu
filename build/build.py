@@ -11,13 +11,14 @@ import argparse
 import datetime
 import html
 import json
+import math
 import re
 import shutil
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from content import BIZ, SERVICES, ARTICLES, REASONS, COMPARE_ROWS, HOME_FAQ, CHECKLIST  # noqa: E402
+from content import BIZ, SERVICES, ARTICLES, REASONS, COMPARE_ROWS, HOME_FAQ, CHECKLIST, AREA, AREA_REGIONS, TOWNS  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
@@ -116,6 +117,58 @@ def soften(markup):
     return _HEAD_RE.sub(fix, markup)
 
 
+# ---------------------------------------------------------------- Einsatzgebiet
+
+_UM = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss", "Ä": "ae", "Ö": "oe", "Ü": "ue"})
+
+
+def slugify(name):
+    return re.sub(r"[^a-z0-9]+", "-", name.translate(_UM).lower()).strip("-")
+
+
+def km_between(lat1, lon1, lat2, lon2):
+    """Luftlinie in Kilometern (Haversine)."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp, dl = p2 - p1, math.radians(lon2 - lon1)
+    h = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * 6371 * math.asin(math.sqrt(h))
+
+
+def xy_km(lat, lon):
+    """Versatz in Kilometern von Celle: (Ost, Nord)."""
+    c_lat, c_lon = AREA["center"]
+    return ((lon - c_lon) * 111.32 * math.cos(math.radians(c_lat)), (lat - c_lat) * 111.32)
+
+
+def compass(lat, lon):
+    dx, dy = xy_km(lat, lon)
+    names = ["Norden", "Nordosten", "Osten", "Südosten", "Süden", "Südwesten", "Westen", "Nordwesten"]
+    return names[int(((math.degrees(math.atan2(dx, dy)) + 22.5) % 360) // 45)]
+
+
+def prepare_towns():
+    c_lat, c_lon = AREA["center"]
+    for t in TOWNS:
+        if t.get("page"):
+            t["slug"] = "einsatzgebiet/" + slugify(t["name"])
+            dist = km_between(c_lat, c_lon, t["lat"], t["lon"])
+            t["dist"] = max(5, int(round(dist / 5.0) * 5))
+            t["dir"] = compass(t["lat"], t["lon"])
+            assert dist <= AREA["radius_km"], f"{t['name']} liegt außerhalb des Einsatzgebiets"
+
+
+prepare_towns()
+PAGE_TOWNS = [t for t in TOWNS if t.get("page")]
+
+
+def area_served():
+    c_lat, c_lon = AREA["center"]
+    return [{"@type": "City", "name": "Celle"},
+            {"@type": "AdministrativeArea", "name": "Landkreis Celle"},
+            {"@type": "GeoCircle", "geoMidpoint": {"@type": "GeoCoordinates", "latitude": c_lat, "longitude": c_lon},
+             "geoRadius": str(AREA["radius_km"] * 1000)}]
+
+
 LINK_RE = re.compile(r"\[\[([^|\]]+)\|([^\]]+)\]\]")
 
 
@@ -187,7 +240,7 @@ def business_node():
         "telephone": "+49 172 5178150",
         "email": BIZ["email"],
         "address": address_node(),
-        "areaServed": {"@type": "City", "name": "Celle"},
+        "areaServed": area_served(),
         "founder": {"@id": DOMAIN + "/#person"},
         "knowsAbout": ["Kfz-Gutachten", "Haftpflichtschaden", "Restwertermittlung", "Wertgutachten",
                        "Oldtimer-Bewertung", "Leasingrückgabe", "Unfallanalyse"],
@@ -273,7 +326,7 @@ def header(d, slug):
 
 
 def footer(d):
-    svc = "\n      ".join(f'<a href="{u(s["slug"], d)}">{esc(s["short"])}</a>' for s in SERVICES)
+    svc = "\n      ".join(f'<a href="{u(s["slug"], d)}">{_SHY_RE.sub(lambda w: SHY[w.group(0)], esc(s["short"]))}</a>' for s in SERVICES)
     return f'''<footer class="site-footer">
   <div class="wrap">
     <div class="col">
@@ -290,6 +343,7 @@ def footer(d):
       <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>
       <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a>
       <a href="https://wa.me/{BIZ["phone_tel"].lstrip("+")}" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="{u("einsatzgebiet", d)}">Einsatzgebiet</a>
       <a href="{u("ratgeber", d)}">Ratgeber</a>
       <a href="{u("gruende-fuer-ein-gutachten", d)}">Gründe für ein Gutachten</a>
       <a href="{u("unfall-checkliste", d)}">Unfall-Checkliste</a>
@@ -466,6 +520,7 @@ def related(slugs, d):
     extra = {
         "leistungen": ("Alle Leistungen", "Sechs Gutachten im Überblick und welches zu Ihrer Situation passt."),
         "ratgeber": ("Ratgeber", "Antworten auf häufige Fragen nach dem Unfall."),
+        "einsatzgebiet": ("Einsatzgebiet", "Landkreis Celle und Umkreis von 50 Kilometern."),
         "gruende-fuer-ein-gutachten": ("Gründe für ein Kfz-Gutachten", "Warum ein Gutachten mehr bringt als ein Kostenvoranschlag."),
         "unfall-checkliste": ("Unfall-Checkliste", "Die ersten Schritte nach einem Unfall zum Abhaken."),
         "kontakt": ("Kontakt", "Anfrage senden oder direkt anrufen."),
@@ -493,6 +548,38 @@ def service_cards(d):
     return '<ul class="services">' + "\n".join(out) + "</ul>"
 
 
+def contact_rows():
+    wa = BIZ["phone_tel"].lstrip("+")
+    return f'''<ul class="contact-rows">
+        <li><span class="k">Telefon</span><span class="v"><a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a></span><button class="copy-btn" type="button" data-copy="{BIZ["phone_copy"]}">kopieren</button></li>
+        <li><span class="k">WhatsApp</span><span class="v"><a href="https://wa.me/{wa}" target="_blank" rel="noopener">+49 172 517 81 50</a></span><span></span></li>
+        <li><span class="k">E-Mail</span><span class="v"><a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a></span><button class="copy-btn" type="button" data-copy="{BIZ["email"]}">kopieren</button></li>
+        <li><span class="k">Adresse</span><span class="v">{BIZ["street"]}<br>{BIZ["zip"]} {BIZ["city"]}</span><span></span></li>
+        <li><span class="k">Termine</span><span class="v">Besichtigung nach Absprache, {AREA["label"]}</span><span></span></li>
+      </ul>'''
+
+
+def contact_compact(d):
+    wa = BIZ["phone_tel"].lstrip("+")
+    return f'''<section class="section section--surface-top contact-compact" id="kontakt" aria-labelledby="kontakt-title">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Kontakt</p>
+      <h2 id="kontakt-title">Rufen Sie an oder schreiben Sie</h2>
+      <p class="lede">Für eine unverbindliche Erstberatung, einen Besichtigungstermin oder ein individuelles Angebot. Am schnellsten erreichen Sie mich telefonisch oder per WhatsApp.</p>
+    </div>
+    <div class="contact-compact-grid">
+      <div>{contact_rows()}</div>
+      <div class="contact-actions">
+        <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{BIZ["phone_display"]}</a>
+        <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
+        <a class="btn btn-secondary" href="{u("kontakt", d)}">{svg("mail")}Anfrage per Formular</a>
+      </div>
+    </div>
+  </div>
+</section>'''
+
+
 def contact_section(d, h2="Fragen Sie unverbindlich an", wrap_class="section contact section--surface-top"):
     wa = BIZ["phone_tel"].lstrip("+")
     return f'''<section class="{wrap_class}" id="kontakt" aria-labelledby="kontakt-title">
@@ -501,13 +588,7 @@ def contact_section(d, h2="Fragen Sie unverbindlich an", wrap_class="section con
       <p class="eyebrow">Kontakt</p>
       <h2 id="kontakt-title">{esc(h2)}</h2>
       <p class="lede">Für eine unverbindliche Erstberatung, einen Besichtigungstermin oder ein individuelles Angebot. Am schnellsten erreichen Sie mich telefonisch oder per WhatsApp.</p>
-      <ul class="contact-rows">
-        <li><span class="k">Telefon</span><span class="v"><a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a></span><button class="copy-btn" type="button" data-copy="{BIZ["phone_copy"]}">kopieren</button></li>
-        <li><span class="k">WhatsApp</span><span class="v"><a href="https://wa.me/{wa}" target="_blank" rel="noopener">+49 172 517 81 50</a></span><span></span></li>
-        <li><span class="k">E-Mail</span><span class="v"><a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a></span><button class="copy-btn" type="button" data-copy="{BIZ["email"]}">kopieren</button></li>
-        <li><span class="k">Adresse</span><span class="v">{BIZ["street"]}<br>{BIZ["zip"]} {BIZ["city"]}</span><span></span></li>
-        <li><span class="k">Termine</span><span class="v">Besichtigung nach Absprache, Celle und Umgebung</span><span></span></li>
-      </ul>
+      {contact_rows()}
       <p class="contact-hint">{BIZ["person"]} · {BIZ["role"]} · {BIZ["craft"]}</p>
     </div>
 
@@ -739,7 +820,19 @@ def build_home():
     </div>
   </section>
 
-  {contact_section(d)}
+  <section class="section" id="einsatzgebiet" aria-labelledby="gebiet-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Einsatzgebiet</p>
+        <h2 id="gebiet-title">Im Landkreis Celle und im Umkreis von 50 Kilometern</h2>
+        <p class="lede">Besichtigungstermine nach Absprache, von Celle bis Hannover, Gifhorn, Soltau und Walsrode.</p>
+      </div>
+      {town_chips([t for t in PAGE_TOWNS], d)}
+      <p class="more-row"><a class="btn btn-secondary" href="{u("einsatzgebiet", d)}">Alle Orte im Einsatzgebiet →</a></p>
+    </div>
+  </section>
+
+  {contact_compact(d)}
 '''
     graph = [business_node(), person_node(), website_node(), faq_node(faq)]
     return dict(slug="", d=d,
@@ -787,7 +880,7 @@ def build_service(s):
     graph = [
         {"@type": "Service", "@id": abs_url(s["slug"]) + "#service", "name": s["short"], "serviceType": s["short"],
          "description": s["desc"], "url": abs_url(s["slug"]), "provider": business_ref(),
-         "areaServed": {"@type": "City", "name": "Celle"}},
+         "areaServed": area_served()},
         breadcrumb_node([("Leistungen", "leistungen"), (s["short"], s["slug"])]),
         faq_node(s["faq"]),
     ]
@@ -933,6 +1026,185 @@ def build_ratgeber_index():
     return dict(slug="ratgeber", d=d,
                 title="Ratgeber Kfz-Gutachten und Unfall | PS Schneider",
                 desc="Ratgeber vom Kfz-Sachverständigen in Celle: Wertminderung, Totalschaden, Mietwagen, Gutachterkosten und Oldtimer-Wertgutachten verständlich erklärt.",
+                body=body, graph=graph)
+
+
+def town_chips(towns, d, current=None):
+    items = []
+    for t in towns:
+        if t.get("home"):
+            items.append(f'<li><a href="{u("", d)}">{esc(t["name"])}</a></li>')
+        elif t.get("page") and t["name"] != current:
+            items.append(f'<li><a href="{u(t["slug"], d)}">{esc(t["name"])}</a></li>')
+        else:
+            items.append(f'<li><span>{esc(t["name"])}</span></li>')
+    return f'<ul class="chips">{"".join(items)}</ul>'
+
+
+def area_svg(d):
+    """Schematische Darstellung (keine Karte): Celle in der Mitte, Ringe bei 25 und 50 km."""
+    S, C = 5.6, 320  # Pixel pro km, Mittelpunkt
+    pts = []
+    for t in PAGE_TOWNS:
+        dx, dy = xy_km(t["lat"], t["lon"])
+        x, y = C + dx * S, C - dy * S
+        left = dx < 0
+        tx = x - 11 if left else x + 11
+        anchor = "end" if left else "start"
+        pts.append(f'<a href="{u(t["slug"], d)}"><circle class="pt" cx="{x:.0f}" cy="{y:.0f}" r="7"/>'
+                   f'<text class="lb" x="{tx:.0f}" y="{y + 6:.0f}" text-anchor="{anchor}">{esc(t["name"])}</text></a>')
+    r50, r25 = AREA["radius_km"] * S, AREA["radius_km"] / 2 * S
+    return f'''<svg class="area-svg" viewBox="0 0 640 640" role="img" aria-label="Schema des Einsatzgebiets: Celle in der Mitte, Orte im Umkreis von 50 Kilometern">
+  <circle class="ring" cx="{C}" cy="{C}" r="{r50:.0f}"/>
+  <circle class="ring ring-in" cx="{C}" cy="{C}" r="{r25:.0f}"/>
+  <text class="ring-lb" x="{C}" y="{C - r25 - 6:.0f}" text-anchor="middle">25 km</text>
+  <text class="ring-lb" x="{C}" y="{C - r50 - 6:.0f}" text-anchor="middle">50 km</text>
+  <text class="ring-lb" x="{C}" y="{C - r50 - 26:.0f}" text-anchor="middle">N</text>
+  {"".join(pts)}
+  <circle class="home" cx="{C}" cy="{C}" r="9"/>
+  <text class="lb lb-home" x="{C}" y="{C + 28}" text-anchor="middle">Celle</text>
+</svg>'''
+
+
+AREA_FAQ = [
+    ("In welchen Orten sind Sie tätig?",
+     "Im gesamten Landkreis Celle und im Umkreis von 50 Kilometern um Celle, zum Beispiel in Hannover, Burgdorf, Gifhorn, Walsrode und Soltau. Die Liste auf dieser Seite nennt die größeren Orte."),
+    ("Mein Ort steht nicht in der Liste. Was nun?",
+     "Rufen Sie einfach an. Orte im Umkreis von rund 50 Kilometern um Celle gehören zum Einsatzgebiet, auch wenn sie hier nicht einzeln genannt sind. Liegt Ihr Ort weiter weg, fragen Sie trotzdem an."),
+    ("Wo findet die Besichtigung statt?",
+     "Das stimmen wir individuell ab. Rufen Sie an, dann klären wir Ort und Termin."),
+]
+
+
+def build_area_hub():
+    d = 1
+    regions = []
+    for name, desc in AREA_REGIONS:
+        towns = [t for t in TOWNS if t["region"] == name]
+        regions.append(f'''<section>
+        <h2>{esc(name)}</h2>
+        <p>{esc(desc)}</p>
+        {town_chips(towns, d)}
+      </section>''')
+    body = f'''
+  {page_hero([("Einsatzgebiet", "einsatzgebiet")], d, "Einsatzgebiet", "Kfz-Gutachter im Landkreis Celle und Umkreis von 50 Kilometern",
+             "Unabhängige Kfz-Gutachten in Celle und in den Orten rundherum. Besichtigungstermine stimme ich individuell mit Ihnen ab.", byline=False)}
+
+  <div class="wrap page-grid">
+    <article class="prose">
+      <section>
+        <h2>Wo ich für Sie da bin</h2>
+        <p>Mein Büro ist in Celle. Von dort aus betreue ich den gesamten Landkreis Celle und die Orte im Umkreis von 50 Kilometern, vom Nordrand der Region Hannover bis in die Heide. Orte mit eigener Seite sind verlinkt.</p>
+        <figure class="area-map">
+          {area_svg(d)}
+          <figcaption>Schema, keine Landkarte. Die Entfernungen sind Luftlinie ab Celle.</figcaption>
+        </figure>
+      </section>
+      {"".join(regions)}
+      <section>
+        <h2>Unfall außerhalb des Gebiets?</h2>
+        <p>Der Radius ist ein Richtwert. Liegt Ihr Ort weiter entfernt, rufen Sie an. Wir klären dann, ob sich ein Termin einrichten lässt.</p>
+      </section>
+    </article>
+    {side_cta(d)}
+  </div>
+
+  <section class="section section--surface" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="faq-title">Häufige Fragen zum Einsatzgebiet</h2></div>
+      {faq_section(AREA_FAQ, d, open_first=True)}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rel-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="rel-title">Leistungen</h2></div>
+      {related(["leistungen", "leistungen/haftpflichtschaden-gutachten", "leistungen/wertgutachten"], d)}
+    </div>
+  </section>
+
+  {cta_band(d)}
+'''
+    graph = [breadcrumb_node([("Einsatzgebiet", "einsatzgebiet")]),
+             {"@type": "WebPage", "name": "Einsatzgebiet", "url": abs_url("einsatzgebiet"), "about": {"@id": DOMAIN + "/#business"}},
+             faq_node(AREA_FAQ)]
+    return dict(slug="einsatzgebiet", d=d,
+                title="Einsatzgebiet: Kfz-Gutachter Landkreis Celle | PS Schneider",
+                desc="Kfz-Sachverständiger im Landkreis Celle und im Umkreis von 50 Kilometern: Celle, Bergen, Gifhorn, Burgdorf, Soltau, Walsrode, Hannover und weitere Orte.",
+                body=body, graph=graph)
+
+
+def build_town(t):
+    d = t["slug"].count("/") + 1
+    name, region = t["name"], t["region"]
+    here = (t["lat"], t["lon"])
+    near = sorted((o for o in PAGE_TOWNS if o is not t),
+                  key=lambda o: km_between(here[0], here[1], o["lat"], o["lon"]))[:3]
+    trail = [("Einsatzgebiet", "einsatzgebiet"), (f"Kfz-Gutachter {name}", t["slug"])]
+    services = "".join(f'<li><a href="{u(s["slug"], d)}">{esc(s["short"])}</a></li>' for s in SERVICES)
+    faq = [
+        (f"Sind Sie auch in {name} tätig?",
+         f"Ja. {name} liegt rund {t['dist']} Kilometer Luftlinie von Celle entfernt und gehört zu meinem Einsatzgebiet im {AREA['label']}."),
+        ("Wo findet die Besichtigung statt?",
+         f"Das stimmen wir individuell ab. Rufen Sie an, dann klären wir, wo und wann ich Ihr Fahrzeug in oder um {name} besichtigen kann."),
+        ("Wer zahlt das Gutachten nach einem unverschuldeten Unfall?",
+         "In der Regel die Haftpflichtversicherung des Unfallverursachers. Sie haben das Recht, den Sachverständigen frei zu wählen."),
+    ]
+    near_links = "".join(f'<li><a href="{u(o["slug"], d)}"><strong>{esc(o["name"])}</strong><span>{esc(o["kind"])} im {esc(o["region"])}</span></a></li>' for o in near)
+    body = f'''
+  {page_hero(trail, d, "Einsatzgebiet", f"Kfz-Gutachter in {name}",
+             f"Unabhängige Kfz-Gutachten für {name} und Umgebung. {name} liegt rund {t['dist']} Kilometer Luftlinie von Celle entfernt im {t['dir']}, mitten in meinem Einsatzgebiet.", byline=False)}
+
+  <div class="wrap page-grid">
+    <article class="prose">
+      <section>
+        <h2>Gutachten für {esc(name)}</h2>
+        <p>{esc(name)} ({esc(t["kind"])} im {esc(region)}) gehört zu meinem Einsatzgebiet im {esc(AREA["label"])}. Wurde Ihr Fahrzeug in {esc(name)} oder Umgebung beschädigt, oder möchten Sie dort ein Fahrzeug bewerten lassen, erstelle ich Ihnen ein unabhängiges Gutachten.</p>
+        <ul>{services}</ul>
+      </section>
+      <section>
+        <h2>So läuft ein Termin ab</h2>
+        <ol>
+          <li>Sie rufen an oder schreiben mir und schildern kurz, worum es geht.</li>
+          <li>Wir klären, wo und wann ich Ihr Fahrzeug in oder um {esc(name)} besichtigen kann.</li>
+          <li>Ich dokumentiere Schaden oder Zustand und erstelle das Gutachten zügig.</li>
+          <li>Sie erhalten das Gutachten und entscheiden über die nächsten Schritte.</li>
+        </ol>
+      </section>
+      <section>
+        <h2>Nach einem Unfall in {esc(name)}</h2>
+        <p>Sichern Sie zuerst die Unfallstelle. Bei Verletzten rufen Sie die 112, bei einem Unfall mit Polizeiaufnahme die 110. Danach erreichen Sie mich telefonisch. Die <a href="{u("unfall-checkliste", d)}">Unfall-Checkliste</a> führt Sie durch die ersten Schritte.</p>
+      </section>
+    </article>
+    {side_cta(d)}
+  </div>
+
+  <section class="section section--surface" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="faq-title">Häufige Fragen zu {esc(name)}</h2></div>
+      {faq_section(faq, d, open_first=True)}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rel-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="rel-title">Weitere Orte in der Nähe</h2></div>
+      <ul class="related">{near_links}</ul>
+      <p class="more-row"><a href="{u("einsatzgebiet", d)}">Alle Orte im Einsatzgebiet</a></p>
+    </div>
+  </section>
+
+  {cta_band(d)}
+'''
+    graph = [
+        {"@type": "Service", "@id": abs_url(t["slug"]) + "#service", "name": f"Kfz-Gutachter {name}", "serviceType": "Kfz-Gutachten",
+         "url": abs_url(t["slug"]), "provider": business_ref(), "areaServed": {"@type": "City", "name": name}},
+        breadcrumb_node(trail),
+        faq_node(faq),
+    ]
+    return dict(slug=t["slug"], d=d,
+                title=f"Kfz-Gutachter {name} | PS Schneider",
+                desc=f"Unabhängiger Kfz-Gutachter für {name}: Unfallgutachten, Wertgutachten und mehr. Rund {t['dist']} km von Celle, Termin nach Absprache. Tel. 0172 517 81 50.",
                 body=body, graph=graph)
 
 
@@ -1366,6 +1638,7 @@ def main():
     pages = [build_home(), build_leistungen()]
     pages += [build_service(s) for s in SERVICES]
     pages += [build_ratgeber_index()] + [build_article(a) for a in ARTICLES]
+    pages += [build_area_hub()] + [build_town(t) for t in PAGE_TOWNS]
     pages += [build_gruende(), build_checkliste(), build_kontakt(), build_impressum(), build_datenschutz(), build_404()]
 
     indexable = []

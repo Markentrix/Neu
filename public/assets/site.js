@@ -22,6 +22,11 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
   }
 
+  /* Auf schmalen Bildschirmen sind alle Fragen zunächst zugeklappt, das verkürzt die Seite */
+  if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) {
+    $$('.faq details[open]').forEach(function (d) { d.removeAttribute('open'); });
+  }
+
   /* Kopieren-Buttons */
   $$('.copy-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {

@@ -43,10 +43,25 @@
     "addressLocality": "Celle",
     "addressCountry": "DE"
    },
-   "areaServed": {
-    "@type": "City",
-    "name": "Celle"
-   },
+   "areaServed": [
+    {
+     "@type": "City",
+     "name": "Celle"
+    },
+    {
+     "@type": "AdministrativeArea",
+     "name": "Landkreis Celle"
+    },
+    {
+     "@type": "GeoCircle",
+     "geoMidpoint": {
+      "@type": "GeoCoordinates",
+      "latitude": 52.6226,
+      "longitude": 10.0805
+     },
+     "geoRadius": "50000"
+    }
+   ],
    "founder": {
     "@id": "https://psschneider.de/#person"
    },
@@ -428,62 +443,39 @@
     </div>
   </section>
 
-  <section class="section contact section--surface-top" id="kontakt" aria-labelledby="kontakt-title">
+  <section class="section" id="einsatzgebiet" aria-labelledby="gebiet-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Einsatzgebiet</p>
+        <h2 id="gebiet-title">Im Landkreis Celle und im Umkreis von 50 Kilometern</h2>
+        <p class="lede">Besichtigungstermine nach Absprache, von Celle bis Hannover, Gifhorn, Soltau und Walsrode.</p>
+      </div>
+      <ul class="chips"><li><a href="/einsatzgebiet/bergen/">Bergen</a></li><li><a href="/einsatzgebiet/hambuehren/">Hambühren</a></li><li><a href="/einsatzgebiet/wietze/">Wietze</a></li><li><a href="/einsatzgebiet/hannover/">Hannover</a></li><li><a href="/einsatzgebiet/burgdorf/">Burgdorf</a></li><li><a href="/einsatzgebiet/gifhorn/">Gifhorn</a></li><li><a href="/einsatzgebiet/walsrode/">Walsrode</a></li><li><a href="/einsatzgebiet/soltau/">Soltau</a></li></ul>
+      <p class="more-row"><a class="btn btn-secondary" href="/einsatzgebiet/">Alle Orte im Einsatzgebiet →</a></p>
+    </div>
+  </section>
+
+  <section class="section section--surface-top contact-compact" id="kontakt" aria-labelledby="kontakt-title">
   <div class="wrap">
-    <div class="contact-info">
+    <div class="section-head">
       <p class="eyebrow">Kontakt</p>
-      <h2 id="kontakt-title">Fragen Sie unverbindlich an</h2>
+      <h2 id="kontakt-title">Rufen Sie an oder schreiben Sie</h2>
       <p class="lede">Für eine unverbindliche Erstberatung, einen Besichtigungstermin oder ein individuelles Angebot. Am schnellsten erreichen Sie mich telefonisch oder per WhatsApp.</p>
-      <ul class="contact-rows">
+    </div>
+    <div class="contact-compact-grid">
+      <div><ul class="contact-rows">
         <li><span class="k">Telefon</span><span class="v"><a href="tel:+491725178150">0172 517 81 50</a></span><button class="copy-btn" type="button" data-copy="0172 5178150">kopieren</button></li>
         <li><span class="k">WhatsApp</span><span class="v"><a href="https://wa.me/491725178150" target="_blank" rel="noopener">+49 172 517 81 50</a></span><span></span></li>
         <li><span class="k">E-Mail</span><span class="v"><a href="mailto:info@psschneider.de">info@psschneider.de</a></span><button class="copy-btn" type="button" data-copy="info@psschneider.de">kopieren</button></li>
         <li><span class="k">Adresse</span><span class="v">Im Röthel 43<br>29225 Celle</span><span></span></li>
-        <li><span class="k">Termine</span><span class="v">Besichtigung nach Absprache, Celle und Umgebung</span><span></span></li>
-      </ul>
-      <p class="contact-hint">Patric Schneider · Sachverständiger für Fahrzeugtechnik · Kraftfahrzeugtechniker-Meister</p>
+        <li><span class="k">Termine</span><span class="v">Besichtigung nach Absprache, Landkreis Celle und Umkreis von 50 Kilometern</span><span></span></li>
+      </ul></div>
+      <div class="contact-actions">
+        <a class="btn btn-primary" href="tel:+491725178150"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6.2 6.2l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>0172 517 81 50</a>
+        <a class="btn btn-secondary" href="https://wa.me/491725178150" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 21l2.2-5.2A8.5 8.5 0 1 1 21 11.5z"/><path d="M9.5 9.2c.3 1.6 1.9 3.5 3.6 4.3l1.2-1.2 1.9.8v1.6c-3.6.5-7.7-3.3-7.9-7.1h1.7l.8 1.8-1.3 1z"/></svg>WhatsApp</a>
+        <a class="btn btn-secondary" href="/kontakt/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Anfrage per Formular</a>
+      </div>
     </div>
-
-    <form class="form" id="contact-form" novalidate>
-      <div class="row">
-        <div class="field">
-          <label for="f-name">Name <span class="req" aria-hidden="true">*</span></label>
-          <input type="text" id="f-name" name="name" autocomplete="name" autocapitalize="words" enterkeyhint="next" required>
-        </div>
-        <div class="field">
-          <label for="f-phone">Telefon</label>
-          <input type="tel" id="f-phone" name="phone" autocomplete="tel" inputmode="tel" enterkeyhint="next">
-        </div>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label for="f-email">E-Mail <span class="req" aria-hidden="true">*</span></label>
-          <input type="email" id="f-email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" enterkeyhint="next" required>
-        </div>
-        <div class="field">
-          <label for="f-subject">Anliegen <span class="req" aria-hidden="true">*</span></label>
-          <select id="f-subject" name="subject" required>
-            <option value="">Bitte wählen</option>
-            <option>Haftpflichtschaden-Gutachten</option><option>Beweissicherungsgutachten</option><option>Leasingrücknahme-Gutachten</option><option>Wertgutachten</option><option>Restwertermittlung</option><option>Unfallanalytisches Gutachten</option>
-            <option>Sonstige Frage</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label for="f-message">Nachricht <span class="req" aria-hidden="true">*</span></label>
-        <textarea id="f-message" name="message" required placeholder="Kurz: Was ist passiert, welches Fahrzeug, wann passt Ihnen ein Termin?"></textarea>
-        <span class="help">* Pflichtfelder</span>
-      </div>
-      <label class="consent">
-        <input type="checkbox" id="f-consent" name="consent" required>
-        <span>Ich habe die <a href="/datenschutz/">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung meiner Anfrage verwendet werden.</span>
-      </label>
-      <div class="form-actions">
-        <button class="btn btn-primary" type="submit">Anfrage senden</button>
-        <span class="form-status" id="form-status" role="status" aria-live="polite"></span>
-      </div>
-      <pre class="form-preview" id="form-preview"></pre>
-    </form>
   </div>
 </section>
 
@@ -497,18 +489,19 @@
     </div>
     <div class="col">
       <strong>Leistungen</strong>
-      <a href="/leistungen/haftpflichtschaden-gutachten/">Haftpflichtschaden-Gutachten</a>
-      <a href="/leistungen/beweissicherungsgutachten/">Beweissicherungsgutachten</a>
-      <a href="/leistungen/leasingruecknahme-gutachten/">Leasingrücknahme-Gutachten</a>
+      <a href="/leistungen/haftpflichtschaden-gutachten/">Haft­pflicht­schaden-Gutachten</a>
+      <a href="/leistungen/beweissicherungsgutachten/">Beweis­sicherungs­gutachten</a>
+      <a href="/leistungen/leasingruecknahme-gutachten/">Leasing­rück­nahme-Gutachten</a>
       <a href="/leistungen/wertgutachten/">Wertgutachten</a>
-      <a href="/leistungen/restwertermittlung/">Restwertermittlung</a>
-      <a href="/leistungen/unfallanalytisches-gutachten/">Unfallanalytisches Gutachten</a>
+      <a href="/leistungen/restwertermittlung/">Rest­wert­ermittlung</a>
+      <a href="/leistungen/unfallanalytisches-gutachten/">Unfall­analytisches Gutachten</a>
     </div>
     <div class="col">
       <strong>Kontakt</strong>
       <a href="tel:+491725178150">0172 517 81 50</a>
       <a href="mailto:info@psschneider.de">info@psschneider.de</a>
       <a href="https://wa.me/491725178150" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="/einsatzgebiet/">Einsatzgebiet</a>
       <a href="/ratgeber/">Ratgeber</a>
       <a href="/gruende-fuer-ein-gutachten/">Gründe für ein Gutachten</a>
       <a href="/unfall-checkliste/">Unfall-Checkliste</a>

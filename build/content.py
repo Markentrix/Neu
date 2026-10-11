@@ -538,3 +538,65 @@ ARTICLES = [
         "related": ["leistungen/wertgutachten", "leistungen/beweissicherungsgutachten", "ratgeber/kfz-gutachten-kosten"],
     },
 ]
+
+
+# ---------------------------------------------------------------------------
+# Einsatzgebiet: Landkreis Celle und Umkreis von 50 Kilometern.
+# Koordinaten sind grobe Näherungen für die Entfernungsangabe "rund N km Luftlinie".
+# Nur Orte mit eigener Seite (page=True) brauchen Koordinaten.
+# ---------------------------------------------------------------------------
+AREA = {
+    "center": (52.6226, 10.0805),   # Celle
+    "radius_km": 50,
+    "label": "Landkreis Celle und Umkreis von 50 Kilometern",
+}
+
+AREA_REGIONS = [
+    ("Landkreis Celle", "Celle und die Orte im gesamten Landkreis."),
+    ("Region Hannover", "Der nördliche und östliche Teil der Region bis in die Landeshauptstadt."),
+    ("Landkreis Gifhorn", "Der östliche Umkreis bis Gifhorn und Wittingen."),
+    ("Heidekreis", "Der nordwestliche und nördliche Umkreis, von Walsrode bis Soltau."),
+    ("Landkreis Peine", "Peine im Südosten."),
+]
+
+# kind: Art der Gebietskörperschaft, nur für Orte mit eigener Seite benötigt
+TOWNS = [
+    # Landkreis Celle
+    {"name": "Celle", "region": "Landkreis Celle", "home": True},
+    {"name": "Bergen", "region": "Landkreis Celle", "page": True, "kind": "Stadt", "lat": 52.8136, "lon": 9.9608},
+    {"name": "Hambühren", "region": "Landkreis Celle", "page": True, "kind": "Gemeinde", "lat": 52.5558, "lon": 9.8514},
+    {"name": "Wietze", "region": "Landkreis Celle", "page": True, "kind": "Gemeinde", "lat": 52.6522, "lon": 9.8403},
+    {"name": "Winsen (Aller)", "region": "Landkreis Celle"},
+    {"name": "Eschede", "region": "Landkreis Celle"},
+    {"name": "Hermannsburg", "region": "Landkreis Celle"},
+    {"name": "Faßberg", "region": "Landkreis Celle"},
+    {"name": "Lachendorf", "region": "Landkreis Celle"},
+    {"name": "Wathlingen", "region": "Landkreis Celle"},
+    {"name": "Adelheidsdorf", "region": "Landkreis Celle"},
+    {"name": "Wienhausen", "region": "Landkreis Celle"},
+    {"name": "Unterlüß", "region": "Landkreis Celle"},
+    # Region Hannover
+    {"name": "Hannover", "region": "Region Hannover", "page": True, "kind": "Landeshauptstadt", "lat": 52.3759, "lon": 9.7320},
+    {"name": "Burgdorf", "region": "Region Hannover", "page": True, "kind": "Stadt", "lat": 52.4467, "lon": 10.0071},
+    {"name": "Langenhagen", "region": "Region Hannover"},
+    {"name": "Burgwedel", "region": "Region Hannover"},
+    {"name": "Isernhagen", "region": "Region Hannover"},
+    {"name": "Lehrte", "region": "Region Hannover"},
+    {"name": "Sehnde", "region": "Region Hannover"},
+    {"name": "Uetze", "region": "Region Hannover"},
+    {"name": "Wedemark", "region": "Region Hannover"},
+    {"name": "Garbsen", "region": "Region Hannover"},
+    # Landkreis Gifhorn
+    {"name": "Gifhorn", "region": "Landkreis Gifhorn", "page": True, "kind": "Kreisstadt", "lat": 52.4806, "lon": 10.5486},
+    {"name": "Hankensbüttel", "region": "Landkreis Gifhorn"},
+    {"name": "Wittingen", "region": "Landkreis Gifhorn"},
+    {"name": "Meinersen", "region": "Landkreis Gifhorn"},
+    # Heidekreis
+    {"name": "Walsrode", "region": "Heidekreis", "page": True, "kind": "Stadt", "lat": 52.8607, "lon": 9.6000},
+    {"name": "Soltau", "region": "Heidekreis", "page": True, "kind": "Stadt", "lat": 52.9850, "lon": 9.8430},
+    {"name": "Bad Fallingbostel", "region": "Heidekreis"},
+    {"name": "Munster", "region": "Heidekreis"},
+    {"name": "Schwarmstedt", "region": "Heidekreis"},
+    # Landkreis Peine
+    {"name": "Peine", "region": "Landkreis Peine"},
+]
