@@ -739,3 +739,47 @@ h1, h2, h3, .lbl, .lede, .crumbs, .service p, .steps p, .reasons p, .summary p, 
 .site-footer .col { min-width: 0; }
 .site-footer .col a, .site-footer .col span { overflow-wrap: anywhere; hyphens: auto; -webkit-hyphens: auto; }
 .id-card dd a { padding-block: 11px; }
+
+/* ==========================================================================
+   Kontaktformular mit Schadenfotos
+   ========================================================================== */
+.form-wrap { min-width: 0; display: grid; }
+.form[hidden], .form-success[hidden] { display: none; }
+.field .label { font-size: 14px; font-weight: 600; display: block; }
+.field .opt { font-weight: 400; color: var(--muted); margin-left: 6px; font-size: 13px; }
+.field-error { color: var(--danger); font-size: 14px; font-weight: 500; }
+.field input[aria-invalid="true"], .field select[aria-invalid="true"], .field textarea[aria-invalid="true"] { border-color: var(--danger); }
+.consent input[aria-invalid="true"] { outline: 2px solid var(--danger); outline-offset: 2px; }
+.form-error { border: 1px solid var(--danger); border-left-width: 4px; background: var(--surface-2); color: var(--fg); border-radius: var(--radius); padding: 12px 14px; font-size: 15px; }
+.form-error a { color: var(--accent-strong); font-weight: 600; }
+.demo-note { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0; font-size: 14px; }
+.notice-js { font-size: 14.5px; color: var(--muted); }
+.hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+.file-input { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; opacity: 0; }
+.dropzone { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 14px; border: 2px dashed var(--line); border-radius: var(--radius); background: var(--bg); transition: border-color .12s ease, background-color .12s ease; }
+.dropzone.is-over { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone:focus-within .dz-btn { outline: 3px solid var(--accent); outline-offset: 3px; }
+.dz-btn { cursor: pointer; padding-block: 12px; min-height: 48px; }
+.dz-text { color: var(--muted); font-size: 14.5px; }
+.dz-count { color: var(--muted); font-size: 14px; flex-basis: 100%; }
+@media (max-width: 560px) { .dz-text { display: none; } .dz-btn { flex: 1 1 100%; } }
+
+.photo-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.photo-list:empty { display: none; }
+.photo-list li { position: relative; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); min-width: 0; }
+.photo-list img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--surface-2); }
+.photo-list .meta { display: flex; justify-content: space-between; gap: 6px; padding: 6px 8px; font-size: 12.5px; color: var(--muted); }
+.photo-list .rm { position: absolute; top: 0; right: 0; width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
+.photo-list .rm span { width: 28px; height: 28px; border-radius: 50%; background: var(--deep); color: var(--deep-fg); display: grid; place-items: center; font-size: 20px; line-height: 1; }
+.photo-list .rm:hover span { background: var(--accent); color: var(--on-accent); }
+
+.form.is-sending { opacity: .85; }
+.form.is-sending button[type="submit"] { cursor: progress; }
+.form-success { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: clamp(20px, 3vw, 32px); display: grid; gap: 12px; box-shadow: var(--shadow); }
+.form-success h3 { font-size: clamp(26px, 3vw, 32px); }
+.form-success a { color: var(--accent-strong); font-weight: 600; text-underline-offset: 3px; }
+.form-success:focus { outline: none; }
+
+/* Das ausgeblendete Dateifeld darf von der allgemeinen Feldregel (Breite 100 %) nicht verbreitert werden */
+.field .file-input { width: 1px; height: 1px; padding: 0; border: 0; margin: -1px; }

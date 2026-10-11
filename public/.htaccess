@@ -6,6 +6,23 @@ Options -Indexes
 DirectoryIndex index.html
 ErrorDocument 404 /404.html
 
+# --- PHP: nur der Formular-Endpunkt ist von außen erreichbar, versteckte Dateien sind gesperrt ---
+<FilesMatch "\.php$">
+  Require all denied
+</FilesMatch>
+<Files "anfrage.php">
+  Require all granted
+</Files>
+<FilesMatch "^\.(ht|user\.ini)">
+  Require all denied
+</FilesMatch>
+# Upload-Grenzen für Fotos (bei mod_php; bei php-fpm gilt die Datei .user.ini)
+<IfModule mod_php.c>
+  php_value upload_max_filesize 20M
+  php_value post_max_size 60M
+  php_value max_file_uploads 10
+</IfModule>
+
 # --- HTTPS und eine Domain erzwingen (nach dem Einrichten des Zertifikats einkommentieren) ---
 # <IfModule mod_rewrite.c>
 #   RewriteEngine On
@@ -36,7 +53,7 @@ RedirectMatch 301 ^/kontakt/datenschutz/index\.php/?$ /datenschutz/
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
   Header always set X-Frame-Options "SAMEORIGIN"
   # Alles kommt vom eigenen Server, es gibt keinen Inline-Code:
-  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'"
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'"
   # Erst aktivieren, wenn HTTPS dauerhaft läuft:
   # Header always set Strict-Transport-Security "max-age=31536000"
 </IfModule>

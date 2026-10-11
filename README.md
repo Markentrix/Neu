@@ -92,7 +92,12 @@ Das Vorschaubild neu erzeugen: `node build/make-og.js` (braucht Playwright).
 
 **Pflicht**
 - `build/build.py`, Funktion `build_impressum`: USt-ID, W-IdNr., Handwerkskammer eintragen oder Absätze entfernen. Hinweisbox löschen.
-- `build/build.py`, Funktion `build_datenschutz`: Betreiber des Servers und eingesetzte Kalkulationssysteme eintragen. Hinweisbox löschen. Rechtliche Prüfung empfohlen.
+- `build/build.py`, Funktion `build_datenschutz`: fünf gelb markierte Stellen klären und eintragen, dann Hinweisbox löschen. Rechtliche Prüfung empfohlen.
+  - Standort des Hetzner-Rechenzentrums und Vertrag zur Auftragsverarbeitung (im Hetzner-Kundenkonto abschließen)
+  - Anbieter des Postfachs, über das die Anfragen laufen, samt Auftragsverarbeitung
+  - Aufbewahrungsdauer der Zugriffsprotokolle (empfohlen 7 Tage) und des Formular-Protokolls (empfohlen 90 Tage), per Logrotate umsetzen
+  - eingesetzte Kalkulationssysteme und Restwertbörsen
+- Kontaktformular: `private/config.php` auf dem Server ausfüllen und mit `selftest` prüfen, siehe unten. Ein echtes Testformular mit Foto absenden.
 - Adresse klären: Startseite „Im Röthel 43“, altes Impressum „Am Röthel 43“.
 
 **Inhalte, die nicht von der alten Website stammen, bitte fachlich prüfen**
@@ -118,6 +123,59 @@ Das Vorschaubild neu erzeugen: `node build/make-og.js` (braucht Playwright).
 - Branchenverzeichnisse mit identischem Namen, Adresse und Telefonnummer.
 - Danach in `build/build.py` Öffnungszeiten und Geokoordinaten in die strukturierten Daten aufnehmen.
 
-## Kontaktformular
+## Kontaktformular mit Schadenfotos (Hetzner-Server)
 
-Das Formular öffnet das E-Mail-Programm des Besuchers mit fertigem Text. Es sendet selbst nichts an einen Server. Für Versand ohne E-Mail-Programm braucht es ein Formular-Skript auf dem Server (z. B. PHP mit Spam-Schutz). Dann muss auch die Datenschutzerklärung angepasst werden.
+Das Formular auf `/kontakt/` sendet an `public/api/anfrage.php`. Der Endpunkt prüft die Eingaben, verkleinert die Fotos, entfernt dabei den Aufnahmeort und schickt eine E-Mail mit den Fotos als Anhang an das Postfach. Es werden keine Cookies gesetzt und keine Dienste Dritter genutzt.
+
+**Was der Server braucht:** PHP 8.1 oder neuer mit den Erweiterungen `gd`, `fileinfo`, `openssl` (empfohlen auch `exif`, `mbstring`) und einen Postfach-Zugang mit SMTP.
+
+### Einrichtung in sieben Schritten
+
+1. **Pakete (Ubuntu/Debian mit nginx):**
+   `apt install nginx php8.3-fpm php8.3-gd php8.3-mbstring`
+2. **Ordner anlegen.** Der Webserver zeigt auf `public/`. Die Zugangsdaten liegen daneben in `private/`, außerhalb des Webroots:
+   ```
+   /var/www/psschneider.de/public/    <- Inhalt des Ordners public/ aus dem Repository
+   /var/www/psschneider.de/private/   <- nur config.php, nicht öffentlich
+   ```
+3. **Konfiguration.** `server/private.example/config.php` nach `private/config.php` kopieren und ausfüllen. Geheimen Schlüssel erzeugen mit `openssl rand -hex 32`. Dann:
+   ```
+   chown -R www-data:www-data /var/www/psschneider.de/private
+   chmod 750 /var/www/psschneider.de/private && chmod 640 /var/www/psschneider.de/private/config.php
+   ```
+4. **E-Mail-Versand per SMTP.** In `config.php` den SMTP-Zugang des Postfachs eintragen, am besten Port 587 mit `starttls`. Bei Hetzner Cloud ist der ausgehende Port 25 gesperrt, deshalb funktioniert ein lokaler Mailserver ohne weiteres nicht. Beim Postfachanbieter für die Domain SPF und DKIM einrichten, sonst landen die Anfragen im Spam-Ordner. Als Absender eine Adresse verwenden, die der Zugang senden darf.
+5. **Webserver.** `server/nginx.conf.example` (wird von `build.py` erzeugt) als Vorlage verwenden. Socket von php-fpm, Zertifikate und den Pfad `PSS_PRIVATE_DIR` anpassen. Die Vorlage erlaubt von außen nur `anfrage.php`, sperrt alle anderen PHP-Dateien und versteckten Dateien, erlaubt Uploads bis 60 MB und kürzt IP-Adressen im Zugriffsprotokoll. Bei Apache liegen die gleichen Regeln in der `.htaccess`.
+6. **Prüfen.** Auf dem Server als Webserver-Benutzer:
+   ```
+   sudo -u www-data env PSS_PRIVATE_DIR=/var/www/psschneider.de/private \
+     php /var/www/psschneider.de/public/api/anfrage.php selftest
+   ```
+   Der Selbsttest prüft PHP-Erweiterungen, Konfiguration, Schreibrechte und ob der Mailserver erreichbar ist. Die Upload-Grenzen zeigt er für die Konsole an. Für den Webserver gelten php-fpm und die mitgelieferte Datei `.user.ini`. Danach ein echtes Testformular mit Foto absenden.
+7. **Aufräumen per Cron** (löscht gescheiterte Anfragen nach 14 Tagen und alte Zähler):
+   ```
+   17 3 * * * www-data env PSS_PRIVATE_DIR=/var/www/psschneider.de/private php /var/www/psschneider.de/public/api/anfrage.php purge
+   ```
+
+### Was der Endpunkt tut und was er speichert
+
+| Thema | Verhalten |
+| --- | --- |
+| Fotos | Höchstens 5, JPG, PNG oder WebP. Werden im Browser und auf dem Server auf 2400 Pixel verkleinert, gedreht und neu gespeichert. Standortdaten und andere Metadaten sind danach weg. Dateien, die keine Bilder sind, werden abgelehnt. |
+| Spam | Unsichtbares Köderfeld, zeitlich begrenztes Token, höchstens 5 Anfragen pro Stunde und 15 pro Tag und Verbindung, Prüfung der Herkunft. |
+| IP-Adresse | Nur als Hash mit geheimem Schlüssel, nach zwei Tagen gelöscht. Nie im Klartext. |
+| Anfragen | Nach erfolgreichem Versand sofort vom Server gelöscht. Bei Versandfehler bleiben sie 14 Tage gesichert in `private/inbox/`, damit nichts verloren geht. |
+| Protokoll | `private/logs/anfragen.log`: Zeit, Status, Referenz, Fotozahl. Keine Namen oder Kontaktdaten. Per Logrotate nach 90 Tagen löschen. |
+
+Schlägt der Versand fehl, sieht der Besucher eine Meldung mit Telefon und E-Mail. Im Protokoll steht dann `mail_fehler`. Das sollte jemand beobachten, zum Beispiel per Monitoring auf diese Zeile.
+
+### Tests
+
+```
+python3 server/tests/test_form.py
+```
+
+Der Test startet einen lokalen PHP-Server und einen Test-Mailserver mit Verschlüsselung und prüft 56 Fälle: normale Anfragen, Fotos mit Standortdaten, getarnte Dateien, zu große Anfragen, Spam-Versuche, Header-Einschleusung, Mengenbegrenzung und Versandfehler. Voraussetzung: `php` mit `gd`, `openssl` und `pip install pillow`.
+
+### Vorschau und Entwurf
+
+In der Vorschau (Artefakt) läuft das Formular im Demo-Modus: Es prüft die Eingaben und zeigt die Fotos an, sendet aber nichts. Auf dem Server ist der Endpunkt aktiv.

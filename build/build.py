@@ -202,6 +202,7 @@ ICONS = {
     "tag": '<path d="M20 12.5 12.5 20 4 11.5V4h7.5z"/><circle cx="8" cy="8" r="1.3"/>',
     "euro": '<path d="M17 6.5A5.5 5.5 0 0 0 7.2 9H5v2h1.6a6 6 0 0 0 0 2H5v2h2.2A5.5 5.5 0 0 0 17 17.5"/><path d="M8 11h7M8 13h7"/>',
     "chart": '<path d="M3 17 9 7l4 6 3-4 5 8z"/><path d="M3 21h18"/>',
+    "camera": '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
 }
 
 
@@ -389,6 +390,7 @@ def page_html(*, slug, d, title, desc, body, graph=None, noindex=False, canonica
                  f'<span>© {TODAY.year} {OWNER}</span><span class="draft-mid">· Alle Rechte vorbehalten</span><span class="draft-long">· Nur zur Ansicht, keine Weitergabe oder Veröffentlichung</span></div>\n'
                  '<div class="draft-wm" aria-hidden="true"></div>\n') if DRAFT else ""
     draft_js = f'\n<script src="{asset("draft.js", d)}" defer></script>' if DRAFT else ""
+    form_js = f'\n<script src="{asset("form.js", d)}" defer></script>' if 'id="contact-form"' in body else ""
     og = DOMAIN + "/assets/og-image.jpg"
     ld_block = ld(graph) if graph else ""
     canon_tag = "" if noindex else f'<link rel="canonical" href="{canon}">'
@@ -434,7 +436,7 @@ def page_html(*, slug, d, title, desc, body, graph=None, noindex=False, canonica
 </main>
 {footer(d)}
 {action_bar(d)}
-<script src="{asset("site.js", d)}" defer></script>{draft_js}
+<script src="{asset("site.js", d)}" defer></script>{form_js}{draft_js}
 </body>
 </html>
 ''')
@@ -597,21 +599,26 @@ def contact_section(d, h2="Fragen Sie unverbindlich an", wrap_class="section con
       <p class="contact-hint">{BIZ["person"]} · {BIZ["role"]} · {BIZ["craft"]}</p>
     </div>
 
-    <form class="form" id="contact-form" novalidate>
+    <div class="form-wrap">
+    <form class="form" id="contact-form" novalidate data-endpoint="{"" if PREVIEW else "/api/anfrage.php"}"{' data-demo="true"' if PREVIEW else ""} data-phone="{BIZ["phone_display"]}" data-phone-tel="{BIZ["phone_tel"]}" data-email="{BIZ["email"]}">
+      {'<p class="demo-note">Vorschau: Hier wird nichts gesendet. Auf dem Server geht die Anfrage mit den Fotos per E-Mail an ' + BIZ["email"] + '.</p>' if PREVIEW else ""}
+      <div class="form-error" id="form-error" role="alert" hidden></div>
       <div class="row">
         <div class="field">
           <label for="f-name">Name <span class="req" aria-hidden="true">*</span></label>
-          <input type="text" id="f-name" name="name" autocomplete="name" autocapitalize="words" enterkeyhint="next" required>
+          <input type="text" id="f-name" name="name" autocomplete="name" autocapitalize="words" enterkeyhint="next" maxlength="100" required>
+          <p class="field-error" id="err-name" hidden></p>
         </div>
         <div class="field">
           <label for="f-phone">Telefon</label>
-          <input type="tel" id="f-phone" name="phone" autocomplete="tel" inputmode="tel" enterkeyhint="next">
+          <input type="tel" id="f-phone" name="phone" autocomplete="tel" inputmode="tel" enterkeyhint="next" maxlength="40">
         </div>
       </div>
       <div class="row">
         <div class="field">
           <label for="f-email">E-Mail <span class="req" aria-hidden="true">*</span></label>
-          <input type="email" id="f-email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" enterkeyhint="next" required>
+          <input type="email" id="f-email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" enterkeyhint="next" maxlength="254" required>
+          <p class="field-error" id="err-email" hidden></p>
         </div>
         <div class="field">
           <label for="f-subject">Anliegen <span class="req" aria-hidden="true">*</span></label>
@@ -620,23 +627,51 @@ def contact_section(d, h2="Fragen Sie unverbindlich an", wrap_class="section con
             {"".join(f"<option>{esc(s['short'])}</option>" for s in SERVICES)}
             <option>Sonstige Frage</option>
           </select>
+          <p class="field-error" id="err-subject" hidden></p>
         </div>
       </div>
       <div class="field">
         <label for="f-message">Nachricht <span class="req" aria-hidden="true">*</span></label>
-        <textarea id="f-message" name="message" required placeholder="Kurz: Was ist passiert, welches Fahrzeug, wann passt Ihnen ein Termin?"></textarea>
+        <textarea id="f-message" name="message" maxlength="5000" required placeholder="Kurz: Was ist passiert, welches Fahrzeug, wann passt Ihnen ein Termin?"></textarea>
+        <p class="field-error" id="err-message" hidden></p>
         <span class="help">* Pflichtfelder</span>
       </div>
-      <label class="consent">
-        <input type="checkbox" id="f-consent" name="consent" required>
-        <span>Ich habe die <a href="{u("datenschutz", d)}">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung meiner Anfrage verwendet werden.</span>
-      </label>
+      <div class="field" id="photos-field">
+        <span class="label" id="photos-label">Schadenfotos <span class="opt">optional</span></span>
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="f-photos" class="file-input" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="photos-help dz-count">
+          <label for="f-photos" class="btn btn-secondary dz-btn">{svg("camera")}Fotos auswählen</label>
+          <span class="dz-text">oder hierher ziehen</span>
+          <span class="dz-count" id="dz-count">Noch keine Fotos ausgewählt</span>
+        </div>
+        <p class="help" id="photos-help">Bis zu 5 Fotos (JPG, PNG, WebP). Die Fotos werden vor dem Senden verkleinert, Standortdaten werden entfernt. Bitte keine Fotos, auf denen Personen erkennbar sind.</p>
+        <ul class="photo-list" id="photo-list"></ul>
+        <p class="field-error" id="err-photos" hidden></p>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="f-website">Bitte leer lassen</label>
+        <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <input type="hidden" id="f-token" name="token" value="">
+      <div class="field">
+        <label class="consent">
+          <input type="checkbox" id="f-consent" name="consent" required>
+          <span>Ich habe die <a href="{u("datenschutz", d)}">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben und Fotos zur Bearbeitung meiner Anfrage verwendet werden.</span>
+        </label>
+        <p class="field-error" id="err-consent" hidden></p>
+      </div>
       <div class="form-actions">
         <button class="btn btn-primary" type="submit">Anfrage senden</button>
         <span class="form-status" id="form-status" role="status" aria-live="polite"></span>
       </div>
-      <pre class="form-preview" id="form-preview"></pre>
+      <noscript><p class="notice-js">Zum Senden braucht das Formular JavaScript. Schreiben Sie sonst an <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a> oder rufen Sie an: <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>.</p></noscript>
     </form>
+    <div class="form-success" id="form-success" tabindex="-1" hidden>
+      <h3>Danke, Ihre Anfrage ist eingegangen.</h3>
+      <p>Ihre Referenz: <strong id="success-ref"></strong>. Wir melden uns bei Ihnen. Bei einem akuten Schaden rufen Sie bitte direkt an: <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>.</p>
+      <p><button class="btn btn-secondary" type="button" id="form-again">Weitere Anfrage senden</button></p>
+    </div>
+    </div>
   </div>
 </section>'''
 
@@ -1394,35 +1429,45 @@ def build_impressum(d=1):
 
 def build_datenschutz(d=1):
     inner = f'''
-      <p class="notice">Hinweis für den Betreiber: Diese Erklärung ist auf die neue Seite zugeschnitten (keine Cookies, keine Analyse-Tools, selbst gehostete Schriften). Die gelb markierten Stellen bitte ergänzen. Eine rechtliche Prüfung ersetzt dieser Text nicht. Diesen Hinweis danach löschen.</p>
+      <p class="notice">Hinweis für den Betreiber: Diese Erklärung beschreibt die Technik dieser Website (Kontaktformular mit Fotos auf einem Server von Hetzner, keine Cookies, keine Analyse-Tools, selbst gehostete Schriften). Die gelb markierten Stellen müssen vor dem Livegang geklärt und ausgefüllt werden: Serverstandort und Auftragsverarbeitung bei Hetzner, Anbieter des Postfachs, Aufbewahrungsdauer der Server-Protokolle. Kommen später Cookies, Statistik oder externe Inhalte hinzu, müssen Banner und Erklärung angepasst werden. Eine rechtliche Prüfung ersetzt dieser Text nicht. Diesen Hinweis danach löschen.</p>
 
       <h2>1. Verantwortlicher</h2>
       <address>{BIZ["person"]}<br>{BIZ["street"]}, {BIZ["zip"]} {BIZ["city"]}<br>Telefon: {BIZ["phone_display"]}<br>E-Mail: {BIZ["email"]}</address>
 
       <h2>2. Überblick</h2>
-      <p>Diese Website kommt ohne Cookies, Tracking und Analyse-Dienste aus. Es werden keine Inhalte von Drittanbietern eingebunden und keine Schriften von externen Servern geladen. Personenbezogene Daten verarbeiten wir nur, wenn Sie uns kontaktieren oder beim Aufruf der Seite technisch notwendige Verbindungsdaten anfallen.</p>
+      <p>Diese Website setzt keine Cookies und verwendet keine Tracking- oder Analyse-Dienste. Es werden keine Inhalte von Drittanbietern eingebunden und keine Schriften von externen Servern geladen. Personenbezogene Daten verarbeiten wir, wenn Sie das Kontaktformular nutzen oder uns kontaktieren, und in Form technisch notwendiger Verbindungsdaten beim Aufruf der Seite.</p>
 
       <h2>3. Hosting und Server-Logfiles</h2>
-      <p>Beim Aufruf der Website verarbeitet der Webserver automatisch Informationen, die Ihr Browser übermittelt: IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, übertragene Datenmenge, Browsertyp und Betriebssystem. Diese Daten dienen der Sicherheit und Stabilität der Website und werden nach kurzer Zeit gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
-      <p>Betreiber des Servers: <span class="todo">Name und Anschrift eintragen. Bei eigenem Server: Standort und Betreiber nennen. Bei einem Hoster: Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO abschließen.</span></p>
+      <p>Diese Website wird auf einem Server der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, betrieben. <span class="todo">Standort des Rechenzentrums eintragen und den Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO mit Hetzner abschließen beziehungsweise bestätigen</span></p>
+      <p>Beim Aufruf der Website verarbeitet der Webserver automatisch Informationen, die Ihr Browser übermittelt: gekürzte IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, übertragene Datenmenge, Browsertyp und Betriebssystem. Diese Daten dienen der Sicherheit und Stabilität der Website und werden nach <span class="todo">Dauer eintragen, empfohlen 7 Tage</span> gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
 
-      <h2>4. Kontaktaufnahme</h2>
-      <h3>Kontaktformular</h3>
-      <p>Das Kontaktformular auf dieser Seite sendet keine Daten an einen Server. Es bereitet eine E-Mail in Ihrem eigenen E-Mail-Programm vor, die Sie selbst an uns senden. Ihre Angaben (Name, E-Mail-Adresse, optional Telefonnummer, Anliegen und Nachricht) erreichen uns daher ausschließlich per E-Mail.</p>
-      <h3>E-Mail, Telefon, WhatsApp</h3>
-      <p>Wenn Sie uns per E-Mail, Telefon oder WhatsApp kontaktieren, verarbeiten wir die übermittelten Daten zur Bearbeitung Ihrer Anfrage und für eventuelle Anschlussfragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Anbahnung oder Durchführung eines Vertrags) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Beantwortung von Anfragen).</p>
-      <p>Bei WhatsApp werden Daten an WhatsApp Ireland Limited (Meta) übermittelt, darunter Ihre Telefonnummer und Metadaten der Kommunikation. Inhalte sind Ende-zu-Ende verschlüsselt. Nutzen Sie WhatsApp nur, wenn Sie damit einverstanden sind. Alternativ erreichen Sie uns jederzeit per Telefon oder E-Mail.</p>
-      <p>Anfragedaten werden gelöscht, sobald sie für die Bearbeitung nicht mehr erforderlich sind und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+      <h2>4. Kontaktformular und Schadenfotos</h2>
+      <p>Wenn Sie das Kontaktformular nutzen, übertragen wir Ihre Angaben verschlüsselt (HTTPS) an unseren Server: Name, E-Mail-Adresse, Anliegen, Nachricht, auf Wunsch Ihre Telefonnummer und bis zu fünf Fotos. Die Angabe von Name, E-Mail-Adresse, Anliegen und Nachricht ist erforderlich, damit wir Ihre Anfrage beantworten können.</p>
+      <h3>Fotos</h3>
+      <p>Fotos werden schon in Ihrem Browser verkleinert. Der Server verkleinert sie erneut und entfernt dabei Metadaten wie den Aufnahmeort. Bitte laden Sie keine Fotos hoch, auf denen Personen erkennbar sind.</p>
+      <h3>Weiterleitung und Löschung</h3>
+      <p>Der Server leitet Ihre Anfrage mit den Fotos per E-Mail an unser Postfach weiter. Die Übertragung zum Mailserver ist verschlüsselt. Postfachanbieter: <span class="todo">Name und Anschrift des Anbieters eintragen, Auftragsverarbeitung prüfen</span> Nach erfolgreichem Versand werden Anfrage und Fotos auf dem Server gelöscht. Schlägt der Versand technisch fehl, bleibt die Anfrage höchstens 14 Tage gesichert, damit sie nicht verloren geht, und wird dann gelöscht.</p>
+      <h3>Schutz vor Missbrauch</h3>
+      <p>Damit das Formular nicht von automatischen Programmen missbraucht wird, begrenzen wir die Zahl der Anfragen pro Verbindung. Dafür speichern wir Ihre IP-Adresse nicht im Klartext, sondern nur einen Hash mit geheimem Schlüssel, der nach höchstens zwei Tagen gelöscht wird. Außerdem prüfen wir ein für Menschen unsichtbares Feld und ein zeitlich begrenztes Formular-Token. Beides arbeitet ohne Cookies und ohne Dienste Dritter.</p>
+      <h3>Protokoll</h3>
+      <p>Das Protokoll des Formulars enthält nur Zeitpunkt, Referenznummer, Anzahl der Fotos und Status, aber keine Namen oder Kontaktdaten. Es wird nach <span class="todo">Dauer eintragen, empfohlen 90 Tage</span> gelöscht.</p>
+      <h3>Rechtsgrundlage</h3>
+      <p>Die Verarbeitung erfolgt zur Beantwortung Ihrer Anfrage und zur Anbahnung eines Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie zum Schutz vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO). Anfragedaten werden gelöscht, sobald sie für die Bearbeitung nicht mehr erforderlich sind und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
 
-      <h2>5. Auftragsbearbeitung und Gutachten</h2>
+      <h2>5. E-Mail, Telefon und WhatsApp</h2>
+      <p>Wenn Sie uns per E-Mail, Telefon oder WhatsApp kontaktieren, verarbeiten wir die übermittelten Daten zur Bearbeitung Ihrer Anfrage und für eventuelle Anschlussfragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Beantwortung von Anfragen).</p>
+      <p>Bei WhatsApp werden Daten an WhatsApp Ireland Limited (Meta) übermittelt, darunter Ihre Telefonnummer und Metadaten der Kommunikation. Inhalte sind Ende-zu-Ende verschlüsselt. Nutzen Sie WhatsApp nur, wenn Sie damit einverstanden sind. Alternativ erreichen Sie uns jederzeit per Telefon, E-Mail oder über das Kontaktformular.</p>
+
+      <h2>6. Auftragsbearbeitung und Gutachten</h2>
       <p>Beauftragen Sie ein Gutachten, verarbeiten wir die dafür notwendigen Daten: Ihre Kontaktdaten, Fahrzeugdaten (Kennzeichen, Fahrzeug-Identifizierungsnummer, Laufleistung), Angaben zum Schadenereignis, Fotos des Fahrzeugs sowie bei Haftpflichtschäden Daten des Unfallgegners und dessen Versicherung. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
       <p>Zur Abwicklung übermitteln wir das Gutachten an die von Ihnen benannten Empfänger, etwa die regulierende Versicherung, Ihre Werkstatt oder Ihren Rechtsanwalt. Zur Kalkulation und Restwertermittlung setzen wir branchenübliche Fachsysteme ein. <span class="todo">Verwendete Systeme und Restwertbörsen eintragen oder Satz entfernen</span></p>
       <p>Gutachten und zugehörige Unterlagen bewahren wir nach den handels- und steuerrechtlichen Vorgaben auf (in der Regel 10 Jahre, § 147 AO, § 257 HGB).</p>
 
-      <h2>6. Speicherung auf Ihrem Gerät</h2>
-      <p>Die Unfall-Checkliste merkt sich abgehakte Punkte im lokalen Speicher Ihres Browsers (Local Storage). Diese Information verlässt Ihr Gerät nicht, wird nicht an uns übermittelt und kann jederzeit über „Liste zurücksetzen“ oder die Browser-Einstellungen gelöscht werden. Es handelt sich um eine rein funktionale Speicherung nach § 25 Abs. 2 Nr. 2 TDDDG.</p>
+      <h2>7. Cookies und lokaler Speicher</h2>
+      <p>Diese Website setzt keine Cookies. Sie nutzt weder Statistik- noch Werbe-Werkzeuge und lädt keine Inhalte, Karten, Videos oder Schriften von fremden Servern.</p>
+      <p>Die Unfall-Checkliste merkt sich abgehakte Punkte im lokalen Speicher Ihres Browsers (Local Storage). Diese Information verlässt Ihr Gerät nicht, wird nicht an uns übermittelt und kann jederzeit über „Liste zurücksetzen“ oder die Browser-Einstellungen gelöscht werden. Es handelt sich um eine rein funktionale Speicherung, die für den von Ihnen gewünschten Dienst erforderlich ist (§ 25 Abs. 2 Nr. 2 TDDDG). Eine Einwilligungsabfrage und ein Cookie-Banner sind deshalb nicht erforderlich.</p>
 
-      <h2>7. Ihre Rechte</h2>
+      <h2>8. Ihre Rechte</h2>
       <p>Sie haben gegenüber uns folgende Rechte hinsichtlich Ihrer personenbezogenen Daten:</p>
       <ul>
         <li>Auskunft (Art. 15 DSGVO)</li>
@@ -1434,10 +1479,10 @@ def build_datenschutz(d=1):
       </ul>
       <p>Sie haben zudem das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig ist die Landesbeauftragte für den Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover.</p>
 
-      <h2>8. Datensicherheit</h2>
-      <p>Die Website wird über HTTPS verschlüsselt ausgeliefert. Wir treffen angemessene technische und organisatorische Maßnahmen, um Ihre Daten gegen Verlust, Manipulation und unbefugten Zugriff zu schützen.</p>
+      <h2>9. Datensicherheit</h2>
+      <p>Die Website wird über HTTPS verschlüsselt ausgeliefert. Die Konfiguration des Formulars liegt nicht im öffentlich erreichbaren Bereich des Servers. Wir treffen angemessene technische und organisatorische Maßnahmen, um Ihre Daten gegen Verlust, Manipulation und unbefugten Zugriff zu schützen.</p>
 
-      <h2>9. Änderungen</h2>
+      <h2>10. Änderungen</h2>
       <p>Wir passen diese Datenschutzerklärung an, wenn sich die Website oder die rechtlichen Anforderungen ändern. Es gilt die jeweils hier veröffentlichte Fassung.</p>
 '''
     return legal_page("datenschutz", "Datenschutzerklärung | PS Schneider Kfz-Gutachter Celle", f"Stand: {STAND}", "Datenschutzerklärung", inner)
@@ -1480,6 +1525,23 @@ def htaccess():
         "DirectoryIndex index.html",
         "ErrorDocument 404 /404.html",
         "",
+        "# --- PHP: nur der Formular-Endpunkt ist von außen erreichbar, versteckte Dateien sind gesperrt ---",
+        '<FilesMatch "\\.php$">',
+        "  Require all denied",
+        "</FilesMatch>",
+        '<Files "anfrage.php">',
+        "  Require all granted",
+        "</Files>",
+        '<FilesMatch "^\\.(ht|user\\.ini)">',
+        "  Require all denied",
+        "</FilesMatch>",
+        "# Upload-Grenzen für Fotos (bei mod_php; bei php-fpm gilt die Datei .user.ini)",
+        "<IfModule mod_php.c>",
+        "  php_value upload_max_filesize 20M",
+        "  php_value post_max_size 60M",
+        "  php_value max_file_uploads 10",
+        "</IfModule>",
+        "",
         "# --- HTTPS und eine Domain erzwingen (nach dem Einrichten des Zertifikats einkommentieren) ---",
         "# <IfModule mod_rewrite.c>",
         "#   RewriteEngine On",
@@ -1502,7 +1564,7 @@ def htaccess():
         '  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"',
         '  Header always set X-Frame-Options "SAMEORIGIN"',
         "  # Alles kommt vom eigenen Server, es gibt keinen Inline-Code:",
-        '  Header always set Content-Security-Policy "default-src \'self\'; img-src \'self\' data:; script-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'self\'; form-action \'none\'; frame-ancestors \'self\'"',
+        '  Header always set Content-Security-Policy "default-src \'self\'; img-src \'self\' data: blob:; script-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'self\'; form-action \'none\'; frame-ancestors \'self\'"',
         "  # Erst aktivieren, wenn HTTPS dauerhaft läuft:",
         '  # Header always set Strict-Transport-Security "max-age=31536000"',
         "</IfModule>",
@@ -1534,6 +1596,14 @@ def nginx_conf():
     return f'''# PS Schneider – Beispiel für nginx. Pfade und Zertifikate anpassen.
 # Wird von build/build.py erzeugt. Webroot = Inhalt des Ordners public/.
 
+# IP-Adressen im Zugriffsprotokoll kürzen (Datenschutz): letzte Stelle bei IPv4, hinterer Teil bei IPv6
+map $remote_addr $ip_gekuerzt {{
+    ~(?P<ip>\\d+\\.\\d+\\.\\d+)\\.\\d+$  $ip.0;
+    ~(?P<ip>[^:]+:[^:]+):         $ip::;
+    default                       0.0.0.0;
+}}
+log_format gekuerzt '$ip_gekuerzt [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
+
 server {{
     listen 80;
     server_name psschneider.de www.psschneider.de;
@@ -1554,12 +1624,27 @@ server {{
     ssl_certificate     /pfad/zum/zertifikat/fullchain.pem;
     ssl_certificate_key /pfad/zum/zertifikat/privkey.pem;
 
-    root /var/www/psschneider.de;
+    root /var/www/psschneider.de/public;
     index index.html;
+    access_log /var/log/nginx/psschneider.access.log gekuerzt;
     error_page 404 /404.html;
 
     # Alte Adressen der bisherigen Website: dauerhaft (301) auf die neuen Seiten
 {red}
+
+    # Fotos: bis zu 5 Dateien, großzügige Obergrenze
+    client_max_body_size 60m;
+
+    # PHP nur für den Formular-Endpunkt. Passen Sie Socket und Pfad zu private/ an.
+    location = /api/anfrage.php {{
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PSS_PRIVATE_DIR /var/www/psschneider.de/private;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_read_timeout 90s;
+    }}
+    location ~ \\.php$ {{ return 404; }}
+    location ~ /\\.(?!well-known) {{ deny all; }}
 
     location / {{
         try_files $uri $uri/ =404;
@@ -1572,7 +1657,7 @@ server {{
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'" always;
+    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'" always;
     # add_header Strict-Transport-Security "max-age=31536000" always;
 
     # Komprimierung
@@ -1585,6 +1670,15 @@ server {{
     location ~* \\.(css|js)$ {{ expires 7d; add_header Cache-Control "public"; }}
 }}
 '''
+
+
+USER_INI = """; Von build/build.py erzeugt. Gilt für php-fpm und CGI. Upload-Grenzen für die Schadenfotos.
+upload_max_filesize = 20M
+post_max_size = 60M
+max_file_uploads = 10
+memory_limit = 256M
+max_execution_time = 90
+"""
 
 
 def robots():
@@ -1668,6 +1762,7 @@ def main():
     if not PREVIEW and not DRAFT:
         write(out, "sitemap.xml", sitemap(indexable))
     if not PREVIEW:
+        write(out, ".user.ini", USER_INI)
         write(out, "robots.txt", robots())
         write(out, ".htaccess", htaccess())
         write(ROOT / "server", "nginx.conf.example", nginx_conf())
