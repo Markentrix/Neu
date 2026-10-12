@@ -239,7 +239,7 @@
   /* ── Blog-Filter ────────────────────────────────────────────────────── */
   function initBlogFilter() {
     var bar = $('[data-filter]'); if (!bar) return;
-    var items = $$('[data-cat]');
+    var items = $$('[data-cat]').filter(function (it) { return !bar.contains(it); }); // Filterknöpfe selbst ausnehmen
     on(bar, 'click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       $$('button', bar).forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });

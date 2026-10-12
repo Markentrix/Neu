@@ -187,6 +187,7 @@ a.card:hover{text-decoration:none}
 .card--lg{padding:clamp(24px,3.5vw,44px)}
 .card h3{margin-bottom:2px}
 .card .link-arrow{margin-top:auto;padding-top:6px}
+.card>.pill{align-self:flex-start}
 .card-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(40,199,247,.12);color:var(--blue-text);margin-bottom:4px}
 .card-icon--violet{background:rgba(139,92,246,.12);color:var(--violet-text)}
 .card-icon--navy{background:var(--navy);color:#fff}
@@ -564,3 +565,9 @@ html.a11y-contrast .card,html.a11y-contrast .price-card,html.a11y-contrast .step
 .avatar--lg{width:120px;height:120px}
 .avatar--md{width:88px;height:88px}
 .avatar--sm{width:56px;height:56px}
+
+/* ─── 28. Korrektur Prozess-Schritte ────────────────────────────────────── */
+/* Kinder von .step (h3, p, .result) gehören in die Textspalte, nicht neben die Nummer */
+.step{row-gap:0}
+.step>*{grid-column:2}
+@media (max-width:560px){.step>*{grid-column:1}}
