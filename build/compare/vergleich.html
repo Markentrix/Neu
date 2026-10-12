@@ -1,0 +1,52 @@
+<title>Alt und Neu im Vergleich | PS Schneider</title>
+<meta name="description" content="Die bisherige Website von PS Schneider links, der Entwurf der neuen Seite rechts. Nur zur Ansicht.">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="copyright" content="© {{YEAR}} Markentrix. Alle Rechte vorbehalten.">
+<link rel="stylesheet" href="vergleich.css">
+<div class="cmp" id="cmp" data-pages="{{PAGES}}" data-old-base="{{OLD_BASE}}">
+  <header class="cmp-bar">
+    <div class="cmp-title">
+      <strong>Alt und Neu im Vergleich</strong>
+      <span>© {{YEAR}} Markentrix · Entwurf zur Ansicht, keine Weitergabe</span>
+    </div>
+    <div class="cmp-controls">
+      <label class="cmp-page"><span class="lbl">Seite</span>
+        <select id="cmp-page" aria-label="Seite wählen"></select>
+      </label>
+      <div class="seg" role="group" aria-label="Darstellung">
+        <button type="button" data-view="d" aria-pressed="true">Desktop</button>
+        <button type="button" data-view="m" aria-pressed="false">Handy</button>
+      </div>
+      <div class="seg" role="group" aria-label="Größe">
+        <button type="button" id="zoom-out" aria-label="Verkleinern">−</button>
+        <button type="button" id="zoom-fit">Passend</button>
+        <button type="button" id="zoom-in" aria-label="Vergrößern">+</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="cmp-sync" checked><span>Gemeinsam scrollen</span></label>
+    </div>
+  </header>
+  <div class="cmp-panes">
+    <section class="pane" aria-label="Bisherige Seite">
+      <div class="pane-head">
+        <span class="tag tag-old">Alt</span>
+        <span class="pane-name">Bisherige Seite</span>
+        <a id="old-link" href="{{OLD_BASE}}" target="_blank" rel="noopener">Original</a>
+      </div>
+      <div class="pane-scroll" id="scroll-old">
+        <div class="sizer" id="size-old"><img id="old-img" alt="Bisherige Seite als Bild" draggable="false"></div>
+        <p class="none" id="old-none" hidden>Für diese Seite gibt es keine Entsprechung auf der alten Website.</p>
+      </div>
+    </section>
+    <section class="pane" aria-label="Neue Seite">
+      <div class="pane-head">
+        <span class="tag tag-new">Neu</span>
+        <span class="pane-name">Neuer Entwurf</span>
+        <a id="new-link" href="neu/index.html" target="_blank" rel="noopener">Einzeln öffnen</a>
+      </div>
+      <div class="pane-scroll" id="scroll-new">
+        <div class="sizer" id="size-new"><iframe id="new-frame" title="Neue Seite" scrolling="no"></iframe></div>
+      </div>
+    </section>
+  </div>
+</div>
+<script src="vergleich.js" defer></script>

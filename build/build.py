@@ -2180,6 +2180,22 @@ def write(out_dir, rel, text):
     p.write_text(text, encoding="utf-8")
 
 
+def write_compare(dest):
+    """Vergleichsansicht: links Bilder der bisherigen Seite, rechts der neue Entwurf. Quellen in build/compare/."""
+    src = Path(__file__).resolve().parent / "compare"
+    pages = json.loads((src / "pages.json").read_text(encoding="utf-8"))
+    tpl = (src / "vergleich.html").read_text(encoding="utf-8")
+    page = (tpl.replace("{{PAGES}}", html.escape(json.dumps(pages, ensure_ascii=False), quote=True))
+               .replace("{{YEAR}}", str(TODAY.year)).replace("{{OLD_BASE}}", DOMAIN))
+    write(dest, "vergleich.html", page)
+    for name in ("vergleich.css", "vergleich.js"):
+        shutil.copyfile(src / name, dest / name)
+    alt = dest / "alt"
+    if alt.exists():
+        shutil.rmtree(alt)
+    shutil.copytree(src / "alt", alt)
+
+
 def build_pages():
     """Alle Seiten der aktuellen Sprache."""
     pages = [build_home(), build_leistungen()]
@@ -2194,6 +2210,7 @@ def main():
     global PREVIEW, DRAFT
     ap = argparse.ArgumentParser()
     ap.add_argument("--preview", metavar="DIR", help="Vorschau mit relativen Links in DIR erzeugen")
+    ap.add_argument("--compare", metavar="DIR", help="Vergleichsansicht alt und neu in DIR erzeugen (neue Seite in DIR/neu)")
     ap.add_argument("--final", action="store_true", help="Endversion ohne Entwurfsmodus (Urheberrechtsvermerk, Wasserzeichen, Sperren)")
     args = ap.parse_args()
     DRAFT = not args.final
@@ -2205,6 +2222,8 @@ def main():
         elif target.exists():
             target.unlink()
 
+    if args.compare:
+        args.preview = str(Path(args.compare).resolve() / "neu")
     if args.preview:
         PREVIEW = True
         out = Path(args.preview).resolve()
@@ -2246,6 +2265,8 @@ def main():
         write(out, "robots.txt", robots())
         write(out, ".htaccess", htaccess())
         write(ROOT / "server", "nginx.conf.example", nginx_conf())
+    if args.compare:
+        write_compare(Path(args.compare).resolve())
     print(f"{count} Seiten nach {out} geschrieben.")
 
 

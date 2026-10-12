@@ -204,3 +204,13 @@ Der Test startet einen lokalen PHP-Server und einen Test-Mailserver mit Verschl�
 ### Vorschau und Entwurf
 
 In der Vorschau (Artefakt) läuft das Formular im Demo-Modus: Es prüft die Eingaben und zeigt die Fotos an, sendet aber nichts. Auf dem Server ist der Endpunkt aktiv.
+
+## Vergleich alt und neu (für die Vorführung)
+
+Links die bisherige Seite, rechts der neue Entwurf, auf einen Blick und mit gemeinsamem Scrollen:
+
+```
+python3 build/build.py --compare ORDNER
+```
+
+Der Ordner enthält `vergleich.html` (die Startseite der Ansicht), `neu/` (die komplette neue Seite mit relativen Links) und `alt/` (Bilder der bisherigen Seite). Die Bilder der alten Seite entstehen mit `NODE_PATH=$(npm root -g) node build/compare/capture-old.js` (Playwright und Internet nötig) und liegen in `build/compare/alt/`. Die Zuordnung alter zu neuer Seiten steht in `build/compare/pages.json`. Die Ansicht gehört nicht in den Webroot.
