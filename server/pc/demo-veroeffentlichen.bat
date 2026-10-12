@@ -10,6 +10,8 @@ set "LINK="
 
 echo.
 set /p "ID=Name der Demo (z.B. mueller-kfz, nur kleine Buchstaben, Ziffern, Bindestrich): "
+rem Name automatisch in Kleinbuchstaben umwandeln, Leerzeichen werden zu Bindestrichen
+for /f "delims=" %%i in ('powershell -NoProfile -Command "('%ID%').ToLower().Trim().Replace(' ','-')"') do set "ID=%%i"
 echo %ID%| findstr /r /x "[a-z0-9][a-z0-9-]*[a-z0-9]" >nul
 if errorlevel 1 (
   echo FEHLER: "%ID%" ist kein gueltiger Name. Beispiel: mueller-kfz
@@ -42,9 +44,12 @@ if errorlevel 2 (
 
 echo.
 echo [1/3] Demo-Adresse wird auf dem Server bereitgestellt ...
-for /f "tokens=2 delims==" %%A in ('ssh %SERVER% "/opt/neu/server/scripts/demo-anlegen.sh %ID%" ^| findstr "^LINK="') do set "LINK=%%A"
+set "AUSGABE=%TEMP%\demo-ausgabe.txt"
+ssh %SERVER% "/opt/neu/server/scripts/demo-anlegen.sh %ID%" > "%AUSGABE%" 2>&1
+for /f "tokens=2 delims==" %%A in ('findstr "^LINK=" "%AUSGABE%"') do set "LINK=%%A"
 if "%LINK%"=="" (
-  echo FEHLER: Auf dem Server konnte keine Demo-Adresse angelegt werden.
+  echo FEHLER: Auf dem Server konnte keine Demo-Adresse angelegt werden. Meldung des Servers:
+  type "%AUSGABE%"
   pause
   exit /b 1
 )
