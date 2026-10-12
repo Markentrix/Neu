@@ -27,7 +27,18 @@ ld: |
   {"@context":"https://schema.org", … }   (ein JSON-Objekt, eine Zeile, gültiges JSON)
 ---
 ```
-Danach folgt direkt der Inhalt von `<main>` (ohne `<main>`-Tag). Erste Zeile: `{{> icons}}`, wenn Icons benutzt werden.
+Danach folgt direkt der Inhalt von `<main>` (ohne `<main>`-Tag). Das Icon-Sprite (`{{> icons}}`) liegt im Layout und ist auf jeder Seite verfügbar; nicht noch einmal einbinden.
+
+## Signature-System (CI: Datenpunkte, Verbindungslinien, Wachstumskurve)
+| Baustein | Markup |
+|---|---|
+| Systemkarte | `{{> sysmap-ki}}`, `{{> sysmap-web}}`, `{{> sysmap-ads}}` (in einer `.card` oder frei; zeichnet sich beim Einblenden, Pulse laufen per SMIL) |
+| Wachstumspfad | Startseite: Section mit `has-rail`, erstes Kind im `.wrap`: `<span class="rail-dot reveal" aria-hidden="true">01</span>` |
+| Nummerierung | `<span class="eyebrow"><span class="num">03<small> / 08</small></span>Die Lösung</span>` |
+| Statement | `<section class="statement"><div class="wrap"><p><span class="num">Markentrix<small> · Haltung</small></span>Satz eins. <span class="dim">Satz zwei.</span></p></div></section>` (nur Sätze aus der CI-Allowlist) |
+| Brancheneinstieg | `.card.branch` mit `card-icon`, `card-step`, `p.pain` (Zitat), `p.sys`, Button `data-open-modal data-branche="handwerk|praxis|gastro"` |
+| Icons | eigenes Set in `src/partials/icons.html`, jedes Icon mit genau einem gefüllten Datenpunkt; neue Icons nach diesem Muster ergänzen (24er-Raster, Strich 2) |
+| Potenzial-Check | Dialog im Layout (`form[data-wizard]`): Schritte als `fieldset[data-step]`, Auswahl als `.choices > label.choice`, Logik in `site.js` (`initWizard`). Texte der Ersteinschätzung dort pflegen, nur Preisliste und CI-Allowlist verwenden. |
 
 ## Regeln
 1. **Keine Inline-Styles**, kein `<style>`, kein `<script>` in Seiten. Alles kommt aus `mx.css` und `site.js`. Fehlt eine Komponente: in `mx.css` ergänzen (Abschnitt passend wählen, Tokens benutzen).

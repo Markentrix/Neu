@@ -95,17 +95,18 @@
         var payload = { quelle: form.getAttribute('data-lead') || 'Formular' };
         $$('input,select,textarea', form).forEach(function (i) {
           if (!i.name || i.type === 'submit' || i.closest('.hp')) return;
+          if (i.type === 'radio' && !i.checked) return;
           payload[i.name] = i.type === 'checkbox' ? (i.checked ? 'ja' : 'nein') : i.value.trim();
         });
         var cal = form.__cal; if (cal && cal.date && cal.time) { payload.wunschtermin = cal.label(); payload.termin_iso = cal.iso(); }
-        payload.nachricht = Object.keys(payload).filter(function (k) { return ['name', 'email', 'tel', 'firma', 'thema', 'budget', 'wunschtermin', 'nachricht_text'].indexOf(k) >= 0 && payload[k]; })
+        payload.nachricht = Object.keys(payload).filter(function (k) { return ['name', 'email', 'tel', 'firma', 'thema', 'budget', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'nachricht_text'].indexOf(k) >= 0 && payload[k]; })
           .map(function (k) { return k + ': ' + payload[k]; }).join('\n');
         busy = true; var orig = btn ? btn.innerHTML : '';
         if (btn) { btn.classList.add('is-loading'); btn.innerHTML = 'Wird gesendet …'; }
         track('form_submit', { location: payload.quelle });
         postLead(payload).then(function (res) {
           busy = false; if (btn) { btn.classList.remove('is-loading'); btn.innerHTML = orig; }
-          if (res.ok) { form.reset(); if (cal) cal.reset(); showOk(); track('generate_lead', { location: payload.quelle }); }
+          if (res.ok) { form.reset(); if (cal) cal.reset(); if (form.__wizard) form.__wizard.reset(); showOk(); track('generate_lead', { location: payload.quelle }); }
           else if (msg) { msg.className = 'form-msg is-error'; msg.textContent = res.timeout ? 'Die Verbindung hat zu lange gedauert. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.' : 'Ihre Anfrage konnte nicht übermittelt werden. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.'; }
         });
         function showOk() {
@@ -181,10 +182,10 @@
   function initModal() {
     var modal = $('#mx-modal'); if (!modal) return;
     var box = $('.modal-box', modal), last = null;
-    function open() { modal.hidden = false; modal.classList.add('is-open'); d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
+    function open(branche) { modal.hidden = false; modal.classList.add('is-open'); var wf = $('form[data-wizard]', modal); if (wf && wf.__wizard) { if (branche) wf.__wizard.preset(branche); else wf.__wizard.show(wf.__wizard.current()); } d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
     function close() { modal.classList.remove('is-open'); modal.hidden = true; d.body.classList.remove('menu-open'); if (last && last.focus) last.focus(); }
     on(d, 'click', function (e) {
-      var t = e.target.closest('[data-open-modal]'); if (t) { e.preventDefault(); open(); return; }
+      var t = e.target.closest('[data-open-modal]'); if (t) { e.preventDefault(); open(t.getAttribute('data-branche')); return; }
       if (e.target.closest('[data-close-modal]') || e.target === modal) close();
     });
     on(d, 'keydown', function (e) {
@@ -196,6 +197,57 @@
       }
     });
     if (location.hash === '#potenzial-check') open();
+  }
+
+
+  /* ── Potenzial-Check als Dialog ─────────────────────────────────────── */
+  function initWizard() {
+    var form = $('form[data-wizard]'); if (!form) return;
+    var steps = $$('fieldset[data-step]', form), prog = $$('.wz-progress li', form);
+    var prevB = $('[data-wz=prev]', form), nextB = $('[data-wz=next]', form), submitB = $('[type=submit]', form);
+    var result = $('[data-wz-result]', form), reco = $('input[name=empfehlung]', form), cur = 0;
+    var PAIN = { handwerk: 'Das Telefon klingelt, während Sie auf der Baustelle oder unterm Auto sind. Der Anrufer ruft selten ein zweites Mal an.',
+      praxis: 'Die Anfrage liegt seit gestern im Postfach, während das Team am Empfang keine Hand frei hat.',
+      gastro: 'Reservierungen, Bestellungen und Fragen kommen über mehrere Kanäle gleichzeitig, mitten im Betrieb.',
+      sonstige: 'Anfragen kommen an, während Sie arbeiten, und bleiben liegen, bis Zeit dafür ist.' };
+    var KANAL = { telefon: '<b>Telefon.</b> Dafür ist der KI-Telefonassistent gedacht: Er nimmt Anrufe an, gibt Auskunft, erfasst Rückrufwünsche und bucht Termine. Enthalten ab Paket BUSINESS (699 € im Monat netto, Einrichtung einmalig 2.490 €).',
+      whatsapp: '<b>WhatsApp.</b> Der WhatsApp-Assistent antwortet sofort, qualifiziert die Anfrage und bucht Termine. Ein Kanal ist mit Paket ONE abgedeckt (349 € im Monat netto, Einrichtung einmalig 1.490 €), Telefon dazu ab BUSINESS.',
+      email: '<b>E-Mail.</b> Der E-Mail-Assistent sortiert das Postfach, antwortet auf Standardanfragen und schlägt freie Termine vor. Ein Kanal ist mit Paket ONE abgedeckt (349 € im Monat netto, Einrichtung einmalig 1.490 €).',
+      website: '<b>Website.</b> Hier hilft eine Landingpage mit Terminbuchung, deren Anfragen direkt beim Assistenten oder Ihrem Team landen (LANDING ab 2.290 € einmalig, Pflege 59 € im Monat).',
+      unklar: '<b>Noch unklar.</b> Im Erstgespräch finden wir in rund 30 Minuten den Kanal, über den bei Ihnen am meisten verloren geht.' };
+    function val(name) { var r = $('input[name=' + name + ']:checked', form); return r ? r.value : ''; }
+    function label(name) { var r = $('input[name=' + name + ']:checked', form); return r ? (r.closest('.choice').textContent || '').trim() : ''; }
+    function show(i) {
+      cur = i;
+      steps.forEach(function (s, k) { s.hidden = k !== i; });
+      prog.forEach(function (p, k) { p.classList.toggle('is-done', k < i); p.classList.toggle('is-current', k === i); if (k === i) p.setAttribute('aria-current', 'step'); else p.removeAttribute('aria-current'); });
+      if (prevB) prevB.hidden = i === 0;
+      if (nextB) nextB.hidden = i === steps.length - 1;
+      if (submitB) submitB.hidden = i !== steps.length - 1;
+      if (i === steps.length - 1) buildResult();
+      var f = $('input:not([type=hidden]):not([type=radio]), input[type=radio]:checked, input[type=radio]', steps[i]); if (f && !d.documentElement.classList.contains('reduced')) f.focus({ preventScroll: true });
+    }
+    function valid(i) {
+      var req = steps[i].getAttribute('data-require'); if (!req) return true;
+      var ok = !!$('input[name=' + req + ']:checked', form); var err = $('.error', steps[i]); if (err) err.style.display = ok ? '' : 'block';
+      return ok;
+    }
+    function buildResult() {
+      var b = val('branche') || 'sonstige', k = val('kanal') || 'unklar', n = +((($('input[name=anfragen]', form) || {}).value) || 0);
+      var volume = n < 5 ? 'Bei unter fünf Anfragen pro Woche ist der erste Hebel meist die Sichtbarkeit: Google-Unternehmensprofil, Bewertungen und lokale Suche (LOCAL VISIBILITY, 449 € im Monat netto).'
+        : 'Bei rund ' + n + (n >= 100 ? ' und mehr' : '') + ' Anfragen pro Woche zählt jede, die liegen bleibt. Was eine verpasste Anfrage kostet, zeigt der Sparrechner.';
+      var html = '<b>Kurz zusammengefasst</b><ul><li>' + PAIN[b] + '</li><li>' + KANAL[k] + '</li><li>' + volume + '</li></ul><p class="tiny">Keine Zusicherung, alle Preise netto zzgl. USt. Im Erstgespräch prüfen wir, ob und wie sich das in Ihrem Betrieb rechnet.</p>';
+      if (result) result.innerHTML = html;
+      if (reco) reco.value = 'Branche: ' + (label('branche') || 'offen') + ' | Kanal: ' + (label('kanal') || 'offen') + ' | Anfragen/Woche: ' + n;
+    }
+    on(nextB, 'click', function () { if (valid(cur)) show(cur + 1); });
+    on(prevB, 'click', function () { show(Math.max(0, cur - 1)); });
+    on(form, 'keydown', function (e) { if (e.key === 'Enter' && cur < steps.length - 1 && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); nextB.click(); } });
+    $$('.choice input', form).forEach(function (r) { on(r, 'change', function () { if (cur < 2) setTimeout(function () { nextB.click(); }, 160); }); });
+    var range = $('input[name=anfragen]', form);
+    if (range) { var out = $('output[for=' + range.id + ']', form); var paint = function () { var pct = (range.value - range.min) / (range.max - range.min) * 100; range.style.setProperty('--pct', pct + '%'); if (out) out.textContent = range.value + (+range.value === +range.max ? '+' : ''); }; on(range, 'input', paint); paint(); }
+    form.__wizard = { show: show, current: function () { return cur; }, reset: function () { show(0); }, preset: function (b) { var r = $('input[name=branche][value="' + b + '"]', form); if (r) { r.checked = true; show(1); } else show(0); } };
+    show(0);
   }
 
   /* ── Kurzcheck (Startseite) ─────────────────────────────────────────── */
@@ -274,6 +326,6 @@
   /* ── Jahr im Footer ─────────────────────────────────────────────────── */
   function initYear() { $$('[data-year]').forEach(function (e) { e.textContent = new Date().getFullYear(); }); }
 
-  function init() { initNav(); initReveal(); initForms(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); }
+  function init() { initNav(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

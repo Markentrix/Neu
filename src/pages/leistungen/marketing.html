@@ -6,7 +6,6 @@ lastmod: 2026-10-12
 ld: |
   {"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://markentrix.de/leistungen/marketing#webpage","url":"https://markentrix.de/leistungen/marketing","name":"Marketing & lokale Sichtbarkeit für Betriebe | Markentrix","isPartOf":{"@id":"https://markentrix.de/#website"},"about":{"@id":"https://markentrix.de/#organization"},"inLanguage":"de-DE","dateModified":"2026-10-12","breadcrumb":{"@id":"https://markentrix.de/leistungen/marketing#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://markentrix.de/leistungen/marketing#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Startseite","item":"https://markentrix.de/"},{"@type":"ListItem","position":2,"name":"Marketing","item":"https://markentrix.de/leistungen/marketing"}]},{"@type":"Organization","@id":"https://markentrix.de/#organization","name":"Markentrix","url":"https://markentrix.de"},{"@type":"Service","@id":"https://markentrix.de/leistungen/marketing#service","name":"Marketing und lokale Sichtbarkeit","serviceType":"Marketing und lokale Sichtbarkeit","description":"Social-Media-Betreuung, Google-Unternehmensprofil, lokale Suchmaschinenoptimierung und Bewertungsmanagement für lokale Betriebe.","provider":{"@id":"https://markentrix.de/#organization"},"areaServed":{"@type":"Country","name":"Deutschland"},"url":"https://markentrix.de/leistungen/marketing","offers":[{"@type":"Offer","name":"LOCAL VISIBILITY","price":"449","priceCurrency":"EUR","valueAddedTaxIncluded":false,"description":"Google-Profil, lokale Suchmaschinenoptimierung, Bewertungen. Monatlich, 12 Monate Laufzeit."},{"@type":"Offer","name":"SOCIAL MEDIA","price":"749","priceCurrency":"EUR","valueAddedTaxIncluded":false,"description":"Vier Beiträge auf zwei Kanälen, Redaktionsplan, Reporting. Monatlich, 12 Monate Laufzeit."},{"@type":"Offer","name":"GOOGLE ADS AGENT","price":"599","priceCurrency":"EUR","valueAddedTaxIncluded":false,"description":"Kampagnenentwürfe und Optimierung zur Freigabe. Monatlich, Einrichtung 1.490 €, Mediabudget separat."}]}]}
 ---
-{{> icons}}
 
 <!-- ══ Seitenkopf ══ -->
 <section class="sec sec--white" aria-labelledby="page-title">
@@ -22,14 +21,11 @@ ld: |
           <a class="btn btn--ghost btn--lg" href="#umfang">Leistungsumfang <svg class="arrow"><use href="#i-arrow"/></svg></a>
         </div>
       </div>
-      <div class="card card--soft reveal" data-delay="1">
-        <span class="eyebrow">Drei Bausteine</span>
-        <div class="stack">
-          <div class="feat"><span class="card-icon card-icon--violet"><svg><use href="#i-target"/></svg></span><div><b>Werbung</b><p>Anzeigen bei Meta und Google, nur im freigegebenen Rahmen</p></div></div>
-          <div class="feat"><span class="card-icon"><svg><use href="#i-pin"/></svg></span><div><b>Lokale Sichtbarkeit</b><p>Google-Unternehmensprofil, Bewertungen, lokale Suche</p></div></div>
-          <div class="feat"><span class="card-icon"><svg><use href="#i-pen"/></svg></span><div><b>Inhalte</b><p>Social-Media-Beiträge und Fachtexte mit Redaktionsplan</p></div></div>
-        </div>
-        <p class="tiny mt-2">Jede Anfrage, die daraus entsteht, bearbeitet auf Wunsch Ihr <a href="/leistungen/ki-automatisierung">KI-Assistent</a>.</p>
+      <div class="card reveal" data-delay="1">
+        <span class="card-step">Das System</span>
+        <h2 class="h3">Vor Ort gefunden, als Anfrage angekommen.</h2>
+        {{> sysmap-ads}}
+        <p class="tiny">Anzeigen bei Meta und Google nur nach Ihrer Freigabe, dazu Google-Unternehmensprofil und Bewertungen. Jede Anfrage, die daraus entsteht, bearbeitet auf Wunsch Ihr <a href="/leistungen/ki-automatisierung">KI-Assistent</a>.</p>
       </div>
     </div>
   </div>

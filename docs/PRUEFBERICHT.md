@@ -49,6 +49,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Startseite** nach CI-Standardstruktur: Hero (Claim, Systemablauf-Karte, Kennzahlen) → Problem → Lösung (ein System, drei Schritte) → Leistungen (vier Bereiche) → Beweis (eigener Betrieb, Projekt Pony Club Lila) → Prozess (Zeitleiste) → Kurzcheck → Warum Markentrix (Gründer) → Pilotangebot → Abschluss-CTA auf Navy mit Wachstumskurve.
 
+**Signature-System (Nachtrag 12.10.2026, zweite Runde)**: Eigenes Icon-Set in der Linienlogik der Wortmarke (jedes Icon trägt genau einen gefüllten Datenpunkt), drei animierte Systemkarten (Knoten + Verbindungslinien im CI-Verlauf) für Marketing, Webdesign und KI-Automatisierung, ein durchlaufender Wachstumspfad mit nummerierten Datenpunkten auf der Startseite (ab 1340 px), zwei Typografie-Statements aus den CI-Markenbotschaften, Brancheneinstiege (Handwerk, Praxis, Gastro/Handel) mit vorbelegtem Potenzial-Check, Hover-Verbindungslinie zwischen Bausteinen und ein Datenpunkte-Muster in Footer und Kontrastfläche. Der Potenzial-Check ist jetzt ein Dialog: Branche, Kanal, Anfragen pro Woche, dann eine Ersteinschätzung (nur Aussagen aus Preisliste und CI-Allowlist, keine Ergebnisversprechen), erst danach Name und E-Mail. Der Webhook erhält zusätzlich `branche`, `kanal`, `anfragen`, `empfehlung`.
+
 **Alle 23 Seiten** mit gleichem Gerüst, Breadcrumbs, Abschluss-CTA, strukturierten Daten (WebPage, BreadcrumbList, FAQPage, Service, Article, OfferCatalog) und sauberer Überschriftenhierarchie.
 
 ## 3. Prüfung des Ergebnisses
