@@ -1,0 +1,136 @@
+# Markentrix — Netlify-Konfiguration · Stand 28.09.2026
+# Veröffentlicht wird ausschließlich der Build-Ordner dist/ (statisches HTML, kein CDN).
+# Netlify liefert /preise automatisch aus dist/preise.html aus.
+
+[build]
+  publish = "dist"
+
+# ── Alte Dateipfade dauerhaft auf die sprechenden URLs umleiten ──
+[[redirects]]
+  from = "/Markentrix%20Website.dc.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Leistungen-KI-Automatisierung.dc.html"
+  to = "/leistungen/ki-automatisierung"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Leistungen-Marketing.dc.html"
+  to = "/leistungen/marketing"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Leistungen-Webdesign.dc.html"
+  to = "/leistungen/webdesign"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Preise.dc.html"
+  to = "/preise"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Prozess.dc.html"
+  to = "/prozess"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Ueber-uns.dc.html"
+  to = "/ueber-uns"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Referenzen.dc.html"
+  to = "/referenzen"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/FAQ.dc.html"
+  to = "/faq"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ROI-Rechner.dc.html"
+  to = "/roi-rechner"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Kontakt.dc.html"
+  to = "/kontakt"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Impressum.dc.html"
+  to = "/impressum"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Datenschutz.dc.html"
+  to = "/datenschutz"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/AGB.dc.html"
+  to = "/agb"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/KI-Checkliste%20Markentrix.dc.html"
+  to = "/ki-checkliste"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/KI-Marketing-Celle.dc.html"
+  to = "/ki-marketing-celle"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/KI-Marketing-Hannover.dc.html"
+  to = "/ki-marketing-hannover"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/KI-Marketing-Braunschweig.dc.html"
+  to = "/ki-marketing-braunschweig"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/KI-Marketing-Gifhorn.dc.html"
+  to = "/ki-marketing-gifhorn"
+  status = 301
+  force = true
+
+# ── Ehemaliger Kundenbereich → externes Portal ──
+[[redirects]]
+  from = "/kunden-dashboard"
+  to = "https://markentrix.netlify.app/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/Kunden-Dashboard.dc.html"
+  to = "https://markentrix.netlify.app/"
+  status = 301
+  force = true
+
+# Header stehen in dist/_headers (Sicherheitsheader + Caching).

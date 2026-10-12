@@ -1,0 +1,40 @@
+User-agent: *
+Allow: /
+
+# Ehemaliger interner Kundenbereich, jetzt Weiterleitung zum externen Portal
+Disallow: /kunden-dashboard
+
+# Impressum, AGB und Datenschutz sind bewusst indexierbar (Vertrauenssignal)
+# und stehen in der Sitemap. Die KI-Checkliste ist per meta robots auf noindex.
+
+# KI-/Answer-Engines ausdruecklich erlaubt (GEO)
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap & KI-Kurzprofil
+Sitemap: https://markentrix.de/sitemap.xml
