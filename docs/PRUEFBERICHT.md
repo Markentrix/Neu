@@ -21,7 +21,7 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 ### Technik
 | # | Befund | Status |
 |---|---|---|
-| 11 | Startseite 198 KB, davon 57 KB Inline-JavaScript mit eigener Mini-Laufzeit („DCLogic“), Unterseiten mit zweiter Laufzeit `mx.js` | ersetzt durch `site.js` (17 KB, ein Modul, ohne Framework) |
+| 11 | Startseite 198 KB, davon 57 KB Inline-JavaScript mit eigener Mini-Laufzeit („DCLogic“), Unterseiten mit zweiter Laufzeit `mx.js` | Startseite jetzt 55 KB; eine Laufzeit `site.js` (22 KB, ohne Framework), ein Stylesheet `mx.css` (47 KB) für alle Seiten, beide langlebig gecacht |
 | 12 | Keine Content-Security-Policy möglich (Inline-Skripte) | strikte CSP in `_headers` (script-src 'self' + Analytics-Hosts), getestet |
 | 13 | Doppelte `<meta charset>`/`viewport`, `X-UA-Compatible` | bereinigt |
 | 14 | Mobile Navigation wurde per JavaScript aus der Desktop-Navigation „abgeleitet“ (fehleranfällig) | eigenes, statisches Mobile-Menü mit Fokusführung, Escape, aria-expanded |
@@ -58,7 +58,15 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 - CSP-Test mit echtem Header: Consent, GA4 und Metricool laden nur nach Einwilligung und ohne CSP-Fehler, Webhook erreichbar, Fonts lokal.
 - Screenshots Desktop (1440) und Mobil (390) aller Seiten gesichtet.
 
-## 4. Offen (braucht Entscheidung oder Material)
+## 4. Redaktionelle Hinweise aus der Migration
+- **Über uns** sagt „Serverstandort Deutschland“, Startseite „Hostingregion projektbezogen“, KI-Seite „EU-Server“. Alle drei Aussagen stammen aus der alten Seite; bitte auf eine Formulierung festlegen (Datenschutz nennt Hetzner, Rechenzentrum DE).
+- **KI-Checkliste** (noindex) enthält aus der Altseite „Einführungspreise gültig bis 31.12.2026“, „30/60 Minuten Anpassungsbudget je Monat“ und einen Hinweis auf verbrauchsbasierte Abrechnung von API-Aufrufen. Das steht so nicht in der Preisliste. Unverändert übernommen, fachlich prüfen oder Seite entfernen.
+- **FAQ** nennt „Google Calendar“ als Kanalbezeichnung (wortgleich mit dem FAQPage-JSON-LD). Erlaubt als Leistungsbezeichnung, kein Toolname im Markensinn.
+- **Datenschutz, Abschnitt 5**: Der Eintrag zum Dark-Mode-Speicher `mk-theme` wurde gestrichen, weil es den Umschalter nicht mehr gibt. Die Einträge `mx-consent`, `mx-a11y-scale`, `mx-a11y-contrast` bleiben korrekt. Abschnitt 4 nennt den Workflow-Dienst und die KI-Anbieter namentlich; das ist als Pflichtangabe richtig und keine Werbung.
+- **Webdesign**: Der alte Hinweis „Angebot bis 31.12.2026: LANDING START“ wurde zu „nur als Angebot“ (wie auf /preise). Falls die Frist gelten soll, auf beiden Seiten ergänzen.
+- **Regionalseiten**: Hannover und Gifhorn hatten kein Beispielszenario; es wurde keines erfunden, der vorhandene Textblock sitzt im selben Slot.
+
+## 5. Offen (braucht Entscheidung oder Material)
 1. **USt-IdNr.** im Impressum eintragen, sobald vorhanden (Kommentar in `src/pages/impressum.html`).
 2. **Netlify**: Repository mit dem Netlify-Projekt „markentrix-website“ verbinden (Branch `main`, `publish = dist`, kein Build-Befehl) oder `dist/` per Drag-and-drop deployen. Nach dem Deploy die Abnahmetests aus `docs/DEPLOY.md` ausführen und die Sitemap in der Search Console neu einreichen.
 3. **n8n-Workflow** `markentrix-anfrage`: Feldnamen sind kompatibel; neue Felder `firma`, `budget`, `seite`, `zeit` können im Workflow genutzt werden. Quelle „Buchungsformular“ heißt jetzt „Kontaktformular“.
