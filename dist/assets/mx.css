@@ -649,3 +649,44 @@ html.a11y-contrast .card,html.a11y-contrast .price-card,html.a11y-contrast .step
 .wz-result li{margin:.3em 0}
 .wz-result .tiny{margin-top:8px}
 @media (max-width:480px){.choices{grid-template-columns:minmax(0,1fr)}.wz-progress li{font-size:.62rem}}
+
+/* ─── 30. Visuelle Bühne: Browser-Mockup, Suche und KI-Antwort, Ausblick ─── */
+.hero--stage::before{background:radial-gradient(55% 60% at 82% 30%,rgba(40,199,247,.16),transparent 62%),radial-gradient(40% 40% at 12% 90%,rgba(139,92,246,.12),transparent 60%),radial-gradient(rgba(11,16,32,.06) 1px,transparent 1.3px);background-size:auto,auto,22px 22px}
+.browser{position:relative;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg)}
+.browser-bar{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--soft);border-radius:16px 16px 0 0}
+.browser-bar i{width:10px;height:10px;border-radius:50%;background:var(--cool);display:block;opacity:.7}
+.browser-bar .url{margin-left:8px;flex:1;height:26px;border-radius:7px;background:#fff;border:1px solid var(--border);font-size:.74rem;color:var(--muted);display:flex;align-items:center;padding:0 10px}
+.browser-body{border-radius:0 0 16px 16px;overflow:hidden;background:#fff}
+.browser-body img{width:100%;height:auto;display:block}
+.float-chip{position:absolute;display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border-radius:100px;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow-md);font-size:.8rem;font-weight:600;color:var(--navy);white-space:nowrap;animation:floaty 6s ease-in-out infinite;z-index:2}
+.float-chip svg{width:16px;height:16px;color:var(--blue-text)}
+.float-chip--1{left:-28px;top:16%}
+.float-chip--2{right:-22px;top:48%;animation-delay:1.6s}
+.float-chip--3{left:10%;bottom:-18px;animation-delay:3.1s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@media (max-width:900px){
+  .float-chip{position:static;animation:none;box-shadow:none;margin:0}
+  .browser{display:flex;flex-direction:column}
+  .browser .float-chip{display:none}
+}
+@media (prefers-reduced-motion:reduce){.float-chip{animation:none}}
+/* Suche und KI-Antwort (Beispieldarstellungen) */
+.proof-seo{gap:14px}
+.serp{position:relative;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;font-size:.9rem;display:flex;flex-direction:column}
+.serp .q{display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--border-strong);border-radius:100px;color:var(--navy);margin:14px 0 12px;font-weight:500}
+.serp .q svg{width:16px;height:16px;color:var(--muted);flex:none}
+.serp .hit{padding:10px 0;border-top:1px solid var(--border)}
+.serp .hit b{display:block;color:var(--link);font-weight:600}
+.serp .hit span{display:block;color:var(--muted);font-size:.82rem;margin-top:2px}
+.serp .hit--you{background:rgba(40,199,247,.08);border:1px solid rgba(30,155,255,.35);border-radius:10px;padding:10px 12px;margin-bottom:6px}
+.serp .hit--you b{color:var(--navy)}
+.serp .stars{color:#B45309;letter-spacing:.04em}
+.ai-answer{background:var(--navy) radial-gradient(rgba(255,255,255,.10) 1px,transparent 1.3px) 0 0/22px 22px;color:#fff;border-radius:14px;padding:18px;font-size:.9rem}
+.ai-answer .q{color:rgba(255,255,255,.72);font-size:.84rem;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;line-height:1.4}
+.ai-answer .q svg{width:16px;height:16px;color:var(--cyan);flex:none;margin-top:2px}
+.ai-answer p{margin:0;color:#fff;line-height:1.6}
+.ai-answer mark{background:rgba(40,199,247,.28);color:#fff;border-radius:4px;padding:0 4px}
+.ai-answer .src{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.ai-answer .src span{font-size:.72rem;padding:3px 9px;border-radius:100px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.9)}
+.pill--soon{background:#fff;border:1px solid var(--violet);color:var(--violet-text);white-space:normal;text-align:left}
+.card--violet .pill--soon{background:rgba(139,92,246,.08)}

@@ -206,15 +206,15 @@
     var steps = $$('fieldset[data-step]', form), prog = $$('.wz-progress li', form);
     var prevB = $('[data-wz=prev]', form), nextB = $('[data-wz=next]', form), submitB = $('[type=submit]', form);
     var result = $('[data-wz-result]', form), reco = $('input[name=empfehlung]', form), cur = 0;
-    var PAIN = { handwerk: 'Das Telefon klingelt, während Sie auf der Baustelle oder unterm Auto sind. Der Anrufer ruft selten ein zweites Mal an.',
-      praxis: 'Die Anfrage liegt seit gestern im Postfach, während das Team am Empfang keine Hand frei hat.',
-      gastro: 'Reservierungen, Bestellungen und Fragen kommen über mehrere Kanäle gleichzeitig, mitten im Betrieb.',
-      sonstige: 'Anfragen kommen an, während Sie arbeiten, und bleiben liegen, bis Zeit dafür ist.' };
-    var KANAL = { telefon: '<b>Telefon.</b> Dafür ist der KI-Telefonassistent gedacht: Er nimmt Anrufe an, gibt Auskunft, erfasst Rückrufwünsche und bucht Termine. Enthalten ab Paket BUSINESS (699 € im Monat netto, Einrichtung einmalig 2.490 €).',
-      whatsapp: '<b>WhatsApp.</b> Der WhatsApp-Assistent antwortet sofort, qualifiziert die Anfrage und bucht Termine. Ein Kanal ist mit Paket ONE abgedeckt (349 € im Monat netto, Einrichtung einmalig 1.490 €), Telefon dazu ab BUSINESS.',
-      email: '<b>E-Mail.</b> Der E-Mail-Assistent sortiert das Postfach, antwortet auf Standardanfragen und schlägt freie Termine vor. Ein Kanal ist mit Paket ONE abgedeckt (349 € im Monat netto, Einrichtung einmalig 1.490 €).',
-      website: '<b>Website.</b> Hier hilft eine Landingpage mit Terminbuchung, deren Anfragen direkt beim Assistenten oder Ihrem Team landen (LANDING ab 2.290 € einmalig, Pflege 59 € im Monat).',
-      unklar: '<b>Noch unklar.</b> Im Erstgespräch finden wir in rund 30 Minuten den Kanal, über den bei Ihnen am meisten verloren geht.' };
+    var PAIN = { handwerk: 'Kunden suchen „Elektriker Celle“ oder „Dachdecker in der Nähe“ und entscheiden auf dem Handy in Sekunden. Ihr Telefon klingelt, während Sie auf der Baustelle sind.',
+      praxis: 'Neue Patienten und Mandanten vergleichen Website, Bewertungen und Öffnungszeiten, bevor sie anrufen. Oft außerhalb der Sprechzeiten.',
+      gastro: 'Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy. Wer sie nicht in zehn Sekunden findet, geht weiter.',
+      sonstige: 'Interessenten suchen online, vergleichen und melden sich dann. Die Website entscheidet, ob daraus eine Anfrage wird.' };
+    var KANAL = { website: '<b>Website.</b> Der erste Hebel ist eine Landingpage oder Website, die mobil überzeugt und lokal gefunden wird. LANDING ab 2.290 € einmalig (Pflege 59 € im Monat), Unternehmenswebsite BUSINESS WEB 4.490 €. In 5 bis 15 Werktagen live.',
+      sichtbarkeit: '<b>Sichtbarkeit.</b> Lokale SEO-Grundlagen und GEO, also gefunden werden in KI-Antworten, gehören bei uns zur Website. Für die laufende Pflege von Google-Unternehmensprofil und Bewertungen: LOCAL VISIBILITY, 449 € im Monat netto.',
+      formular: '<b>Anfragewege.</b> Anfragen müssen dort landen, wo sie bearbeitet werden: Terminbuchung im Kalender, Benachrichtigung aufs Handy, klare Antwortzeiten. Das richten wir mit der Website ein (LANDING ab 2.290 €).',
+      anfragen: '<b>Telefon und WhatsApp.</b> Sofort hilft eine Landingpage mit Terminbuchung, damit Anfragen nicht warten. Ab November 2026 übernehmen unsere KI-Assistenten Telefon, WhatsApp und E-Mail (Pakete ab 349 € im Monat netto). Pilotplätze können Sie jetzt vormerken.',
+      unklar: '<b>Noch unklar.</b> Im Erstgespräch finden wir in rund 30 Minuten den Punkt, an dem bei Ihnen am meisten verloren geht.' };
     function val(name) { var r = $('input[name=' + name + ']:checked', form); return r ? r.value : ''; }
     function label(name) { var r = $('input[name=' + name + ']:checked', form); return r ? (r.closest('.choice').textContent || '').trim() : ''; }
     function show(i) {
@@ -235,7 +235,7 @@
     function buildResult() {
       var b = val('branche') || 'sonstige', k = val('kanal') || 'unklar', n = +((($('input[name=anfragen]', form) || {}).value) || 0);
       var volume = n < 5 ? 'Bei unter fünf Anfragen pro Woche ist der erste Hebel meist die Sichtbarkeit: Google-Unternehmensprofil, Bewertungen und lokale Suche (LOCAL VISIBILITY, 449 € im Monat netto).'
-        : 'Bei rund ' + n + (n >= 100 ? ' und mehr' : '') + ' Anfragen pro Woche zählt jede, die liegen bleibt. Was eine verpasste Anfrage kostet, zeigt der Sparrechner.';
+        : 'Bei rund ' + n + (n >= 100 ? ' und mehr' : '') + ' Anfragen pro Woche zählt jede, die liegen bleibt. Eine Website mit klaren Anfragewegen ist dann der schnellste Hebel. Was eine verpasste Anfrage kostet, zeigt der Sparrechner.';
       var html = '<b>Kurz zusammengefasst</b><ul><li>' + PAIN[b] + '</li><li>' + KANAL[k] + '</li><li>' + volume + '</li></ul><p class="tiny">Keine Zusicherung, alle Preise netto zzgl. USt. Im Erstgespräch prüfen wir, ob und wie sich das in Ihrem Betrieb rechnet.</p>';
       if (result) result.innerHTML = html;
       if (reco) reco.value = 'Branche: ' + (label('branche') || 'offen') + ' | Kanal: ' + (label('kanal') || 'offen') + ' | Anfragen/Woche: ' + n;
