@@ -1,0 +1,14 @@
+[
+  {"id": "start", "label": "Startseite", "old": "/start/", "new": "index.html"},
+  {"id": "leistungen", "label": "Leistungen", "old": "/LEISTUNGEN/", "new": "leistungen/index.html"},
+  {"id": "haftpflicht", "label": "Haftpflichtschaden-Gutachten", "old": "/LEISTUNGEN/Haftpflichtschaden-Gutachten/", "new": "leistungen/haftpflichtschaden-gutachten/index.html"},
+  {"id": "beweis", "label": "Beweissicherungsgutachten", "old": "/LEISTUNGEN/Beweissicherungsgutachten/", "new": "leistungen/beweissicherungsgutachten/index.html"},
+  {"id": "leasing", "label": "Leasingrücknahme-Gutachten", "old": "/LEISTUNGEN/Leasingruecknahme-Gutachten/", "new": "leistungen/leasingruecknahme-gutachten/index.html"},
+  {"id": "wert", "label": "Wertgutachten", "old": "/LEISTUNGEN/Wertgutachten/", "new": "leistungen/wertgutachten/index.html"},
+  {"id": "restwert", "label": "Restwertermittlung", "old": "/LEISTUNGEN/Restwertermittlung/", "new": "leistungen/restwertermittlung/index.html"},
+  {"id": "gruende", "label": "Gründe für ein Gutachten", "old": "/Gruende-fuer-ein-Gutachten/", "new": "gruende-fuer-ein-gutachten/index.html"},
+  {"id": "checkliste", "label": "Unfall-Checkliste", "old": "/UNFALL-CHECKLISTE/", "new": "unfall-checkliste/index.html"},
+  {"id": "kontakt", "label": "Kontakt", "old": "/kontakt/", "new": "kontakt/index.html"},
+  {"id": "impressum", "label": "Impressum", "old": "/kontakt/impressum/", "new": "impressum/index.html"},
+  {"id": "datenschutz", "label": "Datenschutz", "old": "/kontakt/datenschutz/", "new": "datenschutz/index.html"}
+]

@@ -1,0 +1,87 @@
+# PS Schneider – Apache-Konfiguration
+# Diese Datei liegt im Webroot neben index.html. Sie wird von build/build.py erzeugt.
+# Benötigte Module: mod_alias, mod_headers, mod_expires, mod_deflate (sonst Zeilen entfernen).
+
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+# --- PHP: nur der Formular-Endpunkt ist von außen erreichbar, versteckte Dateien sind gesperrt ---
+<FilesMatch "\.php$">
+  Require all denied
+</FilesMatch>
+<Files "anfrage.php">
+  Require all granted
+</Files>
+<FilesMatch "^\.(ht|user\.ini)">
+  Require all denied
+</FilesMatch>
+# Upload-Grenzen für Fotos (bei mod_php; bei php-fpm gilt die Datei .user.ini)
+<IfModule mod_php.c>
+  php_value upload_max_filesize 20M
+  php_value post_max_size 60M
+  php_value max_file_uploads 10
+</IfModule>
+
+# --- HTTPS und eine Domain erzwingen (nach dem Einrichten des Zertifikats einkommentieren) ---
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{HTTPS} !=on [OR]
+#   RewriteCond %{HTTP_HOST} ^www\. [NC]
+#   RewriteRule ^ https://psschneider.de%{REQUEST_URI} [L,R=301]
+# </IfModule>
+
+# --- Alte Adressen der bisherigen Website: dauerhaft (301) auf die neuen Seiten ---
+RedirectMatch 301 ^/start/?$ /
+RedirectMatch 301 ^/LEISTUNGEN/?$ /leistungen/
+RedirectMatch 301 ^/LEISTUNGEN/Haftpflichtschaden-Gutachten/?$ /leistungen/haftpflichtschaden-gutachten/
+RedirectMatch 301 ^/LEISTUNGEN/Beweissicherungsgutachten/?$ /leistungen/beweissicherungsgutachten/
+RedirectMatch 301 ^/LEISTUNGEN/Leasingruecknahme-Gutachten/?$ /leistungen/leasingruecknahme-gutachten/
+RedirectMatch 301 ^/LEISTUNGEN/Wertgutachten/?$ /leistungen/wertgutachten/
+RedirectMatch 301 ^/LEISTUNGEN/Restwertermittlung/?$ /leistungen/restwertermittlung/
+RedirectMatch 301 ^/Gruende-fuer-ein-Gutachten/?$ /gruende-fuer-ein-gutachten/
+RedirectMatch 301 ^/UNFALL-CHECKLISTE/?$ /unfall-checkliste/
+RedirectMatch 301 ^/kontakt/impressum/?$ /impressum/
+RedirectMatch 301 ^/kontakt/datenschutz/?$ /datenschutz/
+RedirectMatch 301 ^/kontakt/datenschutz/index\.php/?$ /datenschutz/
+
+# --- Sicherheit ---
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  # Alles kommt vom eigenen Server, es gibt keinen Inline-Code:
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'"
+  # Erst aktivieren, wenn HTTPS dauerhaft läuft:
+  # Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
+
+# --- Komprimierung ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json application/xml image/svg+xml text/plain
+</IfModule>
+
+# --- Zwischenspeicher im Browser ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/avif "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 1 month"
+  ExpiresByType text/css "access plus 1 week"
+  ExpiresByType application/javascript "access plus 1 week"
+  ExpiresByType text/html "access plus 5 minutes"
+</IfModule>
+
+# Dateien mit ?v=Prüfsumme in der Adresse ändern sich nie unter derselben Adresse: ein Jahr, ohne Nachfrage
+<IfModule mod_setenvif.c>
+  SetEnvIfExpr "%{QUERY_STRING} =~ /^v=[0-9a-f]{8}$/" versioned
+</IfModule>
+<IfModule mod_headers.c>
+  Header onsuccess set Cache-Control "public, max-age=31536000, immutable" env=versioned
+</IfModule>
