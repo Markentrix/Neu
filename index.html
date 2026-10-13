@@ -612,6 +612,21 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
   .mini.ok{animation:none}
   .cat-img img{transform:none!important}
 }
+
+/* ---- Korrekturen Handyansicht ---- */
+.kilo h2 em{box-shadow:none;text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:.14em;text-underline-offset:.1em;text-decoration-skip-ink:none}
+.cut{background:var(--soft)}
+.quick{background:linear-gradient(to bottom,transparent 40px,var(--soft) 40px)}
+.proof .pf{align-items:center}
+@media(max-width:700px){
+  .proof .wrap{grid-template-columns:1fr 1fr;gap:14px 12px}
+  .proof .pf{flex-direction:column;align-items:flex-start;gap:3px;padding:0}
+  .proof .pf b{font-size:1.9rem}
+  .proof .pf span{font-size:.86rem;line-height:1.3}
+  .quick .wrap{gap:10px}
+  .qa b{font-size:1.02rem;letter-spacing:.02em}
+  .hero .wrap{padding-bottom:62px}
+}
 </style>
 </head>
 <body>
@@ -1030,7 +1045,8 @@ document.getElementById("yr").textContent = new Date().getFullYear();
     const txt = b.textContent.trim();
     const m = txt.match(/^([^\d]*)(\d[\d.]*)(.*)$/); if (!m) return;
     const [, pre, num, post] = m; const target = parseInt(num.replace(/\./g,""),10); if (!target) return;
-    const fmt = n => n.toLocaleString("de-DE");
+    if (/seit/i.test(pre) || /^(19|20)\d\d$/.test(num)) return; // Jahreszahlen nicht zaehlen
+    const fmt = num.includes(".") ? (n => n.toLocaleString("de-DE")) : (n => String(n));
     const t0 = performance.now(), dur = 1100;
     const step = now => {
       const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
