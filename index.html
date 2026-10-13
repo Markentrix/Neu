@@ -463,6 +463,101 @@ footer .brand-name small{color:var(--red-d)}
 @media(max-width:700px){.pill{font-size:.88rem}}
 .badge-row .pill.o{background:rgba(255,255,255,.14);color:#fff}
 .micro{color:#e4e6e9}
+
+/* ---- Ruhige Palette: Weiss / Warmgrau / Anthrazit, Rot nur fuer Aktion, Gelb nur als Akzent ---- */
+:root{--ink:#1f2124;--ink-2:#2a2d31;--paper:#fff;--soft:#f3f1ec;--line:rgba(31,33,36,.12);--red:#c8161d;--red-d:#a31218;--yellow:#f7c922;--muted:#5b5e63}
+body{background:#fff}
+/* Laufband weg, Vertrauensleiste ruhig */
+.ticker{display:none}
+.proof{background:var(--soft);padding:22px 0;margin-top:0}
+.proof .wrap{gap:12px}
+.pf b{color:var(--ink)}
+.pf span{color:var(--muted)}
+.quick{margin-top:clamp(-40px,-4vw,-28px);padding:0 0 32px;background:linear-gradient(to bottom,transparent 40px,var(--soft) 40px)}
+.qa{box-shadow:0 2px 10px rgba(31,33,36,.08);border:1px solid var(--line)}
+.qa:hover{box-shadow:0 8px 20px rgba(31,33,36,.12)}
+.qa i{background:var(--soft);color:var(--ink)}
+.qa.wa i{background:var(--soft);color:var(--ink)}
+.qa.rt i{background:var(--red);color:#fff}
+.qa.off i{background:var(--soft);color:#8a8d91}
+/* Seitenanfang bleibt der einzige dunkle Block */
+.hero::before{background:linear-gradient(105deg,rgba(31,33,36,.97) 0%,rgba(31,33,36,.93) 55%,rgba(31,33,36,.8) 100%),url(assets/schrauben.jpg) center/cover}
+.hero .pill.y{background:var(--yellow);color:var(--ink)}
+.kicker{color:#e8e9eb;font-weight:700}
+.lead strong{color:#fff}
+.sign-top{border-color:rgba(255,255,255,.35);box-shadow:none;background:var(--ink-2)}
+.sign-red{box-shadow:none;border-color:rgba(255,255,255,.35)}
+.hero-date{box-shadow:none;border:0;background:#fff;color:var(--ink)}
+.hero-date b{color:var(--red)}
+.cut{background:#fff}
+/* Buttons: Rot = Hauptaktion, Anthrazit = Zweitaktion, Rahmen = Dritte */
+.btn{box-shadow:none!important}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:hover{background:var(--red-d);transform:translateY(-1px)}
+.btn-yellow,.btn-dark{background:var(--ink);color:#fff}
+.btn-yellow:hover,.btn-dark:hover{background:#000;transform:translateY(-1px)}
+.btn-wa{background:var(--ink);color:#fff}
+.btn-wa:hover{background:#000;transform:translateY(-1px)}
+.btn-ghost{color:#fff;border-color:rgba(255,255,255,.6)}
+.btn-line{background:#fff;color:var(--ink);border-color:var(--line)}
+.btn.off{background:var(--soft);color:#5b5e63;border:1px dashed #a0a3a7}
+.sticky{background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(31,33,36,.1)}
+.sticky .btn-ghost{color:var(--ink);border-color:var(--line)}
+.sticky .btn.off{background:var(--soft);color:#5b5e63;border:1px dashed #a0a3a7}
+/* Abschnitte im Wechsel Weiss / Warmgrau */
+.eyebrow{color:var(--muted)}
+.eyebrow::before{background:var(--red)}
+#sortiment{background:#fff}
+#fuer-wen{background:var(--soft);padding-top:clamp(56px,8vw,96px)!important}
+.who article{border:0;box-shadow:none}
+.who .tick{background:var(--ink);color:#fff}
+.kilo{background:#fff}
+.kilo h2 em{background:none;color:var(--ink);padding:0;box-shadow:inset 0 -.32em 0 var(--yellow)}
+.kilo li i{background:var(--ink);color:#fff}
+.scarce{background:var(--soft);border:1px solid var(--line)}
+.kilo-visual .ph{box-shadow:0 8px 24px rgba(31,33,36,.18)}
+.scale{background:var(--ink);border-color:#fff}
+.scale b span{color:var(--yellow);text-decoration:none}
+#besuch{background:var(--soft)}
+.card{border:0;box-shadow:none}
+.card .ci{background:var(--ink);color:#fff}
+.big-date{color:var(--ink)}
+.hours li span:last-child{background:#fff;border:1px solid var(--line)}
+.hours li.today{color:var(--red)}
+#kontakt{background:#fff}
+.panel{border:1px solid var(--line);box-shadow:none}
+.numrow,.dest{background:var(--soft)}
+.dest svg{color:var(--ink)}
+.field input:focus{box-shadow:0 0 0 3px rgba(31,33,36,.15)}
+.bulk{background:var(--soft);padding:clamp(48px,7vw,80px) 0}
+.bulk .wrap{background:transparent;border-radius:0;padding:0 var(--gut);max-width:var(--wrap)}
+.bulk-ico{background:var(--ink);color:var(--yellow)}
+#faq{background:#fff}
+.faq details{border-color:var(--line)}
+.faq details[open]{border-color:var(--ink)}
+.faq summary::after{color:var(--ink)}
+.ka{background:var(--soft)}
+.ka .eyebrow{color:var(--muted)!important}
+.ka .btn-yellow{background:var(--red)}
+.ka-card{border:0;box-shadow:0 8px 24px rgba(31,33,36,.1)}
+.avatar{background:var(--ink);color:#fff}
+.tag{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.stats b{color:var(--ink)}
+.stats{border-top:1px solid var(--line)}
+.flyer-sec{background:#fff}
+.flyer-wrap img{box-shadow:0 8px 24px rgba(31,33,36,.18)}
+.glance{background:var(--soft);border-top:0}
+.glance dt{color:var(--muted)}
+footer{background:var(--ink);color:#c9ccd0;border-top:4px solid var(--yellow)}
+footer .brand,footer .brand-name{color:#fff}
+footer .brand-name small{color:var(--yellow)}
+footer nav a{color:#fff}
+footer .copy{border-top:1px solid rgba(255,255,255,.15);color:#9a9ea3}
+@media(max-width:700px){
+  .quick{padding-bottom:24px}
+  .proof{padding:16px 0}
+  .bulk .wrap{margin:0;padding:0 16px;border-radius:0}
+}
 </style>
 </head>
 <body>
@@ -521,12 +616,6 @@ footer .brand-name small{color:var(--red-d)}
   <a class="qa wa js-wa" target="_blank" rel="noopener noreferrer" href="#kontakt"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.5L3 21Z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .7a3.5 3.5 0 0 1-1.7-1.7l.7-1-1-2L9 9.5Z"/></svg></i><span><b>WhatsApp</b><small>Direkt schreiben</small></span></a>
   <a class="qa rt" href="#anfahrt"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg></i><span><b>Route planen</b><small>Celle, Braunschw. Heerstr. 100</small></span></a>
   <a class="qa js-ka" target="_blank" rel="noopener noreferrer" href="#"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></i><span><b>Kleinanzeigen</b><small>403 Anzeigen online</small></span></a>
-</div></div>
-
-<!-- TICKER -->
-<div class="ticker" aria-hidden="true"><div class="ticker-in">
-  <span>Super günstige Preise</span><span>Direkt zum Mitnehmen</span><span>Nach Kilo abgerechnet</span><span>Nur solange der Vorrat reicht</span><span>Reinschauen lohnt sich</span>
-  <span>Super günstige Preise</span><span>Direkt zum Mitnehmen</span><span>Nach Kilo abgerechnet</span><span>Nur solange der Vorrat reicht</span><span>Reinschauen lohnt sich</span>
 </div></div>
 
 <!-- VERTRAUEN -->
