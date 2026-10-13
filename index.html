@@ -162,6 +162,18 @@ h2{font-size:clamp(2.4rem,6vw,4.2rem);margin-bottom:.3em}
 .card .btn{width:100%;font-size:1.1rem;padding:.7em 1em;min-height:48px}
 @media(max-width:900px){.info-grid{grid-template-columns:1fr}}
 
+
+/* ---- Großabnehmer ---- */
+.bulk{background:var(--yellow);color:var(--ink);padding:clamp(40px,6vw,72px) 0;border-block:4px solid var(--ink)}
+.bulk .wrap{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(18px,4vw,44px);align-items:center}
+.bulk-ico{width:clamp(72px,10vw,104px);aspect-ratio:1;background:var(--ink);color:var(--yellow);display:grid;place-items:center;border-radius:8px;box-shadow:6px 6px 0 var(--red);transform:rotate(-3deg)}
+.bulk-ico svg{width:56%;height:56%}
+.bulk h2{font-size:clamp(2rem,5vw,3.2rem);margin-bottom:.25em}
+.bulk p{font-size:1.1rem;max-width:38em;min-width:0}
+.bulk p strong{font-weight:600}
+.bulk .btn-primary{white-space:nowrap}
+@media(max-width:860px){.bulk .wrap{grid-template-columns:1fr;justify-items:start}.bulk .btn{width:100%}}
+
 /* ---- CTA / Kleinanzeigen ---- */
 .ka{background:var(--red);color:#fff;position:relative;overflow:hidden}
 .ka::before{content:"";position:absolute;inset:0;opacity:.1;background:repeating-linear-gradient(-45deg,#000 0 2px,transparent 2px 14px)}
@@ -360,6 +372,18 @@ footer nav a:hover{color:var(--yellow)}
         </a>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- GROSSABNEHMER -->
+<section class="bulk" id="anfrage">
+  <div class="wrap">
+    <div class="bulk-ico rv" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/></svg></div>
+    <div class="rv">
+      <h2 class="disp">Größere Mengen?<br>Eigener Termin?</h2>
+      <p><strong>Sie möchten größere Mengen abnehmen und wünschen einen gesonderten Termin?</strong> Kein Problem. Fragen Sie bei uns an.</p>
+    </div>
+    <a class="btn btn-primary rv js-ka" target="_blank" rel="noopener noreferrer" href="#">Jetzt anfragen</a>
   </div>
 </section>
 
