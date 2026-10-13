@@ -637,6 +637,20 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
   .scale b{font-size:.78rem}
   .scale svg{width:36%}
 }
+
+/* ---- Optik 4-6: kompakter Seitenanfang, Flyer raus, Vertrauensleiste scrollbar ---- */
+@media(max-width:700px){
+  .hero .kicker,.hero .micro{display:none}
+  .hero .wrap{padding-top:22px;padding-bottom:60px}
+  .hero .lead{margin-bottom:18px}
+  .quick{padding-bottom:28px}
+  .proof{padding:18px 0 20px}
+  .proof .wrap{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+  .proof .wrap::-webkit-scrollbar{display:none}
+  .proof .pf{flex:0 0 auto;min-width:130px;scroll-snap-align:start;white-space:nowrap}
+  .proof .pf span{white-space:nowrap}
+}
+.flyer-sec{display:none}
 </style>
 </head>
 <body>
@@ -914,20 +928,6 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
   </div>
 </section>
 
-<!-- FLYER -->
-<section class="flyer-sec">
-  <div class="wrap flyer-wrap">
-    <img class="rv" src="assets/flyer.jpg" alt="Flyer: Handwerker aufgepasst! Berg's Sonderposten ist zurück in Celle" loading="lazy" width="900" height="1257">
-    <div class="rv">
-      <span class="eyebrow">Nicht verpassen</span>
-      <h2 class="disp">Nur solange<br>der Vorrat reicht!</h2>
-      <p>Sichere dir die besten Stücke zum kleinen Preis. Wir freuen uns auf euch – <strong>Reinschauen lohnt sich!</strong></p>
-      <div class="cta-row">
-        <a class="btn btn-primary js-ka" target="_blank" rel="noopener noreferrer" href="#">Jetzt auf Kleinanzeigen ansehen</a>
-      </div>
-    </div>
-  </div>
-</section>
 <section class="glance" aria-labelledby="glance-h">
   <div class="wrap">
     <h2 class="disp" id="glance-h">Berg's Sonderposten auf einen Blick</h2>
