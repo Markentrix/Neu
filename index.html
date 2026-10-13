@@ -224,6 +224,45 @@ footer nav a:hover{color:var(--yellow)}
   .rv{opacity:1;transform:none}
   html{scroll-behavior:auto}
 }
+
+/* ---- Komfort-Feinschliff: ruhiger, lesbarer, weniger Härte ---- */
+:root{--ink:#17181a;--ink-2:#222427;--paper:#f7f5f1;--red:#c8161d;--red-d:#a31218;--yellow:#f7c922;--muted:#4f5256}
+body{font-size:17px;line-height:1.65}
+p{max-width:62ch}
+.hero::after,.kilo::before,.ka::before{display:none}
+.hero::before{background:linear-gradient(105deg,rgba(23,24,26,.97) 0%,rgba(23,24,26,.92) 55%,rgba(23,24,26,.75) 100%),url(assets/schrauben.jpg) center/cover}
+h1{font-size:clamp(3rem,9vw,6.4rem)}
+h1 .l2{text-shadow:none}
+.ka h2{text-shadow:none}
+.lead{font-size:clamp(1.1rem,2.2vw,1.3rem);line-height:1.6}
+/* weichere Flächen statt harter Versatzschatten */
+.btn{border-radius:12px;border-width:2px;min-height:56px}
+.btn-primary,.btn-yellow{box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.btn-primary:hover,.btn-yellow:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.26)}
+.btn-primary:active,.btn-yellow:active{transform:translateY(1px);box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.cat,.card{border:1px solid rgba(23,24,26,.12);border-radius:16px;box-shadow:0 4px 18px rgba(23,24,26,.08)}
+.cat:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(23,24,26,.14)}
+.cat-img{border-bottom:0}
+.cat-ico{border-radius:10px 10px 0 0}
+.card .ci{border-radius:12px;box-shadow:none}
+.card{padding:30px 28px}
+.sign-top,.sign-red,.hero-date{border-width:3px;box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.hero-sign,.hero-date,.ka-card,.flyer-wrap img,.kilo-visual .ph,.scale{transform:none}
+.kilo-visual .ph{border:0;border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.scale{border-width:4px;box-shadow:0 8px 20px rgba(0,0,0,.4);left:-10px}
+.ka{background:var(--red-d)}
+.ka-card{border:0;border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+.flyer-wrap img{border:0;border-radius:14px;box-shadow:0 14px 34px rgba(23,24,26,.25)}
+.bulk-ico{box-shadow:none;transform:none;border-radius:16px}
+.bulk{border-block:0}
+.ticker{border-block:0}
+.ticker-in{animation-duration:48s}
+.ticker:hover .ticker-in{animation-play-state:paused}
+.hours li{font-size:1.2rem}
+.sec-head p,.card small,.cat p{font-size:1.02rem}
+section{padding:clamp(64px,9vw,112px) 0}
+.sticky{border-top:1px solid rgba(255,255,255,.15);box-shadow:0 -6px 20px rgba(0,0,0,.25)}
+.sticky .btn{border-radius:12px}
 </style>
 </head>
 <body>
