@@ -651,6 +651,146 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
   .proof .pf span{white-space:nowrap}
 }
 .flyer-sec{display:none}
+
+/* ---- Mobil kompakt: kleinere Schrift, weniger Abstaende, cleaner ---- */
+.kilo h2 em{background:none;padding:0;margin:0;color:inherit}
+@media(max-width:700px){
+  html{font-size:15px}
+  body{font-size:15px;line-height:1.5;padding-bottom:64px}
+  p{font-size:.95rem}
+  section{padding:30px 0}
+  #fuer-wen{padding-top:30px!important}
+  .sec-head{margin-bottom:14px}
+  .sec-head p{font-size:.92rem;line-height:1.45}
+  .eyebrow{font-size:.72rem;letter-spacing:.14em;margin-bottom:6px}
+  .eyebrow::before{width:22px;height:3px;margin-right:8px}
+  h2{font-size:1.65rem;line-height:1;margin-bottom:.3em}
+  /* Kopfzeile */
+  .top .wrap{height:54px}
+  .brand-mark{width:30px;height:30px;font-size:1.15rem}
+  .brand-name{font-size:1.05rem}
+  .nav .btn{font-size:.82rem;min-height:36px;padding:.45em .8em;border-radius:9px}
+  /* Seitenanfang */
+  .hero .wrap{padding-top:18px;padding-bottom:52px}
+  .badge-row{margin-bottom:10px;gap:6px}
+  .pill{font-size:.72rem;padding:.35em .7em}
+  h1{font-size:2.4rem;margin-bottom:.2em}
+  .hero .lead{font-size:.95rem;line-height:1.5;margin-bottom:14px}
+  .cta-row{gap:8px}
+  .cta-row .btn{font-size:.95rem;min-height:46px;padding:.7em 1em}
+  .cta-row .btn-ghost{min-height:42px}
+  .btn{font-size:.95rem;min-height:46px;border-radius:10px}
+  .stack .btn{font-size:.95rem}
+  .stack{gap:8px}
+  /* Schnellzugriff */
+  .quick{margin-top:-28px;padding-bottom:16px}
+  .quick .wrap{gap:8px}
+  .qa{min-height:50px;padding:8px 10px;gap:8px;border-radius:12px}
+  .qa i{width:32px;height:32px;border-radius:9px}
+  .qa i svg{width:18px;height:18px}
+  .qa b{font-size:.88rem;letter-spacing:.02em}
+  /* Vertrauensleiste: alle 4 sichtbar, klein */
+  .proof{padding:10px 0 14px}
+  .proof .wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;overflow:visible}
+  .proof .pf{flex-direction:row;align-items:baseline;gap:6px;min-width:0;white-space:normal}
+  .proof .pf b{font-size:1.1rem;line-height:1}
+  .proof .pf span{font-size:.7rem;line-height:1.2;white-space:normal;color:var(--muted)}
+  /* Sortiment */
+  .cats{gap:10px}
+  .cat{border-radius:12px}
+  .cat-body{padding:9px 10px 11px}
+  .cat h3{font-size:.98rem;margin-bottom:3px}
+  .cat p{font-size:.78rem;line-height:1.35}
+  .cat-ico{width:32px;height:32px;left:8px}
+  .cat-ico svg{width:17px;height:17px}
+  /* Für wen */
+  .who{gap:8px}
+  .who article{padding:12px 14px;border-radius:12px}
+  .who h3{font-size:1.1rem;margin-bottom:4px}
+  .who p{font-size:.85rem;line-height:1.4}
+  .who .tick{width:24px;height:24px;margin-bottom:8px}
+  .who .tick svg{width:12px;height:12px}
+  /* Kilo */
+  .kilo p{font-size:.95rem;margin-bottom:.8em}
+  .kilo ul{gap:8px;margin-top:14px}
+  .kilo li{font-size:.9rem;gap:10px}
+  .kilo li i{width:22px;height:22px}
+  .kilo li i svg{width:12px;height:12px}
+  .scarce{font-size:.85rem;padding:10px 12px;margin-top:14px;border-radius:10px}
+  .kilo-visual{margin-top:18px}
+  .scale{width:76px;right:10px;bottom:10px}
+  .scale b{font-size:.62rem}
+  /* Besuch */
+  #besuch .info-grid{gap:8px}
+  .card{padding:12px 12px;border-radius:12px}
+  .card .ci{width:38px;height:38px;margin-bottom:10px;border-radius:9px}
+  .card .ci svg{width:20px;height:20px}
+  .card h3{font-size:1.05rem;margin-bottom:4px}
+  .big-date{font-size:1.9rem}
+  .card small{font-size:.78rem;line-height:1.35;margin-top:4px}
+  .hours{gap:6px}
+  .hours li{font-size:.85rem;gap:2px;padding-bottom:6px}
+  .hours li span:last-child{font-size:.8rem;padding:.1em .5em}
+  /* Kontakt & Route */
+  .panel{padding:14px 12px;border-radius:12px}
+  .panel h3{font-size:1.25rem;margin-bottom:4px}
+  .panel>p{font-size:.88rem;margin-bottom:10px}
+  .numrow{font-size:1.05rem;padding:8px 10px;margin-bottom:10px;border-radius:10px}
+  .mini{font-size:.78rem;min-height:32px;padding:.35em .65em}
+  .dest{padding:10px;margin-bottom:10px;border-radius:10px;gap:8px}
+  .dest b{font-size:1rem}
+  .dest svg{width:20px;height:20px}
+  .field{margin-bottom:8px;gap:4px}
+  .field label{font-size:.78rem}
+  .field input{min-height:44px;padding:.6em .8em;border-radius:10px}
+  .divider{font-size:.78rem;margin:10px 0 2px}
+  .alt{gap:8px;margin-top:8px}
+  .alt .btn{font-size:.85rem;min-height:40px}
+  .hint,.area{font-size:.78rem;margin-top:8px}
+  .area{padding-top:8px}
+  /* Anfrage */
+  .bulk{padding:26px 0}
+  .bulk .wrap{gap:10px}
+  .bulk-ico{width:44px;border-radius:10px}
+  .bulk h2{font-size:1.4rem}
+  .bulk p{font-size:.9rem}
+  /* FAQ */
+  .faq{gap:6px}
+  .faq details{border-radius:10px}
+  .faq summary{font-size:.95rem;padding:11px 12px;min-height:44px;gap:10px}
+  .faq summary::after{font-size:1.2rem}
+  .faq .ans{padding:0 12px 12px;font-size:.88rem;line-height:1.45}
+  /* Kleinanzeigen */
+  .ka p{font-size:.92rem;margin-bottom:14px}
+  .ka-card{padding:12px;border-radius:12px}
+  .ka-top{gap:10px;margin-bottom:10px}
+  .avatar{width:42px;height:42px;font-size:1.3rem}
+  .ka-top b{font-size:1.2rem}
+  .ka-top span{font-size:.78rem}
+  .tags{gap:6px;margin-bottom:10px}
+  .tag{font-size:.75rem;padding:.3em .6em}
+  .stats{padding-top:10px}
+  .stats b{font-size:1.3rem}
+  .stats span{font-size:.7rem}
+  /* Auf einen Blick + Fuss */
+  .glance{padding:22px 0}
+  .glance h2{font-size:1.25rem;margin-bottom:8px}
+  .glance dt{font-size:.75rem;margin-top:6px}
+  .glance dd{font-size:.88rem;line-height:1.4}
+  footer{padding:22px 0 84px}
+  footer p{font-size:.82rem}
+  footer nav{gap:4px}
+  footer nav a{font-size:.85rem}
+  .copy{font-size:.72rem;padding-top:12px}
+  /* Feste Leiste */
+  .sticky{padding:7px 12px calc(7px + env(safe-area-inset-bottom,0px));gap:7px}
+  .sticky .btn{min-height:42px;font-size:.85rem;padding:.5em .3em;border-radius:9px}
+}
+@media(max-width:360px){
+  h1{font-size:2.1rem}
+  .qa b{font-size:.8rem}
+  .proof .pf span{font-size:.66rem}
+}
 </style>
 </head>
 <body>
