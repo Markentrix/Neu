@@ -558,6 +558,60 @@ footer .copy{border-top:1px solid rgba(255,255,255,.15);color:#9a9ea3}
   .proof{padding:16px 0}
   .bulk .wrap{margin:0;padding:0 16px;border-radius:0}
 }
+
+/* ---- Animationen: sichtbar im Ruhezustand, nur Bewegung, respektiert reduced-motion ---- */
+:root{--ease:cubic-bezier(.22,1,.36,1)}
+/* 5 Seitenanfang: gestaffeltes Einschweben beim Laden (Inhalt bleibt sichtbar) */
+.hero .badge-row,.hero h1,.hero .kicker,.hero .lead,.hero .cta-row,.hero .micro,.hero-sign{animation:rise .7s var(--ease) both}
+.hero .badge-row{animation-delay:.05s}.hero h1{animation-delay:.15s}.hero .kicker{animation-delay:.25s}.hero .lead{animation-delay:.33s}.hero .cta-row{animation-delay:.42s}.hero .micro{animation-delay:.5s}.hero-sign{animation-delay:.3s}
+@keyframes rise{from{transform:translateY(14px);opacity:.001}to{transform:none;opacity:1}}
+/* 4 Karten schweben sanft ein: nur Bewegung, nie Ausblenden */
+.rv{opacity:1;transform:translateY(12px);transition:transform .7s var(--ease)}
+.rv.in{transform:none}
+/* 1 Zahlen zaehlen hoch */
+.pf b{font-variant-numeric:tabular-nums}
+/* 2 Statuszaehler: sanftes Aufleuchten bei Wechsel */
+#status{display:inline-block;transition:opacity .4s}
+#status.flash{animation:flash .9s var(--ease)}
+@keyframes flash{0%{opacity:.35;transform:translateY(3px)}100%{opacity:1;transform:none}}
+/* 3 Haupt-Button Schimmer alle 6 s */
+.btn-primary{position:relative;overflow:hidden;isolation:isolate}
+.btn-primary::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);animation:sheen 6s ease-in-out infinite;pointer-events:none}
+@keyframes sheen{0%,14%{transform:translateX(-120%)}26%,100%{transform:translateX(120%)}}
+.btn-primary.off::after{display:none}
+/* 6 Buttons: weiches Anheben / Eindruecken */
+.btn{transition:transform .18s var(--ease),background .18s,box-shadow .18s,border-color .18s}
+.btn:active{transform:scale(.97)}
+.qa{transition:transform .22s var(--ease),box-shadow .22s}
+.qa:active{transform:scale(.98)}
+/* 7 FAQ: weiches Aufklappen */
+.faq .ans{overflow:hidden;transition:height .32s var(--ease),opacity .32s;opacity:1}
+.faq details:not([open]) .ans{height:0!important;padding-top:0;padding-bottom:0;opacity:0}
+.faq details.closing .ans{height:0!important;padding-top:0;padding-bottom:0;opacity:0}
+.faq summary::after{transition:transform .3s var(--ease)}
+.faq details[open] summary::after{transform:rotate(180deg)}
+.faq summary{transition:background .18s}
+.faq summary:hover{background:var(--soft)}
+/* 8 Foto-Zoom: Desktop hover, Handy beim Beruehren */
+.cat-img img{transition:transform .6s var(--ease)}
+.cat:hover .cat-img img,.cat:active .cat-img img{transform:scale(1.06)}
+@media(hover:none){.cat-img img{transform:none!important}}
+/* 9 Kopiert-Rueckmeldung */
+.mini{transition:background .18s,color .18s,border-color .18s,transform .18s}
+.mini.ok{background:#1f8a4c;border-color:#1f8a4c;color:#fff;animation:pop .35s var(--ease)}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:none}}
+/* Kopf: sanfter Schatten beim Scrollen */
+header.top{transition:box-shadow .3s}
+header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
+@media(prefers-reduced-motion:reduce){
+  .hero .badge-row,.hero h1,.hero .kicker,.hero .lead,.hero .cta-row,.hero .micro,.hero-sign{animation:none}
+  .rv{transform:none;transition:none}
+  .btn-primary::after{display:none}
+  #status.flash{animation:none}
+  .faq .ans{transition:none}
+  .mini.ok{animation:none}
+  .cat-img img{transform:none!important}
+}
 </style>
 </head>
 <body>
@@ -795,12 +849,12 @@ footer .copy{border-top:1px solid rgba(255,255,255,.15);color:#9a9ea3}
       <h2 class="disp">Gut zu wissen</h2>
     </div>
     <div class="faq">
-      <details class="rv"><summary>Wann hat Berg's Sonderposten in Celle geöffnet?</summary><div class="ans">Wir haben freitags von 09:00 bis 17:00 Uhr und samstags von 10:00 bis 16:00 Uhr geöffnet. Start ist am 08.05.</div></details>
-      <details class="rv"><summary>Wo finde ich Berg's Sonderposten?</summary><div class="ans">Wir sind in der Braunschweiger Heerstraße 100 in 29227 Celle. Über den Routenplaner auf dieser Seite startest du die Navigation direkt aus deiner Karten-App.</div></details>
-      <details class="rv"><summary>Was kostet es, wenn Material nach Kilo abgerechnet wird?</summary><div class="ans">Bei vielen Artikeln zahlst du nach Gewicht statt pro Stück. Das ist fair und für dich günstig. Die aktuellen Kilopreise erfährst du vor Ort.</div></details>
-      <details class="rv"><summary>Was gibt es bei Berg's Sonderposten zu kaufen?</summary><div class="ans">Werkzeug, Schleifmittel, Schrauben und Befestigungstechnik, Restposten und vieles mehr, zum Beispiel Metallprofile. Alles gibt es direkt zum Mitnehmen vor Ort.</div></details>
-      <details class="rv"><summary>Muss ich vorher einen Termin machen?</summary><div class="ans">Nein. Zu den Öffnungszeiten kannst du einfach vorbeikommen. Wenn du größere Mengen abnehmen möchtest und einen gesonderten Termin wünschst, frag bei uns an.</div></details>
-      <details class="rv"><summary>Gibt es die Angebote auch online?</summary><div class="ans">Ja. Auf Kleinanzeigen haben wir über 400 Anzeigen online, zum Beispiel Metallscheren, Gabelstaplerreifen und Metallschränke. Folge unserem Profil, um neue Angebote nicht zu verpassen.</div></details>
+      <details><summary>Wann hat Berg's Sonderposten in Celle geöffnet?</summary><div class="ans">Wir haben freitags von 09:00 bis 17:00 Uhr und samstags von 10:00 bis 16:00 Uhr geöffnet. Start ist am 08.05.</div></details>
+      <details><summary>Wo finde ich Berg's Sonderposten?</summary><div class="ans">Wir sind in der Braunschweiger Heerstraße 100 in 29227 Celle. Über den Routenplaner auf dieser Seite startest du die Navigation direkt aus deiner Karten-App.</div></details>
+      <details><summary>Was kostet es, wenn Material nach Kilo abgerechnet wird?</summary><div class="ans">Bei vielen Artikeln zahlst du nach Gewicht statt pro Stück. Das ist fair und für dich günstig. Die aktuellen Kilopreise erfährst du vor Ort.</div></details>
+      <details><summary>Was gibt es bei Berg's Sonderposten zu kaufen?</summary><div class="ans">Werkzeug, Schleifmittel, Schrauben und Befestigungstechnik, Restposten und vieles mehr, zum Beispiel Metallprofile. Alles gibt es direkt zum Mitnehmen vor Ort.</div></details>
+      <details><summary>Muss ich vorher einen Termin machen?</summary><div class="ans">Nein. Zu den Öffnungszeiten kannst du einfach vorbeikommen. Wenn du größere Mengen abnehmen möchtest und einen gesonderten Termin wünschst, frag bei uns an.</div></details>
+      <details><summary>Gibt es die Angebote auch online?</summary><div class="ans">Ja. Auf Kleinanzeigen haben wir über 400 Anzeigen online, zum Beispiel Metallscheren, Gabelstaplerreifen und Metallschränke. Folge unserem Profil, um neue Angebote nicht zu verpassen.</div></details>
     </div>
   </div>
 </section>
@@ -908,9 +962,9 @@ const EMAIL = "";
   const copy = (btn, text) => btn && btn.addEventListener("click", async () => {
     if (!text) return;
     const old = btn.innerHTML;
-    try { await navigator.clipboard.writeText(text); btn.textContent = "Kopiert ✓"; }
+    try { await navigator.clipboard.writeText(text); btn.textContent = "Kopiert ✓"; btn.classList.add("ok"); }
     catch(e){ const r = document.createRange(); const n = btn.id==="copyPhone" ? pt : null; if (n){ r.selectNodeContents(n); const s = getSelection(); s.removeAllRanges(); s.addRange(r);} btn.textContent = "Markiert"; }
-    setTimeout(() => btn.innerHTML = old, 1800);
+    setTimeout(() => { btn.innerHTML = old; btn.classList.remove("ok"); }, 1800);
   });
   copy(document.getElementById("copyPhone"), PHONE);
   copy(document.getElementById("copyAddr"), "Braunschweiger Heerstraße 100, 29227 Celle");
@@ -932,6 +986,7 @@ document.getElementById("yr").textContent = new Date().getFullYear();
 // Live-Status (Fr 9–17, Sa 10–16, Europe/Berlin)
 (function(){
   const dot = document.getElementById("dot"), status = document.getElementById("status");
+  status.classList.add("flash"); status.addEventListener("animationend", () => status.classList.remove("flash"), {once:true});
   const parts = new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Berlin",weekday:"short",hour:"numeric",minute:"numeric",hour12:false}).formatToParts(new Date());
   const get = t => parts.find(p => p.type === t).value;
   const day = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[get("weekday")];
@@ -957,15 +1012,58 @@ document.getElementById("yr").textContent = new Date().getFullYear();
   }
 })();
 
-// Reveal on scroll + sticky CTA
+// Animationen: Einschweben, Zahlen zaehlen, FAQ, Kopf-Schatten, Sticky-Leiste
 (function(){
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const els = document.querySelectorAll(".rv");
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), {threshold:.12});
-    els.forEach((el,i) => { el.style.transitionDelay = (i % 4) * 80 + "ms"; io.observe(el); });
+  // 4: Karten schweben ein (nur Bewegung, Inhalt ist immer sichtbar)
+  if (!reduce && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), {threshold:.1, rootMargin:"0px 0px -5% 0px"});
+    els.forEach((el,i) => { el.style.transitionDelay = (i % 4) * 70 + "ms"; io.observe(el); });
+    // Elemente, die beim Laden schon im Bild sind, sofort setzen
+    requestAnimationFrame(() => els.forEach(el => { if (el.getBoundingClientRect().top < innerHeight) el.classList.add("in"); }));
   } else els.forEach(el => el.classList.add("in"));
-  const st = document.getElementById("sticky");
-  const onScroll = () => st.classList.toggle("show", scrollY > 500);
+
+  // 1: Zahlen zaehlen hoch (Zieltext steht im HTML, nur die Anzeige laeuft)
+  const nums = [...document.querySelectorAll(".pf b")].filter(b => /\d/.test(b.textContent));
+  const countUp = b => {
+    const txt = b.textContent.trim();
+    const m = txt.match(/^([^\d]*)(\d[\d.]*)(.*)$/); if (!m) return;
+    const [, pre, num, post] = m; const target = parseInt(num.replace(/\./g,""),10); if (!target) return;
+    const fmt = n => n.toLocaleString("de-DE");
+    const t0 = performance.now(), dur = 1100;
+    const step = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      b.textContent = pre + fmt(Math.round(target * e)) + post;
+      if (p < 1) requestAnimationFrame(step); else b.textContent = txt;
+    };
+    requestAnimationFrame(step);
+  };
+  if (!reduce && "IntersectionObserver" in window && nums.length) {
+    const io2 = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { countUp(e.target); io2.unobserve(e.target); } }), {threshold:.6});
+    nums.forEach(b => io2.observe(b));
+  }
+
+  // 7: FAQ weich auf- und zuklappen
+  document.querySelectorAll(".faq details").forEach(d => {
+    const ans = d.querySelector(".ans"); if (!ans) return;
+    const setH = () => { ans.style.height = ans.scrollHeight + "px"; };
+    d.querySelector("summary").addEventListener("click", e => {
+      if (reduce) return;
+      e.preventDefault();
+      if (d.open) {
+        setH(); requestAnimationFrame(() => { d.classList.add("closing"); });
+        ans.addEventListener("transitionend", () => { d.classList.remove("closing"); d.open = false; ans.style.height = ""; }, {once:true});
+      } else {
+        d.open = true; ans.style.height = "0px"; ans.getBoundingClientRect(); setH();
+        ans.addEventListener("transitionend", () => { ans.style.height = ""; }, {once:true});
+      }
+    });
+  });
+
+  // Kopf-Schatten + Sticky-Leiste
+  const st = document.getElementById("sticky"), top = document.querySelector("header.top");
+  const onScroll = () => { st.classList.toggle("show", scrollY > 500); top.classList.toggle("scrolled", scrollY > 8); };
   addEventListener("scroll", onScroll, {passive:true}); onScroll();
 })();
 </script>
