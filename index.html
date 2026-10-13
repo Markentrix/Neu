@@ -217,8 +217,7 @@ footer nav a:hover{color:var(--yellow)}
 @media(max-width:700px){.sticky{display:flex}}
 
 /* ---- Reveal ---- */
-.rv{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
-.rv.in{opacity:1;transform:none}
+.rv{opacity:1}
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
   .rv{opacity:1;transform:none}
@@ -312,6 +311,101 @@ html{scroll-padding-top:80px}
 @media(max-width:860px){.contact-grid{grid-template-columns:1fr}}
 .sticky .btn{padding:.6em .4em;font-size:1rem}
 .sticky .btn svg{width:1.1em;height:1.1em}
+
+/* ---- Weisser Look & Mobile-first-Optimierung ---- */
+:root{--paper:#fff;--line:rgba(23,24,26,.14)}
+html{-webkit-tap-highlight-color:transparent}
+body{background:#fff}
+.cat,.card,.panel{background:#fff;border:1px solid var(--line);box-shadow:0 2px 10px rgba(23,24,26,.06)}
+.numrow,.dest{background:#f4f2ee}
+.kilo{background:#fff;color:var(--ink)}
+.kilo h2{color:var(--ink)}
+.kilo h2 em{background:var(--yellow);color:var(--ink);padding:0 .12em}
+.kilo p{color:var(--muted)}
+.kilo li{color:var(--ink)}
+.kilo-visual .ph{box-shadow:0 14px 34px rgba(23,24,26,.25)}
+.ka{background:#fff;color:var(--ink)}
+.ka h2{color:var(--ink)}
+.ka p{color:var(--muted)}
+.ka .eyebrow{color:var(--red)!important}
+.ka .btn-yellow{background:var(--red);color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.ka-card{background:#fff;border:1px solid var(--line);box-shadow:0 8px 28px rgba(23,24,26,.14)}
+.flyer-sec{background:#fff}
+.quick{background:linear-gradient(to bottom,transparent 40px,#fff 40px)}
+.field input{font-size:16px}
+@media(max-width:700px){
+  body{font-size:16px;line-height:1.6;padding-bottom:76px}
+  section{padding:40px 0}
+  .bulk{padding:32px 0}
+  .wrap{padding:0 16px}
+  h2{font-size:2.1rem}
+  .sec-head{margin-bottom:22px}
+  .sec-head p{font-size:1rem}
+  .eyebrow{font-size:.85rem;letter-spacing:.16em}
+  .hero .wrap{padding-top:26px;padding-bottom:58px;gap:0}
+  .hero-sign{display:none}
+  h1{font-size:3.1rem;margin-bottom:.25em}
+  .lead{font-size:1.05rem;margin-bottom:20px}
+  .badge-row{margin-bottom:14px;gap:8px}
+  .pill{font-size:.8rem}
+  .cta-row{flex-direction:column;gap:10px}
+  .cta-row .btn{width:100%;font-size:1.1rem;min-height:54px}
+  .cta-row .btn-ghost{min-height:48px}
+  .quick .wrap{gap:10px}
+  .qa small{display:none}
+  .qa{min-height:64px;padding:12px}
+  .ticker span{font-size:1.15rem}
+  .cats{grid-template-columns:1fr 1fr;gap:12px}
+  .cat-img{aspect-ratio:1/1}
+  .cat-body{padding:12px 12px 14px}
+  .cat h3{font-size:1.15rem}
+  .cat p{font-size:.88rem;line-height:1.4}
+  .cat-ico{width:40px;height:40px}
+  .cat-ico svg{width:22px;height:22px}
+  .kilo-visual{margin:0 0 24px;max-width:none}
+  .kilo-visual .ph{aspect-ratio:4/3}
+  .scale{width:104px;left:-4px;bottom:-18px}
+  #besuch .sec-head{display:none}
+  #besuch{padding-bottom:0}
+  #besuch .info-grid{grid-template-columns:1fr 1fr;gap:12px}
+  #besuch .info-grid .card:nth-child(3){display:none}
+  .card{padding:18px 16px}
+  .card h3{font-size:1.3rem}
+  .big-date{font-size:2.8rem}
+  .hours li{font-size:1rem;flex-direction:column;align-items:flex-start;gap:4px}
+  .panel{padding:20px 16px}
+  .panel h3{font-size:1.6rem}
+  .contact-grid{gap:16px}
+  .stack .btn,.btn{font-size:1.1rem}
+  .numrow{font-size:1.3rem}
+  .panel .hours{display:none}
+  .bulk .wrap{gap:16px}
+  .bulk-ico{width:56px}
+  .bulk h2{font-size:1.9rem}
+  .ka .btn{width:100%}
+  .ka-card{padding:18px}
+  .flyer-wrap{gap:22px}
+  .flyer-wrap img{max-width:240px}
+  .flyer-wrap .cta-row .btn{width:100%}
+  footer{padding:32px 0 100px}
+  .sticky .btn{min-height:52px}
+}
+@media(max-width:360px){h1{font-size:2.7rem}.cats{gap:10px}}
+
+/* ---- mehr Weiss: helle Fusszeile, Anfrage als Karte ---- */
+footer{background:#fff;color:var(--muted);border-top:6px solid var(--yellow)}
+footer .brand,footer .brand-name{color:var(--ink)}
+footer nav a{color:var(--ink)}
+footer .copy{border-top:1px solid var(--line);color:#6b6e72}
+.bulk{background:#fff;padding:clamp(28px,5vw,56px) 0}
+.bulk .wrap{background:var(--yellow);border-radius:20px;padding:clamp(22px,4vw,40px) clamp(18px,4vw,40px);max-width:calc(var(--wrap) - 2 * var(--gut) + 0px)}
+@media(max-width:700px){
+  .bulk .wrap{margin:0 16px;padding:22px 18px;max-width:none;border-radius:18px}
+  .kilo-visual .ph{aspect-ratio:16/9}
+  .ticker-in{padding:.35em 0}
+  .hero .wrap{padding-bottom:50px}
+  .flyer-wrap img{max-width:210px}
+}
 </style>
 </head>
 <body>
