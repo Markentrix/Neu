@@ -263,6 +263,55 @@ h1 .l2{text-shadow:none}
 section{padding:clamp(64px,9vw,112px) 0}
 .sticky{border-top:1px solid rgba(255,255,255,.15);box-shadow:0 -6px 20px rgba(0,0,0,.25)}
 .sticky .btn{border-radius:12px}
+
+/* ---- Kontakt & Anfahrt ---- */
+html{scroll-padding-top:80px}
+.quick{position:relative;z-index:2;margin-top:clamp(-40px,-4vw,-28px);padding:0 0 40px;background:linear-gradient(to bottom,transparent 40px,var(--paper) 40px)}
+.quick .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.qa{display:flex;align-items:center;gap:14px;background:#fff;color:var(--ink);text-decoration:none;border-radius:16px;padding:16px 18px;box-shadow:0 10px 28px rgba(23,24,26,.16);min-height:72px;transition:transform .15s,box-shadow .15s;min-width:0}
+.qa:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(23,24,26,.2)}
+.qa i{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--ink);color:var(--yellow)}
+.qa i svg{width:24px;height:24px}
+.qa.wa i{background:#1faa59;color:#fff}
+.qa.rt i{background:var(--red);color:#fff}
+.qa b{display:block;font-family:var(--cond);font-weight:800;text-transform:uppercase;font-size:1.2rem;line-height:1.1;letter-spacing:.03em}
+.qa small{display:block;color:var(--muted);font-size:.85rem;line-height:1.25;overflow-wrap:anywhere}
+.qa.off{opacity:.55}
+@media(max-width:900px){.quick .wrap{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.qa{padding:12px;gap:10px}.qa i{width:38px;height:38px}.qa b{font-size:1.05rem}}
+.contact-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(20px,4vw,40px);align-items:start}
+.panel{background:#fff;border-radius:18px;padding:clamp(22px,3.5vw,34px);box-shadow:0 4px 18px rgba(23,24,26,.08);border:1px solid rgba(23,24,26,.1);min-width:0}
+.panel h3{font-family:var(--disp);font-weight:400;text-transform:uppercase;font-size:1.9rem;margin-bottom:6px}
+.panel>p{color:var(--muted);margin-bottom:18px}
+.stack{display:grid;gap:12px}
+.stack .btn{width:100%;justify-content:flex-start;padding-inline:1.1em}
+.btn-wa{background:#1faa59;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.btn-wa:hover{background:#18924b;transform:translateY(-2px)}
+.btn-dark{background:var(--ink);color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.btn-dark:hover{background:#000;transform:translateY(-2px)}
+.btn-line{background:#fff;color:var(--ink);border-color:rgba(23,24,26,.25)}
+.btn-line:hover{border-color:var(--ink)}
+.btn.off{opacity:.55;pointer-events:none}
+.numrow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--paper);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-family:var(--cond);font-weight:800;font-size:1.5rem;letter-spacing:.04em;flex-wrap:wrap}
+.numrow span{user-select:all;min-width:0;overflow-wrap:anywhere}
+.mini{font:600 .9rem var(--body);display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(23,24,26,.2);background:#fff;border-radius:8px;padding:.45em .8em;cursor:pointer;min-height:40px;color:var(--ink)}
+.mini svg{width:16px;height:16px}
+.mini:hover{border-color:var(--ink)}
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label{font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.95rem}
+.field input{font:inherit;font-size:1rem;padding:.85em 1em;border:2px solid rgba(23,24,26,.2);border-radius:12px;background:#fff;color:var(--ink);min-height:52px;width:100%}
+.field input:focus{border-color:var(--ink);outline:none;box-shadow:0 0 0 4px rgba(247,201,34,.55)}
+.dest{display:flex;gap:12px;align-items:flex-start;background:var(--paper);border-radius:12px;padding:14px;margin-bottom:18px}
+.dest svg{width:26px;height:26px;color:var(--red);flex:none;margin-top:2px}
+.dest b{font-family:var(--cond);font-weight:800;text-transform:uppercase;font-size:1.3rem;line-height:1.15;display:block}
+.alt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.alt .btn{justify-content:center;font-size:1rem;min-height:48px;padding:.6em .8em}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.9rem;margin:16px 0 4px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:rgba(23,24,26,.15)}
+.hint{font-size:.9rem;color:var(--muted);margin-top:14px}
+@media(max-width:860px){.contact-grid{grid-template-columns:1fr}}
+.sticky .btn{padding:.6em .4em;font-size:1rem}
+.sticky .btn svg{width:1.1em;height:1.1em}
 </style>
 </head>
 <body>
@@ -277,6 +326,7 @@ section{padding:clamp(64px,9vw,112px) 0}
       <a class="link" href="#sortiment">Sortiment</a>
       <a class="link" href="#kilo">Nach Kilo</a>
       <a class="link" href="#besuch">Öffnungszeiten</a>
+      <a class="link" href="#kontakt">Kontakt</a>
       <a class="btn btn-primary js-ka" target="_blank" rel="noopener noreferrer" href="#">Kleinanzeigen</a>
     </nav>
   </div>
@@ -314,6 +364,14 @@ section{padding:clamp(64px,9vw,112px) 0}
   </div>
   <div class="cut"></div>
 </div>
+
+<!-- SCHNELLZUGRIFF -->
+<div class="quick"><div class="wrap">
+  <a class="qa js-tel" href="#kontakt"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></i><span><b>Anrufen</b><small class="js-telshow">Nummer folgt</small></span></a>
+  <a class="qa wa js-wa" target="_blank" rel="noopener noreferrer" href="#kontakt"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.5L3 21Z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .7a3.5 3.5 0 0 1-1.7-1.7l.7-1-1-2L9 9.5Z"/></svg></i><span><b>WhatsApp</b><small>Direkt schreiben</small></span></a>
+  <a class="qa rt" href="#anfahrt"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg></i><span><b>Route planen</b><small>Celle, Braunschw. Heerstr. 100</small></span></a>
+  <a class="qa js-ka" target="_blank" rel="noopener noreferrer" href="#"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></i><span><b>Kleinanzeigen</b><small>403 Anzeigen online</small></span></a>
+</div></div>
 
 <!-- TICKER -->
 <div class="ticker" aria-hidden="true"><div class="ticker-in">
@@ -405,10 +463,49 @@ section{padding:clamp(64px,9vw,112px) 0}
         <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
         <h3>Standort Celle</h3>
         <p class="addr">Braunschweiger Heerstraße 100<br>29227 Celle</p>
-        <a class="btn btn-yellow" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>
-          Route planen
-        </a>
+        <a class="btn btn-yellow" href="#anfahrt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>Route planen</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KONTAKT & ANFAHRT -->
+<section id="kontakt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">Kontakt &amp; Anfahrt</span>
+      <h2 class="disp">Schnell erreicht.<br>Leicht gefunden.</h2>
+      <p>Ruf an, schreib uns bei WhatsApp oder plane direkt deine Route nach Celle.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="panel rv">
+        <h3>Kontakt aufnehmen</h3>
+        <p>Fragen zu Ware, Preisen oder einem Termin? Wir antworten gern.</p>
+        <div class="numrow"><span id="phoneText">Nummer folgt</span><button class="mini" type="button" id="copyPhone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>Kopieren</button></div>
+        <div class="stack">
+          <a class="btn btn-primary js-tel" href="#kontakt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>Jetzt anrufen</a>
+          <a class="btn btn-wa js-wa" target="_blank" rel="noopener noreferrer" href="#kontakt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.5L3 21Z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .7a3.5 3.5 0 0 1-1.7-1.7l.7-1-1-2L9 9.5Z"/></svg>Per WhatsApp schreiben</a>
+          <a class="btn btn-dark js-ka" target="_blank" rel="noopener noreferrer" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>Nachricht über Kleinanzeigen</a>
+        </div>
+        <ul class="hours" style="margin-top:22px">
+          <li data-day="5"><span>Freitag</span><span>09:00 – 17:00 Uhr</span></li>
+          <li data-day="6"><span>Samstag</span><span>10:00 – 16:00 Uhr</span></li>
+        </ul>
+      </div>
+      <div class="panel rv" id="anfahrt">
+        <h3>Route planen</h3>
+        <div class="dest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg><div><b>Braunschweiger Heerstraße 100</b>29227 Celle<br><button class="mini" type="button" id="copyAddr" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>Adresse kopieren</button></div></div>
+        <a class="btn btn-primary" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/dir/?api=1&destination=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle&travelmode=driving"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>Route ab meinem Standort</a>
+        <div class="divider">oder von einer anderen Adresse</div>
+        <form id="routeForm" autocomplete="street-address">
+          <div class="field"><label for="startAddr">Startadresse</label><input id="startAddr" name="start" type="text" placeholder="z. B. Hauptstraße 1, Hannover" autocomplete="street-address"></div>
+          <button class="btn btn-dark" type="submit" style="width:100%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>Route berechnen</button>
+        </form>
+        <div class="alt">
+          <a class="btn btn-line" target="_blank" rel="noopener noreferrer" href="https://maps.apple.com/?daddr=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle&dirflg=d">Apple Karten</a>
+          <a class="btn btn-line" target="_blank" rel="noopener noreferrer" href="https://waze.com/ul?q=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle&navigate=yes">Waze</a>
+        </div>
+        <p class="hint">Die Navigation öffnet sich in deiner Karten-App oder im Browser.</p>
       </div>
     </div>
   </div>
@@ -422,7 +519,7 @@ section{padding:clamp(64px,9vw,112px) 0}
       <h2 class="disp">Größere Mengen?<br>Eigener Termin?</h2>
       <p><strong>Sie möchten größere Mengen abnehmen und wünschen einen gesonderten Termin?</strong> Kein Problem. Fragen Sie bei uns an.</p>
     </div>
-    <a class="btn btn-primary rv js-ka" target="_blank" rel="noopener noreferrer" href="#">Jetzt anfragen</a>
+    <a class="btn btn-primary rv" href="#kontakt">Jetzt anfragen</a>
   </div>
 </section>
 
@@ -482,6 +579,7 @@ section{padding:clamp(64px,9vw,112px) 0}
       <a href="#sortiment">Sortiment</a>
       <a href="#kilo">Nach Kilo</a>
       <a href="#besuch">Öffnungszeiten</a>
+      <a href="#kontakt">Kontakt &amp; Anfahrt</a>
       <a class="js-ka" target="_blank" rel="noopener noreferrer" href="#">Kleinanzeigen</a>
     </nav>
     <p class="copy">© <span id="yr">2026</span> Berg's Sonderposten · Gewerblicher Anbieter. Preise und Verfügbarkeit nur solange der Vorrat reicht.</p>
@@ -489,11 +587,44 @@ section{padding:clamp(64px,9vw,112px) 0}
 </footer>
 
 <div class="sticky" id="sticky">
-  <a class="btn btn-primary js-ka" target="_blank" rel="noopener noreferrer" href="#">Kleinanzeigen</a>
-  <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle" target="_blank" rel="noopener noreferrer">Route</a>
+  <a class="btn btn-primary js-tel" href="#kontakt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>Anrufen</a>
+  <a class="btn btn-wa js-wa" target="_blank" rel="noopener noreferrer" href="#kontakt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.5L3 21Z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .7a3.5 3.5 0 0 1-1.7-1.7l.7-1-1-2L9 9.5Z"/></svg>WhatsApp</a>
+  <a class="btn btn-ghost" href="#anfahrt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>Route</a>
 </div>
 
 <script>
+
+// Kontaktdaten zentral pflegen (Nummer im internationalen Format, z. B. "+49 5141 123456"; E-Mail optional)
+const PHONE = "";
+const EMAIL = "";
+(function(){
+  const digits = PHONE.replace(/[^\d+]/g,"");
+  const wa = digits.replace(/^\+/,"").replace(/^0/,"49");
+  document.querySelectorAll(".js-tel").forEach(a => {
+    if (digits) a.href = "tel:" + digits; else a.classList.add("off");
+  });
+  document.querySelectorAll(".js-wa").forEach(a => {
+    if (digits) a.href = "https://wa.me/" + wa + "?text=" + encodeURIComponent("Hallo, ich habe eine Frage zu Berg's Sonderposten in Celle."); else a.classList.add("off");
+  });
+  document.querySelectorAll(".js-telshow").forEach(e => e.textContent = PHONE || "Nummer folgt");
+  const pt = document.getElementById("phoneText"); if (pt) pt.textContent = PHONE || "Nummer folgt";
+  const copy = (btn, text) => btn && btn.addEventListener("click", async () => {
+    if (!text) return;
+    const old = btn.innerHTML;
+    try { await navigator.clipboard.writeText(text); btn.textContent = "Kopiert ✓"; }
+    catch(e){ const r = document.createRange(); const n = btn.id==="copyPhone" ? pt : null; if (n){ r.selectNodeContents(n); const s = getSelection(); s.removeAllRanges(); s.addRange(r);} btn.textContent = "Markiert"; }
+    setTimeout(() => btn.innerHTML = old, 1800);
+  });
+  copy(document.getElementById("copyPhone"), PHONE);
+  copy(document.getElementById("copyAddr"), "Braunschweiger Heerstraße 100, 29227 Celle");
+  const f = document.getElementById("routeForm");
+  if (f) f.addEventListener("submit", e => {
+    e.preventDefault();
+    const o = document.getElementById("startAddr").value.trim();
+    const u = "https://www.google.com/maps/dir/?api=1&destination=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle&travelmode=driving" + (o ? "&origin=" + encodeURIComponent(o) : "");
+    window.open(u, "_blank", "noopener") || (location.href = u);
+  });
+})();
 // Kleinanzeigen-Link zentral hier pflegen (z. B. durch die Profil-URL "Berg" ersetzen, sobald bekannt):
 const KLEINANZEIGEN_URL = "https://www.kleinanzeigen.de/s-celle/bergs-sonderposten/k0l3267";
 document.querySelectorAll(".js-ka").forEach(a => a.href = KLEINANZEIGEN_URL);
