@@ -9,7 +9,8 @@
 <meta name="geo.region" content="DE-NI">
 <meta name="geo.placename" content="Celle">
 <meta name="author" content="Berg's Sonderposten">
-<meta name="theme-color" content="#0d0d0d">
+<meta name="theme-color" content="#1f2124">
+<!-- Nach Livegang eintragen: <link rel="canonical" href="https://DEINE-DOMAIN.de/"> und og:image/og:url mit voller Adresse -->
 <meta property="og:title" content="Berg's Sonderposten Celle ist zurück – Werkzeug &amp; Restposten nach Kilo">
 <meta property="og:description" content="Super günstige Preise, viel Material nach Kilo, alles direkt zum Mitnehmen. Fr 9–17 Uhr · Sa 10–16 Uhr in Celle.">
 <meta property="og:locale" content="de_DE">
@@ -17,6 +18,7 @@
 <meta property="og:image" content="assets/flyer.jpg">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230d0d0d'/%3E%3Ctext x='32' y='46' font-size='38' font-weight='900' text-anchor='middle' fill='%23ffd21f' font-family='Impact,Arial'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preload" as="image" href="assets/schrauben.jpg" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -861,6 +863,41 @@ body.nophone .quick .wrap{grid-template-columns:repeat(2,1fr)}
 .sign-red{margin:0;border-top:0}
 .sign-top .s1,.sign-top .s2{transform:none}
 .who-list li b{display:block}
+
+/* ---- QA-Durchlauf: Tipp-Flaechen >= 40px, Tablet-Ueberlauf, Fusszeile ---- */
+.proof .pf{min-width:0}
+.proof .pf span{overflow-wrap:anywhere;white-space:normal}
+@media(min-width:701px) and (max-width:900px){.proof .wrap{grid-template-columns:1fr 1fr;gap:12px 20px}}
+.mini{min-height:40px}
+.nav .btn{min-height:40px}
+footer nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 2px}
+@media(min-width:821px){.nav a.link{display:inline-flex;align-items:center;min-height:40px}}
+@media(max-width:700px){
+  .nav .btn{min-height:40px;padding:.5em .85em}
+  .mini{min-height:40px}
+  footer nav a{min-height:40px}
+}
+
+/* ---- Mindestschriftgroesse 12px auf dem Handy, Kontrast Hero-Headline ---- */
+h1 .l2{color:#e0252c}
+@media(max-width:700px){
+  .eyebrow{font-size:.8rem}
+  .proof .pf span{font-size:.8rem}
+  .cat p{font-size:.84rem}
+  .who p{font-size:.88rem}
+  .stats span{font-size:.8rem}
+  .copy{font-size:.8rem}
+  .ka-top span{font-size:.82rem}
+  .hint,.area{font-size:.82rem}
+  .field label{font-size:.82rem}
+  .mini{font-size:.82rem}
+  .card small{font-size:.82rem}
+  .scale{width:84px}
+  .scale b{font-size:.7rem}
+  .tag{font-size:.8rem}
+  .divider{font-size:.82rem}
+  .pill{font-size:.78rem}
+}
 </style>
 </head>
 <body>
@@ -1163,6 +1200,8 @@ body.nophone .quick .wrap{grid-template-columns:repeat(2,1fr)}
       <a href="#sortiment">Sortiment</a>
       <a href="#kontakt">Kontakt &amp; Anfahrt</a>
       <a class="js-ka" target="_blank" rel="noopener noreferrer" href="#">Kleinanzeigen</a>
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
     </nav>
     <p class="copy">© <span id="yr">2026</span> Berg's Sonderposten · Gewerblicher Anbieter. Preise und Verfügbarkeit nur solange der Vorrat reicht.</p>
   </div>
