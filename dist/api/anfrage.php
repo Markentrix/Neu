@@ -89,7 +89,7 @@ $hits[] = $now;
 
 // E-Mail zusammensetzen
 $quelle  = $clean['quelle'] ?? 'Website';
-$order   = ['quelle', 'name', 'firma', 'email', 'tel', 'thema', 'budget', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'termin_iso', 'nachricht_text', 'seite', 'zeit'];
+$order   = ['quelle', 'name', 'firma', 'email', 'tel', 'thema', 'budget', 'bedarf', 'status', 'zeitplan', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'termin_iso', 'nachricht_text', 'seite', 'zeit'];
 $lines   = [];
 foreach ($order as $k) {
   if (isset($clean[$k]) && $clean[$k] !== '') $lines[] = str_pad($k, 14) . ': ' . $clean[$k];

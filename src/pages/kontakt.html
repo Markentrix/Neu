@@ -34,7 +34,7 @@ ld: |
 
       <div class="card card--lg" id="anfrage">
         <h2 class="h3">Anfrage senden</h2>
-        <p class="muted small">Felder mit * sind Pflichtfelder.</p>
+        <p class="muted small">Pflicht sind nur Name, E-Mail und Einwilligung. Alles andere hilft uns, besser vorbereitet zu sein.</p>
         <form class="form" name="kontakt" data-lead="Kontaktformular" data-success="#kontakt-danke" novalidate>
           <div class="form-row">
             <div class="field"><label for="k-name">Name *</label><input id="k-name" name="name" type="text" autocomplete="name" required></div>
@@ -42,11 +42,11 @@ ld: |
           </div>
           <div class="form-row">
             <div class="field"><label for="k-email">E-Mail *</label><input id="k-email" name="email" type="email" autocomplete="email" required></div>
-            <div class="field"><label for="k-tel">Telefon <span class="opt">(optional)</span></label><input id="k-tel" name="tel" type="tel" autocomplete="tel"></div>
+            <div class="field"><label for="k-tel">Telefon <span class="opt">(optional, für einen kurzen Rückruf)</span></label><input id="k-tel" name="tel" type="tel" autocomplete="tel"></div>
           </div>
           <div class="form-row">
-            <div class="field"><label for="k-thema">Gewünschte Leistung *</label>
-              <select id="k-thema" name="thema" required>
+            <div class="field"><label for="k-thema">Gewünschte Leistung</label>
+              <select id="k-thema" name="thema">
                 <option>Websites &amp; Funnels</option>
                 <option>Sichtbarkeit &amp; Social Media</option>
                 <option>Corporate Identity</option>
@@ -68,7 +68,7 @@ ld: |
             <label aria-hidden="true">Wunschtermin <span class="opt">(optional, Mo–Fr)</span></label>
             <div data-calendar role="group" aria-labelledby="k-cal-label"></div>
           </div>
-          <div class="field"><label for="k-msg">Kurze Projektbeschreibung *</label><textarea id="k-msg" name="nachricht_text" rows="4" required placeholder="Was soll besser laufen? Welche Kanäle nutzen Ihre Kunden?"></textarea></div>
+          <div class="field"><label for="k-msg">Kurze Projektbeschreibung <span class="opt">(optional)</span></label><textarea id="k-msg" name="nachricht_text" rows="4" placeholder="Zum Beispiel: neue Website für einen Elektrobetrieb in Celle, bestehende Seite ist von 2018."></textarea></div>
           <div class="hp" aria-hidden="true"><label for="k-web">Website (bitte leer lassen)</label><input id="k-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
           <label class="check"><input type="checkbox" name="einwilligung" required><span>Ich stimme der Verarbeitung meiner Angaben gemäß <a href="/datenschutz">Datenschutzerklärung</a> zu. Die Einwilligung ist jederzeit widerrufbar. *</span></label>
           <p class="form-note"><b>Angebot nur für Gewerbetreibende</b> (Unternehmer i. S. d. § 14 BGB). Alle Preise netto zzgl. USt.</p>

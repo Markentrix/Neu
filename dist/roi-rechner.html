@@ -29,11 +29,11 @@
 <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/mx.css?v=202610141934">
+<link rel="stylesheet" href="/assets/mx.css?v=202610141953">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://markentrix.de/roi-rechner#webpage","url":"https://markentrix.de/roi-rechner","name":"ROI-Rechner: Was kosten verpasste Anfragen? | Markentrix","isPartOf":{"@id":"https://markentrix.de/#website"},"inLanguage":"de-DE","dateModified":"2026-10-12","breadcrumb":{"@id":"https://markentrix.de/roi-rechner#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://markentrix.de/roi-rechner#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Startseite","item":"https://markentrix.de/"},{"@type":"ListItem","position":2,"name":"ROI-Rechner","item":"https://markentrix.de/roi-rechner"}]},{"@type":"Organization","@id":"https://markentrix.de/#organization","name":"Markentrix","url":"https://markentrix.de"}]}</script>
-<script src="/assets/consent.js?v=202610141934" defer></script>
-<script src="/assets/site.js?v=202610141934" defer></script>
+<script src="/assets/consent.js?v=202610141953" defer></script>
+<script src="/assets/site.js?v=202610141953" defer></script>
 </head>
 <body class="">
 <!-- Markentrix Icon-Set · Linienlogik der Wortmarke: 24er-Raster, Strich 2, runde Enden, genau ein gefüllter Datenpunkt je Icon.
@@ -247,6 +247,7 @@
           <li><a href="/leistungen/marketing">Marketing</a></li>
           <li><a href="/leistungen/ki-automatisierung">KI-Automatisierung</a></li>
           <li><a href="/preise">Preise und Pakete</a></li>
+          <li><a href="/website-checkliste">Website-Checkliste</a></li>
           <li><a href="/roi-rechner">Sparrechner</a></li>
         </ul>
       </div>
@@ -309,43 +310,53 @@
     <button type="button" class="modal-close" data-close-modal aria-label="Schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <span class="eyebrow">Kostenlos und unverbindlich · 2 Minuten</span>
     <h2 id="mx-modal-title">Potenzial-Check</h2>
-    <p class="muted mb-3">Drei kurze Fragen, dann eine erste Einschätzung. Ihre Kontaktdaten brauchen wir erst am Ende.</p>
+    <p class="muted mb-3">Drei kurze Fragen zu Ihrem Vorhaben, dann eine erste Einschätzung mit Paket und Preis. Ihre Kontaktdaten brauchen wir erst am Ende.</p>
     <form class="form wizard" name="potenzial-check" data-lead="Potenzial-Check" data-wizard data-success="#wz-danke" novalidate>
-      <ol class="wz-progress"><li>Branche</li><li>Kanal</li><li>Anfragen</li><li>Kontakt</li></ol>
-      <fieldset data-step="1" data-require="branche">
-        <legend>In welcher Branche arbeiten Sie?</legend>
-        <p class="legend-sub">Damit die Einschätzung zu Ihrem Alltag passt.</p>
+      <ol class="wz-progress"><li>Bedarf</li><li>Ausgangslage</li><li>Zeitplan</li><li>Kontakt</li></ol>
+      <input type="hidden" name="branche" value="">
+      <fieldset data-step="1" data-require="bedarf">
+        <legend>Was brauchen Sie?</legend>
+        <p class="legend-sub">Eine grobe Richtung reicht. Details klären wir im Gespräch.</p>
         <div class="choices">
-          <label class="choice"><input type="radio" name="branche" value="handwerk"><span><svg><use href="#i-handwerk"/></svg>Handwerk, Werkstatt, Bau</span></label>
-          <label class="choice"><input type="radio" name="branche" value="praxis"><span><svg><use href="#i-praxis"/></svg>Praxis, Kanzlei, Dienstleistung</span></label>
-          <label class="choice"><input type="radio" name="branche" value="gastro"><span><svg><use href="#i-gastro"/></svg>Gastronomie, Handel</span></label>
-          <label class="choice"><input type="radio" name="branche" value="sonstige"><span><svg><use href="#i-node"/></svg>Andere Branche</span></label>
-          <div class="error" role="alert">Bitte wählen Sie eine Branche.</div>
-        </div>
-      </fieldset>
-      <fieldset data-step="2" data-require="kanal" hidden>
-        <legend>Wo geht bei Ihnen heute am meisten verloren?</legend>
-        <p class="legend-sub">Der Punkt, an dem Interessenten abspringen.</p>
-        <div class="choices">
-          <label class="choice"><input type="radio" name="kanal" value="website"><span><svg><use href="#i-layout"/></svg>Website veraltet oder keine</span></label>
-          <label class="choice"><input type="radio" name="kanal" value="sichtbarkeit"><span><svg><use href="#i-search"/></svg>Bei Google und KI nicht sichtbar</span></label>
-          <label class="choice"><input type="radio" name="kanal" value="formular"><span><svg><use href="#i-mail"/></svg>Anfragen laufen ins Leere</span></label>
-          <label class="choice"><input type="radio" name="kanal" value="anfragen"><span><svg><use href="#i-phone"/></svg>Telefon und WhatsApp bleiben liegen</span></label>
-          <label class="choice"><input type="radio" name="kanal" value="unklar"><span><svg><use href="#i-node"/></svg>Weiß ich nicht genau</span></label>
+          <label class="choice"><input type="radio" name="bedarf" value="landingpage"><span><svg><use href="#i-target"/></svg>Eine Landingpage für ein Angebot</span></label>
+          <label class="choice"><input type="radio" name="bedarf" value="website"><span><svg><use href="#i-layout"/></svg>Eine neue Unternehmenswebsite</span></label>
+          <label class="choice"><input type="radio" name="bedarf" value="relaunch"><span><svg><use href="#i-pen"/></svg>Bestehende Website überarbeiten</span></label>
+          <label class="choice"><input type="radio" name="bedarf" value="funnel"><span><svg><use href="#i-chart"/></svg>Website mit Anfrage- oder Verkaufsstrecke</span></label>
+          <label class="choice"><input type="radio" name="bedarf" value="unklar"><span><svg><use href="#i-node"/></svg>Weiß ich noch nicht</span></label>
           <div class="error" role="alert">Bitte wählen Sie einen Punkt.</div>
         </div>
       </fieldset>
-      <fieldset data-step="3" hidden>
-        <legend>Wie viele Anfragen erreichen Sie pro Woche?</legend>
-        <p class="legend-sub">Anrufe, Nachrichten, E-Mails und Formulare zusammen, grob geschätzt.</p>
-        <div class="range-head"><label for="wz-anfragen">Anfragen pro Woche</label><output for="wz-anfragen">20</output></div>
-        <input type="range" id="wz-anfragen" name="anfragen" min="0" max="100" step="1" value="20">
+      <fieldset data-step="2" data-require="status" hidden>
+        <legend>Wie ist die Ausgangslage?</legend>
+        <p class="legend-sub">Damit wir wissen, worauf wir aufbauen.</p>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="status" value="keine"><span><svg><use href="#i-globe"/></svg>Noch keine Website</span></label>
+          <label class="choice"><input type="radio" name="status" value="veraltet"><span><svg><use href="#i-clock"/></svg>Website vorhanden, aber veraltet</span></label>
+          <label class="choice"><input type="radio" name="status" value="keineanfragen"><span><svg><use href="#i-mail"/></svg>Website vorhanden, bringt keine Anfragen</span></label>
+          <label class="choice"><input type="radio" name="status" value="gut"><span><svg><use href="#i-check"/></svg>Website läuft, ich möchte erweitern</span></label>
+          <div class="error" role="alert">Bitte wählen Sie einen Punkt.</div>
+        </div>
+      </fieldset>
+      <fieldset data-step="3" data-require="zeitplan" hidden>
+        <legend>Bis wann soll es live sein?</legend>
+        <p class="legend-sub">Live gehen wir in der Regel 5 bis 15 Werktage nach Freigabe der Inhalte.</p>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="zeitplan" value="schnell"><span><svg><use href="#i-bolt"/></svg>So schnell wie möglich</span></label>
+          <label class="choice"><input type="radio" name="zeitplan" value="quartal"><span><svg><use href="#i-calendar"/></svg>In den nächsten ein bis drei Monaten</span></label>
+          <label class="choice"><input type="radio" name="zeitplan" value="offen"><span><svg><use href="#i-info"/></svg>Noch offen</span></label>
+          <div class="error" role="alert">Bitte wählen Sie einen Punkt.</div>
+        </div>
       </fieldset>
       <fieldset data-step="4" hidden>
         <legend>Ersteinschätzung und Erstgespräch</legend>
         <div class="wz-result" data-wz-result aria-live="polite"></div>
         <input type="hidden" name="empfehlung" value="">
-        <p class="legend-sub">Für das kostenlose Erstgespräch brauchen wir nur Name und E-Mail. Rückmeldung werktags innerhalb von 24 Stunden.</p>
+        <ol class="wz-next">
+          <li><b>Rückmeldung</b><span>Wir lesen Ihre Anfrage und melden uns werktags innerhalb von 24 Stunden.</span></li>
+          <li><b>Erstgespräch</b><span>Rund 30 Minuten, kostenlos: Ausgangslage, Ziel und Umfang.</span></li>
+          <li><b>Angebot</b><span>Festpreis und klarer Umfang. Sie entscheiden in Ruhe.</span></li>
+        </ol>
+        <p class="legend-sub">Für das Erstgespräch brauchen wir nur Name und E-Mail.</p>
         <div class="form-row">
           <div class="field"><label for="mm-name">Name</label><input id="mm-name" name="name" type="text" autocomplete="name" required></div>
           <div class="field"><label for="mm-firma">Unternehmen <span class="opt">(optional)</span></label><input id="mm-firma" name="firma" type="text" autocomplete="organization"></div>
@@ -368,7 +379,7 @@
     </form>
     <div id="wz-danke" hidden>
       <div class="note"><svg><use href="#i-check"/></svg><div><b>Vielen Dank. Ihre Anfrage ist eingegangen.</b><br>Wir melden uns werktags innerhalb von 24 Stunden mit einem Terminvorschlag für das Erstgespräch.</div></div>
-      <p class="mt-3"><a class="btn btn--secondary" href="/roi-rechner">Bis dahin: Sparrechner öffnen</a></p>
+      <p class="mt-3"><a class="btn btn--secondary" href="/referenzen">Bis dahin: Referenzen ansehen</a> <a class="btn btn--ghost" href="/website-checkliste">Website-Checkliste</a></p>
     </div>
   </div>
 </div>

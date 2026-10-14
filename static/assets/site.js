@@ -102,7 +102,7 @@
           payload[i.name] = i.type === 'checkbox' ? (i.checked ? 'ja' : 'nein') : i.value.trim();
         });
         var cal = form.__cal; if (cal && cal.date && cal.time) { payload.wunschtermin = cal.label(); payload.termin_iso = cal.iso(); }
-        payload.nachricht = Object.keys(payload).filter(function (k) { return ['name', 'email', 'tel', 'firma', 'thema', 'budget', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'nachricht_text'].indexOf(k) >= 0 && payload[k]; })
+        payload.nachricht = Object.keys(payload).filter(function (k) { return ['name', 'email', 'tel', 'firma', 'thema', 'budget', 'bedarf', 'status', 'zeitplan', 'branche', 'empfehlung', 'wunschtermin', 'nachricht_text'].indexOf(k) >= 0 && payload[k]; })
           .map(function (k) { return k + ': ' + payload[k]; }).join('\n');
         busy = true; var orig = btn ? btn.innerHTML : '';
         if (btn) { btn.classList.add('is-loading'); btn.innerHTML = 'Wird gesendet …'; }
@@ -208,16 +208,23 @@
     var form = $('form[data-wizard]'); if (!form) return;
     var steps = $$('fieldset[data-step]', form), prog = $$('.wz-progress li', form);
     var prevB = $('[data-wz=prev]', form), nextB = $('[data-wz=next]', form), submitB = $('[type=submit]', form);
-    var result = $('[data-wz-result]', form), reco = $('input[name=empfehlung]', form), cur = 0;
-    var PAIN = { handwerk: 'Kunden suchen „Elektriker Celle“ oder „Dachdecker in der Nähe“ und entscheiden auf dem Handy in Sekunden. Ihr Telefon klingelt, während Sie auf der Baustelle sind.',
-      praxis: 'Neue Patienten und Mandanten vergleichen Website, Bewertungen und Öffnungszeiten, bevor sie anrufen. Oft außerhalb der Sprechzeiten.',
-      gastro: 'Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy. Wer sie nicht in zehn Sekunden findet, geht weiter.',
+    var result = $('[data-wz-result]', form), reco = $('input[name=empfehlung]', form), branche = $('input[name=branche]', form), cur = 0;
+    var PAIN = { handwerk: 'Für Handwerk und Bau heißt das: Kunden suchen „Elektriker Celle“ oder „Dachdecker in der Nähe“ und entscheiden auf dem Handy in Sekunden. Eine Leistungsseite je Gewerk und Ort ist deshalb Teil des Konzepts.',
+      praxis: 'Für Praxen und Kanzleien heißt das: Neue Patienten und Mandanten vergleichen Website, Bewertungen und Öffnungszeiten, oft außerhalb der Sprechzeiten. Terminanfrage und Antworten auf die häufigsten Fragen gehören auf die Seite.',
+      gastro: 'Für Gastronomie und Handel heißt das: Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy. Wer das nicht in zehn Sekunden findet, geht weiter.',
       sonstige: 'Interessenten suchen online, vergleichen und melden sich dann. Die Website entscheidet, ob daraus eine Anfrage wird.' };
-    var KANAL = { website: '<b>Website.</b> Der erste Hebel ist eine Landingpage oder Website, die mobil überzeugt und lokal gefunden wird. LANDING ab 2.290 € einmalig (Pflege 59 € im Monat), Unternehmenswebsite BUSINESS WEB 4.490 €. In 5 bis 15 Werktagen live.',
-      sichtbarkeit: '<b>Sichtbarkeit.</b> Lokale SEO-Grundlagen und GEO, also gefunden werden in KI-Antworten, gehören bei uns zur Website. Für die laufende Pflege von Google-Unternehmensprofil und Bewertungen: LOCAL VISIBILITY, 449 € im Monat netto.',
-      formular: '<b>Anfragewege.</b> Anfragen müssen dort landen, wo sie bearbeitet werden: Terminbuchung im Kalender, Benachrichtigung aufs Handy, klare Antwortzeiten. Das richten wir mit der Website ein (LANDING ab 2.290 €).',
-      anfragen: '<b>Telefon und WhatsApp.</b> Sofort hilft eine Landingpage mit Terminbuchung, damit Anfragen nicht warten. Ab November 2026 übernehmen unsere KI-Assistenten Telefon, WhatsApp und E-Mail (Pakete ab 349 € im Monat netto). Pilotplätze können Sie jetzt vormerken.',
-      unklar: '<b>Noch unklar.</b> Im Erstgespräch finden wir in rund 30 Minuten den Punkt, an dem bei Ihnen am meisten verloren geht.' };
+    var BEDARF = { landingpage: '<b>Passendes Paket: LANDING, 2.290 € einmalig, Pflege 59 € im Monat.</b> Ein Conversion-Onepager mit Texten, Bildern und Terminbuchung für ein Angebot. Wenn Sie Texte und Bilder selbst liefern, geht LANDING START auf Vorlagenbasis ab 1.290 €.',
+      website: '<b>Passendes Paket: BUSINESS WEB, 4.490 € einmalig, Pflege 89 € im Monat.</b> Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.',
+      relaunch: '<b>Passendes Paket: je nach Umfang LANDING (2.290 €) oder BUSINESS WEB (4.490 €).</b> Wir prüfen zuerst, was von der bestehenden Seite bleibt: Domain, Inhalte, Bewertungen. Darauf entsteht die neue Struktur.',
+      funnel: '<b>Passendes Paket: WEB + FUNNEL, 6.990 € einmalig, Pflege 129 € im Monat.</b> Bis zwölf Seiten mit einer Anfrage- oder Verkaufsstrecke, die Besucher Schritt für Schritt zur Anfrage führt.',
+      unklar: '<b>Noch offen, das ist in Ordnung.</b> Die meisten Betriebe starten mit LANDING (2.290 €) für ein konkretes Angebot. Im Erstgespräch klären wir in rund 30 Minuten, was zuerst Sinn ergibt.' };
+    var STATUS = { keine: 'Ohne Website entscheidet heute allein das Google-Profil, ob jemand anfragt. Eine erste Seite mit Leistungen, Ort und Anfrageweg ändert das.',
+      veraltet: 'Eine veraltete Seite kostet Vertrauen, besonders auf dem Handy. Domain und brauchbare Inhalte übernehmen wir, der Rest wird neu aufgebaut.',
+      keineanfragen: 'Eine Seite ohne Anfragen hat meist kein klares Angebot und keinen klaren Anfrageweg. Genau das prüfen wir als Erstes.',
+      gut: 'Gute Basis. Dann geht es um Erweiterung: Leistungsseiten je Ort, eine Landingpage je Angebot, ein sauberer Anfrageweg.' };
+    var ZEIT = { schnell: 'Live in der Regel 5 bis 15 Werktage nach Freigabe der Inhalte. Je schneller Texte, Bilder und Freigaben vorliegen, desto früher.',
+      quartal: 'Das passt zum üblichen Ablauf: Erstgespräch, Angebot, 5 bis 15 Werktage Umsetzung, Freigabegespräch, Livegang.',
+      offen: 'Kein Druck. Das Erstgespräch ist unverbindlich, das Angebot hat einen Festpreis. Sie entscheiden in Ruhe.' };
     function val(name) { var r = $('input[name=' + name + ']:checked', form); return r ? r.value : ''; }
     function label(name) { var r = $('input[name=' + name + ']:checked', form); return r ? (r.closest('.choice').textContent || '').trim() : ''; }
     function show(i) {
@@ -237,20 +244,17 @@
       return ok;
     }
     function buildResult() {
-      var b = val('branche') || 'sonstige', k = val('kanal') || 'unklar', n = +((($('input[name=anfragen]', form) || {}).value) || 0);
-      var volume = n < 5 ? 'Bei unter fünf Anfragen pro Woche ist der erste Hebel meist die Sichtbarkeit: Google-Unternehmensprofil, Bewertungen und lokale Suche (LOCAL VISIBILITY, 449 € im Monat netto).'
-        : 'Bei rund ' + n + (n >= 100 ? ' und mehr' : '') + ' Anfragen pro Woche zählt jede, die liegen bleibt. Eine Website mit klaren Anfragewegen ist dann der schnellste Hebel. Was eine verpasste Anfrage kostet, zeigt der Sparrechner.';
-      var html = '<b>Kurz zusammengefasst</b><ul><li>' + PAIN[b] + '</li><li>' + KANAL[k] + '</li><li>' + volume + '</li></ul><p class="tiny">Keine Zusicherung, alle Preise netto zzgl. USt. Im Erstgespräch prüfen wir, ob und wie sich das in Ihrem Betrieb rechnet.</p>';
+      var b = val('bedarf') || 'unklar', st = val('status'), z = val('zeitplan'), br = branche ? branche.value : '';
+      var items = [BEDARF[b]]; if (STATUS[st]) items.push(STATUS[st]); if (ZEIT[z]) items.push(ZEIT[z]); if (PAIN[br]) items.push(PAIN[br]);
+      var html = '<b>Kurz zusammengefasst</b><ul>' + items.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul><p class="tiny">Erste Einschätzung ohne Zusicherung. Alle Preise netto zzgl. USt., Preisliste vom 1. Oktober 2026. Das verbindliche Angebot folgt nach dem Erstgespräch.</p>';
       if (result) result.innerHTML = html;
-      if (reco) reco.value = 'Branche: ' + (label('branche') || 'offen') + ' | Kanal: ' + (label('kanal') || 'offen') + ' | Anfragen/Woche: ' + n;
+      if (reco) reco.value = 'Bedarf: ' + (label('bedarf') || 'offen') + ' | Ausgangslage: ' + (label('status') || 'offen') + ' | Zeitplan: ' + (label('zeitplan') || 'offen') + (br ? ' | Branche: ' + br : '');
     }
     on(nextB, 'click', function () { if (valid(cur)) show(cur + 1); });
     on(prevB, 'click', function () { show(Math.max(0, cur - 1)); });
     on(form, 'keydown', function (e) { if (e.key === 'Enter' && cur < steps.length - 1 && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); nextB.click(); } });
-    $$('.choice input', form).forEach(function (r) { on(r, 'change', function () { if (cur < 2) setTimeout(function () { nextB.click(); }, 160); }); });
-    var range = $('input[name=anfragen]', form);
-    if (range) { var out = $('output[for=' + range.id + ']', form); var paint = function () { var pct = (range.value - range.min) / (range.max - range.min) * 100; range.style.setProperty('--pct', pct + '%'); if (out) out.textContent = range.value + (+range.value === +range.max ? '+' : ''); }; on(range, 'input', paint); paint(); }
-    form.__wizard = { show: show, current: function () { return cur; }, reset: function () { show(0); }, preset: function (b) { var r = $('input[name=branche][value="' + b + '"]', form); if (r) { r.checked = true; show(1); } else show(0); } };
+    $$('.choice input', form).forEach(function (r) { on(r, 'change', function () { if (cur < steps.length - 1) setTimeout(function () { nextB.click(); }, 160); }); });
+    form.__wizard = { show: show, current: function () { return cur; }, reset: function () { if (branche) branche.value = ''; show(0); }, preset: function (b) { if (branche) branche.value = b || ''; show(0); } };
     show(0);
   }
 
@@ -480,6 +484,13 @@
       mark(); on(row, 'scroll', mark, { passive: true }); on(w, 'resize', mark);
     });
   }
-  function init() { initNav(); initMore(); initSwipe(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  /* Website-Checkliste: Zähler der erfüllten Punkte */
+  function initChecklist() {
+    var root = $('[data-checklist]'); if (!root) return;
+    var boxes = $$('input[type=checkbox]', root), out = $('[data-checklist-out]', root), total = boxes.length;
+    function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
+    boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
+  }
+  function init() { initNav(); initChecklist(); initMore(); initSwipe(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();
