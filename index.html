@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Berg's Sonderposten Celle | Werkzeug &amp; Restposten nach Kilo</title>
-<meta name="description" content="Berg's Sonderposten Celle: Werkzeug, Schleifmittel, Schrauben &amp; Restposten nach Kilo. Fr 9–17, Sa 10–16 Uhr, Braunschweiger Heerstr. 100. Jetzt Route planen.">
+<title>Berg's Sonderposten Celle | 50 % Rabatt auf alles</title>
+<meta name="description" content="Berg's Sonderposten Celle: Alles muss raus – 50 % Rabatt auf alles. Lampen, Werkzeug, Schrauben, Farben, Sanitär, Garten &amp; Haushalt. Mo–Fr 10–18, Sa 10–16 Uhr, Braunschweiger Heerstr. 100.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="geo.region" content="DE-NI">
 <meta name="geo.placename" content="Celle">
 <meta name="author" content="Berg's Sonderposten">
 <meta name="theme-color" content="#1f2124">
 <!-- Nach Livegang eintragen: <link rel="canonical" href="https://DEINE-DOMAIN.de/"> und og:image/og:url mit voller Adresse -->
-<meta property="og:title" content="Berg's Sonderposten Celle ist zurück – Werkzeug &amp; Restposten nach Kilo">
-<meta property="og:description" content="Super günstige Preise, viel Material nach Kilo, alles direkt zum Mitnehmen. Fr 9–17 Uhr · Sa 10–16 Uhr in Celle.">
+<meta property="og:title" content="Berg's Sonderposten Celle: Alles muss raus – 50 % Rabatt auf alles">
+<meta property="og:description" content="Große Partie Lampen, Werkzeug, Schrauben, Farben, Sanitär, Garten &amp; Haushalt – 50 % Rabatt auf alles, solange der Vorrat reicht. Mo–Fr 10–18 Uhr · Sa 10–16 Uhr in Celle.">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:image" content="assets/flyer.jpg">
@@ -985,6 +985,39 @@ footer .brand .logo{height:36px}
   .price b{font-size:1.3rem}
   .price span{font-size:.82rem}
 }
+
+/* ---- Sortiment neu: Lampen-Highlight + 6 Icon-Kacheln ---- */
+.lamp{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(16px,3vw,36px);background:var(--ink);color:#fff;border-radius:18px;padding:clamp(20px,3vw,32px) clamp(20px,3.5vw,40px);margin-bottom:22px}
+.lamp-badge{width:clamp(76px,9vw,104px);aspect-ratio:1;border-radius:50%;background:var(--red);display:grid;place-items:center;text-align:center;font-family:var(--cond);font-weight:800;text-transform:uppercase;font-size:clamp(.8rem,1.4vw,1rem);line-height:1.1;letter-spacing:.04em}
+.lamp-body h3{font-size:clamp(2.2rem,5vw,3.6rem);color:var(--yellow);line-height:.95;margin-bottom:8px}
+.lamp-body ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;color:#e4e6e9;font-weight:500;font-size:1rem}
+.lamp-body li{display:flex;align-items:center;gap:7px}
+.lamp-body li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--yellow)}
+.lamp-pct{text-align:center;border-left:1px solid rgba(255,255,255,.2);padding-left:clamp(16px,3vw,36px)}
+.lamp-pct b{display:block;font-family:var(--disp);font-weight:400;font-size:clamp(2.4rem,5vw,3.6rem);line-height:1;color:var(--yellow)}
+.lamp-pct span{font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:.95rem}
+.cats2{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cat2{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 22px 24px;transition:transform .2s,box-shadow .2s}
+.cat2:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(31,33,36,.1)}
+.cat2-ico{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:var(--soft);color:var(--ink);margin-bottom:14px}
+.cat2-ico svg{width:26px;height:26px}
+.cat2 h3{font-family:var(--disp);font-weight:400;text-transform:uppercase;font-size:1.35rem;line-height:1.05;margin-bottom:6px}
+.cat2 p{color:var(--muted);font-size:.98rem}
+@media(max-width:900px){.cats2{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){
+  .lamp{grid-template-columns:auto 1fr;gap:12px 14px;padding:16px;border-radius:14px;margin-bottom:12px}
+  .lamp-badge{width:64px;font-size:.68rem}
+  .lamp-body h3{font-size:1.9rem;margin-bottom:6px}
+  .lamp-body ul{gap:4px 12px;font-size:.85rem}
+  .lamp-pct{grid-column:1/3;border-left:0;border-top:1px solid rgba(255,255,255,.2);padding:10px 0 0;display:flex;align-items:baseline;justify-content:center;gap:8px}
+  .lamp-pct b{font-size:1.8rem}
+  .cats2{gap:8px}
+  .cat2{padding:12px 12px 14px;border-radius:12px}
+  .cat2-ico{width:36px;height:36px;margin-bottom:8px;border-radius:9px}
+  .cat2-ico svg{width:20px;height:20px}
+  .cat2 h3{font-size:1rem}
+  .cat2 p{font-size:.8rem;line-height:1.35}
+}
 </style>
 </head>
 <body>
@@ -1011,12 +1044,12 @@ footer .brand .logo{height:36px}
   <div class="wrap">
     <div>
       <div class="badge-row">
-        <span class="pill y">Bekannt aus Celle</span>
-        <span class="pill o"><span class="dot" id="dot"></span><span id="status">Fr 09–17 · Sa 10–16 Uhr</span></span>
+        <span class="pill y">Alles muss raus</span>
+        <span class="pill o"><span class="dot" id="dot"></span><span id="status">Mo–Fr 10–18 · Sa 10–16 Uhr</span></span>
       </div>
-      <h1 class="disp"><span class="l1">Handwerker</span><span class="l2">aufgepasst!</span></h1>
-      <p class="kicker">Werkzeug, Schrauben &amp; Restposten in Celle – nach Kilo zum Schnäppchenpreis</p>
-      <p class="lead"><strong>Berg's Sonderposten ist zurück</strong> und jetzt wieder für euch da: Werkzeug, Schleifmittel, Schrauben &amp; Befestigungstechnik, Restposten und vieles mehr. Alles direkt zum Mitnehmen.</p>
+      <h1 class="disp"><span class="l1">Alles muss raus!</span><span class="l2">50 % Rabatt auf alles</span></h1>
+      <p class="kicker">Handwerker &amp; Heimwerker aufgepasst – Sonderposten in Celle, solange der Vorrat reicht</p>
+      <p class="lead"><strong>Große Partie Lampen</strong> – Decken-, Hänge-, Steh- und Gartenlampen. Dazu Werkzeug, Schrauben &amp; Befestigung, Farben &amp; Zubehör, Sanitär, Garten- und Haushaltsartikel. Alles zum halben Preis, alles direkt zum Mitnehmen.</p>
       <div class="cta-row">
         <a class="btn btn-primary" href="#anfahrt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>Jetzt Route planen</a>
         <a class="btn btn-ghost js-ka" target="_blank" rel="noopener noreferrer" href="#">Angebote auf Kleinanzeigen</a>
@@ -1030,7 +1063,7 @@ footer .brand .logo{height:36px}
       </div>
       <div class="sign-red"><span>Ist zurück!</span></div>
       <div class="hero-date">
-        <b>Fr + Sa</b><span>Geöffnet<br>in Celle</span>
+        <b>50 %</b><span>Rabatt<br>auf alles</span>
       </div>
     </div>
   </div>
@@ -1058,30 +1091,26 @@ footer .brand .logo{height:36px}
   <div class="wrap">
     <div class="sec-head rv">
       <span class="eyebrow">Das Sortiment</span>
-      <h2 class="disp">Große Auswahl.<br>Kleine Preise.</h2>
-      <p>Alles, was Handwerker, Werkstätten und Heimwerker brauchen – tonnenweise Restposten, Markenware und Sonderposten.</p>
+      <h2 class="disp">Alles zum<br>halben Preis.</h2>
+      <p>Sechs Warengruppen, ständig wechselnde Sonderposten – und eine große Partie Lampen. 50 % Rabatt auf alles, solange der Vorrat reicht.</p>
     </div>
-    <div class="cats">
-      <article class="cat rv">
-        <div class="cat-img"><picture><source srcset="assets/werkzeug.webp" type="image/webp"><img src="assets/werkzeug.jpg" alt="Kisten voller Werkzeug: Bohrmaschinen, Zangen und Handwerkzeug" loading="lazy" width="400" height="300"></picture>
-          <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 12.6 12.6 21 3 11.4 11.4 3l3.3 3.3Z"/><path d="m8 8 3 3"/></svg></span></div>
-        <div class="cat-body"><h3>Werkzeug</h3><p>Elektro- und Handwerkzeug für Profis und Heimwerker.</p></div>
-      </article>
-      <article class="cat rv">
-        <div class="cat-img"><picture><source srcset="assets/schleifmittel.webp" type="image/webp"><img src="assets/schleifmittel.jpg" alt="Schleifscheiben, Trennscheiben und Schleifmittel in Kisten" loading="lazy" width="400" height="300"></picture>
-          <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="m5.6 5.6 12.8 12.8M18.4 5.6 5.6 18.4"/></svg></span></div>
-        <div class="cat-body"><h3>Schleifmittel</h3><p>Schleif-, Trenn- und Fächerscheiben in rauen Mengen.</p></div>
-      </article>
-      <article class="cat rv">
-        <div class="cat-img"><picture><source srcset="assets/schrauben.webp" type="image/webp"><img src="assets/schrauben.jpg" alt="Kartons mit Schrauben und Befestigungstechnik" loading="lazy" width="400" height="300"></picture>
-          <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v4a6 6 0 0 1-12 0V3Z"/><path d="m10 13 1 8 1-1 1 1 1-8M9 7h6"/></svg></span></div>
-        <div class="cat-body"><h3>Schrauben &amp; Befestigung</h3><p>Schrauben, Dübel und Befestigungstechnik – Original verpackt.</p></div>
-      </article>
-      <article class="cat rv">
-        <div class="cat-img"><picture><source srcset="assets/profile.webp" type="image/webp"><img src="assets/profile.jpg" alt="Stapel von Metallprofilen auf Paletten" loading="lazy" width="400" height="300"></picture>
-          <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 8-9-5-9 5v8l9 5 9-5V8Z"/><path d="m3.3 7.5 8.7 5 8.7-5M12 22V12.5"/></svg></span></div>
-        <div class="cat-body"><h3>Restposten &amp; mehr</h3><p>Metallprofile, Kartons voller Überraschungen – und vieles mehr.</p></div>
-      </article>
+        <div class="lamp rv">
+      <div class="lamp-badge"><span>Große<br>Partie</span></div>
+      <div class="lamp-body">
+        <h3 class="disp">Lampen!</h3>
+        <ul>
+          <li>Deckenlampen</li><li>Hängelampen</li><li>Stehlampen</li><li>Gartenlampen</li><li>und vieles mehr</li>
+        </ul>
+      </div>
+      <div class="lamp-pct"><b>50 %</b><span>Rabatt</span></div>
+    </div>
+    <div class="cats2">
+      <article class="cat2 rv"><span class="cat2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22V12M12 12c-4 0-7-3-7-7 4 0 7 3 7 7ZM12 12c4 0 7-3 7-7-4 0-7 3-7 7Z"/><path d="M5 22h14"/></svg></span><h3>Gartenartikel</h3><p>Pflanzkübel, Schubkarren, Gartenlampen und mehr für draußen.</p></article>
+      <article class="cat2 rv"><span class="cat2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-2Z"/><path d="M12 12V5a2 2 0 0 1 2-2h1"/><path d="M8 20v2M16 20v2"/></svg></span><h3>Sanitärartikel</h3><p>Waschbecken, Armaturen, Duschen und WC-Zubehör.</p></article>
+      <article class="cat2 rv"><span class="cat2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10v6H5zM15 5h2a2 2 0 0 1 2 2v3H9"/><path d="M10 12h2v9a1 1 0 0 1-2 0z"/></svg></span><h3>Farben &amp; Zubehör</h3><p>Farben, Lacke, Pinsel, Rollen und Abdeckmaterial.</p></article>
+      <article class="cat2 rv"><span class="cat2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v4a6 6 0 0 1-12 0V3Z"/><path d="m10 13 1 8 1-1 1 1 1-8M9 7h6"/></svg></span><h3>Schrauben &amp; Befestigung</h3><p>Schrauben, Dübel, Muttern – original verpackt oder nach Kilo.</p></article>
+      <article class="cat2 rv"><span class="cat2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg></span><h3>Haushaltsartikel</h3><p>Boxen, Körbe, Deko, Kleinmöbel und Küchenhelfer.</p></article>
+      <article class="cat2 rv"><span class="cat2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 8-9-5-9 5v8l9 5 9-5V8Z"/><path d="m3.3 7.5 8.7 5 8.7-5M12 22V12.5"/></svg></span><h3>Und vieles mehr</h3><p>Werkzeug, Schleifmittel, Metallprofile, Restposten – jede Woche Neues.</p></article>
     </div>
   </div>
 </section>
@@ -1094,8 +1123,8 @@ footer .brand .logo{height:36px}
       <h2 class="disp">Material kaufen,<br>nicht Marge zahlen</h2>
     </div>
     <ul class="who-list rv">
-      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Handwerker &amp; Betriebe</b> Verbrauchsmaterial günstig nachkaufen, Materialkosten senken.</span></li>
-      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Werkstatt &amp; Heimwerker</b> aussuchen, was du brauchst, bei vielem nur das Gewicht zahlen.</span></li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Handwerker &amp; Betriebe</b> Schrauben, Werkzeug, Farben und Sanitär zum halben Preis nachkaufen.</span></li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Haus, Garten &amp; Wohnung</b> Lampen, Gartenartikel, Haushaltswaren – stöbern und Schnäppchen mitnehmen.</span></li>
       <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Große Abnahmemengen</b> gesonderten Termin anfragen, wir nehmen uns Zeit.</span></li>
     </ul>
   </div>
@@ -1106,14 +1135,14 @@ footer .brand .logo{height:36px}
   <div class="wrap">
     <div class="rv">
       <span class="eyebrow">Die Besonderheit</span>
-      <h2 class="disp">Viel Material<br>nach <em>Kilo</em> abgerechnet</h2>
-      <p>Statt Einzelpreisen wiegen wir ab: Du suchst dir aus, was du brauchst – bezahlt wird nach Gewicht. Fair, transparent und ideal zum Schnäppchenpreis.</p>
+      <h2 class="disp">50 % auf alles.<br>Viel Material <em>nach Kilo</em>.</h2>
+      <p>Alles muss raus: Auf das gesamte Sortiment gibt es 50 % Rabatt. Vieles, etwa Schrauben, Profile und Kleinteile, wiegen wir einfach ab – bezahlt wird nach Gewicht. Fair, transparent, ohne Rätselraten.</p>
       <ul>
-        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></i>Fairer Preis nach Gewicht – kein Rätselraten</li>
-        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></i>Alles direkt zum Mitnehmen vor Ort</li>
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></i>50 % Rabatt auf alles, ohne Ausnahme</li>
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></i>Kleinteile fair nach Gewicht abgerechnet</li>
         <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></i>Nur solange der Vorrat reicht – schnell sein lohnt sich</li>
       </ul>
-      <p class="scarce"><span aria-hidden="true">⏳</span><span><b>Einzelne Posten gibt es nur einmal.</b> Ist etwas weg, ist es weg. Komm am besten gleich am Freitag.</span></p>
+      <p class="scarce"><span aria-hidden="true">⏳</span><span><b>Einzelne Posten gibt es nur einmal.</b> Ist etwas weg, ist es weg. Komm am besten gleich diese Woche.</span></p>
     </div>
     <div class="kilo-visual rv">
       <div class="ph"><picture><source srcset="assets/profile.webp" type="image/webp"><img src="assets/profile.jpg" alt="Aluminium- und Stahlprofile auf Paletten, abgerechnet nach Kilo" loading="lazy" width="400" height="300"></picture></div>
@@ -1159,9 +1188,9 @@ footer .brand .logo{height:36px}
       <h2 class="disp">Kommen. Aussuchen.<br>Wiegen. Mitnehmen.</h2>
     </div>
     <ol class="steps">
-      <li class="rv"><span class="num">1</span><h3>Vorbeikommen</h3><p>Freitag 9–17 Uhr oder Samstag 10–16 Uhr, ohne Termin. Parken direkt vor der Halle.</p></li>
+      <li class="rv"><span class="num">1</span><h3>Vorbeikommen</h3><p>Montag bis Freitag 10–18 Uhr, Samstag 10–16 Uhr, ohne Termin. Parken direkt vor der Halle.</p></li>
       <li class="rv"><span class="num">2</span><h3>Aussuchen</h3><p>Kisten, Kartons und Paletten durchstöbern. Anhänger oder Transporter lohnen sich.</p></li>
-      <li class="rv"><span class="num">3</span><h3>Wiegen &amp; zahlen</h3><p>Viel Material wird auf der Waage nach Kilo abgerechnet. Alles direkt mitnehmen.</p></li>
+      <li class="rv"><span class="num">3</span><h3>Wiegen &amp; zahlen</h3><p>50 % Rabatt auf alles, Kleinteile nach Kilo auf der Waage. Alles direkt mitnehmen.</p></li>
     </ol>
   </div>
 </section>
@@ -1184,8 +1213,8 @@ footer .brand .logo{height:36px}
         <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l3.5 2"/></svg></div>
         <h3>Öffnungszeiten</h3>
         <ul class="hours" id="hours">
-          <li data-day="5"><span>Freitag</span><span>09:00 – 17:00 Uhr</span></li>
-          <li data-day="6"><span>Samstag</span><span>10:00 – 16:00 Uhr</span></li>
+          <li data-days="1,2,3,4,5"><span>Montag – Freitag</span><span>10:00 – 18:00 Uhr</span></li>
+          <li data-days="6"><span>Samstag</span><span>10:00 – 16:00 Uhr</span></li>
         </ul>
       </div>
       <div class="card rv">
@@ -1217,8 +1246,8 @@ footer .brand .logo{height:36px}
           <a class="btn btn-dark js-ka" target="_blank" rel="noopener noreferrer" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>Nachricht über Kleinanzeigen</a>
         </div>
         <ul class="hours" style="margin-top:22px">
-          <li data-day="5"><span>Freitag</span><span>09:00 – 17:00 Uhr</span></li>
-          <li data-day="6"><span>Samstag</span><span>10:00 – 16:00 Uhr</span></li>
+          <li data-days="1,2,3,4,5"><span>Montag – Freitag</span><span>10:00 – 18:00 Uhr</span></li>
+          <li data-days="6"><span>Samstag</span><span>10:00 – 16:00 Uhr</span></li>
         </ul>
       </div>
       <div class="panel rv" id="anfahrt">
@@ -1261,10 +1290,10 @@ footer .brand .logo{height:36px}
       <h2 class="disp">Gut zu wissen</h2>
     </div>
     <div class="faq">
-      <details><summary>Wann hat Berg's Sonderposten in Celle geöffnet?</summary><div class="ans">Wir haben freitags von 09:00 bis 17:00 Uhr und samstags von 10:00 bis 16:00 Uhr geöffnet.</div></details>
+      <details><summary>Wann hat Berg's Sonderposten in Celle geöffnet?</summary><div class="ans">Wir haben Montag bis Freitag von 10:00 bis 18:00 Uhr und samstags von 10:00 bis 16:00 Uhr geöffnet.</div></details>
       <details><summary>Wo finde ich Berg's Sonderposten?</summary><div class="ans">Wir sind in der Braunschweiger Heerstraße 100 in 29227 Celle. Über den Routenplaner auf dieser Seite startest du die Navigation direkt aus deiner Karten-App.</div></details>
-      <details><summary>Was kostet es, wenn Material nach Kilo abgerechnet wird?</summary><div class="ans">Bei vielen Artikeln zahlst du nach Gewicht statt pro Stück. Das ist fair und für dich günstig. Die aktuellen Kilopreise erfährst du vor Ort.</div></details>
-      <details><summary>Was gibt es bei Berg's Sonderposten zu kaufen?</summary><div class="ans">Werkzeug, Schleifmittel, Schrauben und Befestigungstechnik, Restposten und vieles mehr, zum Beispiel Metallprofile. Alles gibt es direkt zum Mitnehmen vor Ort.</div></details>
+      <details><summary>Was kostet es, wenn Material nach Kilo abgerechnet wird?</summary><div class="ans">Auf alles gibt es 50 % Rabatt. Viele Kleinteile wie Schrauben oder Profile zahlst du nach Gewicht statt pro Stück. Die aktuellen Kilopreise erfährst du vor Ort.</div></details>
+      <details><summary>Was gibt es bei Berg's Sonderposten zu kaufen?</summary><div class="ans">Eine große Partie Lampen (Decken-, Hänge-, Steh- und Gartenlampen), dazu Gartenartikel, Sanitärartikel, Farben und Zubehör, Schrauben und Befestigung, Haushaltsartikel, Werkzeug und Restposten. Alles gibt es direkt zum Mitnehmen vor Ort.</div></details>
       <details><summary>Muss ich vorher einen Termin machen?</summary><div class="ans">Nein. Zu den Öffnungszeiten kannst du einfach vorbeikommen. Wenn du größere Mengen abnehmen möchtest und einen gesonderten Termin wünschst, frag bei uns an.</div></details>
       <details><summary>Gibt es die Angebote auch online?</summary><div class="ans">Ja. Auf Kleinanzeigen haben wir über 400 Anzeigen online, zum Beispiel Metallscheren, Gabelstaplerreifen und Metallschränke. Folge unserem Profil, um neue Angebote nicht zu verpassen.</div></details>
     </div>
@@ -1277,7 +1306,7 @@ footer .brand .logo{height:36px}
     <div class="rv">
       <span class="eyebrow" style="color:#fff">Auch online stöbern</span>
       <h2 class="disp">Unsere Anzeigen<br>auf Kleinanzeigen</h2>
-      <p>Über 400 Anzeigen online – von der Metallschere bis zum Gabelstaplerreifen und Metallschrank. Schau dir unser Profil an und folge uns, um keine neuen Angebote zu verpassen.</p>
+      <p>Über 400 Anzeigen online – von Lampen über Werkzeug bis zu Metallschränken. Schau dir unser Profil an und folge uns, um keine neuen Angebote zu verpassen.</p>
       <a class="btn btn-yellow js-ka" target="_blank" rel="noopener noreferrer" href="#">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
         Zum Kleinanzeigen-Profil
@@ -1306,10 +1335,10 @@ footer .brand .logo{height:36px}
     <h2 class="disp" id="glance-h">Berg's Sonderposten auf einen Blick</h2>
     <button class="glance-toggle" type="button" id="glanceBtn" aria-expanded="false" aria-controls="glanceDl">Details anzeigen</button>
     <dl id="glanceDl">
-      <dt>Was</dt><dd>Sonderpostenmarkt für Werkzeug, Schleifmittel, Schrauben &amp; Befestigungstechnik, Restposten und mehr. Viel Material wird nach Kilo abgerechnet.</dd>
+      <dt>Was</dt><dd>Sonderpostenmarkt mit 50 % Rabatt auf alles: große Partie Lampen, Gartenartikel, Sanitärartikel, Farben &amp; Zubehör, Schrauben &amp; Befestigung, Haushaltsartikel, Werkzeug und Restposten. Viel Material wird nach Kilo abgerechnet.</dd>
       <dt>Wo</dt><dd>Braunschweiger Heerstraße 100, 29227 Celle (Niedersachsen)</dd>
-      <dt>Öffnungszeiten</dt><dd>Freitag 09:00–17:00 Uhr, Samstag 10:00–16:00 Uhr</dd>
-      <dt>Verkauf</dt><dd>Direkt zum Mitnehmen vor Ort, nur solange der Vorrat reicht</dd>
+      <dt>Öffnungszeiten</dt><dd>Montag bis Freitag 10:00–18:00 Uhr, Samstag 10:00–16:00 Uhr</dd>
+      <dt>Aktion</dt><dd>Alles muss raus – 50 % Rabatt auf alles, nur solange der Vorrat reicht. Direkt zum Mitnehmen vor Ort.</dd>
       <dt>Online</dt><dd>Über 400 Anzeigen auf Kleinanzeigen, Profil „Berg", gewerblicher Anbieter</dd>
     </dl>
   </div>
@@ -1320,7 +1349,7 @@ footer .brand .logo{height:36px}
   <div class="wrap">
     <div>
       <a class="brand" href="#top"><svg class="logo" viewBox="0 0 300 44" role="img" aria-label="Berg's Sonderposten Celle"><path d="M8 2h36l-6 40H2z" fill="#f7c922"/><text x="19" y="34" font-family="Anton,Impact,sans-serif" font-size="34" fill="#1f2124" text-anchor="middle" transform="skewX(-8)">B</text><text x="54" y="20" font-family="'Barlow Condensed',sans-serif" font-weight="800" font-size="19" letter-spacing=".6" fill="currentColor">BERG'S SONDERPOSTEN</text><text x="54" y="38" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="11.5" letter-spacing="3" fill="#f7c922">CELLE · NACH KILO</text></svg></a>
-      <p>Braunschweiger Heerstraße 100, 29227 Celle<br>Fr 09:00–17:00 Uhr · Sa 10:00–16:00 Uhr</p>
+      <p>Braunschweiger Heerstraße 100, 29227 Celle<br>Mo–Fr 10:00–18:00 Uhr · Sa 10:00–16:00 Uhr</p>
     </div>
     <nav aria-label="Footer">
       <a href="#sortiment">Sortiment</a>
@@ -1339,8 +1368,8 @@ footer .brand .logo{height:36px}
   <a class="btn btn-ghost" href="#anfahrt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>Route</a>
 </div>
 
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "HardwareStore", "name": "Berg's Sonderposten", "description": "Sonderposten in Celle: Werkzeug, Schleifmittel, Schrauben & Befestigungstechnik, Restposten und vieles mehr. Viel Material wird nach Kilo abgerechnet. Alles direkt zum Mitnehmen.", "image": "assets/flyer.jpg", "address": {"@type": "PostalAddress", "streetAddress": "Braunschweiger Heerstraße 100", "postalCode": "29227", "addressLocality": "Celle", "addressRegion": "Niedersachsen", "addressCountry": "DE"}, "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": "Friday", "opens": "09:00", "closes": "17:00"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "16:00"}], "hasMap": "https://www.google.com/maps/search/?api=1&query=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle", "areaServed": [{"@type": "City", "name": "Celle"}, {"@type": "City", "name": "Hannover"}, {"@type": "City", "name": "Braunschweig"}, {"@type": "City", "name": "Gifhorn"}, {"@type": "City", "name": "Lüneburg"}, {"@type": "City", "name": "Uelzen"}, {"@type": "City", "name": "Wolfsburg"}], "knowsAbout": ["Werkzeug", "Schleifmittel", "Schrauben", "Befestigungstechnik", "Restposten", "Sonderposten"]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wann hat Berg's Sonderposten in Celle geöffnet?", "acceptedAnswer": {"@type": "Answer", "text": "Wir haben freitags von 09:00 bis 17:00 Uhr und samstags von 10:00 bis 16:00 Uhr geöffnet."}}, {"@type": "Question", "name": "Wo finde ich Berg's Sonderposten?", "acceptedAnswer": {"@type": "Answer", "text": "Wir sind in der Braunschweiger Heerstraße 100 in 29227 Celle. Über den Routenplaner auf dieser Seite startest du die Navigation direkt aus deiner Karten-App."}}, {"@type": "Question", "name": "Was kostet es, wenn Material nach Kilo abgerechnet wird?", "acceptedAnswer": {"@type": "Answer", "text": "Bei vielen Artikeln zahlst du nach Gewicht statt pro Stück. Das ist fair und für dich günstig. Die aktuellen Kilopreise erfährst du vor Ort."}}, {"@type": "Question", "name": "Was gibt es bei Berg's Sonderposten zu kaufen?", "acceptedAnswer": {"@type": "Answer", "text": "Werkzeug, Schleifmittel, Schrauben und Befestigungstechnik, Restposten und vieles mehr, zum Beispiel Metallprofile. Alles gibt es direkt zum Mitnehmen vor Ort."}}, {"@type": "Question", "name": "Muss ich vorher einen Termin machen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Zu den Öffnungszeiten kannst du einfach vorbeikommen. Wenn du größere Mengen abnehmen möchtest und einen gesonderten Termin wünschst, frag bei uns an."}}, {"@type": "Question", "name": "Gibt es die Angebote auch online?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Auf Kleinanzeigen haben wir über 400 Anzeigen online, zum Beispiel Metallscheren, Gabelstaplerreifen und Metallschränke. Folge unserem Profil, um neue Angebote nicht zu verpassen."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "HardwareStore", "name": "Berg's Sonderposten", "description": "Sonderposten in Celle: Alles muss raus, 50 % Rabatt auf alles. Große Partie Lampen, Gartenartikel, Sanitärartikel, Farben & Zubehör, Schrauben & Befestigung, Haushaltsartikel, Werkzeug und Restposten. Viel Material wird nach Kilo abgerechnet.", "image": "assets/flyer.jpg", "address": {"@type": "PostalAddress", "streetAddress": "Braunschweiger Heerstraße 100", "postalCode": "29227", "addressLocality": "Celle", "addressRegion": "Niedersachsen", "addressCountry": "DE"}, "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "10:00", "closes": "18:00"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "16:00"}], "hasMap": "https://www.google.com/maps/search/?api=1&query=Braunschweiger+Heerstra%C3%9Fe+100%2C+29227+Celle", "areaServed": [{"@type": "City", "name": "Celle"}, {"@type": "City", "name": "Hannover"}, {"@type": "City", "name": "Braunschweig"}, {"@type": "City", "name": "Gifhorn"}, {"@type": "City", "name": "Lüneburg"}, {"@type": "City", "name": "Uelzen"}, {"@type": "City", "name": "Wolfsburg"}], "knowsAbout": ["Lampen", "Gartenartikel", "Sanitärartikel", "Farben", "Schrauben", "Befestigungstechnik", "Haushaltsartikel", "Werkzeug", "Restposten", "Sonderposten"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wann hat Berg's Sonderposten in Celle geöffnet?", "acceptedAnswer": {"@type": "Answer", "text": "Wir haben Montag bis Freitag von 10:00 bis 18:00 Uhr und samstags von 10:00 bis 16:00 Uhr geöffnet."}}, {"@type": "Question", "name": "Wo finde ich Berg's Sonderposten?", "acceptedAnswer": {"@type": "Answer", "text": "Wir sind in der Braunschweiger Heerstraße 100 in 29227 Celle. Über den Routenplaner auf dieser Seite startest du die Navigation direkt aus deiner Karten-App."}}, {"@type": "Question", "name": "Was kostet es, wenn Material nach Kilo abgerechnet wird?", "acceptedAnswer": {"@type": "Answer", "text": "Auf alles gibt es 50 % Rabatt. Viele Kleinteile wie Schrauben oder Profile zahlst du nach Gewicht statt pro Stück. Die aktuellen Kilopreise erfährst du vor Ort."}}, {"@type": "Question", "name": "Was gibt es bei Berg's Sonderposten zu kaufen?", "acceptedAnswer": {"@type": "Answer", "text": "Eine große Partie Lampen (Decken-, Hänge-, Steh- und Gartenlampen), dazu Gartenartikel, Sanitärartikel, Farben und Zubehör, Schrauben und Befestigung, Haushaltsartikel, Werkzeug und Restposten. Alles gibt es direkt zum Mitnehmen vor Ort."}}, {"@type": "Question", "name": "Muss ich vorher einen Termin machen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Zu den Öffnungszeiten kannst du einfach vorbeikommen. Wenn du größere Mengen abnehmen möchtest und einen gesonderten Termin wünschst, frag bei uns an."}}, {"@type": "Question", "name": "Gibt es die Angebote auch online?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Auf Kleinanzeigen haben wir über 400 Anzeigen online, zum Beispiel Metallscheren, Gabelstaplerreifen und Metallschränke. Folge unserem Profil, um neue Angebote nicht zu verpassen."}}]}</script>
 <script>
 
 // =====================================================================
@@ -1426,7 +1455,7 @@ document.querySelectorAll(".js-ka").forEach(a => a.href = CONFIG.KLEINANZEIGEN_U
 // Jahr
 document.getElementById("yr").textContent = new Date().getFullYear();
 
-// Live-Status (Fr 9–17, Sa 10–16, Europe/Berlin)
+// Live-Status (Mo–Fr 10–18, Sa 10–16, Europe/Berlin)
 (function(){
   const dot = document.getElementById("dot"), status = document.getElementById("status");
   status.classList.add("flash"); status.addEventListener("animationend", () => status.classList.remove("flash"), {once:true});
@@ -1434,10 +1463,11 @@ document.getElementById("yr").textContent = new Date().getFullYear();
   const get = t => parts.find(p => p.type === t).value;
   const day = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[get("weekday")];
   const mins = (+get("hour") % 24) * 60 + +get("minute");
-  const slots = {5:[540,1020], 6:[600,960]};
+  const slots = {1:[600,1080], 2:[600,1080], 3:[600,1080], 4:[600,1080], 5:[600,1080], 6:[600,960]};
+  const DN = ["So","Mo","Di","Mi","Do","Fr","Sa"];
   const s = slots[day];
-  document.querySelectorAll("#hours li").forEach(li => { if (+li.dataset.day === day) li.classList.add("today"); });
-  if (s && mins >= s[0] && mins < s[1]) { dot.classList.add("open"); status.textContent = "Jetzt geöffnet · bis " + (day === 5 ? "17:00" : "16:00") + " Uhr"; }
+  document.querySelectorAll(".hours li").forEach(li => { if ((li.dataset.days || "").split(",").map(Number).includes(day)) li.classList.add("today"); });
+  if (s && mins >= s[0] && mins < s[1]) { dot.classList.add("open"); status.textContent = "Jetzt geöffnet · bis " + (day === 6 ? "16:00" : "18:00") + " Uhr"; }
   else {
     let best = null;
     for (let d = 0; d <= 7; d++) {
@@ -1450,8 +1480,8 @@ document.getElementById("yr").textContent = new Date().getFullYear();
       const t = best.delta, dd = Math.floor(t / 1440), hh = Math.floor((t % 1440) / 60), mm = t % 60;
       const when = dd > 0 ? "in " + dd + " Tg " + hh + " Std" : hh > 0 ? "in " + hh + " Std " + mm + " Min" : "in " + mm + " Min";
       const hhmm = String(Math.floor(best.start / 60)).padStart(2, "0") + ":" + String(best.start % 60).padStart(2, "0");
-      status.textContent = "Öffnet " + (best.dayIdx === 5 ? "Fr " : "Sa ") + hhmm + " · " + when;
-    } else status.textContent = "Fr 09–17 · Sa 10–16 Uhr";
+      status.textContent = "Öffnet " + DN[best.dayIdx] + " " + hhmm + " · " + when;
+    } else status.textContent = "Mo–Fr 10–18 · Sa 10–16 Uhr";
   }
 })();
 
