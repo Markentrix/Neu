@@ -791,6 +791,19 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
   .qa b{font-size:.8rem}
   .proof .pf span{font-size:.66rem}
 }
+
+/* ---- Korrekturen 3: weisser Streifen unter dem Seitenanfang, Vertrauensleiste, Abstand Besuch ---- */
+@media(max-width:700px){
+  .cut{display:none}
+  .hero{padding-bottom:0}
+  .quick{margin-top:-26px;background:linear-gradient(to bottom,transparent 26px,var(--soft) 26px)}
+  .proof .wrap{gap:10px 12px}
+  .proof .pf{flex-direction:column;align-items:flex-start;gap:2px}
+  .proof .pf b{font-size:1.15rem}
+  .proof .pf span{font-size:.72rem;line-height:1.25}
+  #besuch{padding-bottom:30px}
+  #besuch .info-grid .card{display:flex;flex-direction:column}
+}
 </style>
 </head>
 <body>
@@ -853,10 +866,10 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
 
 <!-- VERTRAUEN -->
 <div class="proof"><div class="wrap">
-  <div class="pf"><b>TOP</b><span>Zufriedenheit auf Kleinanzeigen</span></div>
-  <div class="pf"><b>1.448</b><span>Follower folgen unseren Angeboten</span></div>
-  <div class="pf"><b>4.262</b><span>Anzeigen bisher geschaltet</span></div>
-  <div class="pf"><b>seit 2018</b><span>aktiv als gewerblicher Anbieter</span></div>
+  <div class="pf"><b>TOP</b><span>Zufriedenheit bei Kleinanzeigen</span></div>
+  <div class="pf"><b>1.448</b><span>Follower</span></div>
+  <div class="pf"><b>4.262</b><span>Anzeigen geschaltet</span></div>
+  <div class="pf"><b>seit 2018</b><span>gewerblicher Anbieter</span></div>
 </div></div>
 
 <!-- SORTIMENT -->
