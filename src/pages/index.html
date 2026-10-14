@@ -26,14 +26,22 @@ ld: |
         </div>
       </div>
       <div class="hero-visual reveal" data-delay="1">
+        <div class="device-toggle" role="group" aria-label="Ansicht wechseln">
+          <button type="button" data-device="desktop" aria-pressed="true"><svg><use href="#i-layout"/></svg>Desktop</button>
+          <button type="button" data-device="mobile" aria-pressed="false"><svg><use href="#i-chat"/></svg>Smartphone</button>
+        </div>
         <div class="browser">
           <div class="browser-bar" aria-hidden="true"><i></i><i></i><i></i><span class="url">ponyclublila.de</span></div>
-          <div class="browser-body"><img src="/img/pony-club-lila-1200.webp" alt="Startseite der von Markentrix gebauten Website von Pony Club Lila" width="1200" height="790" decoding="async" fetchpriority="high"></div>
+          <div class="browser-body"><img src="/img/pony-club-lila-1200.webp" data-mobile="/img/pony-club-lila-mobile.webp" alt="Startseite der von Markentrix gebauten Website von Pony Club Lila" width="1200" height="790" decoding="async" fetchpriority="high"></div>
           <span class="float-chip float-chip--1"><svg><use href="#i-layout"/></svg>Mobil zuerst gebaut</span>
           <span class="float-chip float-chip--2"><svg><use href="#i-search"/></svg>Lokal auffindbar</span>
-          <span class="float-chip float-chip--3"><svg><use href="#i-chat"/></svg>Anfrage direkt per WhatsApp</span>
+          <div class="seq" role="group" aria-label="Beispielablauf: Anfrage wird zum Termin">
+            <div class="seq-item"><span class="ic"><svg><use href="#i-chat"/></svg></span><div><b>Anfrage per WhatsApp</b><span>„Haben Sie Samstag noch einen Termin?“</span></div><time>21:47</time></div>
+            <div class="seq-item is-ai"><span class="ic"><svg><use href="#i-calendar"/></svg></span><div><b>Termin im Kalender</b><span>Samstag 10:00 Uhr, automatisch eingetragen</span></div><time>21:48</time></div>
+            <div class="seq-item"><span class="ic"><svg><use href="#i-check"/></svg></span><div><b>Bestätigung gesendet</b><span>Erinnerung am Vortag geplant</span></div><time>21:48</time></div>
+          </div>
         </div>
-        <p class="tiny center mt-3">Aktuelles Projekt: <a href="/referenzen">Pony Club Lila, Tornesch</a></p>
+        <p class="tiny center mt-3">Aktuelles Projekt: <a href="/referenzen">Pony Club Lila, Tornesch</a> · Ablauf als Beispiel · <button type="button" class="seq-replay"><svg><use href="#i-arrow"/></svg>erneut abspielen</button></p>
       </div>
     </div>
     <div class="stats mt-5 reveal" role="group" aria-label="Eckdaten">

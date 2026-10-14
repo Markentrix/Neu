@@ -661,7 +661,7 @@ html.a11y-contrast .card,html.a11y-contrast .price-card,html.a11y-contrast .step
 .float-chip{position:absolute;display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border-radius:100px;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow-md);font-size:.8rem;font-weight:600;color:var(--navy);white-space:nowrap;animation:floaty 6s ease-in-out infinite;z-index:2}
 .float-chip svg{width:16px;height:16px;color:var(--blue-text)}
 .float-chip--1{left:-28px;top:16%}
-.float-chip--2{right:-22px;top:48%;animation-delay:1.6s}
+.float-chip--2{left:-24px;top:auto;bottom:22%;animation-delay:1.6s}
 .float-chip--3{left:10%;bottom:-18px;animation-delay:3.1s}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @media (max-width:900px){
@@ -690,3 +690,103 @@ html.a11y-contrast .card,html.a11y-contrast .price-card,html.a11y-contrast .step
 .ai-answer .src span{font-size:.72rem;padding:3px 9px;border-radius:100px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.9)}
 .pill--soon{background:#fff;border:1px solid var(--violet);color:var(--violet-text);white-space:normal;text-align:left}
 .card--violet .pill--soon{background:rgba(139,92,246,.08)}
+
+/* ─── 31. Bewegung mit Zweck (Animationen 1–12) ─────────────────────────── */
+/* 1 · Systemablauf als Sequenz im Hero-Mockup */
+.seq{position:absolute;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:3;width:min(260px,70%)}
+.seq-item{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 10px;box-shadow:var(--shadow-md);font-size:.78rem;color:var(--navy);opacity:0;transform:translateY(10px) scale(.98);transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.seq-item.is-on{opacity:1;transform:none}
+.seq-item .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:rgba(40,199,247,.14);color:var(--blue-text)}
+.seq-item .ic svg{width:16px;height:16px}
+.seq-item.is-ai .ic{background:var(--navy);color:#fff}
+.seq-item b{display:block;font-weight:600}
+.seq-item span{color:var(--muted);font-size:.72rem}
+.seq-item time{position:absolute;right:10px;top:8px;font-size:.66rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.seq-item{position:relative}
+.seq-replay{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;color:var(--link);background:none;border:0;padding:4px 0}
+.seq-replay svg{width:14px;height:14px}
+@media (max-width:900px){.seq{position:static;width:100%;margin-top:12px}.seq-item{opacity:1;transform:none}}
+/* 4 · Desktop / Smartphone */
+.device-toggle{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:100px;background:#fff;margin-bottom:12px}
+.device-toggle button{min-height:34px;padding:4px 14px;border-radius:100px;border:0;background:transparent;font-size:.8rem;font-weight:600;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.device-toggle button svg{width:15px;height:15px}
+.device-toggle button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.browser{transition:max-width .5s var(--ease),border-radius .5s var(--ease)}
+.browser .browser-body img{transition:opacity .35s}
+.browser.is-switching .browser-body img{opacity:0}
+.browser.is-mobile{max-width:300px;margin:0 auto;border-radius:28px}
+.browser.is-mobile .browser-bar{border-radius:28px 28px 0 0;justify-content:center}
+.browser.is-mobile .browser-bar i{display:none}
+.browser.is-mobile .browser-bar .url{margin:0;max-width:200px;justify-content:center;height:22px}
+.browser.is-mobile .browser-body{border-radius:0 0 28px 28px}
+.browser.is-mobile .float-chip,.browser.is-mobile .seq{display:none}
+/* 3 · Wachstumskurve in der Kontrastfläche */
+.band-sig .curve{stroke-dasharray:900;stroke-dashoffset:900;transition:stroke-dashoffset 1.6s var(--ease) .2s}
+.band-sig .dot{opacity:0;transition:opacity .4s}
+.band.is-in .band-sig .curve{stroke-dashoffset:0}
+.band.is-in .band-sig .dot{opacity:1}
+.band.is-in .band-sig .dot:nth-of-type(1){transition-delay:.9s}.band.is-in .band-sig .dot:nth-of-type(2){transition-delay:1.3s}.band.is-in .band-sig .dot:nth-of-type(3){transition-delay:1.7s}
+/* 2 · Suche und KI-Antwort bauen sich auf */
+.proof-seo .q .typed{white-space:pre}
+.proof-seo .q .caret{display:inline-block;width:2px;height:1em;background:var(--navy);margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+.proof-seo.is-live .q .caret.is-done{display:none}
+@keyframes blink{50%{opacity:0}}
+.proof-seo .hit,.proof-seo .src{opacity:0;transform:translateY(6px);transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.proof-seo .hit.is-on,.proof-seo .src.is-on{opacity:1;transform:none}
+.ai-answer .w{opacity:0;transition:opacity .25s}
+.ai-answer .w.is-on{opacity:1}
+html.no-js .proof-seo .hit,html.no-js .proof-seo .src,html.no-js .ai-answer .w,html.reduced .proof-seo .hit,html.reduced .proof-seo .src,html.reduced .ai-answer .w{opacity:1;transform:none}
+/* 5 · Zahlen und Rechner */
+.pulse{animation:pulse .6s var(--ease)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(30,155,255,.35)}100%{box-shadow:0 0 0 14px rgba(30,155,255,0)}}
+/* 6 · Dialog */
+.wizard fieldset.wz-in{animation:wzIn .35s var(--ease)}
+.wizard fieldset.wz-back{animation:wzBack .35s var(--ease)}
+@keyframes wzIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+@keyframes wzBack{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+.wz-progress li{position:relative;border-top-color:var(--border)}
+.wz-progress li::before{content:"";position:absolute;left:0;top:-3px;height:3px;width:0;background:var(--blue);transition:width .45s var(--ease)}
+.wz-progress li.is-done::before{width:100%}
+.wz-progress li.is-current::before{width:100%;background:var(--navy)}
+.wz-result li{opacity:0;transform:translateY(6px);animation:wzLi .4s var(--ease) forwards}
+.wz-result li:nth-child(2){animation-delay:.15s}.wz-result li:nth-child(3){animation-delay:.3s}
+@keyframes wzLi{to{opacity:1;transform:none}}
+/* 7 · Akkordeon und Tabs */
+.faq .faq-body,.details .details-body{overflow:hidden}
+.tabbar a{transition:background .3s,color .3s,border-color .3s}
+/* 8 · Lichtlauf auf der primären CTA */
+.btn--primary{position:relative;overflow:hidden}
+.btn--primary::before{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);transition:none;pointer-events:none}
+.btn--primary:hover::before{left:120%;transition:left .55s var(--ease)}
+/* 9 · Wachstumspfad als Scroll-Fortschritt */
+.scroll-progress{position:fixed;left:0;top:calc(64px + var(--safe-top));height:3px;width:0;background:var(--grad-signature);z-index:901;pointer-events:none;transition:width .12s linear}
+@media (min-width:1161px){.scroll-progress{top:calc(72px + var(--safe-top))}}
+.rail{position:absolute;width:2px;background:rgba(11,16,32,.08);border-radius:2px;pointer-events:none;z-index:0}
+.rail-fill{position:absolute;left:0;top:0;width:100%;height:0;background:var(--grad-signature);border-radius:2px;transition:height .15s linear}
+@media (min-width:1340px){.page-home .has-rail .wrap::before{display:none}}
+/* 10 · Statements zeilenweise */
+.statement p{opacity:0;transform:translateY(10px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.statement p .dim{display:inline-block;opacity:0;transform:translateY(8px);transition:opacity .6s var(--ease) .45s,transform .6s var(--ease) .45s}
+.statement.is-in p,.statement.is-in p .dim{opacity:1;transform:none}
+html.no-js .statement p,html.no-js .statement p .dim,html.reduced .statement p,html.reduced .statement p .dim{opacity:1;transform:none}
+/* 11 · Header und Logo */
+.site-header .nav{transition:min-height .3s var(--ease)}
+.site-header.is-scrolled .nav{min-height:60px}
+.site-header.is-scrolled{box-shadow:0 4px 18px rgba(11,16,32,.06)}
+.site-header .brand svg path{stroke-dasharray:70;stroke-dashoffset:70;animation:logoDraw .9s var(--ease) forwards}
+.site-header .brand svg path:nth-child(3){animation-delay:.35s}.site-header .brand svg path:nth-child(4){animation-delay:.6s}
+@keyframes logoDraw{to{stroke-dashoffset:0}}
+/* 12 · Seitenwechsel */
+@media (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  ::view-transition-old(root){animation:vtOut .22s ease-out}
+  ::view-transition-new(root){animation:vtIn .28s ease-out}
+  @keyframes vtOut{to{opacity:0}}
+  @keyframes vtIn{from{opacity:0;transform:translateY(6px)}}
+}
+@media (prefers-reduced-motion:reduce){
+  .seq-item,.statement p,.statement p .dim,.proof-seo .hit,.proof-seo .src,.ai-answer .w{opacity:1;transform:none;transition:none}
+  .band-sig .curve{stroke-dashoffset:0;transition:none}.band-sig .dot{opacity:1}
+  .btn--primary::before,.site-header .brand svg path,.wizard fieldset{animation:none!important;stroke-dashoffset:0}
+  .scroll-progress,.rail-fill{transition:none}
+}
