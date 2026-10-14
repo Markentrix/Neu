@@ -847,6 +847,20 @@ body.nophone .quick .wrap{grid-template-columns:repeat(2,1fr)}
   body.nophone .qa{flex-direction:row;text-align:left;min-height:50px;padding:8px 10px}
   body.nophone .qa b{font-size:.88rem}
 }
+
+/* ---- Desktop-Feinschliff: 3 Spalten, dichtere Abschnitte, gerades Schild ---- */
+@media(min-width:701px){
+  section{padding:80px 0}
+  #fuer-wen{padding-top:80px!important}
+  .bulk{padding:56px 0}
+  .who-list{grid-template-columns:repeat(3,1fr);gap:24px;max-width:none}
+  .who-list li{flex-direction:column;gap:12px;background:#fff;border-radius:16px;padding:22px 22px 24px}
+  .who-list li b{display:block;font-family:var(--disp);font-weight:400;text-transform:uppercase;font-size:1.35rem;line-height:1.05;margin-bottom:4px}
+}
+.sign-red,.sign-red span{transform:none}
+.sign-red{margin:0;border-top:0}
+.sign-top .s1,.sign-top .s2{transform:none}
+.who-list li b{display:block}
 </style>
 </head>
 <body>
@@ -956,9 +970,9 @@ body.nophone .quick .wrap{grid-template-columns:repeat(2,1fr)}
       <h2 class="disp">Material kaufen,<br>nicht Marge zahlen</h2>
     </div>
     <ul class="who-list rv">
-      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Handwerker &amp; Betriebe</b> – Verbrauchsmaterial günstig nachkaufen, Materialkosten senken.</span></li>
-      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Werkstatt &amp; Heimwerker</b> – aussuchen, was du brauchst, bei vielem nur das Gewicht zahlen.</span></li>
-      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Große Abnahmemengen</b> – gesonderten Termin anfragen, wir nehmen uns Zeit.</span></li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Handwerker &amp; Betriebe</b> Verbrauchsmaterial günstig nachkaufen, Materialkosten senken.</span></li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Werkstatt &amp; Heimwerker</b> aussuchen, was du brauchst, bei vielem nur das Gewicht zahlen.</span></li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Große Abnahmemengen</b> gesonderten Termin anfragen, wir nehmen uns Zeit.</span></li>
     </ul>
   </div>
 </section>
