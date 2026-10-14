@@ -310,17 +310,19 @@
 
   /* ── 4 · Desktop / Smartphone im Browser-Mockup ─────────────────────── */
   function initDeviceToggle() {
-    var tog = $('.device-toggle'), browser = $('.browser'), img = browser && $('.browser-body img', browser); if (!tog || !browser || !img) return;
-    var srcD = img.getAttribute('src'), srcM = img.getAttribute('data-mobile'), setD = img.getAttribute('srcset') || '', mode = 'desktop', auto = null, busy = false; if (!srcM) return;
+    var tog = $('.device-toggle'), browser = $('.browser'), img = browser && $('.browser-body img', browser); if (!tog || !browser) return;
+    var srcD = img && img.getAttribute('src'), srcM = img && img.getAttribute('data-mobile'), setD = (img && img.getAttribute('srcset')) || '', mode = 'desktop', auto = null, busy = false; if (img && !srcM) img = null;
     function set(next) {
       if (busy || next === mode) return; busy = true; mode = next;
       $$('button', tog).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-device') === mode ? 'true' : 'false'); });
       browser.classList.add('is-switching');
       setTimeout(function () {
         browser.classList.toggle('is-mobile', mode === 'mobile');
-        if (mode === 'mobile') img.removeAttribute('srcset'); else if (setD) img.setAttribute('srcset', setD);
-        img.setAttribute('src', mode === 'mobile' ? srcM : srcD);
-        img.setAttribute('width', mode === 'mobile' ? '600' : '1200'); img.setAttribute('height', mode === 'mobile' ? '1200' : '790');
+        if (img) {
+          if (mode === 'mobile') img.removeAttribute('srcset'); else if (setD) img.setAttribute('srcset', setD);
+          img.setAttribute('src', mode === 'mobile' ? srcM : srcD);
+          img.setAttribute('width', mode === 'mobile' ? '600' : '1200'); img.setAttribute('height', mode === 'mobile' ? '1200' : '790');
+        }
         browser.classList.remove('is-switching'); busy = false;
       }, 350);
     }
