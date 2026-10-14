@@ -526,3 +526,103 @@ h3{letter-spacing:-.01em}
 .sub-title em{font-style:normal;background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero-sub .kicker{margin-bottom:.8rem}
 .btn .i{margin-right:.35rem}
+
+/* ===== HANDY: KLEINER & FLÜSSIGER ===== */
+@media (max-width:860px),(hover:none){
+  /* teure Effekte raus: ein einzelner weicher Glow statt drei, keine Filter, keine 3D-Transformation, keine Masken */
+  .neon{text-shadow:0 0 18px var(--a)}
+  .tw-year{text-shadow:0 0 22px var(--a)}
+  .era-big{text-shadow:none}
+  .steps b,.cd-boxes b,.infobar .cd-boxes b,.stats b,.logo{text-shadow:none}
+  .ico,.c-ico{filter:none}
+  .feature{box-shadow:none}
+  .btn.primary{box-shadow:0 6px 18px -10px var(--a)}
+  .grid-bg{display:none}
+  .sun{-webkit-mask:none;mask:none;opacity:.28;background:radial-gradient(circle,var(--a),transparent 70%)}
+  .hero-img{animation:none}
+  .progress{display:none}
+  .tw-imgs img.on{opacity:.3}
+  .tw-in::after{background:linear-gradient(180deg,var(--bg),rgba(11,6,20,.45) 30%,rgba(11,6,20,.45) 70%,var(--bg))}
+  .timewarp{height:150vh}
+  .feature img,.gallery img{transition:none}
+}
+/* kompaktere Größen bis 600px */
+@media (max-width:600px){
+  html{font-size:15px}
+  body{line-height:1.55}
+  h2{font-size:clamp(1.55rem,6.4vw,2rem);margin-bottom:1rem}
+  h3{font-size:1.1rem}
+  .kicker{font-size:.68rem;letter-spacing:.22em;margin-bottom:.5rem}
+  .sec{padding:3rem 0}
+  .wrap{width:min(1120px,100% - 2rem)}
+  .two{gap:1.6rem}
+  .neon{font-size:clamp(2.8rem,13vw,4rem)}
+  .pitch{font-size:clamp(1.25rem,5.6vw,1.6rem);margin:.5rem 0 .3rem}
+  .hero .lead{font-size:.95rem;margin:.5rem auto 1rem;max-width:34ch}
+  .hero{padding:4.6rem .9rem 3.4rem}
+  .eyebrow{font-size:.66rem;letter-spacing:.1em}
+  .cta .btn{padding:.7rem .8rem;font-size:.88rem}
+  .marquee{font-size:.9rem;padding:.5rem 0}
+  .infobar{padding:.8rem 0}
+  .infobar .facts{font-size:.8rem;gap:.3rem .9rem}
+  .infobar .cd-boxes{grid-template-columns:repeat(4,minmax(46px,1fr));gap:.35rem}
+  .infobar .cd-boxes div{min-width:46px;padding:.35rem .2rem}
+  .infobar .cd-boxes b{font-size:1.1rem}
+  .infobar .cd-boxes span{font-size:.56rem}
+  .cards{gap:.8rem;margin-top:1.2rem}
+  .card{padding:1.3rem 1.1rem;border-radius:18px}
+  .i.big{width:1.9rem;height:1.9rem}
+  .ico{margin-bottom:.7rem}
+  .card p,.era p,.lede,.faq p,.ev-body p{font-size:.93rem;line-height:1.55}
+  .steps{gap:.6rem;margin:1.4rem 0}
+  .steps li{padding:.9rem 1rem .9rem 1.1rem}
+  .steps b{font-size:1.35rem}
+  .photo{border-radius:18px}
+  .tw-in{padding:4rem 1rem 2.5rem}
+  .tw-year{font-size:clamp(3.4rem,18vw,5rem);margin:.2rem 0 .8rem}
+  .tw-eras{gap:.5rem}.tw-eras li{padding:.5rem .9rem;border-radius:14px}.tw-eras b{font-size:1rem}.tw-eras span{font-size:.78rem}
+  .tw-hint{margin-top:1rem;font-size:.78rem}
+  .tabs{margin:1rem 0 1.2rem;gap:.4rem}.tabs button{padding:.55rem 1rem;font-size:.9rem;min-height:40px}
+  .era{padding:1.1rem;border-radius:20px;gap:1rem}.era figure{min-height:160px}
+  .era-big{font-size:3rem;margin-bottom:.2rem}
+  .chips li{padding:.2rem .7rem;font-size:.78rem}
+  .event{padding:1rem 1.1rem;border-radius:18px;gap:.9rem}
+  .feature{aspect-ratio:3/2;border-radius:18px;margin:1.2rem 0 .8rem}
+  .feature figcaption{padding:2rem 1rem 1rem;font-size:.9rem}
+  .gallery.small{gap:.6rem;grid-auto-rows:120px}
+  .gallery figcaption{font-size:.85rem;padding:1.4rem .7rem .5rem}
+  .quiet{padding:4rem 0}
+  .quiet .wrap::before{margin-bottom:1.4rem;width:48px}
+  .quote{font-size:clamp(1.5rem,7vw,2.2rem)}
+  .quote-sub{font-size:.95rem}
+  .status{font-size:.9rem;padding:.55rem 1rem}
+  table.hours th,table.hours td{padding:.7rem 1rem;font-size:.95rem}
+  .ticks{gap:.4rem;font-size:.95rem}
+  .c-card{padding:1rem 1.1rem;border-radius:18px;gap:.9rem}
+  .c-ico .i{width:1.5rem;height:1.5rem}
+  .c-card b{font-size:1.05rem}.c-card small{font-size:.88rem}
+  .faq{gap:.6rem;margin-top:1rem}.faq details{padding:0 1.1rem;border-radius:14px}.faq summary{padding:.9rem 0;font-size:.95rem}
+  .final h2{font-size:clamp(1.6rem,7vw,2.2rem)}
+  .final p,.insta p{font-size:1rem;margin-bottom:1.4rem}
+  .strip{gap:.5rem;margin-bottom:1.4rem}
+  address{font-size:1.02rem;margin-bottom:1.2rem}
+  .routes a{padding:.5rem .8rem;font-size:.85rem;min-height:40px}
+  .map{aspect-ratio:4/3;border-radius:18px}
+  .foot{padding:2.4rem 1rem 6rem;font-size:.92rem}
+  .foot .logo{font-size:1.7rem}
+  .dock a{padding:.75rem .3rem;font-size:.8rem}
+  .legal{padding:5.5rem 0 3rem}
+  .hero-sub{min-height:0;padding:5.5rem 1rem 3rem}
+  .sub-title{font-size:clamp(1.9rem,8vw,2.6rem)}
+}
+/* Korrekturen Handy: Mindestgrößen für Tippflächen und Schrift, Hero nicht leer */
+@media (max-width:600px){
+  .tabs button,.routes a,.cta .btn,.decades button,.party-btn,.lang,.dock a{min-height:44px}
+  .party-btn .lbl,.kicker,.eyebrow,.infobar .cd-label,.infobar .cd-boxes span,.ev-tag,.cd-boxes span{font-size:.8rem}
+  .eyebrow{white-space:normal;letter-spacing:.08em;line-height:1.3}
+  .infobar .cd-boxes span{letter-spacing:.06em}
+  .hero{min-height:min(100svh,640px);padding-top:5rem}
+  .scroll{display:none}
+}
+@media (max-width:600px){.tw-eras span,.chips li,.c-card small{font-size:.8rem}}
+@media (max-width:600px){.tw-hint{font-size:.8rem}}

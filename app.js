@@ -101,7 +101,7 @@
   const tw = $('#zeitreise');
   if (tw && !reduce) {
     const yearEl = $('#twYear'), fill = $('#twFill'), imgs = $$('.tw-imgs img', tw), lis = $$('.tw-eras li', tw);
-    let near = false, queued = false, lastYear = 0, top = 0, span = 1;
+    let near = false, queued = false, lastYear = 0, top = 0, span = 1, lastP = '';
     const measure = () => { top = tw.getBoundingClientRect().top + scrollY; span = Math.max(1, tw.offsetHeight - innerHeight); };
     measure();
     new IntersectionObserver(es => { near = es[0].isIntersecting; if (near) { measure(); onScroll(); } }, { rootMargin: '20% 0px' }).observe(tw);
@@ -109,7 +109,8 @@
       queued = false;
       const p = Math.min(1, Math.max(0, (scrollY - top) / span));
       const year = 1970 + Math.min(29, Math.floor(p * 30));
-      fill.style.setProperty('--p', p.toFixed(3));
+      const pf = p.toFixed(2);
+      if (pf !== lastP) { lastP = pf; fill.style.setProperty('--p', pf); }
       if (year === lastYear) return;
       lastYear = year; yearEl.textContent = year;
       const era = year < 1980 ? 0 : year < 1990 ? 1 : 2;
