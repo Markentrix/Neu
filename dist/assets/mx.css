@@ -882,3 +882,60 @@ html.no-js .statement p,html.no-js .statement p .dim,html.reduced .statement p,h
 .cl-item span b{display:block;color:var(--navy);font-weight:600;margin-bottom:2px;font-size:1.02rem}
 .cl-item:has(input:checked){border-color:rgba(21,128,61,.45);background:rgba(21,128,61,.04)}
 .cl-item:has(input:focus-visible){outline:2px solid var(--blue);outline-offset:2px}
+
+/* ─── 33. Mobilgeräte: Lesbarkeit, Tippflächen, Umbrüche ─── */
+h1,h2,h3,.h1--md{overflow-wrap:anywhere}
+.dl dd{min-width:0;overflow-wrap:anywhere}
+.cmp tbody th{position:sticky;left:0;background:#fff;z-index:1;box-shadow:1px 0 0 var(--border)}
+.cmp thead th:first-child{position:sticky;left:0;z-index:2}
+@media (max-width:720px){
+  .tiny,p.tiny,span.tiny{font-size:.8125rem}
+  .eyebrow{font-size:.82rem;letter-spacing:.1em}
+  .pill{font-size:.82rem;letter-spacing:.04em;padding:6px 12px;white-space:normal;max-width:100%;text-align:left}
+  .mobile-cta{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr)}
+  .mobile-cta a{min-width:0;white-space:nowrap}
+  .card-step,.dl dt,.footer-col h2,.cmp thead th{font-size:.82rem}
+  .cal-grid .dow{font-size:.82rem}
+  .seq-item time{font-size:.8rem}
+  .seq-item div span,.seq-item div b{font-size:.86rem}
+  .mobile-cta a{font-size:.78rem}
+  .eyebrow .num small{font-size:.9em}
+  .float-chip{font-size:.84rem}
+  .sysmap .sm-node text{font-size:12.5px}
+  .stats span{font-size:.9rem}
+  .breadcrumb{font-size:.88rem}
+  .link-arrow{min-height:44px;padding:6px 0}
+  .footer-col a{min-height:40px;padding:4px 0}
+  .footer-col ul{gap:2px}
+  .device-toggle button{min-height:40px;padding:6px 16px;font-size:.86rem}
+  .seq-replay{min-height:40px;padding:6px 4px;font-size:.86rem}
+  .check input,.cl-item input{width:24px;height:24px}
+  .faq summary{padding:18px 0;font-size:1.05rem;line-height:1.35}
+  .tabbar a{min-height:44px;font-size:.92rem}
+  .cal-grid{gap:2px}
+  .cal-day{font-size:.95rem;min-height:36px}
+  .table-wrap{position:relative}
+  .table-wrap::after{content:"";position:absolute;top:0;right:0;bottom:0;width:28px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff);pointer-events:none;border-radius:0 var(--r-lg) var(--r-lg) 0}
+  .cmp{min-width:600px;font-size:.92rem}
+  .cmp th,.cmp td{padding:12px 12px}
+  .cmp tbody th{width:34%}
+  .price-card{padding:20px}
+  .choice span{min-height:56px;font-size:1rem}
+  .wz-next{margin-top:10px}
+}
+@media (max-width:480px){
+  .row .btn--lg,.hero .btn--lg,.band .btn--lg,.mp-actions .btn,.wz-nav .btn--lg{width:100%;justify-content:center}
+  .row{gap:10px}
+  .hero-grid .row .btn--ghost{justify-content:center}
+  .band-steps li{padding:10px 12px}
+  .wz-progress li{font-size:.66rem;letter-spacing:.04em}
+  .stats b{font-size:1.65rem}
+  .kpi b{font-size:1.6rem}
+}
+@media (max-width:400px){
+  .dl{grid-template-columns:minmax(0,1fr)}
+  .dl--lined dt{padding-top:12px}
+  .dl--lined dd{padding-top:2px;padding-bottom:10px}
+  .cal{padding:10px}
+  .eyebrow{letter-spacing:.08em}
+}
