@@ -55,6 +55,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Alle 23 Seiten** mit gleichem Gerüst, Breadcrumbs, Abschluss-CTA, strukturierten Daten (WebPage, BreadcrumbList, FAQPage, Service, Article, OfferCatalog) und sauberer Überschriftenhierarchie.
 
+**Mobil und Menü (Nachtrag 14.10.2026)**: Die mobile Startseite war rund 20 Bildschirme hoch. Karten-Reihen (Für wen, Problem, Lösung) sind unter 720 px jetzt Wischleisten mit Positionspunkten, die Leistungskarten und die Konditionen auf der Preisseite klappen mobil ein (Desktop unverändert offen), der KI-Ausblick zeigt drei Fakten statt der doppelten Systemgrafik, Abschnittsabstände sind mobil kleiner. Ergebnis: Startseite mobil rund 18 % kürzer (16.913 auf 13.916 px), Inhaltsabschnitte rund 20 % kürzer. Die Schnellkontakt-Leiste erscheint erst nach dem Hero. Mobilmenü mit Markierung der aktuellen Seite, Button-Reihe Potenzial-Check und Anrufen, zweizeilige Fußzeile; Desktop-Menü ohne Prozess und Blog (beide bleiben im Mobilmenü und Footer). Behoben: Marke „Ab November 2026“ überdeckte mobil die Zeile „Schritt 3 · Automatisierung“; Systemgrafik-Punkte waren vor Animationsstart am Nullpunkt sichtbar; Kontaktformular startete mit „KI-Kundenkommunikation“ statt „Websites & Funnels“. Lighthouse mobil Startseite danach: Performance 94, Barrierefreiheit 100, Best Practices 100, SEO 100.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.

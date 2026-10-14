@@ -128,7 +128,28 @@ hr{border:0;border-top:1px solid var(--border);margin:var(--sec-sm) 0}
 .grid--sidebar{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start;gap:clamp(24px,4vw,56px)}
 .grid--sidebar-left{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);align-items:start;gap:clamp(24px,4vw,56px)}
 @media (max-width:1000px){.grid--4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid--3{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:720px){.grid--2,.grid--3,.grid--4,.grid--split,.grid--sidebar,.grid--sidebar-left{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:720px){.grid--2,.grid--3,.grid--4,.grid--split,.grid--sidebar,.grid--sidebar-left{grid-template-columns:minmax(0,1fr)}
+:root{--sec:48px;--sec-sm:36px}
+/* Wischleiste: Karten nebeneinander, Snap je Karte */
+.swipe{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 calc(-1 * var(--gutter));padding:4px var(--gutter) 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.swipe::-webkit-scrollbar{display:none}
+.swipe>*{flex:0 0 min(86%,340px);scroll-snap-align:center;margin:0}
+.swipe-dots{display:flex;justify-content:center;gap:6px;margin-top:2px}
+.swipe-dots i{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .25s,transform .25s}
+.swipe-dots i.is-on{background:var(--blue);transform:scale(1.2)}
+}
+@media (min-width:721px){.swipe-dots{display:none}}
+/* Aufklappbare Details in Karten: Desktop immer offen, Summary ausgeblendet */
+.more{margin:0}
+.more>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:40px;font-weight:600;font-size:.92rem;color:var(--blue-text)}
+.more>summary::-webkit-details-marker{display:none}
+.more>summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.more[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+.more>summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:6px}
+@media (min-width:721px){.more>summary{display:none}}
+.kpi-stack{display:grid;gap:10px;align-content:center}
+.kpi-stack .card{padding:16px 18px}
+.kpi-stack .kpi b{font-size:1.5rem}
 .stack{display:flex;flex-direction:column;gap:12px}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .row--between{justify-content:space-between}
@@ -196,6 +217,7 @@ a.card:hover{text-decoration:none}
 .card-icon svg{width:22px;height:22px}
 .card-step{font-family:var(--f-body);font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--violet-text)}
 .card .corner{position:absolute;top:16px;right:16px}
+@media (max-width:720px){.card .corner{position:static;align-self:flex-start;margin-bottom:-2px}}
 
 /* ─── 8. Header ─────────────────────────────────────────────────────────── */
 .site-header{position:sticky;top:0;z-index:900;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding-top:var(--safe-top)}
@@ -234,6 +256,12 @@ a.card:hover{text-decoration:none}
 .mobile-panel.is-open{display:flex}
 .mobile-panel a{display:flex;align-items:center;justify-content:space-between;min-height:54px;padding:0 4px;border-bottom:1px solid var(--border);color:var(--navy);font-weight:600;font-size:1.08rem;text-decoration:none}
 .mobile-panel a.sub{padding-left:18px;font-weight:500;font-size:1rem;color:var(--text)}
+.mobile-panel a[aria-current="page"]{color:var(--blue-text)}
+.mobile-panel a[aria-current="page"]::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--blue);flex:none}
+.mp-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:18px}
+.mp-actions .btn{min-height:50px;padding-inline:16px}
+.mp-actions .btn svg{width:17px;height:17px;margin-right:6px}
+.mp-foot{display:grid;gap:4px;margin-top:14px;font-size:.84rem;color:var(--muted)}
 .mobile-panel .mp-head{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:18px 4px 6px}
 .mobile-panel .btn{margin-top:20px}
 .mobile-panel .mp-foot{margin-top:auto;padding-top:24px;font-size:.9rem;color:var(--muted)}
@@ -530,11 +558,11 @@ input[type=range]:focus-visible{outline:3px solid var(--blue);outline-offset:4px
 .a11y-bar button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
 
 /* Mobile Kontaktleiste */
-.mobile-cta{display:none;position:fixed;left:0;right:0;bottom:0;z-index:850;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:8px 10px calc(8px + var(--safe-bot));grid-template-columns:1fr 1fr 1.6fr;gap:8px}
-.mobile-cta a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;border-radius:10px;font-size:.72rem;font-weight:600;color:var(--navy);text-decoration:none;border:1px solid var(--border)}
+.mobile-cta{display:none;position:fixed;left:0;right:0;bottom:0;z-index:850;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:6px 10px calc(6px + var(--safe-bot));grid-template-columns:1fr 1fr 1.6fr;gap:8px}
+.mobile-cta a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:46px;border-radius:10px;font-size:.72rem;font-weight:600;color:var(--navy);text-decoration:none;border:1px solid var(--border)}
 .mobile-cta a svg{width:18px;height:18px}
 .mobile-cta a.primary{background:var(--grad);border-color:transparent}
-@media (max-width:760px){.mobile-cta{display:grid}body{padding-bottom:74px}}
+@media (max-width:760px){.mobile-cta{display:grid;transform:translateY(110%);transition:transform .35s var(--ease)}.mobile-cta.is-on{transform:none}body{padding-bottom:74px}}
 
 /* ─── 24. Reveal-Animationen ────────────────────────────────────────────── */
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
@@ -586,8 +614,7 @@ html.a11y-contrast .card,html.a11y-contrast .price-card,html.a11y-contrast .step
 .sysmap .sm-node--core circle{fill:var(--navy);stroke:var(--navy)}
 .sysmap .sm-node--core svg{color:#fff}
 .sysmap .sm-node--core text{fill:var(--navy)}
-.sysmap .sm-pulse{fill:var(--blue);opacity:0;transition:opacity .4s 1.2s}
-.is-in .sysmap .sm-pulse,.sysmap.is-in .sm-pulse{opacity:1}
+.sysmap .sm-pulse{fill:var(--blue)}
 @media (prefers-reduced-motion:reduce){.sysmap .sm-pulse{display:none}.sysmap .sm-link{transition:none;stroke-dashoffset:0}}
 .card .sysmap{margin:4px auto 6px}
 
