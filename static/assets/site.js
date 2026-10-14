@@ -135,7 +135,7 @@
       var next = d.createElement('button'); next.type = 'button'; next.className = 'cal-nav'; next.setAttribute('aria-label', 'Nächster Monat'); next.innerHTML = '›';
       var lbl = d.createElement('b'); lbl.setAttribute('aria-live', 'polite');
       head.appendChild(prev); head.appendChild(lbl); head.appendChild(next);
-      var grid = d.createElement('div'); grid.className = 'cal-grid'; grid.setAttribute('role', 'grid');
+      var grid = d.createElement('div'); grid.className = 'cal-grid';
       var times = d.createElement('div'); times.className = 'times'; times.hidden = true;
       var sel = d.createElement('div'); sel.className = 'cal-selected'; sel.hidden = true; sel.setAttribute('aria-live', 'polite');
       root.className = 'cal'; root.appendChild(head); root.appendChild(grid); root.appendChild(times); root.appendChild(sel);
@@ -266,6 +266,15 @@
     (function step(t) { var k = Math.min(1, (t - start) / dur); k = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (value - from) * k); if (k < 1) el.__raf = requestAnimationFrame(step); })(start);
   }
 
+  /* ── Systemkarten: Pulse nur im Sichtfeld laufen lassen ─────────────── */
+  function initSysmaps() {
+    var maps = $$('.sysmap'); if (!maps.length) return;
+    maps.forEach(function (m) { try { m.pauseAnimations(); } catch (e) { } });
+    if (!('IntersectionObserver' in w)) { maps.forEach(function (m) { try { m.unpauseAnimations(); } catch (e) { } }); return; }
+    var io = new IntersectionObserver(function (entries) { entries.forEach(function (en) { try { if (en.isIntersecting) en.target.unpauseAnimations(); else en.target.pauseAnimations(); } catch (e) { } }); }, { threshold: 0.05 });
+    maps.forEach(function (m) { io.observe(m); });
+  }
+
   /* ── 5 · Kennzahlen zählen hoch ─────────────────────────────────────── */
   function initCountUp() {
     $$('.stats').forEach(function (stats) {
@@ -302,13 +311,14 @@
   /* ── 4 · Desktop / Smartphone im Browser-Mockup ─────────────────────── */
   function initDeviceToggle() {
     var tog = $('.device-toggle'), browser = $('.browser'), img = browser && $('.browser-body img', browser); if (!tog || !browser || !img) return;
-    var srcD = img.getAttribute('src'), srcM = img.getAttribute('data-mobile'), mode = 'desktop', auto = null, busy = false; if (!srcM) return;
+    var srcD = img.getAttribute('src'), srcM = img.getAttribute('data-mobile'), setD = img.getAttribute('srcset') || '', mode = 'desktop', auto = null, busy = false; if (!srcM) return;
     function set(next) {
       if (busy || next === mode) return; busy = true; mode = next;
       $$('button', tog).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-device') === mode ? 'true' : 'false'); });
       browser.classList.add('is-switching');
       setTimeout(function () {
         browser.classList.toggle('is-mobile', mode === 'mobile');
+        if (mode === 'mobile') img.removeAttribute('srcset'); else if (setD) img.setAttribute('srcset', setD);
         img.setAttribute('src', mode === 'mobile' ? srcM : srcD);
         img.setAttribute('width', mode === 'mobile' ? '600' : '1200'); img.setAttribute('height', mode === 'mobile' ? '1200' : '790');
         browser.classList.remove('is-switching'); busy = false;
@@ -352,7 +362,7 @@
   function initScroll() {
     var header = $('.site-header'); if (!header) return;
     var bar = d.createElement('div'); bar.className = 'scroll-progress'; bar.setAttribute('aria-hidden', 'true'); d.body.appendChild(bar);
-    var main = $('main'), sections = $$('.has-rail'), first = sections[0], last = sections[sections.length - 1], rail = null, fill = null, railTop = 0, railH = 0;
+    var main = $('main'), sections = $$('.has-rail'), first = sections[0], last = sections[sections.length - 1], rail = null, fill = null, railTop = 0, railH = 0, mainTop = 0, ticking = false;
     if (d.body.classList.contains('page-home') && first && last && w.matchMedia('(min-width:1340px)').matches) {
       rail = d.createElement('div'); rail.className = 'rail'; fill = d.createElement('div'); fill.className = 'rail-fill'; rail.appendChild(fill); main.style.position = 'relative'; main.appendChild(rail);
     }
@@ -361,14 +371,15 @@
       var wr = $('.wrap', first).getBoundingClientRect(), mr = main.getBoundingClientRect();
       rail.style.left = (wr.left - mr.left - 52) + 'px';
       railTop = first.getBoundingClientRect().top - mr.top + 60; railH = Math.max(0, last.getBoundingClientRect().bottom - mr.top - railTop - 80);
-      rail.style.top = railTop + 'px'; rail.style.height = railH + 'px';
+      rail.style.top = railTop + 'px'; rail.style.height = railH + 'px'; mainTop = mr.top + w.scrollY;
     }
     function update() {
       var max = d.documentElement.scrollHeight - w.innerHeight; bar.style.width = (max > 0 ? Math.min(100, w.scrollY / max * 100) : 0) + '%';
       header.classList.toggle('is-scrolled', w.scrollY > 24);
-      if (rail) { var mainTop = main.getBoundingClientRect().top + w.scrollY; var y = w.scrollY + w.innerHeight * 0.55 - (mainTop + railTop); fill.style.height = Math.max(0, Math.min(railH, y)) + 'px'; }
+      if (rail) { var y = w.scrollY + w.innerHeight * 0.55 - (mainTop + railTop); fill.style.height = Math.max(0, Math.min(railH, y)) + 'px'; }
     }
-    on(w, 'scroll', update, { passive: true }); on(w, 'resize', function () { layout(); update(); }); on(w, 'load', function () { layout(); update(); });
+    function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(function () { update(); ticking = false; }); }
+    on(w, 'scroll', onScroll, { passive: true }); on(w, 'resize', function () { layout(); update(); }); on(w, 'load', function () { layout(); update(); });
     layout(); update();
   }
 
@@ -448,6 +459,6 @@
   /* ── Jahr im Footer ─────────────────────────────────────────────────── */
   function initYear() { $$('[data-year]').forEach(function (e) { e.textContent = new Date().getFullYear(); }); }
 
-  function init() { initNav(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();
