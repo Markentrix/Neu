@@ -491,6 +491,7 @@ input[type=range]:focus-visible{outline:3px solid var(--blue);outline-offset:4px
 .post-list{display:grid;gap:14px}
 .post-card{display:grid;gap:8px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:clamp(20px,2.4vw,28px);color:inherit;transition:border-color var(--t),transform var(--t)}
 .post-card:hover{border-color:rgba(30,155,255,.45);transform:translateY(-2px);text-decoration:none}
+.post-card[hidden]{display:none}
 .post-card h2,.post-card h3{font-size:1.3rem;margin:0}
 .post-meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.84rem;color:var(--muted)}
 .post-meta b{color:var(--violet-text);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:.76rem}
