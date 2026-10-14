@@ -804,6 +804,49 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
   #besuch{padding-bottom:30px}
   #besuch .info-grid .card{display:flex;flex-direction:column}
 }
+
+/* ---- Optik 1-3, 5-8 ---- */
+.who-list{list-style:none;display:grid;gap:10px;max-width:760px}
+.who-list li{display:flex;gap:12px;align-items:flex-start;font-size:1.02rem;line-height:1.45;color:var(--muted)}
+.who-list li b{color:var(--ink);font-weight:700}
+.who-list li i{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;margin-top:1px}
+.who-list li i svg{width:14px;height:14px}
+.bulk p{font-weight:400}
+.bulk p strong{font-weight:700}
+/* Kontakt-Buttons ohne Nummer ausblenden statt grau */
+.stack .btn.off{display:none}
+.quick .qa.off{display:none}
+.sticky .btn.off{display:none}
+.quick .wrap{grid-template-columns:repeat(3,1fr)}
+.quick .qa.rt{display:none}
+.glance-toggle{display:none}
+footer nav{flex-direction:row;flex-wrap:wrap;gap:8px 22px}
+@media(max-width:700px){
+  .who-list li{font-size:.9rem;gap:10px}
+  .who-list li i{width:22px;height:22px}
+  .who-list li i svg{width:12px;height:12px}
+  .hero .cta-row .btn-ghost{display:none}
+  .quick .wrap{grid-template-columns:repeat(3,1fr);gap:8px}
+  .qa{flex-direction:column;justify-content:center;text-align:center;gap:6px;padding:10px 6px;min-height:68px}
+  .qa b{font-size:.78rem}
+  .quick:has(.qa.off:nth-child(1)) .wrap{grid-template-columns:repeat(2,1fr)}
+  .glance dl{display:none}
+  .glance dl.open{display:grid}
+  .glance-toggle{display:inline-flex;align-items:center;gap:8px;font:700 .9rem var(--cond);text-transform:uppercase;letter-spacing:.06em;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.6em 1em;min-height:42px;color:var(--ink);cursor:pointer}
+  .glance-toggle::after{content:"+";font-family:var(--body);font-size:1.2rem;line-height:1}
+  .glance-toggle.open::after{content:"\2212"}
+  .glance dl.open{margin-top:12px}
+  footer nav{gap:6px 18px}
+}
+
+/* Ohne Telefonnummer: Route + Kleinanzeigen als Kacheln */
+body.nophone .quick .qa.rt{display:flex}
+body.nophone .quick .wrap{grid-template-columns:repeat(2,1fr)}
+@media(max-width:700px){
+  body.nophone .quick .wrap{grid-template-columns:repeat(2,1fr)}
+  body.nophone .qa{flex-direction:row;text-align:left;min-height:50px;padding:8px 10px}
+  body.nophone .qa b{font-size:.88rem}
+}
 </style>
 </head>
 <body>
@@ -912,11 +955,11 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
       <span class="eyebrow">Für wen sich das lohnt</span>
       <h2 class="disp">Material kaufen,<br>nicht Marge zahlen</h2>
     </div>
-    <div class="who">
-      <article class="rv"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span><h3>Handwerker &amp; Betriebe</h3><p>Verbrauchsmaterial wie Schrauben, Schleifmittel und Werkzeug günstig nachkaufen und die Materialkosten senken.</p></article>
-      <article class="rv"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span><h3>Werkstatt &amp; Heimwerker</h3><p>Du suchst dir aus, was du brauchst, und zahlst bei vielem nur das Gewicht. Ideal für Projekte und Vorrat.</p></article>
-      <article class="rv"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span><h3>Große Abnahmemengen</h3><p>Du brauchst mehr als eine Kiste? Frag einen gesonderten Termin an, wir nehmen uns Zeit für dich.</p></article>
-    </div>
+    <ul class="who-list rv">
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Handwerker &amp; Betriebe</b> – Verbrauchsmaterial günstig nachkaufen, Materialkosten senken.</span></li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Werkstatt &amp; Heimwerker</b> – aussuchen, was du brauchst, bei vielem nur das Gewicht zahlen.</span></li>
+      <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></i><span><b>Große Abnahmemengen</b> – gesonderten Termin anfragen, wir nehmen uns Zeit.</span></li>
+    </ul>
   </div>
 </section>
 
@@ -1066,7 +1109,7 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
     <div class="ka-card rv" aria-label="Profil auf Kleinanzeigen">
       <div class="ka-top">
         <div class="avatar" aria-hidden="true">B</div>
-        <div><b>Berg</b><span>Gewerblicher Anbieter · Aktiv seit 17.01.18</span></div>
+        <div><b>Berg</b><span>Gewerblicher Anbieter · seit 2018</span></div>
       </div>
       <div class="tags">
         <span class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M8.5 14a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg>TOP Zufriedenheit</span>
@@ -1084,7 +1127,8 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
 <section class="glance" aria-labelledby="glance-h">
   <div class="wrap">
     <h2 class="disp" id="glance-h">Berg's Sonderposten auf einen Blick</h2>
-    <dl>
+    <button class="glance-toggle" type="button" id="glanceBtn" aria-expanded="false" aria-controls="glanceDl">Details anzeigen</button>
+    <dl id="glanceDl">
       <dt>Was</dt><dd>Sonderpostenmarkt für Werkzeug, Schleifmittel, Schrauben &amp; Befestigungstechnik, Restposten und mehr. Viel Material wird nach Kilo abgerechnet.</dd>
       <dt>Wo</dt><dd>Braunschweiger Heerstraße 100, 29227 Celle (Niedersachsen)</dd>
       <dt>Öffnungszeiten</dt><dd>Freitag 09:00–17:00 Uhr, Samstag 10:00–16:00 Uhr</dd>
@@ -1103,8 +1147,6 @@ header.top.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
     </div>
     <nav aria-label="Footer">
       <a href="#sortiment">Sortiment</a>
-      <a href="#kilo">Nach Kilo</a>
-      <a href="#besuch">Öffnungszeiten</a>
       <a href="#kontakt">Kontakt &amp; Anfahrt</a>
       <a class="js-ka" target="_blank" rel="noopener noreferrer" href="#">Kleinanzeigen</a>
     </nav>
@@ -1127,6 +1169,7 @@ const PHONE = "";
 const EMAIL = "";
 (function(){
   const digits = PHONE.replace(/[^\d+]/g,"");
+  if (!digits) document.body.classList.add("nophone");
   const wa = digits.replace(/^\+/,"").replace(/^0/,"49");
   document.querySelectorAll(".js-tel").forEach(a => {
     if (digits) a.href = "tel:" + digits; else a.classList.add("off");
@@ -1238,6 +1281,10 @@ document.getElementById("yr").textContent = new Date().getFullYear();
       }
     });
   });
+
+  // Auf einen Blick: auf dem Handy einklappbar
+  const gb = document.getElementById("glanceBtn"), gd = document.getElementById("glanceDl");
+  if (gb && gd) gb.addEventListener("click", () => { const o = gd.classList.toggle("open"); gb.classList.toggle("open", o); gb.setAttribute("aria-expanded", o); gb.firstChild.textContent = o ? "Details ausblenden" : "Details anzeigen"; });
 
   // Kopf-Schatten + Sticky-Leiste
   const st = document.getElementById("sticky"), top = document.querySelector("header.top");
