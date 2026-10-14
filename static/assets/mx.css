@@ -939,3 +939,6 @@ h1,h2,h3,.h1--md{overflow-wrap:anywhere}
   .cal{padding:10px}
   .eyebrow{letter-spacing:.08em}
 }
+
+.range-head output{white-space:nowrap;flex:none}
+.range-head label{min-width:0}
