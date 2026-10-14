@@ -171,7 +171,8 @@
     <span class="eyebrow">Kostenlos und unverbindlich · 2 Minuten</span>
     <h2 id="mx-modal-title">Potenzial-Check</h2>
     <p class="muted mb-3">Drei kurze Fragen, dann eine erste Einschätzung. Ihre Kontaktdaten brauchen wir erst am Ende.</p>
-    <form class="form wizard" data-lead="Potenzial-Check" data-wizard data-success="#wz-danke" novalidate>
+    <form class="form wizard" name="potenzial-check" method="POST" action="/kontakt" data-netlify="true" netlify-honeypot="website" data-lead="Potenzial-Check" data-wizard data-success="#wz-danke" novalidate>
+      <input type="hidden" name="form-name" value="potenzial-check">
       <ol class="wz-progress"><li>Branche</li><li>Kanal</li><li>Anfragen</li><li>Kontakt</li></ol>
       <fieldset data-step="1" data-require="branche">
         <legend>In welcher Branche arbeiten Sie?</legend>

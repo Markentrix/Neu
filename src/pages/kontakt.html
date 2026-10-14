@@ -35,7 +35,8 @@ ld: |
       <div class="card card--lg" id="anfrage">
         <h2 class="h3">Anfrage senden</h2>
         <p class="muted small">Felder mit * sind Pflichtfelder.</p>
-        <form class="form" data-lead="Kontaktformular" data-success="#kontakt-danke" novalidate>
+        <form class="form" name="kontakt" method="POST" action="/kontakt" data-netlify="true" netlify-honeypot="website" data-lead="Kontaktformular" data-success="#kontakt-danke" novalidate>
+          <input type="hidden" name="form-name" value="kontakt">
           <div class="form-row">
             <div class="field"><label for="k-name">Name *</label><input id="k-name" name="name" type="text" autocomplete="name" required></div>
             <div class="field"><label for="k-firma">Unternehmen</label><input id="k-firma" name="firma" type="text" autocomplete="organization"></div>

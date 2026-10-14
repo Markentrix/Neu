@@ -31,6 +31,8 @@ curl -I https://markentrix.de/gibtsnicht        → 404 (eigene Seite)
 curl -I https://markentrix.de/assets/mx.css     → 200, Cache-Control immutable
 ```
 - Ohne JavaScript: alle Texte, Preise und Rechtstexte lesbar. Formulare, Rechner und Kalender brauchen JavaScript.
-- Testanfrage über /kontakt und über das Potenzial-Check-Modal → Eingang im n8n-Workflow `markentrix-anfrage` prüfen (Felder: `quelle, name, firma, email, tel, thema, budget, nachricht_text, wunschtermin, termin_iso, nachricht, seite, zeit`).
+- **Formulare (Netlify Forms)**: Vor dem ersten Test in Netlify unter *Site configuration → Forms* die Formularerkennung („Enable form detection“) aktivieren und einmal neu deployen. Danach erscheinen die Formulare `kontakt` und `potenzial-check` unter *Forms*. Dort *Form notifications* einrichten: E-Mail an info@markentrix.de und optional *Outgoing webhook* an einen n8n-Workflow. Felder: `quelle, name, firma, email, tel, thema, budget, branche, kanal, anfragen, empfehlung, nachricht_text, wunschtermin, termin_iso, nachricht, seite, zeit`. Spam-Schutz über das Honeypot-Feld `website`.
+- Stand 14.10.2026: Der frühere n8n-Webhook `markentrix.app.n8n.cloud/webhook/markentrix-anfrage` antwortet mit „404 – No instance here“ (Instanz existiert nicht mehr). Deshalb versendet auch die bisherige Live-Seite keine Anfragen. Ein neuer Webhook kann in `static/assets/site.js` (Konstante `WEBHOOK`) eingetragen werden; er läuft dann zusätzlich zu Netlify Forms.
+- Testanfrage über /kontakt und über das Potenzial-Check-Modal → Eingang unter Netlify *Forms* prüfen.
 - Cookie-Banner: „Nur notwendige“ → keine Verbindung zu Google/Metricool (Netzwerk-Tab).
 - Lighthouse mobil, Rich-Results-Test (JSON-LD), Sitemap in der Search Console einreichen.

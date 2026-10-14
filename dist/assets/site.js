@@ -4,7 +4,13 @@
 (function () {
   'use strict';
   var d = document, w = window;
-  var WEBHOOK = 'https://markentrix.app.n8n.cloud/webhook/markentrix-anfrage';
+  /* Versandweg der Formulare:
+     1. Netlify Forms (gleiche Domain, kein CORS, Eingang im Netlify-Dashboard + E-Mail-Benachrichtigung).
+        Voraussetzung: In Netlify unter Site configuration → Forms die Formularerkennung aktivieren.
+     2. Optional zusätzlich ein n8n-Webhook (Best-Effort, blockiert den Nutzer nicht). Leer lassen, wenn keiner aktiv ist.
+        Hinweis: markentrix.app.n8n.cloud antwortete am 14.10.2026 mit "404 - No instance here". */
+  var NETLIFY_FORMS = true;
+  var WEBHOOK = '';
   d.documentElement.classList.remove('no-js');
   if (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches) d.documentElement.classList.add('reduced');
 
@@ -55,10 +61,16 @@
 
   /* ── Formulare ──────────────────────────────────────────────────────── */
   function postLead(payload) {
+    payload.seite = location.pathname; payload.zeit = new Date().toISOString();
     var ctrl = ('AbortController' in w) ? new AbortController() : null;
     var timer = ctrl && setTimeout(function () { ctrl.abort(); }, 12000);
-    payload.seite = location.pathname; payload.zeit = new Date().toISOString();
-    return fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctrl ? ctrl.signal : undefined })
+    if (WEBHOOK) { // Best-Effort an n8n, Ergebnis nicht abgewartet
+      try { fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload), mode: 'no-cors', keepalive: true }).catch(function () { }); } catch (e) { }
+    }
+    if (!NETLIFY_FORMS) { clearTimeout(timer); return Promise.resolve({ ok: !!WEBHOOK, status: 0 }); }
+    var body = new URLSearchParams();
+    Object.keys(payload).forEach(function (k) { body.append(k, payload[k] == null ? '' : String(payload[k])); });
+    return fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString(), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { clearTimeout(timer); return { ok: r.ok, status: r.status }; })
       .catch(function (e) { clearTimeout(timer); return { ok: false, status: 0, timeout: e && e.name === 'AbortError' }; });
   }

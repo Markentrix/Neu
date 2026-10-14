@@ -29,11 +29,11 @@
 <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/mx.css?v=202610121216">
+<link rel="stylesheet" href="/assets/mx.css?v=202610141050">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://markentrix.de/ki-marketing-gifhorn#webpage","url":"https://markentrix.de/ki-marketing-gifhorn","name":"KI-Assistent & Website in Gifhorn | Markentrix","description":"Websites und KI-Assistenten für Betriebe im Landkreis Gifhorn: Einzugsgebiet klar benennen, Anrufe auch unterwegs annehmen. Remote, Sitz in Celle.","isPartOf":{"@id":"https://markentrix.de/#website"},"inLanguage":"de-DE","breadcrumb":{"@id":"https://markentrix.de/ki-marketing-gifhorn#breadcrumb"},"dateModified":"2026-10-12"},{"@type":"BreadcrumbList","@id":"https://markentrix.de/ki-marketing-gifhorn#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Startseite","item":"https://markentrix.de/"},{"@type":"ListItem","position":2,"name":"KI-Assistent und Website in Gifhorn","item":"https://markentrix.de/ki-marketing-gifhorn"}]},{"@type":"Service","@id":"https://markentrix.de/ki-marketing-gifhorn#service","name":"Website und KI-Assistent für Betriebe in Gifhorn","serviceType":"KI-Automatisierung und Webdesign","provider":{"@id":"https://markentrix.de/#organization"},"areaServed":{"@type":"City","name":"Gifhorn"},"url":"https://markentrix.de/ki-marketing-gifhorn"},{"@type":"Organization","@id":"https://markentrix.de/#organization","name":"Markentrix","url":"https://markentrix.de"},{"@type":"FAQPage","@id":"https://markentrix.de/ki-marketing-gifhorn#faq","mainEntity":[{"@type":"Question","name":"Arbeiten Sie auch im ländlichen Raum?","acceptedAnswer":{"@type":"Answer","text":"Ja. Die Arbeit läuft remote und ist vom Standort unabhängig. Das Gespräch führen wir wahlweise vor Ort oder als Online-Call. Wichtig ist nur, dass Ihr Einzugsgebiet klar definiert ist."}},{"@type":"Question","name":"Brauche ich dafür neue Technik?","acceptedAnswer":{"@type":"Answer","text":"Nein. Der Assistent läuft über Telefonie- und Nachrichtendienste, die wir mit Ihnen einrichten. Eine bestehende Rufnummer kann in der Regel weiter genutzt werden. Das klären wir vorab."}},{"@type":"Question","name":"Was ist, wenn die KI etwas nicht weiß?","acceptedAnswer":{"@type":"Answer","text":"Dann geht die Anfrage mit allen Angaben an Sie oder Ihr Team. Wir legen vorab fest, was der Assistent beantworten darf."}}]}]}</script>
-<script src="/assets/consent.js?v=202610121216" defer></script>
-<script src="/assets/site.js?v=202610121216" defer></script>
+<script src="/assets/consent.js?v=202610141050" defer></script>
+<script src="/assets/site.js?v=202610141050" defer></script>
 </head>
 <body class="">
 <!-- Markentrix Icon-Set · Linienlogik der Wortmarke: 24er-Raster, Strich 2, runde Enden, genau ein gefüllter Datenpunkt je Icon.
@@ -293,7 +293,8 @@
     <span class="eyebrow">Kostenlos und unverbindlich · 2 Minuten</span>
     <h2 id="mx-modal-title">Potenzial-Check</h2>
     <p class="muted mb-3">Drei kurze Fragen, dann eine erste Einschätzung. Ihre Kontaktdaten brauchen wir erst am Ende.</p>
-    <form class="form wizard" data-lead="Potenzial-Check" data-wizard data-success="#wz-danke" novalidate>
+    <form class="form wizard" name="potenzial-check" method="POST" action="/kontakt" data-netlify="true" netlify-honeypot="website" data-lead="Potenzial-Check" data-wizard data-success="#wz-danke" novalidate>
+      <input type="hidden" name="form-name" value="potenzial-check">
       <ol class="wz-progress"><li>Branche</li><li>Kanal</li><li>Anfragen</li><li>Kontakt</li></ol>
       <fieldset data-step="1" data-require="branche">
         <legend>In welcher Branche arbeiten Sie?</legend>
