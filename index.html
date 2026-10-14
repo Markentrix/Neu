@@ -19,10 +19,46 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230d0d0d'/%3E%3Ctext x='32' y='46' font-size='38' font-weight='900' text-anchor='middle' fill='%23ffd21f' font-family='Impact,Arial'%3EB%3C/text%3E%3C/svg%3E">
 <link rel="preload" as="image" href="assets/schrauben.jpg" fetchpriority="high">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/Anton-400-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/BarlowCondensed-800-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/Barlow-400-latin.woff2" crossorigin>
 <style>
+@font-face{font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/Anton-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-500-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-600-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/fonts/BarlowCondensed-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(assets/fonts/BarlowCondensed-800-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 :root{
   --ink:#0d0d0d; --ink-2:#1a1a1a; --paper:#f6f4ef; --white:#fff;
   --red:#d9141c; --red-d:#a80f15; --yellow:#ffd21f; --muted:#5d5d5d;
@@ -124,6 +160,7 @@ h2{font-size:clamp(2.4rem,6vw,4.2rem);margin-bottom:.3em}
 .cat:hover{transform:translate(-3px,-3px);box-shadow:11px 11px 0 var(--red)}
 .cat-img{aspect-ratio:4/3;background:#222 center/cover no-repeat;position:relative;overflow:hidden;border-bottom:3px solid var(--ink)}
 .cat-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.cat-img picture,.kilo-visual .ph picture{display:block;width:100%;height:100%}
 .cat:hover .cat-img img{transform:scale(1.07)}
 .cat-ico{position:absolute;left:12px;bottom:-1px;background:var(--ink);color:var(--yellow);width:52px;height:52px;display:grid;place-items:center;border-radius:6px 6px 0 0}
 .cat-ico svg{width:28px;height:28px}
@@ -898,6 +935,56 @@ h1 .l2{color:#e0252c}
   .divider{font-size:.82rem}
   .pill{font-size:.78rem}
 }
+
+/* ---- Wortmarke ---- */
+.brand .logo{height:38px;width:auto;display:block;color:#fff}
+footer .brand .logo{height:36px}
+@media(max-width:700px){.brand .logo{height:32px}}
+@media(max-width:360px){.brand .logo{height:28px}}
+
+/* ---- Hero-Video (optional, siehe CONFIG.HERO_VIDEO) ---- */
+.hero-media{position:absolute;inset:0;z-index:-2;overflow:hidden}
+.hero-media video{width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(.9)}
+.hero.has-video::before{background:linear-gradient(105deg,rgba(31,33,36,.85) 0%,rgba(31,33,36,.6) 55%,rgba(31,33,36,.35) 100%)}
+.hero.has-video::before{z-index:-1}
+
+/* ---- Ablauf ---- */
+.steps-sec{background:#fff}
+.steps{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:s}
+.steps li{position:relative;padding:26px 24px 28px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.steps .num{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--yellow);font-family:var(--disp);font-size:1.3rem;margin-bottom:14px}
+.steps h3{font-family:var(--disp);font-weight:400;text-transform:uppercase;font-size:1.45rem;line-height:1.05;margin-bottom:8px}
+.steps p{color:var(--muted);font-size:1rem}
+@media(max-width:700px){
+  .steps{grid-template-columns:1fr;gap:10px}
+  .steps li{display:grid;grid-template-columns:36px 1fr;column-gap:12px;padding:14px 14px 16px}
+  .steps .num{width:32px;height:32px;font-size:1.05rem;margin:0;grid-row:1/3}
+  .steps h3{font-size:1.1rem;margin-bottom:3px}
+  .steps p{font-size:.88rem;grid-column:2}
+}
+
+/* ---- Kundenstimmen & Preise ---- */
+.quotes-sec{background:var(--soft)}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.quote{background:#fff;border-radius:16px;padding:24px 22px;display:flex;flex-direction:column;gap:12px}
+.quote p{font-size:1.05rem;line-height:1.5;color:var(--ink);margin:0;max-width:none}
+.quote p::before{content:"\201E";color:var(--red);font-family:var(--disp);font-size:1.6em;line-height:0;margin-right:.08em}
+.quote .qwho{font-size:.9rem;color:var(--muted);margin-top:auto}
+.quote .qwho b{color:var(--ink);font-weight:600}
+.prices-sec{background:#fff}
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.price{border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:4px}
+.price b{font-family:var(--disp);font-weight:400;font-size:1.7rem;line-height:1;color:var(--ink)}
+.price span{font-size:.95rem;color:var(--muted)}
+@media(max-width:700px){
+  .quotes{grid-template-columns:1fr;gap:10px}
+  .quote{padding:16px 14px}
+  .quote p{font-size:.95rem}
+  .prices{grid-template-columns:1fr 1fr;gap:8px}
+  .price{padding:12px}
+  .price b{font-size:1.3rem}
+  .price span{font-size:.82rem}
+}
 </style>
 </head>
 <body>
@@ -905,8 +992,7 @@ h1 .l2{color:#e0252c}
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Berg's Sonderposten – Startseite">
-      <span class="brand-mark" aria-hidden="true">B</span>
-      <span class="brand-name">Berg's Sonderposten<small>CELLE</small></span>
+      <svg class="logo" viewBox="0 0 300 44" role="img" aria-label="Berg's Sonderposten Celle"><path d="M8 2h36l-6 40H2z" fill="#f7c922"/><text x="19" y="34" font-family="Anton,Impact,sans-serif" font-size="34" fill="#1f2124" text-anchor="middle" transform="skewX(-8)">B</text><text x="54" y="20" font-family="'Barlow Condensed',sans-serif" font-weight="800" font-size="19" letter-spacing=".6" fill="currentColor">BERG'S SONDERPOSTEN</text><text x="54" y="38" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="11.5" letter-spacing="3" fill="#f7c922">CELLE · NACH KILO</text></svg>
     </a>
     <nav class="nav" aria-label="Hauptnavigation">
       <a class="link" href="#sortiment">Sortiment</a>
@@ -921,6 +1007,7 @@ h1 .l2{color:#e0252c}
 <main id="top">
 <!-- HERO -->
 <div class="hero">
+  <div class="hero-media" id="heroMedia" aria-hidden="true"></div>
   <div class="wrap">
     <div>
       <div class="badge-row">
@@ -976,22 +1063,22 @@ h1 .l2{color:#e0252c}
     </div>
     <div class="cats">
       <article class="cat rv">
-        <div class="cat-img"><img src="assets/werkzeug.jpg" alt="Kisten voller Werkzeug: Bohrmaschinen, Zangen und Handwerkzeug" loading="lazy" width="400" height="300">
+        <div class="cat-img"><picture><source srcset="assets/werkzeug.webp" type="image/webp"><img src="assets/werkzeug.jpg" alt="Kisten voller Werkzeug: Bohrmaschinen, Zangen und Handwerkzeug" loading="lazy" width="400" height="300"></picture>
           <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 12.6 12.6 21 3 11.4 11.4 3l3.3 3.3Z"/><path d="m8 8 3 3"/></svg></span></div>
         <div class="cat-body"><h3>Werkzeug</h3><p>Elektro- und Handwerkzeug für Profis und Heimwerker.</p></div>
       </article>
       <article class="cat rv">
-        <div class="cat-img"><img src="assets/schleifmittel.jpg" alt="Schleifscheiben, Trennscheiben und Schleifmittel in Kisten" loading="lazy" width="400" height="300">
+        <div class="cat-img"><picture><source srcset="assets/schleifmittel.webp" type="image/webp"><img src="assets/schleifmittel.jpg" alt="Schleifscheiben, Trennscheiben und Schleifmittel in Kisten" loading="lazy" width="400" height="300"></picture>
           <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="m5.6 5.6 12.8 12.8M18.4 5.6 5.6 18.4"/></svg></span></div>
         <div class="cat-body"><h3>Schleifmittel</h3><p>Schleif-, Trenn- und Fächerscheiben in rauen Mengen.</p></div>
       </article>
       <article class="cat rv">
-        <div class="cat-img"><img src="assets/schrauben.jpg" alt="Kartons mit Schrauben und Befestigungstechnik" loading="lazy" width="400" height="300">
+        <div class="cat-img"><picture><source srcset="assets/schrauben.webp" type="image/webp"><img src="assets/schrauben.jpg" alt="Kartons mit Schrauben und Befestigungstechnik" loading="lazy" width="400" height="300"></picture>
           <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v4a6 6 0 0 1-12 0V3Z"/><path d="m10 13 1 8 1-1 1 1 1-8M9 7h6"/></svg></span></div>
         <div class="cat-body"><h3>Schrauben &amp; Befestigung</h3><p>Schrauben, Dübel und Befestigungstechnik – Original verpackt.</p></div>
       </article>
       <article class="cat rv">
-        <div class="cat-img"><img src="assets/profile.jpg" alt="Stapel von Metallprofilen auf Paletten" loading="lazy" width="400" height="300">
+        <div class="cat-img"><picture><source srcset="assets/profile.webp" type="image/webp"><img src="assets/profile.jpg" alt="Stapel von Metallprofilen auf Paletten" loading="lazy" width="400" height="300"></picture>
           <span class="cat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 8-9-5-9 5v8l9 5 9-5V8Z"/><path d="m3.3 7.5 8.7 5 8.7-5M12 22V12.5"/></svg></span></div>
         <div class="cat-body"><h3>Restposten &amp; mehr</h3><p>Metallprofile, Kartons voller Überraschungen – und vieles mehr.</p></div>
       </article>
@@ -1029,7 +1116,7 @@ h1 .l2{color:#e0252c}
       <p class="scarce"><span aria-hidden="true">⏳</span><span><b>Einzelne Posten gibt es nur einmal.</b> Ist etwas weg, ist es weg. Komm am besten gleich am Freitag.</span></p>
     </div>
     <div class="kilo-visual rv">
-      <div class="ph"><img src="assets/profile.jpg" alt="Aluminium- und Stahlprofile auf Paletten, abgerechnet nach Kilo" loading="lazy" width="400" height="300"></div>
+      <div class="ph"><picture><source srcset="assets/profile.webp" type="image/webp"><img src="assets/profile.jpg" alt="Aluminium- und Stahlprofile auf Paletten, abgerechnet nach Kilo" loading="lazy" width="400" height="300"></picture></div>
       <div class="scale" aria-hidden="true">
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8.5h11l2.5 11.5H4L6.5 8.5Z"/><circle cx="12" cy="5" r="2.2"/><path d="m12 15 2-3"/></svg>
@@ -1037,6 +1124,45 @@ h1 .l2{color:#e0252c}
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- KUNDENSTIMMEN (wird nur angezeigt, wenn CONFIG.TESTIMONIALS gefuellt ist) -->
+<section id="stimmen" class="quotes-sec" hidden>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">Das sagen Kunden</span>
+      <h2 class="disp">Gekauft, gewogen,<br>wiedergekommen</h2>
+    </div>
+    <div class="quotes" id="quotesGrid"></div>
+  </div>
+</section>
+
+<!-- PREISE (wird nur angezeigt, wenn CONFIG.PRICES gefuellt ist) -->
+<section id="preise" class="prices-sec" hidden>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">Preisbeispiele</span>
+      <h2 class="disp">Das kostet es<br>bei uns</h2>
+      <p>Beispielpreise, Stand siehe unten. Ware und Preise ändern sich laufend, nur solange der Vorrat reicht.</p>
+    </div>
+    <div class="prices" id="pricesGrid"></div>
+    <p class="hint" id="pricesStand"></p>
+  </div>
+</section>
+
+<!-- ABLAUF -->
+<section id="ablauf" class="steps-sec">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">So läuft ein Besuch ab</span>
+      <h2 class="disp">Kommen. Aussuchen.<br>Wiegen. Mitnehmen.</h2>
+    </div>
+    <ol class="steps">
+      <li class="rv"><span class="num">1</span><h3>Vorbeikommen</h3><p>Freitag 9–17 Uhr oder Samstag 10–16 Uhr, ohne Termin. Parken direkt vor der Halle.</p></li>
+      <li class="rv"><span class="num">2</span><h3>Aussuchen</h3><p>Kisten, Kartons und Paletten durchstöbern. Anhänger oder Transporter lohnen sich.</p></li>
+      <li class="rv"><span class="num">3</span><h3>Wiegen &amp; zahlen</h3><p>Viel Material wird auf der Waage nach Kilo abgerechnet. Alles direkt mitnehmen.</p></li>
+    </ol>
   </div>
 </section>
 
@@ -1193,7 +1319,7 @@ h1 .l2{color:#e0252c}
 <footer>
   <div class="wrap">
     <div>
-      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">B</span><span class="brand-name">Berg's Sonderposten<small>CELLE</small></span></a>
+      <a class="brand" href="#top"><svg class="logo" viewBox="0 0 300 44" role="img" aria-label="Berg's Sonderposten Celle"><path d="M8 2h36l-6 40H2z" fill="#f7c922"/><text x="19" y="34" font-family="Anton,Impact,sans-serif" font-size="34" fill="#1f2124" text-anchor="middle" transform="skewX(-8)">B</text><text x="54" y="20" font-family="'Barlow Condensed',sans-serif" font-weight="800" font-size="19" letter-spacing=".6" fill="currentColor">BERG'S SONDERPOSTEN</text><text x="54" y="38" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="11.5" letter-spacing="3" fill="#f7c922">CELLE · NACH KILO</text></svg></a>
       <p>Braunschweiger Heerstraße 100, 29227 Celle<br>Fr 09:00–17:00 Uhr · Sa 10:00–16:00 Uhr</p>
     </div>
     <nav aria-label="Footer">
@@ -1217,13 +1343,36 @@ h1 .l2{color:#e0252c}
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wann hat Berg's Sonderposten in Celle geöffnet?", "acceptedAnswer": {"@type": "Answer", "text": "Wir haben freitags von 09:00 bis 17:00 Uhr und samstags von 10:00 bis 16:00 Uhr geöffnet."}}, {"@type": "Question", "name": "Wo finde ich Berg's Sonderposten?", "acceptedAnswer": {"@type": "Answer", "text": "Wir sind in der Braunschweiger Heerstraße 100 in 29227 Celle. Über den Routenplaner auf dieser Seite startest du die Navigation direkt aus deiner Karten-App."}}, {"@type": "Question", "name": "Was kostet es, wenn Material nach Kilo abgerechnet wird?", "acceptedAnswer": {"@type": "Answer", "text": "Bei vielen Artikeln zahlst du nach Gewicht statt pro Stück. Das ist fair und für dich günstig. Die aktuellen Kilopreise erfährst du vor Ort."}}, {"@type": "Question", "name": "Was gibt es bei Berg's Sonderposten zu kaufen?", "acceptedAnswer": {"@type": "Answer", "text": "Werkzeug, Schleifmittel, Schrauben und Befestigungstechnik, Restposten und vieles mehr, zum Beispiel Metallprofile. Alles gibt es direkt zum Mitnehmen vor Ort."}}, {"@type": "Question", "name": "Muss ich vorher einen Termin machen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Zu den Öffnungszeiten kannst du einfach vorbeikommen. Wenn du größere Mengen abnehmen möchtest und einen gesonderten Termin wünschst, frag bei uns an."}}, {"@type": "Question", "name": "Gibt es die Angebote auch online?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Auf Kleinanzeigen haben wir über 400 Anzeigen online, zum Beispiel Metallscheren, Gabelstaplerreifen und Metallschränke. Folge unserem Profil, um neue Angebote nicht zu verpassen."}}]}</script>
 <script>
 
-// Kontaktdaten zentral pflegen (Nummer im internationalen Format, z. B. "+49 5141 123456"; E-Mail optional)
-const PHONE = "";
+// =====================================================================
+//  KONFIGURATION - alles, was sich aendert, wird hier gepflegt
+// =====================================================================
+const CONFIG = {
+  // Telefonnummer im internationalen Format, z. B. "+49 5141 123456" (leer = Buttons ausgeblendet)
+  PHONE: "",
+  // Abweichende WhatsApp-Nummer, sonst leer lassen
+  WHATSAPP: "",
+  // Kleinanzeigen-Profil "Berg" (Profil oeffnen -> Teilen -> Link kopieren)
+  KLEINANZEIGEN_URL: "https://www.kleinanzeigen.de/s-celle/bergs-sonderposten/k0l3267",
+  // Hintergrundvideo im Seitenanfang, z. B. "assets/halle.mp4" (stumm, 10-20 s, max. 3 MB). Leer = Foto.
+  HERO_VIDEO: "",
+  // Kundenstimmen: {text, name, ort}. Leer = Abschnitt bleibt ausgeblendet.
+  TESTIMONIALS: [
+    // {text: "40 kg Schrauben fuer 60 Euro. Fahre jetzt jeden Freitag hin.", name: "M. Krause", ort: "Celle"},
+  ],
+  // Preisbeispiele: {preis, was}. Leer = Abschnitt bleibt ausgeblendet.
+  PRICES: [
+    // {preis: "ab 2,50 EUR/kg", was: "Schrauben & Muttern, lose"},
+  ],
+  PRICES_STAND: "",   // z. B. "Stand: Oktober 2026"
+};
+// =====================================================================
+
+const PHONE = CONFIG.PHONE;
 const EMAIL = "";
 (function(){
   const digits = PHONE.replace(/[^\d+]/g,"");
   if (!digits) document.body.classList.add("nophone");
-  const wa = digits.replace(/^\+/,"").replace(/^0/,"49");
+  const wa = (CONFIG.WHATSAPP || PHONE).replace(/[^\d+]/g,"").replace(/^\+/,"").replace(/^0/,"49");
   document.querySelectorAll(".js-tel").forEach(a => {
     if (digits) a.href = "tel:" + digits; else a.classList.add("off");
   });
@@ -1249,9 +1398,30 @@ const EMAIL = "";
     window.open(u, "_blank", "noopener") || (location.href = u);
   });
 })();
-// Kleinanzeigen-Link zentral hier pflegen (z. B. durch die Profil-URL "Berg" ersetzen, sobald bekannt):
-const KLEINANZEIGEN_URL = "https://www.kleinanzeigen.de/s-celle/bergs-sonderposten/k0l3267";
-document.querySelectorAll(".js-ka").forEach(a => a.href = KLEINANZEIGEN_URL);
+document.querySelectorAll(".js-ka").forEach(a => a.href = CONFIG.KLEINANZEIGEN_URL);
+
+// Hero-Video, Kundenstimmen, Preise aus CONFIG
+(function(){
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  if (CONFIG.HERO_VIDEO && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const v = document.createElement("video");
+    v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.setAttribute("playsinline", "");
+    v.src = CONFIG.HERO_VIDEO;
+    v.addEventListener("canplay", () => document.querySelector(".hero").classList.add("has-video"), {once:true});
+    v.addEventListener("error", () => v.remove());
+    document.getElementById("heroMedia").appendChild(v);
+  }
+  if (CONFIG.TESTIMONIALS && CONFIG.TESTIMONIALS.length) {
+    const g = document.getElementById("quotesGrid");
+    g.innerHTML = CONFIG.TESTIMONIALS.slice(0, 3).map(t => `<figure class="quote rv"><blockquote><p>${esc(t.text)}</p></blockquote><figcaption class="qwho"><b>${esc(t.name)}</b>${t.ort ? " · " + esc(t.ort) : ""}</figcaption></figure>`).join("");
+    document.getElementById("stimmen").hidden = false;
+  }
+  if (CONFIG.PRICES && CONFIG.PRICES.length) {
+    document.getElementById("pricesGrid").innerHTML = CONFIG.PRICES.map(p => `<div class="price rv"><b>${esc(p.preis)}</b><span>${esc(p.was)}</span></div>`).join("");
+    document.getElementById("pricesStand").textContent = CONFIG.PRICES_STAND || "";
+    document.getElementById("preise").hidden = false;
+  }
+})();
 
 // Jahr
 document.getElementById("yr").textContent = new Date().getFullYear();

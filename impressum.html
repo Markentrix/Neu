@@ -11,10 +11,43 @@
 <meta name="author" content="Berg's Sonderposten">
 <meta name="theme-color" content="#0d0d0d">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230d0d0d'/%3E%3Ctext x='32' y='46' font-size='38' font-weight='900' text-anchor='middle' fill='%23ffd21f' font-family='Impact,Arial'%3EB%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/Anton-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-500-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-600-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/fonts/BarlowCondensed-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(assets/fonts/BarlowCondensed-800-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 :root{
   --ink:#0d0d0d; --ink-2:#1a1a1a; --paper:#f6f4ef; --white:#fff;
   --red:#d9141c; --red-d:#a80f15; --yellow:#ffd21f; --muted:#5d5d5d;
@@ -879,12 +912,13 @@ footer nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 2p
 .legal .note{background:var(--soft);border-left:4px solid var(--yellow);padding:12px 14px;border-radius:8px;margin:0 0 24px;font-size:.95rem;color:var(--ink)}
 .legal a{color:var(--red);font-weight:600}
 .back{display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;text-decoration:none;font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);min-height:40px}
+.brand .logo{height:36px;width:auto;display:block;color:#fff}@media(max-width:700px){.brand .logo{height:30px}}
 </style>
 </head>
 <body>
 
 <header class="top"><div class="wrap">
-  <a class="brand" href="index.html" aria-label="Berg's Sonderposten – Startseite"><span class="brand-mark" aria-hidden="true">B</span><span class="brand-name">Berg's Sonderposten<small>CELLE</small></span></a>
+  <a class="brand" href="index.html" aria-label="Berg's Sonderposten – Startseite"><svg class="logo" viewBox="0 0 300 44" role="img" aria-label="Berg's Sonderposten Celle"><path d="M8 2h36l-6 40H2z" fill="#f7c922"/><text x="19" y="34" font-family="Anton,Impact,sans-serif" font-size="34" fill="#1f2124" text-anchor="middle" transform="skewX(-8)">B</text><text x="54" y="20" font-family="'Barlow Condensed',sans-serif" font-weight="800" font-size="19" letter-spacing=".6" fill="currentColor">BERG'S SONDERPOSTEN</text><text x="54" y="38" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="11.5" letter-spacing="3" fill="#f7c922">CELLE · NACH KILO</text></svg></a>
   <nav class="nav" aria-label="Hauptnavigation"><a class="btn btn-primary" href="index.html#kontakt">Kontakt</a></nav>
 </div></header>
 <main class="legal">
@@ -909,7 +943,7 @@ footer nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 2p
 <p>Alle Fotos: Berg's Sonderposten.</p>
 </main>
 <footer><div class="wrap">
-  <div><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">B</span><span class="brand-name">Berg's Sonderposten<small>CELLE</small></span></a><p>Braunschweiger Heerstraße 100, 29227 Celle<br>Fr 09:00–17:00 Uhr · Sa 10:00–16:00 Uhr</p></div>
+  <div><a class="brand" href="index.html"><svg class="logo" viewBox="0 0 300 44" role="img" aria-label="Berg's Sonderposten Celle"><path d="M8 2h36l-6 40H2z" fill="#f7c922"/><text x="19" y="34" font-family="Anton,Impact,sans-serif" font-size="34" fill="#1f2124" text-anchor="middle" transform="skewX(-8)">B</text><text x="54" y="20" font-family="'Barlow Condensed',sans-serif" font-weight="800" font-size="19" letter-spacing=".6" fill="currentColor">BERG'S SONDERPOSTEN</text><text x="54" y="38" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="11.5" letter-spacing="3" fill="#f7c922">CELLE · NACH KILO</text></svg></a><p>Braunschweiger Heerstraße 100, 29227 Celle<br>Fr 09:00–17:00 Uhr · Sa 10:00–16:00 Uhr</p></div>
   <nav aria-label="Footer"><a href="index.html">Startseite</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav>
   <p class="copy">© <span id="yr">2026</span> Berg's Sonderposten · Gewerblicher Anbieter.</p>
 </div></footer>
