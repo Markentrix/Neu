@@ -21,5 +21,6 @@
 
 ## Seiten
 - [Startseite](https://bar-zeitreise.de/): Story, Jahrzehnte, Impressionen, Öffnungszeiten, Reservierung, FAQ, Anfahrt
+- [Feiern](https://bar-zeitreise.de/feiern.html): Private Feiern (Geburtstag, Firmen-Event, Motto-Party) – exklusive Buchung nach Absprache, Kontakt per Telefon oder Instagram
 - [Impressum](https://bar-zeitreise.de/impressum.html)
 - [Datenschutz](https://bar-zeitreise.de/datenschutz.html)

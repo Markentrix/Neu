@@ -47,6 +47,7 @@
     const prev = (day + 6) % 7;
     const openNow = (OPEN[day] && min >= 1200) || (OPEN[prev] && min < 60);
     const st = $('#status'), dot = $('#liveDot'), txt = $('#liveText');
+    if (!st || !dot || !txt) return;
     let msg, short;
     if (openNow) {
       msg = T.open; short = T.openShort;
@@ -150,19 +151,21 @@
     const t = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date());
     let left = 0;
     $$('#eventList .event[data-date]').forEach(li => { if (li.dataset.date < t) li.hidden = true; else left++; });
-    $('#eventsEmpty').hidden = left > 0;
+    const ee = $('#eventsEmpty'); if (ee) ee.hidden = left > 0;
   })();
 
   /* ---------- Lightbox ---------- */
   const lb = $('#lb');
-  $$('.gallery button').forEach(b => b.addEventListener('click', () => {
+  if (lb) {
+  $$('.gallery button, .feature button').forEach(b => b.addEventListener('click', () => {
     const img = $('img', lb); img.src = b.dataset.full; img.alt = $('img', b).alt;
     lb.showModal();
   }));
   lb.addEventListener('click', e => { if (e.target !== $('img', lb)) lb.close(); });
+  }
 
   /* ---------- Karte erst nach Klick laden (DSGVO) ---------- */
-  $('#mapBtn').addEventListener('click', () => {
+  if ($('#mapBtn')) $('#mapBtn').addEventListener('click', () => {
     const f = document.createElement('iframe');
     f.title = T.map;
     f.referrerPolicy = 'no-referrer';
@@ -172,6 +175,7 @@
 
   /* ---------- PARTY-MODUS ---------- */
   const partyBtn = $('#partyBtn'), soundBtn = $('#soundBtn'), cv = $('#confetti');
+  if (!partyBtn || !soundBtn || !cv) return; // Unterseiten ohne Party-Modus
   const ctx2d = cv.getContext('2d');
   let soundOn = false, partyOn = false, raf = 0, parts = [], beatT = 0, lastBeat = 0;
   const BPM = 118, STEP = 60 / BPM;
