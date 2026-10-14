@@ -30,18 +30,13 @@ ld: |
           <button type="button" data-device="desktop" aria-pressed="true"><svg><use href="#i-layout"/></svg>Desktop</button>
           <button type="button" data-device="mobile" aria-pressed="false"><svg><use href="#i-chat"/></svg>Smartphone</button>
         </div>
-        <div class="browser">
-          <div class="browser-bar" aria-hidden="true"><i></i><i></i><i></i><span class="url">beispiel-betrieb.de</span></div>
-          <div class="browser-body">{{> mock-site}}</div>
-          <span class="float-chip float-chip--1"><svg><use href="#i-layout"/></svg>Mobil zuerst gebaut</span>
-          <span class="float-chip float-chip--2"><svg><use href="#i-search"/></svg>Lokal auffindbar</span>
-          <div class="seq" role="group" aria-label="Beispielablauf: Anfrage wird zum Termin">
-            <div class="seq-item"><span class="ic"><svg><use href="#i-chat"/></svg></span><div><b>Anfrage per WhatsApp</b><span>„Haben Sie Samstag noch einen Termin?“</span></div><time>21:47</time></div>
-            <div class="seq-item is-ai"><span class="ic"><svg><use href="#i-calendar"/></svg></span><div><b>Termin im Kalender</b><span>Samstag 10:00 Uhr, automatisch eingetragen</span></div><time>21:48</time></div>
-            <div class="seq-item"><span class="ic"><svg><use href="#i-check"/></svg></span><div><b>Bestätigung gesendet</b><span>Erinnerung am Vortag geplant</span></div><time>21:48</time></div>
-          </div>
+        {{> mini-site}}
+        <div class="seq seq--row" role="group" aria-label="Beispielablauf: Anfrage wird zum Termin">
+          <div class="seq-item"><span class="ic"><svg><use href="#i-chat"/></svg></span><div><b>Anfrage per WhatsApp</b><span>„Haben Sie Samstag noch einen Termin?“</span></div><time>21:47</time></div>
+          <div class="seq-item is-ai"><span class="ic"><svg><use href="#i-calendar"/></svg></span><div><b>Termin im Kalender</b><span>Samstag 10:00 Uhr, automatisch eingetragen</span></div><time>21:48</time></div>
+          <div class="seq-item"><span class="ic"><svg><use href="#i-check"/></svg></span><div><b>Bestätigung gesendet</b><span>Erinnerung am Vortag geplant</span></div><time>21:48</time></div>
         </div>
-        <p class="tiny center mt-3">Skizze mit fiktivem Betrieb · Ablauf als Beispiel · <button type="button" class="seq-replay"><svg><use href="#i-arrow"/></svg>erneut abspielen</button></p>
+        <p class="tiny center mt-2">Echte Beispielseite für einen fiktiven Betrieb, scrollen Sie direkt in der Vorschau · <a href="/beispiel/elektro-muster/" target="_blank" rel="noopener">In voller Größe öffnen</a> · <button type="button" class="seq-replay"><svg><use href="#i-arrow"/></svg>Ablauf erneut</button></p>
       </div>
     </div>
     <div class="stats mt-5 reveal" role="group" aria-label="Eckdaten">
@@ -113,15 +108,16 @@ ld: |
 </section>
 
 <!-- ══ 03 Lösung ══ -->
-<section class="sec sec--white has-rail" id="system" aria-labelledby="system-title">
+<section class="sec sec--dark has-rail" id="system" aria-labelledby="system-title">
   <div class="wrap">
     <span class="rail-dot reveal" aria-hidden="true">03</span>
-    <div class="sec-head">
+    <div class="grid grid--sidebar-left grid--sticky">
+    <div class="sec-head sticky-head">
       <span class="eyebrow"><span class="num">03<small> / 08</small></span>Die Lösung</span>
       <h2 id="system-title">Ein System statt Einzelmaßnahmen.</h2>
       <p class="lead">Die Website ist der Kern. Sichtbarkeit bringt Besucher, die Website macht daraus Anfragen, und ab November übernimmt der KI-Assistent die Bearbeitung.</p>
     </div>
-    <div class="grid grid--3 swipe" data-swipe>
+    <div class="stack-cards swipe" data-swipe>
       <a href="/leistungen/webdesign" class="card card--hover card--accent reveal">
         <span class="pill corner">Kern</span>
         <span class="card-step">Schritt 1 · Website</span>
@@ -145,6 +141,7 @@ ld: |
         <p class="muted">KI-Assistenten für Telefon, WhatsApp und E-Mail nehmen Anfragen rund um die Uhr an und buchen Termine. Pilotplätze jetzt vormerkbar.</p>
         <span class="link-arrow">KI-Automatisierung</span>
       </a>
+    </div>
     </div>
   </div>
 </section>
@@ -177,43 +174,38 @@ ld: |
 <section class="sec sec--white has-rail" aria-labelledby="leistungen-title">
   <div class="wrap">
     <span class="rail-dot reveal" aria-hidden="true">05</span>
-    <div class="grid grid--sidebar-left">
-      <div>
+    <div class="grid grid--sidebar-left grid--sticky">
+      <div class="sticky-head">
         <span class="eyebrow"><span class="num">05<small> / 08</small></span>Leistungen</span>
         <h2 id="leistungen-title">Vier Bereiche. Einzeln buchbar, als System am stärksten.</h2>
         <p class="lead">Feste Leistungsgrenzen, klare Preise, keine vagen Versprechen. Alle Pakete netto zzgl. gesetzlicher Umsatzsteuer, nur für Unternehmen.</p>
         <a class="btn btn--secondary mt-2" href="/preise">Alle Preise und Pakete</a>
       </div>
-      <div class="grid grid--2">
-        <div class="card card--accent reveal">
-          <span class="card-icon"><svg><use href="#i-layout"/></svg></span>
-          <h3>Websites und Landingpages</h3>
-          <details class="more" open><summary>Leistungsumfang</summary><ul class="checks small"><li>Landingpage, Unternehmenswebsite oder Funnel</li><li>SEO- und GEO-Grundlagen, Terminbuchung</li><li>Hosting, Pflege und technische Betreuung</li></ul></details>
-          <p class="tiny">Projekte ab 1.290 € einmalig, Pflege ab 59 € im Monat</p>
-          <a class="link-arrow" href="/leistungen/webdesign">Mehr erfahren</a>
-        </div>
-        <div class="card reveal" data-delay="1">
-          <span class="card-icon card-icon--violet"><svg><use href="#i-target"/></svg></span>
-          <h3>Sichtbarkeit und Werbung</h3>
-          <details class="more" open><summary>Leistungsumfang</summary><ul class="checks small"><li>Google-Profil, Bewertungen, lokale Suche</li><li>Meta- und Google-Anzeigen nach Freigabe</li><li>Social-Media-Betreuung mit Redaktionsplan</li></ul></details>
-          <p class="tiny">Betreuung ab 449 € im Monat</p>
-          <a class="link-arrow" href="/leistungen/marketing">Mehr erfahren</a>
-        </div>
-        <div class="card reveal" data-delay="2">
-          <span class="card-icon"><svg><use href="#i-pen"/></svg></span>
-          <h3>Marke und Personal Branding</h3>
-          <details class="more" open><summary>Leistungsumfang</summary><ul class="checks small"><li>Corporate Identity: Logo, Farb- und Schriftwelt</li><li>Personal Branding für Inhaber und Geschäftsführer</li><li>Werbemittel, Vorlagen, Angebotsunterlagen</li></ul></details>
-          <p class="tiny">Corporate Identity ab 1.290 € einmalig</p>
-          <a class="link-arrow" href="/preise#pp-ci">Zu den Paketen</a>
-        </div>
-        <div class="card reveal" data-delay="3">
-          <span class="pill pill--soon corner">Ab November 2026</span>
-          <span class="card-icon card-icon--navy"><svg><use href="#i-cpu"/></svg></span>
-          <h3>KI-Automatisierung</h3>
-          <details class="more" open><summary>Leistungsumfang</summary><ul class="checks small"><li>Telefon-, WhatsApp- und E-Mail-Assistent</li><li>Anfrage-Vorqualifizierung und Terminbuchung</li><li>Zwei Pilotplätze zum halben Einrichtungspreis</li></ul></details>
-          <p class="tiny">Pakete ab 349 € im Monat zzgl. Einrichtung</p>
-          <a class="link-arrow" href="/leistungen/ki-automatisierung">Pilotplatz vormerken</a>
-        </div>
+      <div class="svc-rows">
+        <a class="svc-row reveal" href="/leistungen/webdesign">
+          <span class="svc-num">01</span>
+          <div><h3>Websites und Landingpages</h3><p>Landingpage, Unternehmenswebsite oder Funnel. SEO- und GEO-Grundlagen, Terminbuchung, Hosting und Pflege inklusive.</p></div>
+          <span class="svc-price">ab 2.290 €<small>einmalig, Einstieg ab 1.290 €</small></span>
+          <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="svc-row reveal" href="/leistungen/marketing" data-delay="1">
+          <span class="svc-num">02</span>
+          <div><h3>Sichtbarkeit und Werbung</h3><p>Google-Profil, Bewertungen und lokale Suche. Meta- und Google-Anzeigen nur nach Ihrer Freigabe, Social-Media-Betreuung mit Redaktionsplan.</p></div>
+          <span class="svc-price">ab 449 €<small>im Monat</small></span>
+          <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="svc-row reveal" href="/preise#pp-ci" data-delay="2">
+          <span class="svc-num">03</span>
+          <div><h3>Marke und Personal Branding</h3><p>Corporate Identity mit Logo, Farb- und Schriftwelt. Personal Branding für Inhaber und Geschäftsführer, Werbemittel und Vorlagen.</p></div>
+          <span class="svc-price">ab 1.290 €<small>einmalig</small></span>
+          <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="svc-row svc-row--soon reveal" href="/leistungen/ki-automatisierung" data-delay="3">
+          <span class="svc-num">04</span>
+          <div><h3>KI-Automatisierung <span class="pill pill--soon">Ab November 2026</span></h3><p>Telefon-, WhatsApp- und E-Mail-Assistent nimmt Anfragen an und bucht Termine. Zwei Pilotplätze zum halben Einrichtungspreis.</p></div>
+          <span class="svc-price">ab 349 €<small>im Monat, zzgl. Einrichtung</small></span>
+          <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
+        </a>
       </div>
     </div>
   </div>

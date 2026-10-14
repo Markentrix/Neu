@@ -149,6 +149,8 @@ def check_links(pages):
         for f in files:
             p = '/' + os.path.relpath(os.path.join(dirpath, f), DIST).replace(os.sep, '/')
             known[p] = f
+            if f == 'index.html':
+                known[p[:-len('index.html')]] = f  # Verzeichnis-Link mit Schrägstrich
     errors = 0
     for meta, rel, out in pages:
         for href in re.findall(r'(?:href|src)="([^"]+)"', out):

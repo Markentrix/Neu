@@ -185,10 +185,10 @@
   function initModal() {
     var modal = $('#mx-modal'); if (!modal) return;
     var box = $('.modal-box', modal), last = null;
-    function open(branche) { var pb = $('.burger'); if (pb && pb.getAttribute('aria-expanded') === 'true') pb.click(); modal.hidden = false; modal.classList.add('is-open'); var wf = $('form[data-wizard]', modal); if (wf && wf.__wizard) { if (branche) wf.__wizard.preset(branche); else wf.__wizard.show(wf.__wizard.current()); } d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
+    function open(branche, bedarf) { var pb = $('.burger'); if (pb && pb.getAttribute('aria-expanded') === 'true') pb.click(); modal.hidden = false; modal.classList.add('is-open'); var wf = $('form[data-wizard]', modal); if (wf && wf.__wizard) { if (branche || bedarf) wf.__wizard.preset(branche, bedarf); else wf.__wizard.show(wf.__wizard.current()); } d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
     function close() { modal.classList.remove('is-open'); modal.hidden = true; d.body.classList.remove('menu-open'); if (last && last.focus) last.focus(); }
     on(d, 'click', function (e) {
-      var t = e.target.closest('[data-open-modal]'); if (t) { e.preventDefault(); open(t.getAttribute('data-branche')); return; }
+      var t = e.target.closest('[data-open-modal]'); if (t) { e.preventDefault(); open(t.getAttribute('data-branche'), t.getAttribute('data-bedarf')); return; }
       if (e.target.closest('[data-close-modal]') || e.target === modal) close();
     });
     on(d, 'keydown', function (e) {
@@ -254,7 +254,7 @@
     on(prevB, 'click', function () { show(Math.max(0, cur - 1)); });
     on(form, 'keydown', function (e) { if (e.key === 'Enter' && cur < steps.length - 1 && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); nextB.click(); } });
     $$('.choice input', form).forEach(function (r) { on(r, 'change', function () { if (cur < steps.length - 1) setTimeout(function () { nextB.click(); }, 160); }); });
-    form.__wizard = { show: show, current: function () { return cur; }, reset: function () { if (branche) branche.value = ''; show(0); }, preset: function (b) { if (branche) branche.value = b || ''; show(0); } };
+    form.__wizard = { show: show, current: function () { return cur; }, reset: function () { if (branche) branche.value = ''; show(0); }, preset: function (b, bd) { if (branche) branche.value = b || ''; var r = bd && $('input[name=bedarf][value="' + bd + '"]', form); if (r) { r.checked = true; show(1); } else show(0); } };
     show(0);
   }
 
@@ -314,26 +314,80 @@
 
   /* ── 4 · Desktop / Smartphone im Browser-Mockup ─────────────────────── */
   function initDeviceToggle() {
-    var tog = $('.device-toggle'), browser = $('.browser'), img = browser && $('.browser-body img', browser); if (!tog || !browser) return;
-    var srcD = img && img.getAttribute('src'), srcM = img && img.getAttribute('data-mobile'), setD = (img && img.getAttribute('srcset')) || '', mode = 'desktop', auto = null, busy = false; if (img && !srcM) img = null;
+    var tog = $('.device-toggle'); if (!tog) return;
+    var mini = $('[data-mini]'), browser = $('.browser'), target = mini || browser; if (!target) return;
+    var img = browser && $('.browser-body img', browser), mode = 'desktop', auto = null, busy = false;
+    var srcD = img && img.getAttribute('src'), srcM = img && img.getAttribute('data-mobile'), setD = (img && img.getAttribute('srcset')) || ''; if (img && !srcM) img = null;
     function set(next) {
       if (busy || next === mode) return; busy = true; mode = next;
       $$('button', tog).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-device') === mode ? 'true' : 'false'); });
-      browser.classList.add('is-switching');
+      target.classList.add('is-switching');
       setTimeout(function () {
-        browser.classList.toggle('is-mobile', mode === 'mobile');
+        target.classList.toggle('is-mobile', mode === 'mobile');
         if (img) {
           if (mode === 'mobile') img.removeAttribute('srcset'); else if (setD) img.setAttribute('srcset', setD);
           img.setAttribute('src', mode === 'mobile' ? srcM : srcD);
           img.setAttribute('width', mode === 'mobile' ? '600' : '1200'); img.setAttribute('height', mode === 'mobile' ? '1200' : '790');
         }
-        browser.classList.remove('is-switching'); busy = false;
-      }, 350);
+        target.classList.remove('is-switching'); busy = false; w.dispatchEvent(new Event('resize'));
+      }, mini ? 0 : 350);
     }
     on(tog, 'click', function (e) { var b = e.target.closest('button[data-device]'); if (!b) return; if (auto) { clearInterval(auto); auto = null; } set(b.getAttribute('data-device')); });
-    if (!d.documentElement.classList.contains('reduced') && w.innerWidth > 900) { auto = setInterval(function () { if (d.hidden) return; set(mode === 'desktop' ? 'mobile' : 'desktop'); }, 7000); }
+    if (mini && w.innerWidth <= 720) set('mobile');
+    if (!mini && !d.documentElement.classList.contains('reduced') && w.innerWidth > 900) { auto = setInterval(function () { if (d.hidden) return; set(mode === 'desktop' ? 'mobile' : 'desktop'); }, 7000); }
   }
 
+  /* Live-Miniatur: Beispielseite im Rahmen skalieren, scrollbar bleibt sie */
+  function initMini() {
+    var frames = $$('.mini-frame'); if (!frames.length) return;
+    var ready = false;
+    function load(fr) { var f = $('iframe', fr); if (!f || f.getAttribute('src')) return; on(f, 'load', function () { fr.classList.add('is-live'); }); f.setAttribute('src', f.getAttribute('data-src')); }
+    function fit(fr) { var base = +fr.getAttribute('data-base') || 1280, wdt = fr.clientWidth; if (wdt > 0) { fr.style.setProperty('--s', (wdt / base).toFixed(4)); if (ready) load(fr); } }
+    function all() { frames.forEach(fit); }
+    all();
+    if ('ResizeObserver' in w) { var ro = new ResizeObserver(all); frames.forEach(function (f) { ro.observe(f); }); } else on(w, 'resize', all);
+    function go() { ready = true; all(); }
+    if (d.readyState === 'complete') setTimeout(go, 400); else on(w, 'load', function () { setTimeout(go, 400); });
+  }
+
+  /* Hero: Lichtschein folgt dem Zeiger */
+  function initGlow() {
+    var hero = $('.hero'); if (!hero || d.documentElement.classList.contains('reduced') || !w.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+    on(hero, 'pointermove', function (e) { var r = hero.getBoundingClientRect(); hero.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%'); hero.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%'); hero.classList.add('has-glow'); });
+    on(hero, 'pointerleave', function () { hero.classList.remove('has-glow'); });
+  }
+
+  /* Seitenwechsel: kurzes Ausblenden bei internen Links */
+  function initTransitions() {
+    if (d.documentElement.classList.contains('reduced')) return;
+    on(d, 'click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest('a[href]'); if (!a || a.hasAttribute('data-open-modal') || a.target || a.hasAttribute('download')) return;
+      var href = a.getAttribute('href'); if (!href || href.charAt(0) === '#' || /^(mailto|tel):/.test(href) || a.origin !== location.origin) return;
+      if (a.pathname === location.pathname && a.hash) return;
+      e.preventDefault(); d.body.classList.add('is-leaving'); setTimeout(function () { location.href = a.href; }, 170);
+    });
+    on(w, 'pageshow', function () { d.body.classList.remove('is-leaving'); });
+  }
+
+  /* Preise: Paket wählen */
+  function initPick() {
+    var root = $('[data-pick]'); if (!root) return;
+    var P = { landing: { name: 'LANDING', price: '2.290 €', care: '59 € im Monat', bedarf: 'landingpage', text: 'Conversion-Onepager mit Texten, Bildern und Terminbuchung. Struktur, Texte und Bildauswahl entstehen bei uns.', hint: 'Texte und Bilder selbst liefern? LANDING START auf Vorlagenbasis ab 1.290 €.' },
+      business: { name: 'BUSINESS WEB', price: '4.490 €', care: '89 € im Monat', bedarf: 'website', text: 'Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.', hint: 'Kombivorteil: 500 € Nachlass bei Website und KI-Kommunikation zusammen, ab Paket BUSINESS.' },
+      funnel: { name: 'WEB + FUNNEL', price: '6.990 €', care: '129 € im Monat', bedarf: 'funnel', text: 'Bis zwölf Seiten mit Anfrage- oder Verkaufsstrecke, die Besucher Schritt für Schritt zur Anfrage führt.', hint: 'Abweichender Umfang wird vorab schriftlich vereinbart.' } };
+    var outs = {}; $$('[data-pick-out]', root).forEach(function (el) { outs[el.getAttribute('data-pick-out')] = el; });
+    function choose(k) {
+      var p = P[k] || P.landing;
+      $$('[data-pick-btn]', root).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-pick-btn') === k ? 'true' : 'false'); });
+      if (outs.name) outs.name.textContent = p.name; if (outs.price) outs.price.textContent = p.price; if (outs.care) outs.care.textContent = p.care;
+      if (outs.text) outs.text.textContent = p.text; if (outs.hint) outs.hint.textContent = p.hint;
+      if (outs.cta) { outs.cta.textContent = p.name + ' anfragen'; outs.cta.setAttribute('data-bedarf', p.bedarf); }
+      $$('.price-card[data-pkg]').forEach(function (c) { c.classList.toggle('is-chosen', c.getAttribute('data-pkg') === k); });
+    }
+    on(root, 'click', function (e) { var b = e.target.closest('[data-pick-btn]'); if (b) choose(b.getAttribute('data-pick-btn')); });
+    choose('landing');
+  }
   /* ── 2 · Suche und KI-Antwort bauen sich auf ────────────────────────── */
   function initSeoProof() {
     $$('.proof-seo').forEach(function (root) {
@@ -492,6 +546,6 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMore(); initSwipe(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initChecklist(); initMini(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();
