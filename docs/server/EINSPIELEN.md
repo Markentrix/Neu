@@ -7,7 +7,7 @@ Dateien in diesem Ordner:
 
 | Datei | Ziel auf dem Server |
 |---|---|
-| `markentrix.de.caddy` | `/srv/caddy-sites/markentrix.de.caddy` |
+| `markentrix-site.caddy` | `/opt/neu/server/caddy/snippets/markentrix-site.caddy` (die Domain-Datei `/srv/caddy-sites/markentrix.de.caddy` bleibt unverändert) |
 | `docker-compose.yml` | `/opt/neu/server/docker-compose.yml` |
 | `veroeffentlichen.bat` | bleibt auf dem Windows-Rechner neben `dist` |
 
@@ -18,7 +18,7 @@ Dateien in diesem Ordner:
 ## 2. Server-Dateien hochladen (Windows, im Ordner docs/server)
 
 ```
-scp markentrix.de.caddy deploy@5.75.146.212:/tmp/markentrix.de.caddy
+scp markentrix-site.caddy deploy@5.75.146.212:/tmp/markentrix-site.caddy
 scp docker-compose.yml deploy@5.75.146.212:/tmp/docker-compose.yml
 ```
 
@@ -28,24 +28,14 @@ scp docker-compose.yml deploy@5.75.146.212:/tmp/docker-compose.yml
 ssh deploy@5.75.146.212
 ```
 
-Bisherige Definition von markentrix.de finden und sichern (Caddy verweigert doppelte Domains):
+Bisherige Dateien sichern, neue an Ort und Stelle, Protokollordner anlegen, Passwort hinterlegen:
 
 ```
-grep -l "markentrix.de" /opt/neu/server/caddy/snippets/*.caddy /srv/caddy-sites/*.caddy
-mkdir -p ~/sicherung && cp /opt/neu/server/docker-compose.yml /srv/caddy-sites/*.caddy ~/sicherung/
-```
-
-Zeigt grep eine Datei in `snippets/` oder eine andere Datei als `markentrix.de.caddy` in `/srv/caddy-sites/`,
-dort den Block für markentrix.de und www.markentrix.de entfernen (oder die Datei umbenennen, z. B. auf `.alt`,
-damit `import *.caddy` sie nicht mehr lädt).
-
-Neue Dateien an Ort und Stelle, Protokollordner anlegen, Passwort hinterlegen:
-
-```
-sudo mv /tmp/markentrix.de.caddy /srv/caddy-sites/markentrix.de.caddy
-sudo mv /tmp/docker-compose.yml /opt/neu/server/docker-compose.yml
+mkdir -p ~/sicherung && cp /opt/neu/server/docker-compose.yml /opt/neu/server/caddy/snippets/markentrix-site.caddy ~/sicherung/
+mv /tmp/markentrix-site.caddy /opt/neu/server/caddy/snippets/markentrix-site.caddy
+mv /tmp/docker-compose.yml /opt/neu/server/docker-compose.yml
 sudo mkdir -p /srv/markentrix-daten && sudo chown 82:82 /srv/markentrix-daten
-echo "MX_SMTP_PASS=HIER-DAS-16-STELLIGE-APP-PASSWORT" | sudo tee -a /opt/neu/server/.env
+echo "MX_SMTP_PASS=HIER-DAS-16-STELLIGE-APP-PASSWORT" >> /opt/neu/server/.env
 ```
 
 Prüfen und starten:
@@ -66,6 +56,8 @@ curl -sI https://markentrix.de/preise.html | head -1                         # e
 curl -s -o /dev/null -w "%{http_code}\n" https://markentrix.de/api/anfrage.php   # erwartet 405 (nicht 404)
 curl -s -o /dev/null -w "%{http_code}\n" https://demos.markentrix.de/            # andere Domains weiter erreichbar
 ```
+
+Falls `validate` einen Fehler meldet: Sicherung zurückspielen (`cp ~/sicherung/markentrix-site.caddy /opt/neu/server/caddy/snippets/`), die Live-Seite läuft bis zum `reload` unverändert weiter.
 
 Dann im Browser: Startseite zeigt die Miniatur, Kontaktformular mit Testanfrage absenden, Mail bei info@markentrix.de prüfen.
 Fehlersuche: `sudo docker compose logs --tail 50 php caddy` und `sudo cat /srv/markentrix-daten/anfragen.log`.
