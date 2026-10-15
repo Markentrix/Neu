@@ -69,6 +69,16 @@ test("Richtpreis-Rechner rechnet je Fahrzeugklasse", async ({ page }) => {
   await expect(page.locator("#quoteBook")).toHaveAttribute("href", /paket=premium&klasse=suv/);
 });
 
+test("Buchung: Zurück und Absenden erst dann sichtbar, wenn sie gebraucht werden", async ({ page }) => {
+  await page.goto("/termin.html");
+  await expect(page.locator("[data-wz-prev]")).toBeHidden();
+  await expect(page.locator("[data-wz-submit]")).toBeHidden();
+  await expect(page.locator("[data-wz-next]")).toBeVisible();
+  await page.locator("[data-wz-next]").click();
+  await expect(page.locator("[data-wz-prev]")).toBeVisible();
+  await expect(page.locator("[data-wz-submit]")).toBeHidden();
+});
+
 test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
   await page.goto("/termin.html?paket=komplett&klasse=suv");
   await expect(page.locator('input[name="paket"][value="komplett"]')).toBeChecked();
@@ -128,6 +138,7 @@ test("Nächster freier Tag: Anzeige auf der Startseite und Übernahme in die Buc
   await page.goto("/" + href);
   await expect(page.locator("#t-date1")).toHaveValue(href.split("=")[1]);
   await page.goto("/termin.html");
+  for (let i = 0; i < 3; i++) await page.locator("[data-wz-next]").click();  // bis Schritt 4 (Wunschtermin)
   await page.locator("[data-nf-fill]").click();
   await expect(page.locator("#t-date1")).toHaveValue(href.split("=")[1]);
 });

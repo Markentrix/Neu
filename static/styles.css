@@ -109,6 +109,9 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, div[tabindex="-1"]:focu
 }
 .skip-link:focus { top: 12px; }
 
+/* hidden-Attribut gilt immer, auch wenn eine Komponente selbst display setzt (z. B. .btn) */
+[hidden]:not(.next-free) { display: none !important; }
+
 .visually-hidden {
   position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
@@ -352,7 +355,7 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 /* Richtpreis-Rechner (Hero rechts) */
 .quote-card {
   position: relative;
-  background: linear-gradient(170deg, #fff, #f3f6fb);
+  background: linear-gradient(170deg, #fff, #f5f6f8);
   color: var(--ink);
   border-radius: var(--radius-l);
   padding: clamp(22px, 3vw, 30px);
@@ -363,12 +366,13 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
   content: ""; position: absolute; inset: -1px; border-radius: inherit; z-index: -1;
   background: linear-gradient(140deg, rgba(91,155,232,0.55), transparent 50%);
 }
-.quote-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.quote-head { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
 .quote-head h2 { font-size: 1.35rem; color: var(--ink); }
 .quote-head span { font-size: 0.76rem; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); background: var(--blue-soft); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
 .quote-field { display: grid; gap: 8px; }
 .quote-field > span { font-weight: 650; font-size: 0.84rem; color: var(--ink); }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.seg label, .seg span { min-width: 0; overflow-wrap: break-word; }
 .seg label { position: relative; min-width: 0; }
 .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; }
 .seg span {
@@ -1124,3 +1128,38 @@ blockquote.note p { color: #4d3a0f; }
 .article-layout { padding-block: clamp(36px, 5vw, 64px); }
 .summary-card dl div { grid-template-columns: 112px 1fr; }
 @media (max-width: 599.98px) { .summary-card dl div { grid-template-columns: 104px 1fr; } }
+
+/* ==========================================================================
+   Handy: etwas kleinere, ruhigere Schriftskala. Knöpfe brechen um statt abzuschneiden
+   (wichtig bei vergrößerter Systemschrift auf Android/iOS).
+   ========================================================================== */
+@media (max-width: 599.98px) {
+  body { font-size: 15px; }
+  .btn:not(.btn-icon):not(.header-book) { white-space: normal; text-align: center; line-height: 1.25; padding: 12px 20px; font-size: 0.94rem; max-width: 100%; }
+  .btn svg { flex: none; }
+  .btn-lg { padding: 14px 22px; min-height: 52px; font-size: 0.98rem; }
+  .hero-headline { font-size: clamp(1.85rem, 8.6vw, 2.45rem); }
+  h2.display { font-size: clamp(1.6rem, 7.2vw, 2.1rem); }
+  .page-hero h1 { font-size: clamp(1.85rem, 8.4vw, 2.4rem); }
+  .hero-sub, .page-hero .lead { font-size: 0.98rem; }
+  .section-head p { font-size: 0.97rem; }
+  .quote-head h2 { font-size: 1.2rem; }
+  .quote-result .val { font-size: 1.75rem; }
+  .plan-row-name strong { font-size: 1.12rem; }
+  .plan-row-price { font-size: 1.5rem; }
+  .plan h3 { font-size: 1.35rem; }
+  .plan-price .amount { font-size: 2.1rem; }
+  .service-title { font-size: 1.18rem; }
+  .why-item h3, .process-cell h3 { font-size: 1.05rem; }
+  .review-score-big { font-size: 3.8rem; }
+  .review-quote { font-size: 1.12rem; }
+  .faq-item summary { font-size: 0.96rem; }
+  .eyebrow { font-size: 0.75rem; letter-spacing: 0.14em; }
+  /* Lange Wörter (z. B. „Geruchsneutralisation“) dürfen umbrechen, Spalten dürfen schrumpfen */
+  body { overflow-wrap: break-word; }
+  h1, h2, h3, summary, .lead { hyphens: auto; }
+  .container > *, .two-up > *, .why-grid > *, .prose, .prose > *, .facts div > * { min-width: 0; }
+}
+@media (max-width: 359.98px) {
+  .hero-headline { font-size: 1.8rem; }
+}

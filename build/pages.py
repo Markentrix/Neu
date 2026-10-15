@@ -244,7 +244,7 @@ def build_home(site, write):
           <span class="lbl">Richtpreis <span id="quotePkgName">{ESC(feat["name"])}</span></span>
           <span class="val" id="quoteValue"><small>ab</small>{feat["prices"][cls0]}&nbsp;€</span>
         </div>
-        <a class="btn btn-primary" id="quoteBook" href="termin.html?paket={feat["key"]}&amp;klasse={cls0}">{I["cal"]}Mit diesem Paket Termin anfragen</a>
+        <a class="btn btn-primary" id="quoteBook" href="termin.html?paket={feat["key"]}&amp;klasse={cls0}">{I["cal"]}Dieses Paket anfragen</a>
         <a class="quote-wa" id="quoteWa" href="{site.wa()}" target="_blank" rel="noopener">{I["wa"]}oder Angebot per WhatsApp</a>
         <p class="quote-note">Richtwert für normalen Pflegezustand. Der verbindliche Preis hängt von Fahrzeug und Zustand ab und wird vor dem Termin bestätigt.</p>
       </form>
