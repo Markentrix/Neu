@@ -61,13 +61,93 @@ def plan_card(site, p, prefix=""):
         </article>'''
 
 
+def plan_row(site, p, prefix=""):
+    featured = p.get("featured")
+    return f'''
+        <a class="plan-row{" is-featured" if featured else ""} reveal" href="{prefix}termin.html?paket={p["key"]}">
+          <span class="plan-row-name"><strong>{ESC(p["name"])}</strong>{'<span class="plan-row-badge">Beliebt</span>' if featured else ""}<small>{ESC(p["for"])}</small></span>
+          <span class="plan-row-price"><small>ab</small>{site.min_price(p["key"])}&nbsp;€<small>{ESC(p["duration"])}</small></span>
+          <span class="service-arrow">{I["arrow"]}</span>
+        </a>'''
+
+
+HOME_FAQ = [0, 2, 3, 5, 6]     # Indizes aus faq.json, die auf der Startseite stehen
+PRICE_FAQ = [0, 1, 7, 8, 9]    # … und auf der Preisseite
+
+
+def pick(items, idx):
+    return [items[i] for i in idx if i < len(items)] or items[:5]
+
+
+def price_section(site, prefix=""):
+    """Volle Preisübersicht mit Klassen-Umschalter, Paketen, Extras und Vergleichstabelle."""
+    pr = site.pricing
+    feat = next((p for p in pr["packages"] if p.get("featured")), pr["packages"][0])
+    price_cls = "".join(f'<label><input type="radio" name="pclass" value="{c["key"]}"{" checked" if i == 0 else ""}><span>{ESC(c["name"])}</span></label>' for i, c in enumerate(pr["classes"]))
+    plans = "".join(plan_card(site, p, prefix) for p in pr["packages"])
+    extras = "".join(f"<li>{ESC(e)} <small>· auf Anfrage</small></li>" for e in pr["extras"])
+
+    def cell(v, f=False):
+        c = ("featured-col " if f else "") + ("yes" if v else "")
+        return f'<td class="{c.strip()}"><span aria-hidden="true">{"✓" if v else "—"}</span><span class="visually-hidden">{"Inklusive" if v else "Nicht enthalten"}</span></td>'
+    keys = [p["key"] for p in pr["packages"]]
+    fkey = feat["key"]
+    trs = "".join(f'<tr><th scope="row">{ESC(r["label"])}</th>' + "".join(cell(r.get(k), k == fkey) for k in keys) + "</tr>" for r in pr["compare"])
+    fc = ' class="featured-col"'
+    ths = "".join(f'<th scope="col"{fc if p["key"] == fkey else ""}>{ESC(p["name"])}</th>' for p in pr["packages"])
+    return f'''
+      <div class="price-toolbar reveal">
+        <fieldset id="priceClass"><legend class="visually-hidden">Fahrzeugklasse wählen</legend><div class="seg">{price_cls}</div></fieldset>
+        <p>Richtpreise für <strong id="priceClassLabel">{ESC(pr["classes"][0]["name"])}</strong> in normalem Pflegezustand.</p>
+      </div>
+      <div class="plans stagger">{plans}
+      </div>
+      <p class="price-note">{ESC(pr["note"])}</p>
+      <div class="extras reveal">
+        <h2>Einzeln buchbar oder als Ergänzung</h2>
+        <ul>{extras}</ul>
+      </div>
+      <details class="compare reveal" open>
+        <summary>Alle Leistungen der Pakete im Vergleich</summary>
+        <div class="price-scroll" tabindex="0" role="region" aria-label="Vergleichstabelle, seitlich scrollbar">
+          <table class="price-table">
+            <caption class="visually-hidden">Vergleich der Aufbereitungspakete nach enthaltenen Leistungen</caption>
+            <thead><tr><th scope="col">Leistung</th>{ths}</tr></thead>
+            <tbody>{trs}</tbody>
+          </table>
+        </div>
+      </details>'''
+
+
+def contact_compact(site, prefix=""):
+    """Kurzer Kontaktblock: Termin, WhatsApp, Anrufen. Das ausführliche Formular steht auf kontakt.html."""
+    s = site.s
+    return f'''  <section id="kontakt" class="tight" aria-labelledby="kontakt-h">
+    <div class="container">
+      <div class="cta-band reveal">
+        <p class="eyebrow">Kontakt &amp; Termin</p>
+        <h2 id="kontakt-h" class="display">Bereit für ein Auto, das sich wieder neu anfühlt?</h2>
+        <p>Fahrzeug, Wunschpaket und Zeitraum nennen. Du bekommst ein verbindliches Angebot, bevor irgendetwas passiert.</p>
+        <div class="contact-actions">
+          <a class="contact-action is-primary" href="{prefix}termin.html">{I["cal"]}<span><strong>Termin online anfragen</strong><small>In 2 Minuten, mit Richtpreis</small></span></a>
+          <a class="contact-action" href="{site.wa("Hallo ElbDetail, ich möchte einen Termin zur Fahrzeugaufbereitung anfragen. Fahrzeug: … Wunsch: …")}" target="_blank" rel="noopener">{I["wa"]}<span><strong>WhatsApp</strong><small>{ESC(s["phoneIntl"])}</small></span></a>
+          <a class="contact-action" href="tel:{s["phone"]}">{I["phone"]}<span><strong>Anrufen</strong><small>{ESC(s["phoneDisplay"])}</small></span></a>
+        </div>
+        <p class="contact-line"><a href="{site.maps_url()}" target="_blank" rel="noopener">{I["pin"]}{ESC(site.addr_line())}</a><a href="{prefix}kontakt.html">Kontaktformular &amp; Anfahrt</a></p>
+      </div>
+    </div>
+  </section>
+'''
+
+
 def build_home(site, write):
     s = site.s
     pr = site.pricing
     title = f"Fahrzeugaufbereitung in Celle ab {site.min_price('frisch')} € | ElbDetail"
     desc = (f"Innen- & Außenaufbereitung, Lackpolitur und Versiegelung in Celle. Handarbeit, {s['rating']['value']} ★ bei Google, "
             f"Koch-Chemie geschult. Jetzt Termin anfragen.")
-    ld = [seo.business(site), seo.website(site), seo.faq(site.faq),
+    home_faq = pick(site.faq, HOME_FAQ)
+    ld = [seo.business(site), seo.website(site), seo.faq(home_faq),
           seo.webpage(site, "/", title, {"speakable": {"@type": "SpeakableSpecification", "cssSelector": ["#auf-einen-blick", ".hero-sub"]}})]
 
     services_rows = "".join(f'''
@@ -84,18 +164,7 @@ def build_home(site, write):
                          for p in pr["packages"])
     feat = next((p for p in pr["packages"] if p.get("featured")), pr["packages"][0])
     cls0 = pr["classes"][0]["key"]
-    price_cls = "".join(f'<label><input type="radio" name="pclass" value="{c["key"]}"{" checked" if i == 0 else ""}><span>{ESC(c["name"])}</span></label>' for i, c in enumerate(pr["classes"]))
-    plans = "".join(plan_card(site, p) for p in pr["packages"])
-    extras = "".join(f"<li>{ESC(e)} <small>· auf Anfrage</small></li>" for e in pr["extras"])
-
-    def cell(v, f=False):
-        c = ("featured-col " if f else "") + ("yes" if v else "")
-        return f'<td class="{c.strip()}"><span aria-hidden="true">{"✓" if v else "—"}</span><span class="visually-hidden">{"Inklusive" if v else "Nicht enthalten"}</span></td>'
-    keys = [p["key"] for p in pr["packages"]]
-    fkey = feat["key"]
-    trs = "".join(f'<tr><th scope="row">{ESC(r["label"])}</th>' + "".join(cell(r.get(k), k == fkey) for k in keys) + "</tr>" for r in pr["compare"])
-    fc = ' class="featured-col"'
-    ths = "".join(f'<th scope="col"{fc if p["key"] == fkey else ""}>{ESC(p["name"])}</th>' for p in pr["packages"])
+    plan_rows = "".join(plan_row(site, p) for p in pr["packages"])
 
     tiles, real = [], 0
     for n, it in enumerate(site.gallery):
@@ -120,7 +189,7 @@ def build_home(site, write):
         <h2 id="ratgeber-h" class="display">Wissen aus der Werkstatt.</h2>
         <p>Ehrliche Antworten auf die Fragen, die wir täglich hören. Von Preisen über Leasingrückgabe bis zur richtigen Lackpflege im Winter.</p>
       </div>
-      <div class="article-grid stagger">{art_cards}</div>
+      <div class="article-grid home-scroll stagger" tabindex="0" role="region" aria-label="Ratgeber-Artikel, seitlich wischen">{art_cards}</div>
       <p class="section-more"><a class="btn btn-line-light" href="ratgeber/index.html">Alle Ratgeber-Artikel</a></p>
     </div>
   </section>''' if articles else ""
@@ -175,38 +244,16 @@ def build_home(site, write):
     </div>
   </div>
 
-  <section id="anlaesse" class="soft" aria-labelledby="anlaesse-h">
-    <div class="container">
-      <div class="section-head reveal">
-        <p class="eyebrow">Wofür Kund:innen zu uns kommen</p>
-        <h2 id="anlaesse-h" class="display">Der richtige Moment für eine Aufbereitung.</h2>
-        <p>Ob Alltag, Verkauf oder Rückgabe: Eine professionelle Aufbereitung zahlt sich fast immer aus. In Geld, in Zeit oder einfach im Gefühl beim Einsteigen.</p>
-      </div>
-      <div class="usecase-grid stagger">
-        <a class="usecase reveal" href="leistungen/leasingrueckgabe-gebrauchtwagen-celle.html">{I["key"]}<h3>Leasingrückgabe</h3><p>Verschmutzung, Gerüche und Gebrauchsspuren kosten bei der Rückgabe bares Geld. Wir bereiten das Fahrzeug so auf, dass möglichst wenig beanstandet wird.</p><span class="more">Mehr erfahren →</span></a>
-        <a class="usecase reveal" href="leistungen/leasingrueckgabe-gebrauchtwagen-celle.html">{I["tag"]}<h3>Gebrauchtwagenverkauf</h3><p>Ein sauberes, glänzendes Auto verkauft sich schneller und zu einem besseren Preis. Die Aufbereitung holt sich in der Regel mehrfach wieder rein.</p><span class="more">Mehr erfahren →</span></a>
-        <a class="usecase reveal" href="leistungen/innenaufbereitung-celle.html">{I["paw"]}<h3>Familie, Hund &amp; Alltag</h3><p>Krümel, Tierhaare, Flecken und Gerüche: Die Innenaufbereitung bringt den Innenraum zurück in den Zustand, in dem man gern einsteigt.</p><span class="more">Innenaufbereitung →</span></a>
-        <a class="usecase reveal" href="aktion/winterschutz.html">{I["snow"]}<h3>Lack winterfest machen</h3><p>Vor dem ersten Streusalz versiegeln: Schmutz und Salz haften weniger, Waschen wird leichter und der Lack bleibt länger wie am ersten Tag.</p><span class="more">Winter-Lackschutz →</span></a>
-        <a class="usecase reveal" href="leistungen/lackpolitur-celle.html">{I["spark"]}<h3>Matter, verkratzter Lack</h3><p>Waschstraßenkratzer, Hologramme und Oxidation nehmen jedem Auto den Glanz. Eine mehrstufige Politur holt die Tiefe zurück.</p><span class="more">Lackpolitur →</span></a>
-        <a class="usecase reveal" href="firmenkunden.html">{I["brief"]}<h3>Firmenwagen &amp; Flotten</h3><p>Planbare Pflege für Firmenfahrzeuge, Autohäuser und Leasingrückläufer in Celle und Umgebung. Ein Ansprechpartner, feste Abläufe.</p><span class="more">Für Firmenkunden →</span></a>
-      </div>
-    </div>
-  </section>
-
   <section id="leistungen" aria-labelledby="leistungen-h">
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Leistungen</p>
         <h2 id="leistungen-h" class="display">Aufbereitung, die man sieht. Und fühlt.</h2>
-        <p>Vom schnellen Frischekick bis zur vollständigen Neuaufbereitung: Jedes Fahrzeug bekommt die Behandlung, die zu seinem Zustand passt. Alle Leistungen auch einzeln buchbar.</p>
+        <p>Vom schnellen Frischekick bis zur Neuaufbereitung, passend zum Zustand deines Fahrzeugs. Alle Leistungen auch einzeln buchbar.</p>
       </div>
       <div class="service-list stagger">{services_rows}
       </div>
-      <div class="brand-strip reveal">
-        {I["shield"]}
-        <p>Geschult in den Lehrgängen von Koch-Chemie setzen wir für alle Arbeiten ausschließlich professionelle Koch-Chemie-Pflegeprodukte ein, abgestimmt auf Lack, Leder, Kunststoff und Textil.</p>
-        <a href="https://www.koch-chemie.com/de/produkte/automotive" target="_blank" rel="noopener">Produkte ansehen ↗</a>
-      </div>
+      <p class="service-more reveal">Auch für <a class="text-link" href="firmenkunden.html">Firmenwagen &amp; Flotten</a> und als <a class="text-link" href="aktion/winterschutz.html">Winter-Lackschutz</a> vor dem ersten Streusalz.</p>
     </div>
   </section>
 
@@ -215,29 +262,11 @@ def build_home(site, write):
       <div class="section-head reveal">
         <p class="eyebrow">Pakete &amp; Preise</p>
         <h2 id="preise-h" class="display">Transparente Richtpreise. Keine Überraschungen.</h2>
-        <p>Wähle deine Fahrzeugklasse und sieh sofort, womit du rechnen kannst. Den verbindlichen Preis bestätigen wir kostenlos vor dem Termin.</p>
+        <p>Richtpreise für eine Kompaktklasse. Den verbindlichen Preis bestätigen wir kostenlos vor dem Termin.</p>
       </div>
-      <div class="price-toolbar reveal">
-        <fieldset id="priceClass"><legend class="visually-hidden">Fahrzeugklasse wählen</legend><div class="seg">{price_cls}</div></fieldset>
-        <p>Richtpreise für <strong id="priceClassLabel">{ESC(pr["classes"][0]["name"])}</strong> in normalem Pflegezustand.</p>
+      <div class="plan-rows stagger">{plan_rows}
       </div>
-      <div class="plans stagger">{plans}
-      </div>
-      <p class="price-note">{ESC(pr["note"])}</p>
-      <div class="extras reveal">
-        <h3>Einzeln buchbar oder als Ergänzung</h3>
-        <ul>{extras}</ul>
-      </div>
-      <details class="compare reveal">
-        <summary>Alle Leistungen der Pakete im Vergleich</summary>
-        <div class="price-scroll" tabindex="0" role="region" aria-label="Vergleichstabelle, seitlich scrollbar">
-          <table class="price-table">
-            <caption class="visually-hidden">Vergleich der Aufbereitungspakete nach enthaltenen Leistungen</caption>
-            <thead><tr><th scope="col">Leistung</th>{ths}</tr></thead>
-            <tbody>{trs}</tbody>
-          </table>
-        </div>
-      </details>
+      <p class="section-more"><a class="btn btn-line-light" href="preise.html">Alle Preise &amp; Leistungen</a></p>
     </div>
   </section>
 
@@ -248,7 +277,7 @@ def build_home(site, write):
         <h2 id="vn-h" class="display">Vorher. Nachher. Selbst schieben.</h2>
         <p>Ziehe den Regler, um den Unterschied zu sehen.</p>
       </div>
-      <div class="ba-grid stagger">{"".join(tiles)}
+      <div class="ba-grid home-scroll stagger" tabindex="0" role="region" aria-label="Vorher-Nachher-Beispiele, seitlich wischen">{"".join(tiles)}
       </div>
       <p class="gallery-note">{ESC(gallery_note)} <a class="text-link" href="{s["social"]["instagram"]}" target="_blank" rel="noopener">Instagram</a> · <a class="text-link" href="{s["social"]["tiktok"]}" target="_blank" rel="noopener">TikTok</a></p>
     </div>
@@ -260,8 +289,10 @@ def build_home(site, write):
         <div class="section-head section-head--tight">
           <p class="eyebrow">Warum ElbDetail</p>
           <h2 id="warum-h" class="display">Handarbeit, Fachwissen und ein Preis, der vorher feststeht.</h2>
-          <p>ElbDetail ist ein inhabergeführter Fachbetrieb für Fahrzeugaufbereitung in Celle. Kein Franchise, keine Waschstraße: Jedes Fahrzeug wird persönlich und von Hand aufbereitet.</p>
+          <p>Inhabergeführter Fachbetrieb in Celle. Kein Franchise, keine Waschstraße: Jedes Fahrzeug wird persönlich und von Hand aufbereitet.</p>
         </div>
+        <details class="facts-wrap" open data-close-narrow>
+        <summary>ElbDetail auf einen Blick</summary>
         <dl class="facts" id="auf-einen-blick">
           <div><dt>Betrieb</dt><dd>{ESC(s["name"])} – {ESC(s["tagline"])}</dd></div>
           <div><dt>Standort</dt><dd>{ESC(site.addr_line())}</dd></div>
@@ -272,13 +303,13 @@ def build_home(site, write):
           <div><dt>Bewertung</dt><dd>{ESC(s["rating"]["value"])} ★ bei {s["rating"]["count"]} Google-Rezensionen (Stand {ESC(s["rating"]["asOf"])})</dd></div>
           <div><dt>Termin</dt><dd><a href="termin.html">Online-Terminanfrage</a> oder <a href="{site.wa()}" target="_blank" rel="noopener">WhatsApp {ESC(s["phoneIntl"])}</a></dd></div>
         </dl>
+        </details>
       </div>
       <div class="why-list stagger">
         <div class="why-item reveal">{I["hand"]}<div><h3>Handarbeit statt Waschstraße</h3><p>Zwei-Eimer-Handwäsche, weiche Mikrofaser, kratzfreie Trocknung. So entstehen keine neuen Swirls, während alte verschwinden.</p></div></div>
         <div class="why-item reveal">{I["shield"]}<div><h3>Koch-Chemie geschult</h3><p>Produkte und Verfahren aus dem Profibereich, abgestimmt auf Lack, Leder, Alcantara, Kunststoff und Textil. Kein Experimentieren an deinem Auto.</p></div></div>
         <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Du bekommst ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
         <div class="why-item reveal">{I["clock"]}<div><h3>Schnelle Antwort, flexible Termine</h3><p>Online-Anfrage oder WhatsApp, Termin nach Vereinbarung, samstags nach Absprache. Ideal auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
-        <div class="why-item reveal">{I["pin"]}<div><h3>Lokal in Celle</h3><p>Fester Standort in der Lachtehäuser Straße, gut erreichbar aus der Innenstadt, Westercelle, Altencelle, Garßen und dem gesamten Landkreis.</p></div></div>
       </div>
     </div>
   </section>
@@ -287,13 +318,12 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Ablauf</p>
-        <h2 id="ablauf-h" class="display">In vier Schritten zum Auto wie neu.</h2>
+        <h2 id="ablauf-h" class="display">In drei Schritten zum Auto wie neu.</h2>
       </div>
       <div class="process-rail stagger">
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Du bekommst ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung in Handarbeit</h3><p>Sorgfältige Aufbereitung an unserem Standort in Celle mit professionellen Koch-Chemie-Produkten.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 04</span><h3>Gemeinsame Abnahme</h3><p>Abschlusskontrolle mit dir bei Tageslicht, Pflegetipps für danach, Bezahlung bar oder per Überweisung.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle, danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar oder per Überweisung.</p></div>
       </div>
     </div>
   </section>
@@ -317,7 +347,7 @@ def build_home(site, write):
       </div>
       <div class="review-grid stagger" tabindex="0" role="region" aria-label="Kundenbewertungen">{core.review_cards(site)}
       </div>
-      <p class="gallery-note">Echte Rezensionen aus unserem Google-Unternehmensprofil (Stand {ESC(s["rating"]["asOf"])}), gekürzt um Emojis. <strong>Hinweis zur Echtheit:</strong> Die Bewertungen werden auf Google von Nutzer:innen veröffentlicht. Wir selbst prüfen nicht, ob jede Bewertung von einer Person stammt, die unsere Leistung genutzt hat; Google prüft Bewertungen nach eigenen Richtlinien. Wir übernehmen ausgewählte Bewertungen unverändert im Wortlaut.</p>
+      <p class="gallery-note">Ausgewählte Google-Rezensionen im Wortlaut, ohne Emojis (Stand {ESC(s["rating"]["asOf"])}). <strong>Hinweis zur Echtheit:</strong> Wir prüfen nicht, ob alle Bewertenden unsere Leistung genutzt haben. Google prüft Bewertungen nach eigenen Richtlinien.</p>
     </div>
   </section>
 
@@ -334,23 +364,6 @@ def build_home(site, write):
     </div>
   </section>
 
-  <section id="einzugsgebiet" aria-labelledby="gebiet-h">
-    <div class="container">
-      <div class="section-head reveal">
-        <p class="eyebrow">Einzugsgebiet</p>
-        <h2 id="gebiet-h" class="display">Fahrzeugaufbereitung für Celle und den Landkreis.</h2>
-        <p>Unser Standort liegt in der {ESC(s["address"]["street"])} im Osten von Celle, wenige Minuten von der Altstadt. Kund:innen kommen aus der ganzen Stadt und dem Umland.</p>
-      </div>
-      <div class="area-grid reveal">
-        <div><h3>Stadt Celle</h3><ul class="chips">{"".join(f"<li>{ESC(x)}</li>" for x in s["areas"]["city"])}</ul></div>
-        <div>
-          <h3>Umland &amp; Landkreis Celle</h3>
-          <ul class="chips">{"".join(f"<li>{ESC(x)}</li>" for x in s["areas"]["region"])}</ul>
-          <p class="area-note">Du kommst von weiter her, zum Beispiel aus Hannover, Gifhorn oder Uelzen? Kein Problem, die meisten Pakete lassen sich an einem Tag erledigen.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 {ratgeber_section}
   <section id="faq" class="soft" aria-labelledby="faq-h">
     <div class="container">
@@ -359,16 +372,83 @@ def build_home(site, write):
         <h2 id="faq-h" class="display">Gut zu wissen, bevor du anfragst.</h2>
       </div>
       <div class="faq-list stagger">
-        {core.faq_html(site.faq)}
+        {core.faq_html(home_faq, first_open=False)}
+      </div>
+      <p class="section-more"><a class="text-link" href="preise.html#fragen">Weitere Fragen zu Preisen, Dauer und Bezahlung →</a></p>
+    </div>
+  </section>
+
+{contact_compact(site)}
+</main>
+'''
+    write("index.html", core.head(site, title, desc, "/", ld=ld, og_type="business.business") + core.header(site, home=True) + body + core.footer(site, home=True))
+
+
+# --------------------------------------------------------------------------- Preise & Kontakt
+def build_preise(site, write):
+    pr = site.pricing
+    path = "/preise.html"
+    title = f"Preise Fahrzeugaufbereitung Celle ab {site.min_price('frisch')} € | ElbDetail"
+    desc = ("Fahrzeugaufbereitung Celle: "
+            + ", ".join(f"{p['name']} ab {site.min_price(p['key'])} €" for p in pr["packages"]) + ". Preise je Fahrzeugklasse, Festpreis vorab.")
+    faq = pick(site.faq, PRICE_FAQ)
+    ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Preise", path)]), seo.faq(faq)]
+    facts = "".join(f'<div class="keyfact"><strong>ab {site.min_price(p["key"])} €</strong><span>{ESC(p["name"])}</span></div>' for p in pr["packages"])
+    body = f'''
+<main id="main">
+  <section class="page-hero" aria-labelledby="page-h">
+    <div class="container">
+      {core.breadcrumb("", [("Startseite", "index.html"), ("Pakete & Preise", None)])}
+      <h1 id="page-h">Preise für Fahrzeug&shy;aufbereitung in Celle</h1>
+      <p class="lead">Drei Pakete, transparente Richtpreise je Fahrzeugklasse. Den verbindlichen Preis bestätigen wir kostenlos vor dem Termin, Zusatzarbeiten nur nach Rücksprache.</p>
+      <div class="keyfacts">{facts}</div>
+    </div>
+  </section>
+
+  <section id="pakete" class="soft" aria-labelledby="pakete-h">
+    <div class="container">
+      <h2 id="pakete-h" class="visually-hidden">Pakete und Richtpreise</h2>{price_section(site)}
+    </div>
+  </section>
+
+  <section id="fragen" aria-labelledby="fragen-h">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Häufige Fragen</p>
+        <h2 id="fragen-h" class="display">Preise, Dauer und Bezahlung.</h2>
+      </div>
+      <div class="faq-list stagger">
+        {core.faq_html(faq)}
       </div>
     </div>
   </section>
 
-{core.contact_section(site)}
 {core.cta_band(site)}
 </main>
 '''
-    write("index.html", core.head(site, title, desc, "/", ld=ld, og_type="business.business") + core.header(site, home=True) + body + core.footer(site, home=True))
+    write("preise.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="preise.html") + body + core.footer(site))
+
+
+def build_kontakt(site, write):
+    s = site.s
+    path = "/kontakt.html"
+    title = "Kontakt & Anfahrt | ElbDetail Fahrzeugaufbereitung Celle"
+    desc = (f"ElbDetail in Celle kontaktieren: {s['address']['street']}, {s['address']['zip']} {s['address']['city']}. "
+            f"Per WhatsApp, Telefon, E-Mail oder Kontaktformular. {s['openingHours']['text']}.")
+    ld = [seo.webpage(site, path, title, {"@type": "ContactPage"}), seo.crumbs(site, [("Startseite", "/"), ("Kontakt", path)])]
+    body = f'''
+<main id="main">
+  <section class="page-hero" aria-labelledby="page-h">
+    <div class="container">
+      {core.breadcrumb("", [("Startseite", "index.html"), ("Kontakt", None)])}
+      <h1 id="page-h">Kontakt &amp; Anfahrt</h1>
+      <p class="lead">Standort, Erreichbarkeit und Kontaktformular von ElbDetail in Celle. Schreib uns, ruf an oder komm vorbei.</p>
+    </div>
+  </section>
+{core.contact_section(site)}
+</main>
+'''
+    write("kontakt.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="kontakt.html") + body + core.footer(site))
 
 
 # --------------------------------------------------------------------------- Leistungsseiten
@@ -401,7 +481,7 @@ def build_service(site, sv, write):
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket={p["key"]}">{I["cal"]}Termin anfragen</a>
         <a class="btn btn-wa btn-lg" href="{wa}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
-        <a class="btn btn-line" href="{prefix}index.html#preise">Alle Pakete &amp; Preise</a>
+        <a class="btn btn-line" href="{prefix}preise.html">Alle Pakete &amp; Preise</a>
       </div>
     </div>
   </section>
@@ -428,7 +508,7 @@ def build_service(site, sv, write):
         <div class="aside-card">
           <h3>Passendes Paket</h3>
           <p><strong>{ESC(p["name"])}</strong> enthält diese Leistung, Richtpreis ab {site.min_price(p["key"])} € für eine Kompaktklasse.</p>
-          <a class="btn btn-line-light" href="{prefix}index.html#preise">Pakete vergleichen</a>
+          <a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>
         </div>
         {art_aside}
         <div class="aside-card"><h3>Weitere Leistungen</h3><ul>{others}</ul></div>

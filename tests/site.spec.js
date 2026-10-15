@@ -3,7 +3,7 @@ const { test, expect } = require("@playwright/test");
 const AxeBuilder = require("@axe-core/playwright").default;
 
 const PAGES = [
-  "/", "/termin.html", "/gutscheine.html", "/firmenkunden.html", "/aktion/winterschutz.html", "/ratgeber/index.html",
+  "/", "/preise.html", "/kontakt.html", "/termin.html", "/gutscheine.html", "/firmenkunden.html", "/aktion/winterschutz.html", "/ratgeber/index.html",
   "/ratgeber/leasingrueckgabe-checkliste.html", "/ratgeber/kosten-fahrzeugaufbereitung-celle.html",
   "/leistungen/aussenaufbereitung-celle.html", "/leistungen/innenaufbereitung-celle.html", "/leistungen/lackpolitur-celle.html",
   "/leistungen/lackversiegelung-celle.html", "/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html",
@@ -48,11 +48,13 @@ test("Alle internen Links funktionieren", async ({ page, request }) => {
   expect(broken).toEqual([]);
 });
 
-for (const path of ["/", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
+for (const path of ["/", "/preise.html", "/kontakt.html", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
   test(`Barrierefreiheit ${path}: keine schweren axe-Verstöße`, async ({ page }) => {
     await page.goto(path);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.evaluate(() => document.querySelectorAll(".reveal").forEach((e) => e.classList.add("is-visible")));
+    // Einblend-Effekte (gestaffelte Verzögerung) abwarten, sonst misst axe halbtransparente Elemente
+    await page.waitForFunction(() => [...document.querySelectorAll(".reveal")].every((e) => getComputedStyle(e).opacity === "1"), null, { timeout: 5000 });
     const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
     const serious = r.violations.filter((v) => ["serious", "critical"].includes(v.impact || ""));
     expect(serious.map((v) => `${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`)).toEqual([]);
@@ -91,10 +93,29 @@ test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
 });
 
 test("Kontaktformular zeigt Pflichtfelder an", async ({ page }) => {
-  await page.goto("/#kontakt");
+  await page.goto("/kontakt.html");
   await page.locator('#contactForm button[type="submit"]').click();
   await expect(page.locator("#k-name")).toHaveAttribute("aria-invalid", "true");
   await expect(page.locator("#k-status")).toContainText("Pflichtfelder");
+});
+
+test("Preisseite: Fahrzeugklasse schaltet Richtpreise um", async ({ page }) => {
+  await page.goto("/preise.html");
+  const amount = page.locator('[data-plan="komplett"] .amount');
+  const before = await amount.textContent();
+  await page.locator('#priceClass label').nth(2).click();
+  await expect(amount).not.toHaveText(before || "");
+  await expect(page.locator('[data-plan="komplett"] [data-book]')).toHaveAttribute("href", /paket=komplett&klasse=/);
+});
+
+test("Startseite: kompakter Kontaktblock führt zu Termin, WhatsApp und Kontaktseite", async ({ page }) => {
+  await page.goto("/");
+  const k = page.locator("#kontakt");
+  await expect(k.locator('a[href="termin.html"]')).toHaveCount(1);
+  await expect(k.locator('a[href^="https://wa.me/"]')).toHaveCount(1);
+  await expect(k.locator('a[href^="tel:"]')).toHaveCount(1);
+  await expect(k.locator('a[href="kontakt.html"]')).toHaveCount(1);
+  await expect(page.locator("#contactForm")).toHaveCount(0);
 });
 
 test("Gutschein-Vorschau und Bestellung", async ({ page }) => {

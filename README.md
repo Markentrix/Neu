@@ -6,13 +6,13 @@ Verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung in
 
 | Bereich | Inhalt |
 |---|---|
-| **Website** | Startseite mit Richtpreis-Rechner, 5 Leistungsseiten, Online-Terminbuchung in 5 Schritten, Gutschein-Konfigurator mit Live-Vorschau, Firmenkunden-Seite, Winter-Aktionsseite, Ratgeber mit 10 Artikeln, Impressum, Datenschutz, 404, Danke-Seite |
+| **Website** | Kompakte Startseite mit Richtpreis-Rechner, Preisseite mit Vergleich je Fahrzeugklasse, Kontaktseite mit Formular und Karte, 5 Leistungsseiten, Online-Terminbuchung in 5 Schritten, Gutschein-Konfigurator mit Live-Vorschau, Firmenkunden-Seite, Winter-Aktionsseite, Ratgeber mit 10 Artikeln, Impressum, Datenschutz, 404, Danke-Seite |
 | **SEO** | LocalBusiness/AutoDetailing-, Service-, FAQ-, BlogPosting-, Breadcrumb- und Product-Schema, Sitemap, RSS, Canonicals, Open Graph, sprechende Titel und Beschreibungen, interne Verlinkung |
 | **GEO (KI-Suche)** | `llms.txt` und `llms-full.txt`, KI-Crawler in `robots.txt` erlaubt, „Das Wichtigste in Kürze“ in jedem Artikel, Faktenblock, zitierfähige FAQ |
 | **Conversion** | Buchungsassistent mit Live-Preis und Sperrtagen, WhatsApp-Weg mit vorausgefüllter Nachricht, Gutscheinverkauf, Firmenanfrage, Danke-Seite, mobile Aktionsleiste |
 | **Verwaltungsportal** `/admin` | Übersicht mit Statistik, Anfragen-Postfach mit Antwortvorlagen und Bewertungsanfrage, Gutscheinverwaltung mit Code-Prüfung, Kalender mit Sperrtagen, Inhalts-Editor für Preise, Texte und Ratgeber, Foto-Upload, Veröffentlichen per Knopfdruck |
 | **Datenschutz** | Keine Cookies, keine Drittanbieter-Skripte, Statistik ohne IP-Speicherung, Google-Karte erst nach Klick, automatische Löschfristen |
-| **Qualität** | 27 Server-Tests, 58 Browser-Tests (Desktop und Mobil, inklusive axe-Barrierefreiheit), Lighthouse 95–99 / 100 / 100 / 100 |
+| **Qualität** | 28 Server-Tests, 70 Browser-Tests (Desktop und Mobil, inklusive axe-Barrierefreiheit), Lighthouse 95–99 / 100 / 100 / 100 |
 
 ## Projektstruktur
 

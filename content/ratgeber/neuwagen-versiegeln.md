@@ -128,6 +128,6 @@ Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Sie ist außerdem Teil des Pakets Premium Politur. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und ausschließlich mit Koch-Chemie-Produkten. Du erhältst vor dem Termin einen verbindlichen Preis und begutachtest das Ergebnis gemeinsam bei Tageslicht. Richtpreise findest du in der [Preisübersicht](/index.html#preise).
+ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Sie ist außerdem Teil des Pakets Premium Politur. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und ausschließlich mit Koch-Chemie-Produkten. Du erhältst vor dem Termin einen verbindlichen Preis und begutachtest das Ergebnis gemeinsam bei Tageslicht. Richtpreise findest du in der [Preisübersicht](/preise.html).
 
 Frag deinen Termin für den Neuwagen per WhatsApp an +49 172 7613807 oder über das [Terminformular](/termin.html) an.

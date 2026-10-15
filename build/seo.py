@@ -140,6 +140,8 @@ def llms(site, full=False):
 - Einzugsgebiet: {a["city"]} (alle Stadtteile, u. a. {", ".join(s["areas"]["city"][:8])}) und Landkreis Celle (u. a. {", ".join(s["areas"]["region"][:9])})
 - Kontakt: WhatsApp/Telefon {s["phoneIntl"]}, E-Mail {s["email"]}
 - Online-Terminanfrage: {site.url}/termin.html
+- Kontakt und Anfahrt: {site.url}/kontakt.html
+- Preise je Fahrzeugklasse: {site.url}/preise.html
 - Terminvergabe: {s["openingHours"]["text"]}, {s["openingHours"]["detail"]}
 - Bewertung: {s["rating"]["value"]} von 5 Sternen, {s["rating"]["count"]} Google-Rezensionen (Stand {s["rating"]["asOf"]})
 - Besonderheiten: 100 % Handarbeit (keine Waschstraße), Koch-Chemie-Lehrgänge absolviert, verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht
@@ -165,7 +167,9 @@ def llms(site, full=False):
 ## Seiten
 
 - Startseite: {site.url}/
+- Pakete und Preise: {site.url}/preise.html
 - Terminanfrage: {site.url}/termin.html
+- Kontakt und Anfahrt: {site.url}/kontakt.html
 - Ratgeber: {site.url}/ratgeber/index.html
 - Impressum: {site.url}/impressum.html
 - Datenschutz: {site.url}/datenschutz.html

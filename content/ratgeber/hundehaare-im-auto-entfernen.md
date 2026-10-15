@@ -114,6 +114,6 @@ Checkliste: Denk an einen Profi, wenn
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle bereitet Fahrzeuge in 100 % Handarbeit auf. Bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html) werden Teppiche und Polster tiefengereinigt. Im Paket Komplettpflege ist auch eine Geruchsneutralisation enthalten. Gearbeitet wird ausschließlich mit Koch-Chemie-Produkten. Den verbindlichen Preis erfährst du vor dem Termin, und das Ergebnis schaut ihr euch am Ende gemeinsam bei Tageslicht an. Richtpreise findest du in der [Preisübersicht](/index.html#preise).
+ElbDetail in Celle bereitet Fahrzeuge in 100 % Handarbeit auf. Bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html) werden Teppiche und Polster tiefengereinigt. Im Paket Komplettpflege ist auch eine Geruchsneutralisation enthalten. Gearbeitet wird ausschließlich mit Koch-Chemie-Produkten. Den verbindlichen Preis erfährst du vor dem Termin, und das Ergebnis schaut ihr euch am Ende gemeinsam bei Tageslicht an. Richtpreise findest du in der [Preisübersicht](/preise.html).
 
 Schick ein paar Fotos vom Innenraum per WhatsApp an +49 172 7613807 oder nutze das [Terminformular](/termin.html). So bekommst du schnell eine Einschätzung für dein Auto.

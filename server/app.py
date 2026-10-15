@@ -834,7 +834,23 @@ class Handler(BaseHTTPRequestHandler):
                 return xff.split(",")[0].strip()
         return self.client_address[0]
 
+    def drain(self):
+        """Ungelesenen Anfrage-Inhalt verwerfen. Sonst stünde er bei wiederverwendeten Verbindungen
+        (Keep-Alive, z. B. hinter Caddy) vor der nächsten Anfrage und würde diese zerstören."""
+        if getattr(self, "_body_done", True):
+            return
+        self._body_done = True
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            n = -1
+        if n < 0 or n > 2_000_000 or "chunked" in (self.headers.get("Transfer-Encoding") or "").lower():
+            self.close_connection = True
+        elif n:
+            self.rfile.read(n)
+
     def send(self, code, body=b"", ctype="application/json; charset=utf-8", headers=None):
+        self.drain()
         if isinstance(body, (dict, list)):
             body = json.dumps(body, ensure_ascii=False).encode()
         elif isinstance(body, str):
@@ -860,6 +876,7 @@ class Handler(BaseHTTPRequestHandler):
         n = int(self.headers.get("Content-Length") or 0)
         if n > limit:
             raise ValueError("zu groß")
+        self._body_done = True
         return self.rfile.read(n) if n else b""
 
     def parse(self, limit=65536):
@@ -904,6 +921,7 @@ class Handler(BaseHTTPRequestHandler):
         self.route("DELETE")
 
     def route(self, method):
+        self._body_done = False
         try:
             u = urllib.parse.urlparse(self.path)
             path, qs = u.path, urllib.parse.parse_qs(u.query)

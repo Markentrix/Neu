@@ -81,7 +81,7 @@ Nicht lohnenswert ist alles, was Schäden verdecken soll oder keinen sichtbaren 
 
 Selbst reinigen reicht, wenn dein Auto gepflegt ist und du die richtige Ausstattung hast. Mit Staubsauger, Mikrofasertüchern und einer schonenden Handwäsche kommst du bei leichtem Alltagsschmutz gut voran. Wasch dabei nicht in der prallen Sonne und nutze zwei Eimer, damit kein Schmutz zurück auf den Lack gelangt.
 
-Professionelle Hilfe lohnt sich, sobald es um Flecken in Polstern, hartnäckige Gerüche, Tierhaare oder Lackkorrektur geht. Dafür braucht es passende Geräte, Erfahrung und Zeit. Bei einer Politur kommt hinzu, dass der Lack vorher gemessen werden sollte. Ohne Messung riskierst du, an Kanten oder dünnen Stellen zu viel abzutragen. Eine Übersicht aller Pakete findest du in der [Preisübersicht](/index.html#preise).
+Professionelle Hilfe lohnt sich, sobald es um Flecken in Polstern, hartnäckige Gerüche, Tierhaare oder Lackkorrektur geht. Dafür braucht es passende Geräte, Erfahrung und Zeit. Bei einer Politur kommt hinzu, dass der Lack vorher gemessen werden sollte. Ohne Messung riskierst du, an Kanten oder dünnen Stellen zu viel abzutragen. Eine Übersicht aller Pakete findest du in der [Preisübersicht](/preise.html).
 
 ## Wie läuft die Aufbereitung vor dem Verkauf ab?
 

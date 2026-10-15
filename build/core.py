@@ -173,8 +173,8 @@ def nav_href(prefix, home, target):
     return prefix + target
 
 
-NAV = [("Leistungen", "#leistungen"), ("Preise", "#preise"), ("Ratgeber", "ratgeber/index.html"),
-       ("Gutscheine", "gutscheine.html"), ("Firmenkunden", "firmenkunden.html"), ("Kontakt", "#kontakt")]
+NAV = [("Leistungen", "#leistungen"), ("Preise", "preise.html"), ("Ratgeber", "ratgeber/index.html"),
+       ("Gutscheine", "gutscheine.html"), ("Firmenkunden", "firmenkunden.html"), ("Kontakt", "kontakt.html")]
 
 
 def header(site, prefix="", home=False, current=None):
@@ -201,13 +201,13 @@ def header(site, prefix="", home=False, current=None):
     <ul>
       <li><a href="{nav_href(prefix, home, '#leistungen')}">Leistungen</a></li>
       {svc}
-      <li><a href="{nav_href(prefix, home, '#preise')}">Pakete &amp; Preise</a></li>
+      <li><a href="{prefix}preise.html">Pakete &amp; Preise</a></li>
       <li><a href="{prefix}termin.html">Termin online anfragen</a></li>
       <li><a href="{prefix}gutscheine.html">Gutscheine</a></li>
       <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
       <li><a href="{prefix}ratgeber/index.html">Ratgeber</a></li>
       <li><a href="{nav_href(prefix, home, '#bewertungen')}">Bewertungen</a></li>
-      <li><a href="{nav_href(prefix, home, '#kontakt')}">Kontakt</a></li>
+      <li><a href="{prefix}kontakt.html">Kontakt</a></li>
     </ul>
   </nav>
 </header>
@@ -223,6 +223,7 @@ def footer(site, prefix="", home=False):
     <div>
       <a class="footer-brand" href="{brand_href}">{logo(site, prefix, True)}</a>
       <p class="footer-about">Premium Fahrzeugaufbereitung in Celle: Innen- &amp; Außenaufbereitung, Lackpolitur und Lackversiegelung in Handarbeit mit Koch-Chemie-Produkten.</p>
+      <p class="footer-areas">Für Kund:innen aus {ESC(", ".join(s["areas"]["city"]))} sowie {ESC(", ".join(s["areas"]["region"]))} und dem ganzen Landkreis Celle.</p>
       <div class="social-row">
         <a class="social-btn" href="{s["social"]["instagram"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Instagram">{I["insta"]}</a>
         <a class="social-btn" href="{s["social"]["facebook"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Facebook">{I["fb"]}</a>
@@ -238,7 +239,7 @@ def footer(site, prefix="", home=False):
       <h2 class="footer-h">Service</h2>
       <ul>
         <li><a href="{prefix}termin.html">Termin online anfragen</a></li>
-        <li><a href="{nav_href(prefix, home, '#preise')}">Pakete &amp; Preise</a></li>
+        <li><a href="{prefix}preise.html">Pakete &amp; Preise</a></li>
         <li><a href="{prefix}gutscheine.html">Gutscheine</a></li>
         <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
         <li><a href="{prefix}aktion/winterschutz.html">Winter-Lackschutz</a></li>

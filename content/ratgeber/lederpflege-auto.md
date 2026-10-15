@@ -121,6 +121,6 @@ Sind Risse oder Farbschäden bereits vorhanden, reicht eine Reinigung allein nic
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle reinigt und pflegt Leder in Handarbeit und ausschließlich mit Koch-Chemie-Produkten. Lederpflege und Imprägnierung sind einzeln buchbar und als Leder- oder Polsterpflege auch Teil der Komplettpflege bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html). Die Richtpreise der Pakete findest du in der [Preisübersicht](/index.html#preise). Ein schön gepflegter Innenraum ist übrigens auch eine gute Idee für einen [Gutschein](/gutscheine.html).
+ElbDetail in Celle reinigt und pflegt Leder in Handarbeit und ausschließlich mit Koch-Chemie-Produkten. Lederpflege und Imprägnierung sind einzeln buchbar und als Leder- oder Polsterpflege auch Teil der Komplettpflege bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html). Die Richtpreise der Pakete findest du in der [Preisübersicht](/preise.html). Ein schön gepflegter Innenraum ist übrigens auch eine gute Idee für einen [Gutschein](/gutscheine.html).
 
 Schick ein Foto deiner Sitze per WhatsApp an +49 172 7613807 oder nutze das [Terminformular](/termin.html). Du bekommst vor dem Termin einen verbindlichen Preis.

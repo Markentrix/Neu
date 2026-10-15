@@ -87,7 +87,7 @@ Fang am besten etwa zwei Monate vor dem Rückgabetermin an. So bleibt genug Zeit
 
 Für die meisten Leasingrückgaben ist die Komplettpflege ein guter Ausgangspunkt, weil der Innenraum oft am stärksten beansprucht ist. Sie umfasst die Handwäsche außen, Felgen und Scheiben sowie eine Tiefenreinigung von Polstern und Teppich, Leder- oder Polsterpflege, Kunststoffpflege und Geruchsneutralisation. Die Richtpreise liegen bei ab {ab:komplett} € für Kompaktwagen, ab 209 € für Limousinen und Kombis und ab 229 € für SUVs und Vans.
 
-Zeigt der Lack viele feine Kratzer oder Waschanlagenspuren, kann die Premium Politur sinnvoll sein. Sie enthält zusätzlich eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung sowie eine Lack-, Felgen- und Scheibenversiegelung. Hier beginnen die Richtpreise bei 349 €. Alle Pakete findest du in der [Preisübersicht](/index.html#preise), Details zur Politur auf der Seite [Lackpolitur](/leistungen/lackpolitur-celle.html).
+Zeigt der Lack viele feine Kratzer oder Waschanlagenspuren, kann die Premium Politur sinnvoll sein. Sie enthält zusätzlich eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung sowie eine Lack-, Felgen- und Scheibenversiegelung. Hier beginnen die Richtpreise bei 349 €. Alle Pakete findest du in der [Preisübersicht](/preise.html), Details zur Politur auf der Seite [Lackpolitur](/leistungen/lackpolitur-celle.html).
 
 > Eine Aufbereitung ist keine Garantie für eine Rückgabe ohne Nachzahlung. Sie sorgt aber dafür, dass dein Auto sauber und gepflegt zur Begutachtung kommt und Schmutz nicht mit Schäden verwechselt wird.
 

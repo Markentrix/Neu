@@ -116,6 +116,6 @@ Bei starkem, über Jahre gewachsenem Rauchgeruch sind manchmal mehrere Durchgän
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle arbeitet in 100 % Handarbeit und ausschließlich mit Koch-Chemie-Produkten. Die Geruchsneutralisation ist Teil der Komplettpflege und auch als Geruchsentfernung einzeln buchbar. Du bekommst vor dem Termin einen verbindlichen Preis. Richtpreise für die Pakete findest du in der [Preisübersicht](/index.html#preise).
+ElbDetail in Celle arbeitet in 100 % Handarbeit und ausschließlich mit Koch-Chemie-Produkten. Die Geruchsneutralisation ist Teil der Komplettpflege und auch als Geruchsentfernung einzeln buchbar. Du bekommst vor dem Termin einen verbindlichen Preis. Richtpreise für die Pakete findest du in der [Preisübersicht](/preise.html).
 
 Beschreib kurz, wonach dein Auto riecht, und schick die Nachricht per WhatsApp an +49 172 7613807. Oder buche direkt über das [Terminformular](/termin.html).

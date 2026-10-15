@@ -110,6 +110,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     site.media = images.process(os.path.join(content_dir, "media"), out_dir, os.path.join(content_dir, ".media-cache"))
 
     pages.build_home(site, write)
+    pages.build_preise(site, write)
+    pages.build_kontakt(site, write)
     for sv in site.services:
         pages.build_service(site, sv, write)
     conversion.build_termin(site, write)
@@ -127,6 +129,7 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     iso = site.s["standIso"]
     sm = [("/", iso, "1.0", "weekly")]
     sm += [(f"/leistungen/{s['slug']}.html", iso, "0.8", "monthly") for s in site.services]
+    sm += [("/preise.html", iso, "0.9", "monthly"), ("/kontakt.html", iso, "0.5", "yearly")]
     sm += [("/termin.html", iso, "0.9", "monthly"), ("/gutscheine.html", iso, "0.7", "monthly"), ("/firmenkunden.html", iso, "0.7", "monthly"),
            ("/aktion/winterschutz.html", iso, "0.7", "monthly"), ("/ratgeber/index.html", iso, "0.7", "weekly")]
     sm += [(f"/ratgeber/{a['slug']}.html", a.get("updated") or a.get("date") or iso, "0.6", "monthly") for a in site.articles]

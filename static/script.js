@@ -144,6 +144,9 @@
     priceSwitch.addEventListener("change", applyClass); applyClass();
   }
 
+  /* Faktenbox: auf schmalen Bildschirmen eingeklappt starten (im HTML offen für Suchmaschinen und ohne JS) */
+  if (window.matchMedia && matchMedia("(max-width: 899.98px)").matches) $$("[data-close-narrow]").forEach(function (d) { d.open = false; });
+
   /* Vorher/Nachher-Slider */
   $$(".ba").forEach(function (ba) {
     var r = $('input[type="range"]', ba); if (!r) return;

@@ -12,7 +12,7 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 
 ## 1. Vor dem Start
 
-- [ ] Alle Ziel-URLs sind live und laden fehlerfrei: `/termin.html`, `/gutscheine.html`, `/aktion/winterschutz.html`, `/firmenkunden.html`, `/index.html#preise` und alle 5 Seiten unter `/leistungen/`.
+- [ ] Alle Ziel-URLs sind live und laden fehlerfrei: `/termin.html`, `/gutscheine.html`, `/aktion/winterschutz.html`, `/firmenkunden.html`, `/preise.html` und alle 5 Seiten unter `/leistungen/`.
 - [ ] Inhalt der Winter-Lackschutz-Aktion steht fest: `[PLATZHALTER: Leistungen, Preis, Zeitraum der Aktion]`. Anzeigentexte bei Bedarf daran anpassen.
 - [ ] Gutschein-Angebot steht fest: `[PLATZHALTER: Werte oder Pakete, Form (PDF, gedruckt), letzter Bestelltag vor Weihnachten]`.
 - [ ] Test-Aufruf jeder Ziel-URL mit UTM-Parametern (Abschnitt 5). In der eigenen Statistik prüfen, dass Quelle und Kampagne ankommen.
@@ -102,7 +102,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 #### AG1 Fahrzeugaufbereitung allgemein
 
 **Ziel-URL:** `/termin.html`  
-**Hinweis:** Alternative zum Testen: /index.html#preise (Preise zuerst, dann Termin).  
+**Hinweis:** Alternative zum Testen: /preise.html (Preise zuerst, dann Termin).  
 **Keywords (23):** 18 Phrase Match, 5 Exact Match
 
 | Phrase Match | Exact Match |
@@ -407,7 +407,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 
 | Sitelink-Text (max. 25) | Zeichen | Ziel-URL | Beschreibung 1 (max. 35) | Beschreibung 2 (max. 35) |
 |---|---|---|---|---|
-| Pakete & Preise | 15 | `/index.html#preise` | Drei Pakete, Richtpreise ab 79 € (32) | Verbindlicher Preis vorab (25) |
+| Pakete & Preise | 15 | `/preise.html` | Drei Pakete, Richtpreise ab 79 € (32) | Verbindlicher Preis vorab (25) |
 | Termin anfragen | 15 | `/termin.html` | Online oder per WhatsApp (24) | Mo bis Fr, Sa nach Absprache (28) |
 | Innenaufbereitung | 17 | `/leistungen/innenaufbereitung-celle.html` | Tiefenreinigung, Polster, Teppich (33) | Geruchsneutralisation inklusive (31) |
 | Lackpolitur | 11 | `/leistungen/lackpolitur-celle.html` | Mehrstufig, mit Messung vorab (29) | Kratzer- und Hologrammentfernung (32) |
@@ -446,7 +446,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 
 **Standort-Asset:** über das verknüpfte Google Business Profile (Lachtehäuser Straße 1, 29223 Celle).
 
-**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Frisch & Sauber ab 79 €, Komplettpflege ab 179 €, Premium Politur ab 349 €, jeweils mit Ziel-URL `/index.html#preise`. Preise gelten für Kompaktwagen bei normalem Pflegezustand, inkl. MwSt.
+**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Frisch & Sauber ab 79 €, Komplettpflege ab 179 €, Premium Politur ab 349 €, jeweils mit Ziel-URL `/preise.html`. Preise gelten für Kompaktwagen bei normalem Pflegezustand, inkl. MwSt.
 
 **Bild-Assets:** Motive aus der Shotlist (01, 14, 27/28, 33) in 1:1 und 1,91:1. Kennzeichen unkenntlich.
 

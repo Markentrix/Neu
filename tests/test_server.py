@@ -112,12 +112,13 @@ class TestMarkdown(unittest.TestCase):
 class TestBuild(Base):
     def test_pages_and_seo_files(self):
         site = app.site_dir()
-        for p in ["index.html", "termin.html", "gutscheine.html", "firmenkunden.html", "aktion/winterschutz.html", "ratgeber/index.html",
+        for p in ["index.html", "preise.html", "kontakt.html", "termin.html", "gutscheine.html", "firmenkunden.html", "aktion/winterschutz.html", "ratgeber/index.html",
                   "leistungen/lackpolitur-celle.html", "impressum.html", "datenschutz.html", "404.html", "danke.html",
                   "sitemap.xml", "robots.txt", "llms.txt", "llms-full.txt", "config.js", "ratgeber/feed.xml"]:
             self.assertTrue(os.path.exists(os.path.join(site, p)), p)
         sm = open(os.path.join(site, "sitemap.xml"), encoding="utf-8").read()
         self.assertIn("/ratgeber/", sm)
+        self.assertIn("/preise.html", sm)
         self.assertNotIn("danke.html", sm)
         self.assertNotIn("entwurf", sm)
         robots = open(os.path.join(site, "robots.txt"), encoding="utf-8").read()
@@ -206,6 +207,26 @@ class TestPublicAPI(Base):
         self.assertEqual((code, j.get("ref")), (200, "OK"))
         code, _ = self.req("POST", "/api/anfrage", {"typ": "kontakt"}, {"Origin": "https://evil.example"})
         self.assertEqual(code, 403)
+
+    def test_keepalive_after_early_response(self):
+        """Antworten ohne gelesenen Inhalt (Herkunft abgelehnt, Statistik-Limit) dürfen die nächste Anfrage
+        auf derselben Verbindung nicht zerstören (wichtig hinter Caddy mit Keep-Alive)."""
+        import http.client
+        con = http.client.HTTPConnection("127.0.0.1", self.srv.server_address[1], timeout=5)
+        try:
+            body = json.dumps({"typ": "kontakt", "name": "x" * 500})
+            con.request("POST", "/api/anfrage", body, {"Content-Type": "application/json", "Origin": "https://evil.example"})
+            r = con.getresponse(); r.read()
+            self.assertEqual(r.status, 403)
+            for _ in range(130):  # über das Limit von 120 Ereignissen pro Minute
+                con.request("POST", "/api/e", json.dumps({"t": "pv", "u": "/"}), {"Content-Type": "application/json"})
+                r = con.getresponse(); r.read()
+                self.assertEqual(r.status, 204)
+            con.request("GET", "/api/health")
+            r = con.getresponse()
+            self.assertEqual((r.status, json.loads(r.read())), (200, {"ok": True}))
+        finally:
+            con.close()
 
     def test_voucher_order_creates_code(self):
         code, j = self.req("POST", "/api/anfrage", {"typ": "gutschein", "art": "wert", "betrag": "150", "name": "Lisa", "email": "l@example.com", "einwilligung": "ja"})
