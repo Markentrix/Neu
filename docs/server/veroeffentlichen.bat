@@ -2,45 +2,54 @@
 setlocal EnableDelayedExpansion
 title Markentrix - Website veroeffentlichen
 
-rem Dieses Skript liegt im Git-Checkout des Repositories Markentrix/Neu neben dem
-rem Ordner "dist". Ablauf: aktuellen Stand aus dem Repository holen, dann nur "dist"
-rem hochladen. Auf dem Server werden Dateien entfernt, die in dist nicht mehr existieren.
+rem Dieses Skript liegt in einem beliebigen Ordner auf dem Windows-Rechner. Ablauf:
+rem   1. Die Datei "markentrix-website.zip" aus dem Chat in denselben Ordner speichern
+rem      (eine vorhandene gleichnamige Datei einfach ueberschreiben).
+rem   2. Doppelklick auf dieses Skript, J druecken. Fertig.
+rem Das Skript entpackt die ZIP nach "dist", prueft den Inhalt und laedt "dist" hoch.
+rem Auf dem Server werden Dateien entfernt, die in der ZIP nicht mehr existieren.
 set "SRC=%~dp0dist"
+set "ZIP=%~dp0markentrix-website.zip"
 set "PAKET=%TEMP%\markentrix-dist.tar"
 set "SERVER=deploy@5.75.146.212"
 set "ZIEL=/srv/sites/markentrix"
 
-if not exist "%SRC%\index.html" (
-  echo FEHLER: Der Ordner dist wurde nicht gefunden oder enthaelt keine index.html.
-  echo Gesucht in: %SRC%
-  pause
-  exit /b 1
-)
-if not exist "%SRC%\blog\das-system-website-sichtbarkeit-ki-assistent.html" (
-  echo WARNUNG: dist scheint nicht der neue Stand zu sein, der Blog-Ordner ist unvollstaendig.
-  echo Bitte zuerst "git pull" ausfuehren oder den Inhalt der ZIP nach dist kopieren.
+if not exist "%ZIP%" (
+  echo FEHLER: Die Datei markentrix-website.zip wurde nicht gefunden.
+  echo Erwartet in: %~dp0
+  echo Bitte die ZIP aus dem Chat in diesen Ordner speichern und erneut starten.
   pause
   exit /b 1
 )
 
 echo.
-echo [0/3] Aktuellen Stand aus dem Repository holen ...
-git -C "%~dp0." pull --ff-only
+echo [0/3] ZIP wird nach dist entpackt ...
+if exist "%SRC%" rmdir /s /q "%SRC%"
+mkdir "%SRC%"
+tar -xf "%ZIP%" -C "%SRC%"
 if errorlevel 1 (
-  echo FEHLER: git pull ist fehlgeschlagen. Es wurde nichts hochgeladen.
-  echo Moegliche Ursachen: keine Internetverbindung, Anmeldung bei GitHub noetig
-  echo oder lokale Aenderungen im Ordner. Meldung oben lesen oder im Chat zeigen.
+  echo FEHLER beim Entpacken der ZIP. Es wurde nichts hochgeladen.
   pause
   exit /b 1
 )
-for /f "delims=" %%b in ('git -C "%~dp0." rev-parse --abbrev-ref HEAD') do set "BRANCH=%%b"
-for /f "delims=" %%c in ('git -C "%~dp0." log -1 --format=%%s') do set "LETZTE=%%c"
+if not exist "%SRC%\index.html" (
+  echo FEHLER: In der ZIP fehlt die index.html. Es wurde nichts hochgeladen.
+  pause
+  exit /b 1
+)
+if not exist "%SRC%\api\anfrage.php" (
+  echo FEHLER: In der ZIP fehlt der Formular-Endpunkt api\anfrage.php. Es wurde nichts hochgeladen.
+  pause
+  exit /b 1
+)
+for /f "delims=" %%d in ('dir /b /a-d "%SRC%\*.html" ^| find /c /v ""') do set "SEITEN=%%d"
+for %%z in ("%ZIP%") do set "ZIPDATUM=%%~tz"
 
 echo.
-echo Die Website aus diesem Ordner wird jetzt LIVE auf markentrix.de veroeffentlicht:
-echo   %SRC%
-echo   Branch: !BRANCH!
-echo   Letzte Aenderung: !LETZTE!
+echo Die Website aus dieser ZIP wird jetzt LIVE auf markentrix.de veroeffentlicht:
+echo   %ZIP%
+echo   Stand der ZIP: !ZIPDATUM!
+echo   Seiten im Hauptordner: !SEITEN!
 echo.
 choice /c JN /m "Jetzt veroeffentlichen (J = ja, N = abbrechen)"
 if errorlevel 2 (
@@ -49,7 +58,6 @@ if errorlevel 2 (
   exit /b 0
 )
 
-echo.
 echo [1/3] Dateien werden gepackt ...
 tar -cf "%PAKET%" -C "%SRC%" .
 if errorlevel 1 (
