@@ -1,7 +1,7 @@
 {
   "title": "Gerüche im Auto dauerhaft entfernen: Rauch, Hund, Feuchtigkeit",
   "seoTitle": "Geruch im Auto dauerhaft entfernen | ElbDetail",
-  "description": "Rauch, Hund oder muffige Feuchtigkeit: So findest du die Ursache für Geruch im Auto und entfernst ihn dauerhaft. Mit Tipps vom Aufbereiter in Celle.",
+  "description": "Rauch, Hund oder muffige Feuchtigkeit: So finden Sie die Ursache für Geruch im Auto und entfernen ihn dauerhaft. Mit Tipps vom Aufbereiter in Celle.",
   "date": "2026-10-15",
   "updated": "2026-10-15",
   "category": "Innenraum",
@@ -21,7 +21,7 @@
     },
     {
       "q": "Warum riecht mein Auto muffig, wenn ich die Lüftung einschalte?",
-      "a": "Ein muffiger Geruch beim Einschalten der Lüftung deutet oft auf einen verschmutzten Innenraumfilter oder Feuchtigkeit am Verdampfer der Klimaanlage hin. Lass den Filter prüfen und tauschen. Hält der Geruch an, sollte eine Werkstatt die Klimaanlage reinigen."
+      "a": "Ein muffiger Geruch beim Einschalten der Lüftung deutet oft auf einen verschmutzten Innenraumfilter oder Feuchtigkeit am Verdampfer der Klimaanlage hin. Lassen Sie den Filter prüfen und tauschen. Hält der Geruch an, sollte eine Werkstatt die Klimaanlage reinigen."
     },
     {
       "q": "Helfen Duftbäume gegen Geruch im Auto?",
@@ -30,23 +30,23 @@
   ]
 }
 
-Ein unangenehmer Geruch im Auto ist mehr als ein Schönheitsfehler. Er begleitet dich auf jeder Fahrt, mindert den Wert beim Verkauf und kann ein Hinweis auf ein technisches Problem sein. Viele greifen dann zum Duftbaum oder Spray. Nach ein paar Tagen ist der Geruch aber wieder da.
+Ein unangenehmer Geruch im Auto ist mehr als ein Schönheitsfehler. Er begleitet Sie auf jeder Fahrt, mindert den Wert beim Verkauf und kann ein Hinweis auf ein technisches Problem sein. Viele greifen dann zum Duftbaum oder Spray. Nach ein paar Tagen ist der Geruch aber wieder da.
 
-Dauerhaft wirst du Gerüche nur los, wenn du die Ursache findest und beseitigst. Dieser Ratgeber zeigt dir, wo die typischen Quellen sitzen, was du selbst tun kannst und wie eine professionelle Geruchsneutralisation abläuft.
+Dauerhaft werden Sie Gerüche nur los, wenn Sie die Ursache finden und beseitigen. Dieser Ratgeber zeigt Ihnen, wo die typischen Quellen sitzen, was Sie selbst tun können und wie eine professionelle Geruchsneutralisation abläuft.
 
 ## Woher kommt der Geruch im Auto?
 
 Gerüche im Auto entstehen fast immer durch Rückstände in Textilien, auf Oberflächen oder durch Feuchtigkeit. Polster, Teppich und Dachhimmel nehmen Gerüche auf wie ein Schwamm. Die Lüftung verteilt sie anschließend im ganzen Innenraum.
 
-| Geruch | Typische Ursache | Wo du suchen solltest |
+| Geruch | Typische Ursache | Wo Sie suchen sollten |
 |---|---|---|
 | Kalter Rauch | Rückstände von Teer und Nikotin | Dachhimmel, Polster, Gurte, Kunststoffe, Lüftung, Aschenbecher |
 | Hund | Hautfett, Speichel, nasses Fell, Haare | Kofferraum, Rückbank, Teppich, Schondecken |
 | Muffig, modrig | Feuchtigkeit im Teppich oder in der Lüftung | Fußraum unter den Matten, Kofferraummulde, Innenraumfilter |
 | Säuerlich | Verschüttete Getränke, besonders Milch | Sitzritzen, Teppich unter den Sitzen, Kindersitz |
-| Süßlich, chemisch | Mögliches technisches Problem | Lass das Fahrzeug in einer Werkstatt prüfen |
+| Süßlich, chemisch | Mögliches technisches Problem | Lassen Sie das Fahrzeug in einer Werkstatt prüfen |
 
-Geh systematisch vor. Nimm alle Fußmatten heraus, taste den Teppich darunter ab und schau unter die Sitze. Prüfe auch die Kofferraummulde, in der sich oft unbemerkt Wasser sammelt.
+Gehen Sie systematisch vor. Nehmen Sie alle Fußmatten heraus, tasten Sie den Teppich darunter ab und schauen Sie unter die Sitze. Prüfen Sie auch die Kofferraummulde, in der sich oft unbemerkt Wasser sammelt.
 
 ### Warum ist Rauchgeruch so hartnäckig?
 
@@ -54,7 +54,7 @@ Rauchgeruch ist hartnäckig, weil sich die Bestandteile des Rauchs als klebriger
 
 ### Was macht Hundegeruch so beständig?
 
-Hundegeruch entsteht vor allem durch Hautfett, Speichel und Feuchtigkeit aus dem Fell. Nach einem Spaziergang im Regen gelangt besonders viel davon in Decken und Teppich. In Verbindung mit Wärme zersetzen sich diese Rückstände und riechen stärker. Haare im Teppich verstärken den Effekt, weil sie selbst Geruchsträger sind. Entferne deshalb immer zuerst die Haare und reinige erst danach die Textilien.
+Hundegeruch entsteht vor allem durch Hautfett, Speichel und Feuchtigkeit aus dem Fell. Nach einem Spaziergang im Regen gelangt besonders viel davon in Decken und Teppich. In Verbindung mit Wärme zersetzen sich diese Rückstände und riechen stärker. Haare im Teppich verstärken den Effekt, weil sie selbst Geruchsträger sind. Entfernen Sie deshalb immer zuerst die Haare und reinigen Sie erst danach die Textilien.
 
 ## Warum lösen Duftbäume das Problem nicht?
 
@@ -66,38 +66,38 @@ Hinzu kommt der Mischgeruch. Rauch plus Vanille oder Hund plus Zitrus wirkt auf 
 
 Der Innenraumfilter spielt eine große Rolle, weil jede Luft, die über die Lüftung ins Auto kommt, durch ihn hindurchströmt. Mit der Zeit sammeln sich darin Staub, Pollen, Laub und Feuchtigkeit. Ein alter Filter kann selbst zur Geruchsquelle werden.
 
-- Lass den Filter nach den Vorgaben im Serviceheft wechseln oder öfter, wenn du viel auf staubigen Straßen fährst.
+- Lassen Sie den Filter nach den Vorgaben im Serviceheft wechseln, bei vielen Fahrten auf staubigen Straßen auch öfter.
 - Ein Filter mit Aktivkohle bindet zusätzlich Gerüche von außen.
 - Riecht es beim Einschalten der Klimaanlage muffig, kann Feuchtigkeit am Verdampfer die Ursache sein. Das ist ein Fall für die Werkstatt.
 
-> Tipp: Schalte die Klimaanlage einige Minuten vor dem Ziel aus und lass das Gebläse weiterlaufen. So trocknet der Verdampfer besser ab und es bildet sich weniger muffiger Geruch.
+> Tipp: Schalten Sie die Klimaanlage einige Minuten vor dem Ziel aus und lassen Sie das Gebläse weiterlaufen. So trocknet der Verdampfer besser ab und es bildet sich weniger muffiger Geruch.
 
-## Feuchtigkeit und Schimmel: Woran erkennst du ein Problem?
+## Feuchtigkeit und Schimmel: Woran erkennen Sie ein Problem?
 
-Ein Feuchtigkeitsproblem erkennst du an dauerhaft beschlagenen Scheiben, nassen Stellen im Teppich und einem modrigen Geruch, der trotz Lüften bleibt. Gerade im Herbst und Winter bringen nasse Schuhe und Jacken viel Wasser ins Auto. Trocknet das nicht ab, entstehen ideale Bedingungen für Schimmel.
+Ein Feuchtigkeitsproblem erkennen Sie an dauerhaft beschlagenen Scheiben, nassen Stellen im Teppich und einem modrigen Geruch, der trotz Lüften bleibt. Gerade im Herbst und Winter bringen nasse Schuhe und Jacken viel Wasser ins Auto. Trocknet das nicht ab, entstehen ideale Bedingungen für Schimmel.
 
 Checkliste für den Feuchtigkeitstest:
 
 - Ist der Teppich unter den Fußmatten feucht oder kalt?
 - Steht Wasser in der Reserveradmulde?
 - Beschlagen die Scheiben schon kurz nach dem Losfahren?
-- Siehst du helle oder dunkle Flecken an Polstern, Gurten oder im Kofferraum?
+- Sehen Sie helle oder dunkle Flecken an Polstern, Gurten oder im Kofferraum?
 - Sind Türdichtungen beschädigt oder Wasserabläufe am Schiebedach oder unter der Frontscheibe verstopft?
 
-> Wichtig: Bürste sichtbaren Schimmel nicht trocken ab, weil dabei Sporen in die Luft gelangen. Lass zuerst die Ursache für das eindringende Wasser in einer Werkstatt beheben. Reinigung ohne Abdichtung bringt nur kurzfristig etwas.
+> Wichtig: Bürsten Sie sichtbaren Schimmel nicht trocken ab, weil dabei Sporen in die Luft gelangen. Lassen Sie zuerst die Ursache für das eindringende Wasser in einer Werkstatt beheben. Reinigung ohne Abdichtung bringt nur kurzfristig etwas.
 
-## Was kannst du selbst gegen Gerüche tun?
+## Was können Sie selbst gegen Gerüche tun?
 
-Selbst kannst du vor allem die Geruchsquelle entfernen und den Innenraum gründlich trocken reinigen. Bei leichten Gerüchen reicht das oft schon aus.
+Selbst können Sie vor allem die Geruchsquelle entfernen und den Innenraum gründlich trocken reinigen. Bei leichten Gerüchen reicht das oft schon aus.
 
-1. Räume das Auto vollständig aus und entsorge Abfälle.
-2. Sauge Teppich, Sitze und Kofferraum gründlich, auch unter den Sitzen.
-3. Wasche Textilmatten und Schondecken oder tausche sie aus.
-4. Wische Kunststoffe, Gurte und Armaturen mit einem geeigneten Innenraumreiniger ab.
-5. Lüfte das Auto bei trockenem Wetter mit offenen Türen.
-6. Lass den Innenraumfilter wechseln.
+1. Räumen Sie das Auto vollständig aus und entsorgen Sie Abfälle.
+2. Saugen Sie Teppich, Sitze und Kofferraum gründlich, auch unter den Sitzen.
+3. Waschen Sie Textilmatten und Schondecken oder tauschen Sie sie aus.
+4. Wischen Sie Kunststoffe, Gurte und Armaturen mit einem geeigneten Innenraumreiniger ab.
+5. Lüften Sie das Auto bei trockenem Wetter mit offenen Türen.
+6. Lassen Sie den Innenraumfilter wechseln.
 
-Hausmittel wie eine Schale mit Natron oder Kaffeepulver können Gerüche über Nacht etwas binden. Sie wirken aber nur an der Luft im Innenraum und erreichen die Quelle in den Fasern nicht. Sieh sie deshalb als Ergänzung, nicht als Lösung. Denk auch an Gegenstände, die oft übersehen werden: Kindersitze, Sitzbezüge, Kofferraumabdeckungen und Taschen in den Rückenlehnen. Diese Teile nehmen Gerüche genauso auf wie der Rest des Innenraums.
+Hausmittel wie eine Schale mit Natron oder Kaffeepulver können Gerüche über Nacht etwas binden. Sie wirken aber nur an der Luft im Innenraum und erreichen die Quelle in den Fasern nicht. Sehen Sie sie deshalb als Ergänzung, nicht als Lösung. Denken Sie auch an Gegenstände, die oft übersehen werden: Kindersitze, Sitzbezüge, Kofferraumabdeckungen und Taschen in den Rückenlehnen. Diese Teile nehmen Gerüche genauso auf wie der Rest des Innenraums.
 
 Bei Rauch, starkem Hundegeruch oder Feuchtigkeit in den Polstern stößt diese Methode an ihre Grenzen. Die Geruchsstoffe sitzen dann tief in den Fasern und im Schaumstoff der Sitze.
 
@@ -112,10 +112,10 @@ Typische Schritte bei einer [Innenaufbereitung](/leistungen/innenaufbereitung-ce
 - schonende Behandlung des Dachhimmels, der gerade bei Rauch stark belastet ist
 - Einsatz von Produkten, die Geruchsstoffe neutralisieren, statt sie zu überdecken
 
-Bei starkem, über Jahre gewachsenem Rauchgeruch sind manchmal mehrere Durchgänge nötig. Ein ehrliches Gespräch vorab hilft dir, das realistische Ergebnis einzuschätzen. Vor dem Verkauf oder der [Leasingrückgabe](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html) lohnt sich die Behandlung besonders, weil Gerüche den Eindruck vom Fahrzeug stark prägen.
+Bei starkem, über Jahre gewachsenem Rauchgeruch sind manchmal mehrere Durchgänge nötig. Ein ehrliches Gespräch vorab hilft Ihnen, das realistische Ergebnis einzuschätzen. Vor dem Verkauf oder der [Leasingrückgabe](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html) lohnt sich die Behandlung besonders, weil Gerüche den Eindruck vom Fahrzeug stark prägen.
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle arbeitet in 100 % Handarbeit und ausschließlich mit Koch-Chemie-Produkten. Die Geruchsneutralisation ist Teil der Komplettpflege und auch als Geruchsentfernung einzeln buchbar. Du bekommst vor dem Termin einen verbindlichen Preis. Richtpreise für die Pakete findest du in der [Preisübersicht](/preise.html).
+ElbDetail in Celle arbeitet in 100 % Handarbeit und ausschließlich mit Koch-Chemie-Produkten. Die Geruchsneutralisation ist Teil der Komplettpflege und auch als Geruchsentfernung einzeln buchbar. Sie bekommen vor dem Termin einen verbindlichen Preis. Richtpreise für die Pakete finden Sie in der [Preisübersicht](/preise.html).
 
-Beschreib kurz, wonach dein Auto riecht, und schick die Nachricht per WhatsApp an +49 172 7613807. Oder buche direkt über das [Terminformular](/termin.html).
+Beschreiben Sie kurz, wonach Ihr Auto riecht, und schicken Sie die Nachricht per WhatsApp an +49 172 7613807. Oder buchen Sie direkt über das [Terminformular](/termin.html).
