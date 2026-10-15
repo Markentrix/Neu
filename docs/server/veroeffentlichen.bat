@@ -17,7 +17,7 @@ if not exist "%SRC%\index.html" (
   exit /b 1
 )
 if not exist "%SRC%\blog\das-system-website-sichtbarkeit-ki-assistent.html" (
-  echo WARNUNG: dist scheint nicht der neue Stand zu sein (Blog-Ordner unvollstaendig).
+  echo WARNUNG: dist scheint nicht der neue Stand zu sein, der Blog-Ordner ist unvollstaendig.
   echo Bitte zuerst "git pull" ausfuehren oder den Inhalt der ZIP nach dist kopieren.
   pause
   exit /b 1
@@ -70,7 +70,7 @@ echo.
 echo Pruefung der Live-Seite ...
 curl.exe -s -o NUL -w "markentrix.de antwortet mit Status %%{http_code}\n" https://markentrix.de/
 curl.exe -s -o NUL -w "Blog antwortet mit Status %%{http_code}\n" https://markentrix.de/blog/das-system-website-sichtbarkeit-ki-assistent
-curl.exe -s -o NUL -w "Formular-Endpunkt antwortet mit Status %%{http_code} (erwartet 405 oder 400, nicht 404)\n" https://markentrix.de/api/anfrage.php
+curl.exe -s -o NUL -w "Formular-Endpunkt antwortet mit Status %%{http_code}, erwartet 405 oder 400, nicht 404\n" https://markentrix.de/api/anfrage.php
 echo.
 echo Fertig. Die Aenderungen sind live.
 pause
