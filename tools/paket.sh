@@ -4,7 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 python3 tools/build.py --check
-out="${1:-.}/markentrix-website.zip"
+outdir="$(cd "${1:-.}" && pwd)"
+out="$outdir/markentrix-website.zip"
 rm -f "$out"
-(cd dist && zip -qr -X "$OLDPWD/$out" . -x '.DS_Store' '*/.DS_Store')
+(cd dist && zip -qr -X "$out" . -x '.DS_Store' '*/.DS_Store')
 echo "$(unzip -l "$out" | tail -1 | awk '{print $2}') Dateien → $out"
