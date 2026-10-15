@@ -173,6 +173,21 @@ class TestBuild(Base):
         self.assertIn('"founder":{"@type":"Person","name":"Max Muster"', home)
         shutil.rmtree(tmp, ignore_errors=True)
 
+    def test_formal_address_everywhere(self):
+        """Kund:innen werden gesiezt: keine Du-Ansprache in Seiten, Texten und E-Mail-Vorlagen."""
+        import re
+        pat = re.compile(r"\b(du|dich|dir|dein|deine|deinen|deinem|deiner|deines|euch|euer|eure|euren|eurem|eurer)\b", re.I)
+        site = app.site_dir()
+        hits = []
+        for root, _, files in os.walk(site):
+            for f in files:
+                if f.endswith((".html", ".txt", ".xml", ".js")):
+                    t = open(os.path.join(root, f), encoding="utf-8").read()
+                    t = re.sub(r"<script[^>]*>.*?</script>", " ", t, flags=re.S)
+                    t = re.sub(r"<[^>]+>", " ", t)
+                    hits += [f"{f}: {m.group(0)} …{t[max(0, m.start() - 30):m.end() + 30]!r}" for m in pat.finditer(t)]
+        self.assertEqual(hits[:10], [])
+
     def test_no_inline_scripts_for_csp(self):
         import re
         site = app.site_dir()

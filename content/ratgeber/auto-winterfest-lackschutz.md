@@ -1,12 +1,12 @@
 {
   "title": "Auto winterfest machen: Lack, Felgen und Innenraum schützen",
   "seoTitle": "Auto winterfest machen: Lackschutz | ElbDetail",
-  "description": "Auto winterfest machen in Celle: So schützt du Lack, Felgen, Dichtungen und Innenraum vor Streusalz und Nässe. Mit Checkliste für den Herbst.",
+  "description": "Auto winterfest machen in Celle: So schützen Sie Lack, Felgen, Dichtungen und Innenraum vor Streusalz und Nässe. Mit Checkliste für den Herbst.",
   "date": "2026-10-15",
   "updated": "2026-10-15",
   "category": "Saison",
   "readingTime": 6,
-  "excerpt": "Streusalz, Nässe und Frost setzen deinem Auto zu. Mit der richtigen Vorbereitung im Herbst schützt du Lack, Felgen und Innenraum durch den Winter.",
+  "excerpt": "Streusalz, Nässe und Frost setzen Ihrem Auto zu. Mit der richtigen Vorbereitung im Herbst schützen Sie Lack, Felgen und Innenraum durch den Winter.",
   "service": "lackversiegelung-celle",
   "summary": [
     "Das Auto sollte im Herbst winterfest gemacht werden, bevor der erste Frost kommt und die Straßen gestreut werden.",
@@ -25,79 +25,79 @@
     },
     {
       "q": "Wie oft sollte ich mein Auto im Winter waschen?",
-      "a": "Wasch dein Auto im Winter regelmäßig, vor allem nach Fahrten auf gestreuten Straßen. Wähle dafür möglichst einen Tag mit Temperaturen über dem Gefrierpunkt. Spül auch Radkästen und Unterboden gründlich ab und trockne danach die Türdichtungen."
+      "a": "Waschen Sie Ihr Auto im Winter regelmäßig, vor allem nach Fahrten auf gestreuten Straßen. Wählen Sie dafür möglichst einen Tag mit Temperaturen über dem Gefrierpunkt. Spülen Sie auch Radkästen und Unterboden gründlich ab und trocknen Sie danach die Türdichtungen."
     }
   ]
 }
 
-Du machst dein Auto am besten im Herbst winterfest, bevor der erste Frost kommt und die Straßen gestreut werden. Die wichtigsten Schritte sind eine Lackversiegelung, saubere und geschützte Felgen, gepflegte Dichtungen und ein Innenraum, der Nässe gut wegsteckt.
+Sie machen Ihr Auto am besten im Herbst winterfest, bevor der erste Frost kommt und die Straßen gestreut werden. Die wichtigsten Schritte sind eine Lackversiegelung, saubere und geschützte Felgen, gepflegte Dichtungen und ein Innenraum, der Nässe gut wegsteckt.
 
-Streusalz, Matsch und Feuchtigkeit wirken über Monate auf dein Fahrzeug ein. In diesem Ratgeber erfährst du, wie du Lack, Felgen, Scheiben und Innenraum gezielt schützt und worauf du während des Winters achten solltest. Am Ende findest du eine Checkliste.
+Streusalz, Matsch und Feuchtigkeit wirken über Monate auf Ihr Fahrzeug ein. In diesem Ratgeber erfahren Sie, wie Sie Lack, Felgen, Scheiben und Innenraum gezielt schützen und worauf Sie während des Winters achten sollten. Am Ende finden Sie eine Checkliste.
 
-## Warum ist Streusalz schädlich für dein Auto?
+## Warum ist Streusalz schädlich für Ihr Auto?
 
 Streusalz ist schädlich, weil es zusammen mit Feuchtigkeit Korrosion fördert. Die Salzlauge gelangt in Ritzen, Falze, Radkästen und an den Unterboden. Besonders kritisch sind kleine Steinschläge, an denen der Lack bereits beschädigt ist. Dort kann Rost entstehen.
 
-Auf dem Lack bildet getrocknetes Salz eine Kruste. Wischst du sie trocken ab, wirken die Kristalle wie feines Schleifpapier und hinterlassen Kratzer. Auch Felgen, Dichtungen und Fußmatten leiden unter Salz und Nässe.
+Auf dem Lack bildet getrocknetes Salz eine Kruste. Wischen Sie sie trocken ab, wirken die Kristalle wie feines Schleifpapier und hinterlassen Kratzer. Auch Felgen, Dichtungen und Fußmatten leiden unter Salz und Nässe.
 
-## Wann solltest du den Lack versiegeln?
+## Wann sollten Sie den Lack versiegeln?
 
-Versiegle den Lack vor dem ersten Frost, solange es noch trocken und mild ist. Eine Versiegelung braucht geeignete Bedingungen, um sich gut mit dem Lack zu verbinden. Bei Kälte und Nässe ist das deutlich schwieriger.
+Versiegeln Sie den Lack vor dem ersten Frost, solange es noch trocken und mild ist. Eine Versiegelung braucht geeignete Bedingungen, um sich gut mit dem Lack zu verbinden. Bei Kälte und Nässe ist das deutlich schwieriger.
 
 Vor der Versiegelung wird das Auto gründlich gereinigt. Zeigt der Lack Kratzer oder Hologramme, ist vorher eine Politur sinnvoll, damit die Defekte nicht unter der Schutzschicht konserviert werden. Nach der Versiegelung perlt Wasser ab, Salzlauge und Schmutz haften schlechter, und das Waschen im Winter geht schneller.
 
-Mehr zur Versiegelung findest du auf der Seite [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Aktuelle Infos zum Winterschutz bei ElbDetail in Celle gibt es bei der [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
+Mehr zur Versiegelung finden Sie auf der Seite [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Aktuelle Infos zum Winterschutz bei ElbDetail in Celle gibt es bei der [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
 
-## Wie machst du die Felgen winterfest?
+## Wie machen Sie die Felgen winterfest?
 
-Reinige die Felgen gründlich, bevor du die Winterräder montierst oder montieren lässt. Bremsstaub und Salz setzen sich im Winter besonders hartnäckig fest. Auf einer sauberen und versiegelten Felge haften sie schlechter und lassen sich leichter entfernen.
+Reinigen Sie die Felgen gründlich, bevor Sie die Winterräder montieren oder montieren lassen. Bremsstaub und Salz setzen sich im Winter besonders hartnäckig fest. Auf einer sauberen und versiegelten Felge haften sie schlechter und lassen sich leichter entfernen.
 
-Denk auch an die Sommerräder: Lagere sie nur sauber und trocken ein. Eingetrockneter Bremsstaub lässt sich nach einigen Monaten deutlich schwerer lösen. Bei stark verschmutzten Felgen hilft eine Felgen-Intensivreinigung. Eine Felgenversiegelung ist im Paket Premium Politur enthalten.
+Denken Sie auch an die Sommerräder: Lagern Sie sie nur sauber und trocken ein. Eingetrockneter Bremsstaub lässt sich nach einigen Monaten deutlich schwerer lösen. Bei stark verschmutzten Felgen hilft eine Felgen-Intensivreinigung. Eine Felgenversiegelung ist im Paket Premium Politur enthalten.
 
-## Wie schützt du Dichtungen und Schlösser?
+## Wie schützen Sie Dichtungen und Schlösser?
 
-Pflege die Gummidichtungen an Türen, Kofferraum und Schiebedach mit einem geeigneten Gummipflegemittel. Gepflegte Dichtungen bleiben geschmeidig und frieren weniger leicht fest. Das schont das Gummi beim Öffnen der Türen bei Frost.
+Pflegen Sie die Gummidichtungen an Türen, Kofferraum und Schiebedach mit einem geeigneten Gummipflegemittel. Gepflegte Dichtungen bleiben geschmeidig und frieren weniger leicht fest. Das schont das Gummi beim Öffnen der Türen bei Frost.
 
-Prüfe auch den Tankdeckel und die Türschlösser. Ein festgefrorener Deckel lässt sich mit etwas Geduld und lauwarmer Luft lösen. Wende dabei keine Gewalt an und gieß kein heißes Wasser darüber.
+Prüfen Sie auch den Tankdeckel und die Türschlösser. Ein festgefrorener Deckel lässt sich mit etwas Geduld und lauwarmer Luft lösen. Wenden Sie dabei keine Gewalt an und gießen Sie kein heißes Wasser darüber.
 
-## Wie bereitest du Scheiben und Wischer vor?
+## Wie bereiten Sie Scheiben und Wischer vor?
 
-Reinige die Scheiben innen und außen gründlich. Ein Schmierfilm auf der Innenseite lässt Scheiben schneller beschlagen und blendet bei tiefer Sonne oder Gegenlicht. Eine Scheibenversiegelung außen sorgt dafür, dass Wasser besser abläuft und sich Eis oft leichter entfernen lässt.
+Reinigen Sie die Scheiben innen und außen gründlich. Ein Schmierfilm auf der Innenseite lässt Scheiben schneller beschlagen und blendet bei tiefer Sonne oder Gegenlicht. Eine Scheibenversiegelung außen sorgt dafür, dass Wasser besser abläuft und sich Eis oft leichter entfernen lässt.
 
-Prüfe die Wischerblätter auf Risse und Schlieren und tausche sie bei Bedarf. Füll Frostschutz ins Wischwasser. Bei vereisten Scheiben solltest du die Wischer nicht einschalten, damit die Gummis nicht beschädigt werden. Nutze einen Eiskratzer statt heißem Wasser.
+Prüfen Sie die Wischerblätter auf Risse und Schlieren und tauschen Sie sie bei Bedarf. Füllen Sie Frostschutz ins Wischwasser. Bei vereisten Scheiben sollten Sie die Wischer nicht einschalten, damit die Gummis nicht beschädigt werden. Nutzen Sie einen Eiskratzer statt heißem Wasser.
 
-## Wie schützt du den Innenraum im Winter?
+## Wie schützen Sie den Innenraum im Winter?
 
-Leg Gummi- oder Allwettermatten ein, damit Schneematsch und Salz nicht in den Teppich ziehen. Salzränder auf Textilmatten und Teppich lassen sich schwer entfernen, wenn sie lange einwirken. Nimm nasse Matten regelmäßig heraus und lass sie trocknen.
+Legen Sie Gummi- oder Allwettermatten ein, damit Schneematsch und Salz nicht in den Teppich ziehen. Salzränder auf Textilmatten und Teppich lassen sich schwer entfernen, wenn sie lange einwirken. Nehmen Sie nasse Matten regelmäßig heraus und lassen Sie sie trocknen.
 
-Feuchtigkeit im Innenraum führt zu beschlagenen Scheiben und kann muffige Gerüche verursachen. Lüfte das Auto regelmäßig und klopf Schnee vor dem Einsteigen von den Schuhen. Ledersitze profitieren im Winter von Pflege, weil trockene Heizungsluft und Kälte das Material beanspruchen. Wenn der Innenraum nach dem Winter Salzränder oder Gerüche zeigt, hilft eine [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html).
+Feuchtigkeit im Innenraum führt zu beschlagenen Scheiben und kann muffige Gerüche verursachen. Lüften Sie das Auto regelmäßig und klopfen Sie Schnee vor dem Einsteigen von den Schuhen. Ledersitze profitieren im Winter von Pflege, weil trockene Heizungsluft und Kälte das Material beanspruchen. Wenn der Innenraum nach dem Winter Salzränder oder Gerüche zeigt, hilft eine [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html).
 
-## Wie pflegst du dein Auto während des Winters?
+## Wie pflegen Sie Ihr Auto während des Winters?
 
-Wasch dein Auto im Winter regelmäßig, besonders nach Fahrten auf gestreuten Straßen. Wähle dafür möglichst einen Tag mit Plusgraden, damit das Wasser nicht sofort in Ritzen und Schlössern gefriert.
+Waschen Sie Ihr Auto im Winter regelmäßig, besonders nach Fahrten auf gestreuten Straßen. Wählen Sie dafür möglichst einen Tag mit Plusgraden, damit das Wasser nicht sofort in Ritzen und Schlössern gefriert.
 
-- Spül Radkästen und Unterboden gründlich ab.
-- Entferne Salzkrusten immer mit viel Wasser, nie trocken.
-- Fege Schnee mit einem weichen Schneebesen vom Lack, nicht mit Eiskratzer oder harter Bürste.
-- Trockne nach der Wäsche die Türdichtungen ab, damit sie nicht festfrieren.
-- Kontrolliere den Lack auf neue Steinschläge und lass sie zeitnah ausbessern.
+- Spülen Sie Radkästen und Unterboden gründlich ab.
+- Entfernen Sie Salzkrusten immer mit viel Wasser, nie trocken.
+- Fegen Sie Schnee mit einem weichen Schneebesen vom Lack, nicht mit Eiskratzer oder harter Bürste.
+- Trocknen Sie nach der Wäsche die Türdichtungen ab, damit sie nicht festfrieren.
+- Kontrollieren Sie den Lack auf neue Steinschläge und lassen Sie diese zeitnah ausbessern.
 
 ## Was gehört außerdem zur Wintervorbereitung?
 
-Neben der Pflege gehört auch ein kurzer Technik-Check zur Wintervorbereitung. Er ersetzt keine Werkstatt, hilft dir aber, typische Probleme bei Kälte zu vermeiden:
+Neben der Pflege gehört auch ein kurzer Technik-Check zur Wintervorbereitung. Er ersetzt keine Werkstatt, hilft Ihnen aber, typische Probleme bei Kälte zu vermeiden:
 
 - **Reifen:** Winterreifen oder Ganzjahresreifen mit ausreichend Profil montieren lassen und den Luftdruck prüfen.
-- **Batterie:** Eine schwache Batterie zeigt sich bei Kälte oft zuerst. Lass sie bei Startproblemen prüfen.
+- **Batterie:** Eine schwache Batterie zeigt sich bei Kälte oft zuerst. Lassen Sie sie bei Startproblemen prüfen.
 - **Kühlmittel:** Den Frostschutz im Kühlsystem kontrollieren lassen.
 - **Beleuchtung:** Alle Lampen prüfen, weil es im Winter früher dunkel wird.
 
 ## Lohnt sich Winterschutz auch für ältere Autos?
 
-Winterschutz lohnt sich gerade für ältere Autos, weil ihr Lack oft schon Steinschläge und dünnere Stellen hat. Dort findet Salzlauge leichter einen Angriffspunkt. Eine gründliche Reinigung und eine Versiegelung vor dem Winter helfen, den Zustand zu erhalten. Bei einem älteren Fahrzeug ist es außerdem sinnvoll, kleine Lackschäden vor dem Winter ausbessern zu lassen, bevor sich Rost bildet. Wie eine schonende Außenpflege abläuft, liest du auf der Seite zur [Außenaufbereitung](/leistungen/aussenaufbereitung-celle.html).
+Winterschutz lohnt sich gerade für ältere Autos, weil ihr Lack oft schon Steinschläge und dünnere Stellen hat. Dort findet Salzlauge leichter einen Angriffspunkt. Eine gründliche Reinigung und eine Versiegelung vor dem Winter helfen, den Zustand zu erhalten. Bei einem älteren Fahrzeug ist es außerdem sinnvoll, kleine Lackschäden vor dem Winter ausbessern zu lassen, bevor sich Rost bildet. Wie eine schonende Außenpflege abläuft, lesen Sie auf der Seite zur [Außenaufbereitung](/leistungen/aussenaufbereitung-celle.html).
 
 ## Checkliste: Auto winterfest machen
 
-Mit dieser Liste bist du gut vorbereitet:
+Mit dieser Liste sind Sie gut vorbereitet:
 
 - Auto gründlich von Hand gewaschen
 - Lack auf Kratzer und Steinschläge geprüft
@@ -112,6 +112,6 @@ Mit dieser Liste bist du gut vorbereitet:
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail bereitet dein Auto in Celle zu 100 % von Hand auf den Winter vor, mit Zwei-Eimer-Handwäsche und Produkten von Koch-Chemie. Du bekommst vor dem Termin einen verbindlichen Preis, und das Ergebnis nehmt ihr gemeinsam bei Tageslicht ab.
+ElbDetail bereitet Ihr Auto in Celle zu 100 % von Hand auf den Winter vor, mit Zwei-Eimer-Handwäsche und Produkten von Koch-Chemie. Sie bekommen vor dem Termin einen verbindlichen Preis, und das Ergebnis nehmen wir gemeinsam mit Ihnen bei Tageslicht ab.
 
-Schick ein paar Fotos deines Autos per WhatsApp an +49 172 7613807 oder buche über das [Terminformular](/termin.html). Je früher du vor dem ersten Frost anfragst, desto entspannter wird die Terminplanung.
+Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 oder buchen Sie über das [Terminformular](/termin.html). Je früher Sie vor dem ersten Frost anfragen, desto entspannter wird die Terminplanung.

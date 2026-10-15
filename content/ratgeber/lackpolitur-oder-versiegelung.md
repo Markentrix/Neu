@@ -1,17 +1,17 @@
 {
   "title": "Lackpolitur oder Lackversiegelung: Was braucht mein Auto?",
   "seoTitle": "Lackpolitur oder Versiegelung? | ElbDetail",
-  "description": "Lackpolitur oder Versiegelung? So erkennst du Lackdefekte mit einfachen Tests und findest heraus, was dein Auto braucht. Entscheidungshilfe aus Celle.",
+  "description": "Lackpolitur oder Versiegelung? So erkennen Sie Lackdefekte mit einfachen Tests und finden heraus, was Ihr Auto braucht. Entscheidungshilfe aus Celle.",
   "date": "2026-10-15",
   "updated": "2026-10-15",
   "category": "Lackpflege",
   "readingTime": 6,
-  "excerpt": "Politur korrigiert, Versiegelung schützt. Mit drei einfachen Tests findest du selbst heraus, was dein Lack gerade braucht.",
+  "excerpt": "Politur korrigiert, Versiegelung schützt. Mit drei einfachen Tests finden Sie selbst heraus, was Ihr Lack gerade braucht.",
   "service": "lackpolitur-celle",
   "summary": [
     "Eine Lackpolitur entfernt feine Kratzer, Hologramme und Verwitterung, indem sie eine sehr dünne Schicht Klarlack abträgt.",
     "Eine Lackversiegelung korrigiert keine Defekte, sondern legt eine Schutzschicht auf den Lack und erleichtert die Reinigung.",
-    "Mit dem Sonnen- oder Taschenlampentest und dem Fingernageltest kannst du Lackdefekte selbst grob einschätzen.",
+    "Mit dem Sonnen- oder Taschenlampentest und dem Fingernageltest können Sie Lackdefekte selbst grob einschätzen.",
     "Nach einer Politur sollte der Lack immer versiegelt werden, weil er sonst ungeschützt ist."
   ],
   "faq": [
@@ -25,14 +25,14 @@
     },
     {
       "q": "Woran erkenne ich, ob ein Kratzer wegpoliert werden kann?",
-      "a": "Fahr mit dem Fingernagel quer über den Kratzer. Bleibst du nicht hängen, liegt er meist im Klarlack und lässt sich oft auspolieren. Bleibt der Nagel hängen oder schimmert heller Untergrund durch, ist der Kratzer in der Regel zu tief für eine Politur."
+      "a": "Fahren Sie mit dem Fingernagel quer über den Kratzer. Gleitet der Nagel darüber, liegt der Kratzer meist im Klarlack und lässt sich oft auspolieren. Bleibt der Nagel hängen oder schimmert heller Untergrund durch, ist der Kratzer in der Regel zu tief für eine Politur."
     }
   ]
 }
 
-Eine Lackpolitur korrigiert Schäden im Lack, eine Lackversiegelung schützt ihn. Zeigt dein Lack feine Kratzer, Hologramme oder einen grauen Schleier, brauchst du zuerst eine Politur. Ist der Lack noch in gutem Zustand und soll vor allem geschützt werden, reicht oft eine Versiegelung.
+Eine Lackpolitur korrigiert Schäden im Lack, eine Lackversiegelung schützt ihn. Zeigt Ihr Lack feine Kratzer, Hologramme oder einen grauen Schleier, brauchen Sie zuerst eine Politur. Ist der Lack noch in gutem Zustand und soll vor allem geschützt werden, reicht oft eine Versiegelung.
 
-In diesem Ratgeber erfährst du, wie sich beide Verfahren unterscheiden, wie du Lackdefekte selbst erkennst und wann sich die Kombination aus beidem lohnt.
+In diesem Ratgeber erfahren Sie, wie sich beide Verfahren unterscheiden, wie Sie Lackdefekte selbst erkennen und wann sich die Kombination aus beidem lohnt.
 
 ## Was ist der Unterschied zwischen Lackpolitur und Lackversiegelung?
 
@@ -59,29 +59,29 @@ Die häufigsten Lackdefekte entstehen durch falsche Wäsche, Umwelteinflüsse un
 - **Ätzspuren:** matte Stellen durch Vogelkot, Insekten oder Baumharz
 - **Tiefe Kratzer und Steinschläge:** Beschädigungen, die durch den Klarlack hindurchgehen
 
-## Wie erkennst du Lackdefekte selbst?
+## Wie erkennen Sie Lackdefekte selbst?
 
-Du erkennst Lackdefekte am besten an einem sauberen, trockenen Auto mit gezieltem Licht. Im Schatten oder bei bewölktem Himmel bleiben feine Kratzer oft unsichtbar.
+Sie erkennen Lackdefekte am besten an einem sauberen, trockenen Auto mit gezieltem Licht. Im Schatten oder bei bewölktem Himmel bleiben feine Kratzer oft unsichtbar.
 
 ### Sonnentest
 
-Stell das frisch gewaschene Auto in die direkte Sonne. Schau dir die Spiegelung der Sonne im Lack aus verschiedenen Winkeln an. Siehst du feine Kreise um den Lichtpunkt, sind das Waschanlagenkratzer. Wandern schillernde Schlieren mit, wenn du dich bewegst, handelt es sich um Hologramme.
+Stellen Sie das frisch gewaschene Auto in die direkte Sonne. Schauen Sie sich die Spiegelung der Sonne im Lack aus verschiedenen Winkeln an. Sehen Sie feine Kreise um den Lichtpunkt, sind das Waschanlagenkratzer. Wandern schillernde Schlieren mit, wenn Sie sich bewegen, handelt es sich um Hologramme.
 
 ### Taschenlampentest
 
-Ohne Sonne funktioniert der Test mit einer hellen LED-Taschenlampe oder dem Licht deines Smartphones. Halte das Licht in einer dunklen Garage oder am Abend schräg auf den Lack und bewege es langsam. Kratzer und Schlieren werden so deutlich sichtbar.
+Ohne Sonne funktioniert der Test mit einer hellen LED-Taschenlampe oder dem Licht Ihres Smartphones. Halten Sie das Licht in einer dunklen Garage oder am Abend schräg auf den Lack und bewegen Sie es langsam. Kratzer und Schlieren werden so deutlich sichtbar.
 
 ### Fingernageltest
 
-Mit dem Fingernageltest prüfst du die Tiefe einzelner Kratzer. Fahr mit dem Nagel quer über den Kratzer. Gleitet er darüber, liegt der Kratzer meist im Klarlack und lässt sich oft auspolieren. Bleibt er hängen oder siehst du hellen Untergrund, ist der Kratzer in der Regel zu tief für eine Politur.
+Mit dem Fingernageltest prüfen Sie die Tiefe einzelner Kratzer. Fahren Sie mit dem Nagel quer über den Kratzer. Gleitet er darüber, liegt der Kratzer meist im Klarlack und lässt sich oft auspolieren. Bleibt er hängen oder sehen Sie hellen Untergrund, ist der Kratzer in der Regel zu tief für eine Politur.
 
 ### Tütentest
 
-Steck deine Hand in eine dünne Plastiktüte und streich damit über den sauberen Lack. Fühlt sich die Oberfläche rau an, sitzen dort festhaftende Partikel wie Flugrost oder Teerreste. Sie sollten vor einer Politur oder Versiegelung entfernt werden.
+Stecken Sie Ihre Hand in eine dünne Plastiktüte und streichen Sie damit über den sauberen Lack. Fühlt sich die Oberfläche rau an, sitzen dort festhaftende Partikel wie Flugrost oder Teerreste. Sie sollten vor einer Politur oder Versiegelung entfernt werden.
 
 ## Entscheidungshilfe: Politur oder Versiegelung?
 
-Die Tabelle hilft dir, deinen Befund einzuordnen:
+Die Tabelle hilft Ihnen, Ihren Befund einzuordnen:
 
 | Befund | Empfehlung | Warum |
 |---|---|---|
@@ -105,32 +105,32 @@ Bei ElbDetail ist diese Kombination im Paket Premium Politur enthalten. Es umfas
 
 Eine Lackpolitur bei ElbDetail beginnt mit einer gründlichen Handwäsche und endet mit einer gemeinsamen Abnahme bei Tageslicht. Dazwischen liegen mehrere Arbeitsschritte:
 
-1. **Fotos und Preis:** Du schickst Fotos per WhatsApp und bekommst vor dem Termin einen verbindlichen Preis.
+1. **Fotos und Preis:** Sie schicken Fotos per WhatsApp und bekommen vor dem Termin einen verbindlichen Preis.
 2. **Handwäsche:** Das Auto wird mit der Zwei-Eimer-Methode von Hand gewaschen, damit beim Reinigen keine neuen Kratzer entstehen.
 3. **Messung:** Die Lackschichtdicke wird gemessen, um zu wissen, wie viel Spielraum der Lack bietet.
 4. **Politur:** Der Lack wird mehrstufig poliert, bis Kratzer und Hologramme so weit wie möglich entfernt sind.
 5. **Versiegelung:** Der polierte Lack bekommt eine Schutzschicht.
-6. **Abnahme:** Ihr prüft das Ergebnis gemeinsam bei Tageslicht.
+6. **Abnahme:** Sie prüfen das Ergebnis gemeinsam mit uns bei Tageslicht.
 
 Gearbeitet wird zu 100 % von Hand und ausschließlich mit Produkten von Koch-Chemie.
 
 ## Wie oft braucht ein Auto eine Politur?
 
-Eine Politur brauchst du nur, wenn der Lack sichtbare Defekte zeigt. Sie ist kein Pflegeschritt für jede Wäsche, weil jedes Polieren etwas Klarlack abträgt. Die Versiegelung dagegen kannst du regelmäßig erneuern lassen, sobald Wasser nicht mehr gut abperlt. Wer schonend wäscht und den Lack geschützt hält, muss deutlich seltener polieren.
+Eine Politur brauchen Sie nur, wenn der Lack sichtbare Defekte zeigt. Sie ist kein Pflegeschritt für jede Wäsche, weil jedes Polieren etwas Klarlack abträgt. Die Versiegelung dagegen können Sie regelmäßig erneuern lassen, sobald Wasser nicht mehr gut abperlt. Wer schonend wäscht und den Lack geschützt hält, muss deutlich seltener polieren.
 
-## Wie pflegst du den Lack danach?
+## Wie pflegen Sie den Lack danach?
 
-Du pflegst den Lack nach Politur und Versiegelung am besten mit regelmäßiger, schonender Handwäsche. Diese Punkte helfen:
+Sie pflegen den Lack nach Politur und Versiegelung am besten mit regelmäßiger, schonender Handwäsche. Diese Punkte helfen:
 
-- Wasch dein Auto von Hand, nicht in der Bürstenwaschanlage.
-- Nutze zwei Eimer und einen sauberen Waschhandschuh.
-- Verwende ein mildes Autoshampoo ohne aggressive Zusätze.
-- Trockne den Lack mit einem weichen Mikrofasertuch.
-- Entferne Vogelkot, Insekten und Baumharz möglichst schnell.
-- Wasch nicht in der prallen Sonne, damit keine Wasserflecken entstehen.
+- Waschen Sie Ihr Auto von Hand, nicht in der Bürstenwaschanlage.
+- Nutzen Sie zwei Eimer und einen sauberen Waschhandschuh.
+- Verwenden Sie ein mildes Autoshampoo ohne aggressive Zusätze.
+- Trocknen Sie den Lack mit einem weichen Mikrofasertuch.
+- Entfernen Sie Vogelkot, Insekten und Baumharz möglichst schnell.
+- Waschen Sie nicht in der prallen Sonne, damit keine Wasserflecken entstehen.
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail poliert und versiegelt Lack in Celle zu 100 % von Hand, mit Lackschichtdickenmessung und Produkten von Koch-Chemie. Mehr Details findest du auf den Seiten [Lackpolitur](/leistungen/lackpolitur-celle.html) und [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Vor dem Winter lohnt sich auch ein Blick auf die [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
+ElbDetail poliert und versiegelt Lack in Celle zu 100 % von Hand, mit Lackschichtdickenmessung und Produkten von Koch-Chemie. Mehr Details finden Sie auf den Seiten [Lackpolitur](/leistungen/lackpolitur-celle.html) und [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Vor dem Winter lohnt sich auch ein Blick auf die [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
 
-Schick ein paar Fotos deines Lacks per WhatsApp an +49 172 7613807 oder nutze das [Terminformular](/termin.html). Du bekommst vor dem Termin einen verbindlichen Preis.
+Schicken Sie ein paar Fotos Ihres Lacks per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.

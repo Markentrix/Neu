@@ -6,7 +6,7 @@
   "updated": "2026-10-15",
   "category": "Lackpflege",
   "readingTime": 6,
-  "excerpt": "Ein Neuwagen glänzt, ist aber nicht automatisch geschützt. Hier erfährst du, wann sich eine Versiegelung lohnt und worauf es bei der Vorbereitung ankommt.",
+  "excerpt": "Ein Neuwagen glänzt, ist aber nicht automatisch geschützt. Hier erfahren Sie, wann sich eine Versiegelung lohnt und worauf es bei der Vorbereitung ankommt.",
   "service": "lackversiegelung-celle",
   "summary": [
     "Auch ein Neuwagen kann nach Transport und Standzeit Flugrost, Industriestaub und erste Waschkratzer aufweisen.",
@@ -17,11 +17,11 @@
   "faq": [
     {
       "q": "Ist eine Versiegelung beim Neuwagen sinnvoll?",
-      "a": "Eine Versiegelung ist beim Neuwagen sinnvoll, wenn du den Lack von Anfang an leichter pflegen und besser vor Umwelteinflüssen schützen möchtest. Der Lack ist zu diesem Zeitpunkt meist in gutem Zustand und braucht wenig Vorarbeit. Wer sein Auto oft draußen parkt oder lange fahren möchte, profitiert besonders."
+      "a": "Eine Versiegelung ist beim Neuwagen sinnvoll, wenn Sie den Lack von Anfang an leichter pflegen und besser vor Umwelteinflüssen schützen möchten. Der Lack ist zu diesem Zeitpunkt meist in gutem Zustand und braucht wenig Vorarbeit. Wer sein Auto oft draußen parkt oder lange fahren möchte, profitiert besonders."
     },
     {
       "q": "Wann sollte man einen Neuwagen versiegeln?",
-      "a": "Am besten versiegelst du einen Neuwagen möglichst bald nach der Übergabe, bevor sich viele Waschkratzer und Ablagerungen bilden. Vorher wird der Lack gründlich gereinigt und von Flugrost und Rückständen befreit. Hat der Händler das Auto bereits maschinell gewaschen, kann eine leichte Politur vorab sinnvoll sein."
+      "a": "Am besten versiegeln Sie einen Neuwagen möglichst bald nach der Übergabe, bevor sich viele Waschkratzer und Ablagerungen bilden. Vorher wird der Lack gründlich gereinigt und von Flugrost und Rückständen befreit. Hat der Händler das Auto bereits maschinell gewaschen, kann eine leichte Politur vorab sinnvoll sein."
     },
     {
       "q": "Was ist der Unterschied zwischen Wachs und Versiegelung?",
@@ -32,37 +32,37 @@
 
 Ein neues Auto glänzt bei der Übergabe und wirkt makellos. Viele fragen sich deshalb, ob eine Versiegelung überhaupt nötig ist. Schließlich ist der Lack frisch und hat noch keine Spuren des Alltags.
 
-Ganz so einfach ist es nicht. Zwischen Lackiererei und Übergabe liegen oft Transport, Lagerung und eine erste Wäsche. In diesem Ratgeber erfährst du, in welchem Zustand der Lack wirklich ist, welche Schutzarten es gibt und wann sich die Versiegelung für dich lohnt.
+Ganz so einfach ist es nicht. Zwischen Lackiererei und Übergabe liegen oft Transport, Lagerung und eine erste Wäsche. In diesem Ratgeber erfahren Sie, in welchem Zustand der Lack wirklich ist, welche Schutzarten es gibt und wann sich die Versiegelung für Sie lohnt.
 
 ## In welchem Zustand ist der Lack eines Neuwagens?
 
 Der Lack eines Neuwagens ist in der Regel in gutem Zustand, aber nicht unberührt und nicht automatisch geschützt. Der Klarlack ist zwar die oberste Schutzschicht, er ist aber allen Umwelteinflüssen direkt ausgesetzt.
 
-Auf dem Weg zu dir kann der Lack einiges erleben:
+Auf dem Weg zu Ihnen kann der Lack einiges erleben:
 
 - **Transport per Bahn, Lkw oder Schiff:** Dabei setzen sich Industriestaub, Bremsabrieb und feine Metallpartikel auf dem Lack ab. Diese Partikel können als Flugrost in kleinen orangefarbenen Punkten sichtbar werden.
 - **Standzeit im Freien:** Neuwagen stehen oft eine Weile auf großen Parkflächen. Vogelkot, Baumharz und Regenwasser hinterlassen dort ihre Spuren.
-- **Transportschutzfolie:** Ihre Kleberückstände bleiben teilweise auf dem Lack.
+- **Transportschutzfolie:** Kleberückstände der Folie bleiben teilweise auf dem Lack.
 - **Wäsche vor der Übergabe:** Wird das Auto in einer Waschanlage oder hastig von Hand gewaschen, entstehen schon die ersten feinen Kratzer.
 
-Fahr mit der Hand in einer dünnen Plastiktüte über die gewaschene Motorhaube. Fühlt sich der Lack rau an, haften Partikel darauf, die vor einer Versiegelung entfernt werden sollten.
+Fahren Sie mit der Hand in einer dünnen Plastiktüte über die gewaschene Motorhaube. Fühlt sich der Lack rau an, haften Partikel darauf, die vor einer Versiegelung entfernt werden sollten.
 
 ## Welche Vorteile hat eine Versiegelung?
 
-Der wichtigste Vorteil einer Versiegelung ist, dass Schmutz schlechter haftet und sich leichter entfernen lässt. Wasser perlt ab und nimmt einen Teil des Schmutzes gleich mit. Jede Wäsche wird dadurch einfacher und schonender, weil du weniger reiben musst.
+Der wichtigste Vorteil einer Versiegelung ist, dass Schmutz schlechter haftet und sich leichter entfernen lässt. Wasser perlt ab und nimmt einen Teil des Schmutzes gleich mit. Jede Wäsche wird dadurch einfacher und schonender, weil Sie weniger reiben müssen.
 
 Weitere Vorteile:
 
-- Sie verschafft dir einen zeitlichen Puffer bei aggressiven Verschmutzungen wie Vogelkot, Baumharz und Insekten.
-- Sie hilft, den Lack vor UV-Strahlung und Witterung zu schützen.
-- Sie verstärkt Glanz und Farbtiefe.
+- Die Versiegelung verschafft Ihnen einen zeitlichen Puffer bei aggressiven Verschmutzungen wie Vogelkot, Baumharz und Insekten.
+- UV-Strahlung und Witterung setzen dem Lack weniger zu.
+- Glanz und Farbtiefe wirken kräftiger.
 - Streusalz und Winterschmutz lassen sich leichter abwaschen.
 
 > Wichtig: Eine Versiegelung schützt nicht vor Steinschlägen, Parkremplern oder tiefen Kratzern. Dafür ist eine Lackschutzfolie gedacht. Auch eine Versiegelung braucht regelmäßige und richtige Pflege.
 
 ## Wachs, Versiegelung oder Keramik: Was ist der Unterschied?
 
-Wachs, Versiegelung und Keramikbeschichtung unterscheiden sich vor allem in Material, Haltbarkeit und Aufwand bei der Verarbeitung. Die folgende Übersicht ordnet die Varianten grob ein. Die tatsächliche Haltbarkeit hängt immer vom Produkt, der Vorbereitung und deiner Pflege ab.
+Wachs, Versiegelung und Keramikbeschichtung unterscheiden sich vor allem in Material, Haltbarkeit und Aufwand bei der Verarbeitung. Die folgende Übersicht ordnet die Varianten grob ein. Die tatsächliche Haltbarkeit hängt immer vom Produkt, der Vorbereitung und Ihrer Pflege ab.
 
 | Schutzart | Basis | Haltbarkeit grob | Aufwand |
 |---|---|---|---|
@@ -70,7 +70,7 @@ Wachs, Versiegelung und Keramikbeschichtung unterscheiden sich vor allem in Mate
 | Lackversiegelung | Synthetische Polymere oder Hybridprodukte | deutlich länger als Wachs | mittel |
 | Keramikbeschichtung | Siliziumdioxid-basierte Beschichtung | laut Herstellern am längsten | hoch, sehr gründliche Vorbereitung nötig |
 
-Für viele Fahrzeuge im Alltag ist eine Lackversiegelung ein guter Mittelweg zwischen Schutz, Aufwand und Kosten. Welche Lösung zu dir passt, hängt davon ab, wie du dein Auto nutzt und wie viel Zeit du in die Pflege investieren möchtest.
+Für viele Fahrzeuge im Alltag ist eine Lackversiegelung ein guter Mittelweg zwischen Schutz, Aufwand und Kosten. Welche Lösung zu Ihnen passt, hängt davon ab, wie Sie Ihr Auto nutzen und wie viel Zeit Sie in die Pflege investieren möchten.
 
 ### Was ist mit Lackschutzfolie?
 
@@ -87,32 +87,32 @@ Ein Neuwagen wird vor der Versiegelung gründlich gereinigt und von allen haften
 5. **Leichte Politur bei Bedarf**, wenn bereits Swirls vorhanden sind. Vor einer [Lackpolitur](/leistungen/lackpolitur-celle.html) wird die Lackschichtdicke gemessen.
 6. **Versiegelung** auf den sauberen und fettfreien Lack auftragen und nach Herstellerangabe aushärten lassen.
 
-## Wie wäschst du ein versiegeltes Auto richtig?
+## Wie waschen Sie ein versiegeltes Auto richtig?
 
-Ein versiegeltes Auto wäschst du am besten von Hand mit pH-neutralem Shampoo und der Zwei-Eimer-Methode. Aggressive Reiniger und Bürstenwaschanlagen verkürzen die Lebensdauer der Schutzschicht.
+Ein versiegeltes Auto waschen Sie am besten von Hand mit pH-neutralem Shampoo und der Zwei-Eimer-Methode. Aggressive Reiniger und Bürstenwaschanlagen verkürzen die Lebensdauer der Schutzschicht.
 
-- Halte die Aushärtezeit des Produkts ein, bevor du das Auto zum ersten Mal wäschst.
-- Spüle groben Schmutz vor, bevor du den Lack berührst.
-- Verzichte auf stark alkalische Reiniger, außer sie werden gezielt für Felgen oder starke Verschmutzungen eingesetzt.
-- Trockne mit einem weichen Mikrofasertuch, um Kalkflecken zu vermeiden.
-- Frische die Versiegelung bei nachlassendem Abperleffekt mit einem passenden Pflegeprodukt auf.
+- Halten Sie die Aushärtezeit des Produkts ein, bevor Sie das Auto zum ersten Mal waschen.
+- Spülen Sie groben Schmutz vor, bevor Sie den Lack berühren.
+- Verzichten Sie auf stark alkalische Reiniger, es sei denn, diese werden gezielt für Felgen oder starke Verschmutzungen eingesetzt.
+- Trocknen Sie mit einem weichen Mikrofasertuch, um Kalkflecken zu vermeiden.
+- Frischen Sie die Versiegelung bei nachlassendem Abperleffekt mit einem passenden Pflegeprodukt auf.
 
-## Entscheidungshilfe: Lohnt sich die Versiegelung für dich?
+## Entscheidungshilfe: Lohnt sich die Versiegelung für Sie?
 
-Eine Versiegelung lohnt sich für dich, wenn du dein Auto länger fahren, leichter pflegen und den Lack in gutem Zustand halten möchtest. Diese Checkliste hilft bei der Entscheidung.
+Eine Versiegelung lohnt sich für Sie, wenn Sie Ihr Auto länger fahren, leichter pflegen und den Lack in gutem Zustand halten möchten. Diese Checkliste hilft bei der Entscheidung.
 
 Eher sinnvoll, wenn
 
-- dein Auto meist draußen steht, etwa unter Bäumen oder an der Straße,
-- du dein Auto mehrere Jahre fahren oder später gut verkaufen möchtest,
-- du einen dunklen Lack hast, auf dem Kratzer und Schmutz stark auffallen,
-- du ein geleastes Fahrzeug in gutem Zustand zurückgeben möchtest,
-- du weniger Zeit mit dem Waschen verbringen willst.
+- Ihr Auto meist draußen steht, etwa unter Bäumen oder an der Straße,
+- Sie Ihr Auto mehrere Jahre fahren oder später gut verkaufen möchten,
+- Sie einen dunklen Lack haben, auf dem Kratzer und Schmutz stark auffallen,
+- Sie ein geleastes Fahrzeug in gutem Zustand zurückgeben möchten,
+- Sie weniger Zeit mit dem Waschen verbringen wollen.
 
 Eher verzichtbar, wenn
 
-- dein Auto fast immer in der Garage steht und selten gefahren wird,
-- du ohnehin sehr regelmäßig von Hand wäschst und wachst.
+- Ihr Auto fast immer in der Garage steht und selten gefahren wird,
+- Sie ohnehin sehr regelmäßig von Hand waschen und Wachs auftragen.
 
 ### Drei häufige Irrtümer
 
@@ -128,6 +128,6 @@ Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Sie ist außerdem Teil des Pakets Premium Politur. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und ausschließlich mit Koch-Chemie-Produkten. Du erhältst vor dem Termin einen verbindlichen Preis und begutachtest das Ergebnis gemeinsam bei Tageslicht. Richtpreise findest du in der [Preisübersicht](/preise.html).
+ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Sie ist außerdem Teil des Pakets Premium Politur. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und ausschließlich mit Koch-Chemie-Produkten. Sie erhalten vor dem Termin einen verbindlichen Preis und begutachten das Ergebnis gemeinsam mit uns bei Tageslicht. Richtpreise finden Sie in der [Preisübersicht](/preise.html).
 
-Frag deinen Termin für den Neuwagen per WhatsApp an +49 172 7613807 oder über das [Terminformular](/termin.html) an.
+Fragen Sie Ihren Termin für den Neuwagen per WhatsApp an +49 172 7613807 oder über das [Terminformular](/termin.html) an.
