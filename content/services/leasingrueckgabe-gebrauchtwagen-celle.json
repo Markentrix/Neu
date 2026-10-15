@@ -3,13 +3,13 @@
   "order": 5,
   "short": "Leasingrückgabe & Verkauf",
   "teaser": "Aufbereitung vor Rückgabe oder Verkauf: weniger Abzüge, besserer Preis.",
-  "seoTitle": "Aufbereitung vor Leasingrückgabe & Gebrauchtwagenverkauf in Celle | ElbDetail",
-  "description": "Fahrzeugaufbereitung vor Leasingrückgabe oder Verkauf in Celle: weniger Abzüge, besserer Verkaufspreis. Innen- & Außenaufbereitung ab 179 €, auf Wunsch mit Politur. Kurzfristige Termine per WhatsApp.",
+  "seoTitle": "Aufbereitung vor Leasingrückgabe Celle | ElbDetail",
+  "description": "Aufbereitung vor Leasingrückgabe oder Verkauf in Celle: weniger Abzüge, besserer Preis. Innen & außen ab {ab:komplett} €, kurzfristige Termine.",
   "h1": "Aufbereitung vor Leasingrückgabe & Verkauf: *weniger Abzüge, mehr Erlös.*",
   "lead": "Bei der Rückgabe zahlt man für jeden Fleck, jeden Kratzer und jeden Geruch. Beim Verkauf bekommt man für Glanz und Sauberkeit mehr Geld. **Wir sorgen dafür, dass dein Auto im besten Licht steht.**",
   "facts": [
     {
-      "value": "ab 179 €",
+      "value": "ab {ab:komplett} €",
       "label": "Komplettpflege"
     },
     {
@@ -54,7 +54,7 @@
   "faq": [
     {
       "q": "Lohnt sich die Aufbereitung vor der Leasingrückgabe finanziell?",
-      "a": "In den meisten Fällen ja. Verschmutzung, Gerüche und oberflächliche Gebrauchsspuren werden bei der Rückgabe als Minderwert berechnet, oft mit mehreren hundert Euro. Eine Komplettpflege ab 179 € ist in der Regel günstiger als die Abzüge, die sie verhindert."
+      "a": "In den meisten Fällen ja. Verschmutzung, Gerüche und oberflächliche Gebrauchsspuren werden bei der Rückgabe als Minderwert berechnet, oft mit mehreren hundert Euro. Eine Komplettpflege ab {ab:komplett} € ist in der Regel günstiger als die Abzüge, die sie verhindert."
     },
     {
       "q": "Welche Mängel könnt ihr beheben und welche nicht?",

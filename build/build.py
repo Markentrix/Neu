@@ -12,8 +12,10 @@ import argparse
 import email.utils
 import datetime
 import hashlib
+import html
 import json
 import os
+import re
 import shutil
 import sys
 import time
@@ -153,12 +155,35 @@ def build(content_dir, out_dir, static_dir, quiet=False):
         warnings.append("Google-Bewertungslink fehlt (Grunddaten → googleReviewUrl)")
     if not site.media:
         warnings.append("Keine Vorher/Nachher-Fotos hochgeladen")
+    warnings += seo_lengths(out_dir, written)
     if not quiet:
         print(f"Fertig: {len(written)} Dateien, {len([w for w in written if w.endswith('.html')])} Seiten, {len(site.articles)} Artikel, "
               f"{len(site.media)} Bilder in {time.time() - t0:.1f}s → {out_dir}")
         for w in warnings:
             print("Hinweis:", w)
     return {"files": len(written), "warnings": warnings}
+
+
+TITLE_MAX, DESC_MIN, DESC_MAX = 60, 110, 160
+
+
+def seo_lengths(out_dir, written):
+    """Prüft Titel- und Beschreibungslängen aller indexierbaren Seiten (Google kürzt sonst in der Trefferliste)."""
+    out = []
+    for rel in sorted(w for w in written if w.endswith(".html")):
+        with open(os.path.join(out_dir, rel), encoding="utf-8") as f:
+            h = f.read()
+        if 'name="robots" content="noindex' in h:
+            continue
+        t = re.search(r"<title>(.*?)</title>", h, re.S)
+        d = re.search(r'<meta name="description" content="(.*?)"', h, re.S)
+        t = html.unescape(t.group(1)) if t else ""
+        d = html.unescape(d.group(1)) if d else ""
+        if len(t) > TITLE_MAX:
+            out.append(f"Titel zu lang ({len(t)} von max. {TITLE_MAX} Zeichen): {rel}")
+        if not DESC_MIN <= len(d) <= DESC_MAX:
+            out.append(f"Beschreibung {'zu kurz' if len(d) < DESC_MIN else 'zu lang'} ({len(d)} Zeichen, ideal {DESC_MIN}–155): {rel}")
+    return out
 
 
 def main():

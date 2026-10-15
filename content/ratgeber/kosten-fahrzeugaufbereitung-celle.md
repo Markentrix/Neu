@@ -9,7 +9,7 @@
   "excerpt": "Von der Handwäsche bis zur Lackpolitur: Hier siehst du, was eine Fahrzeugaufbereitung kostet, wovon der Preis abhängt und wie du ohne Qualitätsverlust sparst.",
   "service": "aussenaufbereitung-celle",
   "summary": [
-    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab 79 € bis ab 449 € inklusive Mehrwertsteuer.",
+    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € bis ab 449 € inklusive Mehrwertsteuer.",
     "Der Preis hängt vor allem von Fahrzeuggröße, Leistungsumfang und Pflegezustand des Autos ab.",
     "Starke Verschmutzung, Tierhaare, Gerüche oder tiefe Lackdefekte erhöhen den Aufwand und damit den Preis.",
     "Bei ElbDetail bekommst du vor dem Termin einen verbindlichen Preis, am einfachsten nach Fotos per WhatsApp."
@@ -17,7 +17,7 @@
   "faq": [
     {
       "q": "Was kostet eine einfache Fahrzeugaufbereitung in Celle?",
-      "a": "Das Paket Frisch & Sauber kostet bei ElbDetail ab 79 € für Kompaktwagen, ab 89 € für Limousinen und Kombis und ab 99 € für SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert etwa zwei Stunden."
+      "a": "Das Paket Frisch & Sauber kostet bei ElbDetail ab {ab:frisch} € für Kompaktwagen, ab 89 € für Limousinen und Kombis und ab 99 € für SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert etwa zwei Stunden."
     },
     {
       "q": "Warum ist eine Aufbereitung für ein SUV teurer?",
@@ -30,7 +30,7 @@
   ]
 }
 
-Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab 79 € für eine Handwäsche mit Innenraumreinigung und ab 349 € für eine Premium Politur mit Versiegelung. Alle Angaben sind Richtpreise inklusive Mehrwertsteuer und gelten für einen normalen Pflegezustand.
+Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € für eine Handwäsche mit Innenraumreinigung und ab {ab:premium} € für eine Premium Politur mit Versiegelung. Alle Angaben sind Richtpreise inklusive Mehrwertsteuer und gelten für einen normalen Pflegezustand.
 
 Die Spanne ergibt sich aus dem Aufwand. In diesem Ratgeber erfährst du, welche Faktoren den Preis bestimmen, was die einzelnen Pakete enthalten und wo du sinnvoll sparen kannst, ohne am falschen Ende zu kürzen.
 
@@ -56,9 +56,9 @@ Die folgende Tabelle zeigt die drei Pakete von ElbDetail mit Richtpreisen je Fah
 
 | Paket | Kompakt (Polo, Golf, A3) | Limousine/Kombi (Passat, C-Klasse) | SUV/Van (Tiguan, Bulli, X5) | Dauer |
 |---|---|---|---|---|
-| Frisch & Sauber: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab 79 € | ab 89 € | ab 99 € | ca. 2 Std. |
-| Komplettpflege: + Innenraum-Tiefenreinigung, Polster/Teppich, Leder- oder Polsterpflege, Kunststoffpflege, Geruchsneutralisation | ab 179 € | ab 209 € | ab 229 € | ca. ½ Tag |
-| Premium Politur: + mehrstufige Lackpolitur, Kratzer-/Hologrammentfernung, Lackversiegelung, Felgen- & Scheibenversiegelung | ab 349 € | ab 399 € | ab 449 € | ca. 1 Tag |
+| Frisch & Sauber: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab {ab:frisch} € | ab 89 € | ab 99 € | ca. 2 Std. |
+| Komplettpflege: + Innenraum-Tiefenreinigung, Polster/Teppich, Leder- oder Polsterpflege, Kunststoffpflege, Geruchsneutralisation | ab {ab:komplett} € | ab 209 € | ab 229 € | ca. ½ Tag |
+| Premium Politur: + mehrstufige Lackpolitur, Kratzer-/Hologrammentfernung, Lackversiegelung, Felgen- & Scheibenversiegelung | ab {ab:premium} € | ab 399 € | ab 449 € | ca. 1 Tag |
 
 Zusätzlich kannst du einzelne Leistungen separat buchen. Dazu gehören Lederpflege und Imprägnierung, Geruchsentfernung, Motorraumreinigung, Felgen-Intensivreinigung, eine reine Lackpolitur, eine reine Lackversiegelung und die Reinigung eines Cabrioverdecks. Diese Einzelleistungen werden auf Anfrage kalkuliert, weil der Aufwand stark vom Fahrzeug abhängt.
 

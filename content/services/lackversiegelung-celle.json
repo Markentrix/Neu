@@ -3,13 +3,13 @@
   "order": 4,
   "short": "Lackversiegelung",
   "teaser": "Monatelanger Schutz vor UV, Streusalz, Insekten und Schmutz.",
-  "seoTitle": "Lackversiegelung Celle – Schutz vor UV, Salz & Schmutz | ElbDetail",
-  "description": "Lackversiegelung in Celle: monatelanger Schutz vor UV-Strahlung, Streusalz, Insekten und Schmutz. Leichteres Waschen, dauerhafter Glanz. Im Paket Premium Politur ab 349 €. ElbDetail.",
+  "seoTitle": "Lackversiegelung Celle: Schutz vor UV & Salz | ElbDetail",
+  "description": "Lackversiegelung in Celle: monatelanger Schutz vor UV, Streusalz und Schmutz, leichteres Waschen, tiefer Glanz. Mit Politur ab {ab:premium} €.",
   "h1": "Lackversiegelung in Celle: *Schutz, der Monate hält.*",
   "lead": "Eine hochwertige Versiegelung legt sich als Schutzschicht über den Klarlack. **Schmutz und Wasser perlen ab, Waschen wird leichter, der Glanz bleibt.**",
   "facts": [
     {
-      "value": "ab 349 €",
+      "value": "ab {ab:premium} €",
       "label": "im Paket Premium Politur"
     },
     {

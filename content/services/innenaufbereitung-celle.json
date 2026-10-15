@@ -3,13 +3,13 @@
   "order": 2,
   "short": "Innenaufbereitung",
   "teaser": "Polster- und Teppichreinigung, Kunststoffpflege, Scheiben, Geruchsentfernung.",
-  "seoTitle": "Innenaufbereitung Celle – Polster, Leder, Tierhaare & Gerüche | ElbDetail",
-  "description": "Innenraumreinigung in Celle: Polster- und Teppichreinigung, Lederpflege, Tierhaarentfernung, Geruchsneutralisation, Kunststoffpflege. Ab 179 € in der Komplettpflege. Termin per WhatsApp.",
+  "seoTitle": "Innenaufbereitung Celle: Polster & Tierhaare | ElbDetail",
+  "description": "Innenaufbereitung in Celle: Polster, Teppiche, Leder, Tierhaare und Gerüche. Komplettpflege ab {ab:komplett} €. Termin per WhatsApp oder online anfragen.",
   "h1": "Innenaufbereitung in Celle: *Einsteigen und durchatmen.*",
   "lead": "Tiefenreinigung von Polstern und Teppichen, Leder- und Kunststoffpflege, Tierhaare und Gerüche inklusive. **Für Familienautos, Hundebesitzer und alle, die ihr Auto täglich nutzen.**",
   "facts": [
     {
-      "value": "ab 179 €",
+      "value": "ab {ab:komplett} €",
       "label": "in der Komplettpflege"
     },
     {
@@ -66,7 +66,7 @@
     },
     {
       "q": "Was kostet eine Innenaufbereitung in Celle?",
-      "a": "In der Komplettpflege ist die Innenraum-Tiefenreinigung inklusive Außenwäsche ab 179 € für eine Kompaktklasse enthalten. Eine reine Innenaufbereitung bieten wir auf Anfrage an, abhängig von Größe und Zustand des Fahrzeugs."
+      "a": "In der Komplettpflege ist die Innenraum-Tiefenreinigung inklusive Außenwäsche ab {ab:komplett} € für eine Kompaktklasse enthalten. Eine reine Innenaufbereitung bieten wir auf Anfrage an, abhängig von Größe und Zustand des Fahrzeugs."
     }
   ],
   "related": [

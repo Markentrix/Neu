@@ -17,8 +17,8 @@ def de_date(iso):
 def build_index(site, write):
     prefix = "../"
     path = "/ratgeber/index.html"
-    title = "Ratgeber Fahrzeugaufbereitung & Autopflege | ElbDetail Celle"
-    desc = "Ratgeber von ElbDetail aus Celle: Kosten der Fahrzeugaufbereitung, Leasingrückgabe, Lackpflege, Innenraum und Tipps für den Winter. Ehrlich und praxisnah erklärt."
+    title = "Ratgeber Autopflege & Aufbereitung | ElbDetail Celle"
+    desc = "Ratgeber aus Celle: Kosten der Fahrzeugaufbereitung, Leasingrückgabe, Lackpflege, Innenraum und Tipps für den Winter. Ehrlich und praxisnah erklärt."
     cats = []
     for a in site.articles:
         c = a.get("category", "Ratgeber")

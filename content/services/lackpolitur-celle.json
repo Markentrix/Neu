@@ -3,13 +3,13 @@
   "order": 3,
   "short": "Lackpolitur",
   "teaser": "Mehrstufige Politur gegen Kratzer, Hologramme und matten Lack.",
-  "seoTitle": "Lackpolitur Celle – Kratzer, Hologramme & matter Lack | ElbDetail",
-  "description": "Mehrstufige Lackpolitur in Celle: Entfernung von Waschstraßenkratzern, Hologrammen und Oxidation, danach Tiefenglanz. Premium Politur ab 349 € inkl. Versiegelung. ElbDetail, Koch-Chemie geschult.",
+  "seoTitle": "Lackpolitur Celle: Kratzer & Hologramme weg | ElbDetail",
+  "description": "Mehrstufige Lackpolitur in Celle gegen Waschstraßenkratzer, Hologramme und Oxidation. Ab {ab:premium} € inkl. Versiegelung. Koch-Chemie geschult.",
   "h1": "Lackpolitur in Celle: *Tiefenglanz statt Kratzer.*",
   "lead": "Mehrstufige Maschinenpolitur gegen Swirls, Hologramme, Oxidation und matte Stellen. **Der Lack bekommt seine Tiefe zurück, ohne Risiko für den Klarlack.**",
   "facts": [
     {
-      "value": "ab 349 €",
+      "value": "ab {ab:premium} €",
       "label": "Premium Politur inkl. Versiegelung"
     },
     {
@@ -66,7 +66,7 @@
     },
     {
       "q": "Was kostet eine Lackpolitur in Celle?",
-      "a": "Im Paket Premium Politur ist die mehrstufige Politur inklusive Komplettpflege und Lackversiegelung ab 349 € für eine Kompaktklasse enthalten. Eine Politur als Einzelleistung oder nur einzelner Teile, zum Beispiel der Motorhaube, bieten wir nach Besichtigung an."
+      "a": "Im Paket Premium Politur ist die mehrstufige Politur inklusive Komplettpflege und Lackversiegelung ab {ab:premium} € für eine Kompaktklasse enthalten. Eine Politur als Einzelleistung oder nur einzelner Teile, zum Beispiel der Motorhaube, bieten wir nach Besichtigung an."
     }
   ],
   "related": [

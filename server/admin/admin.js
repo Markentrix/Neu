@@ -400,7 +400,7 @@
     prices: "Richtpreise je Klasse (€)", kompakt: "Kompakt", mittel: "Limousine / Kombi", suv: "SUV / Van", features: "Leistungen", included: "Enthalten", extras: "Einzelleistungen", compare: "Vergleichstabelle",
     label: "Bezeichnung", frisch: "Frisch & Sauber", komplett: "Komplettpflege", premium: "Premium Politur", note: "Hinweistext", featuredQuote: "Hervorgehobenes Zitat", items: "Einträge", source: "Quelle",
     q: "Frage", a: "Antwort", title: "Titel", sub: "Untertitel", before: "Foto vorher (Dateiname)", after: "Foto nachher (Dateiname)", alt: "Bildbeschreibung", slug: "Adresse (nicht ändern)",
-    order: "Reihenfolge", teaser: "Kurzbeschreibung", seoTitle: "Seitentitel für Google (max. 60 Zeichen)", description: "Beschreibung für Google (max. 158 Zeichen)", h1: "Überschrift (*kursiv* = blau)",
+    order: "Reihenfolge", teaser: "Kurzbeschreibung", seoTitle: "Seitentitel für Google (max. 60 Zeichen)", description: "Beschreibung für Google (120–155 Zeichen, Preise als {ab:frisch}, {ab:komplett}, {ab:premium})", h1: "Überschrift (*kursiv* = blau)",
     lead: "Einleitung (**fett** möglich)", facts: "Kennzahlen", package: "Passendes Paket (Schlüssel)", intro: "Haupttext (Markdown)", includes: "Leistungsumfang", steps: "Ablauf", faq: "Häufige Fragen",
     related: "Verwandte Leistungen (Adressen)", date: "Veröffentlicht (JJJJ-MM-TT)", updated: "Aktualisiert (JJJJ-MM-TT)", category: "Kategorie", readingTime: "Lesezeit (Min.)", excerpt: "Teaser",
     service: "Passende Leistung (Adresse)", summary: "Das Wichtigste in Kürze", draft: "Entwurf (nicht veröffentlichen)", city_: "Stadtteile" };

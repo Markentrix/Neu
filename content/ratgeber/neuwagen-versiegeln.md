@@ -124,7 +124,7 @@ Eher verzichtbar, wenn
 
 ## Was kostet eine Versiegelung beim Neuwagen?
 
-Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des Lacks ab. Bei ElbDetail ist die Lackversiegelung einzeln buchbar, der Preis dafür wird auf Anfrage genannt. Hat der Lack bereits Waschkratzer, ist das Paket Premium Politur eine Option. Es umfasst eine mehrstufige Lackpolitur, Lackversiegelung sowie Felgen- und Scheibenversiegelung und beginnt bei Kompaktwagen ab 349 €, bei Limousinen und Kombis ab 399 € und bei SUVs und Vans ab 449 €. Die Richtpreise gelten für einen normalen Pflegezustand.
+Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des Lacks ab. Bei ElbDetail ist die Lackversiegelung einzeln buchbar, der Preis dafür wird auf Anfrage genannt. Hat der Lack bereits Waschkratzer, ist das Paket Premium Politur eine Option. Es umfasst eine mehrstufige Lackpolitur, Lackversiegelung sowie Felgen- und Scheibenversiegelung und beginnt bei Kompaktwagen ab {ab:premium} €, bei Limousinen und Kombis ab 399 € und bei SUVs und Vans ab 449 €. Die Richtpreise gelten für einen normalen Pflegezustand.
 
 ## Aufbereitung in Celle anfragen
 

@@ -64,9 +64,9 @@ def plan_card(site, p, prefix=""):
 def build_home(site, write):
     s = site.s
     pr = site.pricing
-    title = "Fahrzeugaufbereitung Celle | ElbDetail – Innenreinigung, Lackpolitur & Versiegelung"
-    desc = (f"ElbDetail: professionelle Fahrzeugaufbereitung in Celle. Innen- & Außenaufbereitung, Lackpolitur, Lackversiegelung – "
-            f"{s['rating']['value']} ★ bei Google, Koch-Chemie geschult. Richtpreise ab {site.min_price('frisch')} €. Termin online anfragen.")
+    title = f"Fahrzeugaufbereitung in Celle ab {site.min_price('frisch')} € | ElbDetail"
+    desc = (f"Innen- & Außenaufbereitung, Lackpolitur und Versiegelung in Celle. Handarbeit, {s['rating']['value']} ★ bei Google, "
+            f"Koch-Chemie geschult. Jetzt Termin anfragen.")
     ld = [seo.business(site), seo.website(site), seo.faq(site.faq),
           seo.webpage(site, "/", title, {"speakable": {"@type": "SpeakableSpecification", "cssSelector": ["#auf-einen-blick", ".hero-sub"]}})]
 
@@ -524,8 +524,8 @@ def build_legal(site, write):
     <p class="legal-updated legal-note">Hinweis für den Seitenbetreiber: Diese Datenschutzerklärung ist eine sorgfältig erstellte Vorlage für den Betrieb auf eigenem Server. Bitte Platzhalter im Verwaltungsportal unter „Inhalte → Grunddaten → Rechtliches“ ausfüllen und vor Veröffentlichung rechtlich prüfen lassen.</p>
 '''
     for fname, title, desc, h1, sub, content in [
-        ("impressum.html", "Impressum | ElbDetail Fahrzeugaufbereitung Celle", "Impressum von ElbDetail, Fahrzeugaufbereitung in Celle, Lachtehäuser Straße 1.", "Impressum", "Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)", imp),
-        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", "Datenschutzerklärung von ElbDetail: eigener Server in Deutschland, keine Cookies, keine Tracking-Dienste.", "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
+        ("impressum.html", "Impressum | ElbDetail Fahrzeugaufbereitung Celle", "Impressum von ElbDetail, Fahrzeugaufbereitung in Celle, Lachtehäuser Straße 1: Anbieterkennzeichnung, Kontakt und rechtliche Angaben nach DDG.", "Impressum", "Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)", imp),
+        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", "Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, keine Cookies, keine Tracking-Dienste. Alle Infos zu deinen Rechten.", "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
         body = f'''
 <main id="main" class="legal-main">
   <div class="container">

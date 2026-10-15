@@ -1,7 +1,7 @@
 {
   "title": "Auto winterfest machen: Lack, Felgen und Innenraum schützen",
   "seoTitle": "Auto winterfest machen: Lackschutz | ElbDetail",
-  "description": "Auto winterfest machen in Celle: So schützt du Lack, Felgen, Dichtungen und Innenraum vor Streusalz und Nässe. Mit Checkliste für die Vorbereitung im Herbst.",
+  "description": "Auto winterfest machen in Celle: So schützt du Lack, Felgen, Dichtungen und Innenraum vor Streusalz und Nässe. Mit Checkliste für den Herbst.",
   "date": "2026-10-15",
   "updated": "2026-10-15",
   "category": "Saison",

@@ -134,6 +134,21 @@ class TestBuild(Base):
                     for blob in re.findall(r'<script type="application/ld\+json">(.*?)</script>', t, re.S):
                         json.loads(blob)
 
+    def test_seo_title_and_description_lengths(self):
+        import build as builder
+        site = app.site_dir()
+        rel = [os.path.relpath(os.path.join(r, f), site) for r, _, fs in os.walk(site) for f in fs if f.endswith(".html")]
+        self.assertGreater(len(rel), 20)
+        self.assertEqual(builder.seo_lengths(site, rel), [])
+
+    def test_price_placeholders_resolved(self):
+        site = app.site_dir()
+        for root, _, files in os.walk(site):
+            for f in files:
+                if f.endswith((".html", ".txt", ".xml")):
+                    self.assertNotIn("{ab:", open(os.path.join(root, f), encoding="utf-8").read(), f)
+        self.assertIn("ab 179 €", open(os.path.join(site, "leistungen/innenaufbereitung-celle.html"), encoding="utf-8").read())
+
     def test_no_inline_scripts_for_csp(self):
         import re
         site = app.site_dir()

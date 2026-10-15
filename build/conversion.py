@@ -35,8 +35,8 @@ def build_termin(site, write):
     pr = site.pricing
     s = site.s
     path = "/termin.html"
-    title = "Termin anfragen | Fahrzeugaufbereitung Celle – ElbDetail"
-    desc = "Termin für deine Fahrzeugaufbereitung in Celle online anfragen: Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Verbindliches Angebot vor dem Termin."
+    title = "Termin anfragen: Fahrzeugaufbereitung Celle | ElbDetail"
+    desc = "Fahrzeugaufbereitung in Celle online anfragen: Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Du bekommst vorab ein verbindliches Angebot."
     ld = [seo.webpage(site, path, title, {"potentialAction": {"@type": "ReserveAction", "target": site.url + path}}),
           seo.crumbs(site, [("Startseite", "/"), ("Termin anfragen", path)])]
     cls0 = pr["classes"][0]["key"]
@@ -177,8 +177,8 @@ def build_gutscheine(site, write):
     s = site.s
     v = s["vouchers"]
     path = "/gutscheine.html"
-    title = "Gutschein Fahrzeugaufbereitung Celle | Geschenkidee – ElbDetail"
-    desc = "Gutschein für Fahrzeugaufbereitung in Celle verschenken: Wunschbetrag oder Paket, persönliche Nachricht, als PDF per E-Mail oder zum Abholen. Ideal zu Weihnachten."
+    title = "Gutschein Fahrzeugaufbereitung Celle | ElbDetail"
+    desc = "Gutschein für Fahrzeugaufbereitung in Celle verschenken: Wunschbetrag oder Paket, persönliche Nachricht, als PDF per E-Mail. Ideal zu Weihnachten."
     year = int(s["standIso"][:4])
     faq = [
         {"q": "Wie lange ist ein Gutschein gültig?", "a": f"Gutscheine sind drei Jahre gültig, gerechnet ab dem Ende des Kaufjahres. Ein 2026 gekaufter Gutschein gilt also bis 31.12.{year + 3}."},
@@ -273,8 +273,8 @@ def build_gutscheine(site, write):
 def build_firmen(site, write):
     s = site.s
     path = "/firmenkunden.html"
-    title = "Fahrzeugaufbereitung für Firmen & Flotten in Celle | ElbDetail"
-    desc = "Fahrzeugaufbereitung für Firmenwagen, Flotten, Autohäuser und Leasingrückläufer in Celle: planbare Intervalle, ein Ansprechpartner, Abrechnung nach Absprache."
+    title = "Fahrzeugaufbereitung für Firmen & Flotten | ElbDetail Celle"
+    desc = "Aufbereitung für Firmenwagen, Flotten, Autohäuser und Leasingrückläufer in Celle: planbare Intervalle, ein Ansprechpartner, Abrechnung nach Absprache."
     faq = [
         {"q": "Ab wie vielen Fahrzeugen lohnt sich eine Rahmenvereinbarung?", "a": "Schon ab wenigen Fahrzeugen mit regelmäßigem Pflegebedarf. Wir besprechen Umfang und Intervalle individuell und machen ein Angebot, das zu deinem Fuhrpark passt."},
         {"q": "Bereitet ihr auch Fahrzeuge für Autohäuser und Händler auf?", "a": "Ja. Aufbereitung vor Verkauf, Übergabe oder Fotoshooting gehört zu unseren Kernleistungen. Abläufe und Fristen stimmen wir direkt mit dir ab."},
@@ -345,8 +345,9 @@ def build_winter(site, write):
     s = site.s
     prefix = "../"
     path = "/aktion/winterschutz.html"
-    title = "Auto winterfest machen in Celle: Lackschutz vor Streusalz | ElbDetail"
-    desc = "Lack, Felgen und Scheiben vor Streusalz schützen: Lackversiegelung in Celle vor dem ersten Frost. Premium Politur inkl. Versiegelung ab 349 €. Jetzt Termin sichern."
+    title = "Auto winterfest machen in Celle: Lackschutz | ElbDetail"
+    desc = (f"Lack, Felgen und Scheiben vor Streusalz schützen: Versiegelung in Celle vor dem ersten Frost. "
+            f"Politur inkl. Versiegelung ab {site.min_price('premium')} €. Termin sichern.")
     prem = site.pkg("premium")
     faq = [
         {"q": "Wann sollte ich mein Auto versiegeln lassen?", "a": "Am besten vor dem ersten Frost und dem ersten Streusalz, in Celle also meist im Oktober oder November. Die Versiegelung braucht trockene Bedingungen und Zeit zum Aushärten."},

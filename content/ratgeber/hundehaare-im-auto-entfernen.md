@@ -25,7 +25,7 @@
     },
     {
       "q": "Was kostet es, Hundehaare im Auto professionell entfernen zu lassen?",
-      "a": "Bei ElbDetail in Celle ist die Tiefenreinigung von Polstern und Teppich Teil der Komplettpflege, die bei Kompaktwagen ab 179 € beginnt. Die Richtpreise gelten für einen normalen Pflegezustand. Bei starkem Haarbefall bekommst du vor dem Termin einen verbindlichen Preis."
+      "a": "Bei ElbDetail in Celle ist die Tiefenreinigung von Polstern und Teppich Teil der Komplettpflege, die bei Kompaktwagen ab {ab:komplett} € beginnt. Die Richtpreise gelten für einen normalen Pflegezustand. Bei starkem Haarbefall bekommst du vor dem Termin einen verbindlichen Preis."
     }
   ]
 }

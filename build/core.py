@@ -4,6 +4,7 @@ import glob
 import html
 import json
 import os
+import re
 import urllib.parse
 
 import md
@@ -70,6 +71,9 @@ class Site:
             meta["body"] = body
             self.articles.append(meta)
         self.articles.sort(key=lambda a: (a.get("date", ""), a.get("title", "")), reverse=True)
+        # Preis-Platzhalter wie {ab:komplett} in Texten durch den aktuellen Richtpreis ersetzen
+        self.services = [self.fill(sv) for sv in self.services]
+        self.articles = [self.fill(a) for a in self.articles]
         self.url = self.s["url"].rstrip("/")
         self.asset_v = {}
         self.media = {}   # Galerie-Bilder: name -> {"srcset":..., "src":..., "w":..., "h":...}
@@ -87,6 +91,17 @@ class Site:
 
     def min_price(self, key):
         return min(self.pkg(key)["prices"].values())
+
+    def fill(self, obj):
+        keys = {p["key"] for p in self.pricing["packages"]}
+        rep = lambda m: str(self.min_price(m.group(1))) if m.group(1) in keys else m.group(0)
+        if isinstance(obj, str):
+            return re.sub(r"\{ab:(\w+)\}", rep, obj)
+        if isinstance(obj, list):
+            return [self.fill(x) for x in obj]
+        if isinstance(obj, dict):
+            return {k: self.fill(v) for k, v in obj.items()}
+        return obj
 
     def addr_line(self):
         a = self.s["address"]

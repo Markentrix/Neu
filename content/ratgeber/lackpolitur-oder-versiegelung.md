@@ -1,7 +1,7 @@
 {
   "title": "Lackpolitur oder Lackversiegelung: Was braucht mein Auto?",
   "seoTitle": "Lackpolitur oder Versiegelung? | ElbDetail",
-  "description": "Lackpolitur oder Lackversiegelung? So erkennst du Lackdefekte mit einfachen Tests und findest heraus, was dein Auto braucht. Mit Entscheidungshilfe aus Celle.",
+  "description": "Lackpolitur oder Versiegelung? So erkennst du Lackdefekte mit einfachen Tests und findest heraus, was dein Auto braucht. Entscheidungshilfe aus Celle.",
   "date": "2026-10-15",
   "updated": "2026-10-15",
   "category": "Lackpflege",
@@ -99,7 +99,7 @@ Politur und Versiegelung gehören zusammen, weil frisch polierter Lack ohne Schu
 
 Umgekehrt gilt: Wer stumpfen oder verkratzten Lack nur versiegelt, konserviert die Defekte darunter. Die Kombination ist deshalb meist die bessere Wahl, wenn der Lack sichtbare Mängel hat.
 
-Bei ElbDetail ist diese Kombination im Paket Premium Politur enthalten. Es umfasst eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung, eine Lackversiegelung sowie eine Felgen- und Scheibenversiegelung. Dazu kommen Handwäsche und Innenraumreinigung. Die Richtpreise liegen bei ab 349 € für Kompaktwagen, ab 399 € für Limousinen und Kombis und ab 449 € für SUVs und Vans, bei einer Dauer von etwa einem Tag. Eine reine Lackpolitur oder reine Lackversiegelung ist einzeln auf Anfrage buchbar.
+Bei ElbDetail ist diese Kombination im Paket Premium Politur enthalten. Es umfasst eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung, eine Lackversiegelung sowie eine Felgen- und Scheibenversiegelung. Dazu kommen Handwäsche und Innenraumreinigung. Die Richtpreise liegen bei ab {ab:premium} € für Kompaktwagen, ab 399 € für Limousinen und Kombis und ab 449 € für SUVs und Vans, bei einer Dauer von etwa einem Tag. Eine reine Lackpolitur oder reine Lackversiegelung ist einzeln auf Anfrage buchbar.
 
 ## Wie läuft eine Lackpolitur bei ElbDetail ab?
 

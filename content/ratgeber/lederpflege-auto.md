@@ -1,6 +1,6 @@
 {
   "title": "Lederpflege im Auto: reinigen, pflegen, schützen",
-  "seoTitle": "Lederpflege im Auto: richtig reinigen und pflegen | ElbDetail",
+  "seoTitle": "Lederpflege im Auto: richtig reinigen & pflegen | ElbDetail",
   "description": "Lederpflege im Auto richtig gemacht: Lederarten, typische Fehler, sinnvolle Intervalle und eine Anleitung Schritt für Schritt. Tipps vom Profi aus Celle.",
   "date": "2026-10-15",
   "updated": "2026-10-15",

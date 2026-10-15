@@ -3,13 +3,13 @@
   "order": 1,
   "short": "Außenaufbereitung",
   "teaser": "Handwäsche, Felgen, Dichtungen, Trocknung ohne Kratzer.",
-  "seoTitle": "Außenaufbereitung Celle – Handwäsche, Felgen & Lackpflege | ElbDetail",
-  "description": "Professionelle Außenaufbereitung in Celle: schonende Handwäsche, Felgenreinigung, Insekten- und Teerentfernung, Dichtungspflege. Ab 79 €. Termin per WhatsApp bei ElbDetail.",
+  "seoTitle": "Außenaufbereitung Celle: Handwäsche & Felgen | ElbDetail",
+  "description": "Außenaufbereitung in Celle: schonende Handwäsche, Felgen, Insekten- und Teerentfernung, Dichtungspflege. Ab {ab:frisch} €. Jetzt Termin anfragen.",
   "h1": "Außenaufbereitung in Celle: *Handwäsche ohne Kratzer.*",
   "lead": "Schonende Zwei-Eimer-Handwäsche, gründliche Felgenreinigung, Insekten- und Teerentfernung und gepflegte Dichtungen. **Keine Waschstraße, keine Swirls.**",
   "facts": [
     {
-      "value": "ab 79 €",
+      "value": "ab {ab:frisch} €",
       "label": "Richtpreis Kompakt"
     },
     {
@@ -62,7 +62,7 @@
     },
     {
       "q": "Was kostet eine Außenaufbereitung in Celle?",
-      "a": "Im Paket Frisch & Sauber ist die komplette Außenwäsche inklusive Felgen und Innenraum-Basis ab 79 € für eine Kompaktklasse enthalten. Als reine Außenaufbereitung ohne Innenraum machen wir ein individuelles Angebot."
+      "a": "Im Paket Frisch & Sauber ist die komplette Außenwäsche inklusive Felgen und Innenraum-Basis ab {ab:frisch} € für eine Kompaktklasse enthalten. Als reine Außenaufbereitung ohne Innenraum machen wir ein individuelles Angebot."
     },
     {
       "q": "Entfernt ihr auch Baumharz und Teerflecken?",
