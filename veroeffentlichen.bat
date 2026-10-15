@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 title Markentrix - Website veroeffentlichen
 
 rem Dieses Skript liegt im Git-Checkout des Repositories Markentrix/Neu neben dem
@@ -34,13 +34,13 @@ if errorlevel 1 (
   exit /b 1
 )
 for /f "delims=" %%b in ('git -C "%~dp0." rev-parse --abbrev-ref HEAD') do set "BRANCH=%%b"
-for /f "delims=" %%c in ('git -C "%~dp0." log -1 --format^=%%s') do set "LETZTE=%%c"
+for /f "delims=" %%c in ('git -C "%~dp0." log -1 --format=%%s') do set "LETZTE=%%c"
 
 echo.
 echo Die Website aus diesem Ordner wird jetzt LIVE auf markentrix.de veroeffentlicht:
 echo   %SRC%
-echo   Branch: %BRANCH%
-echo   Letzte Aenderung: %LETZTE%
+echo   Branch: !BRANCH!
+echo   Letzte Aenderung: !LETZTE!
 echo.
 choice /c JN /m "Jetzt veroeffentlichen (J = ja, N = abbrechen)"
 if errorlevel 2 (
