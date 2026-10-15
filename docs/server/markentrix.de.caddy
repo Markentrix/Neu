@@ -1,7 +1,8 @@
-# Markentrix · Caddy-Konfiguration für markentrix.de · Stand 15.10.2026
-# Ersetzt den bisherigen Site-Block in /etc/caddy/Caddyfile.
-# Vor dem Einspielen prüfen: Webroot (root) und PHP-Socket (php_fastcgi).
-# Einspielen: sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy
+# Markentrix · Caddy-Site-Datei für markentrix.de · Stand 15.10.2026
+# Ziel auf dem Server: /srv/caddy-sites/markentrix.de.caddy (wird von /opt/neu/server/caddy/Caddyfile eingebunden).
+# Ersetzt die bisherige Definition von markentrix.de und www.markentrix.de. Andere Domains (demos, server.markentrix.de) bleiben unberührt.
+# PHP läuft im Container "php" aus /opt/neu/server/docker-compose.yml; beide Container sehen den Webroot unter /srv/sites/markentrix.
+# Einspielen: cd /opt/neu/server && sudo docker compose exec caddy caddy validate --config /etc/caddy/Caddyfile && sudo docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
 
 www.markentrix.de {
 	redir https://markentrix.de{uri} permanent
@@ -60,7 +61,7 @@ markentrix.de {
 		not path /api/anfrage.php
 	}
 	respond @otherphp 404
-	php_fastcgi /api/anfrage.php unix//run/php/php8.2-fpm.sock
+	php_fastcgi /api/anfrage.php php:9000
 
 	# Saubere Adressen ohne .html
 	try_files {path} {path}.html {path}/index.html

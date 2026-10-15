@@ -1,0 +1,48 @@
+# /opt/neu/server/docker-compose.yml · Stand 15.10.2026
+# Ergänzt gegenüber der Fassung vom 07.10.2026: Dienst "php" für den Formular-Endpunkt
+# der Markentrix-Website (/api/anfrage.php). Caddy reicht nur diese eine Datei an PHP weiter.
+# Das SMTP-Passwort steht NICHT hier, sondern in /opt/neu/server/.env als MX_SMTP_PASS=…
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/snippets:/etc/caddy/snippets:ro
+      - /srv/caddy-sites:/etc/caddy/sites:ro   # pro Domain eine .caddy-Datei
+      - /srv/sites:/srv/sites:ro               # statische Websites
+      - caddy_data:/data                       # Zertifikate (nicht löschen!)
+      - caddy_config:/config
+    networks: [web]
+
+  php:
+    image: php:8.3-fpm-alpine
+    restart: unless-stopped
+    volumes:
+      - /srv/sites:/srv/sites:ro               # gleicher Pfad wie bei Caddy, nur lesen
+      - /srv/markentrix-daten:/srv/markentrix-daten   # Protokoll der Anfragen, außerhalb des Webroots
+    environment:
+      MX_SMTP_HOST: smtp.gmail.com
+      MX_SMTP_PORT: "465"
+      MX_SMTP_USER: info@markentrix.de
+      MX_SMTP_PASS: ${MX_SMTP_PASS}            # App-Passwort aus .env
+      MX_MAIL_TO: info@markentrix.de
+      MX_MAIL_FROM: info@markentrix.de         # muss bei Gmail die Kontoadresse sein
+      MX_LOG_FILE: /srv/markentrix-daten/anfragen.log
+    networks: [web]
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+# Gemeinsames Netz: spätere Apps (CRM-OS, Agenten) hängen sich hier ein und
+# werden per Caddy-Snippet über `reverse_proxy <container>:<port>` veröffentlicht.
+networks:
+  web:
+    external: true

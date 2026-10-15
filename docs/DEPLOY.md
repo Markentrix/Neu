@@ -19,7 +19,7 @@ Nicht enthalten: `src/`, `docs/`, `tools/`.
 `publish = "dist"`, sprechende URLs ohne `.html` (Netlify Pretty URLs), 301-Weiterleitungen alter `.dc.html`-Pfade in `netlify.toml`. `404.html` wird automatisch als Fehlerseite verwendet. Sicherheits- und Cache-Header in `dist/_headers`.
 
 ## Hetzner / Caddy (tatsächlicher Live-Server, Stand 15.10.2026)
-Der Live-Server 5.75.146.212 läuft mit Caddy, nicht mit nginx (erkennbar an ETag-Format und HTTP/3). Webroot ist `/srv/sites/markentrix`, Upload per `docs/veroeffentlichen.bat` (tar + scp + ssh als Benutzer `deploy`). Die passende Konfiguration liegt in `docs/caddy-markentrix.Caddyfile`; sie ersetzt den Site-Block in `/etc/caddy/Caddyfile`. Vor dem Einspielen prüfen: PHP-FPM installiert (`ls /run/php/`), Socket-Pfad in `php_fastcgi`, Schreibrecht für `/srv/sites/anfragen.log` für den PHP-Benutzer. Einspielen mit `sudo caddy validate --config /etc/caddy/Caddyfile` und `sudo systemctl reload caddy`. Die nginx-Datei unten bleibt als Alternative für einen anderen Server.
+Caddy 2 läuft als Docker-Container (`/opt/neu/server/docker-compose.yml`), Webroot `/srv/sites/markentrix`, Domain-Dateien in `/srv/caddy-sites/`. Upload per `docs/server/veroeffentlichen.bat`. Formular-Endpunkt über einen PHP-FPM-Container, Mailversand per SMTP über Google Workspace. Komplette Anleitung mit allen Dateien: `docs/server/EINSPIELEN.md`. Die nginx-Datei unten bleibt als Alternative für einen anderen Server.
 
 ## Hetzner / nginx
 `docs/nginx-markentrix.conf` (HTTPS, www → ohne www, try_files für `.html`-lose URLs, 301 alte Pfade, Header, Caching).
