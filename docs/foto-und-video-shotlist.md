@@ -244,7 +244,7 @@ Nur mit echtem Kunden und schriftlicher Einwilligung. Keine gestellten Szenen mi
 
 ## 5. Reel- und Short-Ideen
 
-Für Instagram Reels, TikTok, Facebook Reels und YouTube Shorts. Länge 15 bis 30 Sekunden. Text-Overlay in Oswald 700, Weiß auf Anthrazit-Fläche, sichere Zone beachten (oben ca. 250 px und unten ca. 400 px frei). Musik nur aus der kommerziell freigegebenen Bibliothek der Plattform oder lizenzfrei.
+Für Instagram Reels, TikTok, Facebook Reels und YouTube Shorts. Länge 15 bis 30 Sekunden. Text-Overlay in Inter 650 (Akzentwort in Instrument Serif kursiv), Weiß auf Anthrazit-Fläche, sichere Zone beachten (oben ca. 250 px und unten ca. 400 px frei). Musik nur aus der kommerziell freigegebenen Bibliothek der Plattform oder lizenzfrei.
 
 | Nr. | Titel | Hook (0 bis 2 Sekunden) | Ablauf | Text-Overlay | Motive |
 |---|---|---|---|---|---|

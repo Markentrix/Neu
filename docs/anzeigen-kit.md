@@ -505,7 +505,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 | Ablauf | Gutschein (Gestaltung nach Markenleitfaden), Hände bei der Arbeit, Abnahme bei Tageslicht, Endkarte |
 | Text-Overlay | "Geschenkidee fürs Auto" dann "Gutschein von ElbDetail" dann "Jetzt anfragen" |
 | Motive (Shotlist) | 56, 01, 48, 54 |
-| Gestaltung | Weiß/Blaugrau mit Anthrazit, Blau als Akzent. Kein Rot-Grün-Weihnachtslook, höchstens dezente Saison-Details |
+| Gestaltung | Weiß/Platin mit Anthrazit, Blau als Akzent. Kein Rot-Grün-Weihnachtslook, höchstens dezente Saison-Details |
 | Endkarte | Logo, "Gutscheine", elbdetail.de/gutscheine |
 
 ### 4.3 M3 Innenraum/Hund

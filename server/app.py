@@ -584,18 +584,18 @@ def voucher_html(v):
     return f"""<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Gutschein {E(v['code'])} | {E(s.get('name', 'ElbDetail'))}</title>
 <style>
-@font-face{{font-family:Oswald;font-weight:700;src:url(/fonts/oswald-700.woff2) format("woff2")}}
-:root{{color-scheme:light}}*{{box-sizing:border-box}}body{{margin:0;padding:24px 16px;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#eef3fb;color:#171c24}}
+@font-face{{font-family:Inter;font-weight:100 900;src:url(/fonts/inter-var.woff2) format("woff2")}}@font-face{{font-family:"Instrument Serif";font-style:italic;src:url(/fonts/instrument-serif-italic.woff2) format("woff2")}}
+:root{{color-scheme:light}}*{{box-sizing:border-box}}body{{margin:0;padding:24px 16px;font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f5f7;color:#161a21}}
 .wrap{{max-width:820px;margin:0 auto;display:grid;gap:16px}}
 .card{{position:relative;overflow:hidden;border-radius:20px;padding:32px;color:#f4f6f9;background:radial-gradient(circle at 85% 15%,rgba(91,155,232,.45),transparent 45%),linear-gradient(140deg,#262c36,#15181d);display:grid;gap:10px;min-height:420px}}
-.top{{display:flex;justify-content:space-between;align-items:center}}.top img{{height:46px}}.top span{{font-family:Oswald,Arial Narrow,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#5b9be8}}
-.val{{font-family:Oswald,Arial Narrow,sans-serif;font-size:64px;line-height:1;margin-top:28px}}.desc{{color:#9ea6b3}}
-.names{{display:flex;gap:28px;flex-wrap:wrap;color:#9ea6b3}}.names b{{color:#fff}}.msg{{font-style:italic;font-size:17px;min-height:1.4em}}
+.top{{display:flex;justify-content:space-between;align-items:center}}.top img{{height:46px}}.top span{{font-weight:600;font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:#5b9be8}}
+.val{{font-weight:300;font-size:64px;letter-spacing:-.03em;line-height:1;margin-top:28px}}.desc{{color:#9ea6b3}}
+.names{{display:flex;gap:28px;flex-wrap:wrap;color:#9ea6b3}}.names b{{color:#fff}}.msg{{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:24px;line-height:1.3;min-height:1.4em}}
 .foot{{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.15);padding-top:12px;font-size:13px;color:#c7cdd6}}
 .code{{font:700 18px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;color:#fff}}
 .state{{background:#fff3cd;border:1px solid #f1d9a0;color:#4d3a0f;padding:12px 16px;border-radius:12px;font-weight:600}}
-.how{{background:#fff;border-radius:16px;padding:20px 22px;border:1px solid #d3ddee}}.how h2{{margin:0 0 8px;font-family:Oswald,Arial Narrow,sans-serif}}
-.btn{{display:inline-block;background:#1c4f9c;color:#fff;border:0;border-radius:999px;padding:12px 22px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none}}
+.how{{background:#fff;border-radius:16px;padding:20px 22px;border:1px solid #dfe3e9}}.how h2{{margin:0 0 8px;font-weight:650;letter-spacing:-.02em}}
+.btn{{display:inline-block;background:#1c4f9c;color:#fff;border:0;border-radius:999px;padding:12px 22px;font:inherit;font-weight:650;cursor:pointer;text-decoration:none}}
 @media print{{body{{background:#fff;padding:0}}.noprint{{display:none!important}}.card{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}}}
 </style></head><body><div class="wrap">
 {f'<p class="state">{E(state)}</p>' if state else ''}

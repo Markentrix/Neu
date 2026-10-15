@@ -233,11 +233,13 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 | Akzent | Blau | `#1c4f9c` | 28, 79, 156 | Buttons, Links, Hervorhebungen, Icons auf hellem Grund. **Einzige Akzentfarbe.** | Text auf Anthrazit (zu wenig Kontrast) |
 | Akzent auf dunkel | Hellblau | `#5b9be8` | 91, 155, 232 | Links, Icons und Hervorhebungen auf Anthrazit | Text auf Weiß (zu wenig Kontrast) |
 | Fläche | Weiß | `#ffffff` | 255, 255, 255 | Haupthintergrund, Text auf Blau und Anthrazit | |
-| Fläche | Blaugrau hell | `#eef3fb` | 238, 243, 251 | Abschnittswechsel, Karten, Preistabellen | Text |
-| Funktion | WhatsApp-Grün | `#1f9d55` | 31, 157, 85 | **Nur** WhatsApp-Buttons und WhatsApp-Icon | Andere Buttons, Deko, Überschriften |
+| Fläche | Platin hell | `#f4f5f7` | 244, 245, 247 | Abschnittswechsel, Karten, Preistabellen. Neutral statt bläulich: ruhiger, hochwertiger | Text |
+| Linie | Platin | `#dfe3e9` | 223, 227, 233 | Trennlinien, Rahmen von Karten und Feldern | Text |
+| Text gedämpft | Schiefer | `#565f6e` | 86, 95, 110 | Zweitrangiger Text, Hinweise | Überschriften |
+| Funktion | WhatsApp-Grün | `#3ddc84` | 61, 220, 132 | **Nur** das WhatsApp-Icon. Die WhatsApp-Knöpfe selbst sind zurückhaltend (Umriss), nie vollflächig grün | Flächen, Buttons, Text, Überschriften |
 | Funktion | Sternegelb | `#f5b301` | 245, 179, 1 | **Nur** Bewertungssterne | Text, Buttons, Flächen |
 
-**Mengenverhältnis als Richtwert:** viel Weiß und Blaugrau, Anthrazit für Struktur und Text, Blau sparsam als Signal. Pro Ansicht möglichst nur ein blauer Haupt-Button.
+**Mengenverhältnis als Richtwert:** viel Weiß und Platin, Anthrazit für Struktur und Text, Blau sparsam als Signal. Pro Ansicht möglichst nur ein blauer Haupt-Button.
 
 ### 8.2 Kontrastregeln
 
@@ -246,13 +248,14 @@ Geprüft nach WCAG 2.1. Ziel: AA (4,5:1 für Fließtext, 3:1 für große Schrift
 | Vordergrund | Hintergrund | Kontrast | Freigabe |
 |---|---|---|---|
 | Anthrazit `#1e2229` | Weiß `#ffffff` | 15,96:1 | Alle Textgrößen |
-| Anthrazit `#1e2229` | Blaugrau `#eef3fb` | 14,32:1 | Alle Textgrößen |
+| Anthrazit `#1e2229` | Platin `#f4f5f7` | 14,63:1 | Alle Textgrößen |
+| Schiefer `#565f6e` | Weiß / Platin | 6,45 / 5,91:1 | Alle Textgrößen |
 | Weiß `#ffffff` | Anthrazit `#1e2229` | 15,96:1 | Alle Textgrößen |
 | Blau `#1c4f9c` | Weiß `#ffffff` | 7,93:1 | Alle Textgrößen, Links |
 | Weiß `#ffffff` | Blau `#1c4f9c` | 7,93:1 | Button-Text |
-| Blau `#1c4f9c` | Blaugrau `#eef3fb` | 7,12:1 | Alle Textgrößen |
+| Blau `#1c4f9c` | Platin `#f4f5f7` | 7,27:1 | Alle Textgrößen |
 | Hellblau `#5b9be8` | Anthrazit `#1e2229` | 5,55:1 | Alle Textgrößen auf dunkel |
-| Weiß `#ffffff` | WhatsApp-Grün `#1f9d55` | 3,49:1 | Nur Button-Text ab 18,66 px fett oder 24 px, plus Icon |
+| WhatsApp-Grün `#3ddc84` | Anthrazit `#1e2229` | 8,94:1 | Nur Icon auf dunklem Grund |
 | Sternegelb `#f5b301` | Anthrazit `#1e2229` | 8,61:1 | Sterne auf dunkel |
 | Sternegelb `#f5b301` | Weiß `#ffffff` | 1,85:1 | **Nur** mit Zahl daneben ("5,0"), Sterne nie als einzige Info |
 | Hellblau `#5b9be8` | Weiß `#ffffff` | 2,88:1 | **Nicht für Text** |
@@ -260,34 +263,36 @@ Geprüft nach WCAG 2.1. Ziel: AA (4,5:1 für Fließtext, 3:1 für große Schrift
 
 **Weitere Regeln:**
 - Text auf Fotos nur mit Anthrazit-Overlay (mind. 60 % Deckkraft) oder auf einer Anthrazit-Fläche.
-- WhatsApp-Buttons: Text fett und mindestens 18,66 px, oder Text in Anthrazit neben einem grünen Icon.
+- WhatsApp-Buttons: Umriss-Knopf, Text in Weiß (auf dunkel) bzw. Anthrazit (auf hell), nur das Icon ist grün.
 - Bedeutung nie nur über Farbe transportieren. Immer Text oder Icon dazu.
 
 ### 8.3 Typografie
 
+Zwei Schriften, beide frei lizenziert (SIL OFL) und auf dem eigenen Server eingebunden:
+
+- **Inter** für alles: Überschriften, Fließtext, Preise, Knöpfe. Ruhig, präzise, auf jedem Gerät gleich.
+- **Instrument Serif kursiv** nur als Akzent: das hervorgehobene Wort oder der Halbsatz in einer Überschrift (auf der Website in Blau bzw. Hellblau), die persönliche Nachricht auf Gutscheinen. Nie für Fließtext, nie für ganze Überschriften.
+
 | Rolle | Schrift | Schnitt | Größe Desktop | Größe Mobil | Zeilenhöhe | Hinweise |
 |---|---|---|---|---|---|---|
-| H1 / Hero | Oswald | 700 | 56 px | 36 px | 1,1 | Großbuchstaben erlaubt, max. 2 Zeilen |
-| H2 / Abschnitt | Oswald | 600 | 40 px | 28 px | 1,15 | |
-| H3 / Karte, Paketname | Oswald | 600 | 26 px | 22 px | 1,2 | |
-| H4 / Zwischenzeile | Oswald | 500 | 20 px | 18 px | 1,25 | |
-| Label / Kicker | Oswald | 500 | 14 px | 13 px | 1,3 | Großbuchstaben, Laufweite +0,06 em |
-| Preis | Oswald | 700 | 32 px | 28 px | 1,1 | "ab" in Systemschrift, kleiner |
-| Fließtext | Systemschrift | 400 | 17 px | 16 px | 1,6 | Max. 70 Zeichen pro Zeile |
-| Klein / Hinweise | Systemschrift | 400 | 14 px | 14 px | 1,5 | Nie kleiner als 14 px |
-| Button | Systemschrift oder Oswald 500 | 600 / 500 | 17 px | 16 px | 1 | Klickfläche mind. 44 × 44 px |
+| H1 / Hero | Inter | 650 | 56–64 px | 34–40 px | 1,02 | Laufweite −0,03 em, Akzent in Instrument Serif kursiv auf eigener Zeile |
+| H2 / Abschnitt | Inter | 650 | 40–52 px | 31–42 px | 1,1 | Laufweite −0,022 em, Akzent kursiv in Blau |
+| H3 / Karte, Paketname | Inter | 650 | 22–26 px | 20–22 px | 1,2 | Laufweite −0,012 em |
+| Label / Kicker | Inter | 650 | 12 px | 12 px | 1,3 | Großbuchstaben, Laufweite +0,16 em |
+| Preis | Inter | 600 | 32–42 px | 28–34 px | 1 | Ziffern gleich breit (tabular), "ab" klein davor |
+| Fließtext | Inter | 400 | 17 px | 16 px | 1,6 | Max. 70 Zeichen pro Zeile |
+| Klein / Hinweise | Inter | 400 | 14 px | 13–14 px | 1,5 | Nie kleiner als 12 px |
+| Button | Inter | 600 | 17 px | 16 px | 1 | Klickfläche mind. 44 × 44 px |
 
-Systemschrift-Stack: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`.
+Fettdruck sparsam: 600 bis 650 statt 700 bis 800. Gehobene Marken wirken über Ruhe, nicht über Lautstärke.
 
-Die Skala ist die Vorgabe für neue Gestaltung. Bei Abweichungen auf der Website gilt das Stylesheet der Website. `[PLATZHALTER: Skala mit dem aktuellen Stylesheet abgleichen]`
-
-Für Social Media und Druck: Oswald 700 für Headlines, Oswald 500 für Labels. Fließtext auf Social-Grafiken: Systemschrift ist nicht einbettbar, deshalb dort eine frei lizenzierte Sans verwenden. `[PLATZHALTER: Fließtextschrift für Social und Druck festlegen, z. B. eine Open-Source-Sans]`
+Für Social Media und Druck dieselben Schriften verwenden. Beide gibt es kostenlos bei Google Fonts (Inter, Instrument Serif); die Dateien liegen auch unter `static/fonts/` mit Lizenztext.
 
 ### 8.4 Logo
 
 **Aufbau:** Schriftzug "ElbDetail" mit Unterzeile "Premium Fahrzeugaufbereitung".
 
-**Aktueller Stand:** Das Logo liegt nur als PNG mit 142 × 57 px vor. Das reicht für kleine Darstellungen am Bildschirm, aber nicht für Druck, Folierung, Schilder, Banner oder große Social-Grafiken.
+**Aktueller Stand:** Für die Website gibt es einen Vektor-Nachbau (`static/logo.svg` hell auf dunkel, `static/logo-dark.svg` dunkel auf hell, transparent, beliebig skalierbar). Er ist aus dem alten PNG (142 × 57 px) nachgezeichnet. Vor Druck, Folierung oder Schildern bitte mit dem Original vergleichen oder die Originaldatei des Gestalters verwenden.
 
 > **Wichtig: Vektorlogo beschaffen.** Das Logo als SVG und PDF (Vektor) beim ursprünglichen Gestalter anfragen. Ist das nicht möglich, das Logo neu zeichnen lassen. Dabei mitbestellen: Positivversion (für hellen Grund), Negativversion (für dunklen Grund), einfarbige Version, Version ohne Unterzeile für kleine Größen, Favicon/Avatar. `[PLATZHALTER: Kontakt ursprünglicher Gestalter / Auftrag Neuzeichnung]`
 
@@ -307,7 +312,7 @@ Für Social Media und Druck: Oswald 700 für Headlines, Oswald 500 für Labels. 
 | Hintergrund | Erlaubt | Version |
 |---|---|---|
 | Weiß `#ffffff` | Ja | Positiv (Anthrazit oder Anthrazit/Blau) |
-| Blaugrau `#eef3fb` | Ja | Positiv |
+| Platin `#f4f5f7` | Ja | Positiv |
 | Anthrazit `#1e2229` | Ja | Negativ (Weiß, ggf. Hellblau) |
 | Blau `#1c4f9c` | Nur Negativversion in Weiß | Negativ einfarbig |
 | Ruhige Fotostelle mit Anthrazit-Overlay | Ja | Negativ |
@@ -315,7 +320,7 @@ Für Social Media und Druck: Oswald 700 für Headlines, Oswald 500 für Labels. 
 
 `[PLATZHALTER: Prüfen, für welchen Hintergrund das vorhandene PNG angelegt ist (hell oder dunkel, transparent oder nicht)]`
 
-**Verboten:** verzerren, drehen, Schatten, Glow, Outline, Farben tauschen, Unterzeile ändern oder umstellen, Logo neu setzen aus Oswald, Logo in Fließtext einbauen.
+**Verboten:** verzerren, drehen, Schatten, Glow, Outline, Farben tauschen, Unterzeile ändern oder umstellen, Logo neu setzen aus einer anderen Schrift, Logo in Fließtext einbauen.
 
 ### 8.5 Bildstil
 
@@ -345,10 +350,10 @@ Details zu Motiven und Technik: `docs/foto-und-video-shotlist.md`.
 
 **Regeln:**
 1. **Ein Foto, eine Aussage.** Maximal 8 Wörter Headline auf der Grafik.
-2. **Headline** in Oswald 700, Großbuchstaben erlaubt. Weiß auf Anthrazit oder Anthrazit auf Weiß/Blaugrau.
+2. **Headline** in Inter 650, ein Akzentwort in Instrument Serif kursiv. Weiß auf Anthrazit oder Anthrazit auf Weiß/Platin.
 3. **Akzent** nur Blau (auf hell) oder Hellblau (auf dunkel). Kein drittes Akzentfarb-Element.
 4. **Logo** unten links oder unten mittig, mit Schutzzone. Bis zum Vektorlogo nur klein einsetzen.
-5. **Vorher/Nachher-Label:** "VORHER" und "NACHHER" in Oswald 600, Weiß auf Anthrazit-Fläche, immer an derselben Position. Trennung links/rechts oder oben/unten, immer gleiche Reihenfolge (vorher zuerst).
+5. **Vorher/Nachher-Label:** "VORHER" und "NACHHER" in Inter 650, Weiß auf Anthrazit-Fläche, immer an derselben Position. Trennung links/rechts oder oben/unten, immer gleiche Reihenfolge (vorher zuerst).
 6. **Sichere Zone 9:16:** oben ca. 250 px und unten ca. 400 px frei von Text halten. Dort liegen die Bedienelemente der Apps.
 7. **Preise** nur aus der Preisliste und immer mit "ab".
 8. **Bewertungen:** nur echte Zitate aus Google-Rezensionen, mit Einwilligung bzw. als öffentliches Zitat mit Quelle "Google-Rezension". Sterne in `#f5b301` plus Zahl "5,0".

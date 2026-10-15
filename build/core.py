@@ -158,7 +158,8 @@ def head(site, title, desc, path, prefix="", ld=None, noindex=False, og_type="we
 <meta name="twitter:title" content="{ESC(title)}">
 <meta name="twitter:description" content="{ESC(desc)}">
 <meta name="twitter:image" content="{site.url}/og-image.png">
-<link rel="preload" href="{prefix}fonts/oswald-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{prefix}fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{prefix}fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{site.asset(prefix, "styles.css")}">
 {extra}{lds}</head>
 <body>

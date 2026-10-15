@@ -126,7 +126,7 @@ def contact_compact(site, prefix=""):
     <div class="container">
       <div class="cta-band reveal">
         <p class="eyebrow">Kontakt &amp; Termin</p>
-        <h2 id="kontakt-h" class="display">Bereit für ein Auto, das sich wieder neu anfühlt?</h2>
+        <h2 id="kontakt-h" class="display">Bereit für ein Auto, das sich <em>wieder neu anfühlt?</em></h2>
         <p>Nennen Sie uns Fahrzeug, Wunschpaket und Zeitraum. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert.</p>
         <div class="contact-actions">
           <a class="contact-action is-primary" href="{prefix}termin.html">{I["cal"]}<span><strong>Termin online anfragen</strong><small>In 2 Minuten, mit Richtpreis</small></span></a>
@@ -204,7 +204,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Ratgeber</p>
-        <h2 id="ratgeber-h" class="display">Wissen aus der Werkstatt.</h2>
+        <h2 id="ratgeber-h" class="display">Wissen aus der <em>Werkstatt.</em></h2>
         <p>Ehrliche Antworten auf die Fragen, die wir täglich hören. Von Preisen über Leasingrückgabe bis zur richtigen Lackpflege im Winter.</p>
       </div>
       <div class="article-grid home-scroll stagger" tabindex="0" role="region" aria-label="Ratgeber-Artikel, seitlich wischen">{art_cards}</div>
@@ -266,7 +266,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Leistungen</p>
-        <h2 id="leistungen-h" class="display">Für jedes Auto die passende Pflege.</h2>
+        <h2 id="leistungen-h" class="display">Für jedes Auto die <em>passende Pflege.</em></h2>
         <p>Vom Frischekick für den Alltag bis zur mehrstufigen Politur für den Neuwagen. Alle Leistungen auch einzeln buchbar.</p>
       </div>
       <div class="service-list stagger">{services_rows}
@@ -279,7 +279,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Ergebnisse</p>
-        <h2 id="vn-h" class="display">Vorher. Nachher. Selbst schieben.</h2>
+        <h2 id="vn-h" class="display">Vorher. Nachher. <em>Selbst schieben.</em></h2>
         <p>Ziehen Sie den Regler, um den Unterschied zu sehen.</p>
       </div>
       <div class="ba-grid stagger">{"".join(tiles)}
@@ -292,7 +292,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head section-head--tight reveal">
         <p class="eyebrow">Bewertungen</p>
-        <h2 id="bewertungen-h" class="display">Was Kund:innen aus Celle sagen.</h2>
+        <h2 id="bewertungen-h" class="display">Was Kund:innen aus Celle <em>sagen.</em></h2>
       </div>
       <div class="review-block reveal">
         <div class="review-score-wrap">
@@ -315,7 +315,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Pakete &amp; Preise</p>
-        <h2 id="preise-h" class="display">Klare Preise. Bevor wir anfangen.</h2>
+        <h2 id="preise-h" class="display">Klare Preise. <em>Bevor wir anfangen.</em></h2>
         <p>Richtpreise für eine Kompaktklasse. Den Festpreis für Ihr Fahrzeug erhalten Sie vor dem Termin, kostenlos und unverbindlich.</p>
       </div>
       <div class="plan-rows stagger">{plan_rows}
@@ -330,7 +330,7 @@ def build_home(site, write):
       <div class="reveal">
         <div class="section-head section-head--tight">
           <p class="eyebrow">Warum ElbDetail</p>
-          <h2 id="warum-h" class="display">Sorgfalt, die man sieht. Ein Preis, der vorher steht.</h2>
+          <h2 id="warum-h" class="display">Sorgfalt, die man sieht. <em>Ein Preis, der vorher steht.</em></h2>
           <p>Inhabergeführter Fachbetrieb in Celle. Kein Franchise, keine Waschstraße: Jedes Fahrzeug wird persönlich und von Hand aufbereitet.</p>
         </div>
         <details class="facts-wrap" open data-close-narrow>
@@ -360,7 +360,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Ablauf</p>
-        <h2 id="ablauf-h" class="display">In drei Schritten zum Auto wie neu.</h2>
+        <h2 id="ablauf-h" class="display">In drei Schritten zum <em>Auto wie neu.</em></h2>
       </div>
       <div class="process-rail stagger">
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
@@ -376,7 +376,7 @@ def build_home(site, write):
       <div class="promo-band reveal">
         <div class="promo-icon">{I["gift"]}</div>
         <div>
-          <h2 id="gift-h">Verschenken Sie ein Auto wie neu.</h2>
+          <h2 id="gift-h">Verschenken Sie ein <em>Auto wie neu.</em></h2>
           <p>Gutscheine für Wunschbetrag oder Paket, mit persönlicher Nachricht. Ideal zu Weihnachten, zum Geburtstag oder als Dankeschön.</p>
         </div>
         <a class="btn btn-primary" href="gutscheine.html">Gutschein gestalten</a>
@@ -389,7 +389,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Häufige Fragen</p>
-        <h2 id="faq-h" class="display">Gut zu wissen, bevor Sie anfragen.</h2>
+        <h2 id="faq-h" class="display">Gut zu wissen, <em>bevor Sie anfragen.</em></h2>
       </div>
       <div class="faq-list stagger">
         {core.faq_html(home_faq, first_open=False)}
