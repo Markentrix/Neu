@@ -2,9 +2,9 @@
 setlocal
 title Markentrix - Website veroeffentlichen
 
-rem Dieses Skript liegt neben dem Ordner "dist". Nur "dist" wird hochgeladen.
-rem Stand 15.10.2026: Auf dem Server werden Dateien, die in dist nicht mehr
-rem existieren, jetzt entfernt (alte Seiten wie Preise.dc.html verschwinden).
+rem Dieses Skript liegt im Git-Checkout des Repositories Markentrix/Neu neben dem
+rem Ordner "dist". Ablauf: aktuellen Stand aus dem Repository holen, dann nur "dist"
+rem hochladen. Auf dem Server werden Dateien entfernt, die in dist nicht mehr existieren.
 set "SRC=%~dp0dist"
 set "PAKET=%TEMP%\markentrix-dist.tar"
 set "SERVER=deploy@5.75.146.212"
@@ -24,8 +24,23 @@ if not exist "%SRC%\blog\das-system-website-sichtbarkeit-ki-assistent.html" (
 )
 
 echo.
+echo [0/3] Aktuellen Stand aus dem Repository holen ...
+git -C "%~dp0." pull --ff-only
+if errorlevel 1 (
+  echo FEHLER: git pull ist fehlgeschlagen. Es wurde nichts hochgeladen.
+  echo Moegliche Ursachen: keine Internetverbindung, Anmeldung bei GitHub noetig
+  echo oder lokale Aenderungen im Ordner. Meldung oben lesen oder im Chat zeigen.
+  pause
+  exit /b 1
+)
+for /f "delims=" %%b in ('git -C "%~dp0." rev-parse --abbrev-ref HEAD') do set "BRANCH=%%b"
+for /f "delims=" %%c in ('git -C "%~dp0." log -1 --format^=%%s') do set "LETZTE=%%c"
+
+echo.
 echo Die Website aus diesem Ordner wird jetzt LIVE auf markentrix.de veroeffentlicht:
 echo   %SRC%
+echo   Branch: %BRANCH%
+echo   Letzte Aenderung: %LETZTE%
 echo.
 choice /c JN /m "Jetzt veroeffentlichen (J = ja, N = abbrechen)"
 if errorlevel 2 (

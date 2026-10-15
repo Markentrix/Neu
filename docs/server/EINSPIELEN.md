@@ -9,7 +9,7 @@ Dateien in diesem Ordner:
 |---|---|
 | `markentrix-site.caddy` | `/opt/neu/server/caddy/snippets/markentrix-site.caddy` (die Domain-Datei `/srv/caddy-sites/markentrix.de.caddy` bleibt unverändert) |
 | `docker-compose.yml` | `/opt/neu/server/docker-compose.yml` |
-| `veroeffentlichen.bat` | bleibt auf dem Windows-Rechner neben `dist` |
+| `veroeffentlichen.bat` (im Hauptordner des Repositories) | wird im Git-Checkout auf dem Windows-Rechner ausgeführt, holt zuerst den aktuellen Stand |
 
 ## 1. Website hochladen (Windows)
 

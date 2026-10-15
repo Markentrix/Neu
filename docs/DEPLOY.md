@@ -19,7 +19,7 @@ Nicht enthalten: `src/`, `docs/`, `tools/`.
 `publish = "dist"`, sprechende URLs ohne `.html` (Netlify Pretty URLs), 301-Weiterleitungen alter `.dc.html`-Pfade in `netlify.toml`. `404.html` wird automatisch als Fehlerseite verwendet. Sicherheits- und Cache-Header in `dist/_headers`.
 
 ## Hetzner / Caddy (tatsächlicher Live-Server, Stand 15.10.2026)
-Caddy 2 läuft als Docker-Container (`/opt/neu/server/docker-compose.yml`), Webroot `/srv/sites/markentrix`, Domain-Dateien in `/srv/caddy-sites/`. Upload per `docs/server/veroeffentlichen.bat`. Formular-Endpunkt über einen PHP-FPM-Container, Mailversand per SMTP über Google Workspace. Komplette Anleitung mit allen Dateien: `docs/server/EINSPIELEN.md`. Die nginx-Datei unten bleibt als Alternative für einen anderen Server.
+Caddy 2 läuft als Docker-Container (`/opt/neu/server/docker-compose.yml`), Webroot `/srv/sites/markentrix`, Domain-Dateien in `/srv/caddy-sites/`. Upload per `veroeffentlichen.bat` im Hauptordner (holt zuerst den Stand aus dem Repository, Anleitung `docs/server/AENDERN-UND-VEROEFFENTLICHEN.md`). Formular-Endpunkt über einen PHP-FPM-Container, Mailversand per SMTP über Google Workspace. Komplette Anleitung mit allen Dateien: `docs/server/EINSPIELEN.md`. Die nginx-Datei unten bleibt als Alternative für einen anderen Server.
 
 ## Hetzner / nginx
 `docs/nginx-markentrix.conf` (HTTPS, www → ohne www, try_files für `.html`-lose URLs, 301 alte Pfade, Header, Caching).
