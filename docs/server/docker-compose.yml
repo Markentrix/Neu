@@ -29,7 +29,7 @@ services:
       - /srv/markentrix-daten:/srv/markentrix-daten   # Protokoll der Anfragen, außerhalb des Webroots
     environment:
       MX_SMTP_HOST: smtp.gmail.com
-      MX_SMTP_PORT: "465"
+      MX_SMTP_PORT: "587"                      # 587 mit STARTTLS; Hetzner Cloud sperrt ausgehend 25 und 465
       MX_SMTP_USER: info@markentrix.de
       MX_SMTP_PASS: ${MX_SMTP_PASS}            # App-Passwort aus .env
       MX_MAIL_TO: info@markentrix.de
