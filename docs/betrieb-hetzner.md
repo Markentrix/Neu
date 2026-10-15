@@ -49,6 +49,12 @@ Ressourcenbedarf: Ein Hetzner Cloud **CX22** (2 vCPU, 4 GB RAM) reicht mit groß
     15 3 * * * /opt/elbdetail/deploy/backup.sh >> /var/log/elbdetail-backup.log 2>&1
     ```
     Den Ordner `/opt/elbdetail-backups` zusätzlich auf eine Hetzner Storage Box spiegeln (z. B. mit `rsync` oder `borg`).
+11. **Wächter einrichten:** prüft alle 5 Minuten Website (über HTTPS), Speicherplatz, Alter der letzten Sicherung und Zertifikat. Ist die Website zweimal hintereinander nicht erreichbar, startet er App und Caddy neu. Bei jeder Störung kommt eine E-Mail an `NOTIFY_TO` (höchstens alle 6 Stunden pro Störung).
+    ```bash
+    crontab -e
+    */5 * * * * /opt/elbdetail/deploy/watchdog.sh >> /var/log/elbdetail-watchdog.log 2>&1
+    ```
+    Zusätzlich hat der App-Container einen Docker-Healthcheck (`docker compose ps` zeigt `healthy`).
 
 ## E-Mail-Versand
 
@@ -65,6 +71,8 @@ Benachrichtigungen bei neuen Anfragen und Eingangsbestätigungen an Kund:innen l
 | Logs ansehen | `docker compose logs --tail 100 app` |
 | Passwort ändern | Schritt 6 wiederholen, dann `docker compose up -d` |
 | Status | `docker compose ps` und `curl -s https://www.elbdetail.de/api/health` |
+| Wächter-Protokoll | `tail -50 /var/log/elbdetail-watchdog.log` |
+| Alarm-E-Mail testen | `docker compose run --rm --no-deps app python3 /app/server/app.py alarm "Test"` |
 
 ## Wiederherstellen
 

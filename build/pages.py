@@ -140,6 +140,21 @@ def contact_compact(site, prefix=""):
 '''
 
 
+def owner_html(site, prefix=""):
+    """Inhaber-Karte. Erscheint erst, wenn Name und Text im Portal (Grunddaten → Über uns) gepflegt sind."""
+    ab = site.s.get("about") or {}
+    if not (ab.get("name") and ab.get("text")):
+        return ""
+    photo = picture(site, ab.get("photo", ""), f'{ab["name"]}, {ab.get("role") or "Inhaber"} von {site.s["name"]}', "owner-photo", prefix, sizes="96px")
+    since = f' · seit {ESC(ab["since"])}' if ab.get("since") else ""
+    return f'''
+        <figure class="owner-card reveal">
+          {photo}
+          <blockquote>„{ESC(ab["text"])}“</blockquote>
+          <figcaption><strong>{ESC(ab["name"])}</strong>{ESC(ab.get("role") or "Inhaber")}, {ESC(site.s["name"])}{since}</figcaption>
+        </figure>'''
+
+
 def build_home(site, write):
     s = site.s
     pr = site.pricing
@@ -147,6 +162,7 @@ def build_home(site, write):
     desc = (f"Innen- & Außenaufbereitung, Lackpolitur und Versiegelung in Celle. Handarbeit, {s['rating']['value']} ★ bei Google, "
             f"Koch-Chemie geschult. Jetzt Termin anfragen.")
     home_faq = pick(site.faq, HOME_FAQ)
+    owner_card = owner_html(site)
     ld = [seo.business(site), seo.website(site), seo.faq(home_faq),
           seo.webpage(site, "/", title, {"speakable": {"@type": "SpeakableSpecification", "cssSelector": ["#auf-einen-blick", ".hero-sub"]}})]
 
@@ -277,7 +293,7 @@ def build_home(site, write):
         <h2 id="vn-h" class="display">Vorher. Nachher. Selbst schieben.</h2>
         <p>Ziehe den Regler, um den Unterschied zu sehen.</p>
       </div>
-      <div class="ba-grid home-scroll stagger" tabindex="0" role="region" aria-label="Vorher-Nachher-Beispiele, seitlich wischen">{"".join(tiles)}
+      <div class="ba-grid stagger">{"".join(tiles)}
       </div>
       <p class="gallery-note">{ESC(gallery_note)} <a class="text-link" href="{s["social"]["instagram"]}" target="_blank" rel="noopener">Instagram</a> · <a class="text-link" href="{s["social"]["tiktok"]}" target="_blank" rel="noopener">TikTok</a></p>
     </div>
@@ -305,7 +321,7 @@ def build_home(site, write):
         </dl>
         </details>
       </div>
-      <div class="why-list stagger">
+      <div class="why-list stagger">{owner_card}
         <div class="why-item reveal">{I["hand"]}<div><h3>Handarbeit statt Waschstraße</h3><p>Zwei-Eimer-Handwäsche, weiche Mikrofaser, kratzfreie Trocknung. So entstehen keine neuen Swirls, während alte verschwinden.</p></div></div>
         <div class="why-item reveal">{I["shield"]}<div><h3>Koch-Chemie geschult</h3><p>Produkte und Verfahren aus dem Profibereich, abgestimmt auf Lack, Leder, Alcantara, Kunststoff und Textil. Kein Experimentieren an deinem Auto.</p></div></div>
         <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Du bekommst ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>

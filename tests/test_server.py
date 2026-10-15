@@ -150,6 +150,29 @@ class TestBuild(Base):
                     self.assertNotIn("{ab:", open(os.path.join(root, f), encoding="utf-8").read(), f)
         self.assertIn("ab 179 €", open(os.path.join(site, "leistungen/innenaufbereitung-celle.html"), encoding="utf-8").read())
 
+    def test_owner_card_and_verification_only_when_filled(self):
+        import build as builder
+        site = app.site_dir()
+        home = open(os.path.join(site, "index.html"), encoding="utf-8").read()
+        self.assertNotIn("owner-card", home)
+        self.assertNotIn("google-site-verification", home)
+        tmp = tempfile.mkdtemp(prefix="elb-owner-")
+        content = os.path.join(tmp, "content")
+        shutil.copytree(os.path.join(ROOT, "content"), content, ignore=shutil.ignore_patterns(".media-cache"))
+        p = os.path.join(content, "site.json")
+        d = json.load(open(p, encoding="utf-8"))
+        d["about"] = {"name": "Max Muster", "role": "Inhaber", "photo": "", "since": "2023", "text": "Ich bereite jedes Auto selbst auf."}
+        d["verification"] = {"google": "abc123", "bing": ""}
+        json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False)
+        builder.build(content, os.path.join(tmp, "out"), os.path.join(ROOT, "static"), quiet=True)
+        home = open(os.path.join(tmp, "out", "index.html"), encoding="utf-8").read()
+        self.assertIn("owner-card", home)
+        self.assertIn("Max Muster", home)
+        self.assertIn('<meta name="google-site-verification" content="abc123">', home)
+        self.assertNotIn("msvalidate.01", home)
+        self.assertIn('"founder":{"@type":"Person","name":"Max Muster"', home)
+        shutil.rmtree(tmp, ignore_errors=True)
+
     def test_no_inline_scripts_for_csp(self):
         import re
         site = app.site_dir()

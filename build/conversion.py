@@ -247,7 +247,7 @@ def build_gutscheine(site, write):
       <div class="voucher-preview-wrap">
         <p class="eyebrow">Vorschau</p>
         <div class="voucher-card" id="voucherPreview" aria-live="polite">
-          <div class="vc-top"><img src="logo.png" alt="" width="142" height="57"><span>Gutschein</span></div>
+          <div class="vc-top"><img src="logo.svg" alt="" width="150" height="60"><span>Gutschein</span></div>
           <div class="vc-value" data-vc="value">100 €</div>
           <div class="vc-desc" data-vc="desc">für eine Fahrzeugaufbereitung nach Wahl</div>
           <div class="vc-names"><span>Für <strong data-vc="fuer">…</strong></span><span>Von <strong data-vc="von">…</strong></span></div>

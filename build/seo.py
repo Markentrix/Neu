@@ -27,7 +27,7 @@ def business(site):
         "telephone": s["phone"],
         "email": s["email"],
         "image": site.url + "/og-image.png",
-        "logo": site.url + "/logo.png",
+        "logo": site.url + "/logo-512.png",
         "priceRange": "€€",
         "currenciesAccepted": "EUR",
         "paymentAccepted": "Bar, Überweisung",
@@ -50,6 +50,8 @@ def business(site):
                             "itemListElement": [{"@type": "OfferCatalog", "name": sv["short"], "url": site.url + "/leistungen/" + sv["slug"] + ".html"}
                                                 for sv in site.services]},
         "makesOffer": offers,
+        **({"founder": {"@type": "Person", "name": s["about"]["name"], "jobTitle": s["about"].get("role") or "Inhaber"}}
+           if (s.get("about") or {}).get("name") else {}),
         "potentialAction": {"@type": "ReserveAction", "name": "Termin anfragen",
                             "target": {"@type": "EntryPoint", "urlTemplate": site.url + "/termin.html", "inLanguage": "de-DE",
                                        "actionPlatform": ["http://schema.org/DesktopWebPlatform", "http://schema.org/MobileWebPlatform"]},
@@ -100,7 +102,7 @@ def article(site, a):
             "inLanguage": "de-DE", "mainEntityOfPage": site.url + path, "image": site.url + "/og-image.png",
             "articleSection": a.get("category", "Ratgeber"), "wordCount": len(md.plain(a["body"]).split()),
             "author": {"@type": "Organization", "name": site.s["name"], "url": site.url + "/"},
-            "publisher": {"@type": "Organization", "name": site.s["name"], "logo": {"@type": "ImageObject", "url": site.url + "/logo.png"}},
+            "publisher": {"@type": "Organization", "name": site.s["name"], "logo": {"@type": "ImageObject", "url": site.url + "/logo-512.png", "width": 512, "height": 512}},
             "about": {"@id": site.url + "/#business"},
             "speakable": {"@type": "SpeakableSpecification", "cssSelector": [".article-summary"]}}
 

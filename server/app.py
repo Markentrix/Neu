@@ -32,6 +32,7 @@ import threading
 import time
 import traceback
 import urllib.parse
+import urllib.request
 from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 from http import HTTPStatus
@@ -598,7 +599,7 @@ def voucher_html(v):
 @media print{{body{{background:#fff;padding:0}}.noprint{{display:none!important}}.card{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}}}
 </style></head><body><div class="wrap">
 {f'<p class="state">{E(state)}</p>' if state else ''}
-<div class="card"><div class="top"><img src="/logo.png" alt="{E(s.get('name', 'ElbDetail'))}"><span>Gutschein</span></div>
+<div class="card"><div class="top"><img src="/logo.svg" alt="{E(s.get('name', 'ElbDetail'))}"><span>Gutschein</span></div>
 <div class="val">{value}</div><div class="desc">{desc}</div>
 <div class="names">{f'<span>Für <b>{E(v["fuer"])}</b></span>' if v['fuer'] else ''}{f'<span>Von <b>{E(v["von"])}</b></span>' if v['von'] else ''}</div>
 <p class="msg">{E(v['widmung'] or '')}</p>
@@ -1454,6 +1455,18 @@ class AdminAPI:
 
 # --------------------------------------------------------------------------- Start
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "health":  # für den Docker-Healthcheck, ohne Datenbankzugriff
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{Cfg.port}/api/health", timeout=4) as r:
+                sys.exit(0 if r.status == 200 else 1)
+        except Exception:
+            sys.exit(1)
+    if len(sys.argv) > 1 and sys.argv[1] == "alarm":  # vom Wächter-Skript: Warnung per E-Mail an NOTIFY_TO
+        text = " ".join(sys.argv[2:]) or "Unbekannte Störung"
+        to = Cfg.notify_to or site_info().get("email")
+        ok = send_mail(to, "ElbDetail-Server: " + text[:80], text + "\n\nGesendet vom Wächter auf dem Server (deploy/watchdog.sh).")
+        print("gesendet" if ok else "nicht gesendet (SMTP prüfen)")
+        sys.exit(0 if ok else 1)
     if len(sys.argv) > 1 and sys.argv[1] == "passwort":
         pw = getpass.getpass("Neues Passwort: ")
         if len(pw) < 12:

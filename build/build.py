@@ -97,12 +97,6 @@ def build(content_dir, out_dir, static_dir, quiet=False):
         css = f.read()
     with open(css_path, "w", encoding="utf-8") as f:
         f.write(minify_css(css))
-    try:  # Logo zusätzlich als WebP (kleiner)
-        from PIL import Image
-        Image.open(os.path.join(out_dir, "logo.png")).save(os.path.join(out_dir, "logo.webp"), "WEBP", quality=90, method=6)
-        site.has_webp_logo = True
-    except Exception:
-        site.has_webp_logo = False
     for name in ("styles.css", "script.js", "config.js"):
         with open(os.path.join(out_dir, name), "rb") as f:
             site.asset_v[name] = hashlib.sha1(f.read()).hexdigest()[:10]
@@ -158,6 +152,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
         warnings.append("Google-Bewertungslink fehlt (Grunddaten → googleReviewUrl)")
     if not site.media:
         warnings.append("Keine Vorher/Nachher-Fotos hochgeladen")
+    if not (site.s.get("about") or {}).get("name"):
+        warnings.append("Inhaber-Karte fehlt (Grunddaten → Über uns: Name, Foto, kurzer Text)")
     warnings += seo_lengths(out_dir, written)
     if not quiet:
         print(f"Fertig: {len(written)} Dateien, {len([w for w in written if w.endswith('.html')])} Seiten, {len(site.articles)} Artikel, "

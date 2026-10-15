@@ -57,7 +57,7 @@
   /* ------------------------------------------------------------ Login */
   function renderLogin() {
     app.className = "";
-    app.innerHTML = '<div class="login"><form id="lf"><img src="/logo.png" alt="ElbDetail"><h1>Verwaltung</h1>' +
+    app.innerHTML = '<div class="login"><form id="lf"><img src="/logo.svg" alt="ElbDetail"><h1>Verwaltung</h1>' +
       '<label class="f">Benutzername<input type="text" name="user" autocomplete="username" required></label>' +
       '<label class="f">Passwort<input type="password" name="password" autocomplete="current-password" required></label>' +
       '<p class="err" id="lerr"></p><button class="btn primary" type="submit">Anmelden</button></form></div>';
@@ -73,10 +73,10 @@
   var NAV = [["", "Übersicht"], ["anfragen", "Anfragen"], ["gutscheine", "Gutscheine"], ["kalender", "Kalender"], ["inhalte", "Inhalte"], ["medien", "Fotos"], ["veroeffentlichen", "Veröffentlichen"], ["einstellungen", "Einstellungen"]];
   function shell(active) {
     app.className = "app";
-    var side = '<a class="logo" href="#/"><img src="/logo.png" alt="ElbDetail"></a>' + NAV.map(function (n) {
+    var side = '<a class="logo" href="#/"><img src="/logo.svg" alt="ElbDetail"></a>' + NAV.map(function (n) {
       return '<a class="nav' + (active === n[0] ? " active" : "") + '" href="#/' + n[0] + '">' + n[1] + (n[0] === "anfragen" && ME.open ? '<span class="badge">' + ME.open + "</span>" : "") + "</a>";
     }).join("") + '<div class="spacer"></div><div class="foot"><a href="/" target="_blank" rel="noopener">Website ansehen ↗</a><span>Angemeldet als ' + esc(ME.user) + '</span><a href="#" id="logout">Abmelden</a></div>';
-    app.innerHTML = '<aside class="side" id="side">' + side + '</aside><div><div class="mobile-bar"><img src="/logo.png" alt="ElbDetail"><button class="btn small" id="menuBtn" type="button">Menü</button></div><main class="main" id="main"></main></div>';
+    app.innerHTML = '<aside class="side" id="side">' + side + '</aside><div><div class="mobile-bar"><img src="/logo.svg" alt="ElbDetail"><button class="btn small" id="menuBtn" type="button">Menü</button></div><main class="main" id="main"></main></div>';
     document.getElementById("logout").addEventListener("click", function (e) { e.preventDefault(); api("POST", "logout", {}).then(function () { ME = null; renderLogin(); }); });
     document.getElementById("menuBtn").addEventListener("click", function () { document.getElementById("side").classList.toggle("open"); });
     document.getElementById("side").addEventListener("click", function (e) { if (e.target.closest("a.nav")) this.classList.remove("open"); });
@@ -403,6 +403,8 @@
     order: "Reihenfolge", teaser: "Kurzbeschreibung", seoTitle: "Seitentitel für Google (max. 60 Zeichen)", description: "Beschreibung für Google (120–155 Zeichen, Preise als {ab:frisch}, {ab:komplett}, {ab:premium})", h1: "Überschrift (*kursiv* = blau)",
     lead: "Einleitung (**fett** möglich)", facts: "Kennzahlen", package: "Passendes Paket (Schlüssel)", intro: "Haupttext (Markdown)", includes: "Leistungsumfang", steps: "Ablauf", faq: "Häufige Fragen",
     related: "Verwandte Leistungen (Adressen)", date: "Veröffentlicht (JJJJ-MM-TT)", updated: "Aktualisiert (JJJJ-MM-TT)", category: "Kategorie", readingTime: "Lesezeit (Min.)", excerpt: "Teaser",
+    about: "Über uns (Inhaber-Karte auf der Startseite, erscheint wenn Name und Text gefüllt sind)", role: "Rolle", photo: "Foto (Dateiname aus Fotos)", since: "Seit (z. B. 2023)",
+    verification: "Bestätigungscodes für Google Search Console / Bing", google: "Google (nur der Code aus dem Meta-Tag)", bing: "Bing (nur der Code)",
     service: "Passende Leistung (Adresse)", summary: "Das Wichtigste in Kürze", draft: "Entwurf (nicht veröffentlichen)", city_: "Stadtteile" };
   function lbl(k) { return KEYS[k] || String(k).replace(/([A-Z])/g, " $1").replace(/^./, function (c) { return c.toUpperCase(); }); }
   function blank(tpl) {
@@ -429,7 +431,7 @@
         input = h("textarea", { rows: key === "intro" ? 14 : Math.min(8, Math.max(3, Math.ceil(String(v).length / 90))), oninput: function () { holder[key] = input.value; onchange(); } }); input.value = v;
       } else {
         input = h("input", { type: "text", value: v, oninput: function () { holder[key] = input.value; onchange(); } });
-        if (key === "before" || key === "after") input.setAttribute("list", "media-names");
+        if (key === "before" || key === "after" || key === "photo") input.setAttribute("list", "media-names");
       }
       var hint = key === "seoTitle" || key === "description" ? h("small", { text: String(v).length + " Zeichen" }) : null;
       if (hint) input.addEventListener("input", function () { hint.textContent = input.value.length + " Zeichen"; });

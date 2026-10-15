@@ -118,16 +118,15 @@ class Site:
 # --------------------------------------------------------------------------- Layout
 def logo(site, prefix, lazy=False):
     lz = ' loading="lazy"' if lazy else ""
-    img = f'<img src="{prefix}logo.png" alt="ElbDetail – Premium Fahrzeugaufbereitung" width="142" height="57"{lz}>'
-    if getattr(site, "has_webp_logo", False):
-        return f'<picture><source type="image/webp" srcset="{prefix}logo.webp">{img}</picture>'
-    return img
+    return f'<img src="{prefix}logo.svg" alt="ElbDetail – Premium Fahrzeugaufbereitung" width="150" height="60"{lz}>'
 
 
 def head(site, title, desc, path, prefix="", ld=None, noindex=False, og_type="website", extra=""):
     lds = "".join('<script type="application/ld+json">' + json.dumps(o, ensure_ascii=False, separators=(",", ":")) + "</script>\n" for o in (ld or []))
     robots = "noindex, follow" if noindex else "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
     url = site.url + path
+    ver = site.s.get("verification") or {}
+    verify = "".join(f'<meta name="{n}" content="{ESC(ver[k])}">\n' for k, n in (("google", "google-site-verification"), ("bing", "msvalidate.01")) if ver.get(k))
     return f'''<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -141,7 +140,7 @@ def head(site, title, desc, path, prefix="", ld=None, noindex=False, og_type="we
 <meta name="theme-color" content="#1e2229">
 <meta name="geo.region" content="DE-NI">
 <meta name="geo.placename" content="{ESC(site.s["address"]["city"])}">
-<link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
+{verify}<link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{prefix}apple-touch-icon.png">
 <link rel="manifest" href="{prefix}site.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="ElbDetail Ratgeber" href="{prefix}ratgeber/feed.xml">

@@ -92,5 +92,16 @@
     "maxAmount": 1000
   },
   "stand": "Oktober 2026",
-  "standIso": "2026-10-15"
+  "standIso": "2026-10-15",
+  "about": {
+    "name": "",
+    "role": "Inhaber",
+    "photo": "",
+    "since": "",
+    "text": ""
+  },
+  "verification": {
+    "google": "",
+    "bing": ""
+  }
 }
