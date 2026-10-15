@@ -529,19 +529,19 @@ def notify(ref, data):
     body += f"\nIm Verwaltungsportal öffnen: {Cfg.public_url}/admin/#/anfragen/{ref}\n"
     mail_async(Cfg.notify_to or s.get("email"), f"{title}: {data.get('name')} ({ref})", body, reply_to=data.get("email") or None)
     if Cfg.autoreply and data.get("email"):
-        greet = f"Hallo {data.get('name', '').split(' ')[0]},".strip()
+        greet = f"Guten Tag {data.get('name', '').strip()},".replace("Tag ,", "Tag,")
         extra = ""
         if data["typ"] == "termin":
-            extra = "Wir prüfen deinen Wunschtermin und melden uns mit einer Bestätigung und einem verbindlichen Angebot.\n"
+            extra = "Wir prüfen Ihren Wunschtermin und melden uns mit einer Bestätigung und einem verbindlichen Angebot.\n"
         elif data["typ"] == "gutschein":
-            pay = setting("zahlungshinweis", "") or "Die Zahlungsdaten senden wir dir in Kürze."
-            extra = f"Vielen Dank für deine Gutscheinbestellung über {data.get('wert')} €.\n\n{pay}\n\nNach Zahlungseingang erhältst du den Gutschein als Link zum Ausdrucken.\n"
+            pay = setting("zahlungshinweis", "") or "Die Zahlungsdaten senden wir Ihnen in Kürze."
+            extra = f"Vielen Dank für Ihre Gutscheinbestellung über {data.get('wert')} €.\n\n{pay}\n\nNach Zahlungseingang erhalten Sie den Gutschein als Link zum Ausdrucken.\n"
         else:
-            extra = "Wir melden uns so schnell wie möglich bei dir.\n"
-        text = (f"{greet}\n\ndanke für deine {title} bei {s.get('name', 'ElbDetail')}. {extra}\nDeine Angaben ({ref}):\n{summary_text(data)}\n\n"
-                f"Fragen? Antworte einfach auf diese E-Mail oder schreib per WhatsApp: {s.get('phoneIntl', '')}\n\n"
+            extra = "Wir melden uns so schnell wie möglich bei Ihnen.\n"
+        text = (f"{greet}\n\nvielen Dank für Ihre {title} bei {s.get('name', 'ElbDetail')}. {extra}\nIhre Angaben ({ref}):\n{summary_text(data)}\n\n"
+                f"Fragen? Antworten Sie einfach auf diese E-Mail oder schreiben Sie uns per WhatsApp: {s.get('phoneIntl', '')}\n\n"
                 f"Viele Grüße\n{s.get('name', 'ElbDetail')}\n{s.get('address', {}).get('street', '')}, {s.get('address', {}).get('zip', '')} {s.get('address', {}).get('city', '')}\n{Cfg.public_url}\n")
-        mail_async(data["email"], f"Deine {title} bei {s.get('name', 'ElbDetail')} ({ref})", text, reply_to=s.get("email") or None)
+        mail_async(data["email"], f"Ihre {title} bei {s.get('name', 'ElbDetail')} ({ref})", text, reply_to=s.get("email") or None)
 
 
 # --------------------------------------------------------------------------- Gutscheine
@@ -1196,10 +1196,10 @@ class AdminAPI:
                 return self.h.send(404, {"ok": False})
             d = json.loads(r["data"] or "{}")
             parts = (r["name"] or "").split()
-            first = parts[0] if parts and r["typ"] != "firma" and not parts[0].endswith(".") else (r["name"] or "")
+            first = " ".join(parts) or ""  # Sie-Form: vollständiger Name statt Vorname
             if art == "bewertung":
                 link = s.get("googleReviewUrl") or "[GOOGLE-BEWERTUNGSLINK]"
-                text = (f"Hallo {first}, danke, dass wir dein Auto aufbereiten durften! Wenn du zufrieden warst, würden wir uns sehr über eine kurze "
+                text = (f"Guten Tag {first}, vielen Dank, dass wir Ihr Auto aufbereiten durften! Wenn Sie zufrieden waren, würden wir uns sehr über eine kurze "
                         f"Google-Bewertung freuen. Das dauert nur eine Minute: {link}\nViele Grüße, {s.get('name', 'ElbDetail')}")
                 c.execute("UPDATE anfragen SET bewertung_angefragt=? WHERE id=?", (now().isoformat(), r["id"]))
                 warn = "" if d.get("bewertung_ok") == "ja" else "Achtung: Für diese Anfrage liegt keine Einwilligung zur Bewertungsanfrage vor. Bitte nur nach persönlicher Zustimmung senden."
@@ -1208,17 +1208,17 @@ class AdminAPI:
                 pname = next((p["name"] for p in pr.get("packages", []) if p["key"] == d.get("paket")), d.get("paket", ""))
                 date = _date(d.get("datum", ""))
                 rp = richtpreis(d)
-                text = f"Hallo {first}, danke für deine Anfrage bei {s.get('name', 'ElbDetail')}!"
+                text = f"Guten Tag {first}, vielen Dank für Ihre Anfrage bei {s.get('name', 'ElbDetail')}!"
                 if date:
-                    text += f" Dein Wunschtermin am {date.strftime('%d.%m.%Y')} passt [ODER: Wir können dir den … anbieten]."
+                    text += f" Ihr Wunschtermin am {date.strftime('%d.%m.%Y')} passt [ODER: Wir können Ihnen den … anbieten]."
                 if pname:
-                    text += f" Für {pname}" + (f" liegt der Richtpreis bei ab {rp} €" if rp else "") + ". Der verbindliche Preis für dein Fahrzeug: [PREIS] €."
-                text += " Passt das für dich? Viele Grüße"
+                    text += f" Für {pname}" + (f" liegt der Richtpreis bei ab {rp} €" if rp else "") + ". Der verbindliche Preis für Ihr Fahrzeug: [PREIS] €."
+                text += " Passt das für Sie? Viele Grüße"
                 warn = ""
             tel = wa_number(r["telefon"])
             c.commit()
             return self.h.send(200, {"text": text, "whatsapp": f"https://wa.me/{tel}?text={urllib.parse.quote(text)}" if tel else "", "warning": warn,
-                                     "mailto": f"mailto:{r['email']}?subject={urllib.parse.quote('Deine Anfrage bei ' + s.get('name', 'ElbDetail'))}&body={urllib.parse.quote(text)}" if r["email"] else ""})
+                                     "mailto": f"mailto:{r['email']}?subject={urllib.parse.quote('Ihre Anfrage bei ' + s.get('name', 'ElbDetail'))}&body={urllib.parse.quote(text)}" if r["email"] else ""})
 
     def csv_export(self):
         with db() as c:
@@ -1288,10 +1288,10 @@ class AdminAPI:
                 if st == "bezahlt" and d.get("sendMail") and v["email"]:
                     s = site_info()
                     vv = dict(v); vv["status"] = st
-                    text = (f"Hallo {(v['kaeufer'] or '').split(' ')[0]},\n\nvielen Dank, deine Zahlung ist eingegangen. Hier ist dein Gutschein zum Ausdrucken oder Weiterleiten:\n\n"
+                    text = (f"Guten Tag {(v['kaeufer'] or '').strip()},\n\nvielen Dank, Ihre Zahlung ist eingegangen. Hier ist Ihr Gutschein zum Ausdrucken oder Weiterleiten:\n\n"
                             f"{voucher_link(vv)}\n\nCode: {v['code']}\nGültig bis {dt.date.fromisoformat(v['valid_until']).strftime('%d.%m.%Y')}\n\n"
                             f"Viel Freude beim Verschenken!\n{s.get('name', 'ElbDetail')}\n")
-                    mail_async(v["email"], f"Dein Gutschein von {s.get('name', 'ElbDetail')}", text, reply_to=s.get("email"))
+                    mail_async(v["email"], f"Ihr Gutschein von {s.get('name', 'ElbDetail')}", text, reply_to=s.get("email"))
                     sent = mail_ready()
                 c.commit()
                 return h.send(200, {"ok": True, "mailSent": sent})
@@ -1431,7 +1431,7 @@ class AdminAPI:
             return self.h.send(409, {"ok": False, "message": "Ein Artikel mit dieser Adresse existiert bereits."})
         meta = {"title": title, "seoTitle": title[:50] + " | ElbDetail", "description": "", "date": today().isoformat(), "updated": today().isoformat(),
                 "category": "Ratgeber", "readingTime": 5, "excerpt": "", "service": "", "summary": [], "faq": [], "draft": True}
-        body = "Einleitung …\n\n## Erster Abschnitt\n\nText …\n\n## Aufbereitung in Celle anfragen\n\nHier kannst du direkt einen [Termin anfragen](/termin.html).\n"
+        body = "Einleitung …\n\n## Erster Abschnitt\n\nText …\n\n## Aufbereitung in Celle anfragen\n\nHier können Sie direkt einen [Termin anfragen](/termin.html).\n"
         with open(p, "w", encoding="utf-8") as f:
             f.write(mdlib.write_frontmatter(meta, body))
         audit("artikel_neu", slug)

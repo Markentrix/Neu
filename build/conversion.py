@@ -36,7 +36,7 @@ def build_termin(site, write):
     s = site.s
     path = "/termin.html"
     title = "Termin anfragen: Fahrzeugaufbereitung Celle | ElbDetail"
-    desc = "Fahrzeugaufbereitung in Celle online anfragen: Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Du bekommst vorab ein verbindliches Angebot."
+    desc = "Fahrzeugaufbereitung in Celle online anfragen: Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Sie erhalten vorab ein verbindliches Angebot."
     ld = [seo.webpage(site, path, title, {"potentialAction": {"@type": "ReserveAction", "target": site.url + path}}),
           seo.crumbs(site, [("Startseite", "/"), ("Termin anfragen", path)])]
     cls0 = pr["classes"][0]["key"]
@@ -56,7 +56,7 @@ def build_termin(site, write):
             <input type="radio" name="paket" value="beratung">
             <span class="choice-body">
               <span class="choice-head"><strong>Unsicher oder Einzelleistung</strong><span class="choice-price">Beratung</span></span>
-              <span class="choice-sub">Leasingrückgabe, nur Politur, nur Versiegelung oder etwas anderes: Wir beraten dich und machen ein Angebot.</span>
+              <span class="choice-sub">Leasingrückgabe, nur Politur, nur Versiegelung oder etwas anderes: Wir beraten Sie und machen ein Angebot.</span>
             </span>
           </label>'''
     cls = "".join(f'''<label class="choice-pill"><input type="radio" name="klasse" value="{c["key"]}" required{" checked" if i == 0 else ""}><span><strong>{ESC(c["short"])}</strong><small>{ESC(c["examples"])}</small></span></label>'''
@@ -70,7 +70,7 @@ def build_termin(site, write):
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Termin anfragen", None)], "Online-Terminanfrage",
             "Termin anfragen in <em>2 Minuten.</em>",
-            "Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Du bekommst ein verbindliches Angebot und eine Terminbestätigung, bevor wir loslegen.")}
+            "Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Sie erhalten ein verbindliches Angebot und eine Terminbestätigung, bevor wir loslegen.")}
   <section class="tight-top" aria-label="Terminanfrage">
     <div class="container booking">
       <form class="wizard js-form" id="bookingForm" data-form="termin" action="/api/anfrage" method="post" novalidate>
@@ -86,7 +86,7 @@ def build_termin(site, write):
         </fieldset>
 
         <fieldset class="wz-step" data-step="2">
-          <legend><span class="wz-num">2</span>Dein Fahrzeug</legend>
+          <legend><span class="wz-num">2</span>Ihr Fahrzeug</legend>
           <p class="wz-hint">Die Fahrzeugklasse bestimmt den Richtpreis.</p>
           <div class="choice-pills">{cls}</div>
           <div class="form-row"><label for="t-vehicle">Marke, Modell, Baujahr <span class="hint">(optional)</span></label><input type="text" id="t-vehicle" name="fahrzeug" maxlength="120" placeholder="z. B. VW Golf 7, 2018"></div>
@@ -95,7 +95,7 @@ def build_termin(site, write):
 
         <fieldset class="wz-step" data-step="3">
           <legend><span class="wz-num">3</span>Extras &amp; Service</legend>
-          <p class="wz-hint">Zusätzliche Leistungen werden nach Aufwand berechnet und vorab mit dir abgestimmt.</p>
+          <p class="wz-hint">Zusätzliche Leistungen werden nach Aufwand berechnet und vorab mit Ihnen abgestimmt.</p>
           <div class="check-grid">{extras}</div>
           <div class="form-row"><span class="label">Hol- und Bringservice</span>
             <div class="choice-pills">
@@ -119,7 +119,7 @@ def build_termin(site, write):
         </fieldset>
 
         <fieldset class="wz-step" data-step="5">
-          <legend><span class="wz-num">5</span>Wie erreichen wir dich?</legend>
+          <legend><span class="wz-num">5</span>Wie erreichen wir Sie?</legend>
           <div class="two-col">
             <div class="form-row"><label for="t-name">Name*</label><input type="text" id="t-name" name="name" autocomplete="name" required maxlength="120"></div>
             <div class="form-row"><label for="t-phone">Telefon / WhatsApp*</label><input type="tel" id="t-phone" name="telefon" autocomplete="tel" required maxlength="40"></div>
@@ -136,7 +136,7 @@ def build_termin(site, write):
           {core.honeypot("t-website")}
           <div class="consent-row consent-row--optional">
             <input type="checkbox" id="t-review" name="bewertung_ok" value="ja">
-            <label for="t-review">Ihr dürft mich nach dem Termin einmalig fragen, ob ich eine Google-Bewertung schreiben möchte. <span class="hint">(optional, jederzeit widerrufbar)</span></label>
+            <label for="t-review">Sie dürfen mich nach dem Termin einmalig fragen, ob ich eine Google-Bewertung schreiben möchte. <span class="hint">(optional, jederzeit widerrufbar)</span></label>
           </div>
           {core.consent_row("", "t-consent")}
         </fieldset>
@@ -152,7 +152,7 @@ def build_termin(site, write):
 
       <aside class="wz-summary" aria-label="Zusammenfassung">
         <div class="summary-card">
-          <h2>Deine Anfrage</h2>
+          <h2>Ihre Anfrage</h2>
           <dl>
             <div><dt>Paket</dt><dd data-sum="paket">–</dd></div>
             <div><dt>Fahrzeug</dt><dd data-sum="klasse">–</dd></div>
@@ -184,7 +184,7 @@ def build_gutscheine(site, write):
         {"q": "Wie lange ist ein Gutschein gültig?", "a": f"Gutscheine sind drei Jahre gültig, gerechnet ab dem Ende des Kaufjahres. Ein 2026 gekaufter Gutschein gilt also bis 31.12.{year + 3}."},
         {"q": "Wie löse ich einen Gutschein ein?", "a": "Bei der Online-Terminanfrage den Gutscheincode eingeben oder ihn bei der WhatsApp-Anfrage nennen. Wir verrechnen den Wert mit dem Auftrag."},
         {"q": "Was passiert bei einem größeren Fahrzeug?", "a": "Paketgutscheine gelten für die Kompaktklasse. Bei Limousine, Kombi, SUV oder Van wird nur die Differenz zum Richtpreis der jeweiligen Fahrzeugklasse fällig."},
-        {"q": "Wie bezahle ich den Gutschein?", "a": "Nach deiner Bestellung bekommst du die Zahlungsdaten per E-Mail. Du zahlst per Überweisung oder bar bei Abholung. Nach Zahlungseingang erhältst du den Gutschein als Link zum Ausdrucken oder holst ihn gedruckt ab."},
+        {"q": "Wie bezahle ich den Gutschein?", "a": "Nach Ihrer Bestellung erhalten Sie die Zahlungsdaten per E-Mail. Sie zahlen per Überweisung oder bar bei Abholung. Nach Zahlungseingang erhalten Sie den Gutschein als Link zum Ausdrucken oder holen ihn gedruckt ab."},
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Gutscheine", path)]), seo.faq(faq),
           {"@context": "https://schema.org", "@type": "Product", "name": "ElbDetail Gutschein Fahrzeugaufbereitung", "brand": {"@type": "Brand", "name": s["name"]},
@@ -196,7 +196,7 @@ def build_gutscheine(site, write):
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Gutscheine", None)], "Geschenkidee",
-            "Verschenke ein <em>Auto wie neu.</em>",
+            "Verschenken Sie ein <em>Auto wie neu.</em>",
             "Wunschbetrag oder komplettes Paket, mit persönlicher Nachricht. Als PDF per E-Mail zum Ausdrucken oder gedruckt zum Abholen in Celle.")}
   <section class="tight-top" aria-label="Gutschein gestalten">
     <div class="container voucher-layout">
@@ -223,7 +223,7 @@ def build_gutscheine(site, write):
             <div class="form-row"><label for="g-for">Für <span class="hint">(Name auf dem Gutschein)</span></label><input type="text" id="g-for" name="fuer" maxlength="60" placeholder="z. B. Papa"></div>
             <div class="form-row"><label for="g-from">Von</label><input type="text" id="g-from" name="von" maxlength="60" placeholder="z. B. Lisa &amp; Tom"></div>
           </div>
-          <div class="form-row"><label for="g-msg">Nachricht <span class="hint">(max. 160 Zeichen)</span></label><textarea id="g-msg" name="widmung" rows="2" maxlength="160" placeholder="Frohe Weihnachten! Damit dein Auto endlich wieder glänzt."></textarea></div>
+          <div class="form-row"><label for="g-msg">Nachricht <span class="hint">(max. 160 Zeichen)</span></label><textarea id="g-msg" name="widmung" rows="2" maxlength="160" placeholder="Frohe Weihnachten! Damit Ihr Auto endlich wieder glänzt."></textarea></div>
         </fieldset>
         <fieldset class="form-block">
           <legend>3. Zustellung &amp; Kontakt</legend>
@@ -232,7 +232,7 @@ def build_gutscheine(site, write):
             <label class="choice-pill"><input type="radio" name="zustellung" value="abholung"><span><strong>Gedruckt abholen</strong><small>in Celle</small></span></label>
           </div>
           <div class="two-col">
-            <div class="form-row"><label for="g-name">Dein Name*</label><input type="text" id="g-name" name="name" autocomplete="name" required maxlength="120"></div>
+            <div class="form-row"><label for="g-name">Ihr Name*</label><input type="text" id="g-name" name="name" autocomplete="name" required maxlength="120"></div>
             <div class="form-row"><label for="g-email">E-Mail*</label><input type="email" id="g-email" name="email" autocomplete="email" required maxlength="160"></div>
           </div>
           <div class="form-row"><label for="g-phone">Telefon <span class="hint">(optional)</span></label><input type="tel" id="g-phone" name="telefon" autocomplete="tel" maxlength="40"></div>
@@ -240,7 +240,7 @@ def build_gutscheine(site, write):
           {core.consent_row("", "g-consent")}
         </fieldset>
         <button class="btn btn-primary btn-lg btn-block" type="submit">{I["gift"]}Gutschein verbindlich bestellen</button>
-        <p class="hint">Du bekommst die Zahlungsdaten per E-Mail (Überweisung oder bar bei Abholung). Nach Zahlungseingang erhältst du den Gutschein.</p>
+        <p class="hint">Sie erhalten die Zahlungsdaten per E-Mail (Überweisung oder bar bei Abholung). Nach Zahlungseingang erhalten Sie den Gutschein.</p>
         {core.form_status("g-status")}
       </form>
 
@@ -276,8 +276,8 @@ def build_firmen(site, write):
     title = "Fahrzeugaufbereitung für Firmen & Flotten | ElbDetail Celle"
     desc = "Aufbereitung für Firmenwagen, Flotten, Autohäuser und Leasingrückläufer in Celle: planbare Intervalle, ein Ansprechpartner, Abrechnung nach Absprache."
     faq = [
-        {"q": "Ab wie vielen Fahrzeugen lohnt sich eine Rahmenvereinbarung?", "a": "Schon ab wenigen Fahrzeugen mit regelmäßigem Pflegebedarf. Wir besprechen Umfang und Intervalle individuell und machen ein Angebot, das zu deinem Fuhrpark passt."},
-        {"q": "Bereitet ihr auch Fahrzeuge für Autohäuser und Händler auf?", "a": "Ja. Aufbereitung vor Verkauf, Übergabe oder Fotoshooting gehört zu unseren Kernleistungen. Abläufe und Fristen stimmen wir direkt mit dir ab."},
+        {"q": "Ab wie vielen Fahrzeugen lohnt sich eine Rahmenvereinbarung?", "a": "Schon ab wenigen Fahrzeugen mit regelmäßigem Pflegebedarf. Wir besprechen Umfang und Intervalle individuell und machen ein Angebot, das zu Ihrem Fuhrpark passt."},
+        {"q": "Bereiten Sie auch Fahrzeuge für Autohäuser und Händler auf?", "a": "Ja. Aufbereitung vor Verkauf, Übergabe oder Fotoshooting gehört zu unseren Kernleistungen. Abläufe und Fristen stimmen wir direkt mit Ihnen ab."},
         {"q": "Wie wird abgerechnet?", "a": "Nach Absprache, zum Beispiel pro Fahrzeug oder gesammelt pro Zeitraum. Die Details halten wir im Angebot fest."},
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Firmenkunden", path)]), seo.faq(faq),
@@ -295,7 +295,7 @@ def build_firmen(site, write):
     <div class="container">
       <div class="section-head"><p class="eyebrow">Warum ElbDetail</p><h2 id="b2b-h" class="display">Was Firmenkunden von uns bekommen.</h2></div>
       <div class="usecase-grid">
-        <div class="usecase">{I["cal"]}<h3>Planbare Intervalle</h3><p>Feste Pflegetermine im passenden Rhythmus, abgestimmt auf eure Einsatzzeiten. So stehen Fahrzeuge nicht unnötig still.</p></div>
+        <div class="usecase">{I["cal"]}<h3>Planbare Intervalle</h3><p>Feste Pflegetermine im passenden Rhythmus, abgestimmt auf Ihre Einsatzzeiten. So stehen Fahrzeuge nicht unnötig still.</p></div>
         <div class="usecase">{I["phone"]}<h3>Ein Ansprechpartner</h3><p>Direkter Draht per Telefon oder WhatsApp, kurze Wege und schnelle Rückmeldung auch bei kurzfristigem Bedarf.</p></div>
         <div class="usecase">{I["euro"]}<h3>Klare Konditionen</h3><p>Leistungsumfang und Preise pro Fahrzeugklasse werden im Angebot festgehalten. Abrechnung nach Absprache.</p></div>
         <div class="usecase">{I["key"]}<h3>Leasingrückläufer</h3><p>Aufbereitung vor der Rückgabe reduziert Beanstandungen wegen Verschmutzung, Gerüchen und oberflächlicher Gebrauchsspuren.</p></div>
@@ -307,7 +307,7 @@ def build_firmen(site, write):
   <section id="firmenanfrage" class="soft" aria-labelledby="ff-h">
     <div class="container two-up">
       <div>
-        <div class="section-head"><p class="eyebrow">Angebot anfordern</p><h2 id="ff-h" class="display">Erzähl uns von deinem Fuhrpark.</h2>
+        <div class="section-head"><p class="eyebrow">Angebot anfordern</p><h2 id="ff-h" class="display">Erzählen Sie uns von Ihrem Fuhrpark.</h2>
           <p>Ein paar Eckdaten genügen. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen.</p></div>
         <div class="faq-list">{core.faq_html(faq, first_open=False)}</div>
       </div>
@@ -334,7 +334,7 @@ def build_firmen(site, write):
       </form>
     </div>
   </section>
-{core.cta_band(site, "", "Lieber direkt sprechen?", "Ruf an oder schreib per WhatsApp. Wir klären Umfang und Ablauf in wenigen Minuten.")}
+{core.cta_band(site, "", "Lieber direkt sprechen?", "Rufen Sie an oder schreiben Sie per WhatsApp. Wir klären Umfang und Ablauf in wenigen Minuten.")}
 </main>
 '''
     write("firmenkunden.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="firmenkunden.html") + body + core.footer(site))
@@ -403,7 +403,7 @@ def build_winter(site, write):
       <aside class="sticky-aside">
         <div class="aside-card dark">
           <h3>Wintertermin sichern</h3>
-          <p>Die Wochen vor dem ersten Frost sind gefragt. Frag frühzeitig an, wir bestätigen den Termin persönlich.</p>
+          <p>Die Wochen vor dem ersten Frost sind gefragt. Fragen Sie frühzeitig an, wir bestätigen den Termin persönlich.</p>
           <a class="btn btn-primary" href="{prefix}termin.html?paket=premium&amp;quelle=winter">{I["cal"]}Termin anfragen</a>
           <a class="btn btn-wa" href="{site.wa("Hallo ElbDetail, ich möchte mein Auto vor dem Winter versiegeln lassen.")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
         </div>
@@ -414,7 +414,7 @@ def build_winter(site, write):
       </aside>
     </div>
   </section>
-{core.cta_band(site, prefix, "Jetzt vor dem ersten Frost versiegeln.", "Kurz Fahrzeug und Wunschtermin nennen. Du bekommst ein verbindliches Angebot, bevor irgendetwas passiert.")}
+{core.cta_band(site, prefix, "Jetzt vor dem ersten Frost versiegeln.", "Nennen Sie uns kurz Fahrzeug und Wunschtermin. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert.")}
 </main>
 '''
     write("aktion/winterschutz.html", core.head(site, title, desc, path, prefix=prefix, ld=ld) + core.header(site, prefix) + body + core.footer(site, prefix))

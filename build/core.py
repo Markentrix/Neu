@@ -323,7 +323,7 @@ def contact_section(site, prefix=""):
       <div class="section-head reveal">
         <p class="eyebrow">Kontakt &amp; Termin</p>
         <h2 id="kontakt-h" class="display">Anfrage stellen. Antwort kommt schnell.</h2>
-        <p>Kurz Fahrzeug, Wunschpaket und Zeitraum nennen. Du bekommst ein verbindliches Angebot, bevor irgendetwas passiert. Für einen konkreten Termin nutze die <a class="text-link" href="{prefix}termin.html">Online-Terminanfrage</a>.</p>
+        <p>Nennen Sie uns kurz Fahrzeug, Wunschpaket und Zeitraum. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert. Für einen konkreten Termin nutzen Sie am besten die <a class="text-link" href="{prefix}termin.html">Online-Terminanfrage</a>.</p>
       </div>
 
       <div class="contact-split reveal">
@@ -354,7 +354,7 @@ def contact_section(site, prefix=""):
             <button class="btn btn-line-light" type="button" data-wa-from-form>{I["wa"]}Lieber per WhatsApp</button>
           </div>
           {form_status("k-status")}
-          <p class="hint">*Pflichtfeld. Deine Anfrage wird verschlüsselt an unseren eigenen Server in Deutschland übertragen und nur zur Bearbeitung verwendet.</p>
+          <p class="hint">*Pflichtfeld. Ihre Anfrage wird verschlüsselt an unseren eigenen Server in Deutschland übertragen und nur zur Bearbeitung verwendet.</p>
         </form>
       </div>
 
@@ -371,7 +371,7 @@ def contact_section(site, prefix=""):
 
 
 def cta_band(site, prefix="", title="Bereit für ein Auto, das sich wieder neu anfühlt?",
-             text="Schreib uns kurz, welches Fahrzeug es ist und was gemacht werden soll. Du bekommst ein verbindliches Angebot, bevor irgendetwas passiert."):
+             text="Schreiben Sie uns kurz, welches Fahrzeug es ist und was gemacht werden soll. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert."):
     return f'''  <section class="tight" aria-label="Termin anfragen">
     <div class="container">
       <div class="cta-band reveal">

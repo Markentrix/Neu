@@ -127,7 +127,7 @@ def contact_compact(site, prefix=""):
       <div class="cta-band reveal">
         <p class="eyebrow">Kontakt &amp; Termin</p>
         <h2 id="kontakt-h" class="display">Bereit für ein Auto, das sich wieder neu anfühlt?</h2>
-        <p>Fahrzeug, Wunschpaket und Zeitraum nennen. Du bekommst ein verbindliches Angebot, bevor irgendetwas passiert.</p>
+        <p>Nennen Sie uns Fahrzeug, Wunschpaket und Zeitraum. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert.</p>
         <div class="contact-actions">
           <a class="contact-action is-primary" href="{prefix}termin.html">{I["cal"]}<span><strong>Termin online anfragen</strong><small>In 2 Minuten, mit Richtpreis</small></span></a>
           <a class="contact-action" href="{site.wa("Hallo ElbDetail, ich möchte einen Termin zur Fahrzeugaufbereitung anfragen. Fahrzeug: … Wunsch: …")}" target="_blank" rel="noopener">{I["wa"]}<span><strong>WhatsApp</strong><small>{ESC(s["phoneIntl"])}</small></span></a>
@@ -188,8 +188,8 @@ def build_home(site, write):
     for n, it in enumerate(site.gallery):
         h, has = ba_tile(site, it, n + 1)
         tiles.append(h); real += has
-    gallery_note = ("Ziehe den Regler, um den Unterschied zu sehen. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok."
-                    if real else "Die Darstellungen sind Platzhalter, bis die ersten Vorher-/Nachher-Fotos online sind. Echte Ergebnisse findest du jederzeit auf Instagram und TikTok.")
+    gallery_note = ("Ziehen Sie den Regler, um den Unterschied zu sehen. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok."
+                    if real else "Die Darstellungen sind Platzhalter, bis die ersten Vorher-/Nachher-Fotos online sind. Echte Ergebnisse finden Sie jederzeit auf Instagram und TikTok.")
 
     articles = site.articles[:3]
     art_cards = "".join(f'''
@@ -280,7 +280,7 @@ def build_home(site, write):
       <div class="section-head reveal">
         <p class="eyebrow">Ergebnisse</p>
         <h2 id="vn-h" class="display">Vorher. Nachher. Selbst schieben.</h2>
-        <p>Ziehe den Regler, um den Unterschied zu sehen.</p>
+        <p>Ziehen Sie den Regler, um den Unterschied zu sehen.</p>
       </div>
       <div class="ba-grid stagger">{"".join(tiles)}
       </div>
@@ -316,7 +316,7 @@ def build_home(site, write):
       <div class="section-head reveal">
         <p class="eyebrow">Pakete &amp; Preise</p>
         <h2 id="preise-h" class="display">Klare Preise. Bevor wir anfangen.</h2>
-        <p>Richtpreise für eine Kompaktklasse. Den Festpreis für dein Fahrzeug bekommst du vor dem Termin, kostenlos und unverbindlich.</p>
+        <p>Richtpreise für eine Kompaktklasse. Den Festpreis für Ihr Fahrzeug erhalten Sie vor dem Termin, kostenlos und unverbindlich.</p>
       </div>
       <div class="plan-rows stagger">{plan_rows}
       </div>
@@ -349,9 +349,9 @@ def build_home(site, write):
       </div>
       <div class="why-list stagger">{owner_card}
         <div class="why-item reveal">{I["hand"]}<div><h3>Keine neuen Kratzer</h3><p>Handwäsche mit der Zwei-Eimer-Methode, weiche Mikrofaser, kratzfreie Trocknung. Alte Swirls verschwinden, neue entstehen nicht.</p></div></div>
-        <div class="why-item reveal">{I["shield"]}<div><h3>Schonend für Lack, Leder und Alcantara</h3><p>Profi-Produkte von Koch-Chemie, in deren Lehrgängen wir geschult sind. Jedes Material bekommt das passende Mittel, kein Experimentieren an deinem Auto.</p></div></div>
-        <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Du bekommst ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
-        <div class="why-item reveal">{I["clock"]}<div><h3>Termin, wann es dir passt</h3><p>Online oder per WhatsApp anfragen, Termin nach Vereinbarung, samstags nach Absprache. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
+        <div class="why-item reveal">{I["shield"]}<div><h3>Schonend für Lack, Leder und Alcantara</h3><p>Profi-Produkte von Koch-Chemie, in deren Lehrgängen wir geschult sind. Jedes Material bekommt das passende Mittel, kein Experimentieren an Ihrem Auto.</p></div></div>
+        <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Sie erhalten ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
+        <div class="why-item reveal">{I["clock"]}<div><h3>Termin, wann es Ihnen passt</h3><p>Online oder per WhatsApp anfragen, Termin nach Vereinbarung, samstags nach Absprache. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
       </div>
     </div>
   </section>
@@ -364,7 +364,7 @@ def build_home(site, write):
       </div>
       <div class="process-rail stagger">
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Du bekommst ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle, danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar oder per Überweisung.</p></div>
       </div>
     </div>
@@ -376,7 +376,7 @@ def build_home(site, write):
       <div class="promo-band reveal">
         <div class="promo-icon">{I["gift"]}</div>
         <div>
-          <h2 id="gift-h">Verschenke ein Auto wie neu.</h2>
+          <h2 id="gift-h">Verschenken Sie ein Auto wie neu.</h2>
           <p>Gutscheine für Wunschbetrag oder Paket, mit persönlicher Nachricht. Ideal zu Weihnachten, zum Geburtstag oder als Dankeschön.</p>
         </div>
         <a class="btn btn-primary" href="gutscheine.html">Gutschein gestalten</a>
@@ -389,7 +389,7 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Häufige Fragen</p>
-        <h2 id="faq-h" class="display">Gut zu wissen, bevor du anfragst.</h2>
+        <h2 id="faq-h" class="display">Gut zu wissen, bevor Sie anfragen.</h2>
       </div>
       <div class="faq-list stagger">
         {core.faq_html(home_faq, first_open=False)}
@@ -462,7 +462,7 @@ def build_kontakt(site, write):
     <div class="container">
       {core.breadcrumb("", [("Startseite", "index.html"), ("Kontakt", None)])}
       <h1 id="page-h">Kontakt &amp; Anfahrt</h1>
-      <p class="lead">Standort, Erreichbarkeit und Kontaktformular von ElbDetail in Celle. Schreib uns, ruf an oder komm vorbei.</p>
+      <p class="lead">Standort, Erreichbarkeit und Kontaktformular von ElbDetail in Celle. Schreiben Sie uns, rufen Sie an oder kommen Sie vorbei.</p>
     </div>
   </section>
 {core.contact_section(site)}
@@ -520,7 +520,7 @@ def build_service(site, sv, write):
       <aside class="sticky-aside">
         <div class="aside-card dark">
           <h3>Termin in Celle anfragen</h3>
-          <p>Paket, Fahrzeug und Wunschtermin in 2 Minuten. Du bekommst ein verbindliches Angebot vor dem Termin.</p>
+          <p>Paket, Fahrzeug und Wunschtermin in 2 Minuten. Sie erhalten ein verbindliches Angebot vor dem Termin.</p>
           <a class="btn btn-primary" href="{prefix}termin.html?paket={p["key"]}">{I["cal"]}Online-Terminanfrage</a>
           <a class="btn btn-wa" href="{wa}" target="_blank" rel="noopener">{I["wa"]}WhatsApp {ESC(site.s["phoneIntl"])}</a>
           <p>{ESC(site.addr_line())} · {ESC(site.s["openingHours"]["text"])}</p>
@@ -596,21 +596,21 @@ def build_legal(site, write):
     <h2>4. Keine Cookies, keine Tracking-Dienste</h2>
     <p>Diese Website setzt keine Cookies und bindet keine Analyse- oder Werbedienste Dritter ein (kein Google Analytics, kein Meta-Pixel). Ausnahme ist die freiwillig nachladbare Google-Karte (Ziffer 8).</p>
     <h2>5. Eigene, cookielose Besucherstatistik</h2>
-    <p>Um die Website zu verbessern, zählen wir Seitenaufrufe und einzelne Ereignisse (z. B. Klick auf „WhatsApp“, abgeschickte Terminanfrage) mit einer selbst betriebenen Statistik auf unserem Server. Dabei werden keine Cookies gesetzt und nichts auf deinem Gerät gespeichert. Die IP-Adresse wird nicht gespeichert; zur Zählung eindeutiger Besuche wird aus IP-Adresse, Browserkennung und einem täglich wechselnden, nach 24 Stunden gelöschten Zufallswert ein nicht rückrechenbarer Kurzwert gebildet. Gespeichert werden: aufgerufene Seite, Herkunftsseite (nur Domain), Kampagnenparameter (utm), Gerätekategorie und Zeitpunkt. Eine Zuordnung zu einer Person ist nicht möglich. Rechtsgrundlage ist unser berechtigtes Interesse an einer bedarfsgerechten Gestaltung der Website (Art. 6 Abs. 1 lit. f DSGVO). Wenn dein Browser „Do Not Track“ oder „Global Privacy Control“ sendet, wird nichts gezählt.</p>
+    <p>Um die Website zu verbessern, zählen wir Seitenaufrufe und einzelne Ereignisse (z. B. Klick auf „WhatsApp“, abgeschickte Terminanfrage) mit einer selbst betriebenen Statistik auf unserem Server. Dabei werden keine Cookies gesetzt und nichts auf Ihrem Gerät gespeichert. Die IP-Adresse wird nicht gespeichert; zur Zählung eindeutiger Besuche wird aus IP-Adresse, Browserkennung und einem täglich wechselnden, nach 24 Stunden gelöschten Zufallswert ein nicht rückrechenbarer Kurzwert gebildet. Gespeichert werden: aufgerufene Seite, Herkunftsseite (nur Domain), Kampagnenparameter (utm), Gerätekategorie und Zeitpunkt. Eine Zuordnung zu einer Person ist nicht möglich. Rechtsgrundlage ist unser berechtigtes Interesse an einer bedarfsgerechten Gestaltung der Website (Art. 6 Abs. 1 lit. f DSGVO). Wenn Ihr Browser „Do Not Track“ oder „Global Privacy Control“ sendet, wird nichts gezählt.</p>
     <h2>6. Anfragen über die Website-Formulare</h2>
-    <p>Wenn du das Kontakt-, Termin-, Gutschein- oder Firmenkundenformular nutzt, werden deine Angaben (z. B. Name, Telefonnummer, E-Mail-Adresse, Fahrzeug, Wunschtermin, Nachricht) verschlüsselt an unseren Server übertragen, dort in einer Datenbank gespeichert und zur Bearbeitung deiner Anfrage verwendet (Art. 6 Abs. 1 lit. b DSGVO). Zur Benachrichtigung senden wir uns eine E-Mail mit den Angaben; wenn du eine E-Mail-Adresse angibst, erhältst du eine Eingangsbestätigung. Für den E-Mail-Versand nutzen wir: {mail}.</p>
+    <p>Wenn Sie das Kontakt-, Termin-, Gutschein- oder Firmenkundenformular nutzen, werden Ihre Angaben (z. B. Name, Telefonnummer, E-Mail-Adresse, Fahrzeug, Wunschtermin, Nachricht) verschlüsselt an unseren Server übertragen, dort in einer Datenbank gespeichert und zur Bearbeitung Ihrer Anfrage verwendet (Art. 6 Abs. 1 lit. b DSGVO). Zur Benachrichtigung senden wir uns eine E-Mail mit den Angaben; wenn Sie eine E-Mail-Adresse angeben, erhalten Sie eine Eingangsbestätigung. Für den E-Mail-Versand nutzen wir: {mail}.</p>
     <p>Anfragen, aus denen kein Auftrag entsteht, löschen wir spätestens 12 Monate nach dem letzten Kontakt. Daten zu Aufträgen und Gutscheinen bewahren wir entsprechend den gesetzlichen Aufbewahrungsfristen (bis zu 10 Jahre für Buchungsbelege) auf.</p>
     <h2>7. Kontakt per WhatsApp, E-Mail oder Telefon</h2>
-    <p>WhatsApp-Links führen zum Messenger-Dienst der WhatsApp Ireland Ltd. / Meta Platforms Ireland Limited, 4 Grand Canal Square, Dublin 2, Irland. Erst wenn du dort eine Nachricht sendest, werden Daten an WhatsApp übertragen; es gilt die Datenschutzerklärung von WhatsApp, eine Übermittlung in die USA ist nicht auszuschließen. Die Nutzung ist freiwillig, alternativ erreichst du uns über das Formular, per E-Mail oder Telefon. Bei Kontakt per E-Mail oder Telefon verarbeiten wir deine Angaben zur Bearbeitung der Anfrage (Art. 6 Abs. 1 lit. b, f DSGVO).</p>
+    <p>WhatsApp-Links führen zum Messenger-Dienst der WhatsApp Ireland Ltd. / Meta Platforms Ireland Limited, 4 Grand Canal Square, Dublin 2, Irland. Erst wenn Sie dort eine Nachricht senden, werden Daten an WhatsApp übertragen; es gilt die Datenschutzerklärung von WhatsApp, eine Übermittlung in die USA ist nicht auszuschließen. Die Nutzung ist freiwillig, alternativ erreichen Sie uns über das Formular, per E-Mail oder Telefon. Bei Kontakt per E-Mail oder Telefon verarbeiten wir Ihre Angaben zur Bearbeitung der Anfrage (Art. 6 Abs. 1 lit. b, f DSGVO).</p>
     <h2>8. Google Maps</h2>
-    <p>Die Kartendarstellung wird erst nach deinem Klick auf „Karte laden“ eingebunden. Erst dann wird eine Verbindung zu Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland hergestellt, wobei IP-Adresse und ggf. Cookies übertragen werden können. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+    <p>Die Kartendarstellung wird erst nach Ihrem Klick auf „Karte laden“ eingebunden. Erst dann wird eine Verbindung zu Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland hergestellt, wobei IP-Adresse und ggf. Cookies übertragen werden können. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
     <h2>9. Verweise auf soziale Netzwerke</h2>
     <p>Diese Website enthält reine Verlinkungen (keine eingebetteten Plugins) zu Instagram und Facebook (Meta Platforms Ireland Limited) sowie TikTok (TikTok Technology Limited, Irland). Ohne Klick findet keine Datenübertragung an diese Anbieter statt.</p>
     <h2>10. Kundenstimmen</h2>
     <p>Wir zeigen auszugsweise öffentlich einsehbare Bewertungen aus unserem Google-Unternehmensprofil (Anzeigename und Bewertungstext). Rechtsgrundlage ist unser berechtigtes Interesse an der Außendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf Wunsch entfernen wir ein Zitat umgehend nach Nachricht an <a href="mailto:{s["email"]}">{ESC(s["email"])}</a>.</p>
     <h2>11. Gutscheine</h2>
     <p>Für bestellte Gutscheine speichern wir Käufer, Empfängername, Wert, Code und Einlösestatus zur Vertragsabwicklung und zur Erfüllung steuerlicher Pflichten (Art. 6 Abs. 1 lit. b, c DSGVO). Der Gutschein ist über einen nicht erratbaren Link abrufbar.</p>
-    <h2>12. Deine Rechte</h2>
+    <h2>12. Ihre Rechte</h2>
     <ul>
       <li>Auskunft (Art. 15 DSGVO)</li><li>Berichtigung (Art. 16 DSGVO)</li><li>Löschung (Art. 17 DSGVO)</li>
       <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li><li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
@@ -625,7 +625,7 @@ def build_legal(site, write):
 '''
     for fname, title, desc, h1, sub, content in [
         ("impressum.html", "Impressum | ElbDetail Fahrzeugaufbereitung Celle", "Impressum von ElbDetail, Fahrzeugaufbereitung in Celle, Lachtehäuser Straße 1: Anbieterkennzeichnung, Kontakt und rechtliche Angaben nach DDG.", "Impressum", "Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)", imp),
-        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", "Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, keine Cookies, keine Tracking-Dienste. Alle Infos zu deinen Rechten.", "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
+        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", "Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, keine Cookies, keine Tracking-Dienste. Alle Infos zu Ihren Rechten.", "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
         body = f'''
 <main id="main" class="legal-main">
   <div class="container">
@@ -646,7 +646,7 @@ def build_404(site, write):
   <div class="container notfound-inner">
     <span class="code">404</span>
     <h1>Diese Seite gibt es nicht (mehr).</h1>
-    <p class="notfound-text">Vielleicht ein Tippfehler im Link. Alles zu Fahrzeugaufbereitung in Celle findest du auf der Startseite.</p>
+    <p class="notfound-text">Vielleicht ein Tippfehler im Link. Alles zu Fahrzeugaufbereitung in Celle finden Sie auf der Startseite.</p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="/">Zur Startseite</a>
       <a class="btn btn-line-light" href="/termin.html">Termin anfragen</a>
@@ -665,7 +665,7 @@ def build_danke(site, write):
     <div class="container">
       <p class="eyebrow">Anfrage eingegangen</p>
       <h1 id="page-h" data-thanks-title>Danke! <em>Wir melden uns schnell.</em></h1>
-      <p class="lead" data-thanks-text>Deine Anfrage ist bei uns angekommen. In der Regel antworten wir am selben oder nächsten Werktag mit einem verbindlichen Angebot und einem Terminvorschlag.</p>
+      <p class="lead" data-thanks-text>Ihre Anfrage ist bei uns angekommen. In der Regel antworten wir am selben oder nächsten Werktag mit einem verbindlichen Angebot und einem Terminvorschlag.</p>
       <div class="hero-actions">
         <a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich habe gerade eine Anfrage über die Website geschickt.")}" target="_blank" rel="noopener">{I["wa"]}Rückfrage per WhatsApp</a>
         <a class="btn btn-line" href="index.html">Zur Startseite</a>
@@ -676,12 +676,12 @@ def build_danke(site, write):
     <div class="container">
       <div class="section-head"><p class="eyebrow">So geht es weiter</p><h2 id="next-h" class="display">Die nächsten Schritte.</h2></div>
       <div class="process-rail">
-        <div class="process-cell"><span class="process-index">JETZT</span><h3>Eingangsbestätigung</h3><p>Hast du eine E-Mail-Adresse angegeben, bekommst du gleich eine Bestätigung mit deinen Angaben.</p></div>
-        <div class="process-cell"><span class="process-index">BALD</span><h3>Angebot &amp; Termin</h3><p>Wir prüfen deine Angaben und melden uns per WhatsApp, Telefon oder E-Mail, je nach deinem Wunsch.</p></div>
+        <div class="process-cell"><span class="process-index">JETZT</span><h3>Eingangsbestätigung</h3><p>Haben Sie eine E-Mail-Adresse angegeben, erhalten Sie gleich eine Bestätigung mit Ihren Angaben.</p></div>
+        <div class="process-cell"><span class="process-index">BALD</span><h3>Angebot &amp; Termin</h3><p>Wir prüfen Ihre Angaben und melden uns per WhatsApp, Telefon oder E-Mail, ganz nach Ihrem Wunsch.</p></div>
         <div class="process-cell"><span class="process-index">TIPP</span><h3>Fotos helfen</h3><p>Schick uns gern ein paar Fotos vom Zustand per WhatsApp. So wird das Angebot noch genauer.</p></div>
       </div>
     </div>
   </section>
 </main>
 '''
-    write("danke.html", core.head(site, "Danke für deine Anfrage | ElbDetail", "Deine Anfrage bei ElbDetail ist eingegangen. Wir melden uns mit Angebot und Terminvorschlag, meist am selben oder nächsten Werktag.", "/danke.html", noindex=True) + core.header(site) + body + core.footer(site))
+    write("danke.html", core.head(site, "Danke für Ihre Anfrage | ElbDetail", "Ihre Anfrage bei ElbDetail ist eingegangen. Wir melden uns mit Angebot und Terminvorschlag, meist am selben oder nächsten Werktag.", "/danke.html", noindex=True) + core.header(site) + body + core.footer(site))

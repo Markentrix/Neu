@@ -283,7 +283,7 @@
       if (!validate(form)) { setStatus(form, "Bitte die markierten Pflichtfelder ausfüllen.", "error"); return; }
       var btn = form.querySelector('[type="submit"]:not([hidden])');
       if (!IS_LIVE) {
-        setStatus(form, "", "info", fallbackHtml(form, "Vorschau-Modus: Auf dieser Vorschau wird das Formular nicht übertragen. Sende die Angaben direkt:"));
+        setStatus(form, "", "info", fallbackHtml(form, "Vorschau-Modus: Auf dieser Vorschau wird das Formular nicht übertragen. Senden Sie die Angaben direkt:"));
         return;
       }
       if (btn) { btn.disabled = true; btn.classList.add("is-loading"); }
@@ -299,7 +299,7 @@
             setStatus(form, j.message || "Bitte die markierten Angaben prüfen.", "error");
           } else throw new Error("server");
         })
-        .catch(function () { setStatus(form, "", "error", fallbackHtml(form, "Die Anfrage konnte gerade nicht übertragen werden. Bitte sende sie direkt:")); })
+        .catch(function () { setStatus(form, "", "error", fallbackHtml(form, "Die Anfrage konnte gerade nicht übertragen werden. Bitte senden Sie sie direkt:")); })
         .then(function () { if (btn) { btn.disabled = false; btn.classList.remove("is-loading"); } });
     });
     $$("input, select, textarea", form).forEach(function (el) {
@@ -412,11 +412,11 @@
   var thanks = $("[data-thanks-title]");
   if (thanks && Q.typ) {
     var T = {
-      termin: ["Terminanfrage eingegangen.", "Wir prüfen deinen Wunschtermin und melden uns mit Bestätigung und verbindlichem Angebot, in der Regel am selben oder nächsten Werktag."],
-      gutschein: ["Gutscheinbestellung eingegangen.", "Du bekommst gleich eine E-Mail mit den Zahlungsdaten. Nach Zahlungseingang senden wir dir den Gutschein."],
-      firma: ["Anfrage eingegangen.", "Danke für dein Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."]
+      termin: ["Terminanfrage eingegangen.", "Wir prüfen Ihren Wunschtermin und melden uns mit Bestätigung und verbindlichem Angebot, in der Regel am selben oder nächsten Werktag."],
+      gutschein: ["Gutscheinbestellung eingegangen.", "Sie erhalten gleich eine E-Mail mit den Zahlungsdaten. Nach Zahlungseingang senden wir Ihnen den Gutschein."],
+      firma: ["Anfrage eingegangen.", "Vielen Dank für Ihr Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."]
     }[Q.typ];
-    if (T) { thanks.innerHTML = "Danke! <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " Deine Vorgangsnummer: " + Q.ref + "." : ""); }
+    if (T) { thanks.innerHTML = "Danke! <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " Ihre Vorgangsnummer: " + Q.ref + "." : ""); }
   }
 
   /* ---------------------------------------------------------------- Einblenden beim Scrollen */

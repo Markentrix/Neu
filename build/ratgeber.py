@@ -45,7 +45,7 @@ def build_index(site, write):
       {core.breadcrumb(prefix, [("Startseite", prefix + "index.html"), ("Ratgeber", None)])}
       <p class="eyebrow">Ratgeber</p>
       <h1 id="page-h">Wissen aus der Werkstatt. <em>Ehrlich erklärt.</em></h1>
-      <p class="lead">Antworten auf die Fragen, die wir in Celle jeden Tag hören: Was kostet eine Aufbereitung, was hilft vor der Leasingrückgabe, wie pflegst du Lack, Leder und Innenraum richtig?</p>
+      <p class="lead">Antworten auf die Fragen, die wir in Celle jeden Tag hören: Was kostet eine Aufbereitung, was hilft vor der Leasingrückgabe, wie pflegen Sie Lack, Leder und Innenraum richtig?</p>
     </div>
   </section>
   <section class="tight-top" aria-label="Artikel">
@@ -105,9 +105,9 @@ def build_article(site, a, write):
         <nav class="aside-card toc" aria-label="Inhalt"><h3>Inhalt</h3><ol>{toc_html}</ol></nav>
         <div class="aside-card dark">
           <h3>Lieber vom Profi?</h3>
-          <p>Wir bereiten dein Auto in Celle in Handarbeit auf. Verbindlicher Preis vor dem Termin.</p>
+          <p>Wir bereiten Ihr Auto in Celle in Handarbeit auf. Verbindlicher Preis vor dem Termin.</p>
           <a class="btn btn-primary" href="{prefix}termin.html{("?paket=" + pkg) if pkg else ""}">{I["cal"]}Termin anfragen</a>
-          <a class="btn btn-wa" href="{site.wa("Hallo ElbDetail, ich habe euren Ratgeber gelesen und habe eine Frage: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
+          <a class="btn btn-wa" href="{site.wa("Hallo ElbDetail, ich habe Ihren Ratgeber gelesen und habe eine Frage: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
         </div>
         {sv_card}
       </aside>
