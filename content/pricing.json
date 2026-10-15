@@ -1,0 +1,231 @@
+{
+  "classes": [
+    {
+      "key": "kompakt",
+      "name": "Kleinwagen / Kompakt",
+      "short": "Kompakt",
+      "examples": "Polo, Golf, A3"
+    },
+    {
+      "key": "mittel",
+      "name": "Limousine / Kombi",
+      "short": "Limo / Kombi",
+      "examples": "Passat, C-Klasse"
+    },
+    {
+      "key": "suv",
+      "name": "SUV / Van / Bus",
+      "short": "SUV / Van",
+      "examples": "Tiguan, Bulli, X5"
+    }
+  ],
+  "packages": [
+    {
+      "key": "frisch",
+      "name": "Frisch & Sauber",
+      "short": "Wäsche + Innen-Basis",
+      "for": "Für den regelmäßigen Frischekick und den gepflegten Alltag.",
+      "duration": "ca. 2 Std.",
+      "featured": false,
+      "prices": {
+        "kompakt": 79,
+        "mittel": 89,
+        "suv": 99
+      },
+      "features": [
+        {
+          "text": "Außenwäsche von Hand",
+          "included": true
+        },
+        {
+          "text": "Felgenreinigung",
+          "included": true
+        },
+        {
+          "text": "Innenraum saugen & abwischen",
+          "included": true
+        },
+        {
+          "text": "Scheiben innen & außen",
+          "included": true
+        },
+        {
+          "text": "Innenraum-Tiefenreinigung",
+          "included": false
+        },
+        {
+          "text": "Leder- oder Polsterpflege",
+          "included": false
+        },
+        {
+          "text": "Lackpolitur & Versiegelung",
+          "included": false
+        }
+      ]
+    },
+    {
+      "key": "komplett",
+      "name": "Komplettpflege",
+      "short": "Innen-Tiefenreinigung + außen",
+      "for": "Für Familienautos, Tierhaare, Leasingrückgabe und Verkauf.",
+      "duration": "ca. ½ Tag",
+      "featured": true,
+      "prices": {
+        "kompakt": 179,
+        "mittel": 209,
+        "suv": 229
+      },
+      "features": [
+        {
+          "text": "Alles aus Frisch & Sauber",
+          "included": true
+        },
+        {
+          "text": "Innenraum-Tiefenreinigung",
+          "included": true
+        },
+        {
+          "text": "Polster- & Teppichreinigung",
+          "included": true
+        },
+        {
+          "text": "Leder- oder Polsterpflege",
+          "included": true
+        },
+        {
+          "text": "Kunststoffpflege & Geruchsneutralisation",
+          "included": true
+        },
+        {
+          "text": "Mehrstufige Lackpolitur",
+          "included": false
+        },
+        {
+          "text": "Lackversiegelung",
+          "included": false
+        }
+      ]
+    },
+    {
+      "key": "premium",
+      "name": "Premium Politur",
+      "short": "+ Politur & Versiegelung",
+      "for": "Für Neuwagen, Liebhaberfahrzeuge und sichtbar matten Lack.",
+      "duration": "ca. 1 Tag",
+      "featured": false,
+      "prices": {
+        "kompakt": 349,
+        "mittel": 399,
+        "suv": 449
+      },
+      "features": [
+        {
+          "text": "Alles aus Komplettpflege",
+          "included": true
+        },
+        {
+          "text": "Mehrstufige Lackpolitur",
+          "included": true
+        },
+        {
+          "text": "Kratzer- & Hologrammentfernung",
+          "included": true
+        },
+        {
+          "text": "Lackversiegelung mit Monaten Schutz",
+          "included": true
+        },
+        {
+          "text": "Felgen- & Scheibenversiegelung",
+          "included": true
+        },
+        {
+          "text": "Abschlusskontrolle bei Tageslicht",
+          "included": true
+        },
+        {
+          "text": "Pflegehinweise für danach",
+          "included": true
+        }
+      ]
+    }
+  ],
+  "extras": [
+    "Lederpflege & Imprägnierung",
+    "Geruchsentfernung",
+    "Motorraumreinigung",
+    "Felgen-Intensivreinigung",
+    "Nur Lackpolitur",
+    "Nur Lackversiegelung",
+    "Cabrioverdeck-Reinigung"
+  ],
+  "compare": [
+    {
+      "label": "Außenwäsche von Hand",
+      "frisch": true,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Felgenreinigung",
+      "frisch": true,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Innenraum saugen & abwischen",
+      "frisch": true,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Scheiben innen & außen",
+      "frisch": true,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Innenraum-Tiefenreinigung",
+      "frisch": false,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Polster- & Teppichreinigung",
+      "frisch": false,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Leder- oder Polsterpflege",
+      "frisch": false,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Geruchsneutralisation",
+      "frisch": false,
+      "komplett": true,
+      "premium": true
+    },
+    {
+      "label": "Mehrstufige Lackpolitur",
+      "frisch": false,
+      "komplett": false,
+      "premium": true
+    },
+    {
+      "label": "Lackversiegelung",
+      "frisch": false,
+      "komplett": false,
+      "premium": true
+    },
+    {
+      "label": "Felgen- & Scheibenversiegelung",
+      "frisch": false,
+      "komplett": false,
+      "premium": true
+    }
+  ],
+  "note": "Alle Preise sind Richtwerte inkl. MwSt. und abhängig von Fahrzeuggröße, Verschmutzungsgrad und Lackzustand. Stark verschmutzte Innenräume, Tierhaare in großer Menge oder tiefe Lackdefekte besprechen wir vorab. Der verbindliche Preis wird vor dem Termin persönlich bestätigt."
+}

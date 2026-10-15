@@ -1,0 +1,363 @@
+# ElbDetail Markenleitfaden
+
+Stand: 15.10.2026. Gilt für Website, Social Media, WhatsApp, Anzeigen, Druck und Fahrzeugbeschriftung.
+
+**Platzhalter:** Alles in `[PLATZHALTER: …]` muss der Betrieb entscheiden oder ergänzen. Diese Stellen bitte nicht mit erfundenen Angaben füllen.
+
+---
+
+## 1. Positionierung
+
+### In einem Satz
+
+ElbDetail ist die Fahrzeugaufbereitung in Celle, die dein Auto in 100 % Handarbeit mit Koch-Chemie-Produkten aufbereitet, dir vorher einen verbindlichen Preis nennt und das Ergebnis mit dir bei Tageslicht abnimmt.
+
+### Was wir verkaufen
+
+Nicht "eine Wäsche", sondern ein planbares Ergebnis: sauber, gepflegt, nachvollziehbar. Der Preis steht vorher fest. Das Ergebnis siehst du bei der Abnahme selbst.
+
+### Fakten, auf denen die Marke steht
+
+Nur diese Fakten dürfen in Kommunikation verwendet werden:
+
+| Fakt | Formulierung für Texte |
+|---|---|
+| 100 % Handarbeit, keine Waschstraße | "100 % Handarbeit. Keine Waschstraße." |
+| Zwei-Eimer-Handwäsche | "Handwäsche nach der Zwei-Eimer-Methode" |
+| Koch-Chemie-Lehrgänge absolviert, nur Koch-Chemie-Produkte | "Geschult in Koch-Chemie-Lehrgängen. Wir arbeiten ausschließlich mit Koch-Chemie-Produkten." |
+| Lackschichtdickenmessung vor Politur | "Vor jeder Politur messen wir die Lackschichtdicke." |
+| Verbindlicher Preis vor dem Termin | "Du kennst den Preis, bevor wir anfangen." |
+| Gemeinsame Abnahme bei Tageslicht | "Wir nehmen das Ergebnis gemeinsam bei Tageslicht ab." |
+| 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026) | "5,0 Sterne bei 19 Google-Rezensionen" (Zahl regelmäßig aktualisieren) |
+| Termine nach Vereinbarung Mo bis Fr, samstags nach Absprache | "Termine Mo bis Fr, samstags nach Absprache" |
+| Bezahlung bar oder Überweisung | "Bezahlen kannst du bar oder per Überweisung." |
+| Standort Lachtehäuser Straße 1, 29223 Celle | vollständig ausschreiben |
+
+**Nicht verwenden, solange nicht bestätigt:** Inhabername, Gründungsjahr, Mitarbeiterzahl, Kundengeschichten, Statistiken, Garantien, Rabatte, Abo-Preise, Keramikversiegelung als festes Angebot, Abholservice als Zusage (nur "nach Absprache"), konkrete Ersparnisse bei Leasingrückgabe.
+
+`[PLATZHALTER: Spricht der Betrieb als "wir" oder als "ich"? Dieser Leitfaden nutzt "wir". Bei Ein-Personen-Betrieb ggf. auf "ich" umstellen.]`
+
+---
+
+## 2. Zielgruppen
+
+Die drei Personas sind Arbeitsannahmen für Texte und Anzeigen. Sie beschreiben keine echten Kunden.
+
+### Persona A: Familienauto mit Alltagsspuren
+
+| | |
+|---|---|
+| **Wer** | Berufstätige Eltern aus Celle oder dem Landkreis, Kombi oder SUV/Van, oft mit Hund |
+| **Anlass** | Nach dem Urlaub, nach dem Winter, vor dem Familienbesuch, wenn der Geruch stört |
+| **Sorge** | "Das wird teuer und ich weiß vorher nicht, was es kostet." "Bekommen die Hundehaare und den Geruch wirklich raus?" "Ich habe keine Zeit für lange Abstimmung." |
+| **Kaufgrund** | Komplettpflege mit Tiefenreinigung, Polster/Teppich und Geruchsneutralisation. Verbindlicher Preis vorab. Anfrage einfach per WhatsApp mit Fotos. |
+| **Passendes Paket** | Komplettpflege (ab 179 € / 209 € / 229 €) |
+| **Ziel-Seite** | `/leistungen/innenaufbereitung-celle.html` |
+
+### Persona B: Leasingrückgabe oder Verkauf
+
+| | |
+|---|---|
+| **Wer** | Leasingnehmer, Dienstwagenfahrer, Privatverkäufer |
+| **Anlass** | Rückgabetermin steht fest, Auto soll verkauft werden |
+| **Sorge** | "Bei der Rückgabe wird jeder Kratzer gefunden." "Ich will nicht zu viel investieren." "Es muss bis zum Termin fertig sein." |
+| **Kaufgrund** | Innen und außen von Hand aufbereitet. Lackschichtdickenmessung vor Politur. Verbindlicher Preis vorab. Gemeinsame Abnahme bei Tageslicht, damit der Zustand vor der Übergabe klar ist. |
+| **Passendes Paket** | Komplettpflege oder Premium Politur, je nach Zustand |
+| **Ziel-Seite** | `/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html` |
+| **Wichtig** | Keine Aussagen zu Abzugsbeträgen oder Ersparnissen. Kein "garantiert ohne Nachzahlung". |
+
+### Persona C: Werterhalt und Liebhaber
+
+| | |
+|---|---|
+| **Wer** | Besitzer eines neuen, hochwertigen oder besonderen Fahrzeugs, auch Cabrio |
+| **Anlass** | Vor dem Winter, nach dem Kauf, vor der Saison, Swirls und Hologramme im Lack |
+| **Sorge** | "Waschstraßen-Bürsten machen Kratzer." "Wird mit falscher Chemie oder zu viel Abtrag poliert?" |
+| **Kaufgrund** | Zwei-Eimer-Handwäsche, ausschließlich Koch-Chemie-Produkte, Lackschichtdickenmessung vor jeder Politur, mehrstufige Politur mit Versiegelung |
+| **Passendes Paket** | Premium Politur (ab 349 € / 399 € / 449 €), Lackversiegelung, Cabrioverdeck-Reinigung |
+| **Ziel-Seite** | `/leistungen/lackpolitur-celle.html`, `/leistungen/lackversiegelung-celle.html` |
+
+### Weitere Zielgruppen (Nebenrollen)
+
+- **Schenkende:** Gutscheine zu Weihnachten, Geburtstag, Führerschein. Ziel-Seite `/gutscheine.html`.
+- **Firmenkunden und Flotten:** Ziel-Seite `/firmenkunden.html`. `[PLATZHALTER: Konditionen und Ansprechweise für Firmenkunden festlegen]`
+
+---
+
+## 3. Abgrenzung
+
+Vergleiche immer sachlich formulieren. Nie einzelne Mitbewerber nennen oder herabsetzen.
+
+| | Waschstraße | Selbstwaschbox | Hobby-Aufbereiter | **ElbDetail** |
+|---|---|---|---|---|
+| Wer arbeitet | Maschine | Du selbst | Privatperson nebenbei | Geschulter Aufbereiter (Koch-Chemie-Lehrgänge) |
+| Methode | Bürsten oder Textil, Durchlauf | Hochdrucklanze, Bürste, Zeitdruck | Unterschiedlich | 100 % Handarbeit, Zwei-Eimer-Handwäsche |
+| Innenraum | Höchstens Sauger an der Ausfahrt | Selbst saugen | Unterschiedlich | Tiefenreinigung, Polster/Teppich, Leder- oder Polsterpflege, Geruchsneutralisation |
+| Lack | Reinigt, korrigiert nichts | Reinigt, korrigiert nichts | Unterschiedlich, Messung nicht selbstverständlich | Lackschichtdickenmessung vor Politur, mehrstufige Politur, Versiegelung |
+| Produkte | Anlagenchemie | Automatenchemie | Gemischt | Ausschließlich Koch-Chemie |
+| Preis | Fest, aber nur Wäsche | Nach Münzen und Zeit | Unterschiedlich | Verbindlicher Preis vor dem Termin |
+| Ergebnis | Kein Ansprechpartner | Deine eigene Arbeit | Unterschiedlich | Gemeinsame Abnahme bei Tageslicht |
+| Rechnung | Beleg | Kein Beleg | Unterschiedlich | `[PLATZHALTER: Rechnung mit ausgewiesener MwSt. bestätigen]` |
+
+**Kurzform für Texte:** "Keine Waschstraße. Kein Zeitdruck. Handarbeit mit Messung, festem Preis und Abnahme bei Tageslicht."
+
+---
+
+## 4. Markenwerte
+
+| Wert | Bedeutung | So zeigt es sich |
+|---|---|---|
+| **Sorgfalt** | Jedes Detail zählt. | Zwei-Eimer-Handwäsche, Felgen, Fugen, Lüftungsgitter. Makrofotos in der Kommunikation. |
+| **Ehrlichkeit** | Kein Kleingedrucktes. | Verbindlicher Preis vor dem Termin. Keine Versprechen, die wir nicht prüfen können. |
+| **Fachwissen** | Wir wissen, was wir tun, und zeigen es. | Koch-Chemie-Lehrgänge, Lackschichtdickenmessung, Erklärungen im Ratgeber `/ratgeber/index.html`. |
+| **Nähe** | Ein Betrieb aus Celle für Celle und den Landkreis. | Ortsnamen nennen, du-Ansprache, schnelle Antwort per WhatsApp. |
+| **Sichtbares Ergebnis** | Was gut ist, sieht man bei Tageslicht. | Gemeinsame Abnahme, echte Vorher/Nachher-Bilder ohne Retusche. |
+
+---
+
+## 5. Claim
+
+**Aktueller Claim:** "Dein Auto, wie neu."
+
+Empfehlung: Den aktuellen Claim als Hauptclaim behalten. Er ist kurz, nutzt die du-Ansprache und ist gelernt. Die folgenden Vorschläge eignen sich als Kampagnenzeilen oder als Alternative bei einem späteren Relaunch.
+
+| Nr. | Claim | Einsatz | Stärke |
+|---|---|---|---|
+| 1 | **Von Hand. Bis ins Detail.** | Website-Hero, Visitenkarte | Verbindet Handarbeit und Sorgfalt |
+| 2 | **Gemessen. Poliert. Abgenommen.** | Lackpolitur, Reels | Erzählt den Ablauf mit drei Beweisen |
+| 3 | **Handarbeit, die man bei Tageslicht sieht.** | Abnahme, Google-Bewertungen | Macht die Abnahme zum Versprechen |
+| 4 | **Celles Auto-Pflege von Hand.** | Lokale Anzeigen, Fahrzeugbeschriftung | Stark lokal, gut für Suchanzeigen |
+| 5 | **Erst der Preis. Dann der Glanz.** | Anzeigen, WhatsApp-Status | Nimmt die größte Sorge (Kosten) auf |
+
+`[PLATZHALTER: Entscheidung Hauptclaim und ggf. Kampagnenclaim]`
+
+---
+
+## 6. Botschaftsarchitektur
+
+### Kernbotschaft
+
+**Dein Auto, wie neu: in 100 % Handarbeit, zum verbindlichen Preis und mit gemeinsamer Abnahme bei Tageslicht. In Celle.**
+
+### Vier Beweispunkte
+
+| Nr. | Beweispunkt | Kurzform (Anzeige) | Langform (Website) |
+|---|---|---|---|
+| 1 | **Handarbeit statt Waschstraße** | 100 % Handarbeit | Wir waschen ausschließlich von Hand nach der Zwei-Eimer-Methode. Keine Waschstraße, keine Bürsten. |
+| 2 | **Profi-Produkte und Schulung** | Koch-Chemie geschult | Wir haben Koch-Chemie-Lehrgänge absolviert und arbeiten ausschließlich mit Koch-Chemie-Produkten. |
+| 3 | **Messen vor Polieren** | Lackschichtdickenmessung | Vor jeder Politur messen wir die Lackschichtdicke. So wissen wir, wie viel dein Lack verträgt. |
+| 4 | **Planbar und transparent** | Verbindlicher Preis vorab | Du bekommst vor dem Termin einen verbindlichen Preis. Am Ende nehmen wir das Ergebnis gemeinsam bei Tageslicht ab. |
+
+**Vertrauensanker:** 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026). Immer mit Stand-Angabe oder aktueller Zahl verwenden.
+
+### Handlungsaufforderung
+
+Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Termin anfragen" (`/termin.html`).
+
+---
+
+## 7. Tonalität
+
+**Grundton:** klar, freundlich, fachkundig, ehrlich. Wie ein guter Handwerker, der erklärt, was er macht. Ansprache: **du**. Kurze Sätze. Keine Gedankenstriche als Stilmittel.
+
+### Do und Don't
+
+| Do | Beispiel Do | Don't | Beispiel Don't |
+|---|---|---|---|
+| Konkret werden | "Vor der Politur messen wir die Lackschichtdicke." | Leere Superlative | "Die beste Aufbereitung aller Zeiten!" |
+| Preis offen nennen | "Komplettpflege für deinen Golf: ab 179 €. Den verbindlichen Preis bekommst du vorab." | Preis verstecken | "Preise auf Anfrage, ruf einfach mal an." |
+| Ergebnis zeigen | "Hier siehst du die Fahrertür vorher und nachher, gleiches Licht." | Übertreiben | "Danach ist dein Auto besser als neu!" |
+| Sorge aufnehmen | "Hundehaare im Kofferraum? Kennen wir." | Kunden belehren | "Wer seinen Innenraum so verkommen lässt, …" |
+| Kurz und aktiv | "Schick uns drei Fotos. Wir melden uns mit einem Preis." | Behördendeutsch | "Bitte übermitteln Sie uns zwecks Angebotserstellung Bildmaterial." |
+| Fachbegriff erklären | "Hologramme sind feine Schlieren im Lack, die bei Sonne sichtbar werden." | Fachchinesisch ohne Erklärung | "Wir entfernen RDS-Defekte per DA-Finish." |
+| Sachlich abgrenzen | "Keine Waschstraße. Jede Fläche von Hand." | Mitbewerber schlechtmachen | "Die Waschstraße um die Ecke ruiniert deinen Lack." |
+| Nur belegbare Aussagen | "5,0 Sterne bei 19 Google-Rezensionen" | Erfundene Zahlen | "Über 1.000 zufriedene Kunden" |
+| Verfügbarkeit ehrlich | "Abholung nach Absprache möglich." | Ungeprüfte Zusagen | "Wir holen dein Auto immer kostenlos ab." |
+
+### Wortliste
+
+| Bevorzugt | Vermeiden | Grund |
+|---|---|---|
+| Fahrzeugaufbereitung, Aufbereitung | Autowäsche, Waschen (als Hauptbegriff) | Wir sind mehr als Wäsche |
+| Handarbeit, von Hand | maschinell, Express | Kernversprechen |
+| verbindlicher Preis, Preis vorab | Festpreisgarantie, Garantie | Keine Garantien zusagen |
+| ab 79 €, ab 179 €, ab 349 € | "schon ab", "nur", "billig", "günstig" | Wertig, nicht Discount |
+| Lackpolitur, Kratzer- und Hologrammentfernung | "alle Kratzer weg", "kratzerfrei" | Nicht jeder Kratzer ist polierbar |
+| Lackversiegelung | Keramikversiegelung, Nanoversiegelung | Keramik ist kein festes Angebot |
+| Geruchsneutralisation, Geruchsentfernung | "geruchsfrei garantiert" | Kein Garantieversprechen |
+| Abnahme bei Tageslicht | Übergabe im Vorbeigehen | Beweispunkt |
+| Termin anfragen | "Jetzt sofort buchen" | Termine nach Vereinbarung |
+| nach Absprache | immer, jederzeit, 24/7 | Keine ungeprüften Zusagen |
+| Koch-Chemie | "Premium-Chemie" ohne Marke | Konkreter Beweis |
+| Celle, Landkreis Celle, Ortsnamen | "Region Hannover" | Einzugsgebiet ist Celle und Landkreis |
+| du, dein Auto | Sie, Ihr Fahrzeug | Markenansprache |
+
+### Regeln für WhatsApp-Antworten
+
+1. **Antwortzeit:** `[PLATZHALTER: Ziel-Antwortzeit, z. B. am selben Werktag]`. Außerhalb dieser Zeit: Abwesenheitsnachricht in WhatsApp Business hinterlegen.
+2. **Begrüßung mit Namen**, falls bekannt. Du-Ansprache. Signatur: `[PLATZHALTER: Vorname oder "Dein ElbDetail-Team"]`.
+3. **Immer diese Infos abfragen:** Fahrzeugmodell, Zustand, gewünschte Leistung oder Paket, Wunschzeitraum, 2 bis 4 Fotos (Innenraum, Lack bei Tageslicht, Felgen).
+4. **Preis:** Richtpreis aus der Preisliste nennen ("ab"). Den verbindlichen Preis erst nach Fotos oder Besichtigung nennen und klar als verbindlich bezeichnen.
+5. **Kurz halten:** maximal 4 bis 5 Zeilen pro Nachricht. Eine Frage pro Nachricht, wenn möglich.
+6. **Emojis sparsam:** höchstens eines pro Nachricht, z. B. 👍. Keine Emoji-Ketten.
+7. **Keine Zusagen** zu Abholung (nur "nach Absprache"), Rabatten, Garantien oder Ergebnissen bei starken Schäden.
+8. **Terminbestätigung immer schriftlich** mit Datum, Uhrzeit, Adresse (Lachtehäuser Straße 1, 29223 Celle), Paket, verbindlichem Preis und Zahlungsart (bar oder Überweisung).
+9. **Fotos von Kunden** nie ohne Einwilligung im Status, auf Social Media oder der Website zeigen.
+10. **Sprachnachrichten:** `[PLATZHALTER: erlaubt ja/nein]`. Wichtige Infos immer zusätzlich schriftlich.
+
+**Textbausteine (Schnellantworten in WhatsApp Business):**
+
+- **/erstanfrage:** "Hi [Name], danke für deine Nachricht! Damit wir dir einen verbindlichen Preis nennen können: Welches Modell fährst du, und kannst du uns 2 bis 4 Fotos schicken (Innenraum, Lack bei Tageslicht, Felgen)?"
+- **/richtpreis:** "Für deinen [Modell] liegt die [Paket] bei ab [Preis] €. Nach deinen Fotos bekommst du den verbindlichen Preis."
+- **/bestaetigung:** "Dein Termin steht: [Datum], [Uhrzeit], Lachtehäuser Straße 1, 29223 Celle. Paket: [Paket], Preis: [Preis] €. Bezahlen kannst du bar oder per Überweisung. Bis dann!"
+- **/abnahme:** "Dein Auto ist fertig. Wir schauen es uns gleich gemeinsam bei Tageslicht an."
+- **/bewertung:** "Danke, dass du bei uns warst! Wenn du zufrieden bist, freuen wir uns über eine Google-Bewertung: [PLATZHALTER: Link zur Google-Bewertung]"
+
+---
+
+## 8. Visuelles System
+
+### 8.1 Farben
+
+| Rolle | Name | Hex | RGB | Einsatz | Nicht verwenden für |
+|---|---|---|---|---|---|
+| Struktur | Anthrazit | `#1e2229` | 30, 34, 41 | Fließtext auf hell, dunkle Flächen (Header, Footer, Hero-Overlay), Logo auf hell | Große Flächen ohne Weißraum |
+| Akzent | Blau | `#1c4f9c` | 28, 79, 156 | Buttons, Links, Hervorhebungen, Icons auf hellem Grund. **Einzige Akzentfarbe.** | Text auf Anthrazit (zu wenig Kontrast) |
+| Akzent auf dunkel | Hellblau | `#5b9be8` | 91, 155, 232 | Links, Icons und Hervorhebungen auf Anthrazit | Text auf Weiß (zu wenig Kontrast) |
+| Fläche | Weiß | `#ffffff` | 255, 255, 255 | Haupthintergrund, Text auf Blau und Anthrazit | |
+| Fläche | Blaugrau hell | `#eef3fb` | 238, 243, 251 | Abschnittswechsel, Karten, Preistabellen | Text |
+| Funktion | WhatsApp-Grün | `#1f9d55` | 31, 157, 85 | **Nur** WhatsApp-Buttons und WhatsApp-Icon | Andere Buttons, Deko, Überschriften |
+| Funktion | Sternegelb | `#f5b301` | 245, 179, 1 | **Nur** Bewertungssterne | Text, Buttons, Flächen |
+
+**Mengenverhältnis als Richtwert:** viel Weiß und Blaugrau, Anthrazit für Struktur und Text, Blau sparsam als Signal. Pro Ansicht möglichst nur ein blauer Haupt-Button.
+
+### 8.2 Kontrastregeln
+
+Geprüft nach WCAG 2.1. Ziel: AA (4,5:1 für Fließtext, 3:1 für große Schrift ab 24 px oder 18,66 px fett sowie für Icons und Bedienelemente).
+
+| Vordergrund | Hintergrund | Kontrast | Freigabe |
+|---|---|---|---|
+| Anthrazit `#1e2229` | Weiß `#ffffff` | 15,96:1 | Alle Textgrößen |
+| Anthrazit `#1e2229` | Blaugrau `#eef3fb` | 14,32:1 | Alle Textgrößen |
+| Weiß `#ffffff` | Anthrazit `#1e2229` | 15,96:1 | Alle Textgrößen |
+| Blau `#1c4f9c` | Weiß `#ffffff` | 7,93:1 | Alle Textgrößen, Links |
+| Weiß `#ffffff` | Blau `#1c4f9c` | 7,93:1 | Button-Text |
+| Blau `#1c4f9c` | Blaugrau `#eef3fb` | 7,12:1 | Alle Textgrößen |
+| Hellblau `#5b9be8` | Anthrazit `#1e2229` | 5,55:1 | Alle Textgrößen auf dunkel |
+| Weiß `#ffffff` | WhatsApp-Grün `#1f9d55` | 3,49:1 | Nur Button-Text ab 18,66 px fett oder 24 px, plus Icon |
+| Sternegelb `#f5b301` | Anthrazit `#1e2229` | 8,61:1 | Sterne auf dunkel |
+| Sternegelb `#f5b301` | Weiß `#ffffff` | 1,85:1 | **Nur** mit Zahl daneben ("5,0"), Sterne nie als einzige Info |
+| Hellblau `#5b9be8` | Weiß `#ffffff` | 2,88:1 | **Nicht für Text** |
+| Blau `#1c4f9c` | Anthrazit `#1e2229` | 2,01:1 | **Nicht verwenden** |
+
+**Weitere Regeln:**
+- Text auf Fotos nur mit Anthrazit-Overlay (mind. 60 % Deckkraft) oder auf einer Anthrazit-Fläche.
+- WhatsApp-Buttons: Text fett und mindestens 18,66 px, oder Text in Anthrazit neben einem grünen Icon.
+- Bedeutung nie nur über Farbe transportieren. Immer Text oder Icon dazu.
+
+### 8.3 Typografie
+
+| Rolle | Schrift | Schnitt | Größe Desktop | Größe Mobil | Zeilenhöhe | Hinweise |
+|---|---|---|---|---|---|---|
+| H1 / Hero | Oswald | 700 | 56 px | 36 px | 1,1 | Großbuchstaben erlaubt, max. 2 Zeilen |
+| H2 / Abschnitt | Oswald | 600 | 40 px | 28 px | 1,15 | |
+| H3 / Karte, Paketname | Oswald | 600 | 26 px | 22 px | 1,2 | |
+| H4 / Zwischenzeile | Oswald | 500 | 20 px | 18 px | 1,25 | |
+| Label / Kicker | Oswald | 500 | 14 px | 13 px | 1,3 | Großbuchstaben, Laufweite +0,06 em |
+| Preis | Oswald | 700 | 32 px | 28 px | 1,1 | "ab" in Systemschrift, kleiner |
+| Fließtext | Systemschrift | 400 | 17 px | 16 px | 1,6 | Max. 70 Zeichen pro Zeile |
+| Klein / Hinweise | Systemschrift | 400 | 14 px | 14 px | 1,5 | Nie kleiner als 14 px |
+| Button | Systemschrift oder Oswald 500 | 600 / 500 | 17 px | 16 px | 1 | Klickfläche mind. 44 × 44 px |
+
+Systemschrift-Stack: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`.
+
+Die Skala ist die Vorgabe für neue Gestaltung. Bei Abweichungen auf der Website gilt das Stylesheet der Website. `[PLATZHALTER: Skala mit dem aktuellen Stylesheet abgleichen]`
+
+Für Social Media und Druck: Oswald 700 für Headlines, Oswald 500 für Labels. Fließtext auf Social-Grafiken: Systemschrift ist nicht einbettbar, deshalb dort eine frei lizenzierte Sans verwenden. `[PLATZHALTER: Fließtextschrift für Social und Druck festlegen, z. B. eine Open-Source-Sans]`
+
+### 8.4 Logo
+
+**Aufbau:** Schriftzug "ElbDetail" mit Unterzeile "Premium Fahrzeugaufbereitung".
+
+**Aktueller Stand:** Das Logo liegt nur als PNG mit 142 × 57 px vor. Das reicht für kleine Darstellungen am Bildschirm, aber nicht für Druck, Folierung, Schilder, Banner oder große Social-Grafiken.
+
+> **Wichtig: Vektorlogo beschaffen.** Das Logo als SVG und PDF (Vektor) beim ursprünglichen Gestalter anfragen. Ist das nicht möglich, das Logo neu zeichnen lassen. Dabei mitbestellen: Positivversion (für hellen Grund), Negativversion (für dunklen Grund), einfarbige Version, Version ohne Unterzeile für kleine Größen, Favicon/Avatar. `[PLATZHALTER: Kontakt ursprünglicher Gestalter / Auftrag Neuzeichnung]`
+
+**Schutzzone:** Rund um das Logo bleibt ein Freiraum in der Höhe des Großbuchstabens "E" aus "ElbDetail". In diesem Raum stehen keine Texte, Kanten oder Bildelemente.
+
+**Mindestgröße:**
+
+| Version | Digital | Druck |
+|---|---|---|
+| Mit Unterzeile | 120 px Breite | 30 mm Breite (erst mit Vektorlogo) |
+| Ohne Unterzeile (nach Neuzeichnung) | 80 px Breite | 20 mm Breite |
+
+**PNG-Regel:** Das PNG nie größer als 142 px Breite darstellen. Hochskalieren macht es unscharf. Für Retina-Displays und alles Größere wird die Vektorversion gebraucht.
+
+**Hintergründe:**
+
+| Hintergrund | Erlaubt | Version |
+|---|---|---|
+| Weiß `#ffffff` | Ja | Positiv (Anthrazit oder Anthrazit/Blau) |
+| Blaugrau `#eef3fb` | Ja | Positiv |
+| Anthrazit `#1e2229` | Ja | Negativ (Weiß, ggf. Hellblau) |
+| Blau `#1c4f9c` | Nur Negativversion in Weiß | Negativ einfarbig |
+| Ruhige Fotostelle mit Anthrazit-Overlay | Ja | Negativ |
+| Unruhiges Foto, Lackreflexe, WhatsApp-Grün, Sternegelb | Nein | |
+
+`[PLATZHALTER: Prüfen, für welchen Hintergrund das vorhandene PNG angelegt ist (hell oder dunkel, transparent oder nicht)]`
+
+**Verboten:** verzerren, drehen, Schatten, Glow, Outline, Farben tauschen, Unterzeile ändern oder umstellen, Logo neu setzen aus Oswald, Logo in Fließtext einbauen.
+
+### 8.5 Bildstil
+
+**Grundsatz:** Echte Autos, echte Arbeit, echter Standort. Kein Stockfoto-Look.
+
+| Thema | Vorgabe |
+|---|---|
+| **Licht außen** | Bedeckter Himmel oder weiches Licht morgens/abends. Keine harte Mittagssonne auf dem Lack. Tageslicht passt zum Beweispunkt "Abnahme bei Tageslicht". |
+| **Licht Lackpolitur** | Punktlicht oder Swirl-Leuchte im abgedunkelten Raum, damit Hologramme und Kratzer sichtbar werden. Vorher und nachher mit derselben Leuchte, gleichem Winkel. |
+| **Licht innen** | Gleichmäßig, Türen offen, ggf. Aufhelllicht. Keine farbigen LED-Stimmungslichter. |
+| **Perspektiven** | Außen: 3/4-Front auf Scheinwerferhöhe, Seite, Heck 3/4. Details: Makro von Felge, Emblem, Naht, Lüftungsgitter, Wasserperlen. Arbeit: Hände mit Werkzeug, Blick über die Schulter. |
+| **Bearbeitung** | Natürliche Farben, leichte Kontrast- und Weißabgleich-Korrektur. Kein HDR-Look, keine übersättigten Farben, keine Vignetten, keine Filter. |
+| **Vorher/Nachher** | Gleicher Standpunkt, gleiche Brennweite, gleiches Licht, gleiche Bearbeitung. **Keine Retusche am Ergebnis.** Das wäre irreführend. |
+| **Menschen** | Hände und Arbeit im Fokus. Gesichter nur mit schriftlicher Einwilligung. Arbeitskleidung `[PLATZHALTER: Arbeitskleidung mit Logo vorhanden?]`. |
+| **Datenschutz** | Kennzeichen unkenntlich, keine persönlichen Gegenstände, Dokumente oder Navi-Adressen im Bild. |
+| **Vermeiden** | Lächelnde Models mit Schwamm, Schaumberge als Show, Sportwagen, die nicht in der Werkstatt waren, KI-Bilder als echte Arbeit ausgeben, Werbung oder Logos Dritter als Bildmittelpunkt (Ausnahme: Koch-Chemie-Produkte im Arbeitskontext). |
+
+Details zu Motiven und Technik: `docs/foto-und-video-shotlist.md`.
+
+### 8.6 Social-Media-Vorlagen
+
+| Format | Größe | Einsatz |
+|---|---|---|
+| 1:1 | 1080 × 1080 px | Feed-Post, Facebook |
+| 4:5 | 1080 × 1350 px | Instagram-Feed (bevorzugt), Karussell |
+| 9:16 | 1080 × 1920 px | Reels, TikTok, Stories |
+
+**Regeln:**
+1. **Ein Foto, eine Aussage.** Maximal 8 Wörter Headline auf der Grafik.
+2. **Headline** in Oswald 700, Großbuchstaben erlaubt. Weiß auf Anthrazit oder Anthrazit auf Weiß/Blaugrau.
+3. **Akzent** nur Blau (auf hell) oder Hellblau (auf dunkel). Kein drittes Akzentfarb-Element.
+4. **Logo** unten links oder unten mittig, mit Schutzzone. Bis zum Vektorlogo nur klein einsetzen.
+5. **Vorher/Nachher-Label:** "VORHER" und "NACHHER" in Oswald 600, Weiß auf Anthrazit-Fläche, immer an derselben Position. Trennung links/rechts oder oben/unten, immer gleiche Reihenfolge (vorher zuerst).
+6. **Sichere Zone 9:16:** oben ca. 250 px und unten ca. 400 px frei von Text halten. Dort liegen die Bedienelemente der Apps.
+7. **Preise** nur aus der Preisliste und immer mit "ab".
+8. **Bewertungen:** nur echte Zitate aus Google-Rezensionen, mit Einwilligung bzw. als öffentliches Zitat mit Quelle "Google-Rezension". Sterne in `#f5b301` plus Zahl "5,0".
+9. **WhatsApp-Hinweis** als Text "Termin per WhatsApp: +49 172 7613807". WhatsApp-Grün nur für das Icon.
+10. **Hashtags** sparsam: `#elbdetail #celle #fahrzeugaufbereitung` plus 2 bis 3 themenbezogene.
+11. **Kanäle:** instagram.com/elbdetail, tiktok.com/@elbdetail, facebook.com/p/ElbDetail-61591214390265.
+
+`[PLATZHALTER: Vorlagen in Canva oder einem anderen Tool anlegen und hier verlinken]`
+
+---
+
+## 9. Checkliste vor jeder Veröffentlichung
+
+- [ ] Nur Fakten aus Abschnitt 1 verwendet?
+- [ ] Preise mit "ab" und passend zur Preisliste?
+- [ ] Bewertungszahl aktuell?
+- [ ] Du-Ansprache, kurze Sätze, keine Gedankenstriche?
+- [ ] Farben und Kontraste nach Abschnitt 8?
+- [ ] Kennzeichen unkenntlich, Einwilligungen vorhanden?
+- [ ] Link mit UTM-Parametern (siehe `docs/anzeigen-kit.md`)?

@@ -1,0 +1,77 @@
+{
+  "slug": "lackpolitur-celle",
+  "order": 3,
+  "short": "Lackpolitur",
+  "teaser": "Mehrstufige Politur gegen Kratzer, Hologramme und matten Lack.",
+  "seoTitle": "Lackpolitur Celle – Kratzer, Hologramme & matter Lack | ElbDetail",
+  "description": "Mehrstufige Lackpolitur in Celle: Entfernung von Waschstraßenkratzern, Hologrammen und Oxidation, danach Tiefenglanz. Premium Politur ab 349 € inkl. Versiegelung. ElbDetail, Koch-Chemie geschult.",
+  "h1": "Lackpolitur in Celle: *Tiefenglanz statt Kratzer.*",
+  "lead": "Mehrstufige Maschinenpolitur gegen Swirls, Hologramme, Oxidation und matte Stellen. **Der Lack bekommt seine Tiefe zurück, ohne Risiko für den Klarlack.**",
+  "facts": [
+    {
+      "value": "ab 349 €",
+      "label": "Premium Politur inkl. Versiegelung"
+    },
+    {
+      "value": "ca. 1 Tag",
+      "label": "Dauer"
+    },
+    {
+      "value": "Mehrstufig",
+      "label": "Schleif- & Finishpolitur"
+    }
+  ],
+  "package": "premium",
+  "intro": "Jede Waschstraße, jeder trockene Lappen und jeder Winter hinterlassen Spuren im Klarlack: feine Kratzer, die in der Sonne als Spinnennetz sichtbar werden, Hologramme von schlecht ausgeführten Polituren, matte, oxidierte Flächen. Eine professionelle Lackpolitur trägt diese Defekte kontrolliert ab und stellt Glanz und Farbtiefe wieder her.\n\nWir arbeiten mehrstufig: Zuerst wird der Lack gewaschen, dekontaminiert und geknetet, dann die Lackstärke gemessen. Erst danach entscheiden wir, wie viel Abtrag nötig und sicher ist. Nach der Schleifpolitur folgt eine Finishpolitur für maximalen Glanz, abschließend wird der Lack entfettet und versiegelt.\n",
+  "includes": [
+    "Handwäsche und chemische Dekontamination",
+    "Lackreinigungsknete gegen Rauigkeit",
+    "Lackschichtdickenmessung vor der Politur",
+    "Abkleben empfindlicher Kanten und Kunststoffe",
+    "Schleifpolitur gegen Kratzer und Hologramme",
+    "Finishpolitur für Tiefenglanz",
+    "Kontrolle unter Tageslicht und Punktlicht",
+    "Lackversiegelung zum Schutz des Ergebnisses"
+  ],
+  "steps": [
+    {
+      "title": "Analyse",
+      "text": "Wäsche, Dekontamination, Messung der Lackstärke und Beurteilung der Defekte unter Punktlicht."
+    },
+    {
+      "title": "Schleifpolitur",
+      "text": "Mit abgestimmten Pad-Politur-Kombinationen werden Kratzer und Hologramme kontrolliert abgetragen."
+    },
+    {
+      "title": "Finishpolitur",
+      "text": "Feine Politur für maximalen Glanz und einen hologrammfreien Lack."
+    },
+    {
+      "title": "Versiegelung",
+      "text": "Der polierte Lack wird entfettet und versiegelt, damit das Ergebnis Monate hält."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Welche Kratzer lassen sich wegpolieren?",
+      "a": "Alles, was im Klarlack liegt: Waschstraßenkratzer, Swirls, Hologramme, leichte Oxidation und flache Kratzer, bei denen der Fingernagel nicht hängen bleibt. Tiefe Kratzer bis in die Farbschicht oder Grundierung lassen sich nur kaschieren, nicht entfernen."
+    },
+    {
+      "q": "Ist eine Politur schädlich für den Lack?",
+      "a": "Fachgerecht ausgeführt nicht. Wir messen vorher die Lackstärke und tragen nur so viel ab, wie für das Ergebnis nötig ist. Schäden entstehen durch zu aggressive Polituren ohne Messung, nicht durch Politur an sich."
+    },
+    {
+      "q": "Wie lange hält das Ergebnis?",
+      "a": "Die entfernten Kratzer sind dauerhaft weg. Wie lange der Lack kratzerfrei bleibt, hängt von der Pflege danach ab: Handwäsche statt Waschstraße und die mitgelieferte Versiegelung verlängern das Ergebnis deutlich."
+    },
+    {
+      "q": "Was kostet eine Lackpolitur in Celle?",
+      "a": "Im Paket Premium Politur ist die mehrstufige Politur inklusive Komplettpflege und Lackversiegelung ab 349 € für eine Kompaktklasse enthalten. Eine Politur als Einzelleistung oder nur einzelner Teile, zum Beispiel der Motorhaube, bieten wir nach Besichtigung an."
+    }
+  ],
+  "related": [
+    "lackversiegelung-celle",
+    "aussenaufbereitung-celle",
+    "leasingrueckgabe-gebrauchtwagen-celle"
+  ]
+}

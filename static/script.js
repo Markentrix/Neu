@@ -1,0 +1,395 @@
+/* ElbDetail – Website-Skript. Ohne Abhängigkeiten, ohne Cookies, ohne Drittanbieter. */
+(function () {
+  "use strict";
+
+  var ELB = window.ELB || {};
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var API = ELB.api || "/api";
+  var IS_LIVE = (ELB.hosts || []).indexOf(location.hostname) !== -1;
+
+  function fmt(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+  function waLink(text) { return "https://wa.me/" + ELB.whatsapp + (text ? "?text=" + encodeURIComponent(text) : ""); }
+  function pkg(key) { return (ELB.packages || []).filter(function (p) { return p.key === key; })[0]; }
+  function cls(key) { return (ELB.classes || []).filter(function (c) { return c.key === key; })[0]; }
+  function price(pk, ck) { var p = pkg(pk); return p && p.prices ? p.prices[ck] : null; }
+  function radio(form, name) { var el = form.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
+  function deDate(iso) { if (!iso) return ""; var p = iso.split("-"); return p.length === 3 ? p[2] + "." + p[1] + "." + p[0] : iso; }
+  function todayIso() { var t = new Date(); return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0"); }
+  function params() { var o = {}; location.search.replace(/^\?/, "").split("&").forEach(function (kv) { if (!kv) return; var p = kv.split("="); o[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || "").replace(/\+/g, " ")); }); return o; }
+  var Q = params();
+
+  /* ---------------------------------------------------------------- Statistik (eigener Server, cookielos) */
+  var noTrack = navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true;
+  function send(payload) {
+    if (noTrack || !IS_LIVE) return;
+    try {
+      var body = JSON.stringify(payload);
+      if (navigator.sendBeacon) navigator.sendBeacon(API + "/e", new Blob([body], { type: "application/json" }));
+      else fetch(API + "/e", { method: "POST", body: body, headers: { "Content-Type": "application/json" }, keepalive: true });
+    } catch (e) { /* Statistik ist optional */ }
+  }
+  function track(name, props) { send({ t: "ev", n: name, u: location.pathname, p: props || {} }); }
+  window.elbTrack = track;
+  (function pageview() {
+    var ref = "";
+    try { if (document.referrer && new URL(document.referrer).hostname !== location.hostname) ref = new URL(document.referrer).hostname; } catch (e) {}
+    send({ t: "pv", u: location.pathname, r: ref, w: window.innerWidth,
+      utm: { s: Q.utm_source || "", m: Q.utm_medium || "", c: Q.utm_campaign || "" } });
+  })();
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var h = a.getAttribute("href");
+    if (h.indexOf("wa.me/") !== -1) track("WhatsApp-Klick", { ort: a.closest("[id]") ? a.closest("[id]").id : "" });
+    else if (h.indexOf("tel:") === 0) track("Anruf-Klick");
+    else if (h.indexOf("mailto:") === 0) track("E-Mail-Klick");
+    else if (/termin\.html/.test(h)) track("Termin-Button", { ziel: h.split("?")[1] || "" });
+  });
+
+  /* ---------------------------------------------------------------- Navigation & Basis */
+  function focusTarget(t) {
+    var had = t.hasAttribute("tabindex");
+    if (!had) t.setAttribute("tabindex", "-1");
+    t.focus({ preventScroll: true });
+    if (!had) t.addEventListener("blur", function () { t.removeAttribute("tabindex"); }, { once: true });
+  }
+  if (location.hash && /^#[\w-]+$/.test(location.hash)) {
+    var toHash = function () { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView({ block: "start" }); };
+    toHash();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(toHash);
+    window.addEventListener("load", toHash);
+  }
+  document.addEventListener("click", function (e) {
+    var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!link || e.defaultPrevented) return;
+    var id = link.getAttribute("href").slice(1);
+    var t = id ? document.getElementById(id) : null;
+    if (t) { e.preventDefault(); t.scrollIntoView({ block: "start", behavior: "smooth" }); history.pushState(null, "", "#" + id); focusTarget(t); }
+  });
+
+  var header = $(".site-header");
+  if (header) {
+    var onScroll = function () { header.classList.toggle("is-scrolled", window.scrollY > 24); };
+    window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  }
+  var menuToggle = $("#menuToggle"), mobileNav = $("#mobileNav");
+  if (menuToggle && mobileNav) {
+    var setMenu = function (open) {
+      menuToggle.setAttribute("aria-expanded", String(open));
+      menuToggle.setAttribute("aria-label", open ? "Menü schließen" : "Menü öffnen");
+      mobileNav.hidden = !open;
+    };
+    menuToggle.addEventListener("click", function () { setMenu(menuToggle.getAttribute("aria-expanded") !== "true"); });
+    $$("a", mobileNav).forEach(function (a) { a.addEventListener("click", function () { setMenu(false); }); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") { setMenu(false); menuToggle.focus(); } });
+    document.addEventListener("click", function (e) { if (menuToggle.getAttribute("aria-expanded") === "true" && !e.target.closest(".site-header")) setMenu(false); });
+    if (window.matchMedia) window.matchMedia("(min-width: 1100px)").addEventListener("change", function (e) { if (e.matches) setMenu(false); });
+  }
+
+  /* FAQ: sanftes Auf-/Zuklappen */
+  $$(".faq-item").forEach(function (item) {
+    var summary = $("summary", item), wrap = $(".faq-body-wrap", item);
+    if (!summary || !wrap) return;
+    summary.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (item.hasAttribute("data-animating")) return;
+      item.setAttribute("data-animating", "true");
+      if (item.open) { wrap.style.gridTemplateRows = "1fr"; void wrap.offsetHeight; wrap.style.gridTemplateRows = "0fr"; }
+      else { item.open = true; wrap.style.gridTemplateRows = "0fr"; void wrap.offsetHeight; wrap.style.gridTemplateRows = "1fr"; }
+      setTimeout(function () { if (item.hasAttribute("data-animating")) { finish(); } }, 450);
+    });
+    function finish() {
+      if (item.open && wrap.style.gridTemplateRows === "0fr") item.open = false;
+      wrap.style.gridTemplateRows = ""; item.removeAttribute("data-animating");
+    }
+    wrap.addEventListener("transitionend", function (e) { if (e.propertyName === "grid-template-rows") finish(); });
+  });
+
+  /* ---------------------------------------------------------------- Richtpreis-Rechner (Startseite) */
+  var quote = $("#quoteForm");
+  if (quote) {
+    quote.addEventListener("submit", function (e) { e.preventDefault(); });
+    var updateQuote = function (user) {
+      var pk = radio(quote, "qpkg"), ck = radio(quote, "qclass"), p = pkg(pk), c = cls(ck), v = price(pk, ck);
+      if (!p || v == null) return;
+      $("#quoteValue").innerHTML = "<small>ab</small>" + fmt(v) + " €";
+      $("#quotePkgName").textContent = p.name;
+      $("#quoteBook").href = "termin.html?paket=" + pk + "&klasse=" + ck;
+      $("#quoteWa").href = waLink("Hallo ElbDetail, ich interessiere mich für das Paket „" + p.name + "“ (" + c.name + ", Richtpreis ab " + fmt(v) + " €). Fahrzeug: … Wunschtermin: …");
+      if (user) track("Rechner genutzt", { paket: p.name, klasse: c.short });
+    };
+    quote.addEventListener("change", function () { updateQuote(true); });
+    updateQuote(false);
+  }
+
+  /* Pakete: Fahrzeugklasse umschalten */
+  var priceSwitch = $("#priceClass");
+  if (priceSwitch) {
+    var applyClass = function () {
+      var ck = radio(priceSwitch, "pclass") || (ELB.classes[0] || {}).key, c = cls(ck);
+      $$("[data-plan]").forEach(function (plan) {
+        var pk = plan.getAttribute("data-plan"), v = price(pk, ck), p = pkg(pk);
+        var amount = $(".amount", plan); if (amount && v != null) amount.textContent = fmt(v) + " €";
+        var book = $("[data-book]", plan); if (book) book.href = "termin.html?paket=" + pk + "&klasse=" + ck;
+        var wa = $("[data-wa-plan]", plan); if (wa) wa.href = waLink("Hallo ElbDetail, ich möchte das Paket „" + p.name + "“ anfragen (" + c.name + ", Richtpreis ab " + fmt(v) + " €). Fahrzeug: … Wunschtermin: …");
+      });
+      var lbl = $("#priceClassLabel"); if (lbl && c) lbl.textContent = c.name;
+    };
+    priceSwitch.addEventListener("change", applyClass); applyClass();
+  }
+
+  /* Vorher/Nachher-Slider */
+  $$(".ba").forEach(function (ba) {
+    var r = $('input[type="range"]', ba); if (!r) return;
+    var set = function () { ba.style.setProperty("--pos", r.value + "%"); };
+    r.addEventListener("input", set); set();
+  });
+
+  /* Tastatur offen: Aktionsleiste ausblenden */
+  var kbT;
+  var isField = function (el) { return el && el.matches && el.matches("input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, select"); };
+  document.addEventListener("focusin", function (e) { if (isField(e.target)) { clearTimeout(kbT); document.documentElement.classList.add("kb-open"); } });
+  document.addEventListener("focusout", function () { clearTimeout(kbT); kbT = setTimeout(function () { if (!isField(document.activeElement)) document.documentElement.classList.remove("kb-open"); }, 120); });
+
+  /* Google Maps erst nach Klick */
+  var mapBtn = $("#loadMapBtn"), mapPh = $("#mapPlaceholder");
+  if (mapBtn && mapPh) mapBtn.addEventListener("click", function () {
+    var f = document.createElement("iframe");
+    f.className = "map-frame"; f.loading = "lazy"; f.referrerPolicy = "no-referrer-when-downgrade";
+    f.title = "Standort ElbDetail, Lachtehäuser Straße 1, 29223 Celle";
+    f.src = "https://www.google.com/maps?q=Lachteh%C3%A4user%20Stra%C3%9Fe%201,%2029223%20Celle&output=embed";
+    mapPh.replaceWith(f); track("Karte geladen");
+  });
+
+  /* ---------------------------------------------------------------- Formulare */
+  var LABELS = {
+    typ: null, website: null, einwilligung: null, quelle: null, name: "Name", telefon: "Telefon", email: "E-Mail", paket: "Paket",
+    klasse: "Fahrzeugklasse", fahrzeug: "Fahrzeug", zustand: "Zustand", extras: "Extras", abholung: "Abholung", datum: "Wunschtermin",
+    datum2: "Ausweichtermin", zeitfenster: "Zeitfenster", gutscheincode: "Gutscheincode", kanal: "Antwort per", nachricht: "Nachricht",
+    bewertung_ok: null, art: "Gutschein", betrag: "Betrag", wunschbetrag: "Wunschbetrag", fuer: "Für", von: "Von", widmung: "Widmung",
+    zustellung: "Zustellung", firma: "Firma", anzahl: "Fahrzeuge", intervall: "Intervall", leistungen: "Leistungen"
+  };
+  var TITLES = { kontakt: "Anfrage", termin: "Terminanfrage", gutschein: "Gutscheinbestellung", firma: "Firmenanfrage" };
+
+  function collect(form) {
+    var data = {};
+    $$("input, select, textarea", form).forEach(function (el) {
+      if (!el.name || el.disabled) return;
+      if ((el.type === "checkbox" || el.type === "radio") && !el.checked) return;
+      var v = el.value.trim();
+      if (el.type === "checkbox" && form.querySelectorAll('input[type=checkbox][name="' + el.name + '"]').length > 1) {
+        (data[el.name] = data[el.name] || []).push(v);
+      } else data[el.name] = v;
+    });
+    return data;
+  }
+  function pretty(k, v) {
+    if (k === "paket") { var p = pkg(v); return p ? p.name : (v === "beratung" ? "Beratung / Einzelleistung" : v); }
+    if (k === "klasse") { var c = cls(v); return c ? c.name : v; }
+    if (k === "datum" || k === "datum2") return deDate(v);
+    if (k === "betrag" || k === "wunschbetrag") return v + " €";
+    return Array.isArray(v) ? v.join(", ") : v;
+  }
+  function asText(data) {
+    var lines = [];
+    Object.keys(data).forEach(function (k) {
+      if (LABELS[k] === null || !data[k] || (Array.isArray(data[k]) && !data[k].length)) return;
+      lines.push((LABELS[k] || k) + ": " + pretty(k, data[k]));
+    });
+    return lines.join("\n");
+  }
+  function waFromForm(form) {
+    var data = collect(form), typ = data.typ || "kontakt";
+    return waLink("Hallo ElbDetail, hier meine " + (TITLES[typ] || "Anfrage") + ":\n" + asText(data));
+  }
+  function openWa(href) {
+    var a = document.createElement("a"); a.href = href; a.target = "_blank"; a.rel = "noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function setStatus(form, msg, kind, html) {
+    var st = $(".form-status", form); if (!st) return;
+    st.className = "form-status" + (kind ? " " + kind : "");
+    if (html) st.innerHTML = html; else st.textContent = msg;
+  }
+  function fallbackHtml(form, reason) {
+    var data = collect(form);
+    var mail = "mailto:" + ELB.email + "?subject=" + encodeURIComponent((TITLES[data.typ] || "Anfrage") + " über die Website – " + (data.name || "")) +
+      "&body=" + encodeURIComponent(asText(data));
+    return '<span>' + reason + '</span><span class="fb-actions"><a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="' + waFromForm(form) +
+      '">Per WhatsApp senden</a><a class="btn btn-line-light btn-sm" href="' + mail + '">Per E-Mail senden</a></span><span class="hint">Oder ruf an: ' + ELB.phoneDisplay + '</span>';
+  }
+  function validate(form, scope) {
+    var ok = true, first = null;
+    $$("input, select, textarea", scope || form).forEach(function (el) {
+      if (!el.willValidate) return;
+      var valid = el.checkValidity();
+      if (el.type === "radio") valid = !el.required || !!form.querySelector('input[name="' + el.name + '"]:checked');
+      el.setAttribute("aria-invalid", valid ? "false" : "true");
+      if (!valid) { ok = false; first = first || el; }
+    });
+    if (form.getAttribute("data-form") === "kontakt" && (!scope || scope === form)) {
+      var t = form.querySelector('[name="telefon"]'), m = form.querySelector('[name="email"]');
+      if (t && m && !t.value.trim() && !m.value.trim()) { ok = false; first = first || t; t.setAttribute("aria-invalid", "true"); }
+    }
+    if (first) first.focus();
+    return ok;
+  }
+
+  $$("form.js-form").forEach(function (form) {
+    var typ = form.getAttribute("data-form");
+    $$("[data-wa-from-form]", form).forEach(function (b) {
+      b.addEventListener("click", function () { track("WhatsApp-Klick", { ort: "formular-" + typ }); openWa(waFromForm(form)); });
+    });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (form.website && form.website.value) return;
+      if (!validate(form)) { setStatus(form, "Bitte die markierten Pflichtfelder ausfüllen.", "error"); return; }
+      var btn = form.querySelector('[type="submit"]:not([hidden])');
+      if (!IS_LIVE) {
+        setStatus(form, "", "info", fallbackHtml(form, "Vorschau-Modus: Auf dieser Vorschau wird das Formular nicht übertragen. Sende die Angaben direkt:"));
+        return;
+      }
+      if (btn) { btn.disabled = true; btn.classList.add("is-loading"); }
+      setStatus(form, "Wird gesendet …", "");
+      fetch(API + "/anfrage", { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(collect(form)) })
+        .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { j.status = r.status; return j; }); })
+        .then(function (j) {
+          if (j.ok) {
+            track("Anfrage gesendet", { typ: typ });
+            location.href = "danke.html?typ=" + encodeURIComponent(typ) + (j.ref ? "&ref=" + encodeURIComponent(j.ref) : "");
+          } else if (j.errors) {
+            Object.keys(j.errors).forEach(function (k) { var el = form.querySelector('[name="' + k + '"]'); if (el) el.setAttribute("aria-invalid", "true"); });
+            setStatus(form, j.message || "Bitte die markierten Angaben prüfen.", "error");
+          } else throw new Error("server");
+        })
+        .catch(function () { setStatus(form, "", "error", fallbackHtml(form, "Die Anfrage konnte gerade nicht übertragen werden. Bitte sende sie direkt:")); })
+        .then(function () { if (btn) { btn.disabled = false; btn.classList.remove("is-loading"); } });
+    });
+    $$("input, select, textarea", form).forEach(function (el) {
+      el.addEventListener("input", function () { if (el.getAttribute("aria-invalid") === "true" && el.checkValidity()) el.setAttribute("aria-invalid", "false"); });
+    });
+  });
+
+  /* ---------------------------------------------------------------- Terminbuchung (Assistent) */
+  var wz = $("#bookingForm");
+  if (wz) {
+    document.documentElement.classList.add("wz-ready");
+    var steps = $$(".wz-step", wz), inds = $$("[data-step-ind]", wz), cur = 0;
+    var prev = $("[data-wz-prev]", wz), next = $("[data-wz-next]", wz), submit = $("[data-wz-submit]", wz);
+    var blocked = [], closedWeekdays = [0];
+
+    if (Q.paket) { var rp = wz.querySelector('input[name="paket"][value="' + Q.paket + '"]'); if (rp) rp.checked = true; }
+    if (Q.klasse) { var rk = wz.querySelector('input[name="klasse"][value="' + Q.klasse + '"]'); if (rk) rk.checked = true; }
+    if (Q.quelle) wz.quelle.value = Q.quelle;
+    if (Q.gutschein) wz.gutscheincode.value = Q.gutschein;
+    ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].min = todayIso(); });
+
+    if (IS_LIVE) fetch(API + "/verfuegbarkeit").then(function (r) { return r.json(); }).then(function (j) {
+      blocked = j.blocked || []; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
+    }).catch(function () {});
+
+    function checkDate(el) {
+      var msg = $("#" + el.id + "-msg"), v = el.value, txt = "";
+      if (v) {
+        var d = new Date(v + "T12:00:00");
+        if (v < todayIso()) txt = "Bitte ein Datum ab heute wählen.";
+        else if (closedWeekdays.indexOf(d.getDay()) !== -1) txt = "An Sonntagen sind wir geschlossen. Bitte einen anderen Tag wählen.";
+        else if (blocked.indexOf(v) !== -1) txt = "An diesem Tag sind wir leider ausgebucht oder geschlossen.";
+      }
+      el.setCustomValidity(txt);
+      if (msg) { msg.textContent = txt; msg.className = "field-msg" + (txt ? " error" : ""); }
+    }
+    ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); summary(); }); });
+
+    function show(i) {
+      cur = Math.max(0, Math.min(steps.length - 1, i));
+      steps.forEach(function (s, k) { s.hidden = k !== cur; });
+      inds.forEach(function (li, k) { li.className = k < cur ? "done" : (k === cur ? "current" : ""); if (k === cur) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current"); });
+      prev.hidden = cur === 0; next.hidden = cur === steps.length - 1; submit.hidden = cur !== steps.length - 1;
+      track("Buchung Schritt", { schritt: cur + 1 });
+    }
+    function go(d) {
+      if (d > 0 && !validate(wz, steps[cur])) { setStatus(wz, "Bitte die markierten Angaben ergänzen.", "error"); return; }
+      setStatus(wz, "", "");
+      show(cur + d);
+      var lg = $("legend", steps[cur]); if (lg) { lg.setAttribute("tabindex", "-1"); lg.focus(); }
+      var top = wz.getBoundingClientRect().top + window.scrollY - 110; if (window.scrollY > top) window.scrollTo({ top: top, behavior: "smooth" });
+    }
+    next.addEventListener("click", function () { go(1); });
+    prev.addEventListener("click", function () { go(-1); });
+    inds.forEach(function (li, k) { li.addEventListener("click", function () { if (k < cur) { cur = k; show(k); } }); });
+    steps.forEach(function (s) { s.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "checkbox" && cur < steps.length - 1) { e.preventDefault(); go(1); } }); });
+
+    function summary() {
+      var d = collect(wz), p = pkg(d.paket), c = cls(d.klasse), v = p && c ? price(d.paket, d.klasse) : null;
+      var set = function (k, t) { var el = wz.parentNode.querySelector('[data-sum="' + k + '"]'); if (el) el.textContent = t; };
+      set("paket", p ? p.name : (d.paket === "beratung" ? "Beratung" : "–"));
+      set("klasse", (c ? c.name : "–") + (d.fahrzeug ? " · " + d.fahrzeug : ""));
+      set("extras", d.extras && d.extras.length ? d.extras.join(", ") : "keine");
+      set("datum", d.datum ? deDate(d.datum) + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
+      set("preis", v != null ? "ab " + fmt(v) + " €" : (d.paket === "beratung" ? "nach Beratung" : "–"));
+      $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); if (x != null) el.textContent = "ab " + fmt(x) + " €"; });
+    }
+    wz.addEventListener("change", summary); wz.addEventListener("input", summary);
+    summary(); show(0);
+  }
+
+  /* ---------------------------------------------------------------- Gutschein-Konfigurator */
+  var vf = $("#voucherForm");
+  if (vf) {
+    var vp = $("#voucherPreview");
+    var setVc = function (k, t) { var el = $('[data-vc="' + k + '"]', vp); if (el) el.textContent = t; };
+    var updateV = function () {
+      var art = radio(vf, "art");
+      $(".vf-wert", vf).hidden = art !== "wert"; $(".vf-paket", vf).hidden = art !== "paket";
+      if (art === "paket") {
+        var p = pkg(vf.paket.value);
+        setVc("value", p ? p.name : "Paket"); setVc("desc", "Fahrzeugaufbereitung für die Kompaktklasse" + (p ? " · Wert " + p.prices[ELB.classes[0].key] + " €" : ""));
+      } else {
+        var c = vf.wunschbetrag.value ? parseInt(vf.wunschbetrag.value, 10) : parseInt(radio(vf, "betrag") || "0", 10);
+        setVc("value", (c || 0) + " €"); setVc("desc", "für eine Fahrzeugaufbereitung nach Wahl");
+      }
+      setVc("fuer", vf.fuer.value.trim() || "…"); setVc("von", vf.von.value.trim() || "…"); setVc("msg", vf.widmung.value.trim());
+    };
+    vf.addEventListener("input", updateV); vf.addEventListener("change", function (e) {
+      if (e.target.name === "betrag") vf.wunschbetrag.value = "";
+      updateV();
+    });
+    vf.wunschbetrag.addEventListener("input", function () { if (vf.wunschbetrag.value) $$('input[name="betrag"]', vf).forEach(function (r) { r.checked = false; }); });
+    updateV();
+  }
+
+  /* Ratgeber-Filter */
+  var grid = $("#articleGrid");
+  if (grid) $$(".chip[data-filter]").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      var f = chip.getAttribute("data-filter");
+      $$(".chip[data-filter]").forEach(function (c) { c.classList.toggle("is-active", c === chip); c.setAttribute("aria-pressed", String(c === chip)); });
+      $$(".article-card", grid).forEach(function (card) { card.hidden = !!f && card.getAttribute("data-cat") !== f; });
+    });
+  });
+
+  /* Danke-Seite */
+  var thanks = $("[data-thanks-title]");
+  if (thanks && Q.typ) {
+    var T = {
+      termin: ["Terminanfrage eingegangen.", "Wir prüfen deinen Wunschtermin und melden uns mit Bestätigung und verbindlichem Angebot, in der Regel am selben oder nächsten Werktag."],
+      gutschein: ["Gutscheinbestellung eingegangen.", "Du bekommst gleich eine E-Mail mit den Zahlungsdaten. Nach Zahlungseingang senden wir dir den Gutschein."],
+      firma: ["Anfrage eingegangen.", "Danke für dein Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."]
+    }[Q.typ];
+    if (T) { thanks.innerHTML = "Danke! <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " Deine Vorgangsnummer: " + Q.ref + "." : ""); }
+  }
+
+  /* ---------------------------------------------------------------- Einblenden beim Scrollen */
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduce && "IntersectionObserver" in window) {
+    document.documentElement.classList.add("js-anim");
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); } });
+    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    $$(".reveal").forEach(function (el) { io.observe(el); });
+    setTimeout(function () { $$(".reveal:not(.is-visible)").forEach(function (el) { el.classList.add("is-visible"); }); }, 3000);
+  }
+  var y = $("#year"); if (y) y.textContent = String(new Date().getFullYear());
+})();

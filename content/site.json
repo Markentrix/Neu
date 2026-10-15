@@ -1,0 +1,96 @@
+{
+  "name": "ElbDetail",
+  "tagline": "Premium Fahrzeugaufbereitung",
+  "url": "https://www.elbdetail.de",
+  "phone": "+491727613807",
+  "phoneDisplay": "0172 7613807",
+  "phoneIntl": "+49 172 7613807",
+  "whatsapp": "491727613807",
+  "email": "info@elbdetail.de",
+  "address": {
+    "street": "Lachtehäuser Straße 1",
+    "zip": "29223",
+    "city": "Celle",
+    "region": "Niedersachsen",
+    "country": "DE"
+  },
+  "openingHours": {
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "opens": "08:00",
+    "closes": "18:00",
+    "text": "Termine nach Vereinbarung",
+    "detail": "Montag bis Freitag, samstags nach Absprache"
+  },
+  "rating": {
+    "value": "5,0",
+    "count": 19,
+    "asOf": "Oktober 2026"
+  },
+  "googleMapsUrl": "https://www.google.com/maps/place/?q=ElbDetail+Celle",
+  "googleReviewUrl": "",
+  "social": {
+    "instagram": "https://www.instagram.com/elbdetail/",
+    "facebook": "https://www.facebook.com/p/ElbDetail-61591214390265/",
+    "tiktok": "https://www.tiktok.com/@elbdetail"
+  },
+  "areas": {
+    "city": [
+      "Altstadt",
+      "Neuenhäusen",
+      "Blumlage",
+      "Westercelle",
+      "Altencelle",
+      "Lachtehausen",
+      "Garßen",
+      "Klein Hehlen",
+      "Groß Hehlen",
+      "Vorwerk",
+      "Wietzenbruch",
+      "Altenhagen",
+      "Boye",
+      "Scheuen"
+    ],
+    "region": [
+      "Wietze",
+      "Winsen (Aller)",
+      "Hambühren",
+      "Bergen",
+      "Lachendorf",
+      "Eschede",
+      "Wathlingen",
+      "Nienhagen",
+      "Eicklingen",
+      "Adelheidsdorf",
+      "Hermannsburg",
+      "Faßberg",
+      "Unterlüß",
+      "Beedenbostel"
+    ]
+  },
+  "legal": {
+    "owner": "",
+    "vatId": "",
+    "responsible": "",
+    "mailProvider": "",
+    "hosting": "Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland"
+  },
+  "vouchers": {
+    "amounts": [
+      50,
+      100,
+      150,
+      250
+    ],
+    "minAmount": 25,
+    "maxAmount": 1000
+  },
+  "stand": "Oktober 2026",
+  "standIso": "2026-10-15"
+}

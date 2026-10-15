@@ -1,0 +1,77 @@
+{
+  "slug": "innenaufbereitung-celle",
+  "order": 2,
+  "short": "Innenaufbereitung",
+  "teaser": "Polster- und Teppichreinigung, Kunststoffpflege, Scheiben, Geruchsentfernung.",
+  "seoTitle": "Innenaufbereitung Celle – Polster, Leder, Tierhaare & Gerüche | ElbDetail",
+  "description": "Innenraumreinigung in Celle: Polster- und Teppichreinigung, Lederpflege, Tierhaarentfernung, Geruchsneutralisation, Kunststoffpflege. Ab 179 € in der Komplettpflege. Termin per WhatsApp.",
+  "h1": "Innenaufbereitung in Celle: *Einsteigen und durchatmen.*",
+  "lead": "Tiefenreinigung von Polstern und Teppichen, Leder- und Kunststoffpflege, Tierhaare und Gerüche inklusive. **Für Familienautos, Hundebesitzer und alle, die ihr Auto täglich nutzen.**",
+  "facts": [
+    {
+      "value": "ab 179 €",
+      "label": "in der Komplettpflege"
+    },
+    {
+      "value": "ca. ½ Tag",
+      "label": "Dauer"
+    },
+    {
+      "value": "Textil & Leder",
+      "label": "Koch-Chemie"
+    }
+  ],
+  "package": "komplett",
+  "intro": "Der Innenraum ist der Teil deines Autos, den du jeden Tag siehst, riechst und anfasst. Unsere Innenaufbereitung geht deutlich tiefer als Saugen und Abwischen: Sitze, Teppiche und Fußmatten werden mit Nasssaugung und Textilreiniger gereinigt, Kunststoffe entfettet und gepflegt, Leder gereinigt und rückgefettet.\n\nTierhaare, Krümel in Ritzen, Flecken von Kaffee oder Kindersitzen, Nikotin- und Hundegeruch: Für jeden Fall gibt es das passende Verfahren. Das Ergebnis ist ein Innenraum, der nicht nur sauber aussieht, sondern auch hygienisch und frisch ist.\n",
+  "includes": [
+    "Gründliches Aussaugen inkl. Ritzen, Sitzschienen und Kofferraum",
+    "Tierhaarentfernung",
+    "Nassreinigung von Sitzen, Teppichen und Fußmatten",
+    "Fleckenbehandlung (Kaffee, Fett, Kinder, Hund)",
+    "Lederreinigung und Lederpflege",
+    "Kunststoff- und Armaturenpflege, matt statt speckig",
+    "Scheiben innen streifenfrei",
+    "Geruchsneutralisation statt Überdecken"
+  ],
+  "steps": [
+    {
+      "title": "Ausräumen & Vorbereiten",
+      "text": "Fußmatten raus, Kindersitze raus, grober Schmutz und Tierhaare werden mechanisch gelöst."
+    },
+    {
+      "title": "Trockenreinigung",
+      "text": "Gründliches Saugen mit Düsen und Bürsten, auch unter den Sitzen und in den Schienen."
+    },
+    {
+      "title": "Nassreinigung",
+      "text": "Polster und Teppiche werden mit Textilreiniger behandelt und per Nasssauger ausgespült."
+    },
+    {
+      "title": "Pflege & Finish",
+      "text": "Leder, Kunststoffe und Scheiben werden gepflegt, der Innenraum wird neutralisiert und getrocknet."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Bekommt ihr Tierhaare wirklich komplett raus?",
+      "a": "Ja. Tierhaare lösen wir mechanisch mit Spezialbürsten und Gummiwerkzeugen aus dem Gewebe, bevor gesaugt und nass gereinigt wird. Das ist aufwendiger als normales Saugen, deshalb bitten wir bei viel Hundehaar um einen Hinweis bei der Anfrage."
+    },
+    {
+      "q": "Wie lange ist der Innenraum nach der Nassreinigung feucht?",
+      "a": "Je nach Wetter und Polsterart sind die Sitze nach wenigen Stunden wieder trocken. Wir planen die Trocknungszeit in den Termin ein, sodass du das Auto in der Regel trocken übernimmst."
+    },
+    {
+      "q": "Entfernt ihr auch Rauch- und Hundegeruch?",
+      "a": "Ja. Wir beseitigen zuerst die Ursache, zum Beispiel Nikotinablagerungen oder Rückstände im Polster, und neutralisieren den Geruch anschließend, statt ihn mit Duft zu überdecken."
+    },
+    {
+      "q": "Was kostet eine Innenaufbereitung in Celle?",
+      "a": "In der Komplettpflege ist die Innenraum-Tiefenreinigung inklusive Außenwäsche ab 179 € für eine Kompaktklasse enthalten. Eine reine Innenaufbereitung bieten wir auf Anfrage an, abhängig von Größe und Zustand des Fahrzeugs."
+    }
+  ],
+  "related": [
+    "aussenaufbereitung-celle",
+    "leasingrueckgabe-gebrauchtwagen-celle",
+    "lackpolitur-celle"
+  ]
+}

@@ -1,36 +1,64 @@
-# ElbDetail – Website
+# ElbDetail – Website, Buchung und Verwaltung
 
-Statische, verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung Celle**.
-Kein Build-Schritt, kein Framework, kein Tracking: Die Dateien können direkt auf jedes Hosting
-(Netlify, IONOS, Strato, all-inkl …) hochgeladen werden.
+Verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung in Celle**, inklusive Online-Terminbuchung, Gutscheinverkauf, Firmenkunden-Anfragen, Ratgeber, Verwaltungsportal und cookieloser Statistik. Alles läuft auf dem eigenen Server (Hetzner), ohne Fremddienste.
 
-## Struktur
+## Was drin ist
 
-| Datei / Ordner | Zweck |
-| --- | --- |
-| `index.html` | Startseite: Hero mit Richtpreis-Rechner, Anlässe, Leistungen, Pakete & Preise, Vorher/Nachher, Warum ElbDetail, Ablauf, Bewertungen, Einzugsgebiet, FAQ, Kontakt |
-| `leistungen/*.html` | 5 SEO-Landingpages (Außen, Innen, Lackpolitur, Lackversiegelung, Leasingrückgabe/Verkauf) mit eigenem Service-, FAQ- und Breadcrumb-Schema |
-| `impressum.html`, `datenschutz.html` | Rechtsseiten mit markierten Platzhaltern |
-| `404.html` | Fehlerseite |
-| `styles.css`, `script.js` | Design und Interaktion (Rechner, Preis-Umschalter, Vorher/Nachher-Slider, Formular, FAQ, Menü) |
-| `robots.txt`, `sitemap.xml` | Suchmaschinen |
-| `llms.txt`, `llms-full.txt` | Fakten für KI-Suchmaschinen (GEO) |
-| `og-image.png`, `apple-touch-icon.png`, `favicon.svg`, `site.webmanifest` | Social Preview, Icons |
-| `netlify.toml`, `.htaccess` | Security-Header, Caching, HTTPS/www-Redirect, 404 (je nach Hosting eine der beiden Dateien) |
+| Bereich | Inhalt |
+|---|---|
+| **Website** | Startseite mit Richtpreis-Rechner, 5 Leistungsseiten, Online-Terminbuchung in 5 Schritten, Gutschein-Konfigurator mit Live-Vorschau, Firmenkunden-Seite, Winter-Aktionsseite, Ratgeber mit 10 Artikeln, Impressum, Datenschutz, 404, Danke-Seite |
+| **SEO** | LocalBusiness/AutoDetailing-, Service-, FAQ-, BlogPosting-, Breadcrumb- und Product-Schema, Sitemap, RSS, Canonicals, Open Graph, sprechende Titel und Beschreibungen, interne Verlinkung |
+| **GEO (KI-Suche)** | `llms.txt` und `llms-full.txt`, KI-Crawler in `robots.txt` erlaubt, „Das Wichtigste in Kürze“ in jedem Artikel, Faktenblock, zitierfähige FAQ |
+| **Conversion** | Buchungsassistent mit Live-Preis und Sperrtagen, WhatsApp-Weg mit vorausgefüllter Nachricht, Gutscheinverkauf, Firmenanfrage, Danke-Seite, mobile Aktionsleiste |
+| **Verwaltungsportal** `/admin` | Übersicht mit Statistik, Anfragen-Postfach mit Antwortvorlagen und Bewertungsanfrage, Gutscheinverwaltung mit Code-Prüfung, Kalender mit Sperrtagen, Inhalts-Editor für Preise, Texte und Ratgeber, Foto-Upload, Veröffentlichen per Knopfdruck |
+| **Datenschutz** | Keine Cookies, keine Drittanbieter-Skripte, Statistik ohne IP-Speicherung, Google-Karte erst nach Klick, automatische Löschfristen |
+| **Qualität** | 25 Server-Tests, 58 Browser-Tests (Desktop und Mobil, inklusive axe-Barrierefreiheit), Lighthouse 95–99 / 100 / 100 / 100 |
 
-## Vor dem Livegang ausfüllen / prüfen
+## Projektstruktur
 
-1. **Impressum & Datenschutz**: alle blau markierten Platzhalter (Inhaber, USt-IdNr., Hosting-Anbieter) ausfüllen und rechtlich prüfen lassen.
-2. **Preisfaktoren**: In `script.js` oben stehen die Richtpreise (79 / 179 / 349 €) und die Zuschlagsfaktoren für Limousine/Kombi (+15 %) und SUV/Van (+30 %). Bei Bedarf anpassen.
-3. **Öffnungszeiten im Schema**: `index.html` enthält `openingHoursSpecification` Mo–Sa 08:00–18:00 als Rahmen für „Termine nach Vereinbarung“. Anpassen, falls anders.
-4. **Vorher/Nachher-Fotos**: In `index.html` im Abschnitt `#vorher-nachher` die drei `<svg class="ba-art">`-Platzhalter durch `<img class="ba-art" src="…" alt="…">` (vorher) und `<img class="ba-art ba-after" …>` (nachher) ersetzen, Format 4:3.
-5. **Google-Bewertungen**: Zahl (19) und Zitate bei Änderungen in `index.html`, `llms.txt` und im JSON-LD aktualisieren.
-6. **Domain**: Alle absoluten URLs zeigen auf `https://www.elbdetail.de/`.
-7. **Google Business Profile** mit identischer Adresse/Telefon pflegen und die Website dort verlinken.
-8. Nach dem Livegang: Google Search Console einrichten, `sitemap.xml` einreichen, Rich-Results-Test für Startseite und eine Leistungsseite durchführen.
+```
+content/      Inhalte als JSON und Markdown (Startvorlage, auf dem Server im Portal pflegbar)
+static/       CSS, JavaScript, Schriften, Logo, Icons
+build/        Website-Generator (Python, nur Standardbibliothek + Pillow für Bilder)
+server/       App-Server und Verwaltungsportal (Python-Standardbibliothek)
+deploy/       Dockerfile, docker-compose, Caddyfile, .env-Vorlage, Backup- und Update-Skript
+tests/        Server-Tests (unittest) und Browser-Tests (Playwright)
+docs/         Betrieb, Portal-Anleitung, Livegang-Checkliste, Marketing-Unterlagen
+```
 
-## Formular
+## Lokal starten
 
-Das Kontaktformular speichert nichts auf einem Server. Beim Absenden öffnet sich WhatsApp (Standard)
-oder das E-Mail-Programm mit vorausgefüllter Anfrage. Soll später ein Server-Versand ergänzt werden,
-bietet sich Netlify Forms oder ein Dienst wie Formspree an.
+```bash
+python3 build/build.py                         # Website nach dist/ bauen
+ADMIN_PASSWORD=test COOKIE_SECURE=0 ELB_SERVE_STATIC=1 python3 server/app.py
+# → http://localhost:8080 und http://localhost:8080/admin (Benutzer: admin, Passwort: test)
+```
+
+Tests:
+
+```bash
+pip install -r requirements.txt && npm ci
+npm test
+```
+
+## Auf dem Server
+
+Schritt-für-Schritt-Anleitung: [`docs/betrieb-hetzner.md`](docs/betrieb-hetzner.md). Kurzfassung:
+
+```bash
+git clone https://github.com/Markentrix/Neu.git /opt/elbdetail && cd /opt/elbdetail/deploy
+cp .env.example .env && nano .env
+docker compose up -d --build
+```
+
+## Dokumente
+
+- [Betrieb auf Hetzner](docs/betrieb-hetzner.md)
+- [Verwaltungsportal](docs/verwaltungsportal.md)
+- [Livegang-Checkliste](docs/livegang-checkliste.md)
+- [Markenleitfaden](docs/markenleitfaden.md)
+- [Google-Unternehmensprofil-Kit](docs/google-unternehmensprofil.md)
+- [Branchenverzeichnisse & lokale Backlinks](docs/branchenverzeichnisse.md)
+- [Bewertungs-Prozess](docs/bewertungs-prozess.md)
+- [Foto- und Video-Shotlist](docs/foto-und-video-shotlist.md)
+- [Anzeigen-Kit Google & Meta](docs/anzeigen-kit.md)

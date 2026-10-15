@@ -1,0 +1,52 @@
+# ElbDetail auf eigenem Server (z. B. Hetzner Cloud)
+#   cp .env.example .env   → Werte eintragen
+#   docker compose up -d --build
+name: elbdetail
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PUBLIC_URL: https://${DOMAIN}
+      TRUST_PROXY: "1"
+      COOKIE_SECURE: "1"
+    volumes:
+      - data:/data
+      - site:/srv/site
+    expose:
+      - "8080"
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+      DOMAIN_APEX: ${DOMAIN_APEX}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - site:/srv/site:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  data:
+  site:
+  caddy_data:
+  caddy_config:

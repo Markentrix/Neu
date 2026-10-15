@@ -1,0 +1,77 @@
+{
+  "slug": "aussenaufbereitung-celle",
+  "order": 1,
+  "short": "Außenaufbereitung",
+  "teaser": "Handwäsche, Felgen, Dichtungen, Trocknung ohne Kratzer.",
+  "seoTitle": "Außenaufbereitung Celle – Handwäsche, Felgen & Lackpflege | ElbDetail",
+  "description": "Professionelle Außenaufbereitung in Celle: schonende Handwäsche, Felgenreinigung, Insekten- und Teerentfernung, Dichtungspflege. Ab 79 €. Termin per WhatsApp bei ElbDetail.",
+  "h1": "Außenaufbereitung in Celle: *Handwäsche ohne Kratzer.*",
+  "lead": "Schonende Zwei-Eimer-Handwäsche, gründliche Felgenreinigung, Insekten- und Teerentfernung und gepflegte Dichtungen. **Keine Waschstraße, keine Swirls.**",
+  "facts": [
+    {
+      "value": "ab 79 €",
+      "label": "Richtpreis Kompakt"
+    },
+    {
+      "value": "ca. 2 Std.",
+      "label": "Dauer"
+    },
+    {
+      "value": "Handarbeit",
+      "label": "Zwei-Eimer-Methode"
+    }
+  ],
+  "package": "frisch",
+  "intro": "Die Außenaufbereitung ist die Basis jeder Fahrzeugpflege. Wir waschen ausschließlich von Hand nach der Zwei-Eimer-Methode mit pH-neutralen Koch-Chemie-Shampoos, damit Schmutz gelöst wird, ohne ihn über den Lack zu reiben. So entstehen keine neuen Kratzer, wie sie Waschstraßen und Hochdruck-Selbstwaschboxen typischerweise hinterlassen.\n\nFelgen, Radhäuser, Türeinstiege und Dichtungen bekommen dabei genauso viel Aufmerksamkeit wie die Motorhaube. Hartnäckige Rückstände wie Insekten, Teer, Flugrost oder Baumharz lösen wir chemisch an und entfernen sie schonend, bevor sie den Klarlack angreifen.\n",
+  "includes": [
+    "Vorwäsche mit Schaum, lösen von grobem Schmutz",
+    "Zwei-Eimer-Handwäsche mit pH-neutralem Shampoo",
+    "Felgen- und Reifenreinigung inkl. Radhäuser",
+    "Insekten-, Teer- und Flugrostentfernung",
+    "Türeinstiege, Falze und Tankdeckel",
+    "Dichtungs- und Kunststoffpflege außen",
+    "Scheiben außen streifenfrei",
+    "Kratzfreie Trocknung mit Mikrofaser und Luft"
+  ],
+  "steps": [
+    {
+      "title": "Vorwäsche & Schaum",
+      "text": "Grober Schmutz wird eingeweicht und abgespült, bevor ein Handschuh den Lack berührt."
+    },
+    {
+      "title": "Handwäsche",
+      "text": "Zwei Eimer, Grit Guards, weiche Waschhandschuhe. Panel für Panel von oben nach unten."
+    },
+    {
+      "title": "Dekontamination",
+      "text": "Insekten, Teer und Flugrost werden gezielt gelöst statt abgerieben."
+    },
+    {
+      "title": "Trocknung & Pflege",
+      "text": "Trocknen mit weichen Tüchern und Druckluft, anschließend Pflege für Kunststoffe und Dichtungen."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Wie oft sollte man eine Außenaufbereitung machen lassen?",
+      "a": "Für ein dauerhaft gepflegtes Fahrzeug empfehlen wir alle 4 bis 8 Wochen eine schonende Handwäsche. Nach dem Winter lohnt sich zusätzlich eine gründliche Dekontamination von Streusalz und Flugrost."
+    },
+    {
+      "q": "Ist die Handwäsche wirklich besser als die Waschstraße?",
+      "a": "Ja. Waschstraßenbürsten tragen Schmutzpartikel vom Vorgängerfahrzeug über deinen Lack und erzeugen feine Kratzer, sogenannte Swirls. Bei der Zwei-Eimer-Handwäsche wird der Schmutz zuerst gelöst und der Waschhandschuh regelmäßig ausgespült."
+    },
+    {
+      "q": "Was kostet eine Außenaufbereitung in Celle?",
+      "a": "Im Paket Frisch & Sauber ist die komplette Außenwäsche inklusive Felgen und Innenraum-Basis ab 79 € für eine Kompaktklasse enthalten. Als reine Außenaufbereitung ohne Innenraum machen wir ein individuelles Angebot."
+    },
+    {
+      "q": "Entfernt ihr auch Baumharz und Teerflecken?",
+      "a": "Ja, Baumharz, Teer, Insektenreste und Flugrost gehören zur Außenaufbereitung dazu. Wir lösen die Rückstände chemisch an, damit nichts über den Lack gerieben werden muss."
+    }
+  ],
+  "related": [
+    "innenaufbereitung-celle",
+    "lackpolitur-celle",
+    "lackversiegelung-celle"
+  ]
+}

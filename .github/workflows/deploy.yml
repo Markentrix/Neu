@@ -1,0 +1,27 @@
+name: Auf Server veröffentlichen
+
+# Manuell starten: GitHub → Actions → "Auf Server veröffentlichen" → Run workflow.
+# Benötigte Repository-Secrets:
+#   SERVER_HOST         IP oder Hostname des Hetzner-Servers
+#   SERVER_USER         SSH-Benutzer (z. B. deploy)
+#   SERVER_SSH_KEY      privater SSH-Schlüssel (nur für dieses Deployment)
+#   SERVER_KNOWN_HOSTS  Ausgabe von: ssh-keyscan -H <server>
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Per SSH aktualisieren
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+          KEY: ${{ secrets.SERVER_SSH_KEY }}
+          KNOWN: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          ssh -o StrictHostKeyChecking=yes "$USER@$HOST" "/opt/elbdetail/deploy/update.sh"

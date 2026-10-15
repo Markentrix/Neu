@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "title": "Lackpolitur & Versiegelung",
+      "sub": "Mehrstufige Politur, danach Versiegelung",
+      "before": "",
+      "after": "",
+      "alt": "Lack vor und nach der Politur"
+    },
+    {
+      "title": "Innenraum-Tiefenreinigung",
+      "sub": "Polster, Teppich, Kunststoff, Scheiben",
+      "before": "",
+      "after": "",
+      "alt": "Innenraum vor und nach der Reinigung"
+    },
+    {
+      "title": "Felgen & Außenaufbereitung",
+      "sub": "Handwäsche, Felgen, Dichtungen",
+      "before": "",
+      "after": "",
+      "alt": "Felge vor und nach der Reinigung"
+    }
+  ]
+}

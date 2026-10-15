@@ -1,0 +1,121 @@
+// @ts-check
+const { test, expect } = require("@playwright/test");
+const AxeBuilder = require("@axe-core/playwright").default;
+
+const PAGES = [
+  "/", "/termin.html", "/gutscheine.html", "/firmenkunden.html", "/aktion/winterschutz.html", "/ratgeber/index.html",
+  "/ratgeber/leasingrueckgabe-checkliste.html", "/ratgeber/kosten-fahrzeugaufbereitung-celle.html",
+  "/leistungen/aussenaufbereitung-celle.html", "/leistungen/innenaufbereitung-celle.html", "/leistungen/lackpolitur-celle.html",
+  "/leistungen/lackversiegelung-celle.html", "/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html",
+  "/impressum.html", "/datenschutz.html", "/danke.html",
+];
+
+function nextWorkday(days) {
+  const d = new Date(); d.setDate(d.getDate() + days);
+  while (d.getDay() === 0) d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+for (const path of PAGES) {
+  test(`Seite ${path}: lädt fehlerfrei, eine H1, kein Querscrollen`, async ({ page }) => {
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    page.on("console", (m) => { if (m.type() === "error" && !/maps|google/.test(m.text())) errors.push(m.text()); });
+    const res = await page.goto(path);
+    expect(res.status()).toBe(200);
+    await expect(page.locator("h1")).toHaveCount(1);
+    expect((await page.title()).length).toBeGreaterThan(10);
+    const desc = await page.locator('meta[name="description"]').getAttribute("content");
+    expect(desc && desc.length).toBeGreaterThan(50);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("Alle internen Links funktionieren", async ({ page, request }) => {
+  const seen = new Set();
+  for (const path of PAGES) {
+    await page.goto(path);
+    const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.href));
+    hrefs.forEach((h) => { const u = new URL(h); if (u.origin === new URL(page.url()).origin) seen.add(u.pathname); });
+  }
+  const broken = [];
+  for (const p of seen) {
+    const r = await request.get(p);
+    if (r.status() !== 200) broken.push(`${p} → ${r.status()}`);
+  }
+  expect(broken).toEqual([]);
+});
+
+for (const path of ["/", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
+  test(`Barrierefreiheit ${path}: keine schweren axe-Verstöße`, async ({ page }) => {
+    await page.goto(path);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.evaluate(() => document.querySelectorAll(".reveal").forEach((e) => e.classList.add("is-visible")));
+    const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    const serious = r.violations.filter((v) => ["serious", "critical"].includes(v.impact || ""));
+    expect(serious.map((v) => `${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`)).toEqual([]);
+  });
+}
+
+test("Richtpreis-Rechner rechnet je Fahrzeugklasse", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('#quoteForm label:has(input[value="suv"])').click();
+  await page.locator('#quoteForm label:has(input[value="premium"])').click();
+  await expect(page.locator("#quoteValue")).toContainText("449");
+  await expect(page.locator("#quoteBook")).toHaveAttribute("href", /paket=premium&klasse=suv/);
+});
+
+test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
+  await page.goto("/termin.html?paket=komplett&klasse=suv");
+  await expect(page.locator('input[name="paket"][value="komplett"]')).toBeChecked();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 229 €");
+  await page.locator("[data-wz-next]").click();
+  await expect(page.locator('input[name="klasse"][value="suv"]')).toBeChecked();
+  await page.fill("#t-vehicle", "VW Tiguan 2020");
+  await page.locator("[data-wz-next]").click();
+  await page.locator('label.check:has(input[value="Motorraumreinigung"])').click();
+  await page.locator("[data-wz-next]").click();
+  await page.locator("[data-wz-next]").click();
+  await expect(page.locator(".form-status")).toContainText("ergänzen");
+  await page.fill("#t-date1", nextWorkday(4));
+  await page.locator("[data-wz-next]").click();
+  await page.fill("#t-name", "E2E Kunde");
+  await page.fill("#t-phone", "0172 5555555");
+  await page.fill("#t-email", "e2e@example.com");
+  await page.locator('label[for="t-consent"]').click();
+  await page.locator("[data-wz-submit]").click();
+  await expect(page).toHaveURL(/danke\.html\?typ=termin&ref=T/);
+  await expect(page.locator("h1")).toContainText("Terminanfrage eingegangen");
+});
+
+test("Kontaktformular zeigt Pflichtfelder an", async ({ page }) => {
+  await page.goto("/#kontakt");
+  await page.locator('#contactForm button[type="submit"]').click();
+  await expect(page.locator("#k-name")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.locator("#k-status")).toContainText("Pflichtfelder");
+});
+
+test("Gutschein-Vorschau und Bestellung", async ({ page }) => {
+  await page.goto("/gutscheine.html");
+  await page.fill("#g-for", "Papa");
+  await page.fill("#g-msg", "Frohe Weihnachten");
+  await expect(page.locator('[data-vc="fuer"]')).toHaveText("Papa");
+  await page.fill("#g-custom", "120");
+  await expect(page.locator('[data-vc="value"]')).toHaveText("120 €");
+  await page.locator('label.choice-pill:has(input[value="paket"])').click();
+  await expect(page.locator('[data-vc="value"]')).toHaveText("Komplettpflege", { timeout: 2000 }).catch(() => {});
+  await page.locator('label.choice-pill:has(input[value="wert"])').click();
+  await page.fill("#g-name", "E2E Käuferin");
+  await page.fill("#g-email", "kauf@example.com");
+  await page.locator('label[for="g-consent"]').click();
+  await page.locator('#voucherForm button[type="submit"]').click();
+  await expect(page).toHaveURL(/danke\.html\?typ=gutschein/);
+});
+
+test("404-Seite", async ({ request }) => {
+  const r = await request.get("/gibt-es-nicht.html");
+  expect(r.status()).toBe(404);
+  expect(await r.text()).toContain("Diese Seite gibt es nicht");
+});

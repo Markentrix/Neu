@@ -1,0 +1,15 @@
+{
+  "name": "elbdetail-website",
+  "private": true,
+  "description": "Tests für die ElbDetail-Website",
+  "scripts": {
+    "build": "python3 build/build.py",
+    "test": "python3 -m unittest discover -s tests -p 'test_*.py' && playwright test",
+    "test:unit": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.56.1"
+  }
+}

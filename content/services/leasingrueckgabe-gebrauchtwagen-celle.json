@@ -1,0 +1,77 @@
+{
+  "slug": "leasingrueckgabe-gebrauchtwagen-celle",
+  "order": 5,
+  "short": "Leasingrückgabe & Verkauf",
+  "teaser": "Aufbereitung vor Rückgabe oder Verkauf: weniger Abzüge, besserer Preis.",
+  "seoTitle": "Aufbereitung vor Leasingrückgabe & Gebrauchtwagenverkauf in Celle | ElbDetail",
+  "description": "Fahrzeugaufbereitung vor Leasingrückgabe oder Verkauf in Celle: weniger Abzüge, besserer Verkaufspreis. Innen- & Außenaufbereitung ab 179 €, auf Wunsch mit Politur. Kurzfristige Termine per WhatsApp.",
+  "h1": "Aufbereitung vor Leasingrückgabe & Verkauf: *weniger Abzüge, mehr Erlös.*",
+  "lead": "Bei der Rückgabe zahlt man für jeden Fleck, jeden Kratzer und jeden Geruch. Beim Verkauf bekommt man für Glanz und Sauberkeit mehr Geld. **Wir sorgen dafür, dass dein Auto im besten Licht steht.**",
+  "facts": [
+    {
+      "value": "ab 179 €",
+      "label": "Komplettpflege"
+    },
+    {
+      "value": "1 Tag",
+      "label": "auch kurzfristig"
+    },
+    {
+      "value": "Innen + außen",
+      "label": "auf Wunsch mit Politur"
+    }
+  ],
+  "package": "komplett",
+  "intro": "Leasinggesellschaften bewerten bei der Rückgabe sehr genau: Flecken auf den Sitzen, Gerüche, verschmutzte Kunststoffe, Kratzer und stumpfer Lack werden nach festen Katalogen als Minderwert berechnet. Vieles davon ist keine Beschädigung, sondern reine Verschmutzung oder oberflächliche Gebrauchsspur, die sich mit einer professionellen Aufbereitung beheben lässt.\n\nBeim privaten Verkauf gilt dasselbe in die andere Richtung: Ein sauberes, glänzendes Fahrzeug wirkt gepflegt, erzeugt Vertrauen und erzielt in den meisten Fällen einen Aufpreis, der die Aufbereitung deutlich übersteigt. Außerdem verkauft es sich schneller, weil die Fotos im Inserat besser aussehen.\n\n## Was wir vor Rückgabe oder Verkauf machen\n\nStandard ist unsere Komplettpflege: komplette Innenraum-Tiefenreinigung inklusive Polster, Teppich, Leder und Geruchsneutralisation plus Außenwäsche mit Felgen und Dekontamination. Bei verkratztem oder mattem Lack empfehlen wir zusätzlich die Lackpolitur, weil Lackzustand und Swirls bei der Rückgabebewertung besonders ins Gewicht fallen.\n",
+  "includes": [
+    "Innenraum-Tiefenreinigung inkl. Polster und Teppich",
+    "Leder- und Kunststoffpflege",
+    "Tierhaar- und Geruchsentfernung",
+    "Außenwäsche mit Felgen und Dekontamination",
+    "Optional: Lackpolitur gegen Kratzer und Hologramme",
+    "Optional: Lackversiegelung für das Verkaufsfoto",
+    "Kofferraum, Türeinstiege, Motorraum auf Wunsch",
+    "Hinweise, welche Spuren wirtschaftlich zu beheben sind"
+  ],
+  "steps": [
+    {
+      "title": "Zustand besprechen",
+      "text": "Du schickst uns Fotos oder kommst vorbei. Wir sagen dir ehrlich, was sich lohnt und was nicht."
+    },
+    {
+      "title": "Angebot & Termin",
+      "text": "Verbindlicher Preis, Termin passend zum Rückgabe- oder Besichtigungstermin, auch kurzfristig."
+    },
+    {
+      "title": "Aufbereitung",
+      "text": "Innen und außen in Handarbeit, bei Bedarf mit Politur. Alles an einem Tag."
+    },
+    {
+      "title": "Abnahme",
+      "text": "Gemeinsame Kontrolle bei Tageslicht. Danach: Fotos fürs Inserat oder direkt zur Rückgabe."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Lohnt sich die Aufbereitung vor der Leasingrückgabe finanziell?",
+      "a": "In den meisten Fällen ja. Verschmutzung, Gerüche und oberflächliche Gebrauchsspuren werden bei der Rückgabe als Minderwert berechnet, oft mit mehreren hundert Euro. Eine Komplettpflege ab 179 € ist in der Regel günstiger als die Abzüge, die sie verhindert."
+    },
+    {
+      "q": "Welche Mängel könnt ihr beheben und welche nicht?",
+      "a": "Verschmutzung, Flecken, Gerüche, matte Kunststoffe, Waschstraßenkratzer und Hologramme beheben wir. Dellen, Steinschläge, tiefe Kratzer bis in die Grundierung und Risse in Polstern sind Schäden, die ein Karosserie- oder Sattlerbetrieb reparieren muss. Wir sagen dir vorher, was sich lohnt."
+    },
+    {
+      "q": "Wie kurzfristig bekomme ich einen Termin vor der Rückgabe?",
+      "a": "Schreib uns so früh wie möglich per WhatsApp mit dem Rückgabedatum. Kurzfristige Termine sind nach Verfügbarkeit möglich, ideal ist eine Woche Vorlauf."
+    },
+    {
+      "q": "Macht ihr auch Fotos für das Verkaufsinserat?",
+      "a": "Fotos machst du am besten direkt nach der Abnahme bei gutem Licht selbst. Gern geben wir dir Tipps, wo und wie das aufbereitete Fahrzeug am besten wirkt."
+    }
+  ],
+  "related": [
+    "innenaufbereitung-celle",
+    "lackpolitur-celle",
+    "aussenaufbereitung-celle"
+  ]
+}

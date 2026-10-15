@@ -1,0 +1,2 @@
+# Nur für die Bild-Pipeline (AVIF/WebP). Alles andere nutzt die Python-Standardbibliothek.
+Pillow==11.3.0

@@ -1,0 +1,77 @@
+{
+  "slug": "lackversiegelung-celle",
+  "order": 4,
+  "short": "Lackversiegelung",
+  "teaser": "Monatelanger Schutz vor UV, Streusalz, Insekten und Schmutz.",
+  "seoTitle": "Lackversiegelung Celle – Schutz vor UV, Salz & Schmutz | ElbDetail",
+  "description": "Lackversiegelung in Celle: monatelanger Schutz vor UV-Strahlung, Streusalz, Insekten und Schmutz. Leichteres Waschen, dauerhafter Glanz. Im Paket Premium Politur ab 349 €. ElbDetail.",
+  "h1": "Lackversiegelung in Celle: *Schutz, der Monate hält.*",
+  "lead": "Eine hochwertige Versiegelung legt sich als Schutzschicht über den Klarlack. **Schmutz und Wasser perlen ab, Waschen wird leichter, der Glanz bleibt.**",
+  "facts": [
+    {
+      "value": "ab 349 €",
+      "label": "im Paket Premium Politur"
+    },
+    {
+      "value": "Monate",
+      "label": "Schutzdauer"
+    },
+    {
+      "value": "Koch-Chemie",
+      "label": "Profi-Versiegelung"
+    }
+  ],
+  "package": "premium",
+  "intro": "Der Klarlack deines Autos ist täglich UV-Strahlung, Streusalz, Insekten, Vogelkot, Baumharz und Straßenschmutz ausgesetzt. Eine professionelle Lackversiegelung bildet eine glatte, hydrophobe Schutzschicht, an der Schmutz schlechter haftet und Wasser abperlt. Der Lack bleibt länger sauber, lässt sich leichter waschen und behält seinen Glanz.\n\nBesonders sinnvoll ist eine Versiegelung direkt nach dem Neuwagenkauf, nach einer Lackpolitur oder vor dem Winter. Wir bereiten den Lack vor der Versiegelung gründlich vor: Wäsche, Dekontamination, bei Bedarf Politur und Entfettung. Nur auf perfekt vorbereitetem Lack hält eine Versiegelung so lange, wie sie soll.\n",
+  "includes": [
+    "Handwäsche und chemische Dekontamination",
+    "Lackreinigungsknete für eine glatte Oberfläche",
+    "Optional: Politur vor der Versiegelung",
+    "Entfettung aller Lackflächen",
+    "Auftrag der Versiegelung Panel für Panel",
+    "Felgenversiegelung gegen Bremsstaub",
+    "Scheibenversiegelung für bessere Sicht bei Regen",
+    "Pflegehinweise zur Erhaltung der Schutzschicht"
+  ],
+  "steps": [
+    {
+      "title": "Vorbereitung",
+      "text": "Wäsche, Dekontamination und Kneten, damit die Versiegelung direkt auf dem Klarlack haftet."
+    },
+    {
+      "title": "Optional: Politur",
+      "text": "Vorhandene Kratzer werden vorher entfernt, denn eine Versiegelung konserviert den Zustand darunter."
+    },
+    {
+      "title": "Entfetten & Versiegeln",
+      "text": "Jedes Panel wird entfettet und die Versiegelung gleichmäßig aufgetragen und abgenommen."
+    },
+    {
+      "title": "Aushärten & Abnahme",
+      "text": "Die Versiegelung härtet aus, anschließend Kontrolle und Pflegehinweise für danach."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Wie lange hält eine Lackversiegelung?",
+      "a": "Je nach Produkt und Pflege mehrere Monate bis über ein Jahr. Entscheidend ist die Wäsche danach: Handwäsche mit pH-neutralem Shampoo erhält die Schutzschicht, aggressive Waschstraßenchemie verkürzt sie."
+    },
+    {
+      "q": "Was ist der Unterschied zwischen Wachs, Versiegelung und Keramik?",
+      "a": "Wachs ist natürlich, glänzt schön, hält aber nur Wochen. Eine synthetische Versiegelung hält Monate und ist chemisch beständiger. Keramikbeschichtungen halten am längsten, erfordern aber eine aufwendige Vorbereitung. Welche Lösung zu deinem Auto passt, besprechen wir bei der Anfrage."
+    },
+    {
+      "q": "Muss der Lack vor der Versiegelung poliert werden?",
+      "a": "Nicht zwingend, aber empfehlenswert, wenn Kratzer vorhanden sind. Die Versiegelung konserviert den Zustand darunter, Kratzer bleiben also sichtbar. Bei Neuwagen oder gutem Lack reicht eine gründliche Vorbereitung ohne Politur."
+    },
+    {
+      "q": "Lohnt sich eine Versiegelung beim Neuwagen?",
+      "a": "Gerade dort. Der Lack ist noch unbeschädigt, und die Versiegelung schützt ihn von Anfang an vor Umwelteinflüssen. Das erhält den Wert und spart später eine aufwendige Politur."
+    }
+  ],
+  "related": [
+    "lackpolitur-celle",
+    "aussenaufbereitung-celle",
+    "innenaufbereitung-celle"
+  ]
+}
