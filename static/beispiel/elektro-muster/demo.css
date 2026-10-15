@@ -55,4 +55,5 @@ summary::after{content:"+";float:right;color:var(--amber-d)}details[open] summar
 .form-msg{margin:0;font-size:.9rem;color:#178a3f;min-height:1.2em}
 .foot{padding:28px 0;border-top:1px solid var(--line);font-size:.88rem;color:var(--muted)}.foot p{margin:0 0 6px}
 @media (max-width:820px){.hero-grid,.split{grid-template-columns:1fr}.grid3,.steps{grid-template-columns:1fr}.nav{display:none}.map{max-width:300px}.top{padding:10px 14px}.btn-call{padding:10px 12px}}
-@media (max-width:480px){.facts{grid-template-columns:1fr 1fr}.actions .btn{width:100%;justify-content:center}}
+@media (max-width:480px){.facts{grid-template-columns:1fr 1fr}.facts li{padding:12px;min-width:0}.facts b{font-size:1.25rem;overflow-wrap:anywhere}.actions .btn{width:100%;justify-content:center}}
+@media (max-width:360px){.facts{grid-template-columns:1fr}}

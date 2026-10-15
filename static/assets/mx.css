@@ -319,8 +319,8 @@ body.menu-open{overflow:hidden}
 
 /* ─── 11. Listen ────────────────────────────────────────────────────────── */
 .checks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-.checks li{display:flex;gap:10px;align-items:flex-start;color:var(--text)}
-.checks li::before{content:"";flex:none;width:20px;height:20px;margin-top:2px;border-radius:50%;background:rgba(40,199,247,.16) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%230B63C6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5l3.2 3L15 7'/%3E%3C/svg%3E") center/13px no-repeat}
+.checks li{display:block;position:relative;padding-left:30px;color:var(--text)}
+.checks li::before{content:"";position:absolute;left:0;top:2px;width:20px;height:20px;border-radius:50%;background:rgba(40,199,247,.16) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%230B63C6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5l3.2 3L15 7'/%3E%3C/svg%3E") center/13px no-repeat}
 .checks--violet li::before{background-color:rgba(139,92,246,.14);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236D3FD1' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5l3.2 3L15 7'/%3E%3C/svg%3E")}
 .checks--x li::before{background:rgba(185,28,28,.10) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23B91C1C' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 6l8 8M14 6l-8 8'/%3E%3C/svg%3E") center/12px no-repeat}
 .feat{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
@@ -400,6 +400,7 @@ body.menu-open{overflow:hidden}
 .field.has-error .error{display:block}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:.92rem;color:var(--text);cursor:pointer}
 .check input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--blue-text)}
+.check a{text-decoration:underline;text-underline-offset:.15em}
 .form-note{font-size:.85rem;color:var(--muted)}
 .form-msg{display:none;padding:14px 16px;border-radius:10px;font-size:.95rem}
 .form-msg.is-error{display:block;background:rgba(185,28,28,.07);border:1px solid rgba(185,28,28,.25);color:var(--danger)}
