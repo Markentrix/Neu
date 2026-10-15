@@ -231,6 +231,32 @@ class TestPublicAPI(Base):
         code, _ = self.req("POST", "/api/anfrage", {"typ": "kontakt"}, {"Origin": "https://evil.example"})
         self.assertEqual(code, 403)
 
+    def test_capacity_and_next_free_day(self):
+        self.login()
+        day = next_workday(10)
+        code, _ = self.admin("PUT", "kalender", {"dailyCapacity": 1, "leadDays": 1})
+        self.assertEqual(code, 200)
+        code, _ = self.admin("PUT", "kalender", {"dailyCapacity": "viele"})
+        self.assertEqual(code, 422)
+        code, j = self.req("GET", "/api/verfuegbarkeit")
+        self.assertNotIn(day, j["blocked"])
+        nf = dt.date.fromisoformat(j["nextFree"])
+        self.assertGreater(nf, dt.date.today())
+        self.assertNotEqual(nf.weekday(), 6)  # Sonntag ist Ruhetag
+        with app.db() as c:  # ein bestätigter Termin füllt den Tag bei Kapazität 1
+            c.execute("INSERT INTO anfragen(ref, typ, status, created, updated, name, datum, data) VALUES (?,?,?,?,?,?,?,?)",
+                      ("TCAP1", "termin", "termin_bestaetigt", "x", "x", "Test", day, "{}"))
+        code, j = self.req("GET", "/api/verfuegbarkeit")
+        self.assertIn(day, j["blocked"])
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "komplett", "klasse": "kompakt", "datum": day,
+                                                    "name": "Eva", "telefon": "0170 1234567", "einwilligung": "ja"})
+        self.assertEqual(code, 422)
+        self.admin("PUT", "kalender", {"dailyCapacity": 2})
+        code, j = self.req("GET", "/api/verfuegbarkeit")
+        self.assertNotIn(day, j["blocked"])
+        with app.db() as c:
+            c.execute("DELETE FROM anfragen WHERE ref='TCAP1'")
+
     def test_keepalive_after_early_response(self):
         """Antworten ohne gelesenen Inhalt (Herkunft abgelehnt, Statistik-Limit) dürfen die nächste Anfrage
         auf derselben Verbindung nicht zerstören (wichtig hinter Caddy mit Keep-Alive)."""

@@ -19,6 +19,19 @@
   function params() { var o = {}; location.search.replace(/^\?/, "").split("&").forEach(function (kv) { if (!kv) return; var p = kv.split("="); o[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || "").replace(/\+/g, " ")); }); return o; }
   var Q = params();
 
+  /* Verfügbarkeit (Sperrtage, Ruhetage, nächster freier Tag) – einmal laden, mehrfach nutzen */
+  var availP = null;
+  function availability() {
+    if (!availP) availP = IS_LIVE ? fetch(API + "/verfuegbarkeit").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) : Promise.resolve(null);
+    return availP;
+  }
+  function niceDate(iso) {
+    var d = new Date(iso + "T12:00:00"), t = new Date(); t.setHours(12, 0, 0, 0);
+    var diff = Math.round((d - t) / 86400000);
+    var txt = d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
+    return diff === 0 ? "heute, " + txt : diff === 1 ? "morgen, " + txt : txt;
+  }
+
   /* ---------------------------------------------------------------- Statistik (eigener Server, cookielos) */
   var noTrack = navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true;
   function send(payload) {
@@ -146,6 +159,21 @@
 
   /* Faktenbox: auf schmalen Bildschirmen eingeklappt starten (im HTML offen für Suchmaschinen und ohne JS) */
   if (window.matchMedia && matchMedia("(max-width: 899.98px)").matches) $$("[data-close-narrow]").forEach(function (d) { d.open = false; });
+
+  /* Nächster freier Tag (nur live, aus dem Kalender im Verwaltungsportal) */
+  var nfEls = $$("[data-next-free]");
+  if (nfEls.length) availability().then(function (j) {
+    if (!j || !j.nextFree) return;
+    nfEls.forEach(function (el) {
+      var d = $("[data-nf-date]", el); if (d) d.textContent = niceDate(j.nextFree);
+      if (el.tagName === "A") { var h = el.getAttribute("href") || "termin.html"; el.setAttribute("href", h + (h.indexOf("?") === -1 ? "?" : "&") + "datum=" + j.nextFree); }
+      if (el.hasAttribute("data-nf-fill")) el.addEventListener("click", function () {
+        var inp = document.getElementById("t-date1"); if (!inp) return;
+        inp.value = j.nextFree; inp.dispatchEvent(new Event("change", { bubbles: true })); inp.focus();
+      });
+      el.hidden = false;
+    });
+  });
 
   /* Vorher/Nachher-Slider */
   $$(".ba").forEach(function (ba) {
@@ -293,9 +321,11 @@
     if (Q.gutschein) wz.gutscheincode.value = Q.gutschein;
     ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].min = todayIso(); });
 
-    if (IS_LIVE) fetch(API + "/verfuegbarkeit").then(function (r) { return r.json(); }).then(function (j) {
+    if (Q.datum && /^\d{4}-\d{2}-\d{2}$/.test(Q.datum) && Q.datum >= todayIso() && wz.datum) wz.datum.value = Q.datum;
+    availability().then(function (j) {
+      if (!j) return;
       blocked = j.blocked || []; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
-    }).catch(function () {});
+    });
 
     function checkDate(el) {
       var msg = $("#" + el.id + "-msg"), v = el.value, txt = "";

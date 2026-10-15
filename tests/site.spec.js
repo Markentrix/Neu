@@ -118,6 +118,20 @@ test("Startseite: kompakter Kontaktblock führt zu Termin, WhatsApp und Kontakts
   await expect(page.locator("#contactForm")).toHaveCount(0);
 });
 
+test("Nächster freier Tag: Anzeige auf der Startseite und Übernahme in die Buchung", async ({ page }) => {
+  await page.goto("/");
+  const nf = page.locator(".hero [data-next-free]");
+  await expect(nf).toBeVisible();
+  await expect(nf.locator("[data-nf-date]")).not.toHaveText("");
+  const href = await nf.getAttribute("href");
+  expect(href).toMatch(/termin\.html\?datum=\d{4}-\d{2}-\d{2}$/);
+  await page.goto("/" + href);
+  await expect(page.locator("#t-date1")).toHaveValue(href.split("=")[1]);
+  await page.goto("/termin.html");
+  await page.locator("[data-nf-fill]").click();
+  await expect(page.locator("#t-date1")).toHaveValue(href.split("=")[1]);
+});
+
 test("Gutschein-Vorschau und Bestellung", async ({ page }) => {
   await page.goto("/gutscheine.html");
   await page.fill("#g-for", "Papa");

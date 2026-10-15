@@ -611,8 +611,28 @@ def voucher_html(v):
 
 # --------------------------------------------------------------------------- Kalender
 def blocked_days():
+    """Gesperrte Tage plus ausgebuchte Tage (bestätigte Termine ≥ Tageskapazität)."""
+    cap = int(setting("dailyCapacity", 2) or 0)
+    t0 = today().isoformat()
     with db() as c:
-        return [r["day"] for r in c.execute("SELECT day FROM blocked WHERE day >= ? ORDER BY day", (today().isoformat(),))]
+        days = {r["day"] for r in c.execute("SELECT day FROM blocked WHERE day >= ?", (t0,))}
+        if cap > 0:
+            days |= {r["datum"] for r in c.execute(
+                "SELECT datum, COUNT(*) n FROM anfragen WHERE typ='termin' AND status='termin_bestaetigt' AND datum >= ? "
+                "GROUP BY datum HAVING n >= ?", (t0, cap))}
+    return sorted(days)
+
+
+def next_free_day(blocked=None, closed=None):
+    """Nächster buchbarer Tag ab Vorlauf (Standard: morgen), ohne Ruhetage und gesperrte/ausgebuchte Tage."""
+    blocked = set(blocked_days() if blocked is None else blocked)
+    closed = setting("closedWeekdays", [0]) if closed is None else closed
+    d = today() + dt.timedelta(days=max(0, int(setting("leadDays", 1) or 0)))
+    for _ in range(120):
+        if (d.weekday() + 1) % 7 not in closed and d.isoformat() not in blocked:
+            return d.isoformat()
+        d += dt.timedelta(days=1)
+    return None
 
 
 # --------------------------------------------------------------------------- Statistik
@@ -957,7 +977,8 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/health":
             return self.send(200, {"ok": True})
         if path == "/api/verfuegbarkeit" and method == "GET":
-            return self.send(200, {"blocked": blocked_days(), "closedWeekdays": setting("closedWeekdays", [0])})
+            bl, closed = blocked_days(), setting("closedWeekdays", [0])
+            return self.send(200, {"blocked": bl, "closedWeekdays": closed, "nextFree": next_free_day(bl, closed)})
         if path == "/api/e" and method == "POST":
             if RL.ok("e:" + ip, 120, 60):
                 try:
@@ -1157,11 +1178,13 @@ class AdminAPI:
                 notes = str(body.get("notizen", r["notizen"] or ""))[:5000]
                 c.execute("UPDATE anfragen SET status=?, notizen=?, updated=? WHERE id=?", (st, notes, now().isoformat(), r["id"]))
                 audit("anfrage_status", f"{r['ref']} → {st}", c)
+                c.commit()  # erst speichern, dann antworten (sonst sieht ein sofortiges Neuladen den alten Stand)
                 return h.send(200, {"ok": True})
             if m == "DELETE":
                 c.execute("UPDATE gutscheine SET anfrage_id=NULL WHERE anfrage_id=?", (r["id"],))
                 c.execute("DELETE FROM anfragen WHERE id=?", (r["id"],))
                 audit("anfrage_geloescht", r["ref"], c)
+                c.commit()
                 return h.send(200, {"ok": True})
         h.send(405, {"ok": False})
 
@@ -1193,6 +1216,7 @@ class AdminAPI:
                 text += " Passt das für dich? Viele Grüße"
                 warn = ""
             tel = wa_number(r["telefon"])
+            c.commit()
             return self.h.send(200, {"text": text, "whatsapp": f"https://wa.me/{tel}?text={urllib.parse.quote(text)}" if tel else "", "warning": warn,
                                      "mailto": f"mailto:{r['email']}?subject={urllib.parse.quote('Deine Anfrage bei ' + s.get('name', 'ElbDetail'))}&body={urllib.parse.quote(text)}" if r["email"] else ""})
 
@@ -1269,6 +1293,7 @@ class AdminAPI:
                             f"Viel Freude beim Verschenken!\n{s.get('name', 'ElbDetail')}\n")
                     mail_async(v["email"], f"Dein Gutschein von {s.get('name', 'ElbDetail')}", text, reply_to=s.get("email"))
                     sent = mail_ready()
+                c.commit()
                 return h.send(200, {"ok": True, "mailSent": sent})
             if self.m == "GET":
                 d = dict(v); d["link"] = voucher_link(d)
@@ -1291,7 +1316,8 @@ class AdminAPI:
             with db() as c:
                 bl = [dict(r) for r in c.execute("SELECT day, reason FROM blocked WHERE day >= ? ORDER BY day", ((today() - dt.timedelta(days=31)).isoformat(),))]
                 req = [dict(r) for r in c.execute("SELECT datum day, COUNT(*) n, SUM(status='termin_bestaetigt') ok FROM anfragen WHERE typ='termin' AND datum != '' GROUP BY datum")]
-            return h.send(200, {"blocked": bl, "requests": req, "closedWeekdays": setting("closedWeekdays", [0])})
+            return h.send(200, {"blocked": bl, "requests": req, "closedWeekdays": setting("closedWeekdays", [0]),
+                                "dailyCapacity": setting("dailyCapacity", 2), "leadDays": setting("leadDays", 1), "nextFree": next_free_day()})
         d = h.parse()
         if self.m == "POST":
             days = d.get("days") or [d.get("day")]
@@ -1305,8 +1331,14 @@ class AdminAPI:
                 c.execute("DELETE FROM blocked WHERE day=?", (str(d.get("day")),))
             return h.send(200, {"ok": True})
         if self.m == "PUT":
-            wd = [int(x) for x in d.get("closedWeekdays", []) if str(x).isdigit() and 0 <= int(x) <= 6]
-            set_setting("closedWeekdays", wd)
+            if "closedWeekdays" in d:
+                set_setting("closedWeekdays", [int(x) for x in d.get("closedWeekdays", []) if str(x).isdigit() and 0 <= int(x) <= 6])
+            for k, lo, hi in (("dailyCapacity", 0, 20), ("leadDays", 0, 30)):
+                if k in d:
+                    v = int(d[k]) if str(d[k]).isdigit() else None
+                    if v is None or not lo <= v <= hi:
+                        raise Invalid({k: f"Bitte eine Zahl von {lo} bis {hi} angeben."})
+                    set_setting(k, v)
             return h.send(200, {"ok": True})
         h.send(405, {"ok": False})
 

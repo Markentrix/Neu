@@ -33,10 +33,13 @@ Die Statistik setzt keine Cookies und speichert keine IP-Adressen. Ein Einwillig
 - Tag anklicken sperrt ihn (z. B. Urlaub, ausgebucht). Nochmal klicken gibt ihn frei. Gesperrte Tage und Ruhetage sind in der Online-Buchung nicht wählbar.
 - Die Zahl im Tag zeigt Terminwünsche, „best.“ die bestätigten.
 - **Ruhetage** (Standard: Sonntag) rechts festlegen.
+- **Auslastung:** „Fahrzeuge pro Tag“ (Standard 2). Hat ein Tag so viele Anfragen mit Status „Termin bestätigt“, gilt er automatisch als ausgebucht. „Vorlauf“ (Standard 1) legt fest, ab wann frühestens gebucht werden kann.
+- **Nächster freier Tag:** Startseite, Kontaktblock und Buchung zeigen automatisch den nächsten Tag, der weder Ruhetag noch gesperrt noch ausgebucht ist. Ein Klick übernimmt ihn in die Terminanfrage. Damit die Anzeige stimmt: Termine nach Zusage auf „Termin bestätigt“ setzen und Urlaub sperren.
 
 ## Inhalte
 
-- **Grunddaten & Kontakt:** Telefon, Adresse, Bewertungsanzahl, Google-Links, Einzugsgebiet, Angaben für Impressum und Datenschutz, Gutscheinbeträge.
+- **Grunddaten & Kontakt:** Telefon, Adresse, Bewertungsanzahl, Google-Links, Einzugsgebiet, Angaben für Impressum und Datenschutz, Gutscheinbeträge, „Über uns“ (Inhaber-Karte), Bestätigungscodes für Google und Bing.
+- **Bewertungen:** `heroQuote` ist das kurze Zitat im Startbereich. Nur echte Sätze aus einer Google-Bewertung verwenden, Name abgekürzt.
 - **Pakete & Preise:** Paketnamen, Leistungen, Richtpreise je Fahrzeugklasse, Einzelleistungen, Vergleichstabelle. Preise ändern sich überall gleichzeitig (Startseite, Rechner, Buchung, Leistungsseiten, strukturierte Daten, llms.txt).
 - **Bewertungen, Häufige Fragen, Vorher/Nachher-Galerie, Leistungsseiten.**
 - **Ratgeber:** Artikel bearbeiten mit Live-Vorschau, neue Artikel anlegen. Neue Artikel starten als Entwurf (Häkchen „Entwurf“ entfernen, um sie zu veröffentlichen).

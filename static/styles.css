@@ -324,9 +324,20 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .hero-sub { color: var(--muted-on-anthracite); font-size: clamp(1.05rem, 1.6vw, 1.22rem); max-width: 52ch; }
 .hero-sub strong { color: var(--on-anthracite); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.hero-proof { display: flex; flex-wrap: wrap; gap: 10px 22px; color: var(--muted-on-anthracite); font-size: 0.9rem; }
-.hero-proof li { list-style: none; display: inline-flex; align-items: center; gap: 8px; }
-.hero-proof svg { width: 16px; height: 16px; color: var(--blue-bright); flex: none; }
+.hero-quote { margin: 4px 0 0; padding-left: 16px; border-left: 3px solid var(--blue-bright); max-width: 52ch; }
+.hero-quote blockquote { margin: 0; color: var(--on-anthracite); font-size: 1.02rem; line-height: 1.5; }
+.hero-quote figcaption { margin-top: 6px; color: var(--muted-on-anthracite); font-size: 0.86rem; }
+.hq-stars { color: #f5b301; letter-spacing: 1px; }
+/* Nächster freier Tag (live aus dem Kalender) */
+.next-free { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--on-anthracite); font-size: 0.94rem; text-decoration: none; }
+.next-free[hidden] { display: none; }
+.hero .next-free[hidden] { display: inline-flex; visibility: hidden; } /* Platz freihalten: kein Springen beim Laden */
+.next-free strong { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.nf-dot { width: 9px; height: 9px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 0 4px rgba(61,220,132,0.18); flex: none; }
+.next-free--band { justify-content: center; }
+.next-free--fill { margin-top: 8px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--soft); color: var(--ink); font: inherit; font-size: 0.9rem; cursor: pointer; }
+.next-free--fill strong { color: var(--ink); }
+.next-free--fill .nf-dot { background: var(--ok); box-shadow: 0 0 0 4px rgba(21,115,71,0.15); }
 
 /* Richtpreis-Rechner (Hero rechts) */
 .quote-card {
