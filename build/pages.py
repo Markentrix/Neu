@@ -257,7 +257,7 @@ def build_home(site, write):
   <section id="warum" class="dark on-dark" aria-labelledby="warum-h">
     <div class="container why-grid">
       <div class="reveal">
-        <div class="section-head" style="margin-bottom:28px">
+        <div class="section-head section-head--tight">
           <p class="eyebrow">Warum ElbDetail</p>
           <h2 id="warum-h" class="display">Handarbeit, Fachwissen und ein Preis, der vorher feststeht.</h2>
           <p>ElbDetail ist ein inhabergeführter Fachbetrieb für Fahrzeugaufbereitung in Celle. Kein Franchise, keine Waschstraße: Jedes Fahrzeug wird persönlich und von Hand aufbereitet.</p>
@@ -300,7 +300,7 @@ def build_home(site, write):
 
   <section id="bewertungen" class="soft" aria-labelledby="bewertungen-h">
     <div class="container">
-      <div class="section-head reveal" style="margin-bottom:28px;">
+      <div class="section-head section-head--tight reveal">
         <p class="eyebrow">Bewertungen</p>
         <h2 id="bewertungen-h" class="display">Was Kund:innen aus Celle sagen.</h2>
       </div>
@@ -521,7 +521,7 @@ def build_legal(site, write):
     <p>Wir setzen keine automatisierte Entscheidungsfindung oder Profiling im Sinne des Art. 22 DSGVO ein.</p>
     <h2>14. Verschlüsselung</h2>
     <p>Diese Seite nutzt eine TLS-Verschlüsselung, erkennbar an „https://“ in der Adresszeile.</p>
-    <p class="legal-updated" style="margin-top:30px;">Hinweis für den Seitenbetreiber: Diese Datenschutzerklärung ist eine sorgfältig erstellte Vorlage für den Betrieb auf eigenem Server. Bitte Platzhalter im Verwaltungsportal unter „Inhalte → Grunddaten → Rechtliches“ ausfüllen und vor Veröffentlichung rechtlich prüfen lassen.</p>
+    <p class="legal-updated legal-note">Hinweis für den Seitenbetreiber: Diese Datenschutzerklärung ist eine sorgfältig erstellte Vorlage für den Betrieb auf eigenem Server. Bitte Platzhalter im Verwaltungsportal unter „Inhalte → Grunddaten → Rechtliches“ ausfüllen und vor Veröffentlichung rechtlich prüfen lassen.</p>
 '''
     for fname, title, desc, h1, sub, content in [
         ("impressum.html", "Impressum | ElbDetail Fahrzeugaufbereitung Celle", "Impressum von ElbDetail, Fahrzeugaufbereitung in Celle, Lachtehäuser Straße 1.", "Impressum", "Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)", imp),
@@ -543,10 +543,10 @@ def build_legal(site, write):
 def build_404(site, write):
     body = f'''
 <main id="main" class="notfound">
-  <div class="container" style="display:grid;gap:18px;justify-items:center">
+  <div class="container notfound-inner">
     <span class="code">404</span>
     <h1>Diese Seite gibt es nicht (mehr).</h1>
-    <p style="color:var(--muted);max-width:50ch">Vielleicht ein Tippfehler im Link. Alles zu Fahrzeugaufbereitung in Celle findest du auf der Startseite.</p>
+    <p class="notfound-text">Vielleicht ein Tippfehler im Link. Alles zu Fahrzeugaufbereitung in Celle findest du auf der Startseite.</p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="/">Zur Startseite</a>
       <a class="btn btn-line-light" href="/termin.html">Termin anfragen</a>

@@ -65,7 +65,12 @@
     if (!link || e.defaultPrevented) return;
     var id = link.getAttribute("href").slice(1);
     var t = id ? document.getElementById(id) : null;
-    if (t) { e.preventDefault(); t.scrollIntoView({ block: "start", behavior: "smooth" }); history.pushState(null, "", "#" + id); focusTarget(t); }
+    if (t) {
+      e.preventDefault();
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      t.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+      history.pushState(null, "", "#" + id); focusTarget(t);
+    }
   });
 
   var header = $(".site-header");

@@ -207,5 +207,7 @@ def rss(site):
 def manifest(site):
     return json.dumps({"name": site.s["name"] + " – Fahrzeugaufbereitung " + site.s["address"]["city"], "short_name": site.s["name"],
                        "start_url": "/", "display": "browser", "background_color": "#1e2229", "theme_color": "#1e2229", "lang": "de",
-                       "icons": [{"src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"},
+                       "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+                                 {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+                                 {"src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"},
                                  {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml"}]}, ensure_ascii=False, indent=2) + "\n"
