@@ -248,10 +248,10 @@ Für Instagram Reels, TikTok, Facebook Reels und YouTube Shorts. Länge 15 bis 3
 
 | Nr. | Titel | Hook (0 bis 2 Sekunden) | Ablauf | Text-Overlay | Motive |
 |---|---|---|---|---|---|
-| 1 | Erst messen | Messgerät setzt auf Lack, Zahl erscheint | Messung an 3 Stellen, Schnitt auf Politur, Ergebnis unter Punktlicht | "Wie viel Lack hat dein Auto noch?" dann "Erst messen. Dann polieren." | 26, 49, 64, 30 |
+| 1 | Erst messen | Messgerät setzt auf Lack, Zahl erscheint | Messung an 3 Stellen, Schnitt auf Politur, Ergebnis unter Punktlicht | "Wie viel Lack hat Ihr Auto noch?" dann "Erst messen. Dann polieren." | 26, 49, 64, 30 |
 | 2 | Swirl-Reveal | Punktlicht geht an, Hologramme leuchten auf | Schwenk über Motorhaube, Politur, gleicher Schwenk nachher | "Das sieht man nur mit Punktlicht." dann "Und jetzt?" | 61, 27, 28 |
 | 3 | Hund an Bord | Nahaufnahme Hundehaare im Kofferraum | Saugen, Bürsten, Kofferraum-Totale nachher | "Hund an Bord?" dann "Kofferraum wieder frei." | 18, 60, 23 |
-| 4 | Warum zwei Eimer | Zwei Eimer werden hingestellt, Klopfen | Handschuh in Wascheimer, Lack, Spüleimer, wieder Wascheimer | "Warum wir zwei Eimer nehmen" dann "Schmutz bleibt im Spüleimer. Nicht auf deinem Lack." | 07, 09, 48 |
+| 4 | Warum zwei Eimer | Zwei Eimer werden hingestellt, Klopfen | Handschuh in Wascheimer, Lack, Spüleimer, wieder Wascheimer | "Warum wir zwei Eimer nehmen" dann "Schmutz bleibt im Spüleimer. Nicht auf Ihrem Lack." | 07, 09, 48 |
 | 5 | Winterfest | Wasser trifft versiegelten Lack in Zeitlupe | Perlen, Felge, Scheibe, Auto in der Totale | "Bereit für Salz und Matsch?" dann "Winter-Lackschutz in Celle" | 06, 33, 38 |
 | 6 | 50/50 | Klebeband wird abgezogen | Punktlicht über die Trennlinie, langsam | "Links vorher. Rechts nachher." | 29, 61 |
 | 7 | Saubere Linie | Sauger zieht eine Bahn in den Teppich | 3 Bahnen, Fußraum-Totale, Fußmatte | "Kurz zuschauen. Lohnt sich." | 60, 17, 40 |

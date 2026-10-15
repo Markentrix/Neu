@@ -1199,8 +1199,8 @@ class AdminAPI:
             first = " ".join(parts) or ""  # Sie-Form: vollständiger Name statt Vorname
             if art == "bewertung":
                 link = s.get("googleReviewUrl") or "[GOOGLE-BEWERTUNGSLINK]"
-                text = (f"Guten Tag {first}, vielen Dank, dass wir Ihr Auto aufbereiten durften! Wenn Sie zufrieden waren, würden wir uns sehr über eine kurze "
-                        f"Google-Bewertung freuen. Das dauert nur eine Minute: {link}\nViele Grüße, {s.get('name', 'ElbDetail')}")
+                text = (f"Guten Tag {first}, vielen Dank, dass wir Ihr Auto aufbereiten durften! Über eine kurze, ehrliche "
+                        f"Google-Bewertung würden wir uns sehr freuen. Das dauert nur eine Minute: {link}\nViele Grüße, {s.get('name', 'ElbDetail')}")
                 c.execute("UPDATE anfragen SET bewertung_angefragt=? WHERE id=?", (now().isoformat(), r["id"]))
                 warn = "" if d.get("bewertung_ok") == "ja" else "Achtung: Für diese Anfrage liegt keine Einwilligung zur Bewertungsanfrage vor. Bitte nur nach persönlicher Zustimmung senden."
             else:

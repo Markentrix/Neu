@@ -113,9 +113,9 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > wir sind ElbDetail, Fahrzeugaufbereitung in Celle. Wir arbeiten zu 100 % in Handarbeit mit Produkten von Koch-Chemie.
 >
-> Wir möchten [VEREINSNAME] gern unterstützen. Unsere Idee: [SPONSORING-LEISTUNG, z. B. Aufbereitung des Vereinsbusses, Gutschein für die Tombola, Trikotsatz]. Im Gegenzug würden wir uns über eine Nennung mit Link auf eurer Sponsorenseite freuen.
+> Wir möchten [VEREINSNAME] gern unterstützen. Unsere Idee: [SPONSORING-LEISTUNG, z. B. Aufbereitung des Vereinsbusses, Gutschein für die Tombola, Trikotsatz]. Im Gegenzug würden wir uns über eine Nennung mit Link auf Ihrer Sponsorenseite freuen.
 >
-> Passt das zu euch? Ich freue mich auf eine kurze Rückmeldung.
+> Passt das zu Ihnen? Ich freue mich auf eine kurze Rückmeldung.
 >
 > Viele Grüße
 > [VORNAME NACHNAME]
@@ -130,9 +130,9 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > wir sind ElbDetail aus Celle und bereiten Fahrzeuge von Hand auf. Vor jeder Politur messen wir die Lackschichtdicke. Gerade bei älteren Fahrzeugen ist das wichtig.
 >
-> Wir würden gern [ANGEBOT, z. B. einen kurzen Pflege-Vortrag bei eurem Stammtisch oder eine Vorführung] machen. [KOSTEN: z. B. kostenlos für euch]. Wenn es euch gefällt, freuen wir uns über einen Hinweis mit Link auf eurer Website.
+> Wir würden gern [ANGEBOT, z. B. einen kurzen Pflege-Vortrag bei Ihrem Stammtisch oder eine Vorführung] machen. [KOSTEN: z. B. kostenlos für Sie]. Wenn es Ihnen gefällt, freuen wir uns über einen Hinweis mit Link auf Ihrer Website.
 >
-> Habt ihr Interesse?
+> Haben Sie Interesse?
 >
 > Viele Grüße
 > [VORNAME NACHNAME], ElbDetail

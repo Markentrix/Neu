@@ -142,7 +142,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H10 | Zwei-Eimer-Handwäsche | 21 |
 | H11 | Mit Koch-Chemie-Produkten | 25 |
 | H12 | Abnahme bei Tageslicht | 22 |
-| H13 | Dein Auto, wie neu. | 19 |
+| H13 | Ihr Auto, wie neu. | 18 |
 | H14 | Lachtehäuser Straße 1, Celle | 28 |
 | H15 | Jetzt Termin anfragen | 21 |
 
@@ -314,7 +314,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 |---|---|---|
 | D1 | Aufbereitung vor Leasingrückgabe oder Verkauf in Celle. Innen und außen von Hand. | 81 |
 | D2 | Lackschichtdickenmessung vor der Politur. Verbindlicher Preis vor dem Termin. | 77 |
-| D3 | Gemeinsame Abnahme bei Tageslicht, damit du den Zustand vor der Übergabe kennst. | 80 |
+| D3 | Gemeinsame Abnahme bei Tageslicht, damit Sie den Zustand vor der Übergabe kennen. | 81 |
 | D4 | 100 % Handarbeit mit Koch-Chemie-Produkten. Termin per WhatsApp oder online anfragen. | 85 |
 
 #### AG5 Winterschutz
@@ -454,7 +454,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 
 ## 4. Meta Ads
 
-Ansprache du. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-Button "Mehr dazu", bei Klick-zu-WhatsApp "WhatsApp-Nachricht senden". Pro Anzeigengruppe 2 bis 3 Creatives testen.
+Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-Button "Mehr dazu", bei Klick-zu-WhatsApp "WhatsApp-Nachricht senden". Pro Anzeigengruppe 2 bis 3 Creatives testen.
 
 ### 4.1 M1 Winterschutz
 
@@ -462,9 +462,9 @@ Ansprache du. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-B
 
 **Primärtexte**
 
-1. Streusalz, Matsch und Frost setzen deinem Lack zu. Mit dem Winter-Lackschutz von ElbDetail in Celle machst du dein Auto winterfest. `[PLATZHALTER: Aktionsinhalt in einem Satz]`. Den verbindlichen Preis kennst du vor dem Termin. Jetzt anfragen.
-2. Von Hand statt Waschstraße. Wir waschen nach der Zwei-Eimer-Methode und arbeiten ausschließlich mit Koch-Chemie-Produkten. So kommt dein Lack versiegelt durch den Winter. Termin per WhatsApp: +49 172 7613807.
-3. 5,0 Sterne bei 19 Google-Rezensionen. Jetzt auch für deinen Lack vor dem Winter: Winter-Lackschutz in Celle. Termine Mo bis Fr, samstags nach Absprache. Zum Schluss nehmen wir dein Auto gemeinsam bei Tageslicht ab.
+1. Streusalz, Matsch und Frost setzen Ihrem Lack zu. Mit dem Winter-Lackschutz von ElbDetail in Celle machen Sie Ihr Auto winterfest. `[PLATZHALTER: Aktionsinhalt in einem Satz]`. Den verbindlichen Preis kennen Sie vor dem Termin. Jetzt anfragen.
+2. Von Hand statt Waschstraße. Wir waschen nach der Zwei-Eimer-Methode und arbeiten ausschließlich mit Koch-Chemie-Produkten. So kommt Ihr Lack versiegelt durch den Winter. Termin per WhatsApp: +49 172 7613807.
+3. 5,0 Sterne bei 19 Google-Rezensionen. Jetzt auch für Ihren Lack vor dem Winter: Winter-Lackschutz in Celle. Termine Mo bis Fr, samstags nach Absprache. Zum Schluss nehmen wir Ihr Auto gemeinsam bei Tageslicht ab.
 
 **Headlines:** "Winter-Lackschutz in Celle" | "Lack winterfest machen" | "Versiegelt durch den Winter"
 
@@ -488,11 +488,11 @@ Ansprache du. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-B
 
 **Primärtexte**
 
-1. Noch kein Geschenk für jemanden, der sein Auto liebt? Verschenk eine Fahrzeugaufbereitung in 100 % Handarbeit von ElbDetail aus Celle. `[PLATZHALTER: Gutscheinwerte oder Pakete]`. Gutschein jetzt anfragen.
+1. Noch kein Geschenk für jemanden, der sein Auto liebt? Verschenken Sie eine Fahrzeugaufbereitung in 100 % Handarbeit von ElbDetail aus Celle. `[PLATZHALTER: Gutscheinwerte oder Pakete]`. Gutschein jetzt anfragen.
 2. Frisch & Sauber, Komplettpflege oder Premium Politur: Ein Gutschein für ein sauberes Auto, innen wie außen. Eingelöst wird nach Terminvereinbarung, Mo bis Fr, samstags nach Absprache. `[PLATZHALTER: bestätigen, ob Gutscheine je Paket möglich sind]`
 3. Last-Minute-Geschenk für Celle und Umgebung: ein Gutschein von ElbDetail. `[PLATZHALTER: Form des Gutscheins und letzter Bestelltag vor Weihnachten]`. 5,0 Sterne bei 19 Google-Rezensionen.
 
-**Headlines:** "Gutschein für Fahrzeugpflege" | "Verschenk ein sauberes Auto" | "Weihnachtsgeschenk aus Celle"
+**Headlines:** "Gutschein für Fahrzeugpflege" | "Schenken Sie ein sauberes Auto" | "Weihnachtsgeschenk aus Celle"
 
 **Beschreibung (Link-Beschreibung):** "Gutschein online anfragen."
 
@@ -514,8 +514,8 @@ Ansprache du. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-B
 
 **Primärtexte**
 
-1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit der Komplettpflege reinigen wir deinen Innenraum von Hand: Tiefenreinigung, Polster und Teppich, Kunststoffpflege und Geruchsneutralisation. Ab 179 € für Kompaktwagen.
-2. Dein Hund liebt Autofahren. Deinem Innenraum sieht man das an. Schick uns 3 Fotos per WhatsApp an +49 172 7613807 und du bekommst einen verbindlichen Preis, bevor wir anfangen.
+1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit der Komplettpflege reinigen wir Ihren Innenraum von Hand: Tiefenreinigung, Polster und Teppich, Kunststoffpflege und Geruchsneutralisation. Ab 179 € für Kompaktwagen.
+2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 172 7613807 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
 3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Komplettpflege ab 179 € (Kompakt), ab 209 € (Limousine/Kombi), ab 229 € (SUV/Van). 5,0 Sterne bei 19 Google-Rezensionen.
 
 **Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Komplettpflege ab 179 €"
@@ -607,7 +607,7 @@ Monatlich, pro Kampagne:
 1. **Kosten** aus Google Ads bzw. Meta-Werbeanzeigenmanager.
 2. **Ereignisse** aus der eigenen Statistik, gefiltert nach `utm_campaign`.
 3. **Kosten pro Anfrage** = Kosten ÷ (Termin angefragt + Gutschein angefragt + WhatsApp-Klick + Anruf-Klick). Zusätzlich getrennt ausweisen: Kosten pro "Termin angefragt".
-4. **Abschluss** aus der eigenen Auftragsliste: Spalte "Quelle" bei jeder Anfrage pflegen (Google, Meta, Empfehlung, Google Maps, sonstiges). Bei WhatsApp und Telefon nachfragen: "Wie bist du auf uns aufmerksam geworden?"
+4. **Abschluss** aus der eigenen Auftragsliste: Spalte "Quelle" bei jeder Anfrage pflegen (Google, Meta, Empfehlung, Google Maps, sonstiges). Bei WhatsApp und Telefon nachfragen: "Wie sind Sie auf uns aufmerksam geworden?"
 5. **Umsatz aus Anzeigen** aus der Auftragsliste summieren.
 
 WhatsApp-Klicks und Anruf-Klicks sind Absichten, keine sicheren Anfragen. Deshalb die echte Zahl der WhatsApp-Chats und Anrufe aus Anzeigen zusätzlich per Strichliste erfassen.

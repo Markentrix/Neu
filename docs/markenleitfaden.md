@@ -10,11 +10,11 @@ Stand: 15.10.2026. Gilt für Website, Social Media, WhatsApp, Anzeigen, Druck un
 
 ### In einem Satz
 
-ElbDetail ist die Fahrzeugaufbereitung in Celle, die dein Auto in 100 % Handarbeit mit Koch-Chemie-Produkten aufbereitet, dir vorher einen verbindlichen Preis nennt und das Ergebnis mit dir bei Tageslicht abnimmt.
+ElbDetail ist die Fahrzeugaufbereitung in Celle, die Ihr Auto in 100 % Handarbeit mit Koch-Chemie-Produkten aufbereitet, Ihnen vorher einen verbindlichen Preis nennt und das Ergebnis mit Ihnen bei Tageslicht abnimmt.
 
 ### Was wir verkaufen
 
-Nicht "eine Wäsche", sondern ein planbares Ergebnis: sauber, gepflegt, nachvollziehbar. Der Preis steht vorher fest. Das Ergebnis siehst du bei der Abnahme selbst.
+Nicht "eine Wäsche", sondern ein planbares Ergebnis: sauber, gepflegt, nachvollziehbar. Der Preis steht vorher fest. Das Ergebnis sehen Sie bei der Abnahme selbst.
 
 ### Fakten, auf denen die Marke steht
 
@@ -26,11 +26,11 @@ Nur diese Fakten dürfen in Kommunikation verwendet werden:
 | Zwei-Eimer-Handwäsche | "Handwäsche nach der Zwei-Eimer-Methode" |
 | Koch-Chemie-Lehrgänge absolviert, nur Koch-Chemie-Produkte | "Geschult in Koch-Chemie-Lehrgängen. Wir arbeiten ausschließlich mit Koch-Chemie-Produkten." |
 | Lackschichtdickenmessung vor Politur | "Vor jeder Politur messen wir die Lackschichtdicke." |
-| Verbindlicher Preis vor dem Termin | "Du kennst den Preis, bevor wir anfangen." |
+| Verbindlicher Preis vor dem Termin | "Sie kennen den Preis, bevor wir anfangen." |
 | Gemeinsame Abnahme bei Tageslicht | "Wir nehmen das Ergebnis gemeinsam bei Tageslicht ab." |
 | 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026) | "5,0 Sterne bei 19 Google-Rezensionen" (Zahl regelmäßig aktualisieren) |
 | Termine nach Vereinbarung Mo bis Fr, samstags nach Absprache | "Termine Mo bis Fr, samstags nach Absprache" |
-| Bezahlung bar oder Überweisung | "Bezahlen kannst du bar oder per Überweisung." |
+| Bezahlung bar oder Überweisung | "Bezahlen können Sie bar oder per Überweisung." |
 | Standort Lachtehäuser Straße 1, 29223 Celle | vollständig ausschreiben |
 
 **Nicht verwenden, solange nicht bestätigt:** Inhabername, Gründungsjahr, Mitarbeiterzahl, Kundengeschichten, Statistiken, Garantien, Rabatte, Abo-Preise, Keramikversiegelung als festes Angebot, Abholservice als Zusage (nur "nach Absprache"), konkrete Ersparnisse bei Leasingrückgabe.
@@ -90,13 +90,13 @@ Vergleiche immer sachlich formulieren. Nie einzelne Mitbewerber nennen oder hera
 
 | | Waschstraße | Selbstwaschbox | Hobby-Aufbereiter | **ElbDetail** |
 |---|---|---|---|---|
-| Wer arbeitet | Maschine | Du selbst | Privatperson nebenbei | Geschulter Aufbereiter (Koch-Chemie-Lehrgänge) |
+| Wer arbeitet | Maschine | Sie selbst | Privatperson nebenbei | Geschulter Aufbereiter (Koch-Chemie-Lehrgänge) |
 | Methode | Bürsten oder Textil, Durchlauf | Hochdrucklanze, Bürste, Zeitdruck | Unterschiedlich | 100 % Handarbeit, Zwei-Eimer-Handwäsche |
 | Innenraum | Höchstens Sauger an der Ausfahrt | Selbst saugen | Unterschiedlich | Tiefenreinigung, Polster/Teppich, Leder- oder Polsterpflege, Geruchsneutralisation |
 | Lack | Reinigt, korrigiert nichts | Reinigt, korrigiert nichts | Unterschiedlich, Messung nicht selbstverständlich | Lackschichtdickenmessung vor Politur, mehrstufige Politur, Versiegelung |
 | Produkte | Anlagenchemie | Automatenchemie | Gemischt | Ausschließlich Koch-Chemie |
 | Preis | Fest, aber nur Wäsche | Nach Münzen und Zeit | Unterschiedlich | Verbindlicher Preis vor dem Termin |
-| Ergebnis | Kein Ansprechpartner | Deine eigene Arbeit | Unterschiedlich | Gemeinsame Abnahme bei Tageslicht |
+| Ergebnis | Kein Ansprechpartner | Ihre eigene Arbeit | Unterschiedlich | Gemeinsame Abnahme bei Tageslicht |
 | Rechnung | Beleg | Kein Beleg | Unterschiedlich | `[PLATZHALTER: Rechnung mit ausgewiesener MwSt. bestätigen]` |
 
 **Kurzform für Texte:** "Keine Waschstraße. Kein Zeitdruck. Handarbeit mit Messung, festem Preis und Abnahme bei Tageslicht."
@@ -110,16 +110,16 @@ Vergleiche immer sachlich formulieren. Nie einzelne Mitbewerber nennen oder hera
 | **Sorgfalt** | Jedes Detail zählt. | Zwei-Eimer-Handwäsche, Felgen, Fugen, Lüftungsgitter. Makrofotos in der Kommunikation. |
 | **Ehrlichkeit** | Kein Kleingedrucktes. | Verbindlicher Preis vor dem Termin. Keine Versprechen, die wir nicht prüfen können. |
 | **Fachwissen** | Wir wissen, was wir tun, und zeigen es. | Koch-Chemie-Lehrgänge, Lackschichtdickenmessung, Erklärungen im Ratgeber `/ratgeber/index.html`. |
-| **Nähe** | Ein Betrieb aus Celle für Celle und den Landkreis. | Ortsnamen nennen, du-Ansprache, schnelle Antwort per WhatsApp. |
+| **Nähe** | Ein Betrieb aus Celle für Celle und den Landkreis. | Ortsnamen nennen, warme Sie-Ansprache, schnelle Antwort per WhatsApp. |
 | **Sichtbares Ergebnis** | Was gut ist, sieht man bei Tageslicht. | Gemeinsame Abnahme, echte Vorher/Nachher-Bilder ohne Retusche. |
 
 ---
 
 ## 5. Claim
 
-**Aktueller Claim:** "Dein Auto, wie neu."
+**Aktueller Claim:** "Ihr Auto, wie neu."
 
-Empfehlung: Den aktuellen Claim als Hauptclaim behalten. Er ist kurz, nutzt die du-Ansprache und ist gelernt. Die folgenden Vorschläge eignen sich als Kampagnenzeilen oder als Alternative bei einem späteren Relaunch.
+Empfehlung: Den aktuellen Claim als Hauptclaim behalten. Er ist kurz, bereits eingeführt und funktioniert mit der Sie-Ansprache genauso gut. Die alte Fassung "Dein Auto, wie neu." überall ersetzen, wo sie noch steht (Website, Druck, Fahrzeugbeschriftung, Social-Profile). Die folgenden Vorschläge eignen sich als Kampagnenzeilen oder als Alternative bei einem späteren Relaunch.
 
 | Nr. | Claim | Einsatz | Stärke |
 |---|---|---|---|
@@ -137,7 +137,7 @@ Empfehlung: Den aktuellen Claim als Hauptclaim behalten. Er ist kurz, nutzt die 
 
 ### Kernbotschaft
 
-**Dein Auto, wie neu: in 100 % Handarbeit, zum verbindlichen Preis und mit gemeinsamer Abnahme bei Tageslicht. In Celle.**
+**Ihr Auto, wie neu: in 100 % Handarbeit, zum verbindlichen Preis und mit gemeinsamer Abnahme bei Tageslicht. In Celle.**
 
 ### Vier Beweispunkte
 
@@ -145,8 +145,8 @@ Empfehlung: Den aktuellen Claim als Hauptclaim behalten. Er ist kurz, nutzt die 
 |---|---|---|---|
 | 1 | **Handarbeit statt Waschstraße** | 100 % Handarbeit | Wir waschen ausschließlich von Hand nach der Zwei-Eimer-Methode. Keine Waschstraße, keine Bürsten. |
 | 2 | **Profi-Produkte und Schulung** | Koch-Chemie geschult | Wir haben Koch-Chemie-Lehrgänge absolviert und arbeiten ausschließlich mit Koch-Chemie-Produkten. |
-| 3 | **Messen vor Polieren** | Lackschichtdickenmessung | Vor jeder Politur messen wir die Lackschichtdicke. So wissen wir, wie viel dein Lack verträgt. |
-| 4 | **Planbar und transparent** | Verbindlicher Preis vorab | Du bekommst vor dem Termin einen verbindlichen Preis. Am Ende nehmen wir das Ergebnis gemeinsam bei Tageslicht ab. |
+| 3 | **Messen vor Polieren** | Lackschichtdickenmessung | Vor jeder Politur messen wir die Lackschichtdicke. So wissen wir, wie viel Ihr Lack verträgt. |
+| 4 | **Planbar und transparent** | Verbindlicher Preis vorab | Sie erhalten vor dem Termin einen verbindlichen Preis. Am Ende nehmen wir das Ergebnis gemeinsam bei Tageslicht ab. |
 
 **Vertrauensanker:** 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026). Immer mit Stand-Angabe oder aktueller Zahl verwenden.
 
@@ -158,21 +158,29 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 
 ## 7. Tonalität
 
-**Grundton:** klar, freundlich, fachkundig, ehrlich. Wie ein guter Handwerker, der erklärt, was er macht. Ansprache: **du**. Kurze Sätze. Keine Gedankenstriche als Stilmittel.
+**Grundton:** gehoben, warm, klar. Dazu fachkundig und ehrlich, wie ein guter Handwerker, der erklärt, was er macht.
+
+**Ansprache: Sie.** Kundinnen und Kunden werden immer gesiezt, auf allen Kanälen (Website, Anzeigen, Google, WhatsApp, E-Mail, Social Media, Druck). Sie, Ihnen, Ihr, Ihre immer großschreiben. Das Sie ist respektvoll, aber nie steif:
+
+- Kurze Sätze und aktive Verben statt Floskeln ("Schicken Sie uns zwei Fotos." statt "Wir bitten um Zusendung von Bildmaterial.").
+- Warme Wörter wie "gern", "einfach", "wir freuen uns" sind erwünscht.
+- Aufforderungen freundlich und direkt: "Fragen Sie einfach an.", "Schreiben Sie uns per WhatsApp."
+- Kein Behördendeutsch, keine Übertreibungen, keine Gedankenstriche als Stilmittel.
 
 ### Do und Don't
 
 | Do | Beispiel Do | Don't | Beispiel Don't |
 |---|---|---|---|
 | Konkret werden | "Vor der Politur messen wir die Lackschichtdicke." | Leere Superlative | "Die beste Aufbereitung aller Zeiten!" |
-| Preis offen nennen | "Komplettpflege für deinen Golf: ab 179 €. Den verbindlichen Preis bekommst du vorab." | Preis verstecken | "Preise auf Anfrage, ruf einfach mal an." |
-| Ergebnis zeigen | "Hier siehst du die Fahrertür vorher und nachher, gleiches Licht." | Übertreiben | "Danach ist dein Auto besser als neu!" |
+| Preis offen nennen | "Komplettpflege für Ihren Golf: ab 179 €. Den verbindlichen Preis erhalten Sie vorab." | Preis verstecken | "Preise auf Anfrage, rufen Sie einfach mal an." |
+| Ergebnis zeigen | "Hier sehen Sie die Fahrertür vorher und nachher, gleiches Licht." | Übertreiben | "Danach ist Ihr Auto besser als neu!" |
 | Sorge aufnehmen | "Hundehaare im Kofferraum? Kennen wir." | Kunden belehren | "Wer seinen Innenraum so verkommen lässt, …" |
-| Kurz und aktiv | "Schick uns drei Fotos. Wir melden uns mit einem Preis." | Behördendeutsch | "Bitte übermitteln Sie uns zwecks Angebotserstellung Bildmaterial." |
+| Kurz und aktiv | "Schicken Sie uns drei Fotos. Wir melden uns mit einem Preis." | Behördendeutsch | "Bitte übermitteln Sie uns zwecks Angebotserstellung Bildmaterial." |
 | Fachbegriff erklären | "Hologramme sind feine Schlieren im Lack, die bei Sonne sichtbar werden." | Fachchinesisch ohne Erklärung | "Wir entfernen RDS-Defekte per DA-Finish." |
-| Sachlich abgrenzen | "Keine Waschstraße. Jede Fläche von Hand." | Mitbewerber schlechtmachen | "Die Waschstraße um die Ecke ruiniert deinen Lack." |
+| Sachlich abgrenzen | "Keine Waschstraße. Jede Fläche von Hand." | Mitbewerber schlechtmachen | "Die Waschstraße um die Ecke ruiniert Ihren Lack." |
 | Nur belegbare Aussagen | "5,0 Sterne bei 19 Google-Rezensionen" | Erfundene Zahlen | "Über 1.000 zufriedene Kunden" |
-| Verfügbarkeit ehrlich | "Abholung nach Absprache möglich." | Ungeprüfte Zusagen | "Wir holen dein Auto immer kostenlos ab." |
+| Verfügbarkeit ehrlich | "Abholung nach Absprache möglich." | Ungeprüfte Zusagen | "Wir holen Ihr Auto immer kostenlos ab." |
+| Sie, aber nahbar | "Gern schauen wir uns Ihr Auto vorher an." | Steifes Sie | "Hiermit teilen wir Ihnen mit, dass Ihr Fahrzeug abholbereit ist." |
 
 ### Wortliste
 
@@ -190,12 +198,12 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 | nach Absprache | immer, jederzeit, 24/7 | Keine ungeprüften Zusagen |
 | Koch-Chemie | "Premium-Chemie" ohne Marke | Konkreter Beweis |
 | Celle, Landkreis Celle, Ortsnamen | "Region Hannover" | Einzugsgebiet ist Celle und Landkreis |
-| du, dein Auto | Sie, Ihr Fahrzeug | Markenansprache |
+| Sie, Ihnen, Ihr Auto (großgeschrieben) | du, dein Auto; steife Floskeln wie "werter Kunde" | Markenansprache: gehoben, aber nahbar |
 
 ### Regeln für WhatsApp-Antworten
 
 1. **Antwortzeit:** `[PLATZHALTER: Ziel-Antwortzeit, z. B. am selben Werktag]`. Außerhalb dieser Zeit: Abwesenheitsnachricht in WhatsApp Business hinterlegen.
-2. **Begrüßung mit Namen**, falls bekannt. Du-Ansprache. Signatur: `[PLATZHALTER: Vorname oder "Dein ElbDetail-Team"]`.
+2. **Begrüßung mit Namen**, falls bekannt. Sie-Ansprache. Signatur: `[PLATZHALTER: Vorname oder "Ihr ElbDetail-Team"]`.
 3. **Immer diese Infos abfragen:** Fahrzeugmodell, Zustand, gewünschte Leistung oder Paket, Wunschzeitraum, 2 bis 4 Fotos (Innenraum, Lack bei Tageslicht, Felgen).
 4. **Preis:** Richtpreis aus der Preisliste nennen ("ab"). Den verbindlichen Preis erst nach Fotos oder Besichtigung nennen und klar als verbindlich bezeichnen.
 5. **Kurz halten:** maximal 4 bis 5 Zeilen pro Nachricht. Eine Frage pro Nachricht, wenn möglich.
@@ -207,11 +215,11 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 
 **Textbausteine (Schnellantworten in WhatsApp Business):**
 
-- **/erstanfrage:** "Hi [Name], danke für deine Nachricht! Damit wir dir einen verbindlichen Preis nennen können: Welches Modell fährst du, und kannst du uns 2 bis 4 Fotos schicken (Innenraum, Lack bei Tageslicht, Felgen)?"
-- **/richtpreis:** "Für deinen [Modell] liegt die [Paket] bei ab [Preis] €. Nach deinen Fotos bekommst du den verbindlichen Preis."
-- **/bestaetigung:** "Dein Termin steht: [Datum], [Uhrzeit], Lachtehäuser Straße 1, 29223 Celle. Paket: [Paket], Preis: [Preis] €. Bezahlen kannst du bar oder per Überweisung. Bis dann!"
-- **/abnahme:** "Dein Auto ist fertig. Wir schauen es uns gleich gemeinsam bei Tageslicht an."
-- **/bewertung:** "Danke, dass du bei uns warst! Wenn du zufrieden bist, freuen wir uns über eine Google-Bewertung: [PLATZHALTER: Link zur Google-Bewertung]"
+- **/erstanfrage:** "Hallo [Name], danke für Ihre Nachricht! Damit wir Ihnen einen verbindlichen Preis nennen können: Welches Modell fahren Sie, und können Sie uns 2 bis 4 Fotos schicken (Innenraum, Lack bei Tageslicht, Felgen)?"
+- **/richtpreis:** "Für Ihren [Modell] liegt die [Paket] bei ab [Preis] €. Nach Ihren Fotos erhalten Sie den verbindlichen Preis."
+- **/bestaetigung:** "Ihr Termin steht: [Datum], [Uhrzeit], Lachtehäuser Straße 1, 29223 Celle. Paket: [Paket], Preis: [Preis] €. Bezahlen können Sie bar oder per Überweisung. Wir freuen uns auf Sie!"
+- **/abnahme:** "Ihr Auto ist fertig. Wir schauen es uns gleich gemeinsam bei Tageslicht an."
+- **/bewertung:** "Danke, dass Sie bei uns waren! Über Ihre ehrliche Google-Bewertung freuen wir uns sehr: [PLATZHALTER: Link zur Google-Bewertung]"
 
 ---
 
@@ -357,7 +365,7 @@ Details zu Motiven und Technik: `docs/foto-und-video-shotlist.md`.
 - [ ] Nur Fakten aus Abschnitt 1 verwendet?
 - [ ] Preise mit "ab" und passend zur Preisliste?
 - [ ] Bewertungszahl aktuell?
-- [ ] Du-Ansprache, kurze Sätze, keine Gedankenstriche?
+- [ ] Sie-Ansprache (warm, nicht steif), kurze Sätze, keine Gedankenstriche?
 - [ ] Farben und Kontraste nach Abschnitt 8?
 - [ ] Kennzeichen unkenntlich, Einwilligungen vorhanden?
 - [ ] Link mit UTM-Parametern (siehe `docs/anzeigen-kit.md`)?
