@@ -22,6 +22,50 @@ Nicht enthalten: `src/`, `docs/`, `tools/`.
 `docs/nginx-markentrix.conf` (HTTPS, www → ohne www, try_files für `.html`-lose URLs, 301 alte Pfade, Header, Caching).
 Upload: `rsync -a --delete dist/ user@server:/var/www/markentrix/`
 
+### Schritt für Schritt (Ubuntu/Debian, Zugang per SSH als root oder mit sudo)
+
+1. Voraussetzungen prüfen: nginx, PHP-FPM und ein Let's-Encrypt-Zertifikat müssen vorhanden sein.
+   ```
+   nginx -v
+   ls /run/php/            # zeigt z. B. php8.2-fpm.sock
+   ls /etc/letsencrypt/live/markentrix.de/
+   ```
+   Fehlt PHP-FPM: `apt install php-fpm`. Fehlt das Zertifikat: `apt install certbot python3-certbot-nginx` und `certbot certonly --nginx -d markentrix.de -d www.markentrix.de`.
+2. Webroot anlegen und Dateien hochladen (vom eigenen Rechner aus, aus dem entpackten Ordner `markentrix-website/`):
+   ```
+   ssh root@SERVER "mkdir -p /var/www/markentrix"
+   rsync -a --delete markentrix-website/ root@SERVER:/var/www/markentrix/
+   ```
+3. Konfiguration hochladen und aktivieren:
+   ```
+   scp nginx-markentrix.conf root@SERVER:/etc/nginx/sites-available/markentrix.de
+   ssh root@SERVER
+   ln -s /etc/nginx/sites-available/markentrix.de /etc/nginx/sites-enabled/markentrix.de
+   rm -f /etc/nginx/sites-enabled/default     # nur falls die Standardseite noch aktiv ist
+   ```
+4. Zwei Stellen in der Datei prüfen (`nano /etc/nginx/sites-available/markentrix.de`): `root /var/www/markentrix;` muss zum Upload-Ordner passen, `fastcgi_pass unix:/run/php/php8.2-fpm.sock;` muss zur Ausgabe von `ls /run/php/` passen.
+5. Testen und neu laden. `nginx -t` muss „syntax is ok“ und „test is successful“ melden, erst dann neu laden:
+   ```
+   nginx -t
+   systemctl reload nginx
+   ```
+6. Rechte für das Formularprotokoll: `anfrage.php` schreibt nach `/var/www/anfragen.log` (eine Ebene über dem Webroot). Der PHP-Benutzer braucht Schreibrecht:
+   ```
+   touch /var/www/anfragen.log
+   chown www-data:www-data /var/www/anfragen.log
+   chmod 640 /var/www/anfragen.log
+   ```
+7. Kontrolle von außen (vom eigenen Rechner):
+   ```
+   curl -I https://markentrix.de/preise          # erwartet: 200 und X-Frame-Options: SAMEORIGIN
+   curl -I https://markentrix.de/preise.html     # erwartet: 301 auf /preise
+   curl -I https://www.markentrix.de/            # erwartet: 301 auf https://markentrix.de/
+   curl -I https://markentrix.de/Preise.dc.html  # erwartet: 301 auf /preise
+   ```
+   Dann im Browser die Startseite öffnen: Die Miniatur muss die Beispiel-Landingpage zeigen, und eine Testanfrage über das Kontaktformular muss per Mail ankommen.
+
+Bei jedem späteren Update reicht Schritt 2. Die nginx-Datei bleibt unverändert.
+
 ## Abnahmetests nach Deploy
 ```
 curl -I https://markentrix.de/                  → 200
