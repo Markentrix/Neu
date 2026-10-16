@@ -128,6 +128,10 @@
   const offIO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)), { rootMargin: '100px 0px' });
   $$('.hero, .marquee, .timewarp').forEach(el => offIO.observe(el));
 
+  /* ---------- Kontaktleiste (Desktop) erscheint nach dem Hero der Feiern-Seite ---------- */
+  const sticky = $('#stickyCta'), heroSub = $('.hero-sub');
+  if (sticky && heroSub) new IntersectionObserver(es => sticky.classList.toggle('show', !es[0].isIntersecting), { rootMargin: '-35% 0px 0px 0px' }).observe(heroSub);
+
   /* ---------- Reveal + Zähler ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (!e.isIntersecting) return;

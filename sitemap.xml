@@ -30,6 +30,19 @@
     <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://bar-zeitreise.de/feiern.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://bar-zeitreise.de/en/feiern.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://bar-zeitreise.de/feiern.html"/>
     <image:image><image:loc>https://bar-zeitreise.de/img/gaeste-theke-bar-zeitreise-celle-1200.webp</image:loc><image:title>Gäste an der Theke der Bar Zeitreise in Celle</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://bar-zeitreise.de/en/feiern.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://bar-zeitreise.de/feiern.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://bar-zeitreise.de/en/feiern.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://bar-zeitreise.de/feiern.html"/>
+    <image:image><image:loc>https://bar-zeitreise.de/img/partynacht-tanzflaeche-bar-zeitreise-celle-1200.webp</image:loc><image:title>Party night on the dance floor of Bar Zeitreise in Celle</image:title></image:image>
   </url>
 </urlset>
