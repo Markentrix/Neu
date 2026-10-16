@@ -73,6 +73,17 @@
     toHash();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(toHash);
     window.addEventListener("load", toHash);
+  } else if (window.self !== window.top) {
+    /* Eingebettet (z. B. Vorschau im Rahmen): Der äußere Rahmen behält beim Seitenwechsel seine Scrollposition.
+       Neue Seiten daher oben beginnen lassen, außer bei Zurück/Vor oder wenn schon gescrollt wurde. */
+    var nav = window.performance && performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+    if (!nav || nav.type === "navigate") {
+      var touched = false;
+      ["wheel", "touchstart", "keydown", "pointerdown"].forEach(function (ev) { window.addEventListener(ev, function () { touched = true; }, { once: true, passive: true }); });
+      var toTop = function () { if (touched) return; try { document.documentElement.scrollIntoView({ block: "start" }); } catch (e) { window.scrollTo(0, 0); } };
+      toTop();
+      window.addEventListener("load", toTop);
+    }
   }
   document.addEventListener("click", function (e) {
     var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
