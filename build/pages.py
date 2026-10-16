@@ -26,6 +26,17 @@ def picture(site, name, alt, cls, prefix, sizes="(min-width: 900px) 33vw, 90vw")
             f'loading="lazy" decoding="async"></picture>')
 
 
+def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
+    """Bild mit Bildunterschrift und Quellenangabe, z. B. {"file", "alt", "caption", "credit"}."""
+    if not img or img.get("file") not in site.media:
+        return ""
+    pic = picture(site, img["file"], img.get("alt", ""), "fig-img", prefix, sizes=sizes)
+    cap = ESC(img.get("caption", ""))
+    if img.get("credit"):
+        cap += f' <span class="fig-credit">Bild: {ESC(img["credit"])}</span>'
+    return f'<figure class="fig">{pic}' + (f"<figcaption>{cap}</figcaption>" if cap else "") + "</figure>"
+
+
 def ba_tile(site, item, n, prefix=""):
     has = item.get("before") in site.media and item.get("after") in site.media
     if has:
@@ -367,7 +378,7 @@ def build_home(site, write):
       <div class="process-rail stagger">
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle, danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar oder per Überweisung.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle, danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
       </div>
     </div>
   </section>
@@ -510,6 +521,7 @@ def build_about(site, write):
         <p>Mein Anspruch ist, hochwertige Arbeit, professionelle Produkte und persönliche Betreuung miteinander zu verbinden. Ich möchte, dass Sie nicht einfach nur ein sauberes Auto zurückbekommen, sondern sich wirklich über das Ergebnis freuen.</p>
         <h2>Mein Schwerpunkt: Lack und Keramik</h2>
         <p>Besonders am Herzen liegt mir die professionelle Lackaufbereitung in Verbindung mit hochwertigen <a href="leistungen/keramikversiegelung-celle.html">Keramikversiegelungen</a>. Dabei geht es nicht nur um eine schöne Optik, sondern auch um langfristigen Lackschutz und eine leichtere Pflege. Als offizieller C²Coating Excellence Partner möchte ich ElbDetail zur festen Anlaufstelle für Keramikversiegelungen in Celle und Umgebung machen.</p>
+        {figure(site, ab.get("partnerImage"), "")}
         <p>Genauso wichtig ist mir die Zusammenarbeit mit <a href="firmenkunden.html">Autohäusern, Unternehmen und Flotten</a>, und zwar langfristig und partnerschaftlich. Mein Ziel bleibt dabei immer dasselbe: hochwertige Fahrzeugpflege aus echter Leidenschaft.</p>
       </div>
       <aside class="sticky-aside">
@@ -585,6 +597,7 @@ def build_service(site, sv, write):
     <div class="container two-up">
       <div class="prose">
         {intro}
+        {figure(site, sv.get("image"), prefix)}
         <h2 id="enthalten">Das ist enthalten</h2>
         <ul class="includes">{includes}</ul>
         <h2 id="ablauf">So läuft es ab</h2>

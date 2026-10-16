@@ -325,7 +325,7 @@
     document.documentElement.classList.add("wz-ready");
     var steps = $$(".wz-step", wz), inds = $$("[data-step-ind]", wz), cur = 0;
     var prev = $("[data-wz-prev]", wz), next = $("[data-wz-next]", wz), submit = $("[data-wz-submit]", wz);
-    var blocked = [], closedWeekdays = [0];
+    var blocked = [], blockedKer = [], closedWeekdays = [0];
 
     if (Q.paket) { var rp = wz.querySelector('input[name="paket"][value="' + Q.paket + '"]'); if (rp) rp.checked = true; }
     if (Q.klasse) { var rk = wz.querySelector('input[name="klasse"][value="' + Q.klasse + '"]'); if (rk) rk.checked = true; }
@@ -336,9 +336,10 @@
     if (Q.datum && /^\d{4}-\d{2}-\d{2}$/.test(Q.datum) && Q.datum >= todayIso() && wz.datum) wz.datum.value = Q.datum;
     availability().then(function (j) {
       if (!j) return;
-      blocked = j.blocked || []; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
+      blocked = j.blocked || []; blockedKer = j.blockedKeramik || blocked; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
     });
 
+    function isKer() { var r = wz.querySelector('input[name="paket"]:checked'); return !!r && r.value === "keramik"; }
     function checkDate(el) {
       var msg = $("#" + el.id + "-msg"), v = el.value, txt = "";
       if (v) {
@@ -346,11 +347,13 @@
         if (v < todayIso()) txt = "Bitte ein Datum ab heute wählen.";
         else if (closedWeekdays.indexOf(d.getDay()) !== -1) txt = "An Sonntagen sind wir geschlossen. Bitte einen anderen Tag wählen.";
         else if (blocked.indexOf(v) !== -1) txt = "An diesem Tag sind wir leider ausgebucht oder geschlossen.";
+        else if (isKer() && blockedKer.indexOf(v) !== -1) txt = "Für eine Keramikversiegelung brauchen wir die Halle einen ganzen Tag. An diesem Tag ist dafür leider kein Platz frei.";
       }
       el.setCustomValidity(txt);
       if (msg) { msg.textContent = txt; msg.className = "field-msg" + (txt ? " error" : ""); }
     }
     ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); summary(); }); });
+    $$('input[name="paket"]', wz).forEach(function (r) { r.addEventListener("change", function () { ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); }); });
 
     function show(i) {
       cur = Math.max(0, Math.min(steps.length - 1, i));

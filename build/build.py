@@ -154,8 +154,10 @@ def build(content_dir, out_dir, static_dir, quiet=False):
             warnings.append(f"Platzhalter offen: {label}")
     if not site.s.get("googleReviewUrl"):
         warnings.append("Google-Bewertungslink fehlt (Grunddaten → googleReviewUrl)")
-    if not site.media:
+    if not any(g.get("before") in site.media and g.get("after") in site.media for g in site.gallery):
         warnings.append("Keine Vorher/Nachher-Fotos hochgeladen")
+    if not (site.s.get("about") or {}).get("photo") in site.media:
+        warnings.append("Foto von René fehlt (Grunddaten → Über uns → Foto)")
     if not (site.s.get("about") or {}).get("name"):
         warnings.append("Inhaber-Karte fehlt (Grunddaten → Über uns: Name, Foto, kurzer Text)")
     warnings += seo_lengths(out_dir, written)

@@ -198,7 +198,7 @@ def build_gutscheine(site, write):
         {"q": "Wie lange ist ein Gutschein gültig?", "a": f"Gutscheine sind drei Jahre gültig, gerechnet ab dem Ende des Kaufjahres. Ein 2026 gekaufter Gutschein gilt also bis 31.12.{year + 3}."},
         {"q": "Wie löse ich einen Gutschein ein?", "a": "Bei der Online-Terminanfrage den Gutscheincode eingeben oder ihn bei der WhatsApp-Anfrage nennen. Wir verrechnen den Wert mit dem Auftrag."},
         {"q": "Was passiert bei einem größeren Fahrzeug?", "a": "Paketgutscheine gelten für die Kompaktklasse. Bei Limousine, Kombi, SUV oder Van wird nur die Differenz zum Richtpreis der jeweiligen Fahrzeugklasse fällig."},
-        {"q": "Wie bezahle ich den Gutschein?", "a": "Nach Ihrer Bestellung erhalten Sie die Zahlungsdaten per E-Mail. Sie zahlen per Überweisung oder bar bei Abholung. Nach Zahlungseingang erhalten Sie den Gutschein als Link zum Ausdrucken oder holen ihn gedruckt ab."},
+        {"q": "Wie bezahle ich den Gutschein?", "a": "Nach Ihrer Bestellung erhalten Sie die Zahlungsdaten per E-Mail. Sie zahlen per Überweisung, per PayPal oder bei Abholung bar oder mit Karte. Nach Zahlungseingang erhalten Sie den Gutschein als Link zum Ausdrucken oder holen ihn gedruckt ab."},
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Gutscheine", path)]), seo.faq(faq),
           {"@context": "https://schema.org", "@type": "Product", "name": "ElbDetail Gutschein Fahrzeugaufbereitung", "brand": {"@type": "Brand", "name": s["name"]},
@@ -254,7 +254,7 @@ def build_gutscheine(site, write):
           {core.consent_row("", "g-consent")}
         </fieldset>
         <button class="btn btn-primary btn-lg btn-block" type="submit">{I["gift"]}Gutschein verbindlich bestellen</button>
-        <p class="hint">Sie erhalten die Zahlungsdaten per E-Mail (Überweisung oder bar bei Abholung). Nach Zahlungseingang erhalten Sie den Gutschein.</p>
+        <p class="hint">Sie erhalten die Zahlungsdaten per E-Mail (Überweisung, PayPal oder bei Abholung bar bzw. mit Karte). Nach Zahlungseingang erhalten Sie den Gutschein.</p>
         {core.form_status("g-status")}
       </form>
 
@@ -301,6 +301,10 @@ def build_firmen(site, write):
            "provider": {"@id": site.url + "/#business"}, "areaServed": {"@type": "City", "name": s["address"]["city"]}, "audience": {"@type": "BusinessAudience"}}]
     services = "".join(f'<label class="check"><input type="checkbox" name="leistungen" value="{ESC(x)}"><span>{ESC(x)}</span></label>' for x in
                        ["Regelmäßige Pflege (ElbDetail Care)", "Regelmäßige Außenwäsche", "Innenreinigung", "Komplettaufbereitung", "Aufbereitung vor Verkauf/Rückgabe", "Lackpolitur & Versiegelung", "Keramikversiegelung", "Geruchsentfernung", "Abhol- und Bringservice"])
+    refs = ""
+    if s.get("references"):
+        refs = ('<div class="b2b-refs"><h3 class="eyebrow">Unter anderem vertrauen uns</h3><ul class="ref-list">'
+                + "".join(f"<li>{ESC(r)}</li>" for r in s["references"]) + "</ul></div>")
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Firmenkunden", None)], "Für Unternehmen",
@@ -313,7 +317,7 @@ def build_firmen(site, write):
       <ul class="chips b2b-groups">
         <li>Autohäuser &amp; Fahrzeughändler</li><li>Fahrschulen</li><li>Pflegedienste</li><li>Handwerksbetriebe</li>
         <li>Unternehmen mit Dienstwagen</li><li>Leasing- &amp; Fuhrparkunternehmen</li>
-      </ul>
+      </ul>{refs}
     </div>
   </section>
   <section aria-labelledby="b2b-h">

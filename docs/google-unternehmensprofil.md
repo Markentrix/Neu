@@ -200,7 +200,7 @@ Nur aktivieren, was wirklich zutrifft. Welche Attribute erscheinen, hängt von d
 | Onlinetermine / Terminvereinbarung | Aktivieren, Link: https://www.elbdetail.de/termin.html |
 | Termin erforderlich | Aktivieren, falls angeboten |
 | Zahlungsmittel: Bargeld | Aktivieren, falls angeboten |
-| Zahlungsmittel: Kreditkarte, Debitkarte, NFC | Nicht aktivieren (Bezahlung nur bar oder per Überweisung) |
+| Zahlungsmittel: Kreditkarte, Debitkarte, NFC | Aktivieren, sobald das Kartenterminal bestätigt ist (René nimmt Karte, PayPal, bar) |
 | Barrierefreiheit (Eingang, Parkplatz) | `[PRÜFEN vor Ort, nur bei "ja" eintragen]` |
 | Service vor Ort beim Kunden | Nicht aktivieren. Gearbeitet wird am Standort. |
 | Abholung / Bringservice (falls das Attribut erscheint) | Nur aktivieren, wenn sich "nach Vereinbarung" dazuschreiben lässt. Keinen kostenlosen Radius angeben, solange René ihn nicht festgelegt hat. |
@@ -454,7 +454,7 @@ Am schnellsten per WhatsApp an +49 172 7613807 oder über das Terminformular auf
 Termine gibt es nach Vereinbarung von Montag bis Freitag. Samstags ist ein Termin nach Absprache möglich. Fragen Sie einfach an.
 
 **7. Wie kann ich bezahlen?**
-Sie bezahlen bar oder per Überweisung.
+Sie bezahlen bar, mit Karte, per PayPal oder per Überweisung.
 
 **8. Ist der Preis auf der Website verbindlich?**
 Die Preise auf der Website sind Einstiegspreise ("ab") für Fahrzeuge in normalem Pflegezustand. Bei starker Verschmutzung oder intensiver Tierhaarentfernung kann es teurer werden. Deshalb nennen wir Ihnen vor dem Termin einen verbindlichen Preis für Ihr Fahrzeug. So gibt es keine Überraschungen.

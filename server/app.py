@@ -413,7 +413,7 @@ def validate(d):
         out["bewertung_ok"] = "ja" if d.get("bewertung_ok") in ("ja", "on", True) else "nein"
         out["quelle"] = _s(d, "quelle", 40, False, errors)
         closed = setting("closedWeekdays", [0])
-        blocked = blocked_days()
+        blocked = blocked_days(keramik=out["paket"] == "keramik")
         for k in ("datum", "datum2"):
             raw = _s(d, k, 10, k == "datum", errors)
             if not raw:
@@ -610,16 +610,31 @@ def voucher_html(v):
 
 
 # --------------------------------------------------------------------------- Kalender
-def blocked_days():
-    """Gesperrte Tage plus ausgebuchte Tage (bestätigte Termine ≥ Tageskapazität)."""
+def blocked_days(keramik=False):
+    """Gesperrte Tage plus ausgebuchte Tage (bestätigte Termine ≥ Tageskapazität).
+
+    Keramikversiegelung belegt den Platz für einen ganzen Tag: Ein Tag mit bestätigter Keramik ist für alles
+    andere ausgebucht, und Keramik ist nur an Tagen ohne bestätigten Termin möglich (Einstellung keramikExclusive).
+    """
     cap = int(setting("dailyCapacity", 2) or 0)
+    excl = bool(setting("keramikExclusive", True))
     t0 = today().isoformat()
     with db() as c:
         days = {r["day"] for r in c.execute("SELECT day FROM blocked WHERE day >= ?", (t0,))}
-        if cap > 0:
-            days |= {r["datum"] for r in c.execute(
-                "SELECT datum, COUNT(*) n FROM anfragen WHERE typ='termin' AND status='termin_bestaetigt' AND datum >= ? "
-                "GROUP BY datum HAVING n >= ?", (t0, cap))}
+        count, ker = {}, set()
+        for r in c.execute("SELECT datum, data FROM anfragen WHERE typ='termin' AND status='termin_bestaetigt' AND datum >= ?", (t0,)):
+            count[r["datum"]] = count.get(r["datum"], 0) + 1
+            try:
+                if json.loads(r["data"] or "{}").get("paket") == "keramik":
+                    ker.add(r["datum"])
+            except ValueError:
+                pass
+    if cap > 0:
+        days |= {d for d, n in count.items() if n >= cap}
+    if excl:
+        days |= ker
+        if keramik:
+            days |= set(count)
     return sorted(days)
 
 
@@ -978,7 +993,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, {"ok": True})
         if path == "/api/verfuegbarkeit" and method == "GET":
             bl, closed = blocked_days(), setting("closedWeekdays", [0])
-            return self.send(200, {"blocked": bl, "closedWeekdays": closed, "nextFree": next_free_day(bl, closed)})
+            return self.send(200, {"blocked": bl, "blockedKeramik": blocked_days(keramik=True), "closedWeekdays": closed,
+                                   "nextFree": next_free_day(bl, closed)})
         if path == "/api/e" and method == "POST":
             if RL.ok("e:" + ip, 120, 60):
                 try:
@@ -1317,7 +1333,8 @@ class AdminAPI:
                 bl = [dict(r) for r in c.execute("SELECT day, reason FROM blocked WHERE day >= ? ORDER BY day", ((today() - dt.timedelta(days=31)).isoformat(),))]
                 req = [dict(r) for r in c.execute("SELECT datum day, COUNT(*) n, SUM(status='termin_bestaetigt') ok FROM anfragen WHERE typ='termin' AND datum != '' GROUP BY datum")]
             return h.send(200, {"blocked": bl, "requests": req, "closedWeekdays": setting("closedWeekdays", [0]),
-                                "dailyCapacity": setting("dailyCapacity", 2), "leadDays": setting("leadDays", 1), "nextFree": next_free_day()})
+                                "dailyCapacity": setting("dailyCapacity", 2), "leadDays": setting("leadDays", 1),
+                                "keramikExclusive": bool(setting("keramikExclusive", True)), "nextFree": next_free_day()})
         d = h.parse()
         if self.m == "POST":
             days = d.get("days") or [d.get("day")]
@@ -1333,6 +1350,8 @@ class AdminAPI:
         if self.m == "PUT":
             if "closedWeekdays" in d:
                 set_setting("closedWeekdays", [int(x) for x in d.get("closedWeekdays", []) if str(x).isdigit() and 0 <= int(x) <= 6])
+            if "keramikExclusive" in d:
+                set_setting("keramikExclusive", bool(d["keramikExclusive"]))
             for k, lo, hi in (("dailyCapacity", 0, 20), ("leadDays", 0, 30)):
                 if k in d:
                     v = int(d[k]) if str(d[k]).isdigit() else None

@@ -386,9 +386,11 @@
       side.appendChild(h("p", { class: "sub", text: "Ab so vielen bestätigten Terminen gilt ein Tag als ausgebucht. Die Website zeigt dann automatisch den nächsten freien Tag (aktuell: " + (c.nextFree ? deDate(c.nextFree) : "keiner in Sicht") + "). 0 = Auslastung nicht berücksichtigen." }));
       var cap = h("input", { type: "number", min: 0, max: 20, value: c.dailyCapacity });
       var lead = h("input", { type: "number", min: 0, max: 30, value: c.leadDays });
+      var ker = h("input", { type: "checkbox", checked: c.keramikExclusive !== false });
       side.appendChild(h("div", { class: "grid g2" }, [h("label", { class: "f" }, ["Fahrzeuge pro Tag", cap]), h("label", { class: "f" }, ["Vorlauf in Tagen (1 = frühestens morgen)", lead])]));
+      side.appendChild(h("label", { class: "chk", style: "margin-top:8px" }, [ker, "Keramikversiegelung belegt den ganzen Tag (nur 1 Fahrzeug)"]));
       side.appendChild(h("button", { class: "btn", type: "button", style: "margin-top:10px", text: "Auslastung speichern", onclick: function () {
-        api("PUT", "kalender", { dailyCapacity: +cap.value, leadDays: +lead.value }).then(function () { toast("Gespeichert"); viewCalendar(main); }).catch(fail);
+        api("PUT", "kalender", { dailyCapacity: +cap.value, leadDays: +lead.value, keramikExclusive: ker.checked }).then(function () { toast("Gespeichert"); viewCalendar(main); }).catch(fail);
       } }));
       var up = c.blocked.filter(function (b) { return b.day >= todayIso; });
       side.appendChild(h("h2", { text: "Gesperrte Tage", style: "margin-top:20px" }));

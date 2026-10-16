@@ -27,6 +27,7 @@
     "Begutachtung des Lacks und persönliche Beratung",
     "Gründliche Vorwäsche und Handwäsche",
     "Chemische und mechanische Lackdekontamination",
+    "Lackschichtdickenmessung vor der Korrektur",
     "Lackkorrektur nach Bedarf, ein- oder mehrstufig",
     "Entfettung und Vorbereitung jeder Fläche",
     "Keramische Lackversiegelung mit C²Coating",
@@ -85,5 +86,11 @@
     "lackpolitur-celle",
     "lackversiegelung-celle",
     "aussenaufbereitung-celle"
-  ]
+  ],
+  "image": {
+    "file": "c2-abperleffekt.jpg",
+    "alt": "Wasser perlt in dichten Tropfen von einer keramisch versiegelten Motorhaube ab",
+    "caption": "Der typische Abperleffekt einer Keramikversiegelung: Wasser und Schmutz finden kaum Halt.",
+    "credit": "C²Coating"
+  }
 }

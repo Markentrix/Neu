@@ -634,6 +634,14 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .area-grid h3 { font-size: 1.15rem; margin-bottom: 12px; color: var(--ink); }
 .chips { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
 .b2b-groups { margin-top: 14px; }
+.fig { margin: 30px 0 6px; }
+.fig .fig-img, .fig .fig-img img { display: block; width: 100%; }
+.fig .fig-img img { aspect-ratio: 4 / 3; height: auto; object-fit: cover; border-radius: var(--radius-m); background: var(--soft); }
+.fig figcaption { margin-top: 10px; font-size: 0.86rem; line-height: 1.5; color: var(--muted); }
+.fig-credit { white-space: nowrap; opacity: 0.85; }
+.b2b-refs { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); }
+.ref-list { list-style: none; display: flex; flex-wrap: wrap; gap: 10px 34px; margin-top: 12px; }
+.ref-list li { font-size: 1.05rem; font-weight: 650; letter-spacing: -0.01em; color: var(--muted); }
 .chips li { padding: 8px 13px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); font-size: 0.88rem; font-weight: 600; color: var(--ink); }
 .area-note { margin-top: 18px; color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
 

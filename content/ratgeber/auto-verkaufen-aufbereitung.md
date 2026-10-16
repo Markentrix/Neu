@@ -92,7 +92,7 @@ Der Ablauf bei ElbDetail ist einfach und planbar:
 3. Wir vereinbaren gemeinsam einen Termin, Montag bis Freitag oder samstags nach Absprache.
 4. Das Auto wird zu 100 % von Hand aufbereitet, mit Zwei-Eimer-Handwäsche und professionellen Produkten von Koch-Chemie. Vor einer Politur wird die Lackschichtdicke gemessen.
 5. Zum Schluss nehmen wir das Ergebnis gemeinsam bei Tageslicht ab.
-6. Sie bezahlen bar oder per Überweisung.
+6. Sie bezahlen bar, mit Karte, per PayPal oder per Überweisung.
 
 Planen Sie die Aufbereitung kurz vor den Fotos für Ihr Inserat ein. So zeigen die Bilder den gepflegten Zustand.
 

@@ -30,7 +30,7 @@ def business(site):
         "logo": site.url + "/logo-512.png",
         "priceRange": "€€",
         "currenciesAccepted": "EUR",
-        "paymentAccepted": "Bar, Überweisung",
+        "paymentAccepted": "Bar, Kartenzahlung, PayPal, Überweisung",
         "address": {"@type": "PostalAddress", "streetAddress": a["street"], "postalCode": a["zip"], "addressLocality": a["city"],
                     "addressRegion": a["region"], "addressCountry": a["country"]},
         "hasMap": site.maps_url(),
@@ -153,8 +153,9 @@ def llms(site, full=False):
 - Abhol- und Bringservice: nach Vereinbarung
 - Regelmäßige Pflege: ElbDetail Care, individuell auf Anfrage für Privatkunden, Unternehmen und Flotten: {site.url}/elbdetail-care.html
 - Gewerbekunden: Autohäuser und Händler, Fahrschulen, Pflegedienste, Handwerksbetriebe, Unternehmen mit Dienstwagen, Leasing- und Fuhrparkunternehmen; Konditionen auf Anfrage: {site.url}/firmenkunden.html
+- Gewerbliche Referenzen: {', '.join(site.s.get('references', [])) or 'auf Anfrage'}
 - Umsatzsteuer: Kleinunternehmer nach § 19 UStG, es wird keine Umsatzsteuer berechnet
-- Bezahlung: bar oder Überweisung
+- Bezahlung: bar, Karte, PayPal oder Überweisung
 - Gutscheine: {site.url}/gutscheine.html
 - Firmenkunden und Flotten: {site.url}/firmenkunden.html
 

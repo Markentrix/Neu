@@ -275,8 +275,25 @@ class TestPublicAPI(Base):
         self.admin("PUT", "kalender", {"dailyCapacity": 2})
         code, j = self.req("GET", "/api/verfuegbarkeit")
         self.assertNotIn(day, j["blocked"])
+        # Keramik belegt den ganzen Tag: an einem Tag mit einem anderen Termin ist keine Keramik möglich ...
+        self.assertIn(day, j["blockedKeramik"])
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "keramik", "klasse": "kompakt", "datum": day,
+                                                    "name": "Eva", "telefon": "0170 1234567", "einwilligung": "ja"})
+        self.assertEqual(code, 422)
+        # ... und eine bestätigte Keramik sperrt den Tag für alles andere, auch bei Kapazität 2
+        day2 = next_workday(12)
         with app.db() as c:
-            c.execute("DELETE FROM anfragen WHERE ref='TCAP1'")
+            c.execute("INSERT INTO anfragen(ref, typ, status, created, updated, name, datum, data) VALUES (?,?,?,?,?,?,?,?)",
+                      ("TCAP2", "termin", "termin_bestaetigt", "x", "x", "Test", day2, json.dumps({"paket": "keramik"})))
+        code, j = self.req("GET", "/api/verfuegbarkeit")
+        self.assertIn(day2, j["blocked"])
+        self.admin("PUT", "kalender", {"keramikExclusive": False})
+        code, j = self.req("GET", "/api/verfuegbarkeit")
+        self.assertNotIn(day2, j["blocked"])
+        self.assertNotIn(day, j["blockedKeramik"])
+        self.admin("PUT", "kalender", {"keramikExclusive": True})
+        with app.db() as c:
+            c.execute("DELETE FROM anfragen WHERE ref IN ('TCAP1', 'TCAP2')")
 
     def test_keepalive_after_early_response(self):
         """Antworten ohne gelesenen Inhalt (Herkunft abgelehnt, Statistik-Limit) dürfen die nächste Anfrage

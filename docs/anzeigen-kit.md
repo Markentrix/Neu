@@ -488,7 +488,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 | Lackschichtdickenmessung | 24 |
 | Verbindlicher Preis vorab | 25 |
 | Abnahme bei Tageslicht | 22 |
-| Bar oder Überweisung | 20 |
+| Bar, Karte oder PayPal | 22 |
 | Samstags nach Absprache | 23 |
 | 5,0 Sterne bei Google | 21 |
 | Koch-Chemie geschult | 20 |

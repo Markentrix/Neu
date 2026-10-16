@@ -46,7 +46,7 @@ Nur diese Fakten dürfen in Kommunikation verwendet werden:
 | Gemeinsame Abnahme bei Tageslicht | "Wir nehmen das Ergebnis gemeinsam bei Tageslicht ab." |
 | 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026) | "5,0 Sterne bei 19 Google-Rezensionen" (Zahl regelmäßig aktualisieren) |
 | Termine nach Vereinbarung Mo bis Fr, samstags nach Absprache | "Termine Mo bis Fr, samstags nach Absprache" |
-| Bezahlung bar oder Überweisung | "Bezahlen können Sie bar oder per Überweisung." |
+| Bezahlung bar, Karte, PayPal oder Überweisung | "Bezahlen können Sie bar, mit Karte, per PayPal oder per Überweisung." |
 | Preise sind "ab"-Preise (Einstiegspreise), Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich | "Ab 179 €. Bei starker Verschmutzung oder vielen Tierhaaren kann es mehr werden. Den verbindlichen Preis nennen wir Ihnen vorab." |
 | Kleinunternehmer nach § 19 UStG | "Alle Preise sind Endpreise. Gemäß § 19 UStG berechnen wir keine Umsatzsteuer." |
 | Standort Lachtehäuser Straße 1, 29223 Celle | vollständig ausschreiben |
@@ -245,7 +245,7 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 5. **Kurz halten:** maximal 4 bis 5 Zeilen pro Nachricht. Eine Frage pro Nachricht, wenn möglich.
 6. **Emojis sparsam:** höchstens eines pro Nachricht, z. B. 👍. Keine Emoji-Ketten.
 7. **Keine Zusagen** zu Abholung (nur "nach Absprache"), Rabatten, Garantien oder Ergebnissen bei starken Schäden.
-8. **Terminbestätigung immer schriftlich** mit Datum, Uhrzeit, Adresse (Lachtehäuser Straße 1, 29223 Celle), Paket, verbindlichem Preis und Zahlungsart (bar oder Überweisung).
+8. **Terminbestätigung immer schriftlich** mit Datum, Uhrzeit, Adresse (Lachtehäuser Straße 1, 29223 Celle), Paket, verbindlichem Preis und Zahlungsart (bar, Karte, PayPal oder Überweisung).
 9. **Fotos von Kunden** nie ohne Einwilligung im Status, auf Social Media oder der Website zeigen.
 10. **Sprachnachrichten:** `[PLATZHALTER: erlaubt ja/nein]`. Wichtige Infos immer zusätzlich schriftlich.
 
@@ -253,7 +253,7 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 
 - **/erstanfrage:** "Hallo [Name], danke für Ihre Nachricht! Damit wir Ihnen einen verbindlichen Preis nennen können: Welches Modell fahren Sie, und können Sie uns 2 bis 4 Fotos schicken (Innenraum, Lack bei Tageslicht, Felgen)?"
 - **/richtpreis:** "Für Ihren [Modell] liegt die [Paket] bei ab [Preis] €. Nach Ihren Fotos erhalten Sie den verbindlichen Preis."
-- **/bestaetigung:** "Ihr Termin steht: [Datum], [Uhrzeit], Lachtehäuser Straße 1, 29223 Celle. Paket: [Paket], Preis: [Preis] €. Bezahlen können Sie bar oder per Überweisung. Wir freuen uns auf Sie!"
+- **/bestaetigung:** "Ihr Termin steht: [Datum], [Uhrzeit], Lachtehäuser Straße 1, 29223 Celle. Paket: [Paket], Preis: [Preis] €. Bezahlen können Sie bar, mit Karte, per PayPal oder per Überweisung. Wir freuen uns auf Sie!"
 - **/abnahme:** "Ihr Auto ist fertig. Wir schauen es uns gleich gemeinsam bei Tageslicht an."
 - **/bewertung:** "Danke, dass Sie bei uns waren! Über Ihre ehrliche Google-Bewertung freuen wir uns sehr: [PLATZHALTER: Link zur Google-Bewertung]"
 

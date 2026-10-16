@@ -100,7 +100,13 @@
     "photo": "",
     "since": "",
     "text": "Für mich ist Fahrzeugaufbereitung keine Dienstleistung von der Stange. Ob Familienwagen, Firmenfahrzeug oder Sportwagen: Jedes Auto bekommt die gleiche Sorgfalt. Mein Ziel ist, dass Sie sich wirklich über das Ergebnis freuen.",
-    "fullName": "René Triechelt"
+    "fullName": "René Triechelt",
+    "partnerImage": {
+      "file": "c2-excellence-partner.jpg",
+      "alt": "C²Coating Excellence-Partner-Aufsteller mit Car-Ceramic-Produkten auf einem Mikrofasertuch",
+      "caption": "Als Excellence Partner arbeiten wir mit dem Keramiksystem von C²Coating.",
+      "credit": "C²Coating"
+    }
   },
   "verification": {
     "google": "",
@@ -126,5 +132,17 @@
   "pickup": {
     "freeRadiusKm": 0,
     "text": "Abhol- und Bringservice nach Vereinbarung"
-  }
+  },
+  "references": [
+    "Die Fahr-Schu-Leh",
+    "City Fahrschule",
+    "Koops GmbH",
+    "BioFit"
+  ],
+  "paymentMethods": [
+    "Bar",
+    "Karte",
+    "PayPal",
+    "Überweisung"
+  ]
 }
