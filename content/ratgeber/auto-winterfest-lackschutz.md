@@ -46,6 +46,8 @@ Versiegeln Sie den Lack vor dem ersten Frost, solange es noch trocken und mild i
 
 Vor der Versiegelung wird das Auto gründlich gereinigt. Zeigt der Lack Kratzer oder Hologramme, ist vorher eine Politur sinnvoll, damit die Defekte nicht unter der Schutzschicht konserviert werden. Nach der Versiegelung perlt Wasser ab, Salzlauge und Schmutz haften schlechter, und das Waschen im Winter geht schneller.
 
+Wer nicht jeden Herbst neu versiegeln möchte, fragt nach einer [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html). Als C²Coating Excellence Partner bietet ElbDetail sie für Lack, Scheiben und Felgen an. Sie hält deutlich länger als eine klassische Versiegelung. Die genaue Haltbarkeit hängt von der Beschichtung und Ihrer Pflege ab.
+
 Mehr zur Versiegelung finden Sie auf der Seite [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Aktuelle Infos zum Winterschutz bei ElbDetail in Celle gibt es bei der [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
 
 ## Wie machen Sie die Felgen winterfest?
@@ -112,6 +114,6 @@ Mit dieser Liste sind Sie gut vorbereitet:
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail bereitet Ihr Auto in Celle zu 100 % von Hand auf den Winter vor, mit Zwei-Eimer-Handwäsche und Produkten von Koch-Chemie. Sie bekommen vor dem Termin einen verbindlichen Preis, und das Ergebnis nehmen wir gemeinsam mit Ihnen bei Tageslicht ab.
+ElbDetail bereitet Ihr Auto in Celle zu 100 % von Hand auf den Winter vor, mit Zwei-Eimer-Handwäsche und professionellen Produkten von Koch-Chemie und C²Coating. Sie bekommen vor dem Termin einen verbindlichen Preis, und das Ergebnis nehmen wir gemeinsam mit Ihnen bei Tageslicht ab.
 
-Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 oder buchen Sie über das [Terminformular](/termin.html). Je früher Sie vor dem ersten Frost anfragen, desto entspannter wird die Terminplanung.
+Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 173 5845574 oder buchen Sie über das [Terminformular](/termin.html). Je früher Sie vor dem ersten Frost anfragen, desto entspannter wird die Terminplanung.

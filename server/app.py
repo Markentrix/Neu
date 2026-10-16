@@ -398,7 +398,7 @@ def validate(d):
             errors["telefon"] = "Bitte Telefon oder E-Mail angeben."
     elif typ == "termin":
         out["paket"] = _s(d, "paket", 20, True, errors)
-        if out["paket"] and out["paket"] not in pkeys + ["beratung"]:
+        if out["paket"] and out["paket"] not in pkeys + ["beratung", "keramik", "care"]:
             errors["paket"] = "Bitte ein Paket wählen."
         out["klasse"] = _s(d, "klasse", 20, True, errors)
         if out["klasse"] and out["klasse"] not in ckeys:
@@ -469,7 +469,7 @@ def validate(d):
 def summary_text(data):
     pr = pricing()
     names = {p["key"]: p["name"] for p in pr.get("packages", [])}
-    names["beratung"] = "Beratung / Einzelleistung"
+    names.update({"beratung": "Beratung / Einzelleistung", "keramik": "Keramikversiegelung", "care": "ElbDetail Care"})
     cnames = {c["key"]: c["name"] for c in pr.get("classes", [])}
     lines = []
     for k, v in data.items():

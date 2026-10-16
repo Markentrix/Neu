@@ -1,6 +1,6 @@
 {
   "slug": "lackversiegelung-celle",
-  "order": 4,
+  "order": 6,
   "short": "Lackversiegelung",
   "teaser": "Monatelanger Schutz vor UV, Streusalz, Insekten und Schmutz.",
   "seoTitle": "Lackversiegelung Celle: Schutz vor UV & Salz | ElbDetail",
@@ -58,7 +58,7 @@
     },
     {
       "q": "Was ist der Unterschied zwischen Wachs, Versiegelung und Keramik?",
-      "a": "Wachs ist natürlich, glänzt schön, hält aber nur Wochen. Eine synthetische Versiegelung hält Monate und ist chemisch beständiger. Keramikbeschichtungen halten am längsten, erfordern aber eine aufwendige Vorbereitung. Welche Lösung zu Ihrem Auto passt, besprechen wir bei der Anfrage."
+      "a": "Wachs ist natürlich, glänzt schön, hält aber nur Wochen. Eine synthetische Versiegelung hält Monate und ist chemisch beständiger. Eine [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html) hält am längsten, erfordert aber eine aufwendige Vorbereitung. Als C²Coating Excellence Partner beraten wir Sie, welche Lösung zu Ihrem Auto passt."
     },
     {
       "q": "Muss der Lack vor der Versiegelung poliert werden?",
@@ -70,8 +70,8 @@
     }
   ],
   "related": [
+    "keramikversiegelung-celle",
     "lackpolitur-celle",
-    "aussenaufbereitung-celle",
-    "innenaufbereitung-celle"
+    "aussenaufbereitung-celle"
   ]
 }

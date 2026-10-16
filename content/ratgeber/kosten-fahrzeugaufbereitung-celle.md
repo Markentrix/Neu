@@ -9,7 +9,7 @@
   "excerpt": "Von der Handwäsche bis zur Lackpolitur: Hier sehen Sie, was eine Fahrzeugaufbereitung kostet, wovon der Preis abhängt und wie Sie ohne Qualitätsverlust sparen.",
   "service": "aussenaufbereitung-celle",
   "summary": [
-    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € bis ab 449 € inklusive Mehrwertsteuer.",
+    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € bis ab {preis:premium:suv} €. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.",
     "Der Preis hängt vor allem von Fahrzeuggröße, Leistungsumfang und Pflegezustand des Autos ab.",
     "Starke Verschmutzung, Tierhaare, Gerüche oder tiefe Lackdefekte erhöhen den Aufwand und damit den Preis.",
     "Bei ElbDetail bekommen Sie vor dem Termin einen verbindlichen Preis, am einfachsten nach Fotos per WhatsApp."
@@ -17,7 +17,7 @@
   "faq": [
     {
       "q": "Was kostet eine einfache Fahrzeugaufbereitung in Celle?",
-      "a": "Das Paket Frisch & Sauber kostet bei ElbDetail ab {ab:frisch} € für Kompaktwagen, ab 89 € für Limousinen und Kombis und ab 99 € für SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert etwa zwei Stunden."
+      "a": "Das Paket Frisch & Sauber kostet bei ElbDetail ab {ab:frisch} € für Kompaktwagen, ab {preis:frisch:mittel} € für Limousinen und Kombis und ab {preis:frisch:suv} € für SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert etwa zwei Stunden."
     },
     {
       "q": "Warum ist eine Aufbereitung für ein SUV teurer?",
@@ -25,12 +25,12 @@
     },
     {
       "q": "Bekomme ich vorher einen festen Preis?",
-      "a": "Ja. ElbDetail nennt Ihnen vor dem Termin einen verbindlichen Preis. Am schnellsten geht das, wenn Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 schicken."
+      "a": "Ja. ElbDetail nennt Ihnen vor dem Termin einen verbindlichen Preis. Am schnellsten geht das, wenn Sie ein paar Fotos Ihres Autos per WhatsApp an +49 173 5845574 schicken."
     }
   ]
 }
 
-Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € für eine Handwäsche mit Innenraumreinigung und ab {ab:premium} € für eine Premium Politur mit Versiegelung. Alle Angaben sind Richtpreise inklusive Mehrwertsteuer und gelten für einen normalen Pflegezustand.
+Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € für eine Handwäsche mit Innenraumreinigung und ab {ab:premium} € für eine Premium Politur mit Versiegelung. Alle Angaben sind Richtpreise für einen normalen Pflegezustand. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.
 
 Die Spanne ergibt sich aus dem Aufwand. In diesem Ratgeber erfahren Sie, welche Faktoren den Preis bestimmen, was die einzelnen Pakete enthalten und wo Sie sinnvoll sparen können, ohne am falschen Ende zu kürzen.
 
@@ -52,13 +52,13 @@ Die Richtpreise gelten für einen normalen Pflegezustand. Starke Verschmutzung, 
 
 ## Pakete und Richtpreise im Überblick
 
-Die folgende Tabelle zeigt die drei Pakete von ElbDetail mit Richtpreisen je Fahrzeugklasse. Die Preise verstehen sich inklusive Mehrwertsteuer bei normalem Pflegezustand.
+Die folgende Tabelle zeigt die drei Pakete von ElbDetail mit Richtpreisen je Fahrzeugklasse. Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.
 
 | Paket | Kompakt (Polo, Golf, A3) | Limousine/Kombi (Passat, C-Klasse) | SUV/Van (Tiguan, Bulli, X5) | Dauer |
 |---|---|---|---|---|
-| Frisch & Sauber: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab {ab:frisch} € | ab 89 € | ab 99 € | ca. 2 Std. |
-| Komplettpflege: + Innenraum-Tiefenreinigung, Polster/Teppich, Leder- oder Polsterpflege, Kunststoffpflege, Geruchsneutralisation | ab {ab:komplett} € | ab 209 € | ab 229 € | ca. ½ Tag |
-| Premium Politur: + mehrstufige Lackpolitur, Kratzer-/Hologrammentfernung, Lackversiegelung, Felgen- & Scheibenversiegelung | ab {ab:premium} € | ab 399 € | ab 449 € | ca. 1 Tag |
+| Frisch & Sauber: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab {ab:frisch} € | ab {preis:frisch:mittel} € | ab {preis:frisch:suv} € | ca. 2 Std. |
+| Komplettpflege: + Innenraum-Tiefenreinigung, Polster/Teppich, Leder- oder Polsterpflege, Kunststoffpflege, Geruchsneutralisation | ab {ab:komplett} € | ab {preis:komplett:mittel} € | ab {preis:komplett:suv} € | ca. ½ Tag |
+| Premium Politur: + mehrstufige Lackpolitur, Kratzer-/Hologrammentfernung, Lackversiegelung, Felgen- & Scheibenversiegelung | ab {ab:premium} € | ab {preis:premium:mittel} € | ab {preis:premium:suv} € | ca. 1 Tag |
 
 Zusätzlich können Sie einzelne Leistungen separat buchen. Dazu gehören Lederpflege und Imprägnierung, Geruchsentfernung, Motorraumreinigung, Felgen-Intensivreinigung, eine reine Lackpolitur, eine reine Lackversiegelung und die Reinigung eines Cabrioverdecks. Diese Einzelleistungen werden auf Anfrage kalkuliert, weil der Aufwand stark vom Fahrzeug abhängt.
 
@@ -88,7 +88,7 @@ Wichtig für Sie: Sie erfahren den Preis nicht erst nach dem Termin. Bei ElbDeta
 
 Handarbeit kostet mehr, weil sie mehr Zeit braucht und jede Fläche gezielt behandelt. In der Waschstraße reinigen Bürsten das Auto in wenigen Minuten. Dabei können feine Kratzer entstehen, die Sie später als Kreise oder Schlieren im Sonnenlicht sehen.
 
-ElbDetail arbeitet zu 100 % von Hand und nutzt die Zwei-Eimer-Handwäsche. Ein Eimer enthält das Shampoo, der zweite dient zum Ausspülen des Waschhandschuhs. So landet der gelöste Schmutz nicht wieder auf dem Lack. Vor jeder Politur wird die Lackschichtdicke gemessen, damit nur so viel Material abgetragen wird wie nötig. Verwendet werden ausschließlich Produkte von Koch-Chemie.
+ElbDetail arbeitet zu 100 % von Hand und nutzt die Zwei-Eimer-Handwäsche. Ein Eimer enthält das Shampoo, der zweite dient zum Ausspülen des Waschhandschuhs. So landet der gelöste Schmutz nicht wieder auf dem Lack. Vor jeder Politur wird die Lackschichtdicke gemessen, damit nur so viel Material abgetragen wird wie nötig. Verwendet werden professionelle Produkte von Koch-Chemie, C²Coating und Colourlock.
 
 Zum Abschluss gibt es eine gemeinsame Abnahme bei Tageslicht. So sehen Sie selbst, was gemacht wurde, bevor Sie bezahlen.
 
@@ -121,4 +121,4 @@ Ein faires Angebot nennt klar, welche Leistungen enthalten sind und welche nicht
 
 ElbDetail sitzt in der Lachtehäuser Straße 1 in Celle und arbeitet für Kundinnen und Kunden aus der Stadt und dem Landkreis. Termine gibt es nach Vereinbarung von Montag bis Freitag, samstags nach Absprache. Bezahlen können Sie bar oder per Überweisung.
 
-Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vorab einen verbindlichen Preis.
+Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vorab einen verbindlichen Preis.

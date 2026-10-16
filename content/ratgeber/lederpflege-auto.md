@@ -117,10 +117,10 @@ Alcantara ist kein Leder, sondern eine Mikrofaser mit wildlederähnlicher Oberfl
 
 Bürsten Sie Alcantara regelmäßig trocken mit einer weichen Bürste. Bei Verschmutzung nutzen Sie einen speziell dafür geeigneten Reiniger, und zwar sparsam und mit wenig Feuchtigkeit. Tragen Sie ihn auf ein Mikrofasertuch oder eine weiche Bürste auf und arbeiten Sie in kleinen Abschnitten. Nehmen Sie gelösten Schmutz mit einem sauberen Tuch auf und lassen Sie die Fläche vollständig trocknen. Zum Schluss bürsten Sie die Fasern noch einmal leicht auf, damit die Oberfläche wieder gleichmäßig aussieht. Reiben Sie nie mit Druck auf einer Stelle, sonst entstehen glatte, glänzende Flecken.
 
-Sind Risse oder Farbschäden bereits vorhanden, reicht eine Reinigung allein nicht mehr aus. Dann ist eine Lederreparatur der passende Weg. Regelmäßige Pflege beugt solchen Schäden vor.
+Sind Risse oder Farbschäden bereits vorhanden, reicht eine Reinigung allein nicht mehr aus. Dann ist eine Lederreparatur der passende Weg. ElbDetail bietet dafür die [Lederreparatur mit Colourlock](/leistungen/lederaufbereitung-celle.html) an, etwa bei abgenutzten Stellen, Verfärbungen oder kleinen Schäden, und den Umfang klären wir nach einer Begutachtung. Regelmäßige Pflege beugt solchen Schäden vor.
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle reinigt und pflegt Leder in Handarbeit und ausschließlich mit Koch-Chemie-Produkten. Lederpflege und Imprägnierung sind einzeln buchbar und als Leder- oder Polsterpflege auch Teil der Komplettpflege bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html). Die Richtpreise der Pakete finden Sie in der [Preisübersicht](/preise.html). Ein schön gepflegter Innenraum ist übrigens auch eine gute Idee für einen [Gutschein](/gutscheine.html).
+ElbDetail in Celle reinigt und pflegt Leder in Handarbeit und mit professionellen Produkten von Colourlock. Lederpflege und Imprägnierung sind einzeln buchbar und als Leder- oder Polsterpflege auch Teil der Komplettpflege bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html). Die Richtpreise der Pakete finden Sie in der [Preisübersicht](/preise.html). Ein schön gepflegter Innenraum ist übrigens auch eine gute Idee für einen [Gutschein](/gutscheine.html).
 
-Schicken Sie ein Foto Ihrer Sitze per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.
+Schicken Sie ein Foto Ihrer Sitze per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.

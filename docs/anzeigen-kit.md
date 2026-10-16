@@ -1,6 +1,6 @@
 # ElbDetail Anzeigen-Kit: Google Ads und Meta Ads
 
-Startphase lokal Celle. Stand: 15.10.2026.
+Startphase lokal Celle. Stand: 16.10.2026 (Fakten von René ergänzt).
 
 **Platzhalter:** Alles in `[PLATZHALTER: …]` muss der Betrieb entscheiden.
 
@@ -12,7 +12,8 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 
 ## 1. Vor dem Start
 
-- [ ] Alle Ziel-URLs sind live und laden fehlerfrei: `/termin.html`, `/gutscheine.html`, `/aktion/winterschutz.html`, `/firmenkunden.html`, `/preise.html` und alle 5 Seiten unter `/leistungen/`.
+- [ ] Alle Ziel-URLs sind live und laden fehlerfrei: `/termin.html`, `/gutscheine.html`, `/aktion/winterschutz.html`, `/firmenkunden.html`, `/preise.html`, `/elbdetail-care.html`, `/ueber-uns.html` und alle 7 Seiten unter `/leistungen/` (neu: `/leistungen/keramikversiegelung-celle.html`, `/leistungen/lederaufbereitung-celle.html`).
+- [ ] Preisangaben in allen Texten als Endpreise ohne Umsatzsteuer-Hinweis (Kleinunternehmer nach § 19 UStG). Finale Preisliste von René abwarten und dann alle "ab"-Preise abgleichen: `[PLATZHALTER: finale Preisliste]`.
 - [ ] Inhalt der Winter-Lackschutz-Aktion steht fest: `[PLATZHALTER: Leistungen, Preis, Zeitraum der Aktion]`. Anzeigentexte bei Bedarf daran anpassen.
 - [ ] Gutschein-Angebot steht fest: `[PLATZHALTER: Werte oder Pakete, Form (PDF, gedruckt), letzter Bestelltag vor Weihnachten]`.
 - [ ] Test-Aufruf jeder Ziel-URL mit UTM-Parametern (Abschnitt 5). In der eigenen Statistik prüfen, dass Quelle und Kampagne ankommen.
@@ -30,7 +31,7 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 
 | Kanal | Kampagne | Inhalt | Ziel-URL | Laufzeit |
 |---|---|---|---|---|
-| Google Suche | **G1 Leistungen Celle** | AG1 bis AG4 (allgemein, Innen, Lack, Leasing) | je Anzeigengruppe | Dauerhaft |
+| Google Suche | **G1 Leistungen Celle** | AG1 bis AG4 (allgemein, Innen, Lack, Leasing) und AG6 Keramikversiegelung | je Anzeigengruppe | Dauerhaft |
 | Google Suche | **G2 Winterschutz Celle** | AG5 Winterschutz | `/aktion/winterschutz.html` | Ab sofort bis `[PLATZHALTER: Aktionsende]` |
 | Meta | **M1 Winterschutz** | Reels und Bilder Winter-Lackschutz | `/aktion/winterschutz.html` | Ab sofort bis `[PLATZHALTER: Aktionsende]` |
 | Meta | **M2 Weihnachtsgutscheine** | Gutscheine als Geschenk | `/gutscheine.html` | `[PLATZHALTER: Start, Empfehlung Mitte November]` bis `[PLATZHALTER: letzter Bestelltag]` |
@@ -56,7 +57,7 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 
 | Kampagne | Anteil | Monatsbudget | Tagesbudget (÷ 30,4) | Begründung |
 |---|---|---|---|---|
-| G1 Leistungen Celle | 45 % | `[PLATZHALTER: €]` | `[PLATZHALTER: €]` | Höchste Kaufabsicht, dauerhafte Basis |
+| G1 Leistungen Celle | 45 % | `[PLATZHALTER: €]` | `[PLATZHALTER: €]` | Höchste Kaufabsicht, dauerhafte Basis. AG6 Keramik ist der strategische Schwerpunkt: in den ersten 4 Wochen beobachten und bei guter Anfragequote innerhalb von G1 bevorzugen |
 | G2 Winterschutz Celle | 15 % | `[PLATZHALTER: €]` | `[PLATZHALTER: €]` | Saisonale Suche im Herbst |
 | M1 Winterschutz | 15 % | `[PLATZHALTER: €]` | `[PLATZHALTER: €]` | Saison-Thema sichtbar machen, Reels mit Wasserperlen |
 | M2 Weihnachtsgutscheine | 15 % | `[PLATZHALTER: €]` | `[PLATZHALTER: €]` | Nur Mitte November bis kurz vor Weihnachten, dann Budget zurück zu G1 |
@@ -89,7 +90,7 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 | Alter | Keine Einschränkung | `[PLATZHALTER: Altersspanne, z. B. ab 18]` |
 | Geräte | Alle, mobil im Blick behalten | Alle |
 
-**Optional Meta:** Kampagne mit Ziel "Interaktion", Conversion-Ort WhatsApp (Klick-zu-WhatsApp-Anzeigen). Voraussetzung: Die Nummer +49 172 7613807 ist ein WhatsApp-Business-Konto und mit der Facebook-Seite verbunden `[PLATZHALTER: prüfen]`. Diese Klicks laufen nicht über die Website und erscheinen deshalb nicht in der eigenen Statistik. Gemessen wird dann über die Meta-Berichte (gestartete Unterhaltungen) und die eigene Strichliste (Abschnitt 5.3).
+**Optional Meta:** Kampagne mit Ziel "Interaktion", Conversion-Ort WhatsApp (Klick-zu-WhatsApp-Anzeigen). Voraussetzung: Die Nummer +49 173 5845574 ist ein WhatsApp-Business-Konto und mit der Facebook-Seite verbunden `[PLATZHALTER: prüfen]`. Diese Klicks laufen nicht über die Website und erscheinen deshalb nicht in der eigenen Statistik. Gemessen wird dann über die Meta-Berichte (gestartete Unterhaltungen) und die eigene Strichliste (Abschnitt 5.3).
 
 ---
 
@@ -152,7 +153,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 |---|---|---|
 | D1 | Fahrzeugaufbereitung in Celle: 100 % Handarbeit, keine Waschstraße. Jetzt Termin anfragen. | 90 |
 | D2 | Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. 5,0 Sterne bei Google. | 82 |
-| D3 | Zwei-Eimer-Handwäsche und ausschließlich Koch-Chemie-Produkte. Frisch & Sauber ab 79 €. | 87 |
+| D3 | Zwei-Eimer-Handwäsche mit Koch-Chemie-Produkten. Frisch & Sauber ab 79 €. | 73 |
 | D4 | Termin per WhatsApp oder online anfragen. Mo bis Fr, samstags nach Absprache. | 77 |
 
 #### AG2 Innenreinigung
@@ -212,7 +213,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 #### AG3 Lackpolitur und Versiegelung
 
 **Ziel-URL:** `/leistungen/lackpolitur-celle.html`  
-**Hinweis:** Keywords mit „versiegelung“ auf Keyword-Ebene mit der finalen URL /leistungen/lackversiegelung-celle.html hinterlegen.  
+**Hinweis:** Keywords mit „versiegelung“ auf Keyword-Ebene mit der finalen URL /leistungen/lackversiegelung-celle.html hinterlegen. Keywords mit „keramik“ oder „coating“ gehören nicht in AG3, sondern in AG6 Keramikversiegelung.  
 **Keywords (22):** 18 Phrase Match, 4 Exact Match
 
 | Phrase Match | Exact Match |
@@ -263,7 +264,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | D1 | Mehrstufige Lackpolitur in Celle: Kratzer- und Hologrammentfernung von Hand. | 76 |
 | D2 | Lackschichtdickenmessung vor jeder Politur. Danach Lack-, Felgen-, Scheibenversiegelung. | 88 |
 | D3 | Premium Politur ab 349 €. Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. | 85 |
-| D4 | Ausschließlich Koch-Chemie-Produkte, 100 % Handarbeit. Jetzt Politur-Termin anfragen. | 85 |
+| D4 | Koch-Chemie geschult, C²Coating Excellence Partner. Jetzt Politur-Termin anfragen. | 82 |
 
 #### AG4 Leasingrückgabe und Verkauf
 
@@ -367,8 +368,60 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 |---|---|---|
 | D1 | Winter-Lackschutz in Celle: Lack, Felgen und Scheiben vor dem Winter versiegeln lassen. | 87 |
 | D2 | Handwäsche, Lackversiegelung und Abnahme bei Tageslicht. Verbindlicher Preis vorab. | 83 |
-| D3 | 100 % Handarbeit, ausschließlich Koch-Chemie-Produkte. 5,0 Sterne bei Google. | 77 |
+| D3 | 100 % Handarbeit mit Koch-Chemie-Produkten. 5,0 Sterne bei Google. | 66 |
 | D4 | Jetzt Termin vor dem ersten Frost anfragen. Per WhatsApp oder online. | 69 |
+
+#### AG6 Keramikversiegelung (Schwerpunkt)
+
+**Ziel-URL:** `/leistungen/keramikversiegelung-celle.html`  
+**Kampagne:** G1 Leistungen Celle, `utm_content=ag-keramik`.  
+**Hinweis:** Keine Preise in Headlines oder Descriptions. Die Preise für Keramik nennt René erst nach Besichtigung oder Fotos. 12 Headlines zum Start, bei Bedarf bis 15 ergänzen. `[PRÜFEN: Akzeptiert Google Ads das Zeichen "²" in "C²Coating"? Falls die Anzeige wegen Sonderzeichen abgelehnt wird, die Headline H3 durch "Offizieller Coating-Partner" (27) ersetzen und "C²Coating" nur auf der Zielseite nennen.]`  
+**Keywords (20):** 16 Phrase Match, 4 Exact Match
+
+| Phrase Match | Exact Match |
+|---|---|
+| `"keramikversiegelung celle"` | `[keramikversiegelung celle]` |
+| `"keramikversiegelung auto celle"` | `[keramikversiegelung auto celle]` |
+| `"keramik versiegelung celle"` | `[ceramic coating celle]` |
+| `"ceramic coating celle"` | `[lackkorrektur celle]` |
+| `"keramikbeschichtung auto celle"` |  |
+| `"keramikversiegelung auto"` |  |
+| `"keramikversiegelung lack"` |  |
+| `"keramikversiegelung kosten"` |  |
+| `"keramikversiegelung in der nähe"` |  |
+| `"auto keramik versiegeln lassen"` |  |
+| `"keramikversiegelung felgen"` |  |
+| `"keramikversiegelung scheiben"` |  |
+| `"lackkorrektur celle"` |  |
+| `"lackkorrektur und keramikversiegelung"` |  |
+| `"c2coating"` |  |
+| `"coating auto celle"` |  |
+
+**Headlines (max. 30 Zeichen)**
+
+| Nr. | Headline | Zeichen |
+|---|---|---|
+| H1 | Keramikversiegelung Celle | 25 |
+| H2 | Keramikversiegelung vom Profi | 29 |
+| H3 | C²Coating Excellence Partner | 28 |
+| H4 | Lackkorrektur vor Versiegelung | 30 |
+| H5 | Keramik für Lack, Glas, Felgen | 30 |
+| H6 | Glanz und Abperleffekt | 22 |
+| H7 | Gründliche Lackvorbereitung | 27 |
+| H8 | Pflege nach der Versiegelung | 28 |
+| H9 | Persönliche Beratung in Celle | 29 |
+| H10 | 100 % Handarbeit | 16 |
+| H11 | 5,0 Sterne bei Google | 21 |
+| H12 | Keramik-Termin anfragen | 23 |
+
+**Descriptions (max. 90 Zeichen)**
+
+| Nr. | Description | Zeichen |
+|---|---|---|
+| D1 | Keramikversiegelung in Celle für Lack, Glas und Felgen. Mit gründlicher Lackvorbereitung. | 89 |
+| D2 | Als C²Coating Excellence Partner versiegeln wir Ihren Lack nach professioneller Korrektur. | 90 |
+| D3 | Vor dem Coating: Handwäsche, Dekontamination, Lackkorrektur. Verbindlicher Preis vorab. | 87 |
+| D4 | Termin per WhatsApp oder online anfragen. Wir beraten Sie gern zur passenden Versiegelung. | 90 |
 
 ### 3.2 Negative Keywords
 
@@ -392,10 +445,12 @@ Als **auszuschließende Keyword-Liste** "ElbDetail Negativ" anlegen und G1 und G
 
 | Thema | Negative Keywords |
 |---|---|
-| Angebote, die nicht fest im Programm sind | `keramik`, `keramikversiegelung`, `ceramic`, `nano`, `mobil`, `mobile aufbereitung`, `vor ort`, `abholservice`, `hol und bring`, `abo`, `flatrate` |
+| Angebote, die nicht fest im Programm sind | `nano`, `mobil`, `mobile aufbereitung`, `vor ort`, `flatrate` |
 | Fahrzeugarten | `wohnmobil`, `wohnwagen`, `motorrad`, `boot`, `lkw`, `oldtimer` |
 | Preissuchende | `billig`, `günstig` |
 | Nahe Städte außerhalb des Einzugsgebiets | `burgdorf`, `gifhorn`, `uelzen`, `soltau`, `peine` |
+
+**Nicht mehr ausschließen:** `keramik`, `keramikversiegelung`, `ceramic` (Schwerpunkt, AG6), `abholservice`, `hol und bring` (Abhol- und Bringservice nach Vereinbarung). `abo` nicht pauschal ausschließen: Suchen wie "auto pflege abo" können zu ElbDetail Care passen. Im Bericht "Suchbegriffe" beobachten.
 
 **Pflege:** Wöchentlich den Bericht "Suchbegriffe" prüfen. Unpassende Begriffe ergänzen.
 
@@ -411,11 +466,15 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 | Termin anfragen | 15 | `/termin.html` | Online oder per WhatsApp (24) | Mo bis Fr, Sa nach Absprache (28) |
 | Innenaufbereitung | 17 | `/leistungen/innenaufbereitung-celle.html` | Tiefenreinigung, Polster, Teppich (33) | Geruchsneutralisation inklusive (31) |
 | Lackpolitur | 11 | `/leistungen/lackpolitur-celle.html` | Mehrstufig, mit Messung vorab (29) | Kratzer- und Hologrammentfernung (32) |
+| Keramikversiegelung | 19 | `/leistungen/keramikversiegelung-celle.html` | Für Lack, Glas und Felgen (25) | C²Coating Excellence Partner (28) |
 | Lackversiegelung | 16 | `/leistungen/lackversiegelung-celle.html` | Lack, Felgen und Scheiben (25) | Mit Koch-Chemie-Produkten (25) |
+| Lederaufbereitung | 17 | `/leistungen/lederaufbereitung-celle.html` | Reinigen, pflegen, reparieren (29) | Lederreparatur mit Colourlock (29) |
 | Leasingrückgabe | 15 | `/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html` | Aufbereitung vor Rückgabe (25) | Auch vor dem Verkauf (20) |
 | Winter-Lackschutz | 17 | `/aktion/winterschutz.html` | Lack winterfest machen (22) | Versiegelung vor dem Winter (27) |
 | Gutscheine | 10 | `/gutscheine.html` | Fahrzeugpflege verschenken (26) | Ideal zu Weihnachten (20) |
-| Firmenkunden & Flotten | 22 | `/firmenkunden.html` | Für Firmenwagen und Flotten (27) | Termine nach Vereinbarung (25) |
+| Firmenkunden & Flotten | 22 | `/firmenkunden.html` | Autohäuser, Fahrschulen, Flotten (32) | Konditionen auf Anfrage (23) |
+| ElbDetail Care | 14 | `/elbdetail-care.html` | Regelmäßige Pflege nach Plan (28) | Individuell, nur auf Anfrage (28) |
+| Über uns | 8 | `/ueber-uns.html` | René, Gründer von ElbDetail (27) | Koch-Chemie-Fachschulungen (26) |
 
 **Callouts (max. 25 Zeichen)**
 
@@ -424,7 +483,8 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 | 100 % Handarbeit | 16 |
 | Keine Waschstraße | 17 |
 | Zwei-Eimer-Handwäsche | 21 |
-| Nur Koch-Chemie-Produkte | 24 |
+| Keramikversiegelung | 19 |
+| Colourlock Lederreparatur | 25 |
 | Lackschichtdickenmessung | 24 |
 | Verbindlicher Preis vorab | 25 |
 | Abnahme bei Tageslicht | 22 |
@@ -438,15 +498,15 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 
 | Header | Werte |
 |---|---|
-| Leistungen (engl. Services) | Außenwäsche von Hand, Innenraum-Tiefenreinigung, Lackpolitur, Lackversiegelung, Lederpflege, Geruchsentfernung, Motorraumreinigung, Felgen-Intensivreinigung, Cabrioverdeck-Reinigung |
+| Leistungen (engl. Services) | Keramikversiegelung, Lackkorrektur, Lackversiegelung, Innenraumaufbereitung, Lederreparatur, Handwäsche, Geruchsneutralisierung, Motorraumreinigung, Cabrioverdeckreinigung, Verkaufsaufbereitung |
 | Typen (engl. Types) | Frisch & Sauber, Komplettpflege, Premium Politur |
 | Stadtteile (engl. Neighborhoods) | Altstadt, Neuenhäusen, Blumlage, Westercelle, Altencelle, Garßen, Klein Hehlen, Groß Hehlen, Vorwerk, Wietzenbruch |
 
-**Anruf-Asset:** +49 172 7613807, nur zu Erreichbarkeitszeiten `[PLATZHALTER: Zeiten]`.
+**Anruf-Asset:** +49 173 5845574, nur zu Erreichbarkeitszeiten `[PLATZHALTER: Zeiten]`.
 
 **Standort-Asset:** über das verknüpfte Google Business Profile (Lachtehäuser Straße 1, 29223 Celle).
 
-**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Frisch & Sauber ab 79 €, Komplettpflege ab 179 €, Premium Politur ab 349 €, jeweils mit Ziel-URL `/preise.html`. Preise gelten für Kompaktwagen bei normalem Pflegezustand, inkl. MwSt.
+**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Frisch & Sauber ab 79 €, Komplettpflege ab 179 €, Premium Politur ab 349 €, jeweils mit Ziel-URL `/preise.html`. Preise gelten für Kompaktwagen bei normalem Pflegezustand. Es sind Endpreise: ElbDetail ist Kleinunternehmer nach § 19 UStG und berechnet keine Umsatzsteuer. Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich. Keine Keramik-Preise in das Preis-Asset aufnehmen.
 
 **Bild-Assets:** Motive aus der Shotlist (01, 14, 27/28, 33) in 1:1 und 1,91:1. Kennzeichen unkenntlich.
 
@@ -463,7 +523,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 **Primärtexte**
 
 1. Streusalz, Matsch und Frost setzen Ihrem Lack zu. Mit dem Winter-Lackschutz von ElbDetail in Celle machen Sie Ihr Auto winterfest. `[PLATZHALTER: Aktionsinhalt in einem Satz]`. Den verbindlichen Preis kennen Sie vor dem Termin. Jetzt anfragen.
-2. Von Hand statt Waschstraße. Wir waschen nach der Zwei-Eimer-Methode und arbeiten ausschließlich mit Koch-Chemie-Produkten. So kommt Ihr Lack versiegelt durch den Winter. Termin per WhatsApp: +49 172 7613807.
+2. Von Hand statt Waschstraße. Wir waschen nach der Zwei-Eimer-Methode und arbeiten mit Profi-Produkten von Koch-Chemie. So kommt Ihr Lack versiegelt durch den Winter. Termin per WhatsApp: +49 173 5845574.
 3. 5,0 Sterne bei 19 Google-Rezensionen. Jetzt auch für Ihren Lack vor dem Winter: Winter-Lackschutz in Celle. Termine Mo bis Fr, samstags nach Absprache. Zum Schluss nehmen wir Ihr Auto gemeinsam bei Tageslicht ab.
 
 **Headlines:** "Winter-Lackschutz in Celle" | "Lack winterfest machen" | "Versiegelt durch den Winter"
@@ -479,7 +539,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 | Ablauf | Wasserperlen Makro, Felge sauber, Scheibe mit Perlen, Fahrzeug-Totale, Endkarte |
 | Text-Overlay | "Bereit für Salz und Matsch?" dann "Winter-Lackschutz in Celle" dann "Termin per WhatsApp" |
 | Motive (Shotlist) | 06, 33, 35, 38, 01 |
-| Endkarte | Logo, "Winter-Lackschutz", "+49 172 7613807", elbdetail.de |
+| Endkarte | Logo, "Winter-Lackschutz", "+49 173 5845574", elbdetail.de |
 | Nicht zeigen | Schneeketten, Reifenwechsel, Leistungen, die nicht zur Aktion gehören |
 
 ### 4.2 M2 Weihnachtsgutscheine
@@ -515,7 +575,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 **Primärtexte**
 
 1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit der Komplettpflege reinigen wir Ihren Innenraum von Hand: Tiefenreinigung, Polster und Teppich, Kunststoffpflege und Geruchsneutralisation. Ab 179 € für Kompaktwagen.
-2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 172 7613807 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
+2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 173 5845574 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
 3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Komplettpflege ab 179 € (Kompakt), ab 209 € (Limousine/Kombi), ab 229 € (SUV/Van). 5,0 Sterne bei 19 Google-Rezensionen.
 
 **Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Komplettpflege ab 179 €"
@@ -532,7 +592,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 | Text-Overlay | "Hund an Bord?" dann "Kofferraum wieder frei." dann "Komplettpflege ab 179 €" |
 | Motive (Shotlist) | 18, 60, 23, 25, 17 |
 | Hund im Bild | Nur mit Einwilligung des Halters. Kein Hund im Fahrzeug während der Reinigung zeigen |
-| Endkarte | Logo, "3 Fotos per WhatsApp, verbindlicher Preis", "+49 172 7613807" |
+| Endkarte | Logo, "3 Fotos per WhatsApp, verbindlicher Preis", "+49 173 5845574" |
 | Nicht zeigen | Keine Versprechen wie "100 % haarfrei" oder "garantiert geruchsfrei" |
 
 ---
@@ -574,7 +634,7 @@ Die Statistik liest die **UTM-Parameter** aus der URL. Deshalb bekommt jede Anze
 | M3 Innenraum/Hund | `meta` | `paid_social` | `2026_meta_innenraum-hund` |
 | Optional Klick-zu-WhatsApp | (keine Website-URL, Messung in Meta) | | |
 
-**Utm_content für Google (G1):** `ag-allgemein`, `ag-innen`, `ag-lack`, `ag-leasing`. Für G2: `ag-winter`.
+**Utm_content für Google (G1):** `ag-allgemein`, `ag-innen`, `ag-lack`, `ag-leasing`, `ag-keramik`. Für G2: `ag-winter`.
 
 **Beispiel-URLs:**
 

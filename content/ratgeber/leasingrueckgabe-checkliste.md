@@ -85,7 +85,7 @@ Fangen Sie am besten etwa zwei Monate vor dem Rückgabetermin an. So bleibt genu
 
 ## Welches Paket ist für die Leasingrückgabe sinnvoll?
 
-Für die meisten Leasingrückgaben ist die Komplettpflege ein guter Ausgangspunkt, weil der Innenraum oft am stärksten beansprucht ist. Sie umfasst die Handwäsche außen, Felgen und Scheiben sowie eine Tiefenreinigung von Polstern und Teppich, Leder- oder Polsterpflege, Kunststoffpflege und Geruchsneutralisation. Die Richtpreise liegen bei ab {ab:komplett} € für Kompaktwagen, ab 209 € für Limousinen und Kombis und ab 229 € für SUVs und Vans.
+Für die meisten Leasingrückgaben ist die Komplettpflege ein guter Ausgangspunkt, weil der Innenraum oft am stärksten beansprucht ist. Sie umfasst die Handwäsche außen, Felgen und Scheiben sowie eine Tiefenreinigung von Polstern und Teppich, Leder- oder Polsterpflege, Kunststoffpflege und Geruchsneutralisation. Die Richtpreise liegen bei ab {ab:komplett} € für Kompaktwagen, ab {preis:komplett:mittel} € für Limousinen und Kombis und ab {preis:komplett:suv} € für SUVs und Vans.
 
 Zeigt der Lack viele feine Kratzer oder Waschanlagenspuren, kann die Premium Politur sinnvoll sein. Das Paket enthält zusätzlich eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung sowie eine Lack-, Felgen- und Scheibenversiegelung. Hier beginnen die Richtpreise bei {ab:premium} €. Alle Pakete finden Sie in der [Preisübersicht](/preise.html), Details zur Politur auf der Seite [Lackpolitur](/leistungen/lackpolitur-celle.html).
 
@@ -124,6 +124,6 @@ Lesen Sie das Rückgabeprotokoll vor der Unterschrift sorgfältig. Wenn Sie mit 
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail bereitet Leasingfahrzeuge in Celle zu 100 % von Hand auf, mit Zwei-Eimer-Handwäsche und Produkten von Koch-Chemie. Sie bekommen vor dem Termin einen verbindlichen Preis. Mehr zum Ablauf lesen Sie auf der Seite [Leasingrückgabe und Gebrauchtwagenaufbereitung](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html). Für Firmenwagen gibt es zusätzlich ein Angebot für [Firmenkunden](/firmenkunden.html).
+ElbDetail bereitet Leasingfahrzeuge in Celle zu 100 % von Hand auf, mit Zwei-Eimer-Handwäsche und professionellen Produkten von Koch-Chemie. Sie bekommen vor dem Termin einen verbindlichen Preis. Ein Abhol- und Bringservice ist nach Vereinbarung möglich. Mehr zum Ablauf lesen Sie auf der Seite [Leasingrückgabe und Gebrauchtwagenaufbereitung](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html). Für Firmenwagen gibt es zusätzlich ein Angebot für [Firmenkunden](/firmenkunden.html).
 
-Schicken Sie ein paar Fotos Ihres Leasingautos per WhatsApp an +49 172 7613807 oder buchen Sie direkt über das [Terminformular](/termin.html). Planen Sie den Termin rechtzeitig vor Ihrer Rückgabe ein.
+Schicken Sie ein paar Fotos Ihres Leasingautos per WhatsApp an +49 173 5845574 oder buchen Sie direkt über das [Terminformular](/termin.html). Planen Sie den Termin rechtzeitig vor Ihrer Rückgabe ein.

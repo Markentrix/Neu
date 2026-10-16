@@ -106,7 +106,7 @@ Die Website zeigt "5,0 von 5 Sternen bei 19 Google-Rezensionen". Wer Bewertungen
 >
 > Ihre Bewertung hilft anderen Autofahrern aus Celle und Umgebung. Und sie hilft uns, noch besser zu werden.
 >
-> Haben Sie Fragen zum Ergebnis? Antworten Sie einfach auf diese E-Mail oder schreiben Sie uns per WhatsApp an +49 172 7613807.
+> Haben Sie Fragen zum Ergebnis? Antworten Sie einfach auf diese E-Mail oder schreiben Sie uns per WhatsApp an +49 173 5845574.
 >
 > Viele Grüße
 > [IHR VORNAME NACHNAME]
@@ -162,7 +162,7 @@ Den Link nicht kürzen oder über fremde Dienste umleiten. Den Original-Link von
 > 2. Sterne wählen.
 > 3. Ein paar Sätze schreiben, gern mit Foto.
 >
-> Fragen zum Ergebnis? WhatsApp: +49 172 7613807
+> Fragen zum Ergebnis? WhatsApp: +49 173 5845574
 > www.elbdetail.de
 
 **Nicht auf die Karte:** "Bitte 5 Sterne", Geschenke, Rabatte, Gewinnspiele.
@@ -190,13 +190,13 @@ Den Link nicht kürzen oder über fremde Dienste umleiten. Den Original-Link von
 
 ### 3. Kritische Bewertung
 
-> Hallo [VORNAME], danke für Ihre offene Rückmeldung. Es tut uns leid, dass Sie mit [PUNKT AUS DER BEWERTUNG] nicht zufrieden waren. Das nehmen wir ernst. Wir möchten uns das gern gemeinsam mit Ihnen ansehen und eine Lösung finden. Bitte melden Sie sich per WhatsApp unter +49 172 7613807 oder per E-Mail an info@elbdetail.de. Viele Grüße, [IHR VORNAME] von ElbDetail
+> Hallo [VORNAME], danke für Ihre offene Rückmeldung. Es tut uns leid, dass Sie mit [PUNKT AUS DER BEWERTUNG] nicht zufrieden waren. Das nehmen wir ernst. Wir möchten uns das gern gemeinsam mit Ihnen ansehen und eine Lösung finden. Bitte melden Sie sich per WhatsApp unter +49 173 5845574 oder per E-Mail an info@elbdetail.de. Viele Grüße, [IHR VORNAME] von ElbDetail
 
 Danach: Kunden aktiv kontaktieren, falls bekannt. Lösung anbieten. Nicht um Änderung der Bewertung bitten. Wenn der Kunde sie von sich aus anpasst, ist das in Ordnung.
 
 ### 4. Unfaire oder falsche Bewertung
 
-> Guten Tag, danke für Ihre Nachricht. Leider können wir Ihre Bewertung keinem Auftrag bei uns zuordnen. Wenn Sie bei uns waren, melden Sie sich bitte direkt per WhatsApp unter +49 172 7613807 oder per E-Mail an info@elbdetail.de. Wir klären das gern persönlich. Viele Grüße, [IHR VORNAME] von ElbDetail
+> Guten Tag, danke für Ihre Nachricht. Leider können wir Ihre Bewertung keinem Auftrag bei uns zuordnen. Wenn Sie bei uns waren, melden Sie sich bitte direkt per WhatsApp unter +49 173 5845574 oder per E-Mail an info@elbdetail.de. Wir klären das gern persönlich. Viele Grüße, [IHR VORNAME] von ElbDetail
 
 Passt der Kunde, aber die Darstellung ist falsch, statt des ersten Satzes nutzen: "Wir sehen den Ablauf etwas anders. Vor jedem Termin nennen wir einen verbindlichen Preis und die Abnahme machen wir gemeinsam bei Tageslicht." Nur Tatsachen nennen, die auf diesen Auftrag zutreffen.
 
@@ -208,7 +208,7 @@ Zusätzlich: Verstößt die Bewertung gegen die Google-Richtlinien (z. B. Beleid
 
 Bei weniger als 4 Sternen ohne Text:
 
-> Danke für Ihre Bewertung, [VORNAME]. Wir würden gern verstehen, was wir besser machen können. Schreiben Sie uns gern per WhatsApp unter +49 172 7613807. Viele Grüße, [IHR VORNAME] von ElbDetail
+> Danke für Ihre Bewertung, [VORNAME]. Wir würden gern verstehen, was wir besser machen können. Schreiben Sie uns gern per WhatsApp unter +49 173 5845574. Viele Grüße, [IHR VORNAME] von ElbDetail
 
 ### 6. Bewertung mit Fotos
 

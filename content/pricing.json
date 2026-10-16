@@ -151,13 +151,16 @@
     }
   ],
   "extras": [
-    "Lederpflege & Imprägnierung",
-    "Geruchsentfernung",
+    "Keramikversiegelung Lack, Glas oder Felgen",
+    "Lederreparatur mit Colourlock",
+    "Lederreinigung & Lederpflege",
+    "Geruchsneutralisierung",
+    "Dampfreinigung",
     "Motorraumreinigung",
+    "Cabrioverdeck reinigen & imprägnieren",
     "Felgen-Intensivreinigung",
     "Nur Lackpolitur",
-    "Nur Lackversiegelung",
-    "Cabrioverdeck-Reinigung"
+    "Nur Lackversiegelung"
   ],
   "compare": [
     {
@@ -227,5 +230,5 @@
       "premium": true
     }
   ],
-  "note": "Alle Preise sind Richtwerte inkl. MwSt. und abhängig von Fahrzeuggröße, Verschmutzungsgrad und Lackzustand. Stark verschmutzte Innenräume, Tierhaare in großer Menge oder tiefe Lackdefekte besprechen wir vorab. Der verbindliche Preis wird vor dem Termin persönlich bestätigt."
+  "note": "Alle Preise sind Einstiegspreise (Endpreise; gemäß § 19 UStG wird keine Umsatzsteuer berechnet) und abhängig von Fahrzeuggröße, Zustand und Leistungsumfang. Starke Verschmutzung, intensive Tierhaarentfernung oder tiefe Lackdefekte besprechen wir vorab. Den verbindlichen Preis bestätigen wir vor dem Termin."
 }

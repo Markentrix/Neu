@@ -1,0 +1,77 @@
+{
+  "slug": "lederaufbereitung-celle",
+  "order": 5,
+  "short": "Lederaufbereitung",
+  "teaser": "Leder reinigen, pflegen und reparieren mit Colourlock.",
+  "seoTitle": "Lederreparatur & Lederpflege Celle | ElbDetail",
+  "description": "Lederaufbereitung in Celle mit Colourlock: Ledersitze reinigen, pflegen und reparieren. Abnutzung, Verfärbungen und kleine Schäden aufarbeiten.",
+  "h1": "Lederaufbereitung in Celle: *Leder, das wieder schön ist.*",
+  "lead": "Reinigung, Pflege und **Lederreparatur mit Colourlock**. Für beanspruchte Fahrersitze, Verfärbungen und kleinere Schäden. **Den Umfang legen wir nach Begutachtung fest.**",
+  "facts": [
+    {
+      "value": "Colourlock",
+      "label": "Pflege & Reparatur"
+    },
+    {
+      "value": "Handarbeit",
+      "label": "Sitz für Sitz"
+    },
+    {
+      "value": "Festpreis",
+      "label": "nach Begutachtung"
+    }
+  ],
+  "bookAs": "beratung",
+  "intro": "Leder im Auto wird täglich beansprucht. Am Fahrersitz reiben Kleidung und Gürtel an der Seitenwange, Hautfett und Schmutz setzen sich in die Narbung, helle Bezüge nehmen die Farbe von Jeans an. Mit der Zeit wird das Leder speckig, rissig oder stellenweise blank.\n\nWir reinigen Leder schonend und gründlich, auch in Nähten und Perforation, und pflegen es anschließend, damit es geschmeidig bleibt und vor neuem Schmutz geschützt ist. Für Reinigung, Pflege und Reparatur arbeiten wir mit Colourlock.\n\nIst das Leder bereits beschädigt, arbeiten wir beanspruchte Oberflächen auf: Abrieb, Verfärbungen und kleinere Schäden lassen sich je nach Zustand ausbessern und farblich angleichen. Was möglich ist, sagen wir Ihnen nach einer Begutachtung ehrlich. Größere Risse oder durchgescheuerte Stellen gehören manchmal in die Hände eines Sattlers. Auch das sagen wir offen.\n\nDie Lederreinigung und -pflege ist auch Teil der Komplettpflege. Mehr Tipps finden Sie im Ratgeber [Lederpflege im Auto](/ratgeber/lederpflege-auto.html).\n",
+  "includes": [
+    "Bestimmung der Lederart und des Zustands",
+    "Schonende Tiefenreinigung, auch in Nähten und Perforation",
+    "Entfernung von Glanzstellen und Verfärbungen",
+    "Pflege und Schutz mit Colourlock",
+    "Aufarbeitung beanspruchter Oberflächen",
+    "Ausbesserung von Abrieb und kleineren Schäden nach Befund",
+    "Farbangleich an das Originalleder",
+    "Pflegehinweise für danach"
+  ],
+  "steps": [
+    {
+      "title": "Begutachtung",
+      "text": "Sie schicken uns Fotos per WhatsApp oder kommen vorbei. Wir sagen Ihnen, was möglich ist, und nennen einen Festpreis."
+    },
+    {
+      "title": "Reinigung",
+      "text": "Schonende Reinigung mit weicher Bürste, Schmutz und Hautfett werden aus der Narbung gelöst."
+    },
+    {
+      "title": "Reparatur",
+      "text": "Beanspruchte Stellen werden aufgearbeitet und farblich angeglichen, soweit der Befund es erlaubt."
+    },
+    {
+      "title": "Pflege & Schutz",
+      "text": "Pflege für geschmeidiges Leder und Schutz vor neuem Abrieb, danach gemeinsame Abnahme."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Kann jedes Leder repariert werden?",
+      "a": "Abrieb, Verfärbungen und kleinere Schäden lassen sich in vielen Fällen gut ausbessern. Bei großen Rissen oder Löchern stößt eine Reparatur an Grenzen. Nach der Begutachtung sagen wir Ihnen ehrlich, was möglich ist."
+    },
+    {
+      "q": "Was kostet eine Lederreparatur?",
+      "a": "Das hängt von Art und Umfang der Schäden ab. Wir nennen den Preis nach einer Begutachtung. Für eine erste Einschätzung genügen oft ein paar Fotos per WhatsApp."
+    },
+    {
+      "q": "Wie oft sollte Autoleder gepflegt werden?",
+      "a": "Bei normaler Nutzung reichen meist zwei bis vier Pflegedurchgänge im Jahr. Helles Leder und stark genutzte Fahrersitze brauchen etwas mehr Aufmerksamkeit."
+    },
+    {
+      "q": "Behandeln Sie auch Alcantara?",
+      "a": "Ja, wir reinigen Alcantara schonend mit dafür geeigneten Mitteln. Alcantara ist eine Mikrofaser und kein Leder, deshalb kommen dort keine Lederpflegemittel zum Einsatz."
+    }
+  ],
+  "related": [
+    "innenaufbereitung-celle",
+    "leasingrueckgabe-gebrauchtwagen-celle",
+    "keramikversiegelung-celle"
+  ]
+}

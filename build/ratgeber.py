@@ -99,7 +99,7 @@ def build_article(site, a, write):
         <div class="article-summary"><h2 class="as-h">Das Wichtigste in Kürze</h2><ul>{summary}</ul></div>
         {html_body}
         {faq}
-        <div class="author-box">{I["shield"]}<div><strong>Über {ESC(site.s["name"])}</strong><p>Fachbetrieb für Fahrzeugaufbereitung in Celle. Koch-Chemie geschult, 100 % Handarbeit, {ESC(site.s["rating"]["value"])} ★ bei {site.s["rating"]["count"]} Google-Bewertungen. Dieser Artikel gibt unsere Erfahrung aus der täglichen Arbeit wieder.</p></div></div>
+        <div class="author-box">{I["shield"]}<div><strong>Über {ESC(site.s["name"])}</strong><p>Fachbetrieb für Fahrzeugaufbereitung in Celle, gegründet von {ESC((site.s.get("about") or {}).get("name") or "dem Inhaber")}. C²Coating Excellence Partner, Koch-Chemie geschult, 100 % Handarbeit, {ESC(site.s["rating"]["value"])} ★ bei {site.s["rating"]["count"]} Google-Bewertungen. Dieser Artikel gibt unsere Erfahrung aus der täglichen Arbeit wieder.</p></div></div>
       </div>
       <aside class="sticky-aside">
         <nav class="aside-card toc" aria-label="Inhalt"><h3>Inhalt</h3><ol>{toc_html}</ol></nav>

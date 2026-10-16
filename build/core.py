@@ -73,6 +73,7 @@ class Site:
         self.articles.sort(key=lambda a: (a.get("date", ""), a.get("title", "")), reverse=True)
         # Preis-Platzhalter wie {ab:komplett} in Texten durch den aktuellen Richtpreis ersetzen
         self.services = [self.fill(sv) for sv in self.services]
+        self.faq = self.fill(self.faq)
         self.articles = [self.fill(a) for a in self.articles]
         self.url = self.s["url"].rstrip("/")
         self.asset_v = {}
@@ -95,8 +96,13 @@ class Site:
     def fill(self, obj):
         keys = {p["key"] for p in self.pricing["packages"]}
         rep = lambda m: str(self.min_price(m.group(1))) if m.group(1) in keys else m.group(0)
+        def rep_cls(m):  # {preis:komplett:suv} → Richtpreis dieses Pakets für diese Fahrzeugklasse
+            if m.group(1) not in keys:
+                return m.group(0)
+            v = self.pkg(m.group(1))["prices"].get(m.group(2))
+            return str(v) if v is not None else m.group(0)
         if isinstance(obj, str):
-            return re.sub(r"\{ab:(\w+)\}", rep, obj)
+            return re.sub(r"\{preis:(\w+):(\w+)\}", rep_cls, re.sub(r"\{ab:(\w+)\}", rep, obj))
         if isinstance(obj, list):
             return [self.fill(x) for x in obj]
         if isinstance(obj, dict):
@@ -173,7 +179,7 @@ def nav_href(prefix, home, target):
     return prefix + target
 
 
-NAV = [("Leistungen", "#leistungen"), ("Preise", "preise.html"), ("Ratgeber", "ratgeber/index.html"),
+NAV = [("Leistungen", "#leistungen"), ("Preise", "preise.html"), ("Über uns", "ueber-uns.html"), ("Ratgeber", "ratgeber/index.html"),
        ("Gutscheine", "gutscheine.html"), ("Firmenkunden", "firmenkunden.html"), ("Kontakt", "kontakt.html")]
 
 
@@ -205,6 +211,8 @@ def header(site, prefix="", home=False, current=None):
       <li><a href="{prefix}termin.html">Termin online anfragen</a></li>
       <li><a href="{prefix}gutscheine.html">Gutscheine</a></li>
       <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
+      <li><a href="{prefix}elbdetail-care.html">ElbDetail Care</a></li>
+      <li><a href="{prefix}ueber-uns.html">Über uns</a></li>
       <li><a href="{prefix}ratgeber/index.html">Ratgeber</a></li>
       <li><a href="{nav_href(prefix, home, '#bewertungen')}">Bewertungen</a></li>
       <li><a href="{prefix}kontakt.html">Kontakt</a></li>
@@ -222,7 +230,7 @@ def footer(site, prefix="", home=False):
   <div class="container footer-grid">
     <div>
       <a class="footer-brand" href="{brand_href}">{logo(site, prefix, True)}</a>
-      <p class="footer-about">Premium Fahrzeugaufbereitung in Celle: Innen- &amp; Außenaufbereitung, Lackpolitur und Lackversiegelung in Handarbeit mit Koch-Chemie-Produkten.</p>
+      <p class="footer-about">Premium Fahrzeugaufbereitung in Celle: Lackaufbereitung, Keramikversiegelung, Innen- &amp; Außenaufbereitung in Handarbeit. Offizieller C²Coating Excellence Partner.</p>
       <p class="footer-areas">Für Kund:innen aus {ESC(", ".join(s["areas"]["city"]))} sowie {ESC(", ".join(s["areas"]["region"]))} und dem ganzen Landkreis Celle.</p>
       <div class="social-row">
         <a class="social-btn" href="{s["social"]["instagram"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Instagram">{I["insta"]}</a>
@@ -242,7 +250,9 @@ def footer(site, prefix="", home=False):
         <li><a href="{prefix}preise.html">Pakete &amp; Preise</a></li>
         <li><a href="{prefix}gutscheine.html">Gutscheine</a></li>
         <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
+        <li><a href="{prefix}elbdetail-care.html">ElbDetail Care</a></li>
         <li><a href="{prefix}aktion/winterschutz.html">Winter-Lackschutz</a></li>
+        <li><a href="{prefix}ueber-uns.html">Über uns</a></li>
         <li><a href="{prefix}ratgeber/index.html">Ratgeber</a></li>
       </ul>
     </div>
@@ -312,7 +322,7 @@ def package_options(site, include_extra=True, selected=None):
         sel = " selected" if selected == p["key"] else ""
         opts.append(f'<option value="{ESC(p["name"])}"{sel}>{ESC(p["name"])} – ab {site.min_price(p["key"])} €</option>')
     if include_extra:
-        for v in ["Leasingrückgabe / Verkaufsvorbereitung", "Einzelleistung (z. B. nur Politur)", "Unsicher – bitte beraten"]:
+        for v in ["Keramikversiegelung", "Lederreparatur / Lederpflege", "ElbDetail Care (regelmäßige Pflege)", "Leasingrückgabe / Verkaufsvorbereitung", "Einzelleistung (z. B. nur Politur)", "Unsicher – bitte beraten"]:
             opts.append(f"<option>{v}</option>")
     return "".join(opts)
 

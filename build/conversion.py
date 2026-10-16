@@ -25,7 +25,7 @@ def _trust_list(site):
     return f'''<ul class="mini-trust">
           <li>{I["star"]}{ESC(s["rating"]["value"])} ★ bei {s["rating"]["count"]} Google-Bewertungen</li>
           <li>{I["euro"]}Verbindlicher Preis vor dem Termin</li>
-          <li>{I["hand"]}100 % Handarbeit, Koch-Chemie geschult</li>
+          <li>{I["hand"]}100 % Handarbeit, C²Coating Excellence Partner</li>
           <li>{I["shield"]}Daten bleiben auf unserem Server in Deutschland</li>
         </ul>'''
 
@@ -53,10 +53,24 @@ def build_termin(site, write):
             </span>
           </label>'''
     pk += '''<label class="choice-card">
+            <input type="radio" name="paket" value="keramik">
+            <span class="choice-body">
+              <span class="choice-head"><strong>Keramikversiegelung</strong><span class="choice-price">nach Begutachtung</span></span>
+              <span class="choice-sub">Keramischer Schutz für Lack, Glas und Felgen mit C²Coating, inklusive Lackvorbereitung.</span>
+            </span>
+          </label>
+          <label class="choice-card">
+            <input type="radio" name="paket" value="care">
+            <span class="choice-body">
+              <span class="choice-head"><strong>ElbDetail Care</strong><span class="choice-price">auf Anfrage</span></span>
+              <span class="choice-sub">Regelmäßige Pflege im festen Rhythmus, individuell abgestimmt. Für Privat, Firmen und Flotten.</span>
+            </span>
+          </label>
+          <label class="choice-card">
             <input type="radio" name="paket" value="beratung">
             <span class="choice-body">
               <span class="choice-head"><strong>Unsicher oder Einzelleistung</strong><span class="choice-price">Beratung</span></span>
-              <span class="choice-sub">Leasingrückgabe, nur Politur, nur Versiegelung oder etwas anderes: Wir beraten Sie und machen ein Angebot.</span>
+              <span class="choice-sub">Lederreparatur, Cabrioverdeck, nur Politur oder etwas anderes: Wir beraten Sie und machen ein Angebot.</span>
             </span>
           </label>'''
     cls = "".join(f'''<label class="choice-pill"><input type="radio" name="klasse" value="{c["key"]}" required{" checked" if i == 0 else ""}><span><strong>{ESC(c["short"])}</strong><small>{ESC(c["examples"])}</small></span></label>'''
@@ -160,7 +174,7 @@ def build_termin(site, write):
             <div><dt>Wunschtermin</dt><dd data-sum="datum">–</dd></div>
           </dl>
           <div class="summary-price"><span>Richtpreis</span><strong data-sum="preis">–</strong></div>
-          <p class="hint">Richtwert für normalen Pflegezustand inkl. MwSt. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>
+          <p class="hint">Einstiegspreis für normalen Pflegezustand. Gemäß § 19 UStG ohne Umsatzsteuer. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>
         </div>
         {_trust_list(site)}
         <p class="summary-alt">Lieber direkt sprechen? <a href="tel:{s["phone"]}">{ESC(s["phoneDisplay"])}</a> oder <a href="{site.wa()}" target="_blank" rel="noopener">WhatsApp</a></p>
@@ -279,18 +293,29 @@ def build_firmen(site, write):
         {"q": "Ab wie vielen Fahrzeugen lohnt sich eine Rahmenvereinbarung?", "a": "Schon ab wenigen Fahrzeugen mit regelmäßigem Pflegebedarf. Wir besprechen Umfang und Intervalle individuell und machen ein Angebot, das zu Ihrem Fuhrpark passt."},
         {"q": "Bereiten Sie auch Fahrzeuge für Autohäuser und Händler auf?", "a": "Ja. Aufbereitung vor Verkauf, Übergabe oder Fotoshooting gehört zu unseren Kernleistungen. Abläufe und Fristen stimmen wir direkt mit Ihnen ab."},
         {"q": "Wie wird abgerechnet?", "a": "Nach Absprache, zum Beispiel pro Fahrzeug oder gesammelt pro Zeitraum. Die Details halten wir im Angebot fest."},
+        {"q": "Gibt es eine Preisliste für Gewerbekunden?", "a": "Nein, bewusst nicht. Die Konditionen richten sich nach Fahrzeuganzahl, Zustand, Leistungsumfang und Auftragsvolumen. Für Gewerbekunden gibt es Sonderkonditionen, die wir individuell vereinbaren."},
+        {"q": "Holen Sie Fahrzeuge auch ab?", "a": "Ja, ein Abhol- und Bringservice ist nach Vereinbarung möglich. Für regelmäßige Pflege bietet sich ElbDetail Care an, mit festen Intervallen und einem Ansprechpartner."},
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Firmenkunden", path)]), seo.faq(faq),
           {"@context": "https://schema.org", "@type": "Service", "name": "Fahrzeugaufbereitung für Firmen und Flotten", "serviceType": "Flottenpflege",
            "provider": {"@id": site.url + "/#business"}, "areaServed": {"@type": "City", "name": s["address"]["city"]}, "audience": {"@type": "BusinessAudience"}}]
     services = "".join(f'<label class="check"><input type="checkbox" name="leistungen" value="{ESC(x)}"><span>{ESC(x)}</span></label>' for x in
-                       ["Regelmäßige Außenwäsche", "Innenreinigung", "Komplettaufbereitung", "Aufbereitung vor Verkauf/Rückgabe", "Lackpolitur & Versiegelung", "Geruchsentfernung"])
+                       ["Regelmäßige Pflege (ElbDetail Care)", "Regelmäßige Außenwäsche", "Innenreinigung", "Komplettaufbereitung", "Aufbereitung vor Verkauf/Rückgabe", "Lackpolitur & Versiegelung", "Keramikversiegelung", "Geruchsentfernung", "Abhol- und Bringservice"])
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Firmenkunden", None)], "Für Unternehmen",
             "Gepflegte Firmenwagen. <em>Planbar und ohne Aufwand.</em>",
-            "Fahrzeugaufbereitung für Fuhrparks, Handwerksbetriebe, Autohäuser und Leasingrückläufer in Celle und Umgebung. Ein Ansprechpartner, feste Abläufe, Abrechnung nach Absprache.",
+            "Individuelle Aufbereitungslösungen und Sonderkonditionen für Autohäuser, Fahrschulen, Pflegedienste, Handwerksbetriebe, Dienstwagen und Fuhrparks in Celle und Umgebung. Einzeln oder als langfristige Vereinbarung.",
             f'<div class="hero-actions"><a class="btn btn-primary btn-lg" href="#firmenanfrage">{I["brief"]}Angebot anfordern</a><a class="btn btn-line" href="tel:{s["phone"]}">{I["phone"]}{ESC(s["phoneDisplay"])}</a></div>')}
+  <section class="tight" aria-labelledby="b2b-groups-h">
+    <div class="container">
+      <h2 id="b2b-groups-h" class="eyebrow">Wir arbeiten für</h2>
+      <ul class="chips b2b-groups">
+        <li>Autohäuser &amp; Fahrzeughändler</li><li>Fahrschulen</li><li>Pflegedienste</li><li>Handwerksbetriebe</li>
+        <li>Unternehmen mit Dienstwagen</li><li>Leasing- &amp; Fuhrparkunternehmen</li>
+      </ul>
+    </div>
+  </section>
   <section aria-labelledby="b2b-h">
     <div class="container">
       <div class="section-head"><p class="eyebrow">Warum ElbDetail</p><h2 id="b2b-h" class="display">Was Firmenkunden von uns bekommen.</h2></div>
@@ -300,7 +325,7 @@ def build_firmen(site, write):
         <div class="usecase">{I["euro"]}<h3>Klare Konditionen</h3><p>Leistungsumfang und Preise pro Fahrzeugklasse werden im Angebot festgehalten. Abrechnung nach Absprache.</p></div>
         <div class="usecase">{I["key"]}<h3>Leasingrückläufer</h3><p>Aufbereitung vor der Rückgabe reduziert Beanstandungen wegen Verschmutzung, Gerüchen und oberflächlicher Gebrauchsspuren.</p></div>
         <div class="usecase">{I["tag"]}<h3>Autohäuser &amp; Händler</h3><p>Verkaufsfertige Aufbereitung für Inserat, Übergabe oder Showroom, in Handarbeit und mit Profi-Produkten.</p></div>
-        <div class="usecase">{I["spark"]}<h3>Repräsentative Fahrzeuge</h3><p>Firmenwagen sind Visitenkarte. Lackpflege und Versiegelung halten sie dauerhaft in gutem Zustand.</p></div>
+        <div class="usecase">{I["spark"]}<h3>Repräsentative Fahrzeuge</h3><p>Firmenwagen sind Visitenkarte. Lackpflege und Keramikversiegelung halten sie dauerhaft in gutem Zustand.</p></div>
       </div>
     </div>
   </section>
@@ -421,29 +446,61 @@ def build_winter(site, write):
 
 
 # --------------------------------------------------------------------------- Entwurf Pflege-Abo
-def build_abo_draft(site, write):
-    prefix = "../"
-    ph = lambda t: f'<span class="legal-placeholder">[{t}]</span>'
+def build_care(site, write):
+    """ElbDetail Care: individuelles Pflegekonzept, nur auf Anfrage, ohne Paketpreise."""
+    s = site.s
+    path = "/elbdetail-care.html"
+    title = "ElbDetail Care: Regelmäßige Fahrzeugpflege Celle | ElbDetail"
+    desc = ("ElbDetail Care: regelmäßige Fahrzeugpflege in Celle für Privat, Firmen und Flotten. "
+            "Leistungen und Intervalle nach Maß, nur auf Anfrage.")
+    faq = [
+        {"q": "Was kostet ElbDetail Care?", "a": "Es gibt keine festen Paketpreise. Die Konditionen richten sich nach Fahrzeug, gewünschtem Leistungsumfang und Häufigkeit der Pflege. Nach einem kurzen Gespräch erhalten Sie ein individuelles Angebot."},
+        {"q": "Für wen eignet sich ElbDetail Care?", "a": "Für alle, die ihr Fahrzeug dauerhaft gepflegt halten möchten: Privatkunden, Unternehmen mit Dienstwagen und Fuhrparks. Besonders sinnvoll ist Care auch für keramisch versiegelte Fahrzeuge, deren Beschichtung regelmäßig gewartet werden sollte."},
+        {"q": "Wie oft kommt mein Fahrzeug zur Pflege?", "a": "Das legen wir gemeinsam fest, zum Beispiel monatlich, alle zwei bis drei Monate oder saisonal im Frühjahr und vor dem Winter. Die Intervalle lassen sich jederzeit anpassen."},
+        {"q": "Kann das Fahrzeug abgeholt werden?", "a": "Ja, ein Abhol- und Bringservice ist nach Vereinbarung möglich. Die Details klären wir im Gespräch."},
+    ]
+    ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("ElbDetail Care", path)]), seo.faq(faq),
+          {"@context": "https://schema.org", "@type": "Service", "name": "ElbDetail Care", "serviceType": "Regelmäßige Fahrzeugpflege",
+           "description": desc, "provider": {"@id": site.url + "/#business"}, "areaServed": {"@type": "City", "name": s["address"]["city"]}}]
+    wa = site.wa("Hallo ElbDetail, ich interessiere mich für ElbDetail Care. Fahrzeug(e): … Gewünschter Rhythmus: …")
+    items = [("cal", "Regelmäßige Innen- und Außenpflege", "Feste Termine im passenden Rhythmus, damit Ihr Fahrzeug immer gepflegt ist."),
+             ("snow", "Saisonale Pflege", "Lack- und Felgenschutz vor dem Winter, gründliche Frühjahrspflege nach der Streusalz-Saison."),
+             ("shield", "Wartung von Keramikversiegelungen", "Pflege und Auffrischung bereits keramisch versiegelter Fahrzeuge, damit der Schutz lange hält."),
+             ("car", "Abhol- und Bringservice", "Nach Vereinbarung holen wir das Fahrzeug ab und bringen es gepflegt zurück.")]
+    cards = "".join(f'<div class="usecase">{I[i]}<h3>{h}</h3><p>{p}</p></div>' for i, h, p in items)
     body = f'''
 <main id="main">
-  <section class="page-hero page-hero--compact" aria-labelledby="page-h">
+{_page_hero("", [("Startseite", "index.html"), ("ElbDetail Care", None)], "ElbDetail Care",
+            "Dauerhaft gepflegt. <em>Ganz ohne daran zu denken.</em>",
+            "Ein individuelles Pflegekonzept für Privatkunden, Unternehmen und Fahrzeugflotten. Leistungen und Intervalle stimmen wir genau auf Sie und Ihr Fahrzeug ab.",
+            f'<div class="hero-actions"><a class="btn btn-primary btn-lg" href="termin.html?paket=care">{I["cal"]}Care anfragen</a><a class="btn btn-wa btn-lg" href="{wa}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a></div>')}
+  <section aria-labelledby="care-h">
     <div class="container">
-      <p class="eyebrow">Entwurf · nicht öffentlich verlinkt</p>
-      <h1 id="page-h">ElbDetail Pflege-Abo: <em>Immer gepflegt, ohne daran zu denken.</em></h1>
-      <p class="lead">Regelmäßige Aufbereitung im festen Rhythmus mit Vorzugsterminen. Diese Seite ist ein Entwurf. Preise und Konditionen müssen vom Betrieb festgelegt werden, bevor sie live geht.</p>
+      <div class="section-head"><p class="eyebrow">Was enthalten sein kann</p><h2 id="care-h" class="display">Pflege nach Maß, <em>nicht von der Stange.</em></h2>
+        <p>Sie wählen, was Ihr Fahrzeug braucht. Wir kümmern uns darum, dass es regelmäßig passiert.</p></div>
+      <div class="usecase-grid">{cards}</div>
     </div>
   </section>
-  <section aria-label="Abo-Modelle">
+  <section class="soft" aria-labelledby="care2-h">
     <div class="container">
-      <div class="plans">
-        <article class="plan"><h3>Basis</h3><p class="plan-for">Frisch &amp; Sauber alle {ph("6")} Wochen</p><div class="plan-price"><span class="amount">{ph("Preis / Monat")}</span></div><ul><li>{I["check"]}Feste Wunschtermine</li><li>{I["check"]}Erinnerung per WhatsApp</li><li>{I["check"]}{ph("Preisvorteil gegenüber Einzelbuchung")}</li></ul></article>
-        <article class="plan is-featured"><span class="plan-badge">Empfehlung</span><h3>Plus</h3><p class="plan-for">Wechsel aus Frisch &amp; Sauber und Komplettpflege</p><div class="plan-price"><span class="amount">{ph("Preis / Monat")}</span></div><ul><li>{I["check"]}Alles aus Basis</li><li>{I["check"]}{ph("Anzahl")} × Komplettpflege pro Jahr</li><li>{I["check"]}Vorzugstermine</li></ul></article>
-        <article class="plan"><h3>Premium</h3><p class="plan-for">Plus jährliche Politur und Versiegelung</p><div class="plan-price"><span class="amount">{ph("Preis / Monat")}</span></div><ul><li>{I["check"]}Alles aus Plus</li><li>{I["check"]}1 × Premium Politur pro Jahr</li><li>{I["check"]}{ph("Laufzeit / Kündigung")}</li></ul></article>
+      <div class="section-head"><p class="eyebrow">So funktioniert es</p><h2 id="care2-h" class="display">In vier Schritten <em>zu Ihrem Pflegeplan.</em></h2></div>
+      <div class="process-rail">
+        <div class="process-cell"><span class="process-index">SCHRITT 01</span><h3>Gespräch</h3><p>Wir sprechen über Ihr Fahrzeug, die Nutzung und Ihre Wünsche.</p></div>
+        <div class="process-cell"><span class="process-index">SCHRITT 02</span><h3>Individuelles Angebot</h3><p>Sie erhalten einen Pflegeplan mit Leistungen, Intervallen und Konditionen.</p></div>
+        <div class="process-cell"><span class="process-index">SCHRITT 03</span><h3>Feste Termine</h3><p>Die Pflegetermine planen wir im Voraus, auf Wunsch mit Abholung.</p></div>
+        <div class="process-cell"><span class="process-index">SCHRITT 04</span><h3>Laufende Betreuung</h3><p>Ein fester Ansprechpartner, Anpassungen jederzeit nach Absprache.</p></div>
       </div>
-      <p class="price-note">Zu klären: Laufzeit, Kündigungsfrist, Zahlungsweise, Umgang mit ausgefallenen Terminen, Fahrzeugwechsel. Danach kann die Seite in den Inhalten freigeschaltet und verlinkt werden.</p>
+      <p class="hint">ElbDetail Care gibt es nur auf Anfrage. Feste Paketpreise gibt es nicht, weil sich die Konditionen nach Fahrzeug, Umfang und Häufigkeit richten. Für Unternehmen und Fuhrparks siehe auch <a class="text-link" href="firmenkunden.html">Firmenkunden</a>.</p>
     </div>
   </section>
+  <section aria-labelledby="care3-h">
+    <div class="container">
+      <div class="section-head"><p class="eyebrow">Häufige Fragen</p><h2 id="care3-h" class="display">Gut zu wissen <em>über Care.</em></h2></div>
+      <div class="faq-list">{core.faq_html(faq)}</div>
+    </div>
+  </section>
+{core.cta_band(site, "", "Ihr Pflegeplan beginnt mit einem Gespräch.", "Schreiben Sie uns kurz, um welches Fahrzeug es geht und wie oft Sie sich Pflege wünschen. Wir melden uns mit einem individuellen Vorschlag.")}
 </main>
 '''
-    write("entwurf/pflege-abo.html", core.head(site, "Entwurf Pflege-Abo | ElbDetail", "Entwurf, nicht öffentlich.", "/entwurf/pflege-abo.html", prefix=prefix, noindex=True)
-          + core.header(site, prefix) + body + core.footer(site, prefix))
+    write("elbdetail-care.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="elbdetail-care.html") + body + core.footer(site))
+

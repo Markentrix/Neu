@@ -413,6 +413,8 @@
     related: "Verwandte Leistungen (Adressen)", date: "Veröffentlicht (JJJJ-MM-TT)", updated: "Aktualisiert (JJJJ-MM-TT)", category: "Kategorie", readingTime: "Lesezeit (Min.)", excerpt: "Teaser",
     about: "Über uns (Inhaber-Karte auf der Startseite, erscheint wenn Name und Text gefüllt sind)", role: "Rolle", photo: "Foto (Dateiname aus Fotos)", since: "Seit (z. B. 2023)",
     verification: "Bestätigungscodes für Google Search Console / Bing", google: "Google (nur der Code aus dem Meta-Tag)", bing: "Bing (nur der Code)",
+    smallBusiness: "Kleinunternehmer nach § 19 UStG (keine Umsatzsteuer)", partners: "Partner & Qualifikationen", pickup: "Abhol- und Bringservice",
+    freeRadiusKm: "Kostenloser Umkreis in km (0 = nicht anzeigen)", bookAs: "Anfrage-Art in der Buchung (Schlüssel)",
     service: "Passende Leistung (Adresse)", summary: "Das Wichtigste in Kürze", draft: "Entwurf (nicht veröffentlichen)", city_: "Stadtteile" };
   function lbl(k) { return KEYS[k] || String(k).replace(/([A-Z])/g, " $1").replace(/^./, function (c) { return c.toUpperCase(); }); }
   function blank(tpl) {

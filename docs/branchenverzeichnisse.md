@@ -1,6 +1,6 @@
 # Branchenverzeichnisse: NAP-Konsistenz und Citations für ElbDetail
 
-Stand: 15.10.2026. Eckige Klammern `[...]` markieren Entscheidungen oder Prüfungen, die der Betrieb selbst vornehmen muss.
+Stand: 16.10.2026 (Fakten von René ergänzt). Eckige Klammern `[...]` markieren Entscheidungen oder Prüfungen, die der Betrieb selbst vornehmen muss.
 
 **Warum das wichtig ist:** Google gleicht Name, Adresse und Telefonnummer (NAP) mit anderen Quellen im Netz ab. Stimmen die Angaben überall überein, stärkt das das Vertrauen in den Eintrag. Abweichungen wie "Str." statt "Straße" oder eine andere Telefonschreibweise schwächen ihn.
 
@@ -14,7 +14,7 @@ Diese Angaben genau so kopieren. Keine Abkürzungen, keine Varianten.
 ElbDetail – Premium Fahrzeugaufbereitung
 Lachtehäuser Straße 1
 29223 Celle
-+49 172 7613807
++49 173 5845574
 https://www.elbdetail.de
 info@elbdetail.de
 ```
@@ -25,7 +25,7 @@ info@elbdetail.de
 | Straße | Lachtehäuser Straße 1 | Lachtehäuser Str. 1, Lachtehaeuser Strasse 1 |
 | PLZ und Ort | 29223 Celle | Celle 29223, 29223 Celle-Lachtehausen |
 | Bundesland (falls Pflichtfeld) | Niedersachsen | Nds. |
-| Telefon | +49 172 7613807 | 0172/7613807, 0172 761 38 07, +49 (0) 172 7613807 |
+| Telefon | +49 173 5845574 | 0173/5845574, 0173 584 55 74, +49 (0) 173 5845574. **Die alte Nummer 0172 7613807 überall ersetzen**, wo sie schon eingetragen ist (Google, Verzeichnisse, Social Media) |
 | Website | https://www.elbdetail.de | elbdetail.de, http://elbdetail.de, Unterseiten als Hauptadresse |
 | E-Mail | info@elbdetail.de | private Adressen |
 
@@ -34,8 +34,16 @@ info@elbdetail.de
 **Zusatzangaben, die ebenfalls überall gleich sein sollen**
 
 - Kategorie: Autoaufbereitung (oder "Fahrzeugaufbereitung", wenn es die Kategorie dort gibt)
+- Zusatzkategorien, wo erlaubt: Keramikversiegelung (oder "Keramikbeschichtung", "Lackversiegelung"), Autopflege, Lederpflege. Keramik zuerst wählen, sie ist der Schwerpunkt.
+- Stichwörter / Leistungen (wo es ein Feld gibt): Keramikversiegelung, C²Coating Excellence Partner, Lackkorrektur, Lackpolitur, Lackversiegelung, Innenraumaufbereitung, Lederreparatur mit Colourlock, Polster- und Teppichreinigung, Tierhaarentfernung, Geruchsneutralisierung, Cabrioverdeckreinigung, Motorraumreinigung, Leasingrückläufer- und Verkaufsaufbereitung, ElbDetail Care, Aufbereitung für Autohäuser und Unternehmen, Abhol- und Bringservice nach Vereinbarung
+- Erlaubt ein Feld kein "²", "C2Coating Excellence Partner" schreiben.
 - Öffnungszeiten: Montag bis Freitag `[UHRZEITEN wie im Google-Profil]`, samstags nach Absprache, Termine nach Vereinbarung
 - Kurzbeschreibung: dieselbe wie im Google-Profil (siehe `google-unternehmensprofil.md`, Abschnitt 3)
+- Kurzfassung für Felder mit wenig Platz (193 Zeichen):
+
+  > Fahrzeugaufbereitung in Celle mit Schwerpunkt Lackkorrektur und Keramikversiegelung. Offizieller C²Coating Excellence Partner. 100 % Handarbeit, Innenraum- und Lederaufbereitung mit Colourlock.
+
+- Steuerhinweis, falls ein Preisfeld danach fragt: Endpreise, Kleinunternehmer nach § 19 UStG, keine Umsatzsteuer. Keine AGB verlinken, es gibt noch keine.
 - Zahlungsarten: Bar, Überweisung
 - Logo und Titelbild: dieselben Dateien wie im Google-Profil
 
@@ -65,11 +73,13 @@ Kostenangaben ändern sich. Vor jeder Buchung selbst prüfen. Für die Wirkung r
 | 13 | GoLocal | golocal.de | B | kostenlos/kostenpflichtig prüfen | Hat eigene Bewertungen. Gleiche Regeln wie bei Google beachten. |
 | 14 | meinestadt.de | meinestadt.de | B | kostenlos/kostenpflichtig prüfen | Lokales Portal mit Stadtseite Celle. |
 | 15 | Yelp | yelp.de | B | Grundeintrag kostenlos, Werbung kostenpflichtig | Yelp filtert Bewertungen streng. Nie um Yelp-Bewertungen bitten, Yelp untersagt das. |
-| 16 | Werkenntdenbesten | werkenntdenbesten.de | C | kostenlos/kostenpflichtig prüfen | Bewertungsportal. Nur eintragen, wenn Sie es auch pflegen. |
+| 16 | Werkenntdenbesten | werkenntdenbesten.de | C | kostenlos/kostenpflichtig prüfen | Bewertungsportal. Nur eintragen, wenn ihr es auch pflegt. |
 | 17 | OpenStreetMap | openstreetmap.org | B | kostenlos | Freie Karte, Datenquelle für viele Navi-Apps. Betrieb als Punkt mit Name, Adresse, Telefon, Website eintragen. |
 | 18 | LinkedIn Unternehmensseite | linkedin.com | C | kostenlos | Sinnvoll für Firmenkunden und Flotten. Link auf /firmenkunden.html setzen. |
-| 19 | Koch-Chemie Partner- oder Händlersuche | prüfen | C | prüfen | Nur prüfen: Gibt es eine Partnerliste für Betriebe mit Lehrgang? Falls ja, Eintrag anfragen. Falls nein, streichen. |
+| 19 | Koch-Chemie Partner- oder Händlersuche | prüfen | C | prüfen | Nur prüfen: Gibt es eine Partnerliste für Betriebe mit Fachschulung? Falls ja, Eintrag anfragen. Falls nein, streichen. |
 | 20 | Stadt Celle, Wirtschaftsförderung oder lokales Branchenbuch | prüfen | C | prüfen | Prüfen, ob es ein offizielles Firmenverzeichnis für Celle gibt, z. B. über Stadt, Landkreis oder Gewerbeverein. |
+| 21 | C²Coating Partnersuche (Herstellerseite) | prüfen | A | prüfen | René ist offizieller C²Coating Excellence Partner. Prüfen, ob ElbDetail in der Partnersuche des Herstellers steht und ob NAP und Website stimmen. Wenn möglich, Link auf /leistungen/keramikversiegelung-celle.html setzen lassen. |
+| 22 | Colourlock Fachbetriebs- oder Händlersuche | prüfen | C | prüfen | Nur prüfen: Gibt es eine Liste für Betriebe, die mit Colourlock arbeiten? Falls ja, Eintrag mit Link auf /leistungen/lederaufbereitung-celle.html anfragen. Falls nein, streichen. |
 
 **Tracking:** Für jeden Eintrag notieren: Datum, Plattform, Zugangsdaten im Passwortmanager, Link zum Eintrag, Status. `[ABLAGEORT, z. B. Tabelle im Verwaltungsportal oder Passwortmanager]`
 
@@ -92,11 +102,11 @@ Ein Link von einer lokalen Website zu elbdetail.de hilft bei der Sichtbarkeit in
 | Zielgruppe | Beispiele (selbst recherchieren) | Mögliche Linkquelle | Ziel-Unterseite |
 |---|---|---|---|
 | Sport- und Freizeitvereine | Fußball, Handball, Reiten, Schützen im Landkreis Celle | Sponsorenseite, Vereinsheft online | /index.html |
-| Auto- und Oldtimer-Clubs | Oldtimer-Stammtische, Youngtimer-Treffen, Markenclubs in der Region | Partnerseite, Bericht über ein Pflege-Treffen | /leistungen/lackpolitur-celle.html |
-| Autohäuser ohne eigene Aufbereitung | Kleinere Gebrauchtwagenhändler in Celle und im Landkreis | Partnerseite, Hinweis für Käufer | /leistungen/leasingrueckgabe-gebrauchtwagen-celle.html |
+| Auto- und Oldtimer-Clubs | Oldtimer-Stammtische, Youngtimer-Treffen, Markenclubs in der Region | Partnerseite, Bericht über ein Pflege-Treffen | /leistungen/keramikversiegelung-celle.html, /leistungen/lackpolitur-celle.html |
+| Autohäuser und Fahrzeughändler | Autohäuser und Gebrauchtwagenhändler in Celle und im Landkreis, besonders ohne eigene Aufbereitung | Partnerseite, Hinweis für Käufer | /firmenkunden.html, /leistungen/keramikversiegelung-celle.html |
 | Freie Werkstätten, Reifenhändler | Betriebe ohne eigene Aufbereitung | Empfehlungsseite "Unsere Partner" | /leistungen/aussenaufbereitung-celle.html |
-| Leasingfirmen, Fuhrparkverwalter, Kfz-Sachverständige | Regionale Leasinggeber, Gutachterbüros | Hinweis vor Rückgabe oder Begutachtung | /leistungen/leasingrueckgabe-gebrauchtwagen-celle.html |
-| Unternehmen mit Fuhrpark | Handwerksbetriebe, Pflegedienste, Fahrschulen, Taxibetriebe | Partner- oder Dienstleisterseite | /firmenkunden.html |
+| Leasing- und Fuhrparkunternehmen, Kfz-Sachverständige | Regionale Leasinggeber, Fuhrparkverwalter, Gutachterbüros | Hinweis vor Rückgabe oder Begutachtung | /leistungen/leasingrueckgabe-gebrauchtwagen-celle.html, /firmenkunden.html |
+| Unternehmen mit Fuhrpark | Fahrschulen, Pflegedienste, Handwerksbetriebe, Unternehmen mit Dienstwagen | Partner- oder Dienstleisterseite | /firmenkunden.html, /elbdetail-care.html |
 | Lokalpresse und Online-Portale | Cellesche Zeitung, lokale Online-Portale `[PRÜFEN]` | Ratgeberartikel, Bericht | /ratgeber/index.html |
 | Gutschein-Kooperationen | Einzelhändler, Geschenkeläden, Fotografen, Hochzeitsdienstleister, ein möglicher Celler Stadtgutschein `[PRÜFEN, ob es ihn gibt]` | Geschenkideen-Seite, Partnerliste | /gutscheine.html |
 | Wirtschaft und Netzwerke | Gewerbevereine, Unternehmerstammtische, IHK-Regionalgruppe `[PRÜFEN]` | Mitgliederverzeichnis | /index.html |
@@ -111,16 +121,16 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > Hallo [NAME],
 >
-> wir sind ElbDetail, Fahrzeugaufbereitung in Celle. Wir arbeiten zu 100 % in Handarbeit mit Produkten von Koch-Chemie.
+> wir sind ElbDetail, Fahrzeugaufbereitung in Celle. Wir arbeiten zu 100 % in Handarbeit. Unser Schwerpunkt ist die Lackkorrektur mit Keramikversiegelung. Ich bin offizieller C²Coating Excellence Partner.
 >
 > Wir möchten [VEREINSNAME] gern unterstützen. Unsere Idee: [SPONSORING-LEISTUNG, z. B. Aufbereitung des Vereinsbusses, Gutschein für die Tombola, Trikotsatz]. Im Gegenzug würden wir uns über eine Nennung mit Link auf Ihrer Sponsorenseite freuen.
 >
 > Passt das zu Ihnen? Ich freue mich auf eine kurze Rückmeldung.
 >
 > Viele Grüße
-> [VORNAME NACHNAME]
+> René [NACHNAME]
 > ElbDetail – Premium Fahrzeugaufbereitung
-> +49 172 7613807 · https://www.elbdetail.de
+> +49 173 5845574 · https://www.elbdetail.de
 
 **Vorlage B: Auto- oder Oldtimer-Club**
 
@@ -128,31 +138,31 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > Hallo [NAME],
 >
-> wir sind ElbDetail aus Celle und bereiten Fahrzeuge von Hand auf. Vor jeder Politur messen wir die Lackschichtdicke. Gerade bei älteren Fahrzeugen ist das wichtig.
+> wir sind ElbDetail aus Celle und bereiten Fahrzeuge von Hand auf. Vor jeder Politur messen wir die Lackschichtdicke. Gerade bei älteren Fahrzeugen ist das wichtig. Auf Wunsch schützen wir den Lack danach mit einer Keramikversiegelung. Ich bin offizieller C²Coating Excellence Partner. Leder pflegen und reparieren wir mit Colourlock.
 >
 > Wir würden gern [ANGEBOT, z. B. einen kurzen Pflege-Vortrag bei Ihrem Stammtisch oder eine Vorführung] machen. [KOSTEN: z. B. kostenlos für Sie]. Wenn es Ihnen gefällt, freuen wir uns über einen Hinweis mit Link auf Ihrer Website.
 >
 > Haben Sie Interesse?
 >
 > Viele Grüße
-> [VORNAME NACHNAME], ElbDetail
+> René [NACHNAME], ElbDetail
 
 **Vorlage C: Autohaus oder Gebrauchtwagenhändler ohne eigene Aufbereitung**
 
-> Betreff: Fahrzeugaufbereitung für Ihre Gebrauchtwagen
+> Betreff: Fahrzeugaufbereitung und Keramikversiegelung für Ihre Fahrzeuge
 >
 > Guten Tag [NAME],
 >
-> wir sind ElbDetail, Fahrzeugaufbereitung in Celle. Wir bereiten Fahrzeuge innen und außen von Hand auf, auf Wunsch mit Lackpolitur nach Schichtdickenmessung.
+> wir sind ElbDetail, Fahrzeugaufbereitung in Celle. Wir bereiten Fahrzeuge innen und außen von Hand auf. Das reicht von der Verkaufsaufbereitung über die Lackkorrektur nach Schichtdickenmessung bis zur Keramikversiegelung. Ich bin offizieller C²Coating Excellence Partner.
 >
-> Für Händler ohne eigene Aufbereitung können wir eine Lösung sein. Sie erhalten vor jedem Auftrag einen verbindlichen Preis. Bezahlung per Überweisung ist möglich. [KONDITIONEN FÜR HÄNDLER, falls gewünscht]
+> Für Autohäuser und Händler können wir ein fester Partner sein, ob für Gebrauchtwagen vor dem Verkauf, Leasingrückläufer oder Neuwagen mit Keramikversiegelung. Die Konditionen legen wir individuell mit Ihnen fest. Bezahlung per Überweisung ist möglich. Ein Abhol- und Bringservice ist nach Vereinbarung möglich. [KONDITIONEN FÜR HÄNDLER, erst nach Entscheidung von René]
 >
 > Darf ich Ihnen unser Angebot in einem kurzen Gespräch vorstellen? Wenn die Zusammenarbeit passt, würden wir uns gegenseitig auf unseren Websites als Partner nennen.
 >
 > Freundliche Grüße
-> [VORNAME NACHNAME]
+> René [NACHNAME]
 > ElbDetail – Premium Fahrzeugaufbereitung
-> +49 172 7613807 · https://www.elbdetail.de/firmenkunden.html
+> +49 173 5845574 · https://www.elbdetail.de/firmenkunden.html
 
 **Vorlage D: Freie Werkstatt oder Reifenhändler**
 
@@ -160,14 +170,14 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > Hallo [NAME],
 >
-> Ihre Kunden fragen bestimmt manchmal nach einer gründlichen Reinigung oder Politur. Wir sind ElbDetail aus Celle und machen genau das, in Handarbeit und mit Koch-Chemie-Produkten.
+> Ihre Kunden fragen bestimmt manchmal nach einer gründlichen Reinigung, Politur oder Keramikversiegelung. Wir sind ElbDetail aus Celle und machen genau das, in Handarbeit und mit Profi-Produkten von C²Coating, Koch-Chemie und Colourlock.
 >
 > Unser Vorschlag: Sie empfehlen uns bei Bedarf weiter, wir empfehlen Sie bei Werkstatt- und Reifenthemen. Gern auch mit gegenseitigem Link auf der Website. [Visitenkarten oder Flyer bringen wir vorbei, falls vorhanden.]
 >
 > Wann passt ein kurzer Besuch?
 >
 > Viele Grüße
-> [VORNAME NACHNAME], ElbDetail
+> René [NACHNAME], ElbDetail
 
 **Vorlage E: Leasingfirma, Fuhrparkverwalter oder Kfz-Sachverständiger**
 
@@ -177,14 +187,16 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > wir sind ElbDetail, Fahrzeugaufbereitung in Celle. Wir bereiten Fahrzeuge vor der Rückgabe oder Begutachtung innen und außen von Hand auf. Vor einer Politur messen wir die Lackschichtdicke. Vor jedem Termin gibt es einen verbindlichen Preis.
 >
+> Für Leasing- und Fuhrparkunternehmen bieten wir außerdem regelmäßige Pflege mit ElbDetail Care an. Die Konditionen legen wir individuell fest. Mehr dazu: https://www.elbdetail.de/elbdetail-care.html
+>
 > Falls Sie Ihren Kunden vor der Rückgabe einen Hinweis auf eine Aufbereitung geben, nehmen Sie uns gern als Ansprechpartner für die Region Celle auf. Infos finden Sie hier: https://www.elbdetail.de/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html
 >
 > Für Rückfragen bin ich gern erreichbar.
 >
 > Freundliche Grüße
-> [VORNAME NACHNAME]
+> René [NACHNAME]
 > ElbDetail – Premium Fahrzeugaufbereitung
-> +49 172 7613807
+> +49 173 5845574
 
 **Vorlage F: Lokalpresse**
 
@@ -192,17 +204,18 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > Guten Tag [NAME],
 >
-> ich bin [VORNAME NACHNAME] von ElbDetail, Fahrzeugaufbereitung in Celle. Ich biete Ihnen gern Fachwissen für einen Ratgeber an, zum Beispiel:
+> ich bin René [NACHNAME] von ElbDetail, Fahrzeugaufbereitung in Celle, und offizieller C²Coating Excellence Partner. Ich biete Ihnen gern Fachwissen für einen Ratgeber an, zum Beispiel:
 >
 > - Wie schützt man den Lack vor Streusalz?
 > - Worauf sollte man vor der Leasingrückgabe achten?
 > - Warum misst man vor einer Politur die Lackschichtdicke?
+> - Was bringt eine Keramikversiegelung, und warum ist die Vorbereitung des Lacks so wichtig?
 >
 > Ich stehe für ein kurzes Interview oder für Fotos bei der Arbeit zur Verfügung. Über eine Nennung mit Link auf https://www.elbdetail.de freue ich mich, falls das bei Ihnen möglich ist.
 >
 > Freundliche Grüße
-> [VORNAME NACHNAME]
-> +49 172 7613807 · info@elbdetail.de
+> René [NACHNAME]
+> +49 173 5845574 · info@elbdetail.de
 
 **Vorlage G: Gutschein-Kooperation mit Einzelhandel oder Dienstleistern**
 
@@ -217,7 +230,7 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 > Haben Sie Lust, darüber zu sprechen?
 >
 > Viele Grüße
-> [VORNAME NACHNAME], ElbDetail
+> René [NACHNAME], ElbDetail
 > https://www.elbdetail.de/gutscheine.html
 
 ### 3.3 Nachfassen

@@ -18,6 +18,7 @@
   function todayIso() { var t = new Date(); return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0"); }
   function params() { var o = {}; location.search.replace(/^\?/, "").split("&").forEach(function (kv) { if (!kv) return; var p = kv.split("="); o[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || "").replace(/\+/g, " ")); }); return o; }
   var Q = params();
+  var SPECIAL = { beratung: "Beratung / Einzelleistung", keramik: "Keramikversiegelung", care: "ElbDetail Care" };  // Anfragen ohne Paketpreis
 
   /* Verfügbarkeit (Sperrtage, Ruhetage, nächster freier Tag) – einmal laden, mehrfach nutzen */
   var availP = null;
@@ -221,7 +222,7 @@
     return data;
   }
   function pretty(k, v) {
-    if (k === "paket") { var p = pkg(v); return p ? p.name : (v === "beratung" ? "Beratung / Einzelleistung" : v); }
+    if (k === "paket") { var p = pkg(v); return p ? p.name : (SPECIAL[v] || v); }
     if (k === "klasse") { var c = cls(v); return c ? c.name : v; }
     if (k === "datum" || k === "datum2") return deDate(v);
     if (k === "betrag" || k === "wunschbetrag") return v + " €";
@@ -362,11 +363,11 @@
     function summary() {
       var d = collect(wz), p = pkg(d.paket), c = cls(d.klasse), v = p && c ? price(d.paket, d.klasse) : null;
       var set = function (k, t) { var el = wz.parentNode.querySelector('[data-sum="' + k + '"]'); if (el) el.textContent = t; };
-      set("paket", p ? p.name : (d.paket === "beratung" ? "Beratung" : "–"));
+      set("paket", p ? p.name : (SPECIAL[d.paket] || "–"));
       set("klasse", (c ? c.name : "–") + (d.fahrzeug ? " · " + d.fahrzeug : ""));
       set("extras", d.extras && d.extras.length ? d.extras.join(", ") : "keine");
       set("datum", d.datum ? deDate(d.datum) + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
-      set("preis", v != null ? "ab " + fmt(v) + " €" : (d.paket === "beratung" ? "nach Beratung" : "–"));
+      set("preis", v != null ? "ab " + fmt(v) + " €" : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
       $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); if (x != null) el.textContent = "ab " + fmt(x) + " €"; });
     }
     wz.addEventListener("change", summary); wz.addEventListener("input", summary);

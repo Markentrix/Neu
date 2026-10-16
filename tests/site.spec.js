@@ -3,7 +3,8 @@ const { test, expect } = require("@playwright/test");
 const AxeBuilder = require("@axe-core/playwright").default;
 
 const PAGES = [
-  "/", "/preise.html", "/kontakt.html", "/termin.html", "/gutscheine.html", "/firmenkunden.html", "/aktion/winterschutz.html", "/ratgeber/index.html",
+  "/", "/preise.html", "/kontakt.html", "/ueber-uns.html", "/elbdetail-care.html", "/leistungen/keramikversiegelung-celle.html",
+  "/leistungen/lederaufbereitung-celle.html", "/termin.html", "/gutscheine.html", "/firmenkunden.html", "/aktion/winterschutz.html", "/ratgeber/index.html",
   "/ratgeber/leasingrueckgabe-checkliste.html", "/ratgeber/kosten-fahrzeugaufbereitung-celle.html",
   "/leistungen/aussenaufbereitung-celle.html", "/leistungen/innenaufbereitung-celle.html", "/leistungen/lackpolitur-celle.html",
   "/leistungen/lackversiegelung-celle.html", "/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html",
@@ -48,7 +49,7 @@ test("Alle internen Links funktionieren", async ({ page, request }) => {
   expect(broken).toEqual([]);
 });
 
-for (const path of ["/", "/preise.html", "/kontakt.html", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
+for (const path of ["/", "/preise.html", "/kontakt.html", "/ueber-uns.html", "/elbdetail-care.html", "/leistungen/keramikversiegelung-celle.html", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
   test(`Barrierefreiheit ${path}: keine schweren axe-Verstöße`, async ({ page }) => {
     await page.goto(path);
     await page.emulateMedia({ reducedMotion: "reduce" });

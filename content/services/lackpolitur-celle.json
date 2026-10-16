@@ -1,6 +1,6 @@
 {
   "slug": "lackpolitur-celle",
-  "order": 3,
+  "order": 2,
   "short": "Lackpolitur",
   "teaser": "Mehrstufige Politur gegen Kratzer, Hologramme und matten Lack.",
   "seoTitle": "Lackpolitur Celle: Kratzer & Hologramme weg | ElbDetail",
@@ -28,7 +28,7 @@
     "Lackreinigungsknete gegen Rauigkeit",
     "Lackschichtdickenmessung vor der Politur",
     "Abkleben empfindlicher Kanten und Kunststoffe",
-    "Schleifpolitur gegen Kratzer und Hologramme",
+    "Einstufige Glanzpolitur oder mehrstufige Lackkorrektur, je nach Zustand",
     "Finishpolitur für Tiefenglanz",
     "Kontrolle unter Tageslicht und Punktlicht",
     "Lackversiegelung zum Schutz des Ergebnisses"
@@ -70,8 +70,8 @@
     }
   ],
   "related": [
+    "keramikversiegelung-celle",
     "lackversiegelung-celle",
-    "aussenaufbereitung-celle",
-    "leasingrueckgabe-gebrauchtwagen-celle"
+    "aussenaufbereitung-celle"
   ]
 }

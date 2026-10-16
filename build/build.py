@@ -112,7 +112,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     conversion.build_gutscheine(site, write)
     conversion.build_firmen(site, write)
     conversion.build_winter(site, write)
-    conversion.build_abo_draft(site, write)
+    conversion.build_care(site, write)
+    pages.build_about(site, write)
     ratgeber.build_index(site, write)
     for a in site.articles:
         ratgeber.build_article(site, a, write)
@@ -123,7 +124,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     iso = site.s["standIso"]
     sm = [("/", iso, "1.0", "weekly")]
     sm += [(f"/leistungen/{s['slug']}.html", iso, "0.8", "monthly") for s in site.services]
-    sm += [("/preise.html", iso, "0.9", "monthly"), ("/kontakt.html", iso, "0.5", "yearly")]
+    sm += [("/preise.html", iso, "0.9", "monthly"), ("/kontakt.html", iso, "0.5", "yearly"), ("/ueber-uns.html", iso, "0.6", "yearly"),
+           ("/elbdetail-care.html", iso, "0.7", "monthly")]
     sm += [("/termin.html", iso, "0.9", "monthly"), ("/gutscheine.html", iso, "0.7", "monthly"), ("/firmenkunden.html", iso, "0.7", "monthly"),
            ("/aktion/winterschutz.html", iso, "0.7", "monthly"), ("/ratgeber/index.html", iso, "0.7", "weekly")]
     sm += [(f"/ratgeber/{a['slug']}.html", a.get("updated") or a.get("date") or iso, "0.6", "monthly") for a in site.articles]
@@ -145,7 +147,9 @@ def build(content_dir, out_dir, static_dir, quiet=False):
 
     warnings = []
     L = site.s.get("legal", {})
-    for k, label in (("owner", "Inhaber im Impressum"), ("vatId", "USt-IdNr."), ("mailProvider", "E-Mail-Anbieter in der Datenschutzerklärung")):
+    for k, label in (("owner", "Inhaber im Impressum (vollständiger Name)"), ("vatId", "USt-IdNr."), ("mailProvider", "E-Mail-Anbieter in der Datenschutzerklärung")):
+        if k == "vatId" and L.get("smallBusiness"):
+            continue
         if not L.get(k):
             warnings.append(f"Platzhalter offen: {label}")
     if not site.s.get("googleReviewUrl"):

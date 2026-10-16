@@ -2,7 +2,7 @@
   "items": [
     {
       "q": "Was kostet eine Fahrzeugaufbereitung in Celle bei ElbDetail?",
-      "a": "Die Richtpreise für eine Kompaktklasse liegen bei 79 € (Frisch & Sauber), 179 € (Komplettpflege) und 349 € (Premium Politur mit Lackversiegelung). Größere Fahrzeuge wie Kombis, SUVs oder Vans und stark verschmutzte Innenräume kosten entsprechend mehr. Ein verbindliches Angebot gibt es kostenlos per WhatsApp."
+      "a": "Die Einstiegspreise für eine Kompaktklasse liegen bei {ab:frisch} € (Frisch & Sauber), {ab:komplett} € (Komplettpflege) und {ab:premium} € (Premium Politur mit Lackversiegelung). Größere Fahrzeuge, starke Verschmutzung oder intensive Tierhaarentfernung kosten entsprechend mehr. Keramikversiegelungen kalkulieren wir nach Begutachtung. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Ein verbindliches Angebot erhalten Sie kostenlos vorab."
     },
     {
       "q": "Wie lange dauert eine Aufbereitung?",
@@ -10,15 +10,15 @@
     },
     {
       "q": "Wo findet die Aufbereitung statt? Kommen Sie auch zu mir?",
-      "a": "Die Aufbereitung findet am Standort Lachtehäuser Straße 1 in 29223 Celle statt. Ob eine Abholung oder ein Bring-Service in Celle und Umgebung möglich ist, klären wir individuell bei der Anfrage."
+      "a": "Die Aufbereitung findet an unserem Standort in der Lachtehäuser Straße 1 in 29223 Celle statt. Auf Wunsch holen wir Ihr Fahrzeug ab und bringen es zurück. Den Abhol- und Bringservice vereinbaren wir individuell bei der Anfrage."
     },
     {
       "q": "Wie bekomme ich einen Termin?",
-      "a": "Am schnellsten über das Online-Terminformular oder per WhatsApp an +49 172 7613807: kurz Fahrzeug, gewünschtes Paket und Wunschzeitraum nennen. Alternativ telefonisch. Termine vergeben wir nach Vereinbarung, samstags nach Absprache."
+      "a": "Am schnellsten über das Online-Terminformular oder per WhatsApp an +49 173 5845574: kurz Fahrzeug, gewünschtes Paket und Wunschzeitraum nennen. Alternativ telefonisch. Termine vergeben wir nach Vereinbarung, samstags nach Absprache."
     },
     {
       "q": "Welche Produkte verwendet ElbDetail?",
-      "a": "Wir arbeiten ausschließlich mit professionellen Pflegeprodukten von Koch-Chemie und sind in den Koch-Chemie-Lehrgängen geschult. Alle Arbeiten erfolgen in Handarbeit, ohne Waschstraße."
+      "a": "Wir arbeiten mit professionellen Produkten und Systemen von C²Coating, Koch-Chemie und Colourlock. ElbDetail ist offizieller C²Coating Excellence Partner, Inhaber René hat Fachschulungen bei Koch-Chemie absolviert. Für Leder nutzen wir Colourlock, auch für Reparaturen. Alle Arbeiten erfolgen in Handarbeit, ohne Waschstraße."
     },
     {
       "q": "Entfernen Sie auch Tierhaare, Flecken und Gerüche?",
@@ -39,6 +39,14 @@
     {
       "q": "Wie kann ich bezahlen?",
       "a": "Bar oder per Überweisung nach der gemeinsamen Abnahme des Fahrzeugs."
+    },
+    {
+      "q": "Bieten Sie eine Keramikversiegelung an?",
+      "a": "Ja, die Keramikversiegelung ist unser Schwerpunkt. Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Scheiben und Felgen keramisch. Vorher bereiten wir den Lack sorgfältig vor, bei Bedarf mit einer Lackkorrektur. Den Preis nennen wir nach Begutachtung Ihres Fahrzeugs. Mehr dazu auf der Seite [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html)."
+    },
+    {
+      "q": "Gibt es eine regelmäßige Pflege, zum Beispiel für Firmen oder Flotten?",
+      "a": "Ja, mit [ElbDetail Care](/elbdetail-care.html). Leistungen und Intervalle stimmen wir individuell auf Sie und Ihr Fahrzeug ab, für Privatkunden ebenso wie für Unternehmen und Fuhrparks. ElbDetail Care gibt es nur auf Anfrage, ohne feste Paketpreise."
     }
   ]
 }

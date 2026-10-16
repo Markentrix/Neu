@@ -2,10 +2,10 @@
   "name": "ElbDetail",
   "tagline": "Premium Fahrzeugaufbereitung",
   "url": "https://www.elbdetail.de",
-  "phone": "+491727613807",
-  "phoneDisplay": "0172 7613807",
-  "phoneIntl": "+49 172 7613807",
-  "whatsapp": "491727613807",
+  "phone": "+491735845574",
+  "phoneDisplay": "0173 5845574",
+  "phoneIntl": "+49 173 5845574",
+  "whatsapp": "491735845574",
   "email": "info@elbdetail.de",
   "address": {
     "street": "Lachtehäuser Straße 1",
@@ -79,7 +79,8 @@
     "vatId": "",
     "responsible": "",
     "mailProvider": "",
-    "hosting": "Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland"
+    "hosting": "Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland",
+    "smallBusiness": true
   },
   "vouchers": {
     "amounts": [
@@ -94,14 +95,35 @@
   "stand": "Oktober 2026",
   "standIso": "2026-10-15",
   "about": {
-    "name": "",
-    "role": "Inhaber",
+    "name": "René",
+    "role": "Gründer und Inhaber",
     "photo": "",
     "since": "",
-    "text": ""
+    "text": "Für mich ist Fahrzeugaufbereitung keine Dienstleistung von der Stange. Ob Familienwagen, Firmenfahrzeug oder Sportwagen: Jedes Auto bekommt die gleiche Sorgfalt. Mein Ziel ist, dass Sie sich wirklich über das Ergebnis freuen."
   },
   "verification": {
     "google": "",
     "bing": ""
+  },
+  "partners": [
+    {
+      "name": "C²Coating",
+      "role": "Offizieller Excellence Partner",
+      "text": "Keramikversiegelungen für Lack, Glas und Felgen"
+    },
+    {
+      "name": "Koch-Chemie",
+      "role": "Fachschulungen absolviert",
+      "text": "Reinigung, Politur und Pflege"
+    },
+    {
+      "name": "Colourlock",
+      "role": "Lederpflege und Lederreparatur",
+      "text": "Reinigung, Pflege und Aufarbeitung von Leder"
+    }
+  ],
+  "pickup": {
+    "freeRadiusKm": 0,
+    "text": "Abhol- und Bringservice nach Vereinbarung"
   }
 }

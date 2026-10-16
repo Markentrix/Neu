@@ -147,20 +147,26 @@ class TestBuild(Base):
         for root, _, files in os.walk(site):
             for f in files:
                 if f.endswith((".html", ".txt", ".xml")):
-                    self.assertNotIn("{ab:", open(os.path.join(root, f), encoding="utf-8").read(), f)
+                    t = open(os.path.join(root, f), encoding="utf-8").read()
+                    self.assertNotIn("{ab:", t, f)
+                    self.assertNotIn("{preis:", t, f)
         self.assertIn("ab 179 €", open(os.path.join(site, "leistungen/innenaufbereitung-celle.html"), encoding="utf-8").read())
 
     def test_owner_card_and_verification_only_when_filled(self):
         import build as builder
         site = app.site_dir()
         home = open(os.path.join(site, "index.html"), encoding="utf-8").read()
-        self.assertNotIn("owner-card", home)
+        self.assertIn("owner-card", home)  # Startinhalt: Karte von René ist gefüllt
         self.assertNotIn("google-site-verification", home)
         tmp = tempfile.mkdtemp(prefix="elb-owner-")
         content = os.path.join(tmp, "content")
         shutil.copytree(os.path.join(ROOT, "content"), content, ignore=shutil.ignore_patterns(".media-cache"))
         p = os.path.join(content, "site.json")
         d = json.load(open(p, encoding="utf-8"))
+        d["about"] = {"name": "", "role": "", "photo": "", "since": "", "text": ""}
+        json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False)
+        builder.build(content, os.path.join(tmp, "leer"), os.path.join(ROOT, "static"), quiet=True)
+        self.assertNotIn("owner-card", open(os.path.join(tmp, "leer", "index.html"), encoding="utf-8").read())
         d["about"] = {"name": "Max Muster", "role": "Inhaber", "photo": "", "since": "2023", "text": "Ich bereite jedes Auto selbst auf."}
         d["verification"] = {"google": "abc123", "bing": ""}
         json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False)

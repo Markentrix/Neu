@@ -1,6 +1,6 @@
 # ElbDetail Foto- und Video-Shotlist
 
-Briefing für Fotoshooting und Videodreh. Stand: 15.10.2026.
+Briefing für Fotoshooting und Videodreh. Stand: 16.10.2026 (Keramikversiegelung und Lederreparatur ergänzt).
 
 **Platzhalter:** Alles in `[PLATZHALTER: …]` muss der Betrieb vor dem Shooting entscheiden.
 
@@ -15,9 +15,9 @@ Bildstil, Farben und Logo-Regeln: siehe `docs/markenleitfaden.md`, Abschnitt 8.
 | Ort | Lachtehäuser Straße 1, 29223 Celle |
 | Datum, Uhrzeit | `[PLATZHALTER: Shooting-Tag(e), Beginn]` |
 | Fotograf / Videograf | `[PLATZHALTER: Name, Kontakt]` |
-| Fahrzeuge | `[PLATZHALTER: Möglichst je ein Fahrzeug Kompakt, Limousine/Kombi und SUV/Van. Eines mit sichtbaren Swirls im Lack, eines mit verschmutztem Innenraum, gern mit Hundehaaren. Schriftliche Einwilligung des Halters.]` |
+| Fahrzeuge | `[PLATZHALTER: Möglichst je ein Fahrzeug Kompakt, Limousine/Kombi und SUV/Van. Eines mit sichtbaren Swirls im Lack, eines mit verschmutztem Innenraum, gern mit Hundehaaren. Ein Fahrzeug, das eine Keramikversiegelung bekommt (dunkler Lack zeigt Glanz und Abperleffekt am besten). Ein Ledersitz oder Lenkrad mit Abrieb für die Colourlock-Reparatur. Schriftliche Einwilligung des Halters.]` |
 | Arbeitsbereich | `[PLATZHALTER: Halle oder überdachter Platz mit konstantem Licht vorhanden? Außenfläche für Tageslicht-Aufnahmen?]` |
-| Ansprechpartner vor Ort | `[PLATZHALTER: Inhaber oder Vertretung]` |
+| Ansprechpartner vor Ort | René (Inhaber) `[PLATZHALTER: oder Vertretung]` |
 | Ziel | Echte Bilder für Website (Hero, Vorher/Nachher-Slider, Leistungsseiten, Galerie), Social Media und Anzeigen |
 
 ---
@@ -80,6 +80,8 @@ elbdetail_<gruppe>_<motiv>_<fahrzeug>_<jjjjmmtt>_<nr>[_vorher|_nachher].<endung>
 | Außenaufbereitung | `aussen` |
 | Innenraum | `innen` |
 | Lackpolitur | `lack` |
+| Keramikversiegelung | `keramik` |
+| Lederaufbereitung und Lederreparatur | `leder` |
 | Detail-Makro | `makro` |
 | Standort/Werkstatt | `standort` |
 | Inhaber bei der Arbeit | `arbeit` |
@@ -199,7 +201,7 @@ Format-Kürzel: 16:9, 4:3, 4:5, 1:1, 9:16. V/N = Vorher/Nachher-Paar nach Abschn
 | 42 | Außenansicht Standort Lachtehäuser Straße 1 | Totale, ca. 24 mm | Tageslicht | 16:9, 4:3 | Kontakt, Anfahrt | `[PLATZHALTER: Schild/Logo am Gebäude vorhanden?]` |
 | 43 | Zufahrt und Abstellfläche, so wie Kunden ankommen | Augenhöhe, ca. 24 mm | Tageslicht | 4:3 | Termin-Seite, Anfahrt | Fremde Kennzeichen K |
 | 44 | Arbeitsplatz aufgeräumt als Totale | Ecke des Raums, ca. 16 bis 24 mm | Arbeitslicht | 16:9 | Firmenkunden, Startseite | |
-| 45 | Produktregal mit Koch-Chemie-Produkten | Halbnah, ca. 35 mm | Gleichmäßig | 4:5, 1:1 | Beweis Koch-Chemie | |
+| 45 | Produktregal mit Produkten von C²Coating, Koch-Chemie und Colourlock | Halbnah, ca. 35 mm | Gleichmäßig | 4:5, 1:1 | Beweis Profi-Produkte | |
 | 46 | Arbeitswagen mit Werkzeug, Pads, Pinseln | Halbnah, ca. 35 mm | Gleichmäßig | 4:5 | Social | |
 | 47 | Arbeitsplatz am Abend, Licht an, Auto auf der Fläche | Totale, ca. 24 mm | Mischlicht | 16:9, 9:16 | Social, Hero-Alternative | H, K |
 
@@ -240,6 +242,39 @@ Nur mit echtem Kunden und schriftlicher Einwilligung. Keine gestellten Szenen mi
 | 64 | Display des Messgeräts zeigt Wert, Schnitt auf Politur | Nah, 9:16 | Weiches Licht | 9:16 | Reel | |
 | 65 | Tür öffnen und Innenraum zeigen (Reveal) | Gimbal, 9:16 | Gleichmäßig | 9:16 | Reel | H |
 
+### 4.10 Keramikversiegelung
+
+Keramik ist der Schwerpunkt von ElbDetail. Diese Motive haben beim Shooting Vorrang. Nur zeigen, wie René tatsächlich arbeitet. Aushärtezeiten der Produkte beachten: Abperl-Aufnahmen erst, wenn die Versiegelung laut Hersteller belastbar ist, oder an einem bereits versiegelten Fahrzeug.
+
+| Nr. | Motiv | Perspektive / Brennweite | Licht | Format | Einsatz | Einwill. |
+|---|---|---|---|---|---|---|
+| 66 | Video: Wasser perlt in Zeitlupe von keramikversiegelter Motorhaube | Makro, Zeitlupe 100 fps, 10 Sekunden | Gegenlicht | 16:9 Video, 9:16 | Leistungsseite Keramik, Reel, Anzeigen AG6 | |
+| 67 | Abperleffekt in Ruhe: runde Wasserperlen auf Lack | Makro, ca. 100 mm | Gegenlicht | 1:1, 4:5 | Keramik, Google-Beitrag | |
+| 68 | Glanz nach dem Coating: Spiegelung von Himmel oder Halle im Lack | Flach über Lack, ca. 35 mm | Tageslicht | 16:9, 4:5 | Hero-Alternative, Keramik | H |
+| 69 | Vorbereitung: Lackdekontamination (Flugrost- oder Teerentferner, Knete), wie tatsächlich verwendet | Nah, ca. 50 mm | Weiches Licht | 4:5, 9:16 | Keramik, Ratgeber | |
+| 70 | Vorbereitung: Lack entfetten mit Tuch vor dem Auftrag | Nah, ca. 50 mm | Weiches Licht | 4:5 | Keramik "Vorbereitung" | |
+| 71 | Auftrag von Hand: Applikator gleitet im Kreuzgang über den Lack | Nah, seitlich, ca. 50 mm | Prüflicht oder Seitenlicht | 4:5, 9:16 | Keramik, Reel | |
+| 72 | Rückstände abnehmen mit Mikrofasertuch unter Prüflicht | Nah, ca. 50 mm | Punktlicht | 4:5, 9:16 | Keramik | |
+| 73 | IR-Trocknung: Infrarotstrahler vor der versiegelten Fläche | Halbnah, ca. 35 mm | Mischlicht | 16:9, 4:5 | Keramik `[PLATZHALTER: Nutzt René IR-Trocknung? Sonst streichen.]` | |
+| 74 | Urkunde "C²Coating Excellence Partner", gut lesbar, ohne Spiegelung | Frontal, Stativ, ca. 50 mm | Gleichmäßig, Polfilter | 4:5, 1:1 | Über uns, Google-Profil, Keramik | P, falls René die Urkunde hält |
+| 75 | C²Coating-Produkte auf dem Arbeitswagen, Etiketten lesbar | Halbnah, ca. 50 mm | Gleichmäßig | 4:5, 1:1 | Beweis C²Coating | |
+| 76 | Wasser perlt von keramikversiegelter Frontscheibe | Makro, ca. 100 mm | Gegenlicht | 4:5, 9:16 | Keramik Glas | |
+| 77 | Wasser perlt von keramikversiegelter Felge, Speiche im Detail | Makro, ca. 100 mm | Seitenlicht | 1:1, 4:5 | Keramik Felgen | |
+| 78 | Video: Pflegewäsche eines keramikversiegelten Fahrzeugs, Schaum läuft ab | Totale und Nah, 9:16 | Tageslicht | 9:16, 16:9 | Pflege keramikversiegelter Fahrzeuge, ElbDetail Care | H, K |
+
+### 4.11 Lederreparatur mit Colourlock
+
+Vorher/Nachher nach den Regeln aus Abschnitt 3. Keine Retusche am Leder. Nur Reparaturen zeigen, die René wirklich gemacht hat.
+
+| Nr. | Motiv | Perspektive / Brennweite | Licht | Format | Einsatz | Einwill. |
+|---|---|---|---|---|---|---|
+| 79 | Sitzwange mit Abrieb, Rissen oder Farbverlust (vorher) | Nah, Stativ, ca. 50 bis 100 mm | Weiches Seitenlicht, Leuchte markiert | 4:3 V/N | Leistungsseite Leder, Google-Beitrag | H |
+| 80 | Gleiche Stelle nach der Colourlock-Reparatur (nachher) | Identisch zu 79 | Identisch zu 79 | 4:3 V/N | Leistungsseite Leder, Vorher/Nachher-Slider | H |
+| 81 | Lenkrad abgegriffen vorher und nachher | Nah, Stativ, ca. 50 mm | Weiches Licht | 4:3 V/N | Leder, Galerie | H |
+| 82 | Reinigung mit Colourlock-Lederreiniger und Bürste, Schaum auf dem Leder | Makro, ca. 100 mm | Seitenlicht | 4:5, 9:16 | Leder, Reel | |
+| 83 | Reparatur: Farbe oder Füller wird aufgetragen, so wie tatsächlich gearbeitet wird | Nah, ca. 50 mm | Weiches Licht | 4:5, 9:16 | Leder | |
+| 84 | Colourlock-Produkte im Arbeitskontext am Sitz | Halbnah, ca. 35 mm | Gleichmäßig | 4:5, 1:1 | Beweis Colourlock | |
+
 ---
 
 ## 5. Reel- und Short-Ideen
@@ -256,14 +291,16 @@ Für Instagram Reels, TikTok, Facebook Reels und YouTube Shorts. Länge 15 bis 3
 | 6 | 50/50 | Klebeband wird abgezogen | Punktlicht über die Trennlinie, langsam | "Links vorher. Rechts nachher." | 29, 61 |
 | 7 | Saubere Linie | Sauger zieht eine Bahn in den Teppich | 3 Bahnen, Fußraum-Totale, Fußmatte | "Kurz zuschauen. Lohnt sich." | 60, 17, 40 |
 | 8 | Abnahme bei Tageslicht | Fahrzeug fährt ins Tageslicht | Rundgang, Kunde zeigt Detail, Schlüssel | "Zum Schluss: gemeinsame Abnahme bei Tageslicht." | 54, 55, 56 |
-| 9 | Preis vorab | Smartphone zeigt WhatsApp mit 3 Fotos (Demo-Chat ohne echte Kundendaten) | Fotos senden, Antwort mit Preis, Terminbestätigung | "3 Fotos per WhatsApp." dann "Verbindlicher Preis vor dem Termin." dann "+49 172 7613807" | Demo-Screen, 01 |
+| 9 | Preis vorab | Smartphone zeigt WhatsApp mit 3 Fotos (Demo-Chat ohne echte Kundendaten) | Fotos senden, Antwort mit Preis, Terminbestätigung | "3 Fotos per WhatsApp." dann "Verbindlicher Preis vor dem Termin." dann "+49 173 5845574" | Demo-Screen, 01 |
 | 10 | Leasingrückgabe | Kalender mit markiertem Rückgabetermin | Rundgang mit Taschenlampe, Messung, Politur, Innenraum, Abnahme | "Leasingrückgabe steht an?" dann "Gepflegt in die Übergabe." | 50, 26, 30, 25, 54 |
+| 11 | Keramik in 20 Sekunden | Wasser trifft keramikversiegelten Lack, Perlen springen ab | Dekontamination, Entfetten, Auftrag von Hand, Abnehmen, Abperleffekt, Urkunde | "Was passiert vor dem Coating?" dann "Vorbereitung. Auftrag. Glanz." dann "C²Coating Excellence Partner in Celle" | 66, 69, 70, 71, 72, 74 |
+| 12 | Leder gerettet | Finger fährt über die abgeriebene Sitzwange | Reinigung, Reparatur mit Colourlock, gleiche Stelle nachher | "Abrieb am Ledersitz?" dann "Reparatur mit Colourlock." | 79, 82, 83, 80 |
 
 **Hinweise:**
 - In den ersten 2 Sekunden kein Logo-Intro. Sofort das Motiv.
-- Am Ende 2 Sekunden Endkarte: Logo, "Termin per WhatsApp: +49 172 7613807", elbdetail.de.
+- Am Ende 2 Sekunden Endkarte: Logo, "Termin per WhatsApp: +49 173 5845574", elbdetail.de.
 - Untertitel für gesprochenen Text immer einblenden.
-- Keine Versprechen ins Overlay, die nicht in den Fakten stehen (keine Garantien, keine Ersparnis bei Leasingrückgabe, keine Keramikversiegelung).
+- Keine Versprechen ins Overlay, die nicht in den Fakten stehen (keine Garantien, keine Haltbarkeit in Jahren bei Keramik, keine Ersparnis bei Leasingrückgabe, keine Preise für Keramik).
 
 ---
 
@@ -320,10 +357,14 @@ Gilt auch für den Inhaber selbst, für Aushilfen und für Kunden bei der Abnahm
 | Innenaufbereitung | `/leistungen/innenaufbereitung-celle.html` | 16:9, 4:3 | 04, 16, 17, 18, 25 |
 | Lackpolitur | `/leistungen/lackpolitur-celle.html` | 16:9, 4:3 | 03, 26, 27/28, 29, 34 |
 | Lackversiegelung | `/leistungen/lackversiegelung-celle.html` | 4:3 | 32, 33, 38 |
+| Keramikversiegelung | `/leistungen/keramikversiegelung-celle.html` | 16:9, 4:3 | 66 bis 78, Hero-Alternative 68 |
+| Lederaufbereitung | `/leistungen/lederaufbereitung-celle.html` | 16:9, 4:3 | 79/80, 81, 82 bis 84, 20, 37 |
+| ElbDetail Care | `/elbdetail-care.html` | 16:9, 4:3 | 78, 44, 47 |
+| Über uns | `/ueber-uns.html` | 4:5, 4:3 | 51, 52, 53, 74 |
 | Leasingrückgabe / Verkauf | `/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html` | 4:3 | 14, 50, 54 |
 | Winter-Lackschutz | `/aktion/winterschutz.html` | 16:9, 4:3 | 06, 33, 35, 38 |
 | Gutscheine | `/gutscheine.html` | 4:3 | 56, 01 |
-| Firmenkunden & Flotten | `/firmenkunden.html` | 16:9 | 44, 47 |
+| Firmenkunden & Flotten | `/firmenkunden.html` | 16:9 | 44, 47, 68 |
 | Termin | `/termin.html` | 4:3 | 42, 43 |
 | Ratgeber | `/ratgeber/index.html` | 4:3 | 07, 26, 39 |
 | Galerie | Galerie im Verwaltungsportal | 4:3 | alle freigegebenen V/N-Paare und Details |
@@ -332,6 +373,8 @@ Gilt auch für den Inhaber selbst, für Aushilfen und für Kunden bei der Abnahm
 - "Vorher: Fahrersitz eines Kombis mit Krümeln und Flecken"
 - "Nachher: derselbe Fahrersitz nach der Innenraum-Tiefenreinigung"
 - "Lackschichtdickenmessung an der Motorhaube vor der Politur"
+- "Wasser perlt von einer keramikversiegelten Motorhaube"
+- "Vorher: Ledersitz mit Abrieb an der Sitzwange"
 
 **Reihenfolge Vorher/Nachher:** immer vorher links bzw. zuerst, nachher rechts bzw. danach.
 
@@ -343,12 +386,13 @@ Gilt auch für den Inhaber selbst, für Aushilfen und für Kunden bei der Abnahm
 |---|---|---|
 | 1 | Aufbau, Bodenmarkierungen, Stativpositionen, Protokoll vorbereiten | |
 | 2 | Einwilligungen unterschreiben lassen, Kennzeichen abdecken, persönliche Gegenstände entfernen | |
-| 3 | Alle Vorher-Bilder, bevor gearbeitet wird | 10, 14, 15, 16, 17, 18, 22, 27, 41 |
+| 3 | Alle Vorher-Bilder, bevor gearbeitet wird | 10, 14, 15, 16, 17, 18, 22, 27, 41, 79, 81 |
 | 4 | Zeitraffer-Kamera starten | 59 |
-| 5 | Arbeit begleiten: außen, innen, Lack, Makros, Hände | 07 bis 13, 19 bis 24, 26, 29 bis 33, 48 bis 50 |
-| 6 | Alle Nachher-Bilder mit identischen Einstellungen | Gegenstücke aus Schritt 3, 28 |
-| 7 | Hero, Spiegelung, Wasserperlen, Details | 01 bis 06, 34 bis 40 |
-| 8 | Standort, Porträt, Erklärvideo | 42 bis 47, 51 bis 53 |
+| 5 | Arbeit begleiten: außen, innen, Lack, Makros, Hände | 07 bis 13, 19 bis 24, 26, 29 bis 33, 48 bis 50, 82 bis 84 |
+| 5a | Keramikversiegelung begleiten: Vorbereitung, Auftrag, Abnehmen, ggf. IR-Trocknung. Oft eigener Termin, weil das Coating Zeit zum Aushärten braucht | 69 bis 73, 75 |
+| 6 | Alle Nachher-Bilder mit identischen Einstellungen | Gegenstücke aus Schritt 3, 28, 80 |
+| 7 | Hero, Spiegelung, Wasserperlen, Details | 01 bis 06, 34 bis 40, 66 bis 68, 76 bis 78 (an einem ausgehärteten Fahrzeug) |
+| 8 | Standort, Porträt, Erklärvideo, Urkunde | 42 bis 47, 51 bis 53, 74 |
 | 9 | Abnahme mit Kunde bei Tageslicht | 54 bis 58 |
 | 10 | Social-Clips und Reel-Hooks gezielt nachdrehen | 60 bis 65 |
 | 11 | Datensicherung doppelt, Dateinamen nach Schema | |

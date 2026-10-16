@@ -72,6 +72,8 @@ Wachs, Versiegelung und Keramikbeschichtung unterscheiden sich vor allem in Mate
 
 Für viele Fahrzeuge im Alltag ist eine Lackversiegelung ein guter Mittelweg zwischen Schutz, Aufwand und Kosten. Welche Lösung zu Ihnen passt, hängt davon ab, wie Sie Ihr Auto nutzen und wie viel Zeit Sie in die Pflege investieren möchten.
 
+Gerade beim Neuwagen lohnt sich ein Blick auf die [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html). Als C²Coating Excellence Partner trägt ElbDetail die Beschichtung auf, solange der Lack noch makellos ist. Sie hält deutlich länger als eine klassische Versiegelung. Wie lange genau, hängt von der Beschichtung und Ihrer Pflege ab.
+
 ### Was ist mit Lackschutzfolie?
 
 Eine Lackschutzfolie ist eine transparente Folie, die auf besonders gefährdete Bereiche geklebt wird. Dazu gehören Frontstoßfänger, Motorhaube, Spiegel und Einstiegsleisten. Sie fängt Steinschläge und leichte Kratzer ab, die eine Versiegelung nicht verhindern kann. Folie und Versiegelung schließen sich nicht aus. Viele kombinieren beides, um vorne mechanischen Schutz und auf dem restlichen Lack leichtere Pflege zu erhalten.
@@ -124,10 +126,10 @@ Eher verzichtbar, wenn
 
 ## Was kostet eine Versiegelung beim Neuwagen?
 
-Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des Lacks ab. Bei ElbDetail ist die Lackversiegelung einzeln buchbar, der Preis dafür wird auf Anfrage genannt. Hat der Lack bereits Waschkratzer, ist das Paket Premium Politur eine Option. Es umfasst eine mehrstufige Lackpolitur, Lackversiegelung sowie Felgen- und Scheibenversiegelung und beginnt bei Kompaktwagen ab {ab:premium} €, bei Limousinen und Kombis ab 399 € und bei SUVs und Vans ab 449 €. Die Richtpreise gelten für einen normalen Pflegezustand.
+Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des Lacks ab. Bei ElbDetail ist die Lackversiegelung einzeln buchbar, der Preis dafür wird auf Anfrage genannt. Hat der Lack bereits Waschkratzer, ist das Paket Premium Politur eine Option. Es umfasst eine mehrstufige Lackpolitur, Lackversiegelung sowie Felgen- und Scheibenversiegelung und beginnt bei Kompaktwagen ab {ab:premium} €, bei Limousinen und Kombis ab {preis:premium:mittel} € und bei SUVs und Vans ab {preis:premium:suv} €. Die Richtpreise gelten für einen normalen Pflegezustand.
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Sie ist außerdem Teil des Pakets Premium Politur. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und ausschließlich mit Koch-Chemie-Produkten. Sie erhalten vor dem Termin einen verbindlichen Preis und begutachten das Ergebnis gemeinsam mit uns bei Tageslicht. Richtpreise finden Sie in der [Preisübersicht](/preise.html).
+ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Sie ist außerdem Teil des Pakets Premium Politur. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und mit professionellen Produkten von Koch-Chemie und C²Coating. Sie erhalten vor dem Termin einen verbindlichen Preis und begutachten das Ergebnis gemeinsam mit uns bei Tageslicht. Richtpreise finden Sie in der [Preisübersicht](/preise.html).
 
-Fragen Sie Ihren Termin für den Neuwagen per WhatsApp an +49 172 7613807 oder über das [Terminformular](/termin.html) an.
+Fragen Sie Ihren Termin für den Neuwagen per WhatsApp an +49 173 5845574 oder über das [Terminformular](/termin.html) an.

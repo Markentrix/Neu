@@ -71,8 +71,8 @@ def plan_row(site, p, prefix=""):
         </a>'''
 
 
-HOME_FAQ = [0, 2, 3, 5, 6]     # Indizes aus faq.json, die auf der Startseite stehen
-PRICE_FAQ = [0, 1, 7, 8, 9]    # … und auf der Preisseite
+HOME_FAQ = [0, 10, 2, 5, 3]     # Indizes aus faq.json, die auf der Startseite stehen
+PRICE_FAQ = [0, 1, 7, 8, 9, 11]    # … und auf der Preisseite
 
 
 def pick(items, idx):
@@ -160,7 +160,7 @@ def build_home(site, write):
     s = site.s
     pr = site.pricing
     title = f"Fahrzeugaufbereitung in Celle ab {site.min_price('frisch')} € | ElbDetail"
-    desc = (f"Fahrzeugaufbereitung in Celle mit Liebe zum Detail: Lackpolitur, Versiegelung und Innenraum in Handarbeit. "
+    desc = (f"Fahrzeugaufbereitung in Celle mit Liebe zum Detail: Lackkorrektur, Keramikversiegelung und Innenraum in Handarbeit. "
             f"{s['rating']['value']} ★ bei Google, Festpreis vorab.")
     home_faq = pick(site.faq, HOME_FAQ)
     hero_q = site.reviews.get("heroQuote") or {"text": site.reviews["featuredQuote"], "name": "Google-Bewertung", "source": ""}
@@ -224,7 +224,7 @@ def build_home(site, write):
           <span class="hero-badge">{I["pin"]} {ESC(s["address"]["city"])} · {ESC(s["address"]["street"])}</span>
         </div>
         <h1 id="hero-h" class="hero-headline">Fahrzeug&shy;aufbereitung in Celle. <em>Mit Liebe zum Detail.</em></h1>
-        <p class="hero-sub">Lackpolitur, Versiegelung und Innenaufbereitung <strong>in Handarbeit</strong>. Für den Neuwagen, das Liebhaberstück und den Familienwagen, der wieder glänzen soll. Mit Festpreis, bevor wir anfangen.</p>
+        <p class="hero-sub">Lackaufbereitung, <strong>Keramikversiegelung</strong> und Innenaufbereitung in Handarbeit. Für den Neuwagen, das Liebhaberstück und den Familienwagen, der wieder glänzen soll. Mit Festpreis, bevor wir anfangen.</p>
         <div class="hero-actions">
           <a class="btn btn-primary btn-lg" href="termin.html">{I["cal"]}Termin anfragen</a>
           <a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich möchte einen Termin anfragen. Fahrzeug: … Wunsch: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
@@ -257,7 +257,7 @@ def build_home(site, write):
         <li>{I["star"]}<span>{ESC(s["rating"]["value"])} von 5 Sternen<small>{s["rating"]["count"]} Google-Bewertungen</small></span></li>
         <li>{I["hand"]}<span>Handarbeit statt Waschstraße<small>Keine neuen Kratzer</small></span></li>
         <li>{I["euro"]}<span>Festpreis vorab<small>Keine Überraschung bei Abholung</small></span></li>
-        <li>{I["shield"]}<span>Profi-Produkte<small>Koch-Chemie, schonend für Lack &amp; Leder</small></span></li>
+        <li>{I["shield"]}<span>C²Coating Excellence Partner<small>Koch-Chemie geschult, Colourlock für Leder</small></span></li>
       </ul>
     </div>
   </div>
@@ -271,7 +271,7 @@ def build_home(site, write):
       </div>
       <div class="service-list stagger">{services_rows}
       </div>
-      <p class="service-more reveal">Neuwagen oder Liebhaberfahrzeug? Dafür ist die <a class="text-link" href="leistungen/lackpolitur-celle.html">Premium Politur mit Versiegelung</a> gemacht. Auch für <a class="text-link" href="firmenkunden.html">Firmenwagen &amp; Flotten</a> und als <a class="text-link" href="aktion/winterschutz.html">Winter-Lackschutz</a>.</p>
+      <p class="service-more reveal">Außerdem: Cabrioverdeck reinigen und imprägnieren, Motorraumreinigung, Abhol- und Bringservice nach Vereinbarung. Für regelmäßige Pflege gibt es <a class="text-link" href="elbdetail-care.html">ElbDetail Care</a>, für Unternehmen unsere <a class="text-link" href="firmenkunden.html">Firmenkunden-Angebote</a>.</p>
     </div>
   </section>
 
@@ -339,9 +339,11 @@ def build_home(site, write):
           <div><dt>Betrieb</dt><dd>{ESC(s["name"])} – {ESC(s["tagline"])}</dd></div>
           <div><dt>Standort</dt><dd>{ESC(site.addr_line())}</dd></div>
           <div><dt>Einzugsgebiet</dt><dd>Celle und Landkreis Celle</dd></div>
-          <div><dt>Leistungen</dt><dd>Innen- &amp; Außenaufbereitung, Lackpolitur, Lackversiegelung, Lederpflege, Geruchsentfernung</dd></div>
+          <div><dt>Leistungen</dt><dd>Keramikversiegelung, Lackkorrektur, Innen- &amp; Außenaufbereitung, Lederpflege und -reparatur, Geruchsneutralisierung, Cabrioverdeck</dd></div>
           <div><dt>Richtpreise</dt><dd>{" / ".join(f"ab {site.min_price(p['key'])} €" for p in pr["packages"])} (Kompaktklasse)</dd></div>
-          <div><dt>Produkte</dt><dd>Koch-Chemie (Lehrgänge absolviert)</dd></div>
+          <div><dt>Inhaber</dt><dd>{ESC((s.get("about") or {}).get("name") or "")} ({ESC((s.get("about") or {}).get("role") or "Inhaber")})</dd></div>
+          <div><dt>Partner</dt><dd>Offizieller C²Coating Excellence Partner, Koch-Chemie-Fachschulungen, Colourlock für Leder</dd></div>
+          <div><dt>Service</dt><dd>Abhol- und Bringservice nach Vereinbarung, regelmäßige Pflege mit ElbDetail Care</dd></div>
           <div><dt>Bewertung</dt><dd>{ESC(s["rating"]["value"])} ★ bei {s["rating"]["count"]} Google-Rezensionen (Stand {ESC(s["rating"]["asOf"])})</dd></div>
           <div><dt>Termin</dt><dd><a href="termin.html">Online-Terminanfrage</a> oder <a href="{site.wa()}" target="_blank" rel="noopener">WhatsApp {ESC(s["phoneIntl"])}</a></dd></div>
         </dl>
@@ -349,7 +351,7 @@ def build_home(site, write):
       </div>
       <div class="why-list stagger">{owner_card}
         <div class="why-item reveal">{I["hand"]}<div><h3>Keine neuen Kratzer</h3><p>Handwäsche mit der Zwei-Eimer-Methode, weiche Mikrofaser, kratzfreie Trocknung. Alte Swirls verschwinden, neue entstehen nicht.</p></div></div>
-        <div class="why-item reveal">{I["shield"]}<div><h3>Schonend für Lack, Leder und Alcantara</h3><p>Profi-Produkte von Koch-Chemie, in deren Lehrgängen wir geschult sind. Jedes Material bekommt das passende Mittel, kein Experimentieren an Ihrem Auto.</p></div></div>
+        <div class="why-item reveal">{I["shield"]}<div><h3>Profi-Systeme statt Baumarkt</h3><p>Offizieller C²Coating Excellence Partner für Keramikversiegelungen, Fachschulungen bei Koch-Chemie, Colourlock für Leder. Jedes Material bekommt das passende Mittel.</p></div></div>
         <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Sie erhalten ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
         <div class="why-item reveal">{I["clock"]}<div><h3>Termin, wann es Ihnen passt</h3><p>Online oder per WhatsApp anfragen, Termin nach Vereinbarung, samstags nach Absprache. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
       </div>
@@ -471,11 +473,84 @@ def build_kontakt(site, write):
     write("kontakt.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="kontakt.html") + body + core.footer(site))
 
 
+def build_about(site, write):
+    """Über uns: René, seine Geschichte, sein Anspruch, Partner und Qualifikationen."""
+    s = site.s
+    ab = s.get("about") or {}
+    name = ab.get("name") or "der Inhaber"
+    path = "/ueber-uns.html"
+    title = f"Über uns: {name}, Gründer von ElbDetail Celle"
+    desc = (f"{name}, Gründer von ElbDetail in Celle: Fahrzeugaufbereitung aus Leidenschaft. "
+            "C²Coating Excellence Partner, Koch-Chemie geschult.")
+    photo = picture(site, ab.get("photo", ""), f"{name}, {ab.get('role') or 'Inhaber'} von {s['name']}", "about-photo", "", sizes="(min-width: 900px) 40vw, 90vw")
+    partners = "".join(f'<div class="usecase">{I["shield"]}<h3>{ESC(x["name"])}</h3><p><strong>{ESC(x["role"])}.</strong> {ESC(x["text"])}.</p></div>'
+                       for x in s.get("partners", []))
+    ld = [seo.webpage(site, path, title, {"@type": "AboutPage", "mainEntity": {"@type": "Person", "name": name, "jobTitle": ab.get("role") or "Inhaber",
+                                                                                "worksFor": {"@id": site.url + "/#business"}}}),
+          seo.crumbs(site, [("Startseite", "/"), ("Über uns", path)])]
+    body = f'''
+<main id="main">
+  <section class="page-hero" aria-labelledby="page-h">
+    <div class="container">
+      {core.breadcrumb("", [("Startseite", "index.html"), ("Über uns", None)])}
+      <p class="eyebrow">Über ElbDetail</p>
+      <h1 id="page-h">Hinter ElbDetail steht <em>{ESC(name)}.</em></h1>
+      <p class="lead">Ich bin {ESC(name)}, 30 Jahre alt und Gründer von ElbDetail in Celle. Aus meiner Leidenschaft für Autos und ihre Pflege ist mein Beruf geworden.</p>
+    </div>
+  </section>
+
+  <section aria-label="Geschichte">
+    <div class="container two-up">
+      <div class="prose">
+        <h2>Aus Leidenschaft zum Beruf</h2>
+        <p>Ich begeistere mich schon lange für Fahrzeuge, für ihre Optik und für die Möglichkeiten, ihren Zustand zu erhalten oder wiederherzustellen. Aus dieser Begeisterung ist irgendwann der Wunsch entstanden, meine Leidenschaft zum Beruf zu machen. So habe ich mich mit der professionellen Fahrzeugaufbereitung selbstständig gemacht.</p>
+        <p>Für mich ist Fahrzeugaufbereitung deshalb nicht einfach nur eine Dienstleistung. Ich beschäftige mich gern intensiv mit einem Fahrzeug, achte auf die Details und freue mich jedes Mal, wenn ich am Ende sehe, was die richtige Pflege erreichen kann.</p>
+        <h2>Jedes Fahrzeug verdient die gleiche Sorgfalt</h2>
+        <p>Ob ein alltäglicher Familienwagen, ein Firmenfahrzeug oder ein hochwertiger Sportwagen vor mir steht, spielt für mich keine Rolle. Jedes Fahrzeug bekommt die gleiche Aufmerksamkeit.</p>
+        <p>Mein Anspruch ist, hochwertige Arbeit, professionelle Produkte und persönliche Betreuung miteinander zu verbinden. Ich möchte, dass Sie nicht einfach nur ein sauberes Auto zurückbekommen, sondern sich wirklich über das Ergebnis freuen.</p>
+        <h2>Mein Schwerpunkt: Lack und Keramik</h2>
+        <p>Besonders am Herzen liegt mir die professionelle Lackaufbereitung in Verbindung mit hochwertigen <a href="leistungen/keramikversiegelung-celle.html">Keramikversiegelungen</a>. Dabei geht es nicht nur um eine schöne Optik, sondern auch um langfristigen Lackschutz und eine leichtere Pflege. Als offizieller C²Coating Excellence Partner möchte ich ElbDetail zur festen Anlaufstelle für Keramikversiegelungen in Celle und Umgebung machen.</p>
+        <p>Genauso wichtig ist mir die Zusammenarbeit mit <a href="firmenkunden.html">Autohäusern, Unternehmen und Flotten</a>, und zwar langfristig und partnerschaftlich. Mein Ziel bleibt dabei immer dasselbe: hochwertige Fahrzeugpflege aus echter Leidenschaft.</p>
+      </div>
+      <aside class="sticky-aside">
+        {('<div class="aside-card">' + photo + '</div>') if photo else ""}
+        <div class="aside-card dark">
+          <h3>Lernen Sie mich kennen</h3>
+          <p>Schreiben Sie mir oder rufen Sie an. Ich berate Sie persönlich und ehrlich.</p>
+          <a class="btn btn-primary" href="termin.html">{I["cal"]}Termin anfragen</a>
+          <a class="btn btn-wa" href="{site.wa(f"Hallo {name}, ich habe eine Frage zu meinem Fahrzeug: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp {ESC(s["phoneIntl"])}</a>
+          <p>{ESC(site.addr_line())}</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="soft" aria-labelledby="partner-h">
+    <div class="container">
+      <div class="section-head"><p class="eyebrow">Partner &amp; Qualifikationen</p><h2 id="partner-h" class="display">Profi-Systeme, <em>geschult angewendet.</em></h2>
+        <p>Ich arbeite mit professionellen Produkten und Aufbereitungssystemen, die ich kenne und denen ich vertraue.</p></div>
+      <div class="usecase-grid">{partners}</div>
+    </div>
+  </section>
+
+{core.cta_band(site, "", "Ihr Auto in den besten Händen.", "Erzählen Sie mir kurz, worum es geht. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert.")}
+</main>
+'''
+    write("ueber-uns.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="ueber-uns.html") + body + core.footer(site))
+
+
 # --------------------------------------------------------------------------- Leistungsseiten
 def build_service(site, sv, write):
     prefix = "../"
     path = "/leistungen/" + sv["slug"] + ".html"
-    p = site.pkg(sv["package"])
+    p = site.pkg(sv["package"]) if sv.get("package") else None
+    book = p["key"] if p else sv.get("bookAs", "beratung")  # Leistungen ohne Paketpreis: Anfrage nach Begutachtung
+    if p:
+        price_card = (f'<h3>Passendes Paket</h3><p><strong>{ESC(p["name"])}</strong> enthält diese Leistung, Richtpreis ab {site.min_price(p["key"])} € '
+                      f'für eine Kompaktklasse.</p><a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>')
+    else:
+        price_card = (f'<h3>Preis nach Begutachtung</h3><p>Den Preis legen wir nach Fahrzeug und Zustand fest. Sie erhalten vorab einen verbindlichen Festpreis. '
+                      f'Für eine erste Einschätzung genügen oft ein paar Fotos per WhatsApp.</p><a class="btn btn-line-light" href="{prefix}preise.html">Alle Pakete &amp; Preise</a>')
     toc = []
     intro = md.render(sv["intro"], prefix, toc=toc)
     ld = [seo.service(site, sv), seo.crumbs(site, [("Startseite", "/"), ("Leistungen", "/#leistungen"), (sv["short"] + " Celle", path)]),
@@ -499,7 +574,7 @@ def build_service(site, sv, write):
       <p class="lead">{inl(sv["lead"])}</p>
       <div class="keyfacts">{facts}</div>
       <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket={p["key"]}">{I["cal"]}Termin anfragen</a>
+        <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket={book}">{I["cal"]}Termin anfragen</a>
         <a class="btn btn-wa btn-lg" href="{wa}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
         <a class="btn btn-line" href="{prefix}preise.html">Alle Pakete &amp; Preise</a>
       </div>
@@ -521,15 +596,11 @@ def build_service(site, sv, write):
         <div class="aside-card dark">
           <h3>Termin in Celle anfragen</h3>
           <p>Paket, Fahrzeug und Wunschtermin in 2 Minuten. Sie erhalten ein verbindliches Angebot vor dem Termin.</p>
-          <a class="btn btn-primary" href="{prefix}termin.html?paket={p["key"]}">{I["cal"]}Online-Terminanfrage</a>
+          <a class="btn btn-primary" href="{prefix}termin.html?paket={book}">{I["cal"]}Online-Terminanfrage</a>
           <a class="btn btn-wa" href="{wa}" target="_blank" rel="noopener">{I["wa"]}WhatsApp {ESC(site.s["phoneIntl"])}</a>
           <p>{ESC(site.addr_line())} · {ESC(site.s["openingHours"]["text"])}</p>
         </div>
-        <div class="aside-card">
-          <h3>Passendes Paket</h3>
-          <p><strong>{ESC(p["name"])}</strong> enthält diese Leistung, Richtpreis ab {site.min_price(p["key"])} € für eine Kompaktklasse.</p>
-          <a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>
-        </div>
+        <div class="aside-card">{price_card}</div>
         {art_aside}
         <div class="aside-card"><h3>Weitere Leistungen</h3><ul>{others}</ul></div>
       </aside>
@@ -558,7 +629,8 @@ def _ph(v, text):
 def build_legal(site, write):
     s = site.s
     L = s["legal"]
-    vat = (f"<p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: {ESC(L['vatId'])}</p>" if L.get("vatId")
+    vat = ("<p>Kleinunternehmer im Sinne von § 19 UStG. Es wird keine Umsatzsteuer berechnet und daher auch nicht ausgewiesen.</p>" if L.get("smallBusiness")
+           else f"<p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: {ESC(L['vatId'])}</p>" if L.get("vatId")
            else '<p><span class="legal-placeholder">[USt-IdNr. gemäß § 27a UStG, falls vorhanden – sonst Hinweis auf Kleinunternehmerregelung gemäß § 19 UStG]</span></p>')
     imp = f'''
     <h2>Diensteanbieter</h2>
@@ -575,11 +647,11 @@ def build_legal(site, write):
     <h2>Haftung für Inhalte</h2>
     <p>Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.</p>
     <h2>Haftung für Links</h2>
-    <p>Unser Angebot enthält Links zu externen Websites Dritter (z. B. Google Maps, Instagram, Facebook, TikTok, WhatsApp, Koch-Chemie), auf deren Inhalte wir keinen Einfluss haben. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter verantwortlich.</p>
+    <p>Unser Angebot enthält Links zu externen Websites Dritter (z. B. Google Maps, Instagram, Facebook, TikTok, WhatsApp, C²Coating, Koch-Chemie, Colourlock), auf deren Inhalte wir keinen Einfluss haben. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter verantwortlich.</p>
     <h2>Urheberrecht</h2>
     <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet.</p>
     <h2>Hinweis zu Preisangaben</h2>
-    <p>Alle auf dieser Website genannten Preise sind unverbindliche Richtwerte inklusive gesetzlicher Umsatzsteuer für Fahrzeuge in normalem Pflegezustand. Ein verbindliches Angebot erfolgt individuell nach Fahrzeug und Zustand.</p>
+    <p>Alle auf dieser Website genannten Preise sind unverbindliche Einstiegspreise für Fahrzeuge in normalem Pflegezustand{" und Endpreise; gemäß § 19 UStG wird keine Umsatzsteuer berechnet" if L.get("smallBusiness") else " inklusive gesetzlicher Umsatzsteuer"}. Ein verbindliches Angebot erfolgt individuell nach Fahrzeug und Zustand.</p>
 '''
     mail = _ph(L.get("mailProvider"), "E-Mail-Anbieter mit Anschrift, z. B. der Anbieter des Postfachs info@elbdetail.de")
     ds = f'''

@@ -114,6 +114,6 @@ Sind Swirls bereits vorhanden, hilft keine Wäsche mehr, sondern nur eine Politu
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle wäscht ausschließlich von Hand und nutzt keine Waschstraße. Bei der [Außenaufbereitung](/leistungen/aussenaufbereitung-celle.html) kommen die Zwei-Eimer-Methode und Koch-Chemie-Produkte zum Einsatz. Vor jeder Politur wird die Lackschichtdicke gemessen. Den verbindlichen Preis erfahren Sie vor dem Termin.
+ElbDetail in Celle wäscht ausschließlich von Hand und nutzt keine Waschstraße. Bei der [Außenaufbereitung](/leistungen/aussenaufbereitung-celle.html) kommen die Zwei-Eimer-Methode und professionelle Produkte von Koch-Chemie zum Einsatz. Vor jeder Politur wird die Lackschichtdicke gemessen. Den verbindlichen Preis erfahren Sie vor dem Termin.
 
-Schicken Sie ein Foto Ihres Lacks im Sonnenlicht per WhatsApp an +49 172 7613807 oder fragen Sie direkt über das [Terminformular](/termin.html) an.
+Schicken Sie ein Foto Ihres Lacks im Sonnenlicht per WhatsApp an +49 173 5845574 oder fragen Sie direkt über das [Terminformular](/termin.html) an.

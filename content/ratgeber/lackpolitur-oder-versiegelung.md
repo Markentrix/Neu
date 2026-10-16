@@ -99,7 +99,9 @@ Politur und Versiegelung gehören zusammen, weil frisch polierter Lack ohne Schu
 
 Umgekehrt gilt: Wer stumpfen oder verkratzten Lack nur versiegelt, konserviert die Defekte darunter. Die Kombination ist deshalb meist die bessere Wahl, wenn der Lack sichtbare Mängel hat.
 
-Bei ElbDetail ist diese Kombination im Paket Premium Politur enthalten. Es umfasst eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung, eine Lackversiegelung sowie eine Felgen- und Scheibenversiegelung. Dazu kommen Handwäsche und Innenraumreinigung. Die Richtpreise liegen bei ab {ab:premium} € für Kompaktwagen, ab 399 € für Limousinen und Kombis und ab 449 € für SUVs und Vans, bei einer Dauer von etwa einem Tag. Eine reine Lackpolitur oder reine Lackversiegelung ist einzeln auf Anfrage buchbar.
+Bei ElbDetail ist diese Kombination im Paket Premium Politur enthalten. Es umfasst eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung, eine Lackversiegelung sowie eine Felgen- und Scheibenversiegelung. Dazu kommen Handwäsche und Innenraumreinigung. Die Richtpreise liegen bei ab {ab:premium} € für Kompaktwagen, ab {preis:premium:mittel} € für Limousinen und Kombis und ab {preis:premium:suv} € für SUVs und Vans, bei einer Dauer von etwa einem Tag. Eine reine Lackpolitur oder reine Lackversiegelung ist einzeln auf Anfrage buchbar.
+
+Wer das Ergebnis einer Politur besonders lange erhalten möchte, kann statt der klassischen Versiegelung eine [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html) wählen. ElbDetail ist dafür offizieller C²Coating Excellence Partner. Die Keramik konserviert den frisch polierten Lack und hält länger, je nach Beschichtung und Pflege.
 
 ## Wie läuft eine Lackpolitur bei ElbDetail ab?
 
@@ -112,7 +114,7 @@ Eine Lackpolitur bei ElbDetail beginnt mit einer gründlichen Handwäsche und en
 5. **Versiegelung:** Der polierte Lack bekommt eine Schutzschicht.
 6. **Abnahme:** Sie prüfen das Ergebnis gemeinsam mit uns bei Tageslicht.
 
-Gearbeitet wird zu 100 % von Hand und ausschließlich mit Produkten von Koch-Chemie.
+Gearbeitet wird zu 100 % von Hand und mit professionellen Produkten von Koch-Chemie und C²Coating.
 
 ## Wie oft braucht ein Auto eine Politur?
 
@@ -131,6 +133,6 @@ Sie pflegen den Lack nach Politur und Versiegelung am besten mit regelmäßiger,
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail poliert und versiegelt Lack in Celle zu 100 % von Hand, mit Lackschichtdickenmessung und Produkten von Koch-Chemie. Mehr Details finden Sie auf den Seiten [Lackpolitur](/leistungen/lackpolitur-celle.html) und [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Vor dem Winter lohnt sich auch ein Blick auf die [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
+ElbDetail poliert und versiegelt Lack in Celle zu 100 % von Hand, mit Lackschichtdickenmessung und professionellen Produkten von Koch-Chemie und C²Coating. Mehr Details finden Sie auf den Seiten [Lackpolitur](/leistungen/lackpolitur-celle.html) und [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Vor dem Winter lohnt sich auch ein Blick auf die [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
 
-Schicken Sie ein paar Fotos Ihres Lacks per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.
+Schicken Sie ein paar Fotos Ihres Lacks per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.

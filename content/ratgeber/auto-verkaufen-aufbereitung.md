@@ -48,12 +48,12 @@ Sinnvoll ist vor allem eine gründliche Reinigung von Innenraum, Lack, Felgen un
 
 | Ausgangslage | Empfehlung bei ElbDetail | Richtpreis ab (Kompakt / Limousine / SUV) |
 |---|---|---|
-| Gepflegtes Auto, nur Alltagsschmutz | Frisch & Sauber | 79 € / 89 € / 99 € |
-| Innenraum mit Flecken, Gerüchen oder Tierhaaren | Komplettpflege | 179 € / 209 € / 229 € |
-| Lack matt oder mit vielen Waschanlagenkratzern | Premium Politur | 349 € / 399 € / 449 € |
-| Älteres Auto mit geringem Restwert | Frisch & Sauber oder gründliche Eigenreinigung | 79 € / 89 € / 99 € |
+| Gepflegtes Auto, nur Alltagsschmutz | Frisch & Sauber | {preis:frisch:kompakt} € / {preis:frisch:mittel} € / {preis:frisch:suv} € |
+| Innenraum mit Flecken, Gerüchen oder Tierhaaren | Komplettpflege | {preis:komplett:kompakt} € / {preis:komplett:mittel} € / {preis:komplett:suv} € |
+| Lack matt oder mit vielen Waschanlagenkratzern | Premium Politur | {preis:premium:kompakt} € / {preis:premium:mittel} € / {preis:premium:suv} € |
+| Älteres Auto mit geringem Restwert | Frisch & Sauber oder gründliche Eigenreinigung | {preis:frisch:kompakt} € / {preis:frisch:mittel} € / {preis:frisch:suv} € |
 
-Die Preise gelten inklusive Mehrwertsteuer bei normalem Pflegezustand. Vor dem Termin bekommen Sie einen verbindlichen Preis.
+Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Vor dem Termin bekommen Sie einen verbindlichen Preis.
 
 ### Innenraum
 
@@ -90,7 +90,7 @@ Der Ablauf bei ElbDetail ist einfach und planbar:
 1. Sie schicken ein paar Fotos Ihres Autos per WhatsApp und sagen, dass Sie verkaufen möchten.
 2. Sie bekommen eine Empfehlung und einen verbindlichen Preis vor dem Termin.
 3. Wir vereinbaren gemeinsam einen Termin, Montag bis Freitag oder samstags nach Absprache.
-4. Das Auto wird zu 100 % von Hand aufbereitet, mit Zwei-Eimer-Handwäsche und Produkten von Koch-Chemie. Vor einer Politur wird die Lackschichtdicke gemessen.
+4. Das Auto wird zu 100 % von Hand aufbereitet, mit Zwei-Eimer-Handwäsche und professionellen Produkten von Koch-Chemie. Vor einer Politur wird die Lackschichtdicke gemessen.
 5. Zum Schluss nehmen wir das Ergebnis gemeinsam bei Tageslicht ab.
 6. Sie bezahlen bar oder per Überweisung.
 
@@ -114,6 +114,6 @@ Zwischen Fotos und Besichtigung vergehen oft einige Tage. Saugen Sie kurz nach, 
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail bereitet Fahrzeuge für den Verkauf in der Lachtehäuser Straße 1 in Celle auf. Alle Infos zur Aufbereitung von Gebrauchtwagen finden Sie auf der Seite [Leasingrückgabe und Gebrauchtwagenaufbereitung](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html).
+ElbDetail bereitet Fahrzeuge für den Verkauf in der Lachtehäuser Straße 1 in Celle auf. Ein Abhol- und Bringservice ist nach Vereinbarung möglich. Alle Infos zur Aufbereitung von Gebrauchtwagen finden Sie auf der Seite [Leasingrückgabe und Gebrauchtwagenaufbereitung](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html).
 
-Schicken Sie ein paar Fotos per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). So ist Ihr Auto bereit für Inserat und Besichtigung.
+Schicken Sie ein paar Fotos per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). So ist Ihr Auto bereit für Inserat und Besichtigung.

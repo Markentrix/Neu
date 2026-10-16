@@ -22,7 +22,7 @@ def business(site):
         "@id": bid,
         "name": s["name"],
         "alternateName": s["name"] + " – " + s["tagline"] + " " + a["city"],
-        "description": "Professionelle Fahrzeugaufbereitung in Celle: Innen- und Außenaufbereitung, Lackpolitur, Lackversiegelung, Lederpflege und Geruchsentfernung in Handarbeit mit Koch-Chemie-Produkten. Termine nach Vereinbarung.",
+        "description": "Professionelle Fahrzeugaufbereitung in Celle mit Schwerpunkt Lackaufbereitung und Keramikversiegelung: Innen- und Außenaufbereitung, Lackpolitur, Keramik- und Lackversiegelung, Lederpflege und Lederreparatur in Handarbeit. Offizieller C²Coating Excellence Partner, Koch-Chemie geschult. Termine nach Vereinbarung.",
         "url": site.url + "/",
         "telephone": s["phone"],
         "email": s["email"],
@@ -35,8 +35,8 @@ def business(site):
                     "addressRegion": a["region"], "addressCountry": a["country"]},
         "hasMap": site.maps_url(),
         "areaServed": [{"@type": "City", "name": a["city"]}] + [{"@type": "City", "name": n} for n in s["areas"]["region"]],
-        "knowsAbout": ["Fahrzeugaufbereitung", "Car Detailing", "Lackpolitur", "Lackversiegelung", "Innenraumreinigung",
-                       "Lederpflege", "Geruchsentfernung", "Leasingrückgabe"],
+        "knowsAbout": ["Fahrzeugaufbereitung", "Car Detailing", "Keramikversiegelung", "Lackkorrektur", "Lackpolitur", "Lackversiegelung",
+                       "Innenraumreinigung", "Lederpflege", "Lederreparatur", "Geruchsentfernung", "Cabrioverdeckreinigung", "Leasingrückgabe", "Flottenpflege"],
         "openingHoursSpecification": {"@type": "OpeningHoursSpecification", "dayOfWeek": s["openingHours"]["days"],
                                       "opens": s["openingHours"]["opens"], "closes": s["openingHours"]["closes"],
                                       "description": s["openingHours"]["text"]},
@@ -85,14 +85,17 @@ def crumbs(site, items):
 
 
 def service(site, sv):
-    p = site.pkg(sv["package"])
+    p = site.pkg(sv["package"]) if sv.get("package") else None
     path = "/leistungen/" + sv["slug"] + ".html"
-    return {"@context": "https://schema.org", "@type": "Service", "@id": site.url + path + "#service", "name": sv["short"] + " in Celle",
-            "serviceType": sv["short"], "url": site.url + path, "description": sv["description"], "provider": {"@id": site.url + "/#business"},
-            "areaServed": {"@type": "City", "name": site.s["address"]["city"]},
-            "offers": {"@type": "Offer", "priceCurrency": "EUR", "price": str(site.min_price(p["key"])),
+    o = {"@context": "https://schema.org", "@type": "Service", "@id": site.url + path + "#service", "name": sv["short"] + " in Celle",
+         "serviceType": sv["short"], "url": site.url + path, "description": sv["description"], "provider": {"@id": site.url + "/#business"},
+         "areaServed": {"@type": "City", "name": site.s["address"]["city"]}}
+    if p:  # Leistungen ohne Paket (z. B. Keramik) haben einen Preis erst nach Begutachtung
+        o["offers"] = {"@type": "Offer", "priceCurrency": "EUR", "price": str(site.min_price(p["key"])),
                        "priceSpecification": {"@type": "PriceSpecification", "priceCurrency": "EUR", "minPrice": str(site.min_price(p["key"])),
-                                              "description": "Richtpreis Paket " + p["name"] + " für Kompaktklasse"}}}
+                                              "valueAddedTaxIncluded": False,
+                                              "description": "Einstiegspreis Paket " + p["name"] + " für Kompaktklasse"}}
+    return o
 
 
 def article(site, a):
@@ -132,7 +135,7 @@ def llms(site, full=False):
     cls = site.pricing["classes"]
     t = f"""# {s["name"]} – {s["tagline"]} {a["city"]}
 
-> {s["name"]} ist ein inhabergeführter Fachbetrieb für professionelle Fahrzeugaufbereitung (Car Detailing) in {a["city"]}, {a["region"]}. Innen- und Außenaufbereitung, Lackpolitur und Lackversiegelung in Handarbeit mit Koch-Chemie-Produkten. {s["rating"]["value"]} von 5 Sternen bei {s["rating"]["count"]} Google-Rezensionen (Stand {s["rating"]["asOf"]}).
+> {s["name"]} ist ein inhabergeführter Fachbetrieb für professionelle Fahrzeugaufbereitung (Car Detailing) in {a["city"]}, {a["region"]}. Gegründet und geführt von {(s.get("about") or {}).get("name") or "dem Inhaber"}. Schwerpunkt: Lackaufbereitung und Keramikversiegelung, dazu Innen- und Außenaufbereitung, Lederreparatur und regelmäßige Pflege (ElbDetail Care). Offizieller C²Coating Excellence Partner, Koch-Chemie geschult, Lederpflege mit Colourlock. {s["rating"]["value"]} von 5 Sternen bei {s["rating"]["count"]} Google-Rezensionen (Stand {s["rating"]["asOf"]}).
 
 ## Kerninformationen
 
@@ -146,7 +149,11 @@ def llms(site, full=False):
 - Preise je Fahrzeugklasse: {site.url}/preise.html
 - Terminvergabe: {s["openingHours"]["text"]}, {s["openingHours"]["detail"]}
 - Bewertung: {s["rating"]["value"]} von 5 Sternen, {s["rating"]["count"]} Google-Rezensionen (Stand {s["rating"]["asOf"]})
-- Besonderheiten: 100 % Handarbeit (keine Waschstraße), Koch-Chemie-Lehrgänge absolviert, verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht
+- Besonderheiten: 100 % Handarbeit (keine Waschstraße), offizieller C²Coating Excellence Partner, Koch-Chemie-Fachschulungen, Colourlock für Leder, verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht
+- Abhol- und Bringservice: nach Vereinbarung
+- Regelmäßige Pflege: ElbDetail Care, individuell auf Anfrage für Privatkunden, Unternehmen und Flotten: {site.url}/elbdetail-care.html
+- Gewerbekunden: Autohäuser und Händler, Fahrschulen, Pflegedienste, Handwerksbetriebe, Unternehmen mit Dienstwagen, Leasing- und Fuhrparkunternehmen; Konditionen auf Anfrage: {site.url}/firmenkunden.html
+- Umsatzsteuer: Kleinunternehmer nach § 19 UStG, es wird keine Umsatzsteuer berechnet
 - Bezahlung: bar oder Überweisung
 - Gutscheine: {site.url}/gutscheine.html
 - Firmenkunden und Flotten: {site.url}/firmenkunden.html
@@ -157,7 +164,7 @@ def llms(site, full=False):
     for sv in site.services:
         t += f"- {sv['short']}: {sv['teaser']} → {site.url}/leistungen/{sv['slug']}.html\n"
     t += "- Einzeln buchbar (Preis auf Anfrage): " + ", ".join(site.pricing["extras"]) + "\n\n"
-    t += f"## Pakete und Richtpreise (inkl. MwSt., normaler Pflegezustand, Stand {s['stand']})\n\n"
+    t += f"## Pakete und Einstiegspreise (Endpreise, gemäß § 19 UStG ohne Umsatzsteuer, normaler Pflegezustand, Stand {s['stand']})\n\n"
     t += "| Paket | " + " | ".join(c["name"] for c in cls) + " | Dauer |\n|---|" + "---|" * (len(cls) + 1) + "\n"
     for p in site.pricing["packages"]:
         inc = ", ".join(f["text"] for f in p["features"] if f["included"])
