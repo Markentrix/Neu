@@ -1166,3 +1166,9 @@ blockquote.note p { color: #4d3a0f; }
 @media (max-width: 359.98px) {
   .hero-headline { font-size: 1.8rem; }
 }
+
+/* Impressum: Gestaltungshinweis */
+.design-credit { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+.design-credit a { display: inline-flex; align-items: center; min-height: 44px; border-radius: 8px; }
+.design-credit img { height: 32px; width: auto; display: block; transition: opacity 0.2s ease; }
+@media (hover: hover) and (pointer: fine) { .design-credit a:hover img { opacity: 0.8; } }

@@ -652,6 +652,10 @@ def build_legal(site, write):
     <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet.</p>
     <h2>Hinweis zu Preisangaben</h2>
     <p>Alle auf dieser Website genannten Preise sind unverbindliche Einstiegspreise für Fahrzeuge in normalem Pflegezustand{" und Endpreise; gemäß § 19 UStG wird keine Umsatzsteuer berechnet" if L.get("smallBusiness") else " inklusive gesetzlicher Umsatzsteuer"}. Ein verbindliches Angebot erfolgt individuell nach Fahrzeug und Zustand.</p>
+    <div class="design-credit">
+      <span>Designed by</span>
+      <a href="https://markentrix.de/" target="_blank" rel="noopener" aria-label="Markentrix, Webdesign aus Celle (öffnet in neuem Tab)"><img src="markentrix-logo.svg" alt="Markentrix" width="147" height="36" loading="lazy"></a>
+    </div>
 '''
     mail = _ph(L.get("mailProvider"), "E-Mail-Anbieter mit Anschrift, z. B. der Anbieter des Postfachs info@elbdetail.de")
     ds = f'''
