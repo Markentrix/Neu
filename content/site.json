@@ -144,5 +144,14 @@
     "Karte",
     "PayPal",
     "Überweisung"
-  ]
+  ],
+  "heroImage": {
+    "file": "c2-abperleffekt.jpg",
+    "credit": "C²Coating"
+  },
+  "spotlightImage": {
+    "file": "c2-car-ceramic.jpg",
+    "alt": "Flasche C²Coating Car Ceramic auf einem frisch versiegelten dunklen Lack",
+    "credit": "C²Coating"
+  }
 }

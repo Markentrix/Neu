@@ -13,7 +13,7 @@ def _ba_placeholder(n):
     return before, after
 
 
-def picture(site, name, alt, cls, prefix, sizes="(min-width: 900px) 33vw, 90vw"):
+def picture(site, name, alt, cls, prefix, sizes="(min-width: 900px) 33vw, 90vw", eager=False):
     m = site.media.get(name)
     if not m:
         return ""
@@ -23,7 +23,7 @@ def picture(site, name, alt, cls, prefix, sizes="(min-width: 900px) 33vw, 90vw")
     if m.get("webp"):
         srcs += f'<source type="image/webp" srcset="{", ".join(prefix + s for s in m["webp"])}" sizes="{sizes}">'
     return (f'<picture class="{cls}">{srcs}<img src="{prefix}{m["src"]}" alt="{ESC(alt)}" width="{m["w"]}" height="{m["h"]}" '
-            f'loading="lazy" decoding="async"></picture>')
+            + ('fetchpriority="high" ' if eager else 'loading="lazy" ') + 'decoding="async"></picture>')
 
 
 def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
@@ -174,6 +174,38 @@ def build_home(site, write):
     desc = (f"Fahrzeugaufbereitung in Celle mit Liebe zum Detail: Lackkorrektur, Keramikversiegelung und Innenraum in Handarbeit. "
             f"{s['rating']['value']} ★ bei Google, Festpreis vorab.")
     home_faq = pick(site.faq, HOME_FAQ)
+    hi = s.get("heroImage") or {}
+    hero_img = picture(site, hi.get("file", ""), "", "hero-photo", "", sizes="100vw", eager=True)
+    if hero_img:
+        hero_img = hero_img.replace('<picture class="hero-photo">', '<picture class="hero-photo" aria-hidden="true">')
+        if hi.get("credit"):
+            hero_img += f'<span class="hero-credit">Bild: {ESC(hi["credit"])}</span>'
+    sp = s.get("spotlightImage") or {}
+    spot_pic = picture(site, sp.get("file", ""), sp.get("alt", ""), "spot-img", "", sizes="(min-width: 900px) 520px, 92vw")
+    spotlight = ""
+    if spot_pic:
+        spotlight = f'''
+  <section class="tight" aria-labelledby="ker-h">
+    <div class="container">
+      <div class="spot reveal">
+        <figure class="spot-media">{spot_pic}{f'<figcaption>Bild: {ESC(sp["credit"])}</figcaption>' if sp.get("credit") else ""}</figure>
+        <div class="spot-copy">
+          <p class="eyebrow">Unser Schwerpunkt</p>
+          <h2 id="ker-h" class="display">Keramikversiegelung. <em>Glanz, der bleibt.</em></h2>
+          <p>Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Glas und Felgen mit einem keramischen System, das deutlich länger hält als Wachs oder klassische Versiegelung. Vorher korrigieren wir den Lack, damit unter der Keramik nur noch Glanz eingeschlossen wird.</p>
+          <ul class="spot-points">
+            <li>{I["shield"]}<span>Langzeitschutz gegen Witterung, Streusalz und UV</span></li>
+            <li>{I["spark"]}<span>Tiefer Glanz und starker Abperleffekt</span></li>
+            <li>{I["hand"]}<span>Lackschichtdicke gemessen, Korrektur in Handarbeit</span></li>
+          </ul>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="leistungen/keramikversiegelung-celle.html">Mehr zur Keramikversiegelung</a>
+            <a class="btn btn-line" href="termin.html?paket=keramik">{I["cal"]}Beratung anfragen</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>'''
     hero_q = site.reviews.get("heroQuote") or {"text": site.reviews["featuredQuote"], "name": "Google-Bewertung", "source": ""}
     owner_card = owner_html(site)
     ld = [seo.business(site), seo.website(site), seo.faq(home_faq),
@@ -226,7 +258,8 @@ def build_home(site, write):
     body = f'''
 <main id="main">
 
-  <section class="hero" aria-labelledby="hero-h">
+  <section class="hero{" has-photo" if hero_img else ""}" aria-labelledby="hero-h">
+    {hero_img}
     <div class="hero-bg-grid" aria-hidden="true"></div>
     <div class="container hero-inner">
       <div class="hero-copy">
@@ -285,6 +318,7 @@ def build_home(site, write):
       <p class="service-more reveal">Außerdem: Cabrioverdeck reinigen und imprägnieren, Motorraumreinigung, Abhol- und Bringservice nach Vereinbarung. Für regelmäßige Pflege gibt es <a class="text-link" href="elbdetail-care.html">ElbDetail Care</a>, für Unternehmen unsere <a class="text-link" href="firmenkunden.html">Firmenkunden-Angebote</a>.</p>
     </div>
   </section>
+{spotlight}
 
   <section id="vorher-nachher" class="soft" aria-labelledby="vn-h">
     <div class="container">
