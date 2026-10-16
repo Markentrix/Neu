@@ -227,6 +227,8 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, div[tabindex="-1"]:focu
 html.kb-open .mobile-actionbar { display: none; }
 html.kb-open body { padding-bottom: 0; }
 @media (min-width: 900px) { .mobile-actionbar { display: none; } }
+/* Mobil übernimmt die Leiste unten Anrufen, WhatsApp und Termin: oben bleiben nur Logo und Menü */
+@media (max-width: 899.98px) { .header-cta .btn-wa-ghost, .header-cta .header-book { display: none; } }
 @media (max-width: 899.98px) { body { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); } }
 
 /* ==========================================================================
@@ -923,6 +925,7 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
   .hero::before { width: 90vw; height: 90vw; right: -34vw; top: 20%; }
   .hero-headline { font-size: clamp(2.2rem, 10.5vw, 3.4rem); line-height: 1; max-width: none; }
   .hero-badge { font-size: 0.78rem; }
+  .hero-badge-addr, .hide-xs { display: none; }
   .seg.pk span { flex-wrap: wrap; align-items: center; min-height: 46px; padding: 8px 12px; gap: 2px 10px; }
   .seg.pk span small { margin-left: auto; }
   .trust-bar { padding-block: 14px; }

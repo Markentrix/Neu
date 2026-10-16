@@ -23,7 +23,7 @@ def picture(site, name, alt, cls, prefix, sizes="(min-width: 900px) 33vw, 90vw",
     if m.get("webp"):
         srcs += f'<source type="image/webp" srcset="{", ".join(prefix + s for s in m["webp"])}" sizes="{sizes}">'
     return (f'<picture class="{cls}">{srcs}<img src="{prefix}{m["src"]}" alt="{ESC(alt)}" width="{m["w"]}" height="{m["h"]}" '
-            + ('fetchpriority="high" ' if eager else 'loading="lazy" ') + 'decoding="async"></picture>')
+            + ('fetchpriority="low" ' if eager else 'loading="lazy" ') + 'decoding="async"></picture>')
 
 
 def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
@@ -192,7 +192,7 @@ def build_home(site, write):
         <div class="spot-copy">
           <p class="eyebrow">Unser Schwerpunkt</p>
           <h2 id="ker-h" class="display">Keramikversiegelung. <em>Glanz, der bleibt.</em></h2>
-          <p>Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Glas und Felgen mit einem keramischen System, das deutlich länger hält als Wachs oder klassische Versiegelung. Vorher korrigieren wir den Lack, damit unter der Keramik nur noch Glanz eingeschlossen wird.</p>
+          <p>Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Glas und Felgen keramisch. Das hält deutlich länger als Wachs oder klassische Versiegelung.</p>
           <ul class="spot-points">
             <li>{I["shield"]}<span>Langzeitschutz gegen Witterung, Streusalz und UV</span></li>
             <li>{I["spark"]}<span>Tiefer Glanz und starker Abperleffekt</span></li>
@@ -264,8 +264,8 @@ def build_home(site, write):
     <div class="container hero-inner">
       <div class="hero-copy">
         <div class="hero-kicker">
-          <a class="hero-badge" href="#bewertungen">{STARS5} {ESC(s["rating"]["value"])} · {s["rating"]["count"]} Google-Bewertungen</a>
-          <span class="hero-badge">{I["pin"]} {ESC(s["address"]["city"])} · {ESC(s["address"]["street"])}</span>
+          <a class="hero-badge" href="#bewertungen">{STARS5} {ESC(s["rating"]["value"])} · {s["rating"]["count"]} <span class="hide-xs">Google-</span>Bewertungen</a>
+          <span class="hero-badge hero-badge-addr">{I["pin"]} {ESC(s["address"]["city"])} · {ESC(s["address"]["street"])}</span>
         </div>
         <h1 id="hero-h" class="hero-headline">Fahrzeug&shy;aufbereitung in Celle. <em>Mit Liebe zum Detail.</em></h1>
         <p class="hero-sub">Lackaufbereitung, <strong>Keramikversiegelung</strong> und Innenaufbereitung in Handarbeit. Für den Neuwagen, das Liebhaberstück und den Familienwagen, der wieder glänzen soll. Mit Festpreis, bevor wir anfangen.</p>
