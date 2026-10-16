@@ -116,4 +116,4 @@ Zwischen Fotos und Besichtigung vergehen oft einige Tage. Saugen Sie kurz nach, 
 
 ElbDetail bereitet Fahrzeuge für den Verkauf in der Lachtehäuser Straße 1 in Celle auf. Ein Abhol- und Bringservice ist nach Vereinbarung möglich. Alle Infos zur Aufbereitung von Gebrauchtwagen finden Sie auf der Seite [Leasingrückgabe und Gebrauchtwagenaufbereitung](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html).
 
-Schicken Sie ein paar Fotos per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). So ist Ihr Auto bereit für Inserat und Besichtigung.
+Schicken Sie ein paar Fotos per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). So ist Ihr Auto bereit für Inserat und Besichtigung.

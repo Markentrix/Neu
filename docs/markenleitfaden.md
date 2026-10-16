@@ -184,7 +184,7 @@ Empfehlung: Den aktuellen Claim als Hauptclaim behalten. Er ist kurz, bereits ei
 
 ### Handlungsaufforderung
 
-Primär: "Termin per WhatsApp anfragen" (+49 173 5845574). Sekundär: "Online-Termin anfragen" (`/termin.html`).
+Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Termin anfragen" (`/termin.html`).
 
 ---
 
@@ -393,7 +393,7 @@ Details zu Motiven und Technik: `docs/foto-und-video-shotlist.md`.
 6. **Sichere Zone 9:16:** oben ca. 250 px und unten ca. 400 px frei von Text halten. Dort liegen die Bedienelemente der Apps.
 7. **Preise** nur aus der Preisliste und immer mit "ab".
 8. **Bewertungen:** nur echte Zitate aus Google-Rezensionen, mit Einwilligung bzw. als öffentliches Zitat mit Quelle "Google-Rezension". Sterne in `#f5b301` plus Zahl "5,0".
-9. **WhatsApp-Hinweis** als Text "Termin per WhatsApp: +49 173 5845574". WhatsApp-Grün nur für das Icon.
+9. **WhatsApp-Hinweis** als Text "Termin per WhatsApp: +49 172 7613807". WhatsApp-Grün nur für das Icon.
 10. **Hashtags** sparsam: `#elbdetail #celle #fahrzeugaufbereitung` plus 2 bis 3 themenbezogene.
 11. **Kanäle:** instagram.com/elbdetail, tiktok.com/@elbdetail, facebook.com/p/ElbDetail-61591214390265.
 

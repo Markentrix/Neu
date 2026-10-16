@@ -2,10 +2,10 @@
   "name": "ElbDetail",
   "tagline": "Premium Fahrzeugaufbereitung",
   "url": "https://www.elbdetail.de",
-  "phone": "+491735845574",
-  "phoneDisplay": "0173 5845574",
-  "phoneIntl": "+49 173 5845574",
-  "whatsapp": "491735845574",
+  "phone": "+491727613807",
+  "phoneDisplay": "0172 7613807",
+  "phoneIntl": "+49 172 7613807",
+  "whatsapp": "491727613807",
   "email": "info@elbdetail.de",
   "address": {
     "street": "Lachtehäuser Straße 1",
@@ -75,10 +75,10 @@
     ]
   },
   "legal": {
-    "owner": "",
+    "owner": "René Triechelt",
     "vatId": "",
-    "responsible": "",
-    "mailProvider": "",
+    "responsible": "René Triechelt, Lachtehäuser Straße 1, 29223 Celle",
+    "mailProvider": "IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Deutschland",
     "hosting": "Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland",
     "smallBusiness": true
   },
@@ -99,7 +99,8 @@
     "role": "Gründer und Inhaber",
     "photo": "",
     "since": "",
-    "text": "Für mich ist Fahrzeugaufbereitung keine Dienstleistung von der Stange. Ob Familienwagen, Firmenfahrzeug oder Sportwagen: Jedes Auto bekommt die gleiche Sorgfalt. Mein Ziel ist, dass Sie sich wirklich über das Ergebnis freuen."
+    "text": "Für mich ist Fahrzeugaufbereitung keine Dienstleistung von der Stange. Ob Familienwagen, Firmenfahrzeug oder Sportwagen: Jedes Auto bekommt die gleiche Sorgfalt. Mein Ziel ist, dass Sie sich wirklich über das Ergebnis freuen.",
+    "fullName": "René Triechelt"
   },
   "verification": {
     "google": "",

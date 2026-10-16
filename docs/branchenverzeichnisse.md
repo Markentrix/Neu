@@ -14,7 +14,7 @@ Diese Angaben genau so kopieren. Keine Abkürzungen, keine Varianten.
 ElbDetail – Premium Fahrzeugaufbereitung
 Lachtehäuser Straße 1
 29223 Celle
-+49 173 5845574
++49 172 7613807
 https://www.elbdetail.de
 info@elbdetail.de
 ```
@@ -25,7 +25,7 @@ info@elbdetail.de
 | Straße | Lachtehäuser Straße 1 | Lachtehäuser Str. 1, Lachtehaeuser Strasse 1 |
 | PLZ und Ort | 29223 Celle | Celle 29223, 29223 Celle-Lachtehausen |
 | Bundesland (falls Pflichtfeld) | Niedersachsen | Nds. |
-| Telefon | +49 173 5845574 | 0173/5845574, 0173 584 55 74, +49 (0) 173 5845574. **Die alte Nummer 0172 7613807 überall ersetzen**, wo sie schon eingetragen ist (Google, Verzeichnisse, Social Media) |
+| Telefon | +49 172 7613807 | 0172/7613807, 0172 761 38 07, +49 (0) 172 7613807. Überall exakt gleich schreiben (Google, Verzeichnisse, Social Media) |
 | Website | https://www.elbdetail.de | elbdetail.de, http://elbdetail.de, Unterseiten als Hauptadresse |
 | E-Mail | info@elbdetail.de | private Adressen |
 
@@ -130,7 +130,7 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 > Viele Grüße
 > René [NACHNAME]
 > ElbDetail – Premium Fahrzeugaufbereitung
-> +49 173 5845574 · https://www.elbdetail.de
+> +49 172 7613807 · https://www.elbdetail.de
 
 **Vorlage B: Auto- oder Oldtimer-Club**
 
@@ -162,7 +162,7 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 > Freundliche Grüße
 > René [NACHNAME]
 > ElbDetail – Premium Fahrzeugaufbereitung
-> +49 173 5845574 · https://www.elbdetail.de/firmenkunden.html
+> +49 172 7613807 · https://www.elbdetail.de/firmenkunden.html
 
 **Vorlage D: Freie Werkstatt oder Reifenhändler**
 
@@ -196,7 +196,7 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 > Freundliche Grüße
 > René [NACHNAME]
 > ElbDetail – Premium Fahrzeugaufbereitung
-> +49 173 5845574
+> +49 172 7613807
 
 **Vorlage F: Lokalpresse**
 
@@ -215,7 +215,7 @@ Kurz halten. Persönlich anrufen oder vorbeigehen wirkt oft besser als eine E-Ma
 >
 > Freundliche Grüße
 > René [NACHNAME]
-> +49 173 5845574 · info@elbdetail.de
+> +49 172 7613807 · info@elbdetail.de
 
 **Vorlage G: Gutschein-Kooperation mit Einzelhandel oder Dienstleistern**
 

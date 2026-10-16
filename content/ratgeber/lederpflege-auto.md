@@ -123,4 +123,4 @@ Sind Risse oder Farbschäden bereits vorhanden, reicht eine Reinigung allein nic
 
 ElbDetail in Celle reinigt und pflegt Leder in Handarbeit und mit professionellen Produkten von Colourlock. Lederpflege und Imprägnierung sind einzeln buchbar und als Leder- oder Polsterpflege auch Teil der Komplettpflege bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html). Die Richtpreise der Pakete finden Sie in der [Preisübersicht](/preise.html). Ein schön gepflegter Innenraum ist übrigens auch eine gute Idee für einen [Gutschein](/gutscheine.html).
 
-Schicken Sie ein Foto Ihrer Sitze per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.
+Schicken Sie ein Foto Ihrer Sitze per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.

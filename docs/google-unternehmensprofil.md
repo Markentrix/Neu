@@ -16,7 +16,7 @@ Diese Angaben müssen exakt so im Profil stehen wie auf der Website und in allen
 | Adresse | Lachtehäuser Straße 1, 29223 Celle |
 | Adresse anzeigen | `[PLATZHALTER: Anzeigen, wenn Kunden ihr Fahrzeug an dieser Adresse abgeben. Ausblenden, wenn dort kein Kundenempfang stattfindet.]` |
 | Einzugsgebiet | Celle, Wietze, Winsen (Aller), Hambühren, Bergen, Lachendorf, Eschede, Wathlingen, Nienhagen, Eicklingen, Adelheidsdorf, Faßberg, Beedenbostel, Hermannsburg, Unterlüß (Google erlaubt bis zu 20 Gebiete. Findet Google Hermannsburg oder Unterlüß nicht, "Südheide" wählen.) |
-| Telefon | +49 173 5845574 |
+| Telefon | +49 172 7613807 |
 | Website | https://www.elbdetail.de |
 | Link für Terminvereinbarung | https://www.elbdetail.de/termin.html |
 | Social-Media-Profile | instagram.com/elbdetail, tiktok.com/@elbdetail, facebook.com/p/ElbDetail-61591214390265 |
@@ -206,7 +206,7 @@ Nur aktivieren, was wirklich zutrifft. Welche Attribute erscheinen, hängt von d
 | Abholung / Bringservice (falls das Attribut erscheint) | Nur aktivieren, wenn sich "nach Vereinbarung" dazuschreiben lässt. Keinen kostenlosen Radius angeben, solange René ihn nicht festgelegt hat. |
 | Angaben zur Inhaberschaft (z. B. "frauengeführt") | `[PLATZHALTER: nur wenn zutreffend und gewünscht]` |
 | Online-Kostenvoranschläge (falls das Attribut erscheint) | Aktivieren. Kunden schicken Fotos per WhatsApp und erhalten vorab einen verbindlichen Preis. |
-| Chat/WhatsApp | `[PRÜFEN: Bietet das Profil ein Feld für WhatsApp? Dann +49 173 5845574 eintragen.]` |
+| Chat/WhatsApp | `[PRÜFEN: Bietet das Profil ein Feld für WhatsApp? Dann +49 172 7613807 eintragen.]` |
 
 ---
 
@@ -448,7 +448,7 @@ Nein. Wir arbeiten zu 100 % in Handarbeit. Außen waschen wir mit der Zwei-Eimer
 Wir arbeiten mit Profi-Produkten von C²Coating, Koch-Chemie und Colourlock. René ist offizieller C²Coating Excellence Partner und hat Koch-Chemie-Fachschulungen absolviert. Für Leder nutzen wir Colourlock. So kommt auf jede Oberfläche das passende Produkt.
 
 **5. Wie vereinbare ich einen Termin?**
-Am schnellsten per WhatsApp an +49 173 5845574 oder über das Terminformular auf www.elbdetail.de/termin.html. Schicken Sie uns gern Fahrzeug und Wunschleistung. Wir melden uns mit einem Terminvorschlag.
+Am schnellsten per WhatsApp an +49 172 7613807 oder über das Terminformular auf www.elbdetail.de/termin.html. Schicken Sie uns gern Fahrzeug und Wunschleistung. Wir melden uns mit einem Terminvorschlag.
 
 **6. Arbeiten Sie auch samstags?**
 Termine gibt es nach Vereinbarung von Montag bis Freitag. Samstags ist ein Termin nach Absprache möglich. Fragen Sie einfach an.

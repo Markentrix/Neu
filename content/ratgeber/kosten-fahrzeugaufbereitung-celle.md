@@ -25,7 +25,7 @@
     },
     {
       "q": "Bekomme ich vorher einen festen Preis?",
-      "a": "Ja. ElbDetail nennt Ihnen vor dem Termin einen verbindlichen Preis. Am schnellsten geht das, wenn Sie ein paar Fotos Ihres Autos per WhatsApp an +49 173 5845574 schicken."
+      "a": "Ja. ElbDetail nennt Ihnen vor dem Termin einen verbindlichen Preis. Am schnellsten geht das, wenn Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 schicken."
     }
   ]
 }
@@ -121,4 +121,4 @@ Ein faires Angebot nennt klar, welche Leistungen enthalten sind und welche nicht
 
 ElbDetail sitzt in der Lachtehäuser Straße 1 in Celle und arbeitet für Kundinnen und Kunden aus der Stadt und dem Landkreis. Termine gibt es nach Vereinbarung von Montag bis Freitag, samstags nach Absprache. Bezahlen können Sie bar oder per Überweisung.
 
-Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vorab einen verbindlichen Preis.
+Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vorab einen verbindlichen Preis.

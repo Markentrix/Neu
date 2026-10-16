@@ -135,4 +135,4 @@ Sie pflegen den Lack nach Politur und Versiegelung am besten mit regelmäßiger,
 
 ElbDetail poliert und versiegelt Lack in Celle zu 100 % von Hand, mit Lackschichtdickenmessung und professionellen Produkten von Koch-Chemie und C²Coating. Mehr Details finden Sie auf den Seiten [Lackpolitur](/leistungen/lackpolitur-celle.html) und [Lackversiegelung](/leistungen/lackversiegelung-celle.html). Vor dem Winter lohnt sich auch ein Blick auf die [Winter-Lackschutz-Aktion](/aktion/winterschutz.html).
 
-Schicken Sie ein paar Fotos Ihres Lacks per WhatsApp an +49 173 5845574 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.
+Schicken Sie ein paar Fotos Ihres Lacks per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vor dem Termin einen verbindlichen Preis.

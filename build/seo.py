@@ -50,7 +50,7 @@ def business(site):
                             "itemListElement": [{"@type": "OfferCatalog", "name": sv["short"], "url": site.url + "/leistungen/" + sv["slug"] + ".html"}
                                                 for sv in site.services]},
         "makesOffer": offers,
-        **({"founder": {"@type": "Person", "name": s["about"]["name"], "jobTitle": s["about"].get("role") or "Inhaber"}}
+        **({"founder": {"@type": "Person", "name": s["about"].get("fullName") or s["about"]["name"], "jobTitle": s["about"].get("role") or "Inhaber"}}
            if (s.get("about") or {}).get("name") else {}),
         "potentialAction": {"@type": "ReserveAction", "name": "Termin anfragen",
                             "target": {"@type": "EntryPoint", "urlTemplate": site.url + "/termin.html", "inLanguage": "de-DE",

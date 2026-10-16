@@ -116,4 +116,4 @@ Mit dieser Liste sind Sie gut vorbereitet:
 
 ElbDetail bereitet Ihr Auto in Celle zu 100 % von Hand auf den Winter vor, mit Zwei-Eimer-Handwäsche und professionellen Produkten von Koch-Chemie und C²Coating. Sie bekommen vor dem Termin einen verbindlichen Preis, und das Ergebnis nehmen wir gemeinsam mit Ihnen bei Tageslicht ab.
 
-Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 173 5845574 oder buchen Sie über das [Terminformular](/termin.html). Je früher Sie vor dem ersten Frost anfragen, desto entspannter wird die Terminplanung.
+Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 oder buchen Sie über das [Terminformular](/termin.html). Je früher Sie vor dem ersten Frost anfragen, desto entspannter wird die Terminplanung.

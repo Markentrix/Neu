@@ -485,7 +485,7 @@ def build_about(site, write):
     photo = picture(site, ab.get("photo", ""), f"{name}, {ab.get('role') or 'Inhaber'} von {s['name']}", "about-photo", "", sizes="(min-width: 900px) 40vw, 90vw")
     partners = "".join(f'<div class="usecase">{I["shield"]}<h3>{ESC(x["name"])}</h3><p><strong>{ESC(x["role"])}.</strong> {ESC(x["text"])}.</p></div>'
                        for x in s.get("partners", []))
-    ld = [seo.webpage(site, path, title, {"@type": "AboutPage", "mainEntity": {"@type": "Person", "name": name, "jobTitle": ab.get("role") or "Inhaber",
+    ld = [seo.webpage(site, path, title, {"@type": "AboutPage", "mainEntity": {"@type": "Person", "name": ab.get("fullName") or name, "jobTitle": ab.get("role") or "Inhaber",
                                                                                 "worksFor": {"@id": site.url + "/#business"}}}),
           seo.crumbs(site, [("Startseite", "/"), ("Über uns", path)])]
     body = f'''

@@ -126,4 +126,4 @@ Lesen Sie das Rückgabeprotokoll vor der Unterschrift sorgfältig. Wenn Sie mit 
 
 ElbDetail bereitet Leasingfahrzeuge in Celle zu 100 % von Hand auf, mit Zwei-Eimer-Handwäsche und professionellen Produkten von Koch-Chemie. Sie bekommen vor dem Termin einen verbindlichen Preis. Ein Abhol- und Bringservice ist nach Vereinbarung möglich. Mehr zum Ablauf lesen Sie auf der Seite [Leasingrückgabe und Gebrauchtwagenaufbereitung](/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html). Für Firmenwagen gibt es zusätzlich ein Angebot für [Firmenkunden](/firmenkunden.html).
 
-Schicken Sie ein paar Fotos Ihres Leasingautos per WhatsApp an +49 173 5845574 oder buchen Sie direkt über das [Terminformular](/termin.html). Planen Sie den Termin rechtzeitig vor Ihrer Rückgabe ein.
+Schicken Sie ein paar Fotos Ihres Leasingautos per WhatsApp an +49 172 7613807 oder buchen Sie direkt über das [Terminformular](/termin.html). Planen Sie den Termin rechtzeitig vor Ihrer Rückgabe ein.

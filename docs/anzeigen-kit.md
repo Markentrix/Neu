@@ -90,7 +90,7 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 | Alter | Keine Einschränkung | `[PLATZHALTER: Altersspanne, z. B. ab 18]` |
 | Geräte | Alle, mobil im Blick behalten | Alle |
 
-**Optional Meta:** Kampagne mit Ziel "Interaktion", Conversion-Ort WhatsApp (Klick-zu-WhatsApp-Anzeigen). Voraussetzung: Die Nummer +49 173 5845574 ist ein WhatsApp-Business-Konto und mit der Facebook-Seite verbunden `[PLATZHALTER: prüfen]`. Diese Klicks laufen nicht über die Website und erscheinen deshalb nicht in der eigenen Statistik. Gemessen wird dann über die Meta-Berichte (gestartete Unterhaltungen) und die eigene Strichliste (Abschnitt 5.3).
+**Optional Meta:** Kampagne mit Ziel "Interaktion", Conversion-Ort WhatsApp (Klick-zu-WhatsApp-Anzeigen). Voraussetzung: Die Nummer +49 172 7613807 ist ein WhatsApp-Business-Konto und mit der Facebook-Seite verbunden `[PLATZHALTER: prüfen]`. Diese Klicks laufen nicht über die Website und erscheinen deshalb nicht in der eigenen Statistik. Gemessen wird dann über die Meta-Berichte (gestartete Unterhaltungen) und die eigene Strichliste (Abschnitt 5.3).
 
 ---
 
@@ -502,7 +502,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 | Typen (engl. Types) | Frisch & Sauber, Komplettpflege, Premium Politur |
 | Stadtteile (engl. Neighborhoods) | Altstadt, Neuenhäusen, Blumlage, Westercelle, Altencelle, Garßen, Klein Hehlen, Groß Hehlen, Vorwerk, Wietzenbruch |
 
-**Anruf-Asset:** +49 173 5845574, nur zu Erreichbarkeitszeiten `[PLATZHALTER: Zeiten]`.
+**Anruf-Asset:** +49 172 7613807, nur zu Erreichbarkeitszeiten `[PLATZHALTER: Zeiten]`.
 
 **Standort-Asset:** über das verknüpfte Google Business Profile (Lachtehäuser Straße 1, 29223 Celle).
 
@@ -523,7 +523,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 **Primärtexte**
 
 1. Streusalz, Matsch und Frost setzen Ihrem Lack zu. Mit dem Winter-Lackschutz von ElbDetail in Celle machen Sie Ihr Auto winterfest. `[PLATZHALTER: Aktionsinhalt in einem Satz]`. Den verbindlichen Preis kennen Sie vor dem Termin. Jetzt anfragen.
-2. Von Hand statt Waschstraße. Wir waschen nach der Zwei-Eimer-Methode und arbeiten mit Profi-Produkten von Koch-Chemie. So kommt Ihr Lack versiegelt durch den Winter. Termin per WhatsApp: +49 173 5845574.
+2. Von Hand statt Waschstraße. Wir waschen nach der Zwei-Eimer-Methode und arbeiten mit Profi-Produkten von Koch-Chemie. So kommt Ihr Lack versiegelt durch den Winter. Termin per WhatsApp: +49 172 7613807.
 3. 5,0 Sterne bei 19 Google-Rezensionen. Jetzt auch für Ihren Lack vor dem Winter: Winter-Lackschutz in Celle. Termine Mo bis Fr, samstags nach Absprache. Zum Schluss nehmen wir Ihr Auto gemeinsam bei Tageslicht ab.
 
 **Headlines:** "Winter-Lackschutz in Celle" | "Lack winterfest machen" | "Versiegelt durch den Winter"
@@ -539,7 +539,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 | Ablauf | Wasserperlen Makro, Felge sauber, Scheibe mit Perlen, Fahrzeug-Totale, Endkarte |
 | Text-Overlay | "Bereit für Salz und Matsch?" dann "Winter-Lackschutz in Celle" dann "Termin per WhatsApp" |
 | Motive (Shotlist) | 06, 33, 35, 38, 01 |
-| Endkarte | Logo, "Winter-Lackschutz", "+49 173 5845574", elbdetail.de |
+| Endkarte | Logo, "Winter-Lackschutz", "+49 172 7613807", elbdetail.de |
 | Nicht zeigen | Schneeketten, Reifenwechsel, Leistungen, die nicht zur Aktion gehören |
 
 ### 4.2 M2 Weihnachtsgutscheine
@@ -575,7 +575,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 **Primärtexte**
 
 1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit der Komplettpflege reinigen wir Ihren Innenraum von Hand: Tiefenreinigung, Polster und Teppich, Kunststoffpflege und Geruchsneutralisation. Ab 179 € für Kompaktwagen.
-2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 173 5845574 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
+2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 172 7613807 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
 3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Komplettpflege ab 179 € (Kompakt), ab 209 € (Limousine/Kombi), ab 229 € (SUV/Van). 5,0 Sterne bei 19 Google-Rezensionen.
 
 **Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Komplettpflege ab 179 €"
@@ -592,7 +592,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 | Text-Overlay | "Hund an Bord?" dann "Kofferraum wieder frei." dann "Komplettpflege ab 179 €" |
 | Motive (Shotlist) | 18, 60, 23, 25, 17 |
 | Hund im Bild | Nur mit Einwilligung des Halters. Kein Hund im Fahrzeug während der Reinigung zeigen |
-| Endkarte | Logo, "3 Fotos per WhatsApp, verbindlicher Preis", "+49 173 5845574" |
+| Endkarte | Logo, "3 Fotos per WhatsApp, verbindlicher Preis", "+49 172 7613807" |
 | Nicht zeigen | Keine Versprechen wie "100 % haarfrei" oder "garantiert geruchsfrei" |
 
 ---

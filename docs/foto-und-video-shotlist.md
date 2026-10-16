@@ -291,14 +291,14 @@ Für Instagram Reels, TikTok, Facebook Reels und YouTube Shorts. Länge 15 bis 3
 | 6 | 50/50 | Klebeband wird abgezogen | Punktlicht über die Trennlinie, langsam | "Links vorher. Rechts nachher." | 29, 61 |
 | 7 | Saubere Linie | Sauger zieht eine Bahn in den Teppich | 3 Bahnen, Fußraum-Totale, Fußmatte | "Kurz zuschauen. Lohnt sich." | 60, 17, 40 |
 | 8 | Abnahme bei Tageslicht | Fahrzeug fährt ins Tageslicht | Rundgang, Kunde zeigt Detail, Schlüssel | "Zum Schluss: gemeinsame Abnahme bei Tageslicht." | 54, 55, 56 |
-| 9 | Preis vorab | Smartphone zeigt WhatsApp mit 3 Fotos (Demo-Chat ohne echte Kundendaten) | Fotos senden, Antwort mit Preis, Terminbestätigung | "3 Fotos per WhatsApp." dann "Verbindlicher Preis vor dem Termin." dann "+49 173 5845574" | Demo-Screen, 01 |
+| 9 | Preis vorab | Smartphone zeigt WhatsApp mit 3 Fotos (Demo-Chat ohne echte Kundendaten) | Fotos senden, Antwort mit Preis, Terminbestätigung | "3 Fotos per WhatsApp." dann "Verbindlicher Preis vor dem Termin." dann "+49 172 7613807" | Demo-Screen, 01 |
 | 10 | Leasingrückgabe | Kalender mit markiertem Rückgabetermin | Rundgang mit Taschenlampe, Messung, Politur, Innenraum, Abnahme | "Leasingrückgabe steht an?" dann "Gepflegt in die Übergabe." | 50, 26, 30, 25, 54 |
 | 11 | Keramik in 20 Sekunden | Wasser trifft keramikversiegelten Lack, Perlen springen ab | Dekontamination, Entfetten, Auftrag von Hand, Abnehmen, Abperleffekt, Urkunde | "Was passiert vor dem Coating?" dann "Vorbereitung. Auftrag. Glanz." dann "C²Coating Excellence Partner in Celle" | 66, 69, 70, 71, 72, 74 |
 | 12 | Leder gerettet | Finger fährt über die abgeriebene Sitzwange | Reinigung, Reparatur mit Colourlock, gleiche Stelle nachher | "Abrieb am Ledersitz?" dann "Reparatur mit Colourlock." | 79, 82, 83, 80 |
 
 **Hinweise:**
 - In den ersten 2 Sekunden kein Logo-Intro. Sofort das Motiv.
-- Am Ende 2 Sekunden Endkarte: Logo, "Termin per WhatsApp: +49 173 5845574", elbdetail.de.
+- Am Ende 2 Sekunden Endkarte: Logo, "Termin per WhatsApp: +49 172 7613807", elbdetail.de.
 - Untertitel für gesprochenen Text immer einblenden.
 - Keine Versprechen ins Overlay, die nicht in den Fakten stehen (keine Garantien, keine Haltbarkeit in Jahren bei Keramik, keine Ersparnis bei Leasingrückgabe, keine Preise für Keramik).
 
