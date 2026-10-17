@@ -264,7 +264,7 @@ def build_home(site, write):
     <div class="container hero-inner">
       <div class="hero-copy">
         <div class="hero-kicker">
-          <a class="hero-badge" href="#bewertungen">{STARS5} {ESC(s["rating"]["value"])} · {s["rating"]["count"]} <span class="hide-xs">Google-</span>Bewertungen</a>
+          <a class="hero-badge" href="#bewertungen">{STARS5} <span>{ESC(s["rating"]["value"])} · {s["rating"]["count"]} <span class="hide-xs">Google-</span>Bewertungen</span></a>
           <span class="hero-badge hero-badge-addr">{I["pin"]} {ESC(s["address"]["city"])} · {ESC(s["address"]["street"])}</span>
         </div>
         <h1 id="hero-h" class="hero-headline">Fahrzeug&shy;aufbereitung in Celle. <em>Mit Liebe zum Detail.</em></h1>
@@ -409,7 +409,7 @@ def build_home(site, write):
         <p class="eyebrow">Ablauf</p>
         <h2 id="ablauf-h" class="display">In drei Schritten zum <em>Auto wie neu.</em></h2>
       </div>
-      <div class="process-rail stagger">
+      <div class="process-rail stagger" data-draw>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle, danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>

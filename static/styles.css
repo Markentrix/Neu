@@ -127,13 +127,56 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, div[tabindex="-1"]:focu
 
 /* Scroll-reveal: progressive enhancement, sichtbar ohne JS */
 .reveal { opacity: 1; transform: none; }
-.js-anim .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1); }
-.js-anim .reveal.is-visible { opacity: 1; transform: none; }
+/* Statt Durchsichtigkeit ein Wisch-Effekt: Inhalt fährt aus einer Maske nach oben, Farben und Kontrast bleiben jederzeit voll */
+.js-anim .reveal {
+  transform: translateY(26px); clip-path: inset(-40px -40px 100% -40px);
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), clip-path 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.js-anim .reveal.is-visible { transform: none; clip-path: inset(-40px -40px -40px -40px); }
 .js-anim .stagger > .reveal:nth-child(2) { transition-delay: 70ms; }
 .js-anim .stagger > .reveal:nth-child(3) { transition-delay: 140ms; }
 .js-anim .stagger > .reveal:nth-child(4) { transition-delay: 210ms; }
 .js-anim .stagger > .reveal:nth-child(5) { transition-delay: 280ms; }
 .js-anim .stagger > .reveal:nth-child(6) { transition-delay: 350ms; }
+
+/* ==========================================================================
+   Bewegung mit Sinn: Auftritt im Hero, Lackglanz, Bildzoom, Ablauf-Linie, Preis-Puls.
+   Alles nur ohne "Bewegung reduzieren"; Text bewegt sich nur per transform, damit der LCP nicht wartet.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-photo img { animation: hero-zoom 3.2s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .hero-kicker, .hero-actions, .hero-quote, .quote-card { animation: rise-in 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .hero-headline, .hero-sub { animation: rise-move 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .hero-headline { animation-delay: 60ms; }
+  .hero-sub { animation-delay: 140ms; }
+  .hero-actions { animation-delay: 220ms; }
+  .quote-card { animation-delay: 260ms; }
+  .hero-quote { animation-delay: 340ms; }
+  /* Ein Lichtreflex läuft einmal über „Mit Liebe zum Detail.“, wie über frisch polierten Lack */
+  .hero-headline em {
+    background: linear-gradient(100deg, var(--blue-bright) 0%, var(--blue-bright) 40%, #f2f7ff 50%, var(--blue-bright) 60%, var(--blue-bright) 100%);
+    background-size: 280% 100%; background-position: 100% 0;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    padding-right: 0.12em; margin-right: -0.12em;
+    animation: gloss 2.4s 0.9s cubic-bezier(0.35, 0.6, 0.2, 1) both;
+  }
+  .js-anim .spot .spot-media img { transform: scale(1.08); transition: transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .js-anim .spot.is-visible .spot-media img { transform: none; }
+  .quote-result.bump { animation: bump 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+}
+@keyframes hero-zoom { from { transform: scale(1.12); } to { transform: none; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes rise-move { from { transform: translateY(18px); } to { transform: none; } }
+@keyframes gloss { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@keyframes bump { 0% { transform: none; } 40% { transform: scale(1.025); box-shadow: 0 0 0 4px rgba(91,155,232,0.25); } 100% { transform: none; } }
+
+/* Ablauf: Linie zeichnet sich beim Scrollen, Punkte füllen sich nacheinander */
+.js-anim .process-rail[data-draw]::before { content: ""; position: absolute; left: 0; right: 0; top: -14px; height: 2px; background: var(--line); }
+.js-anim .process-rail[data-draw]::after {
+  content: ""; position: absolute; background: var(--blue); transform-origin: left center;
+  left: 0; right: 0; top: -14px; height: 2px; transform: scaleX(0); transition: transform 1.6s cubic-bezier(0.3, 0.6, 0.2, 1) 0.15s;
+}
+.js-anim .process-rail.is-visible::after { transform: none; }
 
 /* ==========================================================================
    Header
@@ -899,16 +942,21 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
   .process-cell { padding: 0 0 30px 26px; }
   .process-cell:last-child { padding-bottom: 0; }
   .process-cell::before { content: ""; position: absolute; left: -10px; top: 1px; width: 18px; height: 18px; border-radius: 50%; background: var(--soft); border: 3px solid var(--blue); }
+  .js-anim .process-rail[data-draw]::before { display: none; }
+  .js-anim .process-rail[data-draw]::after { left: -2px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; transform-origin: center top; transform: scaleY(0); }
+  .js-anim .process-rail.is-visible::after { transform: none; }
+  .js-anim .process-cell::before { transition: background-color 0.4s ease 0.5s; }
+  .js-anim .process-cell.is-visible::before { background: var(--blue); }
   .review-grid { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); padding-bottom: 4px; margin-top: 34px; }
   .review-grid::-webkit-scrollbar { display: none; }
   /* Startseite: Vorher/Nachher und Ratgeber als seitliche Karussells, spart Scrollhöhe */
   .article-grid.home-scroll { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); padding-bottom: 4px; }
   .home-scroll::-webkit-scrollbar { display: none; }
   .home-scroll > * { flex: 0 0 84%; max-width: 360px; scroll-snap-align: start; }
-  .js-anim .home-scroll .reveal { opacity: 1; transform: none; transition: none; }
+  .js-anim .home-scroll .reveal { transform: none; clip-path: none; transition: none; }
   .facts div { grid-template-columns: 104px 1fr; }
   .review-card { flex: 0 0 86%; max-width: 340px; scroll-snap-align: start; }
-  .js-anim .review-grid .reveal { opacity: 1; transform: none; transition: none; }
+  .js-anim .review-grid .reveal { transform: none; clip-path: none; transition: none; }
   .price-toolbar { align-items: flex-start; flex-direction: column; }
 }
 /* Footer auf Touch-Geräten und Tablets: Tippflächen 44px, negativer Rand hält den Zeilenabstand gleichmäßig */
@@ -963,6 +1011,7 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
   .seg { grid-template-columns: 1fr; }
 }
 @media print {
+  .js-anim .reveal { clip-path: none !important; transform: none !important; }
   .site-header, .mobile-actionbar, .mobile-nav, .skip-link, .cta-band, .map-wrap { display: none !important; }
   body { padding: 0; color: #000; }
   .hero, .page-hero { clip-path: none; color: #000; background: #fff; }

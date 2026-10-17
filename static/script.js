@@ -140,10 +140,28 @@
   var quote = $("#quoteForm");
   if (quote) {
     quote.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* Preis zählt beim Umschalten kurz hoch oder runter, Screenreader hören nur den Endwert */
+    var qv = $("#quoteValue"), qBox = qv && qv.parentNode, lastV = null;
+    var qReduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var showQuoteValue = function (v) {
+      var from = lastV; lastV = v;
+      var paint = function (n) { qv.innerHTML = "<small>ab</small>" + fmt(n) + " €"; };
+      if (from == null || from === v || qReduce || !window.requestAnimationFrame) { paint(v); return; }
+      qBox.setAttribute("aria-busy", "true");
+      qBox.classList.remove("bump"); void qBox.offsetWidth; qBox.classList.add("bump");
+      var t0 = null, dur = 480;
+      var step = function (t) {
+        if (t0 === null) t0 = t;
+        var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+        paint(Math.round(from + (v - from) * e));
+        if (k < 1) requestAnimationFrame(step); else qBox.setAttribute("aria-busy", "false");
+      };
+      requestAnimationFrame(step);
+    };
     var updateQuote = function (user) {
       var pk = radio(quote, "qpkg"), ck = radio(quote, "qclass"), p = pkg(pk), c = cls(ck), v = price(pk, ck);
       if (!p || v == null) return;
-      $("#quoteValue").innerHTML = "<small>ab</small>" + fmt(v) + " €";
+      showQuoteValue(v);
       $("#quotePkgName").textContent = p.name;
       $("#quoteBook").href = "termin.html?paket=" + pk + "&klasse=" + ck;
       $("#quoteWa").href = waLink("Hallo ElbDetail, ich interessiere mich für das Paket „" + p.name + "“ (" + c.name + ", Richtpreis ab " + fmt(v) + " €). Fahrzeug: … Wunschtermin: …");
@@ -193,6 +211,31 @@
     var set = function () { ba.style.setProperty("--pos", r.value + "%"); };
     r.addEventListener("input", set); set();
   });
+  /* Kurzer Hinweis beim ersten Sichtkontakt: Der Regler wandert einmal hin und her, damit klar ist, dass man ihn ziehen kann */
+  var baReduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!baReduce && "IntersectionObserver" in window && window.requestAnimationFrame) {
+    var baHint = function (ba) {
+      var r = $('input[type="range"]', ba); if (!r) return;
+      var touched = false, stop = function () { touched = true; };
+      ["pointerdown", "keydown", "touchstart"].forEach(function (ev) { r.addEventListener(ev, stop, { once: true, passive: true }); });
+      var keys = [[0, 50], [550, 66], [1250, 36], [1800, 50]], t0 = null;
+      var ease = function (k) { return k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; };
+      var step = function (t) {
+        if (touched) { ba.style.setProperty("--pos", r.value + "%"); return; }
+        if (t0 === null) t0 = t;
+        var e = t - t0, i = 1;
+        while (i < keys.length - 1 && e > keys[i][0]) i++;
+        var a = keys[i - 1], b = keys[i], k = Math.max(0, Math.min(1, (e - a[0]) / (b[0] - a[0])));
+        ba.style.setProperty("--pos", (a[1] + (b[1] - a[1]) * ease(k)) + "%");
+        if (e < keys[keys.length - 1][0]) requestAnimationFrame(step); else ba.style.setProperty("--pos", r.value + "%");
+      };
+      setTimeout(function () { requestAnimationFrame(step); }, 350);
+    };
+    var baIo = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { baIo.unobserve(en.target); baHint(en.target); } });
+    }, { threshold: 0.6 });
+    $$(".ba").forEach(function (ba) { baIo.observe(ba); });
+  }
 
   /* Tastatur offen: Aktionsleiste ausblenden */
   var kbT;
@@ -438,11 +481,13 @@
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!reduce && "IntersectionObserver" in window) {
     document.documentElement.classList.add("js-anim");
+    var ioSeen = false;
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); } });
+      entries.forEach(function (en) { if (en.isIntersecting) { ioSeen = true; en.target.classList.add("is-visible"); io.unobserve(en.target); } });
     }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
-    $$(".reveal").forEach(function (el) { io.observe(el); });
-    setTimeout(function () { $$(".reveal:not(.is-visible)").forEach(function (el) { el.classList.add("is-visible"); }); }, 3000);
+    $$(".reveal, [data-draw]").forEach(function (el) { io.observe(el); });
+    /* Sicherheitsnetz nur, falls der Beobachter in dieser Umgebung gar nicht meldet: dann alles sofort zeigen */
+    setTimeout(function () { if (!ioSeen) $$(".reveal:not(.is-visible), [data-draw]").forEach(function (el) { el.classList.add("is-visible"); }); }, 2500);
   }
   var y = $("#year"); if (y) y.textContent = String(new Date().getFullYear());
 })();
