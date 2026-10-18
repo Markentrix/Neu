@@ -17,4 +17,13 @@ jobs:
       - name: Abhängigkeiten
         run: pip3 install --break-system-packages -q -r markentrix-server/portal/requirements.txt aiosmtpd httpx pyflakes
       - name: Tests
-        run: bash markentrix-server/tests/run.sh
+        run: bash markentrix-server/tests/run.sh 2>&1 | tee /tmp/testlauf.txt; exit ${PIPESTATUS[0]}
+        shell: bash
+      - name: Fehlerdetails als Hinweis ausgeben
+        if: failure()
+        shell: bash
+        run: |
+          T=$(tail -c 3000 /tmp/testlauf.txt | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+          echo "::error title=Testlauf::$T"
+          L=$(tail -c 1500 /var/tmp/pt/log 2>/dev/null | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+          echo "::error title=Portal-Log::$L"
