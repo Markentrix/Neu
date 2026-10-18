@@ -71,7 +71,7 @@ def current_user(request: Request) -> dict:
         raise HTTPException(401, "Nicht angemeldet.")
     with tx("system") as cur:
         cur.execute(
-            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id
+            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id
                FROM sitzungen s JOIN benutzer b ON b.id = s.benutzer_id
                WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv""",
             (token_hash(t),),
@@ -91,6 +91,12 @@ def require_admin(user: dict = Depends(current_user)) -> dict:
 def require_kunde(user: dict = Depends(current_user)) -> dict:
     if user["rolle"] != "kunde" or not user["kunden_id"]:
         raise HTTPException(403, "Nur für Kunden.")
+    return user
+
+
+def require_vertrieb(user: dict = Depends(current_user)) -> dict:
+    if user["rolle"] != "vertrieb" or not user["vertriebspartner_id"]:
+        raise HTTPException(403, "Nur für Vertriebler.")
     return user
 
 

@@ -14,3 +14,6 @@ SESSION_HOURS = 12
 INVITE_DAYS = 7
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+PORTAL_SECRET = os.environ.get("PORTAL_SECRET", "")
+ANTHROPIC_BASE_URL = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com").rstrip("/")
+RESET_HOURS = 2

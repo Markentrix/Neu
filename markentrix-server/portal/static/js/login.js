@@ -8,3 +8,13 @@ f.addEventListener('submit', async (ev) => {
     location.href = r.ziel;
   } catch (e) { melde(m, e.message); b.disabled = false; }
 });
+
+const f2 = document.getElementById('f2'), m2 = document.getElementById('m2');
+document.getElementById('v').addEventListener('click', (e) => { e.preventDefault(); f.hidden = true; f2.hidden = false; });
+document.getElementById('z').addEventListener('click', (e) => { e.preventDefault(); f2.hidden = true; f.hidden = false; });
+f2.addEventListener('submit', async (ev) => {
+  ev.preventDefault(); const b2 = document.getElementById('b2'); b2.disabled = true; melde(m2, '');
+  try { const r = await api('/api/passwort-vergessen', { method: 'POST', body: { email: document.getElementById('e2').value } }); melde(m2, r.hinweis, 'ok'); }
+  catch (e) { melde(m2, e.message); }
+  b2.disabled = false;
+});

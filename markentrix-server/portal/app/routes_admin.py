@@ -9,7 +9,8 @@ from pydantic import BaseModel, Field
 from . import config
 from .db import tx
 from .publish import DOMAIN_RE
-from .security import EMAIL_RE, audit, new_token, require_admin, token_hash
+from . import zugang
+from .security import EMAIL_RE, audit, require_admin
 
 router = APIRouter(prefix="/api/admin")
 
@@ -117,20 +118,7 @@ def standardmodule(cur, kid, paket):
 
 
 def einladung_erzeugen(cur, kid, email, name=None):
-    email = email.strip().lower()
-    if not EMAIL_RE.match(email):
-        raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
-    tok = new_token()
-    cur.execute("SELECT id, kunden_id FROM benutzer WHERE lower(email)=%s", (email,))
-    vorhanden = cur.fetchone()
-    if vorhanden and str(vorhanden["kunden_id"]) != str(kid):
-        raise HTTPException(409, "Diese E-Mail-Adresse gehört schon zu einem anderen Konto.")
-    if vorhanden:
-        cur.execute("UPDATE benutzer SET einladung_token_hash=%s, einladung_ablauf=now()+make_interval(days=>%s) WHERE id=%s", (token_hash(tok), config.INVITE_DAYS, vorhanden["id"]))
-    else:
-        cur.execute("""INSERT INTO benutzer (email, name, rolle, kunden_id, einladung_token_hash, einladung_ablauf)
-                       VALUES (%s,%s,'kunde',%s,%s,now()+make_interval(days=>%s))""", (email, name, kid, token_hash(tok), config.INVITE_DAYS))
-    return f"{config.BASE_URL}/einladung?token={tok}"
+    return zugang.link_erzeugen(cur, email, name, "kunde", kunden_id=kid)
 
 
 @router.get("/kunden")
@@ -165,7 +153,8 @@ def kunde_neu(data: KundeIn, user: dict = Depends(require_admin)):
         standardmodule(cur, k["id"], data.paket_code)
         link = einladung_erzeugen(cur, k["id"], data.email, data.ansprechpartner) if data.einladen else None
         audit(cur, user, "kunde_angelegt", k["id"], {"kundennummer": k["kundennummer"]})
-    return {"id": k["id"], "kundennummer": k["kundennummer"], "einladungslink": link}
+    mail = zugang.per_mail(data.email, data.ansprechpartner, link, "kunde") if link else None
+    return {"id": k["id"], "kundennummer": k["kundennummer"], "einladungslink": link, "mail": mail}
 
 
 @router.get("/kunden/{kid}")
@@ -256,6 +245,7 @@ def modul_schalten(kid: str, code: str, data: ModulIn, user: dict = Depends(requ
 class EinladungIn(BaseModel):
     email: str
     name: str | None = Field(default=None, max_length=200)
+    per_mail: bool = True
 
 
 @router.post("/kunden/{kid}/einladung")
@@ -264,7 +254,8 @@ def einladung(kid: str, data: EinladungIn, user: dict = Depends(require_admin)):
         pflicht(cur, kid)
         link = einladung_erzeugen(cur, kid, data.email, data.name)
         audit(cur, user, "einladung_erzeugt", kid)
-    return {"einladungslink": link, "gueltig_tage": config.INVITE_DAYS}
+    mail = zugang.per_mail(data.email, data.name, link, "kunde") if data.per_mail else None
+    return {"einladungslink": link, "gueltig_tage": config.INVITE_DAYS, "mail": mail}
 
 
 @router.post("/benutzer/{bid}/aktiv")

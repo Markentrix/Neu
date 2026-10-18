@@ -113,6 +113,7 @@ N8N_ENCRYPTION_KEY=$(openssl rand -hex 24)
 N8N_DB_PASSWORD=$(openssl rand -hex 16)
 MK_DB_PASSWORD=$(openssl rand -hex 16)
 MK_APP_PASSWORD=$(openssl rand -hex 16)
+PORTAL_SECRET=$(openssl rand -hex 32)
 PANEL_PASSWORD=$NEW_PANEL_PW
 EOF
   )
@@ -121,6 +122,7 @@ fi
 chmod 600 "$BASE/.env"
 grep -q '^MK_DB_PASSWORD=' "$BASE/.env" || echo "MK_DB_PASSWORD=$(openssl rand -hex 16)" >> "$BASE/.env"
 grep -q '^MK_APP_PASSWORD=' "$BASE/.env" || echo "MK_APP_PASSWORD=$(openssl rand -hex 16)" >> "$BASE/.env"
+grep -q '^PORTAL_SECRET=' "$BASE/.env" || echo "PORTAL_SECRET=$(openssl rand -hex 32)" >> "$BASE/.env"
 set -a; . "$BASE/.env"; set +a
 chmod -R a+rX "$SITES"
 

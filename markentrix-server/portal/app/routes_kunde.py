@@ -5,7 +5,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
-from . import config, publish
+from . import config, einstellungen, ki, publish
 from .db import tx
 from .security import audit, check_password_rules, hash_password, require_kunde, require_modul, verify_password
 
@@ -70,20 +70,51 @@ def agent_antwort(kunde: dict, text: str, verlauf: list) -> str:
         return "Der Agent ist gerade nicht erreichbar. Deine Nachricht ist gespeichert, das Team meldet sich bei dir."
 
 
+def ki_antwort(kunde: dict, text: str, verlauf: list, cfg: dict, ctx: dict) -> tuple[str, int, int]:
+    system = ki.system_prompt(kunde, ctx["module"], ctx["anfragen"], ctx["termine"])
+    return ki.fragen(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, system, ki.nachrichten(verlauf, text))
+
+
 @router.post("/chat")
 def chat_senden(data: ChatIn, user: dict = Depends(require_kunde)):
     kid = user["kunden_id"]
+    text = data.text.strip()
     with tx("kunde", kid) as cur:
         gate(cur, user, "ki_chat")
-        cur.execute("SELECT id, kundennummer FROM kunden WHERE id=%s", (kid,))
+        cur.execute("""SELECT k.id, k.kundennummer, k.firma, k.ansprechpartner, p.name AS paket FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code WHERE k.id=%s""", (kid,))
         kunde = cur.fetchone()
         cur.execute("SELECT absender, text FROM chat_verlauf ORDER BY id DESC LIMIT 10")
         verlauf = list(reversed(cur.fetchall()))
-        cur.execute("INSERT INTO chat_verlauf (kunden_id, benutzer_id, absender, text) VALUES (%s,%s,'kunde',%s)", (kid, user["id"], data.text.strip()))
-    antwort = agent_antwort(kunde, data.text.strip(), verlauf)   # außerhalb der Transaktion (kann dauern)
+        cur.execute("SELECT count(*) AS n FROM chat_verlauf WHERE absender='kunde' AND erstellt_am >= date_trunc('day', now())")
+        heute = cur.fetchone()["n"]
+        cur.execute("SELECT m.name FROM kunden_module km JOIN module m ON m.code=km.modul_code WHERE km.aktiv AND m.art='portal' ORDER BY m.sortierung")
+        module = [r["name"] for r in cur.fetchall()]
+        cur.execute("SELECT erstellt_am, name, nachricht FROM anfragen WHERE status='neu' ORDER BY erstellt_am DESC LIMIT 5")
+        anfragen = cur.fetchall()
+        cur.execute("SELECT beginn, titel, status FROM termine WHERE beginn >= now() AND status IN ('geplant','bestaetigt') ORDER BY beginn LIMIT 5")
+        termine = cur.fetchall()
+    with tx("system") as cur:
+        cfg = einstellungen.lesen(cur, "ki")
+    limit = int(cfg.get("tageslimit", 50)) if cfg.get("api_key") else 0
+    if cfg.get("api_key") and heute >= limit:
+        antwort = f"Für heute ist das Nachrichtenlimit ({limit}) erreicht. Morgen geht es weiter. Dringende Fragen beantwortet das Markentrix-Team direkt."
+        ein = aus = 0
+    elif cfg.get("api_key"):
+        try:
+            antwort, ein, aus = ki_antwort(kunde, text, verlauf, cfg, {"module": module, "anfragen": anfragen, "termine": termine})
+            antwort = antwort or "Dazu habe ich gerade keine Antwort. Das Markentrix-Team schaut sich deine Nachricht an."
+        except Exception:
+            antwort, ein, aus = "Der Assistent ist gerade nicht erreichbar. Deine Nachricht ist gespeichert, das Team meldet sich bei dir.", 0, 0
+    else:
+        antwort, ein, aus = agent_antwort(kunde, text, verlauf), 0, 0     # Webhook oder Platzhalter
     with tx("kunde", kid) as cur:
+        cur.execute("INSERT INTO chat_verlauf (kunden_id, benutzer_id, absender, text) VALUES (%s,%s,'kunde',%s)", (kid, user["id"], text))
         cur.execute("INSERT INTO chat_verlauf (kunden_id, absender, text) VALUES (%s,'agent',%s) RETURNING id, absender, text, erstellt_am", (kid, antwort))
-        return cur.fetchone()
+        r = cur.fetchone()
+    if ein or aus:
+        with tx("system") as cur:
+            cur.execute("INSERT INTO kosten_log (kunden_id, dienst, einheit, menge, kosten_cent) VALUES (%s,'anthropic','tokens',%s,0)", (kid, ein + aus))
+    return r
 
 
 # ---------------------------------------------------------------- Anfragen und Termine

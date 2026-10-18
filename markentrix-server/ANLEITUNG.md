@@ -93,3 +93,13 @@ Im Kunden stellst du per **Schalter** ein, welche Module er sieht (KI-Assistent,
 3. **markentrix-core:** Im Repo liegt noch kein Code, deshalb nicht Teil dieses Pakets.
 4. **Provisionen berechnen:** Die Berechnung läuft noch nicht automatisch (kommt über n8n). Das Portal zeigt und verwaltet sie.
 5. **Kopie der Sicherungen außerhalb des Servers** (z. B. Hetzner Storage Box).
+
+## E-Mail-Versand, KI-Chat, Vertriebler-Login, Provisionen
+
+**Einstellungen** (Admin → Einstellungen)
+- *E-Mail-Versand (SMTP)*: Server, Port, Verschlüsselung (meist STARTTLS/587), Benutzername, Passwort und Absender deines Postfachs (z. B. info@markentrix.de) eintragen, speichern, dann „Testmail senden". Danach gehen Einladungen und „Passwort vergessen"-Mails automatisch raus. Das Passwort wird verschlüsselt gespeichert.
+- *KI-Assistent*: API-Key aus der Anthropic-Konsole (console.anthropic.com) eintragen. Modell ist vorgegeben (günstig), dazu ein Tageslimit pro Kunde. Ohne Key nutzt der Chat weiter den n8n-Webhook (falls eingerichtet). Abgerechnet wird pro Nutzung direkt bei Anthropic.
+
+**Vertriebler-Login**: Admin → Vertriebler → Name anklicken → „Portal-Zugang" → E-Mail eintragen → „Einladung erzeugen". Der Vertriebler bekommt die Mail, legt sein Passwort selbst fest und meldet sich unter portal.markentrix.de an (landet automatisch im Partnerportal). Er sieht nur seine eigenen Kunden, Leads und Provisionen. Sperren/Freigeben geht am selben Ort.
+
+**Provisionen**: Zuerst unter Preise & Konditionen die Provisionsregel(n) „laufend" freigeben. Dann Admin → Vertriebler → „Provisionen berechnen": Monat wählen → Vorschau → Anlegen. Doppelte Einträge werden nie angelegt. Der Vertriebler sieht seine Beträge sofort; Freigeben/Auszahlen markierst du beim Vertriebler.

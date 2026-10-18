@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
-from . import config
+from . import config, mailer
 from .db import tx
 from .security import (COOKIE, EMAIL_RE, audit, check_password_rules, client_ip, current_user, hash_password,
                        new_token, rate_limit, token_hash, verify_password)
@@ -52,7 +52,7 @@ def login(data: LoginIn, request: Request, response: Response):
         audit(cur, {"id": u["id"]}, "login", u["kunden_id"])
         cur.execute("DELETE FROM sitzungen WHERE ablauf < now()")
     response.set_cookie(COOKIE, tok, max_age=config.SESSION_HOURS * 3600, httponly=True, secure=config.COOKIE_SECURE, samesite="lax", path="/")
-    return {"rolle": u["rolle"], "ziel": "/admin" if u["rolle"] == "admin" else "/app"}
+    return {"rolle": u["rolle"], "ziel": {"admin": "/admin", "vertrieb": "/vertrieb"}.get(u["rolle"], "/app")}
 
 
 @router.post("/logout")
@@ -67,13 +67,13 @@ def logout(request: Request, response: Response):
 
 @router.get("/me")
 def me(user: dict = Depends(current_user)):
-    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"]}
+    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"]}
 
 
 @router.get("/einladung/{token}")
 def einladung_pruefen(token: str):
     with tx("system") as cur:
-        cur.execute("SELECT email FROM benutzer WHERE einladung_token_hash=%s AND einladung_ablauf > now()", (token_hash(token),))
+        cur.execute("SELECT email FROM benutzer WHERE einladung_token_hash=%s AND einladung_ablauf > now() AND aktiv", (token_hash(token),))
         u = cur.fetchone()
     if not u:
         raise HTTPException(404, "Der Einladungslink ist ungültig oder abgelaufen.")
@@ -85,11 +85,36 @@ def einladung_annehmen(data: EinladungIn, request: Request):
     rate_limit("einl:" + client_ip(request), 20, 300)
     check_password_rules(data.password)
     with tx("system") as cur:
-        cur.execute("SELECT id, kunden_id FROM benutzer WHERE einladung_token_hash=%s AND einladung_ablauf > now()", (token_hash(data.token),))
+        cur.execute("SELECT id, kunden_id FROM benutzer WHERE einladung_token_hash=%s AND einladung_ablauf > now() AND aktiv", (token_hash(data.token),))
         u = cur.fetchone()
         if not u:
             raise HTTPException(404, "Der Einladungslink ist ungültig oder abgelaufen.")
-        cur.execute("UPDATE benutzer SET passwort_hash=%s, einladung_token_hash=NULL, einladung_ablauf=NULL, aktiv=true, fehlversuche=0, gesperrt_bis=NULL WHERE id=%s",
+        cur.execute("UPDATE benutzer SET passwort_hash=%s, einladung_token_hash=NULL, einladung_ablauf=NULL, fehlversuche=0, gesperrt_bis=NULL WHERE id=%s",
                     (hash_password(data.password), u["id"]))
         audit(cur, {"id": u["id"]}, "passwort_gesetzt", u["kunden_id"])
     return {"ok": True}
+
+
+class VergessenIn(BaseModel):
+    email: str
+
+
+@router.post("/passwort-vergessen")
+def passwort_vergessen(data: VergessenIn, request: Request):
+    """Antwortet immer gleich, damit niemand erraten kann, welche Adressen es gibt."""
+    rate_limit("vergessen:" + client_ip(request), 5, 600)
+    email = data.email.strip().lower()
+    antwort = {"ok": True, "hinweis": "Wenn es dazu ein Konto gibt, ist eine E-Mail mit einem Link unterwegs."}
+    if not EMAIL_RE.match(email):
+        return antwort
+    rate_limit("vergessen-mail:" + email, 3, 3600)
+    with tx("system") as cur:
+        cur.execute("SELECT id FROM benutzer WHERE lower(email)=%s AND aktiv AND passwort_hash IS NOT NULL", (email,))
+        u = cur.fetchone()
+        if not u:
+            return antwort
+        tok = new_token()
+        cur.execute("UPDATE benutzer SET einladung_token_hash=%s, einladung_ablauf=now()+make_interval(hours=>%s) WHERE id=%s", (token_hash(tok), config.RESET_HOURS, u["id"]))
+        audit(cur, {"id": u["id"]}, "passwort_vergessen")
+    mailer.passwort_zuruecksetzen(email, f"{config.BASE_URL}/einladung?token={tok}")
+    return antwort

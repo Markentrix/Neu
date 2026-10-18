@@ -11,6 +11,8 @@ from .routes_auth import router as auth_router
 from .routes_kunde import router as kunde_router
 from .routes_websites import router as websites_router
 from .routes_verwaltung import router as verwaltung_router
+from .routes_einstellungen import router as einstellungen_router
+from .routes_vertrieb import router as vertrieb_router
 
 
 @asynccontextmanager
@@ -56,6 +58,8 @@ app.include_router(kunde_router)
 app.include_router(admin_router)
 app.include_router(websites_router)
 app.include_router(verwaltung_router)
+app.include_router(einstellungen_router)
+app.include_router(vertrieb_router)
 
 
 def seite(name):
@@ -65,5 +69,6 @@ def seite(name):
 app.get("/", include_in_schema=False)(seite("login.html"))
 app.get("/app", include_in_schema=False)(seite("kunde.html"))
 app.get("/admin", include_in_schema=False)(seite("admin.html"))
+app.get("/vertrieb", include_in_schema=False)(seite("vertrieb.html"))
 app.get("/einladung", include_in_schema=False)(seite("einladung.html"))
 app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")

@@ -1,7 +1,7 @@
 import { h, api, datum, zeit, euro, melde, abmelden } from './common.js';
 
 const root = document.getElementById('app');
-const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['protokoll', 'Protokoll']];
+const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
 let paketListe = [];
 
 function gerüst(aktiv, inhalt) {
@@ -65,7 +65,7 @@ V.neu = async () => {
     try {
       const r = await api('/api/admin/kunden', { method: 'POST', body: d });
       m.replaceChildren(h('div', { class: 'msg ok' }, 'Kunde ' + r.kundennummer + ' angelegt.'),
-        r.einladungslink ? h('div', { class: 'msg info' }, 'Einladungslink (7 Tage gültig, einmalig an den Kunden senden): ', h('br'), r.einladungslink) : '',
+        r.einladungslink ? h('div', { class: 'msg info' }, 'Einladungslink (7 Tage gültig): ', h('br'), r.einladungslink) : '', mailHinweis(r.mail),
         h('p', {}, h('a', { class: 'btn', href: '#kunde/' + r.id }, 'Zum Kunden')));
       e.target.reset();
     } catch (x) { melde(m, x.message); }
@@ -122,6 +122,33 @@ const knopf = (text, fn, art = 'sec') => h('button', { class: 'btn small ' + art
 const bestaetigt = async (m, fn, ok = 'Gespeichert.') => { try { await fn(); melde(m, ok, 'ok'); setTimeout(() => location.reload(), 700); } catch (x) { fehler(m, x); } };
 const select = (name, optionen, wert, extra = {}) => h('select', { name, ...extra }, optionen.map(o => { const [v, l] = Array.isArray(o) ? o : [o, o]; return h('option', { value: v, selected: v === wert }, String(l).replace(/_/g, ' ')); }));
 
+const mailHinweis = (mail) => !mail ? '' : h('div', { class: 'msg ' + (mail.gesendet ? 'ok' : 'info') }, mail.gesendet ? 'Die Einladung wurde per E-Mail verschickt.' : 'Nicht per E-Mail verschickt: ' + mail.grund);
+
+// ---------------------------------------------------------------- Einstellungen
+V.einstellungen = async () => {
+  const d = await api('/api/admin/einstellungen');
+  const m1 = h('div'), m2 = h('div'), m3 = h('div');
+  const fs = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.port = Number(o.port);
+    try { await api('/api/admin/einstellungen/smtp', { method: 'PUT', body: o }); melde(m1, 'Gespeichert.', 'ok'); } catch (x) { fehler(m1, x); } } },
+    h('div', { class: 'form2' }, feld('Server (SMTP-Host) *', 'host', d.smtp.host, { required: true, placeholder: 'z. B. smtp.ionos.de' }), feld('Port *', 'port', d.smtp.port, { type: 'number', required: true }),
+      h('div', {}, h('label', {}, 'Verschlüsselung'), select('sicherung', [['starttls', 'STARTTLS (Port 587)'], ['ssl', 'SSL (Port 465)'], ['keine', 'keine']], d.smtp.sicherung)),
+      feld('Benutzername', 'benutzer', d.smtp.benutzer, { autocomplete: 'off' }),
+      feld(d.smtp.passwort_gesetzt ? 'Passwort (leer lassen = unverändert)' : 'Passwort', 'passwort', '', { type: 'password', autocomplete: 'new-password' }),
+      feld('Absender-Adresse *', 'absender', d.smtp.absender, { type: 'email', required: true, placeholder: 'info@markentrix.de' }), feld('Absender-Name', 'absender_name', d.smtp.absender_name)),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  const t = h('input', { type: 'email', placeholder: 'Testmail an …', style: 'max-width:280px' });
+  const ft = h('div', { class: 'row' }, t, knopf('Testmail senden', async () => { try { await api('/api/admin/einstellungen/testmail', { method: 'POST', body: { an: t.value } }); melde(m1, 'Testmail wurde versendet.', 'ok'); } catch (x) { fehler(m1, x); } }));
+  const fk = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.tageslimit = Number(o.tageslimit);
+    try { await api('/api/admin/einstellungen/ki', { method: 'PUT', body: o }); melde(m2, 'Gespeichert.', 'ok'); e.target.api_key.value = ''; } catch (x) { fehler(m2, x); } } },
+    h('div', { class: 'form2' }, feld(d.ki.key_gesetzt ? 'API-Key (leer lassen = unverändert)' : 'API-Key', 'api_key', '', { type: 'password', autocomplete: 'new-password', placeholder: 'sk-ant-…' }),
+      feld('Modell', 'modell', d.ki.modell), feld('Nachrichten pro Kunde und Tag', 'tageslimit', d.ki.tageslimit, { type: 'number', min: 1, max: 1000 })),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'stack' }, kopf('Einstellungen'),
+    !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
+    h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
+    h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
+};
+
 // ---------------------------------------------------------------- Vertriebler
 V.vertrieb = async () => {
   const d = await api('/api/admin/vertrieb/partner');
@@ -132,9 +159,17 @@ V.vertrieb = async () => {
       h('div', {}, h('label', {}, 'Status'), select('status', ['aktiv', 'anfrage', 'pausiert', 'beendet'], 'aktiv'))),
     h('p', {}, h('button', { class: 'btn' }, 'Vertriebler anlegen')));
   const aktiv = d.filter(p => p.status === 'aktiv').length;
+  const mb = h('div'), mon = h('input', { type: 'month', value: new Date().toISOString().slice(0, 7), style: 'max-width:200px' }), erg = h('div');
+  const rechne = async (vorschau) => { try { const r = await api('/api/admin/vertrieb/provisionen/berechnen', { method: 'POST', body: { monat: mon.value, vorschau } });
+    if (vorschau) { const sum = r.zeilen.reduce((a, z) => a + Number(z.betrag_cent), 0);
+      erg.replaceChildren(h('p', { class: 'small muted' }, r.zeilen.length + ' Posten, Summe ' + fmtEuro(sum) + (r.schon_vorhanden ? ' – für diesen Monat gibt es schon ' + r.schon_vorhanden + ' Einträge (werden nicht doppelt angelegt).' : '')),
+        tabelle([['Vertriebler', z => z.partner], ['Kunde', z => z.kundennummer], ['Vertragsmonat', z => z.vm], ['Basis', z => fmtEuro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => fmtEuro(z.betrag_cent)]], r.zeilen, 'Für diesen Monat entstehen keine Provisionen.'));
+    } else { erg.replaceChildren(); melde(mb, r.angelegt + ' Provisionen angelegt, ' + r.uebersprungen + ' schon vorhanden.', 'ok'); } } catch (x) { fehler(mb, x); } };
+  const berechnen = h('div', { class: 'card' }, h('h2', {}, 'Provisionen berechnen'), h('p', { class: 'small muted' }, 'Rechnet für alle aktiven Vertriebler die laufende Provision des gewählten Monats nach den freigegebenen Regeln. Erst Vorschau ansehen, dann anlegen. Die Vertriebler sehen ihre Beträge sofort im Partnerportal.'), mb,
+    h('div', { class: 'row' }, mon, knopf('Vorschau', () => rechne(true)), knopf('Anlegen', () => confirm('Provisionen für ' + mon.value + ' jetzt anlegen?') && rechne(false), 'btn')), erg);
   return h('div', { class: 'stack' }, kopf('Vertriebler', h('span', { class: 'pill ok' }, aktiv + ' aktiv')),
     h('div', { class: 'card' }, tabelle([['Name', z => h('a', { href: '#partner/' + z.id }, z.name)], ['Firma', z => z.firma], ['Status', z => pill(z.status)], ['Kunden', z => z.kunden], ['Offene Leads', z => z.offene_leads], ['Provision offen', z => fmtEuro(z.offen_cent)], ['IBAN', z => z.iban_hinterlegt ? 'ja' : 'nein']], d, 'Noch keine Vertriebler.')),
-    h('div', { class: 'card' }, h('h2', {}, 'Neuer Vertriebler'), m, f));
+    berechnen, h('div', { class: 'card' }, h('h2', {}, 'Neuer Vertriebler'), m, f));
 };
 
 async function partnerDetail(pid) {
@@ -149,8 +184,15 @@ async function partnerDetail(pid) {
   const provAktion = (z) => h('span', { class: 'row' }, naechster[z.status] && knopf(naechster[z.status][1], () => bestaetigt(mp, () => api('/api/admin/vertrieb/provisionen/' + z.id + '/status', { method: 'POST', body: { status: naechster[z.status][0] } }))),
     ['berechnet', 'freigegeben'].includes(z.status) && knopf('Stornieren', () => confirm('Provision stornieren?') && bestaetigt(mp, () => api('/api/admin/vertrieb/provisionen/' + z.id + '/status', { method: 'POST', body: { status: 'storniert' } })), 'bad'));
   const summe = d.provisionen.filter(z => ['berechnet', 'freigegeben'].includes(z.status)).reduce((a, z) => a + z.betrag_cent, 0);
+  const mz = h('div'), mail = h('input', { type: 'email', value: p.email || '', placeholder: 'E-Mail des Vertrieblers' }), perMail = h('input', { type: 'checkbox', checked: true, style: 'width:auto' });
+  const zugang = h('div', { class: 'card' }, h('h2', {}, 'Portal-Zugang'), h('p', { class: 'small muted' }, 'Der Vertriebler bekommt einen Link, legt damit selbst sein Passwort an und sieht danach seine Kunden, Leads und Provisionen unter /vertrieb.'), mz,
+    tabelle([['E-Mail', z => z.email], ['Passwort', z => z.hat_passwort ? 'gesetzt' : 'offen'], ['Letzter Login', z => zeit(z.letzter_login)],
+      ['', z => knopf(z.aktiv ? 'Sperren' : 'Freigeben', async () => { try { await api('/api/admin/vertrieb/zugang/' + z.id + '/aktiv', { method: 'POST', body: { aktiv: !z.aktiv } }); location.reload(); } catch (x) { fehler(mz, x); } }, z.aktiv ? 'bad' : 'sec')]], d.zugaenge, 'Noch kein Zugang.'),
+    h('div', { class: 'row', style: 'margin-top:12px' }, mail, h('label', { class: 'small', style: 'display:flex;gap:6px;align-items:center;white-space:nowrap' }, perMail, 'per E-Mail senden'),
+      knopf('Einladung erzeugen', async () => { try { const r = await api('/api/admin/vertrieb/partner/' + pid + '/einladung', { method: 'POST', body: { email: mail.value, per_mail: perMail.checked } });
+        mz.replaceChildren(h('div', { class: 'msg info' }, 'Einladungslink (' + r.gueltig_tage + ' Tage gültig): ', h('br'), r.einladungslink), mailHinweis(r.mail)); } catch (x) { fehler(mz, x); } }, 'btn')));
   return h('div', { class: 'stack' }, kopf(p.name, pill(p.status), h('a', { class: 'btn sec small', href: '#vertrieb' }, '← Liste')),
-    h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), m, stamm),
+    h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), m, stamm), zugang,
     h('div', { class: 'card' }, h('h2', {}, 'Zugeordnete Kunden (' + d.kunden.length + ')'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Paket', z => z.paket || '–'], ['Status', z => pill(z.status)], ['Monatlich', z => fmtEuro(z.monatlich_cent)]], d.kunden, 'Noch keine Kunden. Zuordnung im Kunden unter Stammdaten (Feld Vertriebler).')),
     h('div', { class: 'card' }, h('h2', {}, 'Provisionen'), h('p', { class: 'small muted' }, 'Offen (berechnet/freigegeben): ' + fmtEuro(summe)), mp,
       tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Vertragsmonat', z => z.vertragsmonat], ['Basis', z => fmtEuro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => fmtEuro(z.betrag_cent)], ['Status', z => pill(z.status)], ['', provAktion]], d.provisionen, 'Noch keine Provisionen berechnet.')),
@@ -276,8 +318,8 @@ async function kundeDetail(kid) {
   const mail = h('input', { type: 'email', placeholder: 'E-Mail für Portal-Zugang', value: k.email || '' });
   const linkbox = h('div');
   const einladen = h('button', { class: 'btn small', onclick: async () => {
-    try { const r = await api('/api/admin/kunden/' + kid + '/einladung', { method: 'POST', body: { email: mail.value } });
-      linkbox.replaceChildren(h('div', { class: 'msg info' }, 'Einladungslink (' + r.gueltig_tage + ' Tage gültig): ', h('br'), r.einladungslink)); } catch (x) { melde(linkbox, x.message); }
+    try { const r = await api('/api/admin/kunden/' + kid + '/einladung', { method: 'POST', body: { email: mail.value, per_mail: true } });
+      linkbox.replaceChildren(h('div', { class: 'msg info' }, 'Einladungslink (' + r.gueltig_tage + ' Tage gültig): ', h('br'), r.einladungslink), mailHinweis(r.mail)); } catch (x) { melde(linkbox, x.message); }
   } }, 'Einladungslink erzeugen');
   const zugaenge = tabelle([['E-Mail', z => z.email], ['Passwort', z => z.hat_passwort ? 'gesetzt' : 'offen'], ['Letzter Login', z => zeit(z.letzter_login)],
     ['Zugang', z => h('button', { class: 'btn small ' + (z.aktiv ? 'bad' : 'sec'), onclick: async () => { try { await api('/api/admin/benutzer/' + z.id + '/aktiv', { method: 'POST', body: { aktiv: !z.aktiv } }); neu(); } catch (x) { alert(x.message); } } }, z.aktiv ? 'Sperren' : 'Freigeben')]], d.benutzer, 'Noch kein Zugang.');

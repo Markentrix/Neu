@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors, sql
 from pydantic import BaseModel, Field
 
+from . import config, zugang
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -100,9 +101,11 @@ def partner_detail(pid: str, user: dict = Depends(require_admin)):
             prov = cur.fetchall()
             cur.execute("SELECT id, firma, status, ort, erstellt_am FROM leads WHERE vertriebspartner_id=%s ORDER BY erstellt_am DESC LIMIT 100", (pid,))
             leads = cur.fetchall()
+            cur.execute("SELECT id, email, aktiv, letzter_login, passwort_hash IS NOT NULL AS hat_passwort FROM benutzer WHERE vertriebspartner_id=%s ORDER BY erstellt_am", (pid,))
+            zugaenge = cur.fetchall()
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Vertriebler nicht gefunden.")
-    return {"partner": p, "kunden": kunden, "provisionen": prov, "leads": leads}
+    return {"partner": p, "kunden": kunden, "provisionen": prov, "leads": leads, "zugaenge": zugaenge}
 
 
 @router.patch("/vertrieb/partner/{pid}")
@@ -446,3 +449,85 @@ def fehler_behoben(fid: int, user: dict = Depends(require_admin)):
         if cur.rowcount == 0:
             raise HTTPException(404, "Eintrag nicht gefunden.")
     return {"ok": True}
+
+
+# ================================================================= Vertriebler-Zugang und Provisionsberechnung
+class PartnerEinladungIn(BaseModel):
+    email: str
+    per_mail: bool = True
+
+
+@router.post("/vertrieb/partner/{pid}/einladung")
+def partner_einladung(pid: str, data: PartnerEinladungIn, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT name, status FROM vertriebspartner WHERE id=%s", (pid,))
+            p = cur.fetchone()
+            if not p:
+                raise HTTPException(404, "Vertriebler nicht gefunden.")
+            if p["status"] in ("beendet",):
+                raise HTTPException(400, "Dieser Vertriebler ist beendet.")
+            link = zugang.link_erzeugen(cur, data.email, p["name"], "vertrieb", partner_id=pid)
+            audit(cur, user, "partner_einladung", None, {"partner": pid})
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Vertriebler nicht gefunden.")
+    mail = zugang.per_mail(data.email, p["name"], link, "vertrieb") if data.per_mail else None
+    return {"einladungslink": link, "gueltig_tage": config.INVITE_DAYS, "mail": mail}
+
+
+@router.post("/vertrieb/zugang/{bid}/aktiv")
+def partner_zugang_aktiv(bid: str, data: dict, user: dict = Depends(require_admin)):
+    aktiv = bool(data.get("aktiv"))
+    with tx("admin") as cur:
+        cur.execute("UPDATE benutzer SET aktiv=%s WHERE id=%s AND rolle='vertrieb'", (aktiv, bid))
+        if cur.rowcount == 0:
+            raise HTTPException(404, "Zugang nicht gefunden.")
+        if not aktiv:
+            cur.execute("DELETE FROM sitzungen WHERE benutzer_id=%s", (bid,))
+        audit(cur, user, "partner_zugang_aktiv", None, {"aktiv": aktiv})
+    return {"ok": True}
+
+
+class BerechnenIn(BaseModel):
+    monat: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+    vorschau: bool = True
+
+
+BERECHNUNG = """
+WITH m AS (SELECT %(m)s::date AS tag),
+basis AS (
+  SELECT v.id AS pid, v.name AS partner, k.id AS kunden_id, k.kundennummer, k.firma, b.id AS buchung_id,
+         ((extract(year FROM m.tag) - extract(year FROM b.beginn)) * 12 + extract(month FROM m.tag) - extract(month FROM b.beginn))::int + 1 AS vm,
+         (b.monatlich_cent - b.rabatt_cent) AS basis_cent
+  FROM m, buchungen b JOIN kunden k ON k.id = b.kunden_id JOIN vertriebspartner v ON v.id = k.vertriebspartner_id
+  WHERE v.status = 'aktiv' AND b.status = 'aktiv' AND b.beginn IS NOT NULL AND b.monatlich_cent > 0
+    AND b.beginn < (m.tag + interval '1 month') AND (b.ende IS NULL OR b.ende >= m.tag)
+)
+SELECT basis.*, r.id AS regel_id, r.prozent, round(basis.basis_cent * r.prozent / 100)::bigint AS betrag_cent
+FROM basis JOIN provisionsregeln r ON r.art = 'laufend' AND r.status = 'freigegeben'
+     AND basis.vm >= r.von_monat AND (r.bis_monat IS NULL OR basis.vm <= r.bis_monat)
+WHERE basis.vm >= 1 AND basis.basis_cent > 0
+ORDER BY basis.partner, basis.kundennummer
+"""
+
+
+@router.post("/vertrieb/provisionen/berechnen")
+def provisionen_berechnen(data: BerechnenIn, user: dict = Depends(require_admin)):
+    monat = data.monat + "-01"
+    with tx("admin") as cur:
+        cur.execute("SELECT count(*) AS n FROM provisionsregeln WHERE art='laufend' AND status='freigegeben'")
+        if cur.fetchone()["n"] == 0:
+            raise HTTPException(400, "Es gibt noch keine freigegebene Provisionsregel. Bitte zuerst unter Preise & Konditionen freigeben.")
+        cur.execute(BERECHNUNG, {"m": monat})
+        zeilen = cur.fetchall()
+        if data.vorschau:
+            cur.execute("""SELECT count(*) AS n FROM provisionen WHERE monat=%s""", (monat,))
+            return {"vorschau": True, "zeilen": zeilen, "schon_vorhanden": cur.fetchone()["n"]}
+        neu = 0
+        for z in zeilen:
+            cur.execute("""INSERT INTO provisionen (vertriebspartner_id, kunden_id, buchung_id, regel_id, monat, vertragsmonat, basis_cent, prozent, betrag_cent)
+                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (vertriebspartner_id, buchung_id, monat) DO NOTHING""",
+                        (z["pid"], z["kunden_id"], z["buchung_id"], z["regel_id"], monat, z["vm"], z["basis_cent"], z["prozent"], z["betrag_cent"]))
+            neu += cur.rowcount
+        audit(cur, user, "provisionen_berechnet", None, {"monat": data.monat, "neu": neu})
+    return {"vorschau": False, "angelegt": neu, "uebersprungen": len(zeilen) - neu}
