@@ -39,7 +39,8 @@ def start(user: dict = Depends(require_kunde)):
         kommende = cur.fetchone()["n"]
         cur.execute("SELECT domain, status FROM websites ORDER BY erstellt_am LIMIT 1")
         web = cur.fetchone()
-        cur.execute("""SELECT (SELECT count(*) FROM tickets WHERE kunde_ungelesen) AS nachrichten, (SELECT count(*) FROM kundenfreigaben WHERE status='wartet') AS freigaben""")
+        cur.execute("""SELECT (SELECT count(*) FROM tickets WHERE kunde_ungelesen) AS nachrichten, (SELECT count(*) FROM kundenfreigaben WHERE status='wartet') AS freigaben,
+                              (SELECT CASE WHEN EXISTS (SELECT 1 FROM briefings WHERE status='abgeschickt') THEN 0 ELSE 1 END) AS briefing""")
         badges = cur.fetchone()
     return {"badges": badges, "kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
             "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"]}

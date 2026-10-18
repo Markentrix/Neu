@@ -218,6 +218,12 @@ Unerwartete Fehler zeigen dem Nutzer nur „Interner Fehler" und erscheinen als 
 
 Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen und Dokumente im Datenexport enthalten und werden danach gelöscht.
 
+**Briefing:** Neue Kunden sehen im Portal einen Hinweis und das Menü „Briefing“ (Fragebogen zu Unternehmen, Öffnungszeiten, Auftritt, Inhalten, Zielen). Sie können zwischenspeichern und später abschicken. Beim Abschicken bekommst du eine E-Mail und eine Aufgabe. Die Antworten stehen beim Kunden unter „Briefing“.
+
+**Auswertung:** Kunden sehen unter „Auswertung“ Anfragen, Termine, Anrufe und Agent-Aktionen im laufenden Monat mit Vergleich zum Vormonat, den Verlauf über 12 Wochen, die Quellen der Anfragen und, wenn du sie einträgst, Besucher und Google-Zahlen. Letztere trägst du beim Kunden unter „Zahlen für die Auswertung“ monatlich ein (Besucher, Google-Aufrufe, Bewertungen, Sterne). Sie kommen nicht automatisch.
+
+**Hilfe:** Kunden finden im Menü „Hilfe“ Antworten auf häufige Fragen mit Suche. Funktionen, die ein Kunde nicht gebucht hat, werden ausgeblendet. Die Texte stehen in `portal/static/js/kunde.js` (Liste `HILFE`).
+
 ## Automatische Tests
 
 `sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").

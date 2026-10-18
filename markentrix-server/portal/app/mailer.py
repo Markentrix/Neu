@@ -175,3 +175,8 @@ def aufgaben_digest_team(an: str, zeilen: list[str]) -> tuple[bool, str]:
 def stammdaten_geaendert_team(an: str, firma: str, kundennummer: str, aenderung: str) -> tuple[bool, str]:
     t = f"{firma} ({kundennummer}) hat Stammdaten im Portal geändert:\n\n{aenderung}\n\nBitte bei Rechnungen und Verträgen beachten.\n\n(automatische Meldung des Portals)"
     return senden(an, f"Stammdaten geändert: {firma}", t)
+
+
+def briefing_team(an: str, firma: str, kundennummer: str, kid: str) -> tuple[bool, str]:
+    t = (f"{firma} ({kundennummer}) hat das Briefing abgeschickt.\n\nAnsehen im Admin-Bereich: {config.BASE_URL}/admin#kunde/{kid}" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"Briefing abgeschickt: {firma}", t)

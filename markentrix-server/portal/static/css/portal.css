@@ -89,3 +89,5 @@ th{color:var(--mut);font-weight:500;font-size:12px;text-transform:uppercase;lett
 .freitext{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
 .punkte{gap:4px;flex-wrap:wrap}.punkte .btn.gewaehlt{background:var(--navy);color:#fff}
 .sprachblock{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:6px}
+details.hilfe summary{cursor:pointer;list-style:none}details.hilfe summary::-webkit-details-marker{display:none}details.hilfe[open] summary{margin-bottom:8px}details.hilfe p{margin:0;line-height:1.5}
+.small.ok{color:#166534}

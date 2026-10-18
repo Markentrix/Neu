@@ -692,6 +692,26 @@ V.kennzahlen = async () => {
     z.kommentare.length ? h('div', { class: 'card' }, h('h2', {}, 'Kommentare von Kunden'), tabelle([['Kunde', c => c.firma], ['Punkte', c => c.punkte], ['Kommentar', c => c.kommentar], ['Datum', c => zeit(c.erstellt_am)]], z.kommentare)) : '');
 };
 
+// ------------------------------------------------------------- Briefing und externe Zahlen (Kunde öffnen)
+async function briefingKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/briefing');
+  const inhalt = d.struktur.map(a => [h('h3', {}, a.abschnitt), a.felder.map(f => h('div', { style: 'margin:6px 0' }, h('div', { class: 'small muted' }, f.frage), h('div', { class: 'freitext' }, d.daten[f.key] || '–')))]);
+  return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { style: 'margin:0' }, 'Briefing'), d.status === 'abgeschickt' ? h('span', { class: 'pill ok' }, 'abgeschickt ' + zeit(d.abgeschickt_am)) : h('span', { class: 'pill warn' }, Object.keys(d.daten).length ? 'in Arbeit' : 'noch leer')),
+    Object.keys(d.daten).length ? h('details', {}, h('summary', {}, 'Antworten anzeigen'), inhalt) : h('p', { class: 'small muted' }, 'Der Kunde hat das Briefing noch nicht ausgefüllt. Es erscheint in seinem Portal unter „Briefing“.'));
+}
+
+async function externKarte(kid) {
+  const liste = await api('/api/admin/kunden/' + kid + '/kennzahlen-extern'), m = h('div');
+  const jetzt = new Date(), monat = h('input', { type: 'month', value: jetzt.getFullYear() + '-' + String(jetzt.getMonth() + 1).padStart(2, '0') });
+  const zahl = (ph, step = '1') => h('input', { type: 'number', min: '0', step, placeholder: ph });
+  const bes = zahl('Website-Besucher'), auf = zahl('Google-Aufrufe'), anz = zahl('Google-Bewertungen (Anzahl)'), ste = h('input', { type: 'number', min: '1', max: '5', step: '0.1', placeholder: 'Google-Sterne (1 bis 5)' });
+  const n = (el) => el.value === '' ? null : Number(el.value);
+  return h('div', { class: 'card' }, h('h2', {}, 'Zahlen für die Auswertung (Besucher, Google)'), h('p', { class: 'small muted' }, 'Trage monatlich ein, was du aus Statistik und Google-Profil ablesen kannst. Der Kunde sieht es in seiner Auswertung. Gleicher Monat nochmal speichern überschreibt.'), m,
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Monat'), monat), h('div', {}, h('label', {}, 'Besucher'), bes), h('div', {}, h('label', {}, 'Google-Aufrufe'), auf), h('div', {}, h('label', {}, 'Bewertungen'), anz), h('div', {}, h('label', {}, 'Sterne'), ste)),
+    h('p', {}, h('button', { class: 'btn', onclick: async () => { try { await api('/api/admin/kunden/' + kid + '/kennzahlen-extern', { method: 'PUT', body: { monat: monat.value, besucher: n(bes), google_aufrufe: n(auf), google_bewertungen: n(anz), google_sterne: n(ste) } }); zeige(); } catch (x) { melde(m, x.message); } } }, 'Speichern')),
+    tabelle([['Monat', z => z.monat], ['Besucher', z => z.besucher ?? '–'], ['Google-Aufrufe', z => z.google_aufrufe ?? '–'], ['Bewertungen', z => z.google_bewertungen ?? '–'], ['Sterne', z => z.google_sterne ?? '–']], liste, 'Noch keine Zahlen.'));
+}
+
 async function kundeDetail(kid) {
   const d = await api('/api/admin/kunden/' + kid), k = d.kunde;
   const neu = () => { const s = location.hash; location.hash = ''; setTimeout(() => { location.hash = s; }, 0); };
@@ -779,10 +799,12 @@ async function kundeDetail(kid) {
     h('div', { class: 'card' }, h('h2', {}, 'Websites'), mw, webs, h('div', { style: 'height:10px' }), wform,
       h('p', { class: 'small muted' }, 'Danach auf dem Server einmal: mkctl site-add <domain>, damit Ordner und Webserver bereit sind.')),
     await belegeKarte(kid, k.referenzkunde),
+    await briefingKarte(kid),
     await nachrichtenKundeKarte(kid, k),
     await freigabenKundeKarte(kid, k),
     await unterlagenKarte(kid),
     await berichteKarte(kid),
+    await externKarte(kid),
     await kostenKarte(kid),
     brandingKarte(kid, k),
     offboardingKarte(kid, k),
