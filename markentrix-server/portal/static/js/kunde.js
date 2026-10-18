@@ -284,6 +284,18 @@ async function inhalteKarte() {
   });
   const preis = h('input', { maxlength: 40, placeholder: 'Preis, z. B. 1,99 € / kg (freiwillig)' }), von = h('input', { type: 'date' }), bis = h('input', { type: 'date' });
   const nachher = (r) => { if (r.hinweis) alert(r.hinweis); zeige(); };
+  const ziele = d.sprachen.filter(x => x !== 'de');
+  const uebersetzen = async (e) => {
+    const texte = {}; if (titel.de.value.trim()) texte.titel = titel.de.value; if (text.de.value.trim()) texte.text = text.de.value;
+    if (!Object.keys(texte).length) { melde(m, 'Bitte schreibe zuerst den deutschen Titel oder Text.'); return; }
+    const b = e.target; b.disabled = true; b.textContent = 'Übersetze …'; melde(m, '');
+    try {
+      const r = await api('/api/kunde/angebots-inhalte/uebersetzen', { method: 'POST', body: { texte, ziele } }); let n = 0;
+      ziele.forEach(sp => { if (r.uebersetzungen.titel && r.uebersetzungen.titel[sp] && !titel[sp].value.trim()) { titel[sp].value = r.uebersetzungen.titel[sp]; n++; } if (r.uebersetzungen.text && r.uebersetzungen.text[sp] && !text[sp].value.trim()) { text[sp].value = r.uebersetzungen.text[sp]; n++; } });
+      melde(m, n ? r.hinweis : 'Die anderen Felder sind schon ausgefüllt. Leere sie, wenn du neu übersetzen lassen willst.', n ? 'ok' : 'info');
+    } catch (x) { melde(m, x.message); }
+    b.disabled = false; b.textContent = 'Aus Deutsch übersetzen';
+  };
   const speichern = async () => {
     const t = {}, x = {}; d.sprachen.forEach(sp => { t[sp] = titel[sp].value; x[sp] = text[sp].value; });
     try { nachher(await api('/api/kunde/angebots-inhalte', { method: 'POST', body: { art: art.value, titel: t, text: x, preis: preis.value || null, gueltig_von: von.value || null, gueltig_bis: bis.value || null } })); } catch (e) { melde(m, e.message); }
@@ -295,7 +307,8 @@ async function inhalteKarte() {
     h('p', { class: 'small muted' }, 'Zusätzlich zur Datei: Angebote mit Preis, Veranstaltungen, Hinweise und „heute geschlossen“. Sprachen auf deiner Website: ' + d.sprachen.map(s => d.sprachnamen[s]).join(', ') + '. Ist eine Übersetzung leer, zeigen wir den deutschen Text.'),
     m, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Art'), art), h('div', {}, h('label', {}, 'Preis'), preis), h('div', {}, h('label', {}, 'Gültig von (leer = sofort)'), von), h('div', {}, h('label', {}, 'Gültig bis (leer = unbegrenzt)'), bis)),
     h('div', { class: 'stack', style: 'margin-top:10px' }, felder),
-    h('p', {}, h('button', { class: 'btn', onclick: speichern }, 'Speichern und veröffentlichen')),
+    h('div', { class: 'row', style: 'margin-top:10px' }, ziele.length ? h('button', { class: 'btn sec', type: 'button', onclick: uebersetzen }, 'Aus Deutsch übersetzen') : '', h('button', { class: 'btn', onclick: speichern }, 'Speichern und veröffentlichen')),
+    ziele.length ? h('p', { class: 'small muted' }, 'Tipp: Deutsch ausfüllen, auf „Aus Deutsch übersetzen“ klicken, kurz prüfen, dann speichern. Die Übersetzung erstellt der Agent automatisch, bitte lies sie kurz durch.') : '',
     h('h3', {}, 'Aktuelle Einträge'),
     tabelle([['Art', z => IART[z.art]], ['Titel', name], ['Preis', z => z.preis || ''], ['Gültig', z => [z.gueltig_von ? datum(z.gueltig_von) : '', z.gueltig_bis ? ' – ' + datum(z.gueltig_bis) : ''].join('')], ['Sprachen', z => Object.keys(z.titel).concat(Object.keys(z.text)).filter((v, i, a) => a.indexOf(v) === i).join(', ')],
       ['Status', z => h('span', { class: 'pill ' + (z.aktiv ? 'ok' : '') }, z.aktiv ? 'sichtbar' : 'ausgeblendet')],

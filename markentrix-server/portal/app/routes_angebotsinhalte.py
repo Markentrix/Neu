@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import publish
+from . import einstellungen, ki, publish
 from .db import tx
 from .routes_zusammenarbeit import nicht_gefunden
 from .security import audit, require_admin, require_kunde, require_modul
@@ -182,3 +182,40 @@ def sprachen_setzen(wid: str, data: SprachenIn, user: dict = Depends(require_adm
     except errors.InvalidTextRepresentation:
         raise nicht_gefunden()
     return {"sprachen": sp}
+
+
+class UebersetzenIn(BaseModel):
+    texte: dict[str, str]
+    ziele: list[str]
+
+
+UEBERSETZUNGEN_PRO_TAG = 40
+
+
+@kunde_router.post("/angebots-inhalte/uebersetzen")
+def uebersetzen(data: UebersetzenIn, user: dict = Depends(require_kunde)):
+    kid = user["kunden_id"]
+    texte = {k: v.strip() for k, v in data.texte.items() if v and v.strip()}
+    ziele = [z for z in dict.fromkeys(data.ziele) if z in publish.SPRACHEN and z != "de"]
+    if not texte or not ziele:
+        raise HTTPException(400, "Bitte schreibe zuerst den deutschen Text und wähle mindestens eine andere Sprache.")
+    if len(texte) > 12 or any(len(v) > 2000 for v in texte.values()):
+        raise HTTPException(400, "Der Text ist zu lang für die automatische Übersetzung.")
+    with tx("kunde", kid) as cur:
+        require_modul(cur, user, "wochenangebote")
+    with tx("system") as cur:
+        cfg = einstellungen.lesen(cur, "ki") or {}
+        cur.execute("SELECT count(*) AS n FROM kosten_log WHERE kunden_id=%s AND einheit='uebersetzung' AND zeit > now() - interval '1 day'", (kid,))
+        heute = cur.fetchone()["n"]
+    if not cfg.get("api_key"):
+        raise HTTPException(400, "Die automatische Übersetzung ist noch nicht eingerichtet. Bitte trage die Texte selbst ein oder schreib uns unter Nachrichten.")
+    if heute >= UEBERSETZUNGEN_PRO_TAG:
+        raise HTTPException(429, "Für heute ist das Limit für automatische Übersetzungen erreicht. Morgen geht es weiter.")
+    try:
+        ergebnis, ein, aus = ki.uebersetzen(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, texte, ziele)
+    except Exception:
+        raise HTTPException(502, "Die Übersetzung hat gerade nicht geklappt. Bitte versuche es gleich noch einmal oder trage den Text selbst ein.")
+    kosten = (ein * float(cfg.get("preis_ein_eur", 3.0)) + aus * float(cfg.get("preis_aus_eur", 15.0))) / 1_000_000 * 100
+    with tx("system") as cur:
+        cur.execute("INSERT INTO kosten_log (kunden_id, dienst, einheit, menge, kosten_cent) VALUES (%s,'anthropic','uebersetzung',%s,%s)", (kid, ein + aus, round(kosten, 4)))
+    return {"uebersetzungen": ergebnis, "hinweis": "Automatisch übersetzt. Bitte kurz prüfen, bevor du speicherst."}

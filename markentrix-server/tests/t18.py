@@ -80,6 +80,21 @@ chk("Modul aus: gesperrt",c2.get("/api/kunde/angebots-inhalte").status_code in (
 # Datei erneut hochladen behält Texte
 r=c.post("/api/kunde/wochenangebote",files={"datei":("b.pdf",b"%PDF-1.4 neu","application/pdf")}); chk("2. Datei",r.status_code==200 and r.json()["status"]=="veroeffentlicht",r.text)
 chk("Texte bleiben nach neuer Datei","Grillfest" in open(seite+"index.html",encoding="utf8").read())
+
+# ---- Übersetzen
+r=c.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{"titel":"Frische Tomaten"},"ziele":["tr"]}); chk("Übersetzen ohne KI-Schlüssel: verständliche Meldung",r.status_code==400 and "nicht eingerichtet" in r.text,r.text)
+a.put("/api/admin/einstellungen/ki",json={"api_key":"sk-test","modell":"claude-haiku-5-5","tageslimit":50,"preis_ein_eur":3,"preis_aus_eur":15})
+r=c.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{"titel":"Frische Tomaten","text":"Nur diese Woche 1,99 €"},"ziele":["tr","en","ar","de","fr"]}); u=r.json().get("uebersetzungen",{})
+chk("Übersetzen",r.status_code==200 and u["titel"]=={"tr":"[tr] Frische Tomaten","en":"[en] Frische Tomaten","ar":"[ar] Frische Tomaten"} and "text" in u,r.text)
+chk("Prompt: Daten gekapselt",'<daten>' in open("/var/tmp/pt/mock_last.json",encoding="utf8").read())
+chk("Übersetzen: Kosten protokolliert",sql(f"select count(*) from kosten_log where kunden_id='{kid}' and einheit='uebersetzung'")=="1")
+chk("Übersetzen: leer",c.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{},"ziele":["tr"]}).status_code==400)
+chk("Übersetzen: nur Deutsch als Ziel",c.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{"titel":"x"},"ziele":["de"]}).status_code==400)
+chk("Übersetzen: zu lang",c.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{"titel":"x"*2001},"ziele":["tr"]}).status_code==400)
+r=c.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{"titel":"kaputt"},"ziele":["tr"]}); chk("Übersetzen: unlesbare Antwort -> 502",r.status_code==502,r.text)
+chk("Übersetzen: Modul aus gesperrt",c2.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{"titel":"x"},"ziele":["tr"]}).status_code in (402,403))
+sql(f"insert into kosten_log (kunden_id,dienst,einheit,menge,kosten_cent) select '{kid}','anthropic','uebersetzung',1,0 from generate_series(1,45)")
+chk("Übersetzen: Tageslimit",c.post("/api/kunde/angebots-inhalte/uebersetzen",json={"texte":{"titel":"x"},"ziele":["tr"]}).status_code==429)
 # Export enthält Inhalte
 import zipfile
 sql(f"update kunden set status='gekuendigt' where id='{kid}'")
