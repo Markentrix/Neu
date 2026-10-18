@@ -25,11 +25,12 @@ PSQL "markentrix -f $REPO/db/999_rechte.sql" >/dev/null
 
 export DATABASE_URL="postgresql://mk_app:apppw@localhost:54329/markentrix?host=$PGD" PORTAL_BASE_URL=http://localhost:8000 PORTAL_COOKIE_SECURE=0 \
   UPLOAD_DIR=$T/up SITES_LIVE=$T/s/live SITES_ROOT=$T/s QUEUE_DIR=$T/b/queue PORTAL_SECRET=testgeheimnis123 ANTHROPIC_BASE_URL=http://127.0.0.1:8999 PORTAL_JOBS=0
+export PYTHONPATH="$REPO/portal"
 cd "$REPO/portal" || exit 2
 python3 -m app.cli admin-add chef@test.de | grep PASSWORT | cut -d= -f2 > "$T/adminpw"
 [ -s "$T/adminpw" ] || { echo "Admin konnte nicht angelegt werden."; exit 1; }
-(cd "$T" && nohup python3 smtp.py >/dev/null 2>&1 &)
-(cd "$T" && nohup python3 mock.py >/dev/null 2>&1 &)
+(cd "$T" && setsid nohup python3 smtp.py >/dev/null 2>&1 </dev/null &) >/dev/null 2>&1
+(cd "$T" && setsid nohup python3 mock.py >/dev/null 2>&1 </dev/null &) >/dev/null 2>&1
 # Vorlage der frischen Datenbank (mit Admin) – jede Testgruppe startet mit einer frischen Kopie
 pkill -f "uvicorn app.main:app"; sleep 1
 PSQL "postgres -c \"alter database markentrix rename to mk_vorlage\"" >/dev/null
@@ -37,7 +38,7 @@ starten() {
   { pkill -f "uvicorn app.main:app"; } 2>/dev/null; sleep 1
   PSQL "postgres -c \"drop database if exists markentrix\" -c \"create database markentrix template mk_vorlage owner markentrix\"" >/dev/null
   rm -rf "$T/up"/* "$T/b/queue"/* "$T/mails.txt"
-  (cd "$REPO/portal" && nohup python3 -m uvicorn app.main:app --port 8000 >"$T/log" 2>&1 &)
+  (cd "$REPO/portal" && setsid nohup python3 -m uvicorn app.main:app --port 8000 >"$T/log" 2>&1 </dev/null &) >/dev/null 2>&1
   for i in $(seq 1 30); do curl -fs localhost:8000/healthz >/dev/null && return 0; sleep 1; done
   echo "Portal startet nicht:"; tail -20 "$T/log"; return 1
 }
@@ -53,7 +54,7 @@ done
 cd "$REPO/portal" && python3 -m pyflakes app && echo "[pyflakes] ok" || FEHLER=1
 for f in static/js/*.js; do node --check "$f" 2>/dev/null || { echo "[js] Syntaxfehler in $f"; FEHLER=1; }; done
 for f in $(ls "$REPO"/bin/* "$REPO"/install.sh | grep -v "\.py$"); do bash -n "$f" 2>/dev/null || { echo "[bash] Syntaxfehler in $f"; FEHLER=1; }; done
-pkill -f "uvicorn app.main:app"; pkill -f "$T/smtp.py"; pkill -f "$T/mock.py"
+pkill -f "uvicorn app.main:app"; pkill -f "python3 smtp.py"; pkill -f "python3 mock.py"
 su postgres -c "$PGB/pg_ctl -D $PGD/data stop -m fast" >/dev/null 2>&1
 [ $FEHLER = 0 ] && echo "ALLES OK" || echo "FEHLER GEFUNDEN"
 exit $FEHLER
