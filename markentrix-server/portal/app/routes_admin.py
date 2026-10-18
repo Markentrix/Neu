@@ -193,7 +193,7 @@ def kunde_detail(kid: str, user: dict = Depends(require_admin)):
                               b.mindestlaufzeit_ende, b.ende, b.status, b.standort, b.notiz
                        FROM buchungen b JOIN produkte p ON p.code=b.produkt_code WHERE b.kunden_id=%s ORDER BY b.erstellt_am DESC""", (kid,))
         buchungen = cur.fetchall()
-        cur.execute("SELECT id, domain, art, status, letzte_veroeffentlichung FROM websites WHERE kunden_id=%s ORDER BY erstellt_am", (kid,))
+        cur.execute("SELECT id, domain, art, status, sprachen, letzte_veroeffentlichung FROM websites WHERE kunden_id=%s ORDER BY erstellt_am", (kid,))
         websites = cur.fetchall()
         zaehler = {}
         for t in ("anfragen", "termine", "kontakte", "angebote", "vertraege", "projekte", "berichte", "wochenangebote_uploads"):

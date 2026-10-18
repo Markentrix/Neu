@@ -14,11 +14,11 @@ from . import berichte, belege, config, rechtstexte
 EXPORT_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "websites",
                    "angebote", "vertraege", "projekte", "buchungen", "belege", "avv", "agent_laeufe",
-                   "tickets", "ticket_nachrichten", "kundenfreigaben", "zufriedenheit"]
+                   "tickets", "ticket_nachrichten", "kundenfreigaben", "zufriedenheit", "angebots_inhalte"]
 # Inhalte, die bei der Löschung entfernt werden (Reihenfolge ist egal, es gibt keine Abhängigkeiten untereinander außer SET NULL / CASCADE)
 LOESCH_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "agent_laeufe",
-                   "prompts", "freigaben", "projekte", "websites", "tickets", "kundenfreigaben", "zufriedenheit", "aufgaben", "dateien"]
+                   "prompts", "freigaben", "projekte", "websites", "tickets", "kundenfreigaben", "zufriedenheit", "aufgaben", "dateien", "angebots_inhalte"]
 
 
 def _json(o):

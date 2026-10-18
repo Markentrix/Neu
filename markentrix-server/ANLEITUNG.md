@@ -81,6 +81,8 @@ Im Kunden stellst du per **Schalter** ein, welche Module er sieht (KI-Assistent,
 
 **Wochenangebote:** Bei einem Kunden mit Website: Website im Admin anlegen und einmal auf dem Server `mkctl site-add kunde.de` ausführen. Modul „Wochenangebote" einschalten. Der Kunde lädt PDF/JPG/PNG hoch, danach liegt es sofort unter `https://kunde.de/angebote/`.
 
+**Mehrsprachige Angebotsseite:** Pro Website stellst du im Admin (Kunde öffnen → Websites → „Sprachen der Angebotsseite“) ein, welche Sprachen erscheinen: Deutsch (immer), Türkisch, Englisch, Arabisch. Der Kunde pflegt unter Wochenangebote zusätzlich **Angebote mit Preis, Events, Hinweise und „Heute geschlossen“**, jeweils mit Titel und Text pro Sprache. Fehlt eine Übersetzung, zeigt die Seite den deutschen Text. Die Seite erkennt die Browsersprache des Besuchers, es gibt Knöpfe zum Umschalten, Arabisch läuft von rechts nach links. Einträge mit Zeitraum verschwinden nach Ablauf automatisch, „Heute geschlossen“ gilt nur an den eingetragenen Tagen. Die Datei (PDF/Bild) und die Texte stehen zusammen auf `https://kunde.de/angebote/`. Nach dem Update einmal `mkctl site-add` ist nicht nötig, die Ordner bleiben bestehen. Die Übersetzungen trägt der Kunde selbst ein.
+
 **KI-Chat anbinden (später):** In `/opt/markentrix/.env` `CHAT_WEBHOOK_URL` (n8n-Webhook) und `CHAT_WEBHOOK_SECRET` eintragen, dann `mkctl restart portal`.
 
 **Vertriebler:** Menü *Vertriebler* → anlegen, Kunden im Kunden unter „Vertriebler" zuordnen, Provisionen freigeben und als ausgezahlt markieren. Leads: Menü *Leads*, Status pflegen, einem Vertriebler geben, „Zum Kunden machen".

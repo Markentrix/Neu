@@ -751,7 +751,10 @@ async function kundeDetail(kid) {
   const wform = h('form', { class: 'row', onsubmit: async (e) => {
     e.preventDefault(); try { await api('/api/admin/kunden/' + kid + '/websites', { method: 'POST', body: Object.fromEntries(new FormData(e.target)) }); neu(); } catch (x) { melde(mw, x.message); }
   } }, h('input', { class: 'grow', name: 'domain', placeholder: 'domain.de', required: true }), h('select', { name: 'art', style: 'width:auto' }, h('option', { value: 'live' }, 'live'), h('option', { value: 'demo' }, 'demo')), h('button', { class: 'btn' }, 'Website anlegen'));
-  const webs = tabelle([['Domain', z => z.domain], ['Art', z => z.art], ['Status', z => pill(z.status)], ['Zuletzt', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Keine Website.');
+  const SPR = { de: 'Deutsch', tr: 'Türkisch', en: 'Englisch', ar: 'Arabisch' };
+  const sprachWahl = (z) => { const boxen = Object.entries(SPR).map(([c, n]) => { const i = h('input', { type: 'checkbox', checked: (z.sprachen || ['de']).includes(c), disabled: c === 'de', style: 'width:auto', 'data-c': c }); return h('label', { style: 'display:inline-flex;gap:4px;align-items:center;margin-right:10px;color:inherit' }, i, n); });
+    return h('div', { class: 'row' }, boxen, h('button', { class: 'btn sec small', onclick: async (e) => { const liste = ['de'].concat(boxen.map(b => b.firstChild).filter(i => i.checked && i.dataset.c !== 'de').map(i => i.dataset.c)); try { await api('/api/admin/websites/' + z.id + '/sprachen', { method: 'PUT', body: { sprachen: liste } }); e.target.textContent = 'Gespeichert'; } catch (x) { melde(mw, x.message); } } }, 'Speichern')); };
+  const webs = tabelle([['Domain', z => z.domain], ['Art', z => z.art], ['Status', z => pill(z.status)], ['Sprachen der Angebotsseite', sprachWahl], ['Zuletzt', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Keine Website.');
 
   const tabs = h('div', { class: 'tabs' }, DATEN_TABS.map(([t, l]) => h('button', { onclick: (e) => ladeDaten(t, e.target) }, l + (d.zaehler[t] === undefined ? '' : ' (' + d.zaehler[t] + ')'))));
   async function ladeDaten(t, btn) {

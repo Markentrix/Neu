@@ -291,8 +291,10 @@ def wochenangebot_hochladen(datei: UploadFile = File(...), gueltig_von: str | No
     typ, mime, groesse, pfad = publish.datei_speichern(datei, kid)
     name = publish.sicherer_name(datei.filename)
     with tx("kunde", kid) as cur:
-        cur.execute("SELECT id, domain FROM websites WHERE art='live' ORDER BY erstellt_am LIMIT 1")
+        cur.execute("SELECT id, domain, sprachen FROM websites WHERE art='live' ORDER BY erstellt_am LIMIT 1")
         web = cur.fetchone()
+        cur.execute("SELECT art, titel, text, preis, gueltig_von, gueltig_bis, aktiv FROM angebots_inhalte WHERE aktiv")
+        inhalte = cur.fetchall()
         cur.execute("""INSERT INTO wochenangebote_uploads (kunden_id, website_id, dateiname, mime, groesse, dateipfad, gueltig_von, gueltig_bis, hochgeladen_von)
                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
                     (kid, web["id"] if web else None, name, mime, groesse, str(pfad), von, bis, user["id"]))
@@ -302,7 +304,7 @@ def wochenangebot_hochladen(datei: UploadFile = File(...), gueltig_von: str | No
             fehler = "Noch keine Website mit deinem Konto verknüpft. Das Team hat deine Datei und veröffentlicht sie nach der Verknüpfung."
         else:
             try:
-                publish.veroeffentlichen(web["domain"], pfad, typ, von, bis)
+                publish.veroeffentlichen(web["domain"], pfad, typ, von, bis, web["sprachen"], inhalte)
                 status = "veroeffentlicht"
             except Exception as e:
                 status, fehler = "fehler", str(e)[:300]

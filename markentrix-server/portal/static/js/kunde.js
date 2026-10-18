@@ -272,6 +272,36 @@ V.website = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Projekte'), tabelle([['Titel', z => z.titel], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Link', z => z.url && h('a', { href: z.url, target: '_blank', rel: 'noopener' }, 'Öffnen')]], d.projekte, 'Keine Projekte.')));
 };
 
+const IART = { angebot: 'Angebot', event: 'Event', hinweis: 'Hinweis', geschlossen: 'Heute geschlossen' };
+async function inhalteKarte() {
+  const d = await api('/api/kunde/angebots-inhalte'), m = h('div');
+  const art = h('select', {}, Object.entries(IART).map(([v, t]) => h('option', { value: v }, t)));
+  const titel = {}, text = {};
+  const felder = d.sprachen.map(sp => {
+    titel[sp] = h('input', { maxlength: 200, placeholder: 'Titel (' + d.sprachnamen[sp] + ')' + (sp === 'de' ? ', Pflicht' : ', freiwillig'), dir: sp === 'ar' ? 'rtl' : 'ltr' });
+    text[sp] = h('textarea', { rows: 2, maxlength: 2000, placeholder: 'Beschreibung (' + d.sprachnamen[sp] + '), freiwillig', dir: sp === 'ar' ? 'rtl' : 'ltr' });
+    return h('div', { class: 'sprachblock' }, h('label', {}, d.sprachnamen[sp] + (sp === 'de' ? ' (Hauptsprache)' : '')), titel[sp], text[sp]);
+  });
+  const preis = h('input', { maxlength: 40, placeholder: 'Preis, z. B. 1,99 € / kg (freiwillig)' }), von = h('input', { type: 'date' }), bis = h('input', { type: 'date' });
+  const nachher = (r) => { if (r.hinweis) alert(r.hinweis); zeige(); };
+  const speichern = async () => {
+    const t = {}, x = {}; d.sprachen.forEach(sp => { t[sp] = titel[sp].value; x[sp] = text[sp].value; });
+    try { nachher(await api('/api/kunde/angebots-inhalte', { method: 'POST', body: { art: art.value, titel: t, text: x, preis: preis.value || null, gueltig_von: von.value || null, gueltig_bis: bis.value || null } })); } catch (e) { melde(m, e.message); }
+  };
+  const umschalten = async (z) => { try { nachher(await api('/api/kunde/angebots-inhalte/' + z.id, { method: 'PATCH', body: { aktiv: !z.aktiv } })); } catch (e) { melde(m, e.message); } };
+  const weg = async (z) => { if (!confirm('Eintrag wirklich löschen?')) return; try { nachher(await api('/api/kunde/angebots-inhalte/' + z.id, { method: 'DELETE' })); } catch (e) { melde(m, e.message); } };
+  const name = (z) => (z.titel.de || Object.values(z.titel)[0] || (z.art === 'geschlossen' ? 'Heute geschlossen' : '–'));
+  return h('div', { class: 'card' }, h('h2', {}, 'Texte, Events und Hinweise'),
+    h('p', { class: 'small muted' }, 'Zusätzlich zur Datei: Angebote mit Preis, Veranstaltungen, Hinweise und „heute geschlossen“. Sprachen auf deiner Website: ' + d.sprachen.map(s => d.sprachnamen[s]).join(', ') + '. Ist eine Übersetzung leer, zeigen wir den deutschen Text.'),
+    m, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Art'), art), h('div', {}, h('label', {}, 'Preis'), preis), h('div', {}, h('label', {}, 'Gültig von (leer = sofort)'), von), h('div', {}, h('label', {}, 'Gültig bis (leer = unbegrenzt)'), bis)),
+    h('div', { class: 'stack', style: 'margin-top:10px' }, felder),
+    h('p', {}, h('button', { class: 'btn', onclick: speichern }, 'Speichern und veröffentlichen')),
+    h('h3', {}, 'Aktuelle Einträge'),
+    tabelle([['Art', z => IART[z.art]], ['Titel', name], ['Preis', z => z.preis || ''], ['Gültig', z => [z.gueltig_von ? datum(z.gueltig_von) : '', z.gueltig_bis ? ' – ' + datum(z.gueltig_bis) : ''].join('')], ['Sprachen', z => Object.keys(z.titel).concat(Object.keys(z.text)).filter((v, i, a) => a.indexOf(v) === i).join(', ')],
+      ['Status', z => h('span', { class: 'pill ' + (z.aktiv ? 'ok' : '') }, z.aktiv ? 'sichtbar' : 'ausgeblendet')],
+      ['', z => h('div', { class: 'row' }, h('button', { class: 'btn sec small', onclick: () => umschalten(z) }, z.aktiv ? 'Ausblenden' : 'Einblenden'), h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen'))]], d.inhalte, 'Noch keine Einträge.'));
+}
+
 V.wochenangebote = async () => {
   const d = await api('/api/kunde/wochenangebote');
   const m = h('div'), dat = h('input', { type: 'file', name: 'datei', accept: '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png', required: true });
@@ -290,6 +320,7 @@ V.wochenangebote = async () => {
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Wochenangebote hochladen'),
       h('p', { class: 'muted small' }, d.website ? 'Die Datei erscheint sofort auf ' + d.website + '/angebote/. Das alte Angebot wandert ins Archiv.' : 'Noch keine Website verknüpft – Dateien werden gespeichert und vom Team veröffentlicht.'), m, f),
+    await inhalteKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Bisherige Uploads'), tabelle([['Datum', z => zeit(z.erstellt_am)], ['Datei', z => z.dateiname], ['Größe', z => groesse(z.groesse)], ['Gültig', z => [datum(z.gueltig_von), z.gueltig_bis ? ' – ' + datum(z.gueltig_bis) : ''].join('')], ['Status', z => [statusPill(z.status), z.fehlertext && h('div', { class: 'small muted' }, z.fehlertext)]]], d.uploads, 'Noch keine Uploads.')));
 };
 
