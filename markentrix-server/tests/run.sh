@@ -52,7 +52,7 @@ for t in t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 smoke; do
   else echo "[$t] ok ($(grep -c '^OK' "out_$t.txt") Prüfungen)"; fi
 done
 cd "$REPO/portal" && python3 -m pyflakes app && echo "[pyflakes] ok" || FEHLER=1
-for f in static/js/*.js; do node --check "$f" 2>/dev/null || { echo "[js] Syntaxfehler in $f"; FEHLER=1; }; done
+for f in static/js/*.js; do node --check "$f" 2>&1 | head -3; [ "${PIPESTATUS[0]}" = 0 ] || { echo "[js] Syntaxfehler in $f"; FEHLER=1; }; done
 for f in $(ls "$REPO"/bin/* "$REPO"/install.sh | grep -v "\.py$"); do bash -n "$f" 2>/dev/null || { echo "[bash] Syntaxfehler in $f"; FEHLER=1; }; done
 pkill -f "uvicorn app.main:app"; pkill -f "python3 smtp.py"; pkill -f "python3 mock.py"
 su postgres -c "$PGB/pg_ctl -D $PGD/data stop -m fast" >/dev/null 2>&1
