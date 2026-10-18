@@ -45,7 +45,7 @@ FEHLER=0
 cd "$T" || exit 2
 for t in t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 smoke; do
   starten || { FEHLER=1; break; }
-  python3 "$t.py" >"out_$t.txt" 2>&1; rc=$?
+  timeout 180 python3 "$t.py" >"out_$t.txt" 2>&1 </dev/null; rc=$?
   n=$(grep -c "^FAIL" "out_$t.txt"); grep -qE "Fehler [1-9]" "out_$t.txt" && n=$((n+1))
   if [ "$rc" != 0 ] || [ "$n" != 0 ]; then echo "[$t] FEHLER (Exitcode $rc, $n FAIL)"; grep -E "^FAIL|Traceback|Error" "out_$t.txt" | head -8; FEHLER=1
   else echo "[$t] ok ($(grep -c '^OK' "out_$t.txt") Prüfungen)"; fi

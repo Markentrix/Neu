@@ -7,7 +7,7 @@ jobs:
   portal:
     runs-on: ubuntu-latest
     container: ubuntu:24.04   # läuft als root, damit der Testlauf eine eigene Test-Datenbank starten kann
-    timeout-minutes: 25
+    timeout-minutes: 12
     steps:
       - name: Programme installieren
         run: |
@@ -17,7 +17,10 @@ jobs:
       - name: Abhängigkeiten
         run: pip3 install --break-system-packages -q -r markentrix-server/portal/requirements.txt aiosmtpd httpx pyflakes
       - name: Tests
-        run: bash markentrix-server/tests/run.sh 2>&1 | tee /tmp/testlauf.txt; exit ${PIPESTATUS[0]}
+        run: |
+          bash markentrix-server/tests/run.sh > /tmp/testlauf.txt 2>&1 < /dev/null; rc=$?
+          cat /tmp/testlauf.txt
+          exit $rc
         shell: bash
       - name: Fehlerdetails als Hinweis ausgeben
         if: failure()
