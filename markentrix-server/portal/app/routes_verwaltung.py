@@ -500,7 +500,7 @@ basis AS (
          ((extract(year FROM m.tag) - extract(year FROM b.beginn)) * 12 + extract(month FROM m.tag) - extract(month FROM b.beginn))::int + 1 AS vm,
          (b.monatlich_cent - b.rabatt_cent) AS basis_cent
   FROM m, buchungen b JOIN kunden k ON k.id = b.kunden_id JOIN vertriebspartner v ON v.id = k.vertriebspartner_id
-  WHERE v.status = 'aktiv' AND b.status = 'aktiv' AND b.beginn IS NOT NULL AND b.monatlich_cent > 0
+  WHERE v.status = 'aktiv' AND NOT k.referenzkunde AND b.status = 'aktiv' AND b.beginn IS NOT NULL AND b.monatlich_cent > 0
     AND b.beginn < (m.tag + interval '1 month') AND (b.ende IS NULL OR b.ende >= m.tag)
 )
 SELECT basis.*, r.id AS regel_id, r.prozent, round(basis.basis_cent * r.prozent / 100)::bigint AS betrag_cent

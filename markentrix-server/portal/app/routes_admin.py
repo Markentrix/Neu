@@ -43,8 +43,10 @@ def uebersicht(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         cur.execute("SELECT status, count(*) AS n FROM kunden GROUP BY status")
         status = {r["status"]: r["n"] for r in cur.fetchall()}
-        cur.execute("SELECT coalesce(sum(monatlich_cent - rabatt_cent),0) AS cent FROM buchungen WHERE status IN ('aktiv','in_einrichtung','beauftragt') AND monatlich_cent IS NOT NULL")
+        cur.execute("SELECT coalesce(sum(b.monatlich_cent - b.rabatt_cent),0) AS cent FROM buchungen b JOIN kunden k ON k.id=b.kunden_id WHERE b.status IN ('aktiv','in_einrichtung','beauftragt') AND b.monatlich_cent IS NOT NULL AND NOT k.referenzkunde")
         mrr = cur.fetchone()["cent"]
+        cur.execute("SELECT count(*) AS n FROM kunden WHERE referenzkunde")
+        referenz = cur.fetchone()["n"]
         cur.execute("SELECT count(*) AS n FROM anfragen WHERE status='neu'")
         neu = cur.fetchone()["n"]
         cur.execute("SELECT count(*) AS n FROM wochenangebote_uploads WHERE erstellt_am > now() - interval '7 days'")
@@ -53,7 +55,7 @@ def uebersicht(user: dict = Depends(require_admin)):
         freigaben = cur.fetchone()["n"]
         cur.execute("SELECT zeit, aktion, details, kunden_id FROM audit_log ORDER BY id DESC LIMIT 12")
         letzte = cur.fetchall()
-    return {"kunden_status": status, "monatlich_cent": int(mrr), "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte}
+    return {"kunden_status": status, "monatlich_cent": int(mrr), "referenzkunden": referenz, "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte}
 
 
 @router.get("/katalog")
@@ -92,6 +94,9 @@ class KundeIn(BaseModel):
     paket_code: str | None = None
     notizen: str | None = Field(default=None, max_length=4000)
     einladen: bool = False
+    referenzkunde: bool = False
+    referenz_leistung: str | None = Field(default=None, max_length=1000)
+    referenz_nennen_erlaubt: bool = False
 
 
 class KundePatch(BaseModel):
@@ -107,6 +112,9 @@ class KundePatch(BaseModel):
     domain: str | None = None
     paket_code: str | None = None
     notizen: str | None = None
+    referenzkunde: bool | None = None
+    referenz_leistung: str | None = Field(default=None, max_length=1000)
+    referenz_nennen_erlaubt: bool | None = None
     standardmodule_anwenden: bool = False
 
 
@@ -124,7 +132,7 @@ def einladung_erzeugen(cur, kid, email, name=None):
 @router.get("/kunden")
 def kunden_liste(q: str = "", user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        cur.execute("""SELECT k.id, k.kundennummer, k.firma, k.ansprechpartner, k.email, k.domain, k.status, p.name AS paket, k.erstellt_am,
+        cur.execute("""SELECT k.id, k.kundennummer, k.firma, k.ansprechpartner, k.email, k.domain, k.status, k.referenzkunde, p.name AS paket, k.erstellt_am,
                               (SELECT count(*) FROM kunden_module km WHERE km.kunden_id=k.id AND km.aktiv) AS module_aktiv,
                               (SELECT count(*) FROM benutzer b WHERE b.kunden_id=k.id AND b.passwort_hash IS NOT NULL) AS zugang_aktiv
                        FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code
@@ -143,10 +151,12 @@ def kunde_neu(data: KundeIn, user: dict = Depends(require_admin)):
         raise HTTPException(400, "Zum Einladen wird eine E-Mail-Adresse gebraucht.")
     with tx("admin") as cur:
         try:
-            cur.execute("""INSERT INTO kunden (firma, rechtsform, ansprechpartner, email, telefon, branche, strasse, plz, ort, domain, paket_code, notizen)
-                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, kundennummer""",
+            cur.execute("""INSERT INTO kunden (firma, rechtsform, ansprechpartner, email, telefon, branche, strasse, plz, ort, domain, paket_code, notizen,
+                                               referenzkunde, referenz_leistung, referenz_nennen_erlaubt)
+                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, kundennummer""",
                         (data.firma.strip(), data.rechtsform, data.ansprechpartner, data.email and data.email.strip(), data.telefon, data.branche,
-                         data.strasse, data.plz, data.ort, data.domain and data.domain.strip().lower(), data.paket_code or None, data.notizen))
+                         data.strasse, data.plz, data.ort, data.domain and data.domain.strip().lower(), data.paket_code or None, data.notizen,
+                         data.referenzkunde, data.referenz_leistung, data.referenz_nennen_erlaubt))
         except errors.ForeignKeyViolation:
             raise HTTPException(400, "Unbekanntes Paket.")
         k = cur.fetchone()
@@ -284,7 +294,11 @@ class BuchungIn(BaseModel):
 @router.post("/kunden/{kid}/buchungen")
 def buchung_neu(kid: str, data: BuchungIn, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        pflicht(cur, kid)
+        cur.execute("SELECT referenzkunde FROM kunden WHERE id=%s", (kid,))
+        kr = cur.fetchone()
+        if not kr:
+            raise HTTPException(404, "Kunde nicht gefunden.")
+        referenz = kr["referenzkunde"]
         cur.execute("""SELECT pp.id AS preis_id, pp.einrichtung_cent, pp.monatlich_cent, pp.projekt_cent, p.laufzeit_monate, p.nur_auf_anfrage
                        FROM produkte p LEFT JOIN LATERAL (SELECT * FROM produkt_preise x WHERE x.produkt_code=p.code AND x.gueltig_ab<=current_date ORDER BY gueltig_ab DESC LIMIT 1) pp ON true
                        WHERE p.code=%s AND p.aktiv""", (data.produkt_code,))
@@ -294,6 +308,10 @@ def buchung_neu(kid: str, data: BuchungIn, user: dict = Depends(require_admin)):
         if p["preis_id"] is None and not p["nur_auf_anfrage"]:
             raise HTTPException(400, "Für dieses Produkt ist kein Preis hinterlegt.")
         beginn = data.beginn
+        if referenz:  # Referenzkunde: Preise auf 0, kein Rabattgrund nötig
+            p = {**p, "einrichtung_cent": 0, "monatlich_cent": 0, "projekt_cent": 0}
+            data.rabatt_cent = 0
+            data.rabatt_grund = "Referenzkunde"
         cur.execute("""INSERT INTO buchungen (kunden_id, produkt_code, preis_id, einrichtung_cent, monatlich_cent, projekt_cent, rabatt_cent, rabatt_grund, beginn,
                                              mindestlaufzeit_ende, status, standort, notiz)
                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s, CASE WHEN %s::date IS NOT NULL AND %s::int IS NOT NULL THEN (%s::date + make_interval(months=>%s::int))::date END,

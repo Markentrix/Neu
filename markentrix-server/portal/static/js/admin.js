@@ -36,6 +36,7 @@ V.uebersicht = async () => {
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Aktiv'), h('b', {}, s.aktiv || 0)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Im Onboarding'), h('b', {}, s.onboarding || 0)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Monatlich (gebucht)'), h('b', {}, euro(d.monatlich_cent))),
+      h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Referenzkunden (unbezahlt)'), h('b', {}, d.referenzkunden)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Neue Anfragen'), h('b', {}, d.neue_anfragen)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Uploads (7 Tage)'), h('b', {}, d.uploads_7d))),
     h('div', { class: 'card' }, h('h2', {}, 'Letzte Aktionen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d.letzte_aktionen)));
@@ -43,25 +44,28 @@ V.uebersicht = async () => {
 
 V.kunden = async () => {
   const q = h('input', { placeholder: 'Suchen nach Firma, Nummer, E-Mail …' });
-  const box = h('div');
+  const box = h('div'), nurRef = h('input', { type: 'checkbox', style: 'width:auto', onchange: () => lade() });
   const lade = async () => {
-    const d = await api('/api/admin/kunden?q=' + encodeURIComponent(q.value));
+    let d = await api('/api/admin/kunden?q=' + encodeURIComponent(q.value));
+    if (nurRef.checked) d = d.filter(z => z.referenzkunde);
     box.replaceChildren(tabelle([
-      ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Paket', z => z.paket || '–'],
+      ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => h('span', {}, z.firma, z.referenzkunde ? [' ', h('span', { class: 'pill warn' }, 'Referenz')] : '')], ['Paket', z => z.paket || '–'],
       ['Status', z => pill(z.status)], ['Module', z => z.module_aktiv], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(lade, 250); });
   await lade();
-  return h('div', {}, kopf('Kunden', h('a', { class: 'btn', href: '#neu' }, '+ Neuer Kunde')), h('div', { class: 'card' }, q, h('div', { style: 'height:12px' }), box));
+  return h('div', {}, kopf('Kunden', h('a', { class: 'btn', href: '#neu' }, '+ Neuer Kunde')), h('div', { class: 'card' }, q, h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-top:8px' }, nurRef, 'Nur Referenzkunden'), h('div', { style: 'height:12px' }), box));
 };
 
 V.neu = async () => {
   const m = h('div');
   const paket = h('select', { name: 'paket_code' }, h('option', { value: '' }, '– kein Paket –'), paketListe.map(p => h('option', { value: p.code }, p.name)));
   const einl = h('input', { type: 'checkbox', name: 'einladen', checked: true, style: 'width:auto' });
+  const ref = h('input', { type: 'checkbox', style: 'width:auto' }), refd = h('input', { type: 'checkbox', style: 'width:auto' });
   const f = h('form', { onsubmit: async (e) => {
     e.preventDefault();
-    const d = leerzu(Object.fromEntries(new FormData(e.target))); d.einladen = einl.checked;
+    const d = leerzu(Object.fromEntries(new FormData(e.target))); d.einladen = einl.checked; d.referenzkunde = ref.checked; d.referenz_nennen_erlaubt = ref.checked && refd.checked;
+    if (!ref.checked) delete d.referenz_leistung;
     try {
       const r = await api('/api/admin/kunden', { method: 'POST', body: d });
       m.replaceChildren(h('div', { class: 'msg ok' }, 'Kunde ' + r.kundennummer + ' angelegt.'),
@@ -77,7 +81,11 @@ V.neu = async () => {
       h('div', {}, h('label', {}, 'Paket'), paket)),
     h('label', {}, 'Notizen'), h('textarea', { name: 'notizen', rows: 3 }),
     h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, einl, 'Einladungslink für das Portal erzeugen'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, ref, 'Referenzkunde (zahlt nichts, wird aber normal betreut)'),
+    h('div', { id: 'refbox' }, h('label', {}, 'Was bekommt der Referenzkunde? (z. B. Website, KI-Telefonassistent)'), h('textarea', { name: 'referenz_leistung', rows: 2 }),
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, refd, 'Darf als Referenz genannt werden (schriftliches Einverständnis liegt vor)')),
     h('p', {}, h('button', { class: 'btn' }, 'Kunde anlegen')));
+  const refbox = f.querySelector('#refbox'); refbox.hidden = true; ref.addEventListener('change', () => { refbox.hidden = !ref.checked; });
   return h('div', {}, kopf('Neuer Kunde'), h('div', { class: 'card' }, m, f));
 };
 
@@ -290,16 +298,21 @@ async function kundeDetail(kid) {
   const mk = h('div'), mz = h('div'), mb = h('div'), mw = h('div'), mdaten = h('div'), mv = h('div');
   const partnerListe = await api('/api/admin/vertrieb/partnerliste');
 
+  const refK = h('input', { type: 'checkbox', checked: k.referenzkunde, style: 'width:auto' }), refE = h('input', { type: 'checkbox', checked: k.referenz_nennen_erlaubt, style: 'width:auto' });
   const stamm = h('form', { onsubmit: async (e) => {
     e.preventDefault();
     const o = Object.fromEntries(new FormData(e.target));
-    try { await api('/api/admin/kunden/' + kid, { method: 'PATCH', body: o }); melde(mk, 'Gespeichert.', 'ok'); } catch (x) { melde(mk, x.message); }
+    o.referenzkunde = refK.checked; o.referenz_nennen_erlaubt = refK.checked && refE.checked;
+    try { await api('/api/admin/kunden/' + kid, { method: 'PATCH', body: o }); melde(mk, 'Gespeichert.', 'ok'); setTimeout(() => location.reload(), 600); } catch (x) { melde(mk, x.message); }
   } }, h('div', { class: 'form2' },
     feld('Firma', 'firma', k.firma), feld('Rechtsform', 'rechtsform', k.rechtsform), feld('Ansprechpartner', 'ansprechpartner', k.ansprechpartner),
     feld('E-Mail', 'email', k.email), feld('Telefon', 'telefon', k.telefon), feld('Branche', 'branche', k.branche),
     feld('Straße', 'strasse', k.strasse), feld('PLZ', 'plz', k.plz), feld('Ort', 'ort', k.ort), feld('Domain', 'domain', k.domain),
     h('div', {}, h('label', {}, 'Paket'), h('select', { name: 'paket_code' }, h('option', { value: '' }, '–'), paketListe.map(p => h('option', { value: p.code, selected: p.code === k.paket_code }, p.name))))),
     h('label', {}, 'Notizen'), h('textarea', { name: 'notizen', rows: 3 }, k.notizen || ''),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, refK, 'Referenzkunde (zahlt nichts, wird aber normal betreut; zählt nicht in Umsatz und Provision)'),
+    h('label', {}, 'Was bekommt der Referenzkunde?'), h('textarea', { name: 'referenz_leistung', rows: 2 }, k.referenz_leistung || ''),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, refE, 'Darf als Referenz genannt werden (Einverständnis liegt vor)'),
     h('p', { class: 'row' }, h('button', { class: 'btn' }, 'Speichern')));
 
   const status = h('select', { style: 'width:auto', onchange: async (e) => {
@@ -351,7 +364,7 @@ async function kundeDetail(kid) {
   }
 
   return h('div', { class: 'stack' },
-    kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
+    kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
     h('div', { class: 'card' }, h('h2', {}, 'Vertriebler'), mv, h('div', { class: 'row' }, h('div', { class: 'grow' }, h('select', { id: 'vsel' }, h('option', { value: '' }, '– kein Vertriebler –'), partnerListe.map(p => h('option', { value: p.id, selected: p.id === k.vertriebspartner_id }, p.name + (p.status !== 'aktiv' ? ' (' + p.status + ')' : ''))))),
       knopf('Zuordnen', async () => { try { await api('/api/admin/kunden/' + kid + '/partner', { method: 'PUT', body: { partner_id: document.getElementById('vsel').value || null } }); melde(mv, 'Gespeichert.', 'ok'); } catch (x) { melde(mv, x.message); } }))),
