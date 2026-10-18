@@ -114,12 +114,41 @@ CADDY
     "${COMPOSE[@]}" restart "$svc"
     ;;
 
+  migrate)
+    need_root
+    [ -f "$BASE/.env" ] && { set -a; . "$BASE/.env"; set +a; }
+    PSQL=(docker exec -i mk-db psql -U markentrix -d markentrix -v ON_ERROR_STOP=1 -q)
+    "${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, angewendet_am timestamptz NOT NULL DEFAULT now())"
+    # Anwendungsrolle (Passwort aus .env), anlegen oder Passwort angleichen
+    "${PSQL[@]}" -v pw="$MK_APP_PASSWORD" <<'SQL'
+SELECT CASE WHEN EXISTS (SELECT 1 FROM pg_roles WHERE rolname='mk_app')
+  THEN format('ALTER ROLE mk_app LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD %L', :'pw')
+  ELSE format('CREATE ROLE mk_app LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD %L', :'pw') END \gexec
+SQL
+    for f in "$BASE"/db/[0-9]*.sql; do
+      n="$(basename "$f")"
+      if [ "$n" = 002_rechte.sql ]; then
+        "${PSQL[@]}" < "$f"   # Rechte immer neu setzen, damit neue Tabellen erfasst werden
+        continue
+      fi
+      done_n="$("${PSQL[@]}" -At -c "SELECT 1 FROM schema_migrations WHERE name='$n'")"
+      if [ -z "$done_n" ]; then
+        "${PSQL[@]}" < "$f"
+        "${PSQL[@]}" -c "INSERT INTO schema_migrations(name) VALUES ('$n')"
+        echo "Angewendet: $n"
+      else
+        echo "Schon vorhanden: $n"
+      fi
+    done
+    ;;
+
   psql)
     need_root; docker exec -it mk-db psql -U markentrix -d markentrix
     ;;
 
   logs)
     svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl psql                             Datenbank-Konsole öffnen
+mkctl migrate                          Datenbankstruktur anlegen/aktualisieren
 mkctl logs <Containername>   (Namen siehe: mkctl status)"
     docker logs --tail 100 -f "$svc"
     ;;

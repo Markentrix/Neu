@@ -93,6 +93,7 @@ install -d -m 700 "$BASE/backups"
 cp "$SRC/templates/docker-compose.yml" "$BASE/docker-compose.yml"
 cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"
+rm -rf "$BASE/db" && cp -r "$SRC/db" "$BASE/db"
 install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$BASE/bin/"
 ln -sf "$BASE/bin/mkctl" /usr/local/bin/mkctl
 [ -f "$BASE/caddy/sites/00-platzhalter.caddy" ] || echo "# Hier liegen die Kunden-Websites (mkctl site-add)" > "$BASE/caddy/sites/00-platzhalter.caddy"
@@ -108,6 +109,7 @@ ACME_EMAIL=$ACME_EMAIL
 N8N_ENCRYPTION_KEY=$(openssl rand -hex 24)
 N8N_DB_PASSWORD=$(openssl rand -hex 16)
 MK_DB_PASSWORD=$(openssl rand -hex 16)
+MK_APP_PASSWORD=$(openssl rand -hex 16)
 PANEL_PASSWORD=$NEW_PANEL_PW
 EOF
   )
@@ -115,6 +117,7 @@ EOF
 fi
 chmod 600 "$BASE/.env"
 grep -q '^MK_DB_PASSWORD=' "$BASE/.env" || echo "MK_DB_PASSWORD=$(openssl rand -hex 16)" >> "$BASE/.env"
+grep -q '^MK_APP_PASSWORD=' "$BASE/.env" || echo "MK_APP_PASSWORD=$(openssl rand -hex 16)" >> "$BASE/.env"
 set -a; . "$BASE/.env"; set +a
 chmod -R a+rX "$SITES"
 
@@ -134,6 +137,8 @@ echo
 [ "$(docker inspect -f '{{.State.Health.Status}}' mk-db 2>/dev/null || true)" = healthy ] \
   || die "Die Datenbank ist nach 3 Minuten nicht bereit. Ausgabe von 'docker logs mk-db --tail 50' schicken."
 ok "Datenbank läuft"
+"$BASE/bin/mkctl" migrate
+ok "Datenbankstruktur angelegt (Kunden, Zugänge, Pakete, Module, Projekte, Anfragen, Termine, Uploads ...)"
 
 # ---------------------------------------------------------------- 6. n8n, Dashboard, Caddy
 say "6/8 n8n, Server-Dashboard und Webserver starten"

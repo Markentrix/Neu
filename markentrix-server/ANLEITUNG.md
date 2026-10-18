@@ -2,7 +2,7 @@
 
 Dieses Paket richtet auf deinem Hetzner-Server alles Neue mit **einem Befehl** ein:
 
-- **PostgreSQL-Datenbank** für Kunden-Portal und Admin, läuft nur auf deinem Server und ist von außen nicht erreichbar (kein Supabase)
+- **PostgreSQL-Datenbank** mit fertiger Struktur: Kunden mit Kundennummer, Zugänge, Pakete (KI ONE, BUSINESS, KOMPLETT), 8 Module, Projekte, Anfragen, Termine, Kontakte, Angebote, Verträge, Wochenangebote-Uploads, Chatverlauf, Berichte. Jeder Kunde sieht nur seine eigenen Daten (Row-Level-Security, getestet). Läuft nur auf deinem Server, kein Supabase.
 - **n8n** (deine Workflows), mit eigener Datenbank
 - **Server-Dashboard** unter `panel.deine-domain.de` (nur lesend): zeigt Dienste, Websites, Demos, Speicher und Sicherungen
 - **Tägliche Sicherung** um 03:15 Uhr, 14 Tage Aufbewahrung
@@ -52,6 +52,7 @@ Das Skript erkennt das, lässt ihn unverändert und schreibt die nötigen Zeilen
 mkctl status                              Überblick
 mkctl backup                              Sicherung jetzt
 mkctl psql                                Datenbank-Konsole
+mkctl migrate                             Datenbankstruktur anlegen/aktualisieren
 mkctl demo-add anadolu                    neue Demo unter https://demo.markentrix.de/anadolu/
 mkctl site-add kunde.de --kunde "Name"    Kunden-Website mit eigener Domain
 mkctl update                              Sicherung, dann alles aktualisieren
@@ -69,7 +70,7 @@ Eigene Dateien einer Website kopierst du mit `--from /pfad/zum/ordner` hinein.
 
 ## Was noch offen ist
 
-1. **Portal-Backend:** Die Datenbank ist leer. Login (E-Mail + Passwort), Kundenrechte nach Kundennummer, Upload und Admin-Funktionen baue ich als eigenen kleinen Dienst auf dieser Datenbank (`portal.deine-domain.de`).
+1. **Portal-Backend:** Die Datenbank hat die Struktur, aber noch keine Kunden. Login (E-Mail + Passwort), Kundenrechte nach Kundennummer, Upload und Admin-Funktionen baue ich als eigenen kleinen Dienst auf dieser Datenbank (`portal.deine-domain.de`).
 2. **E-Mail-Versand für Logins:** Einladungen und „Passwort vergessen" brauchen einen E-Mail-Zugang (SMTP), der dann im Portal-Dienst eingetragen wird.
 3. **n8n-Workflows:** Müssen aus n8n Cloud exportiert und in das neue n8n importiert werden. Zugangsdaten (Gmail usw.) werden dort neu verbunden.
 4. **markentrix-core:** Im Repo liegt noch kein Code, deshalb ist es nicht Teil dieses Pakets.
