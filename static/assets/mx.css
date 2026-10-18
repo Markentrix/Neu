@@ -1107,3 +1107,14 @@ html.reduced .ill .il-float{animation:none}
 .offer-cta{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin-top:6px}
 .offer-list{margin:0 0 14px}
 @media (max-width:820px){.offer{grid-template-columns:minmax(0,1fr)}}
+/* 37 · Soziale Netzwerke */
+.soc{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0}
+.soc a{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:44px;padding:0 16px;border:1px solid var(--border);border-radius:100px;background:#fff;color:var(--navy);text-decoration:none;font-weight:600;font-size:.9rem;transition:border-color .2s,color .2s,transform .2s}
+.soc a:hover{border-color:rgba(30,155,255,.55);color:var(--blue-text);transform:translateY(-1px)}
+.soc svg{width:20px;height:20px;flex:none}
+.soc--icons a{padding:0;width:44px}
+.soc--icons span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.foot-social{margin-top:16px}.foot-social .tiny{display:block;margin-bottom:8px}
+.band .soc{margin-top:18px}
+.band .soc a{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);color:#fff}
+.band .soc a:hover{border-color:var(--cyan);color:var(--cyan)}
