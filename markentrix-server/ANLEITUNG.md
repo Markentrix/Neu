@@ -2,7 +2,7 @@
 
 Dieses Paket richtet auf deinem Hetzner-Server alles Neue mit **einem Befehl** ein:
 
-- **PostgreSQL-Datenbank** mit fertiger Struktur: Kunden mit Kundennummer, Zugänge, Pakete (KI ONE, BUSINESS, KOMPLETT), 8 Module, Projekte, Anfragen, Termine, Kontakte, Angebote, Verträge, Wochenangebote-Uploads, Chatverlauf, Berichte. Jeder Kunde sieht nur seine eigenen Daten (Row-Level-Security, getestet). Läuft nur auf deinem Server, kein Supabase.
+- **PostgreSQL-Datenbank** mit fertiger Struktur (66 Tabellen): Kunden mit Kundennummer, Zugänge, Preiskatalog (Preisliste Stand September 2026) und Buchungen, Kundenbereich, Konfiguration und Prompts, Wissensbasis und Agentenläufe, Vertrieb, Akquise und Lead-Finder, Kommunikation, Datenschutz (Einwilligungen, Auskunft, Löschung) und Qualität (Befunde, Maßnahmen, Ausnahmeregister, Alarme). Jeder Kunde sieht nur seine eigenen Daten (getestet). Kein Supabase.
 - **n8n** (deine Workflows), mit eigener Datenbank
 - **Server-Dashboard** unter `panel.deine-domain.de` (nur lesend): zeigt Dienste, Websites, Demos, Speicher und Sicherungen
 - **Tägliche Sicherung** um 03:15 Uhr, 14 Tage Aufbewahrung

@@ -127,7 +127,7 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM pg_roles WHERE rolname='mk_app')
 SQL
     for f in "$BASE"/db/[0-9]*.sql; do
       n="$(basename "$f")"
-      if [ "$n" = 002_rechte.sql ]; then
+      if [ "$n" = 999_rechte.sql ]; then
         "${PSQL[@]}" < "$f"   # Rechte immer neu setzen, damit neue Tabellen erfasst werden
         continue
       fi
