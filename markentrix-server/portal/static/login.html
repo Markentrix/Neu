@@ -1,9 +1,10 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Markentrix Portal – Anmeldung</title><link rel="stylesheet" href="/static/css/portal.css"></head>
+<title>Markentrix Portal – Anmeldung</title><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#4F46E5"><link rel="icon" href="/static/icons/icon-192.png"><link rel="apple-touch-icon" href="/static/icons/icon-192.png"><link rel="stylesheet" href="/static/css/portal.css"></head>
 <body><div class="center"><form class="card login" id="f"><div class="logo">M</div><h1>Markentrix Portal</h1>
 <p class="muted small" style="text-align:center;margin-top:-6px">Melde dich mit deiner E-Mail-Adresse an.</p>
 <div id="m"></div><label for="e">E-Mail</label><input id="e" type="email" autocomplete="username" required>
 <label for="p">Passwort</label><input id="p" type="password" autocomplete="current-password" required>
+<div id="cw" hidden><label for="c">Code aus der Authenticator-App (oder Notfallcode)</label><input id="c" inputmode="text" autocomplete="one-time-code"></div>
 <p><button class="btn" style="width:100%" id="b">Anmelden</button></p>
 <p style="text-align:center;margin:0"><a href="#" id="v" class="small">Passwort vergessen?</a></p></form>
 <form class="card login" id="f2" hidden><div class="logo">M</div><h1>Passwort zurücksetzen</h1>
@@ -11,4 +12,5 @@
 <div id="m2"></div><label for="e2">E-Mail</label><input id="e2" type="email" autocomplete="username" required>
 <p><button class="btn" style="width:100%" id="b2">Link senden</button></p>
 <p style="text-align:center;margin:0"><a href="#" id="z" class="small">Zurück zur Anmeldung</a></p></form></div>
+<p class="small muted" style="text-align:center;margin-top:18px"><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></p>
 <script type="module" src="/static/js/login.js"></script></body></html>

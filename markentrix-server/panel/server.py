@@ -132,7 +132,18 @@ def backups():
         last = int((BACKUPS / "last_success").read_text().strip())
     except Exception:
         pass
-    return {"last_success": last, "items": items}
+    extra = {}
+    for k in ("offsite_last", "restore_last"):
+        try:
+            extra[k] = int((BACKUPS / k).read_text().strip())
+        except Exception:
+            extra[k] = None
+    for k in ("offsite_fehler", "restore_fehler"):
+        try:
+            extra[k] = (BACKUPS / k).read_text().strip()[:200]
+        except Exception:
+            extra[k] = None
+    return {"last_success": last, "items": items, **extra}
 
 
 def status():

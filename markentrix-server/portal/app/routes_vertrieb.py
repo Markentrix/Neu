@@ -36,7 +36,7 @@ def start(user: dict = Depends(require_vertrieb)):
 @router.get("/provisionen")
 def provisionen(user: dict = Depends(require_vertrieb)):
     with tx("system") as cur:
-        cur.execute("""SELECT pr.id, pr.monat, k.kundennummer, k.firma, pr.vertragsmonat, pr.basis_cent, pr.prozent, pr.betrag_cent, pr.status
+        cur.execute("""SELECT pr.id, pr.art, pr.monat, k.kundennummer, k.firma, pr.vertragsmonat, pr.basis_cent, pr.prozent, pr.betrag_cent, pr.status
                        FROM provisionen pr JOIN kunden k ON k.id=pr.kunden_id
                        WHERE pr.vertriebspartner_id=%s ORDER BY pr.monat DESC, k.kundennummer LIMIT 500""", (user["vertriebspartner_id"],))
         return cur.fetchall()

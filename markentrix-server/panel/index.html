@@ -113,6 +113,10 @@ code{background:#F3F5FC;padding:2px 6px;border-radius:6px;font-size:13px}
     if (h.mem_total) tiles.appendChild(tile('Arbeitsspeicher', Math.round(h.mem_used / h.mem_total * 100) + ' %', bytes(h.mem_used) + ' von ' + bytes(h.mem_total), h.mem_used / h.mem_total * 100));
     var last = d.backups.last_success;
     tiles.appendChild(tile('Letzte Sicherung', last ? ago(d.now - last) : 'keine', last ? date(last) : 'noch nie gelaufen'));
+    var off = d.backups.offsite_last;
+    tiles.appendChild(tile('Externe Sicherung', d.backups.offsite_fehler ? 'Fehler' : (off ? ago(d.now - off) : 'nicht eingerichtet'), d.backups.offsite_fehler || (off ? date(off) : 'mkctl offsite-setup')));
+    var rs = d.backups.restore_last;
+    tiles.appendChild(tile('Wiederherstellungstest', d.backups.restore_fehler ? 'Fehler' : (rs ? ago(d.now - rs) : 'noch nie'), d.backups.restore_fehler || (rs ? date(rs) : 'mkctl restore-test')));
 
     var sv = document.getElementById('services');
     sv.textContent = '';

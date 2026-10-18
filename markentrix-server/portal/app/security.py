@@ -71,7 +71,7 @@ def current_user(request: Request) -> dict:
         raise HTTPException(401, "Nicht angemeldet.")
     with tx("system") as cur:
         cur.execute(
-            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id
+            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id, b.totp_aktiv, b.kunden_rolle
                FROM sitzungen s JOIN benutzer b ON b.id = s.benutzer_id
                WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv""",
             (token_hash(t),),
@@ -88,9 +88,18 @@ def require_admin(user: dict = Depends(current_user)) -> dict:
     return user
 
 
-def require_kunde(user: dict = Depends(current_user)) -> dict:
+def require_kunde(request: Request, user: dict = Depends(current_user)) -> dict:
     if user["rolle"] != "kunde" or not user["kunden_id"]:
         raise HTTPException(403, "Nur für Kunden.")
+    if user["kunden_rolle"] == "nur_lesen" and request.method not in ("GET", "HEAD"):
+        raise HTTPException(403, "Dein Zugang ist nur zum Ansehen freigegeben.")
+    return user
+
+
+def require_inhaber(user: dict = Depends(require_kunde)) -> dict:
+    """Team, Rechnungen und Verträge: nur für Inhaber-Zugänge eines Kunden."""
+    if user["kunden_rolle"] != "inhaber":
+        raise HTTPException(403, "Dafür brauchst du einen Inhaber-Zugang.")
     return user
 
 

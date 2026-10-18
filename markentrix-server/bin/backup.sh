@@ -55,3 +55,6 @@ for d in $(ls -1d "$BASE"/backups/*/ 2>/dev/null | sort -r | head -14); do
 done
 chmod 644 "$BASE/backup-status/"*
 echo "[$(date '+%F %T')] Sicherung fertig: $(du -sh "$DEST" | cut -f1)"
+
+# 6) Zusätzlich verschlüsselt extern ablegen (nur wenn eingerichtet); ein Fehler hier bricht die lokale Sicherung nicht ab
+"$BASE/bin/offsite.sh" || echo "[$(date '+%F %T')] Externe Sicherung fehlgeschlagen (siehe Meldung oben)" >&2

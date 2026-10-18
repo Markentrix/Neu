@@ -96,12 +96,12 @@ def partner_detail(pid: str, user: dict = Depends(require_admin)):
                            (SELECT coalesce(sum(b.monatlich_cent - b.rabatt_cent),0) FROM buchungen b WHERE b.kunden_id=k.id AND b.status IN ('beauftragt','in_einrichtung','aktiv')) AS monatlich_cent
                            FROM kunden k LEFT JOIN produkte pk ON pk.code=k.paket_code WHERE k.vertriebspartner_id=%s ORDER BY k.kundennummer DESC""", (pid,))
             kunden = cur.fetchall()
-            cur.execute("""SELECT pr.id, pr.monat, k.kundennummer, k.firma, pr.vertragsmonat, pr.basis_cent, pr.prozent, pr.betrag_cent, pr.status
+            cur.execute("""SELECT pr.art, pr.notiz, pr.id, pr.monat, k.kundennummer, k.firma, pr.vertragsmonat, pr.basis_cent, pr.prozent, pr.betrag_cent, pr.status
                            FROM provisionen pr JOIN kunden k ON k.id=pr.kunden_id WHERE pr.vertriebspartner_id=%s ORDER BY pr.monat DESC, k.kundennummer LIMIT 300""", (pid,))
             prov = cur.fetchall()
             cur.execute("SELECT id, firma, status, ort, erstellt_am FROM leads WHERE vertriebspartner_id=%s ORDER BY erstellt_am DESC LIMIT 100", (pid,))
             leads = cur.fetchall()
-            cur.execute("SELECT id, email, aktiv, letzter_login, passwort_hash IS NOT NULL AS hat_passwort FROM benutzer WHERE vertriebspartner_id=%s ORDER BY erstellt_am", (pid,))
+            cur.execute("SELECT id, email, aktiv, letzter_login, totp_aktiv, passwort_hash IS NOT NULL AS hat_passwort FROM benutzer WHERE vertriebspartner_id=%s ORDER BY erstellt_am", (pid,))
             zugaenge = cur.fetchall()
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Vertriebler nicht gefunden.")
@@ -118,6 +118,10 @@ def partner_aendern(pid: str, data: PartnerPatch, user: dict = Depends(require_a
     try:
         with tx("admin") as cur:
             felder_setzen(cur, "vertriebspartner", pid, felder)
+            if felder.get("status") == "beendet":
+                cur.execute("UPDATE vertriebspartner SET beendet_am=coalesce(beendet_am, current_date) WHERE id=%s", (pid,))
+            elif felder.get("status"):
+                cur.execute("UPDATE vertriebspartner SET beendet_am=NULL WHERE id=%s", (pid,))
             audit(cur, user, "partner_geaendert", None, {"id": pid, "felder": list(felder)})
     except DB_FEHLER as e:
         raise fehler_db(e)
@@ -500,7 +504,7 @@ basis AS (
          ((extract(year FROM m.tag) - extract(year FROM b.beginn)) * 12 + extract(month FROM m.tag) - extract(month FROM b.beginn))::int + 1 AS vm,
          (b.monatlich_cent - b.rabatt_cent) AS basis_cent
   FROM m, buchungen b JOIN kunden k ON k.id = b.kunden_id JOIN vertriebspartner v ON v.id = k.vertriebspartner_id
-  WHERE v.status = 'aktiv' AND NOT k.referenzkunde AND b.status = 'aktiv' AND b.beginn IS NOT NULL AND b.monatlich_cent > 0
+  WHERE (v.status = 'aktiv' OR (v.status = 'beendet' AND v.beendet_am IS NOT NULL AND m.tag <= v.beendet_am + make_interval(months => %(nachlauf)s))) AND NOT k.referenzkunde AND b.status = 'aktiv' AND b.beginn IS NOT NULL AND b.monatlich_cent > 0
     AND b.beginn < (m.tag + interval '1 month') AND (b.ende IS NULL OR b.ende >= m.tag)
 )
 SELECT basis.*, r.id AS regel_id, r.prozent, round(basis.basis_cent * r.prozent / 100)::bigint AS betrag_cent
@@ -518,7 +522,13 @@ def provisionen_berechnen(data: BerechnenIn, user: dict = Depends(require_admin)
         cur.execute("SELECT count(*) AS n FROM provisionsregeln WHERE art='laufend' AND status='freigegeben'")
         if cur.fetchone()["n"] == 0:
             raise HTTPException(400, "Es gibt noch keine freigegebene Provisionsregel. Bitte zuerst unter Preise & Konditionen freigeben.")
-        cur.execute(BERECHNUNG, {"m": monat})
+        cur.execute("SELECT wert FROM konfiguration WHERE schluessel='provision.nachlauf_monate' ORDER BY version DESC LIMIT 1")
+        nl = cur.fetchone()
+        try:
+            nachlauf = int(str(nl["wert"]).strip('"')) if nl else 6
+        except ValueError:
+            nachlauf = 6
+        cur.execute(BERECHNUNG, {"m": monat, "nachlauf": nachlauf})
         zeilen = cur.fetchall()
         if data.vorschau:
             cur.execute("""SELECT count(*) AS n FROM provisionen WHERE monat=%s""", (monat,))
@@ -526,7 +536,7 @@ def provisionen_berechnen(data: BerechnenIn, user: dict = Depends(require_admin)
         neu = 0
         for z in zeilen:
             cur.execute("""INSERT INTO provisionen (vertriebspartner_id, kunden_id, buchung_id, regel_id, monat, vertragsmonat, basis_cent, prozent, betrag_cent)
-                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (vertriebspartner_id, buchung_id, monat) DO NOTHING""",
+                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (vertriebspartner_id, buchung_id, monat, art) DO NOTHING""",
                         (z["pid"], z["kunden_id"], z["buchung_id"], z["regel_id"], monat, z["vm"], z["basis_cent"], z["prozent"], z["betrag_cent"]))
             neu += cur.rowcount
         audit(cur, user, "provisionen_berechnet", None, {"monat": data.monat, "neu": neu})

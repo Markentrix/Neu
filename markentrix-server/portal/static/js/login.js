@@ -4,7 +4,9 @@ api('/api/me', { leise: true }).then(u => { location.href = u.rolle === 'admin' 
 f.addEventListener('submit', async (ev) => {
   ev.preventDefault(); b.disabled = true; melde(m, '');
   try {
-    const r = await api('/api/login', { method: 'POST', body: { email: document.getElementById('e').value, password: document.getElementById('p').value } });
+    const cw = document.getElementById('cw');
+    const r = await api('/api/login', { method: 'POST', body: { email: document.getElementById('e').value, password: document.getElementById('p').value, code: cw.hidden ? null : document.getElementById('c').value } });
+    if (r.zwei_faktor) { cw.hidden = false; document.getElementById('c').focus(); melde(m, 'Bitte den Code aus deiner Authenticator-App eingeben.', 'info'); b.disabled = false; return; }
     location.href = r.ziel;
   } catch (e) { melde(m, e.message); b.disabled = false; }
 });

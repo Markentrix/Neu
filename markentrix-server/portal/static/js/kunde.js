@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline } from './common.js';
+import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -11,19 +11,23 @@ const SEITEN = [
   ['termine', 'Termine', 'anfragen_termine'],
   ['kontakte', 'Kontakte', 'kontakte_angebote_vertraege'],
   ['dokumente', 'Angebote & Verträge', 'kontakte_angebote_vertraege'],
+  ['berichte', 'Monatsberichte', null],
+  ['belege', 'Angebote & Rechnungen', null],
   ['website', 'Website & Landingpages', 'website'],
   ['wochenangebote', 'Wochenangebote', 'wochenangebote'],
   ['werbung', 'Werbung & Berichte', 'werbung_berichte'],
   ['automationen', 'Automationen', 'automationen'],
+  ['team', 'Team', null],
   ['einstellungen', 'Einstellungen', null],
 ];
-const sichtbar = () => SEITEN.filter(s => !s[2] || hat(s[2]));
+const inhaber = () => start.kunden_rolle === 'inhaber';
+const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team'].includes(s[0]) || inhaber()));
 
 function gerüst(aktiv, inhalt) {
   const k = start.kunde;
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
-      h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Markentrix'),
+      h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, 'M'), k.logo_vorhanden ? k.firma : 'Markentrix'),
       sichtbar().map(s => h('a', { class: 'nav' + (s[0] === aktiv ? ' on' : ''), href: '#' + s[0] }, s[1])),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
@@ -32,7 +36,7 @@ function gerüst(aktiv, inhalt) {
         h('h1', {}, k.firma),
         h('span', { class: 'pill' }, 'Kundennr. ' + k.kundennummer),
         h('span', { class: 'pill ok' }, '● Online')),
-      inhalt));
+      inhalt, rechtFuss()));
 }
 
 function karten() {
@@ -80,7 +84,7 @@ V.assistent = async () => {
     knopf.disabled = false; log.scrollTop = log.scrollHeight; eingabe.focus();
   } }, eingabe, knopf);
   setTimeout(() => { log.scrollTop = log.scrollHeight; });
-  const chat = h('div', { class: 'card chat' }, h('h2', {}, 'KI-Assistent'), log, form);
+  const chat = h('div', { class: 'card chat' }, h('h2', {}, 'KI-Assistent'), h('p', { class: 'small muted' }, 'Hinweis: Du schreibst hier mit einer KI, nicht mit einem Menschen. Bitte gib keine Passwörter oder besonders sensible Daten ein. Antworten können Fehler enthalten.'), log, form);
   return h('div', { class: 'cols' }, chat, h('div', { class: 'stack' }, karten()));
 };
 
@@ -173,6 +177,28 @@ V.werbung = async () => {
   return h('div', { class: 'card' }, h('h2', {}, 'Werbung & Berichte'), tabelle([['Zeitraum', z => [datum(z.zeitraum_von), ' – ', datum(z.zeitraum_bis)].join('')], ['Titel', z => z.titel], ['Art', z => z.art], ['Erstellt', z => datum(z.erstellt_am)]], d, 'Noch keine Berichte.'));
 };
 
+V.belege = async () => {
+  const d = await api('/api/kunde/belege'), m = h('div');
+  const art = (z) => z.storno_von ? 'Storno' : z.art === 'rechnung' ? 'Rechnung' : 'Angebot';
+  const st = (z) => h('span', { class: 'pill ' + (z.ueberfaellig ? 'bad' : ['bezahlt', 'angenommen'].includes(z.status) ? 'ok' : ['abgelehnt', 'storniert'].includes(z.status) ? 'bad' : 'warn') }, z.ueberfaellig ? 'überfällig' : z.status === 'gestellt' || z.status === 'versendet' ? (z.art === 'rechnung' ? 'offen' : 'wartet auf Annahme') : z.status);
+  const aktion = (z) => h('span', { class: 'row' }, h('a', { class: 'btn sec small', href: '/api/kunde/belege/' + z.id + '/pdf' }, 'PDF'),
+    z.art === 'angebot' && ['gestellt', 'versendet'].includes(z.status) ? h('button', { class: 'btn small', onclick: async () => { if (!confirm('Angebot ' + z.nummer + ' verbindlich annehmen?')) return; try { await api('/api/kunde/belege/' + z.id + '/annehmen', { method: 'POST' }); melde(m, 'Danke! Das Angebot ist angenommen.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); } } }, 'Annehmen') : '');
+  return h('div', { class: 'card' }, h('h2', {}, 'Angebote & Rechnungen'), m, tabelle([['Nummer', z => z.nummer], ['Art', art], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => euro(z.brutto_cent)], ['Status', st], ['', aktion]], d, 'Noch keine Angebote oder Rechnungen.'));
+};
+
+V.berichte = async () => {
+  const d = await api('/api/kunde/monatsberichte');
+  if (!d.length) return h('div', { class: 'card' }, h('h2', {}, 'Monatsberichte'), h('p', { class: 'muted' }, 'Hier erscheint jeden Monat dein Bericht: Anfragen, Termine und was deine Automatisierungen für dich erledigt haben. Der erste kommt am Anfang des nächsten Monats.'));
+  return h('div', { class: 'stack' }, d.map(b => {
+    const x = b.daten, a = x.anfragen;
+    return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow', style: 'margin:0' }, b.titel), h('a', { class: 'btn small', href: '/api/kunde/monatsberichte/' + b.id + '/pdf' }, 'PDF herunterladen')),
+      h('div', { class: 'grid3', style: 'margin-top:12px' },
+        h('div', { class: 'stat' }, h('b', {}, a.gesamt), h('span', { class: 'muted small' }, 'Anfragen (Vormonat ' + a.vormonat + ')')),
+        h('div', { class: 'stat' }, h('b', {}, x.termine.gesamt), h('span', { class: 'muted small' }, 'Termine')),
+        h('div', { class: 'stat' }, h('b', {}, x.automatische_ablaeufe), h('span', { class: 'muted small' }, 'Automatische Abläufe'))));
+  }));
+};
+
 V.automationen = async () => {
   const d = await api('/api/kunde/automationen');
   return h('div', { class: 'card' }, h('h2', {}, 'Automationen'),
@@ -182,8 +208,12 @@ V.automationen = async () => {
 
 V.einstellungen = async () => {
   const p = await api('/api/kunde/profil');
-  const m1 = h('div'), m2 = h('div');
-  const k = p.kunde;
+  const m1 = h('div'), m2 = h('div'), m3 = h('div');
+  const k = p.kunde; const sw = { benachr_anfragen: k.benachr_anfragen, benachr_termine: k.benachr_termine, benachr_bericht: k.benachr_bericht };
+  const kb = (label, key) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', checked: sw[key], style: 'width:auto', onchange: (e) => { sw[key] = e.target.checked; } }), label);
+  const f3 = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/kunde/profil', { method: 'PATCH', body: { ...sw, benachr_email: e.target.benachr_email.value } }); melde(m3, 'Gespeichert.', 'ok'); } catch (x) { melde(m3, x.message); } } },
+    h('div', {}, h('label', {}, 'Benachrichtigungen an (leer = deine Kontakt-E-Mail)'), h('input', { name: 'benachr_email', type: 'email', value: k.benachr_email || '' })),
+    kb('Bei neuen Anfragen', 'benachr_anfragen'), kb('Erinnerung vor Terminen', 'benachr_termine'), kb('Monatsbericht per E-Mail', 'benachr_bericht'), h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   const f1 = h('form', { class: 'form2', onsubmit: async (e) => {
     e.preventDefault();
     try { await api('/api/kunde/profil', { method: 'PATCH', body: Object.fromEntries(new FormData(e.target)) }); melde(m1, 'Gespeichert.', 'ok'); } catch (x) { melde(m1, x.message); }
@@ -202,8 +232,27 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Dein Konto'), h('p', {}, 'Kundennummer ', h('b', {}, k.kundennummer), ' · Paket ', h('b', {}, k.paket || '–'), ' · Login ', h('b', {}, p.login))),
     h('div', { class: 'card' }, h('h2', {}, 'Kontaktdaten'), m1, f1),
-    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2),
+    h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
+    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), zweiFaktorKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
+};
+
+V.team = async () => {
+  const d = await api('/api/kunde/team'), m = h('div');
+  const ROLLE = { inhaber: 'Inhaber (alles)', mitarbeiter: 'Mitarbeiter (ohne Team und Rechnungen)', nur_lesen: 'Nur ansehen' };
+  const neu = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target));
+    try { const r = await api('/api/kunde/team/einladen', { method: 'POST', body: o }); melde(m, r.gemailt ? 'Einladung wurde per E-Mail versendet.' : 'Einladung erstellt. Bitte diesen Link weitergeben: ' + r.einladungslink, 'ok'); setTimeout(zeige, r.gemailt ? 900 : 8000); } catch (x) { melde(m, x.message); } } },
+    h('div', {}, h('label', {}, 'E-Mail'), h('input', { name: 'email', type: 'email', required: true })),
+    h('div', {}, h('label', {}, 'Name'), h('input', { name: 'name' })),
+    h('div', {}, h('label', {}, 'Rolle'), h('select', { name: 'kunden_rolle' }, ...Object.entries(ROLLE).map(([v, t]) => h('option', { value: v, selected: v === 'mitarbeiter' }, t)))),
+    h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Einladen')));
+  const aend = async (z, body) => { try { await api('/api/kunde/team/' + z.id, { method: 'PATCH', body }); zeige(); } catch (x) { melde(m, x.message); } };
+  const rolleWahl = (z) => h('select', { onchange: (e) => aend(z, { kunden_rolle: e.target.value }) }, ...Object.entries(ROLLE).map(([v, t]) => h('option', { value: v, selected: v === z.kunden_rolle }, t)));
+  return h('div', { class: 'stack' },
+    h('div', { class: 'card' }, h('h2', {}, 'Team'), h('p', { class: 'small muted' }, 'Hier lädst du Kolleginnen und Kollegen ein. Jeder bekommt einen eigenen Zugang mit eigenem Passwort.'), m,
+      tabelle([['Name', z => z.name || '–'], ['E-Mail', z => z.email], ['Rolle', rolleWahl], ['Status', z => h('span', { class: 'pill ' + (!z.aktiv ? 'bad' : z.angemeldet ? 'ok' : 'warn') }, !z.aktiv ? 'gesperrt' : z.angemeldet ? 'aktiv' : 'eingeladen')],
+        ['Letzter Login', z => z.letzter_login ? zeit(z.letzter_login) : 'noch nie'], ['', z => h('button', { class: 'btn sec small', onclick: () => aend(z, { aktiv: !z.aktiv }) }, z.aktiv ? 'Sperren' : 'Entsperren')]], d, 'Noch keine Zugänge.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Neuen Zugang einladen'), neu));
 };
 
 async function zeige() {
@@ -215,11 +264,13 @@ async function zeige() {
   root.replaceChildren(gerüst(seite, inhalt));
 }
 
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 (async () => {
   try {
     const me = await api('/api/me');
     if (me.rolle === 'admin') { location.href = '/admin'; return; }
     start = await api('/api/kunde/start');
+    if (start.kunde.branding_farbe) { const f = start.kunde.branding_farbe; document.documentElement.style.setProperty('--grad', f); document.documentElement.style.setProperty('--violet', f); }
   } catch (e) { return; }
   window.addEventListener('hashchange', zeige);
   zeige();

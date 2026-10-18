@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, melde, abmelden } from './common.js';
+import { h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -9,7 +9,7 @@ function gerüst(aktiv, inhalt) {
     h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Partnerportal'),
       NAV.map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1])),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), inhalt));
+    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), inhalt, rechtFuss()));
 }
 function tabelle(spalten, zeilen, leer) {
   if (!zeilen.length) return h('p', { class: 'muted' }, leer);
@@ -39,8 +39,8 @@ V.provisionen = async () => {
   const nachMonat = {};
   d.filter(z => z.status !== 'storniert').forEach(z => { const k = String(z.monat).slice(0, 7); nachMonat[k] = (nachMonat[k] || 0) + z.betrag_cent; });
   return h('div', { class: 'stack' },
-    h('div', { class: 'card' }, h('h2', {}, 'Pro Monat'), tabelle([['Monat', z => z[0]], ['Summe', z => euro(z[1])]], Object.entries(nachMonat), 'Noch keine Provisionen.')),
-    h('div', { class: 'card' }, h('h2', {}, 'Einzelposten'), tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Vertragsmonat', z => z.vertragsmonat], ['Basis', z => euro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => euro(z.betrag_cent)], ['Status', z => pill(z.status)]], d, 'Noch keine Provisionen.')));
+    h('div', { class: 'card' }, h('h2', {}, 'Pro Monat'), tabelle([['Monat', z => z[0]], ['Summe', z => euro(z[1])], ['Abrechnung', z => h('a', { href: '/api/vertrieb/abrechnung/' + z[0], target: '_blank', rel: 'noopener' }, 'PDF')]], Object.entries(nachMonat), 'Noch keine Provisionen.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Einzelposten'), tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Art', z => ({ laufend: 'Laufend', verlaengerung: 'Verlängerung', rueckbuchung: 'Rückbuchung' })[z.art] || z.art], ['Vertragsmonat', z => z.vertragsmonat || '–'], ['Basis', z => euro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => euro(z.betrag_cent)], ['Status', z => pill(z.status)]], d, 'Noch keine Provisionen.')));
 };
 
 V.leads = async () => {
@@ -72,7 +72,7 @@ V.konto = async () => {
   const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/passwort', { method: 'POST', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Passwort geändert.', 'ok'); e.target.reset(); } catch (x) { melde(m, x.message); } } },
     feld('Aktuelles Passwort', 'alt', { type: 'password', required: true, autocomplete: 'current-password' }), feld('Neues Passwort (mind. 10 Zeichen)', 'neu', { type: 'password', required: true, minlength: 10, autocomplete: 'new-password' }),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Passwort ändern')));
-  return h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f);
+  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f), zweiFaktorKarte());
 };
 
 async function zeige() {

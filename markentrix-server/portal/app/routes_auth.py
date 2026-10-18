@@ -1,9 +1,10 @@
+import json
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
-from . import config, mailer
+from . import config, mailer, zweifaktor
 from .db import tx
 from .security import (COOKIE, EMAIL_RE, audit, check_password_rules, client_ip, current_user, hash_password,
                        new_token, rate_limit, token_hash, verify_password)
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/api")
 class LoginIn(BaseModel):
     email: str
     password: str
+    code: str | None = None
 
 
 class EinladungIn(BaseModel):
@@ -28,22 +30,38 @@ def login(data: LoginIn, request: Request, response: Response):
     if not EMAIL_RE.match(email) or len(data.password) > 200:
         raise HTTPException(401, "E-Mail oder Passwort stimmt nicht.")
     with tx("system") as cur:
-        cur.execute("SELECT id, passwort_hash, rolle, kunden_id, aktiv, gesperrt_bis, fehlversuche FROM benutzer WHERE lower(email)=%s", (email,))
+        cur.execute("SELECT id, passwort_hash, rolle, kunden_id, aktiv, gesperrt_bis, fehlversuche, totp_aktiv, totp_secret, totp_letzter_schritt, totp_recovery FROM benutzer WHERE lower(email)=%s", (email,))
         u = cur.fetchone()
         gesperrt = u and u["gesperrt_bis"] and u["gesperrt_bis"] > datetime.now(timezone.utc)
         ok = verify_password(data.password, u["passwort_hash"] if u else None)
+        pw_ok = ok
         fehler = None
-        if not u or not ok or not u["aktiv"] or gesperrt:
+        zwei = False
+        if u and ok and u["aktiv"] and not gesperrt and u["totp_aktiv"]:
+            if not data.code:
+                zwei = True
+            else:
+                gut, aend = zweifaktor.pruefen_login(u, data.code)
+                if gut:
+                    for sp, wert in aend.items():
+                        cur.execute(f"UPDATE benutzer SET {sp}=%s{'::jsonb' if sp == 'totp_recovery' else ''} WHERE id=%s", (json.dumps(wert) if sp == 'totp_recovery' else wert, u["id"]))
+                else:
+                    ok = False
+        if zwei:
+            pass
+        elif not u or not ok or not u["aktiv"] or gesperrt:
             if gesperrt:
                 fehler = (429, "Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.")
             else:
                 if u:
                     n = u["fehlversuche"] + 1
                     cur.execute("UPDATE benutzer SET fehlversuche=%s, gesperrt_bis=CASE WHEN %s>=5 THEN now()+interval '15 minutes' END WHERE id=%s", (n, n, u["id"]))
-                fehler = (401, "E-Mail oder Passwort stimmt nicht.")
+                fehler = (401, "Der Code stimmt nicht." if (u and pw_ok and data.code and u["totp_aktiv"]) else "E-Mail oder Passwort stimmt nicht.")
     if fehler:
         # erst nach dem Commit abbrechen, sonst wird der Fehlversuch zurückgerollt
         raise HTTPException(*fehler)
+    if zwei:
+        return {"zwei_faktor": True}
     with tx("system") as cur:
         tok = new_token()
         cur.execute("INSERT INTO sitzungen (token_hash, benutzer_id, ablauf, ip) VALUES (%s,%s,now()+make_interval(hours=>%s),%s)",
@@ -67,7 +85,7 @@ def logout(request: Request, response: Response):
 
 @router.get("/me")
 def me(user: dict = Depends(current_user)):
-    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"]}
+    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"], "zwei_faktor": user["totp_aktiv"], "kunden_rolle": user["kunden_rolle"]}
 
 
 @router.get("/einladung/{token}")

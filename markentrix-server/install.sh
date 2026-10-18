@@ -30,8 +30,9 @@ missing=()
 for c in curl git openssl ss awk sed; do command -v "$c" >/dev/null || missing+=("$c"); done
 if [ "${#missing[@]}" -gt 0 ]; then
   apt-get update -qq
-  apt-get install -y -qq curl git openssl iproute2 gawk sed ca-certificates >/dev/null
+  apt-get install -y -qq curl git openssl iproute2 gawk sed ca-certificates rsync openssh-client >/dev/null
 fi
+command -v rsync >/dev/null || { apt-get update -qq; apt-get install -y -qq rsync openssh-client >/dev/null; }
 ok "Grundwerkzeuge vorhanden"
 
 if ! command -v docker >/dev/null; then
@@ -97,7 +98,7 @@ cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"
 rm -rf "$BASE/db" && cp -r "$SRC/db" "$BASE/db"
 rm -rf "$BASE/portal" && cp -r "$SRC/portal" "$BASE/portal"
-install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$BASE/bin/"
+install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$BASE/bin/"
 ln -sf "$BASE/bin/mkctl" /usr/local/bin/mkctl
 [ -f "$BASE/caddy/sites/00-platzhalter.caddy" ] || echo "# Hier liegen die Kunden-Websites (mkctl site-add)" > "$BASE/caddy/sites/00-platzhalter.caddy"
 echo "$CADDY_MODE" > "$BASE/mode"
@@ -203,6 +204,9 @@ EOF
 chmod 644 /etc/cron.d/markentrix-backup
 printf "%s\n" "* * * * * root flock -n /run/mk-worker.lock /opt/markentrix/bin/worker.py >> /var/log/markentrix-worker.log 2>&1" > /etc/cron.d/markentrix-worker
 chmod 644 /etc/cron.d/markentrix-worker
+printf "%s\n" "*/5 * * * * root flock -n /run/mk-watchdog.lock /opt/markentrix/bin/watchdog.sh >> /var/log/markentrix-watchdog.log 2>&1" > /etc/cron.d/markentrix-watchdog
+printf "%s\n" "30 4 * * 0 root /opt/markentrix/bin/restore-test.sh >> /var/log/markentrix-restore-test.log 2>&1" > /etc/cron.d/markentrix-restore-test
+chmod 644 /etc/cron.d/markentrix-watchdog /etc/cron.d/markentrix-restore-test
 "$BASE/bin/backup.sh"
 ok "Sicherung funktioniert (täglich um 03:15 Uhr, 14 Tage Aufbewahrung)"
 

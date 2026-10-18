@@ -1,8 +1,8 @@
-import { h, api, datum, zeit, euro, melde, abmelden } from './common.js';
+import { h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
-const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
-let paketListe = [];
+const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
+let paketListe = [], ich = null;
 
 function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
@@ -12,7 +12,7 @@ function gerüst(aktiv, inhalt) {
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, inhalt));
+    h('main', { class: 'main' }, ich && !ich.zwei_faktor ? h('div', { class: 'msg info' }, 'Dein Admin-Konto hat noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten'), '.') : '', inhalt, rechtFuss()));
 }
 function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
   if (!zeilen.length) return h('p', { class: 'muted' }, leer);
@@ -28,7 +28,7 @@ const leerzu = (o) => { Object.keys(o).forEach(k => { if (o[k] === '') delete o[
 const V = {};
 
 V.uebersicht = async () => {
-  const d = await api('/api/admin/uebersicht');
+  const d = await api('/api/admin/uebersicht'), ob = await api('/api/admin/onboarding/offen');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
   return h('div', {}, kopf('Übersicht'),
     h('div', { class: 'grid3' },
@@ -37,8 +37,10 @@ V.uebersicht = async () => {
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Im Onboarding'), h('b', {}, s.onboarding || 0)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Monatlich (gebucht)'), h('b', {}, euro(d.monatlich_cent))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Referenzkunden (unbezahlt)'), h('b', {}, d.referenzkunden)),
+      h('a', { class: 'card stat', href: '#belege', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Offene Rechnungen' + (d.rechnungen_ueberfaellig ? ' (' + d.rechnungen_ueberfaellig + ' überfällig)' : '')), h('b', {}, euro(d.rechnungen_offen_cent))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Neue Anfragen'), h('b', {}, d.neue_anfragen)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Uploads (7 Tage)'), h('b', {}, d.uploads_7d))),
+    ob.length ? h('div', { class: 'card' }, h('h2', {}, 'Neue Kunden im Onboarding'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Fortschritt', z => z.fertig + ' von ' + z.gesamt]], ob)) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Letzte Aktionen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d.letzte_aktionen)));
 };
 
@@ -146,16 +148,192 @@ V.einstellungen = async () => {
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   const t = h('input', { type: 'email', placeholder: 'Testmail an …', style: 'max-width:280px' });
   const ft = h('div', { class: 'row' }, t, knopf('Testmail senden', async () => { try { await api('/api/admin/einstellungen/testmail', { method: 'POST', body: { an: t.value } }); melde(m1, 'Testmail wurde versendet.', 'ok'); } catch (x) { fehler(m1, x); } }));
-  const fk = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.tageslimit = Number(o.tageslimit);
+  const fk = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.tageslimit = Number(o.tageslimit); o.preis_ein_eur = Number(o.preis_ein_eur); o.preis_aus_eur = Number(o.preis_aus_eur);
     try { await api('/api/admin/einstellungen/ki', { method: 'PUT', body: o }); melde(m2, 'Gespeichert.', 'ok'); e.target.api_key.value = ''; } catch (x) { fehler(m2, x); } } },
     h('div', { class: 'form2' }, feld(d.ki.key_gesetzt ? 'API-Key (leer lassen = unverändert)' : 'API-Key', 'api_key', '', { type: 'password', autocomplete: 'new-password', placeholder: 'sk-ant-…' }),
-      feld('Modell', 'modell', d.ki.modell), feld('Nachrichten pro Kunde und Tag', 'tageslimit', d.ki.tageslimit, { type: 'number', min: 1, max: 1000 })),
+      feld('Modell', 'modell', d.ki.modell), feld('Nachrichten pro Kunde und Tag', 'tageslimit', d.ki.tageslimit, { type: 'number', min: 1, max: 1000 }),
+        feld('Preis Eingabe, € je 1 Mio. Tokens', 'preis_ein_eur', d.ki.preis_ein_eur, { type: 'number', step: '0.01', min: 0 }), feld('Preis Ausgabe, € je 1 Mio. Tokens', 'preis_aus_eur', d.ki.preis_aus_eur, { type: 'number', step: '0.01', min: 0 })),
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
+    zweiFaktorKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
+
+const kk = (label, wert, set) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', checked: wert, style: 'width:auto', onchange: (e) => set(e.target.checked) }), label);
+async function firmaKarte() {
+  const f = await api('/api/admin/einstellungen/firma'), m = h('div'); let klein = f.kleinunternehmer;
+  const form = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.kleinunternehmer = klein; o.zahlungsziel_tage = Number(o.zahlungsziel_tage); o.mwst_satz = Number(o.mwst_satz);
+    try { await api('/api/admin/einstellungen/firma', { method: 'PUT', body: o }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } },
+    h('div', { class: 'form2' }, feld('Firmenname', 'name', f.name), feld('Inhaber', 'inhaber', f.inhaber), feld('Straße', 'strasse', f.strasse), feld('PLZ', 'plz', f.plz), feld('Ort', 'ort', f.ort),
+      feld('E-Mail', 'email', f.email), feld('Telefon', 'telefon', f.telefon), feld('Website', 'website', f.website), feld('USt-IdNr.', 'ustid', f.ustid), feld('Steuernummer', 'steuernummer', f.steuernummer),
+      feld('IBAN', 'iban', f.iban), feld('BIC', 'bic', f.bic), feld('Bank', 'bank', f.bank), feld('Zahlungsziel (Tage)', 'zahlungsziel_tage', f.zahlungsziel_tage, { type: 'number', min: 0, max: 90 }),
+      feld('Umsatzsteuer (%)', 'mwst_satz', f.mwst_satz, { type: 'number', min: 0, max: 30 }), feld('Rechnungs-Kürzel', 'rechnungsprefix', f.rechnungsprefix), feld('Angebots-Kürzel', 'angebotsprefix', f.angebotsprefix)),
+    kk('Kleinunternehmer (§ 19 UStG, keine Umsatzsteuer auf Rechnungen)', klein, (v) => { klein = v; }),
+    h('label', {}, 'Zusatztext unten auf Rechnungen und Angeboten (optional)'), h('textarea', { name: 'fusszeile', rows: 2 }, f.fusszeile || ''),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Firmendaten'), h('p', { class: 'small muted' }, 'Werden für Impressum, Datenschutz, Angebote, Rechnungen und Berichte verwendet. Bitte Angaben zu Steuern mit deiner Steuerberatung abstimmen.'), m, form);
+}
+async function rechtKarte() {
+  const r = await api('/api/admin/einstellungen/recht'), m = h('div');
+  const form = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/admin/einstellungen/recht', { method: 'PUT', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } },
+    h('label', {}, 'Impressum (leer lassen = Standardtext aus den Firmendaten)'), h('textarea', { name: 'impressum', rows: 6, placeholder: r.impressum_standard }, r.impressum || ''),
+    h('label', {}, 'Datenschutzerklärung (leer lassen = Standardvorlage)'), h('textarea', { name: 'datenschutz', rows: 10, placeholder: r.datenschutz_standard }, r.datenschutz || ''),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern'), ' ', h('a', { class: 'btn sec', href: '/impressum', target: '_blank' }, 'Impressum ansehen'), ' ', h('a', { class: 'btn sec', href: '/datenschutz', target: '_blank' }, 'Datenschutz ansehen')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Impressum und Datenschutz'), h('p', { class: 'small muted' }, 'Die Standardtexte sind eine Vorlage und ersetzen keine Rechtsberatung. Bitte einmal von einem Anwalt oder Datenschutzbeauftragten prüfen lassen und bei Bedarf hier überschreiben. Die Links erscheinen automatisch auf der Anmeldeseite.'), m, form);
+}
+
+async function onboardingKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/onboarding'), m = h('div');
+  const pct = d.gesamt ? Math.round(d.fertig / d.gesamt * 100) : 0;
+  const zeilen = d.punkte.map(p => {
+    const cb = h('input', { type: 'checkbox', checked: p.fertig, disabled: p.automatisch, style: 'width:auto', onchange: async (e) => { try { await api('/api/admin/kunden/' + kid + '/onboarding/' + p.code, { method: 'PATCH', body: { erledigt: e.target.checked } }); location.reload(); } catch (x) { fehler(m, x); e.target.checked = !e.target.checked; } } });
+    return h('div', { class: 'modul' }, cb, h('div', { class: 'grow' }, h('b', {}, p.titel), p.automatisch ? [' ', h('span', { class: 'pill ok' }, 'automatisch erkannt')] : '', p.hilfe ? h('div', { class: 'small muted' }, p.hilfe) : '', p.erledigt_am ? h('div', { class: 'small muted' }, 'erledigt am ' + datum(p.erledigt_am)) : ''));
+  });
+  const neu = h('input', { placeholder: 'Eigener Punkt, z. B. „Flyer drucken“' });
+  return h('div', { class: 'card' }, h('h2', {}, 'Onboarding-Checkliste ', h('span', { class: 'pill ' + (pct === 100 ? 'ok' : 'warn') }, d.fertig + ' von ' + d.gesamt)),
+    h('div', { class: 'bar', style: 'margin:6px 0 12px' }, h('i', { style: 'width:' + pct + '%' })), m, zeilen,
+    pct === 100 && d.status === 'onboarding' ? h('div', { class: 'msg ok' }, 'Alles erledigt. ', knopf('Kunde auf „aktiv“ setzen', async () => { try { await api('/api/admin/kunden/' + kid + '/status', { method: 'POST', body: { status: 'aktiv' } }); location.reload(); } catch (x) { fehler(m, x); } }, 'btn')) : '',
+    h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, neu), knopf('Punkt hinzufügen', async () => { if (!neu.value.trim()) return; try { await api('/api/admin/kunden/' + kid + '/onboarding', { method: 'POST', body: { titel: neu.value } }); location.reload(); } catch (x) { fehler(m, x); } })));
+}
+
+function brandingKarte(kid, k) {
+  const m = h('div'); let logoB64 = null;
+  const datei = h('input', { type: 'file', accept: 'image/png,image/jpeg', onchange: (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { logoB64 = r.result; }; r.readAsDataURL(f); } });
+  const farbe = h('input', { type: 'color', value: k.branding_farbe || '#4f46e5', style: 'width:60px;padding:2px' });
+  let farbeGesetzt = !!k.branding_farbe;
+  farbe.addEventListener('input', () => { farbeGesetzt = true; });
+  const senden = async (extra) => { try { await api('/api/admin/kunden/' + kid + '/branding', { method: 'PUT', body: { farbe: farbeGesetzt ? farbe.value : null, logo_base64: logoB64, ...extra } }); melde(m, 'Gespeichert. Der Kunde sieht es beim nächsten Laden.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Branding im Kundenportal'),
+    h('p', { class: 'small muted' }, 'Logo (PNG oder JPG, max. 400 KB) und Akzentfarbe, die der Kunde in seinem Portal sieht.'), m,
+    k.logo_vorhanden ? h('p', {}, h('img', { src: '/api/admin/kunden/' + kid + '/logo', style: 'max-height:48px;background:#fff;border-radius:8px' })) : h('p', { class: 'small muted' }, 'Noch kein Logo.'),
+    h('div', { class: 'row' }, datei, h('span', { class: 'small muted' }, 'Farbe'), farbe, knopf('Speichern', () => senden({}), 'btn'), k.logo_vorhanden && knopf('Logo entfernen', () => confirm('Logo entfernen?') && senden({ logo_entfernen: true }), 'bad'),
+      k.branding_farbe && knopf('Farbe zurücksetzen', async () => { farbeGesetzt = false; senden({}); }, 'sec')));
+}
+
+async function kostenKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/kosten');
+  return h('div', { class: 'card' }, h('h2', {}, 'Kosten (KI-Chat) pro Monat'),
+    h('p', { class: 'small muted' }, 'Monatlicher Umsatz laut aktiven Buchungen: ' + fmtEuro(d.umsatz_monat_cent) + '. Die Kosten werden aus den Tokens und den Preisen unter Einstellungen berechnet.'),
+    tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Tokens', z => z.tokens], ['Kosten', z => fmtEuro(Math.round(z.kosten_cent))], ['Anteil am Umsatz', z => d.umsatz_monat_cent ? (z.kosten_cent / d.umsatz_monat_cent * 100).toFixed(1).replace('.', ',') + ' %' : '–']], d.monate, 'Noch keine Kosten erfasst.'));
+}
+
+async function berichteKarte(kid) {
+  const liste = await api('/api/admin/kunden/' + kid + '/berichte'), m = h('div');
+  const monate = []; const jetzt = new Date();
+  for (let i = 1; i <= 12; i++) { const d = new Date(jetzt.getFullYear(), jetzt.getMonth() - i, 1); monate.push([d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })]); }
+  const sel = select('monat', monate, monate[0][0]);
+  const los = async (senden) => { try { const r = await api('/api/admin/kunden/' + kid + '/bericht', { method: 'POST', body: { monat: sel.value, senden } });
+    melde(m, senden ? (r.gesendet ? 'Bericht erstellt und per E-Mail gesendet.' : 'Bericht erstellt, aber nicht gesendet: ' + (r.grund || 'unbekannt')) : 'Bericht erstellt.', r.gesendet || !senden ? 'ok' : 'info'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Monatsberichte'), h('p', { class: 'small muted' }, 'Wird jeden Monat automatisch erstellt und an den Kunden gemailt (wenn der Versand eingerichtet ist). Hier kannst du einen Monat von Hand erstellen oder erneut senden.'), m,
+    tabelle([['Monat', z => z.titel], ['Gesendet', z => z.versendet_am ? zeit(z.versendet_am) : 'nein'], ['PDF', z => h('a', { href: '/api/admin/berichte/' + z.id + '/pdf', target: '_blank', rel: 'noopener' }, 'Öffnen')]], liste, 'Noch keine Berichte.'),
+    h('div', { class: 'row', style: 'margin-top:12px' }, sel, knopf('Erstellen', () => los(false)), knopf('Erstellen und per Mail senden', () => los(true), 'btn')));
+}
+
+async function benachrKarte() {
+  const c = await api('/api/admin/einstellungen/benachrichtigung'), m = h('div'); const v = { ...c };
+  const form = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.termin_stunden = Number(o.termin_stunden);
+    Object.assign(o, { anfrage_mails: v.anfrage_mails, termin_erinnerung: v.termin_erinnerung, monatsbericht: v.monatsbericht });
+    try { await api('/api/admin/einstellungen/benachrichtigung', { method: 'PUT', body: o }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } },
+    h('div', { class: 'form2' }, feld('Alarm-E-Mail für dich (leer = erster Admin)', 'alarm_email', c.alarm_email, { type: 'email' }), feld('Terminerinnerung (Stunden vorher)', 'termin_stunden', c.termin_stunden, { type: 'number', min: 1, max: 168 })),
+    kk('Kunden per Mail über neue Anfragen informieren', c.anfrage_mails, (x) => { v.anfrage_mails = x; }),
+    kk('Kunden an Termine erinnern', c.termin_erinnerung, (x) => { v.termin_erinnerung = x; }),
+    kk('Monatsbericht automatisch am Monatsanfang an Kunden senden', c.monatsbericht, (x) => { v.monatsbericht = x; }),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Benachrichtigungen'), h('p', { class: 'small muted' }, 'Jeder Kunde kann diese Mails in seinem Portal unter Einstellungen einzeln abschalten. Für dich: Fehler in Automationen und Server-Alarme kommen an die Alarm-E-Mail.'), m, form);
+}
+
+// ---------------------------------------------------------------- Angebote und Rechnungen
+const BELEG_ST = { entwurf: '', gestellt: 'warn', versendet: 'warn', angenommen: 'ok', abgelehnt: 'bad', bezahlt: 'ok', storniert: 'bad' };
+const belegPill = (z) => h('span', { class: 'pill ' + (z.ueberfaellig ? 'bad' : BELEG_ST[z.status] || '') }, z.ueberfaellig ? 'überfällig' : z.status);
+const belegArt = (z) => z.storno_von ? 'Storno' : z.art === 'rechnung' ? 'Rechnung' : 'Angebot';
+const eurIn = (v) => { const n = Math.round(parseFloat(String(v).replace(/\./g, '').replace(',', '.')) * 100); return Number.isFinite(n) ? n : 0; };
+const eurOut = (c) => (c / 100).toFixed(2).replace('.', ',');
+
+V.belege = async () => {
+  const q = new URLSearchParams(location.hash.split('?')[1] || '');
+  const art = q.get('art') || '', status = q.get('status') || '';
+  const d = await api('/api/admin/belege?art=' + art + '&status=' + status), s = d.summen;
+  const f = (a, st, l) => h('button', { class: (art === a && status === st) ? 'on' : '', onclick: () => { location.hash = '#belege?art=' + a + '&status=' + st; } }, l);
+  return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen'),
+    h('p', { class: 'small' }, h('a', { href: '/api/admin/belege-export.csv', target: '_blank', rel: 'noopener' }, 'Rechnungen als CSV exportieren (Buchhaltung/sevDesk)')),
+    h('div', { class: 'grid3' },
+      h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Offen'), h('b', {}, euro(s.offen))),
+      h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Überfällig (' + s.ueberfaellig_n + ')'), h('b', {}, euro(s.ueberfaellig))),
+      h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Bezahlt diesen Monat'), h('b', {}, euro(s.bezahlt_monat)))),
+    h('div', { class: 'card' }, h('div', { class: 'tabs' }, f('', '', 'Alle'), f('rechnung', '', 'Rechnungen'), f('angebot', '', 'Angebote'), f('rechnung', 'gestellt', 'Offen'), f('rechnung', 'bezahlt', 'Bezahlt'), f('', 'entwurf', 'Entwürfe')),
+      tabelle([['Nr.', z => h('a', { href: '#beleg/' + z.id }, z.nummer || 'Entwurf')], ['Art', belegArt], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => fmtEuro(z.brutto_cent)], ['Status', belegPill]], d.belege, 'Noch keine Belege. Anlegen im jeweiligen Kunden.')),
+    h('p', { class: 'small muted' }, 'Hinweis: Rechnungen werden hier als PDF erstellt. Ab 2027/2028 gelten für Rechnungen zwischen Unternehmen schrittweise Pflichten zur E-Rechnung (z. B. ZUGFeRD/XRechnung). Das ist hier noch nicht umgesetzt; bitte mit der Steuerberatung abstimmen.'));
+};
+
+async function belegEditor(id, kid, art) {
+  let b, k, vorschlag = [];
+  if (id) { const r = await api('/api/admin/belege/' + id); b = r.beleg; k = r.kunde; }
+  else {
+    const r = await api('/api/admin/kunden/' + kid), v = await api('/api/admin/kunden/' + kid + '/belege-vorlage');
+    k = { kundennummer: r.kunde.kundennummer, firma: r.kunde.firma, email: r.kunde.email, referenzkunde: r.kunde.referenzkunde };
+    vorschlag = v.positionen;
+    b = { art, status: 'entwurf', betreff: '', einleitung: '', schluss: '', leistungszeitraum: '', positionen: vorschlag, kunden_id: kid };
+  }
+  const frei = b.status === 'entwurf', m = h('div');
+  const zeilen = [...b.positionen];
+  const box = h('div'), sum = h('div', { class: 'small muted', style: 'text-align:right' });
+  const feldB = (name, wert, extra = {}) => h('input', { name, value: wert ?? '', disabled: !frei, ...extra });
+  const betreff = feldB('betreff', b.betreff, { placeholder: 'z. B. Website-Paket' }), zeitraum = feldB('leistungszeitraum', b.leistungszeitraum, { placeholder: 'z. B. November 2026' });
+  const einl = h('textarea', { rows: 3, disabled: !frei }, b.einleitung || ''), schluss = h('textarea', { rows: 3, disabled: !frei }, b.schluss || '');
+  const rechne = () => { const n = zeilen.reduce((a, z) => a + Math.round(Number(z.menge || 0) * (z.preis_cent || 0)), 0); sum.textContent = 'Zwischensumme netto: ' + euro(n) + (frei ? ' (Umsatzsteuer wird beim Ausstellen nach den Firmendaten berechnet)' : ''); };
+  const zeichne = () => {
+    box.replaceChildren(...zeilen.map((z, i) => h('div', { class: 'row', style: 'margin-bottom:6px;align-items:center' },
+      h('div', { class: 'grow' }, h('input', { value: z.text, placeholder: 'Beschreibung', disabled: !frei, oninput: (e) => { z.text = e.target.value; } })),
+      h('div', { style: 'width:80px' }, h('input', { value: String(z.menge).replace('.', ','), disabled: !frei, oninput: (e) => { z.menge = parseFloat(e.target.value.replace(',', '.')) || 0; rechne(); } })),
+      h('div', { style: 'width:80px' }, h('input', { value: z.einheit || '', placeholder: 'Einheit', disabled: !frei, oninput: (e) => { z.einheit = e.target.value; } })),
+      h('div', { style: 'width:110px' }, h('input', { value: eurOut(z.preis_cent), disabled: !frei, oninput: (e) => { z.preis_cent = eurIn(e.target.value); rechne(); } })),
+      frei ? knopf('✕', () => { zeilen.splice(i, 1); zeichne(); }, 'sec') : ''))); rechne();
+  };
+  zeichne();
+  const daten = () => ({ betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, leistungszeitraum: zeitraum.value, positionen: zeilen.map(z => ({ text: z.text, menge: z.menge, einheit: z.einheit || '', preis_cent: z.preis_cent })) });
+  const aktion = (text, pfad, body, ok, art = 'sec', bestaetigen) => knopf(text, async () => {
+    if (bestaetigen && !confirm(bestaetigen)) return;
+    try { const r = await api(pfad, { method: 'POST', body }); if (ok) ok(r); } catch (x) { fehler(m, x); } }, art);
+  const speichern = knopf('Entwurf speichern', async () => { try {
+    if (id) { await api('/api/admin/belege/' + id, { method: 'PUT', body: daten() }); melde(m, 'Gespeichert.', 'ok'); }
+    else { const r = await api('/api/admin/kunden/' + kid + '/belege', { method: 'POST', body: { art, ...daten() } }); location.hash = '#beleg/' + r.id; }
+  } catch (x) { fehler(m, x); } }, 'btn');
+  const neu = () => location.reload();
+  const knoepfe = [];
+  if (id) {
+    knoepfe.push(h('a', { class: 'btn sec small', href: '/api/admin/belege/' + id + '/pdf', target: '_blank', rel: 'noopener' }, 'PDF ansehen'));
+    if (b.status === 'entwurf') knoepfe.push(speichern, aktion('Ausstellen', '/api/admin/belege/' + id + '/ausstellen', {}, (r) => { melde(m, 'Ausgestellt als ' + r.nummer + '.', 'ok'); setTimeout(neu, 700); }, 'btn',
+      'Beleg jetzt ausstellen? Danach bekommt er eine feste Nummer und kann nicht mehr geändert werden.'),
+      knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/belege/' + id, { method: 'DELETE' }); location.hash = '#belege'; } catch (x) { fehler(m, x); } } }, 'bad'));
+    if (['gestellt', 'versendet'].includes(b.status)) knoepfe.push(aktion(b.versendet_am ? 'Erneut per Mail senden' : 'Per Mail an Kunden senden', '/api/admin/belege/' + id + '/senden', {}, (r) => { melde(m, r.gesendet ? 'Per E-Mail gesendet.' : 'Nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(neu, 800); }, 'btn'));
+    if (b.art === 'rechnung' && ['gestellt', 'versendet'].includes(b.status)) {
+      knoepfe.push(aktion('Als bezahlt markieren', '/api/admin/belege/' + id + '/bezahlt', {}, neu, 'sec', 'Zahlungseingang in voller Höhe bestätigen?'));
+      if (new Date(b.faellig_am) < new Date()) for (const st of [1, 2, 3]) if (st > b.mahnstufe) knoepfe.push(aktion({ 1: 'Zahlungserinnerung senden', 2: '1. Mahnung senden', 3: '2. Mahnung senden' }[st], '/api/admin/belege/' + id + '/mahnung', { stufe: st, senden: true }, (r) => { melde(m, r.gesendet ? 'Gesendet.' : 'Nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(neu, 800); }, 'sec', 'Schreiben jetzt per E-Mail an den Kunden senden?'));
+    }
+    if (b.art === 'rechnung' && !b.storno_von && ['gestellt', 'versendet', 'bezahlt'].includes(b.status)) knoepfe.push(aktion('Stornieren', '/api/admin/belege/' + id + '/stornieren', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'bad', 'Rechnung stornieren? Es wird eine Stornorechnung mit eigener Nummer erzeugt.'));
+    if (b.art === 'angebot' && ['gestellt', 'versendet'].includes(b.status)) knoepfe.push(aktion('Angenommen', '/api/admin/belege/' + id + '/angebot-status', { status: 'angenommen' }, neu), aktion('Abgelehnt', '/api/admin/belege/' + id + '/angebot-status', { status: 'abgelehnt' }, neu, 'sec'));
+    if (b.art === 'angebot' && ['gestellt', 'versendet', 'angenommen'].includes(b.status) && !k.referenzkunde) knoepfe.push(aktion('Rechnung daraus erstellen', '/api/admin/belege/' + id + '/rechnung', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec'));
+  } else knoepfe.push(speichern);
+  const titel = (b.storno_von ? 'Stornorechnung' : art === 'rechnung' || b.art === 'rechnung' ? 'Rechnung' : 'Angebot') + (b.nummer ? ' ' + b.nummer : ' (Entwurf)');
+  return h('div', { class: 'stack' }, kopf(titel, belegPill(b), h('a', { class: 'btn sec small', href: '#kunde/' + (b.kunden_id || kid) }, '← ' + k.firma)),
+    k.referenzkunde && (b.art || art) === 'rechnung' ? h('div', { class: 'msg err' }, 'Das ist ein Referenzkunde – Rechnungen sind für Referenzkunden gesperrt.') : '', m,
+    h('div', { class: 'card' }, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Leistungszeitraum'), zeitraum)),
+      h('label', {}, 'Einleitung (optional)'), einl, h('h3', { style: 'margin-top:16px' }, 'Positionen'), h('div', { class: 'small muted' }, 'Beschreibung · Menge · Einheit · Einzelpreis netto in €'), box,
+      frei ? knopf('+ Position', () => { zeilen.push({ text: '', menge: 1, einheit: '', preis_cent: 0 }); zeichne(); }) : '', sum,
+      !frei ? h('div', { style: 'text-align:right;margin-top:8px' }, h('div', {}, 'Netto ' + fmtEuro(b.netto_cent)), b.kleinunternehmer ? h('div', { class: 'small muted' }, 'Kleinunternehmer – keine Umsatzsteuer') : h('div', {}, 'USt ' + Number(b.ust_satz) + ' % ' + fmtEuro(b.ust_cent)), h('div', {}, h('b', {}, 'Gesamt ' + fmtEuro(b.brutto_cent)))) : '',
+      h('label', {}, 'Schlusstext (optional)'), schluss,
+      !frei ? h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Datum ' + datum(b.datum) + ' · ' + (b.art === 'rechnung' ? 'zahlbar bis ' : 'gültig bis ') + datum(b.faellig_am) + (b.versendet_am ? ' · gesendet am ' + datum(b.versendet_am) : '') + (b.bezahlt_am ? ' · bezahlt am ' + datum(b.bezahlt_am) : '') + (b.mahnstufe ? ' · Mahnstufe ' + b.mahnstufe : '')) : ''),
+    h('div', { class: 'row' }, knoepfe));
+}
+
+async function belegeKarte(kid, referenz) {
+  const liste = await api('/api/admin/kunden/' + kid + '/belege');
+  return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow', style: 'margin:0' }, 'Angebote & Rechnungen'),
+    h('a', { class: 'btn sec small', href: '#neubeleg/' + kid + '/angebot' }, '+ Angebot'), referenz ? '' : h('a', { class: 'btn small', href: '#neubeleg/' + kid + '/rechnung' }, '+ Rechnung')),
+    tabelle([['Nr.', z => h('a', { href: '#beleg/' + z.id }, z.nummer || 'Entwurf')], ['Art', belegArt], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Betrag', z => fmtEuro(z.brutto_cent)], ['Status', belegPill]], liste, referenz ? 'Referenzkunde: keine Rechnungen, Angebote sind möglich.' : 'Noch keine Belege.'));
+}
 
 // ---------------------------------------------------------------- Vertriebler
 V.vertrieb = async () => {
@@ -180,6 +358,16 @@ V.vertrieb = async () => {
     berechnen, h('div', { class: 'card' }, h('h2', {}, 'Neuer Vertriebler'), m, f));
 };
 
+function abrechnungsZeile(pid, liste, mp) {
+  const monate = [...new Set(liste.map(z => String(z.monat).slice(0, 7)))];
+  if (!monate.length) return h('span');
+  const sel = h('select', {}, ...monate.map(x => h('option', { value: x }, x)));
+  return h('div', { class: 'row', style: 'margin-top:10px' }, h('span', { class: 'small muted' }, 'Abrechnung als PDF:'), sel,
+    knopf('Öffnen', () => window.open('/api/admin/vertrieb/' + pid + '/abrechnung/' + sel.value, '_blank', 'noopener')),
+    knopf('Verlängerung erfassen', async () => { const bid = prompt('Buchungs-ID der verlängerten Buchung (steht in der Kundenakte):'); if (!bid) return; const mon = prompt('Abrechnungsmonat (JJJJ-MM)', sel.value);
+      if (mon) bestaetigt(mp, () => api('/api/admin/vertrieb/provisionen/verlaengerung', { method: 'POST', body: { buchung_id: bid.trim(), monat: mon } })); }));
+}
+
 async function partnerDetail(pid) {
   const d = await api('/api/admin/vertrieb/partner/' + pid), p = d.partner, m = h('div'), mp = h('div');
   const stamm = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.iban_hinterlegt = e.target.iban.checked; if (!o.vereinbarung_am) delete o.vereinbarung_am; delete o.iban;
@@ -190,11 +378,12 @@ async function partnerDetail(pid) {
     h('label', {}, 'Notiz'), h('textarea', { name: 'notiz', rows: 2 }, p.notiz || ''), h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   const naechster = { berechnet: ['freigegeben', 'Freigeben'], freigegeben: ['ausgezahlt', 'Als ausgezahlt'] };
   const provAktion = (z) => h('span', { class: 'row' }, naechster[z.status] && knopf(naechster[z.status][1], () => bestaetigt(mp, () => api('/api/admin/vertrieb/provisionen/' + z.id + '/status', { method: 'POST', body: { status: naechster[z.status][0] } }))),
+    z.status === 'ausgezahlt' && z.art !== 'rueckbuchung' && knopf('Zurückbuchen', async () => { const mon = prompt('In welchem Monat verrechnen? (JJJJ-MM)', new Date().toISOString().slice(0, 7)); if (mon) bestaetigt(mp, () => api('/api/admin/vertrieb/provisionen/' + z.id + '/rueckbuchung', { method: 'POST', body: { monat: mon } })); }, 'bad'),
     ['berechnet', 'freigegeben'].includes(z.status) && knopf('Stornieren', () => confirm('Provision stornieren?') && bestaetigt(mp, () => api('/api/admin/vertrieb/provisionen/' + z.id + '/status', { method: 'POST', body: { status: 'storniert' } })), 'bad'));
   const summe = d.provisionen.filter(z => ['berechnet', 'freigegeben'].includes(z.status)).reduce((a, z) => a + z.betrag_cent, 0);
   const mz = h('div'), mail = h('input', { type: 'email', value: p.email || '', placeholder: 'E-Mail des Vertrieblers' }), perMail = h('input', { type: 'checkbox', checked: true, style: 'width:auto' });
   const zugang = h('div', { class: 'card' }, h('h2', {}, 'Portal-Zugang'), h('p', { class: 'small muted' }, 'Der Vertriebler bekommt einen Link, legt damit selbst sein Passwort an und sieht danach seine Kunden, Leads und Provisionen unter /vertrieb.'), mz,
-    tabelle([['E-Mail', z => z.email], ['Passwort', z => z.hat_passwort ? 'gesetzt' : 'offen'], ['Letzter Login', z => zeit(z.letzter_login)],
+    tabelle([['E-Mail', z => z.email], ['Passwort', z => z.hat_passwort ? 'gesetzt' : 'offen'], ['2FA', (z) => z.totp_aktiv ? knopf('2FA zurücksetzen', async () => { if (confirm('Zwei-Faktor-Anmeldung dieses Zugangs ausschalten?')) { try { await api('/api/admin/benutzer/' + z.id + '/2fa-zuruecksetzen', { method: 'POST' }); location.reload(); } catch (x) { alert(x.message); } } }) : '–'], ['Letzter Login', z => zeit(z.letzter_login)],
       ['', z => knopf(z.aktiv ? 'Sperren' : 'Freigeben', async () => { try { await api('/api/admin/vertrieb/zugang/' + z.id + '/aktiv', { method: 'POST', body: { aktiv: !z.aktiv } }); location.reload(); } catch (x) { fehler(mz, x); } }, z.aktiv ? 'bad' : 'sec')]], d.zugaenge, 'Noch kein Zugang.'),
     h('div', { class: 'row', style: 'margin-top:12px' }, mail, h('label', { class: 'small', style: 'display:flex;gap:6px;align-items:center;white-space:nowrap' }, perMail, 'per E-Mail senden'),
       knopf('Einladung erzeugen', async () => { try { const r = await api('/api/admin/vertrieb/partner/' + pid + '/einladung', { method: 'POST', body: { email: mail.value, per_mail: perMail.checked } });
@@ -203,7 +392,8 @@ async function partnerDetail(pid) {
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), m, stamm), zugang,
     h('div', { class: 'card' }, h('h2', {}, 'Zugeordnete Kunden (' + d.kunden.length + ')'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Paket', z => z.paket || '–'], ['Status', z => pill(z.status)], ['Monatlich', z => fmtEuro(z.monatlich_cent)]], d.kunden, 'Noch keine Kunden. Zuordnung im Kunden unter Stammdaten (Feld Vertriebler).')),
     h('div', { class: 'card' }, h('h2', {}, 'Provisionen'), h('p', { class: 'small muted' }, 'Offen (berechnet/freigegeben): ' + fmtEuro(summe)), mp,
-      tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Vertragsmonat', z => z.vertragsmonat], ['Basis', z => fmtEuro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => fmtEuro(z.betrag_cent)], ['Status', z => pill(z.status)], ['', provAktion]], d.provisionen, 'Noch keine Provisionen berechnet.')),
+      tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Art', z => ({ laufend: 'Laufend', verlaengerung: 'Verlängerung', rueckbuchung: 'Rückbuchung' })[z.art] || z.art], ['Vertragsmonat', z => z.vertragsmonat || '–'], ['Basis', z => fmtEuro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => fmtEuro(z.betrag_cent)], ['Status', z => pill(z.status)], ['', provAktion]], d.provisionen, 'Noch keine Provisionen berechnet.'),
+      abrechnungsZeile(pid, d.provisionen, mp)),
     h('div', { class: 'card' }, h('h2', {}, 'Leads'), tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Status', z => pill(z.status)], ['Angelegt', z => datum(z.erstellt_am)]], d.leads, 'Keine Leads zugeordnet.')));
 }
 
@@ -334,7 +524,7 @@ async function kundeDetail(kid) {
     try { const r = await api('/api/admin/kunden/' + kid + '/einladung', { method: 'POST', body: { email: mail.value, per_mail: true } });
       linkbox.replaceChildren(h('div', { class: 'msg info' }, 'Einladungslink (' + r.gueltig_tage + ' Tage gültig): ', h('br'), r.einladungslink), mailHinweis(r.mail)); } catch (x) { melde(linkbox, x.message); }
   } }, 'Einladungslink erzeugen');
-  const zugaenge = tabelle([['E-Mail', z => z.email], ['Passwort', z => z.hat_passwort ? 'gesetzt' : 'offen'], ['Letzter Login', z => zeit(z.letzter_login)],
+  const zugaenge = tabelle([['E-Mail', z => z.email], ['Rolle', z => ({ inhaber: 'Inhaber', mitarbeiter: 'Mitarbeiter', nur_lesen: 'Nur ansehen' })[z.kunden_rolle] || z.kunden_rolle], ['Passwort', z => z.hat_passwort ? 'gesetzt' : 'offen'], ['2FA', (z) => z.totp_aktiv ? knopf('2FA zurücksetzen', async () => { if (confirm('Zwei-Faktor-Anmeldung dieses Zugangs ausschalten?')) { try { await api('/api/admin/benutzer/' + z.id + '/2fa-zuruecksetzen', { method: 'POST' }); location.reload(); } catch (x) { alert(x.message); } } }) : '–'], ['Letzter Login', z => zeit(z.letzter_login)],
     ['Zugang', z => h('button', { class: 'btn small ' + (z.aktiv ? 'bad' : 'sec'), onclick: async () => { try { await api('/api/admin/benutzer/' + z.id + '/aktiv', { method: 'POST', body: { aktiv: !z.aktiv } }); neu(); } catch (x) { alert(x.message); } } }, z.aktiv ? 'Sperren' : 'Freigeben')]], d.benutzer, 'Noch kein Zugang.');
 
   const prod = h('select', { name: 'produkt_code' }, paketListe.map(p => h('option', { value: p.code }, p.name + ' (' + p.code + ')')));
@@ -366,6 +556,7 @@ async function kundeDetail(kid) {
   return h('div', { class: 'stack' },
     kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
+    await onboardingKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Vertriebler'), mv, h('div', { class: 'row' }, h('div', { class: 'grow' }, h('select', { id: 'vsel' }, h('option', { value: '' }, '– kein Vertriebler –'), partnerListe.map(p => h('option', { value: p.id, selected: p.id === k.vertriebspartner_id }, p.name + (p.status !== 'aktiv' ? ' (' + p.status + ')' : ''))))),
       knopf('Zuordnen', async () => { try { await api('/api/admin/kunden/' + kid + '/partner', { method: 'PUT', body: { partner_id: document.getElementById('vsel').value || null } }); melde(mv, 'Gespeichert.', 'ok'); } catch (x) { melde(mv, x.message); } }))),
     h('div', { class: 'card' }, h('h2', {}, 'Module des Kunden (Schalter)'), h('p', { class: 'small muted' }, 'Was hier aktiv ist, sieht der Kunde in seinem Portal.'), mz, module),
@@ -373,6 +564,10 @@ async function kundeDetail(kid) {
     h('div', { class: 'card' }, h('h2', {}, 'Buchungen'), mb, buchungen, h('h3', { style: 'margin-top:18px' }, 'Neue Buchung'), bform),
     h('div', { class: 'card' }, h('h2', {}, 'Websites'), mw, webs, h('div', { style: 'height:10px' }), wform,
       h('p', { class: 'small muted' }, 'Danach auf dem Server einmal: mkctl site-add <domain>, damit Ordner und Webserver bereit sind.')),
+    await belegeKarte(kid, k.referenzkunde),
+    await berichteKarte(kid),
+    await kostenKarte(kid),
+    brandingKarte(kid, k),
     h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
 }
 
@@ -383,16 +578,19 @@ async function zeige() {
     if (seite === 'kunde') inhalt = await kundeDetail(hash.split('/')[1]);
     else if (seite === 'partner') inhalt = await partnerDetail(hash.split('/')[1]);
     else if (seite === 'lead') inhalt = await leadDetail(hash.split('/')[1]);
+    else if (seite === 'beleg') inhalt = await belegEditor(hash.split('/')[1]);
+    else if (seite === 'neubeleg') inhalt = await belegEditor(null, hash.split('/')[1], hash.split('/')[2]);
     else if (V[seite]) inhalt = await V[seite]();
     else { seite = 'uebersicht'; inhalt = await V.uebersicht(); }
   } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
-  root.replaceChildren(gerüst(seite === 'kunde' ? 'kunden' : seite === 'partner' ? 'vertrieb' : seite === 'lead' ? 'leads' : seite, inhalt));
+  root.replaceChildren(gerüst(seite === 'kunde' ? 'kunden' : seite === 'partner' ? 'vertrieb' : seite === 'lead' ? 'leads' : (seite === 'beleg' || seite === 'neubeleg') ? 'belege' : seite, inhalt));
 }
 
 (async () => {
   try {
     const me = await api('/api/me');
     if (me.rolle !== 'admin') { location.href = '/app'; return; }
+    ich = me;
     paketListe = (await api('/api/admin/katalog')).produkte;
   } catch (e) { return; }
   window.addEventListener('hashchange', zeige);

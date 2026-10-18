@@ -2,12 +2,13 @@ import json
 import urllib.request
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
+from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, ki, publish
+from . import berichte as bericht_modul, config, rechtstexte, einstellungen, ki, publish
 from .db import tx
-from .security import audit, check_password_rules, hash_password, require_kunde, require_modul, verify_password
+from .security import EMAIL_RE, audit, check_password_rules, hash_password, require_kunde, require_modul, verify_password
 
 router = APIRouter(prefix="/api/kunde")
 
@@ -20,7 +21,7 @@ def gate(cur, user, code):
 def start(user: dict = Depends(require_kunde)):
     kid = user["kunden_id"]
     with tx("kunde", kid) as cur:
-        cur.execute("""SELECT k.kundennummer, k.firma, k.ansprechpartner, k.status, p.name AS paket
+        cur.execute("""SELECT k.kundennummer, k.firma, k.ansprechpartner, k.status, p.name AS paket, k.branding_farbe, (k.logo IS NOT NULL) AS logo_vorhanden
                        FROM kunden k LEFT JOIN produkte p ON p.code = k.paket_code WHERE k.id=%s""", (kid,))
         kunde = cur.fetchone()
         cur.execute("""SELECT m.code, m.name, m.art FROM kunden_module km JOIN module m ON m.code = km.modul_code
@@ -39,7 +40,7 @@ def start(user: dict = Depends(require_kunde)):
         cur.execute("SELECT domain, status FROM websites ORDER BY erstellt_am LIMIT 1")
         web = cur.fetchone()
     return {"kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
-            "neue_anfragen": neue, "kommende_termine": kommende, "website": web}
+            "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"]}
 
 
 # ---------------------------------------------------------------- Chat
@@ -113,7 +114,8 @@ def chat_senden(data: ChatIn, user: dict = Depends(require_kunde)):
         r = cur.fetchone()
     if ein or aus:
         with tx("system") as cur:
-            cur.execute("INSERT INTO kosten_log (kunden_id, dienst, einheit, menge, kosten_cent) VALUES (%s,'anthropic','tokens',%s,0)", (kid, ein + aus))
+            kosten = (ein * float(cfg.get("preis_ein_eur", 3.0)) + aus * float(cfg.get("preis_aus_eur", 15.0))) / 1_000_000 * 100
+            cur.execute("INSERT INTO kosten_log (kunden_id, dienst, einheit, menge, kosten_cent) VALUES (%s,'anthropic','tokens',%s,%s)", (kid, ein + aus, round(kosten, 4)))
     return r
 
 
@@ -335,6 +337,10 @@ class ProfilIn(BaseModel):
     ansprechpartner: str | None = Field(default=None, max_length=200)
     email: str | None = Field(default=None, max_length=254)
     telefon: str | None = Field(default=None, max_length=60)
+    benachr_email: str | None = Field(default=None, max_length=254)
+    benachr_anfragen: bool | None = None
+    benachr_termine: bool | None = None
+    benachr_bericht: bool | None = None
 
 
 class PasswortIn(BaseModel):
@@ -345,22 +351,30 @@ class PasswortIn(BaseModel):
 @router.get("/profil")
 def profil(user: dict = Depends(require_kunde)):
     with tx("kunde", user["kunden_id"]) as cur:
-        cur.execute("""SELECT k.kundennummer, k.firma, k.ansprechpartner, k.email, k.telefon, k.domain, p.name AS paket
+        cur.execute("""SELECT k.kundennummer, k.firma, k.ansprechpartner, k.email, k.telefon, k.domain, p.name AS paket,
+                              k.benachr_email, k.benachr_anfragen, k.benachr_termine, k.benachr_bericht,
+                              k.branding_farbe, (k.logo IS NOT NULL) AS logo_vorhanden
                        FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code WHERE k.id=%s""", (user["kunden_id"],))
         kunde = cur.fetchone()
         cur.execute("""SELECT b.produkt_code, p.name, b.status, b.beginn, b.mindestlaufzeit_ende FROM buchungen b JOIN produkte p ON p.code=b.produkt_code
                        WHERE b.status IN ('beauftragt','in_einrichtung','aktiv','pausiert') ORDER BY b.beginn NULLS LAST""")
         buchungen = cur.fetchall()
-    return {"kunde": kunde, "buchungen": buchungen, "login": user["email"]}
+    return {"kunde": kunde, "buchungen": buchungen, "login": user["email"], "kunden_rolle": user["kunden_rolle"]}
 
 
 @router.patch("/profil")
 def profil_aendern(data: ProfilIn, user: dict = Depends(require_kunde)):
     # Kunden dürfen nur Kontaktdaten ändern. Die Tabelle kunden ist für Kunden schreibgeschützt,
     # deshalb läuft die Änderung bewusst im Systemkontext und nur für den eigenen Datensatz.
+    if data.benachr_email and not EMAIL_RE.match(data.benachr_email.strip()):
+        raise HTTPException(400, "Die E-Mail-Adresse für Benachrichtigungen ist ungültig.")
     with tx("system") as cur:
-        cur.execute("UPDATE kunden SET ansprechpartner=coalesce(%s,ansprechpartner), email=coalesce(%s,email), telefon=coalesce(%s,telefon) WHERE id=%s",
-                    (data.ansprechpartner, data.email, data.telefon, user["kunden_id"]))
+        cur.execute("""UPDATE kunden SET ansprechpartner=coalesce(%s,ansprechpartner), email=coalesce(%s,email), telefon=coalesce(%s,telefon),
+                       benachr_email=CASE WHEN %s::boolean THEN nullif(%s,'') ELSE benachr_email END,
+                       benachr_anfragen=coalesce(%s,benachr_anfragen), benachr_termine=coalesce(%s,benachr_termine), benachr_bericht=coalesce(%s,benachr_bericht)
+                       WHERE id=%s""",
+                    (data.ansprechpartner, data.email, data.telefon, data.benachr_email is not None, data.benachr_email,
+                     data.benachr_anfragen, data.benachr_termine, data.benachr_bericht, user["kunden_id"]))
         audit(cur, user, "profil_geaendert", user["kunden_id"])
     return {"ok": True}
 
@@ -375,3 +389,22 @@ def passwort_aendern(data: PasswortIn, user: dict = Depends(require_kunde)):
         cur.execute("UPDATE benutzer SET passwort_hash=%s WHERE id=%s", (hash_password(data.neu), user["id"]))
         audit(cur, user, "passwort_geaendert", user["kunden_id"])
     return {"ok": True}
+
+
+# ---------------------------------------------------------------- Monatsberichte (für alle Kunden)
+@router.get("/monatsberichte")
+def monatsberichte(user: dict = Depends(require_kunde)):
+    with tx("kunde", user["kunden_id"]) as cur:
+        cur.execute("SELECT id, titel, zeitraum_von, zeitraum_bis, daten, erstellt_am FROM berichte WHERE art='monatsbericht' ORDER BY zeitraum_von DESC LIMIT 36")
+        return cur.fetchall()
+
+
+@router.get("/monatsberichte/{bid}/pdf")
+def monatsbericht_pdf(bid: str, user: dict = Depends(require_kunde)):
+    try:
+        f = rechtstexte.firma_system()
+        with tx("kunde", user["kunden_id"]) as cur:
+            daten, name = bericht_modul.pdf_erzeugen(cur, bid, f)
+    except (LookupError, errors.InvalidTextRepresentation):
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{name}"'})

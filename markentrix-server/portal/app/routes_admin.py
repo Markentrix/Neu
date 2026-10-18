@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors, sql
 from pydantic import BaseModel, Field
 
-from . import config
+from . import berichte as bericht_modul, config, jobs, onboarding
+from fastapi.responses import Response
 from .db import tx
 from .publish import DOMAIN_RE
 from . import zugang
@@ -47,6 +48,10 @@ def uebersicht(user: dict = Depends(require_admin)):
         mrr = cur.fetchone()["cent"]
         cur.execute("SELECT count(*) AS n FROM kunden WHERE referenzkunde")
         referenz = cur.fetchone()["n"]
+        cur.execute("""SELECT coalesce(sum(brutto_cent) FILTER (WHERE status IN ('gestellt','versendet')),0) AS offen,
+                              count(*) FILTER (WHERE status IN ('gestellt','versendet') AND faellig_am < current_date) AS ueberfaellig
+                       FROM belege WHERE art='rechnung'""")
+        rechn = cur.fetchone()
         cur.execute("SELECT count(*) AS n FROM anfragen WHERE status='neu'")
         neu = cur.fetchone()["n"]
         cur.execute("SELECT count(*) AS n FROM wochenangebote_uploads WHERE erstellt_am > now() - interval '7 days'")
@@ -55,7 +60,7 @@ def uebersicht(user: dict = Depends(require_admin)):
         freigaben = cur.fetchone()["n"]
         cur.execute("SELECT zeit, aktion, details, kunden_id FROM audit_log ORDER BY id DESC LIMIT 12")
         letzte = cur.fetchall()
-    return {"kunden_status": status, "monatlich_cent": int(mrr), "referenzkunden": referenz, "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte}
+    return {"kunden_status": status, "monatlich_cent": int(mrr), "referenzkunden": referenz, "rechnungen_offen_cent": int(rechn["offen"]), "rechnungen_ueberfaellig": rechn["ueberfaellig"], "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte}
 
 
 @router.get("/katalog")
@@ -161,6 +166,7 @@ def kunde_neu(data: KundeIn, user: dict = Depends(require_admin)):
             raise HTTPException(400, "Unbekanntes Paket.")
         k = cur.fetchone()
         standardmodule(cur, k["id"], data.paket_code)
+        onboarding.anlegen(cur, k["id"])
         link = einladung_erzeugen(cur, k["id"], data.email, data.ansprechpartner) if data.einladen else None
         audit(cur, user, "kunde_angelegt", k["id"], {"kundennummer": k["kundennummer"]})
     mail = zugang.per_mail(data.email, data.ansprechpartner, link, "kunde") if link else None
@@ -174,10 +180,11 @@ def kunde_detail(kid: str, user: dict = Depends(require_admin)):
         k = cur.fetchone()
         if not k:
             raise HTTPException(404, "Kunde nicht gefunden.")
+        k["logo_vorhanden"] = k.pop("logo", None) is not None
         cur.execute("""SELECT m.code, m.name, m.beschreibung, m.art, coalesce(km.aktiv,false) AS aktiv
                        FROM module m LEFT JOIN kunden_module km ON km.modul_code=m.code AND km.kunden_id=%s ORDER BY m.art, m.sortierung""", (kid,))
         module = cur.fetchall()
-        cur.execute("SELECT id, email, name, aktiv, letzter_login, passwort_hash IS NOT NULL AS hat_passwort, einladung_ablauf FROM benutzer WHERE kunden_id=%s ORDER BY erstellt_am", (kid,))
+        cur.execute("SELECT id, email, name, aktiv, letzter_login, totp_aktiv, kunden_rolle, passwort_hash IS NOT NULL AS hat_passwort, einladung_ablauf FROM benutzer WHERE kunden_id=%s ORDER BY erstellt_am", (kid,))
         benutzer = cur.fetchall()
         cur.execute("""SELECT b.id, b.produkt_code, p.name, b.einrichtung_cent, b.monatlich_cent, b.projekt_cent, b.rabatt_cent, b.rabatt_grund, b.beginn,
                               b.mindestlaufzeit_ende, b.ende, b.status, b.standort, b.notiz
@@ -409,3 +416,40 @@ def daten_loeschen(kid: str, tabelle: str, rid: str, user: dict = Depends(requir
         cur.execute(sql.SQL("DELETE FROM {} WHERE id=%s AND kunden_id=%s").format(sql.Identifier(tabelle)), (rid, kid))
         audit(cur, user, "daten_geloescht", kid, {"tabelle": tabelle})
     return {"ok": True}
+
+
+# ---------------------------------------------------------------- Berichte
+@router.get("/kunden/{kid}/berichte")
+def berichte_liste(kid: str, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        pflicht(cur, kid)
+        cur.execute("SELECT id, titel, zeitraum_von, versendet_am, erstellt_am FROM berichte WHERE kunden_id=%s AND art='monatsbericht' ORDER BY zeitraum_von DESC LIMIT 36", (kid,))
+        return cur.fetchall()
+
+
+class BerichtIn(BaseModel):
+    monat: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+    senden: bool = False
+
+
+@router.post("/kunden/{kid}/bericht")
+def bericht_erstellen(kid: str, data: BerichtIn, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        pflicht(cur, kid)
+    monat = date.fromisoformat(data.monat + "-01")
+    if monat >= date.today().replace(day=1):
+        raise HTTPException(400, "Berichte gibt es nur für abgeschlossene Monate.")
+    r = jobs.bericht_senden(kid, monat, mail=data.senden)
+    with tx("admin") as cur:
+        audit(cur, user, "bericht_erstellt", kid, {"monat": data.monat, "gesendet": r["gesendet"]})
+    return r
+
+
+@router.get("/berichte/{bid}/pdf")
+def bericht_pdf(bid: str, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            daten, name = bericht_modul.pdf_erzeugen(cur, bid)
+    except (LookupError, errors.InvalidTextRepresentation):
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{name}"'})

@@ -29,3 +29,16 @@ def schreiben(cur, schluessel: str, wert: dict):
     token = _fernet().encrypt(json.dumps(wert).encode()).decode()
     cur.execute("""INSERT INTO portal_einstellungen (schluessel, wert) VALUES (%s,%s)
                    ON CONFLICT (schluessel) DO UPDATE SET wert=EXCLUDED.wert, geaendert_am=now()""", (schluessel, token))
+
+
+def verschluesseln(text: str) -> str:
+    return _fernet().encrypt(text.encode()).decode()
+
+
+def entschluesseln(token: str | None) -> str:
+    if not token:
+        return ""
+    try:
+        return _fernet().decrypt(token.encode()).decode()
+    except (InvalidToken, ValueError, RuntimeError):
+        return ""

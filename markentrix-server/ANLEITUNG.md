@@ -66,7 +66,7 @@ Eigene Dateien einer Website kopierst du mit `--from /pfad/zum/ordner` hinein.
 - Alle Dienste sind nur über HTTPS und Caddy erreichbar. Die Datenbank hört nur auf dem Server selbst.
 - Es gibt keine öffentliche Registrierung. Kunden legst du selbst an.
 - Empfohlen: In der Hetzner Cloud Console eine **Firewall** anlegen, die nur die Ports 22, 80 und 443 erlaubt.
-- `/opt/markentrix/.env` enthält alle Schlüssel. Ohne sie lässt sich nichts wiederherstellen. Die tägliche Sicherung legt eine Kopie ab, die Sicherungen liegen aber auf demselben Server. **Eine Kopie außerhalb des Servers** (z. B. Hetzner Storage Box) fehlt noch.
+- `/opt/markentrix/.env` enthält alle Schlüssel. Ohne sie lässt sich nichts wiederherstellen. Die tägliche Sicherung legt eine Kopie ab, die Sicherungen liegen aber auf demselben Server. Eine Kopie außerhalb des Servers richtest du mit `mkctl offsite-setup` ein (siehe „Sicherheit und Überwachung“).
 
 ## Das Portal benutzen
 
@@ -88,11 +88,11 @@ Im Kunden stellst du per **Schalter** ein, welche Module er sieht (KI-Assistent,
 
 ## Was noch offen ist
 
-1. **E-Mail-Versand:** Einladungen laufen über Links, die du selbst verschickst. „Passwort vergessen" per Mail braucht einen SMTP-Zugang.
+1. **Hetzner Cloud Firewall** (nur Ports 22, 80, 443) in der Hetzner-Konsole anlegen.
 2. **n8n-Workflows:** Aus n8n Cloud exportieren und im neuen n8n importieren, Zugangsdaten neu verbinden.
 3. **markentrix-core:** Im Repo liegt noch kein Code, deshalb nicht Teil dieses Pakets.
-4. **Provisionen berechnen:** Die Berechnung läuft noch nicht automatisch (kommt über n8n). Das Portal zeigt und verwaltet sie.
-5. **Kopie der Sicherungen außerhalb des Servers** (z. B. Hetzner Storage Box).
+4. **Externe Sicherung einrichten** (siehe unten, `mkctl offsite-setup`).
+5. **Firmendaten, SMTP und KI-Key** unter Einstellungen eintragen, Impressum und Datenschutz juristisch prüfen lassen.
 
 ## E-Mail-Versand, KI-Chat, Vertriebler-Login, Provisionen
 
@@ -105,3 +105,53 @@ Im Kunden stellst du per **Schalter** ein, welche Module er sieht (KI-Assistent,
 **Provisionen**: Zuerst unter Preise & Konditionen die Provisionsregel(n) „laufend" freigeben. Dann Admin → Vertriebler → „Provisionen berechnen": Monat wählen → Vorschau → Anlegen. Doppelte Einträge werden nie angelegt. Der Vertriebler sieht seine Beträge sofort; Freigeben/Auszahlen markierst du beim Vertriebler.
 
 **Referenzkunden**: Beim Anlegen (oder später in den Stammdaten) „Referenzkunde" anhaken und eintragen, was der Kunde bekommt (z. B. Website, Agent). Referenzkunden werden wie alle Kunden verwaltet (Module, Websites, Portal-Zugang, Daten), Buchungen bekommen automatisch 0 €, sie zählen nicht in „Monatlich (gebucht)" und lösen keine Vertriebler-Provision aus. In der Kundenliste sind sie markiert und filterbar. „Darf als Referenz genannt werden" nur anhaken, wenn das Einverständnis des Kunden vorliegt.
+
+## Firmendaten, Impressum, Datenschutz
+
+Admin → Einstellungen → **Firmendaten**: Name, Inhaber, Anschrift, E-Mail, Telefon, Steuernummer oder USt-IdNr, Bankverbindung, Zahlungsziel, Umsatzsteuersatz und ob du **Kleinunternehmer (§ 19 UStG)** bist. Ohne Steuernummer oder USt-IdNr lässt das Portal keine Rechnung ausstellen. Aus diesen Daten entstehen auch Impressum (`/impressum`) und Datenschutzerklärung (`/datenschutz`), beide ohne Login erreichbar und in der Anmeldeseite verlinkt. Die Texte sind Standardvorlagen: **bitte einmal von einer Anwältin oder einem Anwalt prüfen lassen**. Eigene Texte kannst du in den Einstellungen hinterlegen. Eine Vorlage für den Auftragsverarbeitungsvertrag (AVV) liegt unter `docs/AVV-Vorlage.md`, ebenfalls zur Prüfung.
+
+## Zwei-Faktor-Anmeldung (2FA)
+
+Jeder Zugang kann unter Einstellungen eine Authenticator-App koppeln (QR-Code scannen, Code eingeben). Dabei entstehen 10 Notfallcodes, die nur einmal angezeigt werden. **Für den Admin dringend empfohlen**, bis dahin zeigt das Portal einen Hinweis. Hat jemand das Handy verloren, setzt der Admin die 2FA im Zugang zurück (Kunde: Portal-Zugang, Vertriebler: Portal-Zugang).
+
+## Benachrichtigungen und Monatsbericht
+
+Voraussetzung: E-Mail-Versand ist eingerichtet. Das Portal prüft jede Minute im Hintergrund und mailt dem Kunden bei **neuen Anfragen** und kurz vor **Terminen** (Voreinstellung 24 Stunden). Kunden schalten das unter Einstellungen einzeln ab. Am Monatsanfang erstellt das Portal automatisch den **Monatsbericht** (PDF: Anfragen, Termine, Anrufe, Nachrichten, Chat, Agent-Läufe …) und mailt ihn; Referenz- und aktive Kunden bekommen ihn, Admin kann ihn pro Kunde auch von Hand erstellen. Fehler in Workflows melden sich per Mail an dich (Einstellungen → Benachrichtigungen, Alarm-Adresse).
+
+## Onboarding-Checkliste
+
+Beim Anlegen eines Kunden entsteht automatisch eine Checkliste (Vertrag, Zugang, Website, Wissen, Module …). Manches haken Portal und Server selbst ab (Zugang eingerichtet, Website live, Wissen erfasst). In der Übersicht siehst du alle Kunden mit offenen Punkten. Eigene Punkte kannst du ergänzen.
+
+## Angebote und Rechnungen
+
+Beim Kunden → Angebote & Rechnungen: Vorlage aus den Buchungen übernehmen, Positionen anpassen, **ausstellen** (vergibt eine lückenlose Nummer, danach nicht mehr änderbar), als PDF herunterladen oder per Mail senden. Rechnungen enthalten einen GiroCode (QR für die Banking-App). Fehler korrigierst du mit einer **Stornorechnung**, nicht durch Ändern. Mahnungen (3 Stufen) gibt es per Knopf, „Bezahlt" setzt du von Hand. Kunden sehen und laden ihre Belege im Portal und können Angebote annehmen.
+
+Wichtig:
+- Du hattest dich für **sevDesk** als Buchhaltung entschieden. Das Portal erstellt Rechnungen, die du dort weiterverwenden kannst: Angebote & Rechnungen → „Rechnungen als CSV exportieren". Ob du Rechnungen im Portal oder direkt in sevDesk erstellst, solltest du **einheitlich** halten (gleiche Nummernkreise!).
+- **E-Rechnung:** Für Rechnungen zwischen Unternehmen (B2B) gilt in Deutschland nach und nach eine Pflicht zur strukturierten E-Rechnung (ZUGFeRD/XRechnung). Das Portal erzeugt bisher nur PDF-Rechnungen. Bitte mit der Steuerberatung klären, ab wann das für dich gilt; Kleinunternehmer sind ausgenommen.
+- Referenzkunden bekommen keine Rechnungen.
+
+## Vertriebler: Abrechnung, Verlängerung, Rückbuchung
+
+- **Provisionsabrechnung (PDF)** pro Monat: Admin → Vertriebler → Name → „Abrechnung als PDF". Der Vertriebler lädt sie selbst im Partnerportal (Provisionen → Pro Monat). Es ist eine Abrechnung, keine Rechnung im steuerlichen Sinn.
+- **Verlängerungsprovision**: Wird bewusst von Hand erfasst („Verlängerung erfassen", Buchungs-ID und Monat). Betrag = Prozentsatz der freigegebenen Regel × Monatsbetrag × 12 Monate. Das ist meine Auslegung deiner Regel (5 %): bitte prüfen, bevor du die Regel freigibst.
+- **Nachlauf**: Wird ein Vertriebler auf „beendet" gesetzt, laufen seine Provisionen noch so viele Monate weiter, wie in `provision.nachlauf_monate` steht (Standard 6).
+- **Rückbuchung**: Bei einer bereits ausgezahlten Provision „Zurückbuchen" wählen, die negative Zeile wird im gewählten Monat verrechnet.
+
+## Kosten pro Kunde
+
+Im Kunden steht die Karte „Kosten (KI-Chat) pro Monat" mit Tokens, Kosten in Euro und dem Anteil am Monatsumsatz. Die Preise je 1 Mio. Tokens stehen unter Einstellungen → KI-Assistent (Voreinstellung 3 € / 15 €); bitte mit der aktuellen Anthropic-Preisliste abgleichen. Andere Kosten (Telefonie, Werbung …) werden noch nicht erfasst.
+
+## Team-Zugänge, Branding, App
+
+- **Mehrere Zugänge pro Kunde**: Der Kunde lädt im Menü **Team** selbst Kolleginnen und Kollegen ein. Rollen: *Inhaber* (alles), *Mitarbeiter* (alles außer Team und Rechnungen), *Nur ansehen*. Der Admin sieht die Rolle in der Zugangs-Tabelle des Kunden.
+- **Branding**: Beim Kunden Logo (PNG/JPG, max. 400 KB) und Akzentfarbe setzen; der Kunde sieht beides in seinem Portal.
+- **Als App installieren**: Das Portal ist installierbar (Handy: Browser-Menü → „Zum Startbildschirm“; Chrome/Edge am Rechner: Installieren-Symbol in der Adressleiste). Es werden keine Daten auf dem Gerät zwischengespeichert.
+
+## Sicherheit und Überwachung
+
+- **Externe Sicherung**: Eine Hetzner Storage Box bestellen, dann auf dem Server `mkctl offsite-setup u123456@u123456.your-storagebox.de markentrix`. Der Befehl zeigt einen öffentlichen Schlüssel, den du in der Storage-Box-Verwaltung hinterlegst; danach `mkctl offsite-test`. Die Sicherungen werden verschlüsselt hochgeladen. **Die Datei `/opt/markentrix/offsite/passphrase` außerhalb des Servers aufbewahren** (Passwortmanager), sonst sind die Sicherungen nicht lesbar.
+- **Wiederherstellungstest**: läuft sonntags automatisch (`mkctl restore-test` von Hand). Er spielt die letzte Sicherung in einen Wegwerf-Container ein und prüft sie. Das Ergebnis steht im Server-Panel.
+- **Überwachung (Watchdog)**: Alle 5 Minuten werden Container, Portal, Speicherplatz und Sicherungen geprüft. Alarme kommen per E-Mail, optional zusätzlich per Telegram (`mkctl alarm-telegram <Bot-Token> <Chat-ID>`).
+- **Ausfall von außen**: Der Watchdog läuft auf demselben Server. Für den Fall, dass der ganze Server aus ist, zusätzlich einen kostenlosen externen Dienst wie UptimeRobot auf `https://portal.markentrix.de/healthz` einrichten.
+- **Testsystem**: siehe `docs/TESTSYSTEM.md`.

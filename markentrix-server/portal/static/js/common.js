@@ -55,3 +55,37 @@ export function sparkline(werte, farbe = '#8B5CF6') {
   });
   return svg;
 }
+
+// Karte für die Zwei-Faktor-Anmeldung (Authenticator-App). Wird in allen drei Bereichen genutzt.
+export function zweiFaktorKarte() {
+  const m = h('div'), box = h('div'), card = h('div', { class: 'card' }, h('h2', {}, 'Zwei-Faktor-Anmeldung'),
+    h('p', { class: 'small muted' }, 'Zusätzlicher Schutz: Beim Anmelden wird neben dem Passwort ein Code aus einer Authenticator-App (z. B. Google Authenticator, Microsoft Authenticator, 2FAS) abgefragt.'), m, box);
+  const laden = async () => {
+    let s; try { s = await api('/api/2fa'); } catch (e) { melde(m, e.message); return; }
+    if (s.aktiv) {
+      const pw = h('input', { type: 'password', autocomplete: 'current-password' }), code = h('input', { inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: '6-stelliger Code' });
+      box.replaceChildren(h('p', {}, h('span', { class: 'pill ok' }, 'aktiv'), ' Noch ' + s.notfallcodes_uebrig + ' Notfallcodes übrig.'),
+        h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Passwort'), pw), h('div', {}, h('label', {}, 'Code aus der App oder Notfallcode'), code),
+          h('div', {}, h('label', {}, ' '), h('button', { class: 'btn sec', onclick: async () => {
+            try { await api('/api/2fa/deaktivieren', { method: 'POST', body: { passwort: pw.value, code: code.value } }); melde(m, 'Zwei-Faktor-Anmeldung ausgeschaltet.', 'ok'); laden(); } catch (x) { melde(m, x.message); } } }, 'Ausschalten'))));
+    } else {
+      box.replaceChildren(h('p', {}, h('span', { class: 'pill' }, 'aus'), ' '), h('button', { class: 'btn', onclick: async () => {
+        try {
+          const r = await api('/api/2fa/start', { method: 'POST' });
+          const code = h('input', { inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: '6-stelliger Code' });
+          box.replaceChildren(h('p', {}, '1. Code mit der Authenticator-App scannen:'), h('img', { src: r.qr, alt: 'QR-Code', style: 'width:200px;height:200px;background:#fff;border-radius:12px;padding:6px' }),
+            h('p', { class: 'small muted' }, 'Oder Schlüssel von Hand eingeben: ', h('code', {}, r.geheimnis)),
+            h('p', {}, '2. Den angezeigten 6-stelligen Code hier eingeben:'), h('div', { class: 'row' }, code, h('button', { class: 'btn', onclick: async () => {
+              try { const a = await api('/api/2fa/aktivieren', { method: 'POST', body: { code: code.value } });
+                box.replaceChildren(h('div', { class: 'msg ok' }, 'Zwei-Faktor-Anmeldung ist aktiv. Bitte die Notfallcodes jetzt sicher aufbewahren – sie werden nur einmal angezeigt und ersetzen den App-Code, falls das Handy verloren geht.'),
+                  h('pre', { style: 'background:rgba(127,127,127,.12);padding:12px;border-radius:10px;user-select:all' }, a.notfallcodes.join('\n')), h('button', { class: 'btn sec', onclick: laden }, 'Fertig'));
+              } catch (x) { melde(m, x.message); } } }, 'Bestätigen')));
+        } catch (x) { melde(m, x.message); } } }, 'Einrichten'));
+    }
+  };
+  laden();
+  return card;
+}
+
+// Fußzeile mit Impressum und Datenschutz
+export const rechtFuss = () => h('div', { class: 'rechtfuss small muted' }, h('a', { href: '/impressum' }, 'Impressum'), ' · ', h('a', { href: '/datenschutz' }, 'Datenschutz'));

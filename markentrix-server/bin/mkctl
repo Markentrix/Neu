@@ -156,10 +156,7 @@ SQL
     ;;
 
   logs)
-    svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl psql                             Datenbank-Konsole öffnen
-mkctl migrate                          Datenbankstruktur anlegen/aktualisieren
-mkctl admin-add <E-Mail>               Admin fürs Portal anlegen (oder Passwort neu setzen)
-mkctl logs <Containername>   (Namen siehe: mkctl status)"
+    svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl logs <Containername>  (Namen siehe: mkctl status)"
     docker logs --tail 100 -f "$svc"
     ;;
 
@@ -172,6 +169,52 @@ mkctl logs <Containername>   (Namen siehe: mkctl status)"
     echo "Update fertig."
     ;;
 
+  offsite-setup)
+    need_root
+    ziel="${1:-}"; [ -n "$ziel" ] || die "Aufruf: mkctl offsite-setup <benutzer@host> [verzeichnis]   (Beispiel: mkctl offsite-setup u123456@u123456.your-storagebox.de markentrix)"
+    verz="${2:-markentrix}"
+    command -v rsync >/dev/null || { apt-get update -qq && apt-get install -y -qq rsync >/dev/null; }
+    install -d -m 700 "$BASE/offsite"
+    [ -f "$BASE/offsite/id_ed25519" ] || ssh-keygen -q -t ed25519 -N "" -C "markentrix-backup" -f "$BASE/offsite/id_ed25519"
+    [ -f "$BASE/offsite/passphrase" ] || { ( umask 077; openssl rand -hex 24 > "$BASE/offsite/passphrase" ); }
+    sed -i '/^OFFSITE_TARGET=/d;/^OFFSITE_PORT=/d' "$BASE/.env"
+    printf 'OFFSITE_TARGET=%s:%s/\nOFFSITE_PORT=%s\n' "$ziel" "$verz" "${OFFSITE_PORT:-23}" >> "$BASE/.env"
+    echo
+    echo "Fast fertig. Zwei Dinge noch:"
+    echo
+    echo "1) Diesen öffentlichen Schlüssel beim Hetzner Storage Box hinterlegen"
+    echo "   (Hetzner Console/Robot -> Storage Box -> SSH-Schlüssel hinzufügen, Port 23 aktivieren):"
+    echo
+    cat "$BASE/offsite/id_ed25519.pub"
+    echo
+    echo "2) Dieses Passwort sicher AUSSERHALB des Servers aufbewahren (Passwort-Manager). Ohne es lassen sich die Sicherungen nicht entschlüsseln:"
+    echo
+    cat "$BASE/offsite/passphrase"
+    echo
+    echo "Danach prüfen mit:  mkctl offsite-test"
+    ;;
+
+  offsite-test)
+    need_root
+    "$BASE/bin/offsite.sh" --test
+    ;;
+
+  restore-test)
+    need_root
+    "$BASE/bin/restore-test.sh"
+    ;;
+
+  alarm-telegram)
+    need_root
+    tok="${1:-}"; chat="${2:-}"; [ -n "$tok" ] && [ -n "$chat" ] || die "Aufruf: mkctl alarm-telegram <Bot-Token> <Chat-ID>"
+    sed -i '/^TELEGRAM_TOKEN=/d;/^TELEGRAM_CHAT=/d' "$BASE/.env"
+    printf 'TELEGRAM_TOKEN=%s\nTELEGRAM_CHAT=%s\n' "$tok" "$chat" >> "$BASE/.env"
+    "$BASE/bin/watchdog.sh" --test
+    ;;
+
+  watchdog)
+    need_root; "$BASE/bin/watchdog.sh" "$@" ;;
+
   help|*)
     cat <<TXT
 mkctl status                           Überblick: Dienste, Speicher, letzte Sicherung
@@ -183,6 +226,13 @@ mkctl site-list                        Alle Websites und Demos
 mkctl restart <n8n|panel|portal|caddy|mk-db>
 mkctl logs <Containername>             Protokoll eines Dienstes ansehen
 mkctl update                           Sicherung, dann alle Dienste aktualisieren
+mkctl admin-add <E-Mail>               Admin fürs Portal anlegen oder Passwort (und 2FA) zurücksetzen
+mkctl psql | migrate                   Datenbank-Konsole | Datenbankstruktur aktualisieren
+mkctl offsite-setup <benutzer@host> [verzeichnis]   Sicherung zusätzlich verschlüsselt auf eine Hetzner Storage Box
+mkctl offsite-test                     Prüft die externe Sicherung
+mkctl restore-test                     Spielt die letzte Sicherung testweise ein und prüft sie
+mkctl alarm-telegram <Token> <Chat-ID> Zweiter Alarmweg per Telegram einrichten
+mkctl watchdog [--test]                Überwachung von Hand ausführen
 TXT
     ;;
 esac
