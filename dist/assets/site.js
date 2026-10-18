@@ -350,6 +350,28 @@
     if (d.readyState === 'complete') setTimeout(go, 400); else on(w, 'load', function () { setTimeout(go, 400); });
   }
 
+  /* Live-Miniatur: zwischen Beispielseiten umschalten (Handwerk, Praxis, Gastronomie) */
+  function initMiniTabs() {
+    $$('.mini-tabs').forEach(function (bar) {
+      var mini = bar.closest('[data-mini]'); if (!mini) return;
+      var scope = mini.parentElement || mini;
+      on(bar, 'click', function (e) {
+        var b = e.target.closest('button[data-demo]'); if (!b || b.getAttribute('aria-pressed') === 'true') return;
+        var slug = b.getAttribute('data-demo'), name = b.getAttribute('data-name') || '';
+        $$('button', bar).forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        $$('.mini-frame', mini).forEach(function (fr) {
+          var f = $('iframe', fr); if (!f) return;
+          var src = '/beispiel/' + slug + '/', mobile = fr.classList.contains('mini-frame--m');
+          f.setAttribute('data-src', src); f.setAttribute('title', 'Beispiel-Landingpage ' + name + ', ' + (mobile ? 'Smartphone' : 'Desktop') + '-Ansicht, scrollbar');
+          if (f.getAttribute('src')) { fr.classList.remove('is-live'); on(f, 'load', function () { fr.classList.add('is-live'); }); f.setAttribute('src', src); }
+        });
+        var url = $('.browser-bar .url', mini); if (url) url.textContent = b.getAttribute('data-url');
+        $$('a[data-demo-link]', scope).forEach(function (a) { a.setAttribute('href', '/beispiel/' + slug + '/'); });
+        var nz = $('noscript', mini); void nz;
+      });
+    });
+  }
+
   /* Hero: Lichtschein folgt dem Zeiger */
   function initGlow() {
     var hero = $('.hero'); if (!hero || d.documentElement.classList.contains('reduced') || !w.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
@@ -546,6 +568,6 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMini(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

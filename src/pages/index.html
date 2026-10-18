@@ -36,7 +36,7 @@ ld: |
           <div class="seq-item is-ai"><span class="ic"><svg><use href="#i-calendar"/></svg></span><div><b>Termin im Kalender</b><span>Samstag 10:00 Uhr, automatisch eingetragen</span></div><time>21:48</time></div>
           <div class="seq-item"><span class="ic"><svg><use href="#i-check"/></svg></span><div><b>Bestätigung gesendet</b><span>Erinnerung am Vortag geplant</span></div><time>21:48</time></div>
         </div>
-        <p class="tiny center mt-2">Echte Beispielseite für einen fiktiven Betrieb, scrollen Sie direkt in der Vorschau · <a href="/beispiel/elektro-muster/" target="_blank" rel="noopener">In voller Größe öffnen</a> · <button type="button" class="seq-replay"><svg><use href="#i-arrow"/></svg>Ablauf erneut</button></p>
+        <p class="tiny center mt-2">Drei echte Beispielseiten für fiktive Betriebe, oben wählbar, scrollen Sie direkt in der Vorschau · <a href="/beispiel/elektro-muster/" data-demo-link target="_blank" rel="noopener">In voller Größe öffnen</a> · <button type="button" class="seq-replay"><svg><use href="#i-arrow"/></svg>Ablauf erneut</button></p>
       </div>
     </div>
     <div class="stats mt-5 reveal" role="group" aria-label="Eckdaten">
@@ -53,49 +53,32 @@ ld: |
   <div class="wrap">
     <span class="rail-dot reveal" aria-hidden="true">01</span>
     <div class="sec-head">
-      <span class="eyebrow"><span class="num">01<small> / 08</small></span>Für wen</span>
+      <span class="eyebrow"><span class="num">01<small> / 05</small></span>Für wen</span>
       <h2 id="branchen-title">Drei Betriebe, drei Suchanfragen, eine Website, die antwortet.</h2>
-      <p class="lead">Wählen Sie Ihren Alltag. Die Einschätzung im Potenzial-Check berücksichtigt dann Ihre Branche.</p>
+      <p class="lead">Die meisten Websites lokaler Betriebe sind Visitenkarten: Sie zeigen, dass es den Betrieb gibt, lösen aber keine Anfrage aus. Wählen Sie Ihren Alltag, der Potenzial-Check berücksichtigt dann Ihre Branche.</p>
     </div>
     <div class="grid grid--3 swipe" data-swipe>
       <div class="card branch reveal">
-        <span class="card-icon"><svg><use href="#i-handwerk"/></svg></span>
+        {{> ill-handwerk}}
         <span class="card-step">Handwerk · Werkstatt · Bau</span>
         <p class="pain">„Kunden suchen ‚Elektriker Celle‘ und finden den Wettbewerb.“</p>
         <p class="sys">Eine Leistungsseite je Gewerk und Ort, klare Preise und ein Anfrageweg, der auch von der Baustelle aus funktioniert.</p>
         <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="handwerk">Für Handwerk prüfen</a>
       </div>
       <div class="card branch reveal" data-delay="1">
-        <span class="card-icon"><svg><use href="#i-praxis"/></svg></span>
+        {{> ill-praxis}}
         <span class="card-step">Praxis · Kanzlei · Dienstleistung</span>
         <p class="pain">„Neue Patienten vergleichen Website und Bewertungen, bevor sie anrufen.“</p>
         <p class="sys">Vertrauen auf den ersten Blick: Team, Leistungen, Öffnungszeiten und eine Terminanfrage, die ohne Warteschleife ankommt.</p>
         <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="praxis">Für Praxen prüfen</a>
       </div>
       <div class="card branch reveal" data-delay="2">
-        <span class="card-icon"><svg><use href="#i-gastro"/></svg></span>
+        {{> ill-gastro}}
         <span class="card-step">Gastronomie · Handel</span>
         <p class="pain">„Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy.“</p>
         <p class="sys">Alles in zehn Sekunden findbar, dazu ein gepflegtes Google-Profil und Bewertungen, die neue Gäste überzeugen.</p>
         <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="gastro">Für Gastro und Handel prüfen</a>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ 02 Problem ══ -->
-<section class="sec sec--white has-rail" aria-labelledby="problem-title">
-  <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">02</span>
-    <div class="sec-head">
-      <span class="eyebrow"><span class="num">02<small> / 08</small></span>Das Problem</span>
-      <h2 id="problem-title">Sichtbarkeit allein reicht nicht. Entscheidend ist, ob daraus Anfragen entstehen.</h2>
-      <p class="lead">Die meisten Websites lokaler Betriebe sind Visitenkarten. Sie zeigen, dass es den Betrieb gibt, lösen aber keine Anfrage aus.</p>
-    </div>
-    <div class="grid grid--3 swipe" data-swipe>
-      <div class="card reveal"><span class="card-icon"><svg><use href="#i-layout"/></svg></span><h3>Die Website ist alt und auf dem Handy unbrauchbar.</h3><p class="muted">Der Großteil lokaler Suchen passiert mobil. Wer scrollen, zoomen und suchen muss, ruft woanders an.</p></div>
-      <div class="card reveal" data-delay="1"><span class="card-icon card-icon--violet"><svg><use href="#i-search"/></svg></span><h3>Bei Google und in KI-Antworten taucht der Betrieb nicht auf.</h3><p class="muted">Ohne Ortsbezug, strukturierte Daten und gepflegtes Google-Profil wird die Seite weder gefunden noch von KI-Assistenten genannt.</p></div>
-      <div class="card reveal" data-delay="2"><span class="card-icon"><svg><use href="#i-mail"/></svg></span><h3>Das Formular führt ins Nirgendwo.</h3><p class="muted">Anfragen landen in einem Postfach, das abends gelesen wird. Bis dahin hat der Interessent oft woanders gebucht.</p></div>
     </div>
   </div>
 </section>
@@ -107,13 +90,13 @@ ld: |
   </div>
 </section>
 
-<!-- ══ 03 Lösung ══ -->
+<!-- ══ 02 Lösung ══ -->
 <section class="sec sec--dark has-rail" id="system" aria-labelledby="system-title">
   <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">03</span>
+    <span class="rail-dot reveal" aria-hidden="true">02</span>
     <div class="grid grid--sidebar-left grid--sticky">
     <div class="sec-head sticky-head">
-      <span class="eyebrow"><span class="num">03<small> / 08</small></span>Die Lösung</span>
+      <span class="eyebrow"><span class="num">02<small> / 05</small></span>Die Lösung</span>
       <h2 id="system-title">Ein System statt Einzelmaßnahmen.</h2>
       <p class="lead">Die Website ist der Kern. Sichtbarkeit bringt Besucher, die Website macht daraus Anfragen, und ab November übernimmt der KI-Assistent die Bearbeitung.</p>
     </div>
@@ -146,62 +129,42 @@ ld: |
   </div>
 </section>
 
-<!-- ══ 04 SEO und GEO ══ -->
-<section class="sec has-rail" id="seo-geo" aria-labelledby="seo-title">
-  <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">04</span>
-    <div class="grid grid--sidebar-left">
-      <div>
-        <span class="eyebrow"><span class="num">04<small> / 08</small></span>Gefunden werden</span>
-        <h2 id="seo-title">Bei Google und in KI-Antworten. SEO und GEO gehören zur Website.</h2>
-        <p class="lead">Immer mehr Kunden fragen KI-Assistenten statt zu googeln. Beides erreichen Sie mit derselben Grundlage.</p>
-        <div class="stack mt-3">
-          <div class="feat reveal"><span class="card-icon"><svg><use href="#i-pin"/></svg></span><div><b>Lokale SEO-Grundlagen</b><p>Eine Seite je Leistung und Ort, saubere Titel und Beschreibungen, schnelle Ladezeit, Google-Unternehmensprofil.</p></div></div>
-          <div class="feat reveal" data-delay="1"><span class="card-icon card-icon--navy"><svg><use href="#i-cpu"/></svg></span><div><b>GEO: lesbar für KI-Systeme</b><p>Strukturierte Daten, klare Antworten auf Kundenfragen, FAQ und ein Kurzprofil für KI-Crawler. So wird Ihr Betrieb in Antworten genannt.</p></div></div>
-          <div class="feat reveal" data-delay="2"><span class="card-icon card-icon--violet"><svg><use href="#i-star"/></svg></span><div><b>Bewertungen und Profilpflege</b><p>Laufend als Baustein buchbar: Bewertungsanfragen, Google-Postings, lokale Sichtbarkeit.</p></div></div>
-        </div>
-        <p class="mt-3"><a class="link-arrow" href="/blog/seo-und-geo-optimierung">Was SEO und GEO konkret bedeuten</a></p>
-      </div>
-      <div class="reveal" data-delay="1">
-        {{> proof-seo}}
-        <p class="tiny mt-2">Beispieldarstellung mit fiktivem Betrieb. Platzierungen hängen von Wettbewerb, Inhalten und Pflege ab und werden nicht garantiert.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ 05 Leistungen ══ -->
+<!-- ══ 03 Leistungen ══ -->
 <section class="sec sec--white has-rail" aria-labelledby="leistungen-title">
   <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">05</span>
+    <span class="rail-dot reveal" aria-hidden="true">03</span>
     <div class="grid grid--sidebar-left grid--sticky">
       <div class="sticky-head">
-        <span class="eyebrow"><span class="num">05<small> / 08</small></span>Leistungen</span>
+        <span class="eyebrow"><span class="num">03<small> / 05</small></span>Leistungen</span>
         <h2 id="leistungen-title">Vier Bereiche. Einzeln buchbar, als System am stärksten.</h2>
         <p class="lead">Feste Leistungsgrenzen, klare Preise, keine vagen Versprechen. Alle Pakete netto zzgl. gesetzlicher Umsatzsteuer, nur für Unternehmen.</p>
         <a class="btn btn--secondary mt-2" href="/preise">Alle Preise und Pakete</a>
       </div>
-      <div class="svc-rows">
+      <div class="svc-rows svc-rows--ill">
         <a class="svc-row reveal" href="/leistungen/webdesign">
           <span class="svc-num">01</span>
+          <span class="svc-thumb" aria-hidden="true">{{> ill-web}}</span>
           <div><h3>Websites und Landingpages</h3><p>Landingpage, Unternehmenswebsite oder Funnel. SEO- und GEO-Grundlagen, Terminbuchung, Hosting und Pflege inklusive.</p></div>
           <span class="svc-price">ab 2.290 €<small>einmalig, Einstieg ab 1.290 €</small></span>
           <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
         </a>
         <a class="svc-row reveal" href="/leistungen/marketing" data-delay="1">
           <span class="svc-num">02</span>
+          <span class="svc-thumb" aria-hidden="true">{{> ill-seo}}</span>
           <div><h3>Sichtbarkeit und Werbung</h3><p>Google-Profil, Bewertungen und lokale Suche. Meta- und Google-Anzeigen nur nach Ihrer Freigabe, Social-Media-Betreuung mit Redaktionsplan.</p></div>
           <span class="svc-price">ab 449 €<small>im Monat</small></span>
           <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
         </a>
         <a class="svc-row reveal" href="/preise#pp-ci" data-delay="2">
           <span class="svc-num">03</span>
+          <span class="svc-thumb" aria-hidden="true">{{> ill-brand}}</span>
           <div><h3>Marke und Personal Branding</h3><p>Corporate Identity mit Logo, Farb- und Schriftwelt. Personal Branding für Inhaber und Geschäftsführer, Werbemittel und Vorlagen.</p></div>
           <span class="svc-price">ab 1.290 €<small>einmalig</small></span>
           <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
         </a>
         <a class="svc-row svc-row--soon reveal" href="/leistungen/ki-automatisierung" data-delay="3">
           <span class="svc-num">04</span>
+          <span class="svc-thumb" aria-hidden="true">{{> ill-ki}}</span>
           <div><h3>KI-Automatisierung <span class="pill pill--soon">Ab November 2026</span></h3><p>Telefon-, WhatsApp- und E-Mail-Assistent nimmt Anfragen an und bucht Termine. Zwei Pilotplätze zum halben Einrichtungspreis.</p></div>
           <span class="svc-price">ab 349 €<small>im Monat, zzgl. Einrichtung</small></span>
           <span class="svc-arrow" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
@@ -211,19 +174,12 @@ ld: |
   </div>
 </section>
 
-<!-- ══ Statement ══ -->
-<section class="statement has-rail">
-  <div class="wrap">
-    <p><span class="num">Markentrix<small> · Haltung</small></span>Sichtbarkeit allein reicht nicht. <span class="dim">Entscheidend ist, ob daraus Anfragen entstehen.</span></p>
-  </div>
-</section>
-
-<!-- ══ 06 Prozess ══ -->
+<!-- ══ 04 Prozess ══ -->
 <section class="sec has-rail" aria-labelledby="prozess-title">
   <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">06</span>
+    <span class="rail-dot reveal" aria-hidden="true">04</span>
     <div class="sec-head">
-      <span class="eyebrow"><span class="num">06<small> / 08</small></span>So läuft es ab</span>
+      <span class="eyebrow"><span class="num">04<small> / 05</small></span>So läuft es ab</span>
       <h2 id="prozess-title">Von der ersten Nachricht bis zum Go-Live.</h2>
       <p class="lead">Ihr Aufwand insgesamt: rund 60 Minuten für Briefing und Freigabe. Den Rest übernehmen wir.</p>
     </div>
@@ -239,53 +195,19 @@ ld: |
   </div>
 </section>
 
-<!-- ══ 07 Kurzcheck ══ -->
-<section class="sec sec--white has-rail" id="kurzcheck" aria-labelledby="roi-title">
-  <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">07</span>
-    <div class="grid grid--split">
-      <div>
-        <span class="eyebrow"><span class="num">07<small> / 08</small></span>Kurzcheck</span>
-        <h2 id="roi-title">Was kosten Sie verpasste Anfragen?</h2>
-        <p class="lead">Zwei Angaben, eine Modellrechnung. Was eine Website davon zurückholen kann, zeigt der ausführliche Sparrechner.</p>
-        <p class="tiny">Unverbindliche Modellrechnung, kalkuliert mit 20 % Abschlussquote und 4,33 Wochen je Monat. Keine Zusicherung tatsächlicher Werte.</p>
-        <a class="link-arrow" href="/roi-rechner">Vollständige Berechnung</a>
-      </div>
-      <div class="card card--lg reveal" data-quickcheck>
-        <div class="stack">
-          <div>
-            <div class="range-head"><label for="qc-missed">Verpasst oder zu spät beantwortet · je Woche</label><output for="qc-missed">6</output></div>
-            <input type="range" id="qc-missed" name="missed" min="0" max="50" value="6" aria-label="Verpasste Anfragen pro Woche">
-          </div>
-          <div>
-            <div class="range-head"><label for="qc-order">Durchschnittlicher Auftragswert</label><output for="qc-order">400 €</output></div>
-            <input type="range" id="qc-order" name="order" min="50" max="20000" step="50" value="400" aria-label="Durchschnittlicher Auftragswert in Euro">
-          </div>
-          <div class="note note--violet mt-2" aria-live="polite">
-            <svg><use href="#i-chart"/></svg>
-            <div><b>Möglicher entgangener Umsatz je Monat</b><br><span class="price" data-out="lost">2.078 €</span></div>
-          </div>
-          <a class="btn btn--primary btn--block mt-1" href="/kontakt" data-open-modal>Potenzial-Check starten</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ 08 Warum Markentrix ══ -->
+<!-- ══ 05 Warum Markentrix ══ -->
 <section class="sec has-rail" aria-labelledby="why-title">
   <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">08</span>
+    <span class="rail-dot reveal" aria-hidden="true">05</span>
     <div class="grid grid--split">
       <div>
-        <span class="eyebrow"><span class="num">08<small> / 08</small></span>Warum Markentrix</span>
+        <span class="eyebrow"><span class="num">05<small> / 05</small></span>Warum Markentrix</span>
         <h2 id="why-title">Ein Ansprechpartner. Kein Agentur-Apparat.</h2>
         <p class="lead">Sie sprechen vom Erstgespräch bis zur laufenden Pflege mit derselben Person. Aus Celle, für Betriebe in Niedersachsen und bundesweit.</p>
         <div class="stack mt-3">
           <div class="feat reveal"><span class="card-icon"><svg><use href="#i-bolt"/></svg></span><div><b>Schneller Start</b><p>Ihre Website ist in der Regel in 5 bis 15 Werktagen live. Kein monatelanges Projekt.</p></div></div>
           <div class="feat reveal" data-delay="1"><span class="card-icon"><svg><use href="#i-shield"/></svg></span><div><b>Rechtssicher und datenschutzkonform</b><p>Impressum, Datenschutz, Einwilligungsbanner und lokale Schriften ohne Verbindung zu Drittanbietern gehören dazu.</p></div></div>
           <div class="feat reveal" data-delay="2"><span class="card-icon"><svg><use href="#i-user"/></svg></span><div><b>Persönlicher Ansprechpartner</b><p>Ein fester Ansprechpartner, kein Ticket-System, kein Call-Center.</p></div></div>
-          <div class="feat reveal" data-delay="3"><span class="card-icon"><svg><use href="#i-chart"/></svg></span><div><b>Transparente Ergebnisse</b><p>Jede Anfrage nennt die Seite, über die sie kam. Festpreis und klarer Umfang statt Bauchgefühl.</p></div></div>
         </div>
       </div>
       <div class="card card--lg reveal" data-delay="1">
@@ -312,13 +234,10 @@ ld: |
           <span class="pill pill--soon mb-2">Ausblick · ab November 2026</span>
           <h2 id="ki-title">Als Nächstes: KI-Assistenten für Telefon, WhatsApp und E-Mail.</h2>
           <p class="muted">Wenn die Website Anfragen bringt, übernimmt ab November unser KI-Assistent die Annahme: Anrufe entgegennehmen, Nachrichten beantworten, Termine im Kalender eintragen. Zwei Pilotbetriebe starten als Erste.</p>
+        </div>
+        <div>
           <ul class="checks checks--violet"><li>50 % Nachlass auf die einmalige Einrichtung für Pilotbetriebe</li><li>Persönliche Einrichtung und Betreuung durch Christian Wien</li><li>Pakete ab 349 € im Monat netto, Einrichtung ab 1.490 €</li></ul>
           <div class="row mt-3"><a class="btn btn--primary" href="/kontakt" data-open-modal>Pilotplatz vormerken</a><a class="link-arrow" href="/leistungen/ki-automatisierung">Mehr zur KI-Automatisierung</a></div>
-        </div>
-        <div class="kpi-stack">
-          <div class="card"><div class="kpi"><b class="violet">November 2026</b><span>Start des Assistenten für Telefon, WhatsApp und E-Mail</span></div></div>
-          <div class="card"><div class="kpi"><b>2 Pilotplätze</b><span>Für die ersten zwei Betriebe, Einrichtung zum halben Preis</span></div></div>
-          <div class="card"><div class="kpi"><b class="blue">ab 349 €</b><span>im Monat netto, Einrichtung ab 1.490 €, 12 Monate Laufzeit</span></div></div>
         </div>
       </div>
     </div>
@@ -338,8 +257,9 @@ ld: |
           <a class="btn btn--primary btn--lg" href="/kontakt" data-open-modal>Potenzial-Check starten</a>
           <a class="btn btn--secondary btn--lg" href="/kontakt">Wunschtermin wählen</a>
         </div>
+        <p class="band-contact">Oder direkt: <a href="tel:+4917620370429">0176&nbsp;20370429</a> · <a href="mailto:info@markentrix.de">info@markentrix.de</a> · Mo–Do 09:00–17:00 Uhr, Fr 09:00–15:00 Uhr</p>
       </div>
     </div>
-    <p class="center tiny mt-4">Sitz in Celle, Projekte bundesweit, komplett remote möglich. Regionen: <a href="/ki-marketing-celle">Celle</a> · <a href="/ki-marketing-hannover">Hannover</a> · <a href="/ki-marketing-braunschweig">Braunschweig</a> · <a href="/ki-marketing-gifhorn">Gifhorn</a> · <a href="/faq">Häufige Fragen</a></p>
+    <p class="center tiny mt-4">Sitz in Celle, Projekte bundesweit, komplett remote möglich. Rechner: <a href="/roi-rechner">verpasste Anfragen berechnen</a> · Regionen: <a href="/ki-marketing-celle">Celle</a> · <a href="/ki-marketing-hannover">Hannover</a> · <a href="/ki-marketing-braunschweig">Braunschweig</a> · <a href="/ki-marketing-gifhorn">Gifhorn</a> · <a href="/faq">Häufige Fragen</a></p>
   </div>
 </section>
