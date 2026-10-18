@@ -80,9 +80,16 @@ Im Kunden stellst du per **Schalter** ein, welche Module er sieht (KI-Assistent,
 
 **KI-Chat anbinden (später):** In `/opt/markentrix/.env` `CHAT_WEBHOOK_URL` (n8n-Webhook) und `CHAT_WEBHOOK_SECRET` eintragen, dann `mkctl restart portal`.
 
+**Vertriebler:** Menü *Vertriebler* → anlegen, Kunden im Kunden unter „Vertriebler" zuordnen, Provisionen freigeben und als ausgezahlt markieren. Leads: Menü *Leads*, Status pflegen, einem Vertriebler geben, „Zum Kunden machen".
+
+**Preise:** Menü *Preise & Konditionen*: neue Preise gelten ab einem Datum, alte Buchungen behalten ihren Preis. Provisionsregeln stehen als Entwurf da und gelten erst nach deiner Freigabe.
+
+**Datenschutz & Qualität:** offene Alarme, Freigaben, DSGVO-Anfragen, Workflow-Fehler und Befunde an einem Ort.
+
 ## Was noch offen ist
 
 1. **E-Mail-Versand:** Einladungen laufen über Links, die du selbst verschickst. „Passwort vergessen" per Mail braucht einen SMTP-Zugang.
 2. **n8n-Workflows:** Aus n8n Cloud exportieren und im neuen n8n importieren, Zugangsdaten neu verbinden.
 3. **markentrix-core:** Im Repo liegt noch kein Code, deshalb nicht Teil dieses Pakets.
-4. **Kopie der Sicherungen außerhalb des Servers** (z. B. Hetzner Storage Box).
+4. **Provisionen berechnen:** Die Berechnung läuft noch nicht automatisch (kommt über n8n). Das Portal zeigt und verwaltet sie.
+5. **Kopie der Sicherungen außerhalb des Servers** (z. B. Hetzner Storage Box).

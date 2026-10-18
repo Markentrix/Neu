@@ -1,0 +1,448 @@
+"""Admin: Vertriebler, Leads, Preise und Konditionen, Datenschutz und Qualität."""
+from datetime import date
+
+from fastapi import APIRouter, Depends, HTTPException
+from psycopg import errors, sql
+from pydantic import BaseModel, Field
+
+from .db import tx
+from .security import EMAIL_RE, audit, require_admin
+
+router = APIRouter(prefix="/api/admin")
+
+PARTNER_STATUS = ("anfrage", "aktiv", "pausiert", "beendet")
+LEAD_STATUS = ("neu", "kontaktiert", "antwort", "termin", "angebot", "gewonnen", "verloren", "gesperrt", "consent_ausstehend", "tot")
+PROV_STATUS = ("berechnet", "freigegeben", "ausgezahlt", "storniert")
+AKT_ART = ("mail_gesendet", "antwort", "anruf", "termin", "notiz", "statuswechsel", "consent")
+
+
+def fehler_db(e):
+    if isinstance(e, errors.ForeignKeyViolation):
+        return HTTPException(400, "Verweis auf einen Eintrag, den es nicht gibt.")
+    if isinstance(e, errors.UniqueViolation):
+        return HTTPException(409, "Diesen Eintrag gibt es schon.")
+    return HTTPException(400, "Ein Feld hat einen ungültigen oder fehlenden Wert.")
+
+
+DB_FEHLER = (errors.CheckViolation, errors.ForeignKeyViolation, errors.UniqueViolation, errors.NotNullViolation,
+             errors.InvalidTextRepresentation, errors.InvalidDatetimeFormat, errors.NumericValueOutOfRange)
+
+
+def felder_setzen(cur, tabelle, rid, felder, idspalte="id"):
+    if not felder:
+        return
+    teile = sql.SQL(", ").join(sql.SQL("{}=%s").format(sql.Identifier(k)) for k in felder)
+    cur.execute(sql.SQL("UPDATE {} SET {} WHERE {}=%s").format(sql.Identifier(tabelle), teile, sql.Identifier(idspalte)), (*felder.values(), rid))
+    if cur.rowcount == 0:
+        raise HTTPException(404, "Nicht gefunden.")
+
+
+# ================================================================= Vertriebler
+class PartnerIn(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    firma: str | None = Field(default=None, max_length=200)
+    email: str | None = Field(default=None, max_length=254)
+    telefon: str | None = Field(default=None, max_length=60)
+    status: str = "aktiv"
+    notiz: str | None = Field(default=None, max_length=2000)
+
+
+class PartnerPatch(BaseModel):
+    name: str | None = Field(default=None, max_length=200)
+    firma: str | None = Field(default=None, max_length=200)
+    email: str | None = Field(default=None, max_length=254)
+    telefon: str | None = Field(default=None, max_length=60)
+    status: str | None = None
+    notiz: str | None = Field(default=None, max_length=2000)
+    iban_hinterlegt: bool | None = None
+    vereinbarung_am: date | None = None
+
+
+@router.get("/vertrieb/partner")
+def partner_liste(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("""SELECT v.id, v.name, v.firma, v.email, v.telefon, v.status, v.iban_hinterlegt, v.vereinbarung_am,
+                       (SELECT count(*) FROM kunden k WHERE k.vertriebspartner_id=v.id) AS kunden,
+                       (SELECT count(*) FROM leads l WHERE l.vertriebspartner_id=v.id AND l.status NOT IN ('gewonnen','verloren','tot','gesperrt')) AS offene_leads,
+                       (SELECT coalesce(sum(betrag_cent),0) FROM provisionen p WHERE p.vertriebspartner_id=v.id AND p.status IN ('berechnet','freigegeben')) AS offen_cent
+                       FROM vertriebspartner v ORDER BY (v.status='aktiv') DESC, lower(v.name)""")
+        return cur.fetchall()
+
+
+@router.post("/vertrieb/partner")
+def partner_neu(data: PartnerIn, user: dict = Depends(require_admin)):
+    if data.status not in PARTNER_STATUS:
+        raise HTTPException(400, "Unbekannter Status.")
+    if data.email and not EMAIL_RE.match(data.email.strip()):
+        raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
+    with tx("admin") as cur:
+        cur.execute("INSERT INTO vertriebspartner (name, firma, email, telefon, status, notiz) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",
+                    (data.name.strip(), data.firma, data.email, data.telefon, data.status, data.notiz))
+        r = cur.fetchone()
+        audit(cur, user, "partner_angelegt", None, {"name": data.name})
+    return r
+
+
+@router.get("/vertrieb/partner/{pid}")
+def partner_detail(pid: str, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT * FROM vertriebspartner WHERE id=%s", (pid,))
+            p = cur.fetchone()
+            if not p:
+                raise HTTPException(404, "Vertriebler nicht gefunden.")
+            cur.execute("""SELECT k.id, k.kundennummer, k.firma, k.status, pk.name AS paket,
+                           (SELECT coalesce(sum(b.monatlich_cent - b.rabatt_cent),0) FROM buchungen b WHERE b.kunden_id=k.id AND b.status IN ('beauftragt','in_einrichtung','aktiv')) AS monatlich_cent
+                           FROM kunden k LEFT JOIN produkte pk ON pk.code=k.paket_code WHERE k.vertriebspartner_id=%s ORDER BY k.kundennummer DESC""", (pid,))
+            kunden = cur.fetchall()
+            cur.execute("""SELECT pr.id, pr.monat, k.kundennummer, k.firma, pr.vertragsmonat, pr.basis_cent, pr.prozent, pr.betrag_cent, pr.status
+                           FROM provisionen pr JOIN kunden k ON k.id=pr.kunden_id WHERE pr.vertriebspartner_id=%s ORDER BY pr.monat DESC, k.kundennummer LIMIT 300""", (pid,))
+            prov = cur.fetchall()
+            cur.execute("SELECT id, firma, status, ort, erstellt_am FROM leads WHERE vertriebspartner_id=%s ORDER BY erstellt_am DESC LIMIT 100", (pid,))
+            leads = cur.fetchall()
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Vertriebler nicht gefunden.")
+    return {"partner": p, "kunden": kunden, "provisionen": prov, "leads": leads}
+
+
+@router.patch("/vertrieb/partner/{pid}")
+def partner_aendern(pid: str, data: PartnerPatch, user: dict = Depends(require_admin)):
+    felder = {k: v for k, v in data.model_dump().items() if v is not None}
+    if "status" in felder and felder["status"] not in PARTNER_STATUS:
+        raise HTTPException(400, "Unbekannter Status.")
+    if "email" in felder and not EMAIL_RE.match(felder["email"].strip()):
+        raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
+    try:
+        with tx("admin") as cur:
+            felder_setzen(cur, "vertriebspartner", pid, felder)
+            audit(cur, user, "partner_geaendert", None, {"id": pid, "felder": list(felder)})
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return {"ok": True}
+
+
+class ZuordnungIn(BaseModel):
+    partner_id: str | None = None
+
+
+@router.put("/kunden/{kid}/partner")
+def kunde_partner(kid: str, data: ZuordnungIn, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("UPDATE kunden SET vertriebspartner_id=%s WHERE id=%s", (data.partner_id or None, kid))
+            if cur.rowcount == 0:
+                raise HTTPException(404, "Kunde nicht gefunden.")
+            audit(cur, user, "kunde_vertriebler_zugeordnet", kid, {"partner_id": data.partner_id})
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return {"ok": True}
+
+
+@router.get("/vertrieb/partnerliste")
+def partner_auswahl(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("SELECT id, name, status FROM vertriebspartner WHERE status IN ('anfrage','aktiv','pausiert') ORDER BY lower(name)")
+        return cur.fetchall()
+
+
+class StatusIn(BaseModel):
+    status: str
+
+
+@router.post("/vertrieb/provisionen/{rid}/status")
+def provision_status(rid: str, data: StatusIn, user: dict = Depends(require_admin)):
+    if data.status not in PROV_STATUS:
+        raise HTTPException(400, "Unbekannter Status.")
+    try:
+        with tx("admin") as cur:
+            felder_setzen(cur, "provisionen", rid, {"status": data.status})
+            audit(cur, user, "provision_status", None, {"id": rid, "status": data.status})
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return {"ok": True}
+
+
+@router.get("/vertrieb/provisionsuebersicht")
+def provisionsuebersicht(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("""SELECT v.id, v.name, p.status, count(*) AS anzahl, sum(p.betrag_cent) AS summe_cent
+                       FROM provisionen p JOIN vertriebspartner v ON v.id=p.vertriebspartner_id GROUP BY v.id, v.name, p.status ORDER BY v.name, p.status""")
+        return cur.fetchall()
+
+
+# ================================================================= Leads
+class LeadIn(BaseModel):
+    firma: str = Field(min_length=1, max_length=200)
+    ansprechpartner: str | None = Field(default=None, max_length=200)
+    email: str | None = Field(default=None, max_length=254)
+    telefon: str | None = Field(default=None, max_length=60)
+    website: str | None = Field(default=None, max_length=253)
+    branche: str | None = Field(default=None, max_length=120)
+    plz: str | None = Field(default=None, max_length=10)
+    ort: str | None = Field(default=None, max_length=120)
+    quelle: str = "manuell"
+    vertriebspartner_id: str | None = None
+    notiz: str | None = Field(default=None, max_length=2000)
+
+
+class LeadPatch(BaseModel):
+    status: str | None = None
+    vertriebspartner_id: str | None = None
+    zuordnung_loeschen: bool = False
+    notiz: str | None = Field(default=None, max_length=2000)
+    score: int | None = Field(default=None, ge=0, le=100)
+    ansprechpartner: str | None = None
+    email: str | None = None
+    telefon: str | None = None
+
+
+@router.get("/leads")
+def leads_liste(status: str = "", q: str = "", user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.ort, l.branche, l.quelle, l.status, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
+                       FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id
+                       WHERE (%s='' OR l.status=%s) AND (%s='' OR l.firma ILIKE %s OR coalesce(l.ort,'') ILIKE %s)
+                       ORDER BY l.erstellt_am DESC LIMIT 300""", (status, status, q, f"%{q}%", f"%{q}%"))
+        rows = cur.fetchall()
+        cur.execute("SELECT status, count(*) AS n FROM leads GROUP BY status")
+        zaehler = {r["status"]: r["n"] for r in cur.fetchall()}
+    return {"leads": rows, "zaehler": zaehler}
+
+
+@router.post("/leads")
+def lead_neu(data: LeadIn, user: dict = Depends(require_admin)):
+    d = data.model_dump()
+    try:
+        with tx("admin") as cur:
+            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, branche, plz, ort, quelle, vertriebspartner_id, notiz)
+                           VALUES (%(firma)s,%(ansprechpartner)s,%(email)s,%(telefon)s,%(website)s,%(branche)s,%(plz)s,%(ort)s,%(quelle)s,%(vertriebspartner_id)s,%(notiz)s) RETURNING id""", d)
+            r = cur.fetchone()
+            audit(cur, user, "lead_angelegt", None, {"firma": data.firma})
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return r
+
+
+@router.get("/leads/{lid}")
+def lead_detail(lid: str, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT l.*, v.name AS vertriebler FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id WHERE l.id=%s", (lid,))
+            l = cur.fetchone()
+            if not l:
+                raise HTTPException(404, "Lead nicht gefunden.")
+            cur.execute("SELECT id, art, inhalt, zeit, von FROM lead_aktivitaeten WHERE lead_id=%s ORDER BY zeit DESC LIMIT 200", (lid,))
+            akt = cur.fetchall()
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Lead nicht gefunden.")
+    return {"lead": l, "aktivitaeten": akt}
+
+
+@router.patch("/leads/{lid}")
+def lead_aendern(lid: str, data: LeadPatch, user: dict = Depends(require_admin)):
+    felder = {k: v for k, v in data.model_dump(exclude={"zuordnung_loeschen"}).items() if v is not None}
+    if data.zuordnung_loeschen:
+        felder["vertriebspartner_id"] = None
+    if "status" in felder and felder["status"] not in LEAD_STATUS:
+        raise HTTPException(400, "Unbekannter Status.")
+    try:
+        with tx("admin") as cur:
+            if "status" in felder:
+                cur.execute("SELECT status FROM leads WHERE id=%s", (lid,))
+                alt = cur.fetchone()
+                if not alt:
+                    raise HTTPException(404, "Lead nicht gefunden.")
+                if alt["status"] != felder["status"]:
+                    cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)",
+                                (lid, f"{alt['status']} → {felder['status']}", user["email"]))
+            felder_setzen(cur, "leads", lid, felder)
+            audit(cur, user, "lead_geaendert", None, {"id": lid, "felder": list(felder)})
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return {"ok": True}
+
+
+class AktIn(BaseModel):
+    art: str = "notiz"
+    inhalt: str = Field(min_length=1, max_length=2000)
+
+
+@router.post("/leads/{lid}/aktivitaet")
+def lead_aktivitaet(lid: str, data: AktIn, user: dict = Depends(require_admin)):
+    if data.art not in AKT_ART:
+        raise HTTPException(400, "Unbekannte Art.")
+    try:
+        with tx("admin") as cur:
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s) RETURNING id", (lid, data.art, data.inhalt, user["email"]))
+            r = cur.fetchone()
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return r
+
+
+@router.post("/leads/{lid}/zu-kunde")
+def lead_zu_kunde(lid: str, user: dict = Depends(require_admin)):
+    """Macht aus dem Lead einen Kunden (Status Onboarding) und übernimmt den Vertriebler."""
+    with tx("admin") as cur:
+        cur.execute("SELECT * FROM leads WHERE id=%s", (lid,))
+        l = cur.fetchone()
+        if not l:
+            raise HTTPException(404, "Lead nicht gefunden.")
+        if l["kunden_id"]:
+            raise HTTPException(409, "Aus diesem Lead ist schon ein Kunde geworden.")
+        if l["status"] in ("gesperrt", "consent_ausstehend"):
+            raise HTTPException(400, "Dieser Lead ist gesperrt oder wartet auf Einwilligung.")
+        cur.execute("""INSERT INTO kunden (firma, ansprechpartner, email, telefon, branche, plz, ort, domain, vertriebspartner_id, status)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,NULL,%s,'onboarding') RETURNING id, kundennummer""",
+                    (l["firma"], l["ansprechpartner"], l["email"], l["telefon"], l["branche"], l["plz"], l["ort"], l["vertriebspartner_id"]))
+        k = cur.fetchone()
+        cur.execute("UPDATE leads SET kunden_id=%s, status='gewonnen' WHERE id=%s", (k["id"], lid))
+        cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (lid, "Zum Kunden gemacht: " + k["kundennummer"], user["email"]))
+        audit(cur, user, "lead_zu_kunde", k["id"], {"lead": lid})
+    return k
+
+
+# ================================================================= Preise und Konditionen
+class PreisIn(BaseModel):
+    produkt_code: str
+    gueltig_ab: date
+    einrichtung_cent: int | None = Field(default=None, ge=0)
+    monatlich_cent: int | None = Field(default=None, ge=0)
+    projekt_cent: int | None = Field(default=None, ge=0)
+    ab_preis: bool = False
+
+
+@router.get("/preise")
+def preise(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("SELECT * FROM v_preise_aktuell ORDER BY kategorie, code")
+        aktuell = cur.fetchall()
+        cur.execute("SELECT id, produkt_code, gueltig_ab, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, freigegeben_von FROM produkt_preise ORDER BY gueltig_ab DESC, produkt_code LIMIT 200")
+        verlauf = cur.fetchall()
+        cur.execute("SELECT schluessel, wert_text, wert_zahl, beschreibung FROM konditionen ORDER BY schluessel")
+        konditionen = cur.fetchall()
+        cur.execute("SELECT id, name, von_monat, bis_monat, prozent, art, status, gueltig_ab FROM provisionsregeln ORDER BY art, von_monat")
+        regeln = cur.fetchall()
+    return {"aktuell": aktuell, "verlauf": verlauf, "konditionen": konditionen, "provisionsregeln": regeln}
+
+
+@router.post("/preise")
+def preis_neu(data: PreisIn, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("""INSERT INTO produkt_preise (produkt_code, gueltig_ab, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, quelle, freigegeben_von)
+                           VALUES (%s,%s,%s,%s,%s,%s,'admin-portal',%s)""",
+                        (data.produkt_code, data.gueltig_ab, data.einrichtung_cent, data.monatlich_cent, data.projekt_cent, data.ab_preis, user["email"]))
+            audit(cur, user, "preis_neu", None, {"produkt": data.produkt_code, "ab": str(data.gueltig_ab)})
+    except errors.UniqueViolation:
+        raise HTTPException(409, "Für dieses Produkt gibt es zu diesem Datum schon einen Preis.")
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return {"ok": True}
+
+
+class KondIn(BaseModel):
+    wert_text: str | None = Field(default=None, max_length=500)
+    wert_zahl: int | None = None
+
+
+@router.put("/konditionen/{schluessel}")
+def kondition(schluessel: str, data: KondIn, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("UPDATE konditionen SET wert_text=%s, wert_zahl=%s, geaendert_am=now() WHERE schluessel=%s", (data.wert_text, data.wert_zahl, schluessel))
+        if cur.rowcount == 0:
+            raise HTTPException(404, "Unbekannte Kondition.")
+        audit(cur, user, "kondition_geaendert", None, {"schluessel": schluessel})
+    return {"ok": True}
+
+
+@router.post("/provisionsregeln/{rid}/freigeben")
+def regel_freigeben(rid: int, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("UPDATE provisionsregeln SET status='freigegeben', gueltig_ab=coalesce(gueltig_ab, current_date) WHERE id=%s AND status='entwurf'", (rid,))
+        if cur.rowcount == 0:
+            raise HTTPException(404, "Regel nicht gefunden oder schon freigegeben.")
+        audit(cur, user, "provisionsregel_freigegeben", None, {"id": rid})
+    return {"ok": True}
+
+
+# ================================================================= Datenschutz und Qualität
+# Tabelle -> (Statusspalte, erlaubte Werte, Zusatzfelder beim Setzen)
+ENTSCHEIDUNG = {
+    "auskunftsanfragen": ("status", ("offen", "in_bearbeitung", "erledigt", "abgelehnt")),
+    "freigaben": ("status", ("offen", "freigegeben", "abgelehnt")),
+    "aenderungsfreigaben": ("status", ("offen", "freigegeben", "abgelehnt", "zurueckgezogen")),
+    "befunde": ("status", ("offen", "in_arbeit", "behoben", "verifiziert", "ausnahme")),
+    "massnahmen": ("status", ("geplant", "in_arbeit", "umgesetzt", "verifiziert", "verworfen")),
+}
+
+
+@router.get("/compliance")
+def compliance(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        def q(s):
+            cur.execute(s)
+            return cur.fetchall()
+        return {
+            "auskunft": q("SELECT id, person_ref, art, eingang_am, frist_bis, status, notiz FROM auskunftsanfragen WHERE status IN ('offen','in_bearbeitung') ORDER BY frist_bis NULLS LAST LIMIT 100"),
+            "freigaben": q("SELECT f.id, k.kundennummer, f.art, f.vorschau, f.status, f.erstellt_am FROM freigaben f LEFT JOIN kunden k ON k.id=f.kunden_id WHERE f.status='offen' ORDER BY f.erstellt_am LIMIT 100"),
+            "aenderungen": q("SELECT id, gegenstand, beschreibung, art, beantragt_von, beantragt_am, status FROM aenderungsfreigaben WHERE status='offen' ORDER BY beantragt_am LIMIT 100"),
+            "alarme": q("SELECT id, zeit, stufe, quelle, titel FROM alarme WHERE bestaetigt_am IS NULL ORDER BY zeit DESC LIMIT 100"),
+            "workflow_fehler": q("SELECT id, zeit, workflow_name, knoten, left(fehlertext, 300) AS fehlertext FROM workflow_fehler WHERE NOT behoben ORDER BY zeit DESC LIMIT 100"),
+            "befunde": q("SELECT id, titel, schwere, status, regel_code, gefunden_am FROM befunde WHERE status IN ('offen','in_arbeit') ORDER BY (schwere='kritisch') DESC, gefunden_am DESC LIMIT 100"),
+            "massnahmen": q("SELECT id, beschreibung, verantwortlich, faellig_am, status FROM massnahmen WHERE status IN ('geplant','in_arbeit') ORDER BY faellig_am NULLS LAST LIMIT 100"),
+        }
+
+
+class EntscheidIn(BaseModel):
+    status: str
+    begruendung: str | None = Field(default=None, max_length=1000)
+
+
+@router.post("/compliance/{tabelle}/{rid}")
+def entscheiden(tabelle: str, rid: str, data: EntscheidIn, user: dict = Depends(require_admin)):
+    if tabelle not in ENTSCHEIDUNG or data.status not in ENTSCHEIDUNG[tabelle][1]:
+        raise HTTPException(400, "Unbekannte Aktion.")
+    extra = {}
+    if tabelle in ("freigaben", "aenderungsfreigaben"):
+        extra = {"entschieden_von": user["email"], "entschieden_am": "now"}
+        if data.begruendung:
+            extra["begruendung"] = data.begruendung
+    if tabelle == "auskunftsanfragen" and data.status in ("erledigt", "abgelehnt"):
+        extra = {"erledigt_am": "now"}
+    felder = {"status": data.status}
+    try:
+        with tx("admin") as cur:
+            sets = [sql.SQL("{}=%s").format(sql.Identifier("status"))]
+            werte = [data.status]
+            for k, v in extra.items():
+                if v == "now":
+                    sets.append(sql.SQL("{}=now()").format(sql.Identifier(k)))
+                else:
+                    sets.append(sql.SQL("{}=%s").format(sql.Identifier(k)))
+                    werte.append(v)
+            cur.execute(sql.SQL("UPDATE {} SET {} WHERE id=%s").format(sql.Identifier(tabelle), sql.SQL(", ").join(sets)), (*werte, rid))
+            if cur.rowcount == 0:
+                raise HTTPException(404, "Nicht gefunden.")
+            audit(cur, user, "compliance_entscheidung", None, {"tabelle": tabelle, "id": rid, "status": data.status})
+    except DB_FEHLER as e:
+        raise fehler_db(e)
+    return {"ok": True}
+
+
+@router.post("/alarme/{aid}/bestaetigen")
+def alarm_bestaetigen(aid: int, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("UPDATE alarme SET bestaetigt_von=%s, bestaetigt_am=now() WHERE id=%s AND bestaetigt_am IS NULL", (user["email"], aid))
+        if cur.rowcount == 0:
+            raise HTTPException(404, "Alarm nicht gefunden.")
+    return {"ok": True}
+
+
+@router.post("/workflow-fehler/{fid}/behoben")
+def fehler_behoben(fid: int, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("UPDATE workflow_fehler SET behoben=true WHERE id=%s", (fid,))
+        if cur.rowcount == 0:
+            raise HTTPException(404, "Eintrag nicht gefunden.")
+    return {"ok": True}
