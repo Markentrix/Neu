@@ -102,7 +102,7 @@
           payload[i.name] = i.type === 'checkbox' ? (i.checked ? 'ja' : 'nein') : i.value.trim();
         });
         var cal = form.__cal; if (cal && cal.date && cal.time) { payload.wunschtermin = cal.label(); payload.termin_iso = cal.iso(); }
-        payload.nachricht = Object.keys(payload).filter(function (k) { return ['name', 'email', 'tel', 'firma', 'thema', 'budget', 'bedarf', 'status', 'zeitplan', 'branche', 'empfehlung', 'wunschtermin', 'nachricht_text'].indexOf(k) >= 0 && payload[k]; })
+        payload.nachricht = Object.keys(payload).filter(function (k) { return ['name', 'email', 'tel', 'firma', 'thema', 'budget', 'bedarf', 'status', 'zeitplan', 'branche', 'aktion', 'empfehlung', 'wunschtermin', 'nachricht_text'].indexOf(k) >= 0 && payload[k]; })
           .map(function (k) { return k + ': ' + payload[k]; }).join('\n');
         busy = true; var orig = btn ? btn.innerHTML : '';
         if (btn) { btn.classList.add('is-loading'); btn.innerHTML = 'Wird gesendet …'; }
@@ -185,10 +185,10 @@
   function initModal() {
     var modal = $('#mx-modal'); if (!modal) return;
     var box = $('.modal-box', modal), last = null;
-    function open(branche, bedarf) { var pb = $('.burger'); if (pb && pb.getAttribute('aria-expanded') === 'true') pb.click(); modal.hidden = false; modal.classList.add('is-open'); var wf = $('form[data-wizard]', modal); if (wf && wf.__wizard) { if (branche || bedarf) wf.__wizard.preset(branche, bedarf); else wf.__wizard.show(wf.__wizard.current()); } d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
+    function open(branche, bedarf, aktion) { var pb = $('.burger'); if (pb && pb.getAttribute('aria-expanded') === 'true') pb.click(); modal.hidden = false; modal.classList.add('is-open'); var wf = $('form[data-wizard]', modal); var ak = wf && $('input[name=aktion]', wf); if (ak) ak.value = aktion || ''; if (wf && wf.__wizard) { if (branche || bedarf) wf.__wizard.preset(branche, bedarf); else wf.__wizard.show(wf.__wizard.current()); } d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
     function close() { modal.classList.remove('is-open'); modal.hidden = true; d.body.classList.remove('menu-open'); if (last && last.focus) last.focus(); }
     on(d, 'click', function (e) {
-      var t = e.target.closest('[data-open-modal]'); if (t) { e.preventDefault(); open(t.getAttribute('data-branche'), t.getAttribute('data-bedarf')); return; }
+      var t = e.target.closest('[data-open-modal]'); if (t) { e.preventDefault(); open(t.getAttribute('data-branche'), t.getAttribute('data-bedarf'), t.getAttribute('data-aktion')); return; }
       if (e.target.closest('[data-close-modal]') || e.target === modal) close();
     });
     on(d, 'keydown', function (e) {
