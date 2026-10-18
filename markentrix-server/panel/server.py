@@ -121,10 +121,12 @@ def sites():
 
 def backups():
     items = []
-    if BACKUPS.is_dir():
-        for d in sorted((p for p in BACKUPS.iterdir() if p.is_dir()), reverse=True)[:14]:
-            size, files, newest = dir_stats(d)
-            items.append({"name": d.name, "size": size, "files": files})
+    try:
+        for line in (BACKUPS / "list.txt").read_text().splitlines()[:14]:
+            name, size, files = line.split("|")
+            items.append({"name": name, "size": int(size), "files": int(files)})
+    except Exception:
+        pass
     last = None
     try:
         last = int((BACKUPS / "last_success").read_text().strip())

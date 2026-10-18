@@ -90,6 +90,7 @@ fi
 say "3/8 Dateien und Zugangsdaten anlegen"
 install -d -m 755 "$BASE" "$BASE/bin" "$BASE/caddy/sites" "$SITES/live" "$SITES/demos"
 install -d -m 700 "$BASE/backups"
+install -d -m 755 "$BASE/backup-status"
 cp "$SRC/templates/docker-compose.yml" "$BASE/docker-compose.yml"
 cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"

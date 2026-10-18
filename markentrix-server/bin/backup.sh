@@ -46,4 +46,12 @@ tar -czf "$DEST/config.tar.gz" -C "$BASE" .env docker-compose.yml Caddyfile cadd
 find "$BASE/backups" -mindepth 1 -maxdepth 1 -type d -mtime +"$KEEP_DAYS" -exec rm -rf {} +
 
 date +%s > "$BASE/backups/last_success"
+# Lesbare Kurzinfo für das Dashboard (die Sicherungen selbst bleiben nur für root lesbar)
+install -d -m 755 "$BASE/backup-status"
+cp "$BASE/backups/last_success" "$BASE/backup-status/last_success"
+: > "$BASE/backup-status/list.txt"
+for d in $(ls -1d "$BASE"/backups/*/ 2>/dev/null | sort -r | head -14); do
+  echo "$(basename "$d")|$(du -sb "$d" | cut -f1)|$(find "$d" -type f | wc -l)" >> "$BASE/backup-status/list.txt"
+done
+chmod 644 "$BASE/backup-status/"*
 echo "[$(date '+%F %T')] Sicherung fertig: $(du -sh "$DEST" | cut -f1)"
