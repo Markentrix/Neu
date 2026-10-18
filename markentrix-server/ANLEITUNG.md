@@ -11,9 +11,9 @@ Dieses Paket richtet auf deinem Hetzner-Server alles Neue mit **einem Befehl** e
 
 ## Schritt 1: DNS-Einträge anlegen
 
-Bei deinem Domain-Anbieter (aktuell Squarespace) drei neue **A-Einträge** anlegen, Ziel ist die IP deines Servers (5.75.146.212):
+Bei deinem Domain-Anbieter (aktuell Squarespace) vier neue **A-Einträge** anlegen, Ziel ist die IP deines Servers (5.75.146.212):
 
-`n8n`, `panel`, `demo` (also z. B. `n8n.markentrix.de`)
+`n8n`, `panel`, `portal`, `demo` (also z. B. `n8n.markentrix.de`)
 
 Die bestehenden Einträge für markentrix.de und www bleiben, wie sie sind.
 
@@ -44,7 +44,7 @@ Bricht das Skript ab, schick mir einfach die letzten Zeilen. Es kann gefahrlos e
 
 ## Wenn schon ein Caddy läuft (z. B. für markentrix.de)
 
-Das Skript erkennt das, lässt ihn unverändert und schreibt die nötigen Zeilen in die Datei `/opt/markentrix/caddy-zusatz-fuer-bestehenden-caddy.txt`. Diese zwei Blöcke müssen in die vorhandene Caddyfile kopiert werden, danach Caddy neu laden. Das machen wir dann gemeinsam, bevor du etwas veränderst.
+Das Skript erkennt das, lässt ihn unverändert und schreibt die nötigen Zeilen in die Datei `/opt/markentrix/caddy-zusatz-fuer-bestehenden-caddy.txt`. Diese drei Blöcke müssen in die vorhandene Caddyfile kopiert werden, danach Caddy neu laden. Das machen wir dann gemeinsam, bevor du etwas veränderst.
 
 ## Alltag: mkctl
 
@@ -68,10 +68,21 @@ Eigene Dateien einer Website kopierst du mit `--from /pfad/zum/ordner` hinein.
 - Empfohlen: In der Hetzner Cloud Console eine **Firewall** anlegen, die nur die Ports 22, 80 und 443 erlaubt.
 - `/opt/markentrix/.env` enthält alle Schlüssel. Ohne sie lässt sich nichts wiederherstellen. Die tägliche Sicherung legt eine Kopie ab, die Sicherungen liegen aber auf demselben Server. **Eine Kopie außerhalb des Servers** (z. B. Hetzner Storage Box) fehlt noch.
 
+## Das Portal benutzen
+
+**Admin (du):** `https://portal.deine-domain.de`, Login mit der E-Mail aus der Installation. Das Passwort steht am Ende der Installation. Neues Passwort jederzeit: `mkctl admin-reset deine@mail.de`.
+
+Kunde anlegen: *Neuer Kunde* → Firma, E-Mail, Paket → „Einladungslink erzeugen". Den Link schickst du dem Kunden (7 Tage gültig). Er legt damit sein Passwort fest und sieht nur seine eigenen Daten.
+
+Im Kunden stellst du per **Schalter** ein, welche Module er sieht (KI-Assistent, Anfragen & Termine, Wochenangebote ...). Unter *Buchungen* hältst du gebuchte Pakete samt Preis fest.
+
+**Wochenangebote:** Bei einem Kunden mit Website: Website im Admin anlegen und einmal auf dem Server `mkctl site-add kunde.de` ausführen. Modul „Wochenangebote" einschalten. Der Kunde lädt PDF/JPG/PNG hoch, danach liegt es sofort unter `https://kunde.de/angebote/`.
+
+**KI-Chat anbinden (später):** In `/opt/markentrix/.env` `CHAT_WEBHOOK_URL` (n8n-Webhook) und `CHAT_WEBHOOK_SECRET` eintragen, dann `mkctl restart portal`.
+
 ## Was noch offen ist
 
-1. **Portal-Backend:** Die Datenbank hat die Struktur, aber noch keine Kunden. Login (E-Mail + Passwort), Kundenrechte nach Kundennummer, Upload und Admin-Funktionen baue ich als eigenen kleinen Dienst auf dieser Datenbank (`portal.deine-domain.de`).
-2. **E-Mail-Versand für Logins:** Einladungen und „Passwort vergessen" brauchen einen E-Mail-Zugang (SMTP), der dann im Portal-Dienst eingetragen wird.
-3. **n8n-Workflows:** Müssen aus n8n Cloud exportiert und in das neue n8n importiert werden. Zugangsdaten (Gmail usw.) werden dort neu verbunden.
-4. **markentrix-core:** Im Repo liegt noch kein Code, deshalb ist es nicht Teil dieses Pakets.
-5. **Kunden-Dashboard und Admin-Bereich:** Das Design steht, die Anbindung an die neue Datenbank kommt als Nächstes (Adresse `portal.deine-domain.de`).
+1. **E-Mail-Versand:** Einladungen laufen über Links, die du selbst verschickst. „Passwort vergessen" per Mail braucht einen SMTP-Zugang.
+2. **n8n-Workflows:** Aus n8n Cloud exportieren und im neuen n8n importieren, Zugangsdaten neu verbinden.
+3. **markentrix-core:** Im Repo liegt noch kein Code, deshalb nicht Teil dieses Pakets.
+4. **Kopie der Sicherungen außerhalb des Servers** (z. B. Hetzner Storage Box).

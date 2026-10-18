@@ -94,6 +94,7 @@ cp "$SRC/templates/docker-compose.yml" "$BASE/docker-compose.yml"
 cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"
 rm -rf "$BASE/db" && cp -r "$SRC/db" "$BASE/db"
+rm -rf "$BASE/portal" && cp -r "$SRC/portal" "$BASE/portal"
 install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$BASE/bin/"
 ln -sf "$BASE/bin/mkctl" /usr/local/bin/mkctl
 [ -f "$BASE/caddy/sites/00-platzhalter.caddy" ] || echo "# Hier liegen die Kunden-Websites (mkctl site-add)" > "$BASE/caddy/sites/00-platzhalter.caddy"
@@ -139,9 +140,10 @@ echo
 ok "Datenbank läuft"
 "$BASE/bin/mkctl" migrate
 ok "Datenbankstruktur angelegt (Kunden, Zugänge, Pakete, Module, Projekte, Anfragen, Termine, Uploads ...)"
+chown -R 10001:10001 "$SITES/live" 2>/dev/null || true
 
 # ---------------------------------------------------------------- 6. n8n, Dashboard, Caddy
-say "6/8 n8n, Server-Dashboard und Webserver starten"
+say "6/8 n8n, Server-Dashboard, Portal und Webserver starten"
 cd "$BASE"
 if [ "$CADDY_MODE" = own ]; then
   docker compose --project-directory "$BASE" -f "$BASE/docker-compose.yml" --profile own-caddy up -d --build
@@ -156,7 +158,7 @@ if [ "$CADDY_MODE" = docker ]; then
 fi
 
 if [ "$CADDY_MODE" != own ]; then
-  if [ "$CADDY_MODE" = docker ]; then U_N8N="mk-n8n:5678"; U_PANEL="mk-panel:8080"; else U_N8N="127.0.0.1:5678"; U_PANEL="127.0.0.1:8088"; fi
+  if [ "$CADDY_MODE" = docker ]; then U_N8N="mk-n8n:5678"; U_PANEL="mk-panel:8080"; U_PORTAL="mk-portal:8000"; else U_N8N="127.0.0.1:5678"; U_PANEL="127.0.0.1:8088"; U_PORTAL="127.0.0.1:8090"; fi
   cat > "$BASE/caddy-zusatz-fuer-bestehenden-caddy.txt" <<EOF
 # Diese Blöcke in die vorhandene Caddyfile einfügen und Caddy neu laden.
 n8n.${DOMAIN} {
@@ -167,9 +169,27 @@ panel.${DOMAIN} {
 	encode zstd gzip
 	reverse_proxy ${U_PANEL}
 }
+portal.${DOMAIN} {
+	encode zstd gzip
+	reverse_proxy ${U_PORTAL}
+}
 EOF
   warn "Eintrag für den vorhandenen Caddy: /opt/markentrix/caddy-zusatz-fuer-bestehenden-caddy.txt"
 fi
+
+# Erster Admin für das Portal
+ADMIN_OUT=""
+for _ in $(seq 1 30); do
+  [ "$(docker inspect -f '{{.State.Health.Status}}' mk-portal 2>/dev/null || true)" = healthy ] && break
+  sleep 2
+done
+if ! docker exec mk-db psql -U markentrix -d markentrix -tAc "select 1 from benutzer where rolle='admin' limit 1" | grep -q 1; then
+  ADMIN_OUT="$(docker exec mk-portal python -m app.cli admin-add "$ACME_EMAIL" 2>&1 || true)"
+  ADMIN_PW="$(echo "$ADMIN_OUT" | sed -n 's/^ADMIN_PASSWORT=//p')"
+else
+  ADMIN_PW="(Admin gibt es schon. Neues Passwort: mkctl admin-reset ${ACME_EMAIL})"
+fi
+[ -n "${ADMIN_PW:-}" ] || warn "Admin konnte nicht angelegt werden. Danach ausführen: mkctl admin-add ${ACME_EMAIL}"
 
 # ---------------------------------------------------------------- 7. Sicherung
 say "7/8 Tägliche Sicherung einrichten und einmal testen"
@@ -192,12 +212,15 @@ cat <<EOF
 ================================================================
  1) DNS-Einträge anlegen (Typ A, Ziel: ${IP}):
       n8n.${DOMAIN}      panel.${DOMAIN}
-      demo.${DOMAIN}
+      portal.${DOMAIN}   demo.${DOMAIN}
     Erst danach sind die Adressen von außen erreichbar.
 
  2) Adressen und Zugänge:
       Server-Dashboard   https://panel.${DOMAIN}
                          Benutzer: admin   Passwort: ${SHOW_PW}
+      Portal (Admin)     https://portal.${DOMAIN}
+                         E-Mail: ${ACME_EMAIL}   Passwort: ${ADMIN_PW:-siehe Hinweis oben}
+                         (Kunden erhalten ihren Zugang über einen Einladungslink aus dem Admin-Bereich.)
       Datenbank          nur intern (Container mk-db), Zugang über mkctl psql
       n8n                https://n8n.${DOMAIN}
                          (Beim ersten Öffnen legst du dein Konto an.)

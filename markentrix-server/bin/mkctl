@@ -90,6 +90,8 @@ case "$cmd" in
     if [ -n "$from" ]; then [ -d "$from" ] || die "Quellordner nicht gefunden: $from"; cp -a "$from"/. "$dir"/; else placeholder_page "$dir" "$domain"; fi
     write_meta "$dir" live "$domain" "$kunde"
     chmod -R a+rX "$dir"
+    # Ordner für Wochenangebote: das Portal (Benutzer 10001) darf hier schreiben
+    mkdir -p "$dir/angebote/archiv"; chown -R 10001:10001 "$dir/angebote"; chmod -R a+rX "$dir/angebote"
     cat > "$BASE/caddy/sites/$domain.caddy" <<CADDY
 $domain, www.$domain {
 	encode zstd gzip
@@ -110,8 +112,15 @@ CADDY
     ;;
 
   restart)
-    need_root; svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl restart <n8n|panel|caddy|mk-db>"
+    need_root; svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl restart <n8n|panel|portal|caddy|mk-db>"
     "${COMPOSE[@]}" restart "$svc"
+    ;;
+
+  admin-add|admin-reset)
+    need_root
+    [ -n "${1:-}" ] || die "Aufruf: mkctl $cmd <E-Mail>"
+    docker exec mk-portal python -m app.cli admin-add "$1" "${2:-}"
+    echo "Das Passwort wird nur jetzt angezeigt. Bitte sofort im Passwortmanager speichern."
     ;;
 
   migrate)
@@ -149,6 +158,7 @@ SQL
   logs)
     svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl psql                             Datenbank-Konsole öffnen
 mkctl migrate                          Datenbankstruktur anlegen/aktualisieren
+mkctl admin-add <E-Mail>               Admin fürs Portal anlegen (oder Passwort neu setzen)
 mkctl logs <Containername>   (Namen siehe: mkctl status)"
     docker logs --tail 100 -f "$svc"
     ;;
@@ -158,6 +168,7 @@ mkctl logs <Containername>   (Namen siehe: mkctl status)"
     echo "Vor dem Update läuft eine Sicherung ..."; "$BASE/bin/backup.sh"
     "${COMPOSE[@]}" pull --ignore-buildable n8n n8n-db mk-db
     if [ "$MODE" = own ]; then "${COMPOSE[@]}" pull caddy; "${COMPOSE[@]}" --profile own-caddy up -d --build; else "${COMPOSE[@]}" up -d --build; fi
+    "$BASE/bin/mkctl" migrate
     echo "Update fertig."
     ;;
 
@@ -169,7 +180,7 @@ mkctl demo-add <name> [--from Ordner]  Neue Demo unter https://demo.$DOMAIN/<nam
 mkctl site-add <domain> [--from Ordner] [--kunde "Name"]
                                        Neue Kunden-Website mit eigener Domain
 mkctl site-list                        Alle Websites und Demos
-mkctl restart <n8n|panel|caddy|mk-db>
+mkctl restart <n8n|panel|portal|caddy|mk-db>
 mkctl logs <Containername>             Protokoll eines Dienstes ansehen
 mkctl update                           Sicherung, dann alle Dienste aktualisieren
 TXT

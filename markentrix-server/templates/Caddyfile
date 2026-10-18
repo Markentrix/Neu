@@ -14,6 +14,12 @@ panel.{$DOMAIN} {
 	reverse_proxy mk-panel:8080
 }
 
+# Kunden-Portal und Admin
+portal.{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy mk-portal:8000
+}
+
 # Demo-Versionen: https://demo.<domain>/<name>/
 demo.{$DOMAIN} {
 	encode zstd gzip

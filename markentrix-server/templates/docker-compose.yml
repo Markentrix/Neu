@@ -11,6 +11,7 @@ volumes:
   mk_db:
   caddy_data:
   caddy_config:
+  portal_uploads:
 
 services:
   # Nur lesender Zugriff auf Docker, damit das Dashboard die Dienste anzeigen kann.
@@ -116,6 +117,37 @@ services:
     security_opt: ["no-new-privileges:true"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/healthz',timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks: [net]
+
+  # Kunden-Portal und Admin-Bereich: https://portal.<domain>
+  portal:
+    build: ./portal
+    image: markentrix-portal:local
+    container_name: mk-portal
+    restart: unless-stopped
+    depends_on:
+      mk-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8090:8000"
+    environment:
+      DATABASE_URL: postgresql://mk_app:${MK_APP_PASSWORD}@mk-db:5432/markentrix
+      PORTAL_BASE_URL: https://portal.${DOMAIN}
+      PORTAL_COOKIE_SECURE: "1"
+      CHAT_WEBHOOK_URL: ${CHAT_WEBHOOK_URL:-}
+      CHAT_WEBHOOK_SECRET: ${CHAT_WEBHOOK_SECRET:-}
+    volumes:
+      - portal_uploads:/data
+      - /srv/sites/live:/srv/sites/live
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/healthz',timeout=3)"]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -35,6 +35,9 @@ fi
 docker run --rm -v markentrix_n8n_data:/data:ro -v "$DEST":/out alpine \
   tar -czf /out/n8n-data.tar.gz -C /data .
 
+docker run --rm -v markentrix_portal_uploads:/data:ro -v "$DEST":/out alpine \
+  tar -czf /out/portal-uploads.tar.gz -C /data . 2>/dev/null || true
+
 # 4) Zugangsdaten und Konfiguration (ohne diese lässt sich nichts wiederherstellen)
 tar -czf "$DEST/config.tar.gz" -C "$BASE" .env docker-compose.yml Caddyfile caddy 2>/dev/null || \
   tar -czf "$DEST/config.tar.gz" -C "$BASE" .env docker-compose.yml
