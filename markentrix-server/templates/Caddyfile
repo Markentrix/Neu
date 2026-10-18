@@ -1,0 +1,26 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# Workflows (n8n)
+n8n.{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy mk-n8n:5678
+}
+
+# Server-Dashboard
+panel.{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy mk-panel:8080
+}
+
+# Demo-Versionen: https://demo.<domain>/<name>/
+demo.{$DOMAIN} {
+	encode zstd gzip
+	root * /srv/sites/demos
+	header X-Robots-Tag "noindex, nofollow"
+	file_server
+}
+
+# Kunden-Websites (je Website eine Datei, angelegt mit: mkctl site-add)
+import /etc/caddy/sites/*.caddy

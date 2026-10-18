@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Markentrix Server</title>
+<style>
+:root{--navy:#0B1020;--ink:#0B1020;--muted:#3F4762;--line:#E6E9F3;--bg:#EEF1FA;--card:#fff;--ok:#0F7A45;--okbg:#E2F6EA;--bad:#9B1C1C;--badbg:#FDE7E7;--warn:#8A5A00;--warnbg:#FFF4DB;--info:#0B6E95;--infobg:#E0F3FD;--violet:#6D4AE0}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:var(--navy);color:#fff;padding:20px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#28C7F7,#8B5CF6);display:grid;place-items:center;font-weight:700;font-size:20px}
+h1{margin:0;font-size:20px}
+.sub{color:#B8C0DC;font-size:13px}
+main{max-width:1200px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.tile,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px}
+.tile .l{font-size:13px;color:var(--muted)}
+.tile .v{font-size:30px;font-weight:700;margin-top:6px}
+.tile .h{font-size:13px;color:var(--muted);margin-top:4px}
+.bar{height:8px;border-radius:99px;background:#E4E7F3;margin-top:10px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#1BA9DC,#7C4DEB)}
+h2{margin:0 0 12px;font-size:18px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:8px 8px 8px 0}
+td{padding:12px 8px 12px 0;border-top:1px solid #EEF0F7;vertical-align:top}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:500;white-space:nowrap}
+.ok{background:var(--okbg);color:var(--ok)}.bad{background:var(--badbg);color:var(--bad)}.warn{background:var(--warnbg);color:var(--warn)}.info{background:var(--infobg);color:var(--info)}
+a{color:#4B3FD8;overflow-wrap:anywhere}
+.muted{color:var(--muted);font-size:13px}
+code{background:#F3F5FC;padding:2px 6px;border-radius:6px;font-size:13px}
+.err{background:var(--badbg);color:var(--bad);padding:12px 16px;border-radius:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">M</div><div><h1>Markentrix Server</h1><div class="sub" id="domain">lädt ...</div></div></div>
+  <div class="sub" id="updated"></div>
+</header>
+<main>
+  <div id="error"></div>
+  <div class="tiles" id="tiles"></div>
+  <section class="card"><h2>Dienste</h2><div class="scroll"><table><thead><tr><th>Name</th><th>Gruppe</th><th>Status</th><th>Image</th><th>Ports</th></tr></thead><tbody id="services"></tbody></table></div></section>
+  <section class="card"><h2>Websites und Demos</h2>
+    <div class="scroll"><table><thead><tr><th>Name</th><th>Art</th><th>Adresse</th><th>Kunde</th><th>Größe</th><th>Zuletzt geändert</th></tr></thead><tbody id="sites"></tbody></table></div>
+    <p class="muted">Neue Demo: <code>mkctl demo-add name</code> &nbsp; Neue Kunden-Website: <code>mkctl site-add domain.de</code></p>
+  </section>
+  <section class="card"><h2>Sicherungen</h2><div class="scroll"><table><thead><tr><th>Sicherung</th><th>Größe</th><th>Dateien</th></tr></thead><tbody id="backups"></tbody></table></div></section>
+</main>
+<script>
+(function () {
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function bytes(n) {
+    if (n === null || n === undefined) return '?';
+    var u = ['B', 'KB', 'MB', 'GB', 'TB'], i = 0;
+    while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+    return (i > 1 ? n.toFixed(1) : Math.round(n)) + ' ' + u[i];
+  }
+  function ago(sec) {
+    if (sec < 90) return 'gerade eben';
+    if (sec < 5400) return 'vor ' + Math.round(sec / 60) + ' Min.';
+    if (sec < 172800) return 'vor ' + Math.round(sec / 3600) + ' Std.';
+    return 'vor ' + Math.round(sec / 86400) + ' Tagen';
+  }
+  function date(ts) {
+    return ts ? new Date(ts * 1000).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+  }
+  function badge(text, kind) { return el('span', 'badge ' + kind, text); }
+  function tile(label, value, hint, pct) {
+    var t = el('div', 'tile');
+    t.appendChild(el('div', 'l', label));
+    t.appendChild(el('div', 'v', value));
+    if (hint) t.appendChild(el('div', 'h', hint));
+    if (pct !== undefined) { var b = el('div', 'bar'), i = el('i'); i.style.width = Math.min(100, pct) + '%'; b.appendChild(i); t.appendChild(b); }
+    return t;
+  }
+  function row(tbody, cells) {
+    var tr = el('tr');
+    cells.forEach(function (c) {
+      var td = el('td');
+      if (c instanceof Node) td.appendChild(c); else td.textContent = c;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  }
+  function empty(tbody, cols, text) {
+    var tr = el('tr'), td = el('td', 'muted', text);
+    td.colSpan = cols; tr.appendChild(td); tbody.appendChild(tr);
+  }
+
+  function render(d) {
+    document.getElementById('domain').textContent = d.domain || 'Server';
+    document.getElementById('updated').textContent = 'Stand: ' + date(d.now);
+    var err = document.getElementById('error');
+    err.textContent = '';
+    if (d.containers.error) { err.appendChild(el('div', 'err', 'Docker nicht erreichbar: ' + d.containers.error)); }
+
+    var cs = d.containers.items;
+    var running = cs.filter(function (c) { return c.state === 'running' && c.health !== 'unhealthy'; }).length;
+    var h = d.host;
+    var tiles = document.getElementById('tiles');
+    tiles.textContent = '';
+    tiles.appendChild(tile('Dienste', running + ' von ' + cs.length, running === cs.length ? 'alles läuft' : 'es gibt Probleme', cs.length ? running / cs.length * 100 : 0));
+    if (h.disk_total) tiles.appendChild(tile('Speicher', Math.round(h.disk_used / h.disk_total * 100) + ' %', bytes(h.disk_used) + ' von ' + bytes(h.disk_total), h.disk_used / h.disk_total * 100));
+    if (h.mem_total) tiles.appendChild(tile('Arbeitsspeicher', Math.round(h.mem_used / h.mem_total * 100) + ' %', bytes(h.mem_used) + ' von ' + bytes(h.mem_total), h.mem_used / h.mem_total * 100));
+    var last = d.backups.last_success;
+    tiles.appendChild(tile('Letzte Sicherung', last ? ago(d.now - last) : 'keine', last ? date(last) : 'noch nie gelaufen'));
+
+    var sv = document.getElementById('services');
+    sv.textContent = '';
+    if (!cs.length) empty(sv, 5, 'Keine Dienste gefunden.');
+    cs.forEach(function (c) {
+      var ok = c.state === 'running' && c.health !== 'unhealthy';
+      row(sv, [c.name, c.project || '-', badge(c.status || c.state, ok ? 'ok' : 'bad'), c.image, c.ports.join(', ') || '-']);
+    });
+
+    var st = document.getElementById('sites');
+    st.textContent = '';
+    if (!d.sites.length) empty(st, 6, 'Noch keine Websites oder Demos angelegt.');
+    d.sites.forEach(function (s) {
+      var addr = '-';
+      if (s.url) { addr = el('a', '', s.url); addr.href = s.url; addr.target = '_blank'; addr.rel = 'noopener'; }
+      row(st, [s.name, badge(s.kind, s.kind === 'Live' ? 'ok' : 'info'), addr, s.kunde || '-', bytes(s.size), date(s.changed)]);
+    });
+
+    var bk = document.getElementById('backups');
+    bk.textContent = '';
+    if (!d.backups.items.length) empty(bk, 3, 'Noch keine Sicherung vorhanden.');
+    d.backups.items.forEach(function (b) { row(bk, [b.name, bytes(b.size), String(b.files)]); });
+  }
+
+  function load() {
+    fetch('/api/status', { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error('Status ' + r.status); return r.json(); })
+      .then(render)
+      .catch(function (e) {
+        var err = document.getElementById('error');
+        err.textContent = '';
+        err.appendChild(el('div', 'err', 'Daten konnten nicht geladen werden: ' + e.message));
+      });
+  }
+  load();
+  setInterval(load, 30000);
+})();
+</script>
+</body>
+</html>

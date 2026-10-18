@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# mkctl: kleines Werkzeug für den Markentrix-Server.
+set -Eeuo pipefail
+
+BASE=/opt/markentrix
+SITES=/srv/sites
+COMPOSE=(docker compose --project-directory "$BASE" -f "$BASE/docker-compose.yml")
+
+# shellcheck disable=SC1091
+set -a; . "$BASE/.env"; set +a
+MODE="$(cat "$BASE/mode" 2>/dev/null || echo own)"
+
+die() { printf 'Fehler: %s\n' "$*" >&2; exit 1; }
+need_root() { [ "$(id -u)" -eq 0 ] || die "Bitte mit sudo starten."; }
+
+server_ip() { curl -4 -fsS --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}'; }
+
+reload_caddy() {
+  if [ "$MODE" = own ]; then
+    "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null
+    echo "Caddy wurde neu geladen."
+  else
+    echo "Hinweis: Auf diesem Server läuft ein bereits vorhandener Caddy. Er muss die neue Datei noch einbinden:"
+    echo "  $BASE/caddy/sites/*.caddy"
+  fi
+}
+
+write_meta() { # Datei Typ Name Kunde
+  printf '{\n  "typ": "%s",\n  "name": "%s",\n  "kunde": "%s",\n  "angelegt": "%s"\n}\n' "$2" "$3" "$4" "$(date +%F)" > "$1/site.json"
+}
+
+placeholder_page() { # Zielordner Titel
+  cat > "$1/index.html" <<HTML
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>$2</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;background:#0B1020;color:#fff}
+main{text-align:center;padding:24px}h1{margin:0 0 8px;font-size:32px}p{margin:0;color:#B8C0DC}</style></head>
+<body><main><h1>$2</h1><p>Platzhalter. Hier kommt die Seite hin.</p></main></body></html>
+HTML
+}
+
+cmd="${1:-help}"; shift || true
+
+case "$cmd" in
+  status)
+    echo "== Dienste =="
+    docker ps --format 'table {{.Names}}\t{{.Status}}' | sort
+    echo; echo "== Speicher =="; df -h / "$SITES" 2>/dev/null | awk 'NR==1 || !seen[$1]++'
+    echo; echo "== Arbeitsspeicher =="; free -h | awk 'NR<=2'
+    echo; echo "== Letzte Sicherung =="
+    if [ -f "$BASE/backups/last_success" ]; then date -d "@$(cat "$BASE/backups/last_success")" '+%d.%m.%Y %H:%M'; else echo "noch keine"; fi
+    ;;
+
+  backup)
+    need_root; "$BASE/bin/backup.sh" ;;
+
+  demo-add)
+    need_root
+    name="${1:-}"; [ -n "$name" ] || die "Aufruf: mkctl demo-add <name> [--from <Ordner>]"
+    [[ "$name" =~ ^[a-z0-9]([a-z0-9-]{0,40}[a-z0-9])?$ ]] || die "Name nur mit a-z, 0-9 und Bindestrich."
+    dir="$SITES/demos/$name"; [ ! -e "$dir" ] || die "Die Demo $name gibt es schon."
+    mkdir -p "$dir"
+    if [ "${2:-}" = "--from" ]; then
+      [ -d "${3:-}" ] || die "Quellordner nicht gefunden: ${3:-}"
+      cp -a "$3"/. "$dir"/
+    else
+      placeholder_page "$dir" "Demo $name"
+    fi
+    write_meta "$dir" demo "$name" ""
+    chmod -R a+rX "$dir"
+    echo "Demo angelegt: https://demo.$DOMAIN/$name/"
+    ;;
+
+  site-add)
+    need_root
+    domain="${1:-}"; [ -n "$domain" ] || die "Aufruf: mkctl site-add <domain> [--from <Ordner>] [--kunde \"Name\"]"
+    [[ "$domain" =~ ^([a-z0-9-]+\.)+[a-z]{2,}$ ]] || die "Das sieht nicht wie eine Domain aus: $domain"
+    shift
+    from=""; kunde=""
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --from) from="${2:-}"; shift 2 ;;
+        --kunde) kunde="${2:-}"; shift 2 ;;
+        *) die "Unbekannte Option: $1" ;;
+      esac
+    done
+    dir="$SITES/live/$domain"; [ ! -e "$dir" ] || die "Die Website $domain gibt es schon."
+    mkdir -p "$dir" "$BASE/caddy/sites"
+    if [ -n "$from" ]; then [ -d "$from" ] || die "Quellordner nicht gefunden: $from"; cp -a "$from"/. "$dir"/; else placeholder_page "$dir" "$domain"; fi
+    write_meta "$dir" live "$domain" "$kunde"
+    chmod -R a+rX "$dir"
+    cat > "$BASE/caddy/sites/$domain.caddy" <<CADDY
+$domain, www.$domain {
+	encode zstd gzip
+	root * /srv/sites/live/$domain
+	file_server
+}
+CADDY
+    reload_caddy
+    echo "Website angelegt: $domain"
+    echo "Damit sie erreichbar ist, muss die Domain per A-Eintrag auf $(server_ip) zeigen (auch www)."
+    ;;
+
+  site-list)
+    for kind in live demos; do
+      echo "== $kind =="
+      ls -1 "$SITES/$kind" 2>/dev/null || true
+    done
+    ;;
+
+  restart)
+    need_root; svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl restart <n8n|panel|caddy|mk-db>"
+    "${COMPOSE[@]}" restart "$svc"
+    ;;
+
+  psql)
+    need_root; docker exec -it mk-db psql -U markentrix -d markentrix
+    ;;
+
+  logs)
+    svc="${1:-}"; [ -n "$svc" ] || die "Aufruf: mkctl psql                             Datenbank-Konsole öffnen
+mkctl logs <Containername>   (Namen siehe: mkctl status)"
+    docker logs --tail 100 -f "$svc"
+    ;;
+
+  update)
+    need_root
+    echo "Vor dem Update läuft eine Sicherung ..."; "$BASE/bin/backup.sh"
+    "${COMPOSE[@]}" pull --ignore-buildable n8n n8n-db mk-db
+    if [ "$MODE" = own ]; then "${COMPOSE[@]}" pull caddy; "${COMPOSE[@]}" --profile own-caddy up -d --build; else "${COMPOSE[@]}" up -d --build; fi
+    echo "Update fertig."
+    ;;
+
+  help|*)
+    cat <<TXT
+mkctl status                           Überblick: Dienste, Speicher, letzte Sicherung
+mkctl backup                           Sicherung jetzt starten
+mkctl demo-add <name> [--from Ordner]  Neue Demo unter https://demo.$DOMAIN/<name>/
+mkctl site-add <domain> [--from Ordner] [--kunde "Name"]
+                                       Neue Kunden-Website mit eigener Domain
+mkctl site-list                        Alle Websites und Demos
+mkctl restart <n8n|panel|caddy|mk-db>
+mkctl logs <Containername>             Protokoll eines Dienstes ansehen
+mkctl update                           Sicherung, dann alle Dienste aktualisieren
+TXT
+    ;;
+esac
