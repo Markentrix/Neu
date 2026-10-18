@@ -141,7 +141,9 @@ services:
       CHAT_WEBHOOK_SECRET: ${CHAT_WEBHOOK_SECRET:-}
     volumes:
       - portal_uploads:/data
+      - /srv/sites:/srv/sites:ro
       - /srv/sites/live:/srv/sites/live
+      - ./queue:/data/queue
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]

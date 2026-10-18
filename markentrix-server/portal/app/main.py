@@ -9,6 +9,7 @@ from . import config, db
 from .routes_admin import router as admin_router
 from .routes_auth import router as auth_router
 from .routes_kunde import router as kunde_router
+from .routes_websites import router as websites_router
 
 
 @asynccontextmanager
@@ -52,6 +53,7 @@ def healthz():
 app.include_router(auth_router)
 app.include_router(kunde_router)
 app.include_router(admin_router)
+app.include_router(websites_router)
 
 
 def seite(name):

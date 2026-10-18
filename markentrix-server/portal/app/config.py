@@ -5,6 +5,8 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "")
 BASE_URL = os.environ.get("PORTAL_BASE_URL", "http://localhost:8000").rstrip("/")
 COOKIE_SECURE = os.environ.get("PORTAL_COOKIE_SECURE", "1") != "0"
 UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR", "/data/uploads"))
+SITES_ROOT = Path(os.environ.get("SITES_ROOT", "/srv/sites"))
+QUEUE_DIR = Path(os.environ.get("QUEUE_DIR", "/data/queue"))
 SITES_LIVE = Path(os.environ.get("SITES_LIVE", "/srv/sites/live"))
 CHAT_WEBHOOK_URL = os.environ.get("CHAT_WEBHOOK_URL", "")
 CHAT_WEBHOOK_SECRET = os.environ.get("CHAT_WEBHOOK_SECRET", "")

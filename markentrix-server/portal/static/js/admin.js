@@ -1,7 +1,7 @@
 import { h, api, datum, zeit, euro, melde, abmelden } from './common.js';
 
 const root = document.getElementById('app');
-const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['katalog', 'Pakete & Preise'], ['protokoll', 'Protokoll']];
+const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['websites', 'Websites & Demos'], ['katalog', 'Pakete & Preise'], ['protokoll', 'Protokoll']];
 let paketListe = [];
 
 function gerüst(aktiv, inhalt) {
@@ -88,6 +88,29 @@ V.katalog = async () => {
       tabelle([['Code', z => z.code], ['Name', z => z.name], ['Einrichtung', z => euro(z.einrichtung_cent)], ['Monatlich', z => euro(z.monatlich_cent)], ['Projekt', z => euro(z.projekt_cent)]], d.produkte)),
     h('div', { class: 'card' }, h('h2', {}, 'Module'), tabelle([['Code', z => z.code], ['Name', z => z.name], ['Art', z => z.art], ['Beschreibung', z => z.beschreibung]], d.module)),
     h('p', { class: 'muted small' }, 'Preise ändern: neue Zeile in produkt_preise mit späterem gueltig_ab (mkctl psql). Bestehende Buchungen behalten ihren Preis.'));
+};
+
+V.websites = async () => {
+  const d = await api('/api/admin/websites');
+  const m = h('div');
+  const mb = (b) => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+  const wann = (t) => new Date(t * 1000).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' });
+  const loesch = (z) => z.loeschung_laeuft ? h('span', { class: 'pill warn' }, 'wird gelöscht …') :
+    h('button', { class: 'btn small bad', onclick: async () => {
+      const eingabe = prompt('Zum Löschen den Namen genau eintippen:\n' + z.name + '\n\nDie Seite geht offline und liegt ' + d.aufbewahrung_tage + ' Tage im Papierkorb.');
+      if (eingabe === null) return;
+      try { const r = await api('/api/admin/websites/loeschen', { method: 'POST', body: { art: z.art, name: z.name, bestaetigung: eingabe } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
+      catch (x) { melde(m, x.message); }
+    } }, 'Löschen');
+  const zurueck = (z) => h('button', { class: 'btn small sec', onclick: async () => {
+    try { const r = await api('/api/admin/websites/wiederherstellen', { method: 'POST', body: { id: z.id } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
+    catch (x) { melde(m, x.message); }
+  } }, 'Wiederherstellen');
+  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m,
+    h('div', { class: 'card' }, h('h2', {}, 'Aktiv'),
+      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', loesch]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
+    h('div', { class: 'card' }, h('h2', {}, 'Papierkorb'), h('p', { class: 'small muted' }, 'Gelöschte Seiten bleiben ' + d.aufbewahrung_tage + ' Tage erhalten und werden dann endgültig entfernt.'),
+      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Gelöscht', z => wann(z.geloescht)], ['Größe', z => mb(z.groesse)], ['', zurueck]], d.papierkorb, 'Papierkorb ist leer.')));
 };
 
 V.protokoll = async () => {
