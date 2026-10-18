@@ -21,6 +21,7 @@ from .routes_onboarding import router as onboarding_router
 from .routes_provision import router as provision_router, vertrieb_router as provision_vertrieb_router
 from .routes_team import router as team_router, admin_router as team_admin_router
 from .routes_avv import router as avv_router, kunde_router as avv_kunde_router
+from .routes_offboarding import router as offboarding_router
 from .routes_belege import router as belege_router, kunde_router as belege_kunde_router
 
 
@@ -60,6 +61,29 @@ async def schutz(request: Request, call_next):
     return r
 
 
+_letzter_alarm: dict = {}
+
+
+@app.exception_handler(Exception)
+async def unbehandelt(request: Request, exc: Exception):
+    """Unerwartete Fehler: nicht nur 500 zeigen, sondern als Alarm ins Protokoll (max. 1x je Pfad und 10 Minuten), damit sie auffallen."""
+    import logging
+    import time
+    logging.getLogger("uvicorn.error").exception("Unbehandelter Fehler bei %s", request.url.path, exc_info=exc)
+    pfad = request.url.path
+    jetzt = time.time()
+    if jetzt - _letzter_alarm.get(pfad, 0) > 600:
+        _letzter_alarm[pfad] = jetzt
+        try:
+            import json
+            with db.tx("system") as cur:
+                cur.execute("INSERT INTO alarme (stufe, quelle, titel, details) VALUES ('warnung','portal',%s,%s::jsonb)",
+                            ("Fehler im Portal: " + request.method + " " + pfad[:120], json.dumps({"fehler": type(exc).__name__, "text": str(exc)[:500]})))
+        except Exception:  # noqa: BLE001 - Alarm darf nie selbst den Fehler verdoppeln
+            pass
+    return JSONResponse({"detail": "Interner Fehler. Der Fehler wurde protokolliert."}, status_code=500)
+
+
 @app.get("/healthz")
 def healthz():
     return PlainTextResponse("ok")
@@ -77,6 +101,7 @@ app.include_router(public_router)
 app.include_router(onboarding_router)
 app.include_router(belege_router)
 app.include_router(belege_kunde_router)
+app.include_router(offboarding_router)
 app.include_router(avv_router)
 app.include_router(avv_kunde_router)
 app.include_router(team_router)

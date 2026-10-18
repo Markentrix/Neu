@@ -417,7 +417,6 @@ def entscheiden(tabelle: str, rid: str, data: EntscheidIn, user: dict = Depends(
             extra["begruendung"] = data.begruendung
     if tabelle == "auskunftsanfragen" and data.status in ("erledigt", "abgelehnt"):
         extra = {"erledigt_am": "now"}
-    felder = {"status": data.status}
     try:
         with tx("admin") as cur:
             sets = [sql.SQL("{}=%s").format(sql.Identifier("status"))]

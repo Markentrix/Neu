@@ -21,6 +21,8 @@ curl -fsS --max-time 10 http://127.0.0.1:8090/healthz >/dev/null 2>&1 || p "Port
 [ -z "${DOMAIN:-}" ] || curl -fsS --max-time 15 "https://portal.${DOMAIN}/healthz" >/dev/null 2>&1 || p "Portal von außen nicht erreichbar (https://portal.${DOMAIN})"
 # 3) Speicherplatz
 USE="$(df --output=pcent / | tail -1 | tr -dc 0-9)"; [ "${USE:-0}" -lt 85 ] || p "Festplatte zu ${USE}% voll"
+# 3b) Sicherheitsupdate wartet auf Neustart (erst nach 7 Tagen melden, damit du in Ruhe planen kannst)
+if [ -f /var/run/reboot-required ] && [ $(( $(date +%s) - $(stat -c %Y /var/run/reboot-required) )) -gt 604800 ]; then p "Der Server braucht seit über 7 Tagen einen Neustart (Sicherheitsupdate). Bitte in einem ruhigen Moment: reboot"; fi
 # 4) Sicherungen
 alter() { [ -f "$1" ] && echo $(( ( $(date +%s) - $(cat "$1") ) / 3600 )) || echo 9999; }
 [ "$(alter "$BASE/backups/last_success")" -le 36 ] || p "Letzte Sicherung ist älter als 36 Stunden"

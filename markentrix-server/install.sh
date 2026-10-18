@@ -150,6 +150,16 @@ chown -R 10001:10001 "$SITES/live" 2>/dev/null || true
 # ---------------------------------------------------------------- 6. n8n, Dashboard, Caddy
 say "6/8 n8n, Server-Dashboard, Portal und Webserver starten"
 cd "$BASE"
+# n8n auf die laufende Version festlegen, damit ein Update nicht ungewollt Workflows verändert (Änderung später mit: mkctl n8n-version <x.y.z>)
+if ! grep -q '^N8N_VERSION=' "$BASE/.env"; then
+  LAUFEND="$(docker exec mk-n8n n8n --version 2>/dev/null | tr -dc '0-9.' | head -c 20 || true)"
+  if [[ "$LAUFEND" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "N8N_VERSION=$LAUFEND" >> "$BASE/.env"; set -a; . "$BASE/.env"; set +a
+    ok "n8n ist auf Version $LAUFEND festgelegt"
+  else
+    warn "n8n-Version konnte nicht ermittelt werden (n8n läuft noch nicht?). Nach dem Start festlegen mit: mkctl n8n-version <Version>"
+  fi
+fi
 if [ "$CADDY_MODE" = own ]; then
   docker compose --project-directory "$BASE" -f "$BASE/docker-compose.yml" --profile own-caddy up -d --build
 else
@@ -195,6 +205,28 @@ else
   ADMIN_PW="(Admin gibt es schon. Neues Passwort: mkctl admin-reset ${ACME_EMAIL})"
 fi
 [ -n "${ADMIN_PW:-}" ] || warn "Admin konnte nicht angelegt werden. Danach ausführen: mkctl admin-add ${ACME_EMAIL}"
+
+# ---------------------------------------------------------------- Absicherung des Servers
+say "Server absichern (automatische Sicherheitsupdates, Schutz vor Passwort-Raten, Protokolle begrenzen)"
+if apt-get install -y -qq unattended-upgrades fail2ban logrotate dnsutils >/dev/null 2>&1; then
+  printf 'APT::Periodic::Update-Package-Lists "1";\nAPT::Periodic::Unattended-Upgrade "1";\n' > /etc/apt/apt.conf.d/20auto-upgrades
+  install -d /etc/fail2ban/jail.d
+  printf '[sshd]\nenabled = true\nbackend = systemd\nmaxretry = 5\nfindtime = 10m\nbantime = 1h\n' > /etc/fail2ban/jail.d/markentrix.local
+  systemctl enable --now fail2ban >/dev/null 2>&1 && systemctl restart fail2ban >/dev/null 2>&1 || warn "fail2ban konnte nicht gestartet werden"
+  cat > /etc/logrotate.d/markentrix <<'LOGEOF'
+/var/log/markentrix-*.log {
+    weekly
+    rotate 8
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
+LOGEOF
+  ok "Sicherheitsupdates automatisch, fail2ban aktiv, Protokolle werden wöchentlich rotiert"
+else
+  warn "Absicherung konnte nicht installiert werden (apt). Später erneut: bash install.sh"
+fi
 
 # ---------------------------------------------------------------- 7. Sicherung
 say "7/8 Tägliche Sicherung einrichten und einmal testen"

@@ -7,7 +7,7 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import config, zugang
+from . import zugang
 from .db import tx
 from .security import EMAIL_RE, audit, rate_limit, require_admin, require_inhaber, require_kunde
 

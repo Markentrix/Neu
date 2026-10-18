@@ -215,6 +215,48 @@ SQL
   watchdog)
     need_root; "$BASE/bin/watchdog.sh" "$@" ;;
 
+  n8n-version)
+    need_root
+    v="${1:-}"; [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "Aufruf: mkctl n8n-version <x.y.z>   (aktuell: $(grep '^N8N_VERSION=' "$BASE/.env" | cut -d= -f2))"
+    echo "Sicherung vor der Änderung ..."; "$BASE/bin/backup.sh"
+    sed -i '/^N8N_VERSION=/d' "$BASE/.env"; echo "N8N_VERSION=$v" >> "$BASE/.env"
+    "${COMPOSE[@]}" pull n8n && "${COMPOSE[@]}" up -d n8n
+    echo "n8n läuft jetzt mit Version $v. Bitte einmal die Workflows prüfen."
+    ;;
+
+  ssh-haerten)
+    need_root
+    f=/etc/ssh/sshd_config.d/99-markentrix.conf
+    if [ "${1:-}" = "--rueckgaengig" ]; then rm -f "$f"; systemctl reload ssh 2>/dev/null || systemctl reload sshd; echo "Rückgängig gemacht."; exit 0; fi
+    [ -s /root/.ssh/authorized_keys ] || die "Es ist kein SSH-Schlüssel für root hinterlegt (/root/.ssh/authorized_keys ist leer). Ohne Schlüssel würdest du dich aussperren. Es wurde nichts verändert."
+    echo "Das schaltet die Anmeldung per Passwort über SSH ab. Nur noch Schlüssel funktionieren (die Hetzner-Konsole im Browser bleibt davon unberührt)."
+    read -r -p "Ist ein Schlüssel hinterlegt UND hast du dich damit schon einmal erfolgreich angemeldet? (ja/nein): " a
+    [ "$a" = ja ] || die "Abgebrochen. Es wurde nichts verändert."
+    install -d /etc/ssh/sshd_config.d
+    printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\nPermitRootLogin prohibit-password\n' > "$f"
+    if sshd -t; then systemctl reload ssh 2>/dev/null || systemctl reload sshd; echo "Fertig. Teste in einem zweiten Fenster, ob die Anmeldung mit Schlüssel noch klappt. Rückgängig: mkctl ssh-haerten --rueckgaengig"
+    else rm -f "$f"; die "Die SSH-Einstellung war fehlerhaft und wurde nicht übernommen."; fi
+    ;;
+
+  mail-check)
+    need_root
+    command -v dig >/dev/null || { apt-get update -qq && apt-get install -y -qq dnsutils >/dev/null; }
+    d="${1:-$DOMAIN}"; sel="${2:-}"
+    echo "Prüfung der Mail-Einträge für $d"
+    spf="$(dig +short TXT "$d" | tr -d '"' | grep -i '^v=spf1' || true)"
+    [ -n "$spf" ] && echo "  OK      SPF:   $spf" || echo "  FEHLT   SPF   (TXT-Eintrag auf $d, beginnt mit v=spf1; erlaubt deinem Mail-Anbieter zu senden)"
+    dm="$(dig +short TXT "_dmarc.$d" | tr -d '"' | grep -i '^v=DMARC1' || true)"
+    [ -n "$dm" ] && echo "  OK      DMARC: $dm" || echo "  FEHLT   DMARC (TXT-Eintrag auf _dmarc.$d, z. B. v=DMARC1; p=none; rua=mailto:info@$d)"
+    mx="$(dig +short MX "$d" || true)"; [ -n "$mx" ] && echo "  OK      MX:    $(echo "$mx" | tr '\n' ' ')" || echo "  FEHLT   MX    (damit Antworten bei dir ankommen)"
+    gefunden=""
+    for s in ${sel:-default mail google selector1 selector2 k1 k2 s1 s2 dkim}; do
+      k="$(dig +short TXT "${s}._domainkey.$d" | tr -d '"' | grep -i 'v=DKIM1\|p=' || true)"
+      [ -n "$k" ] && { echo "  OK      DKIM:  Selektor $s vorhanden"; gefunden=1; }
+    done
+    [ -n "$gefunden" ] || echo "  FEHLT   DKIM  (Selektor deines Mail-Anbieters unbekannt: mkctl mail-check $d <selektor>; der Selektor steht in der Anbieter-Verwaltung)"
+    echo "Anleitung: docs/MAIL-DNS.md"
+    ;;
+
   help|*)
     cat <<TXT
 mkctl status                           Überblick: Dienste, Speicher, letzte Sicherung
@@ -233,6 +275,9 @@ mkctl offsite-test                     Prüft die externe Sicherung
 mkctl restore-test                     Spielt die letzte Sicherung testweise ein und prüft sie
 mkctl alarm-telegram <Token> <Chat-ID> Zweiter Alarmweg per Telegram einrichten
 mkctl watchdog [--test]                Überwachung von Hand ausführen
+mkctl mail-check [domain] [selektor]   Prüft SPF, DKIM, DMARC und MX der Absender-Domain
+mkctl n8n-version <x.y.z>              n8n bewusst auf eine bestimmte Version setzen (mit Sicherung)
+mkctl ssh-haerten [--rueckgaengig]     SSH nur noch mit Schlüssel (fragt vorher nach)
 TXT
     ;;
 esac

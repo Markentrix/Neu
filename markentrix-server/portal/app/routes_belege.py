@@ -6,7 +6,7 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import belege, mailer, rechtstexte
+from . import belege, mailer, rechtstexte, zahlungsabgleich
 from .db import tx
 from .security import audit, require_admin, require_inhaber
 
@@ -257,6 +257,32 @@ def bezahlt(bid: str, data: BezahltIn, user: dict = Depends(require_admin)):
         cur.execute("UPDATE belege SET status='bezahlt', bezahlt_am=%s, bezahlt_cent=%s, geaendert_am=now() WHERE id=%s", (data.datum or date.today(), betrag, bid))
         audit(cur, user, "rechnung_bezahlt", b["kunden_id"], {"nummer": b["nummer"]})
     return {"ok": True}
+
+
+class AbgleichIn(BaseModel):
+    csv: str = Field(max_length=3_000_000)
+    anwenden: bool = False
+
+
+@router.post("/belege/zahlungsabgleich")
+def zahlungsabgleich_route(data: AbgleichIn, user: dict = Depends(require_admin)):
+    """Kontoauszug-CSV mit offenen Rechnungen abgleichen. Ohne 'anwenden' nur Vorschau; gebucht werden nur eindeutige Treffer mit passendem Betrag."""
+    try:
+        zeilen = zahlungsabgleich.zeilen_lesen(data.csv)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    with tx("admin") as cur:
+        erg = zahlungsabgleich.abgleichen(cur, zeilen)
+        gebucht = 0
+        if data.anwenden:
+            for t in erg["sicher"]:
+                cur.execute("UPDATE belege SET status='bezahlt', bezahlt_am=%s, bezahlt_cent=%s, geaendert_am=now() WHERE id=%s AND status IN ('gestellt','versendet') RETURNING kunden_id",
+                            (t["datum"] or date.today(), t["eingang_cent"], t["beleg_id"]))
+                r = cur.fetchone()
+                if r:
+                    gebucht += 1
+                    audit(cur, user, "rechnung_bezahlt", r["kunden_id"], {"nummer": t["nummer"], "quelle": "kontoauszug"})
+    return {"zeilen": len(zeilen), "gebucht": gebucht, "angewendet": data.anwenden, **erg}
 
 
 class MahnIn(BaseModel):

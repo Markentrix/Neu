@@ -56,6 +56,9 @@ mkctl migrate                             Datenbankstruktur anlegen/aktualisiere
 mkctl demo-add anadolu                    neue Demo unter https://demo.markentrix.de/anadolu/
 mkctl site-add kunde.de --kunde "Name"    Kunden-Website mit eigener Domain
 mkctl update                              Sicherung, dann alles aktualisieren
+mkctl n8n-version 1.2.3                   n8n gezielt auf eine Version setzen (mit Sicherung davor)
+mkctl mail-check                          SPF/DKIM/DMARC der Absender-Domain prüfen
+mkctl ssh-haerten                         Passwort-Login per SSH abschalten (nur mit Schlüssel)
 mkctl help                                alle Befehle
 ```
 
@@ -151,7 +154,7 @@ Wichtig:
 
 ## Kosten pro Kunde
 
-Im Kunden steht die Karte „Kosten (KI-Chat) pro Monat" mit Tokens, Kosten in Euro und dem Anteil am Monatsumsatz. Die Preise je 1 Mio. Tokens stehen unter Einstellungen → KI-Assistent (Voreinstellung 3 € / 15 €); bitte mit der aktuellen Anthropic-Preisliste abgleichen. Andere Kosten (Telefonie, Werbung …) werden noch nicht erfasst.
+Im Kunden steht die Karte „Kosten (KI-Chat) pro Monat" mit Tokens, Kosten in Euro und dem Anteil am Monatsumsatz. Die Preise je 1 Mio. Tokens stehen unter Einstellungen → KI-Assistent (Voreinstellung 3 € / 15 €); bitte mit der aktuellen Anthropic-Preisliste abgleichen. Andere Kosten (Telefonie, Domain, Werbung …) trägst du in derselben Karte unten von Hand ein (Kostenart, Betrag, optional Datum); sie fließen in die Monatssumme ein und werden zusätzlich nach Kostenart aufgeteilt angezeigt.
 
 ## Team-Zugänge, Branding, App
 
@@ -166,3 +169,37 @@ Im Kunden steht die Karte „Kosten (KI-Chat) pro Monat" mit Tokens, Kosten in E
 - **Überwachung (Watchdog)**: Alle 5 Minuten werden Container, Portal, Speicherplatz und Sicherungen geprüft. Alarme kommen per E-Mail, optional zusätzlich per Telegram (`mkctl alarm-telegram <Bot-Token> <Chat-ID>`).
 - **Ausfall von außen**: Der Watchdog läuft auf demselben Server. Für den Fall, dass der ganze Server aus ist, zusätzlich einen kostenlosen externen Dienst wie UptimeRobot auf `https://portal.markentrix.de/healthz` einrichten.
 - **Testsystem**: siehe `docs/TESTSYSTEM.md`.
+
+## Server-Härtung (wird bei der Installation eingerichtet)
+
+- **Automatische Sicherheitsupdates** des Betriebssystems (unattended-upgrades). Braucht ein Update einen Neustart, meldet der Watchdog das erst nach 7 Tagen per E-Mail; dann `reboot` in der Hetzner-Konsole.
+- **fail2ban** sperrt IPs nach 5 falschen SSH-Anmeldungen für 1 Stunde.
+- **Log-Rotation**: Docker-Logs sind auf 3 × 10 MB je Container begrenzt, damit die Platte nicht vollläuft.
+- **n8n-Version festgehalten**: Die Installation merkt sich die laufende n8n-Version in `.env` (`N8N_VERSION`). Ein `mkctl update` springt dadurch nicht ungewollt auf eine neue Hauptversion. Gezielt wechseln: `mkctl n8n-version <Version>`; vorher wird eine Sicherung gemacht.
+- **SSH nur mit Schlüssel**: Erst sicherstellen, dass ein eigener Schlüssel in `/root/.ssh/authorized_keys` steht und du dich damit anmelden kannst (zweites Fenster offen lassen!). Dann `mkctl ssh-haerten`. Rückgängig: `mkctl ssh-haerten --rueckgaengig`. Die Hetzner-Web-Konsole funktioniert unabhängig davon immer weiter.
+- **Hetzner Cloud Firewall** (im Hetzner-Konto, nicht auf dem Server): nur Ports 22, 80 und 443 eingehend erlauben.
+
+## Zahlungseingänge abgleichen
+
+Unter „Angebote & Rechnungen" ganz oben: Kontoauszug als CSV aus dem Online-Banking exportieren, Datei auswählen, „Vorschau". Das Portal sucht in den Verwendungszwecken nach Rechnungsnummern offener Rechnungen.
+
+- **Passt genau** (Nummer und Betrag stimmen): kann mit einem Klick als bezahlt gebucht werden.
+- **Betrag weicht ab** (Teilzahlung, Skonto, Überzahlung): wird nie automatisch gebucht, bitte selbst prüfen.
+- **Nicht zugeordnet**: nur zur Info. Ausgänge werden ignoriert.
+
+Erst die Vorschau, dann „buchen". Derselbe Auszug kann gefahrlos zweimal hochgeladen werden.
+
+## Kunde beendet den Vertrag (Offboarding)
+
+Im Kunden, wenn der Status „gekündigt" oder „beendet" ist, gibt es die Karte „Vertragsende: Datenexport und Löschung":
+
+1. **Datenexport (ZIP)**: alle Daten des Kunden (Anfragen, Kontakte, Wissensbasis, Chat, Rechnungen als PDF, Berichte, AVV, hochgeladene Dateien) zum Übergeben an den Kunden. Passwörter sind nicht enthalten.
+2. **Löschen**: Haken „Export wurde übergeben" setzen und die Kundennummer eintippen. Gelöscht werden Inhalte, Zugänge, Kontaktdaten und die Website-Dateien (Website-Ordner erst nach 14 Tagen endgültig, Papierkorb). **Bleiben müssen** aus gesetzlichen Gründen Stammdaten, Rechnungen/Angebote, Verträge, Buchungen, Provisionen, AVV und das Protokoll. Das Löschprotokoll hält fest, was wann gelöscht wurde. Aufbewahrungsfristen (i. d. R. 6 bzw. 8 bis 10 Jahre) bitte mit der Steuerberatung bestätigen.
+
+## Fehler im Portal
+
+Unerwartete Fehler zeigen dem Nutzer nur „Interner Fehler" und erscheinen als Warnung in der Übersicht (unter Alarme), höchstens einmal je Seite und 10 Minuten. Dort bestätigen, wenn erledigt.
+
+## Automatische Tests
+
+`sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").

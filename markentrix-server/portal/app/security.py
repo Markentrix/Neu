@@ -8,7 +8,6 @@ from collections import defaultdict, deque
 
 from fastapi import Depends, HTTPException, Request
 
-from . import config
 from .db import tx
 
 ITER = 600_000

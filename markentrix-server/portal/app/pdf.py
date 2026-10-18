@@ -6,7 +6,7 @@ from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle  # noqa: F401
 
 AKZENT = colors.HexColor("#4F46E5")
 GRAU = colors.HexColor("#6B7280")
@@ -99,5 +99,6 @@ def dokument(titel: str, kopfzeile: str, inhalt: list, firma: dict, fuss_extra: 
     return puffer.getvalue()
 
 
-# bequemer Zugriff aus anderen Modulen
-from reportlab.platypus import Spacer  # noqa: E402,F401
+
+# von anderen Modulen als pdf.PageBreak usw. benutzt
+_REEXPORT = (KeepTogether, PageBreak, Spacer)

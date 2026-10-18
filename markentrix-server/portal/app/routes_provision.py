@@ -145,8 +145,35 @@ def kosten(kid: str, user: dict = Depends(require_admin)):
                                   coalesce(sum(menge),0)::bigint AS tokens
                            FROM kosten_log WHERE kunden_id=%s GROUP BY 1 ORDER BY 1 DESC LIMIT 12""", (kid,))
             monate = cur.fetchall()
+            cur.execute("""SELECT date_trunc('month', zeit)::date AS monat, dienst, round(coalesce(sum(kosten_cent),0))::bigint AS kosten_cent
+                           FROM kosten_log WHERE kunden_id=%s GROUP BY 1,2 ORDER BY 1 DESC, 2 LIMIT 60""", (kid,))
+            dienste = cur.fetchall()
             cur.execute("SELECT coalesce(sum(monatlich_cent - rabatt_cent),0) AS umsatz FROM buchungen WHERE kunden_id=%s AND status='aktiv'", (kid,))
             umsatz = int(cur.fetchone()["umsatz"])
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Kunde nicht gefunden.")
-    return {"monate": monate, "umsatz_monat_cent": umsatz}
+    return {"monate": monate, "dienste": dienste, "umsatz_monat_cent": umsatz}
+
+
+class KostenIn(BaseModel):
+    dienst: str = Field(min_length=2, max_length=40, pattern=r"^[A-Za-z0-9_ äöüÄÖÜß.-]+$")
+    betrag_eur: float = Field(gt=0, le=100000)
+    notiz: str = Field(default="", max_length=200)
+    datum: date | None = None
+
+
+@router.post("/kunden/{kid}/kosten")
+def kosten_erfassen(kid: str, data: KostenIn, user: dict = Depends(require_admin)):
+    """Kosten von Hand eintragen (z. B. Telefonie, Domain, Werbebudget), damit die Marge pro Kunde stimmt."""
+    dienst = data.dienst.strip().lower().replace(" ", "_")
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT 1 FROM kunden WHERE id=%s", (kid,))
+            if not cur.fetchone():
+                raise HTTPException(404, "Kunde nicht gefunden.")
+            cur.execute("INSERT INTO kosten_log (zeit, kunden_id, dienst, einheit, menge, kosten_cent) VALUES (COALESCE(%s::date, now()::date)::timestamptz + interval '12 hours', %s, %s, 'manuell', 0, %s)",
+                        (data.datum, kid, dienst, round(data.betrag_eur * 100, 2)))
+            audit(cur, user, "kosten_erfasst", kid, {"dienst": dienst, "betrag_eur": data.betrag_eur, "notiz": data.notiz})
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Kunde nicht gefunden.")
+    return {"ok": True}

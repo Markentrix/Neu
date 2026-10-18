@@ -55,7 +55,6 @@ def alarm_mail(stufe: str, titel: str, text: str):
 
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "admin-add":
-        from . import config
         db.open_pool()
         admin_add(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None)
         db.close_pool()

@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from . import zweifaktor
 from .db import tx
 from .einstellungen import entschluesseln, verschluesseln
-from .security import audit, client_ip, current_user, rate_limit, require_admin, verify_password
+from .security import audit, current_user, rate_limit, require_admin, verify_password
 
 router = APIRouter(prefix="/api")
 

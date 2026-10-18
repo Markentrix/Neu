@@ -1,6 +1,13 @@
 # Markentrix Server-Stack: n8n, Server-Dashboard und (optional) Caddy.
 name: markentrix
 
+# Protokolle begrenzen, damit die Festplatte nicht vollläuft
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 networks:
   net:
     name: markentrix_net
@@ -19,6 +26,7 @@ services:
     image: tecnativa/docker-socket-proxy:0.3.0
     container_name: mk-socket-proxy
     restart: unless-stopped
+    logging: *logging
     environment:
       CONTAINERS: 1
       INFO: 1
@@ -32,6 +40,7 @@ services:
     image: postgres:16-alpine
     container_name: mk-db
     restart: unless-stopped
+    logging: *logging
     environment:
       POSTGRES_USER: markentrix
       POSTGRES_DB: markentrix
@@ -49,6 +58,7 @@ services:
     image: postgres:16-alpine
     container_name: mk-n8n-db
     restart: unless-stopped
+    logging: *logging
     environment:
       POSTGRES_USER: n8n
       POSTGRES_DB: n8n
@@ -63,9 +73,10 @@ services:
     networks: [net]
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n:latest
+    image: docker.n8n.io/n8nio/n8n:${N8N_VERSION:-latest}
     container_name: mk-n8n
     restart: unless-stopped
+    logging: *logging
     depends_on:
       n8n-db:
         condition: service_healthy
@@ -99,6 +110,7 @@ services:
     image: markentrix-panel:local
     container_name: mk-panel
     restart: unless-stopped
+    logging: *logging
     depends_on: [socket-proxy]
     ports:
       - "127.0.0.1:8088:8080"
@@ -128,6 +140,7 @@ services:
     image: markentrix-portal:local
     container_name: mk-portal
     restart: unless-stopped
+    logging: *logging
     depends_on:
       mk-db:
         condition: service_healthy
@@ -162,6 +175,7 @@ services:
     container_name: mk-caddy
     profiles: ["own-caddy"]
     restart: unless-stopped
+    logging: *logging
     ports:
       - "80:80"
       - "443:443"

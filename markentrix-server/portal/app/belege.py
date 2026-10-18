@@ -1,13 +1,11 @@
 """Angebote und Rechnungen: Berechnung, Nummernvergabe, PDF, Texte.
 Eine ausgestellte Rechnung wird nie geändert; Korrekturen laufen über eine Storno-Rechnung."""
-import json
 from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from io import BytesIO
 
 import segno
 from fastapi import HTTPException
-from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Image, KeepTogether
 
 from . import pdf, rechtstexte

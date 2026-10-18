@@ -241,11 +241,30 @@ function brandingKarte(kid, k) {
       k.branding_farbe && knopf('Farbe zurücksetzen', async () => { farbeGesetzt = false; senden({}); }, 'sec')));
 }
 
+function offboardingKarte(kid, k) {
+  const m = h('div'); const beendet = ['gekuendigt', 'beendet'].includes(k.status);
+  if (k.geloescht_am) return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende'), h('p', {}, 'Die Inhalte dieses Kunden wurden am ' + datum(k.geloescht_am) + ' gelöscht. Stammdaten und Belege bleiben wegen Aufbewahrungspflichten erhalten.'));
+  const best = h('input', { placeholder: 'Kundennummer ' + k.kundennummer + ' zur Bestätigung', style: 'max-width:300px' });
+  const haken = h('input', { type: 'checkbox', style: 'width:auto' });
+  return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende: Datenexport und Löschung'),
+    h('p', { class: 'small muted' }, 'Zum Vertragsende bekommt der Kunde seine Daten (Pflicht laut AVV) und danach werden seine Inhalte gelöscht. Stammdaten, Rechnungen, Verträge, Buchungen und der AVV bleiben wegen Aufbewahrungspflichten erhalten, die Kontaktdaten der Ansprechperson werden entfernt. Sicherungen enthalten die Daten noch bis zu 14 Tage.'), m,
+    h('p', {}, h('a', { class: 'btn', href: '/api/admin/kunden/' + kid + '/export.zip' }, 'Datenexport als ZIP herunterladen')),
+    beendet ? h('div', { class: 'stack', style: 'margin-top:12px' },
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, haken, 'Der Datenexport wurde an den Kunden übergeben'), best,
+      h('p', {}, knopf('Inhalte endgültig löschen', async () => { if (!confirm('Alle Inhalte dieses Kunden endgültig löschen? Das kann nicht rückgängig gemacht werden.')) return;
+        try { await api('/api/admin/kunden/' + kid + '/loeschen', { method: 'POST', body: { bestaetigung: best.value, export_uebergeben: haken.checked } }); melde(m, 'Gelöscht.', 'ok'); setTimeout(() => location.reload(), 1200); } catch (x) { fehler(m, x); } }, 'bad')))
+      : h('p', { class: 'small muted' }, 'Löschen ist erst möglich, wenn der Status des Kunden „gekündigt“ oder „beendet“ ist.'));
+}
+
 async function kostenKarte(kid) {
-  const d = await api('/api/admin/kunden/' + kid + '/kosten');
-  return h('div', { class: 'card' }, h('h2', {}, 'Kosten (KI-Chat) pro Monat'),
-    h('p', { class: 'small muted' }, 'Monatlicher Umsatz laut aktiven Buchungen: ' + fmtEuro(d.umsatz_monat_cent) + '. Die Kosten werden aus den Tokens und den Preisen unter Einstellungen berechnet.'),
-    tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Tokens', z => z.tokens], ['Kosten', z => fmtEuro(Math.round(z.kosten_cent))], ['Anteil am Umsatz', z => d.umsatz_monat_cent ? (z.kosten_cent / d.umsatz_monat_cent * 100).toFixed(1).replace('.', ',') + ' %' : '–']], d.monate, 'Noch keine Kosten erfasst.'));
+  const d = await api('/api/admin/kunden/' + kid + '/kosten'), m = h('div');
+  const dienst = h('input', { placeholder: 'z. B. telefonie, domain, werbung', maxlength: 40 }), betrag = h('input', { type: 'number', step: '0.01', min: '0.01', placeholder: 'Betrag in €' }), tag = h('input', { type: 'date' });
+  const speichern = knopf('Kosten eintragen', async () => { try { await api('/api/admin/kunden/' + kid + '/kosten', { method: 'POST', body: { dienst: dienst.value, betrag_eur: Number(betrag.value), datum: tag.value || null } }); location.reload(); } catch (x) { fehler(m, x); } }, 'btn');
+  return h('div', { class: 'card' }, h('h2', {}, 'Kosten pro Monat'),
+    h('p', { class: 'small muted' }, 'Monatlicher Umsatz laut aktiven Buchungen: ' + fmtEuro(d.umsatz_monat_cent) + '. KI-Kosten werden automatisch aus den Tokens berechnet, alle anderen Kosten (Telefonie, Domain, Werbung …) trägst du hier von Hand ein.'),
+    tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Tokens', z => z.tokens], ['Kosten gesamt', z => fmtEuro(Math.round(z.kosten_cent))], ['Anteil am Umsatz', z => d.umsatz_monat_cent ? (z.kosten_cent / d.umsatz_monat_cent * 100).toFixed(1).replace('.', ',') + ' %' : '–']], d.monate, 'Noch keine Kosten erfasst.'),
+    d.dienste.length ? h('div', {}, h('h3', {}, 'Aufgeteilt nach Kostenart'), tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kostenart', z => z.dienst], ['Kosten', z => fmtEuro(Math.round(z.kosten_cent))]], d.dienste)) : '',
+    h('h3', {}, 'Kosten von Hand eintragen'), m, h('div', { class: 'row' }, dienst, betrag, tag, speichern));
 }
 
 async function berichteKarte(kid) {
@@ -280,6 +299,25 @@ const belegArt = (z) => z.storno_von ? 'Storno' : z.art === 'rechnung' ? 'Rechnu
 const eurIn = (v) => { const n = Math.round(parseFloat(String(v).replace(/\./g, '').replace(',', '.')) * 100); return Number.isFinite(n) ? n : 0; };
 const eurOut = (c) => (c / 100).toFixed(2).replace('.', ',');
 
+async function abgleichKarte() {
+  const m = h('div'), erg = h('div'); let csvText = '';
+  const datei = h('input', { type: 'file', accept: '.csv,.txt,text/csv', onchange: (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { csvText = String(r.result); }; r.readAsText(f, 'utf-8'); } });
+  const zeige = (j, gebucht) => {
+    erg.replaceChildren(
+      h('p', {}, j.zeilen + ' Zeilen gelesen. ', gebucht ? h('b', {}, j.gebucht + ' Rechnung(en) als bezahlt gebucht.') : 'Das ist erst eine Vorschau, es wurde noch nichts gebucht.'),
+      h('h3', {}, 'Passt genau (' + j.sicher.length + ')'), tabelle([['Rechnung', z => z.nummer], ['Kunde', z => z.firma], ['Betrag', z => fmtEuro(z.eingang_cent)], ['Datum', z => z.datum ? datum(z.datum) : '']], j.sicher, 'Keine eindeutigen Treffer.'),
+      h('h3', {}, 'Bitte prüfen: Betrag weicht ab (' + j.abweichend.length + ')'), tabelle([['Rechnung', z => z.nummer], ['Kunde', z => z.firma], ['Rechnung', z => z.rechnung_cent == null ? '–' : fmtEuro(z.rechnung_cent)], ['Eingang', z => fmtEuro(z.eingang_cent)]], j.abweichend, 'Keine.'),
+      h('p', { class: 'small muted' }, 'Diese werden nie automatisch gebucht – bitte in der Rechnung selbst als bezahlt eintragen, wenn es stimmt.'),
+      h('h3', {}, 'Nicht zugeordnet (' + j.unbekannt.length + ')'), tabelle([['Datum', z => z.datum ? datum(z.datum) : ''], ['Betrag', z => fmtEuro(z.eingang_cent)], ['Verwendungszweck', z => z.text]], j.unbekannt, 'Keine.'));
+    if (!gebucht && j.sicher.length) erg.append(h('p', {}, knopf(j.sicher.length + ' Treffer als bezahlt buchen', () => los(true), 'btn')));
+  };
+  const los = async (anwenden) => { if (!csvText) { fehler(m, new Error('Bitte zuerst die CSV-Datei auswählen.')); return; }
+    try { const j = await api('/api/admin/belege/zahlungsabgleich', { method: 'POST', body: { csv: csvText, anwenden } }); m.replaceChildren(); zeige(j, anwenden); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Zahlungseingänge abgleichen'),
+    h('p', { class: 'small muted' }, 'Kontoauszug als CSV-Datei aus dem Online-Banking exportieren und hier auswählen. Gebucht wird nur, wenn Rechnungsnummer im Verwendungszweck steht und der Betrag genau stimmt. Zuerst siehst du eine Vorschau.'),
+    m, h('div', { class: 'row' }, datei, knopf('Vorschau', () => los(false))), erg);
+}
+
 V.belege = async () => {
   const q = new URLSearchParams(location.hash.split('?')[1] || '');
   const art = q.get('art') || '', status = q.get('status') || '';
@@ -287,6 +325,7 @@ V.belege = async () => {
   const f = (a, st, l) => h('button', { class: (art === a && status === st) ? 'on' : '', onclick: () => { location.hash = '#belege?art=' + a + '&status=' + st; } }, l);
   return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen'),
     h('p', { class: 'small' }, h('a', { href: '/api/admin/belege-export.csv', target: '_blank', rel: 'noopener' }, 'Rechnungen als CSV exportieren (Buchhaltung/sevDesk)')),
+    await abgleichKarte(),
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Offen'), h('b', {}, euro(s.offen))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Überfällig (' + s.ueberfaellig_n + ')'), h('b', {}, euro(s.ueberfaellig))),
@@ -598,6 +637,7 @@ async function kundeDetail(kid) {
     await berichteKarte(kid),
     await kostenKarte(kid),
     brandingKarte(kid, k),
+    offboardingKarte(kid, k),
     h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
 }
 
