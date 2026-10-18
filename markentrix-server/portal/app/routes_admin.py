@@ -10,6 +10,7 @@ from .db import tx
 from .publish import DOMAIN_RE
 from . import zugang
 from . import routes_avv as avv_modul
+from .routes_aufgaben import kennzahlen_laden
 from .security import EMAIL_RE, audit, require_admin
 
 router = APIRouter(prefix="/api/admin")
@@ -57,10 +58,11 @@ def uebersicht(user: dict = Depends(require_admin)):
         uploads = cur.fetchone()["n"]
         cur.execute("SELECT count(*) AS n FROM freigaben WHERE status='offen'")
         freigaben = cur.fetchone()["n"]
+        zus = kennzahlen_laden(cur)
         cur.execute("SELECT zeit, aktion, details, kunden_id FROM audit_log ORDER BY id DESC LIMIT 12")
         letzte = cur.fetchall()
         avv_fehlt = avv_modul.fehlende(cur)
-    return {"avv_fehlt": avv_fehlt, "kunden_status": status, "monatlich_cent": int(mrr), "referenzkunden": referenz, "rechnungen_offen_cent": int(rechn["offen"]), "rechnungen_ueberfaellig": rechn["ueberfaellig"], "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte}
+    return {"avv_fehlt": avv_fehlt, "kunden_status": status, "monatlich_cent": int(mrr), "referenzkunden": referenz, "rechnungen_offen_cent": int(rechn["offen"]), "rechnungen_ueberfaellig": rechn["ueberfaellig"], "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte, "zusammenarbeit": zus}
 
 
 @router.get("/katalog")

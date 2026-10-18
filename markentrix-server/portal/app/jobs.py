@@ -7,6 +7,7 @@ from datetime import date, datetime, timezone
 
 from . import berichte, einstellungen, mailer, pdf
 from .db import tx
+from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
 log = logging.getLogger("jobs")
 _stop = threading.Event()
@@ -146,12 +147,63 @@ def avv_erinnerung(cfg):
                       "\n\nIm Portal beim jeweiligen Kunden: AVV erstellen, senden und die unterschriebene Fassung ablegen." + mailer.SIGNATUR)
 
 
+def aufgaben_automatisch(cfg):
+    """Legt Aufgaben für das Team an (je Anlass genau einmal) und schickt eine Sammelmail über die neuen."""
+    admin = "(SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1)"
+    regeln = [
+        # Kunde hat geschrieben, seit 24 Stunden keine Antwort
+        f"""INSERT INTO aufgaben (kunden_id, ticket_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT t.kunden_id, t.id, 'Antworten: ' || k.firma || ' – ' || t.betreff, {admin}, current_date, 'auto',
+                   'ticket-antwort-' || t.id || '-' || (SELECT max(n.id) FROM ticket_nachrichten n WHERE n.ticket_id = t.id)
+            FROM tickets t JOIN kunden k ON k.id = t.kunden_id
+            WHERE t.status IN ('offen','in_arbeit') AND t.letzte_nachricht_von = 'kunde' AND t.geaendert_am < now() - interval '24 hours'
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Wir warten seit einer Woche auf den Kunden
+        f"""INSERT INTO aufgaben (kunden_id, ticket_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT t.kunden_id, t.id, 'Nachfassen: ' || k.firma || ' – ' || t.betreff, {admin}, current_date, 'auto', 'nachfassen-' || t.id || '-' || to_char(t.geaendert_am, 'YYYYMMDDHH24MISS')
+            FROM tickets t JOIN kunden k ON k.id = t.kunden_id
+            WHERE t.status = 'wartet_auf_kunde' AND t.geaendert_am < now() - interval '7 days'
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Rechnung überfällig
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT b.kunden_id, 'Rechnung ' || b.nummer || ' überfällig: ' || k.firma, {admin}, current_date, 'auto', 'rechnung-' || b.id
+            FROM belege b JOIN kunden k ON k.id = b.kunden_id
+            WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Mindestlaufzeit endet in den nächsten 60 Tagen
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT b.kunden_id, 'Vertrag: Mindestlaufzeit endet am ' || to_char(b.mindestlaufzeit_ende, 'DD.MM.YYYY') || ' – ' || k.firma, {admin}, current_date, 'auto', 'vertrag-' || b.id || '-' || b.mindestlaufzeit_ende
+            FROM buchungen b JOIN kunden k ON k.id = b.kunden_id
+            WHERE b.status = 'aktiv' AND b.mindestlaufzeit_ende BETWEEN current_date AND current_date + 60 AND k.status = 'aktiv'
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+    ]
+    neu, erinnern = [], []
+    with tx("system") as cur:
+        for sql_text in regeln:
+            cur.execute(sql_text)
+            neu += [r["titel"] for r in cur.fetchall()]
+        # Freigabe wartet seit 3 Tagen: Kunde einmal erinnern
+        cur.execute("""WITH offen AS (SELECT id FROM kundenfreigaben WHERE status = 'wartet' AND erinnert_am IS NULL AND angefragt_am < now() - interval '3 days' LIMIT 50 FOR UPDATE SKIP LOCKED)
+                       UPDATE kundenfreigaben f SET erinnert_am = now() FROM offen WHERE f.id = offen.id RETURNING f.kunden_id, f.titel""")
+        for r in cur.fetchall():
+            cur.execute("SELECT ansprechpartner, status FROM kunden WHERE id=%s", (r["kunden_id"],))
+            k = cur.fetchone()
+            if k and k["status"] in ("onboarding", "aktiv"):
+                erinnern.append((kunden_empfaenger(cur, r["kunden_id"]), k["ansprechpartner"], r["titel"]))
+        an = cfg["alarm_email"] or admin_empfaenger(cur)
+    for ziele, name, titel in erinnern:
+        for a in ziele:
+            mailer.freigabe_erinnerung_kunde(a, name, titel)
+    if neu and an:
+        mailer.aufgaben_digest_team(an, neu[:30])
+
+
 def tick():
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
     if not mailer.konfiguriert():
         return
-    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung):
+    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

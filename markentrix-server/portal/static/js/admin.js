@@ -1,14 +1,15 @@
-import { h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
+import { h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
-const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
+const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
 let paketListe = [], ich = null;
+const zaehlerAdmin = {};
 
 function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Admin'),
-      NAV.map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1])),
+      NAV.map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1], zaehlerAdmin[n[0]] ? h('span', { class: 'badge' }, zaehlerAdmin[n[0]]) : '')),
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
@@ -40,6 +41,10 @@ V.uebersicht = async () => {
       h('a', { class: 'card stat', href: '#belege', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Offene Rechnungen' + (d.rechnungen_ueberfaellig ? ' (' + d.rechnungen_ueberfaellig + ' überfällig)' : '')), h('b', {}, euro(d.rechnungen_offen_cent))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Neue Anfragen'), h('b', {}, d.neue_anfragen)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Uploads (7 Tage)'), h('b', {}, d.uploads_7d))),
+    h('div', { class: 'grid3' },
+      h('a', { class: 'card stat', href: '#postfach', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Nachrichten offen (' + d.zusammenarbeit.tickets_ungelesen + ' ungelesen)'), h('b', {}, d.zusammenarbeit.tickets_offen)),
+      h('a', { class: 'card stat', href: '#freigaben', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Freigaben warten auf Kunden'), h('b', {}, d.zusammenarbeit.freigaben_wartend)),
+      h('a', { class: 'card stat', href: '#aufgaben', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Aufgaben offen (' + d.zusammenarbeit.aufgaben_ueberfaellig + ' überfällig)'), h('b', {}, d.zusammenarbeit.aufgaben_offen))),
     d.avv_fehlt.length ? h('div', { class: 'card' }, h('h2', {}, 'AVV fehlt bei ' + d.avv_fehlt.length + (d.avv_fehlt.length === 1 ? ' Kunde' : ' Kunden')), h('p', { class: 'small muted' }, 'Ohne unterschriebenen Auftragsverarbeitungsvertrag sollten keine Kundendaten verarbeitet werden.'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Status', z => pill(z.status)]], d.avv_fehlt)) : '',
     ob.length ? h('div', { class: 'card' }, h('h2', {}, 'Neue Kunden im Onboarding'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Fortschritt', z => z.fertig + ' von ' + z.gesamt]], ob)) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Letzte Aktionen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d.letzte_aktionen)));
@@ -550,6 +555,143 @@ V.protokoll = async () => {
 const STATI = ['onboarding', 'aktiv', 'pausiert', 'gekuendigt', 'beendet'];
 const DATEN_TABS = [['anfragen', 'Anfragen'], ['termine', 'Termine'], ['kontakte', 'Kontakte'], ['angebote', 'Angebote'], ['vertraege', 'Verträge'], ['projekte', 'Projekte'], ['berichte', 'Berichte'], ['wochenangebote_uploads', 'Uploads'], ['chat_verlauf', 'Chat']];
 
+// ------------------------------------------------------------- Nachrichten (Postfach)
+const T_ART = { frage: 'Frage', auftrag: 'Auftrag', aenderung: 'Änderungswunsch', problem: 'Problem', modul: 'Zusatzmodul' };
+const T_ST = ['offen', 'in_arbeit', 'wartet_auf_kunde', 'erledigt'];
+const T_ST_TXT = { offen: 'offen', in_arbeit: 'in Arbeit', wartet_auf_kunde: 'wartet auf Kunde', erledigt: 'erledigt' };
+const tPill = (st) => h('span', { class: 'pill ' + (st === 'erledigt' ? 'ok' : st === 'offen' ? 'warn' : '') }, T_ST_TXT[st] || st);
+const dateiLink = (d) => h('a', { class: 'dateilink', href: '/api/admin/dateien/' + d.id, target: '_blank', rel: 'noopener' }, '📎 ' + d.name + ' (' + groesse(d.groesse) + ')');
+
+V.postfach = async (param) => {
+  if (param && param.startsWith('neu')) return ticketNeu(param.split('/')[1]);
+  if (param) return ticketDetail(param);
+  const f = new URLSearchParams((location.hash.split('?')[1] || '')), status = f.get('status') || 'offene';
+  const liste = await api('/api/admin/tickets?status=' + status);
+  const tab = (st, t) => h('a', { href: '#postfach?status=' + st, class: 'tab' + (status === st ? ' on' : '') }, t);
+  return h('div', {}, kopf('Nachrichten'), h('div', { class: 'tabs' }, tab('offene', 'Offen'), tab('offen', 'Neu'), tab('in_arbeit', 'In Arbeit'), tab('wartet_auf_kunde', 'Wartet auf Kunde'), tab('erledigt', 'Erledigt'), tab('', 'Alle')),
+    h('div', { class: 'card' }, tabelle([['Nr.', z => h('a', { href: '#postfach/' + z.id }, z.nr)], ['Kunde', z => h('a', { href: '#kunde/' + z.kunden_id }, z.firma)], ['Betreff', z => h('a', { href: '#postfach/' + z.id }, (z.team_ungelesen ? '● ' : '') + z.betreff)],
+      ['Art', z => T_ART[z.art] || z.art], ['Prio', z => z.prioritaet === 'hoch' ? h('span', { class: 'pill bad' }, 'hoch') : ''], ['Status', z => tPill(z.status)], ['Fällig', z => z.faellig_am ? datum(z.faellig_am) : ''], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Keine Nachrichten in dieser Ansicht.')));
+};
+
+async function ticketDetail(id) {
+  const t = await api('/api/admin/tickets/' + id), m = h('div');
+  const bubbles = t.nachrichten.map(n => h('div', { class: 'bub ' + (n.intern ? 'intern' : n.von === 'kunde' ? 'kunde' : 'team') }, h('div', { class: 'small wer' }, (n.intern ? 'Interne Notiz · ' : '') + (n.autor_name || (n.von === 'kunde' ? 'Kunde' : 'Team')) + ' · ' + zeit(n.erstellt_am)), n.text));
+  const text = h('textarea', { rows: 5, maxlength: 10000, placeholder: 'Antwort an den Kunden …' });
+  const intern = h('input', { type: 'checkbox', style: 'width:auto' });
+  const stSel = h('select', {}, h('option', { value: '' }, 'Status unverändert'), T_ST.map(x => h('option', { value: x }, T_ST_TXT[x])));
+  const datei = h('input', { type: 'file' });
+  const senden = async () => {
+    try {
+      if (text.value.trim()) await api('/api/admin/tickets/' + id + '/nachricht', { method: 'POST', body: { text: text.value, intern: intern.checked, status: stSel.value || null } });
+      else if (stSel.value) await api('/api/admin/tickets/' + id, { method: 'PATCH', body: { status: stSel.value } });
+      if (datei.files[0]) { const f = new FormData(); f.append('datei', datei.files[0]); await api('/api/admin/tickets/' + id + '/dateien', { method: 'POST', body: f }); }
+      if (!text.value.trim() && !stSel.value && !datei.files[0]) { melde(m, 'Nichts zu senden.'); return; }
+      zeige();
+    } catch (x) { melde(m, x.message); }
+  };
+  const mp = h('div'), zu = h('input', { value: t.zustaendig || '', placeholder: 'Zuständig (E-Mail oder Name)' }), faellig = h('input', { type: 'date', value: t.faellig_am ? String(t.faellig_am).slice(0, 10) : '' });
+  const prio = h('select', {}, ['normal', 'hoch'].map(x => h('option', { value: x, selected: x === t.prioritaet }, x)));
+  const speichern = async () => { try { const b = { prioritaet: prio.value, zustaendig: zu.value || null }; if (faellig.value) b.faellig_am = faellig.value; else b.faellig_loeschen = true; await api('/api/admin/tickets/' + id, { method: 'PATCH', body: b }); melde(mp, 'Gespeichert.', 'ok'); } catch (x) { melde(mp, x.message); } };
+  const aufg = async () => { const titel = prompt('Aufgabe zu dieser Nachricht (Titel):', t.betreff); if (!titel) return; try { await api('/api/admin/aufgaben', { method: 'POST', body: { titel, kunden_id: t.kunden_id, ticket_id: t.id, zustaendig: zu.value || null, faellig_am: faellig.value || null } }); melde(mp, 'Aufgabe angelegt.', 'ok'); } catch (x) { melde(mp, x.message); } };
+  return h('div', { class: 'stack' }, kopf(t.nr + ' · ' + t.betreff, h('a', { class: 'btn sec small', href: '#postfach' }, '← Alle Nachrichten')),
+    h('div', { class: 'card' }, h('p', { class: 'small muted' }, h('a', { href: '#kunde/' + t.kunden_id }, t.firma + ' (' + t.kundennummer + ')'), ' · ' + (T_ART[t.art] || t.art) + ' · von ' + (t.ersteller_name || '–') + ' · eröffnet ' + zeit(t.erstellt_am) + (t.erste_antwort_am ? ' · erste Antwort ' + zeit(t.erste_antwort_am) : ' · noch nicht beantwortet')),
+      tPill(t.status), h('div', { class: 'chatlog thread' }, bubbles), t.dateien.length ? h('div', { class: 'small' }, t.dateien.map(dateiLink)) : '',
+      t.bewertung ? h('p', { class: 'small' }, 'Bewertung: ' + t.bewertung.punkte + ' / 10' + (t.bewertung.kommentar ? ' · „' + t.bewertung.kommentar + '“' : '')) : ''),
+    h('div', { class: 'card' }, h('h3', {}, 'Antworten'), m, text, h('div', { class: 'row', style: 'margin-top:10px' }, h('label', { style: 'display:flex;gap:6px;align-items:center;margin:0;color:inherit' }, intern, 'Nur intern (Kunde sieht es nicht)'), stSel, datei, h('span', { class: 'grow' }), h('button', { class: 'btn', onclick: senden }, 'Senden'))),
+    h('div', { class: 'card' }, h('h3', {}, 'Bearbeitung'), mp, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Zuständig'), zu), h('div', {}, h('label', {}, 'Fällig am'), faellig), h('div', {}, h('label', {}, 'Priorität'), prio)),
+      h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: aufg }, 'Aufgabe daraus machen'))));
+}
+
+async function ticketNeu(kid) {
+  const m = h('div'), betreff = h('input', { required: true, maxlength: 200 }), text = h('textarea', { rows: 5, maxlength: 10000 });
+  const art = h('select', {}, ['auftrag', 'frage', 'aenderung', 'problem'].map(x => h('option', { value: x }, T_ART[x])));
+  return h('div', { class: 'stack' }, kopf('Nachricht an Kunden', h('a', { class: 'btn sec small', href: '#kunde/' + kid }, '← Zurück')),
+    h('div', { class: 'card' }, m, h('label', {}, 'Betreff'), betreff, h('label', {}, 'Art'), art, h('label', {}, 'Nachricht an den Kunden'), text,
+      h('p', {}, h('button', { class: 'btn', onclick: async () => { try { const r = await api('/api/admin/kunden/' + kid + '/tickets', { method: 'POST', body: { betreff: betreff.value, art: art.value, text: text.value } }); location.hash = '#postfach/' + r.id; } catch (x) { melde(m, x.message); } } }, 'Senden'))));
+}
+
+// ------------------------------------------------------------- Freigaben
+const F_ART = { social: 'Social Media', text: 'Text', angebot: 'Angebot', design: 'Design', website: 'Website', sonstiges: 'Sonstiges' };
+const fPill = (st) => h('span', { class: 'pill ' + (st === 'freigegeben' ? 'ok' : st === 'abgelehnt' ? 'bad' : st === 'wartet' ? 'warn' : '') }, st === 'abgelehnt' ? 'Änderung gewünscht' : st === 'wartet' ? 'wartet' : st);
+
+async function freigabeNeuKarte(kid) {
+  const m = h('div'), titel = h('input', { maxlength: 200, placeholder: 'z. B. Instagram-Beitrag Wochenangebote KW 43' }), inhalt = h('textarea', { rows: 4, maxlength: 20000, placeholder: 'Text bzw. Beschreibung, den der Kunde prüfen soll' });
+  const art = h('select', {}, Object.entries(F_ART).map(([v, t]) => h('option', { value: v }, t))), datei = h('input', { type: 'file' });
+  return h('div', { class: 'card' }, h('h2', {}, 'Neue Freigabe-Bitte'), h('p', { class: 'small muted' }, 'Der Kunde bekommt eine E-Mail und entscheidet im Portal. Datum, Uhrzeit, Name und IP werden festgehalten.'), m,
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Titel'), titel), h('div', {}, h('label', {}, 'Art'), art)), h('label', {}, 'Inhalt'), inhalt,
+    h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, h('label', { style: 'margin:0 0 4px' }, 'Datei anhängen (Bild, PDF, optional)'), datei),
+      h('button', { class: 'btn', onclick: async () => { try { const r = await api('/api/admin/kunden/' + kid + '/freigaben-kunden', { method: 'POST', body: { titel: titel.value, art: art.value, inhalt: inhalt.value || null } });
+        if (datei.files[0]) { const f = new FormData(); f.append('datei', datei.files[0]); await api('/api/admin/freigaben-kunden/' + r.id + '/dateien', { method: 'POST', body: f }); }
+        zeige(); } catch (x) { melde(m, x.message); } } }, 'Anfragen')));
+}
+
+V.freigaben = async () => {
+  const f = new URLSearchParams((location.hash.split('?')[1] || '')), status = f.get('status') || '';
+  const liste = await api('/api/admin/freigaben-kunden?status=' + status), m = h('div');
+  const tab = (st, t) => h('a', { href: '#freigaben' + (st ? '?status=' + st : ''), class: 'tab' + (status === st ? ' on' : '') }, t);
+  const zurueck = async (z) => { if (!confirm('Diese Bitte zurückziehen?')) return; try { await api('/api/admin/freigaben-kunden/' + z.id + '/zurueckziehen', { method: 'POST', body: {} }); zeige(); } catch (x) { melde(m, x.message); } };
+  return h('div', {}, kopf('Freigaben'), m, h('p', { class: 'small muted' }, 'Neue Freigabe-Bitten legst du beim jeweiligen Kunden an (Kunden → Kunde öffnen → Freigaben).'),
+    h('div', { class: 'tabs' }, tab('', 'Alle'), tab('wartet', 'Wartet'), tab('freigegeben', 'Freigegeben'), tab('abgelehnt', 'Änderung gewünscht')),
+    h('div', { class: 'card' }, tabelle([['Kunde', z => h('a', { href: '#kunde/' + z.kunden_id }, z.firma)], ['Titel', z => z.titel + ' (' + (F_ART[z.art] || z.art) + ')'], ['Status', z => fPill(z.status)], ['Angefragt', z => zeit(z.angefragt_am)],
+      ['Entscheidung', z => z.entschieden_am ? zeit(z.entschieden_am) + ' · ' + (z.entschieden_name || '') + (z.entschieden_ip ? ' · IP ' + z.entschieden_ip : '') + (z.kommentar ? ' · „' + z.kommentar + '“' : '') : ''],
+      ['', z => z.status === 'wartet' ? h('button', { class: 'btn sec small', onclick: () => zurueck(z) }, 'Zurückziehen') : '']], liste, 'Keine Freigaben.')));
+};
+
+async function freigabenKundeKarte(kid, k) {
+  const alle = await api('/api/admin/freigaben-kunden'), liste = alle.filter(z => z.kunden_id === kid);
+  return h('div', { class: 'stack' }, await freigabeNeuKarte(kid), liste.length ? h('div', { class: 'card' }, h('h3', {}, 'Bisherige Freigaben'), tabelle([['Titel', z => z.titel], ['Status', z => fPill(z.status)], ['Angefragt', z => zeit(z.angefragt_am)], ['Entscheidung', z => z.entschieden_am ? zeit(z.entschieden_am) + ' · ' + (z.entschieden_name || '') + (z.kommentar ? ' · „' + z.kommentar + '“' : '') : '']], liste)) : '');
+}
+
+// ------------------------------------------------------------- Dokumente pro Kunde
+async function unterlagenKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/unterlagen'), m = h('div');
+  const kat = h('select', {}, Object.entries(d.kategorien).map(([v, t]) => h('option', { value: v }, t))), datei = h('input', { type: 'file' });
+  const sicht = h('input', { type: 'checkbox', checked: true, style: 'width:auto' });
+  const hoch = async () => { if (!datei.files[0]) { melde(m, 'Bitte Datei wählen.'); return; } const f = new FormData(); f.append('datei', datei.files[0]); f.append('kategorie', kat.value); f.append('sichtbar_kunde', sicht.checked ? 'true' : 'false');
+    try { await api('/api/admin/kunden/' + kid + '/unterlagen', { method: 'POST', body: f }); zeige(); } catch (x) { melde(m, x.message); } };
+  const weg = async (z) => { if (!confirm('Datei "' + z.name + '" löschen?')) return; try { await api('/api/admin/unterlagen/' + z.id, { method: 'DELETE' }); zeige(); } catch (x) { melde(m, x.message); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Dokumente'), m,
+    tabelle([['Datei', z => h('a', { href: '/api/admin/dateien/' + z.id, target: '_blank', rel: 'noopener' }, z.name)], ['Art', z => d.kategorien[z.kategorie] || '–'], ['Größe', z => groesse(z.groesse)], ['Von', z => z.von === 'team' ? 'Team' : 'Kunde'], ['Kunde sieht es', z => z.sichtbar_kunde ? 'ja' : 'nein'], ['Datum', z => zeit(z.erstellt_am)], ['', z => h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen')]], d.dateien, 'Noch keine Dokumente.'),
+    h('div', { class: 'row', style: 'margin-top:12px' }, kat, datei, h('label', { style: 'display:flex;gap:6px;align-items:center;margin:0;color:inherit' }, sicht, 'für Kunden sichtbar'), h('button', { class: 'btn', onclick: hoch }, 'Hochladen')));
+}
+
+async function nachrichtenKundeKarte(kid, k) {
+  const liste = await api('/api/admin/tickets?kunde=' + encodeURIComponent(k.kundennummer));
+  return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { style: 'margin:0' }, 'Nachrichten'), h('span', { class: 'grow' }), h('a', { class: 'btn small', href: '#postfach/neu/' + kid }, 'Neue Nachricht / Auftrag')),
+    tabelle([['Nr.', z => h('a', { href: '#postfach/' + z.id }, z.nr)], ['Betreff', z => (z.team_ungelesen ? '● ' : '') + z.betreff], ['Status', z => tPill(z.status)], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Noch keine Nachrichten.'));
+}
+
+// ------------------------------------------------------------- Aufgaben
+V.aufgaben = async () => {
+  const f = new URLSearchParams((location.hash.split('?')[1] || '')), status = f.get('status') || 'offen';
+  const liste = await api('/api/admin/aufgaben?status=' + status), m = h('div');
+  const tab = (st, t) => h('a', { href: '#aufgaben?status=' + st, class: 'tab' + (status === st ? ' on' : '') }, t);
+  const titel = h('input', { maxlength: 200, placeholder: 'Neue Aufgabe …' }), zu = h('input', { placeholder: 'Zuständig (leer = ich)' }), fa = h('input', { type: 'date' });
+  const neu = async () => { try { await api('/api/admin/aufgaben', { method: 'POST', body: { titel: titel.value, zustaendig: zu.value || null, faellig_am: fa.value || null } }); zeige(); } catch (x) { melde(m, x.message); } };
+  const setz = async (z, st) => { try { await api('/api/admin/aufgaben/' + z.id, { method: 'PATCH', body: { status: st } }); zeige(); } catch (x) { melde(m, x.message); } };
+  const weg = async (z) => { if (!confirm('Aufgabe löschen?')) return; try { await api('/api/admin/aufgaben/' + z.id, { method: 'DELETE' }); zeige(); } catch (x) { melde(m, x.message); } };
+  return h('div', {}, kopf('Aufgaben'), m,
+    h('div', { class: 'card' }, h('div', { class: 'row' }, h('div', { class: 'grow' }, titel), zu, fa, h('button', { class: 'btn', onclick: neu }, 'Anlegen'))),
+    h('div', { class: 'tabs' }, tab('offen', 'Offen'), tab('erledigt', 'Erledigt'), tab('alle', 'Alle')),
+    h('div', { class: 'card' }, h('p', { class: 'small muted' }, 'Aufgaben mit „auto“ legt das System selbst an, z. B. bei unbeantworteten Nachrichten, wartenden Freigaben oder überfälligen Rechnungen.'),
+      tabelle([['Aufgabe', z => (z.ueberfaellig ? '⚠ ' : '') + z.titel + (z.quelle === 'auto' ? ' (auto)' : '')], ['Kunde', z => z.kunden_id ? h('a', { href: '#kunde/' + z.kunden_id }, z.firma) : ''], ['Zuständig', z => z.zustaendig || ''], ['Fällig', z => z.faellig_am ? datum(z.faellig_am) : ''],
+        ['', z => h('div', { class: 'row' }, z.ticket_id ? h('a', { class: 'btn sec small', href: '#postfach/' + z.ticket_id }, 'Nachricht') : '', z.status === 'offen' ? h('button', { class: 'btn small', onclick: () => setz(z, 'erledigt') }, 'Erledigt') : h('button', { class: 'btn sec small', onclick: () => setz(z, 'offen') }, 'Wieder öffnen'), z.quelle === 'manuell' ? h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen') : '')]], liste, 'Keine Aufgaben.')));
+};
+
+// ------------------------------------------------------------- Kennzahlen
+V.kennzahlen = async () => {
+  const z = await api('/api/admin/kennzahlen'), st = (t, w, link) => h(link ? 'a' : 'div', { class: 'card stat', href: link, style: link ? 'text-decoration:none;color:inherit' : '' }, h('span', { class: 'muted small' }, t), h('b', {}, w));
+  const hh = (v) => v === null || v === undefined ? '–' : String(v).replace('.', ',') + ' h';
+  return h('div', { class: 'stack' }, kopf('Kennzahlen'),
+    h('div', { class: 'grid3' }, st('Nachrichten offen', z.tickets_offen, '#postfach'), st('davon ungelesen', z.tickets_ungelesen, '#postfach'), st('überfällig', z.tickets_ueberfaellig, '#postfach'),
+      st('Freigaben warten', z.freigaben_wartend, '#freigaben'), st('Aufgaben offen', z.aufgaben_offen, '#aufgaben'), st('Aufgaben überfällig', z.aufgaben_ueberfaellig, '#aufgaben')),
+    h('div', { class: 'card' }, h('h2', {}, 'Reaktionsgeschwindigkeit (90 Tage)'), h('div', { class: 'grid3' }, st('Erste Antwort im Schnitt', hh(z.antwortzeit_h)), st('Bis erledigt im Schnitt', hh(z.erledigungszeit_h)), st('Freigabe-Dauer im Schnitt', hh(z.freigabedauer_h)))),
+    h('div', { class: 'card' }, h('h2', {}, 'Zufriedenheit (90 Tage)'), h('div', { class: 'grid3' }, st('Bewertungen', z.bewertungen), st('Durchschnitt (0–10)', z.bewertung_durchschnitt === null ? '–' : String(z.bewertung_durchschnitt).replace('.', ',')), st('NPS', z.nps === null ? '–' : z.nps)),
+      h('p', { class: 'small muted' }, 'NPS = Anteil Promoter (9–10) minus Anteil Kritiker (0–6), in Prozentpunkten. Über 0 ist gut, über 50 sehr gut.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Pro Kunde'), tabelle([['Kunde', c => h('a', { href: '#kunde/' + c.id }, c.firma)], ['Status', c => pill(c.status)], ['Nachrichten offen', c => c.tickets_offen], ['Freigaben wartend', c => c.freigaben_wartend], ['Bewertung (180 T.)', c => c.bewertung === null ? '–' : String(c.bewertung).replace('.', ',')], ['Letzte Aktivität', c => c.letzte_aktivitaet ? zeit(c.letzte_aktivitaet) : '–']], z.kunden)),
+    z.kommentare.length ? h('div', { class: 'card' }, h('h2', {}, 'Kommentare von Kunden'), tabelle([['Kunde', c => c.firma], ['Punkte', c => c.punkte], ['Kommentar', c => c.kommentar], ['Datum', c => zeit(c.erstellt_am)]], z.kommentare)) : '');
+};
+
 async function kundeDetail(kid) {
   const d = await api('/api/admin/kunden/' + kid), k = d.kunde;
   const neu = () => { const s = location.hash; location.hash = ''; setTimeout(() => { location.hash = s; }, 0); };
@@ -634,6 +776,9 @@ async function kundeDetail(kid) {
     h('div', { class: 'card' }, h('h2', {}, 'Websites'), mw, webs, h('div', { style: 'height:10px' }), wform,
       h('p', { class: 'small muted' }, 'Danach auf dem Server einmal: mkctl site-add <domain>, damit Ordner und Webserver bereit sind.')),
     await belegeKarte(kid, k.referenzkunde),
+    await nachrichtenKundeKarte(kid, k),
+    await freigabenKundeKarte(kid, k),
+    await unterlagenKarte(kid),
     await berichteKarte(kid),
     await kostenKarte(kid),
     brandingKarte(kid, k),
@@ -650,7 +795,7 @@ async function zeige() {
     else if (seite === 'lead') inhalt = await leadDetail(hash.split('/')[1]);
     else if (seite === 'beleg') inhalt = await belegEditor(hash.split('/')[1]);
     else if (seite === 'neubeleg') inhalt = await belegEditor(null, hash.split('/')[1], hash.split('/')[2]);
-    else if (V[seite]) inhalt = await V[seite]();
+    else if (V[seite]) inhalt = await V[seite](hash.split('?')[0].split('/').slice(1).join('/') || undefined);
     else { seite = 'uebersicht'; inhalt = await V.uebersicht(); }
   } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
   root.replaceChildren(gerüst(seite === 'kunde' ? 'kunden' : seite === 'partner' ? 'vertrieb' : seite === 'lead' ? 'leads' : (seite === 'beleg' || seite === 'neubeleg') ? 'belege' : seite, inhalt));
@@ -662,6 +807,7 @@ async function zeige() {
     if (me.rolle !== 'admin') { location.href = '/app'; return; }
     ich = me;
     paketListe = (await api('/api/admin/katalog')).produkte;
+    try { const z = (await api('/api/admin/uebersicht')).zusammenarbeit; zaehlerAdmin.postfach = z.tickets_ungelesen; zaehlerAdmin.freigaben = z.freigaben_wartend; zaehlerAdmin.aufgaben = z.aufgaben_ueberfaellig; } catch (e) { /* Zähler sind optional */ }
   } catch (e) { return; }
   window.addEventListener('hashchange', zeige);
   zeige();

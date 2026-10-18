@@ -39,7 +39,9 @@ def start(user: dict = Depends(require_kunde)):
         kommende = cur.fetchone()["n"]
         cur.execute("SELECT domain, status FROM websites ORDER BY erstellt_am LIMIT 1")
         web = cur.fetchone()
-    return {"kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
+        cur.execute("""SELECT (SELECT count(*) FROM tickets WHERE kunde_ungelesen) AS nachrichten, (SELECT count(*) FROM kundenfreigaben WHERE status='wartet') AS freigaben""")
+        badges = cur.fetchone()
+    return {"badges": badges, "kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
             "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"]}
 
 
@@ -341,6 +343,7 @@ class ProfilIn(BaseModel):
     benachr_anfragen: bool | None = None
     benachr_termine: bool | None = None
     benachr_bericht: bool | None = None
+    benachr_nachrichten: bool | None = None
 
 
 class PasswortIn(BaseModel):
@@ -352,7 +355,8 @@ class PasswortIn(BaseModel):
 def profil(user: dict = Depends(require_kunde)):
     with tx("kunde", user["kunden_id"]) as cur:
         cur.execute("""SELECT k.kundennummer, k.firma, k.ansprechpartner, k.email, k.telefon, k.domain, p.name AS paket,
-                              k.benachr_email, k.benachr_anfragen, k.benachr_termine, k.benachr_bericht,
+                              k.benachr_email, k.benachr_anfragen, k.benachr_termine, k.benachr_bericht, k.benachr_nachrichten,
+                              k.strasse, k.plz, k.ort,
                               k.branding_farbe, (k.logo IS NOT NULL) AS logo_vorhanden
                        FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code WHERE k.id=%s""", (user["kunden_id"],))
         kunde = cur.fetchone()
@@ -371,10 +375,10 @@ def profil_aendern(data: ProfilIn, user: dict = Depends(require_kunde)):
     with tx("system") as cur:
         cur.execute("""UPDATE kunden SET ansprechpartner=coalesce(%s,ansprechpartner), email=coalesce(%s,email), telefon=coalesce(%s,telefon),
                        benachr_email=CASE WHEN %s::boolean THEN nullif(%s,'') ELSE benachr_email END,
-                       benachr_anfragen=coalesce(%s,benachr_anfragen), benachr_termine=coalesce(%s,benachr_termine), benachr_bericht=coalesce(%s,benachr_bericht)
+                       benachr_anfragen=coalesce(%s,benachr_anfragen), benachr_termine=coalesce(%s,benachr_termine), benachr_bericht=coalesce(%s,benachr_bericht), benachr_nachrichten=coalesce(%s,benachr_nachrichten)
                        WHERE id=%s""",
                     (data.ansprechpartner, data.email, data.telefon, data.benachr_email is not None, data.benachr_email,
-                     data.benachr_anfragen, data.benachr_termine, data.benachr_bericht, user["kunden_id"]))
+                     data.benachr_anfragen, data.benachr_termine, data.benachr_bericht, data.benachr_nachrichten, user["kunden_id"]))
         audit(cur, user, "profil_geaendert", user["kunden_id"])
     return {"ok": True}
 

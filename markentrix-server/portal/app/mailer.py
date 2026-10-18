@@ -113,3 +113,65 @@ def avv(an: str, name: str | None, pdf_bytes: bytes) -> tuple[bool, str]:
 def mahnung(an: str, titel: str, nummer: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
     text = (f"Guten Tag,\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}.\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
     return senden(an, f"{titel} zu Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
+
+
+# ---------------------------------------------------------------- Zusammenarbeit (Nachrichten, Freigaben, Aufgaben)
+def _kurz(text: str, n: int = 400) -> str:
+    text = (text or "").strip()
+    return text if len(text) <= n else text[:n].rstrip() + " …"
+
+
+def ticket_neu_team(an: str, nr: str, firma: str, kundennummer: str, betreff: str, art: str, text: str) -> tuple[bool, str]:
+    t = (f"Neue Nachricht von {firma} ({kundennummer}), {art}:\n\n{nr}: {betreff}\n\n{_kurz(text)}\n\n"
+         f"Antworten im Admin-Bereich: {config.BASE_URL}/admin#postfach" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"Neu: {nr} {betreff} ({firma})", t)
+
+
+def ticket_antwort_team(an: str, nr: str, firma: str, betreff: str, text: str) -> tuple[bool, str]:
+    t = (f"{firma} hat auf {nr} ({betreff}) geantwortet:\n\n{_kurz(text)}\n\nAdmin-Bereich: {config.BASE_URL}/admin#postfach" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"Antwort: {nr} {betreff} ({firma})", t)
+
+
+def ticket_antwort_kunde(an: str, name: str | None, nr: str, betreff: str, text: str, erledigt: bool = False) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    t = (f"{hallo}\n\nzu Ihrer Nachricht {nr} ({betreff}) gibt es eine Antwort von uns:\n\n{_kurz(text)}\n\n" +
+         ("Wir haben die Anfrage damit als erledigt markiert. Wenn noch etwas offen ist, antworten Sie einfach im Portal.\n\n" if erledigt else "") +
+         f"Sie können direkt im Portal antworten: {config.BASE_URL}/app#nachrichten" + SIGNATUR)
+    return senden(an, f"Antwort zu {nr}: {betreff}", t)
+
+
+def ticket_erledigt_kunde(an: str, name: str | None, nr: str, betreff: str) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    t = (f"{hallo}\n\nIhre Anfrage {nr} ({betreff}) ist erledigt.\n\nWenn noch etwas offen ist, antworten Sie einfach im Portal, dann öffnen wir sie wieder. "
+         f"Über eine kurze Bewertung freuen wir uns: {config.BASE_URL}/app#nachrichten" + SIGNATUR)
+    return senden(an, f"Erledigt: {nr} {betreff}", t)
+
+
+def freigabe_anfrage_kunde(an: str, name: str | None, titel: str) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    t = (f"{hallo}\n\nwir bitten um Ihre Freigabe: {titel}\n\nBitte sehen Sie es sich im Portal an und geben Sie es frei oder teilen Sie uns mit, was geändert werden soll: "
+         f"{config.BASE_URL}/app#freigaben" + SIGNATUR)
+    return senden(an, f"Bitte um Freigabe: {titel}", t)
+
+
+def freigabe_erinnerung_kunde(an: str, name: str | None, titel: str) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    t = (f"{hallo}\n\nzur Erinnerung: Wir warten noch auf Ihre Freigabe für \"{titel}\".\n\nIm Portal geht es mit zwei Klicks: {config.BASE_URL}/app#freigaben" + SIGNATUR)
+    return senden(an, f"Erinnerung: Freigabe {titel}", t)
+
+
+def freigabe_entschieden_team(an: str, firma: str, titel: str, status: str, kommentar: str | None, wer: str) -> tuple[bool, str]:
+    ergebnis = "freigegeben" if status == "freigegeben" else "abgelehnt (Änderungswunsch)"
+    t = (f"{firma} hat \"{titel}\" {ergebnis} (durch {wer}).\n" + (f"\nKommentar: {kommentar}\n" if kommentar else "") +
+         f"\nAdmin-Bereich: {config.BASE_URL}/admin#freigaben" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"Freigabe {ergebnis}: {titel} ({firma})", t)
+
+
+def aufgaben_digest_team(an: str, zeilen: list[str]) -> tuple[bool, str]:
+    t = ("Neue Aufgaben im Portal:\n\n" + "\n".join(f"- {z}" for z in zeilen) + f"\n\nAlle Aufgaben: {config.BASE_URL}/admin#aufgaben" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"{len(zeilen)} neue Aufgabe" + ("n" if len(zeilen) != 1 else ""), t)
+
+
+def stammdaten_geaendert_team(an: str, firma: str, kundennummer: str, aenderung: str) -> tuple[bool, str]:
+    t = f"{firma} ({kundennummer}) hat Stammdaten im Portal geändert:\n\n{aenderung}\n\nBitte bei Rechnungen und Verträgen beachten.\n\n(automatische Meldung des Portals)"
+    return senden(an, f"Stammdaten geändert: {firma}", t)

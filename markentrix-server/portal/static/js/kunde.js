@@ -6,11 +6,14 @@ const hat = (c) => start.module.some(m => m.code === c);
 
 const SEITEN = [
   ['uebersicht', 'Übersicht', null],
+  ['nachrichten', 'Nachrichten', null],
+  ['freigaben', 'Freigaben', null],
   ['assistent', 'KI-Assistent', 'ki_chat'],
   ['anfragen', 'Anfragen', 'anfragen_termine'],
   ['termine', 'Termine', 'anfragen_termine'],
   ['kontakte', 'Kontakte', 'kontakte_angebote_vertraege'],
   ['dokumente', 'Angebote & Verträge', 'kontakte_angebote_vertraege'],
+  ['unterlagen', 'Dokumente', null],
   ['berichte', 'Monatsberichte', null],
   ['belege', 'Angebote & Rechnungen', null],
   ['website', 'Website & Landingpages', 'website'],
@@ -24,12 +27,14 @@ const SEITEN = [
 const inhaber = () => start.kunden_rolle === 'inhaber';
 const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv'].includes(s[0]) || inhaber()));
 
+const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : 0)) || 0;
+
 function gerüst(aktiv, inhalt) {
   const k = start.kunde;
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, 'M'), k.logo_vorhanden ? k.firma : 'Markentrix'),
-      sichtbar().map(s => h('a', { class: 'nav' + (s[0] === aktiv ? ' on' : ''), href: '#' + s[0] }, s[1])),
+      sichtbar().map(s => h('a', { class: 'nav' + (s[0] === aktiv ? ' on' : ''), href: '#' + s[0] }, s[1], zaehler(s[0]) ? h('span', { class: 'badge' }, zaehler(s[0])) : '')),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' },
@@ -64,7 +69,26 @@ const statusPill = (s) => h('span', { class: 'pill ' + (['neu', 'geplant'].inclu
 // ------------------------------------------------------------- Seiten
 const V = {};
 
-V.uebersicht = async () => h('div', { class: 'grid3' }, karten());
+V.uebersicht = async () => {
+  const z = await api('/api/kunde/kennzahlen');
+  const karte = (titel, zahl, text, link) => h('a', { class: 'card', href: link, style: 'text-decoration:none;color:inherit' }, h('h3', {}, titel), h('div', { class: 'stat' }, h('b', {}, zahl), h('span', { class: 'muted small' }, text)));
+  const zusatz = [
+    karte('Nachrichten', z.nachrichten_offen, z.wartet_auf_dich ? z.wartet_auf_dich + ' warten auf dich' : 'offen', '#nachrichten'),
+    karte('Freigaben', z.freigaben_wartend, z.freigaben_wartend ? 'warten auf deine Entscheidung' : 'nichts offen', '#freigaben'),
+    karte('Anfragen', z.anfragen_30d, 'letzte 30 Tage', '#anfragen'),
+    z.antwortzeit_h !== null ? h('div', { class: 'card' }, h('h3', {}, 'Antwortzeit des Teams'), h('div', { class: 'stat' }, h('b', {}, String(z.antwortzeit_h).replace('.', ',') + ' h'), h('span', { class: 'muted small' }, 'im Schnitt, letzte 90 Tage'))) : '',
+  ];
+  return h('div', { class: 'stack' }, z.bewertung_faellig ? zufriedenheitKarte() : '', h('div', { class: 'grid3' }, karten(), zusatz));
+};
+
+function zufriedenheitKarte() {
+  const m = h('div'), kom = h('input', { placeholder: 'Möchtest du uns etwas mitgeben? (freiwillig)', maxlength: 1000 }); let wahl = null;
+  const knoepfe = Array.from({ length: 11 }, (_, i) => h('button', { class: 'btn sec small', type: 'button', onclick: (e) => { wahl = i; knoepfe.forEach(b => b.classList.remove('gewaehlt')); e.target.classList.add('gewaehlt'); } }, String(i)));
+  return h('div', { class: 'card' }, h('h2', {}, 'Wie zufrieden bist du mit uns?'), h('p', { class: 'small muted' }, 'Von 0 (gar nicht) bis 10 (sehr). Dauert 10 Sekunden und hilft uns, besser zu werden.'), m,
+    h('div', { class: 'row punkte' }, knoepfe), h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, kom),
+      h('button', { class: 'btn', onclick: async () => { if (wahl === null) { melde(m, 'Bitte wähle eine Zahl.'); return; }
+        try { await api('/api/kunde/zufriedenheit', { method: 'POST', body: { punkte: wahl, kommentar: kom.value } }); location.reload(); } catch (x) { melde(m, x.message); } } }, 'Senden')));
+}
 
 V.assistent = async () => {
   const log = h('div', { class: 'chatlog' });
@@ -138,6 +162,102 @@ V.kontakte = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Kontakt'), m, f));
 };
 
+// ------------------------------------------------------------- Nachrichten und Aufträge
+const ARTEN = { frage: 'Frage', auftrag: 'Auftrag', aenderung: 'Änderungswunsch', problem: 'Problem', modul: 'Zusatzmodul' };
+const STATUS_TXT = { offen: 'offen', in_arbeit: 'in Arbeit', wartet_auf_kunde: 'wartet auf dich', erledigt: 'erledigt' };
+const tstatus = (s) => h('span', { class: 'pill ' + (s === 'erledigt' ? 'ok' : s === 'wartet_auf_kunde' ? 'warn' : '') }, STATUS_TXT[s] || s);
+const darfSchreiben = () => start.kunden_rolle !== 'nur_lesen';
+
+function dateiLinks(liste) {
+  return liste.length ? h('div', { class: 'small', style: 'margin-top:6px' }, liste.map(d => h('a', { class: 'dateilink', href: '/api/kunde/dateien/' + d.id, target: '_blank', rel: 'noopener' }, '📎 ' + d.name + ' (' + groesse(d.groesse) + ')'))) : '';
+}
+
+V.nachrichten = async (id) => {
+  if (id) return nachrichtDetail(id);
+  const liste = await api('/api/kunde/tickets'), m = h('div');
+  const betreff = h('input', { name: 'betreff', required: true, maxlength: 200, placeholder: 'Worum geht es?' });
+  const art = h('select', { name: 'art' }, ...Object.entries(ARTEN).filter(([v]) => v !== 'modul').map(([v, t]) => h('option', { value: v }, t)));
+  const text = h('textarea', { name: 'text', rows: 5, required: true, maxlength: 10000, placeholder: 'Beschreibe dein Anliegen. Je genauer, desto schneller können wir helfen.' });
+  const form = h('form', { onsubmit: async (e) => { e.preventDefault();
+    try { const r = await api('/api/kunde/tickets', { method: 'POST', body: { betreff: betreff.value, art: art.value, text: text.value } }); location.hash = '#nachrichten/' + r.id; } catch (x) { melde(m, x.message); } } },
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Art'), art)),
+    h('label', {}, 'Nachricht'), text, h('p', {}, h('button', { class: 'btn' }, 'Absenden')));
+  return h('div', { class: 'stack' },
+    darfSchreiben() ? h('div', { class: 'card' }, h('h2', {}, 'Neue Nachricht an Markentrix'), h('p', { class: 'small muted' }, 'Fragen, Aufträge oder Änderungswünsche, z. B. neue Öffnungszeiten, ein Foto für die Website, ein Problem. Wir antworten hier und per E-Mail.'), m, form) : '',
+    h('div', { class: 'card' }, h('h2', {}, 'Deine Nachrichten'),
+      tabelle([['Nr.', z => h('a', { href: '#nachrichten/' + z.id }, z.nr)], ['Betreff', z => h('a', { href: '#nachrichten/' + z.id }, (z.kunde_ungelesen ? '● ' : '') + z.betreff)], ['Art', z => ARTEN[z.art] || z.art], ['Status', z => tstatus(z.status)], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Noch keine Nachrichten.')));
+};
+
+async function nachrichtDetail(id) {
+  const t = await api('/api/kunde/tickets/' + id), m = h('div');
+  const bubbles = t.nachrichten.map(n => h('div', { class: 'bub ' + (n.von === 'kunde' ? 'kunde' : 'team') }, h('div', { class: 'small wer' }, (n.von === 'kunde' ? (n.autor_name || 'Du') : (n.autor_name || 'Markentrix-Team')) + ' · ' + zeit(n.erstellt_am)), n.text));
+  const text = h('textarea', { rows: 4, maxlength: 10000, placeholder: t.status === 'erledigt' ? 'Noch etwas offen? Schreibe hier, dann öffnen wir die Anfrage wieder.' : 'Deine Antwort …' });
+  const datei = h('input', { type: 'file', accept: '.pdf,.png,.jpg,.jpeg,.webp,.docx,.xlsx,.pptx,.txt,.csv,.zip' });
+  const senden = async () => {
+    try {
+      if (text.value.trim()) await api('/api/kunde/tickets/' + id + '/nachricht', { method: 'POST', body: { text: text.value } });
+      if (datei.files[0]) { const f = new FormData(); f.append('datei', datei.files[0]); await api('/api/kunde/tickets/' + id + '/dateien', { method: 'POST', body: f }); }
+      if (!text.value.trim() && !datei.files[0]) { melde(m, 'Bitte schreibe etwas oder wähle eine Datei.'); return; }
+      zeige();
+    } catch (x) { melde(m, x.message); }
+  };
+  let bewertung = '';
+  if (t.status === 'erledigt') {
+    if (t.bewertung) bewertung = h('p', { class: 'small muted' }, 'Deine Bewertung: ' + t.bewertung.punkte + ' von 10. Danke!');
+    else if (darfSchreiben()) {
+      const mb = h('div'), kom = h('input', { placeholder: 'Kommentar (freiwillig)', maxlength: 1000 }); let wahl = null;
+      const kn = Array.from({ length: 11 }, (_, i) => h('button', { class: 'btn sec small', type: 'button', onclick: (e) => { wahl = i; kn.forEach(b => b.classList.remove('gewaehlt')); e.target.classList.add('gewaehlt'); } }, String(i)));
+      bewertung = h('div', { class: 'card' }, h('h3', {}, 'Wie zufrieden warst du mit der Bearbeitung?'), mb, h('div', { class: 'row punkte' }, kn),
+        h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, kom), h('button', { class: 'btn', onclick: async () => { if (wahl === null) { melde(mb, 'Bitte wähle eine Zahl von 0 bis 10.'); return; }
+          try { await api('/api/kunde/tickets/' + id + '/zufriedenheit', { method: 'POST', body: { punkte: wahl, kommentar: kom.value } }); zeige(); } catch (x) { melde(mb, x.message); } } }, 'Bewerten')));
+    }
+  }
+  return h('div', { class: 'stack' },
+    h('div', { class: 'card' }, h('div', { class: 'row' }, h('a', { href: '#nachrichten' }, '← Alle Nachrichten'), h('span', { class: 'grow' }), tstatus(t.status)),
+      h('h2', { style: 'margin-top:10px' }, t.nr + ' · ' + t.betreff), h('p', { class: 'small muted' }, (ARTEN[t.art] || t.art) + ' · eröffnet am ' + zeit(t.erstellt_am)),
+      h('div', { class: 'chatlog thread' }, bubbles), dateiLinks(t.dateien)),
+    bewertung,
+    darfSchreiben() ? h('div', { class: 'card' }, h('h3', {}, 'Antworten'), m, text, h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, h('label', { style: 'margin:0 0 4px' }, 'Datei anhängen (max. 8 MB, optional)'), datei), h('button', { class: 'btn', onclick: senden }, 'Senden'))) : '');
+}
+
+// ------------------------------------------------------------- Freigaben
+const FART = { social: 'Social Media', text: 'Text', angebot: 'Angebot', design: 'Design', website: 'Website', sonstiges: 'Sonstiges' };
+V.freigaben = async () => {
+  const liste = await api('/api/kunde/freigaben');
+  const wartend = liste.filter(f => f.status === 'wartet'), erledigt = liste.filter(f => f.status !== 'wartet');
+  const karte = (f) => {
+    const m = h('div'), kom = h('textarea', { rows: 2, maxlength: 2000, placeholder: 'Kommentar (bei „Änderung wünschen“ bitte kurz beschreiben, was angepasst werden soll)' });
+    const los = async (entscheidung) => { try { await api('/api/kunde/freigaben/' + f.id + '/entscheiden', { method: 'POST', body: { entscheidung, kommentar: kom.value } }); zeige(); } catch (x) { melde(m, x.message); } };
+    return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h3', { style: 'margin:0' }, f.titel), h('span', { class: 'pill' }, FART[f.art] || f.art), h('span', { class: 'grow' }),
+      h('span', { class: 'pill ' + (f.status === 'freigegeben' ? 'ok' : f.status === 'abgelehnt' ? 'bad' : f.status === 'wartet' ? 'warn' : '') }, f.status === 'wartet' ? 'wartet auf dich' : f.status === 'freigegeben' ? 'freigegeben' : f.status === 'abgelehnt' ? 'Änderung gewünscht' : 'zurückgezogen')),
+      h('p', { class: 'small muted' }, 'Angefragt am ' + zeit(f.angefragt_am)), f.inhalt ? h('div', { class: 'freitext' }, f.inhalt) : '',
+      f.dateien.length ? h('div', { class: 'small' }, f.dateien.map(d => h('a', { class: 'dateilink', href: '/api/kunde/dateien/' + d.id, target: '_blank', rel: 'noopener' }, '📎 ' + d.name + ' (' + groesse(d.groesse) + ')'))) : '',
+      f.status === 'wartet' ? (darfSchreiben() ? h('div', {}, m, kom, h('div', { class: 'row', style: 'margin-top:10px' }, knopf('Freigeben', () => los('freigegeben'), 'btn'), knopf('Änderung wünschen', () => los('abgelehnt'), 'btn sec'))) : h('p', { class: 'small muted' }, 'Mit deinem Zugang kannst du nur ansehen.'))
+        : h('p', { class: 'small muted' }, (f.entschieden_name ? f.entschieden_name + ' am ' : 'Am ') + zeit(f.entschieden_am) + (f.kommentar ? ' · „' + f.kommentar + '“' : '')));
+  };
+  const knopf = (t, fn, c) => h('button', { class: c, onclick: fn }, t);
+  return h('div', { class: 'stack' },
+    h('div', { class: 'card' }, h('h2', {}, 'Freigaben'), h('p', { class: 'small muted' }, 'Hier zeigen wir dir Beiträge, Texte und Entwürfe, bevor sie veröffentlicht werden. Mit deiner Freigabe wird Datum, Uhrzeit und dein Name festgehalten.')),
+    wartend.length ? wartend.map(karte) : h('div', { class: 'card' }, h('p', { class: 'muted' }, 'Aktuell wartet nichts auf deine Freigabe.')),
+    erledigt.length ? h('div', { class: 'stack' }, h('h3', {}, 'Bisherige Entscheidungen'), erledigt.map(karte)) : '');
+};
+
+// ------------------------------------------------------------- Dokumentenablage
+V.unterlagen = async () => {
+  const d = await api('/api/kunde/unterlagen'), m = h('div');
+  const kat = h('select', {}, ...Object.entries(d.kategorien).map(([v, t]) => h('option', { value: v }, t)));
+  const datei = h('input', { type: 'file', accept: '.pdf,.png,.jpg,.jpeg,.webp,.docx,.xlsx,.pptx,.txt,.csv,.zip' });
+  const hoch = async () => { if (!datei.files[0]) { melde(m, 'Bitte wähle zuerst eine Datei.'); return; }
+    const f = new FormData(); f.append('datei', datei.files[0]); f.append('kategorie', kat.value);
+    try { await api('/api/kunde/unterlagen', { method: 'POST', body: f }); zeige(); } catch (x) { melde(m, x.message); } };
+  const weg = async (z) => { if (!confirm('Datei "' + z.name + '" wirklich löschen?')) return; try { await api('/api/kunde/unterlagen/' + z.id, { method: 'DELETE' }); zeige(); } catch (x) { melde(m, x.message); } };
+  return h('div', { class: 'stack' },
+    h('div', { class: 'card' }, h('h2', {}, 'Dokumente'), h('p', { class: 'small muted' }, 'Verträge, Briefings, Logos und Material an einem sicheren Ort, für dich und das Markentrix-Team. Bitte lade hier keine Passwörter hoch, die schickst du uns nicht per Datei.'),
+      darfSchreiben() ? h('div', {}, m, h('div', { class: 'row' }, kat, datei, h('button', { class: 'btn', onclick: hoch }, 'Hochladen'))) : '',
+      tabelle([['Datei', z => h('a', { href: '/api/kunde/dateien/' + z.id, target: '_blank', rel: 'noopener' }, z.name)], ['Art', z => d.kategorien[z.kategorie] || '–'], ['Größe', z => groesse(z.groesse)], ['Von', z => z.von === 'team' ? 'Markentrix' : 'Dir'], ['Datum', z => zeit(z.erstellt_am)],
+        ['', z => darfSchreiben() && z.von === 'kunde' ? h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen') : '']], d.dateien, 'Noch keine Dokumente.')));
+};
+
 V.dokumente = async () => {
   const d = await api('/api/kunde/dokumente');
   return h('div', { class: 'stack' },
@@ -203,18 +323,29 @@ V.berichte = async () => {
 V.automationen = async () => {
   const d = await api('/api/kunde/automationen');
   return h('div', { class: 'card' }, h('h2', {}, 'Automationen'),
-    d.map(a => h('div', { class: 'modul' }, h('div', { class: 'grow' }, h('b', {}, a.name), h('div', { class: 'small muted' }, a.beschreibung)), h('span', { class: 'pill ' + (a.aktiv ? 'ok' : '') }, a.aktiv ? 'aktiv' : 'nicht gebucht'))),
-    h('p', { class: 'muted small' }, 'Weitere Automationen buchst du über dein Markentrix-Team.'));
+    d.map(a => h('div', { class: 'modul' }, h('div', { class: 'grow' }, h('b', {}, a.name), h('div', { class: 'small muted' }, a.beschreibung)), h('span', { class: 'pill ' + (a.aktiv ? 'ok' : '') }, a.aktiv ? 'aktiv' : 'nicht gebucht'), !a.aktiv && inhaber() ? h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Wir melden uns bei dir mit Details und Preis. Anfrage senden?')) return; try { const r = await api('/api/kunde/modul-anfrage', { method: 'POST', body: { modul_code: a.code } }); location.hash = '#nachrichten/' + r.id; } catch (x) { alert(x.message); } } }, 'Anfragen') : '')),
+    h('p', { class: 'muted small' }, 'Mit „Anfragen“ erhält das Markentrix-Team deine Nachricht und meldet sich mit Details und Preis.'));
 };
+
+function anschriftKarte(k) {
+  const m = h('div');
+  const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault();
+    try { await api('/api/kunde/stammdaten', { method: 'PATCH', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Gespeichert. Das Markentrix-Team wurde informiert und nutzt die Anschrift ab der nächsten Rechnung.', 'ok'); } catch (x) { melde(m, x.message); } } },
+    h('div', {}, h('label', {}, 'Straße und Nr.'), h('input', { name: 'strasse', value: k.strasse || '' })),
+    h('div', {}, h('label', {}, 'PLZ'), h('input', { name: 'plz', value: k.plz || '' })),
+    h('div', {}, h('label', {}, 'Ort'), h('input', { name: 'ort', value: k.ort || '' })),
+    h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Rechnungsanschrift'), h('p', { class: 'small muted' }, 'Firmenname oder Rechtsform ändern wir für dich: Schreib uns dazu unter Nachrichten.'), m, f);
+}
 
 V.einstellungen = async () => {
   const p = await api('/api/kunde/profil');
   const m1 = h('div'), m2 = h('div'), m3 = h('div');
-  const k = p.kunde; const sw = { benachr_anfragen: k.benachr_anfragen, benachr_termine: k.benachr_termine, benachr_bericht: k.benachr_bericht };
+  const k = p.kunde; const sw = { benachr_anfragen: k.benachr_anfragen, benachr_termine: k.benachr_termine, benachr_bericht: k.benachr_bericht, benachr_nachrichten: k.benachr_nachrichten };
   const kb = (label, key) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', checked: sw[key], style: 'width:auto', onchange: (e) => { sw[key] = e.target.checked; } }), label);
   const f3 = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/kunde/profil', { method: 'PATCH', body: { ...sw, benachr_email: e.target.benachr_email.value } }); melde(m3, 'Gespeichert.', 'ok'); } catch (x) { melde(m3, x.message); } } },
     h('div', {}, h('label', {}, 'Benachrichtigungen an (leer = deine Kontakt-E-Mail)'), h('input', { name: 'benachr_email', type: 'email', value: k.benachr_email || '' })),
-    kb('Bei neuen Anfragen', 'benachr_anfragen'), kb('Erinnerung vor Terminen', 'benachr_termine'), kb('Monatsbericht per E-Mail', 'benachr_bericht'), h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+    kb('Bei neuen Anfragen', 'benachr_anfragen'), kb('Erinnerung vor Terminen', 'benachr_termine'), kb('Monatsbericht per E-Mail', 'benachr_bericht'), kb('Antworten und Freigabe-Bitten vom Team', 'benachr_nachrichten'), h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   const f1 = h('form', { class: 'form2', onsubmit: async (e) => {
     e.preventDefault();
     try { await api('/api/kunde/profil', { method: 'PATCH', body: Object.fromEntries(new FormData(e.target)) }); melde(m1, 'Gespeichert.', 'ok'); } catch (x) { melde(m1, x.message); }
@@ -233,6 +364,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Dein Konto'), h('p', {}, 'Kundennummer ', h('b', {}, k.kundennummer), ' · Paket ', h('b', {}, k.paket || '–'), ' · Login ', h('b', {}, p.login))),
     h('div', { class: 'card' }, h('h2', {}, 'Kontaktdaten'), m1, f1),
+    inhaber() ? anschriftKarte(k) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
     h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), zweiFaktorKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
@@ -264,11 +396,11 @@ V.team = async () => {
 };
 
 async function zeige() {
-  const id = (location.hash || '#').slice(1);
+  const [id, param] = (location.hash || '#').slice(1).split('/');
   const erlaubt = sichtbar().map(s => s[0]);
   const seite = erlaubt.includes(id) ? id : (hat('ki_chat') ? 'assistent' : 'uebersicht');
   let inhalt;
-  try { inhalt = await V[seite](); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
+  try { inhalt = await V[seite](param); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
   root.replaceChildren(gerüst(seite, inhalt));
 }
 

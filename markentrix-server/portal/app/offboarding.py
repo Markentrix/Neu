@@ -13,11 +13,12 @@ from . import berichte, belege, config, rechtstexte
 
 EXPORT_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "websites",
-                   "angebote", "vertraege", "projekte", "buchungen", "belege", "avv", "agent_laeufe"]
+                   "angebote", "vertraege", "projekte", "buchungen", "belege", "avv", "agent_laeufe",
+                   "tickets", "ticket_nachrichten", "kundenfreigaben", "zufriedenheit"]
 # Inhalte, die bei der Löschung entfernt werden (Reihenfolge ist egal, es gibt keine Abhängigkeiten untereinander außer SET NULL / CASCADE)
 LOESCH_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "agent_laeufe",
-                   "prompts", "freigaben", "projekte", "websites"]
+                   "prompts", "freigaben", "projekte", "websites", "tickets", "kundenfreigaben", "zufriedenheit", "aufgaben", "dateien"]
 
 
 def _json(o):
@@ -48,7 +49,8 @@ def export_zip(cur, kid) -> bytes:
                    "belege/   Angebote und Rechnungen als PDF\n"
                    "berichte/ Monatsberichte als PDF\n"
                    "avv/      Auftragsverarbeitungsvertrag (unterschrieben)\n"
-                   "uploads/  hochgeladene Dateien (z. B. Wochenangebote)\n")
+                   "uploads/  hochgeladene Dateien (z. B. Wochenangebote)\n"
+                   "dateien/  Dokumentenablage und Anhänge aus Nachrichten und Freigaben\n")
         z.writestr("daten/kunde.json", json.dumps(k, default=_json, ensure_ascii=False, indent=1))
         cur.execute("SELECT id, email, name, rolle, kunden_rolle, aktiv, letzter_login, erstellt_am FROM benutzer WHERE kunden_id=%s", (kid,))
         z.writestr("daten/zugaenge.json", json.dumps(cur.fetchall(), default=_json, ensure_ascii=False, indent=1))
@@ -72,6 +74,9 @@ def export_zip(cur, kid) -> bytes:
         cur.execute("SELECT id, datei, datei_name, unterschrieben_am FROM avv WHERE kunden_id=%s AND datei IS NOT NULL", (kid,))
         for a in cur.fetchall():
             z.writestr(f"avv/{a['unterschrieben_am']}-{(a['datei_name'] or 'AVV')}", bytes(a["datei"]))
+        cur.execute("SELECT id, name, bereich, kategorie, daten FROM dateien WHERE kunden_id=%s", (kid,))
+        for d in cur.fetchall():
+            z.writestr(f"dateien/{d['bereich']}/{str(d['id'])[:8]}-{d['name']}", bytes(d["daten"]))
         basis = _upload_dir(kid)
         cur.execute("SELECT id, dateiname, dateipfad FROM wochenangebote_uploads WHERE kunden_id=%s", (kid,))
         for u in cur.fetchall():

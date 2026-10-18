@@ -200,6 +200,22 @@ Im Kunden, wenn der Status „gekündigt" oder „beendet" ist, gibt es die Kart
 
 Unerwartete Fehler zeigen dem Nutzer nur „Interner Fehler" und erscheinen als Warnung in der Übersicht (unter Alarme), höchstens einmal je Seite und 10 Minuten. Dort bestätigen, wenn erledigt.
 
+## Zusammenarbeit mit Kunden (Nachrichten, Freigaben, Aufgaben, Dokumente)
+
+**Nachrichten (Admin → Nachrichten):** Kunden schreiben im Portal unter „Nachrichten“ (Frage, Auftrag, Änderungswunsch, Problem). Du bekommst eine E-Mail und einen roten Zähler. Antwort mit „Senden“; Status setzen (offen, in Arbeit, wartet auf Kunde, erledigt). „Nur intern“ ist eine Notiz, die der Kunde nie sieht. Bei „erledigt“ wird der Kunde um eine Bewertung (0 bis 10) gebeten. Du kannst auch selbst eine Nachricht oder einen Auftrag an einen Kunden schicken (Kunde öffnen → Nachrichten → Neue Nachricht).
+
+**Freigaben (Kunde öffnen → Neue Freigabe-Bitte):** Text, Beitrag oder Entwurf (optional mit Datei) zur Prüfung schicken. Der Kunde gibt frei oder wünscht eine Änderung (Kommentar Pflicht). Datum, Uhrzeit, Name und IP werden gespeichert. Übersicht aller Freigaben: Admin → Freigaben.
+
+**Aufgaben (Admin → Aufgaben):** Eigene To-dos mit Zuständigem und Fälligkeit. Das System legt selbst Aufgaben an (unbeantwortete Nachrichten, wartende Freigaben) und schickt täglich eine Zusammenfassung. Automatische Aufgaben nur „Erledigt“ markieren.
+
+**Kennzahlen (Admin → Kennzahlen):** Antwortzeit, Bearbeitungsdauer, Freigabedauer, Zufriedenheit und NPS der letzten 90 Tage, dazu eine Tabelle pro Kunde. Kunden sehen auf ihrer Übersicht die eigenen Zahlen und werden einmal pro Quartal um eine Bewertung gebeten.
+
+**Dokumente (Kunde öffnen → Dokumente):** Verträge, Briefings, Logos pro Kunde ablegen, mit Schalter „für Kunden sichtbar“. Kunden haben unter „Dokumente“ ihre eigene Ablage. Erlaubt: PDF, Bilder, Word, Excel, PowerPoint, Text, CSV, ZIP bis 8 MB. Passwörter gehören nicht hierher.
+
+**Selbstbedienung:** Kunden (Inhaber) ändern ihre Rechnungsanschrift selbst, fragen Zusatzmodule per Knopf „Anfragen“ an (landet als Nachricht bei dir) und schalten E-Mails zu Antworten ein oder aus. Firmenname und Rechtsform änderst du.
+
+Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen und Dokumente im Datenexport enthalten und werden danach gelöscht.
+
 ## Automatische Tests
 
 `sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").
