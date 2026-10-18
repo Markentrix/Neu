@@ -11,6 +11,7 @@ from fastapi.responses import Response
 from .db import tx
 from .publish import DOMAIN_RE
 from . import zugang
+from . import routes_avv as avv_modul
 from .security import EMAIL_RE, audit, require_admin
 
 router = APIRouter(prefix="/api/admin")
@@ -60,7 +61,8 @@ def uebersicht(user: dict = Depends(require_admin)):
         freigaben = cur.fetchone()["n"]
         cur.execute("SELECT zeit, aktion, details, kunden_id FROM audit_log ORDER BY id DESC LIMIT 12")
         letzte = cur.fetchall()
-    return {"kunden_status": status, "monatlich_cent": int(mrr), "referenzkunden": referenz, "rechnungen_offen_cent": int(rechn["offen"]), "rechnungen_ueberfaellig": rechn["ueberfaellig"], "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte}
+        avv_fehlt = avv_modul.fehlende(cur)
+    return {"avv_fehlt": avv_fehlt, "kunden_status": status, "monatlich_cent": int(mrr), "referenzkunden": referenz, "rechnungen_offen_cent": int(rechn["offen"]), "rechnungen_ueberfaellig": rechn["ueberfaellig"], "neue_anfragen": neu, "uploads_7d": uploads, "offene_freigaben": freigaben, "letzte_aktionen": letzte}
 
 
 @router.get("/katalog")
@@ -139,7 +141,8 @@ def kunden_liste(q: str = "", user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         cur.execute("""SELECT k.id, k.kundennummer, k.firma, k.ansprechpartner, k.email, k.domain, k.status, k.referenzkunde, p.name AS paket, k.erstellt_am,
                               (SELECT count(*) FROM kunden_module km WHERE km.kunden_id=k.id AND km.aktiv) AS module_aktiv,
-                              (SELECT count(*) FROM benutzer b WHERE b.kunden_id=k.id AND b.passwort_hash IS NOT NULL) AS zugang_aktiv
+                              (SELECT count(*) FROM benutzer b WHERE b.kunden_id=k.id AND b.passwort_hash IS NOT NULL) AS zugang_aktiv,
+                              EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL) AS avv_ok
                        FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code
                        WHERE %s = '' OR k.firma ILIKE %s OR k.kundennummer ILIKE %s OR coalesce(k.email,'') ILIKE %s
                        ORDER BY k.kundennummer DESC LIMIT 500""", (q, f"%{q}%", f"%{q}%", f"%{q}%"))

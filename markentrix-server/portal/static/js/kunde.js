@@ -17,11 +17,12 @@ const SEITEN = [
   ['wochenangebote', 'Wochenangebote', 'wochenangebote'],
   ['werbung', 'Werbung & Berichte', 'werbung_berichte'],
   ['automationen', 'Automationen', 'automationen'],
+  ['avv', 'Datenschutz-Vertrag', null],
   ['team', 'Team', null],
   ['einstellungen', 'Einstellungen', null],
 ];
 const inhaber = () => start.kunden_rolle === 'inhaber';
-const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team'].includes(s[0]) || inhaber()));
+const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv'].includes(s[0]) || inhaber()));
 
 function gerüst(aktiv, inhalt) {
   const k = start.kunde;
@@ -235,6 +236,13 @@ V.einstellungen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
     h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), zweiFaktorKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
+};
+
+V.avv = async () => {
+  const d = await api('/api/kunde/avv');
+  return h('div', { class: 'card' }, h('h2', {}, 'Vertrag zur Auftragsverarbeitung (AVV)'),
+    h('p', { class: 'small muted' }, 'Hier liegt der unterschriebene Vertrag, der regelt, wie Markentrix personenbezogene Daten in deinem Auftrag verarbeitet (Art. 28 DSGVO).'),
+    tabelle([['Unterschrieben am', z => datum(z.unterschrieben_am)], ['Datei', z => z.datei_name || 'AVV'], ['', z => h('a', { class: 'btn sec small', href: '/api/kunde/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Ansehen / Herunterladen')]], d, 'Noch kein unterschriebener Vertrag abgelegt. Das Markentrix-Team meldet sich dazu bei dir.'));
 };
 
 V.team = async () => {

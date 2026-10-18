@@ -103,6 +103,13 @@ def beleg(an: str, art: str, nummer: str, name: str | None, pdf_bytes: bytes, da
     return senden(an, f"Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
 
 
+def avv(an: str, name: str | None, pdf_bytes: bytes) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    text = (f"{hallo}\n\nanbei erhalten Sie den Vertrag zur Auftragsverarbeitung (AVV) nach Art. 28 DSGVO. Er regelt, wie wir personenbezogene Daten in Ihrem Auftrag verarbeiten.\n\n"
+            "Bitte unterschreiben Sie ihn und senden Sie uns ihn unterschrieben zurück (Scan oder Foto genügt)." + SIGNATUR)
+    return senden(an, "Vertrag zur Auftragsverarbeitung (AVV)", text, ("Auftragsverarbeitungsvertrag.pdf", pdf_bytes, "application/pdf"))
+
+
 def mahnung(an: str, titel: str, nummer: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
     text = (f"Guten Tag,\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}.\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
     return senden(an, f"{titel} zu Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))

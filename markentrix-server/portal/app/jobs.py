@@ -122,12 +122,36 @@ def fehler_melden(cfg):
         mailer.senden(an, f"{len(rows)} Workflow-Fehler" if len(rows) > 1 else "Workflow-Fehler", "Es sind Fehler in Automationen aufgetreten:\n\n" + "\n".join(zeilen) + mailer.SIGNATUR)
 
 
+def avv_erinnerung(cfg):
+    """Erinnert den Admin höchstens einmal pro Woche und Kunde, wenn drei Tage nach Anlage noch kein unterschriebener AVV vorliegt."""
+    with tx("system") as cur:
+        cur.execute("""WITH offen AS (
+                         SELECT k.id FROM kunden k
+                         WHERE k.status IN ('onboarding','aktiv','pausiert') AND k.erstellt_am < now() - interval '3 days'
+                           AND (k.avv_erinnert_am IS NULL OR k.avv_erinnert_am < now() - interval '7 days')
+                           AND NOT EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL)
+                         ORDER BY k.erstellt_am LIMIT 50 FOR UPDATE SKIP LOCKED)
+                       UPDATE kunden k SET avv_erinnert_am = now() FROM offen WHERE k.id = offen.id
+                       RETURNING k.kundennummer, k.firma""")
+        rows = cur.fetchall()
+        an = cfg["alarm_email"]
+        if not an:
+            cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
+            r = cur.fetchone()
+            an = r and r["email"]
+    if rows and an:
+        zeilen = [f"- {r['kundennummer']} {r['firma']}" for r in rows]
+        mailer.senden(an, "AVV fehlt bei " + (f"{len(rows)} Kunden" if len(rows) > 1 else "einem Kunden"),
+                      "Für diese Kunden liegt noch kein unterschriebener Auftragsverarbeitungsvertrag (AVV) vor:\n\n" + "\n".join(zeilen) +
+                      "\n\nIm Portal beim jeweiligen Kunden: AVV erstellen, senden und die unterschriebene Fassung ablegen." + mailer.SIGNATUR)
+
+
 def tick():
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
     if not mailer.konfiguriert():
         return
-    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden):
+    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

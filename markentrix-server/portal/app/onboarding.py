@@ -3,7 +3,7 @@
 VORLAGE = [
     # code, titel, hilfe, sortierung, modul, auto
     ("vertrag", "Angebot/Vertrag unterschrieben", "Unterschriebenes Angebot oder Vertrag liegt vor und ist abgelegt.", 10, None, None),
-    ("avv", "Auftragsverarbeitungsvertrag (AVV) unterschrieben", "Pflicht, sobald Daten von Kundinnen/Kunden des Kunden verarbeitet werden.", 20, None, None),
+    ("avv", "Auftragsverarbeitungsvertrag (AVV) unterschrieben", "Pflicht, sobald Daten von Kundinnen/Kunden des Kunden verarbeitet werden. Wird automatisch erledigt, sobald die unterschriebene Fassung abgelegt ist.", 20, None, "avv"),
     ("zugang", "Portal-Zugang eingerichtet", "Kunde hat sein Passwort gesetzt und sich einmal angemeldet.", 30, None, "zugang"),
     ("stammdaten", "Firmendaten, Öffnungszeiten, Leistungen erfasst", "Wird für Website, Assistent und Berichte gebraucht.", 40, None, None),
     ("branding", "Logo, Farben, Fotos erhalten", "Vom Kunden bekommen oder mit ihm abgestimmt.", 50, None, None),
@@ -46,6 +46,9 @@ def auto_erkannt(cur, kid) -> set:
     cur.execute("SELECT 1 FROM wissensbasis WHERE kunden_id=%s AND aktiv LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("wissen")
+    cur.execute("SELECT 1 FROM avv WHERE kunden_id=%s AND datei IS NOT NULL AND unterschrieben_am IS NOT NULL LIMIT 1", (kid,))
+    if cur.fetchone():
+        erkannt.add("avv")
     return erkannt
 
 

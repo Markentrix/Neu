@@ -108,7 +108,18 @@ Im Kunden stellst du per **Schalter** ein, welche Module er sieht (KI-Assistent,
 
 ## Firmendaten, Impressum, Datenschutz
 
-Admin → Einstellungen → **Firmendaten**: Name, Inhaber, Anschrift, E-Mail, Telefon, Steuernummer oder USt-IdNr, Bankverbindung, Zahlungsziel, Umsatzsteuersatz und ob du **Kleinunternehmer (§ 19 UStG)** bist. Ohne Steuernummer oder USt-IdNr lässt das Portal keine Rechnung ausstellen. Aus diesen Daten entstehen auch Impressum (`/impressum`) und Datenschutzerklärung (`/datenschutz`), beide ohne Login erreichbar und in der Anmeldeseite verlinkt. Die Texte sind Standardvorlagen: **bitte einmal von einer Anwältin oder einem Anwalt prüfen lassen**. Eigene Texte kannst du in den Einstellungen hinterlegen. Eine Vorlage für den Auftragsverarbeitungsvertrag (AVV) liegt unter `docs/AVV-Vorlage.md`, ebenfalls zur Prüfung.
+Admin → Einstellungen → **Firmendaten**: Name, Inhaber, Anschrift, E-Mail, Telefon, Steuernummer oder USt-IdNr, Bankverbindung, Zahlungsziel, Umsatzsteuersatz und ob du **Kleinunternehmer (§ 19 UStG)** bist. Ohne Steuernummer oder USt-IdNr lässt das Portal keine Rechnung ausstellen. Aus diesen Daten entstehen auch Impressum (`/impressum`) und Datenschutzerklärung (`/datenschutz`), beide ohne Login erreichbar und in der Anmeldeseite verlinkt. Die Texte sind Standardvorlagen: **bitte einmal von einer Anwältin oder einem Anwalt prüfen lassen**. Eigene Texte kannst du in den Einstellungen hinterlegen. Die Vorlage für den Auftragsverarbeitungsvertrag (AVV) steht auch als Text unter `docs/AVV-Vorlage.md`; die im Portal erzeugte PDF-Fassung nutzt denselben Inhalt (siehe nächster Abschnitt).
+
+## Auftragsverarbeitungsvertrag (AVV) pro Kunde
+
+Jeder Kunde braucht einen unterschriebenen AVV, bevor du seine Daten verarbeitest. Im Portal beim Kunden → Karte **Auftragsverarbeitungsvertrag**:
+1. „Neuen AVV erstellen“, dann **Vertrag (PDF)** öffnen: Kundenname, Anschrift und deine Firmendaten sind eingesetzt.
+2. **Per Mail senden** schickt das PDF an die Kunden-E-Mail (Versand muss eingerichtet sein).
+3. Unterschrieben zurück? Datei wählen, Unterschriftsdatum eintragen, **Ablegen** (PDF, Scan oder Foto, max. 6 MB). Der Onboarding-Punkt „AVV“ wird automatisch erledigt.
+4. Der Kunde sieht den abgelegten Vertrag in seinem Portal unter **Datenschutz-Vertrag** (nur Inhaber-Zugänge).
+5. In der Admin-Übersicht und in der Kundenliste steht „AVV fehlt“. Drei Tage nach Anlage ohne AVV bekommst du eine Mail, danach höchstens einmal pro Woche.
+
+Wichtig: Unter Einstellungen → **AVV: Unterauftragsverarbeiter** die Liste prüfen und vervollständigen (E-Mail-Anbieter, Telefonie-Dienst …). Der Vertragstext ist eine Vorlage und muss einmal juristisch geprüft werden. Abgelegte, unterschriebene Fassungen lassen sich nicht löschen, nur Entwürfe.
 
 ## Zwei-Faktor-Anmeldung (2FA)
 

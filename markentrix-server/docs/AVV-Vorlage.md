@@ -1,5 +1,7 @@
 # Vertrag zur Auftragsverarbeitung (Vorlage)
 
+> **Hinweis:** Im Portal wird daraus pro Kunde automatisch ein PDF erzeugt (Kunde → Auftragsverarbeitungsvertrag). Der Text dort entspricht dieser Vorlage. Die Unterauftragsverarbeiter pflegst du unter Einstellungen.
+>
 > **Wichtig:** Das ist eine Arbeitsvorlage, keine Rechtsberatung. Bitte einmal von einer Anwältin / einem Anwalt oder einer Datenschutzbeauftragten prüfen lassen, bevor sie mit Kunden verwendet wird. Eckige Klammern [ ] ausfüllen.
 
 zwischen

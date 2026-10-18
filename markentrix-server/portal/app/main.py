@@ -20,6 +20,7 @@ from .routes_public import router as public_router
 from .routes_onboarding import router as onboarding_router
 from .routes_provision import router as provision_router, vertrieb_router as provision_vertrieb_router
 from .routes_team import router as team_router, admin_router as team_admin_router
+from .routes_avv import router as avv_router, kunde_router as avv_kunde_router
 from .routes_belege import router as belege_router, kunde_router as belege_kunde_router
 
 
@@ -76,6 +77,8 @@ app.include_router(public_router)
 app.include_router(onboarding_router)
 app.include_router(belege_router)
 app.include_router(belege_kunde_router)
+app.include_router(avv_router)
+app.include_router(avv_kunde_router)
 app.include_router(team_router)
 app.include_router(team_admin_router)
 app.include_router(provision_router)

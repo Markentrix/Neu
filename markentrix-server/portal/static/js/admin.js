@@ -40,6 +40,7 @@ V.uebersicht = async () => {
       h('a', { class: 'card stat', href: '#belege', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Offene Rechnungen' + (d.rechnungen_ueberfaellig ? ' (' + d.rechnungen_ueberfaellig + ' überfällig)' : '')), h('b', {}, euro(d.rechnungen_offen_cent))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Neue Anfragen'), h('b', {}, d.neue_anfragen)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Uploads (7 Tage)'), h('b', {}, d.uploads_7d))),
+    d.avv_fehlt.length ? h('div', { class: 'card' }, h('h2', {}, 'AVV fehlt bei ' + d.avv_fehlt.length + (d.avv_fehlt.length === 1 ? ' Kunde' : ' Kunden')), h('p', { class: 'small muted' }, 'Ohne unterschriebenen Auftragsverarbeitungsvertrag sollten keine Kundendaten verarbeitet werden.'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Status', z => pill(z.status)]], d.avv_fehlt)) : '',
     ob.length ? h('div', { class: 'card' }, h('h2', {}, 'Neue Kunden im Onboarding'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Fortschritt', z => z.fertig + ' von ' + z.gesamt]], ob)) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Letzte Aktionen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d.letzte_aktionen)));
 };
@@ -52,7 +53,7 @@ V.kunden = async () => {
     if (nurRef.checked) d = d.filter(z => z.referenzkunde);
     box.replaceChildren(tabelle([
       ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => h('span', {}, z.firma, z.referenzkunde ? [' ', h('span', { class: 'pill warn' }, 'Referenz')] : '')], ['Paket', z => z.paket || '–'],
-      ['Status', z => pill(z.status)], ['Module', z => z.module_aktiv], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
+      ['Status', z => pill(z.status)], ['Module', z => z.module_aktiv], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(lade, 250); });
   await lade();
@@ -157,7 +158,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(),
+    zweiFaktorKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -175,6 +176,34 @@ async function firmaKarte() {
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   return h('div', { class: 'card' }, h('h2', {}, 'Firmendaten'), h('p', { class: 'small muted' }, 'Werden für Impressum, Datenschutz, Angebote, Rechnungen und Berichte verwendet. Bitte Angaben zu Steuern mit deiner Steuerberatung abstimmen.'), m, form);
 }
+async function avvEinstKarte() {
+  const r = await api('/api/admin/einstellungen/avv'), m = h('div');
+  const form = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/admin/einstellungen/avv', { method: 'PUT', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } },
+    h('label', {}, 'Unterauftragsverarbeiter im AVV (eine Zeile je Firma: Name | Leistung | Sitz). Leer lassen = Standardliste.'),
+    h('textarea', { name: 'unterauftragnehmer', rows: 6, placeholder: r.standard }, r.unterauftragnehmer || ''),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'card' }, h('h2', {}, 'AVV: Unterauftragsverarbeiter'),
+    h('p', { class: 'small muted' }, 'Diese Liste steht in Anlage 2 jedes AVV. Bitte vollständig und aktuell halten (z. B. E-Mail-Anbieter, Telefonie-Dienst) und den Vertragstext einmal juristisch prüfen lassen.'), m, form);
+}
+
+async function avvKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/avv'), m = h('div');
+  const neu = async () => { try { await api('/api/admin/kunden/' + kid + '/avv', { method: 'POST' }); location.reload(); } catch (x) { fehler(m, x); } };
+  const hoch = (z) => { const datei = h('input', { type: 'file', accept: 'application/pdf,image/png,image/jpeg' }), tag = h('input', { type: 'date', value: new Date().toISOString().slice(0, 10), style: 'max-width:160px' });
+    return h('span', { class: 'row' }, datei, tag, knopf('Ablegen', () => { const f = datei.files[0]; if (!f) return fehler(m, { message: 'Bitte zuerst die unterschriebene Datei wählen.' });
+      const r = new FileReader(); r.onload = async () => { try { await api('/api/admin/avv/' + z.id + '/upload', { method: 'POST', body: { datei_base64: r.result, datei_name: f.name, unterschrieben_am: tag.value } }); location.reload(); } catch (x) { fehler(m, x); } }; r.readAsDataURL(f); }, 'btn')); };
+  const aktion = (z) => h('span', { class: 'row' },
+    h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/vorlage.pdf', target: '_blank', rel: 'noopener' }, 'Vertrag (PDF)'),
+    knopf('Per Mail senden', async () => { if (confirm('AVV jetzt per E-Mail an den Kunden senden?')) { try { await api('/api/admin/avv/' + z.id + '/senden', { method: 'POST' }); melde(m, 'Gesendet.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'sec small'),
+    z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Unterschrieben ansehen') : knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/avv/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { fehler(m, x); } } }, 'bad small'));
+  return h('div', { class: 'card' }, h('h2', {}, 'Auftragsverarbeitungsvertrag (AVV) ', d.vorhanden ? h('span', { class: 'pill ok' }, 'liegt vor') : h('span', { class: 'pill warn' }, 'fehlt')),
+    h('p', { class: 'small muted' }, 'Ablauf: Vertrag erstellen, per Mail an den Kunden senden, unterschrieben zurückbekommen und hier ablegen. Der Kunde sieht die abgelegte Fassung in seinem Portal.'), m,
+    tabelle([['Erstellt', z => datum(z.erstellt_am)], ['Gesendet', z => z.gesendet_am ? datum(z.gesendet_am) : '–'], ['Unterschrieben am', z => z.unterschrieben_am ? datum(z.unterschrieben_am) : '–'],
+      ['Datei', z => z.hat_datei ? z.datei_name : 'noch nicht abgelegt'], ['', aktion]], d.liste, 'Noch kein AVV erstellt.'),
+    d.liste.filter(z => !z.hat_datei).length ? h('div', { style: 'margin-top:12px' }, h('p', { class: 'small muted' }, 'Unterschriebene Fassung zum neuesten Entwurf ablegen:'), hoch(d.liste.find(z => !z.hat_datei))) : '',
+    h('p', { style: 'margin-top:12px' }, knopf('Neuen AVV erstellen', neu, 'btn')));
+}
+
 async function rechtKarte() {
   const r = await api('/api/admin/einstellungen/recht'), m = h('div');
   const form = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/admin/einstellungen/recht', { method: 'PUT', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } },
@@ -557,6 +586,7 @@ async function kundeDetail(kid) {
     kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
     await onboardingKarte(kid),
+    await avvKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Vertriebler'), mv, h('div', { class: 'row' }, h('div', { class: 'grow' }, h('select', { id: 'vsel' }, h('option', { value: '' }, '– kein Vertriebler –'), partnerListe.map(p => h('option', { value: p.id, selected: p.id === k.vertriebspartner_id }, p.name + (p.status !== 'aktiv' ? ' (' + p.status + ')' : ''))))),
       knopf('Zuordnen', async () => { try { await api('/api/admin/kunden/' + kid + '/partner', { method: 'PUT', body: { partner_id: document.getElementById('vsel').value || null } }); melde(mv, 'Gespeichert.', 'ok'); } catch (x) { melde(mv, x.message); } }))),
     h('div', { class: 'card' }, h('h2', {}, 'Module des Kunden (Schalter)'), h('p', { class: 'small muted' }, 'Was hier aktiv ist, sieht der Kunde in seinem Portal.'), mz, module),
