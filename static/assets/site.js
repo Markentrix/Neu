@@ -361,13 +361,12 @@
         $$('button', bar).forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
         $$('.mini-frame', mini).forEach(function (fr) {
           var f = $('iframe', fr); if (!f) return;
-          var src = '/beispiel/' + slug + '/', mobile = fr.classList.contains('mini-frame--m');
+          var src = (f.getAttribute('data-src') || '').replace(/[a-z]+-muster/, slug), mobile = fr.classList.contains('mini-frame--m');
           f.setAttribute('data-src', src); f.setAttribute('title', 'Beispiel-Landingpage ' + name + ', ' + (mobile ? 'Smartphone' : 'Desktop') + '-Ansicht, scrollbar');
           if (f.getAttribute('src')) { fr.classList.remove('is-live'); on(f, 'load', function () { fr.classList.add('is-live'); }); f.setAttribute('src', src); }
         });
         var url = $('.browser-bar .url', mini); if (url) url.textContent = b.getAttribute('data-url');
-        $$('a[data-demo-link]', scope).forEach(function (a) { a.setAttribute('href', '/beispiel/' + slug + '/'); });
-        var nz = $('noscript', mini); void nz;
+        $$('a[data-demo-link]', scope).forEach(function (a) { a.setAttribute('href', (a.getAttribute('href') || '').replace(/[a-z]+-muster/, slug)); });
       });
     });
   }
