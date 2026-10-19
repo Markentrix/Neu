@@ -1240,3 +1240,7 @@ main:focus{outline:none}
 @media (min-width:900px){.partner-strip{grid-template-columns:minmax(0,1fr) auto}.partner-actions{justify-content:flex-end;flex-wrap:nowrap}}
 #vertrieb,#fotograf{scroll-margin-top:90px}
 #vertrieb h4,#fotograf h4{font-size:1rem;margin:18px 0 8px}
+/* 47 · Menüpunkt „Partner werden“ */
+.nav-links a.nav-partner{color:var(--violet-text);font-weight:600;white-space:nowrap}
+.mobile-panel .mp-partner{display:block;margin:4px 0 8px;padding:12px 14px;border-radius:12px;background:rgba(139,92,246,.10);color:var(--violet-text);font-weight:600}
+@media (min-width:1061px) and (max-width:1240px){.nav-links{gap:clamp(10px,1.1vw,18px)}.nav-links a{font-size:.92rem}}
