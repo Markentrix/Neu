@@ -13,7 +13,7 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 ## 1. Vor dem Start
 
 - [ ] Alle Ziel-URLs sind live und laden fehlerfrei: `/termin.html`, `/gutscheine.html`, `/aktion/winterschutz.html`, `/firmenkunden.html`, `/preise.html`, `/elbdetail-care.html`, `/ueber-uns.html` und alle 7 Seiten unter `/leistungen/` (neu: `/leistungen/keramikversiegelung-celle.html`, `/leistungen/lederaufbereitung-celle.html`).
-- [ ] Preisangaben in allen Texten als Endpreise ohne Umsatzsteuer-Hinweis (Kleinunternehmer nach § 19 UStG). Finale Preisliste von René abwarten und dann alle "ab"-Preise abgleichen: `[PLATZHALTER: finale Preisliste]`.
+- [ ] Preisangaben in allen Texten als Endpreise ohne Umsatzsteuer-Hinweis (Kleinunternehmer nach § 19 UStG). Alle "ab"-Preise mit der Preisliste auf `/preise.html` abgleichen (vier Pakete Refresh, Essential, Signature, Excellence; niedrigster Ab-Preis gilt für Kleinwagen).
 - [ ] Inhalt der Winter-Lackschutz-Aktion steht fest: `[PLATZHALTER: Leistungen, Preis, Zeitraum der Aktion]`. Anzeigentexte bei Bedarf daran anpassen.
 - [ ] Gutschein-Angebot steht fest: `[PLATZHALTER: Werte oder Pakete, Form (PDF, gedruckt), letzter Bestelltag vor Weihnachten]`.
 - [ ] Test-Aufruf jeder Ziel-URL mit UTM-Parametern (Abschnitt 5). In der eigenen Statistik prüfen, dass Quelle und Kampagne ankommen.
@@ -137,8 +137,8 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H4 | Keine Waschstraße | 17 |
 | H5 | 5,0 Sterne bei Google | 21 |
 | H6 | Verbindlicher Preis vorab | 25 |
-| H7 | Frisch & Sauber ab 79 € | 23 |
-| H8 | Komplettpflege ab 179 € | 23 |
+| H7 | Refresh ab 75 € | 15 |
+| H8 | Essential ab 300 € | 18 |
 | H9 | Termin per WhatsApp anfragen | 28 |
 | H10 | Zwei-Eimer-Handwäsche | 21 |
 | H11 | Mit Koch-Chemie-Produkten | 25 |
@@ -153,7 +153,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 |---|---|---|
 | D1 | Fahrzeugaufbereitung in Celle: 100 % Handarbeit, keine Waschstraße. Jetzt Termin anfragen. | 90 |
 | D2 | Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. 5,0 Sterne bei Google. | 82 |
-| D3 | Zwei-Eimer-Handwäsche mit Koch-Chemie-Produkten. Frisch & Sauber ab 79 €. | 73 |
+| D3 | Zwei-Eimer-Handwäsche mit Koch-Chemie-Produkten. Refresh ab 75 €. | 65 |
 | D4 | Termin per WhatsApp oder online anfragen. Mo bis Fr, samstags nach Absprache. | 77 |
 
 #### AG2 Innenreinigung
@@ -190,7 +190,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H3 | Polster & Teppich reinigen | 26 |
 | H4 | Geruchsneutralisation | 21 |
 | H5 | Leder- oder Polsterpflege | 25 |
-| H6 | Komplettpflege ab 179 € | 23 |
+| H6 | Essential ab 300 € | 18 |
 | H7 | Inkl. Kunststoffpflege | 22 |
 | H8 | Auto voller Hundehaare? | 23 |
 | H9 | Innenraum wieder frisch | 23 |
@@ -206,7 +206,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | Nr. | Description | Zeichen |
 |---|---|---|
 | D1 | Innenraum-Tiefenreinigung in Celle: Polster, Teppich, Kunststoff, Geruchsneutralisation. | 88 |
-| D2 | Komplettpflege ab 179 € inkl. Leder- oder Polsterpflege. Verbindlicher Preis vorab. | 83 |
+| D2 | Essential ab 300 € inkl. Leder- oder Polsterpflege. Verbindlicher Preis vorab. | 78 |
 | D3 | Hundehaare, Krümel, Gerüche? Innenraum gründlich von Hand gereinigt. Jetzt anfragen. | 84 |
 | D4 | 5,0 Sterne bei 19 Google-Rezensionen. Termin per WhatsApp oder online anfragen. | 79 |
 
@@ -243,12 +243,12 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 |---|---|---|
 | H1 | Lackpolitur in Celle | 20 |
 | H2 | Lackversiegelung in Celle | 25 |
-| H3 | Kratzer & Hologramme entfernen | 30 |
+| H3 | Kratzer & Hologramme mindern | 28 |
 | H4 | Mehrstufige Lackpolitur | 23 |
 | H5 | Lackschichtdickenmessung | 24 |
 | H6 | Messung vor jeder Politur | 25 |
-| H7 | Premium Politur ab 349 € | 24 |
-| H8 | Felgen- & Scheibenversiegelung | 30 |
+| H7 | Excellence ab 600 € | 19 |
+| H8 | Signature ab 450 € | 18 |
 | H9 | Tiefer Glanz von Hand | 21 |
 | H10 | 100 % Handarbeit | 16 |
 | H11 | 5,0 Sterne bei Google | 21 |
@@ -261,9 +261,9 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 
 | Nr. | Description | Zeichen |
 |---|---|---|
-| D1 | Mehrstufige Lackpolitur in Celle: Kratzer- und Hologrammentfernung von Hand. | 76 |
-| D2 | Lackschichtdickenmessung vor jeder Politur. Danach Lack-, Felgen-, Scheibenversiegelung. | 88 |
-| D3 | Premium Politur ab 349 €. Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. | 85 |
+| D1 | Mehrstufige Lackkorrektur in Celle: reduziert korrigierbare Kratzer und Hologramme. | 83 |
+| D2 | Lackschichtdickenmessung vor jeder Politur. Lackversiegelung separat buchbar. | 77 |
+| D3 | Excellence ab 600 €. Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. | 80 |
 | D4 | Koch-Chemie geschult, C²Coating Excellence Partner. Jetzt Politur-Termin anfragen. | 82 |
 
 #### AG4 Leasingrückgabe und Verkauf
@@ -299,13 +299,13 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H4 | Gebrauchtwagen aufbereiten | 26 |
 | H5 | Fahrzeug fit für die Rückgabe | 29 |
 | H6 | Innen & außen von Hand | 22 |
-| H7 | Kratzerentfernung von Hand | 26 |
+| H7 | Lackkorrektur von Hand | 22 |
 | H8 | Lackschichtdickenmessung | 24 |
 | H9 | Verbindlicher Preis vorab | 25 |
 | H10 | 5,0 Sterne bei Google | 21 |
 | H11 | Abnahme bei Tageslicht | 22 |
 | H12 | Gepflegt in die Übergabe | 24 |
-| H13 | Komplettpflege ab 179 € | 23 |
+| H13 | Essential ab 300 € | 18 |
 | H14 | Termin per WhatsApp anfragen | 28 |
 | H15 | 100 % Handarbeit | 16 |
 
@@ -375,7 +375,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 
 **Ziel-URL:** `/leistungen/keramikversiegelung-celle.html`  
 **Kampagne:** G1 Leistungen Celle, `utm_content=ag-keramik`.  
-**Hinweis:** Keine Preise in Headlines oder Descriptions. Die Preise für Keramik nennt René erst nach Besichtigung oder Fotos. 12 Headlines zum Start, bei Bedarf bis 15 ergänzen. `[PRÜFEN: Akzeptiert Google Ads das Zeichen "²" in "C²Coating"? Falls die Anzeige wegen Sonderzeichen abgelehnt wird, die Headline H3 durch "Offizieller Coating-Partner" (27) ersetzen und "C²Coating" nur auf der Zielseite nennen.]`  
+**Hinweis:** Keine Preise in Headlines oder Descriptions. Die Richtpreise (C² CarCeramic, Pkw ab 550 € je nach C²Coating-Kategorie) stehen auf der Zielseite. Den verbindlichen Preis nennt René nach Lackprüfung, Besichtigung oder Fotos. 12 Headlines zum Start, bei Bedarf bis 15 ergänzen. `[PRÜFEN: Akzeptiert Google Ads das Zeichen "²" in "C²Coating"? Falls die Anzeige wegen Sonderzeichen abgelehnt wird, die Headline H3 durch "Offizieller Coating-Partner" (27) ersetzen und "C²Coating" nur auf der Zielseite nennen.]`  
 **Keywords (20):** 16 Phrase Match, 4 Exact Match
 
 | Phrase Match | Exact Match |
@@ -462,10 +462,10 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 
 | Sitelink-Text (max. 25) | Zeichen | Ziel-URL | Beschreibung 1 (max. 35) | Beschreibung 2 (max. 35) |
 |---|---|---|---|---|
-| Pakete & Preise | 15 | `/preise.html` | Drei Pakete, Richtpreise ab 79 € (32) | Verbindlicher Preis vorab (25) |
+| Pakete & Preise | 15 | `/preise.html` | Vier Pakete, Richtpreise ab 75 € (32) | Verbindlicher Preis vorab (25) |
 | Termin anfragen | 15 | `/termin.html` | Online oder per WhatsApp (24) | Mo bis Fr, Sa nach Absprache (28) |
 | Innenaufbereitung | 17 | `/leistungen/innenaufbereitung-celle.html` | Tiefenreinigung, Polster, Teppich (33) | Geruchsneutralisation inklusive (31) |
-| Lackpolitur | 11 | `/leistungen/lackpolitur-celle.html` | Mehrstufig, mit Messung vorab (29) | Kratzer- und Hologrammentfernung (32) |
+| Lackpolitur | 11 | `/leistungen/lackpolitur-celle.html` | Mehrstufig, mit Messung vorab (29) | Mindert Kratzer und Hologramme (30) |
 | Keramikversiegelung | 19 | `/leistungen/keramikversiegelung-celle.html` | Für Lack, Glas und Felgen (25) | C²Coating Excellence Partner (28) |
 | Lackversiegelung | 16 | `/leistungen/lackversiegelung-celle.html` | Lack, Felgen und Scheiben (25) | Mit Koch-Chemie-Produkten (25) |
 | Lederaufbereitung | 17 | `/leistungen/lederaufbereitung-celle.html` | Reinigen, pflegen, reparieren (29) | Lederreparatur mit Colourlock (29) |
@@ -499,14 +499,14 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 | Header | Werte |
 |---|---|
 | Leistungen (engl. Services) | Keramikversiegelung, Lackkorrektur, Lackversiegelung, Innenraumaufbereitung, Lederreparatur, Handwäsche, Geruchsneutralisierung, Motorraumreinigung, Cabrioverdeckreinigung, Verkaufsaufbereitung |
-| Typen (engl. Types) | Frisch & Sauber, Komplettpflege, Premium Politur |
+| Typen (engl. Types) | Refresh, Essential, Signature, Excellence |
 | Stadtteile (engl. Neighborhoods) | Altstadt, Neuenhäusen, Blumlage, Westercelle, Altencelle, Garßen, Klein Hehlen, Groß Hehlen, Vorwerk, Wietzenbruch |
 
 **Anruf-Asset:** +49 172 7613807, nur zu Erreichbarkeitszeiten `[PLATZHALTER: Zeiten]`.
 
 **Standort-Asset:** über das verknüpfte Google Business Profile (Lachtehäuser Straße 1, 29223 Celle).
 
-**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Frisch & Sauber ab 79 €, Komplettpflege ab 179 €, Premium Politur ab 349 €, jeweils mit Ziel-URL `/preise.html`. Preise gelten für Kompaktwagen bei normalem Pflegezustand. Es sind Endpreise: ElbDetail ist Kleinunternehmer nach § 19 UStG und berechnet keine Umsatzsteuer. Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich. Keine Keramik-Preise in das Preis-Asset aufnehmen.
+**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Refresh ab 75 €, Essential ab 300 €, Signature ab 450 €, Excellence ab 600 €, jeweils mit Ziel-URL `/preise.html`. Preise gelten für Kleinwagen bei normalem Pflegezustand. Es sind Endpreise: ElbDetail ist Kleinunternehmer nach § 19 UStG und berechnet keine Umsatzsteuer. Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich. Keine Keramik-Preise in das Preis-Asset aufnehmen.
 
 **Bild-Assets:** Motive aus der Shotlist (01, 14, 27/28, 33) in 1:1 und 1,91:1. Kennzeichen unkenntlich.
 
@@ -549,7 +549,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 **Primärtexte**
 
 1. Noch kein Geschenk für jemanden, der sein Auto liebt? Verschenken Sie eine Fahrzeugaufbereitung in 100 % Handarbeit von ElbDetail aus Celle. `[PLATZHALTER: Gutscheinwerte oder Pakete]`. Gutschein jetzt anfragen.
-2. Frisch & Sauber, Komplettpflege oder Premium Politur: Ein Gutschein für ein sauberes Auto, innen wie außen. Eingelöst wird nach Terminvereinbarung, Mo bis Fr, samstags nach Absprache. `[PLATZHALTER: bestätigen, ob Gutscheine je Paket möglich sind]`
+2. Refresh, Essential, Signature oder Excellence: Ein Gutschein für ein gepflegtes Auto, innen wie außen. Paketgutscheine gelten für einen Kleinwagen. Eingelöst wird nach Terminvereinbarung, Mo bis Fr, samstags nach Absprache. `[PLATZHALTER: bestätigen, ob Gutscheine je Paket möglich sind]`
 3. Last-Minute-Geschenk für Celle und Umgebung: ein Gutschein von ElbDetail. `[PLATZHALTER: Form des Gutscheins und letzter Bestelltag vor Weihnachten]`. 5,0 Sterne bei 19 Google-Rezensionen.
 
 **Headlines:** "Gutschein für Fahrzeugpflege" | "Schenken Sie ein sauberes Auto" | "Weihnachtsgeschenk aus Celle"
@@ -574,11 +574,11 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 
 **Primärtexte**
 
-1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit der Komplettpflege reinigen wir Ihren Innenraum von Hand: Tiefenreinigung, Polster und Teppich, Kunststoffpflege und Geruchsneutralisation. Ab 179 € für Kompaktwagen.
+1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit dem Paket Essential reinigen wir Innenraum und Kofferraum intensiv von Hand: Polster und Teppich, Einstiege, Türverkleidungen und Kunststoffe. Ab 300 € für Kleinwagen. Bei vielen Tierhaaren oder Gerüchen nennen wir Ihnen den Mehraufwand vorab.
 2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 172 7613807 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
-3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Komplettpflege ab 179 € (Kompakt), ab 209 € (Limousine/Kombi), ab 229 € (SUV/Van). 5,0 Sterne bei 19 Google-Rezensionen.
+3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Essential ab 300 € (Kleinwagen), ab 375 € (Kompaktwagen), ab 450 € (Limousine, Kombi, kleinerer SUV), ab 525 € (großer SUV, Van). 5,0 Sterne bei 19 Google-Rezensionen.
 
-**Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Komplettpflege ab 179 €"
+**Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Essential ab 300 €"
 
 **Beschreibung (Link-Beschreibung):** "Verbindlicher Preis vor dem Termin."
 
@@ -589,7 +589,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 | Formate | Reel 9:16, 15 bis 20 Sekunden. Karussell 4:5 mit Vorher/Nachher (Kofferraum, Rückbank, Fußraum) |
 | Hook (0 bis 2 s) | Nahaufnahme Hundehaare im Kofferraum-Teppich |
 | Ablauf | Saugen, Bürsten, saubere Bahn im Teppich, Kofferraum-Totale nachher, Endkarte |
-| Text-Overlay | "Hund an Bord?" dann "Kofferraum wieder frei." dann "Komplettpflege ab 179 €" |
+| Text-Overlay | "Hund an Bord?" dann "Kofferraum wieder frei." dann "Essential ab 300 €" |
 | Motive (Shotlist) | 18, 60, 23, 25, 17 |
 | Hund im Bild | Nur mit Einwilligung des Halters. Kein Hund im Fahrzeug während der Reinigung zeigen |
 | Endkarte | Logo, "3 Fotos per WhatsApp, verbindlicher Preis", "+49 172 7613807" |

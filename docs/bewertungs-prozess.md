@@ -177,12 +177,12 @@ Den Link nicht kürzen oder über fremde Dienste umleiten. Den Original-Link von
 - Jede Antwort anpassen. Nicht zweimal denselben Text verwenden.
 - Den Vornamen nur nennen, wenn der Kunde ihn selbst im Profil zeigt.
 - Keine Auftragsdetails nennen, die der Kunde nicht selbst erwähnt hat. Kein Kennzeichen, kein Preis, kein Datum.
-- Leistung und Ort natürlich erwähnen, z. B. "Komplettpflege" oder "in Celle". Nicht übertreiben.
+- Leistung und Ort natürlich erwähnen, z. B. "Essential" oder "in Celle". Nicht übertreiben.
 - Sachlich bleiben, auch wenn es schwerfällt. Antworten lesen vor allem künftige Kunden.
 
 ### 1. Fünf Sterne mit Text
 
-> Vielen Dank, [VORNAME], für die tolle Bewertung! Schön, dass Ihnen [LEISTUNG, z. B. die Komplettpflege] gefallen hat. Genau dafür nehmen wir uns bei jedem Fahrzeug die Zeit und arbeiten alles von Hand. Wir freuen uns, wenn wir Ihr Auto wieder in Celle begrüßen dürfen. Viele Grüße, [IHR VORNAME] von ElbDetail
+> Vielen Dank, [VORNAME], für die tolle Bewertung! Schön, dass Ihnen [LEISTUNG, z. B. das Paket Essential] gefallen hat. Genau dafür nehmen wir uns bei jedem Fahrzeug die Zeit und arbeiten alles von Hand. Wir freuen uns, wenn wir Ihr Auto wieder in Celle begrüßen dürfen. Viele Grüße, [IHR VORNAME] von ElbDetail
 
 ### 2. Vier Sterne
 

@@ -4,8 +4,8 @@
 
 - [ ] **Impressum:** Inhaber:in oder Firmenname, USt-IdNr. oder Kleinunternehmer-Hinweis, Verantwortliche:r nach § 18 MStV (Portal → Inhalte → Grunddaten → Rechtliches).
 - [ ] **Datenschutz:** E-Mail-Anbieter eintragen, Auftragsverarbeitungsvertrag mit Hetzner im Hetzner-Konto abschließen (Konsole → Datenschutz), Text rechtlich prüfen lassen.
-- [ ] **Preise prüfen:** Richtpreise je Fahrzeugklasse in „Pakete & Preise“ (Limousine/Kombi und SUV/Van sind Vorschläge).
-- [ ] **Aussagen prüfen:** „samstags nach Absprache“, „Abholung nach Absprache“, Firmenkunden-Seite („Abrechnung nach Absprache“), Gutschein-Regeln (Gültigkeit 3 Jahre, Paketgutschein für Kompaktklasse, Zahlung per Überweisung oder bar).
+- [ ] **Preise prüfen:** Richtpreise der vier Pakete (Refresh, Essential, Signature, Excellence) je Fahrzeugklasse in „Pakete & Preise“ (Kleinwagen, Kompaktwagen, Limousinen/Kombis/kleinere SUVs, große SUVs und Vans; Sport- und Luxusfahrzeuge sowie Wohnmobile auf Anfrage) und Keramikpreise (C² CarCeramic).
+- [ ] **Aussagen prüfen:** „samstags nach Absprache“, „Abholung nach Absprache“, Firmenkunden-Seite („Abrechnung nach Absprache“), Gutschein-Regeln (Gültigkeit 3 Jahre, Paketgutschein für einen Kleinwagen, Zahlung per Überweisung oder bar).
 - [ ] **Zahlungshinweis für Gutscheine** in Einstellungen (Kontoinhaber, IBAN, Verwendungszweck).
 - [ ] **SMTP** in `.env` eintragen und Test-E-Mail senden.
 - [ ] **Testbuchung** über jede Formularart (Kontakt, Termin, Gutschein, Firma) durchführen und im Portal löschen.

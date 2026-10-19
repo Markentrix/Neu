@@ -66,35 +66,41 @@ Im Profil unter "Leistungen" anlegen. Google erlaubt pro Leistung einen Preis. D
 - Alle Preise sind "ab"-Preise (Einstiegspreise) für Fahrzeuge in normalem Pflegezustand.
 - Steuerhinweis: Endpreise. ElbDetail ist Kleinunternehmer nach § 19 UStG, daher wird keine Umsatzsteuer berechnet. Nirgends "zzgl." oder "inkl. Umsatzsteuer" schreiben.
 - Mehrkosten sind bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich. Das in den Paketbeschreibungen kurz erwähnen.
-- Keramikversiegelung, Lederreparatur, ElbDetail Care und Firmenkonditionen ohne Preis anlegen ("Preis auf Anfrage").
-- `[PLATZHALTER: René schickt die finale Preisliste. Danach alle Preise hier, auf der Website und in den Anzeigen abgleichen.]`
+- Preise stehen für Kleinwagen, Kompaktwagen, Limousinen/Kombis/kleinere SUVs und große SUVs/Vans fest. Sport- und Luxusfahrzeuge sowie Wohnmobile und Wohnwagen: Preis auf Anfrage.
+- Keramikversiegelung C² CarCeramic mit dem Ab-Preis 550 € anlegen (Pkw). Lederreparatur, Felgen- und Scheibenbeschichtung, ElbDetail Care und Firmenkonditionen ohne Preis anlegen ("Preis auf Anfrage").
+- Maßgeblich ist die Preisliste auf der Website (`/preise.html`). Bei jeder Preisänderung hier und in den Anzeigen abgleichen.
 
 ### Pakete
 
-**Frisch & Sauber**
-Außenwäsche von Hand, Felgen, Innenraum saugen und abwischen, Scheiben. Die schnelle Pflege zwischendurch in ca. 2 Stunden.
-Ab 79 € (Kompakt), ab 89 € (Limousine/Kombi), ab 99 € (SUV/Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+**Refresh**
+Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen, Oberflächen abwischen, Scheiben innen und außen. Für den gepflegten Alltag zwischendurch. Dauer ab 2 Stunden.
+Ab 75 € (Kleinwagen), ab 113 € (Kompaktwagen), ab 150 € (Limousine, Kombi, kleinerer SUV), ab 187 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
-**Komplettpflege**
-Alles aus Frisch & Sauber plus intensive Innenraumaufbereitung, Polster und Teppich, Leder- oder Polsterpflege, Kunststoffpflege und Geruchsneutralisierung. Dauer ca. ein halber Tag. Bei starker Verschmutzung oder vielen Tierhaaren sind Mehrkosten möglich.
-Ab 179 € (Kompakt), ab 209 € (Limousine/Kombi), ab 229 € (SUV/Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+**Essential**
+Alles aus Refresh plus intensive Innenraum- und Kofferraumreinigung, Einstiege, Türverkleidungen und Kunststoffe sowie Polster-, Teppich- oder Lederreinigung und Pflege. Ihr Auto bleibt ca. 24 Stunden bei uns. Bei starker Verschmutzung oder vielen Tierhaaren sind Mehrkosten möglich.
+Ab 300 € (Kleinwagen), ab 375 € (Kompaktwagen), ab 450 € (Limousine, Kombi, kleinerer SUV), ab 525 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
-**Premium Politur**
-Alles aus der Komplettpflege plus mehrstufige Lackkorrektur, Reduzierung von Waschkratzern und Hologrammen, Lackversiegelung sowie Felgen- und Scheibenversiegelung. Vorher messen wir die Lackschichtdicke. Dauer ca. 1 Tag. Auf Wunsch mit Keramikversiegelung statt klassischer Versiegelung (Preis auf Anfrage).
-Ab 349 € (Kompakt), ab 399 € (Limousine/Kombi), ab 449 € (SUV/Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+**Signature**
+Alles aus Essential plus Lackvorbereitung und einstufige Glanzpolitur. Für mehr Glanz und ein frischeres Lackbild, leichte Gebrauchsspuren werden reduziert. Dauer ab 24 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
+Ab 450 € (Kleinwagen), ab 525 € (Kompaktwagen), ab 600 € (Limousine, Kombi, kleinerer SUV), ab 675 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
-### Keramikversiegelung (Schwerpunkt, Preis auf Anfrage)
+**Excellence**
+Alles aus Essential plus mehrstufige Lackkorrektur. Reduziert korrigierbare Kratzer, Waschspuren und Hologramme. Vorher messen wir die Lackschichtdicke. Der mögliche Korrekturgrad hängt vom Lackzustand ab. Dauer ab 24 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
+Ab 600 € (Kleinwagen), ab 675 € (Kompaktwagen), ab 750 € (Limousine, Kombi, kleinerer SUV), ab 900 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+
+### Keramikversiegelung (Schwerpunkt)
 
 Infos unter /leistungen/keramikversiegelung-celle.html.
 
-**Keramikversiegelung für Lack**
-Hochwertige Keramikversiegelung mit Produkten von C²Coating. René ist offizieller C²Coating Excellence Partner. Vorher bereiten wir den Lack gründlich vor und korrigieren ihn bei Bedarf.
+**Keramikversiegelung für Lack (C² CarCeramic)**
+Hochwertige Keramikversiegelung mit Produkten von C²Coating. René ist offizieller C²Coating Excellence Partner. Buchbar ab dem Paket Signature, bei Neuwagen nach Lackprüfung auch ohne Paket. Eine nötige Politur stimmen wir vorher mit Ihnen ab.
+Pkw ab 550 € je nach C²Coating-Kategorie (550 €, 650 €, 715 €, 750 €, 950 €, 1.190 €). Wohnmobile nach Länge ab 1.950 €. Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Keramikversiegelung für Glas**
-Keramische Versiegelung für Scheiben. Wasser perlt besser ab, die Sicht bei Regen wird klarer.
+Keramische Versiegelung für Scheiben. Wasser perlt besser ab, die Sicht bei Regen wird klarer. Preis auf Anfrage.
 
 **Keramikversiegelung für Felgen**
-Keramische Versiegelung für Felgen. Bremsstaub und Schmutz haften schlechter, die Reinigung geht leichter.
+Keramische Versiegelung für Felgen. Bremsstaub und Schmutz haften schlechter, die Reinigung geht leichter. Preis auf Anfrage.
 
 **Lackvorbereitung vor der Keramikversiegelung**
 Handwäsche, Dekontamination, Lackkorrektur und Entfettung. Eine Keramikversiegelung ist nur so gut wie der Lack darunter.
@@ -117,13 +123,13 @@ Gezielte Entfernung von Insektenresten, Flugrost und Teerflecken von Hand.
 Chemische und mechanische Reinigung des Lacks von festsitzenden Partikeln. Grundlage für Politur und Versiegelung.
 
 **Einstufige Glanzpolitur**
-Eine Politurstufe für mehr Glanz und frische Farben. Ideal für gepflegte Fahrzeuge.
+Eine Politurstufe für mehr Glanz und frische Farben. Ideal für gepflegte Fahrzeuge. Enthalten im Paket Signature.
 
 **Mehrstufige Lackkorrektur**
-Mehrstufige Politur nach Messung der Lackschichtdicke. Reduziert Waschkratzer, Hologramme und andere Lackdefekte.
+Mehrstufige Politur nach Messung der Lackschichtdicke. Reduziert korrigierbare Kratzer, Waschspuren und Hologramme. Wie weit, hängt vom Lackzustand ab. Enthalten im Paket Excellence.
 
 **Lackversiegelung**
-Klassische Versiegelung des Lacks nach gründlicher Reinigung. Ideal vor dem Winter.
+Klassische Versiegelung des Lacks nach gründlicher Reinigung. Ideal vor dem Winter. Separat buchbar zu Signature oder Excellence.
 
 **Kunststoff- und Reifenpflege**
 Pflege für Kunststoffteile außen und für die Reifenflanken.
@@ -251,9 +257,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Herbst im Innenraum: Zeit für eine Tiefenreinigung
-- **Text (462 Zeichen, ohne Titelzeile):**
+- **Text (559 Zeichen, ohne Titelzeile):**
 
-> Nasses Laub, feuchte Schuhe, Schmutz in den Fußmatten: Im Herbst leidet der Innenraum. Mit unserer Komplettpflege reinigen wir Polster und Teppiche in der Tiefe. Wir pflegen Leder oder Stoff und alle Kunststoffteile. Gerüche neutralisieren wir gleich mit. Alles in Handarbeit mit Produkten von Koch-Chemie. Richtpreis ab 179 € für Kompaktwagen, ab 209 € für Limousine oder Kombi, ab 229 € für SUV und Van. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
+> Nasses Laub, feuchte Schuhe, Schmutz in den Fußmatten: Im Herbst leidet der Innenraum. Mit unserem Paket Essential reinigen wir Innenraum und Kofferraum intensiv. Polster, Teppiche oder Leder reinigen und pflegen wir materialgerecht, dazu Einstiege, Türverkleidungen und Kunststoffe. Alles in Handarbeit mit Profi-Produkten von Koch-Chemie und Colourlock. Richtpreis ab 300 € für Kleinwagen, ab 375 € für Kompaktwagen, ab 450 € für Limousine, Kombi oder kleineren SUV, ab 525 € für große SUVs und Vans. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Vorher-Nachher-Paar eines Fußraums: links mit Laub und Sand, rechts sauber.
@@ -262,9 +268,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Felgen fit für den Winter
-- **Text (384 Zeichen, ohne Titelzeile):**
+- **Text (434 Zeichen, ohne Titelzeile):**
 
-> Bremsstaub, Streusalz und Schmutz setzen sich im Winter an den Felgen fest. Unsere Felgen-Intensivreinigung entfernt das gründlich von Hand, auch in den Zwischenräumen der Speichen. Sie ist einzeln buchbar oder Teil unserer Pakete. Den Preis für die Einzelleistung nennen wir Ihnen nach einer kurzen Anfrage per WhatsApp oder über unser Terminformular. Termine von Montag bis Freitag.
+> Bremsstaub, Streusalz und Schmutz setzen sich im Winter an den Felgen fest. Unsere Felgen-Intensivreinigung entfernt das gründlich von Hand, auch in den Zwischenräumen der Speichen. Eine Felgenreinigung ist in allen Paketen enthalten, die Intensivreinigung buchen Sie einzeln dazu. Den Preis für die Einzelleistung nennen wir Ihnen nach einer kurzen Anfrage per WhatsApp oder über unser Terminformular. Termine von Montag bis Freitag.
 
 - **Button:** Weitere Infos → https://www.elbdetail.de/leistungen/aussenaufbereitung-celle.html
 - **Bildidee:** Halbe Felge gereinigt, halbe Felge noch mit Bremsstaub. Gut sichtbarer Kontrast.
@@ -273,9 +279,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Erst messen, dann polieren
-- **Text (436 Zeichen, ohne Titelzeile):**
+- **Text (600 Zeichen, ohne Titelzeile):**
 
-> Bevor wir polieren, messen wir die Lackschichtdicke. Jedes Fahrzeug hat andere Werte, zum Beispiel nach einer Nachlackierung. So wissen wir, wie viel Politur der Lack verträgt. Danach polieren wir mehrstufig, entfernen Kratzer und Hologramme und versiegeln den Lack. Premium Politur ab 349 € für Kompaktwagen, ab 399 € für Limousine oder Kombi, ab 449 € für SUV und Van. Dauer ca. 1 Tag. Die Abnahme machen wir gemeinsam bei Tageslicht.
+> Bevor wir polieren, messen wir die Lackschichtdicke. Jedes Fahrzeug hat andere Werte, zum Beispiel nach einer Nachlackierung. So wissen wir, wie viel Politur der Lack verträgt. Mit Excellence polieren wir danach mehrstufig und reduzieren korrigierbare Kratzer, Waschspuren und Hologramme. Wie weit das geht, hängt vom Lackzustand ab. Excellence ab 600 € für Kleinwagen, ab 675 € für Kompaktwagen, ab 750 € für Limousine, Kombi oder kleineren SUV, ab 900 € für große SUVs und Vans. Dauer ab 24 Stunden. Eine Lackversiegelung buchen Sie auf Wunsch dazu. Die Abnahme machen wir gemeinsam bei Tageslicht.
 
 - **Button:** Weitere Infos → https://www.elbdetail.de/leistungen/lackpolitur-celle.html
 - **Bildidee:** Schichtdickenmessgerät auf dem Lack, Display gut lesbar.
@@ -295,9 +301,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Weihnachtsgeschenk mit Glanz: Gutscheine von ElbDetail
-- **Text (405 Zeichen inkl. Platzhalter, ohne Titelzeile; nach dem Ersetzen neu zählen):**
+- **Text (443 Zeichen inkl. Platzhalter, ohne Titelzeile; nach dem Ersetzen neu zählen):**
 
-> Sie suchen ein Geschenk für Menschen, die ihr Auto lieben? Verschenken Sie einen Gutschein von ElbDetail. Ob Frisch & Sauber, Komplettpflege oder Premium Politur: Die beschenkte Person vereinbart den Termin später selbst. [GUTSCHEIN-DETAILS: Paket- oder Wertgutschein, Versand per Post oder als PDF]. Alle Infos finden Sie auf unserer Gutscheinseite. Ein Geschenk, das man jeden Tag beim Einsteigen sieht.
+> Sie suchen ein Geschenk für Menschen, die ihr Auto lieben? Verschenken Sie einen Gutschein von ElbDetail. Ob Refresh, Essential, Signature oder Excellence: Die beschenkte Person vereinbart den Termin später selbst. Paketgutscheine gelten für einen Kleinwagen. [GUTSCHEIN-DETAILS: Paket- oder Wertgutschein, Versand per Post oder als PDF]. Alle Infos finden Sie auf unserer Gutscheinseite. Ein Geschenk, das man jeden Tag beim Einsteigen sieht.
 
 - **Button:** Weitere Infos → https://www.elbdetail.de/gutscheine.html (oder "Kaufen", falls Gutscheine online bestellbar sind)
 - **Bildidee:** Gutscheinkarte auf einem frisch gepflegten Armaturenbrett, dezente Weihnachtsdeko.
@@ -306,9 +312,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Streusalz runter, Glanz zurück
-- **Text (355 Zeichen, ohne Titelzeile):**
+- **Text (415 Zeichen, ohne Titelzeile):**
 
-> Im Winter klebt Salz am Lack, an den Felgen und an den Scheiben. Unser Paket Frisch & Sauber ist die schnelle Pflege zwischendurch: Außenwäsche von Hand, Felgen, Innenraum saugen und abwischen, Scheiben. Dauer ca. 2 Stunden. Richtpreis ab 79 € für Kompaktwagen, ab 89 € für Limousine oder Kombi, ab 99 € für SUV und Van. Keine Waschstraße, nur Handarbeit.
+> Im Winter klebt Salz am Lack, an den Felgen und an den Scheiben. Unser Paket Refresh ist die Pflege zwischendurch: Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen und abwischen, Scheiben innen und außen. Dauer ab 2 Stunden. Richtpreis ab 75 € für Kleinwagen, ab 113 € für Kompaktwagen, ab 150 € für Limousine, Kombi oder kleineren SUV, ab 187 € für große SUVs und Vans. Keine Waschstraße, nur Handarbeit.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Handwäsche mit Schaum und zwei Eimern im Bild.
@@ -361,9 +367,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Frühjahr schon jetzt planen
-- **Text (426 Zeichen inkl. Platzhalter, ohne Titelzeile; nach dem Ersetzen neu zählen):**
+- **Text (484 Zeichen inkl. Platzhalter, ohne Titelzeile; nach dem Ersetzen neu zählen):**
 
-> Der Winter ist noch nicht vorbei, aber das Frühjahr kommt bestimmt. Nach Monaten mit Salz und Schmutz braucht der Lack oft eine Auffrischung. Unsere Premium Politur dauert ca. 1 Tag: mehrstufige Lackkorrektur, Lack-, Felgen- und Scheibenversiegelung. Ab 349 € für Kompaktwagen. Auf Wunsch versiegeln wir Ihren Lack danach mit Keramik. Termine für [MONATE, z. B. März und April] vergeben wir schon jetzt. Fragen Sie einfach an.
+> Der Winter ist noch nicht vorbei, aber das Frühjahr kommt bestimmt. Nach Monaten mit Salz und Schmutz braucht der Lack oft eine Auffrischung. Für mehr Glanz gibt es Signature mit einstufiger Glanzpolitur, ab 450 € für Kleinwagen. Bei Waschspuren und Hologrammen passt Excellence mit mehrstufiger Lackkorrektur, ab 600 €. Eine Lack- oder Keramikversiegelung buchen Sie auf Wunsch separat dazu. Termine für [MONATE, z. B. März und April] vergeben wir schon jetzt. Fragen Sie einfach an.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Spiegelung im polierten Lack, zum Beispiel Bäume oder Himmel auf der Motorhaube.
@@ -376,9 +382,9 @@ Diese Beiträge in Wochen mit Lücke oder als zweiten Beitrag der Woche einplane
 
 - **Typ:** Neuigkeiten
 - **Titel:** Keramikversiegelung in Celle
-- **Text (410 Zeichen, ohne Titelzeile):**
+- **Text (475 Zeichen, ohne Titelzeile):**
 
-> Eine Keramikversiegelung schützt Ihren Lack und sorgt für tiefen Glanz. Wasser perlt ab, Schmutz haftet schlechter und die Wäsche geht leichter. Wir versiegeln Lack, Glas und Felgen mit Produkten von C²Coating. Vorher bereiten wir den Lack gründlich vor: Handwäsche, Dekontamination und bei Bedarf eine mehrstufige Lackkorrektur. Den Preis nennen wir Ihnen nach einer Besichtigung oder nach Fotos per WhatsApp.
+> Eine Keramikversiegelung schützt Ihren Lack und sorgt für tiefen Glanz. Wasser perlt ab, Schmutz haftet schlechter und die Wäsche geht leichter. Wir versiegeln Lack, Glas und Felgen mit Produkten von C²Coating. Vorher bereiten wir den Lack gründlich vor: Handwäsche, Dekontamination und bei Bedarf eine mehrstufige Lackkorrektur. Für Pkw beginnt die Keramikversiegelung bei 550 €. Den verbindlichen Preis nennen wir Ihnen nach einer Besichtigung oder nach Fotos per WhatsApp.
 
 - **Button:** Weitere Infos → https://www.elbdetail.de/leistungen/keramikversiegelung-celle.html
 - **Bildidee:** Wasser perlt in Zeitlupe von einer frisch keramikversiegelten Motorhaube (Shotlist 66).
@@ -436,10 +442,10 @@ Ihr dürft als Inhaber selbst Fragen stellen und beantworten. Erst die Frage ste
 `[PRÜFEN: Google hat die Funktion "Fragen & Antworten" seit Ende 2025 in vielen Profilen eingeschränkt oder durch automatische Antworten ersetzt. Ist sie in eurem Profil nicht mehr sichtbar, die Texte als FAQ auf der Website nutzen. Google bezieht Antworten dann aus Website, Beschreibung und Rezensionen.]`
 
 **1. Was kostet eine Fahrzeugaufbereitung bei ElbDetail?**
-Unsere Einstiegspreise für Kompaktwagen: Frisch & Sauber ab 79 €, Komplettpflege ab 179 €, Premium Politur ab 349 €. Für Limousine, Kombi, SUV und Van liegen die Preise etwas höher. Alle Preise sind Endpreise. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
+Unsere Einstiegspreise für Kleinwagen: Refresh ab 75 €, Essential ab 300 €, Signature ab 450 €, Excellence ab 600 €. Für Kompaktwagen, Limousinen, Kombis, SUVs und Vans liegen die Preise höher. Für Sport- und Luxusfahrzeuge sowie Wohnmobile erhalten Sie ein Angebot auf Anfrage. Alle Preise sind Endpreise. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
 
 **2. Wie lange dauert eine Aufbereitung?**
-Frisch & Sauber dauert ca. 2 Stunden. Die Komplettpflege ca. einen halben Tag. Die Premium Politur ca. einen Tag. Je nach Zustand des Fahrzeugs kann es abweichen. Das sagen wir Ihnen vorab.
+Refresh dauert ab 2 Stunden. Bei Essential bleibt Ihr Auto ca. 24 Stunden bei uns, bei Signature und Excellence ab 24 Stunden. So können Pflegeprodukte und Versiegelung über Nacht in Ruhe aushärten. Je nach Zustand des Fahrzeugs kann es abweichen. Das sagen wir Ihnen vorab.
 
 **3. Waschen Sie in einer Waschstraße?**
 Nein. Wir arbeiten zu 100 % in Handarbeit. Außen waschen wir mit der Zwei-Eimer-Methode. Das schont den Lack.
@@ -466,7 +472,7 @@ Ja. Wir bereiten Ihr Fahrzeug innen und außen auf, auf Wunsch mit Lackpolitur n
 Ja, einen Abhol- und Bringservice gibt es nach Vereinbarung. Sprechen Sie uns bei der Terminanfrage darauf an. Wir sind für Kunden aus Celle und dem ganzen Landkreis da.
 
 **11. Bieten Sie eine Keramikversiegelung an?**
-Ja. Die Keramikversiegelung ist unser Schwerpunkt. Wir versiegeln Lack, Glas und Felgen mit Produkten von C²Coating. René ist offizieller C²Coating Excellence Partner. Vorher bereiten wir den Lack gründlich vor und korrigieren ihn bei Bedarf. Den Preis nennen wir Ihnen nach einer kurzen Besichtigung oder nach Fotos. Mehr unter www.elbdetail.de/leistungen/keramikversiegelung-celle.html.
+Ja. Die Keramikversiegelung ist unser Schwerpunkt. Wir versiegeln Lack, Glas und Felgen mit Produkten von C²Coating. René ist offizieller C²Coating Excellence Partner. Vorher bereiten wir den Lack gründlich vor und korrigieren ihn bei Bedarf. Für Pkw beginnt die Keramikversiegelung C² CarCeramic bei 550 €, je nach Fahrzeugkategorie. Wohnmobile ab 1.950 €. Den verbindlichen Preis nennen wir Ihnen nach einer kurzen Besichtigung oder nach Fotos. Mehr unter www.elbdetail.de/leistungen/keramikversiegelung-celle.html.
 
 **12. Pflegen Sie auch Autos, die schon eine Keramikversiegelung haben?**
 Ja. Wir waschen keramikversiegelte Fahrzeuge schonend von Hand und prüfen die Versiegelung. Das gilt auch, wenn Ihr Auto woanders versiegelt wurde.

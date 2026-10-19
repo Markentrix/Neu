@@ -15,7 +15,7 @@ Bildstil, Farben und Logo-Regeln: siehe `docs/markenleitfaden.md`, Abschnitt 8.
 | Ort | Lachtehäuser Straße 1, 29223 Celle |
 | Datum, Uhrzeit | `[PLATZHALTER: Shooting-Tag(e), Beginn]` |
 | Fotograf / Videograf | `[PLATZHALTER: Name, Kontakt]` |
-| Fahrzeuge | `[PLATZHALTER: Möglichst je ein Fahrzeug Kompakt, Limousine/Kombi und SUV/Van. Eines mit sichtbaren Swirls im Lack, eines mit verschmutztem Innenraum, gern mit Hundehaaren. Ein Fahrzeug, das eine Keramikversiegelung bekommt (dunkler Lack zeigt Glanz und Abperleffekt am besten). Ein Ledersitz oder Lenkrad mit Abrieb für die Colourlock-Reparatur. Schriftliche Einwilligung des Halters.]` |
+| Fahrzeuge | `[PLATZHALTER: Möglichst je ein Fahrzeug Kleinwagen oder Kompaktwagen, Limousine/Kombi/kleinerer SUV und großer SUV/Van. Eines mit sichtbaren Swirls im Lack, eines mit verschmutztem Innenraum, gern mit Hundehaaren. Ein Fahrzeug, das eine Keramikversiegelung bekommt (dunkler Lack zeigt Glanz und Abperleffekt am besten). Ein Ledersitz oder Lenkrad mit Abrieb für die Colourlock-Reparatur. Schriftliche Einwilligung des Halters.]` |
 | Arbeitsbereich | `[PLATZHALTER: Halle oder überdachter Platz mit konstantem Licht vorhanden? Außenfläche für Tageslicht-Aufnahmen?]` |
 | Ansprechpartner vor Ort | René (Inhaber) `[PLATZHALTER: oder Vertretung]` |
 | Ziel | Echte Bilder für Website (Hero, Vorher/Nachher-Slider, Leistungsseiten, Galerie), Social Media und Anzeigen |
@@ -100,7 +100,7 @@ elbdetail_clip_wasserperlen-zeitlupe_kompakt_20261021_02.mp4
 
 Vorher und Nachher eines Paares unterscheiden sich **nur** in der Endung `_vorher` / `_nachher`.
 
-Fahrzeug im Dateinamen nur als Klasse (`kompakt`, `kombi`, `limousine`, `suv`, `van`), nicht mit Kennzeichen oder Kundennamen.
+Fahrzeug im Dateinamen nur als Klasse (`klein`, `kompakt`, `kombi`, `limousine`, `suv`, `van`), nicht mit Kennzeichen oder Kundennamen.
 
 ---
 
