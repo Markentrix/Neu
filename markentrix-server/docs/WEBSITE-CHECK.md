@@ -9,8 +9,7 @@ Folgeaufgabe (+1 Tag) und Mail an das Team an. Fehler dabei blockieren den Besuc
 ## Einrichtung
 1. Admin → Einstellungen → „Website-Check → Leads“ → „Schlüssel erzeugen“ (wird nur einmal angezeigt).
 2. Auf dem Server:
-   `echo -n SCHLUESSEL | sudo tee /srv/markentrix-daten/lead-secret >/dev/null`
-   `sudo chown 82:82 /srv/markentrix-daten/lead-secret && sudo chmod 600 /srv/markentrix-daten/lead-secret`
+   ``bash bin/lead-key.sh` im Ordner markentrix-server (Schlüssel einfügen, Enter)
    (Alternative: Umgebungsvariable `MX_LEAD_SECRET` im PHP-Container; optional `MX_LEAD_URL`.)
 3. Neuen Check mit beiden Haken machen.
 
