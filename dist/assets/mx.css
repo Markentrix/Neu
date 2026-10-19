@@ -1118,3 +1118,15 @@ html.reduced .ill .il-float{animation:none}
 .band .soc{margin-top:18px}
 .band .soc a{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);color:#fff}
 .band .soc a:hover{border-color:var(--cyan);color:var(--cyan)}
+/* 38 · Feed-Beispiele */
+.feed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.feed-item{position:relative;display:block;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border);background:#fff;transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.feed-item img{width:100%;height:auto;aspect-ratio:1;object-fit:cover}
+.feed-item:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.feed-ig{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.94);display:grid;place-items:center;color:var(--navy);box-shadow:0 1px 4px rgba(11,16,32,.15)}
+.feed-ig svg{width:17px;height:17px}
+@media (min-width:1100px){.feed{grid-template-columns:repeat(2,minmax(0,1fr))}}
+li .soc a,.soc li a,.band .soc a:not(.btn){text-decoration:none}
+.soc a:hover{text-decoration:none}
+.feed-ig{top:auto;bottom:10px}
+ul.soc li a:not(.btn):not(.link-arrow),ul.soc li a:not(.btn):not(.link-arrow):hover{text-decoration:none}
