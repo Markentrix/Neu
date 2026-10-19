@@ -1,0 +1,29 @@
+{
+  "hinweis": "Zertifikate erscheinen auf /zertifikate.html und als Auswahl auf „Über uns“. Bilder unter Fotos hochladen (Hochformat), Unterschriften vorher unkenntlich machen.",
+  "items": [
+    {
+      "title": "Fachseminar Fahrzeugaufbereitung",
+      "subtitle": "inklusive hologrammfreier Lackaufbereitung, Nano-Versiegelung und Keramikversiegelung",
+      "kind": "Zertifikat",
+      "issuer": "Koch-Chemie CompetenceCenter",
+      "issuerUrl": "https://www.koch-chemie.com",
+      "place": "Unna",
+      "date": "2026-08-13",
+      "text": "Erfolgreich abgeschlossenes Fachseminar. Die Fortbildung baut auf den praktischen und theoretischen Bausteinen zur Ausbildung des Bundesverbandes Fahrzeugaufbereitung (BFA) auf.",
+      "benefit": "Lackkorrektur ohne Hologramme und Versiegelungen nach Herstellervorgaben, von der Nano- bis zur Keramikversiegelung.",
+      "image": "zertifikat-koch-chemie-fachseminar.jpg"
+    },
+    {
+      "title": "Hochvolt-Qualifikation Stufe S",
+      "subtitle": "Sensibilisierte Person für Arbeiten an Serienfahrzeugen mit Hochvoltsystemen",
+      "kind": "Teilnahmebescheinigung",
+      "issuer": "Koch-Chemie",
+      "issuerUrl": "https://www.koch-chemie.com",
+      "place": "Unna",
+      "date": "2026-08-13",
+      "text": "Unterweisung durch eine fachkundige Person Hochvolt zu möglichen Gefahren, notwendigen Schutzeinrichtungen und Schutzmaßnahmen bei Arbeiten an HV-Fahrzeugen.",
+      "benefit": "Ihr Elektroauto oder Hybrid wird mit dem nötigen Wissen über Hochvoltsysteme aufbereitet.",
+      "image": "zertifikat-koch-chemie-hochvolt.jpg"
+    }
+  ]
+}

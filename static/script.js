@@ -266,6 +266,25 @@
     $$("[data-offer-section]").forEach(function (sec) { if (!$("[data-offer]:not([hidden])", sec)) sec.hidden = true; });
   })();
 
+  /* Lightbox für Zertifikate: native <dialog>, Esc und Klick daneben schließen; ohne JS öffnet der Link das Bild */
+  var lbLinks = $$("a[data-lightbox]");
+  if (lbLinks.length && window.HTMLDialogElement) {
+    var dlg = document.createElement("dialog");
+    dlg.className = "lightbox";
+    dlg.innerHTML = '<button type="button" class="lightbox-close" aria-label="Schließen">×</button><img alt="">';
+    document.body.appendChild(dlg);
+    var lbImg = dlg.querySelector("img");
+    dlg.addEventListener("click", function (e) { if (e.target === dlg || e.target.closest(".lightbox-close")) dlg.close(); });
+    lbLinks.forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        var img = a.querySelector("img");
+        lbImg.src = a.getAttribute("href"); lbImg.alt = img ? img.alt : "";
+        dlg.showModal();
+      });
+    });
+  }
+
   /* Vorher/Nachher-Slider */
   $$(".ba").forEach(function (ba) {
     var r = $('input[type="range"]', ba); if (!r) return;

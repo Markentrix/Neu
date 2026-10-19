@@ -8,7 +8,7 @@ const PAGES = [
   "/ratgeber/leasingrueckgabe-checkliste.html", "/ratgeber/kosten-fahrzeugaufbereitung-celle.html",
   "/leistungen/aussenaufbereitung-celle.html", "/leistungen/innenaufbereitung-celle.html", "/leistungen/lackpolitur-celle.html",
   "/leistungen/lackversiegelung-celle.html", "/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html",
-  "/impressum.html", "/datenschutz.html", "/danke.html", "/angebote.html", "/ratgeber/winter.html",
+  "/impressum.html", "/datenschutz.html", "/danke.html", "/angebote.html", "/ratgeber/winter.html", "/zertifikate.html",
   "/ratgeber/auto-im-winter-waschen-streusalz.html", "/ratgeber/feuchtigkeit-im-auto-winter.html",
 ];
 
@@ -50,7 +50,7 @@ test("Alle internen Links funktionieren", async ({ page, request }) => {
   expect(broken).toEqual([]);
 });
 
-for (const path of ["/", "/angebote.html", "/ratgeber/winter.html", "/preise.html", "/kontakt.html", "/ueber-uns.html", "/elbdetail-care.html", "/leistungen/keramikversiegelung-celle.html", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
+for (const path of ["/", "/angebote.html", "/ratgeber/winter.html", "/zertifikate.html", "/preise.html", "/kontakt.html", "/ueber-uns.html", "/elbdetail-care.html", "/leistungen/keramikversiegelung-celle.html", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
   test(`Barrierefreiheit ${path}: keine schweren axe-Verstöße`, async ({ page }) => {
     await page.goto(path);
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -207,4 +207,14 @@ test("Mit Google-Analytics-ID: Google lädt erst nach Akzeptieren, Ablehnen blei
   await page.locator('#consent [data-c="granted"]').click();
   await expect.poll(() => gtm.length).toBeGreaterThan(0);
   expect(gtm[0]).toContain("id=G-TEST12345");
+});
+
+test("Zertifikate: Vergrößern öffnet die Lightbox, Esc schließt sie", async ({ page }) => {
+  await page.goto("/zertifikate.html");
+  await expect(page.locator(".cert")).toHaveCount(2);
+  await page.locator("a[data-lightbox]").first().click();
+  await expect(page.locator("dialog.lightbox")).toHaveAttribute("open", "");
+  await expect(page.locator("dialog.lightbox img")).toHaveAttribute("src", /zertifikat-koch-chemie/);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("dialog.lightbox")).not.toHaveAttribute("open", "");
 });

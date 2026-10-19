@@ -922,7 +922,7 @@ def read_session(cookie):
         return None
 
 
-EDITABLE = re.compile(r"^(site|pricing|reviews|faq|gallery|angebote)\.json$|^services/[a-z0-9-]{2,80}\.json$|^ratgeber/[a-z0-9-]{2,80}\.md$")
+EDITABLE = re.compile(r"^(site|pricing|reviews|faq|gallery|angebote|zertifikate)\.json$|^services/[a-z0-9-]{2,80}\.json$|^ratgeber/[a-z0-9-]{2,80}\.md$")
 MEDIA_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,80}\.(jpg|jpeg|png|webp)$")
 
 
@@ -1482,7 +1482,8 @@ class AdminAPI:
     def content_list(self):
         items = []
         labels = {"site.json": "Grunddaten & Kontakt", "pricing.json": "Pakete & Preise", "reviews.json": "Bewertungen",
-                  "faq.json": "Häufige Fragen (Startseite)", "gallery.json": "Vorher/Nachher-Galerie"}
+                  "faq.json": "Häufige Fragen (Startseite)", "gallery.json": "Vorher/Nachher-Galerie",
+                  "zertifikate.json": "Zertifikate"}
         for f, l in labels.items():
             items.append({"path": f, "label": l, "group": "Allgemein"})
         for f in sorted(os.listdir(os.path.join(Cfg.content, "services"))):

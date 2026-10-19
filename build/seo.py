@@ -50,7 +50,8 @@ def business(site):
                             "itemListElement": [{"@type": "OfferCatalog", "name": sv["short"], "url": site.url + "/leistungen/" + sv["slug"] + ".html"}
                                                 for sv in site.services]},
         "makesOffer": offers,
-        **({"founder": {"@type": "Person", "name": s["about"].get("fullName") or s["about"]["name"], "jobTitle": s["about"].get("role") or "Inhaber"}}
+        **({"founder": {"@type": "Person", "name": s["about"].get("fullName") or s["about"]["name"], "jobTitle": s["about"].get("role") or "Inhaber",
+                        **({"hasCredential": credentials(site)} if site.certs else {})}}
            if (s.get("about") or {}).get("name") else {}),
         "potentialAction": {"@type": "ReserveAction", "name": "Termin anfragen",
                             "target": {"@type": "EntryPoint", "urlTemplate": site.url + "/termin.html", "inLanguage": "de-DE",
@@ -119,6 +120,20 @@ def sitemap(site, pages):
     return x + "</urlset>\n"
 
 
+def credentials(site):
+    """Zertifikate als schema.org EducationalOccupationalCredential (für Google und KI-Suchen)."""
+    out = []
+    for c in site.certs:
+        o = {"@type": "EducationalOccupationalCredential", "name": c["title"] + (" – " + c["subtitle"] if c.get("subtitle") else ""),
+             "credentialCategory": c.get("kind") or "Zertifikat", "url": site.url + "/zertifikate.html"}
+        if c.get("date"):
+            o["dateCreated"] = c["date"]
+        if c.get("issuer"):
+            o["recognizedBy"] = {"@type": "Organization", "name": c["issuer"], **({"url": c["issuerUrl"]} if c.get("issuerUrl") else {})}
+        out.append(o)
+    return out
+
+
 def robots(site):
     bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User", "PerplexityBot",
             "Perplexity-User", "Google-Extended", "Applebot-Extended", "Bingbot", "DuckAssistBot", "MistralAI-User"]
@@ -158,6 +173,7 @@ def llms(site, full=False):
 - Bezahlung: bar, Karte, PayPal oder Überweisung
 - Gutscheine: {site.url}/gutscheine.html
 - Firmenkunden und Flotten: {site.url}/firmenkunden.html
+- Zertifikate: {'; '.join(c['title'] + ' (' + c.get('issuer', '') + ', ' + c.get('date', '')[8:10] + '.' + c.get('date', '')[5:7] + '.' + c.get('date', '')[:4] + ')' for c in site.certs) or 'auf Anfrage'}, Details: {site.url}/zertifikate.html
 - Aktuelle Angebote: {site.url}/angebote.html ({'; '.join(o['title'] + ' ' + o.get('price', '') for o in site.offers) or 'derzeit keine Aktion'})
 
 ## Leistungen

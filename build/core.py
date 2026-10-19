@@ -25,6 +25,7 @@ I = {
  "mail": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7"/></svg>',
  "pin": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>',
  "cal": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>',
+ "zoom": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg>',
  "check": '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l4 4 8-8"/></svg>',
  "x": '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l8 8M14 6l-8 8"/></svg>',
  "arrow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -61,6 +62,10 @@ class Site:
         self.reviews = j("reviews.json")
         self.faq = j("faq.json")["items"]
         self.gallery = j("gallery.json")["items"]
+        try:
+            self.certs = j("zertifikate.json").get("items", [])
+        except FileNotFoundError:
+            self.certs = []
         try:
             offers = j("angebote.json").get("items", [])
         except FileNotFoundError:
@@ -228,6 +233,7 @@ def header(site, prefix="", home=False, current=None):
       <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
       <li><a href="{prefix}elbdetail-care.html">ElbDetail Care</a></li>
       <li><a href="{prefix}ueber-uns.html">Über uns</a></li>
+      <li><a href="{prefix}zertifikate.html">Zertifikate</a></li>
       <li><a href="{prefix}ratgeber/index.html">Ratgeber</a></li>
       <li><a href="{nav_href(prefix, home, '#bewertungen')}">Bewertungen</a></li>
       <li><a href="{prefix}kontakt.html">Kontakt</a></li>
@@ -269,12 +275,13 @@ def footer(site, prefix="", home=False):
       <ul>
         <li><a href="{prefix}termin.html">Termin online anfragen</a></li>
         <li><a href="{prefix}preise.html">Pakete &amp; Preise</a></li>
-      <li><a href="{prefix}angebote.html">Aktuelle Angebote</a></li>
+        <li><a href="{prefix}angebote.html">Aktuelle Angebote</a></li>
         <li><a href="{prefix}gutscheine.html">Gutscheine</a></li>
         <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
         <li><a href="{prefix}elbdetail-care.html">ElbDetail Care</a></li>
         <li><a href="{prefix}aktion/winterschutz.html">Winter-Lackschutz</a></li>
         <li><a href="{prefix}ueber-uns.html">Über uns</a></li>
+        <li><a href="{prefix}zertifikate.html">Zertifikate &amp; Qualifikationen</a></li>
         <li><a href="{prefix}ratgeber/index.html">Ratgeber</a></li>
       </ul>
     </div>

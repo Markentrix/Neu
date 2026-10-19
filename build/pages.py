@@ -404,7 +404,7 @@ def build_home(site, write):
         <li>{I["star"]}<span>{ESC(s["rating"]["value"])} von 5 Sternen<small>{s["rating"]["count"]} Google-Bewertungen</small></span></li>
         <li>{I["hand"]}<span>Handarbeit statt Waschstraße<small>Keine neuen Kratzer</small></span></li>
         <li>{I["euro"]}<span>Festpreis vorab<small>Keine Überraschung bei Abholung</small></span></li>
-        <li>{I["shield"]}<span>C²Coating Excellence Partner<small>Koch-Chemie geschult, Colourlock für Leder</small></span></li>
+        <li><a class="trust-link" href="zertifikate.html">{I["shield"]}<span>C²Coating Excellence Partner<small>Koch-Chemie zertifiziert · Zertifikate ansehen</small></span></a></li>
       </ul>
     </div>
   </div>
@@ -622,6 +622,88 @@ def build_kontakt(site, write):
     write("kontakt.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="kontakt.html") + body + core.footer(site))
 
 
+def _de(iso):
+    return f"{iso[8:10]}.{iso[5:7]}.{iso[:4]}" if iso and len(iso) >= 10 else ""
+
+
+def cert_card(site, c, prefix="", compact=False):
+    """Zertifikat als Karte. Ein Klick auf das Bild öffnet die große Ansicht (Lightbox, ohne JS: neue Seite mit dem Bild)."""
+    m = site.media.get(c.get("image", ""))
+    alt = f'{c.get("kind") or "Zertifikat"} „{c["title"]}“ für {(site.s.get("about") or {}).get("fullName") or "den Inhaber"}, {c.get("issuer", "")}'
+    pic = picture(site, c.get("image", ""), alt, "cert-img", prefix, sizes="(min-width: 900px) 360px, 80vw")
+    big = (prefix + (m["webp"][-1].split(" ")[0] if m.get("webp") else m["src"])) if m else ""
+    media = (f'<a class="cert-media" href="{big}" data-lightbox aria-label="{ESC(c["title"])} groß ansehen">{pic}'
+             f'<span class="cert-zoom">{I["zoom"]}Vergrößern</span></a>') if m else ""
+    meta = " · ".join(x for x in [c.get("issuer", ""), c.get("place", ""), _de(c.get("date", ""))] if x)
+    if compact:
+        return f'''<article class="cert cert--compact reveal">{media}<div class="cert-body"><span class="cert-kind">{ESC(c.get("kind") or "Zertifikat")}</span><h3>{ESC(c["title"])}</h3><p class="cert-meta">{ESC(meta)}</p></div></article>'''
+    return f'''
+        <article class="cert reveal">
+          {media}
+          <div class="cert-body">
+            <span class="cert-kind">{ESC(c.get("kind") or "Zertifikat")}</span>
+            <h2>{ESC(c["title"])}</h2>
+            {f'<p class="cert-sub">{ESC(c["subtitle"])}</p>' if c.get("subtitle") else ""}
+            <p class="cert-meta">{ESC(meta)}</p>
+            <p>{ESC(c.get("text", ""))}</p>
+            {f'<p class="cert-benefit">{I["check"]}<span><strong>Ihr Vorteil:</strong> {ESC(c["benefit"])}</span></p>' if c.get("benefit") else ""}
+          </div>
+        </article>'''
+
+
+def build_zertifikate(site, write):
+    s = site.s
+    ab = s.get("about") or {}
+    path = "/zertifikate.html"
+    title = "Zertifikate & Qualifikationen | ElbDetail Celle"
+    desc = "Zertifikate von ElbDetail Celle: Koch-Chemie-Fachseminar für Lack- und Keramikversiegelung, Hochvolt-Qualifikation für E-Autos, C²Coating Partner."
+    faq = [
+        {"q": "Bereiten Sie auch Elektroautos und Hybridfahrzeuge auf?", "a": "Ja. Inhaber " + (ab.get("name") or "René") + " ist für Arbeiten an Serienfahrzeugen mit Hochvoltsystemen sensibilisiert (Qualifikation Stufe S). Für die Aufbereitung von Lack, Innenraum und Felgen ist das die passende Grundlage. Arbeiten an der Hochvolttechnik selbst gehören in eine Fachwerkstatt."},
+        {"q": "Was bedeutet das Koch-Chemie-Fachseminar für mein Auto?", "a": "Lackkorrektur und Versiegelung werden nach den Vorgaben des Herstellers ausgeführt, von der hologrammfreien Politur bis zur Nano- und Keramikversiegelung. Die Fortbildung baut auf den Ausbildungsbausteinen des Bundesverbandes Fahrzeugaufbereitung (BFA) auf."},
+        {"q": "Kann ich die Zertifikate im Original sehen?", "a": "Gern. Bei Ihrem Termin zeigen wir Ihnen die Originale. Auf dieser Seite sind sie zum Schutz der Unterzeichnenden mit unkenntlich gemachter Unterschrift abgebildet."},
+    ]
+    ld = [seo.webpage(site, path, title, {"mainEntity": {"@type": "Person", "name": ab.get("fullName") or ab.get("name") or s["name"],
+                                                          "worksFor": {"@id": site.url + "/#business"}, "hasCredential": seo.credentials(site)}}),
+          seo.crumbs(site, [("Startseite", "/"), ("Über uns", "/ueber-uns.html"), ("Zertifikate", path)]), seo.faq(faq)]
+    cards = "".join(cert_card(site, c) for c in site.certs) or '<p class="empty-offers">Zertifikate folgen in Kürze.</p>'
+    partners = "".join(f'<div class="usecase">{I["shield"]}<h3>{ESC(x["name"])}</h3><p><strong>{ESC(x["role"])}.</strong> {ESC(x["text"])}.</p></div>'
+                       for x in s.get("partners", []))
+    body = f'''
+<main id="main">
+  <section class="page-hero page-hero--compact" aria-labelledby="page-h">
+    <div class="container">
+      {core.breadcrumb("", [("Startseite", "index.html"), ("Über uns", "ueber-uns.html"), ("Zertifikate", None)])}
+      <p class="eyebrow">Zertifikate &amp; Qualifikationen</p>
+      <h1 id="page-h">Geprüftes Können. <em>Schwarz auf weiß.</em></h1>
+      <p class="lead">Gute Aufbereitung ist Handwerk mit Fachwissen. Hier sehen Sie die Nachweise von {ESC(ab.get("fullName") or ab.get("name") or "unserem Inhaber")}, im Original abgebildet.</p>
+      <div class="hero-actions"><a class="btn btn-primary btn-lg" href="termin.html">{I["cal"]}Termin anfragen</a><a class="btn btn-line" href="ueber-uns.html">Mehr über {ESC(ab.get("name") or "uns")}</a></div>
+    </div>
+  </section>
+  <section aria-label="Zertifikate">
+    <div class="container">
+      <div class="cert-list stagger">{cards}
+      </div>
+      <p class="price-note">Zum Schutz der Unterzeichnenden sind Unterschriften unkenntlich gemacht. Die Originale zeigen wir Ihnen gern beim Termin.</p>
+    </div>
+  </section>
+  <section class="soft" aria-labelledby="partner-h">
+    <div class="container">
+      <div class="section-head"><p class="eyebrow">Partnerschaften</p><h2 id="partner-h" class="display">Profi-Systeme, <em>geschult angewendet.</em></h2></div>
+      <div class="usecase-grid">{partners}</div>
+    </div>
+  </section>
+  <section aria-labelledby="zfaq-h">
+    <div class="container narrow">
+      <div class="section-head"><p class="eyebrow">Fragen</p><h2 id="zfaq-h" class="display">Gut zu wissen.</h2></div>
+      <div class="faq-list">{core.faq_html(faq, "")}</div>
+    </div>
+  </section>
+{core.cta_band(site, "")}
+</main>
+'''
+    write("zertifikate.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="ueber-uns.html") + body + core.footer(site))
+
+
 def build_about(site, write):
     """Über uns: René, seine Geschichte, sein Anspruch, Partner und Qualifikationen."""
     s = site.s
@@ -680,6 +762,7 @@ def build_about(site, write):
       <div class="section-head"><p class="eyebrow">Partner &amp; Qualifikationen</p><h2 id="partner-h" class="display">Profi-Systeme, <em>geschult angewendet.</em></h2>
         <p>Ich arbeite mit professionellen Produkten und Aufbereitungssystemen, die ich kenne und denen ich vertraue.</p></div>
       <div class="usecase-grid">{partners}</div>
+      {('<div class="cert-row stagger">' + "".join(cert_card(site, c, "", compact=True) for c in site.certs) + '</div><p class="section-more"><a class="text-link" href="zertifikate.html">Alle Zertifikate im Detail ansehen →</a></p>') if site.certs else ""}
     </div>
   </section>
 
