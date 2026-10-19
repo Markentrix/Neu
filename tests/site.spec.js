@@ -67,7 +67,7 @@ test("Richtpreis-Rechner rechnet je Fahrzeugklasse", async ({ page }) => {
   await page.goto("/");
   await page.locator('#quoteForm label:has(input[value="suv"])').click();
   await page.locator('#quoteForm label:has(input[value="excellence"])').click();
-  await expect(page.locator("#quoteValue")).toContainText("900");
+  await expect(page.locator("#quoteValue")).toContainText("899");
   await expect(page.locator("#quoteBook")).toHaveAttribute("href", /paket=excellence&klasse=suv/);
 });
 
@@ -84,7 +84,7 @@ test("Buchung: Zurück und Absenden erst dann sichtbar, wenn sie gebraucht werde
 test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
   await page.goto("/termin.html?paket=essential&klasse=suv");
   await expect(page.locator('input[name="paket"][value="essential"]')).toBeChecked();
-  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 525 €");
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 449 €");
   await page.locator("[data-wz-next]").click();
   await expect(page.locator('input[name="klasse"][value="suv"]')).toBeChecked();
   await page.fill("#t-vehicle", "VW Tiguan 2020");
@@ -188,7 +188,7 @@ test("Preisrechner: Sport / Luxus und Wohnmobil zeigen individuelles Angebot sta
   await page.locator('label:has(input[name="qclass"][value="camper"])').click();
   await expect(page.locator("#quoteNote")).toContainText("Wohnmobile");
   await page.locator('label:has(input[name="qclass"][value="suv"])').click();
-  await expect(page.locator("#quoteValue")).toContainText("525");
+  await expect(page.locator("#quoteValue")).toContainText("449");
 });
 
 test("Ohne Google-Analytics-ID: kein Einwilligungs-Hinweis, kein Google-Skript", async ({ page }) => {

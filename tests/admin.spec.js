@@ -30,7 +30,7 @@ test("Verwaltung: Anfrage bearbeiten, Kalender, Inhalte, Veröffentlichen", asyn
   await page.click('a.nav[href="#/anfragen"]');
   await page.click(`text=${ref}`);
   await expect(page.locator(".drawer h2")).toHaveText("Admin Test");
-  await expect(page.locator(".drawer")).toContainText("ab 600 €");
+  await expect(page.locator(".drawer")).toContainText("ab 549 €");
   await page.selectOption("#rst", "termin_bestaetigt");
   await page.click(".drawer >> text=Speichern");
   await expect(page.locator("#toast")).toHaveText("Gespeichert");

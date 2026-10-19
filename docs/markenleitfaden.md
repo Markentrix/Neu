@@ -47,9 +47,9 @@ Nur diese Fakten dürfen in Kommunikation verwendet werden:
 | 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026) | "5,0 Sterne bei 19 Google-Rezensionen" (Zahl regelmäßig aktualisieren) |
 | Termine nach Vereinbarung Mo bis Fr, samstags nach Absprache | "Termine Mo bis Fr, samstags nach Absprache" |
 | Bezahlung bar, Karte, PayPal oder Überweisung | "Bezahlen können Sie bar, mit Karte, per PayPal oder per Überweisung." |
-| Preise sind "ab"-Preise (Einstiegspreise), Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich | "Ab 300 €. Bei starker Verschmutzung oder vielen Tierhaaren kann es mehr werden. Den verbindlichen Preis nennen wir Ihnen vorab." |
+| Preise sind "ab"-Preise (Einstiegspreise), Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich | "Ab 299 €. Bei starker Verschmutzung oder vielen Tierhaaren kann es mehr werden. Den verbindlichen Preis nennen wir Ihnen vorab." |
 | Vier Pakete: Refresh (Wäsche und Innen-Basis), Essential (innen und außen gründlich), Signature (plus einstufige Glanzpolitur), Excellence (plus mehrstufige Lackkorrektur). Lackversiegelung ist in keinem Paket enthalten | "Die Lackversiegelung buchen Sie separat zu Signature oder Excellence." |
-| Fahrzeugklassen: Kleinwagen, Kompaktwagen, Limousinen/Kombis/kleinere SUVs, große SUVs und Vans. Sport- und Luxusfahrzeuge sowie Wohnmobile und Wohnwagen auf Anfrage | "Für Ihren Polo: Refresh ab 75 €." |
+| Fahrzeugklassen: Kleinwagen, Kompaktwagen, Limousinen/Kombis/kleinere SUVs, große SUVs und Vans. Sport- und Luxusfahrzeuge sowie Wohnmobile und Wohnwagen auf Anfrage | "Für Ihren Polo: Refresh ab 79 €." |
 | Lackkorrektur reduziert korrigierbare Kratzer, Waschspuren und Hologramme. Der mögliche Korrekturgrad hängt vom Lackzustand ab | "Wie weit wir korrigieren können, hängt vom Lackzustand ab. Das prüfen wir vorher." |
 | Keramikversiegelung C² CarCeramic: Pkw ab 550 €, Wohnmobile nach Länge ab 1.950 €. Buchbar ab Paket Signature, bei Neuwagen nach Lackprüfung auch ohne Paket. Felgen- und Scheibenbeschichtung auf Anfrage | "Keramikversiegelung für Pkw ab 550 €. Den verbindlichen Preis nennen wir nach der Lackprüfung." |
 | Kleinunternehmer nach § 19 UStG | "Alle Preise sind Endpreise. Gemäß § 19 UStG berechnen wir keine Umsatzsteuer." |
@@ -74,7 +74,7 @@ Die vier Personas sind Arbeitsannahmen für Texte und Anzeigen. Sie beschreiben 
 | **Anlass** | Nach dem Urlaub, nach dem Winter, vor dem Familienbesuch, wenn der Geruch stört |
 | **Sorge** | "Das wird teuer und ich weiß vorher nicht, was es kostet." "Bekommen die Hundehaare und den Geruch wirklich raus?" "Ich habe keine Zeit für lange Abstimmung." |
 | **Kaufgrund** | Paket Essential mit intensiver Innenraum- und Kofferraumreinigung, Polster-, Teppich- oder Lederpflege. Geruchsneutralisierung und starke Tierhaarbelastung als Zusatzleistung. Verbindlicher Preis vorab. Anfrage einfach per WhatsApp mit Fotos. |
-| **Passendes Paket** | Essential (ab 300 € / 375 € / 450 € / 525 € für Kleinwagen / Kompaktwagen / Limousine, Kombi, kleinerer SUV / großer SUV, Van) |
+| **Passendes Paket** | Essential (ab 299 € / 329 € / 379 € / 449 € für Kleinwagen / Kompaktwagen / Limousine, Kombi, kleinerer SUV / großer SUV, Van) |
 | **Ziel-Seite** | `/leistungen/innenaufbereitung-celle.html` |
 
 ### Persona B: Leasingrückgabe oder Verkauf
@@ -97,7 +97,7 @@ Die vier Personas sind Arbeitsannahmen für Texte und Anzeigen. Sie beschreiben 
 | **Anlass** | Vor dem Winter, nach dem Kauf, vor der Saison, Swirls und Hologramme im Lack |
 | **Sorge** | "Waschstraßen-Bürsten machen Kratzer." "Wird mit falscher Chemie oder zu viel Abtrag poliert?" "Hält die Keramikversiegelung, oder wird nur schnell etwas aufgetragen?" |
 | **Kaufgrund** | Lackkorrektur mit Keramikversiegelung von einem offiziellen C²Coating Excellence Partner. Gründliche Lackvorbereitung, Lackschichtdickenmessung vor jeder Politur, Zwei-Eimer-Handwäsche. Lederreparatur mit Colourlock für den Innenraum. |
-| **Passendes Paket** | Keramikversiegelung C² CarCeramic (Pkw ab 550 €, ab Paket Signature, bei Neuwagen nach Lackprüfung auch ohne Paket), Excellence (ab 600 € / 675 € / 750 € / 900 €), Signature für mehr Glanz (ab 450 € / 525 € / 600 € / 675 €), Pflege keramikversiegelter Fahrzeuge, ElbDetail Care, Cabrioverdeckreinigung und -imprägnierung |
+| **Passendes Paket** | Keramikversiegelung C² CarCeramic (Pkw ab 550 €, ab Paket Signature, bei Neuwagen nach Lackprüfung auch ohne Paket), Excellence (ab 599 € / 649 € / 749 € / 899 €), Signature für mehr Glanz (ab 449 € / 499 € / 549 € / 649 €), Pflege keramikversiegelter Fahrzeuge, ElbDetail Care, Cabrioverdeckreinigung und -imprägnierung |
 | **Ziel-Seite** | `/leistungen/keramikversiegelung-celle.html`, `/leistungen/lackpolitur-celle.html`, `/leistungen/lederaufbereitung-celle.html` |
 
 ### Persona D: Firmenkunden und Händler
@@ -208,7 +208,7 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 | Do | Beispiel Do | Don't | Beispiel Don't |
 |---|---|---|---|
 | Konkret werden | "Vor der Politur messen wir die Lackschichtdicke." | Leere Superlative | "Die beste Aufbereitung aller Zeiten!" |
-| Preis offen nennen | "Essential für Ihren Golf: ab 375 €. Den verbindlichen Preis erhalten Sie vorab." | Preis verstecken | "Preise auf Anfrage, rufen Sie einfach mal an." |
+| Preis offen nennen | "Essential für Ihren Golf: ab 329 €. Den verbindlichen Preis erhalten Sie vorab." | Preis verstecken | "Preise auf Anfrage, rufen Sie einfach mal an." |
 | Ergebnis zeigen | "Hier sehen Sie die Fahrertür vorher und nachher, gleiches Licht." | Übertreiben | "Danach ist Ihr Auto besser als neu!" |
 | Sorge aufnehmen | "Hundehaare im Kofferraum? Kennen wir." | Kunden belehren | "Wer seinen Innenraum so verkommen lässt, …" |
 | Kurz und aktiv | "Schicken Sie uns drei Fotos. Wir melden uns mit einem Preis." | Behördendeutsch | "Bitte übermitteln Sie uns zwecks Angebotserstellung Bildmaterial." |
@@ -225,7 +225,7 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 | Fahrzeugaufbereitung, Aufbereitung | Autowäsche, Waschen (als Hauptbegriff) | Wir sind mehr als Wäsche |
 | Handarbeit, von Hand | maschinell, Express | Kernversprechen |
 | verbindlicher Preis, Preis vorab | Festpreisgarantie, Garantie | Keine Garantien zusagen |
-| ab 75 €, ab 300 €, ab 450 €, ab 600 € | "schon ab", "nur", "billig", "günstig" | Wertig, nicht Discount |
+| ab 79 €, ab 299 €, ab 449 €, ab 599 € | "schon ab", "nur", "billig", "günstig" | Wertig, nicht Discount |
 | Lackpolitur, "reduziert korrigierbare Kratzer, Waschspuren und Hologramme" | "alle Kratzer weg", "kratzerfrei", "Kratzerentfernung" | Nicht jeder Kratzer ist polierbar. Der Korrekturgrad hängt vom Lackzustand ab |
 | Keramikversiegelung (für das Coating), Lackversiegelung (für die klassische Versiegelung) | Nanoversiegelung, beide Begriffe vermischen | Keramik ist Schwerpunkt und eigene Leistung. Sauber trennen |
 | Lackkorrektur, mehrstufige Lackkorrektur | "Lack wie neu", "makellos" | Fachbegriff des Schwerpunkts, kein Übertreiben |

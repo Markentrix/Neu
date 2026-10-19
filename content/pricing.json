@@ -50,10 +50,10 @@
       "duration": "ab 2 Std.",
       "featured": false,
       "prices": {
-        "klein": 75,
-        "kompakt": 113,
-        "mittel": 150,
-        "suv": 187
+        "klein": 79,
+        "kompakt": 99,
+        "mittel": 119,
+        "suv": 149
       },
       "description": "Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen, zugängliche Oberflächen abwischen und Scheiben innen und außen reinigen.",
       "features": [
@@ -95,10 +95,10 @@
       "duration": "ca. 24 Std.",
       "featured": true,
       "prices": {
-        "klein": 300,
-        "kompakt": 375,
-        "mittel": 450,
-        "suv": 525
+        "klein": 299,
+        "kompakt": 329,
+        "mittel": 379,
+        "suv": 449
       },
       "description": "Gründliche Innen- und Außenaufbereitung. Enthält Refresh sowie intensive Innenraum- und Kofferraumreinigung, Reinigung von Einstiegen, Türverkleidungen und Kunststoffen sowie materialgerechte Polster-, Teppich- beziehungsweise Lederreinigung und Pflege.",
       "features": [
@@ -136,10 +136,10 @@
       "duration": "ab 24 Std.",
       "featured": false,
       "prices": {
-        "klein": 450,
-        "kompakt": 525,
-        "mittel": 600,
-        "suv": 675
+        "klein": 449,
+        "kompakt": 499,
+        "mittel": 549,
+        "suv": 649
       },
       "description": "Komplettaufbereitung wie Essential, zusätzlich Lackvorbereitung und einstufige Glanzpolitur zur Verbesserung des Lackbilds und Reduzierung leichter Gebrauchsspuren.",
       "features": [
@@ -177,10 +177,10 @@
       "duration": "ab 24 Std.",
       "featured": false,
       "prices": {
-        "klein": 600,
-        "kompakt": 675,
-        "mittel": 750,
-        "suv": 900
+        "klein": 599,
+        "kompakt": 649,
+        "mittel": 749,
+        "suv": 899
       },
       "description": "Komplettaufbereitung wie Essential, zusätzlich mehrstufige Lackkorrektur zur Reduzierung korrigierbarer Kratzer, Waschspuren und Hologramme sowie Vorbereitung für eine anschließende Versiegelung.",
       "features": [

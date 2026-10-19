@@ -150,7 +150,7 @@ class TestBuild(Base):
                     t = open(os.path.join(root, f), encoding="utf-8").read()
                     self.assertNotIn("{ab:", t, f)
                     self.assertNotIn("{preis:", t, f)
-        self.assertIn("ab 300\u00a0€", open(os.path.join(site, "leistungen/innenaufbereitung-celle.html"), encoding="utf-8").read())
+        self.assertIn("ab 299\u00a0€", open(os.path.join(site, "leistungen/innenaufbereitung-celle.html"), encoding="utf-8").read())
 
     def test_owner_card_and_verification_only_when_filled(self):
         import build as builder
@@ -368,7 +368,7 @@ class TestAdmin(Base):
         code, lst = self.admin("GET", "anfragen?typ=termin")
         self.assertIn(ref, [i["ref"] for i in lst["items"]])
         code, d = self.admin("GET", "anfragen/" + ref)
-        self.assertEqual(d["preis"], 600)
+        self.assertEqual(d["preis"], 549)
         code, t = self.admin("GET", f"anfragen/{ref}/vorlage?art=antwort")
         self.assertIn("wa.me/491727654321", t["whatsapp"])
         code, t = self.admin("GET", f"anfragen/{ref}/vorlage?art=bewertung")

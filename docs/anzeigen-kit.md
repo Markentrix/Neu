@@ -137,8 +137,8 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H4 | Keine Waschstraße | 17 |
 | H5 | 5,0 Sterne bei Google | 21 |
 | H6 | Verbindlicher Preis vorab | 25 |
-| H7 | Refresh ab 75 € | 15 |
-| H8 | Essential ab 300 € | 18 |
+| H7 | Refresh ab 79 € | 15 |
+| H8 | Essential ab 299 € | 18 |
 | H9 | Termin per WhatsApp anfragen | 28 |
 | H10 | Zwei-Eimer-Handwäsche | 21 |
 | H11 | Mit Koch-Chemie-Produkten | 25 |
@@ -153,7 +153,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 |---|---|---|
 | D1 | Fahrzeugaufbereitung in Celle: 100 % Handarbeit, keine Waschstraße. Jetzt Termin anfragen. | 90 |
 | D2 | Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. 5,0 Sterne bei Google. | 82 |
-| D3 | Zwei-Eimer-Handwäsche mit Koch-Chemie-Produkten. Refresh ab 75 €. | 65 |
+| D3 | Zwei-Eimer-Handwäsche mit Koch-Chemie-Produkten. Refresh ab 79 €. | 65 |
 | D4 | Termin per WhatsApp oder online anfragen. Mo bis Fr, samstags nach Absprache. | 77 |
 
 #### AG2 Innenreinigung
@@ -190,7 +190,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H3 | Polster & Teppich reinigen | 26 |
 | H4 | Geruchsneutralisation | 21 |
 | H5 | Leder- oder Polsterpflege | 25 |
-| H6 | Essential ab 300 € | 18 |
+| H6 | Essential ab 299 € | 18 |
 | H7 | Inkl. Kunststoffpflege | 22 |
 | H8 | Auto voller Hundehaare? | 23 |
 | H9 | Innenraum wieder frisch | 23 |
@@ -206,7 +206,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | Nr. | Description | Zeichen |
 |---|---|---|
 | D1 | Innenraum-Tiefenreinigung in Celle: Polster, Teppich, Kunststoff, Geruchsneutralisation. | 88 |
-| D2 | Essential ab 300 € inkl. Leder- oder Polsterpflege. Verbindlicher Preis vorab. | 78 |
+| D2 | Essential ab 299 € inkl. Leder- oder Polsterpflege. Verbindlicher Preis vorab. | 78 |
 | D3 | Hundehaare, Krümel, Gerüche? Innenraum gründlich von Hand gereinigt. Jetzt anfragen. | 84 |
 | D4 | 5,0 Sterne bei 19 Google-Rezensionen. Termin per WhatsApp oder online anfragen. | 79 |
 
@@ -247,8 +247,8 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H4 | Mehrstufige Lackpolitur | 23 |
 | H5 | Lackschichtdickenmessung | 24 |
 | H6 | Messung vor jeder Politur | 25 |
-| H7 | Excellence ab 600 € | 19 |
-| H8 | Signature ab 450 € | 18 |
+| H7 | Excellence ab 599 € | 19 |
+| H8 | Signature ab 449 € | 18 |
 | H9 | Tiefer Glanz von Hand | 21 |
 | H10 | 100 % Handarbeit | 16 |
 | H11 | 5,0 Sterne bei Google | 21 |
@@ -263,7 +263,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 |---|---|---|
 | D1 | Mehrstufige Lackkorrektur in Celle: reduziert korrigierbare Kratzer und Hologramme. | 83 |
 | D2 | Lackschichtdickenmessung vor jeder Politur. Lackversiegelung separat buchbar. | 77 |
-| D3 | Excellence ab 600 €. Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. | 80 |
+| D3 | Excellence ab 599 €. Verbindlicher Preis vor dem Termin, Abnahme bei Tageslicht. | 80 |
 | D4 | Koch-Chemie geschult, C²Coating Excellence Partner. Jetzt Politur-Termin anfragen. | 82 |
 
 #### AG4 Leasingrückgabe und Verkauf
@@ -305,7 +305,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H10 | 5,0 Sterne bei Google | 21 |
 | H11 | Abnahme bei Tageslicht | 22 |
 | H12 | Gepflegt in die Übergabe | 24 |
-| H13 | Essential ab 300 € | 18 |
+| H13 | Essential ab 299 € | 18 |
 | H14 | Termin per WhatsApp anfragen | 28 |
 | H15 | 100 % Handarbeit | 16 |
 
@@ -462,7 +462,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 
 | Sitelink-Text (max. 25) | Zeichen | Ziel-URL | Beschreibung 1 (max. 35) | Beschreibung 2 (max. 35) |
 |---|---|---|---|---|
-| Pakete & Preise | 15 | `/preise.html` | Vier Pakete, Richtpreise ab 75 € (32) | Verbindlicher Preis vorab (25) |
+| Pakete & Preise | 15 | `/preise.html` | Vier Pakete, Richtpreise ab 79 € (32) | Verbindlicher Preis vorab (25) |
 | Termin anfragen | 15 | `/termin.html` | Online oder per WhatsApp (24) | Mo bis Fr, Sa nach Absprache (28) |
 | Innenaufbereitung | 17 | `/leistungen/innenaufbereitung-celle.html` | Tiefenreinigung, Polster, Teppich (33) | Geruchsneutralisation inklusive (31) |
 | Lackpolitur | 11 | `/leistungen/lackpolitur-celle.html` | Mehrstufig, mit Messung vorab (29) | Mindert Kratzer und Hologramme (30) |
@@ -506,7 +506,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 
 **Standort-Asset:** über das verknüpfte Google Business Profile (Lachtehäuser Straße 1, 29223 Celle).
 
-**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Refresh ab 75 €, Essential ab 300 €, Signature ab 450 €, Excellence ab 600 €, jeweils mit Ziel-URL `/preise.html`. Preise gelten für Kleinwagen bei normalem Pflegezustand. Es sind Endpreise: ElbDetail ist Kleinunternehmer nach § 19 UStG und berechnet keine Umsatzsteuer. Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich. Keine Keramik-Preise in das Preis-Asset aufnehmen.
+**Preis-Asset (optional):** Typ "Leistungen", Einheit "ab". Refresh ab 79 €, Essential ab 299 €, Signature ab 449 €, Excellence ab 599 €, jeweils mit Ziel-URL `/preise.html`. Preise gelten für Kleinwagen bei normalem Pflegezustand. Es sind Endpreise: ElbDetail ist Kleinunternehmer nach § 19 UStG und berechnet keine Umsatzsteuer. Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich. Keine Keramik-Preise in das Preis-Asset aufnehmen.
 
 **Bild-Assets:** Motive aus der Shotlist (01, 14, 27/28, 33) in 1:1 und 1,91:1. Kennzeichen unkenntlich.
 
@@ -574,11 +574,11 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 
 **Primärtexte**
 
-1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit dem Paket Essential reinigen wir Innenraum und Kofferraum intensiv von Hand: Polster und Teppich, Einstiege, Türverkleidungen und Kunststoffe. Ab 300 € für Kleinwagen. Bei vielen Tierhaaren oder Gerüchen nennen wir Ihnen den Mehraufwand vorab.
+1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit dem Paket Essential reinigen wir Innenraum und Kofferraum intensiv von Hand: Polster und Teppich, Einstiege, Türverkleidungen und Kunststoffe. Ab 299 € für Kleinwagen. Bei vielen Tierhaaren oder Gerüchen nennen wir Ihnen den Mehraufwand vorab.
 2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 172 7613807 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
-3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Essential ab 300 € (Kleinwagen), ab 375 € (Kompaktwagen), ab 450 € (Limousine, Kombi, kleinerer SUV), ab 525 € (großer SUV, Van). 5,0 Sterne bei 19 Google-Rezensionen.
+3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Essential ab 299 € (Kleinwagen), ab 329 € (Kompaktwagen), ab 379 € (Limousine, Kombi, kleinerer SUV), ab 449 € (großer SUV, Van). 5,0 Sterne bei 19 Google-Rezensionen.
 
-**Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Essential ab 300 €"
+**Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Essential ab 299 €"
 
 **Beschreibung (Link-Beschreibung):** "Verbindlicher Preis vor dem Termin."
 
@@ -589,7 +589,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 | Formate | Reel 9:16, 15 bis 20 Sekunden. Karussell 4:5 mit Vorher/Nachher (Kofferraum, Rückbank, Fußraum) |
 | Hook (0 bis 2 s) | Nahaufnahme Hundehaare im Kofferraum-Teppich |
 | Ablauf | Saugen, Bürsten, saubere Bahn im Teppich, Kofferraum-Totale nachher, Endkarte |
-| Text-Overlay | "Hund an Bord?" dann "Kofferraum wieder frei." dann "Essential ab 300 €" |
+| Text-Overlay | "Hund an Bord?" dann "Kofferraum wieder frei." dann "Essential ab 299 €" |
 | Motive (Shotlist) | 18, 60, 23, 25, 17 |
 | Hund im Bild | Nur mit Einwilligung des Halters. Kein Hund im Fahrzeug während der Reinigung zeigen |
 | Endkarte | Logo, "3 Fotos per WhatsApp, verbindlicher Preis", "+49 172 7613807" |

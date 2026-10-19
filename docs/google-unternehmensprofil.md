@@ -74,19 +74,19 @@ Im Profil unter "Leistungen" anlegen. Google erlaubt pro Leistung einen Preis. D
 
 **Refresh**
 Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen, Oberflächen abwischen, Scheiben innen und außen. Für den gepflegten Alltag zwischendurch. Dauer ab 2 Stunden.
-Ab 75 € (Kleinwagen), ab 113 € (Kompaktwagen), ab 150 € (Limousine, Kombi, kleinerer SUV), ab 187 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+Ab 79 € (Kleinwagen), ab 99 € (Kompaktwagen), ab 119 € (Limousine, Kombi, kleinerer SUV), ab 149 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Essential**
 Alles aus Refresh plus intensive Innenraum- und Kofferraumreinigung, Einstiege, Türverkleidungen und Kunststoffe sowie Polster-, Teppich- oder Lederreinigung und Pflege. Ihr Auto bleibt ca. 24 Stunden bei uns. Bei starker Verschmutzung oder vielen Tierhaaren sind Mehrkosten möglich.
-Ab 300 € (Kleinwagen), ab 375 € (Kompaktwagen), ab 450 € (Limousine, Kombi, kleinerer SUV), ab 525 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+Ab 299 € (Kleinwagen), ab 329 € (Kompaktwagen), ab 379 € (Limousine, Kombi, kleinerer SUV), ab 449 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Signature**
 Alles aus Essential plus Lackvorbereitung und einstufige Glanzpolitur. Für mehr Glanz und ein frischeres Lackbild, leichte Gebrauchsspuren werden reduziert. Dauer ab 24 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
-Ab 450 € (Kleinwagen), ab 525 € (Kompaktwagen), ab 600 € (Limousine, Kombi, kleinerer SUV), ab 675 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+Ab 449 € (Kleinwagen), ab 499 € (Kompaktwagen), ab 549 € (Limousine, Kombi, kleinerer SUV), ab 649 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Excellence**
 Alles aus Essential plus mehrstufige Lackkorrektur. Reduziert korrigierbare Kratzer, Waschspuren und Hologramme. Vorher messen wir die Lackschichtdicke. Der mögliche Korrekturgrad hängt vom Lackzustand ab. Dauer ab 24 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
-Ab 600 € (Kleinwagen), ab 675 € (Kompaktwagen), ab 750 € (Limousine, Kombi, kleinerer SUV), ab 900 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
+Ab 599 € (Kleinwagen), ab 649 € (Kompaktwagen), ab 749 € (Limousine, Kombi, kleinerer SUV), ab 899 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 ### Keramikversiegelung (Schwerpunkt)
 
@@ -259,7 +259,7 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 - **Titel:** Herbst im Innenraum: Zeit für eine Tiefenreinigung
 - **Text (559 Zeichen, ohne Titelzeile):**
 
-> Nasses Laub, feuchte Schuhe, Schmutz in den Fußmatten: Im Herbst leidet der Innenraum. Mit unserem Paket Essential reinigen wir Innenraum und Kofferraum intensiv. Polster, Teppiche oder Leder reinigen und pflegen wir materialgerecht, dazu Einstiege, Türverkleidungen und Kunststoffe. Alles in Handarbeit mit Profi-Produkten von Koch-Chemie und Colourlock. Richtpreis ab 300 € für Kleinwagen, ab 375 € für Kompaktwagen, ab 450 € für Limousine, Kombi oder kleineren SUV, ab 525 € für große SUVs und Vans. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
+> Nasses Laub, feuchte Schuhe, Schmutz in den Fußmatten: Im Herbst leidet der Innenraum. Mit unserem Paket Essential reinigen wir Innenraum und Kofferraum intensiv. Polster, Teppiche oder Leder reinigen und pflegen wir materialgerecht, dazu Einstiege, Türverkleidungen und Kunststoffe. Alles in Handarbeit mit Profi-Produkten von Koch-Chemie und Colourlock. Richtpreis ab 299 € für Kleinwagen, ab 329 € für Kompaktwagen, ab 379 € für Limousine, Kombi oder kleineren SUV, ab 449 € für große SUVs und Vans. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Vorher-Nachher-Paar eines Fußraums: links mit Laub und Sand, rechts sauber.
@@ -281,7 +281,7 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 - **Titel:** Erst messen, dann polieren
 - **Text (600 Zeichen, ohne Titelzeile):**
 
-> Bevor wir polieren, messen wir die Lackschichtdicke. Jedes Fahrzeug hat andere Werte, zum Beispiel nach einer Nachlackierung. So wissen wir, wie viel Politur der Lack verträgt. Mit Excellence polieren wir danach mehrstufig und reduzieren korrigierbare Kratzer, Waschspuren und Hologramme. Wie weit das geht, hängt vom Lackzustand ab. Excellence ab 600 € für Kleinwagen, ab 675 € für Kompaktwagen, ab 750 € für Limousine, Kombi oder kleineren SUV, ab 900 € für große SUVs und Vans. Dauer ab 24 Stunden. Eine Lackversiegelung buchen Sie auf Wunsch dazu. Die Abnahme machen wir gemeinsam bei Tageslicht.
+> Bevor wir polieren, messen wir die Lackschichtdicke. Jedes Fahrzeug hat andere Werte, zum Beispiel nach einer Nachlackierung. So wissen wir, wie viel Politur der Lack verträgt. Mit Excellence polieren wir danach mehrstufig und reduzieren korrigierbare Kratzer, Waschspuren und Hologramme. Wie weit das geht, hängt vom Lackzustand ab. Excellence ab 599 € für Kleinwagen, ab 649 € für Kompaktwagen, ab 749 € für Limousine, Kombi oder kleineren SUV, ab 899 € für große SUVs und Vans. Dauer ab 24 Stunden. Eine Lackversiegelung buchen Sie auf Wunsch dazu. Die Abnahme machen wir gemeinsam bei Tageslicht.
 
 - **Button:** Weitere Infos → https://www.elbdetail.de/leistungen/lackpolitur-celle.html
 - **Bildidee:** Schichtdickenmessgerät auf dem Lack, Display gut lesbar.
@@ -314,7 +314,7 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 - **Titel:** Streusalz runter, Glanz zurück
 - **Text (415 Zeichen, ohne Titelzeile):**
 
-> Im Winter klebt Salz am Lack, an den Felgen und an den Scheiben. Unser Paket Refresh ist die Pflege zwischendurch: Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen und abwischen, Scheiben innen und außen. Dauer ab 2 Stunden. Richtpreis ab 75 € für Kleinwagen, ab 113 € für Kompaktwagen, ab 150 € für Limousine, Kombi oder kleineren SUV, ab 187 € für große SUVs und Vans. Keine Waschstraße, nur Handarbeit.
+> Im Winter klebt Salz am Lack, an den Felgen und an den Scheiben. Unser Paket Refresh ist die Pflege zwischendurch: Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen und abwischen, Scheiben innen und außen. Dauer ab 2 Stunden. Richtpreis ab 79 € für Kleinwagen, ab 99 € für Kompaktwagen, ab 119 € für Limousine, Kombi oder kleineren SUV, ab 149 € für große SUVs und Vans. Keine Waschstraße, nur Handarbeit.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Handwäsche mit Schaum und zwei Eimern im Bild.
@@ -369,7 +369,7 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 - **Titel:** Frühjahr schon jetzt planen
 - **Text (484 Zeichen inkl. Platzhalter, ohne Titelzeile; nach dem Ersetzen neu zählen):**
 
-> Der Winter ist noch nicht vorbei, aber das Frühjahr kommt bestimmt. Nach Monaten mit Salz und Schmutz braucht der Lack oft eine Auffrischung. Für mehr Glanz gibt es Signature mit einstufiger Glanzpolitur, ab 450 € für Kleinwagen. Bei Waschspuren und Hologrammen passt Excellence mit mehrstufiger Lackkorrektur, ab 600 €. Eine Lack- oder Keramikversiegelung buchen Sie auf Wunsch separat dazu. Termine für [MONATE, z. B. März und April] vergeben wir schon jetzt. Fragen Sie einfach an.
+> Der Winter ist noch nicht vorbei, aber das Frühjahr kommt bestimmt. Nach Monaten mit Salz und Schmutz braucht der Lack oft eine Auffrischung. Für mehr Glanz gibt es Signature mit einstufiger Glanzpolitur, ab 449 € für Kleinwagen. Bei Waschspuren und Hologrammen passt Excellence mit mehrstufiger Lackkorrektur, ab 599 €. Eine Lack- oder Keramikversiegelung buchen Sie auf Wunsch separat dazu. Termine für [MONATE, z. B. März und April] vergeben wir schon jetzt. Fragen Sie einfach an.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Spiegelung im polierten Lack, zum Beispiel Bäume oder Himmel auf der Motorhaube.
@@ -442,7 +442,7 @@ Ihr dürft als Inhaber selbst Fragen stellen und beantworten. Erst die Frage ste
 `[PRÜFEN: Google hat die Funktion "Fragen & Antworten" seit Ende 2025 in vielen Profilen eingeschränkt oder durch automatische Antworten ersetzt. Ist sie in eurem Profil nicht mehr sichtbar, die Texte als FAQ auf der Website nutzen. Google bezieht Antworten dann aus Website, Beschreibung und Rezensionen.]`
 
 **1. Was kostet eine Fahrzeugaufbereitung bei ElbDetail?**
-Unsere Einstiegspreise für Kleinwagen: Refresh ab 75 €, Essential ab 300 €, Signature ab 450 €, Excellence ab 600 €. Für Kompaktwagen, Limousinen, Kombis, SUVs und Vans liegen die Preise höher. Für Sport- und Luxusfahrzeuge sowie Wohnmobile erhalten Sie ein Angebot auf Anfrage. Alle Preise sind Endpreise. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
+Unsere Einstiegspreise für Kleinwagen: Refresh ab 79 €, Essential ab 299 €, Signature ab 449 €, Excellence ab 599 €. Für Kompaktwagen, Limousinen, Kombis, SUVs und Vans liegen die Preise höher. Für Sport- und Luxusfahrzeuge sowie Wohnmobile erhalten Sie ein Angebot auf Anfrage. Alle Preise sind Endpreise. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
 
 **2. Wie lange dauert eine Aufbereitung?**
 Refresh dauert ab 2 Stunden. Bei Essential bleibt Ihr Auto ca. 24 Stunden bei uns, bei Signature und Excellence ab 24 Stunden. So können Pflegeprodukte und Versiegelung über Nacht in Ruhe aushärten. Je nach Zustand des Fahrzeugs kann es abweichen. Das sagen wir Ihnen vorab.
