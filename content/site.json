@@ -137,7 +137,8 @@
   "references": [
     {
       "name": "Die Fahr-Schu-Leh",
-      "type": "Fahrschule"
+      "type": "Fahrschule",
+      "logo": "ref-fahr-schu-leh.svg"
     },
     {
       "name": "City Fahrschule",

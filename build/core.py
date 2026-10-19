@@ -133,7 +133,7 @@ class Site:
 # --------------------------------------------------------------------------- Layout
 def logo(site, prefix, lazy=False):
     lz = ' loading="lazy"' if lazy else ""
-    return f'<img src="{prefix}logo.svg" alt="ElbDetail – Premium Fahrzeugaufbereitung" width="150" height="60"{lz}>'
+    return f'<img src="{prefix}logo.svg" alt="ElbDetail – Premium Fahrzeugaufbereitung" width="173" height="60"{lz}>'
 
 
 def head(site, title, desc, path, prefix="", ld=None, noindex=False, og_type="website", extra=""):

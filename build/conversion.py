@@ -263,7 +263,7 @@ def build_gutscheine(site, write):
       <div class="voucher-preview-wrap">
         <p class="eyebrow">Vorschau</p>
         <div class="voucher-card" id="voucherPreview" aria-live="polite">
-          <div class="vc-top"><img src="logo.svg" alt="" width="150" height="60"><span>Gutschein</span></div>
+          <div class="vc-top"><img src="logo.svg" alt="" width="173" height="60"><span>Gutschein</span></div>
           <div class="vc-value" data-vc="value">100 €</div>
           <div class="vc-desc" data-vc="desc">für eine Fahrzeugaufbereitung nach Wahl</div>
           <div class="vc-names"><span>Für <strong data-vc="fuer">…</strong></span><span>Von <strong data-vc="von">…</strong></span></div>
@@ -309,7 +309,9 @@ def build_firmen(site, write):
         def mono(n):
             w = [x for x in n.replace("-", " ").split() if x[:1].isalpha() and x.lower() not in ("die", "der", "das", "gmbh")]
             return ("".join(x[0] for x in w[:2]) or n[:2]).upper()
-        tiles = "".join(f'<li class="ref-tile reveal"><span class="ref-mono" aria-hidden="true">{ESC(mono(r["name"]))}</span>'
+        mark = lambda r: (f'<img src="{ESC(r["logo"])}" alt="" loading="lazy" decoding="async">' if r.get("logo")
+                          else f'<span class="ref-mono">{ESC(mono(r["name"]))}</span>')
+        tiles = "".join(f'<li class="ref-tile reveal"><span class="ref-mark" aria-hidden="true">{mark(r)}</span>'
                         f'<span class="ref-name">{ESC(r["name"])}</span><span class="ref-type">{ESC(r.get("type") or "Firmenkunde")}</span></li>' for r in rl)
         refs = f'''
   <section class="soft refs-band" aria-labelledby="refs-h">

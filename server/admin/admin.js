@@ -416,7 +416,7 @@
     about: "Über uns (Inhaber-Karte auf der Startseite, erscheint wenn Name und Text gefüllt sind)", role: "Rolle", fullName: "Vor- und Nachname (für strukturierte Daten)", photo: "Foto (Dateiname aus Fotos)", since: "Seit (z. B. 2023)",
     verification: "Bestätigungscodes für Google Search Console / Bing", google: "Google (nur der Code aus dem Meta-Tag)", bing: "Bing (nur der Code)",
     active: "Aktiv (auf der Website zeigen)", highlight: "Auf der Startseite hervorheben", icon: "Symbol (snow, gift, spark, brief, tag, key)", badge: "Etikett", price: "Preisangabe", validUntil: "Gültig bis (JJJJ-MM-TT, leer = unbegrenzt)", ctaLabel: "Button-Text", ctaHref: "Button-Ziel (z. B. termin.html)",
-    references: "Referenzen (Firmenkunden, nur mit Erlaubnis)", type: "Branche",
+    references: "Referenzen (Firmenkunden, nur mit Erlaubnis)", type: "Branche", logo: "Logo-Datei (z. B. ref-firma.svg)",
     analytics: "Google Analytics (lädt nur nach Einwilligung)", ga4: "Mess-ID Google Analytics 4 (G-…), leer = aus", hinweis: "Hinweis", hostingLocation: "Serverstandort (Stadt)",
     smallBusiness: "Kleinunternehmer nach § 19 UStG (keine Umsatzsteuer)", partners: "Partner & Qualifikationen", pickup: "Abhol- und Bringservice",
     freeRadiusKm: "Kostenloser Umkreis in km (0 = nicht anzeigen)", bookAs: "Anfrage-Art in der Buchung (Schlüssel)",
