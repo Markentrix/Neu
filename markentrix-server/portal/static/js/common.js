@@ -133,8 +133,8 @@ if (typeof window !== 'undefined') {
 const b64zuBytes = (s) => { const p = '='.repeat((4 - s.length % 4) % 4), r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(r, c => c.charCodeAt(0)); };
 const bytesZuB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
-export function pushKarte() {
-  const m = h('div'), box = h('div'), install = h('div');
+export function pushKarte(rolle) {
+  const m = h('div'), box = h('div'), install = h('div'), anlass = h('div');
   const ios = /iphone|ipad/i.test(navigator.userAgent), standalone = window.matchMedia && matchMedia('(display-mode: standalone)').matches;
   const geht = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   async function zeigen() {
@@ -155,8 +155,90 @@ export function pushKarte() {
     } }, 'Benachrichtigungen auf diesem Gerät einschalten'));
   }
   zeigen().catch(() => {});
+  if (rolle && ANLAESSE[rolle]) ladeAnsicht().then(a => {
+    const aus = new Set(a.push_aus || []);
+    anlass.replaceChildren(h('h3', {}, 'Wobei soll ich dich benachrichtigen?'), ...ANLAESSE[rolle].map(([tag, name]) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:5px 0' },
+      h('input', { type: 'checkbox', checked: !aus.has(tag), style: 'width:auto', onchange: async (e) => {
+        e.target.checked ? aus.delete(tag) : aus.add(tag);
+        try { await api('/api/me/ansicht', { method: 'PUT', body: { push_aus: [...aus] } }); a.push_aus = [...aus]; melde(m, ''); } catch (x) { e.target.checked = !e.target.checked; melde(m, x.message); }
+      } }), name)));
+  }).catch(() => {});
   if (!standalone) install.replaceChildren(installAngebot ? h('p', {}, h('button', { class: 'btn sec small', onclick: async () => { installAngebot.prompt(); installAngebot = null; install.replaceChildren(); } }, 'Als App installieren')) :
     h('p', { class: 'small muted' }, ios ? 'Als App: Teilen-Symbol → „Zum Home-Bildschirm“.' : 'Als App: im Browser-Menü „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen.'));
   return h('div', { class: 'card' }, h('h2', {}, 'App & Benachrichtigungen'),
-    h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, install);
+    h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, install);
+}
+
+// ---------------------------------------------------------------- Glocke, Suche, Ansicht
+const ANLAESSE = {
+  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung']],
+  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht']],
+  kunde: [['anfrage', 'Neue Anfrage'], ['anruf', 'Neuer Anruf']],
+};
+let _ansicht = null;
+export const ladeAnsicht = () => (_ansicht = _ansicht || api('/api/me/ansicht', { leise: true }).catch(() => ({ ausgeblendet: [], push_aus: [] })));
+
+export function anpassenKnopf(liste) {
+  const panel = h('div', { class: 'card', style: 'display:none;margin-bottom:12px' });
+  const knopf = h('button', { class: 'btn sec small', onclick: async () => {
+    if (panel.style.display === 'block') { panel.style.display = 'none'; return; }
+    const a = await ladeAnsicht(), aus = new Set(a.ausgeblendet);
+    panel.replaceChildren(h('h3', {}, 'Welche Karten möchtest du sehen?'),
+      ...liste.map(([id, name]) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' },
+        h('input', { type: 'checkbox', checked: !aus.has(id), style: 'width:auto', onchange: (e) => { e.target.checked ? aus.delete(id) : aus.add(id); } }), name)),
+      h('p', {}, h('button', { class: 'btn small', onclick: async () => { await api('/api/me/ansicht', { method: 'PUT', body: { ausgeblendet: [...aus] } }); location.reload(); } }, 'Speichern')));
+    panel.style.display = 'block';
+  } }, 'Ansicht anpassen');
+  return { knopf, panel };
+}
+
+export function glocke() {
+  const zahl = h('span', { class: 'badge', style: 'display:none' }), liste = h('div', { class: 'glockeliste' });
+  const panel = h('div', { class: 'glockepanel', style: 'display:none' });
+  const knopf = h('button', { class: 'glocke', title: 'Benachrichtigungen', 'aria-label': 'Benachrichtigungen', onclick: async (e) => { e.stopPropagation(); panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; if (panel.style.display === 'block') await laden(); } }, '🔔', zahl);
+  const aktualisieren = (n) => { zahl.textContent = n; zahl.style.display = n ? '' : 'none'; };
+  async function laden() {
+    try {
+      const d = await api('/api/benachrichtigungen', { leise: true }); aktualisieren(d.ungelesen);
+      liste.replaceChildren(...(d.liste.length ? d.liste.map(n => h('a', { class: 'glockeeintrag' + (n.gelesen_am ? '' : ' neu'), href: n.url || '#', onclick: async (e) => { e.preventDefault(); try { await api('/api/benachrichtigungen/gelesen', { method: 'POST', body: { ids: [n.id] } }); } catch (x) { /* egal */ } location.href = n.url || '/'; } },
+        h('b', {}, n.titel), h('span', { class: 'small muted' }, n.text || ''), h('span', { class: 'small muted' }, zeit(n.erstellt_am)))) : [h('p', { class: 'muted small', style: 'padding:10px' }, 'Noch keine Benachrichtigungen.')]));
+    } catch (x) { /* leise */ }
+  }
+  panel.append(h('div', { class: 'row', style: 'padding:8px 10px;border-bottom:1px solid var(--line)' }, h('b', { class: 'grow' }, 'Benachrichtigungen'),
+    h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/benachrichtigungen/gelesen', { method: 'POST', body: { alle: true } }); await laden(); } catch (x) { /* egal */ } } }, 'Alle gelesen')), liste);
+  document.addEventListener('click', (e) => { if (!panel.contains(e.target)) panel.style.display = 'none'; });
+  laden(); setInterval(() => { if (!document.hidden) api('/api/benachrichtigungen', { leise: true }).then(d => aktualisieren(d.ungelesen)).catch(() => {}); }, 60000);
+  return h('div', { class: 'glockewrap' }, knopf, panel);
+}
+
+export function sucheKnopf() {
+  let overlay = null;
+  const oeffnen = () => {
+    if (overlay) return;
+    const eingabe = h('input', { placeholder: 'Kunde, Lead, Rechnung, Nachricht, Aufgabe …', autofocus: true, 'aria-label': 'Suche' }), ergebnis = h('div', { class: 'suchtreffer' });
+    let timer = null, treffer = [], pos = -1;
+    const schliessen = () => { overlay.remove(); overlay = null; };
+    const markieren = () => treffer.forEach((a, i) => a.classList.toggle('auswahl', i === pos));
+    const suchen = async () => {
+      const q = eingabe.value.trim();
+      if (q.length < 2) { ergebnis.replaceChildren(h('p', { class: 'muted small', style: 'padding:10px' }, 'Mindestens 2 Zeichen eingeben.')); treffer = []; return; }
+      try {
+        const d = await api('/api/admin/suche?q=' + encodeURIComponent(q));
+        if (eingabe.value.trim() !== q) return;
+        treffer = []; pos = -1;
+        ergebnis.replaceChildren(...(d.gruppen.length ? d.gruppen.map(g => h('div', {}, h('div', { class: 'suchgruppe' }, g.art), g.treffer.map(t => { const a = h('a', { href: t.link, onclick: () => schliessen() }, h('b', {}, t.titel), h('span', { class: 'small muted' }, t.text)); treffer.push(a); return a; }))) : [h('p', { class: 'muted small', style: 'padding:10px' }, 'Nichts gefunden.')]));
+      } catch (x) { ergebnis.replaceChildren(h('p', { class: 'muted small', style: 'padding:10px' }, x.message)); }
+    };
+    eingabe.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(suchen, 200); });
+    eingabe.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') schliessen();
+      else if (e.key === 'ArrowDown' && treffer.length) { e.preventDefault(); pos = (pos + 1) % treffer.length; markieren(); treffer[pos].scrollIntoView({ block: 'nearest' }); }
+      else if (e.key === 'ArrowUp' && treffer.length) { e.preventDefault(); pos = (pos - 1 + treffer.length) % treffer.length; markieren(); treffer[pos].scrollIntoView({ block: 'nearest' }); }
+      else if (e.key === 'Enter') { const a = treffer[pos >= 0 ? pos : 0]; if (a) { e.preventDefault(); location.hash = a.getAttribute('href'); schliessen(); } }
+    });
+    overlay = h('div', { class: 'suchoverlay', onclick: (e) => { if (e.target === overlay) schliessen(); } }, h('div', { class: 'suchbox', role: 'dialog', 'aria-label': 'Suche' }, eingabe, ergebnis));
+    document.body.append(overlay); eingabe.focus(); suchen();
+  };
+  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); oeffnen(); } });
+  return h('button', { class: 'suchknopf', onclick: oeffnen, 'aria-label': 'Suche öffnen' }, '🔍 Suchen', h('kbd', {}, 'Strg K'));
 }

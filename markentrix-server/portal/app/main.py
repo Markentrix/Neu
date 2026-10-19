@@ -32,6 +32,7 @@ from .routes_loginlink import router as loginlink_router
 from .routes_zahlung import router as zahlung_router
 from .routes_fruehwarnung import router as fruehwarnung_router
 from .routes_push import router as push_router
+from .routes_dashboard import router as dashboard_router
 from .routes_telefon import router as telefon_router
 from .routes_vorlagen import router as vorlagen_router
 from .routes_leadimport import router as leadimport_router
@@ -132,6 +133,7 @@ app.include_router(loginlink_router)
 app.include_router(zahlung_router)
 app.include_router(fruehwarnung_router)
 app.include_router(push_router)
+app.include_router(dashboard_router)
 app.include_router(telefon_router)
 app.include_router(vorlagen_router)
 app.include_router(leadimport_router)

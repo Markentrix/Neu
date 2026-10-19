@@ -6,7 +6,7 @@ from .security import require_admin
 
 router = APIRouter(prefix="/api/admin")
 
-SQL = """
+SQL_BASIS = """
 SELECT k.id, k.kundennummer, k.firma, k.referenzkunde, k.erstellt_am,
   (SELECT max(b.letzter_login) FROM benutzer b WHERE b.kunden_id = k.id) AS login,
   (SELECT count(*) FROM anfragen a WHERE a.kunden_id = k.id AND a.status <> 'spam' AND a.erstellt_am > now() - interval '30 days') AS a30,
@@ -15,8 +15,8 @@ SELECT k.id, k.kundennummer, k.firma, k.referenzkunde, k.erstellt_am,
   (SELECT coalesce(max(b.mahnstufe), 0) FROM belege b WHERE b.kunden_id = k.id AND b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date) AS mahnstufe,
   (SELECT z.punkte FROM zufriedenheit z WHERE z.kunden_id = k.id ORDER BY z.erstellt_am DESC LIMIT 1) AS letzte_punkte,
   (SELECT count(*) FROM tickets t WHERE t.kunden_id = k.id AND t.status IN ('offen','in_arbeit') AND t.letzte_nachricht_von = 'kunde' AND t.geaendert_am < now() - interval '3 days') AS ticket_wartet
-FROM kunden k WHERE k.status = 'aktiv' AND k.erstellt_am < now() - interval '14 days'
-"""
+FROM kunden k"""
+SQL = SQL_BASIS + " WHERE k.status = 'aktiv' AND k.erstellt_am < now() - interval '14 days'"
 
 
 def bewerten(r: dict, heute=None) -> tuple[int, list]:
@@ -64,6 +64,15 @@ def berechnen(cur) -> dict:
             liste.append({"id": r["id"], "kundennummer": r["kundennummer"], "firma": r["firma"], "punkte": p, "stufe": stufe, "gruende": g})
     liste.sort(key=lambda x: -x["punkte"])
     return {"kunden": liste, "geprueft": len(alle), "hoch": sum(1 for x in liste if x["stufe"] == "hoch")}
+
+
+def risiko_fuer(cur, kid) -> dict:
+    cur.execute(SQL_BASIS + " WHERE k.id = %s", (kid,))
+    r = cur.fetchone()
+    if not r:
+        return {"punkte": 0, "stufe": "ok", "gruende": []}
+    p, g = bewerten(r)
+    return {"punkte": p, "stufe": "hoch" if p >= 50 else "mittel" if p >= 25 else "ok", "gruende": g}
 
 
 @router.get("/fruehwarnung")

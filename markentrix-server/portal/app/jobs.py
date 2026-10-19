@@ -329,6 +329,23 @@ def fruehwarnung_woche(cfg):
         push.senden(ids, "Kunden-Frühwarnung", f"{d['hoch']} Kunde(n) mit hohem Kündigungsrisiko.", "/admin#uebersicht", "fruehwarnung")
 
 
+def geschaeftszahlen_mail(cfg):
+    """Am Monatsanfang eine kurze Mail mit den Zahlen des Vormonats."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.day > 5 or jetzt.hour < 7 or not _marker("cockpit-%d-%02d" % (jetzt.year, jetzt.month)):
+        return
+    from .routes_dashboard import cockpit_daten
+    with tx("system") as cur:
+        d = cockpit_daten(cur)
+        an = admin_empfaenger(cur)
+    if not an or len(d["reihe"]) < 2:
+        return
+    v = d["reihe"][-2]
+    eur = lambda c: f"{c / 100:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " €"
+    mailer.senden(an, f"Geschäftszahlen {v['monat']}", f"Zahlen für {v['monat']}:\n\n- Zahlungseingang (brutto): {eur(v['umsatz_cent'])}\n- Neukunden: {v['neukunden']}\n- Kündigungen: {v['kuendigungen']}\n- Neue Leads: {v['leads']}\n\n"
+                  f"Aktuell: {d['aktiv']} aktive Kunden, wiederkehrender Umsatz {eur(d['mrr_cent'])} im Monat, offene Rechnungen {eur(d['offen_cent'])} (davon überfällig {eur(d['ueberfaellig_cent'])}), Kündigungsquote 90 Tage {str(d['churn_prozent']).replace('.', ',')} %." + mailer.SIGNATUR)
+
+
 def vertrieb_morgens(cfg):
     """Täglich werktags: Push an Vertriebler mit der Zahl der heute fälligen Anrufe."""
     jetzt = datetime.now(timezone.utc)
@@ -350,6 +367,7 @@ def anrufe_bereinigen() -> int:
         cur.execute("UPDATE anrufe SET nummer=NULL, name=NULL, zusammenfassung=NULL WHERE beginn < now() - interval '180 days' AND (nummer IS NOT NULL OR name IS NOT NULL OR zusammenfassung IS NOT NULL)")
         n = cur.rowcount
         cur.execute("DELETE FROM job_marker WHERE am < now() - interval '60 days'")
+        cur.execute("DELETE FROM benachrichtigungen WHERE erstellt_am < now() - interval '60 days'")
     return n
 
 
@@ -370,7 +388,7 @@ def tick():
             log.exception("Job %s fehlgeschlagen", job.__name__)
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

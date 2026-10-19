@@ -86,7 +86,9 @@ def _lauf(benutzer_ids: list, titel: str, text: str, url: str, tag: str | None):
         nutzlast = json.dumps({"titel": titel, "text": text, "url": url, "tag": tag}).encode()
         with tx("system") as cur:
             k = schluessel(cur)
-            cur.execute("SELECT id, endpoint, p256dh, auth FROM push_abos WHERE benutzer_id = ANY(%s::uuid[])", ([str(b) for b in benutzer_ids],))
+            cur.execute("""SELECT a.id, a.endpoint, a.p256dh, a.auth FROM push_abos a JOIN benutzer b ON b.id = a.benutzer_id
+                           WHERE a.benutzer_id = ANY(%s::uuid[]) AND NOT (coalesce(b.ansicht->'push_aus', '[]'::jsonb) @> to_jsonb(%s::text))""",
+                        ([str(b) for b in benutzer_ids], tag or ""))
             abos = cur.fetchall()
         for abo in abos:
             try:
@@ -111,6 +113,12 @@ def senden(benutzer_ids: list, titel: str, text: str, url: str = "/", tag: str |
     ids = [b for b in benutzer_ids if b]
     if not ids:
         return
+    if tag != "test":
+        try:                                              # Glocke: jede Meldung bleibt im Posteingang des Benutzers
+            with tx("system") as cur:
+                cur.executemany("INSERT INTO benachrichtigungen (benutzer_id, tag, titel, text, url) VALUES (%s,%s,%s,%s,%s)", [(i, tag, titel, text, url) for i in ids])
+        except Exception:
+            log.exception("Benachrichtigung speichern")
     if sofort:
         _lauf(ids, titel, text, url, tag)
     else:

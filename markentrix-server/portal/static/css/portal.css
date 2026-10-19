@@ -106,3 +106,27 @@ details.hilfe summary{cursor:pointer;list-style:none}details.hilfe summary::-web
 .leadtab .lfirma{font-weight:600;text-decoration:none}.leadtab .lfirma:hover{text-decoration:underline}
 .nowrap{white-space:nowrap}
 .wv-faellig{color:#92400e;font-weight:600}
+/* Glocke, Suche, Zeitachse */
+.side .brandzeile{display:flex;align-items:center;gap:6px;padding:0 4px 8px}
+.glockewrap{position:relative}
+.glocke{background:#ffffff14;border:0;color:#fff;border-radius:9px;padding:5px 9px;cursor:pointer;font-size:14px;position:relative}
+.glocke .badge{position:absolute;top:-5px;right:-5px;margin:0}
+.glockepanel{position:fixed;left:8px;top:54px;width:340px;max-width:calc(100vw - 16px);max-height:70vh;overflow:auto;background:#fff;color:#0B1020;border-radius:14px;box-shadow:0 12px 40px #0006;z-index:60}
+.glockeeintrag{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.glockeeintrag.neu{background:#eef2ff}.glockeeintrag:hover{background:#e5eaff}
+.suchknopf{flex:1;display:flex;align-items:center;justify-content:space-between;gap:6px;background:#ffffff14;border:0;color:#cbd2ea;border-radius:9px;padding:6px 8px;cursor:pointer;font:500 12.5px inherit}
+.suchknopf kbd{font:11px inherit;background:#ffffff1f;border-radius:5px;padding:1px 5px}
+.suchoverlay{position:fixed;inset:0;background:#0B102080;z-index:80;display:flex;align-items:flex-start;justify-content:center;padding-top:12vh}
+.suchbox{background:#fff;color:#0B1020;width:min(620px,94vw);border-radius:16px;box-shadow:0 20px 60px #0007;overflow:hidden}
+.suchbox input{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:16px 18px;font-size:16px;outline:none}
+.suchtreffer{max-height:55vh;overflow:auto}
+.suchtreffer a{display:flex;flex-direction:column;padding:8px 18px;text-decoration:none;color:inherit}
+.suchtreffer a:hover,.suchtreffer a.auswahl{background:#eef2ff}
+.suchgruppe{font:600 11px inherit;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;padding:10px 18px 2px}
+.zeitachse{border-left:2px solid var(--line);margin:8px 0 0 6px;padding-left:14px;max-height:360px;overflow:auto}
+.zeitachse .ev{position:relative;padding:4px 0 8px}.zeitachse .ev:before{content:"";position:absolute;left:-20px;top:9px;width:9px;height:9px;border-radius:50%;background:var(--accent,#4F46E5)}
+.balken{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:8px}
+.balken div{flex:1;background:linear-gradient(#4F46E5,#8B5CF6);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.balken span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:#6b7280}
+.suchknopf{white-space:nowrap;min-width:0;padding:6px 8px}.suchknopf kbd{display:none}
+.zahlenblock>.grid3{margin-top:12px}

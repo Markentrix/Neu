@@ -83,11 +83,11 @@ def current_user(request: Request) -> dict:
 
 # Bereiche für Mitarbeiter mit eingeschränkten Rechten (admin_rechte NULL = alles)
 RECHTE = {"kunden": "Kunden & Projekte", "nachrichten": "Nachrichten", "leads": "Leads & Vertrieb", "finanzen": "Angebote, Rechnungen & Preise", "einstellungen": "Einstellungen & Protokoll"}
-_IMMER = {"uebersicht", "heute", "aufgaben"}
+_IMMER = {"uebersicht", "heute", "aufgaben", "suche"}
 _BEREICH = {"tickets": "nachrichten", "leads": "leads", "gespraeche": "leads", "vertrieb": "leads", "website-check": "leads", "provisionsregeln": "leads",
             "belege": "finanzen", "belege-export.csv": "finanzen", "preise": "finanzen", "konditionen": "finanzen", "katalog": "finanzen", "kennzahlen": "finanzen",
             "kunden": "kunden", "berichte": "kunden", "avv": "kunden", "avv-fehlt": "kunden", "onboarding": "kunden", "dateien": "kunden", "websites": "kunden",
-            "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden", "fruehwarnung": "kunden", "vorlagen": "kunden"}
+            "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden", "fruehwarnung": "kunden", "vorlagen": "kunden", "cockpit": "finanzen", "lastschrift": "finanzen"}
 
 
 def recht_fuer_pfad(pfad: str) -> str:

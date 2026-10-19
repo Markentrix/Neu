@@ -1,4 +1,4 @@
-import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss } from './common.js';
+import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, sucheKnopf, ladeAnsicht, anpassenKnopf } from './common.js';
 
 const root = document.getElementById('app');
 const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
@@ -12,6 +12,7 @@ function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Admin'),
+      h('div', { class: 'brandzeile' }, sucheKnopf(), glocke()),
       NAV.filter(n => erlaubt(n[0])).map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1], zaehlerAdmin[n[0]] ? h('span', { class: 'badge' }, zaehlerAdmin[n[0]]) : '')),
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
@@ -49,7 +50,12 @@ function heuteKarte(t) {
 V.uebersicht = async () => {
   const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus'), fw = await sicherApi('/api/admin/fruehwarnung');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
-  return h('div', {}, kopf('Übersicht'), sys ? systemKarte(sys) : '', fw ? fruehwarnKarte(fw) : '', heuteKarte(heute),
+  const ans = await ladeAnsicht(), aus = new Set(ans.ausgeblendet || []);
+  const cp = await sicherApi('/api/admin/cockpit');
+  const KARTEN = [['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
+  const an = anpassenKnopf(KARTEN), zeige = (id, el) => aus.has(id) ? '' : el;
+  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
+    zeige('zahlen', h('div', { class: 'zahlenblock' },
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Aktiv'), h('b', {}, s.aktiv || 0)),
@@ -62,11 +68,38 @@ V.uebersicht = async () => {
     h('div', { class: 'grid3' },
       h('a', { class: 'card stat', href: '#postfach', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Nachrichten offen (' + d.zusammenarbeit.tickets_ungelesen + ' ungelesen)'), h('b', {}, d.zusammenarbeit.tickets_offen)),
       h('a', { class: 'card stat', href: '#freigaben', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Freigaben warten auf Kunden'), h('b', {}, d.zusammenarbeit.freigaben_wartend)),
-      h('a', { class: 'card stat', href: '#aufgaben', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Aufgaben offen (' + d.zusammenarbeit.aufgaben_ueberfaellig + ' überfällig)'), h('b', {}, d.zusammenarbeit.aufgaben_offen))),
-    d.avv_fehlt.length ? h('div', { class: 'card' }, h('h2', {}, 'AVV fehlt bei ' + d.avv_fehlt.length + (d.avv_fehlt.length === 1 ? ' Kunde' : ' Kunden')), h('p', { class: 'small muted' }, 'Ohne unterschriebenen Auftragsverarbeitungsvertrag sollten keine Kundendaten verarbeitet werden.'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Status', z => pill(z.status)]], d.avv_fehlt)) : '',
-    ob.length ? h('div', { class: 'card' }, h('h2', {}, 'Neue Kunden im Onboarding'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Fortschritt', z => z.fertig + ' von ' + z.gesamt]], ob)) : '',
-    h('div', { class: 'card' }, h('h2', {}, 'Letzte Aktionen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d.letzte_aktionen)));
+      h('a', { class: 'card stat', href: '#aufgaben', style: 'text-decoration:none;color:inherit' }, h('span', { class: 'muted small' }, 'Aufgaben offen (' + d.zusammenarbeit.aufgaben_ueberfaellig + ' überfällig)'), h('b', {}, d.zusammenarbeit.aufgaben_offen))))),
+    aus.has('avv') ? '' : d.avv_fehlt.length ? h('div', { class: 'card' }, h('h2', {}, 'AVV fehlt bei ' + d.avv_fehlt.length + (d.avv_fehlt.length === 1 ? ' Kunde' : ' Kunden')), h('p', { class: 'small muted' }, 'Ohne unterschriebenen Auftragsverarbeitungsvertrag sollten keine Kundendaten verarbeitet werden.'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Status', z => pill(z.status)]], d.avv_fehlt)) : '',
+    aus.has('onboarding') ? '' : ob.length ? h('div', { class: 'card' }, h('h2', {}, 'Neue Kunden im Onboarding'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Fortschritt', z => z.fertig + ' von ' + z.gesamt]], ob)) : '',
+    zeige('aktionen', h('div', { class: 'card' }, h('h2', {}, 'Letzte Aktionen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d.letzte_aktionen))));
 };
+
+async function zeitachseKarte(kid) {
+  const z = await sicherApi('/api/admin/kunden/' + kid + '/zeitachse');
+  if (!z) return '';
+  const zu = z.zustand, risikoKlasse = { hoch: 'bad', mittel: 'warn' }[zu.risiko] || 'ok';
+  return h('div', { class: 'card' }, h('h2', {}, 'Zustand & Verlauf'),
+    h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px' },
+      h('span', { class: 'pill ' + risikoKlasse }, 'Risiko: ' + (zu.risiko || 'niedrig')),
+      h('span', { class: 'pill ' + (zu.ueberfaellig ? 'bad' : '') }, 'Offen: ' + euro(zu.offen_cent) + (zu.ueberfaellig ? ' (überfällig)' : '')),
+      h('span', { class: 'pill' }, 'Anfragen 30 Tage: ' + zu.anfragen_30d),
+      h('span', { class: 'pill' }, 'Letzter Login: ' + (zu.letzter_login ? zeit(zu.letzter_login) : 'noch nie')),
+      zu.aufgabe ? h('span', { class: 'pill warn' }, 'Nächste Aufgabe: ' + zu.aufgabe) : ''),
+    h('div', { class: 'zeitachse' }, z.ereignisse.length ? z.ereignisse.map(e => h('div', { class: 'ev' }, h('b', {}, e.titel), ' ', h('span', { class: 'small muted' }, zeit(e.zeit)), e.text ? h('div', { class: 'small muted' }, e.text) : '')) : h('p', { class: 'muted' }, 'Noch keine Ereignisse.')));
+}
+
+function cockpitKarte(c) {
+  const max = Math.max(1, ...c.reihe.map(r => r.umsatz_cent)), mon = (m) => ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][Number(String(m).slice(5, 7)) - 1];
+  const kachel = (t, w, extra) => h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, t), h('b', {}, w), extra ? h('span', { class: 'small muted' }, extra) : '');
+  return h('div', { class: 'card' }, h('h2', {}, 'Geschäftszahlen'),
+    h('div', { class: 'grid3' }, kachel('Monatlich wiederkehrend (MRR)', euro(c.mrr_cent), c.aktiv + ' aktive Kunden · ' + euro(c.arpu_cent) + ' je Kunde'),
+      kachel('Kündigungen (90 Tage)', c.kuendigungen_90d, c.churn_prozent !== null ? String(c.churn_prozent).replace('.', ',') + ' % vom Bestand' : ''),
+      kachel('Offen / überfällig', euro(c.offen_cent), euro(c.ueberfaellig_cent) + ' überfällig'),
+      kachel('Neue Leads (30 Tage)', c.leads_30d, c.termine_30d + ' Gespräche gebucht')),
+    h('h3', { style: 'margin-top:14px' }, 'Zahlungseingang der letzten 12 Monate'),
+    h('div', { class: 'balken', style: 'margin-bottom:22px' }, c.reihe.map(r => h('div', { style: 'height:' + Math.max(2, Math.round(r.umsatz_cent / max * 100)) + '%', title: mon(r.monat) + ': ' + euro(r.umsatz_cent) + ' · ' + r.neukunden + ' neu · ' + r.kuendigungen + ' gekündigt · ' + r.leads + ' Leads' }, h('span', {}, mon(r.monat))))));
+}
+
 
 const modulZelle = (z) => {
   const wrap = h('div', { class: 'modul-zelle' }), panel = h('div', { class: 'small', style: 'display:none;margin-top:6px' });
@@ -201,7 +234,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), pushKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    zweiFaktorKarte(), pushKarte('admin'), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -1139,6 +1172,7 @@ async function kundeDetail(kid) {
 
   return h('div', { class: 'stack' },
     kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
+    await zeitachseKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
     await onboardingKarte(kid),
     await avvKarte(kid),

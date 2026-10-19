@@ -1,4 +1,4 @@
-import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss } from './common.js';
+import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -7,6 +7,7 @@ const NAV = [['heute', 'Heute anrufen'], ['uebersicht', 'Übersicht'], ['kunden'
 function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Partnerportal'),
+      h('div', { class: 'brandzeile' }, glocke()),
       NAV.map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1])),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), inhalt, rechtFuss()));
@@ -91,7 +92,7 @@ V.konto = async () => {
   const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/passwort', { method: 'POST', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Passwort geändert.', 'ok'); e.target.reset(); } catch (x) { melde(m, x.message); } } },
     feld('Aktuelles Passwort', 'alt', { type: 'password', required: true, autocomplete: 'current-password' }), feld('Neues Passwort (mind. 10 Zeichen)', 'neu', { type: 'password', required: true, minlength: 10, autocomplete: 'new-password' }),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Passwort ändern')));
-  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f), pushKarte(), zweiFaktorKarte());
+  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f), pushKarte('vertrieb'), zweiFaktorKarte());
 };
 
 async function zeige() {

@@ -258,6 +258,11 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 - **Anrufprotokoll** (Einstellungen → Telefon-Assistent): Geheimnis erzeugen, beim Anbieter des Telefon-Assistenten (z. B. Famulor) einen Webhook auf `/api/webhook/telefon/KUNDENNUMMER?s=GEHEIMNIS` eintragen. Anrufe erscheinen beim Kunden unter „Anrufe“, eingehende zusätzlich als Anfrage. Nummern, Namen und Zusammenfassungen werden nach 180 Tagen gelöscht. Das genaue Format des Anbieters wird tolerant gelesen, bitte mit einem Testanruf prüfen.
 - **Branchenvorlagen**: beim Kunden unten „Branchenvorlage“ (Kfz, Friseur, Restaurant, Handwerk, Einzelhandel, Fitness): legt Wissenseinträge (inaktiv, mit Platzhaltern), Beitrags-Entwürfe und Aufgaben an. Nichts wird veröffentlicht oder vom Assistenten benutzt, bevor du es prüfst und aktivierst.
 - **App & Push-Nachrichten**: in Einstellungen (Admin), Konto (Vertrieb) und Einstellungen (Kunde) gibt es die Karte „App & Benachrichtigungen“. Anlässe: neue Anfrage/Anruf (Kunde), neue Leads und „Heute anrufen“ am Morgen (Vertrieb), Gespräch gebucht, Kundennachricht, Website-Check, Frühwarnung (Admin). Die Nachrichten enthalten keine Namen. Auf dem iPhone geht es erst, wenn das Portal zum Home-Bildschirm hinzugefügt wurde.
+- **Suche (Strg+K)**: im Admin-Menü oben „Suchen“ – findet Kunden, Leads, Rechnungen/Angebote, Nachrichten und Aufgaben (nur in den Bereichen, für die dein Konto Rechte hat).
+- **Zustand & Verlauf**: auf jeder Kundenseite ganz oben – Risiko, offene Beträge, letzter Login, nächste Aufgabe und eine Zeitachse aller Ereignisse.
+- **Geschäftszahlen**: auf der Admin-Übersicht (MRR, Kündigungen, offene Rechnungen, Zahlungseingang 12 Monate). Am Monatsanfang kommt eine Zusammenfassung per Mail.
+- **Ansicht anpassen**: Button oben rechts auf der Übersicht (Admin und Kunde) – nicht benötigte Karten ausblenden. Gilt pro Person.
+- **Glocke 🔔**: in allen drei Portalen; sammelt die Benachrichtigungen, auch ohne Push. Welche Anlässe als Push kommen, stellst du in der Karte „App & Benachrichtigungen“ ein.
 
 ## Automatische Tests
 

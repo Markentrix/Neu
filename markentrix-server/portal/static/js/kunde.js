@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline, zweiFaktorKarte, pushKarte, rechtFuss } from './common.js';
+import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline, zweiFaktorKarte, pushKarte, rechtFuss, glocke, ladeAnsicht, anpassenKnopf } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -39,6 +39,7 @@ function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, 'M'), k.logo_vorhanden ? k.firma : 'Markentrix'),
+      h('div', { class: 'brandzeile' }, glocke()),
       sichtbar().map(s => h('a', { class: 'nav' + (s[0] === aktiv ? ' on' : ''), href: '#' + s[0] }, s[1], zaehler(s[0]) ? h('span', { class: 'badge' }, zaehler(s[0])) : '')),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
@@ -94,7 +95,8 @@ V.uebersicht = async () => {
     karte('Anfragen', z.anfragen_30d, 'letzte 30 Tage', '#anfragen'),
     z.antwortzeit_h !== null ? h('div', { class: 'card' }, h('h3', {}, 'Antwortzeit des Teams'), h('div', { class: 'stat' }, h('b', {}, String(z.antwortzeit_h).replace('.', ',') + ' h'), h('span', { class: 'muted small' }, 'im Schnitt, letzte 90 Tage'))) : '',
   ];
-  return h('div', { class: 'stack' }, startKarte(sl), start.badges && start.badges.briefing && !sl.aktiv ? h('div', { class: 'card' }, h('h2', {}, 'Dein Briefing fehlt noch'), h('p', { class: 'small muted' }, 'Mit ein paar Angaben zu deinem Unternehmen können wir deine Website und Texte viel schneller fertigstellen. Es dauert etwa 10 Minuten.'), h('a', { class: 'btn', href: '#briefing' }, 'Jetzt ausfüllen')) : '', z.bewertung_faellig ? zufriedenheitKarte() : '', h('div', { class: 'grid3' }, karten(), zusatz));
+  const ans = await ladeAnsicht(), aus = new Set(ans.ausgeblendet || []), an = anpassenKnopf([['zufriedenheit', 'Zufriedenheits-Abfrage'], ['karten', 'Kennzahlen-Kacheln']]);
+  return h('div', { class: 'stack' }, h('div', { class: 'row' }, h('div', { class: 'grow' }), an.knopf), an.panel, startKarte(sl), start.badges && start.badges.briefing && !sl.aktiv ? h('div', { class: 'card' }, h('h2', {}, 'Dein Briefing fehlt noch'), h('p', { class: 'small muted' }, 'Mit ein paar Angaben zu deinem Unternehmen können wir deine Website und Texte viel schneller fertigstellen. Es dauert etwa 10 Minuten.'), h('a', { class: 'btn', href: '#briefing' }, 'Jetzt ausfüllen')) : '', z.bewertung_faellig && !aus.has('zufriedenheit') ? zufriedenheitKarte() : '', aus.has('karten') ? '' : h('div', { class: 'grid3' }, karten(), zusatz));
 };
 
 function zufriedenheitKarte() {
@@ -536,7 +538,7 @@ V.einstellungen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Kontaktdaten'), m1, f1),
     inhaber() ? anschriftKarte(k) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
-    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte(), zweiFaktorKarte(),
+    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
 };
 

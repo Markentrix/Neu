@@ -44,7 +44,7 @@ starten() {
 }
 FEHLER=0
 cd "$T" || exit 2
-for t in ${TESTS:-t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 smoke}; do
+for t in ${TESTS:-t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 t26 smoke}; do
   starten || { FEHLER=1; break; }
   timeout 180 python3 "$t.py" >"out_$t.txt" 2>&1 </dev/null; rc=$?
   n=$(grep -c "^FAIL" "out_$t.txt"); grep -qE "Fehler [1-9]" "out_$t.txt" && n=$((n+1))
