@@ -40,14 +40,14 @@ rows=[kopf,
  [f"Kaputt GmbH {sfx}",None,"keine-mail",None,None,None,None,None,None],
  [f"Werkstatt C {sfx}",None,None,None,None,"KFZ","29225","Hambühren",None]]
 d=xlsx(rows)
-r=imp(d,"liste.xlsx").json(); chk("Vorschau",r["neu"]==3 and r["doppelt"]==1 and r["ungueltig_anzahl"]==2 and not r["importiert"],r)
-chk("Spalten erkannt",r["erkannt"].get("firma")=="Unternehmen" and r["erkannt"].get("telefon")=="Tel" and r["erkannt"].get("ort")=="Stadt",r["erkannt"])
+r=imp(d,"liste.xlsx").json(); b0=r["blaetter"][0]; chk("Vorschau",r["neu"]==3 and b0["doppelt"]==1 and b0["ungueltig"]==2 and not r["importiert"],r)
+chk("Spalten erkannt",b0["erkannt"].get("firma")=="Unternehmen" and b0["erkannt"].get("telefon")=="Tel" and b0["erkannt"].get("ort")=="Stadt",b0["erkannt"])
 chk("Vorschau schreibt nichts",sql(f"select count(*) from leads where firma like '%{sfx}'")=="0")
 r=imp(d,"liste.xlsx",nur_pruefen=False,liste="Werkstätten Celle",temperatur="kalt",quelle="akquise"); chk("Import",r.status_code==200 and r.json()["importiert"] and r.json()["neu"]==3,r.text)
 chk("3 Leads angelegt",sql(f"select count(*) from leads where firma like 'Werkstatt _ {sfx}'")=="3")
-chk("Felder korrekt",sql(f"select telefon||'|'||website||'|'||plz||'|'||temperatur||'|'||liste||'|'||quelle from leads where firma='Werkstatt A {sfx}'")=="5113123456|www.wa.de|29221|kalt|Werkstätten Celle|akquise",sql(f"select telefon||'|'||website from leads where firma='Werkstatt A {sfx}'"))
-chk("Keine Einwilligung vermerkt",sql(f"select count(*) from lead_aktivitaeten a join leads l on l.id=a.lead_id where l.liste='Werkstätten Celle' and a.art='consent'")=="0")
-r=imp(d,"liste.xlsx",nur_pruefen=False).json(); chk("Zweiter Import: nur Dubletten",r["neu"]==0 and r["doppelt"]==4,r)
+chk("Felder korrekt",sql(f"select telefon||'|'||website||'|'||plz||'|'||temperatur||'|'||liste||'|'||quelle from leads where firma='Werkstatt A {sfx}'")=="5113123456|www.wa.de|29221|kalt|Werkstätten Celle · Sheet|akquise",sql(f"select telefon||'|'||website from leads where firma='Werkstatt A {sfx}'"))
+chk("Keine Einwilligung vermerkt",sql(f"select count(*) from lead_aktivitaeten a join leads l on l.id=a.lead_id where l.liste like 'Werkstätten Celle%' and a.art='consent'")=="0")
+r=imp(d,"liste.xlsx",nur_pruefen=False).json(); chk("Zweiter Import: nur Dubletten",r["neu"]==0 and r["blaetter"][0]["doppelt"]==4,r)
 chk("Nicht doppelt in DB",sql(f"select count(*) from leads where firma like 'Werkstatt _ {sfx}'")=="3")
 # CSV mit Semikolon und Windows-Zeichensatz
 txt="Firma;E-Mail;Telefon;PLZ;Ort\r\nBäckerei Müller "+sfx+";m"+sfx+"@b.de;0511 9;29221;Celle\r\n"
@@ -63,16 +63,40 @@ chk("Kunde darf nicht importieren",c.post("/api/admin/leads/import",json={"datei
 p=a.post("/api/admin/vertrieb/partner",json={"name":"Imp Vertrieb","status":"aktiv"}).json()["id"]
 d2=xlsx([["Firma","Ort"],[f"Zugeordnet GmbH {sfx}","Hannover"]]); imp(d2,"z.xlsx",nur_pruefen=False,vertriebspartner_id=p,liste="Hannover",temperatur="heiss")
 L=lambda q: a.get("/api/admin/leads?"+q).json()
-chk("Filter Liste",[x["firma"] for x in L("liste=Hannover")["leads"]]==[f"Zugeordnet GmbH {sfx}"],L("liste=Hannover"))
+chk("Filter Liste",[x["firma"] for x in L("liste=Hannover%20·%20Sheet")["leads"]]==[f"Zugeordnet GmbH {sfx}"],L("liste=Hannover%20·%20Sheet"))
 chk("Filter Vertriebler",len(L(f"vertriebler={p}")["leads"])==1)
 chk("Filter nicht zugeordnet",all(x["vertriebler"] is None for x in L("vertriebler=keiner")["leads"]) and len(L("vertriebler=keiner")["leads"])>=3)
 chk("Filter Einstufung",all(x["temperatur"]=="heiss" for x in L("temperatur=heiss")["leads"]) and len(L("temperatur=heiss")["leads"])>=1)
 chk("Filter ohne Einstufung",all(x["temperatur"] is None for x in L("temperatur=keine")["leads"]))
-chk("Filter Quelle",all(x["quelle"]=="akquise" for x in L("quelle=akquise")["leads"]) and len(L("quelle=akquise")["leads"])>=4)
+chk("Filter Quelle",all(x["quelle"]=="akquise" for x in L("quelle=akquise")["leads"]) and len(L("quelle=akquise")["leads"])>=3)
 chk("Suche E-Mail",[x["firma"] for x in L(f"q=a{sfx}@w.de")["leads"]]==[f"Werkstatt A {sfx}"])
 chk("Suche Telefon",len(L("q=5113123456")["leads"])==1)
 chk("Suche Branche",len([x for x in L("q=KFZ")["leads"] if sfx in x["firma"]])==3)
-chk("Listen im Ergebnis",any(l["liste"]=="Werkstätten Celle" and l["n"]==3 for l in L("")["listen"]),L("")["listen"])
-chk("Kombinierter Filter",len(L("liste=Werkstätten%20Celle&q=Hambühren")["leads"])==1)
+chk("Listen im Ergebnis",any(l["liste"]=="Werkstätten Celle · Sheet" and l["n"]==3 for l in L("")["listen"]),L("")["listen"])
+chk("Kombinierter Filter",len(L("liste=Werkstätten%20Celle%20·%20Sheet&q=Hambühren")["leads"])==1)
 chk("Importierter Lead hat Lösch-Frist",sql(f"select loeschen_nach is not null from leads where firma='Werkstatt A {sfx}'")=="t")
 chk("Audit",int(sql("select count(*) from audit_log where aktion='leads_import'"))>=3)
+
+# ---- Mehrere Blätter, Prio, Adresse, Gruppe
+def xlsx_multi(blaetter):
+    wb=Workbook(); wb.remove(wb.active)
+    for name,rows in blaetter:
+        ws=wb.create_sheet(name)
+        for r in rows: ws.append(r)
+    b=io.BytesIO(); wb.save(b); return "data:application/octet-stream;base64,"+base64.b64encode(b.getvalue()).decode()
+K=["Prio","Firmenname","Branche","Branchengruppe","Telefon","Adresse","Ort","km","Bewertung","Anz. Bewertungen","Google Maps","Hinweis"]
+mb=xlsx_multi([("Übersicht",[["Titel"],["x","y"]]),
+ ("Warme Leads",[K,["A",f"Friseur Eins {sfx}","Friseursalon","Beauty","05141 111111","Weg 5, 29221 Celle","Celle",1.2,4.7,27,"Maps","aktiv"],["B",f"Friseur Zwei {sfx}","Friseursalon","Beauty","05141 222222","Str 2, 29223 Celle","Celle",2,4.0,5,"Maps",None],["C",f"Bagger Drei {sfx}","Baubetrieb","Handwerk & Bau","05141 333333","Ring 9, 29225 Celle","Celle",3,None,None,None,None]]),
+ ("Noch ungeprüft",[["Firmenname","Branche","Adresse","Ort"],[f"Ungeprueft {sfx}","Bäcker","Hof 1, 29221 Celle","Celle"]])])
+r=imp(mb,"multi.xlsx").json(); names={b["name"]:b for b in r["blaetter"]}
+chk("Blätter erkannt (Übersicht ausgelassen)",set(names)=={"Warme Leads","Noch ungeprüft"},list(names))
+chk("Standard: ungeprüft nicht vorgewählt",names["Warme Leads"]["gewaehlt"] and not names["Noch ungeprüft"]["gewaehlt"] and r["neu"]==3,r["neu"])
+r=imp(mb,"multi.xlsx",nur_pruefen=False,liste="Celle").json(); chk("Multi-Import",r["importiert"] and r["neu"]==3,r)
+chk("Prio A heiß",sql(f"select temperatur from leads where firma='Friseur Eins {sfx}'")=="heiss"); chk("Prio B warm",sql(f"select temperatur from leads where firma='Friseur Zwei {sfx}'")=="warm"); chk("Prio C kalt",sql(f"select temperatur from leads where firma='Bagger Drei {sfx}'")=="kalt")
+chk("PLZ aus Adresse",sql(f"select plz||'|'||ort from leads where firma='Friseur Eins {sfx}'")=="29221|Celle")
+chk("Gruppe gespeichert",sql(f"select gruppe from leads where firma='Bagger Drei {sfx}'")=="Handwerk & Bau")
+chk("Notiz mit Bewertung","Google-Bewertung 4.7 (27 Bewertungen)" in sql(f"select notiz from leads where firma='Friseur Eins {sfx}'"))
+chk("Ungeprüftes Blatt nicht importiert",sql(f"select count(*) from leads where firma='Ungeprueft {sfx}'")=="0")
+r=imp(mb,"multi.xlsx",nur_pruefen=False,blaetter=["Noch ungeprüft"],liste="Celle").json(); chk("Blatt gezielt wählen",r["neu"]==1,r)
+chk("Filter Branchengruppe",[x["firma"] for x in L("gruppe=Handwerk%20%26%20Bau")["leads"]]==[f"Bagger Drei {sfx}"] and any(g["gruppe"]=="Beauty" for g in L("")["gruppen"]))
+chk("Suche in Notiz",len(L("q=Prio%20A")["leads"])>=1)
