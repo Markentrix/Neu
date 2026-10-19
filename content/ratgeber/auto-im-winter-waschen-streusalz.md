@@ -6,7 +6,7 @@
   "updated": "2026-10-19",
   "category": "Winter-Spezial",
   "readingTime": 6,
-  "excerpt": "Streusalz greift Lack, Felgen und Unterboden an. So waschen Sie Ihr Auto im Winter richtig: zum passenden Zeitpunkt, mit der richtigen Methode und ohne neue Kratzer.",
+  "excerpt": "Streusalz greift Lack, Felgen und Unterboden an. So waschen Sie Ihr Auto im Winter richtig: zum passenden Zeitpunkt, mit der richtigen Methode und lackschonend.",
   "service": "aussenaufbereitung-celle",
   "summary": [
     "Waschen Sie Ihr Auto im Winter regelmäßig, vor allem nach Fahrten auf gestreuten Straßen, idealerweise an einem Tag über dem Gefrierpunkt.",
@@ -37,7 +37,7 @@
 
 Waschen Sie Ihr Auto im Winter regelmäßig, am besten an einem Tag mit Plusgraden, und spülen Sie das Salz zuerst mit viel Wasser ab, bevor Sie den Lack berühren. Besonders gründlich sollten Sie Radkästen, Schweller, Felgen und Unterboden reinigen, denn dort sammelt sich das meiste Salz. Danach trocknen Sie Dichtungen und Schlösser, damit nichts festfriert.
 
-In diesem Ratgeber erfahren Sie, warum Streusalz so schädlich ist, wie oft eine Wäsche sinnvoll ist und wie Sie dabei neue Kratzer vermeiden.
+In diesem Ratgeber erfahren Sie, warum Streusalz so schädlich ist, wie oft eine Wäsche sinnvoll ist und wie Sie dabei lackschonend vorgehen.
 
 ## Warum ist Streusalz so schädlich für Ihr Auto?
 

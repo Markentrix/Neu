@@ -171,7 +171,7 @@ def plan_card(site, p, prefix=""):
           <h3>{ESC(p["name"])}</h3>
           <p class="plan-for">{ESC(p["for"])}</p>
           <div class="plan-price"><span class="from">ab</span><span class="amount">{p["prices"][cls0]} €</span></div>
-          <div class="plan-meta"><span>{I["clock"]}{ESC(p["duration"])}</span><span>{I["hand"]}Handarbeit</span></div>
+          <div class="plan-meta"><span title="reine Arbeitszeit">{I["clock"]}{ESC(p["duration"])}</span><span>{I["hand"]}Handarbeit</span></div>
           <ul>{lis}</ul>
           <a class="btn {"btn-primary" if featured else "btn-line-light"}" href="{prefix}termin.html?paket={p["key"]}" data-book="{p["key"]}">{I["cal"]}{ESC(p["name"])} anfragen</a>
           <a class="text-link plan-wa" href="{site.wa()}" data-wa-plan="{p["key"]}" target="_blank" rel="noopener">{I["wa"]}oder per WhatsApp</a>
@@ -231,6 +231,28 @@ def ceramic_section(site, prefix="", head="h2"):
       </div>'''
 
 
+def price_matrix(site):
+    """Alle Ab-Preise auf einen Blick: Fahrzeugklassen × Pakete."""
+    pr = site.pricing
+    ths = "".join(f'<th scope="col" class="num">{ESC(p["name"])}</th>' for p in pr["packages"])
+    def td(p, c):
+        v = p["prices"].get(c["key"])
+        return f'<td class="num">{f"ab {v}&nbsp;€" if v is not None else "auf Anfrage"}</td>'
+    trs = "".join(f'<tr><th scope="row">{ESC(c["name"])}<small>{ESC(c["examples"])}</small></th>' + "".join(td(p, c) for p in pr["packages"]) + "</tr>"
+                  for c in pr["classes"])
+    return f'''
+      <div class="price-matrix reveal" id="alle-preise">
+        <h2>Alle Preise auf einen Blick</h2>
+        <div class="price-scroll" tabindex="0" role="region" aria-label="Preisübersicht nach Fahrzeugklasse, seitlich scrollbar">
+          <table class="price-table">
+            <caption class="visually-hidden">Ab-Preise je Fahrzeugklasse und Paket</caption>
+            <thead><tr><th scope="col">Fahrzeugklasse</th>{ths}</tr></thead>
+            <tbody>{trs}</tbody>
+          </table>
+        </div>
+      </div>'''
+
+
 def price_section(site, prefix=""):
     """Volle Preisübersicht mit Klassen-Umschalter, Paketen, Extras und Vergleichstabelle."""
     pr = site.pricing
@@ -258,6 +280,7 @@ def price_section(site, prefix=""):
       </div>
       <div class="plans stagger">{plans}
       </div>
+      {price_matrix(site)}
       <p class="price-note">{ESC(pr["note"])}</p>
       {f'<p class="price-stand">{I["clock"]}<span>{ESC(pr["standNote"])}</span></p>' if pr.get("standNote") else ""}
       {f'<p class="price-stand">{I["spark"]}<span>{ESC(pr["polishNote"])}</span></p>' if pr.get("polishNote") else ""}
@@ -452,7 +475,7 @@ def build_home(site, write):
     <div class="container">
       <ul>
         <li>{I["star"]}<span>{ESC(s["rating"]["value"])} von 5 Sternen<small>{s["rating"]["count"]} Google-Bewertungen</small></span></li>
-        <li>{I["hand"]}<span>Handarbeit statt Waschstraße<small>Keine neuen Kratzer</small></span></li>
+        <li>{I["hand"]}<span>Handarbeit statt Waschstraße<small>Lackschonende Arbeit</small></span></li>
         <li>{I["euro"]}<span>Festpreis vorab<small>Keine Überraschung bei Abholung</small></span></li>
         <li><a class="trust-link" href="zertifikate.html">{I["shield"]}<span>C²Coating Excellence Partner<small>Koch-Chemie zertifiziert · Zertifikate ansehen</small></span></a></li>
       </ul>
@@ -549,7 +572,7 @@ def build_home(site, write):
         </details>
       </div>
       <div class="why-list stagger">{owner_card}
-        <div class="why-item reveal">{I["hand"]}<div><h3>Keine neuen Kratzer</h3><p>Handwäsche mit der Zwei-Eimer-Methode, weiche Mikrofaser, kratzfreie Trocknung. Alte Swirls verschwinden, neue entstehen nicht.</p></div></div>
+        <div class="why-item reveal">{I["hand"]}<div><h3>Lackschonende Arbeit</h3><p>Handwäsche mit der Zwei-Eimer-Methode, weiche Mikrofaser und schonende Trocknung. So behandeln wir Ihren Lack so sanft wie möglich.</p></div></div>
         <div class="why-item reveal">{I["shield"]}<div><h3>Profi-Systeme statt Baumarkt</h3><p>Offizieller C²Coating Excellence Partner für Keramikversiegelungen, Fachschulungen bei Koch-Chemie, Colourlock für Leder. Jedes Material bekommt das passende Mittel.</p></div></div>
         <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Sie erhalten ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
         <div class="why-item reveal">{I["clock"]}<div><h3>Termin, wann es Ihnen passt</h3><p>Online oder per WhatsApp anfragen, Termin nach Vereinbarung, samstags nach Absprache. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>

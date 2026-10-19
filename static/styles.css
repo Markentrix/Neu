@@ -700,7 +700,12 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .plan li.opt { color: var(--muted); }
 .plan li.opt svg { color: var(--blue); opacity: 0.6; }
 
-/* Paketbeschreibungen und C² CarCeramic-Preisliste */
+/* Preisübersicht, Paketbeschreibungen und C² CarCeramic-Preisliste */
+.price-matrix { margin-top: 36px; display: grid; gap: 14px; }
+.price-matrix .price-scroll { border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--bg); }
+.price-matrix .price-table { min-width: 640px; }
+.price-matrix tbody th small { display: block; font-weight: 500; font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+.price-matrix .num { text-align: right; white-space: nowrap; color: var(--ink); font-weight: 650; font-variant-numeric: tabular-nums; }
 .pkg-details { margin-top: 44px; }
 .pkg-details dl { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 16px; }
 .pkg-details dl > div { padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--bg); }

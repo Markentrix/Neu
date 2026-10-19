@@ -73,19 +73,19 @@ Im Profil unter "Leistungen" anlegen. Google erlaubt pro Leistung einen Preis. D
 ### Pakete
 
 **Refresh**
-Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen, Oberflächen abwischen, Scheiben innen und außen. Für den gepflegten Alltag zwischendurch. Dauer ab 2 Stunden.
+Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen, Oberflächen abwischen, Scheiben innen und außen. Für den gepflegten Alltag zwischendurch. Arbeitszeit ca. 1 Stunde.
 Ab 79 € (Kleinwagen), ab 99 € (Kompaktwagen), ab 119 € (Limousine, Kombi, kleinerer SUV), ab 149 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Essential**
-Alles aus Refresh plus intensive Innenraum- und Kofferraumreinigung, Einstiege, Türverkleidungen und Kunststoffe sowie Polster-, Teppich- oder Lederreinigung und Pflege. Ihr Auto bleibt ca. 24 Stunden bei uns. Bei starker Verschmutzung oder vielen Tierhaaren sind Mehrkosten möglich.
+Alles aus Refresh plus intensive Innenraum- und Kofferraumreinigung, Einstiege, Türverkleidungen und Kunststoffe sowie Polster-, Teppich- oder Lederreinigung und Pflege. Arbeitszeit ca. 4 Stunden, Ihr Auto bleibt über Nacht bei uns. Bei starker Verschmutzung oder vielen Tierhaaren sind Mehrkosten möglich.
 Ab 299 € (Kleinwagen), ab 329 € (Kompaktwagen), ab 379 € (Limousine, Kombi, kleinerer SUV), ab 449 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Signature**
-Alles aus Essential plus Lackvorbereitung und einstufige Glanzpolitur. Für mehr Glanz und ein frischeres Lackbild, leichte Gebrauchsspuren werden reduziert. Dauer ab 24 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
+Alles aus Essential plus Lackvorbereitung und einstufige Glanzpolitur. Für mehr Glanz und ein frischeres Lackbild, leichte Gebrauchsspuren werden reduziert. Arbeitszeit ca. 6 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
 Ab 449 € (Kleinwagen), ab 499 € (Kompaktwagen), ab 549 € (Limousine, Kombi, kleinerer SUV), ab 649 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Excellence**
-Alles aus Essential plus mehrstufige Lackkorrektur. Reduziert korrigierbare Kratzer, Waschspuren und Hologramme. Vorher messen wir die Lackschichtdicke. Der mögliche Korrekturgrad hängt vom Lackzustand ab. Dauer ab 24 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
+Alles aus Essential plus mehrstufige Lackkorrektur. Reduziert korrigierbare Kratzer, Waschspuren und Hologramme. Vorher messen wir die Lackschichtdicke. Der mögliche Korrekturgrad hängt vom Lackzustand ab. Arbeitszeit ca. 8 bis 12 Stunden. Lackversiegelung und Keramikversiegelung separat buchbar.
 Ab 599 € (Kleinwagen), ab 649 € (Kompaktwagen), ab 749 € (Limousine, Kombi, kleinerer SUV), ab 899 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 ### Keramikversiegelung (Schwerpunkt)
@@ -279,9 +279,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Erst messen, dann polieren
-- **Text (600 Zeichen, ohne Titelzeile):**
+- **Text (613 Zeichen, ohne Titelzeile):**
 
-> Bevor wir polieren, messen wir die Lackschichtdicke. Jedes Fahrzeug hat andere Werte, zum Beispiel nach einer Nachlackierung. So wissen wir, wie viel Politur der Lack verträgt. Mit Excellence polieren wir danach mehrstufig und reduzieren korrigierbare Kratzer, Waschspuren und Hologramme. Wie weit das geht, hängt vom Lackzustand ab. Excellence ab 599 € für Kleinwagen, ab 649 € für Kompaktwagen, ab 749 € für Limousine, Kombi oder kleineren SUV, ab 899 € für große SUVs und Vans. Dauer ab 24 Stunden. Eine Lackversiegelung buchen Sie auf Wunsch dazu. Die Abnahme machen wir gemeinsam bei Tageslicht.
+> Bevor wir polieren, messen wir die Lackschichtdicke. Jedes Fahrzeug hat andere Werte, zum Beispiel nach einer Nachlackierung. So wissen wir, wie viel Politur der Lack verträgt. Mit Excellence polieren wir danach mehrstufig und reduzieren korrigierbare Kratzer, Waschspuren und Hologramme. Wie weit das geht, hängt vom Lackzustand ab. Excellence ab 599 € für Kleinwagen, ab 649 € für Kompaktwagen, ab 749 € für Limousine, Kombi oder kleineren SUV, ab 899 € für große SUVs und Vans. Arbeitszeit ca. 8 bis 12 Stunden. Eine Lackversiegelung buchen Sie auf Wunsch dazu. Die Abnahme machen wir gemeinsam bei Tageslicht.
 
 - **Button:** Weitere Infos → https://www.elbdetail.de/leistungen/lackpolitur-celle.html
 - **Bildidee:** Schichtdickenmessgerät auf dem Lack, Display gut lesbar.
@@ -312,9 +312,9 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 
 - **Typ:** Neuigkeiten
 - **Titel:** Streusalz runter, Glanz zurück
-- **Text (415 Zeichen, ohne Titelzeile):**
+- **Text (420 Zeichen, ohne Titelzeile):**
 
-> Im Winter klebt Salz am Lack, an den Felgen und an den Scheiben. Unser Paket Refresh ist die Pflege zwischendurch: Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen und abwischen, Scheiben innen und außen. Dauer ab 2 Stunden. Richtpreis ab 79 € für Kleinwagen, ab 99 € für Kompaktwagen, ab 119 € für Limousine, Kombi oder kleineren SUV, ab 149 € für große SUVs und Vans. Keine Waschstraße, nur Handarbeit.
+> Im Winter klebt Salz am Lack, an den Felgen und an den Scheiben. Unser Paket Refresh ist die Pflege zwischendurch: Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen und abwischen, Scheiben innen und außen. Arbeitszeit ca. 1 Stunde. Richtpreis ab 79 € für Kleinwagen, ab 99 € für Kompaktwagen, ab 119 € für Limousine, Kombi oder kleineren SUV, ab 149 € für große SUVs und Vans. Keine Waschstraße, nur Handarbeit.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Handwäsche mit Schaum und zwei Eimern im Bild.
@@ -445,7 +445,7 @@ Ihr dürft als Inhaber selbst Fragen stellen und beantworten. Erst die Frage ste
 Unsere Einstiegspreise für Kleinwagen: Refresh ab 79 €, Essential ab 299 €, Signature ab 449 €, Excellence ab 599 €. Für Kompaktwagen, Limousinen, Kombis, SUVs und Vans liegen die Preise höher. Für Sport- und Luxusfahrzeuge sowie Wohnmobile erhalten Sie ein Angebot auf Anfrage. Alle Preise sind Endpreise. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
 
 **2. Wie lange dauert eine Aufbereitung?**
-Refresh dauert ab 2 Stunden. Bei Essential bleibt Ihr Auto ca. 24 Stunden bei uns, bei Signature und Excellence ab 24 Stunden. So können Pflegeprodukte und Versiegelung über Nacht in Ruhe aushärten. Je nach Zustand des Fahrzeugs kann es abweichen. Das sagen wir Ihnen vorab.
+Die reine Arbeitszeit beträgt bei Refresh ca. 1 Stunde, bei Essential ca. 4 Stunden, bei Signature ca. 6 Stunden und bei Excellence ca. 8 bis 12 Stunden. Ab Essential bleibt Ihr Auto über Nacht bei uns, damit Pflegeprodukte und Versiegelung in Ruhe aushärten. Je nach Zustand des Fahrzeugs kann es abweichen. Das sagen wir Ihnen vorab.
 
 **3. Waschen Sie in einer Waschstraße?**
 Nein. Wir arbeiten zu 100 % in Handarbeit. Außen waschen wir mit der Zwei-Eimer-Methode. Das schont den Lack.

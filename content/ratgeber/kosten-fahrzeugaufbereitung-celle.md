@@ -17,7 +17,7 @@
   "faq": [
     {
       "q": "Was kostet eine einfache Fahrzeugaufbereitung in Celle?",
-      "a": "Das Paket Refresh kostet bei ElbDetail ab {ab:refresh} € für Kleinwagen, ab {preis:refresh:kompakt} € für Kompaktwagen, ab {preis:refresh:mittel} € für Limousinen, Kombis und kleinere SUVs und ab {preis:refresh:suv} € für große SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert ab etwa zwei Stunden."
+      "a": "Das Paket Refresh kostet bei ElbDetail ab {ab:refresh} € für Kleinwagen, ab {preis:refresh:kompakt} € für Kompaktwagen, ab {preis:refresh:mittel} € für Limousinen, Kombis und kleinere SUVs und ab {preis:refresh:suv} € für große SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert etwa eine Stunde."
     },
     {
       "q": "Warum ist eine Aufbereitung für ein SUV teurer?",
@@ -54,12 +54,12 @@ Die Richtpreise gelten für einen normalen Pflegezustand. Starke Verschmutzung, 
 
 Die folgende Tabelle zeigt die vier Pakete von ElbDetail mit Ab-Preisen je Fahrzeugklasse. Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.
 
-| Paket | Kleinwagen (Polo, Corsa) | Kompakt (Golf, A3) | Limousine/Kombi/SUV (Passat, Tiguan) | Großer SUV/Van (X5, Multivan) | Dauer |
+| Paket | Kleinwagen (Polo, Corsa) | Kompakt (Golf, A3) | Limousine/Kombi/SUV (Passat, Tiguan) | Großer SUV/Van (X5, Multivan) | Arbeitszeit |
 |---|---|---|---|---|---|
-| Refresh: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab {preis:refresh:klein} € | ab {preis:refresh:kompakt} € | ab {preis:refresh:mittel} € | ab {preis:refresh:suv} € | ab 2 Std. |
-| Essential: + intensive Innenraum- & Kofferraumreinigung, Einstiege, Türverkleidungen, Polster-, Teppich- bzw. Lederreinigung & Pflege | ab {preis:essential:klein} € | ab {preis:essential:kompakt} € | ab {preis:essential:mittel} € | ab {preis:essential:suv} € | ca. 24 Std. |
-| Signature: wie Essential + Lackvorbereitung und einstufige Glanzpolitur | ab {preis:signature:klein} € | ab {preis:signature:kompakt} € | ab {preis:signature:mittel} € | ab {preis:signature:suv} € | ab 24 Std. |
-| Excellence: wie Essential + mehrstufige Lackkorrektur gegen korrigierbare Kratzer, Waschspuren und Hologramme | ab {preis:excellence:klein} € | ab {preis:excellence:kompakt} € | ab {preis:excellence:mittel} € | ab {preis:excellence:suv} € | ab 24 Std. |
+| Refresh: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab {preis:refresh:klein} € | ab {preis:refresh:kompakt} € | ab {preis:refresh:mittel} € | ab {preis:refresh:suv} € | ca. 1 Std. |
+| Essential: + intensive Innenraum- & Kofferraumreinigung, Einstiege, Türverkleidungen, Polster-, Teppich- bzw. Lederreinigung & Pflege | ab {preis:essential:klein} € | ab {preis:essential:kompakt} € | ab {preis:essential:mittel} € | ab {preis:essential:suv} € | ca. 4 Std. |
+| Signature: wie Essential + Lackvorbereitung und einstufige Glanzpolitur | ab {preis:signature:klein} € | ab {preis:signature:kompakt} € | ab {preis:signature:mittel} € | ab {preis:signature:suv} € | ca. 6 Std. |
+| Excellence: wie Essential + mehrstufige Lackkorrektur gegen korrigierbare Kratzer, Waschspuren und Hologramme | ab {preis:excellence:klein} € | ab {preis:excellence:kompakt} € | ab {preis:excellence:mittel} € | ab {preis:excellence:suv} € | ca. 8–12 Std. |
 
 Eine Lackversiegelung oder die C² CarCeramic Keramikversiegelung buchen Sie zu Signature oder Excellence separat dazu. Die Keramik beginnt für Pkw bei {ab:keramik} €, je nach C²Coating-Fahrzeugkategorie. Alle Preise finden Sie in der [Preisübersicht](/preise.html).
 

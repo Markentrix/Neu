@@ -99,7 +99,7 @@ Politur und Versiegelung gehören zusammen, weil frisch polierter Lack ohne Schu
 
 Umgekehrt gilt: Wer stumpfen oder verkratzten Lack nur versiegelt, konserviert die Defekte darunter. Die Kombination ist deshalb meist die bessere Wahl, wenn der Lack sichtbare Mängel hat.
 
-Bei ElbDetail steckt die Politur in zwei Paketen, jeweils mit kompletter Innen- und Außenaufbereitung: **Signature** mit einstufiger Glanzpolitur ab {ab:signature} € und **Excellence** mit mehrstufiger Lackkorrektur gegen korrigierbare Kratzer, Waschspuren und Hologramme ab {ab:excellence} € (jeweils Kleinwagen, Dauer ab 24 Stunden). Die Lackversiegelung buchen Sie zu beiden Paketen separat dazu. Wie weit sich der Lack korrigieren lässt, hängt von seinem Zustand ab. Tiefe Kratzer bis in die Grundierung lassen sich durch Polieren nicht entfernen.
+Bei ElbDetail steckt die Politur in zwei Paketen, jeweils mit kompletter Innen- und Außenaufbereitung: **Signature** mit einstufiger Glanzpolitur ab {ab:signature} € und **Excellence** mit mehrstufiger Lackkorrektur gegen korrigierbare Kratzer, Waschspuren und Hologramme ab {ab:excellence} € (jeweils Kleinwagen, Arbeitszeit etwa 6 beziehungsweise 8 bis 12 Stunden). Die Lackversiegelung buchen Sie zu beiden Paketen separat dazu. Wie weit sich der Lack korrigieren lässt, hängt von seinem Zustand ab. Tiefe Kratzer bis in die Grundierung lassen sich durch Polieren nicht entfernen.
 
 Wer das Ergebnis einer Politur besonders lange erhalten möchte, kann statt der klassischen Versiegelung eine [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html) wählen. ElbDetail ist dafür offizieller C²Coating Excellence Partner. Die Keramik konserviert den frisch polierten Lack und hält länger, je nach Beschichtung und Pflege. Die C² CarCeramic gibt es für Pkw ab {ab:keramik} €.
 
@@ -108,7 +108,7 @@ Wer das Ergebnis einer Politur besonders lange erhalten möchte, kann statt der 
 Eine Lackpolitur bei ElbDetail beginnt mit einer gründlichen Handwäsche und endet mit einer gemeinsamen Abnahme bei Tageslicht. Dazwischen liegen mehrere Arbeitsschritte:
 
 1. **Fotos und Preis:** Sie schicken Fotos per WhatsApp und bekommen vor dem Termin einen verbindlichen Preis.
-2. **Handwäsche:** Das Auto wird mit der Zwei-Eimer-Methode von Hand gewaschen, damit beim Reinigen keine neuen Kratzer entstehen.
+2. **Handwäsche:** Das Auto wird mit der Zwei-Eimer-Methode lackschonend von Hand gewaschen.
 3. **Messung:** Die Lackschichtdicke wird gemessen, um zu wissen, wie viel Spielraum der Lack bietet.
 4. **Politur:** Der Lack wird mehrstufig poliert, bis Kratzer und Hologramme so weit wie möglich entfernt sind.
 5. **Versiegelung:** Der polierte Lack bekommt eine Schutzschicht.

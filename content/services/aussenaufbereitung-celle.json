@@ -2,10 +2,10 @@
   "slug": "aussenaufbereitung-celle",
   "order": 3,
   "short": "Außenaufbereitung",
-  "teaser": "Handwäsche, Felgen, Dichtungen, Trocknung ohne Kratzer.",
+  "teaser": "Handwäsche, Felgen, Dichtungen, lackschonende Trocknung.",
   "seoTitle": "Außenaufbereitung Celle: Handwäsche & Felgen | ElbDetail",
   "description": "Außenaufbereitung in Celle: schonende Handwäsche, Felgen, Insekten- und Teerentfernung, Dichtungspflege. Ab {ab:refresh} €. Jetzt Termin anfragen.",
-  "h1": "Außenaufbereitung in Celle: *Handwäsche ohne Kratzer.*",
+  "h1": "Außenaufbereitung in Celle: *Lackschonende Handwäsche.*",
   "lead": "Schonende Zwei-Eimer-Handwäsche, gründliche Felgenreinigung, Insekten- und Teerentfernung und gepflegte Dichtungen. **Keine Waschstraße, keine Swirls.**",
   "facts": [
     {
@@ -13,7 +13,7 @@
       "label": "Refresh, Kleinwagen"
     },
     {
-      "value": "ca. 2 Std.",
+      "value": "ca. 1 Std.",
       "label": "Dauer"
     },
     {
@@ -22,7 +22,7 @@
     }
   ],
   "package": "refresh",
-  "intro": "Die Außenaufbereitung ist die Basis jeder Fahrzeugpflege. Wir waschen ausschließlich von Hand nach der Zwei-Eimer-Methode mit pH-neutralen Koch-Chemie-Shampoos, damit Schmutz gelöst wird, ohne ihn über den Lack zu reiben. So entstehen keine neuen Kratzer, wie sie Waschstraßen und Hochdruck-Selbstwaschboxen typischerweise hinterlassen.\n\nFelgen, Radhäuser, Türeinstiege und Dichtungen bekommen dabei genauso viel Aufmerksamkeit wie die Motorhaube. Hartnäckige Rückstände wie Insekten, Teer, Flugrost oder Baumharz lösen wir chemisch an und entfernen sie schonend, bevor sie den Klarlack angreifen.\n",
+  "intro": "Die Außenaufbereitung ist die Basis jeder Fahrzeugpflege. Wir waschen ausschließlich von Hand nach der Zwei-Eimer-Methode mit pH-neutralen Koch-Chemie-Shampoos, damit Schmutz gelöst wird, ohne ihn über den Lack zu reiben. Das ist deutlich lackschonender als Waschstraßen und Hochdruck-Selbstwaschboxen, die typischerweise feine Kratzer hinterlassen.\n\nFelgen, Radhäuser, Türeinstiege und Dichtungen bekommen dabei genauso viel Aufmerksamkeit wie die Motorhaube. Hartnäckige Rückstände wie Insekten, Teer, Flugrost oder Baumharz lösen wir chemisch an und entfernen sie schonend, bevor sie den Klarlack angreifen.\n",
   "includes": [
     "Vorwäsche mit Schaum, lösen von grobem Schmutz",
     "Zwei-Eimer-Handwäsche mit pH-neutralem Shampoo",
@@ -32,7 +32,7 @@
     "Türeinstiege, Falze und Tankdeckel",
     "Kunststoff-, Dichtungs- und Reifenpflege",
     "Scheiben außen streifenfrei",
-    "Kratzfreie Trocknung mit Mikrofaser und Luft"
+    "Lackschonende Trocknung mit Mikrofaser und Luft"
   ],
   "steps": [
     {
