@@ -9,7 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, mailer
+from . import config, einstellungen, mailer, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin
@@ -130,6 +130,11 @@ def _mails(g: dict, ort: str, an_team: list):
                       f"{g['name']} ({g['email']}, {g.get('telefon') or 'keine Nummer'}) hat ein Erstgespräch gebucht: {lokal}.\n\n{g.get('nachricht') or ''}\n\nDer Lead wurde im Portal auf 'Termin' gesetzt: {config.BASE_URL}/admin", anhang)
 
 
+def _lead_partner(cur, lid):
+    cur.execute("SELECT vertriebspartner_id FROM leads WHERE id=%s AND vertriebspartner_id IS NOT NULL", (lid,))
+    return cur.fetchone()
+
+
 @router.post("/public/buchung")
 def buchen(data: BuchenIn, bg: BackgroundTasks, request: Request):
     rate_limit("buchen:" + client_ip(request), 10, 3600)
@@ -173,6 +178,8 @@ def buchen(data: BuchenIn, bg: BackgroundTasks, request: Request):
                     (lid, "Gespräch gebucht für " + start.astimezone(TZ).strftime("%d.%m.%Y %H:%M") + " Uhr"))
         an = [x for x in [admin_empfaenger(cur)] if x]
         ort = c["ort"]
+        ids = push.admins(cur) + (push.partner(cur, lp["vertriebspartner_id"]) if (lp := _lead_partner(cur, lid)) else [])
+    push.senden(ids, "Neues Gespräch gebucht", "Ein Interessent hat ein Erstgespräch gebucht.", "/admin#leads", "buchung")
     bg.add_task(_mails, g, ort, an)
     return {"ok": True, "wann": start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")}
 

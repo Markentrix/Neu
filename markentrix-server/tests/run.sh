@@ -24,7 +24,7 @@ done
 PSQL "markentrix -f $REPO/db/999_rechte.sql" >/dev/null
 
 export DATABASE_URL="postgresql://mk_app:apppw@localhost:54329/markentrix?host=$PGD" PORTAL_BASE_URL=http://localhost:8000 PORTAL_COOKIE_SECURE=0 \
-  UPLOAD_DIR=$T/up SITES_LIVE=$T/s/live SITES_ROOT=$T/s QUEUE_DIR=$T/b/queue PORTAL_SECRET=testgeheimnis123 ANTHROPIC_BASE_URL=http://127.0.0.1:8999 PORTAL_JOBS=0 BACKUP_DIR=$T/bk
+  UPLOAD_DIR=$T/up SITES_LIVE=$T/s/live SITES_ROOT=$T/s QUEUE_DIR=$T/b/queue PORTAL_SECRET=testgeheimnis123 ANTHROPIC_BASE_URL=http://127.0.0.1:8999 PORTAL_JOBS=0 BACKUP_DIR=$T/bk PUSH_HTTP_ERLAUBT=1
 export PYTHONPATH="$REPO/portal"
 cd "$REPO/portal" || exit 2
 python3 -m app.cli admin-add chef@test.de | grep PASSWORT | cut -d= -f2 > "$T/adminpw"
@@ -44,7 +44,7 @@ starten() {
 }
 FEHLER=0
 cd "$T" || exit 2
-for t in t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 smoke; do
+for t in ${TESTS:-t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 smoke}; do
   starten || { FEHLER=1; break; }
   timeout 180 python3 "$t.py" >"out_$t.txt" 2>&1 </dev/null; rc=$?
   n=$(grep -c "^FAIL" "out_$t.txt"); grep -qE "Fehler [1-9]" "out_$t.txt" && n=$((n+1))

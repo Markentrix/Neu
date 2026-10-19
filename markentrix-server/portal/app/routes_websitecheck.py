@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, mailer
+from . import config, einstellungen, mailer, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin
@@ -129,9 +129,11 @@ async def website_check(data: CheckIn, request: Request, bg: BackgroundTasks):
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'website')",
                     (lid, f"Website-Check für {website or 'ohne Website'}: {data.score if data.score is not None else '-'} von 100"))
         an = admin_empfaenger(cur)
+        push_ids = push.admins(cur)
         cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
                       VALUES (NULL, %s, %s, current_date + 1, 'auto', %s) ON CONFLICT (auto_schluessel) DO NOTHING""",
                     (f"Lead nachfassen: {firma}", an, f"lead-check-{lid}-{__import__('datetime').date.today().isoformat()}"))
+    push.senden(push_ids, "Neuer Website-Check", "Ein Interessent hat den Website-Check genutzt." if neu else "Ein bekannter Lead hat den Website-Check erneut genutzt.", "/admin#leads", "check")
     if an:
         bg.add_task(mailer.website_check_team, an, (data.name or "").strip(), firma, email, website or "", data.score, neu, str(lid))
     return {"ok": True, "neu": neu}

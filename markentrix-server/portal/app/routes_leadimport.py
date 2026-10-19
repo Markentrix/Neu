@@ -7,6 +7,7 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from . import push
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -232,6 +233,10 @@ def importieren(data: ImportIn, user: dict = Depends(require_admin)):
                                       d.get("notiz"), data.quelle, d["temperatur"], data.vertriebspartner_id, d["_liste"][:120]) for d in neu])
         if not data.nur_pruefen:
             audit(cur, user, "leads_import", None, {"datei": data.datei_name, "neu": gesamt_neu, "blaetter": sorted(gewaehlt)})
+    if not data.nur_pruefen and gesamt_neu and data.vertriebspartner_id:
+        with tx("system") as cur:
+            ids = push.partner(cur, data.vertriebspartner_id)
+        push.senden(ids, "Neue Leads", f"{gesamt_neu} neue Leads wurden Ihnen zugewiesen.", "/vertrieb#heute", "zugewiesen")
     for u in uebersicht:
         for d in u["vorschau"]:
             d.pop("_liste", None)

@@ -17,3 +17,4 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 PORTAL_SECRET = os.environ.get("PORTAL_SECRET", "")
 ANTHROPIC_BASE_URL = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com").rstrip("/")
 RESET_HOURS = 2
+PUSH_HTTP_ERLAUBT = os.environ.get("PUSH_HTTP_ERLAUBT", "0") == "1"   # nur für Tests mit lokalem Push-Server

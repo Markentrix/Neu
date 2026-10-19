@@ -123,3 +123,40 @@ export function skriptKarte(skript, skriptAm, url) {
   return h('div', { class: 'card' }, h('h2', {}, 'Gesprächsleitfaden (KI-Entwurf)'),
     h('p', { class: 'small muted' }, 'Ein Vorschlag aus den Daten dieses Betriebs. Bitte nicht ablesen, nichts versprechen und keine Preise nennen. Wer kein Interesse hat, wird respektiert. Dieser Text wurde mit KI-Unterstützung vorbereitet.' + (skriptAm ? ' Erstellt am ' + datum(skriptAm) + '.' : '')), m, box, h('p', {}, knopf));
 }
+
+// ---------------------------------------------------------------- App-Installation und Push-Nachrichten
+let installAngebot = null;
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installAngebot = e; });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+const b64zuBytes = (s) => { const p = '='.repeat((4 - s.length % 4) % 4), r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(r, c => c.charCodeAt(0)); };
+const bytesZuB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+export function pushKarte() {
+  const m = h('div'), box = h('div'), install = h('div');
+  const ios = /iphone|ipad/i.test(navigator.userAgent), standalone = window.matchMedia && matchMedia('(display-mode: standalone)').matches;
+  const geht = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  async function zeigen() {
+    if (!geht) { box.replaceChildren(h('p', { class: 'muted small' }, ios && !standalone ? 'Auf dem iPhone geht das erst, wenn du das Portal zum Home-Bildschirm hinzufügst (Teilen → „Zum Home-Bildschirm“) und von dort öffnest.' : 'Dieser Browser unterstützt keine Push-Nachrichten.')); return; }
+    const reg = await navigator.serviceWorker.ready, abo = await reg.pushManager.getSubscription();
+    if (abo) box.replaceChildren(h('p', {}, h('span', { class: 'pill ok' }, 'an'), ' Benachrichtigungen sind auf diesem Gerät eingeschaltet.'),
+      h('div', { class: 'row' }, h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/push/test', { method: 'POST' }); melde(m, 'Testnachricht gesendet.', 'ok'); } catch (x) { melde(m, x.message); } } }, 'Testnachricht'),
+        h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/push/abmelden', { method: 'POST', body: { endpoint: abo.endpoint } }); await abo.unsubscribe(); zeigen(); } catch (x) { melde(m, x.message); } } }, 'Ausschalten')));
+    else box.replaceChildren(h('button', { class: 'btn small', onclick: async () => {
+      try {
+        if (await Notification.requestPermission() !== 'granted') { melde(m, 'Die Erlaubnis wurde im Browser abgelehnt. Du kannst sie in den Browser-Einstellungen ändern.'); return; }
+        const st = await api('/api/push/status');
+        const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64zuBytes(st.schluessel) });
+        const j = neu.toJSON();
+        await api('/api/push/abo', { method: 'POST', body: { endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, geraet: navigator.userAgent.slice(0, 150) } });
+        melde(m, 'Eingeschaltet.', 'ok'); zeigen();
+      } catch (x) { melde(m, x.message || 'Das hat nicht geklappt.'); }
+    } }, 'Benachrichtigungen auf diesem Gerät einschalten'));
+  }
+  zeigen().catch(() => {});
+  if (!standalone) install.replaceChildren(installAngebot ? h('p', {}, h('button', { class: 'btn sec small', onclick: async () => { installAngebot.prompt(); installAngebot = null; install.replaceChildren(); } }, 'Als App installieren')) :
+    h('p', { class: 'small muted' }, ios ? 'Als App: Teilen-Symbol → „Zum Home-Bildschirm“.' : 'Als App: im Browser-Menü „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen.'));
+  return h('div', { class: 'card' }, h('h2', {}, 'App & Benachrichtigungen'),
+    h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, install);
+}

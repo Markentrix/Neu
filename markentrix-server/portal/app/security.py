@@ -87,7 +87,7 @@ _IMMER = {"uebersicht", "heute", "aufgaben"}
 _BEREICH = {"tickets": "nachrichten", "leads": "leads", "gespraeche": "leads", "vertrieb": "leads", "website-check": "leads", "provisionsregeln": "leads",
             "belege": "finanzen", "belege-export.csv": "finanzen", "preise": "finanzen", "konditionen": "finanzen", "katalog": "finanzen", "kennzahlen": "finanzen",
             "kunden": "kunden", "berichte": "kunden", "avv": "kunden", "avv-fehlt": "kunden", "onboarding": "kunden", "dateien": "kunden", "websites": "kunden",
-            "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden"}
+            "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden", "fruehwarnung": "kunden", "vorlagen": "kunden"}
 
 
 def recht_fuer_pfad(pfad: str) -> str:

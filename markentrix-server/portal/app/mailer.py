@@ -152,7 +152,7 @@ def kunden_feedback(an: str, name: str | None) -> tuple[bool, str]:
 
 
 def mahnung(an: str, titel: str, nummer: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
-    text = (f"Guten Tag,\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}.\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
+    text = (f"Guten Tag,\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}." + "\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
     return senden(an, f"{titel} zu Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
 
 
@@ -227,3 +227,21 @@ def website_check_team(an: str, name: str, firma: str, email: str, website: str,
     t = (f"{'Neuer Lead' if neu else 'Wiederholter Website-Check'} über markentrix.de:\n\nName: {name or '-'}\nFirma: {firma}\nE-Mail: {email}\nGeprüfte Website: {website or '-'}\nErgebnis: {score if score is not None else '-'} von 100\n\n"
          f"Ansehen im Admin-Bereich: {config.BASE_URL}/admin#lead/{lead_id}" + "\n\n(automatische Meldung des Portals)")
     return senden(an, f"{'Neuer Lead' if neu else 'Website-Check'}: {firma} ({website or 'ohne Website'})", t)
+
+
+def mandat_bestaetigt(an: str, name: str | None, referenz: str, iban_ende: str, glaeubiger_id: str, firma: str) -> tuple[bool, str]:
+    text = (f"{'Hallo ' + name + ',' if name else 'Guten Tag,'}\n\nSie haben {firma} ein SEPA-Lastschriftmandat erteilt. Zur Bestätigung:\n\n"
+            f"Mandatsreferenz: {referenz}\nGläubiger-Identifikationsnummer: {glaeubiger_id}\nKonto: ...{iban_ende}\n\n"
+            "Rechnungen werden künftig von diesem Konto eingezogen. Vor jedem Einzug erhalten Sie eine Ankündigung mit Betrag und Datum. "
+            "Sie können das Mandat jederzeit im Kundenportal unter Angebote & Rechnungen widerrufen." + SIGNATUR)
+    return senden(an, "Bestätigung Ihres SEPA-Lastschriftmandats", text)
+
+
+def lastschrift_vorab(an: str, name: str | None, positionen: list, datum, referenz: str, glaeubiger_id: str, firma: str) -> tuple[bool, str]:
+    summe = sum(p[1] for p in positionen)
+    zeilen = "\n".join(f"- Rechnung {n}: {c / 100:.2f} EUR".replace(".", ",") for n, c in positionen)
+    text = (f"{'Hallo ' + name + ',' if name else 'Guten Tag,'}\n\nwir ziehen am {datum:%d.%m.%Y} per SEPA-Lastschrift ein:\n\n{zeilen}\n"
+            f"Gesamt: {summe / 100:.2f} EUR\n\n".replace(".", ",") +
+            f"Mandatsreferenz: {referenz}\nGläubiger-Identifikationsnummer: {glaeubiger_id}\nEinzug durch: {firma}\n\n"
+            "Bitte sorgen Sie für ausreichende Deckung auf dem Konto." + SIGNATUR)
+    return senden(an, f"Ankündigung Lastschrift am {datum:%d.%m.%Y}", text)

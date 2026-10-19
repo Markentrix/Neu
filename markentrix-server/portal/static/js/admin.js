@@ -1,4 +1,4 @@
-import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
+import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
 const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
@@ -47,9 +47,9 @@ function heuteKarte(t) {
 }
 
 V.uebersicht = async () => {
-  const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus');
+  const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus'), fw = await sicherApi('/api/admin/fruehwarnung');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
-  return h('div', {}, kopf('Übersicht'), sys ? systemKarte(sys) : '', heuteKarte(heute),
+  return h('div', {}, kopf('Übersicht'), sys ? systemKarte(sys) : '', fw ? fruehwarnKarte(fw) : '', heuteKarte(heute),
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Aktiv'), h('b', {}, s.aktiv || 0)),
@@ -201,7 +201,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    zweiFaktorKarte(), pushKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -299,6 +299,80 @@ async function buchungKarte() {
   return h('div', { class: 'card' }, h('h2', {}, 'Terminbuchung'), h('p', { class: 'small muted' }, 'Interessenten buchen selbst ein Erstgespräch. Der Lead wird automatisch angelegt oder auf „Termin“ gesetzt, ihr bekommt eine Mail mit Kalendereinladung. Zeiten gelten für Deutschland.'), m, f,
     h('h3', { style: 'margin-top:16px' }, 'Kommende Gespräche'),
     tabelle([['Wann', g => datum(g.start) + ' ' + zeit(g.start)], ['Name', g => g.name], ['Kontakt', g => g.email + (g.telefon ? ' · ' + g.telefon : '')], ['Status', g => pill(g.status === 'gebucht' ? 'aktiv' : 'pausiert')], ['Nachricht', g => g.nachricht || '–']], liste, 'Noch keine Gespräche gebucht.'));
+}
+
+// ---------------------------------------------------------------- Zahlung, Telefon, Vorlagen, Frühwarnung
+async function zahlungKarte() {
+  const d = await api('/api/admin/einstellungen/zahlung'), m = h('div'), l = d.lastschrift, w = d.mahnwesen;
+  const cb = (n, v, t) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' }, h('input', { type: 'checkbox', name: n, checked: v, style: 'width:auto' }), t);
+  const num = (n, v, min, max) => h('input', { name: n, type: 'number', min, max, value: v });
+  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const x = e.target;
+    try { await api('/api/admin/einstellungen/zahlung', { method: 'PUT', body: { glaeubiger_id: x.glaeubiger_id.value, vorab_tage: Number(x.vorab_tage.value), mahn_aktiv: x.mahn_aktiv.checked,
+      tage_1: Number(x.tage_1.value), tage_2: Number(x.tage_2.value), tage_3: Number(x.tage_3.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } } },
+    h('h3', {}, 'SEPA-Lastschrift'),
+    l.iban_da ? '' : h('div', { class: 'msg info' }, 'Bitte unter „Firmendaten“ deine IBAN eintragen, sie wird als Einzugskonto gebraucht.'),
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Gläubiger-Identifikationsnummer'), h('input', { name: 'glaeubiger_id', value: l.glaeubiger_id, placeholder: 'DE98ZZZ09999999999' })),
+      h('div', {}, h('label', {}, 'Ankündigung (Tage vor Einzug)'), num('vorab_tage', l.vorab_tage, 2, 14))),
+    h('p', { class: 'small muted' }, 'Die Gläubiger-ID beantragst du kostenlos bei der Bundesbank (glaeubiger-id.bundesbank.de). Erst wenn sie eingetragen ist, können Kunden im Portal ein Mandat erteilen.'),
+    h('h3', {}, 'Automatische Zahlungserinnerungen'),
+    cb('mahn_aktiv', w.aktiv, 'Erinnerung und Mahnungen automatisch per Mail verschicken (werktags, nicht bei angekündigtem Einzug und nicht bei Referenzkunden)'),
+    h('div', { class: 'form3' }, h('div', {}, h('label', {}, 'Zahlungserinnerung nach (Tagen)'), num('tage_1', w.tage_1, 1, 90)), h('div', {}, h('label', {}, '1. Mahnung nach'), num('tage_2', w.tage_2, 2, 120)), h('div', {}, h('label', {}, '2. Mahnung nach'), num('tage_3', w.tage_3, 3, 180))),
+    h('p', { class: 'small muted' }, 'Die Tage zählen ab dem Fälligkeitsdatum. Mahngebühren und Verzugszinsen werden nicht automatisch berechnet. Vor dem Einschalten bitte rechtlich prüfen lassen.'),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Zahlung & Mahnwesen'), m, f);
+}
+
+async function telefonKarte() {
+  const d = await api('/api/admin/einstellungen/telefon'), m = h('div'), box = h('div');
+  return h('div', { class: 'card' }, h('h2', {}, 'Telefon-Assistent (Anrufprotokoll)'),
+    h('p', { class: 'small muted' }, 'Der Anbieter des Telefon-Assistenten (z. B. Famulor) schickt nach jedem Gespräch eine Nachricht an das Portal. Eingehende Anrufe erscheinen beim Kunden unter „Anrufe“ und als Anfrage. Gesprächsaufzeichnungen und Texte werden nicht gespeichert, nur eine Zusammenfassung. Nummern und Namen werden nach 180 Tagen entfernt.'),
+    m, h('p', { class: 'small' }, 'Webhook-Adresse (KUNDENNUMMER ersetzen): ', h('code', {}, d.url + '?s=GEHEIMNIS')), h('p', { class: 'small muted' }, d.geheimnis_gesetzt ? 'Ein Geheimnis ist gesetzt. Ein neues macht das alte ungültig.' : 'Noch kein Geheimnis gesetzt.'),
+    h('p', {}, knopf(d.geheimnis_gesetzt ? 'Neues Geheimnis erzeugen' : 'Geheimnis erzeugen', async () => {
+      if (d.geheimnis_gesetzt && !confirm('Das alte Geheimnis wird ungültig. Alle Webhooks müssen angepasst werden. Fortfahren?')) return;
+      try { const r = await api('/api/admin/einstellungen/telefon/neues-geheimnis', { method: 'POST' }); box.replaceChildren(h('div', { class: 'msg ok' }, 'Dein Geheimnis (wird nur jetzt angezeigt): ', h('code', {}, r.geheimnis))); } catch (x) { fehler(m, x); } })), box);
+}
+
+function vorlagenKarte(kid, k) {
+  const m = h('div'), box = h('div');
+  const laden = async () => {
+    if (k.vorlage) { box.replaceChildren(h('p', {}, 'Angewendet: ', h('b', {}, k.vorlage), ' (' + datum(k.vorlage_am) + ')')); return; }
+    const liste = await api('/api/admin/vorlagen');
+    const sel = select('code', liste.map(v => [v.code, v.name + ' – ' + v.beschreibung]), liste[0].code);
+    box.replaceChildren(h('div', { class: 'row' }, sel, knopf('Vorlage anwenden', async () => {
+      if (!confirm('Die Vorlage legt Wissenseinträge (inaktiv), Beitrags-Entwürfe und Aufgaben an. Fortfahren?')) return;
+      try { const r = await api('/api/admin/kunden/' + kid + '/vorlage', { method: 'POST', body: { code: sel.value } }); melde(m, r.name + ': ' + r.wissen + ' Wissenseinträge (inaktiv, bitte prüfen), ' + r.beitraege + ' Beitrags-Entwürfe, ' + r.aufgaben + ' Aufgaben angelegt.', 'ok'); box.replaceChildren(); } catch (x) { fehler(m, x); } }, '')));
+  };
+  laden().catch(x => fehler(m, x));
+  return h('div', { class: 'card' }, h('h2', {}, 'Branchenvorlage'), h('p', { class: 'small muted' }, 'Startpaket für typische Branchen: Wissenseinträge für den Assistenten (zunächst inaktiv, mit Platzhaltern zum Ausfüllen), Entwürfe für Beiträge und eine Aufgabenliste. Es wird nichts veröffentlicht.'), m, box);
+}
+
+function fruehwarnKarte(d) {
+  if (!d.kunden.length) return h('div', { class: 'card' }, h('h2', {}, 'Kunden-Frühwarnung'), h('p', { class: 'muted' }, 'Kein Kunde mit auffälligem Verlauf (' + d.geprueft + ' geprüft).'));
+  return h('div', { class: 'card' }, h('h2', {}, 'Kunden-Frühwarnung'), h('p', { class: 'small muted' }, 'Kunden mit Anzeichen für eine Kündigung, aus Anmeldungen, Anfragen, Zahlungen und Zufriedenheit. Ein Anruf in dieser Woche hilft am meisten.'),
+    tabelle([['Kunde', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer + ' ' + z.firma)], ['Risiko', z => h('span', { class: 'pill ' + (z.stufe === 'hoch' ? 'bad' : 'warn') }, z.stufe + ' (' + z.punkte + ')')], ['Gründe', z => z.gruende.join(' ')]], d.kunden));
+}
+
+async function lastschriftKarte() {
+  const d = await api('/api/admin/lastschrift'), m = h('div');
+  if (!d.konfiguriert && !d.bereit.length && !d.angekuendigt.length) return h('div', { class: 'card' }, h('h2', {}, 'Lastschrift-Einzug'), h('p', { class: 'muted small' }, 'Noch nicht eingerichtet: Gläubiger-ID unter Einstellungen → Zahlung & Mahnwesen und IBAN in den Firmendaten eintragen. Danach können Kunden im Portal ein Mandat erteilen.'));
+  const gewaehlt = new Set(d.bereit.map(z => z.id));
+  const morgen = new Date(Date.now() + (d.vorab_tage + 1) * 864e5); while ([0, 6].includes(morgen.getDay())) morgen.setDate(morgen.getDate() + 1);
+  const tag = h('input', { type: 'date', value: morgen.toISOString().slice(0, 10), style: 'width:auto' });
+  const export_ = async () => {
+    if (!gewaehlt.size) { melde(m, 'Bitte mindestens eine Rechnung auswählen.'); return; }
+    try {
+      const r = await fetch('/api/admin/lastschrift/export', { method: 'POST', headers: { 'X-MK': '1', 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ beleg_ids: [...gewaehlt], einzug_am: tag.value }) });
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.detail || 'Fehler ' + r.status); }
+      const a = h('a', { href: URL.createObjectURL(await r.blob()), download: 'lastschrift-' + tag.value + '.xml' }); document.body.append(a); a.click(); a.remove();
+      melde(m, 'Datei erstellt. Bitte im Online-Banking als SEPA-Sammellastschrift hochladen. Die Kunden bekommen die Ankündigung per Mail.', 'ok'); setTimeout(() => location.reload(), 2500);
+    } catch (x) { fehler(m, x); }
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Lastschrift-Einzug'), m,
+    h('p', { class: 'small muted' }, 'Rechnungen von Kunden mit Mandat. Du erstellst eine Datei (pain.008), lädst sie im Online-Banking hoch, und der Kontoauszug-Abgleich bucht den Zahlungseingang. Die Kunden werden mindestens ' + d.vorab_tage + ' Tage vorher informiert.'),
+    d.bereit.length ? [tabelle([['', z => h('input', { type: 'checkbox', checked: true, style: 'width:auto', onchange: (e) => { e.target.checked ? gewaehlt.add(z.id) : gewaehlt.delete(z.id); } })], ['Rechnung', z => z.nummer], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Fällig', z => datum(z.faellig_am)], ['Betrag', z => euro(z.offen_cent)], ['Konto', z => '…' + z.iban_ende]], d.bereit),
+      h('div', { class: 'row', style: 'margin-top:10px' }, h('label', { style: 'margin:0' }, 'Einzug am'), tag, knopf('Einzugsdatei erstellen', export_, ''))] : h('p', { class: 'muted' }, 'Keine offenen Rechnungen mit Mandat.'),
+    d.angekuendigt.length ? [h('h3', { style: 'margin-top:16px' }, 'Angekündigt'), tabelle([['Rechnung', z => z.nummer], ['Kunde', z => z.firma], ['Einzug am', z => datum(z.einzug_am)], ['Betrag', z => euro(z.offen_cent)],
+      ['', z => knopf('Zurücksetzen', async () => { if (confirm('Einzug zurücksetzen (z. B. bei Rücklastschrift)?')) { try { await api('/api/admin/lastschrift/zuruecksetzen', { method: 'POST', body: { beleg_id: z.id } }); location.reload(); } catch (x) { fehler(m, x); } } })]], d.angekuendigt)] : '');
 }
 
 async function folgemailsKarte() {
@@ -474,6 +548,7 @@ V.belege = async () => {
   return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen'),
     h('p', { class: 'small' }, h('a', { href: '/api/admin/belege-export.csv', target: '_blank', rel: 'noopener' }, 'Rechnungen als CSV exportieren (Buchhaltung/sevDesk)')),
     await abgleichKarte(),
+    await sicher(lastschriftKarte),
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Offen'), h('b', {}, euro(s.offen))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Überfällig (' + s.ueberfaellig_n + ')'), h('b', {}, euro(s.ueberfaellig))),
@@ -1085,6 +1160,7 @@ async function kundeDetail(kid) {
     brandingKarte(kid, k),
     offboardingKarte(kid, k),
     await historieKarte(kid),
+    vorlagenKarte(kid, k),
     h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
 }
 

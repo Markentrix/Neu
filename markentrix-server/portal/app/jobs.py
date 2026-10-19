@@ -5,7 +5,7 @@ import threading
 import time
 from datetime import date, datetime, timezone
 
-from . import berichte, einstellungen, mailer, pdf
+from . import berichte, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -36,12 +36,16 @@ def anfragen_mails(cfg):
             if r["status"] == "spam":
                 continue
             kunden.setdefault(r["kunden_id"], []).append(r)
-        ziele = []
+        ziele, pushes = [], []
         for kid, liste in kunden.items():
             cur.execute("SELECT firma, email, benachr_email, benachr_anfragen, status FROM kunden WHERE id=%s", (kid,))
             k = cur.fetchone()
-            if k and k["benachr_anfragen"] and k["status"] in ("onboarding", "aktiv") and _empfaenger(k):
-                ziele.append((k, liste))
+            if k and k["benachr_anfragen"] and k["status"] in ("onboarding", "aktiv"):
+                pushes.append((push.kunde(cur, kid), len(liste)))
+                if _empfaenger(k):
+                    ziele.append((k, liste))
+    for ids, n in pushes:
+        push.senden(ids, "Neue Anfrage" if n == 1 else f"{n} neue Anfragen", "Über Ihre Website oder Ihren Assistenten ist eine Anfrage eingegangen.", "/app#anfragen", "anfrage")
     for k, liste in ziele:
         ok, fehler = mailer.neue_anfragen(_empfaenger(k), k["firma"], liste)
         if not ok:
@@ -285,12 +289,88 @@ def ueberwachung_stumm(cfg):
                       "Bitte in der Hetzner-Konsole prüfen: /opt/markentrix/bin/watchdog.sh --zeigen" + mailer.SIGNATUR)
 
 
+def _marker(schluessel: str) -> bool:
+    """True genau einmal je Schlüssel (verhindert Mehrfachläufe nach Neustart)."""
+    with tx("system") as cur:
+        cur.execute("INSERT INTO job_marker (schluessel) VALUES (%s) ON CONFLICT DO NOTHING", (schluessel,))
+        return cur.rowcount == 1
+
+
+def mahnungen_automatisch(cfg):
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 8 or jetzt.weekday() >= 5:
+        return
+    from .routes_zahlung import mahnlauf, mahn_cfg
+    with tx("system") as cur:
+        if not mahn_cfg(cur)["aktiv"]:
+            return
+    if _marker(f"mahnlauf-{jetzt.date()}"):
+        mahnlauf(cfg)
+
+
+def fruehwarnung_woche(cfg):
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.weekday() != 0 or jetzt.hour < 6:
+        return
+    if not _marker("fruehwarnung-%d-%02d" % jetzt.isocalendar()[:2]):
+        return
+    from .routes_fruehwarnung import berechnen
+    with tx("system") as cur:
+        d = berechnen(cur)
+        an = admin_empfaenger(cur)
+        ids = push.admins(cur)
+    if not d["kunden"]:
+        return
+    zeilen = [f"- {k['firma']} ({'hoch' if k['stufe'] == 'hoch' else 'mittel'}): " + " ".join(k["gruende"]) for k in d["kunden"][:15]]
+    if an:
+        mailer.senden(an, f"Kunden-Frühwarnung: {len(d['kunden'])} Kunde(n) mit Risiko",
+                      "Diese Kunden sollten Sie diese Woche anrufen:\n\n" + "\n".join(zeilen) + "\n\nDetails im Portal auf der Übersicht." + mailer.SIGNATUR)
+    if d["hoch"]:
+        push.senden(ids, "Kunden-Frühwarnung", f"{d['hoch']} Kunde(n) mit hohem Kündigungsrisiko.", "/admin#uebersicht", "fruehwarnung")
+
+
+def vertrieb_morgens(cfg):
+    """Täglich werktags: Push an Vertriebler mit der Zahl der heute fälligen Anrufe."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 6 or jetzt.weekday() >= 5 or not _marker(f"vertrieb-morgens-{jetzt.date()}"):
+        return
+    with tx("system") as cur:
+        cur.execute("""SELECT l.vertriebspartner_id AS pid, count(*) AS n FROM leads l
+                       WHERE l.vertriebspartner_id IS NOT NULL AND l.status NOT IN ('verloren','gewonnen','gesperrt','tot','consent_ausstehend')
+                         AND (l.wiedervorlage_am <= current_date OR (l.status='neu' AND l.temperatur='heiss' AND l.letzter_kontakt_am IS NULL))
+                       GROUP BY 1""")
+        liste = cur.fetchall()
+        ziele = [(push.partner(cur, r["pid"]), r["n"]) for r in liste]
+    for ids, n in ziele:
+        push.senden(ids, "Heute anrufen", f"{n} Lead(s) warten auf Ihren Anruf.", "/vertrieb#heute", "heute")
+
+
+def anrufe_bereinigen() -> int:
+    with tx("system") as cur:
+        cur.execute("UPDATE anrufe SET nummer=NULL, name=NULL, zusammenfassung=NULL WHERE beginn < now() - interval '180 days' AND (nummer IS NOT NULL OR name IS NOT NULL OR zusammenfassung IS NOT NULL)")
+        n = cur.rowcount
+        cur.execute("DELETE FROM job_marker WHERE am < now() - interval '60 days'")
+    return n
+
+
+def anrufe_aufraeumen(cfg):
+    """Personenbezogene Angaben aus Telefonprotokollen nach 180 Tagen entfernen (Datensparsamkeit)."""
+    if datetime.now(timezone.utc).hour < 2 or not _marker(f"anrufe-aufraeumen-{date.today()}"):
+        return
+    anrufe_bereinigen()
+
+
 def tick():
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
+    for job in (vertrieb_morgens, anrufe_aufraeumen):
+        try:
+            job(cfg)
+        except Exception:
+            log.exception("Job %s fehlgeschlagen", job.__name__)
     if not mailer.konfiguriert():
         return
-    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

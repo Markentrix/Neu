@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline, zweiFaktorKarte, rechtFuss } from './common.js';
+import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline, zweiFaktorKarte, pushKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -19,6 +19,7 @@ const SEITEN = [
   ['auswertung', 'Auswertung', null],
   ['berichte', 'Monatsberichte', null],
   ['belege', 'Angebote & Rechnungen', null],
+  ['anrufe', 'Anrufe', null],
   ['website', 'Website & Landingpages', 'website'],
   ['wochenangebote', 'Wochenangebote', 'wochenangebote'],
   ['werbung', 'Werbung & Berichte', 'werbung_berichte'],
@@ -444,7 +445,34 @@ V.belege = async () => {
   const st = (z) => h('span', { class: 'pill ' + (z.ueberfaellig ? 'bad' : ['bezahlt', 'angenommen'].includes(z.status) ? 'ok' : ['abgelehnt', 'storniert'].includes(z.status) ? 'bad' : 'warn') }, z.ueberfaellig ? 'überfällig' : z.status === 'gestellt' || z.status === 'versendet' ? (z.art === 'rechnung' ? 'offen' : 'wartet auf Annahme') : z.status);
   const aktion = (z) => h('span', { class: 'row' }, h('a', { class: 'btn sec small', href: '/api/kunde/belege/' + z.id + '/pdf' }, 'PDF'),
     z.art === 'angebot' && ['gestellt', 'versendet'].includes(z.status) ? h('button', { class: 'btn small', onclick: async () => { if (!confirm('Angebot ' + z.nummer + ' verbindlich annehmen?')) return; try { await api('/api/kunde/belege/' + z.id + '/annehmen', { method: 'POST' }); melde(m, 'Danke! Das Angebot ist angenommen.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); } } }, 'Annehmen') : '');
-  return h('div', { class: 'card' }, h('h2', {}, 'Angebote & Rechnungen'), m, tabelle([['Nummer', z => z.nummer], ['Art', art], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => euro(z.brutto_cent)], ['Status', st], ['', aktion]], d, 'Noch keine Angebote oder Rechnungen.'));
+  const mandat = await mandatKarte();
+  return h('div', { class: 'stack' }, mandat, h('div', { class: 'card' }, h('h2', {}, 'Angebote & Rechnungen'), m, tabelle([['Nummer', z => z.nummer], ['Art', art], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => euro(z.brutto_cent)], ['Status', st], ['', aktion]], d, 'Noch keine Angebote oder Rechnungen.')));
+};
+
+async function mandatKarte() {
+  const d = await api('/api/kunde/lastschrift'), m = h('div');
+  if (d.mandat) return h('div', { class: 'card' }, h('h2', {}, 'Bezahlung per Lastschrift'), m,
+    h('p', {}, h('span', { class: 'pill ok' }, 'aktiv'), ' Konto auf ', h('b', {}, d.mandat.kontoinhaber), ', IBAN endet auf ', h('b', {}, d.mandat.iban_ende), '. Mandatsreferenz: ', d.mandat.referenz, '.'),
+    h('p', { class: 'small muted' }, 'Offene Rechnungen werden von diesem Konto eingezogen. Vorher bekommst du eine Mail mit Betrag und Datum.'),
+    h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Lastschriftmandat wirklich widerrufen? Danach überweist du Rechnungen wieder selbst.')) return; try { await api('/api/kunde/lastschrift', { method: 'DELETE' }); location.reload(); } catch (x) { melde(m, x.message); } } }, 'Mandat widerrufen'));
+  if (!d.verfuegbar) return h('div', { class: 'card' }, h('h2', {}, 'Bezahlung'), h('p', { class: 'muted small' }, 'Bitte überweise Rechnungen mit der Rechnungsnummer als Verwendungszweck. Die Bankverbindung und ein QR-Code für dein Banking stehen auf der Rechnung.'));
+  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const x = e.target;
+    try { await api('/api/kunde/lastschrift', { method: 'POST', body: { kontoinhaber: x.inhaber.value, iban: x.iban.value, bic: x.bic.value, zustimmung: x.ok.checked } }); melde(m, 'Danke! Das Mandat ist erteilt. Eine Bestätigung kommt per E-Mail.', 'ok'); setTimeout(() => location.reload(), 1200); } catch (z) { melde(m, z.message); } } },
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Kontoinhaber'), h('input', { name: 'inhaber', required: true, maxlength: 70 })), h('div', {}, h('label', {}, 'IBAN'), h('input', { name: 'iban', required: true, placeholder: 'DE00 0000 0000 0000 0000 00' }))),
+    h('label', {}, 'BIC (optional)'), h('input', { name: 'bic', maxlength: 11 }),
+    h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:13px;margin:12px 0' }, h('input', { type: 'checkbox', name: 'ok', style: 'width:auto;margin-top:3px' }), d.text),
+    h('p', {}, h('button', { class: 'btn' }, 'Lastschriftmandat erteilen')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Bequem per Lastschrift bezahlen'), h('p', { class: 'small muted' }, 'Optional: Du erteilst uns ein SEPA-Mandat, und wir ziehen Rechnungen automatisch ein. Sonst überweist du wie gewohnt. Gläubiger-ID: ' + d.glaeubiger_id), m, f);
+}
+
+V.anrufe = async () => {
+  const d = await api('/api/kunde/anrufe');
+  const dauer = (s) => s ? Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' min' : '–';
+  return h('div', { class: 'stack' },
+    h('div', { class: 'grid3' }, h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Anrufe (7 Tage)'), h('b', {}, d.woche)), h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Anrufe (30 Tage)'), h('b', {}, d.monat)),
+      h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Ø Dauer'), h('b', {}, dauer(d.dauer_sek)))),
+    h('div', { class: 'card' }, h('h2', {}, 'Anrufprotokoll'), h('p', { class: 'small muted' }, 'Anrufe, die dein Telefon-Assistent angenommen hat. Eingehende Anrufe erscheinen zusätzlich unter „Anfragen“. Nummern und Namen werden nach 180 Tagen automatisch entfernt.'),
+      tabelle([['Zeit', z => datum(z.beginn) + ' ' + zeit(z.beginn)], ['Richtung', z => z.richtung === 'ein' ? 'eingehend' : 'ausgehend'], ['Anrufer', z => [z.name, z.nummer].filter(Boolean).join(' · ') || '–'], ['Dauer', z => dauer(z.dauer_sek)], ['Ergebnis', z => z.ergebnis || '–'], ['Zusammenfassung', z => z.zusammenfassung || '–']], d.anrufe, 'Noch keine Anrufe protokolliert. Sobald dein Telefon-Assistent läuft, erscheinen sie hier.')));
 };
 
 V.berichte = async () => {
@@ -508,7 +536,7 @@ V.einstellungen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Kontaktdaten'), m1, f1),
     inhaber() ? anschriftKarte(k) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
-    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), zweiFaktorKarte(),
+    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte(), zweiFaktorKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
 };
 
@@ -566,7 +594,7 @@ async function zeige() {
   root.replaceChildren(gerüst(seite, inhalt));
 }
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
 (async () => {
   try {
     const me = await api('/api/me');

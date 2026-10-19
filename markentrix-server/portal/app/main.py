@@ -29,6 +29,11 @@ from .routes_buchung import router as buchung_router
 from .routes_vertriebsplus import router as vertriebsplus_router
 from .routes_system import router as system_router
 from .routes_loginlink import router as loginlink_router
+from .routes_zahlung import router as zahlung_router
+from .routes_fruehwarnung import router as fruehwarnung_router
+from .routes_push import router as push_router
+from .routes_telefon import router as telefon_router
+from .routes_vorlagen import router as vorlagen_router
 from .routes_leadimport import router as leadimport_router
 from .routes_mitarbeiter import router as mitarbeiter_router
 from .routes_briefing import router as brief_router, kunde_router as brief_kunde_router
@@ -56,7 +61,8 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
 @app.middleware("http")
 async def schutz(request: Request, call_next):
     # Änderungen nur von der eigenen Seite aus (zusätzlich zu SameSite-Cookie)
-    if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.url.path.startswith("/api/"):
+    if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.url.path.startswith("/api/") and not request.url.path.startswith("/api/webhook/"):
+        # /api/webhook/… wird von fremden Diensten (Stripe, Telefon-Assistent) aufgerufen und prüft Signatur bzw. Geheimnis selbst
         if request.headers.get("x-mk") != "1":
             return JSONResponse({"detail": "Ungültige Anfrage."}, status_code=403)
         origin = request.headers.get("origin")
@@ -123,6 +129,11 @@ app.include_router(buchung_router)
 app.include_router(vertriebsplus_router)
 app.include_router(system_router)
 app.include_router(loginlink_router)
+app.include_router(zahlung_router)
+app.include_router(fruehwarnung_router)
+app.include_router(push_router)
+app.include_router(telefon_router)
+app.include_router(vorlagen_router)
 app.include_router(leadimport_router)
 app.include_router(mitarbeiter_router)
 app.include_router(brief_router)

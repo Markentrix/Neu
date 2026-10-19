@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors, sql
 from pydantic import BaseModel, Field
 
-from . import config, leadkontakt, zugang
+from . import config, leadkontakt, push, zugang
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -269,6 +269,7 @@ def leads_bulk(data: BulkIn, user: dict = Depends(require_admin)):
     if data.aktion == "status" and data.wert not in ("neu", "kontaktiert", "antwort", "termin", "angebot", "verloren", "tot"):
         raise HTTPException(400, "Ungültiger Status.")
     f = _filter(**{k: str(v) for k, v in (data.filter or {}).items() if k in ("status", "q", "quelle", "temperatur", "vertriebler", "liste", "gruppe")})
+    push_ziel = None
     try:
         with tx("admin") as cur:
             if data.alle_gefilterten:
@@ -290,12 +291,17 @@ def leads_bulk(data: BulkIn, user: dict = Depends(require_admin)):
                     if not cur.fetchone():
                         raise HTTPException(400, "Vertriebler nicht gefunden.")
                 cur.execute("UPDATE leads SET vertriebspartner_id=%s WHERE id = ANY(%s::uuid[])", (data.wert or None, ids))
+                zugewiesen = cur.rowcount
+                if data.wert and zugewiesen:
+                    push_ziel = (push.partner(cur, data.wert), zugewiesen)
             else:
                 cur.execute("UPDATE leads SET status=%s WHERE id = ANY(%s::uuid[]) AND status NOT IN ('gewonnen','gesperrt','consent_ausstehend')", (data.wert, ids))
-            n = cur.rowcount
+            n = zugewiesen if data.aktion == "vertriebler" else cur.rowcount
             audit(cur, user, "leads_bulk", None, {"aktion": data.aktion, "wert": data.wert, "anzahl": n})
     except (errors.InvalidTextRepresentation, errors.DataError):
         raise HTTPException(400, "Ungültige Auswahl.")
+    if push_ziel:
+        push.senden(push_ziel[0], "Neue Leads", f"{push_ziel[1]} Lead(s) wurden Ihnen zugewiesen.", "/vertrieb#heute", "zugewiesen")
     return {"geaendert": n}
 
 

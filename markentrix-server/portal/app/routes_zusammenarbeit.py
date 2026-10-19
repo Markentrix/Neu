@@ -6,7 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPExcepti
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import dateien, einstellungen, mailer
+from . import dateien, einstellungen, mailer, push
 from .db import tx
 from .security import audit, client_ip, require_admin, require_kunde
 
@@ -99,6 +99,8 @@ def k_neu(data: TicketIn, bg: BackgroundTasks, user: dict = Depends(require_kund
         audit(cur, user, "ticket_erstellt", kid, {"nr": t["nr"], "art": data.art})
     with tx("system") as cur:
         an = admin_empfaenger(cur)
+        ids = push.admins(cur)
+    push.senden(ids, "Neue Kundennachricht", "Ein Kunde hat eine neue Nachricht im Portal geschrieben.", "/admin#postfach", "ticket")
     _mails(bg, an, mailer.ticket_neu_team, t["nr"], k["firma"], k["kundennummer"], data.betreff, ART_NAMEN[data.art], data.text)
     return {"id": t["id"], "nr": t["nr"]}
 
@@ -142,6 +144,8 @@ def k_antwort(tid: str, data: NachrichtIn, bg: BackgroundTasks, user: dict = Dep
         raise nicht_gefunden()
     with tx("system") as cur:
         an = admin_empfaenger(cur)
+        ids = push.admins(cur)
+    push.senden(ids, "Antwort vom Kunden", "Ein Kunde hat auf eine Nachricht geantwortet.", "/admin#postfach", "ticket")
     _mails(bg, an, mailer.ticket_antwort_team, t["nr"], firma, t["betreff"], data.text)
     return {"ok": True}
 

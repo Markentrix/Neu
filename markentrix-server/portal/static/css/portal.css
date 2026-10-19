@@ -32,10 +32,10 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
 .login .logo{margin:0 auto 14px}
 .login h1{text-align:center}
 /* Layout */
-.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
-.side{background:var(--navy);color:#cbd2ea;padding:18px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
-.side .brand{display:flex;align-items:center;gap:10px;color:#fff;font:700 18px "Space Grotesk";padding:4px 8px 16px}
-.side a.nav{display:block;padding:10px 12px;border-radius:12px;color:#cbd2ea;text-decoration:none;font-weight:500}
+.shell{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+.side{background:var(--navy);color:#cbd2ea;padding:12px 8px;display:flex;flex-direction:column;gap:1px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side .brand{display:flex;align-items:center;gap:10px;color:#fff;font:700 16px "Space Grotesk";padding:2px 8px 10px}
+.side a.nav{display:block;padding:6px 10px;border-radius:9px;color:#cbd2ea;text-decoration:none;font-weight:500;font-size:13.5px}
 .side a.nav:hover{background:#ffffff14}.side a.nav.on{background:var(--grad);color:#fff}
 .side .grow{flex:1}
 .main{padding:20px 26px;min-width:0}
