@@ -95,6 +95,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Nachtrag (19.10.2026, „Partner werden“ im Hauptmenü):** Der Menüpunkt „Partner werden“ steht jetzt in der Hauptnavigation (violett hervorgehoben, zwischen „Über uns“ und „Kontakt“) und im mobilen Menü als hervorgehobene Zeile ganz oben. Navigation bei 1180 bis 1440 px ohne Überlauf, darunter greift das mobile Menü; axe 0 Befunde auf Startseite, Partnerseite und Kontakt bei 390 und 1280 px sowie bei geöffnetem mobilem Menü.
 
+**Nachtrag (19.10.2026, „Partner werden“ immer sichtbar):** Bei eingeklapptem Menü (Smartphone, Tablet, bis 1160 px) steht „Partner werden“ als violette Schaltfläche links neben dem Menüknopf direkt in der Kopfzeile, auf jeder Seite, ohne das Menü zu öffnen; ab 1180 px steht der Punkt in der Hauptnavigation. Auf sehr schmalen Bildschirmen (bis 400 und 340 px) werden Logo und Schaltfläche etwas verkleinert, damit nichts überläuft. Geprüft: sichtbar auf Startseite, Preise und Blogbeitrag bei 320, 360, 390, 768, 1000, 1160 und 1180 px, kein Überlauf auf allen 49 Seiten bei 320, 390, 768, 1080 und 1280 px, axe 0 Befunde, Tastaturtest bestanden. Die Zeile „Partner werden“ ganz oben im mobilen Menü entfällt dadurch.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.

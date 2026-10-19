@@ -1244,3 +1244,12 @@ main:focus{outline:none}
 .nav-links a.nav-partner{color:var(--violet-text);font-weight:600;white-space:nowrap}
 .mobile-panel .mp-partner{display:block;margin:4px 0 8px;padding:12px 14px;border-radius:12px;background:rgba(139,92,246,.10);color:var(--violet-text);font-weight:600}
 @media (min-width:1061px) and (max-width:1240px){.nav-links{gap:clamp(10px,1.1vw,18px)}.nav-links a{font-size:.92rem}}
+/* 48 · „Partner werden“ bleibt auch bei eingeklapptem Menü sichtbar (Tablet, Smartphone) */
+.nav-partner-pill{display:none}
+@media (max-width:1160px){
+  .nav-partner-pill{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:rgba(139,92,246,.12);color:var(--violet-text);font-weight:700;font-size:.9rem;line-height:1;white-space:nowrap;text-decoration:none;border:1px solid rgba(109,63,209,.28)}
+  .nav-partner-pill:hover{background:rgba(139,92,246,.2);text-decoration:none}
+  .mobile-panel .mp-partner{display:none}
+}
+@media (max-width:400px){.site-header .brand{font-size:1.1rem;gap:8px}.site-header .brand svg{width:30px;height:30px}.nav-partner-pill{padding:0 11px;font-size:.82rem}.nav-side{gap:6px}}
+@media (max-width:340px){.site-header .brand{font-size:1rem;gap:6px}.site-header .brand svg{width:28px;height:28px}.nav-partner-pill{padding:0 9px;font-size:.78rem}}
