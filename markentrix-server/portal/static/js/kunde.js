@@ -6,6 +6,7 @@ const hat = (c) => start.module.some(m => m.code === c);
 
 const SEITEN = [
   ['uebersicht', 'Übersicht', null],
+  ['status', 'Status', null],
   ['briefing', 'Briefing', null],
   ['nachrichten', 'Nachrichten', null],
   ['freigaben', 'Freigaben', null],
@@ -455,7 +456,9 @@ V.berichte = async () => {
       h('div', { class: 'grid3', style: 'margin-top:12px' },
         h('div', { class: 'stat' }, h('b', {}, a.gesamt), h('span', { class: 'muted small' }, 'Anfragen (Vormonat ' + a.vormonat + ')')),
         h('div', { class: 'stat' }, h('b', {}, x.termine.gesamt), h('span', { class: 'muted small' }, 'Termine')),
-        h('div', { class: 'stat' }, h('b', {}, x.automatische_ablaeufe), h('span', { class: 'muted small' }, 'Automatische Abläufe'))));
+        h('div', { class: 'stat' }, h('b', {}, x.automatische_ablaeufe), h('span', { class: 'muted small' }, 'Automatische Abläufe'))),
+      b.einordnung ? h('div', { style: 'margin-top:14px' }, h('h3', {}, 'Einordnung'), h('p', {}, b.einordnung)) : '',
+      b.schritte && b.schritte.length ? h('div', {}, h('h3', {}, 'Unsere nächsten Schritte'), h('ul', {}, b.schritte.map(z => h('li', {}, z)))) : '');
   }));
 };
 
@@ -507,6 +510,19 @@ V.einstellungen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
     h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), zweiFaktorKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
+};
+
+V.status = async () => {
+  const d = await api('/api/kunde/status');
+  const farbe = (st) => st === 'erledigt' ? 'ok' : st === 'wartet_auf_kunde' ? 'warn' : '';
+  return h('div', { class: 'stack' },
+    h('div', { class: 'card' }, h('h2', {}, 'Wartet auf dich'),
+      d.wartet_auf_dich.length ? d.wartet_auf_dich.map(w => h('div', { class: 'row', style: 'padding:6px 0;border-bottom:1px solid var(--line)' }, h('span', { class: 'grow' }, w.text), h('a', { class: 'btn small', href: '#' + w.seite }, 'Ansehen'))) : h('p', { class: 'muted' }, 'Nichts offen. Alles läuft bei uns.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Deine Aufträge'),
+      tabelle([['Nr.', z => z.nummer], ['Betreff', z => h('a', { href: '#nachrichten/' + z.id }, z.betreff)], ['Stand', z => h('span', { class: 'pill ' + farbe(z.status) }, z.status_text)], ['Zuletzt', z => zeit(z.geaendert_am)], ['Fällig', z => z.faellig_am ? datum(z.faellig_am) : '']], d.auftraege, 'Noch keine Aufträge.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Website'),
+      tabelle([['Domain', z => z.domain], ['Status', z => h('span', { class: 'pill ' + (z.status === 'live' ? 'ok' : 'warn') }, z.status)], ['Erreichbar', z => z.erreichbar ? (z.erreichbar.ok ? '✅ ja' : '⚠ gerade nicht') : '–'], ['Zuletzt veröffentlicht', z => z.letzte_veroeffentlichung ? datum(z.letzte_veroeffentlichung) : '–']], d.websites, 'Noch keine Website verknüpft.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Deine Module'), d.module.length ? h('p', {}, d.module.join(' · ')) : h('p', { class: 'muted' }, 'Noch keine Module aktiv.')));
 };
 
 V.avv = async () => {

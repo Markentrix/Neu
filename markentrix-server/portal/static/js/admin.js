@@ -1,15 +1,18 @@
-import { h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
+import { kontaktKarte, h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
 const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
 let paketListe = [], ich = null;
 const zaehlerAdmin = {};
 
+const NAV_RECHT = { postfach: 'nachrichten', freigaben: 'kunden', kennzahlen: 'finanzen', kunden: 'kunden', neu: 'kunden', vertrieb: 'leads', leads: 'leads', websites: 'kunden', belege: 'finanzen', preise: 'finanzen', compliance: 'einstellungen', katalog: 'finanzen', einstellungen: 'einstellungen', protokoll: 'einstellungen' };
+const erlaubt = (seite) => !ich || !ich.admin_rechte || !NAV_RECHT[seite] || ich.admin_rechte.includes(NAV_RECHT[seite]);
+
 function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Admin'),
-      NAV.map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1], zaehlerAdmin[n[0]] ? h('span', { class: 'badge' }, zaehlerAdmin[n[0]]) : '')),
+      NAV.filter(n => erlaubt(n[0])).map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1], zaehlerAdmin[n[0]] ? h('span', { class: 'badge' }, zaehlerAdmin[n[0]]) : '')),
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
@@ -35,6 +38,7 @@ function heuteKarte(t) {
     t.gesamt ? '' : h('p', { class: 'muted' }, 'Alles erledigt. Nichts Dringendes offen. 🎉'),
     abschnitt('Nachrichten ohne Antwort', t.nachrichten, z => [h('a', { class: 'grow', href: '#postfach/' + z.id }, z.firma + ': ' + z.betreff)]),
     abschnitt('Aufgaben fällig oder überfällig', t.aufgaben, z => [h('a', { class: 'grow', href: '#aufgaben' }, z.titel), h('span', { class: 'small muted' }, datum(z.faellig_am))]),
+    abschnitt('Leads: Wiedervorlage fällig', t.wiedervorlagen, z => [h('a', { class: 'grow', href: '#lead/' + z.id }, z.firma), h('span', { class: 'small muted' }, (z.vertriebler ? z.vertriebler + ' · ' : '') + datum(z.wiedervorlage_am))]),
     abschnitt('Neue Leads' + (t.leads_gesamt > t.leads.length ? ' (' + t.leads_gesamt + ')' : ''), t.leads, z => [h('a', { class: 'grow', href: '#lead/' + z.id }, (TEMP[z.temperatur] || '') + ' ' + z.firma), h('span', { class: 'small muted' }, z.quelle)]),
     abschnitt('Freigaben warten seit über 3 Tagen', t.freigaben, z => [h('a', { class: 'grow', href: '#kunde/' + z.kunden_id }, z.firma + ': ' + z.titel)]),
     abschnitt('Onboarding hängt', t.onboarding, z => [h('a', { class: 'grow', href: '#kunde/' + z.id }, z.firma)]),
@@ -197,7 +201,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(),
+    zweiFaktorKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -233,6 +237,71 @@ async function avvEinstKarte() {
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   return h('div', { class: 'card' }, h('h2', {}, 'AVV: Unterauftragsverarbeiter'),
     h('p', { class: 'small muted' }, 'Diese Liste steht in Anlage 2 jedes AVV. Bitte vollständig und aktuell halten (z. B. E-Mail-Anbieter, Telefonie-Dienst) und den Vertragstext einmal juristisch prüfen lassen.'), m, form);
+}
+
+async function mitarbeiterKarte() {
+  const d = await api('/api/admin/mitarbeiter'), m = h('div');
+  const bereiche = Object.entries(d.bereiche);
+  const boxen = (vor) => bereiche.map(([k, t]) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:4px 0' }, h('input', { type: 'checkbox', 'data-r': k, checked: vor === null || vor.includes(k), style: 'width:auto' }), t));
+  const gew = (el) => [...el.querySelectorAll('input[data-r]')].filter(i => i.checked).map(i => i.dataset.r);
+  const neuBoxen = h('div', {}, ...boxen([]));
+  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const x = e.target;
+    try { const r = await api('/api/admin/mitarbeiter', { method: 'POST', body: { email: x.email.value, name: x.name.value || null, rechte: gew(neuBoxen) } }); melde(m, 'Eingeladen. Einladungslink (falls keine Mail ankommt): ' + r.link, 'ok'); } catch (z) { fehler(m, z); } } },
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'E-Mail'), h('input', { name: 'email', type: 'email', required: true })), h('div', {}, h('label', {}, 'Name'), h('input', { name: 'name' }))),
+    h('label', {}, 'Darf zugreifen auf'), neuBoxen, h('p', {}, h('button', { class: 'btn' }, 'Mitarbeiter einladen')));
+  const zeile = (b) => {
+    if (b.admin_rechte === null) return h('span', { class: 'small muted' }, 'voller Zugriff');
+    const bx = h('div', {}, ...boxen(b.admin_rechte));
+    return h('div', {}, bx, h('span', { class: 'row' }, knopf('Rechte speichern', async () => { try { await api('/api/admin/mitarbeiter/' + b.id, { method: 'PATCH', body: { rechte: gew(bx) } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } }, 'small'),
+      knopf(b.aktiv ? 'Sperren' : 'Entsperren', async () => { try { await api('/api/admin/mitarbeiter/' + b.id, { method: 'PATCH', body: { aktiv: !b.aktiv } }); location.reload(); } catch (z) { fehler(m, z); } }, 'sec small')));
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Mitarbeiter & Rechte'), h('p', { class: 'small muted' }, 'Mitarbeiter bekommen nur die Bereiche, die du freigibst. Übersicht, Heute zu tun und Aufgaben sehen alle. Alle Änderungen landen im Protokoll.'), m,
+    tabelle([['Name', b => b.name || '–'], ['E-Mail', b => b.email + (b.aktiv ? '' : ' (gesperrt)')], ['Rechte', zeile]], d.liste), h('h3', { style: 'margin-top:16px' }, 'Neuen Mitarbeiter einladen'), f);
+}
+
+async function sicher(f) { try { return await f(); } catch (e) { return ''; } }
+
+async function historieKarte(kid) {
+  const l = await api('/api/admin/kunden/' + kid + '/historie');
+  return h('div', { class: 'card' }, h('h2', {}, 'Änderungshistorie'), h('p', { class: 'small muted' }, 'Wer hat wann was bei diesem Kunden geändert (letzte 150 Einträge).'),
+    tabelle([['Zeit', z => zeit(z.zeit)], ['Von', z => z.name || z.email || 'System'], ['Aktion', z => z.aktion.replace(/_/g, ' ')], ['Details', z => h('span', { class: 'small muted' }, JSON.stringify(z.details).slice(0, 160))]], l, 'Noch keine Einträge.'));
+}
+
+async function buchungKarte() {
+  const d = await api('/api/admin/einstellungen/buchung'), liste = await api('/api/admin/gespraeche'), m = h('div');
+  const tageN = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  const cb = (n, w, t) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' }, h('input', { type: 'checkbox', name: n, checked: w, style: 'width:auto' }), t);
+  const wt = h('div', { class: 'row' }, ...tageN.map((t, i) => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', 'data-wt': i + 1, checked: d.wochentage.includes(i + 1), style: 'width:auto' }), t)));
+  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const x = e.target;
+    try { await api('/api/admin/einstellungen/buchung', { method: 'PUT', body: { aktiv: x.aktiv.checked, dauer: Number(x.dauer.value), tage: Number(x.tage.value), von: x.von.value, bis: x.bis.value,
+      wochentage: [...wt.querySelectorAll('input')].filter(i => i.checked).map(i => Number(i.dataset.wt)), vorlauf_std: Number(x.vorlauf.value), ort: x.ort.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } } },
+    cb('aktiv', d.aktiv, 'Terminbuchung einschalten (öffentliche Seite: ' + location.origin + '/buchen)'),
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Dauer (Minuten)'), h('input', { name: 'dauer', type: 'number', min: 15, max: 120, step: 5, value: d.dauer })), h('div', {}, h('label', {}, 'Wie viele Tage im Voraus'), h('input', { name: 'tage', type: 'number', min: 1, max: 60, value: d.tage }))),
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Von (Uhr)'), h('input', { name: 'von', type: 'time', value: d.von })), h('div', {}, h('label', {}, 'Bis (Uhr)'), h('input', { name: 'bis', type: 'time', value: d.bis }))),
+    h('label', {}, 'Wochentage'), wt,
+    h('label', {}, 'Frühestens in (Stunden)'), h('input', { name: 'vorlauf', type: 'number', min: 0, max: 240, value: d.vorlauf_std }),
+    h('label', {}, 'Ort / Hinweis in der Bestätigung'), h('input', { name: 'ort', value: d.ort }),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Terminbuchung'), h('p', { class: 'small muted' }, 'Interessenten buchen selbst ein Erstgespräch. Der Lead wird automatisch angelegt oder auf „Termin“ gesetzt, ihr bekommt eine Mail mit Kalendereinladung. Zeiten gelten für Deutschland.'), m, f,
+    h('h3', { style: 'margin-top:16px' }, 'Kommende Gespräche'),
+    tabelle([['Wann', g => datum(g.start) + ' ' + zeit(g.start)], ['Name', g => g.name], ['Kontakt', g => g.email + (g.telefon ? ' · ' + g.telefon : '')], ['Status', g => pill(g.status === 'gebucht' ? 'aktiv' : 'pausiert')], ['Nachricht', g => g.nachricht || '–']], liste, 'Noch keine Gespräche gebucht.'));
+}
+
+async function folgemailsKarte() {
+  const d = await api('/api/admin/einstellungen/folgemails'), m = h('div');
+  const feld_ = (n, w, o = {}) => h('input', { name: n, value: w, ...o }), area = (n, w, r = 6) => h('textarea', { name: n, rows: r }, w);
+  const cb = (n, w, t) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' }, h('input', { type: 'checkbox', name: n, checked: w, style: 'width:auto' }), t);
+  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const x = e.target;
+    try { await api('/api/admin/einstellungen/folgemails', { method: 'PUT', body: { aktiv: x.aktiv.checked, kunden_feedback: x.kunden_feedback.checked, tage_1: Number(x.tage_1.value), tage_2: Number(x.tage_2.value),
+      betreff_1: x.betreff_1.value, text_1: x.text_1.value, betreff_2: x.betreff_2.value, text_2: x.text_2.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } } },
+    cb('aktiv', d.aktiv, 'Folgemails an Leads automatisch senden (nur an Leads mit Einwilligung, die noch nicht geantwortet oder einen Termin gebucht haben)'),
+    cb('kunden_feedback', d.kunden_feedback, 'Kunden 30 Tage nach Start um Feedback bitten (eine Mail)'),
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, '1. Mail nach (Tagen)'), feld_('tage_1', d.tage_1, { type: 'number', min: 1, max: 30 })), h('div', {}, h('label', {}, '2. Mail nach (Tagen)'), feld_('tage_2', d.tage_2, { type: 'number', min: 2, max: 60 }))),
+    h('label', {}, 'Betreff der 1. Mail'), feld_('betreff_1', d.betreff_1), h('label', {}, 'Text der 1. Mail (Platzhalter: {name}, {firma}, {buchen})'), area('text_1', d.text_1),
+    h('label', {}, 'Betreff der 2. Mail'), feld_('betreff_2', d.betreff_2), h('label', {}, 'Text der 2. Mail'), area('text_2', d.text_2),
+    h('p', { class: 'small muted' }, 'Jede Mail enthält automatisch deine Grußformel und einen Abmeldelink. Standardmäßig ist alles aus. Vor dem Einschalten bitte rechtlich prüfen lassen (UWG § 7, siehe Anwalts-Checkliste).'),
+    h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+  return h('div', { class: 'card' }, h('h2', {}, 'Folgemails'), m, f);
 }
 
 async function avvKarte(kid) {
@@ -317,6 +386,21 @@ async function kostenKarte(kid) {
     h('h3', {}, 'Kosten von Hand eintragen'), m, h('div', { class: 'row' }, dienst, betrag, tag, speichern));
 }
 
+async function berichtTexte(id, m) {
+  const b = await api('/api/admin/berichte/' + id);
+  const ein = h('textarea', { rows: 5, maxlength: 3000 }, b.einordnung), sch = h('textarea', { rows: 5 }, b.schritte.join('\n'));
+  const f = h('div', { class: 'card', style: 'border:1px solid var(--line)' }, h('h3', {}, b.titel + ': Einordnung und nächste Schritte'),
+    h('p', { class: 'small muted' }, b.angepasst ? 'Von dir angepasst.' : 'Automatisch aus den Zahlen erzeugt. Du kannst ihn ändern, bevor der Bericht an den Kunden geht.'),
+    h('label', {}, 'Einordnung'), ein, h('label', {}, 'Nächste Schritte (eine Zeile je Schritt)'), sch,
+    h('div', { class: 'row', style: 'margin-top:10px' },
+      knopf('KI-Entwurf', async () => { try { const k = await api('/api/admin/berichte/' + id + '/ki-entwurf', { method: 'POST' }); ein.value = k.einordnung; sch.value = k.schritte.join('\n'); melde(m, 'Entwurf eingesetzt. Bitte prüfen und speichern.', 'info'); } catch (x) { fehler(m, x); } }, 'sec small'),
+      knopf('Zurück auf automatisch', () => { ein.value = ''; sch.value = ''; melde(m, 'Leer speichern setzt die automatische Einordnung wieder ein.', 'info'); }, 'sec small'),
+      h('span', { class: 'grow' }),
+      knopf('Speichern', async () => { try { await api('/api/admin/berichte/' + id, { method: 'PUT', body: { einordnung: ein.value, schritte: sch.value.split('\n') } }); melde(m, 'Gespeichert. Das PDF und die Kundenansicht zeigen jetzt diese Texte.', 'ok'); } catch (x) { fehler(m, x); } }, 'btn'),
+      knopf('Speichern und erneut senden', async () => { if (!confirm('Bericht mit diesen Texten erneut an den Kunden senden?')) return; try { await api('/api/admin/berichte/' + id, { method: 'PUT', body: { einordnung: ein.value, schritte: sch.value.split('\n') } }); const r = await api('/api/admin/berichte/' + id + '/senden', { method: 'POST' }); melde(m, r.gesendet ? 'Gesendet.' : 'Nicht gesendet: ' + (r.grund || 'unbekannt'), r.gesendet ? 'ok' : 'info'); } catch (x) { fehler(m, x); } }, 'sec small')));
+  m.after(f);
+}
+
 async function berichteKarte(kid) {
   const liste = await api('/api/admin/kunden/' + kid + '/berichte'), m = h('div');
   const monate = []; const jetzt = new Date();
@@ -325,7 +409,7 @@ async function berichteKarte(kid) {
   const los = async (senden) => { try { const r = await api('/api/admin/kunden/' + kid + '/bericht', { method: 'POST', body: { monat: sel.value, senden } });
     melde(m, senden ? (r.gesendet ? 'Bericht erstellt und per E-Mail gesendet.' : 'Bericht erstellt, aber nicht gesendet: ' + (r.grund || 'unbekannt')) : 'Bericht erstellt.', r.gesendet || !senden ? 'ok' : 'info'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } };
   return h('div', { class: 'card' }, h('h2', {}, 'Monatsberichte'), h('p', { class: 'small muted' }, 'Wird jeden Monat automatisch erstellt und an den Kunden gemailt (wenn der Versand eingerichtet ist). Hier kannst du einen Monat von Hand erstellen oder erneut senden.'), m,
-    tabelle([['Monat', z => z.titel], ['Gesendet', z => z.versendet_am ? zeit(z.versendet_am) : 'nein'], ['PDF', z => h('a', { href: '/api/admin/berichte/' + z.id + '/pdf', target: '_blank', rel: 'noopener' }, 'Öffnen')]], liste, 'Noch keine Berichte.'),
+    tabelle([['Monat', z => z.titel], ['Gesendet', z => z.versendet_am ? zeit(z.versendet_am) : 'nein'], ['PDF', z => h('a', { href: '/api/admin/berichte/' + z.id + '/pdf', target: '_blank', rel: 'noopener' }, 'Öffnen')], ['', z => knopf('Einordnung bearbeiten', () => berichtTexte(z.id, m), 'sec small')]], liste, 'Noch keine Berichte.'),
     h('div', { class: 'row', style: 'margin-top:12px' }, sel, knopf('Erstellen', () => los(false)), knopf('Erstellen und per Mail senden', () => los(true), 'btn')));
 }
 
@@ -538,7 +622,7 @@ V.leads = async () => {
       h('div', {}, h('label', {}, 'Vertriebler'), select('vertriebspartner_id', [['', '– niemand –'], ...partner.map(p => [p.id, p.name])], ''))),
     h('p', {}, h('button', { class: 'btn' }, 'Lead anlegen')));
   return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, tabs,
-    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Quelle', z => z.quelle], ['Status', z => pill(z.status)], ['Einstufung', z => tempWahl(z, m)], ['Score', z => z.score ?? ''], ['Vertriebler', zuordnen], ['Angelegt', z => datum(z.erstellt_am)], ['', z => leadLoeschen(z, m, () => {})]], d.leads, 'Keine Leads.')),
+    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Quelle', z => z.quelle], ['Status', z => pill(z.status)], ['Einstufung', z => tempWahl(z, m)], ['Wiedervorlage', z => z.wiedervorlage_am ? h('span', { class: z.wiedervorlage_am.slice(0, 10) <= new Date().toISOString().slice(0, 10) ? 'pill warn' : 'small' }, datum(z.wiedervorlage_am)) : ''], ['Score', z => z.score ?? ''], ['Vertriebler', zuordnen], ['Angelegt', z => datum(z.erstellt_am)], ['', z => leadLoeschen(z, m, () => {})]], d.leads, 'Keine Leads.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
 };
 
@@ -554,6 +638,7 @@ async function leadDetail(lid) {
       bestaetigtOhneReload(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); await api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: 'angebot' } }); location.hash = '#neubeleg/' + k.id + '/angebot'; }), 'btn');
   return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
+    kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am),
     d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),
       h('div', { class: 'freitext' }, JSON.stringify(c.ergebnis, null, 2))))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt], ['Von', z => z.von]], d.aktivitaeten, 'Noch keine Einträge.')));
@@ -867,9 +952,9 @@ async function kundeDetail(kid) {
     h('div', { class: 'card' }, h('h2', {}, 'Buchungen'), mb, buchungen, h('h3', { style: 'margin-top:18px' }, 'Neue Buchung'), bform),
     h('div', { class: 'card' }, h('h2', {}, 'Websites'), mw, webs, h('div', { style: 'height:10px' }), wform,
       h('p', { class: 'small muted' }, 'Danach auf dem Server einmal: mkctl site-add <domain>, damit Ordner und Webserver bereit sind.')),
-    await belegeKarte(kid, k.referenzkunde),
+    await sicher(() => belegeKarte(kid, k.referenzkunde)),
     await briefingKarte(kid),
-    await nachrichtenKundeKarte(kid, k),
+    await sicher(() => nachrichtenKundeKarte(kid, k)),
     await freigabenKundeKarte(kid, k),
     await unterlagenKarte(kid),
     await berichteKarte(kid),
@@ -877,6 +962,7 @@ async function kundeDetail(kid) {
     await kostenKarte(kid),
     brandingKarte(kid, k),
     offboardingKarte(kid, k),
+    await historieKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
 }
 

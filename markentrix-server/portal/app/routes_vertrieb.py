@@ -4,6 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors
 from pydantic import BaseModel, Field
 
+from datetime import date
+
+from . import leadkontakt
 from .db import tx
 from .security import audit, check_password_rules, hash_password, require_vertrieb, verify_password
 
@@ -45,7 +48,7 @@ def provisionen(user: dict = Depends(require_vertrieb)):
 @router.get("/leads")
 def leads(user: dict = Depends(require_vertrieb)):
     with tx("system") as cur:
-        cur.execute("""SELECT id, firma, ansprechpartner, ort, branche, status, erstellt_am FROM leads
+        cur.execute("""SELECT id, firma, ansprechpartner, ort, branche, status, wiedervorlage_am, letzter_kontakt_am, temperatur, erstellt_am FROM leads
                        WHERE vertriebspartner_id=%s ORDER BY erstellt_am DESC LIMIT 300""", (user["vertriebspartner_id"],))
         return cur.fetchall()
 
@@ -93,7 +96,7 @@ def lead_detail(lid: str, user: dict = Depends(require_vertrieb)):
         akt = cur.fetchall()
     for k in ("score", "loeschen_nach", "kunden_id", "vertriebspartner_id"):
         l.pop(k, None)
-    return {"lead": l, "aktivitaeten": akt}
+    return {"lead": l, "aktivitaeten": akt, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche()}
 
 
 class StatusIn(BaseModel):
@@ -127,6 +130,21 @@ def lead_aktivitaet(lid: str, data: AktIn, user: dict = Depends(require_vertrieb
         eigener_lead(cur, lid, user["vertriebspartner_id"])
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)", (lid, data.art, data.inhalt, user["email"]))
     return {"ok": True}
+
+
+class KontaktIn(BaseModel):
+    ergebnis: str
+    notiz: str | None = Field(default=None, max_length=1500)
+    wiedervorlage: date | None = None
+
+
+@router.post("/leads/{lid}/kontakt")
+def lead_kontakt(lid: str, data: KontaktIn, user: dict = Depends(require_vertrieb)):
+    with tx("system") as cur:
+        l = eigener_lead(cur, lid, user["vertriebspartner_id"])
+        r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"], darf_status=l["status"] not in leadkontakt.GESPERRT)
+        audit(cur, user, "lead_kontakt_vertrieb", None, {"id": lid, "ergebnis": data.ergebnis})
+    return r
 
 
 class PasswortIn(BaseModel):

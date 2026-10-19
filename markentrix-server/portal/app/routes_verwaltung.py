@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors, sql
 from pydantic import BaseModel, Field
 
-from . import config, zugang
+from . import config, leadkontakt, zugang
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -207,7 +207,7 @@ class LeadPatch(BaseModel):
 @router.get("/leads")
 def leads_liste(status: str = "", q: str = "", user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
+        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.wiedervorlage_am, l.letzter_kontakt_am, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
                        FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id
                        WHERE (%s='' OR l.status=%s) AND (%s='' OR l.firma ILIKE %s OR coalesce(l.ort,'') ILIKE %s)
                        ORDER BY l.erstellt_am DESC LIMIT 300""", (status, status, q, f"%{q}%", f"%{q}%"))
@@ -245,7 +245,7 @@ def lead_detail(lid: str, user: dict = Depends(require_admin)):
             checks = cur.fetchall()
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Lead nicht gefunden.")
-    return {"lead": l, "aktivitaeten": akt, "checks": checks}
+    return {"lead": l, "aktivitaeten": akt, "checks": checks, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche()}
 
 
 @router.patch("/leads/{lid}")
@@ -279,6 +279,23 @@ def lead_aendern(lid: str, data: LeadPatch, user: dict = Depends(require_admin))
 class AktIn(BaseModel):
     art: str = "notiz"
     inhalt: str = Field(min_length=1, max_length=2000)
+
+
+class KontaktIn(BaseModel):
+    ergebnis: str
+    notiz: str | None = Field(default=None, max_length=1500)
+    wiedervorlage: date | None = None
+
+
+@router.post("/leads/{lid}/kontakt")
+def lead_kontakt(lid: str, data: KontaktIn, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"])
+            audit(cur, user, "lead_kontakt", None, {"id": lid, "ergebnis": data.ergebnis})
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Lead nicht gefunden.")
+    return r
 
 
 @router.delete("/leads/{lid}")

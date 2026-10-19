@@ -235,6 +235,16 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 - **AVV per Klick**: Kunde → AVV → „Im Portal zur Bestätigung freigeben“. Der Kunde bekommt eine Mail, liest den Vertrag und bestätigt mit Namen und Häkchen. Das PDF enthält danach einen Bestätigungsvermerk (Name, Zeit, Prüfsumme), der Nachweis liegt zusätzlich in der Datenbank. Der Weg über Mail und Upload eines unterschriebenen PDFs bleibt möglich.
 - **Unterauftragsverarbeiter im AVV**: Einstellungen → „AVV: Unterauftragsverarbeiter“. Leer lassen = Standardliste.
 
+## Weitere Funktionen (Oktober 2026)
+
+- **Kontaktergebnis** bei Leads (Admin und Vertriebler): per Klick „Angerufen: erreicht / nicht erreicht", „E-Mail geschickt", „Termin vereinbart" usw. Status und Wiedervorlage ziehen automatisch nach, der Verlauf wird geführt.
+- **Monatsbericht**: unter dem Kunden „Texte" öffnen, Einordnung und nächste Schritte schreiben (oder KI-Entwurf), speichern, erneut senden. Beides steht im PDF und im Kundenportal.
+- **Status-Seite** im Kundenportal: offene Anfragen, was auf den Kunden wartet, Erreichbarkeit der Websites, aktive Module.
+- **Folgemails** (Einstellungen → Folgemails): standardmäßig aus. Nur Leads mit Einwilligung, mit Abmeldelink. Vor dem Einschalten rechtlich prüfen lassen.
+- **Terminbuchung** (Einstellungen → Terminbuchung): Seite `/buchen` im Portal, Link auf die Website setzen. Interessenten wählen einen Slot, du bekommst Mail mit Kalendereinladung, der Lead steht auf „Termin".
+- **Mitarbeiter & Rechte** (Einstellungen): Mitarbeiter einladen und nur Bereiche freigeben (Kunden, Nachrichten, Leads, Rechnungen & Preise, Einstellungen). Nur Konten mit vollem Zugriff verwalten das.
+- **Änderungshistorie** bei jedem Kunden: wer hat wann was geändert.
+
 ## Automatische Tests
 
 `sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").

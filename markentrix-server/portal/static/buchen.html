@@ -1,0 +1,13 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gespräch buchen – Markentrix</title><link rel="icon" href="/static/icons/icon-192.png"><link rel="stylesheet" href="/static/css/portal.css"></head>
+<body><div class="center"><div class="card login" style="max-width:560px;width:100%"><div class="logo">M</div><h1>Gespräch buchen</h1>
+<p class="muted small" id="info" style="text-align:center;margin-top:-6px">Wählen Sie einen Termin für ein kostenloses Erstgespräch.</p>
+<div id="m"></div><div id="tage"></div>
+<form id="f" hidden><p><b id="wahl"></b></p>
+<label for="n">Name</label><input id="n" required minlength="2" maxlength="120" autocomplete="name">
+<label for="e">E-Mail</label><input id="e" type="email" required autocomplete="email">
+<label for="t">Telefon (optional)</label><input id="t" autocomplete="tel">
+<label for="x">Worum geht es? (optional)</label><textarea id="x" rows="3" maxlength="1500"></textarea>
+<label style="display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:13px;margin:10px 0"><input type="checkbox" id="c" required style="width:auto;margin-top:3px"><span>Ich bin einverstanden, dass Markentrix meine Angaben zur Terminvereinbarung verarbeitet und mich dazu kontaktiert. Hinweise im <a href="/datenschutz" target="_blank" rel="noopener">Datenschutz</a>.</span></label>
+<p><button class="btn" style="width:100%" id="b">Termin verbindlich buchen</button></p></form></div></div>
+<script type="module" src="/static/js/buchen.js"></script></body></html>

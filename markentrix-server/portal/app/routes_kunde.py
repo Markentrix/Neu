@@ -1,4 +1,5 @@
 import json
+import urllib.error
 import urllib.request
 from datetime import date
 
@@ -47,6 +48,63 @@ def start(user: dict = Depends(require_kunde)):
         badges["avv"] = cur.fetchone()["n"]
     return {"badges": badges, "kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
             "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"]}
+
+
+_erreichbar: dict = {}   # domain -> (Zeitpunkt, Ergebnis), 5 Minuten zwischengespeichert
+
+
+def _web_erreichbar(domain: str) -> dict:
+    import time
+    jetzt = time.time()
+    c = _erreichbar.get(domain)
+    if c and jetzt - c[0] < 300:
+        return c[1]
+    try:
+        req = urllib.request.Request("https://" + domain, method="HEAD", headers={"User-Agent": "Markentrix-Statuspruefung"})
+        with urllib.request.urlopen(req, timeout=4) as r:
+            erg = {"ok": r.status < 500, "code": r.status}
+    except urllib.error.HTTPError as e:
+        erg = {"ok": e.code < 500, "code": e.code}
+    except Exception:
+        erg = {"ok": False, "code": None}
+    _erreichbar[domain] = (jetzt, erg)
+    return erg
+
+
+T_STATUS_TXT = {"offen": "Eingegangen", "in_arbeit": "In Arbeit", "wartet_auf_kunde": "Wartet auf dich", "erledigt": "Erledigt"}
+
+
+@router.get("/status")
+def status(user: dict = Depends(require_kunde)):
+    """Alles auf einen Blick: laufende Aufträge, was auf den Kunden wartet, Erreichbarkeit der Website."""
+    kid = user["kunden_id"]
+    with tx("kunde", kid) as cur:
+        cur.execute("""SELECT id, nummer, betreff, status, art, faellig_am, geaendert_am, erledigt_am FROM tickets
+                       WHERE status <> 'erledigt' OR erledigt_am > now() - interval '30 days' ORDER BY (status = 'erledigt'), geaendert_am DESC LIMIT 40""")
+        tickets = cur.fetchall()
+        cur.execute("SELECT id, titel, angefragt_am FROM kundenfreigaben WHERE status='wartet' ORDER BY angefragt_am")
+        freigaben = cur.fetchall()
+        cur.execute("SELECT domain, status, letzte_veroeffentlichung FROM websites ORDER BY erstellt_am")
+        webs = cur.fetchall()
+        cur.execute("SELECT m.name FROM kunden_module km JOIN module m ON m.code = km.modul_code WHERE km.aktiv ORDER BY m.sortierung")
+        module = [r["name"] for r in cur.fetchall()]
+        cur.execute("SELECT CASE WHEN EXISTS (SELECT 1 FROM briefings WHERE status='abgeschickt') THEN false ELSE true END AS offen")
+        briefing_offen = cur.fetchone()["offen"]
+    with tx("system") as cur:
+        cur.execute("SELECT count(*) AS n FROM avv WHERE kunden_id=%s AND datei IS NULL AND portal_freigabe_am IS NOT NULL", (kid,))
+        avv_offen = cur.fetchone()["n"]
+    for w in webs:
+        w["erreichbar"] = _web_erreichbar(w["domain"]) if w["status"] == "live" else None
+    for t in tickets:
+        t["status_text"] = T_STATUS_TXT.get(t["status"], t["status"])
+    wartet = []
+    if avv_offen and user["kunden_rolle"] == "inhaber":
+        wartet.append({"text": "Vertrag zur Auftragsverarbeitung bestätigen", "seite": "avv"})
+    if briefing_offen:
+        wartet.append({"text": "Briefing ausfüllen", "seite": "briefing"})
+    wartet += [{"text": "Freigabe: " + f["titel"], "seite": "freigaben"} for f in freigaben]
+    wartet += [{"text": f"Antwort zu {t['nummer']}: {t['betreff']}", "seite": "nachrichten/" + str(t["id"])} for t in tickets if t["status"] == "wartet_auf_kunde"]
+    return {"wartet_auf_dich": wartet, "auftraege": tickets, "websites": webs, "module": module}
 
 
 @router.get("/startliste")
@@ -425,8 +483,12 @@ def passwort_aendern(data: PasswortIn, user: dict = Depends(require_kunde)):
 @router.get("/monatsberichte")
 def monatsberichte(user: dict = Depends(require_kunde)):
     with tx("kunde", user["kunden_id"]) as cur:
-        cur.execute("SELECT id, titel, zeitraum_von, zeitraum_bis, daten, erstellt_am FROM berichte WHERE art='monatsbericht' ORDER BY zeitraum_von DESC LIMIT 36")
-        return cur.fetchall()
+        cur.execute("SELECT id, titel, zeitraum_von, zeitraum_bis, daten, einordnung, naechste_schritte, erstellt_am FROM berichte WHERE art='monatsbericht' ORDER BY zeitraum_von DESC LIMIT 36")
+        rows = cur.fetchall()
+    for r in rows:
+        r["einordnung"], r["schritte"] = bericht_modul.texte(r)
+        r.pop("naechste_schritte", None)
+    return rows
 
 
 @router.get("/monatsberichte/{bid}/pdf")

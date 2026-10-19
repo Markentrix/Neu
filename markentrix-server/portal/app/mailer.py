@@ -128,6 +128,23 @@ def onboarding_erinnerung_kunde(an: str, name: str | None, offen: list[str]) -> 
     return senden(an, "Für Ihren Start fehlt noch etwas", text)
 
 
+def lead_folge(an: str, name: str | None, firma: str, betreff: str, text: str, token: str) -> tuple[bool, str]:
+    kopf = {"name": name or "Sie", "firma": firma, "buchen": config.BASE_URL.rstrip("/") + "/buchen"}
+    try:
+        body = text.format(**kopf)
+    except (KeyError, IndexError, ValueError):
+        body = text
+    abmelden = config.BASE_URL.rstrip("/") + "/api/public/abmelden?t=" + token
+    return senden(an, betreff, body + SIGNATUR + f"\n\n--\nSie möchten dazu nichts mehr von uns erhalten? Hier abmelden: {abmelden}")
+
+
+def kunden_feedback(an: str, name: str | None) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    text = (f"{hallo}\n\nSie sind jetzt seit gut einem Monat bei uns. Wie läuft es aus Ihrer Sicht? Im Portal können Sie uns in zehn Sekunden eine Bewertung geben, "
+            f"und jederzeit eine Nachricht schreiben, wenn etwas fehlt: {config.BASE_URL}/app" + SIGNATUR)
+    return senden(an, "Wie läuft es bei Ihnen?", text)
+
+
 def mahnung(an: str, titel: str, nummer: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
     text = (f"Guten Tag,\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}.\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
     return senden(an, f"{titel} zu Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))

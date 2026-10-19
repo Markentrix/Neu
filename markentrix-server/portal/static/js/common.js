@@ -89,3 +89,21 @@ export function zweiFaktorKarte() {
 
 // Fußzeile mit Impressum und Datenschutz
 export const rechtFuss = () => h('div', { class: 'rechtfuss small muted' }, h('a', { href: '/impressum' }, 'Impressum'), ' · ', h('a', { href: '/datenschutz' }, 'Datenschutz'));
+
+
+// Kontaktergebnis zu einem Lead festhalten (Admin und Vertriebler): Schnellauswahl, Notiz, Wiedervorlage
+export function kontaktKarte(optionen, url, wiedervorlage) {
+  const m = h('div'), notiz = h('input', { placeholder: 'Kurze Notiz (freiwillig)', maxlength: 1500 }), tag = h('input', { type: 'date', style: 'max-width:170px' });
+  let wahl = null; const knoepfe = [];
+  const speichern = h('button', { class: 'btn', disabled: true }, 'Speichern');
+  const waehle = (o, b) => { wahl = o; knoepfe.forEach(x => x.classList.remove('gewaehlt')); b.classList.add('gewaehlt'); speichern.disabled = false;
+    tag.value = o.wiedervorlage_tage ? new Date(Date.now() + o.wiedervorlage_tage * 864e5).toISOString().slice(0, 10) : ''; };
+  optionen.forEach(o => { const b = h('button', { type: 'button', class: 'btn sec small', onclick: () => waehle(o, b) }, o.text); knoepfe.push(b); });
+  speichern.onclick = async () => { if (!wahl) return;
+    try { await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: tag.value || null } }); location.reload(); } catch (x) { melde(m, x.message); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Kontakt festhalten'),
+    h('p', { class: 'small muted' }, 'Was ist passiert? Der Verlauf und, wo es passt, der Status werden automatisch gesetzt.'), m,
+    h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, knoepfe),
+    h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, notiz), h('div', {}, h('label', { style: 'margin:0' }, 'Wiedervorlage'), tag), speichern),
+    wiedervorlage ? h('p', { class: 'small muted' }, 'Aktuelle Wiedervorlage: ' + datum(wiedervorlage)) : '');
+}

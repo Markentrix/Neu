@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
+import { kontaktKarte, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -50,7 +50,7 @@ V.leads = async () => {
     h('div', { class: 'form2' }, feld('Firma *', 'firma', { required: true }), feld('Ansprechpartner', 'ansprechpartner'), feld('E-Mail', 'email'), feld('Telefon', 'telefon'), feld('Branche', 'branche'), feld('PLZ', 'plz'), feld('Ort', 'ort'), feld('Website', 'website')),
     h('label', {}, 'Notiz'), h('textarea', { name: 'notiz', rows: 2 }), h('p', {}, h('button', { class: 'btn' }, 'Lead speichern')));
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Meine Leads'),
-    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Branche', z => z.branche], ['Status', z => pill(z.status)], ['Angelegt', z => datum(z.erstellt_am)]], d, 'Noch keine Leads.')),
+    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Branche', z => z.branche], ['Status', z => pill(z.status)], ['Einstufung', z => ({ kalt: '❄ Cold', warm: '☀ Warm', heiss: '🔥 HOT' })[z.temperatur] || ''], ['Wiedervorlage', z => z.wiedervorlage_am ? datum(z.wiedervorlage_am) : ''], ['Zuletzt kontaktiert', z => z.letzter_kontakt_am ? datum(z.letzter_kontakt_am) : '–'], ['Angelegt', z => datum(z.erstellt_am)]], d, 'Noch keine Leads.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), h('p', { class: 'small muted' }, 'Bitte nur Kontakte eintragen, bei denen eine geschäftliche Ansprache zulässig ist.'), m, f));
 };
 
@@ -64,6 +64,7 @@ async function leadDetail(lid) {
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
+    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
 }
 

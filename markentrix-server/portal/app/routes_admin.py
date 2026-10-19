@@ -455,6 +455,81 @@ def bericht_erstellen(kid: str, data: BerichtIn, user: dict = Depends(require_ad
     return r
 
 
+@router.get("/berichte/{bid}")
+def bericht_texte(bid: str, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT id, titel, daten, einordnung, naechste_schritte, einordnung_geaendert_am FROM berichte WHERE id=%s AND art='monatsbericht'", (bid,))
+            b = cur.fetchone()
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    if not b:
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    auto_t, auto_s = bericht_modul.einordnung_auto(b["daten"])
+    text, schritte = bericht_modul.texte(b)
+    return {"id": b["id"], "titel": b["titel"], "einordnung": text, "schritte": schritte, "angepasst": bool(b["einordnung_geaendert_am"]),
+            "auto_einordnung": auto_t, "auto_schritte": auto_s}
+
+
+class BerichtTexteIn(BaseModel):
+    einordnung: str = Field(default="", max_length=3000)
+    schritte: list[str] = Field(default_factory=list, max_length=8)
+
+
+@router.put("/berichte/{bid}")
+def bericht_texte_speichern(bid: str, data: BerichtTexteIn, user: dict = Depends(require_admin)):
+    schritte = "\n".join(z.strip()[:400] for z in data.schritte if z.strip())
+    try:
+        with tx("admin") as cur:
+            cur.execute("""UPDATE berichte SET einordnung=%s, naechste_schritte=%s, einordnung_geaendert_am=CASE WHEN %s='' AND %s='' THEN NULL ELSE now() END
+                           WHERE id=%s AND art='monatsbericht' RETURNING kunden_id""", (data.einordnung.strip() or None, schritte or None, data.einordnung.strip(), schritte, bid))
+            r = cur.fetchone()
+            if not r:
+                raise HTTPException(404, "Bericht nicht gefunden.")
+            audit(cur, user, "bericht_texte", r["kunden_id"], {"id": bid})
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    return {"ok": True}
+
+
+@router.post("/berichte/{bid}/senden")
+def bericht_erneut_senden(bid: str, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT kunden_id, zeitraum_von FROM berichte WHERE id=%s AND art='monatsbericht'", (bid,))
+            b = cur.fetchone()
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    if not b:
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    r = jobs.bericht_senden(b["kunden_id"], b["zeitraum_von"], mail=True)
+    with tx("admin") as cur:
+        audit(cur, user, "bericht_gesendet", b["kunden_id"], {"id": bid, "gesendet": r["gesendet"]})
+    return r
+
+
+@router.post("/berichte/{bid}/ki-entwurf")
+def bericht_ki_entwurf(bid: str, user: dict = Depends(require_admin)):
+    """KI-Entwurf für Einordnung und nächste Schritte. Wird nur vorgeschlagen, gespeichert wird erst nach deiner Freigabe."""
+    from . import einstellungen, ki
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT b.daten, k.firma, k.branche FROM berichte b JOIN kunden k ON k.id=b.kunden_id WHERE b.id=%s AND b.art='monatsbericht'", (bid,))
+            b = cur.fetchone()
+            cfg = einstellungen.lesen(cur, "ki") or {}
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    if not b:
+        raise HTTPException(404, "Bericht nicht gefunden.")
+    if not cfg.get("api_key"):
+        raise HTTPException(400, "Für den KI-Entwurf fehlt der Schlüssel unter Einstellungen → KI.")
+    try:
+        ergebnis = ki.bericht_entwurf(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, b["firma"], b["branche"], b["daten"])
+    except Exception:
+        raise HTTPException(502, "Der KI-Dienst hat nicht geantwortet. Bitte später erneut versuchen.")
+    return ergebnis
+
+
 @router.get("/berichte/{bid}/pdf")
 def bericht_pdf(bid: str, user: dict = Depends(require_admin)):
     try:

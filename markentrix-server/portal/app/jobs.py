@@ -107,6 +107,47 @@ def bericht_senden(kid, monat: date, mail: bool = True) -> dict:
     return {"id": bid, "gesendet": ok, "grund": fehler}
 
 
+def lead_folgemails(cfg):
+    """Nachfass-Mails an Leads mit Einwilligung, wenn noch kein Gespräch zustande kam. Nur wenn in den Einstellungen eingeschaltet."""
+    from .routes_folgemails import lesen as folge_lesen, token_fuer
+    with tx("system") as cur:
+        f = folge_lesen(cur)
+        if not f["aktiv"]:
+            return
+        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.email, l.folge_stufe FROM leads l
+                       WHERE l.email IS NOT NULL AND NOT l.abgemeldet AND l.status IN ('neu','kontaktiert')
+                         AND EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art = 'consent')
+                         AND NOT EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art IN ('antwort','termin'))
+                         AND ((l.folge_stufe = 0 AND l.erstellt_am < now() - make_interval(days => %s))
+                           OR (l.folge_stufe = 1 AND l.folge_gesendet_am < now() - make_interval(days => %s)))
+                       ORDER BY l.erstellt_am LIMIT 20""", (f["tage_1"], max(1, f["tage_2"] - f["tage_1"])))
+        faellig = cur.fetchall()
+        auftraege = []
+        for l in faellig:
+            auftraege.append((l, token_fuer(cur, l["id"])))
+            cur.execute("UPDATE leads SET folge_stufe=folge_stufe+1, folge_gesendet_am=now(), letzter_kontakt_am=now() WHERE id=%s", (l["id"],))
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'mail_gesendet',%s,'automatisch')", (l["id"], f"Automatische Folgemail {l['folge_stufe'] + 1}"))
+    for l, tok in auftraege:
+        n = l["folge_stufe"] + 1
+        mailer.lead_folge(l["email"], l["ansprechpartner"], l["firma"], f["betreff_%d" % n], f["text_%d" % n], tok)
+
+
+def kunden_feedback(cfg):
+    """Eine Feedback-Mail 30 Tage nach Start, wenn in den Einstellungen eingeschaltet."""
+    from .routes_folgemails import lesen as folge_lesen
+    with tx("system") as cur:
+        if not folge_lesen(cur)["kunden_feedback"]:
+            return
+        cur.execute("""UPDATE kunden k SET feedback_mail_am = now() WHERE k.id IN
+                         (SELECT id FROM kunden WHERE status = 'aktiv' AND feedback_mail_am IS NULL AND erstellt_am < now() - interval '30 days' LIMIT 20)
+                       RETURNING k.id, k.ansprechpartner""")
+        kunden = cur.fetchall()
+        ziele = [(kunden_empfaenger(cur, k["id"]), k["ansprechpartner"]) for k in kunden]
+    for adressen, name in ziele:
+        for a in adressen:
+            mailer.kunden_feedback(a, name)
+
+
 def fehler_melden(cfg):
     with tx("system") as cur:
         cur.execute("""WITH offen AS (SELECT id FROM workflow_fehler WHERE NOT benachrichtigt AND zeit > now() - interval '2 days' ORDER BY zeit LIMIT 50 FOR UPDATE SKIP LOCKED)
@@ -227,7 +268,7 @@ def tick():
         cfg = einstellungen_lesen(cur)
     if not mailer.konfiguriert():
         return
-    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch):
+    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

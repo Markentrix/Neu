@@ -85,7 +85,7 @@ def logout(request: Request, response: Response):
 
 @router.get("/me")
 def me(user: dict = Depends(current_user)):
-    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"], "zwei_faktor": user["totp_aktiv"], "kunden_rolle": user["kunden_rolle"]}
+    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"], "zwei_faktor": user["totp_aktiv"], "kunden_rolle": user["kunden_rolle"], "admin_rechte": user.get("admin_rechte")}
 
 
 @router.get("/einladung/{token}")

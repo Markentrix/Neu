@@ -24,6 +24,9 @@ from .routes_avv import router as avv_router, kunde_router as avv_kunde_router
 from .routes_offboarding import router as offboarding_router
 from .routes_zusammenarbeit import router as zus_router, kunde_router as zus_kunde_router
 from .routes_websitecheck import router as wcheck_router
+from .routes_folgemails import router as folge_router
+from .routes_buchung import router as buchung_router
+from .routes_mitarbeiter import router as mitarbeiter_router
 from .routes_briefing import router as brief_router, kunde_router as brief_kunde_router
 from .routes_angebotsinhalte import router as ang_router, kunde_router as ang_kunde_router
 from .routes_aufgaben import router as aufgaben_router, kunde_router as aufgaben_kunde_router
@@ -111,6 +114,9 @@ app.include_router(zus_router)
 app.include_router(zus_kunde_router)
 app.include_router(aufgaben_router)
 app.include_router(wcheck_router)
+app.include_router(folge_router)
+app.include_router(buchung_router)
+app.include_router(mitarbeiter_router)
 app.include_router(brief_router)
 app.include_router(brief_kunde_router)
 app.include_router(ang_router)
@@ -133,6 +139,7 @@ app.get("/app", include_in_schema=False)(seite("kunde.html"))
 app.get("/admin", include_in_schema=False)(seite("admin.html"))
 app.get("/vertrieb", include_in_schema=False)(seite("vertrieb.html"))
 app.get("/einladung", include_in_schema=False)(seite("einladung.html"))
+app.get("/buchen", include_in_schema=False)(seite("buchen.html"))
 app.get("/impressum", include_in_schema=False)(seite("recht.html"))
 app.get("/datenschutz", include_in_schema=False)(seite("recht.html"))
 @app.get("/manifest.webmanifest", include_in_schema=False)

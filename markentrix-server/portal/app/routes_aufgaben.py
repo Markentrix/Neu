@@ -220,6 +220,9 @@ def heute(user: dict = Depends(require_admin)):
         cur.execute("""SELECT id, firma, temperatur, quelle, erstellt_am FROM leads WHERE status = 'neu'
                        ORDER BY (temperatur = 'heiss') DESC NULLS LAST, erstellt_am DESC LIMIT 6""")
         leads = cur.fetchall()
+        cur.execute("""SELECT l.id, l.firma, l.wiedervorlage_am, v.name AS vertriebler FROM leads l LEFT JOIN vertriebspartner v ON v.id = l.vertriebspartner_id
+                       WHERE l.wiedervorlage_am <= current_date AND l.status NOT IN ('verloren','gewonnen','gesperrt','tot') ORDER BY l.wiedervorlage_am LIMIT 8""")
+        wiedervorlagen = cur.fetchall()
         cur.execute("SELECT count(*) AS n FROM leads WHERE status = 'neu'")
         leads_n = cur.fetchone()["n"]
         cur.execute("""SELECT f.id, f.titel, k.firma, k.id AS kunden_id FROM kundenfreigaben f JOIN kunden k ON k.id = f.kunden_id
@@ -232,6 +235,6 @@ def heute(user: dict = Depends(require_admin)):
                        WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL ORDER BY b.faellig_am LIMIT 6""")
         rechnungen = cur.fetchall()
         avv_fehlt = [{"id": r["id"], "firma": r["firma"]} for r in fehlende(cur)][:6]
-    gesamt = len(nachrichten) + len(aufgaben) + leads_n + len(freigaben) + len(onboarding) + len(rechnungen) + len(avv_fehlt)
-    return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "leads_gesamt": leads_n, "freigaben": freigaben,
+    gesamt = len(nachrichten) + len(aufgaben) + len(wiedervorlagen) + leads_n + len(freigaben) + len(onboarding) + len(rechnungen) + len(avv_fehlt)
+    return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "wiedervorlagen": wiedervorlagen, "leads_gesamt": leads_n, "freigaben": freigaben,
             "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "gesamt": gesamt}

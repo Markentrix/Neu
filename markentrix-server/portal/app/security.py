@@ -70,7 +70,7 @@ def current_user(request: Request) -> dict:
         raise HTTPException(401, "Nicht angemeldet.")
     with tx("system") as cur:
         cur.execute(
-            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id, b.totp_aktiv, b.kunden_rolle
+            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id, b.totp_aktiv, b.kunden_rolle, b.admin_rechte
                FROM sitzungen s JOIN benutzer b ON b.id = s.benutzer_id
                WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv""",
             (token_hash(t),),
@@ -81,9 +81,38 @@ def current_user(request: Request) -> dict:
     return u
 
 
-def require_admin(user: dict = Depends(current_user)) -> dict:
+# Bereiche für Mitarbeiter mit eingeschränkten Rechten (admin_rechte NULL = alles)
+RECHTE = {"kunden": "Kunden & Projekte", "nachrichten": "Nachrichten", "leads": "Leads & Vertrieb", "finanzen": "Angebote, Rechnungen & Preise", "einstellungen": "Einstellungen & Protokoll"}
+_IMMER = {"uebersicht", "heute", "aufgaben"}
+_BEREICH = {"tickets": "nachrichten", "leads": "leads", "gespraeche": "leads", "vertrieb": "leads", "website-check": "leads", "provisionsregeln": "leads",
+            "belege": "finanzen", "belege-export.csv": "finanzen", "preise": "finanzen", "konditionen": "finanzen", "katalog": "finanzen", "kennzahlen": "finanzen",
+            "kunden": "kunden", "berichte": "kunden", "avv": "kunden", "avv-fehlt": "kunden", "onboarding": "kunden", "dateien": "kunden", "websites": "kunden",
+            "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden"}
+
+
+def recht_fuer_pfad(pfad: str) -> str:
+    teile = pfad.split("/")
+    erst = teile[3] if len(teile) > 3 else ""
+    if erst in _IMMER:
+        return ""
+    return _BEREICH.get(erst, "einstellungen")
+
+
+def require_admin(request: Request, user: dict = Depends(current_user)) -> dict:
     if user["rolle"] != "admin":
         raise HTTPException(403, "Nur für Administratoren.")
+    r = user.get("admin_rechte")
+    if r is not None:
+        b = recht_fuer_pfad(request.url.path)
+        if b and b not in r:
+            raise HTTPException(403, "Dafür hast du keine Berechtigung. Bitte wende dich an die Inhaber.")
+    return user
+
+
+def require_voll(user: dict = Depends(current_user)) -> dict:
+    """Nur Administratoren ohne Einschränkung (Mitarbeiter anlegen und Rechte vergeben)."""
+    if user["rolle"] != "admin" or user.get("admin_rechte") is not None:
+        raise HTTPException(403, "Nur für Administratoren mit vollem Zugriff.")
     return user
 
 

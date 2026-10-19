@@ -12,6 +12,9 @@ class H(BaseHTTPRequestHandler):
             if "kaputt" in json.dumps(daten): res="das ist kein JSON"
             out=json.dumps({"content":[{"type":"text","text":"Hier: "+(res if isinstance(res,str) else json.dumps(res,ensure_ascii=False))}],"usage":{"input_tokens":100,"output_tokens":50}}).encode()
             self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
+        if "Berichts-Assistent" in str(b.get("system","")):
+            out=json.dumps({"content":[{"type":"text","text":"Hier: "+json.dumps({"einordnung":"Entwurf der KI: solide Entwicklung.","schritte":["Erster KI-Schritt","Zweiter KI-Schritt"]},ensure_ascii=False)}],"usage":{"input_tokens":50,"output_tokens":30}}).encode()
+            self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
         out=json.dumps({"content":[{"type":"text","text":"Hallo! Du hast 1 neue Anfrage."}],"usage":{"input_tokens":321,"output_tokens":45}}).encode()
         self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out)
     def log_message(self,*a): pass

@@ -70,8 +70,55 @@ def _delta(neu, alt) -> str:
     return f" ({'+' if d >= 0 else ''}{d} % zum Vormonat)"
 
 
+def einordnung_auto(d: dict) -> tuple[str, list[str]]:
+    """Regelbasierte Einordnung und nächste Schritte aus den Zahlen. Nur Aussagen, die die Zahlen tragen."""
+    a, t = d["anfragen"], d["termine"]
+    teile, schritte = [], []
+    if a["gesamt"] == 0 and a["vormonat"] == 0:
+        teile.append("In diesem Monat sind über die angebundenen Kanäle keine Anfragen eingegangen.")
+        schritte.append("Wir prüfen, ob Kontaktformular, Telefonnummer und Google-Profil gut sichtbar und erreichbar sind.")
+    else:
+        if a["vormonat"] > 0:
+            pct = round((a["gesamt"] - a["vormonat"]) / a["vormonat"] * 100)
+            if pct >= 5:
+                teile.append(f"Die Anfragen sind gegenüber dem Vormonat um {pct} % gestiegen ({a['vormonat']} auf {a['gesamt']}).")
+            elif pct <= -5:
+                teile.append(f"Die Anfragen sind gegenüber dem Vormonat um {abs(pct)} % zurückgegangen ({a['vormonat']} auf {a['gesamt']}).")
+                schritte.append("Wir prüfen, woran der Rückgang liegt (Sichtbarkeit, Saison, Angebote) und schlagen Gegenmaßnahmen vor.")
+            else:
+                teile.append(f"Die Anfragen liegen mit {a['gesamt']} auf dem Niveau des Vormonats ({a['vormonat']}).")
+        else:
+            teile.append(f"Im Vormonat gab es keine Anfragen, in diesem Monat waren es {a['gesamt']}.")
+        if a["nach_quelle"]:
+            q, n = next(iter(a["nach_quelle"].items()))
+            teile.append(f"Die meisten Anfragen kamen über „{q}“ ({n} von {a['gesamt']}).")
+        if a["gesamt"] >= 3 and a["bearbeitet"] < a["gesamt"] * 0.7:
+            schritte.append(f"Offene Anfragen zeitnah beantworten: bisher sind {a['bearbeitet']} von {a['gesamt']} bearbeitet. Schnelle Antworten erhöhen die Chance auf einen Auftrag.")
+    if a["spam"] >= 5:
+        schritte.append(f"{a['spam']} Spam-Anfragen wurden aussortiert. Wir verschärfen bei Bedarf den Spam-Schutz am Formular.")
+    nicht = t["nach_status"].get("nicht_erschienen", 0)
+    if t["gesamt"] and nicht:
+        teile.append(f"Von {t['gesamt']} Terminen wurden {nicht} nicht wahrgenommen.")
+        schritte.append("Terminerinnerungen für Kundinnen und Kunden aktivieren, um Ausfälle zu verringern.")
+    elif t["gesamt"]:
+        teile.append(f"Es gab {t['gesamt']} Termine.")
+    if d["automatische_ablaeufe"]:
+        teile.append(f"Die Automatisierungen haben {d['automatische_ablaeufe']} Abläufe erledigt.")
+    if not schritte:
+        schritte.append("Wir beobachten die Entwicklung weiter und melden uns, sobald sich etwas Auffälliges zeigt.")
+    return " ".join(teile), schritte[:5]
+
+
+def texte(b: dict) -> tuple[str, list[str]]:
+    """Gespeicherte (bearbeitete) Texte, sonst die automatische Einordnung."""
+    auto_t, auto_s = einordnung_auto(b["daten"])
+    text = (b.get("einordnung") or "").strip() or auto_t
+    sch = [z.strip() for z in (b.get("naechste_schritte") or "").splitlines() if z.strip()] or auto_s
+    return text, sch
+
+
 def pdf_erzeugen(cur, bericht_id, f: dict | None = None) -> tuple[bytes, str]:
-    cur.execute("""SELECT b.id, b.titel, b.zeitraum_von, b.zeitraum_bis, b.daten, k.firma, k.kundennummer
+    cur.execute("""SELECT b.id, b.titel, b.zeitraum_von, b.zeitraum_bis, b.daten, b.einordnung, b.naechste_schritte, k.firma, k.kundennummer
                    FROM berichte b JOIN kunden k ON k.id=b.kunden_id WHERE b.id=%s AND b.art='monatsbericht'""", (bericht_id,))
     b = cur.fetchone()
     if not b:
@@ -96,6 +143,8 @@ def pdf_erzeugen(cur, bericht_id, f: dict | None = None) -> tuple[bytes, str]:
     if d["bewertungsanfragen"]:
         zeilen.append(f"{d['bewertungsanfragen']} Bewertungsanfragen wurden an Kundinnen und Kunden verschickt.")
     inhalt += [pdf.p("• " + z) for z in zeilen]
+    ein, schritte = texte(b)
+    inhalt += [pdf.p("Einordnung", pdf.H2), pdf.p(ein), pdf.p("Unsere nächsten Schritte", pdf.H2)] + [pdf.p("• " + z) for z in schritte]
     if a["nach_quelle"]:
         inhalt += [pdf.p("Woher die Anfragen kamen", pdf.H2), pdf.tabelle(["Quelle", "Anzahl"], [[q.capitalize(), str(n)] for q, n in a["nach_quelle"].items()], breiten=[120 * pdf.mm, 50 * pdf.mm], rechts_ab=1)]
     if d["anrufe"]:

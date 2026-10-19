@@ -92,3 +92,4 @@ th{color:var(--mut);font-weight:500;font-size:12px;text-transform:uppercase;lett
 details.hilfe summary{cursor:pointer;list-style:none}details.hilfe summary::-webkit-details-marker{display:none}details.hilfe[open] summary{margin-bottom:8px}details.hilfe p{margin:0;line-height:1.5}
 .small.ok{color:#166534}
 .fortschritt{height:8px;border-radius:99px;background:var(--line);margin:8px 0 12px;overflow:hidden}.fortschritt>div{height:100%;background:var(--grad);border-radius:99px}
+.btn.sec.gewaehlt{background:var(--navy);color:#fff;border-color:var(--navy)}
