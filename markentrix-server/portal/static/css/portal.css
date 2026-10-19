@@ -135,3 +135,12 @@ details.hilfe summary{cursor:pointer;list-style:none}details.hilfe summary::-web
 .tablewrap{max-width:100%}.card{min-width:0}
 code{word-break:break-all;white-space:normal}
 .tablewrap{position:relative}th{position:relative}
+.neuzeile{padding:0 4px 8px}.neuknopf{width:100%;background:var(--grad);border:0;color:#fff;border-radius:9px;padding:6px 10px;font:600 13px inherit;cursor:pointer}
+.prio{list-style:none;margin:0;padding:0}.prio li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.prio li:last-child{border:0}
+.prio .pt{flex:1;min-width:0}.prio .pt b{display:block}.prio .punkt{width:10px;height:10px;border-radius:50%;flex:none;background:#9aa3bd}.prio .punkt.bad{background:var(--bad)}.prio .punkt.warn{background:var(--warn)}
+.prio .kat{font-size:11px}.gesund{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.delta{font-size:12px;font-weight:600}.delta.auf{color:#166534}.delta.ab{color:#991b1b}.delta.gleich{color:var(--mut)}
+.fortschritt{height:10px;background:#e6e9f3;border-radius:99px;overflow:hidden;margin:6px 0}.fortschritt>div{height:100%;background:var(--grad)}
+.trichter .stufe{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:13px}.trichter .stufe>span:first-child{width:130px;flex:none}.trichter .bar{height:18px;background:linear-gradient(90deg,#28C7F7,#8B5CF6);border-radius:6px;min-width:3px}
+.wert{background:linear-gradient(135deg,#0B1020,#25306b);color:#fff}.wert h2,.wert h3{color:#fff}.wert .muted{color:#cbd2ea}.wert .kennz{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;margin:10px 0}
+.wert .kennz>div{background:#ffffff14;border-radius:12px;padding:10px 12px}.wert .kennz b{font-size:26px;display:block}

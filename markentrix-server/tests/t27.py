@@ -63,10 +63,14 @@ async def main():
             if name=="admin":
                 # Suche per Tastatur
                 await pg.goto(B+"/admin#uebersicht"); await pg.wait_for_selector("text=Geschäftszahlen")
-                await pg.keyboard.press("Control+k"); await pg.fill(".suchbox input","Browser Kunde"); await pg.wait_for_selector(".suchtreffer a",timeout=5000)
+                await pg.keyboard.press("Control+k"); await pg.fill(".suchbox input","Browser Kunde"); await pg.wait_for_selector(".suchgruppe:text-is(\"Kunden\")",timeout=5000)
                 await pg.keyboard.press("Enter"); await pg.wait_for_url("**#kunde/*",timeout=5000)
                 await pg.wait_for_selector("text=Zustand & Verlauf",timeout=8000); chk("Admin: Suche → Kundenseite mit Zeitachse",True)
                 # Ansicht anpassen
+                await pg.goto(B+"/admin#uebersicht"); await pg.wait_for_selector("text=Geschäftszahlen")
+                chk("Admin: Karte 'Jetzt wichtig' sichtbar",await pg.locator("h2:has-text('Jetzt wichtig')").count()==1)
+                chk("Admin: Cockpit mit MRR-Ziel-Knopf, Trichter und Prognose",await pg.locator("text=/MRR-Ziel/").count()>=1 and await pg.locator("text=/Zahlungseingänge|Erwartete/").count()>=1)
+                await pg.click(".neuknopf"); await pg.wait_for_selector(".suchtreffer a:has-text('Neuer Kunde')"); await pg.click(".suchtreffer a:has-text('Neuer Kunde')"); await pg.wait_for_selector("form input[name=firma]"); chk("Admin: '+ Neu' → Neuer Kunde",pg.url.endswith("#neu"))
                 await pg.goto(B+"/admin#uebersicht"); await pg.wait_for_selector("text=Geschäftszahlen")
                 await pg.click("text=Ansicht anpassen"); await pg.click("label:has-text('Geschäftszahlen') input"); await pg.click("button:has-text('Speichern')"); await pg.wait_for_load_state(); await pg.wait_for_selector("h1:has-text('Übersicht')")
                 await pg.wait_for_timeout(600); chk("Admin: Karte ausblenden bleibt nach Neuladen",await pg.locator("h2:has-text('Geschäftszahlen')").count()==0)
@@ -80,7 +84,7 @@ async def main():
                 await pg.click("form button[type=submit], form .btn:not(.sec)"); await pg.wait_for_timeout(1500)
                 r=a.get("/api/admin/kunden",params={"q":"Formular Test"}).json(); chk("Admin: Kunde über das Formular angelegt",len(r)==1,r)
             if name=="kunde":
-                await pg.goto(B+"/app#uebersicht"); await pg.wait_for_selector("text=Ansicht anpassen"); chk("Kunde: Übersicht mit Anpassen-Knopf",True)
+                await pg.goto(B+"/app#uebersicht"); await pg.wait_for_selector("text=Ansicht anpassen"); chk("Kunde: Übersicht mit Anpassen-Knopf",True); chk("Kunde: Karte 'Dein Monat mit Markentrix'",await pg.locator("h2:has-text('Dein Monat mit Markentrix')").count()==1 and await pg.locator("text=Dein nächster Schritt").count()==1)
                 await pg.goto(B+"/app#einstellungen"); await pg.wait_for_selector("text=App & Benachrichtigungen"); chk("Kunde: Push-Karte mit Anlässen",await pg.locator("text=Neue Anfrage").count()>=1)
             if name=="vertrieb":
                 await pg.goto(B+"/vertrieb#leads"); await pg.wait_for_selector("text=Lead 0 GmbH",timeout=8000); chk("Vertrieb: zugewiesene Leads sichtbar",True)

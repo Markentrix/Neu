@@ -184,11 +184,14 @@ const ANLAESSE = {
 let _ansicht = null;
 export const ladeAnsicht = () => (_ansicht = _ansicht || api('/api/me/ansicht', { leise: true }).catch(() => ({ ausgeblendet: [], push_aus: [] })));
 
-export function anpassenKnopf(liste) {
+/** Welche Karten ausgeblendet sind: gespeicherte Auswahl, sonst die Standardauswahl. */
+export const ausgeblendetSet = (a, standard = []) => new Set(a && a.gesetzt ? a.ausgeblendet : standard);
+
+export function anpassenKnopf(liste, standard = []) {
   const panel = h('div', { class: 'card', style: 'display:none;margin-bottom:12px' });
   const knopf = h('button', { class: 'btn sec small', onclick: async () => {
     if (panel.style.display === 'block') { panel.style.display = 'none'; return; }
-    const a = await ladeAnsicht(), aus = new Set(a.ausgeblendet);
+    const a = await ladeAnsicht(), aus = ausgeblendetSet(a, standard);
     panel.replaceChildren(h('h3', {}, 'Welche Karten möchtest du sehen?'),
       ...liste.map(([id, name]) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' },
         h('input', { type: 'checkbox', checked: !aus.has(id), style: 'width:auto', onchange: (e) => { e.target.checked ? aus.delete(id) : aus.add(id); } }), name)),
@@ -220,22 +223,36 @@ export function glocke() {
   return wrap;
 }
 
-export function sucheKnopf() {
+/**
+ * Befehlspalette (Strg+K): sucht Datensätze und bietet Aktionen an.
+ * @param {{titel: string, text?: string, link?: string, aktion?: () => void, neu?: boolean}[]} befehle
+ */
+export function sucheKnopf(befehle = []) {
   let overlay = null;
-  const oeffnen = () => {
+  const oeffnen = (nurNeu = false) => {
     if (overlay || document.querySelector('.suchoverlay')) return;
-    const eingabe = h('input', { placeholder: 'Kunde, Lead, Rechnung, Nachricht, Aufgabe …', autofocus: true, 'aria-label': 'Suche' }), ergebnis = h('div', { class: 'suchtreffer' });
+    const eingabe = h('input', { placeholder: nurNeu ? 'Was möchtest du anlegen?' : 'Suchen oder Aktion eingeben …', autofocus: true, 'aria-label': 'Suche und Aktionen' }), ergebnis = h('div', { class: 'suchtreffer' });
     let timer = null, treffer = [], pos = -1;
     const schliessen = () => { overlay.remove(); overlay = null; };
     const markieren = () => treffer.forEach((a, i) => a.classList.toggle('auswahl', i === pos));
+    const eintrag = (t) => {
+      const a = h('a', { href: t.link || '#', onclick: (e) => { if (t.aktion) { e.preventDefault(); schliessen(); t.aktion(); } else schliessen(); } }, h('b', {}, t.titel), h('span', { class: 'small muted' }, t.text || ''));
+      treffer.push(a); return a;
+    };
+    const gruppe = (name, liste) => liste.length ? h('div', {}, h('div', { class: 'suchgruppe' }, name), liste.map(eintrag)) : '';
+    const passend = (q) => befehle.filter(b => nurNeu ? b.neu : (q.length < 2 ? !b.neu || false : b.titel.toLowerCase().includes(q.toLowerCase())));
     const suchen = async () => {
       const q = eingabe.value.trim();
-      if (q.length < 2) { ergebnis.replaceChildren(h('p', { class: 'muted small', style: 'padding:10px' }, 'Mindestens 2 Zeichen eingeben.')); treffer = []; return; }
+      treffer = []; pos = -1;
+      if (nurNeu || q.length < 2) { ergebnis.replaceChildren(gruppe(nurNeu ? 'Neu anlegen' : 'Aktionen', passend(q)), nurNeu ? '' : h('p', { class: 'muted small', style: 'padding:10px' }, 'Tippe mindestens 2 Zeichen, um Kunden, Leads, Rechnungen und mehr zu suchen.')); return; }
       try {
         const d = await api('/api/admin/suche?q=' + encodeURIComponent(q));
         if (eingabe.value.trim() !== q) return;
         treffer = []; pos = -1;
-        ergebnis.replaceChildren(...(d.gruppen.length ? d.gruppen.map(g => h('div', {}, h('div', { class: 'suchgruppe' }, g.art), g.treffer.map(t => { const a = h('a', { href: t.link, onclick: () => schliessen() }, h('b', {}, t.titel), h('span', { class: 'small muted' }, t.text)); treffer.push(a); return a; }))) : [h('p', { class: 'muted small', style: 'padding:10px' }, 'Nichts gefunden.')]));
+        const kunden = (d.gruppen.find(g => g.art === 'Kunden') || { treffer: [] }).treffer.slice(0, 3);
+        const direkt = kunden.flatMap(k => [{ titel: 'Rechnung für ' + k.titel, text: 'neu anlegen', link: '#neubeleg/' + k.link.split('/')[1] + '/rechnung' }, { titel: 'Angebot für ' + k.titel, text: 'neu anlegen', link: '#neubeleg/' + k.link.split('/')[1] + '/angebot' }]);
+        ergebnis.replaceChildren(gruppe('Aktionen', passend(q)), ...d.gruppen.map(g => gruppe(g.art, g.treffer.map(t => ({ titel: t.titel, text: t.text, link: t.link })))), gruppe('Schnell anlegen', direkt),
+          !d.gruppen.length && !passend(q).length && !direkt.length ? h('p', { class: 'muted small', style: 'padding:10px' }, 'Nichts gefunden.') : '');
       } catch (x) { ergebnis.replaceChildren(h('p', { class: 'muted small', style: 'padding:10px' }, x.message)); }
     };
     eingabe.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(suchen, 200); });
@@ -243,15 +260,22 @@ export function sucheKnopf() {
       if (e.key === 'Escape') schliessen();
       else if (e.key === 'ArrowDown' && treffer.length) { e.preventDefault(); pos = (pos + 1) % treffer.length; markieren(); treffer[pos].scrollIntoView({ block: 'nearest' }); }
       else if (e.key === 'ArrowUp' && treffer.length) { e.preventDefault(); pos = (pos - 1 + treffer.length) % treffer.length; markieren(); treffer[pos].scrollIntoView({ block: 'nearest' }); }
-      else if (e.key === 'Enter') { const a = treffer[pos >= 0 ? pos : 0]; if (a) { e.preventDefault(); location.hash = a.getAttribute('href'); schliessen(); } }
+      else if (e.key === 'Enter') { const a = treffer[pos >= 0 ? pos : 0]; if (a) { e.preventDefault(); a.click(); if (a.getAttribute('href') && a.getAttribute('href') !== '#') location.hash = a.getAttribute('href'); } }
     });
-    overlay = h('div', { class: 'suchoverlay', onclick: (e) => { if (e.target === overlay) schliessen(); } }, h('div', { class: 'suchbox', role: 'dialog', 'aria-label': 'Suche' }, eingabe, ergebnis));
+    overlay = h('div', { class: 'suchoverlay', onclick: (e) => { if (e.target === overlay) schliessen(); } }, h('div', { class: 'suchbox', role: 'dialog', 'aria-label': 'Suche und Aktionen' }, eingabe, ergebnis));
     document.body.append(overlay); eingabe.focus(); suchen();
   };
-  const taste = (e) => { if (!knopf.isConnected) { document.removeEventListener('keydown', taste); return; } if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); oeffnen(); } };
+  const taste = (e) => { if (!knopf.isConnected) { document.removeEventListener('keydown', taste); document.removeEventListener('mk-palette', ruf); return; } if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); oeffnen(); } };
+  const ruf = (e) => { if (knopf.isConnected) oeffnen(Boolean(e.detail && e.detail.nurNeu)); };
   document.addEventListener('keydown', taste);
-  const knopf = h('button', { class: 'suchknopf', onclick: oeffnen, 'aria-label': 'Suche öffnen' }, '🔍 Suchen', h('kbd', {}, 'Strg K'));
+  document.addEventListener('mk-palette', ruf);
+  const knopf = h('button', { class: 'suchknopf', onclick: () => oeffnen(), 'aria-label': 'Suche öffnen' }, '🔍 Suchen', h('kbd', {}, 'Strg K'));
   return knopf;
+}
+
+/** „+ Neu“-Knopf: öffnet die Befehlspalette mit den Anlegen-Aktionen. */
+export function neuKnopf() {
+  return h('button', { class: 'neuknopf', onclick: () => document.dispatchEvent(new CustomEvent('mk-palette', { detail: { nurNeu: true } })) }, '+ Neu');
 }
 
 // ---------------------------------------------------------------- Barrierefreiheit: fehlende Beschriftungen automatisch ergänzen
@@ -272,3 +296,11 @@ function beschriften(wurzel) {
 }
 let _timerBeschriften = null;
 new MutationObserver(() => { clearTimeout(_timerBeschriften); _timerBeschriften = setTimeout(() => beschriften(document.body), 50); }).observe(document.documentElement, { childList: true, subtree: true });
+
+/** Veränderung zum Vormonat als kleiner Pfeil. gut = true, wenn „mehr“ besser ist. */
+export function delta(jetzt, vorher, gut = true, format = (x) => String(x)) {
+  const d = jetzt - vorher;
+  if (d === 0) return h('span', { class: 'delta gleich' }, '→ wie im Vormonat');
+  return h('span', { class: 'delta ' + ((d > 0) === gut ? 'auf' : 'ab') }, (d > 0 ? '▲ +' : '▼ −') + format(Math.abs(d)) + ' zum Vormonat');
+}
+

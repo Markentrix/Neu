@@ -93,7 +93,7 @@ neu=[m for m in mails()[n0:] if "Geschäftszahlen" in str(email.header.make_head
 chk("Geschäftszahlen-Mail genau einmal",len(neu)==1,len(neu))
 
 # ===== 4. Ansicht
-r=a.get("/api/me/ansicht").json(); chk("Ansicht leer",r=={"ausgeblendet":[],"push_aus":[]},r)
+r=a.get("/api/me/ansicht").json(); chk("Ansicht leer",r=={"ausgeblendet":[],"push_aus":[],"gesetzt":False},r)
 chk("Ansicht speichern",a.put("/api/me/ansicht",json={"ausgeblendet":["system","cockpit"]}).status_code==200)
 r=a.get("/api/me/ansicht").json(); chk("Ansicht gelesen",r["ausgeblendet"]==["cockpit","system"] and r["push_aus"]==[],r)
 a.put("/api/me/ansicht",json={"push_aus":["ticket"]}); r=a.get("/api/me/ansicht").json()

@@ -1,4 +1,4 @@
-import { h, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf } from '../common.js';
+import { h, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf } from '../common.js';
 
 
 export const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
@@ -8,11 +8,19 @@ export const zaehlerAdmin = {};
 export const NAV_RECHT = { postfach: 'nachrichten', freigaben: 'kunden', kennzahlen: 'finanzen', kunden: 'kunden', neu: 'kunden', vertrieb: 'leads', leads: 'leads', auswertung: 'leads', websites: 'kunden', belege: 'finanzen', preise: 'finanzen', compliance: 'einstellungen', katalog: 'finanzen', einstellungen: 'einstellungen', protokoll: 'einstellungen' };
 export const erlaubt = (seite) => !ich || !ich.admin_rechte || !NAV_RECHT[seite] || ich.admin_rechte.includes(NAV_RECHT[seite]);
 
+/** Aktionen für die Befehlspalette, nur für Bereiche, für die das Konto Rechte hat. */
+function befehle() {
+  const ziele = [['Neuer Kunde', 'neu', true], ['Neue Rechnung oder neues Angebot', 'belege', true], ['Lead anlegen oder importieren', 'leads', true], ['Aufgabe anlegen', 'aufgaben', true], ['Vertriebler einladen', 'vertrieb', true],
+    ['Zur Übersicht', 'uebersicht', false], ['Nachrichten', 'postfach', false], ['Kennzahlen', 'kennzahlen', false], ['Einstellungen', 'einstellungen', false], ['Protokoll', 'protokoll', false]];
+  return [...ziele.filter(([, s]) => erlaubt(s)).map(([titel, s, neu]) => ({ titel: String(titel), text: '#' + s, link: '#' + s, neu: !!neu })), { titel: 'Abmelden', text: 'Sitzung beenden', aktion: () => abmelden() }];
+}
+
 export function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Admin'),
-      h('div', { class: 'brandzeile' }, sucheKnopf(), glocke()),
+      h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke()),
+      h('div', { class: 'neuzeile' }, neuKnopf()),
       NAV.filter(n => erlaubt(n[0])).map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1], zaehlerAdmin[n[0]] ? h('span', { class: 'badge' }, zaehlerAdmin[n[0]]) : '')),
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),

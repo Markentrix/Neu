@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from . import einstellungen
 from .db import tx
 from .routes_fruehwarnung import risiko_fuer
 from .security import current_user, require_admin
@@ -126,7 +127,23 @@ def cockpit_daten(cur) -> dict:
     b = cur.fetchone()
     cur.execute("SELECT count(*) AS n FROM gespraechstermine WHERE erstellt_am > now() - interval '30 days' AND status='gebucht'")
     termine = cur.fetchone()["n"]
-    return {"reihe": reihe, "mrr_cent": mrr, "aktiv": aktiv, "arpu_cent": int(mrr / aktiv) if aktiv else 0, "kuendigungen_90d": gek90,
+    cur.execute("""SELECT count(*) AS gesamt,
+                          count(*) FILTER (WHERE letzter_kontakt_am IS NOT NULL OR status NOT IN ('neu','consent_ausstehend')) AS bearbeitet,
+                          count(*) FILTER (WHERE status IN ('antwort','termin','angebot','gewonnen')) AS erreicht,
+                          count(*) FILTER (WHERE status IN ('termin','angebot','gewonnen')) AS gespraech,
+                          count(*) FILTER (WHERE status = 'gewonnen') AS kunden
+                   FROM leads WHERE erstellt_am > now() - interval '90 days'""")
+    trichter = cur.fetchone()
+    cur.execute("""SELECT coalesce(sum(brutto_cent - coalesce(bezahlt_cent,0)) FILTER (WHERE faellig_am < current_date),0) AS ueberfaellig,
+                          coalesce(sum(brutto_cent - coalesce(bezahlt_cent,0)) FILTER (WHERE faellig_am >= current_date AND faellig_am < current_date + 8),0) AS w1,
+                          coalesce(sum(brutto_cent - coalesce(bezahlt_cent,0)) FILTER (WHERE faellig_am >= current_date + 8 AND faellig_am < current_date + 15),0) AS w2,
+                          coalesce(sum(brutto_cent - coalesce(bezahlt_cent,0)) FILTER (WHERE faellig_am >= current_date + 15 AND faellig_am < current_date + 22),0) AS w3,
+                          coalesce(sum(brutto_cent - coalesce(bezahlt_cent,0)) FILTER (WHERE faellig_am >= current_date + 22 AND faellig_am < current_date + 31),0) AS w4
+                   FROM belege WHERE art='rechnung' AND status IN ('gestellt','versendet')""")
+    pr = cur.fetchone()
+    prognose = [{"name": n, "cent": int(pr[k])} for n, k in (("überfällig", "ueberfaellig"), ("0–7 Tage", "w1"), ("8–14 Tage", "w2"), ("15–21 Tage", "w3"), ("22–30 Tage", "w4"))]
+    ziel = int((einstellungen.lesen(cur, "ziele") or {}).get("mrr_cent") or 0)
+    return {"reihe": reihe, "trichter": dict(trichter), "prognose": prognose, "ziel_mrr_cent": ziel, "mrr_cent": mrr, "aktiv": aktiv, "arpu_cent": int(mrr / aktiv) if aktiv else 0, "kuendigungen_90d": gek90,
             "churn_prozent": round(100 * gek90 / (aktiv + gek90), 1) if (aktiv + gek90) else 0.0, "offen_cent": int(b["offen"]), "ueberfaellig_cent": int(b["ueberfaellig"]),
             "leads_30d": reihe[-1]["leads"], "termine_30d": termine}
 
@@ -135,6 +152,21 @@ def cockpit_daten(cur) -> dict:
 def cockpit(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         return cockpit_daten(cur)
+
+
+class ZielIn(BaseModel):
+    mrr_cent: int = Field(ge=0, le=100_000_000_00)
+
+
+@router.put("/admin/cockpit/ziel")
+def cockpit_ziel(data: ZielIn, user: dict = Depends(require_admin)):
+    if not _darf(user, "finanzen"):
+        raise HTTPException(403, "Dafür fehlt das Recht.")
+    from .security import audit
+    with tx("admin") as cur:
+        einstellungen.schreiben(cur, "ziele", {"mrr_cent": data.mrr_cent})
+        audit(cur, user, "ziel_mrr", None, {"mrr_cent": data.mrr_cent})
+    return {"ok": True}
 
 
 # ---------------------------------------------------------------- Ansicht und Glocke
@@ -148,7 +180,7 @@ def ansicht_lesen(user: dict = Depends(current_user)):
     with tx("system") as cur:
         cur.execute("SELECT ansicht FROM benutzer WHERE id=%s", (user["id"],))
         a = cur.fetchone()["ansicht"] or {}
-    return {"ausgeblendet": a.get("ausgeblendet", []), "push_aus": a.get("push_aus", [])}
+    return {"ausgeblendet": a.get("ausgeblendet", []), "push_aus": a.get("push_aus", []), "gesetzt": "ausgeblendet" in a}
 
 
 @router.put("/me/ansicht")
@@ -192,3 +224,27 @@ def gelesen(data: GelesenIn, user: dict = Depends(current_user)):
     return {"ok": True}
 
 
+
+
+# ---------------------------------------------------------------- Kunden-Dashboard: Wertnachweis
+@router.get("/kunde/wert")
+def kunde_wert(user: dict = Depends(current_user)):
+    if user["rolle"] != "kunde" or not user.get("kunden_id"):
+        raise HTTPException(403, "Nur für Kunden.")
+    with tx("kunde", user["kunden_id"]) as cur:
+        cur.execute("""SELECT count(*) FILTER (WHERE erstellt_am >= date_trunc('month', now())) AS jetzt,
+                              count(*) FILTER (WHERE erstellt_am >= date_trunc('month', now()) - interval '1 month' AND erstellt_am < date_trunc('month', now())) AS vorher,
+                              count(*) FILTER (WHERE erstellt_am >= date_trunc('month', now()) AND status IN ('beantwortet','erledigt')) AS bearbeitet
+                       FROM anfragen WHERE status <> 'spam'""")
+        a = cur.fetchone()
+        cur.execute("""SELECT count(*) FILTER (WHERE beginn >= date_trunc('month', now())) AS jetzt,
+                              count(*) FILTER (WHERE beginn >= date_trunc('month', now()) - interval '1 month' AND beginn < date_trunc('month', now())) AS vorher,
+                              coalesce(sum(dauer_sek) FILTER (WHERE beginn >= date_trunc('month', now())), 0) AS sek
+                       FROM anrufe WHERE richtung = 'ein'""")
+        t = cur.fetchone()
+        cur.execute("""SELECT count(*) FILTER (WHERE beginn >= date_trunc('month', now()) AND status <> 'abgesagt') AS jetzt FROM termine""")
+        te = cur.fetchone()
+        cur.execute("SELECT to_char(date_trunc('month', now()), 'YYYY-MM') AS monat")
+        monat = cur.fetchone()["monat"]
+    return {"monat": monat, "anfragen": {"jetzt": a["jetzt"], "vorher": a["vorher"], "bearbeitet": a["bearbeitet"]},
+            "anrufe": {"jetzt": t["jetzt"], "vorher": t["vorher"], "minuten": int(t["sek"] // 60)}, "termine": {"jetzt": te["jetzt"]}}
