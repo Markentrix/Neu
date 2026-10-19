@@ -350,7 +350,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | H2 | Lack winterfest machen | 22 |
 | H3 | Versiegelung vor dem Winter | 27 |
 | H4 | Winter-Lackschutz-Aktion | 24 |
-| H5 | Felgen- & Scheibenversiegelung | 30 |
+| H5 | Glanzpolitur vor dem Winter | 27 |
 | H6 | Jetzt vor dem Winter buchen | 27 |
 | H7 | Lackversiegelung in Celle | 25 |
 | H8 | 100 % Handarbeit | 16 |
@@ -366,7 +366,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 
 | Nr. | Description | Zeichen |
 |---|---|---|
-| D1 | Winter-Lackschutz in Celle: Lack, Felgen und Scheiben vor dem Winter versiegeln lassen. | 87 |
+| D1 | Winter-Lackschutz in Celle: Lack vor dem Winter polieren und versiegeln lassen. | 79 |
 | D2 | Handwäsche, Lackversiegelung und Abnahme bei Tageslicht. Verbindlicher Preis vorab. | 83 |
 | D3 | 100 % Handarbeit mit Koch-Chemie-Produkten. 5,0 Sterne bei Google. | 66 |
 | D4 | Jetzt Termin vor dem ersten Frost anfragen. Per WhatsApp oder online. | 69 |
@@ -467,7 +467,7 @@ Auf Kontoebene anlegen, damit sie für G1 und G2 gelten. Asset "Winter-Lackschut
 | Innenaufbereitung | 17 | `/leistungen/innenaufbereitung-celle.html` | Tiefenreinigung, Polster, Teppich (33) | Geruchsneutralisation inklusive (31) |
 | Lackpolitur | 11 | `/leistungen/lackpolitur-celle.html` | Mehrstufig, mit Messung vorab (29) | Mindert Kratzer und Hologramme (30) |
 | Keramikversiegelung | 19 | `/leistungen/keramikversiegelung-celle.html` | Für Lack, Glas und Felgen (25) | C²Coating Excellence Partner (28) |
-| Lackversiegelung | 16 | `/leistungen/lackversiegelung-celle.html` | Lack, Felgen und Scheiben (25) | Mit Koch-Chemie-Produkten (25) |
+| Lackversiegelung | 16 | `/leistungen/lackversiegelung-celle.html` | Schutz vor Salz und UV (22) | Mit Koch-Chemie-Produkten (25) |
 | Lederaufbereitung | 17 | `/leistungen/lederaufbereitung-celle.html` | Reinigen, pflegen, reparieren (29) | Lederreparatur mit Colourlock (29) |
 | Leasingrückgabe | 15 | `/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html` | Aufbereitung vor Rückgabe (25) | Auch vor dem Verkauf (20) |
 | Winter-Lackschutz | 17 | `/aktion/winterschutz.html` | Lack winterfest machen (22) | Versiegelung vor dem Winter (27) |
