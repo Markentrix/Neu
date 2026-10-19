@@ -176,8 +176,15 @@ def aufgaben_automatisch(cfg):
             FROM buchungen b JOIN kunden k ON k.id = b.kunden_id
             WHERE b.status = 'aktiv' AND b.mindestlaufzeit_ende BETWEEN current_date AND current_date + 60 AND k.status = 'aktiv'
             ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Kunde hängt im Onboarding: seit 5 Tagen angelegt, einmal pro Woche eine Aufgabe zum Nachfassen
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT k.id, 'Onboarding nachfassen: ' || k.firma, {admin}, current_date, 'auto', 'onboarding-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
+            FROM kunden k
+            WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '5 days'
+              AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt)
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
     ]
-    neu, erinnern = [], []
+    neu, erinnern, onb = [], [], []
     with tx("system") as cur:
         for sql_text in regeln:
             cur.execute(sql_text)
@@ -190,7 +197,24 @@ def aufgaben_automatisch(cfg):
             k = cur.fetchone()
             if k and k["status"] in ("onboarding", "aktiv"):
                 erinnern.append((kunden_empfaenger(cur, r["kunden_id"]), k["ansprechpartner"], r["titel"]))
+        # Kunde im Onboarding (seit 3 Tagen) hat Briefing oder AVV offen: höchstens einmal pro Woche erinnern
+        cur.execute("""SELECT k.id, k.ansprechpartner,
+                              NOT EXISTS (SELECT 1 FROM briefings b WHERE b.kunden_id = k.id AND b.status = 'abgeschickt') AS briefing_offen,
+                              NOT EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id = k.id AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL)
+                                AND EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id = k.id AND a.portal_freigabe_am IS NOT NULL) AS avv_offen
+                       FROM kunden k
+                       WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '3 days'
+                         AND (k.onboarding_erinnert_am IS NULL OR k.onboarding_erinnert_am < now() - interval '7 days') LIMIT 30""")
+        for k in cur.fetchall():
+            offen = (["das Briefing ausfüllen"] if k["briefing_offen"] else []) + (["den Vertrag zur Auftragsverarbeitung bestätigen"] if k["avv_offen"] else [])
+            if not offen:
+                continue
+            cur.execute("UPDATE kunden SET onboarding_erinnert_am = now() WHERE id = %s", (k["id"],))
+            onb.append((kunden_empfaenger(cur, k["id"]), k["ansprechpartner"], offen))
         an = cfg["alarm_email"] or admin_empfaenger(cur)
+    for ziele, name, offen in onb:
+        for a in ziele:
+            mailer.onboarding_erinnerung_kunde(a, name, offen)
     for ziele, name, titel in erinnern:
         for a in ziele:
             mailer.freigabe_erinnerung_kunde(a, name, titel)

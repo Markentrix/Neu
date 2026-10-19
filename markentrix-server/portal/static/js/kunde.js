@@ -30,7 +30,7 @@ const SEITEN = [
 const inhaber = () => start.kunden_rolle === 'inhaber';
 const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv'].includes(s[0]) || inhaber()));
 
-const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : 0)) || 0;
+const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : 0)) || 0;
 
 function gerüst(aktiv, inhalt) {
   const k = start.kunde;
@@ -72,8 +72,19 @@ const statusPill = (s) => h('span', { class: 'pill ' + (['neu', 'geplant'].inclu
 // ------------------------------------------------------------- Seiten
 const V = {};
 
+function startKarte(sl) {
+  if (!sl.aktiv) return '';
+  const pct = sl.gesamt ? Math.round(100 * sl.fertig / sl.gesamt) : 0;
+  return h('div', { class: 'card' }, h('h2', {}, 'Dein Start bei Markentrix'),
+    h('p', { class: 'small muted' }, sl.fertig + ' von ' + sl.gesamt + ' Schritten erledigt. Wir kümmern uns um die meisten, ein paar brauchen deine Hilfe.'),
+    h('div', { class: 'fortschritt' }, h('div', { style: 'width:' + pct + '%' })),
+    sl.punkte.map(p => h('div', { class: 'row', style: 'padding:6px 0;border-bottom:1px solid var(--line)' },
+      h('span', { style: 'width:22px' }, p.fertig ? '✅' : '⬜'), h('span', { class: 'grow' + (p.fertig ? ' muted' : '') }, p.titel),
+      p.seite ? h('a', { class: 'btn small', href: '#' + p.seite }, p.aktion) : '')));
+}
+
 V.uebersicht = async () => {
-  const z = await api('/api/kunde/kennzahlen');
+  const [z, sl] = await Promise.all([api('/api/kunde/kennzahlen'), api('/api/kunde/startliste')]);
   const karte = (titel, zahl, text, link) => h('a', { class: 'card', href: link, style: 'text-decoration:none;color:inherit' }, h('h3', {}, titel), h('div', { class: 'stat' }, h('b', {}, zahl), h('span', { class: 'muted small' }, text)));
   const zusatz = [
     karte('Nachrichten', z.nachrichten_offen, z.wartet_auf_dich ? z.wartet_auf_dich + ' warten auf dich' : 'offen', '#nachrichten'),
@@ -81,7 +92,7 @@ V.uebersicht = async () => {
     karte('Anfragen', z.anfragen_30d, 'letzte 30 Tage', '#anfragen'),
     z.antwortzeit_h !== null ? h('div', { class: 'card' }, h('h3', {}, 'Antwortzeit des Teams'), h('div', { class: 'stat' }, h('b', {}, String(z.antwortzeit_h).replace('.', ',') + ' h'), h('span', { class: 'muted small' }, 'im Schnitt, letzte 90 Tage'))) : '',
   ];
-  return h('div', { class: 'stack' }, start.badges && start.badges.briefing ? h('div', { class: 'card' }, h('h2', {}, 'Dein Briefing fehlt noch'), h('p', { class: 'small muted' }, 'Mit ein paar Angaben zu deinem Unternehmen können wir deine Website und Texte viel schneller fertigstellen. Es dauert etwa 10 Minuten.'), h('a', { class: 'btn', href: '#briefing' }, 'Jetzt ausfüllen')) : '', z.bewertung_faellig ? zufriedenheitKarte() : '', h('div', { class: 'grid3' }, karten(), zusatz));
+  return h('div', { class: 'stack' }, startKarte(sl), start.badges && start.badges.briefing && !sl.aktiv ? h('div', { class: 'card' }, h('h2', {}, 'Dein Briefing fehlt noch'), h('p', { class: 'small muted' }, 'Mit ein paar Angaben zu deinem Unternehmen können wir deine Website und Texte viel schneller fertigstellen. Es dauert etwa 10 Minuten.'), h('a', { class: 'btn', href: '#briefing' }, 'Jetzt ausfüllen')) : '', z.bewertung_faellig ? zufriedenheitKarte() : '', h('div', { class: 'grid3' }, karten(), zusatz));
 };
 
 function zufriedenheitKarte() {
@@ -499,10 +510,17 @@ V.einstellungen = async () => {
 };
 
 V.avv = async () => {
-  const d = await api('/api/kunde/avv');
-  return h('div', { class: 'card' }, h('h2', {}, 'Vertrag zur Auftragsverarbeitung (AVV)'),
-    h('p', { class: 'small muted' }, 'Hier liegt der unterschriebene Vertrag, der regelt, wie Markentrix personenbezogene Daten in deinem Auftrag verarbeitet (Art. 28 DSGVO).'),
-    tabelle([['Unterschrieben am', z => datum(z.unterschrieben_am)], ['Datei', z => z.datei_name || 'AVV'], ['', z => h('a', { class: 'btn sec small', href: '/api/kunde/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Ansehen / Herunterladen')]], d, 'Noch kein unterschriebener Vertrag abgelegt. Das Markentrix-Team meldet sich dazu bei dir.'));
+  const [d, offen] = await Promise.all([api('/api/kunde/avv'), api('/api/kunde/avv-offen')]), m = h('div');
+  const bestaetigen = (z) => { const name = h('input', { placeholder: 'Vor- und Nachname', maxlength: 200 }), ok = h('input', { type: 'checkbox', style: 'width:auto' });
+    return h('div', { class: 'card' }, h('h2', {}, 'Vertrag zur Auftragsverarbeitung bestätigen'),
+      h('p', { class: 'small muted' }, 'Der Vertrag regelt, wie Markentrix personenbezogene Daten in deinem Auftrag verarbeitet (Art. 28 DSGVO). Bitte lies ihn und bestätige ihn dann mit einem Klick. Drucken und Unterschreiben ist nicht nötig.'), m,
+      h('p', {}, h('a', { class: 'btn sec', href: '/api/kunde/avv-offen/' + z.id + '/vorlage.pdf', target: '_blank', rel: 'noopener' }, 'Vertrag lesen (PDF)')),
+      h('label', {}, 'Dein Name'), name,
+      h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:14px;margin-top:12px' }, ok, 'Ich habe den Vertrag gelesen und bestätige ihn im Namen meines Unternehmens. Ich bin dazu berechtigt.'),
+      h('p', {}, h('button', { class: 'btn', onclick: async () => { try { await api('/api/kunde/avv-offen/' + z.id + '/bestaetigen', { method: 'POST', body: { name: name.value, akzeptiert: ok.checked } }); location.reload(); } catch (x) { melde(m, x.message); } } }, 'Vertrag bestätigen'))); };
+  return h('div', { class: 'stack' }, offen.map(bestaetigen), h('div', { class: 'card' }, h('h2', {}, 'Vertrag zur Auftragsverarbeitung (AVV)'),
+    h('p', { class: 'small muted' }, 'Hier liegt der bestätigte oder unterschriebene Vertrag, der regelt, wie Markentrix personenbezogene Daten in deinem Auftrag verarbeitet (Art. 28 DSGVO).'),
+    tabelle([['Bestätigt / unterschrieben am', z => datum(z.unterschrieben_am)], ['Datei', z => z.datei_name || 'AVV'], ['', z => h('a', { class: 'btn sec small', href: '/api/kunde/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Ansehen / Herunterladen')]], d, offen.length ? 'Noch nicht bestätigt.' : 'Noch kein Vertrag abgelegt.')));
 };
 
 V.team = async () => {

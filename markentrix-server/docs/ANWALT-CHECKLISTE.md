@@ -11,3 +11,6 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 7. **Aufbewahrung und Löschung**: Fristen für Rechnungen/Verträge, was beim Vertragsende gelöscht wird (siehe Offboarding in ANLEITUNG.md), Löschkonzept.
 8. **Verzeichnis der Verarbeitungstätigkeiten**, technische und organisatorische Maßnahmen (TOM, Anlage der AVV), ggf. Datenschutz-Folgenabschätzung für den Telefon-/Chat-Assistenten.
 9. **Zweiter Faktor, Zugriffsrechte, Protokollierung** (vorhanden) als Teil der TOM beschreiben lassen.
+10. **AVV per Klick bestätigen**: Reicht die elektronische Bestätigung im Portal (Textform, Nachweis mit Name, Zeit, IP, Prüfsumme) für Art. 28 Abs. 9 DSGVO und für deine Kundengruppe, oder soll zusätzlich unterschrieben werden? Wortlaut des Bestätigungsvermerks prüfen lassen.
+11. **Drittlandübermittlung**: Anthropic, Google, Meta (Irland, Konzernmutter USA): Rechtsgrundlage (Standardvertragsklauseln / EU-US Data Privacy Framework) und Folgen für die Unterauftragnehmer-Liste prüfen. Telefon-Assistent: Anbieter in der EU (Famulor) mit eigener Unterauftragnehmer-Liste, Aufzeichnungs- und Ansagepflichten klären.
+12. **Leads aus Website-Check und Kontaktformular**: Speicherung im CRM, Löschfrist (12 Monate), Nachfassen per Mail oder Telefon (UWG § 7), Hinweise in der Datenschutzerklärung (Abschnitt Website-Check und Kontaktformular) ergänzen.

@@ -226,6 +226,15 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 
 **Website-Check → Leads:** Wer den Check auf markentrix.de nutzt, erscheint als Lead (Admin → Leads) mit Ergebnis und Mail ans Team. Einrichtung: `docs/WEBSITE-CHECK.md`.
 
+## Leads, Onboarding und AVV (Stand Oktober 2026)
+
+- **Übersicht „Heute zu tun“**: oben auf der Admin-Übersicht stehen Nachrichten ohne Antwort, fällige Aufgaben, neue Leads, wartende Freigaben, hängende Onboardings, überfällige Rechnungen und fehlende AVV.
+- **Leads**: Einstufung Cold / Warm / HOT (Auswahl in Liste und Detail), Löschen-Knopf, „Angebot erstellen“ (legt bei Bedarf den Kunden an). Leads aus dem Website-Check starten als „Warm“, Anfragen über das Kontaktformular als „HOT“. Schlüssel und Einrichtung: `docs/WEBSITE-CHECK.md`, Schlüssel ablegen mit `bash bin/lead-key.sh`.
+- **Onboarding**: Der Kunde sieht auf seiner Übersicht „Dein Start“ mit Fortschritt und den Schritten, bei denen er etwas tun muss. Nach 3 Tagen bekommt er einmal pro Woche eine Erinnerung per Mail, nach 5 Tagen entsteht für dich eine Aufgabe „Onboarding nachfassen“. In der Kundenliste steht bei Kunden im Onboarding „Start: x von y“.
+- **Module** sind in der Kundenliste einzeln sichtbar und dort schaltbar.
+- **AVV per Klick**: Kunde → AVV → „Im Portal zur Bestätigung freigeben“. Der Kunde bekommt eine Mail, liest den Vertrag und bestätigt mit Namen und Häkchen. Das PDF enthält danach einen Bestätigungsvermerk (Name, Zeit, Prüfsumme), der Nachweis liegt zusätzlich in der Datenbank. Der Weg über Mail und Upload eines unterschriebenen PDFs bleibt möglich.
+- **Unterauftragsverarbeiter im AVV**: Einstellungen → „AVV: Unterauftragsverarbeiter“. Leer lassen = Standardliste.
+
 ## Automatische Tests
 
 `sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").

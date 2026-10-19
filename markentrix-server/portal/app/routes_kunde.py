@@ -42,8 +42,31 @@ def start(user: dict = Depends(require_kunde)):
         cur.execute("""SELECT (SELECT count(*) FROM tickets WHERE kunde_ungelesen) AS nachrichten, (SELECT count(*) FROM kundenfreigaben WHERE status='wartet') AS freigaben,
                               (SELECT CASE WHEN EXISTS (SELECT 1 FROM briefings WHERE status='abgeschickt') THEN 0 ELSE 1 END) AS briefing""")
         badges = cur.fetchone()
+    with tx("system") as cur:   # offene AVV sind für die Kundenrolle (Row-Level-Security) nicht sichtbar, daher gezielt mit Kundenfilter
+        cur.execute("SELECT count(*) AS n FROM avv WHERE kunden_id=%s AND datei IS NULL AND portal_freigabe_am IS NOT NULL", (kid,))
+        badges["avv"] = cur.fetchone()["n"]
     return {"badges": badges, "kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
             "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"]}
+
+
+@router.get("/startliste")
+def startliste(user: dict = Depends(require_kunde)):
+    """Onboarding aus Kundensicht: Schritte mit Stand; nur solange der Kunde im Status 'onboarding' ist."""
+    from . import onboarding
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        cur.execute("SELECT status FROM kunden WHERE id=%s", (kid,))
+        k = cur.fetchone()
+        if not k or k["status"] != "onboarding":
+            return {"aktiv": False, "punkte": []}
+        punkte = onboarding.lesen(cur, kid)
+    out = []
+    for p in punkte:
+        if p["code"] in ("rechnung", "vertrag") or p["code"].startswith("x-"):
+            continue
+        a = onboarding.KUNDE_AKTION.get(p["code"])
+        out.append({"titel": p["titel"], "fertig": p["fertig"], "seite": a[0] if a and not p["fertig"] else None, "aktion": a[1] if a and not p["fertig"] else None})
+    return {"aktiv": True, "punkte": out, "fertig": sum(1 for p in out if p["fertig"]), "gesamt": len(out)}
 
 
 # ---------------------------------------------------------------- Chat

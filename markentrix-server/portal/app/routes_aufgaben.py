@@ -204,3 +204,34 @@ def k_modul(data: ModulAnfrageIn, bg: BackgroundTasks, user: dict = Depends(requ
     if an:
         bg.add_task(mailer.ticket_neu_team, an, t["nr"], k["firma"], k["kundennummer"], f"Zusatzmodul anfragen: {m['name']}", "Zusatzmodul-Anfrage", text)
     return {"id": t["id"], "nr": t["nr"]}
+
+
+# ================================================================= Heute zu tun (Admin-Übersicht)
+@router.get("/heute")
+def heute(user: dict = Depends(require_admin)):
+    from .routes_avv import fehlende
+    with tx("admin") as cur:
+        cur.execute("""SELECT t.id, t.nummer, t.betreff, k.firma, k.id AS kunden_id FROM tickets t JOIN kunden k ON k.id = t.kunden_id
+                       WHERE t.status <> 'erledigt' AND t.team_ungelesen ORDER BY t.geaendert_am LIMIT 6""")
+        nachrichten = cur.fetchall()
+        cur.execute("""SELECT a.id, a.titel, a.faellig_am, a.kunden_id FROM aufgaben a WHERE a.status = 'offen' AND a.faellig_am <= current_date
+                       ORDER BY a.faellig_am, a.erstellt_am LIMIT 8""")
+        aufgaben = cur.fetchall()
+        cur.execute("""SELECT id, firma, temperatur, quelle, erstellt_am FROM leads WHERE status = 'neu'
+                       ORDER BY (temperatur = 'heiss') DESC NULLS LAST, erstellt_am DESC LIMIT 6""")
+        leads = cur.fetchall()
+        cur.execute("SELECT count(*) AS n FROM leads WHERE status = 'neu'")
+        leads_n = cur.fetchone()["n"]
+        cur.execute("""SELECT f.id, f.titel, k.firma, k.id AS kunden_id FROM kundenfreigaben f JOIN kunden k ON k.id = f.kunden_id
+                       WHERE f.status = 'wartet' AND f.angefragt_am < now() - interval '3 days' ORDER BY f.angefragt_am LIMIT 6""")
+        freigaben = cur.fetchall()
+        cur.execute("""SELECT k.id, k.firma FROM kunden k WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '5 days'
+                       AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt) ORDER BY k.erstellt_am LIMIT 6""")
+        onboarding = cur.fetchall()
+        cur.execute("""SELECT b.id, b.nummer, k.firma, k.id AS kunden_id FROM belege b JOIN kunden k ON k.id = b.kunden_id
+                       WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL ORDER BY b.faellig_am LIMIT 6""")
+        rechnungen = cur.fetchall()
+        avv_fehlt = [{"id": r["id"], "firma": r["firma"]} for r in fehlende(cur)][:6]
+    gesamt = len(nachrichten) + len(aufgaben) + leads_n + len(freigaben) + len(onboarding) + len(rechnungen) + len(avv_fehlt)
+    return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "leads_gesamt": leads_n, "freigaben": freigaben,
+            "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "gesamt": gesamt}

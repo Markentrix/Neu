@@ -19,3 +19,8 @@ Folgeaufgabe (+1 Tag) und Mail an das Team an. Fehler dabei blockieren den Besuc
 
 ## Recht
 Lead-Speicherung/Nachfassen ist in Datenschutz Abschnitt 4a noch nicht erwähnt → auf die Anwalts-Checkliste.
+
+## Kontaktformular und weitere Formulare
+Alle anderen Formulare der Website (Kontaktformular, Potenzial-Check) legen ebenfalls einen Lead an, wenn die Person die Einwilligung zur Bearbeitung der Anfrage gegeben hat.
+Aufruf: `POST /api/public/kontakt-lead` mit demselben Schlüssel (`X-Lead-Secret`). Der Lead bekommt die Einstufung „HOT“, die Nachricht steht im Verlauf, und es entsteht die Aufgabe „Anfrage beantworten“.
+Eine zweite Anfrage derselben E-Mail-Adresse ergänzt den vorhandenen Lead.

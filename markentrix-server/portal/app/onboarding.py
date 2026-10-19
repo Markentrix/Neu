@@ -5,6 +5,7 @@ VORLAGE = [
     ("vertrag", "Angebot/Vertrag unterschrieben", "Unterschriebenes Angebot oder Vertrag liegt vor und ist abgelegt.", 10, None, None),
     ("avv", "Auftragsverarbeitungsvertrag (AVV) unterschrieben", "Pflicht, sobald Daten von Kundinnen/Kunden des Kunden verarbeitet werden. Wird automatisch erledigt, sobald die unterschriebene Fassung abgelegt ist.", 20, None, "avv"),
     ("zugang", "Portal-Zugang eingerichtet", "Kunde hat sein Passwort gesetzt und sich einmal angemeldet.", 30, None, "zugang"),
+    ("briefing", "Briefing ausgefüllt", "Der Kunde hat den Fragebogen zu Unternehmen, Zielen und Wünschen abgeschickt.", 35, None, "briefing"),
     ("stammdaten", "Firmendaten, Öffnungszeiten, Leistungen erfasst", "Wird für Website, Assistent und Berichte gebraucht.", 40, None, None),
     ("branding", "Logo, Farben, Fotos erhalten", "Vom Kunden bekommen oder mit ihm abgestimmt.", 50, None, None),
     ("domain", "Domain und DNS bereit", "Domain gehört dem Kunden oder wurde registriert, DNS zeigt auf den Server.", 60, "website", None),
@@ -15,6 +16,16 @@ VORLAGE = [
     ("einweisung", "Einweisung / Übergabe-Termin durchgeführt", "Kunde weiß, wie er das Portal und die Benachrichtigungen nutzt.", 110, None, None),
     ("rechnung", "Erste Rechnung gestellt", "Einrichtung und erster Monat abgerechnet (bei Referenzkunden entfällt das).", 120, None, None),
 ]
+
+
+# Schritte, bei denen der Kunde selbst etwas tun muss: code -> (Seite im Kundenportal, Beschriftung)
+KUNDE_AKTION = {
+    "avv": ("avv", "Vertrag bestätigen"),
+    "briefing": ("briefing", "Briefing ausfüllen"),
+    "branding": ("dokumente", "Logo und Fotos hochladen"),
+    "konten": ("nachrichten", "Zugänge senden"),
+    "stammdaten": ("briefing", "Angaben ergänzen"),
+}
 
 
 def anlegen(cur, kid):
@@ -49,6 +60,9 @@ def auto_erkannt(cur, kid) -> set:
     cur.execute("SELECT 1 FROM avv WHERE kunden_id=%s AND datei IS NOT NULL AND unterschrieben_am IS NOT NULL LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("avv")
+    cur.execute("SELECT 1 FROM briefings WHERE kunden_id=%s AND status='abgeschickt'", (kid,))
+    if cur.fetchone():
+        erkannt.add("briefing")
     return erkannt
 
 

@@ -1,4 +1,6 @@
 """Auftragsverarbeitungsvertrag (AVV): Vertragstext und PDF. Der Text ist eine Vorlage und muss juristisch geprüft werden."""
+import json
+
 from . import pdf
 from .pdf import H1, H2, KLEIN, Spacer, p, tabelle
 
@@ -36,7 +38,15 @@ def _firmenadresse(f: dict) -> str:
     return ", ".join(t for t in [name, inhaber, f.get("strasse"), f"{f.get('plz') or ''} {f.get('ort') or ''}".strip()] if t)
 
 
-def avv_pdf(kunde: dict, firma: dict, unter: list) -> bytes:
+def text_hash(kunde: dict, firma: dict, unter: list) -> str:
+    """Prüfsumme über Parteien, Unterauftragsverarbeiter, Version und den Vertragstext im Code."""
+    import hashlib
+    import inspect
+    roh = json.dumps([VERSION, _adresse(kunde), _firmenadresse(firma), [list(u) for u in unter], inspect.getsource(avv_pdf)], ensure_ascii=False)
+    return hashlib.sha256(roh.encode()).hexdigest()
+
+
+def avv_pdf(kunde: dict, firma: dict, unter: list, bestaetigung: dict | None = None) -> bytes:
     inhalt = [p("Vertrag zur Auftragsverarbeitung", H1), p("gemäß Art. 28 Datenschutz-Grundverordnung (DSGVO)", KLEIN), Spacer(1, 10),
               p("zwischen"), p(_adresse(kunde) or "[Auftraggeber]", pdf.RECHTS_FETT.clone("fett_links", alignment=0)), p("– nachfolgend „Auftraggeber“ –"), Spacer(1, 4),
               p("und"), p(_firmenadresse(firma), pdf.RECHTS_FETT.clone("fett_links2", alignment=0)), p("– nachfolgend „Auftragnehmer“ –")]
@@ -66,7 +76,14 @@ def avv_pdf(kunde: dict, firma: dict, unter: list) -> bytes:
         "Der Auftraggeber kann sich nach Voranmeldung von der Einhaltung dieses Vertrags überzeugen, in der Regel durch Auskunft und Nachweise.")
     par("7. Haftung, Schlussbestimmungen",
         "Es gelten die gesetzlichen Regelungen. Änderungen bedürfen der Textform. Es gilt deutsches Recht.")
-    inhalt += [Spacer(1, 26), tabelle(["Ort, Datum", "Auftraggeber", "Auftragnehmer"], [["\n\n\n", "\n\n\n", "\n\n\n"]])]
+    if bestaetigung:
+        inhalt += [Spacer(1, 22), p("Elektronische Bestätigung", H2),
+                   p(f"Der Auftraggeber hat diesen Vertrag am {bestaetigung['zeit']} im Markentrix-Portal elektronisch bestätigt "
+                     f"(bestätigt durch {bestaetigung['name']}, angemeldet als {bestaetigung['email']}). "
+                     "Der Auftragnehmer hat den Vertrag durch Bereitstellung im Portal angeboten und erkennt die Bestätigung an."),
+                   Spacer(1, 4), p(f"Prüfsumme des bestätigten Vertragstextes (SHA-256): {bestaetigung['hash']}", KLEIN)]
+    else:
+        inhalt += [Spacer(1, 26), tabelle(["Ort, Datum", "Auftraggeber", "Auftragnehmer"], [["\n\n\n", "\n\n\n", "\n\n\n"]])]
     inhalt += [pdf.PageBreak(), p("Anlage 1: Technische und organisatorische Maßnahmen", H1), Spacer(1, 6)]
     tom = [("Zutritt", "Betrieb auf Servern der Hetzner Online GmbH (Rechenzentrum in Deutschland); Zutrittskontrolle durch den Rechenzentrumsbetreiber."),
            ("Zugang", "Passwortpflicht (mindestens 10 Zeichen), Sperre nach Fehlversuchen, optionale Zwei-Faktor-Anmeldung, Sitzungen laufen ab, Serverzugang nur per Schlüssel oder Konsole."),

@@ -39,8 +39,7 @@ def _host(url: str | None) -> str:
         return ""
 
 
-@router.post("/public/website-check")
-async def website_check(data: CheckIn, request: Request, bg: BackgroundTasks):
+def _schluessel_pruefen(request: Request):
     rate_limit("wcheck", 60, 600)
     with tx("system") as cur:
         soll = (einstellungen.lesen(cur, "website_check") or {}).get("secret") or ""
@@ -48,6 +47,60 @@ async def website_check(data: CheckIn, request: Request, bg: BackgroundTasks):
     if not soll or not hmac.compare_digest(soll.encode(), gegeben.encode()):
         rate_limit("wcheck-falsch:" + client_ip(request), 10, 600)
         raise HTTPException(401, "Nicht berechtigt.")
+
+
+class KontaktIn(BaseModel):
+    email: str = Field(max_length=320)
+    name: str | None = Field(default=None, max_length=200)
+    firma: str | None = Field(default=None, max_length=200)
+    telefon: str | None = Field(default=None, max_length=60)
+    thema: str | None = Field(default=None, max_length=200)
+    budget: str | None = Field(default=None, max_length=100)
+    nachricht: str | None = Field(default=None, max_length=4000)
+    wunschtermin: str | None = Field(default=None, max_length=200)
+    einwilligung: bool = False
+    einwilligung_text: str | None = Field(default=None, max_length=500)
+
+
+@router.post("/public/kontakt-lead")
+async def kontakt_lead(data: KontaktIn, request: Request):
+    """Anfrage über das Kontaktformular der Website: legt einen Lead (heiß) an oder ergänzt den vorhandenen."""
+    _schluessel_pruefen(request)
+    email = data.email.strip().lower()
+    if not EMAIL.match(email):
+        raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
+    if not data.einwilligung:
+        raise HTTPException(400, "Ohne Einwilligung wird kein Kontakt angelegt.")
+    firma = (data.firma or "").strip() or (data.name or "").strip() or email.split("@")[1]
+    zeilen = [f"Thema: {data.thema}" if data.thema else "", f"Budget: {data.budget}" if data.budget else "", f"Wunschtermin: {data.wunschtermin}" if data.wunschtermin else "",
+              (data.nachricht or "").strip()]
+    inhalt = "Anfrage über das Kontaktformular:\n" + "\n".join(z for z in zeilen if z)
+    with tx("system") as cur:
+        cur.execute("SELECT id FROM leads WHERE lower(email)=%s ORDER BY erstellt_am LIMIT 1", (email,))
+        l = cur.fetchone()
+        neu = not l
+        if neu:
+            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, quelle, temperatur, loeschen_nach, notiz)
+                           VALUES (%s,%s,%s,%s,'website','heiss', current_date + interval '12 months', 'Über das Kontaktformular auf markentrix.de') RETURNING id""",
+                        (firma, (data.name or "").strip() or None, email, (data.telefon or "").strip() or None))
+            lid = cur.fetchone()["id"]
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'consent',%s,'website')",
+                        (lid, "Einwilligung im Kontaktformular erteilt" + (f" (Text: {data.einwilligung_text})" if data.einwilligung_text else "")))
+        else:
+            lid = l["id"]
+            cur.execute("""UPDATE leads SET temperatur='heiss', telefon=coalesce(telefon,%s), loeschen_nach=greatest(loeschen_nach, current_date + interval '12 months') WHERE id=%s""",
+                        ((data.telefon or "").strip() or None, lid))
+        cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'website')", (lid, inhalt[:3900]))
+        an = admin_empfaenger(cur)
+        cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+                      VALUES (NULL, %s, %s, current_date, 'auto', %s) ON CONFLICT (auto_schluessel) DO NOTHING""",
+                    (f"Anfrage beantworten: {firma}", an, f"lead-kontakt-{lid}-{__import__('datetime').datetime.now().strftime('%Y%m%d%H%M')}"))
+    return {"ok": True, "neu": neu}
+
+
+@router.post("/public/website-check")
+async def website_check(data: CheckIn, request: Request, bg: BackgroundTasks):
+    _schluessel_pruefen(request)
     email = data.email.strip().lower()
     if not EMAIL.match(email):
         raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")

@@ -110,6 +110,24 @@ def avv(an: str, name: str | None, pdf_bytes: bytes) -> tuple[bool, str]:
     return senden(an, "Vertrag zur Auftragsverarbeitung (AVV)", text, ("Auftragsverarbeitungsvertrag.pdf", pdf_bytes, "application/pdf"))
 
 
+def avv_portal(an: str, name: str | None) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    text = (f"{hallo}\n\nder Vertrag zur Auftragsverarbeitung (AVV) nach Art. 28 DSGVO liegt in Ihrem Portal zur Bestätigung bereit. "
+            f"Sie können ihn dort lesen und mit einem Klick bestätigen, Drucken und Unterschreiben ist nicht nötig.\n\n{config.BASE_URL}/app#avv" + SIGNATUR)
+    return senden(an, "Vertrag zur Auftragsverarbeitung: bitte bestätigen", text)
+
+
+def avv_bestaetigt_team(an: str, firma: str, kundennummer: str, name: str, kid: str) -> tuple[bool, str]:
+    t = (f"{firma} ({kundennummer}) hat den AVV im Portal bestätigt (durch {name}).\n\nAnsehen im Admin-Bereich: {config.BASE_URL}/admin#kunde/{kid}" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"AVV bestätigt: {firma}", t)
+
+
+def onboarding_erinnerung_kunde(an: str, name: str | None, offen: list[str]) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    text = (f"{hallo}\n\nfür einen guten Start fehlt uns von Ihnen noch Folgendes: bitte " + " und ".join(offen) + f".\n\nDas geht direkt im Portal: {config.BASE_URL}/app\n\nWenn Sie Hilfe brauchen, schreiben Sie uns einfach dort eine Nachricht." + SIGNATUR)
+    return senden(an, "Für Ihren Start fehlt noch etwas", text)
+
+
 def mahnung(an: str, titel: str, nummer: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
     text = (f"Guten Tag,\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}.\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
     return senden(an, f"{titel} zu Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))

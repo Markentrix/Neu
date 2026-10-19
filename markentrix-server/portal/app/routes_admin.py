@@ -148,7 +148,12 @@ def kunden_liste(q: str = "", user: dict = Depends(require_admin)):
                        FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code
                        WHERE %s = '' OR k.firma ILIKE %s OR k.kundennummer ILIKE %s OR coalesce(k.email,'') ILIKE %s
                        ORDER BY k.kundennummer DESC LIMIT 500""", (q, f"%{q}%", f"%{q}%", f"%{q}%"))
-        return cur.fetchall()
+        rows = cur.fetchall()
+        for r in rows:   # Fortschritt der Einrichtung nur für Kunden im Onboarding
+            if r["status"] == "onboarding":
+                punkte = onboarding.lesen(cur, r["id"])
+                r["onboarding"] = {"fertig": sum(1 for p in punkte if p["fertig"]), "gesamt": len(punkte)}
+        return rows
 
 
 @router.post("/kunden")

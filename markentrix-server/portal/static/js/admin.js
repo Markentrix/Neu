@@ -28,10 +28,24 @@ const leerzu = (o) => { Object.keys(o).forEach(k => { if (o[k] === '') delete o[
 
 const V = {};
 
+function heuteKarte(t) {
+  const abschnitt = (titel, liste, zeile) => liste.length ? h('div', { style: 'margin-bottom:12px' }, h('h3', {}, titel), liste.map(z => h('div', { class: 'row', style: 'padding:4px 0;border-bottom:1px solid var(--line)' }, zeile(z)))) : '';
+  const TEMP = { kalt: '❄', warm: '☀', heiss: '🔥' };
+  return h('div', { class: 'card' }, h('h2', {}, 'Heute zu tun', t.gesamt ? h('span', { class: 'badge', style: 'margin-left:8px' }, t.gesamt) : ''),
+    t.gesamt ? '' : h('p', { class: 'muted' }, 'Alles erledigt. Nichts Dringendes offen. 🎉'),
+    abschnitt('Nachrichten ohne Antwort', t.nachrichten, z => [h('a', { class: 'grow', href: '#postfach/' + z.id }, z.firma + ': ' + z.betreff)]),
+    abschnitt('Aufgaben fällig oder überfällig', t.aufgaben, z => [h('a', { class: 'grow', href: '#aufgaben' }, z.titel), h('span', { class: 'small muted' }, datum(z.faellig_am))]),
+    abschnitt('Neue Leads' + (t.leads_gesamt > t.leads.length ? ' (' + t.leads_gesamt + ')' : ''), t.leads, z => [h('a', { class: 'grow', href: '#lead/' + z.id }, (TEMP[z.temperatur] || '') + ' ' + z.firma), h('span', { class: 'small muted' }, z.quelle)]),
+    abschnitt('Freigaben warten seit über 3 Tagen', t.freigaben, z => [h('a', { class: 'grow', href: '#kunde/' + z.kunden_id }, z.firma + ': ' + z.titel)]),
+    abschnitt('Onboarding hängt', t.onboarding, z => [h('a', { class: 'grow', href: '#kunde/' + z.id }, z.firma)]),
+    abschnitt('Rechnungen überfällig', t.rechnungen, z => [h('a', { class: 'grow', href: '#kunde/' + z.kunden_id }, z.firma + ': ' + z.nummer)]),
+    abschnitt('AVV fehlt', t.avv_fehlt, z => [h('a', { class: 'grow', href: '#kunde/' + z.id }, z.firma)]));
+}
+
 V.uebersicht = async () => {
-  const d = await api('/api/admin/uebersicht'), ob = await api('/api/admin/onboarding/offen');
+  const d = await api('/api/admin/uebersicht'), ob = await api('/api/admin/onboarding/offen'), heute = await api('/api/admin/heute');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
-  return h('div', {}, kopf('Übersicht'),
+  return h('div', {}, kopf('Übersicht'), heuteKarte(heute),
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Aktiv'), h('b', {}, s.aktiv || 0)),
@@ -77,7 +91,7 @@ V.kunden = async () => {
     if (nurRef.checked) d = d.filter(z => z.referenzkunde);
     box.replaceChildren(tabelle([
       ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => h('span', {}, z.firma, z.referenzkunde ? [' ', h('span', { class: 'pill warn' }, 'Referenz')] : '')], ['Paket', z => z.paket || '–'],
-      ['Status', z => pill(z.status)], ['Module', z => modulZelle(z)], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
+      ['Status', z => h('span', {}, pill(z.status), z.onboarding ? h('div', { class: 'small muted' }, 'Start: ' + z.onboarding.fertig + ' von ' + z.onboarding.gesamt) : '')], ['Module', z => modulZelle(z)], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(lade, 250); });
   await lade();
@@ -155,6 +169,7 @@ const zahlenfeld = (name, label, wert) => feld(label, name, wert === null || wer
 const cent = (v) => v === undefined || v === '' ? null : Math.round(Number(v) * 100);
 const knopf = (text, fn, art = 'sec') => h('button', { class: 'btn small ' + art, onclick: fn }, text);
 const bestaetigt = async (m, fn, ok = 'Gespeichert.') => { try { await fn(); melde(m, ok, 'ok'); setTimeout(() => location.reload(), 700); } catch (x) { fehler(m, x); } };
+const bestaetigtOhneReload = async (m, fn) => { try { await fn(); } catch (x) { fehler(m, x); } };
 const select = (name, optionen, wert, extra = {}) => h('select', { name, ...extra }, optionen.map(o => { const [v, l] = Array.isArray(o) ? o : [o, o]; return h('option', { value: v, selected: v === wert }, String(l).replace(/_/g, ' ')); }));
 
 const mailHinweis = (mail) => !mail ? '' : h('div', { class: 'msg ' + (mail.gesendet ? 'ok' : 'info') }, mail.gesendet ? 'Die Einladung wurde per E-Mail verschickt.' : 'Nicht per E-Mail verschickt: ' + mail.grund);
@@ -228,12 +243,13 @@ async function avvKarte(kid) {
       const r = new FileReader(); r.onload = async () => { try { await api('/api/admin/avv/' + z.id + '/upload', { method: 'POST', body: { datei_base64: r.result, datei_name: f.name, unterschrieben_am: tag.value } }); location.reload(); } catch (x) { fehler(m, x); } }; r.readAsDataURL(f); }, 'btn')); };
   const aktion = (z) => h('span', { class: 'row' },
     h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/vorlage.pdf', target: '_blank', rel: 'noopener' }, 'Vertrag (PDF)'),
+    !z.hat_datei ? knopf(z.portal_freigabe_am ? 'Erneut zur Bestätigung freigeben' : 'Im Portal zur Bestätigung freigeben', async () => { if (confirm('Der Kunde bekommt eine Mail und kann den Vertrag im Portal mit einem Klick bestätigen. Fortfahren?')) { try { await api('/api/admin/avv/' + z.id + '/portal-freigeben', { method: 'POST' }); melde(m, 'Freigegeben, der Kunde wurde benachrichtigt.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'small') : '',
     knopf('Per Mail senden', async () => { if (confirm('AVV jetzt per E-Mail an den Kunden senden?')) { try { await api('/api/admin/avv/' + z.id + '/senden', { method: 'POST' }); melde(m, 'Gesendet.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'sec small'),
     z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Unterschrieben ansehen') : knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/avv/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { fehler(m, x); } } }, 'bad small'));
   return h('div', { class: 'card' }, h('h2', {}, 'Auftragsverarbeitungsvertrag (AVV) ', d.vorhanden ? h('span', { class: 'pill ok' }, 'liegt vor') : h('span', { class: 'pill warn' }, 'fehlt')),
-    h('p', { class: 'small muted' }, 'Ablauf: Vertrag erstellen, per Mail an den Kunden senden, unterschrieben zurückbekommen und hier ablegen. Der Kunde sieht die abgelegte Fassung in seinem Portal.'), m,
+    h('p', { class: 'small muted' }, 'Ablauf A (empfohlen): Vertrag erstellen, im Portal zur Bestätigung freigeben, der Kunde bestätigt per Klick. Ablauf B: per Mail senden, unterschrieben zurückbekommen und hier ablegen. Der Kunde sieht die abgelegte Fassung in seinem Portal.'), m,
     tabelle([['Erstellt', z => datum(z.erstellt_am)], ['Gesendet', z => z.gesendet_am ? datum(z.gesendet_am) : '–'], ['Unterschrieben am', z => z.unterschrieben_am ? datum(z.unterschrieben_am) : '–'],
-      ['Datei', z => z.hat_datei ? z.datei_name : 'noch nicht abgelegt'], ['', aktion]], d.liste, 'Noch kein AVV erstellt.'),
+      ['Datei', z => z.hat_datei ? z.datei_name + (z.online_bestaetigt_am ? ' (online bestätigt von ' + z.online_bestaetigt_name + ', ' + datum(z.online_bestaetigt_am) + ')' : '') : (z.portal_freigabe_am ? 'im Portal freigegeben, wartet auf Bestätigung' : 'noch nicht abgelegt')], ['', aktion]], d.liste, 'Noch kein AVV erstellt.'),
     d.liste.filter(z => !z.hat_datei).length ? h('div', { style: 'margin-top:12px' }, h('p', { class: 'small muted' }, 'Unterschriebene Fassung zum neuesten Entwurf ablegen:'), hoch(d.liste.find(z => !z.hat_datei))) : '',
     h('p', { style: 'margin-top:12px' }, knopf('Neuen AVV erstellen', neu, 'btn')));
 }
@@ -533,7 +549,10 @@ async function leadDetail(lid) {
   const akt = h('form', { onsubmit: (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); bestaetigt(m, () => api('/api/admin/leads/' + lid + '/aktivitaet', { method: 'POST', body: o }), 'Eingetragen.'); } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, select('art', ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'], 'notiz')), h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => confirm('Aus diesem Lead einen Kunden anlegen?') && bestaetigt(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); location.hash = '#kunde/' + k.id; }), 'btn');
-  return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
+  const ang = l.kunden_id ? h('a', { class: 'btn small', href: '#neubeleg/' + l.kunden_id + '/angebot' }, 'Angebot erstellen')
+    : knopf('Angebot erstellen', () => confirm('Für ein Angebot wird aus dem Lead ein Kunde (Status Onboarding) angelegt. Fortfahren?') &&
+      bestaetigtOhneReload(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); await api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: 'angebot' } }); location.hash = '#neubeleg/' + k.id + '/angebot'; }), 'btn');
+  return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),
       h('div', { class: 'freitext' }, JSON.stringify(c.ergebnis, null, 2))))) : '',

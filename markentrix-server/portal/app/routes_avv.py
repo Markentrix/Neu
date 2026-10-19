@@ -2,20 +2,20 @@
 import base64
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
 from . import avv, einstellungen, mailer, rechtstexte
 from .db import tx
-from .security import audit, require_admin, require_inhaber
+from .security import audit, client_ip, rate_limit, require_admin, require_inhaber
 
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
 
 MAX_DATEI = 6 * 1024 * 1024
-LISTE = "id, version, erstellt_am, gesendet_am, unterschrieben_am, datei_name, hochgeladen_am, (datei IS NOT NULL) AS hat_datei"
+LISTE = "id, version, erstellt_am, gesendet_am, unterschrieben_am, datei_name, hochgeladen_am, portal_freigabe_am, online_bestaetigt_am, online_bestaetigt_name, (datei IS NOT NULL) AS hat_datei"
 
 
 def _404():
@@ -222,3 +222,89 @@ def kunde_datei(aid: str, user: dict = Depends(require_inhaber)):
     if not a:
         raise _404()
     return _antwort(bytes(a["datei"]), a["datei_typ"], a["datei_name"] or "AVV")
+
+
+# ---------------------------------------------------------------- Bestätigung per Klick im Portal
+@router.post("/avv/{aid}/portal-freigeben")
+def portal_freigeben(aid: str, bg: BackgroundTasks, user: dict = Depends(require_admin)):
+    """Gibt den AVV im Kundenportal zur Bestätigung frei und benachrichtigt den Kunden per Mail."""
+    try:
+        with tx("admin") as cur:
+            cur.execute("""UPDATE avv SET portal_freigabe_am=now() WHERE id=%s AND datei IS NULL RETURNING kunden_id""", (aid,))
+            r = cur.fetchone()
+            if not r:
+                raise HTTPException(400, "Nicht gefunden oder schon abgelegt.")
+            cur.execute("SELECT email, ansprechpartner FROM kunden WHERE id=%s", (r["kunden_id"],))
+            k = cur.fetchone()
+            audit(cur, user, "avv_portal_freigegeben", r["kunden_id"])
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    an = (k.get("email") or "").strip()
+    if an:
+        bg.add_task(mailer.avv_portal, an, k.get("ansprechpartner"))
+    return {"ok": True, "gemailt": bool(an)}
+
+
+@kunde_router.get("/avv-offen")
+def kunde_offen(user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        cur.execute("""SELECT id, version, portal_freigabe_am FROM avv
+                       WHERE kunden_id=%s AND datei IS NULL AND portal_freigabe_am IS NOT NULL ORDER BY portal_freigabe_am DESC""", (kid,))
+        return cur.fetchall()
+
+
+def _eigener_avv(cur, aid, kid):
+    cur.execute("SELECT id, kunden_id FROM avv WHERE id=%s AND kunden_id=%s AND datei IS NULL AND portal_freigabe_am IS NOT NULL", (aid, kid))
+    if not cur.fetchone():
+        raise _404()
+
+
+@kunde_router.get("/avv-offen/{aid}/vorlage.pdf")
+def kunde_vorlage(aid: str, user: dict = Depends(require_inhaber)):
+    try:
+        with tx("system") as cur:
+            _eigener_avv(cur, aid, user["kunden_id"])
+            daten, _k = _pdf(cur, aid)
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    return _antwort(daten, "application/pdf", "Auftragsverarbeitungsvertrag.pdf")
+
+
+class BestaetigenIn(BaseModel):
+    name: str = Field(min_length=3, max_length=200)
+    akzeptiert: bool
+
+
+@kunde_router.post("/avv-offen/{aid}/bestaetigen")
+def kunde_bestaetigen(aid: str, data: BestaetigenIn, request: Request, bg: BackgroundTasks, user: dict = Depends(require_inhaber)):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    if not data.akzeptiert:
+        raise HTTPException(400, "Bitte bestätige, dass du den Vertrag gelesen hast und vertretungsberechtigt bist.")
+    rate_limit("avvok:" + str(user["kunden_id"]), 5, 600)
+    kid = user["kunden_id"]
+    name = " ".join(data.name.split())
+    try:
+        with tx("system") as cur:
+            _eigener_avv(cur, aid, kid)
+            cur.execute("SELECT firma, rechtsform, strasse, plz, ort, email, ansprechpartner FROM kunden WHERE id=%s", (kid,))
+            k = cur.fetchone()
+            f = rechtstexte.firma(cur)
+            unter = avv.unterauftragnehmer(einstellungen.lesen(cur, "avv").get("unterauftragnehmer"))
+            jetzt = datetime.now(ZoneInfo("Europe/Berlin"))
+            hashwert = avv.text_hash(k, f, unter)
+            pdf_bytes = avv.avv_pdf(k, f, unter, {"zeit": jetzt.strftime("%d.%m.%Y, %H:%M Uhr"), "name": name, "email": user["email"], "hash": hashwert})
+            cur.execute("""UPDATE avv SET datei=%s, datei_typ='application/pdf', datei_name='AVV-online-bestaetigt.pdf', unterschrieben_am=%s, hochgeladen_am=now(),
+                                  online_bestaetigt_am=now(), online_bestaetigt_name=%s, online_bestaetigt_email=%s, online_bestaetigt_ip=%s, online_bestaetigt_hash=%s
+                           WHERE id=%s""", (pdf_bytes, jetzt.date(), name, user["email"], client_ip(request), hashwert, aid))
+            audit(cur, user, "avv_online_bestaetigt", kid, {"name": name, "hash": hashwert})
+            from .routes_zusammenarbeit import admin_empfaenger
+            an = admin_empfaenger(cur)
+            cur.execute("SELECT kundennummer FROM kunden WHERE id=%s", (kid,))
+            nr = cur.fetchone()["kundennummer"]
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    if an:
+        bg.add_task(mailer.avv_bestaetigt_team, an, k["firma"], nr, name, str(kid))
+    return {"ok": True}

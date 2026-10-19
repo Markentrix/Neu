@@ -360,6 +360,34 @@ if ($quelle === 'Website-Check' && ($clean['kontakt_gewuenscht'] ?? '') === 'ja'
   }
 }
 
+// Portal: normale Anfragen (Kontaktformular, Potenzial-Check, …) als heißen Lead anlegen. Voraussetzung: Einwilligung zur Bearbeitung der Anfrage.
+if ($quelle !== 'Website-Check' && $leadSent === null && function_exists('curl_init') && ($clean['einwilligung'] ?? '') === 'ja') {
+  $leadKey2 = (string) (getenv('MX_LEAD_SECRET') ?: '');
+  if ($leadKey2 === '' && $CONFIG['log_file'] !== '') {
+    $leadKeyFile2 = dirname($CONFIG['log_file']) . '/lead-secret';
+    if (is_file($leadKeyFile2)) $leadKey2 = trim((string) @file_get_contents($leadKeyFile2));
+  }
+  if ($leadKey2 !== '') {
+    $kBody = json_encode([
+      'email' => $email, 'name' => $name, 'firma' => $clean['firma'] ?? '', 'telefon' => $clean['tel'] ?? '',
+      'thema' => ($clean['thema'] ?? '') !== '' ? $clean['thema'] : $quelle, 'budget' => $clean['budget'] ?? '',
+      'nachricht' => $clean['nachricht_text'] ?? '', 'wunschtermin' => $clean['wunschtermin'] ?? '',
+      'einwilligung' => true,
+      'einwilligung_text' => 'Anfrage über "' . $quelle . '" mit Einwilligung zur Bearbeitung (' . gmdate('c') . ' UTC)',
+    ], JSON_UNESCAPED_UNICODE);
+    $kUrl = getenv('MX_LEAD_URL') ?: 'https://portal.markentrix.de/api/public/website-check';
+    $kUrl = preg_replace('#/website-check$#', '/kontakt-lead', $kUrl);
+    $ch = curl_init($kUrl);
+    curl_setopt_array($ch, [
+      CURLOPT_POST => true, CURLOPT_POSTFIELDS => $kBody, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 6, CURLOPT_CONNECTTIMEOUT => 4,
+      CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'X-MK: 1', 'X-Lead-Secret: ' . $leadKey2],
+    ]);
+    @curl_exec($ch);
+    $leadSent = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+  }
+}
+
 // Optional: Protokoll (eine JSON-Zeile je Anfrage, außerhalb des Webroots)
 if ($CONFIG['log_file'] !== '') {
   @file_put_contents($CONFIG['log_file'], json_encode(['t' => gmdate('c'), 'sent' => $sent, 'bestaetigt' => $confirmed, 'bericht' => $reported, 'lead' => $leadSent] + array_diff_key($clean, ['bericht_token' => 1]), JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
