@@ -217,6 +217,12 @@
     if (pre) { try { input.value = decodeURIComponent(pre.replace(/\+/g, ' ')).slice(0, 300); } catch (e) { } if (input.value) setTimeout(function () { form.dispatchEvent(new Event('submit', { cancelable: true })); }, 300); }
   }
 
+  /* Partnerseite: Klick auf „bewerben“ wählt die Rolle im Formular vor */
+  function initPartner() {
+    var sel = $('#b-rolle'); if (!sel) return;
+    $$('a[data-rolle]').forEach(function (a) { on(a, 'click', function () { sel.value = a.getAttribute('data-rolle'); }); });
+  }
+
   /* ── Wunschtermin-Kalender ──────────────────────────────────────────── */
   function initCalendar() {
     $$('[data-calendar]').forEach(function (root) {
@@ -665,6 +671,6 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

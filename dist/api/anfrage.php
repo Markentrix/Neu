@@ -101,7 +101,7 @@ $hits[] = $now;
 
 // E-Mail zusammensetzen
 $quelle  = $clean['quelle'] ?? 'Website';
-$order   = ['quelle', 'name', 'firma', 'email', 'tel', 'thema', 'budget', 'aktion', 'bedarf', 'status', 'zeitplan', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'termin_iso', 'nachricht_text', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_referrer', 'website_check', 'kontakt_gewuenscht', 'seite', 'zeit'];
+$order   = ['quelle', 'name', 'firma', 'email', 'tel', 'thema', 'budget', 'aktion', 'bedarf', 'status', 'zeitplan', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'termin_iso', 'nachricht_text', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_referrer', 'website_check', 'kontakt_gewuenscht', 'rolle', 'region', 'link', 'seite', 'zeit'];
 $lines   = [];
 foreach ($order as $k) {
   if (isset($clean[$k]) && $clean[$k] !== '') $lines[] = str_pad($k, 14) . ': ' . $clean[$k];
@@ -126,7 +126,7 @@ if ($report) {
   $lines[] = '';
 }
 $lines[] = str_pad('einwilligung', 14) . ': ja (' . gmdate('c') . ' UTC, IP-Hash ' . substr(hash('sha256', $ip), 0, 12) . ')';
-$body    = "Neue Anfrage über markentrix.de\n\n" . implode("\n", $lines) . "\n";
+$body    = ($quelle === 'Bewerbung' ? "Neue Bewerbung über markentrix.de" : "Neue Anfrage über markentrix.de") . "\n\n" . implode("\n", $lines) . "\n";
 $subject = $CONFIG['subject_prefix'] . $quelle . ': ' . $name;
 
 $fromName = '=?UTF-8?B?' . base64_encode('Markentrix Website') . '?=';
@@ -299,7 +299,21 @@ if ($sent && $CONFIG['confirm'] && !$report) {
       'X-Auto-Response-Suppress: All',
       'X-Mailer: markentrix-website',
     ];
-    $confirmed = deliver($CONFIG, $email, '=?UTF-8?B?' . base64_encode('Ihre Anfrage bei Markentrix ist eingegangen') . '?=', $cbody, $cheaders);
+    $csubject = 'Ihre Anfrage bei Markentrix ist eingegangen';
+    if ($quelle === 'Bewerbung') {
+      $csubject = 'Ihre Bewerbung bei Markentrix ist eingegangen';
+      $rolle = !empty($clean['rolle']) ? mb_substr($clean['rolle'], 0, 80) : '';
+      $cbody = $hello . "\n\n"
+        . "vielen Dank für Ihre Bewerbung bei Markentrix" . ($rolle !== '' ? " (" . $rolle . ")" : '') . ". Sie ist bei uns eingegangen, wir melden uns zeitnah per E-Mail oder Telefon bei Ihnen.\n\n"
+        . "Wie es weitergeht:\n"
+        . "1. Wir lesen Ihre Angaben und sehen uns Ihr Profil oder Portfolio an.\n"
+        . "2. Wir vereinbaren ein kurzes Kennenlernen.\n"
+        . "3. Wir besprechen offen die Zusammenarbeit, bei Vertriebspartnern auch die Provision, und entscheiden gemeinsam.\n\n"
+        . "Fragen? Antworten Sie einfach auf diese E-Mail oder rufen Sie an: 0176 20370429, Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr.\n\n"
+        . "Diese Nachricht wurde automatisch versendet, weil Sie das Bewerbungsformular auf markentrix.de ausgefüllt haben. Ihre Angaben verwenden wir ausschließlich für das Bewerbungsverfahren und löschen sie spätestens sechs Monate nach dessen Abschluss, sofern Sie nicht in eine längere Speicherung eingewilligt haben. Hinweise zum Datenschutz: https://markentrix.de/datenschutz#bewerbung\n\n"
+        . "Markentrix · Christian Wien · Celle\nhttps://markentrix.de · info@markentrix.de\nImpressum: https://markentrix.de/impressum\n";
+    }
+    $confirmed = deliver($CONFIG, $email, '=?UTF-8?B?' . base64_encode($csubject) . '?=', $cbody, $cheaders);
     if ($confirmed) { $chits[] = $now; @file_put_contents($crate, json_encode($chits)); }
   }
 }

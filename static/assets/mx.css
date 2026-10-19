@@ -1232,3 +1232,11 @@ main:focus{outline:none}
 [hidden]{display:none!important}
 .check .error{display:none;font-size:.85rem;color:var(--danger);font-weight:500;flex:1 1 100%;min-width:0;overflow-wrap:anywhere}
 .check.has-error .error{display:block}
+/* 46 · Partner gesucht */
+.partner-strip{display:grid;gap:20px;align-items:center;padding:clamp(22px,3vw,36px)}
+.partner-strip h2{font-size:clamp(1.3rem,2.2vw,1.75rem);margin:0 0 8px}
+.partner-strip p{margin:0;max-width:62ch}
+.partner-actions{align-items:center}
+@media (min-width:900px){.partner-strip{grid-template-columns:minmax(0,1fr) auto}.partner-actions{justify-content:flex-end;flex-wrap:nowrap}}
+#vertrieb,#fotograf{scroll-margin-top:90px}
+#vertrieb h4,#fotograf h4{font-size:1rem;margin:18px 0 8px}

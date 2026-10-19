@@ -44,6 +44,10 @@ Der Kunde erhält einen Bericht mit allen Befunden als E-Mail (HTML und Text, Ab
 
 Monatlich auszählen: `grep -c '"quelle":"Website-Check"' anfragen.log` (Berichtsanforderungen) und `grep -c '"kontakt_gewuenscht":"ja"' anfragen.log` (Kontaktwunsch).
 
+## Bewerbungen
+
+Bewerbungen von der Seite `/partner-werden` tragen die Quelle „Bewerbung“ (Mail „Neue Bewerbung über markentrix.de“, Betreff „[markentrix.de] Bewerbung: Name“). Zählen: `grep -c '"quelle":"Bewerbung"' anfragen.log`, nach Rolle: `grep -o '"rolle":"[^"]*"' anfragen.log | sort | uniq -c`. Nach Abschluss des Verfahrens die Einträge im Protokoll und die Mails löschen (Löschfrist laut Datenschutzerklärung: spätestens sechs Monate).
+
 ## Auswertung ohne Analytics
 
 Auch ohne Einwilligung bleibt die Zählung möglich: Jede Anfrage steht mit Herkunft im Protokoll. Einmal im Monat auszählen:
