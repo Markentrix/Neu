@@ -53,7 +53,14 @@ for t in ${TESTS:-t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21
   else echo "[$t] ok ($(grep -c '^OK' "out_$t.txt") Prüfungen)"; fi
 done
 cd "$REPO/portal" && python3 -m pyflakes app && echo "[pyflakes] ok" || FEHLER=1
-for f in static/js/*.js; do node --input-type=module --check < "$f" 2>&1 | head -3; [ "${PIPESTATUS[0]}" = 0 ] || { echo "[js] Syntaxfehler in $f"; FEHLER=1; }; done
+for f in static/js/*.js static/js/admin/*.js; do node --input-type=module --check < "$f" 2>&1 | head -3; [ "${PIPESTATUS[0]}" = 0 ] || { echo "[js] Syntaxfehler in $f"; FEHLER=1; }; done
+# Frontend: ESLint (fehlende/ungenutzte Verweise, Doppeldeklarationen) + TypeScript-Prüfung der JavaScript-Dateien (checkJs)
+if [ -d /var/tmp/lint/node_modules/eslint ] || (mkdir -p /var/tmp/lint && cd /var/tmp/lint && npm i --silent eslint@9 globals typescript@5 >/dev/null 2>&1); then
+  cp "$HIER"/frontend/eslint.config.js "$HIER"/frontend/tsconfig.json /var/tmp/lint/ 2>/dev/null; echo '{"type":"module"}' > /var/tmp/lint/package.json
+  rm -rf /var/tmp/lint/js; cp -a "$REPO/portal/static/js" /var/tmp/lint/js; sed -i 's#../../portal/static/js#js#' /var/tmp/lint/tsconfig.json
+  (cd /var/tmp/lint && npx eslint -c eslint.config.js js --max-warnings 3 >"$T/eslint.txt" 2>&1) && echo "[eslint] ok" || { echo "[eslint] FEHLER"; head -15 "$T/eslint.txt"; FEHLER=1; }
+  (cd /var/tmp/lint && npx tsc -p tsconfig.json >"$T/tsc.txt" 2>&1) && echo "[typpruefung] ok" || { echo "[typpruefung] FEHLER"; head -15 "$T/tsc.txt"; FEHLER=1; }
+else echo "[eslint/typpruefung] übersprungen (kein npm)"; fi
 for f in $(ls "$REPO"/bin/* "$REPO"/install.sh | grep -v "\.py$"); do bash -n "$f" 2>/dev/null || { echo "[bash] Syntaxfehler in $f"; FEHLER=1; }; done
 pkill -f "uvicorn app.main:app"; pkill -f "python3 smtp.py"; pkill -f "python3 mock.py"
 su postgres -c "$PGB/pg_ctl -D $PGD/data stop -m fast" >/dev/null 2>&1

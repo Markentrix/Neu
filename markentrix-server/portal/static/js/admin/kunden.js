@@ -1,0 +1,314 @@
+import { h, api, datum, zeit, euro, melde, formular, el } from '../common.js';
+import { belegeKarte } from './belege.js';
+import { V, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
+import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
+import { zeitachseKarte } from './start.js';
+
+export const modulZelle = (z) => {
+  const wrap = h('div', { class: 'modul-zelle' }), panel = h('div', { class: 'small', style: 'display:none;margin-top:6px' });
+  const kopf = h('a', { href: '#', onclick: (e) => { e.preventDefault(); panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; } });
+  const zeige = () => {
+    const akt = z.module.filter(m => m.aktiv);
+    kopf.replaceChildren(akt.length + ' von ' + z.module.length + ' ▾');
+    chips.replaceChildren(...(akt.length ? akt.map(m => h('span', { class: 'pill ok', style: 'margin:1px 2px 1px 0' }, m.name)) : [h('span', { class: 'muted' }, 'keine aktiv')]));
+  };
+  const chips = h('div', { style: 'margin-top:4px' });
+  panel.append(...z.module.map(m => {
+    const cb = h('input', { type: 'checkbox', checked: m.aktiv, style: 'width:auto', onchange: async (e) => {
+      try { await api('/api/admin/kunden/' + z.id + '/module/' + m.code, { method: 'PUT', body: { aktiv: e.target.checked } }); m.aktiv = e.target.checked; zeige(); }
+      catch (x) { e.target.checked = !e.target.checked; alert(x.message); }
+    } });
+    return h('label', { style: 'display:flex;gap:6px;align-items:center;margin:2px 0;white-space:nowrap' }, cb, m.name, ' ', h('span', { class: 'pill' }, m.art === 'agent' ? 'Agent' : 'Portal'));
+  }));
+  zeige(); wrap.append(kopf, chips, panel); return wrap;
+};
+
+V.kunden = async () => {
+  const q = h('input', { placeholder: 'Suchen nach Firma, Nummer, E-Mail …' });
+  const box = h('div'), nurRef = h('input', { type: 'checkbox', style: 'width:auto', onchange: () => lade() });
+  const lade = async () => {
+    let d = await api('/api/admin/kunden?q=' + encodeURIComponent(q.value));
+    if (nurRef.checked) d = d.filter(z => z.referenzkunde);
+    box.replaceChildren(tabelle([
+      ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => h('span', {}, z.firma, z.referenzkunde ? [' ', h('span', { class: 'pill warn' }, 'Referenz')] : '')], ['Paket', z => z.paket || '–'],
+      ['Status', z => h('span', {}, pill(z.status), z.onboarding ? h('div', { class: 'small muted' }, 'Start: ' + z.onboarding.fertig + ' von ' + z.onboarding.gesamt) : '')], ['Module', z => modulZelle(z)], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
+  };
+  let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(lade, 250); });
+  await lade();
+  return h('div', {}, kopf('Kunden', h('a', { class: 'btn', href: '#neu' }, '+ Neuer Kunde')), h('div', { class: 'card' }, q, h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-top:8px' }, nurRef, 'Nur Referenzkunden'), h('div', { style: 'height:12px' }), box));
+};
+
+V.neu = async () => {
+  const m = h('div');
+  const paket = h('select', { name: 'paket_code' }, h('option', { value: '' }, '– kein Paket –'), paketListe.map(p => h('option', { value: p.code }, p.name)));
+  const einl = h('input', { type: 'checkbox', name: 'einladen', checked: true, style: 'width:auto' });
+  const ref = h('input', { type: 'checkbox', style: 'width:auto' }), refd = h('input', { type: 'checkbox', style: 'width:auto' });
+  const f = h('form', { onsubmit: async (e) => {
+    e.preventDefault();
+    const d = leerzu(formular(e.target)); d.einladen = einl.checked; d.referenzkunde = ref.checked; d.referenz_nennen_erlaubt = ref.checked && refd.checked;
+    if (!ref.checked) delete d.referenz_leistung;
+    try {
+      const r = await api('/api/admin/kunden', { method: 'POST', body: d });
+      m.replaceChildren(h('div', { class: 'msg ok' }, 'Kunde ' + r.kundennummer + ' angelegt.'),
+        r.einladungslink ? h('div', { class: 'msg info' }, 'Einladungslink (7 Tage gültig): ', h('br'), r.einladungslink) : '', mailHinweis(r.mail),
+        h('p', {}, h('a', { class: 'btn', href: '#kunde/' + r.id }, 'Zum Kunden')));
+      e.target.reset();
+    } catch (x) { melde(m, x.message); }
+  } },
+    h('div', { class: 'form2' },
+      feld('Firma *', 'firma', '', { required: true }), feld('Rechtsform', 'rechtsform'), feld('Ansprechpartner', 'ansprechpartner'),
+      feld('E-Mail (zugleich Login)', 'email', '', { type: 'email' }), feld('Telefon', 'telefon'), feld('Branche', 'branche'),
+      feld('Straße', 'strasse'), feld('PLZ', 'plz'), feld('Ort', 'ort'), feld('Website-Domain (z. B. firma.de)', 'domain'),
+      h('div', {}, h('label', {}, 'Paket'), paket)),
+    h('label', {}, 'Notizen'), h('textarea', { name: 'notizen', rows: 3 }),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, einl, 'Einladungslink für das Portal erzeugen'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, ref, 'Referenzkunde (zahlt nichts, wird aber normal betreut)'),
+    h('div', { id: 'refbox' }, h('label', {}, 'Was bekommt der Referenzkunde? (z. B. Website, KI-Telefonassistent)'), h('textarea', { name: 'referenz_leistung', rows: 2 }),
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, refd, 'Darf als Referenz genannt werden (schriftliches Einverständnis liegt vor)')),
+    h('p', {}, h('button', { class: 'btn' }, 'Kunde anlegen')));
+  const refbox = f.querySelector('#refbox'); refbox.hidden = true; ref.addEventListener('change', () => { refbox.hidden = !ref.checked; });
+  return h('div', {}, kopf('Neuer Kunde'), h('div', { class: 'card' }, m, f));
+};
+
+export async function historieKarte(kid) {
+  const l = await api('/api/admin/kunden/' + kid + '/historie');
+  return h('div', { class: 'card' }, h('h2', {}, 'Änderungshistorie'), h('p', { class: 'small muted' }, 'Wer hat wann was bei diesem Kunden geändert (letzte 150 Einträge).'),
+    tabelle([['Zeit', z => zeit(z.zeit)], ['Von', z => z.name || z.email || 'System'], ['Aktion', z => z.aktion.replace(/_/g, ' ')], ['Details', z => h('span', { class: 'small muted' }, JSON.stringify(z.details).slice(0, 160))]], l, 'Noch keine Einträge.'));
+}
+
+export function vorlagenKarte(kid, k) {
+  const m = h('div'), box = h('div');
+  const laden = async () => {
+    if (k.vorlage) { box.replaceChildren(h('p', {}, 'Angewendet: ', h('b', {}, k.vorlage), ' (' + datum(k.vorlage_am) + ')')); return; }
+    const liste = await api('/api/admin/vorlagen');
+    const sel = select('code', liste.map(v => [v.code, v.name + ' – ' + v.beschreibung]), liste[0].code);
+    box.replaceChildren(h('div', { class: 'row' }, sel, knopf('Vorlage anwenden', async () => {
+      if (!confirm('Die Vorlage legt Wissenseinträge (inaktiv), Beitrags-Entwürfe und Aufgaben an. Fortfahren?')) return;
+      try { const r = await api('/api/admin/kunden/' + kid + '/vorlage', { method: 'POST', body: { code: sel.value } }); melde(m, r.name + ': ' + r.wissen + ' Wissenseinträge (inaktiv, bitte prüfen), ' + r.beitraege + ' Beitrags-Entwürfe, ' + r.aufgaben + ' Aufgaben angelegt.', 'ok'); box.replaceChildren(); } catch (x) { fehler(m, x); } }, '')));
+  };
+  laden().catch(x => fehler(m, x));
+  return h('div', { class: 'card' }, h('h2', {}, 'Branchenvorlage'), h('p', { class: 'small muted' }, 'Startpaket für typische Branchen: Wissenseinträge für den Assistenten (zunächst inaktiv, mit Platzhaltern zum Ausfüllen), Entwürfe für Beiträge und eine Aufgabenliste. Es wird nichts veröffentlicht.'), m, box);
+}
+
+export async function avvKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/avv'), m = h('div');
+  const neu = async () => { try { await api('/api/admin/kunden/' + kid + '/avv', { method: 'POST' }); location.reload(); } catch (x) { fehler(m, x); } };
+  const hoch = (z) => { const datei = h('input', { type: 'file', accept: 'application/pdf,image/png,image/jpeg' }), tag = h('input', { type: 'date', value: new Date().toISOString().slice(0, 10), style: 'max-width:160px' });
+    return h('span', { class: 'row' }, datei, tag, knopf('Ablegen', () => { const f = datei.files[0]; if (!f) return fehler(m, { message: 'Bitte zuerst die unterschriebene Datei wählen.' });
+      const r = new FileReader(); r.onload = async () => { try { await api('/api/admin/avv/' + z.id + '/upload', { method: 'POST', body: { datei_base64: r.result, datei_name: f.name, unterschrieben_am: tag.value } }); location.reload(); } catch (x) { fehler(m, x); } }; r.readAsDataURL(f); }, 'btn')); };
+  const aktion = (z) => h('span', { class: 'row' },
+    h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/vorlage.pdf', target: '_blank', rel: 'noopener' }, 'Vertrag (PDF)'),
+    !z.hat_datei ? knopf(z.portal_freigabe_am ? 'Erneut zur Bestätigung freigeben' : 'Im Portal zur Bestätigung freigeben', async () => { if (confirm('Der Kunde bekommt eine Mail und kann den Vertrag im Portal mit einem Klick bestätigen. Fortfahren?')) { try { await api('/api/admin/avv/' + z.id + '/portal-freigeben', { method: 'POST' }); melde(m, 'Freigegeben, der Kunde wurde benachrichtigt.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'small') : '',
+    knopf('Per Mail senden', async () => { if (confirm('AVV jetzt per E-Mail an den Kunden senden?')) { try { await api('/api/admin/avv/' + z.id + '/senden', { method: 'POST' }); melde(m, 'Gesendet.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'sec small'),
+    z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Unterschrieben ansehen') : knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/avv/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { fehler(m, x); } } }, 'bad small'));
+  return h('div', { class: 'card' }, h('h2', {}, 'Auftragsverarbeitungsvertrag (AVV) ', d.vorhanden ? h('span', { class: 'pill ok' }, 'liegt vor') : h('span', { class: 'pill warn' }, 'fehlt')),
+    h('p', { class: 'small muted' }, 'Ablauf A (empfohlen): Vertrag erstellen, im Portal zur Bestätigung freigeben, der Kunde bestätigt per Klick. Ablauf B: per Mail senden, unterschrieben zurückbekommen und hier ablegen. Der Kunde sieht die abgelegte Fassung in seinem Portal.'), m,
+    tabelle([['Erstellt', z => datum(z.erstellt_am)], ['Gesendet', z => z.gesendet_am ? datum(z.gesendet_am) : '–'], ['Unterschrieben am', z => z.unterschrieben_am ? datum(z.unterschrieben_am) : '–'],
+      ['Datei', z => z.hat_datei ? z.datei_name + (z.online_bestaetigt_am ? ' (online bestätigt von ' + z.online_bestaetigt_name + ', ' + datum(z.online_bestaetigt_am) + ')' : '') : (z.portal_freigabe_am ? 'im Portal freigegeben, wartet auf Bestätigung' : 'noch nicht abgelegt')], ['', aktion]], d.liste, 'Noch kein AVV erstellt.'),
+    d.liste.filter(z => !z.hat_datei).length ? h('div', { style: 'margin-top:12px' }, h('p', { class: 'small muted' }, 'Unterschriebene Fassung zum neuesten Entwurf ablegen:'), hoch(d.liste.find(z => !z.hat_datei))) : '',
+    h('p', { style: 'margin-top:12px' }, knopf('Neuen AVV erstellen', neu, 'btn')));
+}
+
+export async function onboardingKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/onboarding'), m = h('div');
+  const pct = d.gesamt ? Math.round(d.fertig / d.gesamt * 100) : 0;
+  const zeilen = d.punkte.map(p => {
+    const cb = h('input', { type: 'checkbox', checked: p.fertig, disabled: p.automatisch, style: 'width:auto', onchange: async (e) => { try { await api('/api/admin/kunden/' + kid + '/onboarding/' + p.code, { method: 'PATCH', body: { erledigt: e.target.checked } }); location.reload(); } catch (x) { fehler(m, x); e.target.checked = !e.target.checked; } } });
+    return h('div', { class: 'modul' }, cb, h('div', { class: 'grow' }, h('b', {}, p.titel), p.automatisch ? [' ', h('span', { class: 'pill ok' }, 'automatisch erkannt')] : '', p.hilfe ? h('div', { class: 'small muted' }, p.hilfe) : '', p.erledigt_am ? h('div', { class: 'small muted' }, 'erledigt am ' + datum(p.erledigt_am)) : ''));
+  });
+  const neu = h('input', { placeholder: 'Eigener Punkt, z. B. „Flyer drucken“' });
+  return h('div', { class: 'card' }, h('h2', {}, 'Onboarding-Checkliste ', h('span', { class: 'pill ' + (pct === 100 ? 'ok' : 'warn') }, d.fertig + ' von ' + d.gesamt)),
+    h('div', { class: 'bar', style: 'margin:6px 0 12px' }, h('i', { style: 'width:' + pct + '%' })), m, zeilen,
+    pct === 100 && d.status === 'onboarding' ? h('div', { class: 'msg ok' }, 'Alles erledigt. ', knopf('Kunde auf „aktiv“ setzen', async () => { try { await api('/api/admin/kunden/' + kid + '/status', { method: 'POST', body: { status: 'aktiv' } }); location.reload(); } catch (x) { fehler(m, x); } }, 'btn')) : '',
+    h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, neu), knopf('Punkt hinzufügen', async () => { if (!neu.value.trim()) return; try { await api('/api/admin/kunden/' + kid + '/onboarding', { method: 'POST', body: { titel: neu.value } }); location.reload(); } catch (x) { fehler(m, x); } })));
+}
+
+export function brandingKarte(kid, k) {
+  const m = h('div'); let logoB64 = null;
+  const datei = h('input', { type: 'file', accept: 'image/png,image/jpeg', onchange: (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { logoB64 = r.result; }; r.readAsDataURL(f); } });
+  const farbe = h('input', { type: 'color', value: k.branding_farbe || '#4f46e5', style: 'width:60px;padding:2px' });
+  let farbeGesetzt = !!k.branding_farbe;
+  farbe.addEventListener('input', () => { farbeGesetzt = true; });
+  const senden = async (extra) => { try { await api('/api/admin/kunden/' + kid + '/branding', { method: 'PUT', body: { farbe: farbeGesetzt ? farbe.value : null, logo_base64: logoB64, ...extra } }); melde(m, 'Gespeichert. Der Kunde sieht es beim nächsten Laden.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Branding im Kundenportal'),
+    h('p', { class: 'small muted' }, 'Logo (PNG oder JPG, max. 400 KB) und Akzentfarbe, die der Kunde in seinem Portal sieht.'), m,
+    k.logo_vorhanden ? h('p', {}, h('img', { src: '/api/admin/kunden/' + kid + '/logo', style: 'max-height:48px;background:#fff;border-radius:8px' })) : h('p', { class: 'small muted' }, 'Noch kein Logo.'),
+    h('div', { class: 'row' }, datei, h('span', { class: 'small muted' }, 'Farbe'), farbe, knopf('Speichern', () => senden({}), 'btn'), k.logo_vorhanden && knopf('Logo entfernen', () => confirm('Logo entfernen?') && senden({ logo_entfernen: true }), 'bad'),
+      k.branding_farbe && knopf('Farbe zurücksetzen', async () => { farbeGesetzt = false; senden({}); }, 'sec')));
+}
+
+export function offboardingKarte(kid, k) {
+  const m = h('div'); const beendet = ['gekuendigt', 'beendet'].includes(k.status);
+  if (k.geloescht_am) return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende'), h('p', {}, 'Die Inhalte dieses Kunden wurden am ' + datum(k.geloescht_am) + ' gelöscht. Stammdaten und Belege bleiben wegen Aufbewahrungspflichten erhalten.'));
+  const best = h('input', { placeholder: 'Kundennummer ' + k.kundennummer + ' zur Bestätigung', style: 'max-width:300px' });
+  const haken = h('input', { type: 'checkbox', style: 'width:auto' });
+  return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende: Datenexport und Löschung'),
+    h('p', { class: 'small muted' }, 'Zum Vertragsende bekommt der Kunde seine Daten (Pflicht laut AVV) und danach werden seine Inhalte gelöscht. Stammdaten, Rechnungen, Verträge, Buchungen und der AVV bleiben wegen Aufbewahrungspflichten erhalten, die Kontaktdaten der Ansprechperson werden entfernt. Sicherungen enthalten die Daten noch bis zu 14 Tage.'), m,
+    h('p', {}, h('a', { class: 'btn', href: '/api/admin/kunden/' + kid + '/export.zip' }, 'Datenexport als ZIP herunterladen')),
+    beendet ? h('div', { class: 'stack', style: 'margin-top:12px' },
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, haken, 'Der Datenexport wurde an den Kunden übergeben'), best,
+      h('p', {}, knopf('Inhalte endgültig löschen', async () => { if (!confirm('Alle Inhalte dieses Kunden endgültig löschen? Das kann nicht rückgängig gemacht werden.')) return;
+        try { await api('/api/admin/kunden/' + kid + '/loeschen', { method: 'POST', body: { bestaetigung: best.value, export_uebergeben: haken.checked } }); melde(m, 'Gelöscht.', 'ok'); setTimeout(() => location.reload(), 1200); } catch (x) { fehler(m, x); } }, 'bad')))
+      : h('p', { class: 'small muted' }, 'Löschen ist erst möglich, wenn der Status des Kunden „gekündigt“ oder „beendet“ ist.'));
+}
+
+export async function kostenKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/kosten'), m = h('div');
+  const dienst = h('input', { placeholder: 'z. B. telefonie, domain, werbung', maxlength: 40 }), betrag = h('input', { type: 'number', step: '0.01', min: '0.01', placeholder: 'Betrag in €' }), tag = h('input', { type: 'date' });
+  const speichern = knopf('Kosten eintragen', async () => { try { await api('/api/admin/kunden/' + kid + '/kosten', { method: 'POST', body: { dienst: dienst.value, betrag_eur: Number(betrag.value), datum: tag.value || null } }); location.reload(); } catch (x) { fehler(m, x); } }, 'btn');
+  return h('div', { class: 'card' }, h('h2', {}, 'Kosten pro Monat'),
+    h('p', { class: 'small muted' }, 'Monatlicher Umsatz laut aktiven Buchungen: ' + fmtEuro(d.umsatz_monat_cent) + '. KI-Kosten werden automatisch aus den Tokens berechnet, alle anderen Kosten (Telefonie, Domain, Werbung …) trägst du hier von Hand ein.'),
+    tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Tokens', z => z.tokens], ['Kosten gesamt', z => fmtEuro(Math.round(z.kosten_cent))], ['Anteil am Umsatz', z => d.umsatz_monat_cent ? (z.kosten_cent / d.umsatz_monat_cent * 100).toFixed(1).replace('.', ',') + ' %' : '–']], d.monate, 'Noch keine Kosten erfasst.'),
+    d.dienste.length ? h('div', {}, h('h3', {}, 'Aufgeteilt nach Kostenart'), tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kostenart', z => z.dienst], ['Kosten', z => fmtEuro(Math.round(z.kosten_cent))]], d.dienste)) : '',
+    h('h3', {}, 'Kosten von Hand eintragen'), m, h('div', { class: 'row' }, dienst, betrag, tag, speichern));
+}
+
+export async function berichtTexte(id, m) {
+  const b = await api('/api/admin/berichte/' + id);
+  const ein = h('textarea', { rows: 5, maxlength: 3000 }, b.einordnung), sch = h('textarea', { rows: 5 }, b.schritte.join('\n'));
+  const f = h('div', { class: 'card', style: 'border:1px solid var(--line)' }, h('h3', {}, b.titel + ': Einordnung und nächste Schritte'),
+    h('p', { class: 'small muted' }, b.angepasst ? 'Von dir angepasst.' : 'Automatisch aus den Zahlen erzeugt. Du kannst ihn ändern, bevor der Bericht an den Kunden geht.'),
+    h('label', {}, 'Einordnung'), ein, h('label', {}, 'Nächste Schritte (eine Zeile je Schritt)'), sch,
+    h('div', { class: 'row', style: 'margin-top:10px' },
+      knopf('KI-Entwurf', async () => { try { const k = await api('/api/admin/berichte/' + id + '/ki-entwurf', { method: 'POST' }); ein.value = k.einordnung; sch.value = k.schritte.join('\n'); melde(m, 'Entwurf eingesetzt. Bitte prüfen und speichern.', 'info'); } catch (x) { fehler(m, x); } }, 'sec small'),
+      knopf('Zurück auf automatisch', () => { ein.value = ''; sch.value = ''; melde(m, 'Leer speichern setzt die automatische Einordnung wieder ein.', 'info'); }, 'sec small'),
+      h('span', { class: 'grow' }),
+      knopf('Speichern', async () => { try { await api('/api/admin/berichte/' + id, { method: 'PUT', body: { einordnung: ein.value, schritte: sch.value.split('\n') } }); melde(m, 'Gespeichert. Das PDF und die Kundenansicht zeigen jetzt diese Texte.', 'ok'); } catch (x) { fehler(m, x); } }, 'btn'),
+      knopf('Speichern und erneut senden', async () => { if (!confirm('Bericht mit diesen Texten erneut an den Kunden senden?')) return; try { await api('/api/admin/berichte/' + id, { method: 'PUT', body: { einordnung: ein.value, schritte: sch.value.split('\n') } }); const r = await api('/api/admin/berichte/' + id + '/senden', { method: 'POST' }); melde(m, r.gesendet ? 'Gesendet.' : 'Nicht gesendet: ' + (r.grund || 'unbekannt'), r.gesendet ? 'ok' : 'info'); } catch (x) { fehler(m, x); } }, 'sec small')));
+  m.after(f);
+}
+
+export async function berichteKarte(kid) {
+  const liste = await api('/api/admin/kunden/' + kid + '/berichte'), m = h('div');
+  const monate = []; const jetzt = new Date();
+  for (let i = 1; i <= 12; i++) { const d = new Date(jetzt.getFullYear(), jetzt.getMonth() - i, 1); monate.push([d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })]); }
+  const sel = select('monat', monate, monate[0][0]);
+  const los = async (senden) => { try { const r = await api('/api/admin/kunden/' + kid + '/bericht', { method: 'POST', body: { monat: sel.value, senden } });
+    melde(m, senden ? (r.gesendet ? 'Bericht erstellt und per E-Mail gesendet.' : 'Bericht erstellt, aber nicht gesendet: ' + (r.grund || 'unbekannt')) : 'Bericht erstellt.', r.gesendet || !senden ? 'ok' : 'info'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Monatsberichte'), h('p', { class: 'small muted' }, 'Wird jeden Monat automatisch erstellt und an den Kunden gemailt (wenn der Versand eingerichtet ist). Hier kannst du einen Monat von Hand erstellen oder erneut senden.'), m,
+    tabelle([['Monat', z => z.titel], ['Gesendet', z => z.versendet_am ? zeit(z.versendet_am) : 'nein'], ['PDF', z => h('a', { href: '/api/admin/berichte/' + z.id + '/pdf', target: '_blank', rel: 'noopener' }, 'Öffnen')], ['', z => knopf('Einordnung bearbeiten', () => berichtTexte(z.id, m), 'sec small')]], liste, 'Noch keine Berichte.'),
+    h('div', { class: 'row', style: 'margin-top:12px' }, sel, knopf('Erstellen', () => los(false)), knopf('Erstellen und per Mail senden', () => los(true), 'btn')));
+}
+
+// ------------------------------------------------------------- Briefing und externe Zahlen (Kunde öffnen)
+export async function briefingKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/briefing');
+  const inhalt = d.struktur.map(a => [h('h3', {}, a.abschnitt), a.felder.map(f => h('div', { style: 'margin:6px 0' }, h('div', { class: 'small muted' }, f.frage), h('div', { class: 'freitext' }, d.daten[f.key] || '–')))]);
+  return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { style: 'margin:0' }, 'Briefing'), d.status === 'abgeschickt' ? h('span', { class: 'pill ok' }, 'abgeschickt ' + zeit(d.abgeschickt_am)) : h('span', { class: 'pill warn' }, Object.keys(d.daten).length ? 'in Arbeit' : 'noch leer')),
+    Object.keys(d.daten).length ? h('details', {}, h('summary', {}, 'Antworten anzeigen'), inhalt) : h('p', { class: 'small muted' }, 'Der Kunde hat das Briefing noch nicht ausgefüllt. Es erscheint in seinem Portal unter „Briefing“.'));
+}
+
+export async function externKarte(kid) {
+  const liste = await api('/api/admin/kunden/' + kid + '/kennzahlen-extern'), m = h('div');
+  const jetzt = new Date(), monat = h('input', { type: 'month', value: jetzt.getFullYear() + '-' + String(jetzt.getMonth() + 1).padStart(2, '0') });
+  const zahl = (ph, step = '1') => h('input', { type: 'number', min: '0', step, placeholder: ph });
+  const bes = zahl('Website-Besucher'), auf = zahl('Google-Aufrufe'), anz = zahl('Google-Bewertungen (Anzahl)'), ste = h('input', { type: 'number', min: '1', max: '5', step: '0.1', placeholder: 'Google-Sterne (1 bis 5)' });
+  const n = (el) => el.value === '' ? null : Number(el.value);
+  return h('div', { class: 'card' }, h('h2', {}, 'Zahlen für die Auswertung (Besucher, Google)'), h('p', { class: 'small muted' }, 'Trage monatlich ein, was du aus Statistik und Google-Profil ablesen kannst. Der Kunde sieht es in seiner Auswertung. Gleicher Monat nochmal speichern überschreibt.'), m,
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Monat'), monat), h('div', {}, h('label', {}, 'Besucher'), bes), h('div', {}, h('label', {}, 'Google-Aufrufe'), auf), h('div', {}, h('label', {}, 'Bewertungen'), anz), h('div', {}, h('label', {}, 'Sterne'), ste)),
+    h('p', {}, h('button', { class: 'btn', onclick: async () => { try { await api('/api/admin/kunden/' + kid + '/kennzahlen-extern', { method: 'PUT', body: { monat: monat.value, besucher: n(bes), google_aufrufe: n(auf), google_bewertungen: n(anz), google_sterne: n(ste) } }); zeige(); } catch (x) { melde(m, x.message); } } }, 'Speichern')),
+    tabelle([['Monat', z => z.monat], ['Besucher', z => z.besucher ?? '–'], ['Google-Aufrufe', z => z.google_aufrufe ?? '–'], ['Bewertungen', z => z.google_bewertungen ?? '–'], ['Sterne', z => z.google_sterne ?? '–']], liste, 'Noch keine Zahlen.'));
+}
+
+export async function kundeDetail(kid) {
+  const d = await api('/api/admin/kunden/' + kid), k = d.kunde;
+  const neu = () => { const s = location.hash; location.hash = ''; setTimeout(() => { location.hash = s; }, 0); };
+  const mk = h('div'), mz = h('div'), mb = h('div'), mw = h('div'), mdaten = h('div'), mv = h('div');
+  const partnerListe = await api('/api/admin/vertrieb/partnerliste');
+
+  const refK = h('input', { type: 'checkbox', checked: k.referenzkunde, style: 'width:auto' }), refE = h('input', { type: 'checkbox', checked: k.referenz_nennen_erlaubt, style: 'width:auto' });
+  const stamm = h('form', { onsubmit: async (e) => {
+    e.preventDefault();
+    const o = formular(e.target);
+    o.referenzkunde = refK.checked; o.referenz_nennen_erlaubt = refK.checked && refE.checked;
+    try { await api('/api/admin/kunden/' + kid, { method: 'PATCH', body: o }); melde(mk, 'Gespeichert.', 'ok'); setTimeout(() => location.reload(), 600); } catch (x) { melde(mk, x.message); }
+  } }, h('div', { class: 'form2' },
+    feld('Firma', 'firma', k.firma), feld('Rechtsform', 'rechtsform', k.rechtsform), feld('Ansprechpartner', 'ansprechpartner', k.ansprechpartner),
+    feld('E-Mail', 'email', k.email), feld('Telefon', 'telefon', k.telefon), feld('Branche', 'branche', k.branche),
+    feld('Straße', 'strasse', k.strasse), feld('PLZ', 'plz', k.plz), feld('Ort', 'ort', k.ort), feld('Domain', 'domain', k.domain),
+    h('div', {}, h('label', {}, 'Paket'), h('select', { name: 'paket_code' }, h('option', { value: '' }, '–'), paketListe.map(p => h('option', { value: p.code, selected: p.code === k.paket_code }, p.name))))),
+    h('label', {}, 'Notizen'), h('textarea', { name: 'notizen', rows: 3 }, k.notizen || ''),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, refK, 'Referenzkunde (zahlt nichts, wird aber normal betreut; zählt nicht in Umsatz und Provision)'),
+    h('label', {}, 'Was bekommt der Referenzkunde?'), h('textarea', { name: 'referenz_leistung', rows: 2 }, k.referenz_leistung || ''),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, refE, 'Darf als Referenz genannt werden (Einverständnis liegt vor)'),
+    h('p', { class: 'row' }, h('button', { class: 'btn' }, 'Speichern')));
+
+  const status = h('select', { style: 'width:auto', onchange: async (e) => {
+    if (!confirm('Status ändern auf "' + e.target.value + '"? Bei pausiert/gekündigt/beendet werden die Zugänge gesperrt.')) { e.target.value = k.status; return; }
+    try { await api('/api/admin/kunden/' + kid + '/status', { method: 'POST', body: { status: e.target.value } }); neu(); } catch (x) { melde(mk, x.message); }
+  } }, STATI.map(s => h('option', { value: s, selected: s === k.status }, s)));
+
+  const module = d.module.map(m => {
+    const cb = h('input', { type: 'checkbox', checked: m.aktiv, onchange: async (e) => {
+      try { await api('/api/admin/kunden/' + kid + '/module/' + m.code, { method: 'PUT', body: { aktiv: e.target.checked } }); melde(mz, m.name + (e.target.checked ? ' aktiviert.' : ' deaktiviert.'), 'ok'); }
+      catch (x) { e.target.checked = !e.target.checked; melde(mz, x.message); }
+    } });
+    return h('div', { class: 'modul' }, h('label', { class: 'sw', style: 'margin:0' }, cb, h('i')), h('div', { class: 'grow' }, h('b', {}, m.name), ' ', h('span', { class: 'pill' }, m.art === 'agent' ? 'Agent' : 'Portal'), h('div', { class: 'small muted' }, m.beschreibung)));
+  });
+
+  const mail = h('input', { type: 'email', placeholder: 'E-Mail für Portal-Zugang', value: k.email || '' });
+  const linkbox = h('div');
+  const einladen = h('button', { class: 'btn small', onclick: async () => {
+    try { const r = await api('/api/admin/kunden/' + kid + '/einladung', { method: 'POST', body: { email: mail.value, per_mail: true } });
+      linkbox.replaceChildren(h('div', { class: 'msg info' }, 'Einladungslink (' + r.gueltig_tage + ' Tage gültig): ', h('br'), r.einladungslink), mailHinweis(r.mail)); } catch (x) { melde(linkbox, x.message); }
+  } }, 'Einladungslink erzeugen');
+  const zugaenge = tabelle([['E-Mail', z => z.email], ['Rolle', z => ({ inhaber: 'Inhaber', mitarbeiter: 'Mitarbeiter', nur_lesen: 'Nur ansehen' })[z.kunden_rolle] || z.kunden_rolle], ['Passwort', z => z.hat_passwort ? 'gesetzt' : 'offen'], ['2FA', (z) => z.totp_aktiv ? knopf('2FA zurücksetzen', async () => { if (confirm('Zwei-Faktor-Anmeldung dieses Zugangs ausschalten?')) { try { await api('/api/admin/benutzer/' + z.id + '/2fa-zuruecksetzen', { method: 'POST' }); location.reload(); } catch (x) { alert(x.message); } } }) : '–'], ['Letzter Login', z => zeit(z.letzter_login)],
+    ['Zugang', z => h('button', { class: 'btn small ' + (z.aktiv ? 'bad' : 'sec'), onclick: async () => { try { await api('/api/admin/benutzer/' + z.id + '/aktiv', { method: 'POST', body: { aktiv: !z.aktiv } }); neu(); } catch (x) { alert(x.message); } } }, z.aktiv ? 'Sperren' : 'Freigeben')]], d.benutzer, 'Noch kein Zugang.');
+
+  const prod = h('select', { name: 'produkt_code' }, paketListe.map(p => h('option', { value: p.code }, p.name + ' (' + p.code + ')')));
+  const bform = h('form', { onsubmit: async (e) => {
+    e.preventDefault();
+    const o = leerzu(formular(e.target)); o.rabatt_cent = Math.round(Number(o.rabatt_euro || 0) * 100); delete o.rabatt_euro;
+    try { await api('/api/admin/kunden/' + kid + '/buchungen', { method: 'POST', body: o }); neu(); } catch (x) { melde(mb, x.message); }
+  } }, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Produkt'), prod), feld('Beginn', 'beginn', '', { type: 'date' }), feld('Rabatt in € / Monat', 'rabatt_euro', '', { type: 'number', step: '0.01', min: '0' }), feld('Rabatt-Grund', 'rabatt_grund'), feld('Standort', 'standort'), feld('Notiz', 'notiz')),
+    h('p', {}, h('button', { class: 'btn' }, 'Buchung anlegen (Preis wird festgehalten)')));
+  const bst = (z) => h('select', { onchange: async (e) => { try { await api('/api/admin/buchungen/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { alert(x.message); } } },
+    ['angefragt', 'beauftragt', 'in_einrichtung', 'aktiv', 'pausiert', 'gekuendigt', 'beendet'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
+  const buchungen = tabelle([['Produkt', z => z.name], ['Einrichtung', z => euro(z.einrichtung_cent)], ['Monatlich', z => euro(z.monatlich_cent)], ['Rabatt', z => euro(z.rabatt_cent)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)], ['Status', bst]], d.buchungen, 'Noch keine Buchungen.');
+
+  const wform = h('form', { class: 'row', onsubmit: async (e) => {
+    e.preventDefault(); try { await api('/api/admin/kunden/' + kid + '/websites', { method: 'POST', body: formular(e.target) }); neu(); } catch (x) { melde(mw, x.message); }
+  } }, h('input', { class: 'grow', name: 'domain', placeholder: 'domain.de', required: true }), h('select', { name: 'art', style: 'width:auto' }, h('option', { value: 'live' }, 'live'), h('option', { value: 'demo' }, 'demo')), h('button', { class: 'btn' }, 'Website anlegen'));
+  const SPR = { de: 'Deutsch', tr: 'Türkisch', en: 'Englisch', ar: 'Arabisch' };
+  const sprachWahl = (z) => { const boxen = Object.entries(SPR).map(([c, n]) => { const i = h('input', { type: 'checkbox', checked: (z.sprachen || ['de']).includes(c), disabled: c === 'de', style: 'width:auto', 'data-c': c }); return h('label', { style: 'display:inline-flex;gap:4px;align-items:center;margin-right:10px;color:inherit' }, i, n); });
+    return h('div', { class: 'row' }, boxen, h('button', { class: 'btn sec small', onclick: async (e) => { const liste = ['de'].concat(boxen.map(b => b.firstChild).filter(i => i.checked && i.dataset.c !== 'de').map(i => i.dataset.c)); try { await api('/api/admin/websites/' + z.id + '/sprachen', { method: 'PUT', body: { sprachen: liste } }); e.target.textContent = 'Gespeichert'; } catch (x) { melde(mw, x.message); } } }, 'Speichern')); };
+  const webs = tabelle([['Domain', z => z.domain], ['Art', z => z.art], ['Status', z => pill(z.status)], ['Sprachen der Angebotsseite', sprachWahl], ['Zuletzt', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Keine Website.');
+
+  const tabs = h('div', { class: 'tabs' }, DATEN_TABS.map(([t, l]) => h('button', { onclick: (e) => ladeDaten(t, e.target) }, l + (d.zaehler[t] === undefined ? '' : ' (' + d.zaehler[t] + ')'))));
+  async function ladeDaten(t, btn) {
+    tabs.querySelectorAll('button').forEach(b => b.classList.remove('on')); btn.classList.add('on');
+    try {
+      const z = await api('/api/admin/kunden/' + kid + '/daten/' + t);
+      const sp = z.length ? Object.keys(z[0]).filter(c => c !== 'id') : [];
+      mdaten.replaceChildren(tabelle(sp.map(c => [c, r => { const v = r[c]; return v === null ? '' : /_am$|^zeit$|^beginn$|^ende$/.test(c) && typeof v === 'string' && v.includes('T') ? zeit(v) : String(v); }]), z, 'Keine Einträge.'));
+    } catch (x) { melde(mdaten, x.message); }
+  }
+
+  return h('div', { class: 'stack' },
+    kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
+    await zeitachseKarte(kid),
+    h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
+    await onboardingKarte(kid),
+    await avvKarte(kid),
+    h('div', { class: 'card' }, h('h2', {}, 'Vertriebler'), mv, h('div', { class: 'row' }, h('div', { class: 'grow' }, h('select', { id: 'vsel' }, h('option', { value: '' }, '– kein Vertriebler –'), partnerListe.map(p => h('option', { value: p.id, selected: p.id === k.vertriebspartner_id }, p.name + (p.status !== 'aktiv' ? ' (' + p.status + ')' : ''))))),
+      knopf('Zuordnen', async () => { try { await api('/api/admin/kunden/' + kid + '/partner', { method: 'PUT', body: { partner_id: el('vsel').value || null } }); melde(mv, 'Gespeichert.', 'ok'); } catch (x) { melde(mv, x.message); } }))),
+    h('div', { class: 'card' }, h('h2', {}, 'Module des Kunden (Schalter)'), h('p', { class: 'small muted' }, 'Was hier aktiv ist, sieht der Kunde in seinem Portal.'), mz, module),
+    h('div', { class: 'card' }, h('h2', {}, 'Portal-Zugang'), zugaenge, h('div', { class: 'row', style: 'margin-top:12px' }, h('div', { class: 'grow' }, mail), einladen), linkbox),
+    h('div', { class: 'card' }, h('h2', {}, 'Buchungen'), mb, buchungen, h('h3', { style: 'margin-top:18px' }, 'Neue Buchung'), bform),
+    h('div', { class: 'card' }, h('h2', {}, 'Websites'), mw, webs, h('div', { style: 'height:10px' }), wform,
+      h('p', { class: 'small muted' }, 'Danach auf dem Server einmal: mkctl site-add <domain>, damit Ordner und Webserver bereit sind.')),
+    await sicher(() => belegeKarte(kid, k.referenzkunde)),
+    await briefingKarte(kid),
+    await sicher(() => nachrichtenKundeKarte(kid, k)),
+    await freigabenKundeKarte(kid, k),
+    await unterlagenKarte(kid),
+    await berichteKarte(kid),
+    await externKarte(kid),
+    await kostenKarte(kid),
+    brandingKarte(kid, k),
+    offboardingKarte(kid, k),
+    await historieKarte(kid),
+    vorlagenKarte(kid, k),
+    h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
+}
+

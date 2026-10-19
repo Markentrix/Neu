@@ -1,5 +1,5 @@
-import { api, melde } from './common.js';
-const m = document.getElementById('m'), b = document.getElementById('b');
+import { api, melde, el } from './common.js';
+const m = el('m'), b = el('b');
 const t = new URLSearchParams(location.search).get('t');
 if (!t) { b.disabled = true; melde(m, 'Dieser Link ist unvollständig. Bitte fordern Sie auf der Anmeldeseite einen neuen an.'); }
 b.addEventListener('click', async () => {

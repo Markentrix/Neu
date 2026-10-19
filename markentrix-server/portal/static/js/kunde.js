@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline, zweiFaktorKarte, pushKarte, rechtFuss, glocke, ladeAnsicht, anpassenKnopf } from './common.js';
+import { h, api, datum, zeit, euro, groesse, melde, abmelden, sparkline, zweiFaktorKarte, pushKarte, rechtFuss, glocke, ladeAnsicht, anpassenKnopf, formular } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -145,7 +145,7 @@ V.termine = async () => {
   const m = h('div');
   const f = h('form', { class: 'form2', onsubmit: async (e) => {
     e.preventDefault();
-    const d = Object.fromEntries(new FormData(e.target));
+    const d = formular(e.target);
     Object.keys(d).forEach(k => { if (d[k] === '') delete d[k]; });
     if (d.beginn) d.beginn = new Date(d.beginn).toISOString();
     if (d.ende) d.ende = new Date(d.ende).toISOString();
@@ -169,7 +169,7 @@ V.kontakte = async () => {
   const m = h('div');
   const f = h('form', { class: 'form2', onsubmit: async (e) => {
     e.preventDefault();
-    const d = Object.fromEntries(new FormData(e.target)); Object.keys(d).forEach(k => { if (d[k] === '') delete d[k]; });
+    const d = formular(e.target); Object.keys(d).forEach(k => { if (d[k] === '') delete d[k]; });
     try { await api('/api/kunde/kontakte', { method: 'POST', body: d }); location.reload(); } catch (x) { melde(m, x.message); }
   } },
     ['name:Name', 'firma:Firma', 'email:E-Mail', 'telefon:Telefon', 'notiz:Notiz'].map(s => { const [n, l] = s.split(':'); return h('div', {}, h('label', {}, l), h('input', { name: n, required: n === 'name' })); }),
@@ -502,7 +502,7 @@ V.automationen = async () => {
 function anschriftKarte(k) {
   const m = h('div');
   const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault();
-    try { await api('/api/kunde/stammdaten', { method: 'PATCH', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Gespeichert. Das Markentrix-Team wurde informiert und nutzt die Anschrift ab der nächsten Rechnung.', 'ok'); } catch (x) { melde(m, x.message); } } },
+    try { await api('/api/kunde/stammdaten', { method: 'PATCH', body: formular(e.target) }); melde(m, 'Gespeichert. Das Markentrix-Team wurde informiert und nutzt die Anschrift ab der nächsten Rechnung.', 'ok'); } catch (x) { melde(m, x.message); } } },
     h('div', {}, h('label', {}, 'Straße und Nr.'), h('input', { name: 'strasse', value: k.strasse || '' })),
     h('div', {}, h('label', {}, 'PLZ'), h('input', { name: 'plz', value: k.plz || '' })),
     h('div', {}, h('label', {}, 'Ort'), h('input', { name: 'ort', value: k.ort || '' })),
@@ -520,14 +520,14 @@ V.einstellungen = async () => {
     kb('Bei neuen Anfragen', 'benachr_anfragen'), kb('Erinnerung vor Terminen', 'benachr_termine'), kb('Monatsbericht per E-Mail', 'benachr_bericht'), kb('Antworten und Freigabe-Bitten vom Team', 'benachr_nachrichten'), h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   const f1 = h('form', { class: 'form2', onsubmit: async (e) => {
     e.preventDefault();
-    try { await api('/api/kunde/profil', { method: 'PATCH', body: Object.fromEntries(new FormData(e.target)) }); melde(m1, 'Gespeichert.', 'ok'); } catch (x) { melde(m1, x.message); }
+    try { await api('/api/kunde/profil', { method: 'PATCH', body: formular(e.target) }); melde(m1, 'Gespeichert.', 'ok'); } catch (x) { melde(m1, x.message); }
   } },
     h('div', {}, h('label', {}, 'Ansprechpartner'), h('input', { name: 'ansprechpartner', value: k.ansprechpartner || '' })),
     h('div', {}, h('label', {}, 'E-Mail (Kontakt)'), h('input', { name: 'email', type: 'email', value: k.email || '' })),
     h('div', {}, h('label', {}, 'Telefon'), h('input', { name: 'telefon', value: k.telefon || '' })),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')));
   const f2 = h('form', { class: 'form2', onsubmit: async (e) => {
-    e.preventDefault(); const d = Object.fromEntries(new FormData(e.target));
+    e.preventDefault(); const d = formular(e.target);
     try { await api('/api/kunde/passwort', { method: 'POST', body: d }); melde(m2, 'Passwort geändert.', 'ok'); e.target.reset(); } catch (x) { melde(m2, x.message); }
   } },
     h('div', {}, h('label', {}, 'Aktuelles Passwort'), h('input', { name: 'alt', type: 'password', autocomplete: 'current-password', required: true })),
@@ -572,7 +572,7 @@ V.avv = async () => {
 V.team = async () => {
   const d = await api('/api/kunde/team'), m = h('div');
   const ROLLE = { inhaber: 'Inhaber (alles)', mitarbeiter: 'Mitarbeiter (ohne Team und Rechnungen)', nur_lesen: 'Nur ansehen' };
-  const neu = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target));
+  const neu = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target);
     try { const r = await api('/api/kunde/team/einladen', { method: 'POST', body: o }); melde(m, r.gemailt ? 'Einladung wurde per E-Mail versendet.' : 'Einladung erstellt. Bitte diesen Link weitergeben: ' + r.einladungslink, 'ok'); setTimeout(zeige, r.gemailt ? 900 : 8000); } catch (x) { melde(m, x.message); } } },
     h('div', {}, h('label', {}, 'E-Mail'), h('input', { name: 'email', type: 'email', required: true })),
     h('div', {}, h('label', {}, 'Name'), h('input', { name: 'name' })),

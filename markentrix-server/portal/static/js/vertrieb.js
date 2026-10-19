@@ -1,4 +1,4 @@
-import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke } from './common.js';
+import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -63,7 +63,7 @@ V.provisionen = async () => {
 
 V.leads = async () => {
   const d = await api('/api/vertrieb/leads'), m = h('div');
-  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); Object.keys(o).forEach(k => { if (o[k] === '') delete o[k]; });
+  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); Object.keys(o).forEach(k => { if (o[k] === '') delete o[k]; });
     try { await api('/api/vertrieb/leads', { method: 'POST', body: o }); location.reload(); } catch (x) { melde(m, x.message); } } },
     h('div', { class: 'form2' }, feld('Firma *', 'firma', { required: true }), feld('Ansprechpartner', 'ansprechpartner'), feld('E-Mail', 'email'), feld('Telefon', 'telefon'), feld('Branche', 'branche'), feld('PLZ', 'plz'), feld('Ort', 'ort'), feld('Website', 'website')),
     h('label', {}, 'Notiz'), h('textarea', { name: 'notiz', rows: 2 }), h('p', {}, h('button', { class: 'btn' }, 'Lead speichern')));
@@ -77,7 +77,7 @@ async function leadDetail(lid) {
   const gesperrt = ['gewonnen', 'gesperrt', 'consent_ausstehend'].includes(l.status);
   const st = h('select', { style: 'width:auto', disabled: gesperrt, onchange: async (e) => { try { await api('/api/vertrieb/leads/' + lid + '/status', { method: 'POST', body: { status: e.target.value } }); location.reload(); } catch (x) { melde(m, x.message); } } },
     (gesperrt ? [l.status] : ['neu', 'kontaktiert', 'antwort', 'termin', 'angebot', 'verloren']).map(s => h('option', { value: s, selected: s === l.status }, s.replace(/_/g, ' '))));
-  const akt = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/leads/' + lid + '/aktivitaet', { method: 'POST', body: Object.fromEntries(new FormData(e.target)) }); location.reload(); } catch (x) { melde(m, x.message); } } },
+  const akt = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/leads/' + lid + '/aktivitaet', { method: 'POST', body: formular(e.target) }); location.reload(); } catch (x) { melde(m, x.message); } } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, h('select', { name: 'art' }, ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'].map(a => h('option', { value: a }, a.replace(/_/g, ' '))))),
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
@@ -89,7 +89,7 @@ async function leadDetail(lid) {
 
 V.konto = async () => {
   const m = h('div');
-  const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/passwort', { method: 'POST', body: Object.fromEntries(new FormData(e.target)) }); melde(m, 'Passwort geändert.', 'ok'); e.target.reset(); } catch (x) { melde(m, x.message); } } },
+  const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/passwort', { method: 'POST', body: formular(e.target) }); melde(m, 'Passwort geändert.', 'ok'); e.target.reset(); } catch (x) { melde(m, x.message); } } },
     feld('Aktuelles Passwort', 'alt', { type: 'password', required: true, autocomplete: 'current-password' }), feld('Neues Passwort (mind. 10 Zeichen)', 'neu', { type: 'password', required: true, minlength: 10, autocomplete: 'new-password' }),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Passwort ändern')));
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f), pushKarte('vertrieb'), zweiFaktorKarte());

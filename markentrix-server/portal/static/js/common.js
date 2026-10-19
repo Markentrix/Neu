@@ -15,7 +15,13 @@ export function h(tag, attrs, ...kids) {
   }
   return e;
 }
+/** Element per ID (für Eingabefelder; Typ bewusst offen). @param {string} id @returns {any} */
+export const el = (id) => document.getElementById(id);
+/** Formularfelder als einfaches Objekt. @param {any} f @returns {Record<string, any>} */
+export const formular = (f) => Object.fromEntries(new FormData(f));
+
 export async function api(path, opt = {}) {
+  /** @type {any} */
   const o = { method: opt.method || 'GET', headers: { 'X-MK': '1' }, credentials: 'same-origin' };
   if (opt.body instanceof FormData) o.body = opt.body;
   else if (opt.body !== undefined) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(opt.body); }
@@ -49,8 +55,8 @@ export function sparkline(werte, farbe = '#8B5CF6') {
   const bw = w / werte.length;
   werte.forEach((v, i) => {
     const r = document.createElementNS(ns, 'rect'), bh = Math.max(2, (v / max) * (hh - 4));
-    r.setAttribute('x', i * bw + 2); r.setAttribute('y', hh - bh); r.setAttribute('width', Math.max(2, bw - 4));
-    r.setAttribute('height', bh); r.setAttribute('rx', 3); r.setAttribute('fill', farbe); r.setAttribute('opacity', v ? '1' : '.25');
+    r.setAttribute('x', String(i * bw + 2)); r.setAttribute('y', String(hh - bh)); r.setAttribute('width', String(Math.max(2, bw - 4)));
+    r.setAttribute('height', String(bh)); r.setAttribute('rx', '3'); r.setAttribute('fill', farbe); r.setAttribute('opacity', v ? '1' : '.25');
     svg.append(r);
   });
   return svg;
