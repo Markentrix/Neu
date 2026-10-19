@@ -37,6 +37,62 @@ def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
     return f'<figure class="fig">{pic}' + (f"<figcaption>{cap}</figcaption>" if cap else "") + "</figure>"
 
 
+def _refs(site):
+    return [r if isinstance(r, dict) else {"name": r} for r in site.s.get("references", [])]
+
+
+def _ref_mark(r, prefix, cls):
+    """Logo, falls vorhanden, sonst der Name als ruhige Wortmarke. Geschützte Bindestriche halten Namen zusammen."""
+    name = ESC(r["name"])
+    if r.get("logo"):
+        return f'<img class="{cls}-logo" src="{prefix}{ESC(r["logo"])}" alt="{ESC(r["name"])}" loading="lazy" decoding="async">'
+    return f'<span class="{cls}-word">{name}</span>'
+
+
+def ref_wall(site, prefix=""):
+    """Logo-Wand für die Firmenkunden-Seite (dunkler Abschnitt)."""
+    rl = _refs(site)
+    if not rl:
+        return ""
+    cells = []
+    for r in rl:
+        inner = f'<span class="ref-cell-mark">{_ref_mark(r, prefix, "ref")}</span><span class="ref-cell-type">{ESC(r.get("type") or "Firmenkunde")}</span>'
+        if r.get("url", "").startswith("https://"):
+            cells.append(f'<li><a class="ref-cell" href="{ESC(r["url"])}" target="_blank" rel="noopener">{inner}'
+                         f'<span class="ref-cell-go">Website<span class="visually-hidden"> von {ESC(r["name"])} (öffnet in neuem Tab)</span> {I["arrow"]}</span></a></li>')
+        else:
+            cells.append(f'<li><div class="ref-cell">{inner}</div></li>')
+    return f'''
+  <section class="dark on-dark refs-band" aria-labelledby="refs-h">
+    <div class="container">
+      <div class="refs-head reveal">
+        <div><p class="eyebrow">Referenzen</p><h2 id="refs-h" class="display">Unternehmen aus Celle <em>vertrauen uns.</em></h2></div>
+        <p>Diese Unternehmen aus Celle lassen ihre Fahrzeuge bei uns aufbereiten. Ein Klick auf das Logo führt zur jeweiligen Website.</p>
+      </div>
+      <ul class="ref-wall reveal">{"".join(cells)}</ul>
+      <div class="refs-cta reveal"><p><strong>Ihr Unternehmen fehlt hier noch?</strong> Wir erstellen Ihnen ein Angebot für Ihren Fuhrpark.</p>
+        <a class="btn btn-primary" href="#firmenanfrage">{I["brief"]}Angebot anfordern</a></div>
+    </div>
+  </section>'''
+
+
+def ref_strip(site, prefix=""):
+    """Kompakte Logo-Leiste für die Startseite."""
+    rl = _refs(site)
+    if not rl:
+        return ""
+    items = "".join(
+        (f'<li><a href="{ESC(r["url"])}" target="_blank" rel="noopener" title="{ESC(r["name"])} · {ESC(r.get("type") or "")}">{_ref_mark(r, prefix, "rs")}'
+         f'<span class="visually-hidden"> (öffnet in neuem Tab)</span></a></li>') if r.get("url", "").startswith("https://")
+        else f'<li><span>{_ref_mark(r, prefix, "rs")}</span></li>' for r in rl)
+    return f'''
+      <div class="ref-strip reveal">
+        <p class="ref-strip-label">Auch Unternehmen aus Celle vertrauen uns</p>
+        <ul class="ref-strip-list">{items}</ul>
+        <a class="text-link ref-strip-more" href="{prefix}firmenkunden.html">Angebote für Firmen →</a>
+      </div>'''
+
+
 def offer_card(site, o, prefix=""):
     """Angebotskarte für /angebote.html und die Startseite. Enddatum steht im Attribut, damit abgelaufene Karten sofort verschwinden."""
     until = ""
@@ -399,7 +455,7 @@ def build_home(site, write):
         </div>
       </div>
       <div class="review-grid stagger" tabindex="0" role="region" aria-label="Kundenbewertungen">{core.review_cards(site)}
-      </div>
+      </div>{ref_strip(site)}
       <p class="gallery-note">Ausgewählte Google-Rezensionen im Wortlaut, teils gekürzt, ohne Emojis (Stand {ESC(s["rating"]["asOf"])}). <strong>Hinweis zur Echtheit:</strong> Wir prüfen nicht, ob alle Bewertenden unsere Leistung genutzt haben. Google prüft Bewertungen nach eigenen Richtlinien.</p>
     </div>
   </section>

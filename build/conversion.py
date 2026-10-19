@@ -4,7 +4,7 @@ import datetime
 
 import core
 import seo
-from pages import offer_card
+from pages import offer_card, ref_wall
 from core import ESC, I, STARS5
 
 
@@ -303,30 +303,7 @@ def build_firmen(site, write):
            "provider": {"@id": site.url + "/#business"}, "areaServed": {"@type": "City", "name": s["address"]["city"]}, "audience": {"@type": "BusinessAudience"}}]
     services = "".join(f'<label class="check"><input type="checkbox" name="leistungen" value="{ESC(x)}"><span>{ESC(x)}</span></label>' for x in
                        ["Regelmäßige Pflege (ElbDetail Care)", "Regelmäßige Außenwäsche", "Innenreinigung", "Komplettaufbereitung", "Aufbereitung vor Verkauf/Rückgabe", "Lackpolitur & Versiegelung", "Keramikversiegelung", "Geruchsentfernung", "Abhol- und Bringservice"])
-    refs = ""
-    rl = [r if isinstance(r, dict) else {"name": r} for r in s.get("references", [])]
-    if rl:
-        def mono(n):
-            w = [x for x in n.replace("-", " ").split() if x[:1].isalpha() and x.lower() not in ("die", "der", "das", "gmbh")]
-            return ("".join(x[0] for x in w[:2]) or n[:2]).upper()
-        mark = lambda r: (f'<img src="{ESC(r["logo"])}" alt="" loading="lazy" decoding="async">' if r.get("logo")
-                          else f'<span class="ref-mono">{ESC(r.get("mono") or mono(r["name"]))}</span>')
-        def tile(r):
-            inner = (f'<span class="ref-mark" aria-hidden="true">{mark(r)}</span><span class="ref-name">{ESC(r["name"]).replace("-", "\u2011")}</span>'
-                     f'<span class="ref-type">{ESC(r.get("type") or "Firmenkunde")}</span>')
-            if r.get("url", "").startswith("https://"):
-                return (f'<li class="reveal"><a class="ref-tile" href="{ESC(r["url"])}" target="_blank" rel="noopener">{inner}'
-                        f'<span class="ref-link">Website<span class="visually-hidden"> von {ESC(r["name"])} (öffnet in neuem Tab)</span> {I["arrow"]}</span></a></li>')
-            return f'<li class="reveal"><div class="ref-tile">{inner}</div></li>'
-        tiles = "".join(tile(r) for r in rl)
-        refs = f'''
-  <section class="soft refs-band" aria-labelledby="refs-h">
-    <div class="container">
-      <div class="section-head reveal"><p class="eyebrow">Referenzen</p><h2 id="refs-h" class="display">Diese Unternehmen <em>vertrauen uns.</em></h2>
-        <p>Fahrschulen und Unternehmen aus Celle lassen ihre Fahrzeuge regelmäßig bei uns aufbereiten.</p></div>
-      <ul class="ref-grid stagger">{tiles}</ul>
-    </div>
-  </section>'''
+    refs = ref_wall(site)
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Firmenkunden", None)], "Für Unternehmen",
