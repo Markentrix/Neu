@@ -28,6 +28,8 @@ $CONFIG = [
   'smtp_user'      => getenv('MX_SMTP_USER') ?: '',
   'smtp_pass'      => getenv('MX_SMTP_PASS') ?: '',
   'smtp_security'  => getenv('MX_SMTP_SECURITY') ?: '', // ssl (Standard bei 465), tls = STARTTLS (Standard sonst), none = nur für lokale Relays
+  'confirm'        => getenv('MX_CONFIRM') !== '0',     // Bestätigungsmail an Absender; MX_CONFIRM=0 schaltet sie ab
+  'confirm_max'    => 2,                                // höchstens so viele Bestätigungen je Adresse in 24 Stunden
   'rate_limit'     => 6,                               // Anfragen je IP …
   'rate_window'    => 600,                             // … innerhalb von Sekunden
   'max_len'        => 4000,
@@ -159,10 +161,51 @@ function smtp_send(array $c, string $to, string $subject, string $body, array $h
   return $ok;
 }
 
-if ($CONFIG['smtp_host'] !== '') {
-  $sent = smtp_send($CONFIG, $CONFIG['to'], $encodedSubject, $body, $headers);
-} else {
-  $sent = @mail($CONFIG['to'], $encodedSubject, $body, implode("\r\n", $headers), '-f' . $CONFIG['from']);
+/** Versand über SMTP oder mail(), je nach Konfiguration. */
+function deliver(array $c, string $to, string $encodedSubject, string $body, array $headers): bool {
+  if ($c['smtp_host'] !== '') return smtp_send($c, $to, $encodedSubject, $body, $headers);
+  return @mail($to, $encodedSubject, $body, implode("\r\n", $headers), '-f' . $c['from']);
+}
+
+$sent = deliver($CONFIG, $CONFIG['to'], $encodedSubject, $body, $headers);
+
+// Bestätigung an den Absender: kurze, sachliche Eingangsbestätigung ohne Werbung.
+$confirmed = false;
+if ($sent && $CONFIG['confirm']) {
+  $crate = sys_get_temp_dir() . '/mx-conf-' . hash('sha256', strtolower($email)) . '.json';
+  $chits = is_file($crate) ? (json_decode((string) file_get_contents($crate), true) ?: []) : [];
+  $chits = array_values(array_filter($chits, fn($t) => $now - (int) $t < 86400));
+  if (count($chits) < $CONFIG['confirm_max']) {
+    $labels = ['landingpage' => 'Landingpage', 'website' => 'Unternehmenswebsite', 'relaunch' => 'Relaunch einer bestehenden Website', 'funnel' => 'Website mit Anfragestrecke', 'unklar' => 'Noch offen, Beratung gewünscht'];
+    $about = [];
+    if (!empty($clean['bedarf']) && isset($labels[$clean['bedarf']])) $about[] = 'Anliegen: ' . $labels[$clean['bedarf']];
+    if (!empty($clean['thema'])) $about[] = 'Thema: ' . mb_substr($clean['thema'], 0, 120);
+    if (!empty($clean['wunschtermin'])) $about[] = 'Wunschtermin: ' . mb_substr($clean['wunschtermin'], 0, 120);
+    if (!empty($clean['nachricht_text'])) $about[] = 'Ihre Nachricht: ' . mb_substr($clean['nachricht_text'], 0, 400);
+    $hello = 'Guten Tag ' . preg_replace('/[\x00-\x1F\x7F]/', '', mb_substr($name, 0, 80)) . ',';
+    $cbody = $hello . "\n\n"
+      . "vielen Dank für Ihre Anfrage bei Markentrix. Sie ist bei uns eingegangen, wir melden uns werktags innerhalb von 24 Stunden persönlich bei Ihnen.\n\n"
+      . ($about ? "Ihre Angaben im Überblick:\n" . implode("\n", $about) . "\n\n" : '')
+      . "Wie es weitergeht:\n"
+      . "1. Wir lesen Ihre Anfrage und melden uns werktags innerhalb von 24 Stunden.\n"
+      . "2. Im Erstgespräch, rund 30 Minuten, klären wir Ausgangslage und Ziel.\n"
+      . "3. Sie erhalten ein Angebot mit Festpreis und klarem Umfang und entscheiden in Ruhe.\n\n"
+      . "Eilig? Rufen Sie uns an: 0176 20370429, Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr. Oder antworten Sie einfach auf diese E-Mail.\n\n"
+      . "Diese Nachricht wurde automatisch versendet, weil Sie das Formular auf markentrix.de ausgefüllt haben. Ihre Angaben verwenden wir ausschließlich zur Bearbeitung Ihrer Anfrage. Hinweise zum Datenschutz: https://markentrix.de/datenschutz\n\n"
+      . "Markentrix · Christian Wien · Celle\nhttps://markentrix.de · info@markentrix.de\nImpressum: https://markentrix.de/impressum\n";
+    $cheaders = [
+      'From: ' . $fromName . ' <' . $CONFIG['from'] . '>',
+      'Reply-To: ' . $CONFIG['to'],
+      'MIME-Version: 1.0',
+      'Content-Type: text/plain; charset=UTF-8',
+      'Content-Transfer-Encoding: 8bit',
+      'Auto-Submitted: auto-replied',
+      'X-Auto-Response-Suppress: All',
+      'X-Mailer: markentrix-website',
+    ];
+    $confirmed = deliver($CONFIG, $email, '=?UTF-8?B?' . base64_encode('Ihre Anfrage bei Markentrix ist eingegangen') . '?=', $cbody, $cheaders);
+    if ($confirmed) { $chits[] = $now; @file_put_contents($crate, json_encode($chits)); }
+  }
 }
 
 // Optional: Weiterleitung an Webhook (Fehler dort blockieren den Nutzer nicht)
@@ -181,7 +224,7 @@ if ($CONFIG['webhook'] !== '' && function_exists('curl_init')) {
 
 // Optional: Protokoll (eine JSON-Zeile je Anfrage, außerhalb des Webroots)
 if ($CONFIG['log_file'] !== '') {
-  @file_put_contents($CONFIG['log_file'], json_encode(['t' => gmdate('c'), 'sent' => $sent] + $clean, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
+  @file_put_contents($CONFIG['log_file'], json_encode(['t' => gmdate('c'), 'sent' => $sent, 'bestaetigt' => $confirmed] + $clean, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
 }
 
 if (!$sent) {

@@ -109,7 +109,7 @@
         track('form_submit', { location: payload.quelle });
         postLead(payload).then(function (res) {
           busy = false; if (btn) { btn.classList.remove('is-loading'); btn.innerHTML = orig; }
-          if (res.ok) { form.reset(); if (cal) cal.reset(); if (form.__wizard) form.__wizard.reset(); showOk(); track('generate_lead', { location: payload.quelle }); }
+          if (res.ok) { form.reset(); if (cal) cal.reset(); if (form.__wizard) form.__wizard.reset(); showOk(); track('generate_lead', { location: payload.quelle }); setTimeout(function () { location.href = '/danke?form=' + encodeURIComponent(form.getAttribute('name') || 'anfrage'); }, 700); }
           else if (msg) { msg.className = 'form-msg is-error'; msg.textContent = res.timeout ? 'Die Verbindung hat zu lange gedauert. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.' : 'Ihre Anfrage konnte nicht übermittelt werden. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.'; }
         });
         function showOk() {
