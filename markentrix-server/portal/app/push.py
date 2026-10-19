@@ -8,7 +8,8 @@ import threading
 import time
 from urllib.parse import urlsplit
 
-import httpx
+import urllib.error
+import urllib.request
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
@@ -68,10 +69,14 @@ def _vapid_kopf(endpoint: str, k: dict) -> str:
 
 
 def _senden_an(abo: dict, nutzlast: bytes, k: dict) -> int:
-    r = httpx.post(abo["endpoint"], content=verschluesseln(nutzlast, abo["p256dh"], abo["auth"]), timeout=10,
-                   headers={"Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", "TTL": "86400", "Urgency": "normal",
-                            "Authorization": _vapid_kopf(abo["endpoint"], k)})
-    return r.status_code
+    req = urllib.request.Request(abo["endpoint"], data=verschluesseln(nutzlast, abo["p256dh"], abo["auth"]), method="POST",
+                                 headers={"Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", "TTL": "86400", "Urgency": "normal",
+                                          "Authorization": _vapid_kopf(abo["endpoint"], k)})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status
+    except urllib.error.HTTPError as e:
+        return e.code
 
 
 def _lauf(benutzer_ids: list, titel: str, text: str, url: str, tag: str | None):
