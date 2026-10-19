@@ -1130,3 +1130,7 @@ li .soc a,.soc li a,.band .soc a:not(.btn){text-decoration:none}
 .soc a:hover{text-decoration:none}
 .feed-ig{top:auto;bottom:10px}
 ul.soc li a:not(.btn):not(.link-arrow),ul.soc li a:not(.btn):not(.link-arrow):hover{text-decoration:none}
+/* 39 · Leistungsmenü: Gruppen */
+.nav-dd-head{display:block;padding:10px 14px 4px;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--border);margin-top:6px}
+.footer-grid>*{min-width:0}
+.footer-col a,.footer-col li{overflow-wrap:anywhere;hyphens:auto}
