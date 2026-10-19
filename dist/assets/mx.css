@@ -584,7 +584,7 @@ html.a11y-contrast .card,html.a11y-contrast .price-card,html.a11y-contrast .step
 
 /* ─── 26. Druck ─────────────────────────────────────────────────────────── */
 @media print{
-  .site-header,.site-footer .a11y-bar,.mobile-cta,.modal,.burger,.hero::before,#mx-consent{display:none!important}
+  .site-header,.site-footer .a11y-bar,.mobile-cta,.wa-float,.modal,.burger,.hero::before,#mx-consent{display:none!important}
   body{background:#fff;color:#000}
   a{color:#000;text-decoration:underline}
   .card,.price-card,.step{break-inside:avoid;box-shadow:none}
@@ -1155,7 +1155,7 @@ main:focus{outline:none}
 .mini-frame:not(.mini-frame--m) iframe{width:1024px;height:680px}
 /* 43 · Druckansicht (Preise, Checkliste, Beiträge) */
 @media print{
-  .site-header,.mobile-panel,.mobile-tabbar,.tabbar,.scroll-progress,.rail,#mx-modal,#mx-consent,.a11y-bar,.footer-cta,.band,.hero-visual,.device-toggle,.reveal-skip,.skip-link,.foot-social,.btn--primary,.row .btn,.filter{display:none!important}
+  .site-header,.mobile-panel,.mobile-tabbar,.wa-float,.tabbar,.scroll-progress,.rail,#mx-modal,#mx-consent,.a11y-bar,.footer-cta,.band,.hero-visual,.device-toggle,.reveal-skip,.skip-link,.foot-social,.btn--primary,.row .btn,.filter{display:none!important}
   html,body{background:#fff!important;color:#000!important}
   .reveal,.statement,.band,.seq,.stats{opacity:1!important;transform:none!important}
   .sec,.sec--white,.sec--dark{padding:14px 0!important;background:#fff!important;color:#000!important}
@@ -1253,3 +1253,20 @@ main:focus{outline:none}
 }
 @media (max-width:400px){.site-header .brand{font-size:1.1rem;gap:8px}.site-header .brand svg{width:30px;height:30px}.nav-partner-pill{padding:0 11px;font-size:.82rem}.nav-side{gap:6px}}
 @media (max-width:340px){.site-header .brand{font-size:1rem;gap:6px}.site-header .brand svg{width:28px;height:28px}.nav-partner-pill{padding:0 9px;font-size:.78rem}}
+/* 49 · WhatsApp */
+.wa-float{display:none}
+@media (min-width:761px){
+  .wa-float{display:inline-flex;align-items:center;gap:8px;position:fixed;right:20px;bottom:20px;z-index:840;min-height:48px;padding:0 18px 0 14px;border-radius:999px;background:var(--navy);color:#fff;font-weight:600;font-size:.92rem;text-decoration:none;box-shadow:var(--shadow-lg);transition:transform var(--t) var(--ease),background var(--t)}
+  .wa-float:hover{transform:translateY(-2px);background:#142044;text-decoration:none;color:#fff}
+  .wa-float svg{width:22px;height:22px;stroke:#25D366;fill:none}
+}
+@media (max-width:760px){.mobile-cta{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.5fr)}.mobile-cta a{font-size:.75rem;padding:0 2px}}
+@media (max-width:360px){.mobile-cta{gap:4px;padding-inline:6px}.mobile-cta a{font-size:.75rem}}
+/* 50 · Branchenseiten */
+.branch-hero{display:grid;place-items:center;padding:clamp(16px,2.4vw,28px);min-height:240px}
+.branch-hero .ill{width:100%;max-width:520px}
+.branch-demo{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:center}
+.branch-demo h2{font-size:clamp(1.4rem,2.4vw,1.9rem);margin:4px 0 8px}
+.branch-demo p{margin:0;max-width:62ch}
+@media (min-width:900px){.branch-demo{grid-template-columns:minmax(0,1fr) auto}}
+.feats{gap:18px 28px}

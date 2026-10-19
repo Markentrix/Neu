@@ -48,6 +48,10 @@ Monatlich auszählen: `grep -c '"quelle":"Website-Check"' anfragen.log` (Bericht
 
 Bewerbungen von der Seite `/partner-werden` tragen die Quelle „Bewerbung“ (Mail „Neue Bewerbung über markentrix.de“, Betreff „[markentrix.de] Bewerbung: Name“). Zählen: `grep -c '"quelle":"Bewerbung"' anfragen.log`, nach Rolle: `grep -o '"rolle":"[^"]*"' anfragen.log | sort | uniq -c`. Nach Abschluss des Verfahrens die Einträge im Protokoll und die Mails löschen (Löschfrist laut Datenschutzerklärung: spätestens sechs Monate).
 
+## Wochenbericht
+
+Jeden Montag kommt eine Mail „Wochenbericht markentrix.de: N Anfragen“ mit Quellen, Herkunft, Vorwochenvergleich und allen Eingängen der letzten sieben Tage. Einrichtung und Test: `docs/server/WOCHENBERICHT.md`. Die Auswertung am Monatsende unten bleibt als Gegenprobe möglich.
+
 ## Auswertung ohne Analytics
 
 Auch ohne Einwilligung bleibt die Zählung möglich: Jede Anfrage steht mit Herkunft im Protokoll. Einmal im Monat auszählen:

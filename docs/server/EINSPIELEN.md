@@ -86,6 +86,10 @@ curl -s -XPOST -d '{"url":"https://example.com"}' https://markentrix.de/api/chec
 
 Ohne diesen Schritt bleibt die Seite `/website-check` erreichbar, der Check meldet aber „nicht erreichbar“. Alles andere läuft unverändert. Auslastung: höchstens 8 Prüfungen je IP in 10 Minuten, höchstens 2 gleichzeitig, insgesamt höchstens 24 Sekunden je Prüfung, 1,5 MB je Abruf. Der Check gibt bewusst keine Empfehlungen aus, nur Befunde.
 
+## Nachtrag 19.10.2026: Wochenbericht (einmalig, optional)
+
+Die wöchentliche Lead-Übersicht per Mail braucht nur einen Cronjob auf dem Server. Anleitung, Test und Cron-Zeile: `WOCHENBERICHT.md` (im selben Ordner).
+
 ## Bei jedem späteren Update
 
 Nur Schritt 1. Schritte 2 und 3 sind einmalig.

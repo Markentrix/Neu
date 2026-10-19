@@ -26,7 +26,7 @@ for (const f of walk(DIST)) {
   let main = title, sub = '';
   const i = title.indexOf(':');
   if (i > 0 && i < 42) { main = title.slice(0, i); sub = title.slice(i + 1).trim(); }
-  else { const first = desc.split(/(?<=[.!?])\s/)[0]; sub = first.length <= 118 ? first : desc.slice(0, desc.lastIndexOf(' ', 112)).replace(/[,;:]$/, '') + ' …'; }
+  else { const first = desc.split(/(?<=[.!?])\s/)[0]; sub = first.length <= 76 ? first : desc.slice(0, desc.lastIndexOf(' ', 70)).replace(/[,;:]$/, '') + ' …'; }
   if (canon === '') { main = 'Websites, die Anfragen bringen.'; sub = 'Landingpages, SEO und GEO für Betriebe in Celle und Umgebung.'; }
   const kind = canon.startsWith('/blog/') ? 'Blog' : canon.startsWith('/leistungen/') ? 'Leistung' : canon.startsWith('/ki-marketing-') ? 'Region' : 'Webdesign-Agentur in Celle';
   pages.push({ name, main, sub, kind });
