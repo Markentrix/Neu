@@ -8,18 +8,36 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle  # noqa: F401
 
-AKZENT = colors.HexColor("#4F46E5")
-GRAU = colors.HexColor("#6B7280")
-HELL = colors.HexColor("#F3F4F6")
+import os
+
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+# Markentrix-CI: Inter (Text), Space Grotesk (Überschriften), Navy, Verlauf Cyan -> Violett
+_FD = os.path.join(os.path.dirname(__file__), "fonts")
+try:
+    pdfmetrics.registerFont(TTFont("MX-Text", os.path.join(_FD, "Inter-Regular.ttf")))
+    pdfmetrics.registerFont(TTFont("MX-Fett", os.path.join(_FD, "Inter-SemiBold.ttf")))
+    pdfmetrics.registerFont(TTFont("MX-Titel", os.path.join(_FD, "SpaceGrotesk-Bold.ttf")))
+    F_TEXT, F_FETT, F_TITEL = "MX-Text", "MX-Fett", "MX-Titel"
+except Exception:  # Schriftdateien fehlen: Standardschrift statt Absturz
+    F_TEXT, F_FETT, F_TITEL = "Helvetica", "Helvetica-Bold", "Helvetica-Bold"
+
+NAVY = colors.HexColor("#0B1020")
+CYAN = colors.HexColor("#28C7F7")
+VIOLETT = colors.HexColor("#8B5CF6")
+AKZENT = colors.HexColor("#6D3FE0")   # Violett, auf Weiß lesbar
+GRAU = colors.HexColor("#6B7390")
+HELL = colors.HexColor("#EEF1FA")
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]
 
 _ss = getSampleStyleSheet()
-H1 = ParagraphStyle("h1", parent=_ss["Heading1"], fontName="Helvetica-Bold", fontSize=20, leading=24, textColor=colors.HexColor("#111827"), spaceAfter=4)
-H2 = ParagraphStyle("h2", parent=_ss["Heading2"], fontName="Helvetica-Bold", fontSize=12.5, leading=16, textColor=AKZENT, spaceBefore=14, spaceAfter=6)
-TXT = ParagraphStyle("txt", parent=_ss["BodyText"], fontName="Helvetica", fontSize=10, leading=14, textColor=colors.HexColor("#111827"))
+H1 = ParagraphStyle("h1", parent=_ss["Heading1"], fontName=F_TITEL, fontSize=21, leading=25, textColor=NAVY, spaceAfter=4)
+H2 = ParagraphStyle("h2", parent=_ss["Heading2"], fontName=F_TITEL, fontSize=12.5, leading=16, textColor=AKZENT, spaceBefore=14, spaceAfter=6, keepWithNext=1)
+TXT = ParagraphStyle("txt", parent=_ss["BodyText"], fontName=F_TEXT, fontSize=9.5, leading=14, textColor=NAVY)
 KLEIN = ParagraphStyle("klein", parent=TXT, fontSize=8.5, leading=11, textColor=GRAU)
 RECHTS = ParagraphStyle("rechts", parent=TXT, alignment=TA_RIGHT)
-RECHTS_FETT = ParagraphStyle("rechts_fett", parent=RECHTS, fontName="Helvetica-Bold")
+RECHTS_FETT = ParagraphStyle("rechts_fett", parent=RECHTS, fontName=F_FETT)
 
 
 def esc(t) -> str:
@@ -45,17 +63,17 @@ def monat_name(d) -> str:
 
 
 def tabelle(kopf: list, zeilen: list, breiten=None, rechts_ab=None, summe: list | None = None):
-    daten = [[p(c, ParagraphStyle("th", parent=TXT, fontName="Helvetica-Bold", textColor=colors.white, fontSize=9)) for c in kopf]]
+    daten = [[p(c, ParagraphStyle("th", parent=TXT, fontName=F_FETT, textColor=colors.white, fontSize=9)) for c in kopf]]
     for z in zeilen:
         daten.append([c if hasattr(c, "wrap") else p(c) for c in z])
     if summe:
-        daten.append([c if hasattr(c, "wrap") else p(c, ParagraphStyle("sum", parent=TXT, fontName="Helvetica-Bold")) for c in summe])
+        daten.append([c if hasattr(c, "wrap") else p(c, ParagraphStyle("sum", parent=TXT, fontName=F_FETT)) for c in summe])
     t = Table(daten, colWidths=breiten, repeatRows=1)
-    stil = [("BACKGROUND", (0, 0), (-1, 0), AKZENT), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    stil = [("BACKGROUND", (0, 0), (-1, 0), NAVY), ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1 if not summe else -2), [colors.white, HELL]),
-            ("LINEBELOW", (0, 0), (-1, -1), 0.25, colors.HexColor("#E5E7EB")), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]
+            ("LINEBELOW", (0, 0), (-1, -1), 0.25, colors.HexColor("#E6E9F3")), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]
     if summe:
-        stil += [("LINEABOVE", (0, -1), (-1, -1), 0.8, colors.HexColor("#111827"))]
+        stil += [("LINEABOVE", (0, -1), (-1, -1), 0.8, NAVY)]
     if rechts_ab is not None:
         stil.append(("ALIGN", (rechts_ab, 0), (-1, -1), "RIGHT"))
     t.setStyle(TableStyle(stil))
@@ -85,16 +103,18 @@ def dokument(titel: str, kopfzeile: str, inhalt: list, firma: dict, fuss_extra: 
 
     def seite(c, doc):
         c.saveState()
-        c.setFillColor(AKZENT); c.rect(0, A4[1] - 12 * mm, A4[0], 12 * mm, stroke=0, fill=1)
-        c.setFillColor(colors.white); c.setFont("Helvetica-Bold", 10); c.drawString(20 * mm, A4[1] - 8 * mm, name)
-        c.setFont("Helvetica", 9); c.drawRightString(A4[0] - 20 * mm, A4[1] - 8 * mm, kopfzeile)
-        c.setFillColor(GRAU); c.setFont("Helvetica", 7.5)
+        c.setFillColor(NAVY); c.rect(0, A4[1] - 14 * mm, A4[0], 14 * mm, stroke=0, fill=1)
+        c.saveState(); pf = c.beginPath(); pf.rect(0, A4[1] - 15.2 * mm, A4[0], 1.2 * mm); c.clipPath(pf, stroke=0, fill=0)
+        c.linearGradient(0, 0, A4[0], 0, (CYAN, VIOLETT)); c.restoreState()  # Verlaufslinie unter dem Kopf
+        c.setFillColor(colors.white); c.setFont(F_TITEL, 12); c.drawString(20 * mm, A4[1] - 9 * mm, name)
+        c.setFont(F_TEXT, 8.5); c.setFillColor(colors.HexColor("#C9CFE6")); c.drawRightString(A4[0] - 20 * mm, A4[1] - 8.7 * mm, kopfzeile)
+        c.setFillColor(GRAU); c.setFont(F_TEXT, 7.5)
         c.drawString(20 * mm, 12 * mm, fuss[:120]); c.drawRightString(A4[0] - 20 * mm, 12 * mm, f"Seite {doc.page}")
         if fuss_extra:
             c.drawString(20 * mm, 8 * mm, fuss_extra[:140])
         c.restoreState()
 
-    doc = SimpleDocTemplate(puffer, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=22 * mm, bottomMargin=20 * mm, title=titel, author=name)
+    doc = SimpleDocTemplate(puffer, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=26 * mm, bottomMargin=20 * mm, title=titel, author=name)
     doc.build(inhalt, onFirstPage=seite, onLaterPages=seite)
     return puffer.getvalue()
 

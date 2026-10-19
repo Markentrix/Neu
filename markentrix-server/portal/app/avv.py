@@ -6,7 +6,7 @@ VERSION = "1"
 
 STANDARD_UNTERAUFTRAGNEHMER = [
     ("Hetzner Online GmbH", "Server-Hosting", "Deutschland"),
-    ("Anthropic", "Beantwortung von Chat-Nachrichten im KI-Assistenten (nur wenn das Modul gebucht ist)", "siehe Vertrag mit dem Anbieter"),
+    ("Anthropic Ireland, Limited / Anthropic PBC", "Beantwortung von Chat-Nachrichten im KI-Assistenten (nur wenn das Modul gebucht ist)", "Irland / USA, Übermittlung auf Grundlage von Standardvertragsklauseln"),
 ]
 
 
@@ -55,7 +55,8 @@ def avv_pdf(kunde: dict, firma: dict, unter: list) -> bytes:
         "(4) Verletzungen des Schutzes personenbezogener Daten meldet er unverzüglich nach Bekanntwerden.",
         "(5) Nach Vertragsende werden die Daten nach Wahl des Auftraggebers herausgegeben oder gelöscht, soweit keine gesetzliche Aufbewahrungspflicht entgegensteht.")
     par("5. Unterauftragsverarbeiter",
-        "Der Auftraggeber stimmt dem Einsatz der in Anlage 2 genannten Unterauftragsverarbeiter zu. Änderungen teilt der Auftragnehmer vorab in Textform mit; der Auftraggeber kann aus wichtigem Grund widersprechen.")
+        "Der Auftraggeber stimmt dem Einsatz der in Anlage 2 genannten Unterauftragsverarbeiter zu. Änderungen teilt der Auftragnehmer vorab in Textform mit; der Auftraggeber kann aus wichtigem Grund widersprechen.",
+        "Werden Daten in einem Land außerhalb des Europäischen Wirtschaftsraums verarbeitet, stellt der Auftragnehmer sicher, dass die Voraussetzungen der Art. 44 ff. DSGVO erfüllt sind (zum Beispiel Angemessenheitsbeschluss oder Standardvertragsklauseln).")
     par("6. Kontrollrechte",
         "Der Auftraggeber kann sich nach Voranmeldung von der Einhaltung dieses Vertrags überzeugen, in der Regel durch Auskunft und Nachweise.")
     par("7. Haftung, Schlussbestimmungen",
@@ -71,7 +72,7 @@ def avv_pdf(kunde: dict, firma: dict, unter: list) -> bytes:
            ("Verfügbarkeit", "Tägliche Sicherung, verschlüsselte Kopie an externem Ort, regelmäßiger Wiederherstellungstest, Überwachung mit Alarm."),
            ("Trennung", "Getrennte Mandanten, getrennte Umgebungen für Test und Betrieb."),
            ("Löschung", "Aufbewahrungs- und Löschregeln; Löschung nach Vertragsende.")]
-    inhalt.append(tabelle(["Bereich", "Maßnahme"], [list(z) for z in tom]))
+    inhalt.append(tabelle(["Bereich", "Maßnahme"], [list(z) for z in tom], breiten=[38 * pdf.mm, 132 * pdf.mm]))
     inhalt += [Spacer(1, 18), p("Anlage 2: Unterauftragsverarbeiter", H1), Spacer(1, 6),
-               tabelle(["Unternehmen", "Leistung", "Sitz / Verarbeitungsort"], [list(u) for u in unter])]
+               tabelle(["Unternehmen", "Leistung", "Sitz / Verarbeitungsort"], [list(u) for u in unter], breiten=[50 * pdf.mm, 70 * pdf.mm, 50 * pdf.mm])]
     return pdf.dokument("Auftragsverarbeitungsvertrag", f"AVV Version {VERSION}", inhalt, firma, fuss_extra=f"Vertrag zur Auftragsverarbeitung (Art. 28 DSGVO), Version {VERSION}")
