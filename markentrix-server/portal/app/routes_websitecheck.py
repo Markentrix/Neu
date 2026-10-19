@@ -63,8 +63,8 @@ async def website_check(data: CheckIn, request: Request, bg: BackgroundTasks):
         l = cur.fetchone()
         neu = not l
         if neu:
-            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, quelle, score, loeschen_nach, notiz)
-                           VALUES (%s,%s,%s,%s,%s,'website',%s, current_date + interval '12 months', 'Über den Website-Check auf markentrix.de') RETURNING id""",
+            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, quelle, score, temperatur, loeschen_nach, notiz)
+                           VALUES (%s,%s,%s,%s,%s,'website',%s,'warm', current_date + interval '12 months', 'Über den Website-Check auf markentrix.de') RETURNING id""",
                         (firma, (data.name or "").strip() or None, email, (data.telefon or "").strip() or None, website, data.score))
             lid = cur.fetchone()["id"]
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'consent',%s,'website')",

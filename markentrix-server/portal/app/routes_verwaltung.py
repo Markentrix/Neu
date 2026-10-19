@@ -194,6 +194,7 @@ class LeadIn(BaseModel):
 
 class LeadPatch(BaseModel):
     status: str | None = None
+    temperatur: str | None = None   # kalt | warm | heiss, leer = Einstufung entfernen
     vertriebspartner_id: str | None = None
     zuordnung_loeschen: bool = False
     notiz: str | None = Field(default=None, max_length=2000)
@@ -206,7 +207,7 @@ class LeadPatch(BaseModel):
 @router.get("/leads")
 def leads_liste(status: str = "", q: str = "", user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.ort, l.branche, l.quelle, l.status, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
+        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
                        FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id
                        WHERE (%s='' OR l.status=%s) AND (%s='' OR l.firma ILIKE %s OR coalesce(l.ort,'') ILIKE %s)
                        ORDER BY l.erstellt_am DESC LIMIT 300""", (status, status, q, f"%{q}%", f"%{q}%"))
@@ -254,6 +255,10 @@ def lead_aendern(lid: str, data: LeadPatch, user: dict = Depends(require_admin))
         felder["vertriebspartner_id"] = None
     if "status" in felder and felder["status"] not in LEAD_STATUS:
         raise HTTPException(400, "Unbekannter Status.")
+    if "temperatur" in felder:
+        if felder["temperatur"] not in ("kalt", "warm", "heiss", ""):
+            raise HTTPException(400, "Unbekannte Einstufung.")
+        felder["temperatur"] = felder["temperatur"] or None
     try:
         with tx("admin") as cur:
             if "status" in felder:
@@ -274,6 +279,21 @@ def lead_aendern(lid: str, data: LeadPatch, user: dict = Depends(require_admin))
 class AktIn(BaseModel):
     art: str = "notiz"
     inhalt: str = Field(min_length=1, max_length=2000)
+
+
+@router.delete("/leads/{lid}")
+def lead_loeschen(lid: str, user: dict = Depends(require_admin)):
+    """Löscht den Lead samt Verlauf und Website-Check-Ergebnissen. Ein bereits angelegter Kunde bleibt bestehen."""
+    try:
+        with tx("admin") as cur:
+            cur.execute("DELETE FROM leads WHERE id=%s RETURNING firma", (lid,))
+            r = cur.fetchone()
+            if not r:
+                raise HTTPException(404, "Lead nicht gefunden.")
+            audit(cur, user, "lead_geloescht", None, {"id": lid, "firma": r["firma"]})
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Lead nicht gefunden.")
+    return {"ok": True}
 
 
 @router.post("/leads/{lid}/aktivitaet")

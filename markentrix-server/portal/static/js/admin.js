@@ -500,6 +500,11 @@ async function partnerDetail(pid) {
 }
 
 // ---------------------------------------------------------------- Leads
+const TEMPS = [['', '–'], ['kalt', '❄ Cold'], ['warm', '☀ Warm'], ['heiss', '🔥 HOT']];
+const tempWahl = (z, m) => select('t', TEMPS, z.temperatur || '', { onchange: async (e) => {
+  try { await api('/api/admin/leads/' + z.id, { method: 'PATCH', body: { temperatur: e.target.value } }); z.temperatur = e.target.value; melde(m, 'Einstufung gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } });
+const leadLoeschen = (z, m, danach) => knopf('Löschen', () => confirm('Lead "' + z.firma + '" endgültig löschen (inkl. Verlauf und Website-Check)?') &&
+  bestaetigt(m, async () => { await api('/api/admin/leads/' + z.id, { method: 'DELETE' }); danach(); }, 'Lead gelöscht.'), 'sec');
 const LEAD_ST = ['neu', 'kontaktiert', 'antwort', 'termin', 'angebot', 'gewonnen', 'verloren', 'gesperrt', 'consent_ausstehend', 'tot'];
 const PARTNER = ['anfrage', 'aktiv', 'pausiert', 'beendet'];
 V.leads = async () => {
@@ -517,7 +522,7 @@ V.leads = async () => {
       h('div', {}, h('label', {}, 'Vertriebler'), select('vertriebspartner_id', [['', '– niemand –'], ...partner.map(p => [p.id, p.name])], ''))),
     h('p', {}, h('button', { class: 'btn' }, 'Lead anlegen')));
   return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, tabs,
-    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Quelle', z => z.quelle], ['Status', z => pill(z.status)], ['Score', z => z.score ?? ''], ['Vertriebler', zuordnen], ['Angelegt', z => datum(z.erstellt_am)]], d.leads, 'Keine Leads.')),
+    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Quelle', z => z.quelle], ['Status', z => pill(z.status)], ['Einstufung', z => tempWahl(z, m)], ['Score', z => z.score ?? ''], ['Vertriebler', zuordnen], ['Angelegt', z => datum(z.erstellt_am)], ['', z => leadLoeschen(z, m, () => {})]], d.leads, 'Keine Leads.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
 };
 
@@ -528,7 +533,7 @@ async function leadDetail(lid) {
   const akt = h('form', { onsubmit: (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); bestaetigt(m, () => api('/api/admin/leads/' + lid + '/aktivitaet', { method: 'POST', body: o }), 'Eingetragen.'); } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, select('art', ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'], 'notiz')), h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => confirm('Aus diesem Lead einen Kunden anlegen?') && bestaetigt(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); location.hash = '#kunde/' + k.id; }), 'btn');
-  return h('div', { class: 'stack' }, kopf(l.firma, st, zuK, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
+  return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),
       h('div', { class: 'freitext' }, JSON.stringify(c.ergebnis, null, 2))))) : '',
