@@ -144,9 +144,11 @@
     var pre = (location.search.match(/[?&]url=([^&]+)/) || [])[1];
     var input = $('input[name=url]', form), btn = $('[type=submit]', form), msg = $('.chk-msg', form), out = $('[data-check-result]'), busy = false;
     var LABEL = { ok: 'In Ordnung', warn: 'Verbessern', bad: 'Fehlt', info: 'Hinweis' };
-    var MSG = { url: 'Bitte geben Sie eine gültige Adresse an, zum Beispiel www.ihre-seite.de.', rate: 'Sie haben in kurzer Zeit viele Prüfungen gestartet. Bitte versuchen Sie es in ein paar Minuten erneut.', server: 'Der Check ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.', origin: 'Der Check ist nur über markentrix.de nutzbar.' };
+    var MSG = { url: 'Bitte geben Sie eine gültige Adresse an, zum Beispiel www.ihre-seite.de.', rate: 'Sie haben in kurzer Zeit viele Prüfungen gestartet. Bitte versuchen Sie es in ein paar Minuten erneut.', busy: 'Gerade laufen viele Prüfungen. Bitte versuchen Sie es in einer Minute erneut.', server: 'Der Check ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.', origin: 'Der Check ist nur über markentrix.de nutzbar.' };
     function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
     function fail(t) { msg.className = 'chk-msg is-error'; msg.textContent = t; }
+    var IMPACT = { high: 'Gewicht: hoch', mid: 'Gewicht: mittel', low: 'Gewicht: gering' };
+    var HEAD = { stark: 'Starke Grundlagen, wenige Lücken.', gut: 'Solide, aber mit spürbaren Lücken.', mittel: 'Mittelmaß: hier bleiben Anfragen liegen.', schwach: 'Erheblicher Rückstand bei Auffindbarkeit und Vertrauen.' };
     function render(r) {
       out.textContent = '';
       var score = r.score, tone = score >= 80 ? 'good' : score >= 55 ? 'mid' : 'low';
@@ -154,26 +156,37 @@
       var ring = el('div', 'chk-ring'); ring.style.setProperty('--p', score); ring.appendChild(el('b', null, String(score))); ring.appendChild(el('span', null, 'von 100'));
       var ht = el('div', 'chk-head-text');
       ht.appendChild(el('span', 'eyebrow', 'Ergebnis für ' + r.host));
-      ht.appendChild(el('h2', null, score >= 80 ? 'Solide Grundlagen, mit Luft nach oben.' : score >= 55 ? 'Brauchbar, aber es bleiben Chancen liegen.' : 'Hier gehen Anfragen verloren.'));
-      ht.appendChild(el('p', 'muted', r.counts.ok + ' Merkmale in Ordnung, ' + r.counts.warn + ' zu verbessern, ' + r.counts.bad + ' fehlen. Die Punktzahl ist eine Orientierung, keine Messung von Rankings.'));
+      ht.appendChild(el('h2', null, HEAD[r.grade] || ''));
+      ht.appendChild(el('p', 'muted', r.checks + ' Merkmale geprüft: ' + r.counts.ok + ' in Ordnung, ' + r.counts.warn + ' auffällig, ' + r.counts.bad + ' mangelhaft. Die Punktzahl ist ein Orientierungswert, keine Messung von Rankings.'));
+      if (r.cap) ht.appendChild(el('p', 'chk-cap', 'Gedeckelt wegen: ' + r.cap));
       head.appendChild(ring); head.appendChild(ht); out.appendChild(head);
+      var bars = el('div', 'chk-bars');
+      r.categories.forEach(function (c) {
+        var row = el('div', 'chk-bar ' + (c.score >= 80 ? 'is-good' : c.score >= 55 ? 'is-mid' : 'is-low'));
+        row.appendChild(el('span', 'chk-bar-t', c.title)); var tr = el('span', 'chk-bar-track'); var f = el('i'); f.style.width = c.score + '%'; tr.appendChild(f); row.appendChild(tr);
+        row.appendChild(el('b', null, c.score + ' / 100')); bars.appendChild(row);
+      });
+      out.appendChild(bars);
       var order = { bad: 0, warn: 1, ok: 2, info: 3 };
-      r.groups.forEach(function (g) {
+      r.categories.forEach(function (g) {
         var sec = el('section', 'chk-group'); sec.appendChild(el('h3', null, g.title));
         var ul = el('ul', 'chk-list');
         g.items.slice().sort(function (a, b) { return order[a.status] - order[b.status]; }).forEach(function (it) {
           var li = el('li', 'chk-item is-' + it.status);
           li.appendChild(el('span', 'chk-badge', LABEL[it.status] || ''));
-          var body = el('div'); body.appendChild(el('b', null, it.title)); body.appendChild(el('p', null, it.detail)); li.appendChild(body); ul.appendChild(li);
+          var body = el('div'); body.appendChild(el('b', null, it.title)); body.appendChild(el('p', null, it.detail));
+          if (it.status === 'bad' || it.status === 'warn') body.appendChild(el('span', 'chk-impact', IMPACT[it.impact] || ''));
+          li.appendChild(body); ul.appendChild(li);
         });
         sec.appendChild(ul); out.appendChild(sec);
       });
       var cta = el('div', 'card card--lg card--soft chk-cta');
-      cta.appendChild(el('h3', null, 'Ergebnis gemeinsam durchgehen?'));
-      cta.appendChild(el('p', 'muted', 'Im kostenlosen Potenzial-Check sagen wir Ihnen, welche ein bis zwei Punkte zuerst Sinn ergeben. Unverbindlich, Rückmeldung werktags innerhalb von 24 Stunden.'));
+      cta.appendChild(el('h3', null, 'Ergebnis gemeinsam einordnen?'));
+      cta.appendChild(el('p', 'muted', 'Im kostenlosen Potenzial-Check besprechen wir, was davon für Ihren Betrieb wirklich zählt. Unverbindlich, Rückmeldung werktags innerhalb von 24 Stunden.'));
       var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Potenzial-Check anfragen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
       var b2 = el('a', 'btn btn--secondary btn--lg', 'SEO und GEO ansehen'); b2.href = '/leistungen/seo-geo'; row.appendChild(b2); cta.appendChild(row); out.appendChild(cta);
-      out.appendChild(el('p', 'tiny mt-3', 'Geprüft wurde die Startseite, robots.txt und Sitemap, einmalig und ohne Speicherung. Der Check bewertet weder Texte noch die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
+      var smp = (r.sample && r.sample.length) ? ' Stichprobe interner Seiten: ' + r.sample.map(function (x) { return x.path; }).join(', ') + '.' : '';
+      out.appendChild(el('p', 'tiny mt-3', 'Geprüft wurden Startseite, robots.txt, Sitemap, llms.txt, eine nicht vorhandene Adresse und eine Stichprobe interner Seiten, einmalig und ohne Speicherung, in ' + r.seconds + ' Sekunden.' + smp + ' Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
       out.hidden = false; out.focus({ preventScroll: true });
       if (out.scrollIntoView) out.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' });
     }
@@ -182,8 +195,8 @@
       var v = input.value.trim(); msg.className = 'chk-msg'; msg.textContent = '';
       if (!v || v.indexOf('.') < 0 && !/^https?:\/\//i.test(v)) { fail(MSG.url); input.focus(); return; }
       busy = true; var orig = btn.textContent; btn.textContent = 'Prüfe …'; btn.disabled = true; form.setAttribute('aria-busy', 'true'); out.hidden = true;
-      msg.textContent = 'Wir rufen Ihre Seite ab. Das dauert wenige Sekunden.';
-      var ctrl = ('AbortController' in w) ? new AbortController() : null, timer = ctrl && setTimeout(function () { ctrl.abort(); }, 30000);
+      msg.textContent = 'Wir prüfen Ihre Seite gründlich. Das dauert bis zu 20 Sekunden.';
+      var ctrl = ('AbortController' in w) ? new AbortController() : null, timer = ctrl && setTimeout(function () { ctrl.abort(); }, 45000);
       fetch('/api/check.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }), signal: ctrl ? ctrl.signal : undefined })
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'server' }; }).then(function (j) { j.__status = r.status; return j; }); })
         .then(function (j) {

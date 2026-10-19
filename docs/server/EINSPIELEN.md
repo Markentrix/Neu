@@ -84,7 +84,7 @@ curl -s -o /dev/null -w "%{http_code}\n" https://markentrix.de/api/check.php    
 curl -s -XPOST -d '{"url":"https://example.com"}' https://markentrix.de/api/check.php | head -c 200   # erwartet {"ok":true,...
 ```
 
-Ohne diesen Schritt bleibt die Seite `/website-check` erreichbar, der Check meldet aber „nicht erreichbar“. Alles andere läuft unverändert. Auslastung: höchstens 8 Prüfungen je IP in 10 Minuten, 8 Sekunden und 1,5 MB je Abruf.
+Ohne diesen Schritt bleibt die Seite `/website-check` erreichbar, der Check meldet aber „nicht erreichbar“. Alles andere läuft unverändert. Auslastung: höchstens 8 Prüfungen je IP in 10 Minuten, höchstens 2 gleichzeitig, insgesamt höchstens 24 Sekunden je Prüfung, 1,5 MB je Abruf. Der Check gibt bewusst keine Empfehlungen aus, nur Befunde.
 
 ## Bei jedem späteren Update
 
