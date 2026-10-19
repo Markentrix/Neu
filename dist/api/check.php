@@ -10,7 +10,8 @@
  * eine nicht existierende Adresse zur Prüfung der Fehlerseite, bis zu drei interne Seiten als Stichprobe)
  * und nach überprüfbaren Merkmalen aus den Bereichen SEO, lokale Sichtbarkeit, GEO (Auffindbarkeit in KI-Antworten),
  * Technik und Tempo, Zugänglichkeit sowie Vertrauen und Anfrage ausgewertet. Es werden weder Adresse noch Ergebnis
- * gespeichert oder protokolliert. Für die Begrenzung liegen kurzzeitig Dateien im temporären Ordner (Hash der IP, Platzhalter).
+ * protokolliert. Das Ergebnis liegt höchstens zwei Stunden im temporären Ordner (Zufalls-Token, ohne Personenbezug), damit es auf Wunsch
+ * per E-Mail zugesandt werden kann (siehe anfrage.php); außerdem Dateien für die Begrenzung (Hash der IP, Platzhalter).
  *
  * Schutz gegen Missbrauch: nur http/https auf Port 80/443, nur öffentliche IP-Adressen (auch nach Weiterleitungen, die
  * aufgelöste Adresse wird fest verwendet), höchstens 5 Weiterleitungen, je Abruf Zeit- und Größenbegrenzung, insgesamt
@@ -637,8 +638,14 @@ foreach ($caps as [$limit, $why]) { if ($score > $limit) { $score = $limit; $cap
 $counts = ['ok' => count(array_filter($all, fn($i) => $i['status'] === 'ok')), 'warn' => count(array_filter($all, fn($i) => $i['status'] === 'warn')), 'bad' => count(array_filter($all, fn($i) => $i['status'] === 'bad')), 'info' => count(array_filter($all, fn($i) => $i['status'] === 'info'))];
 $grade = $score >= 85 ? 'stark' : ($score >= 70 ? 'gut' : ($score >= 50 ? 'mittel' : 'schwach'));
 $samplePublic = array_map(fn($s) => ['path' => (string) (parse_url($s['url'], PHP_URL_PATH) ?: '/'), 'ok' => empty($s['bad'])], $sample);
+// Bericht für die Zusendung per E-Mail: Ergebnis kurzzeitig im temporären Speicher (Zufalls-Token, ohne Personenbezug), höchstens zwei Stunden
+$token = bin2hex(random_bytes(16));
+$report = ['host' => $host, 'url' => $finalUrl, 'score' => $score, 'grade' => $grade, 'cap' => $capReason, 'counts' => $counts, 'checks' => count($all) - $counts['info'],
+           'categories' => $cats, 'sample' => $samplePublic, 'date' => date('d.m.Y'), 'created' => time()];
+foreach ((array) glob(sys_get_temp_dir() . '/mx-report-*.json') as $old) { if (@filemtime($old) < time() - 7200) @unlink($old); }
+@file_put_contents(sys_get_temp_dir() . '/mx-report-' . $token . '.json', json_encode($report, JSON_UNESCAPED_UNICODE));
 respond(200, [
-  'ok' => true, 'url' => $finalUrl, 'host' => $host, 'status' => $status, 'score' => $score, 'grade' => $grade, 'cap' => $capReason,
+  'ok' => true, 'token' => $token, 'url' => $finalUrl, 'host' => $host, 'status' => $status, 'score' => $score, 'grade' => $grade, 'cap' => $capReason,
   'counts' => $counts, 'categories' => $cats, 'sample' => $samplePublic, 'checks' => count($all) - $counts['info'],
   'seconds' => round(microtime(true) - $T0, 1),
 ]);

@@ -1223,3 +1223,12 @@ main:focus{outline:none}
 .chk-bar.is-good,.chk-bar.is-mid,.chk-bar.is-low{border:0}
 .chk-impact{display:inline-block;margin-top:6px;font-size:.75rem;font-weight:600;color:#33405A;letter-spacing:.02em}
 @media (min-width:720px){.chk-bar{grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) auto}.chk-bar-t{grid-column:auto}}
+.chk-gate{margin:0 0 32px;border-color:rgba(109,63,209,.28);background:linear-gradient(135deg,rgba(40,199,247,.06),rgba(139,92,246,.08)),#fff}
+.chk-gate h2{font-size:clamp(1.3rem,2.2vw,1.7rem);margin:4px 0 8px}
+.chk-gate .form-row{margin-top:6px}
+.chk-gate .btn{margin-top:6px}
+.chk-findings{margin-top:8px}
+/* 45 · Formulare: ausgeblendete Elemente bleiben ausgeblendet, Fehlertext bei Kontrollkästchen */
+[hidden]{display:none!important}
+.check .error{display:none;font-size:.85rem;color:var(--danger);font-weight:500;flex:1 1 100%;min-width:0;overflow-wrap:anywhere}
+.check.has-error .error{display:block}
