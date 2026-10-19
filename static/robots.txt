@@ -4,6 +4,9 @@ Allow: /
 # Ehemaliger interner Kundenbereich, jetzt Weiterleitung zum externen Portal
 Disallow: /kunden-dashboard
 
+# Technische Endpunkte (Formular, Website-Check)
+Disallow: /api/
+
 # Impressum, AGB und Datenschutz sind bewusst indexierbar (Vertrauenssignal)
 # und stehen in der Sitemap. Die KI-Checkliste ist per meta robots auf noindex.
 

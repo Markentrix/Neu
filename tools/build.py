@@ -67,6 +67,14 @@ def load_partials():
     return parts
 
 
+def og_image_path(path):
+    """Vorschaubild je Seite: static/img/og/<name>.png (erzeugt von tools/og.mjs), sonst das allgemeine Bild."""
+    name = 'home' if path == '/' else path.strip('/').replace('/', '-')
+    if os.path.isfile(os.path.join(STATIC, 'img', 'og', name + '.png')):
+        return f'/img/og/{name}.png'
+    return '/og-image.png'
+
+
 def render(layout, meta, body, partials):
     def sub_partials(s):
         return re.sub(r'\{\{>\s*([\w-]+)\s*\}\}', lambda m: partials.get(m.group(1), f'<!-- partial {m.group(1)} fehlt -->'), s)
@@ -83,6 +91,7 @@ def render(layout, meta, body, partials):
         'canonical': canonical,
         'robots': meta.get('robots', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'),
         'og_type': meta.get('og_type', 'website'),
+        'og_image': SITE + og_image_path(path),
         'body_class': meta.get('body_class', ''),
         'head_extra': meta.get('head_extra', ''),
         'ld_json': ld,

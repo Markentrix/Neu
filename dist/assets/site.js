@@ -76,6 +76,7 @@
   function postLead(payload) {
     payload.seite = location.pathname; payload.zeit = new Date().toISOString();
     var cp = campaign(); Object.keys(cp).forEach(function (k) { payload[k] = cp[k]; });
+    if (w.__mxCheck) payload.website_check = w.__mxCheck.host + ' (' + w.__mxCheck.score + ' von 100)';
     var ctrl = ('AbortController' in w) ? new AbortController() : null;
     var timer = ctrl && setTimeout(function () { ctrl.abort(); }, 12000);
     return fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctrl ? ctrl.signal : undefined })
@@ -135,6 +136,64 @@
         }
       });
     });
+  }
+
+  /* ── Website-Check: ruft /api/check.php auf und zeigt das Ergebnis (nur textContent, kein HTML aus der Antwort) ── */
+  function initCheck() {
+    var form = $('form[data-check]'); if (!form) return;
+    var pre = (location.search.match(/[?&]url=([^&]+)/) || [])[1];
+    var input = $('input[name=url]', form), btn = $('[type=submit]', form), msg = $('.chk-msg', form), out = $('[data-check-result]'), busy = false;
+    var LABEL = { ok: 'In Ordnung', warn: 'Verbessern', bad: 'Fehlt', info: 'Hinweis' };
+    var MSG = { url: 'Bitte geben Sie eine gültige Adresse an, zum Beispiel www.ihre-seite.de.', rate: 'Sie haben in kurzer Zeit viele Prüfungen gestartet. Bitte versuchen Sie es in ein paar Minuten erneut.', server: 'Der Check ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.', origin: 'Der Check ist nur über markentrix.de nutzbar.' };
+    function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+    function fail(t) { msg.className = 'chk-msg is-error'; msg.textContent = t; }
+    function render(r) {
+      out.textContent = '';
+      var score = r.score, tone = score >= 80 ? 'good' : score >= 55 ? 'mid' : 'low';
+      var head = el('div', 'chk-head chk-' + tone);
+      var ring = el('div', 'chk-ring'); ring.style.setProperty('--p', score); ring.appendChild(el('b', null, String(score))); ring.appendChild(el('span', null, 'von 100'));
+      var ht = el('div', 'chk-head-text');
+      ht.appendChild(el('span', 'eyebrow', 'Ergebnis für ' + r.host));
+      ht.appendChild(el('h2', null, score >= 80 ? 'Solide Grundlagen, mit Luft nach oben.' : score >= 55 ? 'Brauchbar, aber es bleiben Chancen liegen.' : 'Hier gehen Anfragen verloren.'));
+      ht.appendChild(el('p', 'muted', r.counts.ok + ' Merkmale in Ordnung, ' + r.counts.warn + ' zu verbessern, ' + r.counts.bad + ' fehlen. Die Punktzahl ist eine Orientierung, keine Messung von Rankings.'));
+      head.appendChild(ring); head.appendChild(ht); out.appendChild(head);
+      var order = { bad: 0, warn: 1, ok: 2, info: 3 };
+      r.groups.forEach(function (g) {
+        var sec = el('section', 'chk-group'); sec.appendChild(el('h3', null, g.title));
+        var ul = el('ul', 'chk-list');
+        g.items.slice().sort(function (a, b) { return order[a.status] - order[b.status]; }).forEach(function (it) {
+          var li = el('li', 'chk-item is-' + it.status);
+          li.appendChild(el('span', 'chk-badge', LABEL[it.status] || ''));
+          var body = el('div'); body.appendChild(el('b', null, it.title)); body.appendChild(el('p', null, it.detail)); li.appendChild(body); ul.appendChild(li);
+        });
+        sec.appendChild(ul); out.appendChild(sec);
+      });
+      var cta = el('div', 'card card--lg card--soft chk-cta');
+      cta.appendChild(el('h3', null, 'Ergebnis gemeinsam durchgehen?'));
+      cta.appendChild(el('p', 'muted', 'Im kostenlosen Potenzial-Check sagen wir Ihnen, welche ein bis zwei Punkte zuerst Sinn ergeben. Unverbindlich, Rückmeldung werktags innerhalb von 24 Stunden.'));
+      var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Potenzial-Check anfragen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
+      var b2 = el('a', 'btn btn--secondary btn--lg', 'SEO und GEO ansehen'); b2.href = '/leistungen/seo-geo'; row.appendChild(b2); cta.appendChild(row); out.appendChild(cta);
+      out.appendChild(el('p', 'tiny mt-3', 'Geprüft wurde die Startseite, robots.txt und Sitemap, einmalig und ohne Speicherung. Der Check bewertet weder Texte noch die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
+      out.hidden = false; out.focus({ preventScroll: true });
+      if (out.scrollIntoView) out.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' });
+    }
+    on(form, 'submit', function (e) {
+      e.preventDefault(); if (busy) return;
+      var v = input.value.trim(); msg.className = 'chk-msg'; msg.textContent = '';
+      if (!v || v.indexOf('.') < 0 && !/^https?:\/\//i.test(v)) { fail(MSG.url); input.focus(); return; }
+      busy = true; var orig = btn.textContent; btn.textContent = 'Prüfe …'; btn.disabled = true; form.setAttribute('aria-busy', 'true'); out.hidden = true;
+      msg.textContent = 'Wir rufen Ihre Seite ab. Das dauert wenige Sekunden.';
+      var ctrl = ('AbortController' in w) ? new AbortController() : null, timer = ctrl && setTimeout(function () { ctrl.abort(); }, 30000);
+      fetch('/api/check.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }), signal: ctrl ? ctrl.signal : undefined })
+        .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'server' }; }).then(function (j) { j.__status = r.status; return j; }); })
+        .then(function (j) {
+          if (j && j.ok) { msg.textContent = ''; w.__mxCheck = { host: j.host, score: j.score }; render(j); track('website_check', { score: j.score >= 80 ? 'hoch' : j.score >= 55 ? 'mittel' : 'niedrig' }); }
+          else fail((j && j.message) || MSG[j && j.error] || MSG.server);
+        })
+        .catch(function () { fail('Die Prüfung hat zu lange gedauert oder die Verbindung ist abgebrochen. Bitte versuchen Sie es erneut.'); })
+        .then(function () { clearTimeout(timer); busy = false; btn.textContent = orig; btn.disabled = false; form.removeAttribute('aria-busy'); });
+    });
+    if (pre) { try { input.value = decodeURIComponent(pre.replace(/\+/g, ' ')).slice(0, 300); } catch (e) { } if (input.value) setTimeout(function () { form.dispatchEvent(new Event('submit', { cancelable: true })); }, 300); }
   }
 
   /* ── Wunschtermin-Kalender ──────────────────────────────────────────── */
@@ -585,6 +644,6 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

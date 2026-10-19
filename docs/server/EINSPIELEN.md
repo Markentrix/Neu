@@ -62,6 +62,30 @@ Falls `validate` einen Fehler meldet: Sicherung zurückspielen (`cp ~/sicherung/
 Dann im Browser: Startseite zeigt die Miniatur, Kontaktformular mit Testanfrage absenden, Mail bei info@markentrix.de prüfen.
 Fehlersuche: `sudo docker compose logs --tail 50 php caddy` und `sudo cat /srv/markentrix-daten/anfragen.log`.
 
+## Nachtrag 19.10.2026: Website-Check (einmalig, nur wenn `/website-check` genutzt werden soll)
+
+Der Website-Check braucht den zweiten PHP-Endpunkt `/api/check.php`. Die Datei kommt mit der ZIP (Schritt 1). Zusätzlich muss Caddy ihn an PHP weiterreichen, dafür die neue `markentrix-site.caddy` einspielen. Der PHP-Container braucht nichts Neues (curl und mbstring sind im Standard-Image enthalten).
+
+Auf dem Windows-Rechner (im Ordner docs/server):
+
+```
+scp markentrix-site.caddy deploy@5.75.146.212:/tmp/markentrix-site.caddy
+```
+
+Auf dem Server (`ssh deploy@5.75.146.212`):
+
+```
+cp /opt/neu/server/caddy/snippets/markentrix-site.caddy ~/sicherung/markentrix-site.caddy.vor-check
+mv /tmp/markentrix-site.caddy /opt/neu/server/caddy/snippets/markentrix-site.caddy
+cd /opt/neu/server
+sudo docker compose exec caddy caddy validate --config /etc/caddy/Caddyfile
+sudo docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+curl -s -o /dev/null -w "%{http_code}\n" https://markentrix.de/api/check.php          # erwartet 405
+curl -s -XPOST -d '{"url":"https://example.com"}' https://markentrix.de/api/check.php | head -c 200   # erwartet {"ok":true,...
+```
+
+Ohne diesen Schritt bleibt die Seite `/website-check` erreichbar, der Check meldet aber „nicht erreichbar“. Alles andere läuft unverändert. Auslastung: höchstens 8 Prüfungen je IP in 10 Minuten, 8 Sekunden und 1,5 MB je Abruf.
+
 ## Bei jedem späteren Update
 
 Nur Schritt 1. Schritte 2 und 3 sind einmalig.

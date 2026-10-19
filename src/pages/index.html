@@ -48,6 +48,24 @@ ld: |
   </div>
 </section>
 
+<!-- ══ Website-Check ══ -->
+<section class="chk-strip-sec" aria-labelledby="chk-strip-title">
+  <div class="wrap">
+    <form class="chk-strip" action="/website-check" method="get">
+      <div class="chk-strip-text">
+        <span class="eyebrow">Kostenloser Website-Check</span>
+        <h2 id="chk-strip-title">Wie sichtbar ist Ihre Website?</h2>
+        <p class="muted">Adresse eingeben und in Sekunden sehen, was bei Google, auf dem Smartphone und beim Vertrauen fehlt.</p>
+      </div>
+      <div class="chk-strip-field">
+        <label class="sr-only" for="strip-url">Adresse Ihrer Website</label>
+        <input id="strip-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="www.ihre-seite.de" required>
+        <button type="submit" class="btn btn--primary btn--lg">Jetzt prüfen</button>
+      </div>
+    </form>
+  </div>
+</section>
+
 <!-- ══ Aktion: Referenzkunden ══ -->
 <section class="offer-sec" id="aktion" aria-labelledby="aktion-title">
   <div class="wrap">
@@ -105,13 +123,6 @@ ld: |
         <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="gastro">Für Gastro und Handel prüfen</a>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ══ Statement ══ -->
-<section class="statement has-rail">
-  <div class="wrap">
-    <p><span class="num">Markentrix<small> · Haltung</small></span>Schöne Posts sind kein Marketing. <span class="dim">Systeme erzeugen Wachstum.</span></p>
   </div>
 </section>
 
@@ -230,11 +241,11 @@ ld: |
         <span class="eyebrow"><span class="num">05<small> / 05</small></span>Warum Markentrix</span>
         <h2 id="why-title">Ein Ansprechpartner. Kein Agentur-Apparat.</h2>
         <p class="lead">Sie sprechen vom Erstgespräch bis zur laufenden Pflege mit derselben Person. Aus Celle, für Betriebe in Niedersachsen und bundesweit.</p>
-        <div class="stack mt-3">
-          <div class="feat reveal"><span class="card-icon"><svg><use href="#i-bolt"/></svg></span><div><b>Schneller Start</b><p>Ihre Website ist in der Regel in 5 bis 15 Werktagen live. Kein monatelanges Projekt.</p></div></div>
-          <div class="feat reveal" data-delay="1"><span class="card-icon"><svg><use href="#i-shield"/></svg></span><div><b>Rechtssicher und datenschutzkonform</b><p>Impressum, Datenschutz, Einwilligungsbanner und lokale Schriften ohne Verbindung zu Drittanbietern gehören dazu.</p></div></div>
-          <div class="feat reveal" data-delay="2"><span class="card-icon"><svg><use href="#i-user"/></svg></span><div><b>Persönlicher Ansprechpartner</b><p>Ein fester Ansprechpartner, kein Ticket-System, kein Call-Center.</p></div></div>
-        </div>
+        <ul class="checks mt-3">
+          <li><b>5 bis 15 Werktage</b> bis zum Livegang, kein monatelanges Projekt</li>
+          <li><b>Rechtssicher:</b> Impressum, Datenschutz, Einwilligungsbanner, lokale Schriften</li>
+          <li><b>Ein fester Ansprechpartner</b>, kein Ticket-System, kein Call-Center</li>
+        </ul>
       </div>
       <div class="card card--lg reveal" data-delay="1">
         <div class="row row--lg row--start">
@@ -252,15 +263,14 @@ ld: |
 </section>
 
 <!-- ══ Social Media ══ -->
-<section class="sec sec--white" id="social" aria-labelledby="social-title">
+<section class="sec sec--white sec--tight" id="social" aria-labelledby="social-title">
   <div class="wrap">
-    <div class="grid grid--sidebar-left">
+    <div class="grid grid--sidebar-left social-row">
       <div>
         <span class="eyebrow">Auf Social Media</span>
-        <h2 id="social-title">Tipps und Beispiele für Ihren Auftritt, auch zwischendurch.</h2>
-        <p class="lead">Auf Instagram und Facebook zeigen wir regelmäßig, wie Website, Sichtbarkeit bei Google und in KI-Antworten und Anfragen zusammenhängen. Kurz, konkret und verständlich.</p>
-        <p class="small muted mt-2">Folgen Sie uns, wenn Sie Ideen für Ihren Betrieb mitnehmen möchten, ganz ohne Verpflichtung.</p>
-        <div class="mt-3">{{> social}}</div>
+        <h2 id="social-title">Tipps und Beispiele, auch zwischendurch.</h2>
+        <p class="lead">Wir zeigen auf Instagram und Facebook, wie Website, Sichtbarkeit und Anfragen zusammenhängen. Kurz und konkret.</p>
+        <div class="mt-2">{{> social}}</div>
       </div>
       <div>
         <div class="feed reveal" role="group" aria-label="Beispiele aus unserem Instagram-Feed">
@@ -276,20 +286,15 @@ ld: |
 </section>
 
 <!-- ══ Ausblick: KI-Assistenten ══ -->
-<section class="sec sec--white" id="ki-ausblick" aria-labelledby="ki-title">
+<section class="sec sec--white sec--tight" id="ki-ausblick" aria-labelledby="ki-title">
   <div class="wrap">
-    <div class="card card--lg card--violet reveal">
-      <div class="grid grid--split">
-        <div>
-          <span class="pill pill--soon mb-2">Ausblick · ab November 2026</span>
-          <h2 id="ki-title">Als Nächstes: KI-Assistenten für Telefon, WhatsApp und E-Mail.</h2>
-          <p class="muted">Wenn die Website Anfragen bringt, übernimmt ab November unser KI-Assistent die Annahme: Anrufe entgegennehmen, Nachrichten beantworten, Termine im Kalender eintragen. Zwei Pilotbetriebe starten als Erste.</p>
-        </div>
-        <div>
-          <ul class="checks checks--violet"><li>50 % Nachlass auf die einmalige Einrichtung für Pilotbetriebe</li><li>Persönliche Einrichtung und Betreuung durch Christian Wien</li><li>Pakete ab 349 € im Monat netto, Einrichtung ab 1.490 €</li></ul>
-          <div class="row mt-3"><a class="btn btn--primary" href="/kontakt" data-open-modal>Pilotplatz vormerken</a><a class="link-arrow" href="/leistungen/ki-automatisierung">Mehr zur KI-Automatisierung</a></div>
-        </div>
+    <div class="card card--violet reveal ki-slim">
+      <div>
+        <span class="pill pill--soon mb-1">Ausblick · ab November 2026</span>
+        <h2 id="ki-title">Als Nächstes: KI-Assistenten für Telefon, WhatsApp und E-Mail.</h2>
+        <p class="muted">Anrufe annehmen, Nachrichten beantworten, Termine eintragen. Zwei Pilotbetriebe starten mit 50 % Nachlass auf die Einrichtung. Pakete ab 349 € im Monat netto.</p>
       </div>
+      <div class="row ki-slim-actions"><a class="btn btn--primary" href="/kontakt" data-open-modal>Pilotplatz vormerken</a><a class="link-arrow" href="/leistungen/ki-automatisierung">Mehr zur KI-Automatisierung</a></div>
     </div>
   </div>
 </section>

@@ -27,9 +27,10 @@ Ziel: Die Seite bleibt aktuell, deckt echte Suchfragen von Betrieben vor Ort ab 
 1. Beitrag nach dem Muster eines bestehenden Beitrags in `src/pages/blog/` anlegen (Front Matter mit `article:published_time`, JSON-LD Article, Breadcrumb, FAQ).
 2. In `src/pages/blog.html` Karte ergänzen, in `static/llms.txt` eintragen.
 3. Drei verwandte Beiträge am Ende und passende Leistungsseite verlinken; auf zwei bis drei älteren Beiträgen zurücklinken.
-4. `python3 tools/build.py --check`, `html-validate`, Sichtprüfung bei 390 und 1280 px.
-5. ZIP bauen (`tools/paket.sh`), hochladen, in der Search Console die neue Adresse prüfen lassen und Indexierung beantragen. Der Feed `https://markentrix.de/feed.xml` aktualisiert sich automatisch.
-6. Social-Posts planen (Metricool), Links mit Kampagnenparametern (`docs/SOCIAL.md`).
+4. Vorschaubild erzeugen: Build ausführen, dann `node tools/og.mjs` (Playwright nötig), danach erneut bauen. Das Bild zeigt Titel und Kurztext der Seite.
+5. `python3 tools/build.py --check`, `html-validate`, Sichtprüfung bei 390 und 1280 px.
+6. ZIP bauen (`tools/paket.sh`), hochladen, in der Search Console die neue Adresse prüfen lassen und Indexierung beantragen. Der Feed `https://markentrix.de/feed.xml` aktualisiert sich automatisch.
+7. Social-Posts planen (Metricool), Links mit Kampagnenparametern (`docs/SOCIAL.md`).
 
 ## Zwölf Wochen: Themenvorschläge
 
