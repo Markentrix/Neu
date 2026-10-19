@@ -144,7 +144,8 @@
     {
       "name": "City-Fahrschule Krug",
       "type": "Fahrschule",
-      "url": "https://city-fahrschule-krug.com/"
+      "url": "https://city-fahrschule-krug.com/",
+      "logo": "ref-city-fahrschule-krug.svg"
     },
     {
       "name": "Koops GmbH",

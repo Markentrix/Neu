@@ -9,3 +9,6 @@ playwright-report/
 __pycache__/
 *.pyc
 .DS_Store
+
+# lokal heruntergeladene Python-Pakete
+*.whl
