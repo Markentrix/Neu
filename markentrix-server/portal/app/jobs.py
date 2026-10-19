@@ -371,6 +371,48 @@ def anrufe_bereinigen() -> int:
     return n
 
 
+def fristen_loeschen(cfg):
+    """Täglich: setzt die Löschfristen um (Leads mit abgelaufener Frist, tote Leads, alte Chatverläufe, Lead-Finder-Rohdaten, Akquise-Antworten). Jede Löschung steht im Löschprotokoll."""
+    if datetime.now(timezone.utc).hour < 2 or not _marker(f"fristen-{date.today()}"):
+        return
+    fristen_ausfuehren()
+
+
+def fristen_ausfuehren() -> dict:
+    ergebnis = {}
+    with tx("system") as cur:
+        cur.execute("SELECT id, tabelle, aufbewahrung_tage FROM loeschregeln WHERE aktiv")
+        regeln = {r["tabelle"]: r for r in cur.fetchall()}
+
+        def protokoll(tabelle, n, regel=None):
+            ergebnis[tabelle] = ergebnis.get(tabelle, 0) + n
+            if n:
+                cur.execute("INSERT INTO loeschprotokoll (tabelle, regel_id, geloescht_anzahl, ausgeloest_durch) VALUES (%s,%s,%s,'automatik')", (tabelle, regel["id"] if regel else None, n))
+
+        def leads_loeschen(bedingung, params, name, regel=None):
+            cur.execute(f"SELECT id FROM leads WHERE kunden_id IS NULL AND status NOT IN ('termin','angebot','gewonnen') AND {bedingung} LIMIT 2000", params)
+            n = 0
+            for r in cur.fetchall():
+                try:
+                    with cur.connection.transaction():  # Sicherungspunkt: ein nicht löschbarer Lead (z. B. verkauft) stoppt nicht den Rest
+                        cur.execute("DELETE FROM leads WHERE id=%s", (r["id"],))
+                    n += 1
+                except Exception:  # noqa: BLE001
+                    continue
+            protokoll(name, n, regel)
+
+        leads_loeschen("loeschen_nach IS NOT NULL AND loeschen_nach < current_date", (), "leads (Löschfrist abgelaufen)", regeln.get("leads"))
+        if "leads" in regeln:
+            leads_loeschen("status IN ('verloren','tot') AND geaendert_am < now() - make_interval(days => %s)", (regeln["leads"]["aufbewahrung_tage"],), "leads (verloren/tot)", regeln["leads"])
+        if "chat_verlauf" in regeln:
+            cur.execute("DELETE FROM chat_verlauf WHERE erstellt_am < now() - make_interval(days => %s)", (regeln["chat_verlauf"]["aufbewahrung_tage"],)); protokoll("chat_verlauf", cur.rowcount, regeln["chat_verlauf"])
+        if "lf_betriebe" in regeln:
+            cur.execute("DELETE FROM lf_betriebe WHERE lead_id IS NULL AND erstellt_am < now() - make_interval(days => %s)", (regeln["lf_betriebe"]["aufbewahrung_tage"],)); protokoll("lf_betriebe", cur.rowcount, regeln["lf_betriebe"])
+        if "akquise_antworten" in regeln:
+            cur.execute("DELETE FROM akquise_antworten WHERE erstellt_am < now() - make_interval(days => %s)", (regeln["akquise_antworten"]["aufbewahrung_tage"],)); protokoll("akquise_antworten", cur.rowcount, regeln["akquise_antworten"])
+    return ergebnis
+
+
 def anrufe_aufraeumen(cfg):
     """Personenbezogene Angaben aus Telefonprotokollen nach 180 Tagen entfernen (Datensparsamkeit)."""
     if datetime.now(timezone.utc).hour < 2 or not _marker(f"anrufe-aufraeumen-{date.today()}"):
@@ -381,7 +423,7 @@ def anrufe_aufraeumen(cfg):
 def tick():
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen):
         try:
             job(cfg)
         except Exception:

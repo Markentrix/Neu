@@ -266,4 +266,6 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 
 ## Automatische Tests
 
+Weitere Unterlagen: `docs/ARCHITEKTUR.md` (Aufbau für Entwickler), `docs/LOESCHKONZEPT.md`, `docs/PILOT-CHECKLISTE.md`. Beispieldaten zum Üben: `mkctl demo-daten` (wieder löschen: `mkctl demo-daten-entfernen`).
+
 `sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").

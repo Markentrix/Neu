@@ -147,7 +147,7 @@ kk=c.get("/api/kunde/kennzahlen").json(); chk("Kunden-Kennzahlen",kk["freigaben_
 chk("Quartalsbewertung",c.post("/api/kunde/zufriedenheit",json={"punkte":8,"kommentar":"gut"}).status_code==200)
 r=c.patch("/api/kunde/stammdaten",json={"strasse":"Neue Str. 5","ort":"Hannover"}); chk("Stammdaten ändern",r.status_code==200,r.text)
 chk("Stammdaten gespeichert",sql(f"select strasse||'|'||ort||'|'||plz from kunden where id='{kid}'")=="Neue Str. 5|Hannover|29221")
-chk("Mail Stammdaten",len([m for m in mails() if "Stammdaten" in str(m["Subject"])])>=1 or len(mail_an("info@markentrix.de","Stammdaten"))>=1)
+time.sleep(2.5); chk("Mail Stammdaten",len([m for m in mails() if "Stammdaten" in str(m["Subject"])])>=1 or len(mail_an("info@markentrix.de","Stammdaten"))>=1)
 chk("Stammdaten leer 400",c.patch("/api/kunde/stammdaten",json={}).status_code==400)
 chk("nur_lesen: Stammdaten verboten",cl.patch("/api/kunde/stammdaten",json={"ort":"X"}).status_code==403)
 mod=sql("select code from module where art='agent' order by sortierung limit 1")

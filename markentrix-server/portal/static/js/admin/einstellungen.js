@@ -128,6 +128,10 @@ export async function telefonKarte() {
   return h('div', { class: 'card' }, h('h2', {}, 'Telefon-Assistent (Anrufprotokoll)'),
     h('p', { class: 'small muted' }, 'Der Anbieter des Telefon-Assistenten (z. B. Famulor) schickt nach jedem Gespräch eine Nachricht an das Portal. Eingehende Anrufe erscheinen beim Kunden unter „Anrufe“ und als Anfrage. Gesprächsaufzeichnungen und Texte werden nicht gespeichert, nur eine Zusammenfassung. Nummern und Namen werden nach 180 Tagen entfernt.'),
     m, h('p', { class: 'small' }, 'Webhook-Adresse (KUNDENNUMMER ersetzen): ', h('code', {}, d.url + '?s=GEHEIMNIS')), h('p', { class: 'small muted' }, d.geheimnis_gesetzt ? 'Ein Geheimnis ist gesetzt. Ein neues macht das alte ungültig.' : 'Noch kein Geheimnis gesetzt.'),
+    d.letzte_nachricht ? h('div', { class: 'small', style: 'margin:8px 0' }, h('b', {}, 'Letzte Nachricht des Anbieters: '), zeit(d.letzte_nachricht.zeit), ' (Kunde ' + d.letzte_nachricht.kunde + ')',
+      h('div', {}, 'Erkannt: ', Object.entries(d.letzte_nachricht.erkannt).map(([k, v]) => k + ' ← ' + v).join(', ') || 'nichts'),
+      h('div', { class: d.letzte_nachricht.nicht_erkannt.length ? 'muted' : '' }, 'Nicht gefunden: ' + (d.letzte_nachricht.nicht_erkannt.join(', ') || 'nichts')),
+      h('details', {}, h('summary', {}, 'Alle gesendeten Feldnamen'), h('code', {}, d.letzte_nachricht.felder.join(', ')))) : h('p', { class: 'small muted' }, 'Es ist noch keine Nachricht eingegangen. Nach einem Testanruf siehst du hier, welche Felder der Anbieter sendet (nur Feldnamen, keine Inhalte).'),
     h('p', {}, knopf(d.geheimnis_gesetzt ? 'Neues Geheimnis erzeugen' : 'Geheimnis erzeugen', async () => {
       if (d.geheimnis_gesetzt && !confirm('Das alte Geheimnis wird ungültig. Alle Webhooks müssen angepasst werden. Fortfahren?')) return;
       try { const r = await api('/api/admin/einstellungen/telefon/neues-geheimnis', { method: 'POST' }); box.replaceChildren(h('div', { class: 'msg ok' }, 'Dein Geheimnis (wird nur jetzt angezeigt): ', h('code', {}, r.geheimnis))); } catch (x) { fehler(m, x); } })), box);

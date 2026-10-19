@@ -53,11 +53,49 @@ def alarm_mail(stufe: str, titel: str, text: str):
         sys.exit("Mail nicht gesendet: " + fehler)
 
 
+DEMO_PRAEFIX = "DEMO – "
+
+
+def demo_daten():
+    """Legt Beispieldaten an (Kunde als Referenzkunde = ohne Abrechnung, Leads, Anfragen, Aufgabe), damit man gefahrlos klicken und Schulungen machen kann. Alles trägt 'DEMO –' im Namen."""
+    with db.tx("system") as cur:
+        cur.execute("SELECT count(*) AS n FROM kunden WHERE firma LIKE %s", (DEMO_PRAEFIX + "%",))
+        if cur.fetchone()["n"]:
+            sys.exit("Die Demo-Daten gibt es schon (mkctl demo-daten-entfernen löscht sie).")
+        cur.execute("""INSERT INTO kunden (firma, ansprechpartner, email, telefon, status, referenzkunde)
+                       VALUES (%s,'Erika Beispiel','demo-kunde@example.invalid','0511 000000','aktiv',true) RETURNING id""", (DEMO_PRAEFIX + "Autohaus Beispiel GmbH",))
+        kid = cur.fetchone()["id"]
+        for n, (name, text) in enumerate((("Max Mustermann", "Bitte um Rückruf wegen Reifenwechsel."), ("Sabine Probe", "Wann habt ihr Samstag geöffnet?"), ("Jan Test", "Angebot für Klimaservice gewünscht."))):
+            cur.execute("INSERT INTO anfragen (kunden_id, name, kontakt, nachricht) VALUES (%s,%s,%s,%s)", (kid, name, "demo@example.invalid", text))
+        for i, (firma, temp) in enumerate((("Bäckerei Beispiel", "heiss"), ("Elektro Muster", "warm"), ("Friseur Probe", "kalt"), ("Kfz Demo Werkstatt", "heiss"), ("Fitness Test Studio", "warm"))):
+            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, ort, quelle, temperatur, loeschen_nach, notiz)
+                           VALUES (%s,'Demo Person','demo@example.invalid','0511 111111','Celle','manuell',%s, current_date + interval '30 days','Demo-Datensatz')""", (DEMO_PRAEFIX + firma, temp))
+        cur.execute("INSERT INTO aufgaben (kunden_id, titel, quelle, faellig_am) VALUES (%s,'DEMO – Kunden anrufen','manuell', current_date)", (kid,))
+        audit(cur, None, "demo_daten_angelegt", None, {"kunde": str(kid)})
+    print("Demo-Daten angelegt: 1 Kunde (Referenzkunde, nie abgerechnet), 3 Anfragen, 5 Leads, 1 Aufgabe.")
+
+
+def demo_entfernen():
+    with db.tx("system") as cur:
+        cur.execute("DELETE FROM aufgaben WHERE titel LIKE %s", (DEMO_PRAEFIX + "%",))
+        cur.execute("DELETE FROM leads WHERE firma LIKE %s", (DEMO_PRAEFIX + "%",))
+        cur.execute("DELETE FROM kunden WHERE firma LIKE %s", (DEMO_PRAEFIX + "%",))
+        n = cur.rowcount
+        audit(cur, None, "demo_daten_entfernt", None, {"kunden": n})
+    print(f"Demo-Daten entfernt ({n} Kunde).")
+
+
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "admin-add":
         db.open_pool()
         admin_add(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None)
         db.close_pool()
+    elif len(sys.argv) >= 2 and sys.argv[1] in ("demo-daten", "demo-daten-entfernen"):
+        db.open_pool()
+        try:
+            demo_daten() if sys.argv[1] == "demo-daten" else demo_entfernen()
+        finally:
+            db.close_pool()
     elif len(sys.argv) >= 5 and sys.argv[1] == "alarm-mail":
         db.open_pool()
         try:

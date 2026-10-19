@@ -65,12 +65,38 @@ def lesen_daten(body: dict) -> dict:
             "ref": str(w("ref") or "")[:100] or None, "beginn": beginn, "ki_hinweis": str(hinweis).lower() in ("true", "1", "ja", "yes") if hinweis is not None else False}
 
 
+def _pfade(d, vor="", tiefe=0) -> list:
+    out = []
+    if isinstance(d, dict):
+        for k, v in d.items():
+            pfad = f"{vor}{k}"
+            if isinstance(v, dict) and tiefe < 3:
+                out += _pfade(v, pfad + ".", tiefe + 1)
+            else:
+                out.append(f"{pfad} ({type(v).__name__})")
+    return out
+
+
+def probe(body: dict, kundennummer: str) -> dict:
+    """Merkt sich nur die STRUKTUR der letzten Nachricht (Feldnamen und Typen, keine Inhalte), damit man nach einem Testanruf sieht, welche Felder der Anbieter schickt und was erkannt wurde."""
+    f = _flach(body)
+    erkannt, fehlt = {}, []
+    for name, namen in ALIAS.items():
+        treffer = next((a for a in namen if f.get(a) not in (None, "", [], {}) and not isinstance(f.get(a), (dict, list))), None)
+        if treffer:
+            erkannt[name] = treffer
+        else:
+            fehlt.append(name)
+    return {"zeit": datetime.now(timezone.utc).isoformat(timespec="seconds"), "kunde": kundennummer[:30], "felder": _pfade(body)[:60], "erkannt": erkannt, "nicht_erkannt": fehlt}
+
+
 # ---------------------------------------------------------------- Einrichtung (Admin)
 @router.get("/api/admin/einstellungen/telefon")
 def einstellung(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         c = einstellungen.lesen(cur, "telefon")
-    return {"geheimnis_gesetzt": bool(c.get("geheimnis")), "url": config.BASE_URL + "/api/webhook/telefon/KUNDENNUMMER"}
+        p = einstellungen.lesen(cur, "telefon_probe") or None
+    return {"geheimnis_gesetzt": bool(c.get("geheimnis")), "url": config.BASE_URL + "/api/webhook/telefon/KUNDENNUMMER", "letzte_nachricht": p}
 
 
 @router.post("/api/admin/einstellungen/telefon/neues-geheimnis")
@@ -102,6 +128,7 @@ async def webhook(kundennummer: str, request: Request):
         raise HTTPException(400, "Ungültiges JSON.")
     d = lesen_daten(body)
     with tx("system") as cur:
+        einstellungen.schreiben(cur, "telefon_probe", probe(body, kundennummer))
         cur.execute("SELECT id, status FROM kunden WHERE kundennummer=%s", (kundennummer,))
         k = cur.fetchone()
         if not k or k["status"] not in ("onboarding", "aktiv"):

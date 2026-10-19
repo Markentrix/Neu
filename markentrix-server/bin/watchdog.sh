@@ -44,6 +44,12 @@ if [ -n "${DOMAIN:-}" ]; then
   fi
 fi
 
+# 6) Mail-Zustellbarkeit: SPF und DMARC der Absender-Domain (ohne sie landen Mails oft im Spam). Nur wenn "dig" vorhanden ist.
+if [ -n "${DOMAIN:-}" ] && command -v dig >/dev/null 2>&1; then
+  dig +short +time=3 +tries=1 TXT "${DOMAIN}" 2>/dev/null | grep -qi "v=spf1" || p "Für ${DOMAIN} fehlt der SPF-Eintrag im DNS (siehe docs/MAIL-DNS.md)"
+  dig +short +time=3 +tries=1 TXT "_dmarc.${DOMAIN}" 2>/dev/null | grep -qi "v=DMARC1" || p "Für ${DOMAIN} fehlt der DMARC-Eintrag im DNS (siehe docs/MAIL-DNS.md)"
+fi
+
 GEFUNDEN="$(printf '%s\n' "${PROBLEME[@]:-}" | sed '/^$/d' | sort)"
 # Status für die Admin-Übersicht im Portal (nur Zahlen und Meldungen, keine Zugangsdaten)
 if [ -d "$BASE/backup-status" ]; then
