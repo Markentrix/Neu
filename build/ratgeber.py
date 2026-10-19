@@ -38,6 +38,20 @@ def build_index(site, write):
           <p>{ESC(a.get("excerpt", ""))}</p>
           <span class="more">{a.get("readingTime", 5)} Min. · aktualisiert {de_date(a.get("updated") or a.get("date"))}</span>
         </a>''' for a in site.articles)
+    winter = [a for a in site.articles if "winter" in a.get("category", "").lower()]
+    winter_band = ""
+    if winter:
+        wl = "".join(f'<li><a href="{a["slug"]}.html">{ESC(a["title"])}</a></li>' for a in winter)
+        winter_band = f'''
+      <div class="winter-band">
+        <div class="winter-band-copy">
+          <p class="eyebrow">{I["snow"]}Winter-Spezial</p>
+          <h2>Gut durch die kalte Jahreszeit.</h2>
+          <p>Streusalz, Nässe und Frost: Unsere Tipps für Lack, Felgen und Innenraum im Winter.</p>
+          <a class="btn btn-primary" href="winter.html">Zum Winter-Ratgeber</a>
+        </div>
+        <ul class="winter-band-list">{wl}<li><a href="{prefix}aktion/winterschutz.html">Aktion: Winter-Lackschutz</a></li></ul>
+      </div>'''
     body = f'''
 <main id="main">
   <section class="page-hero page-hero--compact" aria-labelledby="page-h">
@@ -50,6 +64,7 @@ def build_index(site, write):
   </section>
   <section class="tight-top" aria-label="Artikel">
     <div class="container">
+{winter_band}
       <div class="chip-row" role="group" aria-label="Nach Thema filtern">{chips}</div>
       <div class="article-grid" id="articleGrid">{cards}</div>
     </div>
@@ -58,6 +73,72 @@ def build_index(site, write):
 </main>
 '''
     write("ratgeber/index.html", core.head(site, title, desc, path, prefix=prefix, ld=ld) + core.header(site, prefix, current="ratgeber/index.html") + body + core.footer(site, prefix))
+
+    if winter:
+        build_winter_hub(site, write, winter)
+
+
+def build_winter_hub(site, write, winter):
+    """Winter-Ratgeber: Übersicht aller Winterartikel plus Winteraktion."""
+    prefix = "../"
+    path = "/ratgeber/winter.html"
+    title = "Auto im Winter: Ratgeber für Lack & Innenraum | ElbDetail"
+    desc = ("Winter-Ratgeber aus Celle: Auto winterfest machen, Streusalz richtig abwaschen und Feuchtigkeit im Innenraum vermeiden. "
+            "Praxistipps von ElbDetail.")
+    ld = [seo.webpage(site, path, title, {"@type": "CollectionPage"}),
+          seo.crumbs(site, [("Startseite", "/"), ("Ratgeber", "/ratgeber/index.html"), ("Winter", path)]),
+          {"@context": "https://schema.org", "@type": "ItemList",
+           "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{site.url}/ratgeber/{a['slug']}.html", "name": a["title"]}
+                               for i, a in enumerate(winter)]}]
+    cards = "".join(f'''
+        <a class="article-card" href="{a["slug"]}.html">
+          <span class="article-cat">{ESC(a.get("category", "Winter"))}</span>
+          <h2>{ESC(a["title"])}</h2>
+          <p>{ESC(a.get("excerpt", ""))}</p>
+          <span class="more">{a.get("readingTime", 5)} Min. · aktualisiert {de_date(a.get("updated") or a.get("date"))}</span>
+        </a>''' for a in winter)
+    tips = "".join(f"<li>{t}</li>" for t in [
+        "<strong>Im Herbst versiegeln</strong>, bevor der erste Frost kommt. Dann haften Salz und Schmutz schlechter.",
+        "<strong>Salz regelmäßig abspülen</strong>, auch Radkästen, Schweller und Unterboden.",
+        "<strong>Bei Plusgraden waschen</strong> und Türdichtungen danach trocknen, damit nichts festfriert.",
+        "<strong>Gummimatten nutzen</strong> und Textilmatten bei Nässe herausnehmen und trocknen lassen.",
+        "<strong>Innenscheiben sauber halten</strong>, dann beschlagen sie deutlich weniger."])
+    body = f'''
+<main id="main">
+  <section class="page-hero page-hero--compact page-hero--winter" aria-labelledby="page-h">
+    <div class="container">
+      {core.breadcrumb(prefix, [("Startseite", prefix + "index.html"), ("Ratgeber", "index.html"), ("Winter", None)])}
+      <p class="eyebrow">Winter-Spezial</p>
+      <h1 id="page-h">Ihr Auto im Winter. <em>Gut geschützt.</em></h1>
+      <p class="lead">Streusalz, Matsch und Frost setzen Lack, Felgen und Innenraum stärker zu als jede andere Jahreszeit. Hier finden Sie alles, was Sie für die kalte Jahreszeit wissen müssen.</p>
+      <div class="hero-actions"><a class="btn btn-primary btn-lg" href="{prefix}aktion/winterschutz.html">{I["snow"]}Winter-Lackschutz ansehen</a><a class="btn btn-line" href="{prefix}termin.html?quelle=winter-ratgeber">{I["cal"]}Termin anfragen</a></div>
+    </div>
+  </section>
+  <section aria-labelledby="wtips-h">
+    <div class="container two-up">
+      <div class="prose">
+        <h2 id="wtips-h">Die fünf wichtigsten Wintertipps</h2>
+        <ul class="includes">{tips}</ul>
+      </div>
+      <aside class="sticky-aside">
+        <div class="aside-card dark">
+          <h3>Winter-Lackschutz in Celle</h3>
+          <p>Politur und Versiegelung vor dem ersten Streusalz, ab {site.min_price("premium")} €. Ab der Komplettpflege bleibt Ihr Auto rund 24 Stunden bei uns und trocknet über Nacht in der Halle.</p>
+          <a class="btn btn-primary" href="{prefix}aktion/winterschutz.html">Zur Winteraktion</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+  <section class="soft" aria-labelledby="wart-h">
+    <div class="container">
+      <div class="section-head"><p class="eyebrow">Winter-Ratgeber</p><h2 id="wart-h" class="display">Alle Artikel für den Winter.</h2></div>
+      <div class="article-grid">{cards}</div>
+    </div>
+  </section>
+{core.cta_band(site, prefix)}
+</main>
+'''
+    write("ratgeber/winter.html", core.head(site, title, desc, path, prefix=prefix, ld=ld) + core.header(site, prefix, current="ratgeber/index.html") + body + core.footer(site, prefix))
 
 
 def build_article(site, a, write):

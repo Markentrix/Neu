@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Gemeinsame Bausteine: Inhalte laden, Icons, Layout (Head, Header, Footer), Komponenten."""
+import datetime
 import glob
 import html
 import json
@@ -60,6 +61,12 @@ class Site:
         self.reviews = j("reviews.json")
         self.faq = j("faq.json")["items"]
         self.gallery = j("gallery.json")["items"]
+        try:
+            offers = j("angebote.json").get("items", [])
+        except FileNotFoundError:
+            offers = []
+        today = datetime.date.today().isoformat()
+        self.offers = [o for o in offers if o.get("active", True) and (not o.get("validUntil") or o["validUntil"] >= today)]
         self.services = sorted((json.load(open(f, encoding="utf-8")) for f in glob.glob(os.path.join(content_dir, "services", "*.json"))),
                                key=lambda x: x.get("order", 99))
         self.articles = []
@@ -74,6 +81,7 @@ class Site:
         # Preis-Platzhalter wie {ab:komplett} in Texten durch den aktuellen Richtpreis ersetzen
         self.services = [self.fill(sv) for sv in self.services]
         self.faq = self.fill(self.faq)
+        self.offers = self.fill(self.offers)
         self.articles = [self.fill(a) for a in self.articles]
         self.url = self.s["url"].rstrip("/")
         self.asset_v = {}
@@ -179,7 +187,7 @@ def nav_href(prefix, home, target):
     return prefix + target
 
 
-NAV = [("Leistungen", "#leistungen"), ("Preise", "preise.html"), ("Über uns", "ueber-uns.html"), ("Ratgeber", "ratgeber/index.html"),
+NAV = [("Leistungen", "#leistungen"), ("Preise", "preise.html"), ("Angebote", "angebote.html"), ("Über uns", "ueber-uns.html"), ("Ratgeber", "ratgeber/index.html"),
        ("Gutscheine", "gutscheine.html"), ("Firmenkunden", "firmenkunden.html"), ("Kontakt", "kontakt.html")]
 
 
@@ -198,6 +206,11 @@ def header(site, prefix="", home=False, current=None):
     </a>
     <nav class="main-nav" aria-label="Hauptnavigation"><ul>{items}</ul></nav>
     <div class="header-cta">
+      <div class="header-social" aria-label="ElbDetail in sozialen Netzwerken">
+        <a href="{site.s["social"]["instagram"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Instagram">{I["insta"]}</a>
+        <a href="{site.s["social"]["facebook"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Facebook">{I["fb"]}</a>
+        <a href="{site.s["social"]["tiktok"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf TikTok">{I["tiktok"]}</a>
+      </div>
       <a class="btn btn-icon btn-wa-ghost" href="{site.wa()}" target="_blank" rel="noopener" aria-label="WhatsApp schreiben">{I["wa"]}</a>
       <a class="btn btn-primary btn-sm header-book" href="{prefix}termin.html">{I["cal"]}<span class="btn-label">Termin anfragen</span></a>
       <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Menü öffnen">{I["menu"]}</button>
@@ -208,6 +221,7 @@ def header(site, prefix="", home=False, current=None):
       <li><a href="{nav_href(prefix, home, '#leistungen')}">Leistungen</a></li>
       {svc}
       <li><a href="{prefix}preise.html">Pakete &amp; Preise</a></li>
+      <li><a href="{prefix}angebote.html">Aktuelle Angebote</a></li>
       <li><a href="{prefix}termin.html">Termin online anfragen</a></li>
       <li><a href="{prefix}gutscheine.html">Gutscheine</a></li>
       <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
@@ -217,6 +231,12 @@ def header(site, prefix="", home=False, current=None):
       <li><a href="{nav_href(prefix, home, '#bewertungen')}">Bewertungen</a></li>
       <li><a href="{prefix}kontakt.html">Kontakt</a></li>
     </ul>
+    <div class="mobile-social">
+      <a class="social-btn" href="{site.s["social"]["instagram"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Instagram">{I["insta"]}</a>
+      <a class="social-btn" href="{site.s["social"]["facebook"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Facebook">{I["fb"]}</a>
+      <a class="social-btn" href="{site.s["social"]["tiktok"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf TikTok">{I["tiktok"]}</a>
+      <span>@elbdetail</span>
+    </div>
   </nav>
 </header>
 '''
@@ -248,6 +268,7 @@ def footer(site, prefix="", home=False):
       <ul>
         <li><a href="{prefix}termin.html">Termin online anfragen</a></li>
         <li><a href="{prefix}preise.html">Pakete &amp; Preise</a></li>
+      <li><a href="{prefix}angebote.html">Aktuelle Angebote</a></li>
         <li><a href="{prefix}gutscheine.html">Gutscheine</a></li>
         <li><a href="{prefix}firmenkunden.html">Firmenkunden &amp; Flotten</a></li>
         <li><a href="{prefix}elbdetail-care.html">ElbDetail Care</a></li>
@@ -273,6 +294,7 @@ def footer(site, prefix="", home=False):
     <ul>
       <li><a href="{prefix}impressum.html">Impressum</a></li>
       <li><a href="{prefix}datenschutz.html">Datenschutz</a></li>
+      {'<li><button class="link-btn" type="button" data-consent-open>Cookie-Einstellungen</button></li>' if (s.get("analytics") or {}).get("ga4") else ""}
     </ul>
   </div>
 </footer>

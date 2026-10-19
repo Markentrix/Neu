@@ -407,7 +407,7 @@
     legal: "Rechtliches (Impressum & Datenschutz)", owner: "Inhaber:in / Firma laut Gewerbeanmeldung", vatId: "USt-IdNr.", responsible: "Verantwortlich nach § 18 MStV", mailProvider: "E-Mail-Anbieter (Name, Anschrift)",
     hosting: "Rechenzentrum", vouchers: "Gutscheine", amounts: "Betragsvorschläge", minAmount: "Mindestbetrag", maxAmount: "Höchstbetrag", stand: "Stand (Text)", standIso: "Stand (Datum JJJJ-MM-TT)",
     classes: "Fahrzeugklassen", key: "Schlüssel (nicht ändern)", short: "Kurzname", examples: "Beispiele", packages: "Pakete", for: "Für wen", duration: "Dauer", featured: "Hervorheben",
-    prices: "Richtpreise je Klasse (€)", kompakt: "Kompakt", mittel: "Limousine / Kombi", suv: "SUV / Van", features: "Leistungen", included: "Enthalten", extras: "Einzelleistungen", compare: "Vergleichstabelle",
+    prices: "Richtpreise je Klasse (€)", kompakt: "Kompakt", mittel: "Limousine / Kombi", suv: "SUV / Van", sport: "Sport / Premium", onRequest: "Preis nur auf Anfrage", features: "Leistungen", included: "Enthalten", extras: "Einzelleistungen", compare: "Vergleichstabelle",
     label: "Bezeichnung", frisch: "Frisch & Sauber", komplett: "Komplettpflege", premium: "Premium Politur", note: "Hinweistext", featuredQuote: "Hervorgehobenes Zitat", items: "Einträge", source: "Quelle",
     q: "Frage", a: "Antwort", title: "Titel", sub: "Untertitel", before: "Foto vorher (Dateiname)", after: "Foto nachher (Dateiname)", alt: "Bildbeschreibung", slug: "Adresse (nicht ändern)",
     order: "Reihenfolge", teaser: "Kurzbeschreibung", seoTitle: "Seitentitel für Google (max. 60 Zeichen)", description: "Beschreibung für Google (120–155 Zeichen, Preise als {ab:frisch}, {ab:komplett}, {ab:premium})", h1: "Überschrift (*kursiv* = blau)",
@@ -415,6 +415,9 @@
     related: "Verwandte Leistungen (Adressen)", date: "Veröffentlicht (JJJJ-MM-TT)", updated: "Aktualisiert (JJJJ-MM-TT)", category: "Kategorie", readingTime: "Lesezeit (Min.)", excerpt: "Teaser",
     about: "Über uns (Inhaber-Karte auf der Startseite, erscheint wenn Name und Text gefüllt sind)", role: "Rolle", fullName: "Vor- und Nachname (für strukturierte Daten)", photo: "Foto (Dateiname aus Fotos)", since: "Seit (z. B. 2023)",
     verification: "Bestätigungscodes für Google Search Console / Bing", google: "Google (nur der Code aus dem Meta-Tag)", bing: "Bing (nur der Code)",
+    active: "Aktiv (auf der Website zeigen)", highlight: "Auf der Startseite hervorheben", icon: "Symbol (snow, gift, spark, brief, tag, key)", badge: "Etikett", price: "Preisangabe", validUntil: "Gültig bis (JJJJ-MM-TT, leer = unbegrenzt)", ctaLabel: "Button-Text", ctaHref: "Button-Ziel (z. B. termin.html)",
+    references: "Referenzen (Firmenkunden, nur mit Erlaubnis)", type: "Branche",
+    analytics: "Google Analytics (lädt nur nach Einwilligung)", ga4: "Mess-ID Google Analytics 4 (G-…), leer = aus", hinweis: "Hinweis", hostingLocation: "Serverstandort (Stadt)",
     smallBusiness: "Kleinunternehmer nach § 19 UStG (keine Umsatzsteuer)", partners: "Partner & Qualifikationen", pickup: "Abhol- und Bringservice",
     freeRadiusKm: "Kostenloser Umkreis in km (0 = nicht anzeigen)", bookAs: "Anfrage-Art in der Buchung (Schlüssel)",
     service: "Passende Leistung (Adresse)", summary: "Das Wichtigste in Kürze", draft: "Entwurf (nicht veröffentlichen)", city_: "Stadtteile" };

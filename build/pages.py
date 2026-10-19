@@ -94,7 +94,7 @@ def price_section(site, prefix=""):
     """Volle Preisübersicht mit Klassen-Umschalter, Paketen, Extras und Vergleichstabelle."""
     pr = site.pricing
     feat = next((p for p in pr["packages"] if p.get("featured")), pr["packages"][0])
-    price_cls = "".join(f'<label><input type="radio" name="pclass" value="{c["key"]}"{" checked" if i == 0 else ""}><span>{ESC(c["name"])}</span></label>' for i, c in enumerate(pr["classes"]))
+    price_cls = "".join(f'<label><input type="radio" name="pclass" value="{c["key"]}"{" checked" if i == 0 else ""}><span title="{ESC(c["name"])}">{ESC(c["short"])}</span></label>' for i, c in enumerate(pr["classes"]))
     plans = "".join(plan_card(site, p, prefix) for p in pr["packages"])
     extras = "".join(f"<li>{ESC(e)} <small>· auf Anfrage</small></li>" for e in pr["extras"])
 
@@ -114,6 +114,7 @@ def price_section(site, prefix=""):
       <div class="plans stagger">{plans}
       </div>
       <p class="price-note">{ESC(pr["note"])}</p>
+      {f'<p class="price-stand">{I["clock"]}<span>{ESC(pr["standNote"])}</span></p>' if pr.get("standNote") else ""}
       <div class="extras reveal">
         <h2>Einzeln buchbar oder als Ergänzung</h2>
         <ul>{extras}</ul>
@@ -174,6 +175,12 @@ def build_home(site, write):
     desc = (f"Fahrzeugaufbereitung in Celle mit Liebe zum Detail: Lackkorrektur, Keramikversiegelung und Innenraum in Handarbeit. "
             f"{s['rating']['value']} ★ bei Google, Festpreis vorab.")
     home_faq = pick(site.faq, HOME_FAQ)
+    ho = next((o for o in site.offers if o.get("highlight")), None)
+    offer_strip = ""
+    if ho:
+        offer_strip = (f'\n      <a class="offer-strip reveal" href="angebote.html">{I.get(ho.get("icon") or "spark", I["spark"])}'
+                       f'<span><strong>{ESC(ho.get("badge") or "Aktuell")}:</strong> {ESC(ho["title"])} · {ESC(ho.get("price", "")).replace(" €", "&nbsp;€")}</span>'
+                       f'<span class="offer-strip-more">Alle Angebote →</span></a>\n')
     hi = s.get("heroImage") or {}
     hero_img = picture(site, hi.get("file", ""), "", "hero-photo", "", sizes="100vw", eager=True)
     if hero_img:
@@ -282,7 +289,7 @@ def build_home(site, write):
 
       <form class="quote-card" id="quoteForm" aria-labelledby="quote-h">
         <div class="quote-head"><h2 id="quote-h">Richtpreis in 10 Sekunden</h2><span>Unverbindlich</span></div>
-        <fieldset class="quote-field"><legend><span>Fahrzeugklasse</span></legend><div class="seg">{cls_radios}</div></fieldset>
+        <fieldset class="quote-field"><legend><span>Fahrzeugklasse</span></legend><div class="seg{" c4" if len(pr["classes"]) == 4 else ""}">{cls_radios}</div></fieldset>
         <fieldset class="quote-field"><legend><span>Paket</span></legend><div class="seg pk">{pkg_radios}</div></fieldset>
         <div class="quote-result" aria-live="polite">
           <span class="lbl">Richtpreis <span id="quotePkgName">{ESC(feat["name"])}</span></span>
@@ -290,7 +297,7 @@ def build_home(site, write):
         </div>
         <a class="btn btn-primary" id="quoteBook" href="termin.html?paket={feat["key"]}&amp;klasse={cls0}">{I["cal"]}Dieses Paket anfragen</a>
         <a class="quote-wa" id="quoteWa" href="{site.wa()}" target="_blank" rel="noopener">{I["wa"]}oder Angebot per WhatsApp</a>
-        <p class="quote-note">Richtwert für normalen Pflegezustand. Der verbindliche Preis hängt von Fahrzeug und Zustand ab und wird vor dem Termin bestätigt.</p>
+        <p class="quote-note" id="quoteNote">Richtwert für normalen Pflegezustand. Der verbindliche Preis hängt von Fahrzeug und Zustand ab und wird vor dem Termin bestätigt.</p>
       </form>
     </div>
   </section>
@@ -307,7 +314,7 @@ def build_home(site, write):
   </div>
 
   <section id="leistungen" aria-labelledby="leistungen-h">
-    <div class="container">
+    <div class="container">{offer_strip}
       <div class="section-head reveal">
         <p class="eyebrow">Leistungen</p>
         <h2 id="leistungen-h" class="display">Für jedes Auto die <em>passende Pflege.</em></h2>
@@ -412,7 +419,7 @@ def build_home(site, write):
       <div class="process-rail stagger" data-draw>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle, danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle. Ab der Komplettpflege bleibt Ihr Auto über Nacht bei uns, damit alles aushärtet und keine Wasserflecken entstehen. Danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
       </div>
     </div>
   </section>
@@ -705,6 +712,19 @@ def build_legal(site, write):
     </div>
 '''
     mail = _ph(L.get("mailProvider"), "E-Mail-Anbieter mit Anschrift, z. B. der Anbieter des Postfachs info@elbdetail.de")
+    ga = ((s.get("analytics") or {}).get("ga4") or "").strip()
+    if ga:
+        ga_section = """    <h2>4. Cookies und Google Analytics (nur mit Ihrer Einwilligung)</h2>
+    <p>Wenn Sie im Hinweisfenster auf „Akzeptieren“ klicken, nutzen wir Google Analytics 4, einen Webanalysedienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland („Google“). Ohne Ihre Einwilligung wird Google Analytics nicht geladen und es werden keine Cookies gesetzt.</p>
+    <p><strong>Zweck:</strong> Wir möchten verstehen, wie unsere Website genutzt wird (z. B. aufgerufene Seiten, Verweildauer, ungefährer Standort auf Stadtebene, Gerätetyp, Herkunft des Besuchs und Ereignisse wie Klicks auf „WhatsApp“ oder abgeschickte Anfragen), um Inhalte und Angebote zu verbessern.</p>
+    <p><strong>Cookies:</strong> Google Analytics speichert Cookies auf Ihrem Gerät (u. a. „_ga“ und „_ga_*“, Speicherdauer bis zu 2 Jahre), um wiederkehrende Besuche zu erkennen. IP-Adressen werden von Google Analytics 4 nach Angaben von Google nicht gespeichert.</p>
+    <p><strong>Rechtsgrundlage:</strong> Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen: über den Link „Cookie-Einstellungen“ unten auf jeder Seite.</p>
+    <p><strong>Übermittlung in die USA:</strong> Eine Übermittlung an Google LLC in die USA ist möglich. Google ist unter dem EU-US Data Privacy Framework zertifiziert (Angemessenheitsbeschluss der EU-Kommission, Art. 45 DSGVO). Mit Google besteht ein Vertrag zur Auftragsverarbeitung.</p>
+    <p>Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Datenschutzerklärung von Google</a>, <a href="https://support.google.com/analytics/answer/6004245" target="_blank" rel="noopener">Datenschutz in Google Analytics</a>.</p>
+    <p>Abgesehen davon bindet diese Website keine Werbe- oder Trackingdienste ein (kein Meta-Pixel). Ihre Entscheidung speichern wir im lokalen Speicher Ihres Browsers, damit das Hinweisfenster nicht bei jedem Besuch erscheint.</p>"""
+    else:
+        ga_section = """    <h2>4. Keine Cookies, keine Tracking-Dienste</h2>
+    <p>Diese Website setzt keine Cookies und bindet keine Analyse- oder Werbedienste Dritter ein (kein Google Analytics, kein Meta-Pixel). Ausnahme ist die freiwillig nachladbare Google-Karte (Ziffer 8).</p>"""
     ds = f'''
     <h2>1. Verantwortlicher</h2>
     <p>Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:<br>
@@ -714,10 +734,9 @@ def build_legal(site, write):
     <h2>2. Grundsätzliches</h2>
     <p>Wir verarbeiten personenbezogene Daten nur, soweit dies zur Bereitstellung dieser Website, zur Bearbeitung von Anfragen und zur Durchführung unserer Leistungen erforderlich ist. Rechtsgrundlagen sind Art. 6 Abs. 1 lit. a DSGVO (Einwilligung), lit. b (Vertrag und Vertragsanbahnung), lit. c (rechtliche Pflichten) und lit. f (berechtigte Interessen).</p>
     <h2>3. Hosting auf eigenem Server</h2>
-    <p>Diese Website, alle Formulare und die Besucherstatistik laufen auf einem von uns betriebenen Server im Rechenzentrum der {ESC(L.get("hosting") or "Hetzner Online GmbH")}. Die Daten verbleiben in Deutschland. Mit dem Rechenzentrumsbetreiber besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO. Es werden keine Inhalte, Schriftarten oder Skripte von fremden Servern nachgeladen.</p>
+    <p>Diese Website, alle Formulare und die Besucherstatistik laufen auf einem von uns betriebenen Server im Rechenzentrum der {ESC(L.get("hosting") or "Hetzner Online GmbH")}. Serverstandort ist {ESC(L.get("hostingLocation") or "Deutschland")}, die Daten verbleiben in Deutschland. Mit dem Rechenzentrumsbetreiber besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO. Schriftarten und Skripte der Website liegen auf unserem Server{" (Google Analytics nur nach Ihrer Einwilligung, siehe Ziffer 4)" if ga else ""}.</p>
     <p>Beim Aufruf werden technisch notwendige Daten (u. a. IP-Adresse, Zeitpunkt, aufgerufene Adresse, Browsertyp) verarbeitet, um die Seite auszuliefern und vor Missbrauch zu schützen (Art. 6 Abs. 1 lit. f DSGVO). Zugriffsprotokolle mit IP-Adressen speichern wir nicht dauerhaft.</p>
-    <h2>4. Keine Cookies, keine Tracking-Dienste</h2>
-    <p>Diese Website setzt keine Cookies und bindet keine Analyse- oder Werbedienste Dritter ein (kein Google Analytics, kein Meta-Pixel). Ausnahme ist die freiwillig nachladbare Google-Karte (Ziffer 8).</p>
+{ga_section}
     <h2>5. Eigene, cookielose Besucherstatistik</h2>
     <p>Um die Website zu verbessern, zählen wir Seitenaufrufe und einzelne Ereignisse (z. B. Klick auf „WhatsApp“, abgeschickte Terminanfrage) mit einer selbst betriebenen Statistik auf unserem Server. Dabei werden keine Cookies gesetzt und nichts auf Ihrem Gerät gespeichert. Die IP-Adresse wird nicht gespeichert; zur Zählung eindeutiger Besuche wird aus IP-Adresse, Browserkennung und einem täglich wechselnden, nach 24 Stunden gelöschten Zufallswert ein nicht rückrechenbarer Kurzwert gebildet. Gespeichert werden: aufgerufene Seite, Herkunftsseite (nur Domain), Kampagnenparameter (utm), Gerätekategorie und Zeitpunkt. Eine Zuordnung zu einer Person ist nicht möglich. Rechtsgrundlage ist unser berechtigtes Interesse an einer bedarfsgerechten Gestaltung der Website (Art. 6 Abs. 1 lit. f DSGVO). Wenn Ihr Browser „Do Not Track“ oder „Global Privacy Control“ sendet, wird nichts gezählt.</p>
     <h2>6. Anfragen über die Website-Formulare</h2>
@@ -748,7 +767,7 @@ def build_legal(site, write):
 '''
     for fname, title, desc, h1, sub, content in [
         ("impressum.html", "Impressum | ElbDetail Fahrzeugaufbereitung Celle", "Impressum von ElbDetail, Fahrzeugaufbereitung in Celle, Lachtehäuser Straße 1: Anbieterkennzeichnung, Kontakt und rechtliche Angaben nach DDG.", "Impressum", "Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)", imp),
-        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", "Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, keine Cookies, keine Tracking-Dienste. Alle Infos zu Ihren Rechten.", "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
+        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", ("Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, Google Analytics nur mit Einwilligung. Alle Infos zu Ihren Rechten." if ga else "Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, keine Cookies, keine Tracking-Dienste. Alle Infos zu Ihren Rechten."), "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
         body = f'''
 <main id="main" class="legal-main">
   <div class="container">

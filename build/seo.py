@@ -153,11 +153,12 @@ def llms(site, full=False):
 - Abhol- und Bringservice: nach Vereinbarung
 - Regelmäßige Pflege: ElbDetail Care, individuell auf Anfrage für Privatkunden, Unternehmen und Flotten: {site.url}/elbdetail-care.html
 - Gewerbekunden: Autohäuser und Händler, Fahrschulen, Pflegedienste, Handwerksbetriebe, Unternehmen mit Dienstwagen, Leasing- und Fuhrparkunternehmen; Konditionen auf Anfrage: {site.url}/firmenkunden.html
-- Gewerbliche Referenzen: {', '.join(site.s.get('references', [])) or 'auf Anfrage'}
+- Gewerbliche Referenzen: {', '.join(r['name'] if isinstance(r, dict) else r for r in site.s.get('references', [])) or 'auf Anfrage'}
 - Umsatzsteuer: Kleinunternehmer nach § 19 UStG, es wird keine Umsatzsteuer berechnet
 - Bezahlung: bar, Karte, PayPal oder Überweisung
 - Gutscheine: {site.url}/gutscheine.html
 - Firmenkunden und Flotten: {site.url}/firmenkunden.html
+- Aktuelle Angebote: {site.url}/angebote.html ({'; '.join(o['title'] + ' ' + o.get('price', '') for o in site.offers) or 'derzeit keine Aktion'})
 
 ## Leistungen
 
@@ -169,7 +170,7 @@ def llms(site, full=False):
     t += "| Paket | " + " | ".join(c["name"] for c in cls) + " | Dauer |\n|---|" + "---|" * (len(cls) + 1) + "\n"
     for p in site.pricing["packages"]:
         inc = ", ".join(f["text"] for f in p["features"] if f["included"])
-        t += f"| {p['name']} ({inc}) | " + " | ".join(f"ab {p['prices'][c['key']]} €" for c in cls) + f" | {p['duration']} |\n"
+        t += f"| {p['name']} ({inc}) | " + " | ".join(f"ab {p['prices'][c['key']]} €" if c["key"] in p["prices"] else "auf Anfrage" for c in cls) + f" | {p['duration']} |\n"
     t += "\nVerbindliche Preise werden vor dem Termin persönlich bestätigt.\n\n## Ratgeber\n\n"
     for ar in site.articles:
         t += f"- [{ar['title']}]({site.url}/ratgeber/{ar['slug']}.html): {ar.get('excerpt', '')}\n"

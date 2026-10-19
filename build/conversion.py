@@ -122,6 +122,7 @@ def build_termin(site, write):
         <fieldset class="wz-step" data-step="4">
           <legend><span class="wz-num">4</span>Wunschtermin</legend>
           <p class="wz-hint">{ESC(s["openingHours"]["text"])}, {ESC(s["openingHours"]["detail"])}. Wir bestätigen den Termin persönlich.</p>
+          <p class="wz-hint">Ab der Komplettpflege bleibt Ihr Auto rund 24 Stunden bei uns, die Abholung ist dann am Folgetag.</p>
           <div class="two-col">
             <div class="form-row"><label for="t-date1">Wunschtermin*</label><input type="date" id="t-date1" name="datum" required aria-describedby="t-date1-msg"><span class="field-msg" id="t-date1-msg"></span><button class="next-free next-free--fill" type="button" data-next-free data-nf-fill hidden><span class="nf-dot" aria-hidden="true"></span>Nächster freier Tag: <strong data-nf-date></strong> · übernehmen</button></div>
             <div class="form-row"><label for="t-date2">Ausweichtermin <span class="hint">(optional)</span></label><input type="date" id="t-date2" name="datum2" aria-describedby="t-date2-msg"><span class="field-msg" id="t-date2-msg"></span></div>
@@ -302,9 +303,21 @@ def build_firmen(site, write):
     services = "".join(f'<label class="check"><input type="checkbox" name="leistungen" value="{ESC(x)}"><span>{ESC(x)}</span></label>' for x in
                        ["Regelmäßige Pflege (ElbDetail Care)", "Regelmäßige Außenwäsche", "Innenreinigung", "Komplettaufbereitung", "Aufbereitung vor Verkauf/Rückgabe", "Lackpolitur & Versiegelung", "Keramikversiegelung", "Geruchsentfernung", "Abhol- und Bringservice"])
     refs = ""
-    if s.get("references"):
-        refs = ('<div class="b2b-refs"><h3 class="eyebrow">Unter anderem vertrauen uns</h3><ul class="ref-list">'
-                + "".join(f"<li>{ESC(r)}</li>" for r in s["references"]) + "</ul></div>")
+    rl = [r if isinstance(r, dict) else {"name": r} for r in s.get("references", [])]
+    if rl:
+        def mono(n):
+            w = [x for x in n.replace("-", " ").split() if x[:1].isalpha() and x.lower() not in ("die", "der", "das", "gmbh")]
+            return ("".join(x[0] for x in w[:2]) or n[:2]).upper()
+        tiles = "".join(f'<li class="ref-tile reveal"><span class="ref-mono" aria-hidden="true">{ESC(mono(r["name"]))}</span>'
+                        f'<span class="ref-name">{ESC(r["name"])}</span><span class="ref-type">{ESC(r.get("type") or "Firmenkunde")}</span></li>' for r in rl)
+        refs = f'''
+  <section class="soft refs-band" aria-labelledby="refs-h">
+    <div class="container">
+      <div class="section-head reveal"><p class="eyebrow">Referenzen</p><h2 id="refs-h" class="display">Diese Unternehmen <em>vertrauen uns.</em></h2>
+        <p>Fahrschulen und Unternehmen aus Celle lassen ihre Fahrzeuge regelmäßig bei uns aufbereiten.</p></div>
+      <ul class="ref-grid stagger">{tiles}</ul>
+    </div>
+  </section>'''
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Firmenkunden", None)], "Für Unternehmen",
@@ -317,9 +330,9 @@ def build_firmen(site, write):
       <ul class="chips b2b-groups">
         <li>Autohäuser &amp; Fahrzeughändler</li><li>Fahrschulen</li><li>Pflegedienste</li><li>Handwerksbetriebe</li>
         <li>Unternehmen mit Dienstwagen</li><li>Leasing- &amp; Fuhrparkunternehmen</li>
-      </ul>{refs}
+      </ul>
     </div>
-  </section>
+  </section>{refs}
   <section aria-labelledby="b2b-h">
     <div class="container">
       <div class="section-head"><p class="eyebrow">Warum ElbDetail</p><h2 id="b2b-h" class="display">Was Firmenkunden von uns bekommen.</h2></div>
@@ -384,8 +397,9 @@ def build_winter(site, write):
         {"q": "Wie wasche ich das Auto im Winter richtig?", "a": "Regelmäßig Salz abspülen, möglichst per Handwäsche mit pH-neutralem Shampoo. Aggressive Reiniger aus der Waschstraße verkürzen die Haltbarkeit der Versiegelung."},
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Winter-Lackschutz", path)]), seo.faq(faq)]
-    art = next((a for a in site.articles if a["slug"] == "auto-winterfest-lackschutz"), None)
-    art_link = f'<p>Mehr Tipps im Ratgeber: <a class="text-link" href="{prefix}ratgeber/{art["slug"]}.html">{ESC(art["title"])}</a></p>' if art else ""
+    wart = [a for a in site.articles if "winter" in a.get("category", "").lower()]
+    art_link = ("<p>Mehr Tipps im <a class=\"text-link\" href=\"" + prefix + "ratgeber/winter.html\">Winter-Ratgeber</a>: "
+                + ", ".join(f'<a class="text-link" href="{prefix}ratgeber/{a["slug"]}.html">{ESC(a["title"])}</a>' for a in wart) + ".</p>") if wart else ""
     body = f'''
 <main id="main">
   <section class="page-hero page-hero--winter" aria-labelledby="page-h">
@@ -394,7 +408,7 @@ def build_winter(site, write):
       <p class="eyebrow">Saison-Empfehlung Herbst &amp; Winter</p>
       <h1 id="page-h">Lack winterfest machen. <em>Bevor das Streusalz kommt.</em></h1>
       <p class="lead">Streusalz, Matsch und Frost setzen Lack, Felgen und Dichtungen stärker zu als jede andere Jahreszeit. Eine Versiegelung vor dem Winter sorgt dafür, dass Schmutz schlechter haftet und das Auto im Frühjahr nicht erst gerettet werden muss.</p>
-      <div class="keyfacts"><div class="keyfact"><strong>ab {site.min_price("premium")} €</strong><span>{ESC(prem["name"])} inkl. Versiegelung</span></div><div class="keyfact"><strong>ca. 1 Tag</strong><span>Dauer</span></div><div class="keyfact"><strong>Monate</strong><span>Schutzdauer</span></div></div>
+      <div class="keyfacts"><div class="keyfact"><strong>ab {site.min_price("premium")} €</strong><span>{ESC(prem["name"])} inkl. Versiegelung</span></div><div class="keyfact"><strong>ab 24 Std.</strong><span>inkl. Standzeit über Nacht</span></div><div class="keyfact"><strong>Monate</strong><span>Schutzdauer</span></div></div>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket=premium&amp;quelle=winter">{I["cal"]}Wintertermin anfragen</a>
         <a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich möchte mein Auto vor dem Winter versiegeln lassen. Fahrzeug: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
@@ -508,3 +522,62 @@ def build_care(site, write):
 '''
     write("elbdetail-care.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="elbdetail-care.html") + body + core.footer(site))
 
+
+
+def offer_card(site, o, prefix=""):
+    until = ""
+    if o.get("validUntil"):
+        d = datetime.date.fromisoformat(o["validUntil"])
+        until = f'<span class="offer-until">gültig bis {d.day:02d}.{d.month:02d}.{d.year}</span>'
+    href = o.get("ctaHref") or "termin.html"
+    if not href.startswith(("http", "#", "mailto:", "tel:")):
+        href = prefix + href
+    icon = I.get(o.get("icon") or "spark", I["spark"])
+    return f'''
+        <article class="offer reveal{" is-highlight" if o.get("highlight") else ""}">
+          <div class="offer-top"><span class="offer-icon">{icon}</span>{f'<span class="offer-badge">{ESC(o["badge"])}</span>' if o.get("badge") else ""}</div>
+          <h3>{ESC(o["title"])}</h3>
+          <p>{ESC(o.get("text", ""))}</p>
+          <div class="offer-foot">
+            <span class="offer-price">{ESC(o.get("price", "")).replace(" €", "&nbsp;€")}</span>{until}
+          </div>
+          <a class="btn {"btn-primary" if o.get("highlight") else "btn-line-light"}" href="{ESC(href)}">{ESC(o.get("ctaLabel") or "Jetzt anfragen")}</a>
+        </article>'''
+
+
+def build_angebote(site, write):
+    s = site.s
+    path = "/angebote.html"
+    title = "Aktuelle Angebote: Fahrzeugaufbereitung Celle | ElbDetail"
+    desc = ("Aktuelle Angebote von ElbDetail in Celle: Winter-Lackschutz, Gutscheine, Keramikversiegelung und Sonderkonditionen für Firmen. "
+            "Jetzt Termin anfragen.")
+    offers = site.offers
+    items = []
+    for o in offers:
+        off = {"@type": "Offer", "name": o["title"], "description": o.get("text", ""), "url": site.url + "/" + (o.get("ctaHref") or "angebote.html").lstrip("/"),
+               "seller": {"@id": site.url + "/#business"}, "availability": "https://schema.org/InStock"}
+        if o.get("validUntil"):
+            off["validThrough"] = o["validUntil"]
+        items.append(off)
+    ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Angebote", path)])]
+    if items:
+        ld.append({"@context": "https://schema.org", "@type": "OfferCatalog", "name": "Aktuelle Angebote von " + s["name"], "itemListElement": items})
+    cards = "".join(offer_card(site, o) for o in offers) or \
+        '<p class="empty-offers">Gerade läuft keine Aktion. Fragen Sie uns trotzdem gern: Für Stammkunden und Firmen gibt es immer passende Konditionen.</p>'
+    body = f'''
+<main id="main">
+{_page_hero("", [("Startseite", "index.html"), ("Angebote", None)], "Aktuell",
+            "Aktuelle Angebote. <em>Für Ihr Auto.</em>",
+            "Saisonale Aktionen, Geschenkideen und Sonderkonditionen. Alle Preise sind Endpreise, den verbindlichen Preis bestätigen wir vor dem Termin.",
+            f'<div class="hero-actions"><a class="btn btn-primary btn-lg" href="termin.html">{I["cal"]}Termin anfragen</a><a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich interessiere mich für Ihre aktuellen Angebote. Fahrzeug: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a></div>')}
+  <section aria-labelledby="offers-h">
+    <div class="container">
+      <h2 id="offers-h" class="visually-hidden">Alle aktuellen Angebote</h2>
+      <div class="offer-grid stagger">{cards}
+      </div>
+      <p class="price-note">Aktionen gelten, solange freie Termine verfügbar sind. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.</p>
+    </div>
+  </section>
+</main>
+'''
+    write("angebote.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="angebote.html") + body + core.footer(site))

@@ -1,0 +1,53 @@
+{
+  "hinweis": "Angebote erscheinen auf /angebote.html und (das erste mit highlight) als Hinweis auf der Startseite. Abgelaufene Angebote (validUntil in der Vergangenheit) blendet die Website automatisch aus. Preise mit {ab:paket} bleiben automatisch aktuell.",
+  "items": [
+    {
+      "active": true,
+      "highlight": true,
+      "icon": "snow",
+      "badge": "Winter-Aktion",
+      "title": "Winter-Lackschutz",
+      "text": "Politur und Versiegelung vor dem ersten Streusalz. Schmutz und Salz haften schlechter, Ihr Lack kommt geschützt durch den Winter.",
+      "price": "ab {ab:premium} €",
+      "validUntil": "2027-02-28",
+      "ctaLabel": "Wintertermin anfragen",
+      "ctaHref": "aktion/winterschutz.html"
+    },
+    {
+      "active": true,
+      "highlight": false,
+      "icon": "gift",
+      "badge": "Geschenkidee",
+      "title": "Gutschein zu Weihnachten",
+      "text": "Ein Wertgutschein oder ein Paket als Geschenk. Auf Wunsch mit persönlicher Widmung, zum Ausdrucken oder gedruckt zum Abholen.",
+      "price": "ab 25 €",
+      "validUntil": "",
+      "ctaLabel": "Gutschein bestellen",
+      "ctaHref": "gutscheine.html"
+    },
+    {
+      "active": true,
+      "highlight": false,
+      "icon": "spark",
+      "badge": "Schwerpunkt",
+      "title": "Keramikversiegelung",
+      "text": "Langzeitschutz für Lack, Glas und Felgen vom offiziellen C²Coating Excellence Partner. Festpreis nach kurzer Begutachtung.",
+      "price": "Festpreis nach Begutachtung",
+      "validUntil": "",
+      "ctaLabel": "Beratung anfragen",
+      "ctaHref": "termin.html?paket=keramik"
+    },
+    {
+      "active": true,
+      "highlight": false,
+      "icon": "brief",
+      "badge": "Für Unternehmen",
+      "title": "Sonderkonditionen für Firmen",
+      "text": "Für Autohäuser, Fahrschulen, Pflegedienste und Fuhrparks: individuelle Konditionen nach Fahrzeuganzahl und Intervall.",
+      "price": "Konditionen auf Anfrage",
+      "validUntil": "",
+      "ctaLabel": "Angebot anfordern",
+      "ctaHref": "firmenkunden.html#firmenanfrage"
+    }
+  ]
+}

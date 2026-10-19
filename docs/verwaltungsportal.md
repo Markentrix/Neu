@@ -10,7 +10,7 @@ Adresse: `https://www.elbdetail.de/admin`. Anmeldung mit Benutzername und Passwo
 - **Terminbuchung: Schritte** zeigt, in welchem Schritt Interessierte abbrechen.
 - **Herkunft und Kampagnen**: Verweisende Websites und `utm`-Parameter aus Anzeigen (Schema im Anzeigen-Kit).
 
-Die Statistik setzt keine Cookies und speichert keine IP-Adressen. Ein Einwilligungsbanner ist dafür nicht nötig.
+Die eigene Statistik setzt keine Cookies und speichert keine IP-Adressen. Ein Einwilligungsbanner ist dafür nicht nötig. Google Analytics ist zusätzlich möglich (Grunddaten → Google Analytics, Mess-ID `G-…`): Es lädt erst, wenn ein Besucher im Hinweisfenster zustimmt.
 
 ## Anfragen
 

@@ -674,7 +674,7 @@ WhatsApp-Klicks und Anruf-Klicks sind Absichten, keine sicheren Anfragen. Deshal
 
 ### 5.4 Werbepixel
 
-**Google-Ads-Tag und Meta-Pixel sind bewusst nicht eingebaut.** Die Website kommt ohne Cookies und ohne Drittanbieter-Tracking aus.
+**Google Analytics 4 ist vorbereitet** und lädt nur nach Einwilligung (Mess-ID im Portal eintragen). Google-Ads-Tag und Meta-Pixel sind bewusst nicht eingebaut; Conversions lassen sich über die Verknüpfung von Google Ads mit GA4 auswerten.
 
 Folgen für die Kampagnen:
 - Die Werbeplattformen sehen keine Website-Conversions. Automatische Gebotsstrategien auf Conversions sind deshalb nicht sinnvoll. Gesteuert wird über Klicks, CPC-Limit und die eigene Auswertung.

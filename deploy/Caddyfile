@@ -28,7 +28,8 @@
 
 	handle {
 		root * /srv/site/current
-		header Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-src https://www.google.com; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
+		# Google-Analytics-Hosts sind nur relevant, wenn eine GA4-ID eingetragen ist; geladen wird GA erst nach Einwilligung
+		header Content-Security-Policy "default-src 'self'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-src https://www.google.com; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
 		header X-Frame-Options "SAMEORIGIN"
 
 		# CSS/JS werden mit ?v=<hash> eingebunden, Galerie-Bilder tragen einen Hash im Namen

@@ -1,4 +1,4 @@
-/* ElbDetail – Website-Skript. Ohne Abhängigkeiten, ohne Cookies, ohne Drittanbieter. */
+/* ElbDetail – Website-Skript. Ohne Abhängigkeiten. Drittanbieter (Google Analytics) nur nach Einwilligung. */
 (function () {
   "use strict";
 
@@ -43,7 +43,52 @@
       else fetch(API + "/e", { method: "POST", body: body, headers: { "Content-Type": "application/json" }, keepalive: true });
     } catch (e) { /* Statistik ist optional */ }
   }
-  function track(name, props) { send({ t: "ev", n: name, u: location.pathname, p: props || {} }); }
+  function track(name, props) {
+    send({ t: "ev", n: name, u: location.pathname, p: props || {} });
+    if (window.gtag && gaOn) window.gtag("event", name.toLowerCase().replace(/[^a-z0-9äöüß]+/g, "_"), props || {});
+  }
+
+  /* ---------------------------------------------------------------- Google Analytics 4: nur nach Einwilligung */
+  var GA = (window.ELB && ELB.ga4) || "", gaOn = false, CKEY = "elb-consent";
+  var store = { get: function () { try { return localStorage.getItem(CKEY); } catch (e) { return null; } },
+                set: function (v) { try { localStorage.setItem(CKEY, v); } catch (e) {} } };
+  function loadGa() {
+    if (!GA || gaOn || !/^G-[A-Z0-9]{4,}$/.test(GA)) return;
+    gaOn = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.gtag("config", GA);
+    var sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(GA);
+    document.head.appendChild(sc);
+  }
+  function dropGaCookies() {
+    var host = location.hostname.replace(/^www\./, "");
+    document.cookie.split(";").forEach(function (c) {
+      var n = c.split("=")[0].trim();
+      if (/^_ga/.test(n)) ["", "." + host, host].forEach(function (d) { document.cookie = n + "=; Max-Age=0; path=/" + (d ? "; domain=" + d : ""); });
+    });
+  }
+  function consentBar() {
+    if (document.getElementById("consent")) return;
+    var bar = document.createElement("div");
+    bar.id = "consent"; bar.className = "consent"; bar.setAttribute("role", "dialog"); bar.setAttribute("aria-live", "polite"); bar.setAttribute("aria-label", "Einwilligung Statistik");
+    var dl = document.querySelector('a[href$="datenschutz.html"]'), dsHref = dl ? dl.getAttribute("href") : "datenschutz.html";
+    bar.innerHTML = '<p><strong>Dürfen wir messen, was Ihnen gefällt?</strong> Mit Ihrer Einwilligung nutzen wir Google Analytics, um die Website zu verbessern. Dabei werden Cookies gesetzt und Daten an Google übermittelt. <a href="' + dsHref + '">Mehr in der Datenschutzerklärung</a></p>' +
+      '<div class="consent-actions"><button type="button" class="btn btn-line-light" data-c="denied">Ablehnen</button><button type="button" class="btn btn-line-light" data-c="granted">Akzeptieren</button></div>';
+    document.body.appendChild(bar);
+    bar.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-c]"); if (!b) return;
+      var v = b.getAttribute("data-c"); store.set(v);
+      if (v === "granted") loadGa(); else { dropGaCookies(); if (gaOn) location.reload(); }
+      bar.remove();
+    });
+  }
+  if (GA) {
+    if (store.get() === "granted") loadGa();
+    else if (store.get() !== "denied") consentBar();
+    document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("[data-consent-open]")) consentBar(); });
+  }
   window.elbTrack = track;
   (function pageview() {
     var ref = "";
@@ -146,6 +191,7 @@
     var showQuoteValue = function (v) {
       var from = lastV; lastV = v;
       var paint = function (n) { qv.innerHTML = "<small>ab</small>" + fmt(n) + " €"; };
+      if (v == null) { qv.innerHTML = '<small>Preis</small>auf Anfrage'; return; }
       if (from == null || from === v || qReduce || !window.requestAnimationFrame) { paint(v); return; }
       qBox.setAttribute("aria-busy", "true");
       qBox.classList.remove("bump"); void qBox.offsetWidth; qBox.classList.add("bump");
@@ -160,11 +206,17 @@
     };
     var updateQuote = function (user) {
       var pk = radio(quote, "qpkg"), ck = radio(quote, "qclass"), p = pkg(pk), c = cls(ck), v = price(pk, ck);
-      if (!p || v == null) return;
+      if (!p || !c) return;
+      var onReq = v == null;  // z. B. Sportwagen / Premium-Segment: immer individuelles Angebot
+      var note = $("#quoteNote");
+      if (note) note.textContent = onReq
+        ? "Für Sportwagen und Premium-Modelle wie RS, AMG oder M erstellen wir nach einer kurzen Begutachtung ein individuelles Angebot."
+        : "Richtwert für normalen Pflegezustand. Der verbindliche Preis hängt von Fahrzeug und Zustand ab und wird vor dem Termin bestätigt.";
+      $("#quoteBook").lastChild.textContent = onReq ? "Individuelles Angebot anfragen" : "Dieses Paket anfragen";
       showQuoteValue(v);
       $("#quotePkgName").textContent = p.name;
       $("#quoteBook").href = "termin.html?paket=" + pk + "&klasse=" + ck;
-      $("#quoteWa").href = waLink("Hallo ElbDetail, ich interessiere mich für das Paket „" + p.name + "“ (" + c.name + ", Richtpreis ab " + fmt(v) + " €). Fahrzeug: … Wunschtermin: …");
+      $("#quoteWa").href = waLink("Hallo ElbDetail, ich interessiere mich für das Paket „" + p.name + "“ (" + c.name + (onReq ? ", bitte um ein individuelles Angebot" : ", Richtpreis ab " + fmt(v) + " €") + "). Fahrzeug: … Wunschtermin: …");
       if (user) track("Rechner genutzt", { paket: p.name, klasse: c.short });
     };
     quote.addEventListener("change", function () { updateQuote(true); });
@@ -178,9 +230,11 @@
       var ck = radio(priceSwitch, "pclass") || (ELB.classes[0] || {}).key, c = cls(ck);
       $$("[data-plan]").forEach(function (plan) {
         var pk = plan.getAttribute("data-plan"), v = price(pk, ck), p = pkg(pk);
-        var amount = $(".amount", plan); if (amount && v != null) amount.textContent = fmt(v) + " €";
+        var amount = $(".amount", plan), from = $(".from", plan);
+        if (amount) amount.textContent = v != null ? fmt(v) + " €" : "auf Anfrage";
+        if (from) from.hidden = v == null;
         var book = $("[data-book]", plan); if (book) book.href = "termin.html?paket=" + pk + "&klasse=" + ck;
-        var wa = $("[data-wa-plan]", plan); if (wa) wa.href = waLink("Hallo ElbDetail, ich möchte das Paket „" + p.name + "“ anfragen (" + c.name + ", Richtpreis ab " + fmt(v) + " €). Fahrzeug: … Wunschtermin: …");
+        var wa = $("[data-wa-plan]", plan); if (wa) wa.href = waLink("Hallo ElbDetail, ich möchte das Paket „" + p.name + "“ anfragen (" + c.name + (v != null ? ", Richtpreis ab " + fmt(v) + " €" : ", bitte um ein individuelles Angebot") + "). Fahrzeug: … Wunschtermin: …");
       });
       var lbl = $("#priceClassLabel"); if (lbl && c) lbl.textContent = c.name;
     };
@@ -425,7 +479,7 @@
       set("extras", d.extras && d.extras.length ? d.extras.join(", ") : "keine");
       set("datum", d.datum ? deDate(d.datum) + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
       set("preis", v != null ? "ab " + fmt(v) + " €" : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
-      $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); if (x != null) el.textContent = "ab " + fmt(x) + " €"; });
+      $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? "ab " + fmt(x) + " €" : "auf Anfrage"; });
     }
     wz.addEventListener("change", summary); wz.addEventListener("input", summary);
     summary(); show(0);

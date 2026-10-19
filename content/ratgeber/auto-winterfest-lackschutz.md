@@ -4,7 +4,7 @@
   "description": "Auto winterfest machen in Celle: So schützen Sie Lack, Felgen, Dichtungen und Innenraum vor Streusalz und Nässe. Mit Checkliste für den Herbst.",
   "date": "2026-10-15",
   "updated": "2026-10-15",
-  "category": "Saison",
+  "category": "Winter-Spezial",
   "readingTime": 6,
   "excerpt": "Streusalz, Nässe und Frost setzen Ihrem Auto zu. Mit der richtigen Vorbereitung im Herbst schützen Sie Lack, Felgen und Innenraum durch den Winter.",
   "service": "lackversiegelung-celle",

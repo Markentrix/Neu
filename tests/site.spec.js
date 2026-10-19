@@ -8,7 +8,8 @@ const PAGES = [
   "/ratgeber/leasingrueckgabe-checkliste.html", "/ratgeber/kosten-fahrzeugaufbereitung-celle.html",
   "/leistungen/aussenaufbereitung-celle.html", "/leistungen/innenaufbereitung-celle.html", "/leistungen/lackpolitur-celle.html",
   "/leistungen/lackversiegelung-celle.html", "/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html",
-  "/impressum.html", "/datenschutz.html", "/danke.html",
+  "/impressum.html", "/datenschutz.html", "/danke.html", "/angebote.html", "/ratgeber/winter.html",
+  "/ratgeber/auto-im-winter-waschen-streusalz.html", "/ratgeber/feuchtigkeit-im-auto-winter.html",
 ];
 
 function nextWorkday(days) {
@@ -49,7 +50,7 @@ test("Alle internen Links funktionieren", async ({ page, request }) => {
   expect(broken).toEqual([]);
 });
 
-for (const path of ["/", "/preise.html", "/kontakt.html", "/ueber-uns.html", "/elbdetail-care.html", "/leistungen/keramikversiegelung-celle.html", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
+for (const path of ["/", "/angebote.html", "/ratgeber/winter.html", "/preise.html", "/kontakt.html", "/ueber-uns.html", "/elbdetail-care.html", "/leistungen/keramikversiegelung-celle.html", "/termin.html", "/gutscheine.html", "/ratgeber/leasingrueckgabe-checkliste.html", "/leistungen/lackpolitur-celle.html", "/firmenkunden.html"]) {
   test(`Barrierefreiheit ${path}: keine schweren axe-Verstöße`, async ({ page }) => {
     await page.goto(path);
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -165,4 +166,45 @@ test("404-Seite", async ({ request }) => {
   const r = await request.get("/gibt-es-nicht.html");
   expect(r.status()).toBe(404);
   expect(await r.text()).toContain("Diese Seite gibt es nicht");
+});
+
+test("Preisrechner: Sport / Premium zeigt individuelles Angebot statt Preis", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('label:has(input[name="qclass"][value="sport"])').click();
+  await expect(page.locator("#quoteValue")).toContainText("auf Anfrage");
+  await expect(page.locator("#quoteBook")).toHaveAttribute("href", /klasse=sport/);
+  await expect(page.locator("#quoteBook")).toContainText("Individuelles Angebot");
+  await page.locator('label:has(input[name="qclass"][value="suv"])').click();
+  await expect(page.locator("#quoteValue")).toContainText("229");
+});
+
+test("Ohne Google-Analytics-ID: kein Einwilligungs-Hinweis, kein Google-Skript", async ({ page }) => {
+  const hosts = [];
+  page.on("request", (r) => hosts.push(new URL(r.url()).hostname));
+  await page.goto("/");
+  await page.waitForTimeout(500);
+  await expect(page.locator("#consent")).toHaveCount(0);
+  expect(hosts.filter((h) => /google/.test(h))).toEqual([]);
+});
+
+test("Mit Google-Analytics-ID: Google lädt erst nach Akzeptieren, Ablehnen bleibt ohne Google", async ({ page }) => {
+  await page.route("**/config.js*", async (route) => {
+    const r = await route.fetch(); const body = (await r.text()) + '\nwindow.ELB.ga4="G-TEST12345";';
+    await route.fulfill({ response: r, body });
+  });
+  const gtm = [];
+  await page.route("https://www.googletagmanager.com/**", (route) => { gtm.push(route.request().url()); route.fulfill({ status: 200, contentType: "text/javascript", body: "" }); });
+  await page.goto("/");
+  await expect(page.locator("#consent")).toBeVisible();
+  expect(gtm).toEqual([]);
+  await page.locator('#consent [data-c="denied"]').click();
+  await expect(page.locator("#consent")).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator("#consent")).toHaveCount(0);
+  expect(gtm).toEqual([]);
+  await page.evaluate(() => localStorage.removeItem("elb-consent"));
+  await page.reload();
+  await page.locator('#consent [data-c="granted"]').click();
+  await expect.poll(() => gtm.length).toBeGreaterThan(0);
+  expect(gtm[0]).toContain("id=G-TEST12345");
 });

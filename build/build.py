@@ -68,10 +68,11 @@ def config_js(site):
         "email": site.s["email"],
         "api": "/api",
         "hosts": [site.url.split("//", 1)[-1], site.url.split("//", 1)[-1].replace("www.", "", 1), "localhost", "127.0.0.1"],
-        "classes": [{"key": c["key"], "name": c["name"], "short": c["short"]} for c in pr["classes"]],
+        "classes": [{"key": c["key"], "name": c["name"], "short": c["short"], "onRequest": bool(c.get("onRequest"))} for c in pr["classes"]],
         "packages": [{"key": p["key"], "name": p["name"], "prices": p["prices"]} for p in pr["packages"]],
         "vouchers": site.s["vouchers"],
         "voucherValidYear": int(site.s["standIso"][:4]) + 3,
+        "ga4": ((site.s.get("analytics") or {}).get("ga4") or "").strip(),
     }
     return "/* automatisch erzeugt – nicht bearbeiten */\nwindow.ELB=" + json.dumps(cfg, ensure_ascii=False, separators=(",", ":")) + ";\n"
 
@@ -113,6 +114,7 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     conversion.build_firmen(site, write)
     conversion.build_winter(site, write)
     conversion.build_care(site, write)
+    conversion.build_angebote(site, write)
     pages.build_about(site, write)
     ratgeber.build_index(site, write)
     for a in site.articles:
@@ -125,9 +127,9 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     sm = [("/", iso, "1.0", "weekly")]
     sm += [(f"/leistungen/{s['slug']}.html", iso, "0.8", "monthly") for s in site.services]
     sm += [("/preise.html", iso, "0.9", "monthly"), ("/kontakt.html", iso, "0.5", "yearly"), ("/ueber-uns.html", iso, "0.6", "yearly"),
-           ("/elbdetail-care.html", iso, "0.7", "monthly")]
+           ("/elbdetail-care.html", iso, "0.7", "monthly"), ("/angebote.html", iso, "0.8", "weekly")]
     sm += [("/termin.html", iso, "0.9", "monthly"), ("/gutscheine.html", iso, "0.7", "monthly"), ("/firmenkunden.html", iso, "0.7", "monthly"),
-           ("/aktion/winterschutz.html", iso, "0.7", "monthly"), ("/ratgeber/index.html", iso, "0.7", "weekly")]
+           ("/aktion/winterschutz.html", iso, "0.7", "monthly"), ("/ratgeber/index.html", iso, "0.7", "weekly"), ("/ratgeber/winter.html", iso, "0.7", "monthly")]
     sm += [(f"/ratgeber/{a['slug']}.html", a.get("updated") or a.get("date") or iso, "0.6", "monthly") for a in site.articles]
     sm += [("/impressum.html", iso, "0.2", "yearly"), ("/datenschutz.html", iso, "0.2", "yearly")]
     write("sitemap.xml", seo.sitemap(site, sm))

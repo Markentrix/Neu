@@ -17,6 +17,13 @@
       "name": "SUV / Van / Bus",
       "short": "SUV / Van",
       "examples": "Tiguan, Bulli, X5"
+    },
+    {
+      "key": "sport",
+      "name": "Sportwagen / Premium-Segment",
+      "short": "Sport / Premium",
+      "examples": "RS, AMG, M-Modelle",
+      "onRequest": true
     }
   ],
   "packages": [
@@ -68,7 +75,7 @@
       "name": "Komplettpflege",
       "short": "Innen-Tiefenreinigung + außen",
       "for": "Für Familienautos, Tierhaare, Leasingrückgabe und Verkauf.",
-      "duration": "ca. ½ Tag",
+      "duration": "ca. 24 Std.",
       "featured": true,
       "prices": {
         "kompakt": 179,
@@ -111,7 +118,7 @@
       "name": "Premium Politur",
       "short": "+ Politur & Versiegelung",
       "for": "Für Neuwagen, Liebhaberfahrzeuge und sichtbar matten Lack.",
-      "duration": "ca. 1 Tag",
+      "duration": "ab 24 Std.",
       "featured": false,
       "prices": {
         "kompakt": 349,
@@ -230,5 +237,6 @@
       "premium": true
     }
   ],
-  "note": "Alle Preise sind Einstiegspreise (Endpreise; gemäß § 19 UStG wird keine Umsatzsteuer berechnet) und abhängig von Fahrzeuggröße, Zustand und Leistungsumfang. Starke Verschmutzung, intensive Tierhaarentfernung oder tiefe Lackdefekte besprechen wir vorab. Den verbindlichen Preis bestätigen wir vor dem Termin."
+  "note": "Alle Preise sind Einstiegspreise (Endpreise; gemäß § 19 UStG wird keine Umsatzsteuer berechnet) und abhängig von Fahrzeuggröße, Zustand und Leistungsumfang. Starke Verschmutzung, intensive Tierhaarentfernung oder tiefe Lackdefekte besprechen wir vorab. Den verbindlichen Preis bestätigen wir vor dem Termin.",
+  "standNote": "Ab der Komplettpflege bleibt Ihr Auto rund 24 Stunden bei uns. So können Pflegeprodukte und Versiegelung über Nacht in Ruhe aushärten, und es entstehen keine Wasserflecken."
 }
