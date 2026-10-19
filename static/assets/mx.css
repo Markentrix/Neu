@@ -192,7 +192,7 @@ hr{border:0;border-top:1px solid var(--border);margin:var(--sec-sm) 0}
 .pill--violet{background:rgba(139,92,246,.13);color:var(--violet-text)}
 .pill--navy{background:var(--navy);color:#fff}
 .pill--soft{background:var(--soft);color:var(--navy);border:1px solid var(--border)}
-.pill--ok{background:rgba(21,128,61,.10);color:var(--ok)}
+.pill--ok{background:rgba(21,128,61,.10);color:#116430}
 .pill--dot::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 .pill--live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(21,128,61,.18)}
 .tag{display:inline-block;padding:3px 9px;border-radius:6px;font-size:.78rem;font-weight:600;color:var(--muted);background:var(--soft);border:1px solid var(--border)}
@@ -1134,3 +1134,7 @@ ul.soc li a:not(.btn):not(.link-arrow),ul.soc li a:not(.btn):not(.link-arrow):ho
 .nav-dd-head{display:block;padding:10px 14px 4px;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--border);margin-top:6px}
 .footer-grid>*{min-width:0}
 .footer-col a,.footer-col li{overflow-wrap:anywhere;hyphens:auto}
+/* 40 · Lesbarkeit: Links im Fließtext zusätzlich unterstreichen (nicht nur Farbe) */
+.note a:not(.btn),p a:not(.btn):not(.link-arrow):not(.pill):not(.card){text-decoration:underline;text-underline-offset:.15em}
+.swipe[tabindex]:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:12px}
+main:focus{outline:none}
