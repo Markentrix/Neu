@@ -196,6 +196,9 @@ async function nachrichtDetail(id) {
   const bubbles = t.nachrichten.map(n => h('div', { class: 'bub ' + (n.von === 'kunde' ? 'kunde' : 'team') }, h('div', { class: 'small wer' }, (n.von === 'kunde' ? (n.autor_name || 'Du') : (n.autor_name || 'Markentrix-Team')) + ' · ' + zeit(n.erstellt_am)), n.text));
   const text = h('textarea', { rows: 4, maxlength: 10000, placeholder: t.status === 'erledigt' ? 'Noch etwas offen? Schreibe hier, dann öffnen wir die Anfrage wieder.' : 'Deine Antwort …' });
   const datei = h('input', { type: 'file', accept: '.pdf,.png,.jpg,.jpeg,.webp,.docx,.xlsx,.pptx,.txt,.csv,.zip' });
+  { const hash = location.hash, anzahl = t.nachrichten.length;   // Chat-Gefühl: neue Nachrichten alle 12 s holen, nur wenn nichts getippt wird
+    const iv = setInterval(async () => { if (location.hash !== hash) return clearInterval(iv); if (document.hidden) return;
+      try { const n = await api('/api/kunde/tickets/' + id); if (n.nachrichten.length !== anzahl && !text.value.trim()) { clearInterval(iv); location.reload(); } } catch (e) { /* nächster Versuch */ } }, 12000); }
   const senden = async () => {
     try {
       if (text.value.trim()) await api('/api/kunde/tickets/' + id + '/nachricht', { method: 'POST', body: { text: text.value } });

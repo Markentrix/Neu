@@ -604,15 +604,29 @@ V.postfach = async (param) => {
   const f = new URLSearchParams((location.hash.split('?')[1] || '')), status = f.get('status') || 'offene';
   const liste = await api('/api/admin/tickets?status=' + status);
   const tab = (st, t) => h('a', { href: '#postfach?status=' + st, class: 'tab' + (status === st ? ' on' : '') }, t);
-  return h('div', {}, kopf('Nachrichten'), h('div', { class: 'tabs' }, tab('offene', 'Offen'), tab('offen', 'Neu'), tab('in_arbeit', 'In Arbeit'), tab('wartet_auf_kunde', 'Wartet auf Kunde'), tab('erledigt', 'Erledigt'), tab('', 'Alle')),
+  const kunden = await api('/api/admin/kunden');
+  const wahl = h('select', { style: 'width:auto;min-width:220px' }, h('option', { value: '' }, 'Neue Nachricht an …'), kunden.filter(k => !['beendet', 'gekuendigt'].includes(k.status)).map(k => h('option', { value: k.id }, k.firma + ' (' + k.kundennummer + ')')));
+  wahl.onchange = () => { if (wahl.value) location.hash = '#postfach/neu/' + wahl.value; };
+  return h('div', {}, kopf('Nachrichten', wahl), h('div', { class: 'tabs' }, tab('offene', 'Offen'), tab('offen', 'Neu'), tab('in_arbeit', 'In Arbeit'), tab('wartet_auf_kunde', 'Wartet auf Kunde'), tab('erledigt', 'Erledigt'), tab('', 'Alle')),
     h('div', { class: 'card' }, tabelle([['Nr.', z => h('a', { href: '#postfach/' + z.id }, z.nr)], ['Kunde', z => h('a', { href: '#kunde/' + z.kunden_id }, z.firma)], ['Betreff', z => h('a', { href: '#postfach/' + z.id }, (z.team_ungelesen ? '● ' : '') + z.betreff)],
       ['Art', z => T_ART[z.art] || z.art], ['Prio', z => z.prioritaet === 'hoch' ? h('span', { class: 'pill bad' }, 'hoch') : ''], ['Status', z => tPill(z.status)], ['Fällig', z => z.faellig_am ? datum(z.faellig_am) : ''], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Keine Nachrichten in dieser Ansicht.')));
 };
+
+// Chat-Gefühl: alle 12 Sekunden prüfen, ob neue Nachrichten da sind; neu laden nur, wenn gerade nichts getippt wird
+function chatAktuell(url, anzahl, feld) {
+  const hash = location.hash;
+  const iv = setInterval(async () => {
+    if (location.hash !== hash) return clearInterval(iv);
+    if (document.hidden) return;
+    try { const t = await api(url); if (t.nachrichten.length !== anzahl && !feld.value.trim()) { clearInterval(iv); location.reload(); } } catch (e) { /* nächster Versuch */ }
+  }, 12000);
+}
 
 async function ticketDetail(id) {
   const t = await api('/api/admin/tickets/' + id), m = h('div');
   const bubbles = t.nachrichten.map(n => h('div', { class: 'bub ' + (n.intern ? 'intern' : n.von === 'kunde' ? 'kunde' : 'team') }, h('div', { class: 'small wer' }, (n.intern ? 'Interne Notiz · ' : '') + (n.autor_name || (n.von === 'kunde' ? 'Kunde' : 'Team')) + ' · ' + zeit(n.erstellt_am)), n.text));
   const text = h('textarea', { rows: 5, maxlength: 10000, placeholder: 'Antwort an den Kunden …' });
+  chatAktuell('/api/admin/tickets/' + id, t.nachrichten.length, text);
   const intern = h('input', { type: 'checkbox', style: 'width:auto' });
   const stSel = h('select', {}, h('option', { value: '' }, 'Status unverändert'), T_ST.map(x => h('option', { value: x }, T_ST_TXT[x])));
   const datei = h('input', { type: 'file' });
