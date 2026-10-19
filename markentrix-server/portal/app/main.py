@@ -98,6 +98,8 @@ async def unbehandelt(request: Request, exc: Exception):
             with db.tx("system") as cur:
                 cur.execute("INSERT INTO alarme (stufe, quelle, titel, details) VALUES ('warnung','portal',%s,%s::jsonb)",
                             ("Fehler im Portal: " + request.method + " " + pfad[:120], json.dumps({"fehler": type(exc).__name__, "text": str(exc)[:500]})))
+                from . import push
+                push.senden(push.admins(cur), "Fehler im Portal", "Ein unerwarteter Fehler wurde protokolliert (Admin → Übersicht → Systemstatus).", "/admin#uebersicht", "fehler")
         except Exception:  # noqa: BLE001 - Alarm darf nie selbst den Fehler verdoppeln
             pass
     return JSONResponse({"detail": "Interner Fehler. Der Fehler wurde protokolliert."}, status_code=500)

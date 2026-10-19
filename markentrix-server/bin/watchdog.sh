@@ -29,6 +29,9 @@ alter() { [ -f "$1" ] && echo $(( ( $(date +%s) - $(cat "$1") ) / 3600 )) || ech
 if [ -n "${OFFSITE_TARGET:-}" ]; then
   [ "$(alter "$BASE/backup-status/offsite_last")" -le 36 ] || p "Externe Sicherung ist älter als 36 Stunden"
 fi
+# Der Wiederherstellungstest läuft wöchentlich: wenn er seit über 10 Tagen nicht gelaufen ist (und schon länger Sicherungen existieren), ist das selbst ein Problem
+ANZ_SICH="$(ls -1 "$BASE/backups" 2>/dev/null | grep -cE '^[0-9]{4}-' || true)"
+if [ "${ANZ_SICH:-0}" -ge 9 ] && [ "$(alter "$BASE/backup-status/restore_last")" -gt 240 ]; then p "Der Wiederherstellungstest der Sicherung ist seit über 10 Tagen nicht gelaufen (mkctl restore-test)"; fi
 [ ! -f "$BASE/backup-status/restore_fehler" ] || p "Wiederherstellungstest fehlgeschlagen: $(cat "$BASE/backup-status/restore_fehler")"
 
 # 5) Zertifikat des Portals (Warnung ab 14 Tagen Restlaufzeit)
