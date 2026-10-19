@@ -133,7 +133,32 @@ def build(check=False):
         urls.append(f'  <url><loc>{loc}</loc><lastmod>{meta.get("lastmod", time.strftime("%Y-%m-%d"))}</lastmod></url>')
     open(os.path.join(DIST, 'sitemap.xml'), 'w', encoding='utf-8').write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + '\n'.join(urls) + '\n</urlset>\n')
-    print(f'{len(pages)} Seiten gebaut, {len(urls)} in der Sitemap → dist/')
+    # RSS-Feed der Blogbeiträge (Veröffentlichungsdatum aus article:published_time)
+    items = []
+    for meta, rel, _ in pages:
+        pth = meta.get('path', '')
+        if not pth.startswith('/blog/'):
+            continue
+        m = re.search(r'article:published_time" content="(\d{4}-\d{2}-\d{2})"', meta.get('head_extra', ''))
+        if not m:
+            continue
+        items.append((m.group(1), meta, SITE + pth))
+    items.sort(key=lambda x: x[0], reverse=True)
+    def rfc822(d):
+        return time.strftime('%a, %d %b %Y 08:00:00 +0000', time.strptime(d, '%Y-%m-%d'))
+    esc = lambda t: html.escape(t, quote=False)
+    feed = ['<?xml version="1.0" encoding="UTF-8"?>', '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>',
+            '<title>Markentrix Blog</title>', f'<link>{SITE}/blog</link>',
+            '<description>Praxiswissen zu Website, SEO, GEO, Marke und KI-Automatisierung für lokale Unternehmen.</description>',
+            '<language>de-DE</language>', f'<atom:link href="{SITE}/feed.xml" rel="self" type="application/rss+xml"/>']
+    if items:
+        feed.append(f'<lastBuildDate>{rfc822(items[0][0])}</lastBuildDate>')
+    for d, meta, url in items:
+        title = meta['title'].replace(' | Markentrix Blog', '')
+        feed.append(f'<item><title>{esc(title)}</title><link>{url}</link><guid isPermaLink="true">{url}</guid><pubDate>{rfc822(d)}</pubDate><description>{esc(meta["description"])}</description></item>')
+    feed.append('</channel></rss>')
+    open(os.path.join(DIST, 'feed.xml'), 'w', encoding='utf-8').write('\n'.join(feed) + '\n')
+    print(f'{len(pages)} Seiten gebaut, {len(urls)} in der Sitemap, {len(items)} Beiträge im Feed → dist/')
     if check:
         return check_links(pages)
     return 0

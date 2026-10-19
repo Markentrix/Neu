@@ -38,6 +38,7 @@ Alle Preise netto zzgl. gesetzlicher Umsatzsteuer. Angebot ausschliesslich fuer 
 - Referenzen: https://markentrix.de/referenzen
 - Haeufige Fragen: https://markentrix.de/faq
 - Blog: https://markentrix.de/blog
+- RSS-Feed des Blogs: https://markentrix.de/feed.xml
 - Blog: Warum ist eine Website wichtig: https://markentrix.de/blog/warum-ist-eine-website-wichtig
 - Blog: Was bringt eine Landingpage: https://markentrix.de/blog/was-bringt-eine-landingpage
 - Blog: SEO und GEO: https://markentrix.de/blog/seo-und-geo-optimierung
