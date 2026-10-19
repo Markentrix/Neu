@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Automatischer Test des Portals auf einer FRISCHEN Test-Datenbank (nie gegen den echten Server!).
-# Braucht: PostgreSQL 16, Python-Pakete aus portal/requirements.txt + aiosmtpd + httpx + pyflakes, Root-Rechte (su postgres).
+# Braucht: PostgreSQL 16, Python-Pakete aus portal/requirements.txt + aiosmtpd + httpx + pyflakes + playwright (Chromium) + npm (axe-core), Root-Rechte (su postgres).
 # Aufruf:  sudo bash tests/run.sh
 set -u
 HIER="$(cd "$(dirname "$0")" && pwd)"
@@ -42,9 +42,10 @@ starten() {
   for i in $(seq 1 30); do curl -fs localhost:8000/healthz >/dev/null && return 0; sleep 1; done
   echo "Portal startet nicht:"; tail -20 "$T/log"; return 1
 }
+[ -f /var/tmp/axe/node_modules/axe-core/axe.min.js ] || npm i --silent --prefix /var/tmp/axe axe-core@4.10.2 >/dev/null 2>&1
 FEHLER=0
 cd "$T" || exit 2
-for t in ${TESTS:-t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 t26 smoke}; do
+for t in ${TESTS:-t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 t26 t27 smoke}; do
   starten || { FEHLER=1; break; }
   timeout 180 python3 "$t.py" >"out_$t.txt" 2>&1 </dev/null; rc=$?
   n=$(grep -c "^FAIL" "out_$t.txt"); grep -qE "Fehler [1-9]" "out_$t.txt" && n=$((n+1))

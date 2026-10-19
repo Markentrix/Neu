@@ -206,15 +206,18 @@ export function glocke() {
   }
   panel.append(h('div', { class: 'row', style: 'padding:8px 10px;border-bottom:1px solid var(--line)' }, h('b', { class: 'grow' }, 'Benachrichtigungen'),
     h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/benachrichtigungen/gelesen', { method: 'POST', body: { alle: true } }); await laden(); } catch (x) { /* egal */ } } }, 'Alle gelesen')), liste);
-  document.addEventListener('click', (e) => { if (!panel.contains(e.target)) panel.style.display = 'none'; });
-  laden(); setInterval(() => { if (!document.hidden) api('/api/benachrichtigungen', { leise: true }).then(d => aktualisieren(d.ungelesen)).catch(() => {}); }, 60000);
-  return h('div', { class: 'glockewrap' }, knopf, panel);
+  const wrap = h('div', { class: 'glockewrap' }, knopf, panel);
+  const zu = (e) => { if (!wrap.isConnected) document.removeEventListener('click', zu); else if (!panel.contains(e.target)) panel.style.display = 'none'; };
+  document.addEventListener('click', zu);
+  laden();
+  const takt = setInterval(() => { if (!wrap.isConnected) { clearInterval(takt); return; } if (!document.hidden) api('/api/benachrichtigungen', { leise: true }).then(d => aktualisieren(d.ungelesen)).catch(() => {}); }, 60000);
+  return wrap;
 }
 
 export function sucheKnopf() {
   let overlay = null;
   const oeffnen = () => {
-    if (overlay) return;
+    if (overlay || document.querySelector('.suchoverlay')) return;
     const eingabe = h('input', { placeholder: 'Kunde, Lead, Rechnung, Nachricht, Aufgabe …', autofocus: true, 'aria-label': 'Suche' }), ergebnis = h('div', { class: 'suchtreffer' });
     let timer = null, treffer = [], pos = -1;
     const schliessen = () => { overlay.remove(); overlay = null; };
@@ -239,6 +242,27 @@ export function sucheKnopf() {
     overlay = h('div', { class: 'suchoverlay', onclick: (e) => { if (e.target === overlay) schliessen(); } }, h('div', { class: 'suchbox', role: 'dialog', 'aria-label': 'Suche' }, eingabe, ergebnis));
     document.body.append(overlay); eingabe.focus(); suchen();
   };
-  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); oeffnen(); } });
-  return h('button', { class: 'suchknopf', onclick: oeffnen, 'aria-label': 'Suche öffnen' }, '🔍 Suchen', h('kbd', {}, 'Strg K'));
+  const taste = (e) => { if (!knopf.isConnected) { document.removeEventListener('keydown', taste); return; } if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); oeffnen(); } };
+  document.addEventListener('keydown', taste);
+  const knopf = h('button', { class: 'suchknopf', onclick: oeffnen, 'aria-label': 'Suche öffnen' }, '🔍 Suchen', h('kbd', {}, 'Strg K'));
+  return knopf;
 }
+
+// ---------------------------------------------------------------- Barrierefreiheit: fehlende Beschriftungen automatisch ergänzen
+const _lesbar = (s) => String(s || '').replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim();
+function beschriften(wurzel) {
+  wurzel.querySelectorAll('input:not([type=hidden]):not([aria-label]):not([aria-labelledby]), select:not([aria-label]):not([aria-labelledby]), textarea:not([aria-label]):not([aria-labelledby])').forEach((f) => {
+    if (f.labels && f.labels.length && f.labels[0].textContent.trim()) return;
+    let t = f.getAttribute('title') || f.getAttribute('placeholder') || '';
+    if (!t) { let v = f.previousElementSibling; while (v && !t) { if (/^(LABEL|H[1-6]|SPAN|B)$/.test(v.tagName) && v.textContent.trim()) t = v.textContent.trim(); v = v.previousElementSibling; } }
+    if (!t) { const l = f.closest('label'); if (l) t = l.textContent.trim(); }
+    if (!t && f.parentElement) { const l = f.parentElement.querySelector(':scope > label'); if (l) t = l.textContent.trim(); }
+    if (!t && f.tagName === 'SELECT' && f.options.length) t = f.options[0].textContent.trim();
+    if (!t) t = _lesbar(f.getAttribute('name') || f.getAttribute('id') || f.getAttribute('type') || 'Eingabe');
+    f.setAttribute('aria-label', t.slice(0, 80));
+  });
+  wurzel.querySelectorAll('th:empty').forEach((th) => th.append(Object.assign(document.createElement('span'), { className: 'nur-sr', textContent: 'Aktion' })));
+  wurzel.querySelectorAll('.tablewrap:not([tabindex])').forEach((t) => { t.tabIndex = 0; });
+}
+let _timerBeschriften = null;
+new MutationObserver(() => { clearTimeout(_timerBeschriften); _timerBeschriften = setTimeout(() => beschriften(document.body), 50); }).observe(document.documentElement, { childList: true, subtree: true });
