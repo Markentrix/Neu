@@ -20,3 +20,13 @@ f2.addEventListener('submit', async (ev) => {
   catch (e) { melde(m2, e.message); }
   b2.disabled = false;
 });
+
+const f3 = document.getElementById('f3'), m3 = document.getElementById('m3');
+document.getElementById('l').addEventListener('click', (e) => { e.preventDefault(); f.hidden = true; f3.hidden = false; });
+document.getElementById('z3').addEventListener('click', (e) => { e.preventDefault(); f3.hidden = true; f.hidden = false; });
+f3.addEventListener('submit', async (ev) => {
+  ev.preventDefault(); const b3 = document.getElementById('b3'); b3.disabled = true; melde(m3, '');
+  try { const r = await api('/api/login-link', { method: 'POST', body: { email: document.getElementById('e3').value } }); melde(m3, r.hinweis, 'ok'); }
+  catch (e) { melde(m3, e.message); }
+  b3.disabled = false;
+});

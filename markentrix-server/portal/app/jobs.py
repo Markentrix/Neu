@@ -263,12 +263,34 @@ def aufgaben_automatisch(cfg):
         mailer.aufgaben_digest_team(an, neu[:30])
 
 
+_stumm_gemeldet = 0.0
+
+
+def ueberwachung_stumm(cfg):
+    """Wenn die Server-Überwachung seit über einer Stunde nichts mehr meldet, einmal pro Tag Bescheid geben (sie sollte alle 5 Minuten laufen)."""
+    global _stumm_gemeldet
+    from .routes_system import lesen_status
+    d = lesen_status()
+    if not d or d["alter_minuten"] < 60 or time.time() - _stumm_gemeldet < 86400:
+        return
+    with tx("system") as cur:
+        an = cfg["alarm_email"]
+        if not an:
+            cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
+            r = cur.fetchone()
+            an = r and r["email"]
+    if an:
+        _stumm_gemeldet = time.time()
+        mailer.senden(an, "Markentrix: Die Server-Überwachung meldet sich nicht", f"Die Überwachung auf dem Server hat seit {d['alter_minuten']} Minuten keinen Status mehr geliefert. "
+                      "Bitte in der Hetzner-Konsole prüfen: /opt/markentrix/bin/watchdog.sh --zeigen" + mailer.SIGNATUR)
+
+
 def tick():
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
     if not mailer.konfiguriert():
         return
-    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback):
+    for job in (anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

@@ -1,11 +1,11 @@
-import { kontaktKarte, h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
+import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, groesse, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
-const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
+const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
 let paketListe = [], ich = null;
 const zaehlerAdmin = {};
 
-const NAV_RECHT = { postfach: 'nachrichten', freigaben: 'kunden', kennzahlen: 'finanzen', kunden: 'kunden', neu: 'kunden', vertrieb: 'leads', leads: 'leads', websites: 'kunden', belege: 'finanzen', preise: 'finanzen', compliance: 'einstellungen', katalog: 'finanzen', einstellungen: 'einstellungen', protokoll: 'einstellungen' };
+const NAV_RECHT = { postfach: 'nachrichten', freigaben: 'kunden', kennzahlen: 'finanzen', kunden: 'kunden', neu: 'kunden', vertrieb: 'leads', leads: 'leads', auswertung: 'leads', websites: 'kunden', belege: 'finanzen', preise: 'finanzen', compliance: 'einstellungen', katalog: 'finanzen', einstellungen: 'einstellungen', protokoll: 'einstellungen' };
 const erlaubt = (seite) => !ich || !ich.admin_rechte || !NAV_RECHT[seite] || ich.admin_rechte.includes(NAV_RECHT[seite]);
 
 function gerüst(aktiv, inhalt) {
@@ -47,9 +47,9 @@ function heuteKarte(t) {
 }
 
 V.uebersicht = async () => {
-  const d = await api('/api/admin/uebersicht'), ob = await api('/api/admin/onboarding/offen'), heute = await api('/api/admin/heute');
+  const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
-  return h('div', {}, kopf('Übersicht'), heuteKarte(heute),
+  return h('div', {}, kopf('Übersicht'), sys ? systemKarte(sys) : '', heuteKarte(heute),
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Aktiv'), h('b', {}, s.aktiv || 0)),
@@ -259,6 +259,20 @@ async function mitarbeiterKarte() {
     tabelle([['Name', b => b.name || '–'], ['E-Mail', b => b.email + (b.aktiv ? '' : ' (gesperrt)')], ['Rechte', zeile]], d.liste), h('h3', { style: 'margin-top:16px' }, 'Neuen Mitarbeiter einladen'), f);
 }
 
+function systemKarte(s) {
+  const st = s.status, ok = s.probleme.length === 0;
+  const zeile = (t, w, schlecht) => h('div', { class: 'small', style: 'margin:2px 0' }, h('span', { class: 'muted' }, t + ': '), h('span', { style: schlecht ? 'color:#991b1b;font-weight:600' : '' }, w));
+  const std = (n) => n === null || n === undefined || n >= 9999 ? 'nie' : n < 1 ? 'vor weniger als 1 Stunde' : 'vor ' + n + ' Std.';
+  return h('div', { class: 'card' }, h('h2', {}, 'Systemstatus ', h('span', { class: 'pill ' + (ok ? 'ok' : 'bad') }, ok ? 'alles in Ordnung' : s.probleme.length + (s.probleme.length === 1 ? ' Problem' : ' Probleme'))),
+    ok ? '' : h('ul', { style: 'color:#991b1b;margin:6px 0' }, s.probleme.map(p => h('li', {}, p))),
+    st ? h('div', { class: 'row', style: 'gap:24px;align-items:flex-start' },
+      h('div', {}, zeile('Letzte Sicherung', std(st.backup_stunden), st.backup_stunden > 36), st.offsite_aktiv ? zeile('Externe Sicherung', std(st.offsite_stunden), st.offsite_stunden > 36) : zeile('Externe Sicherung', 'nicht eingerichtet', true)),
+      h('div', {}, zeile('Festplatte', st.platte_prozent + ' % belegt', st.platte_prozent >= 85), st.zertifikat_tage >= 0 ? zeile('Zertifikat', 'noch ' + st.zertifikat_tage + ' Tage gültig', st.zertifikat_tage < 14) : ''),
+      h('div', {}, zeile('E-Mail-Versand', s.mail_eingerichtet ? 'eingerichtet' : 'fehlt', !s.mail_eingerichtet), zeile('KI-Schlüssel', s.ki_eingerichtet ? 'hinterlegt' : 'fehlt', false), zeile('Überwachung zuletzt', 'vor ' + st.alter_minuten + ' Min.', st.alter_minuten > 30)))
+      : h('p', { class: 'small muted' }, 'Die Server-Überwachung hat noch keine Daten geliefert. Nach dem nächsten Server-Update (git pull, bash install.sh) erscheint sie hier automatisch.'));
+}
+
+async function sicherApi(u) { try { return await api(u, { leise: true }); } catch (e) { return null; } }
 async function sicher(f) { try { return await f(); } catch (e) { return ''; } }
 
 async function historieKarte(kid) {
@@ -684,6 +698,20 @@ V.leads = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
 };
 
+V.auswertung = async () => {
+  const d = await api('/api/admin/vertrieb/auswertung');
+  const proz = (a, b) => b ? Math.round(a * 100 / b) + ' %' : '–';
+  const tab = (titel, liste, extra = []) => h('div', { class: 'card' }, h('h2', {}, titel), tabelle([['', z => h('b', {}, z.name)], ['Leads', z => z.leads], ['Bearbeitet', z => z.bearbeitet + ' (' + proz(z.bearbeitet, z.leads) + ')'],
+    ['Erreicht / Antwort', z => z.erreicht + ' (' + proz(z.erreicht, z.bearbeitet) + ')'], ['Termine', z => z.termine + ' (' + proz(z.termine, z.bearbeitet) + ')'], ['Kunden', z => h('b', {}, z.kunden)], ['Verloren', z => z.verloren], ...extra], liste, 'Noch keine Daten.'));
+  const g = d.gesamt || { leads: 0, bearbeitet: 0, erreicht: 0, termine: 0, kunden: 0 };
+  const stufe = (t, n, von) => h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, t), h('b', {}, n), von !== undefined ? h('span', { class: 'small muted' }, proz(n, von) + ' der Vorstufe') : '');
+  return h('div', { class: 'stack' }, kopf('Vertriebs-Auswertung'),
+    h('p', { class: 'small muted' }, 'So viele Leads sind auf welcher Stufe angekommen. „Bearbeitet“ heißt: mindestens ein Kontakt festgehalten. Die Quoten zeigen, welche Liste, Branche und welcher Vertriebler wirklich Termine und Kunden bringt. Ein Lead zählt auf der höchsten Stufe, die er erreicht hat.'),
+    h('div', { class: 'grid3' }, stufe('Leads', g.leads), stufe('Bearbeitet', g.bearbeitet, g.leads), stufe('Erreicht / Antwort', g.erreicht, g.bearbeitet), stufe('Termine', g.termine, g.erreicht), stufe('Kunden', g.kunden, g.termine),
+      h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Gebuchte Gespräche (kommend)'), h('b', {}, d.gebuchte_gespraeche))),
+    tab('Je Vertriebler', d.je_vertriebler, [['Anrufe heute', z => z.anrufe_heute], ['Anrufe 7 Tage', z => z.anrufe_7t]]), tab('Je Importliste', d.je_liste), tab('Je Branche', d.je_gruppe), tab('Je Quelle', d.je_quelle));
+};
+
 async function leadImportKarte(partner) {
   const m = h('div'), erg = h('div');
   const datei = h('input', { type: 'file', accept: '.xlsx,.xlsm,.csv,.txt' });
@@ -732,6 +760,7 @@ async function leadDetail(lid) {
   return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am),
+    skriptKarte(l.skript, l.skript_am, '/api/admin/leads/' + lid + '/skript'),
     d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),
       h('div', { class: 'freitext' }, JSON.stringify(c.ergebnis, null, 2))))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt], ['Von', z => z.von]], d.aktivitaeten, 'Noch keine Einträge.')));

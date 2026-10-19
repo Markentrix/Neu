@@ -107,3 +107,19 @@ export function kontaktKarte(optionen, url, wiedervorlage) {
     h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, notiz), h('div', {}, h('label', { style: 'margin:0' }, 'Wiedervorlage'), tag), speichern),
     wiedervorlage ? h('p', { class: 'small muted' }, 'Aktuelle Wiedervorlage: ' + datum(wiedervorlage)) : '');
 }
+
+// Gesprächsleitfaden (KI) für einen Lead: zeigt den gespeicherten Entwurf, Knopf erzeugt oder erneuert ihn
+export function skriptKarte(skript, skriptAm, url) {
+  const m = h('div'), box = h('div');
+  const zeige = (s) => box.replaceChildren(
+    h('h3', {}, 'Einstieg'), h('p', {}, s.einstieg),
+    s.fragen.length ? [h('h3', {}, 'Fragen'), h('ul', {}, s.fragen.map(f => h('li', {}, f)))] : '',
+    h('h3', {}, 'Was Markentrix für den Betrieb tun kann'), h('p', {}, s.nutzen),
+    s.einwaende.length ? [h('h3', {}, 'Wenn der Kunde sagt …'), s.einwaende.map(e => h('p', {}, h('b', {}, '„' + e.einwand + '“'), h('br'), e.antwort))] : '',
+    h('h3', {}, 'Abschluss'), h('p', {}, s.abschluss));
+  if (skript) zeige(skript);
+  const knopf = h('button', { class: 'btn sec small', onclick: async () => { knopf.disabled = true; melde(m, 'Wird erstellt …', 'info');
+    try { zeige(await api(url, { method: 'POST' })); melde(m, 'Neuer Entwurf erstellt.', 'ok'); } catch (x) { melde(m, x.message); } knopf.disabled = false; } }, skript ? 'Neu erstellen' : 'Gesprächsleitfaden erstellen');
+  return h('div', { class: 'card' }, h('h2', {}, 'Gesprächsleitfaden (KI-Entwurf)'),
+    h('p', { class: 'small muted' }, 'Ein Vorschlag aus den Daten dieses Betriebs. Bitte nicht ablesen, nichts versprechen und keine Preise nennen. Wer kein Interesse hat, wird respektiert. Dieser Text wurde mit KI-Unterstützung vorbereitet.' + (skriptAm ? ' Erstellt am ' + datum(skriptAm) + '.' : '')), m, box, h('p', {}, knopf));
+}

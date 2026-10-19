@@ -26,6 +26,9 @@ from .routes_zusammenarbeit import router as zus_router, kunde_router as zus_kun
 from .routes_websitecheck import router as wcheck_router
 from .routes_folgemails import router as folge_router
 from .routes_buchung import router as buchung_router
+from .routes_vertriebsplus import router as vertriebsplus_router
+from .routes_system import router as system_router
+from .routes_loginlink import router as loginlink_router
 from .routes_leadimport import router as leadimport_router
 from .routes_mitarbeiter import router as mitarbeiter_router
 from .routes_briefing import router as brief_router, kunde_router as brief_kunde_router
@@ -117,6 +120,9 @@ app.include_router(aufgaben_router)
 app.include_router(wcheck_router)
 app.include_router(folge_router)
 app.include_router(buchung_router)
+app.include_router(vertriebsplus_router)
+app.include_router(system_router)
+app.include_router(loginlink_router)
 app.include_router(leadimport_router)
 app.include_router(mitarbeiter_router)
 app.include_router(brief_router)
@@ -142,6 +148,7 @@ app.get("/admin", include_in_schema=False)(seite("admin.html"))
 app.get("/vertrieb", include_in_schema=False)(seite("vertrieb.html"))
 app.get("/einladung", include_in_schema=False)(seite("einladung.html"))
 app.get("/buchen", include_in_schema=False)(seite("buchen.html"))
+app.get("/anmelden", include_in_schema=False)(seite("anmelden.html"))
 app.get("/impressum", include_in_schema=False)(seite("recht.html"))
 app.get("/datenschutz", include_in_schema=False)(seite("recht.html"))
 @app.get("/manifest.webmanifest", include_in_schema=False)

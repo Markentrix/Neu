@@ -31,7 +31,29 @@ if [ -n "${OFFSITE_TARGET:-}" ]; then
 fi
 [ ! -f "$BASE/backup-status/restore_fehler" ] || p "Wiederherstellungstest fehlgeschlagen: $(cat "$BASE/backup-status/restore_fehler")"
 
+# 5) Zertifikat des Portals (Warnung ab 14 Tagen Restlaufzeit)
+CERT_TAGE=-1
+if [ -n "${DOMAIN:-}" ]; then
+  ENDE="$(echo | timeout 15 openssl s_client -servername "portal.${DOMAIN}" -connect "portal.${DOMAIN}:443" 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2 || true)"
+  if [ -n "$ENDE" ]; then
+    CERT_TAGE=$(( ( $(date -d "$ENDE" +%s) - $(date +%s) ) / 86400 ))
+    [ "$CERT_TAGE" -ge 14 ] || p "Das Zertifikat von portal.${DOMAIN} läuft in ${CERT_TAGE} Tagen ab"
+  fi
+fi
+
 GEFUNDEN="$(printf '%s\n' "${PROBLEME[@]:-}" | sed '/^$/d' | sort)"
+# Status für die Admin-Übersicht im Portal (nur Zahlen und Meldungen, keine Zugangsdaten)
+if [ -d "$BASE/backup-status" ]; then
+  BACKUP_H="$(alter "$BASE/backups/last_success")"; OFFSITE_H="$(alter "$BASE/backup-status/offsite_last")"
+  JSON_PROBLEME="$GEFUNDEN" JSON_BACKUP="$BACKUP_H" JSON_OFFSITE="$OFFSITE_H" JSON_OFFSITE_AKTIV="${OFFSITE_TARGET:+1}" JSON_PLATTE="${USE:-0}" JSON_CERT="$CERT_TAGE" python3 - "$BASE/backup-status" <<'PY' 2>/dev/null || true
+import json, os, sys, time
+e = os.environ
+d = {"zeit": time.time(), "backup_stunden": int(e["JSON_BACKUP"]), "offsite_stunden": int(e["JSON_OFFSITE"]), "offsite_aktiv": bool(e.get("JSON_OFFSITE_AKTIV")),
+     "platte_prozent": int(e["JSON_PLATTE"]), "zertifikat_tage": int(e["JSON_CERT"]), "probleme": [x for x in e.get("JSON_PROBLEME", "").splitlines() if x.strip()]}
+p = sys.argv[1] + "/system.json"
+open(p + ".tmp", "w").write(json.dumps(d)); os.chmod(p + ".tmp", 0o644); os.replace(p + ".tmp", p)
+PY
+fi
 # Nur melden, was bei zwei Prüfungen hintereinander (ca. 5-10 Minuten) auftritt: so gibt es keinen Alarm bei Updates oder kurzen Neustarts.
 VORHER="$(cat "$STATE/vorher" 2>/dev/null || true)"
 printf '%s\n' "$GEFUNDEN" > "$STATE/vorher"

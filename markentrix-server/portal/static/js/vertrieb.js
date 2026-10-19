@@ -1,8 +1,8 @@
-import { kontaktKarte, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
+import { kontaktKarte, skriptKarte, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, rechtFuss } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
-const NAV = [['uebersicht', 'Übersicht'], ['kunden', 'Meine Kunden'], ['leads', 'Meine Leads'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
+const NAV = [['heute', 'Heute anrufen'], ['uebersicht', 'Übersicht'], ['kunden', 'Meine Kunden'], ['leads', 'Meine Leads'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
 
 function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
@@ -18,6 +18,23 @@ function tabelle(spalten, zeilen, leer) {
 const pill = (s) => h('span', { class: 'pill ' + (['aktiv', 'ausgezahlt', 'gewonnen'].includes(s) ? 'ok' : ['onboarding', 'berechnet', 'freigegeben', 'neu'].includes(s) ? 'warn' : ['verloren', 'storniert', 'gekuendigt', 'beendet'].includes(s) ? 'bad' : '') }, String(s).replace(/_/g, ' '));
 const feld = (label, name, extra = {}) => h('div', {}, h('label', {}, label), h('input', { name, ...extra }));
 const V = {};
+
+V.heute = async () => {
+  const d = await api('/api/vertrieb/heute');
+  const TEMP = { kalt: '❄', warm: '☀', heiss: '🔥' };
+  const zeile = (z) => h('div', { class: 'row', style: 'padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap' },
+    h('div', { class: 'grow' }, h('a', { href: '#lead/' + z.id, style: 'font-weight:600;text-decoration:none' }, (TEMP[z.temperatur] || '') + ' ' + z.firma),
+      h('div', { class: 'small muted' }, [z.ansprechpartner, z.gruppe || z.branche, z.ort].filter(Boolean).join(' · ') + (z.wiedervorlage_am ? ' · Wiedervorlage ' + datum(z.wiedervorlage_am) : ''))),
+    z.telefon ? h('a', { class: 'btn small', href: 'tel:' + z.telefon.replace(/[^+\d]/g, '') }, '📞 ' + z.telefon) : h('span', { class: 'small muted' }, 'keine Nummer'),
+    h('a', { class: 'btn sec small', href: '#lead/' + z.id }, 'Öffnen'));
+  const block = (titel, liste, leer) => h('div', { class: 'card' }, h('h2', {}, titel, liste.length ? h('span', { class: 'badge', style: 'margin-left:8px' }, liste.length) : ''), liste.length ? liste.map(zeile) : h('p', { class: 'muted' }, leer));
+  return h('div', { class: 'stack' },
+    h('div', { class: 'card' }, h('p', {}, 'Heute schon ', h('b', {}, d.anrufe_heute), ' Anrufe festgehalten. ', d.gesamt ? 'Noch ' + d.gesamt + ' Leads auf deiner Liste.' : 'Deine Liste ist leer, melde dich bei Markentrix für neue Leads.'),
+      d.termine.length ? h('p', { class: 'small' }, '📅 Gebuchte Gespräche in den nächsten 3 Tagen: ' + d.termine.map(t => t.name + ' (' + zeit(t.start) + ')').join(', ')) : ''),
+    block('Wiedervorlage fällig', d.wiedervorlagen, 'Keine Wiedervorlagen für heute.'),
+    block('🔥 Heiße Leads, noch nicht angerufen', d.heiss, 'Keine heißen Leads offen.'),
+    block('Neu zugewiesen', d.neu, 'Keine neuen Leads.'));
+};
 
 V.uebersicht = async () => {
   const s = start.summen, l = start.leads;
@@ -65,6 +82,7 @@ async function leadDetail(lid) {
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am),
+    skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
 }
 
@@ -77,10 +95,10 @@ V.konto = async () => {
 };
 
 async function zeige() {
-  const hash = (location.hash || '#uebersicht').slice(1), seite = hash.split('/')[0];
+  const hash = (location.hash || '#heute').slice(1), seite = hash.split('/')[0];
   let inhalt;
-  try { inhalt = seite === 'lead' ? await leadDetail(hash.split('/')[1]) : await (V[seite] || V.uebersicht)(); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
-  root.replaceChildren(gerüst(seite === 'lead' ? 'leads' : (V[seite] ? seite : 'uebersicht'), inhalt));
+  try { inhalt = seite === 'lead' ? await leadDetail(hash.split('/')[1]) : await (V[seite] || V.heute)(); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
+  root.replaceChildren(gerüst(seite === 'lead' ? 'leads' : (V[seite] ? seite : 'heute'), inhalt));
 }
 (async () => {
   try { const me = await api('/api/me'); if (me.rolle !== 'vertrieb') { location.href = me.rolle === 'admin' ? '/admin' : '/app'; return; } start = await api('/api/vertrieb/start'); } catch (e) { return; }

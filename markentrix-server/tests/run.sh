@@ -13,7 +13,7 @@ PSQL() { su postgres -c "$PGB/psql -q -h $PGD -p 54329 $*"; }
 [ "$(id -u)" = 0 ] || { echo "Bitte als root starten (sudo)."; exit 2; }
 pkill -f "uvicorn app.main:app" 2>/dev/null; pkill -f "$T/smtp.py" 2>/dev/null; pkill -f "$T/mock.py" 2>/dev/null
 su postgres -c "$PGB/pg_ctl -D $PGD/data stop -m fast" >/dev/null 2>&1
-rm -rf "$PGD" "$T"; mkdir -p "$PGD" "$T/up" "$T/s/live" "$T/sites" "$T/b/queue"; chown postgres "$PGD"
+rm -rf "$PGD" "$T"; mkdir -p "$PGD" "$T/up" "$T/s/live" "$T/sites" "$T/b/queue" "$T/bk"; chown postgres "$PGD"
 cp "$HIER"/*.py "$T"/
 su postgres -c "$PGB/initdb -D $PGD/data -A trust -E UTF8 --locale=C.UTF-8" >/dev/null || exit 2
 su postgres -c "$PGB/pg_ctl -D $PGD/data -o '-p 54329 -k $PGD' -l $PGD/log start -w" >/dev/null || exit 2
@@ -24,7 +24,7 @@ done
 PSQL "markentrix -f $REPO/db/999_rechte.sql" >/dev/null
 
 export DATABASE_URL="postgresql://mk_app:apppw@localhost:54329/markentrix?host=$PGD" PORTAL_BASE_URL=http://localhost:8000 PORTAL_COOKIE_SECURE=0 \
-  UPLOAD_DIR=$T/up SITES_LIVE=$T/s/live SITES_ROOT=$T/s QUEUE_DIR=$T/b/queue PORTAL_SECRET=testgeheimnis123 ANTHROPIC_BASE_URL=http://127.0.0.1:8999 PORTAL_JOBS=0
+  UPLOAD_DIR=$T/up SITES_LIVE=$T/s/live SITES_ROOT=$T/s QUEUE_DIR=$T/b/queue PORTAL_SECRET=testgeheimnis123 ANTHROPIC_BASE_URL=http://127.0.0.1:8999 PORTAL_JOBS=0 BACKUP_DIR=$T/bk
 export PYTHONPATH="$REPO/portal"
 cd "$REPO/portal" || exit 2
 python3 -m app.cli admin-add chef@test.de | grep PASSWORT | cut -d= -f2 > "$T/adminpw"
@@ -44,7 +44,7 @@ starten() {
 }
 FEHLER=0
 cd "$T" || exit 2
-for t in t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 smoke; do
+for t in t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 smoke; do
   starten || { FEHLER=1; break; }
   timeout 180 python3 "$t.py" >"out_$t.txt" 2>&1 </dev/null; rc=$?
   n=$(grep -c "^FAIL" "out_$t.txt"); grep -qE "Fehler [1-9]" "out_$t.txt" && n=$((n+1))

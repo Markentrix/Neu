@@ -246,6 +246,11 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 - **Leads aus Excel/CSV importieren** (Leads, weiter unten): Datei wählen, mit „Datei prüfen“ die Vorschau ansehen (erkannte Spalten, Dubletten, Fehler), dann importieren. Listenname, Einstufung und Vertriebler legst du gleich fest. Die Leadliste hat Filter für Suche, Quelle, Einstufung, Vertriebler und Importliste.
 - **Leads-Übersicht**: 50 Leads pro Seite, Haken vorne für Sammelaktionen (Einstufung, Vertriebler, Status setzen, löschen), auch für alle Treffer eines Filters.
 - **Vertriebler einladen**: Beim Anlegen (Haken „Einladung senden“) oder später in der Vertriebsliste über „Einladung senden“. Der Vertriebler bekommt eine Mail mit Link zum Passwort setzen für das Vertriebsportal.
+- **Vertriebler: „Heute anrufen“** ist die Startseite des Vertriebsportals: fällige Wiedervorlagen, heiße Leads ohne Anruf, neu zugewiesene Leads, mit Telefon-Button.
+- **Gesprächsleitfaden (KI)** in jedem Lead (Admin und Vertrieb): Einstieg, Fragen, Nutzen, drei Einwände mit Antworten, Abschluss. Braucht den KI-Schlüssel (Einstellungen → KI). Nur ein Vorschlag, nichts ablesen oder versprechen.
+- **Vertriebs-Auswertung** (Admin, links): Trichter von Leads über Bearbeitet, Erreicht, Termine bis Kunden, je Vertriebler, Importliste, Branche und Quelle.
+- **Systemstatus** oben in der Admin-Übersicht: Sicherung, externe Sicherung, Festplatte, Zertifikat, E-Mail-Versand. Die Daten liefert die Server-Überwachung (watchdog), nach dem Update ab dem nächsten 5-Minuten-Lauf. Meldet sie sich länger als eine Stunde nicht, kommt eine Mail.
+- **Anmelde-Link per E-Mail** auf der Login-Seite für Kunden und Vertriebler ohne Zwei-Faktor-Anmeldung (15 Minuten gültig, einmalig). Administratoren und Konten mit 2FA melden sich weiter mit Passwort.
 - **Änderungshistorie** bei jedem Kunden: wer hat wann was geändert.
 
 ## Automatische Tests

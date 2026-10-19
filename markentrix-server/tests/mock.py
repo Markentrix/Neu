@@ -12,6 +12,9 @@ class H(BaseHTTPRequestHandler):
             if "kaputt" in json.dumps(daten): res="das ist kein JSON"
             out=json.dumps({"content":[{"type":"text","text":"Hier: "+(res if isinstance(res,str) else json.dumps(res,ensure_ascii=False))}],"usage":{"input_tokens":100,"output_tokens":50}}).encode()
             self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
+        if "Gesprächs-Assistent" in str(b.get("system","")):
+            out=json.dumps({"content":[{"type":"text","text":"Hier: "+json.dumps({"einstieg":"Guten Tag, hier ist Markentrix.","fragen":["Wie kommen Kunden zu Ihnen?","Wer beantwortet Anfragen?","Haben Sie eine Website?"],"nutzen":"Wir können Anfragen automatisch bearbeiten.","einwaende":[{"einwand":"Keine Zeit","antwort":"Ich fasse mich kurz."},{"einwand":"Zu teuer","antwort":"Wir sprechen erst über Ihren Bedarf."},{"einwand":"Haben wir schon","antwort":"Gern ergänzend."}],"abschluss":"Darf ich einen kurzen Termin vorschlagen?"},ensure_ascii=False)}],"usage":{"input_tokens":50,"output_tokens":30}}).encode()
+            self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
         if "Berichts-Assistent" in str(b.get("system","")):
             out=json.dumps({"content":[{"type":"text","text":"Hier: "+json.dumps({"einordnung":"Entwurf der KI: solide Entwicklung.","schritte":["Erster KI-Schritt","Zweiter KI-Schritt"]},ensure_ascii=False)}],"usage":{"input_tokens":50,"output_tokens":30}}).encode()
             self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return

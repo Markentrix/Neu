@@ -6,7 +6,12 @@
 <label for="p">Passwort</label><input id="p" type="password" autocomplete="current-password" required>
 <div id="cw" hidden><label for="c">Code aus der Authenticator-App (oder Notfallcode)</label><input id="c" inputmode="text" autocomplete="one-time-code"></div>
 <p><button class="btn" style="width:100%" id="b">Anmelden</button></p>
-<p style="text-align:center;margin:0"><a href="#" id="v" class="small">Passwort vergessen?</a></p></form>
+<p style="text-align:center;margin:0"><a href="#" id="v" class="small">Passwort vergessen?</a> · <a href="#" id="l" class="small">Anmelde-Link per E-Mail</a></p></form>
+<form class="card login" id="f3" hidden><div class="logo">M</div><h1>Anmelde-Link</h1>
+<p class="muted small" style="text-align:center;margin-top:-6px">Wir schicken dir einen Link, mit dem du dich ohne Passwort anmeldest. Er gilt 15 Minuten. (Nicht für Konten mit Zwei-Faktor-Anmeldung.)</p>
+<div id="m3"></div><label for="e3">E-Mail</label><input id="e3" type="email" autocomplete="username" required>
+<p><button class="btn" style="width:100%" id="b3">Link senden</button></p>
+<p style="text-align:center;margin:0"><a href="#" id="z3" class="small">Zurück zur Anmeldung</a></p></form>
 <form class="card login" id="f2" hidden><div class="logo">M</div><h1>Passwort zurücksetzen</h1>
 <p class="muted small" style="text-align:center;margin-top:-6px">Wir schicken dir einen Link per E-Mail.</p>
 <div id="m2"></div><label for="e2">E-Mail</label><input id="e2" type="email" autocomplete="username" required>

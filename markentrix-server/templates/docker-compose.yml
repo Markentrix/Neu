@@ -153,11 +153,13 @@ services:
       PORTAL_SECRET: ${PORTAL_SECRET}
       CHAT_WEBHOOK_URL: ${CHAT_WEBHOOK_URL:-}
       CHAT_WEBHOOK_SECRET: ${CHAT_WEBHOOK_SECRET:-}
+      BACKUP_DIR: /backups
     volumes:
       - portal_uploads:/data
       - /srv/sites:/srv/sites:ro
       - /srv/sites/live:/srv/sites/live
       - ./queue:/data/queue
+      - ./backup-status:/backups:ro
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]
