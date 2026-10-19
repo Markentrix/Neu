@@ -5,8 +5,13 @@ from .pdf import H1, H2, KLEIN, Spacer, p, tabelle
 VERSION = "1"
 
 STANDARD_UNTERAUFTRAGNEHMER = [
-    ("Hetzner Online GmbH", "Server-Hosting", "Deutschland"),
+    ("Hetzner Online GmbH", "Server-Hosting (Portal, Datenbank, Websites, Sicherungen)", "Deutschland"),
     ("Anthropic Ireland, Limited / Anthropic PBC", "Beantwortung von Chat-Nachrichten im KI-Assistenten (nur wenn das Modul gebucht ist)", "Irland / USA, Übermittlung auf Grundlage von Standardvertragsklauseln"),
+    ("Famulor", "Telefon-Assistent (Sprachagent), nur wenn das Modul gebucht ist", "Deutschland (Hosting Frankfurt)"),
+    ("Google Ireland Limited", "E-Mail-Versand und -Empfang, Kalender und Terminbuchung (Gmail, Google Calendar)", "Irland, Konzernmutter USA"),
+    ("Meta Platforms Ireland Limited", "WhatsApp-Kommunikation, nur wenn das Modul gebucht ist", "Irland, Konzernmutter USA"),
+    ("n8n GmbH", "Automatisierungs-Workflows (n8n Cloud), nur soweit noch im Einsatz", "Deutschland"),
+    ("INWX GmbH & Co. KG", "Registrierung und Verwaltung von Kunden-Domains", "Deutschland"),
 ]
 
 
