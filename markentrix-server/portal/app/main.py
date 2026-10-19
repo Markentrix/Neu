@@ -26,6 +26,7 @@ from .routes_zusammenarbeit import router as zus_router, kunde_router as zus_kun
 from .routes_websitecheck import router as wcheck_router
 from .routes_folgemails import router as folge_router
 from .routes_buchung import router as buchung_router
+from .routes_leadimport import router as leadimport_router
 from .routes_mitarbeiter import router as mitarbeiter_router
 from .routes_briefing import router as brief_router, kunde_router as brief_kunde_router
 from .routes_angebotsinhalte import router as ang_router, kunde_router as ang_kunde_router
@@ -116,6 +117,7 @@ app.include_router(aufgaben_router)
 app.include_router(wcheck_router)
 app.include_router(folge_router)
 app.include_router(buchung_router)
+app.include_router(leadimport_router)
 app.include_router(mitarbeiter_router)
 app.include_router(brief_router)
 app.include_router(brief_kunde_router)

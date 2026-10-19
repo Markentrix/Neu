@@ -608,11 +608,22 @@ const leadLoeschen = (z, m, danach) => knopf('Löschen', () => confirm('Lead "' 
 const LEAD_ST = ['neu', 'kontaktiert', 'antwort', 'termin', 'angebot', 'gewonnen', 'verloren', 'gesperrt', 'consent_ausstehend', 'tot'];
 const PARTNER = ['anfrage', 'aktiv', 'pausiert', 'beendet'];
 V.leads = async () => {
-  const filter = new URLSearchParams(location.hash.split('?')[1] || '').get('status') || '';
-  const [d, partner] = await Promise.all([api('/api/admin/leads?status=' + encodeURIComponent(filter)), api('/api/admin/vertrieb/partnerliste')]);
+  const P = new URLSearchParams(location.hash.split('?')[1] || ''), g = (k) => P.get(k) || '';
+  const filter = g('status');
+  const [d, partner] = await Promise.all([api('/api/admin/leads?' + P.toString()), api('/api/admin/vertrieb/partnerliste')]);
   const m = h('div');
-  const tabs = h('div', { class: 'tabs' }, h('button', { class: filter === '' ? 'on' : '', onclick: () => { location.hash = '#leads'; } }, 'Alle'),
-    LEAD_ST.filter(s => d.zaehler[s]).map(s => h('button', { class: filter === s ? 'on' : '', onclick: () => { location.hash = '#leads?status=' + s; } }, s.replace(/_/g, ' ') + ' (' + d.zaehler[s] + ')')));
+  const setze = (k, w) => { const n = new URLSearchParams(P); if (w) n.set(k, w); else n.delete(k); const t = n.toString(); location.hash = '#leads' + (t ? '?' + t : ''); };
+  const tabs = h('div', { class: 'tabs' }, h('button', { class: filter === '' ? 'on' : '', onclick: () => setze('status', '') }, 'Alle'),
+    LEAD_ST.filter(s => d.zaehler[s]).map(s => h('button', { class: filter === s ? 'on' : '', onclick: () => setze('status', s) }, s.replace(/_/g, ' ') + ' (' + d.zaehler[s] + ')')));
+  const fsel = (k, opt, w) => select('f_' + k, opt, w, { style: 'width:auto;min-width:130px', onchange: (e) => setze(k, e.target.value) });
+  const suche = h('input', { placeholder: 'Suchen: Firma, Ort, E-Mail, Telefon, Branche', value: g('q'), style: 'min-width:260px;flex:1', onkeydown: (e) => { if (e.key === 'Enter') setze('q', e.target.value.trim()); } });
+  const filterLeiste = h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px;margin:10px 0' }, suche,
+    fsel('quelle', [['', 'Alle Quellen'], 'manuell', 'empfehlung', 'lead_finder', 'website', 'akquise', 'messe'], g('quelle')),
+    fsel('temperatur', [['', 'Alle Einstufungen'], ['heiss', 'Heiß'], ['warm', 'Warm'], ['kalt', 'Kalt'], ['keine', 'Ohne Einstufung']], g('temperatur')),
+    fsel('vertriebler', [['', 'Alle Vertriebler'], ['keiner', 'Nicht zugeordnet'], ...partner.map(p => [p.id, p.name])], g('vertriebler')),
+    d.listen.length ? fsel('liste', [['', 'Alle Importlisten'], ...d.listen.map(l => [l.liste, l.liste + ' (' + l.n + ')'])], g('liste')) : '',
+    knopf('Suchen', () => setze('q', suche.value.trim()), 'sec small'),
+    [...P.keys()].length ? knopf('Filter zurücksetzen', () => { location.hash = '#leads'; }, 'sec small') : '');
   const zuordnen = (z) => select('p', [['', '– niemand –'], ...partner.map(p => [p.id, p.name])], z.vertriebler ? (partner.find(p => p.name === z.vertriebler) || {}).id : '', { onchange: async (e) => {
     try { await api('/api/admin/leads/' + z.id, { method: 'PATCH', body: e.target.value ? { vertriebspartner_id: e.target.value } : { zuordnung_loeschen: true } }); melde(m, 'Zugeordnet.', 'ok'); } catch (x) { fehler(m, x); } } });
   const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = leerzu(Object.fromEntries(new FormData(e.target)));
@@ -621,10 +632,39 @@ V.leads = async () => {
       h('div', {}, h('label', {}, 'Quelle'), select('quelle', ['manuell', 'empfehlung', 'lead_finder', 'website', 'akquise', 'messe'], 'manuell')),
       h('div', {}, h('label', {}, 'Vertriebler'), select('vertriebspartner_id', [['', '– niemand –'], ...partner.map(p => [p.id, p.name])], ''))),
     h('p', {}, h('button', { class: 'btn' }, 'Lead anlegen')));
-  return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, tabs,
-    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Quelle', z => z.quelle], ['Status', z => pill(z.status)], ['Einstufung', z => tempWahl(z, m)], ['Wiedervorlage', z => z.wiedervorlage_am ? h('span', { class: z.wiedervorlage_am.slice(0, 10) <= new Date().toISOString().slice(0, 10) ? 'pill warn' : 'small' }, datum(z.wiedervorlage_am)) : ''], ['Score', z => z.score ?? ''], ['Vertriebler', zuordnen], ['Angelegt', z => datum(z.erstellt_am)], ['', z => leadLoeschen(z, m, () => {})]], d.leads, 'Keine Leads.')),
+  return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, tabs, filterLeiste, h('p', { class: 'small muted' }, d.leads.length + ' Leads angezeigt' + (d.leads.length >= 500 ? ' (maximal 500, bitte Filter nutzen)' : '')),
+    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Kontakt', z => [z.ansprechpartner, z.telefon, z.email].filter(Boolean).join(' · ')], ['Ort', z => z.ort], ['Liste', z => z.liste || ''], ['Quelle', z => z.quelle], ['Status', z => pill(z.status)], ['Einstufung', z => tempWahl(z, m)], ['Wiedervorlage', z => z.wiedervorlage_am ? h('span', { class: z.wiedervorlage_am.slice(0, 10) <= new Date().toISOString().slice(0, 10) ? 'pill warn' : 'small' }, datum(z.wiedervorlage_am)) : ''], ['Score', z => z.score ?? ''], ['Vertriebler', zuordnen], ['Angelegt', z => datum(z.erstellt_am)], ['', z => leadLoeschen(z, m, () => {})]], d.leads, 'Keine Leads.')),
+    await leadImportKarte(partner),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
 };
+
+async function leadImportKarte(partner) {
+  const m = h('div'), erg = h('div');
+  const datei = h('input', { type: 'file', accept: '.xlsx,.xlsm,.csv,.txt' });
+  const liste = h('input', { placeholder: 'Name der Liste (z. B. Autowerkstätten Celle), sonst Dateiname' });
+  const quelle = select('quelle', ['akquise', 'lead_finder', 'messe', 'empfehlung', 'manuell'], 'akquise');
+  const temp = select('temperatur', [['', 'ohne Einstufung'], ['kalt', 'Kalt'], ['warm', 'Warm'], ['heiss', 'Heiß']], 'kalt');
+  const vt = select('vt', [['', 'niemand'], ...partner.map(p => [p.id, p.name])], '');
+  const lesen = () => new Promise((res, rej) => { const f = datei.files[0]; if (!f) return rej(new Error('Bitte zuerst eine Excel- oder CSV-Datei wählen.')); const r = new FileReader(); r.onload = () => res([f.name, r.result]); r.onerror = () => rej(new Error('Datei nicht lesbar.')); r.readAsDataURL(f); });
+  const senden = async (nurPruefen) => {
+    try {
+      const [name, b64] = await lesen();
+      const r = await api('/api/admin/leads/import', { method: 'POST', body: { datei_base64: b64, datei_name: name, liste: liste.value || null, quelle: quelle.value, temperatur: temp.value || null, vertriebspartner_id: vt.value || null, nur_pruefen: nurPruefen } });
+      melde(m, '');
+      const sp = Object.entries(r.erkannt).map(([k, v]) => k + ' ← „' + v + '“').join(', ');
+      erg.replaceChildren(h('div', { class: 'msg ' + (r.importiert ? 'ok' : 'info') }, r.importiert ? r.neu + ' Leads importiert (Liste „' + r.liste + '“). ' : 'Vorschau: ' + r.neu + ' neue Leads. ', r.doppelt + ' Dubletten übersprungen, ' + r.ungueltig_anzahl + ' ungültig.'),
+        h('p', { class: 'small muted' }, 'Erkannte Spalten: ' + sp),
+        r.ungueltig.length ? h('p', { class: 'small' }, 'Übersprungen: ' + r.ungueltig.map(u => 'Zeile ' + u.zeile + ' (' + u.grund + ')').join('; ')) : '',
+        r.vorschau.length ? tabelle([['Firma', z => z.firma], ['Ansprechpartner', z => z.ansprechpartner || ''], ['E-Mail', z => z.email || ''], ['Telefon', z => z.telefon || ''], ['Ort', z => [z.plz, z.ort].filter(Boolean).join(' ')]], r.vorschau) : '',
+        !r.importiert && r.neu ? h('p', {}, knopf(r.neu + ' Leads jetzt importieren', async () => { await senden(false); setTimeout(() => location.reload(), 1800); }, 'btn')) : '');
+    } catch (x) { erg.replaceChildren(); fehler(m, x); }
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Leads aus Excel oder CSV importieren'),
+    h('p', { class: 'small muted' }, 'In der ersten Zeile stehen die Überschriften. Erkannt werden u. a.: Firma (Pflicht), Ansprechpartner, E-Mail, Telefon, Website, Branche, PLZ, Ort, Notiz/Adresse. Dubletten (gleiche E-Mail oder Firma + PLZ) werden übersprungen. Importierte Leads haben keine Einwilligung, es gehen also keine automatischen Mails raus. Kaltakquise per Mail ist rechtlich heikel (siehe Anwalts-Checkliste), per Telefon ebenfalls.'), m,
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Datei'), datei), h('div', {}, h('label', {}, 'Listenname'), liste),
+      h('div', {}, h('label', {}, 'Quelle'), quelle), h('div', {}, h('label', {}, 'Einstufung'), temp), h('div', {}, h('label', {}, 'Vertriebler zuordnen'), vt)),
+    h('p', {}, knopf('Datei prüfen (Vorschau)', () => senden(true), 'btn')), erg);
+}
 
 async function leadDetail(lid) {
   const [d, partner] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/vertrieb/partnerliste')]), l = d.lead, m = h('div');

@@ -205,16 +205,25 @@ class LeadPatch(BaseModel):
 
 
 @router.get("/leads")
-def leads_liste(status: str = "", q: str = "", user: dict = Depends(require_admin)):
+def leads_liste(status: str = "", q: str = "", quelle: str = "", temperatur: str = "", vertriebler: str = "", liste: str = "", user: dict = Depends(require_admin)):
+    """Filter: Status, Suche (Firma, Ort, E-Mail, Telefon, Branche), Quelle, Einstufung, Vertriebler (ID oder 'keiner'), Importliste."""
     with tx("admin") as cur:
-        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.wiedervorlage_am, l.letzter_kontakt_am, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
+        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.email, l.telefon, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.liste, l.wiedervorlage_am, l.letzter_kontakt_am, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
                        FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id
-                       WHERE (%s='' OR l.status=%s) AND (%s='' OR l.firma ILIKE %s OR coalesce(l.ort,'') ILIKE %s)
-                       ORDER BY l.erstellt_am DESC LIMIT 300""", (status, status, q, f"%{q}%", f"%{q}%"))
+                       WHERE (%(s)s='' OR l.status=%(s)s)
+                         AND (%(q)s='' OR l.firma ILIKE %(l)s OR coalesce(l.ort,'') ILIKE %(l)s OR coalesce(l.email,'') ILIKE %(l)s OR coalesce(l.telefon,'') ILIKE %(l)s OR coalesce(l.branche,'') ILIKE %(l)s OR coalesce(l.ansprechpartner,'') ILIKE %(l)s)
+                         AND (%(qu)s='' OR l.quelle=%(qu)s)
+                         AND (%(t)s='' OR (%(t)s='keine' AND l.temperatur IS NULL) OR l.temperatur=%(t)s)
+                         AND (%(v)s='' OR (%(v)s='keiner' AND l.vertriebspartner_id IS NULL) OR l.vertriebspartner_id::text=%(v)s)
+                         AND (%(li)s='' OR l.liste=%(li)s)
+                       ORDER BY l.erstellt_am DESC, l.firma LIMIT 500""",
+                    {"s": status, "q": q, "l": f"%{q}%", "qu": quelle, "t": temperatur, "v": vertriebler, "li": liste})
         rows = cur.fetchall()
         cur.execute("SELECT status, count(*) AS n FROM leads GROUP BY status")
         zaehler = {r["status"]: r["n"] for r in cur.fetchall()}
-    return {"leads": rows, "zaehler": zaehler}
+        cur.execute("SELECT liste, count(*) AS n FROM leads WHERE liste IS NOT NULL GROUP BY liste ORDER BY max(erstellt_am) DESC LIMIT 50")
+        listen = cur.fetchall()
+    return {"leads": rows, "zaehler": zaehler, "listen": listen}
 
 
 @router.post("/leads")
