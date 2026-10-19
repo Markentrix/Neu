@@ -180,3 +180,9 @@ def stammdaten_geaendert_team(an: str, firma: str, kundennummer: str, aenderung:
 def briefing_team(an: str, firma: str, kundennummer: str, kid: str) -> tuple[bool, str]:
     t = (f"{firma} ({kundennummer}) hat das Briefing abgeschickt.\n\nAnsehen im Admin-Bereich: {config.BASE_URL}/admin#kunde/{kid}" + "\n\n(automatische Meldung des Portals)")
     return senden(an, f"Briefing abgeschickt: {firma}", t)
+
+
+def website_check_team(an: str, name: str, firma: str, email: str, website: str, score, neu: bool, lead_id: str) -> tuple[bool, str]:
+    t = (f"{'Neuer Lead' if neu else 'Wiederholter Website-Check'} über markentrix.de:\n\nName: {name or '-'}\nFirma: {firma}\nE-Mail: {email}\nGeprüfte Website: {website or '-'}\nErgebnis: {score if score is not None else '-'} von 100\n\n"
+         f"Ansehen im Admin-Bereich: {config.BASE_URL}/admin#lead/{lead_id}" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"{'Neuer Lead' if neu else 'Website-Check'}: {firma} ({website or 'ohne Website'})", t)

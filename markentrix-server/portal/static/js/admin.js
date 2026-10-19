@@ -163,11 +163,21 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(),
+    zweiFaktorKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
 const kk = (label, wert, set) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', checked: wert, style: 'width:auto', onchange: (e) => set(e.target.checked) }), label);
+async function websiteCheckKarte() {
+  const d = await api('/api/admin/website-check'), m = h('div'), box = h('div');
+  const erzeugen = async () => {
+    if (d.aktiv && !confirm('Es gibt schon einen Schlüssel. Ein neuer ersetzt ihn, die Website muss dann den neuen bekommen. Fortfahren?')) return;
+    try { const r = await api('/api/admin/website-check/schluessel', { method: 'POST', body: {} }); box.replaceChildren(h('div', { class: 'msg info' }, 'Neuer Schlüssel (wird nur jetzt angezeigt, bitte kopieren): ', h('br'), h('code', { style: 'word-break:break-all' }, r.schluessel))); } catch (x) { melde(m, x.message); }
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Website-Check → Leads'), h('p', { class: 'small muted' }, 'Wer den Website-Check auf markentrix.de nutzt, landet hier als Lead (mit Ergebnis). Adresse für die Website: ', h('code', {}, d.adresse), '. Status: ', d.aktiv ? h('span', { class: 'pill ok' }, 'Schlüssel gesetzt') : h('span', { class: 'pill warn' }, 'noch nicht eingerichtet')),
+    m, box, h('p', {}, h('button', { class: 'btn sec', onclick: erzeugen }, d.aktiv ? 'Neuen Schlüssel erzeugen' : 'Schlüssel erzeugen')));
+}
+
 async function firmaKarte() {
   const f = await api('/api/admin/einstellungen/firma'), m = h('div'); let klein = f.kleinunternehmer;
   const form = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.kleinunternehmer = klein; o.zahlungsziel_tage = Number(o.zahlungsziel_tage); o.mwst_satz = Number(o.mwst_satz);
@@ -501,6 +511,8 @@ async function leadDetail(lid) {
   const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => confirm('Aus diesem Lead einen Kunden anlegen?') && bestaetigt(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); location.hash = '#kunde/' + k.id; }), 'btn');
   return h('div', { class: 'stack' }, kopf(l.firma, st, zuK, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
+    d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),
+      h('div', { class: 'freitext' }, JSON.stringify(c.ergebnis, null, 2))))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt], ['Von', z => z.von]], d.aktivitaeten, 'Noch keine Einträge.')));
 }
 

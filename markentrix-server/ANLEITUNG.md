@@ -224,6 +224,8 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 
 **Hilfe:** Kunden finden im Menü „Hilfe“ Antworten auf häufige Fragen mit Suche. Funktionen, die ein Kunde nicht gebucht hat, werden ausgeblendet. Die Texte stehen in `portal/static/js/kunde.js` (Liste `HILFE`).
 
+**Website-Check → Leads:** Wer den Check auf markentrix.de nutzt, erscheint als Lead (Admin → Leads) mit Ergebnis und Mail ans Team. Einrichtung: `docs/WEBSITE-CHECK.md`.
+
 ## Automatische Tests
 
 `sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").
