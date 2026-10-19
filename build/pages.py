@@ -37,6 +37,52 @@ def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
     return f'<figure class="fig">{pic}' + (f"<figcaption>{cap}</figcaption>" if cap else "") + "</figure>"
 
 
+def offer_card(site, o, prefix=""):
+    """Angebotskarte für /angebote.html und die Startseite. Enddatum steht im Attribut, damit abgelaufene Karten sofort verschwinden."""
+    until = ""
+    if o.get("validUntil"):
+        y, m, d = o["validUntil"].split("-")
+        until = f'<span class="offer-until">gültig bis {d}.{m}.{y}</span>'
+    href = o.get("ctaHref") or "termin.html"
+    ext = href.startswith("http")
+    if not href.startswith(("http", "#", "mailto:", "tel:")):
+        href = prefix + href
+    icon = I.get(o.get("icon") or "spark", I["spark"])
+    img = picture(site, o.get("image", ""), o.get("imageAlt") or o["title"], "offer-img", prefix, sizes="(min-width: 900px) 380px, 88vw")
+    price = ESC(o.get("price", "")).replace(" €", "&nbsp;€")
+    return f'''
+        <article class="offer reveal{" is-highlight" if o.get("highlight") else ""}{" has-img" if img else ""}" data-offer{f' data-until="{ESC(o["validUntil"])}"' if o.get("validUntil") else ""}>
+          {img}
+          <div class="offer-top"><span class="offer-icon">{icon}</span>{f'<span class="offer-badge">{ESC(o["badge"])}</span>' if o.get("badge") else ""}</div>
+          <h3>{ESC(o["title"])}</h3>
+          <p>{ESC(o.get("text", ""))}</p>
+          <div class="offer-foot">
+            <span class="offer-price">{price}</span>{until}
+          </div>
+          <a class="btn {"btn-primary" if o.get("highlight") else "btn-line-light"}" href="{ESC(href)}"{' target="_blank" rel="noopener"' if ext else ""}>{ESC(o.get("ctaLabel") or "Jetzt anfragen")}</a>
+        </article>'''
+
+
+def offers_home(site):
+    """Startseiten-Bereich: hervorgehobene Angebote zuerst, höchstens drei Karten."""
+    offers = sorted(site.offers, key=lambda o: not o.get("highlight"))[:3]
+    if not offers:
+        return ""
+    more = len(site.offers) > len(offers)
+    return f'''
+  <section id="angebote" class="offers-home" aria-labelledby="angebote-h" data-offer-section>
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Aktuelle Angebote</p>
+        <h2 id="angebote-h" class="display">Gerade <em>besonders lohnend.</em></h2>
+      </div>
+      <div class="offer-grid offer-grid--home stagger">{"".join(offer_card(site, o) for o in offers)}
+      </div>
+      <p class="section-more"><a class="text-link" href="angebote.html">{"Alle " + str(len(site.offers)) + " Angebote ansehen" if more else "Alle Angebote im Überblick"} →</a></p>
+    </div>
+  </section>'''
+
+
 def ba_tile(site, item, n, prefix=""):
     has = item.get("before") in site.media and item.get("after") in site.media
     if has:
@@ -175,12 +221,6 @@ def build_home(site, write):
     desc = (f"Fahrzeugaufbereitung in Celle mit Liebe zum Detail: Lackkorrektur, Keramikversiegelung und Innenraum in Handarbeit. "
             f"{s['rating']['value']} ★ bei Google, Festpreis vorab.")
     home_faq = pick(site.faq, HOME_FAQ)
-    ho = next((o for o in site.offers if o.get("highlight")), None)
-    offer_strip = ""
-    if ho:
-        offer_strip = (f'\n      <a class="offer-strip reveal" href="angebote.html">{I.get(ho.get("icon") or "spark", I["spark"])}'
-                       f'<span><strong>{ESC(ho.get("badge") or "Aktuell")}:</strong> {ESC(ho["title"])} · {ESC(ho.get("price", "")).replace(" €", "&nbsp;€")}</span>'
-                       f'<span class="offer-strip-more">Alle Angebote →</span></a>\n')
     hi = s.get("heroImage") or {}
     hero_img = picture(site, hi.get("file", ""), "", "hero-photo", "", sizes="100vw", eager=True)
     if hero_img:
@@ -313,8 +353,9 @@ def build_home(site, write):
     </div>
   </div>
 
+{offers_home(site)}
   <section id="leistungen" aria-labelledby="leistungen-h">
-    <div class="container">{offer_strip}
+    <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Leistungen</p>
         <h2 id="leistungen-h" class="display">Für jedes Auto die <em>passende Pflege.</em></h2>

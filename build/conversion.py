@@ -4,6 +4,7 @@ import datetime
 
 import core
 import seo
+from pages import offer_card
 from core import ESC, I, STARS5
 
 
@@ -522,27 +523,6 @@ def build_care(site, write):
 '''
     write("elbdetail-care.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="elbdetail-care.html") + body + core.footer(site))
 
-
-
-def offer_card(site, o, prefix=""):
-    until = ""
-    if o.get("validUntil"):
-        d = datetime.date.fromisoformat(o["validUntil"])
-        until = f'<span class="offer-until">gültig bis {d.day:02d}.{d.month:02d}.{d.year}</span>'
-    href = o.get("ctaHref") or "termin.html"
-    if not href.startswith(("http", "#", "mailto:", "tel:")):
-        href = prefix + href
-    icon = I.get(o.get("icon") or "spark", I["spark"])
-    return f'''
-        <article class="offer reveal{" is-highlight" if o.get("highlight") else ""}">
-          <div class="offer-top"><span class="offer-icon">{icon}</span>{f'<span class="offer-badge">{ESC(o["badge"])}</span>' if o.get("badge") else ""}</div>
-          <h3>{ESC(o["title"])}</h3>
-          <p>{ESC(o.get("text", ""))}</p>
-          <div class="offer-foot">
-            <span class="offer-price">{ESC(o.get("price", "")).replace(" €", "&nbsp;€")}</span>{until}
-          </div>
-          <a class="btn {"btn-primary" if o.get("highlight") else "btn-line-light"}" href="{ESC(href)}">{ESC(o.get("ctaLabel") or "Jetzt anfragen")}</a>
-        </article>'''
 
 
 def build_angebote(site, write):

@@ -764,6 +764,105 @@ def housekeeping():
         time.sleep(6 * 3600)
 
 
+# --------------------------------------------------------------------------- Angebote
+OFFER_ICONS = ("spark", "snow", "gift", "tag", "brief", "key", "shield", "star")
+OFFER_HREF_RE = re.compile(r"^(?:[a-z0-9][a-z0-9/_.\-]*(?:\?[a-z0-9=&_.\-]*)?(?:#[a-z0-9_\-]+)?|https://[^\s\"'<>]{4,300})$", re.I)
+
+
+def offers_file():
+    return os.path.join(Cfg.content, "angebote.json")
+
+
+def load_offers():
+    try:
+        with open(offers_file(), encoding="utf-8") as f:
+            d = json.load(f)
+    except (FileNotFoundError, ValueError):
+        d = {}
+    if not isinstance(d, dict):
+        d = {}
+    d.setdefault("items", [])
+    missing = [o for o in d["items"] if not re.fullmatch(r"[a-f0-9]{8}", str(o.get("id", "")))]
+    for o in missing:
+        o["id"] = secrets.token_hex(4)
+    if missing and os.path.exists(offers_file()):
+        save_offers(d)  # feste IDs, damit Bearbeiten und Löschen zuverlässig funktionieren
+    return d
+
+
+def save_offers(d):
+    p = offers_file()
+    backup(p)
+    tmp = p + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
+    os.replace(tmp, p)
+
+
+def offer_state(o, day=None):
+    day = (day or today()).isoformat()
+    if not o.get("active", True):
+        return "aus"
+    if o.get("validFrom") and o["validFrom"] > day:
+        return "geplant"
+    if o.get("validUntil") and o["validUntil"] < day:
+        return "abgelaufen"
+    return "aktiv"
+
+
+def offers_live_signature():
+    """Welche Angebote heute sichtbar sein müssen. Ändert sich das (Start- oder Enddatum erreicht), wird neu veröffentlicht."""
+    return ",".join(o["id"] for o in load_offers()["items"] if offer_state(o) == "aktiv")
+
+
+def clean_offer(d, media_dir):
+    errors, out = {}, {}
+    out["title"] = _s(d, "title", 80, True, errors, label="Titel")
+    out["badge"] = _s(d, "badge", 30, False, errors, label="Etikett")
+    out["text"] = _s(d, "text", 400, False, errors, label="Beschreibung")
+    out["price"] = _s(d, "price", 60, False, errors, label="Preisangabe")
+    out["ctaLabel"] = _s(d, "ctaLabel", 40, False, errors, label="Button-Text") or "Jetzt anfragen"
+    href = _s(d, "ctaHref", 300, False, errors, label="Button-Ziel") or "termin.html"
+    if not OFFER_HREF_RE.match(href) or href.lower().startswith(("javascript", "data")):
+        errors["ctaHref"] = "Bitte eine Seite der Website (z. B. termin.html) oder eine https-Adresse angeben."
+    out["ctaHref"] = href
+    out["icon"] = d.get("icon") if d.get("icon") in OFFER_ICONS else "spark"
+    for k in ("validFrom", "validUntil"):
+        v = str(d.get(k) or "").strip()
+        if v and not _date(v):
+            errors[k] = "Ungültiges Datum."
+        out[k] = v if _date(v) else ""
+    if out["validFrom"] and out["validUntil"] and out["validUntil"] < out["validFrom"]:
+        errors["validUntil"] = "Das Enddatum liegt vor dem Startdatum."
+    img = str(d.get("image") or "").strip()
+    if img and (not MEDIA_RE.match(img) or not os.path.exists(os.path.join(media_dir, img))):
+        errors["image"] = "Bild nicht gefunden. Bitte erneut hochladen."
+    out["image"] = img
+    out["imageAlt"] = _s(d, "imageAlt", 140, False, errors, label="Bildbeschreibung")
+    out["active"] = bool(d.get("active", True))
+    out["highlight"] = bool(d.get("highlight", False))
+    if errors:
+        raise Invalid(errors)
+    return out
+
+
+def offers_watcher():
+    """Stündlich prüfen, ob ein Angebot heute startet oder abgelaufen ist, und die Website dann automatisch neu veröffentlichen."""
+    if setting("offersSig") is None:
+        set_setting("offersSig", offers_live_signature())
+    while True:
+        time.sleep(3600)
+        try:
+            sig = offers_live_signature()
+            if sig != setting("offersSig"):
+                r = publish()
+                if r.get("ok"):
+                    set_setting("offersSig", sig)
+                    log("Angebote: Laufzeit geändert, Website neu veröffentlicht")
+        except Exception as e:
+            log("Angebote-Prüfung fehlgeschlagen:", e)
+
+
 # --------------------------------------------------------------------------- Sicherheit
 class RateLimit:
     def __init__(self):
@@ -1123,6 +1222,13 @@ class AdminAPI:
             return h.send(200, {"html": mdlib.render(str(d.get("md", "")), "/")})
         if p.startswith("inhalte/"):
             return self.content_item(p[len("inhalte/"):])
+        if p == "angebote":
+            return self.offers()
+        if p == "angebote/reihenfolge" and m == "PUT":
+            return self.offers_order()
+        mm = re.match(r"^angebote/([a-f0-9]{8})$", p)
+        if mm:
+            return self.offer_item(mm.group(1))
         if p == "medien" and m == "GET":
             return h.send(200, self.media_list())
         if p == "medien" and m == "POST":
@@ -1376,8 +1482,7 @@ class AdminAPI:
     def content_list(self):
         items = []
         labels = {"site.json": "Grunddaten & Kontakt", "pricing.json": "Pakete & Preise", "reviews.json": "Bewertungen",
-                  "faq.json": "Häufige Fragen (Startseite)", "gallery.json": "Vorher/Nachher-Galerie",
-                  "angebote.json": "Aktuelle Angebote"}
+                  "faq.json": "Häufige Fragen (Startseite)", "gallery.json": "Vorher/Nachher-Galerie"}
         for f, l in labels.items():
             items.append({"path": f, "label": l, "group": "Allgemein"})
         for f in sorted(os.listdir(os.path.join(Cfg.content, "services"))):
@@ -1456,6 +1561,56 @@ class AdminAPI:
             f.write(mdlib.write_frontmatter(meta, body))
         audit("artikel_neu", slug)
         self.h.send(200, {"ok": True, "path": f"ratgeber/{slug}.md"})
+
+    # Angebote (eigener Bereich im Portal; jede Änderung geht sofort live)
+    def _offers_out(self, d):
+        mins = {p["key"]: min(p.get("prices", {}).values() or [0]) for p in pricing().get("packages", [])}
+        fill = lambda t: re.sub(r"\{ab:([a-z]+)\}", lambda m: str(mins.get(m.group(1), m.group(0))), t or "")
+        items = [dict(o, state=offer_state(o), priceShown=fill(o.get("price"))) for o in d["items"]]
+        return {"items": items, "today": today().isoformat(), "icons": list(OFFER_ICONS)}
+
+    def _offers_publish(self, d, action, detail):
+        save_offers(d)
+        audit(action, detail)
+        r = publish()
+        if r.get("ok"):
+            set_setting("offersSig", offers_live_signature())
+        out = self._offers_out(load_offers())
+        out.update(ok=True, published=bool(r.get("ok")), publishLog="" if r.get("ok") else (r.get("log") or "")[-600:])
+        return self.h.send(200, out)
+
+    def offers(self):
+        d = load_offers()
+        if self.m == "GET":
+            return self.h.send(200, self._offers_out(d))
+        if self.m == "POST":
+            o = clean_offer(self.h.parse(65536), self.media_dir())
+            o["id"] = secrets.token_hex(4)
+            d["items"].insert(0, o)
+            return self._offers_publish(d, "angebot_neu", o["title"])
+        self.h.send(405, {"ok": False})
+
+    def offer_item(self, oid):
+        d = load_offers()
+        idx = next((i for i, o in enumerate(d["items"]) if o.get("id") == oid), None)
+        if idx is None:
+            return self.h.send(404, {"ok": False, "message": "Angebot nicht gefunden."})
+        if self.m == "PUT":
+            o = clean_offer(self.h.parse(65536), self.media_dir())
+            o["id"] = oid
+            d["items"][idx] = o
+            return self._offers_publish(d, "angebot_geaendert", o["title"])
+        if self.m == "DELETE":
+            old = d["items"].pop(idx)
+            return self._offers_publish(d, "angebot_geloescht", old.get("title", ""))
+        self.h.send(405, {"ok": False})
+
+    def offers_order(self):
+        d = load_offers()
+        ids = [str(x) for x in (self.h.parse(8192).get("ids") or [])]
+        pos = {x: i for i, x in enumerate(ids)}
+        d["items"].sort(key=lambda o: pos.get(o["id"], len(pos)))
+        return self._offers_publish(d, "angebote_sortiert", ", ".join(ids)[:200])
 
     # Medien
     def media_dir(self):
@@ -1552,6 +1707,7 @@ def main():
     if not mail_ready():
         log("Hinweis: SMTP nicht eingerichtet, E-Mail-Benachrichtigungen sind aus.")
     threading.Thread(target=housekeeping, daemon=True).start()
+    threading.Thread(target=offers_watcher, daemon=True).start()
     class Server(ThreadingHTTPServer):
         def handle_error(self, request, client_address):
             et = sys.exc_info()[0]

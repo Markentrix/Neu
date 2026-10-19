@@ -259,6 +259,13 @@
     });
   });
 
+  /* Angebote: abgelaufene Karten sofort ausblenden (der Server veröffentlicht stündlich neu, das hier überbrückt die Zwischenzeit) */
+  (function () {
+    var td = todayIso();
+    $$("[data-offer][data-until]").forEach(function (el) { if (el.getAttribute("data-until") < td) el.hidden = true; });
+    $$("[data-offer-section]").forEach(function (sec) { if (!$("[data-offer]:not([hidden])", sec)) sec.hidden = true; });
+  })();
+
   /* Vorher/Nachher-Slider */
   $$(".ba").forEach(function (ba) {
     var r = $('input[type="range"]', ba); if (!r) return;

@@ -70,7 +70,7 @@
   }
 
   /* ------------------------------------------------------------ Grundgerüst */
-  var NAV = [["", "Übersicht"], ["anfragen", "Anfragen"], ["gutscheine", "Gutscheine"], ["kalender", "Kalender"], ["inhalte", "Inhalte"], ["medien", "Fotos"], ["veroeffentlichen", "Veröffentlichen"], ["einstellungen", "Einstellungen"]];
+  var NAV = [["", "Übersicht"], ["anfragen", "Anfragen"], ["gutscheine", "Gutscheine"], ["kalender", "Kalender"], ["angebote", "Angebote"], ["inhalte", "Inhalte"], ["medien", "Fotos"], ["veroeffentlichen", "Veröffentlichen"], ["einstellungen", "Einstellungen"]];
   function shell(active) {
     app.className = "app";
     var side = '<a class="logo" href="#/"><img src="/logo.svg" alt="ElbDetail"></a>' + NAV.map(function (n) {
@@ -90,7 +90,7 @@
     var page = parts[0] || "";
     var main = shell(page);
     var arg = decodeURIComponent(parts.slice(1).join("/"));
-    ({ "": viewDashboard, anfragen: viewRequests, gutscheine: viewVouchers, kalender: viewCalendar, inhalte: viewContent, medien: viewMedia, veroeffentlichen: viewPublish, einstellungen: viewSettings }[page] || viewDashboard)(main, arg);
+    ({ "": viewDashboard, anfragen: viewRequests, gutscheine: viewVouchers, kalender: viewCalendar, angebote: viewOffers, inhalte: viewContent, medien: viewMedia, veroeffentlichen: viewPublish, einstellungen: viewSettings }[page] || viewDashboard)(main, arg);
   }
   window.addEventListener("hashchange", route);
 
@@ -554,6 +554,145 @@
     drop.addEventListener("dragleave", function () { drop.classList.remove("over"); });
     drop.addEventListener("drop", function (e) { e.preventDefault(); drop.classList.remove("over"); upload(e.dataTransfer.files); });
     load();
+  }
+
+  /* ------------------------------------------------------------ Angebote */
+  var OFFER_STATE = { aktiv: "Live", geplant: "Geplant", abgelaufen: "Abgelaufen", aus: "Ausgeblendet" };
+  var OFFER_ICON = { spark: "✦ Funkeln", snow: "❄ Schneeflocke", gift: "🎁 Geschenk", tag: "🏷 Preisschild", brief: "💼 Aktentasche", key: "🔑 Schlüssel", shield: "🛡 Schild", star: "★ Stern" };
+  var OFFER_TARGETS = [["termin.html", "Terminanfrage"], ["termin.html?paket=komplett", "Terminanfrage: Komplettpflege"], ["termin.html?paket=premium", "Terminanfrage: Premium Politur"],
+    ["termin.html?paket=keramik", "Terminanfrage: Keramikversiegelung"], ["gutscheine.html", "Gutscheine"], ["elbdetail-care.html", "ElbDetail Care"],
+    ["firmenkunden.html#firmenanfrage", "Firmenanfrage"], ["aktion/winterschutz.html", "Winter-Lackschutz"], ["kontakt.html", "Kontakt"], ["", "Eigene Adresse …"]];
+  function offerPeriod(o) {
+    if (o.validFrom && o.validUntil) return deDate(o.validFrom) + " bis " + deDate(o.validUntil);
+    if (o.validFrom) return "ab " + deDate(o.validFrom);
+    if (o.validUntil) return "bis " + deDate(o.validUntil);
+    return "ohne Enddatum";
+  }
+  function offerSaved(r) {
+    if (r.published) toast("Gespeichert und auf der Website live");
+    else toast("Gespeichert, aber das Veröffentlichen ist fehlgeschlagen. Bitte unter „Veröffentlichen“ erneut versuchen.", true);
+  }
+  function viewOffers(main, arg) {
+    main.innerHTML = '<div class="head"><div><h1>Angebote</h1><p>Aktionen und Angebote für die Website. Live-Angebote erscheinen auf der Startseite (hervorgehobene zuerst, bis zu drei) und auf der Seite „Angebote“. Mit Start- und Enddatum gehen sie automatisch online und wieder offline. Jede Änderung ist sofort live.</p></div>' +
+      '<div class="btn-row"><a class="btn" href="/angebote.html" target="_blank" rel="noopener">Seite ansehen ↗</a><button class="btn primary" type="button" id="newOffer">+ Neues Angebot</button></div></div><div id="ol"><p class="empty">Lädt …</p></div>';
+    var data = null;
+    var render = function () {
+      var box = document.getElementById("ol"); box.innerHTML = "";
+      if (!data.items.length) { box.appendChild(h("section", { class: "panel" }, [h("p", { class: "empty", text: "Noch keine Angebote. Legen Sie Ihr erstes Angebot an." })])); return; }
+      data.items.forEach(function (o, i) {
+        var move = function (dir) {
+          var ids = data.items.map(function (x) { return x.id; }), j = i + dir; if (j < 0 || j >= ids.length) return;
+          var t = ids[i]; ids[i] = ids[j]; ids[j] = t;
+          api("PUT", "angebote/reihenfolge", { ids: ids }).then(function (r) { data = r; render(); offerSaved(r); }).catch(fail);
+        };
+        var toggle = function () {
+          var body = Object.assign({}, o, { active: !o.active }); delete body.state;
+          api("PUT", "angebote/" + o.id, body).then(function (r) { data = r; render(); offerSaved(r); }).catch(fail);
+        };
+        box.appendChild(h("section", { class: "panel offer-row" + (o.state === "aktiv" ? "" : " is-off") }, [
+          o.image ? h("img", { class: "offer-thumb", src: "/admin/api/medien/" + encodeURIComponent(o.image), alt: "" }) : h("div", { class: "offer-thumb empty-thumb", text: (OFFER_ICON[o.icon] || "✦").split(" ")[0] }),
+          h("div", { class: "offer-info" }, [
+            h("div", { class: "offer-line" }, [h("strong", { text: o.title }), o.highlight ? h("span", { class: "pill st-neu", text: "Startseite oben" }) : null, h("span", { class: "pill st-" + o.state, text: OFFER_STATE[o.state] || o.state })]),
+            h("p", { class: "muted", text: [o.badge, o.priceShown || o.price, offerPeriod(o)].filter(Boolean).join(" · ") })]),
+          h("div", { class: "btn-row" }, [
+            h("button", { class: "btn small", type: "button", text: "↑", title: "Nach oben", disabled: i === 0, onclick: function () { move(-1); } }),
+            h("button", { class: "btn small", type: "button", text: "↓", title: "Nach unten", disabled: i === data.items.length - 1, onclick: function () { move(1); } }),
+            h("button", { class: "btn small", type: "button", text: o.active ? "Ausblenden" : "Einblenden", onclick: toggle }),
+            h("button", { class: "btn small primary", type: "button", text: "Bearbeiten", onclick: function () { editOffer(o); } }),
+            h("button", { class: "btn small danger", type: "button", text: "Löschen", onclick: function () {
+              if (confirm("Angebot „" + o.title + "“ löschen? Es verschwindet sofort von der Website.")) api("DELETE", "angebote/" + o.id).then(function (r) { data = r; render(); offerSaved(r); }).catch(fail);
+            } })])]));
+      });
+    };
+    var editOffer = function (o) {
+      o = o || { title: "", badge: "", text: "", price: "", validFrom: "", validUntil: "", ctaLabel: "Jetzt anfragen", ctaHref: "termin.html", icon: "spark", image: "", imageAlt: "", active: true, highlight: false };
+      var isNew = !o.id;
+      var inp = function (name, attrs) { var el = h("input", Object.assign({ name: name, value: o[name] || "" }, attrs || {})); el.value = o[name] || ""; return el; };
+      var f = {
+        title: inp("title", { maxlength: 80, required: true, placeholder: "z. B. Frühjahrs-Check" }),
+        badge: inp("badge", { maxlength: 30, placeholder: "z. B. Frühlings-Aktion" }),
+        text: h("textarea", { name: "text", rows: 4, maxlength: 400, placeholder: "Was ist enthalten, für wen lohnt es sich?" }),
+        price: inp("price", { maxlength: 60, placeholder: "z. B. ab 149 € oder 10 % auf die Komplettpflege" }),
+        validFrom: inp("validFrom", { type: "date" }), validUntil: inp("validUntil", { type: "date" }),
+        ctaLabel: inp("ctaLabel", { maxlength: 40 }),
+        target: h("select", {}), custom: inp("ctaHref", { maxlength: 300, placeholder: "z. B. leistungen/lackpolitur-celle.html oder https://…" }),
+        icon: h("select", {}), imageAlt: inp("imageAlt", { maxlength: 140, placeholder: "Was ist auf dem Bild zu sehen?" }),
+        active: h("input", { type: "checkbox", checked: o.active !== false }), highlight: h("input", { type: "checkbox", checked: !!o.highlight })
+      };
+      f.text.value = o.text || "";
+      OFFER_TARGETS.forEach(function (t) { f.target.appendChild(h("option", { value: t[0], text: t[1] })); });
+      var known = OFFER_TARGETS.some(function (t) { return t[0] && t[0] === o.ctaHref; });
+      f.target.value = known ? o.ctaHref : "";
+      f.custom.hidden = known;
+      Object.keys(OFFER_ICON).forEach(function (k) { f.icon.appendChild(h("option", { value: k, text: OFFER_ICON[k] })); });
+      f.icon.value = o.icon || "spark";
+      var image = o.image || "";
+      var imgPrev = h("div", { class: "offer-img-prev" });
+      var fileIn = h("input", { type: "file", accept: "image/jpeg,image/png,image/webp" });
+      var showImg = function () {
+        imgPrev.innerHTML = "";
+        if (image) imgPrev.appendChild(h("img", { src: "/admin/api/medien/" + encodeURIComponent(image), alt: "" }));
+        imgPrev.appendChild(h("div", { class: "btn-row" }, [h("label", { class: "btn small" }, [image ? "Bild ersetzen" : "Bild hochladen", fileIn]),
+          image ? h("button", { class: "btn small danger", type: "button", text: "Bild entfernen", onclick: function () { image = ""; showImg(); preview(); } }) : null]));
+        imgPrev.appendChild(h("small", { class: "muted", text: "Optional. Querformat (16:9), JPG/PNG/WebP, max. 15 MB. Nur eigene Fotos oder Bilder mit Nutzungsrecht." }));
+      };
+      fileIn.addEventListener("change", function () {
+        var file = fileIn.files[0]; if (!file) return;
+        if (file.size > 15 * 1024 * 1024) { toast("Bild größer als 15 MB", true); return; }
+        var rd = new FileReader();
+        rd.onload = function () {
+          var base = (file.name.replace(/\.[^.]+$/, "") || "angebot").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "angebot";
+          var ext = (file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg");
+          api("POST", "medien", { name: "angebot-" + base + "-" + Date.now().toString(36) + "." + ext, data: rd.result }).then(function (r) { image = r.name; showImg(); preview(); toast("Bild hochgeladen"); }).catch(fail);
+        };
+        rd.readAsDataURL(file);
+      });
+      var card = h("article", { class: "offer-prev" });
+      var preview = function () {
+        var g = function (k) { return (f[k].value || "").trim(); };
+        card.className = "offer-prev" + (f.highlight.checked ? " is-highlight" : "");
+        card.innerHTML = (image ? '<img src="/admin/api/medien/' + encodeURIComponent(image) + '" alt="">' : "") +
+          '<div class="op-top"><span class="op-icon">' + esc((OFFER_ICON[f.icon.value] || "✦").split(" ")[0]) + "</span>" + (g("badge") ? '<span class="op-badge">' + esc(g("badge")) + "</span>" : "") + "</div>" +
+          "<h3>" + esc(g("title") || "Titel des Angebots") + "</h3><p>" + esc(g("text") || "Beschreibung") + "</p>" +
+          '<div class="op-foot"><strong>' + esc(g("price")) + "</strong>" + (g("validUntil") ? "<span>gültig bis " + deDate(g("validUntil")) + "</span>" : "") + "</div>" +
+          '<span class="op-btn">' + esc(g("ctaLabel") || "Jetzt anfragen") + "</span>";
+      };
+      var errBox = h("div", {});
+      var form = h("form", { class: "grid offer-form" }, [
+        h("label", { class: "f" }, ["Titel *", f.title]),
+        h("div", { class: "grid g2" }, [h("label", { class: "f" }, ["Etikett", f.badge]), h("label", { class: "f" }, ["Symbol", f.icon])]),
+        h("label", { class: "f" }, ["Beschreibung ", h("small", { text: "kurz und konkret, max. 400 Zeichen" }), f.text]),
+        h("label", { class: "f" }, ["Preisangabe ", h("small", { text: "Endpreis angeben, z. B. „ab 149 €“. Keine erfundenen Streichpreise." }), f.price]),
+        h("div", { class: "grid g2" }, [h("label", { class: "f" }, ["Gültig ab ", h("small", { text: "leer = sofort" }), f.validFrom]), h("label", { class: "f" }, ["Gültig bis ", h("small", { text: "leer = unbegrenzt" }), f.validUntil])]),
+        h("div", { class: "grid g2" }, [h("label", { class: "f" }, ["Button-Text", f.ctaLabel]), h("label", { class: "f" }, ["Button führt zu", f.target, f.custom])]),
+        h("div", { class: "f" }, [h("strong", { text: "Bild" }), imgPrev]),
+        h("label", { class: "f" }, ["Bildbeschreibung (für Barrierefreiheit und Google)", f.imageAlt]),
+        h("label", { class: "chk" }, [f.active, "Auf der Website zeigen"]),
+        h("label", { class: "chk" }, [f.highlight, "Auf der Startseite ganz vorn zeigen"]),
+        errBox,
+        h("div", { class: "btn-row" }, [h("button", { class: "btn primary", type: "submit", text: isNew ? "Anlegen und veröffentlichen" : "Speichern und veröffentlichen" }),
+          h("button", { class: "btn", type: "button", text: "Abbrechen", onclick: function () { close(); } })])]);
+      f.target.addEventListener("change", function () { f.custom.hidden = !!f.target.value; if (f.target.value) f.custom.value = ""; });
+      form.addEventListener("input", preview); form.addEventListener("change", preview);
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var body = { title: f.title.value, badge: f.badge.value, text: f.text.value, price: f.price.value, validFrom: f.validFrom.value, validUntil: f.validUntil.value,
+          ctaLabel: f.ctaLabel.value, ctaHref: f.target.value || f.custom.value, icon: f.icon.value, image: image, imageAlt: f.imageAlt.value,
+          active: f.active.checked, highlight: f.highlight.checked };
+        var btn = form.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Wird veröffentlicht …"; errBox.innerHTML = "";
+        api(isNew ? "POST" : "PUT", isNew ? "angebote" : "angebote/" + o.id, body).then(function (r) { data = r; close(); render(); offerSaved(r); })
+          .catch(function (err) {
+            var ers = (err.data && err.data.errors) || {};
+            errBox.appendChild(h("p", { class: "note", text: Object.keys(ers).length ? Object.keys(ers).map(function (k) { return ers[k]; }).join(" ") : err.message }));
+            btn.disabled = false; btn.textContent = isNew ? "Anlegen und veröffentlichen" : "Speichern und veröffentlichen";
+          });
+      });
+      showImg(); preview();
+      var close = drawer(h("div", { class: "grid" }, [h("h2", { text: isNew ? "Neues Angebot" : "Angebot bearbeiten" }), h("p", { class: "sub", text: "Vorschau" }), card, form]));
+      f.title.focus();
+    };
+    document.getElementById("newOffer").addEventListener("click", function () { editOffer(null); });
+    api("GET", "angebote").then(function (r) { data = r; render(); if (arg === "neu") editOffer(null); }).catch(fail);
   }
 
   /* ------------------------------------------------------------ Veröffentlichen */

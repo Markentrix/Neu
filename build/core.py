@@ -66,7 +66,8 @@ class Site:
         except FileNotFoundError:
             offers = []
         today = datetime.date.today().isoformat()
-        self.offers = [o for o in offers if o.get("active", True) and (not o.get("validUntil") or o["validUntil"] >= today)]
+        self.offers = [o for o in offers if o.get("active", True) and (not o.get("validUntil") or o["validUntil"] >= today)
+                       and (not o.get("validFrom") or o["validFrom"] <= today)]
         self.services = sorted((json.load(open(f, encoding="utf-8")) for f in glob.glob(os.path.join(content_dir, "services", "*.json"))),
                                key=lambda x: x.get("order", 99))
         self.articles = []

@@ -55,3 +55,14 @@ Die eigene Statistik setzt keine Cookies und speichert keine IP-Adressen. Ein Ei
 ## Veröffentlichen
 
 Zeigt den letzten Stand, die Dauer und offene Hinweise (z. B. fehlender Inhaber im Impressum, fehlende Fotos).
+
+
+## Angebote
+
+Unter **Angebote** legen Sie Aktionen selbst an: Titel, Etikett, kurze Beschreibung, Preisangabe, Laufzeit, Button-Ziel und optional ein Bild (Querformat 16:9). Eine Vorschau zeigt die Karte so, wie sie auf der Website erscheint.
+
+- **Speichern = live.** Jede Änderung wird sofort veröffentlicht, ein zusätzlicher Klick auf „Veröffentlichen“ ist nicht nötig.
+- **Startseite:** Bis zu drei Live-Angebote erscheinen direkt unter der Vertrauensleiste. „Auf der Startseite ganz vorn zeigen“ setzt ein Angebot an den Anfang und hebt es dunkel hervor. Alle Live-Angebote stehen auf `/angebote.html`.
+- **Laufzeit:** Mit „Gültig ab“ und „Gültig bis“ geht ein Angebot automatisch online und wieder offline. Der Server prüft das stündlich und veröffentlicht bei Bedarf selbst neu. Abgelaufene Karten blendet die Website zusätzlich sofort aus.
+- **Reihenfolge** mit ↑ und ↓ ändern, **Ausblenden** nimmt ein Angebot von der Website, ohne es zu löschen.
+- **Rechtlich:** Endpreise angeben, keine erfundenen „statt“-Preise. Bilder nur mit Nutzungsrecht (eigene Fotos oder ausdrücklich freigegebenes Herstellermaterial).

@@ -1,5 +1,5 @@
 {
-  "hinweis": "Angebote erscheinen auf /angebote.html und (das erste mit highlight) als Hinweis auf der Startseite. Abgelaufene Angebote (validUntil in der Vergangenheit) blendet die Website automatisch aus. Preise mit {ab:paket} bleiben automatisch aktuell.",
+  "hinweis": "Angebote werden im Verwaltungsportal unter „Angebote“ gepflegt und gehen beim Speichern sofort live. Start- und Enddatum steuern die Sichtbarkeit automatisch.",
   "items": [
     {
       "active": true,
@@ -11,7 +11,11 @@
       "price": "ab {ab:premium} €",
       "validUntil": "2027-02-28",
       "ctaLabel": "Wintertermin anfragen",
-      "ctaHref": "aktion/winterschutz.html"
+      "ctaHref": "aktion/winterschutz.html",
+      "id": "a1c0ffee",
+      "validFrom": "",
+      "image": "",
+      "imageAlt": ""
     },
     {
       "active": true,
@@ -23,7 +27,11 @@
       "price": "ab 25 €",
       "validUntil": "",
       "ctaLabel": "Gutschein bestellen",
-      "ctaHref": "gutscheine.html"
+      "ctaHref": "gutscheine.html",
+      "id": "b2c0ffee",
+      "validFrom": "",
+      "image": "",
+      "imageAlt": ""
     },
     {
       "active": true,
@@ -35,7 +43,11 @@
       "price": "Festpreis nach Begutachtung",
       "validUntil": "",
       "ctaLabel": "Beratung anfragen",
-      "ctaHref": "termin.html?paket=keramik"
+      "ctaHref": "termin.html?paket=keramik",
+      "id": "c3c0ffee",
+      "validFrom": "",
+      "image": "",
+      "imageAlt": ""
     },
     {
       "active": true,
@@ -47,7 +59,11 @@
       "price": "Konditionen auf Anfrage",
       "validUntil": "",
       "ctaLabel": "Angebot anfordern",
-      "ctaHref": "firmenkunden.html#firmenanfrage"
+      "ctaHref": "firmenkunden.html#firmenanfrage",
+      "id": "d4c0ffee",
+      "validFrom": "",
+      "image": "",
+      "imageAlt": ""
     }
   ]
 }

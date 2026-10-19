@@ -183,3 +183,29 @@ pre.text { white-space: pre-wrap; background: var(--soft); padding: 12px; border
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--side); color: #fff; padding: 10px 18px; border-radius: 10px; font-weight: 700; z-index: 100; box-shadow: 0 12px 30px -10px rgba(0,0,0,.5); max-width: calc(100% - 32px); }
 .toast.bad { background: var(--bad); }
 .log { white-space: pre-wrap; font: .8rem/1.5 ui-monospace, Menlo, Consolas, monospace; background: #0f1318; color: #c9d0da; padding: 12px; border-radius: 10px; max-height: 260px; overflow: auto; }
+
+/* Angebote */
+.offer-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 14px; align-items: center; margin-bottom: 10px; }
+.offer-row.is-off { opacity: .72; }
+.offer-thumb { width: 96px; height: 64px; border-radius: 8px; object-fit: cover; background: var(--soft); }
+.empty-thumb { display: grid; place-items: center; font-size: 1.5rem; color: var(--blue); }
+.offer-line { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.offer-info p { margin: 4px 0 0; font-size: .86rem; }
+.st-aktiv { background: var(--ok-soft); color: var(--ok); }
+.st-geplant { background: var(--info-soft); color: var(--blue); }
+.st-abgelaufen, .st-aus { background: #eceff3; color: #47505e; }
+@media (max-width: 760px) { .offer-row { grid-template-columns: 72px minmax(0, 1fr); } .offer-row .btn-row { grid-column: 1 / -1; } .offer-thumb { width: 72px; height: 48px; } }
+.offer-img-prev { display: grid; gap: 8px; }
+.offer-img-prev img { width: 100%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; }
+.offer-img-prev label.btn input { display: none; }
+.offer-prev { border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 8px; background: #fff; overflow: hidden; }
+.offer-prev img { margin: -18px -18px 4px; width: calc(100% + 36px); aspect-ratio: 16 / 9; object-fit: cover; }
+.offer-prev.is-highlight { background: #1e2229; color: #f4f6f9; border-color: transparent; }
+.offer-prev h3 { margin: 0; font-size: 1.1rem; }
+.offer-prev p { margin: 0; color: var(--muted); font-size: .9rem; }
+.offer-prev.is-highlight p, .offer-prev.is-highlight .op-foot span { color: #9ea6b3; }
+.op-top { display: flex; justify-content: space-between; align-items: center; }
+.op-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--blue-soft); }
+.op-badge { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
+.op-foot { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; font-size: .9rem; }
+.op-btn { justify-self: start; padding: 8px 14px; border-radius: 999px; background: var(--blue); color: #fff; font-weight: 700; font-size: .85rem; }

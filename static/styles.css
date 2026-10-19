@@ -448,6 +448,16 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .offer-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .offer { display: grid; gap: 12px; align-content: start; grid-template-rows: auto auto 1fr auto auto; padding: 26px; border-radius: var(--radius-l); border: 1px solid var(--line); background: var(--bg); box-shadow: 0 1px 2px rgba(15,20,30,0.04); }
 .offer.is-highlight { background: var(--anthracite); color: var(--on-anthracite); border-color: transparent; }
+.offer.has-img { padding-top: 0; overflow: hidden; }
+.offer-img { display: block; margin: 0 -26px 4px; }
+.offer-img img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.offers-home { padding-bottom: clamp(20px, 3vw, 36px); }
+@media (max-width: 899.98px) {
+  .offer-grid--home { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); padding-bottom: 4px; }
+  .offer-grid--home::-webkit-scrollbar { display: none; }
+  .offer-grid--home > * { flex: 0 0 84%; max-width: 360px; scroll-snap-align: start; }
+  .js-anim .offer-grid--home .reveal { transform: none; clip-path: none; transition: none; }
+}
 .offer-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .offer-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--blue-soft); color: var(--blue); }
 .offer.is-highlight .offer-icon { background: rgba(91,155,232,0.16); color: var(--blue-bright); }
@@ -464,13 +474,6 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .offer.is-highlight .offer-until { color: var(--muted-on-anthracite); }
 .offer .btn { justify-self: stretch; }
 .offer.is-highlight .btn-line-light { color: var(--on-anthracite); border-color: rgba(255,255,255,0.26); }
-/* Hinweis-Leiste auf der Startseite */
-.offer-strip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; margin-bottom: 36px; padding: 14px 18px; border-radius: var(--radius-m); background: var(--blue-soft); color: var(--ink); text-decoration: none; }
-.offer-strip svg { width: 20px; height: 20px; color: var(--blue); flex: none; }
-.offer-strip strong { color: var(--blue-deep); }
-.offer-strip .offer-strip-more { font-weight: 650; color: var(--blue); white-space: nowrap; }
-@media (max-width: 599.98px) { .offer-strip { grid-template-columns: auto minmax(0, 1fr); } .offer-strip .offer-strip-more { grid-column: 2; } }
-.offer-strip:hover .offer-strip-more { text-decoration: underline; }
 /* Winter-Spezial im Ratgeber */
 .winter-band { display: grid; gap: 22px; margin-bottom: 30px; padding: clamp(22px, 4vw, 36px); border-radius: var(--radius-l); background: linear-gradient(135deg, #1e2229 0%, #22324a 100%); color: var(--on-anthracite); }
 .winter-band > * { min-width: 0; }

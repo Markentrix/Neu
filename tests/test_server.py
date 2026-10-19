@@ -414,6 +414,40 @@ class TestAdmin(Base):
             self.assertIn(self.admin("GET", bad)[0], (400, 404))
         self.assertEqual(self.admin("PUT", "inhalte/pricing.json", {"data": []})[0], 422)
 
+    def test_offers_create_edit_schedule_delete(self):
+        """Angebote: im Portal anlegen, sofort live auf Startseite und /angebote.html, Laufzeit, Bild, Validierung, Löschen."""
+        self.login()
+        code, r = self.admin("GET", "angebote")
+        self.assertEqual(code, 200)
+        self.assertTrue(all(len(o["id"]) == 8 for o in r["items"]))
+        # Validierung: Titel fehlt, gefährliches Ziel, Enddatum vor Start, unbekanntes Bild
+        code, e = self.admin("POST", "angebote", {"title": "", "ctaHref": "javascript:alert(1)", "validFrom": "2030-05-02", "validUntil": "2030-05-01", "image": "gibt-es-nicht.jpg"})
+        self.assertEqual(code, 422)
+        self.assertTrue({"title", "ctaHref", "validUntil", "image"} <= set(e["errors"]))
+        # Bild hochladen und Angebot anlegen
+        png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        self.assertEqual(self.admin("POST", "medien", {"name": "angebot-test.png", "data": png})[0], 200)
+        code, r = self.admin("POST", "angebote", {"title": "Frühjahrs-Check Test", "badge": "Frühling", "text": "Wäsche und Kontrolle.", "price": "ab 99 €",
+                                                 "ctaHref": "termin.html?paket=frisch", "icon": "spark", "image": "angebot-test.png", "highlight": True})
+        self.assertEqual(code, 200, r)
+        self.assertTrue(r["published"])
+        oid = next(o["id"] for o in r["items"] if o["title"] == "Frühjahrs-Check Test")
+        home = open(os.path.join(app.site_dir(), "index.html"), encoding="utf-8").read()
+        page = open(os.path.join(app.site_dir(), "angebote.html"), encoding="utf-8").read()
+        self.assertIn("Frühjahrs-Check Test", home)
+        self.assertIn("Frühjahrs-Check Test", page)
+        self.assertIn("angebot-test", page)
+        # In der Zukunft geplant: nicht sichtbar, Status "geplant"
+        future = (dt.date.today() + dt.timedelta(days=10)).isoformat()
+        code, r = self.admin("PUT", "angebote/" + oid, {"title": "Frühjahrs-Check Test", "validFrom": future, "active": True})
+        self.assertEqual(code, 200, r)
+        self.assertEqual(next(o["state"] for o in r["items"] if o["id"] == oid), "geplant")
+        self.assertNotIn("Frühjahrs-Check Test", open(os.path.join(app.site_dir(), "angebote.html"), encoding="utf-8").read())
+        # Löschen
+        self.assertEqual(self.admin("DELETE", "angebote/" + oid)[0], 200)
+        self.assertEqual(self.admin("DELETE", "angebote/" + oid)[0], 404)
+        self.admin("DELETE", "medien/angebot-test.png")
+
     def test_new_article_is_draft(self):
         self.login()
         code, j = self.admin("POST", "inhalte/neuer-artikel", {"title": "Testartikel Politur"})
