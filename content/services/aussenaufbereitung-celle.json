@@ -4,13 +4,13 @@
   "short": "Außenaufbereitung",
   "teaser": "Handwäsche, Felgen, Dichtungen, Trocknung ohne Kratzer.",
   "seoTitle": "Außenaufbereitung Celle: Handwäsche & Felgen | ElbDetail",
-  "description": "Außenaufbereitung in Celle: schonende Handwäsche, Felgen, Insekten- und Teerentfernung, Dichtungspflege. Ab {ab:frisch} €. Jetzt Termin anfragen.",
+  "description": "Außenaufbereitung in Celle: schonende Handwäsche, Felgen, Insekten- und Teerentfernung, Dichtungspflege. Ab {ab:refresh} €. Jetzt Termin anfragen.",
   "h1": "Außenaufbereitung in Celle: *Handwäsche ohne Kratzer.*",
   "lead": "Schonende Zwei-Eimer-Handwäsche, gründliche Felgenreinigung, Insekten- und Teerentfernung und gepflegte Dichtungen. **Keine Waschstraße, keine Swirls.**",
   "facts": [
     {
-      "value": "ab {ab:frisch} €",
-      "label": "Richtpreis Kompakt"
+      "value": "ab {ab:refresh} €",
+      "label": "Refresh, Kleinwagen"
     },
     {
       "value": "ca. 2 Std.",
@@ -21,7 +21,7 @@
       "label": "Zwei-Eimer-Methode"
     }
   ],
-  "package": "frisch",
+  "package": "refresh",
   "intro": "Die Außenaufbereitung ist die Basis jeder Fahrzeugpflege. Wir waschen ausschließlich von Hand nach der Zwei-Eimer-Methode mit pH-neutralen Koch-Chemie-Shampoos, damit Schmutz gelöst wird, ohne ihn über den Lack zu reiben. So entstehen keine neuen Kratzer, wie sie Waschstraßen und Hochdruck-Selbstwaschboxen typischerweise hinterlassen.\n\nFelgen, Radhäuser, Türeinstiege und Dichtungen bekommen dabei genauso viel Aufmerksamkeit wie die Motorhaube. Hartnäckige Rückstände wie Insekten, Teer, Flugrost oder Baumharz lösen wir chemisch an und entfernen sie schonend, bevor sie den Klarlack angreifen.\n",
   "includes": [
     "Vorwäsche mit Schaum, lösen von grobem Schmutz",
@@ -63,7 +63,7 @@
     },
     {
       "q": "Was kostet eine Außenaufbereitung in Celle?",
-      "a": "Im Paket Frisch & Sauber ist die komplette Außenwäsche inklusive Felgen und Innenraum-Basis ab {ab:frisch} € für eine Kompaktklasse enthalten. Als reine Außenaufbereitung ohne Innenraum machen wir ein individuelles Angebot."
+      "a": "Im Paket Refresh ist die komplette Außenwäsche inklusive Felgen und Innenraum-Basis ab {ab:refresh} € für einen Kleinwagen enthalten. Als reine Außenaufbereitung ohne Innenraum machen wir ein individuelles Angebot."
     },
     {
       "q": "Entfernen Sie auch Baumharz und Teerflecken?",

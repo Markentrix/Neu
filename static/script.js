@@ -210,7 +210,7 @@
       var onReq = v == null;  // z. B. Sportwagen / Premium-Segment: immer individuelles Angebot
       var note = $("#quoteNote");
       if (note) note.textContent = onReq
-        ? "Für Sportwagen und Premium-Modelle wie RS, AMG oder M erstellen wir nach einer kurzen Begutachtung ein individuelles Angebot."
+        ? (c.note || "Für dieses Fahrzeug erstellen wir nach einer kurzen Begutachtung ein individuelles Angebot.")
         : "Richtwert für normalen Pflegezustand. Der verbindliche Preis hängt von Fahrzeug und Zustand ab und wird vor dem Termin bestätigt.";
       $("#quoteBook").lastChild.textContent = onReq ? "Individuelles Angebot anfragen" : "Dieses Paket anfragen";
       showQuoteValue(v);
@@ -521,7 +521,7 @@
       $(".vf-wert", vf).hidden = art !== "wert"; $(".vf-paket", vf).hidden = art !== "paket";
       if (art === "paket") {
         var p = pkg(vf.paket.value);
-        setVc("value", p ? p.name : "Paket"); setVc("desc", "Fahrzeugaufbereitung für die Kompaktklasse" + (p ? " · Wert " + p.prices[ELB.classes[0].key] + " €" : ""));
+        setVc("value", p ? p.name : "Paket"); setVc("desc", "Fahrzeugaufbereitung für einen Kleinwagen" + (p ? " · Wert " + p.prices[ELB.classes[0].key] + " €" : ""));
       } else {
         var c = vf.wunschbetrag.value ? parseInt(vf.wunschbetrag.value, 10) : parseInt(radio(vf, "betrag") || "0", 10);
         setVc("value", (c || 0) + " €"); setVc("desc", "für eine Fahrzeugaufbereitung nach Wahl");

@@ -54,7 +54,7 @@ Mehr zur Versiegelung finden Sie auf der Seite [Lackversiegelung](/leistungen/la
 
 Reinigen Sie die Felgen gründlich, bevor Sie die Winterräder montieren oder montieren lassen. Bremsstaub und Salz setzen sich im Winter besonders hartnäckig fest. Auf einer sauberen und versiegelten Felge haften sie schlechter und lassen sich leichter entfernen.
 
-Denken Sie auch an die Sommerräder: Lagern Sie sie nur sauber und trocken ein. Eingetrockneter Bremsstaub lässt sich nach einigen Monaten deutlich schwerer lösen. Bei stark verschmutzten Felgen hilft eine Felgen-Intensivreinigung. Eine Felgenversiegelung ist im Paket Premium Politur enthalten.
+Denken Sie auch an die Sommerräder: Lagern Sie sie nur sauber und trocken ein. Eingetrockneter Bremsstaub lässt sich nach einigen Monaten deutlich schwerer lösen. Bei stark verschmutzten Felgen hilft eine Felgen-Intensivreinigung. Eine Felgenbeschichtung bieten wir auf Anfrage an.
 
 ## Wie schützen Sie Dichtungen und Schlösser?
 

@@ -27,6 +27,7 @@ I = {
  "cal": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>',
  "zoom": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg>',
  "check": '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l4 4 8-8"/></svg>',
+ "plus": '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>',
  "x": '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l8 8M14 6l-8 8"/></svg>',
  "arrow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
  "star": '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.6l2.5 5.1 5.6.8-4 3.9.9 5.6L10 14.5l-5 2.5.9-5.6-4-3.9 5.6-.8L10 1.6z"/></svg>',
@@ -84,7 +85,7 @@ class Site:
             meta["body"] = body
             self.articles.append(meta)
         self.articles.sort(key=lambda a: (a.get("date", ""), a.get("title", "")), reverse=True)
-        # Preis-Platzhalter wie {ab:komplett} in Texten durch den aktuellen Richtpreis ersetzen
+        # Preis-Platzhalter wie {ab:essential} in Texten durch den aktuellen Richtpreis ersetzen
         self.services = [self.fill(sv) for sv in self.services]
         self.faq = self.fill(self.faq)
         self.offers = self.fill(self.offers)
@@ -105,18 +106,21 @@ class Site:
         return base + ("?text=" + urllib.parse.quote(text) if text else "")
 
     def min_price(self, key):
+        if key == "keramik":  # Einstieg der C² CarCeramic-Preisliste
+            return min(c["price"] for c in self.pricing["ceramic"]["car"] if c.get("price") is not None)
         return min(self.pkg(key)["prices"].values())
 
     def fill(self, obj):
-        keys = {p["key"] for p in self.pricing["packages"]}
+        keys = {p["key"] for p in self.pricing["packages"]} | ({"keramik"} if self.pricing.get("ceramic") else set())
         rep = lambda m: str(self.min_price(m.group(1))) if m.group(1) in keys else m.group(0)
-        def rep_cls(m):  # {preis:komplett:suv} → Richtpreis dieses Pakets für diese Fahrzeugklasse
-            if m.group(1) not in keys:
+        def rep_cls(m):  # {preis:essential:suv} → Richtpreis dieses Pakets für diese Fahrzeugklasse
+            if m.group(1) not in keys or m.group(1) == "keramik":
                 return m.group(0)
             v = self.pkg(m.group(1))["prices"].get(m.group(2))
             return str(v) if v is not None else m.group(0)
         if isinstance(obj, str):
-            return re.sub(r"\{preis:(\w+):(\w+)\}", rep_cls, re.sub(r"\{ab:(\w+)\}", rep, obj))
+            out = re.sub(r"\{preis:(\w+):(\w+)\}", rep_cls, re.sub(r"\{ab:(\w+)\}", rep, obj))
+            return re.sub(r"(\d) €", "\\1\u00a0€", out) if out != obj else out  # Preis und € nicht trennen
         if isinstance(obj, list):
             return [self.fill(x) for x in obj]
         if isinstance(obj, dict):
@@ -136,8 +140,10 @@ class Site:
 
 
 # --------------------------------------------------------------------------- Layout
-def logo(site, prefix, lazy=False):
+def logo(site, prefix, lazy=False, head=False):
     lz = ' loading="lazy"' if lazy else ""
+    if head:  # Kopfzeile: Schriftzug ohne die bei kleiner Größe unlesbare Unterzeile
+        return f'<img src="{prefix}logo-head.svg" alt="ElbDetail – Premium Fahrzeugaufbereitung" width="195" height="60"{lz}>'
     return f'<img src="{prefix}logo.svg" alt="ElbDetail – Premium Fahrzeugaufbereitung" width="173" height="60"{lz}>'
 
 
@@ -208,7 +214,7 @@ def header(site, prefix="", home=False, current=None):
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="{brand_href}" aria-label="ElbDetail – zur Startseite">
-      {logo(site, prefix)}
+      {logo(site, prefix, head=True)}
     </a>
     <nav class="main-nav" aria-label="Hauptnavigation"><ul>{items}</ul></nav>
     <div class="header-cta">

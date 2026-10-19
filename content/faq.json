@@ -2,11 +2,11 @@
   "items": [
     {
       "q": "Was kostet eine Fahrzeugaufbereitung in Celle bei ElbDetail?",
-      "a": "Die Einstiegspreise für eine Kompaktklasse liegen bei {ab:frisch} € (Frisch & Sauber), {ab:komplett} € (Komplettpflege) und {ab:premium} € (Premium Politur mit Lackversiegelung). Größere Fahrzeuge, starke Verschmutzung oder intensive Tierhaarentfernung kosten entsprechend mehr. Keramikversiegelungen kalkulieren wir nach Begutachtung. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Ein verbindliches Angebot erhalten Sie kostenlos vorab."
+      "a": "Die Ab-Preise für einen Kleinwagen liegen bei {ab:refresh} € (Refresh), {ab:essential} € (Essential), {ab:signature} € (Signature mit Glanzpolitur) und {ab:excellence} € (Excellence mit mehrstufiger Lackkorrektur). Größere Fahrzeuge, starke Verschmutzung oder intensive Tierhaarentfernung kosten entsprechend mehr. Sport- und Luxusfahrzeuge sowie Wohnmobile bieten wir individuell an. Die C² CarCeramic Keramikversiegelung gibt es für Pkw ab {ab:keramik} €. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Ein verbindliches Angebot erhalten Sie kostenlos vorab."
     },
     {
       "q": "Wie lange dauert eine Aufbereitung?",
-      "a": "Frisch & Sauber dauert etwa 2 Stunden. Ab der Komplettpflege planen Sie bitte rund 24 Stunden ein: Nach der Arbeit bleibt Ihr Auto über Nacht in unserer Halle, damit Pflegeprodukte und Versiegelung in Ruhe aushärten und keine Wasserflecken entstehen. Bei der Premium Politur und der Keramikversiegelung kann es je nach Fahrzeug auch etwas länger dauern. Abgabe und Abholung stimmen wir vorab mit Ihnen ab."
+      "a": "Refresh dauert ab etwa 2 Stunden. Ab dem Paket Essential planen Sie bitte rund 24 Stunden ein: Nach der Arbeit bleibt Ihr Auto über Nacht in unserer Halle, damit Pflegeprodukte und Versiegelung in Ruhe aushärten und keine Wasserflecken entstehen. Bei Signature, Excellence und der Keramikversiegelung kann es je nach Fahrzeug auch etwas länger dauern. Abgabe und Abholung stimmen wir vorab mit Ihnen ab."
     },
     {
       "q": "Wo findet die Aufbereitung statt? Kommen Sie auch zu mir?",
@@ -18,7 +18,7 @@
     },
     {
       "q": "Welche Produkte verwendet ElbDetail?",
-      "a": "Wir arbeiten mit professionellen Produkten und Systemen von C²Coating, Koch-Chemie und Colourlock. ElbDetail ist offizieller C²Coating Excellence Partner, Inhaber René hat Fachschulungen bei Koch-Chemie absolviert. Für Leder nutzen wir Colourlock, sowohl bei der Pflege in der Komplettpflege als auch für Reparaturen. Alle Arbeiten erfolgen in Handarbeit, ohne Waschstraße."
+      "a": "Wir arbeiten mit professionellen Produkten und Systemen von C²Coating, Koch-Chemie und Colourlock. ElbDetail ist offizieller C²Coating Excellence Partner, Inhaber René hat Fachschulungen bei Koch-Chemie absolviert. Für Leder nutzen wir Colourlock, sowohl bei der Pflege im Paket Essential als auch für Reparaturen. Alle Arbeiten erfolgen in Handarbeit, ohne Waschstraße."
     },
     {
       "q": "Entfernen Sie auch Tierhaare, Flecken und Gerüche?",
@@ -26,7 +26,7 @@
     },
     {
       "q": "Lohnt sich eine Aufbereitung vor dem Verkauf oder der Leasingrückgabe?",
-      "a": "In den meisten Fällen ja. Ein sauber aufbereitetes Fahrzeug erzielt beim Verkauf spürbar bessere Preise und reduziert bei der Leasingrückgabe Abzüge für Verschmutzung, Gebrauchsspuren und Gerüche. Unsere Komplettpflege ist dafür das passende Paket."
+      "a": "In den meisten Fällen ja. Ein sauber aufbereitetes Fahrzeug erzielt beim Verkauf spürbar bessere Preise und reduziert bei der Leasingrückgabe Abzüge für Verschmutzung, Gebrauchsspuren und Gerüche. Unser Paket Essential ist dafür das passende Paket."
     },
     {
       "q": "Kann ich auch nur eine einzelne Leistung buchen, zum Beispiel nur eine Lackpolitur?",
@@ -34,7 +34,7 @@
     },
     {
       "q": "Was ist der Unterschied zwischen Lackpolitur und Lackversiegelung?",
-      "a": "Die Lackpolitur entfernt Kratzer, Hologramme und Oxidation aus dem Klarlack und stellt den Glanz wieder her. Die Lackversiegelung schützt den polierten Lack anschließend für Monate vor UV-Strahlung, Streusalz, Insekten und Schmutz. Beides zusammen ist im Paket Premium Politur enthalten."
+      "a": "Die Lackpolitur reduziert Waschspuren, Hologramme und Oxidation im Klarlack und bringt den Glanz zurück. Wie weit das geht, hängt vom Lackzustand ab. Die Lackversiegelung schützt den polierten Lack anschließend für Monate vor UV-Strahlung, Streusalz, Insekten und Schmutz. Die Politur steckt in den Paketen Signature (einstufig) und Excellence (mehrstufig), die Versiegelung buchen Sie separat dazu."
     },
     {
       "q": "Wie kann ich bezahlen?",
@@ -42,7 +42,7 @@
     },
     {
       "q": "Bieten Sie eine Keramikversiegelung an?",
-      "a": "Ja, die Keramikversiegelung ist unser Schwerpunkt. Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Scheiben und Felgen keramisch. Vorher bereiten wir den Lack sorgfältig vor, bei Bedarf mit einer Lackkorrektur. Den Preis nennen wir nach Begutachtung Ihres Fahrzeugs. Mehr dazu auf der Seite [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html)."
+      "a": "Ja, die Keramikversiegelung ist unser Schwerpunkt. Als offizieller C²Coating Excellence Partner versiegeln wir Ihren Lack mit C² CarCeramic, für Pkw ab {ab:keramik} € je nach C²Coating-Fahrzeugkategorie. Buchbar ist sie ab dem Paket Signature, beim Neuwagen nach Lackprüfung auch ohne Paket. Felgen und Scheiben beschichten wir auf Anfrage. Mehr dazu auf der Seite [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html)."
     },
     {
       "q": "Gibt es eine regelmäßige Pflege, zum Beispiel für Firmen oder Flotten?",

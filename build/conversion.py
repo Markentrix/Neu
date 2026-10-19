@@ -44,7 +44,7 @@ def build_termin(site, write):
 
     pk = ""
     for p in pr["packages"]:
-        inc = "".join(f"<li>{ESC(f['text'])}</li>" for f in p["features"] if f["included"])[:]
+        inc = "".join(f"<li>{ESC(f['text'])}</li>" for f in p["features"] if f.get("included"))[:]
         pk += f'''<label class="choice-card{" is-featured" if p.get("featured") else ""}">
             <input type="radio" name="paket" value="{p["key"]}" required{" checked" if p.get("featured") else ""}>
             <span class="choice-body">
@@ -53,11 +53,11 @@ def build_termin(site, write):
               <ul class="choice-feats">{inc}</ul>
             </span>
           </label>'''
-    pk += '''<label class="choice-card">
+    pk += f'''<label class="choice-card">
             <input type="radio" name="paket" value="keramik">
             <span class="choice-body">
-              <span class="choice-head"><strong>Keramikversiegelung</strong><span class="choice-price">nach Begutachtung</span></span>
-              <span class="choice-sub">Keramischer Schutz für Lack, Glas und Felgen mit C²Coating, inklusive Lackvorbereitung.</span>
+              <span class="choice-head"><strong>Keramikversiegelung</strong><span class="choice-price">ab {site.min_price("keramik")} €</span></span>
+              <span class="choice-sub">C² CarCeramic für den Lack, ab Paket Signature oder beim Neuwagen nach Lackprüfung. Felgen und Scheiben auf Anfrage.</span>
             </span>
           </label>
           <label class="choice-card">
@@ -123,7 +123,7 @@ def build_termin(site, write):
         <fieldset class="wz-step" data-step="4">
           <legend><span class="wz-num">4</span>Wunschtermin</legend>
           <p class="wz-hint">{ESC(s["openingHours"]["text"])}, {ESC(s["openingHours"]["detail"])}. Wir bestätigen den Termin persönlich.</p>
-          <p class="wz-hint">Ab der Komplettpflege bleibt Ihr Auto rund 24 Stunden bei uns, die Abholung ist dann am Folgetag.</p>
+          <p class="wz-hint">Ab dem Paket Essential bleibt Ihr Auto rund 24 Stunden bei uns, die Abholung ist dann am Folgetag.</p>
           <div class="two-col">
             <div class="form-row"><label for="t-date1">Wunschtermin*</label><input type="date" id="t-date1" name="datum" required aria-describedby="t-date1-msg"><span class="field-msg" id="t-date1-msg"></span><button class="next-free next-free--fill" type="button" data-next-free data-nf-fill hidden><span class="nf-dot" aria-hidden="true"></span>Nächster freier Tag: <strong data-nf-date></strong> · übernehmen</button></div>
             <div class="form-row"><label for="t-date2">Ausweichtermin <span class="hint">(optional)</span></label><input type="date" id="t-date2" name="datum2" aria-describedby="t-date2-msg"><span class="field-msg" id="t-date2-msg"></span></div>
@@ -199,7 +199,7 @@ def build_gutscheine(site, write):
     faq = [
         {"q": "Wie lange ist ein Gutschein gültig?", "a": f"Gutscheine sind drei Jahre gültig, gerechnet ab dem Ende des Kaufjahres. Ein 2026 gekaufter Gutschein gilt also bis 31.12.{year + 3}."},
         {"q": "Wie löse ich einen Gutschein ein?", "a": "Bei der Online-Terminanfrage den Gutscheincode eingeben oder ihn bei der WhatsApp-Anfrage nennen. Wir verrechnen den Wert mit dem Auftrag."},
-        {"q": "Was passiert bei einem größeren Fahrzeug?", "a": "Paketgutscheine gelten für die Kompaktklasse. Bei Limousine, Kombi, SUV oder Van wird nur die Differenz zum Richtpreis der jeweiligen Fahrzeugklasse fällig."},
+        {"q": "Was passiert bei einem größeren Fahrzeug?", "a": "Paketgutscheine gelten für einen Kleinwagen. Bei größeren Fahrzeugen wird nur die Differenz zum Richtpreis der jeweiligen Fahrzeugklasse fällig."},
         {"q": "Wie bezahle ich den Gutschein?", "a": "Nach Ihrer Bestellung erhalten Sie die Zahlungsdaten per E-Mail. Sie zahlen per Überweisung, per PayPal oder bei Abholung bar oder mit Karte. Nach Zahlungseingang erhalten Sie den Gutschein als Link zum Ausdrucken oder holen ihn gedruckt ab."},
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Gutscheine", path)]), seo.faq(faq),
@@ -375,8 +375,9 @@ def build_winter(site, write):
     path = "/aktion/winterschutz.html"
     title = "Auto winterfest machen in Celle: Lackschutz | ElbDetail"
     desc = (f"Lack, Felgen und Scheiben vor Streusalz schützen: Versiegelung in Celle vor dem ersten Frost. "
-            f"Politur inkl. Versiegelung ab {site.min_price('premium')} €. Termin sichern.")
-    prem = site.pkg("premium")
+            f"Signature mit Glanzpolitur ab {site.min_price('signature')} €. Termin sichern.")
+    prem = site.pkg("signature")
+    exc = site.pkg("excellence")
     faq = [
         {"q": "Wann sollte ich mein Auto versiegeln lassen?", "a": "Am besten vor dem ersten Frost und dem ersten Streusalz, in Celle also meist im Oktober oder November. Die Versiegelung braucht trockene Bedingungen und Zeit zum Aushärten."},
         {"q": "Reicht eine Versiegelung ohne Politur?", "a": "Bei gutem Lack ja. Sind Kratzer oder Hologramme sichtbar, empfehlen wir vorher eine Politur, weil die Versiegelung den Zustand darunter konserviert."},
@@ -394,9 +395,9 @@ def build_winter(site, write):
       <p class="eyebrow">Saison-Empfehlung Herbst &amp; Winter</p>
       <h1 id="page-h">Lack winterfest machen. <em>Bevor das Streusalz kommt.</em></h1>
       <p class="lead">Streusalz, Matsch und Frost setzen Lack, Felgen und Dichtungen stärker zu als jede andere Jahreszeit. Eine Versiegelung vor dem Winter sorgt dafür, dass Schmutz schlechter haftet und das Auto im Frühjahr nicht erst gerettet werden muss.</p>
-      <div class="keyfacts"><div class="keyfact"><strong>ab {site.min_price("premium")} €</strong><span>{ESC(prem["name"])} inkl. Versiegelung</span></div><div class="keyfact"><strong>ab 24 Std.</strong><span>inkl. Standzeit über Nacht</span></div><div class="keyfact"><strong>Monate</strong><span>Schutzdauer</span></div></div>
+      <div class="keyfacts"><div class="keyfact"><strong>ab {site.min_price("signature")} €</strong><span>{ESC(prem["name"])} mit Glanzpolitur</span></div><div class="keyfact"><strong>ab 24 Std.</strong><span>inkl. Standzeit über Nacht</span></div><div class="keyfact"><strong>+ Versiegelung</strong><span>separat zubuchbar</span></div></div>
       <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket=premium&amp;quelle=winter">{I["cal"]}Wintertermin anfragen</a>
+        <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket=signature&amp;quelle=winter">{I["cal"]}Wintertermin anfragen</a>
         <a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich möchte mein Auto vor dem Winter versiegeln lassen. Fahrzeug: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
       </div>
     </div>
@@ -411,20 +412,21 @@ def build_winter(site, write):
         <ul class="includes">
           <li>{I["check"]}Gründliche Handwäsche und chemische Dekontamination</li>
           <li>{I["check"]}Lackreinigungsknete gegen eingebrannte Partikel</li>
-          <li>{I["check"]}Bei Bedarf Politur gegen Kratzer und Hologramme</li>
-          <li>{I["check"]}Lackversiegelung für Monate Schutz</li>
-          <li>{I["check"]}Felgenversiegelung gegen Bremsstaub und Salz</li>
-          <li>{I["check"]}Scheibenversiegelung für bessere Sicht bei Regen</li>
+          <li>{I["check"]}Glanzpolitur (Signature) oder mehrstufige Lackkorrektur (Excellence)</li>
+          <li>{I["check"]}Komplette Innenaufbereitung, Leder mit Colourlock gepflegt</li>
+          <li>{I["check"]}Lackversiegelung oder C² CarCeramic, separat zubuchbar</li>
+          <li>{I["check"]}Felgen- und Scheibenbeschichtung auf Anfrage</li>
           <li>{I["check"]}Pflege von Gummidichtungen gegen Festfrieren</li>
           <li>{I["check"]}Pflegetipps für die Wäsche im Winter</li>
         </ul>
         <h2>Welche Variante passt?</h2>
         <div class="table-scroll" tabindex="0" role="region" aria-label="Tabelle, seitlich scrollbar"><table class="md-table"><thead><tr><th scope="col">Zustand des Lacks</th><th scope="col">Empfehlung</th><th scope="col">Richtpreis</th></tr></thead><tbody>
           <tr><th scope="row">Neuwagen oder sehr guter Lack</th><td>Versiegelung ohne Politur</td><td>auf Anfrage</td></tr>
-          <tr><th scope="row">Leichte Kratzer, matter Glanz</th><td>{ESC(prem["name"])}: Politur + Versiegelung</td><td>ab {site.min_price("premium")} €</td></tr>
-          <tr><th scope="row">Auch der Innenraum braucht Pflege</th><td>{ESC(prem["name"])} enthält die Komplettpflege innen</td><td>ab {site.min_price("premium")} €</td></tr>
+          <tr><th scope="row">Matter Glanz, leichte Gebrauchsspuren</th><td>{ESC(prem["name"])}: Glanzpolitur + Versiegelung</td><td>ab {site.min_price("signature")} € + Versiegelung</td></tr>
+          <tr><th scope="row">Viele Waschspuren, Hologramme</th><td>{ESC(exc["name"])}: mehrstufige Lackkorrektur + Versiegelung</td><td>ab {site.min_price("excellence")} € + Versiegelung</td></tr>
+          <tr><th scope="row">Langzeitschutz über viele Winter</th><td>C² CarCeramic Keramikversiegelung</td><td>ab {site.min_price("keramik")} €</td></tr>
         </tbody></table></div>
-        <p class="hint">Richtpreise für eine Kompaktklasse. Limousine/Kombi ab {prem["prices"].get("mittel", "")} €, SUV/Van ab {prem["prices"].get("suv", "")} €.</p>
+        <p class="hint">Ab-Preise für einen Kleinwagen, jeweils mit kompletter Innen- und Außenaufbereitung. {ESC(prem["name"])} für Kompaktwagen ab {prem["prices"].get("kompakt", "")} €, Limousine/Kombi/SUV ab {prem["prices"].get("mittel", "")} €, großer SUV/Van ab {prem["prices"].get("suv", "")} €. Der Korrekturgrad hängt vom Lackzustand ab.</p>
         {art_link}
         <h2>Häufige Fragen</h2>
         <div class="faq-list">{core.faq_html(faq, prefix)}</div>
@@ -433,7 +435,7 @@ def build_winter(site, write):
         <div class="aside-card dark">
           <h3>Wintertermin sichern</h3>
           <p>Die Wochen vor dem ersten Frost sind gefragt. Fragen Sie frühzeitig an, wir bestätigen den Termin persönlich.</p>
-          <a class="btn btn-primary" href="{prefix}termin.html?paket=premium&amp;quelle=winter">{I["cal"]}Termin anfragen</a>
+          <a class="btn btn-primary" href="{prefix}termin.html?paket=signature&amp;quelle=winter">{I["cal"]}Termin anfragen</a>
           <a class="btn btn-wa" href="{site.wa("Hallo ElbDetail, ich möchte mein Auto vor dem Winter versiegeln lassen.")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
         </div>
         <div class="aside-card"><h3>Auch interessant</h3><ul>

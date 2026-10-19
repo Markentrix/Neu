@@ -25,7 +25,7 @@
     },
     {
       "q": "Was kostet es, Hundehaare im Auto professionell entfernen zu lassen?",
-      "a": "Bei ElbDetail in Celle ist die Tiefenreinigung von Polstern und Teppich Teil der Komplettpflege, die bei Kompaktwagen ab {ab:komplett} € beginnt. Die Richtpreise gelten für einen normalen Pflegezustand. Bei starkem Haarbefall bekommen Sie vor dem Termin einen verbindlichen Preis."
+      "a": "Bei ElbDetail in Celle ist die Tiefenreinigung von Polstern und Teppich Teil des Pakets Essential, das bei Kleinwagen ab {ab:essential} € beginnt. Die Richtpreise gelten für einen normalen Pflegezustand. Bei starkem Haarbefall bekommen Sie vor dem Termin einen verbindlichen Preis."
     }
   ]
 }
@@ -114,6 +114,6 @@ Checkliste: Denken Sie an einen Profi, wenn
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle bereitet Fahrzeuge in 100 % Handarbeit auf. Bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html) werden Teppiche und Polster tiefengereinigt. Im Paket Komplettpflege ist auch eine Geruchsneutralisation enthalten. Gearbeitet wird mit professionellen Produkten von Koch-Chemie, bei Ledersitzen mit Colourlock. Den verbindlichen Preis erfahren Sie vor dem Termin. Das Ergebnis sehen wir uns am Ende gemeinsam bei Tageslicht an. Richtpreise finden Sie in der [Preisübersicht](/preise.html).
+ElbDetail in Celle bereitet Fahrzeuge in 100 % Handarbeit auf. Bei der [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html) werden Teppiche und Polster tiefengereinigt. Im Paket Essential ist auch eine Geruchsneutralisation enthalten. Gearbeitet wird mit professionellen Produkten von Koch-Chemie, bei Ledersitzen mit Colourlock. Den verbindlichen Preis erfahren Sie vor dem Termin. Das Ergebnis sehen wir uns am Ende gemeinsam bei Tageslicht an. Richtpreise finden Sie in der [Preisübersicht](/preise.html).
 
 Schicken Sie ein paar Fotos vom Innenraum per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). So bekommen Sie schnell eine Einschätzung für Ihr Auto.

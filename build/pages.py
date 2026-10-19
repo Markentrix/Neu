@@ -158,7 +158,11 @@ def ba_tile(site, item, n, prefix=""):
 
 # --------------------------------------------------------------------------- Startseite
 def plan_card(site, p, prefix=""):
-    lis = "".join(f'<li class="{"" if f["included"] else "no"}">{I["check"] if f["included"] else I["x"]}{ESC(f["text"])}</li>' for f in p["features"])
+    def li(f):
+        if f.get("optional"):
+            return f'<li class="opt">{I["plus"]}{ESC(f["text"])}</li>'
+        return f'<li class="{"" if f.get("included") else "no"}">{I["check"] if f.get("included") else I["x"]}{ESC(f["text"])}</li>'
+    lis = "".join(li(f) for f in p["features"])
     cls0 = site.pricing["classes"][0]["key"]
     featured = p.get("featured")
     return f'''
@@ -192,6 +196,41 @@ def pick(items, idx):
     return [items[i] for i in idx if i < len(items)] or items[:5]
 
 
+def ceramic_section(site, prefix="", head="h2"):
+    """C² CarCeramic-Preisliste (eigene Fahrzeugeinteilung von C²Coating)."""
+    cer = site.pricing.get("ceramic")
+    if not cer:
+        return ""
+    eur = lambda v: f"{v:,}".replace(",", ".") + "&nbsp;€" if v is not None else "auf Anfrage"
+    car = "".join(f'<tr><th scope="row">{ESC(c["name"])}</th><td>{ESC(c["examples"])}</td><td class="num">{eur(c["price"])}</td></tr>' for c in cer["car"])
+    camper = "".join(f'<tr><th scope="row">{ESC(c["name"])}</th><td class="num">{eur(c["price"])}</td></tr>' for c in cer.get("camper", []))
+    notes = "".join(f"<li>{ESC(n)}</li>" for n in cer.get("notes", []))
+    return f'''
+      <div class="ceramic-prices reveal" id="keramik-preise">
+        <{head}>{ESC(cer["title"])}</{head}>
+        <p>{ESC(cer["intro"])}</p>
+        <div class="ceramic-grid">
+          <div class="price-scroll" tabindex="0" role="region" aria-label="Keramik-Preise für Pkw">
+            <table class="price-table ceramic-table">
+              <caption>Pkw nach C²Coating-Kategorie</caption>
+              <thead><tr><th scope="col">Kategorie</th><th scope="col">Beispiele</th><th scope="col" class="num">Preis</th></tr></thead>
+              <tbody>{car}</tbody>
+            </table>
+          </div>
+          {f'''<div class="price-scroll" tabindex="0" role="region" aria-label="Keramik-Preise für Wohnmobile">
+            <table class="price-table ceramic-table">
+              <caption>Wohnmobile &amp; Wohnwagen nach Länge</caption>
+              <thead><tr><th scope="col">Länge</th><th scope="col" class="num">Preis</th></tr></thead>
+              <tbody>{camper}</tbody>
+            </table>
+          </div>''' if camper else ""}
+        </div>
+        <p class="price-note">{ESC(cer.get("carNote", ""))}</p>
+        <ul class="ceramic-notes">{notes}</ul>
+        <a class="btn btn-primary" href="{prefix}termin.html?paket=keramik">{I["cal"]}Keramikversiegelung anfragen</a>
+      </div>'''
+
+
 def price_section(site, prefix=""):
     """Volle Preisübersicht mit Klassen-Umschalter, Paketen, Extras und Vergleichstabelle."""
     pr = site.pricing
@@ -201,8 +240,12 @@ def price_section(site, prefix=""):
     extras = "".join(f"<li>{ESC(e)} <small>· auf Anfrage</small></li>" for e in pr["extras"])
 
     def cell(v, f=False):
-        c = ("featured-col " if f else "") + ("yes" if v else "")
-        return f'<td class="{c.strip()}"><span aria-hidden="true">{"✓" if v else "—"}</span><span class="visually-hidden">{"Inklusive" if v else "Nicht enthalten"}</span></td>'
+        if v == "optional":
+            c, mark, sr = "opt", "+", "Optional, separat buchbar"
+        else:
+            c, mark, sr = ("yes" if v else ""), ("✓" if v else "—"), ("Inklusive" if v else "Nicht enthalten")
+        c = ("featured-col " if f else "") + c
+        return f'<td class="{c.strip()}"><span aria-hidden="true">{mark}</span><span class="visually-hidden">{sr}</span></td>'
     keys = [p["key"] for p in pr["packages"]]
     fkey = feat["key"]
     trs = "".join(f'<tr><th scope="row">{ESC(r["label"])}</th>' + "".join(cell(r.get(k), k == fkey) for k in keys) + "</tr>" for r in pr["compare"])
@@ -210,13 +253,19 @@ def price_section(site, prefix=""):
     ths = "".join(f'<th scope="col"{fc if p["key"] == fkey else ""}>{ESC(p["name"])}</th>' for p in pr["packages"])
     return f'''
       <div class="price-toolbar reveal">
-        <fieldset id="priceClass"><legend class="visually-hidden">Fahrzeugklasse wählen</legend><div class="seg">{price_cls}</div></fieldset>
+        <fieldset id="priceClass"><legend class="visually-hidden">Fahrzeugklasse wählen</legend><div class="seg{" c6" if len(pr["classes"]) > 4 else ""}">{price_cls}</div></fieldset>
         <p>Richtpreise für <strong id="priceClassLabel">{ESC(pr["classes"][0]["name"])}</strong> in normalem Pflegezustand.</p>
       </div>
       <div class="plans stagger">{plans}
       </div>
       <p class="price-note">{ESC(pr["note"])}</p>
       {f'<p class="price-stand">{I["clock"]}<span>{ESC(pr["standNote"])}</span></p>' if pr.get("standNote") else ""}
+      {f'<p class="price-stand">{I["spark"]}<span>{ESC(pr["polishNote"])}</span></p>' if pr.get("polishNote") else ""}
+      <div class="pkg-details reveal">
+        <h2>Was in den Paketen steckt</h2>
+        <dl>{"".join(f'<div><dt>{ESC(p["name"])}</dt><dd>{ESC(p["description"])}</dd></div>' for p in pr["packages"] if p.get("description"))}</dl>
+      </div>
+      {ceramic_section(site, prefix)}
       <div class="extras reveal">
         <h2>Einzeln buchbar oder als Ergänzung</h2>
         <ul>{extras}</ul>
@@ -230,6 +279,7 @@ def price_section(site, prefix=""):
             <tbody>{trs}</tbody>
           </table>
         </div>
+        <p class="compare-legend">✓ enthalten · + optional, separat buchbar · — nicht enthalten</p>
       </details>'''
 
 
@@ -273,7 +323,7 @@ def owner_html(site, prefix=""):
 def build_home(site, write):
     s = site.s
     pr = site.pricing
-    title = f"Fahrzeugaufbereitung in Celle ab {site.min_price('frisch')} € | ElbDetail"
+    title = f"Fahrzeugaufbereitung in Celle ab {site.min_price('refresh')} € | ElbDetail"
     desc = (f"Fahrzeugaufbereitung in Celle mit Liebe zum Detail: Lackkorrektur, Keramikversiegelung und Innenraum in Handarbeit. "
             f"{s['rating']['value']} ★ bei Google, Festpreis vorab.")
     home_faq = pick(site.faq, HOME_FAQ)
@@ -385,7 +435,7 @@ def build_home(site, write):
 
       <form class="quote-card" id="quoteForm" aria-labelledby="quote-h">
         <div class="quote-head"><h2 id="quote-h">Richtpreis in 10 Sekunden</h2><span>Unverbindlich</span></div>
-        <fieldset class="quote-field"><legend><span>Fahrzeugklasse</span></legend><div class="seg{" c4" if len(pr["classes"]) == 4 else ""}">{cls_radios}</div></fieldset>
+        <fieldset class="quote-field"><legend><span>Fahrzeugklasse</span></legend><div class="seg{" c4" if len(pr["classes"]) == 4 else ""}{" c6" if len(pr["classes"]) == 6 else ""}">{cls_radios}</div></fieldset>
         <fieldset class="quote-field"><legend><span>Paket</span></legend><div class="seg pk">{pkg_radios}</div></fieldset>
         <div class="quote-result" aria-live="polite">
           <span class="lbl">Richtpreis <span id="quotePkgName">{ESC(feat["name"])}</span></span>
@@ -465,7 +515,7 @@ def build_home(site, write):
       <div class="section-head reveal">
         <p class="eyebrow">Pakete &amp; Preise</p>
         <h2 id="preise-h" class="display">Klare Preise. <em>Bevor wir anfangen.</em></h2>
-        <p>Richtpreise für eine Kompaktklasse. Den Festpreis für Ihr Fahrzeug erhalten Sie vor dem Termin, kostenlos und unverbindlich.</p>
+        <p>Ab-Preise für einen Kleinwagen. Den verbindlichen Preis für Ihr Fahrzeug erhalten Sie vor dem Termin, kostenlos und unverbindlich.</p>
       </div>
       <div class="plan-rows stagger">{plan_rows}
       </div>
@@ -489,7 +539,7 @@ def build_home(site, write):
           <div><dt>Standort</dt><dd>{ESC(site.addr_line())}</dd></div>
           <div><dt>Einzugsgebiet</dt><dd>Celle und Landkreis Celle</dd></div>
           <div><dt>Leistungen</dt><dd>Keramikversiegelung, Lackkorrektur, Innen- &amp; Außenaufbereitung, Lederpflege und -reparatur, Geruchsneutralisierung, Cabrioverdeck</dd></div>
-          <div><dt>Richtpreise</dt><dd>{" / ".join(f"ab {site.min_price(p['key'])} €" for p in pr["packages"])} (Kompaktklasse)</dd></div>
+          <div><dt>Richtpreise</dt><dd>{" / ".join(f"ab {site.min_price(p['key'])} €" for p in pr["packages"])} (Kleinwagen)</dd></div>
           <div><dt>Inhaber</dt><dd>{ESC((s.get("about") or {}).get("name") or "")} ({ESC((s.get("about") or {}).get("role") or "Inhaber")})</dd></div>
           <div><dt>Partner</dt><dd>Offizieller C²Coating Excellence Partner, Koch-Chemie-Fachschulungen, Colourlock für Leder</dd></div>
           <div><dt>Service</dt><dd>Abhol- und Bringservice nach Vereinbarung, regelmäßige Pflege mit ElbDetail Care</dd></div>
@@ -516,7 +566,7 @@ def build_home(site, write):
       <div class="process-rail stagger" data-draw>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle. Ab der Komplettpflege bleibt Ihr Auto über Nacht bei uns, damit alles aushärtet und keine Wasserflecken entstehen. Danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle. Ab dem Paket Essential bleibt Ihr Auto über Nacht bei uns, damit alles aushärtet und keine Wasserflecken entstehen. Danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
       </div>
     </div>
   </section>
@@ -559,7 +609,7 @@ def build_home(site, write):
 def build_preise(site, write):
     pr = site.pricing
     path = "/preise.html"
-    title = f"Preise Fahrzeugaufbereitung Celle ab {site.min_price('frisch')} € | ElbDetail"
+    title = f"Preise Fahrzeugaufbereitung Celle ab {site.min_price('refresh')} € | ElbDetail"
     desc = ("Fahrzeugaufbereitung Celle: "
             + ", ".join(f"{p['name']} ab {site.min_price(p['key'])} €" for p in pr["packages"]) + ". Preise je Fahrzeugklasse, Festpreis vorab.")
     faq = pick(site.faq, PRICE_FAQ)
@@ -571,7 +621,7 @@ def build_preise(site, write):
     <div class="container">
       {core.breadcrumb("", [("Startseite", "index.html"), ("Pakete & Preise", None)])}
       <h1 id="page-h">Preise für Fahrzeug&shy;aufbereitung in Celle</h1>
-      <p class="lead">Drei Pakete, transparente Richtpreise je Fahrzeugklasse. Den verbindlichen Preis bestätigen wir kostenlos vor dem Termin, Zusatzarbeiten nur nach Rücksprache.</p>
+      <p class="lead">Vier Pakete, transparente Ab-Preise je Fahrzeugklasse. Den verbindlichen Preis bestätigen wir kostenlos vor dem Termin, Zusatzarbeiten nur nach Rücksprache.</p>
       <div class="keyfacts">{facts}</div>
     </div>
   </section>
@@ -780,7 +830,13 @@ def build_service(site, sv, write):
     book = p["key"] if p else sv.get("bookAs", "beratung")  # Leistungen ohne Paketpreis: Anfrage nach Begutachtung
     if p:
         price_card = (f'<h3>Passendes Paket</h3><p><strong>{ESC(p["name"])}</strong> enthält diese Leistung, Richtpreis ab {site.min_price(p["key"])} € '
-                      f'für eine Kompaktklasse.</p><a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>')
+                      f'für einen Kleinwagen.</p><a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>')
+    elif sv.get("priceCard"):
+        price_card = (f'<h3>{ESC(sv["priceCard"]["title"])}</h3><p>{ESC(sv["priceCard"]["text"])}</p>'
+                      f'<a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>')
+    elif book == "keramik" and site.pricing.get("ceramic"):
+        price_card = (f'<h3>C² CarCeramic</h3><p>Keramikversiegelung für Pkw ab {site.min_price("keramik")} €, je nach C²Coating-Fahrzeugkategorie. '
+                      f'Buchbar ab dem Paket Signature oder beim Neuwagen nach Lackprüfung.</p><a class="btn btn-line-light" href="#keramik-preise">Zur Preisliste</a>')
     else:
         price_card = (f'<h3>Preis nach Begutachtung</h3><p>Den Preis legen wir nach Fahrzeug und Zustand fest. Sie erhalten vorab einen verbindlichen Festpreis. '
                       f'Für eine erste Einschätzung genügen oft ein paar Fotos per WhatsApp.</p><a class="btn btn-line-light" href="{prefix}preise.html">Alle Pakete &amp; Preise</a>')
@@ -821,6 +877,7 @@ def build_service(site, sv, write):
         {figure(site, sv.get("image"), prefix)}
         <h2 id="enthalten">Das ist enthalten</h2>
         <ul class="includes">{includes}</ul>
+        {ceramic_section(site, prefix) if book == "keramik" else ""}
         <h2 id="ablauf">So läuft es ab</h2>
         <div class="steps">{steps}</div>
         <h2 id="fragen">Häufige Fragen zu {ESC(sv["short"])}</h2>

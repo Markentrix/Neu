@@ -4,21 +4,21 @@
   "short": "Keramikversiegelung",
   "teaser": "Langanhaltender Lackschutz mit C²Coating, auch für Glas und Felgen.",
   "seoTitle": "Keramikversiegelung Celle: C²Coating Partner | ElbDetail",
-  "description": "Keramikversiegelung in Celle vom C²Coating Excellence Partner: Lack, Glas und Felgen keramisch schützen, mit sorgfältiger Lackvorbereitung.",
+  "description": "Keramikversiegelung in Celle vom C²Coating Excellence Partner: C² CarCeramic für Pkw ab {ab:keramik} €, mit sorgfältiger Lackvorbereitung.",
   "h1": "Keramikversiegelung in Celle: *Schutz, der bleibt.*",
-  "lead": "Als offizieller **C²Coating Excellence Partner** versiegeln wir Lack, Scheiben und Felgen keramisch. **Tiefer Glanz, langanhaltender Schutz und deutlich leichtere Pflege.**",
+  "lead": "Als offizieller **C²Coating Excellence Partner** versiegeln wir Ihren Lack mit **C² CarCeramic**. **Tiefer Glanz, langanhaltender Schutz und deutlich leichtere Pflege.** Scheiben und Felgen beschichten wir auf Anfrage.",
   "facts": [
     {
       "value": "C²Coating",
       "label": "Excellence Partner"
     },
     {
-      "value": "Lack · Glas · Felgen",
-      "label": "keramisch versiegelt"
+      "value": "ab {ab:keramik} €",
+      "label": "Pkw, je nach Kategorie"
     },
     {
-      "value": "Festpreis",
-      "label": "nach Begutachtung"
+      "value": "ab Signature",
+      "label": "oder Neuwagen nach Lackprüfung"
     }
   ],
   "bookAs": "keramik",
@@ -31,13 +31,13 @@
     "Lackkorrektur nach Bedarf, ein- oder mehrstufig",
     "Entfettung und Vorbereitung jeder Fläche",
     "Keramische Lackversiegelung mit C²Coating",
-    "Optional: keramische Glas- und Felgenversiegelung",
+    "Felgen- und Scheibenbeschichtung auf Anfrage",
     "Aushärtung, Endkontrolle bei Tageslicht und Pflegeanleitung"
   ],
   "steps": [
     {
       "title": "Begutachtung & Beratung",
-      "text": "Wir sehen uns den Lack genau an und besprechen, welche Beschichtung passt. Sie erhalten vorab einen Festpreis."
+      "text": "Wir sehen uns den Lack genau an und besprechen, welche Beschichtung passt. Sie erhalten vorab ein verbindliches Angebot."
     },
     {
       "title": "Vorbereitung",
@@ -45,11 +45,11 @@
     },
     {
       "title": "Lackkorrektur",
-      "text": "Waschkratzer, Hologramme und matte Stellen werden ein- oder mehrstufig auspoliert, bevor sie versiegelt würden."
+      "text": "Waschspuren, Hologramme und matte Stellen werden ein- oder mehrstufig reduziert, bevor wir versiegeln. Was möglich ist, hängt vom Lackzustand ab."
     },
     {
       "title": "Beschichtung",
-      "text": "Die Keramik wird Fläche für Fläche aufgetragen. Auf Wunsch versiegeln wir auch Scheiben und Felgen."
+      "text": "Die Keramik wird Fläche für Fläche aufgetragen. Scheiben und Felgen beschichten wir auf Anfrage."
     },
     {
       "title": "Aushärtung & Übergabe",
@@ -63,7 +63,7 @@
     },
     {
       "q": "Was kostet eine Keramikversiegelung in Celle?",
-      "a": "Das hängt von Fahrzeuggröße, Lackzustand und dem Aufwand für die Lackkorrektur ab. Deshalb nennen wir den Preis nach einer Begutachtung. Sie erhalten vorab einen verbindlichen Festpreis. Fotos per WhatsApp genügen oft für eine erste Einschätzung."
+      "a": "Für Pkw beginnt die C² CarCeramic bei {ab:keramik} € (C²Coating-Kategorie 1, etwa Polo, Golf oder A3) und reicht bis 1.190 € für Sportwagen wie Porsche oder R8. Wohnmobile berechnen wir nach Länge ab 1.950 €. Die Standardvorbereitung ist enthalten, eine nötige Politur stimmen wir vorher mit Ihnen ab. Sie erhalten vorab ein verbindliches Angebot."
     },
     {
       "q": "Was ist der Unterschied zur klassischen Lackversiegelung?",

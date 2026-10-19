@@ -150,7 +150,7 @@ class TestBuild(Base):
                     t = open(os.path.join(root, f), encoding="utf-8").read()
                     self.assertNotIn("{ab:", t, f)
                     self.assertNotIn("{preis:", t, f)
-        self.assertIn("ab 179 €", open(os.path.join(site, "leistungen/innenaufbereitung-celle.html"), encoding="utf-8").read())
+        self.assertIn("ab 300\u00a0€", open(os.path.join(site, "leistungen/innenaufbereitung-celle.html"), encoding="utf-8").read())
 
     def test_owner_card_and_verification_only_when_filled(self):
         import build as builder
@@ -213,7 +213,7 @@ class TestPublicAPI(Base):
         self.assertIn(0, j["closedWeekdays"])
 
     def test_termin_ok(self):
-        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "komplett", "klasse": "suv", "datum": next_workday(), "name": "Max",
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "essential", "klasse": "suv", "datum": next_workday(), "name": "Max",
                                                    "telefon": "0172 1234567", "einwilligung": "ja", "extras": ["Motorraumreinigung"]})
         self.assertEqual(code, 200, j)
         self.assertTrue(j["ref"].startswith("T"))
@@ -226,9 +226,9 @@ class TestPublicAPI(Base):
 
     def test_sunday_and_past_rejected(self):
         d = dt.date.today() + dt.timedelta(days=(6 - dt.date.today().weekday()) % 7 or 7)
-        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "frisch", "klasse": "kompakt", "datum": d.isoformat(), "name": "A", "telefon": "0172 1111111", "einwilligung": "ja"})
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "refresh", "klasse": "kompakt", "datum": d.isoformat(), "name": "A", "telefon": "0172 1111111", "einwilligung": "ja"})
         self.assertEqual(code, 422)
-        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "frisch", "klasse": "kompakt", "datum": "2020-01-01", "name": "A", "telefon": "0172 1111111", "einwilligung": "ja"})
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "refresh", "klasse": "kompakt", "datum": "2020-01-01", "name": "A", "telefon": "0172 1111111", "einwilligung": "ja"})
         self.assertEqual(code, 422)
 
     def test_form_encoded_redirect(self):
@@ -269,7 +269,7 @@ class TestPublicAPI(Base):
                       ("TCAP1", "termin", "termin_bestaetigt", "x", "x", "Test", day, "{}"))
         code, j = self.req("GET", "/api/verfuegbarkeit")
         self.assertIn(day, j["blocked"])
-        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "komplett", "klasse": "kompakt", "datum": day,
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "essential", "klasse": "kompakt", "datum": day,
                                                     "name": "Eva", "telefon": "0170 1234567", "einwilligung": "ja"})
         self.assertEqual(code, 422)
         self.admin("PUT", "kalender", {"dailyCapacity": 2})
@@ -362,13 +362,13 @@ class TestAdmin(Base):
 
     def test_workflow(self):
         self.login()
-        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "premium", "klasse": "mittel", "datum": next_workday(5), "name": "Erika Muster",
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "signature", "klasse": "mittel", "datum": next_workday(5), "name": "Erika Muster",
                                                    "telefon": "0172 7654321", "email": "erika@example.com", "einwilligung": "ja", "bewertung_ok": "ja"})
         ref = j["ref"]
         code, lst = self.admin("GET", "anfragen?typ=termin")
         self.assertIn(ref, [i["ref"] for i in lst["items"]])
         code, d = self.admin("GET", "anfragen/" + ref)
-        self.assertEqual(d["preis"], 399)
+        self.assertEqual(d["preis"], 600)
         code, t = self.admin("GET", f"anfragen/{ref}/vorlage?art=antwort")
         self.assertIn("wa.me/491727654321", t["whatsapp"])
         code, t = self.admin("GET", f"anfragen/{ref}/vorlage?art=bewertung")
@@ -385,7 +385,7 @@ class TestAdmin(Base):
         self.login()
         day = next_workday(9)
         self.assertEqual(self.admin("POST", "kalender", {"day": day, "reason": "Urlaub"})[0], 200)
-        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "frisch", "klasse": "kompakt", "datum": day, "name": "A", "telefon": "0172 1111111", "einwilligung": "ja"})
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "refresh", "klasse": "kompakt", "datum": day, "name": "A", "telefon": "0172 1111111", "einwilligung": "ja"})
         self.assertEqual(code, 422)
         self.admin("DELETE", "kalender", {"day": day})
 
@@ -404,7 +404,7 @@ class TestAdmin(Base):
         self.login()
         code, d = self.admin("GET", "inhalte/pricing.json")
         data = d["data"]
-        data["packages"][0]["prices"]["kompakt"] = 77
+        data["packages"][0]["prices"]["klein"] = 77
         self.assertEqual(self.admin("PUT", "inhalte/pricing.json", {"data": data})[0], 200)
         code, r = self.admin("POST", "veroeffentlichen", {})
         self.assertTrue(r["ok"], r.get("log"))
@@ -428,7 +428,7 @@ class TestAdmin(Base):
         png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
         self.assertEqual(self.admin("POST", "medien", {"name": "angebot-test.png", "data": png})[0], 200)
         code, r = self.admin("POST", "angebote", {"title": "Frühjahrs-Check Test", "badge": "Frühling", "text": "Wäsche und Kontrolle.", "price": "ab 99 €",
-                                                 "ctaHref": "termin.html?paket=frisch", "icon": "spark", "image": "angebot-test.png", "highlight": True})
+                                                 "ctaHref": "termin.html?paket=refresh", "icon": "spark", "image": "angebot-test.png", "highlight": True})
         self.assertEqual(code, 200, r)
         self.assertTrue(r["published"])
         oid = next(o["id"] for o in r["items"] if o["title"] == "Frühjahrs-Check Test")

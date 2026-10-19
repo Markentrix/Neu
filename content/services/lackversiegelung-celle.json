@@ -4,13 +4,13 @@
   "short": "Lackversiegelung",
   "teaser": "Monatelanger Schutz vor UV, Streusalz, Insekten und Schmutz.",
   "seoTitle": "Lackversiegelung Celle: Schutz vor UV & Salz | ElbDetail",
-  "description": "Lackversiegelung in Celle: monatelanger Schutz vor UV, Streusalz und Schmutz, leichteres Waschen, tiefer Glanz. Mit Politur ab {ab:premium} €.",
+  "description": "Lackversiegelung in Celle: monatelanger Schutz vor UV, Streusalz und Schmutz, leichteres Waschen, tiefer Glanz. Zubuchbar zu Signature und Excellence.",
   "h1": "Lackversiegelung in Celle: *Schutz, der Monate hält.*",
   "lead": "Eine hochwertige Versiegelung legt sich als Schutzschicht über den Klarlack. **Schmutz und Wasser perlen ab, Waschen wird leichter, der Glanz bleibt.**",
   "facts": [
     {
-      "value": "ab {ab:premium} €",
-      "label": "im Paket Premium Politur"
+      "value": "Zusatzleistung",
+      "label": "zu Signature oder Excellence"
     },
     {
       "value": "Monate",
@@ -21,7 +21,6 @@
       "label": "Profi-Versiegelung"
     }
   ],
-  "package": "premium",
   "intro": "Der Klarlack Ihres Autos ist täglich UV-Strahlung, Streusalz, Insekten, Vogelkot, Baumharz und Straßenschmutz ausgesetzt. Eine professionelle Lackversiegelung bildet eine glatte, hydrophobe Schutzschicht, an der Schmutz schlechter haftet und Wasser abperlt. Der Lack bleibt länger sauber, lässt sich leichter waschen und behält seinen Glanz.\n\nBesonders sinnvoll ist eine Versiegelung direkt nach dem Neuwagenkauf, nach einer Lackpolitur oder vor dem Winter. Wir bereiten den Lack vor der Versiegelung gründlich vor: Wäsche, Dekontamination, bei Bedarf Politur und Entfettung. Nur auf perfekt vorbereitetem Lack hält eine Versiegelung so lange, wie sie soll.\n",
   "includes": [
     "Handwäsche und chemische Dekontamination",
@@ -29,8 +28,7 @@
     "Optional: Politur vor der Versiegelung",
     "Entfettung aller Lackflächen",
     "Auftrag der Versiegelung Panel für Panel",
-    "Felgenversiegelung gegen Bremsstaub",
-    "Scheibenversiegelung für bessere Sicht bei Regen",
+    "Felgen- und Scheibenversiegelung auf Anfrage",
     "Pflegehinweise zur Erhaltung der Schutzschicht"
   ],
   "steps": [
@@ -40,7 +38,7 @@
     },
     {
       "title": "Optional: Politur",
-      "text": "Vorhandene Kratzer werden vorher entfernt, denn eine Versiegelung konserviert den Zustand darunter."
+      "text": "Vorhandene Waschspuren werden vorher per Politur reduziert, denn eine Versiegelung konserviert den Zustand darunter."
     },
     {
       "title": "Entfetten & Versiegeln",
@@ -73,5 +71,10 @@
     "keramikversiegelung-celle",
     "lackpolitur-celle",
     "aussenaufbereitung-celle"
-  ]
+  ],
+  "bookAs": "signature",
+  "priceCard": {
+    "title": "Separat buchbar",
+    "text": "Die Lackversiegelung buchen Sie zu den Paketen Signature (ab {ab:signature} €) oder Excellence (ab {ab:excellence} €) dazu. Den Preis nennen wir Ihnen vorab im verbindlichen Angebot."
+  }
 }

@@ -2,15 +2,15 @@
   "slug": "lackpolitur-celle",
   "order": 2,
   "short": "Lackpolitur",
-  "teaser": "Mehrstufige Politur gegen Kratzer, Hologramme und matten Lack.",
-  "seoTitle": "Lackpolitur Celle: Kratzer & Hologramme weg | ElbDetail",
-  "description": "Mehrstufige Lackpolitur in Celle gegen Waschstraßenkratzer, Hologramme und Oxidation. Ab {ab:premium} € inkl. Versiegelung. Koch-Chemie geschult.",
-  "h1": "Lackpolitur in Celle: *Tiefenglanz statt Kratzer.*",
+  "teaser": "Mehrstufige Lackkorrektur gegen Waschspuren, Hologramme und matten Lack.",
+  "seoTitle": "Lackpolitur Celle: Hologramme & Swirls weg | ElbDetail",
+  "description": "Lackpolitur in Celle: mehrstufige Lackkorrektur gegen Waschspuren, Hologramme und Oxidation. Im Paket Excellence ab {ab:excellence} €. Koch-Chemie geschult.",
+  "h1": "Lackpolitur in Celle: *Tiefenglanz statt Waschspuren.*",
   "lead": "Mehrstufige Maschinenpolitur gegen Swirls, Hologramme, Oxidation und matte Stellen. **Der Lack bekommt seine Tiefe zurück, mit so wenig Abtrag wie nötig.**",
   "facts": [
     {
-      "value": "ab {ab:premium} €",
-      "label": "Premium Politur inkl. Versiegelung"
+      "value": "ab {ab:excellence} €",
+      "label": "im Paket Excellence"
     },
     {
       "value": "ab 24 Std.",
@@ -21,8 +21,8 @@
       "label": "Schleif- & Finishpolitur"
     }
   ],
-  "package": "premium",
-  "intro": "Jede Waschstraße, jeder trockene Lappen und jeder Winter hinterlassen Spuren im Klarlack: feine Kratzer, die in der Sonne als Spinnennetz sichtbar werden, Hologramme von schlecht ausgeführten Polituren, matte, oxidierte Flächen. Eine professionelle Lackpolitur trägt diese Defekte kontrolliert ab und stellt Glanz und Farbtiefe wieder her.\n\nWir arbeiten mehrstufig: Zuerst wird der Lack gewaschen, dekontaminiert und geknetet, dann die Lackstärke gemessen. Erst danach entscheiden wir, wie viel Abtrag nötig und sicher ist. Nach der Schleifpolitur folgt eine Finishpolitur für maximalen Glanz, abschließend wird der Lack entfettet und versiegelt.\n",
+  "package": "excellence",
+  "intro": "Jede Waschstraße, jeder trockene Lappen und jeder Winter hinterlassen Spuren im Klarlack: feine Kratzer, die in der Sonne als Spinnennetz sichtbar werden, Hologramme von schlecht ausgeführten Polituren, matte, oxidierte Flächen. Eine professionelle Lackpolitur reduziert diese Defekte kontrolliert und bringt Glanz und Farbtiefe zurück. Wie weit sich der Lack korrigieren lässt, hängt von seinem Zustand ab. Tiefe Kratzer bis in die Grundierung lassen sich durch Polieren nicht entfernen.\n\nWir arbeiten mehrstufig: Zuerst wird der Lack gewaschen, dekontaminiert und geknetet, dann die Lackstärke gemessen. Erst danach entscheiden wir, wie viel Abtrag nötig und sicher ist. Nach der Schleifpolitur folgt eine Finishpolitur für maximalen Glanz. Auf Wunsch versiegeln wir den Lack anschließend, die Versiegelung ist separat buchbar.\n",
   "includes": [
     "Handwäsche und chemische Dekontamination",
     "Lackreinigungsknete gegen Rauigkeit",
@@ -31,7 +31,7 @@
     "Einstufige Glanzpolitur oder mehrstufige Lackkorrektur, je nach Zustand",
     "Finishpolitur für Tiefenglanz",
     "Kontrolle unter Tageslicht und Punktlicht",
-    "Lackversiegelung zum Schutz des Ergebnisses"
+    "Optional: Lack- oder Keramikversiegelung (separat buchbar)"
   ],
   "steps": [
     {
@@ -40,15 +40,15 @@
     },
     {
       "title": "Schleifpolitur",
-      "text": "Mit abgestimmten Pad-Politur-Kombinationen werden Kratzer und Hologramme kontrolliert abgetragen."
+      "text": "Mit abgestimmten Pad-Politur-Kombinationen werden korrigierbare Kratzer und Hologramme kontrolliert reduziert."
     },
     {
       "title": "Finishpolitur",
-      "text": "Feine Politur für maximalen Glanz und einen hologrammfreien Lack."
+      "text": "Feine Politur für maximalen Glanz und ein möglichst hologrammfreies Lackbild."
     },
     {
-      "title": "Versiegelung",
-      "text": "Der polierte Lack wird entfettet und versiegelt, damit das Ergebnis Monate hält."
+      "title": "Schutz nach Wunsch",
+      "text": "Auf Wunsch versiegeln wir den polierten Lack, klassisch oder mit C² CarCeramic. Beides buchen Sie separat dazu."
     }
   ],
   "faq": [
@@ -62,11 +62,11 @@
     },
     {
       "q": "Wie lange hält das Ergebnis?",
-      "a": "Die entfernten Kratzer sind dauerhaft weg. Wie lange der Lack kratzerfrei bleibt, hängt von der Pflege danach ab: Handwäsche statt Waschstraße und die mitgelieferte Versiegelung verlängern das Ergebnis deutlich."
+      "a": "Was einmal auspoliert ist, kommt nicht von selbst zurück. Wie lange der Lack so schön bleibt, hängt von der Pflege danach ab: Handwäsche statt Waschstraße und eine anschließende Versiegelung verlängern das Ergebnis deutlich."
     },
     {
       "q": "Was kostet eine Lackpolitur in Celle?",
-      "a": "Im Paket Premium Politur ist die mehrstufige Politur inklusive Komplettpflege und Lackversiegelung ab {ab:premium} € für eine Kompaktklasse enthalten. Eine Politur als Einzelleistung oder nur einzelner Teile, zum Beispiel der Motorhaube, bieten wir nach Besichtigung an."
+      "a": "Im Paket Signature ist eine einstufige Glanzpolitur ab {ab:signature} € enthalten, im Paket Excellence die mehrstufige Lackkorrektur ab {ab:excellence} €, jeweils mit kompletter Innen- und Außenaufbereitung und als Ab-Preis für einen Kleinwagen. Eine Versiegelung buchen Sie separat dazu. Eine Politur als Einzelleistung oder nur einzelner Teile, zum Beispiel der Motorhaube, bieten wir nach Besichtigung an."
     }
   ],
   "related": [

@@ -126,10 +126,10 @@ Eher verzichtbar, wenn
 
 ## Was kostet eine Versiegelung beim Neuwagen?
 
-Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des Lacks ab. Bei ElbDetail ist die Lackversiegelung einzeln buchbar, der Preis dafür wird auf Anfrage genannt. Hat der Lack bereits Waschkratzer, ist das Paket Premium Politur eine Option. Es umfasst eine mehrstufige Lackpolitur, Lackversiegelung sowie Felgen- und Scheibenversiegelung und beginnt bei Kompaktwagen ab {ab:premium} €, bei Limousinen und Kombis ab {preis:premium:mittel} € und bei SUVs und Vans ab {preis:premium:suv} €. Die Richtpreise gelten für einen normalen Pflegezustand.
+Was eine Versiegelung kostet, hängt von der Fahrzeuggröße und vom Zustand des Lacks ab. Bei ElbDetail ist die Lackversiegelung einzeln buchbar, der Preis dafür wird auf Anfrage genannt. Hat der Lack bereits Waschspuren, sind die Pakete Signature (einstufige Glanzpolitur, ab {ab:signature} €) oder Excellence (mehrstufige Lackkorrektur, ab {ab:excellence} €) eine Option, zu denen Sie die Versiegelung dazubuchen. Für den Neuwagen ist auch die C² CarCeramic Keramikversiegelung ab {ab:keramik} € möglich, nach Lackprüfung und nötiger Vorbereitung sogar ohne Aufbereitungspaket. Die Preise gelten für einen normalen Pflegezustand.
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Sie ist außerdem Teil des Pakets Premium Politur. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und mit professionellen Produkten von Koch-Chemie und C²Coating. Sie erhalten vor dem Termin einen verbindlichen Preis und begutachten das Ergebnis gemeinsam mit uns bei Tageslicht. Richtpreise finden Sie in der [Preisübersicht](/preise.html).
+ElbDetail in Celle bietet die [Lackversiegelung](/leistungen/lackversiegelung-celle.html) einzeln an. Zu den Paketen Signature und Excellence buchen Sie sie separat dazu. Gearbeitet wird in Handarbeit mit Zwei-Eimer-Handwäsche und mit professionellen Produkten von Koch-Chemie und C²Coating. Sie erhalten vor dem Termin einen verbindlichen Preis und begutachten das Ergebnis gemeinsam mit uns bei Tageslicht. Richtpreise finden Sie in der [Preisübersicht](/preise.html).
 
 Fragen Sie Ihren Termin für den Neuwagen per WhatsApp an +49 172 7613807 oder über das [Terminformular](/termin.html) an.

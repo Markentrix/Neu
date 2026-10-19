@@ -123,7 +123,7 @@ def build_winter_hub(site, write, winter):
       <aside class="sticky-aside">
         <div class="aside-card dark">
           <h3>Winter-Lackschutz in Celle</h3>
-          <p>Politur und Versiegelung vor dem ersten Streusalz, ab {site.min_price("premium")} €. Ab der Komplettpflege bleibt Ihr Auto rund 24 Stunden bei uns und trocknet über Nacht in der Halle.</p>
+          <p>Glanzpolitur im Paket Signature ab {site.min_price("signature")} €, dazu eine Versiegelung vor dem ersten Streusalz. Ab dem Paket Essential bleibt Ihr Auto rund 24 Stunden bei uns und trocknet über Nacht in der Halle.</p>
           <a class="btn btn-primary" href="{prefix}aktion/winterschutz.html">Zur Winteraktion</a>
         </div>
       </aside>
@@ -162,7 +162,7 @@ def build_article(site, a, write):
     if sv:
         sv_card = f'''<div class="aside-card"><h3>Passende Leistung</h3><p><strong>{ESC(sv["short"])}</strong>: {ESC(sv["teaser"])}</p>
           <a class="btn btn-line-light" href="{prefix}leistungen/{sv["slug"]}.html">{ESC(sv["short"])} ansehen</a></div>'''
-    pkg = sv["package"] if sv else ""
+    pkg = (sv.get("package") or sv.get("bookAs", "")) if sv else ""
     body = f'''
 <main id="main">
   <article class="article" aria-labelledby="page-h">

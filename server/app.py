@@ -575,7 +575,7 @@ def voucher_html(v):
     pr = pricing()
     pname = next((p["name"] for p in pr.get("packages", []) if p["key"] == v["paket"]), "")
     value = html.escape(pname) if v["art"] == "paket" and pname else f"{v['wert']} €"
-    desc = "Fahrzeugaufbereitung für die Kompaktklasse" if v["art"] == "paket" else "für eine Fahrzeugaufbereitung nach Wahl"
+    desc = "Fahrzeugaufbereitung für einen Kleinwagen" if v["art"] == "paket" else "für eine Fahrzeugaufbereitung nach Wahl"
     valid = dt.date.fromisoformat(v["valid_until"]).strftime("%d.%m.%Y")
     state = {"offen": "Noch nicht bezahlt – wird nach Zahlungseingang gültig.", "storniert": "Dieser Gutschein wurde storniert.",
              "eingeloest": "Dieser Gutschein wurde bereits eingelöst."}.get(v["status"], "")
@@ -604,7 +604,7 @@ def voucher_html(v):
 <div class="names">{f'<span>Für <b>{E(v["fuer"])}</b></span>' if v['fuer'] else ''}{f'<span>Von <b>{E(v["von"])}</b></span>' if v['von'] else ''}</div>
 <p class="msg">{E(v['widmung'] or '')}</p>
 <div class="foot"><span>Code <span class="code">{E(v['code'])}</span></span><span>Gültig bis {valid}</span><span>{E(s.get('name', ''))} · {E(a.get('street', ''))}, {E(a.get('zip', ''))} {E(a.get('city', ''))}</span></div></div>
-<div class="how"><h2>So wird der Gutschein eingelöst</h2><p>Termin über <b>{E(Cfg.public_url.split('//')[-1])}/termin.html</b> anfragen und den Code im Feld „Gutscheincode“ eintragen, oder per WhatsApp an {E(s.get('phoneIntl', ''))} mit dem Code schreiben. Paketgutscheine gelten für die Kompaktklasse; bei größeren Fahrzeugen wird nur die Differenz fällig.</p></div>
+<div class="how"><h2>So wird der Gutschein eingelöst</h2><p>Termin über <b>{E(Cfg.public_url.split('//')[-1])}/termin.html</b> anfragen und den Code im Feld „Gutscheincode“ eintragen, oder per WhatsApp an {E(s.get('phoneIntl', ''))} mit dem Code schreiben. Paketgutscheine gelten für einen Kleinwagen; bei größeren Fahrzeugen wird nur die Differenz fällig.</p></div>
 <p class="noprint"><button class="btn" id="printBtn" type="button">Drucken oder als PDF speichern</button></p>
 </div><script src="/gutschein-druck.js"></script></body></html>"""
 

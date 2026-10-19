@@ -25,7 +25,7 @@
     },
     {
       "q": "Welches Paket eignet sich für die Leasingrückgabe?",
-      "a": "Für die meisten Rückgaben ist die Komplettpflege ein guter Ausgangspunkt, weil sie Innenraum und Außenbereich gründlich abdeckt. Zeigt der Lack viele feine Kratzer, kann die Premium Politur sinnvoll sein. Den verbindlichen Preis bekommen Sie bei ElbDetail vor dem Termin."
+      "a": "Für die meisten Rückgaben ist das Paket Essential ein guter Ausgangspunkt, weil es Innenraum und Außenbereich gründlich abdeckt. Wirkt der Lack stumpf oder zeigt er feine Kratzer, kann das Paket Signature mit Glanzpolitur sinnvoll sein. Den verbindlichen Preis bekommen Sie bei ElbDetail vor dem Termin."
     }
   ]
 }
@@ -85,9 +85,9 @@ Fangen Sie am besten etwa zwei Monate vor dem Rückgabetermin an. So bleibt genu
 
 ## Welches Paket ist für die Leasingrückgabe sinnvoll?
 
-Für die meisten Leasingrückgaben ist die Komplettpflege ein guter Ausgangspunkt, weil der Innenraum oft am stärksten beansprucht ist. Sie umfasst die Handwäsche außen, Felgen und Scheiben sowie eine Tiefenreinigung von Polstern und Teppich, Leder- oder Polsterpflege, Kunststoffpflege und Geruchsneutralisation. Die Richtpreise liegen bei ab {ab:komplett} € für Kompaktwagen, ab {preis:komplett:mittel} € für Limousinen und Kombis und ab {preis:komplett:suv} € für SUVs und Vans.
+Für die meisten Leasingrückgaben ist das Paket Essential ein guter Ausgangspunkt, weil der Innenraum oft am stärksten beansprucht ist. Es umfasst die Handwäsche außen, Felgen und Scheiben sowie eine intensive Innenraum- und Kofferraumreinigung, Einstiege, Türverkleidungen und Kunststoffe und eine materialgerechte Polster-, Teppich- beziehungsweise Lederreinigung mit Pflege. Die Ab-Preise liegen bei {ab:essential} € für Kleinwagen, {preis:essential:kompakt} € für Kompaktwagen, {preis:essential:mittel} € für Limousinen, Kombis und kleinere SUVs und {preis:essential:suv} € für große SUVs und Vans.
 
-Zeigt der Lack viele feine Kratzer oder Waschanlagenspuren, kann die Premium Politur sinnvoll sein. Das Paket enthält zusätzlich eine mehrstufige Lackpolitur, Kratzer- und Hologrammentfernung sowie eine Lack-, Felgen- und Scheibenversiegelung. Hier beginnen die Richtpreise bei {ab:premium} €. Alle Pakete finden Sie in der [Preisübersicht](/preise.html), Details zur Politur auf der Seite [Lackpolitur](/leistungen/lackpolitur-celle.html).
+Zeigt der Lack viele feine Kratzer oder Waschanlagenspuren, kommen die Pakete Signature (einstufige Glanzpolitur, ab {ab:signature} €) oder Excellence (mehrstufige Lackkorrektur, ab {ab:excellence} €) infrage. Wie weit sich der Lack korrigieren lässt, hängt von seinem Zustand ab. Alle Pakete finden Sie in der [Preisübersicht](/preise.html), Details zur Politur auf der Seite [Lackpolitur](/leistungen/lackpolitur-celle.html).
 
 > Eine Aufbereitung ist keine Garantie für eine Rückgabe ohne Nachzahlung. Sie sorgt aber dafür, dass Ihr Auto sauber und gepflegt zur Begutachtung kommt und Schmutz nicht mit Schäden verwechselt wird.
 

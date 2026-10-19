@@ -70,8 +70,8 @@ Wenn es im Auto muffig riecht, sich der Teppich dauerhaft feucht anfühlt oder d
 
 Bei einer [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html) werden Sitze, Teppiche und Matten nass gereinigt und anschließend gründlich getrocknet. Salzränder und Schmutz verschwinden, Gerüche werden an der Ursache beseitigt. Mehr dazu lesen Sie im Ratgeber [Geruch im Auto entfernen](/ratgeber/geruch-im-auto-entfernen.html).
 
-> Gut zu wissen: Bei einer Komplettpflege lassen wir Ihr Auto rund 24 Stunden bei uns. So kann der Innenraum nach der Nassreinigung über Nacht in der Halle vollständig trocknen, gerade im Winter ein wichtiger Punkt.
+> Gut zu wissen: Ab dem Paket Essential lassen wir Ihr Auto rund 24 Stunden bei uns. So kann der Innenraum nach der Nassreinigung über Nacht in der Halle vollständig trocknen, gerade im Winter ein wichtiger Punkt.
 
 ## Innenreinigung im Winter bei ElbDetail in Celle
 
-ElbDetail reinigt Innenräume in Handarbeit mit Profi-Produkten von Koch-Chemie, Leder pflegen wir mit Colourlock. Die Komplettpflege mit Innen-Tiefenreinigung gibt es ab {ab:komplett} €. Den verbindlichen Preis erfahren Sie vor dem Termin. Weitere Tipps für die kalte Jahreszeit finden Sie im Ratgeber [Auto im Winter waschen](/ratgeber/auto-im-winter-waschen-streusalz.html).
+ElbDetail reinigt Innenräume in Handarbeit mit Profi-Produkten von Koch-Chemie, Leder pflegen wir mit Colourlock. Das Paket Essential mit Innen-Tiefenreinigung gibt es ab {ab:essential} €. Den verbindlichen Preis erfahren Sie vor dem Termin. Weitere Tipps für die kalte Jahreszeit finden Sie im Ratgeber [Auto im Winter waschen](/ratgeber/auto-im-winter-waschen-streusalz.html).

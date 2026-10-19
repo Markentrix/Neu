@@ -4,13 +4,13 @@
   "short": "Leasingrückgabe & Verkauf",
   "teaser": "Aufbereitung vor Rückgabe oder Verkauf: weniger Abzüge, besserer Preis.",
   "seoTitle": "Aufbereitung vor Leasingrückgabe Celle | ElbDetail",
-  "description": "Aufbereitung vor Leasingrückgabe oder Verkauf in Celle: weniger Abzüge, besserer Preis. Innen & außen ab {ab:komplett} €, kurzfristige Termine.",
+  "description": "Aufbereitung vor Leasingrückgabe oder Verkauf in Celle: weniger Abzüge, besserer Preis. Innen & außen ab {ab:essential} €, kurzfristige Termine.",
   "h1": "Aufbereitung vor Leasingrückgabe & Verkauf: *weniger Abzüge, mehr Erlös.*",
   "lead": "Bei der Rückgabe zahlt man für jeden Fleck, jeden Kratzer und jeden Geruch. Beim Verkauf bekommt man für Glanz und Sauberkeit mehr Geld. **Wir sorgen dafür, dass Ihr Auto im besten Licht steht.**",
   "facts": [
     {
-      "value": "ab {ab:komplett} €",
-      "label": "Komplettpflege"
+      "value": "ab {ab:essential} €",
+      "label": "im Paket Essential"
     },
     {
       "value": "ca. 24 Std.",
@@ -21,8 +21,8 @@
       "label": "auf Wunsch mit Politur"
     }
   ],
-  "package": "komplett",
-  "intro": "Leasinggesellschaften bewerten bei der Rückgabe sehr genau: Flecken auf den Sitzen, Gerüche, verschmutzte Kunststoffe, Kratzer und stumpfer Lack werden nach festen Katalogen als Minderwert berechnet. Vieles davon ist keine Beschädigung, sondern reine Verschmutzung oder oberflächliche Gebrauchsspur, die sich mit einer professionellen Aufbereitung beheben lässt.\n\nBeim privaten Verkauf gilt dasselbe in die andere Richtung: Ein sauberes, glänzendes Fahrzeug wirkt gepflegt, erzeugt Vertrauen und erzielt in den meisten Fällen einen Aufpreis, der die Aufbereitung deutlich übersteigt. Außerdem verkauft es sich schneller, weil die Fotos im Inserat besser aussehen.\n\n## Was wir vor Rückgabe oder Verkauf machen\n\nStandard ist unsere Komplettpflege: komplette Innenraum-Tiefenreinigung inklusive Polster, Teppich, Leder und Geruchsneutralisation plus Außenwäsche mit Felgen und Dekontamination. Bei verkratztem oder mattem Lack empfehlen wir zusätzlich die Lackpolitur, weil Lackzustand und Swirls bei der Rückgabebewertung besonders ins Gewicht fallen.\n",
+  "package": "essential",
+  "intro": "Leasinggesellschaften bewerten bei der Rückgabe sehr genau: Flecken auf den Sitzen, Gerüche, verschmutzte Kunststoffe, Kratzer und stumpfer Lack werden nach festen Katalogen als Minderwert berechnet. Vieles davon ist keine Beschädigung, sondern reine Verschmutzung oder oberflächliche Gebrauchsspur, die sich mit einer professionellen Aufbereitung beheben lässt.\n\nBeim privaten Verkauf gilt dasselbe in die andere Richtung: Ein sauberes, glänzendes Fahrzeug wirkt gepflegt, erzeugt Vertrauen und erzielt in den meisten Fällen einen Aufpreis, der die Aufbereitung deutlich übersteigt. Außerdem verkauft es sich schneller, weil die Fotos im Inserat besser aussehen.\n\n## Was wir vor Rückgabe oder Verkauf machen\n\nStandard ist unser Paket Essential: komplette Innenraum-Tiefenreinigung inklusive Polster, Teppich, Leder und Geruchsneutralisation plus Außenwäsche mit Felgen und Dekontamination. Bei verkratztem oder mattem Lack empfehlen wir zusätzlich die Lackpolitur, weil Lackzustand und Swirls bei der Rückgabebewertung besonders ins Gewicht fallen.\n",
   "includes": [
     "Innenraum-Tiefenreinigung inkl. Polster und Teppich",
     "Leder- und Kunststoffpflege",
@@ -55,7 +55,7 @@
   "faq": [
     {
       "q": "Lohnt sich die Aufbereitung vor der Leasingrückgabe finanziell?",
-      "a": "In den meisten Fällen ja. Verschmutzung, Gerüche und oberflächliche Gebrauchsspuren werden bei der Rückgabe als Minderwert berechnet, oft mit mehreren hundert Euro. Eine Komplettpflege ab {ab:komplett} € ist in der Regel günstiger als die Abzüge, die sie verhindert."
+      "a": "In den meisten Fällen ja. Verschmutzung, Gerüche und oberflächliche Gebrauchsspuren werden bei der Rückgabe als Minderwert berechnet, oft mit mehreren hundert Euro. Das Paket Essential ab {ab:essential} € ist in der Regel günstiger als die Abzüge, die sie verhindert."
     },
     {
       "q": "Welche Mängel können Sie beheben und welche nicht?",

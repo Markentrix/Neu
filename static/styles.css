@@ -202,15 +202,15 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, div[tabindex="-1"]:focu
   transition: padding 0.25s ease, box-shadow 0.25s ease;
 }
 .site-header.is-scrolled .header-inner { padding-block: 5px; }
-.site-header.is-scrolled .brand img { height: 36px; }
+.site-header.is-scrolled .brand img { height: 38px; }
 .brand { display: flex; align-items: center; text-decoration: none; }
-.brand img { height: 46px; width: auto; transition: height 0.25s ease; }
+.brand img { height: 48px; width: auto; transition: height 0.25s ease; }
 
 .main-nav { display: none; }
 .main-nav ul { list-style: none; display: flex; gap: 22px; }
 .main-nav a {
   position: relative; color: var(--muted-on-anthracite); text-decoration: none;
-  font-weight: 600; font-size: 0.86rem; padding-bottom: 3px;
+  font-weight: 600; font-size: 0.86rem; padding-bottom: 3px; white-space: nowrap;
 }
 .main-nav a::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
@@ -247,7 +247,8 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, div[tabindex="-1"]:focu
 .header-social a { width: 36px; height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted-on-anthracite); border-radius: 10px; transition: color 0.2s ease, background-color 0.2s ease; }
 .header-social a:hover, .header-social a:focus-visible { color: #fff; background: rgba(255,255,255,0.07); }
 .header-social svg { width: 18px; height: 18px; }
-@media (min-width: 1280px) { .header-social { display: inline-flex; } }
+@media (min-width: 1360px) { .header-social { display: inline-flex; } }
+@media (max-width: 1439.98px) { .main-nav ul { gap: 16px; } }
 .mobile-social { display: flex; align-items: center; gap: 10px; margin: 10px 14px 6px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); color: var(--muted-on-anthracite); font-size: 0.9rem; font-weight: 600; }
 .mobile-social span { margin-left: 4px; }
 @media (min-width: 1100px) {
@@ -522,6 +523,7 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .price-stand { display: flex; gap: 10px; align-items: flex-start; max-width: 72ch; margin: 12px 0 0; padding: 14px 16px; border-radius: var(--radius-m); background: var(--blue-soft); color: var(--ink); font-size: 0.94rem; }
 .price-stand svg { width: 20px; height: 20px; flex: none; color: var(--blue); margin-top: 1px; }
 .seg.c4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.seg.c6 span small { font-size: 0.72rem; }
 .seg label, .seg span { min-width: 0; overflow-wrap: break-word; }
 .seg label { position: relative; min-width: 0; }
 .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; }
@@ -618,7 +620,9 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .price-toolbar .seg span small { display: none; }
 .price-toolbar .seg input:checked + span { background: var(--anthracite); color: #fff; }
 .price-toolbar p { font-size: 0.9rem; color: var(--ink); }
-@media (max-width: 599.98px) { .price-toolbar .seg { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 22px; width: 100%; } .price-toolbar .seg span { padding: 6px 10px; text-align: center; justify-content: center; } }
+.price-toolbar .seg.c6 { grid-template-columns: repeat(6, auto); }
+@media (max-width: 1099.98px) { .price-toolbar .seg.c6 { grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: 22px; } .price-toolbar .seg.c6 span { text-align: center; justify-content: center; } }
+@media (max-width: 599.98px) { .price-toolbar .seg, .price-toolbar .seg.c6 { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 22px; width: 100%; } .price-toolbar .seg span { padding: 6px 10px; text-align: center; justify-content: center; } }
 
 /* Startseite: Pakete als kompakte Zeilen, volle Übersicht auf preise.html */
 .plan-rows { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
@@ -691,6 +695,32 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .price-table tbody tr:last-child td, .price-table tbody tr:last-child th { border-bottom: none; }
 .price-table .yes { color: var(--blue); font-weight: 650; }
 .price-table .featured-col { background: var(--blue-soft); }
+.price-table .opt { color: var(--ink); font-weight: 650; }
+.compare-legend { padding: 12px 22px 16px; border-top: 1px solid var(--line); font-size: 0.84rem; color: var(--muted); }
+.plan li.opt { color: var(--muted); }
+.plan li.opt svg { color: var(--blue); opacity: 0.6; }
+
+/* Paketbeschreibungen und C² CarCeramic-Preisliste */
+.pkg-details { margin-top: 44px; }
+.pkg-details dl { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 16px; }
+.pkg-details dl > div { padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--bg); }
+.pkg-details dt { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.pkg-details dd { margin: 0; font-size: 0.93rem; line-height: 1.55; color: var(--muted); }
+.ceramic-prices { margin-top: 48px; display: grid; gap: 14px; }
+.ceramic-prices > p { max-width: 72ch; }
+.ceramic-grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; }
+.ceramic-grid .price-scroll { border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--bg); }
+.ceramic-table { min-width: 0; }
+.ceramic-table caption { caption-side: top; text-align: left; padding: 14px 20px 10px; font-weight: 650; color: var(--ink); }
+.ceramic-table th, .ceramic-table td { padding: 11px 20px; }
+.ceramic-table .num { text-align: right; white-space: nowrap; color: var(--ink); font-weight: 650; font-variant-numeric: tabular-nums; }
+.ceramic-notes { display: grid; gap: 6px; padding-left: 1.1em; font-size: 0.9rem; color: var(--muted); max-width: 80ch; }
+.ceramic-prices .btn { justify-self: start; }
+.prose .ceramic-grid { grid-template-columns: 1fr; }
+.prose .ceramic-prices a.btn { color: #fff; text-decoration: none; }
+.prose .ceramic-table caption, .prose .ceramic-notes li { font-size: 0.9rem; }
+@media (max-width: 899.98px) { .ceramic-grid { grid-template-columns: 1fr; } }
+@media (max-width: 599.98px) { .ceramic-table th, .ceramic-table td { padding: 10px 12px; font-size: 0.86rem; } .ceramic-table caption { padding: 12px 12px 8px; } }
 
 /* ==========================================================================
    Vorher / Nachher
@@ -1056,6 +1086,7 @@ a.ref-cell:hover .ref-word, a.ref-cell:hover .ref-cell-go, a.ref-cell:focus-visi
   .header-inner { margin-inline: 12px; padding: 6px 6px 6px 14px; gap: 10px; }
   .brand { min-height: 44px; }
   .brand img { height: 40px; }
+  .site-header.is-scrolled .brand img { height: 36px; }
   .site-header.is-scrolled .brand img { height: 34px; }
   .mobile-nav { margin: 8px 12px 0; max-height: calc(100dvh - var(--header-h) - 76px); overflow-y: auto; overscroll-behavior: contain; }
   .mobile-nav a { padding: 14px 16px; font-size: 1.05rem; }

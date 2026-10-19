@@ -66,9 +66,9 @@ for (const path of ["/", "/angebote.html", "/ratgeber/winter.html", "/zertifikat
 test("Richtpreis-Rechner rechnet je Fahrzeugklasse", async ({ page }) => {
   await page.goto("/");
   await page.locator('#quoteForm label:has(input[value="suv"])').click();
-  await page.locator('#quoteForm label:has(input[value="premium"])').click();
-  await expect(page.locator("#quoteValue")).toContainText("449");
-  await expect(page.locator("#quoteBook")).toHaveAttribute("href", /paket=premium&klasse=suv/);
+  await page.locator('#quoteForm label:has(input[value="excellence"])').click();
+  await expect(page.locator("#quoteValue")).toContainText("900");
+  await expect(page.locator("#quoteBook")).toHaveAttribute("href", /paket=excellence&klasse=suv/);
 });
 
 test("Buchung: Zurück und Absenden erst dann sichtbar, wenn sie gebraucht werden", async ({ page }) => {
@@ -82,9 +82,9 @@ test("Buchung: Zurück und Absenden erst dann sichtbar, wenn sie gebraucht werde
 });
 
 test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
-  await page.goto("/termin.html?paket=komplett&klasse=suv");
-  await expect(page.locator('input[name="paket"][value="komplett"]')).toBeChecked();
-  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 229 €");
+  await page.goto("/termin.html?paket=essential&klasse=suv");
+  await expect(page.locator('input[name="paket"][value="essential"]')).toBeChecked();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 525 €");
   await page.locator("[data-wz-next]").click();
   await expect(page.locator('input[name="klasse"][value="suv"]')).toBeChecked();
   await page.fill("#t-vehicle", "VW Tiguan 2020");
@@ -113,11 +113,22 @@ test("Kontaktformular zeigt Pflichtfelder an", async ({ page }) => {
 
 test("Preisseite: Fahrzeugklasse schaltet Richtpreise um", async ({ page }) => {
   await page.goto("/preise.html");
-  const amount = page.locator('[data-plan="komplett"] .amount');
+  const amount = page.locator('[data-plan="essential"] .amount');
   const before = await amount.textContent();
   await page.locator('#priceClass label').nth(2).click();
   await expect(amount).not.toHaveText(before || "");
-  await expect(page.locator('[data-plan="komplett"] [data-book]')).toHaveAttribute("href", /paket=komplett&klasse=/);
+  await expect(page.locator('[data-plan="essential"] [data-book]')).toHaveAttribute("href", /paket=essential&klasse=/);
+});
+
+test("Preisseite: C² CarCeramic-Preisliste und optionale Versiegelung", async ({ page }) => {
+  await page.goto("/preise.html");
+  const cer = page.locator("#keramik-preise");
+  await expect(cer).toContainText("550");
+  await expect(cer).toContainText("1.190");
+  await expect(cer).toContainText("bis 7 m");
+  await expect(page.locator('[data-plan="signature"] li.opt').first()).toContainText("separat");
+  await page.locator('#priceClass label:has(input[value="camper"])').click();
+  await expect(page.locator('[data-plan="essential"] .amount')).toContainText("auf Anfrage");
 });
 
 test("Startseite: kompakter Kontaktblock führt zu Termin, WhatsApp und Kontaktseite", async ({ page }) => {
@@ -153,7 +164,7 @@ test("Gutschein-Vorschau und Bestellung", async ({ page }) => {
   await page.fill("#g-custom", "120");
   await expect(page.locator('[data-vc="value"]')).toHaveText("120 €");
   await page.locator('label.choice-pill:has(input[value="paket"])').click();
-  await expect(page.locator('[data-vc="value"]')).toHaveText("Komplettpflege", { timeout: 2000 }).catch(() => {});
+  await expect(page.locator('[data-vc="value"]')).toHaveText("Essential", { timeout: 2000 }).catch(() => {});
   await page.locator('label.choice-pill:has(input[value="wert"])').click();
   await page.fill("#g-name", "E2E Käuferin");
   await page.fill("#g-email", "kauf@example.com");
@@ -168,14 +179,16 @@ test("404-Seite", async ({ request }) => {
   expect(await r.text()).toContain("Diese Seite gibt es nicht");
 });
 
-test("Preisrechner: Sport / Premium zeigt individuelles Angebot statt Preis", async ({ page }) => {
+test("Preisrechner: Sport / Luxus und Wohnmobil zeigen individuelles Angebot statt Preis", async ({ page }) => {
   await page.goto("/");
   await page.locator('label:has(input[name="qclass"][value="sport"])').click();
   await expect(page.locator("#quoteValue")).toContainText("auf Anfrage");
   await expect(page.locator("#quoteBook")).toHaveAttribute("href", /klasse=sport/);
   await expect(page.locator("#quoteBook")).toContainText("Individuelles Angebot");
+  await page.locator('label:has(input[name="qclass"][value="camper"])').click();
+  await expect(page.locator("#quoteNote")).toContainText("Wohnmobile");
   await page.locator('label:has(input[name="qclass"][value="suv"])').click();
-  await expect(page.locator("#quoteValue")).toContainText("229");
+  await expect(page.locator("#quoteValue")).toContainText("525");
 });
 
 test("Ohne Google-Analytics-ID: kein Einwilligungs-Hinweis, kein Google-Skript", async ({ page }) => {

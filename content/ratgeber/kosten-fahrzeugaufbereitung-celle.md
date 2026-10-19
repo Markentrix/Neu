@@ -3,13 +3,13 @@
   "seoTitle": "Fahrzeugaufbereitung Celle: Kosten & Preise | ElbDetail",
   "description": "Was kostet eine Fahrzeugaufbereitung in Celle? Richtpreise je Paket und Fahrzeugklasse, die wichtigsten Preisfaktoren und Tipps, wie Sie sinnvoll sparen.",
   "date": "2026-10-15",
-  "updated": "2026-10-15",
+  "updated": "2026-10-19",
   "category": "Preise & Kosten",
   "readingTime": 6,
   "excerpt": "Von der Handwäsche bis zur Lackpolitur: Hier sehen Sie, was eine Fahrzeugaufbereitung kostet, wovon der Preis abhängt und wie Sie ohne Qualitätsverlust sparen.",
   "service": "aussenaufbereitung-celle",
   "summary": [
-    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € bis ab {preis:premium:suv} €. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.",
+    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:refresh} € bis ab {preis:excellence:suv} €. Sport- und Luxusfahrzeuge sowie Wohnmobile bieten wir individuell an. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.",
     "Der Preis hängt vor allem von Fahrzeuggröße, Leistungsumfang und Pflegezustand des Autos ab.",
     "Starke Verschmutzung, Tierhaare, Gerüche oder tiefe Lackdefekte erhöhen den Aufwand und damit den Preis.",
     "Bei ElbDetail bekommen Sie vor dem Termin einen verbindlichen Preis, am einfachsten nach Fotos per WhatsApp."
@@ -17,11 +17,11 @@
   "faq": [
     {
       "q": "Was kostet eine einfache Fahrzeugaufbereitung in Celle?",
-      "a": "Das Paket Frisch & Sauber kostet bei ElbDetail ab {ab:frisch} € für Kompaktwagen, ab {preis:frisch:mittel} € für Limousinen und Kombis und ab {preis:frisch:suv} € für SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert etwa zwei Stunden."
+      "a": "Das Paket Refresh kostet bei ElbDetail ab {ab:refresh} € für Kleinwagen, ab {preis:refresh:kompakt} € für Kompaktwagen, ab {preis:refresh:mittel} € für Limousinen, Kombis und kleinere SUVs und ab {preis:refresh:suv} € für große SUVs und Vans. Enthalten sind eine Außenwäsche von Hand, Felgenreinigung, Innenraum saugen und abwischen sowie die Scheiben. Die Arbeit dauert ab etwa zwei Stunden."
     },
     {
       "q": "Warum ist eine Aufbereitung für ein SUV teurer?",
-      "a": "Ein SUV oder Van hat mehr Lackfläche, größere Felgen, mehr Scheiben und einen größeren Innenraum. Dadurch braucht die Arbeit mehr Zeit und mehr Material. Deshalb liegen die Richtpreise für SUVs und Vans über denen für Kompaktwagen."
+      "a": "Ein SUV oder Van hat mehr Lackfläche, größere Felgen, mehr Scheiben und einen größeren Innenraum. Dadurch braucht die Arbeit mehr Zeit und mehr Material. Deshalb liegen die Richtpreise für SUVs und Vans über denen für kleinere Autos."
     },
     {
       "q": "Bekomme ich vorher einen festen Preis?",
@@ -30,7 +30,7 @@
   ]
 }
 
-Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:frisch} € für eine Handwäsche mit Innenraumreinigung und ab {ab:premium} € für eine Premium Politur mit Versiegelung. Alle Angaben sind Richtpreise für einen normalen Pflegezustand. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.
+Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:refresh} € für eine Handwäsche mit Innenraum-Basis (Paket Refresh, Kleinwagen) bis ab {preis:excellence:suv} € für eine Komplettaufbereitung mit mehrstufiger Lackkorrektur (Paket Excellence, großer SUV oder Van). Alle Angaben sind Ab-Preise für einen normalen Pflegezustand. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.
 
 Die Spanne ergibt sich aus dem Aufwand. In diesem Ratgeber erfahren Sie, welche Faktoren den Preis bestimmen, was die einzelnen Pakete enthalten und wo Sie sinnvoll sparen können, ohne am falschen Ende zu kürzen.
 
@@ -40,7 +40,7 @@ Der Preis hängt vor allem von drei Dingen ab: der Größe Ihres Fahrzeugs, dem 
 
 ### Fahrzeuggröße
 
-Ein SUV oder Van hat mehr Lackfläche, mehr Scheiben, größere Felgen und einen größeren Innenraum als ein Kompaktwagen. Das bedeutet mehr Zeit und mehr Material. Darum gibt es drei Fahrzeugklassen: Kompakt, Limousine/Kombi und SUV/Van.
+Ein SUV oder Van hat mehr Lackfläche, mehr Scheiben, größere Felgen und einen größeren Innenraum als ein Kleinwagen. Das bedeutet mehr Zeit und mehr Material. Darum gibt es vier Fahrzeugklassen mit festen Ab-Preisen: Kleinwagen, Kompaktwagen, Limousinen/Kombis/kleinere SUVs und große SUVs/Vans. Sport- und Luxusfahrzeuge sowie Wohnmobile kalkulieren wir individuell.
 
 ### Leistungsumfang
 
@@ -52,21 +52,25 @@ Die Richtpreise gelten für einen normalen Pflegezustand. Starke Verschmutzung, 
 
 ## Pakete und Richtpreise im Überblick
 
-Die folgende Tabelle zeigt die drei Pakete von ElbDetail mit Richtpreisen je Fahrzeugklasse. Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.
+Die folgende Tabelle zeigt die vier Pakete von ElbDetail mit Ab-Preisen je Fahrzeugklasse. Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.
 
-| Paket | Kompakt (Polo, Golf, A3) | Limousine/Kombi (Passat, C-Klasse) | SUV/Van (Tiguan, Bulli, X5) | Dauer |
-|---|---|---|---|---|
-| Frisch & Sauber: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab {ab:frisch} € | ab {preis:frisch:mittel} € | ab {preis:frisch:suv} € | ca. 2 Std. |
-| Komplettpflege: + Innenraum-Tiefenreinigung, Polster/Teppich, Leder- oder Polsterpflege, Kunststoffpflege, Geruchsneutralisation | ab {ab:komplett} € | ab {preis:komplett:mittel} € | ab {preis:komplett:suv} € | ca. ½ Tag |
-| Premium Politur: + mehrstufige Lackpolitur, Kratzer-/Hologrammentfernung, Lackversiegelung, Felgen- & Scheibenversiegelung | ab {ab:premium} € | ab {preis:premium:mittel} € | ab {preis:premium:suv} € | ca. 1 Tag |
+| Paket | Kleinwagen (Polo, Corsa) | Kompakt (Golf, A3) | Limousine/Kombi/SUV (Passat, Tiguan) | Großer SUV/Van (X5, Multivan) | Dauer |
+|---|---|---|---|---|---|
+| Refresh: Außenwäsche von Hand, Felgen, Innenraum saugen & abwischen, Scheiben | ab {preis:refresh:klein} € | ab {preis:refresh:kompakt} € | ab {preis:refresh:mittel} € | ab {preis:refresh:suv} € | ab 2 Std. |
+| Essential: + intensive Innenraum- & Kofferraumreinigung, Einstiege, Türverkleidungen, Polster-, Teppich- bzw. Lederreinigung & Pflege | ab {preis:essential:klein} € | ab {preis:essential:kompakt} € | ab {preis:essential:mittel} € | ab {preis:essential:suv} € | ca. 24 Std. |
+| Signature: wie Essential + Lackvorbereitung und einstufige Glanzpolitur | ab {preis:signature:klein} € | ab {preis:signature:kompakt} € | ab {preis:signature:mittel} € | ab {preis:signature:suv} € | ab 24 Std. |
+| Excellence: wie Essential + mehrstufige Lackkorrektur gegen korrigierbare Kratzer, Waschspuren und Hologramme | ab {preis:excellence:klein} € | ab {preis:excellence:kompakt} € | ab {preis:excellence:mittel} € | ab {preis:excellence:suv} € | ab 24 Std. |
+
+Eine Lackversiegelung oder die C² CarCeramic Keramikversiegelung buchen Sie zu Signature oder Excellence separat dazu. Die Keramik beginnt für Pkw bei {ab:keramik} €, je nach C²Coating-Fahrzeugkategorie. Alle Preise finden Sie in der [Preisübersicht](/preise.html).
 
 Zusätzlich können Sie einzelne Leistungen separat buchen. Dazu gehören Lederpflege und Imprägnierung, Geruchsentfernung, Motorraumreinigung, Felgen-Intensivreinigung, eine reine Lackpolitur, eine reine Lackversiegelung und die Reinigung eines Cabrioverdecks. Diese Einzelleistungen werden auf Anfrage kalkuliert, weil der Aufwand stark vom Fahrzeug abhängt.
 
 ### Welches Paket passt zu Ihnen?
 
-- **Frisch & Sauber** passt, wenn Ihr Auto regelmäßig gepflegt wird und einfach wieder ordentlich aussehen soll.
-- **Komplettpflege** lohnt sich, wenn der Innenraum Flecken, Gerüche oder viel Alltagsschmutz zeigt.
-- **Premium Politur** ist sinnvoll, wenn der Lack matt wirkt, Kratzer oder Hologramme zeigt und danach geschützt werden soll.
+- **Refresh** passt, wenn Ihr Auto regelmäßig gepflegt wird und einfach wieder ordentlich aussehen soll.
+- **Essential** lohnt sich, wenn der Innenraum Flecken, Gerüche oder viel Alltagsschmutz zeigt, etwa vor Verkauf oder Leasingrückgabe.
+- **Signature** ist sinnvoll, wenn der Lack etwas stumpf wirkt und wieder mehr Glanz bekommen soll.
+- **Excellence** passt für Neuwagen, Liebhaberfahrzeuge und Lack mit vielen Waschspuren oder Hologrammen. Wie weit sich der Lack korrigieren lässt, hängt von seinem Zustand ab.
 
 Mehr zu den einzelnen Leistungen finden Sie auf den Seiten zur [Außenaufbereitung](/leistungen/aussenaufbereitung-celle.html), zur [Innenaufbereitung](/leistungen/innenaufbereitung-celle.html) und zur [Lackpolitur](/leistungen/lackpolitur-celle.html).
 

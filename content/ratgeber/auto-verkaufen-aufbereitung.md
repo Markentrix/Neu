@@ -21,7 +21,7 @@
     },
     {
       "q": "Welche Aufbereitung ist vor dem Verkauf am wichtigsten?",
-      "a": "Der Innenraum hat meist die größte Wirkung, weil Käufer dort sitzen, riechen und anfassen. Eine Komplettpflege mit Tiefenreinigung und Geruchsneutralisation deckt das ab. Bei mattem oder verkratztem Lack kann zusätzlich eine Politur sinnvoll sein."
+      "a": "Der Innenraum hat meist die größte Wirkung, weil Käufer dort sitzen, riechen und anfassen. Das Paket Essential mit Tiefenreinigung und Geruchsneutralisation deckt das ab. Bei mattem oder verkratztem Lack kann zusätzlich eine Politur sinnvoll sein."
     },
     {
       "q": "Wann sollte ich das Auto vor dem Verkauf aufbereiten lassen?",
@@ -46,14 +46,14 @@ Jeder sichtbare Mangel kann ein Argument für einen Preisnachlass sein. Flecken 
 
 Sinnvoll ist vor allem eine gründliche Reinigung von Innenraum, Lack, Felgen und Scheiben. Den größten Effekt hat meist der Innenraum, weil Käufer dort am längsten Zeit verbringen. Welches Paket passt, hängt vom Zustand und vom Wert Ihres Autos ab.
 
-| Ausgangslage | Empfehlung bei ElbDetail | Richtpreis ab (Kompakt / Limousine / SUV) |
+| Ausgangslage | Empfehlung bei ElbDetail | Ab-Preis (Kompakt / Limousine, Kombi, SUV / großer SUV, Van) |
 |---|---|---|
-| Gepflegtes Auto, nur Alltagsschmutz | Frisch & Sauber | {preis:frisch:kompakt} € / {preis:frisch:mittel} € / {preis:frisch:suv} € |
-| Innenraum mit Flecken, Gerüchen oder Tierhaaren | Komplettpflege | {preis:komplett:kompakt} € / {preis:komplett:mittel} € / {preis:komplett:suv} € |
-| Lack matt oder mit vielen Waschanlagenkratzern | Premium Politur | {preis:premium:kompakt} € / {preis:premium:mittel} € / {preis:premium:suv} € |
-| Älteres Auto mit geringem Restwert | Frisch & Sauber oder gründliche Eigenreinigung | {preis:frisch:kompakt} € / {preis:frisch:mittel} € / {preis:frisch:suv} € |
+| Gepflegtes Auto, nur Alltagsschmutz | Refresh | {preis:refresh:kompakt} € / {preis:refresh:mittel} € / {preis:refresh:suv} € |
+| Innenraum mit Flecken, Gerüchen oder Tierhaaren | Essential | {preis:essential:kompakt} € / {preis:essential:mittel} € / {preis:essential:suv} € |
+| Lack matt oder leicht verkratzt | Signature mit Glanzpolitur | {preis:signature:kompakt} € / {preis:signature:mittel} € / {preis:signature:suv} € |
+| Älteres Auto mit geringem Restwert | Refresh oder gründliche Eigenreinigung | {preis:refresh:kompakt} € / {preis:refresh:mittel} € / {preis:refresh:suv} € |
 
-Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Vor dem Termin bekommen Sie einen verbindlichen Preis.
+Die Preise gelten bei normalem Pflegezustand. Für Kleinwagen beginnen die Pakete bei {ab:refresh} € (Refresh) und {ab:essential} € (Essential). Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Vor dem Termin bekommen Sie einen verbindlichen Preis.
 
 ### Innenraum
 

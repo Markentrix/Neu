@@ -4,13 +4,13 @@
   "short": "Innenaufbereitung",
   "teaser": "Polster- und Teppichreinigung, Kunststoffpflege, Scheiben, Geruchsentfernung.",
   "seoTitle": "Innenaufbereitung Celle: Polster & Tierhaare | ElbDetail",
-  "description": "Innenaufbereitung in Celle: Polster, Teppiche, Leder, Tierhaare und Gerüche. Komplettpflege ab {ab:komplett} €. Termin per WhatsApp oder online anfragen.",
+  "description": "Innenaufbereitung in Celle: Polster, Teppiche, Leder, Tierhaare und Gerüche. Paket Essential ab {ab:essential} €. Termin per WhatsApp oder online anfragen.",
   "h1": "Innenaufbereitung in Celle: *Einsteigen und durchatmen.*",
   "lead": "Tiefenreinigung von Polstern und Teppichen, Leder- und Kunststoffpflege, Tierhaare und Gerüche inklusive. **Für Familienautos, Hundebesitzer und alle, die ihr Auto täglich nutzen.**",
   "facts": [
     {
-      "value": "ab {ab:komplett} €",
-      "label": "in der Komplettpflege"
+      "value": "ab {ab:essential} €",
+      "label": "im Paket Essential"
     },
     {
       "value": "ca. 24 Std.",
@@ -21,7 +21,7 @@
       "label": "Koch-Chemie"
     }
   ],
-  "package": "komplett",
+  "package": "essential",
   "intro": "Der Innenraum ist der Teil Ihres Autos, den Sie jeden Tag sehen, riechen und anfassen. Unsere Innenaufbereitung geht deutlich tiefer als Saugen und Abwischen: Sitze, Teppiche und Fußmatten werden mit Nasssaugung und Textilreiniger gereinigt, Kunststoffe entfettet und gepflegt, Leder gereinigt und rückgefettet.\n\nTierhaare, Krümel in Ritzen, Flecken von Kaffee oder Kindersitzen, Nikotin- und Hundegeruch: Für jeden Fall gibt es das passende Verfahren. Das Ergebnis ist ein Innenraum, der nicht nur sauber aussieht, sondern auch hygienisch und frisch ist.\n",
   "includes": [
     "Gründliches Aussaugen inkl. Ritzen, Sitzschienen und Kofferraum",
@@ -67,7 +67,7 @@
     },
     {
       "q": "Was kostet eine Innenaufbereitung in Celle?",
-      "a": "In der Komplettpflege ist die Innenraum-Tiefenreinigung inklusive Außenwäsche ab {ab:komplett} € für eine Kompaktklasse enthalten. Eine reine Innenaufbereitung bieten wir auf Anfrage an, abhängig von Größe und Zustand des Fahrzeugs."
+      "a": "Im Paket Essential ist die Innenraum-Tiefenreinigung inklusive Außenwäsche ab {ab:essential} € für einen Kleinwagen enthalten. Eine reine Innenaufbereitung bieten wir auf Anfrage an, abhängig von Größe und Zustand des Fahrzeugs."
     }
   ],
   "related": [

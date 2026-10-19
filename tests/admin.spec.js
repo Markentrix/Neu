@@ -21,7 +21,7 @@ test("Verwaltung: falsches Passwort wird abgewiesen", async ({ page }) => {
 
 test("Verwaltung: Anfrage bearbeiten, Kalender, Inhalte, Veröffentlichen", async ({ page, request }) => {
   const d = new Date(); d.setDate(d.getDate() + 6); while (d.getDay() === 0) d.setDate(d.getDate() + 1);
-  const r = await request.post("/api/anfrage", { data: { typ: "termin", paket: "premium", klasse: "mittel", datum: d.toISOString().slice(0, 10), name: "Admin Test", telefon: "0172 4444444", einwilligung: "ja" } });
+  const r = await request.post("/api/anfrage", { data: { typ: "termin", paket: "signature", klasse: "mittel", datum: d.toISOString().slice(0, 10), name: "Admin Test", telefon: "0172 4444444", einwilligung: "ja" } });
   const { ref } = await r.json();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -30,7 +30,7 @@ test("Verwaltung: Anfrage bearbeiten, Kalender, Inhalte, Veröffentlichen", asyn
   await page.click('a.nav[href="#/anfragen"]');
   await page.click(`text=${ref}`);
   await expect(page.locator(".drawer h2")).toHaveText("Admin Test");
-  await expect(page.locator(".drawer")).toContainText("ab 399 €");
+  await expect(page.locator(".drawer")).toContainText("ab 600 €");
   await page.selectOption("#rst", "termin_bestaetigt");
   await page.click(".drawer >> text=Speichern");
   await expect(page.locator("#toast")).toHaveText("Gespeichert");

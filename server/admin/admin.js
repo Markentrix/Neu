@@ -289,7 +289,7 @@
   function viewVouchers(main, id) {
     main.innerHTML = '<div class="head"><div><h1>Gutscheine</h1><p>Bestellungen aus der Website und manuell ausgestellte Gutscheine. Codes prüfen und als eingelöst markieren.</p></div></div>' +
       '<div class="grid g2"><section class="panel"><h2>Code prüfen</h2><div class="btn-row"><input type="text" id="vcode" placeholder="ELB-XXXX-XXXX" style="max-width:220px"><button class="btn primary" id="vchk" type="button">Prüfen</button></div><div id="vres" style="margin-top:10px"></div></section>' +
-      '<section class="panel"><h2>Gutschein manuell anlegen</h2><form id="vnew" class="grid g2"><label class="f">Wert in €<input type="number" name="wert" min="1"></label><label class="f">oder Paket<select name="paket"><option value="">–</option><option value="frisch">Frisch &amp; Sauber</option><option value="komplett">Komplettpflege</option><option value="premium">Premium Politur</option></select></label>' +
+      '<section class="panel"><h2>Gutschein manuell anlegen</h2><form id="vnew" class="grid g2"><label class="f">Wert in €<input type="number" name="wert" min="1"></label><label class="f">oder Paket<select name="paket"><option value="">–</option><option value="refresh">Refresh</option><option value="essential">Essential</option><option value="signature">Signature</option><option value="excellence">Excellence</option></select></label>' +
       '<label class="f">Für<input type="text" name="fuer"></label><label class="f">Von<input type="text" name="von"></label><label class="f">Käufer<input type="text" name="kaeufer"></label><label class="f">E-Mail<input type="email" name="email"></label><div><button class="btn primary" type="submit">Anlegen</button></div></form></section></div>' +
       '<section class="panel" style="margin-top:16px"><div class="tablewrap" id="vlist"><p class="empty">Lädt …</p></div></section>';
     document.getElementById("vchk").addEventListener("click", function () {
@@ -407,10 +407,10 @@
     legal: "Rechtliches (Impressum & Datenschutz)", owner: "Inhaber:in / Firma laut Gewerbeanmeldung", vatId: "USt-IdNr.", responsible: "Verantwortlich nach § 18 MStV", mailProvider: "E-Mail-Anbieter (Name, Anschrift)",
     hosting: "Rechenzentrum", vouchers: "Gutscheine", amounts: "Betragsvorschläge", minAmount: "Mindestbetrag", maxAmount: "Höchstbetrag", stand: "Stand (Text)", standIso: "Stand (Datum JJJJ-MM-TT)",
     classes: "Fahrzeugklassen", key: "Schlüssel (nicht ändern)", short: "Kurzname", examples: "Beispiele", packages: "Pakete", for: "Für wen", duration: "Dauer", featured: "Hervorheben",
-    prices: "Richtpreise je Klasse (€)", kompakt: "Kompakt", mittel: "Limousine / Kombi", suv: "SUV / Van", sport: "Sport / Premium", onRequest: "Preis nur auf Anfrage", features: "Leistungen", included: "Enthalten", extras: "Einzelleistungen", compare: "Vergleichstabelle",
-    label: "Bezeichnung", frisch: "Frisch & Sauber", komplett: "Komplettpflege", premium: "Premium Politur", note: "Hinweistext", featuredQuote: "Hervorgehobenes Zitat", items: "Einträge", source: "Quelle",
+    prices: "Richtpreise je Klasse (€)", kompakt: "Kompaktwagen", mittel: "Limousine / Kombi / SUV", suv: "Großer SUV / Van", sport: "Sport / Luxus", onRequest: "Preis nur auf Anfrage", features: "Leistungen", included: "Enthalten", extras: "Einzelleistungen", compare: "Vergleichstabelle",
+    label: "Bezeichnung", refresh: "Refresh", essential: "Essential", signature: "Signature", excellence: "Excellence", klein: "Kleinwagen", camper: "Wohnmobil", optional: "Optional (separat buchbar)", polishNote: "Hinweis zur Politur", ceramic: "Keramik-Preisliste", car: "Pkw-Kategorien", carNote: "Hinweis zur Einteilung", notes: "Hinweise", note: "Hinweistext", featuredQuote: "Hervorgehobenes Zitat", items: "Einträge", source: "Quelle",
     q: "Frage", a: "Antwort", title: "Titel", sub: "Untertitel", before: "Foto vorher (Dateiname)", after: "Foto nachher (Dateiname)", alt: "Bildbeschreibung", slug: "Adresse (nicht ändern)",
-    order: "Reihenfolge", teaser: "Kurzbeschreibung", seoTitle: "Seitentitel für Google (max. 60 Zeichen)", description: "Beschreibung für Google (120–155 Zeichen, Preise als {ab:frisch}, {ab:komplett}, {ab:premium})", h1: "Überschrift (*kursiv* = blau)",
+    order: "Reihenfolge", teaser: "Kurzbeschreibung", seoTitle: "Seitentitel für Google (max. 60 Zeichen)", description: "Beschreibung für Google (120–155 Zeichen, Preise als {ab:refresh}, {ab:essential}, {ab:signature}, {ab:excellence}, {ab:keramik})", h1: "Überschrift (*kursiv* = blau)",
     lead: "Einleitung (**fett** möglich)", facts: "Kennzahlen", package: "Passendes Paket (Schlüssel)", intro: "Haupttext (Markdown)", includes: "Leistungsumfang", steps: "Ablauf", faq: "Häufige Fragen",
     related: "Verwandte Leistungen (Adressen)", date: "Veröffentlicht (JJJJ-MM-TT)", updated: "Aktualisiert (JJJJ-MM-TT)", category: "Kategorie", readingTime: "Lesezeit (Min.)", excerpt: "Teaser",
     about: "Über uns (Inhaber-Karte auf der Startseite, erscheint wenn Name und Text gefüllt sind)", role: "Rolle", fullName: "Vor- und Nachname (für strukturierte Daten)", photo: "Foto (Dateiname aus Fotos)", since: "Seit (z. B. 2023)",
@@ -560,7 +560,7 @@
   /* ------------------------------------------------------------ Angebote */
   var OFFER_STATE = { aktiv: "Live", geplant: "Geplant", abgelaufen: "Abgelaufen", aus: "Ausgeblendet" };
   var OFFER_ICON = { spark: "✦ Funkeln", snow: "❄ Schneeflocke", gift: "🎁 Geschenk", tag: "🏷 Preisschild", brief: "💼 Aktentasche", key: "🔑 Schlüssel", shield: "🛡 Schild", star: "★ Stern" };
-  var OFFER_TARGETS = [["termin.html", "Terminanfrage"], ["termin.html?paket=komplett", "Terminanfrage: Komplettpflege"], ["termin.html?paket=premium", "Terminanfrage: Premium Politur"],
+  var OFFER_TARGETS = [["termin.html", "Terminanfrage"], ["termin.html?paket=essential", "Terminanfrage: Essential"], ["termin.html?paket=signature", "Terminanfrage: Signature"], ["termin.html?paket=excellence", "Terminanfrage: Excellence"], ["termin.html?paket=keramik", "Terminanfrage: Keramikversiegelung"],
     ["termin.html?paket=keramik", "Terminanfrage: Keramikversiegelung"], ["gutscheine.html", "Gutscheine"], ["elbdetail-care.html", "ElbDetail Care"],
     ["firmenkunden.html#firmenanfrage", "Firmenanfrage"], ["aktion/winterschutz.html", "Winter-Lackschutz"], ["kontakt.html", "Kontakt"], ["", "Eigene Adresse …"]];
   function offerPeriod(o) {
@@ -613,7 +613,7 @@
         title: inp("title", { maxlength: 80, required: true, placeholder: "z. B. Frühjahrs-Check" }),
         badge: inp("badge", { maxlength: 30, placeholder: "z. B. Frühlings-Aktion" }),
         text: h("textarea", { name: "text", rows: 4, maxlength: 400, placeholder: "Was ist enthalten, für wen lohnt es sich?" }),
-        price: inp("price", { maxlength: 60, placeholder: "z. B. ab 149 € oder 10 % auf die Komplettpflege" }),
+        price: inp("price", { maxlength: 60, placeholder: "z. B. ab 149 € oder 10 % auf das Paket Essential" }),
         validFrom: inp("validFrom", { type: "date" }), validUntil: inp("validUntil", { type: "date" }),
         ctaLabel: inp("ctaLabel", { maxlength: 40 }),
         target: h("select", {}), custom: inp("ctaHref", { maxlength: 300, placeholder: "z. B. leistungen/lackpolitur-celle.html oder https://…" }),

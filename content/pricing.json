@@ -1,44 +1,61 @@
 {
   "classes": [
     {
+      "key": "klein",
+      "name": "Kleinwagen",
+      "short": "Kleinwagen",
+      "examples": "Polo, Corsa, Fiat 500"
+    },
+    {
       "key": "kompakt",
-      "name": "Kleinwagen / Kompakt",
+      "name": "Kompaktwagen",
       "short": "Kompakt",
-      "examples": "Polo, Golf, A3"
+      "examples": "Golf, A3, BMW 1er"
     },
     {
       "key": "mittel",
-      "name": "Limousine / Kombi",
-      "short": "Limo / Kombi",
-      "examples": "Passat, C-Klasse"
+      "name": "Limousinen, Kombis & kleinere SUVs",
+      "short": "Limo / Kombi / SUV",
+      "examples": "C-Klasse, 3er, Passat, Tiguan"
     },
     {
       "key": "suv",
-      "name": "SUV / Van / Bus",
-      "short": "SUV / Van",
-      "examples": "Tiguan, Bulli, X5"
+      "name": "Große SUVs & Vans",
+      "short": "Großer SUV / Van",
+      "examples": "Q7, X5, GLS, Multivan"
     },
     {
       "key": "sport",
-      "name": "Sportwagen / Premium-Segment",
-      "short": "Sport / Premium",
-      "examples": "RS, AMG, M-Modelle",
-      "onRequest": true
+      "name": "Sport- & Luxusfahrzeuge",
+      "short": "Sport / Luxus",
+      "examples": "M, AMG, RS, Porsche",
+      "onRequest": true,
+      "note": "Für Sport- und Luxusfahrzeuge wie M, AMG, RS oder Porsche erstellen wir nach kurzer Begutachtung ein individuelles Angebot."
+    },
+    {
+      "key": "camper",
+      "name": "Wohnmobile & Wohnwagen",
+      "short": "Wohnmobil",
+      "examples": "nach Größe & Aufbau",
+      "onRequest": true,
+      "note": "Wohnmobile und Wohnwagen bereiten wir individuell nach Größe, Aufbau und Zustand auf. Sie erhalten ein Angebot auf Anfrage."
     }
   ],
   "packages": [
     {
-      "key": "frisch",
-      "name": "Frisch & Sauber",
+      "key": "refresh",
+      "name": "Refresh",
       "short": "Wäsche + Innen-Basis",
-      "for": "Für den regelmäßigen Frischekick und den gepflegten Alltag.",
-      "duration": "ca. 2 Std.",
+      "for": "Für den gepflegten Alltag zwischendurch.",
+      "duration": "ab 2 Std.",
       "featured": false,
       "prices": {
-        "kompakt": 79,
-        "mittel": 89,
-        "suv": 99
+        "klein": 75,
+        "kompakt": 113,
+        "mittel": 150,
+        "suv": 187
       },
+      "description": "Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen, zugängliche Oberflächen abwischen und Scheiben innen und außen reinigen.",
       "features": [
         {
           "text": "Außenwäsche von Hand",
@@ -49,7 +66,7 @@
           "included": true
         },
         {
-          "text": "Innenraum saugen & abwischen",
+          "text": "Innenraum aussaugen, Oberflächen abwischen",
           "included": true
         },
         {
@@ -57,186 +74,305 @@
           "included": true
         },
         {
-          "text": "Innenraum-Tiefenreinigung",
+          "text": "Intensive Innenraum- & Kofferraumreinigung",
           "included": false
         },
         {
-          "text": "Leder- oder Polsterpflege (Leder mit Colourlock)",
+          "text": "Polster-, Teppich- bzw. Lederreinigung & -pflege",
           "included": false
         },
         {
-          "text": "Lackpolitur & Versiegelung",
+          "text": "Glanzpolitur oder Lackkorrektur",
           "included": false
         }
       ]
     },
     {
-      "key": "komplett",
-      "name": "Komplettpflege",
-      "short": "Innen-Tiefenreinigung + außen",
+      "key": "essential",
+      "name": "Essential",
+      "short": "Innen + außen gründlich",
       "for": "Für Familienautos, Tierhaare, Leasingrückgabe und Verkauf.",
       "duration": "ca. 24 Std.",
       "featured": true,
       "prices": {
-        "kompakt": 179,
-        "mittel": 209,
-        "suv": 229
+        "klein": 300,
+        "kompakt": 375,
+        "mittel": 450,
+        "suv": 525
       },
+      "description": "Gründliche Innen- und Außenaufbereitung. Enthält Refresh sowie intensive Innenraum- und Kofferraumreinigung, Reinigung von Einstiegen, Türverkleidungen und Kunststoffen sowie materialgerechte Polster-, Teppich- beziehungsweise Lederreinigung und Pflege.",
       "features": [
         {
-          "text": "Alles aus Frisch & Sauber",
+          "text": "Alles aus Refresh",
           "included": true
         },
         {
-          "text": "Innenraum-Tiefenreinigung",
+          "text": "Intensive Innenraum- & Kofferraumreinigung",
           "included": true
         },
         {
-          "text": "Polster- & Teppichreinigung",
+          "text": "Einstiege, Türverkleidungen & Kunststoffe",
           "included": true
         },
         {
-          "text": "Leder- oder Polsterpflege (Leder mit Colourlock)",
+          "text": "Polster-, Teppich- bzw. Lederreinigung & -pflege",
           "included": true
         },
         {
-          "text": "Kunststoffpflege & Geruchsneutralisation",
+          "text": "Leder mit Colourlock gepflegt",
           "included": true
         },
         {
-          "text": "Mehrstufige Lackpolitur",
-          "included": false
-        },
-        {
-          "text": "Lackversiegelung",
+          "text": "Glanzpolitur oder Lackkorrektur",
           "included": false
         }
       ]
     },
     {
-      "key": "premium",
-      "name": "Premium Politur",
-      "short": "+ Politur & Versiegelung",
-      "for": "Für Neuwagen, Liebhaberfahrzeuge und sichtbar matten Lack.",
+      "key": "signature",
+      "name": "Signature",
+      "short": "+ einstufige Glanzpolitur",
+      "for": "Für mehr Glanz und ein sichtbar frischeres Lackbild.",
       "duration": "ab 24 Std.",
       "featured": false,
       "prices": {
-        "kompakt": 349,
-        "mittel": 399,
-        "suv": 449
+        "klein": 450,
+        "kompakt": 525,
+        "mittel": 600,
+        "suv": 675
       },
+      "description": "Komplettaufbereitung wie Essential, zusätzlich Lackvorbereitung und einstufige Glanzpolitur zur Verbesserung des Lackbilds und Reduzierung leichter Gebrauchsspuren.",
       "features": [
         {
-          "text": "Alles aus Komplettpflege",
+          "text": "Alles aus Essential",
           "included": true
         },
         {
-          "text": "Mehrstufige Lackpolitur",
+          "text": "Lackvorbereitung",
           "included": true
         },
         {
-          "text": "Kratzer- & Hologrammentfernung",
+          "text": "Einstufige Glanzpolitur",
           "included": true
         },
         {
-          "text": "Lackversiegelung mit Monaten Schutz",
+          "text": "Reduziert leichte Gebrauchsspuren",
           "included": true
         },
         {
-          "text": "Felgen- & Scheibenversiegelung",
+          "text": "Lackversiegelung (separat)",
+          "optional": true
+        },
+        {
+          "text": "C²Coating Keramikversiegelung (separat)",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "key": "excellence",
+      "name": "Excellence",
+      "short": "+ mehrstufige Lackkorrektur",
+      "for": "Für Neuwagen, Liebhaberfahrzeuge und Lack mit Waschspuren.",
+      "duration": "ab 24 Std.",
+      "featured": false,
+      "prices": {
+        "klein": 600,
+        "kompakt": 675,
+        "mittel": 750,
+        "suv": 900
+      },
+      "description": "Komplettaufbereitung wie Essential, zusätzlich mehrstufige Lackkorrektur zur Reduzierung korrigierbarer Kratzer, Waschspuren und Hologramme sowie Vorbereitung für eine anschließende Versiegelung.",
+      "features": [
+        {
+          "text": "Alles aus Essential",
           "included": true
         },
         {
-          "text": "Abschlusskontrolle bei Tageslicht",
+          "text": "Mehrstufige Lackkorrektur",
           "included": true
         },
         {
-          "text": "Pflegehinweise für danach",
+          "text": "Reduziert korrigierbare Kratzer, Waschspuren & Hologramme",
           "included": true
+        },
+        {
+          "text": "Vorbereitung für eine Versiegelung",
+          "included": true
+        },
+        {
+          "text": "Lackversiegelung (separat)",
+          "optional": true
+        },
+        {
+          "text": "C²Coating Keramikversiegelung (separat)",
+          "optional": true
         }
       ]
     }
   ],
   "extras": [
-    "Keramikversiegelung Lack, Glas oder Felgen",
+    "Lackversiegelung (zu Signature oder Excellence)",
+    "Felgen- & Scheibenbeschichtung",
     "Lederreparatur mit Colourlock",
-    "Lederreinigung & Lederpflege",
     "Geruchsneutralisierung",
     "Dampfreinigung",
     "Motorraumreinigung",
     "Cabrioverdeck reinigen & imprägnieren",
     "Felgen-Intensivreinigung",
-    "Nur Lackpolitur",
-    "Nur Lackversiegelung"
+    "Starke Tierhaarbelastung, hartnäckige Flecken"
   ],
   "compare": [
     {
       "label": "Außenwäsche von Hand",
-      "frisch": true,
-      "komplett": true,
-      "premium": true
+      "refresh": true,
+      "essential": true,
+      "signature": true,
+      "excellence": true
     },
     {
       "label": "Felgenreinigung",
-      "frisch": true,
-      "komplett": true,
-      "premium": true
+      "refresh": true,
+      "essential": true,
+      "signature": true,
+      "excellence": true
     },
     {
-      "label": "Innenraum saugen & abwischen",
-      "frisch": true,
-      "komplett": true,
-      "premium": true
+      "label": "Innenraum aussaugen, Oberflächen abwischen",
+      "refresh": true,
+      "essential": true,
+      "signature": true,
+      "excellence": true
     },
     {
       "label": "Scheiben innen & außen",
-      "frisch": true,
-      "komplett": true,
-      "premium": true
+      "refresh": true,
+      "essential": true,
+      "signature": true,
+      "excellence": true
     },
     {
-      "label": "Innenraum-Tiefenreinigung",
-      "frisch": false,
-      "komplett": true,
-      "premium": true
+      "label": "Intensive Innenraum- & Kofferraumreinigung",
+      "refresh": false,
+      "essential": true,
+      "signature": true,
+      "excellence": true
     },
     {
-      "label": "Polster- & Teppichreinigung",
-      "frisch": false,
-      "komplett": true,
-      "premium": true
+      "label": "Einstiege, Türverkleidungen & Kunststoffe",
+      "refresh": false,
+      "essential": true,
+      "signature": true,
+      "excellence": true
     },
     {
-      "label": "Leder- oder Polsterpflege",
-      "frisch": false,
-      "komplett": true,
-      "premium": true
+      "label": "Polster-, Teppich- bzw. Lederreinigung & -pflege",
+      "refresh": false,
+      "essential": true,
+      "signature": true,
+      "excellence": true
     },
     {
-      "label": "Geruchsneutralisation",
-      "frisch": false,
-      "komplett": true,
-      "premium": true
+      "label": "Lackvorbereitung",
+      "refresh": false,
+      "essential": false,
+      "signature": true,
+      "excellence": true
     },
     {
-      "label": "Mehrstufige Lackpolitur",
-      "frisch": false,
-      "komplett": false,
-      "premium": true
+      "label": "Einstufige Glanzpolitur",
+      "refresh": false,
+      "essential": false,
+      "signature": true,
+      "excellence": false
+    },
+    {
+      "label": "Mehrstufige Lackkorrektur",
+      "refresh": false,
+      "essential": false,
+      "signature": false,
+      "excellence": true
     },
     {
       "label": "Lackversiegelung",
-      "frisch": false,
-      "komplett": false,
-      "premium": true
+      "refresh": false,
+      "essential": false,
+      "signature": "optional",
+      "excellence": "optional"
     },
     {
-      "label": "Felgen- & Scheibenversiegelung",
-      "frisch": false,
-      "komplett": false,
-      "premium": true
+      "label": "C²Coating Keramikversiegelung",
+      "refresh": false,
+      "essential": false,
+      "signature": "optional",
+      "excellence": "optional"
     }
   ],
-  "note": "Alle Preise sind Einstiegspreise (Endpreise; gemäß § 19 UStG wird keine Umsatzsteuer berechnet) und abhängig von Fahrzeuggröße, Zustand und Leistungsumfang. Starke Verschmutzung, intensive Tierhaarentfernung oder tiefe Lackdefekte besprechen wir vorab. Den verbindlichen Preis bestätigen wir vor dem Termin.",
-  "standNote": "Ab der Komplettpflege bleibt Ihr Auto rund 24 Stunden bei uns. So können Pflegeprodukte und Versiegelung über Nacht in Ruhe aushärten, und es entstehen keine Wasserflecken."
+  "note": "Alle Preise sind Ab-Preise. Der endgültige Preis richtet sich nach Fahrzeuggröße, Verschmutzungsgrad, Lackzustand und gewünschtem Leistungsumfang. Starke Tierhaarbelastung, hartnäckige Flecken, besondere Geruchsbelastungen oder aufwendige Lackdefekte können Mehrarbeit erfordern. Sie erhalten vor Arbeitsbeginn ein verbindliches Angebot. Zusatzarbeiten erfolgen ausschließlich nach Rücksprache. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.",
+  "polishNote": "Der mögliche Korrekturgrad hängt vom Lackzustand ab. Tiefe Kratzer, die bis in die Grundierung reichen, lassen sich durch Polieren nicht entfernen.",
+  "standNote": "Ab dem Paket Essential bleibt Ihr Auto rund 24 Stunden bei uns. So können Pflegeprodukte und Versiegelung über Nacht in Ruhe aushärten, und es entstehen keine Wasserflecken.",
+  "ceramic": {
+    "title": "C² CarCeramic: Keramikversiegelung",
+    "intro": "Die Keramikversiegelung von C²Coating ist separat buchbar und kann ab dem Paket Signature hinzugebucht werden. Bei Neuwagen ist sie nach Lackprüfung und erforderlicher Vorbereitung auch ohne Aufbereitungspaket möglich. Eine eventuell notwendige Politur stimmen wir vorher mit Ihnen ab.",
+    "car": [
+      {
+        "name": "Kategorie 1",
+        "examples": "Polo, Golf, A-Klasse, A3",
+        "price": 550
+      },
+      {
+        "name": "Kategorie 2",
+        "examples": "Passat, A4, C-Klasse, BMW 3er",
+        "price": 650
+      },
+      {
+        "name": "Kategorie 3",
+        "examples": "BMW 5er, A6, S-Klasse, Q5, Tiguan",
+        "price": 715
+      },
+      {
+        "name": "Kategorie 4",
+        "examples": "X5, X6, Q7, Range Rover Sport",
+        "price": 750
+      },
+      {
+        "name": "Kategorie 5",
+        "examples": "VW T5, Vito, Viano",
+        "price": 950
+      },
+      {
+        "name": "Kategorie 6",
+        "examples": "Sportwagen wie Porsche, R8 oder Ferrari",
+        "price": 1190
+      }
+    ],
+    "carNote": "Hier gilt die eigene Fahrzeugeinteilung von C²Coating. Die genaue Zuordnung erfolgt anhand des Modells.",
+    "camper": [
+      {
+        "name": "bis 7 m",
+        "price": 1950
+      },
+      {
+        "name": "über 7 bis 8 m",
+        "price": 2180
+      },
+      {
+        "name": "über 8 bis 9 m",
+        "price": 2330
+      },
+      {
+        "name": "über 9 bis 10 m",
+        "price": 2530
+      },
+      {
+        "name": "über 10 m",
+        "price": null
+      }
+    ],
+    "notes": [
+      "Die Beschichtungspreise enthalten die vorgesehene Standardvorbereitung. Intensive Lackaufbereitung und zusätzliche Korrekturarbeiten werden separat kalkuliert.",
+      "Bei Kombination mit unseren Paketen berücksichtigen wir bereits enthaltene Vorbereitungsarbeiten im Gesamtangebot.",
+      "Felgen- und Scheibenbeschichtung: vorerst auf Anfrage."
+    ]
+  }
 }

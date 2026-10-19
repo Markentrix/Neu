@@ -68,7 +68,7 @@ def config_js(site):
         "email": site.s["email"],
         "api": "/api",
         "hosts": [site.url.split("//", 1)[-1], site.url.split("//", 1)[-1].replace("www.", "", 1), "localhost", "127.0.0.1"],
-        "classes": [{"key": c["key"], "name": c["name"], "short": c["short"], "onRequest": bool(c.get("onRequest"))} for c in pr["classes"]],
+        "classes": [{"key": c["key"], "name": c["name"], "short": c["short"], "onRequest": bool(c.get("onRequest")), "note": c.get("note", "")} for c in pr["classes"]],
         "packages": [{"key": p["key"], "name": p["name"], "prices": p["prices"]} for p in pr["packages"]],
         "vouchers": site.s["vouchers"],
         "voucherValidYear": int(site.s["standIso"][:4]) + 3,

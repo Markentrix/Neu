@@ -14,7 +14,7 @@ def business(site):
     for p in site.pricing["packages"]:
         offers.append({"@type": "Offer", "name": p["name"], "price": str(site.min_price(p["key"])), "priceCurrency": "EUR",
                        "url": site.url + "/termin.html?paket=" + p["key"],
-                       "description": p["for"] + " Richtpreis ab " + str(site.min_price(p["key"])) + " € (Kompaktklasse).",
+                       "description": p["for"] + " Richtpreis ab " + str(site.min_price(p["key"])) + " € (Kleinwagen).",
                        "itemOffered": {"@type": "Service", "name": p["name"], "serviceType": "Fahrzeugaufbereitung"}})
     return {
         "@context": "https://schema.org",
@@ -95,7 +95,7 @@ def service(site, sv):
         o["offers"] = {"@type": "Offer", "priceCurrency": "EUR", "price": str(site.min_price(p["key"])),
                        "priceSpecification": {"@type": "PriceSpecification", "priceCurrency": "EUR", "minPrice": str(site.min_price(p["key"])),
                                               "valueAddedTaxIncluded": False,
-                                              "description": "Einstiegspreis Paket " + p["name"] + " für Kompaktklasse"}}
+                                              "description": "Einstiegspreis Paket " + p["name"] + " für Kleinwagen"}}
     return o
 
 
@@ -185,8 +185,16 @@ def llms(site, full=False):
     t += f"## Pakete und Einstiegspreise (Endpreise, gemäß § 19 UStG ohne Umsatzsteuer, normaler Pflegezustand, Stand {s['stand']})\n\n"
     t += "| Paket | " + " | ".join(c["name"] for c in cls) + " | Dauer |\n|---|" + "---|" * (len(cls) + 1) + "\n"
     for p in site.pricing["packages"]:
-        inc = ", ".join(f["text"] for f in p["features"] if f["included"])
+        inc = ", ".join(f["text"] for f in p["features"] if f.get("included"))
         t += f"| {p['name']} ({inc}) | " + " | ".join(f"ab {p['prices'][c['key']]} €" if c["key"] in p["prices"] else "auf Anfrage" for c in cls) + f" | {p['duration']} |\n"
+    t += "\nLackversiegelung und Keramikversiegelung sind zu Signature und Excellence separat buchbar. " + site.pricing.get("polishNote", "") + "\n"
+    cer = site.pricing.get("ceramic")
+    if cer:
+        eur = lambda v: f"{v:,}".replace(",", ".") + " €" if v is not None else "auf Anfrage"
+        t += f"\n## {cer['title']}\n\n{cer['intro']}\n\n| Kategorie | Beispiele | Preis |\n|---|---|---|\n"
+        t += "".join(f"| {c['name']} | {c['examples']} | {eur(c['price'])} |\n" for c in cer["car"])
+        t += "\n| Wohnmobil / Wohnwagen | Preis |\n|---|---|\n" + "".join(f"| {c['name']} | {eur(c['price'])} |\n" for c in cer.get("camper", []))
+        t += "\n" + " ".join([cer.get("carNote", "")] + cer.get("notes", [])) + "\n"
     t += "\nVerbindliche Preise werden vor dem Termin persönlich bestätigt.\n\n## Ratgeber\n\n"
     for ar in site.articles:
         t += f"- [{ar['title']}]({site.url}/ratgeber/{ar['slug']}.html): {ar.get('excerpt', '')}\n"
