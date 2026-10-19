@@ -46,6 +46,7 @@ class PartnerIn(BaseModel):
     telefon: str | None = Field(default=None, max_length=60)
     status: str = "aktiv"
     notiz: str | None = Field(default=None, max_length=2000)
+    einladen: bool = False   # Portal-Einladung gleich per E-Mail senden (braucht E-Mail-Adresse)
 
 
 class PartnerPatch(BaseModel):
@@ -63,6 +64,8 @@ class PartnerPatch(BaseModel):
 def partner_liste(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         cur.execute("""SELECT v.id, v.name, v.firma, v.email, v.telefon, v.status, v.iban_hinterlegt, v.vereinbarung_am,
+                       (SELECT CASE WHEN bool_or(b.passwort_hash IS NOT NULL AND b.aktiv) THEN 'aktiv' WHEN bool_or(b.einladung_token_hash IS NOT NULL AND b.einladung_ablauf > now()) THEN 'eingeladen'
+                               WHEN count(*) > 0 THEN 'abgelaufen' ELSE 'keiner' END FROM benutzer b WHERE b.vertriebspartner_id=v.id) AS zugang,
                        (SELECT count(*) FROM kunden k WHERE k.vertriebspartner_id=v.id) AS kunden,
                        (SELECT count(*) FROM leads l WHERE l.vertriebspartner_id=v.id AND l.status NOT IN ('gewonnen','verloren','tot','gesperrt')) AS offene_leads,
                        (SELECT coalesce(sum(betrag_cent),0) FROM provisionen p WHERE p.vertriebspartner_id=v.id AND p.status IN ('berechnet','freigegeben')) AS offen_cent
@@ -81,6 +84,14 @@ def partner_neu(data: PartnerIn, user: dict = Depends(require_admin)):
                     (data.name.strip(), data.firma, data.email, data.telefon, data.status, data.notiz))
         r = cur.fetchone()
         audit(cur, user, "partner_angelegt", None, {"name": data.name})
+        link = None
+        if data.einladen:
+            if not data.email:
+                raise HTTPException(400, "Für die Einladung wird eine E-Mail-Adresse gebraucht.")
+            link = zugang.link_erzeugen(cur, data.email, data.name.strip(), "vertrieb", partner_id=r["id"])
+            audit(cur, user, "partner_einladung", None, {"partner": str(r["id"])})
+    if link:
+        return {**r, "einladungslink": link, "mail": zugang.per_mail(data.email, data.name.strip(), link, "vertrieb")}
     return r
 
 
@@ -204,21 +215,32 @@ class LeadPatch(BaseModel):
     telefon: str | None = None
 
 
-@router.get("/leads")
-def leads_liste(status: str = "", q: str = "", quelle: str = "", temperatur: str = "", vertriebler: str = "", liste: str = "", gruppe: str = "", user: dict = Depends(require_admin)):
-    """Filter: Status, Suche (Firma, Ort, E-Mail, Telefon, Branche), Quelle, Einstufung, Vertriebler (ID oder 'keiner'), Importliste."""
-    with tx("admin") as cur:
-        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.email, l.telefon, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.liste, l.gruppe, l.wiedervorlage_am, l.letzter_kontakt_am, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
-                       FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id
-                       WHERE (%(s)s='' OR l.status=%(s)s)
+FILTER_WHERE = """(%(s)s='' OR l.status=%(s)s)
                          AND (%(q)s='' OR l.firma ILIKE %(l)s OR coalesce(l.ort,'') ILIKE %(l)s OR coalesce(l.email,'') ILIKE %(l)s OR coalesce(l.telefon,'') ILIKE %(l)s OR coalesce(l.branche,'') ILIKE %(l)s OR coalesce(l.ansprechpartner,'') ILIKE %(l)s OR coalesce(l.notiz,'') ILIKE %(l)s)
                          AND (%(qu)s='' OR l.quelle=%(qu)s)
                          AND (%(t)s='' OR (%(t)s='keine' AND l.temperatur IS NULL) OR l.temperatur=%(t)s)
                          AND (%(v)s='' OR (%(v)s='keiner' AND l.vertriebspartner_id IS NULL) OR l.vertriebspartner_id::text=%(v)s)
                          AND (%(li)s='' OR l.liste=%(li)s)
-                         AND (%(g)s='' OR l.gruppe=%(g)s)
-                       ORDER BY l.erstellt_am DESC, l.firma LIMIT 500""",
-                    {"s": status, "q": q, "l": f"%{q}%", "qu": quelle, "t": temperatur, "v": vertriebler, "li": liste, "g": gruppe})
+                         AND (%(g)s='' OR l.gruppe=%(g)s)"""
+SEITE = 50
+
+
+def _filter(status="", q="", quelle="", temperatur="", vertriebler="", liste="", gruppe="") -> dict:
+    return {"s": status, "q": q, "l": f"%{q}%", "qu": quelle, "t": temperatur, "v": vertriebler, "li": liste, "g": gruppe}
+
+
+@router.get("/leads")
+def leads_liste(status: str = "", q: str = "", quelle: str = "", temperatur: str = "", vertriebler: str = "", liste: str = "", gruppe: str = "", seite: int = 1, user: dict = Depends(require_admin)):
+    """Filter: Status, Suche, Quelle, Einstufung, Vertriebler (ID oder 'keiner'), Importliste, Branchengruppe. 50 Leads pro Seite."""
+    f = _filter(status, q, quelle, temperatur, vertriebler, liste, gruppe)
+    seite = max(1, seite)
+    with tx("admin") as cur:
+        cur.execute(f"SELECT count(*) AS n FROM leads l WHERE {FILTER_WHERE}", f)
+        gesamt = cur.fetchone()["n"]
+        cur.execute(f"""SELECT l.id, l.firma, l.ansprechpartner, l.email, l.telefon, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.liste, l.gruppe, l.wiedervorlage_am, l.letzter_kontakt_am, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
+                       FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id
+                       WHERE {FILTER_WHERE}
+                       ORDER BY l.erstellt_am DESC, l.firma LIMIT {SEITE} OFFSET {(seite - 1) * SEITE}""", f)
         rows = cur.fetchall()
         cur.execute("SELECT status, count(*) AS n FROM leads GROUP BY status")
         zaehler = {r["status"]: r["n"] for r in cur.fetchall()}
@@ -226,7 +248,55 @@ def leads_liste(status: str = "", q: str = "", quelle: str = "", temperatur: str
         listen = cur.fetchall()
         cur.execute("SELECT gruppe, count(*) AS n FROM leads WHERE gruppe IS NOT NULL GROUP BY gruppe ORDER BY gruppe")
         gruppen = cur.fetchall()
-    return {"leads": rows, "zaehler": zaehler, "listen": listen, "gruppen": gruppen}
+    return {"leads": rows, "zaehler": zaehler, "listen": listen, "gruppen": gruppen, "gesamt": gesamt, "seite": seite, "pro_seite": SEITE}
+
+
+class BulkIn(BaseModel):
+    aktion: str                              # temperatur | vertriebler | status | loeschen
+    wert: str | None = None
+    ids: list[str] | None = Field(default=None, max_length=500)
+    alle_gefilterten: bool = False
+    filter: dict | None = None
+
+
+@router.post("/leads/bulk")
+def leads_bulk(data: BulkIn, user: dict = Depends(require_admin)):
+    """Mehrere Leads auf einmal ändern: ausgewählte (ids) oder alle, die zum aktuellen Filter passen."""
+    if data.aktion not in ("temperatur", "vertriebler", "status", "loeschen"):
+        raise HTTPException(400, "Unbekannte Aktion.")
+    if data.aktion == "temperatur" and data.wert not in ("", "kalt", "warm", "heiss", None):
+        raise HTTPException(400, "Ungültige Einstufung.")
+    if data.aktion == "status" and data.wert not in ("neu", "kontaktiert", "antwort", "termin", "angebot", "verloren", "tot"):
+        raise HTTPException(400, "Ungültiger Status.")
+    f = _filter(**{k: str(v) for k, v in (data.filter or {}).items() if k in ("status", "q", "quelle", "temperatur", "vertriebler", "liste", "gruppe")})
+    try:
+        with tx("admin") as cur:
+            if data.alle_gefilterten:
+                cur.execute(f"SELECT l.id FROM leads l WHERE {FILTER_WHERE} AND l.kunden_id IS NULL LIMIT 5000", f)
+                ids = [r["id"] for r in cur.fetchall()]
+            elif data.ids:
+                ids = data.ids
+            else:
+                raise HTTPException(400, "Keine Leads ausgewählt.")
+            if not ids:
+                return {"geaendert": 0}
+            if data.aktion == "loeschen":
+                cur.execute("DELETE FROM leads WHERE id = ANY(%s::uuid[]) AND kunden_id IS NULL", (ids,))
+            elif data.aktion == "temperatur":
+                cur.execute("UPDATE leads SET temperatur=%s WHERE id = ANY(%s::uuid[])", (data.wert or None, ids))
+            elif data.aktion == "vertriebler":
+                if data.wert:
+                    cur.execute("SELECT 1 FROM vertriebspartner WHERE id=%s", (data.wert,))
+                    if not cur.fetchone():
+                        raise HTTPException(400, "Vertriebler nicht gefunden.")
+                cur.execute("UPDATE leads SET vertriebspartner_id=%s WHERE id = ANY(%s::uuid[])", (data.wert or None, ids))
+            else:
+                cur.execute("UPDATE leads SET status=%s WHERE id = ANY(%s::uuid[]) AND status NOT IN ('gewonnen','gesperrt','consent_ausstehend')", (data.wert, ids))
+            n = cur.rowcount
+            audit(cur, user, "leads_bulk", None, {"aktion": data.aktion, "wert": data.wert, "anzahl": n})
+    except (errors.InvalidTextRepresentation, errors.DataError):
+        raise HTTPException(400, "Ungültige Auswahl.")
+    return {"geaendert": n}
 
 
 @router.post("/leads")

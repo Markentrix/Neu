@@ -244,6 +244,8 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 - **Terminbuchung** (Einstellungen → Terminbuchung): Seite `/buchen` im Portal, Link auf die Website setzen. Interessenten wählen einen Slot, du bekommst Mail mit Kalendereinladung, der Lead steht auf „Termin".
 - **Mitarbeiter & Rechte** (Einstellungen): Mitarbeiter einladen und nur Bereiche freigeben (Kunden, Nachrichten, Leads, Rechnungen & Preise, Einstellungen). Nur Konten mit vollem Zugriff verwalten das.
 - **Leads aus Excel/CSV importieren** (Leads, weiter unten): Datei wählen, mit „Datei prüfen“ die Vorschau ansehen (erkannte Spalten, Dubletten, Fehler), dann importieren. Listenname, Einstufung und Vertriebler legst du gleich fest. Die Leadliste hat Filter für Suche, Quelle, Einstufung, Vertriebler und Importliste.
+- **Leads-Übersicht**: 50 Leads pro Seite, Haken vorne für Sammelaktionen (Einstufung, Vertriebler, Status setzen, löschen), auch für alle Treffer eines Filters.
+- **Vertriebler einladen**: Beim Anlegen (Haken „Einladung senden“) oder später in der Vertriebsliste über „Einladung senden“. Der Vertriebler bekommt eine Mail mit Link zum Passwort setzen für das Vertriebsportal.
 - **Änderungshistorie** bei jedem Kunden: wer hat wann was geändert.
 
 ## Automatische Tests

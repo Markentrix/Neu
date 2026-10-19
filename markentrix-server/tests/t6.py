@@ -48,7 +48,7 @@ p1=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb"}).json(); p
 r=a.post(f"/api/admin/vertrieb/partner/{p1['id']}/einladung",json={"email":"vera@v.de"}); chk("partner einladung",r.status_code==200 and r.json()["mail"]["gesendet"],r.text)
 chk("gleiche Mail anderer Partner 409",a.post(f"/api/admin/vertrieb/partner/{p2['id']}/einladung",json={"email":"vera@v.de"}).status_code==409)
 chk("kunden-mail nicht für partner",a.post(f"/api/admin/vertrieb/partner/{p2['id']}/einladung",json={"email":"k@mueller.de"}).status_code==409)
-m=[x for x in mails() if "vera@v.de" in x][-1]; chk("partner-mail Text","Partnerportal" in m)
+m=[x for x in mails() if "vera@v.de" in x][-1]; chk("partner-mail Text","Vertriebsportal" in m)
 httpx.post(B+"/api/einladung",headers=H,json={"token":link_aus(m).split("token=")[1],"password":"VeraPasswort123"})
 a.post(f"/api/admin/vertrieb/partner/{p2['id']}/einladung",json={"email":"paul@v.de","per_mail":False}); 
 m2=a.post(f"/api/admin/vertrieb/partner/{p2['id']}/einladung",json={"email":"paul@v.de","per_mail":False}).json()["einladungslink"].replace(B,"")

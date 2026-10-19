@@ -542,10 +542,17 @@ V.vertrieb = async () => {
   const d = await api('/api/admin/vertrieb/partner');
   const m = h('div');
   const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = leerzu(Object.fromEntries(new FormData(e.target)));
-    bestaetigt(m, () => api('/api/admin/vertrieb/partner', { method: 'POST', body: o }), 'Vertriebler angelegt.'); } },
+    o.einladen = e.target.einladen.checked;
+    try { const r = await api('/api/admin/vertrieb/partner', { method: 'POST', body: o }); melde(m, r.mail ? (r.mail.gesendet ? 'Vertriebler angelegt, Einladung per E-Mail gesendet.' : 'Vertriebler angelegt. Mail nicht gesendet (' + r.mail.grund + '). Einladungslink: ' + r.einladungslink) : 'Vertriebler angelegt.', r.mail && !r.mail.gesendet ? 'info' : 'ok'); setTimeout(() => location.reload(), r.mail && !r.mail.gesendet ? 15000 : 1800); } catch (x) { fehler(m, x); } } },
     h('div', { class: 'form2' }, feld('Name *', 'name', '', { required: true }), feld('Firma', 'firma'), feld('E-Mail', 'email', '', { type: 'email' }), feld('Telefon', 'telefon'),
       h('div', {}, h('label', {}, 'Status'), select('status', ['aktiv', 'anfrage', 'pausiert', 'beendet'], 'aktiv'))),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:8px 0' }, h('input', { type: 'checkbox', name: 'einladen', style: 'width:auto', checked: true }), 'Gleich eine Einladung zum Vertriebsportal per E-Mail senden (E-Mail-Adresse nötig)'),
     h('p', {}, h('button', { class: 'btn' }, 'Vertriebler anlegen')));
+  const zugangZelle = (z) => h('div', {}, h('span', { class: 'pill ' + (z.zugang === 'aktiv' ? 'ok' : z.zugang === 'keiner' ? '' : 'warn') }, { aktiv: 'Zugang aktiv', eingeladen: 'eingeladen', abgelaufen: 'Einladung abgelaufen', keiner: 'kein Zugang' }[z.zugang] || z.zugang),
+    z.zugang === 'aktiv' ? '' : h('div', { style: 'margin-top:4px' }, knopf(z.zugang === 'keiner' ? 'Einladung senden' : 'Erneut einladen', async () => {
+      let mail = z.email; if (!mail) mail = prompt('E-Mail-Adresse von ' + z.name + ':'); if (!mail) return;
+      try { const r = await api('/api/admin/vertrieb/partner/' + z.id + '/einladung', { method: 'POST', body: { email: mail, per_mail: true } });
+        const ok = r.mail && r.mail.gesendet; melde(m, ok ? 'Einladung an ' + mail + ' gesendet.' : 'Nicht per Mail gesendet (' + (r.mail ? r.mail.grund : '') + '). Link: ' + r.einladungslink, ok ? 'ok' : 'info'); setTimeout(() => location.reload(), ok ? 1800 : 15000); } catch (x) { fehler(m, x); } }, 'small')));
   const aktiv = d.filter(p => p.status === 'aktiv').length;
   const mb = h('div'), mon = h('input', { type: 'month', value: new Date().toISOString().slice(0, 7), style: 'max-width:200px' }), erg = h('div');
   const rechne = async (vorschau) => { try { const r = await api('/api/admin/vertrieb/provisionen/berechnen', { method: 'POST', body: { monat: mon.value, vorschau } });
@@ -556,7 +563,7 @@ V.vertrieb = async () => {
   const berechnen = h('div', { class: 'card' }, h('h2', {}, 'Provisionen berechnen'), h('p', { class: 'small muted' }, 'Rechnet für alle aktiven Vertriebler die laufende Provision des gewählten Monats nach den freigegebenen Regeln. Erst Vorschau ansehen, dann anlegen. Die Vertriebler sehen ihre Beträge sofort im Partnerportal.'), mb,
     h('div', { class: 'row' }, mon, knopf('Vorschau', () => rechne(true)), knopf('Anlegen', () => confirm('Provisionen für ' + mon.value + ' jetzt anlegen?') && rechne(false), 'btn')), erg);
   return h('div', { class: 'stack' }, kopf('Vertriebler', h('span', { class: 'pill ok' }, aktiv + ' aktiv')),
-    h('div', { class: 'card' }, tabelle([['Name', z => h('a', { href: '#partner/' + z.id }, z.name)], ['Firma', z => z.firma], ['Status', z => pill(z.status)], ['Kunden', z => z.kunden], ['Offene Leads', z => z.offene_leads], ['Provision offen', z => fmtEuro(z.offen_cent)], ['IBAN', z => z.iban_hinterlegt ? 'ja' : 'nein']], d, 'Noch keine Vertriebler.')),
+    h('div', { class: 'card' }, tabelle([['Name', z => h('a', { href: '#partner/' + z.id }, z.name)], ['Firma', z => z.firma], ['Status', z => pill(z.status)], ['Portal-Zugang', zugangZelle], ['Kunden', z => z.kunden], ['Offene Leads', z => z.offene_leads], ['Provision offen', z => fmtEuro(z.offen_cent)], ['IBAN', z => z.iban_hinterlegt ? 'ja' : 'nein']], d, 'Noch keine Vertriebler.')),
     berechnen, h('div', { class: 'card' }, h('h2', {}, 'Neuer Vertriebler'), m, f));
 };
 
@@ -612,19 +619,19 @@ V.leads = async () => {
   const filter = g('status');
   const [d, partner] = await Promise.all([api('/api/admin/leads?' + P.toString()), api('/api/admin/vertrieb/partnerliste')]);
   const m = h('div');
-  const setze = (k, w) => { const n = new URLSearchParams(P); if (w) n.set(k, w); else n.delete(k); const t = n.toString(); location.hash = '#leads' + (t ? '?' + t : ''); };
+  const setze = (k, w) => { const n = new URLSearchParams(P); if (k !== 'seite') n.delete('seite'); if (w) n.set(k, w); else n.delete(k); const t = n.toString(); location.hash = '#leads' + (t ? '?' + t : ''); };
   const tabs = h('div', { class: 'tabs' }, h('button', { class: filter === '' ? 'on' : '', onclick: () => setze('status', '') }, 'Alle'),
     LEAD_ST.filter(s => d.zaehler[s]).map(s => h('button', { class: filter === s ? 'on' : '', onclick: () => setze('status', s) }, s.replace(/_/g, ' ') + ' (' + d.zaehler[s] + ')')));
-  const fsel = (k, opt, w) => select('f_' + k, opt, w, { style: 'width:auto;min-width:130px', onchange: (e) => setze(k, e.target.value) });
-  const suche = h('input', { placeholder: 'Suchen: Firma, Ort, E-Mail, Telefon, Branche', value: g('q'), style: 'min-width:260px;flex:1', onkeydown: (e) => { if (e.key === 'Enter') setze('q', e.target.value.trim()); } });
-  const filterLeiste = h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px;margin:10px 0' }, suche,
+  const fsel = (k, opt, w) => select('f_' + k, opt, w, { onchange: (e) => setze(k, e.target.value) });
+  const suche = h('input', { placeholder: 'Suchen: Firma, Ort, E-Mail, Telefon, Branche, Notiz …', value: g('q'), onkeydown: (e) => { if (e.key === 'Enter') setze('q', e.target.value.trim()); } });
+  const filterLeiste = h('div', { class: 'lfilter' },
+    h('div', { class: 'lsuche' }, suche, knopf('Suchen', () => setze('q', suche.value.trim()), 'small')),
     fsel('quelle', [['', 'Alle Quellen'], 'manuell', 'empfehlung', 'lead_finder', 'website', 'akquise', 'messe'], g('quelle')),
-    fsel('temperatur', [['', 'Alle Einstufungen'], ['heiss', 'Heiß'], ['warm', 'Warm'], ['kalt', 'Kalt'], ['keine', 'Ohne Einstufung']], g('temperatur')),
+    fsel('temperatur', [['', 'Alle Einstufungen'], ['heiss', '🔥 HOT'], ['warm', '☀ Warm'], ['kalt', '❄ Cold'], ['keine', 'Ohne Einstufung']], g('temperatur')),
     fsel('vertriebler', [['', 'Alle Vertriebler'], ['keiner', 'Nicht zugeordnet'], ...partner.map(p => [p.id, p.name])], g('vertriebler')),
     d.gruppen.length ? fsel('gruppe', [['', 'Alle Branchengruppen'], ...d.gruppen.map(l => [l.gruppe, l.gruppe + ' (' + l.n + ')'])], g('gruppe')) : '',
-    d.listen.length ? fsel('liste', [['', 'Alle Importlisten'], ...d.listen.map(l => [l.liste, l.liste + ' (' + l.n + ')'])], g('liste')) : '',
-    knopf('Suchen', () => setze('q', suche.value.trim()), 'sec small'),
-    [...P.keys()].length ? knopf('Filter zurücksetzen', () => { location.hash = '#leads'; }, 'sec small') : '');
+    d.listen.length ? fsel('liste', [['', 'Alle Importlisten'], ...d.listen.map(l => [l.liste, l.liste.replace(/^.* · /, '') + ' (' + l.n + ')'])], g('liste')) : '',
+    ['status', 'q', 'quelle', 'temperatur', 'vertriebler', 'gruppe', 'liste'].some(k => g(k)) ? knopf('Filter zurücksetzen', () => { location.hash = '#leads'; }, 'sec small') : '');
   const zuordnen = (z) => select('p', [['', '– niemand –'], ...partner.map(p => [p.id, p.name])], z.vertriebler ? (partner.find(p => p.name === z.vertriebler) || {}).id : '', { onchange: async (e) => {
     try { await api('/api/admin/leads/' + z.id, { method: 'PATCH', body: e.target.value ? { vertriebspartner_id: e.target.value } : { zuordnung_loeschen: true } }); melde(m, 'Zugeordnet.', 'ok'); } catch (x) { fehler(m, x); } } });
   const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = leerzu(Object.fromEntries(new FormData(e.target)));
@@ -633,8 +640,46 @@ V.leads = async () => {
       h('div', {}, h('label', {}, 'Quelle'), select('quelle', ['manuell', 'empfehlung', 'lead_finder', 'website', 'akquise', 'messe'], 'manuell')),
       h('div', {}, h('label', {}, 'Vertriebler'), select('vertriebspartner_id', [['', '– niemand –'], ...partner.map(p => [p.id, p.name])], ''))),
     h('p', {}, h('button', { class: 'btn' }, 'Lead anlegen')));
-  return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, tabs, filterLeiste, h('p', { class: 'small muted' }, d.leads.length + ' Leads angezeigt' + (d.leads.length >= 500 ? ' (maximal 500, bitte Filter nutzen)' : '')),
-    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Kontakt', z => [z.ansprechpartner, z.telefon, z.email].filter(Boolean).join(' · ')], ['Ort', z => z.ort], ['Liste', z => z.liste || ''], ['Gruppe', z => z.gruppe || ''], ['Quelle', z => z.quelle], ['Status', z => pill(z.status)], ['Einstufung', z => tempWahl(z, m)], ['Wiedervorlage', z => z.wiedervorlage_am ? h('span', { class: z.wiedervorlage_am.slice(0, 10) <= new Date().toISOString().slice(0, 10) ? 'pill warn' : 'small' }, datum(z.wiedervorlage_am)) : ''], ['Score', z => z.score ?? ''], ['Vertriebler', zuordnen], ['Angelegt', z => datum(z.erstellt_am)], ['', z => leadLoeschen(z, m, () => {})]], d.leads, 'Keine Leads.')),
+  const gewaehlt = new Set(); let alleTreffer = false;
+  const leiste = h('div', { class: 'lbulk', hidden: true });
+  const filterObj = () => Object.fromEntries(['status', 'q', 'quelle', 'temperatur', 'vertriebler', 'gruppe', 'liste'].filter(k => g(k)).map(k => [k, g(k)]));
+  const bulk = async (aktion, wert, text) => {
+    const n = alleTreffer ? d.gesamt : gewaehlt.size;
+    if (!n || !confirm(n + ' Leads: ' + text + '?')) return;
+    try { const r = await api('/api/admin/leads/bulk', { method: 'POST', body: { aktion, wert, ids: alleTreffer ? null : [...gewaehlt], alle_gefilterten: alleTreffer, filter: filterObj() } }); melde(m, r.geaendert + ' Leads geändert.', 'ok'); setTimeout(() => location.reload(), 700); } catch (x) { fehler(m, x); }
+  };
+  const aktualisiere = () => {
+    leiste.hidden = !gewaehlt.size && !alleTreffer;
+    const n = alleTreffer ? d.gesamt : gewaehlt.size;
+    const wahl = (name, opt, aktion, text) => select(name, [['__', text], ...opt], '__', { onchange: (e) => { const v = e.target.value; e.target.value = '__'; if (v !== '__') bulk(aktion, v, text + ' → ' + (opt.find(o => o[0] === v) || [0, v])[1]); } });
+    leiste.replaceChildren(h('b', {}, n + ' ausgewählt'),
+      !alleTreffer && d.gesamt > d.leads.length ? knopf('Alle ' + d.gesamt + ' Treffer des Filters auswählen', () => { alleTreffer = true; aktualisiere(); }, 'sec small') : '',
+      wahl('b_t', [['', 'ohne Einstufung'], ['kalt', '❄ Cold'], ['warm', '☀ Warm'], ['heiss', '🔥 HOT']], 'temperatur', 'Einstufung setzen'),
+      wahl('b_v', [['', 'niemand'], ...partner.map(p => [p.id, p.name])], 'vertriebler', 'Vertriebler zuordnen'),
+      wahl('b_s', ['neu', 'kontaktiert', 'antwort', 'termin', 'angebot', 'verloren', 'tot'].map(x => [x, x]), 'status', 'Status setzen'),
+      knopf('Löschen', () => bulk('loeschen', null, 'endgültig löschen (inkl. Verlauf; bereits angelegte Kunden bleiben)'), 'bad small'),
+      knopf('Auswahl aufheben', () => { gewaehlt.clear(); alleTreffer = false; document.querySelectorAll('.leadtab input[type=checkbox]').forEach(c => { c.checked = false; }); aktualisiere(); }, 'sec small'));
+  };
+  const haken = (z) => h('input', { type: 'checkbox', style: 'width:auto', onchange: (e) => { if (e.target.checked) gewaehlt.add(z.id); else { gewaehlt.delete(z.id); alleTreffer = false; } aktualisiere(); } });
+  const alleHaken = h('input', { type: 'checkbox', style: 'width:auto', title: 'Alle auf dieser Seite', onchange: (e) => { document.querySelectorAll('.leadtab tbody input[type=checkbox]').forEach(c => { if (c.checked !== e.target.checked) c.click(); }); } });
+  const heute = new Date().toISOString().slice(0, 10);
+  const zeilen = d.leads.map(z => h('tr', {},
+    h('td', { class: 'ck' }, haken(z)),
+    h('td', {}, h('a', { href: '#lead/' + z.id, class: 'lfirma' }, z.firma), h('div', { class: 'small muted', title: 'Quelle: ' + z.quelle + (z.liste ? ' · Liste: ' + z.liste : '') }, [z.gruppe || z.branche, z.ort].filter(Boolean).join(' · '))),
+    h('td', { class: 'nowrap' }, z.telefon ? h('div', {}, h('a', { href: 'tel:' + z.telefon.replace(/[^+\d]/g, '') }, z.telefon)) : '', z.email ? h('div', { class: 'small muted' }, z.email) : '', !z.telefon && !z.email ? h('span', { class: 'muted' }, '–') : ''),
+    h('td', {}, tempWahl(z, m)),
+    h('td', {}, pill(z.status), z.wiedervorlage_am ? h('div', { class: 'small ' + (z.wiedervorlage_am.slice(0, 10) <= heute ? 'wv-faellig' : 'muted') }, 'WV ' + datum(z.wiedervorlage_am)) : ''),
+    h('td', {}, zuordnen(z)),
+    h('td', { class: 'small muted nowrap' }, datum(z.erstellt_am)),
+    h('td', {}, leadLoeschen(z, m, () => {}))));
+  const seiten = Math.max(1, Math.ceil(d.gesamt / d.pro_seite));
+  const blaettern = seiten > 1 ? h('div', { class: 'row', style: 'justify-content:center;margin-top:12px' },
+    knopf('← Zurück', () => setze('seite', d.seite > 2 ? String(d.seite - 1) : ''), 'sec small'), h('span', { class: 'small muted' }, 'Seite ' + d.seite + ' von ' + seiten),
+    knopf('Weiter →', () => setze('seite', String(d.seite + 1)), 'sec small')) : '';
+  if (d.seite > 1 && !d.leads.length) { setze('seite', ''); }
+  return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, tabs, filterLeiste,
+    h('p', { class: 'small muted', style: 'margin:10px 0 6px' }, d.gesamt + ' Leads' + (['status', 'q', 'quelle', 'temperatur', 'vertriebler', 'gruppe', 'liste'].some(k => g(k)) ? ' passen zum Filter' : '')), leiste,
+    d.leads.length ? h('div', { class: 'tablewrap' }, h('table', { class: 'leadtab' }, h('thead', {}, h('tr', {}, h('th', { class: 'ck' }, alleHaken), ['Firma', 'Kontakt', 'Einstufung', 'Status', 'Vertriebler', 'Angelegt', ''].map(t => h('th', {}, t)))), h('tbody', {}, zeilen))) : h('p', { class: 'muted' }, 'Keine Leads.'), blaettern),
     await leadImportKarte(partner),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
 };

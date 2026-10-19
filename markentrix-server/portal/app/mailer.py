@@ -56,11 +56,17 @@ SIGNATUR = "\n\nViele Grüße\nIhr Markentrix-Team"
 
 def einladung(an: str, name: str | None, link: str, rolle: str, tage: int) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
-    wofuer = "Ihr Zugang zum Markentrix-Kundenportal ist eingerichtet." if rolle == "kunde" else "Ihr Zugang zum Markentrix-Partnerportal ist eingerichtet."
+    if rolle == "kunde":
+        wofuer = "Ihr Zugang zum Markentrix-Kundenportal ist eingerichtet."
+    elif rolle == "vertrieb":
+        wofuer = ("Ihr Zugang zum Markentrix-Vertriebsportal ist eingerichtet. Dort sehen Sie Ihre Leads, halten fest, wer angerufen wurde oder einen Termin hat, "
+                  "und behalten Ihre Kunden und Provisionen im Blick.")
+    else:
+        wofuer = "Ihr Zugang zum Markentrix-Portal ist eingerichtet."
     text = (f"{hallo}\n\n{wofuer}\n\nBitte legen Sie über diesen Link Ihr Passwort fest "
             f"(der Link ist {tage} Tage gültig und nur einmal nutzbar):\n\n{link}\n\n"
             f"Danach melden Sie sich mit dieser E-Mail-Adresse unter {config.BASE_URL} an." + SIGNATUR)
-    return senden(an, "Ihr Zugang zum Markentrix-Portal", text)
+    return senden(an, "Ihr Zugang zum Markentrix-Vertriebsportal" if rolle == "vertrieb" else "Ihr Zugang zum Markentrix-Portal", text)
 
 
 def passwort_zuruecksetzen(an: str, link: str) -> tuple[bool, str]:

@@ -100,3 +100,31 @@ chk("Ungeprüftes Blatt nicht importiert",sql(f"select count(*) from leads where
 r=imp(mb,"multi.xlsx",nur_pruefen=False,blaetter=["Noch ungeprüft"],liste="Celle").json(); chk("Blatt gezielt wählen",r["neu"]==1,r)
 chk("Filter Branchengruppe",[x["firma"] for x in L("gruppe=Handwerk%20%26%20Bau")["leads"]]==[f"Bagger Drei {sfx}"] and any(g["gruppe"]=="Beauty" for g in L("")["gruppen"]))
 chk("Suche in Notiz",len(L("q=Prio%20A")["leads"])>=1)
+
+# ---- Seiten und Sammelaktionen
+big=xlsx([["Firma","Telefon","Ort"]]+[[f"Bulk {i:03d} {sfx}",f"0511 {900000+i}","Celle"] for i in range(120)])
+r=imp(big,"bulk.xlsx",nur_pruefen=False,liste="Bulk",temperatur="kalt").json(); chk("120 importiert",r["neu"]==120,r)
+pg=L("liste=Bulk%20%C2%B7%20Sheet"); chk("Seite 1: 50 von 120",len(pg["leads"])==50 and pg["gesamt"]==120 and pg["pro_seite"]==50,(len(pg["leads"]),pg["gesamt"]))
+p3=L("liste=Bulk%20%C2%B7%20Sheet&seite=3"); chk("Seite 3: 20",len(p3["leads"])==20)
+ids=[x["id"] for x in pg["leads"][:5]]
+r=a.post("/api/admin/leads/bulk",json={"aktion":"temperatur","wert":"heiss","ids":ids}); chk("Bulk Einstufung",r.status_code==200 and r.json()["geaendert"]==5,r.text)
+chk("Bulk wirkt",sql(f"select count(*) from leads where liste='Bulk · Sheet' and temperatur='heiss'")=="5")
+r=a.post("/api/admin/leads/bulk",json={"aktion":"vertriebler","wert":p,"alle_gefilterten":True,"filter":{"liste":"Bulk · Sheet","temperatur":"kalt"}}); chk("Bulk alle Gefilterten zuordnen",r.json()["geaendert"]==115,r.text)
+chk("Zuordnung gesetzt",sql(f"select count(*) from leads where liste='Bulk · Sheet' and vertriebspartner_id='{p}'")=="115")
+r=a.post("/api/admin/leads/bulk",json={"aktion":"status","wert":"kontaktiert","ids":ids}); chk("Bulk Status",r.json()["geaendert"]==5)
+chk("Bulk ungültiger Status",a.post("/api/admin/leads/bulk",json={"aktion":"status","wert":"gewonnen","ids":ids}).status_code==400)
+chk("Bulk ohne Auswahl",a.post("/api/admin/leads/bulk",json={"aktion":"loeschen"}).status_code==400)
+chk("Bulk ungültige ID",a.post("/api/admin/leads/bulk",json={"aktion":"loeschen","ids":["xyz"]}).status_code==400)
+chk("Bulk Kunde verboten",c.post("/api/admin/leads/bulk",json={"aktion":"loeschen","ids":ids}).status_code==403)
+r=a.post("/api/admin/leads/bulk",json={"aktion":"loeschen","alle_gefilterten":True,"filter":{"liste":"Bulk · Sheet"}}); chk("Bulk löschen",r.json()["geaendert"]==120,r.text)
+chk("Weg",sql("select count(*) from leads where liste='Bulk · Sheet'")=="0")
+
+# ---- Vertriebler anlegen und gleich einladen
+r=a.post("/api/admin/vertrieb/partner",json={"name":"Nora Neu","email":f"nora{sfx}@v.de","status":"aktiv","einladen":True}); chk("Vertriebler mit Einladung",r.status_code==200 and r.json()["mail"]["gesendet"] and "einladung?token=" in r.json()["einladungslink"],r.text)
+mm=mail_an(f"nora{sfx}@v.de","Vertriebsportal"); chk("Mail mit Vertriebs-Text",len(mm)==1 and "Leads" in text(mm[0]) and "einladung?token=" in text(mm[0]),len(mm))
+zg=lambda n:[x for x in a.get("/api/admin/vertrieb/partner").json() if x["name"]==n][0]["zugang"]
+chk("Zugang: eingeladen",zg("Nora Neu")=="eingeladen"); chk("Zugang: keiner",zg("Imp Vertrieb")=="keiner")
+httpx.post(B+"/api/einladung",headers=H,json={"token":token(f"nora{sfx}@v.de"),"password":"NoraPasswort123"}); chk("Zugang: aktiv",zg("Nora Neu")=="aktiv")
+chk("Einladung ohne E-Mail abgelehnt",a.post("/api/admin/vertrieb/partner",json={"name":"Ohne Mail","einladen":True}).status_code==400)
+chk("Ohne Einladen kein Zugang",a.post("/api/admin/vertrieb/partner",json={"name":"Stille Sophie","email":f"so{sfx}@v.de"}).status_code==200 and zg("Stille Sophie")=="keiner")
+r=a.post(f"/api/admin/vertrieb/partner/{[x for x in a.get('/api/admin/vertrieb/partner').json() if x['name']=='Stille Sophie'][0]['id']}/einladung",json={"email":f"so{sfx}@v.de","per_mail":True}); chk("Nachträglich einladen",r.status_code==200 and r.json()["mail"]["gesendet"],r.text)
