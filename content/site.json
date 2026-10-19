@@ -138,19 +138,24 @@
     {
       "name": "Die Fahr-Schu-Leh",
       "type": "Fahrschule",
+      "url": "https://die-fahr-schu-leh.de/",
       "logo": "ref-fahr-schu-leh.svg"
     },
     {
-      "name": "City Fahrschule",
-      "type": "Fahrschule"
+      "name": "City-Fahrschule Krug",
+      "type": "Fahrschule",
+      "url": "https://city-fahrschule-krug.com/"
     },
     {
       "name": "Koops GmbH",
-      "type": "Firmenkunde"
+      "type": "Kfz-Werkstatt",
+      "url": "https://celle-koops.premio.de/"
     },
     {
-      "name": "BioFit",
-      "type": "Firmenkunde"
+      "name": "BioFit Celle",
+      "type": "Fitnessstudio",
+      "url": "https://biofit-celle.de/",
+      "mono": "BF"
     }
   ],
   "paymentMethods": [

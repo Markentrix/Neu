@@ -310,9 +310,15 @@ def build_firmen(site, write):
             w = [x for x in n.replace("-", " ").split() if x[:1].isalpha() and x.lower() not in ("die", "der", "das", "gmbh")]
             return ("".join(x[0] for x in w[:2]) or n[:2]).upper()
         mark = lambda r: (f'<img src="{ESC(r["logo"])}" alt="" loading="lazy" decoding="async">' if r.get("logo")
-                          else f'<span class="ref-mono">{ESC(mono(r["name"]))}</span>')
-        tiles = "".join(f'<li class="ref-tile reveal"><span class="ref-mark" aria-hidden="true">{mark(r)}</span>'
-                        f'<span class="ref-name">{ESC(r["name"])}</span><span class="ref-type">{ESC(r.get("type") or "Firmenkunde")}</span></li>' for r in rl)
+                          else f'<span class="ref-mono">{ESC(r.get("mono") or mono(r["name"]))}</span>')
+        def tile(r):
+            inner = (f'<span class="ref-mark" aria-hidden="true">{mark(r)}</span><span class="ref-name">{ESC(r["name"]).replace("-", "\u2011")}</span>'
+                     f'<span class="ref-type">{ESC(r.get("type") or "Firmenkunde")}</span>')
+            if r.get("url", "").startswith("https://"):
+                return (f'<li class="reveal"><a class="ref-tile" href="{ESC(r["url"])}" target="_blank" rel="noopener">{inner}'
+                        f'<span class="ref-link">Website<span class="visually-hidden"> von {ESC(r["name"])} (öffnet in neuem Tab)</span> {I["arrow"]}</span></a></li>')
+            return f'<li class="reveal"><div class="ref-tile">{inner}</div></li>'
+        tiles = "".join(tile(r) for r in rl)
         refs = f'''
   <section class="soft refs-band" aria-labelledby="refs-h">
     <div class="container">

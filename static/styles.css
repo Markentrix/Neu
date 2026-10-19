@@ -779,7 +779,11 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .ref-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
 @media (min-width: 900px) { .ref-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; } }
 @media (max-width: 599.98px) { .ref-tile { padding: 16px 10px; } .ref-name { font-size: 0.9rem; } .ref-type { font-size: 0.8rem; } .ref-mark { height: 64px; } .ref-mark img { max-height: 58px; } .ref-mono { width: 50px; height: 50px; } }
-.ref-tile { display: grid; gap: 4px; justify-items: center; text-align: center; padding: 22px 18px 20px; border-radius: var(--radius-m); background: var(--bg); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(15,20,30,0.04); }
+.ref-grid > li { display: grid; }
+.ref-tile { display: grid; gap: 4px; justify-items: center; align-content: start; text-align: center; padding: 22px 18px 20px; border-radius: var(--radius-m); background: var(--bg); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(15,20,30,0.04); color: inherit; text-decoration: none; transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s ease; }
+a.ref-tile:hover, a.ref-tile:focus-visible { border-color: var(--blue); box-shadow: 0 10px 28px -14px rgba(28,79,156,0.45); transform: translateY(-2px); }
+.ref-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 0.84rem; font-weight: 650; color: var(--blue); }
+.ref-link svg { width: 14px; height: 14px; transform: rotate(-45deg); }
 .ref-mark { height: 84px; width: 100%; display: grid; place-items: center; margin-bottom: 8px; }
 .ref-mark img { max-height: 76px; max-width: 100%; width: auto; height: auto; }
 .ref-mono { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: var(--anthracite); color: var(--on-anthracite); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.04em; }
