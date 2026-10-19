@@ -141,6 +141,8 @@ def kunden_liste(q: str = "", user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         cur.execute("""SELECT k.id, k.kundennummer, k.firma, k.ansprechpartner, k.email, k.domain, k.status, k.referenzkunde, p.name AS paket, k.erstellt_am,
                               (SELECT count(*) FROM kunden_module km WHERE km.kunden_id=k.id AND km.aktiv) AS module_aktiv,
+                              (SELECT coalesce(json_agg(json_build_object('code', m.code, 'name', m.name, 'art', m.art, 'aktiv', coalesce(km.aktiv, false)) ORDER BY m.art, m.sortierung), '[]'::json)
+                                 FROM module m LEFT JOIN kunden_module km ON km.modul_code=m.code AND km.kunden_id=k.id) AS module,
                               (SELECT count(*) FROM benutzer b WHERE b.kunden_id=k.id AND b.passwort_hash IS NOT NULL) AS zugang_aktiv,
                               EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL) AS avv_ok
                        FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code

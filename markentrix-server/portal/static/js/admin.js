@@ -50,6 +50,25 @@ V.uebersicht = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Letzte Aktionen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d.letzte_aktionen)));
 };
 
+const modulZelle = (z) => {
+  const wrap = h('div', { class: 'modul-zelle' }), panel = h('div', { class: 'small', style: 'display:none;margin-top:6px' });
+  const kopf = h('a', { href: '#', onclick: (e) => { e.preventDefault(); panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; } });
+  const zeige = () => {
+    const akt = z.module.filter(m => m.aktiv);
+    kopf.replaceChildren(akt.length + ' von ' + z.module.length + ' ▾');
+    chips.replaceChildren(...(akt.length ? akt.map(m => h('span', { class: 'pill ok', style: 'margin:1px 2px 1px 0' }, m.name)) : [h('span', { class: 'muted' }, 'keine aktiv')]));
+  };
+  const chips = h('div', { style: 'margin-top:4px' });
+  panel.append(...z.module.map(m => {
+    const cb = h('input', { type: 'checkbox', checked: m.aktiv, style: 'width:auto', onchange: async (e) => {
+      try { await api('/api/admin/kunden/' + z.id + '/module/' + m.code, { method: 'PUT', body: { aktiv: e.target.checked } }); m.aktiv = e.target.checked; zeige(); }
+      catch (x) { e.target.checked = !e.target.checked; alert(x.message); }
+    } });
+    return h('label', { style: 'display:flex;gap:6px;align-items:center;margin:2px 0;white-space:nowrap' }, cb, m.name, ' ', h('span', { class: 'pill' }, m.art === 'agent' ? 'Agent' : 'Portal'));
+  }));
+  zeige(); wrap.append(kopf, chips, panel); return wrap;
+};
+
 V.kunden = async () => {
   const q = h('input', { placeholder: 'Suchen nach Firma, Nummer, E-Mail …' });
   const box = h('div'), nurRef = h('input', { type: 'checkbox', style: 'width:auto', onchange: () => lade() });
@@ -58,7 +77,7 @@ V.kunden = async () => {
     if (nurRef.checked) d = d.filter(z => z.referenzkunde);
     box.replaceChildren(tabelle([
       ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => h('span', {}, z.firma, z.referenzkunde ? [' ', h('span', { class: 'pill warn' }, 'Referenz')] : '')], ['Paket', z => z.paket || '–'],
-      ['Status', z => pill(z.status)], ['Module', z => z.module_aktiv], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
+      ['Status', z => pill(z.status)], ['Module', z => modulZelle(z)], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(lade, 250); });
   await lade();
