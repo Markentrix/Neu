@@ -144,3 +144,9 @@ code{word-break:break-all;white-space:normal}
 .trichter .stufe{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:13px}.trichter .stufe>span:first-child{width:130px;flex:none}.trichter .bar{height:18px;background:linear-gradient(90deg,#28C7F7,#8B5CF6);border-radius:6px;min-width:3px}
 .wert{background:linear-gradient(135deg,#0B1020,#25306b);color:#fff}.wert h2,.wert h3{color:#fff}.wert .muted{color:#cbd2ea}.wert .kennz{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;margin:10px 0}
 .wert .kennz>div{background:#ffffff14;border-radius:12px;padding:10px 12px}.wert .kennz b{font-size:26px;display:block}
+
+.grid3.dicht{grid-template-columns:repeat(auto-fit,minmax(min(125px,100%),1fr))}
+.neuknopf{white-space:nowrap;flex:none}
+.trichter .bar{flex:0 1 auto;max-width:42%}
+@media(max-width:720px){.trichter .stufe>span:first-child{width:112px;overflow-wrap:anywhere}.neuzeile{padding:0 4px;display:flex}}
+@media(max-width:560px){.top{flex-wrap:wrap;gap:8px}.top h1{font-size:22px;line-height:1.2}}

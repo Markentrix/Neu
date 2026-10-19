@@ -1,0 +1,86 @@
+import { h, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
+
+export const root = document.getElementById('app');
+export let start = null;
+export const setzeStart = (s) => { start = s; };
+export const hat = (c) => start.module.some(m => m.code === c);
+
+const SEITEN = [
+  ['uebersicht', 'Übersicht', null],
+  ['status', 'Status', null],
+  ['briefing', 'Briefing', null],
+  ['nachrichten', 'Nachrichten', null],
+  ['freigaben', 'Freigaben', null],
+  ['assistent', 'KI-Assistent', 'ki_chat'],
+  ['anfragen', 'Anfragen', 'anfragen_termine'],
+  ['termine', 'Termine', 'anfragen_termine'],
+  ['kontakte', 'Kontakte', 'kontakte_angebote_vertraege'],
+  ['dokumente', 'Angebote & Verträge', 'kontakte_angebote_vertraege'],
+  ['unterlagen', 'Dokumente', null],
+  ['auswertung', 'Auswertung', null],
+  ['berichte', 'Monatsberichte', null],
+  ['belege', 'Angebote & Rechnungen', null],
+  ['anrufe', 'Anrufe', null],
+  ['website', 'Website & Landingpages', 'website'],
+  ['wochenangebote', 'Wochenangebote', 'wochenangebote'],
+  ['werbung', 'Werbung & Berichte', 'werbung_berichte'],
+  ['automationen', 'Automationen', 'automationen'],
+  ['avv', 'Datenschutz-Vertrag', null],
+  ['team', 'Team', null],
+  ['hilfe', 'Hilfe', null],
+  ['einstellungen', 'Einstellungen', null],
+];
+export const inhaber = () => start.kunden_rolle === 'inhaber';
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv'].includes(s[0]) || inhaber()));
+
+const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : 0)) || 0;
+
+export function gerüst(aktiv, inhalt) {
+  const k = start.kunde;
+  return h('div', { class: 'shell' },
+    h('aside', { class: 'side' },
+      h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, 'M'), k.logo_vorhanden ? k.firma : 'Markentrix'),
+      h('div', { class: 'brandzeile' }, glocke()),
+      sichtbar().map(s => h('a', { class: 'nav' + (s[0] === aktiv ? ' on' : ''), href: '#' + s[0] }, s[1], zaehler(s[0]) ? h('span', { class: 'badge' }, zaehler(s[0])) : '')),
+      h('div', { class: 'grow' }),
+      h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
+    h('main', { class: 'main' },
+      h('div', { class: 'top' },
+        h('h1', {}, k.firma),
+        h('span', { class: 'pill' }, 'Kundennr. ' + k.kundennummer),
+        h('span', { class: 'pill ok' }, '● Online')),
+      inhalt, rechtFuss()));
+}
+
+export function karten() {
+  const a = h('div', { class: 'card' }, h('h3', {}, 'Anfragen'),
+    h('div', { class: 'stat' }, h('b', {}, start.neue_anfragen), h('span', { class: 'muted small' }, 'neu · letzte 14 Tage')),
+    sparkline(start.anfragen_14d, '#28C7F7'));
+  const t = h('div', { class: 'card' }, h('h3', {}, 'Termine'),
+    h('div', { class: 'stat' }, h('b', {}, start.kommende_termine), h('span', { class: 'muted small' }, 'kommend · nächste 14 Tage')),
+    sparkline(start.termine_14d, '#8B5CF6'));
+  const w = start.website;
+  const web = h('div', { class: 'card' }, h('h3', {}, 'Website & Landingpages'),
+    w ? h('p', {}, w.domain, ' ', h('span', { class: 'pill ' + (w.status === 'live' ? 'ok' : 'warn') }, w.status)) : h('p', { class: 'muted small' }, 'Noch keine Website verknüpft.'));
+  return [hat('anfragen_termine') && a, hat('anfragen_termine') && t, hat('website') && web];
+}
+
+export function tabelle(spalten, zeilen, leer = 'Noch nichts vorhanden.') {
+  if (!zeilen.length) return h('p', { class: 'muted' }, leer);
+  return h('div', { class: 'tablewrap' }, h('table', {},
+    h('thead', {}, h('tr', {}, spalten.map(s => h('th', {}, s[0])))),
+    h('tbody', {}, zeilen.map(z => h('tr', {}, spalten.map(s => h('td', {}, s[1](z))))))));
+}
+export const statusPill = (s) => h('span', { class: 'pill ' + (['neu', 'geplant'].includes(s) ? 'warn' : ['erledigt', 'veroeffentlicht', 'bestaetigt', 'beantwortet'].includes(s) ? 'ok' : ['fehler', 'abgesagt', 'spam'].includes(s) ? 'bad' : '') }, String(s).replace('_', ' '));
+
+// ------------------------------------------------------------- Seiten
+export const V = {};
+export async function zeige() {
+  const [id, param] = (location.hash || '#').slice(1).split('/');
+  const erlaubt = sichtbar().map(s => s[0]);
+  const seite = erlaubt.includes(id) ? id : (hat('ki_chat') ? 'assistent' : 'uebersicht');
+  let inhalt;
+  try { inhalt = await V[seite](param); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
+  root.replaceChildren(gerüst(seite, inhalt));
+}
+

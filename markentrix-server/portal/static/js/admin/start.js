@@ -75,7 +75,7 @@ export function cockpitKarte(c) {
   const t = c.trichter, stufen = [['Neue Leads (90 Tage)', t.gesamt], ['Bearbeitet', t.bearbeitet], ['Erreicht', t.erreicht], ['Gespräch/Angebot', t.gespraech], ['Kunde geworden', t.kunden]];
   const prog = c.prognose, summe = prog.reduce((a, p) => a + p.cent, 0), pmax = Math.max(1, ...prog.map(p => p.cent));
   return h('div', { class: 'card' }, h('h2', {}, 'Geschäftszahlen'),
-    h('div', { class: 'grid3' },
+    h('div', { class: 'grid3 dicht' },
       kachel('Zahlungseingang ' + monat(jetzt.monat), euro(jetzt.umsatz_cent), delta(jetzt.umsatz_cent, vor.umsatz_cent, true, euro), '#belege'),
       kachel('Neukunden ' + monat(jetzt.monat), jetzt.neukunden, delta(jetzt.neukunden, vor.neukunden), '#kunden'),
       kachel('Neue Leads ' + monat(jetzt.monat), jetzt.leads, delta(jetzt.leads, vor.leads), '#leads'),

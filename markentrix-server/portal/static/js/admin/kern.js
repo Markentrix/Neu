@@ -12,7 +12,7 @@ export const erlaubt = (seite) => !ich || !ich.admin_rechte || !NAV_RECHT[seite]
 function befehle() {
   const ziele = [['Neuer Kunde', 'neu', true], ['Neue Rechnung oder neues Angebot', 'belege', true], ['Lead anlegen oder importieren', 'leads', true], ['Aufgabe anlegen', 'aufgaben', true], ['Vertriebler einladen', 'vertrieb', true],
     ['Zur Übersicht', 'uebersicht', false], ['Nachrichten', 'postfach', false], ['Kennzahlen', 'kennzahlen', false], ['Einstellungen', 'einstellungen', false], ['Protokoll', 'protokoll', false]];
-  return [...ziele.filter(([, s]) => erlaubt(s)).map(([titel, s, neu]) => ({ titel: String(titel), text: '#' + s, link: '#' + s, neu: !!neu })), { titel: 'Abmelden', text: 'Sitzung beenden', aktion: () => abmelden() }];
+  return [...ziele.filter(([, s]) => erlaubt(s)).map(([titel, s, neu]) => ({ titel: String(titel), text: neu ? 'Anlegen' : 'Öffnen', link: '#' + s, neu: !!neu })), { titel: 'Abmelden', text: 'Sitzung beenden', aktion: () => abmelden() }];
 }
 
 export function gerüst(aktiv, inhalt) {

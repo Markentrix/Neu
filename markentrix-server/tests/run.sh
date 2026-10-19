@@ -53,7 +53,7 @@ for t in ${TESTS:-t4 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21
   else echo "[$t] ok ($(grep -c '^OK' "out_$t.txt") Prüfungen)"; fi
 done
 cd "$REPO/portal" && python3 -m pyflakes app && echo "[pyflakes] ok" || FEHLER=1
-for f in static/js/*.js static/js/admin/*.js; do node --input-type=module --check < "$f" 2>&1 | head -3; [ "${PIPESTATUS[0]}" = 0 ] || { echo "[js] Syntaxfehler in $f"; FEHLER=1; }; done
+for f in static/js/*.js static/js/admin/*.js static/js/kunde/*.js; do node --input-type=module --check < "$f" 2>&1 | head -3; [ "${PIPESTATUS[0]}" = 0 ] || { echo "[js] Syntaxfehler in $f"; FEHLER=1; }; done
 # Frontend: ESLint (fehlende/ungenutzte Verweise, Doppeldeklarationen) + TypeScript-Prüfung der JavaScript-Dateien (checkJs)
 if [ -d /var/tmp/lint/node_modules/eslint ] || (mkdir -p /var/tmp/lint && cd /var/tmp/lint && npm i --silent eslint@9 globals typescript@5 >/dev/null 2>&1); then
   cp "$HIER"/frontend/eslint.config.js "$HIER"/frontend/tsconfig.json /var/tmp/lint/ 2>/dev/null; echo '{"type":"module"}' > /var/tmp/lint/package.json
