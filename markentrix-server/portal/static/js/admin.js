@@ -10,6 +10,8 @@ import './admin/einstellungen.js';
 import './admin/belege.js';
 import './admin/vertrieb.js';
 import './admin/postfach.js';
+import './admin/pipeline.js';
+import './admin/onboardingboard.js';
 import './admin/meintag.js';
 const root = document.getElementById('app');
 

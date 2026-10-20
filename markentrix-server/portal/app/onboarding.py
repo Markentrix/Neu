@@ -78,3 +78,30 @@ def lesen(cur, kid) -> list:
         r["fertig"] = r["erledigt"] or r["automatisch"]
         out.append(r)
     return out
+
+
+# Phasen der Kunden-Reise: (Schlüssel, Titel, Codes). Eigene Punkte (x-…) zählen zur Phase „Aufbau“.
+PHASEN = [
+    ("start", "Start", ("vertrag", "avv", "zugang")),
+    ("material", "Briefing & Material", ("briefing", "stammdaten", "branding", "konten")),
+    ("aufbau", "Aufbau", ("domain", "wissen", "agent")),
+    ("live", "Live & Übergabe", ("website", "einweisung", "rechnung")),
+]
+
+
+def phase_von(code: str) -> str:
+    for schluessel, _t, codes in PHASEN:
+        if code in codes:
+            return schluessel
+    return "aufbau"
+
+
+def phasenstand(punkte: list) -> dict:
+    """Phasen mit Fortschritt; aktuell = erste Phase mit offenem Punkt (None, wenn alles erledigt)."""
+    out = []
+    for schluessel, titel, _c in PHASEN:
+        mine = [p for p in punkte if phase_von(p["code"]) == schluessel]
+        fertig = sum(1 for p in mine if p["fertig"])
+        out.append({"schluessel": schluessel, "titel": titel, "fertig": fertig, "gesamt": len(mine), "erledigt": bool(mine) and fertig == len(mine), "leer": not mine})
+    aktuell = next((p["schluessel"] for p in out if not p["leer"] and not p["erledigt"]), None)
+    return {"phasen": out, "aktuell": aktuell}

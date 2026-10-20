@@ -260,7 +260,7 @@ export function sucheKnopf(befehle = []) {
     const suchen = async () => {
       const q = eingabe.value.trim();
       treffer = []; pos = -1;
-      if (nurNeu || q.length < 2) { ergebnis.replaceChildren(gruppe(nurNeu ? 'Neu anlegen' : 'Aktionen', passend(q)), nurNeu ? '' : h('p', { class: 'muted small', style: 'padding:10px' }, 'Tippe mindestens 2 Zeichen, um Kunden, Leads, Rechnungen und mehr zu suchen.')); return; }
+      if (nurNeu || q.length < 2) { ergebnis.replaceChildren(gruppe(nurNeu ? 'Neu anlegen' : 'Aktionen', passend(q)), nurNeu ? '' : gruppe('Zuletzt geöffnet', zuletztGeoeffnet().map(z => ({ titel: z.titel, text: z.link.slice(1).split('/')[0], link: z.link }))), nurNeu ? '' : h('p', { class: 'muted small', style: 'padding:10px' }, 'Tippe mindestens 2 Zeichen, um Kunden, Leads, Rechnungen und mehr zu suchen.')); return; }
       try {
         const d = await api('/api/admin/suche?q=' + encodeURIComponent(q));
         if (eingabe.value.trim() !== q) return;
@@ -338,4 +338,31 @@ export function csvLaden(dateiname, kopfzeile, zeilen) {
   const text = '\ufeff' + [kopfzeile, ...zeilen].map(z => z.map(q).join(';')).join('\r\n');
   const a = h('a', { href: URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })), download: dateiname });
   document.body.append(a); a.click(); a.remove();
+}
+
+/** Hinweis mit „Rückgängig“ für ein paar Sekunden. fn macht die Aktion rückgängig und darf einen Fehler werfen. */
+export function rueckgaengig(text, fn, sekunden = 10) {
+  document.querySelectorAll('.undo').forEach(e => e.remove());
+  let t = null;
+  const weg = () => { clearTimeout(t); box.remove(); };
+  const box = h('div', { class: 'undo', role: 'status' }, h('span', {}, text), h('button', { class: 'btn small', onclick: async (e) => { e.target.disabled = true; try { await fn(); box.firstChild.textContent = 'Rückgängig gemacht.'; e.target.remove(); setTimeout(weg, 2000); } catch (x) { box.firstChild.textContent = 'Rückgängig nicht möglich: ' + x.message; e.target.remove(); setTimeout(weg, 4000); } } }, 'Rückgängig'));
+  document.body.append(box); t = setTimeout(weg, sekunden * 1000);
+  window.addEventListener('hashchange', weg, { once: true });
+}
+
+// Zuletzt geöffnete Seiten (nur in diesem Browser) für die Suche
+const ZUL = 'mk_zuletzt';
+export const zuletztGeoeffnet = () => { try { return JSON.parse(localStorage.getItem(ZUL) || '[]'); } catch { return []; } };
+if (!/** @type {any} */ (window).__mkZuletzt) {
+  /** @type {any} */ (window).__mkZuletzt = true;
+  window.addEventListener('hashchange', () => {
+    const hash = location.hash;
+    if (!/^#(kunde|lead|beleg|postfach|partner)\//.test(hash)) return;
+    setTimeout(() => {
+      if (location.hash !== hash) return;
+      const titel = (document.querySelector('.main h1, main h1, h1') || {}).textContent;
+      if (!titel) return;
+      try { const l = zuletztGeoeffnet().filter(x => x.link !== hash); l.unshift({ link: hash, titel: titel.trim().slice(0, 80) }); localStorage.setItem(ZUL, JSON.stringify(l.slice(0, 8))); } catch { /* ohne Speicher keine Liste */ }
+    }, 900);
+  });
 }

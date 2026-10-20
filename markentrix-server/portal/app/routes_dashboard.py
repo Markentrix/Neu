@@ -49,6 +49,16 @@ def suche(q: str = "", user: dict = Depends(require_admin)):
             cur.execute("""SELECT t.id, t.betreff, t.status, k.firma FROM tickets t JOIN kunden k ON k.id = t.kunden_id
                            WHERE t.betreff ILIKE %s OR t.nummer::text = %s ORDER BY t.geaendert_am DESC LIMIT 6""", (p, q))
             gruppen.append({"art": "Nachrichten", "treffer": [{"titel": r["betreff"], "text": f"{r['firma']} · {r['status']}", "link": "#postfach/" + str(r["id"])} for r in cur.fetchall()]})
+        if _darf(user, "kunden"):
+            cur.execute("""SELECT a.id, a.kunden_id, a.name, a.kontakt, a.nachricht, a.status, k.firma FROM anfragen a JOIN kunden k ON k.id = a.kunden_id
+                           WHERE a.name ILIKE %s OR a.kontakt ILIKE %s OR a.nachricht ILIKE %s ORDER BY a.erstellt_am DESC LIMIT 5""", (p, p, p))
+            gruppen.append({"art": "Kundenanfragen", "treffer": [{"titel": (r["name"] or "Anfrage") + " · " + r["firma"], "text": ((r["nachricht"] or "")[:70] + " · " + r["status"]), "link": "#kunde/" + str(r["kunden_id"])} for r in cur.fetchall()]})
+            cur.execute("""SELECT t.id, t.kunden_id, t.titel, t.kontakt_name, t.beginn, k.firma FROM termine t JOIN kunden k ON k.id = t.kunden_id
+                           WHERE t.titel ILIKE %s OR t.kontakt_name ILIKE %s ORDER BY t.beginn DESC LIMIT 5""", (p, p))
+            gruppen.append({"art": "Termine", "treffer": [{"titel": r["titel"] + (" · " + r["kontakt_name"] if r["kontakt_name"] else ""), "text": f"{r['firma']} · {r['beginn']:%d.%m.%Y %H:%M}", "link": "#kunde/" + str(r["kunden_id"])} for r in cur.fetchall()]})
+        if _darf(user, "leads"):
+            cur.execute("SELECT id, name, email, status FROM vertriebspartner WHERE name ILIKE %s OR email ILIKE %s ORDER BY name LIMIT 5", (p, p))
+            gruppen.append({"art": "Vertriebler", "treffer": [{"titel": r["name"], "text": f"{r['email']} · {r['status']}", "link": "#partner/" + str(r["id"])} for r in cur.fetchall()]})
         cur.execute("SELECT id, titel, faellig_am FROM aufgaben WHERE status='offen' AND titel ILIKE %s ORDER BY faellig_am NULLS LAST LIMIT 5", (p,))
         gruppen.append({"art": "Aufgaben", "treffer": [{"titel": r["titel"], "text": f"fällig {r['faellig_am']:%d.%m.%Y}" if r["faellig_am"] else "offen", "link": "#aufgaben"} for r in cur.fetchall()]})
     return {"gruppen": [g for g in gruppen if g["treffer"]]}

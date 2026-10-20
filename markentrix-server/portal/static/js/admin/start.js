@@ -1,5 +1,5 @@
 import { erinnerungsDialog } from './belege.js';
-import { h, api, datum, zeit, euro, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta } from '../common.js';
+import { h, api, datum, zeit, euro, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta, rueckgaengig } from '../common.js';
 import { V, kopf, pill, sicherApi, tabelle, zeige } from './kern.js';
 
 export function heuteKarte(t) {
@@ -122,7 +122,7 @@ export function prioritaetenKarte(heute, sys, fw) {
     ul.replaceChildren(...(alle ? sichtbar : sichtbar.slice(0, 8)).map(z => h('li', {}, h('span', { class: 'punkt ' + z.ton, 'aria-hidden': 'true' }),
       h('div', { class: 'pt' }, h('b', {}, z.titel), h('span', { class: 'small muted' }, z.text)), h('span', { class: 'pill kat' }, z.kat),
       typeof z.link === 'function' ? h('button', { class: 'btn sec small', onclick: z.link }, z.knopf) : h('a', { class: 'btn sec small', href: z.link }, z.knopf),
-      h('button', { class: 'btn sec small', title: 'Für 7 Tage ausblenden', 'aria-label': 'Hinweis „' + z.titel + '“ für 7 Tage ausblenden', onclick: () => { aus[schluessel(z)] = Date.now() + TAGE7; sichern(aus); zeichnen(); } }, 'Ausblenden'))));
+      h('button', { class: 'btn sec small', title: 'Für 7 Tage ausblenden', 'aria-label': 'Hinweis „' + z.titel + '“ für 7 Tage ausblenden', onclick: () => { const k = schluessel(z); aus[k] = Date.now() + TAGE7; sichern(aus); zeichnen(); rueckgaengig('„' + z.titel + '“ für 7 Tage ausgeblendet.', () => { delete aus[k]; sichern(aus); zeichnen(); }); } }, 'Ausblenden'))));
     ul.hidden = !sichtbar.length;
     leer.hidden = !!sichtbar.length; leer.textContent = versteckt ? 'Alles Offene ist ausgeblendet. Nichts Neues dringend.' : 'Alles erledigt. Nichts Dringendes offen. 🎉';
     mehr.replaceChildren(sichtbar.length > 8 ? h('button', { class: 'btn sec small', onclick: () => { alle = !alle; zeichnen(); } }, alle ? 'Weniger anzeigen' : 'Alle ' + sichtbar.length + ' anzeigen') : '');

@@ -1,8 +1,9 @@
+import { pipelineBoard } from './pipeline.js';
 import { kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
-const NAV = [['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
+const NAV = [['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
 
 function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
@@ -105,6 +106,17 @@ V.uebersicht = async () => {
     h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Meine Kunden'), h('b', {}, start.kunden.length)),
     h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Offene Leads'), h('b', {}, offeneLeads))),
     h('div', { class: 'card' }, h('p', { class: 'muted small' }, '„Offen" ist alles, was berechnet oder freigegeben, aber noch nicht ausgezahlt ist. Die Auszahlung erfolgt durch Markentrix.')));
+};
+
+V.pipeline = async () => {
+  const lade = () => api('/api/vertrieb/pipeline');
+  let board;
+  board = pipelineBoard(await lade(), {
+    ziele: ['neu', 'kontaktiert', 'antwort', 'termin', 'angebot', 'verloren'], link: (l) => '#lead/' + l.id,
+    verschieben: (l, status) => api('/api/vertrieb/leads/' + l.id + '/status', { method: 'POST', body: { status } }),
+    neuLaden: async () => { board.neuZeichnen(await lade()); },
+  });
+  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Meine Pipeline'), h('p', { class: 'small muted' }, 'Alle deine Leads nach Stand. „Gewonnen“ setzt Markentrix, sobald der Kunde angelegt ist.')), board);
 };
 
 V.leitfaden = async () => {

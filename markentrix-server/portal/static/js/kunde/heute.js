@@ -1,4 +1,4 @@
-import { h, api, melde, dialog } from '../common.js';
+import { h, api, melde, dialog, rueckgaengig } from '../common.js';
 import { V } from './kern.js';
 
 /** Telefonnummer für wa.me: nur Ziffern, deutsche Nummern mit 0 am Anfang bekommen 49. */
@@ -46,7 +46,7 @@ const wartet = (hh) => hh === null || hh === undefined ? '' : (hh < 1 ? 'gerade 
 V.heute = async () => {
   const d = await api('/api/kunde/heute');
   const meld = h('div'), karteAnfragen = h('div', { class: 'card' }), karteTermine = h('div', { class: 'card' });
-  const erledigt = (zeile, text) => { zeile.remove(); melde(meld, text, 'ok'); setTimeout(() => meld.replaceChildren(), 3000); };
+  const erledigt = (zeile, text, zurueck) => { zeile.remove(); melde(meld, text, 'ok'); setTimeout(() => meld.replaceChildren(), 3000); if (zurueck) rueckgaengig(text, async () => { await zurueck(); location.reload(); }); };
   const anfrageZeile = (a) => {
     const z = h('div', { class: 'heutezeile' });
     z.append(h('div', { class: 'heutekopf' }, h('div', { class: 'grow' }, h('b', {}, a.name || 'Unbekannt'), a.quelle === 'telefon' ? h('span', { class: 'pill warn', style: 'margin-left:6px' }, 'Rückruf') : '', h('div', { class: 'small muted' }, (a.kontakt || '') + ' · ' + wartet(a.wartet_h))),
@@ -54,12 +54,12 @@ V.heute = async () => {
       a.nachricht ? h('p', { class: 'small' }, a.nachricht) : '',
       h('div', { class: 'heuteknoepfe' },
         h('button', { class: 'btn small', onclick: () => antwortDialog(a.id, () => erledigt(z, 'Als beantwortet markiert.')) }, 'Antworten'),
-        h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'erledigt' } }); erledigt(z, 'Erledigt.'); } catch (x) { melde(meld, x.message); } } }, 'Erledigt'),
-        h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Als Spam markieren?')) return; try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'spam' } }); erledigt(z, 'Als Spam markiert.'); } catch (x) { melde(meld, x.message); } } }, 'Spam')));
+        h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'erledigt' } }); erledigt(z, 'Als erledigt markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Erledigt'),
+        h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Als Spam markieren?')) return; try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'spam' } }); erledigt(z, 'Als Spam markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Spam')));
     return z;
   };
   const terminZeile = (t, heute) => {
-    const z = h('div', { class: 'heutezeile' }), setze = async (status, text) => { try { await api('/api/kunde/termine/' + t.id, { method: 'PATCH', body: { status } }); erledigt(z, text); } catch (x) { melde(meld, x.message); } };
+    const z = h('div', { class: 'heutezeile' }), setze = async (status, text) => { try { const vorher = t.status; await api('/api/kunde/termine/' + t.id, { method: 'PATCH', body: { status } }); erledigt(z, text, () => api('/api/kunde/termine/' + t.id, { method: 'PATCH', body: { status: vorher } })); } catch (x) { melde(meld, x.message); } };
     z.append(h('div', { class: 'heutekopf' }, h('div', { class: 'grow' }, h('b', {}, new Date(t.beginn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr · ' + t.titel), h('div', { class: 'small muted' }, (t.kontakt_name || '') + (t.status === 'bestaetigt' ? ' · bestätigt' : ''))),
       t.kontakt_info && !String(t.kontakt_info).includes('@') ? h('a', { class: 'btn small', href: telLink(t.kontakt_info) }, '📞 Anrufen') : ''),
       h('div', { class: 'heuteknoepfe' },

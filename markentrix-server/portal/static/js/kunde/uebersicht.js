@@ -1,15 +1,23 @@
 import { h, api, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta as vormonat } from '../common.js';
 import { start, hat, V, karten } from './kern.js';
 
+/** Reise-Karte: Phasen von „Start“ bis „Live“ mit Haken, aktueller Phase und den Schritten darunter. */
 function startKarte(sl) {
   if (!sl.aktiv) return '';
-  const pct = sl.gesamt ? Math.round(100 * sl.fertig / sl.gesamt) : 0;
+  const pct = sl.gesamt ? Math.round(100 * sl.fertig / sl.gesamt) : 0, phasen = (sl.phasen || []).filter(p => !p.leer);
+  const zeile = (p) => h('div', { class: 'row', style: 'padding:6px 0;border-bottom:1px solid var(--line)' },
+    h('span', { style: 'width:22px', 'aria-hidden': 'true' }, p.fertig ? '✅' : '⬜'), h('span', { class: 'grow' + (p.fertig ? ' muted' : '') }, p.titel, h('span', { class: 'sr-only' }, p.fertig ? ' (erledigt)' : ' (offen)')),
+    p.seite ? h('a', { class: 'btn small', href: '#' + p.seite }, p.aktion) : '');
+  const schritte = phasen.map((ph, i) => h('li', { class: 'reise-schritt ' + (ph.erledigt ? 'fertig' : ph.schluessel === sl.aktuelle_phase ? 'aktuell' : ''), ...(ph.schluessel === sl.aktuelle_phase ? { 'aria-current': 'step' } : {}) },
+    h('span', { class: 'reise-punkt', 'aria-hidden': 'true' }, ph.erledigt ? '✓' : String(i + 1)), h('b', {}, ph.titel), h('span', { class: 'small muted' }, ph.fertig + ' von ' + ph.gesamt)));
+  const aktuell = phasen.find(p => p.schluessel === sl.aktuelle_phase);
+  const inPhase = (k) => sl.punkte.filter(p => p.phase === k);
   return h('div', { class: 'card' }, h('h2', {}, 'Dein Start bei Markentrix'),
     h('p', { class: 'small muted' }, sl.fertig + ' von ' + sl.gesamt + ' Schritten erledigt. Wir kümmern uns um die meisten, ein paar brauchen deine Hilfe.'),
-    h('div', { class: 'fortschritt' }, h('div', { style: 'width:' + pct + '%' })),
-    sl.punkte.map(p => h('div', { class: 'row', style: 'padding:6px 0;border-bottom:1px solid var(--line)' },
-      h('span', { style: 'width:22px' }, p.fertig ? '✅' : '⬜'), h('span', { class: 'grow' + (p.fertig ? ' muted' : '') }, p.titel),
-      p.seite ? h('a', { class: 'btn small', href: '#' + p.seite }, p.aktion) : '')));
+    h('div', { class: 'fortschritt', role: 'progressbar', 'aria-valuenow': String(pct), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Fortschritt beim Start' }, h('div', { style: 'width:' + pct + '%' })),
+    h('ol', { class: 'reise' }, schritte),
+    aktuell ? h('div', {}, h('h3', {}, 'Jetzt dran: ' + aktuell.titel), inPhase(aktuell.schluessel).map(zeile)) : h('p', {}, 'Alle Schritte sind erledigt. 🎉'),
+    phasen.filter(p => p.erledigt).length ? h('details', { style: 'margin-top:10px' }, h('summary', { class: 'small muted' }, 'Schon erledigt anzeigen'), phasen.filter(p => p.erledigt).map(ph => h('div', {}, h('h3', {}, ph.titel), inPhase(ph.schluessel).map(zeile)))) : '');
 }
 
 /** „Dein Monat mit Markentrix“: was das Team und die Assistenten diesen Monat geleistet haben, plus der nächste Schritt. */

@@ -1,4 +1,4 @@
-import { h, api, csvLaden, datum, dialog, zeit, euro, melde, formular, el } from '../common.js';
+import { h, api, csvLaden, datum, dialog, zeit, euro, melde, formular, el, rueckgaengig } from '../common.js';
 import { belegeKarte } from './belege.js';
 import { V, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
@@ -27,7 +27,9 @@ export const modulZelle = (z) => {
 async function kundenSammelDialog(aktion, ids) {
   const m = h('div'), inhalt = h('div'), d = dialog({ aufgabe: 'Aufgabe für ' + ids.length + ' Kunden anlegen', mail: 'Mail an ' + ids.length + ' Kunden', aufgabenpaket: 'Aufgabenpaket für ' + ids.length + ' Kunden' }[aktion], inhalt);
   const vorlagen = await api('/api/admin/textvorlagen', { leise: true }).catch(() => []);
-  const senden = async (body, ok) => { try { const r = await api('/api/admin/kunden/bulk', { method: 'POST', body: { ids, aktion, ...body } }); m.replaceChildren(h('div', { class: 'msg ' + (r.fehler && r.fehler.length ? 'err' : 'ok') }, ok(r))); } catch (x) { fehler(m, x); } };
+  const senden = async (body, ok) => { try { const r = await api('/api/admin/kunden/bulk', { method: 'POST', body: { ids, aktion, ...body } }); m.replaceChildren(h('div', { class: 'msg ' + (r.fehler && r.fehler.length ? 'err' : 'ok') }, ok(r)));
+      if (r.sammel_id) rueckgaengig(r.angelegt + ' Aufgaben angelegt.', async () => { const u = await api('/api/admin/kunden/bulk/rueckgaengig', { method: 'POST', body: { sammel_id: r.sammel_id } }); m.replaceChildren(h('div', { class: 'msg ok' }, u.entfernt + ' Aufgaben wieder entfernt.')); }, 15);
+    } catch (x) { fehler(m, x); } };
   if (aktion === 'aufgabe') {
     const titel = h('input', { maxlength: 200, placeholder: 'z. B. Rückruf wegen Briefing' }), faellig = h('input', { type: 'date' });
     inhalt.replaceChildren(h('label', {}, 'Titel'), titel, h('label', {}, 'Fällig am (optional)'), faellig, m, h('p', {}, knopf('Aufgaben anlegen', () => senden({ titel: titel.value, faellig_am: faellig.value || null }, r => r.angelegt + ' Aufgaben angelegt (jeweils beim Kunden, dir zugewiesen).'), 'btn')));

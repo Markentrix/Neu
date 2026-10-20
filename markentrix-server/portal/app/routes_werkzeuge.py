@@ -1,6 +1,7 @@
 """Admin-Werkzeuge: Zahlungserinnerungen mit Entwurf, Sammelaktionen für Kunden, Textvorlagen, gespeicherte Filter."""
 import json
 import re
+import uuid
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -170,12 +171,12 @@ def vorlage_gefuellt(vid: str, kid: str, user: dict = Depends(require_admin)):
     return {"betreff": fuellen(v["betreff"], k), "text": fuellen(v["text"], k)}
 
 
-def paket_anwenden(cur, user: dict, k: dict, v: dict) -> int:
+def paket_anwenden(cur, user: dict, k: dict, v: dict, sammel_id=None) -> int:
     """Legt die Aufgaben eines Pakets für einen Kunden an. Doppelt anwenden legt nichts doppelt an."""
     n = 0
     for i, a in enumerate(v["aufgaben"] or []):
-        cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel) VALUES (%s,%s,%s,%s,'auto',%s) ON CONFLICT DO NOTHING""",
-                    (k["id"], f"{k['firma']}: {a['titel']}"[:200], user["email"], date.today() + timedelta(days=int(a.get("tage") or 0)), f"paket-{v['id']}-{i}-{k['id']}"))
+        cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel, sammel_id) VALUES (%s,%s,%s,%s,'auto',%s,%s) ON CONFLICT DO NOTHING""",
+                    (k["id"], f"{k['firma']}: {a['titel']}"[:200], user["email"], date.today() + timedelta(days=int(a.get("tage") or 0)), f"paket-{v['id']}-{i}-{k['id']}", sammel_id))
         n += cur.rowcount
     return n
 
@@ -215,6 +216,23 @@ class KundenBulkIn(BaseModel):
 MAX_MAILS = 40
 
 
+class RueckgaengigIn(BaseModel):
+    sammel_id: str
+
+
+@router.post("/kunden/bulk/rueckgaengig")
+def kunden_bulk_rueckgaengig(data: RueckgaengigIn, user: dict = Depends(require_admin)):
+    """Nimmt die Aufgaben einer Sammelaktion zurück, soweit sie noch offen sind. Versendete Mails lassen sich nicht zurückholen."""
+    try:
+        with tx("admin") as cur:
+            cur.execute("DELETE FROM aufgaben WHERE sammel_id=%s AND status='offen' AND zustaendig=%s", (data.sammel_id, user["email"]))
+            n = cur.rowcount
+            audit(cur, user, "kunden_bulk_rueckgaengig", None, {"entfernt": n})
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(400, "Ungültige Kennung.")
+    return {"entfernt": n}
+
+
 @router.post("/kunden/bulk")
 def kunden_bulk(data: KundenBulkIn, user: dict = Depends(require_admin)):
     ids = list(dict.fromkeys(data.ids))
@@ -235,16 +253,17 @@ def kunden_bulk(data: KundenBulkIn, user: dict = Depends(require_admin)):
                 if not paket:
                     raise HTTPException(404, "Aufgabenpaket nicht gefunden.")
             n = 0
+            sammel = str(uuid.uuid4())
             if data.aktion == "aufgabe":
                 for k in kunden:
-                    cur.execute("INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am) VALUES (%s,%s,%s,%s)", (k["id"], data.titel.strip(), user["email"], data.faellig_am))
+                    cur.execute("INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, sammel_id) VALUES (%s,%s,%s,%s,%s)", (k["id"], data.titel.strip(), user["email"], data.faellig_am, sammel))
                     n += 1
             elif paket:
                 for k in kunden:
-                    n += paket_anwenden(cur, user, k, paket)
+                    n += paket_anwenden(cur, user, k, paket, sammel)
             if data.aktion != "mail":
                 audit(cur, user, "kunden_bulk", None, {"aktion": data.aktion, "kunden": len(kunden), "angelegt": n})
-                return {"angelegt": n, "kunden": len(kunden)}
+                return {"angelegt": n, "kunden": len(kunden), "sammel_id": sammel if n else None}
     except errors.InvalidTextRepresentation:
         raise HTTPException(400, "Ungültige Auswahl.")
     gesendet, fehler, ohne = 0, [], 0

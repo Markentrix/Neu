@@ -170,3 +170,29 @@ code{word-break:break-all;white-space:normal}
 @media(max-width:560px){.heutekopf .btn{width:100%;min-height:48px;text-align:center}}
 .heutekopf .btn,.heuteknoepfe .btn,.dlg .heuteknoepfe .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .prio li{flex-wrap:wrap}
+:root{--c1:#7c3aed;--c2:#0891b2;--c3:#d97706;--c4:#16a34a;--c5:#dc2626;--c6:#64748b}
+.chartbox,.ringbox{margin:8px 0;padding:0}.chart{width:100%;height:auto;max-height:240px;display:block}.chart.klein{max-width:420px}
+.chart .gitter{stroke:var(--line);stroke-width:1}.chart .achse{font:11px Inter,system-ui,sans-serif;fill:var(--mut)}
+.legende{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--mut);margin-top:6px}.legende.senkrecht{flex-direction:column;list-style:none;padding:0;margin:0;flex:1;min-width:170px}
+.legende li{display:flex;align-items:center;gap:8px}.legende li b{margin-left:auto;color:var(--txt)}.swatch{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;flex:none}.legende li .swatch{margin-right:0}
+.ringbox{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.ring{width:150px;height:150px;flex:none}.ringmitte{font:700 7px "Space Grotesk",Inter,sans-serif;fill:var(--txt)}
+.trichter{display:flex;flex-direction:column;gap:8px;margin:8px 0}.tstufe{display:grid;grid-template-columns:minmax(90px,150px) 1fr 90px;gap:10px;align-items:center;font-size:14px}.tbalken{height:20px;background:#f3f5fc;border-radius:10px;overflow:hidden}.tbalken>div{height:100%;border-radius:10px}
+.tzahl{text-align:right}.chartalt{margin-top:8px;font-size:13px}.chartalt summary{cursor:pointer;color:var(--mut)}
+.klartext{background:#f7f5ff;border:1px solid #e4dcff;border-radius:12px;padding:10px 14px;margin:10px 0}.klartext p{margin:4px 0}
+.chartgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+@media(max-width:560px){.tstufe{grid-template-columns:1fr 70px}.tname{grid-column:1/-1}.ring{width:120px;height:120px}}
+@media print{.side,.top .btn,.brandzeile,.noprint,.suchknopf{display:none!important}.shell{display:block}.main{padding:0}.card{break-inside:avoid;box-shadow:none}}
+.reise{list-style:none;display:flex;gap:0;padding:0;margin:14px 0;counter-reset:none}.reise-schritt{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;position:relative;font-size:13px}
+.reise-schritt:not(:last-child)::after{content:"";position:absolute;top:15px;left:calc(50% + 18px);right:calc(-50% + 18px);height:3px;background:var(--line)}.reise-schritt.fertig:not(:last-child)::after{background:var(--ok)}
+.reise-punkt{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line);font-weight:700;color:var(--mut);position:relative;z-index:1}
+.reise-schritt.fertig .reise-punkt{background:var(--ok);border-color:var(--ok);color:#fff}.reise-schritt.aktuell .reise-punkt{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 0 0 4px #8B5CF633}
+@media(max-width:560px){.reise-schritt b{font-size:12px}.reise-schritt .small{font-size:11px}}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.undo{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:14px;padding:10px 14px;display:flex;gap:14px;align-items:center;z-index:60;box-shadow:0 8px 30px #0b102044;max-width:calc(100vw - 24px)}
+.undo .btn{background:#fff;color:var(--navy);padding:6px 12px}
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:12px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x proximity}
+.kspalte{background:#f3f5fc;border:1px solid var(--line);border-radius:14px;padding:10px;min-height:140px;scroll-snap-align:start}.kspalte.ziel{outline:2px dashed var(--violet);background:#f7f5ff}
+.kspalte h3,.kspalte h2{margin:0 0 8px;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.kkarte{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;cursor:grab;font-size:14px}.kkarte.zieht{opacity:.4}.kkarte a{font-weight:600;text-decoration:none}
+.kkarte select{margin-top:8px;padding:6px 8px;font-size:13px}
+@media(max-width:560px){.chart:not(.klein) .achse{font-size:19px}.chart:not(.klein){max-height:none}}
