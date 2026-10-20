@@ -71,6 +71,10 @@ g=anon.get("/api/angebot/"+tok); chk("Öffentlich: Angebot sichtbar ohne Login",
 chk("Öffentlich: Leistungsumfang sichtbar (leere Zeilen entfernt)",g.json()["leistungen"]==["## BUSINESS WEB","Bis zu sieben Inhaltsseiten","Hosting und Sicherung inklusive"],g.json().get("leistungen"))
 hb=[x for x in a.get("/api/admin/heute").json()["angebote"] if x["nummer"]==j["nummer"]]
 chk("Dashboard: Angebot erscheint mit Nummer, Firma und „angesehen“",len(hb)==1 and hb[0]["angesehen_am"] and hb[0]["firma"] and hb[0]["lead_id"]==L,hb)
+r=a.patch(f"/api/admin/leads/{L}",json={"email":"neu@firma-test.de","ort":"Hannover","website":"  "}); chk("Lead-Daten ändern",r.status_code==200,r.text)
+chk("Lead-Daten gespeichert, leer = entfernt",sql(f"select email||'|'||ort||'|'||coalesce(website,'NULL') from leads where id='{L}'")=="neu@firma-test.de|Hannover|NULL")
+chk("Lead-Daten: ungültige E-Mail abgelehnt",a.patch(f"/api/admin/leads/{L}",json={"email":"kein-mail"}).status_code==400)
+chk("Lead-Daten: Firma darf nicht leer sein",a.patch(f"/api/admin/leads/{L}",json={"firma":"  "}).status_code==400)
 chk("Öffentlich: keine internen Daten",not any(k in g.json() for k in ("lead_id","kunden_id","annahme_hash","notiz","vertriebspartner_id","partner_id")),list(g.json()))
 chk("Öffentlich: PDF",anon.get(f"/api/angebot/{tok}/pdf").content[:4]==b"%PDF")
 chk("Öffentlich: falscher Token 404",anon.get("/api/angebot/falsch"+tok).status_code==404 and anon.get("/api/angebot/x").status_code==404)

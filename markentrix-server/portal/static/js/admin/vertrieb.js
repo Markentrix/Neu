@@ -1,5 +1,5 @@
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
-import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular } from '../common.js';
+import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular, dialog } from '../common.js';
 import { filterKarte, V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Vertriebler
@@ -217,7 +217,7 @@ export async function leadDetail(lid) {
   const gesperrt = ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status);
   const ang = gesperrt ? '' : h('button', { class: 'btn small', onclick: () => angebotDialog(lid, () => location.reload()) }, 'Angebot senden');
   return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
-    h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
+    h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     anfragenKarte(anfragen),
     await leadAngebotKarte(lid, l, m),
     kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am),
@@ -227,3 +227,15 @@ export async function leadDetail(lid) {
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt], ['Von', z => z.von]], d.aktivitaeten, 'Noch keine Einträge.')));
 }
 
+
+/** Kontaktdaten eines Leads ändern (z. B. E-Mail ergänzen, bevor ein Angebot rausgeht). */
+function leadDatenDialog(lid, l) {
+  const FELDER = [['Firma', 'firma'], ['Ansprechpartner', 'ansprechpartner'], ['E-Mail', 'email', 'email'], ['Telefon', 'telefon', 'tel'], ['Website', 'website'], ['Branche', 'branche'], ['PLZ', 'plz'], ['Ort', 'ort']];
+  const f = h('form', { class: 'stack' }, FELDER.map(([label, name, type]) => h('div', {}, h('label', {}, label), h('input', { name, type: type || 'text', value: l[name] || '', autocomplete: 'off', required: name === 'firma' }))));
+  const m = h('p', { class: 'small', role: 'status' });
+  const dlg = dialog('Daten bearbeiten', h('div', { class: 'stack' }, f, m, h('button', { class: 'btn', onclick: async (e) => {
+    const d = Object.fromEntries(new FormData(f)); if (!String(d.firma).trim()) { melde(m, 'Die Firma darf nicht leer sein.'); return; }
+    e.target.disabled = true;
+    try { await api('/api/admin/leads/' + lid, { method: 'PATCH', body: d }); dlg.zu(); location.reload(); } catch (x) { e.target.disabled = false; melde(m, x.message); }
+  } }, 'Speichern')));
+}

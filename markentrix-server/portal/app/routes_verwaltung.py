@@ -1,4 +1,5 @@
 """Admin: Vertriebler, Leads, Preise und Konditionen, Datenschutz und Qualität."""
+import re
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -210,9 +211,17 @@ class LeadPatch(BaseModel):
     zuordnung_loeschen: bool = False
     notiz: str | None = Field(default=None, max_length=2000)
     score: int | None = Field(default=None, ge=0, le=100)
-    ansprechpartner: str | None = None
-    email: str | None = None
-    telefon: str | None = None
+    firma: str | None = Field(default=None, max_length=200)
+    ansprechpartner: str | None = Field(default=None, max_length=200)
+    email: str | None = Field(default=None, max_length=254)
+    telefon: str | None = Field(default=None, max_length=60)
+    website: str | None = Field(default=None, max_length=253)
+    branche: str | None = Field(default=None, max_length=120)
+    plz: str | None = Field(default=None, max_length=10)
+    ort: str | None = Field(default=None, max_length=120)
+
+
+KONTAKTFELDER = ("ansprechpartner", "email", "telefon", "website", "branche", "plz", "ort")
 
 
 FILTER_WHERE = """(%(s)s='' OR l.status=%(s)s)
@@ -343,6 +352,13 @@ def lead_aendern(lid: str, data: LeadPatch, user: dict = Depends(require_admin))
         felder["vertriebspartner_id"] = None
     if "status" in felder and felder["status"] not in LEAD_STATUS:
         raise HTTPException(400, "Unbekannter Status.")
+    for k in KONTAKTFELDER + ("firma",):
+        if k in felder:
+            felder[k] = felder[k].strip() or None   # leer = Angabe entfernen
+    if "firma" in felder and not felder["firma"]:
+        raise HTTPException(400, "Die Firma darf nicht leer sein.")
+    if felder.get("email") and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", felder["email"]):
+        raise HTTPException(400, "Bitte eine gültige E-Mail-Adresse eintragen.")
     if "temperatur" in felder:
         if felder["temperatur"] not in ("kalt", "warm", "heiss", ""):
             raise HTTPException(400, "Unbekannte Einstufung.")
