@@ -1,0 +1,80 @@
+{
+  "slug": "felgenversiegelung-celle",
+  "order": 1.5,
+  "short": "Felgenversiegelung",
+  "teaser": "Felgenkeramik mit C² WheelCeramic: weniger Bremsstaub, leichtere Reinigung.",
+  "seoTitle": "Felgenversiegelung Celle: C² WheelCeramic | ElbDetail",
+  "description": "Felgenversiegelung in Celle mit C²Coating WheelCeramic: weniger Bremsstaub, leichtere Reinigung, Schutz vor Streusalz. Ab {ab:felgen} € je nach Größe.",
+  "h1": "Felgenversiegelung in Celle: *Bremsstaub hat es schwer.*",
+  "lead": "Mit **C²Coating WheelCeramic** beschichten wir Ihre Felgen keramisch. **Bremsstaub und Straßenschmutz haften schlechter, die Reinigung wird deutlich leichter.** Für matte und glänzende Felgen.",
+  "facts": [
+    {
+      "value": "ab {ab:felgen} €",
+      "label": "Felgen 15–17 Zoll"
+    },
+    {
+      "value": "bis 100.000 km",
+      "label": "Standzeit laut Hersteller"
+    },
+    {
+      "value": "bis 850 °C",
+      "label": "hitzebeständig laut Hersteller"
+    }
+  ],
+  "bookAs": "keramik",
+  "addon": "felgen",
+  "intro": "Felgen haben es schwer: Heißer Bremsstaub brennt sich in die Oberfläche ein, im Winter kommen Streusalz und Matsch dazu. Ungeschützt lassen sich Felgen mit jeder Woche schwerer reinigen, und aggressive Felgenreiniger greifen die Oberfläche zusätzlich an.\n\nMit der **C²Coating WheelCeramic** bekommen Ihre Felgen eine hitzebeständige keramische Schutzschicht. Bremsstaub und Straßenschmutz haften deutlich schlechter, Wasser perlt ab, und oft reicht später Wasser mit einem milden Shampoo, um die Felgen wieder sauber zu bekommen. Die Beschichtung eignet sich für glänzende und matte Felgen.\n\nEntscheidend ist die Vorbereitung. Wir reinigen die Felgen gründlich, entfernen Flugrost und Teer und entfetten die Oberfläche, bevor wir beschichten. Am gründlichsten wird das Ergebnis, wenn die Räder abmontiert sind, zum Beispiel beim Radwechsel. Das stimmen wir vorab mit Ihnen ab.\n\nEhrlich gesagt: Die Keramik erleichtert die Pflege, sie ersetzt sie aber nicht. Gegen Bordsteinschäden und Steinschläge schützt sie nicht. Die Standzeit von bis zu 100.000 km ist eine Herstellerangabe unter optimalen Voraussetzungen. Wie lange die Beschichtung bei Ihnen hält, hängt von Fahrweise, Beanspruchung und Pflege ab.\n\nIdeal ist die Kombination mit der [Keramikversiegelung für den Lack](/leistungen/keramikversiegelung-celle.html) und der [Scheibenversiegelung](/leistungen/scheibenversiegelung-celle.html).\n",
+  "includes": [
+    "Begutachtung der Felgen und persönliche Beratung",
+    "Intensive Reinigung von Bremsstaub und Straßenschmutz",
+    "Entfernung von Flugrost und Teer",
+    "Entfettung als Vorbereitung für die Beschichtung",
+    "Keramische Beschichtung mit C²Coating WheelCeramic",
+    "Aushärtung, Endkontrolle und Pflegehinweise"
+  ],
+  "steps": [
+    {
+      "title": "Begutachtung",
+      "text": "Wir sehen uns Felgen und Felgengröße an und besprechen, ob die Räder dafür abmontiert werden."
+    },
+    {
+      "title": "Reinigung & Dekontamination",
+      "text": "Bremsstaub, Teer und Flugrost werden gründlich entfernt, danach wird jede Felge entfettet."
+    },
+    {
+      "title": "Beschichtung",
+      "text": "Die WheelCeramic wird gleichmäßig aufgetragen und härtet anschließend aus."
+    },
+    {
+      "title": "Übergabe",
+      "text": "Gemeinsame Abnahme und Tipps, wie Sie die beschichteten Felgen schonend reinigen."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Was kostet eine Felgenversiegelung in Celle?",
+      "a": "Die C²Coating WheelCeramic kostet bei ElbDetail 210 € für Felgen mit 15 bis 17 Zoll, 250 € für 18 bis 19 Zoll und 350 € für 20 bis 21 Zoll. Ab 22 Zoll erhalten Sie ein Angebot auf Anfrage. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer."
+    },
+    {
+      "q": "Wie lange hält die Felgenkeramik?",
+      "a": "Der Hersteller C²Coating gibt eine Standzeit von bis zu 100.000 km an, unter optimalen Voraussetzungen. Die tatsächliche Haltbarkeit hängt von der Beanspruchung, der fachgerechten Verarbeitung und der Pflege danach ab."
+    },
+    {
+      "q": "Eignet sich die Beschichtung auch für matte Felgen?",
+      "a": "Ja. Die C²Coating WheelCeramic ist laut Hersteller für matte und glänzende Felgen geeignet. Die Optik der Felge bleibt erhalten."
+    },
+    {
+      "q": "Lohnt sich die Felgenversiegelung für Winterräder?",
+      "a": "Gerade dort. Im Winter setzen Streusalz und Bremsstaub den Felgen besonders zu. Auf beschichteten Felgen haften sie schlechter und lassen sich leichter abwaschen. Ein guter Zeitpunkt ist der Radwechsel im Herbst."
+    },
+    {
+      "q": "Wie reinige ich keramisch versiegelte Felgen?",
+      "a": "Meist reichen Wasser, ein mildes Shampoo und eine weiche Felgenbürste. Auf aggressive, saure Felgenreiniger sollten Sie verzichten, damit die Beschichtung lange hält."
+    }
+  ],
+  "related": [
+    "keramikversiegelung-celle",
+    "scheibenversiegelung-celle",
+    "aussenaufbereitung-celle"
+  ]
+}

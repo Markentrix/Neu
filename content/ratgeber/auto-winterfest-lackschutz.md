@@ -54,7 +54,7 @@ Mehr zur Versiegelung finden Sie auf der Seite [Lackversiegelung](/leistungen/la
 
 Reinigen Sie die Felgen gründlich, bevor Sie die Winterräder montieren oder montieren lassen. Bremsstaub und Salz setzen sich im Winter besonders hartnäckig fest. Auf einer sauberen und versiegelten Felge haften sie schlechter und lassen sich leichter entfernen.
 
-Denken Sie auch an die Sommerräder: Lagern Sie sie nur sauber und trocken ein. Eingetrockneter Bremsstaub lässt sich nach einigen Monaten deutlich schwerer lösen. Bei stark verschmutzten Felgen hilft eine Felgen-Intensivreinigung. Eine Felgenbeschichtung bieten wir auf Anfrage an.
+Denken Sie auch an die Sommerräder: Lagern Sie sie nur sauber und trocken ein. Eingetrockneter Bremsstaub lässt sich nach einigen Monaten deutlich schwerer lösen. Bei stark verschmutzten Felgen hilft eine Felgen-Intensivreinigung. Dauerhaft leichter wird die Reinigung mit einer [Felgenversiegelung](/leistungen/felgenversiegelung-celle.html) mit C²Coating WheelCeramic ab {ab:felgen} €.
 
 ## Wie schützen Sie Dichtungen und Schlösser?
 
@@ -64,7 +64,7 @@ Prüfen Sie auch den Tankdeckel und die Türschlösser. Ein festgefrorener Decke
 
 ## Wie bereiten Sie Scheiben und Wischer vor?
 
-Reinigen Sie die Scheiben innen und außen gründlich. Ein Schmierfilm auf der Innenseite lässt Scheiben schneller beschlagen und blendet bei tiefer Sonne oder Gegenlicht. Eine Scheibenversiegelung außen sorgt dafür, dass Wasser besser abläuft und sich Eis oft leichter entfernen lässt.
+Reinigen Sie die Scheiben innen und außen gründlich. Ein Schmierfilm auf der Innenseite lässt Scheiben schneller beschlagen und blendet bei tiefer Sonne oder Gegenlicht. Eine [Scheibenversiegelung](/leistungen/scheibenversiegelung-celle.html) außen sorgt dafür, dass Wasser besser abläuft und sich Eis oft leichter entfernen lässt.
 
 Prüfen Sie die Wischerblätter auf Risse und Schlieren und tauschen Sie sie bei Bedarf. Füllen Sie Frostschutz ins Wischwasser. Bei vereisten Scheiben sollten Sie die Wischer nicht einschalten, damit die Gummis nicht beschädigt werden. Nutzen Sie einen Eiskratzer statt heißem Wasser.
 

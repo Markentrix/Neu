@@ -105,16 +105,22 @@ class Site:
         base = "https://wa.me/" + self.s["whatsapp"]
         return base + ("?text=" + urllib.parse.quote(text) if text else "")
 
+    def addon(self, key):
+        return next((a for a in self.pricing.get("addons", []) if a["key"] == key), None)
+
     def min_price(self, key):
         if key == "keramik":  # Einstieg der C² CarCeramic-Preisliste
             return min(c["price"] for c in self.pricing["ceramic"]["car"] if c.get("price") is not None)
+        if self.addon(key):  # Felgen- und Scheibenkeramik
+            return min(i["price"] for i in self.addon(key)["items"] if i.get("price") is not None)
         return min(self.pkg(key)["prices"].values())
 
     def fill(self, obj):
-        keys = {p["key"] for p in self.pricing["packages"]} | ({"keramik"} if self.pricing.get("ceramic") else set())
+        keys = ({p["key"] for p in self.pricing["packages"]} | ({"keramik"} if self.pricing.get("ceramic") else set())
+                | {a["key"] for a in self.pricing.get("addons", [])})
         rep = lambda m: str(self.min_price(m.group(1))) if m.group(1) in keys else m.group(0)
         def rep_cls(m):  # {preis:essential:suv} → Richtpreis dieses Pakets für diese Fahrzeugklasse
-            if m.group(1) not in keys or m.group(1) == "keramik":
+            if m.group(1) not in keys or not any(p["key"] == m.group(1) for p in self.pricing["packages"]):
                 return m.group(0)
             v = self.pkg(m.group(1))["prices"].get(m.group(2))
             return str(v) if v is not None else m.group(0)

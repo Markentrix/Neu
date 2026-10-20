@@ -196,12 +196,90 @@ def pick(items, idx):
     return [items[i] for i in idx if i < len(items)] or items[:5]
 
 
+def _eur(v):
+    return f"{v:,}".replace(",", ".") + "&nbsp;€" if v is not None else "auf Anfrage"
+
+
+def addon_table(site, a):
+    """Preistabelle einer Zusatz-Keramik (Felgen oder Scheiben)."""
+    rows = "".join(f'<tr><th scope="row">{ESC(i["name"])}</th><td class="num">{("ab " if a.get("from") and i["price"] is not None else "") + _eur(i["price"])}</td></tr>'
+                   for i in a["items"])
+    return f'''<div class="price-scroll" tabindex="0" role="region" aria-label="Preise {ESC(a["title"])}">
+            <table class="price-table ceramic-table">
+              <caption>{ESC(a["name"])} · {ESC(a["title"])}</caption>
+              <thead><tr><th scope="col">{ESC(a["priceLabel"])}</th><th scope="col" class="num">Preis</th></tr></thead>
+              <tbody>{rows}</tbody>
+            </table>
+          </div>'''
+
+
+def addon_details(site, a, prefix=""):
+    """Vorteile, Standzeit und Preise einer Zusatz-Keramik für die eigene Leistungsseite."""
+    pr = site.pricing
+    pts = "".join(f'<li>{I["check"]}{ESC(b)}</li>' for b in a["benefits"])
+    return f'''
+      <div class="ceramic-prices reveal" id="keramik-preise">
+        <h2>{ESC(a["name"])}: Preise und Vorteile</h2>
+        <div class="ceramic-grid">
+          {addon_table(site, a)}
+          <div class="addon-facts">
+            <p class="addon-durability">{I["shield"]}<span><strong>Standzeit {ESC(a["durability"])}</strong><small>laut Hersteller, unter optimalen Voraussetzungen</small></span></p>
+            <ul class="includes">{pts}</ul>
+          </div>
+        </div>
+        <p class="price-note">{ESC(pr.get("durabilityNote", ""))}</p>
+        <a class="btn btn-primary" href="{prefix}termin.html?paket=keramik">{I["cal"]}{ESC(a["title"])} anfragen</a>
+      </div>'''
+
+
+def addons_prices(site, prefix=""):
+    """Felgen- und Scheibenkeramik auf der Preisseite."""
+    ads = site.pricing.get("addons", [])
+    if not ads:
+        return ""
+    links = " · ".join(f'<a class="text-link" href="{prefix}leistungen/{a["slug"]}.html">Mehr zur {ESC(a["title"])}</a>' for a in ads)
+    return f'''
+      <div class="ceramic-prices reveal" id="felgen-scheiben-preise">
+        <h2>Felgen- und Scheibenkeramik</h2>
+        <p>Die Keramikbeschichtungen von C²Coating für Felgen und Scheiben buchen Sie einzeln oder zusammen mit der Lackkeramik.</p>
+        <div class="ceramic-grid ceramic-grid--even">{"".join(addon_table(site, a) for a in ads)}</div>
+        <p class="price-note">Standzeit laut Hersteller: {", ".join(f"{ESC(a['title'])} {ESC(a['durability'])}" for a in ads)}. {ESC(site.pricing.get("durabilityNote", ""))}</p>
+        <p>{links}</p>
+      </div>'''
+
+
+def ceramic_cards(site, prefix=""):
+    """Startseite: Lack-, Felgen- und Scheibenkeramik als einheitliche Karten unter dem Keramik-Schwerpunkt."""
+    pr = site.pricing
+    if not pr.get("addons"):
+        return ""
+    cards = [("spark", "C²Coating CarCeramic", "Lackkeramik", site.min_price("keramik"), "keramikversiegelung-celle",
+              ["Tiefer Glanz und starker Abperleffekt", "Langzeitschutz gegen Witterung, Streusalz und UV", "Ab Paket Signature oder beim Neuwagen"], None)]
+    icons = {"felgen": "car", "scheiben": "shield"}
+    for a in pr["addons"]:
+        cards.append((icons.get(a["key"], "shield"), a["name"], a["title"], site.min_price(a["key"]), a["slug"], a["benefits"][:3], a["durability"]))
+    html = "".join(f'''
+        <a class="cer-card reveal" href="{prefix}leistungen/{slug}.html">
+          <span class="cer-icon">{I[ic]}</span>
+          <span class="cer-brand">{ESC(brand)}</span>
+          <h3>{ESC(title)}</h3>
+          <span class="cer-price"><small>ab</small> {_eur(price)}</span>
+          <ul>{"".join(f"<li>{I['check']}{ESC(b)}</li>" for b in pts)}</ul>
+          {f'<span class="cer-dur">Standzeit {ESC(dur)}*</span>' if dur else '<span class="cer-dur">Preis je C²Coating-Fahrzeugkategorie</span>'}
+          <span class="cer-more">Mehr erfahren {I["arrow"]}</span>
+        </a>''' for ic, brand, title, price, slug, pts, dur in cards)
+    return f'''
+      <div class="cer-cards stagger">{html}
+      </div>
+      <p class="cer-note">* Herstellerangaben unter optimalen Voraussetzungen. Die tatsächliche Haltbarkeit hängt von der Beanspruchung, der fachgerechten Verarbeitung und der anschließenden Pflege ab.</p>'''
+
+
 def ceramic_section(site, prefix="", head="h2"):
     """C² CarCeramic-Preisliste (eigene Fahrzeugeinteilung von C²Coating)."""
     cer = site.pricing.get("ceramic")
     if not cer:
         return ""
-    eur = lambda v: f"{v:,}".replace(",", ".") + "&nbsp;€" if v is not None else "auf Anfrage"
+    eur = _eur
     car = "".join(f'<tr><th scope="row">{ESC(c["name"])}</th><td>{ESC(c["examples"])}</td><td class="num">{eur(c["price"])}</td></tr>' for c in cer["car"])
     camper = "".join(f'<tr><th scope="row">{ESC(c["name"])}</th><td class="num">{eur(c["price"])}</td></tr>' for c in cer.get("camper", []))
     notes = "".join(f"<li>{ESC(n)}</li>" for n in cer.get("notes", []))
@@ -259,7 +337,11 @@ def price_section(site, prefix=""):
     feat = next((p for p in pr["packages"] if p.get("featured")), pr["packages"][0])
     price_cls = "".join(f'<label><input type="radio" name="pclass" value="{c["key"]}"{" checked" if i == 0 else ""}><span title="{ESC(c["name"])}">{ESC(c["short"])}</span></label>' for i, c in enumerate(pr["classes"]))
     plans = "".join(plan_card(site, p, prefix) for p in pr["packages"])
-    extras = "".join(f"<li>{ESC(e)} <small>· auf Anfrage</small></li>" for e in pr["extras"])
+    addon_by_extra = {a["extra"]: a["key"] for a in pr.get("addons", [])}
+
+    def extra_price(e):
+        return f"ab {site.min_price(addon_by_extra[e])}&nbsp;€" if e in addon_by_extra else "auf Anfrage"
+    extras = "".join(f"<li>{ESC(e)} <small>· {extra_price(e)}</small></li>" for e in pr["extras"])
 
     def cell(v, f=False):
         if v == "optional":
@@ -289,6 +371,7 @@ def price_section(site, prefix=""):
         <dl>{"".join(f'<div><dt>{ESC(p["name"])}</dt><dd>{ESC(p["description"])}</dd></div>' for p in pr["packages"] if p.get("description"))}</dl>
       </div>
       {ceramic_section(site, prefix)}
+      {addons_prices(site, prefix)}
       <div class="extras reveal">
         <h2>Einzeln buchbar oder als Ergänzung</h2>
         <ul>{extras}</ul>
@@ -368,7 +451,7 @@ def build_home(site, write):
         <div class="spot-copy">
           <p class="eyebrow">Unser Schwerpunkt</p>
           <h2 id="ker-h" class="display">Keramikversiegelung. <em>Glanz, der bleibt.</em></h2>
-          <p>Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Glas und Felgen keramisch. Das hält deutlich länger als Wachs oder klassische Versiegelung.</p>
+          <p>Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Felgen und Scheiben keramisch. Das hält deutlich länger als Wachs oder klassische Versiegelung.</p>
           <ul class="spot-points">
             <li>{I["shield"]}<span>Langzeitschutz gegen Witterung, Streusalz und UV</span></li>
             <li>{I["spark"]}<span>Tiefer Glanz und starker Abperleffekt</span></li>
@@ -379,7 +462,7 @@ def build_home(site, write):
             <a class="btn btn-line" href="termin.html?paket=keramik">{I["cal"]}Beratung anfragen</a>
           </div>
         </div>
-      </div>
+      </div>{ceramic_cards(site)}
     </div>
   </section>'''
     hero_q = site.reviews.get("heroQuote") or {"text": site.reviews["featuredQuote"], "name": "Google-Bewertung", "source": ""}
@@ -857,6 +940,10 @@ def build_service(site, sv, write):
     elif sv.get("priceCard"):
         price_card = (f'<h3>{ESC(sv["priceCard"]["title"])}</h3><p>{ESC(sv["priceCard"]["text"])}</p>'
                       f'<a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>')
+    elif sv.get("addon") and site.addon(sv["addon"]):
+        ad = site.addon(sv["addon"])
+        price_card = (f'<h3>{ESC(ad["name"])}</h3><p>{ESC(ad["title"])} ab {site.min_price(ad["key"])} €. Standzeit laut Hersteller {ESC(ad["durability"])}, '
+                      f'unter optimalen Voraussetzungen.</p><a class="btn btn-line-light" href="#keramik-preise">Zur Preisliste</a>')
     elif book == "keramik" and site.pricing.get("ceramic"):
         price_card = (f'<h3>C² CarCeramic</h3><p>Keramikversiegelung für Pkw ab {site.min_price("keramik")} €, je nach C²Coating-Fahrzeugkategorie. '
                       f'Buchbar ab dem Paket Signature oder beim Neuwagen nach Lackprüfung.</p><a class="btn btn-line-light" href="#keramik-preise">Zur Preisliste</a>')
@@ -900,7 +987,7 @@ def build_service(site, sv, write):
         {figure(site, sv.get("image"), prefix)}
         <h2 id="enthalten">Das ist enthalten</h2>
         <ul class="includes">{includes}</ul>
-        {ceramic_section(site, prefix) if book == "keramik" else ""}
+        {addon_details(site, site.addon(sv["addon"]), prefix) if sv.get("addon") and site.addon(sv["addon"]) else (ceramic_section(site, prefix) if book == "keramik" else "")}
         <h2 id="ablauf">So läuft es ab</h2>
         <div class="steps">{steps}</div>
         <h2 id="fragen">Häufige Fragen zu {ESC(sv["short"])}</h2>

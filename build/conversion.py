@@ -57,7 +57,7 @@ def build_termin(site, write):
             <input type="radio" name="paket" value="keramik">
             <span class="choice-body">
               <span class="choice-head"><strong>Keramikversiegelung</strong><span class="choice-price">ab {site.min_price("keramik")} €</span></span>
-              <span class="choice-sub">C² CarCeramic für den Lack, ab Paket Signature oder beim Neuwagen nach Lackprüfung. Felgen und Scheiben auf Anfrage.</span>
+              <span class="choice-sub">C² CarCeramic für den Lack ab Paket Signature oder beim Neuwagen, dazu Felgenkeramik ab {site.min_price("felgen")} € und Scheibenkeramik ab {site.min_price("scheiben")} €.</span>
             </span>
           </label>
           <label class="choice-card">
@@ -415,7 +415,7 @@ def build_winter(site, write):
           <li>{I["check"]}Glanzpolitur (Signature) oder mehrstufige Lackkorrektur (Excellence)</li>
           <li>{I["check"]}Komplette Innenaufbereitung, Leder mit Colourlock gepflegt</li>
           <li>{I["check"]}Lackversiegelung oder C² CarCeramic, separat zubuchbar</li>
-          <li>{I["check"]}Felgen- und Scheibenbeschichtung auf Anfrage</li>
+          <li>{I["check"]}Felgenkeramik ab {site.min_price("felgen")} € und Scheibenkeramik ab {site.min_price("scheiben")} €</li>
           <li>{I["check"]}Pflege von Gummidichtungen gegen Festfrieren</li>
           <li>{I["check"]}Pflegetipps für die Wäsche im Winter</li>
         </ul>

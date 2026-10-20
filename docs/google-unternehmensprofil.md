@@ -67,7 +67,7 @@ Im Profil unter "Leistungen" anlegen. Google erlaubt pro Leistung einen Preis. D
 - Steuerhinweis: Endpreise. ElbDetail ist Kleinunternehmer nach § 19 UStG, daher wird keine Umsatzsteuer berechnet. Nirgends "zzgl." oder "inkl. Umsatzsteuer" schreiben.
 - Mehrkosten sind bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich. Das in den Paketbeschreibungen kurz erwähnen.
 - Preise stehen für Kleinwagen, Kompaktwagen, Limousinen/Kombis/kleinere SUVs und große SUVs/Vans fest. Sport- und Luxusfahrzeuge sowie Wohnmobile und Wohnwagen: Preis auf Anfrage.
-- Keramikversiegelung C² CarCeramic mit dem Ab-Preis 550 € anlegen (Pkw). Lederreparatur, Felgen- und Scheibenbeschichtung, ElbDetail Care und Firmenkonditionen ohne Preis anlegen ("Preis auf Anfrage").
+- Keramikversiegelung C² CarCeramic mit dem Ab-Preis 550 € anlegen (Pkw). Felgenkeramik ab 210 € und Scheibenkeramik ab 79 € mit Preis anlegen. Lederreparatur, ElbDetail Care und Firmenkonditionen ohne Preis anlegen ("Preis auf Anfrage").
 - Maßgeblich ist die Preisliste auf der Website (`/preise.html`). Bei jeder Preisänderung hier und in den Anzeigen abgleichen.
 
 ### Pakete
@@ -96,11 +96,11 @@ Infos unter /leistungen/keramikversiegelung-celle.html.
 Hochwertige Keramikversiegelung mit Produkten von C²Coating. René ist offizieller C²Coating Excellence Partner. Buchbar ab dem Paket Signature, bei Neuwagen nach Lackprüfung auch ohne Paket. Eine nötige Politur stimmen wir vorher mit Ihnen ab.
 Pkw ab 550 € je nach C²Coating-Kategorie (550 €, 650 €, 715 €, 750 €, 950 €, 1.190 €). Wohnmobile nach Länge ab 1.950 €. Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
-**Keramikversiegelung für Glas**
-Keramische Versiegelung für Scheiben. Wasser perlt besser ab, die Sicht bei Regen wird klarer. Preis auf Anfrage.
+**Scheibenkeramik C²Coating Glass Ceramic**
+Keramische Versiegelung für Scheiben. Wasser perlt besser ab, die Sicht bei Regen wird klarer. Frontscheibe ab 79 €, Front und Heck ab 119 €, alle Außenscheiben ab 149 €, inklusive Panoramadach ab 179 €. Standzeit laut Hersteller bis zu 15.000 km unter optimalen Voraussetzungen.
 
-**Keramikversiegelung für Felgen**
-Keramische Versiegelung für Felgen. Bremsstaub und Schmutz haften schlechter, die Reinigung geht leichter. Preis auf Anfrage.
+**Felgenkeramik C²Coating WheelCeramic**
+Keramische Versiegelung für Felgen. Bremsstaub und Schmutz haften schlechter, die Reinigung geht leichter. 15–17 Zoll 210 €, 18–19 Zoll 250 €, 20–21 Zoll 350 €, ab 22 Zoll auf Anfrage. Standzeit laut Hersteller bis zu 100.000 km unter optimalen Voraussetzungen.
 
 **Lackvorbereitung vor der Keramikversiegelung**
 Handwäsche, Dekontamination, Lackkorrektur und Entfettung. Eine Keramikversiegelung ist nur so gut wie der Lack darunter.

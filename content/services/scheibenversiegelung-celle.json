@@ -1,0 +1,75 @@
+{
+  "slug": "scheibenversiegelung-celle",
+  "order": 1.6,
+  "short": "Scheibenversiegelung",
+  "teaser": "Scheibenkeramik mit C² Glass Ceramic: starker Abperleffekt, klarere Sicht bei Regen.",
+  "seoTitle": "Scheibenversiegelung Celle: C² Glass Ceramic | ElbDetail",
+  "description": "Scheibenversiegelung in Celle mit C²Coating Glass Ceramic: starker Abperleffekt, bessere Sicht bei Regen, leichtere Reinigung. Frontscheibe ab {ab:scheiben} €.",
+  "h1": "Scheibenversiegelung in Celle: *Klare Sicht bei Regen.*",
+  "lead": "Mit **C²Coating Glass Ceramic** beschichten wir Ihre Scheiben keramisch. **Regen perlt ab, Schmutz und Insekten haften schlechter, die Sicht bei Regen wird besser.**",
+  "facts": [
+    {
+      "value": "ab {ab:scheiben} €",
+      "label": "Frontscheibe"
+    },
+    {
+      "value": "bis 15.000 km",
+      "label": "Standzeit laut Hersteller"
+    },
+    {
+      "value": "Abperleffekt",
+      "label": "bessere Sicht bei Regen"
+    }
+  ],
+  "bookAs": "keramik",
+  "addon": "scheiben",
+  "intro": "Bei Regen und Dunkelheit entscheidet eine klare Frontscheibe über die Sicht. Eine unbehandelte Scheibe hält Wasser als Film fest, Insekten und Straßenschmutz kleben fest und lassen sich nur mühsam entfernen.\n\nMit der **C²Coating Glass Ceramic** bekommen Ihre Scheiben eine keramische, wasserabweisende Schicht. Regenwasser perlt in Tropfen ab und läuft schneller von der Scheibe, Schmutz und Insekten haften schlechter, und die Reinigung geht leichter von der Hand.\n\nSie wählen den Umfang: nur die Frontscheibe, Front- und Heckscheibe, alle Außenscheiben oder alle Außenscheiben inklusive Panoramadach. Vor der Beschichtung reinigen wir das Glas gründlich und entfetten es, damit die Keramik direkt auf der Scheibe haftet.\n\nEhrlich gesagt: Die Standzeit von bis zu 15.000 km ist eine Herstellerangabe unter optimalen Voraussetzungen. Scheibenwischer, Waschanlagen und die Pflege beeinflussen, wie lange die Beschichtung tatsächlich hält. Steinschläge verhindert sie nicht.\n\nPasst gut zur [Keramikversiegelung für den Lack](/leistungen/keramikversiegelung-celle.html) und zur [Felgenversiegelung](/leistungen/felgenversiegelung-celle.html).\n",
+  "includes": [
+    "Beratung zum passenden Umfang",
+    "Gründliche Glasreinigung innen und außen an den behandelten Scheiben",
+    "Entfettung der Glasoberfläche",
+    "Keramische Beschichtung mit C²Coating Glass Ceramic",
+    "Aushärtung, Endkontrolle und Pflegehinweise"
+  ],
+  "steps": [
+    {
+      "title": "Umfang wählen",
+      "text": "Frontscheibe, Front und Heck, alle Außenscheiben oder inklusive Panoramadach."
+    },
+    {
+      "title": "Vorbereitung",
+      "text": "Das Glas wird gründlich gereinigt und entfettet, damit die Keramik sauber haftet."
+    },
+    {
+      "title": "Beschichtung",
+      "text": "Die Glass Ceramic wird gleichmäßig aufgetragen und härtet anschließend aus."
+    },
+    {
+      "title": "Übergabe",
+      "text": "Gemeinsame Kontrolle und Hinweise zur Pflege der beschichteten Scheiben."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Was kostet eine Scheibenversiegelung in Celle?",
+      "a": "Die C²Coating Glass Ceramic gibt es bei ElbDetail für die Frontscheibe ab 79 €, für Front- und Heckscheibe ab 119 €, für alle Außenscheiben ab 149 € und inklusive Panoramadach ab 179 €. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer."
+    },
+    {
+      "q": "Wie lange hält die Scheibenkeramik?",
+      "a": "Der Hersteller C²Coating gibt eine Standzeit von bis zu 15.000 km an, unter optimalen Voraussetzungen. Wie lange sie tatsächlich hält, hängt von der Beanspruchung, etwa durch Scheibenwischer, von der Verarbeitung und von der Pflege ab."
+    },
+    {
+      "q": "Brauche ich dann keine Scheibenwischer mehr?",
+      "a": "Doch. Die Beschichtung sorgt dafür, dass Wasser besser abläuft und die Sicht bei Regen klarer wird. Die Scheibenwischer ersetzt sie nicht."
+    },
+    {
+      "q": "Kann ich mit beschichteten Scheiben in die Waschanlage?",
+      "a": "Grundsätzlich ja, aber Bürsten und aggressive Reiniger tragen die Beschichtung schneller ab. Für eine lange Haltbarkeit empfehlen wir die Handwäsche mit mildem Shampoo."
+    }
+  ],
+  "related": [
+    "keramikversiegelung-celle",
+    "felgenversiegelung-celle",
+    "aussenaufbereitung-celle"
+  ]
+}

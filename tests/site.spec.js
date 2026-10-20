@@ -8,6 +8,7 @@ const PAGES = [
   "/ratgeber/leasingrueckgabe-checkliste.html", "/ratgeber/kosten-fahrzeugaufbereitung-celle.html",
   "/leistungen/aussenaufbereitung-celle.html", "/leistungen/innenaufbereitung-celle.html", "/leistungen/lackpolitur-celle.html",
   "/leistungen/lackversiegelung-celle.html", "/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html",
+  "/leistungen/felgenversiegelung-celle.html", "/leistungen/scheibenversiegelung-celle.html",
   "/impressum.html", "/datenschutz.html", "/danke.html", "/angebote.html", "/ratgeber/winter.html", "/zertifikate.html",
   "/ratgeber/auto-im-winter-waschen-streusalz.html", "/ratgeber/feuchtigkeit-im-auto-winter.html",
 ];
@@ -118,6 +119,20 @@ test("Preisseite: Fahrzeugklasse schaltet Richtpreise um", async ({ page }) => {
   await page.locator('#priceClass label').nth(2).click();
   await expect(amount).not.toHaveText(before || "");
   await expect(page.locator('[data-plan="essential"] [data-book]')).toHaveAttribute("href", /paket=essential&klasse=/);
+});
+
+test("Felgen- und Scheibenkeramik: Karten auf der Startseite, Preise und Herstellerhinweis", async ({ page }) => {
+  await page.goto("/");
+  const cards = page.locator(".cer-card");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.nth(1)).toContainText("210");
+  await expect(cards.nth(2)).toContainText("79");
+  await expect(page.locator(".cer-note")).toContainText("Herstellerangaben");
+  await page.goto("/leistungen/felgenversiegelung-celle.html");
+  await expect(page.locator("#keramik-preise")).toContainText("350");
+  await expect(page.locator("#keramik-preise")).toContainText("laut Hersteller");
+  await page.goto("/preise.html");
+  await expect(page.locator("#felgen-scheiben-preise")).toContainText("ab 179");
 });
 
 test("Preisseite: C² CarCeramic-Preisliste und optionale Versiegelung", async ({ page }) => {

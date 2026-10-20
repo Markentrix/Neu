@@ -91,6 +91,11 @@ def service(site, sv):
     o = {"@context": "https://schema.org", "@type": "Service", "@id": site.url + path + "#service", "name": sv["short"] + " in Celle",
          "serviceType": sv["short"], "url": site.url + path, "description": sv["description"], "provider": {"@id": site.url + "/#business"},
          "areaServed": {"@type": "City", "name": site.s["address"]["city"]}}
+    ad = site.addon(sv["addon"]) if sv.get("addon") else None
+    if ad:  # Felgen- und Scheibenkeramik mit eigener Preisliste
+        o["offers"] = {"@type": "AggregateOffer", "priceCurrency": "EUR", "lowPrice": str(site.min_price(ad["key"])),
+                       "highPrice": str(max(i["price"] for i in ad["items"] if i.get("price") is not None)),
+                       "offerCount": str(len(ad["items"])), "description": ad["name"]}
     if p:  # Leistungen ohne Paket (z. B. Keramik) haben einen Preis erst nach Begutachtung
         o["offers"] = {"@type": "Offer", "priceCurrency": "EUR", "price": str(site.min_price(p["key"])),
                        "priceSpecification": {"@type": "PriceSpecification", "priceCurrency": "EUR", "minPrice": str(site.min_price(p["key"])),
@@ -189,12 +194,18 @@ def llms(site, full=False):
         t += f"| {p['name']} ({inc}) | " + " | ".join(f"ab {p['prices'][c['key']]} €" if c["key"] in p["prices"] else "auf Anfrage" for c in cls) + f" | {p['duration']} |\n"
     t += "\nLackversiegelung und Keramikversiegelung sind zu Signature und Excellence separat buchbar. " + site.pricing.get("polishNote", "") + "\n"
     cer = site.pricing.get("ceramic")
+    eur = lambda v: f"{v:,}".replace(",", ".") + " €" if v is not None else "auf Anfrage"
     if cer:
-        eur = lambda v: f"{v:,}".replace(",", ".") + " €" if v is not None else "auf Anfrage"
         t += f"\n## {cer['title']}\n\n{cer['intro']}\n\n| Kategorie | Beispiele | Preis |\n|---|---|---|\n"
         t += "".join(f"| {c['name']} | {c['examples']} | {eur(c['price'])} |\n" for c in cer["car"])
         t += "\n| Wohnmobil / Wohnwagen | Preis |\n|---|---|\n" + "".join(f"| {c['name']} | {eur(c['price'])} |\n" for c in cer.get("camper", []))
         t += "\n" + " ".join([cer.get("carNote", "")] + cer.get("notes", [])) + "\n"
+    for ad in site.pricing.get("addons", []):
+        t += f"\n## {ad['name']}: {ad['title']}\n\n| {ad['priceLabel']} | Preis |\n|---|---|\n"
+        t += "".join(f"| {i['name']} | {('ab ' if ad.get('from') and i['price'] is not None else '') + eur(i['price'])} |\n" for i in ad["items"])
+        t += f"\nStandzeit laut Hersteller: {ad['durability']}. Vorteile: " + ", ".join(ad["benefits"]) + f". Mehr: {site.url}/leistungen/{ad['slug']}.html\n"
+    if site.pricing.get("addons"):
+        t += "\n" + site.pricing.get("durabilityNote", "") + "\n"
     t += "\nVerbindliche Preise werden vor dem Termin persönlich bestätigt.\n\n## Ratgeber\n\n"
     for ar in site.articles:
         t += f"- [{ar['title']}]({site.url}/ratgeber/{ar['slug']}.html): {ar.get('excerpt', '')}\n"

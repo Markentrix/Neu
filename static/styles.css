@@ -840,6 +840,31 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .spot-points { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
 .spot-points li { display: flex; gap: 10px; align-items: flex-start; font-weight: 550; }
 .spot-points svg { width: 20px; height: 20px; flex: none; color: var(--blue-bright); margin-top: 2px; }
+/* Keramik-Programm: Lack, Felgen, Scheiben im Stil des Schwerpunkts */
+.cer-cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 18px; }
+.cer-card { position: relative; display: grid; gap: 10px; align-content: start; padding: 26px 24px 22px; border-radius: var(--radius-l); background: var(--anthracite); color: var(--on-anthracite); text-decoration: none; border: 1px solid rgba(255,255,255,0.06); overflow: hidden; transition: transform 0.25s ease, border-color 0.25s ease; }
+.cer-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--blue-bright), transparent); }
+.cer-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: rgba(91,155,232,0.14); color: var(--blue-bright); }
+.cer-icon svg { width: 22px; height: 22px; }
+.cer-brand { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue-bright); }
+.cer-card h3 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--on-anthracite); line-height: 1.15; }
+.cer-price { font-family: var(--font-display); font-size: 1.9rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.cer-price small { font-family: var(--font); font-size: 0.85rem; font-weight: 600; color: var(--muted-on-anthracite); }
+.cer-card ul { list-style: none; display: grid; gap: 8px; margin: 4px 0 0; padding: 0; }
+.cer-card li { display: flex; gap: 8px; align-items: flex-start; font-size: 0.92rem; line-height: 1.4; color: var(--muted-on-anthracite); }
+.cer-card li svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: var(--blue-bright); }
+.cer-dur { font-size: 0.84rem; font-weight: 600; color: var(--on-anthracite); padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; }
+.cer-more { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 0.92rem; color: var(--blue-bright); }
+.cer-more svg { width: 16px; height: 16px; transition: transform 0.25s ease; }
+@media (hover: hover) and (pointer: fine) { .cer-card:hover { transform: translateY(-3px); border-color: rgba(91,155,232,0.45); } .cer-card:hover .cer-more svg { transform: translateX(3px); } }
+.cer-card:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.cer-note { margin-top: 12px; font-size: 0.8rem; color: var(--muted); max-width: 90ch; }
+.addon-facts { display: grid; gap: 14px; align-content: start; }
+.addon-durability { display: flex; gap: 12px; align-items: flex-start; padding: 16px 18px; border-radius: var(--radius-m); background: var(--blue-soft); color: var(--ink); margin: 0; }
+.addon-durability svg { width: 22px; height: 22px; flex: none; color: var(--blue); margin-top: 2px; }
+.addon-durability span { display: grid; gap: 2px; }
+.addon-durability small { font-size: 0.84rem; color: var(--muted); }
+.ceramic-grid--even { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 @media (min-width: 900px) {
   .spot { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
   .spot-media img { aspect-ratio: auto; min-height: 100%; position: absolute; inset: 0; }

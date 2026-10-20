@@ -213,7 +213,8 @@
   ],
   "extras": [
     "Lackversiegelung (zu Signature oder Excellence)",
-    "Felgen- & Scheibenbeschichtung",
+    "Felgenkeramik (C² WheelCeramic)",
+    "Scheibenkeramik (C² Glass Ceramic)",
     "Lederreparatur mit Colourlock",
     "Geruchsneutralisierung",
     "Dampfreinigung",
@@ -372,7 +373,83 @@
     "notes": [
       "Die Beschichtungspreise enthalten die vorgesehene Standardvorbereitung. Intensive Lackaufbereitung und zusätzliche Korrekturarbeiten werden separat kalkuliert.",
       "Bei Kombination mit unseren Paketen berücksichtigen wir bereits enthaltene Vorbereitungsarbeiten im Gesamtangebot.",
-      "Felgen- und Scheibenbeschichtung: vorerst auf Anfrage."
+      "Felgen- und Scheibenkeramik von C²Coating buchen Sie einzeln oder zusammen mit der Lackkeramik."
     ]
-  }
+  },
+  "addons": [
+    {
+      "key": "felgen",
+      "name": "C²Coating WheelCeramic",
+      "title": "Felgenkeramik",
+      "slug": "felgenversiegelung-celle",
+      "extra": "Felgenkeramik (C² WheelCeramic)",
+      "short": "Keramikschutz für Ihre Felgen",
+      "priceLabel": "Felgengröße",
+      "from": false,
+      "items": [
+        {
+          "name": "15–17 Zoll",
+          "price": 210
+        },
+        {
+          "name": "18–19 Zoll",
+          "price": 250
+        },
+        {
+          "name": "20–21 Zoll",
+          "price": 350
+        },
+        {
+          "name": "ab 22 Zoll",
+          "price": null
+        }
+      ],
+      "durability": "bis zu 100.000 km",
+      "benefits": [
+        "Deutlich erleichterte Felgenreinigung",
+        "Reduzierte Anhaftung von Bremsstaub und Straßenschmutz",
+        "Wasser- und schmutzabweisende Oberfläche",
+        "Schutz vor Streusalz und Umwelteinflüssen",
+        "Hitzebeständig bis 850 °C (Herstellerangabe)",
+        "Für matte und glänzende Felgen geeignet"
+      ]
+    },
+    {
+      "key": "scheiben",
+      "name": "C²Coating Glass Ceramic",
+      "title": "Scheibenkeramik",
+      "slug": "scheibenversiegelung-celle",
+      "extra": "Scheibenkeramik (C² Glass Ceramic)",
+      "short": "Klare Sicht bei Regen",
+      "priceLabel": "Umfang",
+      "from": true,
+      "items": [
+        {
+          "name": "Frontscheibe",
+          "price": 79
+        },
+        {
+          "name": "Front- und Heckscheibe",
+          "price": 119
+        },
+        {
+          "name": "Alle Außenscheiben",
+          "price": 149
+        },
+        {
+          "name": "Alle Außenscheiben inklusive Panoramadach",
+          "price": 179
+        }
+      ],
+      "durability": "bis zu 15.000 km",
+      "benefits": [
+        "Starker Wasserabperleffekt",
+        "Verbesserter Wasserablauf bei Regen",
+        "Weniger Anhaftung von Schmutz und Insekten",
+        "Erleichterte Scheibenreinigung",
+        "Verbesserte Sicht bei Regen"
+      ]
+    }
+  ],
+  "durabilityNote": "Die Standzeiten sind Angaben des Herstellers C²Coating unter optimalen Voraussetzungen. Die tatsächliche Haltbarkeit hängt von der Beanspruchung, der fachgerechten Verarbeitung und der anschließenden Fahrzeugpflege ab."
 }
