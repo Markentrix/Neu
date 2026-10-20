@@ -185,8 +185,13 @@ export function pushKarte(rolle) {
         try { await api('/api/me/ansicht', { method: 'PUT', body: { push_aus: [...aus] } }); a.push_aus = [...aus]; melde(m, ''); } catch (x) { e.target.checked = !e.target.checked; melde(m, x.message); }
       } }), name)));
   }).catch(() => {});
-  if (!standalone) install.replaceChildren(installAngebot ? h('p', {}, h('button', { class: 'btn sec small', onclick: async () => { installAngebot.prompt(); installAngebot = null; install.replaceChildren(); } }, 'Als App installieren')) :
-    h('p', { class: 'small muted' }, ios ? 'Als App: Teilen-Symbol → „Zum Home-Bildschirm“.' : 'Als App: im Browser-Menü „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen.'));
+  const ua = navigator.userAgent, android = /android/i.test(ua), fremd = android && /SamsungBrowser|OPR\/|Opera|Vivaldi|Firefox|DuckDuckGo|EdgA|Brave|MiuiBrowser|UCBrowser/i.test(ua);
+  if (!standalone) install.replaceChildren(
+    installAngebot ? h('p', {}, h('button', { class: 'btn small', onclick: async () => { installAngebot.prompt(); installAngebot = null; install.replaceChildren(); } }, 'Als App installieren')) : '',
+    fremd ? h('div', { class: 'msg info' }, 'Bitte öffne das Portal zum Installieren in Google Chrome. Andere Android-Browser legen teils eine App an, die Google Play Protect als „unsicher“ blockiert.') : '',
+    h('p', { class: 'small muted' }, ios ? 'iPhone: in Safari auf das Teilen-Symbol tippen, dann „Zum Home-Bildschirm“ und „Hinzufügen“.'
+      : android ? 'Android: in Google Chrome das Menü ⋮ öffnen, dann „App installieren“ (oder „Zum Startbildschirm hinzufügen“) wählen. Die App ist immer auf dem neuesten Stand, Updates brauchen nichts zu tun.'
+        : 'Am Rechner: in Chrome oder Edge in der Adressleiste auf das Installieren-Symbol klicken.'));
   return h('div', { class: 'card' }, h('h2', {}, 'App & Benachrichtigungen'),
     h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, install);
 }

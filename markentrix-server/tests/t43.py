@@ -115,3 +115,11 @@ chk("Vertragsstand nur für Admins",cA.get("/api/admin/vertragsstand").status_co
 a.post(f"/api/admin/kunden/{kB}/domains",json=D(domain=f"onb{sfx}.de"))
 sql(f"insert into kunden_module (kunden_id, modul_code, aktiv) values ('{kB}','website',true) on conflict do nothing")
 ob=a.get(f"/api/admin/kunden/{kB}/onboarding"); chk("Onboarding kennt Domain-Schritt",ob.status_code==200 and any(p["code"]=="domain" and p["automatisch"] for p in ob.json()["punkte"]),[(p["code"],p["erledigt"],p["automatisch"]) for p in ob.json()["punkte"]])
+# ---- App-Installation (Android/iPhone)
+mf=httpx.get(B+"/manifest.webmanifest").json()
+chk("Manifest: ID, Standalone, maskierbares Icon",mf.get("id")=="/" and mf["display"]=="standalone" and any(i["purpose"]=="maskable" and i["sizes"]=="512x512" for i in mf["icons"]) and mf.get("prefers_related_applications") is False,mf)
+chk("Manifest: alle Icons erreichbar",all(httpx.get(B+i["src"]).status_code==200 for i in mf["icons"]))
+chk("iPhone: Home-Bildschirm-Symbol erreichbar",httpx.get(B+"/static/icons/apple-touch-icon.png").status_code==200)
+for seite in ("/","/app","/admin","/vertrieb"):
+    t=httpx.get(B+seite,follow_redirects=True).text
+    chk("Kopfzeile iPhone/Android "+seite,"apple-touch-icon" in t and "mobile-web-app-capable" in t,seite)

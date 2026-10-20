@@ -375,3 +375,12 @@ Im Angebotsdialog steht unter den Positionen **„Das bekommt der Kunde“**. De
 **Vertragsstand.** Unter Verwaltung zeigt „Vertragsstand“ auf einen Blick, ob die Zusagen aus dem AVV eingehalten werden: 2FA, Audit-/Chat-Aufbewahrung, Sicherung, Restore-Test, AVV-Fassung, Widersprüche, ablaufende Domains.
 
 **Bewertungsanfrage und Monatsbericht** gab es schon: Der Monatsbericht geht automatisch per Mail raus, die Bewertungsanfrage nach einem erledigten Termin verschickst du bewusst selbst über deinen eigenen Kanal.
+
+## App auf dem Handy installieren (Android und iPhone)
+
+Das Portal ist eine installierbare Web-App. Es gibt keine eigene APK-Datei und keinen App-Store-Eintrag. Deshalb ist sie immer sofort auf dem neuesten Stand, Updates muss niemand einspielen.
+
+- **Android:** In **Google Chrome** das Menü ⋮ öffnen und „App installieren“ wählen. Nicht über andere Browser (Samsung Internet, Opera, Vivaldi …) und nicht über eine heruntergeladene Datei installieren: Das erzeugt teils eine App, die Google Play Protect als „unsichere App blockiert“ meldet. Eine schon so angelegte App einfach löschen und über Chrome neu installieren.
+- **iPhone:** In **Safari** auf das Teilen-Symbol tippen, „Zum Home-Bildschirm“, „Hinzufügen“. Erst dann sind auch Benachrichtigungen möglich.
+- Im Portal steht dieselbe Anleitung unter Konto bzw. Einstellungen in der Karte „App & Benachrichtigungen“, passend zum Gerät. Öffnet jemand das Portal in einem anderen Android-Browser, weist die Karte auf Chrome hin.
+- Echte Store-Apps (Google Play, Apple App Store) wären nur mit Entwicklerkonten möglich (Google einmalig ca. 25 US-Dollar, Apple ca. 99 US-Dollar pro Jahr) und einem eigenen Paket pro Store. Das Portal bräuchte dafür keine Änderung, nur einen Einpack-Schritt.

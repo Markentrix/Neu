@@ -1,14 +1,22 @@
 {
+  "id": "/",
   "name": "Markentrix Portal",
   "short_name": "Markentrix",
+  "description": "Kundenportal, Admin und Partnerportal von Markentrix",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#4F46E5",
   "lang": "de",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "prefers_related_applications": false,
   "icons": [
     { "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
