@@ -55,6 +55,9 @@ async def main():
         await pg.click(".dlg >> text=Weiter"); await pg.click(".dlg >> text=Weiter")
         chk("Dritter Schritt",await pg.locator(".dlg >> text=Schritt 3 von 3").count()==1)
         await pg.click(".dlg >> text=Fertig"); await pg.wait_for_selector(".dlgoverlay",state="detached")
+        for _ in range(15):
+            if c.get("/api/me/ansicht").json()["tour_gesehen"] is True: break
+            await pg.wait_for_timeout(300)
         chk("Tour als gesehen gespeichert",c.get("/api/me/ansicht").json()["tour_gesehen"] is True)
         await pg.reload(); await pg.wait_for_selector(".tabbar"); await pg.wait_for_timeout(800)
         chk("Tour kommt nicht wieder",await pg.locator(".dlgoverlay").count()==0)
