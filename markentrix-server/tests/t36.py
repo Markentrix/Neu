@@ -128,6 +128,7 @@ async def main():
         await pg.fill(".dlg input[name=firma]","Neukunde Browser GmbH"); await pg.fill(".dlg input[name=email]","neu@browser-neu.de"); await pg.click(".dlg >> text=Weiter zum Angebot")
         await pg.wait_for_selector(".dlg select[aria-label='Paket hinzufügen']",timeout=8000)
         chk("Neukunden-Angebot: Lead angelegt, Angebotsdialog offen",sql("select count(*) from leads where firma='Neukunde Browser GmbH' and notiz like '%Neukunden%'")=="1")
+        await pg.goto(B+"/admin#uebersicht"); await pg.wait_for_selector("h2:text('Angebote im Blick')",timeout=8000); chk("Dashboard: Karte Angebote im Blick zeigt Angebote",await pg.locator(".card:has(h2:text('Angebote im Blick')) li").count()>=1)
         await ctx.close()
         for w,thema in ((1280,"hell"),(390,"dunkel")):
             ctx=await br.new_context(viewport={"width":w,"height":900},bypass_csp=True); await ctx.add_init_script(f"try{{localStorage.setItem('mk-theme','{thema}')}}catch(e){{}}"); pg=await ctx.new_page(); errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))

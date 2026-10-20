@@ -235,6 +235,14 @@ def heute(user: dict = Depends(require_admin)):
                        WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL ORDER BY b.faellig_am LIMIT 6""")
         rechnungen = cur.fetchall()
         avv_fehlt = [{"id": r["id"], "firma": r["firma"]} for r in fehlende(cur)][:6]
+        # Angebote im Blick: offene (gesendet, evtl. angesehen) und kürzlich beantwortete, für Leads und Kunden
+        cur.execute("""SELECT b.id, b.nummer, b.status, b.brutto_cent, b.lead_id, b.kunden_id, b.datum, b.faellig_am, b.versendet_am, b.angesehen_am, b.angenommen_am, b.abgelehnt_am,
+                              coalesce(k.firma, l.firma) AS firma, (l.kunden_id IS NOT NULL) AS lead_ist_kunde
+                       FROM belege b LEFT JOIN kunden k ON k.id = b.kunden_id LEFT JOIN leads l ON l.id = b.lead_id
+                       WHERE b.art = 'angebot' AND b.nummer IS NOT NULL
+                         AND (b.status IN ('gestellt','versendet') OR (b.status IN ('angenommen','abgelehnt') AND coalesce(b.angenommen_am, b.abgelehnt_am, b.geaendert_am) > now() - interval '30 days'))
+                       ORDER BY coalesce(b.angesehen_am, b.versendet_am, b.erstellt_am) DESC LIMIT 30""")
+        angebote = cur.fetchall()
     gesamt = len(nachrichten) + len(aufgaben) + len(wiedervorlagen) + leads_n + len(freigaben) + len(onboarding) + len(rechnungen) + len(avv_fehlt)
     return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "wiedervorlagen": wiedervorlagen, "leads_gesamt": leads_n, "freigaben": freigaben,
-            "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "gesamt": gesamt}
+            "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "angebote": angebote, "gesamt": gesamt}

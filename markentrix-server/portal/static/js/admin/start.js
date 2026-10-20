@@ -17,14 +17,35 @@ export function heuteKarte(t) {
     abschnitt('AVV fehlt', t.avv_fehlt, z => [h('a', { class: 'grow', href: '#kunde/' + z.id }, z.firma)]));
 }
 
+/** Was ist aus meinen Angeboten geworden? Angenommen, angesehen, noch ungeöffnet, abgelehnt. */
+const tageSeit = (d) => Math.floor((Date.now() - new Date(d).getTime()) / 864e5);
+export function angebotStand(z) {
+  if (z.status === 'angenommen') return { ton: 'ok', text: 'Angenommen', hinweis: z.lead_id && !z.lead_ist_kunde ? 'Nächster Schritt: Kunde anlegen' : 'am ' + datum(z.angenommen_am), rang: 0 };
+  if (z.status === 'abgelehnt') return { ton: 'bad', text: 'Abgelehnt', hinweis: 'am ' + datum(z.abgelehnt_am), rang: 4 };
+  if (z.faellig_am && new Date(z.faellig_am) < new Date(new Date().toDateString())) return { ton: '', text: 'Abgelaufen', hinweis: 'seit ' + datum(z.faellig_am), rang: 3 };
+  if (z.angesehen_am) return { ton: 'warn', text: 'Angesehen', hinweis: 'vor ' + (tageSeit(z.angesehen_am) < 1 ? 'wenigen Stunden' : tageSeit(z.angesehen_am) + ' Tagen') + ', noch keine Antwort', rang: 1 };
+  return { ton: '', text: z.status === 'versendet' ? 'Gesendet, noch nicht geöffnet' : 'Erstellt, nicht verschickt', hinweis: z.versendet_am ? 'seit ' + tageSeit(z.versendet_am) + ' Tagen' : '', rang: 2 };
+}
+const angebotLink = (z) => z.lead_id ? '#lead/' + z.lead_id : '#beleg/' + z.id;
+export function angebotsKarte(liste) {
+  const L = (liste || []).map(z => ({ z, s: angebotStand(z) })).sort((a, b) => a.s.rang - b.s.rang);
+  const offen = L.filter(x => x.s.rang <= 2).length, summeCent = L.filter(x => x.s.rang <= 2).reduce((n, x) => n + Number(x.z.brutto_cent || 0), 0);
+  return h('div', { class: 'card' }, h('h2', {}, 'Angebote im Blick', offen ? h('span', { class: 'badge', style: 'margin-left:8px' }, offen) : ''),
+    L.length ? h('p', { class: 'small muted' }, offen + ' offen mit zusammen ' + euro(summeCent) + ' brutto. Angenommene und abgelehnte bleiben 30 Tage sichtbar.') : '',
+    L.length ? h('ul', { class: 'prio' }, L.map(({ z, s }) => h('li', {}, h('span', { class: 'punkt ' + s.ton, 'aria-hidden': 'true' }),
+      h('div', { class: 'pt' }, h('b', {}, z.firma + ' · ' + z.nummer), h('span', { class: 'small muted' }, euro(z.brutto_cent) + ' · ' + s.hinweis)),
+      h('span', { class: 'pill ' + s.ton }, s.text), h('a', { class: 'btn sec small', href: angebotLink(z) }, 'Öffnen'))))
+      : h('p', { class: 'muted' }, 'Noch keine verschickten Angebote. Unter „Angebote & Rechnungen“ geht es mit „+ Angebot an Neukunden“.'));
+}
+
 V.uebersicht = async () => {
   const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus'), fw = await sicherApi('/api/admin/fruehwarnung');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
   const STANDARD_AUS = ['system', 'fruehwarnung', 'heute'], ans = await ladeAnsicht(), aus = ausgeblendetSet(ans, STANDARD_AUS);
   const cp = await sicherApi('/api/admin/cockpit');
-  const KARTEN = [['top3', 'Heute zuerst (die 3 wichtigsten Dinge)'], ['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
+  const KARTEN = [['top3', 'Heute zuerst (die 3 wichtigsten Dinge)'], ['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['angebote', 'Angebote im Blick (angesehen, angenommen, offen)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
   const an = anpassenKnopf(KARTEN, STANDARD_AUS), zeige = (id, el) => aus.has(id) ? '' : el;
-  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
+  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('angebote', angebotsKarte(heute.angebote)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
     zeige('zahlen', h('div', { class: 'zahlenblock' },
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
@@ -98,6 +119,10 @@ export function prioListe(heute, sys, fw) {
   const L = [];
   const add = (score, ton, kat, titel, text, link, knopf) => L.push({ score, ton, kat, titel, text, link, knopf });
   (sys && sys.probleme ? sys.probleme : []).forEach(p => add(100, 'bad', 'System', p, 'Betrieb', '#einstellungen', 'Ansehen'));
+  (heute.angebote || []).forEach(z => { const st = angebotStand(z), t = tageSeit(z.versendet_am || z.datum || Date.now());
+    if (st.rang === 0 && z.lead_id && !z.lead_ist_kunde) add(88, 'ok', 'Angebot', z.firma, 'Angebot ' + z.nummer + ' angenommen: jetzt Kunde anlegen', angebotLink(z), 'Öffnen');
+    else if (st.rang === 1) add(72, 'warn', 'Angebot', z.firma, 'hat Angebot ' + z.nummer + ' angesehen, noch keine Antwort: jetzt anrufen', angebotLink(z), 'Öffnen');
+    else if (st.rang === 2 && z.status === 'versendet' && t >= 3) add(58, '', 'Angebot', z.firma, 'Angebot ' + z.nummer + ' seit ' + t + ' Tagen ungeöffnet: nachfassen', angebotLink(z), 'Öffnen'); });
   heute.rechnungen.forEach(z => add(90, 'bad', 'Zahlung', z.firma, 'Rechnung ' + z.nummer + ' ist überfällig', () => erinnerungsDialog(undefined, z.id), 'Erinnerung prüfen'));
   (fw && fw.kunden ? fw.kunden : []).forEach(z => add(z.stufe === 'hoch' ? 85 : 50, z.stufe === 'hoch' ? 'bad' : 'warn', 'Kündigungsrisiko', z.firma, (z.gruende || [])[0] || 'Auffälliger Verlauf', '#kunde/' + z.id, 'Öffnen'));
   heute.nachrichten.forEach(z => add(80, 'warn', 'Nachricht', z.firma, z.betreff, '#postfach/' + z.id, 'Antworten'));

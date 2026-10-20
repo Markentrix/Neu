@@ -69,6 +69,8 @@ chk("Belegliste zeigt Lead-Angebot mit Lead-Namen",any(x["id"]==bid and "Angebot
 anon=httpx.Client(base_url=B,headers=H)
 g=anon.get("/api/angebot/"+tok); chk("Öffentlich: Angebot sichtbar ohne Login",g.status_code==200 and g.json()["nummer"]==j["nummer"] and g.json()["brutto_cent"]==83181 and g.json()["anbieter"]=="Markentrix",g.text[:300])
 chk("Öffentlich: Leistungsumfang sichtbar (leere Zeilen entfernt)",g.json()["leistungen"]==["## BUSINESS WEB","Bis zu sieben Inhaltsseiten","Hosting und Sicherung inklusive"],g.json().get("leistungen"))
+hb=[x for x in a.get("/api/admin/heute").json()["angebote"] if x["nummer"]==j["nummer"]]
+chk("Dashboard: Angebot erscheint mit Nummer, Firma und „angesehen“",len(hb)==1 and hb[0]["angesehen_am"] and hb[0]["firma"] and hb[0]["lead_id"]==L,hb)
 chk("Öffentlich: keine internen Daten",not any(k in g.json() for k in ("lead_id","kunden_id","annahme_hash","notiz","vertriebspartner_id","partner_id")),list(g.json()))
 chk("Öffentlich: PDF",anon.get(f"/api/angebot/{tok}/pdf").content[:4]==b"%PDF")
 chk("Öffentlich: falscher Token 404",anon.get("/api/angebot/falsch"+tok).status_code==404 and anon.get("/api/angebot/x").status_code==404)
