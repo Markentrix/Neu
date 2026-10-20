@@ -317,3 +317,13 @@ Weitere Unterlagen: `docs/ARCHITEKTUR.md` (Aufbau für Entwickler), `docs/LOESCH
 - Ist der E-Mail-Versand nicht eingerichtet, bekommst du den Link zum Kopieren (für WhatsApp oder dein Mailprogramm).
 - Der Vertriebler sieht den Stand seiner Angebotsanfrage automatisch („Angebot ist raus“, „angenommen“). Gesperrte Leads, Leads ohne Einwilligung, verlorene und tote Leads bekommen kein Angebot. Wird ein Lead gelöscht, verschwinden auch seine Angebote.
 - **Nummer falsch / nicht erreichbar** im Lead legt ihn ab (Status „tot“, keine Wiedervorlage mehr).
+
+## Handy-Leiste, Erststart-Tour und Nutzungsmessung
+
+- **Handy-Leiste (Kunden):** Am Handy gibt es unten eine feste Leiste mit „Heute“, „Anfragen“, „Termine“ und „Mehr“. „Mehr“ öffnet das ganze Menü samt Dunkelmodus und Abmelden. Buttons und Eingabefelder sind größer, damit man sie mit dem Daumen trifft. Ein Wischen zwischen Seiten gibt es bewusst nicht.
+- **Erststart-Tour:** Beim ersten Login zeigt das Kunden-Portal drei kurze Schritte (Heute, Anfragen/Nachrichten, Hilfe). „Überspringen“ oder „Fertig“ merkt sich das Konto. Unter „Hilfe“ gibt es „Tour nochmal ansehen“.
+- **Nutzungsmessung:** Unter Admin → Protokoll steht, welche Seiten genutzt werden, wie viele Personen in den letzten 7/30 Tagen aktiv waren und wie viele Kunden die Tour gesehen haben. Gespeichert werden nur Seitenname, Tag und Rolle (keine Inhalte), nach 180 Tagen wird gelöscht. Der Satz steht in der Standard-Datenschutzerklärung; falls ihr einen eigenen Text habt, bitte ergänzen.
+
+## Angebot an Neukunden
+
+Unter Admin → Angebote & Rechnungen gibt es oben „+ Angebot an Neukunden“. Du trägst nur Firma und E-Mail ein (Ansprechpartner, Telefon, Ort sind optional), der Kontakt wird als Lead angelegt und es öffnet sich direkt der Angebotsdialog. Das PDF kommt im Markentrix-Design (Navy-Kopf, Farbverlauf, Inter/Space Grotesk), der Kunde bekommt Mail mit PDF und Link und kann online annehmen oder ablehnen. Nach der Annahme legst du ihn mit „Zum Kunden machen“ an, das Angebot wandert mit.

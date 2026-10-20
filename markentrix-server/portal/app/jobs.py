@@ -502,6 +502,8 @@ def fristen_ausfuehren() -> dict:
             cur.execute("DELETE FROM lf_betriebe WHERE lead_id IS NULL AND erstellt_am < now() - make_interval(days => %s)", (regeln["lf_betriebe"]["aufbewahrung_tage"],)); protokoll("lf_betriebe", cur.rowcount, regeln["lf_betriebe"])
         if "akquise_antworten" in regeln:
             cur.execute("DELETE FROM akquise_antworten WHERE erstellt_am < now() - make_interval(days => %s)", (regeln["akquise_antworten"]["aufbewahrung_tage"],)); protokoll("akquise_antworten", cur.rowcount, regeln["akquise_antworten"])
+        from .routes_nutzung import aufraeumen
+        protokoll("nutzung (Seitenzähler)", aufraeumen(cur))
     return ergebnis
 
 

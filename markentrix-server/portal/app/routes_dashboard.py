@@ -183,6 +183,7 @@ def cockpit_ziel(data: ZielIn, user: dict = Depends(require_admin)):
 class AnsichtIn(BaseModel):
     ausgeblendet: list[str] | None = Field(default=None, max_length=40)
     push_aus: list[str] | None = Field(default=None, max_length=40)
+    tour_gesehen: bool | None = None
 
 
 @router.get("/me/ansicht")
@@ -190,7 +191,7 @@ def ansicht_lesen(user: dict = Depends(current_user)):
     with tx("system") as cur:
         cur.execute("SELECT ansicht FROM benutzer WHERE id=%s", (user["id"],))
         a = cur.fetchone()["ansicht"] or {}
-    return {"ausgeblendet": a.get("ausgeblendet", []), "push_aus": a.get("push_aus", []), "gesetzt": "ausgeblendet" in a}
+    return {"ausgeblendet": a.get("ausgeblendet", []), "push_aus": a.get("push_aus", []), "gesetzt": "ausgeblendet" in a, "tour_gesehen": bool(a.get("tour_gesehen"))}
 
 
 @router.put("/me/ansicht")
@@ -206,6 +207,8 @@ def ansicht_speichern(data: AnsichtIn, user: dict = Depends(current_user)):
             a["ausgeblendet"] = sorted(set(data.ausgeblendet))
         if data.push_aus is not None:
             a["push_aus"] = sorted(set(data.push_aus))
+        if data.tour_gesehen is not None:
+            a["tour_gesehen"] = data.tour_gesehen
         cur.execute("UPDATE benutzer SET ansicht=%s::jsonb WHERE id=%s", (json.dumps(a), user["id"]))
     return {"ok": True}
 

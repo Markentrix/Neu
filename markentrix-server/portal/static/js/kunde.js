@@ -10,6 +10,7 @@ import './kunde/dokumente.js';
 import './kunde/website.js';
 import './kunde/belege.js';
 import './kunde/konto.js';
+import { tour } from './kunde/tour.js';
 
 (async () => {
   try {
@@ -21,4 +22,5 @@ import './kunde/konto.js';
   } catch (e) { return; }
   window.addEventListener('hashchange', zeige);
   zeige();
+  tour().catch(() => {});
 })();

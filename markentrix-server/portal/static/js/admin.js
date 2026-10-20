@@ -1,4 +1,4 @@
-import { h, api } from './common.js';
+import { h, api, nutzung } from './common.js';
 import { belegEditor } from './admin/belege.js';
 import {V, gerüst, zaehlerAdmin, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
 import { kundeDetail } from './admin/kunden.js';
@@ -18,6 +18,7 @@ const root = document.getElementById('app');
 async function seiteZeigen() {
   const hash = (location.hash || '#uebersicht').slice(1);
   let seite = hash.split('/')[0].split('?')[0], inhalt;
+  nutzung(seite);
   try {
     if (seite === 'kunde') inhalt = await kundeDetail(hash.split('/')[1]);
     else if (seite === 'partner') inhalt = await partnerDetail(hash.split('/')[1]);

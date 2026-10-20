@@ -1,6 +1,7 @@
 import { h, api } from '../common.js';
 import { liniendiagramm, ringdiagramm, trichter, balkendiagramm, tabellenAlternative } from '../diagramme.js';
 import { hat, tabelle, V } from './kern.js';
+import { tour } from './tour.js';
 
 const delta = (neu, alt) => alt ? ((neu - alt) / alt * 100) : null;
 const pfeil = (p) => p === null ? '' : (p >= 0 ? '▲ +' : '▼ ') + Math.round(p) + ' % zum Vormonat';
@@ -72,7 +73,7 @@ V.hilfe = async () => {
   };
   such.oninput = zeichne; zeichne();
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Hilfe'), h('p', { class: 'small muted' }, 'Antworten auf die häufigsten Fragen.'), such), box,
-    h('div', { class: 'card' }, h('h3', {}, 'Nichts gefunden?'), h('p', { class: 'small muted' }, 'Wir helfen dir persönlich weiter.'), h('a', { class: 'btn', href: '#nachrichten' }, 'Nachricht an das Team')));
+    h('div', { class: 'card' }, h('h3', {}, 'Nichts gefunden?'), h('p', { class: 'small muted' }, 'Wir helfen dir persönlich weiter.'), h('a', { class: 'btn', href: '#nachrichten' }, 'Nachricht an das Team'), ' ', h('button', { class: 'btn sec', onclick: () => tour(true) }, 'Tour nochmal ansehen')));
 };
 
 // ------------------------------------------------------------- Freigaben

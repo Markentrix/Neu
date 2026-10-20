@@ -30,6 +30,7 @@ from .routes_folgemails import router as folge_router
 from .routes_buchung import router as buchung_router
 from .routes_vertriebsplus import router as vertriebsplus_router
 from .routes_vertriebwerkzeuge import router as vertriebwerkzeuge_router
+from .routes_nutzung import router as nutzung_router
 from .routes_leadangebot import router as leadangebot_router, oeffentlich as angebot_oeffentlich_router
 from .routes_system import router as system_router
 from .routes_loginlink import router as loginlink_router
@@ -139,6 +140,7 @@ app.include_router(buchung_router)
 app.include_router(vertriebsplus_router)
 app.include_router(vertriebwerkzeuge_router)
 app.include_router(leadangebot_router)
+app.include_router(nutzung_router)
 app.include_router(angebot_oeffentlich_router)
 app.include_router(system_router)
 app.include_router(loginlink_router)

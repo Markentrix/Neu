@@ -1,5 +1,5 @@
 import { pipelineBoard } from './pipeline.js';
-import { navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
+import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -243,6 +243,7 @@ V.konto = async () => {
 
 async function zeige() {
   const hash = (location.hash || '#heute').slice(1), seite = hash.split('/')[0];
+  nutzung(V[seite] || seite === 'lead' ? seite : 'heute');
   let inhalt;
   try { inhalt = seite === 'lead' ? await leadDetail(hash.split('/')[1]) : await (V[seite] || V.heute)(); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
   root.replaceChildren(gerüst(seite === 'lead' ? 'leads' : (V[seite] ? seite : 'heute'), inhalt));

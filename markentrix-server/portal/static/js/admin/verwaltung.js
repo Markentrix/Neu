@@ -77,8 +77,26 @@ V.compliance = async () => {
     sektion('Maßnahmen', d.massnahmen, [['Fällig', z => datum(z.faellig_am)], ['Maßnahme', z => z.beschreibung], ['Verantwortlich', z => z.verantwortlich], ['Status', z => pill(z.status)], ['', entscheid('massnahmen', 'Umgesetzt', 'umgesetzt', '', '')]], 'Keine offenen Maßnahmen.'));
 };
 
+/** Nutzungsmessung: welche Seiten werden gebraucht, wer ist aktiv. Nur Seitennamen und Zähler, keine Inhalte. */
+const ALLE_SEITEN = { kunde: 'heute uebersicht status briefing nachrichten freigaben assistent anfragen termine bewertungen kontakte dokumente unterlagen auswertung berichte belege anrufe website wochenangebote werbung automationen avv team hilfe einstellungen'.split(' '),
+  vertrieb: 'heute uebersicht leads pipeline angebote leitfaden kunden provisionen konto'.split(' ') };
+const ROLLE = { kunde: 'Kunden', vertrieb: 'Vertriebler', admin: 'Admin' };
+async function nutzungsKarte() {
+  const d = await api('/api/admin/nutzung?tage=30');
+  const block = (rolle) => {
+    const z = d.seiten.filter(x => x.rolle === rolle), max = Math.max(1, ...z.map(x => x.aufrufe)), nie = (ALLE_SEITEN[rolle] || []).filter(sid => !z.some(x => x.seite === sid));
+    return h('div', { style: 'margin:10px 0' }, h('h3', {}, ROLLE[rolle] + ': ' + (d.aktiv[rolle] || 0) + ' von ' + (d.konten[rolle] || 0) + ' Konten aktiv (7 Tage: ' + (d.aktiv_7_tage[rolle] || 0) + ')'),
+      z.length ? h('div', { class: 'dtrichter' }, z.slice(0, 8).map(x => h('div', { class: 'tstufe' }, h('span', { class: 'tname' }, x.seite), h('div', { class: 'tbalken' }, h('div', { style: 'height:100%;border-radius:10px;background:var(--grad);width:' + Math.max(3, Math.round(x.aufrufe / max * 100)) + '%' })), h('span', { class: 'tzahl' }, x.aufrufe)))) : h('p', { class: 'small muted' }, 'Noch keine Aufrufe.'),
+      nie.length && z.length ? h('p', { class: 'small muted' }, 'Nie geöffnet (30 Tage): ' + nie.join(', ')) : '');
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Nutzung (30 Tage)'),
+    h('p', { class: 'small muted' }, 'Gezählt werden nur Seitenname, Tag und Rolle, dazu wer an einem Tag aktiv war. Keine Inhalte, nach 180 Tagen gelöscht. ' + (d.messung_seit ? 'Messung seit ' + datum(d.messung_seit) + '.' : 'Die Messung beginnt mit dem ersten Aufruf.')),
+    d.tour.alle ? h('p', { class: 'small' }, 'Erststart-Tour gesehen: ' + d.tour.gesehen + ' von ' + d.tour.alle + ' Kundenkonten.') : '',
+    ['kunde', 'vertrieb', 'admin'].map(block));
+}
+
 V.protokoll = async () => {
   const d = await api('/api/admin/audit');
-  return h('div', {}, kopf('Protokoll'), h('div', { class: 'card' }, tabelle([['Zeit', z => zeit(z.zeit)], ['Benutzer', z => z.email || 'System'], ['Kunde', z => z.kundennummer || ''], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d)));
+  return h('div', {}, kopf('Protokoll'), await nutzungsKarte().catch(() => ''), h('div', { class: 'card' }, tabelle([['Zeit', z => zeit(z.zeit)], ['Benutzer', z => z.email || 'System'], ['Kunde', z => z.kundennummer || ''], ['Aktion', z => z.aktion], ['Details', z => JSON.stringify(z.details)]], d)));
 };
 

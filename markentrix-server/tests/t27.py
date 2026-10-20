@@ -33,6 +33,9 @@ async def login(br,m,pw,pfad,w):
     errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))
     await pg.goto(B+"/"); await pg.fill("#e",m); await pg.fill("#p",pw); await pg.click("#b"); await pg.wait_for_url("**"+pfad+"*")
     await pg.wait_for_selector(".side a.nav",state="attached")
+    if pfad=="/app":
+        try: await pg.click(".dlgoverlay >> text=Überspringen",timeout=2500)
+        except Exception: pass
     return ctx,pg,errs
 
 async def seiten_pruefen(pg,name,pfad,w):

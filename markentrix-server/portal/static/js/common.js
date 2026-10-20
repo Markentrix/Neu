@@ -209,6 +209,15 @@ export function themeKnopf() {
   return k;
 }
 
+/** Meldet eine geöffnete Seite für die Nutzungsstatistik (nur Seitenname, keine Inhalte). Fehler bleiben unbemerkt. */
+let _letzteSeite = '', _letzteZeit = 0;
+export function nutzung(seite) {
+  const jetzt = Date.now();
+  if (!/^[a-z0-9_-]{1,30}$/.test(seite) || (seite === _letzteSeite && jetzt - _letzteZeit < 5000)) return;
+  _letzteSeite = seite; _letzteZeit = jetzt;
+  api('/api/me/nutzung', { method: 'POST', body: { seite }, leise: true }).catch(() => {});
+}
+
 /** Menü in einklappbaren Gruppen. gruppen: [[Titel, [[id, Text, Zähler], ...], standardOffen]]. Die Gruppe der aktuellen Seite ist immer offen; der Zustand wird je Gerät gemerkt. */
 export function navGruppen(gruppen, aktiv, schluessel) {
   const lies = (k) => { try { return localStorage.getItem('mk-nav-' + schluessel + '-' + k); } catch { return null; } };

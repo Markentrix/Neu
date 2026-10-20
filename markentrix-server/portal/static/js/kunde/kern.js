@@ -1,4 +1,4 @@
-import { h, leerZustand, themeKnopf, navGruppen, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
+import { h, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
 
 export const root = document.getElementById('app');
 export let start = null;
@@ -45,9 +45,21 @@ export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['bel
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : 0)) || 0;
 
+/** Feste Leiste unten am Handy: die drei wichtigsten Seiten und „Mehr“ mit dem ganzen Menü. */
+function tabbar(aktiv) {
+  const ids = sichtbar().map(x => x[0]), feste = ['heute', ids.includes('anfragen') ? 'anfragen' : 'nachrichten', ids.includes('termine') ? 'termine' : 'uebersicht'];
+  const ICON = { heute: '⌂', anfragen: '✉', termine: '▦', nachrichten: '✉', uebersicht: '◔' };
+  const rest = ids.filter(i => !feste.includes(i)), mehrZahl = rest.reduce((n, i) => n + zaehler(i), 0);
+  const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt' }, navGruppen(GRUPPEN.map(([titel, g]) => [titel, sichtbar().filter(x => g.includes(x[0])).map(x => [x[0], x[1], zaehler(x[0])]), true]), aktiv, 'kunde-mehr'),
+    h('div', { class: 'brandzeile', style: 'margin-top:10px' }, themeKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
+  return h('nav', { class: 'tabbar', 'aria-label': 'Schnellzugriff' },
+    feste.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null }, h('span', { class: 'ic', 'aria-hidden': 'true' }, ICON[id] || '•'), h('span', {}, (SEITEN.find(x => x[0] === id) || [id, id])[1].replace('Angebote & Rechnungen', 'Rechnungen')))),
+    h('button', { type: 'button', class: !feste.includes(aktiv) ? 'on' : '', onclick: mehr }, h('span', { class: 'ic', 'aria-hidden': 'true' }, '☰', mehrZahl ? h('span', { class: 'badge' }, mehrZahl) : ''), h('span', {}, 'Mehr')));
+}
+
 export function gerüst(aktiv, inhalt) {
   const k = start.kunde;
-  return h('div', { class: 'shell' },
+  return h('div', { class: 'shell mobilleiste' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, 'M'), k.logo_vorhanden ? k.firma : 'Markentrix'),
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
@@ -59,7 +71,8 @@ export function gerüst(aktiv, inhalt) {
         h('h1', {}, k.firma),
         h('span', { class: 'pill' }, 'Kundennr. ' + k.kundennummer),
         h('span', { class: 'pill ok' }, '● Online')),
-      inhalt, rechtFuss()));
+      inhalt, rechtFuss()),
+    tabbar(aktiv));
 }
 
 export function karten() {
@@ -89,6 +102,7 @@ export async function zeige() {
   const [id, param] = (location.hash || '#').slice(1).split('/');
   const erlaubt = sichtbar().map(s => s[0]);
   const seite = erlaubt.includes(id) ? id : 'heute';
+  nutzung(seite);
   let inhalt;
   try { inhalt = await V[seite](param); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
   root.replaceChildren(gerüst(seite, inhalt));

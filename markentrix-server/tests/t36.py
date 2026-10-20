@@ -39,6 +39,9 @@ async def login(br,m,pw,pfad,w):
     errs=[]; pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("console",lambda x: x.type=="error" and "favicon" not in x.text and "Failed to load resource" not in x.text and errs.append(x.text))
     await pg.goto(B+"/"); await pg.fill("#e",m); await pg.fill("#p",pw); await pg.click("#b"); await pg.wait_for_url("**"+pfad+"*")
     await pg.wait_for_selector(".side a.nav",state="attached")
+    if pfad=="/app":
+        try: await pg.click(".dlgoverlay >> text=Überspringen",timeout=2500)
+        except Exception: pass
     return ctx,pg,errs
 
 async def alle(pg,name,pfad,seiten,w):
@@ -120,6 +123,10 @@ async def main():
         await pg.click(".dlg button:text('Angebot jetzt senden')"); await pg.wait_for_selector(".dlg .msg.ok",timeout=8000)
         link=await pg.locator(".dlg input[readonly]").input_value(); chk("Lead-Angebot: Link nach dem Senden",'/angebot?t=' in link,link)
         chk("Lead-Angebot: Status im Lead 'angebot'",sql(f"select status from leads where id='{lid}'")=="angebot")
+        await pg.goto(B+"/admin#belege"); await pg.wait_for_selector("button:text('+ Angebot an Neukunden')",timeout=8000); await pg.click("button:text('+ Angebot an Neukunden')")
+        await pg.fill(".dlg input[name=firma]","Neukunde Browser GmbH"); await pg.fill(".dlg input[name=email]","neu@browser-neu.de"); await pg.click(".dlg >> text=Weiter zum Angebot")
+        await pg.wait_for_selector(".dlg select[aria-label='Paket hinzufügen']",timeout=8000)
+        chk("Neukunden-Angebot: Lead angelegt, Angebotsdialog offen",sql("select count(*) from leads where firma='Neukunde Browser GmbH' and notiz like '%Neukunden%'")=="1")
         await ctx.close()
         for w,thema in ((1280,"hell"),(390,"dunkel")):
             ctx=await br.new_context(viewport={"width":w,"height":900},bypass_csp=True); await ctx.add_init_script(f"try{{localStorage.setItem('mk-theme','{thema}')}}catch(e){{}}"); pg=await ctx.new_page(); errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))

@@ -106,3 +106,20 @@ export async function leadAngebotKarte(lid, lead, m) {
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Angebote'), liste.length ? liste.map(zeile) : h('p', { class: 'muted' }, 'Noch kein Angebot. Mit „Angebot senden“ oben geht es in wenigen Klicks.'));
 }
+
+/** Angebot für jemanden, der noch nicht im System ist: Kontakt kurz erfassen, dann gleich das Angebot schreiben. */
+export function neukundenAngebot() {
+  const f = h('form', { class: 'stack' },
+    h('p', { class: 'small muted' }, 'Der Kontakt wird als Lead angelegt. Das Angebot geht im Markentrix-Design per E-Mail raus, der Kunde kann es online annehmen.'),
+    feldZeile('Firma *', 'firma'), feldZeile('Ansprechpartner', 'ansprechpartner'), feldZeile('E-Mail (für den Versand)', 'email', 'email'), feldZeile('Telefon', 'telefon', 'tel'), feldZeile('Ort', 'ort'));
+  const m = h('p', { class: 'small', role: 'status' });
+  const dlg = dialog('Angebot an Neukunden', h('div', { class: 'stack' }, f, m, h('button', { class: 'btn', onclick: async (e) => {
+    const d = Object.fromEntries(new FormData(f)); if (!String(d.firma).trim()) { melde(m, 'Bitte die Firma eintragen.'); return; }
+    e.target.disabled = true;
+    try {
+      const r = await api('/api/admin/leads', { method: 'POST', body: { firma: String(d.firma).trim(), ansprechpartner: d.ansprechpartner || null, email: d.email || null, telefon: d.telefon || null, ort: d.ort || null, quelle: 'manuell', notiz: 'Angelegt über „Angebot an Neukunden“' } });
+      dlg.zu(); await angebotDialog(r.id, () => { location.hash = '#lead/' + r.id; });
+    } catch (x) { e.target.disabled = false; melde(m, x.message); }
+  } }, 'Weiter zum Angebot')));
+}
+const feldZeile = (label, name, type = 'text') => h('div', {}, h('label', {}, label), h('input', { name, type, autocomplete: 'off' }));

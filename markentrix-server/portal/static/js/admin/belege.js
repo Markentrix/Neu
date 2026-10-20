@@ -1,5 +1,6 @@
 import { h, api, csvLaden, datum, dialog, euro, melde } from '../common.js';
 import { lastschriftKarte } from './einstellungen.js';
+import { neukundenAngebot } from './leadangebot.js';
 import { V, auswahl, fehler, filterKarte, fmtEuro, knopf, kopf, sicher, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Angebote und Rechnungen
@@ -84,7 +85,7 @@ V.belege = async () => {
       knopf('Auswahl aufheben', () => sel.leeren(), 'sec'));
   });
   if (q.get('erinnerung')) setTimeout(() => erinnerungsDialog(), 200);
-  return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen', s.ueberfaellig_n ? knopf('Zahlungserinnerungen prüfen (' + s.ueberfaellig_n + ')', () => erinnerungsDialog(), 'btn') : ''),
+  return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen', knopf('+ Angebot an Neukunden', () => neukundenAngebot(), 'btn'), s.ueberfaellig_n ? knopf('Zahlungserinnerungen prüfen (' + s.ueberfaellig_n + ')', () => erinnerungsDialog(), 'btn') : ''),
     h('p', { class: 'small' }, h('a', { href: '/api/admin/belege-export.csv', target: '_blank', rel: 'noopener' }, 'Rechnungen als CSV exportieren (Buchhaltung/sevDesk)')),
     await abgleichKarte(),
     await sicher(lastschriftKarte),
