@@ -1,6 +1,6 @@
-import { h, api, datum, zeit, euro, melde, formular, el } from '../common.js';
+import { h, api, csvLaden, datum, dialog, zeit, euro, melde, formular, el } from '../common.js';
 import { belegeKarte } from './belege.js';
-import { V, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
+import { V, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
 import { zeitachseKarte } from './start.js';
 
@@ -23,19 +23,61 @@ export const modulZelle = (z) => {
   zeige(); wrap.append(kopf, chips, panel); return wrap;
 };
 
+/** Dialog für Sammelaktionen: Aufgabe, Mail (mit Vorlage) oder Aufgabenpaket für mehrere Kunden. */
+async function kundenSammelDialog(aktion, ids) {
+  const m = h('div'), inhalt = h('div'), d = dialog({ aufgabe: 'Aufgabe für ' + ids.length + ' Kunden anlegen', mail: 'Mail an ' + ids.length + ' Kunden', aufgabenpaket: 'Aufgabenpaket für ' + ids.length + ' Kunden' }[aktion], inhalt);
+  const vorlagen = await api('/api/admin/textvorlagen', { leise: true }).catch(() => []);
+  const senden = async (body, ok) => { try { const r = await api('/api/admin/kunden/bulk', { method: 'POST', body: { ids, aktion, ...body } }); m.replaceChildren(h('div', { class: 'msg ' + (r.fehler && r.fehler.length ? 'err' : 'ok') }, ok(r))); } catch (x) { fehler(m, x); } };
+  if (aktion === 'aufgabe') {
+    const titel = h('input', { maxlength: 200, placeholder: 'z. B. Rückruf wegen Briefing' }), faellig = h('input', { type: 'date' });
+    inhalt.replaceChildren(h('label', {}, 'Titel'), titel, h('label', {}, 'Fällig am (optional)'), faellig, m, h('p', {}, knopf('Aufgaben anlegen', () => senden({ titel: titel.value, faellig_am: faellig.value || null }, r => r.angelegt + ' Aufgaben angelegt (jeweils beim Kunden, dir zugewiesen).'), 'btn')));
+  } else if (aktion === 'aufgabenpaket') {
+    const pakete = vorlagen.filter(v => v.art === 'aufgaben'), sel = select('v', pakete.map(v => [v.id, v.name + ' (' + v.aufgaben.length + ' Aufgaben)']), pakete[0] && pakete[0].id);
+    inhalt.replaceChildren(pakete.length ? h('div', {}, h('label', {}, 'Aufgabenpaket'), sel, m, h('p', {}, knopf('Paket anwenden', () => senden({ vorlage_id: sel.value }, r => r.angelegt + ' Aufgaben angelegt. Bereits vorhandene werden nicht doppelt angelegt.'), 'btn'))) : h('p', { class: 'muted' }, 'Noch kein Aufgabenpaket vorhanden (Einstellungen → Textvorlagen).'));
+  } else {
+    const mv = vorlagen.filter(v => v.art === 'mail'), betreff = h('input', { maxlength: 200 }), text = h('textarea', { rows: 9, maxlength: 8000 });
+    const vsel = h('select', { 'aria-label': 'Vorlage', onchange: (e) => { const v = mv.find(x => x.id === e.target.value); if (v) { betreff.value = v.betreff || ''; text.value = v.text || ''; } } }, h('option', { value: '' }, '– Vorlage wählen (optional) –'), mv.map(v => h('option', { value: v.id }, v.name)));
+    inhalt.replaceChildren(h('p', { class: 'small muted' }, 'Platzhalter: {firma}, {name}, {kundennummer}, {ort}. Jeder Kunde bekommt seine eigene Mail. Höchstens 40 Kunden pro Sammelmail. Nur für Informationen zur laufenden Zusammenarbeit, keine Werbung.'),
+      h('label', {}, 'Vorlage'), vsel, h('label', {}, 'Betreff'), betreff, h('label', {}, 'Text'), text, m,
+      h('p', {}, knopf('Mails senden', () => { if (confirm('Jetzt ' + ids.length + ' Mails senden?')) senden({ betreff: betreff.value, text: text.value }, r => r.gesendet + ' von ' + r.kunden + ' Mails verschickt' + (r.ohne_mail ? ', ' + r.ohne_mail + ' ohne E-Mail-Adresse' : '') + (r.fehler.length ? '. Fehler: ' + r.fehler.map(f => f.firma + ' (' + f.grund + ')').join('; ') : '') + '.'); }, 'btn')));
+  }
+  return d;
+}
+
 V.kunden = async () => {
-  const q = h('input', { placeholder: 'Suchen nach Firma, Nummer, E-Mail …' });
-  const box = h('div'), nurRef = h('input', { type: 'checkbox', style: 'width:auto', onchange: () => lade() });
+  const P = new URLSearchParams(location.hash.split('?')[1] || '');
+  const q = h('input', { placeholder: 'Suchen nach Firma, Nummer, E-Mail …', value: P.get('q') || '', 'aria-label': 'Suche' });
+  const status = select('status', [['', 'Alle Status'], 'onboarding', 'aktiv', 'pausiert', 'gekuendigt', 'beendet'], P.get('status') || '', { 'aria-label': 'Status', onchange: () => lade() });
+  const avv = select('avv', [['', 'AVV egal'], ['fehlt', 'AVV fehlt']], P.get('avv') || '', { 'aria-label': 'AVV', onchange: () => lade() });
+  const nurRef = h('input', { type: 'checkbox', style: 'width:auto', checked: P.get('ref') === '1', onchange: () => lade() });
+  const box = h('div'), leiste = h('div', { class: 'sammelleiste', hidden: true });
+  let aktuell = [];
+  const sel = auswahl((g) => {
+    leiste.hidden = !g.size;
+    const ids = [...g], gewaehlt = aktuell.filter(z => g.has(z.id));
+    leiste.replaceChildren(h('b', {}, g.size + ' ausgewählt'), knopf('Aufgabe anlegen', () => kundenSammelDialog('aufgabe', ids), 'sec'), knopf('Mail senden', () => kundenSammelDialog('mail', ids), 'sec'),
+      knopf('Aufgabenpaket', () => kundenSammelDialog('aufgabenpaket', ids), 'sec'),
+      knopf('Als CSV', () => csvLaden('kunden-auswahl.csv', ['Nr.', 'Firma', 'Ansprechpartner', 'E-Mail', 'Status', 'Paket', 'AVV'], gewaehlt.map(z => [z.kundennummer, z.firma, z.ansprechpartner, z.email, z.status, z.paket, z.avv_ok ? 'ja' : 'fehlt'])), 'sec'),
+      knopf('Auswahl aufheben', () => sel.leeren(), 'sec'));
+  });
   const lade = async () => {
-    let d = await api('/api/admin/kunden?q=' + encodeURIComponent(q.value));
+    const n = new URLSearchParams();
+    if (q.value.trim()) n.set('q', q.value.trim()); if (status.value) n.set('status', status.value); if (avv.value) n.set('avv', avv.value); if (nurRef.checked) n.set('ref', '1');
+    history.replaceState(null, '', '#kunden' + (n.toString() ? '?' + n.toString() : ''));   // Adresse = Filter (Kurzlink), ohne die Seite neu zu zeichnen
+    let d = await api('/api/admin/kunden?q=' + encodeURIComponent(q.value.trim()));
     if (nurRef.checked) d = d.filter(z => z.referenzkunde);
-    box.replaceChildren(tabelle([
+    if (status.value) d = d.filter(z => z.status === status.value);
+    if (avv.value === 'fehlt') d = d.filter(z => !z.avv_ok);
+    aktuell = d; sel.leeren();
+    box.replaceChildren(h('p', { class: 'small muted' }, d.length + (d.length === 1 ? ' Kunde' : ' Kunden')), tabelle([
+      [sel.alle, z => sel.haken(z.id)],
       ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => h('span', {}, z.firma, z.referenzkunde ? [' ', h('span', { class: 'pill warn' }, 'Referenz')] : '')], ['Paket', z => z.paket || '–'],
-      ['Status', z => h('span', {}, pill(z.status), z.onboarding ? h('div', { class: 'small muted' }, 'Start: ' + z.onboarding.fertig + ' von ' + z.onboarding.gesamt) : '')], ['Module', z => modulZelle(z)], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Noch keine Kunden.'));
+      ['Status', z => h('span', {}, pill(z.status), z.onboarding ? h('div', { class: 'small muted' }, 'Start: ' + z.onboarding.fertig + ' von ' + z.onboarding.gesamt) : '')], ['Module', z => modulZelle(z)], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Keine Kunden zu diesem Filter.'));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(lade, 250); });
   await lade();
-  return h('div', {}, kopf('Kunden', h('a', { class: 'btn', href: '#neu' }, '+ Neuer Kunde')), h('div', { class: 'card' }, q, h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-top:8px' }, nurRef, 'Nur Referenzkunden'), h('div', { style: 'height:12px' }), box));
+  return h('div', {}, kopf('Kunden', h('a', { class: 'btn', href: '#neu' }, '+ Neuer Kunde')), h('div', { class: 'card' }, await filterKarte('kunden'), h('div', { class: 'filterzeile' }, q, status, avv),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-top:8px' }, nurRef, 'Nur Referenzkunden'), h('div', { style: 'height:12px' }), leiste, box));
 };
 
 V.neu = async () => {
@@ -74,6 +116,19 @@ export async function historieKarte(kid) {
   const l = await api('/api/admin/kunden/' + kid + '/historie');
   return h('div', { class: 'card' }, h('h2', {}, 'Änderungshistorie'), h('p', { class: 'small muted' }, 'Wer hat wann was bei diesem Kunden geändert (letzte 150 Einträge).'),
     tabelle([['Zeit', z => zeit(z.zeit)], ['Von', z => z.name || z.email || 'System'], ['Aktion', z => z.aktion.replace(/_/g, ' ')], ['Details', z => h('span', { class: 'small muted' }, JSON.stringify(z.details).slice(0, 160))]], l, 'Noch keine Einträge.'));
+}
+
+/** Aufgabenpaket (z. B. „Neuer Kunde: 8 Schritte“) mit einem Klick beim Kunden anlegen. */
+export function aufgabenpaketKarte(kid) {
+  const m = h('div'), box = h('div');
+  api('/api/admin/textvorlagen?art=aufgaben').then(liste => {
+    if (!liste.length) { box.replaceChildren(h('p', { class: 'small muted' }, 'Noch kein Aufgabenpaket (Einstellungen → Textvorlagen).')); return; }
+    const sel = select('v', liste.map(v => [v.id, v.name + ' (' + v.aufgaben.length + ' Aufgaben)']), liste[0].id);
+    box.replaceChildren(h('div', { class: 'row' }, sel, knopf('Paket anlegen', async () => {
+      try { const r = await api('/api/admin/kunden/' + kid + '/aufgabenpaket', { method: 'POST', body: { vorlage_id: sel.value } }); melde(m, r.angelegt ? r.angelegt + ' Aufgaben angelegt (dir zugewiesen, mit Fälligkeit).' : 'Dieses Paket wurde hier schon angelegt, nichts doppelt.', r.angelegt ? 'ok' : 'info'); } catch (x) { fehler(m, x); }
+    }, 'btn')));
+  }).catch(x => fehler(m, x));
+  return h('div', { class: 'card' }, h('h2', {}, 'Aufgabenpaket'), h('p', { class: 'small muted' }, 'Legt eine feste Reihe von Aufgaben mit Fälligkeiten an, etwa für jeden neuen Kunden.'), m, box);
 }
 
 export function vorlagenKarte(kid, k) {
@@ -309,6 +364,7 @@ export async function kundeDetail(kid) {
     offboardingKarte(kid, k),
     await historieKarte(kid),
     vorlagenKarte(kid, k),
+    aufgabenpaketKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
 }
 

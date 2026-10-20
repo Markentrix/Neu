@@ -1,3 +1,4 @@
+import { erinnerungsDialog } from './belege.js';
 import { h, api, datum, zeit, euro, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta } from '../common.js';
 import { V, kopf, pill, sicherApi, tabelle, zeige } from './kern.js';
 
@@ -21,9 +22,9 @@ V.uebersicht = async () => {
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
   const STANDARD_AUS = ['system', 'fruehwarnung', 'heute'], ans = await ladeAnsicht(), aus = ausgeblendetSet(ans, STANDARD_AUS);
   const cp = await sicherApi('/api/admin/cockpit');
-  const KARTEN = [['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
+  const KARTEN = [['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
   const an = anpassenKnopf(KARTEN, STANDARD_AUS), zeige = (id, el) => aus.has(id) ? '' : el;
-  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
+  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
     zeige('zahlen', h('div', { class: 'zahlenblock' },
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
@@ -97,7 +98,7 @@ export function prioritaetenKarte(heute, sys, fw) {
   const L = [];
   const add = (score, ton, kat, titel, text, link, knopf) => L.push({ score, ton, kat, titel, text, link, knopf });
   (sys && sys.probleme ? sys.probleme : []).forEach(p => add(100, 'bad', 'System', p, 'Betrieb', '#einstellungen', 'Ansehen'));
-  heute.rechnungen.forEach(z => add(90, 'bad', 'Zahlung', z.firma, 'Rechnung ' + z.nummer + ' ist überfällig', '#kunde/' + z.kunden_id, 'Öffnen'));
+  heute.rechnungen.forEach(z => add(90, 'bad', 'Zahlung', z.firma, 'Rechnung ' + z.nummer + ' ist überfällig', () => erinnerungsDialog(undefined, z.id), 'Erinnerung prüfen'));
   (fw && fw.kunden ? fw.kunden : []).forEach(z => add(z.stufe === 'hoch' ? 85 : 50, z.stufe === 'hoch' ? 'bad' : 'warn', 'Kündigungsrisiko', z.firma, (z.gruende || [])[0] || 'Auffälliger Verlauf', '#kunde/' + z.id, 'Öffnen'));
   heute.nachrichten.forEach(z => add(80, 'warn', 'Nachricht', z.firma, z.betreff, '#postfach/' + z.id, 'Antworten'));
   heute.avv_fehlt.forEach(z => add(75, 'warn', 'Vertrag', z.firma, 'AVV fehlt', '#kunde/' + z.id, 'Öffnen'));
@@ -111,7 +112,7 @@ export function prioritaetenKarte(heute, sys, fw) {
   let alle = false;
   const zeichnen = () => {
     ul.replaceChildren(...(alle ? L : L.slice(0, 8)).map(z => h('li', {}, h('span', { class: 'punkt ' + z.ton, 'aria-hidden': 'true' }),
-      h('div', { class: 'pt' }, h('b', {}, z.titel), h('span', { class: 'small muted' }, z.text)), h('span', { class: 'pill kat' }, z.kat), h('a', { class: 'btn sec small', href: z.link }, z.knopf))));
+      h('div', { class: 'pt' }, h('b', {}, z.titel), h('span', { class: 'small muted' }, z.text)), h('span', { class: 'pill kat' }, z.kat), typeof z.link === 'function' ? h('button', { class: 'btn sec small', onclick: z.link }, z.knopf) : h('a', { class: 'btn sec small', href: z.link }, z.knopf))));
     mehr.replaceChildren(L.length > 8 ? h('button', { class: 'btn sec small', onclick: () => { alle = !alle; zeichnen(); } }, alle ? 'Weniger anzeigen' : 'Alle ' + L.length + ' anzeigen') : '');
   };
   zeichnen();
@@ -121,6 +122,15 @@ export function prioritaetenKarte(heute, sys, fw) {
     h('div', { class: 'gesund small muted' }, h('span', { class: 'pill ' + (ok ? 'ok' : 'bad') }, ok ? 'System in Ordnung' : 'System: Handlungsbedarf'),
       h('span', { class: 'pill ' + (heute.rechnungen.length ? 'bad' : 'ok') }, heute.rechnungen.length ? heute.rechnungen.length + ' Rechnungen überfällig' : 'Keine Rechnung überfällig'),
       h('span', { class: 'pill ' + ((fw && fw.kunden && fw.kunden.some(k => k.stufe === 'hoch')) ? 'bad' : 'ok') }, (fw && fw.kunden && fw.kunden.some(k => k.stufe === 'hoch')) ? 'Kündigungsrisiko' : 'Kein Kündigungsrisiko')));
+}
+
+const AMPEL_TXT = { ok: 'Alles in Ordnung', warn: 'Hinweise', bad: 'Handlungsbedarf', unbekannt: 'Noch keine Messwerte' };
+
+/** Betriebs-Ampel: ein Blick, ob Server, Sicherungen, Zertifikat, Hintergrundjobs und Mailversand gesund sind. */
+export function betriebsKarte(sys) {
+  return h('div', { class: 'card' }, h('h2', {}, 'Betrieb ', h('span', { class: 'pill ' + ({ ok: 'ok', warn: 'warn', bad: 'bad' }[sys.gesamt] || '') }, AMPEL_TXT[sys.gesamt] || '')),
+    h('div', { class: 'ampel' }, sys.ampel.map(p => h('div', { class: 'ap ' + p.status, title: p.detail }, h('span', { class: 'lampe', 'aria-hidden': 'true' }),
+      h('div', {}, h('b', {}, p.titel), h('div', { class: 'small muted' }, p.detail))))));
 }
 
 export function systemKarte(s) {

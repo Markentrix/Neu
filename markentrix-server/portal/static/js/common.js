@@ -304,3 +304,22 @@ export function delta(jetzt, vorher, gut = true, format = (x) => String(x)) {
   return h('span', { class: 'delta ' + ((d > 0) === gut ? 'auf' : 'ab') }, (d > 0 ? '▲ +' : '▼ −') + format(Math.abs(d)) + ' zum Vormonat');
 }
 
+
+/** Dialogfenster (Esc oder Klick daneben schließt). Gibt { zu } zurück. */
+export function dialog(titel, inhalt, breit = false) {
+  const zu = () => { ov.remove(); document.removeEventListener('keydown', esc); window.removeEventListener('hashchange', zu); };
+  const esc = (/** @type {KeyboardEvent} */ e) => { if (e.key === 'Escape') zu(); };
+  const ov = h('div', { class: 'dlgoverlay', onclick: (e) => { if (e.target === ov) zu(); } },
+    h('div', { class: 'dlg' + (breit ? ' breit' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': titel },
+      h('div', { class: 'dlgkopf' }, h('h2', {}, titel), h('button', { class: 'btn sec small', 'aria-label': 'Schließen', onclick: zu }, '✕')), inhalt));
+  document.addEventListener('keydown', esc); window.addEventListener('hashchange', zu); document.body.append(ov);
+  return { zu };
+}
+
+/** CSV-Datei im Browser erzeugen und herunterladen (Excel-tauglich: Semikolon, UTF-8 mit BOM). */
+export function csvLaden(dateiname, kopfzeile, zeilen) {
+  const q = (v) => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+  const text = '\ufeff' + [kopfzeile, ...zeilen].map(z => z.map(q).join(';')).join('\r\n');
+  const a = h('a', { href: URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })), download: dateiname });
+  document.body.append(a); a.click(); a.remove();
+}

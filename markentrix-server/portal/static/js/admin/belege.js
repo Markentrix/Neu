@@ -1,6 +1,6 @@
-import { h, api, datum, euro, melde } from '../common.js';
+import { h, api, csvLaden, datum, dialog, euro, melde } from '../common.js';
 import { lastschriftKarte } from './einstellungen.js';
-import { V, fehler, fmtEuro, knopf, kopf, sicher, tabelle} from './kern.js';
+import { V, auswahl, fehler, filterKarte, fmtEuro, knopf, kopf, sicher, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Angebote und Rechnungen
 export const BELEG_ST = { entwurf: '', gestellt: 'warn', versendet: 'warn', angenommen: 'ok', abgelehnt: 'bad', bezahlt: 'ok', storniert: 'bad' };
@@ -8,6 +8,47 @@ export const belegPill = (z) => h('span', { class: 'pill ' + (z.ueberfaellig ? '
 export const belegArt = (z) => z.storno_von ? 'Storno' : z.art === 'rechnung' ? 'Rechnung' : 'Angebot';
 export const eurIn = (v) => { const n = Math.round(parseFloat(String(v).replace(/\./g, '').replace(',', '.')) * 100); return Number.isFinite(n) ? n : 0; };
 export const eurOut = (c) => (c / 100).toFixed(2).replace('.', ',');
+
+/**
+ * Zahlungserinnerungen und Mahnungen: zeigt zu jeder überfälligen Rechnung die nächste Stufe mit fertigem Mailtext.
+ * Nichts wird automatisch verschickt: Du prüfst und bearbeitest den Text, dann sendest du die Ausgewählten.
+ * @param {string[]} [nurIds] nur diese Rechnungen anzeigen
+ * @param {string} [fokus] diese Rechnung vormarkieren und nach oben stellen
+ */
+export async function erinnerungsDialog(nurIds, fokus) {
+  const inhalt = h('div', {}, h('p', { class: 'small muted' }, 'Lade …')), d = dialog('Zahlungserinnerungen prüfen', inhalt, true);
+  try {
+    let liste = await api('/api/admin/mahnvorschlaege');
+    if (nurIds && nurIds.length) liste = liste.filter(z => nurIds.includes(z.id));
+    if (fokus) liste.sort((a, b) => Number(b.id === fokus) - Number(a.id === fokus));
+    const m = h('div'), zeilen = [];
+    const senden = async () => {
+      const eintraege = zeilen.filter(z => z.cb.checked).map(z => ({ id: z.v.id, stufe: z.v.stufe, text: z.text.value }));
+      if (!eintraege.length) { melde(m, 'Bitte mindestens eine Rechnung auswählen.'); return; }
+      if (!confirm(eintraege.length + ' Mail(s) mit PDF-Anhang jetzt an die Kunden senden?')) return;
+      try {
+        const r = await api('/api/admin/mahnungen/senden', { method: 'POST', body: { eintraege } });
+        const fehlerListe = r.ergebnis.filter(x => !x.gesendet);
+        m.replaceChildren(h('div', { class: 'msg ' + (fehlerListe.length ? 'err' : 'ok') }, r.gesendet + ' von ' + eintraege.length + ' verschickt.' + (fehlerListe.length ? ' Nicht verschickt: ' + fehlerListe.map(x => (liste.find(v => v.id === x.id) || {}).nummer + ' (' + x.grund + ')').join('; ') : '')));
+        if (r.gesendet) setTimeout(() => { d.zu(); if (location.hash.startsWith('#belege') || location.hash.startsWith('#uebersicht') || location.hash === '#meintag') location.reload(); }, 1600);
+      } catch (x) { fehler(m, x); }
+    };
+    inhalt.replaceChildren(
+      h('p', { class: 'small muted' }, 'Es wird nichts automatisch verschickt. Prüfe die Texte, ändere sie bei Bedarf und sende dann die ausgewählten Mails. Die PDF der jeweiligen Stufe hängt automatisch an.'),
+      ...(liste.length ? liste.map(v => {
+        const text = h('textarea', { rows: 9, 'aria-label': 'Mailtext ' + v.nummer, hidden: true }, v.text || '');
+        const cb = h('input', { type: 'checkbox', style: 'width:auto', checked: v.moeglich && !v.warnung && (!fokus || v.id === fokus), disabled: !v.moeglich, 'aria-label': 'Rechnung ' + v.nummer + ' auswählen' });
+        zeilen.push({ v, cb, text });
+        return h('div', { class: 'mahnzeile' + (v.moeglich ? '' : ' aus') },
+          h('div', { class: 'kopfz' }, cb, h('div', { class: 'grow' }, h('b', {}, v.firma), ' ', h('span', { class: 'small muted' }, v.nummer + ' · ' + euro(v.brutto_cent) + ' · seit ' + v.tage + ' Tagen überfällig')),
+            v.stufe ? h('span', { class: 'pill warn' }, v.titel) : h('span', { class: 'pill bad' }, 'nicht möglich'),
+            v.moeglich ? knopf('Text ansehen / ändern', () => { text.hidden = !text.hidden; }, 'sec') : ''),
+          v.warnung ? h('div', { class: 'small', style: 'color:#b45309;margin-top:4px' }, '⚠ ' + v.warnung) : '', !v.moeglich ? h('div', { class: 'small muted', style: 'margin-top:4px' }, v.grund) : '',
+          v.moeglich ? h('div', { class: 'small muted', style: 'margin-top:4px' }, 'An: ' + v.email + ' · Betreff: ' + v.betreff) : '', text);
+      }) : [h('p', { class: 'muted' }, 'Keine überfälligen Rechnungen. Alles bezahlt oder noch nicht fällig. ✅')]),
+      m, liste.length ? h('p', {}, knopf('Ausgewählte senden', senden, 'btn')) : '');
+  } catch (x) { inhalt.replaceChildren(h('div', { class: 'msg err' }, x.message)); }
+}
 
 export async function abgleichKarte() {
   const m = h('div'), erg = h('div'); let csvText = '';
@@ -33,7 +74,17 @@ V.belege = async () => {
   const art = q.get('art') || '', status = q.get('status') || '';
   const d = await api('/api/admin/belege?art=' + art + '&status=' + status), s = d.summen;
   const f = (a, st, l) => h('button', { class: (art === a && status === st) ? 'on' : '', onclick: () => { location.hash = '#belege?art=' + a + '&status=' + st; } }, l);
-  return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen'),
+  const leiste = h('div', { class: 'sammelleiste', hidden: true });
+  const sel = auswahl((g) => {
+    leiste.hidden = !g.size;
+    const ausgewaehlt = d.belege.filter(z => g.has(z.id));
+    leiste.replaceChildren(h('b', {}, g.size + ' ausgewählt'),
+      knopf('Erinnerungen dazu prüfen', () => erinnerungsDialog([...g]), 'sec'),
+      knopf('Auswahl als CSV', () => csvLaden('belege-auswahl.csv', ['Nummer', 'Art', 'Kunde', 'Betreff', 'Datum', 'Fällig', 'Brutto (EUR)', 'Status'], ausgewaehlt.map(z => [z.nummer || 'Entwurf', belegArt(z), z.kundennummer + ' ' + z.firma, z.betreff, z.datum, z.faellig_am, (z.brutto_cent / 100).toFixed(2).replace('.', ','), z.status])), 'sec'),
+      knopf('Auswahl aufheben', () => sel.leeren(), 'sec'));
+  });
+  if (q.get('erinnerung')) setTimeout(() => erinnerungsDialog(), 200);
+  return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen', s.ueberfaellig_n ? knopf('Zahlungserinnerungen prüfen (' + s.ueberfaellig_n + ')', () => erinnerungsDialog(), 'btn') : ''),
     h('p', { class: 'small' }, h('a', { href: '/api/admin/belege-export.csv', target: '_blank', rel: 'noopener' }, 'Rechnungen als CSV exportieren (Buchhaltung/sevDesk)')),
     await abgleichKarte(),
     await sicher(lastschriftKarte),
@@ -41,8 +92,8 @@ V.belege = async () => {
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Offen'), h('b', {}, euro(s.offen))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Überfällig (' + s.ueberfaellig_n + ')'), h('b', {}, euro(s.ueberfaellig))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Bezahlt diesen Monat'), h('b', {}, euro(s.bezahlt_monat)))),
-    h('div', { class: 'card' }, h('div', { class: 'tabs' }, f('', '', 'Alle'), f('rechnung', '', 'Rechnungen'), f('angebot', '', 'Angebote'), f('rechnung', 'gestellt', 'Offen'), f('rechnung', 'bezahlt', 'Bezahlt'), f('', 'entwurf', 'Entwürfe')),
-      tabelle([['Nr.', z => h('a', { href: '#beleg/' + z.id }, z.nummer || 'Entwurf')], ['Art', belegArt], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => fmtEuro(z.brutto_cent)], ['Status', belegPill]], d.belege, 'Noch keine Belege. Anlegen im jeweiligen Kunden.')),
+    h('div', { class: 'card' }, await filterKarte('belege'), h('div', { class: 'tabs' }, f('', '', 'Alle'), f('rechnung', '', 'Rechnungen'), f('angebot', '', 'Angebote'), f('rechnung', 'gestellt', 'Offen'), f('rechnung', 'bezahlt', 'Bezahlt'), f('', 'entwurf', 'Entwürfe')),
+      leiste, tabelle([[sel.alle, z => sel.haken(z.id)], ['Nr.', z => h('a', { href: '#beleg/' + z.id }, z.nummer || 'Entwurf')], ['Art', belegArt], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => fmtEuro(z.brutto_cent)], ['Status', belegPill]], d.belege, 'Noch keine Belege. Anlegen im jeweiligen Kunden.')),
     h('p', { class: 'small muted' }, 'Hinweis: Rechnungen werden hier als PDF erstellt. Ab 2027/2028 gelten für Rechnungen zwischen Unternehmen schrittweise Pflichten zur E-Rechnung (z. B. ZUGFeRD/XRechnung). Das ist hier noch nicht umgesetzt; bitte mit der Steuerberatung abstimmen.'));
 };
 

@@ -1,7 +1,7 @@
 import { h, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf } from '../common.js';
 
 
-export const NAV = [['uebersicht', 'Übersicht'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
+export const NAV = [['uebersicht', 'Übersicht'], ['meintag', 'Mein Tag'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
 export let paketListe = [], ich = null;
 export const zaehlerAdmin = {};
 
@@ -11,8 +11,8 @@ export const erlaubt = (seite) => !ich || !ich.admin_rechte || !NAV_RECHT[seite]
 /** Aktionen für die Befehlspalette, nur für Bereiche, für die das Konto Rechte hat. */
 function befehle() {
   const ziele = [['Neuer Kunde', 'neu', true], ['Neue Rechnung oder neues Angebot', 'belege', true], ['Lead anlegen oder importieren', 'leads', true], ['Aufgabe anlegen', 'aufgaben', true], ['Vertriebler einladen', 'vertrieb', true],
-    ['Zur Übersicht', 'uebersicht', false], ['Nachrichten', 'postfach', false], ['Kennzahlen', 'kennzahlen', false], ['Einstellungen', 'einstellungen', false], ['Protokoll', 'protokoll', false]];
-  return [...ziele.filter(([, s]) => erlaubt(s)).map(([titel, s, neu]) => ({ titel: String(titel), text: neu ? 'Anlegen' : 'Öffnen', link: '#' + s, neu: !!neu })), { titel: 'Abmelden', text: 'Sitzung beenden', aktion: () => abmelden() }];
+    ['Zur Übersicht', 'uebersicht', false], ['Mein Tag', 'meintag', false], ['Zahlungserinnerungen prüfen', 'belege?erinnerung=1', false], ['Nachrichten', 'postfach', false], ['Kennzahlen', 'kennzahlen', false], ['Einstellungen', 'einstellungen', false], ['Protokoll', 'protokoll', false]];
+  return [...ziele.filter(([, s]) => erlaubt(String(s).split('?')[0])).map(([titel, s, neu]) => ({ titel: String(titel), text: neu ? 'Anlegen' : 'Öffnen', link: '#' + s, neu: !!neu })), { titel: 'Abmelden', text: 'Sitzung beenden', aktion: () => abmelden() }];
 }
 
 export function gerüst(aktiv, inhalt) {
@@ -58,3 +58,38 @@ export let zeige = () => {};
 export const setzeZeige = (f) => { zeige = f; };
 export const setzeIch = (m) => { ich = m; };
 export const setzePakete = (p) => { paketListe = p; };
+
+
+/** Auswahl-Haken für Tabellen: haken(id) pro Zeile, alle für die Kopfzeile, gewaehlt = Set der IDs. */
+export function auswahl(beiAenderung) {
+  const gewaehlt = new Set(), boxen = [];
+  const haken = (id) => { const c = h('input', { type: 'checkbox', style: 'width:auto', 'aria-label': 'Zeile auswählen', onchange: (e) => { if (e.target.checked) gewaehlt.add(id); else gewaehlt.delete(id); beiAenderung(gewaehlt); } }); boxen.push(c); return c; };
+  const alle = h('input', { type: 'checkbox', style: 'width:auto', 'aria-label': 'Alle auswählen', onchange: (e) => { boxen.forEach((/** @type {any} */ c) => { if (c.checked !== e.target.checked) c.click(); }); } });
+  const leeren = () => { gewaehlt.clear(); boxen.forEach((/** @type {any} */ c) => { c.checked = false; }); /** @type {any} */ (alle).checked = false; beiAenderung(gewaehlt); };
+  return { gewaehlt, haken, alle, leeren };
+}
+
+/** Abfrage-Teil der aktuellen Adresse ohne Blätter- und Dialog-Angaben (das, was ein gespeicherter Filter enthält). */
+export function aktuelleAbfrage() {
+  const p = new URLSearchParams(location.hash.split('?')[1] || '');
+  ['seite', 'erinnerung'].forEach(x => p.delete(x));
+  return p.toString();
+}
+
+/** Gespeicherte Filter für eine Liste: auswählen, aktuelle Auswahl speichern, Link kopieren, löschen. */
+export async function filterKarte(bereich) {
+  const liste = await api('/api/admin/meine-filter?bereich=' + bereich, { leise: true }).catch(() => []);
+  const treffer = liste.find(f => f.abfrage === aktuelleAbfrage());
+  const sel = h('select', { 'aria-label': 'Gespeicherte Filter', onchange: (e) => { const f = liste.find(x => x.id === e.target.value); if (f) location.hash = '#' + bereich + (f.abfrage ? '?' + f.abfrage : ''); } },
+    h('option', { value: '' }, liste.length ? 'Gespeicherte Filter …' : 'Noch keine gespeicherten Filter'), liste.map(f => h('option', { value: f.id, selected: treffer && treffer.id === f.id }, f.name)));
+  const speichern = async () => {
+    const jetzt = aktuelleAbfrage();
+    if (!jetzt) { alert('Es ist noch kein Filter gesetzt. Wähle zuerst Suche, Status oder Ähnliches aus.'); return; }
+    const name = prompt('Name für diesen Filter:', treffer ? treffer.name : '');
+    if (!name || !name.trim()) return;
+    try { await api('/api/admin/meine-filter', { method: 'POST', body: { bereich, name: name.trim(), abfrage: jetzt } }); zeige(); } catch (x) { alert(x.message); }
+  };
+  const kopieren = async (e) => { try { await navigator.clipboard.writeText(location.href); e.target.textContent = 'Link kopiert ✓'; } catch (x) { prompt('Link zum Kopieren:', location.href); } };
+  const loeschen = async () => { if (!treffer || !confirm('Filter „' + treffer.name + '“ löschen?')) return; try { await api('/api/admin/meine-filter/' + treffer.id, { method: 'DELETE' }); zeige(); } catch (x) { alert(x.message); } };
+  return h('div', { class: 'filterzeile' }, sel, knopf('Aktuelle Auswahl speichern', speichern, 'sec'), knopf('Link kopieren', kopieren, 'sec'), treffer ? knopf('Filter löschen', loeschen, 'sec') : '');
+}

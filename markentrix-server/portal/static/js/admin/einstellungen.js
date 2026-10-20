@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, melde, zweiFaktorKarte, pushKarte, formular } from '../common.js';
+import { h, api, datum, dialog, zeit, euro, melde, zweiFaktorKarte, pushKarte, formular } from '../common.js';
 import { V, fehler, feld, ich, knopf, kopf, pill, select, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Einstellungen
@@ -24,7 +24,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), pushKarte('admin'), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -199,3 +199,37 @@ export async function benachrKarte() {
   return h('div', { class: 'card' }, h('h2', {}, 'Benachrichtigungen'), h('p', { class: 'small muted' }, 'Jeder Kunde kann diese Mails in seinem Portal unter Einstellungen einzeln abschalten. Für dich: Fehler in Automationen und Server-Alarme kommen an die Alarm-E-Mail.'), m, form);
 }
 
+
+
+/** Textvorlagen: Mails mit Platzhaltern und Aufgabenpakete, die bei Antworten, Sammelmails und Kunden benutzt werden. */
+export async function textvorlagenKarte() {
+  const box = h('div'), m = h('div');
+  const bearbeiten = (v) => {
+    const mail = !v || v.art === 'mail', art = v ? v.art : 'mail', fm = h('div');
+    const name = h('input', { maxlength: 80, value: v ? v.name : '', 'aria-label': 'Name' }), betreff = h('input', { maxlength: 200, value: v && v.betreff || '', 'aria-label': 'Betreff' });
+    const text = h('textarea', { rows: 10, maxlength: 8000, 'aria-label': 'Text' }, v && v.text || '');
+    const aufg = h('textarea', { rows: 10, 'aria-label': 'Aufgaben' }, v && v.aufgaben ? v.aufgaben.map(a => a.titel + ' | ' + a.tage).join('\n') : '');
+    const artSel = h('select', { 'aria-label': 'Art', disabled: !!v, onchange: () => { felder(); } }, h('option', { value: 'mail', selected: art === 'mail' }, 'Mail-Vorlage'), h('option', { value: 'aufgaben', selected: art === 'aufgaben' }, 'Aufgabenpaket'));
+    const mailFelder = h('div', {}, h('label', {}, 'Betreff'), betreff, h('label', {}, 'Text (Platzhalter: {firma}, {name}, {kundennummer}, {ort})'), text);
+    const aufgFelder = h('div', {}, h('label', {}, 'Aufgaben (eine pro Zeile, danach „| Tage bis fällig“)'), aufg);
+    const felder = () => { mailFelder.hidden = artSel.value !== 'mail'; aufgFelder.hidden = artSel.value !== 'aufgaben'; };
+    felder();
+    const d = dialog(v ? 'Vorlage bearbeiten' : 'Neue Vorlage', h('div', {}, h('label', {}, 'Art'), artSel, h('label', {}, 'Name'), name, mailFelder, aufgFelder, fm,
+      h('p', { class: 'row' }, knopf('Speichern', async () => {
+        const body = { art: artSel.value, name: name.value, betreff: betreff.value || null, text: text.value || null,
+          aufgaben: aufg.value.split('\n').map(z => z.trim()).filter(Boolean).map(z => { const [t, tage] = z.split('|'); return { titel: t.trim(), tage: parseInt((tage || '0').trim(), 10) || 0 }; }) };
+        if (body.art === 'aufgaben') { body.text = null; body.betreff = null; } else body.aufgaben = [];
+        try { await api('/api/admin/textvorlagen' + (v ? '/' + v.id : ''), { method: v ? 'PUT' : 'POST', body }); d.zu(); laden(); } catch (x) { fehler(fm, x); }
+      }, 'btn'), v ? knopf('Löschen', async () => { if (!confirm('Vorlage „' + v.name + '“ löschen?')) return; try { await api('/api/admin/textvorlagen/' + v.id, { method: 'DELETE' }); d.zu(); laden(); } catch (x) { fehler(fm, x); } }, 'sec') : '')));
+  };
+  const laden = async () => {
+    try {
+      const liste = await api('/api/admin/textvorlagen');
+      box.replaceChildren(tabelle([['Name', z => z.name], ['Art', z => z.art === 'mail' ? 'Mail' : 'Aufgabenpaket (' + z.aufgaben.length + ')'], ['', z => knopf('Bearbeiten', () => bearbeiten(z), 'sec')]], liste, 'Noch keine Vorlagen.'));
+    } catch (x) { fehler(m, x); }
+  };
+  await laden();
+  return h('div', { class: 'card' }, h('h2', {}, 'Textvorlagen'),
+    h('p', { class: 'small muted' }, 'Mail-Vorlagen (z. B. Willkommen, Rückfrage, Terminbestätigung) kannst du bei Nachrichten-Antworten und Sammelmails einfügen. Aufgabenpakete legst du beim Kunden mit einem Klick an. Platzhalter wie {firma} und {name} werden automatisch ersetzt.'),
+    m, box, h('p', {}, knopf('+ Neue Vorlage', () => bearbeiten(null), 'btn')));
+}

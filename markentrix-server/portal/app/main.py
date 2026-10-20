@@ -35,6 +35,7 @@ from .routes_push import router as push_router
 from .routes_dashboard import router as dashboard_router
 from .routes_telefon import router as telefon_router
 from .routes_vorlagen import router as vorlagen_router
+from .routes_werkzeuge import router as werkzeuge_router
 from .routes_leadimport import router as leadimport_router
 from .routes_mitarbeiter import router as mitarbeiter_router
 from .routes_briefing import router as brief_router, kunde_router as brief_kunde_router
@@ -138,6 +139,7 @@ app.include_router(push_router)
 app.include_router(dashboard_router)
 app.include_router(telefon_router)
 app.include_router(vorlagen_router)
+app.include_router(werkzeuge_router)
 app.include_router(leadimport_router)
 app.include_router(mitarbeiter_router)
 app.include_router(brief_router)

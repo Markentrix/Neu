@@ -1,5 +1,5 @@
 import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular } from '../common.js';
-import { V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
+import { filterKarte, V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Vertriebler
 V.vertrieb = async () => {
@@ -141,7 +141,7 @@ V.leads = async () => {
     knopf('← Zurück', () => setze('seite', d.seite > 2 ? String(d.seite - 1) : ''), 'sec small'), h('span', { class: 'small muted' }, 'Seite ' + d.seite + ' von ' + seiten),
     knopf('Weiter →', () => setze('seite', String(d.seite + 1)), 'sec small')) : '';
   if (d.seite > 1 && !d.leads.length) { setze('seite', ''); }
-  return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, tabs, filterLeiste,
+  return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, await filterKarte('leads'), tabs, filterLeiste,
     h('p', { class: 'small muted', style: 'margin:10px 0 6px' }, d.gesamt + ' Leads' + (['status', 'q', 'quelle', 'temperatur', 'vertriebler', 'gruppe', 'liste'].some(k => g(k)) ? ' passen zum Filter' : '')), leiste,
     d.leads.length ? h('div', { class: 'tablewrap' }, h('table', { class: 'leadtab' }, h('thead', {}, h('tr', {}, h('th', { class: 'ck' }, alleHaken), ['Firma', 'Kontakt', 'Einstufung', 'Status', 'Vertriebler', 'Angelegt', ''].map(t => h('th', {}, t)))), h('tbody', {}, zeilen))) : h('p', { class: 'muted' }, 'Keine Leads.'), blaettern),
     await leadImportKarte(partner),

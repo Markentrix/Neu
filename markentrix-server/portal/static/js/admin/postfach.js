@@ -1,5 +1,5 @@
 import { h, api, datum, zeit, groesse, melde } from '../common.js';
-import { V, kopf, tabelle, zeige } from './kern.js';
+import { V, kopf, sicherApi, tabelle, zeige } from './kern.js';
 
 export const STATI = ['onboarding', 'aktiv', 'pausiert', 'gekuendigt', 'beendet'];
 export const DATEN_TABS = [['anfragen', 'Anfragen'], ['termine', 'Termine'], ['kontakte', 'Kontakte'], ['angebote', 'Angebote'], ['vertraege', 'Verträge'], ['projekte', 'Projekte'], ['berichte', 'Berichte'], ['wochenangebote_uploads', 'Uploads'], ['chat_verlauf', 'Chat']];
@@ -40,6 +40,11 @@ export async function ticketDetail(id) {
   const bubbles = t.nachrichten.map(n => h('div', { class: 'bub ' + (n.intern ? 'intern' : n.von === 'kunde' ? 'kunde' : 'team') }, h('div', { class: 'small wer' }, (n.intern ? 'Interne Notiz · ' : '') + (n.autor_name || (n.von === 'kunde' ? 'Kunde' : 'Team')) + ' · ' + zeit(n.erstellt_am)), n.text));
   const text = h('textarea', { rows: 5, maxlength: 10000, placeholder: 'Antwort an den Kunden …' });
   chatAktuell('/api/admin/tickets/' + id, t.nachrichten.length, text);
+  const vorlagen = ((await sicherApi('/api/admin/textvorlagen?art=mail')) || []);
+  const vorlageWahl = vorlagen.length ? h('select', { 'aria-label': 'Vorlage einfügen', onchange: async (e) => {
+    const v = e.target.value; e.target.value = ''; if (!v) return;
+    try { const r = await api('/api/admin/textvorlagen/' + v + '/fuer/' + t.kunden_id); text.value = (text.value ? text.value + '\n\n' : '') + r.text; text.focus(); } catch (x) { melde(m, x.message); }
+  } }, h('option', { value: '' }, 'Vorlage einfügen …'), vorlagen.map(v => h('option', { value: v.id }, v.name))) : '';
   const intern = h('input', { type: 'checkbox', style: 'width:auto' });
   const stSel = h('select', {}, h('option', { value: '' }, 'Status unverändert'), T_ST.map(x => h('option', { value: x }, T_ST_TXT[x])));
   const datei = h('input', { type: 'file' });
@@ -60,7 +65,7 @@ export async function ticketDetail(id) {
     h('div', { class: 'card' }, h('p', { class: 'small muted' }, h('a', { href: '#kunde/' + t.kunden_id }, t.firma + ' (' + t.kundennummer + ')'), ' · ' + (T_ART[t.art] || t.art) + ' · von ' + (t.ersteller_name || '–') + ' · eröffnet ' + zeit(t.erstellt_am) + (t.erste_antwort_am ? ' · erste Antwort ' + zeit(t.erste_antwort_am) : ' · noch nicht beantwortet')),
       tPill(t.status), h('div', { class: 'chatlog thread' }, bubbles), t.dateien.length ? h('div', { class: 'small' }, t.dateien.map(dateiLink)) : '',
       t.bewertung ? h('p', { class: 'small' }, 'Bewertung: ' + t.bewertung.punkte + ' / 10' + (t.bewertung.kommentar ? ' · „' + t.bewertung.kommentar + '“' : '')) : ''),
-    h('div', { class: 'card' }, h('h3', {}, 'Antworten'), m, text, h('div', { class: 'row', style: 'margin-top:10px' }, h('label', { style: 'display:flex;gap:6px;align-items:center;margin:0;color:inherit' }, intern, 'Nur intern (Kunde sieht es nicht)'), stSel, datei, h('span', { class: 'grow' }), h('button', { class: 'btn', onclick: senden }, 'Senden'))),
+    h('div', { class: 'card' }, h('h3', {}, 'Antworten'), m, vorlageWahl, text, h('div', { class: 'row', style: 'margin-top:10px' }, h('label', { style: 'display:flex;gap:6px;align-items:center;margin:0;color:inherit' }, intern, 'Nur intern (Kunde sieht es nicht)'), stSel, datei, h('span', { class: 'grow' }), h('button', { class: 'btn', onclick: senden }, 'Senden'))),
     h('div', { class: 'card' }, h('h3', {}, 'Bearbeitung'), mp, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Zuständig'), zu), h('div', {}, h('label', {}, 'Fällig am'), faellig), h('div', {}, h('label', {}, 'Priorität'), prio)),
       h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: aufg }, 'Aufgabe daraus machen'))));
 }

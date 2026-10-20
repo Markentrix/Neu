@@ -5,7 +5,7 @@ import threading
 import time
 from datetime import date, datetime, timezone
 
-from . import berichte, einstellungen, mailer, pdf, push
+from . import berichte, betrieb, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -421,6 +421,7 @@ def anrufe_aufraeumen(cfg):
 
 
 def tick():
+    betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
     for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen):
@@ -428,6 +429,7 @@ def tick():
             job(cfg)
         except Exception:
             log.exception("Job %s fehlgeschlagen", job.__name__)
+            betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
     for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
@@ -435,6 +437,7 @@ def tick():
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen
             log.exception("Job %s fehlgeschlagen", job.__name__)
+            betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
 
 
 def _schleife():

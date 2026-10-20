@@ -4,7 +4,7 @@ import ssl
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 
-from . import config, einstellungen
+from . import betrieb, config, einstellungen
 from .db import tx
 
 
@@ -15,7 +15,14 @@ def konfiguriert() -> bool:
 
 
 def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None) -> tuple[bool, str]:
-    """Gibt (ok, Fehlertext) zurück. Wirft nie."""
+    """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel festgehalten."""
+    ok, grund = _senden(an, betreff, text, anhang)
+    if grund != "E-Mail-Versand ist noch nicht eingerichtet.":
+        betrieb.notieren("mail", {"ok_am": betrieb.jetzt()} if ok else {"fehler_am": betrieb.jetzt(), "fehler": grund[:200]})
+    return ok, grund
+
+
+def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None) -> tuple[bool, str]:
     try:
         with tx("system") as cur:
             c = einstellungen.lesen(cur, "smtp")
@@ -151,9 +158,14 @@ def kunden_feedback(an: str, name: str | None) -> tuple[bool, str]:
     return senden(an, "Wie läuft es bei Ihnen?", text)
 
 
-def mahnung(an: str, titel: str, nummer: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
-    text = (f"Guten Tag,\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}." + "\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
-    return senden(an, f"{titel} zu Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
+def mahn_text(titel: str, nummer: str, name: str | None = None) -> str:
+    """Vorgeschlagener Mailtext zur Zahlungserinnerung oder Mahnung (vor dem Versand bearbeitbar)."""
+    hallo = f"Guten Tag {name}," if name else "Guten Tag,"
+    return (f"{hallo}\n\nzur Rechnung {nummer} finden Sie im Anhang eine {titel}." + "\n\nSollte sich die Zahlung mit dieser Nachricht überschnitten haben, betrachten Sie sie bitte als gegenstandslos." + SIGNATUR)
+
+
+def mahnung(an: str, titel: str, nummer: str, pdf_bytes: bytes, dateiname: str, text: str | None = None, name: str | None = None) -> tuple[bool, str]:
+    return senden(an, f"{titel} zu Rechnung {nummer}", text or mahn_text(titel, nummer, name), (dateiname, pdf_bytes, "application/pdf"))
 
 
 # ---------------------------------------------------------------- Zusammenarbeit (Nachrichten, Freigaben, Aufgaben)

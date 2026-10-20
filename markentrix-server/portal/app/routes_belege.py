@@ -288,33 +288,42 @@ def zahlungsabgleich_route(data: AbgleichIn, user: dict = Depends(require_admin)
 class MahnIn(BaseModel):
     stufe: int = Field(ge=1, le=3)
     senden: bool = True
+    text: str | None = Field(default=None, max_length=5000)
 
 
-@router.post("/belege/{bid}/mahnung")
-def mahnung(bid: str, data: MahnIn, user: dict = Depends(require_admin)):
+MAHN_TITEL = {1: "Zahlungserinnerung", 2: "1. Mahnung", 3: "2. Mahnung"}
+
+
+def mahnung_ausfuehren(user: dict, bid: str, stufe: int, senden: bool = True, text: str | None = None) -> dict:
+    """Erzeugt die Mahn-PDF, verschickt sie (wenn gewünscht) und hält die Stufe fest. Wirft HTTPException bei Problemen."""
     with tx("admin") as cur:
         b = _laden(cur, bid)
         if b["art"] != "rechnung" or b["status"] not in ("gestellt", "versendet"):
             raise HTTPException(400, "Mahnen geht nur bei offenen Rechnungen.")
         if not b["faellig_am"] or b["faellig_am"] >= date.today():
             raise HTTPException(400, "Die Rechnung ist noch nicht überfällig.")
-        if data.stufe <= b["mahnstufe"]:
+        if stufe <= b["mahnstufe"]:
             raise HTTPException(400, "Diese Mahnstufe wurde schon verschickt.")
-        cur.execute("SELECT email FROM kunden WHERE id=%s", (b["kunden_id"],))
+        cur.execute("SELECT email, ansprechpartner FROM kunden WHERE id=%s", (b["kunden_id"],))
         k = cur.fetchone()
-        daten, name = belege.mahn_pdf(cur, bid, data.stufe)
-    titel = {1: "Zahlungserinnerung", 2: "1. Mahnung", 3: "2. Mahnung"}[data.stufe]
+        daten, name = belege.mahn_pdf(cur, bid, stufe)
+    titel = MAHN_TITEL[stufe]
     gesendet, grund = False, ""
-    if data.senden:
+    if senden:
         if not k["email"]:
             raise HTTPException(400, "Beim Kunden ist keine E-Mail-Adresse hinterlegt.")
-        gesendet, grund = mailer.mahnung(k["email"], titel, b["nummer"], daten, name)
+        gesendet, grund = mailer.mahnung(k["email"], titel, b["nummer"], daten, name, (text or "").strip() or None, (k["ansprechpartner"] or "").strip() or None)
         if not gesendet:
             return {"gesendet": False, "grund": grund}
     with tx("admin") as cur:
-        cur.execute("UPDATE belege SET mahnstufe=%s, mahn_am=current_date, geaendert_am=now() WHERE id=%s", (data.stufe, bid))
-        audit(cur, user, "mahnung", b["kunden_id"], {"nummer": b["nummer"], "stufe": data.stufe, "gesendet": gesendet})
+        cur.execute("UPDATE belege SET mahnstufe=%s, mahn_am=current_date, geaendert_am=now() WHERE id=%s", (stufe, bid))
+        audit(cur, user, "mahnung", b["kunden_id"], {"nummer": b["nummer"], "stufe": stufe, "gesendet": gesendet, "text_angepasst": bool((text or "").strip())})
     return {"gesendet": gesendet, "grund": grund}
+
+
+@router.post("/belege/{bid}/mahnung")
+def mahnung(bid: str, data: MahnIn, user: dict = Depends(require_admin)):
+    return mahnung_ausfuehren(user, bid, data.stufe, data.senden, data.text)
 
 
 @router.post("/belege/{bid}/stornieren")
