@@ -29,7 +29,7 @@ def lead(firma,**kw):
     i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":"0511 5555","ort":"Celle",**kw}).json()["id"]; return i
 import os
 os.environ["BACKUP_DIR"]="/var/tmp/pt/bk"
-ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT=os.path.dirname(os.environ["PYTHONPATH"].split(":")[0])
 sys.path.insert(0,ROOT+"/portal")
 from app import db, jobs
 db.open_pool()
