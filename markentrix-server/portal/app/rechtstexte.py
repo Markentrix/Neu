@@ -3,9 +3,11 @@ Die Standardtexte sind eine Vorlage und ersetzen keine Rechtsberatung."""
 from . import einstellungen
 from .db import tx
 
+NUTZUNG_SATZ = "Zur Verbesserung des Portals zählen wir außerdem, welche Seiten wie oft aufgerufen werden und ob ein Konto an einem Tag aktiv war. Es werden nur Seitenname, Tag und Rolle gespeichert, keine Inhalte; die Zählung wird nach 180 Tagen gelöscht."
+
 LEER = {"name": "", "inhaber": "", "strasse": "", "plz": "", "ort": "", "email": "", "telefon": "", "website": "",
         "ustid": "", "steuernummer": "", "kleinunternehmer": False, "iban": "", "bic": "", "bank": "",
-        "zahlungsziel_tage": 14, "mwst_satz": 19, "rechnungsprefix": "RE", "angebotsprefix": "AN", "fusszeile": ""}
+        "zahlungsziel_tage": 14, "mwst_satz": 19, "rechnungsprefix": "RE", "angebotsprefix": "AN", "fusszeile": "", "angebotsbedingungen": ""}
 
 
 def firma(cur) -> dict:
@@ -42,7 +44,7 @@ Das Portal dient Kundinnen, Kunden und Vertriebspartnern von Markentrix zur Nutz
 Wir setzen ausschließlich ein technisch notwendiges Sitzungs-Cookie ein, das Sie angemeldet hält. Es gibt keine Werbe- oder Analyse-Cookies. Eine Einwilligung ist dafür nicht erforderlich.
 
 4. Hosting und Protokolle
-Das Portal läuft auf Servern der Hetzner Online GmbH in Deutschland. Beim Aufruf werden technisch notwendige Verbindungsdaten (z. B. IP-Adresse, Zeitpunkt) kurzzeitig protokolliert, um den Betrieb abzusichern und Missbrauch zu erkennen. Wichtige Aktionen im Portal werden zur Nachvollziehbarkeit in einem Protokoll gespeichert. Zur Verbesserung des Portals zählen wir außerdem, welche Seiten wie oft aufgerufen werden und ob ein Konto an einem Tag aktiv war. Es werden nur Seitenname, Tag und Rolle gespeichert, keine Inhalte; die Zählung wird nach 180 Tagen gelöscht.
+Das Portal läuft auf Servern der Hetzner Online GmbH in Deutschland. Beim Aufruf werden technisch notwendige Verbindungsdaten (z. B. IP-Adresse, Zeitpunkt) kurzzeitig protokolliert, um den Betrieb abzusichern und Missbrauch zu erkennen. Wichtige Aktionen im Portal werden zur Nachvollziehbarkeit in einem Protokoll gespeichert. {NUTZUNG_SATZ}
 
 5. E-Mail-Versand
 Einladungen, Passwort-Links, Benachrichtigungen und Berichte versenden wir über unseren E-Mail-Server.

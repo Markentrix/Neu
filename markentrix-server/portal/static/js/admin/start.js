@@ -24,7 +24,7 @@ export function angebotStand(z) {
   if (z.status === 'abgelehnt') return { ton: 'bad', text: 'Abgelehnt', hinweis: 'am ' + datum(z.abgelehnt_am), rang: 4 };
   if (z.faellig_am && new Date(z.faellig_am) < new Date(new Date().toDateString())) return { ton: '', text: 'Abgelaufen', hinweis: 'seit ' + datum(z.faellig_am), rang: 3 };
   if (z.angesehen_am) return { ton: 'warn', text: 'Angesehen', hinweis: 'vor ' + (tageSeit(z.angesehen_am) < 1 ? 'wenigen Stunden' : tageSeit(z.angesehen_am) + ' Tagen') + ', noch keine Antwort', rang: 1 };
-  return { ton: '', text: z.status === 'versendet' ? 'Gesendet, noch nicht geöffnet' : 'Erstellt, nicht verschickt', hinweis: z.versendet_am ? 'seit ' + tageSeit(z.versendet_am) + ' Tagen' : '', rang: 2 };
+  return { ton: '', text: z.status === 'versendet' ? 'Gesendet, noch nicht geöffnet' : 'Erstellt, nicht verschickt', hinweis: z.versendet_am ? (tageSeit(z.versendet_am) < 1 ? 'heute gesendet' : 'seit ' + tageSeit(z.versendet_am) + (tageSeit(z.versendet_am) === 1 ? ' Tag' : ' Tagen')) : '', rang: 2 };
 }
 const angebotLink = (z) => z.lead_id ? '#lead/' + z.lead_id : '#beleg/' + z.id;
 export function angebotsKarte(liste) {

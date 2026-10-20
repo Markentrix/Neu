@@ -111,6 +111,7 @@ class FirmaIn(BaseModel):
     rechnungsprefix: str = Field(default="RE", max_length=8, pattern=r"^[A-Za-z0-9-]*$")
     angebotsprefix: str = Field(default="AN", max_length=8, pattern=r"^[A-Za-z0-9-]*$")
     fusszeile: str = Field(default="", max_length=300)
+    angebotsbedingungen: str = Field(default="", max_length=1500)   # erscheint unter jedem Angebot (PDF und Online-Seite)
 
 
 @router.get("/firma")
@@ -140,7 +141,8 @@ def recht_lesen(user: dict = Depends(require_admin)):
         f = rechtstexte.firma(cur)
         r = einstellungen.lesen(cur, "recht")
     return {"impressum": r.get("impressum", ""), "datenschutz": r.get("datenschutz", ""),
-            "impressum_standard": rechtstexte.impressum_standard(f), "datenschutz_standard": rechtstexte.datenschutz_standard(f)}
+            "impressum_standard": rechtstexte.impressum_standard(f), "datenschutz_standard": rechtstexte.datenschutz_standard(f),
+            "nutzung_satz": rechtstexte.NUTZUNG_SATZ, "nutzung_fehlt": bool(r.get("datenschutz", "").strip()) and "Seitenname, Tag und Rolle" not in r.get("datenschutz", "")}
 
 
 @router.put("/recht")

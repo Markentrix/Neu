@@ -25,6 +25,7 @@ function zeigen(d) {
   if (d.einleitung) teile.push(h('p', { style: 'white-space:pre-line' }, d.einleitung));
   teile.push(leistungen(d), positionen(d));
   if (d.schluss) teile.push(h('p', { style: 'white-space:pre-line;margin-top:14px' }, d.schluss));
+  if (d.bedingungen) teile.push(h('section', { class: 'bedingungen' }, h('h3', {}, 'Bedingungen'), h('p', { class: 'small muted', style: 'white-space:pre-line' }, d.bedingungen)));
   teile.push(h('p', { class: 'small muted' }, 'Gültig bis ' + datum(d.gueltig_bis) + '. ', h('a', { href: '/api/angebot/' + encodeURIComponent(token) + '/pdf', target: '_blank', rel: 'noopener' }, 'Als PDF öffnen')));
   if (d.status === 'angenommen') {
     teile.push(h('div', { class: 'msg ok' }, 'Dieses Angebot wurde am ' + datum(d.angenommen_am) + ' angenommen. Vielen Dank! Wir melden uns bei Ihnen zum nächsten Schritt.'));

@@ -1,6 +1,7 @@
 import { h, api, csvLaden, datum, dialog, euro, melde } from '../common.js';
 import { lastschriftKarte } from './einstellungen.js';
 import { neukundenAngebot } from './leadangebot.js';
+import { angebotsAuswertungKarte } from './angebotsplus.js';
 import { V, auswahl, fehler, filterKarte, fmtEuro, knopf, kopf, sicher, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Angebote und Rechnungen
@@ -87,6 +88,7 @@ V.belege = async () => {
   if (q.get('erinnerung')) setTimeout(() => erinnerungsDialog(), 200);
   return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen', knopf('+ Angebot an Neukunden', () => neukundenAngebot(), 'btn'), s.ueberfaellig_n ? knopf('Zahlungserinnerungen prüfen (' + s.ueberfaellig_n + ')', () => erinnerungsDialog(), 'btn') : ''),
     h('p', { class: 'small' }, h('a', { href: '/api/admin/belege-export.csv', target: '_blank', rel: 'noopener' }, 'Rechnungen als CSV exportieren (Buchhaltung/sevDesk)')),
+    await sicher(angebotsAuswertungKarte),
     await abgleichKarte(),
     await sicher(lastschriftKarte),
     h('div', { class: 'grid3' },
@@ -112,6 +114,10 @@ export async function belegEditor(id, kid, art) {
   const box = h('div'), sum = h('div', { class: 'small muted', style: 'text-align:right' });
   const feldB = (name, wert, extra = {}) => h('input', { name, value: wert ?? '', disabled: !frei, ...extra });
   const betreff = feldB('betreff', b.betreff, { placeholder: 'z. B. Website-Paket' }), zeitraum = feldB('leistungszeitraum', b.leistungszeitraum, { placeholder: 'z. B. November 2026' });
+  const istAngebot = (b.art || art) === 'angebot';
+  const leist = h('textarea', { rows: 5, disabled: !frei, 'aria-label': 'Das bekommt der Kunde', placeholder: 'Eine Zeile pro Punkt. „## “ davor = Zwischenüberschrift.' }); leist.value = (b.leistungen || []).join('\n');
+  const pakete = istAngebot && frei ? await api('/api/admin/katalog/leistungstexte').catch(() => []) : [];
+  const paketWahl = h('select', { 'aria-label': 'Leistungen eines Pakets einfügen', style: 'margin-bottom:8px', onchange: () => { const p = pakete.find(x => x.code === paketWahl.value); paketWahl.value = ''; if (p && (p.leistungen || []).length) leist.value = (leist.value.trim() ? leist.value.trim() + '\n' : '') + (leist.value.trim() ? '## ' + p.name + '\n' : '') + p.leistungen.join('\n'); } }, h('option', { value: '' }, '+ Leistungen eines Pakets einfügen …'), pakete.map(p => h('option', { value: p.code }, p.name)));
   const einl = h('textarea', { rows: 3, disabled: !frei }, b.einleitung || ''), schluss = h('textarea', { rows: 3, disabled: !frei }, b.schluss || '');
   const rechne = () => { const n = zeilen.reduce((a, z) => a + Math.round(Number(z.menge || 0) * (z.preis_cent || 0)), 0); sum.textContent = 'Zwischensumme netto: ' + euro(n) + (frei ? ' (Umsatzsteuer wird beim Ausstellen nach den Firmendaten berechnet)' : ''); };
   const zeichne = () => {
@@ -123,7 +129,7 @@ export async function belegEditor(id, kid, art) {
       frei ? knopf('✕', () => { zeilen.splice(i, 1); zeichne(); }, 'sec') : ''))); rechne();
   };
   zeichne();
-  const daten = () => ({ betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, leistungszeitraum: zeitraum.value, positionen: zeilen.map(z => ({ text: z.text, menge: z.menge, einheit: z.einheit || '', preis_cent: z.preis_cent })) });
+  const daten = () => ({ betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, leistungszeitraum: zeitraum.value, leistungen: istAngebot ? leist.value.split('\n').map(x => x.trim()).filter(Boolean) : [], positionen: zeilen.map(z => ({ text: z.text, menge: z.menge, einheit: z.einheit || '', preis_cent: z.preis_cent })) });
   const aktion = (text, pfad, body, ok, art = 'sec', bestaetigen) => knopf(text, async () => {
     if (bestaetigen && !confirm(bestaetigen)) return;
     try { const r = await api(pfad, { method: 'POST', body }); if (ok) ok(r); } catch (x) { fehler(m, x); } }, art);
@@ -135,6 +141,7 @@ export async function belegEditor(id, kid, art) {
   const knoepfe = [];
   if (id) {
     knoepfe.push(h('a', { class: 'btn sec small', href: '/api/admin/belege/' + id + '/pdf', target: '_blank', rel: 'noopener' }, 'PDF ansehen'));
+    if (b.art === 'angebot') knoepfe.push(aktion('Angebot kopieren', '/api/admin/belege/' + id + '/kopie', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec', 'Neuen Entwurf mit denselben Positionen und Texten anlegen?'));
     if (b.status === 'entwurf') knoepfe.push(speichern, aktion('Ausstellen', '/api/admin/belege/' + id + '/ausstellen', {}, (r) => { melde(m, 'Ausgestellt als ' + r.nummer + '.', 'ok'); setTimeout(neu, 700); }, 'btn',
       'Beleg jetzt ausstellen? Danach bekommt er eine feste Nummer und kann nicht mehr geändert werden.'),
       knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/belege/' + id, { method: 'DELETE' }); location.hash = '#belege'; } catch (x) { fehler(m, x); } } }, 'bad'));
@@ -154,6 +161,7 @@ export async function belegEditor(id, kid, art) {
       h('label', {}, 'Einleitung (optional)'), einl, h('h3', { style: 'margin-top:16px' }, 'Positionen'), h('div', { class: 'small muted' }, 'Beschreibung · Menge · Einheit · Einzelpreis netto in €'), box,
       frei ? knopf('+ Position', () => { zeilen.push({ text: '', menge: 1, einheit: '', preis_cent: 0 }); zeichne(); }) : '', sum,
       !frei ? h('div', { style: 'text-align:right;margin-top:8px' }, h('div', {}, 'Netto ' + fmtEuro(b.netto_cent)), b.kleinunternehmer ? h('div', { class: 'small muted' }, 'Kleinunternehmer – keine Umsatzsteuer') : h('div', {}, 'USt ' + Number(b.ust_satz) + ' % ' + fmtEuro(b.ust_cent)), h('div', {}, h('b', {}, 'Gesamt ' + fmtEuro(b.brutto_cent)))) : '',
+      istAngebot ? [h('label', {}, 'Das bekommt der Kunde (steht im Angebot)'), frei ? paketWahl : '', leist] : '',
       h('label', {}, 'Schlusstext (optional)'), schluss,
       !frei ? h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Datum ' + datum(b.datum) + ' · ' + (b.art === 'rechnung' ? 'zahlbar bis ' : 'gültig bis ') + datum(b.faellig_am) + (b.versendet_am ? ' · gesendet am ' + datum(b.versendet_am) : '') + (b.bezahlt_am ? ' · bezahlt am ' + datum(b.bezahlt_am) : '') + (b.mahnstufe ? ' · Mahnstufe ' + b.mahnstufe : '')) : ''),
     h('div', { class: 'row' }, knoepfe));

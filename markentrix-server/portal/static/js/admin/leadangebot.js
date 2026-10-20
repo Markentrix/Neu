@@ -80,7 +80,11 @@ export async function angebotDialog(lid, danach) {
     v.mail_eingerichtet ? '' : h('p', { class: 'small muted' }, 'Der E-Mail-Versand ist noch nicht eingerichtet (Einstellungen → E-Mail). Du bekommst einen Link und kannst ihn selbst per Mail oder WhatsApp schicken.'));
   const d = dialog('Angebot für ' + v.lead.firma, h('div', {}, form, ergebnis), true);
   const vorschlag = v.pakete.find(p => p.code === v.vorschlag_paket);
-  if (vorschlag) { zeilen.push(...paketPositionen(vorschlag)); leistungAnhaengen(vorschlag, false); }
+  if (v.entwurf) {   // gespeicherten Entwurf weiterbearbeiten statt neu anzufangen
+    const e = v.entwurf;
+    zeilen = (e.positionen || []).map(p => ({ text: p.text, menge: p.menge, einheit: p.einheit || '', cent: p.preis_cent }));
+    betreff.value = e.betreff || betreff.value; einl.value = e.einleitung || einl.value; schluss.value = e.schluss || schluss.value; leist.value = (e.leistungen || []).join('\n');
+  } else if (vorschlag) { zeilen.push(...paketPositionen(vorschlag)); leistungAnhaengen(vorschlag, false); }
   zeichnen();
 }
 
@@ -95,13 +99,18 @@ export async function leadAngebotKarte(lid, lead, m) {
     if (!confirm('Angebot ' + a.nummer + ' erneut per Mail an ' + (lead.email || 'den Lead') + ' senden? Dabei wird ein neuer Link erzeugt.')) return;
     try { const r = await api('/api/admin/leads/' + lid + '/angebote/' + a.id + '/senden', { method: 'POST', body: {} }); melde(m, r.gesendet ? 'Erneut gesendet.' : 'Nicht gesendet: ' + (r.grund || ''), r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); }
   }, 'sec');
+  const erinnern = (a) => lead.email && a.status === 'versendet' ? knopf('Erinnerung senden', async () => {
+    if (!confirm('Kurze Nachfrage-Mail mit dem Angebot ' + a.nummer + ' an ' + lead.email + ' senden? Dabei wird ein neuer Link erzeugt, der bisherige gilt dann nicht mehr.')) return;
+    try { const r = await api('/api/admin/leads/' + lid + '/angebote/' + a.id + '/senden', { method: 'POST', body: { erinnerung: true } }); melde(m, r.gesendet ? 'Erinnerung gesendet.' : 'Nicht gesendet: ' + (r.grund || ''), r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); }
+  }, 'sec') : '';
   const zeile = (a) => {
     const [t, k] = STATUS[a.status] || [a.status, ''];
     const stand = a.angenommen_am ? 'angenommen am ' + datum(a.angenommen_am) + (a.angenommen_von ? ' von ' + a.angenommen_von : '') : a.abgelehnt_am ? 'abgelehnt am ' + datum(a.abgelehnt_am) : a.angesehen_am ? 'angesehen am ' + zeit(a.angesehen_am) : a.versendet_am ? 'gesendet am ' + datum(a.versendet_am) + ', noch nicht angesehen' : '';
     return h('div', { class: 'heutezeile' }, h('div', { class: 'heutekopf' }, h('div', { class: 'grow' }, h('b', {}, a.nummer || 'Entwurf'), ' ', h('span', { class: 'pill ' + k }, t), h('div', { class: 'small muted' }, euro(a.brutto_cent) + (a.faellig_am ? ' · gültig bis ' + datum(a.faellig_am) : '') + (stand ? ' · ' + stand : '')))),
       h('div', { class: 'heuteknoepfe' }, h('a', { class: 'btn sec small', href: '/api/admin/leads/' + lid + '/angebote/' + a.id + '/pdf', target: '_blank', rel: 'noopener' }, 'PDF'),
         a.status === 'entwurf' ? knopf('Bearbeiten und senden', () => angebotDialog(lid, () => location.reload()), 'btn') : '',
-        a.status === 'gestellt' || a.status === 'versendet' ? [erneut(a), neuLink(a)] : '',
+        a.status === 'gestellt' || a.status === 'versendet' ? [erneut(a), erinnern(a), neuLink(a)] : '',
+        knopf('Kopieren', async () => { try { const r = await api('/api/admin/belege/' + a.id + '/kopie', { method: 'POST', body: {} }); await angebotDialog(lid, () => location.reload()); } catch (x) { melde(m, x.message); } }, 'sec'),
         (a.status === 'gestellt' || a.status === 'versendet') ? [knopf('Angenommen (telefonisch)', async () => { if (!confirm('Als angenommen markieren?')) return; try { await api('/api/admin/belege/' + a.id + '/angebot-status', { method: 'POST', body: { status: 'angenommen' } }); location.reload(); } catch (x) { melde(m, x.message); } }, 'sec'),
           knopf('Abgelehnt', async () => { try { await api('/api/admin/belege/' + a.id + '/angebot-status', { method: 'POST', body: { status: 'abgelehnt' } }); location.reload(); } catch (x) { melde(m, x.message); } }, 'sec')] : '',
         a.status === 'angenommen' && !lead.kunden_id ? h('span', { class: 'small' }, 'Nächster Schritt: oben „Zum Kunden machen“.') : '',
@@ -111,16 +120,19 @@ export async function leadAngebotKarte(lid, lead, m) {
 }
 
 /** Angebot für jemanden, der noch nicht im System ist: Kontakt kurz erfassen, dann gleich das Angebot schreiben. */
-export function neukundenAngebot() {
+export async function neukundenAngebot() {
+  const frueher = (await api('/api/admin/belege?art=angebot').catch(() => ({ belege: [] }))).belege.filter(b => b.nummer && !b.storno_von).slice(0, 25);
+  const vorlage = h('select', { 'aria-label': 'Vorlage aus früherem Angebot' }, h('option', { value: '' }, 'Neu beginnen'), frueher.map(b => h('option', { value: b.id }, b.nummer + ' · ' + b.firma + ' · ' + euro(b.brutto_cent))));
   const f = h('form', { class: 'stack' },
     h('p', { class: 'small muted' }, 'Der Kontakt wird als Lead angelegt. Das Angebot geht im Markentrix-Design per E-Mail raus, der Kunde kann es online annehmen.'),
-    feldZeile('Firma *', 'firma'), feldZeile('Ansprechpartner', 'ansprechpartner'), feldZeile('E-Mail (für den Versand)', 'email', 'email'), feldZeile('Telefon', 'telefon', 'tel'), feldZeile('Ort', 'ort'));
+    frueher.length ? h('div', {}, h('label', {}, 'Vorlage'), vorlage) : '', feldZeile('Firma *', 'firma'), feldZeile('Ansprechpartner', 'ansprechpartner'), feldZeile('E-Mail (für den Versand)', 'email', 'email'), feldZeile('Telefon', 'telefon', 'tel'), feldZeile('Ort', 'ort'));
   const m = h('p', { class: 'small', role: 'status' });
   const dlg = dialog('Angebot an Neukunden', h('div', { class: 'stack' }, f, m, h('button', { class: 'btn', onclick: async (e) => {
     const d = Object.fromEntries(new FormData(f)); if (!String(d.firma).trim()) { melde(m, 'Bitte die Firma eintragen.'); return; }
     e.target.disabled = true;
     try {
       const r = await api('/api/admin/leads', { method: 'POST', body: { firma: String(d.firma).trim(), ansprechpartner: d.ansprechpartner || null, email: d.email || null, telefon: d.telefon || null, ort: d.ort || null, quelle: 'manuell', notiz: 'Angelegt über „Angebot an Neukunden“' } });
+      if (vorlage.value) await api('/api/admin/belege/' + vorlage.value + '/kopie', { method: 'POST', body: { lead_id: r.id } });
       dlg.zu(); await angebotDialog(r.id, () => { location.hash = '#lead/' + r.id; });
     } catch (x) { e.target.disabled = false; melde(m, x.message); }
   } }, 'Weiter zum Angebot')));

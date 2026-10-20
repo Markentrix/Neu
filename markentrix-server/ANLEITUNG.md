@@ -333,3 +333,15 @@ Im Angebotsdialog steht unter den Positionen **„Das bekommt der Kunde“**. De
 **Angebote im Blick:** Auf der Admin-Übersicht zeigt die Karte „Angebote im Blick“ alle offenen Angebote (an Leads und Kunden) mit Stand: *Angenommen*, *Angesehen* (der Kunde hat den Link geöffnet, aber noch nicht geantwortet), *Gesendet, noch nicht geöffnet*, *Abgelaufen*, *Abgelehnt*. Angenommene und abgelehnte bleiben 30 Tage sichtbar. Dazu melden sich „Heute zuerst“ und „Jetzt wichtig“: angenommen → Kunde anlegen, angesehen → jetzt anrufen, seit 3 Tagen ungeöffnet → nachfassen. Die Karte lässt sich unter „Ansicht anpassen“ aus- und einblenden. Beim Versenden bekommt der Entwurf automatisch die nächste Angebotsnummer und das heutige Datum, die Gültigkeit (14/30/60 Tage) rechnet ab dann.
 
 **Lead-Daten ändern:** In der Lead-Ansicht gibt es oben in der Karte „Daten“ den Knopf „Daten bearbeiten“ (Firma, Ansprechpartner, E-Mail, Telefon, Website, Branche, PLZ, Ort). Feld leeren = Angabe entfernen. Praktisch, wenn die E-Mail fehlt: eintragen, dann beim Angebot „Erneut per Mail senden“.
+
+## Angebote: Nachfassen, Kopieren, Pflege und Auswertung (Oktober 2026)
+
+- **Entwurf weiterbearbeiten:** „Bearbeiten und senden“ lädt jetzt den gespeicherten Entwurf (Positionen, Texte, „Das bekommt der Kunde“).
+- **Angebot kopieren:** In der Angebotsliste des Leads und im Belege-Editor gibt es „Kopieren“ (neuer Entwurf mit denselben Positionen und Texten). Bei „+ Angebot an Neukunden“ kann man oben ein früheres Angebot als **Vorlage** wählen; der Firmenname im Text wird auf den neuen Empfänger umgestellt.
+- **Erinnerung senden:** Bei einem verschickten Lead-Angebot gibt es „Erinnerung senden“ (kurze Nachfrage-Mail mit Angebot und neuem Link; der alte Link gilt dann nicht mehr). Erscheint auch im Verlauf des Leads.
+- **Leistungstexte der Pakete pflegen:** Unter „Preise & Konditionen“ gibt es die Karte „Leistungstexte der Pakete“. Änderungen gelten für neue Angebote, versendete bleiben unverändert.
+- **Belege-Editor:** Angebote an bestehende Kunden haben jetzt auch „Das bekommt der Kunde“ (mit Paket-Auswahl).
+- **Bedingungen im Angebot:** Unter Einstellungen → Firmendaten gibt es „Bedingungen unter jedem Angebot“. Der Text erscheint im PDF und auf der Online-Seite. Bitte selbst festlegen und rechtlich prüfen lassen (AGB, Laufzeit, Kündigung, Zahlung).
+- **Datenschutz:** Hast du eine eigene Datenschutzerklärung hinterlegt, erscheint unter Einstellungen → Rechtstexte ein Hinweis mit Knopf „Satz am Ende einfügen“, solange die Nutzungsstatistik dort nicht genannt wird.
+- **Auswertung:** Auf „Angebote & Rechnungen“ steht oben die Karte „Angebote: Auswertung“ (verschickt, angesehen, angenommen, Quote, Zeit bis zur Annahme, Pakete).
+- **Nutzung:** Unter Protokoll steht „Nie geöffnet“ und „Selten“ erst, wenn die Messung 14 Tage läuft (vorher wäre es Zufall).

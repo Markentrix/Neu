@@ -85,7 +85,7 @@ def current_user(request: Request) -> dict:
 RECHTE = {"kunden": "Kunden & Projekte", "nachrichten": "Nachrichten", "leads": "Leads & Vertrieb", "finanzen": "Angebote, Rechnungen & Preise", "einstellungen": "Einstellungen & Protokoll"}
 _IMMER = {"uebersicht", "heute", "aufgaben", "suche", "textvorlagen", "meine-filter"}
 _BEREICH = {"tickets": "nachrichten", "leads": "leads", "gespraeche": "leads", "vertrieb": "leads", "website-check": "leads", "provisionsregeln": "leads",
-            "belege": "finanzen", "belege-export.csv": "finanzen", "preise": "finanzen", "konditionen": "finanzen", "katalog": "finanzen", "kennzahlen": "finanzen",
+            "belege": "finanzen", "belege-export.csv": "finanzen", "belege-auswertung": "finanzen", "preise": "finanzen", "konditionen": "finanzen", "katalog": "finanzen", "kennzahlen": "finanzen",
             "kunden": "kunden", "berichte": "kunden", "avv": "kunden", "avv-fehlt": "kunden", "onboarding": "kunden", "dateien": "kunden", "websites": "kunden",
             "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden", "fruehwarnung": "kunden", "vorlagen": "kunden", "cockpit": "finanzen", "lastschrift": "finanzen", "mahnvorschlaege": "finanzen", "mahnungen": "finanzen", "angebotsanfragen": "leads", "pipeline": "leads"}
 

@@ -71,10 +71,10 @@ def vorlage(lid: str, user: dict = Depends(require_admin)):
         cur.execute("SELECT paket_code FROM angebotsanfragen WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 1", (lid,))
         a = cur.fetchone()
         f = rechtstexte.firma(cur)
-        cur.execute("SELECT id, nummer, status FROM belege WHERE lead_id=%s AND art='angebot' AND status='entwurf' ORDER BY erstellt_am DESC LIMIT 1", (lid,))
+        cur.execute("SELECT id, nummer, status, betreff, einleitung, schluss, positionen, leistungen FROM belege WHERE lead_id=%s AND art='angebot' AND status='entwurf' ORDER BY erstellt_am DESC LIMIT 1", (lid,))
         entwurf = cur.fetchone()
     return {"lead": {"id": l["id"], "firma": l["firma"], "ansprechpartner": l["ansprechpartner"], "email": l["email"], "status": l["status"], "kunden_id": l["kunden_id"]},
-            "pakete": pakete, "vorschlag_paket": a and a["paket_code"], "entwurf_id": entwurf and entwurf["id"],
+            "pakete": pakete, "vorschlag_paket": a and a["paket_code"], "entwurf_id": entwurf and entwurf["id"], "entwurf": entwurf and {k: entwurf[k] for k in ("betreff", "einleitung", "schluss", "positionen", "leistungen")},
             "gruss": _vorname_gruss(l), "mwst_satz": float(f["mwst_satz"]), "kleinunternehmer": bool(f["kleinunternehmer"]),
             "firma_ok": bool(f["name"] and f["strasse"]), "mail_eingerichtet": mailer.konfiguriert()}
 
@@ -151,6 +151,7 @@ def liste(lid: str, user: dict = Depends(require_admin)):
 class SendenIn(BaseModel):
     gueltig_tage: int = Field(default=30, ge=1, le=365)
     an: str | None = Field(default=None, max_length=200)
+    erinnerung: bool = False        # kurze Nachfrage-Mail statt Erstversand
     nur_link: bool = False          # nicht mailen (z. B. Mail nicht eingerichtet): Link zum Weitergeben per WhatsApp o. Ä.
 
 
@@ -188,21 +189,21 @@ def senden(lid: str, bid: str, data: SendenIn, user: dict = Depends(require_admi
     link = _link(token)
     gesendet, grund = False, ""
     if not data.nur_link:
-        gesendet, grund = mailer.lead_angebot(an, l.get("ansprechpartner"), l["firma"], nummer, daten, name, gueltig, link, f["name"])
+        gesendet, grund = mailer.lead_angebot(an, l.get("ansprechpartner"), l["firma"], nummer, daten, name, gueltig, link, f["name"], erinnerung=data.erinnerung and b["status"] != "entwurf")
     with tx("admin") as cur:
         if gesendet:
             cur.execute("UPDATE belege SET versendet_am=now(), status='versendet' WHERE id=%s", (bid,))
         if l["status"] in ("neu", "kontaktiert", "antwort", "termin"):
             cur.execute("UPDATE leads SET status='angebot' WHERE id=%s", (lid,))
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)",
-                    (lid, "mail_gesendet" if gesendet else "notiz", f"Angebot {nummer} " + ("per E-Mail gesendet" if gesendet else "erstellt (Link zum Weitergeben)"), user["email"]))
+                    (lid, "mail_gesendet" if gesendet else "notiz", f"Angebot {nummer} " + (("Erinnerung per E-Mail gesendet" if data.erinnerung else "per E-Mail gesendet") if gesendet else "erstellt (Link zum Weitergeben)"), user["email"]))
         cur.execute("UPDATE angebotsanfragen SET status='angebot_raus', geaendert_am=now() WHERE lead_id=%s AND status IN ('angefragt','in_pruefung')", (lid,))
         audit(cur, user, "lead_angebot_gesendet", None, {"lead": lid, "nummer": nummer, "per_mail": gesendet})
         if l.get("vertriebspartner_id"):
             ids = push.partner(cur, l["vertriebspartner_id"])
         else:
             ids = []
-    if ids and (gesendet or data.nur_link):
+    if ids and (gesendet or data.nur_link) and not data.erinnerung:
         push.senden(ids, "Angebot ist raus", l["firma"], "/vertrieb#lead/" + lid, "angebotsstatus")
     return {"nummer": nummer, "gesendet": gesendet, "grund": grund, "link": link, "an": an, "betreff": f"Angebot {nummer}"}
 
@@ -223,7 +224,7 @@ def _holen(cur, token: str) -> dict:
 def _info(b: dict, firma: dict) -> dict:
     abgelaufen = bool(b["faellig_am"] and b["faellig_am"] < date.today())
     return {"anbieter": firma["name"], "nummer": b["nummer"], "empfaenger": (b["empfaenger"] or {}).get("firma") or b["lead_firma"], "betreff": b["betreff"], "einleitung": b["einleitung"], "schluss": b["schluss"],
-            "positionen": b["positionen"], "leistungen": b["leistungen"], "netto_cent": int(b["netto_cent"]), "ust_satz": float(b["ust_satz"]), "ust_cent": int(b["ust_cent"]), "brutto_cent": int(b["brutto_cent"]),
+            "positionen": b["positionen"], "leistungen": b["leistungen"], "bedingungen": (firma.get("angebotsbedingungen") or "").strip(), "netto_cent": int(b["netto_cent"]), "ust_satz": float(b["ust_satz"]), "ust_cent": int(b["ust_cent"]), "brutto_cent": int(b["brutto_cent"]),
             "kleinunternehmer": b["kleinunternehmer"], "datum": b["datum"], "gueltig_bis": b["faellig_am"], "status": b["status"], "abgelaufen": abgelaufen,
             "angenommen_am": b["angenommen_am"], "kontakt": {"email": firma.get("email"), "telefon": firma.get("telefon")}}
 

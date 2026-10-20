@@ -1,3 +1,4 @@
+import { leistungstextKarte } from './angebotsplus.js';
 import { h, api, datum, zeit, euro, melde, formular } from '../common.js';
 import { V, bestaetigt, cent, feld, fmtEuro, knopf, kopf, pill, tabelle } from './kern.js';
 
@@ -48,9 +49,10 @@ V.preise = async () => {
   const kond = (z) => { const i = h('input', { value: z.wert_zahl ?? z.wert_text ?? '' }); return h('div', { class: 'row' }, h('div', { class: 'grow' }, i),
     knopf('Speichern', () => { const v = i.value.trim(); const body = /^-?\d+$/.test(v) ? { wert_zahl: Number(v) } : { wert_text: v }; bestaetigt(mk, () => api('/api/admin/konditionen/' + encodeURIComponent(z.schluessel), { method: 'PUT', body })); })); };
   const regelBtn = (z) => z.status === 'entwurf' ? knopf('Freigeben', () => confirm('Regel "' + z.name + '" (' + z.prozent + ' %) freigeben?') && bestaetigt(mr, () => api('/api/admin/provisionsregeln/' + z.id + '/freigeben', { method: 'POST' }), 'Freigegeben.')) : '';
+  const lt = await leistungstextKarte().catch(() => '');
   return h('div', { class: 'stack' }, kopf('Preise & Konditionen'), m,
     h('div', { class: 'card' }, h('h2', {}, 'Aktuelle Preise'), tabelle([['Produkt', z => z.name], ['Einrichtung', z => (z.ab_preis ? 'ab ' : '') + fmtEuro(z.einrichtung_cent)], ['Monatlich', z => fmtEuro(z.monatlich_cent)], ['Projekt', z => fmtEuro(z.projekt_cent)], ['Gültig ab', z => datum(z.gueltig_ab)]], d.aktuell)),
-    h('div', { class: 'card' }, h('h2', {}, 'Preis ändern (neue Version)'), h('p', { class: 'small muted' }, 'Alte Preise bleiben im Verlauf. Bestehende Buchungen behalten den Preis, der bei der Buchung galt.'), pform),
+    h('div', { class: 'card' }, h('h2', {}, 'Preis ändern (neue Version)'), h('p', { class: 'small muted' }, 'Alte Preise bleiben im Verlauf. Bestehende Buchungen behalten den Preis, der bei der Buchung galt.'), pform), lt,
     h('div', { class: 'card' }, h('h2', {}, 'Konditionen'), mk, tabelle([['Schlüssel', z => z.schluessel], ['Beschreibung', z => z.beschreibung], ['Wert', kond]], d.konditionen, 'Keine Konditionen.')),
     h('div', { class: 'card' }, h('h2', {}, 'Provisionsregeln'), h('p', { class: 'small muted' }, 'Entwürfe gelten erst nach deiner Freigabe.'), mr, tabelle([['Regel', z => z.name], ['Monate', z => z.von_monat + (z.bis_monat ? '–' + z.bis_monat : '+')], ['%', z => z.prozent], ['Status', z => pill(z.status === 'entwurf' ? 'onboarding' : z.status)], ['', regelBtn]], d.provisionsregeln)),
     h('div', { class: 'card' }, h('h2', {}, 'Preisverlauf'), tabelle([['Gültig ab', z => datum(z.gueltig_ab)], ['Produkt', z => z.produkt_code], ['Einrichtung', z => fmtEuro(z.einrichtung_cent)], ['Monatlich', z => fmtEuro(z.monatlich_cent)], ['Projekt', z => fmtEuro(z.projekt_cent)], ['Freigegeben von', z => z.freigegeben_von]], d.verlauf)));
@@ -83,14 +85,17 @@ const ALLE_SEITEN = { kunde: 'heute uebersicht status briefing nachrichten freig
 const ROLLE = { kunde: 'Kunden', vertrieb: 'Vertriebler', admin: 'Admin' };
 async function nutzungsKarte() {
   const d = await api('/api/admin/nutzung?tage=30');
+  const tageGemessen = d.messung_seit ? Math.floor((Date.now() - new Date(d.messung_seit).getTime()) / 864e5) : 0, genug = tageGemessen >= 14;
   const block = (rolle) => {
-    const z = d.seiten.filter(x => x.rolle === rolle), max = Math.max(1, ...z.map(x => x.aufrufe)), nie = (ALLE_SEITEN[rolle] || []).filter(sid => !z.some(x => x.seite === sid));
+    const z = d.seiten.filter(x => x.rolle === rolle), max = Math.max(1, ...z.map(x => x.aufrufe)), selten = z.filter(x => x.aufrufe < 3), nie = (ALLE_SEITEN[rolle] || []).filter(sid => !z.some(x => x.seite === sid));
     return h('div', { style: 'margin:10px 0' }, h('h3', {}, ROLLE[rolle] + ': ' + (d.aktiv[rolle] || 0) + ' von ' + (d.konten[rolle] || 0) + ' Konten aktiv (7 Tage: ' + (d.aktiv_7_tage[rolle] || 0) + ')'),
       z.length ? h('div', { class: 'dtrichter' }, z.slice(0, 8).map(x => h('div', { class: 'tstufe' }, h('span', { class: 'tname' }, x.seite), h('div', { class: 'tbalken' }, h('div', { style: 'height:100%;border-radius:10px;background:var(--grad);width:' + Math.max(3, Math.round(x.aufrufe / max * 100)) + '%' })), h('span', { class: 'tzahl' }, x.aufrufe)))) : h('p', { class: 'small muted' }, 'Noch keine Aufrufe.'),
-      nie.length && z.length ? h('p', { class: 'small muted' }, 'Nie geöffnet (30 Tage): ' + nie.join(', ')) : '');
+      !genug ? '' : [nie.length ? h('p', { class: 'small' }, h('b', {}, 'Nie geöffnet (30 Tage): '), nie.join(', '), h('span', { class: 'muted' }, ' – Kandidaten zum Ausblenden oder Entfernen.')) : '',
+        selten.length ? h('p', { class: 'small muted' }, 'Selten (unter 3 Aufrufe): ' + selten.map(x => x.seite).join(', ')) : ''] );
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Nutzung (30 Tage)'),
     h('p', { class: 'small muted' }, 'Gezählt werden nur Seitenname, Tag und Rolle, dazu wer an einem Tag aktiv war. Keine Inhalte, nach 180 Tagen gelöscht. ' + (d.messung_seit ? 'Messung seit ' + datum(d.messung_seit) + '.' : 'Die Messung beginnt mit dem ersten Aufruf.')),
+    genug ? '' : h('p', { class: 'msg info' }, 'Die Messung läuft erst seit ' + tageGemessen + ' Tagen. Aussagen zu ungenutzten Seiten gibt es ab 14 Tagen, vorher wäre das Zufall.'),
     d.tour.alle ? h('p', { class: 'small' }, 'Erststart-Tour gesehen: ' + d.tour.gesehen + ' von ' + d.tour.alle + ' Kundenkonten.') : '',
     ['kunde', 'vertrieb', 'admin'].map(block));
 }

@@ -49,6 +49,8 @@ export async function firmaKarte() {
       feld('Umsatzsteuer (%)', 'mwst_satz', f.mwst_satz, { type: 'number', min: 0, max: 30 }), feld('Rechnungs-Kürzel', 'rechnungsprefix', f.rechnungsprefix), feld('Angebots-Kürzel', 'angebotsprefix', f.angebotsprefix)),
     kk('Kleinunternehmer (§ 19 UStG, keine Umsatzsteuer auf Rechnungen)', klein, (v) => { klein = v; }),
     h('label', {}, 'Zusatztext unten auf Rechnungen und Angeboten (optional)'), h('textarea', { name: 'fusszeile', rows: 2 }, f.fusszeile || ''),
+    h('label', {}, 'Bedingungen unter jedem Angebot (optional)'), h('textarea', { name: 'angebotsbedingungen', rows: 4, maxlength: 1500, placeholder: 'z. B. Es gelten unsere AGB. Preise netto zzgl. USt. Mindestlaufzeit und Kündigung gemäß Vertrag.' }, f.angebotsbedingungen || ''),
+    h('p', { class: 'small muted' }, 'Erscheint im PDF und auf der Online-Angebotsseite. Den Text bitte selbst festlegen und rechtlich prüfen lassen (AGB, Laufzeit, Kündigung, Zahlungsbedingungen).'),
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   return h('div', { class: 'card' }, h('h2', {}, 'Firmendaten'), h('p', { class: 'small muted' }, 'Werden für Impressum, Datenschutz, Angebote, Rechnungen und Berichte verwendet. Bitte Angaben zu Steuern mit deiner Steuerberatung abstimmen.'), m, form);
 }
@@ -181,6 +183,7 @@ export async function rechtKarte() {
   const r = await api('/api/admin/einstellungen/recht'), m = h('div');
   const form = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/admin/einstellungen/recht', { method: 'PUT', body: formular(e.target) }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } },
     h('label', {}, 'Impressum (leer lassen = Standardtext aus den Firmendaten)'), h('textarea', { name: 'impressum', rows: 6, placeholder: r.impressum_standard }, r.impressum || ''),
+    r.nutzung_fehlt ? h('div', { class: 'msg err' }, 'Deine eigene Datenschutzerklärung nennt die Nutzungsstatistik noch nicht (Seitenzählung ohne Inhalte). ', h('button', { type: 'button', class: 'btn small', onclick: (e) => { const t = e.target.closest('form').querySelector('textarea[name=datenschutz]'); t.value = t.value.trimEnd() + '\n\n' + r.nutzung_satz; t.focus(); e.target.disabled = true; } }, 'Satz am Ende einfügen'), ' Danach bitte speichern.') : '',
     h('label', {}, 'Datenschutzerklärung (leer lassen = Standardvorlage)'), h('textarea', { name: 'datenschutz', rows: 10, placeholder: r.datenschutz_standard }, r.datenschutz || ''),
     h('p', {}, h('button', { class: 'btn' }, 'Speichern'), ' ', h('a', { class: 'btn sec', href: '/impressum', target: '_blank' }, 'Impressum ansehen'), ' ', h('a', { class: 'btn sec', href: '/datenschutz', target: '_blank' }, 'Datenschutz ansehen')));
   return h('div', { class: 'card' }, h('h2', {}, 'Impressum und Datenschutz'), h('p', { class: 'small muted' }, 'Die Standardtexte sind eine Vorlage und ersetzen keine Rechtsberatung. Bitte einmal von einem Anwalt oder Datenschutzbeauftragten prüfen lassen und bei Bedarf hier überschreiben. Die Links erscheinen automatisch auf der Anmeldeseite.'), m, form);

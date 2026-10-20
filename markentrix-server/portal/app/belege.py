@@ -145,6 +145,8 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
         inhalt += [pdf.Spacer(1, 8), pdf.p("Diese Stornorechnung hebt die genannte Rechnung auf.", pdf.KLEIN)]
     if b["schluss"]:
         inhalt += [pdf.Spacer(1, 10), pdf.p(b["schluss"])]
+    if not ist_re and (f.get("angebotsbedingungen") or "").strip():
+        inhalt += [pdf.Spacer(1, 10), pdf.p("Bedingungen", pdf.H2), pdf.p(f["angebotsbedingungen"].strip(), pdf.KLEIN)]
     if not ist_re:
         inhalt += [pdf.Spacer(1, 10), pdf.p("Zur Annahme öffnen Sie bitte den Link in unserer E-Mail oder antworten Sie uns kurz per E-Mail." if (b.get("lead_id") and not b["kunden_id"]) else "Zur Annahme dieses Angebots bestätigen Sie es bitte im Kundenportal oder per E-Mail.", pdf.KLEIN)]
     if f.get("fusszeile"):
