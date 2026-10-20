@@ -68,10 +68,10 @@ V.uebersicht = async () => {
 export async function zeitachseKarte(kid) {
   const z = await sicherApi('/api/admin/kunden/' + kid + '/zeitachse');
   if (!z) return '';
-  const zu = z.zustand, risikoKlasse = { hoch: 'bad', mittel: 'warn' }[zu.risiko] || 'ok';
+  const zu = z.zustand, stufe = (zu.risiko && zu.risiko.stufe) || 'ok', risikoKlasse = { hoch: 'bad', mittel: 'warn' }[stufe] || 'ok';
   return h('div', { class: 'card' }, h('h2', {}, 'Zustand & Verlauf'),
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px' },
-      h('span', { class: 'pill ' + risikoKlasse }, 'Risiko: ' + (zu.risiko || 'niedrig')),
+      h('span', { class: 'pill ' + risikoKlasse, title: ((zu.risiko && zu.risiko.gruende) || []).join(' · ') }, 'Kündigungsrisiko: ' + ({ hoch: 'hoch', mittel: 'mittel' }[stufe] || 'niedrig')),
       h('span', { class: 'pill ' + (zu.ueberfaellig ? 'bad' : '') }, 'Offen: ' + euro(zu.offen_cent) + (zu.ueberfaellig ? ' (überfällig)' : '')),
       h('span', { class: 'pill' }, 'Anfragen 30 Tage: ' + zu.anfragen_30d),
       h('span', { class: 'pill' }, 'Letzter Login: ' + (zu.letzter_login ? zeit(zu.letzter_login) : 'noch nie')),

@@ -1,4 +1,5 @@
-import { api } from './common.js';
+import { api, stapelTabellen } from './common.js';
+stapelTabellen();
 import { setzeStart, zeige } from './kunde/kern.js';
 import './kunde/uebersicht.js';
 import './kunde/anfragen.js';

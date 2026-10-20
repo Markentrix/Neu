@@ -413,3 +413,28 @@ if (!/** @type {any} */ (window).__mkZuletzt) {
     }, 900);
   });
 }
+
+/** Tabellen auf dem Handy als beschriftete Karten: jede Zelle bekommt die Spaltenüberschrift als Label (CSS .stapel, ab 640 px). */
+export function stapelTabellen() {
+  let geplant = false;
+  const lauf = () => {
+    geplant = false;
+    document.querySelectorAll('table').forEach(t => {
+      const k = [...t.querySelectorAll('thead th')].map(x => x.textContent.trim());
+      if (!k.length) return;
+      if (!t.classList.contains('stapel')) {
+        t.classList.add('stapel'); t.setAttribute('role', 'table');
+        t.querySelectorAll('thead tr').forEach(r => r.setAttribute('role', 'row'));
+        t.querySelectorAll('thead th').forEach(x => x.setAttribute('role', 'columnheader'));
+      }
+      t.querySelectorAll('tbody tr').forEach(r => {
+        if (r.hasAttribute('data-stapel')) return;
+        r.setAttribute('data-stapel', '1'); r.setAttribute('role', 'row');
+        [...r.children].forEach((c, i) => { c.setAttribute('role', 'cell'); c.setAttribute('data-label', k[i] || ''); });
+      });
+    });
+  };
+  const plane = () => { if (!geplant) { geplant = true; requestAnimationFrame(lauf); } };
+  new MutationObserver(plane).observe(document.body, { childList: true, subtree: true });
+  plane();
+}

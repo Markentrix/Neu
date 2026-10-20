@@ -120,7 +120,7 @@ async function kalenderKarte() {
   const k = await api('/api/admin/freigabe-kalender').catch(() => null);
   if (!k) return h('div');
   const start = new Date(k.von + 'T00:00:00'), tage = [];
-  for (let i = 0; i < k.tage; i++) { const d = new Date(start.getTime() + i * 86400000); tage.push(d); }
+  for (let i = 0; i < k.tage; i++) tage.push(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
   const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const WT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   const eintrag = (e) => h('a', { href: '#kunde/' + e.kunden_id, class: 'pill ' + (e.status === 'freigegeben' ? 'ok' : e.status === 'abgelehnt' ? 'bad' : 'warn'), style: 'display:block;margin:2px 0;white-space:normal', title: e.status }, e.firma + ': ' + e.titel);

@@ -1,4 +1,5 @@
-import { h, api, nutzung, zweiFaktorKarte } from './common.js';
+import { h, api, nutzung, zweiFaktorKarte, stapelTabellen } from './common.js';
+stapelTabellen();
 import { belegEditor } from './admin/belege.js';
 import {V, gerüst, zaehlerAdmin, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
 import { kundeDetail } from './admin/kunden.js';

@@ -1,4 +1,6 @@
 import { pipelineBoard } from './pipeline.js';
+import { stapelTabellen } from './common.js';
+stapelTabellen();
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
 
 const root = document.getElementById('app');
