@@ -66,7 +66,7 @@ def vorlage(lid: str, user: dict = Depends(require_admin)):
     """Alles, was der Dialog braucht: Pakete mit aktuellen Preisen, Textvorschlag, Steuerangaben."""
     with tx("admin") as cur:
         l = _lead(cur, lid)
-        cur.execute("SELECT code, kategorie, name, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, nur_auf_anfrage FROM v_preise_aktuell ORDER BY kategorie, name")
+        cur.execute("SELECT v.code, v.kategorie, v.name, v.einrichtung_cent, v.monatlich_cent, v.projekt_cent, v.ab_preis, v.nur_auf_anfrage, p.leistungen FROM v_preise_aktuell v JOIN produkte p ON p.code = v.code ORDER BY v.kategorie, v.name")
         pakete = cur.fetchall()
         cur.execute("SELECT paket_code FROM angebotsanfragen WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 1", (lid,))
         a = cur.fetchone()
@@ -86,6 +86,7 @@ class AngebotIn(BaseModel):
     einleitung: str = Field(default="", max_length=3000)
     schluss: str = Field(default="", max_length=3000)
     positionen: list[dict] = []
+    leistungen: list[str] = Field(default=[], max_length=60)   # „Das bekommen Sie“; Zeilen mit „## “ sind Zwischenüberschriften
 
 
 @router.post("/api/admin/leads/{lid}/angebote")
@@ -93,6 +94,7 @@ def entwurf(lid: str, data: AngebotIn, user: dict = Depends(require_admin)):
     pos = belege.positionen_pruefen(data.positionen)
     if not pos:
         raise HTTPException(400, "Bitte mindestens eine Position eintragen.")
+    leist = json.dumps([x.strip()[:300] for x in data.leistungen if x.strip()])
     with tx("admin") as cur:
         l = _lead(cur, lid)
         if l["status"] in BLOCKIERT:
@@ -103,14 +105,14 @@ def entwurf(lid: str, data: AngebotIn, user: dict = Depends(require_admin)):
             b = _beleg(cur, lid, data.beleg_id)
             if b["status"] != "entwurf":
                 raise HTTPException(400, "Dieses Angebot ist schon ausgestellt.")
-            cur.execute("""UPDATE belege SET betreff=%s, einleitung=%s, schluss=%s, positionen=%s::jsonb, netto_cent=%s, ust_satz=%s, ust_cent=%s, brutto_cent=%s, kleinunternehmer=%s,
+            cur.execute("""UPDATE belege SET betreff=%s, einleitung=%s, schluss=%s, positionen=%s::jsonb, leistungen=%s::jsonb, netto_cent=%s, ust_satz=%s, ust_cent=%s, brutto_cent=%s, kleinunternehmer=%s,
                                   geaendert_am=now() WHERE id=%s""",
-                        (data.betreff, data.einleitung, data.schluss, json.dumps(pos), s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], b["id"]))
+                        (data.betreff, data.einleitung, data.schluss, json.dumps(pos), leist, s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], b["id"]))
             bid = b["id"]
         else:
-            cur.execute("""INSERT INTO belege (art, kunden_id, lead_id, betreff, einleitung, schluss, positionen, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer)
-                           VALUES ('angebot', %s, %s, %s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s) RETURNING id""",
-                        (l["kunden_id"], lid, data.betreff, data.einleitung, data.schluss, json.dumps(pos), s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"]))
+            cur.execute("""INSERT INTO belege (art, kunden_id, lead_id, betreff, einleitung, schluss, positionen, leistungen, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer)
+                           VALUES ('angebot', %s, %s, %s, %s, %s, %s::jsonb, %s::jsonb, %s, %s, %s, %s, %s) RETURNING id""",
+                        (l["kunden_id"], lid, data.betreff, data.einleitung, data.schluss, json.dumps(pos), leist, s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"]))
             bid = cur.fetchone()["id"]
         audit(cur, user, "lead_angebot_entwurf", l["kunden_id"], {"lead": lid})
     return {"id": bid, "netto_cent": s["netto_cent"], "brutto_cent": s["brutto_cent"]}
@@ -221,7 +223,7 @@ def _holen(cur, token: str) -> dict:
 def _info(b: dict, firma: dict) -> dict:
     abgelaufen = bool(b["faellig_am"] and b["faellig_am"] < date.today())
     return {"anbieter": firma["name"], "nummer": b["nummer"], "empfaenger": (b["empfaenger"] or {}).get("firma") or b["lead_firma"], "betreff": b["betreff"], "einleitung": b["einleitung"], "schluss": b["schluss"],
-            "positionen": b["positionen"], "netto_cent": int(b["netto_cent"]), "ust_satz": float(b["ust_satz"]), "ust_cent": int(b["ust_cent"]), "brutto_cent": int(b["brutto_cent"]),
+            "positionen": b["positionen"], "leistungen": b["leistungen"], "netto_cent": int(b["netto_cent"]), "ust_satz": float(b["ust_satz"]), "ust_cent": int(b["ust_cent"]), "brutto_cent": int(b["brutto_cent"]),
             "kleinunternehmer": b["kleinunternehmer"], "datum": b["datum"], "gueltig_bis": b["faellig_am"], "status": b["status"], "abgelaufen": abgelaufen,
             "angenommen_am": b["angenommen_am"], "kontakt": {"email": firma.get("email"), "telefon": firma.get("telefon")}}
 

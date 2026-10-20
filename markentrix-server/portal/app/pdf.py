@@ -96,6 +96,27 @@ def kacheln(paare: list, spalten=4):
     return t
 
 
+def leistungsbox(titel: str, punkte: list):
+    """„Das bekommen Sie“: getönte Karte mit Häkchen vor jedem Punkt; Zeilen mit „## “ sind Zwischenüberschriften."""
+    from reportlab.graphics.shapes import Circle, Drawing, PolyLine
+    def haken():
+        d = Drawing(5 * mm, 5 * mm)
+        d.add(Circle(2.5 * mm, 2.5 * mm, 2.3 * mm, fillColor=colors.HexColor("#DCEBFF"), strokeColor=None))
+        d.add(PolyLine([1.5 * mm, 2.6 * mm, 2.3 * mm, 1.7 * mm, 3.7 * mm, 3.6 * mm], strokeColor=AKZENT, strokeWidth=1.2, strokeLineCap=1, strokeLineJoin=1))
+        return d
+    sub = ParagraphStyle("lsub", parent=TXT, fontName=F_FETT, textColor=AKZENT, spaceBefore=4)
+    zeilen = [[p(titel, H2), ""]]
+    for x in punkte:
+        x = str(x)
+        zeilen.append([p(x[3:].strip(), sub), ""] if x.startswith("## ") else [haken(), p(x)])
+    t = Table(zeilen, colWidths=[8 * mm, 162 * mm], hAlign="LEFT")
+    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F4F1FF")), ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#E4DCFF")),
+                           ("VALIGN", (0, 0), (-1, -1), "TOP"), ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                           ("LEFTPADDING", (0, 0), (0, -1), 8), ("TOPPADDING", (0, 0), (-1, 0), 8), ("BOTTOMPADDING", (0, -1), (-1, -1), 9)]
+                          + [("SPAN", (0, i), (1, i)) for i, z in enumerate(zeilen) if z[1] == ""]))
+    return t
+
+
 def dokument(titel: str, kopfzeile: str, inhalt: list, firma: dict, fuss_extra: str = "") -> bytes:
     puffer = BytesIO()
     name = firma.get("name") or "Markentrix"

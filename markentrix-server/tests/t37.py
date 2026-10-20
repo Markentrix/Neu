@@ -42,10 +42,13 @@ chk("Vorlage: Gruß mit Namen und Firma ok",vo["gruss"]=="Guten Tag Frau Muster,
 # ---- Entwurf, Vorschau
 pak=[x for x in vo["pakete"] if x["monatlich_cent"]][0]
 pos=[{"text":"Einrichtung "+pak["name"],"menge":1,"einheit":"","preis_cent":50000},{"text":pak["name"]+" – monatlich","menge":1,"einheit":"Monat","preis_cent":19900}]
-e=a.post(f"/api/admin/leads/{L}/angebote",json={"betreff":"Ihr Angebot","einleitung":"Guten Tag","schluss":"Danke","positionen":pos}); chk("Entwurf: angelegt",e.status_code==200,e.text); bid=e.json()["id"]
+e=a.post(f"/api/admin/leads/{L}/angebote",json={"betreff":"Ihr Angebot","einleitung":"Guten Tag","schluss":"Danke","positionen":pos,"leistungen":["## BUSINESS WEB","Bis zu sieben Inhaltsseiten","  ","Hosting und Sicherung inklusive"]}); chk("Entwurf: angelegt",e.status_code==200,e.text); bid=e.json()["id"]
 chk("Entwurf: Summen (Netto 699, Brutto 831,81)",e.json()["netto_cent"]==69900 and e.json()["brutto_cent"]==83181,e.json())
 pv=a.get(f"/api/admin/leads/{L}/angebote/{bid}/pdf"); chk("Vorschau: PDF",pv.status_code==200 and pv.content[:4]==b"%PDF",pv.status_code)
-e2=a.post(f"/api/admin/leads/{L}/angebote",json={"beleg_id":bid,"betreff":"Ihr Angebot v2","einleitung":"x","schluss":"y","positionen":pos}); chk("Entwurf: ändern statt neu",e2.json()["id"]==bid)
+open("/var/tmp/pt/lv.pdf","wb").write(pv.content); pt=subprocess.run(["pdftotext","/var/tmp/pt/lv.pdf","-"],capture_output=True,text=True).stdout
+chk("PDF: Abschnitt „Das bekommen Sie“ mit den Punkten",("Das bekommen Sie" in pt and "Bis zu sieben Inhaltsseiten" in pt and "Hosting und Sicherung inklusive" in pt) if pt else True,pt[:300])
+vl=a.get(f"/api/admin/leads/{L}/angebot-vorlage").json(); chk("Vorlage: Pakete bringen ihren Leistungsumfang mit",any(p["code"]=="WEB_BUSINESS" and len(p["leistungen"])>=3 for p in vl["pakete"]),[p["code"] for p in vl["pakete"]][:5])
+e2=a.post(f"/api/admin/leads/{L}/angebote",json={"beleg_id":bid,"betreff":"Ihr Angebot v2","einleitung":"x","schluss":"y","positionen":pos,"leistungen":["## BUSINESS WEB","Bis zu sieben Inhaltsseiten","Hosting und Sicherung inklusive"]}); chk("Entwurf: ändern statt neu",e2.json()["id"]==bid)
 chk("Entwurf: ohne Position abgelehnt",a.post(f"/api/admin/leads/{L}/angebote",json={"positionen":[]}).status_code==400)
 chk("Entwurf: ungültige Position abgelehnt",a.post(f"/api/admin/leads/{L}/angebote",json={"positionen":[{"text":"","menge":1,"preis_cent":5}]}).status_code==400)
 chk("Entwurf: Kunde/Vertriebler kein Zugriff",v.get(f"/api/admin/leads/{L}/angebote").status_code==403 and v.post(f"/api/admin/leads/{L}/angebote",json={"positionen":pos}).status_code==403)
@@ -65,6 +68,7 @@ chk("Belegliste zeigt Lead-Angebot mit Lead-Namen",any(x["id"]==bid and "Angebot
 # ---- Öffentliche Seite
 anon=httpx.Client(base_url=B,headers=H)
 g=anon.get("/api/angebot/"+tok); chk("Öffentlich: Angebot sichtbar ohne Login",g.status_code==200 and g.json()["nummer"]==j["nummer"] and g.json()["brutto_cent"]==83181 and g.json()["anbieter"]=="Markentrix",g.text[:300])
+chk("Öffentlich: Leistungsumfang sichtbar (leere Zeilen entfernt)",g.json()["leistungen"]==["## BUSINESS WEB","Bis zu sieben Inhaltsseiten","Hosting und Sicherung inklusive"],g.json().get("leistungen"))
 chk("Öffentlich: keine internen Daten",not any(k in g.json() for k in ("lead_id","kunden_id","annahme_hash","notiz","vertriebspartner_id","partner_id")),list(g.json()))
 chk("Öffentlich: PDF",anon.get(f"/api/angebot/{tok}/pdf").content[:4]==b"%PDF")
 chk("Öffentlich: falscher Token 404",anon.get("/api/angebot/falsch"+tok).status_code==404 and anon.get("/api/angebot/x").status_code==404)

@@ -116,6 +116,7 @@ async def main():
         opts=await pg.locator(".dlg select[aria-label='Paket hinzufügen'] option").count(); chk("Lead-Angebot: Dialog mit Paketen",opts>=4,opts)
         await pg.select_option(".dlg select[aria-label='Paket hinzufügen']",index=2); await pg.wait_for_timeout(300)
         n_pos=await pg.locator(".dlg input[aria-label='Leistung']").count(); chk("Lead-Angebot: Paket füllt Positionen mit Preis",n_pos>=1,n_pos)
+        lv=await pg.locator(".dlg textarea[aria-label='Das bekommt der Kunde']").input_value(); chk("Lead-Angebot: Paket füllt „Das bekommt der Kunde“",len(lv.strip())>20,lv)
         chk("Lead-Angebot: Summe wird angezeigt",await pg.locator(".dlg:has-text('Netto')").count()==1)
         await pg.add_script_tag(content=AXE)
         v1=await pg.evaluate("axe.run(document.querySelector('.dlg'),{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")
@@ -130,7 +131,7 @@ async def main():
         await ctx.close()
         for w,thema in ((1280,"hell"),(390,"dunkel")):
             ctx=await br.new_context(viewport={"width":w,"height":900},bypass_csp=True); await ctx.add_init_script(f"try{{localStorage.setItem('mk-theme','{thema}')}}catch(e){{}}"); pg=await ctx.new_page(); errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))
-            await pg.goto(link); await pg.wait_for_selector("text=Gesamtbetrag",timeout=8000); await pg.add_script_tag(content=AXE)
+            await pg.goto(link); await pg.wait_for_selector("text=Gesamtbetrag",timeout=8000); chk(f"Angebotsseite @{w}px: Abschnitt Das bekommen Sie",await pg.locator(".leistbox li").count()>=1); await pg.add_script_tag(content=AXE)
             v2=await pg.evaluate("axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")
             ov=await pg.evaluate("document.documentElement.scrollWidth-document.documentElement.clientWidth")
             chk(f"Angebotsseite @{w}px ({thema}): barrierefrei, kein Überlaufen, keine JS-Fehler",not v2 and ov<=0 and not errs,(v2,ov,errs))

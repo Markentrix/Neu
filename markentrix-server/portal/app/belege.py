@@ -128,6 +128,8 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
     inhalt += [pdf.Spacer(1, 6), t]
     if b["kleinunternehmer"]:
         inhalt += [pdf.Spacer(1, 6), pdf.p(KLEIN_HINWEIS, pdf.KLEIN)]
+    if b.get("leistungen") and not ist_re:
+        inhalt += [pdf.Spacer(1, 14), pdf.leistungsbox("Das bekommen Sie", b["leistungen"])]
     if ist_re and not storno:
         iban = f.get("iban")
         zahl = ["Bitte überweisen Sie den Betrag" + (f" bis zum {pdf.datum(b['faellig_am'])}" if b["faellig_am"] else "") + f" unter Angabe der Rechnungsnummer {nr}."]
@@ -144,7 +146,7 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
     if b["schluss"]:
         inhalt += [pdf.Spacer(1, 10), pdf.p(b["schluss"])]
     if not ist_re:
-        inhalt += [pdf.Spacer(1, 10), pdf.p("Zur Annahme dieses Angebots bestätigen Sie es bitte im Kundenportal oder per E-Mail.", pdf.KLEIN)]
+        inhalt += [pdf.Spacer(1, 10), pdf.p("Zur Annahme öffnen Sie bitte den Link in unserer E-Mail oder antworten Sie uns kurz per E-Mail." if (b.get("lead_id") and not b["kunden_id"]) else "Zur Annahme dieses Angebots bestätigen Sie es bitte im Kundenportal oder per E-Mail.", pdf.KLEIN)]
     if f.get("fusszeile"):
         inhalt += [pdf.Spacer(1, 10), pdf.p(f["fusszeile"], pdf.KLEIN)]
     steuer = f"Steuernummer: {f['steuernummer']}" if f.get("steuernummer") else ""

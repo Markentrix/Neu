@@ -327,3 +327,5 @@ Weitere Unterlagen: `docs/ARCHITEKTUR.md` (Aufbau für Entwickler), `docs/LOESCH
 ## Angebot an Neukunden
 
 Unter Admin → Angebote & Rechnungen gibt es oben „+ Angebot an Neukunden“. Du trägst nur Firma und E-Mail ein (Ansprechpartner, Telefon, Ort sind optional), der Kontakt wird als Lead angelegt und es öffnet sich direkt der Angebotsdialog. Das PDF kommt im Markentrix-Design (Navy-Kopf, Farbverlauf, Inter/Space Grotesk), der Kunde bekommt Mail mit PDF und Link und kann online annehmen oder ablehnen. Nach der Annahme legst du ihn mit „Zum Kunden machen“ an, das Angebot wandert mit.
+
+Im Angebotsdialog steht unter den Positionen **„Das bekommt der Kunde“**. Der Text kommt aus dem gewählten Paket (Leistungsumfang je Produkt) und lässt sich pro Angebot frei ändern: eine Zeile pro Punkt, „## “ davor macht eine Zwischenüberschrift. Er erscheint im PDF als Karte „Das bekommen Sie“ mit Häkchen und auf der Online-Angebotsseite. Die Standardtexte der Pakete (außer BUSINESS WEB) sind aus der Katalogbeschreibung abgeleitet, bitte einmal prüfen.

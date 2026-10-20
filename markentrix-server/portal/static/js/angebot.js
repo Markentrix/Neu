@@ -12,12 +12,18 @@ function positionen(d) {
       h('tr', {}, h('td', { colspan: 3 }, h('b', {}, 'Gesamtbetrag')), h('td', { class: 'tzahl nowrap' }, h('b', {}, euro(d.brutto_cent)))))));
 }
 
+function leistungen(d) {
+  if (!d.leistungen || !d.leistungen.length) return '';
+  return h('section', { class: 'leistbox', 'aria-labelledby': 'leisttitel' }, h('h3', { id: 'leisttitel' }, 'Das bekommen Sie'),
+    h('ul', {}, d.leistungen.map(x => String(x).startsWith('## ') ? h('li', { class: 'ueber' }, String(x).slice(3)) : h('li', {}, String(x)))));
+}
+
 function zeigen(d) {
   titel.textContent = 'Angebot ' + d.nummer;
   const teile = [h('p', { class: 'muted small', style: 'text-align:center;margin-top:-6px' }, 'von ' + d.anbieter + ' für ' + d.empfaenger)];
   if (d.betreff) teile.push(h('h2', {}, d.betreff));
   if (d.einleitung) teile.push(h('p', { style: 'white-space:pre-line' }, d.einleitung));
-  teile.push(positionen(d));
+  teile.push(leistungen(d), positionen(d));
   if (d.schluss) teile.push(h('p', { style: 'white-space:pre-line;margin-top:14px' }, d.schluss));
   teile.push(h('p', { class: 'small muted' }, 'Gültig bis ' + datum(d.gueltig_bis) + '. ', h('a', { href: '/api/angebot/' + encodeURIComponent(token) + '/pdf', target: '_blank', rel: 'noopener' }, 'Als PDF öffnen')));
   if (d.status === 'angenommen') {

@@ -39,8 +39,10 @@ export async function angebotDialog(lid, danach) {
     const neu = paketPositionen(p);
     if (!neu.length) { melde(m, 'Für dieses Paket ist noch kein Preis hinterlegt (Preise & Konditionen). Du kannst eine eigene Position eintragen.'); return; }
     melde(m, p.ab_preis ? 'Hinweis: Der Katalogpreis von ' + p.name + ' ist ein „ab“-Preis. Bitte den Betrag prüfen.' : '', 'info');
-    zeilen.push(...neu); zeichnen();
+    zeilen.push(...neu); leistungAnhaengen(p, !!leist.value.trim()); zeichnen();
   } }, h('option', { value: '' }, '+ Paket aus dem Katalog hinzufügen …'), v.pakete.map(p => h('option', { value: p.code }, p.name + (p.nur_auf_anfrage ? ' (auf Anfrage)' : ''))));
+  const leist = h('textarea', { rows: 6, maxlength: 6000, 'aria-label': 'Das bekommt der Kunde', placeholder: 'Eine Zeile pro Punkt. Zeilen mit „## “ davor sind Zwischenüberschriften.' });
+  const leistungAnhaengen = (p, mitTitel) => { const l = Array.isArray(p.leistungen) ? p.leistungen : []; if (!l.length) return; leist.value = (leist.value.trim() ? leist.value.trim() + '\n' : '') + (mitTitel ? '## ' + p.name + '\n' : '') + l.join('\n'); };
   const betreff = h('input', { value: 'Ihr Angebot für ' + v.lead.firma, maxlength: 200, 'aria-label': 'Betreff' });
   const einl = h('textarea', { rows: 4, maxlength: 3000, 'aria-label': 'Einleitung' }); einl.value = v.gruss + '\n\nvielen Dank für Ihr Interesse. Hier ist unser Angebot für ' + v.lead.firma + '.';
   const schluss = h('textarea', { rows: 3, maxlength: 3000, 'aria-label': 'Schlusstext' }); schluss.value = 'Bei Fragen melden Sie sich gern. Wir freuen uns auf die Zusammenarbeit.';
@@ -49,7 +51,7 @@ export async function angebotDialog(lid, danach) {
   const ergebnis = h('div');
   const speichern = async () => {
     const pos = zeilen.filter(z => z.text.trim()).map(z => ({ text: z.text.trim(), menge: z.menge || 1, einheit: z.einheit || '', preis_cent: z.cent || 0 }));
-    const r = await api('/api/admin/leads/' + lid + '/angebote', { method: 'POST', body: { beleg_id: beleg, betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, positionen: pos } });
+    const r = await api('/api/admin/leads/' + lid + '/angebote', { method: 'POST', body: { beleg_id: beleg, betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, positionen: pos, leistungen: leist.value.split('\n').map(x => x.trim()).filter(Boolean) } });
     beleg = r.id; return r;
   };
   const vorschau = knopf('PDF-Vorschau', async () => { try { melde(m, ''); await speichern(); window.open('/api/admin/leads/' + lid + '/angebote/' + beleg + '/pdf', '_blank', 'noopener'); } catch (x) { melde(m, x.message); } }, 'sec');
@@ -70,6 +72,7 @@ export async function angebotDialog(lid, danach) {
   };
   const form = h('div', {}, h('label', {}, 'Leistungen'), liste, h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, h('div', { class: 'grow', style: 'min-width:200px' }, paketWahl),
     h('button', { class: 'btn sec small', type: 'button', onclick: () => { zeilen.push({ text: '', menge: 1, einheit: '', cent: 0 }); zeichnen(); } }, '+ Eigene Position')), summe,
+    h('label', {}, 'Das bekommt der Kunde (steht im Angebot)'), leist, h('p', { class: 'small muted' }, 'Kommt aus dem Paket und lässt sich frei ändern. Eine Zeile pro Punkt.'),
     h('details', { style: 'margin:10px 0' }, h('summary', {}, 'Texte anpassen'), h('label', {}, 'Betreff'), betreff, h('label', {}, 'Einleitung'), einl, h('label', {}, 'Schluss'), schluss),
     h('div', { class: 'row', style: 'gap:10px;flex-wrap:wrap' }, h('div', { class: 'grow', style: 'min-width:220px' }, h('label', {}, 'An (E-Mail)'), an), h('div', {}, h('label', {}, 'Gültig'), gueltig)),
     m, h('div', { class: 'heuteknoepfe' }, vorschau, v.mail_eingerichtet ? h('button', { class: 'btn', onclick: () => senden(false) }, 'Angebot jetzt senden') : h('button', { class: 'btn', onclick: () => senden(true) }, 'Angebot erstellen und Link kopieren'),
@@ -77,7 +80,7 @@ export async function angebotDialog(lid, danach) {
     v.mail_eingerichtet ? '' : h('p', { class: 'small muted' }, 'Der E-Mail-Versand ist noch nicht eingerichtet (Einstellungen → E-Mail). Du bekommst einen Link und kannst ihn selbst per Mail oder WhatsApp schicken.'));
   const d = dialog('Angebot für ' + v.lead.firma, h('div', {}, form, ergebnis), true);
   const vorschlag = v.pakete.find(p => p.code === v.vorschlag_paket);
-  if (vorschlag) zeilen.push(...paketPositionen(vorschlag));
+  if (vorschlag) { zeilen.push(...paketPositionen(vorschlag)); leistungAnhaengen(vorschlag, false); }
   zeichnen();
 }
 

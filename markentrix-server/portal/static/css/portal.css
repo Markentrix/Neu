@@ -248,3 +248,11 @@ h1{letter-spacing:-.01em}.top{margin-bottom:6px}
   .btn{min-height:44px}
   input,select,textarea{font-size:16px}
 }
+
+/* Angebot: „Das bekommen Sie“ als getönte Karte mit Häkchen */
+.leistbox{background:var(--tint);border:1px solid var(--tintline);border-radius:14px;padding:12px 16px;margin:14px 0}
+.leistbox h3{margin:0 0 8px;font-size:15px}
+.leistbox ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.leistbox li{position:relative;padding-left:28px;line-height:1.45}
+.leistbox li::before{content:"✓";position:absolute;left:0;top:1px;width:19px;height:19px;border-radius:50%;background:var(--tint2);color:var(--link);font-size:12px;font-weight:700;display:grid;place-items:center}
+.leistbox li.ueber{padding-left:0;font-weight:600;color:var(--link);margin-top:4px}.leistbox li.ueber::before{content:none}
