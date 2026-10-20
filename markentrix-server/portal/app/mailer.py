@@ -116,6 +116,15 @@ def beleg(an: str, art: str, nummer: str, name: str | None, pdf_bytes: bytes, da
     return senden(an, f"Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
 
 
+def lead_angebot(an: str, name: str | None, firma: str, nummer: str, pdf_bytes: bytes, dateiname: str, gueltig, link: str, absender: str) -> tuple[bool, str]:
+    hallo = f"Guten Tag {name}," if name else "Guten Tag,"
+    text = (f"{hallo}\n\nvielen Dank für Ihr Interesse. Anbei erhalten Sie unser Angebot {nummer} für {firma} als PDF.\n\n"
+            f"Sie können es auch online ansehen und dort direkt annehmen:\n{link}\n\n"
+            + (f"Das Angebot ist gültig bis zum {gueltig:%d.%m.%Y}.\n\n" if gueltig else "")
+            + "Bei Fragen melden Sie sich gern, wir sprechen alles in Ruhe durch." + SIGNATUR)
+    return senden(an, f"Ihr Angebot {nummer} von {absender}", text, (dateiname, pdf_bytes, "application/pdf"))
+
+
 def avv(an: str, name: str | None, pdf_bytes: bytes) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     text = (f"{hallo}\n\nanbei erhalten Sie den Vertrag zur Auftragsverarbeitung (AVV) nach Art. 28 DSGVO. Er regelt, wie wir personenbezogene Daten in Ihrem Auftrag verarbeiten.\n\n"

@@ -1,3 +1,4 @@
+import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
 import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular } from '../common.js';
 import { filterKarte, V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
 
@@ -213,12 +214,12 @@ export async function leadDetail(lid) {
   const akt = h('form', { onsubmit: (e) => { e.preventDefault(); const o = formular(e.target); bestaetigt(m, () => api('/api/admin/leads/' + lid + '/aktivitaet', { method: 'POST', body: o }), 'Eingetragen.'); } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, select('art', ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'], 'notiz')), h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => confirm('Aus diesem Lead einen Kunden anlegen?') && bestaetigt(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); location.hash = '#kunde/' + k.id; }), 'btn');
-  const ang = l.kunden_id ? h('a', { class: 'btn small', href: '#neubeleg/' + l.kunden_id + '/angebot' }, 'Angebot erstellen')
-    : knopf('Angebot erstellen', () => confirm('Für ein Angebot wird aus dem Lead ein Kunde (Status Onboarding) angelegt. Fortfahren?') &&
-      bestaetigtOhneReload(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); await api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: 'angebot' } }); location.hash = '#neubeleg/' + k.id + '/angebot'; }), 'btn');
+  const gesperrt = ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status);
+  const ang = gesperrt ? '' : h('button', { class: 'btn small', onclick: () => angebotDialog(lid, () => location.reload()) }, 'Angebot senden');
   return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     anfragenKarte(anfragen),
+    await leadAngebotKarte(lid, l, m),
     kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am),
     skriptKarte(l.skript, l.skript_am, '/api/admin/leads/' + lid + '/skript'),
     d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),

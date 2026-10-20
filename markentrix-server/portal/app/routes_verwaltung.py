@@ -431,6 +431,7 @@ def lead_zu_kunde(lid: str, user: dict = Depends(require_admin)):
                     (l["firma"], l["ansprechpartner"], l["email"], l["telefon"], l["branche"], l["plz"], l["ort"], l["vertriebspartner_id"]))
         k = cur.fetchone()
         cur.execute("UPDATE leads SET kunden_id=%s, status='gewonnen' WHERE id=%s", (k["id"], lid))
+        cur.execute("UPDATE belege SET kunden_id=%s WHERE lead_id=%s AND kunden_id IS NULL", (k["id"], lid))   # Angebote an den Lead wandern zum Kunden
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (lid, "Zum Kunden gemacht: " + k["kundennummer"], user["email"]))
         audit(cur, user, "lead_zu_kunde", k["id"], {"lead": lid})
     return k

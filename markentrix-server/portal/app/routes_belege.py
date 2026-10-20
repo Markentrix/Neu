@@ -13,7 +13,7 @@ from .security import audit, require_admin, require_inhaber
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
 
-FELDER = "id, art, nummer, kunden_id, status, betreff, einleitung, schluss, positionen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
+FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
 UEBERFAELLIG = "(art='rechnung' AND status IN ('gestellt','versendet') AND faellig_am < current_date)"
 
 
@@ -59,8 +59,8 @@ def csv_export(von: str = "", bis: str = "", user: dict = Depends(require_admin)
 def liste(art: str = "", status: str = "", user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         cur.execute(f"""SELECT b.id, b.art, b.nummer, b.status, b.betreff, b.datum, b.faellig_am, b.brutto_cent, b.bezahlt_am, b.mahnstufe, b.storno_von,
-                              k.kundennummer, k.firma, {UEBERFAELLIG.replace('art', 'b.art').replace('status', 'b.status').replace('faellig_am', 'b.faellig_am')} AS ueberfaellig
-                       FROM belege b JOIN kunden k ON k.id=b.kunden_id
+                              b.lead_id, b.kunden_id, coalesce(k.kundennummer, 'Lead') AS kundennummer, coalesce(k.firma, l.firma) AS firma, {UEBERFAELLIG.replace('art', 'b.art').replace('status', 'b.status').replace('faellig_am', 'b.faellig_am')} AS ueberfaellig
+                       FROM belege b LEFT JOIN kunden k ON k.id=b.kunden_id LEFT JOIN leads l ON l.id=b.lead_id
                        WHERE (%s='' OR b.art=%s) AND (%s='' OR b.status=%s) ORDER BY b.erstellt_am DESC LIMIT 300""", (art, art, status, status))
         zeilen = cur.fetchall()
         cur.execute(f"""SELECT coalesce(sum(brutto_cent) FILTER (WHERE art='rechnung' AND status IN ('gestellt','versendet')),0) AS offen,
@@ -195,6 +195,8 @@ def ausstellen(bid: str, data: AusstellenIn | None = None, user: dict = Depends(
     data = data or AusstellenIn()
     with tx("admin") as cur:
         b = _laden(cur, bid)
+        if not b["kunden_id"]:
+            raise HTTPException(400, "Dieses Angebot gehört zu einem Lead. Bitte im Lead auf „Angebot senden“ gehen.")
         if b["status"] != "entwurf":
             raise HTTPException(400, "Dieser Beleg ist schon ausgestellt.")
         if not b["positionen"]:
@@ -225,6 +227,8 @@ def ausstellen(bid: str, data: AusstellenIn | None = None, user: dict = Depends(
 def senden(bid: str, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         b = _laden(cur, bid)
+        if not b["kunden_id"]:
+            raise HTTPException(400, "Dieses Angebot gehört zu einem Lead. Bitte im Lead auf „Angebot senden“ gehen.")
         if b["status"] not in ("gestellt", "versendet") or not b["nummer"]:
             raise HTTPException(400, "Bitte den Beleg zuerst ausstellen.")
         cur.execute("SELECT email, ansprechpartner FROM kunden WHERE id=%s", (b["kunden_id"],))
@@ -368,6 +372,8 @@ def aus_angebot(bid: str, user: dict = Depends(require_admin)):
         b = _laden(cur, bid)
         if b["art"] != "angebot" or b["status"] not in ("angenommen", "versendet", "gestellt"):
             raise HTTPException(400, "Eine Rechnung kann nur aus einem ausgestellten Angebot erstellt werden.")
+        if not b["kunden_id"]:
+            raise HTTPException(400, "Das Angebot gehört noch zu einem Lead. Bitte erst den Lead in einen Kunden umwandeln.")
         cur.execute("SELECT referenzkunde FROM kunden WHERE id=%s", (b["kunden_id"],))
         if cur.fetchone()["referenzkunde"]:
             raise HTTPException(400, "Referenzkunden bekommen keine Rechnung.")

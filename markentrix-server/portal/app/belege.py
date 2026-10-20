@@ -78,7 +78,7 @@ def _epc_qr(f: dict, beleg: dict):
     return puffer
 
 
-def beleg_pdf(cur, bid, f: dict | None = None) -> tuple[bytes, str]:
+def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -> tuple[bytes, str]:
     cur.execute("SELECT * FROM belege WHERE id=%s", (bid,))
     b = cur.fetchone()
     if not b:
@@ -86,7 +86,7 @@ def beleg_pdf(cur, bid, f: dict | None = None) -> tuple[bytes, str]:
     f = f or rechtstexte.firma(cur)
     ist_re = b["art"] == "rechnung"
     storno = b["storno_von"] is not None
-    emp = b["empfaenger"] or empfaenger_von(cur, b["kunden_id"])
+    emp = empfaenger if (empfaenger and not b["empfaenger"]) else (b["empfaenger"] or (empfaenger_von(cur, b["kunden_id"]) if b["kunden_id"] else {}))
     storno_nr = None
     if storno:
         cur.execute("SELECT nummer FROM belege WHERE id=%s", (b["storno_von"],))
@@ -98,7 +98,7 @@ def beleg_pdf(cur, bid, f: dict | None = None) -> tuple[bytes, str]:
     absender = " · ".join(x for x in [f["name"], f["strasse"], f"{f['plz']} {f['ort']}".strip()] if x)
     inhalt += [pdf.p(absender, pdf.KLEIN)]
     adr = "\n".join(x for x in [emp.get("firma"), emp.get("ansprechpartner"), emp.get("strasse"), f"{emp.get('plz') or ''} {emp.get('ort') or ''}".strip()] if x)
-    info = [["Kundennummer", emp.get("kundennummer") or ""], ["Nummer", nr], ["Datum", pdf.datum(b["datum"]) or "–"]]
+    info = ([["Kundennummer", emp["kundennummer"]]] if emp.get("kundennummer") else []) + [["Nummer", nr], ["Datum", pdf.datum(b["datum"]) or "–"]]
     if ist_re and b["faellig_am"]:
         info.append(["Zahlbar bis", pdf.datum(b["faellig_am"])])
     if not ist_re and b["faellig_am"]:

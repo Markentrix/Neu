@@ -14,7 +14,7 @@ OPTIONEN = [
     ("angebot", "Angebot geschickt", "notiz", "angebot", 5),
     ("rueckruf", "Bittet um Rückruf", "notiz", "antwort", 1),
     ("kein_interesse", "Kein Interesse", "notiz", "verloren", 0),
-    ("falsche_nummer", "Nummer falsch / nicht erreichbar", "notiz", None, 0),
+    ("falsche_nummer", "Nummer falsch / nicht erreichbar", "notiz", "tot", 0),   # wird abgelegt (Status „tot“): taucht in keiner Anrufliste mehr auf
 ]
 _NACH = {o[0]: o for o in OPTIONEN}
 # Reihenfolge der Status: ein Ergebnis setzt den Status nur vor, nie zurück
@@ -41,7 +41,7 @@ def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | N
     cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)", (lid, art, inhalt[:2000], von))
     status = l["status"]
     if darf_status and neuer_status and status not in GESPERRT:
-        if neuer_status == "verloren" or _RANG.get(neuer_status, 0) > _RANG.get(status, 0):
+        if neuer_status in ("verloren", "tot") or _RANG.get(neuer_status, 0) > _RANG.get(status, 0):
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (lid, f"{status} → {neuer_status}", von))
             status = neuer_status
     if wiedervorlage:

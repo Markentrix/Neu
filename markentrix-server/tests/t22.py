@@ -43,6 +43,7 @@ chk("Status geht nie zurück",sql(f"select status from leads where id='{lid}'")=
 chk("Unbekanntes Ergebnis abgelehnt",a.post(f"/api/admin/leads/{lid}/kontakt",json={"ergebnis":"quatsch"}).status_code in (400,422))
 chk("Verlauf hat Einträge",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{lid}'"))>=4)
 a.post(f"/api/admin/leads/{lid}/kontakt",json={"ergebnis":"kein_interesse"}); chk("Kein Interesse = verloren",sql(f"select status from leads where id='{lid}'")=="verloren")
+lid_f=a.post("/api/admin/leads",json={"firma":"Falsche Nummer "+str(int(time.time())),"telefon":"0511 1","ort":"Celle"}).json()["id"]; a.post(f"/api/admin/leads/{lid_f}/kontakt",json={"ergebnis":"falsche_nummer"}); chk("Nummer falsch = abgelegt (tot), keine Wiedervorlage",sql(f"select status||coalesce(wiedervorlage_am::text,'-') from leads where id='{lid_f}'")=="tot-")
 chk("Wiedervorlage gelöscht",sql(f"select wiedervorlage_am is null from leads where id='{lid}'")=="t")
 # Vertriebler
 p=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb","email":f"vera{sfx}@v.de","status":"aktiv"}).json(); pid=p["id"]

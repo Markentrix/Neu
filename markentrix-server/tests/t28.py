@@ -21,7 +21,7 @@ routen=[(m.upper(),p) for p,d in app.openapi()["paths"].items() for m in d if m.
 chk("Routen gefunden",len(routen)>200,len(routen))
 def fuellen(p): return re.sub(r"\{[^}]+\}","00000000-0000-0000-0000-000000000000",p)
 # Öffentliche Routen (bewusst ohne Anmeldung): jede muss hier ausdrücklich stehen
-OEFFENTLICH=re.compile(r"^/api/(login|logout|einladung|passwort|public/|webhook/|buchen|anmelde|recht$|loginlink|2fa/login|zweifaktor/login|health)")
+OEFFENTLICH=re.compile(r"^/api/(login|logout|einladung|passwort|public/|webhook/|buchen|angebot/|anmelde|recht$|loginlink|2fa/login|zweifaktor/login|health)")
 a=httpx.Client(base_url=B,headers=H); a.post("/api/login",json={"email":"chef@test.de","password":open("/var/tmp/pt/adminpw").read().strip()})
 a.put("/api/admin/einstellungen/smtp",json={"host":"127.0.0.1","port":8025,"sicherung":"keine","absender":"info@markentrix.de"})
 a.post("/api/admin/kunden",json={"firma":"Sweep GmbH","ansprechpartner":"T","email":"sweep@k.de","telefon":"1","strasse":"W 1","plz":"29221","ort":"Celle","paket_code":"KI_ONE","einladen":True})

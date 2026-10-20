@@ -30,6 +30,7 @@ from .routes_folgemails import router as folge_router
 from .routes_buchung import router as buchung_router
 from .routes_vertriebsplus import router as vertriebsplus_router
 from .routes_vertriebwerkzeuge import router as vertriebwerkzeuge_router
+from .routes_leadangebot import router as leadangebot_router, oeffentlich as angebot_oeffentlich_router
 from .routes_system import router as system_router
 from .routes_loginlink import router as loginlink_router
 from .routes_zahlung import router as zahlung_router
@@ -137,6 +138,8 @@ app.include_router(folge_router)
 app.include_router(buchung_router)
 app.include_router(vertriebsplus_router)
 app.include_router(vertriebwerkzeuge_router)
+app.include_router(leadangebot_router)
+app.include_router(angebot_oeffentlich_router)
 app.include_router(system_router)
 app.include_router(loginlink_router)
 app.include_router(zahlung_router)
@@ -171,6 +174,7 @@ app.get("/admin", include_in_schema=False)(seite("admin.html"))
 app.get("/vertrieb", include_in_schema=False)(seite("vertrieb.html"))
 app.get("/einladung", include_in_schema=False)(seite("einladung.html"))
 app.get("/buchen", include_in_schema=False)(seite("buchen.html"))
+app.get("/angebot", include_in_schema=False)(seite("angebot.html"))
 app.get("/anmelden", include_in_schema=False)(seite("anmelden.html"))
 app.get("/impressum", include_in_schema=False)(seite("recht.html"))
 app.get("/datenschutz", include_in_schema=False)(seite("recht.html"))

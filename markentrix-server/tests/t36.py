@@ -21,6 +21,7 @@ def token(adr):
 ADMPW=open("/var/tmp/pt/adminpw").read().strip()
 a=httpx.Client(base_url=B,headers=H); assert a.post("/api/login",json={"email":"chef@test.de","password":ADMPW}).status_code==200
 a.put("/api/admin/einstellungen/smtp",json={"host":"127.0.0.1","port":8025,"sicherung":"keine","absender":"info@markentrix.de"})
+a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","steuernummer":"12/345/67890","zahlungsziel_tage":14,"mwst_satz":19,"kleinunternehmer":False})
 k=a.post("/api/admin/kunden",json={"firma":"Werkzeug Kunde GmbH","ansprechpartner":"Tina Test","email":"kunde@werkzeug.de","telefon":"0511","strasse":"Weg 1","plz":"29221","ort":"Celle","paket_code":"KI_ONE","einladen":True}).json()
 httpx.post(B+"/api/einladung",headers=H,json={"token":token("kunde@werkzeug.de"),"password":"InhaberPasswort1"})
 p=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb","email":"vera@werkzeug.de","status":"aktiv","einladen":True}).json()["id"]
@@ -103,6 +104,33 @@ async def main():
         chk("Vertrieb: Angebotsanfrage mit Mail-Entwurf",True)
         chk("Vertrieb: Menü in 3 Gruppen, Mein Tag zuerst",await pg.locator(".navgruppe").count()==3 and (await pg.locator("a.nav").first.get_attribute("href"))=="#heute")
         chk("Vertrieb: keine JavaScript-Fehler in den Abläufen",not errs,errs); await ctx.close()
+        # ---- Admin: Angebot an einen Lead senden (Dialog) und Annahme auf der öffentlichen Seite
+        lid=[x for x in a.get("/api/admin/leads",params={"q":"WLead 1"}).json()][0]["id"] if isinstance(a.get("/api/admin/leads",params={"q":"WLead 1"}).json(),list) else a.get("/api/admin/leads",params={"q":"WLead 1"}).json()["leads"][0]["id"]
+        a.patch(f"/api/admin/leads/{lid}",json={"email":"wlead1@angebot.de","status":"kontaktiert"})
+        ctx,pg,errs=await login(br,"chef@test.de",ADMPW,"/admin",1280)
+        await pg.goto(B+"/admin#lead/"+lid); await pg.wait_for_selector("button:text('Angebot senden')",timeout=8000)
+        await pg.click("button:text('Angebot senden')"); await pg.wait_for_selector(".dlg select[aria-label='Paket hinzufügen']")
+        opts=await pg.locator(".dlg select[aria-label='Paket hinzufügen'] option").count(); chk("Lead-Angebot: Dialog mit Paketen",opts>=4,opts)
+        await pg.select_option(".dlg select[aria-label='Paket hinzufügen']",index=2); await pg.wait_for_timeout(300)
+        n_pos=await pg.locator(".dlg input[aria-label='Leistung']").count(); chk("Lead-Angebot: Paket füllt Positionen mit Preis",n_pos>=1,n_pos)
+        chk("Lead-Angebot: Summe wird angezeigt",await pg.locator(".dlg:has-text('Netto')").count()==1)
+        await pg.add_script_tag(content=AXE)
+        v1=await pg.evaluate("axe.run(document.querySelector('.dlg'),{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")
+        chk("Lead-Angebot: Dialog barrierefrei",not v1,v1)
+        await pg.click(".dlg button:text('Angebot jetzt senden')"); await pg.wait_for_selector(".dlg .msg.ok",timeout=8000)
+        link=await pg.locator(".dlg input[readonly]").input_value(); chk("Lead-Angebot: Link nach dem Senden",'/angebot?t=' in link,link)
+        chk("Lead-Angebot: Status im Lead 'angebot'",sql(f"select status from leads where id='{lid}'")=="angebot")
+        await ctx.close()
+        for w,thema in ((1280,"hell"),(390,"dunkel")):
+            ctx=await br.new_context(viewport={"width":w,"height":900},bypass_csp=True); await ctx.add_init_script(f"try{{localStorage.setItem('mk-theme','{thema}')}}catch(e){{}}"); pg=await ctx.new_page(); errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))
+            await pg.goto(link); await pg.wait_for_selector("text=Gesamtbetrag",timeout=8000); await pg.add_script_tag(content=AXE)
+            v2=await pg.evaluate("axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")
+            ov=await pg.evaluate("document.documentElement.scrollWidth-document.documentElement.clientWidth")
+            chk(f"Angebotsseite @{w}px ({thema}): barrierefrei, kein Überlaufen, keine JS-Fehler",not v2 and ov<=0 and not errs,(v2,ov,errs))
+            if w==390:
+                await pg.fill("#name","Max Mustermann"); await pg.click("#ok"); await pg.click("button:text('Angebot verbindlich annehmen')"); await pg.wait_for_selector(".msg.ok:has-text('angenommen')",timeout=8000)
+                chk("Angebotsseite: Annahme per Klick",sql(f"select status from belege where lead_id='{lid}'")=="angenommen")
+            await ctx.close()
         # ---- Dunkelmodus: gleiche Barrierefreiheits-Prüfung auf allen Seiten
         for name,(m,pwd,pfad,seiten) in {"Kunde":("kunde@werkzeug.de","InhaberPasswort1","/app",KUNDE),"Vertrieb":("vera@werkzeug.de","VeraPasswort123","/vertrieb",VERT)}.items():
             c0,p0,_e=await login(br,m,pwd,pfad,1280); stz=await c0.storage_state(); await c0.close()

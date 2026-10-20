@@ -231,8 +231,8 @@ export function navGruppen(gruppen, aktiv, schluessel) {
 
 // ---------------------------------------------------------------- Glocke, Suche, Ansicht
 const ANLAESSE = {
-  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot'], ['betriebsalarm', 'Betriebsalarm: Server, Sicherung, Mail'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
-  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
+  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot'], ['betriebsalarm', 'Betriebsalarm: Server, Sicherung, Mail'], ['wochenrueckblick', 'Montags: Wochenrückblick'], ['angebotsreaktion', 'Angebot angesehen, angenommen oder abgelehnt']],
+  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage'], ['angebotsreaktion', 'Angebot angesehen, angenommen oder abgelehnt'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
   kunde: [['anfrage', 'Neue Anfrage'], ['anruf', 'Neuer Anruf'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
 };
 let _ansicht = null;

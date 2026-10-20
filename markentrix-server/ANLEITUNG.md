@@ -309,3 +309,11 @@ Weitere Unterlagen: `docs/ARCHITEKTUR.md` (Aufbau für Entwickler), `docs/LOESCH
 - **Kunden „Dein nächster Schritt“**: Auf „Heute“ steht genau ein Schritt, zum Beispiel die älteste Anfrage beantworten, einen Termin bestätigen oder eine Freigabe prüfen. Ist nichts offen, steht dort „Alles erledigt“.
 - **Wochenrückblick**: Montags ab 8 Uhr bekommen Kunden, Vertriebler und Admins eine Push-Nachricht mit den Zahlen der letzten Woche (nur Zahlen, keine Namen). Abschaltbar unter „App & Benachrichtigungen“ → „Montags: Wochenrückblick“.
 - **Dunkelmodus**: Der Knopf neben der Glocke wechselt zwischen automatisch (folgt dem Gerät), hell und dunkel. Die Wahl wird je Gerät gemerkt.
+
+## Angebot direkt an einen Lead senden
+- Im Lead oben auf **„Angebot senden“**. Im Dialog Paket aus dem Katalog wählen (Preise kommen aus „Preise & Konditionen“, du kannst sie anpassen), bei Bedarf eigene Positionen ergänzen, Empfänger-Mail prüfen, **„PDF-Vorschau“** ansehen und **„Angebot jetzt senden“**. Der Lead wird dafür nicht zum Kunden.
+- Der Lead bekommt eine Mail mit dem PDF und einem **Online-Link**. Auf der Seite sieht er das Angebot, öffnet das PDF und kann mit Namen und einem Klick **verbindlich annehmen** oder ablehnen. Der Link ist geheim, nur für dieses Angebot und bei erneutem Senden wird ein neuer erzeugt (der alte erlischt).
+- Du bekommst Push, Glocke und bei Annahme eine Mail: **angesehen**, **angenommen**, **abgelehnt**. Bei Annahme legt das Portal eine Aufgabe „Kunde anlegen“ an. Dann im Lead **„Zum Kunden machen“**: Das Angebot wandert mit zum Kunden, daraus lässt sich die Rechnung erstellen.
+- Ist der E-Mail-Versand nicht eingerichtet, bekommst du den Link zum Kopieren (für WhatsApp oder dein Mailprogramm).
+- Der Vertriebler sieht den Stand seiner Angebotsanfrage automatisch („Angebot ist raus“, „angenommen“). Gesperrte Leads, Leads ohne Einwilligung, verlorene und tote Leads bekommen kein Angebot. Wird ein Lead gelöscht, verschwinden auch seine Angebote.
+- **Nummer falsch / nicht erreichbar** im Lead legt ihn ab (Status „tot“, keine Wiedervorlage mehr).

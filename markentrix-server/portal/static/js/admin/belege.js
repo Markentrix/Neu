@@ -93,13 +93,13 @@ V.belege = async () => {
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Überfällig (' + s.ueberfaellig_n + ')'), h('b', {}, euro(s.ueberfaellig))),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Bezahlt diesen Monat'), h('b', {}, euro(s.bezahlt_monat)))),
     h('div', { class: 'card' }, await filterKarte('belege'), h('div', { class: 'tabs' }, f('', '', 'Alle'), f('rechnung', '', 'Rechnungen'), f('angebot', '', 'Angebote'), f('rechnung', 'gestellt', 'Offen'), f('rechnung', 'bezahlt', 'Bezahlt'), f('', 'entwurf', 'Entwürfe')),
-      leiste, tabelle([[sel.alle, z => sel.haken(z.id)], ['Nr.', z => h('a', { href: '#beleg/' + z.id }, z.nummer || 'Entwurf')], ['Art', belegArt], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => fmtEuro(z.brutto_cent)], ['Status', belegPill]], d.belege, 'Noch keine Belege. Anlegen im jeweiligen Kunden.')),
+      leiste, tabelle([[sel.alle, z => sel.haken(z.id)], ['Nr.', z => h('a', { href: z.kunden_id ? '#beleg/' + z.id : '#lead/' + z.lead_id }, z.nummer || 'Entwurf')], ['Art', belegArt], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => fmtEuro(z.brutto_cent)], ['Status', belegPill]], d.belege, 'Noch keine Belege. Anlegen im jeweiligen Kunden.')),
     h('p', { class: 'small muted' }, 'Hinweis: Rechnungen werden hier als PDF erstellt. Ab 2027/2028 gelten für Rechnungen zwischen Unternehmen schrittweise Pflichten zur E-Rechnung (z. B. ZUGFeRD/XRechnung). Das ist hier noch nicht umgesetzt; bitte mit der Steuerberatung abstimmen.'));
 };
 
 export async function belegEditor(id, kid, art) {
   let b, k, vorschlag = [];
-  if (id) { const r = await api('/api/admin/belege/' + id); b = r.beleg; k = r.kunde; }
+  if (id) { const r = await api('/api/admin/belege/' + id); b = r.beleg; k = r.kunde; if (!k && b.lead_id) { location.hash = '#lead/' + b.lead_id; return h('div'); } }
   else {
     const r = await api('/api/admin/kunden/' + kid), v = await api('/api/admin/kunden/' + kid + '/belege-vorlage');
     k = { kundennummer: r.kunde.kundennummer, firma: r.kunde.firma, email: r.kunde.email, referenzkunde: r.kunde.referenzkunde };
