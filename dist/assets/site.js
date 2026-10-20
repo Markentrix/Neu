@@ -474,6 +474,34 @@
     });
   }
 
+  /* Website-Vorschau: Name und Ort ins Fragment (#n=..&o=..) der Beispielseiten schreiben, nichts geht an den Server */
+  function initVorschau() {
+    var form = $('[data-vorschau]'), res = $('[data-vorschau-result]'); if (!form || !res) return;
+    var mini = $('[data-mini]', res), bar = $('.mini-tabs', mini), msg = $('.form-msg', form), hash = '';
+    function clean(v, max) { return String(v || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, max); }
+    function host(n) { var s = n.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); return (s || 'ihre-seite') + '.beispiel'; }
+    function urlText() { var u = $('.browser-bar .url', mini); if (u) u.textContent = host(clean(form.elements.n.value, 48)); }
+    on(form, 'submit', function (e) {
+      e.preventDefault(); msg.textContent = '';
+      var n = clean(form.elements.n.value, 48), o = clean(form.elements.o.value, 40);
+      if (!n || !o) { msg.textContent = 'Bitte geben Sie Betriebsnamen und Ort an.'; (n ? form.elements.o : form.elements.n).focus(); return; }
+      hash = '#n=' + encodeURIComponent(n) + '&o=' + encodeURIComponent(o);
+      var want = form.elements.b.value, btn = $('button[data-demo="' + want + '"]', bar);
+      $$('iframe', mini).forEach(function (f) {
+        var src = (f.getAttribute('data-src') || '').replace(/#.*$/, '').replace(/[a-z]+-muster/, want) + hash;
+        f.setAttribute('data-src', src);
+        var fr = f.parentNode; fr.classList.remove('is-live'); on(f, 'load', function () { fr.classList.add('is-live'); }); f.setAttribute('src', src);
+      });
+      if (btn) { $$('button', bar).forEach(function (x) { x.setAttribute('aria-pressed', x === btn ? 'true' : 'false'); }); }
+      $$('a[data-demo-link]', res).forEach(function (a) { a.setAttribute('href', '/beispiel/' + want + '/' + hash); });
+      var t = $('[data-vorschau-title]', res); if (t) t.textContent = 'So könnte ' + n + ' aussehen.';
+      urlText(); res.hidden = false;
+      w.dispatchEvent(new Event('resize'));
+      res.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' });
+    });
+    on(bar, 'click', function (e) { if (e.target.closest('button[data-demo]') && hash) setTimeout(urlText, 0); });
+  }
+
   /* Hero: Lichtschein folgt dem Zeiger */
   function initGlow() {
     var hero = $('.hero'); if (!hero || d.documentElement.classList.contains('reduced') || !w.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
@@ -671,6 +699,6 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initVorschau(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

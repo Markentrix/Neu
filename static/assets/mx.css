@@ -1272,3 +1272,21 @@ main:focus{outline:none}
 .feats{gap:18px 28px}
 .chk-offer{margin:10px 0 4px;padding:14px 16px;border:1px solid var(--border);border-left:3px solid var(--violet,#7C4DE0);border-radius:12px;background:rgba(255,255,255,.7)}
 .chk-offer p{margin:0 0 8px;color:var(--text-2,#3A4356)}
+
+/* ─── 51. Website-Vorschau ─── */
+.vp-points{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
+.vp-points li{display:flex;gap:10px;align-items:flex-start;color:var(--text-2,#3A4356)}
+.vp-points svg{flex:none;width:20px;height:20px;margin-top:2px;color:var(--blue,#1E9BFF);stroke:currentColor;fill:none;stroke-width:2.4}
+.vp-form{display:grid;gap:14px;align-content:start}
+.vp-form h2{margin:0}
+.vp-form .field{margin:0}
+.vp-head{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+.vp-head h2{margin:4px 0 8px;font-size:clamp(1.4rem,2.6vw,2rem)}
+.vp-head .muted{margin:0;max-width:62ch}
+.vp-head .device-toggle{margin-bottom:0}
+.vp-cta{display:grid;gap:18px;align-items:center;margin-top:28px}
+.vp-cta h3{margin:0 0 6px}
+.vp-cta p{margin:0}
+@media (min-width:900px){.vp-cta{grid-template-columns:minmax(0,1fr) auto}}
+.vp-result{scroll-margin-top:80px}
+.chk-strip--vp{margin-top:16px;background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(40,199,247,.06))}

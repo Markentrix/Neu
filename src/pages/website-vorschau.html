@@ -1,0 +1,101 @@
+---
+title: Website-Vorschau: So könnte Ihre Seite aussehen | Markentrix
+description: Name und Ort eingeben und sofort sehen, wie eine Website für Ihren Betrieb aussehen könnte. Drei Designs für Handwerk, Praxis und Gastronomie, ohne Anmeldung.
+path: /website-vorschau
+lastmod: 2026-10-20
+ld: |
+  {"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://markentrix.de/website-vorschau#webpage","url":"https://markentrix.de/website-vorschau","name":"Website-Vorschau: So könnte Ihre Seite aussehen | Markentrix","isPartOf":{"@id":"https://markentrix.de/#website"},"about":{"@id":"https://markentrix.de/#organization"},"inLanguage":"de-DE","dateModified":"2026-10-20","breadcrumb":{"@id":"https://markentrix.de/website-vorschau#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://markentrix.de/website-vorschau#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Startseite","item":"https://markentrix.de/"},{"@type":"ListItem","position":2,"name":"Website-Vorschau","item":"https://markentrix.de/website-vorschau"}]},{"@type":"Organization","@id":"https://markentrix.de/#organization","name":"Markentrix","url":"https://markentrix.de"},{"@type":"FAQPage","@id":"https://markentrix.de/website-vorschau#faq","mainEntity":[{"@type":"Question","name":"Ist die Vorschau meine echte Website?","acceptedAnswer":{"@type":"Answer","text":"Nein. Die Vorschau zeigt eine Beispielseite im Aufbau, den wir für Betriebe wie Ihren bauen, mit Ihrem Namen und Ort darin. Texte, Bilder, Leistungen und Rechtstexte sind Beispiele. Die echten Inhalte erstellen wir für Ihren Betrieb."}},{"@type":"Question","name":"Werden meine Eingaben gespeichert?","acceptedAnswer":{"@type":"Answer","text":"Nein. Name und Ort bleiben in Ihrem Browser und werden nicht an unseren Server gesendet. Die Vorschau wird nur in Ihrem Browser zusammengesetzt."}},{"@type":"Question","name":"Was kostet eine Website nach dieser Vorschau?","acceptedAnswer":{"@type":"Answer","text":"Eine Landingpage kostet ab 1.290 Euro, ein Conversion-Onepager 2.290 Euro und eine Unternehmenswebsite mit bis zu sieben Seiten 4.490 Euro, jeweils netto als Festpreis. Die genauen Pakete stehen auf der Preisseite."}}]}]}
+---
+
+<section class="sec sec--white" aria-labelledby="page-title">
+  <div class="wrap">
+    <ol class="breadcrumb"><li><a href="/">Startseite</a></li><li>Website-Vorschau</li></ol>
+    <div class="grid grid--split">
+      <div>
+        <span class="eyebrow">Kostenlose Vorschau</span>
+        <h1 id="page-title" class="h1--md">So könnte Ihre Website aussehen.</h1>
+        <p class="lead">Geben Sie Ihren Betriebsnamen und Ihren Ort ein. Sie sehen sofort eine Beispielseite in dem Aufbau, den wir für Betriebe wie Ihren bauen, mit Ihrem Namen darin. Ohne Anmeldung, ohne E-Mail-Adresse.</p>
+        <ul class="vp-points">
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Drei Beispiel-Designs zum Wechseln: Handwerk, Praxis oder Kanzlei, Gastronomie oder Handel</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Ansicht für Computer und Smartphone, direkt zum Scrollen</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Ihre Eingaben bleiben in Ihrem Browser und werden nicht gespeichert</li>
+        </ul>
+      </div>
+      <form class="card card--lg vp-form reveal" data-vorschau novalidate aria-labelledby="vp-form-title">
+        <h2 id="vp-form-title" class="h3">Ihre Vorschau erstellen</h2>
+        <div class="field"><label for="vp-name">Name Ihres Betriebs</label><input id="vp-name" name="n" type="text" maxlength="48" autocomplete="organization" placeholder="z. B. Schulz Elektrotechnik" required></div>
+        <div class="field"><label for="vp-ort">Ort</label><input id="vp-ort" name="o" type="text" maxlength="40" autocomplete="address-level2" placeholder="z. B. Celle" required></div>
+        <div class="field"><label for="vp-branche">Branche</label>
+          <select id="vp-branche" name="b">
+            <option value="elektro-muster">Handwerk und Gewerbe</option>
+            <option value="praxis-muster">Praxis, Kanzlei oder Dienstleistung</option>
+            <option value="gasthaus-muster">Gastronomie und Handel</option>
+          </select>
+        </div>
+        <div class="form-msg" role="alert" aria-live="polite"></div>
+        <button type="submit" class="btn btn--primary btn--lg">Vorschau anzeigen</button>
+        <p class="form-note">Es wird nichts an uns gesendet. Die Vorschau entsteht nur in Ihrem Browser.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="sec vp-result" data-vorschau-result aria-labelledby="vp-result-title" hidden>
+  <div class="wrap">
+    <div class="vp-head">
+      <div>
+        <span class="eyebrow">Ihre Vorschau</span>
+        <h2 id="vp-result-title" data-vorschau-title>So könnte es aussehen.</h2>
+        <p class="muted">Wechseln Sie oben zwischen den Designs und scrollen Sie direkt in der Vorschau. Texte, Bilder und Leistungen sind Beispiele: Die echten Inhalte schreiben wir für Ihren Betrieb.</p>
+      </div>
+      <div class="device-toggle" role="group" aria-label="Ansicht wechseln">
+        <button type="button" data-device="desktop" aria-pressed="true"><svg><use href="#i-layout"/></svg>Computer</button>
+        <button type="button" data-device="mobile" aria-pressed="false"><svg><use href="#i-chat"/></svg>Smartphone</button>
+      </div>
+    </div>
+    {{> mini-site}}
+    <p class="tiny center mt-2"><a href="/beispiel/elektro-muster/" data-demo-link data-vorschau-open target="_blank" rel="noopener">In voller Größe öffnen<span class="sr-only"> (öffnet in neuem Tab)</span></a></p>
+    <div class="card card--lg card--violet vp-cta">
+      <div>
+        <h3>Gefällt Ihnen die Richtung?</h3>
+        <p class="muted">Im Potenzial-Check sagen Sie uns in drei Fragen, was Sie brauchen. Danach besprechen wir kostenlos, wie Ihre echte Seite aufgebaut wäre, mit Festpreis.</p>
+      </div>
+      <div class="row">
+        <a class="btn btn--primary btn--lg" href="/kontakt" data-open-modal>Potenzial-Check starten</a>
+        <a class="btn btn--secondary btn--lg" href="/preise">Preise ansehen</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="vp-how-title">
+  <div class="wrap wrap--narrow">
+    <span class="eyebrow">Was Sie sehen</span>
+    <h2 id="vp-how-title">Aufbau statt Zufall.</h2>
+    <p>Die Beispielseiten zeigen, wie wir eine Seite für Anfragen aufbauen: klare Aussage ganz oben, Leistungen und Einzugsgebiet, Ablauf, häufige Fragen und ein Formular, das auch vom Smartphone aus funktioniert. Das sind drei fiktive Betriebe, die Inhalte sind Beispiele. Wer anfängt, kann die Struktur sofort für seinen Betrieb übernehmen.</p>
+    <p>Neugierig auf den Zustand Ihrer jetzigen Seite? Der <a href="/website-check">kostenlose Website-Check</a> zeigt, wie es um Auffindbarkeit, Smartphone und Vertrauen steht.</p>
+  </div>
+</section>
+
+<section class="sec sec--soft" aria-labelledby="faq-title">
+  <div class="wrap wrap--narrow">
+    <span class="eyebrow">Häufige Fragen</span>
+    <h2 id="faq-title">Kurz beantwortet.</h2>
+    <details class="faq" open><summary>Ist die Vorschau meine echte Website?</summary><div class="faq-body"><p>Nein. Die Vorschau zeigt eine Beispielseite im Aufbau, den wir für Betriebe wie Ihren bauen, mit Ihrem Namen und Ort darin. Texte, Bilder, Leistungen und Rechtstexte sind Beispiele. Die echten Inhalte erstellen wir für Ihren Betrieb.</p></div></details>
+    <details class="faq"><summary>Werden meine Eingaben gespeichert?</summary><div class="faq-body"><p>Nein. Name und Ort bleiben in Ihrem Browser und werden nicht an unseren Server gesendet. Die Vorschau wird nur in Ihrem Browser zusammengesetzt.</p></div></details>
+    <details class="faq"><summary>Was kostet eine Website nach dieser Vorschau?</summary><div class="faq-body"><p>Eine Landingpage kostet ab 1.290 Euro, ein Conversion-Onepager 2.290 Euro und eine Unternehmenswebsite mit bis zu sieben Seiten 4.490 Euro, jeweils netto als Festpreis. Die genauen Pakete stehen auf der <a href="/preise">Preisseite</a>.</p></div></details>
+  </div>
+</section>
+
+<section class="sec sec--tight" aria-labelledby="cta-title">
+  <div class="wrap">
+    <div class="band reveal">
+      <div class="wrap-inner">
+        <span class="eyebrow">Nächster Schritt</span>
+        <h2 id="cta-title">Aus der Vorschau wird Ihre Seite.</h2>
+        <p class="lead">Drei Fragen, eine erste Einschätzung, dann ein kostenloses Erstgespräch. Festpreis, klarer Umfang, keine versteckten Kosten.</p>
+        <div class="row mt-3"><a class="btn btn--primary btn--lg" href="/kontakt" data-open-modal>Potenzial-Check starten</a><a class="btn btn--secondary btn--lg" href="/website-check">Website kostenlos prüfen</a></div>
+      </div>
+    </div>
+  </div>
+</section>
