@@ -77,7 +77,7 @@ Außenwäsche von Hand, Felgenreinigung, Innenraum aussaugen, Oberflächen abwis
 Ab 79 € (Kleinwagen), ab 99 € (Kompaktwagen), ab 119 € (Limousine, Kombi, kleinerer SUV), ab 149 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Essential**
-Alles aus Refresh plus intensive Innenraum- und Kofferraumreinigung, Einstiege, Türverkleidungen und Kunststoffe sowie Polster-, Teppich- oder Lederreinigung und Pflege. Arbeitszeit ca. 4 Stunden, Ihr Auto bleibt über Nacht bei uns. Bei starker Verschmutzung oder vielen Tierhaaren sind Mehrkosten möglich.
+Alles aus Refresh plus intensive Innenraum- und Kofferraumreinigung, Einstiege, Türverkleidungen und Kunststoffe sowie Polster-, Teppich- oder Lederreinigung und Pflege. Arbeitszeit ca. 4 Stunden, optimal ist ein Tag Standzeit bei uns. Bei starker Verschmutzung oder vielen Tierhaaren sind Mehrkosten möglich.
 Ab 299 € (Kleinwagen), ab 329 € (Kompaktwagen), ab 379 € (Limousine, Kombi, kleinerer SUV), ab 449 € (großer SUV, Van). Endpreise gemäß § 19 UStG ohne Umsatzsteuer.
 
 **Signature**
@@ -445,7 +445,7 @@ Ihr dürft als Inhaber selbst Fragen stellen und beantworten. Erst die Frage ste
 Unsere Einstiegspreise für Kleinwagen: Refresh ab 79 €, Essential ab 299 €, Signature ab 449 €, Excellence ab 599 €. Für Kompaktwagen, Limousinen, Kombis, SUVs und Vans liegen die Preise höher. Für Sport- und Luxusfahrzeuge sowie Wohnmobile erhalten Sie ein Angebot auf Anfrage. Alle Preise sind Endpreise. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Den verbindlichen Preis nennen wir Ihnen vor dem Termin.
 
 **2. Wie lange dauert eine Aufbereitung?**
-Die reine Arbeitszeit beträgt bei Refresh ca. 1 Stunde, bei Essential ca. 4 Stunden, bei Signature ca. 6 Stunden und bei Excellence ca. 8 bis 12 Stunden. Ab Essential bleibt Ihr Auto über Nacht bei uns, damit Pflegeprodukte und Versiegelung in Ruhe aushärten. Je nach Zustand des Fahrzeugs kann es abweichen. Das sagen wir Ihnen vorab.
+Die reine Arbeitszeit beträgt bei Refresh ca. 1 Stunde, bei Essential ca. 4 Stunden, bei Signature ca. 6 Stunden und bei Excellence ca. 8 bis 12 Stunden. Bei Versiegelung und Keramik für Lack, Felgen oder Scheiben bleibt Ihr Auto 3 Tage bei uns, damit die Beschichtung in Ruhe aushärtet. Bei allen anderen Leistungen ist ein Tag Standzeit optimal. Je nach Zustand des Fahrzeugs kann es abweichen. Das sagen wir Ihnen vorab.
 
 **3. Waschen Sie in einer Waschstraße?**
 Nein. Wir arbeiten zu 100 % in Handarbeit. Außen waschen wir mit der Zwei-Eimer-Methode. Das schont den Lack.

@@ -19,6 +19,10 @@
     {
       "value": "bis 850 °C",
       "label": "hitzebeständig laut Hersteller"
+    },
+    {
+      "value": "3 Tage",
+      "label": "Standzeit zum Aushärten"
     }
   ],
   "bookAs": "keramik",
@@ -47,7 +51,7 @@
     },
     {
       "title": "Übergabe",
-      "text": "Gemeinsame Abnahme und Tipps, wie Sie die beschichteten Felgen schonend reinigen."
+      "text": "Ihr Auto bleibt 3 Tage bei uns, damit die Beschichtung in Ruhe aushärtet. Gemeinsame Abnahme und Tipps, wie Sie die beschichteten Felgen schonend reinigen."
     }
   ],
   "faq": [

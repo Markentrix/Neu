@@ -19,6 +19,10 @@
     {
       "value": "Abperleffekt",
       "label": "bessere Sicht bei Regen"
+    },
+    {
+      "value": "3 Tage",
+      "label": "Standzeit zum Aushärten"
     }
   ],
   "bookAs": "keramik",
@@ -46,7 +50,7 @@
     },
     {
       "title": "Übergabe",
-      "text": "Gemeinsame Kontrolle und Hinweise zur Pflege der beschichteten Scheiben."
+      "text": "Ihr Auto bleibt 3 Tage bei uns, damit die Beschichtung in Ruhe aushärtet. Gemeinsame Kontrolle und Hinweise zur Pflege der beschichteten Scheiben."
     }
   ],
   "faq": [

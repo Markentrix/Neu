@@ -287,6 +287,17 @@ class TestPublicAPI(Base):
                       ("TCAP2", "termin", "termin_bestaetigt", "x", "x", "Test", day2, json.dumps({"paket": "keramik"})))
         code, j = self.req("GET", "/api/verfuegbarkeit")
         self.assertIn(day2, j["blocked"])
+        d2 = dt.date.fromisoformat(day2)
+        for k in (1, 2):  # Standzeit 3 Tage: auch die zwei Folgetage sind belegt
+            self.assertIn((d2 + dt.timedelta(days=k)).isoformat(), j["blocked"])
+        self.assertNotIn((d2 + dt.timedelta(days=3)).isoformat(), j["blocked"])
+        # eine weitere Keramik darf nicht beginnen, wenn ihre Standzeit in die bestehende ragt
+        self.assertIn((d2 - dt.timedelta(days=2)).isoformat(), j["blockedKeramik"])
+        self.admin("PUT", "kalender", {"keramikDays": 1})
+        code, j = self.req("GET", "/api/verfuegbarkeit")
+        self.assertNotIn((d2 + dt.timedelta(days=1)).isoformat(), j["blocked"])
+        self.assertEqual(self.admin("PUT", "kalender", {"keramikDays": 9})[0], 422)
+        self.admin("PUT", "kalender", {"keramikDays": 3})
         self.admin("PUT", "kalender", {"keramikExclusive": False})
         code, j = self.req("GET", "/api/verfuegbarkeit")
         self.assertNotIn(day2, j["blocked"])

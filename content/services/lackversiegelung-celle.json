@@ -13,12 +13,12 @@
       "label": "zu Signature oder Excellence"
     },
     {
-      "value": "Monate",
-      "label": "Schutzdauer"
-    },
-    {
       "value": "Koch-Chemie",
       "label": "Profi-Versiegelung"
+    },
+    {
+      "value": "3 Tage",
+      "label": "Standzeit zum Aushärten"
     }
   ],
   "intro": "Der Klarlack Ihres Autos ist täglich UV-Strahlung, Streusalz, Insekten, Vogelkot, Baumharz und Straßenschmutz ausgesetzt. Eine professionelle Lackversiegelung bildet eine glatte, hydrophobe Schutzschicht, an der Schmutz schlechter haftet und Wasser abperlt. Der Lack bleibt länger sauber, lässt sich leichter waschen und behält seinen Glanz.\n\nBesonders sinnvoll ist eine Versiegelung direkt nach dem Neuwagenkauf, nach einer Lackpolitur oder vor dem Winter. Wir bereiten den Lack vor der Versiegelung gründlich vor: Wäsche, Dekontamination, bei Bedarf Politur und Entfettung. Nur auf perfekt vorbereitetem Lack hält eine Versiegelung so lange, wie sie soll.\n",
@@ -46,7 +46,7 @@
     },
     {
       "title": "Aushärten & Abnahme",
-      "text": "Die Versiegelung härtet aus, anschließend Kontrolle und Pflegehinweise für danach."
+      "text": "Ihr Auto bleibt 3 Tage bei uns, damit die Versiegelung in Ruhe aushärtet. Anschließend Kontrolle und Pflegehinweise für danach."
     }
   ],
   "faq": [

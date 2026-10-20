@@ -19,6 +19,10 @@
     {
       "value": "ab Signature",
       "label": "oder Neuwagen nach Lackprüfung"
+    },
+    {
+      "value": "3 Tage",
+      "label": "Standzeit zum Aushärten"
     }
   ],
   "bookAs": "keramik",
@@ -53,7 +57,7 @@
     },
     {
       "title": "Aushärtung & Übergabe",
-      "text": "Nach der Aushärtung gemeinsame Abnahme bei Tageslicht und eine Pflegeanleitung für die ersten Wochen."
+      "text": "Ihr Auto bleibt 3 Tage bei uns, damit die Beschichtung in Ruhe aushärtet. Nach der Aushärtung gemeinsame Abnahme bei Tageslicht und eine Pflegeanleitung für die ersten Wochen."
     }
   ],
   "faq": [

@@ -613,11 +613,13 @@ def voucher_html(v):
 def blocked_days(keramik=False):
     """Gesperrte Tage plus ausgebuchte Tage (bestätigte Termine ≥ Tageskapazität).
 
-    Keramikversiegelung belegt den Platz für einen ganzen Tag: Ein Tag mit bestätigter Keramik ist für alles
-    andere ausgebucht, und Keramik ist nur an Tagen ohne bestätigten Termin möglich (Einstellung keramikExclusive).
+    Keramikversiegelung belegt den Platz exklusiv, und zwar für die ganze Standzeit (Einstellung keramikDays,
+    Standard 3 Tage): Diese Tage sind für alles andere ausgebucht, und eine Keramik kann nur beginnen, wenn in
+    ihrer Standzeit kein anderer Termin bestätigt ist (Einstellung keramikExclusive).
     """
     cap = int(setting("dailyCapacity", 2) or 0)
     excl = bool(setting("keramikExclusive", True))
+    span = max(1, int(setting("keramikDays", 3) or 1))
     t0 = today().isoformat()
     with db() as c:
         days = {r["day"] for r in c.execute("SELECT day FROM blocked WHERE day >= ?", (t0,))}
@@ -632,9 +634,11 @@ def blocked_days(keramik=False):
     if cap > 0:
         days |= {d for d, n in count.items() if n >= cap}
     if excl:
-        days |= ker
-        if keramik:
-            days |= set(count)
+        shift = lambda d, k: (dt.date.fromisoformat(d) + dt.timedelta(days=k)).isoformat()
+        days |= {shift(d, k) for d in ker for k in range(span)}
+        if keramik:  # Start nur, wenn die ganze Standzeit frei ist
+            days |= {shift(d, -k) for d in set(count) for k in range(span)}
+            days |= {shift(d, -k) for d in ker for k in range(1, span)}
     return sorted(days)
 
 
@@ -1440,7 +1444,8 @@ class AdminAPI:
                 req = [dict(r) for r in c.execute("SELECT datum day, COUNT(*) n, SUM(status='termin_bestaetigt') ok FROM anfragen WHERE typ='termin' AND datum != '' GROUP BY datum")]
             return h.send(200, {"blocked": bl, "requests": req, "closedWeekdays": setting("closedWeekdays", [0]),
                                 "dailyCapacity": setting("dailyCapacity", 2), "leadDays": setting("leadDays", 1),
-                                "keramikExclusive": bool(setting("keramikExclusive", True)), "nextFree": next_free_day()})
+                                "keramikExclusive": bool(setting("keramikExclusive", True)), "keramikDays": setting("keramikDays", 3),
+                                "nextFree": next_free_day()})
         d = h.parse()
         if self.m == "POST":
             days = d.get("days") or [d.get("day")]
@@ -1458,7 +1463,7 @@ class AdminAPI:
                 set_setting("closedWeekdays", [int(x) for x in d.get("closedWeekdays", []) if str(x).isdigit() and 0 <= int(x) <= 6])
             if "keramikExclusive" in d:
                 set_setting("keramikExclusive", bool(d["keramikExclusive"]))
-            for k, lo, hi in (("dailyCapacity", 0, 20), ("leadDays", 0, 30)):
+            for k, lo, hi in (("dailyCapacity", 0, 20), ("leadDays", 0, 30), ("keramikDays", 1, 7)):
                 if k in d:
                     v = int(d[k]) if str(d[k]).isdigit() else None
                     if v is None or not lo <= v <= hi:

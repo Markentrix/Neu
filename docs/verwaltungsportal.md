@@ -33,7 +33,7 @@ Die eigene Statistik setzt keine Cookies und speichert keine IP-Adressen. Ein Ei
 - Tag anklicken sperrt ihn (z. B. Urlaub, ausgebucht). Nochmal klicken gibt ihn frei. Gesperrte Tage und Ruhetage sind in der Online-Buchung nicht wählbar.
 - Die Zahl im Tag zeigt Terminwünsche, „best.“ die bestätigten.
 - **Ruhetage** (Standard: Sonntag) rechts festlegen.
-- **Auslastung:** „Fahrzeuge pro Tag“ (Standard 2). Hat ein Tag so viele Anfragen mit Status „Termin bestätigt“, gilt er automatisch als ausgebucht. „Vorlauf“ (Standard 1) legt fest, ab wann frühestens gebucht werden kann.
+- **Auslastung:** „Fahrzeuge pro Tag“ (Standard 2). Hat ein Tag so viele Anfragen mit Status „Termin bestätigt“, gilt er automatisch als ausgebucht. „Vorlauf“ (Standard 1) legt fest, ab wann frühestens gebucht werden kann. „Keramikversiegelung belegt den Platz exklusiv“ (Standard an) und „Standzeit Keramik in Tagen“ (Standard 3): Eine bestätigte Keramik sperrt ihre ganze Standzeit für andere Termine, und eine neue Keramik kann nur beginnen, wenn in diesen Tagen nichts bestätigt ist.
 - **Nächster freier Tag:** Startseite, Kontaktblock und Buchung zeigen automatisch den nächsten Tag, der weder Ruhetag noch gesperrt noch ausgebucht ist. Ein Klick übernimmt ihn in die Terminanfrage. Damit die Anzeige stimmt: Termine nach Zusage auf „Termin bestätigt“ setzen und Urlaub sperren.
 
 ## Inhalte

@@ -91,7 +91,7 @@ Auch innen hinterlässt der Winter Spuren. Schnee an den Schuhen bringt Salz auf
 
 Am meisten erreichen Sie, wenn Sie das Auto schon im Herbst vorbereiten. Eine [Lackversiegelung](/leistungen/lackversiegelung-celle.html) oder eine [Keramikversiegelung](/leistungen/keramikversiegelung-celle.html) sorgt dafür, dass Salz und Schmutz schlechter am Lack haften. Das Auto lässt sich dann mit weniger Reiben reinigen, und der Lack ist besser geschützt. Wie Sie Ihr Auto vor dem Winter vorbereiten, lesen Sie im Ratgeber [Auto winterfest machen](/ratgeber/auto-winterfest-lackschutz.html).
 
-> Gut zu wissen: Ab dem Paket Essential lassen wir Ihr Auto rund 24 Stunden bei uns stehen. So trocknet es über Nacht vollständig in der Halle ab, und es entstehen keine Wasserflecken. Gerade im Winter ist das ein Vorteil.
+> Gut zu wissen: Am besten lassen Sie Ihr Auto einen Tag bei uns stehen. So trocknet es vollständig in der Halle ab, und es entstehen keine Wasserflecken. Gerade im Winter ist das ein Vorteil.
 
 ## Winterwäsche bei ElbDetail in Celle
 

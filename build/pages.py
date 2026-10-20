@@ -672,7 +672,7 @@ def build_home(site, write):
       <div class="process-rail stagger" data-draw>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
         <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle. Ab dem Paket Essential bleibt Ihr Auto über Nacht bei uns, damit alles aushärtet und keine Wasserflecken entstehen. Danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle. Optimal ist ein Tag Standzeit bei uns, bei Versiegelung und Keramik sind es 3 Tage, damit alles in Ruhe aushärtet. Danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
       </div>
     </div>
   </section>

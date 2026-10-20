@@ -123,7 +123,7 @@ def build_winter_hub(site, write, winter):
       <aside class="sticky-aside">
         <div class="aside-card dark">
           <h3>Winter-Lackschutz in Celle</h3>
-          <p>Glanzpolitur im Paket Signature ab {site.min_price("signature")} €, dazu eine Versiegelung vor dem ersten Streusalz. Ab dem Paket Essential bleibt Ihr Auto rund 24 Stunden bei uns und trocknet über Nacht in der Halle.</p>
+          <p>Glanzpolitur im Paket Signature ab {site.min_price("signature")} €, dazu eine Versiegelung vor dem ersten Streusalz. Mit Versiegelung bleibt Ihr Auto 3 Tage bei uns, damit die Schutzschicht in Ruhe aushärtet.</p>
           <a class="btn btn-primary" href="{prefix}aktion/winterschutz.html">Zur Winteraktion</a>
         </div>
       </aside>

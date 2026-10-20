@@ -123,7 +123,7 @@ def build_termin(site, write):
         <fieldset class="wz-step" data-step="4">
           <legend><span class="wz-num">4</span>Wunschtermin</legend>
           <p class="wz-hint">{ESC(s["openingHours"]["text"])}, {ESC(s["openingHours"]["detail"])}. Wir bestätigen den Termin persönlich.</p>
-          <p class="wz-hint">Ab dem Paket Essential bleibt Ihr Auto rund 24 Stunden bei uns, die Abholung ist dann am Folgetag.</p>
+          <p class="wz-hint">Bei Versiegelung und Keramik bleibt Ihr Auto 3 Tage bei uns. Bei allen anderen Leistungen ist es optimal, wenn es einen Tag bleiben kann.</p>
           <div class="two-col">
             <div class="form-row"><label for="t-date1">Wunschtermin*</label><input type="date" id="t-date1" name="datum" required aria-describedby="t-date1-msg"><span class="field-msg" id="t-date1-msg"></span><button class="next-free next-free--fill" type="button" data-next-free data-nf-fill hidden><span class="nf-dot" aria-hidden="true"></span>Nächster freier Tag: <strong data-nf-date></strong> · übernehmen</button></div>
             <div class="form-row"><label for="t-date2">Ausweichtermin <span class="hint">(optional)</span></label><input type="date" id="t-date2" name="datum2" aria-describedby="t-date2-msg"><span class="field-msg" id="t-date2-msg"></span></div>
@@ -395,7 +395,7 @@ def build_winter(site, write):
       <p class="eyebrow">Saison-Empfehlung Herbst &amp; Winter</p>
       <h1 id="page-h">Lack winterfest machen. <em>Bevor das Streusalz kommt.</em></h1>
       <p class="lead">Streusalz, Matsch und Frost setzen Lack, Felgen und Dichtungen stärker zu als jede andere Jahreszeit. Eine Versiegelung vor dem Winter sorgt dafür, dass Schmutz schlechter haftet und das Auto im Frühjahr nicht erst gerettet werden muss.</p>
-      <div class="keyfacts"><div class="keyfact"><strong>ab {site.min_price("signature")} €</strong><span>{ESC(prem["name"])} mit Glanzpolitur</span></div><div class="keyfact"><strong>ca. 6 Std.</strong><span>Arbeitszeit, Abholung am Folgetag</span></div><div class="keyfact"><strong>+ Versiegelung</strong><span>separat zubuchbar</span></div></div>
+      <div class="keyfacts"><div class="keyfact"><strong>ab {site.min_price("signature")} €</strong><span>{ESC(prem["name"])} mit Glanzpolitur</span></div><div class="keyfact"><strong>3 Tage</strong><span>Standzeit mit Versiegelung</span></div><div class="keyfact"><strong>+ Versiegelung</strong><span>separat zubuchbar</span></div></div>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket=signature&amp;quelle=winter">{I["cal"]}Wintertermin anfragen</a>
         <a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich möchte mein Auto vor dem Winter versiegeln lassen. Fahrzeug: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
