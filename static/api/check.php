@@ -13,9 +13,6 @@
  * protokolliert. Das Ergebnis liegt höchstens zwei Stunden im temporären Ordner (Zufalls-Token, ohne Personenbezug), damit es auf Wunsch
  * per E-Mail zugesandt werden kann (siehe anfrage.php); außerdem Dateien für die Begrenzung (Hash der IP, Platzhalter).
  *
- * Modus „profil“ (JSON {"url":…,"mode":"profil"}): ruft nur die Startseite ab und liefert die öffentlich sichtbaren Angaben (Name, Überschrift,
- * Beschreibung, Leistungen, Telefon, Ort) für die Website-Vorschau. Es wird nichts gespeichert.
- *
  * Schutz gegen Missbrauch: nur http/https auf Port 80/443, nur öffentliche IP-Adressen (auch nach Weiterleitungen, die
  * aufgelöste Adresse wird fest verwendet), höchstens 5 Weiterleitungen, je Abruf Zeit- und Größenbegrenzung, insgesamt
  * höchstens 24 Sekunden, 8 Prüfungen je IP in 10 Minuten, höchstens 2 gleichzeitige Prüfungen auf dem Server.
@@ -260,100 +257,6 @@ function robots_blocks(string $robots, string $agent): bool {
   return $dis && !$allow;
 }
 
-// ── Website-Vorschau: öffentliche Angaben der Startseite auslesen (Modus „profil“) ───────────────────
-function profile_clean(string $s, int $max): string {
-  return cut(norm((string) preg_replace('/[\x00-\x1F\x7F<>]/u', ' ', $s)), $max);
-}
-/** Textstücke eines Knotens (je Textknoten eines), damit verschachtelte Elemente nicht ohne Leerzeichen zusammenkleben. */
-function profile_pieces(DOMNode $n): array {
-  $out = [];
-  $walk = function (DOMNode $x) use (&$walk, &$out): void {
-    foreach ($x->childNodes as $c) {
-      if ($c->nodeType === XML_TEXT_NODE) { $t = norm($c->textContent); if ($t !== '') $out[] = $t; }
-      elseif ($c->nodeType === XML_ELEMENT_NODE && !in_array(strtolower($c->nodeName), ['script', 'style', 'svg', 'noscript'], true)) $walk($c);
-    }
-  };
-  $walk($n);
-  return $out;
-}
-function profile_alnum(string $s): string { return (string) preg_replace('/[^a-z0-9]/', '', strtr(lc($s), ['ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'ß' => 'ss'])); }
-function build_profile(array $P, ?array $entity, string $bareHost): array {
-  $q = $P['q'];
-  $meta = function (string $attr, string $key) use ($q): string {
-    $n = $q('//meta[@' . $attr . '="' . $key . '"]');
-    return $n ? trim((string) $n[0]->getAttribute('content')) : '';
-  };
-  $generic = ['home', 'startseite', 'start', 'kontakt', 'impressum', 'datenschutz', 'datenschutzerklärung', 'über uns', 'ueber uns', 'über mich', 'blog', 'news', 'aktuelles', 'menü', 'menu', 'navigation', 'suche',
-    'login', 'anmelden', 'warenkorb', 'agb', 'faq', 'newsletter', 'cookies', 'cookie', 'karriere', 'jobs', 'presse', 'sitemap', 'galerie', 'links', 'anfahrt', 'öffnungszeiten', 'willkommen', 'herzlich willkommen',
-    'referenzen', 'preise', 'ablauf', 'termin', 'anfrage', 'portfolio', 'wir', 'unternehmen', 'firma', 'philosophie', 'mehr', 'mehr erfahren', 'weiterlesen', 'jetzt anfragen', 'kontaktformular', 'team', 'leistungen', 'angebot', 'service'];
-  $label = profile_alnum(explode('.', $bareHost)[0]);
-
-  // Name: strukturierte Daten, dann Seitentitel
-  $name = '';
-  if ($entity && !empty($entity['name']) && is_string($entity['name'])) $name = profile_clean($entity['name'], 60);
-  if ($name === '') $name = profile_clean($meta('property', 'og:site_name'), 60);
-  if ($name === '' && $P['title'] !== '') {
-    $parts = array_values(array_filter(array_map('trim', (array) preg_split('/\s+[|\-–—·•:]\s+/u', $P['title'])), fn($x) => $x !== ''));
-    foreach ($parts as $pt) { if ($label !== '' && strpos(profile_alnum($pt), $label) !== false && len($pt) <= 60) { $name = profile_clean($pt, 60); break; } }
-    if ($name === '' && $parts) { $name = len($parts[0]) <= 50 ? profile_clean($parts[0], 60) : profile_clean(end($parts), 60); }
-  }
-  if ($name === '' || len($name) < 2 || in_array(lc($name), $generic, true)) $name = ucfirst(explode('.', $bareHost)[0]);
-
-  // Überschrift und Beschreibung
-  $headline = '';
-  $h1n = $q('//h1');
-  if ($h1n) {
-    $pc = profile_pieces($h1n[0]);
-    $joined = implode(' ', $pc);
-    $headline = profile_clean(len($joined) <= 110 ? $joined : ($pc[0] ?? ''), 110);
-  }
-  if ($headline !== '' && profile_alnum($headline) === profile_alnum($name)) $headline = '';
-  $desc = profile_clean($P['desc'] !== '' ? $P['desc'] : $meta('property', 'og:description'), 220);
-
-  // Telefon
-  $phone = '';
-  foreach ($q('//a[starts-with(translate(@href,"TEL","tel"),"tel:")]') as $a) {
-    $v = preg_replace('/[^0-9+()\/\-. ]/', '', rawurldecode(substr(trim((string) $a->getAttribute('href')), 4)));
-    if (strlen((string) preg_replace('/\D/', '', (string) $v)) >= 6) { $phone = cut(trim((string) $v), 24); break; }
-  }
-  if ($phone === '' && $entity && !empty($entity['telephone']) && is_string($entity['telephone'])) $phone = cut(trim((string) preg_replace('/[^0-9+()\/\-. ]/', '', $entity['telephone'])), 24);
-
-  // Ort und Adresse
-  $street = ''; $plz = ''; $city = '';
-  $addr = $entity['address'] ?? null;
-  if (is_array($addr) && isset($addr[0]) && is_array($addr[0])) $addr = $addr[0];
-  if (is_array($addr)) {
-    $street = profile_clean((string) ($addr['streetAddress'] ?? ''), 60);
-    $plz = profile_clean((string) ($addr['postalCode'] ?? ''), 10);
-    $city = profile_clean((string) ($addr['addressLocality'] ?? ''), 40);
-  }
-  if ($city === '' && preg_match('/\b(\d{5})\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-]{2,}(?:\s(?:am|an|bei|im|in|ob)\s[A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-]+)?)/u', (string) $P['text'], $m)) { $plz = $m[1]; $city = profile_clean($m[2], 40); }
-  $address = trim(($street !== '' ? $street . ', ' : '') . trim($plz . ' ' . $city), ' ,');
-
-  // Leistungen: Menüpunkte, dann Zwischenüberschriften
-  $svc = []; $seen = [];
-  $add = function (string $t) use (&$svc, &$seen, $generic, $name): void {
-    $t = profile_clean($t, 45);
-    $k = lc($t);
-    if (count($svc) >= 6 || len($t) < 3 || len($t) > 45 || isset($seen[$k]) || in_array($k, $generic, true) || profile_alnum($t) === profile_alnum($name)) return;
-    if (preg_match('/^(unsere|unser|unseren|ihre|ihr|meine|mein|wir|warum|willkommen|herzlich)\b/iu', $t) || !preg_match('/\p{L}{3}/u', $t) || count(preg_split('/\s+/u', $t)) > 6 || preg_match('/[.!?]$/u', $t)) return;
-    $seen[$k] = true; $svc[] = $t;
-  };
-  foreach ($q('//nav//a | //header//a') as $a) { $pc = profile_pieces($a); $add($pc ? $pc[0] : ''); }
-  foreach ($P['h2'] as $h) $add($h);
-  foreach ($q('//h3') as $h) { $pc = profile_pieces($h); $add($pc ? $pc[0] : ''); }
-
-  // Passender Stil
-  $blob = lc($name . ' ' . $P['title'] . ' ' . $desc . ' ' . implode(' ', $P['h1']) . ' ' . implode(' ', $svc));
-  $hit = fn(array $w): bool => (bool) array_filter($w, fn($x) => strpos($blob, $x) !== false);
-  $stil = 'handwerk';
-  if ($hit(['restaurant', 'gasthaus', 'café', 'cafe', 'bistro', 'hotel', 'pension', 'bäckerei', 'metzger', 'laden', 'shop', 'boutique', 'blumen', 'imbiss', 'pizzeria', 'speisekarte', 'handel'])) $stil = 'gastro';
-  elseif ($hit(['praxis', 'arzt', 'ärzt', 'zahn', 'physio', 'therapie', 'kanzlei', 'anwalt', 'steuer', 'berater', 'beratung', 'notar', 'heilpraktik', 'psycholog', 'optik', 'apotheke', 'kosmetik', 'friseur', 'coaching'])) $stil = 'praxis';
-
-  return ['ok' => true, 'host' => $bareHost, 'name' => $name, 'headline' => $headline, 'beschreibung' => $desc, 'leistungen' => $svc, 'telefon' => $phone,
-          'ort' => $city, 'adresse' => $address, 'stil' => $stil];
-}
-
 // ── Abruf der Startseite ────────────────────────────────────────────────────
 $main = safe_fetch($input, MAX_BYTES, 9);
 if (!$main['ok']) {
@@ -410,9 +313,6 @@ foreach ($ldNodes as $n) {
 }
 $entity = $biz ?? $org;
 $lower = lc($html);
-
-// Website-Vorschau: nur die öffentlichen Angaben der Startseite auslesen, keine Prüfung, keine Speicherung
-if (is_array($data) && ($data['mode'] ?? '') === 'profil') respond(200, build_profile($P, is_array($entity) ? $entity : null, $bareHost));
 
 // ===== TECHNIK =====
 $https = $scheme === 'https';

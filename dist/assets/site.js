@@ -474,62 +474,6 @@
     });
   }
 
-  /* Website-Vorschau: öffentliche Angaben der eigenen Seite auslesen und als Entwurf in der Beispielseite anzeigen; der Entwurf steht nur im Fragment der Adresse */
-  function initVorschau() {
-    var form = $('[data-vp-url]'), res = $('[data-vp-result]'); if (!form || !res) return;
-    var edit = $('[data-vp-edit]', res), mini = $('[data-mini]', res), msg = $('[data-vp-msg]', form), busy = false, stil = 'handwerk', timer = null, host = '';
-    var MSG = { url: 'Bitte geben Sie eine gültige Adresse an, zum Beispiel www.ihre-seite.de.', rate: 'Sie haben in kurzer Zeit viele Vorschauen gestartet. Bitte versuchen Sie es in ein paar Minuten erneut.', busy: 'Gerade laufen viele Anfragen. Bitte versuchen Sie es in einer Minute erneut.', server: 'Die Vorschau ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.', origin: 'Die Vorschau ist nur über markentrix.de nutzbar.' };
-    function clean(v, max) { return String(v || '').replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max); }
-    function lines(v) { return String(v || '').split(/\r?\n/).map(function (x) { return clean(x, 45); }).filter(Boolean).slice(0, 6); }
-    function slug(n) { var s = n.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); return (s || 'ihre-seite') + '.beispiel'; }
-    function data() { var f = edit.elements; return { n: clean(f.n.value, 60), h: clean(f.h.value, 110), b: clean(f.b.value, 220), l: lines(f.l.value), t: clean(f.t.value, 24), o: clean(f.o.value, 40), a: clean(f.a.value, 90), s: stil }; }
-    function push(first) {
-      var dd = data(), hash = '#d=' + encodeURIComponent(JSON.stringify(dd));
-      $$('iframe', mini).forEach(function (f) {
-        var src = '/beispiel/ihre-seite/' + hash; f.setAttribute('data-src', src);
-        if (first || !f.getAttribute('src')) { var fr = f.parentNode; fr.classList.remove('is-live'); on(f, 'load', function () { fr.classList.add('is-live'); }); }
-        f.setAttribute('src', src);
-      });
-      var open = $('[data-vp-open]', res); if (open) open.setAttribute('href', '/beispiel/ihre-seite/' + hash);
-      var u = $('[data-vp-url-bar]', mini); if (u) u.textContent = slug(dd.n);
-      var t = $('[data-vp-title]', res); if (t) t.textContent = dd.n ? 'So könnte ' + dd.n + ' aussehen.' : 'So könnte es aussehen.';
-    }
-    function fill(p, note) {
-      var f = edit.elements;
-      f.n.value = p.name || ''; f.h.value = p.headline || ''; f.b.value = p.beschreibung || ''; f.l.value = (p.leistungen || []).join('\n'); f.t.value = p.telefon || ''; f.o.value = p.ort || ''; f.a.value = p.adresse || '';
-      stil = p.stil || 'handwerk';
-      $$('button[data-stil]', res).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-stil') === stil ? 'true' : 'false'); });
-      $('[data-vp-found]', res).textContent = note;
-      res.hidden = false; push(true); w.dispatchEvent(new Event('resize'));
-      res.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' });
-    }
-    on(edit, 'input', function () { clearTimeout(timer); timer = setTimeout(function () { push(false); }, 250); });
-    on(edit, 'submit', function (e) { e.preventDefault(); });
-    on(res, 'click', function (e) {
-      var b = e.target.closest('button[data-stil]'); if (!b) return;
-      stil = b.getAttribute('data-stil'); $$('button[data-stil]', res).forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); push(false);
-    });
-    on($('[data-vp-skip]', form), 'click', function () { msg.textContent = ''; fill({}, 'Tragen Sie in den Feldern Ihre Angaben ein, die Vorschau entsteht dabei live. Ohne bestehende Website beginnen wir mit leeren Feldern.'); $('#e-n').focus({ preventScroll: true }); });
-    on(form, 'submit', function (e) {
-      e.preventDefault(); if (busy) return;
-      var v = clean($('#vp-url').value, 300); msg.className = 'form-msg';
-      if (!v) { msg.className = 'form-msg is-error'; msg.textContent = MSG.url; $('#vp-url').focus(); return; }
-      busy = true; var btn = $('[type=submit]', form); btn.disabled = true; btn.textContent = 'Seite wird gelesen …'; msg.textContent = '';
-      var ctrl = w.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctrl) ctrl.abort(); }, 30000);
-      fetch('/api/check.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v, mode: 'profil' }), signal: ctrl ? ctrl.signal : undefined })
-        .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
-        .then(function (o) {
-          var j = o.j || {};
-          if (!j.ok) { msg.className = 'form-msg is-error'; msg.textContent = j.message || MSG[j.error] || MSG.server; return; }
-          host = j.host || '';
-          var got = (j.name ? 1 : 0) + (j.headline ? 1 : 0) + (j.leistungen && j.leistungen.length ? 1 : 0) + (j.telefon ? 1 : 0) + (j.ort ? 1 : 0);
-          fill(j, got >= 3 ? 'Die Angaben sind aus ' + host + ' gelesen. Ändern Sie in den Feldern, was nicht passt, die Vorschau passt sich sofort an.' : 'Wir konnten von ' + host + ' nur wenig lesen. Ergänzen Sie in den Feldern Ihre Angaben, die Vorschau passt sich sofort an.');
-        })
-        .catch(function () { msg.className = 'form-msg is-error'; msg.textContent = MSG.server; })
-        .then(function () { clearTimeout(to); busy = false; btn.disabled = false; btn.textContent = 'Vorschau erstellen'; });
-    });
-  }
-
   /* Hero: Lichtschein folgt dem Zeiger */
   function initGlow() {
     var hero = $('.hero'); if (!hero || d.documentElement.classList.contains('reduced') || !w.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
@@ -727,6 +671,6 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initVorschau(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();
