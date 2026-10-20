@@ -2,13 +2,14 @@ import { pipelineBoard } from './pipeline.js';
 import { stapelTabellen } from './common.js';
 stapelTabellen();
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
+import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
 
 const root = document.getElementById('app');
 let start = null;
-const NAV = [['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
+const NAV = [['willkommen', 'So geht’s'], ['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
 
 /** @type {[string, string[]][]} */
-const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden']], ['Kunden & Geld', ['kunden', 'provisionen', 'konto']]];
+const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden']], ['Kunden & Geld', ['kunden', 'provisionen', 'konto', 'willkommen']]];
 
 function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]);
@@ -17,7 +18,7 @@ function gerüst(aktiv, inhalt) {
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
       navGruppen(gruppen, aktiv, 'vertrieb'),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), inhalt, rechtFuss()),
+    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), installBanner(), inhalt, rechtFuss()),
     mobilLeiste({ aktiv, gruppen, feste: ['heute', 'leads', 'pipeline', 'uebersicht'], icons: { heute: '☎', leads: '☰', pipeline: '▦', uebersicht: '▥' }, kurz: { heute: 'Anrufe', leads: 'Leads', uebersicht: 'Zahlen' }, schluessel: 'vertrieb' }));
 }
 function tabelle(spalten, zeilen, leer) {
@@ -126,6 +127,7 @@ V.pipeline = async () => {
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Meine Pipeline'), h('p', { class: 'small muted' }, 'Alle deine Leads nach Stand. „Gewonnen“ setzt Markentrix, sobald der Kunde angelegt ist.')), board);
 };
 
+V.willkommen = () => anleitungSeite('vertrieb');
 V.leitfaden = async () => {
   const d = await api('/api/vertrieb/leitfaden');
   return h('div', { class: 'stack' },
@@ -245,14 +247,17 @@ V.konto = async () => {
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f), pushKarte('vertrieb'), zweiFaktorKarte());
 };
 
+let aufruf = 0;
 async function zeige() {
+  const dieser = ++aufruf;
   const hash = (location.hash || '#heute').slice(1), seite = hash.split('/')[0];
   nutzung(V[seite] || seite === 'lead' ? seite : 'heute');
   let inhalt;
   try { inhalt = seite === 'lead' ? await leadDetail(hash.split('/')[1]) : await (V[seite] || V.heute)(); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
+  if (dieser !== aufruf) return;   // inzwischen wurde eine andere Seite geöffnet
   root.replaceChildren(gerüst(seite === 'lead' ? 'leads' : (V[seite] ? seite : 'heute'), inhalt));
 }
 (async () => {
   try { const me = await api('/api/me'); if (me.rolle !== 'vertrieb') { location.href = me.rolle === 'admin' ? '/admin' : '/app'; return; } start = await api('/api/vertrieb/start'); } catch (e) { return; }
-  window.addEventListener('hashchange', zeige); zeige();
+  window.addEventListener('hashchange', zeige); zeige(); erstStart().catch(() => {});
 })();

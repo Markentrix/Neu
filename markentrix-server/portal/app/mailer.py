@@ -72,7 +72,10 @@ def einladung(an: str, name: str | None, link: str, rolle: str, tage: int) -> tu
         wofuer = "Ihr Zugang zum Markentrix-Portal ist eingerichtet."
     text = (f"{hallo}\n\n{wofuer}\n\nBitte legen Sie über diesen Link Ihr Passwort fest "
             f"(der Link ist {tage} Tage gültig und nur einmal nutzbar):\n\n{link}\n\n"
-            f"Danach melden Sie sich mit dieser E-Mail-Adresse unter {config.BASE_URL} an." + SIGNATUR)
+            f"Danach melden Sie sich mit dieser E-Mail-Adresse unter {config.BASE_URL} an.\n\n"
+            "Tipp: Am Handy können Sie das Portal wie eine App nutzen. Öffnen Sie es dazu auf Android in Google Chrome "
+            "bzw. auf dem iPhone in Safari. Nach der Anmeldung zeigt Ihnen das Portal in wenigen Schritten mit Bildern, wie die Installation geht "
+            "(Android: Menü ⋮ → „App installieren“, iPhone: Teilen → „Zum Home-Bildschirm“)." + SIGNATUR)
     return senden(an, "Ihr Zugang zum Markentrix-Vertriebsportal" if rolle == "vertrieb" else "Ihr Zugang zum Markentrix-Portal", text)
 
 

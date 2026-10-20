@@ -316,3 +316,16 @@ h1,h2,h3,b,strong,.pt,.pill{overflow-wrap:anywhere}
   table.stapel td .btn{min-height:38px}
   .top{margin-bottom:10px}
 }
+
+/* Anleitung „So geht’s“: Schritte mit Handy-Bildern */
+.schritte{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:12px}
+.schritt{display:grid;grid-template-columns:140px minmax(0,1fr);gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--surface)}
+.schritt .handybild{display:block}.schritt .handybild svg{display:block;width:140px;height:auto}
+.schritt h3{margin:0;font-size:15px}.schritt p{margin:4px 0 8px;color:var(--mut)}
+.schrittkopf{display:flex;gap:8px;align-items:center}
+.schrittkopf .nr{flex:none;width:22px;height:22px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font:700 12px "Space Grotesk",system-ui}
+.pulse{animation:pulsieren 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulsieren{50%{opacity:.35}}
+@media(min-width:700px){.schritt{grid-template-columns:150px minmax(0,1fr)}.schritt .handybild svg{width:150px}}
+.appbanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--tint);border:1px solid var(--tintline);border-radius:12px;padding:8px 10px;margin:0 0 10px;font-size:13.5px}
+.appbanner span{flex:1 1 180px}.appbanner .zu{background:none;border:0;font-size:16px;line-height:1;padding:6px;cursor:pointer;color:var(--mut)}

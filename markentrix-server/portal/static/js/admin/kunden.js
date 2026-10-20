@@ -3,6 +3,7 @@ import { belegeKarte } from './belege.js';
 import { V, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
 import { zeitachseKarte } from './start.js';
+import { qrKarte } from '../anleitung.js';
 
 export const modulZelle = (z) => {
   const wrap = h('div', { class: 'modul-zelle' }), panel = h('div', { class: 'small', style: 'display:none;margin-top:6px' });
@@ -421,6 +422,7 @@ export async function kundeDetail(kid) {
     await berichteKarte(kid),
     await externKarte(kid),
     await domainKarte(kid),
+    await qrKarte('kunde', (k.ansprechpartner || '').split(' ')[0]),
     await kostenKarte(kid),
     brandingKarte(kid, k),
     offboardingKarte(kid, k, await api('/api/admin/kunden/' + kid + '/domains')),

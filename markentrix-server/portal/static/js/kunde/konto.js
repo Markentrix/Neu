@@ -1,5 +1,6 @@
 import { h, api, datum, zeit, melde, zweiFaktorKarte, pushKarte, formular, dialog } from '../common.js';
-import { inhaber, tabelle, statusPill, zeige, V } from './kern.js';
+import { inhaber, tabelle, statusPill, zeige, V, hat } from './kern.js';
+import { anleitungSeite } from '../anleitung.js';
 
 function anschriftKarte(k) {
   const m = h('div');
@@ -12,6 +13,7 @@ function anschriftKarte(k) {
   return h('div', { class: 'card' }, h('h2', {}, 'Rechnungsanschrift'), h('p', { class: 'small muted' }, 'Firmenname oder Rechtsform ändern wir für dich: Schreib uns dazu unter Nachrichten.'), m, f);
 }
 
+V.willkommen = () => anleitungSeite('kunde', hat);
 V.einstellungen = async () => {
   const p = await api('/api/kunde/profil');
   const vt = await api('/api/kunde/vertretung').catch(() => null), mv = h('div');

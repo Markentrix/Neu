@@ -4,9 +4,10 @@ import os
 import time
 from pathlib import Path
 
+import segno
 from fastapi import APIRouter, Depends
 
-from . import betrieb, einstellungen
+from . import betrieb, config, einstellungen
 from .db import tx
 from .security import require_admin
 
@@ -139,3 +140,9 @@ def vertragsstand(user: dict = Depends(require_admin)):
         out.append(_punkt("ueberwachung", "Server-Überwachung", "unbekannt", "noch keine Meldung"))
     rang = {"ok": 0, "unbekannt": 1, "warn": 2, "bad": 3}
     return {"punkte": out, "gesamt": max((p["status"] for p in out), key=lambda s: rang[s])}
+
+
+@router.get("/admin/portal-qr")
+def portal_qr(user: dict = Depends(require_admin)):
+    """QR-Code der Portal-Adresse (Anmeldeseite), damit Kunden und Vertriebler das Portal direkt am Handy öffnen."""
+    return {"url": config.BASE_URL, "svg": segno.make(config.BASE_URL, error="m").svg_data_uri(scale=6, border=2)}

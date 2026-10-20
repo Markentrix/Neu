@@ -37,7 +37,7 @@ VERT="heute uebersicht leads pipeline angebote leitfaden kunden provisionen kont
 async def login(br,m,pw,pfad,w):
     ctx=await br.new_context(viewport={"width":w,"height":900},bypass_csp=True); pg=await ctx.new_page()
     errs=[]; pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("console",lambda x: x.type=="error" and "favicon" not in x.text and "Failed to load resource" not in x.text and errs.append(x.text))
-    await pg.goto(B+"/"); await pg.fill("#e",m); await pg.fill("#p",pw); await pg.click("#b"); await pg.wait_for_url("**"+pfad+"*")
+    await pg.goto(B+"/"); await pg.fill("#e",m); await pg.fill("#p",pw); await pg.click("#b"); await pg.wait_for_url("**"+pfad+"*"); await pg.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})"); await pg.goto(B+pfad)
     await pg.wait_for_selector(".side a.nav",state="attached")
     if pfad=="/app":
         try: await pg.click(".dlgoverlay >> text=Überspringen",timeout=2500)

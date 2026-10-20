@@ -149,6 +149,8 @@ export function skriptKarte(skript, skriptAm, url) {
 
 // ---------------------------------------------------------------- App-Installation und Push-Nachrichten
 let installAngebot = null;
+export const installBereit = () => !!installAngebot;
+export async function installStarten() { if (!installAngebot) return; const e = installAngebot; installAngebot = null; try { await e.prompt(); } catch { /* abgebrochen */ } }
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installAngebot = e; });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});

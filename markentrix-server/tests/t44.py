@@ -35,9 +35,9 @@ a.post(f"/api/admin/kunden/{kA}/domains",json={"domain":f"mobil{sfx}.de","inhabe
 a.post(f"/api/admin/kunden/{kA}/freigaben-kunden",json={"titel":"Instagram-Beitrag Wochenangebote KW 43 mit langem Titel","art":"social","inhalt":"Text","veroeffentlichung_am":(datetime.date.today()+datetime.timedelta(days=1)).isoformat()})
 pid=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb","email":f"vv{sfx}@k.de","status":"aktiv","einladen":True}).json()["id"]
 httpx.post(B+"/api/einladung",headers=H,json={"token":token(f"vv{sfx}@k.de"),"password":"VeraPasswort123"})
-VERT=["heute","uebersicht","pipeline","leitfaden","angebote","kunden","provisionen","leads","konto"]
+VERT=["willkommen","heute","uebersicht","pipeline","leitfaden","angebote","kunden","provisionen","leads","konto"]
 ADMIN=["uebersicht","heute","nachrichten","freigaben","aufgaben","kunden","kunde/"+kA,"leads","belege","einstellungen","preise","kennzahlen","auswertung","protokoll","team","katalog","status","compliance","onboarding","verwaltung","pipeline","vertrieb","hilfe"]
-KUNDE=["heute","uebersicht","status","briefing","nachrichten","freigaben","assistent","anfragen","termine","bewertungen","kontakte","dokumente","unterlagen","auswertung","berichte","belege","anrufe","website","wochenangebote","werbung","automationen","avv","team","hilfe","einstellungen"]
+KUNDE=["willkommen","heute","uebersicht","status","briefing","nachrichten","freigaben","assistent","anfragen","termine","bewertungen","kontakte","dokumente","unterlagen","auswertung","berichte","belege","anrufe","website","wochenangebote","werbung","automationen","avv","team","hilfe","einstellungen"]
 JS="""()=>{const W=innerWidth,out=[];if(document.documentElement.scrollWidth>W+1)out.push('Seite breiter als Bildschirm: '+document.documentElement.scrollWidth);
 for(const e of document.querySelectorAll('main *, .main *, body *')){const r=e.getBoundingClientRect();if(!r.width||!r.height)continue;if(e.closest('thead')||e.closest('.nur-sr')||e.classList.contains('nur-sr'))continue;const cs=getComputedStyle(e);if(cs.position==='fixed'||cs.visibility==='hidden')continue;
 let p=e.parentElement,scroll=false;while(p){const o=getComputedStyle(p).overflowX;if((o==='auto'||o==='scroll')&&(p.matches('.tablewrap,.tabs,.side,.tabbar,pre,.chart,.trichter,.pipeline,.board,.kanban,[data-scroll]'))){scroll=true;break}p=p.parentElement}
@@ -70,12 +70,12 @@ async def main():
         for n,v in r.items(): chk("Handy admin #"+n+" sauber",not v,v)
         ctx2=await br.new_context(viewport={"width":360,"height":844},device_scale_factor=2,has_touch=True,is_mobile=True,bypass_csp=True)
         async def lk(pg):
-            await pg.goto(B+"/"); await pg.fill("#e",mA); await pg.fill("#p","InhaberPasswort1"); await pg.click("#b"); await pg.wait_for_url("**/app*")
+            await pg.goto(B+"/"); await pg.fill("#e",mA); await pg.fill("#p","InhaberPasswort1"); await pg.click("#b"); await pg.wait_for_url("**/app*"); await pg.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})"); 
         r=await shoot(ctx2,B+"/app",KUNDE,"app",lk)
         for n,v in r.items(): chk("Handy Kundenportal #"+n+" sauber",not v,v)
         ctx3=await br.new_context(viewport={"width":360,"height":844},device_scale_factor=2,has_touch=True,is_mobile=True,bypass_csp=True)
         async def lv(pg):
-            await pg.goto(B+"/"); await pg.fill("#e",f"vv{sfx}@k.de"); await pg.fill("#p","VeraPasswort123"); await pg.click("#b"); await pg.wait_for_url("**/vertrieb*")
+            await pg.goto(B+"/"); await pg.fill("#e",f"vv{sfx}@k.de"); await pg.fill("#p","VeraPasswort123"); await pg.click("#b"); await pg.wait_for_url("**/vertrieb*"); await pg.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})"); 
         r=await shoot(ctx3,B+"/vertrieb",VERT,"vert",lv)
         for n,v in r.items(): chk("Handy Vertrieb #"+n+" sauber",not v,v)
         await br.close()

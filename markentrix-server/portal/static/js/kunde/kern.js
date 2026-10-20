@@ -1,4 +1,5 @@
 import { h, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
+import { installBanner } from '../anleitung.js';
 
 export const root = document.getElementById('app');
 export let start = null;
@@ -6,6 +7,7 @@ export const setzeStart = (s) => { start = s; };
 export const hat = (c) => start.module.some(m => m.code === c);
 
 const SEITEN = [
+  ['willkommen', 'So geht’s', null],
   ['heute', 'Heute', null],
   ['uebersicht', 'Übersicht', null],
   ['status', 'Status', null],
@@ -38,7 +40,7 @@ const GRUPPEN = [
   ['Täglich', ['heute', 'anfragen', 'termine', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
   ['Verstehen', ['uebersicht', 'status', 'briefing', 'auswertung', 'berichte'], true],
   ['Mein Betrieb', ['assistent', 'website', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
-  ['Verwaltung', ['belege', 'avv', 'team', 'hilfe', 'einstellungen'], false],
+  ['Verwaltung', ['willkommen', 'belege', 'avv', 'team', 'hilfe', 'einstellungen'], false],
 ];
 export const inhaber = () => start.kunden_rolle === 'inhaber';
 export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv'].includes(s[0]) || inhaber()));
@@ -71,7 +73,7 @@ export function gerüst(aktiv, inhalt) {
         h('h1', {}, k.firma),
         h('span', { class: 'pill' }, 'Kundennr. ' + k.kundennummer),
         h('span', { class: 'pill ok' }, '● Online')),
-      inhalt, rechtFuss()),
+      installBanner(), inhalt, rechtFuss()),
     tabbar(aktiv));
 }
 
@@ -98,13 +100,16 @@ export const statusPill = (s) => h('span', { class: 'pill ' + (['neu', 'geplant'
 
 // ------------------------------------------------------------- Seiten
 export const V = {};
+let aufruf = 0;
 export async function zeige() {
+  const dieser = ++aufruf;
   const [id, param] = (location.hash || '#').slice(1).split('/');
   const erlaubt = sichtbar().map(s => s[0]);
   const seite = erlaubt.includes(id) ? id : 'heute';
   nutzung(seite);
   let inhalt;
   try { inhalt = await V[seite](param); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
+  if (dieser !== aufruf) return;   // inzwischen wurde eine andere Seite geöffnet
   root.replaceChildren(gerüst(seite, inhalt));
 }
 

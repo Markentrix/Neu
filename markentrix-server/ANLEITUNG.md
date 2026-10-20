@@ -384,3 +384,11 @@ Das Portal ist eine installierbare Web-App. Es gibt keine eigene APK-Datei und k
 - **iPhone:** In **Safari** auf das Teilen-Symbol tippen, „Zum Home-Bildschirm“, „Hinzufügen“. Erst dann sind auch Benachrichtigungen möglich.
 - Im Portal steht dieselbe Anleitung unter Konto bzw. Einstellungen in der Karte „App & Benachrichtigungen“, passend zum Gerät. Öffnet jemand das Portal in einem anderen Android-Browser, weist die Karte auf Chrome hin.
 - Echte Store-Apps (Google Play, Apple App Store) wären nur mit Entwicklerkonten möglich (Google einmalig ca. 25 US-Dollar, Apple ca. 99 US-Dollar pro Jahr) und einem eigenen Paket pro Store. Das Portal bräuchte dafür keine Änderung, nur einen Einpack-Schritt.
+
+### So führst du Kunden und Vertriebler durch die Installation
+
+1. **Einladung:** Die Einladungs-Mail nennt schon den richtigen Browser (Android: Chrome, iPhone: Safari) und die beiden Installationsschritte.
+2. **Erster Login:** Beim allerersten Anmelden öffnet sich automatisch die Seite „So geht’s“, mit Bildern in Schritten: Teil 1 die App aufs Handy legen (Reiter Android/iPhone, vorgewählt nach Gerät), Teil 2 so arbeitest du im Portal. Kunden und Vertriebler bekommen **unterschiedliche** Anleitungen: Der Kunde sieht Heute, Freigaben, Anfragen, Nachrichten und Menü; der Vertriebler zusätzlich Anrufliste, Ergebnis festhalten, Leads, Pipeline, Angebotsanfragen, Zahlen, Provisionen und Leitfaden. Mit „Los geht’s“ ist sie erledigt und kommt nicht von allein wieder. Wiederfinden: Menü → „So geht’s“.
+3. **Banner:** Solange die App am Handy noch nicht installiert ist, steht oben ein kleines Banner „Markentrix als App aufs Handy legen“ mit Link zur Anleitung. Es lässt sich wegklicken, am Rechner erscheint es nie.
+4. **QR-Code:** Im Kundenblatt und beim Vertriebler gibt es die Karte „Portal aufs Handy“: QR-Code zum Scannen mit der Handy-Kamera, dazu „Text mit Link kopieren“ und „Per WhatsApp senden“.
+5. **Falscher Browser:** Öffnet jemand das Portal auf Android in Samsung Internet, Opera oder Vivaldi, weist die Karte „App & Benachrichtigungen“ auf Chrome hin.
