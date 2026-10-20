@@ -43,7 +43,7 @@ export async function erinnerungsDialog(nurIds, fokus) {
           h('div', { class: 'kopfz' }, cb, h('div', { class: 'grow' }, h('b', {}, v.firma), ' ', h('span', { class: 'small muted' }, v.nummer + ' · ' + euro(v.brutto_cent) + ' · seit ' + v.tage + ' Tagen überfällig')),
             v.stufe ? h('span', { class: 'pill warn' }, v.titel) : h('span', { class: 'pill bad' }, 'nicht möglich'),
             v.moeglich ? knopf('Text ansehen / ändern', () => { text.hidden = !text.hidden; }, 'sec') : ''),
-          v.warnung ? h('div', { class: 'small', style: 'color:#b45309;margin-top:4px' }, '⚠ ' + v.warnung) : '', !v.moeglich ? h('div', { class: 'small muted', style: 'margin-top:4px' }, v.grund) : '',
+          v.warnung ? h('div', { class: 'small', style: 'color:var(--warnfg);margin-top:4px' }, '⚠ ' + v.warnung) : '', !v.moeglich ? h('div', { class: 'small muted', style: 'margin-top:4px' }, v.grund) : '',
           v.moeglich ? h('div', { class: 'small muted', style: 'margin-top:4px' }, 'An: ' + v.email + ' · Betreff: ' + v.betreff) : '', text);
       }) : [h('p', { class: 'muted' }, 'Keine überfälligen Rechnungen. Alles bezahlt oder noch nicht fällig. ✅')]),
       m, liste.length ? h('p', {}, knopf('Ausgewählte senden', senden, 'btn')) : '');

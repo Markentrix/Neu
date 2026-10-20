@@ -68,6 +68,8 @@ async def main():
                 await pg.wait_for_selector("text=Zustand & Verlauf",timeout=8000); chk("Admin: Suche → Kundenseite mit Zeitachse",True)
                 # Ansicht anpassen
                 await pg.goto(B+"/admin#uebersicht"); await pg.wait_for_selector("text=Geschäftszahlen")
+                chk("Admin: 'Heute zuerst' mit höchstens 3 Punkten",await pg.locator(".hero:has-text('am wichtigsten')").count()==1 and await pg.locator(".top3karte").count()<=3)
+                chk("Admin: Menü in Gruppen",await pg.locator(".navgruppe").count()>=4)
                 chk("Admin: Karte 'Jetzt wichtig' sichtbar",await pg.locator("h2:has-text('Jetzt wichtig')").count()==1)
                 chk("Admin: Cockpit mit MRR-Ziel-Knopf, Trichter und Prognose",await pg.locator("text=/MRR-Ziel/").count()>=1 and await pg.locator("text=/Zahlungseingänge|Erwartete/").count()>=1)
                 await pg.click(".neuknopf"); await pg.wait_for_selector(".suchtreffer a:has-text('Neuer Kunde')"); await pg.click(".suchtreffer a:has-text('Neuer Kunde')"); await pg.wait_for_selector("form input[name=firma]"); chk("Admin: '+ Neu' → Neuer Kunde",pg.url.endswith("#neu"))

@@ -1,4 +1,4 @@
-import { h, api, melde, dialog, rueckgaengig } from '../common.js';
+import { h, leerZustand, api, melde, dialog, rueckgaengig } from '../common.js';
 import { V } from './kern.js';
 
 /** Telefonnummer für wa.me: nur Ziffern, deutsche Nummern mit 0 am Anfang bekommen 49. */
@@ -71,7 +71,7 @@ V.heute = async () => {
   };
   const offenA = d.anfragen.length;
   karteAnfragen.append(h('h2', {}, 'Anfragen und Rückrufe', offenA ? h('span', { class: 'badge', style: 'margin-left:8px' }, offenA) : ''),
-    ...(d.modul ? (offenA ? d.anfragen.map(anfrageZeile) : [ h('p', { class: 'muted' }, 'Alles beantwortet. Neue Anfragen erscheinen hier.')]) : [h('p', { class: 'muted' }, 'Das Modul „Anfragen & Termine“ ist für dein Konto nicht freigeschaltet.')]));
+    ...(d.modul ? (offenA ? d.anfragen.map(anfrageZeile) : [leerZustand('Alles beantwortet. Neue Anfragen erscheinen hier.')]) : [h('p', { class: 'muted' }, 'Das Modul „Anfragen & Termine“ ist für dein Konto nicht freigeschaltet.')]));
   karteTermine.append(h('h2', {}, 'Termine heute'), ...(d.termine_heute.length ? d.termine_heute.map(t => terminZeile(t, true)) : [h('p', { class: 'muted' }, 'Heute stehen keine Termine an.')]),
     ...(d.termine_morgen.length ? [h('h3', {}, 'Morgen'), ...d.termine_morgen.map(t => terminZeile(t, false))] : []));
   const entscheidungen = d.freigaben || d.nachrichten ? h('div', { class: 'card' }, h('h2', {}, 'Wartet auf dich'),
@@ -81,5 +81,17 @@ V.heute = async () => {
   const kopf = h('div', { class: 'card' }, h('h2', {}, 'Heute'), h('p', {}, offenA ? h('span', {}, h('b', {}, offenA), (offenA === 1 ? ' Anfrage wartet' : ' Anfragen warten') + ' auf eine Antwort. ') : 'Keine offenen Anfragen. ',
     d.termine_heute.length ? h('span', {}, h('b', {}, d.termine_heute.length), d.termine_heute.length === 1 ? ' Termin heute.' : ' Termine heute.') : 'Heute keine Termine.'),
     d.rueckrufe.length ? h('p', { class: 'small' }, '📞 ' + d.rueckrufe.length + (d.rueckrufe.length === 1 ? ' Rückruf' : ' Rückrufe') + ' vom Telefon-Assistenten warten auf dich.') : '');
-  return h('div', { class: 'stack' }, kopf, meld, karteAnfragen, karteTermine, entscheidungen, bew);
+  // Ein einziger nächster Schritt: das Wichtigste zuerst, alles andere steht darunter.
+  const aeltesteRueck = d.rueckrufe[0], aeltesteAnfrage = d.anfragen[0];
+  const offenTermin = d.termine_heute.find(t => t.status !== 'bestaetigt');
+  const schritt = d.modul && (aeltesteRueck || aeltesteAnfrage) ? { titel: aeltesteRueck ? 'Ruf ' + (aeltesteRueck.name || 'den Kunden') + ' zurück' : 'Beantworte die Anfrage von ' + (aeltesteAnfrage.name || 'einem Interessenten'),
+      text: (aeltesteRueck || aeltesteAnfrage).kontakt ? 'Kontakt: ' + (aeltesteRueck || aeltesteAnfrage).kontakt + ' · wartet ' + wartet((aeltesteRueck || aeltesteAnfrage).wartet_h).replace('seit ', '') : 'Die Anfrage wartet auf eine Antwort.', knopf: 'Jetzt antworten', tun: () => antwortDialog((aeltesteRueck || aeltesteAnfrage).id, () => location.reload()) }
+    : offenTermin ? { titel: 'Bestätige den Termin um ' + new Date(offenTermin.beginn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr', text: offenTermin.titel, knopf: 'Zu den Terminen', link: '#termine' }
+    : d.freigaben ? { titel: d.freigaben === 1 ? 'Eine Freigabe wartet auf dich' : d.freigaben + ' Freigaben warten auf dich', text: 'Schau kurz drüber, dann geht es für dich weiter.', knopf: 'Freigaben prüfen', link: '#freigaben' }
+    : d.nachrichten ? { titel: 'Dein Team hat dir geschrieben', text: d.nachrichten + (d.nachrichten === 1 ? ' Nachricht wartet.' : ' Nachrichten warten.'), knopf: 'Nachrichten lesen', link: '#nachrichten' }
+    : d.bewertung_vorschlaege ? { titel: 'Bitte um eine Bewertung', text: d.bewertung_vorschlaege + ' Kunden waren kürzlich bei dir. Eine freundliche Bitte bringt oft eine Bewertung.', knopf: 'Bitten vorbereiten', link: '#bewertungen' } : null;
+  const hero = h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Schritt'),
+    schritt ? [h('h2', {}, schritt.titel), h('p', { class: 'muted' }, schritt.text), schritt.link ? h('a', { class: 'btn', href: schritt.link }, schritt.knopf) : h('button', { class: 'btn', onclick: schritt.tun }, schritt.knopf)]
+      : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf dich. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
+  return h('div', { class: 'stack' }, hero, kopf, meld, karteAnfragen, karteTermine, entscheidungen, bew);
 };

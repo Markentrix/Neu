@@ -27,7 +27,7 @@ def neuer_kunde(name):
     return k["id"],c,f"{name.lower()}{sfx}@k.de"
 def lead(firma,**kw):
     i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":"0511 5555","ort":"Celle",**kw}).json()["id"]; return i
-import os
+import os, datetime
 os.environ["BACKUP_DIR"]="/var/tmp/pt/bk"
 ROOT=os.path.dirname(os.environ["PYTHONPATH"].split(":")[0])
 sys.path.insert(0,ROOT+"/portal")
@@ -56,3 +56,28 @@ schreibe(alter_min=45); lauf(); chk("Alarm: verstummter Wächter wird gemeldet",
 schreibe()
 cl=httpx.Client(base_url=B,headers=H)
 chk("Alarm: Anlass im Admin-Menü der Push-Einstellungen (common.js)","betriebsalarm" in open(ROOT+"/portal/static/js/common.js").read())
+
+# ---- Wochenrückblick (Montags, nur Zahlen)
+import datetime as _dt
+from zoneinfo import ZoneInfo
+class _Montag(_dt.datetime):
+    @classmethod
+    def now(cls, tz=None): return _dt.datetime(2030,1,7,9,0,tzinfo=tz or ZoneInfo("Europe/Berlin"))   # Montag
+class _Dienstag(_dt.datetime):
+    @classmethod
+    def now(cls, tz=None): return _dt.datetime(2030,1,8,9,0,tzinfo=tz or ZoneInfo("Europe/Berlin"))
+sql("delete from job_marker where schluessel like 'wochenrueckblick-%'"); sql("delete from benachrichtigungen where tag='wochenrueckblick'")
+neuer_kunde("Rueck")  # Kunde mit Anfragen
+kid_r=sql(f"select id from kunden where firma='Rueck {sfx}'")
+for i in range(3): sql(f"INSERT INTO anfragen (kunden_id,name,kontakt,nachricht,quelle,status,erstellt_am,benachrichtigt) VALUES ('{kid_r}','R{i}','r{i}@x.de','T','website','neu',now()-interval '1 day',true)")
+sql(f"update kunden set status='aktiv' where id='{kid_r}'")
+with db.tx("system") as cur: cfg=jobs.einstellungen_lesen(cur)
+jobs.datetime=_Dienstag; jobs.wochenrueckblick(cfg); time.sleep(1.2)
+chk("Rückblick: Dienstag -> nichts",int(sql("select count(*) from benachrichtigungen where tag='wochenrueckblick'") or 0)==0)
+jobs.datetime=_Montag; jobs.wochenrueckblick(cfg); time.sleep(1.5)
+kt=sql(f"select text from benachrichtigungen b join benutzer u on u.id=b.benutzer_id where b.tag='wochenrueckblick' and u.kunden_id='{kid_r}'")
+chk("Rückblick: Kunde bekommt Zahlen (3 Anfragen)","3 Anfragen" in kt,kt)
+chk("Rückblick: Admin bekommt Wochenrückblick",int(sql("select count(*) from benachrichtigungen b join benutzer u on u.id=b.benutzer_id where b.tag='wochenrueckblick' and u.rolle='admin'") or 0)>=1)
+chk("Rückblick: keine Namen im Text","R0" not in kt and "Rueck" not in kt,kt)
+n=int(sql("select count(*) from benachrichtigungen where tag='wochenrueckblick'")); jobs.wochenrueckblick(cfg); time.sleep(1)
+chk("Rückblick: nur einmal pro Woche",int(sql("select count(*) from benachrichtigungen where tag='wochenrueckblick'"))==n)

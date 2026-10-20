@@ -1,4 +1,4 @@
-import { h, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
+import { h, leerZustand, themeKnopf, navGruppen, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
 
 export const root = document.getElementById('app');
 export let start = null;
@@ -32,6 +32,14 @@ const SEITEN = [
   ['hilfe', 'Hilfe', null],
   ['einstellungen', 'Einstellungen', null],
 ];
+/** Menügruppen: Täglich und Verstehen sind offen, selten Gebrauchtes klappt zu. */
+/** @type {[string, string[], boolean][]} */
+const GRUPPEN = [
+  ['Täglich', ['heute', 'anfragen', 'termine', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
+  ['Verstehen', ['uebersicht', 'status', 'briefing', 'auswertung', 'berichte'], true],
+  ['Mein Betrieb', ['assistent', 'website', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
+  ['Verwaltung', ['belege', 'avv', 'team', 'hilfe', 'einstellungen'], false],
+];
 export const inhaber = () => start.kunden_rolle === 'inhaber';
 export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv'].includes(s[0]) || inhaber()));
 
@@ -42,8 +50,8 @@ export function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, 'M'), k.logo_vorhanden ? k.firma : 'Markentrix'),
-      h('div', { class: 'brandzeile' }, glocke()),
-      sichtbar().map(s => h('a', { class: 'nav' + (s[0] === aktiv ? ' on' : ''), href: '#' + s[0] }, s[1], zaehler(s[0]) ? h('span', { class: 'badge' }, zaehler(s[0])) : '')),
+      h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
+      navGruppen(GRUPPEN.map(([titel, ids, offen]) => [titel, sichtbar().filter(s => ids.includes(s[0])).map(s => [s[0], s[1], zaehler(s[0])]), offen]), aktiv, 'kunde'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' },
@@ -68,7 +76,7 @@ export function karten() {
 }
 
 export function tabelle(spalten, zeilen, leer = 'Noch nichts vorhanden.') {
-  if (!zeilen.length) return h('p', { class: 'muted' }, leer);
+  if (!zeilen.length) return leerZustand(leer);
   return h('div', { class: 'tablewrap' }, h('table', {},
     h('thead', {}, h('tr', {}, spalten.map(s => h('th', {}, s[0])))),
     h('tbody', {}, zeilen.map(z => h('tr', {}, spalten.map(s => h('td', {}, s[1](z))))))));

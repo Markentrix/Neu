@@ -22,9 +22,9 @@ V.uebersicht = async () => {
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
   const STANDARD_AUS = ['system', 'fruehwarnung', 'heute'], ans = await ladeAnsicht(), aus = ausgeblendetSet(ans, STANDARD_AUS);
   const cp = await sicherApi('/api/admin/cockpit');
-  const KARTEN = [['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
+  const KARTEN = [['top3', 'Heute zuerst (die 3 wichtigsten Dinge)'], ['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
   const an = anpassenKnopf(KARTEN, STANDARD_AUS), zeige = (id, el) => aus.has(id) ? '' : el;
-  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
+  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
     zeige('zahlen', h('div', { class: 'zahlenblock' },
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
@@ -93,8 +93,8 @@ export function cockpitKarte(c) {
     h('div', { class: 'balken', style: 'margin-bottom:22px' }, R.map(r => h('div', { style: 'height:' + Math.max(2, Math.round(r.umsatz_cent / max * 100)) + '%', title: monat(r.monat) + ': ' + euro(r.umsatz_cent) + ' · ' + r.neukunden + ' neu · ' + r.kuendigungen + ' gekündigt · ' + r.leads + ' Leads' }, h('span', {}, monat(r.monat))))));
 }
 
-/** Alles Dringende in einer Liste, nach Wichtigkeit sortiert. */
-export function prioritaetenKarte(heute, sys, fw) {
+/** Alles Dringende, nach Wichtigkeit sortiert (gemeinsame Quelle für „Heute zuerst“ und „Jetzt wichtig“). */
+export function prioListe(heute, sys, fw) {
   const L = [];
   const add = (score, ton, kat, titel, text, link, knopf) => L.push({ score, ton, kat, titel, text, link, knopf });
   (sys && sys.probleme ? sys.probleme : []).forEach(p => add(100, 'bad', 'System', p, 'Betrieb', '#einstellungen', 'Ansehen'));
@@ -108,12 +108,31 @@ export function prioritaetenKarte(heute, sys, fw) {
   heute.wiedervorlagen.forEach(z => add(55, '', 'Lead', z.firma, 'Wiedervorlage fällig' + (z.vertriebler ? ' · ' + z.vertriebler : ''), '#lead/' + z.id, 'Öffnen'));
   if (heute.leads_gesamt) add(40, '', 'Leads', heute.leads_gesamt + ' neue Leads', 'warten auf den ersten Kontakt', '#leads', 'Öffnen');
   L.sort((a, b) => b.score - a.score);
+  return L;
+}
+
+const SPERRE = 'mk_prio_ausgeblendet', TAGE7 = 7 * 864e5;
+const sperreLaden = () => { try { const o = JSON.parse(localStorage.getItem(SPERRE) || '{}'), jetzt = Date.now(); Object.keys(o).forEach(k => { if (o[k] < jetzt) delete o[k]; }); return o; } catch { return {}; } };
+const prioSchluessel = (z) => z.kat + '|' + z.titel + '|' + z.text;
+
+/** Die drei wichtigsten Dinge des Tages, groß und mit einem Knopf. */
+export function heuteZuerstKarte(heute, sys, fw) {
+  const aus = sperreLaden(), L = prioListe(heute, sys, fw).filter(z => !aus[prioSchluessel(z)]).slice(0, 3);
+  const std = new Date().getHours(), gruss = std < 11 ? 'Guten Morgen' : std < 18 ? 'Guten Tag' : 'Guten Abend';
+  return h('div', { class: 'card hero' }, h('h2', {}, gruss + '. Das ist heute am wichtigsten'),
+    L.length ? h('div', { class: 'top3' }, L.map((z, i) => h('div', { class: 'top3karte ' + z.ton }, h('span', { class: 'top3nr', 'aria-hidden': 'true' }, i + 1), h('div', { class: 'pt' }, h('b', {}, z.titel), h('span', { class: 'small muted' }, z.kat + ' · ' + z.text)),
+      typeof z.link === 'function' ? h('button', { class: 'btn small', onclick: z.link }, z.knopf) : h('a', { class: 'btn small', href: z.link }, z.knopf))))
+      : h('p', { class: 'muted' }, 'Nichts Dringendes offen. Gute Gelegenheit für die ', h('a', { href: '#pipeline' }, 'Lead-Pipeline'), ' oder einen Anruf bei einem Bestandskunden. 🎉'));
+}
+
+/** Alles Dringende in einer Liste, nach Wichtigkeit sortiert. */
+export function prioritaetenKarte(heute, sys, fw) {
+  const L = prioListe(heute, sys, fw);
   // Ausblenden: gilt 7 Tage, nur in diesem Browser. Die Ursache bleibt bestehen, der Hinweis ist nur ruhiggestellt.
-  const SPERRE = 'mk_prio_ausgeblendet', TAGE7 = 7 * 864e5;
-  const laden = () => { try { const o = JSON.parse(localStorage.getItem(SPERRE) || '{}'), jetzt = Date.now(); Object.keys(o).forEach(k => { if (o[k] < jetzt) delete o[k]; }); return o; } catch { return {}; } };
+  const laden = sperreLaden;
   const sichern = (o) => { try { localStorage.setItem(SPERRE, JSON.stringify(o)); } catch { /* ohne Speicher gilt das Ausblenden nur bis zum Neuladen */ } };
   let aus = laden();
-  const schluessel = (z) => z.kat + '|' + z.titel + '|' + z.text;
+  const schluessel = prioSchluessel;
   const ul = h('ul', { class: 'prio' }), mehr = h('p', {}), zaehler = h('span', { class: 'badge', style: 'margin-left:8px' }), zurueck = h('p', { class: 'small' });
   let alle = false;
   const zeichnen = () => {
@@ -149,10 +168,10 @@ export function betriebsKarte(sys) {
 
 export function systemKarte(s) {
   const st = s.status, ok = s.probleme.length === 0;
-  const zeile = (t, w, schlecht) => h('div', { class: 'small', style: 'margin:2px 0' }, h('span', { class: 'muted' }, t + ': '), h('span', { style: schlecht ? 'color:#991b1b;font-weight:600' : '' }, w));
+  const zeile = (t, w, schlecht) => h('div', { class: 'small', style: 'margin:2px 0' }, h('span', { class: 'muted' }, t + ': '), h('span', { style: schlecht ? 'color:var(--badfg);font-weight:600' : '' }, w));
   const std = (n) => n === null || n === undefined || n >= 9999 ? 'nie' : n < 1 ? 'vor weniger als 1 Stunde' : 'vor ' + n + ' Std.';
   return h('div', { class: 'card' }, h('h2', {}, 'Systemstatus ', h('span', { class: 'pill ' + (ok ? 'ok' : 'bad') }, ok ? 'alles in Ordnung' : s.probleme.length + (s.probleme.length === 1 ? ' Problem' : ' Probleme'))),
-    ok ? '' : h('ul', { style: 'color:#991b1b;margin:6px 0' }, s.probleme.map(p => h('li', {}, p))),
+    ok ? '' : h('ul', { style: 'color:var(--badfg);margin:6px 0' }, s.probleme.map(p => h('li', {}, p))),
     st ? h('div', { class: 'row', style: 'gap:24px;align-items:flex-start' },
       h('div', {}, zeile('Letzte Sicherung', std(st.backup_stunden), st.backup_stunden > 36), st.offsite_aktiv ? zeile('Externe Sicherung', std(st.offsite_stunden), st.offsite_stunden > 36) : zeile('Externe Sicherung', 'nicht eingerichtet', true)),
       h('div', {}, zeile('Festplatte', st.platte_prozent + ' % belegt', st.platte_prozent >= 85), st.zertifikat_tage >= 0 ? zeile('Zertifikat', 'noch ' + st.zertifikat_tage + ' Tage gültig', st.zertifikat_tage < 14) : ''),

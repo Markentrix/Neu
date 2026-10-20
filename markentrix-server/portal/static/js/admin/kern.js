@@ -1,7 +1,16 @@
-import { h, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf } from '../common.js';
+import { h, leerZustand, themeKnopf, navGruppen, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf } from '../common.js';
 
 
 export const NAV = [['uebersicht', 'Übersicht'], ['meintag', 'Mein Tag'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['onboarding', 'Onboarding'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['pipeline', 'Pipeline'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
+/** Menügruppen im Admin; leere Gruppen (fehlende Rechte) verschwinden. */
+/** @type {[string, string[], boolean][]} */
+const NAV_GRUPPEN = [
+  ['Täglich', ['uebersicht', 'meintag', 'postfach', 'freigaben', 'aufgaben'], true],
+  ['Kunden', ['kunden', 'onboarding', 'neu', 'websites'], true],
+  ['Vertrieb', ['vertrieb', 'leads', 'pipeline', 'auswertung'], true],
+  ['Geld & Zahlen', ['kennzahlen', 'belege', 'preise', 'katalog'], false],
+  ['System', ['compliance', 'einstellungen', 'protokoll'], false],
+];
 export let paketListe = [], ich = null;
 export const zaehlerAdmin = {};
 
@@ -19,16 +28,16 @@ export function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Admin'),
-      h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke()),
+      h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke(), themeKnopf()),
       h('div', { class: 'neuzeile' }, neuKnopf()),
-      NAV.filter(n => erlaubt(n[0])).map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1], zaehlerAdmin[n[0]] ? h('span', { class: 'badge' }, zaehlerAdmin[n[0]]) : '')),
+      navGruppen(NAV_GRUPPEN.map(([titel, ids, offen]) => [titel, NAV.filter(n => ids.includes(n[0]) && erlaubt(n[0])).map(n => [n[0], n[1], zaehlerAdmin[n[0]] || 0]), offen]), aktiv, 'admin'),
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' }, ich && !ich.zwei_faktor ? h('div', { class: 'msg info' }, 'Dein Admin-Konto hat noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten'), '.') : '', inhalt, rechtFuss()));
 }
 export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
-  if (!zeilen.length) return h('p', { class: 'muted' }, leer);
+  if (!zeilen.length) return leerZustand(leer);
   return h('div', { class: 'tablewrap' }, h('table', {},
     h('thead', {}, h('tr', {}, spalten.map(s => h('th', {}, s[0])))),
     h('tbody', {}, zeilen.map(z => h('tr', {}, spalten.map(s => h('td', {}, s[1](z))))))));

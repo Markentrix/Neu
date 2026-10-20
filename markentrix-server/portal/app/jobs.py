@@ -338,6 +338,49 @@ def betriebs_alarm(cfg):
             log.exception("Alarm-Mail")
 
 
+def _trend(jetzt_n, davor_n, einheit_ein, einheit_mehr):
+    t = f"{jetzt_n} {einheit_ein if jetzt_n == 1 else einheit_mehr}"
+    d = jetzt_n - davor_n
+    return t + (f" ({d} mehr als davor)" if d > 0 else f" ({-d} weniger als davor)" if d < 0 else " (wie davor)")
+
+
+def wochenrueckblick(cfg):
+    """Montags ab 8 Uhr (Berlin) ein Satz zur letzten Woche als Push: für Kunden, Vertriebler und Admins. Nur Zahlen, keine Namen."""
+    from zoneinfo import ZoneInfo
+    lokal = datetime.now(ZoneInfo("Europe/Berlin"))
+    if lokal.weekday() != 0 or lokal.hour < 8 or not _marker("wochenrueckblick-%d-%02d" % lokal.isocalendar()[:2]):
+        return
+    with tx("system") as cur:
+        cur.execute("""SELECT k.id, count(a.*) FILTER (WHERE a.erstellt_am >= now() - interval '7 days') AS a1, count(a.*) FILTER (WHERE a.erstellt_am < now() - interval '7 days') AS a0
+                       FROM kunden k LEFT JOIN anfragen a ON a.kunden_id = k.id AND a.erstellt_am >= now() - interval '14 days'
+                       WHERE k.status = 'aktiv' GROUP BY k.id""")
+        anf = {r["id"]: (r["a1"], r["a0"]) for r in cur.fetchall()}
+        cur.execute("""SELECT kunden_id, count(*) FILTER (WHERE beginn >= now() - interval '7 days') AS t1
+                       FROM termine WHERE beginn >= now() - interval '7 days' AND beginn <= now() AND status <> 'abgesagt' GROUP BY kunden_id""")
+        ter = {r["kunden_id"]: r["t1"] for r in cur.fetchall()}
+        for kid, (a1, a0) in anf.items():
+            if not (a1 or a0):
+                continue
+            ids = push.kunde(cur, kid)
+            if ids:
+                t = ter.get(kid, 0)
+                push.senden(ids, "Dein Rückblick auf die letzte Woche", "Letzte Woche: " + _trend(a1, a0, "Anfrage", "Anfragen") + (f", {t} Termin" + ("e" if t != 1 else "") if t else "") + ".", "/app#auswertung", "wochenrueckblick")
+        cur.execute("""SELECT (SELECT count(*) FROM kunden WHERE erstellt_am >= now() - interval '7 days') AS kunden,
+                              (SELECT count(*) FROM leads WHERE erstellt_am >= now() - interval '7 days') AS leads,
+                              (SELECT count(*) FROM leads WHERE erstellt_am >= now() - interval '14 days' AND erstellt_am < now() - interval '7 days') AS leads0,
+                              (SELECT count(*) FROM anfragen WHERE erstellt_am >= now() - interval '7 days') AS anfragen""")
+        z = cur.fetchone()
+        push.senden(push.admins(cur), "Wochenrückblick", f"Letzte Woche: {z['kunden']} neue Kunden, {_trend(z['leads'], z['leads0'], 'neuer Lead', 'neue Leads')}, {z['anfragen']} Kundenanfragen insgesamt.", "/admin#uebersicht", "wochenrueckblick")
+        cur.execute("""SELECT p.id, count(DISTINCT l.id) FILTER (WHERE l.erstellt_am >= now() - interval '7 days') AS neu,
+                              count(ak.*) FILTER (WHERE ak.art IN ('anruf','antwort','termin') AND ak.zeit >= now() - interval '7 days') AS kontakte
+                       FROM vertriebspartner p LEFT JOIN leads l ON l.vertriebspartner_id = p.id LEFT JOIN lead_aktivitaeten ak ON ak.lead_id = l.id
+                       WHERE p.status = 'aktiv' GROUP BY p.id""")
+        for r in cur.fetchall():
+            ids = push.partner(cur, r["id"])
+            if ids and (r["neu"] or r["kontakte"]):
+                push.senden(ids, "Dein Rückblick auf die letzte Woche", f"Letzte Woche: {r['kontakte']} Kontakte festgehalten, {r['neu']} neue Leads zugewiesen.", "/vertrieb#uebersicht", "wochenrueckblick")
+
+
 def _marker(schluessel: str) -> bool:
     """True genau einmal je Schlüssel (verhindert Mehrfachläufe nach Neustart)."""
     with tx("system") as cur:
@@ -473,7 +516,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick):
         try:
             job(cfg)
         except Exception:

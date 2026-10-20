@@ -1,20 +1,23 @@
 import { pipelineBoard } from './pipeline.js';
-import { kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
+import { navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
 const NAV = [['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
 
+/** @type {[string, string[]][]} */
+const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden']], ['Kunden & Geld', ['kunden', 'provisionen', 'konto']]];
+
 function gerüst(aktiv, inhalt) {
   return h('div', { class: 'shell' },
     h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Partnerportal'),
-      h('div', { class: 'brandzeile' }, glocke()),
-      NAV.map(n => h('a', { class: 'nav' + (n[0] === aktiv ? ' on' : ''), href: '#' + n[0] }, n[1])),
+      h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
+      navGruppen(NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]), aktiv, 'vertrieb'),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), inhalt, rechtFuss()));
 }
 function tabelle(spalten, zeilen, leer) {
-  if (!zeilen.length) return h('p', { class: 'muted' }, leer);
+  if (!zeilen.length) return leerZustand(leer);
   return h('div', { class: 'tablewrap' }, h('table', {}, h('thead', {}, h('tr', {}, spalten.map(s => h('th', {}, s[0])))), h('tbody', {}, zeilen.map(z => h('tr', {}, spalten.map(s => h('td', {}, s[1](z))))))));
 }
 const pill = (s) => h('span', { class: 'pill ' + (['aktiv', 'ausgezahlt', 'gewonnen', 'angenommen', 'angebot_raus'].includes(s) ? 'ok' : ['onboarding', 'berechnet', 'freigegeben', 'neu', 'angefragt', 'in_pruefung'].includes(s) ? 'warn' : ['verloren', 'storniert', 'gekuendigt', 'beendet', 'abgelehnt'].includes(s) ? 'bad' : '') }, String(s).replace(/_/g, ' '));

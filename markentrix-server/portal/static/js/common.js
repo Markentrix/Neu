@@ -191,11 +191,49 @@ export function pushKarte(rolle) {
     h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, install);
 }
 
+const LEER_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><path d="M10 28h14l3 6h10l3-6h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".35"/><circle cx="48" cy="16" r="7" fill="#8B5CF6" opacity=".9"/><path d="M45 16l2 2 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+/** Freundlicher leerer Zustand: kleine Illustration, ein Satz, optional ein nächster Schritt. */
+export function leerZustand(text, aktion) {
+  const bild = h('span', { 'aria-hidden': 'true' });
+  bild.innerHTML = LEER_SVG;   // feste, eigene Grafik ohne Fremdinhalt
+  return h('div', { class: 'leer' }, bild, h('p', { class: 'muted', style: 'margin:0' }, text), aktion ? h('p', { style: 'margin:10px 0 0' }, aktion) : '');
+}
+
+/** Knopf für das Erscheinungsbild: automatisch → hell → dunkel. */
+export function themeKnopf() {
+  const T = /** @type {any} */ (window).mkTheme, namen = { auto: 'automatisch', hell: 'hell', dunkel: 'dunkel' }, icon = { auto: '◐', hell: '☀', dunkel: '☾' };
+  const k = h('button', { type: 'button', class: 'themeknopf' });
+  const zeigen = () => { const w = T ? T.get() : 'auto'; k.textContent = icon[w] || '◐'; k.title = 'Darstellung: ' + namen[w] + ' (klicken zum Wechseln)'; k.setAttribute('aria-label', 'Darstellung wechseln, aktuell ' + namen[w]); };
+  k.addEventListener('click', () => { if (!T) return; T.set({ auto: 'hell', hell: 'dunkel', dunkel: 'auto' }[T.get()] || 'auto'); zeigen(); });
+  zeigen();
+  return k;
+}
+
+/** Menü in einklappbaren Gruppen. gruppen: [[Titel, [[id, Text, Zähler], ...], standardOffen]]. Die Gruppe der aktuellen Seite ist immer offen; der Zustand wird je Gerät gemerkt. */
+export function navGruppen(gruppen, aktiv, schluessel) {
+  const lies = (k) => { try { return localStorage.getItem('mk-nav-' + schluessel + '-' + k); } catch { return null; } };
+  return gruppen.filter(g => g[1].length).map(([titel, punkte, standard]) => {
+    const enthaelt = punkte.some(p => p[0] === aktiv);
+    const gemerkt = lies(titel);
+    let offen = enthaelt || (gemerkt === null ? standard !== false : gemerkt === '1');
+    const summe = punkte.reduce((n, p) => n + (p[2] || 0), 0);
+    const liste = h('div', { class: 'navliste', hidden: !offen }, punkte.map(p => h('a', { class: 'nav' + (p[0] === aktiv ? ' on' : ''), href: '#' + p[0] }, p[1], p[2] ? h('span', { class: 'badge' }, p[2]) : '')));
+    const kopf = h('button', { type: 'button', class: 'navkopf', 'aria-expanded': String(offen) }, h('span', {}, titel), h('span', { class: 'navrechts' }, summe && !offen ? h('span', { class: 'badge' }, summe) : '', h('span', { class: 'pfeil', 'aria-hidden': 'true' }, '▾')));
+    kopf.addEventListener('click', () => {
+      offen = !offen; liste.hidden = !offen; kopf.setAttribute('aria-expanded', String(offen));
+      kopf.querySelector('.navrechts .badge')?.remove();
+      if (!offen && summe) kopf.querySelector('.navrechts').prepend(h('span', { class: 'badge' }, summe));
+      try { localStorage.setItem('mk-nav-' + schluessel + '-' + titel, offen ? '1' : '0'); } catch { /* ohne Speicher geht es trotzdem */ }
+    });
+    return h('div', { class: 'navgruppe' }, kopf, liste);
+  });
+}
+
 // ---------------------------------------------------------------- Glocke, Suche, Ansicht
 const ANLAESSE = {
-  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot'], ['betriebsalarm', 'Betriebsalarm: Server, Sicherung, Mail']],
-  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage']],
-  kunde: [['anfrage', 'Neue Anfrage'], ['anruf', 'Neuer Anruf']],
+  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot'], ['betriebsalarm', 'Betriebsalarm: Server, Sicherung, Mail'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
+  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
+  kunde: [['anfrage', 'Neue Anfrage'], ['anruf', 'Neuer Anruf'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
 };
 let _ansicht = null;
 export const ladeAnsicht = () => (_ansicht = _ansicht || api('/api/me/ansicht', { leise: true }).catch(() => ({ ausgeblendet: [], push_aus: [] })));
