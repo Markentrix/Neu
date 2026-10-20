@@ -14,6 +14,7 @@ function anschriftKarte(k) {
 
 V.einstellungen = async () => {
   const p = await api('/api/kunde/profil');
+  const vt = await api('/api/kunde/vertretung').catch(() => null), mv = h('div');
   const m1 = h('div'), m2 = h('div'), m3 = h('div');
   const k = p.kunde; const sw = { benachr_anfragen: k.benachr_anfragen, benachr_termine: k.benachr_termine, benachr_bericht: k.benachr_bericht, benachr_nachrichten: k.benachr_nachrichten };
   const kb = (label, key) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', checked: sw[key], style: 'width:auto', onchange: (e) => { sw[key] = e.target.checked; } }), label);
@@ -39,6 +40,11 @@ V.einstellungen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Dein Konto'), h('p', {}, 'Kundennummer ', h('b', {}, k.kundennummer), ' · Paket ', h('b', {}, k.paket || '–'), ' · Login ', h('b', {}, p.login))),
     h('div', { class: 'card' }, h('h2', {}, 'Kontaktdaten'), m1, f1),
     inhaber() ? anschriftKarte(k) : '',
+    vt ? h('div', { class: 'card' }, h('h2', {}, 'Vertretung (z. B. im Urlaub)'), h('p', { class: 'small muted' }, 'Eine zweite Person bekommt in diesem Zeitraum zusätzlich die E-Mails mit Freigabe-Bitten und Antworten. Sie kann über den Link in der Mail freigeben, ohne Zugang zum Portal.'), mv,
+      h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); try { await api('/api/kunde/vertretung', { method: 'PUT', body: o }); melde(mv, 'Gespeichert.', 'ok'); } catch (x) { melde(mv, x.message); } } },
+        h('div', {}, h('label', {}, 'Name'), h('input', { name: 'name', value: vt.name || '' })), h('div', {}, h('label', {}, 'E-Mail der Vertretung (leer = keine)'), h('input', { name: 'email', type: 'email', value: vt.email || '' })),
+        h('div', {}, h('label', {}, 'Von'), h('input', { name: 'von', type: 'date', value: vt.von ? String(vt.von).slice(0, 10) : '' })), h('div', {}, h('label', {}, 'Bis'), h('input', { name: 'bis', type: 'date', value: vt.bis ? String(vt.bis).slice(0, 10) : '' })),
+        h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
     h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));

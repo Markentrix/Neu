@@ -130,7 +130,9 @@ export function prioListe(heute, sys, fw) {
   (heute.avv_veraltet || []).forEach(z => add(30, 'warn', 'Vertrag', z.firma, 'AVV: neue Fassung (Version 2) fehlt noch', '#kunde/' + z.id, 'Öffnen'));
   heute.aufgaben.forEach(z => add(70, 'warn', 'Aufgabe', z.titel, 'fällig ' + datum(z.faellig_am), '#aufgaben', 'Öffnen'));
   heute.onboarding.forEach(z => add(65, 'warn', 'Onboarding', z.firma, 'hängt seit über 5 Tagen', '#kunde/' + z.id, 'Öffnen'));
-  heute.freigaben.forEach(z => add(60, '', 'Freigabe', z.firma, z.titel + ' wartet seit über 3 Tagen', '#kunde/' + z.kunden_id, 'Öffnen'));
+  (heute.freigaben_termin || []).forEach(z => add(92, 'bad', 'Freigabe', z.firma, z.titel + ': Veröffentlichung ' + datum(z.veroeffentlichung_am) + ', Freigabe fehlt noch – jetzt anrufen', z.telefon ? 'tel:' + String(z.telefon).replace(/[^0-9+]/g, '') : '#kunde/' + z.kunden_id, z.telefon ? 'Anrufen' : 'Öffnen'));
+  heute.freigaben.forEach(z => { if (z.tage >= 5) add(78, 'warn', 'Freigabe', z.firma, z.titel + ' wartet seit ' + z.tage + ' Tagen: jetzt anrufen' + (z.ansprechpartner ? ' (' + z.ansprechpartner + ')' : ''), z.telefon ? 'tel:' + String(z.telefon).replace(/[^0-9+]/g, '') : '#kunde/' + z.kunden_id, z.telefon ? 'Anrufen' : 'Öffnen');
+    else add(60, '', 'Freigabe', z.firma, z.titel + ' wartet seit über 3 Tagen', '#kunde/' + z.kunden_id, 'Öffnen'); });
   heute.wiedervorlagen.forEach(z => add(55, '', 'Lead', z.firma, 'Wiedervorlage fällig' + (z.vertriebler ? ' · ' + z.vertriebler : ''), '#lead/' + z.id, 'Öffnen'));
   if (heute.leads_gesamt) add(40, '', 'Leads', heute.leads_gesamt + ' neue Leads', 'warten auf den ersten Kontakt', '#leads', 'Öffnen');
   L.sort((a, b) => b.score - a.score);

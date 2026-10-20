@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from . import berichte as bericht_modul, config, rechtstexte, einstellungen, ki, publish
 from .db import tx
-from .security import EMAIL_RE, audit, check_password_rules, hash_password, require_kunde, require_modul, verify_password
+from .security import EMAIL_RE, audit, check_password_rules, hash_password, require_inhaber, require_kunde, require_modul, verify_password
 
 router = APIRouter(prefix="/api/kunde")
 
@@ -417,6 +417,38 @@ def automationen(user: dict = Depends(require_kunde)):
                        FROM module m LEFT JOIN kunden_module km ON km.modul_code=m.code AND km.kunden_id=%s
                        WHERE m.art='agent' ORDER BY m.sortierung""", (user["kunden_id"],))
         return cur.fetchall()
+
+
+# ---------------------------------------------------------------- Vertretung (zweite Person für Freigabe-Mails, z. B. im Urlaub)
+class VertretungIn(BaseModel):
+    email: str = Field(default="", max_length=254)
+    name: str = Field(default="", max_length=200)
+    von: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
+    bis: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
+
+
+@router.get("/vertretung")
+def vertretung_lesen(user: dict = Depends(require_inhaber)):
+    with tx("kunde", user["kunden_id"]) as cur:
+        cur.execute("SELECT vertretung_email AS email, vertretung_name AS name, vertretung_von AS von, vertretung_bis AS bis FROM kunden WHERE id=%s", (user["kunden_id"],))
+        return cur.fetchone()
+
+
+@router.put("/vertretung")
+def vertretung_speichern(data: VertretungIn, user: dict = Depends(require_inhaber)):
+    email = data.email.strip()
+    if email and not EMAIL_RE.match(email):
+        raise HTTPException(400, "Bitte eine gültige E-Mail-Adresse eintragen.")
+    von, bis = (date.fromisoformat(data.von) if data.von else None), (date.fromisoformat(data.bis) if data.bis else None)
+    if email and not (von and bis):
+        raise HTTPException(400, "Bitte Beginn und Ende der Vertretung angeben. Nur in diesem Zeitraum bekommt die Vertretung die Freigabe-Mails.")
+    if von and bis and bis < von:
+        raise HTTPException(400, "Das Ende liegt vor dem Beginn.")
+    with tx("system") as cur:  # kunden ist für Kunden schreibgeschützt (wie beim Profil), nur der eigene Datensatz
+        cur.execute("UPDATE kunden SET vertretung_email=%s, vertretung_name=%s, vertretung_von=%s, vertretung_bis=%s WHERE id=%s",
+                    (email or None, data.name.strip() or None, von if email else None, bis if email else None, user["kunden_id"]))
+        audit(cur, user, "vertretung_geaendert", user["kunden_id"], {"aktiv": bool(email)})
+    return {"ok": True}
 
 
 # ---------------------------------------------------------------- Einstellungen

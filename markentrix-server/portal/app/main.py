@@ -24,6 +24,8 @@ from .routes_provision import router as provision_router, vertrieb_router as pro
 from .routes_team import router as team_router, admin_router as team_admin_router
 from .routes_avv import router as avv_router, kunde_router as avv_kunde_router
 from .routes_uav import router as uav_router, kunde_router as uav_kunde_router
+from .routes_domains import router as domains_router
+from .routes_freigabelink import router as freigabelink_router
 from .routes_offboarding import router as offboarding_router
 from .routes_zusammenarbeit import router as zus_router, kunde_router as zus_kunde_router
 from .routes_websitecheck import router as wcheck_router
@@ -163,6 +165,8 @@ app.include_router(ang_kunde_router)
 app.include_router(aufgaben_kunde_router)
 app.include_router(avv_router)
 app.include_router(uav_router)
+app.include_router(domains_router)
+app.include_router(freigabelink_router)
 app.include_router(avv_kunde_router)
 app.include_router(uav_kunde_router)
 app.include_router(team_router)
@@ -182,6 +186,7 @@ app.get("/vertrieb", include_in_schema=False)(seite("vertrieb.html"))
 app.get("/einladung", include_in_schema=False)(seite("einladung.html"))
 app.get("/buchen", include_in_schema=False)(seite("buchen.html"))
 app.get("/angebot", include_in_schema=False)(seite("angebot.html"))
+app.get("/freigabe", include_in_schema=False)(seite("freigabe.html"))
 app.get("/anmelden", include_in_schema=False)(seite("anmelden.html"))
 app.get("/impressum", include_in_schema=False)(seite("recht.html"))
 app.get("/datenschutz", include_in_schema=False)(seite("recht.html"))

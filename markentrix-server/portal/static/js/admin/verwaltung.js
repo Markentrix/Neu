@@ -69,7 +69,11 @@ V.compliance = async () => {
   const sektion = (titel, zeilen, spalten, leer) => h('div', { class: 'card' }, h('h2', {}, titel + ' (' + zeilen.length + ')'), tabelle(spalten, zeilen, leer));
   const stufe = (s) => h('span', { class: 'pill ' + (s === 'kritisch' ? 'bad' : s === 'warnung' ? 'warn' : '') }, s);
   const offen = d.alarme.length + d.freigaben.length + d.aenderungen.length + d.auskunft.length + d.workflow_fehler.length + d.befunde.length + d.massnahmen.length;
-  return h('div', { class: 'stack' }, kopf('Datenschutz & Qualität', h('span', { class: 'pill ' + (offen ? 'warn' : 'ok') }, offen ? offen + ' offen' : 'alles erledigt')), m,
+  const vs = await api('/api/admin/vertragsstand').catch(() => null);
+  const stand = vs ? h('div', { class: 'card' }, h('h2', {}, 'Stand der AVV-Zusagen ', h('span', { class: 'pill ' + ({ ok: 'ok', warn: 'warn', bad: 'bad' }[vs.gesamt] || '') }, vs.gesamt === 'ok' ? 'alles eingehalten' : vs.gesamt === 'bad' ? 'Handlungsbedarf' : vs.gesamt === 'warn' ? 'bitte prüfen' : 'teils unbekannt')),
+    h('p', { class: 'small muted' }, 'Zeigt, ob das, was im Vertrag steht (Anlage 2), im Betrieb gerade stimmt. Als Nachweis bei Rückfragen von Kunden.'),
+    tabelle([['', z => h('span', { class: 'pill ' + ({ ok: 'ok', warn: 'warn', bad: 'bad' }[z.status] || '') }, { ok: 'ok', warn: 'prüfen', bad: 'Problem', unbekannt: '?' }[z.status])], ['Punkt', z => z.titel], ['Stand', z => z.detail]], vs.punkte)) : '';
+  return h('div', { class: 'stack' }, kopf('Datenschutz & Qualität', h('span', { class: 'pill ' + (offen ? 'warn' : 'ok') }, offen ? offen + ' offen' : 'alles erledigt')), stand, m,
     sektion('Alarme', d.alarme, [['Zeit', z => zeit(z.zeit)], ['Stufe', z => stufe(z.stufe)], ['Quelle', z => z.quelle], ['Titel', z => z.titel], ['', z => knopf('Bestätigen', () => tun(() => post('/alarme/' + z.id + '/bestaetigen')))]], 'Keine offenen Alarme.'),
     sektion('Freigaben (Agenten)', d.freigaben, [['Eingang', z => zeit(z.erstellt_am)], ['Kunde', z => z.kundennummer || ''], ['Art', z => z.art], ['Vorschau', z => z.vorschau], ['', entscheid('freigaben', 'Freigeben', 'freigegeben', 'Ablehnen', 'abgelehnt')]], 'Keine offenen Freigaben.'),
     sektion('Änderungsfreigaben', d.aenderungen, [['Seit', z => datum(z.beantragt_am)], ['Art', z => z.art], ['Gegenstand', z => z.gegenstand], ['Beschreibung', z => z.beschreibung], ['Von', z => z.beantragt_von], ['', entscheid('aenderungsfreigaben', 'Freigeben', 'freigegeben', 'Ablehnen', 'abgelehnt')]], 'Keine offenen Anträge.'),

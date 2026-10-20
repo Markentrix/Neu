@@ -1,14 +1,14 @@
 """Zusammenarbeit mit dem Kunden: Nachrichten/Aufträge (Tickets), Anhänge, Dokumentenablage, Freigaben, Zufriedenheit.
 Kunde: /api/kunde/...   Admin: /api/admin/...   Mails gehen im Hintergrund raus (BackgroundTasks)."""
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Request, UploadFile
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import dateien, einstellungen, mailer, push
+from . import config, dateien, einstellungen, mailer, push
 from .db import tx
-from .security import audit, client_ip, require_admin, require_kunde
+from .security import audit, client_ip, new_token, require_admin, require_kunde, token_hash
 
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
@@ -33,12 +33,14 @@ def admin_empfaenger(cur) -> str | None:
 
 def kunden_empfaenger(cur, kid, zusatz: str | None = None) -> list[str]:
     """Wer eine Benachrichtigung bekommt: Wunschadresse bzw. Haupt-Mail des Kunden (falls nicht abgeschaltet) und optional eine weitere Adresse."""
-    cur.execute("SELECT email, benachr_email, benachr_nachrichten FROM kunden WHERE id=%s", (kid,))
+    cur.execute("""SELECT email, benachr_email, benachr_nachrichten,
+                          CASE WHEN vertretung_email IS NOT NULL AND current_date BETWEEN coalesce(vertretung_von, current_date) AND coalesce(vertretung_bis, current_date) THEN vertretung_email END AS vertretung
+                   FROM kunden WHERE id=%s""", (kid,))
     k = cur.fetchone()
     if not k or not k["benachr_nachrichten"]:
         return []
     ziele = []
-    for a in (zusatz, k["benachr_email"] or k["email"]):
+    for a in (zusatz, k["benachr_email"] or k["email"], k["vertretung"]):
         a = (a or "").strip()
         if a and a.lower() not in [z.lower() for z in ziele]:
             ziele.append(a)
@@ -258,7 +260,8 @@ class EntscheidungIn(BaseModel):
 @kunde_router.get("/freigaben")
 def k_freigaben(user: dict = Depends(require_kunde)):
     with tx("kunde", user["kunden_id"]) as cur:
-        cur.execute("""SELECT f.id, f.titel, f.art, f.inhalt, f.status, f.angefragt_am, f.entschieden_am, f.entschieden_name, f.kommentar,
+        cur.execute("""SELECT f.id, f.titel, f.art, f.inhalt, f.status, f.version, f.veroeffentlichung_am, f.angefragt_am, f.entschieden_am, f.entschieden_name, f.kommentar,
+                              (SELECT v.kommentar FROM kundenfreigaben v WHERE v.id = f.vorgaenger_id) AS vorgaenger_kommentar,
                               (SELECT coalesce(json_agg(json_build_object('id', d.id, 'name', d.name, 'mime', d.mime, 'groesse', d.groesse) ORDER BY d.erstellt_am), '[]'::json)
                                FROM dateien d WHERE d.freigabe_id = f.id) AS dateien
                        FROM kundenfreigaben f ORDER BY (f.status = 'wartet') DESC, f.angefragt_am DESC LIMIT 200""")
@@ -512,6 +515,27 @@ class FreigabeIn(BaseModel):
     titel: str = Field(min_length=1, max_length=200)
     art: str = Field(default="sonstiges", pattern="^(social|text|angebot|design|website|sonstiges)$")
     inhalt: str | None = Field(default=None, max_length=20000)
+    veroeffentlichung_am: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+
+
+@router.get("/freigabe-kalender")
+def a_kalender(von: str | None = None, tage: int = 14, user: dict = Depends(require_admin)):
+    """Freigaben nach geplantem Veröffentlichungstag (ab „von“, standardmäßig Wochenbeginn) plus alle wartenden ohne Termin."""
+    try:
+        start = date.fromisoformat(von) if von else date.today() - timedelta(days=date.today().weekday())
+    except ValueError:
+        raise HTTPException(400, "Datum ungültig.")
+    tage = max(1, min(tage, 42))
+    with tx("admin") as cur:
+        cur.execute("""SELECT f.id, f.titel, f.art, f.status, f.version, f.veroeffentlichung_am, k.id AS kunden_id, k.firma
+                       FROM kundenfreigaben f JOIN kunden k ON k.id=f.kunden_id
+                       WHERE f.veroeffentlichung_am >= %s AND f.veroeffentlichung_am < %s AND f.status IN ('wartet','freigegeben','abgelehnt')
+                       ORDER BY f.veroeffentlichung_am, k.firma""", (start, start + timedelta(days=tage)))
+        eintraege = cur.fetchall()
+        cur.execute("""SELECT f.id, f.titel, f.art, f.status, f.version, k.id AS kunden_id, k.firma FROM kundenfreigaben f JOIN kunden k ON k.id=f.kunden_id
+                       WHERE f.status='wartet' AND f.veroeffentlichung_am IS NULL ORDER BY f.angefragt_am LIMIT 50""")
+        ohne = cur.fetchall()
+    return {"von": start, "tage": tage, "eintraege": eintraege, "ohne_termin": ohne}
 
 
 @router.get("/freigaben-kunden")
@@ -519,7 +543,7 @@ def a_freigaben(status: str = "", user: dict = Depends(require_admin)):
     if status and status not in ("wartet", "freigegeben", "abgelehnt", "zurueckgezogen"):
         raise HTTPException(400, "Status ungültig.")
     with tx("admin") as cur:
-        cur.execute("""SELECT f.id, f.titel, f.art, f.inhalt, f.status, f.angefragt_am, f.angefragt_von, f.entschieden_am, f.entschieden_name, f.entschieden_ip, f.kommentar,
+        cur.execute("""SELECT f.id, f.titel, f.art, f.inhalt, f.status, f.version, f.vorgaenger_id, f.ueber_link, f.veroeffentlichung_am, f.angefragt_am, f.angefragt_von, f.entschieden_am, f.entschieden_name, f.entschieden_ip, f.kommentar,
                               k.id AS kunden_id, k.kundennummer, k.firma,
                               (SELECT coalesce(json_agg(json_build_object('id', d.id, 'name', d.name, 'groesse', d.groesse) ORDER BY d.erstellt_am), '[]'::json) FROM dateien d WHERE d.freigabe_id = f.id) AS dateien
                        FROM kundenfreigaben f JOIN kunden k ON k.id = f.kunden_id
@@ -535,15 +559,93 @@ def a_freigabe_neu(kid: str, data: FreigabeIn, bg: BackgroundTasks, user: dict =
             k = cur.fetchone()
             if not k:
                 raise nicht_gefunden()
-            cur.execute("INSERT INTO kundenfreigaben (kunden_id, titel, art, inhalt, angefragt_von) VALUES (%s,%s,%s,%s,%s) RETURNING id",
-                        (kid, data.titel.strip(), data.art, (data.inhalt or "").strip() or None, team_name(user)))
+            cur.execute("INSERT INTO kundenfreigaben (kunden_id, titel, art, inhalt, angefragt_von, veroeffentlichung_am) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",
+                        (kid, data.titel.strip(), data.art, (data.inhalt or "").strip() or None, team_name(user), data.veroeffentlichung_am))
             fid = cur.fetchone()["id"]
+            link = _link_erzeugen(cur, fid)
             ziele = kunden_empfaenger(cur, kid)
             audit(cur, user, "kundenfreigabe_angefragt", kid, {"titel": data.titel})
     except errors.InvalidTextRepresentation:
         raise nicht_gefunden()
-    _mails(bg, ziele, mailer.freigabe_anfrage_kunde, k["ansprechpartner"], data.titel)
+    _mails(bg, ziele, mailer.freigabe_anfrage_kunde, k["ansprechpartner"], data.titel, link)
     return {"id": fid}
+
+
+def _link_erzeugen(cur, fid) -> str:
+    """Einmal-Link zum Ansehen und Freigeben ohne Anmeldung (14 Tage gültig). Gespeichert wird nur die Prüfsumme."""
+    tok = new_token()
+    cur.execute("UPDATE kundenfreigaben SET link_hash=%s, link_ablauf=now() + interval '14 days' WHERE id=%s", (token_hash(tok), fid))
+    return f"{config.BASE_URL}/freigabe?t={tok}"
+
+
+class NeueVersionIn(BaseModel):
+    titel: str | None = Field(default=None, max_length=200)
+    inhalt: str | None = Field(default=None, max_length=20000)
+
+
+@router.post("/freigaben-kunden/{fid}/neue-version")
+def a_freigabe_version(fid: str, data: NeueVersionIn, bg: BackgroundTasks, user: dict = Depends(require_admin)):
+    """Nach „Änderung gewünscht“: überarbeitete Fassung als neue Version derselben Freigabe an den Kunden schicken."""
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT kunden_id, titel, art, inhalt, status, version, veroeffentlichung_am FROM kundenfreigaben WHERE id=%s", (fid,))
+            alt = cur.fetchone()
+            if not alt:
+                raise nicht_gefunden()
+            if alt["status"] != "abgelehnt":
+                raise HTTPException(400, "Eine neue Version gibt es nur nach „Änderung gewünscht“.")
+            cur.execute("SELECT 1 FROM kundenfreigaben WHERE vorgaenger_id=%s", (fid,))
+            if cur.fetchone():
+                raise HTTPException(400, "Dazu gibt es schon eine neue Version.")
+            titel = (data.titel or alt["titel"]).strip()
+            inhalt = (data.inhalt if data.inhalt is not None else alt["inhalt"]) or None
+            cur.execute("""INSERT INTO kundenfreigaben (kunden_id, titel, art, inhalt, angefragt_von, version, vorgaenger_id, veroeffentlichung_am) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                        (alt["kunden_id"], titel, alt["art"], inhalt, team_name(user), alt["version"] + 1, fid, alt["veroeffentlichung_am"]))
+            nid = cur.fetchone()["id"]
+            link = _link_erzeugen(cur, nid)
+            cur.execute("SELECT ansprechpartner FROM kunden WHERE id=%s", (alt["kunden_id"],))
+            k = cur.fetchone()
+            ziele = kunden_empfaenger(cur, alt["kunden_id"])
+            audit(cur, user, "kundenfreigabe_neue_version", alt["kunden_id"], {"titel": titel, "version": alt["version"] + 1})
+    except errors.InvalidTextRepresentation:
+        raise nicht_gefunden()
+    _mails(bg, ziele, mailer.freigabe_anfrage_kunde, k["ansprechpartner"], f"{titel} (Version {alt['version'] + 1})", link)
+    return {"id": nid, "version": alt["version"] + 1}
+
+
+class VorlageIn(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    art: str = Field(pattern="^(social|text|angebot|design|website|sonstiges)$")
+    titel: str = Field(min_length=1, max_length=200)
+    inhalt: str | None = Field(default=None, max_length=20000)
+
+
+@router.get("/freigabe-vorlagen")
+def a_vorlagen(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("SELECT id, art, name, titel, inhalt FROM freigabe_vorlagen ORDER BY art, name")
+        return cur.fetchall()
+
+
+@router.post("/freigabe-vorlagen")
+def a_vorlage_neu(data: VorlageIn, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        cur.execute("""INSERT INTO freigabe_vorlagen (name, art, titel, inhalt) VALUES (%s,%s,%s,%s)
+                       ON CONFLICT (name) DO UPDATE SET art=EXCLUDED.art, titel=EXCLUDED.titel, inhalt=EXCLUDED.inhalt RETURNING id""",
+                    (data.name.strip(), data.art, data.titel.strip(), (data.inhalt or "").strip() or None))
+        return {"id": cur.fetchone()["id"]}
+
+
+@router.delete("/freigabe-vorlagen/{vid}")
+def a_vorlage_weg(vid: str, user: dict = Depends(require_admin)):
+    try:
+        with tx("admin") as cur:
+            cur.execute("DELETE FROM freigabe_vorlagen WHERE id=%s RETURNING id", (vid,))
+            if not cur.fetchone():
+                raise nicht_gefunden()
+    except errors.InvalidTextRepresentation:
+        raise nicht_gefunden()
+    return {"ok": True}
 
 
 @router.post("/freigaben-kunden/{fid}/dateien")

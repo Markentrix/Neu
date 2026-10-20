@@ -9,9 +9,10 @@ V.freigaben = async () => {
   const karte = (f) => {
     const m = h('div'), kom = h('textarea', { rows: 2, maxlength: 2000, placeholder: 'Kommentar (bei „Änderung wünschen“ bitte kurz beschreiben, was angepasst werden soll)' });
     const los = async (entscheidung) => { try { await api('/api/kunde/freigaben/' + f.id + '/entscheiden', { method: 'POST', body: { entscheidung, kommentar: kom.value } }); zeige(); } catch (x) { melde(m, x.message); } };
-    return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h3', { style: 'margin:0' }, f.titel), h('span', { class: 'pill' }, FART[f.art] || f.art), h('span', { class: 'grow' }),
+    return h('div', { class: 'card' }, h('div', { class: 'row' }, h('h3', { style: 'margin:0' }, f.titel + (f.version > 1 ? ' (Version ' + f.version + ')' : '')), h('span', { class: 'pill' }, FART[f.art] || f.art), h('span', { class: 'grow' }),
       h('span', { class: 'pill ' + (f.status === 'freigegeben' ? 'ok' : f.status === 'abgelehnt' ? 'bad' : f.status === 'wartet' ? 'warn' : '') }, f.status === 'wartet' ? 'wartet auf dich' : f.status === 'freigegeben' ? 'freigegeben' : f.status === 'abgelehnt' ? 'Änderung gewünscht' : 'zurückgezogen')),
-      h('p', { class: 'small muted' }, 'Angefragt am ' + zeit(f.angefragt_am)), f.inhalt ? h('div', { class: 'freitext' }, f.inhalt) : '',
+      h('p', { class: 'small muted' }, 'Angefragt am ' + zeit(f.angefragt_am)), f.vorgaenger_kommentar ? h('div', { class: 'msg info' }, 'Dein Änderungswunsch zur vorherigen Version: „' + f.vorgaenger_kommentar + '“') : '', f.inhalt ? h('div', { class: 'freitext' }, f.inhalt) : '',
+      f.dateien.filter(d => String(d.mime).startsWith('image/')).map(d => h('img', { src: '/api/kunde/dateien/' + d.id, alt: d.name, style: 'max-width:100%;border-radius:10px;display:block;margin:6px 0' })),
       f.dateien.length ? h('div', { class: 'small' }, f.dateien.map(d => h('a', { class: 'dateilink', href: '/api/kunde/dateien/' + d.id, target: '_blank', rel: 'noopener' }, '📎 ' + d.name + ' (' + groesse(d.groesse) + ')'))) : '',
       f.status === 'wartet' ? (darfSchreiben() ? h('div', {}, m, kom, h('div', { class: 'row', style: 'margin-top:10px' }, knopf('Freigeben', () => los('freigegeben'), 'btn'), knopf('Änderung wünschen', () => los('abgelehnt'), 'btn sec'))) : h('p', { class: 'small muted' }, 'Mit deinem Zugang kannst du nur ansehen.'))
         : h('p', { class: 'small muted' }, (f.entschieden_name ? f.entschieden_name + ' am ' : 'Am ') + zeit(f.entschieden_am) + (f.kommentar ? ' · „' + f.kommentar + '“' : '')));

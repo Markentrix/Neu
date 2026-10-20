@@ -221,6 +221,12 @@ def aufgaben_automatisch(cfg):
             FROM buchungen b JOIN kunden k ON k.id = b.kunden_id
             WHERE b.status = 'aktiv' AND b.mindestlaufzeit_ende BETWEEN current_date AND current_date + 60 AND k.status = 'aktiv'
             ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Domain läuft in den nächsten 60 Tagen ab (auch bei automatischer Verlängerung: Zahlungsmittel und Kundenabsprache prüfen)
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT d.kunden_id, 'Domain läuft ab: ' || d.domain || ' am ' || to_char(d.ablauf_am, 'DD.MM.YYYY') || ' – ' || k.firma, {admin}, current_date, 'auto', 'domain-' || d.id || '-' || to_char(d.ablauf_am, 'YYYYMMDD')
+            FROM domains d JOIN kunden k ON k.id = d.kunden_id
+            WHERE d.status = 'aktiv' AND d.ablauf_am BETWEEN current_date AND current_date + 60 AND k.status IN ('onboarding', 'aktiv', 'pausiert')
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
         # Kunde hängt im Onboarding: seit 5 Tagen angelegt, einmal pro Woche eine Aufgabe zum Nachfassen
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT k.id, 'Onboarding nachfassen: ' || k.firma, {admin}, current_date, 'auto', 'onboarding-' || k.id || '-' || to_char(current_date, 'IYYY-IW')

@@ -150,9 +150,11 @@ def kosten(kid: str, user: dict = Depends(require_admin)):
             dienste = cur.fetchall()
             cur.execute("SELECT coalesce(sum(monatlich_cent - rabatt_cent),0) AS umsatz FROM buchungen WHERE kunden_id=%s AND status='aktiv'", (kid,))
             umsatz = int(cur.fetchone()["umsatz"])
+            cur.execute("SELECT coalesce(sum(preis_jahr_cent),0) AS s FROM domains WHERE kunden_id=%s AND status='aktiv' AND inhaber='markentrix'", (kid,))
+            domains_jahr = int(cur.fetchone()["s"])
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Kunde nicht gefunden.")
-    return {"monate": monate, "dienste": dienste, "umsatz_monat_cent": umsatz}
+    return {"monate": monate, "dienste": dienste, "umsatz_monat_cent": umsatz, "domains_jahr_cent": domains_jahr}
 
 
 class KostenIn(BaseModel):

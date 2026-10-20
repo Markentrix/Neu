@@ -54,11 +54,11 @@ GEFUNDEN="$(printf '%s\n' "${PROBLEME[@]:-}" | sed '/^$/d' | sort)"
 # Status für die Admin-Übersicht im Portal (nur Zahlen und Meldungen, keine Zugangsdaten)
 if [ -d "$BASE/backup-status" ]; then
   BACKUP_H="$(alter "$BASE/backups/last_success")"; OFFSITE_H="$(alter "$BASE/backup-status/offsite_last")"
-  JSON_PROBLEME="$GEFUNDEN" JSON_BACKUP="$BACKUP_H" JSON_OFFSITE="$OFFSITE_H" JSON_OFFSITE_AKTIV="${OFFSITE_TARGET:+1}" JSON_PLATTE="${USE:-0}" JSON_CERT="$CERT_TAGE" python3 - "$BASE/backup-status" <<'PY' 2>/dev/null || true
+  JSON_PROBLEME="$GEFUNDEN" JSON_RESTORE="$(alter "$BASE/backup-status/restore_last")" JSON_BACKUP="$BACKUP_H" JSON_OFFSITE="$OFFSITE_H" JSON_OFFSITE_AKTIV="${OFFSITE_TARGET:+1}" JSON_PLATTE="${USE:-0}" JSON_CERT="$CERT_TAGE" python3 - "$BASE/backup-status" <<'PY' 2>/dev/null || true
 import json, os, sys, time
 e = os.environ
 d = {"zeit": time.time(), "backup_stunden": int(e["JSON_BACKUP"]), "offsite_stunden": int(e["JSON_OFFSITE"]), "offsite_aktiv": bool(e.get("JSON_OFFSITE_AKTIV")),
-     "platte_prozent": int(e["JSON_PLATTE"]), "zertifikat_tage": int(e["JSON_CERT"]), "probleme": [x for x in e.get("JSON_PROBLEME", "").splitlines() if x.strip()]}
+     "restore_stunden": int(e.get("JSON_RESTORE", 9999)), "platte_prozent": int(e["JSON_PLATTE"]), "zertifikat_tage": int(e["JSON_CERT"]), "probleme": [x for x in e.get("JSON_PROBLEME", "").splitlines() if x.strip()]}
 p = sys.argv[1] + "/system.json"
 open(p + ".tmp", "w").write(json.dumps(d)); os.chmod(p + ".tmp", 0o644); os.replace(p + ".tmp", p)
 PY

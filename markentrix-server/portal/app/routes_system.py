@@ -97,3 +97,45 @@ def systemstatus(user: dict = Depends(require_admin)):
     rang = {"ok": 0, "unbekannt": 1, "warn": 2, "bad": 3}
     gesamt = max((p["status"] for p in punkte), key=lambda s: rang[s], default="unbekannt")
     return {"ampel": punkte, "gesamt": gesamt, "vorhanden": d is not None, "status": d, "probleme": probleme, "mail_eingerichtet": bool(smtp.get("host")), "ki_eingerichtet": bool(ki.get("api_key"))}
+
+
+@router.get("/admin/vertragsstand")
+def vertragsstand(user: dict = Depends(require_admin)):
+    """Nachweis, dass die Zusagen aus dem AVV (Anlage 2) im Betrieb eingehalten werden: ein Blick statt vieler Karten."""
+    from . import avv as avv_modul
+    from .routes_avv import fehlende, veraltete
+    d = lesen_status()
+    out = []
+    with tx("admin") as cur:
+        cur.execute("SELECT count(*) AS n, count(*) FILTER (WHERE totp_aktiv) AS mit FROM benutzer WHERE rolle='admin' AND aktiv")
+        a = cur.fetchone()
+        out.append(_punkt("zwei_faktor", "Zwei-Faktor-Anmeldung der Admins", "ok" if a["n"] and a["n"] == a["mit"] else "bad", f"{a['mit']} von {a['n']} Admin-Konten mit 2FA"))
+        cur.execute("SELECT min(zeit) AS aelteste FROM audit_log")
+        r = cur.fetchone()["aelteste"]
+        tage = int((time.time() - r.timestamp()) / 86400) if r else 0
+        out.append(_punkt("audit", "Audit-Log: Aufbewahrung 12 Monate", "ok" if tage <= 400 else "bad", f"ältester Eintrag {tage} Tage" + ("" if tage <= 400 else ", die Bereinigung läuft nicht")))
+        cur.execute("SELECT min(erstellt_am) AS aelteste FROM chat_verlauf")
+        r = cur.fetchone()["aelteste"]
+        tage = int((time.time() - r.timestamp()) / 86400) if r else 0
+        out.append(_punkt("chat", "Chatverläufe: Aufbewahrung 6 Monate", "ok" if tage <= 200 else "bad", f"ältester Eintrag {tage} Tage" + ("" if tage <= 200 else ", die Bereinigung läuft nicht")))
+        fe, ve = fehlende(cur), veraltete(cur)
+        out.append(_punkt("avv_fehlt", "Kunden ohne AVV", "ok" if not fe else "bad", "alle Kunden haben einen AVV" if not fe else f"{len(fe)} Kunden ohne AVV"))
+        out.append(_punkt("avv_alt", f"AVV-Fassung (aktuell: Version {avv_modul.VERSION})", "ok" if not ve else "warn", "alle auf der aktuellen Fassung" if not ve else f"{len(ve)} Kunden noch mit alter Fassung"))
+        cur.execute("""SELECT count(*) AS n FROM uav_mitteilungen m JOIN uav_aenderungen a ON a.id=m.aenderung_id WHERE m.widerspruch_am IS NOT NULL AND a.wirksam_ab >= current_date - 30""")
+        w = cur.fetchone()["n"]
+        out.append(_punkt("widerspruch", "Widersprüche gegen Unterauftragsverarbeiter", "ok" if not w else "warn", "keine offenen" if not w else f"{w} Widerspruch/Widersprüche in den letzten 30 Tagen prüfen"))
+        cur.execute("SELECT count(*) AS n FROM domains WHERE status='aktiv' AND ablauf_am IS NOT NULL AND ablauf_am <= current_date + 30")
+        dn = cur.fetchone()["n"]
+        out.append(_punkt("domains", "Domains laufen ab", "ok" if not dn else "warn", "keine in den nächsten 30 Tagen" if not dn else f"{dn} Domain(s) laufen in den nächsten 30 Tagen ab"))
+    if d:
+        b = d.get("backup_stunden", 9999)
+        out.append(_punkt("backup", "Tägliche Sicherung (Aufbewahrung 30 Tage)", "ok" if b <= 36 else "bad", "letzte vor " + _stunden(b) if b < 9999 else "noch keine Sicherung"))
+        rs = d.get("restore_stunden", 9999)
+        out.append(_punkt("restore", "Wiederherstellungstest (mindestens vierteljährlich, läuft wöchentlich)", "ok" if rs <= 240 else "bad" if rs < 9999 else "unbekannt", "letzter Test vor " + _stunden(rs) if rs < 9999 else "noch kein Test festgehalten"))
+        o = d.get("offsite_stunden", 9999)
+        out.append(_punkt("offsite", "Verschlüsselte Kopie getrennt vom Server", "ok" if d.get("offsite_aktiv") and o <= 36 else "bad" if d.get("offsite_aktiv") else "warn",
+                          ("letzte vor " + _stunden(o)) if d.get("offsite_aktiv") and o < 9999 else "nicht eingerichtet (mkctl offsite-setup)"))
+    else:
+        out.append(_punkt("ueberwachung", "Server-Überwachung", "unbekannt", "noch keine Meldung"))
+    rang = {"ok": 0, "unbekannt": 1, "warn": 2, "bad": 3}
+    return {"punkte": out, "gesamt": max((p["status"] for p in out), key=lambda s: rang[s])}

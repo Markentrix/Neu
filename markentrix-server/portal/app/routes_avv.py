@@ -96,7 +96,11 @@ def vorschlag(kid: str, user: dict = Depends(require_admin)):
         raise _404()
     if not k:
         raise _404()
-    a = avv.anlage_bereinigen({"weisung_name": k["ansprechpartner"] or "", "weisung_email": k["email"] or ""})
+    with tx("admin") as cur:
+        cur.execute("SELECT domain FROM domains WHERE kunden_id=%s AND status='aktiv' AND inhaber='markentrix' AND registrar ILIKE 'inwx%%' ORDER BY domain", (kid,))
+        doms = [d["domain"] for d in cur.fetchall()]
+    a = avv.anlage_bereinigen({"weisung_name": k["ansprechpartner"] or "", "weisung_email": k["email"] or "",
+                               "module": ["portal"] + (["domain"] if doms else []), "domain": ", ".join(doms)})
     return {"anlage": a, "module": avv.MODUL_KEYS}
 
 

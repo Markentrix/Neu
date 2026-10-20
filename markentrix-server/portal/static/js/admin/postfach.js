@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, groesse, melde } from '../common.js';
+import { h, api, datum, zeit, groesse, melde, dialog } from '../common.js';
 import { V, kopf, sicherApi, tabelle, zeige } from './kern.js';
 
 export const STATI = ['onboarding', 'aktiv', 'pausiert', 'gekuendigt', 'beendet'];
@@ -82,15 +82,53 @@ export async function ticketNeu(kid) {
 export const F_ART = { social: 'Social Media', text: 'Text', angebot: 'Angebot', design: 'Design', website: 'Website', sonstiges: 'Sonstiges' };
 export const fPill = (st) => h('span', { class: 'pill ' + (st === 'freigegeben' ? 'ok' : st === 'abgelehnt' ? 'bad' : st === 'wartet' ? 'warn' : '') }, st === 'abgelehnt' ? 'Änderung gewünscht' : st === 'wartet' ? 'wartet' : st);
 
+async function dateienHochladen(fid, input) {
+  for (const f of input.files) { const fd = new FormData(); fd.append('datei', f); await api('/api/admin/freigaben-kunden/' + fid + '/dateien', { method: 'POST', body: fd }); }
+}
+
 export async function freigabeNeuKarte(kid) {
+  const vorlagen = await api('/api/admin/freigabe-vorlagen').catch(() => []);
   const m = h('div'), titel = h('input', { maxlength: 200, placeholder: 'z. B. Instagram-Beitrag Wochenangebote KW 43' }), inhalt = h('textarea', { rows: 4, maxlength: 20000, placeholder: 'Text bzw. Beschreibung, den der Kunde prüfen soll' });
-  const art = h('select', {}, Object.entries(F_ART).map(([v, t]) => h('option', { value: v }, t))), datei = h('input', { type: 'file' });
-  return h('div', { class: 'card' }, h('h2', {}, 'Neue Freigabe-Bitte'), h('p', { class: 'small muted' }, 'Der Kunde bekommt eine E-Mail und entscheidet im Portal. Datum, Uhrzeit, Name und IP werden festgehalten.'), m,
-    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Titel'), titel), h('div', {}, h('label', {}, 'Art'), art)), h('label', {}, 'Inhalt'), inhalt,
-    h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, h('label', { style: 'margin:0 0 4px' }, 'Datei anhängen (Bild, PDF, optional)'), datei),
-      h('button', { class: 'btn', onclick: async () => { try { const r = await api('/api/admin/kunden/' + kid + '/freigaben-kunden', { method: 'POST', body: { titel: titel.value, art: art.value, inhalt: inhalt.value || null } });
-        if (datei.files[0]) { const f = new FormData(); f.append('datei', datei.files[0]); await api('/api/admin/freigaben-kunden/' + r.id + '/dateien', { method: 'POST', body: f }); }
-        zeige(); } catch (x) { melde(m, x.message); } } }, 'Anfragen')));
+  const art = h('select', {}, Object.entries(F_ART).map(([v, t]) => h('option', { value: v }, t))), datei = h('input', { type: 'file', multiple: true }), termin = h('input', { type: 'date' });
+  const wahl = h('select', { 'aria-label': 'Vorlage' }, h('option', { value: '' }, '– Vorlage wählen –'), vorlagen.map(v => h('option', { value: v.id }, v.name)));
+  wahl.addEventListener('change', () => { const v = vorlagen.find(x => x.id === wahl.value); if (v) { titel.value = v.titel; inhalt.value = v.inhalt || ''; art.value = v.art; } });
+  const alsVorlage = async () => { const name = prompt('Name der Vorlage:', titel.value.trim()); if (!name) return;
+    try { await api('/api/admin/freigabe-vorlagen', { method: 'POST', body: { name, art: art.value, titel: titel.value || name, inhalt: inhalt.value || null } }); melde(m, 'Vorlage gespeichert.', 'ok'); setTimeout(zeige, 700); } catch (x) { melde(m, x.message); } };
+  const weg = async () => { const v = vorlagen.find(x => x.id === wahl.value); if (!v || !confirm('Vorlage „' + v.name + '“ löschen?')) return; try { await api('/api/admin/freigabe-vorlagen/' + v.id, { method: 'DELETE' }); zeige(); } catch (x) { melde(m, x.message); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Neue Freigabe-Bitte'), h('p', { class: 'small muted' }, 'Der Kunde bekommt eine E-Mail mit einem Link, über den er ohne Anmeldung ansehen und freigeben kann (oder im Portal). Datum, Uhrzeit, Name und IP werden festgehalten.'), m,
+    h('div', { class: 'row' }, h('div', { class: 'grow' }, wahl), knopf2('Vorlage löschen', weg, 'sec small')),
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Titel'), titel), h('div', {}, h('label', {}, 'Art'), art)), h('label', {}, 'Inhalt'), inhalt, h('label', {}, 'Geplante Veröffentlichung (optional, erscheint im Freigabe-Kalender)'), termin,
+    h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, h('label', { style: 'margin:0 0 4px' }, 'Dateien anhängen (Bilder, PDF, mehrere möglich, optional)'), datei),
+      knopf2('Als Vorlage speichern', alsVorlage, 'sec'),
+      h('button', { class: 'btn', onclick: async () => { try { const r = await api('/api/admin/kunden/' + kid + '/freigaben-kunden', { method: 'POST', body: { titel: titel.value, art: art.value, inhalt: inhalt.value || null, veroeffentlichung_am: termin.value || null } });
+        await dateienHochladen(r.id, datei); zeige(); } catch (x) { melde(m, x.message); } } }, 'Anfragen')));
+}
+
+const knopf2 = (t, fn, c = 'btn') => h('button', { class: c, onclick: fn }, t);
+
+/** Nach „Änderung gewünscht“: überarbeitete Fassung als neue Version derselben Freigabe schicken. */
+function neueVersionDialog(z) {
+  const fm = h('div'), titel = h('input', { value: z.titel, maxlength: 200 }), inhalt = h('textarea', { rows: 6, maxlength: 20000 }, z.inhalt || ''), datei = h('input', { type: 'file', multiple: true });
+  dialog('Neue Version zu „' + z.titel + '“', h('div', { class: 'stack' }, z.kommentar ? h('div', { class: 'msg info' }, 'Änderungswunsch des Kunden: „' + z.kommentar + '“') : '', fm,
+    h('label', {}, 'Titel'), titel, h('label', {}, 'Überarbeiteter Inhalt'), inhalt, h('label', {}, 'Neue Dateien (die alten bleiben bei Version ' + (z.version || 1) + ')'), datei,
+    h('p', {}, knopf2('Neue Version senden', async () => { try { const r = await api('/api/admin/freigaben-kunden/' + z.id + '/neue-version', { method: 'POST', body: { titel: titel.value, inhalt: inhalt.value } }); await dateienHochladen(r.id, datei); location.reload(); } catch (x) { melde(fm, x.message); } }))), true);
+}
+const versionTxt = (z) => z.titel + (z.version > 1 ? ' (Version ' + z.version + ')' : '');
+const freigabeAktion = (z) => z.status === 'abgelehnt' ? h('button', { class: 'btn small', onclick: () => neueVersionDialog(z) }, 'Neue Version senden') : '';
+
+async function kalenderKarte() {
+  const k = await api('/api/admin/freigabe-kalender').catch(() => null);
+  if (!k) return h('div');
+  const start = new Date(k.von + 'T00:00:00'), tage = [];
+  for (let i = 0; i < k.tage; i++) { const d = new Date(start.getTime() + i * 86400000); tage.push(d); }
+  const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const WT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  const eintrag = (e) => h('a', { href: '#kunde/' + e.kunden_id, class: 'pill ' + (e.status === 'freigegeben' ? 'ok' : e.status === 'abgelehnt' ? 'bad' : 'warn'), style: 'display:block;margin:2px 0;white-space:normal', title: e.status }, e.firma + ': ' + e.titel);
+  const spalte = (d) => h('div', { style: 'min-width:0' }, h('strong', { class: 'small' }, WT[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth() + 1) + '.'),
+    k.eintraege.filter(e => String(e.veroeffentlichung_am).slice(0, 10) === iso(d)).map(eintrag));
+  return h('div', { class: 'card' }, h('h2', {}, 'Freigabe-Kalender'), h('p', { class: 'small muted' }, 'Geplante Veröffentlichungen der nächsten ' + k.tage + ' Tage. Gelb = wartet auf Freigabe, grün = freigegeben, rot = Änderung gewünscht.'),
+    h('div', { style: 'display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px' }, tage.map(spalte)),
+    k.ohne_termin.length ? h('p', { class: 'small', style: 'margin-top:10px' }, h('strong', {}, 'Wartend ohne Termin: '), k.ohne_termin.map(e => e.firma + ' – ' + e.titel).join(' · ')) : '');
 }
 
 V.freigaben = async () => {
@@ -98,16 +136,17 @@ V.freigaben = async () => {
   const liste = await api('/api/admin/freigaben-kunden?status=' + status), m = h('div');
   const tab = (st, t) => h('a', { href: '#freigaben' + (st ? '?status=' + st : ''), class: 'tab' + (status === st ? ' on' : '') }, t);
   const zurueck = async (z) => { if (!confirm('Diese Bitte zurückziehen?')) return; try { await api('/api/admin/freigaben-kunden/' + z.id + '/zurueckziehen', { method: 'POST', body: {} }); zeige(); } catch (x) { melde(m, x.message); } };
-  return h('div', {}, kopf('Freigaben'), m, h('p', { class: 'small muted' }, 'Neue Freigabe-Bitten legst du beim jeweiligen Kunden an (Kunden → Kunde öffnen → Freigaben).'),
+  const kal = await kalenderKarte();
+  return h('div', {}, kopf('Freigaben'), m, kal, h('p', { class: 'small muted' }, 'Neue Freigabe-Bitten legst du beim jeweiligen Kunden an (Kunden → Kunde öffnen → Freigaben).'),
     h('div', { class: 'tabs' }, tab('', 'Alle'), tab('wartet', 'Wartet'), tab('freigegeben', 'Freigegeben'), tab('abgelehnt', 'Änderung gewünscht')),
-    h('div', { class: 'card' }, tabelle([['Kunde', z => h('a', { href: '#kunde/' + z.kunden_id }, z.firma)], ['Titel', z => z.titel + ' (' + (F_ART[z.art] || z.art) + ')'], ['Status', z => fPill(z.status)], ['Angefragt', z => zeit(z.angefragt_am)],
+    h('div', { class: 'card' }, tabelle([['Kunde', z => h('a', { href: '#kunde/' + z.kunden_id }, z.firma)], ['Titel', z => versionTxt(z) + ' (' + (F_ART[z.art] || z.art) + ')' + (z.ueber_link ? ' · per Link' : '')], ['Status', z => fPill(z.status)], ['Angefragt', z => zeit(z.angefragt_am)],
       ['Entscheidung', z => z.entschieden_am ? zeit(z.entschieden_am) + ' · ' + (z.entschieden_name || '') + (z.entschieden_ip ? ' · IP ' + z.entschieden_ip : '') + (z.kommentar ? ' · „' + z.kommentar + '“' : '') : ''],
-      ['', z => z.status === 'wartet' ? h('button', { class: 'btn sec small', onclick: () => zurueck(z) }, 'Zurückziehen') : '']], liste, 'Keine Freigaben.')));
+      ['', z => z.status === 'wartet' ? h('button', { class: 'btn sec small', onclick: () => zurueck(z) }, 'Zurückziehen') : freigabeAktion(z)]], liste, 'Keine Freigaben.')));
 };
 
 export async function freigabenKundeKarte(kid, k) {
   const alle = await api('/api/admin/freigaben-kunden'), liste = alle.filter(z => z.kunden_id === kid);
-  return h('div', { class: 'stack' }, await freigabeNeuKarte(kid), liste.length ? h('div', { class: 'card' }, h('h3', {}, 'Bisherige Freigaben'), tabelle([['Titel', z => z.titel], ['Status', z => fPill(z.status)], ['Angefragt', z => zeit(z.angefragt_am)], ['Entscheidung', z => z.entschieden_am ? zeit(z.entschieden_am) + ' · ' + (z.entschieden_name || '') + (z.kommentar ? ' · „' + z.kommentar + '“' : '') : '']], liste)) : '');
+  return h('div', { class: 'stack' }, await freigabeNeuKarte(kid), liste.length ? h('div', { class: 'card' }, h('h3', {}, 'Bisherige Freigaben'), tabelle([['Titel', z => versionTxt(z)], ['Status', z => fPill(z.status)], ['', freigabeAktion], ['Angefragt', z => zeit(z.angefragt_am)], ['Entscheidung', z => z.entschieden_am ? zeit(z.entschieden_am) + ' · ' + (z.entschieden_name || '') + (z.kommentar ? ' · „' + z.kommentar + '“' : '') : '']], liste)) : '');
 }
 
 // ------------------------------------------------------------- Dokumente pro Kunde

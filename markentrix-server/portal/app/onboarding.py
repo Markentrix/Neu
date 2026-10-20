@@ -8,7 +8,7 @@ VORLAGE = [
     ("briefing", "Briefing ausgefüllt", "Der Kunde hat den Fragebogen zu Unternehmen, Zielen und Wünschen abgeschickt.", 35, None, "briefing"),
     ("stammdaten", "Firmendaten, Öffnungszeiten, Leistungen erfasst", "Wird für Website, Assistent und Berichte gebraucht.", 40, None, None),
     ("branding", "Logo, Farben, Fotos erhalten", "Vom Kunden bekommen oder mit ihm abgestimmt.", 50, None, None),
-    ("domain", "Domain und DNS bereit", "Domain gehört dem Kunden oder wurde registriert, DNS zeigt auf den Server.", 60, "website", None),
+    ("domain", "Domain erfasst und DNS bereit", "Im Kundenblatt unter „Domains“ Inhaber, Registrar und Ablaufdatum eintragen (wird dann automatisch erkannt). DNS zeigt auf den Server.", 60, "website", "domain_erfasst"),
     ("website", "Website live", "Seite ist veröffentlicht und geprüft (Handy, Impressum, Datenschutz).", 70, "website", "website_live"),
     ("wissen", "Wissensbasis für den Assistenten befüllt", "Leistungen, Preise, Öffnungszeiten, FAQ, Tonalität.", 80, "ki_chat", "wissen"),
     ("agent", "KI-Assistent / Agent getestet", "Mit typischen Fragen ausprobiert, Hinweis auf KI sichtbar.", 90, "ki_chat", None),
@@ -54,6 +54,9 @@ def auto_erkannt(cur, kid) -> set:
     cur.execute("SELECT 1 FROM websites WHERE kunden_id=%s AND status='live' LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("website_live")
+    cur.execute("SELECT 1 FROM domains WHERE kunden_id=%s AND status<>'gekuendigt' AND ablauf_am IS NOT NULL AND (inhaber_name IS NOT NULL OR inhaber='markentrix') LIMIT 1", (kid,))
+    if cur.fetchone():
+        erkannt.add("domain_erfasst")
     cur.execute("SELECT 1 FROM wissensbasis WHERE kunden_id=%s AND aktiv LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("wissen")

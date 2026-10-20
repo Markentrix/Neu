@@ -227,13 +227,39 @@ export function brandingKarte(kid, k) {
       k.branding_farbe && knopf('Farbe zurücksetzen', async () => { farbeGesetzt = false; senden({}); }, 'sec')));
 }
 
-export function offboardingKarte(kid, k) {
+export async function domainKarte(kid) {
+  const liste = await api('/api/admin/kunden/' + kid + '/domains'), m = h('div');
+  const dialogDomain = (z) => {
+    const f = h('form', { class: 'stack', onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); o.auto_verlaengern = e.target.auto_verlaengern.checked; o.preis_jahr_eur = o.preis_jahr_eur === '' ? null : Number(o.preis_jahr_eur);
+        try { await api(z ? '/api/admin/domains/' + z.id : '/api/admin/kunden/' + kid + '/domains', { method: z ? 'PUT' : 'POST', body: o }); location.reload(); } catch (x) { melde(fm, x.message); } } },
+      h('div', { class: 'form2' }, feld('Domain', 'domain', z ? z.domain : '', { required: true, placeholder: 'firma.de' }), feld('Registrar', 'registrar', z ? z.registrar : 'INWX'),
+        h('div', {}, h('label', {}, 'Inhaber der Domain'), h('select', { name: 'inhaber' }, h('option', { value: 'markentrix', selected: !z || z.inhaber === 'markentrix' }, 'Markentrix (wir verwalten)'), h('option', { value: 'kunde', selected: z && z.inhaber === 'kunde' }, 'Kunde (eigener Registrar-Account)'))),
+        feld('Name des Inhabers', 'inhaber_name', z ? z.inhaber_name || '' : ''), feld('Kontakt des Inhabers', 'inhaber_kontakt', z ? z.inhaber_kontakt || '' : ''),
+        feld('Registriert am', 'registriert_am', z ? String(z.registriert_am || '').slice(0, 10) : '', { type: 'date' }), feld('Läuft ab am', 'ablauf_am', z ? String(z.ablauf_am || '').slice(0, 10) : '', { type: 'date' }),
+        feld('Preis pro Jahr in €', 'preis_jahr_eur', z && z.preis_jahr_cent != null ? (z.preis_jahr_cent / 100).toFixed(2) : '', { type: 'number', step: '0.01', min: '0' }),
+        h('div', {}, h('label', {}, 'Status'), h('select', { name: 'status' }, [['aktiv', 'aktiv'], ['transfer', 'wird übertragen'], ['gekuendigt', 'gekündigt']].map(([v, t]) => h('option', { value: v, selected: z && z.status === v }, t))))),
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', name: 'auto_verlaengern', checked: !z || z.auto_verlaengern, style: 'width:auto' }), 'verlängert sich automatisch'),
+      h('label', {}, 'Notiz (keine Passwörter oder Auth-Codes!)'), h('textarea', { name: 'notiz', rows: 2, maxlength: 500 }, z ? z.notiz || '' : ''), h('div', {}), h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
+    const fm = h('div'); dialog(z ? 'Domain bearbeiten' : 'Domain eintragen', h('div', {}, fm, f), true);
+  };
+  const tage = (d) => d ? Math.ceil((new Date(String(d).slice(0, 10)).getTime() - new Date(new Date().toISOString().slice(0, 10)).getTime()) / 864e5) : null;
+  return h('div', { class: 'card' }, h('h2', {}, 'Domains'), m,
+    h('p', { class: 'small muted' }, 'Wem gehört die Domain, wo liegt sie, wann läuft sie ab? Ablauf in den nächsten 60 Tagen erzeugt automatisch eine Aufgabe. Auth-Codes und Passwörter bitte nur im Passwortmanager speichern.'),
+    tabelle([['Domain', z => z.domain], ['Registrar', z => z.registrar], ['Inhaber', z => z.inhaber === 'kunde' ? 'Kunde' : 'Markentrix'],
+      ['Läuft ab', z => { const t = tage(z.ablauf_am); return z.ablauf_am ? datum(z.ablauf_am) + (t !== null && t <= 60 && z.status === 'aktiv' ? ' (' + (t < 0 ? 'abgelaufen' : 'in ' + t + ' Tagen') + ')' : '') : '–'; }],
+      ['Preis/Jahr', z => z.preis_jahr_cent != null ? fmtEuro(z.preis_jahr_cent) : '–'], ['Status', z => z.status === 'aktiv' ? 'aktiv' : z.status === 'transfer' ? 'wird übertragen' : 'gekündigt'],
+      ['', z => h('span', { class: 'row' }, knopf('Bearbeiten', () => dialogDomain(z), 'sec small'), knopf('Löschen', async () => { if (confirm('Domain ' + z.domain + ' aus der Liste entfernen?')) { try { await api('/api/admin/domains/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { fehler(m, x); } } }, 'bad small'))]], liste, 'Noch keine Domain eingetragen.'),
+    h('p', { style: 'margin-top:12px' }, knopf('Domain eintragen', () => dialogDomain(null), 'btn')));
+}
+
+export function offboardingKarte(kid, k, domains = []) {
   const m = h('div'); const beendet = ['gekuendigt', 'beendet'].includes(k.status);
   if (k.geloescht_am) return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende'), h('p', {}, 'Die Inhalte dieses Kunden wurden am ' + datum(k.geloescht_am) + ' gelöscht. Stammdaten und Belege bleiben wegen Aufbewahrungspflichten erhalten.'));
   const best = h('input', { placeholder: 'Kundennummer ' + k.kundennummer + ' zur Bestätigung', style: 'max-width:300px' });
   const haken = h('input', { type: 'checkbox', style: 'width:auto' });
   return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende: Datenexport und Löschung'),
     h('p', { class: 'small muted' }, 'Zum Vertragsende bekommt der Kunde seine Daten (Pflicht laut AVV) und danach werden seine Inhalte gelöscht. Stammdaten, Rechnungen, Verträge, Buchungen und der AVV bleiben wegen Aufbewahrungspflichten erhalten, die Kontaktdaten der Ansprechperson werden entfernt. Sicherungen enthalten die Daten noch bis zu 30 Tage.'), m,
+    domains.filter(z => z.inhaber === 'markentrix' && z.status !== 'gekuendigt').length ? h('div', { class: 'msg warn' }, 'Diese Domains gehören uns und müssen dem Kunden übergeben werden (Transfer zum Registrar des Kunden, Inhaberwechsel): ' + domains.filter(z => z.inhaber === 'markentrix' && z.status !== 'gekuendigt').map(z => z.domain).join(', ') + '. Danach Status auf „wird übertragen“ bzw. „gekündigt“ setzen.') : '',
     h('p', {}, h('a', { class: 'btn', href: '/api/admin/kunden/' + kid + '/export.zip' }, 'Datenexport als ZIP herunterladen')),
     beendet ? h('div', { class: 'stack', style: 'margin-top:12px' },
       h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, haken, 'Der Datenexport wurde an den Kunden übergeben'), best,
@@ -247,7 +273,7 @@ export async function kostenKarte(kid) {
   const dienst = h('input', { placeholder: 'z. B. telefonie, domain, werbung', maxlength: 40 }), betrag = h('input', { type: 'number', step: '0.01', min: '0.01', placeholder: 'Betrag in €' }), tag = h('input', { type: 'date' });
   const speichern = knopf('Kosten eintragen', async () => { try { await api('/api/admin/kunden/' + kid + '/kosten', { method: 'POST', body: { dienst: dienst.value, betrag_eur: Number(betrag.value), datum: tag.value || null } }); location.reload(); } catch (x) { fehler(m, x); } }, 'btn');
   return h('div', { class: 'card' }, h('h2', {}, 'Kosten pro Monat'),
-    h('p', { class: 'small muted' }, 'Monatlicher Umsatz laut aktiven Buchungen: ' + fmtEuro(d.umsatz_monat_cent) + '. KI-Kosten werden automatisch aus den Tokens berechnet, alle anderen Kosten (Telefonie, Domain, Werbung …) trägst du hier von Hand ein.'),
+    h('p', { class: 'small muted' }, 'Monatlicher Umsatz laut aktiven Buchungen: ' + fmtEuro(d.umsatz_monat_cent) + '.' + (d.domains_jahr_cent ? ' Domains, die wir bezahlen: ' + fmtEuro(d.domains_jahr_cent) + ' pro Jahr (' + fmtEuro(Math.round(d.domains_jahr_cent / 12)) + ' pro Monat, noch nicht in den Kosten unten enthalten).' : '') + ' KI-Kosten werden automatisch aus den Tokens berechnet, alle anderen Kosten (Telefonie, Domain, Werbung …) trägst du hier von Hand ein.'),
     tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Tokens', z => z.tokens], ['Kosten gesamt', z => fmtEuro(Math.round(z.kosten_cent))], ['Anteil am Umsatz', z => d.umsatz_monat_cent ? (z.kosten_cent / d.umsatz_monat_cent * 100).toFixed(1).replace('.', ',') + ' %' : '–']], d.monate, 'Noch keine Kosten erfasst.'),
     d.dienste.length ? h('div', {}, h('h3', {}, 'Aufgeteilt nach Kostenart'), tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kostenart', z => z.dienst], ['Kosten', z => fmtEuro(Math.round(z.kosten_cent))]], d.dienste)) : '',
     h('h3', {}, 'Kosten von Hand eintragen'), m, h('div', { class: 'row' }, dienst, betrag, tag, speichern));
@@ -394,9 +420,10 @@ export async function kundeDetail(kid) {
     await unterlagenKarte(kid),
     await berichteKarte(kid),
     await externKarte(kid),
+    await domainKarte(kid),
     await kostenKarte(kid),
     brandingKarte(kid, k),
-    offboardingKarte(kid, k),
+    offboardingKarte(kid, k, await api('/api/admin/kunden/' + kid + '/domains')),
     await historieKarte(kid),
     vorlagenKarte(kid, k),
     aufgabenpaketKarte(kid),

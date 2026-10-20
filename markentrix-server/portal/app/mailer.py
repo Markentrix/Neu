@@ -231,10 +231,15 @@ def ticket_erledigt_kunde(an: str, name: str | None, nr: str, betreff: str) -> t
     return senden(an, f"Erledigt: {nr} {betreff}", t)
 
 
-def freigabe_anfrage_kunde(an: str, name: str | None, titel: str) -> tuple[bool, str]:
+def freigabe_anfrage_kunde(an: str, name: str | None, titel: str, link: str | None = None) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
-    t = (f"{hallo}\n\nwir bitten um Ihre Freigabe: {titel}\n\nBitte sehen Sie es sich im Portal an und geben Sie es frei oder teilen Sie uns mit, was geändert werden soll: "
-         f"{config.BASE_URL}/app#freigaben" + SIGNATUR)
+    t = (f"{hallo}\n\nwir bitten um Ihre Freigabe: {titel}\n\n")
+    if link:
+        t += (f"Direkt ansehen und freigeben, ohne Anmeldung (Link 14 Tage gültig):\n{link}\n\n"
+              f"Oder im Portal: {config.BASE_URL}/app#freigaben" + SIGNATUR)
+    else:
+        t += ("Bitte sehen Sie es sich im Portal an und geben Sie es frei oder teilen Sie uns mit, was geändert werden soll: "
+              f"{config.BASE_URL}/app#freigaben" + SIGNATUR)
     return senden(an, f"Bitte um Freigabe: {titel}", t)
 
 

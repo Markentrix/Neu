@@ -353,3 +353,25 @@ Im Angebotsdialog steht unter den Positionen **„Das bekommt der Kunde“**. De
 - **Alte AVV (Version 1) ersetzen**: Beim Kunden erscheint ein Hinweis „Neue Fassung (Version 2) vorbereiten“, in der Übersicht „Heute“ steht „AVV: neue Fassung fehlt noch“. Der Dialog hat eine **Vorschau (PDF)**, ohne etwas zu speichern. Die alte Fassung bleibt als Nachweis liegen.
 - **Änderung bei Unterauftragsverarbeitern ankündigen** (Einstellungen → „AVV: Änderung bei Unterauftragsverarbeitern ankündigen“): Anbieter, Leistung, Modul und Datum eintragen (mindestens vier Wochen Vorlauf, sonst lehnt das Portal ab). Betroffene Kunden bekommen eine Mail, im Kundenportal steht die Ankündigung unter „Datenschutz-Vertrag“ mit Knopf **Widerspruch einlegen** (bis zum Datum). Du bekommst bei Widerspruch eine Mail, in der Liste steht der Kunde mit Begründung. Die Anbieterliste änderst du erst zum angekündigten Datum, und nicht für Kunden, die widersprochen haben.
 - **Überwachung und Wiederherstellungstest** liefen schon vorher: Prüfung alle 5 Minuten (Container, Portal von außen, Festplatte, Zertifikat, Sicherungsalter, Hintergrundjobs, Mailversand) mit Alarm per Mail und optional Telegram; wöchentlicher automatischer Wiederherstellungstest. Details und der Jahres-Probelauf: `docs/WIEDERHERSTELLUNG.md`.
+
+## Domains, Freigaben mit Dateien und Versionen, Vertretung (Stand Oktober 2026)
+
+**Domains pro Kunde.** Im Kundenblatt gibt es die Karte „Domains“: Domain, Registrar (Standard INWX), Inhaber (Kunde oder Markentrix) mit Name und Kontakt, Registrierung, Ablaufdatum, automatische Verlängerung, Jahrespreis, Status und Notiz. Auth-Codes werden bewusst nicht gespeichert. Wer in 60 Tagen abläuft, steht unter „Heute“ (als Aufgabe, ohne Doppelungen). Die Domains landen im Datenexport beim Offboarding, die Jahrespreise in der Kostenübersicht. Beim AVV schlägt das Portal Domains vor, die Markentrix bei INWX für den Kunden hält. Im Onboarding gilt der Schritt „Domain erfasst“ automatisch als erledigt, sobald Inhaber und Ablaufdatum eingetragen sind.
+
+**Freigaben mit mehreren Dateien.** Im Kundenblatt unter „Freigaben“ → „Neue Freigabe-Bitte“: Titel, Art, Text, beliebig viele Bilder oder PDFs anhängen, optional geplante Veröffentlichung. Der Kunde bekommt eine Mail mit Link; im Portal sieht er dasselbe.
+
+**Vorlagen.** Über das Auswahlfeld „Vorlage wählen“ füllst du Titel und Text vor (fünf Standardvorlagen sind angelegt, zum Beispiel Social-Post Wochenangebot). „Als Vorlage speichern“ legt eigene an, „Vorlage löschen“ entfernt sie.
+
+**Freigabe per Mail-Link ohne Anmeldung.** Der Link ist 14 Tage gültig und führt auf eine Seite mit Text, Bildern und zwei Knöpfen („Freigeben“ / „Änderung wünschen“). Pflicht ist der volle Name; bei einer Änderung zusätzlich eine Begründung. Gespeichert werden Datum, Uhrzeit, Name, IP-Adresse und der Vermerk „per Link“. Im Link steht nur ein Zufallswert, in der Datenbank liegt nur dessen Prüfsumme. Ist der Link abgelaufen, kann der Kunde sich im Portal anmelden oder ihr schickt eine neue Bitte.
+
+**Versionen.** Wünscht der Kunde Änderungen, steht in der Liste „Neue Version senden“. Die Überarbeitung geht als Version 2, 3 … an den Kunden, der frühere Kommentar steht dabei. Pro Ablehnung gibt es genau eine neue Version; der geplante Termin wird übernommen.
+
+**Freigabe-Kalender.** Unter „Freigaben“ oben: die nächsten 14 Tage mit allen geplanten Veröffentlichungen, gelb = wartet, grün = freigegeben, rot = Änderung gewünscht, darunter wartende Freigaben ohne Termin. Fehlt eine Freigabe zwei Tage vor dem Termin, erscheint unter „Heute“ eine Aufgabe „jetzt anrufen“.
+
+**Telefonat nach 5 Tagen.** Reagiert ein Kunde fünf Tage nicht auf eine Freigabe, schlägt „Heute“ einen Anruf vor (mit Telefonnummer als Direktlink).
+
+**Vertretung.** Der Inhaber trägt unter Konto → Vertretung eine zweite Person mit Zeitraum ein (zum Beispiel Urlaub). Nur in diesem Zeitraum bekommt sie die Freigabe-Mails zusätzlich. Eine Entscheidung per Link zählt wie jede andere und wird mit dem Namen festgehalten.
+
+**Vertragsstand.** Unter Verwaltung zeigt „Vertragsstand“ auf einen Blick, ob die Zusagen aus dem AVV eingehalten werden: 2FA, Audit-/Chat-Aufbewahrung, Sicherung, Restore-Test, AVV-Fassung, Widersprüche, ablaufende Domains.
+
+**Bewertungsanfrage und Monatsbericht** gab es schon: Der Monatsbericht geht automatisch per Mail raus, die Bewertungsanfrage nach einem erledigten Termin verschickst du bewusst selbst über deinen eigenen Kanal.

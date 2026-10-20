@@ -225,9 +225,12 @@ def heute(user: dict = Depends(require_admin)):
         wiedervorlagen = cur.fetchall()
         cur.execute("SELECT count(*) AS n FROM leads WHERE status = 'neu'")
         leads_n = cur.fetchone()["n"]
-        cur.execute("""SELECT f.id, f.titel, k.firma, k.id AS kunden_id FROM kundenfreigaben f JOIN kunden k ON k.id = f.kunden_id
+        cur.execute("""SELECT f.id, f.titel, k.firma, k.id AS kunden_id, k.telefon, k.ansprechpartner, (current_date - f.angefragt_am::date) AS tage FROM kundenfreigaben f JOIN kunden k ON k.id = f.kunden_id
                        WHERE f.status = 'wartet' AND f.angefragt_am < now() - interval '3 days' ORDER BY f.angefragt_am LIMIT 6""")
         freigaben = cur.fetchall()
+        cur.execute("""SELECT f.id, f.titel, f.veroeffentlichung_am, k.firma, k.id AS kunden_id, k.telefon FROM kundenfreigaben f JOIN kunden k ON k.id = f.kunden_id
+                       WHERE f.status = 'wartet' AND f.veroeffentlichung_am IS NOT NULL AND f.veroeffentlichung_am <= current_date + 2 ORDER BY f.veroeffentlichung_am LIMIT 6""")
+        freigaben_termin = cur.fetchall()
         cur.execute("""SELECT k.id, k.firma FROM kunden k WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '5 days'
                        AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt) ORDER BY k.erstellt_am LIMIT 6""")
         onboarding = cur.fetchall()
@@ -245,5 +248,5 @@ def heute(user: dict = Depends(require_admin)):
                        ORDER BY coalesce(b.angesehen_am, b.versendet_am, b.erstellt_am) DESC LIMIT 30""")
         angebote = cur.fetchall()
     gesamt = len(nachrichten) + len(aufgaben) + len(wiedervorlagen) + leads_n + len(freigaben) + len(onboarding) + len(rechnungen) + len(avv_fehlt)
-    return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "wiedervorlagen": wiedervorlagen, "leads_gesamt": leads_n, "freigaben": freigaben,
+    return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "wiedervorlagen": wiedervorlagen, "leads_gesamt": leads_n, "freigaben": freigaben, "freigaben_termin": freigaben_termin,
             "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "avv_veraltet": avv_veraltet, "angebote": angebote, "gesamt": gesamt}
