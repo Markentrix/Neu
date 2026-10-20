@@ -1270,3 +1270,5 @@ main:focus{outline:none}
 .branch-demo p{margin:0;max-width:62ch}
 @media (min-width:900px){.branch-demo{grid-template-columns:minmax(0,1fr) auto}}
 .feats{gap:18px 28px}
+.chk-offer{margin:10px 0 4px;padding:14px 16px;border:1px solid var(--border);border-left:3px solid var(--violet,#7C4DE0);border-radius:12px;background:rgba(255,255,255,.7)}
+.chk-offer p{margin:0 0 8px;color:var(--text-2,#3A4356)}

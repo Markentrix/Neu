@@ -99,7 +99,7 @@
       var v = inp.type === 'checkbox' ? inp.checked : inp.value.trim();
       var bad = !v;
       if (!bad && inp.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim())) { bad = true; setError(inp, 'Bitte geben Sie eine gültige E-Mail-Adresse an.'); }
-      else if (bad) setError(inp, inp.type === 'checkbox' ? (inp.getAttribute('data-error') || 'Bitte bestätigen Sie die Datenschutzhinweise.') : 'Bitte füllen Sie dieses Feld aus.');
+      else if (bad) setError(inp, inp.type === 'checkbox' ? 'Bitte bestätigen Sie die Datenschutzhinweise.' : 'Bitte füllen Sie dieses Feld aus.');
       if (bad && !first) first = inp;
     });
     if (first) first.focus();
@@ -194,7 +194,7 @@
       });
       out.appendChild(bars);
       last = r; found.textContent = ''; found.hidden = true;
-      if (gate) { var gf = $('form', gate), ok = $('#chk-danke', gate); if (gf) { gf.hidden = false; gf.reset(); } if (ok) ok.hidden = true; gate.hidden = false; }
+      if (gate) { var gf = $('form', gate), ok = $('#chk-danke', gate); if (gf) { gf.hidden = false; gf.reset(); } if (ok) ok.hidden = true; var offer = $('[data-check-offer]', gate); if (offer) offer.hidden = !(r.score < 100); gate.hidden = false; }
       out.hidden = false; out.focus({ preventScroll: true });
       if (out.scrollIntoView) out.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' });
     }

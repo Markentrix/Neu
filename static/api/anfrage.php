@@ -82,10 +82,6 @@ if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 if (($clean['einwilligung'] ?? '') !== 'ja') {
   respond(422, ['ok' => false, 'error' => 'consent']);
 }
-// Website-Check: Der Bericht gibt es nur mit ausdrücklicher Einwilligung in die Kontaktaufnahme.
-if (($clean['quelle'] ?? '') === 'Website-Check' && ($clean['kontakt_gewuenscht'] ?? '') !== 'ja') {
-  respond(422, ['ok' => false, 'error' => 'consent']);
-}
 
 // Ratenbegrenzung je IP (einfach, dateibasiert)
 $ip   = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
