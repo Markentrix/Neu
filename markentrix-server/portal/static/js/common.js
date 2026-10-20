@@ -193,7 +193,7 @@ export function pushKarte(rolle) {
 
 // ---------------------------------------------------------------- Glocke, Suche, Ansicht
 const ANLAESSE = {
-  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot']],
+  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot'], ['betriebsalarm', 'Betriebsalarm: Server, Sicherung, Mail']],
   vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage']],
   kunde: [['anfrage', 'Neue Anfrage'], ['anruf', 'Neuer Anruf']],
 };

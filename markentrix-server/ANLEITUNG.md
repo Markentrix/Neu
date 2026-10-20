@@ -270,6 +270,7 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 - **Mein Tag**: Eigene Seite im Menü: deine fälligen Aufgaben (mit „Erledigt“), Wiedervorlagen, wartende Nachrichten, überfällige Rechnungen, hängende Freigaben, fehlende AVV und deine gespeicherten Filter.
 - **Textvorlagen** (Einstellungen): Mail-Vorlagen (Willkommen, Rückfrage zum Briefing, Terminbestätigung, Freigabe-Erinnerung) mit Platzhaltern {firma}, {name}, {kundennummer}, {ort}. Sie lassen sich in Nachrichten-Antworten einfügen und in Sammelmails nutzen. Aufgabenpakete (z. B. „Neuer Kunde: 8 Schritte“) legst du beim Kunden mit „Aufgabenpaket anlegen“ an; doppelt anlegen erzeugt nichts doppelt.
 - **Betriebs-Ampel** (Übersicht): Server-Überwachung, lokale und externe Sicherung, Zertifikat, Speicherplatz, Hintergrundjobs und Mailversand als Ampel. Rot erscheint auch in „Jetzt wichtig“. Grau heißt: noch keine Messwerte (z. B. Wächter noch nicht eingerichtet).
+- **Betriebsalarm**: Wird ein Punkt der Betriebs-Ampel rot (Sicherung, Zertifikat, Speicher, Mailversand, stumme Überwachung), bekommen alle Admins sofort eine Push-Nachricht (auch in der Glocke) und eine Mail. Bleibt es rot, kommt nach 24 Stunden eine Erinnerung; wird es wieder grün, eine Entwarnung. Abschalten unter „App & Benachrichtigungen“ → „Betriebsalarm“.
 - **Glocke 🔔**: in allen drei Portalen; sammelt die Benachrichtigungen, auch ohne Push. Welche Anlässe als Push kommen, stellst du in der Karte „App & Benachrichtigungen“ ein.
 
 ## Automatische Tests

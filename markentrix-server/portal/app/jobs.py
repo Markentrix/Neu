@@ -289,6 +289,55 @@ def ueberwachung_stumm(cfg):
                       "Bitte in der Hetzner-Konsole prüfen: /opt/markentrix/bin/watchdog.sh --zeigen" + mailer.SIGNATUR)
 
 
+def betriebs_alarm(cfg):
+    """Meldet rote Punkte der Betriebs-Ampel per Push + Glocke (und Mail, wenn eingerichtet): beim Umschlagen auf rot,
+    nach 24 Stunden erneut, solange es rot bleibt, und wenn es wieder grün ist."""
+    from .routes_system import lesen_status, ampel
+    with tx("system") as cur:
+        smtp = einstellungen.lesen(cur, "smtp") or {}
+        punkte = ampel(lesen_status(), smtp, betrieb.lesen(cur, "jobs"), betrieb.lesen(cur, "mail"))
+        alt = ((betrieb.lesen(cur, "alarm") or {}).get("wert") or {}).get("punkte", {})
+    jetzt_s = time.time()
+    neu, rot, gruen = {}, [], []
+    for p in punkte:
+        if p["id"] == "jobs":     # läuft dieser Job nicht, kann er auch nicht melden; das übernimmt der Wächter auf dem Server
+            continue
+        vorher = alt.get(p["id"]) or {}
+        if p["status"] == "bad":
+            if vorher.get("status") != "bad" or jetzt_s - float(vorher.get("gemeldet", 0)) > 86400:
+                rot.append(p)
+                neu[p["id"]] = {"status": "bad", "gemeldet": jetzt_s}
+            else:
+                neu[p["id"]] = vorher
+        else:
+            if vorher.get("status") == "bad":
+                gruen.append(p)
+            neu[p["id"]] = {"status": p["status"], "gemeldet": 0}
+    if neu != alt:
+        betrieb.notieren("alarm", {"punkte": neu})
+    if not rot and not gruen:
+        return
+    if rot:
+        titel = "Betriebsalarm: " + ", ".join(p["titel"] for p in rot)
+        text = " · ".join(f"{p['titel']}: {p['detail']}" for p in rot)
+    else:
+        titel = "Wieder in Ordnung: " + ", ".join(p["titel"] for p in gruen)
+        text = "Die Betriebs-Ampel ist an diesen Punkten wieder grün."
+    with tx("system") as cur:
+        ids = push.admins(cur)
+        an = cfg["alarm_email"]
+        if not an:
+            cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
+            r = cur.fetchone()
+            an = r and r["email"]
+    push.senden(ids, titel, text, "/admin#uebersicht", "betriebsalarm")
+    if an and mailer.konfiguriert():
+        try:
+            mailer.senden(an, "Markentrix: " + titel, text + mailer.SIGNATUR)
+        except Exception:
+            log.exception("Alarm-Mail")
+
+
 def _marker(schluessel: str) -> bool:
     """True genau einmal je Schlüssel (verhindert Mehrfachläufe nach Neustart)."""
     with tx("system") as cur:
@@ -424,7 +473,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm):
         try:
             job(cfg)
         except Exception:
