@@ -197,8 +197,17 @@ export async function leadImportKarte(partner) {
     h('p', {}, knopf('Datei prüfen (Vorschau)', () => { auswahl = null; return senden(true); }, 'btn')), erg);
 }
 
+const ANFRAGE_ST = [['angefragt', 'Angefragt'], ['in_pruefung', 'In Prüfung'], ['angebot_raus', 'Angebot ist raus'], ['angenommen', 'Angenommen'], ['abgelehnt', 'Abgelehnt']];
+function anfragenKarte(liste) {
+  if (!liste.length) return '';
+  return h('div', { class: 'card' }, h('h2', {}, 'Angebotsanfragen vom Vertrieb'), h('p', { class: 'small muted' }, 'Bei jeder Statusänderung bekommt der Vertriebler eine Mitteilung. Der Hinweis ist für ihn sichtbar.'),
+    liste.map(a => { const m = h('div'), st = select('status', ANFRAGE_ST, a.status, { 'aria-label': 'Status' }), hin = h('input', { value: a.admin_notiz || '', maxlength: 1000, placeholder: 'Hinweis an den Vertriebler (freiwillig)', 'aria-label': 'Hinweis' });
+      return h('div', { class: 'heutezeile' }, h('div', {}, h('b', {}, a.paket || 'Paket offen'), ' · ' + (a.vertriebler || 'unbekannt') + ' · ' + zeit(a.erstellt_am)), a.notiz ? h('p', { class: 'muted' }, a.notiz) : '',
+        h('div', { class: 'row', style: 'flex-wrap:wrap;align-items:flex-end' }, st, h('div', { class: 'grow' }, hin), knopf('Speichern', () => bestaetigtOhneReload(m, async () => { await api('/api/admin/angebotsanfragen/' + a.id, { method: 'PATCH', body: { status: st.value, admin_notiz: hin.value || null } }); melde(m, 'Gespeichert.', 'ok'); }), 'btn')), m); }));
+}
+
 export async function leadDetail(lid) {
-  const [d, partner] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/vertrieb/partnerliste')]), l = d.lead, m = h('div');
+  const [d, partner, anfragen] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/vertrieb/partnerliste'), api('/api/admin/leads/' + lid + '/angebotsanfragen')]), l = d.lead, m = h('div');
   const st = h('select', { onchange: (e) => bestaetigt(m, () => api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: e.target.value } }), 'Status geändert.') }, LEAD_ST.map(s => h('option', { value: s, selected: s === l.status }, s.replace(/_/g, ' '))));
   st.style.width = 'auto';
   const akt = h('form', { onsubmit: (e) => { e.preventDefault(); const o = formular(e.target); bestaetigt(m, () => api('/api/admin/leads/' + lid + '/aktivitaet', { method: 'POST', body: o }), 'Eingetragen.'); } },
@@ -209,6 +218,7 @@ export async function leadDetail(lid) {
       bestaetigtOhneReload(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); await api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: 'angebot' } }); location.hash = '#neubeleg/' + k.id + '/angebot'; }), 'btn');
   return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     h('div', { class: 'card' }, h('h2', {}, 'Daten'), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
+    anfragenKarte(anfragen),
     kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am),
     skriptKarte(l.skript, l.skript_am, '/api/admin/leads/' + lid + '/skript'),
     d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),

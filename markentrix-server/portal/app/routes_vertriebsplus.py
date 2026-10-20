@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors
 
-from . import einstellungen, ki
+from . import einstellungen, ki, leadkontakt
 from .db import tx
 from .security import audit, rate_limit, require_admin, require_vertrieb
 
@@ -32,7 +32,7 @@ def vertrieb_heute(user: dict = Depends(require_vertrieb)):
         cur.execute("""SELECT g.start, g.name, g.telefon, g.lead_id FROM gespraechstermine g JOIN leads l ON l.id=g.lead_id
                        WHERE l.vertriebspartner_id=%s AND g.status='gebucht' AND g.start >= now() AND g.start < now() + interval '3 days' ORDER BY g.start LIMIT 10""", (pid,))
         termine = cur.fetchall()
-    return {"wiedervorlagen": wiedervorlagen, "heiss": heiss, "neu": neu, "anrufe_heute": heute_anrufe, "termine": termine,
+    return {"wiedervorlagen": wiedervorlagen, "heiss": heiss, "neu": neu, "anrufe_heute": heute_anrufe, "termine": termine, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche(),
             "gesamt": len(wiedervorlagen) + len(heiss) + len(neu)}
 
 

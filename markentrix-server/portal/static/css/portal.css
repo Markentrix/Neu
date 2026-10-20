@@ -163,3 +163,8 @@ code{word-break:break-all;white-space:normal}
 .tagblock{margin:14px 0}.tagblock h3{margin:0 0 6px;font-size:15px}
 @media(max-width:560px){.dlg{padding:14px}}
 .filterzeile input:not([type=checkbox]){flex:1 1 240px;min-width:200px;width:auto}.filterzeile select{width:auto;flex:0 1 auto}
+.heutezeile{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:#fff}
+.heutekopf{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.heuteknoepfe{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.heuteknoepfe .btn{min-height:44px;flex:1 1 120px;text-align:center}
+@media(max-width:560px){.heutekopf .btn{width:100%;min-height:48px;text-align:center}}

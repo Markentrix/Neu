@@ -277,3 +277,11 @@ Beim Beenden eines Kunden (Offboarding) sind Nachrichten, Freigaben, Bewertungen
 Weitere Unterlagen: `docs/ARCHITEKTUR.md` (Aufbau für Entwickler), `docs/LOESCHKONZEPT.md`, `docs/PILOT-CHECKLISTE.md`. Beispieldaten zum Üben: `mkctl demo-daten` (wieder löschen: `mkctl demo-daten-entfernen`).
 
 `sudo bash tests/run.sh` auf einem Entwicklungsrechner (nie auf dem Produktivserver) legt eine eigene Test-Datenbank an und prüft alle Funktionen. Bei GitHub läuft derselbe Test bei jedem Push (Reiter „Actions").
+
+## Vertriebler-Portal: Mein Tag, Leitfaden, Zahlen, Angebotsanfrage
+
+- **Heute anrufen** (Startseite, handytauglich): oben der Wochenfortschritt, darunter fällige Wiedervorlagen, heiße und neue Leads. Pro Lead: *Anrufen* (Telefon wählt), *Nicht erreicht* (ein Klick, Wiedervorlage in 2 Tagen), *Gesprochen …* und *Termin …* (Dialog mit Notiz und Wiedervorlage mit Schnellwahl Morgen / In 3 Tagen / Nächste Woche), *Kein Interesse* (mit Rückfrage). Erledigte Leads verschwinden aus der Liste.
+- **Lead-Detail**: „Kontakt festhalten“ mit Schnellwahl und „Speichern & nächster Lead“; Branchenhinweis (wenn die Branche erkannt wird); „Angebot anfragen“; „Nach dem Gespräch“ (Mail-Entwurf, öffnet das eigene Mailprogramm, das Portal verschickt nichts).
+- **Leitfaden**: Eröffnung, Fragen, Einwände, Abschluss und Branchenhinweise. Admin: *Einstellungen → Gesprächsleitfaden* (Textformat, „Auf Standard zurücksetzen“). Es sind Vorschläge ohne Preise und Zusagen; Formulierungen bitte rechtlich prüfen lassen.
+- **Meine Zahlen**: Anrufe, erreicht, Termine, neue Kunden (Woche/Monat, Vergleich zur Vorwoche), Quoten, Wochenziel (änderbar) und ein *Rechenbeispiel* zur Provision. Das Beispiel ist keine Zusage.
+- **Angebotsanfragen**: Der Vertriebler wählt Paket und Notiz. Du erhältst eine Aufgabe und eine Mitteilung, im Lead (Admin) setzt du den Status (Angefragt / In Prüfung / Angebot ist raus / Angenommen / Abgelehnt) und einen Hinweis; der Vertriebler wird benachrichtigt.

@@ -27,6 +27,7 @@ from .routes_websitecheck import router as wcheck_router
 from .routes_folgemails import router as folge_router
 from .routes_buchung import router as buchung_router
 from .routes_vertriebsplus import router as vertriebsplus_router
+from .routes_vertriebwerkzeuge import router as vertriebwerkzeuge_router
 from .routes_system import router as system_router
 from .routes_loginlink import router as loginlink_router
 from .routes_zahlung import router as zahlung_router
@@ -131,6 +132,7 @@ app.include_router(wcheck_router)
 app.include_router(folge_router)
 app.include_router(buchung_router)
 app.include_router(vertriebsplus_router)
+app.include_router(vertriebwerkzeuge_router)
 app.include_router(system_router)
 app.include_router(loginlink_router)
 app.include_router(zahlung_router)

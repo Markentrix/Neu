@@ -98,19 +98,36 @@ export const rechtFuss = () => h('div', { class: 'rechtfuss small muted' }, h('a
 
 
 // Kontaktergebnis zu einem Lead festhalten (Admin und Vertriebler): Schnellauswahl, Notiz, Wiedervorlage
-export function kontaktKarte(optionen, url, wiedervorlage) {
-  const m = h('div'), notiz = h('input', { placeholder: 'Kurze Notiz (freiwillig)', maxlength: 1500 }), tag = h('input', { type: 'date', style: 'max-width:170px' });
+const WV_SCHNELL = [['Morgen', 1], ['In 3 Tagen', 3], ['Nächste Woche', 7], ['In 2 Wochen', 14], ['Keine', 0]];
+const tagIn = (n) => n ? new Date(Date.now() + n * 864e5).toISOString().slice(0, 10) : '';
+
+/** Wiedervorlage-Feld mit Schnellwahl (Morgen, in 3 Tagen, nächste Woche …). Gibt { el, tag } zurück. */
+export function wiedervorlageWahl(start = '') {
+  const tag = h('input', { type: 'date', style: 'max-width:170px', value: start, 'aria-label': 'Wiedervorlage' });
+  const chips = h('div', { class: 'row', style: 'gap:6px;flex-wrap:wrap;margin-top:4px' }, WV_SCHNELL.map(([t, n]) => h('button', { type: 'button', class: 'btn sec small', onclick: () => { tag.value = tagIn(n); } }, t)));
+  return { tag, el: h('div', {}, h('label', { style: 'margin:0' }, 'Wiedervorlage'), tag, chips) };
+}
+
+/**
+ * Kontaktergebnis festhalten. Optionen: { nach: (r) => void } wird statt Neuladen aufgerufen,
+ * { naechster: () => void } blendet „Speichern & nächster Lead“ ein.
+ */
+export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
+  const m = h('div'), notiz = h('input', { placeholder: 'Kurze Notiz (freiwillig)', maxlength: 1500, 'aria-label': 'Notiz' }), wv = wiedervorlageWahl();
   let wahl = null; const knoepfe = [];
-  const speichern = h('button', { class: 'btn', disabled: true }, 'Speichern');
-  const waehle = (o, b) => { wahl = o; knoepfe.forEach(x => x.classList.remove('gewaehlt')); b.classList.add('gewaehlt'); speichern.disabled = false;
-    tag.value = o.wiedervorlage_tage ? new Date(Date.now() + o.wiedervorlage_tage * 864e5).toISOString().slice(0, 10) : ''; };
+  const speichern = h('button', { class: 'btn', disabled: true }, 'Speichern'), weiter = extra.naechster ? h('button', { class: 'btn sec', disabled: true }, 'Speichern & nächster Lead') : '';
+  const waehle = (o, b) => { wahl = o; knoepfe.forEach(x => x.classList.remove('gewaehlt')); b.classList.add('gewaehlt'); speichern.disabled = false; if (weiter) weiter.disabled = false;
+    wv.tag.value = tagIn(o.wiedervorlage_tage); };
   optionen.forEach(o => { const b = h('button', { type: 'button', class: 'btn sec small', onclick: () => waehle(o, b) }, o.text); knoepfe.push(b); });
-  speichern.onclick = async () => { if (!wahl) return;
-    try { await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: tag.value || null } }); location.reload(); } catch (x) { melde(m, x.message); } };
+  const los = async (danach) => { if (!wahl) return;
+    try { const r = await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null } });
+      if (danach) danach(r); else if (extra.nach) extra.nach(r); else location.reload(); } catch (x) { melde(m, x.message); } };
+  speichern.onclick = () => los(null);
+  if (weiter) /** @type {any} */ (weiter).onclick = () => los(extra.naechster);
   return h('div', { class: 'card' }, h('h2', {}, 'Kontakt festhalten'),
     h('p', { class: 'small muted' }, 'Was ist passiert? Der Verlauf und, wo es passt, der Status werden automatisch gesetzt.'), m,
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, knoepfe),
-    h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, notiz), h('div', {}, h('label', { style: 'margin:0' }, 'Wiedervorlage'), tag), speichern),
+    h('div', { class: 'row', style: 'margin-top:10px;align-items:flex-end;flex-wrap:wrap' }, h('div', { class: 'grow' }, notiz), wv.el, speichern, weiter),
     wiedervorlage ? h('p', { class: 'small muted' }, 'Aktuelle Wiedervorlage: ' + datum(wiedervorlage)) : '');
 }
 
@@ -177,8 +194,8 @@ export function pushKarte(rolle) {
 
 // ---------------------------------------------------------------- Glocke, Suche, Ansicht
 const ANLAESSE = {
-  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal']],
-  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht']],
+  admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot']],
+  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage']],
   kunde: [['anfrage', 'Neue Anfrage'], ['anruf', 'Neuer Anruf']],
 };
 let _ansicht = null;
@@ -298,10 +315,10 @@ let _timerBeschriften = null;
 new MutationObserver(() => { clearTimeout(_timerBeschriften); _timerBeschriften = setTimeout(() => beschriften(document.body), 50); }).observe(document.documentElement, { childList: true, subtree: true });
 
 /** Veränderung zum Vormonat als kleiner Pfeil. gut = true, wenn „mehr“ besser ist. */
-export function delta(jetzt, vorher, gut = true, format = (x) => String(x)) {
+export function delta(jetzt, vorher, gut = true, format = (x) => String(x), zeitraum = 'Vormonat') {
   const d = jetzt - vorher;
-  if (d === 0) return h('span', { class: 'delta gleich' }, '→ wie im Vormonat');
-  return h('span', { class: 'delta ' + ((d > 0) === gut ? 'auf' : 'ab') }, (d > 0 ? '▲ +' : '▼ −') + format(Math.abs(d)) + ' zum Vormonat');
+  if (d === 0) return h('span', { class: 'delta gleich' }, '→ wie im ' + zeitraum);
+  return h('span', { class: 'delta ' + ((d > 0) === gut ? 'auf' : 'ab') }, (d > 0 ? '▲ +' : '▼ −') + format(Math.abs(d)) + ' zum ' + zeitraum);
 }
 
 

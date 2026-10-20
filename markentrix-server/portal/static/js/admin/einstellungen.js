@@ -24,7 +24,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -232,4 +232,18 @@ export async function textvorlagenKarte() {
   return h('div', { class: 'card' }, h('h2', {}, 'Textvorlagen'),
     h('p', { class: 'small muted' }, 'Mail-Vorlagen (z. B. Willkommen, Rückfrage, Terminbestätigung) kannst du bei Nachrichten-Antworten und Sammelmails einfügen. Aufgabenpakete legst du beim Kunden mit einem Klick an. Platzhalter wie {firma} und {name} werden automatisch ersetzt.'),
     m, box, h('p', {}, knopf('+ Neue Vorlage', () => bearbeiten(null), 'btn')));
+}
+
+/** Gesprächsleitfaden für den Vertrieb: Standardtext, anpassbar im einfachen Textformat. */
+export async function leitfadenKarte() {
+  const m = h('div');
+  let d;
+  try { d = await api('/api/admin/einstellungen/leitfaden'); } catch (x) { fehler(m, x); return h('div', { class: 'card' }, h('h2', {}, 'Gesprächsleitfaden'), m); }
+  const text = h('textarea', { rows: 18, 'aria-label': 'Leitfaden-Text', style: 'font-family:ui-monospace,monospace;font-size:13px' });
+  text.value = d.text;
+  const speichern = async (body, ok) => { try { await api('/api/admin/einstellungen/leitfaden', { method: 'PUT', body }); text.value = (await api('/api/admin/einstellungen/leitfaden')).text; melde(m, ok, 'ok'); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Gesprächsleitfaden für den Vertrieb'),
+    h('p', { class: 'small muted' }, (d.angepasst ? 'Angepasste Fassung ist aktiv. ' : 'Standardfassung ist aktiv. ') + 'Aufbau: „[Abschnitt] Titel“ mit Zeilen „- Punkt“, „[Einwand] Text“ mit Antwort darunter, „[Branche] kuerzel | Name“ mit „- Tipp“ und „[Mail] Betreff“ mit dem Mailtext (Platzhalter {firma}, {name}, {vertriebler}). Bitte keine Preise oder Zusagen aufnehmen und rechtliche Formulierungen prüfen lassen.'),
+    m, text, h('p', { class: 'row' }, knopf('Speichern', () => speichern({ text: text.value }, 'Leitfaden gespeichert.'), 'btn'),
+      knopf('Auf Standard zurücksetzen', () => { if (confirm('Den angepassten Leitfaden verwerfen und die Standardfassung verwenden?')) speichern({ standard: true }, 'Standard wiederhergestellt.'); }, 'sec')));
 }
