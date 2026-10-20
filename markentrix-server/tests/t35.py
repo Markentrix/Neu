@@ -29,7 +29,8 @@ def lead(firma,**kw):
     i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":"0511 5555","ort":"Celle",**kw}).json()["id"]; return i
 import os
 os.environ["BACKUP_DIR"]="/var/tmp/pt/bk"
-sys.path.insert(0,"/home/claude/markentrix-server/portal")
+ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0,ROOT+"/portal")
 from app import db, jobs
 db.open_pool()
 def schreibe(alter_min=2,backup=5,platte=40):
@@ -54,4 +55,4 @@ n3=glocke(); lauf(); chk("Alarm: nach Entwarnung Ruhe",glocke()==n3)
 schreibe(alter_min=45); lauf(); chk("Alarm: verstummter Wächter wird gemeldet",glocke()>n3)
 schreibe()
 cl=httpx.Client(base_url=B,headers=H)
-chk("Alarm: Anlass im Admin-Menü der Push-Einstellungen (common.js)","betriebsalarm" in open("/home/claude/markentrix-server/portal/static/js/common.js").read())
+chk("Alarm: Anlass im Admin-Menü der Push-Einstellungen (common.js)","betriebsalarm" in open(ROOT+"/portal/static/js/common.js").read())
