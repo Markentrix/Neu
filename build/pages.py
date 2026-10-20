@@ -207,7 +207,7 @@ def addon_table(site, a):
     return f'''<div class="price-scroll" tabindex="0" role="region" aria-label="Preise {ESC(a["title"])}">
             <table class="price-table ceramic-table">
               <caption>{ESC(a["name"])} · {ESC(a["title"])}</caption>
-              <thead><tr><th scope="col">{ESC(a["priceLabel"])}</th><th scope="col" class="num">Preis</th></tr></thead>
+              <thead><tr><th scope="col">{ESC(a["priceLabel"])}</th><th scope="col" class="num">Preis{" " + ESC(a["unit"]) if a.get("unit") else ""}</th></tr></thead>
               <tbody>{rows}</tbody>
             </table>
           </div>'''
@@ -254,20 +254,20 @@ def ceramic_cards(site, prefix=""):
     if not pr.get("addons"):
         return ""
     cards = [("spark", "C²Coating CarCeramic", "Lackkeramik", site.min_price("keramik"), "keramikversiegelung-celle",
-              ["Tiefer Glanz und starker Abperleffekt", "Langzeitschutz gegen Witterung, Streusalz und UV", "Ab Paket Signature oder beim Neuwagen"], None)]
+              ["Tiefer Glanz und starker Abperleffekt", "Langzeitschutz gegen Witterung, Streusalz und UV", "Ab Paket Signature oder beim Neuwagen"], None, "")]
     icons = {"felgen": "car", "scheiben": "shield"}
     for a in pr["addons"]:
-        cards.append((icons.get(a["key"], "shield"), a["name"], a["title"], site.min_price(a["key"]), a["slug"], a["benefits"][:3], a["durability"]))
+        cards.append((icons.get(a["key"], "shield"), a["name"], a["title"], site.min_price(a["key"]), a["slug"], a["benefits"][:3], a["durability"], a.get("unit", "")))
     html = "".join(f'''
         <a class="cer-card reveal" href="{prefix}leistungen/{slug}.html">
           <span class="cer-icon">{I[ic]}</span>
           <span class="cer-brand">{ESC(brand)}</span>
           <h3>{ESC(title)}</h3>
-          <span class="cer-price"><small>ab</small> {_eur(price)}</span>
+          <span class="cer-price"><small>ab</small> {_eur(price)}{f" <small>{ESC(unit)}</small>" if unit else ""}</span>
           <ul>{"".join(f"<li>{I['check']}{ESC(b)}</li>" for b in pts)}</ul>
           {f'<span class="cer-dur">Standzeit {ESC(dur)}*</span>' if dur else '<span class="cer-dur">Preis je C²Coating-Fahrzeugkategorie</span>'}
           <span class="cer-more">Mehr erfahren {I["arrow"]}</span>
-        </a>''' for ic, brand, title, price, slug, pts, dur in cards)
+        </a>''' for ic, brand, title, price, slug, pts, dur, unit in cards)
     return f'''
       <div class="cer-cards stagger">{html}
       </div>
@@ -942,7 +942,7 @@ def build_service(site, sv, write):
                       f'<a class="btn btn-line-light" href="{prefix}preise.html">Pakete vergleichen</a>')
     elif sv.get("addon") and site.addon(sv["addon"]):
         ad = site.addon(sv["addon"])
-        price_card = (f'<h3>{ESC(ad["name"])}</h3><p>{ESC(ad["title"])} ab {site.min_price(ad["key"])} €. Standzeit laut Hersteller {ESC(ad["durability"])}, '
+        price_card = (f'<h3>{ESC(ad["name"])}</h3><p>{ESC(ad["title"])} ab {site.min_price(ad["key"])} €{" " + ESC(ad["unit"]) if ad.get("unit") else ""}. Standzeit laut Hersteller {ESC(ad["durability"])}, '
                       f'unter optimalen Voraussetzungen.</p><a class="btn btn-line-light" href="#keramik-preise">Zur Preisliste</a>')
     elif book == "keramik" and site.pricing.get("ceramic"):
         price_card = (f'<h3>C² CarCeramic</h3><p>Keramikversiegelung für Pkw ab {site.min_price("keramik")} €, je nach C²Coating-Fahrzeugkategorie. '

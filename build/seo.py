@@ -201,7 +201,7 @@ def llms(site, full=False):
         t += "\n| Wohnmobil / Wohnwagen | Preis |\n|---|---|\n" + "".join(f"| {c['name']} | {eur(c['price'])} |\n" for c in cer.get("camper", []))
         t += "\n" + " ".join([cer.get("carNote", "")] + cer.get("notes", [])) + "\n"
     for ad in site.pricing.get("addons", []):
-        t += f"\n## {ad['name']}: {ad['title']}\n\n| {ad['priceLabel']} | Preis |\n|---|---|\n"
+        t += f"\n## {ad['name']}: {ad['title']}\n\n| {ad['priceLabel']} | Preis{(' ' + ad['unit']) if ad.get('unit') else ''} |\n|---|---|\n"
         t += "".join(f"| {i['name']} | {('ab ' if ad.get('from') and i['price'] is not None else '') + eur(i['price'])} |\n" for i in ad["items"])
         t += f"\nStandzeit laut Hersteller: {ad['durability']}. Vorteile: " + ", ".join(ad["benefits"]) + f". Mehr: {site.url}/leistungen/{ad['slug']}.html\n"
     if site.pricing.get("addons"):

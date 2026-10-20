@@ -100,7 +100,7 @@ Pkw ab 550 € je nach C²Coating-Kategorie (550 €, 650 €, 715 €, 750 €,
 Keramische Versiegelung für Scheiben. Wasser perlt besser ab, die Sicht bei Regen wird klarer. Frontscheibe ab 79 €, Front und Heck ab 119 €, alle Außenscheiben ab 149 €, inklusive Panoramadach ab 179 €. Standzeit laut Hersteller bis zu 15.000 km unter optimalen Voraussetzungen.
 
 **Felgenkeramik C²Coating WheelCeramic**
-Keramische Versiegelung für Felgen. Bremsstaub und Schmutz haften schlechter, die Reinigung geht leichter. 15–17 Zoll 210 €, 18–19 Zoll 250 €, 20–21 Zoll 350 €, ab 22 Zoll auf Anfrage. Standzeit laut Hersteller bis zu 100.000 km unter optimalen Voraussetzungen.
+Keramische Versiegelung für Felgen. Bremsstaub und Schmutz haften schlechter, die Reinigung geht leichter. Pro Satz (4 Felgen): 15–17 Zoll 210 €, 18–19 Zoll 250 €, 20–21 Zoll 350 €, ab 22 Zoll auf Anfrage. Standzeit laut Hersteller bis zu 100.000 km unter optimalen Voraussetzungen.
 
 **Lackvorbereitung vor der Keramikversiegelung**
 Handwäsche, Dekontamination, Lackkorrektur und Entfettung. Eine Keramikversiegelung ist nur so gut wie der Lack darunter.
