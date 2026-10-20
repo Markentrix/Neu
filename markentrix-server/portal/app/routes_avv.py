@@ -1,5 +1,6 @@
 """AVV pro Kunde: erzeugen, per Mail senden, unterschriebene Fassung ablegen; Kunde sieht seine abgelegten Verträge."""
 import base64
+import json
 from datetime import date
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
@@ -35,7 +36,7 @@ class AvvEinstIn(BaseModel):
 def einst_lesen(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         e = einstellungen.lesen(cur, "avv")
-    standard = "\n".join(" | ".join(z) for z in avv.STANDARD_UNTERAUFTRAGNEHMER)
+    standard = avv.standard_unterauftragnehmer_text()
     return {"unterauftragnehmer": e.get("unterauftragnehmer", ""), "standard": standard}
 
 
@@ -66,14 +67,74 @@ def liste(kid: str, user: dict = Depends(require_admin)):
         raise _404()
 
 
+class AnlageIn(BaseModel):
+    module: list[str] = Field(default_factory=lambda: ["portal"], max_length=20)
+    domain: str = Field(default="", max_length=300)
+    sonstiges: str = Field(default="", max_length=300)
+    leistung: str = Field(default="", max_length=300)
+    hauptvertrag_datum: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
+    weisung_name: str = Field(default="", max_length=300)
+    weisung_email: str = Field(default="", max_length=300)
+
+
+def _anlage_pruefen_oder_400(data: AnlageIn) -> dict:
+    a = avv.anlage_bereinigen(data.model_dump())
+    fehler = avv.anlage_pruefen(a)
+    if fehler:
+        raise HTTPException(400, fehler)
+    return a
+
+
+@router.get("/avv-vorschlag/{kid}")
+def vorschlag(kid: str, user: dict = Depends(require_admin)):
+    """Vorbelegung für den „AVV erstellen“-Dialog."""
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT ansprechpartner, email FROM kunden WHERE id=%s", (kid,))
+            k = cur.fetchone()
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    if not k:
+        raise _404()
+    a = avv.anlage_bereinigen({"weisung_name": k["ansprechpartner"] or "", "weisung_email": k["email"] or ""})
+    return {"anlage": a, "module": avv.MODUL_KEYS}
+
+
+@router.get("/avv/{aid}/pruefen")
+def pruefen(aid: str, user: dict = Depends(require_admin)):
+    """Checkliste vor dem Versand: welche Angaben fehlen noch."""
+    try:
+        with tx("admin") as cur:
+            k, f, a = _daten(cur, aid)
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    return {"offen": avv.offene_punkte(k, f, a), "anlage": avv.anlage_bereinigen(a)}
+
+
+@router.put("/avv/{aid}/anlage")
+def anlage_speichern(aid: str, data: AnlageIn, user: dict = Depends(require_admin)):
+    a = _anlage_pruefen_oder_400(data)
+    try:
+        with tx("admin") as cur:
+            cur.execute("UPDATE avv SET anlage=%s::jsonb WHERE id=%s AND datei IS NULL AND online_bestaetigt_am IS NULL RETURNING kunden_id", (json.dumps(a), aid))
+            r = cur.fetchone()
+            if not r:
+                raise _404()
+            audit(cur, user, "avv_anlage_geaendert", r["kunden_id"], {"avv": str(aid)})
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    return {"ok": True}
+
+
 @router.post("/kunden/{kid}/avv")
-def erstellen(kid: str, user: dict = Depends(require_admin)):
+def erstellen(kid: str, data: AnlageIn | None = None, user: dict = Depends(require_admin)):
     try:
         with tx("admin") as cur:
             cur.execute("SELECT id FROM kunden WHERE id=%s", (kid,))
             if not cur.fetchone():
                 raise _404()
-            cur.execute("INSERT INTO avv (kunden_id, version) VALUES (%s,%s) RETURNING id", (kid, avv.VERSION))
+            anlage = _anlage_pruefen_oder_400(data) if data else avv.anlage_bereinigen(None)
+            cur.execute("INSERT INTO avv (kunden_id, version, anlage) VALUES (%s,%s,%s::jsonb) RETURNING id", (kid, avv.VERSION, json.dumps(anlage)))
             r = cur.fetchone()
             audit(cur, user, "avv_erstellt", kid)
     except errors.InvalidTextRepresentation:
@@ -81,16 +142,29 @@ def erstellen(kid: str, user: dict = Depends(require_admin)):
     return {"id": r["id"]}
 
 
-def _pdf(cur, aid):
-    cur.execute("SELECT kunden_id FROM avv WHERE id=%s", (aid,))
+KUNDENFELDER = "firma, rechtsform, strasse, plz, ort, email, telefon, ansprechpartner"
+
+
+def _daten(cur, aid):
+    cur.execute("SELECT kunden_id, anlage FROM avv WHERE id=%s", (aid,))
     a = cur.fetchone()
     if not a:
         raise _404()
-    cur.execute("SELECT firma, rechtsform, strasse, plz, ort, email, ansprechpartner FROM kunden WHERE id=%s", (a["kunden_id"],))
-    k = cur.fetchone()
-    f = rechtstexte.firma(cur)
-    unter = avv.unterauftragnehmer(einstellungen.lesen(cur, "avv").get("unterauftragnehmer"))
-    return avv.avv_pdf(k, f, unter), k
+    cur.execute(f"SELECT {KUNDENFELDER} FROM kunden WHERE id=%s", (a["kunden_id"],))
+    return cur.fetchone(), rechtstexte.firma(cur), a["anlage"]
+
+
+def _vollstaendig(cur, aid):
+    k, f, a = _daten(cur, aid)
+    offen = avv.offene_punkte(k, f, a)
+    if offen:
+        raise HTTPException(400, "Vor dem Versand fehlt noch: " + " ".join(offen))
+
+
+def _pdf(cur, aid):
+    k, f, anlage = _daten(cur, aid)
+    unter = avv.unterauftragnehmer(einstellungen.lesen(cur, "avv").get("unterauftragnehmer"), anlage)
+    return avv.avv_pdf(k, f, unter, None, anlage), k
 
 
 @router.get("/avv/{aid}/vorlage.pdf")
@@ -107,6 +181,7 @@ def vorlage(aid: str, user: dict = Depends(require_admin)):
 def senden(aid: str, user: dict = Depends(require_admin)):
     try:
         with tx("admin") as cur:
+            _vollstaendig(cur, aid)
             daten, k = _pdf(cur, aid)
     except errors.InvalidTextRepresentation:
         raise _404()
@@ -230,6 +305,9 @@ def portal_freigeben(aid: str, bg: BackgroundTasks, user: dict = Depends(require
     """Gibt den AVV im Kundenportal zur Bestätigung frei und benachrichtigt den Kunden per Mail."""
     try:
         with tx("admin") as cur:
+            cur.execute("SELECT 1 FROM avv WHERE id=%s", (aid,))
+            if cur.fetchone():
+                _vollstaendig(cur, aid)
             cur.execute("""UPDATE avv SET portal_freigabe_am=now() WHERE id=%s AND datei IS NULL RETURNING kunden_id""", (aid,))
             r = cur.fetchone()
             if not r:
@@ -288,13 +366,11 @@ def kunde_bestaetigen(aid: str, data: BestaetigenIn, request: Request, bg: Backg
     try:
         with tx("system") as cur:
             _eigener_avv(cur, aid, kid)
-            cur.execute("SELECT firma, rechtsform, strasse, plz, ort, email, ansprechpartner FROM kunden WHERE id=%s", (kid,))
-            k = cur.fetchone()
-            f = rechtstexte.firma(cur)
-            unter = avv.unterauftragnehmer(einstellungen.lesen(cur, "avv").get("unterauftragnehmer"))
+            k, f, anlage = _daten(cur, aid)
+            unter = avv.unterauftragnehmer(einstellungen.lesen(cur, "avv").get("unterauftragnehmer"), anlage)
             jetzt = datetime.now(ZoneInfo("Europe/Berlin"))
-            hashwert = avv.text_hash(k, f, unter)
-            pdf_bytes = avv.avv_pdf(k, f, unter, {"zeit": jetzt.strftime("%d.%m.%Y, %H:%M Uhr"), "name": name, "email": user["email"], "hash": hashwert})
+            hashwert = avv.text_hash(k, f, unter, anlage)
+            pdf_bytes = avv.avv_pdf(k, f, unter, {"zeit": jetzt.strftime("%d.%m.%Y, %H:%M Uhr"), "name": name, "email": user["email"], "hash": hashwert}, anlage)
             cur.execute("""UPDATE avv SET datei=%s, datei_typ='application/pdf', datei_name='AVV-online-bestaetigt.pdf', unterschrieben_am=%s, hochgeladen_am=now(),
                                   online_bestaetigt_am=now(), online_bestaetigt_name=%s, online_bestaetigt_email=%s, online_bestaetigt_ip=%s, online_bestaetigt_hash=%s
                            WHERE id=%s""", (pdf_bytes, jetzt.date(), name, user["email"], client_ip(request), hashwert, aid))

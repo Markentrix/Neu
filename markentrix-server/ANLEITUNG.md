@@ -118,7 +118,7 @@ Admin → Einstellungen → **Firmendaten**: Name, Inhaber, Anschrift, E-Mail, T
 ## Auftragsverarbeitungsvertrag (AVV) pro Kunde
 
 Jeder Kunde braucht einen unterschriebenen AVV, bevor du seine Daten verarbeitest. Im Portal beim Kunden → Karte **Auftragsverarbeitungsvertrag**:
-1. „Neuen AVV erstellen“, dann **Vertrag (PDF)** öffnen: Kundenname, Anschrift und deine Firmendaten sind eingesetzt.
+1. „Neuen AVV erstellen“: im Dialog die **gebuchten Module ankreuzen** (E-Mail und Terminbuchung: über dein Konto oder das des Kunden), Domain bzw. „Sonstiges“ eintragen, Datum des Hauptvertrags und die weisungsberechtigte Person angeben. Daraus entstehen Anlage 1 (angekreuzte Module) und Anlage 3 (nur die dazugehörigen Unterauftragsverarbeiter). Der Vertragstext ist **Version 2** (Vorlage `Markentrix_AVV_Version_2_Vorlage.docx`, mit Anlage 2 zu den technischen Maßnahmen). Dann **Vertrag (PDF)** öffnen. Fehlt noch etwas (z. B. das Datum), sperrt das Portal Mailversand und Freigabe und zeigt unter „Module & Angaben prüfen“, was fehlt. Bereits bestätigte oder abgelegte AVV (Version 1) bleiben unverändert erhalten.
 2. **Per Mail senden** schickt das PDF an die Kunden-E-Mail (Versand muss eingerichtet sein).
 3. Unterschrieben zurück? Datei wählen, Unterschriftsdatum eintragen, **Ablegen** (PDF, Scan oder Foto, max. 6 MB). Der Onboarding-Punkt „AVV“ wird automatisch erledigt.
 4. Der Kunde sieht den abgelegten Vertrag in seinem Portal unter **Datenschutz-Vertrag** (nur Inhaber-Zugänge).

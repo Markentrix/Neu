@@ -147,14 +147,39 @@ export function vorlagenKarte(kid, k) {
   return h('div', { class: 'card' }, h('h2', {}, 'Branchenvorlage'), h('p', { class: 'small muted' }, 'Startpaket für typische Branchen: Wissenseinträge für den Assistenten (zunächst inaktiv, mit Platzhaltern zum Ausfüllen), Entwürfe für Beiträge und eine Aufgabenliste. Es wird nichts veröffentlicht.'), m, box);
 }
 
+const AVV_MODULE = [['portal', 'Portal (Basis): Kontaktverwaltung, Anfragen, Berichte', 0], ['website', 'Website: Hosting und Kontaktformular', 0], ['automationen', 'Automationen: Workflows (n8n)', 0],
+  ['email', 'E-Mail-Kommunikation', 0], ['email_auftragnehmer', 'über das Konto des Auftragnehmers (Google)', 1], ['email_eigen', 'über das eigene Konto des Kunden (keine Unterauftragsverarbeitung)', 1],
+  ['termin', 'Terminbuchung und Kalender', 0], ['termin_auftragnehmer', 'über das Konto des Auftragnehmers (Google)', 1], ['termin_eigen', 'über das eigene Konto des Kunden (keine Unterauftragsverarbeitung)', 1],
+  ['ki_chat', 'KI-Assistent (Chat)', 0], ['telefon', 'Telefon-Assistent / KI-Sprachagent (Famulor)', 0], ['whatsapp', 'WhatsApp-Kommunikation (Meta)', 0], ['domain', 'Domainverwaltung (INWX)', 0], ['sonstiges', 'Sonstiges', 0]];
+
+/** Dialog: gebuchte Module und Angaben für den AVV (Anlage 1). aid gesetzt = bestehenden Entwurf ändern. */
+async function avvDialog(kid, aid) {
+  const info = aid ? await api('/api/admin/avv/' + aid + '/pruefen') : { anlage: (await api('/api/admin/avv-vorschlag/' + kid)).anlage, offen: [] };
+  const a = info.anlage, m = h('div'), boxen = {};
+  const feldEin = (name, label, typ = 'text') => { const i = h('input', { type: typ, value: a[name] || '', maxlength: 300 }); return [i, h('label', {}, label, i)]; };
+  const [leist, fLeist] = feldEin('leistung', 'Leistung laut Hauptvertrag'), [dat, fDat] = feldEin('hauptvertrag_datum', 'Datum des Hauptvertrags', 'date'),
+    [wn, fWn] = feldEin('weisung_name', 'Weisungsberechtigt beim Kunden: Name'), [we, fWe] = feldEin('weisung_email', 'Weisungsberechtigt beim Kunden: E-Mail', 'email'),
+    [dom, fDom] = feldEin('domain', 'Domain(s), nur bei „Domainverwaltung“'), [son, fSon] = feldEin('sonstiges', 'Beschreibung, nur bei „Sonstiges“');
+  const zeilen = AVV_MODULE.map(([k, text, e]) => { const cb = h('input', { type: 'checkbox', checked: a.module.includes(k) || k === 'portal', disabled: k === 'portal', style: 'width:auto' }); boxen[k] = cb;
+    return h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-left:' + Number(e) * 24 + 'px' }, cb, text); });
+  const speichern = async () => {
+    const body = { module: Object.keys(boxen).filter(k => boxen[k].checked), leistung: leist.value, hauptvertrag_datum: dat.value, weisung_name: wn.value, weisung_email: we.value, domain: dom.value, sonstiges: son.value };
+    try { if (aid) await api('/api/admin/avv/' + aid + '/anlage', { method: 'PUT', body }); else await api('/api/admin/kunden/' + kid + '/avv', { method: 'POST', body }); location.reload(); } catch (x) { fehler(m, x); } };
+  dialog(aid ? 'AVV-Angaben prüfen' : 'Neuen AVV erstellen', h('div', { class: 'stack' },
+    info.offen.length ? h('div', { class: 'msg warn' }, h('b', {}, 'Vor dem Versand fehlt noch:'), h('ul', {}, info.offen.map(o => h('li', {}, o)))) : '',
+    h('p', { class: 'small muted' }, 'Kreuze an, welche Module der Kunde gebucht hat. Daraus entstehen Anlage 1 und die Liste der Unterauftragsverarbeiter in Anlage 3. Der Vertragstext selbst ist feststehend (Version 2).'),
+    ...zeilen, fLeist, fDat, fWn, fWe, fDom, fSon, m, h('div', { class: 'row' }, knopf(aid ? 'Speichern' : 'Entwurf erstellen', speichern, 'btn'))), true);
+}
+
 export async function avvKarte(kid) {
   const d = await api('/api/admin/kunden/' + kid + '/avv'), m = h('div');
-  const neu = async () => { try { await api('/api/admin/kunden/' + kid + '/avv', { method: 'POST' }); location.reload(); } catch (x) { fehler(m, x); } };
+  const neu = () => avvDialog(kid).catch(x => fehler(m, x));
   const hoch = (z) => { const datei = h('input', { type: 'file', accept: 'application/pdf,image/png,image/jpeg' }), tag = h('input', { type: 'date', value: new Date().toISOString().slice(0, 10), style: 'max-width:160px' });
     return h('span', { class: 'row' }, datei, tag, knopf('Ablegen', () => { const f = datei.files[0]; if (!f) return fehler(m, { message: 'Bitte zuerst die unterschriebene Datei wählen.' });
       const r = new FileReader(); r.onload = async () => { try { await api('/api/admin/avv/' + z.id + '/upload', { method: 'POST', body: { datei_base64: r.result, datei_name: f.name, unterschrieben_am: tag.value } }); location.reload(); } catch (x) { fehler(m, x); } }; r.readAsDataURL(f); }, 'btn')); };
   const aktion = (z) => h('span', { class: 'row' },
     h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/vorlage.pdf', target: '_blank', rel: 'noopener' }, 'Vertrag (PDF)'),
+    !z.hat_datei && !z.portal_freigabe_am ? knopf('Module & Angaben prüfen', () => avvDialog(kid, z.id).catch(x => fehler(m, x)), 'sec small') : '',
     !z.hat_datei ? knopf(z.portal_freigabe_am ? 'Erneut zur Bestätigung freigeben' : 'Im Portal zur Bestätigung freigeben', async () => { if (confirm('Der Kunde bekommt eine Mail und kann den Vertrag im Portal mit einem Klick bestätigen. Fortfahren?')) { try { await api('/api/admin/avv/' + z.id + '/portal-freigeben', { method: 'POST' }); melde(m, 'Freigegeben, der Kunde wurde benachrichtigt.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'small') : '',
     knopf('Per Mail senden', async () => { if (confirm('AVV jetzt per E-Mail an den Kunden senden?')) { try { await api('/api/admin/avv/' + z.id + '/senden', { method: 'POST' }); melde(m, 'Gesendet.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'sec small'),
     z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Unterschrieben ansehen') : knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/avv/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { fehler(m, x); } } }, 'bad small'));

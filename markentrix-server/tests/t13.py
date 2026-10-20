@@ -5,13 +5,26 @@ def sql(q): return subprocess.run(["su","postgres","-c",f"psql -q -t -A -h /var/
 a=httpx.Client(base_url=B,headers=H); a.post("/api/login",json={"email":"chef@test.de","password":open("/var/tmp/pt/adminpw").read().strip()})
 a.put("/api/admin/einstellungen/smtp",json={"host":"127.0.0.1","port":8025,"sicherung":"keine","absender":"info@markentrix.de"})
 sfx=str(int(time.time()))
+a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","kleinunternehmer":True,"mwst_satz":19})
 k=a.post("/api/admin/kunden",json={"firma":"AVV Test "+sfx,"ansprechpartner":"Anna","email":f"anna{sfx}@av.de","strasse":"Weg 1","plz":"29221","ort":"Celle","paket_code":"KI_ONE","einladen":True}).json(); kid=k["id"]
 d=a.get(f"/api/admin/kunden/{kid}/avv").json(); chk("leer",d["liste"]==[] and d["vorhanden"] is False,d)
 chk("auf Fehlt-Liste",any(x["id"]==kid for x in a.get("/api/admin/avv-fehlt").json()))
 chk("übersicht avv_fehlt",any(x["id"]==kid for x in a.get("/api/admin/uebersicht").json()["avv_fehlt"]))
 chk("liste avv_ok false",[x for x in a.get("/api/admin/kunden?q="+sfx).json()][0]["avv_ok"] is False)
-r=a.post(f"/api/admin/kunden/{kid}/avv"); chk("erstellen",r.status_code==200,r.text); aid=r.json()["id"]
+v=a.get(f"/api/admin/avv-vorschlag/{kid}").json(); chk("Vorschlag: Portal + Weisung aus Kunde",v["anlage"]["module"]==["portal"] and v["anlage"]["weisung_name"]=="Anna" and v["anlage"]["weisung_email"]==f"anna{sfx}@av.de",v)
+chk("Modul ohne Domain abgelehnt",a.post(f"/api/admin/kunden/{kid}/avv",json={"module":["portal","domain"]}).status_code==400)
+chk("E-Mail ohne Konto-Wahl abgelehnt",a.post(f"/api/admin/kunden/{kid}/avv",json={"module":["portal","email"]}).status_code==400)
+r=a.post(f"/api/admin/kunden/{kid}/avv",json={"module":["portal","email_auftragnehmer","domain","ki_chat"],"domain":f"avv{sfx}.de","weisung_name":"Anna","weisung_email":f"anna{sfx}@av.de"}); chk("erstellen",r.status_code==200,r.text); aid=r.json()["id"]
+p=a.get(f"/api/admin/avv/{aid}/pruefen").json(); chk("Prüfliste: Hauptvertrags-Datum fehlt",len(p["offen"])==1 and "Hauptvertrag" in p["offen"][0],p)
+r=a.post(f"/api/admin/avv/{aid}/senden"); chk("Senden gesperrt bei offenen Punkten",r.status_code==400 and "Hauptvertrag" in r.text,r.text)
+chk("Freigabe gesperrt bei offenen Punkten",a.post(f"/api/admin/avv/{aid}/portal-freigeben").status_code==400)
+chk("Datum ungültig abgelehnt",a.put(f"/api/admin/avv/{aid}/anlage",json={"module":["portal"],"hauptvertrag_datum":"morgen"}).status_code==422)
+r=a.put(f"/api/admin/avv/{aid}/anlage",json={"module":["portal","email_auftragnehmer","domain","ki_chat"],"domain":f"avv{sfx}.de","hauptvertrag_datum":"2026-10-01","weisung_name":"Anna","weisung_email":f"anna{sfx}@av.de"}); chk("Anlage speichern",r.status_code==200,r.text)
+chk("Prüfliste leer",a.get(f"/api/admin/avv/{aid}/pruefen").json()["offen"]==[])
 r=a.get(f"/api/admin/avv/{aid}/vorlage.pdf"); chk("pdf",r.status_code==200 and r.content[:4]==b"%PDF",r.text[:200]); open("avv.pdf","wb").write(r.content)
+x=subprocess.run(["pdftotext","-layout","avv.pdf","-"],capture_output=True,text=True).stdout
+chk("AVV V2: Inhalt",all(s in x for s in ["Anlage 1: Gebuchte Module","Anlage 2: Technische","Anlage 3: Unterauftragsverarbeiter","Version 2","01.10.2026",f"avv{sfx}.de","Anthropic","INWX","Hetzner","Google Ireland"]),x[:400])
+chk("AVV V2: nicht gebuchte Anbieter fehlen",not any(s in x for s in ["BEK Service","Meta Platforms Ireland"]) and "[Datum]" not in x,x[-600:])
 r=a.post(f"/api/admin/avv/{aid}/senden"); chk("senden",r.status_code==200,r.text)
 time.sleep(1)
 raw=[x for x in open("/var/tmp/pt/mails.txt").read().split("\n=====\n") if x.strip()][-1]; m=email.message_from_string(raw)

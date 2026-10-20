@@ -96,6 +96,17 @@ def kacheln(paare: list, spalten=4):
     return t
 
 
+def kaestchen(angekreuzt: bool, einzug: float = 0):
+    """Kleines Ankreuzfeld für Vertragsanlagen."""
+    from reportlab.graphics.shapes import Drawing, PolyLine, Rect
+    d = Drawing((4.6 + einzug) * mm, 4.6 * mm)
+    x0 = einzug * mm
+    d.add(Rect(x0 + 0.3 * mm, 0.3 * mm, 4 * mm, 4 * mm, fillColor=colors.white, strokeColor=NAVY, strokeWidth=0.8))
+    if angekreuzt:
+        d.add(PolyLine([x0 + 0.9 * mm, 2.4 * mm, x0 + 2 * mm, 1.2 * mm, x0 + 3.8 * mm, 3.8 * mm], strokeColor=NAVY, strokeWidth=1.3, strokeLineCap=1, strokeLineJoin=1))
+    return d
+
+
 def leistungsbox(titel: str, punkte: list):
     """„Das bekommen Sie“: getönte Karte mit Häkchen vor jedem Punkt; Zeilen mit „## “ sind Zwischenüberschriften."""
     from reportlab.graphics.shapes import Circle, Drawing, PolyLine

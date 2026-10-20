@@ -19,6 +19,7 @@ def token(adr):
 a=httpx.Client(base_url=B,headers=H); a.post("/api/login",json={"email":"chef@test.de","password":open("/var/tmp/pt/adminpw").read().strip()})
 a.put("/api/admin/einstellungen/smtp",json={"host":"127.0.0.1","port":8025,"sicherung":"keine","absender":"info@markentrix.de"})
 sfx=str(int(time.time()))
+a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","kleinunternehmer":True,"mwst_satz":19})
 def neuer_kunde(name):
     k=a.post("/api/admin/kunden",json={"firma":f"{name} {sfx}","ansprechpartner":"Tina Test","email":f"{name.lower()}{sfx}@k.de","telefon":"0511","strasse":"Weg 1","plz":"29221","ort":"Celle","paket_code":"KI_ONE","einladen":True}).json()
     httpx.post(B+"/api/einladung",headers=H,json={"token":token(f"{name.lower()}{sfx}@k.de"),"password":"InhaberPasswort1"})
@@ -27,7 +28,7 @@ def neuer_kunde(name):
 kid,c,kmail=neuer_kunde("Alpha"); kid2,c2,kmail2=neuer_kunde("Beta")
 
 # ---- AVV per Klick
-r=a.post(f"/api/admin/kunden/{kid}/avv"); chk("AVV erstellt",r.status_code==200,r.text); aid=r.json()["id"]
+r=a.post(f"/api/admin/kunden/{kid}/avv",json={"hauptvertrag_datum":"2026-10-01"}); chk("AVV erstellt",r.status_code==200,r.text); aid=r.json()["id"]
 chk("Kunde sieht noch nichts zur Bestätigung",c.get("/api/kunde/avv-offen").json()==[])
 chk("Kunde kann Entwurf nicht lesen",c.get(f"/api/kunde/avv-offen/{aid}/vorlage.pdf").status_code==404)
 r=a.post(f"/api/admin/avv/{aid}/portal-freigeben"); chk("Admin gibt frei",r.status_code==200 and r.json()["gemailt"],r.text)
