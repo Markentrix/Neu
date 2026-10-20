@@ -205,7 +205,7 @@ export async function benachrKarte() {
 export async function textvorlagenKarte() {
   const box = h('div'), m = h('div');
   const bearbeiten = (v) => {
-    const mail = !v || v.art === 'mail', art = v ? v.art : 'mail', fm = h('div');
+    const art = v ? v.art : 'mail', fm = h('div');
     const name = h('input', { maxlength: 80, value: v ? v.name : '', 'aria-label': 'Name' }), betreff = h('input', { maxlength: 200, value: v && v.betreff || '', 'aria-label': 'Betreff' });
     const text = h('textarea', { rows: 10, maxlength: 8000, 'aria-label': 'Text' }, v && v.text || '');
     const aufg = h('textarea', { rows: 10, 'aria-label': 'Aufgaben' }, v && v.aufgaben ? v.aufgaben.map(a => a.titel + ' | ' + a.tage).join('\n') : '');

@@ -207,7 +207,7 @@ function anfragenKarte(liste) {
 }
 
 export async function leadDetail(lid) {
-  const [d, partner, anfragen] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/vertrieb/partnerliste'), api('/api/admin/leads/' + lid + '/angebotsanfragen')]), l = d.lead, m = h('div');
+  const [d, anfragen] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/leads/' + lid + '/angebotsanfragen')]), l = d.lead, m = h('div');
   const st = h('select', { onchange: (e) => bestaetigt(m, () => api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: e.target.value } }), 'Status geändert.') }, LEAD_ST.map(s => h('option', { value: s, selected: s === l.status }, s.replace(/_/g, ' '))));
   st.style.width = 'auto';
   const akt = h('form', { onsubmit: (e) => { e.preventDefault(); const o = formular(e.target); bestaetigt(m, () => api('/api/admin/leads/' + lid + '/aktivitaet', { method: 'POST', body: o }), 'Eingetragen.'); } },

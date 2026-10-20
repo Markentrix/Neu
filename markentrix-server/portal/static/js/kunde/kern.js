@@ -6,6 +6,7 @@ export const setzeStart = (s) => { start = s; };
 export const hat = (c) => start.module.some(m => m.code === c);
 
 const SEITEN = [
+  ['heute', 'Heute', null],
   ['uebersicht', 'Übersicht', null],
   ['status', 'Status', null],
   ['briefing', 'Briefing', null],
@@ -14,6 +15,7 @@ const SEITEN = [
   ['assistent', 'KI-Assistent', 'ki_chat'],
   ['anfragen', 'Anfragen', 'anfragen_termine'],
   ['termine', 'Termine', 'anfragen_termine'],
+  ['bewertungen', 'Bewertungen', 'anfragen_termine'],
   ['kontakte', 'Kontakte', 'kontakte_angebote_vertraege'],
   ['dokumente', 'Angebote & Verträge', 'kontakte_angebote_vertraege'],
   ['unterlagen', 'Dokumente', null],
@@ -78,7 +80,7 @@ export const V = {};
 export async function zeige() {
   const [id, param] = (location.hash || '#').slice(1).split('/');
   const erlaubt = sichtbar().map(s => s[0]);
-  const seite = erlaubt.includes(id) ? id : (hat('ki_chat') ? 'assistent' : 'uebersicht');
+  const seite = erlaubt.includes(id) ? id : 'heute';
   let inhalt;
   try { inhalt = await V[seite](param); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
   root.replaceChildren(gerüst(seite, inhalt));

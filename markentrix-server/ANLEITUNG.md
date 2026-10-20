@@ -285,3 +285,10 @@ Weitere Unterlagen: `docs/ARCHITEKTUR.md` (Aufbau für Entwickler), `docs/LOESCH
 - **Leitfaden**: Eröffnung, Fragen, Einwände, Abschluss und Branchenhinweise. Admin: *Einstellungen → Gesprächsleitfaden* (Textformat, „Auf Standard zurücksetzen“). Es sind Vorschläge ohne Preise und Zusagen; Formulierungen bitte rechtlich prüfen lassen.
 - **Meine Zahlen**: Anrufe, erreicht, Termine, neue Kunden (Woche/Monat, Vergleich zur Vorwoche), Quoten, Wochenziel (änderbar) und ein *Rechenbeispiel* zur Provision. Das Beispiel ist keine Zusage.
 - **Angebotsanfragen**: Der Vertriebler wählt Paket und Notiz. Du erhältst eine Aufgabe und eine Mitteilung, im Lead (Admin) setzt du den Status (Angefragt / In Prüfung / Angebot ist raus / Angenommen / Abgelehnt) und einen Hinweis; der Vertriebler wird benachrichtigt.
+
+## Kunden-Portal: Heute, Anfragen-Inbox, Bewertungen
+
+- **Heute** ist die Startseite der Kunden (handytauglich): offene Anfragen und Rückrufe (Anrufen, Antworten, Erledigt, Spam), Termine heute und morgen (Bestätigen, Erledigt, Nicht erschienen, Absagen), was auf ihn wartet (Freigaben, Nachrichten) und Bewertungsvorschläge.
+- **Antworten** (auch in der Anfragen-Liste): fünf Standardvorlagen (Termin bestätigen, Rückruf, Wir melden uns, Rückfrage, Absage) plus eigene Vorlagen; Platzhalter {name} und {firma} werden gefüllt. Das Portal verschickt nichts: Der Kunde öffnet damit sein eigenes Mailprogramm, WhatsApp oder SMS; danach wird die Anfrage als beantwortet markiert.
+- **Bewertungen** (Modul Anfragen & Termine): Der Kunde hinterlegt seinen Google-Bewertungslink, bereitet Bitten vor (Vorschläge aus erledigten Terminen der letzten 30 Tage, oder manuell), prüft den Text und sendet selbst. Dieselbe Person wird innerhalb von 90 Tagen nur einmal gefragt. Hinweise zu Freiwilligkeit und Werbung per Mail stehen auf der Seite; bitte rechtlich prüfen lassen (docs/ANWALT-CHECKLISTE).
+- **Admin-Übersicht**: Einträge unter „Jetzt wichtig“ lassen sich pro Browser 7 Tage ausblenden („Wieder anzeigen“ holt sie zurück). Die Ursache bleibt bestehen, nur der Hinweis wird ruhiggestellt.

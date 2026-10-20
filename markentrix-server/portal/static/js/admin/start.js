@@ -108,17 +108,31 @@ export function prioritaetenKarte(heute, sys, fw) {
   heute.wiedervorlagen.forEach(z => add(55, '', 'Lead', z.firma, 'Wiedervorlage fällig' + (z.vertriebler ? ' · ' + z.vertriebler : ''), '#lead/' + z.id, 'Öffnen'));
   if (heute.leads_gesamt) add(40, '', 'Leads', heute.leads_gesamt + ' neue Leads', 'warten auf den ersten Kontakt', '#leads', 'Öffnen');
   L.sort((a, b) => b.score - a.score);
-  const ul = h('ul', { class: 'prio' }), mehr = h('p', {});
+  // Ausblenden: gilt 7 Tage, nur in diesem Browser. Die Ursache bleibt bestehen, der Hinweis ist nur ruhiggestellt.
+  const SPERRE = 'mk_prio_ausgeblendet', TAGE7 = 7 * 864e5;
+  const laden = () => { try { const o = JSON.parse(localStorage.getItem(SPERRE) || '{}'), jetzt = Date.now(); Object.keys(o).forEach(k => { if (o[k] < jetzt) delete o[k]; }); return o; } catch { return {}; } };
+  const sichern = (o) => { try { localStorage.setItem(SPERRE, JSON.stringify(o)); } catch { /* ohne Speicher gilt das Ausblenden nur bis zum Neuladen */ } };
+  let aus = laden();
+  const schluessel = (z) => z.kat + '|' + z.titel + '|' + z.text;
+  const ul = h('ul', { class: 'prio' }), mehr = h('p', {}), zaehler = h('span', { class: 'badge', style: 'margin-left:8px' }), zurueck = h('p', { class: 'small' });
   let alle = false;
   const zeichnen = () => {
-    ul.replaceChildren(...(alle ? L : L.slice(0, 8)).map(z => h('li', {}, h('span', { class: 'punkt ' + z.ton, 'aria-hidden': 'true' }),
-      h('div', { class: 'pt' }, h('b', {}, z.titel), h('span', { class: 'small muted' }, z.text)), h('span', { class: 'pill kat' }, z.kat), typeof z.link === 'function' ? h('button', { class: 'btn sec small', onclick: z.link }, z.knopf) : h('a', { class: 'btn sec small', href: z.link }, z.knopf))));
-    mehr.replaceChildren(L.length > 8 ? h('button', { class: 'btn sec small', onclick: () => { alle = !alle; zeichnen(); } }, alle ? 'Weniger anzeigen' : 'Alle ' + L.length + ' anzeigen') : '');
+    const sichtbar = L.filter(z => !aus[schluessel(z)]), versteckt = L.length - sichtbar.length;
+    zaehler.textContent = String(sichtbar.length); zaehler.hidden = !sichtbar.length;
+    ul.replaceChildren(...(alle ? sichtbar : sichtbar.slice(0, 8)).map(z => h('li', {}, h('span', { class: 'punkt ' + z.ton, 'aria-hidden': 'true' }),
+      h('div', { class: 'pt' }, h('b', {}, z.titel), h('span', { class: 'small muted' }, z.text)), h('span', { class: 'pill kat' }, z.kat),
+      typeof z.link === 'function' ? h('button', { class: 'btn sec small', onclick: z.link }, z.knopf) : h('a', { class: 'btn sec small', href: z.link }, z.knopf),
+      h('button', { class: 'btn sec small', title: 'Für 7 Tage ausblenden', 'aria-label': 'Hinweis „' + z.titel + '“ für 7 Tage ausblenden', onclick: () => { aus[schluessel(z)] = Date.now() + TAGE7; sichern(aus); zeichnen(); } }, 'Ausblenden'))));
+    ul.hidden = !sichtbar.length;
+    leer.hidden = !!sichtbar.length; leer.textContent = versteckt ? 'Alles Offene ist ausgeblendet. Nichts Neues dringend.' : 'Alles erledigt. Nichts Dringendes offen. 🎉';
+    mehr.replaceChildren(sichtbar.length > 8 ? h('button', { class: 'btn sec small', onclick: () => { alle = !alle; zeichnen(); } }, alle ? 'Weniger anzeigen' : 'Alle ' + sichtbar.length + ' anzeigen') : '');
+    zurueck.replaceChildren(versteckt ? h('span', {}, versteckt + ' ausgeblendet · ', h('button', { class: 'btn sec small', onclick: () => { aus = {}; sichern(aus); zeichnen(); } }, 'Wieder anzeigen')) : '');
   };
+  const leer = h('p', { class: 'muted' });
   zeichnen();
   const ok = !sys || !sys.probleme || !sys.probleme.length;
-  return h('div', { class: 'card' }, h('h2', {}, 'Jetzt wichtig', L.length ? h('span', { class: 'badge', style: 'margin-left:8px' }, L.length) : ''),
-    L.length ? ul : h('p', { class: 'muted' }, 'Alles erledigt. Nichts Dringendes offen. 🎉'), mehr,
+  return h('div', { class: 'card' }, h('h2', {}, 'Jetzt wichtig', zaehler),
+    ul, leer, mehr, zurueck,
     h('div', { class: 'gesund small muted' }, h('span', { class: 'pill ' + (ok ? 'ok' : 'bad') }, ok ? 'System in Ordnung' : 'System: Handlungsbedarf'),
       h('span', { class: 'pill ' + (heute.rechnungen.length ? 'bad' : 'ok') }, heute.rechnungen.length ? heute.rechnungen.length + ' Rechnungen überfällig' : 'Keine Rechnung überfällig'),
       h('span', { class: 'pill ' + ((fw && fw.kunden && fw.kunden.some(k => k.stufe === 'hoch')) ? 'bad' : 'ok') }, (fw && fw.kunden && fw.kunden.some(k => k.stufe === 'hoch')) ? 'Kündigungsrisiko' : 'Kein Kündigungsrisiko')));

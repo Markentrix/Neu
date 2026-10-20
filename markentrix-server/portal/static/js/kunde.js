@@ -2,6 +2,8 @@ import { api } from './common.js';
 import { setzeStart, zeige } from './kunde/kern.js';
 import './kunde/uebersicht.js';
 import './kunde/anfragen.js';
+import './kunde/heute.js';
+import './kunde/bewertungen.js';
 import './kunde/postfach.js';
 import './kunde/auswertung.js';
 import './kunde/dokumente.js';

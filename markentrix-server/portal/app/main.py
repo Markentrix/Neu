@@ -11,6 +11,7 @@ from . import config, db, jobs
 from .routes_admin import router as admin_router
 from .routes_auth import router as auth_router
 from .routes_kunde import router as kunde_router
+from .routes_kundenwerkzeuge import router as kundenwerkzeuge_router
 from .routes_websites import router as websites_router
 from .routes_verwaltung import router as verwaltung_router
 from .routes_einstellungen import router as einstellungen_router
@@ -114,6 +115,7 @@ def healthz():
 
 app.include_router(auth_router)
 app.include_router(kunde_router)
+app.include_router(kundenwerkzeuge_router)
 app.include_router(admin_router)
 app.include_router(websites_router)
 app.include_router(verwaltung_router)

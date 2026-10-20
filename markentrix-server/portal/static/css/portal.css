@@ -168,3 +168,5 @@ code{word-break:break-all;white-space:normal}
 .heuteknoepfe{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .heuteknoepfe .btn{min-height:44px;flex:1 1 120px;text-align:center}
 @media(max-width:560px){.heutekopf .btn{width:100%;min-height:48px;text-align:center}}
+.heutekopf .btn,.heuteknoepfe .btn,.dlg .heuteknoepfe .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.prio li{flex-wrap:wrap}

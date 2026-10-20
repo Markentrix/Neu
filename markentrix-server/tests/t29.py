@@ -71,7 +71,7 @@ if __import__('datetime').datetime.now(__import__('datetime').timezone.utc).hour
 r=a.get(f"/api/admin/kunden/{kid}/export.zip"); chk("Datenexport pro Kunde liefert ZIP",r.status_code==200 and r.content[:2]==b"PK",r.status_code)
 # Demo-Daten (Anlegen, doppeltes Anlegen verhindert, Entfernen)
 import os as _os
-def cli(*arg): return subprocess.run(["python3","-m","app.cli",*arg],cwd="/home/claude/markentrix-server/portal",env=_os.environ.copy(),capture_output=True,text=True)
+def cli(*arg): return subprocess.run(["python3","-m","app.cli",*arg],cwd=_os.environ["PYTHONPATH"],env=_os.environ.copy(),capture_output=True,text=True)
 r=cli("demo-daten"); chk("Demo-Daten angelegt",r.returncode==0 and "angelegt" in r.stdout,r.stdout+r.stderr)
 chk("Demo: 5 Leads, 3 Anfragen, Referenzkunde",sql("select count(*) from leads where firma like 'DEMO – %'")=="5" and sql("select count(*) from kunden where firma like 'DEMO – %' and referenzkunde")=="1" and sql("select count(*) from anfragen a join kunden k on k.id=a.kunden_id where k.firma like 'DEMO – %'")=="3")
 r=cli("demo-daten"); chk("Demo-Daten nicht doppelt",r.returncode!=0 and "gibt es schon" in (r.stdout+r.stderr))

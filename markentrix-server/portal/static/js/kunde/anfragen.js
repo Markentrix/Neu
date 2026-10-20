@@ -1,5 +1,6 @@
 import { h, api, zeit, melde, formular } from '../common.js';
 import { tabelle, V, karten } from './kern.js';
+import { antwortDialog } from './heute.js';
 
 V.assistent = async () => {
   const log = h('div', { class: 'chatlog' });
@@ -29,7 +30,7 @@ V.anfragen = async () => {
   const box = h('div');
   const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/anfragen/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { alert(x.message); } } },
     ['neu', 'in_bearbeitung', 'beantwortet', 'erledigt', 'spam'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
-  box.append(tabelle([['Eingang', z => zeit(z.erstellt_am)], ['Name', z => z.name], ['Kontakt', z => z.kontakt], ['Nachricht', z => z.nachricht], ['Quelle', z => z.quelle], ['Status', status]], daten, 'Noch keine Anfragen.'));
+  box.append(tabelle([['Eingang', z => zeit(z.erstellt_am)], ['Name', z => z.name], ['Kontakt', z => z.kontakt], ['Nachricht', z => z.nachricht], ['Quelle', z => z.quelle], ['Status', status], ['', z => h('button', { class: 'btn small', onclick: () => antwortDialog(z.id, () => location.reload()) }, 'Antworten')]], daten, 'Noch keine Anfragen.'));
   return h('div', { class: 'card' }, h('h2', {}, 'Anfragen'), box);
 };
 
