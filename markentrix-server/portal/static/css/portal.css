@@ -295,3 +295,24 @@ h1,h2,h3,b,strong,.pt,.pill{overflow-wrap:anywhere}
 
 .top h1{flex:1 1 220px;min-width:0}
 @media(max-width:640px){.top h1{flex-basis:100%}}
+
+/* Handy: insgesamt etwas kompakter (lieber klein und sauber als zu groß) */
+@media(max-width:900px){
+  body{font-size:14px}
+  h1{font-size:20px}h2{font-size:16px}h3{font-size:14.5px}
+  .main{padding:12px}
+  .btn{min-height:40px;padding:8px 14px}.btn.small{min-height:36px;padding:5px 10px}
+  .pill{font-size:12px}
+  .shell.kompakt .side .brand{font-size:0;gap:0}.shell.kompakt .side .brand .logo{font-size:16px}
+  .tabbar a,.tabbar button{min-height:52px;font-size:11px;gap:2px}
+  .tabbar .ic{font-size:19px}
+  .tabbar a span:last-child,.tabbar button span:last-child{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .tabbar .on{font-weight:700}
+}
+@media(max-width:640px){
+  .card{padding:12px}
+  .prio li>.btn,.prio li>button,.prio li>a.btn{min-height:38px;padding:0 12px}
+  table.stapel td{padding:5px 0;font-size:13.5px}
+  table.stapel td .btn{min-height:38px}
+  .top{margin-bottom:10px}
+}

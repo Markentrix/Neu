@@ -1,7 +1,7 @@
 import { pipelineBoard } from './pipeline.js';
 import { stapelTabellen } from './common.js';
 stapelTabellen();
-import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular } from './common.js';
+import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
 
 const root = document.getElementById('app');
 let start = null;
@@ -11,12 +11,14 @@ const NAV = [['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads
 const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden']], ['Kunden & Geld', ['kunden', 'provisionen', 'konto']]];
 
 function gerüst(aktiv, inhalt) {
-  return h('div', { class: 'shell' },
+  const gruppen = NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]);
+  return h('div', { class: 'shell mobilleiste kompakt' },
     h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Partnerportal'),
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
-      navGruppen(NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]), aktiv, 'vertrieb'),
+      navGruppen(gruppen, aktiv, 'vertrieb'),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), inhalt, rechtFuss()));
+    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), inhalt, rechtFuss()),
+    mobilLeiste({ aktiv, gruppen, feste: ['heute', 'leads', 'pipeline', 'uebersicht'], icons: { heute: '☎', leads: '☰', pipeline: '▦', uebersicht: '▥' }, kurz: { heute: 'Anrufe', leads: 'Leads', uebersicht: 'Zahlen' }, schluessel: 'vertrieb' }));
 }
 function tabelle(spalten, zeilen, leer) {
   if (!zeilen.length) return leerZustand(leer);

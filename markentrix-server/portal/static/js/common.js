@@ -438,3 +438,19 @@ export function stapelTabellen() {
   new MutationObserver(plane).observe(document.body, { childList: true, subtree: true });
   plane();
 }
+
+/**
+ * Feste Menüleiste unten am Handy (Admin und Partnerportal): bis zu vier wichtigste Seiten plus „Mehr“ mit dem ganzen Menü.
+ * gruppen: [[Titel, [[id, Name, Zähler]], offen]] wie bei navGruppen; feste: Seiten-IDs in Wunschreihenfolge.
+ */
+export function mobilLeiste({ aktiv, gruppen, feste, icons, kurz = {}, schluessel, extra = [] }) {
+  const alle = gruppen.flatMap(g => g[1]), ids = alle.map(p => p[0]);
+  const fest = feste.filter(i => ids.includes(i)).slice(0, 4), zahl = (i) => (alle.find(p => p[0] === i) || [])[2] || 0;
+  const rest = ids.filter(i => !fest.includes(i)), mehrZahl = rest.reduce((n, i) => n + zahl(i), 0);
+  const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt' }, navGruppen(gruppen.map(([titel, p]) => [titel, p, true]), aktiv, schluessel + '-mehr'), extra,
+    h('div', { class: 'brandzeile', style: 'margin-top:10px' }, themeKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
+  return h('nav', { class: 'tabbar', 'aria-label': 'Hauptmenü' },
+    fest.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null },
+      h('span', { class: 'ic', 'aria-hidden': 'true' }, icons[id] || '•', zahl(id) ? h('span', { class: 'badge' }, zahl(id)) : ''), h('span', {}, kurz[id] || alle.find(p => p[0] === id)[1]))),
+    h('button', { type: 'button', class: !fest.includes(aktiv) ? 'on' : '', onclick: mehr }, h('span', { class: 'ic', 'aria-hidden': 'true' }, '☰', mehrZahl ? h('span', { class: 'badge' }, mehrZahl) : ''), h('span', {}, 'Menü')));
+}

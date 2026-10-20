@@ -1,4 +1,4 @@
-import { h, leerZustand, themeKnopf, navGruppen, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf } from '../common.js';
+import { h, leerZustand, themeKnopf, navGruppen, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf, mobilLeiste } from '../common.js';
 
 
 export const NAV = [['uebersicht', 'Übersicht'], ['meintag', 'Mein Tag'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['onboarding', 'Onboarding'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['pipeline', 'Pipeline'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
@@ -25,16 +25,18 @@ function befehle() {
 }
 
 export function gerüst(aktiv, inhalt) {
-  return h('div', { class: 'shell' },
+  const gruppen = NAV_GRUPPEN.map(([titel, ids, offen]) => [titel, NAV.filter(n => ids.includes(n[0]) && erlaubt(n[0])).map(n => [n[0], n[1], zaehlerAdmin[n[0]] || 0]), offen]);
+  return h('div', { class: 'shell mobilleiste kompakt' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Admin'),
       h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke(), themeKnopf()),
       h('div', { class: 'neuzeile' }, neuKnopf()),
-      navGruppen(NAV_GRUPPEN.map(([titel, ids, offen]) => [titel, NAV.filter(n => ids.includes(n[0]) && erlaubt(n[0])).map(n => [n[0], n[1], zaehlerAdmin[n[0]] || 0]), offen]), aktiv, 'admin'),
+      navGruppen(gruppen, aktiv, 'admin'),
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, ich && !ich.zwei_faktor ? h('div', { class: 'msg info' }, 'Dein Admin-Konto hat noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten'), '.') : '', inhalt, rechtFuss()));
+    h('main', { class: 'main' }, ich && !ich.zwei_faktor ? h('div', { class: 'msg info' }, 'Dein Admin-Konto hat noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten'), '.') : '', inhalt, rechtFuss()),
+    mobilLeiste({ aktiv, gruppen, feste: ['uebersicht', 'postfach', 'kunden', 'freigaben'], icons: { uebersicht: '⌂', postfach: '✉', kunden: '▦', freigaben: '✔', aufgaben: '☑' }, kurz: { uebersicht: 'Übersicht', postfach: 'Posteingang' }, schluessel: 'admin' }));
 }
 export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
   if (!zeilen.length) return leerZustand(leer);
