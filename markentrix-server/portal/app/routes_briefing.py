@@ -131,13 +131,18 @@ def auswertung(user: dict = Depends(require_kunde)):
     with tx("kunde", kid) as cur:
         dieser = berichte.sammeln(cur, kid, von, bis)
         letzter = berichte.sammeln(cur, kid, vvon, vbis)
-        cur.execute("""SELECT w::date AS ab, (SELECT count(*) FROM anfragen a WHERE a.erstellt_am >= w AND a.erstellt_am < w + interval '7 days' AND a.status <> 'spam') AS anfragen
-                       FROM generate_series(date_trunc('week', now()) - interval '11 weeks', date_trunc('week', now()), interval '1 week') w ORDER BY w""")
-        wochen = cur.fetchall()
-        cur.execute("""SELECT to_char(m, 'YYYY-MM') AS monat, (SELECT count(*) FROM anfragen a WHERE a.erstellt_am >= m AND a.erstellt_am < m + interval '1 month' AND a.status <> 'spam') AS anfragen,
-                              (SELECT count(*) FROM termine t WHERE t.beginn >= m AND t.beginn < m + interval '1 month' AND t.status NOT IN ('abgesagt')) AS termine
-                       FROM generate_series(date_trunc('month', now()) - interval '5 months', date_trunc('month', now()), interval '1 month') m ORDER BY m""")
-        monate = cur.fetchall()
+        cur.execute("""SELECT w::date AS ab FROM generate_series(date_trunc('week', now()) - interval '11 weeks', date_trunc('week', now()), interval '1 week') w ORDER BY w""")
+        starts = [r["ab"] for r in cur.fetchall()]
+        cur.execute("""SELECT date_trunc('week', erstellt_am)::date AS ab, count(*) AS n FROM anfragen WHERE kunden_id=%s AND status <> 'spam' AND erstellt_am >= date_trunc('week', now()) - interval '11 weeks' GROUP BY 1""", (kid,))
+        a_w = {r["ab"]: r["n"] for r in cur.fetchall()}
+        wochen = [{"ab": st, "anfragen": a_w.get(st, 0)} for st in starts]
+        cur.execute("""SELECT to_char(m, 'YYYY-MM') AS monat FROM generate_series(date_trunc('month', now()) - interval '5 months', date_trunc('month', now()), interval '1 month') m ORDER BY m""")
+        mon = [r["monat"] for r in cur.fetchall()]
+        cur.execute("""SELECT to_char(date_trunc('month', erstellt_am), 'YYYY-MM') AS monat, count(*) AS n FROM anfragen WHERE kunden_id=%s AND status <> 'spam' AND erstellt_am >= date_trunc('month', now()) - interval '5 months' GROUP BY 1""", (kid,))
+        a_m = {r["monat"]: r["n"] for r in cur.fetchall()}
+        cur.execute("""SELECT to_char(date_trunc('month', beginn), 'YYYY-MM') AS monat, count(*) AS n FROM termine WHERE kunden_id=%s AND status NOT IN ('abgesagt') AND beginn >= date_trunc('month', now()) - interval '5 months' AND beginn < date_trunc('month', now()) + interval '1 month' GROUP BY 1""", (kid,))
+        t_m = {r["monat"]: r["n"] for r in cur.fetchall()}
+        monate = [{"monat": m, "anfragen": a_m.get(m, 0), "termine": t_m.get(m, 0)} for m in mon]
         cur.execute("SELECT to_char(monat, 'YYYY-MM') AS monat, besucher, google_aufrufe, google_bewertungen, google_sterne FROM kennzahlen_extern ORDER BY monat DESC LIMIT 12")
         extern = list(reversed(cur.fetchall()))
     return {"monat_name": f"{MONATE[heute.month - 1]} {heute.year}", "vormonat_name": f"{MONATE[vor.month - 1]} {vor.year}",

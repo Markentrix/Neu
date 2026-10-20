@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from . import diagramme, onboarding
 from .db import tx
-from .routes_dashboard import cockpit_daten
 from .security import modul_aktiv, require_admin, require_kunde, require_vertrieb
 
 router = APIRouter(prefix="/api")
@@ -15,14 +14,16 @@ _TZ = "Europe/Berlin"
 def kunde_diagramme(user: dict = Depends(require_kunde)):
     kid = user["kunden_id"]
     with tx("kunde", kid) as cur:
-        cur.execute(f"""SELECT to_char(w.start, 'YYYY-MM-DD') AS start,
-                  (SELECT count(*) FROM anfragen a WHERE a.kunden_id=%s AND a.status<>'spam' AND date_trunc('week', a.erstellt_am AT TIME ZONE '{_TZ}') = w.start) AS anfragen,
-                  (SELECT count(*) FROM termine t WHERE t.kunden_id=%s AND t.status<>'abgesagt' AND date_trunc('week', t.beginn AT TIME ZONE '{_TZ}') = w.start) AS termine
-                FROM (SELECT date_trunc('week', now() AT TIME ZONE '{_TZ}') - make_interval(weeks => n) AS start FROM generate_series(1, 26) n) w ORDER BY w.start""", (kid, kid))
-        wochen = cur.fetchall()
-        cur.execute(f"""SELECT (SELECT count(*) FROM anfragen WHERE kunden_id=%s AND status<>'spam' AND date_trunc('week', erstellt_am AT TIME ZONE '{_TZ}') = date_trunc('week', now() AT TIME ZONE '{_TZ}')) AS anfragen,
-                              (SELECT count(*) FROM termine WHERE kunden_id=%s AND status<>'abgesagt' AND date_trunc('week', beginn AT TIME ZONE '{_TZ}') = date_trunc('week', now() AT TIME ZONE '{_TZ}')) AS termine""", (kid, kid))
-        laufend = cur.fetchone()
+        cur.execute(f"""SELECT to_char(date_trunc('week', now() AT TIME ZONE '{_TZ}') - make_interval(weeks => n), 'YYYY-MM-DD') AS start FROM generate_series(0, 26) n ORDER BY 1""")
+        starts = [r["start"] for r in cur.fetchall()]       # 27 Montage: 26 volle Wochen plus die laufende
+        cur.execute(f"""SELECT to_char(date_trunc('week', erstellt_am AT TIME ZONE '{_TZ}'), 'YYYY-MM-DD') AS start, count(*) AS n FROM anfragen
+                        WHERE kunden_id=%s AND status<>'spam' AND erstellt_am >= now() - interval '28 weeks' GROUP BY 1""", (kid,))
+        a_w = {r["start"]: r["n"] for r in cur.fetchall()}
+        cur.execute(f"""SELECT to_char(date_trunc('week', beginn AT TIME ZONE '{_TZ}'), 'YYYY-MM-DD') AS start, count(*) AS n FROM termine
+                        WHERE kunden_id=%s AND status<>'abgesagt' AND beginn >= now() - interval '28 weeks' AND beginn < now() + interval '2 weeks' GROUP BY 1""", (kid,))
+        t_w = {r["start"]: r["n"] for r in cur.fetchall()}
+        wochen = [{"start": st, "anfragen": a_w.get(st, 0), "termine": t_w.get(st, 0)} for st in starts[:-1]]
+        laufend = {"anfragen": a_w.get(starts[-1], 0), "termine": t_w.get(starts[-1], 0)}
         cur.execute("SELECT quelle, count(*) AS n FROM anfragen WHERE kunden_id=%s AND status<>'spam' AND erstellt_am > now() - interval '90 days' GROUP BY quelle", (kid,))
         quellen = {r["quelle"]: r["n"] for r in cur.fetchall()}
         cur.execute(f"""SELECT extract(isodow FROM erstellt_am AT TIME ZONE '{_TZ}')::int AS tag, count(*) AS n FROM anfragen
@@ -96,9 +97,12 @@ def _pipeline(cur, partner_id=None, mit_prognose=False):
     trichter = [{"status": s, "titel": STUFEN_TXT[s], "anzahl": kumulativ[i]} for i, s in enumerate(STUFEN)]
     out = {"spalten": spalten, "trichter": trichter, "verloren": zaehl.get("verloren", 0), "quote": quote, "entschieden": entschieden, "pro_spalte": PRO_SPALTE}
     if mit_prognose:
-        cp = cockpit_daten(cur)
+        cur.execute("SELECT coalesce(sum(b.monatlich_cent - b.rabatt_cent),0) AS cent FROM buchungen b JOIN kunden k ON k.id=b.kunden_id WHERE b.status IN ('aktiv','in_einrichtung','beauftragt') AND b.monatlich_cent IS NOT NULL AND NOT k.referenzkunde")
+        mrr = int(cur.fetchone()["cent"])
+        cur.execute("SELECT count(*) AS n FROM kunden WHERE status='aktiv' AND NOT referenzkunde")
+        aktiv = cur.fetchone()["n"]
         angebote = zaehl.get("angebot", 0)
-        schnitt = cp["arpu_cent"]
+        schnitt = int(mrr / aktiv) if aktiv else 0
         ok = quote is not None and schnitt > 0
         out["prognose"] = {"angebote": angebote, "quote": quote, "schnitt_cent": schnitt, "erwartet_cent": int(angebote * quote / 100 * schnitt) if ok else None,
                            "hinweis": None if ok else ("Zu wenige abgeschlossene Leads für eine Quote (mindestens %d in 180 Tagen)." % MIN_ABSCHLUSS if quote is None else "Noch kein durchschnittlicher Monatswert je Kunde vorhanden.")}

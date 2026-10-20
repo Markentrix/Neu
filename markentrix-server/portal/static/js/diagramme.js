@@ -42,7 +42,7 @@ export function ringdiagramm(teile, beschreibung, mitte = '') {
 /** Trichter: Stufen von oben nach unten, mit Anteil zur vorherigen Stufe. stufen: [{ name, wert }] */
 export function trichter(stufen, beschreibung) {
   const max = Math.max(1, stufen[0] ? stufen[0].wert : 1);
-  return h('div', { class: 'trichter', role: 'img', 'aria-label': beschreibung }, stufen.map((s, i) => {
+  return h('div', { class: 'dtrichter', role: 'img', 'aria-label': beschreibung }, stufen.map((s, i) => {
     const vor = i ? stufen[i - 1].wert : null;
     return h('div', { class: 'tstufe' }, h('div', { class: 'tname' }, s.name), h('div', { class: 'tbalken' }, h('div', { style: 'width:' + Math.max(2, 100 * s.wert / max) + '%;background:' + farbe(i === 0 ? 1 : i === stufen.length - 1 ? 3 : 0) })),
       h('div', { class: 'tzahl' }, h('b', {}, s.wert), vor ? h('span', { class: 'small muted' }, ' · ' + (vor ? Math.round(100 * s.wert / vor) : 0) + ' %') : ''));
