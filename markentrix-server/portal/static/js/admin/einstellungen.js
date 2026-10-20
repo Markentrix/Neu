@@ -24,7 +24,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -57,11 +57,35 @@ export async function firmaKarte() {
 export async function avvEinstKarte() {
   const r = await api('/api/admin/einstellungen/avv'), m = h('div');
   const form = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/admin/einstellungen/avv', { method: 'PUT', body: formular(e.target) }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } },
-    h('label', {}, 'Unterauftragsverarbeiter im AVV (eine Zeile je Firma: Name | Leistung | Sitz). Leer lassen = Standardliste.'),
+    h('label', {}, 'Unterauftragsverarbeiter im AVV (eine Zeile je Firma: Name | Leistung | Modul | Verarbeitungsort | Grundlage Drittland). Leer lassen = Standardliste, die nach den gebuchten Modulen des Kunden gefiltert wird. Eine eigene Liste ersetzt sie vollständig.'),
     h('textarea', { name: 'unterauftragnehmer', rows: 6, placeholder: r.standard }, r.unterauftragnehmer || ''),
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   return h('div', { class: 'card' }, h('h2', {}, 'AVV: Unterauftragsverarbeiter'),
-    h('p', { class: 'small muted' }, 'Diese Liste steht in Anlage 2 jedes AVV. Bitte vollständig und aktuell halten (z. B. E-Mail-Anbieter, Telefonie-Dienst) und den Vertragstext einmal juristisch prüfen lassen.'), m, form);
+    h('p', { class: 'small muted' }, 'Diese Liste steht in Anlage 3 jedes AVV. Bitte vollständig und aktuell halten (z. B. E-Mail-Anbieter, Telefonie-Dienst) und den Vertragstext einmal juristisch prüfen lassen.'), m, form);
+}
+
+const MODUL_NAMEN = { '': 'alle Kunden mit AVV', automationen: 'Automationen', email_auftragnehmer: 'E-Mail über Auftragnehmer-Konto', termin_auftragnehmer: 'Termine über Auftragnehmer-Konto', ki_chat: 'KI-Chat', telefon: 'Telefon-Assistent', whatsapp: 'WhatsApp', domain: 'Domainverwaltung', website: 'Website' };
+
+/** Änderung bei Unterauftragsverarbeitern ankündigen: Mail an betroffene Kunden mit vier Wochen Vorlauf (AVV Ziff. 5 Abs. 2). */
+export async function uavAenderungKarte() {
+  const liste = await api('/api/admin/uav-aenderungen'), m = h('div');
+  const frueh = new Date(Date.now() + 28 * 864e5).toISOString().slice(0, 10);
+  const form = h('form', { class: 'stack', onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target);
+    if (!confirm('Alle betroffenen Kunden bekommen jetzt eine Mail. Fortfahren?')) return;
+    try { const r = await api('/api/admin/uav-aenderungen', { method: 'POST', body: o }); melde(m, r.kunden + ' Kunden betroffen, ' + r.gesendet + ' Mails gesendet' + (r.ohne_mail ? ', ' + r.ohne_mail + ' ohne E-Mail-Adresse oder Versandfehler' : '') + '. Bitte die Liste oben erst ab dem Datum ändern.', 'ok'); setTimeout(() => location.reload(), 2500); } catch (x) { fehler(m, x); } } },
+    h('div', { class: 'form2' },
+      h('div', {}, h('label', {}, 'Art'), h('select', { name: 'art' }, h('option', { value: 'neu' }, 'neuer Anbieter'), h('option', { value: 'ersetzt' }, 'Anbieter wird ersetzt'))),
+      h('div', {}, h('label', {}, 'Unternehmen'), h('input', { name: 'name', required: true, maxlength: 200 })),
+      h('div', {}, h('label', {}, 'Leistung'), h('input', { name: 'leistung', required: true, maxlength: 400 })),
+      h('div', {}, h('label', {}, 'Betrifft Modul'), h('select', { name: 'modul' }, Object.entries(MODUL_NAMEN).map(([k, t]) => h('option', { value: k }, t)))),
+      h('div', {}, h('label', {}, 'Verarbeitungsort'), h('input', { name: 'ort', maxlength: 200 })),
+      h('div', {}, h('label', {}, 'Geplant ab (mind. 4 Wochen)'), h('input', { name: 'wirksam_ab', type: 'date', min: frueh, value: frueh, required: true }))),
+    h('label', {}, 'Hinweis für die Kunden (optional)'), h('textarea', { name: 'hinweis', rows: 3, maxlength: 1500 }),
+    h('p', {}, h('button', { class: 'btn' }, 'Kunden informieren')));
+  return h('div', { class: 'card' }, h('h2', {}, 'AVV: Änderung bei Unterauftragsverarbeitern ankündigen'),
+    h('p', { class: 'small muted' }, 'Laut AVV musst du neue oder wechselnde Anbieter mindestens vier Wochen vorher in Textform ankündigen. Das Portal verschickt die Mail, merkt sich Zeitpunkt und Empfänger und nimmt Widersprüche der Kunden entgegen. Die Anbieterliste oben änderst du erst zum angekündigten Datum.'), m, form,
+    liste.length ? tabelle([['Angekündigt', z => datum(z.erstellt_am)], ['Anbieter', z => z.name + (z.art === 'ersetzt' ? ' (Ersatz)' : '')], ['Ab', z => datum(z.wirksam_ab)], ['Kunden informiert', z => z.gesendet + ' von ' + z.kunden],
+      ['Widersprüche', z => z.widersprueche ? h('span', { class: 'pill bad' }, z.widersprueche + ': ' + z.widerspruch_liste.map(w => w.firma).join(', ')) : '–']], liste) : h('p', { class: 'small muted' }, 'Bisher keine Änderung angekündigt.'));
 }
 
 export async function mitarbeiterKarte() {

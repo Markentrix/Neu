@@ -5,7 +5,7 @@ Dieses Paket richtet auf deinem Hetzner-Server alles Neue mit **einem Befehl** e
 - **PostgreSQL-Datenbank** mit fertiger Struktur (66 Tabellen): Kunden mit Kundennummer, Zugänge, Preiskatalog (Preisliste Stand September 2026) und Buchungen, Kundenbereich, Konfiguration und Prompts, Wissensbasis und Agentenläufe, Vertrieb, Akquise und Lead-Finder, Kommunikation, Datenschutz (Einwilligungen, Auskunft, Löschung) und Qualität (Befunde, Maßnahmen, Ausnahmeregister, Alarme). Jeder Kunde sieht nur seine eigenen Daten (getestet). Kein Supabase.
 - **n8n** (deine Workflows), mit eigener Datenbank
 - **Server-Dashboard** unter `panel.deine-domain.de` (nur lesend): zeigt Dienste, Websites, Demos, Speicher und Sicherungen
-- **Tägliche Sicherung** um 03:15 Uhr, 14 Tage Aufbewahrung
+- **Tägliche Sicherung** um 03:15 Uhr, 30 Tage Aufbewahrung (laut AVV)
 - **mkctl**: kleines Werkzeug für Demos, Kunden-Websites, Updates und Sicherungen
 - **Caddy** (HTTPS) nur, wenn noch keiner läuft. Ein vorhandener Caddy wird **nicht verändert**.
 
@@ -345,3 +345,11 @@ Im Angebotsdialog steht unter den Positionen **„Das bekommt der Kunde“**. De
 - **Datenschutz:** Hast du eine eigene Datenschutzerklärung hinterlegt, erscheint unter Einstellungen → Rechtstexte ein Hinweis mit Knopf „Satz am Ende einfügen“, solange die Nutzungsstatistik dort nicht genannt wird.
 - **Auswertung:** Auf „Angebote & Rechnungen“ steht oben die Karte „Angebote: Auswertung“ (verschickt, angesehen, angenommen, Quote, Zeit bis zur Annahme, Pakete).
 - **Nutzung:** Unter Protokoll steht „Nie geöffnet“ und „Selten“ erst, wenn die Messung 14 Tage läuft (vorher wäre es Zufall).
+
+
+## Zusagen aus dem AVV und wie das Portal sie umsetzt (Stand Oktober 2026)
+- **Zwei-Faktor-Anmeldung für Admins ist Pflicht** (AVV Anlage 2). Ein Admin ohne 2FA kann sich anmelden, sieht aber nur die Einrichtungsseite, bis die Authenticator-App gekoppelt ist. Kunden- und Vertriebskonten: freiwillig. Notfall: `mkctl admin-reset <E-Mail>` setzt auch die 2FA zurück. Zum Abschalten der Pflicht (nicht empfohlen) `PORTAL_ADMIN_2FA=0` in der Umgebung des Portals setzen, dann steht aber der AVV-Text nicht mehr.
+- **Aufbewahrung**: Chatverläufe 6 Monate (180 Tage), Audit-Log 12 Monate, Telefon-Zusammenfassungen 180 Tage, Sicherungen 30 Tage. Das läuft täglich automatisch und steht im Löschprotokoll. Das Audit-Log ist für die Anwendung unveränderlich; nur eine feste Datenbankfunktion löscht Einträge, die älter als 12 Monate sind.
+- **Alte AVV (Version 1) ersetzen**: Beim Kunden erscheint ein Hinweis „Neue Fassung (Version 2) vorbereiten“, in der Übersicht „Heute“ steht „AVV: neue Fassung fehlt noch“. Der Dialog hat eine **Vorschau (PDF)**, ohne etwas zu speichern. Die alte Fassung bleibt als Nachweis liegen.
+- **Änderung bei Unterauftragsverarbeitern ankündigen** (Einstellungen → „AVV: Änderung bei Unterauftragsverarbeitern ankündigen“): Anbieter, Leistung, Modul und Datum eintragen (mindestens vier Wochen Vorlauf, sonst lehnt das Portal ab). Betroffene Kunden bekommen eine Mail, im Kundenportal steht die Ankündigung unter „Datenschutz-Vertrag“ mit Knopf **Widerspruch einlegen** (bis zum Datum). Du bekommst bei Widerspruch eine Mail, in der Liste steht der Kunde mit Begründung. Die Anbieterliste änderst du erst zum angekündigten Datum, und nicht für Kunden, die widersprochen haben.
+- **Überwachung und Wiederherstellungstest** liefen schon vorher: Prüfung alle 5 Minuten (Container, Portal von außen, Festplatte, Zertifikat, Sicherungsalter, Hintergrundjobs, Mailversand) mit Alarm per Mail und optional Telegram; wöchentlicher automatischer Wiederherstellungstest. Details und der Jahres-Probelauf: `docs/WIEDERHERSTELLUNG.md`.

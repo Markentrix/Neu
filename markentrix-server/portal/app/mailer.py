@@ -150,6 +150,22 @@ def avv_bestaetigt_team(an: str, firma: str, kundennummer: str, name: str, kid: 
     return senden(an, f"AVV bestätigt: {firma}", t)
 
 
+def uav_aenderung(an: str, name: str | None, art: str, uav: str, leistung: str, wirksam: str, hinweis: str) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    was = "ein zusätzlicher Unterauftragsverarbeiter" if art == "neu" else "ein Wechsel eines Unterauftragsverarbeiters"
+    text = (f"{hallo}\n\nnach Ziffer 5 unseres Vertrags zur Auftragsverarbeitung (AVV) informieren wir Sie vorab über eine geplante Änderung: {was}.\n\n"
+            f"Unternehmen: {uav}\nLeistung: {leistung}\nGeplant ab: {wirksam}\n" + (f"\n{hinweis}\n" if hinweis else "") +
+            f"\nSie können der Änderung bis zu diesem Datum aus wichtigem datenschutzrechtlichem Grund widersprechen, direkt im Portal unter „Datenschutz-Vertrag“: {config.BASE_URL}/app#avv\n"
+            "Ohne Widerspruch gilt die Änderung als genehmigt. Bis zu einer Klärung setzen wir den neuen Anbieter für Sie nicht ein." + SIGNATUR)
+    return senden(an, f"Information zur Auftragsverarbeitung: Änderung bei Unterauftragsverarbeitern ({uav})", text)
+
+
+def uav_widerspruch_team(an: str, firma: str, kundennummer: str, uav: str, name: str, grund: str, kid: str) -> tuple[bool, str]:
+    t = (f"{firma} ({kundennummer}) widerspricht der Änderung bei Unterauftragsverarbeitern: {uav}\n\nEingelegt von: {name}\nBegründung: {grund}\n\n"
+         f"Der neue Anbieter darf für diesen Kunden nicht eingesetzt werden, bis das geklärt ist.\nAdmin-Bereich: {config.BASE_URL}/admin#kunde/{kid}" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"Widerspruch gegen Unterauftragsverarbeiter: {firma}", t)
+
+
 def onboarding_erinnerung_kunde(an: str, name: str | None, offen: list[str]) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     text = (f"{hallo}\n\nfür einen guten Start fehlt uns von Ihnen noch Folgendes: bitte " + " und ".join(offen) + f".\n\nDas geht direkt im Portal: {config.BASE_URL}/app\n\nWenn Sie Hilfe brauchen, schreiben Sie uns einfach dort eine Nachricht." + SIGNATUR)

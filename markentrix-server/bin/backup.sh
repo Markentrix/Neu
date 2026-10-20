@@ -4,7 +4,7 @@
 set -Eeuo pipefail
 
 BASE=/opt/markentrix
-KEEP_DAYS="${KEEP_DAYS:-14}"
+KEEP_DAYS="${KEEP_DAYS:-30}"   # laut AVV (Anlage 2): Aufbewahrung der Sicherungen 30 Tage
 STAMP="$(date +%Y-%m-%d_%H%M)"
 DEST="$BASE/backups/$STAMP"
 

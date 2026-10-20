@@ -86,7 +86,7 @@ RECHTE = {"kunden": "Kunden & Projekte", "nachrichten": "Nachrichten", "leads": 
 _IMMER = {"uebersicht", "heute", "aufgaben", "suche", "textvorlagen", "meine-filter"}
 _BEREICH = {"tickets": "nachrichten", "leads": "leads", "gespraeche": "leads", "vertrieb": "leads", "website-check": "leads", "provisionsregeln": "leads",
             "belege": "finanzen", "belege-export.csv": "finanzen", "belege-auswertung": "finanzen", "preise": "finanzen", "konditionen": "finanzen", "katalog": "finanzen", "kennzahlen": "finanzen",
-            "kunden": "kunden", "berichte": "kunden", "avv": "kunden", "avv-fehlt": "kunden", "onboarding": "kunden", "dateien": "kunden", "websites": "kunden",
+            "kunden": "kunden", "berichte": "kunden", "avv": "kunden", "avv-fehlt": "kunden", "avv-veraltet": "kunden", "avv-vorschlag": "kunden", "avv-vorschau": "kunden", "uav-aenderungen": "kunden", "onboarding": "kunden", "dateien": "kunden", "websites": "kunden",
             "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden", "fruehwarnung": "kunden", "vorlagen": "kunden", "cockpit": "finanzen", "lastschrift": "finanzen", "mahnvorschlaege": "finanzen", "mahnungen": "finanzen", "angebotsanfragen": "leads", "pipeline": "leads"}
 
 
@@ -98,9 +98,19 @@ def recht_fuer_pfad(pfad: str) -> str:
     return _BEREICH.get(erst, "einstellungen")
 
 
+def _zwei_faktor_fehlt(user: dict) -> bool:
+    from . import config
+    return bool(config.ADMIN_2FA_PFLICHT and user["rolle"] == "admin" and not user.get("totp_aktiv"))
+
+
+ZWEI_FAKTOR_PFLICHT = "Für Administratoren ist die Zwei-Faktor-Anmeldung Pflicht. Bitte zuerst einrichten."
+
+
 def require_admin(request: Request, user: dict = Depends(current_user)) -> dict:
     if user["rolle"] != "admin":
         raise HTTPException(403, "Nur für Administratoren.")
+    if _zwei_faktor_fehlt(user):
+        raise HTTPException(403, ZWEI_FAKTOR_PFLICHT)
     r = user.get("admin_rechte")
     if r is not None:
         b = recht_fuer_pfad(request.url.path)
@@ -113,6 +123,8 @@ def require_voll(user: dict = Depends(current_user)) -> dict:
     """Nur Administratoren ohne Einschränkung (Mitarbeiter anlegen und Rechte vergeben)."""
     if user["rolle"] != "admin" or user.get("admin_rechte") is not None:
         raise HTTPException(403, "Nur für Administratoren mit vollem Zugriff.")
+    if _zwei_faktor_fehlt(user):
+        raise HTTPException(403, ZWEI_FAKTOR_PFLICHT)
     return user
 
 

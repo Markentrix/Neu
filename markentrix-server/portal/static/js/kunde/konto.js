@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, melde, zweiFaktorKarte, pushKarte, formular } from '../common.js';
+import { h, api, datum, zeit, melde, zweiFaktorKarte, pushKarte, formular, dialog } from '../common.js';
 import { inhaber, tabelle, statusPill, zeige, V } from './kern.js';
 
 function anschriftKarte(k) {
@@ -66,7 +66,15 @@ V.avv = async () => {
       h('label', {}, 'Dein Name'), name,
       h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:14px;margin-top:12px' }, ok, 'Ich habe den Vertrag gelesen und bestätige ihn im Namen meines Unternehmens. Ich bin dazu berechtigt.'),
       h('p', {}, h('button', { class: 'btn', onclick: async () => { try { await api('/api/kunde/avv-offen/' + z.id + '/bestaetigen', { method: 'POST', body: { name: name.value, akzeptiert: ok.checked } }); location.reload(); } catch (x) { melde(m, x.message); } } }, 'Vertrag bestätigen'))); };
-  return h('div', { class: 'stack' }, offen.map(bestaetigen), h('div', { class: 'card' }, h('h2', {}, 'Vertrag zur Auftragsverarbeitung (AVV)'),
+  const aend = await api('/api/kunde/uav-aenderungen').catch(() => []);
+  const widerspruch = (z) => { const grund = h('textarea', { rows: 3, maxlength: 1500, placeholder: 'Wichtiger datenschutzrechtlicher Grund' }), name = h('input', { placeholder: 'Vor- und Nachname', maxlength: 200 }), fm = h('div');
+    dialog('Widerspruch einlegen: ' + z.name, h('div', { class: 'stack' }, h('label', {}, 'Begründung'), grund, h('label', {}, 'Dein Name'), name, fm,
+      h('p', {}, h('button', { class: 'btn', onclick: async () => { try { await api('/api/kunde/uav-aenderungen/' + z.id + '/widerspruch', { method: 'POST', body: { grund: grund.value, name: name.value } }); location.reload(); } catch (x) { melde(fm, x.message); } } }, 'Widerspruch absenden')))); };
+  const aendKarte = aend.length ? h('div', { class: 'card' }, h('h2', {}, 'Änderungen bei Unterauftragsverarbeitern'),
+    h('p', { class: 'small muted' }, 'Wenn wir einen Dienstleister hinzufügen oder wechseln, kündigen wir das mindestens vier Wochen vorher an. Du kannst bis zum genannten Datum aus wichtigem datenschutzrechtlichem Grund widersprechen.'),
+    tabelle([['Angekündigt', z => datum(z.erstellt_am)], ['Anbieter', z => z.name + ' – ' + z.leistung], ['Geplant ab', z => datum(z.wirksam_ab)],
+      ['', z => z.widerspruch_am ? h('span', { class: 'pill warn' }, 'Widerspruch eingelegt') : z.widerspruch_moeglich ? h('button', { class: 'btn sec small', onclick: () => widerspruch(z) }, 'Widerspruch einlegen') : h('span', { class: 'muted small' }, 'Frist abgelaufen')]], aend)) : '';
+  return h('div', { class: 'stack' }, offen.map(bestaetigen), aendKarte, h('div', { class: 'card' }, h('h2', {}, 'Vertrag zur Auftragsverarbeitung (AVV)'),
     h('p', { class: 'small muted' }, 'Hier liegt der bestätigte oder unterschriebene Vertrag, der regelt, wie Markentrix personenbezogene Daten in deinem Auftrag verarbeitet (Art. 28 DSGVO).'),
     tabelle([['Bestätigt / unterschrieben am', z => datum(z.unterschrieben_am)], ['Datei', z => z.datei_name || 'AVV'], ['', z => h('a', { class: 'btn sec small', href: '/api/kunde/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Ansehen / Herunterladen')]], d, offen.length ? 'Noch nicht bestätigt.' : 'Noch kein Vertrag abgelegt.')));
 };

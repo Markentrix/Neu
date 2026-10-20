@@ -62,7 +62,7 @@ def liste(kid: str, user: dict = Depends(require_admin)):
             if not cur.fetchone():
                 raise _404()
             cur.execute(f"SELECT {LISTE} FROM avv WHERE kunden_id=%s ORDER BY erstellt_am DESC", (kid,))
-            return {"liste": cur.fetchall(), "vorhanden": avv_vorhanden(cur, kid)}
+            return {"liste": cur.fetchall(), "vorhanden": avv_vorhanden(cur, kid), "veraltet": (veraltete(cur, kid) or [None])[0]}
     except errors.InvalidTextRepresentation:
         raise _404()
 
@@ -98,6 +98,23 @@ def vorschlag(kid: str, user: dict = Depends(require_admin)):
         raise _404()
     a = avv.anlage_bereinigen({"weisung_name": k["ansprechpartner"] or "", "weisung_email": k["email"] or ""})
     return {"anlage": a, "module": avv.MODUL_KEYS}
+
+
+@router.post("/avv-vorschau/{kid}")
+def vorschau(kid: str, data: AnlageIn, user: dict = Depends(require_admin)):
+    """PDF-Vorschau mit den Angaben aus dem Dialog, noch ohne Speichern."""
+    a = avv.anlage_bereinigen(data.model_dump())
+    try:
+        with tx("admin") as cur:
+            cur.execute(f"SELECT {KUNDENFELDER} FROM kunden WHERE id=%s", (kid,))
+            k = cur.fetchone()
+            if not k:
+                raise _404()
+            f = rechtstexte.firma(cur)
+            unter = avv.unterauftragnehmer(einstellungen.lesen(cur, "avv").get("unterauftragnehmer"), a)
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    return _antwort(avv.avv_pdf(k, f, unter, None, a), "application/pdf", "AVV-Vorschau.pdf")
 
 
 @router.get("/avv/{aid}/pruefen")
@@ -267,6 +284,25 @@ def loeschen(aid: str, user: dict = Depends(require_admin)):
 def fehlt(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         return fehlende(cur)
+
+
+def veraltete(cur, kid=None) -> list:
+    """Kunden mit unterschriebenem AVV, aber ohne die aktuelle Fassung (Version 2): sollen neu bestätigen."""
+    cur.execute("""SELECT k.id, k.kundennummer, k.firma,
+                          (SELECT a.id FROM avv a WHERE a.kunden_id=k.id AND a.version=%s AND a.datei IS NULL ORDER BY a.erstellt_am DESC LIMIT 1) AS entwurf_id,
+                          (SELECT a.portal_freigabe_am FROM avv a WHERE a.kunden_id=k.id AND a.version=%s AND a.datei IS NULL ORDER BY a.erstellt_am DESC LIMIT 1) AS freigegeben_am
+                   FROM kunden k
+                   WHERE k.status IN ('onboarding','aktiv','pausiert') AND (%s::uuid IS NULL OR k.id=%s::uuid)
+                     AND EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL)
+                     AND NOT EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.version=%s AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL)
+                   ORDER BY k.erstellt_am""", (avv.VERSION, avv.VERSION, kid, kid, avv.VERSION))
+    return cur.fetchall()
+
+
+@router.get("/avv-veraltet")
+def veraltet_liste(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        return veraltete(cur)
 
 
 def fehlende(cur) -> list:

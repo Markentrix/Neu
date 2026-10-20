@@ -23,6 +23,7 @@ from .routes_onboarding import router as onboarding_router
 from .routes_provision import router as provision_router, vertrieb_router as provision_vertrieb_router
 from .routes_team import router as team_router, admin_router as team_admin_router
 from .routes_avv import router as avv_router, kunde_router as avv_kunde_router
+from .routes_uav import router as uav_router, kunde_router as uav_kunde_router
 from .routes_offboarding import router as offboarding_router
 from .routes_zusammenarbeit import router as zus_router, kunde_router as zus_kunde_router
 from .routes_websitecheck import router as wcheck_router
@@ -161,7 +162,9 @@ app.include_router(ang_router)
 app.include_router(ang_kunde_router)
 app.include_router(aufgaben_kunde_router)
 app.include_router(avv_router)
+app.include_router(uav_router)
 app.include_router(avv_kunde_router)
+app.include_router(uav_kunde_router)
 app.include_router(team_router)
 app.include_router(team_admin_router)
 app.include_router(provision_router)

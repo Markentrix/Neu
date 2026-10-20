@@ -209,7 +209,7 @@ def k_modul(data: ModulAnfrageIn, bg: BackgroundTasks, user: dict = Depends(requ
 # ================================================================= Heute zu tun (Admin-Übersicht)
 @router.get("/heute")
 def heute(user: dict = Depends(require_admin)):
-    from .routes_avv import fehlende
+    from .routes_avv import fehlende, veraltete
     with tx("admin") as cur:
         cur.execute("""SELECT t.id, t.nummer, t.betreff, k.firma, k.id AS kunden_id FROM tickets t JOIN kunden k ON k.id = t.kunden_id
                        WHERE t.status <> 'erledigt' AND t.team_ungelesen ORDER BY t.geaendert_am LIMIT 6""")
@@ -235,6 +235,7 @@ def heute(user: dict = Depends(require_admin)):
                        WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL ORDER BY b.faellig_am LIMIT 6""")
         rechnungen = cur.fetchall()
         avv_fehlt = [{"id": r["id"], "firma": r["firma"]} for r in fehlende(cur)][:6]
+        avv_veraltet = [{"id": r["id"], "firma": r["firma"]} for r in veraltete(cur)][:6]
         # Angebote im Blick: offene (gesendet, evtl. angesehen) und kürzlich beantwortete, für Leads und Kunden
         cur.execute("""SELECT b.id, b.nummer, b.status, b.brutto_cent, b.lead_id, b.kunden_id, b.datum, b.faellig_am, b.versendet_am, b.angesehen_am, b.angenommen_am, b.abgelehnt_am,
                               coalesce(k.firma, l.firma) AS firma, (l.kunden_id IS NOT NULL) AS lead_ist_kunde
@@ -245,4 +246,4 @@ def heute(user: dict = Depends(require_admin)):
         angebote = cur.fetchall()
     gesamt = len(nachrichten) + len(aufgaben) + len(wiedervorlagen) + leads_n + len(freigaben) + len(onboarding) + len(rechnungen) + len(avv_fehlt)
     return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "wiedervorlagen": wiedervorlagen, "leads_gesamt": leads_n, "freigaben": freigaben,
-            "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "angebote": angebote, "gesamt": gesamt}
+            "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "avv_veraltet": avv_veraltet, "angebote": angebote, "gesamt": gesamt}

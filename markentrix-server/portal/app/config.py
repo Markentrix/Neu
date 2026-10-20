@@ -3,6 +3,7 @@ from pathlib import Path
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 BASE_URL = os.environ.get("PORTAL_BASE_URL", "http://localhost:8000").rstrip("/")
+ADMIN_2FA_PFLICHT = os.environ.get("PORTAL_ADMIN_2FA", "1") != "0"   # laut AVV Anlage 2: Zwei-Faktor-Anmeldung für alle Admin-Konten verpflichtend
 COOKIE_SECURE = os.environ.get("PORTAL_COOKIE_SECURE", "1") != "0"
 UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR", "/data/uploads"))
 SITES_ROOT = Path(os.environ.get("SITES_ROOT", "/srv/sites"))

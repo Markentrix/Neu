@@ -20,3 +20,13 @@ Website-Ordner liegen 14 Tage im Papierkorb. Datenbank-Inhalte nur aus einer Sic
 
 ## 5. Passwort vergessen (Admin)
 `mkctl admin-reset info@markentrix.de` zeigt ein neues Einmalpasswort.
+
+## 6. Probelauf der Wiederherstellung (einmal im Jahr, in Ruhe)
+Der **automatische Test** läuft jede Woche (Sonntag 04:30 Uhr, `mkctl restore-test`): Er spielt die neueste Datenbanksicherung in einen Wegwerf-Container ein und vergleicht Tabellen und Kundenzahl. Fehlschläge und ein ausbleibender Test lösen einen Alarm aus (Mail, optional Telegram). Das deckt den AVV-Satz „Wiederherstellungstest mindestens vierteljährlich“ ab, auch ohne dein Zutun.
+
+Einmal im Jahr lohnt sich zusätzlich der **Probelauf auf einem zweiten Server**, damit du den Ernstfall (Punkt 3) einmal geübt hast:
+1. Im Hetzner-Konto einen kleinen Test-Server anlegen (ein paar Cent pro Stunde), ohne die echte Domain.
+2. Dort Repo holen und `bash install.sh` ausführen.
+3. Eine Sicherung vom Storage Box oder aus dem Hetzner-Backup einspielen (Punkt 3), Portal öffnen, anmelden, ein, zwei Kunden und einen Beleg ansehen.
+4. Testserver löschen. Notiere dir das Datum und wie lange es gedauert hat.
+Wichtig dabei: Das Passwort der externen Sicherung (`/opt/markentrix/offsite/passphrase`) muss im Passwortmanager liegen. Ohne dieses Passwort sind verschlüsselte Sicherungen nicht lesbar.

@@ -7,7 +7,8 @@ Die Fristen stehen in der Datenbank (`loeschregeln`, im Portal unter „Datensch
 | Leads (ohne Kundenbezug) | 12 Monate nach letzter Aktivität (`loeschen_nach`); tote/verlorene Leads nach 365 Tagen | automatisch; Leads im Status Termin/Angebot/Gewonnen bleiben |
 | Lead-Finder-Rohdaten ohne Lead | 180 Tage | automatisch |
 | Akquise-Antworten | 365 Tage | automatisch |
-| Chatverlauf im Kundenbereich | 730 Tage | automatisch |
+| Chatverlauf im Kundenbereich | 180 Tage (6 Monate, laut AVV) | automatisch |
+| Audit-Log (Protokoll wesentlicher Aktionen) | 12 Monate (laut AVV) | automatisch |
 | Anrufprotokoll (Rufnummer, Name, Zusammenfassung) | 180 Tage | automatisch (Angaben werden entfernt, der Zähler bleibt) |
 | Glocke (Benachrichtigungen) | 60 Tage | automatisch |
 | Abgelaufene Sitzungen | beim nächsten Login | automatisch |

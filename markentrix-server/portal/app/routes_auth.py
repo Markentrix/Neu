@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from . import config, mailer, zweifaktor
 from .db import tx
-from .security import (COOKIE, EMAIL_RE, audit, check_password_rules, client_ip, current_user, hash_password,
+from .security import (COOKIE, EMAIL_RE, _zwei_faktor_fehlt, audit, check_password_rules, client_ip, current_user, hash_password,
                        new_token, rate_limit, token_hash, verify_password)
 
 router = APIRouter(prefix="/api")
@@ -85,7 +85,7 @@ def logout(request: Request, response: Response):
 
 @router.get("/me")
 def me(user: dict = Depends(current_user)):
-    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"], "zwei_faktor": user["totp_aktiv"], "kunden_rolle": user["kunden_rolle"], "admin_rechte": user.get("admin_rechte")}
+    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"], "zwei_faktor": user["totp_aktiv"], "zwei_faktor_pflicht": _zwei_faktor_fehlt(user), "kunden_rolle": user["kunden_rolle"], "admin_rechte": user.get("admin_rechte")}
 
 
 @router.get("/einladung/{token}")

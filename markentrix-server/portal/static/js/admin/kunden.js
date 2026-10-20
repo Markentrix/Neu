@@ -162,13 +162,20 @@ async function avvDialog(kid, aid) {
     [dom, fDom] = feldEin('domain', 'Domain(s), nur bei „Domainverwaltung“'), [son, fSon] = feldEin('sonstiges', 'Beschreibung, nur bei „Sonstiges“');
   const zeilen = AVV_MODULE.map(([k, text, e]) => { const cb = h('input', { type: 'checkbox', checked: a.module.includes(k) || k === 'portal', disabled: k === 'portal', style: 'width:auto' }); boxen[k] = cb;
     return h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-left:' + Number(e) * 24 + 'px' }, cb, text); });
+  const bodyBauen = () => ({ module: Object.keys(boxen).filter(k => boxen[k].checked), leistung: leist.value, hauptvertrag_datum: dat.value, weisung_name: wn.value, weisung_email: we.value, domain: dom.value, sonstiges: son.value });
+  const vorschau = async () => {
+    try {
+      const r = await fetch('/api/admin/avv-vorschau/' + kid, { method: 'POST', headers: { 'X-MK': '1', 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(bodyBauen()) });
+      if (!r.ok) { const d = await r.json().catch(() => null); throw new Error(d && typeof d.detail === 'string' ? d.detail : 'Die Vorschau ist nicht möglich. Bitte die Eingaben prüfen.'); }
+      window.open(URL.createObjectURL(await r.blob()), '_blank');
+    } catch (x) { fehler(m, x); } };
   const speichern = async () => {
-    const body = { module: Object.keys(boxen).filter(k => boxen[k].checked), leistung: leist.value, hauptvertrag_datum: dat.value, weisung_name: wn.value, weisung_email: we.value, domain: dom.value, sonstiges: son.value };
+    const body = bodyBauen();
     try { if (aid) await api('/api/admin/avv/' + aid + '/anlage', { method: 'PUT', body }); else await api('/api/admin/kunden/' + kid + '/avv', { method: 'POST', body }); location.reload(); } catch (x) { fehler(m, x); } };
   dialog(aid ? 'AVV-Angaben prüfen' : 'Neuen AVV erstellen', h('div', { class: 'stack' },
     info.offen.length ? h('div', { class: 'msg warn' }, h('b', {}, 'Vor dem Versand fehlt noch:'), h('ul', {}, info.offen.map(o => h('li', {}, o)))) : '',
     h('p', { class: 'small muted' }, 'Kreuze an, welche Module der Kunde gebucht hat. Daraus entstehen Anlage 1 und die Liste der Unterauftragsverarbeiter in Anlage 3. Der Vertragstext selbst ist feststehend (Version 2).'),
-    ...zeilen, fLeist, fDat, fWn, fWe, fDom, fSon, m, h('div', { class: 'row' }, knopf(aid ? 'Speichern' : 'Entwurf erstellen', speichern, 'btn'))), true);
+    ...zeilen, fLeist, fDat, fWn, fWe, fDom, fSon, m, h('div', { class: 'row' }, knopf(aid ? 'Speichern' : 'Entwurf erstellen', speichern, 'btn'), knopf('Vorschau (PDF)', vorschau, 'sec'))), true);
 }
 
 export async function avvKarte(kid) {
@@ -184,6 +191,7 @@ export async function avvKarte(kid) {
     knopf('Per Mail senden', async () => { if (confirm('AVV jetzt per E-Mail an den Kunden senden?')) { try { await api('/api/admin/avv/' + z.id + '/senden', { method: 'POST' }); melde(m, 'Gesendet.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } } }, 'sec small'),
     z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/admin/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Unterschrieben ansehen') : knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/avv/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { fehler(m, x); } } }, 'bad small'));
   return h('div', { class: 'card' }, h('h2', {}, 'Auftragsverarbeitungsvertrag (AVV) ', d.vorhanden ? h('span', { class: 'pill ok' }, 'liegt vor') : h('span', { class: 'pill warn' }, 'fehlt')),
+    d.veraltet ? h('div', { class: 'msg warn' }, 'Dieser Kunde hat noch die alte Fassung des AVV (Version 1). ', d.veraltet.entwurf_id ? 'Ein Entwurf der neuen Fassung (Version 2) liegt bereit, siehe unten.' : [knopf('Neue Fassung (Version 2) vorbereiten', () => avvDialog(kid).catch(x => fehler(m, x)), 'btn small')]) : '',
     h('p', { class: 'small muted' }, 'Ablauf A (empfohlen): Vertrag erstellen, im Portal zur Bestätigung freigeben, der Kunde bestätigt per Klick. Ablauf B: per Mail senden, unterschrieben zurückbekommen und hier ablegen. Der Kunde sieht die abgelegte Fassung in seinem Portal.'), m,
     tabelle([['Erstellt', z => datum(z.erstellt_am)], ['Gesendet', z => z.gesendet_am ? datum(z.gesendet_am) : '–'], ['Unterschrieben am', z => z.unterschrieben_am ? datum(z.unterschrieben_am) : '–'],
       ['Datei', z => z.hat_datei ? z.datei_name + (z.online_bestaetigt_am ? ' (online bestätigt von ' + z.online_bestaetigt_name + ', ' + datum(z.online_bestaetigt_am) + ')' : '') : (z.portal_freigabe_am ? 'im Portal freigegeben, wartet auf Bestätigung' : 'noch nicht abgelegt')], ['', aktion]], d.liste, 'Noch kein AVV erstellt.'),
@@ -225,7 +233,7 @@ export function offboardingKarte(kid, k) {
   const best = h('input', { placeholder: 'Kundennummer ' + k.kundennummer + ' zur Bestätigung', style: 'max-width:300px' });
   const haken = h('input', { type: 'checkbox', style: 'width:auto' });
   return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende: Datenexport und Löschung'),
-    h('p', { class: 'small muted' }, 'Zum Vertragsende bekommt der Kunde seine Daten (Pflicht laut AVV) und danach werden seine Inhalte gelöscht. Stammdaten, Rechnungen, Verträge, Buchungen und der AVV bleiben wegen Aufbewahrungspflichten erhalten, die Kontaktdaten der Ansprechperson werden entfernt. Sicherungen enthalten die Daten noch bis zu 14 Tage.'), m,
+    h('p', { class: 'small muted' }, 'Zum Vertragsende bekommt der Kunde seine Daten (Pflicht laut AVV) und danach werden seine Inhalte gelöscht. Stammdaten, Rechnungen, Verträge, Buchungen und der AVV bleiben wegen Aufbewahrungspflichten erhalten, die Kontaktdaten der Ansprechperson werden entfernt. Sicherungen enthalten die Daten noch bis zu 30 Tage.'), m,
     h('p', {}, h('a', { class: 'btn', href: '/api/admin/kunden/' + kid + '/export.zip' }, 'Datenexport als ZIP herunterladen')),
     beendet ? h('div', { class: 'stack', style: 'margin-top:12px' },
       h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, haken, 'Der Datenexport wurde an den Kunden übergeben'), best,

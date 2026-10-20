@@ -1,4 +1,4 @@
-import { h, api, nutzung } from './common.js';
+import { h, api, nutzung, zweiFaktorKarte } from './common.js';
 import { belegEditor } from './admin/belege.js';
 import {V, gerüst, zaehlerAdmin, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
 import { kundeDetail } from './admin/kunden.js';
@@ -36,6 +36,12 @@ setzeZeige(seiteZeigen);
   try {
     const me = await api('/api/me');
     if (me.rolle !== 'admin') { location.href = '/app'; return; }
+    if (me.zwei_faktor_pflicht) {   // Pflicht laut AVV: ohne Zwei-Faktor-Anmeldung kein Zugriff auf das Admin-Portal
+      root.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Zwei-Faktor-Anmeldung einrichten'),
+        h('p', {}, 'Für Administrator-Zugänge ist die Zwei-Faktor-Anmeldung Pflicht. Bitte jetzt einrichten, danach geht es direkt weiter.'), zweiFaktorKarte(),
+        h('p', {}, h('button', { class: 'btn', onclick: () => location.reload() }, 'Weiter zum Portal'))));
+      return;
+    }
     setzeIch(me);
     setzePakete((await api('/api/admin/katalog')).produkte);
     try { const z = (await api('/api/admin/uebersicht')).zusammenarbeit; zaehlerAdmin.postfach = z.tickets_ungelesen; zaehlerAdmin.freigaben = z.freigaben_wartend; zaehlerAdmin.aufgaben = z.aufgaben_ueberfaellig; } catch (e) { /* Zähler sind optional */ }

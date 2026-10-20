@@ -240,7 +240,7 @@ printf "%s\n" "*/5 * * * * root flock -n /run/mk-watchdog.lock /opt/markentrix/b
 printf "%s\n" "30 4 * * 0 root /opt/markentrix/bin/restore-test.sh >> /var/log/markentrix-restore-test.log 2>&1" > /etc/cron.d/markentrix-restore-test
 chmod 644 /etc/cron.d/markentrix-watchdog /etc/cron.d/markentrix-restore-test
 "$BASE/bin/backup.sh"
-ok "Sicherung funktioniert (täglich um 03:15 Uhr, 14 Tage Aufbewahrung)"
+ok "Sicherung funktioniert (täglich um 03:15 Uhr, 30 Tage Aufbewahrung)"
 
 # ---------------------------------------------------------------- 8. Zusammenfassung
 say "8/8 Fertig"

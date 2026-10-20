@@ -127,6 +127,7 @@ export function prioListe(heute, sys, fw) {
   (fw && fw.kunden ? fw.kunden : []).forEach(z => add(z.stufe === 'hoch' ? 85 : 50, z.stufe === 'hoch' ? 'bad' : 'warn', 'Kündigungsrisiko', z.firma, (z.gruende || [])[0] || 'Auffälliger Verlauf', '#kunde/' + z.id, 'Öffnen'));
   heute.nachrichten.forEach(z => add(80, 'warn', 'Nachricht', z.firma, z.betreff, '#postfach/' + z.id, 'Antworten'));
   heute.avv_fehlt.forEach(z => add(75, 'warn', 'Vertrag', z.firma, 'AVV fehlt', '#kunde/' + z.id, 'Öffnen'));
+  (heute.avv_veraltet || []).forEach(z => add(30, 'warn', 'Vertrag', z.firma, 'AVV: neue Fassung (Version 2) fehlt noch', '#kunde/' + z.id, 'Öffnen'));
   heute.aufgaben.forEach(z => add(70, 'warn', 'Aufgabe', z.titel, 'fällig ' + datum(z.faellig_am), '#aufgaben', 'Öffnen'));
   heute.onboarding.forEach(z => add(65, 'warn', 'Onboarding', z.firma, 'hängt seit über 5 Tagen', '#kunde/' + z.id, 'Öffnen'));
   heute.freigaben.forEach(z => add(60, '', 'Freigabe', z.firma, z.titel + ' wartet seit über 3 Tagen', '#kunde/' + z.kunden_id, 'Öffnen'));
