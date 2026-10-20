@@ -1,0 +1,24 @@
+{
+  "request": {
+    "status": "completed",
+    "request_id": "8bfe6b47-7ae6-4244-91a2-fd53395a8bc2",
+    "status_url": "https://api.higgsfield.ai/requests/8bfe6b47-7ae6-4244-91a2-fd53395a8bc2/status",
+    "cancel_url": "https://api.higgsfield.ai/requests/8bfe6b47-7ae6-4244-91a2-fd53395a8bc2/cancel",
+    "video": {
+      "url": "https://d3u0tzju9qaucj.cloudfront.net/624ba884-e3d8-489b-92bd-45550f47cbb3/1abc2e5e-dfec-400b-8481-570234a93965.mp4"
+    }
+  },
+  "args": {
+    "prompt": "Die Frau aus dem Referenzbild spricht ruhig, freundlich und direkt in die Kamera, exakt lippensynchron zur Referenz-Tonspur. Sie sagt wörtlich auf Deutsch: „Schöne Website, aber kaum Anfragen? Dann schauen wir nach, was sie bremst.“ Natürliche, leichte Kopfbewegungen, kurzes Lächeln am Ende, Hände außerhalb des Bildes. Statische Smartphone-Kamera, helles Büro mit Tageslicht, gleiche Person, gleiche Kleidung, kein Text, keine Logos, keine Untertitel.",
+    "image_urls": [
+      "https://d3snorpfx4xhv8.cloudfront.net/624ba884-e3d8-489b-92bd-45550f47cbb3/0080db2b-048c-4880-a4eb-3ec40a311dba.png"
+    ],
+    "audio_urls": [
+      "https://d3snorpfx4xhv8.cloudfront.net/624ba884-e3d8-489b-92bd-45550f47cbb3/9b2935b9-2b96-42ab-8cf2-6aa53fd12182.wav"
+    ],
+    "duration": 5,
+    "resolution": "1080p",
+    "aspect_ratio": "9:16",
+    "generate_audio": true
+  }
+}

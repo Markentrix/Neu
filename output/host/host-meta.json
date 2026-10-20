@@ -1,0 +1,27 @@
+{
+  "request_id": "9788b332-112c-4161-ab33-ed563793c7be",
+  "args": {
+    "prompt": "Vertical smartphone photo, natural daylight UGC style. A friendly, professional German woman, about 35 years old, shoulder-length dark blonde hair, natural light makeup, wearing a plain navy blazer over a plain white t-shirt, no jewelry logos, no lanyard, no badge. She sits at a clean bright desk in a modern minimal office with large windows, soft white walls, a small green plant, blurred calm background, no screens, no signs, no text, no logos. She looks directly into the camera with a calm, slight confident smile, mouth closed, chest-up framing, centered, head in the upper third of the frame. Realistic skin texture, correct anatomy, editorial yet authentic.",
+    "aspect_ratio": "9:16",
+    "resolution": "1080p",
+    "batch_size": 4
+  },
+  "images": [
+    {
+      "file": "host_kandidat_1.png",
+      "url": "https://d3u0tzju9qaucj.cloudfront.net/624ba884-e3d8-489b-92bd-45550f47cbb3/3db7d8b2-5fc1-4458-9f3e-ae84bc2d4d5d.png"
+    },
+    {
+      "file": "host_kandidat_2.png",
+      "url": "https://d3u0tzju9qaucj.cloudfront.net/624ba884-e3d8-489b-92bd-45550f47cbb3/930ff23f-7c52-495e-95d2-9066f5455793.png"
+    },
+    {
+      "file": "host_kandidat_3.png",
+      "url": "https://d3u0tzju9qaucj.cloudfront.net/624ba884-e3d8-489b-92bd-45550f47cbb3/985f8604-f2ca-43d4-95cb-e40ab26abe90.png"
+    },
+    {
+      "file": "host_kandidat_4.png",
+      "url": "https://d3u0tzju9qaucj.cloudfront.net/624ba884-e3d8-489b-92bd-45550f47cbb3/481dfb33-1699-4f29-8873-2a7c518d4485.png"
+    }
+  ]
+}

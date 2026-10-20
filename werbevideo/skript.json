@@ -1,0 +1,8 @@
+[
+  {"id": "s0_hook", "slot": 5.0, "text": "Schöne Website, aber kaum Anfragen? Dann schauen wir nach, was sie bremst.", "tts": "Schöne Website, aber kaum Anfragen? Dann schauen wir nach, was sie bremst."},
+  {"id": "s1", "slot": 5.0, "text": "Der kostenlose Website-Check zeigt, wo es hakt: Google, Technik und mobile Ansicht.", "tts": "Der kostenlose Website-Check zeigt, wo es hakt: Google, Technik und mobile Ansicht."},
+  {"id": "s2", "slot": 5.0, "text": "Adresse eingeben, Check starten, ohne Anmeldung. Die Bewertung sehen Sie direkt.", "tts": "Adresse eingeben, Check starten, ohne Anmeldung. Die Bewertung sehen Sie direkt."},
+  {"id": "s3", "slot": 5.0, "text": "Sie sehen, wo Ihre Seite steht und wo noch Luft nach oben ist.", "tts": "Sie sehen, wo Ihre Seite steht – und wo noch Luft nach oben ist."},
+  {"id": "s4", "slot": 5.0, "text": "Konkrete Befunde statt Raten. Den vollständigen Bericht bekommen Sie per E-Mail.", "tts": "Konkrete Befunde statt Raten. Den vollständigen Bericht bekommen Sie per E-Mail."},
+  {"id": "s5", "slot": 5.0, "text": "Wie schneidet Ihre Website ab? Jetzt kostenlos prüfen auf markentrix.de.", "tts": "Wie schneidet Ihre Website ab? Jetzt kostenlos prüfen, auf markentrix Punkt de."}
+]

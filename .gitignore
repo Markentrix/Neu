@@ -1,0 +1,4 @@
+output/work/
+output/vo/*.wav
+output/host/host_kandidat_*.png
+__pycache__/
