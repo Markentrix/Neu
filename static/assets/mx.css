@@ -1284,9 +1284,19 @@ main:focus{outline:none}
 .vp-head h2{margin:4px 0 8px;font-size:clamp(1.4rem,2.6vw,2rem)}
 .vp-head .muted{margin:0;max-width:62ch}
 .vp-head .device-toggle{margin-bottom:0}
+.vp-work{display:grid;gap:20px;align-items:start}
+.vp-edit{display:grid;gap:12px;align-content:start}
+.vp-edit .field{margin:0}
+.vp-edit textarea{width:100%;min-height:0}
+.vp-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vp-style{display:grid;gap:6px}
+.vp-style-t{font-size:.86rem;font-weight:600;color:var(--navy)}
+.vp-style .mini-tabs{margin:0;justify-content:flex-start}
+@media (max-width:999px){.vp-work .mini{order:-1}}
 .vp-cta{display:grid;gap:18px;align-items:center;margin-top:28px}
 .vp-cta h3{margin:0 0 6px}
 .vp-cta p{margin:0}
 @media (min-width:900px){.vp-cta{grid-template-columns:minmax(0,1fr) auto}}
+@media (min-width:1000px){.vp-work{grid-template-columns:340px minmax(0,1fr)}}
 .vp-result{scroll-margin-top:80px}
 .chk-strip--vp{margin-top:16px;background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(40,199,247,.06))}

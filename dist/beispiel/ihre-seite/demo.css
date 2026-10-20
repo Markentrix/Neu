@@ -1,0 +1,48 @@
+/* Vorschau-Entwurf (Markentrix): drei Stile über data-t am Wurzelelement. Kein Bestandteil des Markentrix-Designsystems. */
+:root{--ink:#14202e;--ink-2:#3b4a5c;--muted:#66758a;--line:#e3e8ee;--soft:#f4f6f9;--bg:#fff;--ac:#f2a516;--ac-d:#8a5300;--on-ac:#14202e;--dark:#14202e;--r:12px;--f:"Inter",system-ui,sans-serif;--fh:"Space Grotesk","Inter",system-ui,sans-serif;--art:radial-gradient(80% 80% at 30% 20%,#fff3d6 0,#ffd98a 50%,#f2a516 100%)}
+:root[data-t=praxis]{--ink:#0f2a2b;--ink-2:#37514f;--muted:#5c7371;--line:#dbe7e4;--soft:#f1f7f6;--ac:#0b7f73;--ac-d:#07635a;--on-ac:#fff;--dark:#0f2a2b;--r:16px;--art:linear-gradient(160deg,#d9f2ee,#9fded5)}
+:root[data-t=gastro]{--ink:#2a1b14;--ink-2:#5a463b;--muted:#75604f;--line:#eadfce;--soft:#f3e6d3;--bg:#fbf6ee;--ac:#b8442a;--ac-d:#933420;--on-ac:#fff;--dark:#2a1b14;--r:10px;--fh:"Iowan Old Style","Palatino Linotype",Georgia,serif;--art:linear-gradient(160deg,#f3e6d3,#e7cfa9)}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;font-family:var(--f);color:var(--ink-2);background:var(--bg);line-height:1.6;font-size:16px}
+h1,h2,h3{font-family:var(--fh);color:var(--ink);margin:0 0 .4em;line-height:1.1;letter-spacing:-.015em}
+h1{font-size:clamp(2rem,1.4rem + 3vw,3.3rem)}h2{font-size:clamp(1.6rem,1.2rem + 1.6vw,2.3rem)}h3{font-size:1.15rem}
+p{margin:0 0 1em}a{color:var(--ac-d)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.ribbon{background:var(--ink);color:#fff;font-size:.78rem;text-align:center;padding:7px 12px}
+.top{display:flex;align-items:center;gap:20px;padding:12px 20px;max-width:1120px;margin:0 auto}
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:var(--fh);font-weight:700;color:var(--ink);text-decoration:none;font-size:1.08rem}
+.mark{width:36px;height:36px;border-radius:10px;background:var(--ac);color:var(--on-ac);display:grid;place-items:center;font-family:var(--f);font-size:.8rem;font-weight:800;flex:none}
+:root[data-t=gastro] .mark,:root[data-t=praxis] .mark{border-radius:50%}
+.nav{display:flex;gap:18px;margin-left:auto}.nav a{color:var(--ink-2);text-decoration:none;font-weight:500;font-size:.95rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 20px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid transparent;font-family:var(--f);font-size:.95rem;cursor:pointer}
+.btn-primary{background:var(--ac);color:var(--on-ac)}.btn-primary:hover{filter:brightness(1.06)}
+.btn-ghost,.btn-call{border-color:var(--line);color:var(--ink);background:#fff}
+.hero{padding:clamp(34px,6vw,80px) 0;background:linear-gradient(180deg,var(--bg) 0,var(--soft) 100%)}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.eyebrow{display:block;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ac-d);margin-bottom:12px}
+.lead{font-size:1.1rem;max-width:54ch}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.proof{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.9rem;color:var(--muted)}
+.proof li::before{content:"✓ ";color:var(--ac-d);font-weight:700}
+.hero-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 40px rgba(20,32,46,.10)}
+.hero-art{aspect-ratio:4/3;border-radius:12px;background:var(--art);display:grid;place-items:center}
+.badge{width:clamp(84px,14vw,120px);aspect-ratio:1;border-radius:28%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--fh);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;letter-spacing:.02em}
+:root[data-t=praxis] .badge,:root[data-t=gastro] .badge{border-radius:50%}
+.hero-note{padding:14px 4px 2px}.hero-note b{display:block;color:var(--ink);margin-bottom:4px;font-family:var(--fh);font-size:1.1rem}.hero-note p{margin:0;font-size:.92rem;color:var(--muted)}
+.sec{padding:clamp(40px,6vw,76px) 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:22px}
+.card{display:grid;gap:8px;align-content:start;padding:20px;background:#fff;border:1px solid var(--line);border-radius:var(--r);text-decoration:none;color:var(--ink-2);transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(20,32,46,.10)}
+.card h3{margin:0}.card .num{font-family:var(--fh);font-weight:700;color:var(--ac-d);font-size:.9rem;letter-spacing:.08em}
+.card .go{font-size:.9rem;font-weight:600;color:var(--ac-d)}.card .go::after{content:" →"}
+.sec-dark{background:var(--dark);color:rgba(255,255,255,.82)}
+.sec-dark h2{color:#fff}.sec-dark .eyebrow{color:#fff;opacity:.8}.sec-dark a{color:#fff}
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.facts{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.form{background:#fff;border-radius:var(--r);padding:20px;display:grid;gap:12px;color:var(--ink-2)}
+.form label{display:grid;gap:6px;font-weight:600;font-size:.9rem;color:var(--ink)}
+.form input,.form select,.form textarea{font:inherit;font-weight:400;padding:11px 12px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:#fff;min-width:0}
+.form-msg{margin:0;font-size:.85rem;color:var(--muted);min-height:1.2em}
+.foot{padding:22px 0 30px;font-size:.88rem;color:var(--muted);background:var(--bg)}.foot p{margin:0 0 6px}.foot b{color:var(--ink)}
+[hidden]{display:none!important}
+@media (max-width:820px){.hero-grid,.contact{grid-template-columns:1fr}.nav{display:none}.top{justify-content:space-between}}
