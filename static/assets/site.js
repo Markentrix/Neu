@@ -99,7 +99,7 @@
       var v = inp.type === 'checkbox' ? inp.checked : inp.value.trim();
       var bad = !v;
       if (!bad && inp.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim())) { bad = true; setError(inp, 'Bitte geben Sie eine gültige E-Mail-Adresse an.'); }
-      else if (bad) setError(inp, inp.type === 'checkbox' ? 'Bitte bestätigen Sie die Datenschutzhinweise.' : 'Bitte füllen Sie dieses Feld aus.');
+      else if (bad) setError(inp, inp.type === 'checkbox' ? (inp.getAttribute('data-error') || 'Bitte bestätigen Sie die Datenschutzhinweise.') : 'Bitte füllen Sie dieses Feld aus.');
       if (bad && !first) first = inp;
     });
     if (first) first.focus();

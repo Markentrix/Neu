@@ -38,7 +38,7 @@ Erlaubt sind Buchstaben, Ziffern, Leerzeichen, Punkt, Bindestrich und Unterstric
 
 ## Leads aus dem Website-Check
 
-Wer den Bericht anfordert, erscheint wie jede Anfrage in der Mail „Neue Anfrage über markentrix.de“ (Quelle „Website-Check“) und im Protokoll. Die Mail enthält zusätzlich die Gesamtwertung, die sechs Bereichswerte und die Liste der mangelhaften Befunde, damit das Gespräch vorbereitet ist. Das Feld `kontakt_gewuenscht` zeigt, ob die Person ausdrücklich um Kontakt gebeten hat (`ja`) oder nur den Bericht möchte (`nein`). Nur bei `ja` ist ein Anruf oder eine persönliche Nachricht gedeckt; Werbe-E-Mails darüber hinaus nur mit gesonderter Einwilligung.
+Wer den Bericht anfordert, erscheint wie jede Anfrage in der Mail „Neue Anfrage über markentrix.de“ (Quelle „Website-Check“) und im Protokoll. Die Mail enthält zusätzlich die Gesamtwertung, die sechs Bereichswerte und die Liste der mangelhaften Befunde, damit das Gespräch vorbereitet ist. Seit 20.10.2026 ist die Einwilligung in die Kontaktaufnahme Pflicht für den Bericht (Kästchen `kontakt_gewuenscht`, serverseitig erzwungen), das Feld steht also immer auf `ja`; sie ist die dokumentierte Grundlage für Ihren Rückruf oder Ihre E-Mail zum Ergebnis. Die Telefonnummer ist freiwillig. Werbe-E-Mails darüber hinaus (Newsletter) nur mit gesonderter Einwilligung.
 
 Der Kunde erhält einen Bericht mit allen Befunden als E-Mail (HTML und Text, Absender info@markentrix.de, Antworten gehen an Sie). Pro E-Mail-Adresse höchstens drei Berichte in 24 Stunden. Im Protokoll steht `"bericht":true`, wenn der Bericht rausging. In Analytics zählt das Ereignis `generate_lead` mit `location = Website-Check`; eine Weiterleitung auf `/danke` findet hier bewusst nicht statt, weil die Befunde direkt angezeigt werden.
 

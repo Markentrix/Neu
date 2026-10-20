@@ -34,9 +34,10 @@ ld: |
           <div class="field"><label for="g-name">Name</label><input id="g-name" name="name" type="text" autocomplete="name" required></div>
           <div class="field"><label for="g-email">E-Mail</label><input id="g-email" name="email" type="email" autocomplete="email" required></div>
         </div>
+        <div class="field"><label for="g-tel">Telefon <span class="muted">(optional, für einen kurzen Rückruf)</span></label><input id="g-tel" name="tel" type="tel" autocomplete="tel"></div>
         <div class="hp" aria-hidden="true"><label for="g-web">Website (bitte leer lassen)</label><input id="g-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
         <label class="check"><input type="checkbox" name="einwilligung" required><span>Ich möchte den Bericht per E-Mail erhalten und willige in die Verarbeitung meiner Angaben gemäß <a href="/datenschutz#website-check">Datenschutzerklärung</a> ein. Die Einwilligung ist jederzeit widerrufbar. *</span></label>
-        <label class="check"><input type="checkbox" name="kontakt_gewuenscht"><span>Ich möchte zusätzlich, dass Markentrix mich zum Ergebnis persönlich kontaktiert (E-Mail oder Telefon). Freiwillig.</span></label>
+        <label class="check"><input type="checkbox" name="kontakt_gewuenscht" required data-error="Bitte bestätigen Sie, dass wir Sie kontaktieren dürfen."><span>Ich bin damit einverstanden, dass Markentrix mich zum Ergebnis meines Website-Checks per E-Mail oder, falls angegeben, telefonisch kontaktiert. Die Einwilligung ist jederzeit widerrufbar. *</span></label>
         <p class="form-note">Wir senden Ihnen den Bericht einmalig. Weitere Werbe-E-Mails erhalten Sie nur mit Ihrer ausdrücklichen Einwilligung. Angebot nur für Gewerbetreibende.</p>
         <div class="form-msg" role="alert" aria-live="polite"></div>
         <button type="submit" class="btn btn--primary btn--lg">Bericht per E-Mail erhalten</button>
