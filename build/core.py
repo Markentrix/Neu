@@ -323,7 +323,9 @@ def footer(site, prefix="", home=False):
     <ul>
       <li><a href="{prefix}impressum.html">Impressum</a></li>
       <li><a href="{prefix}datenschutz.html">Datenschutz</a></li>
-      {'<li><button class="link-btn" type="button" data-consent-open>Cookie-Einstellungen</button></li>' if (s.get("analytics") or {}).get("ga4") else ""}
+      <li><a href="{prefix}agb.html">AGB</a></li>
+      <li><a href="{prefix}widerruf.html">Vertrag widerrufen</a></li>
+      <li{"" if (s.get("analytics") or {}).get("ga4") else " hidden"} data-consent-li><button class="link-btn" type="button" data-consent-open>Cookie-Einstellungen</button></li>
     </ul>
   </div>
 </footer>
@@ -357,6 +359,10 @@ def consent_row(prefix, fid):
             <input type="checkbox" id="{fid}" name="einwilligung" value="ja" required>
             <label for="{fid}">Ich habe die <a href="{prefix}datenschutz.html">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert und verwendet werden.*</label>
           </div>'''
+
+
+def agb_note(prefix=""):
+    return f'<p class="form-note">Es gelten unsere <a href="{prefix}agb.html">AGB</a>. Informationen zu Ihrem Widerrufsrecht finden Sie in der <a href="{prefix}agb.html#widerruf">Widerrufsbelehrung</a>.</p>'
 
 
 def honeypot(fid):

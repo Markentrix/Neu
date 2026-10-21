@@ -49,16 +49,23 @@
   }
 
   /* ---------------------------------------------------------------- Google Analytics 4: nur nach Einwilligung */
-  var GA = (window.ELB && ELB.ga4) || "", gaOn = false, CKEY = "elb-consent";
+  var GA = (window.ELB && ELB.ga4) || "", gaOn = false, CKEY = "elb-consent", CMAX = 365 * 864e5;  // Einwilligung gilt 12 Monate
   var store = { get: function () { try { return localStorage.getItem(CKEY); } catch (e) { return null; } },
                 set: function (v) { try { localStorage.setItem(CKEY, v); } catch (e) {} } };
+  /* Gespeicherte Wahl: {stat: true|false, t: Zeitpunkt}; ältere Einträge "granted"/"denied" gelten weiter */
+  function consent() {
+    var v = store.get(); if (!v) return null;
+    if (v === "granted" || v === "denied") return { stat: v === "granted", t: Date.now() };
+    try { var o = JSON.parse(v); return o && Date.now() - (o.t || 0) < CMAX ? o : null; } catch (e) { return null; }
+  }
   function loadGa() {
     if (!GA || gaOn || !/^G-[A-Z0-9]{4,}$/.test(GA)) return;
     gaOn = true;
     window.dataLayer = window.dataLayer || [];
     window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("consent", "default", { analytics_storage: "granted", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
     window.gtag("js", new Date());
-    window.gtag("config", GA);
+    window.gtag("config", GA, { allow_google_signals: false, allow_ad_personalization_signals: false });
     var sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(GA);
     document.head.appendChild(sc);
   }
@@ -71,22 +78,39 @@
   }
   function consentBar() {
     if (document.getElementById("consent")) return;
+    var cur = consent() || { stat: false };
+    var link = function (f) { var l = document.querySelector('a[href$="' + f + '"]'); return l ? l.getAttribute("href") : f; };
     var bar = document.createElement("div");
-    bar.id = "consent"; bar.className = "consent"; bar.setAttribute("role", "dialog"); bar.setAttribute("aria-live", "polite"); bar.setAttribute("aria-label", "Einwilligung Statistik");
-    var dl = document.querySelector('a[href$="datenschutz.html"]'), dsHref = dl ? dl.getAttribute("href") : "datenschutz.html";
-    bar.innerHTML = '<p><strong>Dürfen wir messen, was Ihnen gefällt?</strong> Mit Ihrer Einwilligung nutzen wir Google Analytics, um die Website zu verbessern. Dabei werden Cookies gesetzt und Daten an Google übermittelt. <a href="' + dsHref + '">Mehr in der Datenschutzerklärung</a></p>' +
-      '<div class="consent-actions"><button type="button" class="btn btn-line-light" data-c="denied">Ablehnen</button><button type="button" class="btn btn-line-light" data-c="granted">Akzeptieren</button></div>';
+    bar.id = "consent"; bar.className = "consent"; bar.setAttribute("role", "dialog"); bar.setAttribute("aria-modal", "false"); bar.setAttribute("aria-labelledby", "consent-h");
+    bar.innerHTML = '<h2 id="consent-h">Cookies &amp; Datenschutz</h2>' +
+      '<p>Wir verwenden technisch notwendige Speicher, damit die Website funktioniert. Mit Ihrer Einwilligung nutzen wir zusätzlich Google Analytics, um zu verstehen, wie die Website genutzt wird, und sie zu verbessern. Dabei werden Cookies gesetzt und Daten an Google, auch in die USA, übermittelt. Ihre Einwilligung können Sie jederzeit über „Cookie-Einstellungen“ im Fußbereich widerrufen.</p>' +
+      '<div class="consent-opts" hidden>' +
+        '<label class="consent-opt"><input type="checkbox" checked disabled><span><strong>Notwendig</strong> Speichert Ihre Auswahl und sichert Formulare. Immer aktiv.</span></label>' +
+        '<label class="consent-opt"><input type="checkbox" data-stat' + (cur.stat ? " checked" : "") + '><span><strong>Statistik</strong> Google Analytics 4 (Google Ireland Ltd.). Reichweitenmessung ohne Werbezwecke.</span></label>' +
+      '</div>' +
+      '<div class="consent-actions"><button type="button" class="btn btn-line-light" data-c="denied">Nur notwendige</button><button type="button" class="btn btn-line-light" data-c="granted">Alle akzeptieren</button></div>' +
+      '<p class="consent-links"><button type="button" class="link-btn" data-c-more aria-expanded="false">Einstellungen</button><button type="button" class="link-btn" data-c="save" hidden>Auswahl speichern</button>' +
+      '<a href="' + link("datenschutz.html") + '">Datenschutz</a><a href="' + link("impressum.html") + '">Impressum</a></p>';
     document.body.appendChild(bar);
     bar.addEventListener("click", function (e) {
+      var more = e.target.closest("[data-c-more]");
+      if (more) {
+        var o = $(".consent-opts", bar); o.hidden = !o.hidden; more.setAttribute("aria-expanded", String(!o.hidden));
+        $('[data-c="save"]', bar).hidden = o.hidden; return;
+      }
       var b = e.target.closest("[data-c]"); if (!b) return;
-      var v = b.getAttribute("data-c"); store.set(v);
-      if (v === "granted") loadGa(); else { dropGaCookies(); if (gaOn) location.reload(); }
+      var v = b.getAttribute("data-c"), stat = v === "granted" || (v === "save" && $("[data-stat]", bar).checked);
+      store.set(JSON.stringify({ stat: stat, t: Date.now() }));
+      if (stat) loadGa(); else { dropGaCookies(); if (gaOn) location.reload(); }
       bar.remove();
     });
+    var first = $("[data-c=granted]", bar); if (first && !cur.t) first.focus({ preventScroll: true });
   }
   if (GA) {
-    if (store.get() === "granted") loadGa();
-    else if (store.get() !== "denied") consentBar();
+    $$("[data-consent-li]").forEach(function (li) { li.hidden = false; });
+    var cc = consent();
+    if (cc && cc.stat) loadGa();
+    else if (!cc) consentBar();
     document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("[data-consent-open]")) consentBar(); });
   }
   window.elbTrack = track;
@@ -339,9 +363,9 @@
     klasse: "Fahrzeugklasse", fahrzeug: "Fahrzeug", zustand: "Zustand", extras: "Extras", abholung: "Abholung", datum: "Wunschtermin",
     datum2: "Ausweichtermin", zeitfenster: "Zeitfenster", uhrzeit: "Uhrzeit", gutscheincode: "Gutscheincode", kanal: "Antwort per", nachricht: "Nachricht",
     bewertung_ok: null, art: "Gutschein", betrag: "Betrag", wunschbetrag: "Wunschbetrag", fuer: "Für", von: "Von", widmung: "Widmung",
-    zustellung: "Zustellung", firma: "Firma", anzahl: "Fahrzeuge", intervall: "Intervall", leistungen: "Leistungen"
+    zustellung: "Zustellung", firma: "Firma", anzahl: "Fahrzeuge", intervall: "Intervall", leistungen: "Leistungen", vorgang: "Vorgang / Gutscheincode", winterschutz: "Schutz im Winterangebot"
   };
-  var TITLES = { kontakt: "Anfrage", termin: "Terminanfrage", gutschein: "Gutscheinbestellung", firma: "Firmenanfrage" };
+  var TITLES = { kontakt: "Anfrage", termin: "Terminanfrage", gutschein: "Gutscheinbestellung", firma: "Firmenanfrage", widerruf: "Widerruf" };
 
   function collect(form) {
     var data = {};
@@ -360,6 +384,7 @@
     if (k === "klasse") { var c = cls(v); return c ? c.name : v; }
     if (k === "datum" || k === "datum2") return deDate(v);
     if (k === "betrag" || k === "wunschbetrag") return v + " €";
+    if (k === "winterschutz") return v === "keramik" ? "C² CarCeramic statt Wachs (Aufpreis nach Absprache)" : "Wachsversiegelung (inklusive)";
     return Array.isArray(v) ? v.join(", ") : v;
   }
   function asText(data) {
@@ -451,6 +476,7 @@
     var blocked = [], blockedKer = [], closedWeekdays = [0];
 
     if (Q.paket) { var rp = wz.querySelector('input[name="paket"][value="' + Q.paket + '"]'); if (rp) rp.checked = true; }
+    if (Q.schutz === "keramik") { var rw = wz.querySelector('input[name="winterschutz"][value="keramik"]'); if (rw) rw.checked = true; }
     if (Q.klasse) { var rk = wz.querySelector('input[name="klasse"][value="' + Q.klasse + '"]'); if (rk) rk.checked = true; }
     if (Q.quelle) wz.quelle.value = Q.quelle;
     if (Q.gutschein) wz.gutscheincode.value = Q.gutschein;
@@ -462,7 +488,12 @@
       blocked = j.blocked || []; blockedKer = j.blockedKeramik || blocked; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
     });
 
-    function isKer() { var r = wz.querySelector('input[name="paket"]:checked'); return !!r && r.value === "keramik"; }
+    /* Winterangebot: Wachs inklusive oder C² CarCeramic statt Wachs (dann Keramik-Standzeit und Aufpreis nach Absprache) */
+    var winterBox = $(".wz-winter", wz);
+    function paketVal() { return (wz.querySelector('input[name="paket"]:checked') || {}).value || ""; }
+    function winterKer() { var r = wz.querySelector('input[name="winterschutz"]:checked'); return paketVal() === "winter" && !!r && r.value === "keramik"; }
+    function isKer() { return paketVal() === "keramik" || winterKer(); }
+    function syncWinter() { if (winterBox) { winterBox.hidden = paketVal() !== "winter"; $$("input", winterBox).forEach(function (r) { r.disabled = winterBox.hidden; }); } }
     /* Freie Abgabezeiten des gewählten Tages vom Server holen (Auslastung, Keramik-Standzeit, Google Kalender) */
     var slotBox = $("#t-slots"), slotMsg = $("#t-slots-msg"), slotReq = 0;
     function loadSlots() {
@@ -472,9 +503,9 @@
       if (!day || wz.datum.validationMessage) { radios.forEach(function (r) { r.disabled = !day; }); say(day ? "" : "Bitte zuerst einen Tag wählen."); return; }
       radios.forEach(function (r) { r.disabled = false; });
       if (!IS_LIVE) { say(""); return; }
-      var my = ++slotReq, pk = (wz.querySelector('input[name="paket"]:checked') || {}).value || "";
+      var my = ++slotReq, pk = paketVal();
       say("Freie Uhrzeiten werden geladen …");
-      fetch(API + "/slots?tag=" + encodeURIComponent(day) + "&paket=" + encodeURIComponent(pk)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      fetch(API + "/slots?tag=" + encodeURIComponent(day) + "&paket=" + encodeURIComponent(pk) + (winterKer() ? "&winterschutz=keramik" : "")).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
         if (my !== slotReq || !j || !j.slots) { say(""); return; }
         var free = 0;
         j.slots.forEach(function (x) {
@@ -499,7 +530,7 @@
       if (msg) { msg.textContent = txt; msg.className = "field-msg" + (txt ? " error" : ""); }
     }
     ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); if (n === "datum") loadSlots(); summary(); }); });
-    $$('input[name="paket"]', wz).forEach(function (r) { r.addEventListener("change", function () { ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); loadSlots(); }); });
+    $$('input[name="paket"], input[name="winterschutz"]', wz).forEach(function (r) { r.addEventListener("change", function () { syncWinter(); ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); loadSlots(); }); });
 
     function show(i) {
       cur = Math.max(0, Math.min(steps.length - 1, i));
@@ -521,24 +552,24 @@
     steps.forEach(function (s) { s.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "checkbox" && cur < steps.length - 1) { e.preventDefault(); go(1); } }); });
 
     function summary() {
-      var d = collect(wz), p = pkg(d.paket), c = cls(d.klasse), v = p && c ? price(d.paket, d.klasse) : null;
+      var d = collect(wz), p = pkg(d.paket), c = cls(d.klasse), v = p && c ? price(d.paket, d.klasse) : null, wk = winterKer();
       var sc = (ELB.booking || {}).surcharge || {}, zs = [].concat(d.zustand || []).filter(function (z) { return (sc.exempt || []).indexOf(z) === -1; });
       var surPct = zs.reduce(function (a, z) { return a + ((sc.overrides || {})[z] != null ? sc.overrides[z] : (sc.percent || 0)); }, 0);
       if (v != null && surPct) v = Math.round(v * (1 + surPct / 100));
       var surEl = $("#t-surcharge"); if (surEl) surEl.textContent = surPct ? "Richtpreis inkl. " + surPct + " % Zuschlag für den Zustand." : "";
       var set = function (k, t) { var el = wz.parentNode.querySelector('[data-sum="' + k + '"]'); if (el) el.textContent = t; };
-      set("paket", p ? p.name : (SPECIAL[d.paket] || "–"));
+      set("paket", (p ? p.name : (SPECIAL[d.paket] || "–")) + (wk ? " · C² CarCeramic statt Wachs" : ""));
       set("klasse", (c ? c.name : "–") + (d.fahrzeug ? " · " + d.fahrzeug : ""));
       set("extras", d.extras && d.extras.length ? d.extras.join(", ") : "keine");
       set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + d.uhrzeit + " Uhr" : "") + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
-      set("preis", v != null ? "ab " + fmt(v) + " €" : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
-      var bk = ELB.booking || {}, base = v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null);
+      set("preis", v != null ? "ab " + fmt(v) + " €" + (wk ? " + Aufpreis C² CarCeramic" : "") : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
+      var bk = ELB.booking || {}, base = wk ? null : (v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null));
       set("anzahlung", base ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " € per PayPal" : (d.paket ? "nach Absprache" : "–"));
       $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? "ab " + fmt(x) + " €" : "auf Anfrage"; });
     }
     wz.addEventListener("change", summary); wz.addEventListener("input", summary);
     if (wz.datum.value) { checkDate(wz.datum); loadSlots(); } else loadSlots();
-    summary(); show(0);
+    syncWinter(); summary(); show(0);
   }
 
   /* ---------------------------------------------------------------- Gutschein-Konfigurator */
@@ -584,7 +615,8 @@
         ? ["Bitte bestätigen Sie Ihren Termin.", "Wir haben Ihnen eine E-Mail mit einem Link geschickt. Mit der Anzahlung von " + ((ELB.booking || {}).depositPercent || 15) + " % per PayPal ist der Termin verbindlich gebucht. Die Reservierung gilt " + ((ELB.booking || {}).holdHours || 24) + " Stunden. Danach meldet sich " + ((ELB.booking || {}).owner || "unser Team") + " telefonisch und sieht sich Ihr Fahrzeug vorab an."]
         : ["Terminanfrage eingegangen.", "Wir prüfen Ihren Wunschtermin und melden uns mit Bestätigung und verbindlichem Angebot, in der Regel am selben oder nächsten Werktag."],
       gutschein: ["Gutscheinbestellung eingegangen.", "Sie erhalten gleich eine E-Mail mit den Zahlungsdaten. Nach Zahlungseingang senden wir Ihnen den Gutschein."],
-      firma: ["Anfrage eingegangen.", "Vielen Dank für Ihr Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."]
+      firma: ["Anfrage eingegangen.", "Vielen Dank für Ihr Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."],
+      widerruf: ["Ihr Widerruf ist eingegangen.", "Sie erhalten sofort eine Eingangsbestätigung per E-Mail. Bereits geleistete Zahlungen erstatten wir unverzüglich, spätestens binnen 14 Tagen."]
     }[Q.typ];
     if (T) { thanks.innerHTML = "Danke! <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " Ihre Vorgangsnummer: " + Q.ref + "." : ""); }
   }

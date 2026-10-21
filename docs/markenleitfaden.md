@@ -56,7 +56,7 @@ Nur diese Fakten dürfen in Kommunikation verwendet werden:
 | Standort Lachtehäuser Straße 1, 29223 Celle | vollständig ausschreiben |
 | E-Mail info@elbdetail.de | genau so schreiben |
 
-**Nicht verwenden, solange nicht bestätigt:** Gründungsjahr, Mitarbeiterzahl, Kundengeschichten, Statistiken, Garantien (auch keine Haltbarkeitsgarantie für Keramik in Jahren), Rabatte, feste Preise für ElbDetail Care oder Firmenkunden, Preise für Lederreparatur (auf Anfrage), Standzeiten ohne den Zusatz "laut Hersteller", Versprechen wie "alle Kratzer weg", Abholservice als kostenlose Zusage oder mit Radius, konkrete Ersparnisse bei Leasingrückgabe, Hinweise auf AGB (es gibt noch keine), Umsatzsteuer-Hinweise wie "inkl." oder "zzgl." Umsatzsteuer.
+**Nicht verwenden, solange nicht bestätigt:** Gründungsjahr, Mitarbeiterzahl, Kundengeschichten, Statistiken, Garantien (auch keine Haltbarkeitsgarantie für Keramik in Jahren), Rabatte, feste Preise für ElbDetail Care oder Firmenkunden, Preise für Lederreparatur (auf Anfrage), Standzeiten ohne den Zusatz "laut Hersteller", Versprechen wie "alle Kratzer weg", Abholservice als kostenlose Zusage oder mit Radius, konkrete Ersparnisse bei Leasingrückgabe, Umsatzsteuer-Hinweise wie "inkl." oder "zzgl." Umsatzsteuer.
 
 `[PLATZHALTER: Spricht der Betrieb als "wir" oder als "ich"? Dieser Leitfaden nutzt "wir". Bei Ein-Personen-Betrieb ggf. auf "ich" umstellen.]`
 
@@ -409,7 +409,7 @@ Details zu Motiven und Technik: `docs/foto-und-video-shotlist.md`.
 
 - [ ] Nur Fakten aus Abschnitt 1 verwendet?
 - [ ] Preise mit "ab" und passend zur Preisliste (Ab-Preis gilt für Kleinwagen)? Keramik nur als Ab-Preis laut Preisliste? Keine Preise für ElbDetail Care und Firmenkunden?
-- [ ] Steuerhinweis korrekt (Endpreise, § 19 UStG, keine Umsatzsteuer)? Kein Verweis auf AGB?
+- [ ] Steuerhinweis korrekt (Endpreise, § 19 UStG, keine Umsatzsteuer)? AGB-Verweis nur auf `/agb.html`?
 - [ ] Produktmarken richtig (C²Coating, Koch-Chemie, Colourlock), keine Exklusiv-Aussage zu einer einzelnen Marke?
 - [ ] Bewertungszahl aktuell?
 - [ ] Sie-Ansprache (warm, nicht steif), kurze Sätze, keine Gedankenstriche?

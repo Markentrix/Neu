@@ -9,7 +9,7 @@ const PAGES = [
   "/leistungen/aussenaufbereitung-celle.html", "/leistungen/innenaufbereitung-celle.html", "/leistungen/lackpolitur-celle.html",
   "/leistungen/lackversiegelung-celle.html", "/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html",
   "/leistungen/felgenversiegelung-celle.html", "/leistungen/scheibenversiegelung-celle.html",
-  "/impressum.html", "/datenschutz.html", "/danke.html", "/angebote.html", "/ratgeber/winter.html", "/zertifikate.html",
+  "/impressum.html", "/datenschutz.html", "/agb.html", "/widerruf.html", "/danke.html", "/angebote.html", "/ratgeber/winter.html", "/zertifikate.html",
   "/ratgeber/auto-im-winter-waschen-streusalz.html", "/ratgeber/feuchtigkeit-im-auto-winter.html",
 ];
 
@@ -163,6 +163,37 @@ test("Winterangebot: Preise je Fahrzeugklasse und direkt buchbar", async ({ page
   await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 329 €");
 });
 
+test("Winterangebot: Inhalt sichtbar, C² CarCeramic statt Wachs wählbar", async ({ page }) => {
+  await page.goto("/aktion/winterschutz.html");
+  const inc = page.locator("#winterangebot ~ ul.includes").first();
+  for (const t of ["Innenreinigung", "Außenwäsche von Hand", "Glanzpolitur", "Wachsversiegelung"]) await expect(inc).toContainText(t);
+  await expect(page.locator("main")).toContainText("Dann entfällt das Wachs");
+  await page.locator('a[href*="schutz=keramik"]').first().click();
+  await expect(page.locator('input[name="winterschutz"][value="keramik"]')).toBeChecked();
+  await expect(page.locator(".wz-winter")).toBeVisible();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 329 € + Aufpreis C² CarCeramic");
+  await expect(page.locator('[data-sum="anzahlung"]')).toHaveText("nach Absprache");
+  await page.locator('label.choice-pill:has(input[value="wachs"])').click();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 329 €");
+  await page.locator('label.choice-card:has(input[value="essential"])').click();
+  await expect(page.locator(".wz-winter")).toBeHidden();
+});
+
+test("AGB und Widerruf: im Fuß verlinkt, Belehrung, Muster-Formular und Widerrufsformular", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator('footer a[href="agb.html"]')).toHaveText("AGB");
+  await expect(page.locator('footer a[href="widerruf.html"]')).toHaveText("Vertrag widerrufen");
+  await page.goto("/agb.html");
+  await expect(page.locator("h1")).toContainText("Allgemeine Geschäfts");
+  await expect(page.locator("#widerruf")).toBeVisible();
+  await expect(page.locator("#widerrufsformular")).toBeVisible();
+  await expect(page.locator("main")).toContainText("Nachweis gestattet");
+  await page.goto("/widerruf.html");
+  await expect(page.locator('#widerrufForm button[type="submit"]')).toHaveText("Widerruf bestätigen");
+  await page.goto("/termin.html");
+  await expect(page.locator('#bookingForm .form-note a[href="agb.html"]')).toHaveCount(1);
+});
+
 test("Preisseite: C² CarCeramic-Preisliste und optionale Versiegelung", async ({ page }) => {
   await page.goto("/preise.html");
   const cer = page.locator("#keramik-preise");
@@ -263,6 +294,32 @@ test("Mit Google-Analytics-ID: Google lädt erst nach Akzeptieren, Ablehnen blei
   await page.locator('#consent [data-c="granted"]').click();
   await expect.poll(() => gtm.length).toBeGreaterThan(0);
   expect(gtm[0]).toContain("id=G-TEST12345");
+});
+
+test("Cookie-Banner: Einstellungen mit Kategorien, Auswahl speichern und über den Fuß wieder öffnen", async ({ page }) => {
+  await page.route("**/config.js*", async (route) => {
+    const r = await route.fetch(); const body = (await r.text()) + '\nwindow.ELB.ga4="G-TEST12345";';
+    await route.fulfill({ response: r, body });
+  });
+  const gtm = [];
+  await page.route("https://www.googletagmanager.com/**", (route) => { gtm.push(route.request().url()); route.fulfill({ status: 200, contentType: "text/javascript", body: "" }); });
+  await page.goto("/");
+  const c = page.locator("#consent");
+  await expect(c.locator("h2")).toHaveText("Cookies & Datenschutz");
+  await expect(c.locator('a[href$="impressum.html"]')).toBeVisible();
+  await c.locator("[data-c-more]").click();
+  await expect(c.locator(".consent-opt")).toHaveCount(2);
+  await expect(c.locator("[data-stat]")).not.toBeChecked();
+  await c.locator('[data-c="save"]').click();
+  await expect(c).toHaveCount(0);
+  expect(gtm).toEqual([]);
+  await page.locator("footer [data-consent-open]").click();
+  await page.locator("#consent [data-c-more]").click();
+  await page.locator("#consent .consent-opt:has([data-stat])").click();
+  await page.locator('#consent [data-c="save"]').click();
+  await expect.poll(() => gtm.length).toBeGreaterThan(0);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("elb-consent")));
+  expect(saved.stat).toBe(true);
 });
 
 test("Zertifikate: Vergrößern öffnet die Lightbox, Esc schließt sie", async ({ page }) => {

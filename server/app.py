@@ -83,7 +83,7 @@ class Cfg:
 ADMIN_DIR = os.path.join(HERE, "admin")
 STATUS = ["neu", "reserviert", "in_bearbeitung", "angebot_gesendet", "termin_bestaetigt", "erledigt", "abgelehnt", "storniert", "verfallen"]
 V_STATUS = ["offen", "bezahlt", "eingeloest", "storniert"]
-TYPES = ["kontakt", "termin", "gutschein", "firma"]
+TYPES = ["kontakt", "termin", "gutschein", "firma", "widerruf"]
 LOCK = threading.Lock()
 BUILD_LOCK = threading.Lock()
 
@@ -347,9 +347,9 @@ def mail_async(*a, **k):
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,190}\.[a-zA-Z]{2,}$")
 LABELS = {"name": "Name", "telefon": "Telefon", "email": "E-Mail", "paket": "Paket", "klasse": "Fahrzeugklasse", "fahrzeug": "Fahrzeug",
           "zustand": "Zustand", "extras": "Extras", "abholung": "Abholung", "datum": "Wunschtermin", "datum2": "Ausweichtermin",
-          "zeitfenster": "Zeitfenster", "uhrzeit": "Uhrzeit", "anzahlung": "Anzahlung", "gutscheincode": "Gutscheincode", "kanal": "Antwort per", "nachricht": "Nachricht",
+          "zeitfenster": "Zeitfenster", "uhrzeit": "Uhrzeit", "anzahlung": "Anzahlung", "winterschutz": "Schutz im Winterangebot", "gutscheincode": "Gutscheincode", "kanal": "Antwort per", "nachricht": "Nachricht",
           "bewertung_ok": "Bewertungsanfrage erlaubt", "art": "Gutscheinart", "wert": "Wert", "fuer": "Für", "von": "Von", "widmung": "Widmung",
-          "zustellung": "Zustellung", "firma": "Firma", "anzahl": "Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen", "quelle": "Quelle"}
+          "zustellung": "Zustellung", "firma": "Firma", "anzahl": "Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen", "quelle": "Quelle", "vorgang": "Vorgang / Gutscheincode"}
 
 
 class Invalid(Exception):
@@ -396,13 +396,13 @@ def validate(d):
     out = {"typ": typ}
     out["name"] = _s(d, "name", 120, True, errors)
     out["telefon"] = _s(d, "telefon", 40, typ == "termin", errors)
-    out["email"] = _s(d, "email", 160, typ in ("gutschein", "firma"), errors)
+    out["email"] = _s(d, "email", 160, typ in ("gutschein", "firma", "widerruf"), errors)
     if out["email"] and not EMAIL_RE.match(out["email"]):
         errors["email"] = "Bitte eine gültige E-Mail-Adresse angeben."
     if out["telefon"] and not re.match(r"^[0-9+()/ \-.]{5,40}$", out["telefon"]):
         errors["telefon"] = "Bitte eine gültige Telefonnummer angeben."
     out["nachricht"] = _s(d, "nachricht", 2000, False, errors)
-    if d.get("einwilligung") not in ("ja", "on", True, "true"):
+    if typ != "widerruf" and d.get("einwilligung") not in ("ja", "on", True, "true"):  # Widerruf: Verarbeitung zur Erfüllung einer Rechtspflicht
         errors["einwilligung"] = "Bitte die Datenschutzhinweise bestätigen."
     pr = pricing()
     pkeys = [p["key"] for p in pr.get("packages", [])]
@@ -422,6 +422,8 @@ def validate(d):
         out["fahrzeug"] = _s(d, "fahrzeug", 120, False, errors)
         out["zustand"] = _list(d, "zustand", ["tierhaare", "stark", "geruch", "leder", "flecken", "kratzer"])
         out["extras"] = _list(d, "extras", pr.get("extras"))
+        if out["paket"] == "winter":
+            out["winterschutz"] = WINTERSCHUTZ["keramik" if d.get("winterschutz") in ("keramik", WINTERSCHUTZ["keramik"]) else "wachs"]
         out["abholung"] = d.get("abholung") if d.get("abholung") in ("nein", "anfrage") else "nein"
         out["zeitfenster"] = d.get("zeitfenster") if d.get("zeitfenster") in ("morgens", "vormittag", "nachmittag", "flexibel") else "flexibel"
         out["kanal"] = d.get("kanal") if d.get("kanal") in ("whatsapp", "anruf", "email") else "whatsapp"
@@ -429,7 +431,7 @@ def validate(d):
         out["bewertung_ok"] = "ja" if d.get("bewertung_ok") in ("ja", "on", True) else "nein"
         out["quelle"] = _s(d, "quelle", 40, False, errors)
         closed = setting("closedWeekdays", [0])
-        blocked = blocked_days(keramik=out["paket"] == "keramik")
+        blocked = blocked_days(keramik=ker_booking(out))
         for k in ("datum", "datum2"):
             raw = _s(d, k, 10, k == "datum", errors)
             if not raw:
@@ -452,7 +454,7 @@ def validate(d):
                 errors["email"] = "Bitte eine E-Mail-Adresse angeben. Dorthin schicken wir den Link zur Terminbestätigung."
             if not out["uhrzeit"]:
                 errors["uhrzeit"] = "Bitte eine Uhrzeit wählen."
-            elif out["datum"] and "datum" not in errors and not slot_free(out["datum"], out["uhrzeit"], out["paket"]):
+            elif out["datum"] and "datum" not in errors and not slot_free(out["datum"], out["uhrzeit"], keramik=ker_booking(out)):
                 errors["uhrzeit"] = "Diese Uhrzeit ist leider gerade vergeben. Bitte eine andere wählen."
     elif typ == "gutschein":
         art = d.get("art") if d.get("art") in ("wert", "paket") else "wert"
@@ -481,6 +483,8 @@ def validate(d):
         out["von"] = _s(d, "von", 60, False, errors)
         out["widmung"] = _s(d, "widmung", 160, False, errors)
         out["zustellung"] = d.get("zustellung") if d.get("zustellung") in ("pdf", "abholung") else "pdf"
+    elif typ == "widerruf":
+        out["vorgang"] = _s(d, "vorgang", 40, True, errors).upper()
     elif typ == "firma":
         out["firma"] = _s(d, "firma", 160, True, errors)
         out["anzahl"] = _s(d, "anzahl", 30, False, errors)
@@ -536,8 +540,18 @@ def richtpreis(data):
     return int(base * (1 + condition_surcharge(data) / 100) + 0.5)
 
 
+WINTERSCHUTZ = {"wachs": "Wachsversiegelung (inklusive)", "keramik": "C² CarCeramic statt Wachs (Aufpreis nach Absprache)"}
+
+
+def ker_booking(d):
+    """Buchung mit Keramikversiegelung: eigenes Paket oder Winterangebot mit C² CarCeramic statt Wachs."""
+    return d.get("paket") == "keramik" or (d.get("paket") == "winter" and d.get("winterschutz") == WINTERSCHUTZ["keramik"])
+
+
 def base_price(data):
     if data.get("paket") == "winter":
+        if ker_booking(data):
+            return None  # Aufpreis für C² CarCeramic legt René fest, auch die Anzahlung
         return ((winter_offer() or {}).get("prices") or {}).get(data.get("klasse"))
     try:
         p = next(x for x in pricing()["packages"] if x["key"] == data.get("paket"))
@@ -547,11 +561,11 @@ def base_price(data):
 
 
 # --------------------------------------------------------------------------- Anfragen speichern
-TITLES = {"kontakt": "Anfrage", "termin": "Terminanfrage", "gutschein": "Gutscheinbestellung", "firma": "Firmenanfrage"}
+TITLES = {"kontakt": "Anfrage", "termin": "Terminanfrage", "gutschein": "Gutscheinbestellung", "firma": "Firmenanfrage", "widerruf": "Widerruf"}
 
 
 def new_ref(typ):
-    return {"kontakt": "K", "termin": "T", "gutschein": "G", "firma": "F"}[typ] + now().strftime("%y%m%d") + "-" + secrets.token_hex(2).upper()
+    return {"kontakt": "K", "termin": "T", "gutschein": "G", "firma": "F", "widerruf": "W"}[typ] + now().strftime("%y%m%d") + "-" + secrets.token_hex(2).upper()
 
 
 def store_request(data):
@@ -569,7 +583,7 @@ def store_request(data):
             data["anzahlung"] = dep
             data["depositPercent"] = (site_info().get("booking") or {}).get("depositPercent", 15)
     with LOCK, db() as c:
-        if status == "reserviert" and not slot_free(data["datum"], data["uhrzeit"], data.get("paket", "")):
+        if status == "reserviert" and not slot_free(data["datum"], data["uhrzeit"], keramik=ker_booking(data)):
             raise Invalid({"uhrzeit": "Diese Uhrzeit wurde gerade vergeben. Bitte eine andere wählen."})
         cur = c.execute("INSERT INTO anfragen(ref, typ, status, created, updated, name, telefon, email, datum, data) VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (ref, data["typ"], status, ts, ts, data.get("name"), data.get("telefon"), data.get("email"), data.get("datum", ""),
@@ -581,8 +595,36 @@ def store_request(data):
     return ref, status
 
 
+def handle_widerruf(ref, data):
+    """Widerruf über das Formular: Eingang sofort bestätigen (ohne Freigabe), passenden Online-Termin innerhalb der Frist direkt stornieren und erstatten."""
+    s = site_info()
+    at = now()
+    done = ""
+    if re.match(r"^T\d{6}-[0-9A-F]{4}$", data.get("vorgang", "")):
+        r, d = load_termin(data["vorgang"])
+        if r and (d.get("email") or "").lower() == data["email"].lower() and r["status"] == "termin_bestaetigt" and in_widerruf(d):
+            d["widerruf_am"] = at.isoformat()
+            save_termin(r["id"], d)
+            cancel_termin(r, d, "widerruf", confirm=False)
+            r, d = load_termin(data["vorgang"])
+            done = widerruf_refund_line(d)
+    mail_async(Cfg.notify_to or s.get("email"), f"Widerruf eingegangen: {data.get('name')} ({ref})",
+               f"Über das Widerrufsformular der Website ist am {at.strftime('%d.%m.%Y um %H:%M')} Uhr ein Widerruf eingegangen.\n"
+               + (f"Der Online-Termin {data['vorgang']} wurde automatisch storniert. {done}\n" if done else
+                  "Bitte den Vorgang prüfen und Zahlungen innerhalb von 14 Tagen erstatten.\n")
+               + f"\n{summary_text(data)}\n\nIm Verwaltungsportal: {Cfg.public_url}/admin/#/anfragen/{ref}\n", reply_to=data.get("email") or None)
+    customer_mail("widerruf", ref, data["email"], f"Eingangsbestätigung Ihres Widerrufs ({ref})",
+                  f"Guten Tag {data.get('name', '').strip()},\n\nhiermit bestätigen wir den Eingang Ihres Widerrufs am {at.strftime('%d.%m.%Y um %H:%M')} Uhr.\n\n"
+                  f"Inhalt Ihres Widerrufs:\n{summary_text(data)}\n\n"
+                  + (f"Der Termin {data['vorgang']} ist abgesagt. {done}\n\n" if done else
+                     "Bereits geleistete Zahlungen erstatten wir unverzüglich, spätestens binnen 14 Tagen, über dasselbe Zahlungsmittel.\n\n")
+                  + mail_footer())
+
+
 def notify(ref, data, status="neu"):
     s = site_info()
+    if data["typ"] == "widerruf":
+        return handle_widerruf(ref, data)
     title = TITLES[data["typ"]]
     rp = richtpreis(data)
     body = f"Neue {title} über die Website ({ref})\n\n{summary_text(public_data(data))}\n"
@@ -699,15 +741,23 @@ def termin_html(r, d, notice="", mode="", tag=""):
     future = bool(termin_start(d) and termin_start(d) > now())
     policy = f'<p class="small"><strong>Verschieben und Absagen:</strong> {E(booking_policy())}</p>' if d.get("anzahlung") and booking_policy() else ""
     extra_html = ""
+    checks = ('<label class="chk"><input type="checkbox" name="agb" value="1" required> <span>Ich habe die <a href="/agb.html" target="_blank" rel="noopener">AGB</a> '
+              'und die <a href="/agb.html#widerruf" target="_blank" rel="noopener">Widerrufsbelehrung</a> gelesen.</span></label>'
+              + ('<label class="chk"><input type="checkbox" name="vorzeitig" value="1" required> <span>Mein Termin liegt innerhalb der 14-tägigen Widerrufsfrist. '
+                 'Ich verlange ausdrücklich, dass ElbDetail vor Ablauf der Widerrufsfrist mit der Leistung beginnt. Mir ist bekannt, dass ich bei einem Widerruf einen '
+                 'anteiligen Betrag für bereits erbrachte Leistungen zahle und mein Widerrufsrecht erlischt, sobald die Leistung vollständig erbracht ist.</span></label>'
+                 if early_start(d) else ""))
+    wbis = widerruf_bis(d)
+    can_withdraw = st == "termin_bestaetigt" and future and in_widerruf(d)
     if st == "reserviert" and d.get("hold_until", "") >= now().isoformat():
         if deposit_online(d):
             head = "Anzahlung leisten und Termin bestätigen"
             text = (f"Mit der Anzahlung von {eur(d['anzahlung'])} per PayPal ist Ihr Termin verbindlich gebucht. "
                     "Die Anzahlung wird mit dem Endpreis verrechnet.")
-            btns = act("bestaetigen", f"Anzahlung {eur(d['anzahlung'])} mit PayPal leisten") + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost")
+            btns = act("bestaetigen", f"Anzahlung {eur(d['anzahlung'])} mit PayPal leisten", extra=checks) + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost")
         else:
             head, text = "Bitte bestätigen Sie Ihren Termin", "Ein Klick genügt, dann ist der Termin verbindlich gebucht."
-            btns = act("bestaetigen", "Termin verbindlich bestätigen") + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost")
+            btns = act("bestaetigen", "Termin verbindlich bestätigen", extra=checks) + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost")
     elif st == "termin_bestaetigt" and future and mode == "verschieben":
         head = "Termin verschieben"
         text = "Wählen Sie einen neuen Tag und eine Abgabezeit." + (" Ihre Anzahlung bleibt erhalten." if paid or d.get("anzahlung") else "")
@@ -717,17 +767,32 @@ def termin_html(r, d, notice="", mode="", tag=""):
                       f'<label>Neuer Tag<input type="date" name="tag" min="{mind}" value="{E(tag)}" required></label><button class="btn ghost" type="submit">Freie Uhrzeiten zeigen</button></form>')
         btns = f'<a class="btn ghost" href="{base}">Zurück</a>'
         if tag and _date(tag):
-            free = [x["zeit"] for x in free_slots(tag, d.get("paket", ""), exclude_ref=r["ref"])
+            free = [x["zeit"] for x in free_slots(tag, exclude_ref=r["ref"], keramik=ker_booking(d))
                     if x["frei"] and not (tag == d.get("datum") and x["zeit"] == d.get("uhrzeit"))]  # bisherige Uhrzeit nicht anbieten
             if free:
                 radios = "".join(f'<label class="slot"><input type="radio" name="uhrzeit" value="{t}" required{" checked" if i == 0 else ""}> {t} Uhr</label>' for i, t in enumerate(free))
                 btns = act("verschieben", "Auf diesen Termin verschieben", extra=f'<input type="hidden" name="datum" value="{E(tag)}"><div class="slots">{radios}</div>') + btns
             else:
                 extra_html += '<p class="note">An diesem Tag ist leider keine Uhrzeit mehr frei. Bitte wählen Sie einen anderen Tag.</p>'
+    elif can_withdraw and mode == "widerrufen":
+        head = "Vertrag widerrufen"
+        text = (f"Sie können den Vertrag bis zum {wbis.strftime('%d.%m.%Y')} ohne Angabe von Gründen widerrufen. Der Termin wird dann abgesagt"
+                + (f" und Ihre Anzahlung von {eur(d['zahlung']['value'])} über PayPal erstattet." if paid else ".")
+                + " Die Eingangsbestätigung erhalten Sie sofort per E-Mail.")
+        extra_html = (f'<dl><div><dt>Name</dt><dd>{E(d.get("name", ""))}</dd></div><div><dt>Vertrag</dt><dd>Termin {E(r["ref"])}</dd></div>'
+                      f'<div><dt>Bestätigung an</dt><dd>{E(d.get("email", ""))}</dd></div></dl>')
+        btns = act("widerrufen", "Widerruf bestätigen", extra='<input type="hidden" name="ok" value="1">') + f'<a class="btn ghost" href="{base}">Zurück</a>'
+    elif st == "termin_bestaetigt" and future and mode == "absagen" and in_widerruf(d):
+        head = "Termin wirklich absagen?"
+        text = (f"Sie sind noch innerhalb der Widerrufsfrist (bis {wbis.strftime('%d.%m.%Y')}). Wenn Sie den Termin jetzt absagen, gilt das als Widerruf"
+                + (f" und wir erstatten Ihre Anzahlung von {eur(d['zahlung']['value'])} vollständig." if paid else ".")
+                + " Sie können den Termin stattdessen auch kostenlos verschieben.")
+        btns = (f'<a class="btn" href="{base}&aktion=verschieben">Lieber verschieben</a>'
+                + act("absagen", "Ja, Termin absagen", "btn ghost", '<input type="hidden" name="ok" value="1">'))
     elif st == "termin_bestaetigt" and future and mode == "absagen":
         head = "Termin wirklich absagen?"
         text = (f"Wenn Sie den Termin ganz absagen, wird Ihre Anzahlung von {eur(d['zahlung']['value'])} als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben. "
-                "Verschieben ist dagegen kostenlos, die Anzahlung bleibt dann erhalten.") if paid else "Möchten Sie den Termin wirklich absagen? Sie können ihn stattdessen auch kostenlos verschieben."
+                "Ist uns kein oder ein geringerer Schaden entstanden, können Sie uns das nachweisen. Verschieben ist dagegen kostenlos, die Anzahlung bleibt dann erhalten.") if paid else "Möchten Sie den Termin wirklich absagen? Sie können ihn stattdessen auch kostenlos verschieben."
         btns = (f'<a class="btn" href="{base}&aktion=verschieben">Lieber verschieben</a>'
                 + act("absagen", "Ja, Termin endgültig absagen" + (" (Anzahlung verfällt)" if paid else ""), "btn ghost", '<input type="hidden" name="ok" value="1">'))
     elif st == "termin_bestaetigt":
@@ -736,6 +801,9 @@ def termin_html(r, d, notice="", mode="", tag=""):
         if paid:
             text += f" Ihre Anzahlung von {eur(d['zahlung']['value'])} ist eingegangen."
         btns = (f'<a class="btn" href="{base}&aktion=verschieben">Termin verschieben</a><a class="btn ghost" href="{base}&aktion=absagen">Termin absagen</a>') if future else ""
+        if can_withdraw:
+            btns += f'<a class="btn ghost" href="{base}&aktion=widerrufen">Vertrag widerrufen</a>'
+            text += f" Widerrufsrecht: Sie können den Vertrag bis zum {wbis.strftime('%d.%m.%Y')} widerrufen."
     elif st == "storniert":
         head, text, btns = "Termin abgesagt", "Der Termin ist abgesagt. Sie können jederzeit einen neuen Termin buchen.", f'<a class="btn" href="/termin.html">Neuen Termin buchen</a>'
     elif st in ("verfallen", "reserviert"):
@@ -751,7 +819,7 @@ def termin_html(r, d, notice="", mode="", tag=""):
 .card{{background:#fff;border:1px solid #dfe3e9;border-radius:18px;padding:26px 24px;display:grid;gap:14px}}h1{{margin:0;font-size:26px;letter-spacing:-.02em;line-height:1.2}}
 .when{{font-size:20px;font-weight:650;color:#1c4f9c}}dl{{margin:0;display:grid;gap:6px}}dl div{{display:flex;gap:10px;flex-wrap:wrap}}dt{{color:#5b6472;min-width:110px}}dd{{margin:0;font-weight:600}}
 .note{{background:#eef3fb;border-radius:12px;padding:12px 14px;font-size:15px}}.notice{{background:#e7f6ec;border:1px solid #b9e2c6;border-radius:12px;padding:12px 14px;font-weight:600}}
-.btns{{display:flex;gap:10px;flex-wrap:wrap}}form{{margin:0}}.btn{{display:inline-block;background:#1c4f9c;color:#fff;border:1px solid #1c4f9c;border-radius:999px;padding:12px 22px;font:inherit;font-weight:650;cursor:pointer;text-decoration:none;min-height:46px}}
+.btns{{display:flex;gap:10px;flex-wrap:wrap}}form{{margin:0}}.chk{{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:0 0 12px}}.chk input{{width:20px;height:20px;margin-top:2px;flex:none}}.btn{{display:inline-block;background:#1c4f9c;color:#fff;border:1px solid #1c4f9c;border-radius:999px;padding:12px 22px;font:inherit;font-weight:650;cursor:pointer;text-decoration:none;min-height:46px}}
 .btn.ghost{{background:#fff;color:#1e2229;border-color:#c9cfd8}}.pick{{display:grid;gap:10px}}.pick label{{display:grid;gap:4px;font-weight:600}}.pick input{{font:inherit;padding:10px 12px;border:1px solid #c9cfd8;border-radius:12px;min-height:46px}}
 .slots{{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}}.slot{{display:flex;gap:6px;align-items:center;border:1px solid #c9cfd8;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}}.btn:focus-visible{{outline:3px solid #f2b705;outline-offset:2px}}.small{{font-size:14px;color:#5b6472}}a{{color:#1c4f9c}}
 </style></head><body><div class="wrap">
@@ -780,7 +848,7 @@ def occupying(c, t0):
             d = {}
         if r["status"] == "reserviert" and d.get("hold_until", "") < ts:
             continue
-        out.append({"ref": r["ref"], "status": r["status"], "datum": r["datum"], "uhrzeit": d.get("uhrzeit", ""), "paket": d.get("paket", "")})
+        out.append({"ref": r["ref"], "status": r["status"], "datum": r["datum"], "uhrzeit": d.get("uhrzeit", ""), "paket": d.get("paket", ""), "keramik": ker_booking(d)})
     return out
 
 
@@ -800,7 +868,7 @@ def blocked_days(keramik=False):
         count, ker = {}, set()
         for r in occupying(c, t0):
             count[r["datum"]] = count.get(r["datum"], 0) + 1
-            if r["paket"] == "keramik":
+            if r["keramik"]:
                 ker.add(r["datum"])
     if cap > 0:
         days |= {d for d, n in count.items() if n >= cap}
@@ -848,7 +916,7 @@ def termin_start(d):
     return dt.datetime.combine(day, dt.time(int(hh), int(mm)))
 
 
-def free_slots(day, paket="", exclude_ref=""):
+def free_slots(day, paket="", exclude_ref="", keramik=None):
     """Freie Abgabezeiten an einem Tag: Ruhetage, Sperren, Auslastung, belegte Uhrzeiten und Google-Kalender."""
     cfg = booking_cfg()
     d = _date(day)
@@ -856,7 +924,7 @@ def free_slots(day, paket="", exclude_ref=""):
         return []
     lead = max(0, int(setting("leadDays", 1) or 0))
     closed = setting("closedWeekdays", [0])
-    if d < today() + dt.timedelta(days=lead) or ((d.weekday() + 1) % 7) in closed or day in blocked_days(keramik=paket == "keramik"):
+    if d < today() + dt.timedelta(days=lead) or ((d.weekday() + 1) % 7) in closed or day in blocked_days(keramik=paket == "keramik" if keramik is None else keramik):
         return [{"zeit": t, "frei": False} for t in cfg["slotTimes"]]
     with db() as c:
         taken = {o["uhrzeit"] for o in occupying(c, day) if o["datum"] == day and o["ref"] != exclude_ref}
@@ -870,8 +938,8 @@ def free_slots(day, paket="", exclude_ref=""):
     return out
 
 
-def slot_free(day, zeit, paket=""):
-    return any(x["zeit"] == zeit and x["frei"] for x in free_slots(day, paket))
+def slot_free(day, zeit, paket="", keramik=None):
+    return any(x["zeit"] == zeit and x["frei"] for x in free_slots(day, paket, keramik=keramik))
 
 
 def booking_link(ref, token, action=""):
@@ -886,7 +954,7 @@ def de_when(d):
 
 def stand_text(d):
     return ("Bei Versiegelung und Keramik bleibt Ihr Auto 3 Tage bei uns, damit die Beschichtung in Ruhe aushärten kann."
-            if d.get("paket") == "keramik" else "Optimal ist es, wenn Ihr Auto einen Tag bei uns bleiben kann. Bei Versiegelung und Keramik sind es 3 Tage.")
+            if ker_booking(d) else "Optimal ist es, wenn Ihr Auto einen Tag bei uns bleiben kann. Bei Versiegelung und Keramik sind es 3 Tage.")
 
 
 def mail_footer():
@@ -947,9 +1015,14 @@ def confirmed_text(ref, d):
             f"So erhalten Sie den verbindlichen Preis, bevor wir anfangen.\n\n{deposit_text(d)}{stand_text(d)}\n\n"
             f"Bitte räumen Sie Wertsachen und persönliche Gegenstände vorher aus dem Auto.\n\n"
             f"Vor dem Termin erinnern wir Sie noch einmal per E-Mail. Den Termin finden Sie auch im Anhang für Ihren Kalender.\n\n"
-            f"Termin verschieben oder absagen: {booking_link(ref, d['token'])}\n"
+            f"Termin verschieben, absagen oder Vertrag widerrufen: {booking_link(ref, d['token'])}\n"
             + (f"{booking_policy()}\n" if d.get("anzahlung") and booking_policy() else "")
-            + f"\nIhre Angaben ({ref}):\n{summary_text(public_data(d))}\n\n{mail_footer()}")
+            + (f"\nWiderrufsrecht: Sie können diesen Vertrag bis zum {widerruf_bis(d).strftime('%d.%m.%Y')} ohne Angabe von Gründen widerrufen. "
+               "Die vollständige Widerrufsbelehrung steht am Ende dieser E-Mail.\n" if widerruf_bis(d) else "")
+            + ("Sie haben ausdrücklich verlangt, dass wir vor Ablauf der Widerrufsfrist mit der Leistung beginnen. Ihnen ist bekannt, dass Sie bei einem Widerruf "
+               "einen anteiligen Betrag für bereits erbrachte Leistungen zahlen und Ihr Widerrufsrecht erlischt, sobald wir die Leistung vollständig erbracht haben.\n"
+               if d.get("vorzeitig_am") else "")
+            + f"\nIhre Angaben ({ref}):\n{summary_text(public_data(d))}\n\n{mail_footer()}\n\n---\n{widerruf_text()}")
     return f"Termin bestätigt: {termin_start(d).strftime('%d.%m.%Y, %H:%M')} Uhr ({ref})", text
 
 
@@ -982,9 +1055,64 @@ def reminder_text(ref, d, at):
     return f"Erinnerung: Ihr Termin {when} um {st.strftime('%H:%M')} Uhr ({ref})", text
 
 
+WIDERRUF_TAGE = 14
+
+
+def widerruf_bis(d):
+    """Ende der Widerrufsfrist: 14 Tage ab Vertragsschluss (Bestätigung der Buchung durch den Kunden)."""
+    try:
+        return dt.datetime.fromisoformat(d["bestaetigt_am"]) + dt.timedelta(days=WIDERRUF_TAGE)
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def in_widerruf(d):
+    b = widerruf_bis(d)
+    return bool(b and now() < b)
+
+
+def early_start(d):
+    """Termin liegt innerhalb der Widerrufsfrist: Der Kunde muss den vorzeitigen Beginn ausdrücklich verlangen."""
+    st = termin_start(d)
+    return bool(st and st < now() + dt.timedelta(days=WIDERRUF_TAGE))
+
+
+def widerruf_refund_line(d):
+    z = d.get("zahlung") or {}
+    if not z.get("capture_id"):
+        return ""
+    if z.get("erstattet"):
+        return f"Die Anzahlung von {eur(float(z['value']))} wurde über PayPal erstattet."
+    return f"Die Anzahlung von {eur(float(z['value']))} erstatten wir unverzüglich, spätestens binnen 14 Tagen, über PayPal."
+
+
+def widerruf_text():
+    """Widerrufsbelehrung als Text für die Bestätigungs-E-Mail (dauerhafter Datenträger)."""
+    s = site_info()
+    a = s.get("address", {})
+    L = s.get("legal", {})
+    return (f"Widerrufsbelehrung\n\nWiderrufsrecht\nSie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. "
+            f"Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses.\n"
+            f"Um Ihr Widerrufsrecht auszuüben, müssen Sie uns ({s.get('name', 'ElbDetail')}, {L.get('owner', '')}, {a.get('street', '')}, {a.get('zip', '')} {a.get('city', '')}, "
+            f"Telefon {s.get('phoneIntl', '')}, E-Mail {s.get('email', '')}) mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief oder eine E-Mail) "
+            f"über Ihren Entschluss, diesen Vertrag zu widerrufen, informieren. Sie können dafür auch die Funktion „Vertrag widerrufen“ auf unserer Website "
+            f"({Cfg.public_url}/widerruf.html) oder den Link in dieser E-Mail nutzen. Sie können das Muster-Widerrufsformular unter {Cfg.public_url}/agb.html#widerrufsformular "
+            f"verwenden, das jedoch nicht vorgeschrieben ist.\n"
+            f"Zur Wahrung der Widerrufsfrist reicht es aus, dass Sie die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.\n\n"
+            f"Folgen des Widerrufs\nWenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir von Ihnen erhalten haben, unverzüglich und spätestens "
+            f"binnen vierzehn Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über Ihren Widerruf dieses Vertrags bei uns eingegangen ist. Für diese Rückzahlung "
+            f"verwenden wir dasselbe Zahlungsmittel, das Sie bei der ursprünglichen Transaktion eingesetzt haben, es sei denn, mit Ihnen wurde ausdrücklich etwas anderes "
+            f"vereinbart; in keinem Fall werden Ihnen wegen dieser Rückzahlung Entgelte berechnet.\n"
+            f"Haben Sie verlangt, dass die Dienstleistungen während der Widerrufsfrist beginnen sollen, so haben Sie uns einen angemessenen Betrag zu zahlen, der dem Anteil "
+            f"der bis zu dem Zeitpunkt, zu dem Sie uns von der Ausübung des Widerrufsrechts hinsichtlich dieses Vertrags unterrichten, bereits erbrachten Dienstleistungen "
+            f"im Vergleich zum Gesamtumfang der im Vertrag vorgesehenen Dienstleistungen entspricht.\n\n"
+            f"Unsere AGB: {Cfg.public_url}/agb.html")
+
+
 def public_data(d):
     """Kundendaten ohne interne Felder (Token, Kalender-ID, Versandprotokoll)."""
-    return {k: v for k, v in d.items() if k not in ("token", "hold_until", "gcal_id", "mails", "bestaetigt_am", "storniert_am", "paypal_order", "zahlung", "depositPercent", "verschoben")}
+    return {k: v for k, v in d.items() if k not in ("token", "hold_until", "gcal_id", "mails", "bestaetigt_am", "storniert_am", "paypal_order", "zahlung", "depositPercent", "verschoben",
+                                             "agb_am", "vorzeitig_am", "widerruf_am")}
 
 
 def load_termin(ref):
@@ -1025,27 +1153,48 @@ def confirm_termin(r, d, by="kunde"):
                    f"Telefon: {d.get('telefon', '')}\n\n{summary_text(public_data(d))}\n\nIm Verwaltungsportal: {Cfg.public_url}/admin/#/anfragen/{r['ref']}\n")
 
 
-def cancel_termin(r, d, by="kunde"):
+def cancel_termin(r, d, by="kunde", confirm=True):
+    """Termin absagen. Durch den Kunden innerhalb der Widerrufsfrist gilt die Absage als Widerruf: Anzahlung wird erstattet.
+    Danach wird die Anzahlung als Ausfallpauschale einbehalten. by="widerruf": ausdrücklicher Widerruf (Button oder Formular)."""
     if r["status"] in ("storniert", "verfallen", "abgelehnt"):
         return
-    d["storniert_am"] = now().isoformat()
-    if by == "kunde" and (d.get("zahlung") or {}).get("capture_id") and r["status"] == "termin_bestaetigt":
-        d["zahlung"]["einbehalten"] = now().isoformat()  # Ausfallpauschale: Termin war für den Kunden geblockt
-    save_termin(r["id"], d, "storniert" if by == "kunde" else r["status"])
-    audit("termin_storniert", f"{r['ref']} durch {by}")
+    at = now()
+    d["storniert_am"] = at.isoformat()
+    customer = by in ("kunde", "widerruf")
+    paid = (d.get("zahlung") or {}).get("capture_id")
+    widerruf = customer and r["status"] == "termin_bestaetigt" and (by == "widerruf" or in_widerruf(d))
+    if widerruf:
+        d.setdefault("widerruf_am", at.isoformat())
+    elif by == "kunde" and paid and r["status"] == "termin_bestaetigt":
+        d["zahlung"]["einbehalten"] = at.isoformat()  # Ausfallpauschale: Termin war für den Kunden geblockt
+    save_termin(r["id"], d, "storniert" if customer else r["status"])
+    audit("termin_widerrufen" if widerruf else "termin_storniert", f"{r['ref']} durch {by}")
     discard_mails(r["ref"], ["reservierung", "bestaetigung", "erinnerung"], "Termin abgesagt")
     threading.Thread(target=google_delete, args=(r["ref"],), daemon=True).start()
-    if by == "kunde":
+    if widerruf and paid:
+        refund_deposit(r["ref"], mail=False)
+        r, d = load_termin(r["ref"])
+    if customer:
         s = site_info()
-        paid = (d.get("zahlung") or {}).get("capture_id")
-        mail_async(Cfg.notify_to or s.get("email"), f"Termin abgesagt: {d.get('name')} · {de_when(d)} ({r['ref']})",
-                   f"Der Kunde hat den Termin online abgesagt.\n"
-                   + (f"Die Anzahlung von {eur(d['zahlung']['value'])} wird als Ausfallpauschale einbehalten. Eine Erstattung aus Kulanz ist im Verwaltungsportal möglich.\n" if paid else "")
+        refund = widerruf_refund_line(d) if widerruf else ""
+        failed = widerruf and paid and not (d.get("zahlung") or {}).get("erstattet")
+        mail_async(Cfg.notify_to or s.get("email"), f"Termin {'widerrufen' if widerruf else 'abgesagt'}: {d.get('name')} · {de_when(d)} ({r['ref']})",
+                   (f"Der Kunde hat den Vertrag innerhalb der Widerrufsfrist widerrufen bzw. abgesagt.\n{refund}\n"
+                    + ("ACHTUNG: Die automatische PayPal-Erstattung hat nicht geklappt. Bitte im Verwaltungsportal erstatten, spätestens binnen 14 Tagen.\n" if failed else "")
+                    if widerruf else "Der Kunde hat den Termin online abgesagt.\n"
+                    + (f"Die Anzahlung von {eur(d['zahlung']['value'])} wird als Ausfallpauschale einbehalten. Eine Erstattung aus Kulanz ist im Verwaltungsportal möglich.\n" if paid else ""))
                    + f"\n{summary_text(public_data(d))}\n")
-        if d.get("email"):
+        if d.get("email") and widerruf and confirm:
+            customer_mail("widerruf", r["ref"], d["email"], f"Eingangsbestätigung Ihres Widerrufs ({r['ref']})",
+                          f"Guten Tag {d.get('name', '').strip()},\n\nhiermit bestätigen wir den Eingang Ihres Widerrufs am {at.strftime('%d.%m.%Y um %H:%M')} Uhr. "
+                          f"Ihr Vertrag über den Termin am {de_when(d)} ({r['ref']}) ist widerrufen, der Termin ist abgesagt. {refund}\n\n"
+                          f"Einen neuen Termin buchen Sie jederzeit unter {Cfg.public_url}/termin.html\n\n{mail_footer()}",
+                          attachments=[("absage.ics", "text/calendar", ics_event(r["ref"], d, "CANCEL", cancel=True))])
+        elif d.get("email") and not widerruf:
             customer_mail("absage", r["ref"], d["email"], f"Ihr Termin wurde abgesagt ({r['ref']})",
                           f"Guten Tag {d.get('name', '').strip()},\n\nIhr Termin am {de_when(d)} ist abgesagt. "
-                          + (f"Ihre Anzahlung von {eur(d['zahlung']['value'])} behalten wir als Ausfallpauschale ein, weil wir den Termin für Sie freigehalten haben. " if paid else "")
+                          + (f"Ihre Anzahlung von {eur(d['zahlung']['value'])} behalten wir als Ausfallpauschale ein, weil wir den Termin für Sie freigehalten haben. "
+                             "Ist uns kein oder ein geringerer Schaden entstanden, können Sie uns das gern nachweisen. " if paid and r["status"] == "termin_bestaetigt" else "")
                           + f"Einen neuen Termin buchen Sie jederzeit unter {Cfg.public_url}/termin.html\n\n{mail_footer()}",
                           attachments=[("absage.ics", "text/calendar", ics_event(r["ref"], d, "CANCEL", cancel=True))])
 
@@ -1055,7 +1204,7 @@ def reschedule_termin(r, d, datum, uhrzeit, by="kunde"):
     if not _date(datum) or not uhrzeit:
         return "Bitte Tag und Uhrzeit wählen."
     with LOCK:
-        if not any(x["zeit"] == uhrzeit and x["frei"] for x in free_slots(datum, d.get("paket", ""), exclude_ref=r["ref"])):
+        if not any(x["zeit"] == uhrzeit and x["frei"] for x in free_slots(datum, exclude_ref=r["ref"], keramik=ker_booking(d))):
             return "Diese Uhrzeit ist leider nicht mehr frei. Bitte eine andere wählen."
         old = de_when(d)
         d.update(datum=datum, uhrzeit=uhrzeit)
@@ -1107,6 +1256,8 @@ MAIL_KINDS = {"reservierung": "Buchung: Link zur Anzahlung bzw. Bestätigung", "
 
 
 def approval_needed(kind):
+    if kind == "widerruf":
+        return False  # Eingang eines Widerrufs muss unverzüglich bestätigt werden
     return bool((setting("mailApproval", {}) or {}).get(kind, True))
 
 
@@ -1229,7 +1380,7 @@ def deposit_amount(d):
     if pct <= 0:
         return None
     base = richtpreis(d)
-    if base is None and d.get("paket") == "winter" and d.get("klasse") == "sport":
+    if base is None and d.get("paket") == "winter" and d.get("klasse") == "sport" and not ker_booking(d):
         base = (winter_offer() or {}).get("sportFrom")  # Sportwagen: Vorschlag vom Ab-Preis, René prüft im Postausgang
     if base is None and d.get("paket") == "keramik":
         try:
@@ -1243,6 +1394,32 @@ def deposit_amount(d):
 
 def eur(v):
     return f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".").replace(",00", "") + " €"
+
+
+def refund_deposit(ref, mail=True):
+    """PayPal-Anzahlung erstatten. Gibt (HTTP-Code, Meldung) zurück."""
+    r, d = load_termin(ref)
+    z = (d or {}).get("zahlung") or {}
+    if not r or not z.get("capture_id"):
+        return 404, "Keine PayPal-Anzahlung zu diesem Termin."
+    if z.get("erstattet"):
+        return 200, "Bereits erstattet."
+    try:
+        st = paypal_refund(z["capture_id"], float(z["value"]), ref)
+    except Exception as e:
+        log("PayPal-Erstattung fehlgeschlagen:", ref, e)
+        return 502, f"PayPal-Erstattung fehlgeschlagen: {e}"
+    if st not in ("COMPLETED", "PENDING"):
+        return 502, f"PayPal meldet: {st or 'unbekannt'}"
+    z["erstattet"] = now().isoformat()
+    d["zahlung"] = z
+    save_termin(r["id"], d)
+    audit("anzahlung_erstattet", f"{ref}: {z['value']} €")
+    if mail and d.get("email"):
+        customer_mail("erstattung", ref, d["email"], f"Ihre Anzahlung wurde erstattet ({ref})",
+                      f"Guten Tag {d.get('name', '').strip()},\n\nwir haben Ihre Anzahlung von {eur(float(z['value']))} über PayPal erstattet. "
+                      f"Je nach Bank dauert die Gutschrift wenige Tage.\n\n{mail_footer()}")
+    return 200, "Anzahlung erstattet."
 
 
 def deposit_online(d):
@@ -1906,7 +2083,7 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/gutschein-druck.js":
                 return self.send(200, "document.getElementById('printBtn')&&document.getElementById('printBtn').addEventListener('click',function(){window.print()});",
                                  "text/javascript; charset=utf-8")
-            m = re.match(r"^/termin/(T\d{6}-[0-9A-F]{4})(?:/(bestaetigen|absagen|verschieben|bezahlt))?$", path)
+            m = re.match(r"^/termin/(T\d{6}-[0-9A-F]{4})(?:/(bestaetigen|absagen|verschieben|widerrufen|bezahlt))?$", path)
             if m and method in ("GET", "HEAD", "POST"):
                 act = m.group(2) or ""
                 if act and (method == "POST") != (act != "bezahlt"):
@@ -1941,7 +2118,7 @@ class Handler(BaseHTTPRequestHandler):
             day = (qs.get("tag") or [""])[0]
             if not _date(day):
                 return self.send(400, {"ok": False, "message": "Ungültiges Datum"})
-            return self.send(200, {"tag": day, "slots": free_slots(day, (qs.get("paket") or [""])[0]), "selfBooking": self_booking()})
+            return self.send(200, {"tag": day, "slots": free_slots(day, keramik=ker_booking({"paket": (qs.get("paket") or [""])[0], "winterschutz": WINTERSCHUTZ.get((qs.get("winterschutz") or [""])[0])})), "selfBooking": self_booking()})
         if path == "/api/kalender.ics" and method == "GET":
             key = setting("icsKey", "")
             if not key or not hmac.compare_digest(key, (qs.get("key") or [""])[0]):
@@ -1990,6 +2167,15 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(404, '<!DOCTYPE html><meta charset="utf-8"><title>Nicht gefunden</title><p>Termin nicht gefunden. Bitte nutzen Sie den Link aus Ihrer E-Mail.</p>', "text/html; charset=utf-8")
         notice, err = "", ""
         valid = r["status"] == "reserviert" and d.get("hold_until", "") >= now().isoformat()
+        if action == "bestaetigen" and valid:
+            if form.get("agb") != "1" or (early_start(d) and form.get("vorzeitig") != "1"):
+                action, err = "", "Bitte bestätigen Sie die AGB" + (" und den Beginn vor Ablauf der Widerrufsfrist." if early_start(d) else ".")
+                notice = err
+            else:
+                d["agb_am"] = now().isoformat()
+                if early_start(d):
+                    d["vorzeitig_am"] = now().isoformat()
+                save_termin(r["id"], d)
         if (qs.get("abbruch") or [""])[0] and valid:
             notice = "Die Zahlung wurde abgebrochen. Ihr Termin bleibt reserviert, Sie können die Anzahlung hier jederzeit nachholen."
         if action == "bestaetigen" and valid and deposit_online(d):
@@ -2029,14 +2215,17 @@ class Handler(BaseHTTPRequestHandler):
         elif action == "absagen" and (r["status"] == "reserviert" or (r["status"] == "termin_bestaetigt" and form.get("ok") == "1")):
             cancel_termin(r, d, "kunde")
             notice = "Ihr Termin ist abgesagt. Schade, vielleicht ein andermal."
+        elif action == "widerrufen" and r["status"] == "termin_bestaetigt" and in_widerruf(d) and form.get("ok") == "1":
+            cancel_termin(r, d, "widerruf")
+            notice = "Ihr Widerruf ist eingegangen und der Termin abgesagt. Die Eingangsbestätigung kommt per E-Mail."
         elif action == "verschieben" and r["status"] == "termin_bestaetigt":
             err = reschedule_termin(r, d, str(form.get("datum", "")), str(form.get("uhrzeit", "")), "kunde")
             notice = err or "Ihr Termin ist verschoben. Die neue Bestätigung kommt per E-Mail."
         if action:  # aktuellen Stand zeigen; ein erneutes Absenden löst nichts doppelt aus
             r, d = load_termin(ref)
-        mode = "verschieben" if err else ("" if action else (qs.get("aktion") or [""])[0])
+        mode = ("verschieben" if action == "verschieben" else "") if err else ("" if action else (qs.get("aktion") or [""])[0])
         tag = str(form.get("datum", ""))[:10] if err else (qs.get("tag") or [""])[0][:10]
-        self.send(200, termin_html(r, d, notice, mode if mode in ("verschieben", "absagen") else "", tag),
+        self.send(200, termin_html(r, d, notice, mode if mode in ("verschieben", "absagen", "widerrufen") else "", tag),
                   "text/html; charset=utf-8", {"Cache-Control": "no-store", "X-Robots-Tag": "noindex"})
 
     def voucher_page(self, code, token):
@@ -2288,27 +2477,8 @@ class AdminAPI:
         h.send(405, {"ok": False})
 
     def refund(self, ref):
-        r, d = load_termin(ref)
-        z = (d or {}).get("zahlung") or {}
-        if not r or not z.get("capture_id"):
-            return self.h.send(404, {"ok": False, "message": "Keine PayPal-Anzahlung zu diesem Termin."})
-        if z.get("erstattet"):
-            return self.h.send(200, {"ok": True, "message": "Bereits erstattet."})
-        try:
-            st = paypal_refund(z["capture_id"], float(z["value"]), ref)
-        except Exception as e:
-            return self.h.send(502, {"ok": False, "message": f"PayPal-Erstattung fehlgeschlagen: {e}"})
-        if st not in ("COMPLETED", "PENDING"):
-            return self.h.send(502, {"ok": False, "message": f"PayPal meldet: {st or 'unbekannt'}"})
-        z["erstattet"] = now().isoformat()
-        d["zahlung"] = z
-        save_termin(r["id"], d)
-        audit("anzahlung_erstattet", f"{ref}: {z['value']} €")
-        if d.get("email"):
-            customer_mail("erstattung", ref, d["email"], f"Ihre Anzahlung wurde erstattet ({ref})",
-                          f"Guten Tag {d.get('name', '').strip()},\n\nwir haben Ihre Anzahlung von {eur(float(z['value']))} über PayPal erstattet. "
-                          f"Je nach Bank dauert die Gutschrift wenige Tage.\n\n{mail_footer()}")
-        return self.h.send(200, {"ok": True, "message": "Anzahlung erstattet."})
+        code, msg = refund_deposit(ref)
+        return self.h.send(code, {"ok": code == 200, "message": msg})
 
     def template(self, ref, art):
         s = site_info()

@@ -457,7 +457,14 @@
     "key": "winter",
     "name": "Winterangebot mit Wachs",
     "short": "Winterschutz mit Wachs",
-    "text": "Gründliche Pflege mit Wachsschutz vor dem ersten Streusalz. Schmutz und Salz haften schlechter, Ihr Lack kommt geschützt durch den Winter.",
+    "text": "Innen- und Außenwäsche, Glanzpolitur und Wachsversiegelung vor dem ersten Streusalz. Schmutz und Salz haften schlechter, Ihr Lack kommt geschützt durch den Winter.",
+    "includes": [
+      "Innenreinigung",
+      "Außenwäsche von Hand",
+      "Glanzpolitur",
+      "Wachsversiegelung"
+    ],
+    "ceramicOption": "Statt Wachs zubuchbar: C² CarCeramic Keramikversiegelung. Dann entfällt das Wachs. Den Aufpreis nennt René Ihnen nach Fahrzeugklasse und Lackzustand vor dem Termin. Mit Keramik bleibt Ihr Auto 3 Tage bei uns.",
     "validUntil": "2027-02-28",
     "prices": {
       "klein": 329,

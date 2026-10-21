@@ -43,7 +43,7 @@ info@elbdetail.de
 
   > Fahrzeugaufbereitung in Celle mit Schwerpunkt Lackkorrektur und Keramikversiegelung. Offizieller C²Coating Excellence Partner. 100 % Handarbeit, Innenraum- und Lederaufbereitung mit Colourlock.
 
-- Steuerhinweis, falls ein Preisfeld danach fragt: Endpreise, Kleinunternehmer nach § 19 UStG, keine Umsatzsteuer. Keine AGB verlinken, es gibt noch keine.
+- Steuerhinweis, falls ein Preisfeld danach fragt: Endpreise, Kleinunternehmer nach § 19 UStG, keine Umsatzsteuer. AGB bei Bedarf verlinken: `https://www.elbdetail.de/agb.html`.
 - Zahlungsarten: Bar, Überweisung
 - Logo und Titelbild: dieselben Dateien wie im Google-Profil
 

@@ -14,7 +14,7 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 
 - [ ] Alle Ziel-URLs sind live und laden fehlerfrei: `/termin.html`, `/gutscheine.html`, `/aktion/winterschutz.html`, `/firmenkunden.html`, `/preise.html`, `/elbdetail-care.html`, `/ueber-uns.html` und alle 7 Seiten unter `/leistungen/` (neu: `/leistungen/keramikversiegelung-celle.html`, `/leistungen/lederaufbereitung-celle.html`).
 - [ ] Preisangaben in allen Texten als Endpreise ohne Umsatzsteuer-Hinweis (Kleinunternehmer nach § 19 UStG). Alle "ab"-Preise mit der Preisliste auf `/preise.html` abgleichen (vier Pakete Refresh, Essential, Signature, Excellence; niedrigster Ab-Preis gilt für Kleinwagen).
-- [x] Inhalt der Winter-Aktion steht fest: Winterangebot mit Wachs, ab 329 € (Kleinwagen), 379 € (Kompakt), 449 € (Limousine/SUV), 549 € (Van/großer SUV), Sportwagen ab 599 € nach Besichtigung, gültig bis 28.02.2027. Anzeigentexte bei Bedarf daran anpassen.
+- [x] Inhalt der Winter-Aktion steht fest: Winterangebot mit Wachs = Innen- und Außenwäsche, Glanzpolitur und Wachsversiegelung; statt Wachs auf Wunsch C² CarCeramic (Aufpreis nach Absprache). Ab 329 € (Kleinwagen), 379 € (Kompakt), 449 € (Limousine/SUV), 549 € (Van/großer SUV), Sportwagen ab 599 € nach Besichtigung, gültig bis 28.02.2027. Anzeigentexte bei Bedarf daran anpassen.
 - [ ] Gutschein-Angebot steht fest: `[PLATZHALTER: Werte oder Pakete, Form (PDF, gedruckt), letzter Bestelltag vor Weihnachten]`.
 - [ ] Test-Aufruf jeder Ziel-URL mit UTM-Parametern (Abschnitt 5). In der eigenen Statistik prüfen, dass Quelle und Kampagne ankommen.
 - [ ] Test der Ereignisse: Termin angefragt, Gutschein angefragt, WhatsApp-Klick, Anruf-Klick werden in der Statistik gezählt.

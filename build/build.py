@@ -23,6 +23,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+import agb  # noqa: E402
 import core  # noqa: E402
 import conversion  # noqa: E402
 import images  # noqa: E402
@@ -125,6 +126,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     for a in site.articles:
         ratgeber.build_article(site, a, write)
     pages.build_legal(site, write)
+    agb.build_agb(site, write)
+    agb.build_widerruf(site, write)
     pages.build_404(site, write)
     pages.build_danke(site, write)
 
@@ -136,7 +139,7 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     sm += [("/termin.html", iso, "0.9", "monthly"), ("/gutscheine.html", iso, "0.7", "monthly"), ("/firmenkunden.html", iso, "0.7", "monthly"),
            ("/aktion/winterschutz.html", iso, "0.7", "monthly"), ("/ratgeber/index.html", iso, "0.7", "weekly"), ("/ratgeber/winter.html", iso, "0.7", "monthly")]
     sm += [(f"/ratgeber/{a['slug']}.html", a.get("updated") or a.get("date") or iso, "0.6", "monthly") for a in site.articles]
-    sm += [("/impressum.html", iso, "0.2", "yearly"), ("/datenschutz.html", iso, "0.2", "yearly")]
+    sm += [("/impressum.html", iso, "0.2", "yearly"), ("/datenschutz.html", iso, "0.2", "yearly"), ("/agb.html", iso, "0.2", "yearly")]
     write("sitemap.xml", seo.sitemap(site, sm))
     write("robots.txt", seo.robots(site))
     write("llms.txt", seo.llms(site))

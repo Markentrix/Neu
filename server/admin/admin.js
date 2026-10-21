@@ -44,7 +44,7 @@
   function fail(e) { toast(e.message || "Fehler", true); }
   var STATUS = { neu: "Neu", reserviert: "Reserviert (wartet auf Kunde)", in_bearbeitung: "In Bearbeitung", angebot_gesendet: "Angebot gesendet", termin_bestaetigt: "Termin bestätigt", erledigt: "Erledigt", abgelehnt: "Abgelehnt", storniert: "Vom Kunden abgesagt", verfallen: "Reservierung verfallen" };
   var VSTATUS = { offen: "Offen (unbezahlt)", bezahlt: "Bezahlt / gültig", eingeloest: "Eingelöst", storniert: "Storniert" };
-  var TYP = { kontakt: "Anfrage", termin: "Termin", gutschein: "Gutschein", firma: "Firma" };
+  var TYP = { kontakt: "Anfrage", termin: "Termin", gutschein: "Gutschein", firma: "Firma", widerruf: "Widerruf" };
   function pill(st, map) { return '<span class="pill st-' + esc(st) + '">' + esc((map || STATUS)[st] || st) + "</span>"; }
   function deDate(iso) { if (!iso) return ""; var d = iso.slice(0, 10).split("-"); return d.length === 3 ? d[2] + "." + d[1] + "." + d[0] : iso; }
   function deDateTime(iso) { return iso ? deDate(iso) + " " + iso.slice(11, 16) : ""; }

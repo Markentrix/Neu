@@ -98,7 +98,7 @@
   "about": {
     "name": "René",
     "role": "Gründer und Inhaber",
-    "photo": "",
+    "photo": "rene-triechelt.jpg",
     "since": "",
     "text": "Für mich ist Fahrzeugaufbereitung keine Dienstleistung von der Stange. Ob Familienwagen, Firmenfahrzeug oder Sportwagen: Jedes Auto bekommt die gleiche Sorgfalt. Mein Ziel ist, dass Sie sich wirklich über das Ergebnis freuen.",
     "fullName": "René Triechelt",
@@ -200,7 +200,7 @@
     ],
     "hinweis": "Abgabezeiten für die Online-Buchung. Jede E-Mail an Kunden (Anzahlungslink, Bestätigung, Erinnerungen) prüft und gibt René im Portal unter Postausgang frei.",
     "depositPercent": 15,
-    "policy": "Sie können Ihren Termin jederzeit kostenlos auf einen anderen Tag verschieben, die Anzahlung bleibt dabei erhalten. Sagen Sie den Termin ganz ab, wird die Anzahlung als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben.",
+    "policy": "Sie können Ihren Termin jederzeit kostenlos auf einen anderen Tag verschieben, die Anzahlung bleibt dabei erhalten. Innerhalb der gesetzlichen Widerrufsfrist von 14 Tagen ab Buchung erstatten wir die Anzahlung bei einer Absage vollständig. Sagen Sie den Termin danach ganz ab, wird die Anzahlung als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben. Ist uns kein oder ein geringerer Schaden entstanden, können Sie uns das nachweisen.",
     "conditionSurcharge": {
       "percent": 5,
       "overrides": {

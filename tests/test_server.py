@@ -556,8 +556,14 @@ class TestBooking(Base):
         code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
         self.assertEqual(code, 200)
         self.assertIn("Termin verbindlich bestätigen", page.decode())
-        code, page = self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)
+        self.assertIn('name="agb"', page.decode())
+        self.assertIn('name="vorzeitig"', page.decode())  # Termin innerhalb der Widerrufsfrist
+        code, page = self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)  # ohne AGB keine Buchung
+        self.assertIn("Bitte bestätigen Sie die AGB", page.decode())
+        self.assertEqual(app.load_termin(ref)[0]["status"], "reserviert")
+        code, page = self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token, "agb": "1", "vorzeitig": "1"}, raw=True, form=True)
         self.assertIn("verbindlich gebucht", page.decode())
+        self.assertTrue(app.load_termin(ref)[1].get("vorzeitig_am"))
         with app.db() as c:
             self.assertEqual(c.execute("SELECT status FROM anfragen WHERE ref=?", (ref,)).fetchone()["status"], "termin_bestaetigt")
         conf = [m for m in self.wait_mail("kunde@example.com", 2) if "bestätigt" in m["subject"]][0]
@@ -567,7 +573,7 @@ class TestBooking(Base):
         self.assertTrue(any("vom Kunden bestätigt" in m["subject"] for m in self.mails))
         # erneutes Absenden verschickt nichts doppelt
         n = len(self.mails)
-        self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)
+        self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token, "agb": "1", "vorzeitig": "1"}, raw=True, form=True)
         threading.Event().wait(0.2)
         self.assertEqual(len(self.mails), n)
         # Erinnerungen 24 h und 6 h vorher sind geplant und gehen erst zum Zeitpunkt raus
@@ -648,7 +654,7 @@ class TestBooking(Base):
             token = re.search(r"\?t=([\w-]+)", mail["text"]).group(1)
             code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
             self.assertIn("mit PayPal leisten", page.decode())
-            code, _ = self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)  # Weiterleitung zu PayPal
+            code, _ = self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token, "agb": "1", "vorzeitig": "1"}, raw=True, form=True)  # Weiterleitung zu PayPal
             r, d = app.load_termin(ref)
             self.assertEqual(r["status"], "reserviert")  # ohne Zahlung noch nicht bestätigt
             self.assertEqual(d["paypal_order"], "ORDER-" + ref)
@@ -665,6 +671,18 @@ class TestBooking(Base):
             self.assertEqual(d["zahlung"]["capture_id"], "CAP1")
             conf = [m for m in self.wait_mail("zahler@example.com", 2) if "bestätigt" in m["subject"]][0]
             self.assertIn("Anzahlung von 49,35 € per PayPal ist eingegangen", conf["text"])
+            self.assertIn("Widerrufsbelehrung", conf["text"])
+            self.assertIn("ausdrücklich verlangt", conf["text"])
+            code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
+            self.assertIn("Vertrag widerrufen", page.decode())
+            code, page = self.req("GET", f"/termin/{ref}?t={token}&aktion=absagen", raw=True)
+            self.assertIn("innerhalb der Widerrufsfrist", page.decode())
+            # nach Ablauf der Widerrufsfrist gilt die Ausfallpauschale
+            r, d = app.load_termin(ref)
+            d["bestaetigt_am"] = (app.now() - app.dt.timedelta(days=15)).isoformat()
+            app.save_termin(r["id"], d)
+            code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
+            self.assertNotIn("Vertrag widerrufen", page.decode())
             code, page = self.req("GET", f"/termin/{ref}?t={token}&aktion=absagen", raw=True)
             self.assertIn("als Ausfallpauschale einbehalten", page.decode())
             self.req("POST", f"/termin/{ref}/absagen", {"t": token, "ok": "1"}, raw=True, form=True)
@@ -678,6 +696,56 @@ class TestBooking(Base):
             self.assertTrue(app.load_termin(ref)[1]["zahlung"]["erstattet"])
         finally:
             app.paypal_create, app.paypal_capture, app.paypal_refund = orig
+            for k in ("PAYPAL_CLIENT_ID", "PAYPAL_SECRET"):
+                os.environ.pop(k, None)
+
+    def test_widerruf(self):
+        """Widerrufsbutton und Widerrufsformular: Termin storniert, Anzahlung erstattet, Eingangsbestätigung sofort ohne Freigabe."""
+        os.environ.update({"PAYPAL_CLIENT_ID": "id", "PAYPAL_SECRET": "geheim"})
+        orig = (app.paypal_create, app.paypal_capture, app.paypal_refund)
+        calls = {"refunds": []}
+        app.paypal_create = lambda ref, d: ("ORDER-" + ref, self.base + "/api/health")
+        app.paypal_capture = lambda oid: {"status": "COMPLETED", "capture_id": "CAP-" + oid, "capture_status": "COMPLETED", "currency": "EUR", "value": 49.35, "ref": ""}
+        app.paypal_refund = lambda cid, value, ref: calls["refunds"].append(cid) or "COMPLETED"
+        app.set_setting("mailApproval", {})  # alles mit Freigabe: der Widerruf geht trotzdem sofort raus
+        try:
+            refs = []
+            for i, (day, mail_to) in enumerate([(next_workday(20), "w1@example.com"), (next_workday(21), "w2@example.com")]):
+                code, j = self.book(day, "09:00", email=mail_to)
+                self.assertEqual(code, 200, j)
+                ref = j["ref"]
+                r, d = app.load_termin(ref)
+                self.req("POST", f"/termin/{ref}/bestaetigen", {"t": d["token"], "agb": "1"}, raw=True, form=True)
+                self.req("GET", f"/termin/{ref}/bezahlt?t={d['token']}&token=ORDER-{ref}", raw=True)
+                self.assertEqual(app.load_termin(ref)[0]["status"], "termin_bestaetigt")
+                refs.append((ref, d["token"], mail_to))
+            # 1) Button auf der Terminseite: zweistufig „Vertrag widerrufen“ → „Widerruf bestätigen“
+            ref, token, to = refs[0]
+            code, page = self.req("GET", f"/termin/{ref}?t={token}&aktion=widerrufen", raw=True)
+            self.assertIn("Widerruf bestätigen", page.decode())
+            code, page = self.req("POST", f"/termin/{ref}/widerrufen", {"t": token, "ok": "1"}, raw=True, form=True)
+            self.assertIn("Widerruf ist eingegangen", page.decode())
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "storniert")
+            self.assertTrue(d["zahlung"].get("erstattet"))
+            self.assertFalse(d["zahlung"].get("einbehalten"))
+            got = self.wait_mail(to, 1)
+            self.assertTrue(any("Eingangsbestätigung Ihres Widerrufs" in m["subject"] for m in got), [m["subject"] for m in got])
+            # 2) Formular „Vertrag widerrufen“ mit Vorgangsnummer und passender E-Mail
+            ref, token, to = refs[1]
+            code, j = self.req("POST", "/api/anfrage", {"typ": "widerruf", "name": "Karla Kunde", "email": to, "vorgang": ref.lower()})
+            self.assertEqual(code, 200, j)
+            self.assertTrue(j["ref"].startswith("W"))
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "storniert")
+            self.assertTrue(d["zahlung"].get("erstattet"))
+            self.assertEqual(len(calls["refunds"]), 2)
+            got = self.wait_mail(to, 1)
+            self.assertTrue(any("Eingangsbestätigung Ihres Widerrufs" in m["subject"] for m in got))
+            self.assertEqual(self.req("POST", "/api/anfrage", {"typ": "widerruf", "name": "X", "email": "", "vorgang": "T1"})[0], 422)
+        finally:
+            app.paypal_create, app.paypal_capture, app.paypal_refund = orig
+            app.set_setting("mailApproval", {k: False for k in app.MAIL_KINDS})
             for k in ("PAYPAL_CLIENT_ID", "PAYPAL_SECRET"):
                 os.environ.pop(k, None)
 
@@ -714,7 +782,7 @@ class TestBooking(Base):
         self.assertLess(hold, app.now() + dt.timedelta(hours=25))
         # Bestätigung durch den Kunden landet ebenfalls als Entwurf im Postausgang
         token = app.load_termin(ref)[1]["token"]
-        self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)
+        self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token, "agb": "1", "vorzeitig": "1"}, raw=True, form=True)
         code, ob = self.admin("GET", f"postausgang?ref={ref}")
         kinds = sorted(o["kind"] for o in ob["items"] if o["status"] == "entwurf")
         self.assertEqual(kinds, ["bestaetigung", "erinnerung", "erinnerung"])
@@ -740,6 +808,19 @@ class TestBooking(Base):
         d = app.load_termin(j["ref"])[1]
         self.assertEqual(d["anzahlung"], 56.85)  # 15 % vom Winterpreis Kompaktwagen (379 €)
         self.assertIn("Winterangebot mit Wachs", app.summary_text(d))
+        self.assertIn("Wachsversiegelung (inklusive)", app.summary_text(d))
+        self.assertFalse(app.ker_booking(d))
+        # Upgrade: C² CarCeramic statt Wachs → kein Festpreis, René legt die Anzahlung fest; Keramik-Standzeit
+        day2 = next_workday(17)
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "winter", "winterschutz": "keramik", "klasse": "kompakt", "datum": day2, "uhrzeit": "08:00",
+                                                    "name": "Karla Kunde", "telefon": "0171 2223334", "email": "winter2@example.com", "einwilligung": "ja"})
+        self.assertEqual(code, 200, j)
+        d = app.load_termin(j["ref"])[1]
+        self.assertTrue(app.ker_booking(d))
+        self.assertNotIn("anzahlung", d)
+        self.assertIn("C² CarCeramic statt Wachs", app.summary_text(d))
+        self.assertIn("3 Tage", app.stand_text(d))
+        self.assertIn(day2, app.blocked_days())  # Keramik belegt die Halle exklusiv
 
     def test_reviews_sync_updates_site(self):
         orig = app.reviews_fetch
