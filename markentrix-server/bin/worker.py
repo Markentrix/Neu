@@ -107,13 +107,51 @@ def vorname(art, name):
     return VORVERSION / f"{time.strftime('%Y%m%d-%H%M%S')}-{time.time_ns() % 1000000:06d}__{art}__{name}"
 
 
+def portal_upstream():
+    mode = (BASE / "mode").read_text().strip() if (BASE / "mode").exists() else "own"
+    return "127.0.0.1:8090" if mode == "host" else "mk-portal:8000"
+
+
+def caddy_inhalt(domain):
+    """Statische Website plus die Website-API: /api/* der Kundendomain geht an das Portal (Pfad wird zu /siteapi/api/…, die Domain im Host bleibt erhalten).
+    Nur diese Pfade werden weitergeleitet, die übrige Portal-Schnittstelle ist über die Kundendomain nicht erreichbar."""
+    return (f"{domain}, www.{domain} {{\n\tencode zstd gzip\n"
+            f"\thandle /api/* {{\n\t\trewrite * /siteapi{{uri}}\n\t\treverse_proxy {portal_upstream()}\n\t}}\n"
+            f"\thandle {{\n\t\troot * /srv/sites/live/{domain}\n\t\tfile_server\n\t}}\n}}\n")
+
+
+def alt_inhalt(domain):
+    return f"{domain}, www.{domain} {{\n\tencode zstd gzip\n\troot * /srv/sites/live/{domain}\n\tfile_server\n}}\n"
+
+
 def caddy_datei(domain):
     cf = BASE / "caddy" / "sites" / f"{domain}.caddy"
     if cf.exists():
         return False
     cf.parent.mkdir(parents=True, exist_ok=True)
-    cf.write_text(f"{domain}, www.{domain} {{\n\tencode zstd gzip\n\troot * /srv/sites/live/{domain}\n\tfile_server\n}}\n")
+    cf.write_text(caddy_inhalt(domain))
     return True
+
+
+def caddy_nachruesten():
+    """Ältere, unveränderte Standard-Einträge bekommen die Website-API-Weiterleitung. Von Hand geänderte Dateien bleiben unangetastet."""
+    ordner = BASE / "caddy" / "sites"
+    geaendert = False
+    if not ordner.is_dir():
+        return
+    for cf in ordner.glob("*.caddy"):
+        domain = cf.name[:-6]
+        if not NAME["live"].match(domain) or cf.is_symlink():
+            continue
+        try:
+            if cf.read_text() == alt_inhalt(domain):
+                cf.write_text(caddy_inhalt(domain))
+                geaendert = True
+        except OSError:
+            continue
+    if geaendert:
+        reload_caddy()
+        log("Website-API-Weiterleitung in bestehende Caddy-Einträge eingefügt")
 
 
 def vorversionen_aufraeumen(art, name):
@@ -228,6 +266,10 @@ def main():
             log(f"Fehler bei {f.name}: {e}")
         f.unlink(missing_ok=True)
     aufraeumen()
+    try:
+        caddy_nachruesten()
+    except Exception as e:  # noqa: BLE001
+        log(f"Caddy-Nachrüstung: {e}")
 
 
 if __name__ == "__main__":

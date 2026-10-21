@@ -21,3 +21,5 @@ RESET_HOURS = 2
 PUSH_HTTP_ERLAUBT = os.environ.get("PUSH_HTTP_ERLAUBT", "0") == "1"   # nur für Tests mit lokalem Push-Server
 SITE_LOKAL_ERLAUBT = os.environ.get("SITE_LOKAL_ERLAUBT", "0") == "1"   # nur für Tests: lokale Mail-/Kalender-Server und http erlauben
 PLACES_BASE_URL = os.environ.get("PLACES_BASE_URL", "https://places.googleapis.com").rstrip("/")
+
+SITE_API_LIMIT = int(os.environ.get("SITE_API_LIMIT", "8"))   # Anfragen je IP-Adresse und 10 Minuten über die Website-API

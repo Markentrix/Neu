@@ -96,11 +96,18 @@ case "$cmd" in
     chmod -R a+rX "$dir"
     # Ordner für Wochenangebote: das Portal (Benutzer 10001) darf hier schreiben
     mkdir -p "$dir/angebote/archiv"; chown -R 10001:10001 "$dir/angebote"; chmod -R a+rX "$dir/angebote"
+    UPSTREAM="mk-portal:8000"; [ "$MODE" = host ] && UPSTREAM="127.0.0.1:8090"
     cat > "$BASE/caddy/sites/$domain.caddy" <<CADDY
 $domain, www.$domain {
 	encode zstd gzip
-	root * /srv/sites/live/$domain
-	file_server
+	handle /api/* {
+		rewrite * /siteapi{uri}
+		reverse_proxy $UPSTREAM
+	}
+	handle {
+		root * /srv/sites/live/$domain
+		file_server
+	}
 }
 CADDY
     reload_caddy

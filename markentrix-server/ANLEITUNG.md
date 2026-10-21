@@ -422,3 +422,17 @@ So veröffentlichst du eine fertige Kunden-Website, ohne SSH oder WinSCP:
 **Zuordnung:** Die Website wird dem Kunden zugeordnet (Kundenblatt → Websites, Domain beim Kunden vermerkt, Website-Dienste erlauben genau diese Domain) und trägt Kundennummer und Firma in ihrer Kennung (`site.json`). Domain bei IONOS/INWX: nur der A-Eintrag (und www) muss auf den Server zeigen, siehe oben.
 
 Der alte Weg `mkctl site-add … --from Ordner` funktioniert weiter. Eine Windows-.bat mit SSH ist nicht mehr nötig.
+
+
+## Website-API: Termine, Anfragen und Statistik für jede Kunden-Website (Friseur, Werkstatt, Praxis …)
+
+Jede fertige Website ruft unter ihrer eigenen Domain `/api/anfrage`, `/api/slots`, `/api/verfuegbarkeit` und `/api/e` auf. Die Domain wird beim Hochladen eingerichtet, Caddy leitet genau diese Pfade ans Portal, das Portal erkennt den Kunden an der Domain. Es gibt pro Kunde kein eigenes Backend und keinen eigenen Admin: Alles pflegt der Inhaber im Kundenportal unter **Website-Dienste**. Vertrag und Grenzen: `docs/WEBSITE-API.md`. Prompt für Claude Code, damit jede neue Seite passt: `docs/WEBSITE-PROMPT.md`.
+
+**Einrichtung für einen Kunden mit Terminbuchung (z. B. Friseursalon):**
+1. Website nach dem Prompt bauen lassen, ZIP im Admin hochladen (Websites & Demos → Website hochladen, Kunde und Domain wählen). Ganze Projektordner sind ok, der Ordner `website-fertig` wird automatisch gefunden.
+2. Im Kundenportal (oder für den Kunden) **Website-Dienste**: Kontaktformular einschalten (Empfänger), Terminbuchung einschalten. Dort einstellen: Öffnungstage, Beginn/Ende und Dauer **oder** feste Uhrzeiten, Höchstzahl pro Tag, Vorlauf, Ort, optional den iCal-Kalender.
+3. „Ich bestätige jede Buchung selbst“ ein: Neue Wünsche sind vorgemerkt und warten unter „Buchungen über die Website“ auf **Bestätigen** (mit optionaler Anzahlung und PayPal.Me-Link) oder **Ablehnen**. Aus: Buchungen gelten sofort, der Kunde bekommt die Einladung automatisch.
+4. Urlaub und Feiertage unter **Urlaub und Sperrtage** eintragen. Unbestätigte Reservierungen geben die Zeit nach der Haltefrist (Standard 72 Stunden) wieder frei.
+5. Besucherzahlen (ohne Cookies) stehen unter „Besucher der letzten 30 Tage“.
+
+**Wichtig:** Die Uhrzeiten, die die Website anbietet, müssen zu den „Festen Uhrzeiten“ im Portal passen. Bestehende Websites bekommen die Weiterleitung automatisch (der Server-Dienst ergänzt unveränderte Standard-Einträge innerhalb einer Minute).

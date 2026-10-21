@@ -7,7 +7,7 @@ Drei Teile:
 import json
 import re
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from html import escape
 from urllib.parse import urlparse
 
@@ -293,7 +293,7 @@ def _status(cur, kid) -> dict:
 
 def _zustand(cur, kid) -> dict:
     z = sd.zeile(cur, kid)
-    cur.execute("SELECT count(*) AS n FROM website_termine WHERE kunden_id=%s AND status='gebucht' AND start > now()", (kid,))
+    cur.execute("SELECT count(*) AS n FROM website_termine WHERE kunden_id=%s AND status IN ('gebucht','reserviert') AND start > now()", (kid,))
     offen = cur.fetchone()["n"]
     places = bool(einstellungen.lesen(cur, "places").get("api_key"))
     hosts = sorted(h for h in sd.erlaubte_hosts(cur, kid, ROOT) if not h.startswith("demo.") and not h.startswith("www."))
@@ -307,9 +307,10 @@ def _zustand(cur, kid) -> dict:
         "mail": {"aktiv": z["mail_aktiv"], "empfaenger": z["mail_empfaenger"] or "", "betreff": z["mail_betreff"] or "", "name": z["mail_name"] or "", "smtp": smtp},
         "kalender": {"aktiv": z["kal_aktiv"], "ical_gesetzt": bool(z["kal_ical_enc"]), "ical_geprueft_am": z["kal_ical_geprueft_am"], "dauer": z["kal_dauer"],
                      "tage": z["kal_tage"], "von": z["kal_von"], "bis": z["kal_bis"], "wochentage": z["kal_wochentage"], "vorlauf_std": z["kal_vorlauf_std"],
-                     "ort": z["kal_ort"] or "", "empfaenger": z["kal_empfaenger"] or "", "offene_termine": offen},
+                     "ort": z["kal_ort"] or "", "empfaenger": z["kal_empfaenger"] or "", "offene_termine": offen,
+                     "zeiten": z["kal_zeiten"] or "", "kapazitaet": z["kal_kapazitaet"], "freigabe": z["kal_freigabe"], "halte_std": z["kal_halte_std"]},
         "paypal": {"aktiv": z["pp_aktiv"], "client_id": z["pp_client_id"] or "", "waehrung": z["pp_waehrung"], "me_link": z["pp_me_link"] or ""},
-        "analytics": {"aktiv": z["ga_aktiv"], "id": z["ga_id"] or ""},
+        "analytics": {"aktiv": z["ga_aktiv"], "id": z["ga_id"] or "", "statistik": z["stat_aktiv"]},
         "bewertungen": {"aktiv": z["bew_aktiv"], "place_id": z["bew_place_id"] or "", "sterne": float(z["bew_sterne"]) if z["bew_sterne"] is not None else None,
                         "anzahl": z["bew_anzahl"], "link": z["bew_link"] or "", "stand": z["bew_stand"]},
         "status": _status(cur, kid),
@@ -424,6 +425,10 @@ class KalenderIn(BaseModel):
     vorlauf_std: int = Field(default=12, ge=0, le=240)
     ort: str = Field(default="", max_length=300)
     empfaenger: str = Field(default="", max_length=400)
+    zeiten: str = Field(default="", max_length=300)             # feste Uhrzeiten "08:00, 10:00"; leer = Raster
+    kapazitaet: int = Field(default=0, ge=0, le=200)
+    freigabe: bool = False
+    halte_std: int = Field(default=72, ge=1, le=336)
 
 
 @kunde.put("/kalender")
@@ -435,6 +440,9 @@ def k_kalender(data: KalenderIn, user: dict = Depends(require_inhaber)):
     if not data.wochentage or any(w < 1 or w > 7 for w in data.wochentage):
         raise HTTPException(400, "Bitte wähle mindestens einen Wochentag.")
     emp = _empf_pruefen(data.empfaenger, False)
+    zeiten = [x.strip() for x in re.split(r"[,;\s]+", data.zeiten) if x.strip()]
+    if any(not sd.ZEIT_RE.match(x) for x in zeiten) or len(zeiten) > 24:
+        raise HTTPException(400, "Die Uhrzeiten bitte so eintragen: 08:00, 10:00, 13:30.")
     enc, geprueft = None, None
     if data.ical_url.strip():
         try:
@@ -446,9 +454,11 @@ def k_kalender(data: KalenderIn, user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
         sd.zeile(cur, kid)
         cur.execute("""UPDATE website_dienste SET kal_aktiv=%s, kal_dauer=%s, kal_tage=%s, kal_von=%s, kal_bis=%s, kal_wochentage=%s, kal_vorlauf_std=%s,
-                       kal_ort=%s, kal_empfaenger=%s, kal_ical_enc=coalesce(%s, kal_ical_enc), kal_ical_geprueft_am=coalesce(%s, kal_ical_geprueft_am), geaendert_am=now()
+                       kal_ort=%s, kal_empfaenger=%s, kal_ical_enc=coalesce(%s, kal_ical_enc), kal_ical_geprueft_am=coalesce(%s, kal_ical_geprueft_am),
+                       kal_zeiten=%s, kal_kapazitaet=%s, kal_freigabe=%s, kal_halte_std=%s, geaendert_am=now()
                        WHERE kunden_id=%s""",
-                    (data.aktiv, data.dauer, data.tage, data.von, data.bis, sorted(set(data.wochentage)), data.vorlauf_std, data.ort.strip() or None, emp or None, enc, geprueft, kid))
+                    (data.aktiv, data.dauer, data.tage, data.von, data.bis, sorted(set(data.wochentage)), data.vorlauf_std, data.ort.strip() or None, emp or None, enc, geprueft,
+                     ", ".join(sorted(set(zeiten))) or None, data.kapazitaet, data.freigabe, data.halte_std, kid))
         audit(cur, user, "website_dienste_kalender", kid, {"aktiv": data.aktiv})
     sd._ical_cache.pop(str(kid), None)
     return {"ok": True}
@@ -571,6 +581,183 @@ def k_bew_test(user: dict = Depends(require_inhaber)):
 
 # =============================================================== Admin: Status ohne Geheimnisse, Google-Schlüssel
 admin = APIRouter(prefix="/api/admin")
+
+
+# =============================================================== Buchungen, Sperrtage, Statistik (Inhaber)
+@kunde.get("/buchungen")
+def k_buchungen(user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        z = sd.zeile(cur, kid)
+        sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
+        cur.execute("""SELECT id, ref, status, start, name, email, telefon, nachricht, daten, anzahlung, erstellt_am FROM website_termine
+                       WHERE kunden_id=%s AND status IN ('reserviert','gebucht') AND start > now() - interval '1 day'
+                       ORDER BY (status='reserviert') DESC, start LIMIT 100""", (kid,))
+        zeilen = cur.fetchall()
+    out = []
+    for r in zeilen:
+        d = r["daten"] or {}
+        details = {k: v for k, v in d.items() if k not in ("typ", "name", "telefon", "email", "nachricht", "datum", "datum2", "uhrzeit") and v}
+        out.append({"id": str(r["id"]), "ref": r["ref"] or "", "status": r["status"], "start": r["start"], "name": r["name"], "email": r["email"], "telefon": r["telefon"] or "",
+                    "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or ""})
+    return {"buchungen": out, "freigabe": z["kal_freigabe"]}
+
+
+class BestaetigenIn(BaseModel):
+    anzahlung: str = Field(default="", max_length=20)
+    hinweis: str = Field(default="", max_length=600)
+
+
+def _betrag(text: str) -> str:
+    t = text.strip().replace("€", "").replace(",", ".").strip()
+    if not t:
+        return ""
+    try:
+        v = float(t)
+    except ValueError:
+        raise HTTPException(400, "Bitte die Anzahlung als Zahl eintragen, z. B. 30 oder 29,90.")
+    if not 0 < v <= 100000:
+        raise HTTPException(400, "Bitte die Anzahlung als Zahl eintragen, z. B. 30 oder 29,90.")
+    return f"{v:.2f}"
+
+
+@kunde.post("/buchungen/{bid}/bestaetigen")
+def k_bestaetigen(bid: str, data: BestaetigenIn, bg: BackgroundTasks, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("buchbest:" + str(kid), 60, 600)
+    betrag = _betrag(data.anzahlung)
+    with tx("system") as cur:
+        z = sd.zeile(cur, kid)
+        try:
+            cur.execute("""UPDATE website_termine SET status='gebucht', anzahlung=%s WHERE id=%s AND kunden_id=%s AND status='reserviert' AND start > now()
+                           RETURNING id, termin_id, start, ende, name, email, telefon, nachricht, token, ref""", (betrag or None, bid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültige Buchung.")
+        g = cur.fetchone()
+        if not g:
+            raise HTTPException(409, "Diese Buchung ist nicht mehr offen (bestätigt, abgelehnt oder abgelaufen).")
+        if g["termin_id"]:
+            cur.execute("UPDATE termine SET status='bestaetigt' WHERE id=%s", (g["termin_id"],))
+        cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+        firma = cur.fetchone()["firma"]
+        audit(cur, user, "website_buchung_bestaetigt", kid, {"ref": g["ref"]})
+    bg.add_task(_bestaetigung_mail, kid, g, z, firma, betrag, data.hinweis.strip())
+    return {"ok": True}
+
+
+def _bestaetigung_mail(kid, g: dict, z: dict, firma: str, betrag: str, hinweis: str):
+    lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    absagen = f"{config.BASE_URL}/site/{z['site_id']}/termin/absagen?t={g['token']}"
+    zahlung = ""
+    if betrag:
+        me = (z["pp_me_link"] or "").strip().rstrip("/")
+        zahlung = f"\nZur Sicherung des Termins bitten wir um eine Anzahlung von {betrag.replace('.', ',')} €."
+        if z["pp_aktiv"] and me.startswith("https://"):
+            zahlung += f"\nSie können bequem per PayPal zahlen: {me}/{betrag}{z['pp_waehrung']}"
+    text = (f"Guten Tag {g['name']},\n\nIhr Termin ist bestätigt: {lokal}.{(chr(10) + z['kal_ort']) if z['kal_ort'] else ''}\n{zahlung}\n"
+            f"{(chr(10) + hinweis + chr(10)) if hinweis else ''}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}")
+    sd.kundenmail(kid, g["email"], f"Ihr Termin bei {firma} am {lokal} ist bestätigt", text,
+                  anhang=("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin bei " + firma, z["kal_ort"] or ""), "text/calendar"), art="termin")
+
+
+class AblehnenIn(BaseModel):
+    grund: str = Field(default="", max_length=600)
+
+
+@kunde.post("/buchungen/{bid}/ablehnen")
+def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("buchabl:" + str(kid), 60, 600)
+    with tx("system") as cur:
+        try:
+            cur.execute("""UPDATE website_termine SET status='abgesagt' WHERE id=%s AND kunden_id=%s AND status IN ('reserviert','gebucht') AND start > now()
+                           RETURNING termin_id, start, name, email, ref""", (bid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültige Buchung.")
+        g = cur.fetchone()
+        if not g:
+            raise HTTPException(409, "Diese Buchung ist nicht mehr offen.")
+        if g["termin_id"]:
+            cur.execute("UPDATE termine SET status='abgesagt' WHERE id=%s", (g["termin_id"],))
+        cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+        firma = cur.fetchone()["firma"]
+        audit(cur, user, "website_buchung_abgelehnt", kid, {"ref": g["ref"]})
+    lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    bg.add_task(sd.kundenmail, kid, g["email"], f"Zu Ihrem Termin am {lokal}",
+                f"Guten Tag {g['name']},\n\nleider können wir den gewünschten Termin am {lokal} nicht anbieten.\n{(data.grund.strip() + chr(10)) if data.grund.strip() else ''}"
+                f"Auf unserer Website können Sie jederzeit einen anderen Termin wählen.\n\nViele Grüße\n{firma}", None, None, "termin")
+    return {"ok": True}
+
+
+@kunde.get("/sperrtage")
+def k_sperrtage(user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        cur.execute("SELECT tag, grund FROM website_sperrtage WHERE kunden_id=%s AND tag >= current_date ORDER BY tag LIMIT 400", (user["kunden_id"],))
+        return {"tage": [{"tag": r["tag"].isoformat(), "grund": r["grund"] or ""} for r in cur.fetchall()]}
+
+
+class SperrIn(BaseModel):
+    von: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    bis: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
+    grund: str = Field(default="", max_length=80)
+
+
+@kunde.post("/sperrtage")
+def k_sperre(data: SperrIn, user: dict = Depends(require_inhaber)):
+    try:
+        a = date.fromisoformat(data.von)
+        b = date.fromisoformat(data.bis) if data.bis else a
+    except ValueError:
+        raise HTTPException(400, "Das Datum ist ungültig.")
+    if b < a or (b - a).days > 120:
+        raise HTTPException(400, "Der Zeitraum ist ungültig (höchstens 120 Tage am Stück).")
+    with tx("system") as cur:
+        for i in range((b - a).days + 1):
+            cur.execute("INSERT INTO website_sperrtage (kunden_id, tag, grund) VALUES (%s,%s,%s) ON CONFLICT (kunden_id, tag) DO UPDATE SET grund=excluded.grund",
+                        (user["kunden_id"], a + timedelta(days=i), data.grund.strip() or None))
+    return {"ok": True}
+
+
+@kunde.delete("/sperrtage/{tag}")
+def k_sperre_weg(tag: str, user: dict = Depends(require_inhaber)):
+    try:
+        t = date.fromisoformat(tag)
+    except ValueError:
+        raise HTTPException(400, "Das Datum ist ungültig.")
+    with tx("system") as cur:
+        cur.execute("DELETE FROM website_sperrtage WHERE kunden_id=%s AND tag=%s", (user["kunden_id"], t))
+    return {"ok": True}
+
+
+class StatIn(BaseModel):
+    aktiv: bool
+
+
+@kunde.put("/statistik-schalter")
+def k_stat_schalter(data: StatIn, user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        sd.zeile(cur, user["kunden_id"])
+        cur.execute("UPDATE website_dienste SET stat_aktiv=%s, geaendert_am=now() WHERE kunden_id=%s", (data.aktiv, user["kunden_id"]))
+    return {"ok": True}
+
+
+@kunde.get("/statistik")
+def k_statistik(tage: int = 30, user: dict = Depends(require_inhaber)):
+    tage = max(1, min(tage, 365))
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        q = lambda sql, *a: (cur.execute(sql, a), cur.fetchall())[1]  # noqa: E731
+        ges = q("""SELECT count(*) FILTER (WHERE art='pv') AS aufrufe, count(DISTINCT tag::text || besucher) FILTER (WHERE art='pv') AS besucher,
+                          count(*) FILTER (WHERE art='ev' AND name ILIKE 'WhatsApp%%') AS whatsapp, count(*) FILTER (WHERE art='ev' AND name ILIKE 'Anruf%%') AS anrufe
+                   FROM website_stat WHERE kunden_id=%s AND tag > current_date - %s""", kid, tage)[0]
+        cur.execute("SELECT count(*) AS n FROM anfragen WHERE kunden_id=%s AND quelle='website' AND erstellt_am > now() - make_interval(days => %s)", (kid, tage))
+        anfragen = cur.fetchone()["n"]
+        seiten = q("SELECT pfad, count(*) AS aufrufe FROM website_stat WHERE kunden_id=%s AND art='pv' AND tag > current_date - %s GROUP BY pfad ORDER BY 2 DESC LIMIT 10", kid, tage)
+        quellen = q("""SELECT coalesce(quelle, 'Direkt / unbekannt') AS quelle, count(DISTINCT tag::text || besucher) AS besucher FROM website_stat
+                       WHERE kunden_id=%s AND art='pv' AND tag > current_date - %s GROUP BY 1 ORDER BY 2 DESC LIMIT 8""", kid, tage)
+        verlauf = q("SELECT tag, count(*) AS aufrufe FROM website_stat WHERE kunden_id=%s AND art='pv' AND tag > current_date - %s GROUP BY tag ORDER BY tag", kid, tage)
+    return {"tage": tage, "besucher": ges["besucher"], "aufrufe": ges["aufrufe"], "whatsapp": ges["whatsapp"], "anrufe": ges["anrufe"], "anfragen": anfragen,
+            "seiten": seiten, "quellen": quellen, "verlauf": [{"tag": r["tag"].isoformat(), "aufrufe": r["aufrufe"]} for r in verlauf]}
 
 
 @admin.get("/kunden/{kid}/website-dienste")

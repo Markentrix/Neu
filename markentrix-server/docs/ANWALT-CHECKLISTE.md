@@ -24,3 +24,8 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Anlage 3: Google (Places API, Abruf öffentlicher Bewertungsdaten) und Mailversand über unseren Server aufnehmen.
 - Mustertext für die Datenschutzerklärung der Kunden-Websites: Kontaktformular, Online-Terminbuchung (inkl. Kalender-Einladung per E-Mail), PayPal (Zahlung direkt an den Kunden), Google-Bewertungen.
 - Eigenes Postfach des Kunden (SMTP): Zugangsdaten verschlüsselt gespeichert, nur zum Versand der Website-Mails genutzt.
+
+## Website-API (Anfragen, Termine, Statistik)
+- Datenschutzerklärung der Kunden-Websites: Anfrage- und Terminformular (Zweck, Speicherdauer, Empfänger Hoster/Markentrix als Auftragsverarbeiter), Eingangsbestätigung per E-Mail.
+- Besucherstatistik ohne Cookie und ohne IP-Speicherung (täglich wechselnder Hash, Aufbewahrung bis 400 Tage): Formulierung für die Datenschutzerklärung prüfen lassen.
+- Terminbuchung mit Anzahlung per PayPal.Me: Hinweise zu Widerruf/Stornierung auf der jeweiligen Website durch den Kunden bzw. dessen Anwalt prüfen lassen.

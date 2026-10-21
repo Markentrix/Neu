@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    mailKarte(d, neu), kalenderKarte(d, neu), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d));
+    mailKarte(d, neu), kalenderKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
 
 // ---------------------------------------------------------------- E-Mail
@@ -102,11 +102,15 @@ function kalenderKarte(d, neu) {
   const vorlauf = h('input', { type: 'number', min: 0, max: 240, value: k.vorlauf_std });
   const ort = h('input', { value: k.ort, placeholder: 'z. B. Praxis, Hauptstr. 1 – oder „Videocall, Link folgt“', maxlength: 300 });
   const emp = h('input', { value: k.empfaenger, placeholder: 'leer = wie beim Kontaktformular', maxlength: 400 });
+  const zeiten = h('input', { value: k.zeiten, placeholder: 'leer = Raster aus Von, Bis und Dauer; sonst z. B. 08:00, 10:00, 13:30', maxlength: 300 });
+  const kap = h('input', { type: 'number', min: 0, max: 200, value: k.kapazitaet });
+  const halte = h('input', { type: 'number', min: 1, max: 336, value: k.halte_std });
+  const frei = schalter(k.freigabe, 'Ich bestätige jede Buchung selbst (sonst ist sie sofort gültig)');
   const wt = TAGE.map(([n, t]) => ({ n, c: h('input', { type: 'checkbox', checked: k.wochentage.includes(n), style: 'width:auto' }), t }));
   const speichern = async () => {
     melde(m, '');
     try {
-      await api('/api/kunde/website-dienste/kalender', { method: 'PUT', body: { aktiv: an.c.checked, ical_url: url.value, dauer: Number(dauer.value), tage: Number(tage.value), von: von.value, bis: bis.value, wochentage: wt.filter(x => x.c.checked).map(x => x.n), vorlauf_std: Number(vorlauf.value), ort: ort.value, empfaenger: emp.value } });
+      await api('/api/kunde/website-dienste/kalender', { method: 'PUT', body: { aktiv: an.c.checked, ical_url: url.value, dauer: Number(dauer.value), tage: Number(tage.value), von: von.value, bis: bis.value, wochentage: wt.filter(x => x.c.checked).map(x => x.n), vorlauf_std: Number(vorlauf.value), ort: ort.value, empfaenger: emp.value, zeiten: zeiten.value, kapazitaet: Number(kap.value), freigabe: frei.c.checked, halte_std: Number(halte.value) } });
       melde(m, 'Gespeichert.', 'ok'); if (url.value) setTimeout(neu, 1000);
     } catch (x) { melde(m, x.message); }
   };
@@ -121,7 +125,10 @@ function kalenderKarte(d, neu) {
     m, an.el,
     h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Geheime Kalender-Adresse (iCal)', url, k.ical_gesetzt ? 'Gespeichert' + (k.ical_geprueft_am ? ' am ' + datum(k.ical_geprueft_am) : '') + '. Aus Sicherheitsgründen zeigen wir sie nicht mehr an.' : 'Funktioniert mit Google, Outlook, Apple, IONOS und vielen mehr. Anleitung unten.'),
       feld('Termin dauert (Minuten)', dauer), feld('Von', von), feld('Bis', bis), feld('So viele Tage im Voraus buchbar', tage), feld('Frühestens in … Stunden', vorlauf),
-      feld('Ort / Hinweis in der Einladung', ort), feld('Benachrichtigung an', emp)),
+      feld('Ort / Hinweis in der Einladung', ort), feld('Benachrichtigung an', emp),
+      feld('Feste Uhrzeiten (optional)', zeiten, 'Zum Beispiel für Fahrzeugabgabe oder feste Termine. Muss zu den Uhrzeiten auf deiner Website passen.'),
+      feld('Höchstens so viele Buchungen pro Tag (0 = unbegrenzt)', kap), feld('Unbestätigte Reservierung hält … Stunden', halte)),
+    h('div', { style: 'margin:8px 0' }, frei.el),
     h('div', { class: 'row', style: 'gap:12px;margin:8px 0;flex-wrap:wrap' }, h('span', { class: 'small' }, 'Buchbar an:'), wt.map(x => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit' }, x.c, x.t))),
     h('div', { class: 'row' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Kalender testen'), k.ical_gesetzt ? h('button', { class: 'btn sec', onclick: weg }, 'Adresse löschen') : ''),
     k.offene_termine ? h('p', { class: 'small' }, k.offene_termine + ' kommende Termine über die Website gebucht.') : '',
@@ -196,4 +203,59 @@ function analyticsKarte(d) {
     hilfe('Wo finde ich die Mess-ID?',
       h('p', {}, 'analytics.google.com → unten links „Verwalten“ (Zahnrad) → „Datenstreams“ → „Web“ → deinen Stream öffnen → oben rechts steht die ', h('b', {}, 'Mess-ID'), ' (G-…).'),
       h('p', {}, 'Noch kein Konto? Dort „Messung starten“ wählen, ein Konto und eine „Property“ anlegen und einen Web-Datenstream mit der Adresse deiner Website erstellen. Das dauert etwa 5 Minuten. Wenn du magst, machen wir das gemeinsam am Telefon.')));
+}
+
+// ---------------------------------------------------------------- Buchungsanfragen bestätigen
+async function buchungenKarte(d, neu) {
+  if (!d.kalender.aktiv) return '';
+  const r = await api('/api/kunde/website-dienste/buchungen');
+  const m = h('div');
+  const zeile = (b) => {
+    const betrag = h('input', { placeholder: 'Anzahlung in € (optional)', style: 'max-width:200px', maxlength: 20 });
+    const info = Object.entries(b.details).map(([k, v]) => k.replace(/_/g, ' ') + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' · ');
+    const tun = async (pfad, body) => { try { await api('/api/kunde/website-dienste/buchungen/' + b.id + '/' + pfad, { method: 'POST', body }); neu(); } catch (x) { melde(m, x.message); } };
+    return h('div', { class: 'card', style: 'margin:8px 0' },
+      h('p', {}, h('b', {}, ZEIT(b.start)), ' · ' + b.name, ' ', h('span', { class: 'pill ' + (b.status === 'reserviert' ? 'warn' : 'ok') }, b.status === 'reserviert' ? 'wartet auf dich' : 'bestätigt')),
+      h('p', { class: 'small' }, b.email + (b.telefon ? ' · ' + b.telefon : '') + (b.ref ? ' · ' + b.ref : '')),
+      info ? h('p', { class: 'small muted' }, info) : '', b.nachricht ? h('p', { class: 'small' }, b.nachricht) : '',
+      b.anzahlung ? h('p', { class: 'small' }, 'Anzahlung: ' + b.anzahlung.replace('.', ',') + ' €') : '',
+      h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' },
+        b.status === 'reserviert' ? [betrag, h('button', { class: 'btn', onclick: () => tun('bestaetigen', { anzahlung: betrag.value }) }, 'Bestätigen')] : '',
+        h('button', { class: 'btn sec', onclick: () => { const g = prompt('Kurze Begründung für die Absage (optional):', ''); if (g !== null) tun('ablehnen', { grund: g }); } }, b.status === 'reserviert' ? 'Ablehnen' : 'Absagen')));
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Buchungen über die Website'),
+    h('p', { class: 'small muted' }, r.freigabe
+      ? 'Neue Wünsche sind für den Kunden vorgemerkt, bis du sie bestätigst. Mit „Bestätigen“ bekommt er eine E-Mail mit Kalender-Einladung, auf Wunsch mit PayPal-Link für die Anzahlung.'
+      : 'Buchungen sind sofort gültig. Hier siehst du die kommenden und kannst absagen.'),
+    m, r.buchungen.length ? r.buchungen.map(zeile) : h('p', { class: 'small muted' }, 'Keine kommenden Buchungen.'));
+}
+
+// ---------------------------------------------------------------- Sperrtage
+async function sperrtageKarte() {
+  const r = await api('/api/kunde/website-dienste/sperrtage');
+  const m = h('div');
+  const von = h('input', { type: 'date' }), bis = h('input', { type: 'date' }), grund = h('input', { placeholder: 'z. B. Urlaub', maxlength: 80 });
+  const liste = h('div');
+  const zeigen = (tage) => { liste.replaceChildren(...(tage.length ? tage.map(t => h('span', { class: 'pill', style: 'margin:2px;cursor:pointer', title: 'Zum Entfernen anklicken', onclick: async () => { try { await api('/api/kunde/website-dienste/sperrtage/' + t.tag, { method: 'DELETE' }); const n = await api('/api/kunde/website-dienste/sperrtage'); zeigen(n.tage); } catch (x) { melde(m, x.message); } } }, datum(t.tag) + (t.grund ? ' · ' + t.grund : '') + ' ×')) : [h('span', { class: 'small muted' }, 'Keine Sperrtage eingetragen.')])); };
+  zeigen(r.tage);
+  const add = async () => { melde(m, ''); try { await api('/api/kunde/website-dienste/sperrtage', { method: 'POST', body: { von: von.value, bis: bis.value, grund: grund.value } }); const n = await api('/api/kunde/website-dienste/sperrtage'); zeigen(n.tage); von.value = ''; bis.value = ''; grund.value = ''; } catch (x) { melde(m, x.message); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Urlaub und Sperrtage'),
+    h('p', { class: 'small muted' }, 'An diesen Tagen kann auf deiner Website nicht gebucht werden.'), m,
+    h('div', { class: 'form2' }, feld('Von', von), feld('Bis (optional)', bis), feld('Grund (nur für dich)', grund)),
+    h('p', {}, h('button', { class: 'btn', onclick: add }, 'Sperren')), liste);
+}
+
+// ---------------------------------------------------------------- Besucher-Statistik (ohne Cookies, ohne Einwilligung)
+async function statistikKarte(d) {
+  const s = await api('/api/kunde/website-dienste/statistik?tage=30');
+  const m = h('div');
+  const an = schalter(d.analytics.statistik, 'Einfache Besucherzahlen auf unserem Server mitzählen');
+  an.c.addEventListener('change', async () => { try { await api('/api/kunde/website-dienste/statistik-schalter', { method: 'PUT', body: { aktiv: an.c.checked } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } });
+  const kachel = (z, t) => h('div', { class: 'card', style: 'text-align:center;min-width:110px' }, h('div', { style: 'font-size:26px;font-weight:700' }, String(z)), h('div', { class: 'small muted' }, t));
+  return h('div', { class: 'card' }, h('h2', {}, 'Besucher der letzten 30 Tage'),
+    h('p', { class: 'small muted' }, 'Gezählt ohne Cookies und ohne IP-Adresse (anonym, nur auf unserem Server). Das ist keine Google-Statistik. Sie gilt nur für Websites, die dieses Zählen eingebaut haben.'),
+    m, an.el,
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin:8px 0' }, kachel(s.besucher, 'Besucher'), kachel(s.aufrufe, 'Seitenaufrufe'), kachel(s.anfragen, 'Anfragen'), kachel(s.whatsapp, 'WhatsApp-Klicks'), kachel(s.anrufe, 'Anruf-Klicks')),
+    s.seiten.length ? h('p', { class: 'small' }, h('b', {}, 'Beliebteste Seiten: '), s.seiten.slice(0, 5).map(x => x.pfad + ' (' + x.aufrufe + ')').join(' · ')) : '',
+    s.quellen.length ? h('p', { class: 'small' }, h('b', {}, 'Woher: '), s.quellen.slice(0, 5).map(x => x.quelle + ' (' + x.besucher + ')').join(' · ')) : '');
 }

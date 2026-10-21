@@ -462,35 +462,79 @@ def kalender_belegt(z: dict, von: datetime, bis: datetime) -> list:
     return ical_belegt(text, von, bis)
 
 
-def freie_slots(cur, z: dict, mit_ical: bool = True) -> list[datetime]:
+ZEIT_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+
+
+def zeiten_liste(z: dict) -> list[str]:
+    """Feste Uhrzeiten des Inhabers (z. B. Fahrzeugabgabe um 08:00, 10:00). Leer: Raster aus Beginn, Ende und Dauer."""
+    return sorted({x.strip() for x in (z.get("kal_zeiten") or "").split(",") if ZEIT_RE.match(x.strip())})
+
+
+def reservierungen_verfallen(cur, kid, stunden: int):
+    """Unbestätigte Reservierungen geben den Termin nach Ablauf der Haltefrist wieder frei."""
+    cur.execute("""UPDATE website_termine SET status='abgesagt' WHERE kunden_id=%s AND status='reserviert' AND erstellt_am < now() - make_interval(hours => %s)
+                   RETURNING termin_id""", (kid, stunden))
+    ids = [r["termin_id"] for r in cur.fetchall() if r["termin_id"]]
+    if ids:
+        cur.execute("UPDATE termine SET status='abgesagt' WHERE id = ANY(%s) AND status='geplant'", (ids,))
+
+
+def slotplan(cur, z: dict, mit_ical: bool = True, tage: int | None = None) -> dict:
+    """Alle Termine der nächsten Tage je Datum (nur Öffnungstage): {datum: [(Uhrzeit, UTC-Beginn, frei)]}.
+    Frei heißt: Vorlauf eingehalten, Tag nicht gesperrt, Tageslimit nicht erreicht, nicht gebucht oder reserviert, im Kalender des Inhabers frei."""
     jetzt = datetime.now(timezone.utc)
     frueh = jetzt + timedelta(hours=z["kal_vorlauf_std"])
-    h1, m1 = map(int, z["kal_von"].split(":"))
-    h2, m2 = map(int, z["kal_bis"].split(":"))
-    ende_ges = jetzt + timedelta(days=z["kal_tage"] + 1)
-    cur.execute("SELECT start FROM website_termine WHERE kunden_id=%s AND status='gebucht' AND start >= %s AND start < %s", (z["kunden_id"], jetzt, ende_ges))
+    tage = z["kal_tage"] if tage is None else tage
+    ende_ges = jetzt + timedelta(days=tage + 2)
+    cur.execute("""SELECT start FROM website_termine WHERE kunden_id=%s AND start >= %s AND start < %s
+                   AND (status='gebucht' OR (status='reserviert' AND erstellt_am > now() - make_interval(hours => %s)))""",
+                (z["kunden_id"], jetzt - timedelta(days=1), ende_ges, z.get("kal_halte_std") or 72))
     gebucht = {r["start"] for r in cur.fetchall()}
+    pro_tag: dict = {}
+    for g in gebucht:
+        t = g.astimezone(TZ).date()
+        pro_tag[t] = pro_tag.get(t, 0) + 1
+    cur.execute("SELECT tag FROM website_sperrtage WHERE kunden_id=%s AND tag >= %s", (z["kunden_id"], datetime.now(TZ).date()))
+    gesperrt = {r["tag"] for r in cur.fetchall()}
     fremd: list = []
     if mit_ical:
         try:
             fremd = kalender_belegt(z, jetzt - timedelta(days=1), ende_ges)
         except ValueError:
             fremd = []          # Kalender gerade nicht erreichbar: lieber nur eigene Buchungen berücksichtigen als nichts anzubieten
-    heute = datetime.now(TZ).date()
-    liste = []
+    fest = zeiten_liste(z)
+    h1, m1 = map(int, z["kal_von"].split(":"))
+    h2, m2 = map(int, z["kal_bis"].split(":"))
     dauer = timedelta(minutes=z["kal_dauer"])
-    for i in range(z["kal_tage"] + 1):
+    kap = z.get("kal_kapazitaet") or 0
+    heute = datetime.now(TZ).date()
+    plan: dict = {}
+    for i in range(tage + 1):
         tag = heute + timedelta(days=i)
         if tag.isoweekday() not in z["kal_wochentage"]:
             continue
-        t = datetime(tag.year, tag.month, tag.day, h1, m1, tzinfo=TZ)
-        schluss = datetime(tag.year, tag.month, tag.day, h2, m2, tzinfo=TZ)
-        while t + dauer <= schluss:
+        beginne = []
+        if fest:
+            for f in fest:
+                hh, mm = map(int, f.split(":"))
+                beginne.append(datetime(tag.year, tag.month, tag.day, hh, mm, tzinfo=TZ))
+        else:
+            t = datetime(tag.year, tag.month, tag.day, h1, m1, tzinfo=TZ)
+            schluss = datetime(tag.year, tag.month, tag.day, h2, m2, tzinfo=TZ)
+            while t + dauer <= schluss:
+                beginne.append(t)
+                t += dauer
+        tag_zu = tag in gesperrt or (kap > 0 and pro_tag.get(tag, 0) >= kap)
+        plan[tag] = []
+        for t in beginne:
             u = t.astimezone(timezone.utc)
-            if u >= frueh and u not in gebucht and not any(a < u + dauer and b > u for a, b in fremd):
-                liste.append(u)
-            t += dauer
-    return liste
+            frei = not tag_zu and u >= frueh and u not in gebucht and not any(a < u + dauer and b > u for a, b in fremd)
+            plan[tag].append((t.strftime("%H:%M"), u, frei))
+    return plan
+
+
+def freie_slots(cur, z: dict, mit_ical: bool = True) -> list[datetime]:
+    return [u for slots in slotplan(cur, z, mit_ical).values() for _, u, frei in slots if frei]
 
 
 def ics(uid: str, start: datetime, ende: datetime, titel: str, ort: str, abgesagt: bool = False) -> bytes:
