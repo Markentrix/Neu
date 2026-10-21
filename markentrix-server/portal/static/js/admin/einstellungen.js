@@ -24,7 +24,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    await zustellungKarte(), zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    await zustellungKarte(), await vertragKarte(), zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -300,4 +300,15 @@ export async function zustellungKarte() {
     k.letzte_fehler.length ? h('details', {}, h('summary', {}, 'Letzte Fehler'), k.letzte_fehler.map(f => h('p', { class: 'small' }, zeit(f.zeit) + ' · ' + f.art + ' · ' + (f.an_domain || '') + ' · ' + (f.fehler || '')))) : '',
     d.kunden.length ? h('div', {}, h('h3', {}, 'Eigene Postfächer der Kunden'), tabelle([['Kunde', z => z.firma], ['Absender', z => z.absender], ['Einträge', z => z.dns ? chips(z.dns) : ''], ['30 Tage', z => z.fehler30 + ' Fehler von ' + z.gesamt30]], d.kunden)) : '',
     h('p', {}, h('button', { class: 'btn sec', onclick: pruefen }, 'Jetzt neu prüfen')));
+}
+
+
+export async function vertragKarte() {
+  const d = await api('/api/admin/einstellungen/vertrag').catch(() => null), m = h('div');
+  if (!d) return '';
+  const frist = h('input', { type: 'number', min: 0, max: 365, value: d.kuendigungsfrist_tage, style: 'max-width:120px' });
+  return h('div', { class: 'card' }, h('h2', {}, 'Kündigung durch Kunden'),
+    h('p', { class: 'small muted' }, 'Kunden kündigen im Portal verbindlich. Das Vertragsende ist das Monatsende nach Ablauf dieser Frist, frühestens am Ende der Mindestlaufzeit (aus der Buchung). Zum Vertragsende setzt der Server den Kunden automatisch auf „gekündigt“. Die Frist muss zu deinen AGB passen.'),
+    m, h('div', { class: 'row' }, h('label', {}, 'Kündigungsfrist in Tagen'), frist,
+      knopf('Speichern', async () => { try { await api('/api/admin/einstellungen/vertrag', { method: 'PUT', body: { kuendigungsfrist_tage: Number(frist.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } }, 'btn')));
 }

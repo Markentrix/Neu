@@ -18,7 +18,7 @@ SELECT k.id, k.kundennummer, k.firma, k.referenzkunde, k.erstellt_am,
   ,(SELECT count(*) FROM website_wacht w WHERE w.kunden_id = k.id AND NOT w.ok AND w.seit < now() - interval '1 hour') AS web_gestoert,
   (SELECT count(*) FROM mail_protokoll m WHERE m.kunden_id = k.id AND NOT m.ok AND m.zeit > now() - interval '7 days') AS mail_fehler,
   (SELECT count(*) FROM kundenfreigaben f WHERE f.kunden_id = k.id AND f.status = 'wartet' AND f.angefragt_am < now() - interval '7 days') AS freigabe_alt,
-  (SELECT count(*) FROM kuendigungswuensche q WHERE q.kunden_id = k.id AND q.status = 'offen') AS kuendigung
+  (SELECT count(*) FROM kuendigungswuensche q WHERE q.kunden_id = k.id AND q.status IN ('offen','bearbeitet') AND q.vollzogen_am IS NULL) AS kuendigung
 FROM kunden k"""
 SQL = SQL_BASIS + " WHERE k.status = 'aktiv' AND k.erstellt_am < now() - interval '14 days'"
 
@@ -56,7 +56,7 @@ def bewerten(r: dict, heute=None) -> tuple[int, list]:
         gruende.append("Eine Nachricht des Kunden wartet seit über 3 Tagen auf Antwort.")
     if r.get("kuendigung"):
         punkte += 60
-        gruende.append("Kündigungswunsch im Portal eingegangen.")
+        gruende.append("Hat im Portal gekündigt (Vertragsende steht in der Kündigungsliste).")
     if r.get("web_gestoert"):
         punkte += 15
         gruende.append("Die Website ist seit über einer Stunde nicht erreichbar.")

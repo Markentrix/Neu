@@ -2,9 +2,9 @@
 import json
 import re
 import secrets
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
@@ -13,7 +13,7 @@ from . import sitedienste as sd
 from .db import tx
 from .routes_websites import auftrag
 from .routes_zusammenarbeit import admin_empfaenger
-from .security import audit, rate_limit, require_admin, require_inhaber
+from .security import audit, client_ip, rate_limit, require_admin, require_inhaber
 
 admin = APIRouter(prefix="/api/admin")
 kunde = APIRouter(prefix="/api/kunde")
@@ -124,8 +124,28 @@ class KuendigungIn(BaseModel):
     bestaetigt: bool = False
 
 
+RUECKNAHME_STUNDEN = 24
+
+
+def vertragsende(cur, kid, wunsch: date | None) -> dict:
+    """Frühestes Vertragsende: nach Ablauf der Kündigungsfrist und nicht vor Ende der Mindestlaufzeit, jeweils zum Monatsende. Ein späterer Wunschtermin gilt."""
+    frist = int((einstellungen.lesen(cur, "vertrag") or {}).get("kuendigungsfrist_tage") or 30)
+    cur.execute("SELECT max(mindestlaufzeit_ende) AS m FROM buchungen WHERE kunden_id=%s AND status IN ('beauftragt','in_einrichtung','aktiv','pausiert')", (kid,))
+    mind = cur.fetchone()["m"]
+    heute = date.today()
+    basis = heute + timedelta(days=frist)
+    grund = f"Kündigungsfrist von {frist} Tagen"
+    if mind and mind > basis:
+        basis, grund = mind, f"Ende der Mindestlaufzeit am {mind:%d.%m.%Y}"
+    if wunsch and wunsch > basis:
+        basis, grund = wunsch, "dein Wunschdatum"
+    ende = (basis.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)   # Monatsende
+    return {"ende": ende, "frist_tage": frist, "mindestlaufzeit_ende": mind, "massgeblich": grund}
+
+
 def _offen(cur, kid):
-    cur.execute("SELECT id, grund, wunschdatum, erstellt_am, von_name FROM kuendigungswuensche WHERE kunden_id=%s AND status='offen' ORDER BY erstellt_am DESC LIMIT 1", (kid,))
+    cur.execute("""SELECT id, grund, wunschdatum, ende_am, erstellt_am, von_name FROM kuendigungswuensche
+                   WHERE kunden_id=%s AND status IN ('offen','bearbeitet') AND vollzogen_am IS NULL ORDER BY erstellt_am DESC LIMIT 1""", (kid,))
     return cur.fetchone()
 
 
@@ -133,12 +153,21 @@ def _offen(cur, kid):
 def k_kuendigung(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
         o = _offen(cur, user["kunden_id"])
+    if o:
+        o["rueckname_bis"] = o["erstellt_am"] + timedelta(hours=RUECKNAHME_STUNDEN)
     return {"offen": o}
 
 
+@kunde.get("/kuendigung/vorschau")
+def k_kuendigung_vorschau(wunschdatum: date | None = None, user: dict = Depends(require_inhaber)):
+    """Zeigt vor dem Absenden, wann der Vertrag enden würde."""
+    with tx("system") as cur:
+        return vertragsende(cur, user["kunden_id"], wunschdatum)
+
+
 @kunde.post("/kuendigung")
-def k_kuendigung_senden(data: KuendigungIn, user: dict = Depends(require_inhaber)):
-    """Kündigungswunsch in Textform. Er wird mit Zeitpunkt festgehalten; die Bearbeitung (Frist laut Vertrag, Bestätigung) übernimmt das Team."""
+def k_kuendigung_senden(data: KuendigungIn, request: Request, user: dict = Depends(require_inhaber)):
+    """Verbindliche Kündigung in Textform. Das Vertragsende wird aus Frist und Mindestlaufzeit berechnet, der Kunde bekommt sofort eine Bestätigung mit Datum."""
     kid = user["kunden_id"]
     rate_limit("kuendigung:" + str(kid), 5, 3600)
     if not data.bestaetigt:
@@ -147,49 +176,56 @@ def k_kuendigung_senden(data: KuendigungIn, user: dict = Depends(require_inhaber
         raise HTTPException(400, "Das Wunschdatum liegt in der Vergangenheit.")
     with tx("system") as cur:
         if _offen(cur, kid):
-            raise HTTPException(400, "Dein Kündigungswunsch ist schon eingegangen. Wir melden uns.")
-        cur.execute("SELECT firma, kundennummer, email FROM kunden WHERE id=%s", (kid,))
+            raise HTTPException(400, "Deine Kündigung ist schon eingegangen.")
+        cur.execute("SELECT firma, kundennummer, email, status FROM kunden WHERE id=%s", (kid,))
         k = cur.fetchone()
-        cur.execute("INSERT INTO kuendigungswuensche (kunden_id, grund, wunschdatum, von_name, von_email) VALUES (%s,%s,%s,%s,%s) RETURNING id, erstellt_am",
-                    (kid, data.grund.strip() or None, data.wunschdatum, user.get("name"), user.get("email")))
+        if k["status"] in ("gekuendigt", "beendet"):
+            raise HTTPException(400, "Dein Vertrag ist bereits gekündigt.")
+        v = vertragsende(cur, kid, data.wunschdatum)
+        cur.execute("""INSERT INTO kuendigungswuensche (kunden_id, grund, wunschdatum, ende_am, von_name, von_email, ip) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id, erstellt_am""",
+                    (kid, data.grund.strip() or None, data.wunschdatum, v["ende"], user.get("name"), user.get("email"), client_ip(request)))
         neu = cur.fetchone()
-        audit(cur, user, "kuendigungswunsch", kid, {"wunschdatum": str(data.wunschdatum or "")})
+        audit(cur, user, "kuendigung", kid, {"ende": str(v["ende"]), "wunschdatum": str(data.wunschdatum or "")})
         ids = push.admins(cur)
         an_admin = admin_empfaenger(cur)
     wann = neu["erstellt_am"].astimezone(sd.TZ).strftime("%d.%m.%Y %H:%M")
+    ende_txt = f"{v['ende']:%d.%m.%Y}"
     if ids:
-        push.senden(ids, "Kündigungswunsch", f"{k['firma']} möchte kündigen.", "/admin#kunden", "kuendigung")
+        push.senden(ids, "Kündigung", f"{k['firma']} hat zum {ende_txt} gekündigt.", "/admin#kunden", "kuendigung")
     if mailer.konfiguriert():
         if an_admin:
-            mailer.senden(an_admin, f"Kündigungswunsch: {k['firma']} ({k['kundennummer']})",
-                          f"{k['firma']} hat am {wann} im Kundenportal einen Kündigungswunsch gesendet.\n\nWunschdatum: {data.wunschdatum or 'nicht angegeben'}\nGrund: {data.grund.strip() or 'nicht angegeben'}\n\n"
-                          "Bitte Vertragsfrist prüfen und schriftlich bestätigen." + mailer.SIGNATUR)
+            mailer.senden(an_admin, f"Kündigung: {k['firma']} ({k['kundennummer']}) zum {ende_txt}",
+                          f"{k['firma']} hat am {wann} im Kundenportal gekündigt (von {user.get('name') or user.get('email')}).\n\nVertragsende laut Berechnung: {ende_txt} ({v['massgeblich']})\n"
+                          f"Wunschdatum: {data.wunschdatum or 'nicht angegeben'}\nGrund: {data.grund.strip() or 'nicht angegeben'}\n\nDie Kündigung ist verbindlich und wurde dem Kunden automatisch bestätigt. Zum Vertragsende wird der Kunde automatisch auf „gekündigt“ gesetzt." + mailer.SIGNATUR)
         ziel = user.get("email") or k["email"]
         if ziel:
-            mailer.senden(ziel, "Dein Kündigungswunsch ist bei uns eingegangen",
-                          f"Guten Tag,\n\ndein Kündigungswunsch ist am {wann} bei uns eingegangen" + (f" (gewünschtes Ende: {data.wunschdatum:%d.%m.%Y})" if data.wunschdatum else "") +
-                          ". Wir prüfen die Vertragsfrist und bestätigen dir den Zeitpunkt schriftlich. Bis dahin läuft alles wie gewohnt weiter.\n\n"
-                          "Deine Daten kannst du jederzeit unter Konto → „Meine Daten herunterladen“ als ZIP sichern." + mailer.SIGNATUR, kunden_id=kid, art="kuendigung")
-    return {"ok": True, "eingegangen": wann}
+            mailer.senden(ziel, f"Bestätigung deiner Kündigung zum {ende_txt}",
+                          f"Guten Tag,\n\nwir bestätigen den Eingang deiner Kündigung vom {wann}.\n\nDein Vertrag endet am {ende_txt} ({v['massgeblich']}). Bis dahin läuft alles wie gewohnt weiter.\n\n"
+                          f"Deine Daten kannst du jederzeit unter Einstellungen → „Meine Daten herunterladen“ als ZIP sichern. Zum Vertragsende übergeben wir dir außerdem, was dir gehört (z. B. Domains).\n\n"
+                          f"Hast du versehentlich gekündigt? Melde dich innerhalb von {RUECKNAHME_STUNDEN} Stunden im Portal oder per Antwort auf diese Mail." + mailer.SIGNATUR, kunden_id=kid, art="kuendigung")
+    return {"ok": True, "eingegangen": wann, "ende": v["ende"], "massgeblich": v["massgeblich"]}
 
 
 @kunde.delete("/kuendigung")
 def k_kuendigung_zurueck(user: dict = Depends(require_inhaber)):
+    """Rücknahme nur kurz nach dem Absenden (versehentlich gekündigt). Danach bitte beim Team melden."""
     kid = user["kunden_id"]
     with tx("system") as cur:
-        cur.execute("UPDATE kuendigungswuensche SET status='zurueckgenommen', bearbeitet_am=now() WHERE kunden_id=%s AND status='offen'", (kid,))
-        n = cur.rowcount
-        audit(cur, user, "kuendigungswunsch_zurueckgenommen", kid)
-    if not n:
-        raise HTTPException(404, "Es liegt kein offener Kündigungswunsch vor.")
+        o = _offen(cur, kid)
+        if not o:
+            raise HTTPException(404, "Es liegt keine laufende Kündigung vor.")
+        if datetime.now(timezone.utc) - o["erstellt_am"] > timedelta(hours=RUECKNAHME_STUNDEN):
+            raise HTTPException(400, f"Eine Rücknahme ist nur in den ersten {RUECKNAHME_STUNDEN} Stunden möglich. Bitte melde dich bei uns.")
+        cur.execute("UPDATE kuendigungswuensche SET status='zurueckgenommen', bearbeitet_am=now() WHERE id=%s", (o["id"],))
+        audit(cur, user, "kuendigung_zurueckgenommen", kid)
     return {"ok": True}
 
 
 @admin.get("/kuendigungswuensche")
 def a_kuendigungen(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        cur.execute("""SELECT w.id, w.kunden_id, k.firma, k.kundennummer, w.grund, w.wunschdatum, w.erstellt_am, w.von_name, w.status
-                       FROM kuendigungswuensche w JOIN kunden k ON k.id = w.kunden_id WHERE w.status = 'offen' ORDER BY w.erstellt_am""")
+        cur.execute("""SELECT w.id, w.kunden_id, k.firma, k.kundennummer, w.grund, w.wunschdatum, w.ende_am, w.erstellt_am, w.von_name, w.status
+                       FROM kuendigungswuensche w JOIN kunden k ON k.id = w.kunden_id WHERE w.status IN ('offen','bearbeitet') AND w.vollzogen_am IS NULL ORDER BY w.ende_am NULLS LAST, w.erstellt_am""")
         return cur.fetchall()
 
 
@@ -357,4 +393,22 @@ def a_auszug_loeschen(uid: str, user: dict = Depends(require_admin)):
             f.unlink()
         except OSError:
             pass
+    return {"ok": True}
+
+
+class VertragIn(BaseModel):
+    kuendigungsfrist_tage: int = Field(ge=0, le=365)
+
+
+@admin.get("/einstellungen/vertrag")
+def a_vertrag(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        return {"kuendigungsfrist_tage": int((einstellungen.lesen(cur, "vertrag") or {}).get("kuendigungsfrist_tage") or 30)}
+
+
+@admin.put("/einstellungen/vertrag")
+def a_vertrag_setzen(data: VertragIn, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        einstellungen.schreiben(cur, "vertrag", {"kuendigungsfrist_tage": data.kuendigungsfrist_tage})
+        audit(cur, user, "einstellung_vertrag", None, {"frist": data.kuendigungsfrist_tage})
     return {"ok": True}

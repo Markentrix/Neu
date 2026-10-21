@@ -39,5 +39,5 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 ## Mail-Protokoll, Datenexport und Wiederherstellung
 - Mail-Protokoll speichert nur Zeitpunkt, Art, Empfänger-Domain und Fehlertext (90 Tage); im Verzeichnis der Verarbeitungstätigkeiten und AVV (Anlage 2) aufnehmen.
 - Selbstbedienungs-Export (Art. 20 DSGVO): Format ZIP/JSON/PDF, Hinweis in der Datenschutzerklärung; Export wird im Audit-Log festgehalten.
-- Kündigungswunsch im Portal: Textform; prüfen lassen, ob die AGB/der Vertrag die Kündigung per Portal zulassen und wer die Bestätigung versendet.
+- Kündigung im Portal ist verbindlich (Textform) und wird automatisch bestätigt: AGB/Vertrag müssen die Kündigung per Portal ausdrücklich zulassen, die Kündigungsfrist (Einstellung „Kündigung durch Kunden“, Standard 30 Tage zum Monatsende) und die Mindestlaufzeit nennen. Rücknahme nur innerhalb von 24 Stunden. Bei Verbrauchern zusätzlich Kündigungsbutton nach § 312k BGB prüfen.
 - Wiederherstellung einzelner Kundendaten aus der Sicherung: Zugriff nur für Admins, Auszug wird nach spätestens 24 Stunden gelöscht, Vorgang steht im Audit-Log.

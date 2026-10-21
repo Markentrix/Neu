@@ -18,22 +18,31 @@ function datenKarte() {
   const grund = h('textarea', { rows: 3, maxlength: 1500, placeholder: 'Was können wir besser machen? (freiwillig)' });
   const datumF = h('input', { type: 'date' });
   const haken = h('input', { type: 'checkbox', style: 'width:auto' });
+  const vorschau = h('div', { class: 'msg info', style: 'margin:8px 0' });
+  const aktualisiere = async () => {
+    try { const v = await api('/api/kunde/kuendigung/vorschau' + (datumF.value ? '?wunschdatum=' + datumF.value : '')); vorschau.textContent = 'Dein Vertrag würde am ' + datum(v.ende) + ' enden (' + v.massgeblich + ').'; } catch { vorschau.textContent = ''; }
+  };
   const zeigeStand = async () => {
     let o = null; try { o = (await api('/api/kunde/kuendigung')).offen; } catch { /* nur Anzeige */ }
     if (o) {
-      box.replaceChildren(h('div', { class: 'msg info' }, 'Dein Kündigungswunsch ist am ' + zeit(o.erstellt_am) + ' eingegangen' + (o.wunschdatum ? ' (gewünschtes Ende: ' + datum(o.wunschdatum) + ')' : '') + '. Wir bestätigen dir den Zeitpunkt schriftlich.'),
-        h('p', {}, h('button', { class: 'btn sec', onclick: async () => { if (!confirm('Kündigungswunsch zurücknehmen?')) return; try { await api('/api/kunde/kuendigung', { method: 'DELETE' }); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Wunsch zurücknehmen')));
+      const frei = new Date(o.rueckname_bis) > new Date();
+      box.replaceChildren(h('div', { class: 'msg info' }, 'Du hast am ' + zeit(o.erstellt_am) + ' gekündigt. Dein Vertrag endet am ' + datum(o.ende_am) + '. Bis dahin läuft alles wie gewohnt weiter.'),
+        frei ? h('p', {}, h('button', { class: 'btn sec', onclick: async () => { if (!confirm('Kündigung zurücknehmen?')) return; try { await api('/api/kunde/kuendigung', { method: 'DELETE' }); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Versehentlich? Kündigung zurücknehmen'),
+          h('span', { class: 'small muted', style: 'margin-left:8px' }, 'möglich bis ' + zeit(o.rueckname_bis))) : h('p', { class: 'small muted' }, 'Eine Rücknahme ist nur kurz nach dem Absenden möglich. Bitte melde dich bei uns.'));
       return;
     }
+    aktualisiere();
+    datumF.addEventListener('change', aktualisiere);
     box.replaceChildren(h('details', {}, h('summary', {}, 'Vertrag kündigen'),
-      h('p', { class: 'small muted' }, 'Mit dem Absenden meldest du uns deinen Kündigungswunsch in Textform. Die Frist richtet sich nach deinem Vertrag; wir bestätigen dir das Ende schriftlich. Bis dahin läuft alles weiter.'),
-      h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Gewünschtes Ende (optional)'), datumF), h('div', {}, h('label', {}, 'Grund (optional)'), grund)),
-      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:8px 0' }, haken, 'Ja, ich möchte kündigen.'),
+      h('p', { class: 'small muted' }, 'Deine Kündigung ist mit dem Absenden verbindlich (Textform). Das Vertragsende ergibt sich aus Kündigungsfrist und Mindestlaufzeit und gilt zum Monatsende. Du bekommst sofort eine Bestätigung per E-Mail.'),
+      vorschau,
+      h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Späteres Ende gewünscht? (optional)'), datumF), h('div', {}, h('label', {}, 'Grund (optional)'), grund)),
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:8px 0' }, haken, 'Ja, ich kündige meinen Vertrag verbindlich.'),
       h('p', {}, h('button', { class: 'btn bad', onclick: async () => {
-        try { await api('/api/kunde/kuendigung', { method: 'POST', body: { grund: grund.value, wunschdatum: datumF.value || null, bestaetigt: haken.checked } }); melde(m, 'Dein Kündigungswunsch ist bei uns eingegangen.', 'ok'); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Kündigungswunsch senden'))));
+        try { const r = await api('/api/kunde/kuendigung', { method: 'POST', body: { grund: grund.value, wunschdatum: datumF.value || null, bestaetigt: haken.checked } }); melde(m, 'Gekündigt zum ' + datum(r.ende) + '. Die Bestätigung kommt per E-Mail.', 'ok'); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Verbindlich kündigen'))));
   };
   zeigeStand();
-  return h('div', { class: 'card' }, h('h2', {}, 'Meine Daten'),
+  return h('div', { class: 'card' }, h('h2', {}, 'Meine Daten und Kündigung'),
     h('p', { class: 'small muted' }, 'Du kannst jederzeit alles mitnehmen: Anfragen, Termine, Rechnungen und Berichte als PDF, Dokumente und die Dateien deiner Website – als eine ZIP-Datei. Das geht auch, wenn du nicht kündigst.'),
     h('p', {}, h('a', { class: 'btn', href: '/api/kunde/datenexport.zip', download: '' }, 'Meine Daten herunterladen (ZIP)')), m, box);
 }

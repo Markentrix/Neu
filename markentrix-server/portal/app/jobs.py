@@ -526,6 +526,24 @@ def website_erinnerungen(cfg):
     webbetrieb.erinnerungen(cfg)
 
 
+def kuendigungen_vollziehen(cfg):
+    """Am Vertragsende: Kunde auf „gekündigt“, laufende Buchungen beenden, Team informieren (Übergabe der Domains, Export, Löschung)."""
+    with tx("system") as cur:
+        cur.execute("""UPDATE kuendigungswuensche q SET vollzogen_am = now() WHERE q.vollzogen_am IS NULL AND q.status IN ('offen','bearbeitet') AND q.ende_am <= current_date
+                       RETURNING q.kunden_id, q.ende_am""")
+        fertig = cur.fetchall()
+        namen = []
+        for r in fertig:
+            cur.execute("UPDATE kunden SET status='gekuendigt' WHERE id=%s AND status NOT IN ('gekuendigt','beendet') RETURNING firma, kundennummer", (r["kunden_id"],))
+            k = cur.fetchone()
+            cur.execute("UPDATE buchungen SET status='gekuendigt', ende=%s WHERE kunden_id=%s AND status IN ('beauftragt','in_einrichtung','aktiv','pausiert')", (r["ende_am"], r["kunden_id"]))
+            if k:
+                namen.append(f"{k['firma']} ({k['kundennummer']})")
+        ids = push.admins(cur) if namen else []
+    if ids:
+        push.senden(ids, "Vertragsende", "Gekündigt zum Ende: " + ", ".join(namen), "/admin#kunden", "vertragsende")
+
+
 def zustellung_pruefen(cfg):
     """Einmal täglich: SPF, DKIM und DMARC der Absender-Domains prüfen und melden, wenn die Absenderdomain von Markentrix Probleme hat."""
     jetzt = datetime.now(timezone.utc)
@@ -558,7 +576,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, zustellung_pruefen):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, zustellung_pruefen, kuendigungen_vollziehen):
         try:
             job(cfg)
         except Exception:
