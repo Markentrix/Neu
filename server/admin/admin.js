@@ -532,7 +532,7 @@
   /* ------------------------------------------------------------ Inhalte (JSON- und Markdown-Editor) */
   var KEYS = { name: "Name", tagline: "Unterzeile", url: "Website-Adresse", phone: "Telefon (international, ohne Leerzeichen)", phoneDisplay: "Telefon (Anzeige)", phoneIntl: "Telefon (Anzeige international)",
     whatsapp: "WhatsApp-Nummer (nur Ziffern, mit 49)", email: "E-Mail", address: "Adresse", street: "Straße", zip: "PLZ", city: "Ort", region: "Bundesland", country: "Land (Kürzel)",
-    openingHours: "Öffnungszeiten", schedule: "Zeiten je Wochentag", days: "Wochentage (englisch, für Google)", opens: "Öffnet", closes: "Schließt", text: "Text", detail: "Detail", rating: "Google-Bewertung", value: "Wert",
+    hint: "Hinweis zur Anfahrt", openingHours: "Öffnungszeiten", schedule: "Zeiten je Wochentag", days: "Wochentage (englisch, für Google)", opens: "Öffnet", closes: "Schließt", text: "Text", detail: "Detail", rating: "Google-Bewertung", value: "Wert",
     count: "Anzahl", asOf: "Stand", googleMapsUrl: "Google-Maps-Link", googleReviewUrl: "Google-Bewertungslink (für Bewertungsanfragen)", social: "Social Media", areas: "Einzugsgebiet",
     legal: "Rechtliches (Impressum & Datenschutz)", owner: "Inhaber:in / Firma laut Gewerbeanmeldung", vatId: "USt-IdNr.", responsible: "Verantwortlich nach § 18 MStV", mailProvider: "E-Mail-Anbieter (Name, Anschrift)",
     hosting: "Rechenzentrum", vouchers: "Gutscheine", amounts: "Betragsvorschläge", minAmount: "Mindestbetrag", maxAmount: "Höchstbetrag", stand: "Stand (Text)", standIso: "Stand (Datum JJJJ-MM-TT)",

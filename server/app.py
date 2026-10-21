@@ -999,7 +999,7 @@ def ics_event(ref, d, method="PUBLISH", cancel=False):
              f"UID:{ref}@{Cfg.public_url.split('//')[-1]}", f"DTSTAMP:{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
              f"DTSTART;TZID=Europe/Berlin:{f(st)}", f"DTEND;TZID=Europe/Berlin:{f(end)}",
              f"SUMMARY:{esc('Fahrzeugabgabe bei ' + s.get('name', 'ElbDetail'))}",
-             f"LOCATION:{esc(a.get('street', '') + ', ' + a.get('zip', '') + ' ' + a.get('city', ''))}",
+             f"LOCATION:{esc(a.get('street', '') + ', ' + a.get('zip', '') + ' ' + a.get('city', '') + (' (' + a['hint'] + ')' if a.get('hint') else ''))}",
              f"DESCRIPTION:{esc('Vorgang ' + ref + '. ' + stand_text(d))}", f"STATUS:{'CANCELLED' if cancel else 'CONFIRMED'}",
              "END:VEVENT", "END:VCALENDAR"]
     return ("\r\n".join(lines) + "\r\n").encode()
@@ -1074,7 +1074,7 @@ def reminder_text(ref, d, at):
     when = "morgen" if st.date() == at.date() + dt.timedelta(days=1) else ("heute" if st.date() == at.date() else st.strftime("am %d.%m.%Y"))
     a = s.get("address", {})
     text = (f"Guten Tag {d.get('name', '').strip()},\n\nwir freuen uns auf Sie: Ihr Termin bei {s.get('name', 'ElbDetail')} ist {when} um {st.strftime('%H:%M')} Uhr.\n\n"
-            f"Adresse: {a.get('street', '')}, {a.get('zip', '')} {a.get('city', '')}\n"
+            f"Adresse: {a.get('street', '')}, {a.get('zip', '')} {a.get('city', '')}" + (f" ({a['hint']})" if a.get("hint") else "") + "\n"
             f"Route: {'https://www.google.com/maps/search/?api=1&query=' + urllib.parse.quote(a.get('street', '') + ' ' + a.get('city', ''))}\n\n"
             f"{stand_text(d)} Bitte räumen Sie Wertsachen vorher aus dem Auto.\n\n"
             f"Etwas dazwischengekommen? Hier können Sie den Termin kostenlos verschieben: {booking_link(ref, d['token'])}\n\n{mail_footer()}")

@@ -312,6 +312,7 @@ def footer(site, prefix="", home=False):
         {ESC(s["name"])}<br>
         {ESC(s["address"]["street"])}<br>
         {ESC(s["address"]["zip"])} {ESC(s["address"]["city"])}<br>
+        {(ESC(s["address"]["hint"]) + "<br>") if s["address"].get("hint") else ""}
         <a href="tel:{s["phone"]}">{ESC(s["phoneDisplay"])}</a><br>
         <a href="mailto:{s["email"]}">{ESC(s["email"])}</a><br>
         {ESC(s["openingHours"]["text"])}
@@ -399,7 +400,7 @@ def contact_section(site, prefix=""):
           <div class="info-row">{I["wa"]}<div><a href="{site.wa()}" target="_blank" rel="noopener">WhatsApp: {ESC(s["phoneIntl"])}</a><p>Schnellster Weg für kurze Fragen</p></div></div>
           <div class="info-row">{I["phone"]}<div><a href="tel:{s["phone"]}">Telefon: {ESC(s["phoneDisplay"])}</a><p>Direkt anrufen</p></div></div>
           <div class="info-row">{I["mail"]}<div><a href="mailto:{s["email"]}">{ESC(s["email"])}</a><p>Für ausführliche Anfragen und Firmenkunden</p></div></div>
-          <div class="info-row">{I["pin"]}<div><a href="{site.maps_url()}" target="_blank" rel="noopener">{ESC(site.addr_line())}</a><p>Route in Google Maps öffnen</p></div></div>
+          <div class="info-row">{I["pin"]}<div><a href="{site.maps_url()}" target="_blank" rel="noopener">{ESC(site.addr_line())}</a><p>{ESC(s["address"]["hint"]) + " · " if s["address"].get("hint") else ""}Route in Google Maps öffnen</p></div></div>
           <div class="info-row">{I["cal"]}<div><span>{ESC(s["openingHours"]["text"])}</span><p>{ESC(s["openingHours"]["detail"])}</p></div></div>
         </div>
 

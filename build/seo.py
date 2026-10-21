@@ -160,7 +160,7 @@ def llms(site, full=False):
 
 - Name: {s["name"]} ({s["name"]} – {s["tagline"]})
 - Branche: Fahrzeugaufbereitung / Autopflege / Car Detailing
-- Adresse: {site.addr_line()}, Deutschland
+- Adresse: {site.addr_line()}, Deutschland{" (" + s["address"]["hint"] + ")" if s["address"].get("hint") else ""}
 - Einzugsgebiet: {a["city"]} (alle Stadtteile, u. a. {", ".join(s["areas"]["city"][:8])}) und Landkreis Celle (u. a. {", ".join(s["areas"]["region"][:9])})
 - Kontakt: WhatsApp/Telefon {s["phoneIntl"]}, E-Mail {s["email"]}
 - Online-Terminanfrage: {site.url}/termin.html

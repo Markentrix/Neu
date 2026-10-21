@@ -12,7 +12,8 @@
     "zip": "29223",
     "city": "Celle",
     "region": "Niedersachsen",
-    "country": "DE"
+    "country": "DE",
+    "hint": "Auf dem Gelände der Shell-Tankstelle"
   },
   "openingHours": {
     "schedule": [
