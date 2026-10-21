@@ -124,6 +124,15 @@ chmod 600 "$BASE/.env"
 grep -q '^MK_DB_PASSWORD=' "$BASE/.env" || echo "MK_DB_PASSWORD=$(openssl rand -hex 16)" >> "$BASE/.env"
 grep -q '^MK_APP_PASSWORD=' "$BASE/.env" || echo "MK_APP_PASSWORD=$(openssl rand -hex 16)" >> "$BASE/.env"
 grep -q '^PORTAL_SECRET=' "$BASE/.env" || echo "PORTAL_SECRET=$(openssl rand -hex 32)" >> "$BASE/.env"
+# Öffentliche Adresse dieses Servers (für die DNS-Prüfung im Portal), nur eintragen wenn noch nichts da ist
+if ! grep -q '^SERVER_IPV4=.' "$BASE/.env"; then
+  MYIP="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -1)"
+  case "$MYIP" in 10.*|192.168.*|172.1[6-9].*|172.2*|172.3[01].*|"") MYIP="$(curl -4 -fsS --max-time 8 https://api.ipify.org 2>/dev/null || true)";; esac
+  if echo "$MYIP" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+    sed -i '/^SERVER_IPV4=/d' "$BASE/.env"; echo "SERVER_IPV4=$MYIP" >> "$BASE/.env"
+    ok "Server-Adresse $MYIP erkannt und in der .env gespeichert"
+  fi
+fi
 set -a; . "$BASE/.env"; set +a
 chmod -R a+rX "$SITES"
 

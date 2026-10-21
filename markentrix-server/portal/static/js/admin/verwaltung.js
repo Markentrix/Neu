@@ -21,6 +21,18 @@ const checkZeigen = (r, titel) => {
   dnsBox.scrollIntoView({ behavior: 'smooth' });
 };
 
+const dnsZeigen = (r) => {
+  dnsBox.replaceChildren(h('div', { class: 'card' }, h('h2', {}, 'DNS-Prüfung: ' + r.domain),
+    h('p', {}, h('span', { class: 'pill ' + (r.ok ? 'ok' : 'bad') }, r.ok ? 'zeigt auf diesen Server' : 'noch nicht umgestellt'), r.dns_anbieter ? ' DNS bei: ' + r.dns_anbieter : ''),
+    h('table', { class: 'tbl' }, h('tbody', {}, ...[r.apex, r.www].map(x => h('tr', {}, h('td', {}, x.name), h('td', {}, (x.a.join(', ') || '–') + (x.aaaa.length ? ' · AAAA ' + x.aaaa.join(', ') : '')), h('td', {}, h('span', { class: 'pill ' + (x.status === 'ok' ? 'ok' : 'bad') }, x.status)))))),
+    r.probleme.length ? h('ul', {}, ...r.probleme.map(t => h('li', {}, t))) : '',
+    r.schritte.length ? h('ol', {}, ...r.schritte.map(t => h('li', {}, t))) : '',
+    r.kundentext ? h('div', {}, h('h3', {}, 'Text für den Kunden'), h('textarea', { rows: 12, style: 'width:100%', readonly: true }, r.kundentext),
+      h('button', { class: 'btn small sec', onclick: (ev) => navigator.clipboard.writeText(r.kundentext).then(() => { ev.target.textContent = 'Kopiert ✓'; }) }, 'Text kopieren')) : '',
+    h('p', { class: 'small muted' }, 'Server-Adresse: ' + (r.server_ipv4.join(', ') || 'unbekannt'))));
+  dnsBox.scrollIntoView({ behavior: 'smooth' });
+};
+
 async function uploadKarte(d) {
   const kunden = await api('/api/admin/kunden'), m = h('div'), verlauf = h('div');
   const art = h('select', {}, [['live', 'Live-Website (eigene Domain)'], ['demo', 'Demo (demo.markentrix.de/name)']].map(([v, t]) => h('option', { value: v }, t)));
@@ -35,12 +47,31 @@ async function uploadKarte(d) {
   const bekannt = d.aktiv.filter(z => z.art === 'live');
   const liste = h('datalist', { id: 'bekannte-seiten' }, bekannt.map(z => h('option', { value: z.name })));
   name.setAttribute('list', 'bekannte-seiten');
+  const weg = () => { try { return JSON.parse(localStorage.getItem('mk_upload_weg') || '[]'); } catch { return []; } };
+  const wegMerken = (id) => { try { localStorage.setItem('mk_upload_weg', JSON.stringify(weg().concat(id).slice(-200))); } catch { /* nur Komfort */ } };
+  const dnsHinweis = async (e, box) => {
+    // Neue Live-Website: zeigt die Domain schon auf den Server? Wenn nicht, steht hier genau, was einzutragen ist.
+    try {
+      const r = await api('/api/admin/websites/domain/' + encodeURIComponent(e.name));
+      if (r.ok) { box.replaceChildren(h('span', {}, 'Veröffentlicht, Domain zeigt auf diesen Server. ', h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen'))); return; }
+      box.replaceChildren(h('div', {}, h('b', {}, e.name + ': '), 'Veröffentlicht, aber die Domain zeigt noch nicht auf diesen Server. ', h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen'), h('div', {}, 'So geht es:'),
+        r.schritte.length ? h('ol', { style: 'margin:6px 0 0 18px' }, ...r.schritte.map(t => h('li', {}, t))) : '',
+        h('div', { class: 'small', style: 'margin-top:6px' }, 'Server-Adresse: ' + (r.server_ipv4.join(', ') || 'unbekannt') + ' · ', h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); dnsZeigen(r); } }, 'Genaue DNS-Prüfung mit Text für den Kunden'))));
+    } catch { /* Hinweis ist nur eine Hilfe */ }
+  };
   const ladeVerlauf = async () => {
     try {
       const v = await api('/api/admin/websites/veroeffentlichungen');
+      const gesehen = new Set(), ausgeblendet = weg();
+      const neueste = v.ergebnisse.filter(e => { const k = e.art + '|' + e.name; if (gesehen.has(k)) return false; gesehen.add(k); return !ausgeblendet.includes(e.id); }).slice(0, 4);
       verlauf.replaceChildren(
         v.offen.length ? h('p', { class: 'small' }, h('span', { class: 'pill warn' }, 'läuft'), ' ' + v.offen.map(o => o.name).join(', ') + ' wird gerade veröffentlicht (bis zu einer Minute).') : '',
-        ...v.ergebnisse.slice(0, 5).map(e => h('div', { class: 'msg ' + (e.ok ? 'ok' : 'err'), style: 'margin:6px 0' }, h('b', {}, e.name + ': '), e.text + ' ', e.ok && e.url ? h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen') : '')));
+        ...neueste.map(e => {
+          const text = h('div', { style: 'flex:1' }, h('b', {}, e.name + ': '), e.neu && e.art === 'live' && e.ok ? 'Veröffentlicht. Prüfe die Domain …' : e.text + ' ', e.ok && e.url && !(e.neu && e.art === 'live') ? h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen') : '');
+          if (e.ok && e.neu && e.art === 'live') dnsHinweis(e, text);
+          return h('div', { class: 'msg ' + (e.ok ? 'ok' : 'err'), style: 'margin:6px 0;display:flex;gap:10px;align-items:flex-start' }, text,
+            h('button', { class: 'btn small sec', type: 'button', title: 'Meldung ausblenden', onclick: (ev) => { wegMerken(e.id); ev.target.closest('.msg').remove(); } }, '×'));
+        }));
       if (v.offen.length) setTimeout(ladeVerlauf, 5000);
     } catch { /* Anzeige ist nur eine Hilfe */ }
   };
@@ -123,17 +154,6 @@ V.websites = async () => {
     catch (x) { melde(m, x.message); }
   } }, 'Wiederherstellen');
   const checkKnopf = (z) => h('button', { class: 'btn small sec', onclick: async () => { try { checkZeigen(await api('/api/admin/websites/livecheck?art=' + z.art + '&name=' + encodeURIComponent(z.name)), z.name); } catch (x) { melde(m, x.message); } } }, 'Check');
-  const dnsZeigen = (r) => {
-    dnsBox.replaceChildren(h('div', { class: 'card' }, h('h2', {}, 'DNS-Prüfung: ' + r.domain),
-      h('p', {}, h('span', { class: 'pill ' + (r.ok ? 'ok' : 'bad') }, r.ok ? 'zeigt auf diesen Server' : 'noch nicht umgestellt'), r.dns_anbieter ? ' DNS bei: ' + r.dns_anbieter : ''),
-      h('table', { class: 'tbl' }, h('tbody', {}, ...[r.apex, r.www].map(x => h('tr', {}, h('td', {}, x.name), h('td', {}, (x.a.join(', ') || '–') + (x.aaaa.length ? ' · AAAA ' + x.aaaa.join(', ') : '')), h('td', {}, h('span', { class: 'pill ' + (x.status === 'ok' ? 'ok' : 'bad') }, x.status)))))),
-      r.probleme.length ? h('ul', {}, ...r.probleme.map(t => h('li', {}, t))) : '',
-      r.schritte.length ? h('ol', {}, ...r.schritte.map(t => h('li', {}, t))) : '',
-      r.kundentext ? h('div', {}, h('h3', {}, 'Text für den Kunden'), h('textarea', { rows: 12, style: 'width:100%', readonly: true }, r.kundentext),
-        h('button', { class: 'btn small sec', onclick: () => navigator.clipboard.writeText(r.kundentext).then(() => melde(m, 'Text kopiert', 'ok')) }, 'Text kopieren')) : '',
-      h('p', { class: 'small muted' }, 'Server-Adresse: ' + (r.server_ipv4.join(', ') || 'unbekannt'))));
-    dnsBox.scrollIntoView({ behavior: 'smooth' });
-  };
   const dnsKnopf = (z) => z.art !== 'live' ? '' : h('span', {}, z.dns ? h('span', { class: 'pill ' + (z.dns.ok ? 'ok' : 'warn') }, z.dns.ok ? 'DNS ok' : 'DNS offen') : '', ' ',
     h('button', { class: 'btn small sec', onclick: async () => { try { dnsZeigen(await api('/api/admin/websites/domain/' + encodeURIComponent(z.name))); } catch (x) { melde(m, x.message); } } }, 'DNS prüfen'));
   const status = (z) => {
