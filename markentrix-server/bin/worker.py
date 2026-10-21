@@ -333,7 +333,32 @@ def zurueck(a):
         raise
 
 
+def server_ip_ermitteln():
+    """Öffentliche Adresse des Servers (stündlich) für den DNS-Assistenten im Portal."""
+    p = QUEUE / "serverip.json"
+    if p.exists() and p.stat().st_mtime > time.time() - 3500:
+        return
+    import urllib.request
+    d = {}
+    for key, url in (("v4", os.environ.get("MK_IP_URL", "https://api.ipify.org")), ("v6", os.environ.get("MK_IP6_URL", "https://api64.ipify.org"))):
+        try:
+            with urllib.request.urlopen(url, timeout=5) as r:
+                d[key] = r.read(100).decode().strip()
+        except Exception:  # noqa: BLE001
+            pass
+    if d.get("v6") == d.get("v4") or (d.get("v6") and ":" not in d["v6"]):
+        d.pop("v6", None)
+    if d.get("v4"):
+        p.write_text(json.dumps(d))
+        os.chown(p, 10001, 10001)
+        p.chmod(0o640)
+
+
 def aufraeumen():
+    try:
+        server_ip_ermitteln()
+    except Exception as e:  # noqa: BLE001
+        log(f"Server-IP nicht ermittelbar: {e}")
     try:   # Liste der vorhandenen Tagessicherungen für das Portal (Admin → Verwaltung → Aus Sicherung holen)
         p = QUEUE / "sicherungen.json"
         p.write_text(json.dumps({"tage": sicherung_tage(), "db_tage": db_tage(), "stand": time.strftime("%Y-%m-%dT%H:%M:%S")}))

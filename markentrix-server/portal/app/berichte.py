@@ -51,7 +51,11 @@ def sammeln(cur, kid, von: date, bis: date) -> dict:
     cur.execute("""SELECT count(*) FILTER (WHERE status IN ('gebucht','reserviert')) AS buchungen, count(*) FILTER (WHERE ergebnis='nicht_erschienen') AS weg,
                           count(*) FILTER (WHERE ergebnis='erschienen') AS da FROM website_termine WHERE kunden_id=%s AND erstellt_am >= %s AND erstellt_am < %s""", (kid, von, bis))
     wt = cur.fetchone()
-    website = {"besucher": ws["besucher"], "aufrufe": ws["aufrufe"], "whatsapp": ws["whatsapp"], "anrufe": ws["anrufe"], "anfragen": w_anf,
+    cur.execute("""SELECT count(*) AS n, max(median_ms) AS median_ms, coalesce(sum(jsonb_array_length(tote)),0) AS tote, coalesce(sum(jsonb_array_length(langsam)),0) AS langsam
+                   FROM website_qualitaet WHERE kunden_id=%s AND geprueft_am >= now() - interval '3 days'""", (kid,))
+    q = cur.fetchone()
+    qualitaet = {"median_ms": q["median_ms"], "tote": int(q["tote"]), "langsam": int(q["langsam"])} if q and q["n"] else None
+    website = {"qualitaet": qualitaet, "besucher": ws["besucher"], "aufrufe": ws["aufrufe"], "whatsapp": ws["whatsapp"], "anrufe": ws["anrufe"], "anfragen": w_anf,
                "buchungen": wt["buchungen"], "nicht_erschienen": wt["weg"], "erschienen": wt["da"], "erreichbarkeit": webbetrieb.erreichbarkeit(cur, kid, von, bis)}
     return {"website": website, "anfragen": {"gesamt": a_ges, "vormonat": a_vor, "nach_quelle": a_quelle, "bearbeitet": ar["bearbeitet"], "spam": ar["spam"]},
             "termine": {"gesamt": sum(t.values()), "nach_status": t},
@@ -161,6 +165,10 @@ def pdf_erzeugen(cur, bericht_id, f: dict | None = None) -> tuple[bytes, str]:
             zeilen.append(f"Über die Website wurden {_n(w['buchungen'], 'Termin', 'Termine')} gebucht" + (f", {w['nicht_erschienen']} davon sind nicht erschienen." if w.get("nicht_erschienen") else "."))
         if w.get("erreichbarkeit") is not None:
             zeilen.append(f"Erreichbarkeit der Website: {str(w['erreichbarkeit']).replace('.', ',')} % (wir prüfen alle 5 Minuten).")
+        qq = w.get("qualitaet")
+        if qq:
+            zeilen.append(f"Ladezeit der Website: typisch {qq['median_ms']} Millisekunden" + (f"; {_n(qq['langsam'], 'Seite', 'Seiten')} laden langsam." if qq["langsam"] else ".")
+                          + (f" {_n(qq['tote'], 'Verweis', 'Verweise')} führen ins Leere, wir kümmern uns darum." if qq["tote"] else " Keine toten Verweise gefunden."))
     inhalt += [pdf.p("• " + z) for z in zeilen]
     ein, schritte = texte(b)
     inhalt += [pdf.p("Einordnung", pdf.H2), pdf.p(ein), pdf.p("Unsere nächsten Schritte", pdf.H2)] + [pdf.p("• " + z) for z in schritte]

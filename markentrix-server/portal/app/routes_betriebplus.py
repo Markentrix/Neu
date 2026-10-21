@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, mailer, offboarding, push, zustellung
+from . import abo, config, einstellungen, mailer, offboarding, push, zustellung
 from . import sitedienste as sd
 from .db import tx
 from .routes_websites import auftrag
@@ -412,3 +412,115 @@ def a_vertrag_setzen(data: VertragIn, user: dict = Depends(require_admin)):
         einstellungen.schreiben(cur, "vertrag", {"kuendigungsfrist_tage": data.kuendigungsfrist_tage})
         audit(cur, user, "einstellung_vertrag", None, {"frist": data.kuendigungsfrist_tage})
     return {"ok": True}
+
+
+# ---------------------------------------------------------------- Wartungsverträge (wiederkehrende Rechnungen)
+class PlanIn(BaseModel):
+    titel: str = Field(min_length=2, max_length=200)
+    intervall_monate: int = Field(default=1)
+    aus_buchungen: bool = False
+    positionen: list[dict] = []
+    naechste_am: date
+    enddatum: date | None = None
+    auto_senden: bool = False
+
+
+class PlanPut(BaseModel):
+    aktiv: bool | None = None
+    auto_senden: bool | None = None
+    naechste_am: date | None = None
+    enddatum: date | None = None
+    titel: str | None = Field(default=None, min_length=2, max_length=200)
+
+
+def _plan_zeile(r: dict) -> dict:
+    return {"id": str(r["id"]), "titel": r["titel"], "intervall_monate": r["intervall_monate"], "aus_buchungen": r["aus_buchungen"], "positionen": r["positionen"],
+            "naechste_am": r["naechste_am"], "enddatum": r["enddatum"], "aktiv": r["aktiv"], "auto_senden": r["auto_senden"], "zuletzt_am": r["zuletzt_am"]}
+
+
+@admin.get("/kunden/{kid}/abrechnungsplaene")
+def plaene(kid: str, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        try:
+            cur.execute("SELECT * FROM abrechnungsplaene WHERE kunden_id=%s ORDER BY erstellt_am", (kid,))
+        except Exception:
+            raise HTTPException(404, "Kunde nicht gefunden.")
+        return {"plaene": [_plan_zeile(r) for r in cur.fetchall()]}
+
+
+@admin.post("/kunden/{kid}/abrechnungsplaene")
+def plan_anlegen(kid: str, data: PlanIn, user: dict = Depends(require_admin)):
+    from . import belege
+    if data.intervall_monate not in (1, 3, 6, 12):
+        raise HTTPException(400, "Intervall: 1, 3, 6 oder 12 Monate.")
+    pos = [] if data.aus_buchungen else belege.positionen_pruefen(data.positionen)
+    if not data.aus_buchungen and not pos:
+        raise HTTPException(400, "Bitte Positionen eintragen oder „aus den Buchungen“ wählen.")
+    if data.enddatum and data.enddatum < data.naechste_am:
+        raise HTTPException(400, "Das Enddatum liegt vor dem ersten Abrechnungstag.")
+    with tx("admin") as cur:
+        try:
+            cur.execute("SELECT referenzkunde FROM kunden WHERE id=%s", (kid,))
+        except Exception:
+            raise HTTPException(404, "Kunde nicht gefunden.")
+        k = cur.fetchone()
+        if not k:
+            raise HTTPException(404, "Kunde nicht gefunden.")
+        if k["referenzkunde"]:
+            raise HTTPException(400, "Referenzkunden bekommen keine Rechnung.")
+        cur.execute("""INSERT INTO abrechnungsplaene (kunden_id, titel, intervall_monate, aus_buchungen, positionen, naechste_am, enddatum, auto_senden)
+                       VALUES (%s,%s,%s,%s,%s::jsonb,%s,%s,%s) RETURNING id""", (kid, data.titel.strip(), data.intervall_monate, data.aus_buchungen, json.dumps(pos), data.naechste_am, data.enddatum, data.auto_senden))
+        pid = cur.fetchone()["id"]
+        audit(cur, user, "abrechnungsplan_angelegt", kid, {"titel": data.titel})
+    return {"id": str(pid)}
+
+
+@admin.put("/abrechnungsplaene/{pid}")
+def plan_aendern(pid: str, data: PlanPut, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        try:
+            cur.execute("SELECT * FROM abrechnungsplaene WHERE id=%s FOR UPDATE", (pid,))
+        except Exception:
+            raise HTTPException(404, "Plan nicht gefunden.")
+        p = cur.fetchone()
+        if not p:
+            raise HTTPException(404, "Plan nicht gefunden.")
+        neu = {k: v for k, v in data.model_dump().items() if v is not None}
+        if "enddatum" in data.model_fields_set and data.enddatum is None:
+            neu["enddatum"] = None
+        if neu:
+            cur.execute(f"UPDATE abrechnungsplaene SET {', '.join(k + '=%s' for k in neu)} WHERE id=%s", (*neu.values(), pid))
+        audit(cur, user, "abrechnungsplan_geaendert", p["kunden_id"], {k: str(v) for k, v in neu.items()})
+    return {"ok": True}
+
+
+@admin.delete("/abrechnungsplaene/{pid}")
+def plan_loeschen(pid: str, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        try:
+            cur.execute("DELETE FROM abrechnungsplaene WHERE id=%s RETURNING kunden_id", (pid,))
+        except Exception:
+            raise HTTPException(404, "Plan nicht gefunden.")
+        r = cur.fetchone()
+        if not r:
+            raise HTTPException(404, "Plan nicht gefunden.")
+        audit(cur, user, "abrechnungsplan_geloescht", r["kunden_id"], {})
+    return {"ok": True}
+
+
+@admin.post("/abrechnungsplaene/{pid}/jetzt")
+def plan_jetzt(pid: str, user: dict = Depends(require_admin)):
+    """Die nächste Rechnung des Plans sofort erzeugen und ausstellen (nicht versenden). Der Plan rückt um einen Zeitraum weiter."""
+    rate_limit("planjetzt", 30, 3600)
+    with tx("admin") as cur:
+        try:
+            cur.execute("SELECT * FROM abrechnungsplaene WHERE id=%s FOR UPDATE", (pid,))
+        except Exception:
+            raise HTTPException(404, "Plan nicht gefunden.")
+        p = cur.fetchone()
+        if not p:
+            raise HTTPException(404, "Plan nicht gefunden.")
+        r = abo.erzeugen(cur, p, jetzt=True)
+        if not r:
+            raise HTTPException(409, "Es wurde nichts erzeugt (Kunde nicht aktiv, keine Positionen, Betrag 0 oder Vertragsende erreicht).")
+    return r

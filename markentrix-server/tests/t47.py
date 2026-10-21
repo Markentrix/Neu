@@ -73,7 +73,7 @@ async def main():
         pp=pg.locator(".card:has(h2:text-is('PayPal'))"); await pp.locator("input[type=checkbox]").check(); await pp.locator("input[placeholder='https://paypal.me/deinname']").fill("https://paypal.me/dienste")
         await pp.get_by_role("button",name="Speichern").click(); await pg.wait_for_selector("text=Gespeichert.",timeout=4000)
         # Bewertungen
-        bw=pg.locator(".card:has(h2:text-is('Google-Bewertungen'))"); await bw.locator("input[type=checkbox]").check(); await bw.locator("input[placeholder='ChIJ…']").fill("ChIJtestplace12345")
+        bw=pg.locator(".card:has(h2:text-is('Google-Bewertungen'))"); await bw.locator("input[type=checkbox]").first.check(); await bw.locator("input[placeholder='ChIJ…']").fill("ChIJtestplace12345")
         await bw.get_by_role("button",name="Bei Google abfragen").click(); await pg.wait_for_selector("text=Google meldet 4,7 Sterne",timeout=8000)
         chk("Kunde: Bewertungen werden bei Google abgefragt",True)
         await pg.screenshot(path="/var/tmp/pt/shots/dienste_kunde.png",full_page=True)

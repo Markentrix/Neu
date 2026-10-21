@@ -1,11 +1,12 @@
 """Hintergrundaufgaben des Portals (einmal pro Minute): Benachrichtigungen, Terminerinnerungen, Monatsberichte, Fehlermeldungen.
 Mehrfachversand wird durch Markieren der Zeilen beim Abholen (FOR UPDATE SKIP LOCKED) verhindert."""
+import json
 import logging
 import threading
 import time
 from datetime import date, datetime, timezone
 
-from . import berichte, betrieb, webbetrieb, zustellung, einstellungen, mailer, pdf, push
+from . import abo, berichte, betrieb, domaincheck, webbetrieb, zustellung, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -568,6 +569,53 @@ def zustellung_pruefen(cfg):
         push.senden(ids, "Mail-Zustellbarkeit", f"{sys_domain}: {probleme}. Mails können im Spam landen.", "/admin#einstellungen", "zustellung")
 
 
+def domain_pruefen(cfg):
+    """Alle 10 Minuten: Live-Domains, die noch nicht richtig auf den Server zeigen, erneut prüfen; Admin benachrichtigen, sobald sie live sind."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.minute % 10 != 0 or not _marker("domaincheck-" + jetzt.strftime("%Y-%m-%d-%H-%M")):
+        return
+    domain_lauf()
+
+
+def domain_lauf():
+    with tx("system") as cur:
+        v4, v6 = domaincheck.server_adressen(cur)
+        if not v4:
+            return
+        cur.execute("""SELECT w.domain, w.kunden_id, k.firma, p.ok, p.live_gemeldet, p.geprueft_am FROM websites w JOIN kunden k ON k.id = w.kunden_id
+                       LEFT JOIN domain_pruefung p ON p.domain = w.domain
+                       WHERE w.art = 'live' AND (p.domain IS NULL OR p.ok IS NOT TRUE OR p.live_gemeldet IS NOT TRUE OR p.geprueft_am < now() - interval '1 day') LIMIT 30""")
+        todo = cur.fetchall()
+    for t in todo:
+        r = domaincheck.pruefen(t["domain"], v4, v6)
+        neu_live = r["ok"] and not t["live_gemeldet"]
+        with tx("system") as cur:
+            cur.execute("""INSERT INTO domain_pruefung (domain, kunden_id, geprueft_am, ok, ergebnis, live_gemeldet) VALUES (%s,%s,now(),%s,%s,%s)
+                           ON CONFLICT (domain) DO UPDATE SET geprueft_am=now(), ok=EXCLUDED.ok, ergebnis=EXCLUDED.ergebnis, live_gemeldet=domain_pruefung.live_gemeldet OR EXCLUDED.live_gemeldet""",
+                        (t["domain"], t["kunden_id"], r["ok"], json.dumps(r), neu_live))
+            ids = push.admins(cur) if neu_live else []
+        if ids:
+            push.senden(ids, "Domain ist live", f"{t['domain']} ({t['firma']}) zeigt jetzt auf den Server.", "/admin#verwaltung", "domainlive")
+
+
+def website_bewertungen(cfg):
+    webbetrieb.bewertungsanfragen(cfg)
+
+
+def website_qualitaet(cfg):
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 3 or not _marker("webqualitaet-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    webbetrieb.qualitaetslauf(cfg)
+
+
+def abrechnungslauf(cfg):
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 6 or not _marker("abo-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    abo.lauf(cfg)
+
+
 def website_wacht(cfg):
     webbetrieb.wacht(cfg)
 
@@ -576,7 +624,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, zustellung_pruefen, kuendigungen_vollziehen):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, abrechnungslauf):
         try:
             job(cfg)
         except Exception:
@@ -584,7 +632,7 @@ def tick():
             betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

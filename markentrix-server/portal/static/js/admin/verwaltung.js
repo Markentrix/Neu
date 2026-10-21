@@ -12,6 +12,15 @@ V.katalog = async () => {
 };
 
 /** Website als ZIP hochladen und veröffentlichen. Der Server prüft die ZIP, richtet Domain und HTTPS ein und sichert die vorige Version. */
+const dnsBox = h('div');
+const checkZeigen = (r, titel) => {
+  const farbe = { gruen: 'ok', gelb: 'warn', rot: 'bad' }[r.ampel];
+  dnsBox.replaceChildren(h('div', { class: 'card' }, h('h2', {}, 'Livegang-Check: ' + titel),
+    h('p', {}, h('span', { class: 'pill ' + farbe }, { gruen: 'bereit', gelb: 'mit Hinweisen', rot: 'Fehler gefunden' }[r.ampel]), ' ' + r.seiten + ' Seiten geprüft'),
+    r.punkte.length ? h('ul', {}, ...r.punkte.map(x => h('li', {}, h('span', { class: 'pill ' + ({ fehler: 'bad', warn: 'warn', hinweis: '' }[x.stufe]) }, { fehler: 'Fehler', warn: 'Warnung', hinweis: 'Hinweis' }[x.stufe]), ' ' + x.text + (x.ort ? ' (' + x.ort + ')' : '')))) : h('p', {}, 'Keine Auffälligkeiten.')));
+  dnsBox.scrollIntoView({ behavior: 'smooth' });
+};
+
 async function uploadKarte(d) {
   const kunden = await api('/api/admin/kunden'), m = h('div'), verlauf = h('div');
   const art = h('select', {}, [['live', 'Live-Website (eigene Domain)'], ['demo', 'Demo (demo.markentrix.de/name)']].map(([v, t]) => h('option', { value: v }, t)));
@@ -40,7 +49,7 @@ async function uploadKarte(d) {
     if (!datei.files.length) { melde(m, 'Bitte eine ZIP-Datei wählen.'); return; }
     const f = new FormData(); f.append('datei', datei.files[0]); f.append('art', art.value); f.append('name', name.value); f.append('kunden_id', kunde.value); f.append('dienste_skript', skript.checked ? '1' : '0');
     knopfHoch.disabled = true; knopfHoch.textContent = 'Lade hoch …';
-    try { const r = await api('/api/admin/websites/upload', { method: 'POST', body: f }); melde(m, r.hinweis + ' (' + r.dateien + ' Dateien aus „' + r.ordner + '“' + (r.skript_in_seiten ? ', Website-Dienste in ' + r.skript_in_seiten + ' Seiten eingebaut' : '') + ')', 'ok'); datei.value = ''; setTimeout(ladeVerlauf, 1500); }
+    try { const r = await api('/api/admin/websites/upload', { method: 'POST', body: f }); melde(m, r.hinweis + ' (' + r.dateien + ' Dateien aus „' + r.ordner + '“' + (r.skript_in_seiten ? ', Website-Dienste in ' + r.skript_in_seiten + ' Seiten eingebaut' : '') + ')', 'ok'); if (r.check) checkZeigen(r.check, name.value); datei.value = ''; setTimeout(ladeVerlauf, 1500); }
     catch (x) { melde(m, x.message); }
     knopfHoch.disabled = false; knopfHoch.textContent = 'Hochladen und veröffentlichen';
   });
@@ -97,6 +106,7 @@ async function sicherungKarte(d) {
 }
 
 V.websites = async () => {
+  dnsBox.replaceChildren();
   const d = await api('/api/admin/websites');
   const m = h('div');
   const mb = (b) => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
@@ -112,21 +122,35 @@ V.websites = async () => {
     try { const r = await api('/api/admin/websites/wiederherstellen', { method: 'POST', body: { id: z.id } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
     catch (x) { melde(m, x.message); }
   } }, 'Wiederherstellen');
+  const checkKnopf = (z) => h('button', { class: 'btn small sec', onclick: async () => { try { checkZeigen(await api('/api/admin/websites/livecheck?art=' + z.art + '&name=' + encodeURIComponent(z.name)), z.name); } catch (x) { melde(m, x.message); } } }, 'Check');
+  const dnsZeigen = (r) => {
+    dnsBox.replaceChildren(h('div', { class: 'card' }, h('h2', {}, 'DNS-Prüfung: ' + r.domain),
+      h('p', {}, h('span', { class: 'pill ' + (r.ok ? 'ok' : 'bad') }, r.ok ? 'zeigt auf diesen Server' : 'noch nicht umgestellt'), r.dns_anbieter ? ' DNS bei: ' + r.dns_anbieter : ''),
+      h('table', { class: 'tbl' }, h('tbody', {}, ...[r.apex, r.www].map(x => h('tr', {}, h('td', {}, x.name), h('td', {}, (x.a.join(', ') || '–') + (x.aaaa.length ? ' · AAAA ' + x.aaaa.join(', ') : '')), h('td', {}, h('span', { class: 'pill ' + (x.status === 'ok' ? 'ok' : 'bad') }, x.status)))))),
+      r.probleme.length ? h('ul', {}, ...r.probleme.map(t => h('li', {}, t))) : '',
+      r.schritte.length ? h('ol', {}, ...r.schritte.map(t => h('li', {}, t))) : '',
+      r.kundentext ? h('div', {}, h('h3', {}, 'Text für den Kunden'), h('textarea', { rows: 12, style: 'width:100%', readonly: true }, r.kundentext),
+        h('button', { class: 'btn small sec', onclick: () => navigator.clipboard.writeText(r.kundentext).then(() => melde(m, 'Text kopiert', 'ok')) }, 'Text kopieren')) : '',
+      h('p', { class: 'small muted' }, 'Server-Adresse: ' + (r.server_ipv4.join(', ') || 'unbekannt'))));
+    dnsBox.scrollIntoView({ behavior: 'smooth' });
+  };
+  const dnsKnopf = (z) => z.art !== 'live' ? '' : h('span', {}, z.dns ? h('span', { class: 'pill ' + (z.dns.ok ? 'ok' : 'warn') }, z.dns.ok ? 'DNS ok' : 'DNS offen') : '', ' ',
+    h('button', { class: 'btn small sec', onclick: async () => { try { dnsZeigen(await api('/api/admin/websites/domain/' + encodeURIComponent(z.name))); } catch (x) { melde(m, x.message); } } }, 'DNS prüfen'));
   const status = (z) => {
     if (z.art === 'live') {
       const w = z.wacht;
       if (!w) return h('span', { class: 'muted small' }, 'noch nicht geprüft');
       return h('span', {}, h('span', { class: 'pill ' + (w.ok ? 'ok' : 'bad'), title: w.fehler || '' }, w.ok ? 'erreichbar' : 'gestört'), ' ',
-        h('span', { class: 'small muted' }, (w.ms ? w.ms + ' ms · ' : '') + (w.prozent != null ? String(w.prozent).replace('.', ',') + ' % · ' : '') + (w.cert_tage != null ? 'Zertifikat ' + w.cert_tage + ' T' : '')));
+        h('span', { class: 'small muted' }, (w.ms ? w.ms + ' ms · ' : '') + (w.prozent != null ? String(w.prozent).replace('.', ',') + ' % · ' : '') + (w.cert_tage != null ? 'Zertifikat ' + w.cert_tage + ' T' : '') + (w.qualitaet ? ' · ' + (w.qualitaet.tote.length ? w.qualitaet.tote.length + ' tote Links' : 'Links ok') + (w.qualitaet.langsam.length ? ' · ' + w.qualitaet.langsam.length + ' langsam' : '') : '')));
     }
     const f = z.freigabe;
     if (!f) return '';
     const t = { wartet: ['warn', 'Freigabe wartet'], freigegeben: ['ok', 'vom Kunden freigegeben'], abgelehnt: ['bad', 'Änderung gewünscht'], zurueckgezogen: ['', 'zurückgezogen'] }[f.status] || ['', f.status];
     return h('span', {}, h('span', { class: 'pill ' + t[0], title: f.kommentar || '' }, t[1]), f.entschieden_am ? h('span', { class: 'small muted' }, ' ' + new Date(f.entschieden_am).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + (f.entschieden_name ? ' · ' + f.entschieden_name : '')) : '');
   };
-  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, await uploadKarte(d), await vorschauKarte(d), await sicherungKarte(d),
+  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, dnsBox, await uploadKarte(d), await vorschauKarte(d), await sicherungKarte(d),
     h('div', { class: 'card' }, h('h2', {}, 'Aktiv'),
-      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Status', status], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', loesch]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
+      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Status', status], ['DNS', dnsKnopf], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', z => h('span', {}, checkKnopf(z), ' ', loesch(z))]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
     h('div', { class: 'card' }, h('h2', {}, 'Papierkorb'), h('p', { class: 'small muted' }, 'Gelöschte Seiten bleiben ' + d.aufbewahrung_tage + ' Tage erhalten und werden dann endgültig entfernt.'),
       tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Gelöscht', z => wann(z.geloescht)], ['Größe', z => mb(z.groesse)], ['', zurueck]], d.papierkorb, 'Papierkorb ist leer.')));
 };

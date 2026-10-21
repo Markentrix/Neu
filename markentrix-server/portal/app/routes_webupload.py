@@ -10,7 +10,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
-from . import config
+from . import config, livecheck
 from . import sitedienste as sd
 from .db import tx
 from .routes_websites import NAME, auftrag
@@ -220,6 +220,10 @@ def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str 
                 cur.execute("""INSERT INTO websites (kunden_id, domain, art, status, letzte_veroeffentlichung) VALUES (%s,%s,'live','live',now())
                                ON CONFLICT (domain) DO UPDATE SET status='live', letzte_veroeffentlichung=now()""", (kid, name))
             audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet})
+        try:
+            check = livecheck.pruefen(inhalt)
+        except Exception:  # noqa: BLE001
+            check = None
         # Der Server-Dienst erwartet den Inhalt direkt im Zwischenordner
         for p in list(inhalt.iterdir()):
             shutil.move(str(p), str(stage / p.name))
@@ -231,7 +235,7 @@ def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str 
     except OSError:
         shutil.rmtree(stage, ignore_errors=True)
         raise HTTPException(500, "Die Dateien konnten nicht abgelegt werden (Speicherplatz oder Rechte).")
-    return {"ok": True, "id": uid, "dateien": n, "ordner": verwendet, "skript_in_seiten": eingefuegt,
+    return {"ok": True, "id": uid, "dateien": n, "ordner": verwendet, "skript_in_seiten": eingefuegt, "check": check,
             "hinweis": "Hochgeladen und geprüft. Die Website wird innerhalb einer Minute veröffentlicht, unten erscheint das Ergebnis."}
 
 
@@ -247,6 +251,17 @@ def zurueck(daten: dict, user: dict = Depends(require_admin)):
 
 
 TAG_RE = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{4}$")
+
+
+@router.get("/livecheck")
+def livecheck_live(art: str = "live", name: str = "", user: dict = Depends(require_admin)):
+    """Livegang-Check für eine bereits veröffentlichte Seite."""
+    rate_limit("livecheck", 60, 3600)
+    _ordner_name(art, name)
+    ordner = (config.SITES_LIVE if art == "live" else config.SITES_ROOT / "demos") / name
+    if ordner.is_symlink() or not ordner.is_dir():
+        raise HTTPException(404, "Diese Seite gibt es nicht.")
+    return livecheck.pruefen(ordner)
 
 
 @router.get("/sicherungen")

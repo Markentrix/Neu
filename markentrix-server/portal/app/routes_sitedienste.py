@@ -272,6 +272,22 @@ def oeff_absagen(site_id: str, t: str, request: Request, bg: BackgroundTasks):
     return _seite("Ihr Termin wurde abgesagt. Sie können jederzeit einen neuen buchen.")
 
 
+@router.get("/site/{site_id}/bewertung/abmelden", include_in_schema=False)
+def oeff_bewertung_abmelden(site_id: str, t: str, request: Request):
+    """Abmeldelink in der Bewertungsanfrage: keine weitere Bewertungsmail an diese Adresse."""
+    rate_limit("sitebewab:" + client_ip(request), 20, 600)
+    if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not 10 <= len(t) <= 100:
+        return _seite("Dieser Link ist ungültig.")
+    with tx("system") as cur:
+        cur.execute("SELECT w.kunden_id, w.email FROM website_termine w JOIN website_dienste d ON d.kunden_id=w.kunden_id WHERE w.token=%s AND d.site_id=%s", (t, site_id))
+        g = cur.fetchone()
+        if not g:
+            return _seite("Dieser Link ist nicht mehr gültig.")
+        cur.execute("INSERT INTO website_bewertung_sperre (kunden_id, email) VALUES (%s, lower(%s)) ON CONFLICT DO NOTHING", (g["kunden_id"], g["email"]))
+        cur.execute("UPDATE website_termine SET bewertung_faellig=NULL WHERE kunden_id=%s AND lower(email)=lower(%s)", (g["kunden_id"], g["email"]))
+    return _seite("Sie erhalten keine Bewertungsanfragen mehr von uns.")
+
+
 @router.get("/site/{site_id}/bewertungen", include_in_schema=False)
 def oeff_bewertungen(site_id: str, request: Request):
     z = _site(site_id)
@@ -318,7 +334,8 @@ def _zustand(cur, kid) -> dict:
         "paypal": {"aktiv": z["pp_aktiv"], "client_id": z["pp_client_id"] or "", "waehrung": z["pp_waehrung"], "me_link": z["pp_me_link"] or ""},
         "analytics": {"aktiv": z["ga_aktiv"], "id": z["ga_id"] or "", "statistik": z["stat_aktiv"]},
         "bewertungen": {"aktiv": z["bew_aktiv"], "place_id": z["bew_place_id"] or "", "sterne": float(z["bew_sterne"]) if z["bew_sterne"] is not None else None,
-                        "anzahl": z["bew_anzahl"], "link": z["bew_link"] or "", "stand": z["bew_stand"]},
+                        "anzahl": z["bew_anzahl"], "link": z["bew_link"] or "", "stand": z["bew_stand"],
+                        "nach_termin": z["bew_nach_termin"], "verzoegerung_std": z["bew_verzoegerung_std"]},
         "status": _status(cur, kid),
     }
 
@@ -570,6 +587,25 @@ def k_bewertungen(data: BewertungIn, user: dict = Depends(require_inhaber)):
     return {"ok": True}
 
 
+class BewAnfrageIn(BaseModel):
+    aktiv: bool = False
+    verzoegerung_std: int = Field(default=3, ge=1, le=72)
+
+
+@kunde.put("/bewertungen/anfrage")
+def k_bew_anfrage(data: BewAnfrageIn, user: dict = Depends(require_inhaber)):
+    """Opt-in: nach einem als „erschienen“ markierten Termin bittet die Website den Besucher per Mail um eine Google-Bewertung."""
+    kid = user["kunden_id"]
+    rate_limit("bewanfrage:" + str(kid), 30, 600)
+    with tx("system") as cur:
+        z = sd.zeile(cur, kid)
+        if data.aktiv and not (z["bew_link"] or z["bew_place_id"]):
+            raise HTTPException(400, "Bitte trage zuerst die Place-ID oder den Link „Rezension schreiben“ ein und speichere.")
+        cur.execute("UPDATE website_dienste SET bew_nach_termin=%s, bew_verzoegerung_std=%s, geaendert_am=now() WHERE kunden_id=%s", (data.aktiv, data.verzoegerung_std, kid))
+        audit(cur, user, "website_dienste_bewertungsanfrage", kid, {"aktiv": data.aktiv})
+    return {"ok": True}
+
+
 @kunde.post("/bewertungen/test")
 def k_bew_test(user: dict = Depends(require_inhaber)):
     kid = user["kunden_id"]
@@ -642,6 +678,11 @@ def k_ergebnis(bid: str, data: ErgebnisIn, user: dict = Depends(require_inhaber)
             raise HTTPException(409, "Diese Buchung lässt sich nicht mehr bewerten (noch nicht vorbei oder abgesagt).")
         if g["termin_id"]:
             cur.execute("UPDATE termine SET status=%s WHERE id=%s", ("erledigt" if data.ergebnis == "erschienen" else "nicht_erschienen", g["termin_id"]))
+        if data.ergebnis == "erschienen":
+            cur.execute("""UPDATE website_termine w SET bewertung_faellig = now() + make_interval(hours => d.bew_verzoegerung_std)
+                           FROM website_dienste d WHERE w.id=%s AND d.kunden_id=w.kunden_id AND d.bew_nach_termin AND w.bewertung_gesendet IS NULL
+                             AND w.email IS NOT NULL AND (d.bew_link IS NOT NULL OR d.bew_place_id IS NOT NULL)
+                             AND NOT EXISTS (SELECT 1 FROM website_bewertung_sperre s WHERE s.kunden_id=w.kunden_id AND s.email=lower(w.email))""", (bid,))
     return {"ok": True}
 
 

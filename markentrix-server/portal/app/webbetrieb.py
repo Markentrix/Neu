@@ -59,17 +59,45 @@ def erinnerungen(cfg=None):
     return gesendet
 
 
+def bewertungsanfragen(cfg=None):
+    """Bittet Besucher nach einem erschienenen Termin um eine Google-Bewertung (nur mit Opt-in des Kunden, mit Abmeldelink)."""
+    with tx("system") as cur:
+        cur.execute("""WITH f AS (SELECT w.id FROM website_termine w JOIN kunden k ON k.id = w.kunden_id
+                                  WHERE w.bewertung_faellig <= now() AND w.bewertung_gesendet IS NULL AND k.status IN ('onboarding','aktiv')
+                                  ORDER BY w.bewertung_faellig LIMIT 50 FOR UPDATE OF w SKIP LOCKED)
+                       UPDATE website_termine w SET bewertung_gesendet = now(), bewertung_faellig = NULL FROM f WHERE w.id = f.id
+                       RETURNING w.id""")
+        ids = [r["id"] for r in cur.fetchall()]
+        if not ids:
+            return 0
+        cur.execute("""SELECT w.id, w.kunden_id, w.name, w.email, w.token, z.site_id, z.bew_link, z.bew_place_id, k.firma
+                       FROM website_termine w JOIN website_dienste z ON z.kunden_id = w.kunden_id JOIN kunden k ON k.id = w.kunden_id WHERE w.id = ANY(%s)""", (ids,))
+        zeilen = cur.fetchall()
+    n = 0
+    for r in zeilen:
+        link = r["bew_link"] or (f"https://search.google.com/local/writereview?placeid={r['bew_place_id']}" if r["bew_place_id"] else "")
+        if not link or not r["email"]:
+            continue
+        ab = f"{config.BASE_URL}/site/{r['site_id']}/bewertung/abmelden?t={r['token']}"
+        text = (f"Guten Tag {r['name']},\n\nvielen Dank für Ihren Besuch bei {r['firma']}. Wenn Sie zufrieden waren, würden wir uns über eine kurze Bewertung bei Google freuen:\n{link}\n\n"
+                f"Das dauert eine Minute und hilft uns sehr.\n\nViele Grüße\n{r['firma']}\n\n--\nKeine weiteren Bewertungsanfragen erhalten: {ab}")
+        ok, via = sd.kundenmail(r["kunden_id"], r["email"], f"Wie war Ihr Besuch bei {r['firma']}?", text, art="bewertung")
+        sd.ereignis(r["kunden_id"], "bewertung", ok, "gesendet" if ok else "Versand fehlgeschlagen: " + str(via)[:150])
+        n += 1 if ok else 0
+    return n
+
+
 # ---------------------------------------------------------------- Überwachung der Kundenseiten
 _letzter_lauf = 0.0
 
 
-def _abrufen(url: str, host: str, timeout: int = 10) -> tuple[int, bytes, int]:
+def _abrufen(url: str, host: str, timeout: int = 10, limit: int = 65536) -> tuple[int, bytes, int]:
     """(Statuscode, Inhalt bis 64 KB, Millisekunden). Fehler werden als ValueError mit lesbarem Text gemeldet."""
     req = urllib.request.Request(url, headers={"Host": host, "User-Agent": "Markentrix-Wachdienst/1", "Accept": "*/*"})
     t0 = time.time()
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.status, r.read(65536), int((time.time() - t0) * 1000)
+            return r.status, r.read(limit), int((time.time() - t0) * 1000)
     except urllib.error.HTTPError as e:
         return e.code, b"", int((time.time() - t0) * 1000)
     except (urllib.error.URLError, socket.timeout, ssl.SSLError, OSError) as e:
@@ -202,13 +230,87 @@ def _verbuchen(cfg, s: dict, e: dict):
                     "Bitte prüfen, ob die Domain noch auf den Server zeigt.", f"Zertifikat läuft ab: {domain}")
 
 
+LANGSAM_MS = 3000
+
+
+def qualitaet_pruefen(domain: str) -> dict:
+    """Ruft die Startseite und bis zu 25 verschiedene interne Seiten auf: tote Verweise (Fehlercode oder nicht erreichbar) und langsame Seiten."""
+    from urllib.parse import urldefrag, urljoin, urlparse
+    from .livecheck import _P
+    basis = config.WACHT_BASIS or f"https://{domain}"
+    seiten = {}
+    try:
+        code, body, ms = _abrufen(basis + "/", domain, 15, 3_000_000)
+    except ValueError as e:
+        return {"fehler": str(e), "seiten": 0, "median_ms": None, "startseite_kb": None, "tote": [], "langsam": []}
+    seiten["/"] = (code, ms)
+    startseite_kb = round(len(body) / 1024)
+    ps = _P()
+    try:
+        ps.feed(body.decode("utf-8", "replace"))
+    except Exception:  # noqa: BLE001
+        pass
+    ziele, herkunft = [], {}
+    for ref in ps.links + ps.refs:
+        ref, _ = urldefrag(ref.strip())
+        if not ref or ref.startswith(("mailto:", "tel:", "javascript:", "data:", "sms:", "whatsapp:")):
+            continue
+        u = urlparse(urljoin("https://" + domain + "/", ref))
+        if u.netloc.lower().removeprefix("www.") != domain.lower().removeprefix("www."):
+            continue
+        pfad = u.path or "/"
+        if pfad not in herkunft and pfad != "/":
+            herkunft[pfad] = "/"
+            ziele.append(pfad + (("?" + u.query) if u.query else ""))
+    for pfad in ziele[:25]:
+        try:
+            code, _, ms = _abrufen(basis + pfad, domain, 15, 1024)
+        except ValueError:
+            code, ms = 0, None
+        seiten[pfad] = (code, ms)
+    tote = [{"pfad": k, "code": v[0]} for k, v in seiten.items() if v[0] == 0 or v[0] >= 400][:25]
+    zeiten = sorted(v[1] for v in seiten.values() if v[1] is not None)
+    langsam = [{"pfad": k, "ms": v[1]} for k, v in seiten.items() if v[1] is not None and v[1] > LANGSAM_MS][:10]
+    return {"fehler": "", "seiten": len(seiten), "median_ms": zeiten[len(zeiten) // 2] if zeiten else None, "startseite_kb": startseite_kb, "tote": tote, "langsam": langsam}
+
+
+def qualitaetslauf(cfg=None):
+    """Einmal täglich je Live-Website: Ladezeit und tote Verweise prüfen und speichern. Bei neuen toten Verweisen erhält der Admin einen Hinweis."""
+    import json
+    with tx("system") as cur:
+        cur.execute("""SELECT w.domain, w.kunden_id, k.firma FROM websites w JOIN kunden k ON k.id = w.kunden_id
+                       WHERE w.art = 'live' AND w.status = 'live' AND k.status IN ('onboarding','aktiv') ORDER BY w.domain LIMIT 200""")
+        seiten = cur.fetchall()
+    if not seiten:
+        return 0
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        erg = list(pool.map(lambda s: qualitaet_pruefen(s["domain"]), seiten))
+    for s, e in zip(seiten, erg):
+        if e["fehler"]:
+            continue
+        with tx("system") as cur:
+            cur.execute("SELECT jsonb_array_length(tote) AS n FROM website_qualitaet WHERE domain=%s", (s["domain"],))
+            alt = cur.fetchone()
+            cur.execute("""INSERT INTO website_qualitaet (domain, kunden_id, geprueft_am, seiten, median_ms, startseite_kb, tote, langsam) VALUES (%s,%s,now(),%s,%s,%s,%s,%s)
+                           ON CONFLICT (domain) DO UPDATE SET kunden_id=EXCLUDED.kunden_id, geprueft_am=now(), seiten=EXCLUDED.seiten, median_ms=EXCLUDED.median_ms,
+                             startseite_kb=EXCLUDED.startseite_kb, tote=EXCLUDED.tote, langsam=EXCLUDED.langsam""",
+                        (s["domain"], s["kunden_id"], e["seiten"], e["median_ms"], e["startseite_kb"], json.dumps(e["tote"]), json.dumps(e["langsam"])))
+        if e["tote"] and (not alt or alt["n"] == 0):
+            _mail_admin(cfg, f"Tote Links auf {s['domain']}", f"Auf {s['domain']} ({s['firma']}) antworten {len(e['tote'])} Verweise mit Fehler:\n\n"
+                        + "\n".join(f"{t['pfad']} (Code {t['code'] or 'keine Antwort'})" for t in e["tote"][:10]), f"Tote Links: {s['domain']}")
+    return len(seiten)
+
+
 def status(cur, kid=None) -> list:
-    """Letzter Stand je Website (mit Erreichbarkeit der letzten 30 Tage in Prozent)."""
+    """Letzter Stand je Website (mit Erreichbarkeit der letzten 30 Tage in Prozent und der täglichen Qualitätsprüfung)."""
     cur.execute("""SELECT w.domain, w.kunden_id, w.geprueft_am, w.ok, w.seite_ok, w.api_ok, w.http, w.ms, w.cert_tage, w.fehler, w.seit,
-                          (SELECT round(100.0 * sum(t.ok) / nullif(sum(t.geprueft), 0), 2) FROM website_wacht_tag t WHERE t.domain = w.domain AND t.tag > current_date - 30) AS prozent
-                   FROM website_wacht w WHERE (%s::uuid IS NULL OR w.kunden_id = %s::uuid) ORDER BY w.domain""", (kid, kid))
+                          (SELECT round(100.0 * sum(t.ok) / nullif(sum(t.geprueft), 0), 2) FROM website_wacht_tag t WHERE t.domain = w.domain AND t.tag > current_date - 30) AS prozent,
+                          q.geprueft_am AS q_am, q.seiten AS q_seiten, q.median_ms AS q_median, q.startseite_kb AS q_kb, q.tote AS q_tote, q.langsam AS q_langsam
+                   FROM website_wacht w LEFT JOIN website_qualitaet q ON q.domain = w.domain
+                   WHERE (%s::uuid IS NULL OR w.kunden_id = %s::uuid) ORDER BY w.domain""", (kid, kid))
     return [{"domain": r["domain"], "kunden_id": str(r["kunden_id"]), "geprueft_am": r["geprueft_am"], "ok": r["ok"], "seite_ok": r["seite_ok"], "api_ok": r["api_ok"], "http": r["http"],
-             "ms": r["ms"], "cert_tage": r["cert_tage"], "fehler": r["fehler"] or "", "seit": r["seit"], "prozent": float(r["prozent"]) if r["prozent"] is not None else None}
+             "ms": r["ms"], "cert_tage": r["cert_tage"], "fehler": r["fehler"] or "", "seit": r["seit"], "prozent": float(r["prozent"]) if r["prozent"] is not None else None,
+             "qualitaet": {"geprueft_am": r["q_am"], "seiten": r["q_seiten"], "median_ms": r["q_median"], "startseite_kb": r["q_kb"], "tote": r["q_tote"] or [], "langsam": r["q_langsam"] or []} if r["q_am"] else None}
             for r in cur.fetchall()]
 
 

@@ -41,3 +41,8 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Selbstbedienungs-Export (Art. 20 DSGVO): Format ZIP/JSON/PDF, Hinweis in der Datenschutzerklärung; Export wird im Audit-Log festgehalten.
 - Kündigung im Portal ist verbindlich (Textform) und wird automatisch bestätigt: AGB/Vertrag müssen die Kündigung per Portal ausdrücklich zulassen, die Kündigungsfrist (Einstellung „Kündigung durch Kunden“, Standard 30 Tage zum Monatsende) und die Mindestlaufzeit nennen. Rücknahme nur innerhalb von 24 Stunden. Bei Verbrauchern zusätzlich Kündigungsbutton nach § 312k BGB prüfen.
 - Wiederherstellung einzelner Kundendaten aus der Sicherung: Zugriff nur für Admins, Auszug wird nach spätestens 24 Stunden gelöscht, Vorgang steht im Audit-Log.
+
+## Bewertungsanfragen und Wartungsverträge
+- Bewertungsanfrage nach Termin ist eine Werbe-/Kundenpflege-Mail (§ 7 UWG): nur mit Opt-in des Kunden und Hinweis bei der Buchung bzw. in der Datenschutzerklärung der Kundenwebsite; jede Mail enthält einen Abmeldelink, abgemeldete Adressen werden gesperrt gespeichert (nur Kunde und E-Mail-Adresse).
+- Wiederkehrende Rechnungen: Leistungszeitraum steht auf der Rechnung; Vertrag/AGB müssen Turnus, Vorauszahlung und automatische Rechnungsstellung regeln. Rechnungsnummern laufen fortlaufend im selben Nummernkreis.
+- DNS-/Livegang-Check liest nur öffentliche DNS-Daten und die öffentlichen Seiten der Kunden.

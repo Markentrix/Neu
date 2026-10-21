@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from . import config, mailer, webbetrieb
 from .db import tx
-from .security import audit, require_admin
+from .security import audit, rate_limit, require_admin
 
 router = APIRouter(prefix="/api/admin/websites")
 
@@ -60,6 +60,8 @@ def liste(user: dict = Depends(require_admin)):
         cur.execute("SELECT w.domain, w.kunden_id, k.firma FROM websites w JOIN kunden k ON k.id = w.kunden_id WHERE w.art = 'live'")
         eigner = {r["domain"]: {"kunden_id": str(r["kunden_id"]), "firma": r["firma"]} for r in cur.fetchall()}
         wacht = {w["domain"]: w for w in webbetrieb.status(cur)}
+        cur.execute("SELECT domain, ok, geprueft_am FROM domain_pruefung")
+        dnsst = {r["domain"]: {"ok": r["ok"], "geprueft_am": r["geprueft_am"]} for r in cur.fetchall()}
     for art, sub in (("live", "live"), ("demo", "demos")):
         basis = SITES / sub
         if not basis.is_dir():
@@ -74,7 +76,7 @@ def liste(user: dict = Depends(require_admin)):
             except Exception:
                 pass
             aktiv.append({"art": art, "name": d.name, "freigabe": freigaben.get(d.name) if art == "demo" else None, "groesse": s, "dateien": n, "geaendert": new, "kunde": kunde,
-                          "loeschung_laeuft": (art, d.name) in offen, "wacht": wacht.get(d.name) if art == "live" else None, "eigner": eigner.get(d.name) if art == "live" else None})
+                          "loeschung_laeuft": (art, d.name) in offen, "wacht": wacht.get(d.name) if art == "live" else None, "eigner": eigner.get(d.name) if art == "live" else None, "dns": dnsst.get(d.name) if art == "live" else None})
     korb = []
     t = SITES / ".papierkorb"
     if t.is_dir():
@@ -83,6 +85,26 @@ def liste(user: dict = Depends(require_admin)):
                 art, name = d.name.split("__")[1:3]
                 korb.append({"id": d.name, "art": art, "name": name, "geloescht": d.stat().st_mtime, "groesse": groesse(d)[0]})
     return {"aktiv": aktiv, "papierkorb": korb, "aufbewahrung_tage": 14}
+
+
+@router.get("/domain/{domain}")
+def domain_pruefen(domain: str, user: dict = Depends(require_admin)):
+    """DNS-Assistent: wohin zeigt die Domain, was ist zu ändern, Text für den Kunden. Speichert das Ergebnis."""
+    rate_limit("domainpruefung", 60, 3600)
+    domain = domain.strip().lower()
+    if not NAME["live"].match(domain):
+        raise HTTPException(400, "Ungültige Domain")
+    from . import domaincheck
+    with tx("admin") as cur:
+        cur.execute("SELECT kunden_id FROM websites WHERE domain=%s AND art='live'", (domain,))
+        w = cur.fetchone()
+        v4, v6 = domaincheck.server_adressen(cur)
+    r = domaincheck.pruefen(domain, v4, v6)
+    if w:
+        with tx("system") as cur:
+            cur.execute("""INSERT INTO domain_pruefung (domain, kunden_id, geprueft_am, ok, ergebnis, live_gemeldet) VALUES (%s,%s,now(),%s,%s,false)
+                           ON CONFLICT (domain) DO UPDATE SET geprueft_am=now(), ok=EXCLUDED.ok, ergebnis=EXCLUDED.ergebnis""", (domain, w["kunden_id"], r["ok"], json.dumps(r)))
+    return r
 
 
 def auftrag(daten: dict):

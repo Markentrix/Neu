@@ -167,6 +167,15 @@ function paypalKarte(d, neu) {
 }
 
 // ---------------------------------------------------------------- Bewertungen
+function anfrageBlock(b) {
+  const m = h('div'), an = schalter(b.nach_termin, 'Nach einem erschienenen Termin um eine Bewertung bitten');
+  const std = h('input', { type: 'number', min: 1, max: 72, value: b.verzoegerung_std ?? 3, style: 'width:80px' });
+  const sp = async () => { try { await api('/api/kunde/website-dienste/bewertungen/anfrage', { method: 'PUT', body: { aktiv: an.c.checked, verzoegerung_std: Number(std.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
+  return h('div', { style: 'margin-top:14px;border-top:1px solid var(--line,#ddd);padding-top:10px' }, h('h3', {}, 'Bewertungen anfragen'),
+    h('p', { class: 'small muted' }, 'Wenn du einen Termin als „erschienen“ markierst, bekommt der Besucher nach der gewählten Zeit eine freundliche Mail mit deinem Bewertungs-Link. Jede Mail enthält einen Abmeldelink. Schalte das nur ein, wenn deine Besucher bei der Buchung damit rechnen können (Hinweis in deiner Datenschutzerklärung).'),
+    m, an.el, h('div', { class: 'row', style: 'margin-top:6px' }, h('span', {}, 'Mail nach'), std, h('span', {}, 'Stunden'), h('button', { class: 'btn', onclick: sp }, 'Speichern')));
+}
+
 function bewertungKarte(d, neu) {
   const b = d.bewertungen, m = h('div');
   const an = schalter(b.aktiv, 'Google-Bewertungen auf der Website zeigen');
@@ -188,6 +197,7 @@ function bewertungKarte(d, neu) {
     h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Place-ID deines Google-Profils', pid, 'Für die automatische Anzeige.'), feld('Link „Rezension schreiben“', link, 'Nur nötig, wenn du keine Place-ID eintragen kannst.'),
       feld('Oder von Hand: Sterne (z. B. 4,8)', sterne), feld('Anzahl der Bewertungen', anzahl)),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Bei Google abfragen')),
+    anfrageBlock(b),
     b.stand ? h('p', { class: 'small muted' }, 'Zuletzt von Google geholt: ' + datum(b.stand) + ' ' + ZEIT(b.stand)) : '',
     hilfe('Wo finde ich die Place-ID?',
       h('p', {}, 'Öffne den „Place ID Finder“ von Google (suche im Netz nach „Google Place ID Finder“), gib den Namen deiner Firma ein und kopiere die Kennung, die mit ', h('b', {}, 'ChIJ'), ' beginnt.'),
@@ -317,7 +327,7 @@ async function statistikKarte(d) {
   return h('div', { class: 'card' }, h('h2', {}, 'Besucher der letzten 30 Tage'),
     h('p', { class: 'small muted' }, 'Gezählt ohne Cookies und ohne IP-Adresse (anonym, nur auf unserem Server). Das ist keine Google-Statistik. Sie gilt nur für Websites, die dieses Zählen eingebaut haben.'),
     m, an.el,
-    w.map(x => h('p', { class: 'small' }, h('span', { class: 'pill ' + (x.ok ? 'ok' : 'warn') }, x.ok ? 'erreichbar' : 'gestört'), ' ' + x.domain + (x.ms ? ' · ' + x.ms + ' ms' : '') + (x.prozent != null ? ' · ' + String(x.prozent).replace('.', ',') + ' % in 30 Tagen' : '') + (x.cert_tage != null ? ' · Zertifikat noch ' + x.cert_tage + ' Tage' : ''))),
+    w.map(x => h('p', { class: 'small' }, h('span', { class: 'pill ' + (x.ok ? 'ok' : 'warn') }, x.ok ? 'erreichbar' : 'gestört'), ' ' + x.domain + (x.ms ? ' · ' + x.ms + ' ms' : '') + (x.prozent != null ? ' · ' + String(x.prozent).replace('.', ',') + ' % in 30 Tagen' : '') + (x.cert_tage != null ? ' · Zertifikat noch ' + x.cert_tage + ' Tage' : '') + (x.qualitaet ? ' · typische Ladezeit ' + x.qualitaet.median_ms + ' ms · ' + (x.qualitaet.tote.length ? x.qualitaet.tote.length + ' tote Verweise' : 'keine toten Verweise') + (x.qualitaet.langsam.length ? ' · ' + x.qualitaet.langsam.length + ' langsame Seiten' : '') : ''))),
     h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin:8px 0' }, kachel(s.besucher, 'Besucher'), kachel(s.aufrufe, 'Seitenaufrufe'), kachel(s.anfragen, 'Anfragen'), kachel(s.whatsapp, 'WhatsApp-Klicks'), kachel(s.anrufe, 'Anruf-Klicks'), s.erschienen + s.nicht_erschienen ? kachel(s.nicht_erschienen + ' von ' + (s.erschienen + s.nicht_erschienen), 'Nicht erschienen') : '', s.erreichbarkeit != null ? kachel(String(s.erreichbarkeit).replace('.', ',') + ' %', 'Erreichbarkeit') : ''),
     s.seiten.length ? h('p', { class: 'small' }, h('b', {}, 'Beliebteste Seiten: '), s.seiten.slice(0, 5).map(x => x.pfad + ' (' + x.aufrufe + ')').join(' · ')) : '',
     s.quellen.length ? h('p', { class: 'small' }, h('b', {}, 'Woher: '), s.quellen.slice(0, 5).map(x => x.quelle + ' (' + x.besucher + ')').join(' · ')) : '');

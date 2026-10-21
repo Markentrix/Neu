@@ -273,6 +273,40 @@ export async function domainKarte(kid) {
     h('p', { style: 'margin-top:12px' }, knopf('Domain eintragen', () => dialogDomain(null), 'btn')));
 }
 
+/** Wartungsverträge: wiederkehrende Rechnungen (monatlich bis jährlich), automatisch erzeugt und auf Wunsch versendet. */
+export async function abrechnungKarte(kid) {
+  const m = h('div'), box = h('div');
+  const INT = { 1: 'monatlich', 3: 'vierteljährlich', 6: 'halbjährlich', 12: 'jährlich' };
+  const laden = async () => {
+    const d = await api('/api/admin/kunden/' + kid + '/abrechnungsplaene');
+    box.replaceChildren(tabelle([['Titel', p => p.titel], ['Turnus', p => INT[p.intervall_monate]], ['Inhalt', p => p.aus_buchungen ? 'aus den Buchungen' : p.positionen.map(x => x.text + ' ' + fmtEuro(x.preis_cent)).join('; ')],
+      ['Nächste Rechnung', p => datum(p.naechste_am) + (p.enddatum ? ' (bis ' + datum(p.enddatum) + ')' : '')], ['Versand', p => p.auto_senden ? 'automatisch' : 'von Hand'], ['Status', p => p.aktiv ? 'aktiv' : 'pausiert'],
+      ['', p => h('span', { class: 'row' },
+        knopf('Jetzt erzeugen', async () => { if (!confirm('Die nächste Rechnung jetzt erzeugen und ausstellen?')) return; try { const r = await api('/api/admin/abrechnungsplaene/' + p.id + '/jetzt', { method: 'POST', body: {} }); melde(m, 'Rechnung ' + r.nummer + ' (' + r.zeitraum + ') ausgestellt. Sie liegt unter Belege zum Versand bereit.', 'ok'); laden(); } catch (x) { fehler(m, x); } }, 'sec small'),
+        knopf(p.aktiv ? 'Pausieren' : 'Fortsetzen', async () => { try { await api('/api/admin/abrechnungsplaene/' + p.id, { method: 'PUT', body: { aktiv: !p.aktiv } }); laden(); } catch (x) { fehler(m, x); } }, 'sec small'),
+        knopf('Löschen', async () => { if (!confirm('Plan löschen? Bereits erzeugte Rechnungen bleiben.')) return; try { await api('/api/admin/abrechnungsplaene/' + p.id, { method: 'DELETE' }); laden(); } catch (x) { fehler(m, x); } }, 'bad small'))]], d.plaene, 'Noch kein Wartungsvertrag.'));
+  };
+  const neu = () => {
+    const titel = h('input', { value: 'Wartung & Betrieb', maxlength: 200 }), turnus = select('turnus', Object.entries(INT), '1');
+    const buch = h('input', { type: 'checkbox', style: 'width:auto', checked: true }), text = h('input', { placeholder: 'z. B. Wartung Website', maxlength: 300 }), preis = h('input', { placeholder: 'Preis netto je Zeitraum, z. B. 49,00' });
+    const start = h('input', { type: 'date', value: new Date().toISOString().slice(0, 10) }), ende = h('input', { type: 'date' }), auto = h('input', { type: 'checkbox', style: 'width:auto' });
+    const speichern = async () => {
+      const body = { titel: titel.value, intervall_monate: Number(turnus.value), aus_buchungen: buch.checked, naechste_am: start.value, enddatum: ende.value || null, auto_senden: auto.checked, positionen: [] };
+      if (!buch.checked) body.positionen = [{ text: text.value, menge: 1, einheit: '', preis_cent: Math.round(parseFloat(String(preis.value).replace(',', '.')) * 100) || 0 }];
+      try { await api('/api/admin/kunden/' + kid + '/abrechnungsplaene', { method: 'POST', body }); melde(m, 'Wartungsvertrag angelegt.', 'ok'); formBox.replaceChildren(); laden(); } catch (x) { fehler(m, x); }
+    };
+    formBox.replaceChildren(h('div', { class: 'form2' }, feld('Titel der Rechnung', titel), feld('Turnus', turnus), feld('Erste Rechnung am (Beginn des Zeitraums)', start), feld('Endet am (leer = unbefristet)', ende),
+      h('label', { class: 'row' }, buch, ' Positionen aus den aktiven Buchungen übernehmen (monatlicher Preis mal Turnus)'),
+      feld('Oder feste Position', text), feld('Preis netto', preis), h('label', { class: 'row' }, auto, ' Rechnung automatisch per E-Mail an den Kunden senden')),
+      h('p', {}, knopf('Anlegen', speichern, 'btn')));
+  };
+  const formBox = h('div');
+  await laden();
+  return h('div', { class: 'card' }, h('h2', {}, 'Wartungsvertrag & wiederkehrende Rechnungen'),
+    h('p', { class: 'small muted' }, 'Zum Stichtag erzeugt der Server die Rechnung im Voraus für den Zeitraum, stellt sie aus und sendet sie auf Wunsch. Ohne automatischen Versand bekommst du eine Meldung. Wird der Kunde gekündigt, endet der Plan zum Vertragsende.'),
+    m, box, formBox, h('p', { style: 'margin-top:8px' }, knopf('Neuer Wartungsvertrag', neu, 'btn')));
+}
+
 /** Gelöschte Datensätze eines einzelnen Kunden aus der nächtlichen Datenbanksicherung zurückholen (nur fehlende Zeilen, nichts wird überschrieben). */
 export async function auszugKarte(kid) {
   const sich = await api('/api/admin/datensicherungen').catch(() => ({ tage: [] })), m = h('div'), ergebnis = h('div');
@@ -474,6 +508,7 @@ export async function kundeDetail(kid) {
     await qrKarte('kunde', (k.ansprechpartner || '').split(' ')[0]),
     await kostenKarte(kid),
     brandingKarte(kid, k),
+    await abrechnungKarte(kid),
     await auszugKarte(kid),
     offboardingKarte(kid, k, await api('/api/admin/kunden/' + kid + '/domains')),
     await historieKarte(kid),
