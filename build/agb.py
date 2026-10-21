@@ -152,7 +152,7 @@ def build_widerruf(site, write):
     s = site.s
     content = f'''
     <p>Sie möchten einen Vertrag mit uns widerrufen, zum Beispiel eine Online-Buchung oder eine Gutscheinbestellung? Füllen Sie das Formular aus und klicken Sie auf „Widerruf bestätigen“. Sie erhalten sofort eine Eingangsbestätigung per E-Mail.</p>
-    <p>Online gebuchte Termine können Sie auch direkt über den Link in Ihrer Bestätigungs-E-Mail widerrufen. Alle Infos zu Fristen und Folgen stehen in der <a href="agb.html#widerruf">Widerrufsbelehrung</a>.</p>
+    <p><strong>Termin online gebucht?</strong> Dann geht es noch einfacher: Öffnen Sie den Link „Vertrag widerrufen“ in Ihrer Bestätigungs-E-Mail und klicken Sie auf „Widerruf bestätigen“. Sie müssen nichts ausfüllen. Alle Infos zu Fristen und Folgen stehen in der <a href="agb.html#widerruf">Widerrufsbelehrung</a>.</p>
     <form class="widerruf-form js-form" id="widerrufForm" data-form="widerruf" action="/api/anfrage" method="post" novalidate>
       <input type="hidden" name="typ" value="widerruf">
       <div class="form-row"><label for="w-name">Ihr Name*</label><input type="text" id="w-name" name="name" autocomplete="name" required maxlength="120"></div>

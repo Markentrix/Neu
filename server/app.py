@@ -1018,6 +1018,7 @@ def confirmed_text(ref, d):
             f"Termin verschieben, absagen oder Vertrag widerrufen: {booking_link(ref, d['token'])}\n"
             + (f"{booking_policy()}\n" if d.get("anzahlung") and booking_policy() else "")
             + (f"\nWiderrufsrecht: Sie können diesen Vertrag bis zum {widerruf_bis(d).strftime('%d.%m.%Y')} ohne Angabe von Gründen widerrufen. "
+               f"Ohne etwas auszufüllen geht das hier: {booking_link(ref, d['token'])}&aktion=widerrufen\n"
                "Die vollständige Widerrufsbelehrung steht am Ende dieser E-Mail.\n" if widerruf_bis(d) else "")
             + ("Sie haben ausdrücklich verlangt, dass wir vor Ablauf der Widerrufsfrist mit der Leistung beginnen. Ihnen ist bekannt, dass Sie bei einem Widerruf "
                "einen anteiligen Betrag für bereits erbrachte Leistungen zahlen und Ihr Widerrufsrecht erlischt, sobald wir die Leistung vollständig erbracht haben.\n"

@@ -673,6 +673,7 @@ class TestBooking(Base):
             self.assertIn("Anzahlung von 49,35 € per PayPal ist eingegangen", conf["text"])
             self.assertIn("Widerrufsbelehrung", conf["text"])
             self.assertIn("ausdrücklich verlangt", conf["text"])
+            self.assertIn(f"/termin/{ref}?t={token}&aktion=widerrufen", conf["text"])  # Widerruf ohne Ausfüllen
             code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
             self.assertIn("Vertrag widerrufen", page.decode())
             code, page = self.req("GET", f"/termin/{ref}?t={token}&aktion=absagen", raw=True)
