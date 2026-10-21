@@ -158,6 +158,9 @@
   }
   function statistik(cfg) {
     var a = cfg.analytics; if (!a || !a.aktiv) return;
+    // Hat die Seite eine eigene Einwilligungsabfrage samt eigenem Analytics (window.ELB.ga4) oder ist es mit data-eigene-einwilligung gekennzeichnet,
+    // fragt der Baustein nicht ein zweites Mal (sonst liegen zwei Banner übereinander und Google Analytics würde doppelt geladen).
+    if (skript.hasAttribute('data-eigene-einwilligung') || (window.ELB && window.ELB.ga4) || window.__mkGa) return;
     var ds = skript.getAttribute('data-datenschutz') || '/datenschutz', w = wahl();
     if (w === 'ja') gaLaden(a.id); else if (w !== 'nein') banner(a.id, ds);
     Array.prototype.forEach.call(document.querySelectorAll('[data-mk="cookies"]'), function (c) {
@@ -166,6 +169,28 @@
       c.textContent = ''; c.appendChild(l);
     });
   }
+
+  // ------------------------------------------------------------ Sicherheitsnetz für Einblend-Animationen
+  // Manche Seiten verstecken Inhalte (.reveal) und blenden sie per IntersectionObserver beim Scrollen ein (.is-visible). Meldet der Beobachter
+  // bei einzelnen Elementen nichts (z. B. weil der Browser abgeschnittene Elemente nicht als sichtbar zählt), bleiben ganze Bereiche weiß.
+  // Dieses Netz blendet alles ein, was im oder knapp unter dem sichtbaren Bereich liegt, unabhängig vom Beobachter.
+  (function () {
+    var wartend = false;
+    function pruefen() {
+      wartend = false;
+      if (!document.documentElement.classList.contains('js-anim')) return;
+      var liste = document.querySelectorAll('.reveal:not(.is-visible)'), h = window.innerHeight || 800;
+      Array.prototype.forEach.call(liste, function (e) {
+        var r = e.getBoundingClientRect();
+        if (r.bottom > -h && r.top < h * 0.98) e.classList.add('is-visible');
+      });
+    }
+    function planen() { if (wartend) return; wartend = true; (window.requestAnimationFrame || window.setTimeout)(pruefen); }
+    window.addEventListener('scroll', planen, { passive: true });
+    window.addEventListener('resize', planen);
+    window.addEventListener('load', function () { setTimeout(pruefen, 600); });
+    setInterval(pruefen, 1500);
+  })();
 
   // ------------------------------------------------------------ Start
   var slots = {};

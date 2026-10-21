@@ -122,6 +122,21 @@ async def main():
         chk("Analytics: nach Zustimmung wird Google geladen",any("id=G-AB12CD34EF" in u for u in gtm),gtm)
         await p3.reload(); await p3.wait_for_timeout(1200); chk("Analytics: Zustimmung wird gemerkt (kein Banner, Google lädt)",await p3.locator("[aria-label=Statistik]").count()==0 and len(gtm)>=2)
         await ctx3.close()
+        # Seite mit eigener Einwilligung und eigenem Analytics: der Baustein fragt nicht ein zweites Mal
+        ctx4=await br.new_context(bypass_csp=True); p4=await ctx4.new_page(); gtm4=[]; p4.on("request",lambda r:gtm4.append(r.url) if "googletagmanager" in r.url else None)
+        await p4.route("**/googletagmanager.com/**",lambda r:r.fulfill(status=200,content_type="text/javascript",body=""))
+        await p4.route(f"http://{dom}/",lambda r:r.fulfill(status=200,content_type="text/html",body='<script>window.ELB={ga4:"G-EIGEN"}</script>'+html+'<footer><span data-mk="cookies"></span></footer>')); await p4.goto(f"http://{dom}/"); await p4.wait_for_timeout(2500)
+        chk("Eigene Einwilligung der Seite: kein zweites Statistik-Banner, kein doppeltes Analytics",await p4.locator("[aria-label=Statistik]").count()==0 and not gtm4,gtm4)
+        await ctx4.close()
+        # Sicherheitsnetz: Beobachter meldet nie etwas, Einblend-Elemente würden weiß bleiben
+        ctx5=await br.new_context(bypass_csp=True,viewport={"width":400,"height":700}); p5=await ctx5.new_page()
+        pre='<script>document.documentElement.classList.add("js-anim");window.IntersectionObserver=function(){this.observe=function(){};this.unobserve=function(){}}</script><style>.js-anim .reveal{clip-path:inset(-40px -40px 100% -40px)}.js-anim .reveal.is-visible{clip-path:none}</style>'
+        await p5.route(f"http://{dom}/",lambda r:r.fulfill(status=200,content_type="text/html",body=pre+'<div id="r0" class="reveal" style="height:120px">oben</div><div style="height:2600px"></div><div id="r1" class="reveal" style="height:200px">unten</div>'+html)); await p5.goto(f"http://{dom}/"); await p5.wait_for_timeout(1800)
+        chk("Einblend-Netz: Element im Sichtfeld wird eingeblendet, Beobachter ohne Wirkung",await p5.evaluate("document.getElementById('r0').classList.contains('is-visible')"))
+        chk("Einblend-Netz: Element weit unten bleibt zunächst versteckt",not await p5.evaluate("document.getElementById('r1').classList.contains('is-visible')"))
+        await p5.evaluate("window.scrollTo(0, 2500)"); await p5.wait_for_timeout(900)
+        chk("Einblend-Netz: nach dem Scrollen wird es eingeblendet",await p5.evaluate("document.getElementById('r1').classList.contains('is-visible')"))
+        await ctx5.close()
         # Fremde Domain: Dienst verweigert, Seite bleibt leer, kein Absturz
         ctx2=await br.new_context(bypass_csp=True); p2=await ctx2.new_page(); e2=[]; p2.on("pageerror",lambda e:e2.append(str(e)))
         await p2.route("http://fremd.example/",lambda r:r.fulfill(status=200,content_type="text/html",body=html)); await p2.goto("http://fremd.example/"); await p2.wait_for_timeout(1500)
