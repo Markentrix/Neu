@@ -14,32 +14,59 @@ Website für **AJ Atelier – Hair & Beauty**, Friseur in der Hauptstraße 64, 3
 - **SEO & GEO**: strukturierte Daten (`HairSalon` mit Adresse, Geo-Koordinaten, Öffnungszeiten, kompletter Preisliste, Buchungs-Aktion; `FAQPage`), Geo-Meta-Tags, Open-Graph-Bild, `sitemap.xml`, `robots.txt` (KI-Crawler erlaubt), `llms.txt` für ChatGPT/Claude/Perplexity, schnelle Ladezeit ohne Frameworks
 - **DSGVO**: keine Cookies für Besucher:innen, kein Tracking, Schriften lokal, PayPal wird erst bei Auswahl geladen, Karten nur als Link
 
-## Voraussetzungen
+## Installation auf dem eigenen Hetzner-Server (empfohlen: Docker)
 
-Jeder normale Webspace / Server mit Hosting-Portal (Plesk, cPanel, KAS, ISPConfig …):
+Die Website ist komplett eigenständig: **kein Supabase, kein n8n, keine externe Datenbank**.
+Termine liegen in einer SQLite-Datei auf dem Server, HTTPS-Zertifikate holt Caddy automatisch.
 
-- PHP **8.1 oder neuer** mit den Erweiterungen `pdo_sqlite`, `curl`, `mbstring` (bei fast allen Hostern Standard)
-- Apache (für `.htaccess`) – für nginx siehe unten
-- E-Mail-Versand über PHP `mail()` (im Portal meist aktiv)
+**Einmalig auf dem Server** (Ubuntu/Debian, per SSH als root):
 
-Es wird **keine** MySQL-Datenbank benötigt – die Termine liegen in einer SQLite-Datei.
+```bash
+# 1. Docker installieren (falls noch nicht vorhanden)
+curl -fsSL https://get.docker.com | sh
 
-## Installation
+# 2. Projekt holen
+git clone https://github.com/Markentrix/Neu.git /opt/aj-atelier
+cd /opt/aj-atelier
 
-1. **Dateien hochladen** – den kompletten Ordner (`app/` und `public/`) auf den Server.
-2. **Document Root** der Domain im Portal auf den Ordner `public/` stellen.
-   (Plesk: *Hosting-Einstellungen → Dokumentenstamm*, cPanel: *Domains → Document Root*).
-   Der Ordner `app/` liegt dann außerhalb des Webs. Geht das nicht, ist `app/` zusätzlich per `.htaccess` gesperrt.
-3. **Konfiguration**: `app/config.local.example.php` nach `app/config.local.php` kopieren und ausfüllen:
-   - `siteUrl` – z. B. `https://www.aj-atelier-wettmar.de`
-   - `adminPasswordHash` – erzeugen mit
-     `php -r "echo password_hash('IHR-PASSWORT', PASSWORD_DEFAULT), PHP_EOL;"`
-     (oder online in einem PHP-Werkzeug des Portals)
-   - `paypal` – Client-ID & Secret, siehe unten
-   - `mail.from` – Absender **mit der eigenen Domain** (sonst landen Mails im Spam), `mail.salonEmail` – Empfänger neuer Buchungen
-4. Der Ordner `app/data/` muss für PHP **beschreibbar** sein (wird automatisch angelegt).
-5. **SSL** im Portal aktivieren (Let's Encrypt). Die `.htaccess` leitet auf HTTPS um.
-6. Testbuchung durchführen und unter `https://ihre-domain.de/admin/` prüfen.
+# 3. Konfiguration
+cp deploy/.env.example deploy/.env                    # DOMAIN=… eintragen
+cp app/config.local.example.php app/config.local.php  # Passwort, PayPal, SMTP eintragen
+php -r "echo password_hash('IHR-PASSWORT', PASSWORD_DEFAULT), PHP_EOL;"   # oder:
+docker run --rm php:8.3-cli php -r "echo password_hash('IHR-PASSWORT', PASSWORD_DEFAULT), PHP_EOL;"
+
+# 4. Starten
+docker compose up -d --build
+```
+
+Vorher im DNS der Domain **A-Records für `domain.de` und `www.domain.de` auf die IP des Hetzner-Servers** setzen
+und in der Hetzner-Firewall die Ports **80 und 443** freigeben.
+
+**Updates einspielen:**
+
+```bash
+cd /opt/aj-atelier && git pull && docker compose up -d --build
+```
+
+Die Termine liegen im Docker-Volume `bookings` und bleiben bei Updates erhalten.
+Tägliche Sicherung per Cron: `15 3 * * * /opt/aj-atelier/deploy/backup.sh` (legt 30 Tage Backups in `backups/` ab).
+
+**Laufen auf dem Server schon andere Websites** mit eigenem nginx/Caddy/Traefik auf Port 80/443?
+Dann den `caddy`-Dienst in `docker-compose.yml` weglassen, beim `web`-Dienst `ports: ["127.0.0.1:8081:80"]` ergänzen
+und im vorhandenen Proxy die Domain auf `http://127.0.0.1:8081` weiterleiten (mit Header `X-Forwarded-Proto: https`).
+
+### E-Mail auf Hetzner
+
+Hetzner sperrt bei neuen Servern ausgehenden Port 25, d. h. PHP `mail()` kommt meist nicht an.
+Deshalb in `config.local.php` unter `mail.smtp` die SMTP-Daten eines echten Postfachs eintragen
+(z. B. Hetzner-Webhosting-Postfach `mail.your-server.de`, Port 587, oder Google Workspace/IONOS/Strato).
+Absender (`mail.from`) = dieses Postfach, damit die Mails nicht im Spam landen.
+
+### Alternative: klassischer Webspace / Hosting-Panel
+
+Läuft auch ohne Docker auf jedem Webspace mit PHP 8.1+ (`pdo_sqlite`, `curl`, `mbstring`) und Apache:
+Dateien hochladen, Document Root auf `public/` stellen, `app/config.local.php` anlegen, SSL aktivieren.
+Der Ordner `app/data/` muss für PHP beschreibbar sein. `app/` ist zusätzlich per `.htaccess` gesperrt.
 
 ## PayPal einrichten
 
@@ -64,6 +91,7 @@ Einzelne Zeiten (Pause, Arzttermin, telefonisch vergebener Termin) blockiert man
 
 ## Vor dem Livegang erledigen
 
+- [ ] Testbuchung durchführen und unter `https://ihre-domain.de/admin/` prüfen, Test-Mail kontrollieren
 - [ ] Platzhalter in **Impressum** und **Datenschutz** ausfüllen (gelb markiert) und rechtlich prüfen lassen
 - [ ] Domain `www.aj-atelier-wettmar.de` ist ein Platzhalter – echte Domain in `config.local.php` (`siteUrl`) eintragen
 - [ ] Dauer der Leistungen in `app/config.php` mit dem Salon abstimmen

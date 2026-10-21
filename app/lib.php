@@ -378,16 +378,85 @@ function paypal_refund(string $captureId): void
 
 function send_mail(?string $to, string $subject, string $html, ?string $replyTo = null): void
 {
-    $from = cfg()['local']['mail']['from'] ?? '';
+    $mail = cfg()['local']['mail'] ?? [];
+    $from = $mail['from'] ?? '';
     if (!$to || !$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return;
     $headers = [
         'MIME-Version: 1.0',
         'Content-Type: text/html; charset=UTF-8',
+        'Content-Transfer-Encoding: base64',
         'From: ' . mb_encode_mimeheader(cfg()['salon']['name']) . " <{$from}>",
     ];
     if ($replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) $headers[] = "Reply-To: {$replyTo}";
-    $body = '<!doctype html><html><body style="font-family:Georgia,serif;color:#2c2620;line-height:1.6">' . $html . '</body></html>';
-    @mail($to, mb_encode_mimeheader($subject, 'UTF-8'), $body, implode("\r\n", $headers), "-f{$from}");
+    $subject = mb_encode_mimeheader($subject, 'UTF-8');
+    $body = chunk_split(base64_encode('<!doctype html><html><body style="font-family:Georgia,serif;color:#2c2620;line-height:1.6">' . $html . '</body></html>'));
+
+    try {
+        if (!empty($mail['smtp']['host'])) {
+            smtp_send($mail['smtp'], $from, $to, $subject, $body, $headers);
+        } else {
+            @mail($to, $subject, $body, implode("\r\n", $headers), "-f{$from}");
+        }
+    } catch (Throwable $e) {
+        error_log('Mailversand fehlgeschlagen: ' . $e->getMessage());
+    }
+}
+
+/** Minimaler SMTP-Client (SSL auf 465 oder STARTTLS auf 587) – keine Abhängigkeiten nötig. */
+function smtp_send(array $c, string $from, string $to, string $subject, string $body, array $headers): void
+{
+    $port = (int)($c['port'] ?? 587);
+    $host = ($port === 465 ? 'ssl://' : 'tcp://') . $c['host'];
+    $fp = @stream_socket_client("{$host}:{$port}", $errno, $err, 15);
+    if (!$fp) throw new RuntimeException("SMTP-Verbindung fehlgeschlagen: {$err}");
+    stream_set_timeout($fp, 15);
+    $read = function () use ($fp): string {
+        $data = '';
+        while (($line = fgets($fp, 515)) !== false) {
+            $data .= $line;
+            if (isset($line[3]) && $line[3] === ' ') break;
+        }
+        return $data;
+    };
+    $cmd = function (string $line, array $ok) use ($fp, $read): string {
+        if ($line !== '') fwrite($fp, $line . "\r\n");
+        $res = $read();
+        if (!in_array((int)substr($res, 0, 3), $ok, true)) throw new RuntimeException('SMTP: ' . trim($res));
+        return $res;
+    };
+    $helo = parse_url(site_url('/'), PHP_URL_HOST) ?: 'localhost';
+    $cmd('', [220]);
+    $cmd("EHLO {$helo}", [250]);
+    if ($port !== 465) {
+        $cmd('STARTTLS', [220]);
+        if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT)) {
+            throw new RuntimeException('SMTP: TLS fehlgeschlagen');
+        }
+        $cmd("EHLO {$helo}", [250]);
+    }
+    if (!empty($c['user'])) {
+        $cmd('AUTH LOGIN', [334]);
+        $cmd(base64_encode($c['user']), [334]);
+        $cmd(base64_encode($c['pass'] ?? ''), [235]);
+    }
+    $cmd("MAIL FROM:<{$from}>", [250]);
+    $cmd("RCPT TO:<{$to}>", [250, 251]);
+    $cmd('DATA', [354]);
+    $msg = implode("\r\n", array_merge($headers, [
+        "To: <{$to}>",
+        "Subject: {$subject}",
+        'Date: ' . date('r'),
+        'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . substr(strrchr($from, '@'), 1) . '>',
+    ])) . "\r\n\r\n" . $body;
+    $cmd(preg_replace('/^\./m', '..', $msg) . "\r\n.", [250]);
+    $cmd('QUIT', [221]);
+    fclose($fp);
+}
+
+function is_https(): bool
+{
+    return !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+        || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
 }
 
 function german_date(string $iso): string
@@ -402,7 +471,7 @@ function admin_session(): void
 {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         session_name('aj_admin');
-        session_set_cookie_params(['httponly' => true, 'samesite' => 'Strict', 'secure' => !empty($_SERVER['HTTPS']), 'path' => '/']);
+        session_set_cookie_params(['httponly' => true, 'samesite' => 'Strict', 'secure' => is_https(), 'path' => '/']);
         session_start();
     }
 }

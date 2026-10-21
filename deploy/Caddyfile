@@ -1,0 +1,10 @@
+# Leitet die Domain ohne www auf www um und holt Zertifikate automatisch.
+{$DOMAIN} {
+	redir https://www.{$DOMAIN}{uri} permanent
+}
+
+www.{$DOMAIN} {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy web:80
+}

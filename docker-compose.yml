@@ -1,0 +1,30 @@
+# Start auf dem Hetzner-Server:  docker compose up -d --build
+# Vorher: deploy/.env anlegen (DOMAIN=…) und app/config.local.php ausfüllen.
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./app/config.local.php:/var/www/site/app/config.local.php:ro
+      - bookings:/var/www/site/app/data        # Termine bleiben bei Updates erhalten
+    networks: [internal]
+
+  caddy:                                        # HTTPS mit automatischen Let's-Encrypt-Zertifikaten
+    image: caddy:2.8
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    env_file: deploy/.env
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web]
+    networks: [internal]
+
+volumes:
+  bookings:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
