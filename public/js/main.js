@@ -100,6 +100,11 @@ if (root && DATA) initBooking(root, DATA);
 
 function initBooking(root, DATA) {
   const services = Object.fromEntries(DATA.categories.flatMap((c) => c.services.map((s) => [s.id, s])));
+  // Die Seite ist statisch gebaut: buchbare Tage und PayPal-Status live nachladen
+  const fresh = fetch("/api/booking-config.php", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => { if (d?.days) Object.assign(DATA, d); })
+    .catch(() => {});
   const state = { selected: [], date: null, time: null, step: 1, slotCache: new Map(), paypalRendered: false };
 
   const summary = () => {
@@ -138,7 +143,7 @@ function initBooking(root, DATA) {
     target.querySelector("h3")?.setAttribute("tabindex", "-1");
     target.querySelector("h3")?.focus({ preventScroll: true });
     if (step === 2) renderDates();
-    if (step === 4) preparePayment();
+    if (step === 4) fresh.then(preparePayment);
   }
   $$("[data-back]", root).forEach((b) => b.addEventListener("click", () => showStep(state.step - 1)));
 
@@ -218,7 +223,8 @@ function initBooking(root, DATA) {
   slotNotice.hidden = true;
   slotsEl.before(slotNotice);
   const next2 = $('[data-step="2"] [data-next]', root);
-  function renderDates() {
+  async function renderDates() {
+    await fresh;
     if (!strip.children.length) {
       DATA.days.forEach((d) => {
         const dt = new Date(`${d.date}T12:00`);

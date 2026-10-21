@@ -4,3 +4,5 @@ app/data
 deploy
 *.md
 dev-router.php
+dist
+tools

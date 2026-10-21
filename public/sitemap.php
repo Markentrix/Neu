@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../app/lib.php';
-require __DIR__ . '/../app/routes.php';
+require_once __DIR__ . '/../app/lib.php';
+require_once __DIR__ . '/../app/routes.php';
 header('Content-Type: application/xml; charset=utf-8');
 
 // Änderungsdatum: jüngste Änderung an Inhalten, Konfiguration oder Vorlagen

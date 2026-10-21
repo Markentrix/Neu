@@ -8,6 +8,17 @@ const payBox = $("[data-voucher-paypal]", shop);
 const payStart = $("[data-voucher-pay]", shop);
 const customWrap = $("[data-custom-amount]", shop);
 const MIN = +shop.dataset.min, MAX = +shop.dataset.max;
+
+// Statisch gebaute Seite: PayPal-Status live vom Server holen
+fetch("/api/booking-config.php", { cache: "no-store" })
+  .then((r) => (r.ok ? r.json() : null))
+  .then((d) => {
+    if (!d) return;
+    shop.dataset.paypal = d.paypalClientId || "";
+    $("[data-voucher-submit]", shop).hidden = !d.paypalClientId;
+    $("[data-voucher-unavailable]", shop).hidden = Boolean(d.paypalClientId);
+  })
+  .catch(() => {});
 const euro = (n) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(n);
 
 function amount() {

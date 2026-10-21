@@ -145,9 +145,9 @@ function booking_data(): array
 /** Daten für Buchung und „Jetzt geöffnet“ – nur einmal pro Seite ausgeben */
 function booking_data_script(): string
 {
-    static $done = false;
-    if ($done) return '';
-    $done = true;
+    // Pro Seite nur einmal; der Static-Build setzt den Merker vor jeder Seite zurück
+    if (!empty($GLOBALS['booking_data_done'])) return '';
+    $GLOBALS['booking_data_done'] = true;
     return '<script type="application/json" id="booking-data">' . json_encode(booking_data(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
 }
 

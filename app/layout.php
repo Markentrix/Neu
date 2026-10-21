@@ -3,15 +3,22 @@ declare(strict_types=1);
 
 // Gemeinsamer Seitenrahmen (Kopf, Navigation, Fuß) und strukturierte Daten für alle Seiten.
 
+/** CSP ohne frame-ancestors (gilt auch als <meta> in den statischen Seiten) */
+function csp_policy(): string
+{
+    return "default-src 'self'; script-src 'self' https://www.paypal.com https://*.paypal.com; "
+        . "style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.paypal.com https://*.paypalobjects.com; "
+        . "connect-src 'self' https://*.paypal.com; frame-src https://*.paypal.com; font-src 'self'; "
+        . "form-action 'self'; base-uri 'self'";
+}
+
 function security_headers(): void
 {
+    if (headers_sent()) return;
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' https://www.paypal.com https://*.paypal.com; "
-        . "style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.paypal.com https://*.paypalobjects.com; "
-        . "connect-src 'self' https://*.paypal.com; frame-src https://*.paypal.com; font-src 'self'; "
-        . "form-action 'self'; base-uri 'self'; frame-ancestors 'self'");
+    header('Content-Security-Policy: ' . csp_policy() . "; frame-ancestors 'self'");
 }
 
 function opening_hours_schema(): array
@@ -138,6 +145,8 @@ function page_start(array $o): void
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="<?= e(csp_policy()) ?>">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title><?= e($o['title']) ?></title>
   <meta name="description" content="<?= e($o['description']) ?>">
   <link rel="canonical" href="<?= e(site_url($path)) ?>">

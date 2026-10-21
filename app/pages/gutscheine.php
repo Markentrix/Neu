@@ -49,11 +49,8 @@ page_start([
             <label class="check full"><input id="v-consent" type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass meine Angaben zur Ausstellung und Zusendung des Gutscheins verarbeitet werden. Details in der <a href="/datenschutz">Datenschutzerklärung</a>.*</span></label>
             <p class="form-error full" data-voucher-error role="alert" hidden></p>
             <div class="full" data-voucher-pay>
-              <?php if (paypal_enabled()): ?>
-              <button class="btn btn-gold" type="submit">Weiter zur Zahlung</button>
-              <?php else: ?>
-              <p class="notice">Online-Gutscheine sind gerade nicht verfügbar. Gutscheine erhalten Sie jederzeit im Salon oder telefonisch unter <a href="tel:<?= e($c['salon']['phone']) ?>"><?= e($c['salon']['phoneDisplay']) ?></a>.</p>
-              <?php endif; ?>
+              <button class="btn btn-gold" type="submit" data-voucher-submit<?= paypal_enabled() ? '' : ' hidden' ?>>Weiter zur Zahlung</button>
+              <p class="notice" data-voucher-unavailable<?= paypal_enabled() ? ' hidden' : '' ?>>Online-Gutscheine sind gerade nicht verfügbar. Gutscheine erhalten Sie jederzeit im Salon oder telefonisch unter <a href="tel:<?= e($c['salon']['phone']) ?>"><?= e($c['salon']['phoneDisplay']) ?></a>.</p>
             </div>
             <div class="full paypal-box" data-voucher-paypal hidden>
               <p class="hint">Gutschein über <strong data-voucher-sum></strong> – bezahlen Sie sicher mit PayPal:</p>

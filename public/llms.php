@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 // llms.txt – kompakte Fakten und Seitenverzeichnis für KI-Assistenten und generative Suche (GEO)
-require __DIR__ . '/../app/lib.php';
-require __DIR__ . '/../app/routes.php';
+require_once __DIR__ . '/../app/lib.php';
+require_once __DIR__ . '/../app/routes.php';
 header('Content-Type: text/plain; charset=utf-8');
 $c = cfg();
 $s = $c['salon'];

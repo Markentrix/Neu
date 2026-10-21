@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 # Domain für AJ Atelier im gemeinsamen Caddy einrichten (Markentrix-Server).
+# Anstelle von kunde-anlegen.sh verwenden – die Seite braucht zusätzlich den Buchungsdienst.
 #
 #   einrichten.sh MX-1234 mx-1234.vorschau.markentrix.de --vorschau --passwort
 #       Vorschau: für Google gesperrt (noindex), mit Passwortschutz (Benutzer: vorschau).
 #   einrichten.sh MX-1234 aj-atelier-wettmar.de
 #       Live-Domain; www.domain.de wird auf domain.de weitergeleitet.
 #
-# Erzeugt /srv/caddy-sites/kunde-<Kundennummer>-<domain>.caddy (gleiches Schema wie
-# kunde-anlegen.sh), leitet aber per reverse_proxy an den PHP-Container "aj-atelier".
+# Die Seiten (dist/) liegen wie bei allen Kunden in /srv/sites/kunden/<Kundennummer>
+# und werden mit kunde-veroeffentlichen.bat hochgeladen. Nur /api/*, /admin/*,
+# /gutschein-pdf und /termin-stornieren gehen an den Container "aj-atelier".
 set -euo pipefail
 
 CADDY_SITES="${CADDY_SITES:-/srv/caddy-sites}"
+SITES_ROOT="${SITES_ROOT:-/srv/sites/kunden}"
 SERVER_DIR="${SERVER_DIR:-/opt/neu/server}"
 UPSTREAM="${UPSTREAM:-aj-atelier:80}"
 
@@ -55,8 +58,11 @@ if [ "$MODE" = vorschau ]; then
   fi
 fi
 
+mkdir -p "$SITES_ROOT/$ID"
+[ -e "$SITES_ROOT/$ID/index.html" ] || printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>In Vorbereitung</title><p>Diese Website ist in Vorbereitung.</p>\n' > "$SITES_ROOT/$ID/index.html"
+
 {
-  printf '%s {\n\tencode zstd gzip\n\theader {\n\t\tStrict-Transport-Security "max-age=31536000"\n\t\t-Server\n\t}\n%s\treverse_proxy %s\n}\n' "$HOST" "$EXTRA" "$UPSTREAM"
+  printf '%s {\n%s\t@app path /api/* /admin /admin/* /gutschein-pdf /termin-stornieren /termin-stornieren.php\n\treverse_proxy @app %s\n\troot * %s/%s\n\timport kunden_site\n}\n' "$HOST" "$EXTRA" "$UPSTREAM" "$SITES_ROOT" "$ID"
   if [ "$MODE" = live ] && [ "$(tr -cd . <<<"$HOST" | wc -c)" -eq 1 ]; then
     printf 'www.%s {\n\tredir https://%s{uri} permanent\n}\n' "$HOST" "$HOST"
   fi
@@ -65,7 +71,8 @@ fi
 cd "$SERVER_DIR"
 if out="$(docker compose exec -T caddy caddy validate --config /etc/caddy/Caddyfile 2>&1)"; then
   docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null 2>&1
-  echo "OK: https://$HOST  →  Container $UPSTREAM"
+  echo "OK: https://$HOST  →  Seiten aus $SITES_ROOT/$ID, Buchung über $UPSTREAM"
+  echo "Seiten hochladen: dist/ mit kunde-veroeffentlichen.bat (Kundennummer $ID)."
   [ "$MODE" = live ] && echo "Danach in app/config.local.php siteUrl auf https://$HOST setzen und den Container neu starten."
   [ "$MODE" = vorschau ] && echo "Die Vorschau ist für Google gesperrt."
 else

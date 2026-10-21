@@ -10,6 +10,8 @@ function cfg(): array
         $cfg = require __DIR__ . '/config.php';
         $local = __DIR__ . '/config.local.php';
         $cfg['local'] = is_file($local) ? require $local : require __DIR__ . '/config.local.example.php';
+        // Der Static-Build kann die Domain vorgeben: SITE_URL=https://… php tools/build-static.php
+        if (getenv('SITE_URL')) $cfg['local']['siteUrl'] = rtrim((string)getenv('SITE_URL'), '/');
         date_default_timezone_set($cfg['booking']['timezone']);
     }
     return $cfg;

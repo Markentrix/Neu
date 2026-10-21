@@ -2,7 +2,7 @@
 
 Website für **AJ Atelier – Hair & Beauty**, Friseur in der Hauptstraße 64, 30938 Burgwedel-Wettmar.
 
-- Einseitige Website (Leistungen, Preisliste, Über uns, FAQ, Kontakt/Öffnungszeiten)
+- Website mit 26 Seiten (Leistungen, Preise, Gutscheine, Ratgeber, Ortsseiten …), ausgeliefert als statischer Ordner `dist/` wie alle Markentrix-Kundenseiten
 - **Buchungssystem**: Leistungen wählen (mehrere) → freien Termin wählen → Daten → Zahlung
   - Freie Zeiten werden live aus Öffnungszeiten, Dauer der Leistungen, vorhandenen Buchungen und Blockern berechnet
   - Feiertage Niedersachsen, Heiligabend/Silvester automatisch geschlossen
@@ -14,46 +14,59 @@ Website für **AJ Atelier – Hair & Beauty**, Friseur in der Hauptstraße 64, 3
 - **SEO & GEO**: strukturierte Daten (`HairSalon` mit Adresse, Geo-Koordinaten, Öffnungszeiten, kompletter Preisliste, Buchungs-Aktion; `FAQPage`), Geo-Meta-Tags, Open-Graph-Bild, `sitemap.xml`, `robots.txt` (KI-Crawler erlaubt), `llms.txt` für ChatGPT/Claude/Perplexity, schnelle Ladezeit ohne Frameworks
 - **DSGVO**: keine Cookies für Besucher:innen, kein Tracking, Schriften lokal, PayPal wird erst bei Auswahl geladen, Karten nur als Link
 
-## Installation auf dem Markentrix-Server (Hetzner)
+## Aufbau: statische Seiten + Buchungsdienst
 
-Passend zum bestehenden Server-Setup (`/opt/neu/server`, Branch `claude/hetzner-server-setup-p0bxzs`):
-ein gemeinsamer Caddy für alle Domains, Apps als Container im Docker-Netz `web`.
-Die Website ist komplett eigenständig: **kein Supabase, kein n8n**. Termine liegen in einer SQLite-Datei im Container-Volume.
+Wie bei allen Markentrix-Kundenseiten wird **nur `dist/` veröffentlicht** (fertige HTML-Dateien:
+`index.html`, `preise.html`, `leistungen/balayage.html` …). Zusätzlich läuft ein kleiner
+**Buchungsdienst** (Container `aj-atelier`, PHP + SQLite) für alles, was der Server rechnen
+oder speichern muss. Caddy leitet nur diese Adressen an den Container:
 
-Weil die Seite PHP braucht (Buchung, PayPal), läuft sie **nicht** als statischer Ordner unter `/srv/sites/kunden/…`,
-sondern als App-Container `aj-atelier`, an den Caddy per `reverse_proxy` weiterleitet.
+| Adresse | Zweck |
+|---|---|
+| `/api/*` | Freie Zeiten, Buchung, PayPal, Gutscheine, Kontaktformular, Storno |
+| `/admin/` | Terminverwaltung & Gutscheine einlösen |
+| `/gutschein-pdf`, `/termin-stornieren` | Links aus den E-Mails |
 
-**Einmalig, per SSH als `deploy`** (`ssh deploy@5.75.146.212`):
+Alles andere liefert Caddy direkt aus `/srv/sites/kunden/<Kundennummer>` (Baustein `kunden_site`).
+
+### `dist/` neu bauen (nach Text-, Preis- oder Domainänderungen)
 
 ```bash
-# 1. Code holen
+php tools/build-static.php --url=https://www.aj-atelier-wettmar.de
+```
+
+Texte, Preise und Öffnungszeiten werden in `app/` gepflegt (siehe unten), **nicht direkt in `dist/`**,
+denn Navigation, Footer, Preise und strukturierte Daten stehen auf vielen Seiten gleichzeitig.
+Die buchbaren Tage und der PayPal-Status werden im Browser live vom Buchungsdienst geladen,
+`dist/` veraltet also nicht.
+
+## Online stellen auf dem Markentrix-Server (Hetzner)
+
+**1. Buchungsdienst einmalig einrichten** (per SSH als `deploy`):
+
+```bash
 sudo mkdir -p /srv/apps && sudo chown deploy:deploy /srv/apps
 git clone -b ccr-2f7c4155-wki5dk https://github.com/Markentrix/Neu.git /srv/apps/aj-atelier
 cd /srv/apps/aj-atelier
-
-# 2. Konfiguration (Admin-Passwort, PayPal, SMTP) – Datei bleibt nur auf dem Server
 cp app/config.local.example.php app/config.local.php
 docker run --rm php:8.3-cli php -r "echo password_hash('IHR-PASSWORT', PASSWORD_DEFAULT), PHP_EOL;"
-nano app/config.local.php
-
-# 3. Container bauen und starten (hängt sich ins Netz "web")
-docker compose up -d --build
-
-# 4a. Vorschau für den Kunden (noindex + Passwort, Benutzer "vorschau")
-deploy/einrichten.sh MX-XXXX mx-xxxx.vorschau.markentrix.de --vorschau --passwort
-
-# 4b. Später live (DNS-A-Eintrag von domain.de und www.domain.de vorher auf 5.75.146.212)
-deploy/einrichten.sh MX-XXXX aj-atelier-wettmar.de
+nano app/config.local.php          # siteUrl, Admin-Passwort, PayPal, SMTP eintragen
+docker compose up -d --build       # Container „aj-atelier“ im Netz „web“
 ```
 
-`MX-XXXX` = Kundennummer von AJ Atelier aus dem CRM. `einrichten.sh` legt wie `kunde-anlegen.sh`
-eine Datei `/srv/caddy-sites/kunde-MX-XXXX-<domain>.caddy` an, prüft die Caddy-Konfiguration und lädt sie neu.
-Nach dem Live-Schalten in `app/config.local.php` die `siteUrl` auf die echte Domain setzen und `docker compose restart` ausführen.
+**2. Domain einrichten** – statt `kunde-anlegen.sh` dieses Skript verwenden (gleiches Schema, plus Weiterleitung zum Buchungsdienst):
 
-**Updates einspielen:** `cd /srv/apps/aj-atelier && git pull && docker compose up -d --build`
+```bash
+deploy/einrichten.sh MX-XXXX mx-xxxx.vorschau.markentrix.de --vorschau --passwort   # Vorschau (noindex + Passwort)
+deploy/einrichten.sh MX-XXXX aj-atelier-wettmar.de                                  # später live
+```
 
-**Backup:** Das Server-Backup sichert nur `/srv/sites` und `/srv/caddy-sites`. Für die Termine zusätzlich einen Cron-Eintrag anlegen
-(`crontab -e` als deploy):
+**3. Seiten hochladen** – wie bei jeder Kundenseite: den Ordner `dist/` mit
+`pc/kunde-veroeffentlichen.bat` hochladen (Kundennummer MX-XXXX). Vorher `dist/` mit der richtigen Domain bauen.
+
+**Updates des Buchungsdienstes:** `cd /srv/apps/aj-atelier && git pull && docker compose up -d --build`
+
+**Backup:** Das Server-Backup sichert `/srv/sites` und `/srv/caddy-sites`. Für die Termine zusätzlich (`crontab -e` als deploy):
 `45 3 * * * /srv/apps/aj-atelier/deploy/backup.sh >> /var/log/backup.log 2>&1`
 → täglich `/srv/backups/daily/aj-atelier-DATUM.sqlite`, 14 Tage aufbewahrt.
 
@@ -146,7 +159,8 @@ location ~ \.php$ { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $docum
 ## Lokal testen
 
 ```bash
-php -S localhost:8000 -t public dev-router.php
+php -S localhost:8000 -t public dev-router.php     # komplette Seite inkl. Buchung
+php tools/build-static.php --url=http://localhost:8000   # dist/ erzeugen
 ```
 
 ## Seiten
@@ -184,8 +198,10 @@ app/                      nicht öffentlich
   layout.php              Kopf, Navigation, Footer, strukturierte Daten
   lib.php                 Terminlogik, Datenbank, PayPal, E-Mail
   data/                   SQLite-Datenbank (nicht im Git)
-public/                   Document Root
-  index.php               Front-Controller für saubere URLs
+dist/                     fertige HTML-Seiten (wird veröffentlicht, mit tools/build-static.php erzeugt)
+tools/build-static.php    baut dist/ aus app/
+public/                   Buchungsdienst (Container) + Quelle für CSS/JS/Bilder
+  index.php               Front-Controller (lokales Testen, Links aus E-Mails)
   api/                    availability, booking, paypal-order, cancel, contact, admin
   admin/                  Terminverwaltung
   css/ js/ fonts/ img/
