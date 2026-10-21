@@ -521,7 +521,22 @@ def winter_offer():
     return w if w and (not w.get("validUntil") or w["validUntil"] >= today().isoformat()) else None
 
 
+def condition_surcharge(data):
+    """Zuschlag in Prozent für angeklickte Zustandsangaben (5 % je Angabe, Tierhaare 10 %, Ledersitze ausgenommen)."""
+    cfg = (site_info().get("booking") or {}).get("conditionSurcharge") or {}
+    pct, over = float(cfg.get("percent", 0) or 0), cfg.get("overrides") or {}
+    return sum(float(over.get(z, pct)) for z in data.get("zustand") or [] if z not in cfg.get("exempt", []))
+
+
 def richtpreis(data):
+    """Richtpreis laut Website inklusive Zustandszuschlag, auf volle Euro gerundet."""
+    base = base_price(data)
+    if base is None:
+        return None
+    return int(base * (1 + condition_surcharge(data) / 100) + 0.5)
+
+
+def base_price(data):
     if data.get("paket") == "winter":
         return ((winter_offer() or {}).get("prices") or {}).get(data.get("klasse"))
     try:
@@ -579,7 +594,8 @@ def notify(ref, data, status="neu"):
         body = (f"Neue Online-Buchung ({ref}): {de_when(data)}\n{dep}\n{todo}\n\n{summary_text(public_data(data))}\n\n"
                 f"Postausgang: {Cfg.public_url}/admin/#/postausgang\n")
     if rp:
-        body += f"\nRichtpreis laut Website: ab {rp} €\n"
+        sur = condition_surcharge(data)
+        body += f"\nRichtpreis laut Website: ab {rp} €" + (f" (inkl. {sur:g} % Zuschlag für den Zustand)" if sur else "") + "\n"
     body += f"\nIm Verwaltungsportal öffnen: {Cfg.public_url}/admin/#/anfragen/{ref}\n"
     mail_async(Cfg.notify_to or s.get("email"), f"{title}: {data.get('name')} ({ref})", body, reply_to=data.get("email") or None)
     if status == "reserviert":

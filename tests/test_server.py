@@ -727,6 +727,12 @@ class TestBooking(Base):
         code, j = self.admin("PUT", "postausgang", {"approval": {"erinnerung": False}})
         self.assertFalse(self.admin("GET", "postausgang")[1]["approval"]["erinnerung"])
 
+    def test_condition_surcharge(self):
+        d = {"paket": "essential", "klasse": "kompakt", "zustand": ["tierhaare", "leder", "stark"]}
+        self.assertEqual(app.richtpreis(d), 378)  # 329 € + 10 % Tierhaare + 5 % stark verschmutzt, Ledersitze ohne Zuschlag
+        self.assertEqual(app.deposit_amount(d), 56.7)
+        self.assertEqual(app.richtpreis({"paket": "essential", "klasse": "kompakt", "zustand": ["leder"]}), 329)
+
     def test_winter_offer_booking(self):
         day = next_workday(15)
         code, j = self.book(day, "08:00", email="winter@example.com", paket="winter")

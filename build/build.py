@@ -75,7 +75,8 @@ def config_js(site):
         "voucherValidYear": int(site.s["standIso"][:4]) + 3,
         "ga4": ((site.s.get("analytics") or {}).get("ga4") or "").strip(),
         "booking": {"holdHours": (site.s.get("booking") or {}).get("holdHours", 24), "owner": (site.s.get("about") or {}).get("name") or "",
-                    "depositPercent": (site.s.get("booking") or {}).get("depositPercent", 15), "keramikMin": site.min_price("keramik") if pr.get("ceramic") else None},
+                    "depositPercent": (site.s.get("booking") or {}).get("depositPercent", 15),
+                    "surcharge": (site.s.get("booking") or {}).get("conditionSurcharge") or {}, "keramikMin": site.min_price("keramik") if pr.get("ceramic") else None},
     }
     return "/* automatisch erzeugt – nicht bearbeiten */\nwindow.ELB=" + json.dumps(cfg, ensure_ascii=False, separators=(",", ":")) + ";\n"
 

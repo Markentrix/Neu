@@ -200,7 +200,17 @@
     ],
     "hinweis": "Abgabezeiten für die Online-Buchung. Jede E-Mail an Kunden (Anzahlungslink, Bestätigung, Erinnerungen) prüft und gibt René im Portal unter Postausgang frei.",
     "depositPercent": 15,
-    "policy": "Sie können Ihren Termin jederzeit kostenlos auf einen anderen Tag verschieben, die Anzahlung bleibt dabei erhalten. Sagen Sie den Termin ganz ab, wird die Anzahlung als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben."
+    "policy": "Sie können Ihren Termin jederzeit kostenlos auf einen anderen Tag verschieben, die Anzahlung bleibt dabei erhalten. Sagen Sie den Termin ganz ab, wird die Anzahlung als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben.",
+    "conditionSurcharge": {
+      "percent": 5,
+      "overrides": {
+        "tierhaare": 10
+      },
+      "exempt": [
+        "leder"
+      ],
+      "hinweis": "Zuschlag in Prozent je angeklickter Zustandsangabe; overrides = abweichender Satz (Tierhaare 10 %), exempt = ohne Zuschlag (leder = Ledersitze)."
+    }
   },
   "googlePlaceId": ""
 }

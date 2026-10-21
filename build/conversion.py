@@ -94,6 +94,9 @@ def build_termin(site, write):
 
     owner = ESC((s.get("about") or {}).get("name") or "René")
     dep = (s.get("booking") or {}).get("depositPercent", 15)
+    sc = (s.get("booking") or {}).get("conditionSurcharge") or {}
+    sur = sc.get("percent", 0)
+    tier = f", viele Tierhaare um {sc['overrides']['tierhaare']} %" if (sc.get("overrides") or {}).get("tierhaare") else ""
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Termin anfragen", None)], "Online-Terminbuchung",
@@ -118,7 +121,8 @@ def build_termin(site, write):
           <p class="wz-hint">Die Fahrzeugklasse bestimmt den Richtpreis.</p>
           <div class="choice-pills">{cls}</div>
           <div class="form-row"><label for="t-vehicle">Marke, Modell, Baujahr <span class="hint">(optional)</span></label><input type="text" id="t-vehicle" name="fahrzeug" maxlength="120" placeholder="z. B. VW Golf 7, 2018"></div>
-          <div class="form-row"><span class="label">Zustand <span class="hint">(hilft uns bei der Planung)</span></span><div class="check-grid">{zustand}</div></div>
+          <div class="form-row"><span class="label">Zustand <span class="hint">(hilft uns bei der Planung)</span></span><div class="check-grid">{zustand}</div>
+            {f'<p class="wz-hint">Jede Angabe außer Ledersitze erhöht den Richtpreis um {sur} %{tier}, weil der Aufwand größer ist. <strong id="t-surcharge" aria-live="polite"></strong></p>' if sur else ""}</div>
         </fieldset>
 
         <fieldset class="wz-step" data-step="3">

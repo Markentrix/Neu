@@ -522,6 +522,10 @@
 
     function summary() {
       var d = collect(wz), p = pkg(d.paket), c = cls(d.klasse), v = p && c ? price(d.paket, d.klasse) : null;
+      var sc = (ELB.booking || {}).surcharge || {}, zs = [].concat(d.zustand || []).filter(function (z) { return (sc.exempt || []).indexOf(z) === -1; });
+      var surPct = zs.reduce(function (a, z) { return a + ((sc.overrides || {})[z] != null ? sc.overrides[z] : (sc.percent || 0)); }, 0);
+      if (v != null && surPct) v = Math.round(v * (1 + surPct / 100));
+      var surEl = $("#t-surcharge"); if (surEl) surEl.textContent = surPct ? "Richtpreis inkl. " + surPct + " % Zuschlag für den Zustand." : "";
       var set = function (k, t) { var el = wz.parentNode.querySelector('[data-sum="' + k + '"]'); if (el) el.textContent = t; };
       set("paket", p ? p.name : (SPECIAL[d.paket] || "–"));
       set("klasse", (c ? c.name : "–") + (d.fahrzeug ? " · " + d.fahrzeug : ""));

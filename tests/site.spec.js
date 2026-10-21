@@ -139,6 +139,19 @@ test("Felgen- und Scheibenkeramik: Karten auf der Startseite, Preise und Herstel
   await expect(page.locator("#felgen-scheiben-preise")).toContainText("ab 179");
 });
 
+test("Buchung: Zustandsangaben erhöhen den Richtpreis (Tierhaare 10 %, sonst 5 %, Ledersitze nicht)", async ({ page }) => {
+  await page.goto("/termin.html?paket=essential&klasse=kompakt");
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 329 €");
+  await page.locator("[data-wz-next]").click();
+  await page.locator('label.check:has(input[value="leder"])').click();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 329 €");
+  await page.locator('label.check:has(input[value="tierhaare"])').click();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 362 €");
+  await expect(page.locator("#t-surcharge")).toContainText("10 %");
+  await page.locator('label.check:has(input[value="flecken"])').click();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 378 €");
+});
+
 test("Winterangebot: Preise je Fahrzeugklasse und direkt buchbar", async ({ page }) => {
   await page.goto("/aktion/winterschutz.html");
   const t = page.locator(".winter-prices");
