@@ -150,7 +150,8 @@
     {
       "name": "Koops GmbH",
       "type": "Kfz-Werkstatt",
-      "url": "https://celle-koops.premio.de/"
+      "url": "https://celle-koops.premio.de/",
+      "logo": "ref-koops.svg"
     },
     {
       "name": "BioFit Celle",
@@ -160,8 +161,9 @@
     },
     {
       "name": "Pludra International",
-      "type": "Unternehmen",
-      "mono": "PI"
+      "type": "Bestattungsbedarf",
+      "url": "https://www.pludra-shop.de/",
+      "logo": "ref-pludra.svg"
     }
   ],
   "paymentMethods": [

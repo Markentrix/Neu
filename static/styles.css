@@ -875,7 +875,11 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .refs-band .refs-head p:last-child { color: var(--muted-on-anthracite); max-width: 52ch; }
 @media (min-width: 900px) { .refs-band .refs-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .ref-wall { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-m); overflow: hidden; }
-@media (min-width: 900px) { .ref-wall { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ref-wall > li:last-child:nth-child(odd) { grid-column: 1 / -1; }  /* ungerade Anzahl: letztes Logo über die ganze Breite */
+@media (min-width: 900px) {
+  .ref-wall { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .ref-wall > li:last-child:nth-child(odd) { grid-column: auto; }
+}
 .ref-wall > li { display: grid; background: var(--anthracite); min-width: 0; }
 .ref-cell { position: relative; display: grid; grid-template-rows: 1fr auto auto; justify-items: center; align-items: center; gap: 6px; min-height: 170px; padding: 26px 14px 18px; text-align: center; color: var(--on-anthracite); text-decoration: none; transition: background-color 0.25s ease; }
 .ref-cell-mark { display: grid; place-items: center; min-height: 70px; width: 100%; }
