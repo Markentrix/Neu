@@ -40,7 +40,7 @@
           <label class="full">E-Mail* <small>(für die Bestätigung)</small><input name="email" type="email" autocomplete="email" required maxlength="254"></label>
           <label class="full">Anmerkung <small>(optional, z. B. Haarlänge, Wunschfarbe)</small><textarea name="note" rows="3" maxlength="500"></textarea></label>
           <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
-          <label class="check full"><input type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass meine Angaben zur Terminvereinbarung verarbeitet werden. Details in der <a href="/datenschutz.php" target="_blank" rel="noopener">Datenschutzerklärung</a>.*</span></label>
+          <label class="check full"><input type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass meine Angaben zur Terminvereinbarung verarbeitet werden. Details in der <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a>.*</span></label>
           <p class="form-error full" data-form-error role="alert" hidden></p>
         </form>
         <div class="step-actions">
