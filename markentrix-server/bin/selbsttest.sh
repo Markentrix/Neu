@@ -33,6 +33,14 @@ else z fehler "Noch keine erfolgreiche Sicherung vorhanden"; fi
 if [ -n "${DOMAIN:-}" ]; then
   curl -fsS --max-time 15 "https://portal.${DOMAIN}/healthz" >/dev/null 2>&1 && z ok "Portal von außen erreichbar (https://portal.${DOMAIN})" || z fehler "Portal von außen nicht erreichbar (https://portal.${DOMAIN})"
 fi
+# 5b) Kennt der Webserver jede veröffentlichte Kunden-Domain? (sonst gibt es kein Zertifikat)
+CS="$(cat "$BASE/caddy-sites-dir" 2>/dev/null || echo "$BASE/caddy/sites")"
+FEHLT=""
+for d in /srv/sites/live/*/; do
+  n="$(basename "$d")"; [ -d "$d" ] || continue
+  [ -f "$CS/$n.caddy" ] || FEHLT="$FEHLT $n"
+done
+[ -z "$FEHLT" ] && z ok "Jede Kunden-Website ist beim Webserver eingetragen" || z fehler "Beim Webserver fehlt der Eintrag für:$FEHLT (Abhilfe: mkctl caddy-neu)"
 # 6) Speicherplatz
 USE="$(df --output=pcent / | tail -1 | tr -dc 0-9)"; [ "${USE:-0}" -lt 85 ] && z ok "Festplatte zu ${USE} % belegt" || z fehler "Festplatte zu ${USE} % voll"
 echo

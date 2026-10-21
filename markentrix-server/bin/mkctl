@@ -15,14 +15,21 @@ need_root() { [ "$(id -u)" -eq 0 ] || die "Bitte mit sudo starten."; }
 
 server_ip() { curl -4 -fsS --max-time 5 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}'; }
 
+# Ordner, aus dem der Caddy die Domain-Dateien liest (bei vorhandenem Caddy dessen Ordner, bei der Installation erkannt)
+sites_dir() {
+  local d; d="$(cat "$BASE/caddy-sites-dir" 2>/dev/null || true)"
+  if [ -n "$d" ] && [ -d "$d" ]; then echo "$d"; else echo "$BASE/caddy/sites"; fi
+}
+
 reload_caddy() {
-  if [ "$MODE" = own ]; then
-    "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null
-    echo "Caddy wurde neu geladen."
-  else
-    echo "Hinweis: Auf diesem Server läuft ein bereits vorhandener Caddy. Er muss die neue Datei noch einbinden:"
-    echo "  $BASE/caddy/sites/*.caddy"
-  fi
+  case "$MODE" in
+    own) "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null && echo "Caddy wurde neu geladen." ;;
+    docker)
+      local c; c="$(cat "$BASE/caddy-container" 2>/dev/null || true)"
+      [ -n "$c" ] || die "Caddy-Container unbekannt. Bitte install.sh erneut ausführen."
+      docker exec "$c" caddy reload --config /etc/caddy/Caddyfile >/dev/null && echo "Caddy ($c) wurde neu geladen." ;;
+    host) systemctl reload caddy && echo "Caddy wurde neu geladen." ;;
+  esac
 }
 
 write_meta() { # Datei Typ Name Kunde
@@ -90,14 +97,14 @@ case "$cmd" in
       esac
     done
     dir="$SITES/live/$domain"; [ ! -e "$dir" ] || die "Die Website $domain gibt es schon."
-    mkdir -p "$dir" "$BASE/caddy/sites"
+    mkdir -p "$dir" "$(sites_dir)"
     if [ -n "$from" ]; then [ -d "$from" ] || die "Quellordner nicht gefunden: $from"; cp -a "$from"/. "$dir"/; else placeholder_page "$dir" "$domain"; fi
     write_meta "$dir" live "$domain" "$kunde"
     chmod -R a+rX "$dir"
     # Ordner für Wochenangebote: das Portal (Benutzer 10001) darf hier schreiben
     mkdir -p "$dir/angebote/archiv"; chown -R 10001:10001 "$dir/angebote"; chmod -R a+rX "$dir/angebote"
     UPSTREAM="mk-portal:8000"; [ "$MODE" = host ] && UPSTREAM="127.0.0.1:8090"
-    cat > "$BASE/caddy/sites/$domain.caddy" <<CADDY
+    cat > "$(sites_dir)/$domain.caddy" <<CADDY
 $domain, www.$domain {
 	encode zstd gzip
 	handle /api/* {
@@ -113,6 +120,19 @@ CADDY
     reload_caddy
     echo "Website angelegt: $domain"
     echo "Damit sie erreichbar ist, muss die Domain per A-Eintrag auf $(server_ip) zeigen (auch www)."
+    ;;
+
+  caddy-neu)
+    # Domain-Dateien in den Ordner des Caddy übernehmen (falls sie noch im alten Ordner liegen) und Caddy neu laden
+    need_root
+    ziel="$(sites_dir)"
+    if [ "$ziel" != "$BASE/caddy/sites" ]; then
+      for f in "$BASE"/caddy/sites/*.caddy; do
+        [ -f "$f" ] || continue; n="$(basename "$f")"; [ "$n" = 00-platzhalter.caddy ] && continue
+        [ -e "$ziel/$n" ] || { cp "$f" "$ziel/$n"; echo "übernommen: $n"; }
+      done
+    fi
+    reload_caddy
     ;;
 
   site-list)

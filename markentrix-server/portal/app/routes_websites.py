@@ -104,7 +104,53 @@ def domain_pruefen(domain: str, user: dict = Depends(require_admin)):
         with tx("system") as cur:
             cur.execute("""INSERT INTO domain_pruefung (domain, kunden_id, geprueft_am, ok, ergebnis, live_gemeldet) VALUES (%s,%s,now(),%s,%s,false)
                            ON CONFLICT (domain) DO UPDATE SET geprueft_am=now(), ok=EXCLUDED.ok, ergebnis=EXCLUDED.ergebnis""", (domain, w["kunden_id"], r["ok"], json.dumps(r)))
+    with tx("system") as cur:
+        cur.execute("SELECT kundenmail_am, erinnerungen FROM domain_pruefung WHERE domain=%s", (domain,))
+        m = cur.fetchone()
+    r["kundenmail_am"] = m["kundenmail_am"] if m else None
+    r["erinnerungen"] = m["erinnerungen"] if m else 0
     return r
+
+
+class DomainIn(BaseModel):
+    domain: str
+
+
+@router.post("/jetzt-pruefen")
+def jetzt_pruefen(data: DomainIn, user: dict = Depends(require_admin)):
+    """Sofort neu prüfen: DNS, Startseite, Website-API und Zertifikat. Der Wachdienst-Status wird dabei aktualisiert."""
+    rate_limit("jetztpruefen", 30, 600)
+    domain = data.domain.strip().lower()
+    if not NAME["live"].match(domain):
+        raise HTTPException(400, "Ungültige Domain")
+    from . import domaincheck
+    r = domaincheck.einzeln(domain)
+    if not r:
+        raise HTTPException(404, "Diese Live-Website gibt es nicht.")
+    w = r["wacht"]
+    if r["dns"]["ok"] and w["ok"]:
+        zustand, text = "ok", "Alles in Ordnung: Domain zeigt auf den Server, Seite und Website-API antworten."
+    elif not r["dns"]["ok"]:
+        zustand, text = "dns", "Die Domain zeigt noch nicht (richtig) auf den Server. Die Anleitung steht unten."
+    else:
+        zustand, text = "seite", "DNS stimmt, aber die Seite ist noch nicht erreichbar: " + (w["fehler"] or "keine Antwort") + ". Beim ersten Aufruf holt Caddy das Zertifikat, das dauert bis zu einer Minute."
+    return {"zustand": zustand, "text": text, "dns": r["dns"], "wacht": w}
+
+
+@router.post("/domain/{domain}/kundenmail")
+def kundenmail(domain: str, user: dict = Depends(require_admin)):
+    """Schickt dem Kunden die DNS-Anleitung per Mail. Nach 3 Tagen erinnert der Server automatisch (höchstens zweimal), solange die Domain nicht stimmt."""
+    rate_limit("domainkundenmail", 20, 3600)
+    domain = domain.strip().lower()
+    if not NAME["live"].match(domain):
+        raise HTTPException(400, "Ungültige Domain")
+    from . import domaincheck
+    ok, grund = domaincheck.kundenmail(domain)
+    if not ok:
+        raise HTTPException(400, grund)
+    with tx("admin") as cur:
+        audit(cur, user, "dns_anleitung_gesendet", None, {"domain": domain})
+    return {"ok": True, "hinweis": "Die Anleitung wurde an " + grund + " geschickt. In 3 Tagen kommt automatisch eine Erinnerung, falls die Domain dann noch nicht stimmt."}
 
 
 def auftrag(daten: dict):

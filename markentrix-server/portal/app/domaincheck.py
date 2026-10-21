@@ -156,3 +156,89 @@ def pruefen(domain: str, v4: list[str], v6: list[str]) -> dict:
                 "\n\nDie Änderung gilt nach einigen Minuten bis wenigen Stunden. Bitte melden Sie sich, wenn Sie fertig sind, dann prüfen wir alles und schalten die Seite frei.\n\nViele Grüße")
     return {"domain": domain, "geprueft": True, "ok": ok, "nameserver": ns or [], "dns_anbieter": anb, "apex": apex, "www": www,
             "probleme": probleme, "schritte": schritte, "kundentext": text, "server_ipv4": v4, "server_ipv6": v6}
+
+
+def caddy_neu_laden():
+    """Bittet den Server-Dienst, den Webserver neu zu laden. Das stößt die Zertifikatsanforderung für neue Domains erneut an (Konfiguration bleibt gleich)."""
+    import secrets
+    try:
+        config.QUEUE_DIR.mkdir(exist_ok=True, mode=0o770)
+        p = config.QUEUE_DIR / f"auftrag-{secrets.token_hex(8)}.json"
+        tmp = p.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"aktion": "caddy_neu_laden"}))
+        tmp.replace(p)
+    except OSError:
+        log.warning("Auftrag Caddy neu laden konnte nicht abgelegt werden")
+
+
+def verbuchen(domain: str, kunden_id, firma: str, live_gemeldet: bool, r: dict):
+    """Speichert das Ergebnis; meldet den Admins per Push, sobald die Domain zum ersten Mal auf den Server zeigt."""
+    from . import push
+    from .db import tx
+    neu_live = bool(r["ok"]) and not live_gemeldet
+    with tx("system") as cur:
+        cur.execute("""INSERT INTO domain_pruefung (domain, kunden_id, geprueft_am, ok, ergebnis, live_gemeldet) VALUES (%s,%s,now(),%s,%s,%s)
+                       ON CONFLICT (domain) DO UPDATE SET geprueft_am=now(), ok=EXCLUDED.ok, ergebnis=EXCLUDED.ergebnis, live_gemeldet=domain_pruefung.live_gemeldet OR EXCLUDED.live_gemeldet""",
+                    (domain, kunden_id, r["ok"], json.dumps(r), neu_live))
+        ids = push.admins(cur) if neu_live else []
+    if neu_live:
+        caddy_neu_laden()      # Zertifikat jetzt sofort neu versuchen, statt auf die Wartezeit nach früheren Fehlversuchen zu warten
+    if ids:
+        push.senden(ids, "Domain ist live", f"{domain} ({firma}) zeigt jetzt auf den Server.", "/admin#verwaltung", "domainlive")
+
+
+def einzeln(domain: str) -> dict:
+    """Jetzt prüfen: DNS und Erreichbarkeit (Startseite, Website-API, Zertifikat) einer Live-Domain. Speichert beides wie die Hintergrundprüfung."""
+    from . import webbetrieb
+    from .db import tx
+    with tx("system") as cur:
+        cur.execute("""SELECT w.kunden_id, k.firma, k.kundennummer, w.letzte_veroeffentlichung, COALESCE(p.live_gemeldet, false) AS live_gemeldet,
+                              EXISTS (SELECT 1 FROM website_wacht_tag t WHERE t.domain = w.domain AND t.ok > 0) AS lief_schon
+                       FROM websites w JOIN kunden k ON k.id = w.kunden_id LEFT JOIN domain_pruefung p ON p.domain = w.domain
+                       WHERE w.domain = %s AND w.art = 'live' AND w.status = 'live'""", (domain,))
+        s = cur.fetchone()
+        v4, v6 = server_adressen(cur)
+    if not s:
+        return {}
+    dns = pruefen(domain, v4, v6)
+    verbuchen(domain, s["kunden_id"], s["firma"], s["live_gemeldet"], dns)
+    wacht = webbetrieb.pruefen(domain)
+    if dns["ok"] and not wacht["ok"] and "Zertifikat" in (wacht["fehler"] or ""):
+        caddy_neu_laden()
+    webbetrieb._verbuchen(None, {"domain": domain, "kunden_id": s["kunden_id"], "firma": s["firma"], "kundennummer": s["kundennummer"],
+                                 "letzte_veroeffentlichung": s["letzte_veroeffentlichung"], "lief_schon": s["lief_schon"]}, wacht)
+    return {"dns": dns, "wacht": wacht}
+
+
+def kundenmail(domain: str, erinnerung: bool = False) -> tuple[bool, str]:
+    """Schickt dem Kunden die DNS-Anleitung (oder die Erinnerung daran). Gibt (gesendet, Grund oder Empfänger) zurück."""
+    from . import mailer
+    from .db import tx
+    with tx("system") as cur:
+        cur.execute("""SELECT w.kunden_id, k.firma, k.email, k.benachr_email, COALESCE(p.live_gemeldet, false) AS live_gemeldet FROM websites w JOIN kunden k ON k.id = w.kunden_id
+                       LEFT JOIN domain_pruefung p ON p.domain = w.domain WHERE w.domain = %s AND w.art = 'live'""", (domain,))
+        k = cur.fetchone()
+        v4, v6 = server_adressen(cur)
+    if not k:
+        return False, "Diese Website gehört keinem Kunden."
+    an = (k["benachr_email"] or k["email"] or "").strip()
+    if not an:
+        return False, "Beim Kunden ist keine E-Mail-Adresse hinterlegt."
+    if not v4:
+        return False, "Die Server-Adresse ist noch nicht bekannt."
+    if not mailer.konfiguriert():
+        return False, "Der E-Mail-Versand ist nicht eingerichtet (Einstellungen)."
+    r = pruefen(domain, v4, v6)
+    verbuchen(domain, k["kunden_id"], k["firma"], k["live_gemeldet"], r)
+    if r["ok"]:
+        return False, "Die Domain zeigt schon auf den Server, die Anleitung ist nicht nötig."
+    text = r["kundentext"].replace("Guten Tag,\n\nfür die Umstellung", "Guten Tag,\n\nkurze Erinnerung: Für die Umstellung", 1) if erinnerung else r["kundentext"]
+    ok, grund = mailer.senden(an, ("Erinnerung: " if erinnerung else "") + f"Ihre Website {domain}: Umstellung der Domain", text + "\nIhr Markentrix-Team", kunden_id=k["kunden_id"])
+    if not ok:
+        return False, "Die Mail konnte nicht gesendet werden: " + str(grund)[:120]
+    with tx("system") as cur:
+        if erinnerung:
+            cur.execute("UPDATE domain_pruefung SET erinnert_am=now(), erinnerungen=erinnerungen+1 WHERE domain=%s", (domain,))
+        else:
+            cur.execute("UPDATE domain_pruefung SET kundenmail_am=now(), erinnert_am=NULL, erinnerungen=0 WHERE domain=%s", (domain,))
+    return True, an

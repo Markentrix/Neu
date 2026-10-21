@@ -28,7 +28,14 @@ const dnsZeigen = (r) => {
     r.probleme.length ? h('ul', {}, ...r.probleme.map(t => h('li', {}, t))) : '',
     r.schritte.length ? h('ol', {}, ...r.schritte.map(t => h('li', {}, t))) : '',
     r.kundentext ? h('div', {}, h('h3', {}, 'Text für den Kunden'), h('textarea', { rows: 12, style: 'width:100%', readonly: true }, r.kundentext),
-      h('button', { class: 'btn small sec', onclick: (ev) => navigator.clipboard.writeText(r.kundentext).then(() => { ev.target.textContent = 'Kopiert ✓'; }) }, 'Text kopieren')) : '',
+      h('button', { class: 'btn small sec', onclick: (ev) => navigator.clipboard.writeText(r.kundentext).then(() => { ev.target.textContent = 'Kopiert ✓'; }) }, 'Text kopieren'), ' ',
+      h('button', { class: 'btn small', onclick: async (ev) => {
+        if (!confirm('Die Anleitung jetzt per E-Mail an den Kunden schicken? In 3 Tagen kommt automatisch eine Erinnerung, falls die Domain dann noch nicht stimmt.')) return;
+        ev.target.disabled = true;
+        try { const a = await api('/api/admin/websites/domain/' + encodeURIComponent(r.domain) + '/kundenmail', { method: 'POST' }); ev.target.textContent = 'Gesendet ✓'; ev.target.parentNode.append(h('p', { class: 'small' }, a.hinweis)); }
+        catch (x) { ev.target.disabled = false; ev.target.parentNode.append(h('p', { class: 'small', style: 'color:var(--bad,#e66)' }, x.message)); }
+      } }, 'An Kunden mailen'),
+      r.kundenmail_am ? h('p', { class: 'small muted' }, 'Zuletzt gesendet am ' + datum(r.kundenmail_am) + (r.erinnerungen ? ' · ' + r.erinnerungen + ' Erinnerung(en) verschickt' : '')) : '') : '',
     h('p', { class: 'small muted' }, 'Server-Adresse: ' + (r.server_ipv4.join(', ') || 'unbekannt'))));
   dnsBox.scrollIntoView({ behavior: 'smooth' });
 };
@@ -155,11 +162,17 @@ V.websites = async () => {
   } }, 'Wiederherstellen');
   const checkKnopf = (z) => h('button', { class: 'btn small sec', onclick: async () => { try { checkZeigen(await api('/api/admin/websites/livecheck?art=' + z.art + '&name=' + encodeURIComponent(z.name)), z.name); } catch (x) { melde(m, x.message); } } }, 'Check');
   const dnsKnopf = (z) => z.art !== 'live' ? '' : h('span', {}, z.dns ? h('span', { class: 'pill ' + (z.dns.ok ? 'ok' : 'warn') }, z.dns.ok ? 'DNS ok' : 'DNS offen') : '', ' ',
-    h('button', { class: 'btn small sec', onclick: async () => { try { dnsZeigen(await api('/api/admin/websites/domain/' + encodeURIComponent(z.name))); } catch (x) { melde(m, x.message); } } }, 'DNS prüfen'));
+    h('button', { class: 'btn small sec', onclick: async () => { try { dnsZeigen(await api('/api/admin/websites/domain/' + encodeURIComponent(z.name))); } catch (x) { melde(m, x.message); } } }, 'DNS prüfen'), ' ',
+    h('button', { class: 'btn small', title: 'DNS, Startseite, Website-API und Zertifikat sofort neu prüfen', onclick: async (ev) => {
+      ev.target.disabled = true; ev.target.textContent = 'Prüfe …';
+      try { const r = await api('/api/admin/websites/jetzt-pruefen', { method: 'POST', body: { domain: z.name } }); melde(m, z.name + ': ' + r.text, r.zustand === 'ok' ? 'ok' : ''); if (r.zustand === 'dns') dnsZeigen(r.dns); setTimeout(() => location.reload(), r.zustand === 'dns' ? 6000 : 2500); }
+      catch (x) { melde(m, x.message); ev.target.disabled = false; ev.target.textContent = 'Jetzt prüfen'; }
+    } }, 'Jetzt prüfen'));
   const status = (z) => {
     if (z.art === 'live') {
       const w = z.wacht;
       if (!w) return h('span', { class: 'muted small' }, 'noch nicht geprüft');
+      if (!w.ok && w.wartet_dns) return h('span', {}, h('span', { class: 'pill warn', title: 'Neue Seite: die Domain zeigt noch nicht auf den Server. Das ist kein Ausfall. ' + (w.fehler || '') }, 'wartet auf DNS'), ' ', h('span', { class: 'small muted' }, 'kein Alarm'));
       return h('span', {}, h('span', { class: 'pill ' + (w.ok ? 'ok' : 'bad'), title: w.fehler || '' }, w.ok ? 'erreichbar' : 'gestört'), ' ',
         h('span', { class: 'small muted' }, (w.ms ? w.ms + ' ms · ' : '') + (w.prozent != null ? String(w.prozent).replace('.', ',') + ' % · ' : '') + (w.cert_tage != null ? 'Zertifikat ' + w.cert_tage + ' T' : '') + (w.qualitaet ? ' · ' + (w.qualitaet.tote.length ? w.qualitaet.tote.length + ' tote Links' : 'Links ok') + (w.qualitaet.langsam.length ? ' · ' + w.qualitaet.langsam.length + ' langsam' : '') : '')));
     }

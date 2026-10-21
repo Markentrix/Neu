@@ -98,9 +98,29 @@ def recht_fuer_pfad(pfad: str) -> str:
     return _BEREICH.get(erst, "einstellungen")
 
 
+_vertrieb_2fa = (0.0, False)
+
+
+def vertrieb_2fa_pflicht(neu_laden: bool = False) -> bool:
+    """Ist die Zwei-Faktor-Anmeldung für Vertriebs-Zugänge Pflicht? (Einstellung „sicherheit“, 60 Sekunden zwischengespeichert)"""
+    global _vertrieb_2fa
+    if neu_laden or time.time() - _vertrieb_2fa[0] > 60:
+        try:
+            from . import einstellungen
+            with tx("system") as cur:
+                _vertrieb_2fa = (time.time(), bool(einstellungen.lesen(cur, "sicherheit").get("vertrieb_2fa")))
+        except Exception:  # noqa: BLE001
+            _vertrieb_2fa = (time.time(), False)
+    return _vertrieb_2fa[1]
+
+
 def _zwei_faktor_fehlt(user: dict) -> bool:
     from . import config
-    return bool(config.ADMIN_2FA_PFLICHT and user["rolle"] == "admin" and not user.get("totp_aktiv"))
+    if user.get("totp_aktiv"):
+        return False
+    if user["rolle"] == "admin":
+        return bool(config.ADMIN_2FA_PFLICHT)
+    return user["rolle"] == "vertrieb" and vertrieb_2fa_pflicht()
 
 
 ZWEI_FAKTOR_PFLICHT = "Für Administratoren ist die Zwei-Faktor-Anmeldung Pflicht. Bitte zuerst einrichten."
@@ -155,6 +175,8 @@ def require_inhaber(user: dict = Depends(require_kunde)) -> dict:
 def require_vertrieb(user: dict = Depends(current_user)) -> dict:
     if user["rolle"] != "vertrieb" or not user["vertriebspartner_id"]:
         raise HTTPException(403, "Nur für Vertriebler.")
+    if _zwei_faktor_fehlt(user):
+        raise HTTPException(403, "Die Zwei-Faktor-Anmeldung ist für Vertriebs-Zugänge Pflicht. Bitte zuerst einrichten (Konto).")
     return user
 
 

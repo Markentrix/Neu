@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors
@@ -68,10 +69,19 @@ def hinzufuegen(kid: str, data: NeuIn, user: dict = Depends(require_admin)):
 def offen(user: dict = Depends(require_admin)):
     """Kunden im Status 'onboarding' mit Fortschritt – für die Übersicht."""
     with tx("admin") as cur:
-        cur.execute("SELECT id, kundennummer, firma FROM kunden WHERE status='onboarding' ORDER BY erstellt_am DESC LIMIT 50")
+        cur.execute("SELECT id, kundennummer, firma, erstellt_am FROM kunden WHERE status='onboarding' ORDER BY erstellt_am DESC LIMIT 50")
         kunden = cur.fetchall()
+        jetzt = datetime.now(timezone.utc)
         out = []
         for k in kunden:
             punkte = onboarding.lesen(cur, k["id"])
-            out.append({**k, "fertig": sum(1 for p in punkte if p["fertig"]), "gesamt": len(punkte)})
+            offen_p = [p for p in punkte if not p["fertig"]]
+            zeiten = [p["erledigt_am"] for p in punkte if p["erledigt"] and p["erledigt_am"]]
+            zuletzt = max(zeiten + [k["erstellt_am"]])
+            if zuletzt.tzinfo is None:
+                zuletzt = zuletzt.replace(tzinfo=timezone.utc)
+            tage_still = (jetzt - zuletzt).days
+            out.append({"id": k["id"], "kundennummer": k["kundennummer"], "firma": k["firma"], "fertig": len(punkte) - len(offen_p), "gesamt": len(punkte),
+                        "naechster": offen_p[0]["titel"] if offen_p else None, "tage_still": tage_still, "haengt": bool(offen_p) and tage_still >= 7})
+    out.sort(key=lambda x: (not x["haengt"], -x["tage_still"]))
     return out

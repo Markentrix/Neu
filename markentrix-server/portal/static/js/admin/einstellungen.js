@@ -24,7 +24,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    await zustellungKarte(), await vertragKarte(), zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    await zustellungKarte(), await vertragKarte(), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -315,4 +315,23 @@ export async function vertragKarte() {
     h('p', { class: 'small muted' }, 'Kunden kündigen im Portal verbindlich. Das Vertragsende ist das Monatsende nach Ablauf dieser Frist, frühestens am Ende der Mindestlaufzeit (aus der Buchung). Zum Vertragsende setzt der Server den Kunden automatisch auf „gekündigt“. Die Frist muss zu deinen AGB passen.'),
     m, h('div', { class: 'row' }, h('label', {}, 'Kündigungsfrist in Tagen'), frist,
       knopf('Speichern', async () => { try { await api('/api/admin/einstellungen/vertrag', { method: 'PUT', body: { kuendigungsfrist_tage: Number(frist.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } }, 'btn')));
+}
+
+
+/** Wer hat die Zwei-Faktor-Anmeldung? Für Vertriebs-Zugänge lässt sie sich zur Pflicht machen (bei Admins ist sie es immer). */
+async function sicherheitKarte() {
+  const d = await api('/api/admin/sicherheit'), m = h('div');
+  const pflicht = h('input', { type: 'checkbox', style: 'width:auto', checked: d.vertrieb_pflicht });
+  pflicht.addEventListener('change', async () => {
+    if (pflicht.checked && !confirm('Vertriebs-Zugänge ohne Zwei-Faktor-Anmeldung kommen danach nicht mehr ins Partnerportal, bis sie die App eingerichtet haben. Jetzt zur Pflicht machen?')) { pflicht.checked = false; return; }
+    try { await api('/api/admin/sicherheit', { method: 'PUT', body: { vertrieb_2fa: pflicht.checked } }); melde(m, pflicht.checked ? 'Für Vertriebs-Zugänge ist die Zwei-Faktor-Anmeldung jetzt Pflicht.' : 'Gespeichert.', 'ok'); }
+    catch (x) { pflicht.checked = !pflicht.checked; melde(m, x.message); }
+  });
+  const ohne = d.konten.filter(k => !k.totp_aktiv);
+  return h('div', { class: 'card' }, h('h2', {}, 'Sicherheit: Zwei-Faktor-Anmeldung'),
+    h('p', { class: 'small muted' }, 'Admin-Zugänge brauchen sie immer' + (d.admin_pflicht ? '' : ' (hier per Server-Einstellung abgeschaltet)') + '. Für Vertriebs-Zugänge kannst du sie vorschreiben.'),
+    ohne.length ? h('p', {}, h('span', { class: 'pill warn' }, ohne.length + ' ohne 2FA'), ' ' + ohne.map(k => k.email).join(', ')) : h('p', {}, h('span', { class: 'pill ok' }, 'alle Konten geschützt')),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, pflicht, 'Zwei-Faktor-Anmeldung für Vertriebs-Zugänge verpflichtend'), m,
+    h('div', { class: 'tablewrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['E-Mail', 'Rolle', '2FA', 'Letzter Login'].map(t => h('th', {}, t)))),
+      h('tbody', {}, d.konten.map(k => h('tr', {}, h('td', {}, k.email), h('td', {}, k.rolle === 'admin' ? 'Admin' : 'Vertrieb'), h('td', {}, h('span', { class: 'pill ' + (k.totp_aktiv ? 'ok' : 'warn') }, k.totp_aktiv ? 'aktiv' : 'fehlt')), h('td', {}, k.letzter_login ? zeit(k.letzter_login) : '–')))))));
 }

@@ -8,13 +8,15 @@ VORLAGE = [
     ("briefing", "Briefing ausgefüllt", "Der Kunde hat den Fragebogen zu Unternehmen, Zielen und Wünschen abgeschickt.", 35, None, "briefing"),
     ("stammdaten", "Firmendaten, Öffnungszeiten, Leistungen erfasst", "Wird für Website, Assistent und Berichte gebraucht.", 40, None, None),
     ("branding", "Logo, Farben, Fotos erhalten", "Vom Kunden bekommen oder mit ihm abgestimmt.", 50, None, None),
-    ("domain", "Domain erfasst und DNS bereit", "Im Kundenblatt unter „Domains“ Inhaber, Registrar und Ablaufdatum eintragen (wird dann automatisch erkannt). DNS zeigt auf den Server.", 60, "website", "domain_erfasst"),
+    ("domain", "Domain erfasst", "Im Kundenblatt unter „Domains“ Inhaber, Registrar und Ablaufdatum eintragen (wird dann automatisch erkannt).", 60, "website", "domain_erfasst"),
+    ("dns", "DNS zeigt auf den Server", "Wird automatisch erkannt, sobald @ und www auf den Server zeigen. Unter Websites & Demos steht bei „DNS prüfen“, was der Kunde ändern muss, und dort lässt sich die Anleitung direkt mailen.", 65, "website", "dns_ok"),
     ("website", "Website live", "Seite ist veröffentlicht und geprüft (Handy, Impressum, Datenschutz).", 70, "website", "website_live"),
+    ("google_profil", "Google-Unternehmensprofil geprüft", "Eintrag vorhanden, Öffnungszeiten, Adresse und Website-Adresse stimmen; Bewertungslink liegt vor.", 75, "website", None),
     ("wissen", "Wissensbasis für den Assistenten befüllt", "Leistungen, Preise, Öffnungszeiten, FAQ, Tonalität.", 80, "ki_chat", "wissen"),
     ("agent", "KI-Assistent / Agent getestet", "Mit typischen Fragen ausprobiert, Hinweis auf KI sichtbar.", 90, "ki_chat", None),
     ("konten", "Zugänge zu externen Diensten erhalten", "z. B. Google Unternehmensprofil, Social Media, Kalender.", 100, None, None),
     ("einweisung", "Einweisung / Übergabe-Termin durchgeführt", "Kunde weiß, wie er das Portal und die Benachrichtigungen nutzt.", 110, None, None),
-    ("rechnung", "Erste Rechnung gestellt", "Einrichtung und erster Monat abgerechnet (bei Referenzkunden entfällt das).", 120, None, None),
+    ("rechnung", "Erste Rechnung gestellt", "Einrichtung und erster Monat abgerechnet (wird automatisch erkannt, bei Referenzkunden entfällt das).", 120, None, "rechnung"),
 ]
 
 
@@ -57,6 +59,12 @@ def auto_erkannt(cur, kid) -> set:
     cur.execute("SELECT 1 FROM domains WHERE kunden_id=%s AND status<>'gekuendigt' AND ablauf_am IS NOT NULL AND (inhaber_name IS NOT NULL OR inhaber='markentrix') LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("domain_erfasst")
+    cur.execute("""SELECT 1 FROM websites w JOIN domain_pruefung p ON p.domain = w.domain WHERE w.kunden_id=%s AND w.art='live' AND p.ok LIMIT 1""", (kid,))
+    if cur.fetchone():
+        erkannt.add("dns_ok")
+    cur.execute("SELECT 1 FROM belege WHERE kunden_id=%s AND art='rechnung' AND status IN ('gestellt','versendet','bezahlt') LIMIT 1", (kid,))
+    if cur.fetchone():
+        erkannt.add("rechnung")
     cur.execute("SELECT 1 FROM wissensbasis WHERE kunden_id=%s AND aktiv LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("wissen")
@@ -87,8 +95,8 @@ def lesen(cur, kid) -> list:
 PHASEN = [
     ("start", "Start", ("vertrag", "avv", "zugang")),
     ("material", "Briefing & Material", ("briefing", "stammdaten", "branding", "konten")),
-    ("aufbau", "Aufbau", ("domain", "wissen", "agent")),
-    ("live", "Live & Übergabe", ("website", "einweisung", "rechnung")),
+    ("aufbau", "Aufbau", ("domain", "dns", "wissen", "agent")),
+    ("live", "Live & Übergabe", ("website", "google_profil", "einweisung", "rechnung")),
 ]
 
 

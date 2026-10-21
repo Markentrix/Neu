@@ -181,6 +181,22 @@ if [ "$CADDY_MODE" = docker ]; then
   ok "Vorhandener Caddy ist jetzt mit den neuen Diensten verbunden (nur Netzwerk, keine Einstellung geändert)"
 fi
 
+# Vorhandener Caddy: merken, welcher Container es ist und aus welchem Ordner er Domain-Dateien liest, damit neue Kunden-Websites
+# automatisch dort landen und der Caddy sie lädt (sonst bekommt die Domain kein Zertifikat)
+rm -f "$BASE/caddy-container" "$BASE/caddy-sites-dir"
+if [ "$CADDY_MODE" = docker ]; then
+  CS_DIR="$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/etc/caddy/sites"}}{{.Source}}{{end}}{{end}}' "$EXISTING" 2>/dev/null || true)"
+  echo "$EXISTING" > "$BASE/caddy-container"
+  if [ -n "$CS_DIR" ] && [ -d "$CS_DIR" ]; then
+    echo "$CS_DIR" > "$BASE/caddy-sites-dir"
+    ok "Vorhandener Caddy ($EXISTING) liest Domains aus $CS_DIR, neue Kunden-Websites werden dort eingetragen"
+    "$BASE/bin/mkctl" caddy-neu || warn "Caddy konnte nicht neu geladen werden (mkctl caddy-neu)"
+  else
+    warn "Der vorhandene Caddy bindet keinen Ordner /etc/caddy/sites ein. Neue Kunden-Websites müssen von Hand in seine Caddyfile (siehe $BASE/caddy/sites/*.caddy)"
+  fi
+  docker exec "$EXISTING" test -d /srv/sites/live 2>/dev/null || warn "Der vorhandene Caddy sieht /srv/sites nicht. Der Ordner muss dort eingebunden sein, sonst bleiben Kunden-Websites leer."
+fi
+
 if [ "$CADDY_MODE" != own ]; then
   if [ "$CADDY_MODE" = docker ]; then U_N8N="mk-n8n:5678"; U_PANEL="mk-panel:8080"; U_PORTAL="mk-portal:8000"; else U_N8N="127.0.0.1:5678"; U_PANEL="127.0.0.1:8088"; U_PORTAL="127.0.0.1:8090"; fi
   cat > "$BASE/caddy-zusatz-fuer-bestehenden-caddy.txt" <<EOF

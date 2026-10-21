@@ -4,7 +4,7 @@ from psycopg import errors
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from . import zweifaktor
+from . import config, einstellungen, zweifaktor
 from .db import tx
 from .einstellungen import entschluesseln, verschluesseln
 from .security import audit, current_user, rate_limit, require_admin, verify_password
@@ -97,4 +97,30 @@ def admin_reset(bid: str, user: dict = Depends(require_admin)):
         r = None
     if not r:
         raise HTTPException(404, "Benutzer nicht gefunden.")
+    return {"ok": True}
+
+
+@router.get("/admin/sicherheit")
+def sicherheit(user: dict = Depends(require_admin)):
+    """Wer hat die Zwei-Faktor-Anmeldung eingerichtet? Plus Schalter, ob sie für Vertriebs-Zugänge Pflicht ist."""
+    from .security import vertrieb_2fa_pflicht
+    with tx("admin") as cur:
+        cur.execute("""SELECT id, email, name, rolle, aktiv, totp_aktiv, letzter_login FROM benutzer WHERE rolle IN ('admin','vertrieb') AND aktiv
+                       ORDER BY rolle, lower(email)""")
+        konten = cur.fetchall()
+    return {"vertrieb_pflicht": vertrieb_2fa_pflicht(True), "admin_pflicht": config.ADMIN_2FA_PFLICHT, "konten": konten}
+
+
+class SicherheitIn(BaseModel):
+    vertrieb_2fa: bool
+
+
+@router.put("/admin/sicherheit")
+def sicherheit_speichern(data: SicherheitIn, user: dict = Depends(require_admin)):
+    from .security import vertrieb_2fa_pflicht
+    with tx("admin") as cur:
+        alt = einstellungen.lesen(cur, "sicherheit")
+        einstellungen.schreiben(cur, "sicherheit", {**alt, "vertrieb_2fa": data.vertrieb_2fa})
+        audit(cur, user, "sicherheit_vertrieb_2fa", None, {"pflicht": data.vertrieb_2fa})
+    vertrieb_2fa_pflicht(True)
     return {"ok": True}

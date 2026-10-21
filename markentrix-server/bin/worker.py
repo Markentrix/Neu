@@ -24,14 +24,45 @@ def log(m):
     print(time.strftime("%F %T"), m, flush=True)
 
 
-def reload_caddy():
+CONTAINER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,100}$")
+
+
+def caddy_sites():
+    """Ordner, aus dem der Caddy die Domain-Dateien liest. Bei einem vorhandenen Caddy ist das dessen Ordner (bei der Installation erkannt),
+    sonst der eigene unter /opt/markentrix/caddy/sites."""
+    try:
+        p = Path((BASE / "caddy-sites-dir").read_text().strip())
+        if p.is_absolute() and p.is_dir() and not p.is_symlink():
+            return p
+    except OSError:
+        pass
+    return BASE / "caddy" / "sites"
+
+
+def reload_caddy() -> bool:
+    """Lädt die Konfiguration des Webservers neu (ändert nichts an ihr). True bei Erfolg."""
     mode = (BASE / "mode").read_text().strip() if (BASE / "mode").exists() else "own"
-    if mode == "own":
-        try:
-            subprocess.run(["docker", "compose", "--project-directory", str(BASE), "-f", str(BASE / "docker-compose.yml"),
-                            "exec", "-T", "caddy", "caddy", "reload", "--config", "/etc/caddy/Caddyfile"], check=False, capture_output=True)
-        except OSError as e:
-            log(f"Caddy konnte nicht neu geladen werden: {e}")
+    try:
+        if mode == "own":
+            cmd = ["docker", "compose", "--project-directory", str(BASE), "-f", str(BASE / "docker-compose.yml"),
+                   "exec", "-T", "caddy", "caddy", "reload", "--config", "/etc/caddy/Caddyfile"]
+        elif mode == "docker":
+            c = (BASE / "caddy-container").read_text().strip() if (BASE / "caddy-container").exists() else ""
+            if not CONTAINER.match(c):
+                log("Caddy-Container nicht bekannt (Datei caddy-container fehlt): bitte install.sh erneut ausführen")
+                return False
+            cmd = ["docker", "exec", c, "caddy", "reload", "--config", "/etc/caddy/Caddyfile"]
+        elif mode == "host":
+            cmd = ["systemctl", "reload", "caddy"]
+        else:
+            return False
+        r = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+        if r.returncode != 0:
+            log(f"Caddy konnte nicht neu geladen werden: {(r.stderr or r.stdout)[-200:]}")
+        return r.returncode == 0
+    except (OSError, subprocess.TimeoutExpired) as e:
+        log(f"Caddy konnte nicht neu geladen werden: {e}")
+        return False
 
 
 def loeschen(art, name):
@@ -41,7 +72,7 @@ def loeschen(art, name):
     TRASH.mkdir(mode=0o755, exist_ok=True)
     ziel = TRASH / f"{time.strftime('%Y%m%d-%H%M%S')}__{art}__{name}"
     shutil.move(str(quelle), str(ziel))
-    cf = BASE / "caddy" / "sites" / f"{name}.caddy"
+    cf = caddy_sites() / f"{name}.caddy"
     if art == "live" and cf.is_file():
         cf.rename(ziel / "_caddy-datei.bak")
         reload_caddy()
@@ -61,7 +92,7 @@ def wiederherstellen(tid):
     shutil.move(str(quelle), str(ziel))
     bak = ziel / "_caddy-datei.bak"
     if bak.is_file():
-        shutil.move(str(bak), str(BASE / "caddy" / "sites" / f"{name}.caddy"))
+        shutil.move(str(bak), str(caddy_sites() / f"{name}.caddy"))
         reload_caddy()
     if art == "live":
         subprocess.run(["chown", "-R", "10001:10001", str(ziel / "angebote")], check=False, capture_output=True)
@@ -131,7 +162,7 @@ def alt_inhalt(domain):
 
 
 def caddy_datei(domain):
-    cf = BASE / "caddy" / "sites" / f"{domain}.caddy"
+    cf = caddy_sites() / f"{domain}.caddy"
     if cf.exists():
         return False
     cf.parent.mkdir(parents=True, exist_ok=True)
@@ -141,7 +172,7 @@ def caddy_datei(domain):
 
 def caddy_nachruesten():
     """Ältere, unveränderte Standard-Einträge bekommen die Website-API-Weiterleitung. Von Hand geänderte Dateien bleiben unangetastet."""
-    ordner = BASE / "caddy" / "sites"
+    ordner = caddy_sites()
     geaendert = False
     if not ordner.is_dir():
         return
@@ -198,15 +229,17 @@ def veroeffentlichen(a):
             subprocess.run(["chown", "-R", "-h", "10001:10001", str(stage / "angebote")], check=False, capture_output=True)
         ziel.parent.mkdir(parents=True, exist_ok=True)
         os.rename(stage, ziel)
-        angelegt = False
+        angelegt, reload_ok = False, True
         if art == "live":
             angelegt = caddy_datei(name)
             if angelegt:
-                reload_caddy()
+                reload_ok = reload_caddy()
         vorversionen_aufraeumen(art, name)
         url = f"https://{name}/" if art == "live" else f"https://demo.{os.environ.get('MK_DOMAIN', 'markentrix.de')}/{name}/"
         text = ("Website neu angelegt und veröffentlicht. Damit sie erreichbar ist, muss die Domain per A-Eintrag (auch www) auf diesen Server zeigen, das HTTPS-Zertifikat kommt dann automatisch."
                 if neu and art == "live" else "Veröffentlicht. Die vorige Version ist gesichert und lässt sich zurückholen.")
+        if not reload_ok:
+            text += " ACHTUNG: Der Webserver (Caddy) konnte nicht neu geladen werden. Auf dem Server „mkctl caddy-neu“ ausführen."
         ergebnis(uid, a, True, text, url=url, neu=neu)
         log(f"veröffentlicht: {art} {name}")
     except Exception as e:  # noqa: BLE001
@@ -404,6 +437,8 @@ def main():
                 kundenauszug(a)
             elif a.get("aktion") == "zurueck":
                 zurueck(a)
+            elif a.get("aktion") == "caddy_neu_laden":
+                reload_caddy()
             elif a.get("aktion") == "wiederherstellen":
                 wiederherstellen(str(a.get("id", "")))
             else:

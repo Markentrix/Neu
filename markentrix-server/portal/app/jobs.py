@@ -645,14 +645,27 @@ def domain_lauf():
         todo = cur.fetchall()
     for t in todo:
         r = domaincheck.pruefen(t["domain"], v4, v6)
-        neu_live = r["ok"] and not t["live_gemeldet"]
-        with tx("system") as cur:
-            cur.execute("""INSERT INTO domain_pruefung (domain, kunden_id, geprueft_am, ok, ergebnis, live_gemeldet) VALUES (%s,%s,now(),%s,%s,%s)
-                           ON CONFLICT (domain) DO UPDATE SET geprueft_am=now(), ok=EXCLUDED.ok, ergebnis=EXCLUDED.ergebnis, live_gemeldet=domain_pruefung.live_gemeldet OR EXCLUDED.live_gemeldet""",
-                        (t["domain"], t["kunden_id"], r["ok"], json.dumps(r), neu_live))
-            ids = push.admins(cur) if neu_live else []
-        if ids:
-            push.senden(ids, "Domain ist live", f"{t['domain']} ({t['firma']}) zeigt jetzt auf den Server.", "/admin#verwaltung", "domainlive")
+        domaincheck.verbuchen(t["domain"], t["kunden_id"], t["firma"], t["live_gemeldet"], r)
+
+
+def domain_erinnerung(cfg):
+    """Täglich: Kunden, denen die DNS-Anleitung geschickt wurde und deren Domain nach 3 Tagen noch nicht stimmt, höflich erinnern (höchstens zweimal)."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 8 or jetzt.weekday() >= 5 or not _marker("domainerinnerung-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    domain_erinnern()
+
+
+def domain_erinnern():
+    with tx("system") as cur:
+        cur.execute("""SELECT domain FROM domain_pruefung WHERE ok IS NOT TRUE AND kundenmail_am IS NOT NULL AND erinnerungen < 2
+                       AND COALESCE(erinnert_am, kundenmail_am) < now() - interval '3 days' LIMIT 20""")
+        todo = [r["domain"] for r in cur.fetchall()]
+    for d in todo:
+        try:
+            domaincheck.kundenmail(d, erinnerung=True)
+        except Exception:  # noqa: BLE001
+            log.exception("DNS-Erinnerung %s", d)
 
 
 def website_bewertungen(cfg):
@@ -689,7 +702,7 @@ def tick():
             betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

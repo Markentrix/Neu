@@ -117,6 +117,12 @@ def _zertifikat_tage(domain: str) -> int | None:
         return None
 
 
+def _klartext(fehler: str) -> str:
+    if "ALERT_INTERNAL_ERROR" in fehler or "tlsv1 alert internal error" in fehler:
+        return "nicht erreichbar (der Webserver hat für diese Domain noch kein Zertifikat: Domain noch nicht eingebunden, DNS zu neu oder Zertifikat wird gerade geholt)"
+    return fehler
+
+
 def pruefen(domain: str) -> dict:
     """Prüft Startseite, Website-API (/api/health) und Zertifikat einer Website."""
     test = config.WACHT_BASIS
@@ -130,14 +136,14 @@ def pruefen(domain: str) -> dict:
         if not out["seite_ok"]:
             fehler.append(f"Startseite antwortet mit Fehler {code}")
     except ValueError as e:
-        fehler.append("Startseite " + str(e))
+        fehler.append("Startseite " + _klartext(str(e)))
     try:
         code, body, _ = _abrufen(basis + config.WACHT_API_PRAEFIX + "/api/health", domain)
         out["api_ok"] = code == 200 and b'"ok"' in body.replace(b" ", b"")
         if not out["api_ok"]:
             fehler.append("Website-API (/api/health) antwortet nicht richtig")
     except ValueError as e:
-        fehler.append("Website-API " + str(e))
+        fehler.append("Website-API " + _klartext(str(e)))
     if not test:
         try:
             out["cert_tage"] = _zertifikat_tage(domain)
@@ -219,6 +225,11 @@ def _verbuchen(cfg, s: dict, e: dict):
         cur.execute("""INSERT INTO website_wacht_tag (domain, tag, geprueft, ok) VALUES (%s, current_date, 1, %s)
                        ON CONFLICT (domain, tag) DO UPDATE SET geprueft = website_wacht_tag.geprueft + 1, ok = website_wacht_tag.ok + EXCLUDED.ok""", (domain, 1 if ok else 0))
     wer = f"{s['firma']} ({s['kundennummer']})"
+    if ok and not s["lief_schon"]:
+        with tx("system") as cur:
+            ids = push.admins(cur)
+        if ids:
+            push.senden(ids, "Website ist live", f"{domain} ({wer}) ist erreichbar, das Zertifikat ist aktiv.", "/admin#websites", "websitelive")
     if alarm:
         _mail_admin(cfg, f"Website nicht erreichbar: {domain}", f"Die Website {domain} von {wer} ist nicht in Ordnung:\n\n{e['fehler'] or 'keine Antwort'}\n\n"
                     "Bitte prüfen: Läuft Caddy? Zeigt die Domain (A-Eintrag) auf den Server? Ist das Zertifikat gültig?", f"Website nicht erreichbar: {domain}")
@@ -305,11 +316,13 @@ def status(cur, kid=None) -> list:
     """Letzter Stand je Website (mit Erreichbarkeit der letzten 30 Tage in Prozent und der täglichen Qualitätsprüfung)."""
     cur.execute("""SELECT w.domain, w.kunden_id, w.geprueft_am, w.ok, w.seite_ok, w.api_ok, w.http, w.ms, w.cert_tage, w.fehler, w.seit,
                           (SELECT round(100.0 * sum(t.ok) / nullif(sum(t.geprueft), 0), 2) FROM website_wacht_tag t WHERE t.domain = w.domain AND t.tag > current_date - 30) AS prozent,
-                          q.geprueft_am AS q_am, q.seiten AS q_seiten, q.median_ms AS q_median, q.startseite_kb AS q_kb, q.tote AS q_tote, q.langsam AS q_langsam
+                          q.geprueft_am AS q_am, q.seiten AS q_seiten, q.median_ms AS q_median, q.startseite_kb AS q_kb, q.tote AS q_tote, q.langsam AS q_langsam,
+                          (EXISTS (SELECT 1 FROM website_wacht_tag t WHERE t.domain = w.domain AND t.ok > 0) = false
+                           AND COALESCE((SELECT x.letzte_veroeffentlichung FROM websites x WHERE x.domain = w.domain AND x.art = 'live'), now()) > now() - interval '3 days') AS wartet_dns
                    FROM website_wacht w LEFT JOIN website_qualitaet q ON q.domain = w.domain
                    WHERE (%s::uuid IS NULL OR w.kunden_id = %s::uuid) ORDER BY w.domain""", (kid, kid))
     return [{"domain": r["domain"], "kunden_id": str(r["kunden_id"]), "geprueft_am": r["geprueft_am"], "ok": r["ok"], "seite_ok": r["seite_ok"], "api_ok": r["api_ok"], "http": r["http"],
-             "ms": r["ms"], "cert_tage": r["cert_tage"], "fehler": r["fehler"] or "", "seit": r["seit"], "prozent": float(r["prozent"]) if r["prozent"] is not None else None,
+             "ms": r["ms"], "cert_tage": r["cert_tage"], "fehler": r["fehler"] or "", "wartet_dns": bool(r["wartet_dns"]) and not r["ok"], "seit": r["seit"], "prozent": float(r["prozent"]) if r["prozent"] is not None else None,
              "qualitaet": {"geprueft_am": r["q_am"], "seiten": r["q_seiten"], "median_ms": r["q_median"], "startseite_kb": r["q_kb"], "tote": r["q_tote"] or [], "langsam": r["q_langsam"] or []} if r["q_am"] else None}
             for r in cur.fetchall()]
 
