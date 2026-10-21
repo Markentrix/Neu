@@ -110,6 +110,17 @@ Das System schlägt die Anzahlung vor:
 
 Ohne Festpreis legt René den Betrag im Postausgang fest. 0 bedeutet keine Anzahlung, dann bestätigt der Kunde per Klick. Erstattungen lösen Sie im Portal in der Anfrage mit „Anzahlung über PayPal erstatten“ aus.
 
+## Google-Bewertungen automatisch aktuell
+
+Bewertung und Anzahl der Google-Rezensionen kann der Server alle 6 Stunden selbst bei Google abfragen. Neue Werte trägt er ein und veröffentlicht die Website neu. Einrichtung:
+
+1. In der Google Cloud Console (gleiches Projekt wie der Kalender) die **Places API (New)** aktivieren und einen API-Schlüssel anlegen. Den Schlüssel auf diese API beschränken. Für eine Abfrage alle 6 Stunden reicht das kostenlose Kontingent.
+2. Den Schlüssel als `GOOGLE_PLACES_API_KEY` in `.env` eintragen und `docker compose up -d` ausführen.
+3. Die **Place-ID** des Unternehmensprofils mit dem [Place ID Finder](https://developers.google.com/maps/documentation/places/web-service/place-id) suchen und im Portal unter Inhalte → Grunddaten → `googlePlaceId` eintragen.
+4. Im Portal unter Einstellungen → Google-Bewertungen „Jetzt bei Google abgleichen“ klicken.
+
+Ohne Einrichtung ändern Sie die Zahl von Hand unter Grunddaten → `rating`.
+
 ## Alltag
 
 | Aufgabe | Befehl |

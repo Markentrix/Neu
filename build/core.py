@@ -108,7 +108,16 @@ class Site:
     def addon(self, key):
         return next((a for a in self.pricing.get("addons", []) if a["key"] == key), None)
 
+    def winter(self):
+        """Winterangebot, solange es gültig ist (sonst None)."""
+        w = self.pricing.get("winter")
+        if w and (not w.get("validUntil") or w["validUntil"] >= datetime.date.today().isoformat()):
+            return w
+        return None
+
     def min_price(self, key):
+        if key == "winter" and self.pricing.get("winter"):
+            return min(self.pricing["winter"]["prices"].values())
         if key == "keramik":  # Einstieg der C² CarCeramic-Preisliste
             return min(c["price"] for c in self.pricing["ceramic"]["car"] if c.get("price") is not None)
         if self.addon(key):  # Felgen- und Scheibenkeramik
@@ -117,7 +126,7 @@ class Site:
 
     def fill(self, obj):
         keys = ({p["key"] for p in self.pricing["packages"]} | ({"keramik"} if self.pricing.get("ceramic") else set())
-                | {a["key"] for a in self.pricing.get("addons", [])})
+                | {a["key"] for a in self.pricing.get("addons", [])} | ({"winter"} if self.pricing.get("winter") else set()))
         rep = lambda m: str(self.min_price(m.group(1))) if m.group(1) in keys else m.group(0)
         def rep_cls(m):  # {preis:essential:suv} → Richtpreis dieses Pakets für diese Fahrzeugklasse
             if m.group(1) not in keys or not any(p["key"] == m.group(1) for p in self.pricing["packages"]):

@@ -1,6 +1,6 @@
 # Bewertungs-Prozess: Mehr Google-Bewertungen für ElbDetail
 
-Stand: 15.10.2026. Ausgangslage: 5,0 von 5 Sternen bei 19 Google-Rezensionen.
+Stand: 15.10.2026. Ausgangslage: 5,0 von 5 Sternen bei 22 Google-Rezensionen.
 Eckige Klammern `[...]` sind Platzhalter. `[VORNAME]` ist der Vorname des Kunden. `[GOOGLE-BEWERTUNGSLINK]` ist der Kurzlink aus Abschnitt 4.
 
 **Ziel:** Jeder Kunde wird nach jedem Termin einmal freundlich um eine ehrliche Bewertung gebeten. Nicht mehr und nicht weniger.
@@ -64,7 +64,7 @@ Eine Bitte um Bewertung per E-Mail gilt nach der Rechtsprechung als Werbung (BGH
 
 **Bewertungen auf der eigenen Website**
 
-Die Website zeigt "5,0 von 5 Sternen bei 19 Google-Rezensionen". Wer Bewertungen zugänglich macht, muss angeben, ob und wie er sicherstellt, dass sie von echten Kunden stammen (§ 5b Abs. 3 UWG).
+Die Website zeigt "5,0 von 5 Sternen bei 22 Google-Rezensionen". Wer Bewertungen zugänglich macht, muss angeben, ob und wie er sicherstellt, dass sie von echten Kunden stammen (§ 5b Abs. 3 UWG).
 `[PRÜFEN: Hinweis auf der Website ergänzen, z. B. "Die angezeigten Bewertungen stammen aus unserem Google-Unternehmensprofil. Wir prüfen nicht selbst, ob jede Bewertung von einem Kunden stammt." Formulierung anwaltlich bestätigen lassen.]`
 
 ---

@@ -2,7 +2,7 @@
 
 Stand: 16.10.2026 (aktualisiert mit den neuen Fakten von René). Alle Inhalte beruhen auf den verbindlichen Betriebsfakten. Eckige Klammern `[...]` markieren Stellen, die der Betrieb selbst entscheiden oder ergänzen muss. Vor dem Veröffentlichen alle Platzhalter ersetzen oder den Satz streichen.
 
-**Aktueller Stand:** 5,0 von 5 Sternen bei 19 Google-Rezensionen (Oktober 2026).
+**Aktueller Stand:** 5,0 von 5 Sternen bei 22 Google-Rezensionen (Oktober 2026).
 
 ---
 

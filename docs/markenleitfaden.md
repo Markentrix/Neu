@@ -44,7 +44,7 @@ Nur diese Fakten dürfen in Kommunikation verwendet werden:
 | Lackschichtdickenmessung vor Politur | "Vor jeder Politur messen wir die Lackschichtdicke." |
 | Verbindlicher Preis vor dem Termin | "Sie kennen den Preis, bevor wir anfangen." |
 | Gemeinsame Abnahme bei Tageslicht | "Wir nehmen das Ergebnis gemeinsam bei Tageslicht ab." |
-| 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026) | "5,0 Sterne bei 19 Google-Rezensionen" (Zahl regelmäßig aktualisieren) |
+| 5,0 von 5 Sternen bei 22 Google-Rezensionen (Stand Oktober 2026) | "5,0 Sterne bei 22 Google-Rezensionen" (Zahl regelmäßig aktualisieren) |
 | Termine nach Vereinbarung Mo bis Fr, samstags nach Absprache | "Termine Mo bis Fr, samstags nach Absprache" |
 | Bezahlung bar, Karte, PayPal oder Überweisung | "Bezahlen können Sie bar, mit Karte, per PayPal oder per Überweisung." |
 | Preise sind "ab"-Preise (Einstiegspreise), Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich | "Ab 299 €. Bei starker Verschmutzung oder vielen Tierhaaren kann es mehr werden. Den verbindlichen Preis nennen wir Ihnen vorab." |
@@ -184,7 +184,7 @@ Empfehlung: Den aktuellen Claim als Hauptclaim behalten. Er ist kurz, bereits ei
 | 3 | **Messen vor Polieren** | Lackschichtdickenmessung | Vor jeder Politur messen wir die Lackschichtdicke. So wissen wir, wie viel Ihr Lack verträgt. |
 | 4 | **Planbar und transparent** | Verbindlicher Preis vorab | Sie erhalten vor dem Termin einen verbindlichen Preis. Am Ende nehmen wir das Ergebnis gemeinsam bei Tageslicht ab. |
 
-**Vertrauensanker:** 5,0 von 5 Sternen bei 19 Google-Rezensionen (Stand Oktober 2026). Immer mit Stand-Angabe oder aktueller Zahl verwenden.
+**Vertrauensanker:** 5,0 von 5 Sternen bei 22 Google-Rezensionen (Stand Oktober 2026). Immer mit Stand-Angabe oder aktueller Zahl verwenden.
 
 ### Handlungsaufforderung
 
@@ -214,7 +214,7 @@ Primär: "Termin per WhatsApp anfragen" (+49 172 7613807). Sekundär: "Online-Te
 | Kurz und aktiv | "Schicken Sie uns drei Fotos. Wir melden uns mit einem Preis." | Behördendeutsch | "Bitte übermitteln Sie uns zwecks Angebotserstellung Bildmaterial." |
 | Fachbegriff erklären | "Hologramme sind feine Schlieren im Lack, die bei Sonne sichtbar werden." | Fachchinesisch ohne Erklärung | "Wir entfernen RDS-Defekte per DA-Finish." |
 | Sachlich abgrenzen | "Keine Waschstraße. Jede Fläche von Hand." | Mitbewerber schlechtmachen | "Die Waschstraße um die Ecke ruiniert Ihren Lack." |
-| Nur belegbare Aussagen | "5,0 Sterne bei 19 Google-Rezensionen" | Erfundene Zahlen | "Über 1.000 zufriedene Kunden" |
+| Nur belegbare Aussagen | "5,0 Sterne bei 22 Google-Rezensionen" | Erfundene Zahlen | "Über 1.000 zufriedene Kunden" |
 | Verfügbarkeit ehrlich | "Abholung nach Absprache möglich." | Ungeprüfte Zusagen | "Wir holen Ihr Auto immer kostenlos ab." |
 | Sie, aber nahbar | "Gern schauen wir uns Ihr Auto vorher an." | Steifes Sie | "Hiermit teilen wir Ihnen mit, dass Ihr Fahrzeug abholbereit ist." |
 

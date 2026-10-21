@@ -69,7 +69,8 @@ def config_js(site):
         "api": "/api",
         "hosts": [site.url.split("//", 1)[-1], site.url.split("//", 1)[-1].replace("www.", "", 1), "localhost", "127.0.0.1"],
         "classes": [{"key": c["key"], "name": c["name"], "short": c["short"], "onRequest": bool(c.get("onRequest")), "note": c.get("note", "")} for c in pr["classes"]],
-        "packages": [{"key": p["key"], "name": p["name"], "prices": p["prices"]} for p in pr["packages"]],
+        "packages": [{"key": p["key"], "name": p["name"], "prices": p["prices"]} for p in pr["packages"]]
+                    + ([{"key": "winter", "name": site.winter()["name"], "prices": site.winter()["prices"]}] if site.winter() else []),
         "vouchers": site.s["vouchers"],
         "voucherValidYear": int(site.s["standIso"][:4]) + 3,
         "ga4": ((site.s.get("analytics") or {}).get("ga4") or "").strip(),

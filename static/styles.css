@@ -1263,6 +1263,10 @@ section.tight-top { padding-top: clamp(28px, 4vw, 48px); }
 .choice-pill strong { font-size: 0.92rem; }
 .choice-pill small { color: var(--muted); font-size: 0.76rem; }
 .choice-pill input:checked + span { border-color: var(--blue); background: var(--blue-soft); color: var(--blue-deep); }
+.winter-prices th small { display: block; font-weight: 500; color: var(--muted); font-size: 0.8rem; }
+.md-table.winter-prices { min-width: 0; }
+.winter-prices .num { text-align: right; font-weight: 650; color: var(--ink); }
+@media (max-width: 599.98px) { .winter-prices th, .winter-prices td { padding: 10px 12px; } .winter-prices .num { width: 42%; } }
 .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
 .slot-grid .choice-pill span { min-height: 48px; }
 .choice-pill input:disabled + span { opacity: 0.45; cursor: not-allowed; text-decoration: line-through; background: var(--soft); }

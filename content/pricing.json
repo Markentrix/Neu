@@ -452,5 +452,21 @@
       ]
     }
   ],
-  "durabilityNote": "Die Standzeiten sind Angaben des Herstellers C²Coating unter optimalen Voraussetzungen. Die tatsächliche Haltbarkeit hängt von der Beanspruchung, der fachgerechten Verarbeitung und der anschließenden Fahrzeugpflege ab."
+  "durabilityNote": "Die Standzeiten sind Angaben des Herstellers C²Coating unter optimalen Voraussetzungen. Die tatsächliche Haltbarkeit hängt von der Beanspruchung, der fachgerechten Verarbeitung und der anschließenden Fahrzeugpflege ab.",
+  "winter": {
+    "key": "winter",
+    "name": "Winterangebot mit Wachs",
+    "short": "Winterschutz mit Wachs",
+    "text": "Gründliche Pflege mit Wachsschutz vor dem ersten Streusalz. Schmutz und Salz haften schlechter, Ihr Lack kommt geschützt durch den Winter.",
+    "validUntil": "2027-02-28",
+    "prices": {
+      "klein": 329,
+      "kompakt": 379,
+      "mittel": 449,
+      "suv": 549
+    },
+    "sportFrom": 599,
+    "sportNote": "nach Besichtigung",
+    "camperNote": "Individuelles Angebot nach Größe, Aufbau und Zustand"
+  }
 }

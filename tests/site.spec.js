@@ -139,6 +139,17 @@ test("Felgen- und Scheibenkeramik: Karten auf der Startseite, Preise und Herstel
   await expect(page.locator("#felgen-scheiben-preise")).toContainText("ab 179");
 });
 
+test("Winterangebot: Preise je Fahrzeugklasse und direkt buchbar", async ({ page }) => {
+  await page.goto("/aktion/winterschutz.html");
+  const t = page.locator(".winter-prices");
+  await expect(t).toContainText("ab 329 €");
+  await expect(t).toContainText("ab 549 €");
+  await expect(t).toContainText("nach Besichtigung");
+  await page.goto("/termin.html?paket=winter&quelle=winter");
+  await expect(page.locator('input[name="paket"][value="winter"]')).toBeChecked();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 329 €");
+});
+
 test("Preisseite: C² CarCeramic-Preisliste und optionale Versiegelung", async ({ page }) => {
   await page.goto("/preise.html");
   const cer = page.locator("#keramik-preise");

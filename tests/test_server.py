@@ -586,13 +586,28 @@ class TestBooking(Base):
         app.booking_tick()  # keine doppelte Erinnerung
         threading.Event().wait(0.1)
         self.assertEqual(len([m for m in self.mails if "Erinnerung" in m["subject"]]), 1)
+        # Verschieben durch den Kunden: neue Uhrzeit, Bestätigung neu, Erinnerungen neu geplant
+        code, page = self.req("GET", f"/termin/{ref}?t={token}&aktion=verschieben&tag={day}", raw=True)
+        self.assertIn("Auf diesen Termin verschieben", page.decode())
+        self.assertNotIn('value="10:00"', page.decode())  # eigene alte Uhrzeit ist bereits belegt
+        code, page = self.req("POST", f"/termin/{ref}/verschieben", {"t": token, "datum": day, "uhrzeit": "09:00"}, raw=True, form=True)
+        self.assertIn("verschoben", page.decode())
+        r, d = app.load_termin(ref)
+        self.assertEqual((d["uhrzeit"], r["status"]), ("09:00", "termin_bestaetigt"))
+        self.assertTrue(any("Termin verschoben" in m["subject"] for m in self.mails))
+        code, page = self.req("POST", f"/termin/{ref}/verschieben", {"t": token, "datum": day, "uhrzeit": "07:00"}, raw=True, form=True)
+        self.assertIn("nicht mehr frei", page.decode())
         # Kalender-Abo (iCal) nur mit Schlüssel
         self.assertEqual(self.req("GET", "/api/kalender.ics?key=falsch", raw=True)[0], 404)
         code, ics = self.req("GET", "/api/kalender.ics?key=" + app.ics_key(), raw=True)
         self.assertEqual(code, 200)
         self.assertIn(ref, ics.decode())
-        # Absage durch den Kunden
-        code, page = self.req("POST", f"/termin/{ref}/absagen", {"t": token}, raw=True, form=True)
+        # Absage durch den Kunden: erst Rückfrage (Verschieben anbieten), dann endgültig
+        code, page = self.req("GET", f"/termin/{ref}?t={token}&aktion=absagen", raw=True)
+        self.assertIn("Lieber verschieben", page.decode())
+        self.req("POST", f"/termin/{ref}/absagen", {"t": token}, raw=True, form=True)  # ohne Bestätigung keine Absage
+        self.assertEqual(app.load_termin(ref)[0]["status"], "termin_bestaetigt")
+        code, page = self.req("POST", f"/termin/{ref}/absagen", {"t": token, "ok": "1"}, raw=True, form=True)
         self.assertIn("abgesagt", page.decode())
         with app.db() as c:
             self.assertEqual(c.execute("SELECT status FROM anfragen WHERE ref=?", (ref,)).fetchone()["status"], "storniert")
@@ -602,6 +617,8 @@ class TestBooking(Base):
         code, j = self.book(day, "09:00", email="spaet@example.com")
         self.assertEqual(code, 200, j)
         ref = j["ref"]
+        self.wait_mail("spaet@example.com")  # Versand im Hintergrund setzt die Frist neu, erst danach manipulieren
+        threading.Event().wait(0.1)
         r, d = app.load_termin(ref)
         d["hold_until"] = (app.now() - dt.timedelta(minutes=1)).isoformat()
         app.save_termin(r["id"], d)
@@ -648,8 +665,15 @@ class TestBooking(Base):
             self.assertEqual(d["zahlung"]["capture_id"], "CAP1")
             conf = [m for m in self.wait_mail("zahler@example.com", 2) if "bestätigt" in m["subject"]][0]
             self.assertIn("Anzahlung von 49,35 € per PayPal ist eingegangen", conf["text"])
+            code, page = self.req("GET", f"/termin/{ref}?t={token}&aktion=absagen", raw=True)
+            self.assertIn("als Ausfallpauschale einbehalten", page.decode())
+            self.req("POST", f"/termin/{ref}/absagen", {"t": token, "ok": "1"}, raw=True, form=True)
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "storniert")
+            self.assertTrue(d["zahlung"].get("einbehalten"))
+            self.assertTrue(any("Ausfallpauschale" in m["text"] for m in self.mails if m["to"] == "zahler@example.com"))
             self.login()
-            code, j = self.admin("POST", f"anfragen/{ref}/erstatten", {})
+            code, j = self.admin("POST", f"anfragen/{ref}/erstatten", {})  # Erstattung aus Kulanz bleibt möglich
             self.assertEqual(code, 200, j)
             self.assertTrue(app.load_termin(ref)[1]["zahlung"]["erstattet"])
         finally:
@@ -702,6 +726,27 @@ class TestBooking(Base):
         self.assertIn("geplanten Zeitpunkt", j["message"])
         code, j = self.admin("PUT", "postausgang", {"approval": {"erinnerung": False}})
         self.assertFalse(self.admin("GET", "postausgang")[1]["approval"]["erinnerung"])
+
+    def test_winter_offer_booking(self):
+        day = next_workday(15)
+        code, j = self.book(day, "08:00", email="winter@example.com", paket="winter")
+        self.assertEqual(code, 200, j)
+        d = app.load_termin(j["ref"])[1]
+        self.assertEqual(d["anzahlung"], 56.85)  # 15 % vom Winterpreis Kompaktwagen (379 €)
+        self.assertIn("Winterangebot mit Wachs", app.summary_text(d))
+
+    def test_reviews_sync_updates_site(self):
+        orig = app.reviews_fetch
+        app.reviews_fetch = lambda: {"value": "4,9", "count": 23}
+        try:
+            r = app.reviews_sync()
+            self.assertTrue(r["ok"] and r["changed"], r)
+            self.assertEqual(app.site_info()["rating"]["count"], 23)
+            html = open(os.path.join(app.site_dir(), "index.html"), encoding="utf-8").read()
+            self.assertIn("23", html)
+            self.assertFalse(app.reviews_sync()["changed"])  # unverändert: nichts neu veröffentlichen
+        finally:
+            app.reviews_fetch = orig
 
     def test_admin_confirm_sends_mail(self):
         self.login()

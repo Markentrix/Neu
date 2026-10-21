@@ -14,12 +14,12 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 
 - [ ] Alle Ziel-URLs sind live und laden fehlerfrei: `/termin.html`, `/gutscheine.html`, `/aktion/winterschutz.html`, `/firmenkunden.html`, `/preise.html`, `/elbdetail-care.html`, `/ueber-uns.html` und alle 7 Seiten unter `/leistungen/` (neu: `/leistungen/keramikversiegelung-celle.html`, `/leistungen/lederaufbereitung-celle.html`).
 - [ ] Preisangaben in allen Texten als Endpreise ohne Umsatzsteuer-Hinweis (Kleinunternehmer nach § 19 UStG). Alle "ab"-Preise mit der Preisliste auf `/preise.html` abgleichen (vier Pakete Refresh, Essential, Signature, Excellence; niedrigster Ab-Preis gilt für Kleinwagen).
-- [ ] Inhalt der Winter-Lackschutz-Aktion steht fest: `[PLATZHALTER: Leistungen, Preis, Zeitraum der Aktion]`. Anzeigentexte bei Bedarf daran anpassen.
+- [x] Inhalt der Winter-Aktion steht fest: Winterangebot mit Wachs, ab 329 € (Kleinwagen), 379 € (Kompakt), 449 € (Limousine/SUV), 549 € (Van/großer SUV), Sportwagen ab 599 € nach Besichtigung, gültig bis 28.02.2027. Anzeigentexte bei Bedarf daran anpassen.
 - [ ] Gutschein-Angebot steht fest: `[PLATZHALTER: Werte oder Pakete, Form (PDF, gedruckt), letzter Bestelltag vor Weihnachten]`.
 - [ ] Test-Aufruf jeder Ziel-URL mit UTM-Parametern (Abschnitt 5). In der eigenen Statistik prüfen, dass Quelle und Kampagne ankommen.
 - [ ] Test der Ereignisse: Termin angefragt, Gutschein angefragt, WhatsApp-Klick, Anruf-Klick werden in der Statistik gezählt.
 - [ ] Google Business Profile mit identischer Adresse und Telefonnummer, verknüpft mit Google Ads (für Standort-Asset).
-- [ ] Bewertungszahl in allen Texten aktuell (Stand Oktober 2026: 5,0 Sterne bei 19 Google-Rezensionen).
+- [ ] Bewertungszahl in allen Texten aktuell (Stand Oktober 2026: 5,0 Sterne bei 22 Google-Rezensionen).
 - [ ] Meta Business-Konto mit Facebook-Seite und Instagram-Konto verbunden.
 - [ ] Zahlungsmittel in beiden Werbekonten hinterlegt, Rechnungsadresse korrekt.
 
@@ -32,8 +32,8 @@ Texte, Tonalität und Fakten: siehe `docs/markenleitfaden.md`. Bilder und Videos
 | Kanal | Kampagne | Inhalt | Ziel-URL | Laufzeit |
 |---|---|---|---|---|
 | Google Suche | **G1 Leistungen Celle** | AG1 bis AG4 (allgemein, Innen, Lack, Leasing) und AG6 Keramikversiegelung | je Anzeigengruppe | Dauerhaft |
-| Google Suche | **G2 Winterschutz Celle** | AG5 Winterschutz | `/aktion/winterschutz.html` | Ab sofort bis `[PLATZHALTER: Aktionsende]` |
-| Meta | **M1 Winterschutz** | Reels und Bilder Winter-Lackschutz | `/aktion/winterschutz.html` | Ab sofort bis `[PLATZHALTER: Aktionsende]` |
+| Google Suche | **G2 Winterschutz Celle** | AG5 Winterschutz | `/aktion/winterschutz.html` | Ab sofort bis 28.02.2027 |
+| Meta | **M1 Winterschutz** | Reels und Bilder Winter-Lackschutz | `/aktion/winterschutz.html` | Ab sofort bis 28.02.2027 |
 | Meta | **M2 Weihnachtsgutscheine** | Gutscheine als Geschenk | `/gutscheine.html` | `[PLATZHALTER: Start, Empfehlung Mitte November]` bis `[PLATZHALTER: letzter Bestelltag]` |
 | Meta | **M3 Innenraum/Hund** | Innenraum-Tiefenreinigung, Hundehaare, Gerüche | `/leistungen/innenaufbereitung-celle.html` | Dauerhaft, zuerst 4 Wochen Test |
 
@@ -208,7 +208,7 @@ Pro Anzeigengruppe eine responsive Suchanzeige (RSA) mit 15 Headlines und 4 Desc
 | D1 | Innenraum-Tiefenreinigung in Celle: Polster, Teppich, Kunststoff, Geruchsneutralisation. | 88 |
 | D2 | Essential ab 299 € inkl. Leder- oder Polsterpflege. Verbindlicher Preis vorab. | 78 |
 | D3 | Hundehaare, Krümel, Gerüche? Innenraum gründlich von Hand gereinigt. Jetzt anfragen. | 84 |
-| D4 | 5,0 Sterne bei 19 Google-Rezensionen. Termin per WhatsApp oder online anfragen. | 79 |
+| D4 | 5,0 Sterne bei 22 Google-Rezensionen. Termin per WhatsApp oder online anfragen. | 79 |
 
 #### AG3 Lackpolitur und Versiegelung
 
@@ -524,7 +524,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 
 1. Streusalz, Matsch und Frost setzen Ihrem Lack zu. Mit dem Winter-Lackschutz von ElbDetail in Celle machen Sie Ihr Auto winterfest. `[PLATZHALTER: Aktionsinhalt in einem Satz]`. Den verbindlichen Preis kennen Sie vor dem Termin. Jetzt anfragen.
 2. Von Hand statt Waschstraße. Wir waschen nach der Zwei-Eimer-Methode und arbeiten mit Profi-Produkten von Koch-Chemie. So kommt Ihr Lack versiegelt durch den Winter. Termin per WhatsApp: +49 172 7613807.
-3. 5,0 Sterne bei 19 Google-Rezensionen. Jetzt auch für Ihren Lack vor dem Winter: Winter-Lackschutz in Celle. Termine Mo bis Fr, samstags nach Absprache. Zum Schluss nehmen wir Ihr Auto gemeinsam bei Tageslicht ab.
+3. 5,0 Sterne bei 22 Google-Rezensionen. Jetzt auch für Ihren Lack vor dem Winter: Winter-Lackschutz in Celle. Termine Mo bis Fr, samstags nach Absprache. Zum Schluss nehmen wir Ihr Auto gemeinsam bei Tageslicht ab.
 
 **Headlines:** "Winter-Lackschutz in Celle" | "Lack winterfest machen" | "Versiegelt durch den Winter"
 
@@ -550,7 +550,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 
 1. Noch kein Geschenk für jemanden, der sein Auto liebt? Verschenken Sie eine Fahrzeugaufbereitung in 100 % Handarbeit von ElbDetail aus Celle. `[PLATZHALTER: Gutscheinwerte oder Pakete]`. Gutschein jetzt anfragen.
 2. Refresh, Essential, Signature oder Excellence: Ein Gutschein für ein gepflegtes Auto, innen wie außen. Paketgutscheine gelten für einen Kleinwagen. Eingelöst wird nach Terminvereinbarung, Mo bis Fr, samstags nach Absprache. `[PLATZHALTER: bestätigen, ob Gutscheine je Paket möglich sind]`
-3. Last-Minute-Geschenk für Celle und Umgebung: ein Gutschein von ElbDetail. `[PLATZHALTER: Form des Gutscheins und letzter Bestelltag vor Weihnachten]`. 5,0 Sterne bei 19 Google-Rezensionen.
+3. Last-Minute-Geschenk für Celle und Umgebung: ein Gutschein von ElbDetail. `[PLATZHALTER: Form des Gutscheins und letzter Bestelltag vor Weihnachten]`. 5,0 Sterne bei 22 Google-Rezensionen.
 
 **Headlines:** "Gutschein für Fahrzeugpflege" | "Schenken Sie ein sauberes Auto" | "Weihnachtsgeschenk aus Celle"
 
@@ -576,7 +576,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 
 1. Hundehaare im Kofferraum, Pfotenabdrücke auf der Rückbank, Geruch im ganzen Auto? Mit dem Paket Essential reinigen wir Innenraum und Kofferraum intensiv von Hand: Polster und Teppich, Einstiege, Türverkleidungen und Kunststoffe. Ab 299 € für Kleinwagen. Bei vielen Tierhaaren oder Gerüchen nennen wir Ihnen den Mehraufwand vorab.
 2. Ihr Hund liebt Autofahren. Ihrem Innenraum sieht man das an. Schicken Sie uns 3 Fotos per WhatsApp an +49 172 7613807 und Sie erhalten einen verbindlichen Preis, bevor wir anfangen.
-3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Essential ab 299 € (Kleinwagen), ab 329 € (Kompaktwagen), ab 379 € (Limousine, Kombi, kleinerer SUV), ab 449 € (großer SUV, Van). 5,0 Sterne bei 19 Google-Rezensionen.
+3. Innenraum-Tiefenreinigung in Celle, 100 % Handarbeit mit Koch-Chemie-Produkten. Essential ab 299 € (Kleinwagen), ab 329 € (Kompaktwagen), ab 379 € (Limousine, Kombi, kleinerer SUV), ab 449 € (großer SUV, Van). 5,0 Sterne bei 22 Google-Rezensionen.
 
 **Headlines:** "Hundehaare? Kennen wir." | "Innenraum wieder frisch" | "Essential ab 299 €"
 

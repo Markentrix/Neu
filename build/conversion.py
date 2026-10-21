@@ -55,6 +55,15 @@ def build_termin(site, write):
               <ul class="choice-feats">{inc}</ul>
             </span>
           </label>'''
+    if site.winter():
+        w = site.winter()
+        pk += f'''<label class="choice-card is-featured">
+            <input type="radio" name="paket" value="winter">
+            <span class="choice-body">
+              <span class="choice-head"><strong>{ESC(w["name"])}</strong><span class="choice-price" data-price-for="winter">ab {w["prices"][cls0]} €</span></span>
+              <span class="choice-sub">{ESC(w["text"])} Gültig bis {".".join(reversed(w["validUntil"].split("-")))}.</span>
+            </span>
+          </label>'''
     pk += f'''<label class="choice-card">
             <input type="radio" name="paket" value="keramik">
             <span class="choice-body">
@@ -377,11 +386,25 @@ def build_winter(site, write):
     prefix = "../"
     path = "/aktion/winterschutz.html"
     title = "Auto winterfest machen in Celle: Lackschutz | ElbDetail"
-    ws = s.get("winterSpecial") or {}
-    ws_on = bool(ws.get("price")) and (not ws.get("validUntil") or ws["validUntil"] >= datetime.date.today().isoformat())
+    ws = site.winter() or {}
+    ws_on = bool(ws)
     ws_until = ".".join(reversed(ws["validUntil"].split("-"))) if ws_on and ws.get("validUntil") else ""
-    desc = (f"Lack vor Streusalz schützen: Glanzpolitur und Versiegelung in Celle vor dem ersten Frost. "
-            + (f"Winter-Special ab {ws['price']} €. Termin sichern." if ws_on else f"Signature mit Glanzpolitur ab {site.min_price('signature')} €. Termin sichern."))
+    ws_min = site.min_price("winter") if ws_on else 0
+    desc = (f"Lack vor Streusalz schützen: Winterschutz in Celle vor dem ersten Frost. "
+            + (f"Winterangebot mit Wachs ab {ws_min} €. Termin sichern." if ws_on else f"Signature mit Glanzpolitur ab {site.min_price('signature')} €. Termin sichern."))
+    pr = site.pricing
+    ws_rows = ""
+    if ws_on:
+        for c in pr["classes"]:
+            v = ws["prices"].get(c["key"])
+            if v is not None:
+                val = f"ab {v} €"
+            elif c["key"] == "sport" and ws.get("sportFrom"):
+                val = f"ab {ws['sportFrom']} €, {ESC(ws.get('sportNote', 'nach Besichtigung'))}"
+            else:
+                val = ESC(ws.get("camperNote", "auf Anfrage"))
+            ws_rows += f'<tr><th scope="row">{ESC(c["name"])}<small>{ESC(c["examples"])}</small></th><td class="num">{val}</td></tr>'
+    book_key = "winter" if ws_on else "signature"
     prem = site.pkg("signature")
     exc = site.pkg("excellence")
     faq = [
@@ -401,9 +424,9 @@ def build_winter(site, write):
       <p class="eyebrow">Saison-Empfehlung Herbst &amp; Winter</p>
       <h1 id="page-h">Lack winterfest machen. <em>Bevor das Streusalz kommt.</em></h1>
       <p class="lead">Streusalz, Matsch und Frost setzen Lack, Felgen und Dichtungen stärker zu als jede andere Jahreszeit. Eine Versiegelung vor dem Winter sorgt dafür, dass Schmutz schlechter haftet und das Auto im Frühjahr nicht erst gerettet werden muss.</p>
-      <div class="keyfacts">{f'<div class="keyfact"><strong>ab {ws["price"]} €</strong><span>{ESC(ws.get("label", "Winter-Special"))}{" bis " + ws_until if ws_until else ""}</span></div>' if ws_on else f'<div class="keyfact"><strong>ab {site.min_price("signature")} €</strong><span>{ESC(prem["name"])} mit Glanzpolitur</span></div>'}<div class="keyfact"><strong>3 Tage</strong><span>Standzeit mit Versiegelung</span></div><div class="keyfact"><strong>+ Versiegelung</strong><span>separat zubuchbar</span></div></div>
+      <div class="keyfacts">{f'<div class="keyfact"><strong>ab {ws_min} €</strong><span>{ESC(ws["name"])}{" bis " + ws_until if ws_until else ""}</span></div>' if ws_on else f'<div class="keyfact"><strong>ab {site.min_price("signature")} €</strong><span>{ESC(prem["name"])} mit Glanzpolitur</span></div>'}<div class="keyfact"><strong>3 Tage</strong><span>Standzeit mit Versiegelung</span></div><div class="keyfact"><strong>+ Versiegelung</strong><span>separat zubuchbar</span></div></div>
       <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket=signature&amp;quelle=winter">{I["cal"]}Wintertermin anfragen</a>
+        <a class="btn btn-primary btn-lg" href="{prefix}termin.html?paket={book_key}&amp;quelle=winter">{I["cal"]}Wintertermin anfragen</a>
         <a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich möchte mein Auto vor dem Winter versiegeln lassen. Fahrzeug: …")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
       </div>
     </div>
@@ -425,10 +448,14 @@ def build_winter(site, write):
           <li>{I["check"]}Pflege von Gummidichtungen gegen Festfrieren</li>
           <li>{I["check"]}Pflegetipps für die Wäsche im Winter</li>
         </ul>
+        {f'''<h2 id="winterangebot">{ESC(ws["name"])}{" bis " + ws_until if ws_until else ""}</h2>
+        <p>{ESC(ws.get("text", ""))}</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Preise Winterangebot, seitlich scrollbar"><table class="md-table winter-prices"><thead><tr><th scope="col">Fahrzeugklasse</th><th scope="col" class="num">{ESC(ws["name"])}</th></tr></thead><tbody>{ws_rows}</tbody></table></div>
+        <p class="hint">Ab-Preise bei normalem Pflegezustand. Gemäß § 19 UStG ohne Umsatzsteuer. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>
+        <p><a class="btn btn-primary" href="{prefix}termin.html?paket=winter&amp;quelle=winter">{I["cal"]}Winterangebot buchen</a></p>''' if ws_on else ""}
         <h2>Welche Variante passt?</h2>
         <div class="table-scroll" tabindex="0" role="region" aria-label="Tabelle, seitlich scrollbar"><table class="md-table"><thead><tr><th scope="col">Zustand des Lacks</th><th scope="col">Empfehlung</th><th scope="col">Richtpreis</th></tr></thead><tbody>
           <tr><th scope="row">Neuwagen oder sehr guter Lack</th><td>Versiegelung ohne Politur</td><td>auf Anfrage</td></tr>
-          {f'<tr class="is-special"><th scope="row">{ESC(ws.get("label", "Winter-Special"))}{" bis " + ws_until if ws_until else ""}</th><td>{ESC(ws.get("text", ""))}</td><td>ab {ws["price"]} €</td></tr>' if ws_on else ""}
           <tr><th scope="row">Matter Glanz, leichte Gebrauchsspuren</th><td>{ESC(prem["name"])}: Glanzpolitur + Versiegelung</td><td>ab {site.min_price("signature")} € + Versiegelung</td></tr>
           <tr><th scope="row">Viele Waschspuren, Hologramme</th><td>{ESC(exc["name"])}: mehrstufige Lackkorrektur + Versiegelung</td><td>ab {site.min_price("excellence")} € + Versiegelung</td></tr>
           <tr><th scope="row">Langzeitschutz über viele Winter</th><td>C² CarCeramic Keramikversiegelung</td><td>ab {site.min_price("keramik")} €</td></tr>
@@ -442,7 +469,7 @@ def build_winter(site, write):
         <div class="aside-card dark">
           <h3>Wintertermin sichern</h3>
           <p>Die Wochen vor dem ersten Frost sind gefragt. Fragen Sie frühzeitig an, wir bestätigen den Termin persönlich.</p>
-          <a class="btn btn-primary" href="{prefix}termin.html?paket=signature&amp;quelle=winter">{I["cal"]}Termin anfragen</a>
+          <a class="btn btn-primary" href="{prefix}termin.html?paket={book_key}&amp;quelle=winter">{I["cal"]}Termin anfragen</a>
           <a class="btn btn-wa" href="{site.wa("Hallo ElbDetail, ich möchte mein Auto vor dem Winter versiegeln lassen.")}" target="_blank" rel="noopener">{I["wa"]}WhatsApp</a>
         </div>
         <div class="aside-card"><h3>Auch interessant</h3><ul>

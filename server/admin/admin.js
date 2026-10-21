@@ -845,6 +845,13 @@
         h("p", { class: "note " + (s.mail ? "ok" : ""), text: s.mail ? "E-Mail-Versand eingerichtet über " + s.smtpHost + ". Benachrichtigungen gehen an " + s.notify + "." : "E-Mail-Versand ist nicht eingerichtet. In der Server-Datei .env die SMTP-Zugangsdaten eintragen." }),
         h("p", { class: "muted", text: "Eingangsbestätigung an Kund:innen: " + (s.autoreply ? "an" : "aus") + ". Unbearbeitete Anfragen werden nach " + s.retentionDays + " Tagen automatisch gelöscht (DSGVO)." }),
         h("div", {}, [h("button", { class: "btn", type: "button", text: "Test-E-Mail senden", onclick: function () { api("POST", "testmail", {}).then(function (r) { toast(r.message, !r.ok); }).catch(fail); } })])]));
+      var rv = s.reviews || {}, rt = rv.rating || {};
+      w.appendChild(h("section", { class: "panel grid" }, [h("h2", { text: "Google-Bewertungen" }),
+        h("p", { text: "Auf der Website: " + (rt.value || "–") + " ★ bei " + (rt.count || 0) + " Bewertungen (Stand " + (rt.asOf || "–") + ")." }),
+        h("p", { class: "note " + (rv.apiKey && rv.placeId ? "ok" : ""), text: rv.apiKey && rv.placeId
+          ? "Automatischer Abgleich aktiv: Der Server fragt alle 6 Stunden bei Google nach und veröffentlicht neue Werte selbst." + (rv.checked ? " Zuletzt geprüft: " + deDateTime(rv.checked) + "." : "")
+          : "Automatischer Abgleich noch nicht eingerichtet: GOOGLE_PLACES_API_KEY in der Server-Konfiguration und die Place-ID unter Inhalte → Grunddaten → googlePlaceId eintragen. Bis dahin die Zahl unter Grunddaten → rating ändern." }),
+        h("div", {}, [h("button", { class: "btn", type: "button", text: "Jetzt bei Google abgleichen", disabled: !(rv.apiKey && rv.placeId), onclick: function () { api("POST", "bewertungen", {}).then(function (r) { toast(r.message, !r.ok); }).catch(fail); } })])]));
       w.appendChild(h("section", { class: "panel", style: "grid-column:1/-1" }, [h("h2", { text: "Protokoll" }),
         h("div", { class: "tablewrap" }, [h("table", { html: "<thead><tr><th>Zeit</th><th>Aktion</th><th>Detail</th></tr></thead><tbody>" + log.map(function (l) { return '<tr><td class="num">' + deDateTime(l.ts) + "</td><td>" + esc(l.action) + "</td><td>" + esc(l.detail) + "</td></tr>"; }).join("") + "</tbody>" })])]));
     }).catch(fail);
