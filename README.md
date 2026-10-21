@@ -14,46 +14,48 @@ Website für **AJ Atelier – Hair & Beauty**, Friseur in der Hauptstraße 64, 3
 - **SEO & GEO**: strukturierte Daten (`HairSalon` mit Adresse, Geo-Koordinaten, Öffnungszeiten, kompletter Preisliste, Buchungs-Aktion; `FAQPage`), Geo-Meta-Tags, Open-Graph-Bild, `sitemap.xml`, `robots.txt` (KI-Crawler erlaubt), `llms.txt` für ChatGPT/Claude/Perplexity, schnelle Ladezeit ohne Frameworks
 - **DSGVO**: keine Cookies für Besucher:innen, kein Tracking, Schriften lokal, PayPal wird erst bei Auswahl geladen, Karten nur als Link
 
-## Installation auf dem eigenen Hetzner-Server (empfohlen: Docker)
+## Installation auf dem Markentrix-Server (Hetzner)
 
-Die Website ist komplett eigenständig: **kein Supabase, kein n8n, keine externe Datenbank**.
-Termine liegen in einer SQLite-Datei auf dem Server, HTTPS-Zertifikate holt Caddy automatisch.
+Passend zum bestehenden Server-Setup (`/opt/neu/server`, Branch `claude/hetzner-server-setup-p0bxzs`):
+ein gemeinsamer Caddy für alle Domains, Apps als Container im Docker-Netz `web`.
+Die Website ist komplett eigenständig: **kein Supabase, kein n8n**. Termine liegen in einer SQLite-Datei im Container-Volume.
 
-**Einmalig auf dem Server** (Ubuntu/Debian, per SSH als root):
+Weil die Seite PHP braucht (Buchung, PayPal), läuft sie **nicht** als statischer Ordner unter `/srv/sites/kunden/…`,
+sondern als App-Container `aj-atelier`, an den Caddy per `reverse_proxy` weiterleitet.
+
+**Einmalig, per SSH als `deploy`** (`ssh deploy@5.75.146.212`):
 
 ```bash
-# 1. Docker installieren (falls noch nicht vorhanden)
-curl -fsSL https://get.docker.com | sh
+# 1. Code holen
+sudo mkdir -p /srv/apps && sudo chown deploy:deploy /srv/apps
+git clone -b ccr-2f7c4155-wki5dk https://github.com/Markentrix/Neu.git /srv/apps/aj-atelier
+cd /srv/apps/aj-atelier
 
-# 2. Projekt holen
-git clone https://github.com/Markentrix/Neu.git /opt/aj-atelier
-cd /opt/aj-atelier
-
-# 3. Konfiguration
-cp deploy/.env.example deploy/.env                    # DOMAIN=… eintragen
-cp app/config.local.example.php app/config.local.php  # Passwort, PayPal, SMTP eintragen
-php -r "echo password_hash('IHR-PASSWORT', PASSWORD_DEFAULT), PHP_EOL;"   # oder:
+# 2. Konfiguration (Admin-Passwort, PayPal, SMTP) – Datei bleibt nur auf dem Server
+cp app/config.local.example.php app/config.local.php
 docker run --rm php:8.3-cli php -r "echo password_hash('IHR-PASSWORT', PASSWORD_DEFAULT), PHP_EOL;"
+nano app/config.local.php
 
-# 4. Starten
+# 3. Container bauen und starten (hängt sich ins Netz "web")
 docker compose up -d --build
+
+# 4a. Vorschau für den Kunden (noindex + Passwort, Benutzer "vorschau")
+deploy/einrichten.sh MX-XXXX mx-xxxx.vorschau.markentrix.de --vorschau --passwort
+
+# 4b. Später live (DNS-A-Eintrag von domain.de und www.domain.de vorher auf 5.75.146.212)
+deploy/einrichten.sh MX-XXXX aj-atelier-wettmar.de
 ```
 
-Vorher im DNS der Domain **A-Records für `domain.de` und `www.domain.de` auf die IP des Hetzner-Servers** setzen
-und in der Hetzner-Firewall die Ports **80 und 443** freigeben.
+`MX-XXXX` = Kundennummer von AJ Atelier aus dem CRM. `einrichten.sh` legt wie `kunde-anlegen.sh`
+eine Datei `/srv/caddy-sites/kunde-MX-XXXX-<domain>.caddy` an, prüft die Caddy-Konfiguration und lädt sie neu.
+Nach dem Live-Schalten in `app/config.local.php` die `siteUrl` auf die echte Domain setzen und `docker compose restart` ausführen.
 
-**Updates einspielen:**
+**Updates einspielen:** `cd /srv/apps/aj-atelier && git pull && docker compose up -d --build`
 
-```bash
-cd /opt/aj-atelier && git pull && docker compose up -d --build
-```
-
-Die Termine liegen im Docker-Volume `bookings` und bleiben bei Updates erhalten.
-Tägliche Sicherung per Cron: `15 3 * * * /opt/aj-atelier/deploy/backup.sh` (legt 30 Tage Backups in `backups/` ab).
-
-**Laufen auf dem Server schon andere Websites** mit eigenem nginx/Caddy/Traefik auf Port 80/443?
-Dann den `caddy`-Dienst in `docker-compose.yml` weglassen, beim `web`-Dienst `ports: ["127.0.0.1:8081:80"]` ergänzen
-und im vorhandenen Proxy die Domain auf `http://127.0.0.1:8081` weiterleiten (mit Header `X-Forwarded-Proto: https`).
+**Backup:** Das Server-Backup sichert nur `/srv/sites` und `/srv/caddy-sites`. Für die Termine zusätzlich einen Cron-Eintrag anlegen
+(`crontab -e` als deploy):
+`45 3 * * * /srv/apps/aj-atelier/deploy/backup.sh >> /var/log/backup.log 2>&1`
+→ täglich `/srv/backups/daily/aj-atelier-DATUM.sqlite`, 14 Tage aufbewahrt.
 
 ### E-Mail auf Hetzner
 
@@ -100,7 +102,7 @@ Einzelne Zeiten (Pause, Arzttermin, telefonisch vergebener Termin) blockiert man
 - [ ] Website-Link in der Instagram-Bio hinterlegen
 - [ ] Echte Salon-/Arbeitsfotos ergänzen (stärkt Vertrauen und lokale Suche)
 
-## nginx statt Apache
+## Ohne Docker: nginx statt Apache
 
 ```nginx
 root /pfad/zu/public;

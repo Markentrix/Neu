@@ -2,5 +2,4 @@ app/config.local.php
 app/data/
 node_modules/
 .DS_Store
-deploy/.env
 backups/

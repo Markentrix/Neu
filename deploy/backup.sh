@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Tägliche Sicherung der Termin-Datenbank, z. B. per Cron:
-#   15 3 * * * /opt/aj-atelier/deploy/backup.sh
+# Tägliche Sicherung der Termin-Datenbank nach /srv/backups/daily (14 Tage, wie das Server-Backup).
+#   Cron (als deploy):  45 3 * * * /srv/apps/aj-atelier/deploy/backup.sh >> /var/log/backup.log 2>&1
 set -euo pipefail
-cd "$(dirname "$0")/.."
-mkdir -p backups
-docker compose exec -T web php -r '$p=new PDO("sqlite:/var/www/site/app/data/bookings.sqlite"); $p->exec("VACUUM INTO \"/tmp/backup.sqlite\"");'
-docker compose cp web:/tmp/backup.sqlite "backups/bookings-$(date +%F).sqlite"
-find backups -name 'bookings-*.sqlite' -mtime +30 -delete
+OUT=/srv/backups/daily; mkdir -p "$OUT"
+docker exec aj-atelier php -r '$p=new PDO("sqlite:/var/www/site/app/data/bookings.sqlite"); @unlink("/tmp/backup.sqlite"); $p->exec("VACUUM INTO \"/tmp/backup.sqlite\"");'
+docker cp aj-atelier:/tmp/backup.sqlite "$OUT/aj-atelier-$(date +%F).sqlite"
+find "$OUT" -name 'aj-atelier-*.sqlite' -mtime +14 -delete

@@ -1,30 +1,21 @@
-# Start auf dem Hetzner-Server:  docker compose up -d --build
-# Vorher: deploy/.env anlegen (DOMAIN=…) und app/config.local.php ausfüllen.
+# AJ Atelier – läuft als App hinter dem gemeinsamen Caddy des Markentrix-Servers
+# (/opt/neu/server). Kein eigener Port nach außen: Caddy erreicht den Container
+# über das Docker-Netz "web" unter dem Namen "aj-atelier".
+#
+#   cd /srv/apps/aj-atelier && docker compose up -d --build
 services:
   web:
     build: .
+    container_name: aj-atelier
     restart: unless-stopped
     volumes:
       - ./app/config.local.php:/var/www/site/app/config.local.php:ro
       - bookings:/var/www/site/app/data        # Termine bleiben bei Updates erhalten
-    networks: [internal]
-
-  caddy:                                        # HTTPS mit automatischen Let's-Encrypt-Zertifikaten
-    image: caddy:2.8
-    restart: unless-stopped
-    ports: ["80:80", "443:443"]
-    env_file: deploy/.env
-    volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on: [web]
-    networks: [internal]
+    networks: [web]
 
 volumes:
   bookings:
-  caddy_data:
-  caddy_config:
 
 networks:
-  internal:
+  web:
+    external: true
