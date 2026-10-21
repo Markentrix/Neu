@@ -12,7 +12,7 @@ page_start([
 
     <section class="section">
       <div class="container">
-        <?php price_list(); ?>
+        <?php price_list('h2'); ?>
       </div>
     </section>
 

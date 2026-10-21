@@ -31,7 +31,7 @@ page_start([
           <h2>Bald neu: Extensions</h2>
           <p>Mehr Länge und Fülle: Extensions kommen in Kürze ins Angebot. Auf <a href="<?= e($s['instagram']) ?>" rel="noopener" target="_blank">Instagram</a> erfahren Sie zuerst, wann es losgeht.</p>
         </article>
-        <aside class="content-aside">
+        <div class="content-aside">
           <figure class="quote">
             <blockquote><p>„Dein Look.<br>Unsere Leidenschaft.“</p></blockquote>
             <figcaption>Das Team vom AJ Atelier</figcaption>
@@ -40,7 +40,7 @@ page_start([
             <h2>Besuchen Sie uns</h2>
             <?php nap_block(); ?>
           </div>
-        </aside>
+        </div>
       </div>
     </section>
 

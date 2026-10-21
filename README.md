@@ -57,6 +57,17 @@ Nach dem Live-Schalten in `app/config.local.php` die `siteUrl` auf die echte Dom
 `45 3 * * * /srv/apps/aj-atelier/deploy/backup.sh >> /var/log/backup.log 2>&1`
 → täglich `/srv/backups/daily/aj-atelier-DATUM.sqlite`, 14 Tage aufbewahrt.
 
+### Cron-Job (Bewertungs-Mails)
+
+Einmal pro Stunde ausführen lassen (`crontab -e` als deploy):
+
+```
+5 * * * * docker exec aj-atelier php /var/www/site/app/cron.php >> /var/log/aj-atelier-cron.log 2>&1
+```
+
+Das Skript verschickt am Tag nach dem Termin die Bitte um eine Google-Bewertung, aber nur an Kund:innen,
+die bei der Buchung zugestimmt haben, nur einmal und nur zwischen 10 und 19 Uhr.
+
 ### E-Mail auf Hetzner
 
 Hetzner sperrt bei neuen Servern ausgehenden Port 25, d. h. PHP `mail()` kommt meist nicht an.
@@ -69,6 +80,23 @@ Absender (`mail.from`) = dieses Postfach, damit die Mails nicht im Spam landen.
 Läuft auch ohne Docker auf jedem Webspace mit PHP 8.1+ (`pdo_sqlite`, `curl`, `mbstring`) und Apache:
 Dateien hochladen, Document Root auf `public/` stellen, `app/config.local.php` anlegen, SSL aktivieren.
 Der Ordner `app/data/` muss für PHP beschreibbar sein. `app/` ist zusätzlich per `.htaccess` gesperrt.
+
+## Google-Bewertungen & Google-Profil
+
+1. Im **Google-Unternehmensprofil** unter „Mehr Rezensionen erhalten“ den Link kopieren (`https://g.page/r/…/review`)
+   und in `app/config.php` bei `salon.reviewUrl` eintragen. Erst dann erscheint im Buchungsformular die
+   freiwillige Einwilligung für die Bewertungs-Mail. Ohne Einwilligung wird nie eine Mail verschickt (BGH: Werbung).
+2. Im Google-Profil unter **Buchungen / Terminlink** die Adresse `https://<domain>/termin` hinterlegen.
+   Dann zeigt Google Maps einen „Termin buchen“-Knopf.
+3. Name, Adresse und Telefon im Profil exakt so schreiben wie auf der Website.
+
+## Gutscheine
+
+- Kauf unter `/gutscheine`, Bezahlung nur per PayPal. Betrag frei wählbar (Grenzen in `config.php` → `vouchers`).
+- Nach der Zahlung: Gutschein-PDF per E-Mail an die Käufer:in, Kopie der Info an `salonEmail`, Download-Link bleibt gültig.
+- Gültigkeit: bis Jahresende + 3 Jahre (gesetzliche Verjährung).
+- Einlösen in der Verwaltung `/admin/` → Tab **Gutscheine**: Code suchen, Betrag eintragen. Teilbeträge sind möglich,
+  das Restguthaben wird angezeigt. Dort lässt sich das PDF auch erneut zusenden.
 
 ## PayPal einrichten
 
@@ -131,6 +159,8 @@ php -S localhost:8000 -t public dev-router.php
 | `/preise` | Komplette Preisliste + Zahlungsarten |
 | `/termin` | Online-Terminbuchung (`/termin?leistung=f-balayage` wählt die Leistung vor) |
 | `/ueber-uns`, `/kontakt` (mit Formular), `/faq` | Salon-Seiten |
+| `/gutscheine` | Gutscheine online kaufen (PayPal, PDF per Mail) |
+| `/ratgeber` + 3 Artikel | Pflege- und Farbtipps (BlogPosting-Schema) |
 | `/friseur-burgwedel`, `/friseur-isernhagen`, `/friseur-langenhagen`, `/friseur-hannover` | Ortsseiten mit echter Anfahrtszeit (OpenStreetMap) |
 | `/impressum`, `/datenschutz` | Rechtliches (noindex) |
 | `/sitemap.xml`, `/robots.txt`, `/llms.txt` | werden automatisch aus den Inhalten erzeugt |
@@ -138,7 +168,7 @@ php -S localhost:8000 -t public dev-router.php
 **SEO & GEO je Seite:** eigener Titel und Beschreibung, Canonical, Brotkrumen (`BreadcrumbList`), `HairSalon` mit Geo-Koordinaten
 und Öffnungszeiten, `Service` mit Preisen auf Leistungsseiten, `FAQPage` wo Fragen stehen, Geo-Meta-Tags, `llms.txt` für KI-Suche.
 
-**Texte ändern:** Leistungsseiten in `app/content/leistungen.php`, Ortsseiten in `app/content/orte.php`,
+**Texte ändern:** Leistungsseiten in `app/content/leistungen.php`, Ortsseiten in `app/content/orte.php`, Ratgeber in `app/content/ratgeber.php`,
 allgemeine FAQ in `app/routes.php` (`general_faq`). Preise und Dauer immer nur in `app/config.php`.
 
 ## Aufbau

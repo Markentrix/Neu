@@ -77,12 +77,12 @@ function page_hero(string $eyebrow, string $title, string $lead, array $crumbs, 
 }
 
 /** Vollständige Preisliste (alle Kategorien aus config.php) */
-function price_list(): void
+function price_list(string $tag = 'h3'): void
 { ?>
         <div class="price-card">
           <?php foreach (cfg()['categories'] as $cat): ?>
           <section class="price-group" aria-labelledby="pg-<?= e($cat['id']) ?>">
-            <h3 id="pg-<?= e($cat['id']) ?>"><?= e($cat['title']) ?></h3>
+            <<?= $tag ?> id="pg-<?= e($cat['id']) ?>"><?= e($cat['title']) ?></<?= $tag ?>>
             <p class="price-sub"><?= e($cat['subtitle']) ?></p>
             <dl class="price-list">
               <?php $lastGroup = null; foreach ($cat['services'] as $sv):

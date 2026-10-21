@@ -14,6 +14,7 @@ page_start([
       <p><a class="btn btn-gold" href="/">Zur Startseite</a> <a class="btn btn-ghost" href="/termin">Termin buchen</a></p>
     </div>
     <div class="container" style="margin-top:3rem">
+      <h2 class="center">Unsere Leistungen</h2>
       <?php service_cards(); ?>
     </div>
   </main>

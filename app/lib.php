@@ -220,7 +220,30 @@ function db(): PDO
         CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date, status);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_entries_order ON entries(paypal_order) WHERE paypal_order IS NOT NULL;
         CREATE TABLE IF NOT EXISTS rate_limit (ip TEXT NOT NULL, action TEXT NOT NULL, at INTEGER NOT NULL);
+        CREATE TABLE IF NOT EXISTS vouchers (
+            id TEXT PRIMARY KEY,
+            code TEXT NOT NULL UNIQUE,
+            amount REAL NOT NULL,
+            balance REAL NOT NULL,
+            buyer_name TEXT NOT NULL, buyer_email TEXT NOT NULL,
+            recipient TEXT, message TEXT,
+            paypal_order TEXT UNIQUE, paypal_capture TEXT,
+            status TEXT NOT NULL DEFAULT 'active',
+            dl_token TEXT NOT NULL,
+            valid_until TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS voucher_redemptions (
+            voucher_id TEXT NOT NULL REFERENCES vouchers(id),
+            amount REAL NOT NULL,
+            note TEXT,
+            created_at TEXT NOT NULL
+        );
     SQL);
+    // Spalten, die nach der ersten Version dazugekommen sind
+    $cols = array_column($pdo->query('PRAGMA table_info(entries)')->fetchAll(), 'name');
+    if (!in_array('review_optin', $cols, true)) $pdo->exec('ALTER TABLE entries ADD COLUMN review_optin INTEGER NOT NULL DEFAULT 0');
+    if (!in_array('review_sent_at', $cols, true)) $pdo->exec('ALTER TABLE entries ADD COLUMN review_sent_at TEXT');
     return $pdo;
 }
 
@@ -376,20 +399,35 @@ function paypal_refund(string $captureId): void
 
 // ---------- E-Mail ----------
 
-function send_mail(?string $to, string $subject, string $html, ?string $replyTo = null): bool
+/** $attachments = [['dateiname.pdf', 'application/pdf', $bytes], …] */
+function send_mail(?string $to, string $subject, string $html, ?string $replyTo = null, array $attachments = []): bool
 {
     $mail = cfg()['local']['mail'] ?? [];
     $from = $mail['from'] ?? '';
     if (!$to || !$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
     $headers = [
         'MIME-Version: 1.0',
-        'Content-Type: text/html; charset=UTF-8',
-        'Content-Transfer-Encoding: base64',
         'From: ' . mb_encode_mimeheader(cfg()['salon']['name']) . " <{$from}>",
     ];
     if ($replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) $headers[] = "Reply-To: {$replyTo}";
     $subject = mb_encode_mimeheader($subject, 'UTF-8');
-    $body = chunk_split(base64_encode('<!doctype html><html><body style="font-family:Georgia,serif;color:#2c2620;line-height:1.6">' . $html . '</body></html>'));
+    $htmlPart = chunk_split(base64_encode('<!doctype html><html><body style="font-family:Georgia,serif;color:#2c2620;line-height:1.6">' . $html . '</body></html>'));
+
+    if (!$attachments) {
+        $headers[] = 'Content-Type: text/html; charset=UTF-8';
+        $headers[] = 'Content-Transfer-Encoding: base64';
+        $body = $htmlPart;
+    } else {
+        $boundary = 'aj_' . bin2hex(random_bytes(12));
+        $headers[] = "Content-Type: multipart/mixed; boundary=\"{$boundary}\"";
+        $body = "--{$boundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n{$htmlPart}";
+        foreach ($attachments as [$name, $mime, $bytes]) {
+            $name = preg_replace('/[^A-Za-z0-9._-]/', '_', $name);
+            $body .= "--{$boundary}\r\nContent-Type: {$mime}; name=\"{$name}\"\r\nContent-Transfer-Encoding: base64\r\n"
+                . "Content-Disposition: attachment; filename=\"{$name}\"\r\n\r\n" . chunk_split(base64_encode($bytes));
+        }
+        $body .= "--{$boundary}--\r\n";
+    }
 
     try {
         if (!empty($mail['smtp']['host'])) {

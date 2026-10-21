@@ -19,8 +19,9 @@ page_start([
   <main id="main">
     <?php page_hero('Online-Terminbuchung', 'Termin buchen', 'Wählen Sie Ihre Leistungen und eine freie Uhrzeit. Die Bestätigung kommt sofort per E-Mail. Bezahlen Sie per PayPal oder vor Ort.', $crumbs, null); ?>
 
-    <section id="termin" class="section booking-section">
+    <section id="termin" class="section booking-section" aria-labelledby="buchen-title">
       <div class="container">
+        <h2 id="buchen-title" class="sr-only">Leistung und Termin wählen</h2>
         <?php booking_widget(); ?>
       </div>
     </section>

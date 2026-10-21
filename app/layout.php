@@ -170,8 +170,8 @@ function page_start(array $o): void
   <a class="skip-link" href="#main">Zum Inhalt springen</a>
   <header class="site-header" data-header>
     <div class="container header-inner">
-      <a class="brand" href="/" aria-label="AJ Atelier – Startseite">
-        <span class="brand-mark" aria-hidden="true">AJ</span>
+      <a class="brand" href="/">
+        <span class="brand-mark">AJ</span>
         <span class="brand-text">Atelier<small>Hair · Beauty</small></span>
       </a>
       <nav class="main-nav" aria-label="Hauptnavigation">
@@ -184,6 +184,7 @@ function page_start(array $o): void
           </div>
         </div>
         <?= nav_link('/preise', 'Preise', $path) ?>
+        <?= nav_link('/gutscheine', 'Gutscheine', $path) ?>
         <?= nav_link('/ueber-uns', 'Über uns', $path) ?>
         <?= nav_link('/kontakt', 'Kontakt', $path) ?>
         <?= nav_link('/termin', 'Termin buchen', $path, 'btn btn-gold btn-sm') ?>
@@ -200,7 +201,9 @@ function page_start(array $o): void
         <?php endforeach; ?>
       </div>
       <?= nav_link('/preise', 'Preise', $path) ?>
+      <?= nav_link('/gutscheine', 'Gutscheine', $path) ?>
       <?= nav_link('/ueber-uns', 'Über uns', $path) ?>
+      <?= nav_link('/ratgeber', 'Ratgeber', $path) ?>
       <?= nav_link('/faq', 'Häufige Fragen', $path) ?>
       <?= nav_link('/kontakt', 'Kontakt & Anfahrt', $path) ?>
       <a class="btn btn-gold" href="/termin">Termin buchen</a>
@@ -218,8 +221,8 @@ function page_end(bool $mobileCta = true): void
   <footer class="site-footer">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="/" aria-label="AJ Atelier – Startseite">
-          <span class="brand-mark" aria-hidden="true">AJ</span>
+        <a class="brand" href="/">
+          <span class="brand-mark">AJ</span>
           <span class="brand-text">Atelier<small>Hair · Beauty</small></span>
         </a>
         <address>
@@ -238,7 +241,9 @@ function page_end(bool $mobileCta = true): void
         <h2>Salon</h2>
         <a href="/termin">Termin buchen</a>
         <a href="/preise">Preise</a>
+        <a href="/gutscheine">Gutscheine</a>
         <a href="/ueber-uns">Über uns</a>
+        <a href="/ratgeber">Ratgeber</a>
         <a href="/faq">Häufige Fragen</a>
         <a href="/kontakt">Kontakt &amp; Anfahrt</a>
         <a href="<?= e($s['instagram']) ?>" rel="noopener" target="_blank">Instagram</a>

@@ -40,6 +40,12 @@ $loggedIn = is_admin(); // vor jeder Ausgabe, da Session-Cookie
     </form>
 
     <div data-app <?= $loggedIn ? '' : 'hidden' ?>>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" aria-selected="true" data-tab="termine">Termine</button>
+        <button type="button" role="tab" aria-selected="false" data-tab="gutscheine">Gutscheine</button>
+      </div>
+
+      <div data-panel="termine">
       <div class="toolbar">
         <button class="icon-btn" type="button" data-prev aria-label="Vorherige Woche">‹</button>
         <input type="date" data-from value="<?= e(today()) ?>" aria-label="Ab Datum">
@@ -62,6 +68,15 @@ $loggedIn = is_admin(); // vor jeder Ausgabe, da Session-Cookie
           <button class="btn btn-gold" type="submit">Blockieren</button>
         </form>
       </details>
+      </div>
+
+      <div data-panel="gutscheine" hidden>
+        <form class="toolbar" data-voucher-search>
+          <input type="search" name="q" placeholder="Code, Käufer:in oder Empfänger:in" aria-label="Gutschein suchen" style="flex:1;min-width:220px">
+          <button class="btn btn-gold btn-sm" type="submit">Suchen</button>
+        </form>
+        <div class="days" data-vouchers></div>
+      </div>
     </div>
     <?php endif; ?>
   </main>

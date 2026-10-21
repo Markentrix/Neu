@@ -15,6 +15,12 @@ function orte(): array
     return $o ??= require __DIR__ . '/content/orte.php';
 }
 
+function ratgeber(): array
+{
+    static $r = null;
+    return $r ??= require __DIR__ . '/content/ratgeber.php';
+}
+
 function general_faq(): array
 {
     $c = cfg();
@@ -45,12 +51,16 @@ function routes(): array
         '/ueber-uns' => ['ueber-uns', [], 0.6],
         '/kontakt' => ['kontakt', [], 0.7],
         '/faq' => ['faq', [], 0.6],
+        '/gutscheine' => ['gutscheine', [], 0.8],
+        '/ratgeber' => ['ratgeber', [], 0.6],
+        '/gutschein-pdf' => ['gutschein-pdf', [], null],
         '/impressum' => ['impressum', [], null],
         '/datenschutz' => ['datenschutz', [], null],
         '/termin-stornieren' => ['termin-stornieren', [], null],
     ];
     foreach (leistungen() as $slug => $_) $r["/leistungen/{$slug}"] = ['leistung', ['slug' => $slug], 0.8];
     foreach (orte() as $slug => $_) $r["/friseur-{$slug}"] = ['ort', ['slug' => $slug], 0.7];
+    foreach (ratgeber() as $slug => $_) $r["/ratgeber/{$slug}"] = ['artikel', ['slug' => $slug], 0.5];
     return $r;
 }
 

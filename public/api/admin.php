@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . '/../../app/lib.php';
+require __DIR__ . '/../../app/vouchers.php';
 
 // Salon-Verwaltung: Login, Termine ansehen, Zeiten blockieren, Termine absagen.
 admin_session();
@@ -26,6 +27,52 @@ if ($action === 'logout') {
 
 if (!is_admin()) json_fail('Nicht angemeldet.', 401);
 if ($method !== 'GET' && !hash_equals(csrf_token(), (string)($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''))) json_fail('Sitzung abgelaufen – bitte neu laden.', 403);
+
+// ---------- Gutscheine ----------
+if ($action === 'vouchers' && $method === 'GET') {
+    $q = strtoupper(trim((string)($_GET['q'] ?? '')));
+    if ($q !== '') {
+        $st = db()->prepare('SELECT * FROM vouchers WHERE code LIKE ? OR upper(buyer_name) LIKE ? OR upper(recipient) LIKE ? ORDER BY created_at DESC LIMIT 50');
+        $like = '%' . $q . '%';
+        $st->execute([$like, $like, $like]);
+    } else {
+        $st = db()->query('SELECT * FROM vouchers ORDER BY created_at DESC LIMIT 50');
+    }
+    $rows = $st->fetchAll();
+    $red = db()->prepare('SELECT amount, note, created_at FROM voucher_redemptions WHERE voucher_id = ? ORDER BY created_at');
+    foreach ($rows as &$r) {
+        unset($r['dl_token']);
+        $red->execute([$r['id']]);
+        $r['redemptions'] = $red->fetchAll();
+        $r['expired'] = $r['valid_until'] < today();
+    }
+    json_out(['vouchers' => $rows, 'csrf' => csrf_token()]);
+}
+
+if ($action === 'redeem' && $method === 'POST') {
+    $in = json_in();
+    $amount = round((float)($in['amount'] ?? 0), 2);
+    if ($amount <= 0) json_fail('Bitte einen Betrag eingeben.');
+    $pdo = db();
+    $pdo->exec('BEGIN IMMEDIATE');
+    $v = voucher_find((string)($in['code'] ?? ''));
+    if (!$v) { $pdo->exec('ROLLBACK'); json_fail('Gutschein nicht gefunden.', 404); }
+    if ($v['status'] === 'redeemed') { $pdo->exec('ROLLBACK'); json_fail('Dieser Gutschein ist bereits vollständig eingelöst.', 409); }
+    if ($v['status'] !== 'active') { $pdo->exec('ROLLBACK'); json_fail('Dieser Gutschein ist nicht mehr gültig.', 409); }
+    if ($amount > (float)$v['balance'] + 0.001) { $pdo->exec('ROLLBACK'); json_fail('Der Betrag ist höher als das Restguthaben (' . euro((float)$v['balance'], true) . ').', 409); }
+    $pdo->prepare('INSERT INTO voucher_redemptions (voucher_id, amount, note, created_at) VALUES (?, ?, ?, ?)')
+        ->execute([$v['id'], $amount, clean_text($in['note'] ?? '', 120), date('c')]);
+    $balance = round((float)$v['balance'] - $amount, 2);
+    $pdo->prepare('UPDATE vouchers SET balance = ?, status = ? WHERE id = ?')->execute([$balance, $balance <= 0 ? 'redeemed' : 'active', $v['id']]);
+    $pdo->exec('COMMIT');
+    json_out(['ok' => true, 'balance' => $balance]);
+}
+
+if ($action === 'resend' && $method === 'POST') {
+    $v = voucher_find((string)(json_in()['code'] ?? ''));
+    if (!$v) json_fail('Gutschein nicht gefunden.', 404);
+    json_out(['ok' => voucher_send($v, false)]);
+}
 
 if ($method === 'GET') {
     $from = (string)($_GET['from'] ?? today());

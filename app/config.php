@@ -18,6 +18,17 @@ return [
         'instagram'   => 'https://www.instagram.com/ajat.elier/',
         'priceRange'  => '€€',
         'areaServed'  => ['Wettmar', 'Burgwedel', 'Großburgwedel', 'Kleinburgwedel', 'Thönse', 'Engensen', 'Fuhrberg', 'Isernhagen', 'Hannover'],
+        // Link „Rezension schreiben“ aus dem Google-Unternehmensprofil (leer = keine Bewertungs-Mails)
+        // Zu finden im Profil unter „Mehr Rezensionen erhalten“, Format: https://g.page/r/…/review
+        'reviewUrl'   => '',
+    ],
+
+    // Online-Gutscheine (Bezahlung nur per PayPal)
+    'vouchers' => [
+        'amounts'    => [25, 50, 75, 100, 150],  // Schnellauswahl in Euro
+        'min'        => 10,
+        'max'        => 500,
+        'validYears' => 3,  // gesetzliche Verjährung: 3 Jahre zum Jahresende
     ],
 
     'booking' => [

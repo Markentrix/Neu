@@ -41,7 +41,7 @@ page_start([
           <h2>Unser Angebot für <?= e($o['name']) ?></h2>
           <p>Bei uns finden Sie <a href="/leistungen/balayage">Balayage</a> und <a href="/leistungen/babylights">Babylights</a> für natürlich aufgehelltes Haar, <a href="/leistungen/damenhaarschnitt">Damenhaarschnitte</a> und <a href="/leistungen/herren">Herrenschnitte</a> zum Festpreis sowie <a href="/leistungen/farbe">Farbe und Blondierung</a>. Alle Preise finden Sie in der <a href="/preise">Preisliste</a>.</p>
         </article>
-        <aside class="content-aside">
+        <div class="content-aside">
           <div class="aside-card">
             <h2>So finden Sie uns</h2>
             <?php nap_block(); ?>
@@ -50,7 +50,7 @@ page_start([
             <h2>Öffnungszeiten</h2>
             <?php hours_table(); ?>
           </div>
-        </aside>
+        </div>
       </div>
       <div class="container"><?php map_link(); ?></div>
     </section>

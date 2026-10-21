@@ -118,3 +118,68 @@ fromInput?.addEventListener("change", load);
 showCancelled?.addEventListener("change", load);
 
 if (app && !app.hidden) load().catch(() => {});
+
+// ---------- Tabs ----------
+document.querySelectorAll("[data-tab]").forEach((tab) => tab.addEventListener("click", () => {
+  document.querySelectorAll("[data-tab]").forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+  document.querySelectorAll("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== tab.dataset.tab));
+  if (tab.dataset.tab === "gutscheine") loadVouchers();
+}));
+
+// ---------- Gutscheine ----------
+const vSearch = $("[data-voucher-search]");
+const vList = $("[data-vouchers]");
+const dateDe = (iso) => new Date(iso.length === 10 ? `${iso}T12:00` : iso).toLocaleDateString("de-DE");
+
+async function loadVouchers() {
+  const q = vSearch.q.value.trim();
+  const { vouchers } = await api(`?action=vouchers&q=${encodeURIComponent(q)}`);
+  vList.innerHTML = vouchers.length ? "" : '<p class="card muted">Keine Gutscheine gefunden.</p>';
+  for (const v of vouchers) {
+    const box = document.createElement("section");
+    box.className = "card voucher-admin";
+    const state = v.status === "redeemed" ? "eingelöst" : v.expired ? "abgelaufen" : "aktiv";
+    box.innerHTML = `<div class="entry">
+      <div class="time">${euro(Number(v.balance))}<small>von ${euro(Number(v.amount))}</small></div>
+      <div><div class="who">${esc(v.code)} <span class="tag ${state === "aktiv" ? "paid" : ""}">${state}</span></div>
+        <div class="meta">Gekauft am ${dateDe(v.created_at)} von ${esc(v.buyer_name)} (<a href="mailto:${esc(v.buyer_email)}">${esc(v.buyer_email)}</a>)${v.recipient ? ` · für ${esc(v.recipient)}` : ""}</div>
+        <div class="meta">Gültig bis ${dateDe(v.valid_until)}</div>
+        ${v.redemptions.map((r) => `<div class="meta">Eingelöst am ${dateDe(r.created_at)}: ${euro(Number(r.amount))}${r.note ? ` (${esc(r.note)})` : ""}</div>`).join("")}
+      </div>
+      <div class="actions"><button class="link-btn" data-resend="${esc(v.code)}">PDF erneut senden</button></div>
+    </div>
+    ${v.status === "active" ? `<form class="redeem-form" data-redeem="${esc(v.code)}">
+      <label>Betrag einlösen (€)<input name="amount" type="number" min="0.01" step="0.01" max="${Number(v.balance)}" required></label>
+      <label>Notiz<input name="note" maxlength="120" placeholder="z. B. Balayage"></label>
+      <button class="btn btn-gold btn-sm" type="submit">Einlösen</button>
+      <p class="form-msg" role="status"></p>
+    </form>` : ""}`;
+    vList.append(box);
+  }
+}
+
+vSearch?.addEventListener("submit", (e) => { e.preventDefault(); loadVouchers().catch((ex) => alertBox(ex.message)); });
+
+vList?.addEventListener("submit", async (e) => {
+  const f = e.target.closest("[data-redeem]");
+  if (!f) return;
+  e.preventDefault();
+  const msg = f.querySelector(".form-msg");
+  try {
+    const { balance } = await api("?action=redeem", { method: "POST", body: JSON.stringify({ code: f.dataset.redeem, amount: Number(f.amount.value), note: f.note.value }) });
+    msg.textContent = `Eingelöst. Restguthaben: ${euro(balance)}`;
+    setTimeout(() => loadVouchers(), 1200);
+  } catch (ex) { msg.textContent = ex.message; }
+});
+
+vList?.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-resend]");
+  if (!b) return;
+  b.disabled = true;
+  try {
+    const { ok } = await api("?action=resend", { method: "POST", body: JSON.stringify({ code: b.dataset.resend }) });
+    b.textContent = ok ? "Gesendet ✓" : "Versand fehlgeschlagen";
+  } catch (ex) { b.textContent = ex.message; }
+});
+
+function alertBox(msg) { vList.innerHTML = `<p class="card form-error">${esc(msg)}</p>`; }

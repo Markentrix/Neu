@@ -12,7 +12,18 @@
       <section class="step" data-step="1" aria-labelledby="st1">
         <h3 id="st1" class="step-title">Welche Leistungen wünschen Sie?</h3>
         <p class="hint">Mehrfachauswahl möglich, z. B. Färben + Schnitt (max. <?= (int)$c['booking']['maxServices'] ?>).</p>
-        <div class="service-picker" data-service-picker></div>
+        <div class="service-picker" data-service-picker>
+          <?php foreach ($c['categories'] as $i => $cat): ?>
+          <details class="service-cat"<?= $i === 0 ? ' open' : '' ?>>
+            <summary><span><?= e($cat['title']) ?></span><span class="count" hidden></span></summary>
+            <div class="service-options">
+              <?php foreach ($cat['services'] as $sv): $full = services()[$sv['id']]; ?>
+              <label class="service-option"><input type="checkbox" value="<?= e($sv['id']) ?>"><span><span class="n"><?= e($full['fullName']) ?></span><small>ca. <?= e(duration_label((int)$sv['duration'])) ?></small></span><span class="price"><?= e(price_label($full)) ?></span></label>
+              <?php endforeach; ?>
+            </div>
+          </details>
+          <?php endforeach; ?>
+        </div>
         <div class="step-actions">
           <button class="btn btn-gold" type="button" data-next disabled>Weiter zur Terminwahl</button>
         </div>
@@ -40,6 +51,9 @@
           <label class="full">E-Mail* <small>(für die Bestätigung)</small><input name="email" type="email" autocomplete="email" required maxlength="254"></label>
           <label class="full">Anmerkung <small>(optional, z. B. Haarlänge, Wunschfarbe)</small><textarea name="note" rows="3" maxlength="500"></textarea></label>
           <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+          <?php if (!empty($s['reviewUrl'])): ?>
+          <label class="check full"><input type="checkbox" name="reviewOptin"> <span>Optional: Nach dem Termin dürft ihr mich einmalig per E-Mail um eine Google-Bewertung bitten.</span></label>
+          <?php endif; ?>
           <label class="check full"><input type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass meine Angaben zur Terminvereinbarung verarbeitet werden. Details in der <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a>.*</span></label>
           <p class="form-error full" data-form-error role="alert" hidden></p>
         </form>
@@ -84,7 +98,7 @@
       </section>
     </div>
 
-    <aside class="booking-summary" aria-label="Ihre Auswahl">
+    <div class="booking-summary">
       <h3>Ihre Auswahl</h3>
       <ul data-summary-list><li class="muted">Noch keine Leistung gewählt</li></ul>
       <dl>
@@ -93,7 +107,7 @@
         <div><dt>Preis</dt><dd data-summary-price>–</dd></div>
       </dl>
       <p class="hint" data-summary-hint hidden>Finaler Preis nach Aufwand – Kostenvoranschlag vor Ort.</p>
-    </aside>
+    </div>
   </div>
   <noscript><p class="form-error">Für die Online-Buchung wird JavaScript benötigt. Rufen Sie uns gerne an: <a href="tel:<?= $tel ?>"><?= e($s['phoneDisplay']) ?></a>.</p></noscript>
 </div>

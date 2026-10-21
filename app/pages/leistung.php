@@ -47,7 +47,7 @@ page_start([
           </ol>
           <?php endif; ?>
         </article>
-        <aside class="content-aside">
+        <div class="content-aside">
           <?php service_price_box($l['services']); ?>
           <div class="aside-card">
             <h2>AJ Atelier</h2>
@@ -55,7 +55,7 @@ page_start([
             <p><?= icon('clock') ?> Di–Fr 10–18 Uhr · Sa 10–14 Uhr</p>
             <p><?= icon('phone') ?> <a href="tel:<?= e($s['phone']) ?>"><?= e($s['phoneDisplay']) ?></a></p>
           </div>
-        </aside>
+        </div>
       </div>
     </section>
 

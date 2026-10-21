@@ -127,7 +127,8 @@ function initBooking(root, DATA) {
   pickerHint.setAttribute("role", "alert");
   pickerHint.hidden = true;
   picker.after(pickerHint);
-  DATA.categories.forEach((cat, i) => {
+  // Die Liste kommt fertig vom Server; nur falls sie fehlt, hier aufbauen
+  if (!picker.children.length) DATA.categories.forEach((cat, i) => {
     const det = document.createElement("details");
     det.className = "service-cat";
     det.open = i === 0;
@@ -301,7 +302,8 @@ function initBooking(root, DATA) {
   const payload = (extra = {}) => ({
     services: state.selected, date: state.date, time: state.time,
     name: form.name.value, phone: form.phone.value, email: form.email.value, note: form.note.value,
-    website: form.website.value, consent: form.consent.checked, ...extra,
+    website: form.website.value, consent: form.consent.checked,
+    reviewOptin: Boolean(form.reviewOptin?.checked), ...extra,
   });
 
   function showPayError(msg) {

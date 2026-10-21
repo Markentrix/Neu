@@ -28,9 +28,11 @@ foreach (orte() as $slug => $o) {
     foreach ($o['routes'] as [$from, $km, $min]) echo "- {$from}: ca. {$min} Min. (" . number_format($km, 1, ',', '') . " km)\n";
 }
 echo "\n## Wichtige Seiten\n\n";
-foreach (['/preise' => 'Preisliste', '/termin' => 'Termin online buchen', '/ueber-uns' => 'Über uns', '/kontakt' => 'Kontakt & Anfahrt', '/faq' => 'Häufige Fragen'] as $p => $t) {
+foreach (['/preise' => 'Preisliste', '/termin' => 'Termin online buchen', '/gutscheine' => 'Gutscheine online kaufen (PayPal, PDF per E-Mail, 3 Jahre gültig)', '/ueber-uns' => 'Über uns', '/kontakt' => 'Kontakt & Anfahrt', '/faq' => 'Häufige Fragen'] as $p => $t) {
     echo "- [{$t}](" . site_url($p) . ")\n";
 }
 foreach (orte() as $slug => $o) echo "- [{$o['title']}](" . site_url("/friseur-{$slug}") . ")\n";
+echo "\n## Ratgeber\n\n";
+foreach (ratgeber() as $slug => $a) echo "- [{$a['title']}](" . site_url("/ratgeber/{$slug}") . "): {$a['teaser']}\n";
 echo "\n## Häufige Fragen\n\n";
 foreach (general_faq() as [$q, $a]) echo "**{$q}**\n{$a}\n\n";
