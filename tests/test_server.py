@@ -750,6 +750,53 @@ class TestBooking(Base):
             for k in ("PAYPAL_CLIENT_ID", "PAYPAL_SECRET"):
                 os.environ.pop(k, None)
 
+    def test_paypal_me_deposit(self):
+        """PayPal.me: Kunde wird mit Betrag weitergeleitet, René bestätigt den Eingang im Portal; Widerruf → René erstattet selbst."""
+        orig = app.paypal_me_name
+        app.paypal_me_name = lambda: "elbdetail"
+        try:
+            day = next_workday(22)
+            code, j = self.book(day, "10:00", email="me@example.com")
+            self.assertEqual(code, 200, j)
+            ref = j["ref"]
+            mail = self.wait_mail("me@example.com")[0]
+            self.assertIn("Anzahlung von 49,35 € per PayPal", mail["text"])
+            r, d = app.load_termin(ref)
+            token = d["token"]
+            code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
+            self.assertIn("mit PayPal senden", page.decode())
+            link = app.paypal_me_link
+            app.paypal_me_link = lambda d: self.base + "/api/health"  # Weiterleitung lokal statt zu paypal.me
+            try:
+                self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token, "agb": "1"}, raw=True, form=True)
+            finally:
+                app.paypal_me_link = link
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "reserviert")  # erst nach Prüfung durch René
+            self.assertTrue(d.get("paypalme_am") and d.get("agb_am"))
+            self.assertEqual(app.paypal_me_link(d), "https://paypal.me/elbdetail/49.35EUR")
+            code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
+            self.assertIn("Wir prüfen Ihre Anzahlung", page.decode())
+            self.login()
+            code, x = self.admin("POST", f"anfragen/{ref}/anzahlung", {})
+            self.assertEqual(code, 200, x)
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "termin_bestaetigt")
+            self.assertTrue(d["zahlung"]["manuell"])
+            conf = [m for m in self.wait_mail("me@example.com", 2) if "bestätigt" in m["subject"]][0]
+            self.assertIn("Anzahlung von 49,35 € per PayPal ist eingegangen", conf["text"])
+            # Widerruf: keine automatische Erstattung, René bekommt den Auftrag, das Geld zurückzusenden
+            self.req("POST", f"/termin/{ref}/widerrufen", {"t": token, "ok": "1"}, raw=True, form=True)
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "storniert")
+            self.assertFalse(d["zahlung"].get("erstattet"))
+            self.assertTrue(any("BITTE ERSTATTEN" in m["text"] for m in self.mails))
+            code, x = self.admin("POST", f"anfragen/{ref}/erstatten", {})
+            self.assertEqual(code, 200, x)
+            self.assertTrue(app.load_termin(ref)[1]["zahlung"]["erstattet"])
+        finally:
+            app.paypal_me_name = orig
+
     def test_approval_outbox(self):
         """Jede Kunden-E-Mail wartet im Postausgang; René legt die Anzahlung fest, ändert den Text und gibt frei."""
         app.set_setting("mailApproval", {})

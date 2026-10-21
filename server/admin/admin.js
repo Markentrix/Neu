@@ -254,13 +254,25 @@
         if (r.status === "reserviert") box.appendChild(h("p", { class: "note", text: "Online gebucht. Der Kunde muss den Termin noch über den Link in seiner E-Mail bestätigen. Ohne Bestätigung wird die Uhrzeit automatisch wieder frei." }));
         if (r.status === "termin_bestaetigt") box.appendChild(h("p", { class: "note ok", text: "Bestätigt" + (d.bestaetigt_am ? " am " + deDateTime(d.bestaetigt_am) : "") + ". Bitte den Kunden anrufen und das Fahrzeug vorab ansehen." + (d.gcal_id ? " Steht im Google Kalender." : "") }));
         var z = d.zahlung || {};
-        if (z.capture_id) {
+        if (z.manuell) {
+          box.appendChild(h("p", { class: "note " + (z.erstattet ? "" : "ok"), text: "Anzahlung per PayPal.me: " + String(z.value).replace(".", ",") + " €, erfasst am " + deDateTime(z.am) + (z.erstattet ? " · erstattet am " + deDateTime(z.erstattet) : "") }));
+          if (!z.erstattet) box.appendChild(h("button", { class: "btn", type: "button", text: "Anzahlung als erstattet markieren", onclick: function () {
+            if (!confirm("Haben Sie " + String(z.value).replace(".", ",") + " € über PayPal an den Kunden zurückgesendet? Der Kunde bekommt dann eine Bestätigung.")) return;
+            api("POST", "anfragen/" + r.ref + "/erstatten", {}).then(function (x) { toast(x.message || "Erstattet"); }).catch(fail);
+          } }));
+        } else if (z.capture_id) {
           box.appendChild(h("p", { class: "note " + (z.erstattet ? "" : "ok"), text: "Anzahlung per PayPal: " + String(z.value).replace(".", ",") + " € (Transaktion " + z.capture_id + ")" + (z.erstattet ? " · erstattet am " + deDateTime(z.erstattet) : "") }));
           if (!z.erstattet) box.appendChild(h("button", { class: "btn", type: "button", text: "Anzahlung über PayPal erstatten", onclick: function () {
             if (!confirm("Anzahlung von " + String(z.value).replace(".", ",") + " € an den Kunden zurückzahlen?")) return;
             api("POST", "anfragen/" + r.ref + "/erstatten", {}).then(function (x) { toast(x.message || "Erstattet"); }).catch(fail);
           } }));
-        } else if (d.anzahlung) box.appendChild(h("p", { class: "note", text: "Anzahlung " + String(d.anzahlung).replace(".", ",") + " € (" + (d.depositPercent || 15) + " %) noch nicht online bezahlt." }));
+        } else if (d.anzahlung) {
+          box.appendChild(h("p", { class: "note" + (d.paypalme_am ? " info" : ""), text: "Anzahlung " + String(d.anzahlung).replace(".", ",") + " € (" + (d.depositPercent || 15) + " %) noch nicht bezahlt." + (d.paypalme_am ? " Der Kunde wurde am " + deDateTime(d.paypalme_am) + " zu PayPal.me weitergeleitet. Bitte in PayPal nach Verwendungszweck " + r.ref + " suchen." : "") }));
+          if (r.status === "reserviert" || r.status === "termin_bestaetigt") box.appendChild(h("button", { class: "btn primary", type: "button", text: "Anzahlung eingegangen" + (r.status === "reserviert" ? ", Termin bestätigen" : ""), onclick: function () {
+            if (!confirm("Ist die Anzahlung von " + String(d.anzahlung).replace(".", ",") + " € in PayPal eingegangen?")) return;
+            api("POST", "anfragen/" + r.ref + "/anzahlung", {}).then(function (x) { toast(x.message || "Erfasst"); location.reload(); }).catch(fail);
+          } }));
+        }
         tday = h("input", { type: "date", value: d.datum || "" });
         ttime = h("input", { type: "time", step: 300, value: d.uhrzeit || "" });
         box.appendChild(h("div", { class: "grid g2" }, [h("label", { class: "f" }, ["Termin (Tag)", tday]), h("label", { class: "f" }, ["Uhrzeit der Abgabe", ttime])]));
@@ -490,7 +502,8 @@
       var pp = c.paypal || {};
       side.appendChild(h("p", { class: "note " + (pp.configured ? "ok" : ""), html: pp.configured
         ? "PayPal-Anzahlung aktiv (" + esc(pp.percent) + " %" + (pp.mode === "sandbox" ? ", Testmodus" : "") + "). Der Kunde bestätigt seinen Termin mit der Zahlung."
-        : "PayPal-Anzahlung ist noch nicht eingerichtet: In der Server-Konfiguration fehlen <code>PAYPAL_CLIENT_ID</code> und <code>PAYPAL_SECRET</code>. Bis dahin bestätigen Kunden per Klick, die Anzahlung klären Sie am Telefon." }));
+        : pp.me ? "Anzahlung per PayPal.me aktiv (paypal.me/" + esc(pp.me) + ", " + esc(pp.percent) + " %). Der Kunde wird mit dem Betrag zu PayPal weitergeleitet. Sie prüfen den Eingang und klicken beim Termin auf „Anzahlung eingegangen“, dann bekommt der Kunde die Bestätigung."
+        : "PayPal-Anzahlung ist noch nicht eingerichtet. Entweder den PayPal.me-Namen unter Inhalte → Grunddaten → booking → paypalMe eintragen, oder in der Server-Konfiguration <code>PAYPAL_CLIENT_ID</code> und <code>PAYPAL_SECRET</code> setzen (automatische Bestätigung). Bis dahin bestätigen Kunden per Klick, die Anzahlung klären Sie am Telefon." }));
       var g = c.google || {};
       if (!g.configured) {
         side.appendChild(h("p", { class: "note", html: "Google Kalender ist noch nicht eingerichtet. In der Server-Konfiguration fehlen <code>GOOGLE_CLIENT_ID</code> und <code>GOOGLE_CLIENT_SECRET</code>. Weiterleitungs-URL für Google: <code>" + esc(g.redirect || "") + "</code>" }));

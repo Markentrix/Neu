@@ -198,8 +198,9 @@
       24,
       6
     ],
-    "hinweis": "Abgabezeiten für die Online-Buchung. Jede E-Mail an Kunden (Anzahlungslink, Bestätigung, Erinnerungen) prüft und gibt René im Portal unter Postausgang frei.",
+    "hinweis": "Abgabezeiten für die Online-Buchung. Jede E-Mail an Kunden (Anzahlungslink, Bestätigung, Erinnerungen) prüft und gibt René im Portal unter Postausgang frei. paypalMe: Name des PayPal.me-Links (z. B. elbdetail für paypal.me/elbdetail). Damit läuft die Anzahlung über PayPal.me, René bestätigt den Eingang im Portal. Ist die PayPal-Schnittstelle (PAYPAL_CLIENT_ID/SECRET) eingerichtet, hat sie Vorrang.",
     "depositPercent": 15,
+    "paypalMe": "",
     "policy": "Sie können Ihren Termin jederzeit kostenlos auf einen anderen Tag verschieben, die Anzahlung bleibt dabei erhalten. Innerhalb der gesetzlichen Widerrufsfrist von 14 Tagen ab Buchung erstatten wir die Anzahlung bei einer Absage vollständig. Sagen Sie den Termin danach ganz ab, wird die Anzahlung als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben. Ist uns kein oder ein geringerer Schaden entstanden, können Sie uns das nachweisen.",
     "conditionSurcharge": {
       "percent": 5,

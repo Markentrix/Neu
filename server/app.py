@@ -737,7 +737,7 @@ def termin_html(r, d, notice="", mode="", tag=""):
     act = lambda a, label, cls="btn", extra="": (f'<form method="post" action="/termin/{E(r["ref"])}/{a}"><input type="hidden" name="t" value="{tok}">{extra}'
                                                  f'<button class="{cls}" type="submit">{label}</button></form>')
     owner = E((s.get("about") or {}).get("name") or "Wir")
-    paid = (d.get("zahlung") or {}).get("capture_id")
+    paid = is_paid(d)
     future = bool(termin_start(d) and termin_start(d) > now())
     policy = f'<p class="small"><strong>Verschieben und Absagen:</strong> {E(booking_policy())}</p>' if d.get("anzahlung") and booking_policy() else ""
     extra_html = ""
@@ -750,7 +750,18 @@ def termin_html(r, d, notice="", mode="", tag=""):
     wbis = widerruf_bis(d)
     can_withdraw = st == "termin_bestaetigt" and future and in_widerruf(d)
     if st == "reserviert" and d.get("hold_until", "") >= now().isoformat():
-        if deposit_online(d):
+        if deposit_me(d) and d.get("paypalme_am"):
+            head = "Wir prüfen Ihre Anzahlung"
+            text = (f"Danke! Sobald Ihre Anzahlung von {eur(d['anzahlung'])} bei uns eingegangen ist, bestätigen wir den Termin per E-Mail. "
+                    "Haben Sie die Zahlung noch nicht abgeschlossen, geht es hier weiter.")
+            btns = (f'<a class="btn" href="{E(paypal_me_link(d))}" rel="noopener">Zur PayPal-Zahlung ({eur(d["anzahlung"])})</a>'
+                    + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost"))
+        elif deposit_me(d):
+            head = "Anzahlung leisten und Termin bestätigen"
+            text = (f"Mit der Anzahlung von {eur(d['anzahlung'])} per PayPal ist Ihr Termin gebucht. Sie werden zu PayPal weitergeleitet, der Betrag ist schon eingetragen. "
+                    f"Bitte als Verwendungszweck „{E(r['ref'])}“ angeben. Die Anzahlung wird mit dem Endpreis verrechnet.")
+            btns = act("bestaetigen", f"Anzahlung {eur(d['anzahlung'])} mit PayPal senden", extra=checks) + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost")
+        elif deposit_online(d):
             head = "Anzahlung leisten und Termin bestätigen"
             text = (f"Mit der Anzahlung von {eur(d['anzahlung'])} per PayPal ist Ihr Termin verbindlich gebucht. "
                     "Die Anzahlung wird mit dem Endpreis verrechnet.")
@@ -987,7 +998,10 @@ def reservation_text(ref, d):
     s = site_info()
     cfg = booking_cfg()
     pct = d.get("depositPercent", 15)
-    if deposit_online(d):
+    if deposit_me(d):
+        ask = (f"Bitte bestätigen Sie den Termin und leisten Sie die Anzahlung von {eur(d['anzahlung'])} per PayPal:\n{booking_link(ref, d['token'])}\n\n"
+               f"Sobald die Anzahlung bei uns eingegangen ist, erhalten Sie die Terminbestätigung. Die Anzahlung wird mit dem Endpreis verrechnet.\n\n")
+    elif deposit_online(d):
         ask = (f"Bitte bestätigen Sie den Termin, indem Sie die Anzahlung von {eur(d['anzahlung'])} per PayPal leisten:\n{booking_link(ref, d['token'])}\n\n"
                f"Die Anzahlung wird mit dem Endpreis verrechnet.\n\n")
     else:
@@ -1035,7 +1049,7 @@ def mail_confirmed(ref, d):
 
 def deposit_text(d):
     z = d.get("zahlung") or {}
-    if z.get("capture_id"):
+    if is_paid(d):
         return f"Ihre Anzahlung von {eur(z['value'])} per PayPal ist eingegangen und wird mit dem Endpreis verrechnet.\n\n"
     if d.get("anzahlung"):
         return f"Die Anzahlung von {eur(d['anzahlung'])} besprechen wir beim Telefonat.\n\n"
@@ -1080,7 +1094,7 @@ def early_start(d):
 
 def widerruf_refund_line(d):
     z = d.get("zahlung") or {}
-    if not z.get("capture_id"):
+    if not is_paid(d):
         return ""
     if z.get("erstattet"):
         return f"Die Anzahlung von {eur(float(z['value']))} wurde über PayPal erstattet."
@@ -1162,7 +1176,7 @@ def cancel_termin(r, d, by="kunde", confirm=True):
     at = now()
     d["storniert_am"] = at.isoformat()
     customer = by in ("kunde", "widerruf")
-    paid = (d.get("zahlung") or {}).get("capture_id")
+    paid = is_paid(d)
     widerruf = customer and r["status"] == "termin_bestaetigt" and (by == "widerruf" or in_widerruf(d))
     if widerruf:
         d.setdefault("widerruf_am", at.isoformat())
@@ -1179,9 +1193,12 @@ def cancel_termin(r, d, by="kunde", confirm=True):
         s = site_info()
         refund = widerruf_refund_line(d) if widerruf else ""
         failed = widerruf and paid and not (d.get("zahlung") or {}).get("erstattet")
+        manual = failed and (d.get("zahlung") or {}).get("manuell")
         mail_async(Cfg.notify_to or s.get("email"), f"Termin {'widerrufen' if widerruf else 'abgesagt'}: {d.get('name')} · {de_when(d)} ({r['ref']})",
                    (f"Der Kunde hat den Vertrag innerhalb der Widerrufsfrist widerrufen bzw. abgesagt.\n{refund}\n"
-                    + ("ACHTUNG: Die automatische PayPal-Erstattung hat nicht geklappt. Bitte im Verwaltungsportal erstatten, spätestens binnen 14 Tagen.\n" if failed else "")
+                    + (f"BITTE ERSTATTEN: Die Anzahlung kam über PayPal.me. Bitte {eur(float(d['zahlung']['value']))} über PayPal an den Kunden zurücksenden, "
+                       "spätestens binnen 14 Tagen, und danach im Verwaltungsportal auf „Anzahlung erstattet“ klicken.\n" if manual else
+                       "ACHTUNG: Die automatische PayPal-Erstattung hat nicht geklappt. Bitte im Verwaltungsportal erstatten, spätestens binnen 14 Tagen.\n" if failed else "")
                     if widerruf else "Der Kunde hat den Termin online abgesagt.\n"
                     + (f"Die Anzahlung von {eur(d['zahlung']['value'])} wird als Ausfallpauschale einbehalten. Eine Erstattung aus Kulanz ist im Verwaltungsportal möglich.\n" if paid else ""))
                    + f"\n{summary_text(public_data(d))}\n")
@@ -1221,7 +1238,7 @@ def reschedule_termin(r, d, datum, uhrzeit, by="kunde"):
         s = site_info()
         mail_async(Cfg.notify_to or s.get("email"), f"Termin verschoben: {d.get('name')} · {de_when(d)} ({r['ref']})",
                    f"Der Kunde hat seinen Termin online verschoben.\nAlt: {old}\nNeu: {de_when(d)}\n"
-                   + (f"Die Anzahlung von {eur(d['zahlung']['value'])} bleibt bestehen.\n" if (d.get("zahlung") or {}).get("capture_id") else "")
+                   + (f"Die Anzahlung von {eur(d['zahlung']['value'])} bleibt bestehen.\n" if is_paid(d) else "")
                    + f"\n{summary_text(public_data(d))}\n")
     return ""
 
@@ -1397,16 +1414,24 @@ def eur(v):
     return f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".").replace(",00", "") + " €"
 
 
-def refund_deposit(ref, mail=True):
-    """PayPal-Anzahlung erstatten. Gibt (HTTP-Code, Meldung) zurück."""
+def refund_deposit(ref, mail=True, auto=True):
+    """PayPal-Anzahlung erstatten. Gibt (HTTP-Code, Meldung) zurück.
+    PayPal.me-Zahlungen lassen sich nicht automatisch erstatten: René sendet das Geld selbst zurück und hält es im Portal fest (auto=False)."""
     r, d = load_termin(ref)
     z = (d or {}).get("zahlung") or {}
-    if not r or not z.get("capture_id"):
-        return 404, "Keine PayPal-Anzahlung zu diesem Termin."
+    if not r or not is_paid(d):
+        return 404, "Keine Anzahlung zu diesem Termin."
     if z.get("erstattet"):
         return 200, "Bereits erstattet."
+    if z.get("manuell"):
+        if auto:
+            return 409, "PayPal.me-Zahlung: bitte selbst über PayPal zurücksenden und im Portal als erstattet markieren."
+        st = "COMPLETED"
+    else:
+        st = None
     try:
-        st = paypal_refund(z["capture_id"], float(z["value"]), ref)
+        if st is None:
+            st = paypal_refund(z["capture_id"], float(z["value"]), ref)
     except Exception as e:
         log("PayPal-Erstattung fehlgeschlagen:", ref, e)
         return 502, f"PayPal-Erstattung fehlgeschlagen: {e}"
@@ -1425,6 +1450,27 @@ def refund_deposit(ref, mail=True):
 
 def deposit_online(d):
     return bool(d.get("anzahlung")) and paypal_configured()
+
+
+def paypal_me_name():
+    """PayPal.me-Name aus den Grunddaten (booking.paypalMe), z. B. „elbdetail“ für paypal.me/elbdetail."""
+    v = str((site_info().get("booking") or {}).get("paypalMe") or "").strip()
+    v = re.sub(r"^(https?://)?(www\.)?paypal\.me/", "", v, flags=re.I).strip("/")
+    return v if re.match(r"^[A-Za-z0-9]{1,40}$", v) else ""
+
+
+def deposit_me(d):
+    """Anzahlung über den PayPal.me-Link (René prüft den Eingang und bestätigt im Portal), nur ohne PayPal-Schnittstelle."""
+    return bool(d.get("anzahlung")) and not paypal_configured() and bool(paypal_me_name())
+
+
+def paypal_me_link(d):
+    return f"https://paypal.me/{paypal_me_name()}/{float(d['anzahlung']):.2f}EUR"
+
+
+def is_paid(d):
+    z = d.get("zahlung") or {}
+    return bool(z.get("capture_id") or z.get("manuell"))
 
 
 def paypal_create(ref, d):
@@ -2179,6 +2225,20 @@ class Handler(BaseHTTPRequestHandler):
                 save_termin(r["id"], d)
         if (qs.get("abbruch") or [""])[0] and valid:
             notice = "Die Zahlung wurde abgebrochen. Ihr Termin bleibt reserviert, Sie können die Anzahlung hier jederzeit nachholen."
+        if action == "bestaetigen" and valid and deposit_me(d):
+            first = not d.get("paypalme_am")
+            d["paypalme_am"] = d.get("paypalme_am") or now().isoformat()
+            hold = (now() + dt.timedelta(hours=72)).isoformat()  # Zeit für René, den Zahlungseingang zu prüfen
+            d["hold_until"] = max(d.get("hold_until", ""), hold)
+            save_termin(r["id"], d)
+            if first:
+                audit("paypalme_weitergeleitet", ref)
+                mail_async(Cfg.notify_to or site_info().get("email"), f"Anzahlung per PayPal.me unterwegs: {d.get('name')} · {de_when(d)} ({ref})",
+                           f"Der Kunde hat die AGB bestätigt und wurde zu PayPal.me weitergeleitet ({eur(d['anzahlung'])}, Verwendungszweck {ref}).\n"
+                           f"Bitte den Zahlungseingang in PayPal prüfen und im Verwaltungsportal auf „Anzahlung eingegangen“ klicken. "
+                           f"Erst dann bekommt der Kunde die Terminbestätigung. Die Uhrzeit bleibt bis {dt.datetime.fromisoformat(hold).strftime('%d.%m. %H:%M')} Uhr reserviert.\n\n"
+                           f"{summary_text(public_data(d))}\n\nIm Verwaltungsportal: {Cfg.public_url}/admin/#/anfragen/{ref}\n")
+            return self.send(303, b"", "text/plain", {"Location": paypal_me_link(d), "Cache-Control": "no-store"})
         if action == "bestaetigen" and valid and deposit_online(d):
             try:  # Anzahlung: weiter zu PayPal, bestätigt wird erst nach erfolgreicher Zahlung
                 oid, link = paypal_create(ref, d)
@@ -2332,6 +2392,9 @@ class AdminAPI:
         mm = re.match(r"^anfragen/(T\d{6}-[0-9A-F]{4})/erstatten$", p)
         if mm and m == "POST":
             return self.refund(mm.group(1))
+        mm = re.match(r"^anfragen/(T\d{6}-[0-9A-F]{4})/anzahlung$", p)
+        if mm and m == "POST":
+            return self.deposit_received(mm.group(1))
         mm = re.match(r"^anfragen/([A-Z]\d{6}-[0-9A-F]{4})/vorlage$", p)
         if mm:
             return self.template(mm.group(1), self.q("art", "antwort"))
@@ -2477,8 +2540,25 @@ class AdminAPI:
                 return h.send(200, {"ok": True})
         h.send(405, {"ok": False})
 
+    def deposit_received(self, ref):
+        """René hat die PayPal.me-Zahlung gesehen: Anzahlung festhalten und Termin bestätigen."""
+        r, d = load_termin(ref)
+        if not r or not d.get("anzahlung"):
+            return self.h.send(404, {"ok": False, "message": "Zu diesem Termin ist keine Anzahlung hinterlegt."})
+        if is_paid(d):
+            return self.h.send(200, {"ok": True, "message": "Anzahlung ist bereits erfasst."})
+        if r["status"] not in ("reserviert", "termin_bestaetigt"):
+            return self.h.send(409, {"ok": False, "message": "Der Termin ist nicht mehr reserviert. Bitte mit dem Kunden einen neuen Termin vereinbaren und die Zahlung zurücksenden oder anrechnen."})
+        d["zahlung"] = {"anbieter": "paypal.me", "manuell": True, "value": float(d["anzahlung"]), "am": now().isoformat()}
+        save_termin(r["id"], d)
+        audit("anzahlung_erfasst", f"{ref}: {d['anzahlung']} € per PayPal.me")
+        r, d = load_termin(ref)
+        if r["status"] != "termin_bestaetigt":
+            confirm_termin(r, d, "betrieb")
+        return self.h.send(200, {"ok": True, "message": "Anzahlung erfasst, Termin bestätigt."})
+
     def refund(self, ref):
-        code, msg = refund_deposit(ref)
+        code, msg = refund_deposit(ref, auto=False)
         return self.h.send(code, {"ok": code == 200, "message": msg})
 
     def template(self, ref, art):
@@ -2616,7 +2696,7 @@ class AdminAPI:
                                 "google": {"configured": google_configured(), "connected": google_connected(), "redirect": google_redirect(),
                                            "calendarId": setting("googleCalendarId", "primary")},
                                 "icsUrl": f"{Cfg.public_url}/api/kalender.ics?key={ics_key()}",
-                                "paypal": {"configured": paypal_configured(), "mode": env("PAYPAL_MODE", "live"),
+                                "paypal": {"configured": paypal_configured(), "mode": env("PAYPAL_MODE", "live"), "me": paypal_me_name(),
                                            "percent": (site_info().get("booking") or {}).get("depositPercent", 15)}})
         d = h.parse()
         if self.m == "POST":

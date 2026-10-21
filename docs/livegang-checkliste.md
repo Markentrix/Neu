@@ -8,7 +8,7 @@
 - [ ] **Aussagen prüfen:** „samstags nach Absprache“, „Abholung nach Absprache“, Firmenkunden-Seite („Abrechnung nach Absprache“), Gutschein-Regeln (Gültigkeit 3 Jahre, Paketgutschein für einen Kleinwagen, Zahlung per Überweisung oder bar).
 - [ ] **Zahlungshinweis für Gutscheine** in Einstellungen (Kontoinhaber, IBAN, Verwendungszweck).
 - [ ] **SMTP** in `.env` eintragen und Test-E-Mail senden.
-- [ ] **PayPal** (Live-App) und **Google Kalender** (OAuth-Client) einrichten, siehe `betrieb-hetzner.md`. Danach eine Testbuchung mit kleinem Paket machen, anzahlen, erstatten.
+- [ ] **PayPal.me-Namen** unter Grunddaten → booking → paypalMe eintragen (oder alternativ die PayPal-Schnittstelle) und **Google Kalender** (OAuth-Client) einrichten, siehe `betrieb-hetzner.md`. Danach eine Testbuchung mit kleinem Paket machen, anzahlen, erstatten.
 - [x] **Storno-Regel für die Anzahlung** steht in den AGB (§ 6): Verschieben kostenlos, Absage innerhalb der 14-tägigen Widerrufsfrist = volle Erstattung, danach Anzahlung als Ausfallpauschale mit Nachweis-Möglichkeit für den Kunden.
 - [x] **AGB mit Widerrufsbelehrung, Muster-Widerrufsformular und Widerrufsbutton** („Vertrag widerrufen“ im Fuß und auf der Terminseite) sind eingebaut. Selbst erstellter Entwurf, **noch anwaltlich prüfen lassen** (insbesondere Ausfallpauschale, Haftung, Widerrufsfunktion). Die geprüfte Fassung ersetzt den Text in `build/agb.py`.
 - [x] **Domain:** www.elbdetail.de (elbdetail.de leitet weiter).

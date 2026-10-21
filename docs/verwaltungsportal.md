@@ -35,6 +35,7 @@ Erinnerungen haben einen geplanten Versandzeitpunkt. Unten im Postausgang legen 
 
 In einer Terminanfrage können Sie:
 - **Tag und Uhrzeit ändern:** Der Kunde bekommt eine neue Bestätigung, der Google-Termin wird verschoben.
+- **PayPal.me-Anzahlung bestätigen:** In PayPal nach der Vorgangsnummer suchen, dann in der Anfrage „Anzahlung eingegangen, Termin bestätigen“ klicken.
 - **Eine PayPal-Anzahlung erstatten.**
 
 Setzen Sie eine klassische Anfrage auf „Termin bestätigt“, bekommt der Kunde ebenfalls die Bestätigung mit dem Hinweis auf Ihren Anruf und Erinnerungen.

@@ -97,7 +97,15 @@ Ab dann gilt:
 
 Ohne diese Einrichtung gibt es im Portal eine Abo-Adresse (iCal). Sie lässt sich in Google Kalender unter „Weitere Kalender → Per URL“ hinzufügen. Google aktualisiert solche Abos aber nur alle paar Stunden.
 
-**PayPal-Anzahlung einrichten:**
+**Variante A: PayPal.me (ohne Schnittstelle, René bestätigt den Eingang):**
+
+1. Im Portal unter Inhalte → Grunddaten → booking → `paypalMe` den PayPal.me-Namen eintragen (z. B. `elbdetail` für paypal.me/elbdetail) und veröffentlichen.
+2. Der Kunde bestätigt die AGB und wird mit dem fertigen Betrag zu PayPal.me weitergeleitet. Als Verwendungszweck soll er die Vorgangsnummer angeben. Die Uhrzeit bleibt 72 Stunden reserviert.
+3. René bekommt eine E-Mail, prüft den Eingang in PayPal und klickt in der Anfrage auf **„Anzahlung eingegangen, Termin bestätigen“**. Erst dann geht die Terminbestätigung an den Kunden.
+4. Bei einem Widerruf erstattet das System nicht automatisch. René sendet das Geld in PayPal zurück (spätestens binnen 14 Tagen) und klickt danach auf „Anzahlung als erstattet markieren“.
+5. Wichtig: Kunden müssen als „Waren oder Dienstleistungen“ zahlen, nicht als „Freunde und Familie“.
+
+**Variante B: PayPal-Schnittstelle (automatische Bestätigung und Erstattung, hat Vorrang vor PayPal.me):**
 
 1. Im [PayPal Developer Dashboard](https://developer.paypal.com/) mit dem PayPal-Geschäftskonto eine App anlegen („Live“).
 2. Client-ID und Secret als `PAYPAL_CLIENT_ID` und `PAYPAL_SECRET` in `.env` eintragen. Zum Ausprobieren erst `PAYPAL_MODE=sandbox` mit Sandbox-Zugangsdaten nutzen, dann auf `live` umstellen.
