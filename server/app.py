@@ -945,8 +945,19 @@ def free_slots(day, paket="", exclude_ref="", keramik=None):
         start = dt.datetime.combine(d, dt.time(*map(int, t.split(":"))))
         end = start + dt.timedelta(minutes=cfg["slotMinutes"])
         clash = any(b0 < end and b1 > start for b0, b1 in busy)
-        out.append({"zeit": t, "frei": t not in taken and not clash and start > now()})
+        hrs = open_hours(d)
+        inside = hrs is None or hrs[0] <= t < hrs[1]  # z. B. mittwochs erst ab 9 Uhr
+        out.append({"zeit": t, "frei": t not in taken and not clash and start > now() and inside})
     return out
+
+
+def open_hours(d):
+    """Öffnungszeit am Wochentag laut Grunddaten (openingHours.schedule) als (öffnet, schließt) oder None."""
+    name = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][d.weekday()]
+    for o in ((site_info().get("openingHours") or {}).get("schedule") or []):
+        if name in (o.get("days") or []):
+            return o.get("opens", "00:00"), o.get("closes", "23:59")
+    return None
 
 
 def slot_free(day, zeit, paket="", keramik=None):

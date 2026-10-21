@@ -85,6 +85,7 @@ def config_js(site):
 def build(content_dir, out_dir, static_dir, quiet=False):
     t0 = time.time()
     site = core.Site(content_dir)
+    site.static_dir = static_dir
     if os.path.exists(out_dir):
         shutil.rmtree(out_dir)
     shutil.copytree(static_dir, out_dir)

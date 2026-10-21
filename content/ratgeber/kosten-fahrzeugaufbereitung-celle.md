@@ -123,6 +123,6 @@ Ein faires Angebot nennt klar, welche Leistungen enthalten sind und welche nicht
 
 ## Aufbereitung in Celle anfragen
 
-ElbDetail sitzt in der Lachtehäuser Straße 1 in Celle und arbeitet für Kundinnen und Kunden aus der Stadt und dem Landkreis. Termine gibt es nach Vereinbarung von Montag bis Freitag, samstags nach Absprache. Bezahlen können Sie bar, mit Karte, per PayPal oder per Überweisung.
+ElbDetail sitzt in der Lachtehäuser Straße 1 in Celle und arbeitet für Kundinnen und Kunden aus der Stadt und dem Landkreis. Termine gibt es Montag bis Samstag von 8 bis 17 Uhr, mittwochs ab 9 Uhr. Bezahlen können Sie bar, mit Karte, per PayPal oder per Überweisung.
 
 Schicken Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 oder nutzen Sie das [Terminformular](/termin.html). Sie bekommen vorab einen verbindlichen Preis.

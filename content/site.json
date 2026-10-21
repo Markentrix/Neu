@@ -15,18 +15,29 @@
     "country": "DE"
   },
   "openingHours": {
-    "days": [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday"
+    "schedule": [
+      {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "opens": "08:00",
+        "closes": "17:00"
+      },
+      {
+        "days": [
+          "Wednesday"
+        ],
+        "opens": "09:00",
+        "closes": "17:00"
+      }
     ],
-    "opens": "08:00",
-    "closes": "18:00",
-    "text": "Termine nach Vereinbarung",
-    "detail": "Montag bis Freitag, samstags nach Absprache"
+    "text": "Mo bis Sa 8 bis 17 Uhr, Mi ab 9 Uhr",
+    "detail": "Sonntag geschlossen. Termine nach Vereinbarung, auch online buchbar.",
+    "hinweis": "Wie im Google-Unternehmensprofil. schedule steuert die strukturierten Daten für Google und welche Abgabezeiten die Online-Buchung je Wochentag anbietet."
   },
   "rating": {
     "value": "5,0",

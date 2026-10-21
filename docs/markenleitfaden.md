@@ -45,7 +45,7 @@ Nur diese Fakten dürfen in Kommunikation verwendet werden:
 | Verbindlicher Preis vor dem Termin | "Sie kennen den Preis, bevor wir anfangen." |
 | Gemeinsame Abnahme bei Tageslicht | "Wir nehmen das Ergebnis gemeinsam bei Tageslicht ab." |
 | 5,0 von 5 Sternen bei 22 Google-Rezensionen (Stand Oktober 2026) | "5,0 Sterne bei 22 Google-Rezensionen" (Zahl regelmäßig aktualisieren) |
-| Termine nach Vereinbarung Mo bis Fr, samstags nach Absprache | "Termine Mo bis Fr, samstags nach Absprache" |
+| Mo bis Sa 8 bis 17 Uhr, Mi ab 9 Uhr, So geschlossen | "Mo bis Sa 8 bis 17 Uhr, Mi ab 9 Uhr" |
 | Bezahlung bar, Karte, PayPal oder Überweisung | "Bezahlen können Sie bar, mit Karte, per PayPal oder per Überweisung." |
 | Preise sind "ab"-Preise (Einstiegspreise), Mehrkosten bei starker Verschmutzung oder intensiver Tierhaarentfernung möglich | "Ab 299 €. Bei starker Verschmutzung oder vielen Tierhaaren kann es mehr werden. Den verbindlichen Preis nennen wir Ihnen vorab." |
 | Vier Pakete: Refresh (Wäsche und Innen-Basis), Essential (innen und außen gründlich), Signature (plus einstufige Glanzpolitur), Excellence (plus mehrstufige Lackkorrektur). Lackversiegelung ist in keinem Paket enthalten | "Die Lackversiegelung buchen Sie separat zu Signature oder Excellence." |

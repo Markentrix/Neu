@@ -37,7 +37,7 @@ info@elbdetail.de
 - Zusatzkategorien, wo erlaubt: Keramikversiegelung (oder "Keramikbeschichtung", "Lackversiegelung"), Autopflege, Lederpflege. Keramik zuerst wählen, sie ist der Schwerpunkt.
 - Stichwörter / Leistungen (wo es ein Feld gibt): Keramikversiegelung, C²Coating Excellence Partner, Lackkorrektur, Lackpolitur, Lackversiegelung, Innenraumaufbereitung, Lederreparatur mit Colourlock, Polster- und Teppichreinigung, Tierhaarentfernung, Geruchsneutralisierung, Cabrioverdeckreinigung, Motorraumreinigung, Leasingrückläufer- und Verkaufsaufbereitung, ElbDetail Care, Aufbereitung für Autohäuser und Unternehmen, Abhol- und Bringservice nach Vereinbarung
 - Erlaubt ein Feld kein "²", "C2Coating Excellence Partner" schreiben.
-- Öffnungszeiten: Montag bis Freitag `[UHRZEITEN wie im Google-Profil]`, samstags nach Absprache, Termine nach Vereinbarung
+- Öffnungszeiten: Montag, Dienstag, Donnerstag, Freitag, Samstag 08:00 bis 17:00, Mittwoch 09:00 bis 17:00, Sonntag geschlossen (wie im Google-Profil)
 - Kurzbeschreibung: dieselbe wie im Google-Profil (siehe `google-unternehmensprofil.md`, Abschnitt 3)
 - Kurzfassung für Felder mit wenig Platz (193 Zeichen):
 

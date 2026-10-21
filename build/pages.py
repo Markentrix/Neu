@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """Startseite, Leistungsseiten, Rechtsseiten, 404 und Danke-Seite."""
+import os
+import re
+
 import core
 import md
 import seo
@@ -41,11 +44,25 @@ def _refs(site):
     return [r if isinstance(r, dict) else {"name": r} for r in site.s.get("references", [])]
 
 
-def _ref_mark(r, prefix, cls):
+def _svg_size(site, fname):
+    """Breite und Höhe aus dem SVG (width/height, sonst viewBox), damit nichts beim Laden springt."""
+    try:
+        with open(os.path.join(getattr(site, "static_dir", ""), fname), encoding="utf-8") as f:
+            tag = re.search(r"<svg\b[^>]*>", f.read(4096)).group(0)
+    except (OSError, AttributeError):
+        return ""
+    w, h = re.search(r'\bwidth="([\d.]+)', tag), re.search(r'\bheight="([\d.]+)', tag)
+    if w and h:
+        return f' width="{round(float(w.group(1)))}" height="{round(float(h.group(1)))}"'
+    vb = re.search(r'viewBox="[\d.\s-]+?([\d.]+)\s+([\d.]+)"', tag)
+    return f' width="{round(float(vb.group(1)))}" height="{round(float(vb.group(2)))}"' if vb else ""
+
+
+def _ref_mark(site, r, prefix, cls):
     """Logo, falls vorhanden, sonst der Name als ruhige Wortmarke. Geschützte Bindestriche halten Namen zusammen."""
     name = ESC(r["name"])
     if r.get("logo"):
-        return f'<img class="{cls}-logo" src="{prefix}{ESC(r["logo"])}" alt="{ESC(r["name"])}" loading="lazy" decoding="async">'
+        return f'<img class="{cls}-logo" src="{prefix}{ESC(r["logo"])}" alt="{ESC(r["name"])}"{_svg_size(site, r["logo"])} loading="lazy" decoding="async">'
     return f'<span class="{cls}-word">{name}</span>'
 
 
@@ -56,7 +73,7 @@ def ref_wall(site, prefix=""):
         return ""
     cells = []
     for r in rl:
-        inner = f'<span class="ref-cell-mark">{_ref_mark(r, prefix, "ref")}</span><span class="ref-cell-type">{ESC(r.get("type") or "Firmenkunde")}</span>'
+        inner = f'<span class="ref-cell-mark">{_ref_mark(site, r, prefix, "ref")}</span><span class="ref-cell-type">{ESC(r.get("type") or "Firmenkunde")}</span>'
         if r.get("url", "").startswith("https://"):
             cells.append(f'<li><a class="ref-cell" href="{ESC(r["url"])}" target="_blank" rel="noopener">{inner}'
                          f'<span class="ref-cell-go">Website<span class="visually-hidden"> von {ESC(r["name"])} (öffnet in neuem Tab)</span> {I["arrow"]}</span></a></li>')
@@ -82,9 +99,9 @@ def ref_strip(site, prefix=""):
     if not rl:
         return ""
     items = "".join(
-        (f'<li><a href="{ESC(r["url"])}" target="_blank" rel="noopener" title="{ESC(r["name"])} · {ESC(r.get("type") or "")}">{_ref_mark(r, prefix, "rs")}'
+        (f'<li><a href="{ESC(r["url"])}" target="_blank" rel="noopener" title="{ESC(r["name"])} · {ESC(r.get("type") or "")}">{_ref_mark(site, r, prefix, "rs")}'
          f'<span class="visually-hidden"> (öffnet in neuem Tab)</span></a></li>') if r.get("url", "").startswith("https://")
-        else f'<li><span>{_ref_mark(r, prefix, "rs")}</span></li>' for r in rl)
+        else f'<li><span>{_ref_mark(site, r, prefix, "rs")}</span></li>' for r in rl)
     return f'''
       <div class="ref-strip reveal">
         <p class="ref-strip-label">Auch Unternehmen aus Celle vertrauen uns</p>
@@ -668,7 +685,7 @@ def build_home(site, write):
         <div class="why-item reveal">{I["hand"]}<div><h3>Lackschonende Arbeit</h3><p>Handwäsche mit der Zwei-Eimer-Methode, weiche Mikrofaser und schonende Trocknung. So behandeln wir Ihren Lack so sanft wie möglich.</p></div></div>
         <div class="why-item reveal">{I["shield"]}<div><h3>Profi-Systeme statt Baumarkt</h3><p>Offizieller C²Coating Excellence Partner für Keramikversiegelungen, Fachschulungen bei Koch-Chemie, Colourlock für Leder. Jedes Material bekommt das passende Mittel.</p></div></div>
         <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Sie erhalten ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
-        <div class="why-item reveal">{I["clock"]}<div><h3>Termin, wann es Ihnen passt</h3><p>Online oder per WhatsApp anfragen, Termin nach Vereinbarung, samstags nach Absprache. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
+        <div class="why-item reveal">{I["clock"]}<div><h3>Termin, wann es Ihnen passt</h3><p>Online buchen oder per WhatsApp anfragen, Montag bis Samstag. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
       </div>
     </div>
   </section>

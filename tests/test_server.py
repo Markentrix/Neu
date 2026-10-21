@@ -35,7 +35,7 @@ import md  # noqa: E402
 
 def next_workday(days=3):
     d = dt.date.today() + dt.timedelta(days=days)
-    while d.weekday() == 6:
+    while d.weekday() in (2, 6):  # Mittwoch öffnet erst um 9 Uhr, Sonntag geschlossen
         d += dt.timedelta(days=1)
     return d.isoformat()
 
@@ -848,6 +848,15 @@ class TestBooking(Base):
         self.assertEqual(app.richtpreis(d), 378)  # 329 € + 10 % Tierhaare + 5 % stark verschmutzt, Ledersitze ohne Zuschlag
         self.assertEqual(app.deposit_amount(d), 56.7)
         self.assertEqual(app.richtpreis({"paket": "essential", "klasse": "kompakt", "zustand": ["leder"]}), 329)
+
+    def test_opening_hours_limit_slots(self):
+        d = dt.date.today() + dt.timedelta(days=3)
+        while d.weekday() != 2:
+            d += dt.timedelta(days=1)
+        slots = {x["zeit"]: x["frei"] for x in app.free_slots(d.isoformat())}
+        self.assertFalse(slots["08:00"])  # mittwochs erst ab 9 Uhr
+        self.assertTrue(slots["09:00"] and slots["10:00"])
+        self.assertTrue(app.free_slots(next_workday(3))[0]["frei"])
 
     def test_winter_offer_booking(self):
         day = next_workday(15)

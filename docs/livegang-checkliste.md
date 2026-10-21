@@ -5,7 +5,7 @@
 - [ ] **Impressum:** Inhaber:in oder Firmenname, USt-IdNr. oder Kleinunternehmer-Hinweis, Verantwortliche:r nach § 18 MStV (Portal → Inhalte → Grunddaten → Rechtliches).
 - [ ] **Datenschutz:** E-Mail-Anbieter eintragen, Auftragsverarbeitungsvertrag mit Hetzner im Hetzner-Konto abschließen (Konsole → Datenschutz), Text rechtlich prüfen lassen.
 - [ ] **Preise prüfen:** Richtpreise der vier Pakete (Refresh, Essential, Signature, Excellence) je Fahrzeugklasse in „Pakete & Preise“ (Kleinwagen, Kompaktwagen, Limousinen/Kombis/kleinere SUVs, große SUVs und Vans; Sport- und Luxusfahrzeuge sowie Wohnmobile auf Anfrage) und Keramikpreise (C² CarCeramic).
-- [ ] **Aussagen prüfen:** „samstags nach Absprache“, „Abholung nach Absprache“, Firmenkunden-Seite („Abrechnung nach Absprache“), Gutschein-Regeln (Gültigkeit 3 Jahre, Paketgutschein für einen Kleinwagen, Zahlung per Überweisung oder bar).
+- [ ] **Aussagen prüfen:** Öffnungszeiten (Mo bis Sa 8 bis 17 Uhr, Mi ab 9 Uhr, wie im Google-Profil), „Abholung nach Absprache“, Firmenkunden-Seite („Abrechnung nach Absprache“), Gutschein-Regeln (Gültigkeit 3 Jahre, Paketgutschein für einen Kleinwagen, Zahlung per Überweisung oder bar).
 - [ ] **Zahlungshinweis für Gutscheine** in Einstellungen (Kontoinhaber, IBAN, Verwendungszweck).
 - [ ] **SMTP** in `.env` eintragen und Test-E-Mail senden.
 - [ ] **PayPal.me-Namen** unter Grunddaten → booking → paypalMe eintragen (oder alternativ die PayPal-Schnittstelle) und **Google Kalender** (OAuth-Client) einrichten, siehe `betrieb-hetzner.md`. Danach eine Testbuchung mit kleinem Paket machen, anzahlen, erstatten.
@@ -24,6 +24,7 @@
 - [ ] Search Console mit Google Analytics verknüpfen (GA4 → Verwaltung → Produktverknüpfungen → Search Console), dann sehen Sie Suchanfragen und Besuche an einem Ort.
 - [ ] Wächter per Cron einrichten (`deploy/watchdog.sh`, siehe Betriebsanleitung) und einmal testen: `docker compose run --rm --no-deps app python3 /app/server/app.py alarm "Test"` muss eine E-Mail auslösen.
 - [ ] Bing Webmaster Tools: Sitemap einreichen (versorgt auch ChatGPT-Suche und Copilot).
+- [ ] Sicherheits-Kopfzeilen prüfen: `curl -sI https://www.elbdetail.de/ | grep -iE "strict-transport|x-content-type|x-frame|referrer-policy|content-security"` muss alle 5 zeigen (oder securityheaders.com). Sie kommen aus `deploy/Caddyfile` und fehlen nur in der Vorschau auf claude.ai.
 - [ ] Rich-Results-Test für Startseite, eine Leistungsseite und einen Ratgeber-Artikel.
 - [ ] Google-Unternehmensprofil: Website-Link auf `https://www.elbdetail.de/` und Termin-Link auf `/termin.html` setzen (Kit in `google-unternehmensprofil.md`).
 - [ ] Branchenverzeichnisse mit identischer Schreibweise anlegen (`branchenverzeichnisse.md`).

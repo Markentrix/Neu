@@ -89,7 +89,7 @@ Der Ablauf bei ElbDetail ist einfach und planbar:
 
 1. Sie schicken ein paar Fotos Ihres Autos per WhatsApp und sagen, dass Sie verkaufen möchten.
 2. Sie bekommen eine Empfehlung und einen verbindlichen Preis vor dem Termin.
-3. Wir vereinbaren gemeinsam einen Termin, Montag bis Freitag oder samstags nach Absprache.
+3. Wir vereinbaren gemeinsam einen Termin, Montag bis Samstag von 8 bis 17 Uhr, mittwochs ab 9 Uhr.
 4. Das Auto wird zu 100 % von Hand aufbereitet, mit Zwei-Eimer-Handwäsche und professionellen Produkten von Koch-Chemie. Vor einer Politur wird die Lackschichtdicke gemessen.
 5. Zum Schluss nehmen wir das Ergebnis gemeinsam bei Tageslicht ab.
 6. Sie bezahlen bar, mit Karte, per PayPal oder per Überweisung.

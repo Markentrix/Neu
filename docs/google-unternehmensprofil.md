@@ -51,7 +51,7 @@ Nach jeder Kategorieänderung prüfen, ob neue Felder für Leistungen oder Attri
 
 Regeln von Google: keine Links, keine Preise, keine Aktionen, keine Großbuchstaben-Effekte. Maximal 750 Zeichen.
 
-> ElbDetail ist Ihre Fahrzeugaufbereitung in Celle. Gründer René arbeitet zu 100 % in Handarbeit, ohne Waschstraße. Unser Schwerpunkt ist die Lackkorrektur mit hochwertiger Keramikversiegelung für Lack, Glas und Felgen. René ist offizieller C²Coating Excellence Partner und hat Koch-Chemie-Fachschulungen absolviert. Leder reinigen, pflegen und reparieren wir mit Colourlock. Dazu kommen Innenraumaufbereitung, Handwäsche und Aufbereitung vor Leasingrückgabe oder Verkauf. Vor jeder Politur messen wir die Lackschichtdicke. Sie erhalten vorab einen verbindlichen Preis. Für Autohäuser, Unternehmen und Flotten gibt es individuelle Lösungen. Termine nach Vereinbarung, Mo bis Fr, samstags nach Absprache. Für Celle und den ganzen Landkreis.
+> ElbDetail ist Ihre Fahrzeugaufbereitung in Celle. Gründer René arbeitet zu 100 % in Handarbeit, ohne Waschstraße. Unser Schwerpunkt ist die Lackkorrektur mit hochwertiger Keramikversiegelung für Lack, Glas und Felgen. René ist offizieller C²Coating Excellence Partner und hat Koch-Chemie-Fachschulungen absolviert. Leder reinigen, pflegen und reparieren wir mit Colourlock. Dazu kommen Innenraumaufbereitung, Handwäsche und Aufbereitung vor Leasingrückgabe oder Verkauf. Vor jeder Politur messen wir die Lackschichtdicke. Sie erhalten vorab einen verbindlichen Preis. Für Autohäuser, Unternehmen und Flotten gibt es individuelle Lösungen. Geöffnet Mo bis Sa 8 bis 17 Uhr, mittwochs ab 9 Uhr. Für Celle und den ganzen Landkreis.
 
 **Länge: 737 Zeichen inklusive Leerzeichen** (Limit 750, per Skript gezählt; "²" zählt als 1 Zeichen). Bei jeder Änderung neu zählen. Wird es zu lang, zuerst den Satz mit der Leasingrückgabe kürzen.
 
@@ -218,13 +218,13 @@ Nur aktivieren, was wirklich zutrifft. Welche Attribute erscheinen, hängt von d
 
 ## 6. Öffnungszeiten
 
-Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach Absprache. Google braucht trotzdem feste Zeiten. Sonst wirkt das Profil unvollständig.
+Eingetragen im Profil und genauso auf der Website (Grunddaten → openingHours):
 
-**Empfehlung**
+- Montag, Dienstag, Donnerstag, Freitag, Samstag: 08:00 bis 17:00
+- Mittwoch: 09:00 bis 17:00
+- Sonntag: geschlossen
 
-- Montag bis Freitag: `[UHRZEITEN, z. B. 08:00 bis 18:00]`. Das sind die Zeiten, in denen ihr Anrufe und WhatsApp beantwortet und Fahrzeuge annehmt.
-- Samstag: `[PLATZHALTER: "geschlossen" eintragen oder ein kurzes Zeitfenster. Bei "geschlossen" den Hinweis "samstags nach Absprache" in Beschreibung und Fragen & Antworten nutzen.]`
-- Sonntag: geschlossen.
+Ändern sich die Zeiten, zuerst Google ändern, dann im Portal unter Grunddaten → openingHours. Die Online-Buchung bietet dann automatisch nur Abgabezeiten innerhalb der Öffnungszeit an (mittwochs also kein 8-Uhr-Termin).
 - Attribut "Termin erforderlich" aktivieren, falls verfügbar.
 - Unter "Weitere Öffnungszeiten" prüfen, ob es einen passenden Typ gibt (z. B. für Terminvereinbarung oder Fahrzeugannahme).
 - Feiertage und Betriebspausen immer vorher als "Sonderöffnungszeiten" eintragen. Für Ende 2026: `[BETRIEBSPAUSE ZWISCHEN DEN JAHREN, falls geplant]`.
@@ -336,7 +336,7 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 - **Titel:** Last-Minute-Geschenk: Gutschein bis [BESTELLSCHLUSS] bestellen
 - **Text (363 Zeichen inkl. Platzhalter, ohne Titelzeile; nach dem Ersetzen neu zählen):**
 
-> Noch kein Geschenk? Ein Gutschein von ElbDetail passt zu jedem Auto. Bestellen Sie bis [BESTELLSCHLUSS], dann [LIEFERWEG: liegt der Gutschein vor Heiligabend bei Ihnen / erhalten Sie ihn als PDF]. Die beschenkte Person sucht sich den Termin später selbst aus. Termine gibt es von Montag bis Freitag, samstags nach Absprache. Alle Infos auf unserer Gutscheinseite.
+> Noch kein Geschenk? Ein Gutschein von ElbDetail passt zu jedem Auto. Bestellen Sie bis [BESTELLSCHLUSS], dann [LIEFERWEG: liegt der Gutschein vor Heiligabend bei Ihnen / erhalten Sie ihn als PDF]. Die beschenkte Person sucht sich den Termin später selbst aus. Termine gibt es Montag bis Samstag. Alle Infos auf unserer Gutscheinseite.
 
 - **Button:** Weitere Infos → https://www.elbdetail.de/gutscheine.html
 - **Bildidee:** Gutscheinkarte in Geschenkumschlag, daneben Mikrofasertuch mit Schleife.
@@ -358,7 +358,7 @@ Die Fakten sagen: Termine nach Vereinbarung, Montag bis Freitag, samstags nach A
 - **Titel:** Gutschein bekommen? So lösen Sie ihn ein
 - **Text (407 Zeichen inkl. Platzhalter, ohne Titelzeile; nach dem Ersetzen neu zählen):**
 
-> Sie haben zu Weihnachten einen Gutschein von ElbDetail bekommen? So geht es weiter: Schreiben Sie uns per WhatsApp oder nutzen Sie unser Terminformular. Nennen Sie Ihr Fahrzeug und [GUTSCHEINNUMMER ODER CODE]. Wir schlagen Ihnen einen Termin vor, Montag bis Freitag, samstags nach Absprache. Vor dem Termin bestätigen wir, was gemacht wird. Bei der Abholung prüfen wir das Ergebnis gemeinsam bei Tageslicht.
+> Sie haben zu Weihnachten einen Gutschein von ElbDetail bekommen? So geht es weiter: Schreiben Sie uns per WhatsApp oder nutzen Sie unser Terminformular. Nennen Sie Ihr Fahrzeug und [GUTSCHEINNUMMER ODER CODE]. Wir schlagen Ihnen einen Termin vor, Montag bis Samstag. Vor dem Termin bestätigen wir, was gemacht wird. Bei der Abholung prüfen wir das Ergebnis gemeinsam bei Tageslicht.
 
 - **Button:** Buchen → https://www.elbdetail.de/termin.html
 - **Bildidee:** Hand übergibt Fahrzeugschlüssel und Gutscheinkarte.

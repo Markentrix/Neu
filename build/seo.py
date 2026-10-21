@@ -37,9 +37,8 @@ def business(site):
         "areaServed": [{"@type": "City", "name": a["city"]}] + [{"@type": "City", "name": n} for n in s["areas"]["region"]],
         "knowsAbout": ["Fahrzeugaufbereitung", "Car Detailing", "Keramikversiegelung", "Lackkorrektur", "Lackpolitur", "Lackversiegelung",
                        "Innenraumreinigung", "Lederpflege", "Lederreparatur", "Geruchsentfernung", "Cabrioverdeckreinigung", "Leasingrückgabe", "Flottenpflege"],
-        "openingHoursSpecification": {"@type": "OpeningHoursSpecification", "dayOfWeek": s["openingHours"]["days"],
-                                      "opens": s["openingHours"]["opens"], "closes": s["openingHours"]["closes"],
-                                      "description": s["openingHours"]["text"]},
+        "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": o["days"], "opens": o["opens"], "closes": o["closes"]}
+                                      for o in s["openingHours"].get("schedule", [])],
         "sameAs": list(s["social"].values()),
         "aggregateRating": {"@type": "AggregateRating", "ratingValue": s["rating"]["value"].replace(",", "."), "bestRating": "5",
                             "reviewCount": str(s["rating"]["count"])},
