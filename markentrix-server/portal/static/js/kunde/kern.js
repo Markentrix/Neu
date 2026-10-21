@@ -26,6 +26,7 @@ const SEITEN = [
   ['belege', 'Angebote & Rechnungen', null],
   ['anrufe', 'Anrufe', null],
   ['website', 'Website & Landingpages', 'website'],
+  ['dienste', 'Website-Dienste', 'website'],
   ['wochenangebote', 'Wochenangebote', 'wochenangebote'],
   ['werbung', 'Werbung & Berichte', 'werbung_berichte'],
   ['automationen', 'Automationen', 'automationen'],
@@ -39,11 +40,11 @@ const SEITEN = [
 const GRUPPEN = [
   ['Täglich', ['heute', 'anfragen', 'termine', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
   ['Verstehen', ['uebersicht', 'status', 'briefing', 'auswertung', 'berichte'], true],
-  ['Mein Betrieb', ['assistent', 'website', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
+  ['Mein Betrieb', ['assistent', 'website', 'dienste', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
   ['Verwaltung', ['willkommen', 'belege', 'avv', 'team', 'hilfe', 'einstellungen'], false],
 ];
 export const inhaber = () => start.kunden_rolle === 'inhaber';
-export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv'].includes(s[0]) || inhaber()));
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste'].includes(s[0]) || inhaber()));
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : 0)) || 0;
 

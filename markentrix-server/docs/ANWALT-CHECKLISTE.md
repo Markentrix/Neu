@@ -18,3 +18,9 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 14. **SEPA-Lastschrift und Mahnwesen**: Mandatstext im Kundenportal (Online-Erteilung, Nachweis mit Zeit und IP), Ankündigungsfrist (Standard 3 Tage, vertraglich vereinbaren), automatische Zahlungserinnerungen/Mahnungen (Fristen, Mahntexte, B2B/B2C). Die Einzugsdatei vor dem ersten Echteinsatz mit der eigenen Bank testen (Format pain.008.001.02).
 15. **Anrufprotokoll und Push-Nachrichten**: Telefon-Assistent als Auftragsverarbeitung, Hinweispflicht ggü. Anrufern (KI, Aufzeichnung), Löschfrist 180 Tage für Nummern und Zusammenfassungen; Push-Nachrichten enthalten keine Personendaten.
 
+
+## Website-Dienste (Formular, Terminbuchung, Bewertungen, PayPal)
+- Leistungsbeschreibung im AVV um die Verarbeitung von Formular- und Buchungsdaten der Website-Besucher ergänzen (wir verarbeiten sie als Auftragsverarbeiter; Speicherung: Anfragen im Kundenportal, Termine 180 Tage nach dem Termin).
+- Anlage 3: Google (Places API, Abruf öffentlicher Bewertungsdaten) und Mailversand über unseren Server aufnehmen.
+- Mustertext für die Datenschutzerklärung der Kunden-Websites: Kontaktformular, Online-Terminbuchung (inkl. Kalender-Einladung per E-Mail), PayPal (Zahlung direkt an den Kunden), Google-Bewertungen.
+- Eigenes Postfach des Kunden (SMTP): Zugangsdaten verschlüsselt gespeichert, nur zum Versand der Website-Mails genutzt.

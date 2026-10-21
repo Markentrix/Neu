@@ -24,11 +24,20 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
 export const kk = (label, wert, set) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', checked: wert, style: 'width:auto', onchange: (e) => set(e.target.checked) }), label);
+export async function placesKarte() {
+  const d = await api('/api/admin/einstellungen/places'), m = h('div');
+  const key = h('input', { type: 'password', placeholder: d.key_gesetzt ? 'leer lassen = unverändert' : 'API-Schlüssel', autocomplete: 'new-password', maxlength: 300 });
+  const speichern = async () => { try { await api('/api/admin/einstellungen/places', { method: 'PUT', body: { api_key: key.value } }); key.value = ''; melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Google-Bewertungen (Places API)'),
+    h('p', { class: 'small muted' }, d.key_gesetzt ? 'Schlüssel ist hinterlegt. Die Kunden-Websites können ihre Google-Bewertungen anzeigen.' : 'Noch kein Schlüssel. Ohne ihn tragen Kunden Sterne und Anzahl von Hand ein. Schlüssel: Google Cloud → „Places API (New)“ aktivieren → API-Schlüssel erstellen, auf diese API beschränken. Abgerufen wird je Kunde höchstens alle 12 Stunden, nicht pro Besucher.'),
+    m, h('div', { class: 'row' }, key, h('button', { class: 'btn', onclick: speichern }, 'Speichern')));
+}
+
 export async function websiteCheckKarte() {
   const d = await api('/api/admin/website-check'), m = h('div'), box = h('div');
   const erzeugen = async () => {

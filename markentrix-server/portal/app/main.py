@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -31,6 +32,9 @@ from .routes_zusammenarbeit import router as zus_router, kunde_router as zus_kun
 from .routes_websitecheck import router as wcheck_router
 from .routes_folgemails import router as folge_router
 from .routes_buchung import router as buchung_router
+from .routes_sitedienste import admin as site_admin_router
+from .routes_sitedienste import kunde as site_kunde_router
+from .routes_sitedienste import router as site_router
 from .routes_vertriebsplus import router as vertriebsplus_router
 from .routes_vertriebwerkzeuge import router as vertriebwerkzeuge_router
 from .routes_nutzung import router as nutzung_router
@@ -90,6 +94,15 @@ async def schutz(request: Request, call_next):
     return r
 
 
+@app.exception_handler(StarletteHTTPException)
+async def http_fehler(request: Request, exc: StarletteHTTPException):
+    """Wie üblich {"detail": …}. Für die Website-Dienste (/site/…) bekommen auch Fehler die Herkunfts-Kopfzeile, sonst kann das Skript der Website den Text nicht lesen."""
+    kopf = dict(exc.headers or {})
+    if request.url.path.startswith("/site/") and request.headers.get("origin"):
+        kopf.update({"Access-Control-Allow-Origin": request.headers["origin"], "Vary": "Origin"})
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=kopf)
+
+
 _letzter_alarm: dict = {}
 
 
@@ -142,6 +155,9 @@ app.include_router(aufgaben_router)
 app.include_router(wcheck_router)
 app.include_router(folge_router)
 app.include_router(buchung_router)
+app.include_router(site_router)
+app.include_router(site_kunde_router)
+app.include_router(site_admin_router)
 app.include_router(vertriebsplus_router)
 app.include_router(vertriebwerkzeuge_router)
 app.include_router(leadangebot_router)

@@ -392,3 +392,18 @@ Das Portal ist eine installierbare Web-App. Es gibt keine eigene APK-Datei und k
 3. **Banner:** Solange die App am Handy noch nicht installiert ist, steht oben ein kleines Banner „Markentrix als App aufs Handy legen“ mit Link zur Anleitung. Es lässt sich wegklicken, am Rechner erscheint es nie.
 4. **QR-Code:** Im Kundenblatt und beim Vertriebler gibt es die Karte „Portal aufs Handy“: QR-Code zum Scannen mit der Handy-Kamera, dazu „Text mit Link kopieren“ und „Per WhatsApp senden“.
 5. **Falscher Browser:** Öffnet jemand das Portal auf Android in Samsung Internet, Opera oder Vivaldi, weist die Karte „App & Benachrichtigungen“ auf Chrome hin.
+
+## Website-Dienste: Formular, Termine, PayPal, Bewertungen (Stand Oktober 2026)
+Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nutzen vier Dienste. Der Kunde (Inhaber) trägt seine Daten unter **Website-Dienste** im Kundenportal ein, wir bauen die Bausteine ein.
+
+**Einbau in die Website** (Admin → Kunde → Karte „Website-Dienste“ zeigt den fertigen Code zum Kopieren):
+`<script src="https://portal.markentrix.de/static/js/site.js" data-site="mk_…" defer></script>` einmal vor `</body>`, dann je Dienst `<div data-mk="kontakt|termin|bewertungen"></div>` und `<div data-mk="paypal" data-betrag="49,90" data-titel="Gutschein"></div>`. Die Seite enthält nie ein Passwort.
+
+- **Kontaktformular:** Anfragen landen im Kundenportal unter „Anfragen“ und per E-Mail beim Kunden (Antwort-an = Besucher). Standard: Versand über unseren Mailserver mit dem Firmennamen als Absendername. Optional eigenes Postfach des Kunden (Gmail, GMX, Telekom, IONOS …): Server und Port werden aus der Adresse vorbelegt, die Verbindung wird vor dem Speichern geprüft, bei späteren Fehlern springen wir automatisch auf unseren Versand zurück (im Status sichtbar).
+- **Terminbuchung:** Der Kunde fügt die geheime iCal-Adresse seines Kalenders ein (Google, Outlook, iCloud, IONOS …). Belegte Zeiten (auch wiederkehrende, ganztägige, andere Zeitzonen) werden nicht angeboten. Buchungen erscheinen in „Heute“/„Termine“ des Kunden, beide Seiten bekommen eine E-Mail mit Kalender-Einladung, Besucher können per Link absagen.
+- **PayPal:** Nur die öffentliche Client-ID (oder ein PayPal.Me-Link). Das Geld geht direkt an den Kunden, wir verarbeiten keine Zahlungen.
+- **Google-Bewertungen:** Place-ID des Kunden; wir holen mit **einem** Places-API-Schlüssel von uns (Admin → Einstellungen → „Google-Bewertungen“) alle 12 Stunden Sterne und die neuesten Bewertungen. Ohne Schlüssel tragen Kunden Sterne und Anzahl von Hand ein.
+
+**Sicherheit:** Zugangsdaten (SMTP-Passwort, Kalender-Adresse) werden mit dem Server-Schlüssel (`PORTAL_SECRET`) verschlüsselt, sind nie wieder lesbar (auch nicht für Admins) und nur vom Inhaber ersetzbar. Die öffentlichen Aufrufe (`/site/<ID>/…`) funktionieren nur von den Domains des Kunden (Domainverwaltung bzw. Websites), sind je IP und je Website begrenzt und haben ein Lockfeld gegen Bots. SMTP-Server und Kalender-Adressen werden nur geholt, wenn sie ins öffentliche Internet zeigen (kein Zugriff auf interne Dienste), Kalender nur über https. Gebuchte Termine werden 180 Tage nach dem Termin gelöscht, das Ereignisprotokoll nach 90 Tagen.
+
+**Vor dem ersten Kunden:** Domain des Kunden in der Domainverwaltung eintragen (sonst lehnt der Server die Website ab); Datenschutzerklärung der Website um Kontaktformular, Terminbuchung und ggf. Google-Bewertungen/PayPal ergänzen; AVV-Beschreibung der Leistungen und Anlage 3 (Unterauftragsverarbeiter: Google Places) vom Anwalt prüfen lassen (docs/ANWALT-CHECKLISTE.md).

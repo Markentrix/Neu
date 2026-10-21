@@ -20,5 +20,24 @@ class H(BaseHTTPRequestHandler):
             self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
         out=json.dumps({"content":[{"type":"text","text":"Hallo! Du hast 1 neue Anfrage."}],"usage":{"input_tokens":321,"output_tokens":45}}).encode()
         self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out)
+    def do_GET(self):
+        import datetime as _d
+        if self.path.startswith("/v1/places/"):
+            if self.headers.get("x-goog-api-key")!="places-test": self.send_response(403); self.end_headers(); self.wfile.write(b"{}"); return
+            if "NichtDa" in self.path: self.send_response(404); self.end_headers(); self.wfile.write(b"{}"); return
+            out=json.dumps({"rating":4.7,"userRatingCount":128,"googleMapsUri":"https://maps.google.com/?cid=1","reviews":[{"rating":5,"text":{"text":"Sehr gut! <b>Top</b>"},"authorAttribution":{"displayName":"Anna K."},"relativePublishTimeDescription":"vor 2 Wochen"},{"rating":4,"text":{"text":"Freundlich."},"authorAttribution":{"displayName":"Ben"}}]}).encode()
+            self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
+        if self.path.startswith("/ical/"):
+            if "leer" in self.path: self.send_response(200); self.end_headers(); self.wfile.write(b"hallo"); return
+            if "weg" in self.path: self.send_response(404); self.end_headers(); self.wfile.write(b""); return
+            h=_d.date.today(); f=lambda n:(h+_d.timedelta(days=n)).strftime("%Y%m%d")
+            ics="\r\n".join(["BEGIN:VCALENDAR","VERSION:2.0",
+              "BEGIN:VEVENT","UID:a1","DTSTART;TZID=Europe/Berlin:"+f(2)+"T100000","DTEND;TZID=Europe/Berlin:"+f(2)+"T110000","SUMMARY:Einzeltermin","END:VEVENT",
+              "BEGIN:VEVENT","UID:a2","DTSTART;TZID=Europe/Berlin:"+f(-30)+"T120000","DTEND;TZID=Europe/Berlin:"+f(-30)+"T130000","RRULE:FREQ=DAILY;INTERVAL=1","SUMMARY:Mittag taeglich","END:VEVENT",
+              "BEGIN:VEVENT","UID:a3","DTSTART;VALUE=DATE:"+f(4),"DTEND;VALUE=DATE:"+f(5),"SUMMARY:Urlaub","END:VEVENT",
+              "BEGIN:VEVENT","UID:a4","DTSTART:"+f(3)+"T080000Z","DTEND:"+f(3)+"T090000Z","TRANSP:TRANSPARENT","SUMMARY:Frei","END:VEVENT",
+              "END:VCALENDAR",""])
+            self.send_response(200); self.send_header("content-type","text/calendar"); self.end_headers(); self.wfile.write(ics.encode()); return
+        self.send_response(404); self.end_headers()
     def log_message(self,*a): pass
 HTTPServer(("127.0.0.1",8999),H).serve_forever()

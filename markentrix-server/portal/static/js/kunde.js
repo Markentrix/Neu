@@ -9,6 +9,7 @@ import './kunde/postfach.js';
 import './kunde/auswertung.js';
 import './kunde/dokumente.js';
 import './kunde/website.js';
+import './kunde/dienste.js';
 import './kunde/belege.js';
 import './kunde/konto.js';
 import { erstStart } from './anleitung.js';

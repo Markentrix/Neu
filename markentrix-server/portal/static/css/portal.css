@@ -329,3 +329,6 @@ h1,h2,h3,b,strong,.pt,.pill{overflow-wrap:anywhere}
 @media(min-width:700px){.schritt{grid-template-columns:150px minmax(0,1fr)}.schritt .handybild svg{width:150px}}
 .appbanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--tint);border:1px solid var(--tintline);border-radius:12px;padding:8px 10px;margin:0 0 10px;font-size:13.5px}
 .appbanner span{flex:1 1 180px}.appbanner .zu{background:none;border:0;font-size:16px;line-height:1;padding:6px;cursor:pointer;color:var(--mut)}
+details.hilfe{margin-top:10px;border:1px solid var(--border,rgba(128,128,128,.3));border-radius:10px;padding:8px 12px}
+details.hilfe>summary{cursor:pointer;font-weight:600}
+pre.code{background:rgba(128,128,128,.12);padding:10px 12px;border-radius:8px;font-size:12px;overflow:auto;margin:8px 0}

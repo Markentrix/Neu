@@ -228,6 +228,26 @@ export function brandingKarte(kid, k) {
       k.branding_farbe && knopf('Farbe zurücksetzen', async () => { farbeGesetzt = false; senden({}); }, 'sec')));
 }
 
+/** Website-Dienste eines Kunden: Status und fertiger Einbau-Code. Zugangsdaten sieht der Admin bewusst nie. */
+export async function diensteKarte(kid) {
+  const d = await api('/api/admin/kunden/' + kid + '/website-dienste');
+  const ja = (x, t) => h('span', { class: 'pill ' + (x ? 'ok' : '') }, t + (x ? ': an' : ': aus'));
+  const st = (art) => { const e = d.status[art]; return e ? (e.ok || 0) + ' ok' + (e.fehler ? ', ' + e.fehler + ' Fehler' : '') + (e.letzte && !e.letzte.ok ? ' (zuletzt: ' + e.letzte.hinweis + ')' : '') : '–'; };
+  const code = (d.mail.aktiv ? '<div data-mk="kontakt"></div>\n' : '') + (d.kalender.aktiv ? '<div data-mk="termin"></div>\n' : '') + (d.bewertungen.aktiv ? '<div data-mk="bewertungen"></div>\n' : '') +
+    (d.paypal.aktiv ? '<div data-mk="paypal" data-betrag="49,90" data-titel="Gutschein"></div>\n' : '');
+  const skript = '<script src="' + d.basis + '/static/js/site.js" data-site="' + d.site_id + '" defer></script>';
+  const kopieren = (t) => knopf('Kopieren', async () => { try { await navigator.clipboard.writeText(t); } catch { /* ältere Browser */ } }, 'sec small');
+  return h('div', { class: 'card' }, h('h2', {}, 'Website-Dienste'),
+    h('p', { class: 'small muted' }, 'Was der Kunde im Portal eingetragen hat. Zugangsdaten (Passwörter, Kalender-Adresse) sind verschlüsselt und für uns nicht lesbar. Der Kunde kann sie nur ersetzen.'),
+    h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, ja(d.mail.aktiv, 'Formular'), ja(d.mail.smtp.gesetzt, 'Eigenes Postfach'), ja(d.kalender.aktiv, 'Termine'), ja(d.kalender.ical_gesetzt, 'Kalender verbunden'), ja(d.paypal.aktiv, 'PayPal'), ja(d.bewertungen.aktiv, 'Bewertungen')),
+    h('p', { class: 'small' }, 'Erlaubte Seiten: ', d.domains.length ? d.domains.join(', ') : 'noch keine (Domain oben eintragen, sonst lehnt der Server die Website ab)'),
+    h('p', { class: 'small' }, 'Formular: ' + st('kontakt') + ' · Termine: ' + st('termin') + ' · Bewertungen: ' + st('bewertungen') + ' · Test: ' + st('test')),
+    h('h3', {}, 'Einbau in die Website'),
+    h('p', { class: 'small muted' }, '1. Skript einmal vor </body> einfügen. 2. Die Bausteine dort platzieren, wo sie erscheinen sollen.'),
+    h('pre', { class: 'code', style: 'white-space:pre-wrap;overflow-wrap:anywhere' }, skript), kopieren(skript),
+    code ? [h('pre', { class: 'code', style: 'white-space:pre-wrap' }, code), kopieren(code)] : h('p', { class: 'small muted' }, 'Noch kein Dienst eingeschaltet. Sobald der Kunde einen Dienst aktiviert, erscheinen hier die Bausteine.'));
+}
+
 export async function domainKarte(kid) {
   const liste = await api('/api/admin/kunden/' + kid + '/domains'), m = h('div');
   const dialogDomain = (z) => {
@@ -422,6 +442,7 @@ export async function kundeDetail(kid) {
     await berichteKarte(kid),
     await externKarte(kid),
     await domainKarte(kid),
+    await diensteKarte(kid),
     await qrKarte('kunde', (k.ansprechpartner || '').split(' ')[0]),
     await kostenKarte(kid),
     brandingKarte(kid, k),

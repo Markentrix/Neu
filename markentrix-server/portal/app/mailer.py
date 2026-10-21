@@ -14,22 +14,26 @@ def konfiguriert() -> bool:
     return bool(c.get("host") and c.get("absender"))
 
 
-def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None) -> tuple[bool, str]:
+def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
+           von_name: str | None = None) -> tuple[bool, str]:
     """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel festgehalten."""
-    ok, grund = _senden(an, betreff, text, anhang)
+    ok, grund = _senden(an, betreff, text, anhang, reply_to, von_name)
     if grund != "E-Mail-Versand ist noch nicht eingerichtet.":
         betrieb.notieren("mail", {"ok_am": betrieb.jetzt()} if ok else {"fehler_am": betrieb.jetzt(), "fehler": grund[:200]})
     return ok, grund
 
 
-def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None) -> tuple[bool, str]:
+def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
+            von_name: str | None = None) -> tuple[bool, str]:
     try:
         with tx("system") as cur:
             c = einstellungen.lesen(cur, "smtp")
         if not (c.get("host") and c.get("absender")):
             return False, "E-Mail-Versand ist noch nicht eingerichtet."
         msg = EmailMessage()
-        msg["From"] = formataddr((c.get("absender_name") or "Markentrix", c["absender"]))
+        msg["From"] = formataddr((von_name or c.get("absender_name") or "Markentrix", c["absender"]))
+        if reply_to:
+            msg["Reply-To"] = reply_to
         msg["To"] = an
         msg["Subject"] = betreff
         msg["Date"] = formatdate(localtime=True)
