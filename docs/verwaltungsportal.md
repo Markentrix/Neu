@@ -21,6 +21,13 @@ Die eigene Statistik setzt keine Cookies und speichert keine IP-Adressen. Ein Ei
 5. Nach dem Termin: **Bewertung anfragen**. Das Portal warnt, wenn die Kundin oder der Kunde der Bewertungsanfrage im Formular nicht zugestimmt hat. Details im Dokument „Bewertungs-Prozess“.
 6. **Als CSV exportieren** liefert alle Anfragen für Excel.
 
+**Postausgang:** Jede E-Mail an Kunden wartet hier auf Ihre Freigabe, mit Zähler im Menü. Pro E-Mail können Sie:
+- die Anzahlung festlegen oder ändern; der Text wird dann neu erzeugt,
+- Betreff und Text anpassen,
+- „Freigeben und senden“ oder „Nicht senden“ wählen.
+
+Erinnerungen haben einen geplanten Versandzeitpunkt. Unten im Postausgang legen Sie fest, welche E-Mail-Arten eine Freigabe brauchen.
+
 **Online-Buchungen:**
 - Status „Reserviert“: Der Kunde hat noch nicht bestätigt bzw. angezahlt.
 - Nach der Anzahlung oder Bestätigung steht der Termin automatisch auf „Termin bestätigt“.

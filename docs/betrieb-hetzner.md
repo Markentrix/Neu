@@ -64,14 +64,19 @@ Benachrichtigungen bei neuen Anfragen und Eingangsbestätigungen an Kund:innen l
 
 So läuft eine Online-Buchung ab:
 
-1. Der Kunde wählt Paket, Fahrzeug, Tag und Uhrzeit. Die Uhrzeit ist danach 24 Stunden für ihn reserviert (Status „Reserviert“).
-2. Er bekommt eine E-Mail mit einem Link. Dort leistet er 15 % Anzahlung per PayPal. Ohne PayPal-Zugang bestätigt er per Klick.
-3. Danach ist der Termin bestätigt:
+1. Der Kunde wählt Paket, Fahrzeug, Tag und Abgabezeit (8, 9 oder 10 Uhr). Die Uhrzeit ist danach für ihn vorgemerkt (Status „Reserviert“).
+2. René prüft im Portal unter **Postausgang** die E-Mail an den Kunden:
+   - Er kann die Anzahlung ändern. Ohne Festpreis, etwa bei Sport- und Luxusfahrzeugen, Wohnmobilen oder ElbDetail Care, legt er sie selbst fest.
+   - Er kann den Text anpassen und die E-Mail dann freigeben.
+3. Erst mit dem Versand startet die Reservierungsfrist von 24 Stunden. Gibt René eine Buchung nicht innerhalb von 3 Tagen frei, verfällt sie.
+4. Der Kunde leistet über den Link die Anzahlung per PayPal. Ohne PayPal-Zugang bestätigt er per Klick.
+7. Danach ist der Termin bestätigt:
    - Der Kunde bekommt die Bestätigung mit dem Hinweis, dass René anruft und das Fahrzeug vorab ansieht, dazu eine Kalenderdatei.
    - René bekommt eine Benachrichtigung.
    - Der Termin steht im Google Kalender.
-4. 24 und 6 Stunden vor dem Termin geht automatisch eine Erinnerung an den Kunden. Wird ein Termin erst kurz vorher bestätigt, entfällt die ältere Erinnerung.
-5. Nicht bestätigte Reservierungen verfallen automatisch, die Uhrzeit wird wieder frei.
+5. Die Bestätigung und die Erinnerungen (24 und 6 Stunden vorher) legt das System ebenfalls im Postausgang ab. Erinnerungen gehen nach der Freigabe zum geplanten Zeitpunkt raus. Nicht rechtzeitig freigegebene Erinnerungen entfallen.
+6. Welche E-Mail-Arten eine Freigabe brauchen, stellt René unten im Postausgang ein. Standard: alle.
+8. Nicht bestätigte Reservierungen verfallen automatisch, die Uhrzeit wird wieder frei.
 
 Voraussetzungen:
 
@@ -98,7 +103,12 @@ Ohne diese Einrichtung gibt es im Portal eine Abo-Adresse (iCal). Sie lässt sic
 2. Client-ID und Secret als `PAYPAL_CLIENT_ID` und `PAYPAL_SECRET` in `.env` eintragen. Zum Ausprobieren erst `PAYPAL_MODE=sandbox` mit Sandbox-Zugangsdaten nutzen, dann auf `live` umstellen.
 3. `docker compose up -d`. Im Portal unter Kalender steht dann „PayPal-Anzahlung aktiv“.
 
-Die Anzahlung beträgt 15 % vom Richtpreis des gewählten Pakets und der Fahrzeugklasse. Bei der Keramik sind es 15 % vom Einstiegspreis. Für Beratung, ElbDetail Care sowie Sport- und Luxusfahrzeuge und Wohnmobile ohne festen Preis gibt es keine Online-Anzahlung, der Kunde bestätigt per Klick. Erstattungen lösen Sie im Portal in der Anfrage mit „Anzahlung über PayPal erstatten“ aus.
+Das System schlägt die Anzahlung vor:
+- 15 % vom Richtpreis des gewählten Pakets und der Fahrzeugklasse.
+- Bei der Keramik 15 % vom Einstiegspreis.
+- Bei Buchungen über die Winter-Aktion 15 % vom Winter-Special-Preis (329 €).
+
+Ohne Festpreis legt René den Betrag im Postausgang fest. 0 bedeutet keine Anzahlung, dann bestätigt der Kunde per Klick. Erstattungen lösen Sie im Portal in der Anfrage mit „Anzahlung über PayPal erstatten“ aus.
 
 ## Alltag
 

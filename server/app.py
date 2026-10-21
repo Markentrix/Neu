@@ -128,6 +128,11 @@ CREATE TABLE IF NOT EXISTS salts (day TEXT PRIMARY KEY, salt TEXT);
 CREATE TABLE IF NOT EXISTS blocked (day TEXT PRIMARY KEY, reason TEXT);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
 CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, ts TEXT, action TEXT, detail TEXT);
+CREATE TABLE IF NOT EXISTS outbox (
+  id INTEGER PRIMARY KEY, ref TEXT, kind TEXT, to_addr TEXT, subject TEXT, body TEXT, attach TEXT, status TEXT,
+  created TEXT, send_after TEXT DEFAULT '', sent_at TEXT, note TEXT DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS ix_outbox_status ON outbox(status);
 """
 
 
@@ -534,7 +539,9 @@ def store_request(data):
     if data["typ"] == "termin" and data.get("uhrzeit") and data.get("email") and self_booking():
         status = "reserviert"  # Online-Buchung: Uhrzeit ist reserviert, bis der Kunde per Link bestätigt
         data["token"] = secrets.token_urlsafe(24)
-        data["hold_until"] = (now() + dt.timedelta(hours=booking_cfg()["holdHours"])).isoformat()
+        # Frist läuft ab Versand des Links; bis René die E-Mail freigibt, bleibt die Uhrzeit höchstens 3 Tage vorgemerkt
+        hold = max(72, booking_cfg()["holdHours"]) if approval_needed("reservierung") else booking_cfg()["holdHours"]
+        data["hold_until"] = (now() + dt.timedelta(hours=hold)).isoformat()
         dep = deposit_amount(data)
         if dep:
             data["anzahlung"] = dep
@@ -559,8 +566,11 @@ def notify(ref, data, status="neu"):
     body = f"Neue {title} über die Website ({ref})\n\n{summary_text(public_data(data))}\n"
     if status == "reserviert":
         title = "Online-Buchung"
-        body = (f"Neue Online-Buchung ({ref}): {de_when(data)}\nDer Kunde muss den Termin noch per E-Mail-Link bestätigen. "
-                f"Danach kommt die Bestätigung, und der Termin steht im Kalender.\n\n{summary_text(public_data(data))}\n")
+        dep = f"Vorgeschlagene Anzahlung: {eur(data['anzahlung'])}" if data.get("anzahlung") else "Kein Festpreis hinterlegt: Bitte die Anzahlung festlegen."
+        todo = ("Bitte im Portal unter Postausgang die E-Mail an den Kunden prüfen, die Anzahlung bei Bedarf ändern und freigeben."
+                if approval_needed("reservierung") else "Der Kunde hat den Link zur Bestätigung bereits erhalten.")
+        body = (f"Neue Online-Buchung ({ref}): {de_when(data)}\n{dep}\n{todo}\n\n{summary_text(public_data(data))}\n\n"
+                f"Postausgang: {Cfg.public_url}/admin/#/postausgang\n")
     if rp:
         body += f"\nRichtpreis laut Website: ab {rp} €\n"
     body += f"\nIm Verwaltungsportal öffnen: {Cfg.public_url}/admin/#/anfragen/{ref}\n"
@@ -580,7 +590,7 @@ def notify(ref, data, status="neu"):
         text = (f"{greet}\n\nvielen Dank für Ihre {title} bei {s.get('name', 'ElbDetail')}. {extra}\nIhre Angaben ({ref}):\n{summary_text(data)}\n\n"
                 f"Fragen? Antworten Sie einfach auf diese E-Mail oder schreiben Sie uns per WhatsApp: {s.get('phoneIntl', '')}\n\n"
                 f"Viele Grüße\n{s.get('name', 'ElbDetail')}\n{s.get('address', {}).get('street', '')}, {s.get('address', {}).get('zip', '')} {s.get('address', {}).get('city', '')}\n{Cfg.public_url}\n")
-        mail_async(data["email"], f"Ihre {title} bei {s.get('name', 'ElbDetail')} ({ref})", text, reply_to=s.get("email") or None)
+        customer_mail("eingang", ref, data["email"], f"Ihre {title} bei {s.get('name', 'ElbDetail')} ({ref})", text)
 
 
 # --------------------------------------------------------------------------- Gutscheine
@@ -848,30 +858,45 @@ def ics_event(ref, d, method="PUBLISH", cancel=False):
     return ("\r\n".join(lines) + "\r\n").encode()
 
 
-def mail_reservation(ref, d):
+def reservation_text(ref, d):
     s = site_info()
     cfg = booking_cfg()
+    pct = d.get("depositPercent", 15)
+    if deposit_online(d):
+        ask = (f"Bitte bestätigen Sie den Termin, indem Sie die Anzahlung von {eur(d['anzahlung'])} per PayPal leisten:\n{booking_link(ref, d['token'])}\n\n"
+               f"Die Anzahlung wird mit dem Endpreis verrechnet.\n\n")
+    else:
+        ask = f"Bitte bestätigen Sie den Termin mit einem Klick auf diesen Link:\n{booking_link(ref, d['token'])}\n\n"
+        if d.get("anzahlung"):
+            ask += f"Die Anzahlung von {eur(d['anzahlung'])} besprechen wir mit Ihnen am Telefon.\n\n"
     text = (f"Guten Tag {d.get('name', '').strip()},\n\nvielen Dank für Ihre Buchung bei {s.get('name', 'ElbDetail')}.\n\n"
-            f"Wir haben diesen Termin für Sie reserviert:\n{de_when(d)}\n\n"
-            + (f"Bitte bestätigen Sie den Termin, indem Sie die Anzahlung von {eur(d['anzahlung'])} ({d.get('depositPercent', 15)} % vom Richtpreis) per PayPal leisten:\n{booking_link(ref, d['token'])}\n\n"
-               f"Die Anzahlung wird mit dem Endpreis verrechnet.\n\n" if deposit_online(d) else
-               f"Bitte bestätigen Sie den Termin mit einem Klick auf diesen Link:\n{booking_link(ref, d['token'])}\n\n") +
+            f"Wir haben diesen Termin für Sie reserviert:\n{de_when(d)}\n\n{ask}"
             f"Die Reservierung gilt {cfg['holdHours']} Stunden. Ohne Bestätigung geben wir die Uhrzeit danach wieder frei.\n\n"
             f"Ihre Angaben ({ref}):\n{summary_text(public_data(d))}\n\n{mail_footer()}")
-    mail_async(d["email"], f"Bitte bestätigen: Ihr Termin am {termin_start(d).strftime('%d.%m.%Y')} ({ref})", text, reply_to=s.get("email") or None)
+    return f"Bitte bestätigen: Ihr Termin am {termin_start(d).strftime('%d.%m.%Y')} ({ref})", text
 
 
-def mail_confirmed(ref, d):
+def mail_reservation(ref, d):
+    subj, text = reservation_text(ref, d)
+    customer_mail("reservierung", ref, d["email"], subj, text)
+
+
+def confirmed_text(ref, d):
     s = site_info()
     owner = (s.get("about") or {}).get("name") or "Wir"
     text = (f"Guten Tag {d.get('name', '').strip()},\n\nIhr Termin bei {s.get('name', 'ElbDetail')} ist bestätigt:\n{de_when(d)}\n\n"
             f"So geht es weiter: {owner} meldet sich vorab telefonisch bei Ihnen und sieht sich Ihr Fahrzeug vor der Aufbereitung genau an. "
             f"So erhalten Sie den verbindlichen Preis, bevor wir anfangen.\n\n{deposit_text(d)}{stand_text(d)}\n\n"
             f"Bitte räumen Sie Wertsachen und persönliche Gegenstände vorher aus dem Auto.\n\n"
-            f"Sie erhalten 24 Stunden und 6 Stunden vor dem Termin eine Erinnerung. Den Termin finden Sie auch im Anhang für Ihren Kalender.\n\n"
-            f"Termin absagen oder verschieben: {booking_link(ref, d['token'])}\n\nIhre Angaben ({ref}):\n{summary_text(public_data(d))}\n\n{mail_footer()}")
-    mail_async(d["email"], f"Termin bestätigt: {termin_start(d).strftime('%d.%m.%Y, %H:%M')} Uhr ({ref})", text,
-               reply_to=s.get("email") or None, attachments=[("termin.ics", "text/calendar", ics_event(ref, d))])
+            f"Vor dem Termin erinnern wir Sie noch einmal per E-Mail. Den Termin finden Sie auch im Anhang für Ihren Kalender.\n\n"
+            f"Termin absagen: {booking_link(ref, d['token'])}\n\nIhre Angaben ({ref}):\n{summary_text(public_data(d))}\n\n{mail_footer()}")
+    return f"Termin bestätigt: {termin_start(d).strftime('%d.%m.%Y, %H:%M')} Uhr ({ref})", text
+
+
+def mail_confirmed(ref, d):
+    subj, text = confirmed_text(ref, d)
+    discard_mails(ref, ["bestaetigung"], "ersetzt")
+    customer_mail("bestaetigung", ref, d["email"], subj, text, attachments=[("termin.ics", "text/calendar", ics_event(ref, d))])
 
 
 def deposit_text(d):
@@ -879,20 +904,22 @@ def deposit_text(d):
     if z.get("capture_id"):
         return f"Ihre Anzahlung von {eur(z['value'])} per PayPal ist eingegangen und wird mit dem Endpreis verrechnet.\n\n"
     if d.get("anzahlung"):
-        return f"Die Anzahlung von {eur(d['anzahlung'])} ({d.get('depositPercent', 15)} % vom Richtpreis) besprechen wir beim Telefonat.\n\n"
+        return f"Die Anzahlung von {eur(d['anzahlung'])} besprechen wir beim Telefonat.\n\n"
     return ""
 
 
-def mail_reminder(ref, d, hours):
+def reminder_text(ref, d, at):
+    """Erinnerungstext aus Sicht des Versandzeitpunkts (morgen / heute)."""
     s = site_info()
     st = termin_start(d)
-    when = "morgen" if st.date() == today() + dt.timedelta(days=1) else ("heute" if st.date() == today() else st.strftime("am %d.%m.%Y"))
+    when = "morgen" if st.date() == at.date() + dt.timedelta(days=1) else ("heute" if st.date() == at.date() else st.strftime("am %d.%m.%Y"))
+    a = s.get("address", {})
     text = (f"Guten Tag {d.get('name', '').strip()},\n\nwir freuen uns auf Sie: Ihr Termin bei {s.get('name', 'ElbDetail')} ist {when} um {st.strftime('%H:%M')} Uhr.\n\n"
-            f"Adresse: {s.get('address', {}).get('street', '')}, {s.get('address', {}).get('zip', '')} {s.get('address', {}).get('city', '')}\n"
-            f"Route: {'https://www.google.com/maps/search/?api=1&query=' + urllib.parse.quote(s.get('address', {}).get('street', '') + ' ' + s.get('address', {}).get('city', ''))}\n\n"
+            f"Adresse: {a.get('street', '')}, {a.get('zip', '')} {a.get('city', '')}\n"
+            f"Route: {'https://www.google.com/maps/search/?api=1&query=' + urllib.parse.quote(a.get('street', '') + ' ' + a.get('city', ''))}\n\n"
             f"{stand_text(d)} Bitte räumen Sie Wertsachen vorher aus dem Auto.\n\n"
             f"Etwas dazwischengekommen? Hier können Sie absagen: {booking_link(ref, d['token'])}\n\n{mail_footer()}")
-    mail_async(d["email"], f"Erinnerung: Ihr Termin {when} um {st.strftime('%H:%M')} Uhr ({ref})", text, reply_to=s.get("email") or None)
+    return f"Erinnerung: Ihr Termin {when} um {st.strftime('%H:%M')} Uhr ({ref})", text
 
 
 def public_data(d):
@@ -928,6 +955,8 @@ def confirm_termin(r, d, by="kunde"):
     threading.Thread(target=google_upsert, args=(r["ref"],), daemon=True).start()
     if d.get("email") and termin_start(d):
         mail_confirmed(r["ref"], d)
+        schedule_reminders(r["ref"], d)
+    discard_mails(r["ref"], ["reservierung"], "Termin bereits bestätigt")
     if by == "kunde":
         s = site_info()
         mail_async(Cfg.notify_to or s.get("email"), f"Termin vom Kunden bestätigt: {d.get('name')} · {de_when(d)} ({r['ref']})",
@@ -942,6 +971,7 @@ def cancel_termin(r, d, by="kunde"):
     d["storniert_am"] = now().isoformat()
     save_termin(r["id"], d, "storniert" if by == "kunde" else r["status"])
     audit("termin_storniert", f"{r['ref']} durch {by}")
+    discard_mails(r["ref"], ["reservierung", "bestaetigung", "erinnerung"], "Termin abgesagt")
     threading.Thread(target=google_delete, args=(r["ref"],), daemon=True).start()
     if by == "kunde":
         s = site_info()
@@ -951,11 +981,11 @@ def cancel_termin(r, d, by="kunde"):
                    + (f"Die Anzahlung von {eur(d['zahlung']['value'])} wurde per PayPal bezahlt. Eine Erstattung lösen Sie im Verwaltungsportal aus.\n" if paid else "")
                    + f"\n{summary_text(public_data(d))}\n")
         if d.get("email"):
-            mail_async(d["email"], f"Ihr Termin wurde abgesagt ({r['ref']})",
-                       f"Guten Tag {d.get('name', '').strip()},\n\nIhr Termin am {de_when(d)} ist abgesagt. "
-                       + ("Zu Ihrer Anzahlung melden wir uns persönlich bei Ihnen. " if paid else "")
-                       + f"Einen neuen Termin buchen Sie jederzeit unter {Cfg.public_url}/termin.html\n\n{mail_footer()}",
-                       attachments=[("absage.ics", "text/calendar", ics_event(r["ref"], d, "CANCEL", cancel=True))])
+            customer_mail("absage", r["ref"], d["email"], f"Ihr Termin wurde abgesagt ({r['ref']})",
+                          f"Guten Tag {d.get('name', '').strip()},\n\nIhr Termin am {de_when(d)} ist abgesagt. "
+                          + ("Zu Ihrer Anzahlung melden wir uns persönlich bei Ihnen. " if paid else "")
+                          + f"Einen neuen Termin buchen Sie jederzeit unter {Cfg.public_url}/termin.html\n\n{mail_footer()}",
+                          attachments=[("absage.ics", "text/calendar", ics_event(r["ref"], d, "CANCEL", cancel=True))])
 
 
 def booking_watcher():
@@ -969,33 +999,100 @@ def booking_watcher():
 
 
 def booking_tick():
-    """Ein Durchlauf: Reservierungen ohne Bestätigung verfallen lassen, fällige Erinnerungen verschicken."""
+    """Ein Durchlauf: Reservierungen ohne Bestätigung verfallen lassen, freigegebene und fällige E-Mails (z. B. Erinnerungen) senden."""
     ts = now()
     with db() as c:
-        rows = [dict(r) for r in c.execute("SELECT id, ref, status, data FROM anfragen WHERE typ='termin' AND status IN ('reserviert','termin_bestaetigt') AND datum >= ?",
+        rows = [dict(r) for r in c.execute("SELECT id, ref, status, data FROM anfragen WHERE typ='termin' AND status='reserviert' AND datum >= ?",
                                            ((today() - dt.timedelta(days=1)).isoformat(),))]
     for r in rows:
         d = json.loads(r["data"] or "{}")
-        if r["status"] == "reserviert":
-            if d.get("hold_until") and d["hold_until"] < ts.isoformat():
-                save_termin(r["id"], d, "verfallen")
-                audit("termin_verfallen", r["ref"])
+        if d.get("hold_until") and d["hold_until"] < ts.isoformat():
+            save_termin(r["id"], d, "verfallen")
+            discard_mails(r["ref"], ["reservierung"], "Reservierung verfallen")
+            audit("termin_verfallen", r["ref"])
+    outbox_tick()
+
+
+# --------------------------------------------------------------------------- Postausgang: E-Mails an Kunden erst nach Freigabe durch den Betrieb
+MAIL_KINDS = {"reservierung": "Buchung: Link zur Anzahlung bzw. Bestätigung", "bestaetigung": "Terminbestätigung", "erinnerung": "Erinnerung vor dem Termin",
+              "absage": "Absage", "erstattung": "Erstattung der Anzahlung", "eingang": "Eingangsbestätigung (Kontakt, Gutschein, Firmen)"}
+
+
+def approval_needed(kind):
+    return bool((setting("mailApproval", {}) or {}).get(kind, True))
+
+
+def customer_mail(kind, ref, to, subject, body, attachments=None, send_after=None):
+    """Kunden-E-Mail in den Postausgang legen. Mit Freigabepflicht als Entwurf, sonst sofort bzw. zum geplanten Zeitpunkt senden."""
+    if not to:
+        return None
+    status = "entwurf" if approval_needed(kind) else "freigegeben"
+    att = json.dumps([[n, m, base64.b64encode(b).decode()] for n, m, b in (attachments or [])])
+    with db() as c:
+        oid = c.execute("INSERT INTO outbox(ref, kind, to_addr, subject, body, attach, status, created, send_after) VALUES (?,?,?,?,?,?,?,?,?)",
+                        (ref, kind, to, subject, body, att, status, now().isoformat(), send_after or "")).lastrowid
+    if status == "freigegeben" and (not send_after or send_after <= now().isoformat()):
+        threading.Thread(target=deliver, args=(oid,), daemon=True).start()
+    return oid
+
+
+def deliver(oid):
+    with db() as c:
+        m = c.execute("SELECT * FROM outbox WHERE id=?", (oid,)).fetchone()
+        if not m or m["status"] != "freigegeben":
+            return False
+        c.execute("UPDATE outbox SET status='wird_gesendet' WHERE id=?", (oid,))
+    s = site_info()
+    att = [(n, mt, base64.b64decode(b)) for n, mt, b in json.loads(m["attach"] or "[]")]
+    ok = send_mail(m["to_addr"], m["subject"], m["body"], reply_to=s.get("email") or None, attachments=att)
+    with db() as c:
+        c.execute("UPDATE outbox SET status=?, sent_at=? WHERE id=?", ("gesendet" if ok else "fehler", now().isoformat(), oid))
+    if ok and m["kind"] == "reservierung" and m["ref"]:  # Reservierungsfrist läuft ab Versand des Links
+        r, d = load_termin(m["ref"])
+        if r and r["status"] == "reserviert":
+            d["hold_until"] = (now() + dt.timedelta(hours=booking_cfg()["holdHours"])).isoformat()
+            save_termin(r["id"], d)
+    return ok
+
+
+def discard_mails(ref, kinds, reason="verworfen"):
+    with db() as c:
+        c.execute(f"UPDATE outbox SET status=?, note=? WHERE ref=? AND kind IN ({','.join('?' * len(kinds))}) AND status IN ('entwurf','freigegeben')",
+                  ["verworfen", reason, ref] + list(kinds))
+
+
+def outbox_tick():
+    """Freigegebene, fällige E-Mails senden; nicht rechtzeitig freigegebene Erinnerungen verwerfen."""
+    ts = now().isoformat()
+    with db() as c:
+        due = [r["id"] for r in c.execute("SELECT id FROM outbox WHERE status='freigegeben' AND (send_after='' OR send_after<=?)", (ts,))]
+        late = c.execute("SELECT o.id, o.ref FROM outbox o JOIN anfragen a ON a.ref=o.ref WHERE o.kind='erinnerung' AND o.status='entwurf' AND o.send_after<=?", (ts,)).fetchall()
+        for r in late:
+            r2 = c.execute("SELECT datum, data FROM anfragen WHERE ref=?", (r["ref"],)).fetchone()
+            st = termin_start(json.loads(r2["data"] or "{}")) if r2 else None
+            if not st or st.isoformat() <= ts:
+                c.execute("UPDATE outbox SET status='verworfen', note='nicht rechtzeitig freigegeben' WHERE id=?", (r["id"],))
+    for oid in due:
+        deliver(oid)
+
+
+def schedule_reminders(ref, d):
+    """Erinnerungen 24 h und 6 h vorher als (freizugebende) geplante E-Mails anlegen."""
+    discard_mails(ref, ["erinnerung"], "neu geplant")
+    st = termin_start(d)
+    if not st or not d.get("email") or not d.get("token"):
+        return
+    for hrs in booking_cfg()["reminderHours"]:
+        at = st - dt.timedelta(hours=hrs)
+        if at <= now():
             continue
-        st = termin_start(d)
-        if not st or not d.get("email") or not d.get("token"):
-            continue
-        sent = d.setdefault("mails", {})
-        conf = dt.datetime.fromisoformat(d.get("bestaetigt_am") or ts.isoformat())
-        due = [h for h in booking_cfg()["reminderHours"] if f"erinnerung_{h}h" not in sent and st - dt.timedelta(hours=h) <= ts < st]
-        if not due:
-            continue
-        hrs = min(due)  # nach einer Pause nur die jüngste fällige Erinnerung schicken, nicht mehrere auf einmal
-        for h in due:
-            sent[f"erinnerung_{h}h"] = "übersprungen"
-        if conf <= st - dt.timedelta(hours=hrs):  # erst innerhalb der Frist bestätigt: die Bestätigung genügt
-            mail_reminder(r["ref"], d, hrs)
-            sent[f"erinnerung_{hrs}h"] = ts.isoformat()
-        save_termin(r["id"], d)
+        subj, text = reminder_text(ref, d, at)
+        customer_mail("erinnerung", ref, d["email"], subj, text, send_after=at.isoformat())
+
+
+def outbox_open():
+    with db() as c:
+        return c.execute("SELECT COUNT(*) n FROM outbox WHERE status='entwurf'").fetchone()["n"]
 
 
 # --------------------------------------------------------------------------- Anzahlung per PayPal (Orders API v2, Weiterleitung ohne Fremdskripte)
@@ -1044,6 +1141,9 @@ def deposit_amount(d):
     if pct <= 0:
         return None
     base = richtpreis(d)
+    ws = site_info().get("winterSpecial") or {}
+    if d.get("quelle") == "winter" and ws.get("price") and (not ws.get("validUntil") or ws["validUntil"] >= today().isoformat()):
+        base = ws["price"]  # Buchung über die Winter-Aktion: Anzahlung vom Winter-Special-Preis
     if base is None and d.get("paket") == "keramik":
         try:
             base = min(c["price"] for c in pricing()["ceramic"]["car"] if c.get("price") is not None)
@@ -1881,7 +1981,7 @@ class AdminAPI:
         if p == "me":
             s = site_info()
             return h.send(200, {"user": Cfg.admin_user, "site": s.get("name"), "url": Cfg.public_url, "mail": mail_ready(),
-                                "lastPublish": setting("lastPublish"), "open": self._open()})
+                                "lastPublish": setting("lastPublish"), "open": self._open(), "outbox": outbox_open()})
         if p == "stats":
             return h.send(200, stats(self.q("days", "30")))
         if p == "anfragen" and m == "GET":
@@ -1908,6 +2008,11 @@ class AdminAPI:
             return self.calendar()
         if p == "google":
             return self.google()
+        if p == "postausgang":
+            return self.outbox()
+        mm = re.match(r"^postausgang/(\d+)(?:/(freigeben|verwerfen))?$", p)
+        if mm:
+            return self.outbox_item(int(mm.group(1)), mm.group(2) or "")
         if p == "einstellungen":
             return self.settings()
         if p == "inhalte" and m == "GET":
@@ -2004,7 +2109,6 @@ class AdminAPI:
                     moved = (nd, nt) != (dd.get("datum"), dd.get("uhrzeit", ""))
                     if moved:
                         dd.update(datum=nd, uhrzeit=nt)
-                        dd.pop("mails", None)  # Erinnerungen für den neuen Zeitpunkt neu verschicken
                         c.execute("UPDATE anfragen SET datum=?, data=? WHERE id=?", (nd, json.dumps(dd, ensure_ascii=False), r["id"]))
                 c.execute("UPDATE anfragen SET status=?, notizen=?, updated=? WHERE id=?", (st, notes, now().isoformat(), r["id"]))
                 audit("anfrage_status", f"{r['ref']} → {st}", c)
@@ -2020,6 +2124,7 @@ class AdminAPI:
                     threading.Thread(target=google_upsert, args=(r["ref"],), daemon=True).start()
                     if dd.get("email") and dd.get("token"):
                         mail_confirmed(r["ref"], dd)
+                        schedule_reminders(r["ref"], dd)
                 return h.send(200, {"ok": True})
             if m == "DELETE":
                 c.execute("UPDATE gutscheine SET anfrage_id=NULL WHERE anfrage_id=?", (r["id"],))
@@ -2047,9 +2152,9 @@ class AdminAPI:
         save_termin(r["id"], d)
         audit("anzahlung_erstattet", f"{ref}: {z['value']} €")
         if d.get("email"):
-            mail_async(d["email"], f"Ihre Anzahlung wurde erstattet ({ref})",
-                       f"Guten Tag {d.get('name', '').strip()},\n\nwir haben Ihre Anzahlung von {eur(float(z['value']))} über PayPal erstattet. "
-                       f"Je nach Bank dauert die Gutschrift wenige Tage.\n\n{mail_footer()}")
+            customer_mail("erstattung", ref, d["email"], f"Ihre Anzahlung wurde erstattet ({ref})",
+                          f"Guten Tag {d.get('name', '').strip()},\n\nwir haben Ihre Anzahlung von {eur(float(z['value']))} über PayPal erstattet. "
+                          f"Je nach Bank dauert die Gutschrift wenige Tage.\n\n{mail_footer()}")
         return self.h.send(200, {"ok": True, "message": "Anzahlung erstattet."})
 
     def template(self, ref, art):
@@ -2213,6 +2318,74 @@ class AdminAPI:
                         raise Invalid({k: f"Bitte eine Zahl von {lo} bis {hi} angeben."})
                     set_setting(k, v)
             return h.send(200, {"ok": True})
+        h.send(405, {"ok": False})
+
+    def outbox(self):
+        h, m = self.h, self.m
+        if m == "PUT":  # Freigabepflicht je E-Mail-Art
+            d = h.parse()
+            cur = setting("mailApproval", {}) or {}
+            cur.update({k: bool(v) for k, v in (d.get("approval") or {}).items() if k in MAIL_KINDS})
+            set_setting("mailApproval", cur)
+            return h.send(200, {"ok": True})
+        st = self.q("status", "offen")
+        where = {"offen": "status IN ('entwurf','freigegeben','fehler')", "gesendet": "status='gesendet'", "alle": "1=1"}.get(st, "status IN ('entwurf','freigegeben','fehler')")
+        args = []
+        if self.q("ref"):
+            where = "ref=?"; args = [self.q("ref")]
+        with db() as c:
+            rows = [dict(r) for r in c.execute(f"SELECT id, ref, kind, to_addr, subject, body, status, created, send_after, sent_at, note FROM outbox WHERE {where} ORDER BY CASE status WHEN 'entwurf' THEN 0 WHEN 'fehler' THEN 1 ELSE 2 END, COALESCE(NULLIF(send_after,''), created) LIMIT 200", args)]
+        for o in rows:
+            if o["kind"] == "reservierung" and o["ref"]:
+                r, d = load_termin(o["ref"])
+                o["anzahlung"] = (d or {}).get("anzahlung")
+                o["richtpreis"] = richtpreis(d or {})
+                o["paypal"] = paypal_configured()
+        return h.send(200, {"items": rows, "kinds": MAIL_KINDS, "approval": {k: approval_needed(k) for k in MAIL_KINDS}, "open": outbox_open()})
+
+    def outbox_item(self, oid, action):
+        h, m = self.h, self.m
+        with db() as c:
+            o = c.execute("SELECT * FROM outbox WHERE id=?", (oid,)).fetchone()
+        if not o:
+            return h.send(404, {"ok": False, "message": "Nicht gefunden"})
+        if o["status"] not in ("entwurf", "freigegeben", "fehler"):
+            return h.send(409, {"ok": False, "message": "Diese E-Mail ist bereits erledigt."})
+        if m == "PUT" or (m == "POST" and action == "freigeben"):
+            d = h.parse()
+            subj, body = str(d.get("subject", o["subject"]))[:300], str(d.get("body", o["body"]))[:20000]
+            if o["kind"] == "reservierung" and "anzahlung" in d and o["ref"]:  # Anzahlung festlegen oder ändern, Text neu erzeugen
+                r, td = load_termin(o["ref"])
+                try:
+                    amt = round(float(str(d["anzahlung"]).replace(",", ".") or 0), 2)
+                except ValueError:
+                    return h.send(422, {"ok": False, "message": "Bitte einen Betrag in Euro angeben."})
+                if amt < 0 or amt > 10000:
+                    return h.send(422, {"ok": False, "message": "Bitte einen Betrag zwischen 0 und 10.000 € angeben."})
+                if amt != (td.get("anzahlung") or 0):
+                    if amt:
+                        td["anzahlung"] = amt
+                    else:
+                        td.pop("anzahlung", None)
+                    save_termin(r["id"], td)
+                    audit("anzahlung_geaendert", f"{o['ref']}: {amt} €")
+                    subj, body = reservation_text(o["ref"], td)
+            with db() as c:
+                c.execute("UPDATE outbox SET subject=?, body=?, status=? WHERE id=?",
+                          (subj, body, "freigegeben" if action == "freigeben" else o["status"], oid))
+            if action == "freigeben":
+                audit("mail_freigegeben", f"{o['ref']} {o['kind']}")
+                if not o["send_after"] or o["send_after"] <= now().isoformat():
+                    ok = deliver(oid)
+                    return h.send(200 if ok else 502, {"ok": ok, "message": "E-Mail gesendet." if ok else "Versand fehlgeschlagen, bitte SMTP prüfen.",
+                                                         "subject": subj, "body": body})
+                return h.send(200, {"ok": True, "message": "Freigegeben, wird zum geplanten Zeitpunkt gesendet.", "subject": subj, "body": body})
+            return h.send(200, {"ok": True, "message": "Gespeichert.", "subject": subj, "body": body})
+        if m == "POST" and action == "verwerfen":
+            with db() as c:
+                c.execute("UPDATE outbox SET status='verworfen', note='vom Betrieb verworfen' WHERE id=?", (oid,))
+            audit("mail_verworfen", f"{o['ref']} {o['kind']}")
+            return h.send(200, {"ok": True, "message": "Verworfen."})
         h.send(405, {"ok": False})
 
     def google(self):

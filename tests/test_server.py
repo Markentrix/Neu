@@ -508,11 +508,14 @@ class TestBooking(Base):
         app.Cfg.smtp_host, app.Cfg.smtp_from = "smtp.test", "termine@example.com"
         app.send_mail = lambda to, subject, text, reply_to=None, attachments=None: self.mails.append(
             {"to": to, "subject": subject, "text": text, "att": attachments or []}) or True
+        app.set_setting("mailApproval", {k: False for k in app.MAIL_KINDS})  # Standardfälle: ohne Freigabe; Freigabe eigener Test
 
     def tearDown(self):
         app.send_mail, app.Cfg.smtp_host, app.Cfg.smtp_from = self._orig
         with app.db() as c:  # andere Tests (Auslastung) sollen diese Buchungen nicht sehen
             c.execute("DELETE FROM anfragen WHERE name='Karla Kunde'")
+            c.execute("DELETE FROM outbox")
+        app.set_setting("mailApproval", {})
 
     def wait_mail(self, to, n=1):
         for _ in range(100):
@@ -567,24 +570,22 @@ class TestBooking(Base):
         self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)
         threading.Event().wait(0.2)
         self.assertEqual(len(self.mails), n)
-        # Erinnerungen: Termin auf 20 Stunden in die Zukunft legen, bestätigt vor zwei Tagen
-        def move(hours):
-            start = app.now() + dt.timedelta(hours=hours)
-            r, d = app.load_termin(ref)
-            d.update(datum=start.date().isoformat(), uhrzeit=start.strftime("%H:%M"), bestaetigt_am=(app.now() - dt.timedelta(days=2)).isoformat())
-            with app.db() as c:
-                c.execute("UPDATE anfragen SET datum=?, data=? WHERE id=?", (d["datum"], json.dumps(d), r["id"]))
-        move(20)
+        # Erinnerungen 24 h und 6 h vorher sind geplant und gehen erst zum Zeitpunkt raus
+        with app.db() as c:
+            rem = [dict(x) for x in c.execute("SELECT id, send_after, status FROM outbox WHERE ref=? AND kind='erinnerung' ORDER BY send_after", (ref,))]
+        self.assertEqual(len(rem), 2)
+        st = app.termin_start(app.load_termin(ref)[1])
+        self.assertEqual(rem[0]["send_after"], (st - dt.timedelta(hours=24)).isoformat())
         app.booking_tick()
-        rem = [m for m in self.wait_mail("kunde@example.com", 3) if "Erinnerung" in m["subject"]]
-        self.assertEqual(len(rem), 1)
+        threading.Event().wait(0.1)
+        self.assertFalse([m for m in self.mails if "Erinnerung" in m["subject"]])
+        with app.db() as c:
+            c.execute("UPDATE outbox SET send_after=? WHERE id=?", ((app.now() - dt.timedelta(minutes=1)).isoformat(), rem[0]["id"]))
+        app.booking_tick()
+        self.wait_mail("kunde@example.com", 3)
         app.booking_tick()  # keine doppelte Erinnerung
         threading.Event().wait(0.1)
         self.assertEqual(len([m for m in self.mails if "Erinnerung" in m["subject"]]), 1)
-        move(5)
-        app.booking_tick()
-        self.wait_mail("kunde@example.com", 4)
-        self.assertEqual(len([m for m in self.mails if "Erinnerung" in m["subject"]]), 2)
         # Kalender-Abo (iCal) nur mit Schlüssel
         self.assertEqual(self.req("GET", "/api/kalender.ics?key=falsch", raw=True)[0], 404)
         code, ics = self.req("GET", "/api/kalender.ics?key=" + app.ics_key(), raw=True)
@@ -598,14 +599,14 @@ class TestBooking(Base):
 
     def test_reservation_expires_and_frees_slot(self):
         day = next_workday(10)
-        code, j = self.book(day, "13:00", email="spaet@example.com")
+        code, j = self.book(day, "09:00", email="spaet@example.com")
         self.assertEqual(code, 200, j)
         ref = j["ref"]
         r, d = app.load_termin(ref)
         d["hold_until"] = (app.now() - dt.timedelta(minutes=1)).isoformat()
         app.save_termin(r["id"], d)
         code, j = self.req("GET", f"/api/slots?tag={day}")
-        self.assertTrue(next(x for x in j["slots"] if x["zeit"] == "13:00")["frei"])  # abgelaufene Reservierung belegt nichts
+        self.assertTrue(next(x for x in j["slots"] if x["zeit"] == "09:00")["frei"])  # abgelaufene Reservierung belegt nichts
         app.booking_tick()
         with app.db() as c:
             self.assertEqual(c.execute("SELECT status FROM anfragen WHERE ref=?", (ref,)).fetchone()["status"], "verfallen")
@@ -656,13 +657,59 @@ class TestBooking(Base):
             for k in ("PAYPAL_CLIENT_ID", "PAYPAL_SECRET"):
                 os.environ.pop(k, None)
 
+    def test_approval_outbox(self):
+        """Jede Kunden-E-Mail wartet im Postausgang; René legt die Anzahlung fest, ändert den Text und gibt frei."""
+        app.set_setting("mailApproval", {})
+        self.login()
+        day = next_workday(14)
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "essential", "klasse": "sport", "datum": day, "uhrzeit": "09:00",
+                                                    "name": "Karla Kunde", "telefon": "0171 2223334", "email": "frei@example.com", "einwilligung": "ja"})
+        self.assertEqual(code, 200, j)
+        ref = j["ref"]
+        threading.Event().wait(0.2)
+        self.assertFalse([m for m in self.mails if m["to"] == "frei@example.com"])  # noch nichts an den Kunden
+        self.assertTrue(any("Anzahlung festlegen" in m["text"] for m in self.mails))  # Sportwagen: kein Festpreis
+        code, ob = self.admin("GET", "postausgang")
+        draft = next(o for o in ob["items"] if o["ref"] == ref and o["kind"] == "reservierung")
+        self.assertEqual(draft["status"], "entwurf")
+        self.assertIsNone(draft["anzahlung"])
+        code, me = self.admin("GET", "me")
+        self.assertGreaterEqual(me["outbox"], 1)
+        code, j = self.admin("PUT", f"postausgang/{draft['id']}", {"anzahlung": "120"})
+        self.assertIn("120", j["body"])
+        self.assertEqual(app.load_termin(ref)[1]["anzahlung"], 120.0)
+        body = j["body"] + "\nPS: Bitte Fahrzeugschein mitbringen."
+        code, j = self.admin("POST", f"postausgang/{draft['id']}/freigeben", {"subject": j["subject"], "body": body})
+        self.assertEqual(code, 200, j)
+        mail = self.wait_mail("frei@example.com")[0]
+        self.assertIn("Fahrzeugschein", mail["text"])
+        self.assertIn("120 €", mail["text"])
+        self.assertEqual(self.admin("POST", f"postausgang/{draft['id']}/freigeben", {})[0], 409)  # schon gesendet
+        # Frist läuft ab Versand
+        hold = dt.datetime.fromisoformat(app.load_termin(ref)[1]["hold_until"])
+        self.assertLess(hold, app.now() + dt.timedelta(hours=25))
+        # Bestätigung durch den Kunden landet ebenfalls als Entwurf im Postausgang
+        token = app.load_termin(ref)[1]["token"]
+        self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)
+        code, ob = self.admin("GET", f"postausgang?ref={ref}")
+        kinds = sorted(o["kind"] for o in ob["items"] if o["status"] == "entwurf")
+        self.assertEqual(kinds, ["bestaetigung", "erinnerung", "erinnerung"])
+        conf = next(o for o in ob["items"] if o["kind"] == "bestaetigung")
+        self.admin("POST", f"postausgang/{conf['id']}/freigeben", {})
+        self.assertTrue([m for m in self.wait_mail("frei@example.com", 2) if "bestätigt" in m["subject"]])
+        rem = next(o for o in ob["items"] if o["kind"] == "erinnerung")
+        code, j = self.admin("POST", f"postausgang/{rem['id']}/freigeben", {})
+        self.assertIn("geplanten Zeitpunkt", j["message"])
+        code, j = self.admin("PUT", "postausgang", {"approval": {"erinnerung": False}})
+        self.assertFalse(self.admin("GET", "postausgang")[1]["approval"]["erinnerung"])
+
     def test_admin_confirm_sends_mail(self):
         self.login()
         day = next_workday(11)
-        code, j = self.book(day, "15:00", email="portal@example.com")
+        code, j = self.book(day, "10:00", email="portal@example.com")
         ref = j["ref"]
         self.wait_mail("portal@example.com")
-        code, _ = self.admin("PATCH", f"anfragen/{ref}", {"status": "termin_bestaetigt", "uhrzeit": "15:00", "datum": day})
+        code, _ = self.admin("PATCH", f"anfragen/{ref}", {"status": "termin_bestaetigt", "uhrzeit": "10:00", "datum": day})
         self.assertEqual(code, 200)
         conf = [m for m in self.wait_mail("portal@example.com", 2) if "bestätigt" in m["subject"]]
         self.assertTrue(conf)

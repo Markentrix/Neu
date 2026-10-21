@@ -182,9 +182,8 @@
     "selfBooking": true,
     "slotTimes": [
       "08:00",
-      "10:00",
-      "13:00",
-      "15:00"
+      "09:00",
+      "10:00"
     ],
     "slotMinutes": 30,
     "holdHours": 24,
@@ -192,7 +191,13 @@
       24,
       6
     ],
-    "hinweis": "Abgabezeiten für die Online-Buchung. Kunden wählen Tag und Uhrzeit, leisten 15 % Anzahlung per PayPal (bestätigt den Termin) und erhalten Erinnerungen 24 und 6 Stunden vorher.",
+    "hinweis": "Abgabezeiten für die Online-Buchung. Jede E-Mail an Kunden (Anzahlungslink, Bestätigung, Erinnerungen) prüft und gibt René im Portal unter Postausgang frei.",
     "depositPercent": 15
+  },
+  "winterSpecial": {
+    "price": 329,
+    "validUntil": "2027-02-28",
+    "label": "Winter-Special",
+    "text": "Glanzpolitur und Versiegelung vor dem ersten Streusalz"
   }
 }

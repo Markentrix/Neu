@@ -70,11 +70,11 @@
   }
 
   /* ------------------------------------------------------------ Grundgerüst */
-  var NAV = [["", "Übersicht"], ["anfragen", "Anfragen"], ["gutscheine", "Gutscheine"], ["kalender", "Kalender"], ["angebote", "Angebote"], ["inhalte", "Inhalte"], ["medien", "Fotos"], ["veroeffentlichen", "Veröffentlichen"], ["einstellungen", "Einstellungen"]];
+  var NAV = [["", "Übersicht"], ["anfragen", "Anfragen"], ["postausgang", "Postausgang"], ["gutscheine", "Gutscheine"], ["kalender", "Kalender"], ["angebote", "Angebote"], ["inhalte", "Inhalte"], ["medien", "Fotos"], ["veroeffentlichen", "Veröffentlichen"], ["einstellungen", "Einstellungen"]];
   function shell(active) {
     app.className = "app";
     var side = '<a class="logo" href="#/"><img src="/logo.svg" alt="ElbDetail"></a>' + NAV.map(function (n) {
-      return '<a class="nav' + (active === n[0] ? " active" : "") + '" href="#/' + n[0] + '">' + n[1] + (n[0] === "anfragen" && ME.open ? '<span class="badge">' + ME.open + "</span>" : "") + "</a>";
+      return '<a class="nav' + (active === n[0] ? " active" : "") + '" href="#/' + n[0] + '">' + n[1] + (n[0] === "anfragen" && ME.open ? '<span class="badge">' + ME.open + "</span>" : "") + (n[0] === "postausgang" && ME.outbox ? '<span class="badge">' + ME.outbox + "</span>" : "") + "</a>";
     }).join("") + '<div class="spacer"></div><div class="foot"><a href="/" target="_blank" rel="noopener">Website ansehen ↗</a><span>Angemeldet als ' + esc(ME.user) + '</span><a href="#" id="logout">Abmelden</a></div>';
     app.innerHTML = '<aside class="side" id="side">' + side + '</aside><div><div class="mobile-bar"><img src="/logo.svg" alt="ElbDetail"><button class="btn small" id="menuBtn" type="button">Menü</button></div><main class="main" id="main"></main></div>';
     document.getElementById("logout").addEventListener("click", function (e) { e.preventDefault(); api("POST", "logout", {}).then(function () { ME = null; renderLogin(); }); });
@@ -90,7 +90,7 @@
     var page = parts[0] || "";
     var main = shell(page);
     var arg = decodeURIComponent(parts.slice(1).join("/"));
-    ({ "": viewDashboard, anfragen: viewRequests, gutscheine: viewVouchers, kalender: viewCalendar, angebote: viewOffers, inhalte: viewContent, medien: viewMedia, veroeffentlichen: viewPublish, einstellungen: viewSettings }[page] || viewDashboard)(main, arg);
+    ({ "": viewDashboard, anfragen: viewRequests, gutscheine: viewVouchers, kalender: viewCalendar, postausgang: viewOutbox, angebote: viewOffers, inhalte: viewContent, medien: viewMedia, veroeffentlichen: viewPublish, einstellungen: viewSettings }[page] || viewDashboard)(main, arg);
   }
   window.addEventListener("hashchange", route);
 
@@ -273,6 +273,13 @@
         if (tday && tday.value) { body.datum = tday.value; body.uhrzeit = ttime.value; }
         api("PATCH", "anfragen/" + r.ref, body).then(function () { toast("Gespeichert"); ME.open = Math.max(0, ME.open - (r.status === "neu" && st.value !== "neu" ? 1 : 0)); r.status = st.value; }).catch(fail);
       } })]));
+      var obox = h("section", { class: "grid" });
+      box.appendChild(obox);
+      api("GET", "postausgang?ref=" + encodeURIComponent(r.ref)).then(function (ob) {
+        if (!ob.items.length) return;
+        obox.appendChild(h("h3", { text: "E-Mails an den Kunden" }));
+        ob.items.forEach(function (o) { obox.appendChild(outboxCard(o, ob.kinds, function () { location.hash = "#/postausgang"; })); });
+      }).catch(function () {});
       var tpl = h("section", { class: "grid" }, [h("h3", { text: "Antworten" })]);
       var out = h("div", { class: "grid" });
       var mk = function (art, label) {
@@ -357,6 +364,68 @@
 
   /* ------------------------------------------------------------ Kalender */
   var calMonth = null;
+  /* ------------------------------------------------------------ Postausgang: Kunden-E-Mails prüfen, ändern, freigeben */
+  var OB_STATUS = { entwurf: "Wartet auf Freigabe", freigegeben: "Freigegeben, geplant", fehler: "Versand fehlgeschlagen", gesendet: "Gesendet", verworfen: "Verworfen", wird_gesendet: "Wird gesendet" };
+  function outboxCard(o, kinds, reload) {
+    var open = ["entwurf", "freigegeben", "fehler"].indexOf(o.status) !== -1;
+    var card = h("section", { class: "panel grid", style: "gap:10px" });
+    card.appendChild(h("div", { class: "head", style: "margin:0" }, [
+      h("div", {}, [h("span", { class: "typ", text: (kinds[o.kind] || o.kind) + (o.ref ? " · " + o.ref : "") }),
+        h("p", { class: "muted", text: "An " + o.to_addr + (o.send_after ? " · geplant für " + deDateTime(o.send_after) : "") + (o.sent_at ? " · gesendet " + deDateTime(o.sent_at) : "") + (o.note ? " · " + o.note : "") })]),
+      h("span", { class: "pill st-" + (o.status === "entwurf" ? "reserviert" : o.status === "gesendet" ? "termin_bestaetigt" : o.status === "fehler" ? "abgelehnt" : "erledigt"), text: OB_STATUS[o.status] || o.status })]));
+    var subj = h("input", { type: "text", value: o.subject, disabled: !open });
+    var body = h("textarea", { rows: 12, disabled: !open }); body.value = o.body;
+    var amt = null;
+    if (o.kind === "reservierung") {
+      amt = h("input", { type: "text", inputmode: "decimal", value: o.anzahlung != null ? String(o.anzahlung).replace(".", ",") : "", placeholder: "z. B. 80", disabled: !open });
+      card.appendChild(h("p", { class: "note " + (o.anzahlung ? "info" : ""), text: o.anzahlung
+        ? "Anzahlung " + String(o.anzahlung).replace(".", ",") + " €" + (o.richtpreis ? " (15 % vom Richtpreis ab " + o.richtpreis + " €)" : "") + ". Sie können den Betrag ändern."
+        : "Kein Festpreis hinterlegt: Bitte die Anzahlung festlegen. 0 oder leer = ohne Anzahlung, der Kunde bestätigt per Klick." + (o.paypal ? "" : " Hinweis: PayPal ist noch nicht eingerichtet, die Anzahlung wird dann am Telefon geklärt.") }));
+      card.appendChild(h("div", { class: "grid g2" }, [h("label", { class: "f" }, ["Anzahlung in €", amt]),
+        h("div", { style: "align-self:end" }, [h("button", { class: "btn", type: "button", text: "Betrag übernehmen (Text neu erzeugen)", disabled: !open, onclick: function () {
+          if (body.value !== o.body && !confirm("Der Text wird neu erzeugt, Ihre Änderungen am Text gehen verloren. Fortfahren?")) return;
+          api("PUT", "postausgang/" + o.id, { anzahlung: amt.value }).then(function (x) { subj.value = x.subject; body.value = x.body; o.body = x.body; o.anzahlung = amt.value; toast("Anzahlung übernommen"); }).catch(fail);
+        } })])]));
+    }
+    card.appendChild(h("label", { class: "f" }, ["Betreff", subj]));
+    card.appendChild(h("label", { class: "f" }, ["Text", body]));
+    if (open) card.appendChild(h("div", { class: "btn-row" }, [
+      h("button", { class: "btn primary", type: "button", text: o.send_after ? "Freigeben" : "Freigeben und senden", onclick: function () {
+        api("POST", "postausgang/" + o.id + "/freigeben", { subject: subj.value, body: body.value }).then(function (x) { toast(x.message); ME.outbox = Math.max(0, (ME.outbox || 1) - (o.status === "entwurf" ? 1 : 0)); reload(); }).catch(fail);
+      } }),
+      h("button", { class: "btn", type: "button", text: "Änderungen speichern", onclick: function () {
+        api("PUT", "postausgang/" + o.id, { subject: subj.value, body: body.value }).then(function () { toast("Gespeichert"); }).catch(fail);
+      } }),
+      h("button", { class: "btn danger", type: "button", text: "Nicht senden", onclick: function () {
+        if (!confirm("Diese E-Mail verwerfen? Der Kunde erhält sie dann nicht.")) return;
+        api("POST", "postausgang/" + o.id + "/verwerfen", {}).then(function () { toast("Verworfen"); ME.outbox = Math.max(0, (ME.outbox || 1) - (o.status === "entwurf" ? 1 : 0)); reload(); }).catch(fail);
+      } })]));
+    return card;
+  }
+  function viewOutbox(main) {
+    var st = sessionStorage.getItem("elb-ob") || "offen";
+    main.innerHTML = '<div class="head"><div><h1>Postausgang</h1><p>Jede E-Mail an Kunden wartet hier auf Ihre Freigabe. Sie können Text und Anzahlung ändern, freigeben oder verwerfen. Geplante Erinnerungen gehen nach der Freigabe zum angegebenen Zeitpunkt raus.</p></div><div class="filters" id="obf"></div></div><div class="grid" id="oblist"><p class="empty">Lädt …</p></div>';
+    var f = document.getElementById("obf");
+    [["offen", "Offen"], ["gesendet", "Gesendet"], ["alle", "Alle"]].forEach(function (x) {
+      f.appendChild(h("button", { class: "chip" + (x[0] === st ? " on" : ""), type: "button", text: x[1], onclick: function () { sessionStorage.setItem("elb-ob", x[0]); viewOutbox(main); } }));
+    });
+    api("GET", "postausgang?status=" + st).then(function (r) {
+      ME.outbox = r.open;
+      var list = document.getElementById("oblist"); list.innerHTML = "";
+      if (!r.items.length) list.appendChild(h("p", { class: "empty", text: st === "offen" ? "Keine E-Mails warten auf Freigabe." : "Keine E-Mails." }));
+      r.items.forEach(function (o) { list.appendChild(outboxCard(o, r.kinds, function () { viewOutbox(main); })); });
+      var set = h("section", { class: "panel grid" }, [h("h2", { text: "Freigabe nötig für" }),
+        h("p", { class: "sub", text: "Abgehakt = E-Mail wartet auf Ihre Freigabe. Ohne Haken geht sie automatisch raus." })]);
+      var boxes = {};
+      Object.keys(r.kinds).forEach(function (k) { boxes[k] = h("input", { type: "checkbox", checked: r.approval[k] }); set.appendChild(h("label", { class: "chk" }, [boxes[k], r.kinds[k]])); });
+      set.appendChild(h("button", { class: "btn", type: "button", text: "Speichern", onclick: function () {
+        var a = {}; Object.keys(boxes).forEach(function (k) { a[k] = boxes[k].checked; });
+        api("PUT", "postausgang", { approval: a }).then(function () { toast("Gespeichert"); }).catch(fail);
+      } }));
+      list.appendChild(set);
+    }).catch(fail);
+  }
+
   function viewCalendar(main) {
     var t = new Date(); if (!calMonth) calMonth = new Date(t.getFullYear(), t.getMonth(), 1);
     main.innerHTML = '<div class="head"><div><h1>Kalender</h1><p>Gesperrte Tage sind in der Online-Terminanfrage nicht wählbar. Zahlen zeigen Terminwünsche pro Tag.</p></div></div><div class="grid g2" id="calwrap"><p class="empty">Lädt …</p></div>';
