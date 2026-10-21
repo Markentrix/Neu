@@ -40,7 +40,7 @@ async function uploadKarte(d) {
     if (!datei.files.length) { melde(m, 'Bitte eine ZIP-Datei wählen.'); return; }
     const f = new FormData(); f.append('datei', datei.files[0]); f.append('art', art.value); f.append('name', name.value); f.append('kunden_id', kunde.value); f.append('dienste_skript', skript.checked ? '1' : '0');
     knopfHoch.disabled = true; knopfHoch.textContent = 'Lade hoch …';
-    try { const r = await api('/api/admin/websites/upload', { method: 'POST', body: f }); melde(m, r.hinweis + ' (' + r.dateien + ' Dateien' + (r.skript_in_seiten ? ', Website-Dienste in ' + r.skript_in_seiten + ' Seiten eingebaut' : '') + ')', 'ok'); datei.value = ''; setTimeout(ladeVerlauf, 1500); }
+    try { const r = await api('/api/admin/websites/upload', { method: 'POST', body: f }); melde(m, r.hinweis + ' (' + r.dateien + ' Dateien aus „' + r.ordner + '“' + (r.skript_in_seiten ? ', Website-Dienste in ' + r.skript_in_seiten + ' Seiten eingebaut' : '') + ')', 'ok'); datei.value = ''; setTimeout(ladeVerlauf, 1500); }
     catch (x) { melde(m, x.message); }
     knopfHoch.disabled = false; knopfHoch.textContent = 'Hochladen und veröffentlichen';
   });

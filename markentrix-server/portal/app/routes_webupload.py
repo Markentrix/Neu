@@ -34,8 +34,31 @@ def _ordner_name(art: str, name: str) -> str:
     return name
 
 
-def entpacken(zip_pfad: Path, ziel: Path) -> int:
-    """Prüft die ZIP streng und entpackt sie nach ziel. Gibt die Anzahl der Dateien zurück. Wirft HTTPException mit verständlichem Text."""
+BEVORZUGT = ("website-fertig", "website", "dist", "public", "www", "site", "out", "_site", "html")
+
+
+def webroot_waehlen(teile_liste: list) -> tuple:
+    """Findet den Ordner, der die fertige Website enthält. Liegt die index.html direkt oben, ist es die ZIP-Wurzel.
+    Sonst: bevorzugte Namen (website-fertig, dist, public …), sonst der höchste Ordner mit index.html (bei Gleichstand der mit den meisten Dateien)."""
+    if any(t == ["index.html"] for t in teile_liste):
+        return ()
+    kandidaten = {}
+    for t in teile_liste:
+        if len(t) >= 2 and t[-1] == "index.html" and len(t) <= 4:
+            kandidaten[tuple(t[:-1])] = 0
+    if not kandidaten:
+        return None
+    for k in kandidaten:
+        kandidaten[k] = sum(1 for t in teile_liste if tuple(t[:len(k)]) == k)
+    def rang(k):
+        bev = BEVORZUGT.index(k[-1].lower()) if k[-1].lower() in BEVORZUGT else 99
+        return (bev, len(k), -kandidaten[k])
+    return sorted(kandidaten, key=rang)[0]
+
+
+def entpacken(zip_pfad: Path, ziel: Path) -> tuple:
+    """Prüft die ZIP streng und entpackt die Website nach ziel. Gibt (Anzahl Dateien, verwendeter Ordner in der ZIP) zurück.
+    Ganze Projektordner sind erlaubt: Es wird nur der Ordner mit der fertigen Website übernommen, alles andere (Server-Code, Build-Skripte, Doku) bleibt draußen."""
     try:
         zf = zipfile.ZipFile(zip_pfad)
     except zipfile.BadZipFile:
@@ -44,8 +67,7 @@ def entpacken(zip_pfad: Path, ziel: Path) -> int:
         infos = [i for i in zf.infolist() if not i.is_dir()]
         if len(infos) > MAX_DATEIEN:
             raise HTTPException(400, f"Die ZIP enthält zu viele Dateien (mehr als {MAX_DATEIEN}).")
-        eintraege = []
-        verboten = []
+        alle = []
         for i in infos:
             roh = i.filename.replace("\\", "/")
             if "\x00" in roh or any(ord(c) < 32 for c in roh):
@@ -63,24 +85,34 @@ def entpacken(zip_pfad: Path, ziel: Path) -> int:
                 continue
             if any(t.startswith(".") and t != ".well-known" for t in teile):
                 continue           # versteckte Dateien (.git, .htaccess …) gehören nicht auf die Website
-            ext = teile[-1].rsplit(".", 1)[-1].lower() if "." in teile[-1] else ""
+            alle.append((i, teile))
+        if not alle:
+            raise HTTPException(400, "Die ZIP enthält keine Website-Dateien.")
+        # Eine einzelne Hülle (z. B. „firma/“) abstreifen, damit die Suche nach dem Website-Ordner einfach bleibt
+        wurzel_ordner = ""
+        if len({t[0] for _, t in alle}) == 1 and all(len(t) > 1 for _, t in alle):
+            wurzel_ordner = alle[0][1][0]
+            alle = [(i, t[1:]) for i, t in alle]
+        wr = webroot_waehlen([t for _, t in alle])
+        if wr is None:
+            raise HTTPException(400, "In der ZIP wurde keine index.html gefunden. Bitte die fertige Website (mit index.html) packen.")
+        eintraege = [(i, t[len(wr):]) for i, t in alle if tuple(t[:len(wr)]) == wr and len(t) > len(wr)]
+        verwendet = "/".join(([wurzel_ordner] if wurzel_ordner else []) + list(wr)) or "(oberste Ebene)"
+        verboten = []
+        brauchbar = []
+        for i, t in eintraege:
+            ext = t[-1].rsplit(".", 1)[-1].lower() if "." in t[-1] else ""
             if ext not in ERLAUBT:
-                verboten.append("/".join(teile))
+                verboten.append("/".join(t))
                 continue
             if i.file_size > MAX_DATEI:
-                raise HTTPException(400, f"Die Datei {'/'.join(teile)} ist zu groß.")
-            eintraege.append((i, teile))
+                raise HTTPException(400, f"Die Datei {'/'.join(t)} ist zu groß.")
+            brauchbar.append((i, t))
         if verboten:
-            raise HTTPException(400, "Diese Dateitypen sind auf einer Website nicht erlaubt: " + ", ".join(verboten[:6]) + (" …" if len(verboten) > 6 else "") + ". Bitte aus der ZIP entfernen.")
-        if not eintraege:
-            raise HTTPException(400, "Die ZIP enthält keine Website-Dateien.")
+            raise HTTPException(400, "Im Website-Ordner (" + verwendet + ") liegen Dateitypen, die auf einer Website nicht erlaubt sind: " + ", ".join(verboten[:6]) + (" …" if len(verboten) > 6 else "") + ". Bitte aus der ZIP entfernen.")
+        eintraege = brauchbar
         if sum(i.file_size for i, _ in eintraege) > MAX_GESAMT:
             raise HTTPException(400, "Die Website ist entpackt zu groß (über 400 MB).")
-        # Ordner „firma/“ in der ZIP: eine Ebene abstreifen, wenn die index.html nicht direkt oben liegt
-        if not any(t == ["index.html"] for _, t in eintraege) and len({t[0] for _, t in eintraege}) == 1 and all(len(t) > 1 for _, t in eintraege):
-            eintraege = [(i, t[1:]) for i, t in eintraege]
-        if not any(t == ["index.html"] for _, t in eintraege):
-            raise HTTPException(400, "Im obersten Ordner der ZIP liegt keine index.html. Bitte so packen, dass die index.html direkt oben liegt.")
         ziel.mkdir(parents=True, exist_ok=True)
         wurzel = ziel.resolve()
         gesamt = 0
@@ -99,7 +131,7 @@ def entpacken(zip_pfad: Path, ziel: Path) -> int:
                         raise HTTPException(400, "Die Website ist entpackt zu groß (über 400 MB).")
                     z.write(block)
             dest.chmod(0o644)
-        return len(eintraege)
+        return len(eintraege), verwendet
 
 
 def skript_einfuegen(ordner: Path, site_id: str, basis: str) -> int:
@@ -178,7 +210,7 @@ def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str 
                     raise HTTPException(400, "Die ZIP ist zu groß (über 120 MB). Bitte Bilder und Videos verkleinern.")
                 z.write(block)
         inhalt = stage / "inhalt"
-        n = entpacken(zip_pfad, inhalt)
+        n, verwendet = entpacken(zip_pfad, inhalt)
         zip_pfad.unlink()
         eingefuegt = 0
         with tx("admin") as cur:
@@ -187,7 +219,7 @@ def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str 
             if art == "live":
                 cur.execute("""INSERT INTO websites (kunden_id, domain, art, status, letzte_veroeffentlichung) VALUES (%s,%s,'live','live',now())
                                ON CONFLICT (domain) DO UPDATE SET status='live', letzte_veroeffentlichung=now()""", (kid, name))
-            audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n})
+            audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet})
         # Der Server-Dienst erwartet den Inhalt direkt im Zwischenordner
         for p in list(inhalt.iterdir()):
             shutil.move(str(p), str(stage / p.name))
@@ -199,7 +231,7 @@ def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str 
     except OSError:
         shutil.rmtree(stage, ignore_errors=True)
         raise HTTPException(500, "Die Dateien konnten nicht abgelegt werden (Speicherplatz oder Rechte).")
-    return {"ok": True, "id": uid, "dateien": n, "skript_in_seiten": eingefuegt,
+    return {"ok": True, "id": uid, "dateien": n, "ordner": verwendet, "skript_in_seiten": eingefuegt,
             "hinweis": "Hochgeladen und geprüft. Die Website wird innerhalb einer Minute veröffentlicht, unten erscheint das Ergebnis."}
 
 

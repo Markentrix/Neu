@@ -103,6 +103,18 @@ chk("Zuordnung zur Kundennummer",sql(f"select kunden_id from websites where doma
 chk("Unbekannte Kundennummer",up(zipb({"index.html":"x"}),f"y{sfx}.de",kunde="MK-999999").status_code==400)
 # Fremde Domain
 r=up(zipb({"index.html":"x"}),dom,kunde=kB); chk("Domain gehört schon einem anderen Kunden",r.status_code==400,r.text)
+# ---- Ganzes Projekt (wie ElbDetail): nur der Ordner website-fertig/ wird übernommen, Server-Code & Co. bleiben draußen
+domE=f"elbtest{sfx}.de"
+proj={"elbdetail/README.md":"x","elbdetail/server/app.py":"print(1)","elbdetail/deploy/Dockerfile":"FROM x","elbdetail/deploy/docker-compose.yml":"a: b","elbdetail/build/build.py":"x",
+      "elbdetail/content/a.json":"{}","elbdetail/docs/index.html":"docs","elbdetail/website-fertig/index.html":HTML.format(v=1),"elbdetail/website-fertig/leistungen/a.html":"<html><body>a</body></html>",
+      "elbdetail/website-fertig/img/x.png":"PNG","elbdetail/website-fertig/config.js":"window.ELB={}","elbdetail/website-fertig/fonts/f.woff2":"F"}
+r=up(zipb(proj),domE,kunde=kA,skript="0"); chk("Projekt-ZIP (website-fertig/) angenommen",r.status_code==200 and r.json().get("dateien")==5 and "website-fertig" in r.json().get("ordner",""),r.text)
+out=worker(); chk("Nur die Website liegt online",os.path.isfile(f"{S}/live/{domE}/index.html") and os.path.isfile(f"{S}/live/{domE}/leistungen/a.html") and os.path.isfile(f"{S}/live/{domE}/img/x.png"),out)
+chk("Server-Code, Build und Docker bleiben draußen",not any(os.path.exists(f"{S}/live/{domE}/{x}") for x in ("server","deploy","build","content","docs","README.md")))
+r=up(zipb({"proj/a/b/index.html":"x","proj/server/app.py":"x","proj/y.txt":"z"}),f"tief{sfx}.de",kunde=kA,skript="0"); chk("Tief liegende index.html wird gefunden",r.status_code==200,r.text)
+r=up(zipb({"proj/website-fertig/index.html":"x","proj/website-fertig/evil.exe":"MZ"}),f"tief2{sfx}.de",kunde=kA); chk("Verbotene Datei im Website-Ordner weiter abgelehnt",r.status_code==400 and "evil.exe" in r.text,r.text)
+
+
 # ---- Demo
 r=up(zipb({"index.html":HTML.format(v=9)}),"testdemo",art="demo",skript="0"); chk("Demo hochladen (ohne Kunde)",r.status_code==200,r.text)
 worker(); chk("Demo online im Demo-Ordner",os.path.isfile(f"{S}/demos/testdemo/index.html"))
