@@ -1,7 +1,4 @@
 <?php
-declare(strict_types=1);
-require __DIR__ . '/../app/lib.php';
-require __DIR__ . '/../app/layout.php';
 
 $id = (string)($_GET['id'] ?? '');
 $token = (string)($_GET['t'] ?? '');
@@ -13,7 +10,7 @@ $valid = $b && $b['cancel_token'] && hash_equals($b['cancel_token'], $token);
 page_start([
     'title' => 'Termin stornieren | AJ Atelier',
     'description' => 'Termin bei AJ Atelier online stornieren.',
-    'path' => '/termin-stornieren.php',
+    'path' => '/termin-stornieren',
     'robots' => 'noindex, nofollow',
 ]);
 ?>
@@ -30,7 +27,7 @@ page_start([
         <?php if ((float)$b['pay_amount'] > 0): ?><p>Ihre Zahlung über <?= e(euro((float)$b['pay_amount'], true)) ?> wird automatisch über PayPal erstattet.</p><?php endif; ?>
         <p data-cancel-msg role="status"></p>
         <p><button class="btn btn-gold" type="button" data-cancel-btn>Termin jetzt stornieren</button></p>
-        <p><a href="/#termin">Neuen Termin buchen</a></p>
+        <p><a href="/termin">Neuen Termin buchen</a></p>
       <?php endif; ?>
     </div>
   </main>

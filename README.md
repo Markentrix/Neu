@@ -121,18 +121,42 @@ location ~ \.php$ { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $docum
 php -S localhost:8000 -t public dev-router.php
 ```
 
+## Seiten
+
+| Adresse | Inhalt |
+|---|---|
+| `/` | Startseite mit Leistungen, Preisauszug, Online-Buchung, FAQ, Kontakt |
+| `/leistungen` | Übersicht aller Leistungen |
+| `/leistungen/balayage`, `/babylights`, `/damenhaarschnitt`, `/hochsteckfrisuren`, `/herren`, `/farbe`, `/pflege`, `/augenbrauen-wimpern` | Leistungsseiten mit Ablauf, Preisen, Dauer, FAQ und Direktbuchung |
+| `/preise` | Komplette Preisliste + Zahlungsarten |
+| `/termin` | Online-Terminbuchung (`/termin?leistung=f-balayage` wählt die Leistung vor) |
+| `/ueber-uns`, `/kontakt` (mit Formular), `/faq` | Salon-Seiten |
+| `/friseur-burgwedel`, `/friseur-isernhagen`, `/friseur-langenhagen`, `/friseur-hannover` | Ortsseiten mit echter Anfahrtszeit (OpenStreetMap) |
+| `/impressum`, `/datenschutz` | Rechtliches (noindex) |
+| `/sitemap.xml`, `/robots.txt`, `/llms.txt` | werden automatisch aus den Inhalten erzeugt |
+
+**SEO & GEO je Seite:** eigener Titel und Beschreibung, Canonical, Brotkrumen (`BreadcrumbList`), `HairSalon` mit Geo-Koordinaten
+und Öffnungszeiten, `Service` mit Preisen auf Leistungsseiten, `FAQPage` wo Fragen stehen, Geo-Meta-Tags, `llms.txt` für KI-Suche.
+
+**Texte ändern:** Leistungsseiten in `app/content/leistungen.php`, Ortsseiten in `app/content/orte.php`,
+allgemeine FAQ in `app/routes.php` (`general_faq`). Preise und Dauer immer nur in `app/config.php`.
+
 ## Aufbau
 
 ```
 app/                      nicht öffentlich
   config.php              Salon-Daten, Preise, Öffnungszeiten (hier pflegen)
   config.local.php        Passwörter & Zugangsdaten (nicht im Git)
+  content/                Texte der Leistungs- und Ortsseiten
+  pages/                  Seitenvorlagen
+  routes.php              Seitenverzeichnis, Weiterleitungen, allgemeine FAQ
+  partials.php            Bausteine (Preisliste, Buchung, FAQ, Karten …)
+  layout.php              Kopf, Navigation, Footer, strukturierte Daten
   lib.php                 Terminlogik, Datenbank, PayPal, E-Mail
-  layout.php              Seitenkopf/-fuß, strukturierte Daten
   data/                   SQLite-Datenbank (nicht im Git)
 public/                   Document Root
-  index.php               Startseite inkl. Buchung
-  api/                    availability, booking, paypal-order, cancel, admin
+  index.php               Front-Controller für saubere URLs
+  api/                    availability, booking, paypal-order, cancel, contact, admin
   admin/                  Terminverwaltung
   css/ js/ fonts/ img/
 ```

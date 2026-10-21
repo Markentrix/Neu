@@ -75,7 +75,7 @@ try {
 
 // Bestätigungen
 $s = cfg()['salon'];
-$cancelUrl = site_url('/termin-stornieren.php?id=' . rawurlencode($id) . '&t=' . $token);
+$cancelUrl = site_url('/termin-stornieren?id=' . rawurlencode($id) . '&t=' . $token);
 $list = implode('', array_map(fn($x) => '<li>' . e($x['name']) . ' – ' . ($x['from'] ? ($x['price'] > 0 ? 'ab ' . euro((float)$x['price']) : 'nach Beratung') : euro((float)$x['price'])) . '</li>', $services));
 $paid = $payment['amount'] > 0 ? '<p>Online bezahlt (PayPal): <strong>' . euro($payment['amount'], true) . '</strong></p>' : '<p>Zahlung vor Ort (bar oder Karte).</p>';
 $when = german_date($date) . ", {$time} Uhr";

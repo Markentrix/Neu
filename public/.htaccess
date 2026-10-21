@@ -1,7 +1,6 @@
 # AJ Atelier – Apache-Konfiguration
 Options -Indexes
 DirectoryIndex index.php
-ErrorDocument 404 /404.php
 AddDefaultCharset UTF-8
 
 <IfModule mod_rewrite.c>
@@ -19,6 +18,11 @@ AddDefaultCharset UTF-8
   RewriteRule ^robots\.txt$ robots.php [L]
   RewriteRule ^sitemap\.xml$ sitemap.php [L]
   RewriteRule ^llms\.txt$ llms.php [L]
+
+  # Alle übrigen Adressen ohne echte Datei → Front-Controller (saubere URLs)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.php [L]
 </IfModule>
 
 <IfModule mod_headers.c>

@@ -7,7 +7,7 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
-Disallow: /termin-stornieren.php
+Disallow: /termin-stornieren
 
 # KI-Suchmaschinen ausdrücklich willkommen (GEO)
 User-agent: GPTBot

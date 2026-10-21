@@ -1,13 +1,10 @@
 <?php
-declare(strict_types=1);
-require __DIR__ . '/../app/lib.php';
-require __DIR__ . '/../app/layout.php';
 $s = cfg()['salon'];
 
 page_start([
     'title' => 'Impressum | AJ Atelier – Friseur in Burgwedel-Wettmar',
     'description' => 'Impressum von AJ Atelier, Friseur in der Hauptstraße 64, 30938 Burgwedel-Wettmar.',
-    'path' => '/impressum.php',
+    'path' => '/impressum',
     'robots' => 'noindex, follow',
 ]);
 ?>

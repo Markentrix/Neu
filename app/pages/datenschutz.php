@@ -1,13 +1,10 @@
 <?php
-declare(strict_types=1);
-require __DIR__ . '/../app/lib.php';
-require __DIR__ . '/../app/layout.php';
 $s = cfg()['salon'];
 
 page_start([
     'title' => 'Datenschutz | AJ Atelier – Friseur in Burgwedel-Wettmar',
     'description' => 'Datenschutzerklärung von AJ Atelier: Online-Terminbuchung, PayPal-Zahlung und Ihre Rechte nach DSGVO.',
-    'path' => '/datenschutz.php',
+    'path' => '/datenschutz',
     'robots' => 'noindex, follow',
 ]);
 ?>
@@ -29,13 +26,16 @@ page_start([
       <h2>4. Online-Terminbuchung</h2>
       <p>Für die Buchung verarbeiten wir Name, Telefonnummer, E-Mail-Adresse, gewählte Leistungen, Termin und optional Ihre Anmerkung. Zweck ist die Durchführung des Termins und die Bestätigung per E-Mail (Art. 6 Abs. 1 lit. b DSGVO). Zum Schutz vor Missbrauch speichern wir kurzzeitig einen nicht rückrechenbaren Hashwert Ihrer IP-Adresse (max. 24 Stunden, Art. 6 Abs. 1 lit. f DSGVO). Buchungsdaten werden gelöscht, sobald sie nicht mehr benötigt werden, spätestens nach Ablauf gesetzlicher Aufbewahrungsfristen.</p>
 
-      <h2>5. Zahlung mit PayPal</h2>
+      <h2>5. Kontaktformular</h2>
+      <p>Wenn Sie uns über das Kontaktformular schreiben, verarbeiten wir Name, E-Mail-Adresse, optional Telefonnummer und Ihre Nachricht, um Ihre Anfrage zu beantworten (Art. 6 Abs. 1 lit. b bzw. f DSGVO). Die Nachricht wird per E-Mail an uns übermittelt und nicht auf der Website gespeichert.</p>
+
+      <h2>6. Zahlung mit PayPal</h2>
       <p>Wenn Sie „Jetzt mit PayPal bezahlen“ wählen, wird das PayPal-Skript geladen und Ihre Zahlung über PayPal (Europe) S.à r.l. et Cie, S.C.A., 22–24 Boulevard Royal, L-2449 Luxemburg abgewickelt. Dabei werden Zahlungsdaten und technische Daten an PayPal übermittelt (Art. 6 Abs. 1 lit. b DSGVO). Wählen Sie „Vor Ort bezahlen“, wird PayPal nicht geladen. Details: <a href="https://www.paypal.com/de/legalhub/privacy-full" rel="noopener" target="_blank">Datenschutzerklärung von PayPal</a>.</p>
 
-      <h2>6. Externe Links</h2>
+      <h2>7. Externe Links</h2>
       <p>Links zu Instagram, Google Maps und OpenStreetMap werden erst beim Anklicken geöffnet; vorher werden keine Daten an diese Anbieter übertragen.</p>
 
-      <h2>7. Ihre Rechte</h2>
+      <h2>8. Ihre Rechte</h2>
       <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch (Art. 15–21 DSGVO). Zudem können Sie sich bei einer Aufsichtsbehörde beschweren, z. B. bei der Landesbeauftragten für den Datenschutz Niedersachsen.</p>
     </div>
   </main>

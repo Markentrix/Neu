@@ -405,8 +405,9 @@ function initBooking(root, DATA) {
     showStep(1);
   });
 
-  // Direktwahl über Links wie /#termin?leistung=f-balayage
-  const pre = new URLSearchParams(location.hash.split("?")[1] || "").get("leistung");
+  // Direktwahl über Links wie /termin?leistung=f-balayage
+  const pre = new URLSearchParams(location.search).get("leistung")
+    || new URLSearchParams(location.hash.split("?")[1] || "").get("leistung");
   if (pre && services[pre]) {
     const cb = $(`input[value="${CSS.escape(pre)}"]`, picker);
     cb.checked = true;

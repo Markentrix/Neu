@@ -376,11 +376,11 @@ function paypal_refund(string $captureId): void
 
 // ---------- E-Mail ----------
 
-function send_mail(?string $to, string $subject, string $html, ?string $replyTo = null): void
+function send_mail(?string $to, string $subject, string $html, ?string $replyTo = null): bool
 {
     $mail = cfg()['local']['mail'] ?? [];
     $from = $mail['from'] ?? '';
-    if (!$to || !$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return;
+    if (!$to || !$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
     $headers = [
         'MIME-Version: 1.0',
         'Content-Type: text/html; charset=UTF-8',
@@ -394,11 +394,12 @@ function send_mail(?string $to, string $subject, string $html, ?string $replyTo 
     try {
         if (!empty($mail['smtp']['host'])) {
             smtp_send($mail['smtp'], $from, $to, $subject, $body, $headers);
-        } else {
-            @mail($to, $subject, $body, implode("\r\n", $headers), "-f{$from}");
+            return true;
         }
+        return @mail($to, $subject, $body, implode("\r\n", $headers), "-f{$from}");
     } catch (Throwable $e) {
         error_log('Mailversand fehlgeschlagen: ' . $e->getMessage());
+        return false;
     }
 }
 

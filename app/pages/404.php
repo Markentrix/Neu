@@ -1,7 +1,4 @@
 <?php
-declare(strict_types=1);
-require __DIR__ . '/../app/lib.php';
-require __DIR__ . '/../app/layout.php';
 http_response_code(404);
 page_start([
     'title' => 'Seite nicht gefunden | AJ Atelier',
@@ -14,7 +11,10 @@ page_start([
     <div class="container narrow card center">
       <h1>Seite nicht gefunden</h1>
       <p>Die gesuchte Seite gibt es leider nicht (mehr).</p>
-      <p><a class="btn btn-gold" href="/">Zur Startseite</a> <a class="btn btn-ghost" href="/#termin">Termin buchen</a></p>
+      <p><a class="btn btn-gold" href="/">Zur Startseite</a> <a class="btn btn-ghost" href="/termin">Termin buchen</a></p>
+    </div>
+    <div class="container" style="margin-top:3rem">
+      <?php service_cards(); ?>
     </div>
   </main>
 <?php page_end();
