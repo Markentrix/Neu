@@ -35,7 +35,7 @@ Alle Preise netto zzgl. gesetzlicher Umsatzsteuer. Angebot ausschliesslich fuer 
 - Preise & Pakete: https://markentrix.de/preise
 - Prozess: https://markentrix.de/prozess
 - Ueber uns: https://markentrix.de/ueber-uns
-- Referenzen: https://markentrix.de/referenzen
+- Referenzen (umgesetzte Websites, etwa Pony Club Lila und ElbDetail, Kennzahlen nur mit Freigabe): https://markentrix.de/referenzen
 - Haeufige Fragen: https://markentrix.de/faq
 - Blog: https://markentrix.de/blog
 - RSS-Feed des Blogs: https://markentrix.de/feed.xml
