@@ -2,10 +2,12 @@
 import ipaddress
 import json
 import logging
+import time
 
 from . import config, einstellungen
 
 log = logging.getLogger("domaincheck")
+_ip_cache = (0.0, "")
 
 # Bekannte Anbieter an ihren Adressen (Präfixe) und Nameservern (Teilstrings). Nur zur Anzeige, nie für Entscheidungen.
 ANBIETER_IP = [("Squarespace", ("198.185.159.", "198.49.23.", "198.185.159.1")), ("Wix", ("185.230.63.", "23.236.62.147")), ("Shopify", ("23.227.38.",)),
@@ -73,6 +75,17 @@ def server_adressen(cur) -> tuple[list[str], list[str]]:
             v6 = v6 or ([d["v6"]] if d.get("v6") else [])
         except (OSError, ValueError, KeyError):
             pass
+    if not v4 and not config.DNS_TEST_DATEI:       # Notlösung: der Portal-Dienst fragt selbst (höchstens stündlich)
+        global _ip_cache
+        if time.time() - _ip_cache[0] > 3600:
+            try:
+                import urllib.request
+                with urllib.request.urlopen("https://api.ipify.org", timeout=5) as r:
+                    _ip_cache = (time.time(), r.read(100).decode().strip())
+            except Exception:  # noqa: BLE001
+                _ip_cache = (time.time() - 3300, "")      # in 5 Minuten erneut versuchen
+        if _ip_cache[1]:
+            v4 = [_ip_cache[1]]
     gueltig = []
     for x in v4:
         try:
@@ -115,7 +128,7 @@ def pruefen(domain: str, v4: list[str], v6: list[str]) -> dict:
     probleme, schritte = [], []
     ip = v4[0] if v4 else "<Server-IP>"
     if not v4:
-        probleme.append("Die öffentliche Adresse des Servers ist noch nicht bekannt. Sie wird vom Server stündlich ermittelt oder unter Einstellungen → Server eingetragen.")
+        probleme.append("Die öffentliche Adresse des Servers ist noch nicht bekannt. Sie wird automatisch ermittelt; falls das nicht klappt, in der .env des Servers SERVER_IPV4=… eintragen.")
     for h, label in ((apex, domain), (www, "www." + domain)):
         if h["status"] == "unbekannt":
             probleme.append(f"{label}: die DNS-Abfrage war nicht möglich (später erneut versuchen).")
