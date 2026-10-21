@@ -1,6 +1,7 @@
 """Team-Zugänge eines Kunden (Rollen) und Branding (Logo, Farbe)."""
 import base64
 import re
+from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
@@ -14,7 +15,7 @@ from .security import EMAIL_RE, audit, rate_limit, require_admin, require_inhabe
 router = APIRouter(prefix="/api/kunde")
 admin_router = APIRouter(prefix="/api/admin")
 
-ROLLEN = ("inhaber", "mitarbeiter", "nur_lesen")
+ROLLEN = ("inhaber", "mitarbeiter", "nur_lesen", "empfang")
 MAX_LOGO = 400 * 1024
 
 
@@ -22,7 +23,7 @@ MAX_LOGO = 400 * 1024
 @router.get("/team")
 def team(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
-        cur.execute("""SELECT id, email, name, kunden_rolle, aktiv, letzter_login, passwort_hash IS NOT NULL AS angemeldet
+        cur.execute("""SELECT id, email, name, kunden_rolle, aktiv, zugang_bis, letzter_login, passwort_hash IS NOT NULL AS angemeldet
                        FROM benutzer WHERE kunden_id=%s ORDER BY erstellt_am""", (user["kunden_id"],))
         return cur.fetchall()
 
@@ -31,6 +32,7 @@ class EinladenIn(BaseModel):
     email: str = Field(max_length=254)
     name: str | None = Field(default=None, max_length=120)
     kunden_rolle: str = "mitarbeiter"
+    zugang_bis: date | None = None             # Vertretung: Zugang endet automatisch nach diesem Tag
 
 
 @router.post("/team/einladen")
@@ -42,7 +44,7 @@ def einladen(data: EinladenIn, user: dict = Depends(require_inhaber)):
         raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
     with tx("system") as cur:
         link = zugang.link_erzeugen(cur, data.email, data.name, "kunde", kunden_id=user["kunden_id"], kunden_rolle=data.kunden_rolle)
-        cur.execute("UPDATE benutzer SET kunden_rolle=%s WHERE lower(email)=lower(%s) AND kunden_id=%s", (data.kunden_rolle, data.email.strip(), user["kunden_id"]))
+        cur.execute("UPDATE benutzer SET kunden_rolle=%s, zugang_bis=%s WHERE lower(email)=lower(%s) AND kunden_id=%s", (data.kunden_rolle, data.zugang_bis, data.email.strip(), user["kunden_id"]))
         audit(cur, user, "team_eingeladen", user["kunden_id"], {"rolle": data.kunden_rolle})
     mail = zugang.per_mail(data.email, data.name, link, "kunde")
     return {"ok": True, "gemailt": bool(mail and mail.get("gesendet")), "einladungslink": None if (mail and mail.get("gesendet")) else link}
@@ -51,6 +53,7 @@ def einladen(data: EinladenIn, user: dict = Depends(require_inhaber)):
 class MitgliedIn(BaseModel):
     aktiv: bool | None = None
     kunden_rolle: str | None = None
+    zugang_bis: date | None = None
 
 
 @router.patch("/team/{bid}")
@@ -68,6 +71,8 @@ def mitglied(bid: str, data: MitgliedIn, user: dict = Depends(require_inhaber)):
             if str(m["id"]) == str(user["id"]) and (not neu_aktiv or neue_rolle != "inhaber"):
                 raise HTTPException(400, "Du kannst dir selbst weder den Zugang sperren noch die Rolle ändern.")
             cur.execute("UPDATE benutzer SET kunden_rolle=%s, aktiv=%s WHERE id=%s", (neue_rolle, neu_aktiv, bid))
+            if "zugang_bis" in data.model_fields_set:
+                cur.execute("UPDATE benutzer SET zugang_bis=%s WHERE id=%s", (data.zugang_bis, bid))
             if not neu_aktiv:
                 cur.execute("DELETE FROM sitzungen WHERE benutzer_id=%s", (bid,))
             audit(cur, user, "team_geaendert", user["kunden_id"], {"rolle": neue_rolle, "aktiv": neu_aktiv})

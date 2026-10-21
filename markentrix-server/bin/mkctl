@@ -162,6 +162,9 @@ SQL
     done
     ;;
 
+  selbsttest)
+    need_root; exec "$BASE/bin/selbsttest.sh" ;;
+
   psql)
     need_root; docker exec -it mk-db psql -U markentrix -d markentrix
     ;;
@@ -284,6 +287,7 @@ mkctl psql | migrate                   Datenbank-Konsole | Datenbankstruktur akt
 mkctl offsite-setup <benutzer@host> [verzeichnis]   Sicherung zusätzlich verschlüsselt auf eine Hetzner Storage Box
 mkctl offsite-test                     Prüft die externe Sicherung
 mkctl demo-daten / demo-daten-entfernen   Beispiel-Kunde, -Leads und -Anfragen zum gefahrlosen Üben anlegen bzw. löschen
+mkctl selbsttest                       Prüft nach einem Update, ob Anmeldung, Datenbank, Mail, Website-API, Aufträge und Sicherung arbeiten
 mkctl restore-test                     Spielt die letzte Sicherung testweise ein und prüft sie
 mkctl alarm-telegram <Token> <Chat-ID> Zweiter Alarmweg per Telegram einrichten
 mkctl watchdog [--test]                Überwachung von Hand ausführen

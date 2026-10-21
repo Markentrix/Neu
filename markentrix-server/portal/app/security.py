@@ -72,7 +72,7 @@ def current_user(request: Request) -> dict:
         cur.execute(
             """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id, b.totp_aktiv, b.kunden_rolle, b.admin_rechte
                FROM sitzungen s JOIN benutzer b ON b.id = s.benutzer_id
-               WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv""",
+               WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv AND (b.zugang_bis IS NULL OR b.zugang_bis >= current_date)""",
             (token_hash(t),),
         )
         u = cur.fetchone()
@@ -128,9 +128,18 @@ def require_voll(user: dict = Depends(current_user)) -> dict:
     return user
 
 
+# Rolle „Empfang“: nur das Tagesgeschäft (Anfragen, Termine, Nachrichten, Kontakte), kein Geld, keine Verträge, keine Einstellungen
+EMPFANG_ERLAUBT = {"start", "status", "startliste", "heute", "anfragen", "termine", "kontakte", "tickets", "profil", "passwort", "logo"}
+
+
 def require_kunde(request: Request, user: dict = Depends(current_user)) -> dict:
     if user["rolle"] != "kunde" or not user["kunden_id"]:
         raise HTTPException(403, "Nur für Kunden.")
+    if user["kunden_rolle"] == "empfang":
+        teile = request.url.path.split("/")      # ["", "api", "kunde", <bereich>, …]
+        bereich = teile[3] if len(teile) > 3 else ""
+        if bereich not in EMPFANG_ERLAUBT:
+            raise HTTPException(403, "Dein Zugang (Empfang) ist nur für Anfragen, Termine und Nachrichten freigegeben.")
     if user["kunden_rolle"] == "nur_lesen" and request.method not in ("GET", "HEAD"):
         raise HTTPException(403, "Dein Zugang ist nur zum Ansehen freigegeben.")
     return user

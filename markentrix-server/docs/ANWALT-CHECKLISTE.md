@@ -46,3 +46,9 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Bewertungsanfrage nach Termin ist eine Werbe-/Kundenpflege-Mail (§ 7 UWG): nur mit Opt-in des Kunden und Hinweis bei der Buchung bzw. in der Datenschutzerklärung der Kundenwebsite; jede Mail enthält einen Abmeldelink, abgemeldete Adressen werden gesperrt gespeichert (nur Kunde und E-Mail-Adresse).
 - Wiederkehrende Rechnungen: Leistungszeitraum steht auf der Rechnung; Vertrag/AGB müssen Turnus, Vorauszahlung und automatische Rechnungsstellung regeln. Rechnungsnummern laufen fortlaufend im selben Nummernkreis.
 - DNS-/Livegang-Check liest nur öffentliche DNS-Daten und die öffentlichen Seiten der Kunden.
+
+## Statusseite, Preiserhöhung, Zahlungsverzug, Zugänge
+- Statusseite: öffentlich nur über geheimen Link, enthält keine personenbezogenen Daten; im Verzeichnis der Verarbeitungstätigkeiten als Betriebstransparenz aufführen.
+- Preiserhöhung: Einseitige Preisanpassungen brauchen eine wirksame Preisanpassungsklausel (bei Verbrauchern und AGB strenge Anforderungen) oder die Zustimmung des Kunden. Die Mindestfrist im Portal beträgt 30 Tage, der Vertrag kann mehr verlangen. Ankündigung, Lesebestätigung und Einwand werden mit Zeitpunkt gespeichert (Nachweis).
+- Zahlungsverzug: Die Pause von Formular und Terminbuchung (Option) ist eine Leistungsbeschränkung; sie muss im Vertrag/den AGB vorgesehen sein (Zurückbehaltungsrecht, § 320 BGB) und nach Zahlung sofort enden (macht das Portal automatisch). Standardmäßig aus.
+- Rolle Empfang und befristete Zugänge: Zugriffsbeschränkung nach dem Erforderlichkeitsprinzip; Enddatum wird erzwungen, Vorgänge stehen im Audit-Log.

@@ -13,6 +13,24 @@ function anschriftKarte(k) {
   return h('div', { class: 'card' }, h('h2', {}, 'Rechnungsanschrift'), h('p', { class: 'small muted' }, 'Firmenname oder Rechtsform ändern wir für dich: Schreib uns dazu unter Nachrichten.'), m, f);
 }
 
+async function statusKarte() {
+  const d = await api('/api/kunde/statusseite').catch(() => null), m = h('div');
+  if (!d) return '';
+  const box = h('div');
+  const zeig = (r) => {
+    box.replaceChildren(r.aktiv ? h('div', {}, h('p', { class: 'small' }, 'Dein Link (nur wer ihn kennt, sieht die Seite):'),
+      h('input', { value: r.url, readonly: true, style: 'width:100%', onclick: (e) => e.target.select() }),
+      h('p', { class: 'row', style: 'margin-top:6px' }, h('a', { class: 'btn small', href: r.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen'),
+        h('button', { class: 'btn sec small', onclick: () => navigator.clipboard.writeText(r.url).then(() => melde(m, 'Link kopiert.', 'ok')) }, 'Link kopieren'),
+        h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Neuen Link erzeugen? Der alte Link funktioniert danach nicht mehr.')) return; try { zeig(await api('/api/kunde/statusseite/neu', { method: 'POST', body: {} })); melde(m, 'Neuer Link erzeugt.', 'ok'); } catch (x) { melde(m, x.message); } } }, 'Neuen Link erzeugen'))) : '');
+  };
+  const an = h('input', { type: 'checkbox', checked: d.aktiv, style: 'width:auto', onchange: async (e) => { try { zeig(await api('/api/kunde/statusseite', { method: 'PUT', body: { aktiv: e.target.checked } })); } catch (x) { e.target.checked = !e.target.checked; melde(m, x.message); } } });
+  zeig(d);
+  return h('div', { class: 'card' }, h('h2', {}, 'Statusseite für deine Website'),
+    h('p', { class: 'small muted' }, 'Eine einfache Seite zeigt dir und anderen, die du einlädst, ob deine Website erreichbar ist, wie schnell sie lädt, wie lange das Zertifikat gilt und wann zuletzt gesichert oder geändert wurde. Du kannst sie jederzeit abschalten.'),
+    m, h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, an, 'Statusseite einschalten'), box);
+}
+
 function datenKarte() {
   const m = h('div'), box = h('div');
   const grund = h('textarea', { rows: 3, maxlength: 1500, placeholder: 'Was können wir besser machen? (freiwillig)' });
@@ -82,7 +100,7 @@ V.einstellungen = async () => {
         h('div', {}, h('label', {}, 'Von'), h('input', { name: 'von', type: 'date', value: vt.von ? String(vt.von).slice(0, 10) : '' })), h('div', {}, h('label', {}, 'Bis'), h('input', { name: 'bis', type: 'date', value: vt.bis ? String(vt.bis).slice(0, 10) : '' })),
         h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
-    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(), inhaber() ? datenKarte() : '',
+    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(), inhaber() ? await statusKarte() : '', inhaber() ? datenKarte() : '',
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
 };
 
@@ -123,18 +141,19 @@ V.avv = async () => {
 
 V.team = async () => {
   const d = await api('/api/kunde/team'), m = h('div');
-  const ROLLE = { inhaber: 'Inhaber (alles)', mitarbeiter: 'Mitarbeiter (ohne Team und Rechnungen)', nur_lesen: 'Nur ansehen' };
-  const neu = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target);
+  const ROLLE = { inhaber: 'Inhaber (alles)', mitarbeiter: 'Mitarbeiter (ohne Team und Rechnungen)', nur_lesen: 'Nur ansehen', empfang: 'Empfang (nur Anfragen, Termine, Nachrichten)' };
+  const neu = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); if (!o.zugang_bis) delete o.zugang_bis;
     try { const r = await api('/api/kunde/team/einladen', { method: 'POST', body: o }); melde(m, r.gemailt ? 'Einladung wurde per E-Mail versendet.' : 'Einladung erstellt. Bitte diesen Link weitergeben: ' + r.einladungslink, 'ok'); setTimeout(zeige, r.gemailt ? 900 : 8000); } catch (x) { melde(m, x.message); } } },
     h('div', {}, h('label', {}, 'E-Mail'), h('input', { name: 'email', type: 'email', required: true })),
     h('div', {}, h('label', {}, 'Name'), h('input', { name: 'name' })),
     h('div', {}, h('label', {}, 'Rolle'), h('select', { name: 'kunden_rolle' }, ...Object.entries(ROLLE).map(([v, t]) => h('option', { value: v, selected: v === 'mitarbeiter' }, t)))),
+    h('div', {}, h('label', {}, 'Zugang endet am (leer = unbefristet, z. B. für Vertretung)'), h('input', { name: 'zugang_bis', type: 'date' })),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Einladen')));
   const aend = async (z, body) => { try { await api('/api/kunde/team/' + z.id, { method: 'PATCH', body }); zeige(); } catch (x) { melde(m, x.message); } };
   const rolleWahl = (z) => h('select', { onchange: (e) => aend(z, { kunden_rolle: e.target.value }) }, ...Object.entries(ROLLE).map(([v, t]) => h('option', { value: v, selected: v === z.kunden_rolle }, t)));
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Team'), h('p', { class: 'small muted' }, 'Hier lädst du Kolleginnen und Kollegen ein. Jeder bekommt einen eigenen Zugang mit eigenem Passwort.'), m,
       tabelle([['Name', z => z.name || '–'], ['E-Mail', z => z.email], ['Rolle', rolleWahl], ['Status', z => h('span', { class: 'pill ' + (!z.aktiv ? 'bad' : z.angemeldet ? 'ok' : 'warn') }, !z.aktiv ? 'gesperrt' : z.angemeldet ? 'aktiv' : 'eingeladen')],
-        ['Letzter Login', z => z.letzter_login ? zeit(z.letzter_login) : 'noch nie'], ['', z => h('button', { class: 'btn sec small', onclick: () => aend(z, { aktiv: !z.aktiv }) }, z.aktiv ? 'Sperren' : 'Entsperren')]], d, 'Noch keine Zugänge.')),
+        ['Zugang bis', z => h('input', { type: 'date', value: z.zugang_bis ? String(z.zugang_bis).slice(0, 10) : '', onchange: (e) => aend(z, { zugang_bis: e.target.value || null }) })], ['Letzter Login', z => z.letzter_login ? zeit(z.letzter_login) : 'noch nie'], ['', z => h('button', { class: 'btn sec small', onclick: () => aend(z, { aktiv: !z.aktiv }) }, z.aktiv ? 'Sperren' : 'Entsperren')]], d, 'Noch keine Zugänge.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuen Zugang einladen'), neu));
 };

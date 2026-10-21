@@ -144,7 +144,7 @@ export async function zahlungKarte() {
   const num = (n, v, min, max) => h('input', { name: n, type: 'number', min, max, value: v });
   const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const x = e.target;
     try { await api('/api/admin/einstellungen/zahlung', { method: 'PUT', body: { glaeubiger_id: x.glaeubiger_id.value, vorab_tage: Number(x.vorab_tage.value), mahn_aktiv: x.mahn_aktiv.checked,
-      tage_1: Number(x.tage_1.value), tage_2: Number(x.tage_2.value), tage_3: Number(x.tage_3.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } } },
+      tage_1: Number(x.tage_1.value), tage_2: Number(x.tage_2.value), tage_3: Number(x.tage_3.value), verzug_tage: Number(x.verzug_tage.value), verzug_dienste: x.verzug_dienste.checked } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } } },
     h('h3', {}, 'SEPA-Lastschrift'),
     l.iban_da ? '' : h('div', { class: 'msg info' }, 'Bitte unter „Firmendaten“ deine IBAN eintragen, sie wird als Einzugskonto gebraucht.'),
     h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Gläubiger-Identifikationsnummer'), h('input', { name: 'glaeubiger_id', value: l.glaeubiger_id, placeholder: 'DE98ZZZ09999999999' })),
@@ -153,6 +153,10 @@ export async function zahlungKarte() {
     h('h3', {}, 'Automatische Zahlungserinnerungen'),
     cb('mahn_aktiv', w.aktiv, 'Erinnerung und Mahnungen automatisch per Mail verschicken (werktags, nicht bei angekündigtem Einzug und nicht bei Referenzkunden)'),
     h('div', { class: 'form3' }, h('div', {}, h('label', {}, 'Zahlungserinnerung nach (Tagen)'), num('tage_1', w.tage_1, 1, 90)), h('div', {}, h('label', {}, '1. Mahnung nach'), num('tage_2', w.tage_2, 2, 120)), h('div', {}, h('label', {}, '2. Mahnung nach'), num('tage_3', w.tage_3, 3, 180))),
+    h('h3', {}, 'Bei langem Zahlungsverzug'),
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Wartungsplan pausieren, wenn eine Rechnung so viele Tage nach der 2. Mahnung noch offen ist (0 = nie)'), num('verzug_tage', w.verzug_tage || 0, 0, 180))),
+    cb('verzug_dienste', w.verzug_dienste, 'Zusätzlich Formular und Terminbuchung der Kunden-Website pausieren (die Seite selbst bleibt online)'),
+    h('p', { class: 'small muted' }, 'Sobald nichts Überfälliges mehr offen ist, wird automatisch alles wieder freigegeben. Du bekommst jedes Mal eine Meldung. Vertraglich vorher prüfen lassen, ob eine Pause zulässig ist.'),
     h('p', { class: 'small muted' }, 'Die Tage zählen ab dem Fälligkeitsdatum. Mahngebühren und Verzugszinsen werden nicht automatisch berechnet. Vor dem Einschalten bitte rechtlich prüfen lassen.'),
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   return h('div', { class: 'card' }, h('h2', {}, 'Zahlung & Mahnwesen'), m, f);

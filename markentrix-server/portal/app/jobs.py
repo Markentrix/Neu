@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import date, datetime, timezone
 
-from . import abo, berichte, betrieb, domaincheck, webbetrieb, zustellung, einstellungen, mailer, pdf, push
+from . import abo, berichte, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -407,6 +407,63 @@ def mahnungen_automatisch(cfg):
         mahnlauf(cfg)
 
 
+def preisaenderung_anwenden(cfg):
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 4 or not _marker(f"preisaenderung-{jetzt.date()}"):
+        return
+    preisaenderung.anwenden(cfg)
+
+
+def zahlungsverzug(cfg):
+    """Täglich: Kunden mit einer Rechnung, die lange nach der 2. Mahnung unbezahlt ist, bekommen ihren Wartungsplan (und auf Wunsch Formular/Buchung der Website) pausiert.
+    Sobald nichts Überfälliges mehr offen ist, wird alles wieder freigegeben. Der Admin wird jeweils informiert."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 7 or not _marker(f"verzug-{jetzt.date()}"):
+        return
+    from .routes_zahlung import mahn_cfg
+    with tx("system") as cur:
+        m = mahn_cfg(cur)
+        tage = int(m.get("verzug_tage") or 0)
+        if tage <= 0:
+            cur.execute("SELECT kunden_id FROM abrechnungsplaene WHERE pausiert_verzug UNION SELECT kunden_id FROM website_dienste WHERE verzug_pause")
+            frei = [r["kunden_id"] for r in cur.fetchall()]       # Funktion ausgeschaltet: alles freigeben
+            verzug = []
+        else:
+            cur.execute("""SELECT b.kunden_id, k.firma, min(b.nummer) AS nummer FROM belege b JOIN kunden k ON k.id = b.kunden_id
+                           WHERE b.art='rechnung' AND b.status IN ('gestellt','versendet') AND b.storno_von IS NULL AND b.mahnstufe >= 3 AND b.mahn_am <= current_date - %s
+                             AND NOT k.referenzkunde AND k.status = 'aktiv' GROUP BY b.kunden_id, k.firma""", (tage,))
+            verzug = cur.fetchall()
+            cur.execute("""SELECT kunden_id FROM abrechnungsplaene WHERE pausiert_verzug UNION SELECT kunden_id FROM website_dienste WHERE verzug_pause""")
+            gesperrt = {r["kunden_id"] for r in cur.fetchall()}
+            frei = [k for k in gesperrt if k not in {v["kunden_id"] for v in verzug}]
+    for v in verzug:
+        with tx("system") as cur:
+            cur.execute("UPDATE abrechnungsplaene SET aktiv=false, pausiert_verzug=true WHERE kunden_id=%s AND aktiv", (v["kunden_id"],))
+            plaene = cur.rowcount
+            dienste = 0
+            if m.get("verzug_dienste"):
+                cur.execute("UPDATE website_dienste SET verzug_pause=true WHERE kunden_id=%s AND NOT verzug_pause", (v["kunden_id"],))
+                dienste = cur.rowcount
+            ids = push.admins(cur) if (plaene or dienste) else []
+            if plaene or dienste:
+                cur.execute("INSERT INTO audit_log (kunden_id, aktion, details) VALUES (%s,'zahlungsverzug_pausiert',%s::jsonb)", (v["kunden_id"], json.dumps({"plaene": plaene, "dienste": bool(dienste), "rechnung": v["nummer"]})))
+        if ids:
+            push.senden(ids, "Zahlungsverzug", f"{v['firma']}: Rechnung {v['nummer']} unbezahlt. " + ("Wartungsplan pausiert" if plaene else "") + (" · Formular/Buchung der Website pausiert" if dienste else ""), "/admin#kunden", "verzug")
+    for kid in frei:
+        with tx("system") as cur:
+            cur.execute("UPDATE abrechnungsplaene SET aktiv=true, pausiert_verzug=false WHERE kunden_id=%s AND pausiert_verzug", (kid,))
+            plaene = cur.rowcount
+            cur.execute("UPDATE website_dienste SET verzug_pause=false WHERE kunden_id=%s AND verzug_pause", (kid,))
+            dienste = cur.rowcount
+            cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+            f = (cur.fetchone() or {}).get("firma", "")
+            ids = push.admins(cur) if (plaene or dienste) else []
+            if plaene or dienste:
+                cur.execute("INSERT INTO audit_log (kunden_id, aktion, details) VALUES (%s,'zahlungsverzug_aufgehoben',%s::jsonb)", (kid, json.dumps({"plaene": plaene, "dienste": bool(dienste)})))
+        if ids:
+            push.senden(ids, "Zahlungsverzug beendet", f"{f}: nichts Überfälliges mehr offen, Pause aufgehoben.", "/admin#kunden", "verzug")
+
+
 def fruehwarnung_woche(cfg):
     jetzt = datetime.now(timezone.utc)
     if jetzt.weekday() != 0 or jetzt.hour < 6:
@@ -624,7 +681,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, abrechnungslauf):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         try:
             job(cfg)
         except Exception:

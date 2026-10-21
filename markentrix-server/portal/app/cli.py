@@ -1,4 +1,5 @@
 """Verwaltung auf dem Server:  python -m app.cli admin-add EMAIL [NAME]   (legt Admin an oder setzt Passwort neu)"""
+import os
 import secrets
 import sys
 
@@ -53,6 +54,75 @@ def alarm_mail(stufe: str, titel: str, text: str):
         sys.exit("Mail nicht gesendet: " + fehler)
 
 
+def selbsttest() -> int:
+    """Kurztest nach einem Update (läuft im Portal-Container). Gibt je Prüfung eine Zeile aus; Rückgabe = Anzahl Fehler."""
+    import smtplib
+    import ssl
+    import time
+    import urllib.error
+    import urllib.request
+    from . import betrieb
+    fehler = 0
+
+    def zeile(ok: bool, text: str, warnung: bool = False):
+        nonlocal fehler
+        print(("  OK      " if ok else "  WARNUNG " if warnung else "  FEHLER  ") + text)
+        if not ok and not warnung:
+            fehler += 1
+
+    def http(url: str, daten: bytes | None = None, kopf: dict | None = None):
+        req = urllib.request.Request(url, data=daten, headers=kopf or {})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return r.status, r.read(2000)
+        except urllib.error.HTTPError as e:
+            return e.code, e.read(2000)
+        except Exception as e:  # noqa: BLE001
+            return 0, str(e).encode()
+    basis = os.environ.get("SELBSTTEST_URL", "http://127.0.0.1:8090")
+    st, _ = http(basis + "/healthz"); zeile(st == 200, f"Portal antwortet (/healthz: {st})")
+    st, _ = http(basis + "/api/login", json.dumps({"email": "selbsttest@invalid.example", "password": "falsch-falsch-falsch"}).encode(), {"Content-Type": "application/json", "X-MK": "1"})
+    zeile(st in (400, 401, 403, 429), f"Anmeldung weist falsche Daten ab (Status {st})")
+    try:
+        with db.tx("system") as cur:
+            cur.execute("SELECT count(*) AS n FROM benutzer WHERE rolle='admin' AND aktiv")
+            admins = cur.fetchone()["n"]
+        zeile(admins >= 1, f"Datenbank erreichbar, {admins} aktive(r) Admin(s)")
+    except Exception as e:  # noqa: BLE001
+        zeile(False, "Datenbank: " + str(e)[:150])
+    try:
+        with db.tx("system") as cur:
+            c = einstellungen.lesen(cur, "smtp") or {}
+        if not c.get("host"):
+            zeile(False, "E-Mail-Versand ist noch nicht eingerichtet", warnung=True)
+        else:
+            host, port, modus = c["host"], int(c.get("port") or 587), c.get("sicherung", "starttls")
+            ctx = ssl.create_default_context()
+            sm = smtplib.SMTP_SSL(host, port, timeout=15, context=ctx) if modus == "ssl" else smtplib.SMTP(host, port, timeout=15)
+            with sm:
+                sm.ehlo()
+                if modus == "starttls":
+                    sm.starttls(context=ctx)
+                    sm.ehlo()
+                if c.get("benutzer"):
+                    sm.login(c["benutzer"], c.get("passwort", ""))
+            zeile(True, f"Mail-Server {host} nimmt die Anmeldung an (es wurde keine Mail gesendet)")
+    except Exception as e:  # noqa: BLE001
+        zeile(False, "Mail-Server: " + str(e)[:150])
+    st, body = http(basis + "/siteapi/api/health", None, {"Host": "selbsttest.invalid"})
+    zeile(st == 200 and b"ok" in body, f"Website-API antwortet (Status {st})")
+    ok_jobs = False
+    for _ in range(12):       # die Hintergrundaufgaben starten nach dem Neustart erst nach etwa 15 Sekunden
+        with db.tx("system") as cur:
+            j = betrieb.lesen(cur, "jobs")
+        if j and j["sekunden"] < 150:
+            ok_jobs = True
+            break
+        time.sleep(10)
+    zeile(ok_jobs, "Hintergrundaufgaben laufen (Herzschlag in den letzten 2,5 Minuten)")
+    return fehler
+
+
 DEMO_PRAEFIX = "DEMO – "
 
 
@@ -94,6 +164,12 @@ if __name__ == "__main__":
         db.open_pool()
         try:
             demo_daten() if sys.argv[1] == "demo-daten" else demo_entfernen()
+        finally:
+            db.close_pool()
+    elif len(sys.argv) >= 2 and sys.argv[1] == "selbsttest":
+        db.open_pool()
+        try:
+            sys.exit(1 if selbsttest() else 0)
         finally:
             db.close_pool()
     elif len(sys.argv) >= 5 and sys.argv[1] == "alarm-mail":

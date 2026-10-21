@@ -44,7 +44,8 @@ const GRUPPEN = [
   ['Verwaltung', ['willkommen', 'belege', 'avv', 'team', 'hilfe', 'einstellungen'], false],
 ];
 export const inhaber = () => start.kunden_rolle === 'inhaber';
-export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste'].includes(s[0]) || inhaber()));
+const EMPFANG = ['heute', 'anfragen', 'termine', 'nachrichten', 'hilfe', 'einstellungen'];
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste'].includes(s[0]) || inhaber()) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])));
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : 0)) || 0;
 

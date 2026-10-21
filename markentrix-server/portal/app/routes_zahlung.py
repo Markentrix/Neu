@@ -17,7 +17,7 @@ from .security import audit, client_ip, rate_limit, require_admin, require_inhab
 
 log = logging.getLogger("zahlung")
 router = APIRouter()
-MAHN_STANDARD = {"aktiv": False, "tage_1": 7, "tage_2": 21, "tage_3": 35}
+MAHN_STANDARD = {"aktiv": False, "tage_1": 7, "tage_2": 21, "tage_3": 35, "verzug_tage": 0, "verzug_dienste": False}
 ZAHLUNG_STANDARD = {"glaeubiger_id": "", "vorab_tage": 3}
 TITEL = {1: "Zahlungserinnerung", 2: "1. Mahnung", 3: "2. Mahnung"}
 GID_RE = re.compile(r"^[A-Z]{2}\d{2}[A-Z0-9]{3}[A-Z0-9]{1,28}$")
@@ -66,6 +66,8 @@ class ZahlungIn(BaseModel):
     tage_1: int = Field(default=7, ge=1, le=90)
     tage_2: int = Field(default=21, ge=2, le=120)
     tage_3: int = Field(default=35, ge=3, le=180)
+    verzug_tage: int = Field(default=0, ge=0, le=180)       # 0 = aus; sonst: so viele Tage nach der 2. Mahnung wird der Wartungsplan pausiert
+    verzug_dienste: bool = False                              # zusätzlich Formular und Terminbuchung der Kunden-Website pausieren
 
 
 @router.put("/api/admin/einstellungen/zahlung")
@@ -77,7 +79,7 @@ def speichern(data: ZahlungIn, user: dict = Depends(require_admin)):
         raise HTTPException(400, "Die Gläubiger-Identifikationsnummer sieht anders aus (Beispiel: DE98ZZZ09999999999). Sie kommt von der Bundesbank.")
     with tx("admin") as cur:
         einstellungen.schreiben(cur, "zahlung", {"glaeubiger_id": gid, "vorab_tage": data.vorab_tage})
-        einstellungen.schreiben(cur, "mahnwesen", {"aktiv": data.mahn_aktiv, "tage_1": data.tage_1, "tage_2": data.tage_2, "tage_3": data.tage_3})
+        einstellungen.schreiben(cur, "mahnwesen", {"aktiv": data.mahn_aktiv, "tage_1": data.tage_1, "tage_2": data.tage_2, "tage_3": data.tage_3, "verzug_tage": data.verzug_tage, "verzug_dienste": data.verzug_dienste})
         audit(cur, user, "einstellungen_zahlung", None, {"lastschrift": bool(gid), "mahnwesen": data.mahn_aktiv})
     return {"ok": True}
 

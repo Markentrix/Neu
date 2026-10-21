@@ -98,7 +98,7 @@ cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"
 rm -rf "$BASE/db" && cp -r "$SRC/db" "$BASE/db"
 rm -rf "$BASE/portal" && cp -r "$SRC/portal" "$BASE/portal"
-install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$BASE/bin/"
+install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$SRC/bin/selbsttest.sh" "$BASE/bin/"
 ln -sf "$BASE/bin/mkctl" /usr/local/bin/mkctl
 [ -f "$BASE/caddy/sites/00-platzhalter.caddy" ] || echo "# Hier liegen die Kunden-Websites (mkctl site-add)" > "$BASE/caddy/sites/00-platzhalter.caddy"
 echo "$CADDY_MODE" > "$BASE/mode"
@@ -241,6 +241,10 @@ printf "%s\n" "30 4 * * 0 root /opt/markentrix/bin/restore-test.sh >> /var/log/m
 chmod 644 /etc/cron.d/markentrix-watchdog /etc/cron.d/markentrix-restore-test
 "$BASE/bin/backup.sh"
 ok "Sicherung funktioniert (täglich um 03:15 Uhr, 30 Tage Aufbewahrung)"
+
+# ---------------------------------------------------------------- 7b. Selbsttest
+say "Selbsttest (prüft, ob alles wirklich arbeitet)"
+"$BASE/bin/selbsttest.sh" || warn "Der Selbsttest hat Fehler gefunden (siehe oben, eine Alarm-Mail wurde versucht). Später erneut: mkctl selbsttest"
 
 # ---------------------------------------------------------------- 8. Zusammenfassung
 say "8/8 Fertig"

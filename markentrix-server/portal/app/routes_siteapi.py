@@ -66,6 +66,8 @@ def _lade(request: Request) -> dict:
         if not w:
             raise HTTPException(404, "Unbekannte Website.")
         z = sd.zeile(cur, w["kunden_id"])
+        if z.get("verzug_pause") and request.method != "GET":
+            raise HTTPException(503, "Dieser Dienst ist vorübergehend nicht verfügbar. Bitte rufen Sie uns direkt an.")
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (w["kunden_id"],))
         z["_firma"] = cur.fetchone()["firma"]
     z["_domain"] = host

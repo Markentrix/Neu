@@ -1,6 +1,6 @@
 import { leistungstextKarte } from './angebotsplus.js';
 import { h, api, datum, zeit, euro, melde, formular } from '../common.js';
-import { V, bestaetigt, cent, feld, fmtEuro, knopf, kopf, pill, tabelle } from './kern.js';
+import { V, bestaetigt, cent, fehler, feld, fmtEuro, knopf, kopf, pill, tabelle } from './kern.js';
 
 V.katalog = async () => {
   const d = await api('/api/admin/katalog');
@@ -157,6 +157,34 @@ V.websites = async () => {
 
 
 // ---------------------------------------------------------------- Preise und Konditionen
+async function preisaenderungKarte() {
+  const m = h('div'), box = h('div'), liste = h('div');
+  const euroC = (c) => fmtEuro(c);
+  const frist = new Date(Date.now() + 45 * 86400000).toISOString().slice(0, 10);
+  const laden = async () => {
+    const d = await api('/api/admin/preisaenderungen');
+    liste.replaceChildren(tabelle([['Titel', z => z.titel], ['Anpassung', z => String(z.prozent).replace('.', ',') + ' %'], ['Wirksam ab', z => datum(z.wirksam_ab)],
+      ['Status', z => ({ entwurf: 'Entwurf', angekuendigt: 'angekündigt', angewendet: 'angewendet', abgebrochen: 'abgebrochen' })[z.status]], ['Kunden', z => z.kunden + ' (gelesen ' + z.gelesen + ', Einwand ' + z.widersprueche + ')'],
+      ['', z => h('span', { class: 'row' }, knopf('Details', async () => {
+          const r = await api('/api/admin/preisaenderungen/' + z.id);
+          box.replaceChildren(h('div', { class: 'card' }, h('h3', {}, r.aenderung.titel), tabelle([['Kunde', k => k.firma], ['Alt', k => euroC(k.alt_cent)], ['Neu', k => euroC(k.neu_cent)], ['Benachrichtigt', k => k.benachrichtigt_am ? datum(k.benachrichtigt_am) : '–'], ['Gelesen', k => k.gelesen_am ? datum(k.gelesen_am) : '–'], ['Einwand', k => k.widerspruch_am ? (k.widerspruch_text || 'ja') : '–'], ['Angewendet', k => k.angewendet_am ? datum(k.angewendet_am) : '–']], r.kunden, '')));
+        }, 'sec small'),
+        ['entwurf', 'angekuendigt'].includes(z.status) ? knopf(z.status === 'entwurf' ? 'Jetzt ankündigen' : 'Fehlende nachsenden', async () => { if (!confirm('Die Ankündigung per Mail an alle betroffenen Kunden senden?')) return; try { const r = await api('/api/admin/preisaenderungen/' + z.id + '/ankuendigen', { method: 'POST', body: {} }); melde(m, r.gesendet + ' gesendet' + (r.fehlgeschlagen ? ', ' + r.fehlgeschlagen + ' nicht zustellbar (keine E-Mail-Adresse oder Fehler)' : '') + '.', 'ok'); laden(); } catch (x) { fehler(m, x); } }, 'small') : '',
+        ['entwurf', 'angekuendigt'].includes(z.status) ? knopf('Abbrechen', async () => { if (!confirm('Preisänderung abbrechen? Bereits versendete Ankündigungen musst du den Kunden selbst widerrufen.')) return; try { await api('/api/admin/preisaenderungen/' + z.id + '/abbrechen', { method: 'POST', body: {} }); laden(); } catch (x) { fehler(m, x); } }, 'bad small') : '')]], d.liste, 'Noch keine Preisanpassung.'));
+  };
+  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); const body = { titel: o.titel, prozent: Number(String(o.prozent).replace(',', '.')), wirksam_ab: o.wirksam_ab, text: o.text };
+    try { const v = await api('/api/admin/preisaenderungen/vorschau', { method: 'POST', body });
+      box.replaceChildren(h('div', { class: 'card' }, h('h3', {}, 'Vorschau: ' + v.kunden.length + ' Kunden'), tabelle([['Kunde', k => k.firma], ['Monatlich alt', k => euroC(k.alt_cent)], ['Monatlich neu', k => euroC(k.neu_cent)]], v.kunden, ''),
+        h('p', {}, 'Summe monatlich: ' + euroC(v.summe_alt_cent) + ' → ' + euroC(v.summe_neu_cent)),
+        h('p', {}, knopf('Als Entwurf anlegen', async () => { try { await api('/api/admin/preisaenderungen', { method: 'POST', body }); box.replaceChildren(); melde(m, 'Entwurf angelegt. Jetzt in der Liste „Jetzt ankündigen“.', 'ok'); laden(); } catch (x) { fehler(m, x); } }, 'btn'))));
+    } catch (x) { fehler(m, x); } } },
+    h('div', { class: 'form2' }, feld('Titel', 'titel', 'Preisanpassung ' + new Date().getFullYear(), { required: true, minlength: 3 }), feld('Anpassung in %', 'prozent', '', { required: true, type: 'text', placeholder: 'z. B. 5' }), feld('Wirksam ab (mind. 30 Tage Frist)', 'wirksam_ab', frist, { type: 'date', required: true }), feld('Text für die Kunden (optional)', 'text', '')),
+    h('p', {}, h('button', { class: 'btn' }, 'Vorschau berechnen')));
+  await laden();
+  return h('div', { class: 'card' }, h('h2', {}, 'Preiserhöhung ankündigen'),
+    h('p', { class: 'small muted' }, 'Erhöht die monatlichen Preise aller aktiven Kunden (ohne Referenzkunden und ohne laufende Kündigung) um einen Prozentsatz. Jeder Kunde bekommt eine Mail mit altem und neuem Preis und kann bestätigen oder Einwände senden. Kunden mit Einwand bleiben beim alten Preis. Zum Stichtag werden die Preise automatisch angepasst, auch feste Positionen in Wartungsplänen. Ob und wie du einseitig erhöhen darfst, regelt dein Vertrag: bitte vorher prüfen.'), m, f, box, liste);
+}
+
 V.preise = async () => {
   const d = await api('/api/admin/preise'), m = h('div'), mk = h('div'), mr = h('div');
   const heute = new Date().toISOString().slice(0, 10);
@@ -171,7 +199,7 @@ V.preise = async () => {
     knopf('Speichern', () => { const v = i.value.trim(); const body = /^-?\d+$/.test(v) ? { wert_zahl: Number(v) } : { wert_text: v }; bestaetigt(mk, () => api('/api/admin/konditionen/' + encodeURIComponent(z.schluessel), { method: 'PUT', body })); })); };
   const regelBtn = (z) => z.status === 'entwurf' ? knopf('Freigeben', () => confirm('Regel "' + z.name + '" (' + z.prozent + ' %) freigeben?') && bestaetigt(mr, () => api('/api/admin/provisionsregeln/' + z.id + '/freigeben', { method: 'POST' }), 'Freigegeben.')) : '';
   const lt = await leistungstextKarte().catch(() => '');
-  return h('div', { class: 'stack' }, kopf('Preise & Konditionen'), m,
+  return h('div', { class: 'stack' }, kopf('Preise & Konditionen'), m, await preisaenderungKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Aktuelle Preise'), tabelle([['Produkt', z => z.name], ['Einrichtung', z => (z.ab_preis ? 'ab ' : '') + fmtEuro(z.einrichtung_cent)], ['Monatlich', z => fmtEuro(z.monatlich_cent)], ['Projekt', z => fmtEuro(z.projekt_cent)], ['Gültig ab', z => datum(z.gueltig_ab)]], d.aktuell)),
     h('div', { class: 'card' }, h('h2', {}, 'Preis ändern (neue Version)'), h('p', { class: 'small muted' }, 'Alte Preise bleiben im Verlauf. Bestehende Buchungen behalten den Preis, der bei der Buchung galt.'), pform), lt,
     h('div', { class: 'card' }, h('h2', {}, 'Konditionen'), mk, tabelle([['Schlüssel', z => z.schluessel], ['Beschreibung', z => z.beschreibung], ['Wert', kond]], d.konditionen, 'Keine Konditionen.')),

@@ -30,7 +30,7 @@ def login(data: LoginIn, request: Request, response: Response):
     if not EMAIL_RE.match(email) or len(data.password) > 200:
         raise HTTPException(401, "E-Mail oder Passwort stimmt nicht.")
     with tx("system") as cur:
-        cur.execute("SELECT id, passwort_hash, rolle, kunden_id, aktiv, gesperrt_bis, fehlversuche, totp_aktiv, totp_secret, totp_letzter_schritt, totp_recovery FROM benutzer WHERE lower(email)=%s", (email,))
+        cur.execute("SELECT id, passwort_hash, rolle, kunden_id, (aktiv AND (zugang_bis IS NULL OR zugang_bis >= current_date)) AS aktiv, gesperrt_bis, fehlversuche, totp_aktiv, totp_secret, totp_letzter_schritt, totp_recovery FROM benutzer WHERE lower(email)=%s", (email,))
         u = cur.fetchone()
         gesperrt = u and u["gesperrt_bis"] and u["gesperrt_bis"] > datetime.now(timezone.utc)
         ok = verify_password(data.password, u["passwort_hash"] if u else None)
