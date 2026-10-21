@@ -56,7 +56,7 @@ async function uploadKarte(d) {
       if (r.ok) { box.replaceChildren(h('span', {}, 'Veröffentlicht, Domain zeigt auf diesen Server. ', h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen'))); return; }
       box.replaceChildren(h('div', {}, h('b', {}, e.name + ': '), 'Veröffentlicht, aber die Domain zeigt noch nicht auf diesen Server. ', h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen'), h('div', {}, 'So geht es:'),
         r.schritte.length ? h('ol', { style: 'margin:6px 0 0 18px' }, ...r.schritte.map(t => h('li', {}, t))) : '',
-        h('div', { class: 'small', style: 'margin-top:6px' }, 'Server-Adresse: ' + (r.server_ipv4.join(', ') || 'unbekannt') + ' · ', h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); dnsZeigen(r); } }, 'Genaue DNS-Prüfung mit Text für den Kunden'))));
+        h('div', { class: 'small', style: 'margin-top:6px' }, 'Server-Adresse: ' + (r.server_ipv4.join(', ') || 'unbekannt') + ' · ', h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen'), ' · ', h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); dnsZeigen(r); } }, 'Genaue DNS-Prüfung mit Text für den Kunden'))));
     } catch { /* Hinweis ist nur eine Hilfe */ }
   };
   const ladeVerlauf = async () => {
@@ -67,7 +67,7 @@ async function uploadKarte(d) {
       verlauf.replaceChildren(
         v.offen.length ? h('p', { class: 'small' }, h('span', { class: 'pill warn' }, 'läuft'), ' ' + v.offen.map(o => o.name).join(', ') + ' wird gerade veröffentlicht (bis zu einer Minute).') : '',
         ...neueste.map(e => {
-          const text = h('div', { style: 'flex:1' }, h('b', {}, e.name + ': '), e.neu && e.art === 'live' && e.ok ? 'Veröffentlicht. Prüfe die Domain …' : e.text + ' ', e.ok && e.url && !(e.neu && e.art === 'live') ? h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen') : '');
+          const text = h('div', { style: 'flex:1' }, h('b', {}, e.name + ': '), e.neu && e.art === 'live' && e.ok ? 'Veröffentlicht. Prüfe die Domain …' : e.text + ' ', e.ok && e.url ? h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen') : '');
           if (e.ok && e.neu && e.art === 'live') dnsHinweis(e, text);
           return h('div', { class: 'msg ' + (e.ok ? 'ok' : 'err'), style: 'margin:6px 0;display:flex;gap:10px;align-items:flex-start' }, text,
             h('button', { class: 'btn small sec', type: 'button', title: 'Meldung ausblenden', onclick: (ev) => { wegMerken(e.id); ev.target.closest('.msg').remove(); } }, '×'));
