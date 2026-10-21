@@ -15,6 +15,10 @@ ABGABE
 WEBSITE-API (gleiche Domain, relative Pfade, JSON):
 - GET  /api/verfuegbarkeit   -> {blocked:[ISO-Datum], closedWeekdays:[0-6, 0=So], nextFree:ISO-Datum|null, selfBooking:bool, slotTimes:["08:00",…]}
 - GET  /api/slots?tag=JJJJ-MM-TT -> {tag, slots:[{zeit:"08:00", frei:true|false}]}
+- GET  /api/leistungen -> {leistungen:[{key,name,beschreibung,preis,dauer}]}   (nur wenn der Betrieb Leistungen mit Dauer hat, z. B. Friseur)
+- GET  /api/mitarbeiter -> {mitarbeiter:[{key,name,leistungen:[key]}]}          (nur wenn mehrere Personen buchbar sind)
+  Bei Leistungen/Personen: /api/slots und /api/verfuegbarkeit zusätzlich mit ?leistung=<key>&mitarbeiter=<key> (leer = egal) aufrufen
+  und beim Buchen die Felder leistung und mitarbeiter mitsenden. Auswahlfelder aus den beiden Listen aufbauen, nicht fest eintragen.
 - POST /api/anfrage (Content-Type: application/json), Felder:
     typ = "kontakt" | "termin" | "gutschein" | "firma" | "widerruf"
     name*, telefon, email, nachricht, einwilligung ("ja", Pflicht) und beliebige weitere Felder (z. B. leistung, paket, fahrzeug)

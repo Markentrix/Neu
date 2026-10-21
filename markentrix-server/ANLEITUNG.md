@@ -433,6 +433,7 @@ Jede fertige Website ruft unter ihrer eigenen Domain `/api/anfrage`, `/api/slots
 2. Im Kundenportal (oder für den Kunden) **Website-Dienste**: Kontaktformular einschalten (Empfänger), Terminbuchung einschalten. Dort einstellen: Öffnungstage, Beginn/Ende und Dauer **oder** feste Uhrzeiten, Höchstzahl pro Tag, Vorlauf, Ort, optional den iCal-Kalender.
 3. „Ich bestätige jede Buchung selbst“ ein: Neue Wünsche sind vorgemerkt und warten unter „Buchungen über die Website“ auf **Bestätigen** (mit optionaler Anzahlung und PayPal.Me-Link) oder **Ablehnen**. Aus: Buchungen gelten sofort, der Kunde bekommt die Einladung automatisch.
 4. Urlaub und Feiertage unter **Urlaub und Sperrtage** eintragen. Unbestätigte Reservierungen geben die Zeit nach der Haltefrist (Standard 72 Stunden) wieder frei.
-5. Besucherzahlen (ohne Cookies) stehen unter „Besucher der letzten 30 Tage“.
+5. **Leistungen und Mitarbeiter** (Friseur, Kosmetik, Praxis): Unter „Leistungen und Mitarbeiter“ jede Leistung mit Dauer und Pause eintragen (Herrenschnitt 30 Min., Färben 120 Min. + 15 Min. Pause) und jede Person mit Arbeitstagen, Zeiten, eigenem Kalender und den Leistungen, die sie anbietet. Die Website fragt die Listen unter `/api/leistungen` und `/api/mitarbeiter` ab und bietet nur Zeiten an, in denen die gewünschte Person (oder irgendjemand bei „egal“) die ganze Dauer Zeit hat. Urlaub einer einzelnen Person unter „Urlaub und Sperrtage“ mit „Gilt für“.
+6. Besucherzahlen (ohne Cookies) stehen unter „Besucher der letzten 30 Tage“.
 
 **Wichtig:** Die Uhrzeiten, die die Website anbietet, müssen zu den „Festen Uhrzeiten“ im Portal passen. Bestehende Websites bekommen die Weiterleitung automatisch (der Server-Dienst ergänzt unveränderte Standard-Einträge innerhalb einer Minute).

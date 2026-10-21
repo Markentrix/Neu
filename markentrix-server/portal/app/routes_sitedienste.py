@@ -7,6 +7,7 @@ Drei Teile:
 import json
 import re
 import secrets
+import uuid
 from datetime import date, datetime, timedelta, timezone
 from html import escape
 from urllib.parse import urlparse
@@ -180,8 +181,9 @@ def _termin_mails(kid, g: dict, z: dict, firma: str, an: list):
     ort = z["kal_ort"] or ""
     absagen = f"{config.BASE_URL}/site/{z['site_id']}/termin/absagen?t={g['token']}"
     anhang = ("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin bei " + firma, ort), "text/calendar")
+    wer = " · ".join(x for x in (g.get("leistung_name"), ("bei " + g["mitarbeiter_name"]) if g.get("mitarbeiter_name") else "") if x)
     sd.kundenmail(kid, g["email"], f"Ihr Termin bei {firma} am {lokal}",
-                  f"Guten Tag {g['name']},\n\nIhr Termin ist gebucht: {lokal}.\n{ort}\n\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}",
+                  f"Guten Tag {g['name']},\n\nIhr Termin ist gebucht: {lokal}.{(chr(10) + wer) if wer else ''}\n{ort}\n\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}",
                   anhang=anhang, art="termin")
     for a in an:
         sd.kundenmail(kid, a, f"Neuer Termin: {g['name']} am {lokal}",
@@ -213,8 +215,11 @@ def oeff_termin(site_id: str, request: Request, bg: BackgroundTasks, daten: dict
     kid = z["kunden_id"]
     voll = "Dieser Termin ist leider nicht mehr frei. Bitte wählen Sie einen anderen."
     with tx("system") as cur:
-        if start not in sd.freie_slots(cur, z):
+        cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(kid),))
+        platz = sd.freier_platz(cur, z, start)
+        if not platz:
             raise HTTPException(409, voll)
+        rid = platz[1]
         ende = start + timedelta(minutes=z["kal_dauer"])
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
         firma = cur.fetchone()["firma"]
@@ -225,9 +230,9 @@ def oeff_termin(site_id: str, request: Request, bg: BackgroundTasks, daten: dict
         tid = cur.fetchone()["id"]
         token = secrets.token_urlsafe(24)
         try:
-            cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token)
-                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, start, ende, name, email, telefon, nachricht, token""",
-                        (kid, tid, start, ende, d.name.strip(), email, d.telefon.strip() or None, d.nachricht.strip() or None, token))
+            cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token, mitarbeiter_id)
+                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, start, ende, name, email, telefon, nachricht, token""",
+                        (kid, tid, start, ende, d.name.strip(), email, d.telefon.strip() or None, d.nachricht.strip() or None, token, rid))
         except Exception:
             raise HTTPException(409, voll)         # gleichzeitig gebucht: der Rest der Transaktion wird verworfen
         g = cur.fetchone()
@@ -590,16 +595,19 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
         z = sd.zeile(cur, kid)
         sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
-        cur.execute("""SELECT id, ref, status, start, name, email, telefon, nachricht, daten, anzahlung, erstellt_am FROM website_termine
-                       WHERE kunden_id=%s AND status IN ('reserviert','gebucht') AND start > now() - interval '1 day'
-                       ORDER BY (status='reserviert') DESC, start LIMIT 100""", (kid,))
+        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.email, w.telefon, w.nachricht, w.daten, w.anzahlung, w.erstellt_am,
+                              l.name AS leistung, m.name AS mitarbeiter
+                       FROM website_termine w LEFT JOIN website_leistungen l ON l.id=w.leistung_id LEFT JOIN website_mitarbeiter m ON m.id=w.mitarbeiter_id
+                       WHERE w.kunden_id=%s AND w.status IN ('reserviert','gebucht') AND w.start > now() - interval '1 day'
+                       ORDER BY (w.status='reserviert') DESC, w.start LIMIT 100""", (kid,))
         zeilen = cur.fetchall()
     out = []
     for r in zeilen:
         d = r["daten"] or {}
         details = {k: v for k, v in d.items() if k not in ("typ", "name", "telefon", "email", "nachricht", "datum", "datum2", "uhrzeit") and v}
         out.append({"id": str(r["id"]), "ref": r["ref"] or "", "status": r["status"], "start": r["start"], "name": r["name"], "email": r["email"], "telefon": r["telefon"] or "",
-                    "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or ""})
+                    "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
+                    "ende": r["ende"]})
     return {"buchungen": out, "freigabe": z["kal_freigabe"]}
 
 
@@ -692,14 +700,24 @@ def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Dep
 @kunde.get("/sperrtage")
 def k_sperrtage(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
-        cur.execute("SELECT tag, grund FROM website_sperrtage WHERE kunden_id=%s AND tag >= current_date ORDER BY tag LIMIT 400", (user["kunden_id"],))
-        return {"tage": [{"tag": r["tag"].isoformat(), "grund": r["grund"] or ""} for r in cur.fetchall()]}
+        cur.execute("""SELECT s.tag, s.grund, s.mitarbeiter_id, m.name AS mitarbeiter FROM website_sperrtage s LEFT JOIN website_mitarbeiter m ON m.id=s.mitarbeiter_id
+                       WHERE s.kunden_id=%s AND s.tag >= current_date ORDER BY s.tag, m.name NULLS FIRST LIMIT 600""", (user["kunden_id"],))
+        return {"tage": [{"tag": r["tag"].isoformat(), "grund": r["grund"] or "", "mitarbeiter_id": str(r["mitarbeiter_id"]) if r["mitarbeiter_id"] else "",
+                          "mitarbeiter": r["mitarbeiter"] or ""} for r in cur.fetchall()]}
 
 
 class SperrIn(BaseModel):
     von: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     bis: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
     grund: str = Field(default="", max_length=80)
+    mitarbeiter_id: str = Field(default="", max_length=40)      # leer = ganzer Betrieb
+
+
+def _uuid(w: str, text: str = "Ungültige Angabe."):
+    try:
+        return str(uuid.UUID(str(w)))
+    except ValueError:
+        raise HTTPException(400, text)
 
 
 @kunde.post("/sperrtage")
@@ -711,21 +729,218 @@ def k_sperre(data: SperrIn, user: dict = Depends(require_inhaber)):
         raise HTTPException(400, "Das Datum ist ungültig.")
     if b < a or (b - a).days > 120:
         raise HTTPException(400, "Der Zeitraum ist ungültig (höchstens 120 Tage am Stück).")
+    mid = _uuid(data.mitarbeiter_id) if data.mitarbeiter_id else None
     with tx("system") as cur:
+        if mid:
+            cur.execute("SELECT 1 FROM website_mitarbeiter WHERE id=%s AND kunden_id=%s", (mid, user["kunden_id"]))
+            if not cur.fetchone():
+                raise HTTPException(400, "Diesen Mitarbeiter gibt es nicht.")
         for i in range((b - a).days + 1):
-            cur.execute("INSERT INTO website_sperrtage (kunden_id, tag, grund) VALUES (%s,%s,%s) ON CONFLICT (kunden_id, tag) DO UPDATE SET grund=excluded.grund",
-                        (user["kunden_id"], a + timedelta(days=i), data.grund.strip() or None))
+            cur.execute("""INSERT INTO website_sperrtage (kunden_id, tag, grund, mitarbeiter_id) VALUES (%s,%s,%s,%s)
+                           ON CONFLICT (kunden_id, tag, coalesce(mitarbeiter_id, '00000000-0000-0000-0000-000000000000'::uuid)) DO UPDATE SET grund=excluded.grund""",
+                        (user["kunden_id"], a + timedelta(days=i), data.grund.strip() or None, mid))
     return {"ok": True}
 
 
 @kunde.delete("/sperrtage/{tag}")
-def k_sperre_weg(tag: str, user: dict = Depends(require_inhaber)):
+def k_sperre_weg(tag: str, mitarbeiter: str = "", user: dict = Depends(require_inhaber)):
     try:
         t = date.fromisoformat(tag)
     except ValueError:
         raise HTTPException(400, "Das Datum ist ungültig.")
+    mid = _uuid(mitarbeiter) if mitarbeiter else None
     with tx("system") as cur:
-        cur.execute("DELETE FROM website_sperrtage WHERE kunden_id=%s AND tag=%s", (user["kunden_id"], t))
+        cur.execute("DELETE FROM website_sperrtage WHERE kunden_id=%s AND tag=%s AND mitarbeiter_id IS NOT DISTINCT FROM %s", (user["kunden_id"], t, mid))
+    return {"ok": True}
+
+
+# =============================================================== Leistungen und Mitarbeiter (Inhaber)
+def _slug(text: str) -> str:
+    t = text.lower().replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")[:40]
+
+
+def _team(cur, kid) -> dict:
+    cur.execute("SELECT id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, sort FROM website_leistungen WHERE kunden_id=%s ORDER BY sort, name", (kid,))
+    leist = [{**r, "id": str(r["id"]), "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or ""} for r in cur.fetchall()]
+    cur.execute("SELECT * FROM website_mitarbeiter WHERE kunden_id=%s ORDER BY sort, name", (kid,))
+    ms = cur.fetchall()
+    cur.execute("SELECT mitarbeiter_id, leistung_id FROM website_mitarbeiter_leistungen WHERE mitarbeiter_id IN (SELECT id FROM website_mitarbeiter WHERE kunden_id=%s)", (kid,))
+    bietet: dict = {}
+    for r in cur.fetchall():
+        bietet.setdefault(r["mitarbeiter_id"], []).append(str(r["leistung_id"]))
+    return {"leistungen": leist,
+            "mitarbeiter": [{"id": str(m["id"]), "schluessel": m["schluessel"], "name": m["name"], "aktiv": m["aktiv"], "wochentage": m["wochentage"] or [], "von": m["von"] or "",
+                             "bis": m["bis"] or "", "zeiten": m["zeiten"] or "", "leistungen": bietet.get(m["id"], []), "ical_gesetzt": bool(m["ical_enc"]),
+                             "ical_geprueft_am": m["ical_geprueft_am"]} for m in ms]}
+
+
+@kunde.get("/team")
+def k_team(user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        return _team(cur, user["kunden_id"])
+
+
+class LeistungIn(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    schluessel: str = Field(default="", max_length=40)
+    beschreibung: str = Field(default="", max_length=300)
+    preis: str = Field(default="", max_length=40)
+    dauer_min: int = Field(default=30, ge=5, le=720)
+    puffer_min: int = Field(default=0, ge=0, le=240)
+    aktiv: bool = True
+
+
+def _schluessel(roh: str, name: str) -> str:
+    k = _slug(roh or name)
+    if not k:
+        raise HTTPException(400, "Bitte einen Namen mit Buchstaben oder Zahlen angeben.")
+    return k
+
+
+@kunde.post("/leistungen")
+def k_leistung_neu(data: LeistungIn, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    k = _schluessel(data.schluessel, data.name)
+    with tx("system") as cur:
+        cur.execute("SELECT count(*) AS n FROM website_leistungen WHERE kunden_id=%s", (kid,))
+        if cur.fetchone()["n"] >= 60:
+            raise HTTPException(400, "Mehr als 60 Leistungen sind nicht möglich.")
+        cur.execute("SELECT 1 FROM website_leistungen WHERE kunden_id=%s AND schluessel=%s", (kid, k))
+        if cur.fetchone():
+            raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
+        cur.execute("""INSERT INTO website_leistungen (kunden_id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, sort)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,(SELECT coalesce(max(sort),0)+1 FROM website_leistungen WHERE kunden_id=%s)) RETURNING id""",
+                    (kid, k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, kid))
+        return {"ok": True, "id": str(cur.fetchone()["id"]), "schluessel": k}
+
+
+@kunde.put("/leistungen/{lid}")
+def k_leistung_aendern(lid: str, data: LeistungIn, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    lid = _uuid(lid)
+    with tx("system") as cur:
+        cur.execute("SELECT schluessel FROM website_leistungen WHERE id=%s AND kunden_id=%s", (lid, kid))
+        alt = cur.fetchone()
+        if not alt:
+            raise HTTPException(404, "Diese Leistung gibt es nicht.")
+        k = _slug(data.schluessel) if data.schluessel.strip() else alt["schluessel"]
+        if not k:
+            raise HTTPException(400, "Der Kurzname ist ungültig.")
+        cur.execute("SELECT 1 FROM website_leistungen WHERE kunden_id=%s AND schluessel=%s AND id<>%s", (kid, k, lid))
+        if cur.fetchone():
+            raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
+        cur.execute("""UPDATE website_leistungen SET schluessel=%s, name=%s, beschreibung=%s, preis=%s, dauer_min=%s, puffer_min=%s, aktiv=%s WHERE id=%s AND kunden_id=%s""",
+                    (k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, lid, kid))
+    return {"ok": True}
+
+
+@kunde.delete("/leistungen/{lid}")
+def k_leistung_weg(lid: str, user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        cur.execute("DELETE FROM website_leistungen WHERE id=%s AND kunden_id=%s", (_uuid(lid), user["kunden_id"]))
+    return {"ok": True}
+
+
+class MitarbeiterIn(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    schluessel: str = Field(default="", max_length=40)
+    aktiv: bool = True
+    wochentage: list[int] = Field(default=[], max_length=7)      # leer = wie der Betrieb
+    von: str = Field(default="", pattern=r"^(\d{2}:\d{2})?$")
+    bis: str = Field(default="", pattern=r"^(\d{2}:\d{2})?$")
+    zeiten: str = Field(default="", max_length=300)
+    leistungen: list[str] = Field(default=[], max_length=60)       # leer = alle Leistungen
+    ical_url: str = Field(default="", max_length=1500)             # leer = unverändert
+
+
+def _ma_pruefen(cur, kid, data: MitarbeiterIn):
+    if any(w < 1 or w > 7 for w in data.wochentage):
+        raise HTTPException(400, "Die Wochentage sind ungültig.")
+    if bool(data.von) != bool(data.bis) or (data.von and data.von >= data.bis):
+        raise HTTPException(400, "Bitte Beginn und Ende angeben, das Ende nach dem Beginn.")
+    zeiten = [x.strip() for x in re.split(r"[,;\s]+", data.zeiten) if x.strip()]
+    if any(not sd.ZEIT_RE.match(x) for x in zeiten) or len(zeiten) > 24:
+        raise HTTPException(400, "Die Uhrzeiten bitte so eintragen: 08:00, 10:00, 13:30.")
+    ids = [_uuid(x) for x in data.leistungen]
+    if ids:
+        cur.execute("SELECT count(*) AS n FROM website_leistungen WHERE kunden_id=%s AND id = ANY(%s::uuid[])", (kid, ids))
+        if cur.fetchone()["n"] != len(set(ids)):
+            raise HTTPException(400, "Eine der Leistungen gibt es nicht.")
+    enc, geprueft = None, None
+    if data.ical_url.strip():
+        try:
+            u = sd.ical_url_pruefen(data.ical_url)
+            sd.ical_belegt(sd.ical_laden(u), datetime.now(timezone.utc), datetime.now(timezone.utc) + timedelta(days=30))
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        enc, geprueft = einstellungen.verschluesseln(u), datetime.now(timezone.utc)
+    return ", ".join(sorted(set(zeiten))) or None, sorted(set(ids)), enc, geprueft
+
+
+def _ma_leistungen(cur, mid, ids):
+    cur.execute("DELETE FROM website_mitarbeiter_leistungen WHERE mitarbeiter_id=%s", (mid,))
+    for lid in ids:
+        cur.execute("INSERT INTO website_mitarbeiter_leistungen (mitarbeiter_id, leistung_id) VALUES (%s,%s)", (mid, lid))
+
+
+@kunde.post("/mitarbeiter")
+def k_ma_neu(data: MitarbeiterIn, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("mapruef:" + str(kid), 30, 600)
+    k = _schluessel(data.schluessel, data.name)
+    with tx("system") as cur:
+        cur.execute("SELECT count(*) AS n FROM website_mitarbeiter WHERE kunden_id=%s", (kid,))
+        if cur.fetchone()["n"] >= 30:
+            raise HTTPException(400, "Mehr als 30 Mitarbeiter sind nicht möglich.")
+        cur.execute("SELECT 1 FROM website_mitarbeiter WHERE kunden_id=%s AND schluessel=%s", (kid, k))
+        if cur.fetchone():
+            raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
+        zeiten, ids, enc, geprueft = _ma_pruefen(cur, kid, data)
+        cur.execute("""INSERT INTO website_mitarbeiter (kunden_id, schluessel, name, aktiv, sort, wochentage, von, bis, zeiten, ical_enc, ical_geprueft_am)
+                       VALUES (%s,%s,%s,%s,(SELECT coalesce(max(sort),0)+1 FROM website_mitarbeiter WHERE kunden_id=%s),%s,%s,%s,%s,%s,%s) RETURNING id""",
+                    (kid, k, data.name.strip(), data.aktiv, kid, sorted(set(data.wochentage)) or None, data.von or None, data.bis or None, zeiten, enc, geprueft))
+        mid = cur.fetchone()["id"]
+        _ma_leistungen(cur, mid, ids)
+        return {"ok": True, "id": str(mid), "schluessel": k}
+
+
+@kunde.put("/mitarbeiter/{mid}")
+def k_ma_aendern(mid: str, data: MitarbeiterIn, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("mapruef:" + str(kid), 30, 600)
+    mid = _uuid(mid)
+    with tx("system") as cur:
+        cur.execute("SELECT schluessel FROM website_mitarbeiter WHERE id=%s AND kunden_id=%s", (mid, kid))
+        alt = cur.fetchone()
+        if not alt:
+            raise HTTPException(404, "Diesen Mitarbeiter gibt es nicht.")
+        k = _slug(data.schluessel) if data.schluessel.strip() else alt["schluessel"]
+        cur.execute("SELECT 1 FROM website_mitarbeiter WHERE kunden_id=%s AND schluessel=%s AND id<>%s", (kid, k, mid))
+        if cur.fetchone():
+            raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
+        zeiten, ids, enc, geprueft = _ma_pruefen(cur, kid, data)
+        cur.execute("""UPDATE website_mitarbeiter SET schluessel=%s, name=%s, aktiv=%s, wochentage=%s, von=%s, bis=%s, zeiten=%s,
+                       ical_enc=coalesce(%s, ical_enc), ical_geprueft_am=coalesce(%s, ical_geprueft_am) WHERE id=%s AND kunden_id=%s""",
+                    (k, data.name.strip(), data.aktiv, sorted(set(data.wochentage)) or None, data.von or None, data.bis or None, zeiten, enc, geprueft, mid, kid))
+        _ma_leistungen(cur, mid, ids)
+    sd._ical_cache.pop("m:" + mid, None)
+    return {"ok": True}
+
+
+@kunde.delete("/mitarbeiter/{mid}/kalender-adresse")
+def k_ma_kal_weg(mid: str, user: dict = Depends(require_inhaber)):
+    mid = _uuid(mid)
+    with tx("system") as cur:
+        cur.execute("UPDATE website_mitarbeiter SET ical_enc=NULL, ical_geprueft_am=NULL WHERE id=%s AND kunden_id=%s", (mid, user["kunden_id"]))
+    sd._ical_cache.pop("m:" + mid, None)
+    return {"ok": True}
+
+
+@kunde.delete("/mitarbeiter/{mid}")
+def k_ma_weg(mid: str, user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        cur.execute("DELETE FROM website_mitarbeiter WHERE id=%s AND kunden_id=%s", (_uuid(mid), user["kunden_id"]))
     return {"ok": True}
 
 

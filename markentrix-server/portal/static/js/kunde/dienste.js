@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    mailKarte(d, neu), kalenderKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    mailKarte(d, neu), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
 
 // ---------------------------------------------------------------- E-Mail
@@ -212,10 +212,11 @@ async function buchungenKarte(d, neu) {
   const m = h('div');
   const zeile = (b) => {
     const betrag = h('input', { placeholder: 'Anzahlung in € (optional)', style: 'max-width:200px', maxlength: 20 });
-    const info = Object.entries(b.details).map(([k, v]) => k.replace(/_/g, ' ') + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' · ');
+    const info = Object.entries(b.details).filter(([k]) => k !== 'leistung' && k !== 'mitarbeiter').map(([k, v]) => k.replace(/_/g, ' ') + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' · ');
     const tun = async (pfad, body) => { try { await api('/api/kunde/website-dienste/buchungen/' + b.id + '/' + pfad, { method: 'POST', body }); neu(); } catch (x) { melde(m, x.message); } };
     return h('div', { class: 'card', style: 'margin:8px 0' },
       h('p', {}, h('b', {}, ZEIT(b.start)), ' · ' + b.name, ' ', h('span', { class: 'pill ' + (b.status === 'reserviert' ? 'warn' : 'ok') }, b.status === 'reserviert' ? 'wartet auf dich' : 'bestätigt')),
+      (b.leistung || b.mitarbeiter) ? h('p', { class: 'small' }, [b.leistung, b.mitarbeiter ? 'bei ' + b.mitarbeiter : ''].filter(Boolean).join(' · ')) : '',
       h('p', { class: 'small' }, b.email + (b.telefon ? ' · ' + b.telefon : '') + (b.ref ? ' · ' + b.ref : '')),
       info ? h('p', { class: 'small muted' }, info) : '', b.nachricht ? h('p', { class: 'small' }, b.nachricht) : '',
       b.anzahlung ? h('p', { class: 'small' }, 'Anzahlung: ' + b.anzahlung.replace('.', ',') + ' €') : '',
@@ -231,18 +232,66 @@ async function buchungenKarte(d, neu) {
 }
 
 // ---------------------------------------------------------------- Sperrtage
-async function sperrtageKarte() {
+async function sperrtageKarte(d) {
   const r = await api('/api/kunde/website-dienste/sperrtage');
+  const team = d.kalender.aktiv ? await api('/api/kunde/website-dienste/team') : { mitarbeiter: [] };
   const m = h('div');
   const von = h('input', { type: 'date' }), bis = h('input', { type: 'date' }), grund = h('input', { placeholder: 'z. B. Urlaub', maxlength: 80 });
+  const wer = h('select', {}, h('option', { value: '' }, 'Ganzer Betrieb'), team.mitarbeiter.map(x => h('option', { value: x.id }, x.name)));
   const liste = h('div');
-  const zeigen = (tage) => { liste.replaceChildren(...(tage.length ? tage.map(t => h('span', { class: 'pill', style: 'margin:2px;cursor:pointer', title: 'Zum Entfernen anklicken', onclick: async () => { try { await api('/api/kunde/website-dienste/sperrtage/' + t.tag, { method: 'DELETE' }); const n = await api('/api/kunde/website-dienste/sperrtage'); zeigen(n.tage); } catch (x) { melde(m, x.message); } } }, datum(t.tag) + (t.grund ? ' · ' + t.grund : '') + ' ×')) : [h('span', { class: 'small muted' }, 'Keine Sperrtage eingetragen.')])); };
+  const laden = async () => { const n = await api('/api/kunde/website-dienste/sperrtage'); zeigen(n.tage); };
+  const zeigen = (tage) => { liste.replaceChildren(...(tage.length ? tage.map(t => h('span', { class: 'pill', style: 'margin:2px;cursor:pointer', title: 'Zum Entfernen anklicken', onclick: async () => { try { await api('/api/kunde/website-dienste/sperrtage/' + t.tag + (t.mitarbeiter_id ? '?mitarbeiter=' + t.mitarbeiter_id : ''), { method: 'DELETE' }); await laden(); } catch (x) { melde(m, x.message); } } }, datum(t.tag) + (t.mitarbeiter ? ' · ' + t.mitarbeiter : '') + (t.grund ? ' · ' + t.grund : '') + ' ×')) : [h('span', { class: 'small muted' }, 'Keine Sperrtage eingetragen.')])); };
   zeigen(r.tage);
-  const add = async () => { melde(m, ''); try { await api('/api/kunde/website-dienste/sperrtage', { method: 'POST', body: { von: von.value, bis: bis.value, grund: grund.value } }); const n = await api('/api/kunde/website-dienste/sperrtage'); zeigen(n.tage); von.value = ''; bis.value = ''; grund.value = ''; } catch (x) { melde(m, x.message); } };
+  const add = async () => { melde(m, ''); try { await api('/api/kunde/website-dienste/sperrtage', { method: 'POST', body: { von: von.value, bis: bis.value, grund: grund.value, mitarbeiter_id: wer.value } }); await laden(); von.value = ''; bis.value = ''; grund.value = ''; } catch (x) { melde(m, x.message); } };
   return h('div', { class: 'card' }, h('h2', {}, 'Urlaub und Sperrtage'),
-    h('p', { class: 'small muted' }, 'An diesen Tagen kann auf deiner Website nicht gebucht werden.'), m,
-    h('div', { class: 'form2' }, feld('Von', von), feld('Bis (optional)', bis), feld('Grund (nur für dich)', grund)),
+    h('p', { class: 'small muted' }, 'An diesen Tagen kann nicht gebucht werden: für den ganzen Betrieb oder nur für eine Person (z. B. Urlaub).'), m,
+    h('div', { class: 'form2' }, feld('Von', von), feld('Bis (optional)', bis), feld('Gilt für', wer), feld('Grund (nur für dich)', grund)),
     h('p', {}, h('button', { class: 'btn', onclick: add }, 'Sperren')), liste);
+}
+
+// ---------------------------------------------------------------- Leistungen und Mitarbeiter
+async function teamKarte(d, neu) {
+  if (!d.kalender.aktiv) return '';
+  const t = await api('/api/kunde/website-dienste/team');
+  const m = h('div');
+  const melden = (x) => melde(m, x.message);
+  const leistungZeile = (l) => {
+    const name = h('input', { value: l.name, maxlength: 80 }), dauer = h('input', { type: 'number', min: 5, max: 720, value: l.dauer_min, style: 'max-width:90px' });
+    const puffer = h('input', { type: 'number', min: 0, max: 240, value: l.puffer_min, style: 'max-width:90px' }), preis = h('input', { value: l.preis, maxlength: 40, placeholder: 'z. B. 45 €', style: 'max-width:110px' });
+    const an = schalter(l.aktiv, 'aktiv');
+    const body = () => ({ name: name.value, schluessel: l.schluessel, dauer_min: Number(dauer.value), puffer_min: Number(puffer.value), preis: preis.value, aktiv: an.c.checked });
+    return h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end;margin:6px 0' }, feld('Leistung', name, 'Name auf der Website: ' + l.schluessel), feld('Dauer (Min.)', dauer), feld('Pause danach', puffer), feld('Preis (Anzeige)', preis), an.el,
+      h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/kunde/website-dienste/leistungen/' + l.id, { method: 'PUT', body: body() }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melden(x); } } }, 'Speichern'),
+      h('button', { class: 'btn sec', onclick: async () => { if (!confirm('Leistung „' + l.name + '“ löschen?')) return; try { await api('/api/kunde/website-dienste/leistungen/' + l.id, { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Löschen'));
+  };
+  const nName = h('input', { placeholder: 'z. B. Damenhaarschnitt', maxlength: 80 }), nDauer = h('input', { type: 'number', min: 5, max: 720, value: 30, style: 'max-width:90px' }), nPuffer = h('input', { type: 'number', min: 0, max: 240, value: 0, style: 'max-width:90px' }), nPreis = h('input', { maxlength: 40, placeholder: 'z. B. 45 €', style: 'max-width:110px' });
+  const neuL = async () => { try { await api('/api/kunde/website-dienste/leistungen', { method: 'POST', body: { name: nName.value, dauer_min: Number(nDauer.value), puffer_min: Number(nPuffer.value), preis: nPreis.value } }); neu(); } catch (x) { melden(x); } };
+  const aktive = t.leistungen;
+  const maBlock = (ma) => {
+    const name = h('input', { value: ma ? ma.name : '', maxlength: 80, placeholder: 'Name' });
+    const an = schalter(ma ? ma.aktiv : true, 'nimmt Termine an');
+    const wt = TAGE.map(([n, tx]) => ({ n, c: h('input', { type: 'checkbox', checked: ma ? ma.wochentage.includes(n) : false, style: 'width:auto' }), tx }));
+    const von = h('input', { type: 'time', value: ma ? ma.von : '' }), bis = h('input', { type: 'time', value: ma ? ma.bis : '' });
+    const zeiten = h('input', { value: ma ? ma.zeiten : '', maxlength: 300, placeholder: 'leer = wie der Betrieb' });
+    const url = h('input', { maxlength: 1500, autocomplete: 'off', placeholder: ma && ma.ical_gesetzt ? 'Kalender ist gespeichert (zum Ersetzen neu einfügen)' : 'Eigener Kalender (iCal), optional' });
+    const ls = aktive.map(l => ({ id: l.id, c: h('input', { type: 'checkbox', checked: ma ? ma.leistungen.includes(l.id) : false, style: 'width:auto' }), n: l.name }));
+    const body = () => ({ name: name.value, aktiv: an.c.checked, wochentage: wt.filter(x => x.c.checked).map(x => x.n), von: von.value, bis: bis.value, zeiten: zeiten.value, leistungen: ls.filter(x => x.c.checked).map(x => x.id), ical_url: url.value });
+    const speichern = async () => { try { await api('/api/kunde/website-dienste/mitarbeiter' + (ma ? '/' + ma.id : ''), { method: ma ? 'PUT' : 'POST', body: body() }); neu(); } catch (x) { melden(x); } };
+    return h('details', { class: 'hilfe', open: !ma }, h('summary', {}, ma ? ma.name + (ma.aktiv ? '' : ' (pausiert)') : '+ Mitarbeiter hinzufügen'),
+      h('div', { style: 'margin-top:6px' },
+        h('div', { class: 'form2' }, feld('Name', name, ma ? 'Name auf der Website: ' + ma.schluessel : ''), feld('Eigener Kalender (iCal)', url, 'Belegte Zeiten in diesem Kalender werden nicht angeboten.'), feld('Arbeitet von', von), feld('bis', bis), feld('Feste Uhrzeiten (optional)', zeiten)),
+        an.el,
+        h('div', { class: 'row', style: 'gap:12px;margin:8px 0;flex-wrap:wrap' }, h('span', { class: 'small' }, 'Arbeitstage (leer = wie der Betrieb):'), wt.map(x => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit' }, x.c, x.tx))),
+        ls.length ? h('div', { class: 'row', style: 'gap:12px;margin:8px 0;flex-wrap:wrap' }, h('span', { class: 'small' }, 'Bietet an (nichts angehakt = alles):'), ls.map(x => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit' }, x.c, x.n))) : '',
+        h('div', { class: 'row', style: 'gap:8px' }, h('button', { class: 'btn', onclick: speichern }, ma ? 'Speichern' : 'Anlegen'),
+          ma && ma.ical_gesetzt ? h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/kunde/website-dienste/mitarbeiter/' + ma.id + '/kalender-adresse', { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Kalender-Adresse löschen') : '',
+          ma ? h('button', { class: 'btn sec', onclick: async () => { if (!confirm(ma.name + ' löschen? Bestehende Termine bleiben erhalten.')) return; try { await api('/api/kunde/website-dienste/mitarbeiter/' + ma.id, { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Löschen') : '')));
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Leistungen und Mitarbeiter'),
+    h('p', { class: 'small muted' }, 'Optional, zum Beispiel für Friseur, Kosmetik oder Praxis: Jede Leistung hat ihre eigene Dauer. Wer Mitarbeiter einträgt, bei dem wird ein Termin nur angeboten, wenn die gewünschte Person (oder irgendjemand, wenn der Besucher „egal“ wählt) für die ganze Dauer Zeit hat. Ohne Einträge gilt die Dauer aus der Terminbuchung oben.'), m,
+    h('h3', {}, 'Leistungen'), t.leistungen.map(leistungZeile),
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end;margin:6px 0' }, feld('Neue Leistung', nName), feld('Dauer (Min.)', nDauer), feld('Pause danach', nPuffer), feld('Preis (Anzeige)', nPreis), h('button', { class: 'btn', onclick: neuL }, 'Hinzufügen')),
+    h('h3', {}, 'Mitarbeiter'), t.mitarbeiter.map(maBlock), maBlock(null));
 }
 
 // ---------------------------------------------------------------- Besucher-Statistik (ohne Cookies, ohne Einwilligung)

@@ -29,7 +29,7 @@ LABELS = {"name": "Name", "telefon": "Telefon", "email": "E-Mail", "nachricht": 
           "zustand": "Zustand", "extras": "Extras", "abholung": "Abholung", "datum": "Wunschtag", "datum2": "Ersatztag", "uhrzeit": "Uhrzeit", "zeitfenster": "Zeitfenster",
           "kanal": "Rückmeldung per", "gutscheincode": "Gutscheincode", "bewertung_ok": "Bewertung gewünscht", "quelle": "Gefunden über", "winterschutz": "Winterschutz",
           "art": "Art", "wunschbetrag": "Betrag", "betrag": "Betrag", "fuer": "Für", "von": "Von", "widmung": "Widmung", "zustellung": "Zustellung", "vorgang": "Vorgangsnummer",
-          "firma": "Firma", "anzahl": "Anzahl Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen"}
+          "leistung": "Leistung", "mitarbeiter": "Mitarbeiter", "firma": "Firma", "anzahl": "Anzahl Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen"}
 SCHLUESSEL = re.compile(r"^[a-z][a-z0-9_]{0,30}$")
 TELEFON = re.compile(r"^[0-9+()/ \-.]{5,40}$")
 BOT = re.compile(r"bot|crawl|spider|slurp|preview|headless|curl|wget|python|monitor|uptime|lighthouse|facebookexternal", re.I)
@@ -94,26 +94,79 @@ def gesund():
     return _json({"ok": True})
 
 
+EGAL = {"", "egal", "beliebig", "any", "keine", "0"}
+
+
+def _auswahl(cur, z: dict, leistung: str, mitarbeiter: str):
+    """Wunsch-Leistung und -Mitarbeiter (Kurznamen der Website) -> (Leistung|None, Mitarbeiter-ID|None, Mitarbeitername)."""
+    lz, mid, mname = None, None, ""
+    leistung, mitarbeiter = (leistung or "").strip().lower(), (mitarbeiter or "").strip().lower()
+    if leistung:
+        cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv AND (schluessel=%s OR lower(name)=%s)", (z["kunden_id"], leistung, leistung))
+        lz = cur.fetchone()
+        if not lz:
+            cur.execute("SELECT count(*) AS n FROM website_leistungen WHERE kunden_id=%s AND aktiv", (z["kunden_id"],))
+            if cur.fetchone()["n"]:
+                raise Ungueltig({"leistung": "Bitte eine Leistung wählen."})
+    if mitarbeiter not in EGAL:
+        cur.execute("SELECT id, name FROM website_mitarbeiter WHERE kunden_id=%s AND aktiv AND (schluessel=%s OR lower(name)=%s)", (z["kunden_id"], mitarbeiter, mitarbeiter))
+        m = cur.fetchone()
+        if not m:
+            raise Ungueltig({"mitarbeiter": "Bitte eine Person wählen."})
+        mid, mname = m["id"], m["name"]
+    return lz, mid, mname
+
+
+@router.get("/leistungen")
+def leistungen(request: Request):
+    rate_limit("api-leist:" + client_ip(request), 120, 60)
+    z = _lade(request)
+    with tx("system") as cur:
+        cur.execute("SELECT schluessel, name, beschreibung, preis, dauer_min FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (z["kunden_id"],))
+        l = [{"key": r["schluessel"], "name": r["name"], "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "dauer": r["dauer_min"]} for r in cur.fetchall()]
+    return _json({"leistungen": l})
+
+
+@router.get("/mitarbeiter")
+def mitarbeiter(request: Request):
+    rate_limit("api-mitarb:" + client_ip(request), 120, 60)
+    z = _lade(request)
+    with tx("system") as cur:
+        cur.execute("""SELECT m.id, m.schluessel, m.name, coalesce(array_agg(l.schluessel) FILTER (WHERE l.id IS NOT NULL), '{}') AS leistungen
+                       FROM website_mitarbeiter m LEFT JOIN website_mitarbeiter_leistungen x ON x.mitarbeiter_id=m.id LEFT JOIN website_leistungen l ON l.id=x.leistung_id AND l.aktiv
+                       WHERE m.kunden_id=%s AND m.aktiv GROUP BY m.id ORDER BY m.sort, m.name""", (z["kunden_id"],))
+        return _json({"mitarbeiter": [{"key": r["schluessel"], "name": r["name"], "leistungen": list(r["leistungen"])} for r in cur.fetchall()]})
+
+
 @router.get("/verfuegbarkeit")
-def verfuegbarkeit(request: Request):
+def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = ""):
     rate_limit("api-verf:" + client_ip(request), 120, 60)
     z = _lade(request)
     heute = datetime.now(TZ).date()
     if not z["kal_aktiv"]:
         return _json({"blocked": [], "blockedKeramik": [], "closedWeekdays": _geschlossen(z), "nextFree": None, "selfBooking": False, "slotTimes": _zeiten(z)})
-    with tx("system") as cur:
-        sd.reservierungen_verfallen(cur, z["kunden_id"], z["kal_halte_std"])
-        plan = sd.slotplan(cur, z)
-    gesperrt = [d.isoformat() for d, s in plan.items() if not any(f for _, _, f in s)]
+    try:
+        with tx("system") as cur:
+            sd.reservierungen_verfallen(cur, z["kunden_id"], z["kal_halte_std"])
+            lz, mid, _ = _auswahl(cur, z, leistung, mitarbeiter)
+            plan = sd.slotplan(cur, z, leistung=lz, mitarbeiter=mid)
+            res = sd.ressourcen(cur, z, (lz or {}).get("id"), mid)
+            team = any(r["id"] for r in res)
+            offen = set().union(*[set(r["wochentage"]) for r in res]) if res else set()
+    except Ungueltig as e:
+        return _json({"ok": False, "errors": e.fehler, "message": "Bitte die Auswahl prüfen."}, 422)
+    gesperrt = [d.isoformat() for d, s in plan.items() if not any(x[2] for x in s)]
     ab = heute + timedelta(days=z["kal_tage"] + 1)
     gesperrt += [(ab + timedelta(days=i)).isoformat() for i in range(0, 400 - z["kal_tage"])]     # jenseits des Buchungszeitraums gibt es noch keine Termine
-    frei = [d.isoformat() for d, s in sorted(plan.items()) if any(f for _, _, f in s)]
-    return _json({"blocked": gesperrt, "blockedKeramik": gesperrt, "closedWeekdays": _geschlossen(z), "nextFree": frei[0] if frei else None,
-                  "selfBooking": True, "slotTimes": _zeiten(z)})
+    frei = [d.isoformat() for d, s in sorted(plan.items()) if any(x[2] for x in s)]
+    zeiten = sorted(set(_zeiten(z)) | {x[0] for s in plan.values() for x in s}) if team else _zeiten(z)
+    geschlossen = [d for d in range(7) if (7 if d == 0 else d) not in offen]
+    return _json({"blocked": gesperrt, "blockedKeramik": gesperrt, "closedWeekdays": geschlossen, "nextFree": frei[0] if frei else None,
+                  "selfBooking": True, "slotTimes": zeiten})
 
 
 @router.get("/slots")
-def slots(request: Request, tag: str = ""):
+def slots(request: Request, tag: str = "", leistung: str = "", mitarbeiter: str = ""):
     rate_limit("api-slots:" + client_ip(request), 120, 60)
     z = _lade(request)
     try:
@@ -122,11 +175,16 @@ def slots(request: Request, tag: str = ""):
         return _json({"ok": False, "message": "Ungültiges Datum"}, 400)
     if not z["kal_aktiv"]:
         return _json({"tag": tag, "slots": [{"zeit": t, "frei": False} for t in _zeiten(z)]})
-    with tx("system") as cur:
-        sd.reservierungen_verfallen(cur, z["kunden_id"], z["kal_halte_std"])
-        plan = sd.slotplan(cur, z)
-    vorhanden = {t: f for t, _, f in plan.get(d, [])}
-    return _json({"tag": tag, "slots": [{"zeit": t, "frei": bool(vorhanden.get(t, False))} for t in _zeiten(z)]})
+    try:
+        with tx("system") as cur:
+            sd.reservierungen_verfallen(cur, z["kunden_id"], z["kal_halte_std"])
+            lz, mid, _ = _auswahl(cur, z, leistung, mitarbeiter)
+            plan = sd.slotplan(cur, z, leistung=lz, mitarbeiter=mid)
+    except Ungueltig as e:
+        return _json({"ok": False, "errors": e.fehler, "message": "Bitte die Auswahl prüfen."}, 422)
+    vorhanden = {x[0]: x[2] for x in plan.get(d, [])}
+    zeiten = sorted(set(_zeiten(z)) | set(vorhanden))
+    return _json({"tag": tag, "slots": [{"zeit": t, "frei": bool(vorhanden.get(t, False))} for t in zeiten]})
 
 
 async def _roh(request: Request) -> bytes:
@@ -338,27 +396,39 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
                         (kid, felder["name"], kontakt, f"{TITEL[typ]} {ref}\n\n{_zusammenfassung(felder)}"[:6000]))
             aid = cur.fetchone()["id"]
             if typ == "termin" and felder.get("uhrzeit") and z["kal_aktiv"] and felder.get("email"):
+                cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(kid),))
                 sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
+                lz, wunsch, mname = _auswahl(cur, z, felder.get("leistung", ""), felder.get("mitarbeiter", ""))
                 tag = date.fromisoformat(felder["datum"])
-                treffer = [u for t, u, f in sd.slotplan(cur, z).get(tag, []) if t == felder["uhrzeit"] and f]
+                treffer = [(u, rid) for t, u, f, rid in sd.slotplan(cur, z, leistung=lz, mitarbeiter=wunsch).get(tag, []) if t == felder["uhrzeit"] and f]
                 if not treffer:
                     raise Ungueltig({"uhrzeit": "Diese Uhrzeit ist leider gerade vergeben. Bitte eine andere wählen."})
-                start = treffer[0]
-                ende = start + timedelta(minutes=z["kal_dauer"])
+                start, rid = treffer[0]
+                if rid:
+                    cur.execute("SELECT name FROM website_mitarbeiter WHERE id=%s", (rid,))
+                    mname = cur.fetchone()["name"]
+                dauer = (lz or {}).get("dauer_min") or z["kal_dauer"]
+                ende = start + timedelta(minutes=dauer)
+                if lz:
+                    felder["leistung"] = lz["name"]
+                if mname:
+                    felder["mitarbeiter"] = mname
                 frei_gabe = bool(z["kal_freigabe"])
+                titel = " – ".join(x for x in ((lz or {}).get("name"), mname) if x) or "Termin über die Website"
                 cur.execute("""INSERT INTO termine (kunden_id, anfrage_id, titel, beginn, ende, kontakt_name, kontakt_info, status, notiz)
                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                            (kid, aid, "Termin über die Website", start, ende, felder["name"], kontakt, "geplant" if frei_gabe else "bestaetigt", _zusammenfassung(felder)[:1500]))
+                            (kid, aid, titel[:120], start, ende, felder["name"], kontakt, "geplant" if frei_gabe else "bestaetigt", _zusammenfassung(felder)[:1500]))
                 tid = cur.fetchone()["id"]
                 try:
-                    cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token, status, ref, daten)
-                                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token, status, ref, daten, mitarbeiter_id, leistung_id, puffer_min)
+                                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                                    RETURNING id, start, ende, name, email, telefon, nachricht, token""",
                                 (kid, tid, start, ende, felder["name"], felder["email"], felder.get("telefon"), felder.get("nachricht"), secrets.token_urlsafe(24),
-                                 "reserviert" if frei_gabe else "gebucht", ref, json.dumps(felder, ensure_ascii=False)))
+                                 "reserviert" if frei_gabe else "gebucht", ref, json.dumps(felder, ensure_ascii=False), rid, (lz or {}).get("id"), (lz or {}).get("puffer_min") or 0))
                 except Exception:
                     raise Ungueltig({"uhrzeit": "Diese Uhrzeit wurde gerade vergeben. Bitte eine andere wählen."})
                 g = cur.fetchone()
+                g["leistung_name"], g["mitarbeiter_name"] = (lz or {}).get("name", ""), mname
                 buchung = {"zeile": g, "wann": start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")}
             ids = push.kunde(cur, kid)
     except Ungueltig as e:
