@@ -122,6 +122,11 @@ function initBooking(root, DATA) {
 
   // Schritt 1: Leistungen
   const picker = $("[data-service-picker]", root);
+  const pickerHint = document.createElement("p");
+  pickerHint.className = "form-error";
+  pickerHint.setAttribute("role", "alert");
+  pickerHint.hidden = true;
+  picker.after(pickerHint);
   DATA.categories.forEach((cat, i) => {
     const det = document.createElement("details");
     det.className = "service-cat";
@@ -144,9 +149,11 @@ function initBooking(root, DATA) {
     const cb = e.target;
     if (cb.checked && state.selected.length >= DATA.maxServices) {
       cb.checked = false;
-      alert(`Bitte maximal ${DATA.maxServices} Leistungen pro Termin wählen.`);
+      pickerHint.textContent = `Bitte maximal ${DATA.maxServices} Leistungen pro Termin wählen.`;
+      pickerHint.hidden = false;
       return;
     }
+    pickerHint.hidden = true;
     state.selected = $$("input:checked", picker).map((i) => i.value);
     state.time = null;
     $$(".service-cat", picker).forEach((det) => {
@@ -163,6 +170,11 @@ function initBooking(root, DATA) {
   // Schritt 2: Datum & Uhrzeit
   const strip = $("[data-date-strip]", root);
   const slotsEl = $("[data-slots]", root);
+  const slotNotice = document.createElement("p");
+  slotNotice.className = "form-error";
+  slotNotice.setAttribute("role", "alert");
+  slotNotice.hidden = true;
+  slotsEl.before(slotNotice);
   const next2 = $('[data-step="2"] [data-next]', root);
   function renderDates() {
     if (!strip.children.length) {
@@ -232,6 +244,7 @@ function initBooking(root, DATA) {
     const b = e.target.closest(".slot-btn");
     if (!b) return;
     state.time = b.textContent;
+    slotNotice.hidden = true;
     $$(".slot-btn", slotsEl).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     next2.disabled = false;
     renderSummary();
@@ -304,7 +317,8 @@ function initBooking(root, DATA) {
       state.slotCache.clear();
       state.time = null;
       showStep(2);
-      alert(data.error || "Der Termin ist leider nicht mehr frei.");
+      slotNotice.textContent = data.error || "Der Termin ist leider nicht mehr frei.";
+      slotNotice.hidden = false;
       return;
     }
     showPayError(data.error || "Die Buchung konnte nicht abgeschlossen werden. Bitte rufen Sie uns an.");
