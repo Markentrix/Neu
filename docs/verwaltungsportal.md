@@ -21,6 +21,17 @@ Die eigene Statistik setzt keine Cookies und speichert keine IP-Adressen. Ein Ei
 5. Nach dem Termin: **Bewertung anfragen**. Das Portal warnt, wenn die Kundin oder der Kunde der Bewertungsanfrage im Formular nicht zugestimmt hat. Details im Dokument „Bewertungs-Prozess“.
 6. **Als CSV exportieren** liefert alle Anfragen für Excel.
 
+**Online-Buchungen:**
+- Status „Reserviert“: Der Kunde hat noch nicht bestätigt bzw. angezahlt.
+- Nach der Anzahlung oder Bestätigung steht der Termin automatisch auf „Termin bestätigt“.
+- „Vom Kunden abgesagt“ und „Reservierung verfallen“ geben die Uhrzeit wieder frei.
+
+In einer Terminanfrage können Sie:
+- **Tag und Uhrzeit ändern:** Der Kunde bekommt eine neue Bestätigung, der Google-Termin wird verschoben.
+- **Eine PayPal-Anzahlung erstatten.**
+
+Setzen Sie eine klassische Anfrage auf „Termin bestätigt“, bekommt der Kunde ebenfalls die Bestätigung mit dem Hinweis auf Ihren Anruf und Erinnerungen.
+
 ## Gutscheine
 
 1. Bestellungen von der Website legen automatisch einen Gutschein mit Status **Offen** an. Die Käuferin oder der Käufer bekommt eine E-Mail mit dem Zahlungshinweis aus den Einstellungen.

@@ -42,7 +42,7 @@
     clearTimeout(toast.t); toast.t = setTimeout(function () { toastEl.hidden = true; }, 3200);
   }
   function fail(e) { toast(e.message || "Fehler", true); }
-  var STATUS = { neu: "Neu", in_bearbeitung: "In Bearbeitung", angebot_gesendet: "Angebot gesendet", termin_bestaetigt: "Termin bestätigt", erledigt: "Erledigt", abgelehnt: "Abgelehnt" };
+  var STATUS = { neu: "Neu", reserviert: "Reserviert (wartet auf Kunde)", in_bearbeitung: "In Bearbeitung", angebot_gesendet: "Angebot gesendet", termin_bestaetigt: "Termin bestätigt", erledigt: "Erledigt", abgelehnt: "Abgelehnt", storniert: "Vom Kunden abgesagt", verfallen: "Reservierung verfallen" };
   var VSTATUS = { offen: "Offen (unbezahlt)", bezahlt: "Bezahlt / gültig", eingeloest: "Eingelöst", storniert: "Storniert" };
   var TYP = { kontakt: "Anfrage", termin: "Termin", gutschein: "Gutschein", firma: "Firma" };
   function pill(st, map) { return '<span class="pill st-' + esc(st) + '">' + esc((map || STATUS)[st] || st) + "</span>"; }
@@ -86,7 +86,7 @@
   function route() {
     if (!ME) return;
     ROUTE_ID++;
-    var parts = location.hash.replace(/^#\/?/, "").split("/");
+    var parts = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
     var page = parts[0] || "";
     var main = shell(page);
     var arg = decodeURIComponent(parts.slice(1).join("/"));
@@ -249,10 +249,29 @@
       box.appendChild(h("section", {}, [h("h3", { text: "Angaben", style: "margin-bottom:8px" }), h("pre", { class: "text", text: r.summary })]));
       var st = h("select", { id: "rst" }); Object.keys(STATUS).forEach(function (k) { st.appendChild(h("option", { value: k, text: STATUS[k], selected: k === r.status })); });
       var notes = h("textarea", { id: "rno", rows: 4, placeholder: "Interne Notizen, z. B. Angebot 189 €, Termin bestätigt für Di 9 Uhr" }); notes.value = r.notizen || "";
+      var tday = null, ttime = null;
+      if (r.typ === "termin") {
+        if (r.status === "reserviert") box.appendChild(h("p", { class: "note", text: "Online gebucht. Der Kunde muss den Termin noch über den Link in seiner E-Mail bestätigen. Ohne Bestätigung wird die Uhrzeit automatisch wieder frei." }));
+        if (r.status === "termin_bestaetigt") box.appendChild(h("p", { class: "note ok", text: "Bestätigt" + (d.bestaetigt_am ? " am " + deDateTime(d.bestaetigt_am) : "") + ". Bitte den Kunden anrufen und das Fahrzeug vorab ansehen." + (d.gcal_id ? " Steht im Google Kalender." : "") }));
+        var z = d.zahlung || {};
+        if (z.capture_id) {
+          box.appendChild(h("p", { class: "note " + (z.erstattet ? "" : "ok"), text: "Anzahlung per PayPal: " + String(z.value).replace(".", ",") + " € (Transaktion " + z.capture_id + ")" + (z.erstattet ? " · erstattet am " + deDateTime(z.erstattet) : "") }));
+          if (!z.erstattet) box.appendChild(h("button", { class: "btn", type: "button", text: "Anzahlung über PayPal erstatten", onclick: function () {
+            if (!confirm("Anzahlung von " + String(z.value).replace(".", ",") + " € an den Kunden zurückzahlen?")) return;
+            api("POST", "anfragen/" + r.ref + "/erstatten", {}).then(function (x) { toast(x.message || "Erstattet"); }).catch(fail);
+          } }));
+        } else if (d.anzahlung) box.appendChild(h("p", { class: "note", text: "Anzahlung " + String(d.anzahlung).replace(".", ",") + " € (" + (d.depositPercent || 15) + " %) noch nicht online bezahlt." }));
+        tday = h("input", { type: "date", value: d.datum || "" });
+        ttime = h("input", { type: "time", step: 300, value: d.uhrzeit || "" });
+        box.appendChild(h("div", { class: "grid g2" }, [h("label", { class: "f" }, ["Termin (Tag)", tday]), h("label", { class: "f" }, ["Uhrzeit der Abgabe", ttime])]));
+        box.appendChild(h("p", { class: "sub", text: "Auf „Termin bestätigt“ setzen schickt dem Kunden die Bestätigung mit dem Hinweis auf Ihren Anruf und trägt den Termin in den Google Kalender ein. Ein verschobener Termin wird dem Kunden neu bestätigt." }));
+      }
       box.appendChild(h("label", { class: "f" }, ["Status", st]));
       box.appendChild(h("label", { class: "f" }, ["Notizen", notes]));
       box.appendChild(h("div", { class: "btn-row" }, [h("button", { class: "btn primary", type: "button", text: "Speichern", onclick: function () {
-        api("PATCH", "anfragen/" + r.ref, { status: st.value, notizen: notes.value }).then(function () { toast("Gespeichert"); ME.open = Math.max(0, ME.open - (r.status === "neu" && st.value !== "neu" ? 1 : 0)); r.status = st.value; }).catch(fail);
+        var body = { status: st.value, notizen: notes.value };
+        if (tday && tday.value) { body.datum = tday.value; body.uhrzeit = ttime.value; }
+        api("PATCH", "anfragen/" + r.ref, body).then(function () { toast("Gespeichert"); ME.open = Math.max(0, ME.open - (r.status === "neu" && st.value !== "neu" ? 1 : 0)); r.status = st.value; }).catch(fail);
       } })]));
       var tpl = h("section", { class: "grid" }, [h("h3", { text: "Antworten" })]);
       var out = h("div", { class: "grid" });
@@ -394,6 +413,33 @@
       side.appendChild(h("button", { class: "btn", type: "button", style: "margin-top:10px", text: "Auslastung speichern", onclick: function () {
         api("PUT", "kalender", { dailyCapacity: +cap.value, leadDays: +lead.value, keramikExclusive: ker.checked, keramikDays: +kerDays.value }).then(function () { toast("Gespeichert"); viewCalendar(main); }).catch(fail);
       } }));
+      side.appendChild(h("h2", { text: "Online-Buchung & Google Kalender", style: "margin-top:20px" }));
+      side.appendChild(h("p", { class: "note " + (c.selfBooking ? "ok" : ""), text: c.selfBooking
+        ? "Online-Buchung aktiv: Kunden wählen Tag und Uhrzeit (" + c.booking.slotTimes.join(", ") + " Uhr), bestätigen per E-Mail-Link und bekommen Erinnerungen " + c.booking.reminderHours.join(" und ") + " Stunden vorher."
+        : (c.mail ? "Online-Buchung ist in den Grunddaten ausgeschaltet. Anfragen kommen wie bisher als Terminwunsch." : "Online-Buchung startet, sobald der E-Mail-Versand (SMTP) eingerichtet ist. Bis dahin kommen Terminwünsche wie bisher.") }));
+      side.appendChild(h("p", { class: "sub", text: "Abgabezeiten, Reservierungsdauer und Erinnerungen ändern Sie unter Inhalte → Grunddaten → booking." }));
+      var pp = c.paypal || {};
+      side.appendChild(h("p", { class: "note " + (pp.configured ? "ok" : ""), html: pp.configured
+        ? "PayPal-Anzahlung aktiv (" + esc(pp.percent) + " %" + (pp.mode === "sandbox" ? ", Testmodus" : "") + "). Der Kunde bestätigt seinen Termin mit der Zahlung."
+        : "PayPal-Anzahlung ist noch nicht eingerichtet: In der Server-Konfiguration fehlen <code>PAYPAL_CLIENT_ID</code> und <code>PAYPAL_SECRET</code>. Bis dahin bestätigen Kunden per Klick, die Anzahlung klären Sie am Telefon." }));
+      var g = c.google || {};
+      if (!g.configured) {
+        side.appendChild(h("p", { class: "note", html: "Google Kalender ist noch nicht eingerichtet. In der Server-Konfiguration fehlen <code>GOOGLE_CLIENT_ID</code> und <code>GOOGLE_CLIENT_SECRET</code>. Weiterleitungs-URL für Google: <code>" + esc(g.redirect || "") + "</code>" }));
+      } else if (!g.connected) {
+        side.appendChild(h("button", { class: "btn primary", type: "button", text: "Mit Google Kalender verbinden", onclick: function () { api("GET", "google").then(function (x) { location.href = x.url; }).catch(fail); } }));
+      } else {
+        var calId = h("input", { type: "text", value: g.calendarId || "primary", placeholder: "primary" });
+        side.appendChild(h("p", { class: "note ok", text: "Verbunden. Bestätigte Termine landen automatisch im Google Kalender, belegte Zeiten aus dem Kalender sind online nicht buchbar." }));
+        side.appendChild(h("label", { class: "f" }, ["Kalender-ID (primary = Hauptkalender)", calId]));
+        side.appendChild(h("div", { class: "btn-row" }, [
+          h("button", { class: "btn", type: "button", text: "Kalender-ID speichern", onclick: function () { api("PUT", "google", { calendarId: calId.value }).then(function () { toast("Gespeichert"); }).catch(fail); } }),
+          h("button", { class: "btn danger", type: "button", text: "Verbindung trennen", onclick: function () { if (confirm("Verbindung zum Google Kalender trennen?")) api("DELETE", "google").then(function () { viewCalendar(main); }).catch(fail); } })]));
+      }
+      if (/google=ok/.test(location.hash)) toast("Google Kalender verbunden");
+      if (/google=fehler/.test(location.hash)) side.appendChild(h("p", { class: "note", text: "Die Verbindung mit Google hat nicht geklappt. Bitte erneut versuchen." }));
+      side.appendChild(h("p", { class: "sub", text: "Alternativ ohne Google-Konto-Verbindung: Diese Adresse in Google Kalender unter „Weitere Kalender → Per URL“ abonnieren. Google aktualisiert Abos allerdings nur alle paar Stunden." }));
+      var ics = h("input", { type: "text", readonly: true, value: c.icsUrl || "" });
+      side.appendChild(h("div", { class: "btn-row" }, [ics, h("button", { class: "btn small", type: "button", text: "Kopieren", onclick: function () { copy(ics.value); } })]));
       var up = c.blocked.filter(function (b) { return b.day >= todayIso; });
       side.appendChild(h("h2", { text: "Gesperrte Tage", style: "margin-top:20px" }));
       side.appendChild(up.length ? h("ul", { html: up.map(function (b) { return "<li>" + deDate(b.day) + (b.reason ? " · " + esc(b.reason) : "") + "</li>"; }).join("") }) : h("p", { class: "empty", text: "Keine Tage gesperrt." }));

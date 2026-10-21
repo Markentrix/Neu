@@ -60,6 +60,46 @@ Ressourcenbedarf: Ein Hetzner Cloud **CX22** (2 vCPU, 4 GB RAM) reicht mit groß
 
 Benachrichtigungen bei neuen Anfragen und Eingangsbestätigungen an Kund:innen laufen über das bestehende Postfach (`info@elbdetail.de`) per SMTP. Die Zugangsdaten stehen beim E-Mail-Anbieter. Typische Werte: Port 587 mit `SMTP_TLS=starttls` oder Port 465 mit `SMTP_TLS=ssl`. Hetzner sperrt ausgehenden Port 25 bei neuen Konten, 587 und 465 funktionieren. Im Portal unter Einstellungen gibt es einen Knopf „Test-E-Mail senden“.
 
+## Online-Terminbuchung, Google Kalender und PayPal
+
+So läuft eine Online-Buchung ab:
+
+1. Der Kunde wählt Paket, Fahrzeug, Tag und Uhrzeit. Die Uhrzeit ist danach 24 Stunden für ihn reserviert (Status „Reserviert“).
+2. Er bekommt eine E-Mail mit einem Link. Dort leistet er 15 % Anzahlung per PayPal. Ohne PayPal-Zugang bestätigt er per Klick.
+3. Danach ist der Termin bestätigt:
+   - Der Kunde bekommt die Bestätigung mit dem Hinweis, dass René anruft und das Fahrzeug vorab ansieht, dazu eine Kalenderdatei.
+   - René bekommt eine Benachrichtigung.
+   - Der Termin steht im Google Kalender.
+4. 24 und 6 Stunden vor dem Termin geht automatisch eine Erinnerung an den Kunden. Wird ein Termin erst kurz vorher bestätigt, entfällt die ältere Erinnerung.
+5. Nicht bestätigte Reservierungen verfallen automatisch, die Uhrzeit wird wieder frei.
+
+Voraussetzungen:
+
+- **E-Mail-Versand (SMTP)** muss eingerichtet sein. Ohne ihn kommen Terminwünsche wie früher als Anfrage, und René bestätigt im Portal.
+- **Abgabezeiten, Reservierungsdauer, Erinnerungen und Anzahlung (%)** stehen im Portal unter Inhalte → Grunddaten → `booking`.
+
+**Google Kalender einrichten (einmalig, ca. 15 Minuten):**
+
+1. In der [Google Cloud Console](https://console.cloud.google.com/) ein Projekt anlegen und die „Google Calendar API“ aktivieren.
+2. Den OAuth-Zustimmungsbildschirm (extern) mit dem eigenen Google-Konto als Testnutzer anlegen. Für Dauerbetrieb den Status auf „In Produktion“ stellen, sonst läuft die Freigabe nach 7 Tagen ab.
+3. Unter Anmeldedaten einen OAuth-Client vom Typ „Webanwendung“ anlegen. Autorisierte Weiterleitungs-URI: `https://www.elbdetail.de/admin/api/google/callback`.
+4. Client-ID und Client-Secret als `GOOGLE_CLIENT_ID` und `GOOGLE_CLIENT_SECRET` in `.env` eintragen und `docker compose up -d` ausführen.
+5. Im Portal unter Kalender „Mit Google Kalender verbinden“ klicken und mit Renés Google-Konto zustimmen.
+
+Ab dann gilt:
+- Bestätigte Termine erscheinen als „Abgabe: Name · Paket“.
+- Private Termine in Renés Kalender sperren die passenden Uhrzeiten auf der Website.
+
+Ohne diese Einrichtung gibt es im Portal eine Abo-Adresse (iCal). Sie lässt sich in Google Kalender unter „Weitere Kalender → Per URL“ hinzufügen. Google aktualisiert solche Abos aber nur alle paar Stunden.
+
+**PayPal-Anzahlung einrichten:**
+
+1. Im [PayPal Developer Dashboard](https://developer.paypal.com/) mit dem PayPal-Geschäftskonto eine App anlegen („Live“).
+2. Client-ID und Secret als `PAYPAL_CLIENT_ID` und `PAYPAL_SECRET` in `.env` eintragen. Zum Ausprobieren erst `PAYPAL_MODE=sandbox` mit Sandbox-Zugangsdaten nutzen, dann auf `live` umstellen.
+3. `docker compose up -d`. Im Portal unter Kalender steht dann „PayPal-Anzahlung aktiv“.
+
+Die Anzahlung beträgt 15 % vom Richtpreis des gewählten Pakets und der Fahrzeugklasse. Bei der Keramik sind es 15 % vom Einstiegspreis. Für Beratung, ElbDetail Care sowie Sport- und Luxusfahrzeuge und Wohnmobile ohne festen Preis gibt es keine Online-Anzahlung, der Kunde bestätigt per Klick. Erstattungen lösen Sie im Portal in der Anfrage mit „Anzahlung über PayPal erstatten“ aus.
+
 ## Alltag
 
 | Aufgabe | Befehl |

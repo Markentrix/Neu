@@ -37,11 +37,13 @@ def build_termin(site, write):
     s = site.s
     path = "/termin.html"
     title = "Termin anfragen: Fahrzeugaufbereitung Celle | ElbDetail"
-    desc = "Fahrzeugaufbereitung in Celle online anfragen: Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Sie erhalten vorab ein verbindliches Angebot."
+    desc = "Fahrzeugaufbereitung in Celle online buchen: Paket wählen, Fahrzeug angeben, Tag und Uhrzeit aussuchen und per E-Mail-Link verbindlich bestätigen."
     ld = [seo.webpage(site, path, title, {"potentialAction": {"@type": "ReserveAction", "target": site.url + path}}),
           seo.crumbs(site, [("Startseite", "/"), ("Termin anfragen", path)])]
     cls0 = pr["classes"][0]["key"]
 
+    slots = "".join(f'<label class="choice-pill"><input type="radio" name="uhrzeit" value="{t}" required><span><strong>{t} Uhr</strong></span></label>'
+                    for t in (s.get("booking") or {}).get("slotTimes", ["08:00", "10:00", "13:00", "15:00"]))
     pk = ""
     for p in pr["packages"]:
         inc = "".join(f"<li>{ESC(f['text'])}</li>" for f in p["features"] if f.get("included"))[:]
@@ -81,11 +83,13 @@ def build_termin(site, write):
         ("leder", "Ledersitze"), ("flecken", "Flecken auf Polstern"), ("kratzer", "Sichtbare Kratzer im Lack")])
     extras = "".join(f'<label class="check"><input type="checkbox" name="extras" value="{ESC(e)}"><span>{ESC(e)}</span></label>' for e in pr["extras"])
 
+    owner = ESC((s.get("about") or {}).get("name") or "René")
+    dep = (s.get("booking") or {}).get("depositPercent", 15)
     body = f'''
 <main id="main">
-{_page_hero("", [("Startseite", "index.html"), ("Termin anfragen", None)], "Online-Terminanfrage",
-            "Termin anfragen in <em>2 Minuten.</em>",
-            "Paket wählen, Fahrzeug angeben, Wunschtermin aussuchen. Sie erhalten ein verbindliches Angebot und eine Terminbestätigung, bevor wir loslegen.")}
+{_page_hero("", [("Startseite", "index.html"), ("Termin anfragen", None)], "Online-Terminbuchung",
+            "Termin buchen in <em>2 Minuten.</em>",
+            "Paket wählen, Fahrzeug angeben, Tag und Uhrzeit aussuchen. Mit einer Anzahlung von " + str(dep) + " % per PayPal ist Ihr Termin gebucht, danach meldet sich " + owner + " telefonisch und sieht sich Ihr Fahrzeug vorab an.")}
   <section class="tight-top" aria-label="Terminanfrage">
     <div class="container booking">
       <form class="wizard js-form" id="bookingForm" data-form="termin" action="/api/anfrage" method="post" novalidate>
@@ -121,15 +125,13 @@ def build_termin(site, write):
         </fieldset>
 
         <fieldset class="wz-step" data-step="4">
-          <legend><span class="wz-num">4</span>Wunschtermin</legend>
-          <p class="wz-hint">{ESC(s["openingHours"]["text"])}, {ESC(s["openingHours"]["detail"])}. Wir bestätigen den Termin persönlich.</p>
+          <legend><span class="wz-num">4</span>Termin wählen</legend>
+          <p class="wz-hint">Wählen Sie Tag und Uhrzeit für die Abgabe Ihres Autos. Sie bekommen danach eine E-Mail mit einem Link: Mit der Anzahlung von {dep} % per PayPal ist Ihr Termin verbindlich gebucht. Die Anzahlung wird mit dem Endpreis verrechnet.</p>
           <p class="wz-hint">Bei Versiegelung und Keramik bleibt Ihr Auto 3 Tage bei uns. Bei allen anderen Leistungen ist es optimal, wenn es einen Tag bleiben kann.</p>
-          <div class="two-col">
-            <div class="form-row"><label for="t-date1">Wunschtermin*</label><input type="date" id="t-date1" name="datum" required aria-describedby="t-date1-msg"><span class="field-msg" id="t-date1-msg"></span><button class="next-free next-free--fill" type="button" data-next-free data-nf-fill hidden><span class="nf-dot" aria-hidden="true"></span>Nächster freier Tag: <strong data-nf-date></strong> · übernehmen</button></div>
-            <div class="form-row"><label for="t-date2">Ausweichtermin <span class="hint">(optional)</span></label><input type="date" id="t-date2" name="datum2" aria-describedby="t-date2-msg"><span class="field-msg" id="t-date2-msg"></span></div>
-          </div>
-          <div class="form-row"><label for="t-slot">Zeitfenster</label>
-            <select id="t-slot" name="zeitfenster"><option value="morgens">Morgens bringen, abends abholen</option><option value="vormittag">Vormittags</option><option value="nachmittag">Nachmittags</option><option value="flexibel" selected>Ich bin flexibel</option></select>
+          <div class="form-row"><label for="t-date1">Tag*</label><input type="date" id="t-date1" name="datum" required aria-describedby="t-date1-msg"><span class="field-msg" id="t-date1-msg"></span><button class="next-free next-free--fill" type="button" data-next-free data-nf-fill hidden><span class="nf-dot" aria-hidden="true"></span>Nächster freier Tag: <strong data-nf-date></strong> · übernehmen</button></div>
+          <div class="form-row"><span class="label" id="t-slots-l">Uhrzeit der Abgabe*</span>
+            <div class="slot-grid" id="t-slots" role="radiogroup" aria-labelledby="t-slots-l" aria-describedby="t-slots-msg">{slots}</div>
+            <span class="field-msg" id="t-slots-msg">Bitte zuerst einen Tag wählen.</span>
           </div>
           <div class="form-row"><label for="t-gutschein">Gutscheincode <span class="hint">(falls vorhanden)</span></label><input type="text" id="t-gutschein" name="gutscheincode" maxlength="20" placeholder="ELB-XXXX-XXXX" autocomplete="off"></div>
         </fieldset>
@@ -140,7 +142,7 @@ def build_termin(site, write):
             <div class="form-row"><label for="t-name">Name*</label><input type="text" id="t-name" name="name" autocomplete="name" required maxlength="120"></div>
             <div class="form-row"><label for="t-phone">Telefon / WhatsApp*</label><input type="tel" id="t-phone" name="telefon" autocomplete="tel" required maxlength="40"></div>
           </div>
-          <div class="form-row"><label for="t-email">E-Mail <span class="hint">(für die Bestätigung)</span></label><input type="email" id="t-email" name="email" autocomplete="email" maxlength="160"></div>
+          <div class="form-row"><label for="t-email">E-Mail* <span class="hint">(für den Bestätigungslink und die Erinnerungen)</span></label><input type="email" id="t-email" name="email" autocomplete="email" required maxlength="160"></div>
           <div class="form-row"><span class="label">Antwort bevorzugt per</span>
             <div class="choice-pills choice-pills--3">
               <label class="choice-pill"><input type="radio" name="kanal" value="whatsapp" checked><span><strong>WhatsApp</strong></span></label>
@@ -160,7 +162,7 @@ def build_termin(site, write):
         <div class="wz-nav">
           <button class="btn btn-line-light" type="button" data-wz-prev hidden>Zurück</button>
           <button class="btn btn-primary" type="button" data-wz-next hidden>Weiter {I["arrow"]}</button>
-          <button class="btn btn-primary" type="submit" data-wz-submit>{I["cal"]}Terminanfrage senden</button>
+          <button class="btn btn-primary" type="submit" data-wz-submit>{I["cal"]}Termin buchen</button>
         </div>
         <button class="wz-wa" type="button" data-wa-from-form>{I["wa"]}Stattdessen alles per WhatsApp senden</button>
         {core.form_status("t-status")}
@@ -173,7 +175,8 @@ def build_termin(site, write):
             <div><dt>Paket</dt><dd data-sum="paket">–</dd></div>
             <div><dt>Fahrzeug</dt><dd data-sum="klasse">–</dd></div>
             <div><dt>Extras</dt><dd data-sum="extras">keine</dd></div>
-            <div><dt>Wunschtermin</dt><dd data-sum="datum">–</dd></div>
+            <div><dt>Termin</dt><dd data-sum="datum">–</dd></div>
+            <div><dt>Anzahlung ({dep} %)</dt><dd data-sum="anzahlung">–</dd></div>
           </dl>
           <div class="summary-price"><span>Richtpreis</span><strong data-sum="preis">–</strong></div>
           <p class="hint">Einstiegspreis für normalen Pflegezustand. Gemäß § 19 UStG ohne Umsatzsteuer. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>

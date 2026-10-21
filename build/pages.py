@@ -1099,16 +1099,21 @@ def build_legal(site, write):
     <p>Wir zeigen auszugsweise öffentlich einsehbare Bewertungen aus unserem Google-Unternehmensprofil (Anzeigename und Bewertungstext). Rechtsgrundlage ist unser berechtigtes Interesse an der Außendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf Wunsch entfernen wir ein Zitat umgehend nach Nachricht an <a href="mailto:{s["email"]}">{ESC(s["email"])}</a>.</p>
     <h2>11. Gutscheine</h2>
     <p>Für bestellte Gutscheine speichern wir Käufer, Empfängername, Wert, Code und Einlösestatus zur Vertragsabwicklung und zur Erfüllung steuerlicher Pflichten (Art. 6 Abs. 1 lit. b, c DSGVO). Der Gutschein ist über einen nicht erratbaren Link abrufbar.</p>
-    <h2>12. Ihre Rechte</h2>
+    <h2>12. Online-Terminbuchung, Erinnerungen und Kalender</h2>
+    <p>Bei der Online-Buchung reservieren wir die gewählte Uhrzeit und senden Ihnen an die angegebene E-Mail-Adresse einen Link zur Bestätigung, nach der Bestätigung eine Terminbestätigung mit Kalenderdatei sowie Erinnerungen 24 und 6 Stunden vor dem Termin. Dies dient der Durchführung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO). Nicht bestätigte Reservierungen geben wir automatisch wieder frei.</p>
+    <p>Bestätigte Termine (Name, Telefonnummer, Fahrzeug, Leistung, Datum und Uhrzeit) tragen wir zur Planung in den Kalender des Inhabers bei Google ein (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland). Dabei kann eine Übermittlung in die USA nicht ausgeschlossen werden; Google ist nach dem EU-US Data Privacy Framework zertifiziert. Rechtsgrundlage ist unser berechtigtes Interesse an einer zuverlässigen Terminplanung (Art. 6 Abs. 1 lit. f DSGVO).</p>
+    <h2>13. Anzahlung per PayPal</h2>
+    <p>Für die Anzahlung bei der Online-Buchung werden Sie zu PayPal weitergeleitet (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22–24 Boulevard Royal, L-2449 Luxemburg). Wir übermitteln dabei nur Betrag, Vorgangsnummer und Verwendungszweck; Ihre Zahlungsdaten geben Sie direkt bei PayPal ein. Von PayPal erhalten wir die Bestätigung der Zahlung und die Transaktionsnummer. Rechtsgrundlage ist die Vertragsdurchführung (Art. 6 Abs. 1 lit. b DSGVO). Es gilt die <a href="https://www.paypal.com/de/legalhub/privacy-full" target="_blank" rel="noopener">Datenschutzerklärung von PayPal</a>.</p>
+    <h2>14. Ihre Rechte</h2>
     <ul>
       <li>Auskunft (Art. 15 DSGVO)</li><li>Berichtigung (Art. 16 DSGVO)</li><li>Löschung (Art. 17 DSGVO)</li>
       <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li><li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
       <li>Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21 DSGVO)</li><li>Widerruf erteilter Einwilligungen mit Wirkung für die Zukunft (Art. 7 Abs. 3 DSGVO)</li>
     </ul>
     <p>Zudem besteht ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde, z. B. bei der Landesbeauftragten für den Datenschutz Niedersachsen.</p>
-    <h2>13. Keine automatisierte Entscheidungsfindung</h2>
+    <h2>15. Keine automatisierte Entscheidungsfindung</h2>
     <p>Wir setzen keine automatisierte Entscheidungsfindung oder Profiling im Sinne des Art. 22 DSGVO ein.</p>
-    <h2>14. Verschlüsselung</h2>
+    <h2>16. Verschlüsselung</h2>
     <p>Diese Seite nutzt eine TLS-Verschlüsselung, erkennbar an „https://“ in der Adresszeile.</p>
     <p class="legal-updated legal-note">Hinweis für den Seitenbetreiber: Diese Datenschutzerklärung ist eine sorgfältig erstellte Vorlage für den Betrieb auf eigenem Server. Bitte Platzhalter im Verwaltungsportal unter „Inhalte → Grunddaten → Rechtliches“ ausfüllen und vor Veröffentlichung rechtlich prüfen lassen.</p>
 '''

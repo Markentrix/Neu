@@ -95,6 +95,10 @@ test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
   await page.locator("[data-wz-next]").click();
   await expect(page.locator(".form-status")).toContainText("ergänzen");
   await page.fill("#t-date1", nextWorkday(4));
+  await page.locator("#t-date1").dispatchEvent("change");
+  await expect(page.locator("#t-slots-msg")).toContainText("frei");
+  await page.locator('#t-slots label:has(input[value="10:00"])').click();
+  await expect(page.locator('[data-sum="datum"]')).toContainText("10:00 Uhr");
   await page.locator("[data-wz-next]").click();
   await page.fill("#t-name", "E2E Kunde");
   await page.fill("#t-phone", "0172 5555555");

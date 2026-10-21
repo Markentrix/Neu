@@ -20,8 +20,8 @@
 		-Server
 	}
 
-	# Dynamische Teile: Formulare, Statistik, Verwaltungsportal, Gutscheine
-	@app path /api/* /admin /admin/* /gutschein/* /gutschein-druck.js
+	# Dynamische Teile: Formulare, Statistik, Verwaltungsportal, Gutscheine, Terminbestätigung
+	@app path /api/* /admin /admin/* /gutschein/* /gutschein-druck.js /termin/*
 	handle @app {
 		reverse_proxy app:8080
 	}

@@ -177,5 +177,22 @@
   "analytics": {
     "ga4": "",
     "hinweis": "Google-Analytics-4-Mess-ID (Format G-XXXXXXXXXX). Leer = kein Google Analytics, kein Cookie-Banner."
+  },
+  "booking": {
+    "selfBooking": true,
+    "slotTimes": [
+      "08:00",
+      "10:00",
+      "13:00",
+      "15:00"
+    ],
+    "slotMinutes": 30,
+    "holdHours": 24,
+    "reminderHours": [
+      24,
+      6
+    ],
+    "hinweis": "Abgabezeiten für die Online-Buchung. Kunden wählen Tag und Uhrzeit, leisten 15 % Anzahlung per PayPal (bestätigt den Termin) und erhalten Erinnerungen 24 und 6 Stunden vorher.",
+    "depositPercent": 15
   }
 }

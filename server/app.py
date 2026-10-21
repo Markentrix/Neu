@@ -31,6 +31,7 @@ import sys
 import threading
 import time
 import traceback
+import urllib.error
 import urllib.parse
 import urllib.request
 from email.message import EmailMessage
@@ -80,19 +81,26 @@ class Cfg:
 
 
 ADMIN_DIR = os.path.join(HERE, "admin")
-STATUS = ["neu", "in_bearbeitung", "angebot_gesendet", "termin_bestaetigt", "erledigt", "abgelehnt"]
+STATUS = ["neu", "reserviert", "in_bearbeitung", "angebot_gesendet", "termin_bestaetigt", "erledigt", "abgelehnt", "storniert", "verfallen"]
 V_STATUS = ["offen", "bezahlt", "eingeloest", "storniert"]
 TYPES = ["kontakt", "termin", "gutschein", "firma"]
 LOCK = threading.Lock()
 BUILD_LOCK = threading.Lock()
 
 
+try:  # Termine, Erinnerungen und Tagesgrenzen immer in deutscher Ortszeit, auch wenn der Container in UTC läuft
+    from zoneinfo import ZoneInfo
+    TZ = ZoneInfo(os.environ.get("ELB_TZ", "Europe/Berlin"))
+except Exception:  # ohne Zeitzonendaten: Systemzeit
+    TZ = None
+
+
 def now():
-    return dt.datetime.now().replace(microsecond=0)
+    return (dt.datetime.now(TZ).replace(tzinfo=None) if TZ else dt.datetime.now()).replace(microsecond=0)
 
 
 def today():
-    return dt.date.today()
+    return now().date()
 
 
 def log(*a):
@@ -291,7 +299,7 @@ def mail_ready():
     return bool(Cfg.smtp_host and Cfg.smtp_from)
 
 
-def send_mail(to, subject, text, reply_to=None):
+def send_mail(to, subject, text, reply_to=None, attachments=None):
     if not mail_ready() or not to:
         log("E-Mail übersprungen (SMTP nicht konfiguriert):", subject)
         return False
@@ -304,6 +312,9 @@ def send_mail(to, subject, text, reply_to=None):
     if reply_to:
         msg["Reply-To"] = reply_to
     msg.set_content(text)
+    for name, mime, data in attachments or []:  # z. B. ("termin.ics", "text/calendar", b"...")
+        main, sub = mime.split("/", 1)
+        msg.add_attachment(data, maintype=main, subtype=sub, filename=name)
     ctx = ssl.create_default_context()
     try:
         if Cfg.smtp_tls == "ssl":
@@ -331,7 +342,7 @@ def mail_async(*a, **k):
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,190}\.[a-zA-Z]{2,}$")
 LABELS = {"name": "Name", "telefon": "Telefon", "email": "E-Mail", "paket": "Paket", "klasse": "Fahrzeugklasse", "fahrzeug": "Fahrzeug",
           "zustand": "Zustand", "extras": "Extras", "abholung": "Abholung", "datum": "Wunschtermin", "datum2": "Ausweichtermin",
-          "zeitfenster": "Zeitfenster", "gutscheincode": "Gutscheincode", "kanal": "Antwort per", "nachricht": "Nachricht",
+          "zeitfenster": "Zeitfenster", "uhrzeit": "Uhrzeit", "anzahlung": "Anzahlung", "gutscheincode": "Gutscheincode", "kanal": "Antwort per", "nachricht": "Nachricht",
           "bewertung_ok": "Bewertungsanfrage erlaubt", "art": "Gutscheinart", "wert": "Wert", "fuer": "Für", "von": "Von", "widmung": "Widmung",
           "zustellung": "Zustellung", "firma": "Firma", "anzahl": "Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen", "quelle": "Quelle"}
 
@@ -429,6 +440,15 @@ def validate(d):
             elif ((day.weekday() + 1) % 7) in closed or raw in blocked:
                 errors[k] = "An diesem Tag ist leider kein Termin möglich."
             out[k] = raw
+        bc = booking_cfg()
+        out["uhrzeit"] = d.get("uhrzeit") if d.get("uhrzeit") in bc["slotTimes"] else ""
+        if self_booking():
+            if not out["email"]:
+                errors["email"] = "Bitte eine E-Mail-Adresse angeben. Dorthin schicken wir den Link zur Terminbestätigung."
+            if not out["uhrzeit"]:
+                errors["uhrzeit"] = "Bitte eine Uhrzeit wählen."
+            elif out["datum"] and "datum" not in errors and not slot_free(out["datum"], out["uhrzeit"], out["paket"]):
+                errors["uhrzeit"] = "Diese Uhrzeit ist leider gerade vergeben. Bitte eine andere wählen."
     elif typ == "gutschein":
         art = d.get("art") if d.get("art") in ("wert", "paket") else "wert"
         out["art"] = art
@@ -483,6 +503,8 @@ def summary_text(data):
             v = _date(v).strftime("%d.%m.%Y")
         if k == "wert":
             v = f"{v} €"
+        if k == "anzahlung":
+            v = eur(float(v)) + f" ({data.get('depositPercent', 15)} %)"
         if isinstance(v, list):
             v = ", ".join(v)
         lines.append(f"{LABELS.get(k, k)}: {v}")
@@ -508,27 +530,44 @@ def new_ref(typ):
 def store_request(data):
     ref = new_ref(data["typ"])
     ts = now().isoformat()
+    status = "neu"
+    if data["typ"] == "termin" and data.get("uhrzeit") and data.get("email") and self_booking():
+        status = "reserviert"  # Online-Buchung: Uhrzeit ist reserviert, bis der Kunde per Link bestätigt
+        data["token"] = secrets.token_urlsafe(24)
+        data["hold_until"] = (now() + dt.timedelta(hours=booking_cfg()["holdHours"])).isoformat()
+        dep = deposit_amount(data)
+        if dep:
+            data["anzahlung"] = dep
+            data["depositPercent"] = (site_info().get("booking") or {}).get("depositPercent", 15)
     with LOCK, db() as c:
+        if status == "reserviert" and not slot_free(data["datum"], data["uhrzeit"], data.get("paket", "")):
+            raise Invalid({"uhrzeit": "Diese Uhrzeit wurde gerade vergeben. Bitte eine andere wählen."})
         cur = c.execute("INSERT INTO anfragen(ref, typ, status, created, updated, name, telefon, email, datum, data) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                        (ref, data["typ"], "neu", ts, ts, data.get("name"), data.get("telefon"), data.get("email"), data.get("datum", ""),
+                        (ref, data["typ"], status, ts, ts, data.get("name"), data.get("telefon"), data.get("email"), data.get("datum", ""),
                          json.dumps(data, ensure_ascii=False)))
         aid = cur.lastrowid
         if data["typ"] == "gutschein":
             create_voucher(c, data, aid)
-    notify(ref, data)
-    return ref
+    notify(ref, data, status)
+    return ref, status
 
 
-def notify(ref, data):
+def notify(ref, data, status="neu"):
     s = site_info()
     title = TITLES[data["typ"]]
     rp = richtpreis(data)
-    body = f"Neue {title} über die Website ({ref})\n\n{summary_text(data)}\n"
+    body = f"Neue {title} über die Website ({ref})\n\n{summary_text(public_data(data))}\n"
+    if status == "reserviert":
+        title = "Online-Buchung"
+        body = (f"Neue Online-Buchung ({ref}): {de_when(data)}\nDer Kunde muss den Termin noch per E-Mail-Link bestätigen. "
+                f"Danach kommt die Bestätigung, und der Termin steht im Kalender.\n\n{summary_text(public_data(data))}\n")
     if rp:
         body += f"\nRichtpreis laut Website: ab {rp} €\n"
     body += f"\nIm Verwaltungsportal öffnen: {Cfg.public_url}/admin/#/anfragen/{ref}\n"
     mail_async(Cfg.notify_to or s.get("email"), f"{title}: {data.get('name')} ({ref})", body, reply_to=data.get("email") or None)
-    if Cfg.autoreply and data.get("email"):
+    if status == "reserviert":
+        mail_reservation(ref, data)
+    elif Cfg.autoreply and data.get("email"):
         greet = f"Guten Tag {data.get('name', '').strip()},".replace("Tag ,", "Tag,")
         extra = ""
         if data["typ"] == "termin":
@@ -609,7 +648,75 @@ def voucher_html(v):
 </div><script src="/gutschein-druck.js"></script></body></html>"""
 
 
+def termin_html(r, d, notice=""):
+    """Seite hinter dem E-Mail-Link: Termin bestätigen oder absagen."""
+    s = site_info()
+    E = html.escape
+    st = r["status"]
+    tok = E(d.get("token", ""))
+    act = lambda a, label, cls="btn": (f'<form method="post" action="/termin/{E(r["ref"])}/{a}"><input type="hidden" name="t" value="{tok}">'
+                                       f'<button class="{cls}" type="submit">{label}</button></form>')
+    owner = E((s.get("about") or {}).get("name") or "Wir")
+    if st == "reserviert" and d.get("hold_until", "") >= now().isoformat():
+        if deposit_online(d):
+            head = "Anzahlung leisten und Termin bestätigen"
+            text = (f"Mit der Anzahlung von {eur(d['anzahlung'])} ({d.get('depositPercent', 15)} % vom Richtpreis) per PayPal ist Ihr Termin verbindlich gebucht. "
+                    "Die Anzahlung wird mit dem Endpreis verrechnet.")
+            btns = act("bestaetigen", f"Anzahlung {eur(d['anzahlung'])} mit PayPal leisten") + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost")
+        else:
+            head, text = "Bitte bestätigen Sie Ihren Termin", "Ein Klick genügt, dann ist der Termin verbindlich gebucht."
+            btns = act("bestaetigen", "Termin verbindlich bestätigen") + act("absagen", "Doch nicht, Reservierung freigeben", "btn ghost")
+    elif st == "termin_bestaetigt":
+        head = "Ihr Termin ist bestätigt"
+        text = f"{owner} meldet sich vorab telefonisch bei Ihnen und sieht sich Ihr Fahrzeug vor der Aufbereitung genau an. So erhalten Sie den verbindlichen Preis, bevor wir anfangen."
+        if (d.get("zahlung") or {}).get("capture_id"):
+            text += f" Ihre Anzahlung von {eur(d['zahlung']['value'])} ist eingegangen."
+        btns = (termin_start(d) and termin_start(d) > now()) and act("absagen", "Termin absagen", "btn ghost") or ""
+    elif st == "storniert":
+        head, text, btns = "Termin abgesagt", "Der Termin ist abgesagt. Sie können jederzeit einen neuen Termin buchen.", f'<a class="btn" href="/termin.html">Neuen Termin buchen</a>'
+    elif st in ("verfallen", "reserviert"):
+        head, text, btns = "Reservierung abgelaufen", "Die Reservierung wurde nicht rechtzeitig bestätigt und ist wieder frei. Buchen Sie einfach einen neuen Termin.", f'<a class="btn" href="/termin.html">Neuen Termin buchen</a>'
+    else:
+        head, text, btns = "Ihr Termin", "Bei Fragen melden Sie sich gern telefonisch oder per WhatsApp.", ""
+    return f"""<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>{E(head)} | {E(s.get('name', 'ElbDetail'))}</title>
+<style>
+@font-face{{font-family:Inter;font-weight:100 900;src:url(/fonts/inter-var.woff2) format("woff2")}}
+:root{{color-scheme:light}}*{{box-sizing:border-box}}body{{margin:0;padding:24px 16px;font:16px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f5f7;color:#161a21}}
+.wrap{{max-width:640px;margin:0 auto;display:grid;gap:16px}}.top{{background:#1e2229;border-radius:18px;padding:18px 22px}}.top img{{height:40px;display:block}}
+.card{{background:#fff;border:1px solid #dfe3e9;border-radius:18px;padding:26px 24px;display:grid;gap:14px}}h1{{margin:0;font-size:26px;letter-spacing:-.02em;line-height:1.2}}
+.when{{font-size:20px;font-weight:650;color:#1c4f9c}}dl{{margin:0;display:grid;gap:6px}}dl div{{display:flex;gap:10px;flex-wrap:wrap}}dt{{color:#5b6472;min-width:110px}}dd{{margin:0;font-weight:600}}
+.note{{background:#eef3fb;border-radius:12px;padding:12px 14px;font-size:15px}}.notice{{background:#e7f6ec;border:1px solid #b9e2c6;border-radius:12px;padding:12px 14px;font-weight:600}}
+.btns{{display:flex;gap:10px;flex-wrap:wrap}}form{{margin:0}}.btn{{display:inline-block;background:#1c4f9c;color:#fff;border:1px solid #1c4f9c;border-radius:999px;padding:12px 22px;font:inherit;font-weight:650;cursor:pointer;text-decoration:none;min-height:46px}}
+.btn.ghost{{background:#fff;color:#1e2229;border-color:#c9cfd8}}.btn:focus-visible{{outline:3px solid #f2b705;outline-offset:2px}}.small{{font-size:14px;color:#5b6472}}a{{color:#1c4f9c}}
+</style></head><body><div class="wrap">
+<div class="top"><a href="/"><img src="/logo-head.svg" alt="{E(s.get('name', 'ElbDetail'))}"></a></div>
+<main class="card">
+{f'<p class="notice" role="status">{E(notice)}</p>' if notice else ''}
+<h1>{E(head)}</h1><p class="when">{E(de_when(d))}</p><p>{E(text)}</p>
+<dl><div><dt>Vorgang</dt><dd>{E(r['ref'])}</dd></div><div><dt>Name</dt><dd>{E(d.get('name', ''))}</dd></div>
+<div><dt>Adresse</dt><dd>{E(s.get('address', {}).get('street', ''))}, {E(s.get('address', {}).get('zip', ''))} {E(s.get('address', {}).get('city', ''))}</dd></div></dl>
+<p class="note">{E(stand_text(d))}</p>
+<div class="btns">{btns}</div>
+<p class="small">Fragen? Telefon oder WhatsApp: <a href="tel:{E(s.get('phone', ''))}">{E(s.get('phoneDisplay', ''))}</a></p>
+</main></div></body></html>"""
+
+
 # --------------------------------------------------------------------------- Kalender
+def occupying(c, t0):
+    """Termine, die Platz belegen: bestätigte Termine und noch gültige, unbestätigte Online-Reservierungen."""
+    out, ts = [], now().isoformat()
+    for r in c.execute("SELECT ref, status, datum, data FROM anfragen WHERE typ='termin' AND status IN ('termin_bestaetigt','reserviert') AND datum >= ?", (t0,)):
+        try:
+            d = json.loads(r["data"] or "{}")
+        except ValueError:
+            d = {}
+        if r["status"] == "reserviert" and d.get("hold_until", "") < ts:
+            continue
+        out.append({"ref": r["ref"], "status": r["status"], "datum": r["datum"], "uhrzeit": d.get("uhrzeit", ""), "paket": d.get("paket", "")})
+    return out
+
+
 def blocked_days(keramik=False):
     """Gesperrte Tage plus ausgebuchte Tage (bestätigte Termine ≥ Tageskapazität).
 
@@ -624,13 +731,10 @@ def blocked_days(keramik=False):
     with db() as c:
         days = {r["day"] for r in c.execute("SELECT day FROM blocked WHERE day >= ?", (t0,))}
         count, ker = {}, set()
-        for r in c.execute("SELECT datum, data FROM anfragen WHERE typ='termin' AND status='termin_bestaetigt' AND datum >= ?", (t0,)):
+        for r in occupying(c, t0):
             count[r["datum"]] = count.get(r["datum"], 0) + 1
-            try:
-                if json.loads(r["data"] or "{}").get("paket") == "keramik":
-                    ker.add(r["datum"])
-            except ValueError:
-                pass
+            if r["paket"] == "keramik":
+                ker.add(r["datum"])
     if cap > 0:
         days |= {d for d, n in count.items() if n >= cap}
     if excl:
@@ -652,6 +756,493 @@ def next_free_day(blocked=None, closed=None):
             return d.isoformat()
         d += dt.timedelta(days=1)
     return None
+
+
+# --------------------------------------------------------------------------- Online-Buchung: Uhrzeiten, Reservierung, Bestätigung
+def booking_cfg():
+    b = site_info().get("booking") or {}
+    times = [t for t in b.get("slotTimes", ["08:00", "10:00", "13:00", "15:00"]) if re.match(r"^([01]\d|2[0-3]):[0-5]\d$", str(t))]
+    rem = [int(x) for x in b.get("reminderHours", [24, 6]) if str(x).isdigit() and 0 < int(x) <= 168]
+    return {"selfBooking": bool(b.get("selfBooking", True)), "slotTimes": sorted(times) or ["08:00"],
+            "slotMinutes": max(15, min(240, int(b.get("slotMinutes", 30) or 30))),
+            "holdHours": max(1, min(168, int(b.get("holdHours", 24) or 24))), "reminderHours": sorted(rem, reverse=True)}
+
+
+def self_booking():
+    """Kunden buchen Uhrzeit selbst und bestätigen per E-Mail-Link. Ohne E-Mail-Versand: klassische Anfrage."""
+    return booking_cfg()["selfBooking"] and mail_ready()
+
+
+def termin_start(d):
+    day = _date(d.get("datum", ""))
+    if not day:
+        return None
+    hh, mm = (d.get("uhrzeit") or "08:00").split(":")
+    return dt.datetime.combine(day, dt.time(int(hh), int(mm)))
+
+
+def free_slots(day, paket="", exclude_ref=""):
+    """Freie Abgabezeiten an einem Tag: Ruhetage, Sperren, Auslastung, belegte Uhrzeiten und Google-Kalender."""
+    cfg = booking_cfg()
+    d = _date(day)
+    if not d:
+        return []
+    lead = max(0, int(setting("leadDays", 1) or 0))
+    closed = setting("closedWeekdays", [0])
+    if d < today() + dt.timedelta(days=lead) or ((d.weekday() + 1) % 7) in closed or day in blocked_days(keramik=paket == "keramik"):
+        return [{"zeit": t, "frei": False} for t in cfg["slotTimes"]]
+    with db() as c:
+        taken = {o["uhrzeit"] for o in occupying(c, day) if o["datum"] == day and o["ref"] != exclude_ref}
+    busy = google_busy(d)
+    out = []
+    for t in cfg["slotTimes"]:
+        start = dt.datetime.combine(d, dt.time(*map(int, t.split(":"))))
+        end = start + dt.timedelta(minutes=cfg["slotMinutes"])
+        clash = any(b0 < end and b1 > start for b0, b1 in busy)
+        out.append({"zeit": t, "frei": t not in taken and not clash and start > now()})
+    return out
+
+
+def slot_free(day, zeit, paket=""):
+    return any(x["zeit"] == zeit and x["frei"] for x in free_slots(day, paket))
+
+
+def booking_link(ref, token, action=""):
+    return f"{Cfg.public_url}/termin/{ref}{'/' + action if action else ''}?t={token}"
+
+
+def de_when(d):
+    st = termin_start(d)
+    days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+    return f"{days[st.weekday()]}, {st.strftime('%d.%m.%Y')} um {st.strftime('%H:%M')} Uhr" if st else ""
+
+
+def stand_text(d):
+    return ("Bei Versiegelung und Keramik bleibt Ihr Auto 3 Tage bei uns, damit die Beschichtung in Ruhe aushärten kann."
+            if d.get("paket") == "keramik" else "Optimal ist es, wenn Ihr Auto einen Tag bei uns bleiben kann. Bei Versiegelung und Keramik sind es 3 Tage.")
+
+
+def mail_footer():
+    s = site_info()
+    a = s.get("address", {})
+    return (f"Viele Grüße\n{(s.get('about') or {}).get('name') or ''} · {s.get('name', 'ElbDetail')}\n"
+            f"{a.get('street', '')}, {a.get('zip', '')} {a.get('city', '')}\nTelefon/WhatsApp: {s.get('phoneIntl', '')}\n{Cfg.public_url}\n")
+
+
+def ics_event(ref, d, method="PUBLISH", cancel=False):
+    s = site_info()
+    st = termin_start(d)
+    if not st:
+        return b""
+    end = st + dt.timedelta(minutes=booking_cfg()["slotMinutes"])
+    a = s.get("address", {})
+    f = lambda x: x.strftime("%Y%m%dT%H%M%S")
+    esc = lambda x: str(x).replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ElbDetail//Termine//DE", f"METHOD:{method}", "BEGIN:VEVENT",
+             f"UID:{ref}@{Cfg.public_url.split('//')[-1]}", f"DTSTAMP:{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
+             f"DTSTART;TZID=Europe/Berlin:{f(st)}", f"DTEND;TZID=Europe/Berlin:{f(end)}",
+             f"SUMMARY:{esc('Fahrzeugabgabe bei ' + s.get('name', 'ElbDetail'))}",
+             f"LOCATION:{esc(a.get('street', '') + ', ' + a.get('zip', '') + ' ' + a.get('city', ''))}",
+             f"DESCRIPTION:{esc('Vorgang ' + ref + '. ' + stand_text(d))}", f"STATUS:{'CANCELLED' if cancel else 'CONFIRMED'}",
+             "END:VEVENT", "END:VCALENDAR"]
+    return ("\r\n".join(lines) + "\r\n").encode()
+
+
+def mail_reservation(ref, d):
+    s = site_info()
+    cfg = booking_cfg()
+    text = (f"Guten Tag {d.get('name', '').strip()},\n\nvielen Dank für Ihre Buchung bei {s.get('name', 'ElbDetail')}.\n\n"
+            f"Wir haben diesen Termin für Sie reserviert:\n{de_when(d)}\n\n"
+            + (f"Bitte bestätigen Sie den Termin, indem Sie die Anzahlung von {eur(d['anzahlung'])} ({d.get('depositPercent', 15)} % vom Richtpreis) per PayPal leisten:\n{booking_link(ref, d['token'])}\n\n"
+               f"Die Anzahlung wird mit dem Endpreis verrechnet.\n\n" if deposit_online(d) else
+               f"Bitte bestätigen Sie den Termin mit einem Klick auf diesen Link:\n{booking_link(ref, d['token'])}\n\n") +
+            f"Die Reservierung gilt {cfg['holdHours']} Stunden. Ohne Bestätigung geben wir die Uhrzeit danach wieder frei.\n\n"
+            f"Ihre Angaben ({ref}):\n{summary_text(public_data(d))}\n\n{mail_footer()}")
+    mail_async(d["email"], f"Bitte bestätigen: Ihr Termin am {termin_start(d).strftime('%d.%m.%Y')} ({ref})", text, reply_to=s.get("email") or None)
+
+
+def mail_confirmed(ref, d):
+    s = site_info()
+    owner = (s.get("about") or {}).get("name") or "Wir"
+    text = (f"Guten Tag {d.get('name', '').strip()},\n\nIhr Termin bei {s.get('name', 'ElbDetail')} ist bestätigt:\n{de_when(d)}\n\n"
+            f"So geht es weiter: {owner} meldet sich vorab telefonisch bei Ihnen und sieht sich Ihr Fahrzeug vor der Aufbereitung genau an. "
+            f"So erhalten Sie den verbindlichen Preis, bevor wir anfangen.\n\n{deposit_text(d)}{stand_text(d)}\n\n"
+            f"Bitte räumen Sie Wertsachen und persönliche Gegenstände vorher aus dem Auto.\n\n"
+            f"Sie erhalten 24 Stunden und 6 Stunden vor dem Termin eine Erinnerung. Den Termin finden Sie auch im Anhang für Ihren Kalender.\n\n"
+            f"Termin absagen oder verschieben: {booking_link(ref, d['token'])}\n\nIhre Angaben ({ref}):\n{summary_text(public_data(d))}\n\n{mail_footer()}")
+    mail_async(d["email"], f"Termin bestätigt: {termin_start(d).strftime('%d.%m.%Y, %H:%M')} Uhr ({ref})", text,
+               reply_to=s.get("email") or None, attachments=[("termin.ics", "text/calendar", ics_event(ref, d))])
+
+
+def deposit_text(d):
+    z = d.get("zahlung") or {}
+    if z.get("capture_id"):
+        return f"Ihre Anzahlung von {eur(z['value'])} per PayPal ist eingegangen und wird mit dem Endpreis verrechnet.\n\n"
+    if d.get("anzahlung"):
+        return f"Die Anzahlung von {eur(d['anzahlung'])} ({d.get('depositPercent', 15)} % vom Richtpreis) besprechen wir beim Telefonat.\n\n"
+    return ""
+
+
+def mail_reminder(ref, d, hours):
+    s = site_info()
+    st = termin_start(d)
+    when = "morgen" if st.date() == today() + dt.timedelta(days=1) else ("heute" if st.date() == today() else st.strftime("am %d.%m.%Y"))
+    text = (f"Guten Tag {d.get('name', '').strip()},\n\nwir freuen uns auf Sie: Ihr Termin bei {s.get('name', 'ElbDetail')} ist {when} um {st.strftime('%H:%M')} Uhr.\n\n"
+            f"Adresse: {s.get('address', {}).get('street', '')}, {s.get('address', {}).get('zip', '')} {s.get('address', {}).get('city', '')}\n"
+            f"Route: {'https://www.google.com/maps/search/?api=1&query=' + urllib.parse.quote(s.get('address', {}).get('street', '') + ' ' + s.get('address', {}).get('city', ''))}\n\n"
+            f"{stand_text(d)} Bitte räumen Sie Wertsachen vorher aus dem Auto.\n\n"
+            f"Etwas dazwischengekommen? Hier können Sie absagen: {booking_link(ref, d['token'])}\n\n{mail_footer()}")
+    mail_async(d["email"], f"Erinnerung: Ihr Termin {when} um {st.strftime('%H:%M')} Uhr ({ref})", text, reply_to=s.get("email") or None)
+
+
+def public_data(d):
+    """Kundendaten ohne interne Felder (Token, Kalender-ID, Versandprotokoll)."""
+    return {k: v for k, v in d.items() if k not in ("token", "hold_until", "gcal_id", "mails", "bestaetigt_am", "storniert_am", "paypal_order", "zahlung", "depositPercent")}
+
+
+def load_termin(ref):
+    with db() as c:
+        r = c.execute("SELECT * FROM anfragen WHERE ref=? AND typ='termin'", (ref,)).fetchone()
+    if not r:
+        return None, None
+    return dict(r), json.loads(r["data"] or "{}")
+
+
+def save_termin(rid, d, status=None):
+    with db() as c:
+        if status:
+            c.execute("UPDATE anfragen SET status=?, data=?, updated=? WHERE id=?", (status, json.dumps(d, ensure_ascii=False), now().isoformat(), rid))
+        else:
+            c.execute("UPDATE anfragen SET data=?, updated=? WHERE id=?", (json.dumps(d, ensure_ascii=False), now().isoformat(), rid))
+
+
+def confirm_termin(r, d, by="kunde"):
+    """Termin verbindlich machen: Status, Google-Kalender, Bestätigungs-E-Mail, Hinweis an den Betrieb (jeweils nur einmal)."""
+    d.setdefault("token", secrets.token_urlsafe(24))
+    first = not d.get("bestaetigt_am")
+    d["bestaetigt_am"] = d.get("bestaetigt_am") or now().isoformat()
+    save_termin(r["id"], d, "termin_bestaetigt")
+    if not first:
+        return
+    audit("termin_bestaetigt", f"{r['ref']} durch {by}")
+    threading.Thread(target=google_upsert, args=(r["ref"],), daemon=True).start()
+    if d.get("email") and termin_start(d):
+        mail_confirmed(r["ref"], d)
+    if by == "kunde":
+        s = site_info()
+        mail_async(Cfg.notify_to or s.get("email"), f"Termin vom Kunden bestätigt: {d.get('name')} · {de_when(d)} ({r['ref']})",
+                   f"Der Kunde hat den Termin online bestätigt. Bitte vorab anrufen und das Fahrzeug ansehen.\n\n{de_when(d)}\n"
+                   + (f"Anzahlung per PayPal erhalten: {eur(d['zahlung']['value'])} (Transaktion {d['zahlung']['capture_id']})\n" if (d.get("zahlung") or {}).get("capture_id") else "") +
+                   f"Telefon: {d.get('telefon', '')}\n\n{summary_text(public_data(d))}\n\nIm Verwaltungsportal: {Cfg.public_url}/admin/#/anfragen/{r['ref']}\n")
+
+
+def cancel_termin(r, d, by="kunde"):
+    if r["status"] in ("storniert", "verfallen", "abgelehnt"):
+        return
+    d["storniert_am"] = now().isoformat()
+    save_termin(r["id"], d, "storniert" if by == "kunde" else r["status"])
+    audit("termin_storniert", f"{r['ref']} durch {by}")
+    threading.Thread(target=google_delete, args=(r["ref"],), daemon=True).start()
+    if by == "kunde":
+        s = site_info()
+        paid = (d.get("zahlung") or {}).get("capture_id")
+        mail_async(Cfg.notify_to or s.get("email"), f"Termin abgesagt: {d.get('name')} · {de_when(d)} ({r['ref']})",
+                   f"Der Kunde hat den Termin online abgesagt.\n"
+                   + (f"Die Anzahlung von {eur(d['zahlung']['value'])} wurde per PayPal bezahlt. Eine Erstattung lösen Sie im Verwaltungsportal aus.\n" if paid else "")
+                   + f"\n{summary_text(public_data(d))}\n")
+        if d.get("email"):
+            mail_async(d["email"], f"Ihr Termin wurde abgesagt ({r['ref']})",
+                       f"Guten Tag {d.get('name', '').strip()},\n\nIhr Termin am {de_when(d)} ist abgesagt. "
+                       + ("Zu Ihrer Anzahlung melden wir uns persönlich bei Ihnen. " if paid else "")
+                       + f"Einen neuen Termin buchen Sie jederzeit unter {Cfg.public_url}/termin.html\n\n{mail_footer()}",
+                       attachments=[("absage.ics", "text/calendar", ics_event(r["ref"], d, "CANCEL", cancel=True))])
+
+
+def booking_watcher():
+    """Alle 5 Minuten: abgelaufene Reservierungen freigeben, Erinnerungen 24 h und 6 h vorher verschicken."""
+    while True:
+        try:
+            booking_tick()
+        except Exception as e:
+            log("Terminprüfung fehlgeschlagen:", e)
+        time.sleep(300)
+
+
+def booking_tick():
+    """Ein Durchlauf: Reservierungen ohne Bestätigung verfallen lassen, fällige Erinnerungen verschicken."""
+    ts = now()
+    with db() as c:
+        rows = [dict(r) for r in c.execute("SELECT id, ref, status, data FROM anfragen WHERE typ='termin' AND status IN ('reserviert','termin_bestaetigt') AND datum >= ?",
+                                           ((today() - dt.timedelta(days=1)).isoformat(),))]
+    for r in rows:
+        d = json.loads(r["data"] or "{}")
+        if r["status"] == "reserviert":
+            if d.get("hold_until") and d["hold_until"] < ts.isoformat():
+                save_termin(r["id"], d, "verfallen")
+                audit("termin_verfallen", r["ref"])
+            continue
+        st = termin_start(d)
+        if not st or not d.get("email") or not d.get("token"):
+            continue
+        sent = d.setdefault("mails", {})
+        conf = dt.datetime.fromisoformat(d.get("bestaetigt_am") or ts.isoformat())
+        due = [h for h in booking_cfg()["reminderHours"] if f"erinnerung_{h}h" not in sent and st - dt.timedelta(hours=h) <= ts < st]
+        if not due:
+            continue
+        hrs = min(due)  # nach einer Pause nur die jüngste fällige Erinnerung schicken, nicht mehrere auf einmal
+        for h in due:
+            sent[f"erinnerung_{h}h"] = "übersprungen"
+        if conf <= st - dt.timedelta(hours=hrs):  # erst innerhalb der Frist bestätigt: die Bestätigung genügt
+            mail_reminder(r["ref"], d, hrs)
+            sent[f"erinnerung_{hrs}h"] = ts.isoformat()
+        save_termin(r["id"], d)
+
+
+# --------------------------------------------------------------------------- Anzahlung per PayPal (Orders API v2, Weiterleitung ohne Fremdskripte)
+_PTOKEN = {"token": "", "exp": 0}
+
+
+def paypal_configured():
+    return bool(env("PAYPAL_CLIENT_ID") and env("PAYPAL_SECRET"))
+
+
+def paypal_base():
+    return "https://api-m.sandbox.paypal.com" if env("PAYPAL_MODE", "live") == "sandbox" else "https://api-m.paypal.com"
+
+
+def paypal_token():
+    if _PTOKEN["token"] and _PTOKEN["exp"] > time.time() + 60:
+        return _PTOKEN["token"]
+    auth = base64.b64encode(f"{env('PAYPAL_CLIENT_ID')}:{env('PAYPAL_SECRET')}".encode()).decode()
+    req = urllib.request.Request(paypal_base() + "/v1/oauth2/token", data=b"grant_type=client_credentials", method="POST",
+                                 headers={"Authorization": "Basic " + auth, "Content-Type": "application/x-www-form-urlencoded"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        j = json.loads(r.read())
+    _PTOKEN.update(token=j["access_token"], exp=time.time() + int(j.get("expires_in", 3000)))
+    return _PTOKEN["token"]
+
+
+def paypal_api(method, path, body=None, idem=""):
+    h = {"Authorization": "Bearer " + paypal_token(), "Content-Type": "application/json"}
+    if idem:
+        h["PayPal-Request-Id"] = idem  # verhindert doppelte Aufträge/Erstattungen bei Wiederholung
+    req = urllib.request.Request(paypal_base() + path, data=json.dumps(body).encode() if body is not None else None, method=method, headers=h)
+    try:
+        with urllib.request.urlopen(req, timeout=25) as r:
+            raw = r.read()
+    except urllib.error.HTTPError as e:
+        raw = e.read()
+        log("PayPal-Fehler:", e.code, raw[:300])
+        if e.code != 422:
+            raise
+    return json.loads(raw) if raw else {}
+
+
+def deposit_amount(d):
+    """Anzahlung in Euro (zwei Nachkommastellen) aus dem Richtpreis; None, wenn es keinen festen Preis gibt (Anfrage, Care, Beratung)."""
+    pct = float((site_info().get("booking") or {}).get("depositPercent", 15) or 0)
+    if pct <= 0:
+        return None
+    base = richtpreis(d)
+    if base is None and d.get("paket") == "keramik":
+        try:
+            base = min(c["price"] for c in pricing()["ceramic"]["car"] if c.get("price") is not None)
+        except (KeyError, ValueError):
+            base = None
+    if not base:
+        return None
+    return round(base * pct / 100 + 1e-9, 2)
+
+
+def eur(v):
+    return f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".").replace(",00", "") + " €"
+
+
+def deposit_online(d):
+    return bool(d.get("anzahlung")) and paypal_configured()
+
+
+def paypal_create(ref, d):
+    s = site_info()
+    j = paypal_api("POST", "/v2/checkout/orders", {
+        "intent": "CAPTURE",
+        "purchase_units": [{"reference_id": ref, "custom_id": ref, "invoice_id": ref + "-A",
+                            "description": f"Anzahlung {d.get('depositPercent', 15)} % Termin {ref}"[:127],
+                            "amount": {"currency_code": "EUR", "value": f"{d['anzahlung']:.2f}"}}],
+        "payment_source": {"paypal": {"experience_context": {
+            "brand_name": s.get("name", "ElbDetail")[:127], "locale": "de-DE", "shipping_preference": "NO_SHIPPING", "user_action": "PAY_NOW",
+            "return_url": booking_link(ref, d["token"], "bezahlt"), "cancel_url": booking_link(ref, d["token"]) + "&abbruch=1"}}}}, idem="order-" + ref + "-" + d["token"][:8])
+    link = next((x["href"] for x in j.get("links", []) if x.get("rel") in ("payer-action", "approve")), "")
+    return j.get("id", ""), link
+
+
+def paypal_capture(order_id):
+    j = paypal_api("POST", f"/v2/checkout/orders/{urllib.parse.quote(order_id)}/capture", {}, idem="cap-" + order_id)
+    if j.get("status") != "COMPLETED":  # schon erfasst? Dann den aktuellen Stand holen
+        j = paypal_api("GET", f"/v2/checkout/orders/{urllib.parse.quote(order_id)}")
+    cap = {}
+    for pu in j.get("purchase_units", []):
+        for c in (pu.get("payments") or {}).get("captures", []):
+            cap = c
+    return {"status": j.get("status", ""), "capture_id": cap.get("id", ""), "value": float((cap.get("amount") or {}).get("value", 0) or 0),
+            "currency": (cap.get("amount") or {}).get("currency_code", ""), "capture_status": cap.get("status", ""),
+            "ref": next((pu.get("reference_id") for pu in j.get("purchase_units", [])), "")}
+
+
+def paypal_refund(capture_id, value, ref):
+    j = paypal_api("POST", f"/v2/payments/captures/{urllib.parse.quote(capture_id)}/refund",
+                   {"amount": {"currency_code": "EUR", "value": f"{value:.2f}"}, "note_to_payer": f"Erstattung Anzahlung {ref}"[:255]}, idem="ref-" + capture_id)
+    return j.get("status", "")
+
+
+# --------------------------------------------------------------------------- Google Kalender (OAuth, ohne Fremdbibliotheken)
+GOOGLE_SCOPES = "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy"
+_GTOKEN = {"token": "", "exp": 0}
+_GBUSY = {}
+
+
+def google_configured():
+    return bool(env("GOOGLE_CLIENT_ID") and env("GOOGLE_CLIENT_SECRET"))
+
+
+def google_redirect():
+    return f"{Cfg.public_url}/admin/api/google/callback"
+
+
+def google_connected():
+    return google_configured() and bool(setting("googleRefreshToken", ""))
+
+
+def _gpost(url, fields):
+    req = urllib.request.Request(url, data=urllib.parse.urlencode(fields).encode(), method="POST",
+                                 headers={"Content-Type": "application/x-www-form-urlencoded"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.loads(r.read())
+
+
+def google_token():
+    if _GTOKEN["token"] and _GTOKEN["exp"] > time.time() + 60:
+        return _GTOKEN["token"]
+    j = _gpost("https://oauth2.googleapis.com/token", {"client_id": env("GOOGLE_CLIENT_ID"), "client_secret": env("GOOGLE_CLIENT_SECRET"),
+                                                        "refresh_token": setting("googleRefreshToken", ""), "grant_type": "refresh_token"})
+    _GTOKEN.update(token=j["access_token"], exp=time.time() + int(j.get("expires_in", 3600)))
+    return _GTOKEN["token"]
+
+
+def google_api(method, path, body=None):
+    url = "https://www.googleapis.com/calendar/v3" + path
+    req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None, method=method,
+                                 headers={"Authorization": "Bearer " + google_token(), "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        raw = r.read()
+    return json.loads(raw) if raw else {}
+
+
+def google_cal():
+    return urllib.parse.quote(setting("googleCalendarId", "primary") or "primary", safe="")
+
+
+def google_busy(day):
+    """Belegte Zeiten aus Renés Google Kalender an einem Tag (2 Minuten zwischengespeichert, Fehler = keine Einschränkung)."""
+    if not google_connected():
+        return []
+    key = day.isoformat()
+    hit = _GBUSY.get(key)
+    if hit and hit[0] > time.time():
+        return hit[1]
+    busy = []
+    try:
+        off = (dt.datetime.now(TZ).strftime("%z") if TZ else "+0100")
+        off = off[:3] + ":" + off[3:]
+        j = google_api("POST", "/freeBusy", {"timeMin": f"{key}T00:00:00{off}", "timeMax": f"{key}T23:59:59{off}", "timeZone": "Europe/Berlin",
+                                              "items": [{"id": setting("googleCalendarId", "primary") or "primary"}]})
+        for cal in (j.get("calendars") or {}).values():
+            for b in cal.get("busy", []):
+                b0 = dt.datetime.fromisoformat(b["start"].replace("Z", "+00:00"))
+                b1 = dt.datetime.fromisoformat(b["end"].replace("Z", "+00:00"))
+                if TZ:
+                    b0, b1 = b0.astimezone(TZ), b1.astimezone(TZ)
+                busy.append((b0.replace(tzinfo=None), b1.replace(tzinfo=None)))
+    except Exception as e:
+        log("Google freeBusy fehlgeschlagen:", e)
+    _GBUSY[key] = (time.time() + 120, busy)
+    return busy
+
+
+def google_event_body(ref, d):
+    s = site_info()
+    pr = pricing()
+    st = termin_start(d)
+    end = st + dt.timedelta(minutes=booking_cfg()["slotMinutes"])
+    names = {p["key"]: p["name"] for p in pr.get("packages", [])}
+    names.update({"beratung": "Beratung", "keramik": "Keramikversiegelung", "care": "ElbDetail Care"})
+    a = s.get("address", {})
+    return {"summary": f"Abgabe: {d.get('name', '')} · {names.get(d.get('paket'), d.get('paket', ''))}",
+            "location": f"{a.get('street', '')}, {a.get('zip', '')} {a.get('city', '')}",
+            "description": f"Vorgang {ref}\nTelefon: {d.get('telefon', '')}\n\n{summary_text(public_data(d))}\n\n{stand_text(d)}\n\n{Cfg.public_url}/admin/#/anfragen/{ref}",
+            "start": {"dateTime": st.strftime("%Y-%m-%dT%H:%M:%S"), "timeZone": "Europe/Berlin"},
+            "end": {"dateTime": end.strftime("%Y-%m-%dT%H:%M:%S"), "timeZone": "Europe/Berlin"},
+            "reminders": {"useDefault": True}}
+
+
+def google_upsert(ref):
+    if not google_connected():
+        return
+    r, d = load_termin(ref)
+    if not r or not termin_start(d):
+        return
+    try:
+        if d.get("gcal_id"):
+            google_api("PATCH", f"/calendars/{google_cal()}/events/{urllib.parse.quote(d['gcal_id'])}", google_event_body(ref, d))
+        else:
+            ev = google_api("POST", f"/calendars/{google_cal()}/events", google_event_body(ref, d))
+            r, d = load_termin(ref)
+            d["gcal_id"] = ev.get("id", "")
+            save_termin(r["id"], d)
+        _GBUSY.clear()
+    except Exception as e:
+        log("Google-Termin fehlgeschlagen:", e)
+        audit("google_fehler", f"{ref}: {e}")
+
+
+def google_delete(ref):
+    if not google_connected():
+        return
+    r, d = load_termin(ref)
+    if not r or not d.get("gcal_id"):
+        return
+    try:
+        google_api("DELETE", f"/calendars/{google_cal()}/events/{urllib.parse.quote(d['gcal_id'])}")
+    except Exception as e:
+        log("Google-Termin löschen fehlgeschlagen:", e)
+    d.pop("gcal_id", None)
+    save_termin(r["id"], d)
+    _GBUSY.clear()
+
+
+def ics_key():
+    k = setting("icsKey", "")
+    if not k:
+        k = secrets.token_urlsafe(24)
+        set_setting("icsKey", k)
+    return k
+
+
+def ics_feed():
+    """Abo-Kalender (iCal) aller bestätigten Termine, falls Google nicht per Konto verbunden wird."""
+    s = site_info()
+    with db() as c:
+        rows = [dict(r) for r in c.execute("SELECT ref, data FROM anfragen WHERE typ='termin' AND status='termin_bestaetigt' AND datum >= ?",
+                                           ((today() - dt.timedelta(days=30)).isoformat(),))]
+    out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ElbDetail//Termine//DE", f"X-WR-CALNAME:{s.get('name', 'ElbDetail')} Termine", "X-WR-TIMEZONE:Europe/Berlin"]
+    for r in rows:
+        d = json.loads(r["data"] or "{}")
+        ev = ics_event(r["ref"], d).decode().split("\r\n")
+        body = ev[ev.index("BEGIN:VEVENT"):ev.index("END:VEVENT") + 1]
+        body = [("SUMMARY:" + google_event_body(r["ref"], d)["summary"].replace(",", "\\,")) if x.startswith("SUMMARY:") else x for x in body]
+        out += body
+    out.append("END:VCALENDAR")
+    return ("\r\n".join(out) + "\r\n").encode()
 
 
 # --------------------------------------------------------------------------- Statistik
@@ -740,7 +1331,7 @@ def stats(days):
         funnel.append({"step": "gesendet", "n": sent})
         out["funnel"] = funnel
         out["open"] = c.execute("SELECT COUNT(*) n FROM anfragen WHERE status='neu'").fetchone()["n"]
-        out["upcoming"] = q("SELECT ref, name, datum, data FROM anfragen WHERE typ='termin' AND datum >= ? AND status NOT IN ('abgelehnt') ORDER BY datum LIMIT 8", e0)
+        out["upcoming"] = q("SELECT ref, name, datum, data FROM anfragen WHERE typ='termin' AND datum >= ? AND status NOT IN ('abgelehnt','storniert','verfallen') ORDER BY datum LIMIT 8", e0)
         for u in out["upcoming"]:
             d = json.loads(u.pop("data") or "{}")
             u["paket"] = d.get("paket")
@@ -755,7 +1346,7 @@ def housekeeping():
             cut = (now() - dt.timedelta(days=Cfg.retention_days)).isoformat()
             cut_orders = (now() - dt.timedelta(days=3650)).isoformat()
             with db() as c:
-                n1 = c.execute("DELETE FROM anfragen WHERE updated < ? AND status IN ('neu','in_bearbeitung','angebot_gesendet','abgelehnt') "
+                n1 = c.execute("DELETE FROM anfragen WHERE updated < ? AND status IN ('neu','in_bearbeitung','angebot_gesendet','abgelehnt','storniert','verfallen') "
                                "AND id NOT IN (SELECT anfrage_id FROM gutscheine WHERE anfrage_id IS NOT NULL)", (cut,)).rowcount
                 n2 = c.execute("DELETE FROM anfragen WHERE updated < ?", (cut_orders,)).rowcount
                 n3 = c.execute("DELETE FROM events WHERE day < ?", ((today() - dt.timedelta(days=Cfg.stats_days)).isoformat(),)).rowcount
@@ -1075,6 +1666,12 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/gutschein-druck.js":
                 return self.send(200, "document.getElementById('printBtn')&&document.getElementById('printBtn').addEventListener('click',function(){window.print()});",
                                  "text/javascript; charset=utf-8")
+            m = re.match(r"^/termin/(T\d{6}-[0-9A-F]{4})(?:/(bestaetigen|absagen|bezahlt))?$", path)
+            if m and method in ("GET", "HEAD", "POST"):
+                act = m.group(2) or ""
+                if act and (method == "POST") != (act != "bezahlt"):
+                    act = ""  # bestätigen/absagen nur per POST, die Rückkehr von PayPal (bezahlt) nur per GET
+                return self.termin_page(m.group(1), act, qs)
             m = re.match(r"^/gutschein/(ELB-[A-Z0-9]{4}-[A-Z0-9]{4})$", path)
             if m and method in ("GET", "HEAD"):
                 return self.voucher_page(m.group(1), (qs.get("t") or [""])[0])
@@ -1097,7 +1694,19 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/verfuegbarkeit" and method == "GET":
             bl, closed = blocked_days(), setting("closedWeekdays", [0])
             return self.send(200, {"blocked": bl, "blockedKeramik": blocked_days(keramik=True), "closedWeekdays": closed,
-                                   "nextFree": next_free_day(bl, closed)})
+                                   "nextFree": next_free_day(bl, closed), "selfBooking": self_booking(), "slotTimes": booking_cfg()["slotTimes"]})
+        if path == "/api/slots" and method == "GET":
+            if not RL.ok("s:" + ip, 120, 60):
+                return self.send(429, {"ok": False})
+            day = (qs.get("tag") or [""])[0]
+            if not _date(day):
+                return self.send(400, {"ok": False, "message": "Ungültiges Datum"})
+            return self.send(200, {"tag": day, "slots": free_slots(day, (qs.get("paket") or [""])[0]), "selfBooking": self_booking()})
+        if path == "/api/kalender.ics" and method == "GET":
+            key = setting("icsKey", "")
+            if not key or not hmac.compare_digest(key, (qs.get("key") or [""])[0]):
+                return self.send(404, {"ok": False})
+            return self.send(200, ics_feed(), "text/calendar; charset=utf-8", {"Cache-Control": "no-store"})
         if path == "/api/e" and method == "POST":
             if RL.ok("e:" + ip, 120, 60):
                 try:
@@ -1121,11 +1730,66 @@ class Handler(BaseHTTPRequestHandler):
                     msg = "<br>".join(html.escape(x) for x in e.errors.values())
                     return self.send(422, f'<!DOCTYPE html><meta charset="utf-8"><title>Bitte prüfen</title><p>{msg}</p><p><a href="javascript:history.back()">Zurück</a></p>', "text/html; charset=utf-8")
                 raise
-            ref = store_request(data)
+            ref, status = store_request(data)
             if is_form:
-                return self.send(303, b"", "text/plain", {"Location": f"/danke.html?typ={data['typ']}&ref={ref}"})
-            return self.send(200, {"ok": True, "ref": ref})
+                return self.send(303, b"", "text/plain", {"Location": f"/danke.html?typ={data['typ']}&ref={ref}" + ("&s=reserviert" if status == "reserviert" else "")})
+            return self.send(200, {"ok": True, "ref": ref, "status": status})
         self.send(404, {"ok": False})
+
+    def termin_page(self, ref, action, qs):
+        r, d = load_termin(ref)
+        token = (qs.get("t") or [""])[0]
+        if action:
+            if not RL.ok("tp:" + self.ip(), 30, 600):
+                return self.send(429, "Zu viele Versuche. Bitte später erneut.", "text/plain; charset=utf-8")
+            if action != "bezahlt":
+                token = str(self.parse(4096).get("t", ""))
+        if not r or not token or not d.get("token") or not hmac.compare_digest(d["token"], token):
+            return self.send(404, '<!DOCTYPE html><meta charset="utf-8"><title>Nicht gefunden</title><p>Termin nicht gefunden. Bitte nutzen Sie den Link aus Ihrer E-Mail.</p>', "text/html; charset=utf-8")
+        notice = ""
+        valid = r["status"] == "reserviert" and d.get("hold_until", "") >= now().isoformat()
+        if (qs.get("abbruch") or [""])[0] and valid:
+            notice = "Die Zahlung wurde abgebrochen. Ihr Termin bleibt reserviert, Sie können die Anzahlung hier jederzeit nachholen."
+        if action == "bestaetigen" and valid and deposit_online(d):
+            try:  # Anzahlung: weiter zu PayPal, bestätigt wird erst nach erfolgreicher Zahlung
+                oid, link = paypal_create(ref, d)
+            except Exception as e:
+                log("PayPal-Auftrag fehlgeschlagen:", e)
+                oid, link = "", ""
+            if oid and link:
+                d["paypal_order"] = oid
+                save_termin(r["id"], d)
+                return self.send(303, b"", "text/plain", {"Location": link, "Cache-Control": "no-store"})
+            notice = "PayPal ist gerade nicht erreichbar. Bitte versuchen Sie es in ein paar Minuten erneut oder melden Sie sich telefonisch."
+        elif action == "bezahlt":
+            oid = (qs.get("token") or [""])[0]
+            if r["status"] == "termin_bestaetigt":
+                notice = "Vielen Dank, Ihr Termin ist verbindlich gebucht."
+            elif valid and oid and oid == d.get("paypal_order"):
+                try:
+                    pay = paypal_capture(oid)
+                except Exception as e:
+                    log("PayPal-Zahlung nicht erfasst:", e)
+                    pay = {}
+                if pay.get("capture_id") and pay.get("capture_status") == "COMPLETED" and pay.get("currency") == "EUR" and pay.get("value", 0) + 0.005 >= d["anzahlung"]:
+                    d["zahlung"] = {"anbieter": "paypal", "order_id": oid, "capture_id": pay["capture_id"], "value": pay["value"], "am": now().isoformat()}
+                    save_termin(r["id"], d)
+                    r, d = load_termin(ref)
+                    confirm_termin(r, d, "kunde")
+                    notice = "Vielen Dank, Ihre Anzahlung ist eingegangen und Ihr Termin verbindlich gebucht. Die Bestätigung kommt per E-Mail."
+                else:
+                    notice = "Die Zahlung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
+            else:
+                notice = "Diese Zahlung gehört nicht zu Ihrem Termin oder die Reservierung ist abgelaufen."
+        elif action == "bestaetigen" and valid:
+            confirm_termin(r, d, "kunde")
+            notice = "Vielen Dank, Ihr Termin ist verbindlich gebucht. Die Bestätigung kommt per E-Mail."
+        elif action == "absagen" and r["status"] in ("reserviert", "termin_bestaetigt"):
+            cancel_termin(r, d, "kunde")
+            notice = "Ihr Termin ist abgesagt. Schade, vielleicht ein andermal."
+        if action:  # aktuellen Stand zeigen; ein erneutes Absenden löst nichts doppelt aus
+            r, d = load_termin(ref)
+        self.send(200, termin_html(r, d, notice), "text/html; charset=utf-8", {"Cache-Control": "no-store", "X-Robots-Tag": "noindex"})
 
     def voucher_page(self, code, token):
         with db() as c:
@@ -1175,10 +1839,34 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(401, {"ok": False, "message": "Benutzername oder Passwort falsch."})
         if path == "logout":
             return self.send(200, {"ok": True}, headers={"Set-Cookie": "elb_s=; Path=/admin; HttpOnly; SameSite=Strict; Max-Age=0"})
+        if path == "google/callback" and method == "GET":  # Rückkehr von Google: Sitzungs-Cookie (SameSite=Strict) fehlt hier, daher signierter state
+            return self.google_callback(qs)
         user = self.user()
         if not user:
             return self.send(401, {"ok": False, "message": "Bitte anmelden."})
         return AdminAPI(self, method, path, qs).run()
+
+    def google_callback(self, qs):
+        state = (qs.get("state") or [""])[0]
+        try:
+            ts, sig = state.split(".", 1)
+            good = hmac.compare_digest(sig, hmac.new(secret_key(), ("google:" + ts).encode(), hashlib.sha256).hexdigest()) and time.time() - int(ts) < 900
+        except ValueError:
+            good = False
+        code = (qs.get("code") or [""])[0]
+        if not good or not code or not google_configured():
+            return self.send(302, b"", "text/plain", {"Location": "/admin/#/kalender?google=fehler"})
+        try:
+            j = _gpost("https://oauth2.googleapis.com/token", {"code": code, "client_id": env("GOOGLE_CLIENT_ID"), "client_secret": env("GOOGLE_CLIENT_SECRET"),
+                                                                "redirect_uri": google_redirect(), "grant_type": "authorization_code"})
+            if j.get("refresh_token"):
+                set_setting("googleRefreshToken", j["refresh_token"])
+                _GTOKEN.update(token=j.get("access_token", ""), exp=time.time() + int(j.get("expires_in", 3600)))
+                audit("google_verbunden")
+                return self.send(302, b"", "text/plain", {"Location": "/admin/#/kalender?google=ok"})
+        except Exception as e:
+            log("Google-Verbindung fehlgeschlagen:", e)
+        return self.send(302, b"", "text/plain", {"Location": "/admin/#/kalender?google=fehler"})
 
 
 class AdminAPI:
@@ -1203,6 +1891,9 @@ class AdminAPI:
         mm = re.match(r"^anfragen/([A-Z]\d{6}-[0-9A-F]{4}|\d+)$", p)
         if mm:
             return self.request_item(mm.group(1))
+        mm = re.match(r"^anfragen/(T\d{6}-[0-9A-F]{4})/erstatten$", p)
+        if mm and m == "POST":
+            return self.refund(mm.group(1))
         mm = re.match(r"^anfragen/([A-Z]\d{6}-[0-9A-F]{4})/vorlage$", p)
         if mm:
             return self.template(mm.group(1), self.q("art", "antwort"))
@@ -1215,6 +1906,8 @@ class AdminAPI:
             return self.voucher_check(self.q("code").upper().strip())
         if p == "kalender":
             return self.calendar()
+        if p == "google":
+            return self.google()
         if p == "einstellungen":
             return self.settings()
         if p == "inhalte" and m == "GET":
@@ -1302,9 +1995,31 @@ class AdminAPI:
                 if st not in STATUS:
                     return h.send(422, {"ok": False, "message": "Ungültiger Status"})
                 notes = str(body.get("notizen", r["notizen"] or ""))[:5000]
+                moved = False
+                if r["typ"] == "termin" and ("datum" in body or "uhrzeit" in body):  # Termin verschieben (Datum/Uhrzeit)
+                    dd = json.loads(r["data"] or "{}")
+                    nd, nt = str(body.get("datum", dd.get("datum", ""))), str(body.get("uhrzeit", dd.get("uhrzeit", "")))
+                    if not _date(nd) or (nt and not re.match(r"^([01]\d|2[0-3]):[0-5]\d$", nt)):
+                        return h.send(422, {"ok": False, "message": "Ungültiges Datum oder Uhrzeit"})
+                    moved = (nd, nt) != (dd.get("datum"), dd.get("uhrzeit", ""))
+                    if moved:
+                        dd.update(datum=nd, uhrzeit=nt)
+                        dd.pop("mails", None)  # Erinnerungen für den neuen Zeitpunkt neu verschicken
+                        c.execute("UPDATE anfragen SET datum=?, data=? WHERE id=?", (nd, json.dumps(dd, ensure_ascii=False), r["id"]))
                 c.execute("UPDATE anfragen SET status=?, notizen=?, updated=? WHERE id=?", (st, notes, now().isoformat(), r["id"]))
                 audit("anfrage_status", f"{r['ref']} → {st}", c)
                 c.commit()  # erst speichern, dann antworten (sonst sieht ein sofortiges Neuladen den alten Stand)
+                if r["typ"] == "termin" and st != r["status"]:
+                    rr, dd = load_termin(r["ref"])
+                    if st == "termin_bestaetigt":  # Bestätigung durch den Betrieb: Kalender und E-Mail wie bei Kundenbestätigung
+                        confirm_termin(rr, dd, "betrieb")
+                    elif st in ("abgelehnt", "storniert") and dd.get("gcal_id"):
+                        threading.Thread(target=google_delete, args=(r["ref"],), daemon=True).start()
+                elif moved and st == "termin_bestaetigt":  # verschobener, bestätigter Termin: Kalender und Kunde informieren
+                    rr, dd = load_termin(r["ref"])
+                    threading.Thread(target=google_upsert, args=(r["ref"],), daemon=True).start()
+                    if dd.get("email") and dd.get("token"):
+                        mail_confirmed(r["ref"], dd)
                 return h.send(200, {"ok": True})
             if m == "DELETE":
                 c.execute("UPDATE gutscheine SET anfrage_id=NULL WHERE anfrage_id=?", (r["id"],))
@@ -1313,6 +2028,29 @@ class AdminAPI:
                 c.commit()
                 return h.send(200, {"ok": True})
         h.send(405, {"ok": False})
+
+    def refund(self, ref):
+        r, d = load_termin(ref)
+        z = (d or {}).get("zahlung") or {}
+        if not r or not z.get("capture_id"):
+            return self.h.send(404, {"ok": False, "message": "Keine PayPal-Anzahlung zu diesem Termin."})
+        if z.get("erstattet"):
+            return self.h.send(200, {"ok": True, "message": "Bereits erstattet."})
+        try:
+            st = paypal_refund(z["capture_id"], float(z["value"]), ref)
+        except Exception as e:
+            return self.h.send(502, {"ok": False, "message": f"PayPal-Erstattung fehlgeschlagen: {e}"})
+        if st not in ("COMPLETED", "PENDING"):
+            return self.h.send(502, {"ok": False, "message": f"PayPal meldet: {st or 'unbekannt'}"})
+        z["erstattet"] = now().isoformat()
+        d["zahlung"] = z
+        save_termin(r["id"], d)
+        audit("anzahlung_erstattet", f"{ref}: {z['value']} €")
+        if d.get("email"):
+            mail_async(d["email"], f"Ihre Anzahlung wurde erstattet ({ref})",
+                       f"Guten Tag {d.get('name', '').strip()},\n\nwir haben Ihre Anzahlung von {eur(float(z['value']))} über PayPal erstattet. "
+                       f"Je nach Bank dauert die Gutschrift wenige Tage.\n\n{mail_footer()}")
+        return self.h.send(200, {"ok": True, "message": "Anzahlung erstattet."})
 
     def template(self, ref, art):
         s = site_info()
@@ -1445,7 +2183,12 @@ class AdminAPI:
             return h.send(200, {"blocked": bl, "requests": req, "closedWeekdays": setting("closedWeekdays", [0]),
                                 "dailyCapacity": setting("dailyCapacity", 2), "leadDays": setting("leadDays", 1),
                                 "keramikExclusive": bool(setting("keramikExclusive", True)), "keramikDays": setting("keramikDays", 3),
-                                "nextFree": next_free_day()})
+                                "nextFree": next_free_day(), "booking": booking_cfg(), "selfBooking": self_booking(), "mail": mail_ready(),
+                                "google": {"configured": google_configured(), "connected": google_connected(), "redirect": google_redirect(),
+                                           "calendarId": setting("googleCalendarId", "primary")},
+                                "icsUrl": f"{Cfg.public_url}/api/kalender.ics?key={ics_key()}",
+                                "paypal": {"configured": paypal_configured(), "mode": env("PAYPAL_MODE", "live"),
+                                           "percent": (site_info().get("booking") or {}).get("depositPercent", 15)}})
         d = h.parse()
         if self.m == "POST":
             days = d.get("days") or [d.get("day")]
@@ -1469,6 +2212,31 @@ class AdminAPI:
                     if v is None or not lo <= v <= hi:
                         raise Invalid({k: f"Bitte eine Zahl von {lo} bis {hi} angeben."})
                     set_setting(k, v)
+            return h.send(200, {"ok": True})
+        h.send(405, {"ok": False})
+
+    def google(self):
+        h, m = self.h, self.m
+        if m == "GET":  # Anmelde-Link zu Google erzeugen
+            if not google_configured():
+                return h.send(422, {"ok": False, "message": "GOOGLE_CLIENT_ID und GOOGLE_CLIENT_SECRET fehlen in der Server-Konfiguration."})
+            ts = str(int(time.time()))
+            state = ts + "." + hmac.new(secret_key(), ("google:" + ts).encode(), hashlib.sha256).hexdigest()
+            url = "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode({
+                "client_id": env("GOOGLE_CLIENT_ID"), "redirect_uri": google_redirect(), "response_type": "code", "scope": GOOGLE_SCOPES,
+                "access_type": "offline", "prompt": "consent", "include_granted_scopes": "true", "state": state})
+            return h.send(200, {"url": url})
+        if m == "PUT":
+            d = h.parse()
+            cal = str(d.get("calendarId", "primary")).strip()[:200] or "primary"
+            set_setting("googleCalendarId", cal)
+            _GBUSY.clear()
+            return h.send(200, {"ok": True})
+        if m == "DELETE":
+            set_setting("googleRefreshToken", "")
+            _GTOKEN.update(token="", exp=0)
+            _GBUSY.clear()
+            audit("google_getrennt")
             return h.send(200, {"ok": True})
         h.send(405, {"ok": False})
 
@@ -1714,6 +2482,7 @@ def main():
         log("Hinweis: SMTP nicht eingerichtet, E-Mail-Benachrichtigungen sind aus.")
     threading.Thread(target=housekeeping, daemon=True).start()
     threading.Thread(target=offers_watcher, daemon=True).start()
+    threading.Thread(target=booking_watcher, daemon=True).start()
     class Server(ThreadingHTTPServer):
         def handle_error(self, request, client_address):
             et = sys.exc_info()[0]

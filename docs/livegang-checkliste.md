@@ -8,6 +8,8 @@
 - [ ] **Aussagen prüfen:** „samstags nach Absprache“, „Abholung nach Absprache“, Firmenkunden-Seite („Abrechnung nach Absprache“), Gutschein-Regeln (Gültigkeit 3 Jahre, Paketgutschein für einen Kleinwagen, Zahlung per Überweisung oder bar).
 - [ ] **Zahlungshinweis für Gutscheine** in Einstellungen (Kontoinhaber, IBAN, Verwendungszweck).
 - [ ] **SMTP** in `.env` eintragen und Test-E-Mail senden.
+- [ ] **PayPal** (Live-App) und **Google Kalender** (OAuth-Client) einrichten, siehe `betrieb-hetzner.md`. Danach eine Testbuchung mit kleinem Paket machen, anzahlen, erstatten.
+- [ ] **Storno-Regel für die Anzahlung** festlegen und in den Buchungsbedingungen bzw. AGB nennen.
 - [ ] **Testbuchung** über jede Formularart (Kontakt, Termin, Gutschein, Firma) durchführen und im Portal löschen.
 - [ ] **Bewertungszahl** aktualisieren, falls sie sich geändert hat.
 

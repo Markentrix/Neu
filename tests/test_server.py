@@ -7,6 +7,7 @@ import datetime as dt
 import http.cookiejar
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -496,6 +497,178 @@ class TestAdmin(Base):
     def test_backup(self):
         out = app.make_backup()
         self.assertTrue(os.path.exists(out))
+
+
+class TestBooking(Base):
+    """Online-Buchung: Uhrzeit reservieren, per Link bestätigen, Erinnerungen 24 h / 6 h, Absage, Kalender-Abo."""
+
+    def setUp(self):
+        self.mails = []
+        self._orig = (app.send_mail, app.Cfg.smtp_host, app.Cfg.smtp_from)
+        app.Cfg.smtp_host, app.Cfg.smtp_from = "smtp.test", "termine@example.com"
+        app.send_mail = lambda to, subject, text, reply_to=None, attachments=None: self.mails.append(
+            {"to": to, "subject": subject, "text": text, "att": attachments or []}) or True
+
+    def tearDown(self):
+        app.send_mail, app.Cfg.smtp_host, app.Cfg.smtp_from = self._orig
+        with app.db() as c:  # andere Tests (Auslastung) sollen diese Buchungen nicht sehen
+            c.execute("DELETE FROM anfragen WHERE name='Karla Kunde'")
+
+    def wait_mail(self, to, n=1):
+        for _ in range(100):
+            got = [m for m in self.mails if m["to"] == to]
+            if len(got) >= n:
+                return got
+            threading.Event().wait(0.02)
+        self.fail(f"keine E-Mail an {to}: {[m['subject'] for m in self.mails]}")
+
+    def book(self, day, zeit, email="kunde@example.com", paket="essential"):
+        return self.req("POST", "/api/anfrage", {"typ": "termin", "paket": paket, "klasse": "kompakt", "datum": day, "uhrzeit": zeit,
+                                                 "name": "Karla Kunde", "telefon": "0171 2223334", "email": email, "einwilligung": "ja"})
+
+    def test_full_flow(self):
+        day = next_workday(9)
+        code, j = self.req("GET", f"/api/slots?tag={day}")
+        self.assertEqual(code, 200)
+        self.assertTrue(j["selfBooking"])
+        self.assertTrue(all(x["frei"] for x in j["slots"]), j)
+        # ohne Uhrzeit oder E-Mail keine Online-Buchung
+        self.assertEqual(self.book(day, "")[0], 422)
+        self.assertEqual(self.book(day, "10:00", email="")[0], 422)
+        code, j = self.book(day, "10:00")
+        self.assertEqual(code, 200, j)
+        self.assertEqual(j["status"], "reserviert")
+        ref = j["ref"]
+        mail = self.wait_mail("kunde@example.com")[0]
+        self.assertIn("Bitte bestätigen", mail["subject"])
+        m = re.search(r"/termin/" + ref + r"\?t=([\w-]+)", mail["text"])
+        self.assertTrue(m, mail["text"])
+        token = m.group(1)
+        # Uhrzeit ist reserviert, eine zweite Buchung zur gleichen Zeit scheitert
+        code, j = self.req("GET", f"/api/slots?tag={day}")
+        self.assertFalse(next(x for x in j["slots"] if x["zeit"] == "10:00")["frei"])
+        self.assertEqual(self.book(day, "10:00", email="andere@example.com")[0], 422)
+        # Bestätigungsseite: falscher Token 404, richtiger Token zeigt den Button
+        self.assertEqual(self.req("GET", f"/termin/{ref}?t=falsch", raw=True)[0], 404)
+        code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
+        self.assertEqual(code, 200)
+        self.assertIn("Termin verbindlich bestätigen", page.decode())
+        code, page = self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)
+        self.assertIn("verbindlich gebucht", page.decode())
+        with app.db() as c:
+            self.assertEqual(c.execute("SELECT status FROM anfragen WHERE ref=?", (ref,)).fetchone()["status"], "termin_bestaetigt")
+        conf = [m for m in self.wait_mail("kunde@example.com", 2) if "bestätigt" in m["subject"]][0]
+        self.assertIn("meldet sich vorab telefonisch", conf["text"])
+        self.assertIn("Fahrzeug vor der Aufbereitung", conf["text"])
+        self.assertTrue(conf["att"] and b"BEGIN:VEVENT" in conf["att"][0][2])
+        self.assertTrue(any("vom Kunden bestätigt" in m["subject"] for m in self.mails))
+        # erneutes Absenden verschickt nichts doppelt
+        n = len(self.mails)
+        self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)
+        threading.Event().wait(0.2)
+        self.assertEqual(len(self.mails), n)
+        # Erinnerungen: Termin auf 20 Stunden in die Zukunft legen, bestätigt vor zwei Tagen
+        def move(hours):
+            start = app.now() + dt.timedelta(hours=hours)
+            r, d = app.load_termin(ref)
+            d.update(datum=start.date().isoformat(), uhrzeit=start.strftime("%H:%M"), bestaetigt_am=(app.now() - dt.timedelta(days=2)).isoformat())
+            with app.db() as c:
+                c.execute("UPDATE anfragen SET datum=?, data=? WHERE id=?", (d["datum"], json.dumps(d), r["id"]))
+        move(20)
+        app.booking_tick()
+        rem = [m for m in self.wait_mail("kunde@example.com", 3) if "Erinnerung" in m["subject"]]
+        self.assertEqual(len(rem), 1)
+        app.booking_tick()  # keine doppelte Erinnerung
+        threading.Event().wait(0.1)
+        self.assertEqual(len([m for m in self.mails if "Erinnerung" in m["subject"]]), 1)
+        move(5)
+        app.booking_tick()
+        self.wait_mail("kunde@example.com", 4)
+        self.assertEqual(len([m for m in self.mails if "Erinnerung" in m["subject"]]), 2)
+        # Kalender-Abo (iCal) nur mit Schlüssel
+        self.assertEqual(self.req("GET", "/api/kalender.ics?key=falsch", raw=True)[0], 404)
+        code, ics = self.req("GET", "/api/kalender.ics?key=" + app.ics_key(), raw=True)
+        self.assertEqual(code, 200)
+        self.assertIn(ref, ics.decode())
+        # Absage durch den Kunden
+        code, page = self.req("POST", f"/termin/{ref}/absagen", {"t": token}, raw=True, form=True)
+        self.assertIn("abgesagt", page.decode())
+        with app.db() as c:
+            self.assertEqual(c.execute("SELECT status FROM anfragen WHERE ref=?", (ref,)).fetchone()["status"], "storniert")
+
+    def test_reservation_expires_and_frees_slot(self):
+        day = next_workday(10)
+        code, j = self.book(day, "13:00", email="spaet@example.com")
+        self.assertEqual(code, 200, j)
+        ref = j["ref"]
+        r, d = app.load_termin(ref)
+        d["hold_until"] = (app.now() - dt.timedelta(minutes=1)).isoformat()
+        app.save_termin(r["id"], d)
+        code, j = self.req("GET", f"/api/slots?tag={day}")
+        self.assertTrue(next(x for x in j["slots"] if x["zeit"] == "13:00")["frei"])  # abgelaufene Reservierung belegt nichts
+        app.booking_tick()
+        with app.db() as c:
+            self.assertEqual(c.execute("SELECT status FROM anfragen WHERE ref=?", (ref,)).fetchone()["status"], "verfallen")
+        token = d["token"]
+        code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
+        self.assertIn("abgelaufen", page.decode())
+
+    def test_paypal_deposit_confirms_booking(self):
+        os.environ.update({"PAYPAL_CLIENT_ID": "id", "PAYPAL_SECRET": "geheim"})
+        orig = (app.paypal_create, app.paypal_capture, app.paypal_refund)
+        calls = {}
+        app.paypal_create = lambda ref, d: (calls.setdefault("order", "ORDER-" + ref), self.base + "/api/health")
+        app.paypal_capture = lambda oid: {"status": "COMPLETED", "capture_id": "CAP1", "capture_status": "COMPLETED", "currency": "EUR", "value": calls["value"], "ref": ""}
+        app.paypal_refund = lambda cid, value, ref: calls.setdefault("refund", "COMPLETED")
+        try:
+            day = next_workday(13)
+            code, j = self.book(day, "08:00", email="zahler@example.com")  # Essential, Kompaktwagen: 15 % von 329 €
+            self.assertEqual(code, 200, j)
+            ref = j["ref"]
+            mail = self.wait_mail("zahler@example.com")[0]
+            self.assertIn("Anzahlung von 49,35 €", mail["text"])
+            token = re.search(r"\?t=([\w-]+)", mail["text"]).group(1)
+            code, page = self.req("GET", f"/termin/{ref}?t={token}", raw=True)
+            self.assertIn("mit PayPal leisten", page.decode())
+            code, _ = self.req("POST", f"/termin/{ref}/bestaetigen", {"t": token}, raw=True, form=True)  # Weiterleitung zu PayPal
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "reserviert")  # ohne Zahlung noch nicht bestätigt
+            self.assertEqual(d["paypal_order"], "ORDER-" + ref)
+            calls["value"] = 10.0  # zu wenig bezahlt: keine Bestätigung
+            code, page = self.req("GET", f"/termin/{ref}/bezahlt?t={token}&token=ORDER-{ref}", raw=True)
+            self.assertIn("nicht abgeschlossen", page.decode())
+            calls["value"] = 49.35
+            code, page = self.req("GET", f"/termin/{ref}/bezahlt?t={token}&token=FREMD", raw=True)
+            self.assertIn("gehört nicht", page.decode())
+            code, page = self.req("GET", f"/termin/{ref}/bezahlt?t={token}&token=ORDER-{ref}", raw=True)
+            self.assertIn("Anzahlung ist eingegangen", page.decode())
+            r, d = app.load_termin(ref)
+            self.assertEqual(r["status"], "termin_bestaetigt")
+            self.assertEqual(d["zahlung"]["capture_id"], "CAP1")
+            conf = [m for m in self.wait_mail("zahler@example.com", 2) if "bestätigt" in m["subject"]][0]
+            self.assertIn("Anzahlung von 49,35 € per PayPal ist eingegangen", conf["text"])
+            self.login()
+            code, j = self.admin("POST", f"anfragen/{ref}/erstatten", {})
+            self.assertEqual(code, 200, j)
+            self.assertTrue(app.load_termin(ref)[1]["zahlung"]["erstattet"])
+        finally:
+            app.paypal_create, app.paypal_capture, app.paypal_refund = orig
+            for k in ("PAYPAL_CLIENT_ID", "PAYPAL_SECRET"):
+                os.environ.pop(k, None)
+
+    def test_admin_confirm_sends_mail(self):
+        self.login()
+        day = next_workday(11)
+        code, j = self.book(day, "15:00", email="portal@example.com")
+        ref = j["ref"]
+        self.wait_mail("portal@example.com")
+        code, _ = self.admin("PATCH", f"anfragen/{ref}", {"status": "termin_bestaetigt", "uhrzeit": "15:00", "datum": day})
+        self.assertEqual(code, 200)
+        conf = [m for m in self.wait_mail("portal@example.com", 2) if "bestätigt" in m["subject"]]
+        self.assertTrue(conf)
+        code, j = self.admin("GET", "kalender")
+        self.assertIn("icsUrl", j)
+        self.assertFalse(j["google"]["configured"])
 
 
 if __name__ == "__main__":

@@ -1263,6 +1263,10 @@ section.tight-top { padding-top: clamp(28px, 4vw, 48px); }
 .choice-pill strong { font-size: 0.92rem; }
 .choice-pill small { color: var(--muted); font-size: 0.76rem; }
 .choice-pill input:checked + span { border-color: var(--blue); background: var(--blue-soft); color: var(--blue-deep); }
+.slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.slot-grid .choice-pill span { min-height: 48px; }
+.choice-pill input:disabled + span { opacity: 0.45; cursor: not-allowed; text-decoration: line-through; background: var(--soft); }
+.choice-pill:has(input:disabled) { cursor: not-allowed; }
 
 .check-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
 .check { position: relative; cursor: pointer; }

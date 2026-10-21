@@ -337,7 +337,7 @@
   var LABELS = {
     typ: null, website: null, einwilligung: null, quelle: null, name: "Name", telefon: "Telefon", email: "E-Mail", paket: "Paket",
     klasse: "Fahrzeugklasse", fahrzeug: "Fahrzeug", zustand: "Zustand", extras: "Extras", abholung: "Abholung", datum: "Wunschtermin",
-    datum2: "Ausweichtermin", zeitfenster: "Zeitfenster", gutscheincode: "Gutscheincode", kanal: "Antwort per", nachricht: "Nachricht",
+    datum2: "Ausweichtermin", zeitfenster: "Zeitfenster", uhrzeit: "Uhrzeit", gutscheincode: "Gutscheincode", kanal: "Antwort per", nachricht: "Nachricht",
     bewertung_ok: null, art: "Gutschein", betrag: "Betrag", wunschbetrag: "Wunschbetrag", fuer: "Für", von: "Von", widmung: "Widmung",
     zustellung: "Zustellung", firma: "Firma", anzahl: "Fahrzeuge", intervall: "Intervall", leistungen: "Leistungen"
   };
@@ -428,7 +428,7 @@
         .then(function (j) {
           if (j.ok) {
             track("Anfrage gesendet", { typ: typ });
-            location.href = "danke.html?typ=" + encodeURIComponent(typ) + (j.ref ? "&ref=" + encodeURIComponent(j.ref) : "");
+            location.href = "danke.html?typ=" + encodeURIComponent(typ) + (j.ref ? "&ref=" + encodeURIComponent(j.ref) : "") + (j.status === "reserviert" ? "&s=reserviert" : "");
           } else if (j.errors) {
             Object.keys(j.errors).forEach(function (k) { var el = form.querySelector('[name="' + k + '"]'); if (el) el.setAttribute("aria-invalid", "true"); });
             setStatus(form, j.message || "Bitte die markierten Angaben prüfen.", "error");
@@ -463,6 +463,29 @@
     });
 
     function isKer() { var r = wz.querySelector('input[name="paket"]:checked'); return !!r && r.value === "keramik"; }
+    /* Freie Abgabezeiten des gewählten Tages vom Server holen (Auslastung, Keramik-Standzeit, Google Kalender) */
+    var slotBox = $("#t-slots"), slotMsg = $("#t-slots-msg"), slotReq = 0;
+    function loadSlots() {
+      if (!slotBox) return;
+      var day = wz.datum.value, radios = $$('input[name="uhrzeit"]', wz);
+      var say = function (t, err) { if (slotMsg) { slotMsg.textContent = t; slotMsg.className = "field-msg" + (err ? " error" : ""); } };
+      if (!day || wz.datum.validationMessage) { radios.forEach(function (r) { r.disabled = !day; }); say(day ? "" : "Bitte zuerst einen Tag wählen."); return; }
+      radios.forEach(function (r) { r.disabled = false; });
+      if (!IS_LIVE) { say(""); return; }
+      var my = ++slotReq, pk = (wz.querySelector('input[name="paket"]:checked') || {}).value || "";
+      say("Freie Uhrzeiten werden geladen …");
+      fetch(API + "/slots?tag=" + encodeURIComponent(day) + "&paket=" + encodeURIComponent(pk)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (my !== slotReq || !j || !j.slots) { say(""); return; }
+        var free = 0;
+        j.slots.forEach(function (x) {
+          var r = wz.querySelector('input[name="uhrzeit"][value="' + x.zeit + '"]'); if (!r) return;
+          r.disabled = !x.frei; if (!x.frei && r.checked) r.checked = false; if (x.frei) free++;
+          r.parentNode.title = x.frei ? "" : "Bereits vergeben";
+        });
+        say(free ? free + (free === 1 ? " Uhrzeit" : " Uhrzeiten") + " frei an diesem Tag." : "An diesem Tag ist leider keine Uhrzeit mehr frei. Bitte einen anderen Tag wählen.", !free);
+        summary();
+      }).catch(function () { say(""); });
+    }
     function checkDate(el) {
       var msg = $("#" + el.id + "-msg"), v = el.value, txt = "";
       if (v) {
@@ -475,8 +498,8 @@
       el.setCustomValidity(txt);
       if (msg) { msg.textContent = txt; msg.className = "field-msg" + (txt ? " error" : ""); }
     }
-    ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); summary(); }); });
-    $$('input[name="paket"]', wz).forEach(function (r) { r.addEventListener("change", function () { ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); }); });
+    ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); if (n === "datum") loadSlots(); summary(); }); });
+    $$('input[name="paket"]', wz).forEach(function (r) { r.addEventListener("change", function () { ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); loadSlots(); }); });
 
     function show(i) {
       cur = Math.max(0, Math.min(steps.length - 1, i));
@@ -503,11 +526,14 @@
       set("paket", p ? p.name : (SPECIAL[d.paket] || "–"));
       set("klasse", (c ? c.name : "–") + (d.fahrzeug ? " · " + d.fahrzeug : ""));
       set("extras", d.extras && d.extras.length ? d.extras.join(", ") : "keine");
-      set("datum", d.datum ? deDate(d.datum) + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
+      set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + d.uhrzeit + " Uhr" : "") + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
       set("preis", v != null ? "ab " + fmt(v) + " €" : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
+      var bk = ELB.booking || {}, base = v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null);
+      set("anzahlung", base ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " € per PayPal" : (d.paket ? "nach Absprache" : "–"));
       $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? "ab " + fmt(x) + " €" : "auf Anfrage"; });
     }
     wz.addEventListener("change", summary); wz.addEventListener("input", summary);
+    if (wz.datum.value) { checkDate(wz.datum); loadSlots(); } else loadSlots();
     summary(); show(0);
   }
 
@@ -550,7 +576,9 @@
   var thanks = $("[data-thanks-title]");
   if (thanks && Q.typ) {
     var T = {
-      termin: ["Terminanfrage eingegangen.", "Wir prüfen Ihren Wunschtermin und melden uns mit Bestätigung und verbindlichem Angebot, in der Regel am selben oder nächsten Werktag."],
+      termin: Q.s === "reserviert"
+        ? ["Bitte bestätigen Sie Ihren Termin.", "Wir haben Ihnen eine E-Mail mit einem Link geschickt. Mit der Anzahlung von " + ((ELB.booking || {}).depositPercent || 15) + " % per PayPal ist der Termin verbindlich gebucht. Die Reservierung gilt " + ((ELB.booking || {}).holdHours || 24) + " Stunden. Danach meldet sich " + ((ELB.booking || {}).owner || "unser Team") + " telefonisch und sieht sich Ihr Fahrzeug vorab an."]
+        : ["Terminanfrage eingegangen.", "Wir prüfen Ihren Wunschtermin und melden uns mit Bestätigung und verbindlichem Angebot, in der Regel am selben oder nächsten Werktag."],
       gutschein: ["Gutscheinbestellung eingegangen.", "Sie erhalten gleich eine E-Mail mit den Zahlungsdaten. Nach Zahlungseingang senden wir Ihnen den Gutschein."],
       firma: ["Anfrage eingegangen.", "Vielen Dank für Ihr Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."]
     }[Q.typ];
