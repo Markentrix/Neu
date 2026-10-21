@@ -41,6 +41,23 @@ for d in /srv/sites/live/*/; do
   [ -f "$CS/$n.caddy" ] || FEHLT="$FEHLT $n"
 done
 [ -z "$FEHLT" ] && z ok "Jede Kunden-Website ist beim Webserver eingetragen" || z fehler "Beim Webserver fehlt der Eintrag für:$FEHLT (Abhilfe: mkctl caddy-neu)"
+# 5c) Webserver: ist seine Konfiguration gültig, und liefert er jede Kunden-Domain mit Zertifikat aus? (lokal geprüft, unabhängig von DNS und Zwischenspeichern)
+MODE="$(cat "$BASE/mode" 2>/dev/null || echo own)"; CC="$(cat "$BASE/caddy-container" 2>/dev/null || true)"
+case "$MODE" in
+  docker) [ -n "$CC" ] && { docker exec "$CC" caddy validate --config /etc/caddy/Caddyfile >/dev/null 2>&1 && z ok "Webserver-Konfiguration ($CC) ist gültig" || z fehler "Webserver-Konfiguration ($CC) ist ungültig: neue Domains werden nicht geladen"; } ;;
+  own) docker compose --project-directory "$BASE" -f "$BASE/docker-compose.yml" exec -T caddy caddy validate --config /etc/caddy/Caddyfile >/dev/null 2>&1 && z ok "Webserver-Konfiguration ist gültig" || z fehler "Webserver-Konfiguration ist ungültig: neue Domains werden nicht geladen" ;;
+esac
+MYIP="${SERVER_IPV4:-$(curl -4 -fsS --max-time 5 https://api.ipify.org 2>/dev/null || true)}"
+for d in /srv/sites/live/*/; do
+  n="$(basename "$d")"; [ -d "$d" ] || continue
+  CODE="$(curl -sS -m 12 --resolve "$n:443:127.0.0.1" -o /dev/null -w '%{http_code}' "https://$n/" 2>/dev/null || true)"
+  case "$CODE" in
+    2*|3*) z ok "$n: Zertifikat und Seite werden ausgeliefert" ;;
+    *) DNSIP="$(getent ahostsv4 "$n" 2>/dev/null | awk '{print $1; exit}')"
+       if [ -n "$MYIP" ] && [ "$DNSIP" = "$MYIP" ]; then z fehler "$n: DNS stimmt, aber der Webserver liefert keine Seite mit Zertifikat aus (Abhilfe: mkctl caddy-neu, dann Log des Caddy ansehen)"
+       else z warn "$n: noch kein Zertifikat, weil die Domain (noch) nicht auf diesen Server zeigt"; fi ;;
+  esac
+done
 # 6) Speicherplatz
 USE="$(df --output=pcent / | tail -1 | tr -dc 0-9)"; [ "${USE:-0}" -lt 85 ] && z ok "Festplatte zu ${USE} % belegt" || z fehler "Festplatte zu ${USE} % voll"
 echo
