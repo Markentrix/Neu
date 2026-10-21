@@ -74,5 +74,6 @@
     "lederaufbereitung-celle",
     "aussenaufbereitung-celle",
     "leasingrueckgabe-gebrauchtwagen-celle"
-  ]
+  ],
+  "beforeAfter": "Innenraum-Tiefenreinigung"
 }

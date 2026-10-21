@@ -2,6 +2,16 @@
   "hinweis": "Zertifikate erscheinen auf /zertifikate.html und als Auswahl auf „Über uns“. Bilder unter Fotos hochladen (Hochformat), Unterschriften vorher unkenntlich machen.",
   "items": [
     {
+      "title": "Zertifizierter Excellence Partner",
+      "subtitle": "Autorisierter Anwender von C²Coating",
+      "kind": "Zertifikat",
+      "issuer": "C²Coating",
+      "issuerUrl": "https://www.c2coating.de",
+      "text": "René Triechelt erfüllt die Anforderungen als autorisierter Anwender von C²Coating. Das Zertifikat bestätigen der Hersteller und der internationale Vertrieb.",
+      "benefit": "Keramikversiegelungen für Lack, Felgen und Scheiben werden nach den Vorgaben des Herstellers verarbeitet.",
+      "image": "zertifikat-c2coating-excellence-partner.jpg"
+    },
+    {
       "title": "Fachseminar Fahrzeugaufbereitung",
       "subtitle": "inklusive hologrammfreier Lackaufbereitung, Nano-Versiegelung und Keramikversiegelung",
       "kind": "Zertifikat",

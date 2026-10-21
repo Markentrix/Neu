@@ -254,10 +254,10 @@ test("Mit Google-Analytics-ID: Google lädt erst nach Akzeptieren, Ablehnen blei
 
 test("Zertifikate: Vergrößern öffnet die Lightbox, Esc schließt sie", async ({ page }) => {
   await page.goto("/zertifikate.html");
-  await expect(page.locator(".cert")).toHaveCount(2);
+  await expect(page.locator(".cert")).toHaveCount(3);
   await page.locator("a[data-lightbox]").first().click();
   await expect(page.locator("dialog.lightbox")).toHaveAttribute("open", "");
-  await expect(page.locator("dialog.lightbox img")).toHaveAttribute("src", /zertifikat-koch-chemie/);
+  await expect(page.locator("dialog.lightbox img")).toHaveAttribute("src", /zertifikat-/);
   await page.keyboard.press("Escape");
   await expect(page.locator("dialog.lightbox")).not.toHaveAttribute("open", "");
 });

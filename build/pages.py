@@ -156,6 +156,15 @@ def ba_tile(site, item, n, prefix=""):
         </div>''', has
 
 
+def service_ba(site, sv, prefix=""):
+    """Vorher-Nachher-Regler auf einer Leistungsseite (Eintrag aus der Galerie per Titel)."""
+    it = next((g for g in site.gallery if g.get("title") == sv.get("beforeAfter")), None)
+    if not it:
+        return ""
+    tile, has = ba_tile(site, it, 9, prefix)
+    return f'<div class="ba-single" aria-label="Vorher-Nachher-Vergleich">{tile}<p class="hint">Ziehen Sie den Regler, um vorher und nachher zu vergleichen.</p></div>' if has else ""
+
+
 # --------------------------------------------------------------------------- Startseite
 def plan_card(site, p, prefix=""):
     def li(f):
@@ -489,7 +498,8 @@ def build_home(site, write):
     tiles, real = [], 0
     for n, it in enumerate(site.gallery):
         h, has = ba_tile(site, it, n + 1)
-        tiles.append(h); real += has
+        tiles.append((h, has)); real += has
+    tiles = [t for t, has in tiles if has] if real else [t for t, _ in tiles]  # sobald echte Fotos da sind, keine Platzhalter mehr
     gallery_note = ("Ziehen Sie den Regler, um den Unterschied zu sehen. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok."
                     if real else "Die Darstellungen sind Platzhalter, bis die ersten Vorher-/Nachher-Fotos online sind. Echte Ergebnisse finden Sie jederzeit auf Instagram und TikTok.")
 
@@ -587,7 +597,7 @@ def build_home(site, write):
         <h2 id="vn-h" class="display">Vorher. Nachher. <em>Selbst schieben.</em></h2>
         <p>Ziehen Sie den Regler, um den Unterschied zu sehen.</p>
       </div>
-      <div class="ba-grid stagger">{"".join(tiles)}
+      <div class="ba-grid stagger{" ba-grid--few" if len(tiles) < 3 else ""}">{"".join(tiles)}
       </div>
       <p class="gallery-note">{ESC(gallery_note)} <a class="text-link" href="{s["social"]["instagram"]}" target="_blank" rel="noopener">Instagram</a> · <a class="text-link" href="{s["social"]["tiktok"]}" target="_blank" rel="noopener">TikTok</a></p>
     </div>
@@ -984,6 +994,7 @@ def build_service(site, sv, write):
     <div class="container two-up">
       <div class="prose">
         {intro}
+        {service_ba(site, sv, prefix)}
         {figure(site, sv.get("image"), prefix)}
         <h2 id="enthalten">Das ist enthalten</h2>
         <ul class="includes">{includes}</ul>
