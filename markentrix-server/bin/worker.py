@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Führt Aufträge aus dem Portal aus (Website/Demo in den Papierkorb, Wiederherstellen).
 Läuft jede Minute als root per cron. Prüft jeden Auftrag streng, das Portal bleibt ohne Root-Rechte."""
-import json, os, re, shutil, subprocess, sys, time
+import json, os, re, shlex, shutil, subprocess, time
 from pathlib import Path
 
 BASE = Path(os.environ.get("MK_BASE", "/opt/markentrix"))
 SITES = Path(os.environ.get("MK_SITES", "/srv/sites"))
 QUEUE = BASE / "queue"
 BACKUPS = Path(os.environ.get("MK_BACKUPS", str(BASE / "backups")))
+PSQL = shlex.split(os.environ.get("MK_PSQL", "docker exec -i mk-db psql -U markentrix"))
+UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+# Diese Tabellen kommen nie in einen Kundenauszug (Zugangsdaten, Protokolle, Massendaten)
+AUSZUG_NICHT = {"benutzer", "audit_log", "mail_protokoll", "website_stat", "website_wacht", "website_ereignisse", "login_versuche", "sitzungen", "push_abos", "loeschprotokoll"}
 TAG = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{4}$")
 TRASH = SITES / ".papierkorb"
 KEEP_DAYS = 14
@@ -217,6 +221,12 @@ def sicherung_tage():
     return sorted([d.name for d in BACKUPS.iterdir() if TAG.match(d.name) and d.is_dir() and not d.is_symlink() and (d / "sites.tar.gz").is_file()], reverse=True)[:30]
 
 
+def db_tage():
+    if not BACKUPS.is_dir():
+        return []
+    return sorted([d.name for d in BACKUPS.iterdir() if TAG.match(d.name) and d.is_dir() and not d.is_symlink() and (d / "markentrix-db.sql.gz").is_file()], reverse=True)[:30]
+
+
 def aus_sicherung(a):
     """Holt eine Website aus der Tagessicherung. Die jetzige Version bleibt wie bei jeder Veröffentlichung als Vorversion erhalten."""
     art, name, tag, uid = a.get("art"), str(a.get("name", "")), str(a.get("tag", "")), str(a.get("upload", ""))
@@ -249,6 +259,60 @@ def aus_sicherung(a):
     log(f"aus Sicherung {tag}: {art} {name}")
 
 
+def _psql(db, sql=None, stdin=None):
+    return subprocess.run([*PSQL, "-d", db, "-X", "-A", "-t", "-q", *(["-c", sql] if sql else [])], stdin=stdin, capture_output=True, text=True)
+
+
+def kundenauszug(a):
+    """Lädt die Datenbanksicherung in eine Wegwerf-Datenbank und liest alle Zeilen EINES Kunden heraus (JSON für das Portal).
+    Die laufende Datenbank wird dabei nicht angefasst."""
+    kid, tag, uid = str(a.get("kunden_id", "")), str(a.get("tag", "")), str(a.get("upload", ""))
+    if not UUID.match(kid) or not TAG.match(tag) or not UPLOAD.match(uid):
+        raise RuntimeError("ungültiger Auftrag")
+    dump = BACKUPS / tag / "markentrix-db.sql.gz"
+    db = f"mkrestore_{uid}"
+    try:
+        if dump.is_symlink() or not dump.is_file():
+            raise RuntimeError("Diese Datenbanksicherung gibt es nicht (mehr)")
+        r = _psql("postgres", f"CREATE DATABASE {db}")
+        if r.returncode != 0:
+            raise RuntimeError("Wegwerf-Datenbank konnte nicht angelegt werden: " + r.stderr[:150])
+        gz = subprocess.Popen(["gunzip", "-c", str(dump)], stdout=subprocess.PIPE)
+        ladung = _psql(db, stdin=gz.stdout)
+        gz.stdout.close()
+        if gz.wait() != 0:
+            raise RuntimeError("Die Sicherung ist beschädigt (gunzip)")
+        _ = ladung   # einzelne Fehler beim Einspielen (Rollen, Erweiterungen) sind in der Wegwerf-Datenbank unkritisch
+        r = _psql(db, "SELECT c.table_name FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema=c.table_schema AND t.table_name=c.table_name "
+                      "AND t.table_type='BASE TABLE' WHERE c.table_schema='public' AND c.column_name='kunden_id' ORDER BY 1")
+        tabellen = [x for x in r.stdout.split() if re.match(r"^[a-z0-9_]+$", x) and x not in AUSZUG_NICHT]
+        r = _psql(db, "SELECT DISTINCT table_name FROM information_schema.columns WHERE table_schema='public' AND data_type='bytea'")
+        mit_dateien = set(r.stdout.split())
+        r = _psql(db, f"SELECT count(*) FROM kunden WHERE id='{kid}'")
+        if r.stdout.strip() != "1":
+            raise RuntimeError("Dieser Kunde ist in der Sicherung vom " + tag[:10] + " noch nicht vorhanden")
+        aus, uebersprungen = {}, sorted(mit_dateien & set(tabellen))
+        for t in tabellen:
+            if t in mit_dateien:
+                continue
+            r = _psql(db, f"SELECT coalesce(json_agg(x), '[]'::json) FROM (SELECT * FROM {t} WHERE kunden_id='{kid}' LIMIT 5000) x")
+            zeilen = json.loads(r.stdout.strip() or "[]") if r.returncode == 0 else []
+            if zeilen:
+                aus[t] = zeilen
+        p = QUEUE / f"kundenauszug-{uid}.json"
+        p.write_text(json.dumps({"id": uid, "kunden_id": kid, "tag": tag, "tabellen": aus, "ohne_dateiinhalt": uebersprungen, "zeit": time.strftime("%Y-%m-%dT%H:%M:%S")}))
+        os.chown(p, 10001, 10001)
+        p.chmod(0o640)
+        ergebnis(uid, a, True, f"Auszug aus der Sicherung vom {tag[:10]} ist bereit.")
+        log(f"Kundenauszug {kid} aus {tag}")
+    except Exception as e:  # noqa: BLE001
+        ergebnis(uid if UPLOAD.match(uid) else "0" * 16, a, False, f"Auszug fehlgeschlagen: {e}")
+        raise
+    finally:
+        if UPLOAD.match(uid):
+            _psql("postgres", f"DROP DATABASE IF EXISTS {db} WITH (FORCE)")
+
+
 def zurueck(a):
     art, name, uid = a.get("art"), str(a.get("name", "")), str(a.get("upload", ""))
     if art not in NAME or not NAME[art].match(name) or not UPLOAD.match(uid):
@@ -272,11 +336,14 @@ def zurueck(a):
 def aufraeumen():
     try:   # Liste der vorhandenen Tagessicherungen für das Portal (Admin → Verwaltung → Aus Sicherung holen)
         p = QUEUE / "sicherungen.json"
-        p.write_text(json.dumps({"tage": sicherung_tage(), "stand": time.strftime("%Y-%m-%dT%H:%M:%S")}))
+        p.write_text(json.dumps({"tage": sicherung_tage(), "db_tage": db_tage(), "stand": time.strftime("%Y-%m-%dT%H:%M:%S")}))
         os.chown(p, 10001, 10001)
         p.chmod(0o640)
     except OSError as e:
         log(f"Sicherungsliste nicht schreibbar: {e}")
+    for f in QUEUE.glob("kundenauszug-*.json"):    # enthalten personenbezogene Daten: nach einem Tag weg
+        if f.stat().st_mtime < time.time() - 86400:
+            f.unlink(missing_ok=True)
     for d in (SITES / "live").glob(".sicherung-*"):
         if d.is_dir() and not d.is_symlink() and d.stat().st_mtime < time.time() - 86400:
             shutil.rmtree(d, ignore_errors=True)
@@ -308,6 +375,8 @@ def main():
                 veroeffentlichen(a)
             elif a.get("aktion") == "sicherung":
                 aus_sicherung(a)
+            elif a.get("aktion") == "kundenauszug":
+                kundenauszug(a)
             elif a.get("aktion") == "zurueck":
                 zurueck(a)
             elif a.get("aktion") == "wiederherstellen":

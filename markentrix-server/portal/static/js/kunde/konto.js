@@ -13,6 +13,31 @@ function anschriftKarte(k) {
   return h('div', { class: 'card' }, h('h2', {}, 'Rechnungsanschrift'), h('p', { class: 'small muted' }, 'Firmenname oder Rechtsform ändern wir für dich: Schreib uns dazu unter Nachrichten.'), m, f);
 }
 
+function datenKarte() {
+  const m = h('div'), box = h('div');
+  const grund = h('textarea', { rows: 3, maxlength: 1500, placeholder: 'Was können wir besser machen? (freiwillig)' });
+  const datumF = h('input', { type: 'date' });
+  const haken = h('input', { type: 'checkbox', style: 'width:auto' });
+  const zeigeStand = async () => {
+    let o = null; try { o = (await api('/api/kunde/kuendigung')).offen; } catch { /* nur Anzeige */ }
+    if (o) {
+      box.replaceChildren(h('div', { class: 'msg info' }, 'Dein Kündigungswunsch ist am ' + zeit(o.erstellt_am) + ' eingegangen' + (o.wunschdatum ? ' (gewünschtes Ende: ' + datum(o.wunschdatum) + ')' : '') + '. Wir bestätigen dir den Zeitpunkt schriftlich.'),
+        h('p', {}, h('button', { class: 'btn sec', onclick: async () => { if (!confirm('Kündigungswunsch zurücknehmen?')) return; try { await api('/api/kunde/kuendigung', { method: 'DELETE' }); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Wunsch zurücknehmen')));
+      return;
+    }
+    box.replaceChildren(h('details', {}, h('summary', {}, 'Vertrag kündigen'),
+      h('p', { class: 'small muted' }, 'Mit dem Absenden meldest du uns deinen Kündigungswunsch in Textform. Die Frist richtet sich nach deinem Vertrag; wir bestätigen dir das Ende schriftlich. Bis dahin läuft alles weiter.'),
+      h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Gewünschtes Ende (optional)'), datumF), h('div', {}, h('label', {}, 'Grund (optional)'), grund)),
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:8px 0' }, haken, 'Ja, ich möchte kündigen.'),
+      h('p', {}, h('button', { class: 'btn bad', onclick: async () => {
+        try { await api('/api/kunde/kuendigung', { method: 'POST', body: { grund: grund.value, wunschdatum: datumF.value || null, bestaetigt: haken.checked } }); melde(m, 'Dein Kündigungswunsch ist bei uns eingegangen.', 'ok'); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Kündigungswunsch senden'))));
+  };
+  zeigeStand();
+  return h('div', { class: 'card' }, h('h2', {}, 'Meine Daten'),
+    h('p', { class: 'small muted' }, 'Du kannst jederzeit alles mitnehmen: Anfragen, Termine, Rechnungen und Berichte als PDF, Dokumente und die Dateien deiner Website – als eine ZIP-Datei. Das geht auch, wenn du nicht kündigst.'),
+    h('p', {}, h('a', { class: 'btn', href: '/api/kunde/datenexport.zip', download: '' }, 'Meine Daten herunterladen (ZIP)')), m, box);
+}
+
 V.willkommen = () => anleitungSeite('kunde', hat);
 V.einstellungen = async () => {
   const p = await api('/api/kunde/profil');
@@ -48,7 +73,7 @@ V.einstellungen = async () => {
         h('div', {}, h('label', {}, 'Von'), h('input', { name: 'von', type: 'date', value: vt.von ? String(vt.von).slice(0, 10) : '' })), h('div', {}, h('label', {}, 'Bis'), h('input', { name: 'bis', type: 'date', value: vt.bis ? String(vt.bis).slice(0, 10) : '' })),
         h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
-    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(),
+    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(), inhaber() ? datenKarte() : '',
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
 };
 

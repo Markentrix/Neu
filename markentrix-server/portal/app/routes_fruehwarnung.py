@@ -15,6 +15,10 @@ SELECT k.id, k.kundennummer, k.firma, k.referenzkunde, k.erstellt_am,
   (SELECT coalesce(max(b.mahnstufe), 0) FROM belege b WHERE b.kunden_id = k.id AND b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date) AS mahnstufe,
   (SELECT z.punkte FROM zufriedenheit z WHERE z.kunden_id = k.id ORDER BY z.erstellt_am DESC LIMIT 1) AS letzte_punkte,
   (SELECT count(*) FROM tickets t WHERE t.kunden_id = k.id AND t.status IN ('offen','in_arbeit') AND t.letzte_nachricht_von = 'kunde' AND t.geaendert_am < now() - interval '3 days') AS ticket_wartet
+  ,(SELECT count(*) FROM website_wacht w WHERE w.kunden_id = k.id AND NOT w.ok AND w.seit < now() - interval '1 hour') AS web_gestoert,
+  (SELECT count(*) FROM mail_protokoll m WHERE m.kunden_id = k.id AND NOT m.ok AND m.zeit > now() - interval '7 days') AS mail_fehler,
+  (SELECT count(*) FROM kundenfreigaben f WHERE f.kunden_id = k.id AND f.status = 'wartet' AND f.angefragt_am < now() - interval '7 days') AS freigabe_alt,
+  (SELECT count(*) FROM kuendigungswuensche q WHERE q.kunden_id = k.id AND q.status = 'offen') AS kuendigung
 FROM kunden k"""
 SQL = SQL_BASIS + " WHERE k.status = 'aktiv' AND k.erstellt_am < now() - interval '14 days'"
 
@@ -50,6 +54,18 @@ def bewerten(r: dict, heute=None) -> tuple[int, list]:
     if r["ticket_wartet"]:
         punkte += 10
         gruende.append("Eine Nachricht des Kunden wartet seit über 3 Tagen auf Antwort.")
+    if r.get("kuendigung"):
+        punkte += 60
+        gruende.append("Kündigungswunsch im Portal eingegangen.")
+    if r.get("web_gestoert"):
+        punkte += 15
+        gruende.append("Die Website ist seit über einer Stunde nicht erreichbar.")
+    if r.get("mail_fehler", 0) >= 3:
+        punkte += 10
+        gruende.append(f"{r['mail_fehler']} Mails an Besucher oder Kunden konnten diese Woche nicht zugestellt werden.")
+    if r.get("freigabe_alt"):
+        punkte += 10
+        gruende.append("Eine Freigabe wartet seit über 7 Tagen auf die Antwort des Kunden.")
     return min(punkte, 100), gruende
 
 

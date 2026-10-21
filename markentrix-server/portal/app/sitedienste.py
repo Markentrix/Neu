@@ -18,7 +18,7 @@ from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 from zoneinfo import ZoneInfo
 
-from . import config, einstellungen, mailer
+from . import config, einstellungen, mailer, zustellung
 from .db import tx
 
 TZ = ZoneInfo("Europe/Berlin")
@@ -212,11 +212,13 @@ def kundenmail(kid, an: str, betreff: str, text: str, reply_to: str | None = Non
             s = smtp_verbinden(c)
             with s:
                 s.send_message(_nachricht(z["smtp_absender"], name, an, betreff, text, reply_to, anhang))
+            zustellung.protokoll(kid, art, an, True)
             return True, "eigen"
         except Exception as e:  # noqa: BLE001
             grund = str(e) if isinstance(e, ValueError) else smtp_fehlertext(e, vorschlag(z["smtp_absender"]).get("schluessel", ""))
+            zustellung.protokoll(kid, art, an, False, f"{type(e).__name__}: {e}")
             ereignis(kid, art, False, "Eigenes Postfach fehlgeschlagen, Versand über Markentrix. " + grund)
-    ok, fehler = mailer.senden(an, betreff, text, anhang, reply_to=reply_to, von_name=name)
+    ok, fehler = mailer.senden(an, betreff, text, anhang, reply_to=reply_to, von_name=name, kunden_id=kid, art=art)
     return (True, "markentrix") if ok else (False, fehler)
 
 

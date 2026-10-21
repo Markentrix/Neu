@@ -5,7 +5,7 @@ import threading
 import time
 from datetime import date, datetime, timezone
 
-from . import berichte, betrieb, webbetrieb, einstellungen, mailer, pdf, push
+from . import berichte, betrieb, webbetrieb, zustellung, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -526,6 +526,30 @@ def website_erinnerungen(cfg):
     webbetrieb.erinnerungen(cfg)
 
 
+def zustellung_pruefen(cfg):
+    """Einmal täglich: SPF, DKIM und DMARC der Absender-Domains prüfen und melden, wenn die Absenderdomain von Markentrix Probleme hat."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 5 or not _marker("zustellung-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    with tx("system") as cur:
+        smtp = einstellungen.lesen(cur, "smtp") or {}
+        cur.execute("SELECT DISTINCT smtp_absender FROM website_dienste WHERE smtp_absender IS NOT NULL AND smtp_enc IS NOT NULL")
+        domains = {(r["smtp_absender"].rsplit("@", 1)[-1]).lower() for r in cur.fetchall() if "@" in r["smtp_absender"]}
+        cur.execute("DELETE FROM mail_protokoll WHERE zeit < now() - interval '90 days'")
+    sys_domain = (smtp.get("absender") or "").rsplit("@", 1)[-1].lower()
+    if sys_domain:
+        domains.add(sys_domain)
+    ergebnisse = {d: zustellung.pruefen_domain(d) for d in sorted(domains)[:200] if d}
+    with tx("system") as cur:
+        for r in ergebnisse.values():
+            zustellung.speichern(cur, r)
+        ids = push.admins(cur)
+    r = ergebnisse.get(sys_domain)
+    if r and zustellung.schlecht(r) and ids:
+        probleme = ", ".join(f"{n.upper()}: {r[n]}" for n in ("spf", "dkim") if r[n] in ("fehlt", "warn"))
+        push.senden(ids, "Mail-Zustellbarkeit", f"{sys_domain}: {probleme}. Mails können im Spam landen.", "/admin#einstellungen", "zustellung")
+
+
 def website_wacht(cfg):
     webbetrieb.wacht(cfg)
 
@@ -534,7 +558,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, zustellung_pruefen):
         try:
             job(cfg)
         except Exception:

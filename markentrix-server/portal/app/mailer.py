@@ -4,7 +4,7 @@ import ssl
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 
-from . import betrieb, config, einstellungen
+from . import betrieb, config, einstellungen, zustellung
 from .db import tx
 
 
@@ -15,10 +15,11 @@ def konfiguriert() -> bool:
 
 
 def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
-           von_name: str | None = None) -> tuple[bool, str]:
-    """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel festgehalten."""
+           von_name: str | None = None, kunden_id=None, art: str = "system") -> tuple[bool, str]:
+    """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel und das Zustell-Protokoll festgehalten."""
     ok, grund = _senden(an, betreff, text, anhang, reply_to, von_name)
     if grund != "E-Mail-Versand ist noch nicht eingerichtet.":
+        zustellung.protokoll(kunden_id, art, an, ok, grund)
         betrieb.notieren("mail", {"ok_am": betrieb.jetzt()} if ok else {"fehler_am": betrieb.jetzt(), "fehler": grund[:200]})
     return ok, grund
 

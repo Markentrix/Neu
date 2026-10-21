@@ -273,6 +273,34 @@ export async function domainKarte(kid) {
     h('p', { style: 'margin-top:12px' }, knopf('Domain eintragen', () => dialogDomain(null), 'btn')));
 }
 
+/** Gelöschte Datensätze eines einzelnen Kunden aus der nächtlichen Datenbanksicherung zurückholen (nur fehlende Zeilen, nichts wird überschrieben). */
+export async function auszugKarte(kid) {
+  const sich = await api('/api/admin/datensicherungen').catch(() => ({ tage: [] })), m = h('div'), ergebnis = h('div');
+  const tag = h('select', {}, sich.tage.map(t => h('option', { value: t }, t.slice(8, 10) + '.' + t.slice(5, 7) + '.' + t.slice(0, 4) + ' ' + t.slice(11, 13) + ':' + t.slice(13))));
+  let uid = null;
+  const anzeigen = async () => {
+    let a; try { a = await api('/api/admin/kunden/auszug/' + uid); } catch (x) { fehler(m, x); return; }
+    if (a.status === 'laeuft') { ergebnis.replaceChildren(h('p', { class: 'small muted' }, 'Der Server liest die Sicherung … (dauert einige Minuten)')); setTimeout(anzeigen, 6000); return; }
+    if (a.status === 'fehler') { ergebnis.replaceChildren(h('div', { class: 'msg err' }, a.text)); return; }
+    const haken = {};
+    const zeilen = a.tabellen.map(z => { const c = h('input', { type: 'checkbox', style: 'width:auto', checked: z.fehlt_jetzt > 0, disabled: z.fehlt_jetzt === 0 }); haken[z.tabelle] = c; return { ...z, c }; });
+    ergebnis.replaceChildren(
+      h('p', { class: 'small muted' }, 'Stand der Sicherung vom ' + a.tag.slice(0, 10) + '. „Fehlt jetzt“ sind Zeilen, die damals da waren und heute nicht mehr. Zurückgespielt werden nur diese; vorhandene Daten bleiben unverändert.'),
+      tabelle([['Zurückholen', z => z.c], ['Bereich', z => z.tabelle], ['In Sicherung', z => z.in_sicherung], ['Fehlt jetzt', z => z.fehlt_jetzt]], zeilen, 'Zu diesem Kunden enthält die Sicherung keine Daten.'),
+      a.ohne_dateiinhalt.length ? h('p', { class: 'small muted' }, 'Nicht enthalten (Dateien/Dokumente): ' + a.ohne_dateiinhalt.join(', ') + '.') : '',
+      zeilen.length ? h('p', {}, knopf('Ausgewählte Zeilen zurückholen', async () => {
+        const wahl = zeilen.filter(z => z.c.checked).map(z => z.tabelle); if (!wahl.length) return;
+        if (!confirm('Fehlende Zeilen aus ' + wahl.length + ' Bereich(en) zurückspielen?')) return;
+        try { const r = await api('/api/admin/kunden/auszug/' + uid + '/zurueckspielen', { method: 'POST', body: { tabellen: wahl } });
+          melde(m, Object.entries(r.ergebnis).map(([t, v]) => t + ': ' + v.zurueck + ' zurück' + (v.uebrig ? ', ' + v.uebrig + ' nicht möglich' : '')).join(' · '), 'ok'); await api('/api/admin/kunden/auszug/' + uid, { method: 'DELETE' }); ergebnis.replaceChildren(); } catch (x) { fehler(m, x); } }, 'btn')) : '');
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Daten aus der Sicherung zurückholen'),
+    h('p', { class: 'small muted' }, 'Hat dieser Kunde versehentlich etwas gelöscht? Wähle eine Sicherung, sieh dir an, was fehlt, und hole nur das zurück. Die Datenbank der anderen Kunden wird nicht angefasst.'),
+    m, sich.tage.length ? [h('div', { class: 'row' }, tag, knopf('Sicherung prüfen', async () => {
+      try { const r = await api('/api/admin/kunden/' + kid + '/auszug', { method: 'POST', body: { tag: tag.value } }); uid = r.id; ergebnis.replaceChildren(h('p', { class: 'small muted' }, r.hinweis)); setTimeout(anzeigen, 5000); } catch (x) { fehler(m, x); } }, 'btn')), ergebnis]
+      : h('p', { class: 'small muted' }, 'Noch keine Datenbanksicherung gefunden (die erste entsteht nachts).'));
+}
+
 export function offboardingKarte(kid, k, domains = []) {
   const m = h('div'); const beendet = ['gekuendigt', 'beendet'].includes(k.status);
   if (k.geloescht_am) return h('div', { class: 'card' }, h('h2', {}, 'Vertragsende'), h('p', {}, 'Die Inhalte dieses Kunden wurden am ' + datum(k.geloescht_am) + ' gelöscht. Stammdaten und Belege bleiben wegen Aufbewahrungspflichten erhalten.'));
@@ -446,6 +474,7 @@ export async function kundeDetail(kid) {
     await qrKarte('kunde', (k.ansprechpartner || '').split(' ')[0]),
     await kostenKarte(kid),
     brandingKarte(kid, k),
+    await auszugKarte(kid),
     offboardingKarte(kid, k, await api('/api/admin/kunden/' + kid + '/domains')),
     await historieKarte(kid),
     vorlagenKarte(kid, k),

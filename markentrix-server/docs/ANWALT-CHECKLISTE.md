@@ -35,3 +35,9 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Nichterschienen-Vermerk (Name/E-Mail des Besuchers) ist ein personenbezogenes Datum des Kunden: Speicherung bis 180 Tage nach dem Termin, keine Weitergabe; Zweck und Löschfrist im AVV nennen.
 - Wachdienst ruft nur die öffentlichen Seiten der Kunden ab und speichert keine Besucherdaten (nur Status, Antwortzeit, Zertifikats-Restlaufzeit).
 - Vorschau-Freigabe: Name, Zeit und IP der freigebenden Person werden als Nachweis gespeichert (Berechtigtes Interesse/Vertragsdurchführung), Aufbewahrung wie die übrigen Kundenfreigaben.
+
+## Mail-Protokoll, Datenexport und Wiederherstellung
+- Mail-Protokoll speichert nur Zeitpunkt, Art, Empfänger-Domain und Fehlertext (90 Tage); im Verzeichnis der Verarbeitungstätigkeiten und AVV (Anlage 2) aufnehmen.
+- Selbstbedienungs-Export (Art. 20 DSGVO): Format ZIP/JSON/PDF, Hinweis in der Datenschutzerklärung; Export wird im Audit-Log festgehalten.
+- Kündigungswunsch im Portal: Textform; prüfen lassen, ob die AGB/der Vertrag die Kündigung per Portal zulassen und wer die Bestätigung versendet.
+- Wiederherstellung einzelner Kundendaten aus der Sicherung: Zugriff nur für Admins, Auszug wird nach spätestens 24 Stunden gelöscht, Vorgang steht im Audit-Log.

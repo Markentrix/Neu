@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    mailKarte(d, neu), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
 
 // ---------------------------------------------------------------- E-Mail
@@ -321,4 +321,25 @@ async function statistikKarte(d) {
     h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin:8px 0' }, kachel(s.besucher, 'Besucher'), kachel(s.aufrufe, 'Seitenaufrufe'), kachel(s.anfragen, 'Anfragen'), kachel(s.whatsapp, 'WhatsApp-Klicks'), kachel(s.anrufe, 'Anruf-Klicks'), s.erschienen + s.nicht_erschienen ? kachel(s.nicht_erschienen + ' von ' + (s.erschienen + s.nicht_erschienen), 'Nicht erschienen') : '', s.erreichbarkeit != null ? kachel(String(s.erreichbarkeit).replace('.', ',') + ' %', 'Erreichbarkeit') : ''),
     s.seiten.length ? h('p', { class: 'small' }, h('b', {}, 'Beliebteste Seiten: '), s.seiten.slice(0, 5).map(x => x.pfad + ' (' + x.aufrufe + ')').join(' · ')) : '',
     s.quellen.length ? h('p', { class: 'small' }, h('b', {}, 'Woher: '), s.quellen.slice(0, 5).map(x => x.quelle + ' (' + x.besucher + ')').join(' · ')) : '');
+}
+
+
+// ---------------------------------------------------------------- Zustellung der Mails
+const DNS_TXT = { ok: ['ok', 'in Ordnung'], warn: ['warn', 'prüfen'], fehlt: ['bad', 'fehlt'], unbekannt: ['', 'unbekannt'] };
+export function dnsZeile(dns) {
+  return h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, ['spf', 'dkim', 'dmarc'].map(n => h('span', { class: 'pill ' + DNS_TXT[dns[n]][0], title: (dns.details || {})[n] || '' }, n.toUpperCase() + ': ' + DNS_TXT[dns[n]][1])));
+}
+async function zustellKarte() {
+  const z = await api('/api/kunde/website-dienste/zustellung').catch(() => null);
+  if (!z || (!z.eigenes_postfach && !z.kennzahlen.gesamt)) return '';
+  const m = h('div');
+  const k = z.kennzahlen;
+  const neuPruefen = async (e) => { e.target.disabled = true; try { await api('/api/kunde/website-dienste/zustellung/pruefen', { method: 'POST', body: {} }); location.reload(); } catch (x) { melde(m, x.message); e.target.disabled = false; } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Kommen die Mails an?'),
+    h('p', { class: 'small muted' }, 'Wir zeigen, was der Mailserver beim Versand meldet. Landet eine Mail beim Empfänger im Spam, sieht das niemand – deshalb prüfen wir bei einem eigenen Postfach die Absender-Einträge (SPF, DKIM, DMARC) deiner Domain.'),
+    m, h('p', {}, k.gesamt ? [h('b', {}, k.gesamt - k.fehler + ' von ' + k.gesamt), ' Mails der letzten 30 Tage wurden angenommen.', k.fehler ? ' ' + k.fehler + ' nicht' + (k.adresse ? ' (davon ' + k.adresse + ' wegen ungültiger Empfänger-Adresse)' : '') + '.' : ''] : 'In den letzten 30 Tagen wurden keine Mails verschickt.'),
+    z.eigenes_postfach && z.dns ? [h('p', { class: 'small' }, 'Absender: ' + z.absender + ' · geprüft ' + zeit(z.dns.geprueft_am)), dnsZeile(z.dns),
+      ...['spf', 'dkim', 'dmarc'].filter(n => z.dns[n] === 'fehlt' || z.dns[n] === 'warn').map(n => h('p', { class: 'small' }, (z.dns.details || {})[n])),
+      h('p', {}, h('button', { class: 'btn sec', onclick: neuPruefen }, 'Jetzt neu prüfen'))] : '',
+    k.letzte_fehler.length ? h('details', {}, h('summary', {}, 'Letzte Fehler'), k.letzte_fehler.map(f => h('p', { class: 'small' }, zeit(f.zeit) + ' · ' + (f.an_domain || '') + ' · ' + (f.fehler || '')))) : '');
 }

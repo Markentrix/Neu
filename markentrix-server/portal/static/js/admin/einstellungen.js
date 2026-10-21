@@ -24,7 +24,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    await zustellungKarte(), zweiFaktorKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -282,4 +282,22 @@ export async function leitfadenKarte() {
     h('p', { class: 'small muted' }, (d.angepasst ? 'Angepasste Fassung ist aktiv. ' : 'Standardfassung ist aktiv. ') + 'Aufbau: „[Abschnitt] Titel“ mit Zeilen „- Punkt“, „[Einwand] Text“ mit Antwort darunter, „[Branche] kuerzel | Name“ mit „- Tipp“ und „[Mail] Betreff“ mit dem Mailtext (Platzhalter {firma}, {name}, {vertriebler}). Bitte keine Preise oder Zusagen aufnehmen und rechtliche Formulierungen prüfen lassen.'),
     m, text, h('p', { class: 'row' }, knopf('Speichern', () => speichern({ text: text.value }, 'Leitfaden gespeichert.'), 'btn'),
       knopf('Auf Standard zurücksetzen', () => { if (confirm('Den angepassten Leitfaden verwerfen und die Standardfassung verwenden?')) speichern({ standard: true }, 'Standard wiederhergestellt.'); }, 'sec')));
+}
+
+
+export async function zustellungKarte() {
+  const d = await api('/api/admin/zustellung').catch(() => null), m = h('div');
+  if (!d) return '';
+  const TXT = { ok: ['ok', 'in Ordnung'], warn: ['warn', 'prüfen'], fehlt: ['bad', 'fehlt'], unbekannt: ['', 'unbekannt'] };
+  const chips = (dns) => h('span', {}, ['spf', 'dkim', 'dmarc'].map(n => h('span', { class: 'pill ' + TXT[dns[n]][0], style: 'margin-right:6px', title: (dns.details || {})[n] || '' }, n.toUpperCase() + ': ' + TXT[dns[n]][1])));
+  const k = d.kennzahlen;
+  const pruefen = async (e) => { e.target.disabled = true; try { await api('/api/admin/zustellung/pruefen', { method: 'POST', body: {} }); location.reload(); } catch (x) { fehler(m, x); e.target.disabled = false; } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Mail-Zustellbarkeit'),
+    h('p', { class: 'small muted' }, 'Ohne SPF und DKIM landen Mails von deiner Domain häufiger im Spam. Täglich um etwa 5 Uhr wird geprüft; bei Problemen mit deiner Absender-Domain bekommst du eine Push-Nachricht. Hinweis: Rückläufer, die der Zielserver erst später meldet, sieht das Portal nicht, nur was der Versandserver sofort zurückgibt.'),
+    m, d.system ? h('p', {}, h('b', {}, d.system.domain + ': '), chips(d.system), h('span', { class: 'small muted' }, ' geprüft ' + zeit(d.system.geprueft_am))) : h('p', { class: 'small muted' }, 'Noch keine Absender-Adresse eingerichtet.'),
+    d.system ? ['spf', 'dkim', 'dmarc'].filter(n => d.system[n] === 'fehlt' || d.system[n] === 'warn').map(n => h('p', { class: 'small' }, (d.system.details || {})[n])) : '',
+    h('p', {}, 'Letzte 7 Tage: ', h('b', {}, String(k.gesamt)), ' Mails, ', h('b', {}, String(k.fehler)), ' Fehler' + (k.adresse ? ' (' + k.adresse + ' ungültige Empfänger)' : '') + (k.technisch ? ', ' + k.technisch + ' technische' : '') + '.'),
+    k.letzte_fehler.length ? h('details', {}, h('summary', {}, 'Letzte Fehler'), k.letzte_fehler.map(f => h('p', { class: 'small' }, zeit(f.zeit) + ' · ' + f.art + ' · ' + (f.an_domain || '') + ' · ' + (f.fehler || '')))) : '',
+    d.kunden.length ? h('div', {}, h('h3', {}, 'Eigene Postfächer der Kunden'), tabelle([['Kunde', z => z.firma], ['Absender', z => z.absender], ['Einträge', z => z.dns ? chips(z.dns) : ''], ['30 Tage', z => z.fehler30 + ' Fehler von ' + z.gesamt30]], d.kunden)) : '',
+    h('p', {}, h('button', { class: 'btn sec', onclick: pruefen }, 'Jetzt neu prüfen')));
 }

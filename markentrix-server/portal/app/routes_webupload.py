@@ -287,7 +287,10 @@ def verlauf(user: dict = Depends(require_admin)):
                 offen.append({"aktion": a["aktion"], "art": a.get("art"), "name": a.get("name")})
         for f in sorted(q.glob("ergebnis-*.json"), key=lambda p: p.stat().st_mtime, reverse=True)[:12]:
             try:
-                fertig.append(json.loads(f.read_text()))
+                e = json.loads(f.read_text())
+                if e.get("aktion") == "kundenauszug":
+                    continue
+                fertig.append(e)
             except Exception:  # noqa: BLE001
                 continue
     return {"offen": offen, "ergebnisse": fertig}
