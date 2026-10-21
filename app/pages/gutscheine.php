@@ -62,7 +62,7 @@ page_start([
             </div>
           </form>
           <div class="voucher-done" data-voucher-done hidden tabindex="-1">
-            <div class="check-circle" aria-hidden="true">✓</div>
+            <div class="check-circle" aria-hidden="true"><svg viewBox="0 0 52 52"><path class="check-path" pathLength="1" d="M15 27l7.5 7.5L38 19" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span><span class="spark s5"></span><span class="spark s6"></span></div>
             <h2>Vielen Dank für Ihren Kauf!</h2>
             <p>Ihr Gutschein über <strong data-done-amount></strong> ist ausgestellt.</p>
             <p class="voucher-code" data-done-code></p>

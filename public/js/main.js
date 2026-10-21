@@ -39,6 +39,38 @@ const onScroll = () => {
 addEventListener("scroll", onScroll, { passive: true });
 onScroll();
 
+// ---------- Einblenden beim Scrollen ----------
+// Nur Bereiche, die beim Laden noch unterhalb des Bildschirms liegen; ohne JS oder
+// mit „Bewegung reduzieren“ bleibt alles sofort sichtbar.
+const REVEAL = ".section-head, .svc-card, .price-card, .price-teaser, .faq details, .aside-card, .service-box, .steps-list li, "
+  + ".split > *, .prose > *, .cta-inner, .table-wrap, .voucher-card, .info-grid > *, .map-actions, .contact-grid > *, .soon, .contact-form";
+if (matchMedia("(prefers-reduced-motion: no-preference)").matches && "IntersectionObserver" in window) {
+  const io = new IntersectionObserver((entries) => {
+    for (const { target, isIntersecting } of entries) {
+      if (!isIntersecting) continue;
+      io.unobserve(target);
+      target.classList.add("is-in");
+      const done = (e) => {
+        if (e.target !== target || e.propertyName !== "transform") return;
+        target.removeEventListener("transitionend", done);
+        target.classList.remove("reveal", "is-in");
+        target.style.removeProperty("--d");
+      };
+      target.addEventListener("transitionend", done);
+    }
+  }, { rootMargin: "0px 0px -6% 0px", threshold: 0.08 });
+  const groups = new Map();
+  for (const el of $$(REVEAL)) {
+    if (el.closest("[data-booking]") || el.parentElement.closest(".reveal")) continue;
+    if (el.getBoundingClientRect().top < innerHeight) continue;
+    const n = groups.get(el.parentElement) ?? 0;
+    groups.set(el.parentElement, n + 1);
+    el.style.setProperty("--d", Math.min(n, 5));
+    el.classList.add("reveal");
+    io.observe(el);
+  }
+}
+
 // ---------- Daten ----------
 const dataEl = $("#booking-data");
 const DATA = dataEl ? JSON.parse(dataEl.textContent) : null;
@@ -83,9 +115,18 @@ function initBooking(root, DATA) {
   const key = () => `${state.selected.slice().sort().join(",")}|${state.date}`;
 
   // Schritte
+  const stepsBar = $(".steps", root);
   function showStep(step) {
+    const back = typeof step === "number" && typeof state.step === "number" && step < state.step;
     state.step = step;
     $$("[data-step]", root).forEach((el) => (el.hidden = el.dataset.step !== String(step)));
+    stepsBar.style.setProperty("--progress", step === "done" ? "100%" : `${step * 25}%`);
+    const entering = $(`[data-step="${step}"]`, root);
+    const cls = back ? "is-leaving-back" : "is-entering";
+    entering.classList.remove("is-entering", "is-leaving-back");
+    void entering.offsetWidth; // Animation neu starten
+    entering.classList.add(cls);
+    entering.addEventListener("animationend", () => entering.classList.remove(cls), { once: true });
     $$("[data-step-label]", root).forEach((li) => {
       const n = +li.dataset.stepLabel;
       li.classList.toggle("is-active", n === step);
@@ -238,6 +279,7 @@ function initBooking(root, DATA) {
       b.textContent = t;
       b.setAttribute("aria-pressed", String(t === state.time));
       b.setAttribute("aria-label", `${t} Uhr`);
+      b.style.setProperty("--i", slotsEl.children.length);
       slotsEl.append(b);
     });
   }

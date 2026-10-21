@@ -29,6 +29,7 @@ page_start([
           </ul>
         </div>
         <div class="hero-emblem" aria-hidden="true">
+          <span class="em-shine"></span>
           <svg viewBox="0 0 400 400" class="emblem">
             <defs>
               <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
@@ -36,13 +37,14 @@ page_start([
                 <stop offset=".7" stop-color="#dcb86c"/><stop offset="1" stop-color="#8f6524"/>
               </linearGradient>
             </defs>
-            <circle cx="200" cy="200" r="190" fill="rgba(255,255,255,.35)" stroke="url(#gold)" stroke-width="1.2"/>
-            <circle cx="200" cy="200" r="178" fill="none" stroke="url(#gold)" stroke-width=".5"/>
-            <path d="M48 238 C 120 110, 290 84, 366 166" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/>
-            <path d="M70 268 C 150 182, 296 166, 350 222" fill="none" stroke="url(#gold)" stroke-width="1" stroke-linecap="round"/>
-            <text x="200" y="246" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="180" font-weight="500" fill="url(#gold)">AJ</text>
-            <text x="206" y="318" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="30" letter-spacing="13" fill="#2c2620">ATELIER</text>
-            <text x="203" y="346" text-anchor="middle" font-family="Jost, sans-serif" font-size="11" letter-spacing="6" fill="#7a6a55">HAIR · BEAUTY</text>
+            <circle class="em-disc" cx="200" cy="200" r="190" fill="rgba(255,255,255,.35)"/>
+            <circle class="em-draw em-ring" cx="200" cy="200" r="190" fill="none" stroke="url(#gold)" stroke-width="1.2" pathLength="1" transform="rotate(-90 200 200)"/>
+            <circle class="em-draw em-ring2" cx="200" cy="200" r="178" fill="none" stroke="url(#gold)" stroke-width=".5" pathLength="1" transform="rotate(90 200 200)"/>
+            <path class="em-draw em-swoosh" pathLength="1" d="M48 238 C 120 110, 290 84, 366 166" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/>
+            <path class="em-draw em-swoosh2" pathLength="1" d="M70 268 C 150 182, 296 166, 350 222" fill="none" stroke="url(#gold)" stroke-width="1" stroke-linecap="round"/>
+            <text class="em-aj" x="200" y="246" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="180" font-weight="500" fill="url(#gold)">AJ</text>
+            <text class="em-atelier" x="206" y="318" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="30" letter-spacing="13" fill="#2c2620">ATELIER</text>
+            <text class="em-hair" x="203" y="346" text-anchor="middle" font-family="Jost, sans-serif" font-size="11" letter-spacing="6" fill="#7a6a55">HAIR · BEAUTY</text>
           </svg>
         </div>
       </div>
