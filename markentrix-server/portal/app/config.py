@@ -22,4 +22,6 @@ PUSH_HTTP_ERLAUBT = os.environ.get("PUSH_HTTP_ERLAUBT", "0") == "1"   # nur für
 SITE_LOKAL_ERLAUBT = os.environ.get("SITE_LOKAL_ERLAUBT", "0") == "1"   # nur für Tests: lokale Mail-/Kalender-Server und http erlauben
 PLACES_BASE_URL = os.environ.get("PLACES_BASE_URL", "https://places.googleapis.com").rstrip("/")
 
+WACHT_API_PRAEFIX = os.environ.get("WACHT_API_PRAEFIX", "")   # nur für Tests (Portal ohne Caddy davor)
+WACHT_BASIS = os.environ.get("WACHT_BASIS", "").rstrip("/")   # nur für Tests: Wachdienst fragt diese Adresse statt https://<domain>
 SITE_API_LIMIT = int(os.environ.get("SITE_API_LIMIT", "8"))   # Anfragen je IP-Adresse und 10 Minuten über die Website-API

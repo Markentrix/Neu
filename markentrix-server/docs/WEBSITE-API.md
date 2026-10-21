@@ -30,6 +30,10 @@ Der Vertrag bleibt stabil. Es kommen nur neue Felder dazu, bestehende ändern si
 - Gleichzeitige Buchungen derselben Zeit werden serverseitig serialisiert: genau eine gewinnt, die anderen bekommen `422 {errors:{uhrzeit}}`.
 - Unbekannte `leistung` oder `mitarbeiter` ergeben `422 {errors:{leistung|mitarbeiter}}`.
 
+## Betrieb
+- `GET /api/health` (über Caddy: `/siteapi/api/health`) antwortet `{"ok":true}` und wird vom Wachdienst alle 5 Minuten je Domain abgefragt. Wer die Weiterleitung `/api/*` in der Caddy-Datei entfernt, löst dadurch einen Alarm aus.
+- Besucher bekommen 24 h und 2 h vor einer Buchung eine Erinnerungs-Mail mit Absage-Link (je Kunde einstellbar). Ergebnis „erschienen / nicht erschienen“ trägt der Kunde im Portal ein.
+
 ## Grenzen (bewusst)
 - Pakete, Preise und Fahrzeugklassen kennt nur die Website. Das Portal prüft sie nicht, es speichert sie als Text in der Anfrage.
 - Uhrzeiten auf der Website müssen zu den „Festen Uhrzeiten“ im Portal passen. Mit Raster (ohne feste Uhrzeiten) baut die Website die Auswahl aus den `slots` der Antwort auf.

@@ -29,3 +29,9 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Datenschutzerklärung der Kunden-Websites: Anfrage- und Terminformular (Zweck, Speicherdauer, Empfänger Hoster/Markentrix als Auftragsverarbeiter), Eingangsbestätigung per E-Mail.
 - Besucherstatistik ohne Cookie und ohne IP-Speicherung (täglich wechselnder Hash, Aufbewahrung bis 400 Tage): Formulierung für die Datenschutzerklärung prüfen lassen.
 - Terminbuchung mit Anzahlung per PayPal.Me: Hinweise zu Widerruf/Stornierung auf der jeweiligen Website durch den Kunden bzw. dessen Anwalt prüfen lassen.
+
+## Terminerinnerungen und Überwachung der Websites
+- Erinnerungs-Mails an Website-Besucher sind Service-Mails zu einer gebuchten Leistung (kein Werbeinhalt, kein Tracking); Hinweis in der Datenschutzerklärung der Kunden-Websites, dass die E-Mail-Adresse für Bestätigung, Erinnerung und Absage-Link genutzt wird.
+- Nichterschienen-Vermerk (Name/E-Mail des Besuchers) ist ein personenbezogenes Datum des Kunden: Speicherung bis 180 Tage nach dem Termin, keine Weitergabe; Zweck und Löschfrist im AVV nennen.
+- Wachdienst ruft nur die öffentlichen Seiten der Kunden ab und speichert keine Besucherdaten (nur Status, Antwortzeit, Zertifikats-Restlaufzeit).
+- Vorschau-Freigabe: Name, Zeit und IP der freigebenden Person werden als Nachweis gespeichert (Berechtigtes Interesse/Vertragsdurchführung), Aufbewahrung wie die übrigen Kundenfreigaben.

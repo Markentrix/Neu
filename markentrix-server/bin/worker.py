@@ -7,6 +7,8 @@ from pathlib import Path
 BASE = Path(os.environ.get("MK_BASE", "/opt/markentrix"))
 SITES = Path(os.environ.get("MK_SITES", "/srv/sites"))
 QUEUE = BASE / "queue"
+BACKUPS = Path(os.environ.get("MK_BACKUPS", str(BASE / "backups")))
+TAG = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{4}$")
 TRASH = SITES / ".papierkorb"
 KEEP_DAYS = 14
 NAME = {"live": re.compile(r"^(?=.{4,253}$)([a-z0-9-]{1,63}\.)+[a-z]{2,}$"), "demo": re.compile(r"^[a-z0-9]([a-z0-9-]{0,40}[a-z0-9])?$")}
@@ -209,6 +211,44 @@ def veroeffentlichen(a):
         raise
 
 
+def sicherung_tage():
+    if not BACKUPS.is_dir():
+        return []
+    return sorted([d.name for d in BACKUPS.iterdir() if TAG.match(d.name) and d.is_dir() and not d.is_symlink() and (d / "sites.tar.gz").is_file()], reverse=True)[:30]
+
+
+def aus_sicherung(a):
+    """Holt eine Website aus der Tagessicherung. Die jetzige Version bleibt wie bei jeder Veröffentlichung als Vorversion erhalten."""
+    art, name, tag, uid = a.get("art"), str(a.get("name", "")), str(a.get("tag", "")), str(a.get("upload", ""))
+    if art not in NAME or not NAME[art].match(name) or not TAG.match(tag) or not UPLOAD.match(uid):
+        raise RuntimeError("ungültiger Auftrag")
+    archiv = BACKUPS / tag / "sites.tar.gz"
+    tmp = SITES / "live" / f".sicherung-{uid}"
+    stage = SITES / "live" / f".upload-{uid}"
+    try:
+        if archiv.is_symlink() or not archiv.is_file():
+            raise RuntimeError("Diese Sicherung gibt es nicht (mehr)")
+        shutil.rmtree(tmp, ignore_errors=True)
+        tmp.mkdir(mode=0o700, parents=True)
+        sub = "live" if art == "live" else "demos"
+        r = subprocess.run(["tar", "-xzf", str(archiv), "-C", str(tmp), "--no-same-owner", "--no-same-permissions", f"sites/{sub}/{name}"], capture_output=True, text=True)
+        quelle = tmp / "sites" / sub / name
+        if r.returncode != 0 or quelle.is_symlink() or not quelle.is_dir():
+            raise RuntimeError(f"{name} ist in der Sicherung vom {tag[:10]} nicht enthalten")
+        baum_pruefen(quelle)
+        if (ziel_ordner(art, name)).is_dir():
+            shutil.rmtree(quelle / "angebote", ignore_errors=True)   # aktuelle Wochenangebote bleiben erhalten (uebernehmen)
+        os.rename(quelle, stage)
+    except Exception as e:  # noqa: BLE001
+        shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(stage, ignore_errors=True)
+        ergebnis(uid if UPLOAD.match(uid) else "0" * 16, a, False, f"Wiederherstellung fehlgeschlagen: {e}")
+        raise
+    shutil.rmtree(tmp, ignore_errors=True)
+    veroeffentlichen({**a, "aktion": "veroeffentlichen"})
+    log(f"aus Sicherung {tag}: {art} {name}")
+
+
 def zurueck(a):
     art, name, uid = a.get("art"), str(a.get("name", "")), str(a.get("upload", ""))
     if art not in NAME or not NAME[art].match(name) or not UPLOAD.match(uid):
@@ -230,6 +270,16 @@ def zurueck(a):
 
 
 def aufraeumen():
+    try:   # Liste der vorhandenen Tagessicherungen für das Portal (Admin → Verwaltung → Aus Sicherung holen)
+        p = QUEUE / "sicherungen.json"
+        p.write_text(json.dumps({"tage": sicherung_tage(), "stand": time.strftime("%Y-%m-%dT%H:%M:%S")}))
+        os.chown(p, 10001, 10001)
+        p.chmod(0o640)
+    except OSError as e:
+        log(f"Sicherungsliste nicht schreibbar: {e}")
+    for d in (SITES / "live").glob(".sicherung-*"):
+        if d.is_dir() and not d.is_symlink() and d.stat().st_mtime < time.time() - 86400:
+            shutil.rmtree(d, ignore_errors=True)
     for d in (SITES / "live").glob(".upload-*"):
         if d.is_dir() and not d.is_symlink() and d.stat().st_mtime < time.time() - 86400:
             shutil.rmtree(d, ignore_errors=True)
@@ -256,6 +306,8 @@ def main():
                 loeschen(a["art"], a["name"])
             elif a.get("aktion") == "veroeffentlichen":
                 veroeffentlichen(a)
+            elif a.get("aktion") == "sicherung":
+                aus_sicherung(a)
             elif a.get("aktion") == "zurueck":
                 zurueck(a)
             elif a.get("aktion") == "wiederherstellen":

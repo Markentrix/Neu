@@ -437,3 +437,14 @@ Jede fertige Website ruft unter ihrer eigenen Domain `/api/anfrage`, `/api/slots
 6. Besucherzahlen (ohne Cookies) stehen unter „Besucher der letzten 30 Tage“.
 
 **Wichtig:** Die Uhrzeiten, die die Website anbietet, müssen zu den „Festen Uhrzeiten“ im Portal passen. Bestehende Websites bekommen die Weiterleitung automatisch (der Server-Dienst ergänzt unveränderte Standard-Einträge innerhalb einer Minute).
+
+## Betrieb der Kunden-Websites: Erinnerungen, Wachdienst, Vorschau-Freigabe, Sicherung (Stand Oktober 2026)
+**Terminerinnerungen an die Besucher.** Das Portal schickt jedem Besucher mit gültiger Buchung eine E-Mail 24 und 2 Stunden vorher (mit Ort, Leistung, Mitarbeiter und Absage-Link). Der Kunde ändert die Zeiten oder schaltet sie ab unter Website-Dienste → Terminbuchung (0 = aus). Wer erst kurz vor dem Erinnerungszeitpunkt gebucht hat, bekommt keine zweite Mail direkt nach der Bestätigung.
+
+**Nichterschienen-Zähler.** Unter Buchungen steht „Vergangene Termine – hat es geklappt?“ mit zwei Knöpfen. Das Ergebnis erscheint in der Statistik und im Monatsbericht; bei Besuchern, die schon einmal nicht kamen, steht „1× nicht erschienen“. Der Termin im Portal bekommt den Status „erledigt“ bzw. „nicht erschienen“.
+
+**Wachdienst.** Alle fünf Minuten prüft der Server jede Live-Website: Startseite, Website-API (`/api/health`, beweist die Weiterleitung von Caddy zum Portal) und Zertifikat. Nach zwei Fehlschlägen in Folge kommt eine Mail (und Push) an die Alarm-Adresse unter Einstellungen → Benachrichtigungen; bei Erholung eine Entwarnung. Zertifikate mit weniger als 14 Tagen Rest werden alle 3 Tage gemeldet. Eine frisch veröffentlichte Seite, deren Domain noch nicht auf den Server zeigt, löst keinen Alarm aus. Den Stand sieht man in Admin → Websites & Demos (Spalte Status) und der Kunde in den Website-Diensten; die Erreichbarkeit der letzten 30 Tage steht außerdem im Monatsbericht.
+
+**Vorschau vom Kunden freigeben lassen.** Admin → Websites & Demos → „Vorschau vom Kunden freigeben lassen“: Demo und Kunde wählen. Der Kunde bekommt eine Mail mit Link (ohne Anmeldung, 14 Tage gültig), sieht die Demo-Adresse und klickt auf „Freigeben“ oder „Änderung wünschen“. Name, Zeit und IP werden festgehalten; der Stand steht in der Websites-Liste und unter Freigaben.
+
+**Website aus der Tagessicherung zurückholen.** Admin → Websites & Demos → „Aus Tagessicherung wiederherstellen“: Seite und Datum wählen. Der Server holt nur diese Seite aus der Nachtsicherung (`sites.tar.gz`), die jetzige Version bleibt als Vorversion erhalten (wieder holbar über „Vorige Version zurückholen“), die aktuellen Wochenangebote bleiben. Termine, Anfragen und Einstellungen in der Datenbank werden nicht verändert; dafür gilt weiterhin die Datenbanksicherung (Anleitung im Abschnitt Sicherung; prüfbar mit `mkctl restore-test`).

@@ -246,6 +246,33 @@ def zurueck(daten: dict, user: dict = Depends(require_admin)):
     return {"ok": True, "hinweis": "Die vorige Version wird innerhalb einer Minute wiederhergestellt."}
 
 
+TAG_RE = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{4}$")
+
+
+@router.get("/sicherungen")
+def sicherungen(user: dict = Depends(require_admin)):
+    """Vorhandene Tagessicherungen (vom Server-Auftragsdienst jede Minute aktualisiert)."""
+    try:
+        d = json.loads((config.QUEUE_DIR / "sicherungen.json").read_text())
+        return {"tage": [t for t in d.get("tage", []) if TAG_RE.match(str(t))], "stand": d.get("stand")}
+    except (OSError, ValueError):
+        return {"tage": [], "stand": None}
+
+
+@router.post("/aus-sicherung")
+def aus_sicherung(daten: dict, user: dict = Depends(require_admin)):
+    art, name, tag = str(daten.get("art", "")), str(daten.get("name", "")), str(daten.get("tag", ""))
+    _ordner_name(art, name)
+    if not TAG_RE.match(tag):
+        raise HTTPException(400, "Ungültiges Sicherungsdatum.")
+    rate_limit("sicherung-admin", 10, 600)
+    uid = secrets.token_hex(8)
+    auftrag({"aktion": "sicherung", "art": art, "name": name, "tag": tag, "upload": uid, "kunde": str(daten.get("kunde", ""))[:60]})
+    with tx("admin") as cur:
+        audit(cur, user, "website_aus_sicherung", None, {"art": art, "name": name, "tag": tag})
+    return {"ok": True, "hinweis": "Die Website wird innerhalb einer Minute aus der Sicherung vom " + tag[:10] + " geholt. Die jetzige Version bleibt als Vorversion erhalten. Termine und Anfragen in der Datenbank bleiben unverändert."}
+
+
 @router.get("/veroeffentlichungen")
 def verlauf(user: dict = Depends(require_admin)):
     q = config.QUEUE_DIR
@@ -256,7 +283,7 @@ def verlauf(user: dict = Depends(require_admin)):
                 a = json.loads(f.read_text())
             except Exception:  # noqa: BLE001
                 continue
-            if a.get("aktion") in ("veroeffentlichen", "zurueck"):
+            if a.get("aktion") in ("veroeffentlichen", "zurueck", "sicherung"):
                 offen.append({"aktion": a["aktion"], "art": a.get("art"), "name": a.get("name")})
         for f in sorted(q.glob("ergebnis-*.json"), key=lambda p: p.stat().st_mtime, reverse=True)[:12]:
             try:

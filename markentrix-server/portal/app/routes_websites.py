@@ -4,10 +4,13 @@ import re
 import secrets
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from urllib.parse import urlparse
 
-from . import config
+from psycopg import errors
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from pydantic import BaseModel, Field
+
+from . import config, mailer, webbetrieb
 from .db import tx
 from .security import audit, require_admin
 
@@ -49,6 +52,14 @@ def ausstehend():
 def liste(user: dict = Depends(require_admin)):
     offen = {(a.get("art"), a.get("name")) for a in ausstehend() if a.get("aktion") == "loeschen"}
     aktiv = []
+    freigaben = {}
+    with tx("admin") as cur:
+        cur.execute("""SELECT DISTINCT ON (f.demo_name) f.demo_name, f.status, f.angefragt_am, f.entschieden_am, f.entschieden_name, f.kommentar, k.firma
+                       FROM kundenfreigaben f JOIN kunden k ON k.id = f.kunden_id WHERE f.demo_name IS NOT NULL ORDER BY f.demo_name, f.angefragt_am DESC""")
+        freigaben = {r["demo_name"]: {k: r[k] for k in ("status", "angefragt_am", "entschieden_am", "entschieden_name", "kommentar", "firma")} for r in cur.fetchall()}
+        cur.execute("SELECT w.domain, w.kunden_id, k.firma FROM websites w JOIN kunden k ON k.id = w.kunden_id WHERE w.art = 'live'")
+        eigner = {r["domain"]: {"kunden_id": str(r["kunden_id"]), "firma": r["firma"]} for r in cur.fetchall()}
+        wacht = {w["domain"]: w for w in webbetrieb.status(cur)}
     for art, sub in (("live", "live"), ("demo", "demos")):
         basis = SITES / sub
         if not basis.is_dir():
@@ -62,8 +73,8 @@ def liste(user: dict = Depends(require_admin)):
                 kunde = str(json.loads((d / "site.json").read_text()).get("kunde", ""))
             except Exception:
                 pass
-            aktiv.append({"art": art, "name": d.name, "groesse": s, "dateien": n, "geaendert": new, "kunde": kunde,
-                          "loeschung_laeuft": (art, d.name) in offen})
+            aktiv.append({"art": art, "name": d.name, "freigabe": freigaben.get(d.name) if art == "demo" else None, "groesse": s, "dateien": n, "geaendert": new, "kunde": kunde,
+                          "loeschung_laeuft": (art, d.name) in offen, "wacht": wacht.get(d.name) if art == "live" else None, "eigner": eigner.get(d.name) if art == "live" else None})
     korb = []
     t = SITES / ".papierkorb"
     if t.is_dir():
@@ -120,3 +131,38 @@ def wiederherstellen(data: WiederIn, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         audit(cur, user, "website_wiederhergestellt", None, {"id": data.id})
     return {"ok": True, "hinweis": "Wird innerhalb einer Minute wiederhergestellt."}
+
+
+class VorschauIn(BaseModel):
+    kunden_id: str
+    demo_name: str
+    hinweis: str = Field(default="", max_length=1000)
+
+
+@router.post("/vorschau-freigabe")
+def vorschau_freigabe(data: VorschauIn, bg: BackgroundTasks, user: dict = Depends(require_admin)):
+    """Schickt dem Kunden die Demo-Vorschau seiner neuen Website zur Freigabe (Link ohne Anmeldung). Name, Zeit und Version der Freigabe werden festgehalten."""
+    from .routes_zusammenarbeit import _link_erzeugen, _mails, kunden_empfaenger, nicht_gefunden, team_name
+    if not NAME["demo"].match(data.demo_name) or not (SITES / "demos" / data.demo_name).is_dir():
+        raise HTTPException(404, "Diese Demo gibt es nicht.")
+    root = urlparse(config.BASE_URL).hostname or ""
+    root = root[7:] if root.startswith("portal.") else root
+    url = f"https://demo.{root}/{data.demo_name}/"
+    inhalt = (data.hinweis.strip() + "\n\n" if data.hinweis.strip() else "") + "Bitte sehen Sie sich die Vorschau Ihrer neuen Website an:\n" + url + \
+        "\n\nWenn alles passt, klicken Sie unten auf „Freigeben“. Wenn etwas geändert werden soll, wählen Sie „Änderung wünschen“ und schreiben uns, was."
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT ansprechpartner FROM kunden WHERE id=%s", (data.kunden_id,))
+            k = cur.fetchone()
+            if not k:
+                raise nicht_gefunden()
+            cur.execute("""INSERT INTO kundenfreigaben (kunden_id, titel, art, inhalt, angefragt_von, demo_name) VALUES (%s,%s,'website',%s,%s,%s) RETURNING id""",
+                        (data.kunden_id, "Vorschau Ihrer neuen Website", inhalt, team_name(user), data.demo_name))
+            fid = cur.fetchone()["id"]
+            link = _link_erzeugen(cur, fid)
+            ziele = kunden_empfaenger(cur, data.kunden_id)
+            audit(cur, user, "vorschau_freigabe_angefragt", data.kunden_id, {"demo": data.demo_name})
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Kunde nicht gefunden.")
+    _mails(bg, ziele, mailer.freigabe_anfrage_kunde, k["ansprechpartner"], "Vorschau Ihrer neuen Website", link)
+    return {"id": fid, "empfaenger": len(ziele or [])}

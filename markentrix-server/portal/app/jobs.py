@@ -5,7 +5,7 @@ import threading
 import time
 from datetime import date, datetime, timezone
 
-from . import berichte, betrieb, einstellungen, mailer, pdf, push
+from . import berichte, betrieb, webbetrieb, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -522,11 +522,19 @@ def anrufe_aufraeumen(cfg):
     anrufe_bereinigen()
 
 
+def website_erinnerungen(cfg):
+    webbetrieb.erinnerungen(cfg)
+
+
+def website_wacht(cfg):
+    webbetrieb.wacht(cfg)
+
+
 def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick):
+    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht):
         try:
             job(cfg)
         except Exception:
@@ -534,7 +542,7 @@ def tick():
             betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

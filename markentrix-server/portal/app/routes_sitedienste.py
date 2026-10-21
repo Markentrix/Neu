@@ -16,7 +16,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import config, einstellungen, push
+from . import config, einstellungen, push, webbetrieb
 from . import sitedienste as sd
 from .db import tx
 from .security import EMAIL_RE, audit, client_ip, rate_limit, require_admin, require_inhaber
@@ -313,7 +313,8 @@ def _zustand(cur, kid) -> dict:
         "kalender": {"aktiv": z["kal_aktiv"], "ical_gesetzt": bool(z["kal_ical_enc"]), "ical_geprueft_am": z["kal_ical_geprueft_am"], "dauer": z["kal_dauer"],
                      "tage": z["kal_tage"], "von": z["kal_von"], "bis": z["kal_bis"], "wochentage": z["kal_wochentage"], "vorlauf_std": z["kal_vorlauf_std"],
                      "ort": z["kal_ort"] or "", "empfaenger": z["kal_empfaenger"] or "", "offene_termine": offen,
-                     "zeiten": z["kal_zeiten"] or "", "kapazitaet": z["kal_kapazitaet"], "freigabe": z["kal_freigabe"], "halte_std": z["kal_halte_std"]},
+                     "zeiten": z["kal_zeiten"] or "", "kapazitaet": z["kal_kapazitaet"], "freigabe": z["kal_freigabe"], "halte_std": z["kal_halte_std"],
+                     "erinnerung": z["erinnerung_aktiv"], "erinnerung_std1": z["erinnerung_std1"], "erinnerung_std2": z["erinnerung_std2"]},
         "paypal": {"aktiv": z["pp_aktiv"], "client_id": z["pp_client_id"] or "", "waehrung": z["pp_waehrung"], "me_link": z["pp_me_link"] or ""},
         "analytics": {"aktiv": z["ga_aktiv"], "id": z["ga_id"] or "", "statistik": z["stat_aktiv"]},
         "bewertungen": {"aktiv": z["bew_aktiv"], "place_id": z["bew_place_id"] or "", "sterne": float(z["bew_sterne"]) if z["bew_sterne"] is not None else None,
@@ -434,6 +435,9 @@ class KalenderIn(BaseModel):
     kapazitaet: int = Field(default=0, ge=0, le=200)
     freigabe: bool = False
     halte_std: int = Field(default=72, ge=1, le=336)
+    erinnerung: bool = True                                      # Erinnerungs-Mails an die Besucher
+    erinnerung_std1: int = Field(default=24, ge=0, le=168)       # 0 = aus
+    erinnerung_std2: int = Field(default=2, ge=0, le=48)
 
 
 @kunde.put("/kalender")
@@ -460,10 +464,12 @@ def k_kalender(data: KalenderIn, user: dict = Depends(require_inhaber)):
         sd.zeile(cur, kid)
         cur.execute("""UPDATE website_dienste SET kal_aktiv=%s, kal_dauer=%s, kal_tage=%s, kal_von=%s, kal_bis=%s, kal_wochentage=%s, kal_vorlauf_std=%s,
                        kal_ort=%s, kal_empfaenger=%s, kal_ical_enc=coalesce(%s, kal_ical_enc), kal_ical_geprueft_am=coalesce(%s, kal_ical_geprueft_am),
-                       kal_zeiten=%s, kal_kapazitaet=%s, kal_freigabe=%s, kal_halte_std=%s, geaendert_am=now()
+                       kal_zeiten=%s, kal_kapazitaet=%s, kal_freigabe=%s, kal_halte_std=%s,
+                       erinnerung_aktiv=%s, erinnerung_std1=%s, erinnerung_std2=%s, geaendert_am=now()
                        WHERE kunden_id=%s""",
                     (data.aktiv, data.dauer, data.tage, data.von, data.bis, sorted(set(data.wochentage)), data.vorlauf_std, data.ort.strip() or None, emp or None, enc, geprueft,
-                     ", ".join(sorted(set(zeiten))) or None, data.kapazitaet, data.freigabe, data.halte_std, kid))
+                     ", ".join(sorted(set(zeiten))) or None, data.kapazitaet, data.freigabe, data.halte_std,
+                     data.erinnerung, data.erinnerung_std1, data.erinnerung_std2, kid))
         audit(cur, user, "website_dienste_kalender", kid, {"aktiv": data.aktiv})
     sd._ical_cache.pop(str(kid), None)
     return {"ok": True}
@@ -595,20 +601,48 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
         z = sd.zeile(cur, kid)
         sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
-        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.email, w.telefon, w.nachricht, w.daten, w.anzahlung, w.erstellt_am,
-                              l.name AS leistung, m.name AS mitarbeiter
+        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.email, w.telefon, w.nachricht, w.daten, w.anzahlung, w.erstellt_am, w.ergebnis,
+                              l.name AS leistung, m.name AS mitarbeiter,
+                              (SELECT count(*) FROM website_termine x WHERE x.kunden_id=w.kunden_id AND lower(x.email)=lower(w.email) AND x.ergebnis='nicht_erschienen') AS fehlt_bisher
                        FROM website_termine w LEFT JOIN website_leistungen l ON l.id=w.leistung_id LEFT JOIN website_mitarbeiter m ON m.id=w.mitarbeiter_id
-                       WHERE w.kunden_id=%s AND w.status IN ('reserviert','gebucht') AND w.start > now() - interval '1 day'
-                       ORDER BY (w.status='reserviert') DESC, w.start LIMIT 100""", (kid,))
+                       WHERE w.kunden_id=%s AND ((w.status IN ('reserviert','gebucht') AND w.start > now() - interval '1 day')
+                                                 OR (w.status='gebucht' AND w.ergebnis IS NULL AND w.start <= now() AND w.start > now() - interval '14 days'))
+                       ORDER BY (w.status='reserviert') DESC, w.start LIMIT 150""", (kid,))
         zeilen = cur.fetchall()
-    out = []
+    out, vorbei = [], []
+    jetzt = datetime.now(timezone.utc)
     for r in zeilen:
+        if r["start"] <= jetzt and r["ergebnis"] is not None:
+            continue
         d = r["daten"] or {}
         details = {k: v for k, v in d.items() if k not in ("typ", "name", "telefon", "email", "nachricht", "datum", "datum2", "uhrzeit") and v}
-        out.append({"id": str(r["id"]), "ref": r["ref"] or "", "status": r["status"], "start": r["start"], "name": r["name"], "email": r["email"], "telefon": r["telefon"] or "",
-                    "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
-                    "ende": r["ende"]})
-    return {"buchungen": out, "freigabe": z["kal_freigabe"]}
+        eintrag = {"id": str(r["id"]), "ref": r["ref"] or "", "status": r["status"], "start": r["start"], "name": r["name"], "email": r["email"], "telefon": r["telefon"] or "",
+                   "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
+                   "ende": r["ende"], "fehlt_bisher": r["fehlt_bisher"]}
+        (vorbei if r["start"] <= jetzt and r["status"] == "gebucht" and r["ergebnis"] is None else out).append(eintrag)
+    return {"buchungen": out, "vergangen": vorbei, "freigabe": z["kal_freigabe"]}
+
+
+class ErgebnisIn(BaseModel):
+    ergebnis: str = Field(pattern=r"^(erschienen|nicht_erschienen)$")
+
+
+@kunde.post("/buchungen/{bid}/ergebnis")
+def k_ergebnis(bid: str, data: ErgebnisIn, user: dict = Depends(require_inhaber)):
+    """Hat der Termin stattgefunden? Die Antwort steuert den Nichterschienen-Zähler und den Status des Termins im Portal."""
+    kid = user["kunden_id"]
+    rate_limit("buchergebnis:" + str(kid), 120, 600)
+    with tx("system") as cur:
+        try:
+            cur.execute("""UPDATE website_termine SET ergebnis=%s WHERE id=%s AND kunden_id=%s AND status='gebucht' AND start <= now() RETURNING termin_id""", (data.ergebnis, bid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültige Buchung.")
+        g = cur.fetchone()
+        if not g:
+            raise HTTPException(409, "Diese Buchung lässt sich nicht mehr bewerten (noch nicht vorbei oder abgesagt).")
+        if g["termin_id"]:
+            cur.execute("UPDATE termine SET status=%s WHERE id=%s", ("erledigt" if data.ergebnis == "erschienen" else "nicht_erschienen", g["termin_id"]))
+    return {"ok": True}
 
 
 class BestaetigenIn(BaseModel):
@@ -956,6 +990,12 @@ def k_stat_schalter(data: StatIn, user: dict = Depends(require_inhaber)):
     return {"ok": True}
 
 
+@kunde.get("/wacht")
+def k_wacht(user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        return {"seiten": webbetrieb.status(cur, user["kunden_id"])}
+
+
 @kunde.get("/statistik")
 def k_statistik(tage: int = 30, user: dict = Depends(require_inhaber)):
     tage = max(1, min(tage, 365))
@@ -967,11 +1007,16 @@ def k_statistik(tage: int = 30, user: dict = Depends(require_inhaber)):
                    FROM website_stat WHERE kunden_id=%s AND tag > current_date - %s""", kid, tage)[0]
         cur.execute("SELECT count(*) AS n FROM anfragen WHERE kunden_id=%s AND quelle='website' AND erstellt_am > now() - make_interval(days => %s)", (kid, tage))
         anfragen = cur.fetchone()["n"]
+        cur.execute("""SELECT count(*) FILTER (WHERE ergebnis='erschienen') AS da, count(*) FILTER (WHERE ergebnis='nicht_erschienen') AS weg, count(*) FILTER (WHERE status='gebucht') AS gebucht
+                       FROM website_termine WHERE kunden_id=%s AND start > now() - make_interval(days => %s) AND start < now()""", (kid, tage))
+        tm = cur.fetchone()
+        erreich = webbetrieb.erreichbarkeit(cur, kid, date.today() - timedelta(days=tage), date.today() + timedelta(days=1))
         seiten = q("SELECT pfad, count(*) AS aufrufe FROM website_stat WHERE kunden_id=%s AND art='pv' AND tag > current_date - %s GROUP BY pfad ORDER BY 2 DESC LIMIT 10", kid, tage)
         quellen = q("""SELECT coalesce(quelle, 'Direkt / unbekannt') AS quelle, count(DISTINCT tag::text || besucher) AS besucher FROM website_stat
                        WHERE kunden_id=%s AND art='pv' AND tag > current_date - %s GROUP BY 1 ORDER BY 2 DESC LIMIT 8""", kid, tage)
         verlauf = q("SELECT tag, count(*) AS aufrufe FROM website_stat WHERE kunden_id=%s AND art='pv' AND tag > current_date - %s GROUP BY tag ORDER BY tag", kid, tage)
     return {"tage": tage, "besucher": ges["besucher"], "aufrufe": ges["aufrufe"], "whatsapp": ges["whatsapp"], "anrufe": ges["anrufe"], "anfragen": anfragen,
+            "erschienen": tm["da"], "nicht_erschienen": tm["weg"], "termine_vergangen": tm["gebucht"], "erreichbarkeit": erreich,
             "seiten": seiten, "quellen": quellen, "verlauf": [{"tag": r["tag"].isoformat(), "aufrufe": r["aufrufe"]} for r in verlauf]}
 
 

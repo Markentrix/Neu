@@ -20,6 +20,11 @@ function entscheidung(d) {
     h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => los('freigegeben') }, 'Freigeben'), h('button', { class: 'btn sec', onclick: () => los('abgelehnt') }, 'Änderung wünschen')));
 }
 
+// Web-Adressen im Text werden anklickbar (nur https, per DOM statt HTML, öffnet in neuem Tab)
+function verlinkt(text) {
+  return String(text).split(/(https:\/\/[^\s<>"']+)/).map((t, i) => i % 2 ? h('a', { href: t, target: '_blank', rel: 'noopener noreferrer' }, t) : t);
+}
+
 async function laden() {
   let d;
   try { d = await api('/api/freigabe-link/' + encodeURIComponent(token)); } catch (x) { inhalt.replaceChildren(h('div', { class: 'msg err' }, x.message)); return; }
@@ -27,7 +32,7 @@ async function laden() {
   titel.textContent = d.titel + (d.version > 1 ? ' (Version ' + d.version + ')' : '');
   const teile = [h('p', { class: 'muted small', style: 'text-align:center;margin-top:-6px' }, (ART[d.art] || d.art) + ' · für ' + d.firma + ' · angefragt am ' + zeit(d.angefragt_am))];
   if (d.vorgaenger_kommentar) teile.push(h('div', { class: 'msg info' }, 'Ihr Änderungswunsch zur vorherigen Version: „' + d.vorgaenger_kommentar + '“'));
-  if (d.inhalt) teile.push(h('div', { class: 'freitext', style: 'white-space:pre-line' }, d.inhalt));
+  if (d.inhalt) teile.push(h('div', { class: 'freitext', style: 'white-space:pre-line' }, ...verlinkt(d.inhalt)));
   teile.push(anhaenge(d));
   if (d.status === 'wartet') teile.push(d.abgelaufen ? h('div', { class: 'msg warn' }, 'Der Link ist abgelaufen. Bitte melden Sie sich im Portal an oder fragen Sie bei uns nach einem neuen Link.') : entscheidung(d));
   else teile.push(h('div', { class: 'msg ' + (d.status === 'freigegeben' ? 'ok' : 'info') }, (d.status === 'freigegeben' ? 'Freigegeben' : d.status === 'abgelehnt' ? 'Änderung gewünscht' : 'Zurückgezogen') + (d.entschieden_am ? ' am ' + zeit(d.entschieden_am) + (d.entschieden_name ? ' von ' + d.entschieden_name : '') : '') + (d.kommentar ? ': „' + d.kommentar + '“' : '') + '. Vielen Dank!'));

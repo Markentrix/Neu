@@ -2,7 +2,7 @@
 import json
 from datetime import date, timedelta
 
-from . import pdf, rechtstexte
+from . import pdf, rechtstexte, webbetrieb
 
 
 def monat_grenzen(monat: date) -> tuple[date, date]:
@@ -42,7 +42,18 @@ def sammeln(cur, kid, von: date, bis: date) -> dict:
     wa = cur.fetchone()["n"]
     cur.execute("SELECT count(*) AS n FROM bewertungsanfragen WHERE kunden_id=%s AND gesendet_am >= %s AND gesendet_am < %s", (kid, von, bis))
     bew = cur.fetchone()["n"]
-    return {"anfragen": {"gesamt": a_ges, "vormonat": a_vor, "nach_quelle": a_quelle, "bearbeitet": ar["bearbeitet"], "spam": ar["spam"]},
+    cur.execute("""SELECT count(*) FILTER (WHERE art='pv') AS aufrufe, count(DISTINCT tag::text || besucher) FILTER (WHERE art='pv') AS besucher,
+                          count(*) FILTER (WHERE art='ev' AND name ILIKE 'WhatsApp%%') AS whatsapp, count(*) FILTER (WHERE art='ev' AND name ILIKE 'Anruf%%') AS anrufe
+                   FROM website_stat WHERE kunden_id=%s AND tag >= %s AND tag < %s""", (kid, von, bis))
+    ws = cur.fetchone()
+    cur.execute("SELECT count(*) AS n FROM anfragen WHERE kunden_id=%s AND quelle='website' AND erstellt_am >= %s AND erstellt_am < %s AND status<>'spam'", (kid, von, bis))
+    w_anf = cur.fetchone()["n"]
+    cur.execute("""SELECT count(*) FILTER (WHERE status IN ('gebucht','reserviert')) AS buchungen, count(*) FILTER (WHERE ergebnis='nicht_erschienen') AS weg,
+                          count(*) FILTER (WHERE ergebnis='erschienen') AS da FROM website_termine WHERE kunden_id=%s AND erstellt_am >= %s AND erstellt_am < %s""", (kid, von, bis))
+    wt = cur.fetchone()
+    website = {"besucher": ws["besucher"], "aufrufe": ws["aufrufe"], "whatsapp": ws["whatsapp"], "anrufe": ws["anrufe"], "anfragen": w_anf,
+               "buchungen": wt["buchungen"], "nicht_erschienen": wt["weg"], "erschienen": wt["da"], "erreichbarkeit": webbetrieb.erreichbarkeit(cur, kid, von, bis)}
+    return {"website": website, "anfragen": {"gesamt": a_ges, "vormonat": a_vor, "nach_quelle": a_quelle, "bearbeitet": ar["bearbeitet"], "spam": ar["spam"]},
             "termine": {"gesamt": sum(t.values()), "nach_status": t},
             "anrufe": anrufe, "nachrichten": {"ein": nach["ein"], "aus": nach["aus"], "automatisch": nach["automatisch"]},
             "chat_fragen": chat, "automatische_ablaeufe": laeufe, "wochenangebote": wa, "bewertungsanfragen": bew}
@@ -142,6 +153,14 @@ def pdf_erzeugen(cur, bericht_id, f: dict | None = None) -> tuple[bytes, str]:
         zeilen.append(f"{_n(d['wochenangebote'], 'Wochenangebot wurde', 'Wochenangebote wurden')} veröffentlicht.")
     if d["bewertungsanfragen"]:
         zeilen.append(f"{d['bewertungsanfragen']} Bewertungsanfragen wurden an Kundinnen und Kunden verschickt.")
+    w = d.get("website") or {}
+    if w.get("aufrufe") or w.get("erreichbarkeit") is not None or w.get("buchungen"):
+        if w.get("aufrufe"):
+            zeilen.append(f"Ihre Website hatte {_n(w['besucher'], 'Besucher', 'Besucher')} mit {w['aufrufe']} Seitenaufrufen" + (f"; {w['whatsapp']}-mal wurde WhatsApp und {w['anrufe']}-mal der Anruf-Knopf genutzt." if (w["whatsapp"] or w["anrufe"]) else "."))
+        if w.get("buchungen"):
+            zeilen.append(f"Über die Website wurden {_n(w['buchungen'], 'Termin', 'Termine')} gebucht" + (f", {w['nicht_erschienen']} davon sind nicht erschienen." if w.get("nicht_erschienen") else "."))
+        if w.get("erreichbarkeit") is not None:
+            zeilen.append(f"Erreichbarkeit der Website: {str(w['erreichbarkeit']).replace('.', ',')} % (wir prüfen alle 5 Minuten).")
     inhalt += [pdf.p("• " + z) for z in zeilen]
     ein, schritte = texte(b)
     inhalt += [pdf.p("Einordnung", pdf.H2), pdf.p(ein), pdf.p("Unsere nächsten Schritte", pdf.H2)] + [pdf.p("• " + z) for z in schritte]

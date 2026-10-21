@@ -58,6 +58,44 @@ async function uploadKarte(d) {
     h('div', { class: 'row', style: 'margin-top:10px' }, knopfHoch, zurueckKnopf), verlauf);
 }
 
+/** Kunde sieht die Demo, gibt per Klick frei – Name, Zeit und Version werden festgehalten. */
+async function vorschauKarte(d) {
+  const demos = d.aktiv.filter(z => z.art === 'demo');
+  if (!demos.length) return '';
+  const kunden = await api('/api/admin/kunden'), m = h('div');
+  const demo = h('select', {}, demos.map(z => h('option', { value: z.name }, z.name + (z.freigabe ? ' (' + z.freigabe.status + ')' : ''))));
+  const kunde = h('select', {}, [h('option', { value: '' }, '– Kunde wählen –')].concat(kunden.map(k => h('option', { value: k.id }, k.kundennummer + ' · ' + k.firma))));
+  const hinweis = h('input', { placeholder: 'Kurzer Satz für die Mail (optional)', maxlength: 500 });
+  const los = h('button', { class: 'btn', type: 'button', onclick: async () => {
+    if (!kunde.value) { melde(m, 'Bitte den Kunden wählen.'); return; }
+    if (!confirm('Dem Kunden die Vorschau „' + demo.value + '“ zur Freigabe schicken?')) return;
+    try { await api('/api/admin/websites/vorschau-freigabe', { method: 'POST', body: { kunden_id: kunde.value, demo_name: demo.value, hinweis: hinweis.value } }); melde(m, 'Gesendet. Der Kunde bekommt eine E-Mail mit Link; seine Entscheidung steht danach hier und unter Freigaben.', 'ok'); setTimeout(() => location.reload(), 2500); }
+    catch (x) { melde(m, x.message); }
+  } }, 'Vorschau zur Freigabe schicken');
+  const f = (t, el) => h('div', {}, h('label', {}, t), el);
+  return h('div', { class: 'card' }, h('h2', {}, 'Vorschau vom Kunden freigeben lassen'),
+    h('p', { class: 'small muted' }, 'Der Kunde öffnet die Demo und bestätigt mit einem Klick (ohne Anmeldung, Link 14 Tage gültig). Freigabe oder Änderungswunsch wird mit Namen und Zeit festgehalten.'),
+    m, h('div', { class: 'form2' }, f('Demo', demo), f('Kunde', kunde), f('Hinweis', hinweis)), h('div', { class: 'row', style: 'margin-top:10px' }, los));
+}
+
+/** Eine Seite aus der nächtlichen Sicherung zurückholen (die jetzige Version bleibt als Vorversion erhalten). */
+async function sicherungKarte(d) {
+  const sich = await api('/api/admin/websites/sicherungen'), m = h('div');
+  const namen = d.aktiv.map(z => z.art + ':' + z.name);
+  const seite = h('select', {}, namen.map(n => h('option', { value: n }, (n.startsWith('live') ? 'Live · ' : 'Demo · ') + n.split(':')[1])));
+  const tag = h('select', {}, sich.tage.map(t => h('option', { value: t }, t.slice(8, 10) + '.' + t.slice(5, 7) + '.' + t.slice(0, 4) + ' ' + t.slice(11, 13) + ':' + t.slice(13))));
+  const los = h('button', { class: 'btn sec', type: 'button', onclick: async () => {
+    if (!seite.value || !tag.value) return;
+    const [art, name] = seite.value.split(':');
+    if (!confirm(name + ' aus der Sicherung vom ' + tag.selectedOptions[0].textContent + ' holen?\nDie jetzige Version bleibt als Vorversion erhalten.')) return;
+    try { const r = await api('/api/admin/websites/aus-sicherung', { method: 'POST', body: { art, name, tag: tag.value } }); melde(m, r.hinweis, 'ok'); } catch (x) { melde(m, x.message); }
+  } }, 'Aus Sicherung holen');
+  const f = (t, el) => h('div', {}, h('label', {}, t), el);
+  return h('div', { class: 'card' }, h('h2', {}, 'Aus Tagessicherung wiederherstellen'),
+    h('p', { class: 'small muted' }, 'Holt die Dateien einer Website aus der nächtlichen Sicherung zurück. Termine, Anfragen und Einstellungen in der Datenbank werden dabei nicht verändert.'),
+    m, sich.tage.length && namen.length ? [h('div', { class: 'form2' }, f('Seite', seite), f('Sicherung vom', tag)), h('div', { class: 'row', style: 'margin-top:10px' }, los)] : h('p', { class: 'small muted' }, 'Noch keine Sicherung vorhanden (die erste entsteht nachts).'));
+}
+
 V.websites = async () => {
   const d = await api('/api/admin/websites');
   const m = h('div');
@@ -74,9 +112,21 @@ V.websites = async () => {
     try { const r = await api('/api/admin/websites/wiederherstellen', { method: 'POST', body: { id: z.id } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
     catch (x) { melde(m, x.message); }
   } }, 'Wiederherstellen');
-  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, await uploadKarte(d),
+  const status = (z) => {
+    if (z.art === 'live') {
+      const w = z.wacht;
+      if (!w) return h('span', { class: 'muted small' }, 'noch nicht geprüft');
+      return h('span', {}, h('span', { class: 'pill ' + (w.ok ? 'ok' : 'bad'), title: w.fehler || '' }, w.ok ? 'erreichbar' : 'gestört'), ' ',
+        h('span', { class: 'small muted' }, (w.ms ? w.ms + ' ms · ' : '') + (w.prozent != null ? String(w.prozent).replace('.', ',') + ' % · ' : '') + (w.cert_tage != null ? 'Zertifikat ' + w.cert_tage + ' T' : '')));
+    }
+    const f = z.freigabe;
+    if (!f) return '';
+    const t = { wartet: ['warn', 'Freigabe wartet'], freigegeben: ['ok', 'vom Kunden freigegeben'], abgelehnt: ['bad', 'Änderung gewünscht'], zurueckgezogen: ['', 'zurückgezogen'] }[f.status] || ['', f.status];
+    return h('span', {}, h('span', { class: 'pill ' + t[0], title: f.kommentar || '' }, t[1]), f.entschieden_am ? h('span', { class: 'small muted' }, ' ' + new Date(f.entschieden_am).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + (f.entschieden_name ? ' · ' + f.entschieden_name : '')) : '');
+  };
+  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, await uploadKarte(d), await vorschauKarte(d), await sicherungKarte(d),
     h('div', { class: 'card' }, h('h2', {}, 'Aktiv'),
-      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', loesch]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
+      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Status', status], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', loesch]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
     h('div', { class: 'card' }, h('h2', {}, 'Papierkorb'), h('p', { class: 'small muted' }, 'Gelöschte Seiten bleiben ' + d.aufbewahrung_tage + ' Tage erhalten und werden dann endgültig entfernt.'),
       tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Gelöscht', z => wann(z.geloescht)], ['Größe', z => mb(z.groesse)], ['', zurueck]], d.papierkorb, 'Papierkorb ist leer.')));
 };

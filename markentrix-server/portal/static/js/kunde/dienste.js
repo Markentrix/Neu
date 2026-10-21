@@ -106,11 +106,13 @@ function kalenderKarte(d, neu) {
   const kap = h('input', { type: 'number', min: 0, max: 200, value: k.kapazitaet });
   const halte = h('input', { type: 'number', min: 1, max: 336, value: k.halte_std });
   const frei = schalter(k.freigabe, 'Ich bestätige jede Buchung selbst (sonst ist sie sofort gültig)');
+  const erin = schalter(k.erinnerung !== false, 'Besucher per E-Mail an den Termin erinnern (mit Absage-Link)');
+  const erin1 = h('input', { type: 'number', min: 0, max: 168, value: k.erinnerung_std1 ?? 24 }), erin2 = h('input', { type: 'number', min: 0, max: 48, value: k.erinnerung_std2 ?? 2 });
   const wt = TAGE.map(([n, t]) => ({ n, c: h('input', { type: 'checkbox', checked: k.wochentage.includes(n), style: 'width:auto' }), t }));
   const speichern = async () => {
     melde(m, '');
     try {
-      await api('/api/kunde/website-dienste/kalender', { method: 'PUT', body: { aktiv: an.c.checked, ical_url: url.value, dauer: Number(dauer.value), tage: Number(tage.value), von: von.value, bis: bis.value, wochentage: wt.filter(x => x.c.checked).map(x => x.n), vorlauf_std: Number(vorlauf.value), ort: ort.value, empfaenger: emp.value, zeiten: zeiten.value, kapazitaet: Number(kap.value), freigabe: frei.c.checked, halte_std: Number(halte.value) } });
+      await api('/api/kunde/website-dienste/kalender', { method: 'PUT', body: { aktiv: an.c.checked, ical_url: url.value, dauer: Number(dauer.value), tage: Number(tage.value), von: von.value, bis: bis.value, wochentage: wt.filter(x => x.c.checked).map(x => x.n), vorlauf_std: Number(vorlauf.value), ort: ort.value, empfaenger: emp.value, zeiten: zeiten.value, kapazitaet: Number(kap.value), freigabe: frei.c.checked, halte_std: Number(halte.value), erinnerung: erin.c.checked, erinnerung_std1: Number(erin1.value), erinnerung_std2: Number(erin2.value) } });
       melde(m, 'Gespeichert.', 'ok'); if (url.value) setTimeout(neu, 1000);
     } catch (x) { melde(m, x.message); }
   };
@@ -129,6 +131,8 @@ function kalenderKarte(d, neu) {
       feld('Feste Uhrzeiten (optional)', zeiten, 'Zum Beispiel für Fahrzeugabgabe oder feste Termine. Muss zu den Uhrzeiten auf deiner Website passen.'),
       feld('Höchstens so viele Buchungen pro Tag (0 = unbegrenzt)', kap), feld('Unbestätigte Reservierung hält … Stunden', halte)),
     h('div', { style: 'margin:8px 0' }, frei.el),
+    h('div', { style: 'margin:8px 0' }, erin.el),
+    h('div', { class: 'form2' }, feld('Erste Erinnerung … Stunden vorher (0 = aus)', erin1), feld('Zweite Erinnerung … Stunden vorher (0 = aus)', erin2)),
     h('div', { class: 'row', style: 'gap:12px;margin:8px 0;flex-wrap:wrap' }, h('span', { class: 'small' }, 'Buchbar an:'), wt.map(x => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit' }, x.c, x.t))),
     h('div', { class: 'row' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Kalender testen'), k.ical_gesetzt ? h('button', { class: 'btn sec', onclick: weg }, 'Adresse löschen') : ''),
     k.offene_termine ? h('p', { class: 'small' }, k.offene_termine + ' kommende Termine über die Website gebucht.') : '',
@@ -228,7 +232,15 @@ async function buchungenKarte(d, neu) {
     h('p', { class: 'small muted' }, r.freigabe
       ? 'Neue Wünsche sind für den Kunden vorgemerkt, bis du sie bestätigst. Mit „Bestätigen“ bekommt er eine E-Mail mit Kalender-Einladung, auf Wunsch mit PayPal-Link für die Anzahlung.'
       : 'Buchungen sind sofort gültig. Hier siehst du die kommenden und kannst absagen.'),
-    m, r.buchungen.length ? r.buchungen.map(zeile) : h('p', { class: 'small muted' }, 'Keine kommenden Buchungen.'));
+    m, r.buchungen.length ? r.buchungen.map(zeile) : h('p', { class: 'small muted' }, 'Keine kommenden Buchungen.'),
+    r.vergangen.length ? h('div', {}, h('h3', {}, 'Vergangene Termine – hat es geklappt?'),
+      h('p', { class: 'small muted' }, 'Ein Klick genügt. So siehst du, wer öfter nicht kommt, und die Statistik zeigt deine Nichterschienen-Quote.'),
+      r.vergangen.map(b => {
+        const set = async (erg) => { try { await api('/api/kunde/website-dienste/buchungen/' + b.id + '/ergebnis', { method: 'POST', body: { ergebnis: erg } }); neu(); } catch (x) { melde(m, x.message); } };
+        return h('div', { class: 'card', style: 'margin:8px 0' }, h('p', {}, h('b', {}, ZEIT(b.start)), ' · ' + b.name,
+          b.fehlt_bisher ? h('span', { class: 'pill warn', style: 'margin-left:6px' }, b.fehlt_bisher + '× nicht erschienen') : ''),
+          h('div', { class: 'row', style: 'gap:8px' }, h('button', { class: 'btn', onclick: () => set('erschienen') }, 'Ist gekommen'), h('button', { class: 'btn sec', onclick: () => set('nicht_erschienen') }, 'Nicht erschienen')));
+      })) : '');
 }
 
 // ---------------------------------------------------------------- Sperrtage
@@ -297,6 +309,7 @@ async function teamKarte(d, neu) {
 // ---------------------------------------------------------------- Besucher-Statistik (ohne Cookies, ohne Einwilligung)
 async function statistikKarte(d) {
   const s = await api('/api/kunde/website-dienste/statistik?tage=30');
+  const w = (await api('/api/kunde/website-dienste/wacht').catch(() => ({ seiten: [] }))).seiten;
   const m = h('div');
   const an = schalter(d.analytics.statistik, 'Einfache Besucherzahlen auf unserem Server mitzählen');
   an.c.addEventListener('change', async () => { try { await api('/api/kunde/website-dienste/statistik-schalter', { method: 'PUT', body: { aktiv: an.c.checked } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } });
@@ -304,7 +317,8 @@ async function statistikKarte(d) {
   return h('div', { class: 'card' }, h('h2', {}, 'Besucher der letzten 30 Tage'),
     h('p', { class: 'small muted' }, 'Gezählt ohne Cookies und ohne IP-Adresse (anonym, nur auf unserem Server). Das ist keine Google-Statistik. Sie gilt nur für Websites, die dieses Zählen eingebaut haben.'),
     m, an.el,
-    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin:8px 0' }, kachel(s.besucher, 'Besucher'), kachel(s.aufrufe, 'Seitenaufrufe'), kachel(s.anfragen, 'Anfragen'), kachel(s.whatsapp, 'WhatsApp-Klicks'), kachel(s.anrufe, 'Anruf-Klicks')),
+    w.map(x => h('p', { class: 'small' }, h('span', { class: 'pill ' + (x.ok ? 'ok' : 'warn') }, x.ok ? 'erreichbar' : 'gestört'), ' ' + x.domain + (x.ms ? ' · ' + x.ms + ' ms' : '') + (x.prozent != null ? ' · ' + String(x.prozent).replace('.', ',') + ' % in 30 Tagen' : '') + (x.cert_tage != null ? ' · Zertifikat noch ' + x.cert_tage + ' Tage' : ''))),
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin:8px 0' }, kachel(s.besucher, 'Besucher'), kachel(s.aufrufe, 'Seitenaufrufe'), kachel(s.anfragen, 'Anfragen'), kachel(s.whatsapp, 'WhatsApp-Klicks'), kachel(s.anrufe, 'Anruf-Klicks'), s.erschienen + s.nicht_erschienen ? kachel(s.nicht_erschienen + ' von ' + (s.erschienen + s.nicht_erschienen), 'Nicht erschienen') : '', s.erreichbarkeit != null ? kachel(String(s.erreichbarkeit).replace('.', ',') + ' %', 'Erreichbarkeit') : ''),
     s.seiten.length ? h('p', { class: 'small' }, h('b', {}, 'Beliebteste Seiten: '), s.seiten.slice(0, 5).map(x => x.pfad + ' (' + x.aufrufe + ')').join(' · ')) : '',
     s.quellen.length ? h('p', { class: 'small' }, h('b', {}, 'Woher: '), s.quellen.slice(0, 5).map(x => x.quelle + ' (' + x.besucher + ')').join(' · ')) : '');
 }
