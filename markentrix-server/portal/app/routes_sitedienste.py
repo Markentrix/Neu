@@ -90,6 +90,7 @@ def oeff_config(site_id: str, request: Request):
         "paypal": {"aktiv": bool(z["pp_aktiv"] and (z["pp_client_id"] or z["pp_me_link"])), "client_id": z["pp_client_id"] or "", "waehrung": z["pp_waehrung"],
                    "me_link": z["pp_me_link"] or ""},
         "bewertungen": bool(z["bew_aktiv"]),
+        "analytics": {"aktiv": bool(z["ga_aktiv"] and z["ga_id"]), "id": z["ga_id"] or ""},
     }, kopf)
 
 
@@ -308,6 +309,7 @@ def _zustand(cur, kid) -> dict:
                      "tage": z["kal_tage"], "von": z["kal_von"], "bis": z["kal_bis"], "wochentage": z["kal_wochentage"], "vorlauf_std": z["kal_vorlauf_std"],
                      "ort": z["kal_ort"] or "", "empfaenger": z["kal_empfaenger"] or "", "offene_termine": offen},
         "paypal": {"aktiv": z["pp_aktiv"], "client_id": z["pp_client_id"] or "", "waehrung": z["pp_waehrung"], "me_link": z["pp_me_link"] or ""},
+        "analytics": {"aktiv": z["ga_aktiv"], "id": z["ga_id"] or ""},
         "bewertungen": {"aktiv": z["bew_aktiv"], "place_id": z["bew_place_id"] or "", "sterne": float(z["bew_sterne"]) if z["bew_sterne"] is not None else None,
                         "anzahl": z["bew_anzahl"], "link": z["bew_link"] or "", "stand": z["bew_stand"]},
         "status": _status(cur, kid),
@@ -500,6 +502,25 @@ def k_paypal(data: PayPalIn, user: dict = Depends(require_inhaber)):
         cur.execute("UPDATE website_dienste SET pp_aktiv=%s, pp_client_id=%s, pp_waehrung=%s, pp_me_link=%s, geaendert_am=now() WHERE kunden_id=%s",
                     (data.aktiv, cid or None, data.waehrung, link or None, user["kunden_id"]))
         audit(cur, user, "website_dienste_paypal", user["kunden_id"], {"aktiv": data.aktiv})
+    return {"ok": True}
+
+
+class AnalyticsIn(BaseModel):
+    aktiv: bool = False
+    id: str = Field(default="", max_length=20)
+
+
+@kunde.put("/analytics")
+def k_analytics(data: AnalyticsIn, user: dict = Depends(require_inhaber)):
+    gid = data.id.strip().upper()
+    if gid and not re.match(r"^G-[A-Z0-9]{6,14}$", gid):
+        raise HTTPException(400, "Die Mess-ID sieht ungültig aus. Sie beginnt mit „G-“, zum Beispiel G-AB12CD34EF.")
+    if data.aktiv and not gid:
+        raise HTTPException(400, "Bitte trage die Mess-ID ein.")
+    with tx("system") as cur:
+        sd.zeile(cur, user["kunden_id"])
+        cur.execute("UPDATE website_dienste SET ga_aktiv=%s, ga_id=%s, geaendert_am=now() WHERE kunden_id=%s", (data.aktiv, gid or None, user["kunden_id"]))
+        audit(cur, user, "website_dienste_analytics", user["kunden_id"], {"aktiv": data.aktiv})
     return {"ok": True}
 
 

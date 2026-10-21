@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    mailKarte(d, neu), kalenderKarte(d, neu), paypalKarte(d, neu), bewertungKarte(d, neu));
+    mailKarte(d, neu), kalenderKarte(d, neu), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d));
 };
 
 // ---------------------------------------------------------------- E-Mail
@@ -181,4 +181,19 @@ function bewertungKarte(d, neu) {
     hilfe('Wo finde ich die Place-ID?',
       h('p', {}, 'Öffne den „Place ID Finder“ von Google (suche im Netz nach „Google Place ID Finder“), gib den Namen deiner Firma ein und kopiere die Kennung, die mit ', h('b', {}, 'ChIJ'), ' beginnt.'),
       h('p', {}, 'Den Link „Rezension schreiben“ findest du in Google Maps bei deinem Profil unter „Bewertungen“ → „Bewertungen anfordern“ bzw. in deinem Google-Unternehmensprofil.')));
+}
+
+// ---------------------------------------------------------------- Google Analytics
+function analyticsKarte(d) {
+  const a = d.analytics, m = h('div');
+  const an = schalter(a.aktiv, 'Besucher-Statistik (Google Analytics) einschalten');
+  const gid = h('input', { value: a.id, placeholder: 'G-AB12CD34EF', maxlength: 20, autocomplete: 'off' });
+  const speichern = async () => { try { await api('/api/kunde/website-dienste/analytics', { method: 'PUT', body: { aktiv: an.c.checked, id: gid.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Google Analytics'),
+    h('p', { class: 'small muted' }, 'Zeigt dir, wie viele Besucher auf deine Website kommen und woher. Auf der Website erscheint automatisch eine Abfrage („Statistik erlauben?“). Nur wer zustimmt, wird gezählt. Vorher wird nichts an Google gesendet.'),
+    m, an.el, h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Mess-ID', gid, 'Beginnt mit „G-“.')),
+    h('p', {}, h('button', { class: 'btn', onclick: speichern }, 'Speichern')),
+    hilfe('Wo finde ich die Mess-ID?',
+      h('p', {}, 'analytics.google.com → unten links „Verwalten“ (Zahnrad) → „Datenstreams“ → „Web“ → deinen Stream öffnen → oben rechts steht die ', h('b', {}, 'Mess-ID'), ' (G-…).'),
+      h('p', {}, 'Noch kein Konto? Dort „Messung starten“ wählen, ein Konto und eine „Property“ anlegen und einen Web-Datenstream mit der Adresse deiner Website erstellen. Das dauert etwa 5 Minuten. Wenn du magst, machen wir das gemeinsam am Telefon.')));
 }

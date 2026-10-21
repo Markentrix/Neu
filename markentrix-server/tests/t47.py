@@ -110,6 +110,18 @@ async def main():
         chk("Website: Tage als Knöpfe",await pg.locator("#t .mk-chip").count()>=3)
         await pg.screenshot(path="/var/tmp/pt/shots/dienste_website.png",full_page=True)
         chk("Keine JS-Fehler Website",not errs,errs)
+        # Analytics: erst nach Einwilligung
+        cA.put("/api/kunde/website-dienste/analytics",json={"aktiv":True,"id":"G-AB12CD34EF"})
+        ctx3=await br.new_context(bypass_csp=True); p3=await ctx3.new_page(); gtm=[]; p3.on("request",lambda r:gtm.append(r.url) if "googletagmanager" in r.url else None)
+        await p3.route("**/googletagmanager.com/**",lambda r:r.fulfill(status=200,content_type="text/javascript",body="window.__gtmgeladen=1"))
+        await p3.route(f"http://{dom}/",lambda r:r.fulfill(status=200,content_type="text/html",body=html+'<footer><span data-mk="cookies"></span></footer>')); await p3.goto(f"http://{dom}/"); await p3.wait_for_selector("[aria-label=Statistik]",timeout=6000)
+        chk("Analytics: Abfrage erscheint, vorher nichts an Google",not gtm and "Ablehnen" in await p3.locator("[aria-label=Statistik]").inner_text())
+        await p3.click("[aria-label=Statistik] >> text=Ablehnen"); await p3.wait_for_timeout(500); chk("Analytics: abgelehnt = nichts geladen",not gtm and await p3.locator("[aria-label=Statistik]").count()==0)
+        await p3.reload(); await p3.wait_for_timeout(1200); chk("Analytics: Ablehnung wird gemerkt",await p3.locator("[aria-label=Statistik]").count()==0 and not gtm)
+        await p3.click("footer a"); await p3.wait_for_selector("[aria-label=Statistik]"); await p3.click("[aria-label=Statistik] >> text=Erlauben"); await p3.wait_for_timeout(800)
+        chk("Analytics: nach Zustimmung wird Google geladen",any("id=G-AB12CD34EF" in u for u in gtm),gtm)
+        await p3.reload(); await p3.wait_for_timeout(1200); chk("Analytics: Zustimmung wird gemerkt (kein Banner, Google lädt)",await p3.locator("[aria-label=Statistik]").count()==0 and len(gtm)>=2)
+        await ctx3.close()
         # Fremde Domain: Dienst verweigert, Seite bleibt leer, kein Absturz
         ctx2=await br.new_context(bypass_csp=True); p2=await ctx2.new_page(); e2=[]; p2.on("pageerror",lambda e:e2.append(str(e)))
         await p2.route("http://fremd.example/",lambda r:r.fulfill(status=200,content_type="text/html",body=html)); await p2.goto("http://fremd.example/"); await p2.wait_for_timeout(1500)

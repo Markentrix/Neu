@@ -154,6 +154,13 @@ chk("Admin setzt Google-Schlüssel",a.put("/api/admin/einstellungen/places",json
 r=cA.post("/api/kunde/website-dienste/bewertungen/test"); chk("Google-Abfrage im Test",r.status_code==200 and r.json()["sterne"]==4.7 and r.json()["anzahl"]==128,r.text)
 b=pub("GET","bewertungen").json(); chk("Google-Daten mit Autoren und Text",b["quelle"]=="google" and b["sterne"]==4.7 and b["anzahl"]==128 and b["bewertungen"][0]["autor"]=="Anna K." and "writereview?placeid=ChIJtestplace12345" in b["schreiben"],b)
 cA.put("/api/kunde/website-dienste/bewertungen",json={"aktiv":True,"place_id":"ChIJNichtDa12345"}); r=cA.post("/api/kunde/website-dienste/bewertungen/test"); chk("Unbekannter Eintrag: verständlicher Fehler",r.status_code==400 and "keinen Eintrag" in r.text,r.text)
+# ---- Analytics
+chk("Analytics aus",pub("GET","config").json()["analytics"]=={"aktiv":False,"id":""})
+chk("Analytics: ungültige ID",cA.put("/api/kunde/website-dienste/analytics",json={"aktiv":True,"id":"UA-123"}).status_code==400)
+chk("Analytics: aktiv ohne ID",cA.put("/api/kunde/website-dienste/analytics",json={"aktiv":True,"id":""}).status_code==400)
+chk("Analytics: ID speichern",cA.put("/api/kunde/website-dienste/analytics",json={"aktiv":True,"id":"g-ab12cd34ef"}).status_code==200)
+chk("Analytics: Website bekommt die Mess-ID",pub("GET","config").json()["analytics"]=={"aktiv":True,"id":"G-AB12CD34EF"})
+chk("Analytics: Kunden-Zustand",cA.get("/api/kunde/website-dienste").json()["analytics"]["id"]=="G-AB12CD34EF")
 # ---- Admin-Sicht ohne Geheimnisse
 cA.put("/api/kunde/website-dienste/smtp",json=S())
 ad=a.get(f"/api/admin/kunden/{kA}/website-dienste"); chk("Admin sieht den Status",ad.status_code==200 and ad.json()["site_id"]==sid and ad.json()["status"].get("kontakt"),ad.text[:200])

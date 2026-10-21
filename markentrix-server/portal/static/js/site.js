@@ -138,11 +138,40 @@
     } else c.textContent = '';
   }
 
+  // ------------------------------------------------------------ Google Analytics (erst nach Einwilligung)
+  var SCHLUESSEL = 'mk_statistik:' + site;
+  function wahl() { try { return localStorage.getItem(SCHLUESSEL); } catch (e) { return null; } }
+  function merke(w) { try { localStorage.setItem(SCHLUESSEL, w); } catch (e) { /* ohne Speicher: Abfrage kommt beim nächsten Besuch erneut */ } }
+  function gaLaden(id) {
+    if (window.__mkGa) return; window.__mkGa = true;
+    window.dataLayer = window.dataLayer || []; window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date()); window.gtag('config', id, { anonymize_ip: true });
+    document.head.appendChild(el('script', { async: true, src: 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id) }));
+  }
+  function banner(id, ds) {
+    var b = el('div', { class: 'mk-box', role: 'dialog', 'aria-label': 'Statistik', style: 'position:fixed;left:12px;right:12px;bottom:12px;max-width:560px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:12px;background:#fff;color:#111;box-shadow:0 6px 28px rgba(0,0,0,.28)' });
+    var ja = el('button', { class: 'mk-btn', type: 'button', style: 'margin-top:10px', text: 'Erlauben' }), nein = el('button', { class: 'mk-btn mk-leise', type: 'button', style: 'margin:10px 0 0 8px;color:#111', text: 'Ablehnen' });
+    ja.addEventListener('click', function () { merke('ja'); b.remove(); gaLaden(id); });
+    nein.addEventListener('click', function () { merke('nein'); b.remove(); });
+    b.appendChild(el('div', {}, 'Wir möchten anonym zählen, wie viele Besucher unsere Website nutzen (Google Analytics). Dabei werden Daten an Google übertragen. Das geschieht nur mit Ihrer Zustimmung, Sie können sie jederzeit widerrufen. Mehr in der ', el('a', { href: ds, target: '_blank', rel: 'noopener', text: 'Datenschutzerklärung' }), '.'));
+    b.appendChild(ja); b.appendChild(nein); document.body.appendChild(b);
+  }
+  function statistik(cfg) {
+    var a = cfg.analytics; if (!a || !a.aktiv) return;
+    var ds = skript.getAttribute('data-datenschutz') || '/datenschutz', w = wahl();
+    if (w === 'ja') gaLaden(a.id); else if (w !== 'nein') banner(a.id, ds);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-mk="cookies"]'), function (c) {
+      var l = el('a', { href: '#', text: c.getAttribute('data-text') || 'Statistik-Einstellungen' });
+      l.addEventListener('click', function (e) { e.preventDefault(); merke('offen'); try { localStorage.removeItem(SCHLUESSEL); } catch (x) { /* egal */ } if (!document.querySelector('[aria-label=Statistik]')) banner(a.id, ds); });
+      c.textContent = ''; c.appendChild(l);
+    });
+  }
+
   // ------------------------------------------------------------ Start
   var slots = {};
   Array.prototype.forEach.call(document.querySelectorAll('[data-mk]'), function (c) { var a = c.getAttribute('data-mk'); (slots[a] = slots[a] || []).push(c); });
-  if (!Object.keys(slots).length) return;
   anfrage('GET', 'config').then(function (cfg) {
+    statistik(cfg);
     (slots.kontakt || []).forEach(function (c) { if (cfg.kontakt) kontakt(c); else c.textContent = ''; });
     (slots.termin || []).forEach(function (c) { if (cfg.termin.aktiv) termin(c); else c.textContent = ''; });
     (slots.bewertungen || []).forEach(function (c) { if (cfg.bewertungen) bewertungen(c); else c.textContent = ''; });
