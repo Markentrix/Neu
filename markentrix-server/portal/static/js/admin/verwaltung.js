@@ -11,6 +11,53 @@ V.katalog = async () => {
     h('p', { class: 'muted small' }, 'Preise ändern: neue Zeile in produkt_preise mit späterem gueltig_ab (mkctl psql). Bestehende Buchungen behalten ihren Preis.'));
 };
 
+/** Website als ZIP hochladen und veröffentlichen. Der Server prüft die ZIP, richtet Domain und HTTPS ein und sichert die vorige Version. */
+async function uploadKarte(d) {
+  const kunden = await api('/api/admin/kunden'), m = h('div'), verlauf = h('div');
+  const art = h('select', {}, [['live', 'Live-Website (eigene Domain)'], ['demo', 'Demo (demo.markentrix.de/name)']].map(([v, t]) => h('option', { value: v }, t)));
+  const name = h('input', { placeholder: 'Domain ohne www, z. B. elbdetail.de', maxlength: 253, autocomplete: 'off' });
+  const kunde = h('select', {}, [h('option', { value: '' }, '– Kunde wählen –')].concat(kunden.map(k => h('option', { value: k.id, 'data-domain': k.domain || '' }, k.kundennummer + ' · ' + k.firma))));
+  const datei = h('input', { type: 'file', accept: '.zip,application/zip' });
+  const skript = h('input', { type: 'checkbox', style: 'width:auto', checked: true });
+  const knopfHoch = h('button', { class: 'btn', type: 'button' }, 'Hochladen und veröffentlichen');
+  art.addEventListener('change', () => { name.placeholder = art.value === 'live' ? 'Domain ohne www, z. B. elbdetail.de' : 'Name der Demo, z. B. anadolu'; });
+  kunde.addEventListener('change', () => { const dom = (kunde.selectedOptions[0].getAttribute('data-domain') || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); if (dom && !name.value && art.value === 'live') name.value = dom; });
+  // bekannte Live-Seiten: Name vorschlagen und Kunde vorbelegen
+  const bekannt = d.aktiv.filter(z => z.art === 'live');
+  const liste = h('datalist', { id: 'bekannte-seiten' }, bekannt.map(z => h('option', { value: z.name })));
+  name.setAttribute('list', 'bekannte-seiten');
+  const ladeVerlauf = async () => {
+    try {
+      const v = await api('/api/admin/websites/veroeffentlichungen');
+      verlauf.replaceChildren(
+        v.offen.length ? h('p', { class: 'small' }, h('span', { class: 'pill warn' }, 'läuft'), ' ' + v.offen.map(o => o.name).join(', ') + ' wird gerade veröffentlicht (bis zu einer Minute).') : '',
+        ...v.ergebnisse.slice(0, 5).map(e => h('div', { class: 'msg ' + (e.ok ? 'ok' : 'err'), style: 'margin:6px 0' }, h('b', {}, e.name + ': '), e.text + ' ', e.ok && e.url ? h('a', { href: e.url, target: '_blank', rel: 'noopener' }, 'Seite öffnen') : '')));
+      if (v.offen.length) setTimeout(ladeVerlauf, 5000);
+    } catch { /* Anzeige ist nur eine Hilfe */ }
+  };
+  knopfHoch.addEventListener('click', async () => {
+    melde(m, '');
+    if (!datei.files.length) { melde(m, 'Bitte eine ZIP-Datei wählen.'); return; }
+    const f = new FormData(); f.append('datei', datei.files[0]); f.append('art', art.value); f.append('name', name.value); f.append('kunden_id', kunde.value); f.append('dienste_skript', skript.checked ? '1' : '0');
+    knopfHoch.disabled = true; knopfHoch.textContent = 'Lade hoch …';
+    try { const r = await api('/api/admin/websites/upload', { method: 'POST', body: f }); melde(m, r.hinweis + ' (' + r.dateien + ' Dateien' + (r.skript_in_seiten ? ', Website-Dienste in ' + r.skript_in_seiten + ' Seiten eingebaut' : '') + ')', 'ok'); datei.value = ''; setTimeout(ladeVerlauf, 1500); }
+    catch (x) { melde(m, x.message); }
+    knopfHoch.disabled = false; knopfHoch.textContent = 'Hochladen und veröffentlichen';
+  });
+  const zurueckKnopf = h('button', { class: 'btn sec', type: 'button', onclick: async () => {
+    if (!name.value) { melde(m, 'Bitte oben den Namen der Seite eintragen.'); return; }
+    if (!confirm('Die vorige Version von ' + name.value + ' wieder online stellen?')) return;
+    try { const r = await api('/api/admin/websites/zurueck', { method: 'POST', body: { art: art.value, name: name.value } }); melde(m, r.hinweis, 'ok'); setTimeout(ladeVerlauf, 1500); } catch (x) { melde(m, x.message); }
+  } }, 'Vorige Version zurückholen');
+  setTimeout(ladeVerlauf, 0);
+  const f = (t, el, tipp) => h('div', {}, h('label', {}, t), el, tipp ? h('div', { class: 'small muted' }, tipp) : '');
+  return h('div', { class: 'card' }, h('h2', {}, 'Website hochladen'),
+    h('p', { class: 'small muted' }, 'Die fertige Website als ZIP (die index.html direkt oben). Der Server prüft die Dateien, richtet bei einer neuen Domain Website und HTTPS selbst ein und sichert die vorige Version. Erneutes Hochladen mit demselben Namen aktualisiert die Seite.'),
+    m, liste, h('div', { class: 'form2' }, f('Art', art), f('Name / Domain', name, 'Bei bestehenden Seiten wird der Name vorgeschlagen.'), f('Kunde (Kundennummer)', kunde, 'Bei neuen Live-Websites nötig. Die Domain des Kunden wird vorgeschlagen.'), f('ZIP-Datei', datei, 'Bis 120 MB.')),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin-top:8px' }, skript, 'Website-Dienste (Formular, Termine, Statistik) automatisch in alle Seiten einbauen'),
+    h('div', { class: 'row', style: 'margin-top:10px' }, knopfHoch, zurueckKnopf), verlauf);
+}
+
 V.websites = async () => {
   const d = await api('/api/admin/websites');
   const m = h('div');
@@ -27,7 +74,7 @@ V.websites = async () => {
     try { const r = await api('/api/admin/websites/wiederherstellen', { method: 'POST', body: { id: z.id } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
     catch (x) { melde(m, x.message); }
   } }, 'Wiederherstellen');
-  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m,
+  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, await uploadKarte(d),
     h('div', { class: 'card' }, h('h2', {}, 'Aktiv'),
       tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', loesch]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
     h('div', { class: 'card' }, h('h2', {}, 'Papierkorb'), h('p', { class: 'small muted' }, 'Gelöschte Seiten bleiben ' + d.aufbewahrung_tage + ' Tage erhalten und werden dann endgültig entfernt.'),

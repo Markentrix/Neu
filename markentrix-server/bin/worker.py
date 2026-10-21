@@ -21,8 +21,11 @@ def log(m):
 def reload_caddy():
     mode = (BASE / "mode").read_text().strip() if (BASE / "mode").exists() else "own"
     if mode == "own":
-        subprocess.run(["docker", "compose", "--project-directory", str(BASE), "-f", str(BASE / "docker-compose.yml"),
-                        "exec", "-T", "caddy", "caddy", "reload", "--config", "/etc/caddy/Caddyfile"], check=False, capture_output=True)
+        try:
+            subprocess.run(["docker", "compose", "--project-directory", str(BASE), "-f", str(BASE / "docker-compose.yml"),
+                            "exec", "-T", "caddy", "caddy", "reload", "--config", "/etc/caddy/Caddyfile"], check=False, capture_output=True)
+        except OSError as e:
+            log(f"Caddy konnte nicht neu geladen werden: {e}")
 
 
 def loeschen(art, name):
@@ -59,7 +62,142 @@ def wiederherstellen(tid):
     log(f"wiederhergestellt: {art} {name}")
 
 
+UPLOAD = re.compile(r"^[0-9a-f]{16}$")
+VORVERSION = SITES / ".vorversionen"
+VOR_BEHALTEN = 3
+VOR_TAGE = 30
+
+
+def ergebnis(uid, a, ok, text, **extra):
+    """Rückmeldung für das Portal (Admin → Verwaltung → Website hochladen). Lesbar für den Portal-Benutzer 10001."""
+    try:
+        p = QUEUE / f"ergebnis-{uid}.json"
+        p.write_text(json.dumps({"id": uid, "aktion": a.get("aktion"), "art": a.get("art"), "name": a.get("name"), "ok": ok, "text": text,
+                                 "zeit": time.strftime("%Y-%m-%dT%H:%M:%S"), **extra}))
+        os.chown(p, 10001, 10001)
+        p.chmod(0o640)
+    except OSError as e:
+        log(f"Ergebnis nicht schreibbar: {e}")
+
+
+def baum_pruefen(wurzel):
+    """Nur normale Dateien und Ordner: ein Symlink oder Sonderfile im Upload bricht ab (das Portal ist nicht vertrauenswürdig genug für Root-Aktionen)."""
+    for root, dirs, files in os.walk(wurzel):
+        for n in dirs + files:
+            pf = Path(root) / n
+            if pf.is_symlink() or not (pf.is_dir() or pf.is_file()):
+                raise RuntimeError("Unzulässige Datei im Upload")
+
+
+def ziel_ordner(art, name):
+    return SITES / ("live" if art == "live" else "demos") / name
+
+
+def uebernehmen(alt, neu):
+    """Daten, die das Portal selbst pflegt, wandern in die neue Version: Wochenangebote und die Kennung der Seite."""
+    if (alt / "angebote").is_dir() and not (neu / "angebote").exists():
+        shutil.move(str(alt / "angebote"), str(neu / "angebote"))
+    if (alt / "site.json").is_file():
+        (neu / "site.json").unlink(missing_ok=True)
+        shutil.move(str(alt / "site.json"), str(neu / "site.json"))
+
+
+def vorname(art, name):
+    """Eindeutiger Sicherungsname, auch wenn mehrere Wechsel in derselben Sekunde passieren."""
+    return VORVERSION / f"{time.strftime('%Y%m%d-%H%M%S')}-{time.time_ns() % 1000000:06d}__{art}__{name}"
+
+
+def caddy_datei(domain):
+    cf = BASE / "caddy" / "sites" / f"{domain}.caddy"
+    if cf.exists():
+        return False
+    cf.parent.mkdir(parents=True, exist_ok=True)
+    cf.write_text(f"{domain}, www.{domain} {{\n\tencode zstd gzip\n\troot * /srv/sites/live/{domain}\n\tfile_server\n}}\n")
+    return True
+
+
+def vorversionen_aufraeumen(art, name):
+    if not VORVERSION.is_dir():
+        return
+    alle = sorted([d for d in VORVERSION.iterdir() if d.is_dir() and not d.is_symlink() and d.name.endswith(f"__{art}__{name}")], reverse=True)
+    for i, d in enumerate(alle):
+        if i >= VOR_BEHALTEN or d.stat().st_mtime < time.time() - VOR_TAGE * 86400:
+            shutil.rmtree(d, ignore_errors=True)
+
+
+def veroeffentlichen(a):
+    art, name, uid = a.get("art"), str(a.get("name", "")), str(a.get("upload", ""))
+    if art not in NAME or not NAME[art].match(name) or not UPLOAD.match(uid):
+        raise RuntimeError("ungültiger Auftrag")
+    stage = SITES / "live" / f".upload-{uid}"
+    try:
+        if stage.is_symlink() or not stage.is_dir():
+            raise RuntimeError("Der Upload ist nicht mehr vorhanden")
+        baum_pruefen(stage)
+        if not (stage / "index.html").is_file():
+            raise RuntimeError("index.html fehlt")
+        subprocess.run(["chown", "-R", "-h", "root:root", str(stage)], check=True, capture_output=True)
+        subprocess.run(["chmod", "-R", "u-s,g-s,go-w,a+rX", str(stage)], check=True, capture_output=True)
+        ziel = ziel_ordner(art, name)
+        neu = not ziel.exists()
+        if ziel.is_symlink() or (ziel.exists() and not ziel.is_dir()):
+            raise RuntimeError("Zielordner ist ungültig")
+        if neu:
+            (stage / "site.json").write_text(json.dumps({"typ": art, "name": name, "kunde": str(a.get("kunde", "")), "angelegt": time.strftime("%F")}, indent=2))
+            if art == "live":
+                (stage / "angebote" / "archiv").mkdir(parents=True, exist_ok=True)
+        else:
+            uebernehmen(ziel, stage)
+            VORVERSION.mkdir(mode=0o755, exist_ok=True)
+            os.rename(ziel, vorname(art, name))
+        if art == "live":
+            subprocess.run(["chown", "-R", "-h", "10001:10001", str(stage / "angebote")], check=False, capture_output=True)
+        ziel.parent.mkdir(parents=True, exist_ok=True)
+        os.rename(stage, ziel)
+        angelegt = False
+        if art == "live":
+            angelegt = caddy_datei(name)
+            if angelegt:
+                reload_caddy()
+        vorversionen_aufraeumen(art, name)
+        url = f"https://{name}/" if art == "live" else f"https://demo.{os.environ.get('MK_DOMAIN', 'markentrix.de')}/{name}/"
+        text = ("Website neu angelegt und veröffentlicht. Damit sie erreichbar ist, muss die Domain per A-Eintrag (auch www) auf diesen Server zeigen, das HTTPS-Zertifikat kommt dann automatisch."
+                if neu and art == "live" else "Veröffentlicht. Die vorige Version ist gesichert und lässt sich zurückholen.")
+        ergebnis(uid, a, True, text, url=url, neu=neu)
+        log(f"veröffentlicht: {art} {name}")
+    except Exception as e:  # noqa: BLE001
+        shutil.rmtree(stage, ignore_errors=True)
+        ergebnis(uid if UPLOAD.match(uid) else "0" * 16, a, False, f"Fehlgeschlagen: {e}")
+        raise
+
+
+def zurueck(a):
+    art, name, uid = a.get("art"), str(a.get("name", "")), str(a.get("upload", ""))
+    if art not in NAME or not NAME[art].match(name) or not UPLOAD.match(uid):
+        raise RuntimeError("ungültiger Auftrag")
+    try:
+        ziel = ziel_ordner(art, name)
+        alle = sorted([d for d in VORVERSION.iterdir() if d.is_dir() and not d.is_symlink() and d.name.endswith(f"__{art}__{name}")], reverse=True) if VORVERSION.is_dir() else []
+        if not alle or ziel.is_symlink() or not ziel.is_dir():
+            raise RuntimeError("Es gibt keine frühere Version")
+        alt = alle[0]
+        uebernehmen(ziel, alt)
+        os.rename(ziel, vorname(art, name))
+        os.rename(alt, ziel)
+        ergebnis(uid, a, True, "Die vorige Version ist wieder online. Die jetzt ersetzte Version ist gesichert, ein weiterer Klick holt sie zurück.", neu=False)
+        log(f"zurückgesetzt: {art} {name}")
+    except Exception as e:  # noqa: BLE001
+        ergebnis(uid if UPLOAD.match(uid) else "0" * 16, a, False, f"Fehlgeschlagen: {e}")
+        raise
+
+
 def aufraeumen():
+    for d in (SITES / "live").glob(".upload-*"):
+        if d.is_dir() and not d.is_symlink() and d.stat().st_mtime < time.time() - 86400:
+            shutil.rmtree(d, ignore_errors=True)
+    for f in QUEUE.glob("ergebnis-*.json"):
+        if f.stat().st_mtime < time.time() - 7 * 86400:
+            f.unlink(missing_ok=True)
     if not TRASH.is_dir():
         return
     grenze = time.time() - KEEP_DAYS * 86400
@@ -78,6 +216,10 @@ def main():
             a = json.loads(f.read_text())
             if a.get("aktion") == "loeschen" and a.get("art") in NAME and NAME[a["art"]].match(str(a.get("name", ""))):
                 loeschen(a["art"], a["name"])
+            elif a.get("aktion") == "veroeffentlichen":
+                veroeffentlichen(a)
+            elif a.get("aktion") == "zurueck":
+                zurueck(a)
             elif a.get("aktion") == "wiederherstellen":
                 wiederherstellen(str(a.get("id", "")))
             else:

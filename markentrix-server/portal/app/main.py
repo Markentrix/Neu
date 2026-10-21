@@ -33,6 +33,7 @@ from .routes_websitecheck import router as wcheck_router
 from .routes_folgemails import router as folge_router
 from .routes_buchung import router as buchung_router
 from .routes_sitedienste import admin as site_admin_router
+from .routes_webupload import router as webupload_router
 from .routes_sitedienste import kunde as site_kunde_router
 from .routes_sitedienste import router as site_router
 from .routes_vertriebsplus import router as vertriebsplus_router
@@ -158,6 +159,7 @@ app.include_router(buchung_router)
 app.include_router(site_router)
 app.include_router(site_kunde_router)
 app.include_router(site_admin_router)
+app.include_router(webupload_router)
 app.include_router(vertriebsplus_router)
 app.include_router(vertriebwerkzeuge_router)
 app.include_router(leadangebot_router)

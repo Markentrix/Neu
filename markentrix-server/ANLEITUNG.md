@@ -409,3 +409,16 @@ Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nu
 **Sicherheit:** Zugangsdaten (SMTP-Passwort, Kalender-Adresse) werden mit dem Server-Schlüssel (`PORTAL_SECRET`) verschlüsselt, sind nie wieder lesbar (auch nicht für Admins) und nur vom Inhaber ersetzbar. Die öffentlichen Aufrufe (`/site/<ID>/…`) funktionieren nur von den Domains des Kunden (Domainverwaltung bzw. Websites), sind je IP und je Website begrenzt und haben ein Lockfeld gegen Bots. SMTP-Server und Kalender-Adressen werden nur geholt, wenn sie ins öffentliche Internet zeigen (kein Zugriff auf interne Dienste), Kalender nur über https. Gebuchte Termine werden 180 Tage nach dem Termin gelöscht, das Ereignisprotokoll nach 90 Tagen.
 
 **Vor dem ersten Kunden:** Domain des Kunden in der Domainverwaltung eintragen (sonst lehnt der Server die Website ab); Datenschutzerklärung der Website um Kontaktformular, Terminbuchung und ggf. Google-Bewertungen/PayPal ergänzen; AVV-Beschreibung der Leistungen und Anlage 3 (Unterauftragsverarbeiter: Google Places) vom Anwalt prüfen lassen (docs/ANWALT-CHECKLISTE.md).
+
+## Website als ZIP hochladen (Admin → Websites & Demos → „Website hochladen“)
+So veröffentlichst du eine fertige Kunden-Website, ohne SSH oder WinSCP:
+1. Website als ZIP packen (die `index.html` direkt oben; ein Ordner „meine-seite/“ in der ZIP wird automatisch abgestreift).
+2. Im Admin **Websites & Demos** → **Website hochladen**: Art (Live oder Demo), Domain ohne www (z. B. `elbdetail.de`), **Kunde mit Kundennummer** (MK-1001 · Firma; die Domain des Kunden wird vorgeschlagen), ZIP wählen, **Hochladen und veröffentlichen**.
+3. Das Portal prüft die ZIP (keine Skripte wie .php/.exe, keine Symlinks, keine unsicheren Pfade, keine versteckten Dateien, Größenlimits: 120 MB ZIP, 400 MB entpackt) und legt einen Auftrag ab. Der Server-Dienst (läuft jede Minute) richtet bei einer neuen Domain den Webserver-Eintrag für `domain` und `www.domain` ein (HTTPS-Zertifikat automatisch, sobald die Domain per A-Eintrag auf den Server zeigt) und schaltet die Seite live. Das Ergebnis erscheint unter dem Formular, mit Link zur Seite.
+4. Haken „Website-Dienste automatisch einbauen“: fügt das Skript für Formular, Termine, Bewertungen und Statistik (Cookie-Abfrage) vor `</body>` jeder HTML-Seite ein, mit der Kennung dieses Kunden. Die Bausteine selbst (`data-mk=…`) setzt du dort, wo sie erscheinen sollen (Code im Kundenblatt → Website-Dienste).
+
+**Aktualisieren:** Dieselbe Domain nochmal hochladen. Die vorige Version wird gesichert (die letzten 3, höchstens 30 Tage), die Wochenangebote des Kunden (`angebote/`) und die Kennung bleiben erhalten. **Vorige Version zurückholen** (Name oben eintragen) stellt sie in einer Minute wieder her, ein weiterer Klick wechselt zurück.
+
+**Zuordnung:** Die Website wird dem Kunden zugeordnet (Kundenblatt → Websites, Domain beim Kunden vermerkt, Website-Dienste erlauben genau diese Domain) und trägt Kundennummer und Firma in ihrer Kennung (`site.json`). Domain bei IONOS/INWX: nur der A-Eintrag (und www) muss auf den Server zeigen, siehe oben.
+
+Der alte Weg `mkctl site-add … --from Ordner` funktioniert weiter. Eine Windows-.bat mit SSH ist nicht mehr nötig.
