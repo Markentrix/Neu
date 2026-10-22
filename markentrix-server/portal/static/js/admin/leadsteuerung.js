@@ -6,8 +6,8 @@ import { knopf, tabelle } from './kern.js';
 export async function steuerungKarte() {
   const [s, sp] = await Promise.all([api('/api/admin/vertrieb/steuerung'), api('/api/admin/vertrieb/sperrliste')]);
   const m = h('div'), liste = h('div');
-  const auto = h('input', { type: 'checkbox', checked: !!s.auto_zuweisung, id: 'st_auto' });
-  const preise = h('input', { type: 'checkbox', checked: !!s.preise_sichtbar, id: 'st_preise' });
+  const auto = h('input', { type: 'checkbox', checked: !!s.auto_zuweisung, id: 'st_auto', style: 'width:auto' });
+  const preise = h('input', { type: 'checkbox', checked: !!s.preise_sichtbar, id: 'st_preise', style: 'width:auto' });
   const std = h('input', { type: 'number', min: 1, max: 168, value: s.reaktionsstunden || 24, style: 'width:90px', 'aria-label': 'Reaktionszeit in Stunden' });
   const speichern = async () => {
     try { await api('/api/admin/vertrieb/steuerung', { method: 'PUT', body: { auto_zuweisung: auto.checked, preise_sichtbar: preise.checked, reaktionsstunden: Number(std.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
@@ -22,8 +22,8 @@ export async function steuerungKarte() {
     try { await api('/api/admin/vertrieb/sperrliste', { method: 'POST', body: { ...o, grund: 'manuell' } }); location.reload(); } catch (x) { melde(m, x.message); }
   } }, h('input', { name: 'email', placeholder: 'E-Mail', 'aria-label': 'E-Mail' }), h('input', { name: 'telefon', placeholder: 'Telefon', 'aria-label': 'Telefon' }), h('input', { name: 'website', placeholder: 'Website', 'aria-label': 'Website' }), h('button', { class: 'btn small' }, 'Sperren'));
   return h('div', { class: 'card' }, h('h2', {}, 'Steuerung und Sperrliste'), m,
-    h('label', { class: 'row' }, auto, ' Neue Anfragen automatisch auf aktive Vertriebler verteilen'),
-    h('label', { class: 'row' }, preise, ' Vertriebler sehen die Paketpreise'),
+    h('label', { style: 'display:flex;align-items:center;gap:8px' }, auto, ' Neue Anfragen automatisch auf aktive Vertriebler verteilen'),
+    h('label', { style: 'display:flex;align-items:center;gap:8px' }, preise, ' Vertriebler sehen die Paketpreise'),
     h('div', { class: 'row' }, h('span', {}, 'Heiße Anfragen eskalieren nach'), std, h('span', {}, 'Stunden ohne Kontakt')),
     h('p', {}, h('button', { class: 'btn', onclick: speichern }, 'Speichern')),
     h('h3', {}, 'Sperrliste'), h('p', { class: 'small muted' }, 'Wer hier steht, wird beim Import und beim Anlegen abgewiesen. Eingehende Anfragen werden trotzdem angenommen.'), neu, liste);
@@ -34,11 +34,11 @@ export async function zuKundeDialog(lid, danach) {
   const v = await api('/api/admin/leads/' + lid + '/zu-kunde-vorschlag'), m = h('p', { role: 'status' });
   const paket = h('select', { 'aria-label': 'Paket' }, h('option', { value: '' }, 'ohne Paket'), (v.pakete || []).map(p => h('option', { value: p.code, selected: p.code === v.vorschlag }, p.name)));
   const beginn = h('input', { type: 'date', value: new Date().toISOString().slice(0, 10), 'aria-label': 'Beginn' });
-  const einl = h('input', { type: 'checkbox', checked: !!v.lead.email });
+  const einl = h('input', { type: 'checkbox', checked: !!v.lead.email, style: 'width:auto' });
   const d = dialog('Zum Kunden machen', h('div', { class: 'stack' },
-    v.angebot && h('p', { class: 'small' }, 'Angenommenes Angebot ' + v.angebot.nummer + ' (' + (v.angebot.brutto_cent / 100).toFixed(2).replace('.', ',') + ' € brutto).'),
+    (v.angebot ? h('p', { class: 'small' }, 'Angenommenes Angebot ' + v.angebot.nummer + ' (' + (v.angebot.brutto_cent / 100).toFixed(2).replace('.', ',') + ' € brutto).') : ''),
     h('label', {}, 'Paket'), paket, h('label', {}, 'Beginn der Buchung'), beginn,
-    h('label', { class: 'row' }, einl, ' Einladung zum Kundenportal gleich verschicken' + (v.lead.email ? '' : ' (keine E-Mail hinterlegt)')), m,
+    h('label', { style: 'display:flex;align-items:center;gap:8px' }, einl, ' Einladung zum Kundenportal gleich verschicken' + (v.lead.email ? '' : ' (keine E-Mail hinterlegt)')), m,
     h('button', { class: 'btn', onclick: async (e) => {
       e.target.disabled = true;
       try { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST', body: { paket_code: paket.value || null, beginn: paket.value ? beginn.value : null, einladen: einl.checked && !!v.lead.email } }); d.zu(); if (danach) danach(k); } catch (x) { e.target.disabled = false; melde(m, x.message); }
