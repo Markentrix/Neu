@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Werkstatt Muster · Autowerkstatt in Celle (Beispiel-Landingpage)</title>
+<meta name="description" content="Fiktive Beispiel-Landingpage von Markentrix: So kann eine Website für eine Autowerkstatt in Celle aussehen.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/beispiel/werkstatt-muster/demo.css">
+</head>
+<body>
+<svg class="sprite" width="0" height="0" focusable="false" aria-hidden="true"><defs>
+  <symbol id="w-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+  <symbol id="w-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5l-6.2 6.2a2 2 0 0 0 2.8 2.8l6.2-6.2a4 4 0 0 0 5-5.4l-2.5 2.5-2.1-.4-.4-2.1z"/></symbol>
+  <symbol id="w-tire" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></symbol>
+  <symbol id="w-brake" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M5 5l3 3M19 5l-3 3M5 19l3-3M19 19l-3-3"/></symbol>
+  <symbol id="w-snow" viewBox="0 0 24 24"><path d="M12 2v20M4.2 7l15.6 10M19.8 7L4.2 17"/><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5"/></symbol>
+  <symbol id="w-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="w-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></symbol>
+  <symbol id="w-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol>
+  <symbol id="w-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+</defs></svg>
+<aside class="ribbon" aria-label="Hinweis zur Beispielseite">Beispiel-Landingpage von Markentrix. Werkstatt Muster ist ein fiktiver Betrieb, Formular und Nummer sind nicht aktiv.</aside>
+<header class="top">
+  <a class="logo" href="#start"><span class="mark">WM</span>Werkstatt Muster</a>
+  <nav class="nav" aria-label="Hauptnavigation">
+    <a href="#leistungen">Leistungen</a><a href="#ablauf">Ablauf</a><a href="#zeiten">Zeiten und Anfahrt</a><a href="#faq">Fragen</a>
+  </nav>
+  <a class="btn btn-call" href="#kontakt"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#w-phone"/></svg>05141&nbsp;00&nbsp;00&nbsp;03</a>
+</header>
+
+<main id="start">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Autowerkstatt in Celle</span>
+        <h1>Ihr Auto in guten Händen. <em>Termin in zwei Minuten.</em></h1>
+        <p class="lead">Inspektion, Reifenservice, Bremsen und Klimaservice für alle gängigen Marken. Sie nennen Fahrzeug und Wunschtermin, wir melden uns mit einem Festpreis, bevor wir schrauben.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#kontakt">Termin anfragen</a>
+          <a class="btn btn-ghost" href="#leistungen">Leistungen ansehen</a>
+        </div>
+        <ul class="proof">
+          <li>Rückmeldung am selben Werktag</li>
+          <li>Festpreis vor Reparaturbeginn</li>
+          <li>Hol- und Bringservice nach Absprache</li>
+        </ul>
+      </div>
+      <form class="quick" data-demo-form aria-labelledby="quick-title">
+        <h2 id="quick-title">Schnellanfrage</h2>
+        <fieldset>
+          <legend>Was steht an?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="leistung" checked><span>Inspektion</span></label>
+            <label class="chip"><input type="radio" name="leistung"><span>Reifenwechsel</span></label>
+            <label class="chip"><input type="radio" name="leistung"><span>Bremsen</span></label>
+            <label class="chip"><input type="radio" name="leistung"><span>Klimaservice</span></label>
+            <label class="chip"><input type="radio" name="leistung"><span>HU-Vorbereitung</span></label>
+            <label class="chip"><input type="radio" name="leistung"><span>Etwas anderes</span></label>
+          </div>
+        </fieldset>
+        <label class="fld">Fahrzeug<input type="text" placeholder="Zum Beispiel: VW Golf, Baujahr 2017"></label>
+        <label class="fld">Wunschtag
+          <select><option>Diese Woche</option><option>Nächste Woche</option><option>Egal, bitte Vorschlag</option></select>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">Termin anfragen</button>
+        <p class="form-msg" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <section id="leistungen" class="sec">
+    <div class="wrap">
+      <span class="eyebrow eyebrow-d">Leistungen</span>
+      <h2>Sechs Dinge, die wir jeden Tag machen.</h2>
+      <div class="grid3">
+        <article class="card"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#w-wrench"/></svg></span><h3>Inspektion und Wartung</h3><p>Nach Herstellervorgabe, mit Durchsicht und Kostenvoranschlag, bevor etwas getauscht wird.</p><a href="#kontakt">Termin anfragen</a></article>
+        <article class="card"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#w-tire"/></svg></span><h3>Reifenservice</h3><p>Wechsel, Einlagerung und Auswuchten. Zum Saisonwechsel am besten rechtzeitig anfragen.</p><a href="#kontakt">Termin anfragen</a></article>
+        <article class="card"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#w-brake"/></svg></span><h3>Bremsen und Fahrwerk</h3><p>Prüfung von Belägen, Scheiben und Stoßdämpfern. Sie sehen vorher, was nötig ist und was nicht.</p><a href="#kontakt">Termin anfragen</a></article>
+        <article class="card"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#w-snow"/></svg></span><h3>Klimaservice</h3><p>Prüfung und Wartung der Klimaanlage, damit sie im Sommer kühlt und der Innenraum frisch bleibt.</p><a href="#kontakt">Termin anfragen</a></article>
+        <article class="card"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#w-clip"/></svg></span><h3>HU-Vorbereitung</h3><p>Wir prüfen vorab, was zur Hauptuntersuchung auffallen könnte, und beheben es nach Ihrer Freigabe.</p><a href="#kontakt">Termin anfragen</a></article>
+        <article class="card"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#w-spark"/></svg></span><h3>Fahrzeugpflege</h3><p>Innen- und Außenreinigung vor dem Verkauf oder der Rückgabe, auf Wunsch im selben Termin.</p><a href="#kontakt">Termin anfragen</a></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="season" aria-labelledby="season-title">
+    <div class="wrap season-in">
+      <div>
+        <span class="eyebrow">Saisonwechsel</span>
+        <h2 id="season-title">Reifen rechtzeitig anfragen, Wartezeit sparen.</h2>
+        <p>Zum Wechsel der Jahreszeit sind die Termine knapp. Eine kurze Anfrage genügt, wir schlagen Ihnen einen freien Termin vor.</p>
+      </div>
+      <a class="btn btn-dark" href="#kontakt">Reifentermin anfragen</a>
+    </div>
+  </section>
+
+  <section id="ablauf" class="sec sec-steel">
+    <div class="wrap">
+      <span class="eyebrow">So läuft es ab</span>
+      <h2>Vier Schritte, keine Überraschung.</h2>
+      <ol class="steps">
+        <li><span class="n">01</span><b>Anfrage</b><span>Formular oder Anruf. Wir melden uns am selben Werktag mit einem Terminvorschlag.</span></li>
+        <li><span class="n">02</span><b>Annahme und Prüfung</b><span>Wir sehen uns das Fahrzeug an und besprechen mit Ihnen, was nötig ist.</span></li>
+        <li><span class="n">03</span><b>Freigabe mit Festpreis</b><span>Sie erhalten den Preis vorab und entscheiden. Ohne Ihre Freigabe wird nichts getauscht.</span></li>
+        <li><span class="n">04</span><b>Abholung</b><span>Sie erhalten das Fahrzeug mit Rechnung und Erklärung zurück, auf Wunsch mit den Altteilen.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="zeiten" class="sec">
+    <div class="wrap split">
+      <div>
+        <span class="eyebrow eyebrow-d">Zeiten und Anfahrt</span>
+        <h2>Mitten in Celle, gut erreichbar.</h2>
+        <p>Musterstraße 3, Celle. Kundenparkplätze am Haus, Bushaltestelle in drei Gehminuten.</p>
+        <table class="hours">
+          <caption class="sr-only">Öffnungszeiten</caption>
+          <tbody>
+            <tr><th scope="row">Mo bis Fr</th><td>7:30 bis 17:30 Uhr</td></tr>
+            <tr><th scope="row">Samstag</th><td>nach Vereinbarung</td></tr>
+            <tr><th scope="row">Sonntag</th><td>geschlossen</td></tr>
+          </tbody>
+        </table>
+        <a class="btn btn-primary" href="#kontakt">Termin anfragen</a>
+      </div>
+      <div class="roadmap" aria-hidden="true">
+        <span class="road r1"></span><span class="road r2"></span><span class="road r3"></span>
+        <span class="pinmark"><svg viewBox="0 0 24 24"><use href="#w-pin"/></svg></span>
+        <span class="maplabel">Werkstatt Muster</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="sec sec-soft">
+    <div class="wrap narrow">
+      <span class="eyebrow eyebrow-d">Häufige Fragen</span>
+      <h2>Kurz beantwortet.</h2>
+      <details open><summary>Wird etwas ohne meine Zustimmung repariert?</summary><p>Nein. Sie erhalten vorab einen Festpreis und entscheiden. Erst nach Ihrer Freigabe beginnen wir.</p></details>
+      <details><summary>Muss ich einen Termin vereinbaren?</summary><p>Für Inspektion und Reifenservice ja, damit wir Zeit für Ihr Fahrzeug haben. Für kleine Fragen genügt ein Anruf.</p></details>
+      <details><summary>Gibt es einen Hol- und Bringservice?</summary><p>Nach Absprache im näheren Umkreis. Fragen Sie bei der Terminanfrage danach.</p></details>
+      <details><summary>Kann ich die alten Teile sehen?</summary><p>Auf Wunsch zeigen wir Ihnen ausgetauschte Teile und erklären, warum sie getauscht wurden.</p></details>
+    </div>
+  </section>
+
+  <section id="kontakt" class="sec sec-steel">
+    <div class="wrap split">
+      <div>
+        <span class="eyebrow">Termin anfragen</span>
+        <h2>Sagen Sie uns kurz, was ansteht.</h2>
+        <p>Wir melden uns am selben Werktag. Oder Sie rufen direkt an: Mo bis Fr 7:30 bis 17:30 Uhr.</p>
+        <a class="btn btn-ghost btn-light" href="#kontakt">05141&nbsp;00&nbsp;00&nbsp;03</a>
+      </div>
+      <form class="form" data-demo-form>
+        <label>Name<input type="text" placeholder="Ihr Name"></label>
+        <label>Telefon oder E-Mail<input type="text" placeholder="Für die Rückmeldung"></label>
+        <label>Fahrzeug und Anliegen<textarea rows="3" placeholder="Zum Beispiel: Golf 7, Inspektion und Bremsen prüfen"></textarea></label>
+        <button type="submit" class="btn btn-primary">Anfrage senden</button>
+        <p class="form-msg" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><b>Werkstatt Muster</b> · Musterstraße 3 · Celle · Fiktiver Beispielbetrieb</p>
+    <p>Diese Seite ist eine Beispiel-Landingpage von <a href="/">Markentrix</a>. Keine echte Firma, kein echtes Angebot.</p>
+  </div>
+</footer>
+<script src="/beispiel/werkstatt-muster/demo.js" defer></script>
+</body>
+</html>
