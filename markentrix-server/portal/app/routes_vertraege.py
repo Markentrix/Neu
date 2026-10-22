@@ -15,7 +15,8 @@ from .security import audit, require_admin, require_vertrieb
 router = APIRouter(prefix="/api/admin")
 vertrieb = APIRouter(prefix="/api/vertrieb")
 MAX_DATEI = 6 * 1024 * 1024
-SPALTEN = "id, art, kunden_id, partner_id, daten, erstellt_am, gesendet_am, gesendet_an, unterschrieben_am, datei_name, hochgeladen_am, datei IS NOT NULL AS hat_datei"
+SPALTEN = ("id, art, kunden_id, partner_id, daten, erstellt_am, gesendet_am, gesendet_an, unterschrieben_am, datei_name, hochgeladen_am, datei IS NOT NULL AS hat_datei, "
+           "erinnerungen, erinnert_am, online_am, online_name, widerrufen_am")
 
 
 def _404():
@@ -49,16 +50,26 @@ def handelsvertreter_werte(p: dict, d: dict, f: dict) -> tuple:
     return werte, haken
 
 
-def _pdf(cur, z: dict) -> tuple:
+def _basis(cur, z: dict) -> tuple:
+    """Formularwerte, Haken, Standard-Empfänger und Anrede für einen Vertrag, wie der Admin ihn angelegt hat."""
     d = z["daten"]
     if z["art"] == "referenz":
         cur.execute("SELECT firma, ansprechpartner, strasse, plz, ort, email FROM kunden WHERE id=%s", (z["kunden_id"],))
         k = cur.fetchone()
-        return vertraege.ausfuellen("referenz", referenz_werte(k, d)), vertraege.DATEINAME["referenz"] + ".pdf", k["email"], k["ansprechpartner"]
+        return referenz_werte(k, d), [], k["email"], k["ansprechpartner"]
     cur.execute("SELECT name, email FROM vertriebspartner WHERE id=%s", (z["partner_id"],))
     p = cur.fetchone()
     werte, haken = handelsvertreter_werte(p, d, rechtstexte.firma(cur))
-    return vertraege.ausfuellen("handelsvertreter", werte, haken), vertraege.DATEINAME["handelsvertreter"] + ".pdf", (_kurz(d.get("mail")) or p["email"]), (_kurz(d.get("name")) or p["name"])
+    return werte, haken, (_kurz(d.get("mail")) or p["email"]), (_kurz(d.get("name")) or p["name"])
+
+
+def _pdf(cur, z: dict, online: tuple | None = None) -> tuple:
+    """online = (werte, haken) aus der Bestätigung im Portal; sie ergänzen die Werte des Admins, die Haken ersetzen dessen Vorbelegung."""
+    werte, haken, mail, anrede = _basis(cur, z)
+    if online:
+        werte = {**werte, **online[0]}
+        haken = online[1]
+    return vertraege.ausfuellen(z["art"], werte, haken), vertraege.DATEINAME[z["art"]] + ".pdf", mail, anrede
 
 
 def _senden(cur, z: dict, an: str | None, user: dict):
@@ -265,3 +276,94 @@ def loeschen(zid: str, user: dict = Depends(require_admin)):
 @vertrieb.get("/telefonleitfaden.pdf")
 def telefonleitfaden(user: dict = Depends(require_vertrieb)):
     return FileResponse(vertraege.DIR / "telefonleitfaden.pdf", media_type="application/pdf", headers={"Content-Disposition": 'inline; filename="Markentrix-Telefonleitfaden-Kaltakquise.pdf"', "Cache-Control": "private, no-store"})
+
+
+# ---------------------------------------------------------------- Übersicht „Was fehlt noch?“, Referenzliste, Einarbeitung (Admin)
+def _stand(z: dict | None) -> dict:
+    """Kurzstand eines Vertragsdokuments: keins / erstellt / gesendet (offen) / unterschrieben / widerrufen."""
+    if not z:
+        return {"stand": "keins"}
+    if z["widerrufen_am"]:
+        return {"stand": "widerrufen", "id": z["id"]}
+    if z["unterschrieben_am"] or z["hat_datei"]:
+        return {"stand": "unterschrieben", "id": z["id"], "am": z["unterschrieben_am"], "online": bool(z["online_am"])}
+    if z["gesendet_am"]:
+        return {"stand": "gesendet", "id": z["id"], "am": z["gesendet_am"], "erinnerungen": z["erinnerungen"]}
+    return {"stand": "erstellt", "id": z["id"]}
+
+
+@router.get("/vertragsdokumente/uebersicht")
+def uebersicht(user: dict = Depends(require_admin)):
+    """Je aktivem Kunden AVV und Referenzvertrag, je Vertriebler der Handelsvertretervertrag und die Einarbeitung."""
+    from .routes_vertragportal import einarbeitung
+    with tx("admin") as cur:
+        cur.execute(f"""SELECT DISTINCT ON (kunden_id) kunden_id, {SPALTEN} FROM vertragsdokumente WHERE art='referenz' ORDER BY kunden_id, erstellt_am DESC""")
+        ref = {str(r["kunden_id"]): r for r in cur.fetchall()}
+        cur.execute(f"""SELECT DISTINCT ON (partner_id) partner_id, {SPALTEN} FROM vertragsdokumente WHERE art='handelsvertreter' ORDER BY partner_id, erstellt_am DESC""")
+        hv = {str(r["partner_id"]): r for r in cur.fetchall()}
+        cur.execute("""SELECT k.id, k.kundennummer, k.firma, k.status,
+                              EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL) AS avv_ok,
+                              EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.datei IS NULL AND a.portal_freigabe_am IS NOT NULL) AS avv_im_portal
+                       FROM kunden k WHERE k.status IN ('onboarding','aktiv','pausiert') ORDER BY k.firma LIMIT 500""")
+        kunden = [{**k, "referenz": _stand(ref.get(str(k["id"])))} for k in cur.fetchall()]
+        cur.execute("SELECT id, name, status, vereinbarung_am FROM vertriebspartner WHERE status IN ('anfrage','aktiv','pausiert') ORDER BY name LIMIT 500")
+        partner = []
+        for p in cur.fetchall():
+            e = einarbeitung(cur, p["id"])
+            partner.append({"id": p["id"], "name": p["name"], "status": p["status"], "vertrag": _stand(hv.get(str(p["id"]))), "vereinbarung_am": p["vereinbarung_am"],
+                            "einarbeitung_erledigt": sum(1 for x in e if x["erledigt"]), "einarbeitung_gesamt": len(e), "einarbeitung_offen": [x["text"] for x in e if not x["erledigt"]]})
+    offen = {"avv": sum(1 for k in kunden if not k["avv_ok"]), "referenz_gesendet": sum(1 for k in kunden if k["referenz"]["stand"] == "gesendet"),
+             "vertrag": sum(1 for p in partner if p["vertrag"]["stand"] != "unterschrieben" and not p["vereinbarung_am"]), "einarbeitung": sum(1 for p in partner if p["einarbeitung_erledigt"] < p["einarbeitung_gesamt"])}
+    return {"kunden": kunden, "partner": partner, "offen": offen}
+
+
+@router.get("/vertragsdokumente/referenzen")
+def referenzliste(user: dict = Depends(require_admin)):
+    """Alle unterschriebenen Referenzverträge mit dem, was freigegeben wurde. Widerrufene stehen getrennt."""
+    with tx("admin") as cur:
+        cur.execute("""SELECT d.id, d.kunden_id, k.firma, k.kundennummer, d.unterschrieben_am, d.online_am, d.widerrufen_am, d.antworten, d.daten, d.datei IS NOT NULL AS hat_datei
+                       FROM vertragsdokumente d JOIN kunden k ON k.id=d.kunden_id
+                       WHERE d.art='referenz' AND (d.unterschrieben_am IS NOT NULL OR d.datei IS NOT NULL) ORDER BY d.widerrufen_am IS NOT NULL, d.unterschrieben_am DESC NULLS LAST LIMIT 500""")
+        zeilen = cur.fetchall()
+    for z in zeilen:
+        a = z.pop("antworten") or {}
+        d = z.pop("daten") or {}
+        z["projekt"] = d.get("projekt") or ""
+        z["elemente"] = [{"code": c, "name": vertraege.REF_ELEMENTE[c], "text": t} for c, t in (a.get("elemente") or {}).items() if c in vertraege.REF_ELEMENTE]
+        z["kanaele"] = [vertraege.REF_KANAELE[c] for c in a.get("kanaele") or [] if c in vertraege.REF_KANAELE]
+        z["personen"] = bool(a.get("personen_zeigen"))
+        z["einschraenkungen"] = a.get("einschraenkungen") or ""
+        z["strukturiert"] = bool(a)
+    return {"aktiv": [z for z in zeilen if not z["widerrufen_am"]], "widerrufen": [z for z in zeilen if z["widerrufen_am"]]}
+
+
+class WiderrufAdminIn(BaseModel):
+    widerrufen: bool = True
+
+
+@router.post("/vertragsdokumente/{zid}/widerruf")
+def widerruf_setzen(zid: str, data: WiderrufAdminIn, user: dict = Depends(require_admin)):
+    """Widerruf, der per Mail oder Telefon kam, im Portal festhalten (oder zurücknehmen, wenn er irrtümlich eingetragen wurde)."""
+    try:
+        with tx("admin") as cur:
+            cur.execute("UPDATE vertragsdokumente SET widerrufen_am = CASE WHEN %s THEN COALESCE(widerrufen_am, now()) END WHERE id=%s AND art='referenz' RETURNING kunden_id", (data.widerrufen, zid))
+            r = cur.fetchone()
+            if not r:
+                raise _404()
+            audit(cur, user, "referenz_widerruf_vermerkt" if data.widerrufen else "referenz_widerruf_zurueck", r["kunden_id"], {})
+    except errors.InvalidTextRepresentation:
+        raise _404()
+    return {"ok": True}
+
+
+@router.get("/vertrieb/partner/{pid}/einarbeitung")
+def partner_einarbeitung(pid: str, user: dict = Depends(require_admin)):
+    from .routes_vertragportal import einarbeitung
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT 1 FROM vertriebspartner WHERE id=%s", (pid,))
+            if not cur.fetchone():
+                raise _404()
+            return {"punkte": einarbeitung(cur, pid)}
+    except errors.InvalidTextRepresentation:
+        raise _404()

@@ -1,9 +1,9 @@
 // Verträge aus dem Portal: Referenzvertrag (beim Kunden) und Handelsvertretervertrag (beim Vertriebler).
 // Das Portal füllt das PDF-Formular vor, schickt es per Mail und legt die unterschriebene Fassung ab.
 import { h, api, datum, melde } from '../common.js';
-import { fehler, feld, knopf, select, tabelle } from './kern.js';
+import { V, fehler, feld, knopf, kopf, pill, select, tabelle } from './kern.js';
 
-const stand = (z) => z.unterschrieben_am ? h('span', { class: 'pill ok' }, 'unterschrieben ' + datum(z.unterschrieben_am)) : z.gesendet_am ? h('span', { class: 'pill warn' }, 'gesendet an ' + z.gesendet_an + ' (' + datum(z.gesendet_am) + ')') : h('span', { class: 'pill' }, 'nur erstellt');
+const stand = (z) => z.widerrufen_am ? h('span', { class: 'pill bad' }, 'widerrufen ' + datum(z.widerrufen_am)) : z.unterschrieben_am ? h('span', { class: 'pill ok' }, (z.online_am ? 'online bestätigt ' : 'unterschrieben ') + datum(z.unterschrieben_am)) : z.gesendet_am ? h('span', { class: 'pill warn' }, 'gesendet an ' + z.gesendet_an + ' (' + datum(z.gesendet_am) + ')' + (z.erinnerungen ? ', ' + z.erinnerungen + '× erinnert' : '')) : h('span', { class: 'pill' }, 'nur erstellt');
 
 function ablegen(z, m) {
   const datei = h('input', { type: 'file', accept: 'application/pdf,image/png,image/jpeg' }), tag = h('input', { type: 'date', value: new Date().toISOString().slice(0, 10), style: 'max-width:160px' });
@@ -57,3 +57,32 @@ export async function handelsvertreterKarte(pid, p) {
     h('div', { class: 'form2', style: 'margin-top:10px' }, f.name, f.rechtsform, f.strasse, f.ort, f.mail, f.steuer, h('div', {}, h('label', {}, 'Beauftragung'), art), f.einmal, f.monat, f.praemie, f.vorschuss),
     h('div', { class: 'row', style: 'margin-top:8px' }, knopf('Erstellen und per Mail senden', () => absenden(m, pfad, werte(), true), 'btn'), knopf('Nur erstellen', () => absenden(m, pfad, werte(), false), 'sec')));
 }
+
+const STAND = { keins: ['', 'nicht angefragt'], erstellt: ['warn', 'erstellt, nicht gesendet'], gesendet: ['warn', 'wartet auf Antwort'], unterschrieben: ['ok', 'liegt vor'], widerrufen: ['bad', 'widerrufen'] };
+const standPill = (x) => h('span', { class: 'pill ' + STAND[x.stand][0] }, STAND[x.stand][1] + (x.am && x.stand === 'gesendet' ? ' seit ' + datum(x.am) : ''));
+
+export async function einarbeitungKarte(pid) {
+  const e = await api('/api/admin/vertrieb/partner/' + pid + '/einarbeitung');
+  return h('div', { class: 'card' }, h('h2', {}, 'Einarbeitung ', pill(e.punkte.every(x => x.erledigt) ? 'aktiv' : 'neu')),
+    h('ul', { style: 'list-style:none;padding:0;margin:0' }, e.punkte.map(x => h('li', { style: 'margin:4px 0' }, (x.erledigt ? '✅ ' : '⬜ ') + x.text))));
+}
+
+V.vertraege = async () => {
+  const [u, r] = await Promise.all([api('/api/admin/vertragsdokumente/uebersicht'), api('/api/admin/vertragsdokumente/referenzen')]), m = h('div');
+  const nurOffen = h('input', { type: 'checkbox', style: 'width:auto' }), kunden = h('div'), partner = h('div');
+  const zeichne = () => {
+    const k = u.kunden.filter(x => !nurOffen.checked || !x.avv_ok || x.referenz.stand === 'gesendet'), p = u.partner.filter(x => !nurOffen.checked || x.vertrag.stand !== 'unterschrieben' && !x.vereinbarung_am || x.einarbeitung_erledigt < x.einarbeitung_gesamt);
+    kunden.replaceChildren(tabelle([['Kunde', x => h('a', { href: '#kunde/' + x.id }, x.firma)], ['AVV', x => x.avv_ok ? h('span', { class: 'pill ok' }, 'liegt vor') : x.avv_im_portal ? h('span', { class: 'pill warn' }, 'im Portal, wartet') : h('span', { class: 'pill bad' }, 'fehlt')], ['Referenzvertrag (freiwillig)', x => standPill(x.referenz)]], k, 'Nichts offen.'));
+    partner.replaceChildren(tabelle([['Vertriebler', x => h('a', { href: '#partner/' + x.id }, x.name)], ['Handelsvertretervertrag', x => x.vereinbarung_am ? h('span', { class: 'pill ok' }, 'liegt vor ' + datum(x.vereinbarung_am)) : standPill(x.vertrag)],
+      ['Einarbeitung', x => h('span', { class: 'pill ' + (x.einarbeitung_erledigt === x.einarbeitung_gesamt ? 'ok' : 'warn'), title: x.einarbeitung_offen.join(', ') }, x.einarbeitung_erledigt + ' von ' + x.einarbeitung_gesamt)]], p, 'Nichts offen.'));
+  };
+  nurOffen.addEventListener('change', zeichne); zeichne();
+  const widerrufen = (z, an) => knopf(an ? 'Widerruf vermerken' : 'Widerruf zurücknehmen', async () => { if (!confirm(an ? 'Widerruf der Referenz von ' + z.firma + ' vermerken? Danach alle Inhalte entfernen.' : 'Widerruf wirklich zurücknehmen?')) return; try { await api('/api/admin/vertragsdokumente/' + z.id + '/widerruf', { method: 'POST', body: { widerrufen: an } }); location.reload(); } catch (x) { fehler(m, x); } }, 'sec small');
+  const frei = (z) => z.strukturiert ? h('div', {}, h('div', { class: 'small' }, z.elemente.map(e => e.name + (e.text ? ' („' + e.text + '“)' : '')).join(' · ') || 'keine Elemente'), h('div', { class: 'small muted' }, 'Kanäle: ' + (z.kanaele.join(', ') || '–') + (z.personen ? ' · Personen erlaubt' : '') + (z.einschraenkungen && z.einschraenkungen !== 'keine' ? ' · Einschränkung: ' + z.einschraenkungen : ''))) : h('span', { class: 'small muted' }, 'laut unterschriebener Datei' + (z.hat_datei ? '' : ''));
+  return h('div', { class: 'stack' }, kopf('Verträge', h('span', { class: 'pill ' + (u.offen.avv || u.offen.vertrag ? 'warn' : 'ok') }, 'AVV offen: ' + u.offen.avv + ' · HV-Vertrag offen: ' + u.offen.vertrag + ' · Referenz wartet: ' + u.offen.referenz_gesendet)), m,
+    h('div', { class: 'card' }, h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, nurOffen, 'Nur Offenes zeigen')),
+    h('div', { class: 'card' }, h('h2', {}, 'Kunden'), kunden), h('div', { class: 'card' }, h('h2', {}, 'Vertriebler'), partner),
+    h('div', { class: 'card' }, h('h2', {}, 'Referenzen: was darf gezeigt werden?'), h('p', { class: 'small muted' }, 'Nur was hier steht, darf in der Eigenwerbung genutzt werden. Bei einem Widerruf alle Inhalte innerhalb von 7 Tagen entfernen.'),
+      tabelle([['Kunde', z => h('a', { href: '#kunde/' + z.kunden_id }, z.firma)], ['Bestätigt', z => z.unterschrieben_am ? datum(z.unterschrieben_am) + (z.online_am ? ' (online)' : '') : '–'], ['Freigegeben', frei], ['', z => h('span', { class: 'row' }, z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/admin/vertragsdokumente/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Vertrag') : '', widerrufen(z, true))]], r.aktiv, 'Noch keine unterschriebenen Referenzverträge.')),
+    r.widerrufen.length ? h('div', { class: 'card' }, h('h2', {}, 'Widerrufene Referenzen'), tabelle([['Kunde', z => z.firma], ['Widerrufen am', z => datum(z.widerrufen_am)], ['', z => widerrufen(z, false)]], r.widerrufen)) : '');
+};

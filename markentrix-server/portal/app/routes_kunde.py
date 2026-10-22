@@ -46,6 +46,10 @@ def start(user: dict = Depends(require_kunde)):
     with tx("system") as cur:   # offene AVV sind für die Kundenrolle (Row-Level-Security) nicht sichtbar, daher gezielt mit Kundenfilter
         cur.execute("SELECT count(*) AS n FROM avv WHERE kunden_id=%s AND datei IS NULL AND portal_freigabe_am IS NOT NULL", (kid,))
         badges["avv"] = cur.fetchone()["n"]
+        cur.execute("""SELECT count(*) FILTER (WHERE unterschrieben_am IS NULL AND datei IS NULL AND widerrufen_am IS NULL) AS offen, count(*) AS da FROM vertragsdokumente
+                       WHERE kunden_id=%s AND art='referenz' AND (gesendet_am IS NOT NULL OR datei IS NOT NULL)""", (kid,))
+        v = cur.fetchone()
+        badges["vertraege"], badges["vertraege_da"] = v["offen"], v["da"]
     return {"badges": badges, "kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
             "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"]}
 

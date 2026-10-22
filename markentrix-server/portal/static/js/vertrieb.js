@@ -6,10 +6,10 @@ import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
 
 const root = document.getElementById('app');
 let start = null;
-const NAV = [['willkommen', 'So geht’s'], ['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
+const NAV = [['willkommen', 'So geht’s'], ['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['vertrag', 'Mein Vertrag'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
 
 /** @type {[string, string[]][]} */
-const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden']], ['Kunden & Geld', ['kunden', 'provisionen', 'konto', 'willkommen']]];
+const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden']], ['Kunden & Geld', ['kunden', 'provisionen', 'vertrag', 'konto', 'willkommen']]];
 
 function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]);
@@ -127,16 +127,62 @@ V.pipeline = async () => {
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Meine Pipeline'), h('p', { class: 'small muted' }, 'Alle deine Leads nach Stand. „Gewonnen“ setzt Markentrix, sobald der Kunde angelegt ist.')), board);
 };
 
-V.willkommen = () => anleitungSeite('vertrieb');
+const checkKarte = (e, kompakt) => h('div', { class: 'card' }, h('h2', {}, kompakt ? 'Dein Start: noch ' + e.punkte.filter(x => !x.erledigt).length + ' Schritte' : 'Deine Startcheckliste'),
+  h('ul', { style: 'list-style:none;padding:0;margin:0' }, e.punkte.map(x => h('li', { style: 'margin:6px 0' }, x.erledigt ? '✅ ' : '⬜ ', x.erledigt ? x.text : h('a', { href: x.link }, x.text)))));
+V.willkommen = async () => { const e = await api('/api/vertrieb/einarbeitung'); return h('div', { class: 'stack' }, checkKarte(e, false), await anleitungSeite('vertrieb')); };
+{ const heuteOrig = V.heute;
+  V.heute = async () => { const [el, e] = await Promise.all([heuteOrig(), api('/api/vertrieb/einarbeitung').catch(() => ({ fertig: true }))]); return e.fertig ? el : h('div', { class: 'stack' }, checkKarte(e, true), el); }; }
+const leitfadenSuche = async () => {
+  const t = await api('/api/vertrieb/telefonleitfaden-text'), erg = h('div'), q = h('input', { type: 'search', placeholder: 'Im Leitfaden suchen, z. B. „Einwand“ oder „Preis“', 'aria-label': 'Im Leitfaden suchen', maxlength: 80 });
+  const suche = () => { const w = q.value.trim().toLowerCase(); if (w.length < 3) { erg.replaceChildren(h('p', { class: 'small muted' }, 'Mindestens drei Buchstaben eingeben.')); return; }
+    const treffer = []; for (const s of t.seiten) { const z = s.text.split(/\n+/); z.forEach((l, i) => { if (l.toLowerCase().includes(w)) treffer.push({ seite: s.seite, text: z.slice(Math.max(0, i - 1), i + 2).join(' ') }); }); }
+    erg.replaceChildren(treffer.length ? h('div', {}, treffer.slice(0, 30).map(x => h('p', {}, h('b', {}, 'Seite ' + x.seite + ': '), x.text, ' ', h('a', { href: '/api/vertrieb/telefonleitfaden.pdf#page=' + x.seite, target: '_blank', rel: 'noopener' }, 'öffnen')))) : h('p', { class: 'muted' }, 'Nichts gefunden.')); };
+  q.addEventListener('input', suche); suche();
+  return h('div', { class: 'card' }, h('h2', {}, 'Im Leitfaden suchen'), q, erg);
+};
 V.leitfaden = async () => {
-  const d = await api('/api/vertrieb/leitfaden');
-  return h('div', { class: 'stack' },
+  const [d, suchKarte] = await Promise.all([api('/api/vertrieb/leitfaden'), leitfadenSuche()]), gl = h('div');
+  return h('div', { class: 'stack' }, suchKarte,
+    h('div', { class: 'card' }, gl, h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/vertrieb/einarbeitung/leitfaden-gelesen', { method: 'POST' }); melde(gl, 'Notiert, danke.'); } catch (x) { melde(gl, x.message); } } }, 'Ich habe den Leitfaden gelesen')),
     h('div', { class: 'card' }, h('h2', {}, 'Telefonleitfaden Kaltakquise (PDF)'), h('p', { class: 'small muted' }, 'Der ausführliche Leitfaden von Markentrix zum Ansehen, Ausdrucken und Nachschlagen. Darunter die Kurzfassung mit Einwänden und Antworten.'),
       h('p', {}, h('a', { class: 'btn', href: '/api/vertrieb/telefonleitfaden.pdf', target: '_blank', rel: 'noopener' }, 'Leitfaden öffnen'), ' ', h('a', { class: 'btn sec', href: '/api/vertrieb/telefonleitfaden.pdf', download: 'Markentrix-Telefonleitfaden.pdf' }, 'Herunterladen'))),
     h('div', { class: 'card' }, h('h2', {}, 'Gesprächsleitfaden'), h('p', { class: 'small muted' }, 'Zum Üben und Nachschlagen, nicht zum Ablesen. Bei jedem Lead gibt es zusätzlich einen persönlichen Vorschlag (KI-Entwurf) und, wenn die Branche passt, einen Branchenhinweis.')),
     d.abschnitte.map(a => h('div', { class: 'card' }, h('h2', {}, a.titel), h('ul', {}, a.punkte.map(p => h('li', {}, p))))),
     h('div', { class: 'card' }, h('h2', {}, 'Wenn der Kunde sagt …'), d.einwaende.map(e => h('details', { style: 'margin:8px 0' }, h('summary', {}, h('b', {}, '„' + e.einwand + '“')), h('p', {}, e.antwort)))),
     h('div', { class: 'card' }, h('h2', {}, 'Branchen-Hinweise'), Object.values(d.branchen).map(b => h('details', { style: 'margin:8px 0' }, h('summary', {}, h('b', {}, b.name)), h('ul', {}, b.tipps.map(t => h('li', {}, t)))))));
+};
+
+V.vertrag = async () => {
+  const d = await api('/api/vertrieb/vertrag'), m = h('div');
+  const janein = (name) => h('select', { name }, h('option', { value: '' }, 'bitte wählen'), h('option', { value: 'ja' }, 'ja'), h('option', { value: 'nein' }, 'nein'));
+  const form = (z) => {
+    const m2 = h('div'), box = () => h('input', { type: 'checkbox', style: 'width:auto' }), zeile = (c, t) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' }, c, t);
+    const f = { rechtsform: h('input', { placeholder: 'z. B. Einzelunternehmen', maxlength: 60 }), strasse: h('input', { placeholder: 'Straße, Hausnummer', maxlength: 120 }), ort_anschrift: h('input', { placeholder: 'PLZ, Ort', maxlength: 120 }), steuer: h('input', { placeholder: 'Steuernummer oder USt-IdNr.', maxlength: 60 }),
+      gew_seit: h('input', { placeholder: 'Gewerbeanmeldung seit', maxlength: 60 }), gew_amt: h('input', { placeholder: 'beim Gewerbeamt / in der Stadt', maxlength: 100 }) };
+    const art = h('select', {}, h('option', { value: '' }, 'bitte wählen'), h('option', { value: 'haupt' }, 'Hauptberuf'), h('option', { value: 'neben' }, 'Nebenberuf'));
+    const codes = [['gewerbe', 'Mein Gewerbe ist angemeldet'], ['steuer_erfasst', 'Ich bin steuerlich erfasst'], ['betriebsmittel', 'Ich setze eigene Betriebsmittel ein (Arbeitsplatz, Telefon, Computer)'], ['andere_auftraggeber', 'Ich bin auch für andere Auftraggeber tätig oder darf dies sein'],
+      ['versichert', 'Ich bin ausreichend kranken- und pflegeversichert und sorge selbst für meine Altersvorsorge'], ['weisungsfrei', 'Ich bestimme Zeit, Ort und Art meiner Tätigkeit selbst und unterliege keinen Weisungen'], ['statusfeststellung', 'Mir ist das Statusfeststellungsverfahren nach § 7a SGB IV bekannt']];
+    const neben = [['nebenberuf', 'Ich übe die Vermittlung neben einem anderen Hauptberuf aus, und meine Haupteinnahmen stammen nicht aus der Vermittlung für Markentrix'], ['arbeitgeber', 'Soweit ich angestellt bin: Mein Arbeitgeber hat zugestimmt oder es ist nicht zustimmungspflichtig'], ['konkurrenz', 'Meine anderweitige Tätigkeit betrifft keine direkt konkurrierenden Leistungen oder ich habe sie Markentrix offengelegt']];
+    const hk = Object.fromEntries([...codes, ...neben].map(([c]) => [c, box()])), hp = janein('hp'), ea = janein('ea'), name = h('input', { value: d.name || '', maxlength: 200, autocomplete: 'name' }), ort = h('input', { placeholder: 'Ort', maxlength: 100 }), ok = box();
+    const nebenBlock = h('div', { style: 'display:none' }, h('h3', {}, 'Nur bei Nebenberuf'), neben.map(([c, t]) => zeile(hk[c], t)));
+    art.addEventListener('change', () => { nebenBlock.style.display = art.value === 'neben' ? '' : 'none'; });
+    return h('div', { class: 'card' }, h('h2', {}, 'Handelsvertretervertrag bestätigen'),
+      h('p', { class: 'small muted' }, 'Lies den Vertrag in Ruhe, trage deine Angaben ein und bestätige ihn dann hier. Drucken und Einscannen ist nicht nötig. Du bekommst eine Kopie per Mail.'), m2,
+      h('p', {}, h('a', { class: 'btn sec', href: '/api/vertrieb/vertrag/' + z.id + '/vorlage.pdf', target: '_blank', rel: 'noopener' }, 'Vertrag lesen (PDF)')),
+      h('h3', {}, 'Deine Angaben'), h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Rechtsform'), f.rechtsform), h('div', {}, h('label', {}, 'Straße, Hausnummer'), f.strasse), h('div', {}, h('label', {}, 'PLZ, Ort'), f.ort_anschrift), h('div', {}, h('label', {}, 'Steuernummer / USt-IdNr.'), f.steuer)),
+      h('label', {}, 'Tätigkeit'), art,
+      h('h3', {}, 'Anlage 3: Angaben zur Selbständigkeit'), codes.map(([c, t]) => zeile(hk[c], t)), f.gew_seit, f.gew_amt,
+      h('label', {}, 'Ich beschäftige Hilfspersonen oder Arbeitnehmer'), hp, h('label', {}, 'Markentrix ist voraussichtlich auf Dauer mein einziger Auftraggeber'), ea, nebenBlock,
+      h('h3', {}, 'Bestätigung'), h('label', {}, 'Dein Name'), name, h('label', {}, 'Ort'), ort,
+      h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:14px;margin-top:12px' }, ok, 'Ich habe den Handelsvertretervertrag samt Anlagen gelesen, meine Angaben sind richtig und ich bestätige den Vertrag verbindlich.'),
+      h('p', {}, h('button', { class: 'btn', onclick: async () => { try {
+        await api('/api/vertrieb/vertrag/' + z.id + '/bestaetigen', { method: 'POST', body: { name: name.value, ort: ort.value, akzeptiert: ok.checked, angaben: { rechtsform: f.rechtsform.value, strasse: f.strasse.value, ort_anschrift: f.ort_anschrift.value, steuer: f.steuer.value,
+          gew_seit: f.gew_seit.value, gew_amt: f.gew_amt.value, steuer_nr: f.steuer.value, beauftragung: art.value, haken: Object.fromEntries(Object.entries(hk).map(([c, x]) => [c, x.checked])), janein: { hilfspersonen: hp.value, einziger_auftraggeber: ea.value } } } }); location.reload(); } catch (x) { melde(m2, x.message); } } }, 'Vertrag bestätigen')));
+  };
+  return h('div', { class: 'stack' }, m, d.dokumente.filter(z => z.offen).map(form),
+    h('div', { class: 'card' }, h('h2', {}, 'Mein Handelsvertretervertrag'),
+      tabelle([['Bestätigt am', z => z.unterschrieben_am ? datum(z.unterschrieben_am) : 'noch offen'], ['Weg', z => z.online_am ? 'online im Portal' : z.hat_datei ? 'unterschrieben abgelegt' : 'wartet auf dich'],
+        ['', z => z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/vertrieb/vertrag/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Vertrag ansehen') : '']], d.dokumente.filter(z => !z.offen), d.dokumente.some(z => z.offen) ? 'Noch nicht bestätigt. Das Formular steht oben.' : 'Markentrix hat dir noch keinen Vertrag bereitgestellt. Er kommt per Mail und liegt dann hier.')));
 };
 
 V.angebote = async () => {

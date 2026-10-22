@@ -516,3 +516,12 @@ Jede fertige Website ruft unter ihrer eigenen Domain `/api/anfrage`, `/api/slots
 - **Handelsvertretervertrag (Vertriebler):** Admin → Vertrieb → Vertriebler öffnen → Karte „Handelsvertretervertrag“. Name und E-Mail sind vorausgefüllt; Rechtsform, Anschrift, Steuernummer, Haupt-/Nebenberuf und abweichende Provisionssätze optional eintragen. Anlage 3 füllt der Partner selbst aus.
 - **Unterschriebene Fassung ablegen:** in der jeweiligen Karte „Unterschrieben ablegen“ (PDF/PNG/JPG, max. 6 MB, mit Datum). Beim Handelsvertretervertrag wird dadurch das Vereinbarungsdatum des Vertrieblers gesetzt.
 - **Telefonleitfaden:** Vertriebler finden ihn im Vertriebsportal unter „Leitfaden“ (PDF öffnen/herunterladen). Nur für eingeloggte Vertriebler.
+
+### Verträge online bestätigen, Erinnerungen, Übersicht
+
+- **Online bestätigen:** Wurde ein Referenz- oder Handelsvertretervertrag per Mail gesendet, kann ihn der Empfänger auch direkt im Portal bestätigen (Kunde: Menü „Referenzvertrag“, Vertriebler: „Mein Vertrag“). Er trifft seine Auswahl bzw. trägt seine Angaben ein und bestätigt mit Name und Ort. Das Portal füllt das PDF aus, hängt eine Protokollseite an (Name, Konto, Zeitpunkt, IP, Prüfsumme), legt es ab und schickt dem Empfänger eine Kopie. Du bekommst eine Mail. Beim Handelsvertretervertrag wird das Vereinbarungsdatum gesetzt. Das ist eine einfache elektronische Signatur wie beim AVV; Markentrix‑Seite ist vorausgefüllt und gilt mit dem Versand als erklärt.
+- **Erinnerungen:** Werktags prüft das Portal. Ist ein Vertrag nach 7 und nach 14 Tagen noch offen, bekommt der Empfänger eine freundliche Erinnerung (danach keine mehr), du eine Sammelmail.
+- **Admin → Verträge:** Übersicht „Was fehlt noch?“ mit AVV, Referenzvertrag, Handelsvertretervertrag und Einarbeitung. Darunter die Referenzliste: Was hat welcher Kunde freigegeben (Elemente, Kanäle, Einschränkungen)? Nur das darf genutzt werden.
+- **Widerruf:** Der Kunde kann die Freigabe im Portal widerrufen (du bekommst eine Mail, Inhalte innerhalb von 7 Tagen entfernen). Kam der Widerruf per Mail oder Telefon, vermerkst du ihn in der Referenzliste.
+- **Einarbeitung:** Im Vertriebsportal steht auf „So geht’s“ und oben bei „Heute anrufen“ eine Checkliste (Vertrag, Leitfaden, Zwei-Faktor, IBAN, erster Anruf). Du siehst sie beim Vertriebler und in Admin → Verträge.
+- **Leitfaden:** Unter „Leitfaden“ gibt es jetzt eine Suche im Text des Telefonleitfadens und den Knopf „Ich habe den Leitfaden gelesen“.

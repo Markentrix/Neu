@@ -151,15 +151,47 @@ def vertrag_dokument(an: str, name: str | None, art: str, pdf_bytes: bytes, date
     if art == "referenz":
         text = (f"{hallo}\n\nanbei erhalten Sie unseren Referenzvertrag. Damit dürfen wir Ihr Projekt in unserer Eigenwerbung zeigen, aber nur, was Sie ausdrücklich freigeben.\n\n"
                 "So geht es: Kreuzen Sie in Anlage 1 nur die Punkte an, die für Sie in Ordnung sind (alles andere bleibt tabu), und unterschreiben Sie. Das Formular lässt sich am Bildschirm ausfüllen. "
-                "Senden Sie es uns anschließend unterschrieben zurück (Scan oder Foto genügt).\n\n"
+                "Senden Sie es uns anschließend unterschrieben zurück (Scan oder Foto genügt). Einfacher geht es direkt in Ihrem Portal: Dort können Sie Ihre Auswahl treffen und den Vertrag mit einem Klick bestätigen, " + f"{config.BASE_URL}/app#vertraege\n\n"
                 "Das ist freiwillig und völlig unabhängig von Ihrem Auftrag. Sie können es jederzeit ohne Begründung widerrufen, ohne dass Ihnen daraus ein Nachteil entsteht." + SIGNATUR)
         betreff = "Referenzvertrag: Ihre Freigabe für unsere Referenzen"
     else:
         text = (f"{hallo}\n\nanbei erhalten Sie den Handelsvertretervertrag für Ihre Zusammenarbeit mit Markentrix.\n\n"
                 "Bitte lesen Sie ihn in Ruhe, ergänzen Sie Ihre Angaben (Anlage 3 mit den Fragen zu Ihrer Selbständigkeit) und unterschreiben Sie ihn. "
-                "Das Formular lässt sich am Bildschirm ausfüllen. Senden Sie es uns anschließend unterschrieben zurück (Scan oder Foto genügt). Bei Fragen melden Sie sich jederzeit." + SIGNATUR)
+                "Das Formular lässt sich am Bildschirm ausfüllen. Senden Sie es uns anschließend unterschrieben zurück (Scan oder Foto genügt). Einfacher geht es direkt in Ihrem Partnerportal: Dort tragen Sie Ihre Angaben ein und bestätigen den Vertrag mit einem Klick, " + f"{config.BASE_URL}/vertrieb#vertrag. Bei Fragen melden Sie sich jederzeit." + SIGNATUR)
         betreff = "Handelsvertretervertrag Markentrix"
     return senden(an, betreff, text, (dateiname, pdf_bytes, "application/pdf"), art="vertrag")
+
+
+def vertrag_kopie(an: str, name: str | None, art: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
+    was = "Referenzvertrag" if art == "referenz" else "Handelsvertretervertrag"
+    text = (f"Hallo {name or ''},\n\nvielen Dank, Sie haben den {was} im Portal bestätigt. Anbei erhalten Sie Ihre Kopie mit dem Bestätigungsprotokoll auf der letzten Seite. Bitte bewahren Sie sie auf."
+            + ("\n\nSie können die Freigabe jederzeit ohne Angabe von Gründen widerrufen, im Portal unter „Referenzvertrag“ oder per Mail." if art == "referenz" else "") + SIGNATUR)
+    return senden(an, f"Ihre Kopie: {was} bestätigt", text, (dateiname, pdf_bytes, "application/pdf"), art="vertrag")
+
+
+def vertrag_online_team(an: str, wer: str, art: str, name: str, link: str) -> tuple[bool, str]:
+    was = "Referenzvertrag" if art == "referenz" else "Handelsvertretervertrag"
+    t = f"{wer} hat den {was} im Portal bestätigt (durch {name}).\n\nAnsehen im Admin-Bereich: {config.BASE_URL}{link}\n\n(automatische Meldung des Portals)"
+    return senden(an, f"{was} bestätigt: {wer}", t)
+
+
+def referenz_widerruf_team(an: str, firma: str, hinweis: str, link: str) -> tuple[bool, str]:
+    t = (f"{firma} hat die Referenz-Freigabe im Portal widerrufen.\n" + (f"Hinweis des Kunden: {hinweis}\n" if hinweis else "") +
+         f"\nBitte alle freigegebenen Inhalte (Website, Social Media, Verzeichnisse, Präsentationen) innerhalb von 7 Tagen entfernen (§ 7 Referenzvertrag).\n\nAnsehen: {config.BASE_URL}{link}\n\n(automatische Meldung des Portals)")
+    return senden(an, f"Referenz widerrufen: {firma}", t)
+
+
+def vertrag_erinnerung(an: str, name: str | None, art: str) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    if art == "referenz":
+        text = (f"{hallo}\n\nwir haben Ihnen vor einigen Tagen den Referenzvertrag geschickt. Falls Sie ihn noch ansehen möchten: Das geht in Ihrem Portal mit wenigen Klicks, {config.BASE_URL}/app#vertraege\n\n"
+                "Das ist völlig freiwillig. Wenn Sie keine Referenz freigeben möchten, brauchen Sie nichts zu tun. Sie haben keinerlei Nachteile." + SIGNATUR)
+        betreff = "Erinnerung: Referenzvertrag (freiwillig)"
+    else:
+        text = (f"{hallo}\n\nder Handelsvertretervertrag für Ihre Zusammenarbeit mit Markentrix liegt noch unbestätigt bei Ihnen. Sie können ihn direkt im Partnerportal ausfüllen und bestätigen, {config.BASE_URL}/vertrieb#vertrag\n\n"
+                "Bei Fragen melden Sie sich jederzeit." + SIGNATUR)
+        betreff = "Erinnerung: Handelsvertretervertrag"
+    return senden(an, betreff, text)
 
 
 def avv_portal(an: str, name: str | None) -> tuple[bool, str]:

@@ -139,6 +139,42 @@ V.avv = async () => {
     tabelle([['Bestätigt / unterschrieben am', z => datum(z.unterschrieben_am)], ['Datei', z => z.datei_name || 'AVV'], ['', z => h('a', { class: 'btn sec small', href: '/api/kunde/avv/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Ansehen / Herunterladen')]], d, offen.length ? 'Noch nicht bestätigt.' : 'Noch kein Vertrag abgelegt.')));
 };
 
+const REF_EL = [['name', 'Name und Firma'], ['logo', 'Firmenlogo und Kennzeichen'], ['abb', 'Abbildungen des öffentlichen Projektergebnisses (Screenshots, Videos)'], ['link', 'Link auf das Projekt'], ['kurz', 'Kurzbeschreibung'], ['kenn', 'Ergebnisangaben und Kennzahlen'], ['zitat', 'Kundenstimme (Zitat)']];
+const REF_KA = [['web', 'Website von Markentrix'], ['social', 'Social-Media-Profile von Markentrix'], ['ang', 'Angebote, Präsentationen und Pitches'], ['print', 'Print (z. B. Flyer, Broschüren)'], ['verz', 'Branchenverzeichnisse und Bewertungsportale'], ['news', 'Newsletter von Markentrix']];
+
+V.vertraege = async () => {
+  const d = await api('/api/kunde/vertraege'), m = h('div');
+  const formular_ = (z) => {
+    const m2 = h('div'), name = h('input', { placeholder: 'Vor- und Nachname', maxlength: 200, autocomplete: 'name' }), ort = h('input', { placeholder: 'Ort', maxlength: 100 }), ok = h('input', { type: 'checkbox', style: 'width:auto' });
+    const el = Object.fromEntries(REF_EL.map(([c]) => [c, { an: h('input', { type: 'checkbox', style: 'width:auto' }), text: h('input', { placeholder: 'Wortlaut / Vorlage (freiwillig)', maxlength: 600 }) }]));
+    const ka = Object.fromEntries(REF_KA.map(([c]) => [c, h('input', { type: 'checkbox', style: 'width:auto' })]));
+    const pz = h('input', { type: 'checkbox', style: 'width:auto' }), pn = h('input', { placeholder: 'Namen der Personen (freiwillig)', maxlength: 300 }), pu = h('input', { type: 'checkbox', style: 'width:auto' }), es = h('textarea', { rows: 3, maxlength: 1500, placeholder: 'Zum Beispiel Bereiche, die nicht gezeigt werden dürfen, oder „keine“' });
+    const zeile = (box, text) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' }, box, text);
+    return h('div', { class: 'card' }, h('h2', {}, 'Referenzvertrag: deine Freigabe'),
+      h('p', { class: 'small muted' }, 'Das ist freiwillig und hat nichts mit deinem Auftrag zu tun. Markentrix darf nur zeigen, was du unten ausdrücklich ankreuzt. Du kannst jederzeit ohne Begründung widerrufen. Wenn du nichts freigeben möchtest, brauchst du nichts zu tun.'), m2,
+      h('p', {}, h('a', { class: 'btn sec', href: '/api/kunde/vertraege/' + z.id + '/vorlage.pdf', target: '_blank', rel: 'noopener' }, 'Vertrag lesen (PDF)')),
+      h('h3', {}, 'Was darf gezeigt werden?'), REF_EL.map(([c, t]) => h('div', { style: 'margin:6px 0' }, zeile(el[c].an, t), el[c].text)),
+      h('h3', {}, 'Wo darf es gezeigt werden?'), REF_KA.map(([c, t]) => zeile(ka[c], t)),
+      h('h3', {}, 'Personen'), zeile(pz, 'Erkennbare Personen dürfen gezeigt werden (ihre Einwilligung liegt vor)'), pn, zeile(pu, 'Personen werden unkenntlich gemacht oder ausgeblendet'),
+      h('h3', {}, 'Einschränkungen'), es,
+      h('h3', {}, 'Bestätigung'), h('label', {}, 'Dein Name'), name, h('label', {}, 'Ort'), ort,
+      h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:14px;margin-top:12px' }, ok, 'Ich habe den Referenzvertrag gelesen und gebe die oben angekreuzten Elemente freiwillig frei. Ich willige in die Veröffentlichung der angekreuzten personenbezogenen Daten ein (Teil F des Vertrags) und bin dazu berechtigt.'),
+      h('p', {}, h('button', { class: 'btn', onclick: async () => { try {
+        await api('/api/kunde/vertraege/' + z.id + '/bestaetigen', { method: 'POST', body: { name: name.value, ort: ort.value, akzeptiert: ok.checked, angaben: {
+          elemente: Object.fromEntries(Object.entries(el).map(([c, x]) => [c, { an: x.an.checked, text: x.text.value }])), kanaele: Object.entries(ka).filter(([, x]) => x.checked).map(([c]) => c),
+          personen_zeigen: pz.checked, personen_namen: pn.value, personen_unkenntlich: pu.checked, einschraenkungen: es.value } } }); location.reload(); } catch (x) { melde(m2, x.message); } } }, 'Freigabe bestätigen')));
+  };
+  const widerruf = (z) => { const fm = h('div'), hin = h('textarea', { rows: 2, maxlength: 1000, placeholder: 'Hinweis (freiwillig)' });
+    dialog('Freigabe widerrufen', h('div', { class: 'stack' }, h('p', {}, 'Markentrix beendet jede neue Nutzung sofort und entfernt die Inhalte, die es selbst verwaltet, spätestens innerhalb von sieben Tagen. Du hast dadurch keinerlei Nachteile.'), hin, fm,
+      h('p', {}, h('button', { class: 'btn', onclick: async () => { try { await api('/api/kunde/vertraege/' + z.id + '/widerrufen', { method: 'POST', body: { hinweis: hin.value } }); location.reload(); } catch (x) { melde(fm, x.message); } } }, 'Jetzt widerrufen')))); };
+  const erledigt = d.filter(z => !z.offen);
+  return h('div', { class: 'stack' }, m, d.filter(z => z.offen).map(formular_),
+    h('div', { class: 'card' }, h('h2', {}, 'Referenzvertrag'), h('p', { class: 'small muted' }, 'Hier siehst du, was du Markentrix für Referenzen freigegeben hast. Du kannst die Freigabe jederzeit widerrufen.'),
+      tabelle([['Bestätigt am', z => z.unterschrieben_am ? datum(z.unterschrieben_am) : '–'], ['Freigegeben', z => z.widerrufen_am ? h('span', { class: 'pill warn' }, 'Widerrufen am ' + datum(z.widerrufen_am)) : z.antworten ? h('span', {}, (Object.keys(z.antworten.elemente || {}).length) + ' Elemente in ' + ((z.antworten.kanaele || []).length) + ' Kanälen') : 'laut Vertrag'],
+        ['', z => h('span', {}, z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/kunde/vertraege/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Vertrag ansehen') : '', ' ', z.unterschrieben_am && !z.widerrufen_am ? h('button', { class: 'btn sec small', onclick: () => widerruf(z) }, 'Widerrufen') : '')]],
+        erledigt, 'Noch nichts bestätigt.')));
+};
+
 V.team = async () => {
   const d = await api('/api/kunde/team'), m = h('div');
   const ROLLE = { inhaber: 'Inhaber (alles)', mitarbeiter: 'Mitarbeiter (ohne Team und Rechnungen)', nur_lesen: 'Nur ansehen', empfang: 'Empfang (nur Anfragen, Termine, Nachrichten)' };

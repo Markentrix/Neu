@@ -234,6 +234,47 @@ def avv_kunde_erinnern():
             log.exception("AVV-Erinnerung %s", r["id"])
 
 
+def vertrag_erinnerung(cfg):
+    """Werktags: Verträge, die vor 7 Tagen verschickt und noch nicht bestätigt wurden, einmal nach 7 und einmal nach 14 Tagen erinnern. Das Team bekommt eine Sammelmail."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 8 or jetzt.weekday() >= 5 or not _marker("vertragerinnerung-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    vertrag_erinnern(cfg)
+
+
+def vertrag_erinnern(cfg=None):
+    with tx("system") as cur:
+        cur.execute("""SELECT d.id, d.art, d.gesendet_an, d.erinnerungen, COALESCE(k.firma, p.name) AS wer,
+                              COALESCE(NULLIF(d.daten->>'name',''), k.ansprechpartner, p.name) AS anrede
+                       FROM vertragsdokumente d LEFT JOIN kunden k ON k.id = d.kunden_id LEFT JOIN vertriebspartner p ON p.id = d.partner_id
+                       WHERE d.gesendet_am IS NOT NULL AND d.unterschrieben_am IS NULL AND d.datei IS NULL AND d.widerrufen_am IS NULL AND d.erinnerungen < 2
+                         AND COALESCE(d.erinnert_am, d.gesendet_am) < now() - interval '7 days'
+                         AND (k.status IN ('onboarding','aktiv','pausiert') OR p.status IN ('anfrage','aktiv','pausiert'))
+                       ORDER BY d.gesendet_am LIMIT 20""")
+        todo = cur.fetchall()
+    erledigt = []
+    for r in todo:
+        try:
+            if (r["gesendet_an"] or "").strip():
+                mailer.vertrag_erinnerung(r["gesendet_an"].strip(), r["anrede"], r["art"])
+            with tx("system") as cur:
+                cur.execute("UPDATE vertragsdokumente SET erinnert_am=now(), erinnerungen=erinnerungen+1 WHERE id=%s", (r["id"],))
+            erledigt.append(r)
+        except Exception:  # noqa: BLE001
+            log.exception("Vertrags-Erinnerung %s", r["id"])
+    if erledigt:
+        with tx("system") as cur:
+            an = (cfg or {}).get("alarm_email")
+            if not an:
+                cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
+                x = cur.fetchone()
+                an = x and x["email"]
+        if an:
+            zeilen = [f"- {r['wer']}: {'Referenzvertrag' if r['art'] == 'referenz' else 'Handelsvertretervertrag'} ({r['erinnerungen'] + 1}. Erinnerung)" for r in erledigt]
+            mailer.senden(an, "Verträge noch offen: Erinnerungen verschickt", "Diese Verträge sind noch nicht bestätigt, die Empfänger wurden erinnert:\n\n" + "\n".join(zeilen) +
+                          "\n\nÜbersicht im Portal: Admin → Verträge." + mailer.SIGNATUR)
+
+
 def avv_erinnerung(cfg):
     """Erinnert den Admin höchstens einmal pro Woche und Kunde, wenn drei Tage nach Anlage noch kein unterschriebener AVV vorliegt."""
     with tx("system") as cur:
@@ -767,7 +808,7 @@ def tick():
             betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen
