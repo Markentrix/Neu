@@ -12,7 +12,7 @@ page_start([
 ]);
 ?>
   <main id="main">
-    <?php page_hero('Leistungen', 'Unsere Leistungen', 'Farbe, Schnitt, Styling und Pflege für Damen und Herren. Wählen Sie eine Leistung für Details, Preise und Dauer, oder buchen Sie direkt online.', $crumbs); ?>
+    <?php page_hero('Leistungen', 'Unsere Leistungen', 'Farbe auf Atelier-Niveau, präzise Schnitte, Styling für besondere Anlässe und Pflege, die man spürt. Wählen Sie eine Leistung für Details, Preise und Dauer.', $crumbs); ?>
 
     <section class="section">
       <div class="container">

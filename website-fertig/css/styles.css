@@ -449,6 +449,13 @@ input[aria-invalid="true"] { border-color: var(--error); }
 .form-grid .field-error, .field-error { color: var(--error); font-size: .82rem; }
 .field-error:empty { display: none; }
 [aria-invalid="true"] { border-color: var(--error) !important; }
+.personal-note { margin: 0 0 1.2rem; padding: 1rem 1.2rem; background: #fbf4e6; border-left: 3px solid var(--gold); border-radius: 0 var(--radius) var(--radius) 0; font-size: .94rem; }
+.personal-note p { margin: 0 0 .4rem; }
+.personal-note p:last-child { margin: 0; color: var(--ink-soft); }
+.color-questions { border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.2rem 1.2rem; margin: 0; background: var(--paper); }
+.color-questions legend { font: 500 1.2rem var(--serif); padding: 0 .4rem; }
+.color-questions > .hint { margin: 0 0 .8rem; }
+.color-questions > .hint:last-child { margin: .8rem 0 0; }
 .staff-pick { display: flex; flex-direction: column; gap: .35rem; max-width: 340px; margin-top: 1.2rem; font-size: .9rem; }
 .mk-reviews:empty { display: none; }
 .mk-reviews { max-width: 760px; margin: 0 auto 1.4rem; }

@@ -4,7 +4,8 @@ declare(strict_types=1);
 // Nachbau der Portal-Schnittstelle (mk-api v1) für die lokale Vorschau und Browser-Tests.
 //   php tools/build.php && php -S 127.0.0.1:8080 tests/mock-portal.php
 // Liefert website-fertig/ aus und beantwortet /api/* mit Beispieldaten. Nur zum Testen, nie hochladen.
-// MOCK_MODE=wunsch → selfBooking:false, MOCK_MODE=ohne-leistungen → leere Leistungsliste, MOCK_MODE=aus → /api antwortet 502.
+// MOCK_MODE=wunsch → selfBooking:false, MOCK_MODE=ohne-leistungen → leere Leistungsliste, MOCK_MODE=aus → /api antwortet 502,
+// MOCK_MODE=freigabe → Balayage mit „freigabe“ und „anzahlung“ (vorgeschlagene Portal-Erweiterung).
 
 $root = dirname(__DIR__) . '/website-fertig';
 $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
@@ -28,7 +29,8 @@ if (str_starts_with($path, '/api/')) {
             $json(['leistungen' => $mode === 'ohne-leistungen' ? [] : [
                 ['key' => 'd-wsf-mittel', 'name' => 'Waschen, Schneiden & Föhnen – mittel', 'beschreibung' => '', 'preis' => 60, 'dauer' => 60],
                 ['key' => 'h-schnitt', 'name' => 'Herrenschnitt inkl. Waschen & Styling', 'beschreibung' => '', 'preis' => 45, 'dauer' => 40],
-                ['key' => 'f-balayage', 'name' => 'Balayage', 'beschreibung' => 'inkl. Beratung', 'preis' => 'ab 250 €', 'dauer' => 210],
+                ['key' => 'f-balayage', 'name' => 'Balayage', 'beschreibung' => 'inkl. Beratung', 'preis' => 'ab 250 €', 'dauer' => 210]
+                    + ($mode === 'freigabe' ? ['freigabe' => true, 'anzahlung' => 50] : []),
             ]]);
         case '/api/mitarbeiter':
             $json(['mitarbeiter' => [

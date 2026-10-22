@@ -1,6 +1,6 @@
 <?php /* Buchungsformular (Variante B des Website-Vertrags) – eingebunden über booking_widget() in partials.php.
    Leistungen, Mitarbeiter, freie Tage und Uhrzeiten kommen live aus dem Portal (/api/…), nichts davon ist hier fest eingetragen. */ ?>
-<div class="booking" data-booking>
+<div class="booking" data-booking data-freigabe="<?= e(implode(',', $freigabe)) ?>">
   <ol class="steps" aria-label="Buchungsschritte">
     <li class="is-active" data-step-label="1"><span>1</span> Leistung</li>
     <li data-step-label="2"><span>2</span> Termin</li>
@@ -32,6 +32,10 @@
           <div class="date-strip" data-date-strip></div>
           <button class="icon-btn" type="button" data-date-next aria-label="Spätere Tage">›</button>
         </div>
+        <div class="personal-note" data-personal-note hidden>
+          <p><strong>Ihr Farbtermin wird persönlich geplant.</strong> Wählen Sie Ihren Wunschtermin. Wir melden uns, besprechen Ihren Wunsch und bestätigen den Termin verbindlich.</p>
+          <p data-deposit-text>Zur Reservierung bitten wir um eine Anzahlung per PayPal, die vollständig verrechnet wird. Den Link erhalten Sie mit der Bestätigung.</p>
+        </div>
         <p class="form-error" data-slot-error role="alert" hidden></p>
         <div class="slots" data-slots aria-live="polite"></div>
         <div class="step-actions">
@@ -47,7 +51,26 @@
           <label>Telefon*<input name="telefon" type="tel" autocomplete="tel" required minlength="6" maxlength="30"><small class="field-error" data-error-for="telefon"></small></label>
           <label class="full">E-Mail* <small>(für die Bestätigung)</small><input name="email" type="email" autocomplete="email" required maxlength="254"><small class="field-error" data-error-for="email"></small></label>
           <label class="full" data-wish-wrap hidden>Gewünschte Leistung*<input name="wunsch" maxlength="120" placeholder="z. B. Balayage, Herrenschnitt"><small class="field-error" data-error-for="wunsch"></small></label>
-          <label class="full">Anmerkung <small>(optional, z. B. Haarlänge, Wunschfarbe, weitere Leistungen)</small><textarea name="nachricht" rows="3" maxlength="1000"></textarea></label>
+          <fieldset class="full color-questions" data-color-questions hidden>
+            <legend>Ein paar Fragen zu Ihrem Haar</legend>
+            <p class="hint">So können wir Zeit, Technik und Preis schon vor dem Termin einschätzen.</p>
+            <div class="form-grid">
+              <label>Haarlänge*<select name="haarlaenge">
+                <option value="">Bitte wählen</option><option>Kurz (bis Kinn)</option><option>Schulterlang</option><option>Bis zu den Schulterblättern</option><option>Lang (darüber hinaus)</option>
+              </select><small class="field-error" data-error-for="haarlaenge"></small></label>
+              <label>Ihr Haar ist derzeit*<select name="vorbehandlung">
+                <option value="">Bitte wählen</option><option>Naturfarben, nie gefärbt</option><option>Gefärbt (Farbe/Tönung)</option><option>Blondiert oder aufgehellt</option><option>Mit Henna oder Pflanzenfarbe behandelt</option><option>Weiß ich nicht genau</option>
+              </select><small class="field-error" data-error-for="vorbehandlung"></small></label>
+              <label>Letzte chemische Behandlung<select name="letzte_behandlung">
+                <option value="">Bitte wählen</option><option>Innerhalb der letzten 3 Monate</option><option>Vor 3 bis 12 Monaten</option><option>Länger als ein Jahr her</option><option>Noch nie</option>
+              </select></label>
+              <label>Schon einmal bei uns?<select name="kundin">
+                <option value="">Bitte wählen</option><option>Ja</option><option>Nein, zum ersten Mal</option>
+              </select></label>
+            </div>
+            <p class="hint">Inspirationsbilder schicken Sie uns gern nach der Anfrage per <a href="<?= e($s['instagram']) ?>" target="_blank" rel="noopener">Instagram</a> mit Ihrer Vorgangsnummer.</p>
+          </fieldset>
+          <label class="full"><span data-note-label>Anmerkung <small>(optional, z. B. Wunschfarbe, weitere Leistungen)</small></span><textarea name="nachricht" rows="3" maxlength="1000"></textarea></label>
           <?= form_consent('zur Terminvereinbarung') ?>
           <small class="field-error full" data-error-for="einwilligung"></small>
           <p class="form-error full" data-form-error role="alert" hidden></p>
@@ -56,13 +79,14 @@
           <button class="btn btn-ghost" type="button" data-back>Zurück</button>
           <button class="btn btn-gold" type="button" data-submit>Termin verbindlich buchen</button>
         </div>
-        <p class="hint">Bezahlt wird nach dem Termin im Salon, bar oder mit Karte.</p>
+        <p class="hint" data-pay-hint>Bezahlt wird nach dem Termin im Salon, bar oder mit Karte.</p>
       </section>
     </div>
 
     <div class="booking-summary">
       <h3>Ihre Auswahl</h3>
       <dl>
+        <div data-summary-mode-row hidden><dt>Bestätigung</dt><dd>persönlich durch das Atelier</dd></div>
         <div><dt>Leistung</dt><dd data-summary-service>–</dd></div>
         <div data-summary-staff-row hidden><dt>Bei</dt><dd data-summary-staff>–</dd></div>
         <div><dt>Dauer</dt><dd data-summary-duration>–</dd></div>

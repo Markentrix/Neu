@@ -11,7 +11,7 @@ Die `index.html` liegt direkt darin, alle Seiten liegen flach im Hauptordner, es
 
 | Funktion | Umsetzung | Portal |
 |---|---|---|
-| Online-Terminbuchung in 3 Schritten | eigenes Design (Variante B) | `GET /api/leistungen`, `/api/mitarbeiter`, `/api/verfuegbarkeit`, `/api/slots`, `POST /api/anfrage` (typ `termin`) |
+| Online-Terminbuchung in 3 Schritten; Farbtermine als persönlicher Terminwunsch mit Fragebogen und Anzahlung | eigenes Design (Variante B) | `GET /api/leistungen`, `/api/mitarbeiter`, `/api/verfuegbarkeit`, `/api/slots`, `POST /api/anfrage` (typ `termin`) |
 | Kontaktformular | eigenes Design (Variante B) | `POST /api/anfrage` (typ `kontakt`) |
 | Gutscheine | Anfrage mit Betrag, Empfänger, Widmung; Zahlung per PayPal.Me-Link vom Salon | `POST /api/anfrage` (typ `gutschein`) |
 | Google-Bewertungen | Baustein auf der Startseite | `<div data-mk="bewertungen">` (Variante A) |
@@ -64,7 +64,7 @@ Das Markentrix-Skript (`site.js`) fügt das Portal beim Hochladen selbst in jede
 
 3. **Mitarbeiter** anlegen, falls mehrere Personen buchbar sind (Arbeitszeiten, Urlaub, angebotene Leistungen).
 4. **Öffnungszeiten / Raster**: Di–Fr 10–18 Uhr, Sa 10–14 Uhr, Raster z. B. 15 oder 30 Minuten; Sperrtage für Urlaub.
-5. Optional: **„Ich bestätige jede Buchung selbst“** mit **PayPal.Me-Link**, wenn bei Balayage & Co. eine Anzahlung gewünscht ist.
+5. **Farbtermine** (Balayage, Babylights, Blondierung, Color Correction) sendet die Website als Terminwunsch mit Fragebogen. Damit das Portal die Zeit vormerkt und die Anzahlung per PayPal.Me anfordert, braucht es eine kleine Portal-Erweiterung: **[docs/PORTAL-ERWEITERUNG.md](docs/PORTAL-ERWEITERUNG.md)**. Bis dahin kommen diese Wünsche als Anfrage an.
 6. **PayPal.Me-Name** hinterlegen – darüber laufen die Gutschein-Zahlungen.
 
 ## Website ändern und neu bauen

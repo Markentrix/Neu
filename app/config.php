@@ -48,6 +48,8 @@ return [
     // price = Grundpreis €, from = "ab"-Preis, consult = nach Beratung, duration = Minuten.
     // Die id ist zugleich der Kurzname (key) der Leistung im Portal: so springt „Buchen“ auf einer
     // Leistungsseite direkt zur passenden Leistung im Buchungsformular.
+    // freigabe = Farbtermin, den das Atelier persönlich bestätigt (Terminwunsch mit Fragebogen statt Sofortbuchung).
+    // Liefert das Portal bei /api/leistungen selbst ein Feld „freigabe“, gilt das Portal (siehe docs/PORTAL-ERWEITERUNG.md).
     'categories' => [
         [
             'id' => 'damen', 'title' => 'Damen', 'subtitle' => 'Schnitt & Styling',
@@ -76,10 +78,10 @@ return [
                 ['id' => 'f-ansatz',      'name' => 'Ansatzfarbe', 'price' => 55,  'from' => true, 'duration' => 90],
                 ['id' => 'f-faerben',     'name' => 'Färben',      'price' => 50,  'from' => true, 'duration' => 120],
                 ['id' => 'f-glossing',    'name' => 'Glossing',    'price' => 22,  'from' => true, 'duration' => 45],
-                ['id' => 'f-balayage',    'name' => 'Balayage',    'price' => 250, 'from' => true, 'duration' => 210],
-                ['id' => 'f-babylights',  'name' => 'Babylights',  'price' => 250, 'from' => true, 'duration' => 210],
-                ['id' => 'f-blondierung', 'name' => 'Blondierung', 'price' => 55,  'from' => true, 'duration' => 120],
-                ['id' => 'f-correction',  'name' => 'Color Correction', 'price' => 0, 'consult' => true, 'duration' => 30, 'bookingName' => 'Color Correction – Beratungstermin'],
+                ['id' => 'f-balayage',    'name' => 'Balayage',    'price' => 250, 'from' => true, 'duration' => 210, 'freigabe' => true],
+                ['id' => 'f-babylights',  'name' => 'Babylights',  'price' => 250, 'from' => true, 'duration' => 210, 'freigabe' => true],
+                ['id' => 'f-blondierung', 'name' => 'Blondierung', 'price' => 55,  'from' => true, 'duration' => 120, 'freigabe' => true],
+                ['id' => 'f-correction',  'name' => 'Color Correction', 'price' => 0, 'consult' => true, 'duration' => 30, 'bookingName' => 'Color Correction – Beratungstermin', 'freigabe' => true],
             ],
         ],
         [

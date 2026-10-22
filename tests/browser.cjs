@@ -28,7 +28,7 @@ function server(port, mode) {
 
 (async () => {
   for (const f of [lastFile, stateFile]) fs.rmSync(f, { force: true });
-  const servers = [await server(8711, ""), await server(8712, "aus"), await server(8713, "wunsch"), await server(8714, "ohne-leistungen")];
+  const servers = [await server(8711, ""), await server(8712, "aus"), await server(8713, "wunsch"), await server(8714, "ohne-leistungen"), await server(8715, "freigabe")];
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const errors = [];
@@ -41,8 +41,8 @@ function server(port, mode) {
     await page.goto(`${B}/termin.html`);
     await page.waitForSelector('input[name="leistung"]');
     check("Leistungen kommen aus /api/leistungen", (await page.locator('input[name="leistung"]').count()) === 3);
-    await page.locator("label.service-option", { hasText: "Balayage" }).click();
-    check("Wunschperson-Auswahl erscheint (2 Personen bieten Balayage an)", await page.locator("[data-staff-wrap]").isVisible());
+    await page.locator("label.service-option", { hasText: "Föhnen" }).click();
+    check("Wunschperson-Auswahl erscheint (2 Personen bieten die Leistung an)", await page.locator("[data-staff-wrap]").isVisible());
     await page.selectOption("[data-staff]", "jo");
     await page.click('[data-step="1"] [data-next]');
     await page.waitForSelector(".slot-btn");
@@ -68,16 +68,56 @@ function server(port, mode) {
     await page.fill('[data-customer-form] [name="name"]', "Maria Muster");
     await Promise.all([page.waitForURL(/danke/), page.click("[data-submit]")]);
     const sent = last();
-    check("Anfrage typ=termin mit Leistung, Person, Datum, Uhrzeit, Einwilligung", sent.typ === "termin" && sent.leistung === "f-balayage" && sent.mitarbeiter === "jo" && /^\d{4}-\d{2}-\d{2}$/.test(sent.datum) && sent.uhrzeit === "10:30" && sent.einwilligung === "ja" && sent.website === "", JSON.stringify(sent));
+    check("Anfrage typ=termin mit Leistung, Person, Datum, Uhrzeit, Einwilligung", sent.typ === "termin" && sent.leistung === "d-wsf-mittel" && sent.mitarbeiter === "jo" && /^\d{4}-\d{2}-\d{2}$/.test(sent.datum) && sent.uhrzeit === "10:30" && sent.einwilligung === "ja" && sent.website === "", JSON.stringify(sent));
     check("Weiterleitung auf danke.html?typ=termin&ref=…", /danke\.html\?typ=termin&ref=T\d{6}-AB12/.test(page.url()), page.url());
     const thanks = await page.textContent("main");
-    check("Danke-Seite zeigt Vorgangsnummer, Leistung und Termin", thanks.includes("Vorgangsnummer: T") && thanks.includes("Balayage am") && thanks.includes("10:30 Uhr"));
+    check("Danke-Seite zeigt Vorgangsnummer, Leistung und Termin", thanks.includes("Vorgangsnummer: T") && thanks.includes("mittel am") && thanks.includes("10:30 Uhr"));
     check("Kalendereintrag wird angeboten", await page.locator("[data-ics]").isVisible());
 
     await page.goto(`${B}/termin.html?leistung=h-schnitt`);
     await page.waitForSelector('input[name="leistung"]');
     check("Direktwahl über ?leistung= (Link von der Leistungsseite)", await page.isChecked('input[value="h-schnitt"]'));
     check("Nur eine Person bietet Herrenschnitt an → keine Auswahl", !(await page.locator("[data-staff-wrap]").isVisible()));
+
+    console.log("\nFarbtermin (persönliche Bestätigung)");
+    await page.goto(`${B}/termin.html?leistung=f-balayage`);
+    await page.waitForSelector('input[value="f-balayage"]:checked');
+    await page.click('[data-step="1"] [data-next]');
+    await page.waitForSelector(".slot-btn");
+    check("Hinweis auf persönliche Planung und Anzahlung", await page.locator("[data-personal-note]").isVisible());
+    await page.locator(".slot-btn").first().click();
+    await page.click('[data-step="2"] [data-next]');
+    check("Fragebogen zum Haar erscheint", await page.locator("[data-color-questions]").isVisible());
+    check("Knopf heißt „Terminwunsch senden“", (await page.textContent("[data-submit]")) === "Terminwunsch senden");
+    await page.fill('[data-customer-form] [name="name"]', "Lena Blond");
+    await page.fill('[data-customer-form] [name="telefon"]', "0511 654321");
+    await page.fill('[data-customer-form] [name="email"]', "lena@example.org");
+    await page.check('[data-customer-form] [name="einwilligung"]');
+    fs.rmSync(lastFile, { force: true });
+    await page.click("[data-submit]");
+    check("Haarlänge und Vorbehandlung sind Pflicht", (await page.textContent('[data-error-for="haarlaenge"]')).length > 0 && !fs.existsSync(lastFile));
+    await page.selectOption('[name="haarlaenge"]', { index: 2 });
+    await page.selectOption('[name="vorbehandlung"]', { index: 3 });
+    await Promise.all([page.waitForURL(/danke/), page.click("[data-submit]")]);
+    const wish = last();
+    check("Ohne Portal-Freigabe: Wunschzeit statt fester Uhrzeit, Fragebogen dabei", wish.wunschzeit === "10:00" && !("uhrzeit" in wish) && wish.haarlaenge === "Schulterlang" && wish.vorbehandlung.startsWith("Blondiert") && wish.terminart.includes("persönlich"), JSON.stringify(wish));
+    check("Danke-Seite: Terminwunsch mit Anzahlungs-Hinweis, ohne Kalendereintrag", (await page.textContent("main")).includes("Anzahlung") && !(await page.locator("[data-ics]").isVisible()));
+    await page.goto("http://127.0.0.1:8715/termin.html?leistung=f-balayage");
+    await page.waitForSelector('input[value="f-balayage"]:checked');
+    await page.click('[data-step="1"] [data-next]');
+    await page.waitForSelector(".slot-btn");
+    check("Mit Portal-Freigabe: Anzahlungsbetrag aus dem Portal", /50\s€/.test(await page.textContent("[data-deposit-text]")));
+    await page.locator(".slot-btn").first().click();
+    await page.click('[data-step="2"] [data-next]');
+    await page.fill('[data-customer-form] [name="name"]', "Lena Blond");
+    await page.fill('[data-customer-form] [name="telefon"]', "0511 654321");
+    await page.fill('[data-customer-form] [name="email"]', "lena@example.org");
+    await page.selectOption('[name="haarlaenge"]', { index: 1 });
+    await page.selectOption('[name="vorbehandlung"]', { index: 1 });
+    await page.check('[data-customer-form] [name="einwilligung"]');
+    await Promise.all([page.waitForURL(/danke/), page.click("[data-submit]")]);
+    check("Mit Portal-Freigabe: Uhrzeit wird vorgemerkt (uhrzeit gesendet)", last().uhrzeit && !("wunschzeit" in last()));
+    check("Danke-Seite nennt den Anzahlungsbetrag", (await page.textContent("main")).includes("50 €"));
 
     console.log("\nKontakt und Gutschein");
     await page.goto(`${B}/kontakt.html`);

@@ -112,7 +112,7 @@ function service_price_box(array $ids): void
             <li>
               <span class="sr-name"><?= e($sv['fullName']) ?><small>ca. <?= e(duration_label((int)$sv['duration'])) ?></small></span>
               <span class="sr-price"><?= e(price_label($sv)) ?></span>
-              <a class="sr-book" href="/termin?leistung=<?= e($id) ?>">Buchen <?= icon('arrow') ?></a>
+              <a class="sr-book" href="/termin?leistung=<?= e($id) ?>"><?= empty($sv['freigabe']) ? 'Buchen' : 'Anfragen' ?> <?= icon('arrow') ?></a>
             </li>
             <?php endforeach; ?>
           </ul>
@@ -153,6 +153,7 @@ function form_consent(string $purpose): string
 function booking_widget(): void
 {
     $s = cfg()['salon'];
+    $freigabe = array_keys(array_filter(services(), fn($sv) => !empty($sv['freigabe'])));
     include __DIR__ . '/partials/booking-widget.php';
 }
 
@@ -209,7 +210,7 @@ function service_cards(?array $only = null, string $headingTag = 'h3'): void
 <?php
 }
 
-function cta_band(string $title = 'Lust auf einen neuen Look?', string $text = 'Freie Termine sehen Sie sofort online und buchen rund um die Uhr.'): void
+function cta_band(string $title = 'Bereit für Ihre neue Farbe?', string $text = 'Reservieren Sie Ihren Termin online. Bei Farbe stimmen wir den Termin vorab persönlich mit Ihnen ab.'): void
 {
     $s = cfg()['salon']; ?>
     <section class="cta-band">
@@ -219,7 +220,7 @@ function cta_band(string $title = 'Lust auf einen neuen Look?', string $text = '
           <p><?= e($text) ?></p>
         </div>
         <div class="hero-actions">
-          <a class="btn btn-gold" href="/termin">Termin buchen</a>
+          <a class="btn btn-gold" href="/termin">Termin reservieren</a>
           <a class="btn btn-light" href="tel:<?= e($s['phone']) ?>"><?= e($s['phoneDisplay']) ?></a>
         </div>
       </div>

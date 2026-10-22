@@ -4,9 +4,9 @@ $s = $c['salon'];
 $faq = array_slice(general_faq(), 0, 5);
 
 page_start([
-    'title' => 'Friseur Wettmar & Burgwedel | AJ Atelier – Balayage',
-    'ogTitle' => 'AJ Atelier – Friseur in Burgwedel-Wettmar',
-    'description' => 'AJ Atelier, Ihr Friseur in Burgwedel-Wettmar: Balayage, Babylights, Haarschnitt, Färben & Styling für Damen und Herren. Termin online buchen, rund um die Uhr.',
+    'title' => 'AJ Atelier | Exklusiver Friseur in Burgwedel-Wettmar',
+    'ogTitle' => 'AJ Atelier – Hair & Beauty Atelier in Burgwedel-Wettmar',
+    'description' => 'AJ Atelier – exklusiver Friseur in Burgwedel-Wettmar: Balayage, Babylights, Blond und Color Correction mit persönlicher Beratung. Für Hannover, Celle und Region.',
     'path' => '/',
     'schema' => [faq_schema($faq)],
 ]);
@@ -15,17 +15,17 @@ page_start([
     <section class="hero marble" aria-labelledby="hero-title">
       <div class="container hero-inner">
         <div class="hero-copy">
-          <p class="eyebrow">Friseur in Burgwedel-Wettmar</p>
-          <h1 id="hero-title">Dein Look.<br><em>Unsere Leidenschaft.</em></h1>
-          <p class="lead">Balayage, Babylights, präzise Schnitte und Styling mit Gefühl. Im AJ Atelier in Wettmar nehmen wir uns Zeit für Ihr Haar.</p>
+          <p class="eyebrow">Hair &amp; Beauty Atelier · Burgwedel-Wettmar</p>
+          <h1 id="hero-title">Haar mit Handschrift.<br><em>Im Atelier, nicht am Fließband.</em></h1>
+          <p class="lead">Balayage, Babylights und Blond auf höchstem Niveau – mit ausführlicher Beratung, Bond-Schutz bei jeder Aufhellung und der Ruhe, die gute Farbe braucht. Für Kundinnen aus Burgwedel, Hannover, Celle und der ganzen Region.</p>
           <div class="hero-actions">
-            <a class="btn btn-gold" href="#termin">Online Termin buchen</a>
+            <a class="btn btn-gold" href="#termin">Termin reservieren</a>
             <a class="btn btn-ghost" href="tel:<?= e($s['phone']) ?>"><?= e($s['phoneDisplay']) ?></a>
           </div>
           <ul class="hero-facts" aria-label="Auf einen Blick">
-            <li><strong>Di–Fr</strong> 10–18 Uhr</li>
-            <li><strong>Sa</strong> 10–14 Uhr</li>
-            <li><strong>24/7</strong> online buchen</li>
+            <li><strong>Beratung</strong> vor jeder Farbe</li>
+            <li><strong>Bond-Schutz</strong> bei Aufhellungen</li>
+            <li><strong>Di–Sa</strong> nach Termin</li>
           </ul>
         </div>
         <div class="hero-emblem" aria-hidden="true">
@@ -53,28 +53,28 @@ page_start([
     <section class="section" aria-labelledby="leistungen-title">
       <div class="container">
         <header class="section-head">
-          <p class="eyebrow">Leistungen</p>
-          <h2 id="leistungen-title">Handwerk, das man sieht</h2>
-          <p>Von der natürlichen Balayage bis zum klassischen Herrenschnitt. Jede Leistung beginnt mit einer ehrlichen Beratung.</p>
+          <p class="eyebrow">Expertise</p>
+          <h2 id="leistungen-title">Unsere Kunst</h2>
+          <p>Unser Schwerpunkt ist Farbe: weiche Verläufe, strahlendes Blond und Farbkorrekturen. Dazu präzise Schnitte und Hochsteckfrisuren für besondere Tage.</p>
         </header>
         <?php service_cards(); ?>
         <p class="soon">Extensions – <strong>bald im AJ Atelier</strong></p>
       </div>
     </section>
 
-    <section class="section marble" aria-labelledby="preise-title">
+    <section class="section marble" aria-labelledby="ablauf-title">
       <div class="container split">
         <div>
-          <p class="eyebrow">Preise</p>
-          <h2 id="preise-title">Klare Preise, ehrliche Beratung</h2>
-          <p>Schnitte und Styling haben bei uns feste Preise. Bei Farbe und Techniken wie Balayage richtet sich der Preis nach Haarlänge und Verbrauch. Bevor wir beginnen, erhalten Sie einen Kostenvoranschlag.</p>
-          <p><a class="btn btn-ghost" href="/preise">Komplette Preisliste</a></p>
+          <p class="eyebrow">Ihr Termin</p>
+          <h2 id="ablauf-title">So arbeiten wir</h2>
+          <p>Gute Farbe entsteht nicht im Akkord. Deshalb folgt jeder Termin bei uns demselben Ablauf: erst verstehen, dann gestalten, dann pflegen.</p>
+          <p><a class="btn btn-ghost" href="/preise">Preise ansehen</a></p>
         </div>
-        <dl class="price-teaser">
-          <?php foreach (['d-wsf-kurz', 'h-schnitt', 'f-ansatz', 'f-balayage', 'f-glossing', 'b-wimpern'] as $id): $sv = services()[$id]; ?>
-          <div class="price-row"><dt><?= e($sv['fullName']) ?></dt><dd><?= e(price_label($sv)) ?></dd></div>
-          <?php endforeach; ?>
-        </dl>
+        <ol class="steps-list">
+          <li><strong>Beratung</strong><span>Wir analysieren Ihr Haar, besprechen Ihren Wunsch und nennen Ihnen vorab den Preis.</span></li>
+          <li><strong>Gestaltung</strong><span>Farbe und Schnitt in einer Hand, mit Bond-Schutz bei jeder Aufhellung.</span></li>
+          <li><strong>Finish &amp; Pflege</strong><span>Styling, Pflegeempfehlung und der passende Zeitpunkt für Ihren nächsten Termin.</span></li>
+        </ol>
       </div>
     </section>
 
@@ -82,8 +82,8 @@ page_start([
       <div class="container">
         <header class="section-head">
           <p class="eyebrow">Online-Terminbuchung</p>
-          <h2 id="termin-title">Ihr Wunschtermin in 3 Schritten</h2>
-          <p>Rund um die Uhr buchen, Bestätigung per E-Mail. Bezahlt wird bequem im Salon.</p>
+          <h2 id="termin-title">Reservieren Sie Ihren Platz im Atelier</h2>
+          <p>Schnitt und Styling buchen Sie direkt. Farbtermine wie Balayage oder Blondierung planen wir persönlich mit Ihnen: Sie senden Ihren Wunschtermin, wir melden uns zur Abstimmung.</p>
         </header>
         <?php booking_widget(); ?>
       </div>
@@ -96,9 +96,9 @@ page_start([
           <h2 id="ueber-title">Ein Atelier für Haar &amp; Beauty, mitten in Wettmar</h2>
           <p>Im AJ Atelier verbinden wir moderne Farbtechniken mit klassischem Friseurhandwerk. Wir hören zu, beraten ehrlich und arbeiten mit Produkten, die Ihr Haar schonen.</p>
           <ul class="checklist">
-            <li>Individuelle Farbberatung &amp; Kostenvoranschlag</li>
-            <li>Haarschonende Aufhellung mit Bond Treatment</li>
-            <li>Rund um die Uhr online buchen, Gutscheine per PayPal</li>
+            <li>Persönliche Farbberatung und Kostenvoranschlag vor jedem Farbtermin</li>
+            <li>Bond-Schutz bei jeder Aufhellung</li>
+            <li>Von der Beratung bis zum Finish in einer Hand</li>
           </ul>
           <p><a class="btn btn-ghost" href="/ueber-uns">Mehr über uns</a></p>
         </div>

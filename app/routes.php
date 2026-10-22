@@ -26,7 +26,7 @@ function general_faq(): array
     $c = cfg();
     $s = $c['salon'];
     return [
-        ['Wie kann ich einen Termin bei AJ Atelier buchen?', "Rund um die Uhr online unter „Termin buchen“: Leistung wählen, freie Uhrzeit aussuchen, Kontaktdaten eingeben. Sie erhalten eine Bestätigung mit Vorgangsnummer per E-Mail. Telefonisch erreichen Sie uns unter {$s['phoneDisplay']}."],
+        ['Wie kann ich einen Termin bei AJ Atelier buchen?', "Online unter „Termin buchen“: Leistung wählen, Uhrzeit aussuchen, Kontaktdaten eingeben. Schnitt und Styling sind sofort gebucht. Farbtermine wie Balayage oder Blondierung senden Sie als Wunsch, wir melden uns persönlich und bestätigen sie gegen eine Anzahlung. Telefonisch erreichen Sie uns unter {$s['phoneDisplay']}."],
         ['Wie kann ich bezahlen?', 'Bezahlt wird nach dem Termin im Salon, bar oder mit Karte. Gutscheine können Sie online anfragen und per PayPal bezahlen; den Zahlungslink erhalten Sie per E-Mail.'],
         ['Was kostet eine Balayage in Wettmar?', 'Balayage und Babylights beginnen bei AJ Atelier ab 250 €. Der genaue Preis richtet sich nach Haarlänge, Haardichte und Materialverbrauch. Vor dem Start erhalten Sie einen individuellen Kostenvoranschlag.'],
         ['Was kostet ein Haarschnitt?', 'Waschen, Schneiden und Föhnen für Damen kostet 55 € (kurz), 60 € (mittel) oder 70 € (lang). Der Herrenschnitt inklusive Waschen und Styling kostet 45 €, ein Maschinenschnitt 30 €.'],

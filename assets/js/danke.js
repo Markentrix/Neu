@@ -15,7 +15,9 @@ try { termin = JSON.parse(sessionStorage.getItem("aj-termin") || "null"); } catc
 if (termin && termin.ref !== ref) termin = null;
 
 const texts = {
-  termin: termin?.wunsch
+  termin: termin?.farbe
+    ? ["Ihr Terminwunsch ist da!", `Wir sehen uns Ihre Angaben an und melden uns persönlich, um den Termin zu bestätigen. Zur Reservierung erhalten Sie dann einen PayPal-Link für die Anzahlung${termin.anzahlung ? ` von ${termin.anzahlung} €` : ""}, die beim Termin vollständig verrechnet wird. Inspirationsbilder können Sie uns gern mit Ihrer Vorgangsnummer per Instagram schicken.`]
+    : termin?.wunsch
     ? ["Ihr Terminwunsch ist da!", "Wir prüfen den Termin und bestätigen ihn Ihnen so schnell wie möglich per E-Mail."]
     : ["Ihr Termin ist gebucht!", "Die Bestätigung mit allen Details ist unterwegs in Ihr Postfach. Einen Tag vorher erinnern wir Sie noch einmal."],
   gutschein: ["Vielen Dank für Ihre Gutschein-Anfrage!", "Sie erhalten von uns per E-Mail den Link zur Zahlung mit PayPal. Nach Zahlungseingang schicken wir Ihnen den Gutschein mit persönlichem Code."],
@@ -24,7 +26,7 @@ const texts = {
 const [title, text] = texts[typ] || texts.kontakt;
 $("[data-thanks-title]").textContent = title;
 $("[data-thanks-text]").textContent = termin
-  ? `${termin.leistung ? `${termin.leistung} am ` : "Am "}${longDate(termin.datum)} um ${termin.uhrzeit} Uhr. ${text}`
+  ? `${termin.wunsch ? "Ihr Wunsch: " : ""}${termin.leistung ? `${termin.leistung} am ` : "Am "}${longDate(termin.datum)} um ${termin.uhrzeit} Uhr. ${text}`
   : text;
 if (ref) {
   const el = $("[data-thanks-ref]");

@@ -164,7 +164,13 @@ function initBooking(root) {
     return r.json();
   };
   const qs = (o) => new URLSearchParams(Object.entries(o).filter(([, v]) => v)).toString();
-  const state = { step: 1, services: [], staff: [], service: null, person: "", avail: null, date: null, time: null, sending: false };
+  const state = { step: 1, services: [], staff: [], service: null, person: "", avail: null, date: null, time: null, self: true, sending: false };
+  // Farbtermine (Balayage, Blond …) bestätigt das Atelier persönlich. Liefert das Portal ein Feld „freigabe“,
+  // gilt das; sonst die Liste aus der Website-Konfiguration. Nur wenn das Portal die Freigabe kennt, wird die Uhrzeit
+  // gleich vorgemerkt (uhrzeit); sonst geht sie als Wunschzeit mit, damit nichts sofort fest gebucht wird.
+  const FREIGABE = (root.dataset.freigabe || "").split(",").filter(Boolean);
+  const personal = (s) => Boolean(s) && (typeof s.freigabe === "boolean" ? s.freigabe : FREIGABE.includes(s.key));
+  const portalHolds = (s) => s?.freigabe === true;
   const fallback = $("[data-fallback]", root);
   const body = $("[data-booking-body]", root);
   const goOffline = () => { fallback.hidden = false; body.hidden = true; };
@@ -203,6 +209,7 @@ function initBooking(root) {
     $("[data-summary-service]", root).textContent = s ? s.name : (state.services.length ? "–" : "nach Absprache");
     $("[data-summary-duration]", root).textContent = s?.dauer ? `ca. ${duration(+s.dauer)}` : "–";
     $("[data-summary-price]", root).textContent = s ? priceText(s.preis) : "–";
+    $("[data-summary-mode-row]", root).hidden = root.dataset.mode !== "wunsch";
     $("[data-summary-hint]", root).hidden = !(s && /\bab\b/i.test(String(s.preis)));
     $("[data-summary-date]", root).textContent = state.date && state.time
       ? `${new Date(`${state.date}T12:00`).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })}, ${state.time} Uhr` : "–";
@@ -232,6 +239,7 @@ function initBooking(root) {
     state.date = state.time = null;
     next1.disabled = !state.service;
     renderStaff();
+    applyMode();
     renderSummary();
   });
   next1.addEventListener("click", () => showStep(2));
@@ -302,7 +310,8 @@ function initBooking(root) {
       return goOffline();
     }
     const a = state.avail;
-    applyBookingMode(a.selfBooking !== false);
+    state.self = a.selfBooking !== false;
+    applyMode();
     const blocked = new Set(a.blocked || []);
     const closed = new Set(a.closedWeekdays || []);
     const start = new Date();
@@ -328,11 +337,25 @@ function initBooking(root) {
     selectDate(state.date && !$(`.date-btn[data-date="${state.date}"]`, strip)?.disabled ? state.date : first.dataset.date, true);
   }
 
-  // Ohne Selbstbuchung im Portal ist es ein Terminwunsch, den der Salon bestätigt
-  function applyBookingMode(self) {
-    $("#st2", root).textContent = self ? "Wann passt es Ihnen?" : "Wann hätten Sie gern Ihren Termin?";
-    $("[data-submit]", root).textContent = self ? "Termin verbindlich buchen" : "Terminwunsch senden";
-    root.dataset.mode = self ? "buchung" : "wunsch";
+  // Terminwunsch statt Sofortbuchung: bei Farbterminen oder wenn das Portal keine Selbstbuchung erlaubt
+  function applyMode() {
+    const s = state.service;
+    const color = personal(s);
+    const wish = color || !state.self;
+    root.dataset.mode = wish ? "wunsch" : "buchung";
+    $("#st2", root).textContent = wish ? "Wann hätten Sie gern Ihren Termin?" : "Wann passt es Ihnen?";
+    $("#st3", root).textContent = color ? "Ihr Haar und Ihre Kontaktdaten" : "Ihre Kontaktdaten";
+    $("[data-submit]", root).textContent = wish ? "Terminwunsch senden" : "Termin verbindlich buchen";
+    $("[data-personal-note]", root).hidden = !color;
+    $("[data-deposit-text]", root).textContent = typeof s?.anzahlung === "number" && s.anzahlung > 0
+      ? `Zur Reservierung bitten wir um eine Anzahlung von ${euro(s.anzahlung)} per PayPal, die vollständig verrechnet wird. Den Link erhalten Sie mit der Bestätigung.`
+      : "Zur Reservierung bitten wir um eine Anzahlung per PayPal, die vollständig verrechnet wird. Den Link erhalten Sie mit der Bestätigung.";
+    const q = $("[data-color-questions]", root);
+    q.hidden = !color;
+    for (const n of ["haarlaenge", "vorbehandlung"]) q.querySelector(`[name="${n}"]`).required = color;
+    $("[data-pay-hint]", root).textContent = color
+      ? "Die Anzahlung wird beim Termin vollständig verrechnet, der Rest wird im Salon bezahlt."
+      : "Bezahlt wird nach dem Termin im Salon, bar oder mit Karte.";
   }
 
   strip.addEventListener("click", (e) => {
@@ -411,7 +434,13 @@ function initBooking(root) {
       typ: "termin",
       name: f.name.value.trim(), telefon: f.telefon.value.trim(), email: f.email.value.trim(),
       nachricht: f.nachricht.value.trim(),
-      datum: state.date, uhrzeit: state.time,
+      datum: state.date,
+      ...(personal(s) && !portalHolds(s) ? { wunschzeit: state.time } : { uhrzeit: state.time }),
+      ...(personal(s) ? {
+        terminart: "Farbtermin – bitte persönlich bestätigen (Anzahlung per PayPal.Me)",
+        haarlaenge: f.haarlaenge.value, vorbehandlung: f.vorbehandlung.value,
+        letzte_behandlung: f.letzte_behandlung.value, kundin: f.kundin.value,
+      } : {}),
       leistung: s?.key || "", leistung_name: s?.name || f.wunsch.value.trim(),
       mitarbeiter: state.person || "", mitarbeiter_name: person?.name || "",
       einwilligung: f.einwilligung.checked ? "ja" : "", website: f.website.value,
@@ -421,7 +450,7 @@ function initBooking(root) {
     submit.textContent = label;
     if (result.kind === "ok") {
       try {
-        sessionStorage.setItem("aj-termin", JSON.stringify({ ref: result.ref, datum: state.date, uhrzeit: state.time, leistung: s?.name || f.wunsch.value.trim(), dauer: s?.dauer || 0, wunsch: root.dataset.mode === "wunsch" }));
+        sessionStorage.setItem("aj-termin", JSON.stringify({ ref: result.ref, datum: state.date, uhrzeit: state.time, leistung: s?.name || f.wunsch.value.trim(), dauer: s?.dauer || 0, wunsch: root.dataset.mode === "wunsch", farbe: personal(s), anzahlung: typeof s?.anzahlung === "number" ? s.anzahlung : null }));
       } catch { /* ohne Speicher zeigt die Danke-Seite nur die Vorgangsnummer */ }
       location.href = thanks("termin", result.ref);
       return;

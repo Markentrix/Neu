@@ -34,7 +34,7 @@ return [
         'faq' => [
             ['Wie lange hält eine Balayage?', 'Weil der Übergang zum Ansatz weich ist, sieht eine Balayage auch nach drei bis vier Monaten noch gepflegt aus. Viele Kundinnen frischen sie zwei- bis dreimal im Jahr auf, dazwischen reicht oft ein Glossing.'],
             ['Schadet Balayage meinen Haaren?', 'Jede Aufhellung beansprucht das Haar. Wir arbeiten deshalb mit einem Bond Treatment, das die Haarstruktur während der Behandlung schützt, und empfehlen passende Pflege für zu Hause.'],
-            ['Muss ich bei der Online-Buchung schon bezahlen?', 'Nein. Sie buchen online und bezahlen nach dem Termin im Salon, bar oder mit Karte. Bei sehr aufwendigen Farbbehandlungen kann der Salon vorab eine Anzahlung per PayPal erbitten, darüber informieren wir Sie mit der Terminbestätigung.'],
+            ['Wie läuft die Buchung für Balayage ab?', 'Online senden Sie zunächst nur Ihren Wunschtermin und ein paar Angaben zu Ihrem Haar. Wir melden uns persönlich und bestätigen den Termin. Zur Reservierung bitten wir dann um eine Anzahlung per PayPal, die beim Termin vollständig verrechnet wird. Den Rest bezahlen Sie im Salon.'],
         ],
         'related' => ['babylights', 'farbe', 'pflege'],
     ],

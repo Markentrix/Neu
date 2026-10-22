@@ -46,7 +46,7 @@ function local_business_schema(): array
         '@id' => site_url('/#salon'),
         'name' => $s['name'],
         'alternateName' => [$s['legalName'], 'AJ Atelier Wettmar', 'Friseur AJ Atelier Burgwedel'],
-        'description' => 'Friseursalon in Burgwedel-Wettmar für Balayage, Babylights, Färben, Damen- und Herrenschnitte, Hochsteckfrisuren, Haarpflege sowie Augenbrauen und Wimpern. Online-Terminbuchung rund um die Uhr.',
+        'description' => 'Exklusives Hair & Beauty Atelier in Burgwedel-Wettmar mit Schwerpunkt Farbe: Balayage, Babylights, Blondierung und Color Correction mit persönlicher Beratung, dazu Damen- und Herrenschnitte, Hochsteckfrisuren, Haarpflege, Augenbrauen und Wimpern.',
         'url' => site_url('/'),
         'logo' => site_url('/img/logo.png'),
         'image' => site_url('/img/og-image.png'),
