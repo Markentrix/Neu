@@ -363,3 +363,37 @@ def gutschein_erinnerung(cfg=None):
             gesendet += 1 if ok else 0
         push.senden(ids, "Gutschein-Anfrage offen", f"{r['name']}: seit einem Tag ohne Abschluss.", "/app#dienste", "gutschein")
     return gesendet
+
+
+# ---------------------------------------------------------------- Anzahlung nicht eingegangen: Termin wieder freigeben
+def anzahlung_frist(cfg=None):
+    """Hat der Betrieb eine Frist für die Anzahlung eingestellt und ist bis dahin kein Zahlungseingang markiert, wird der Termin freigegeben."""
+    with tx("system") as cur:
+        cur.execute("""WITH f AS (SELECT w.id FROM website_termine w JOIN website_dienste d ON d.kunden_id = w.kunden_id JOIN kunden k ON k.id = w.kunden_id
+                                  WHERE d.anz_frist_std > 0 AND w.anzahlung_betrag > 0 AND w.anzahlung_erhalten_am IS NULL AND w.status IN ('gebucht','reserviert')
+                                    AND w.start > now() AND w.erstellt_am < now() - make_interval(hours => d.anz_frist_std) AND k.status IN ('onboarding','aktiv')
+                                  ORDER BY w.erstellt_am LIMIT 50 FOR UPDATE OF w SKIP LOCKED)
+                       UPDATE website_termine w SET status = 'abgesagt' FROM f WHERE w.id = f.id
+                       RETURNING w.kunden_id, w.termin_id, w.start, w.name, w.email, w.anzahlung, w.ref""")
+        zeilen = cur.fetchall()
+        for r in zeilen:
+            if r["termin_id"]:
+                cur.execute("UPDATE termine SET status='abgesagt' WHERE id=%s", (r["termin_id"],))
+    n = 0
+    for r in zeilen:
+        lokal = r["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+        with tx("system") as cur:
+            cur.execute("SELECT firma FROM kunden WHERE id=%s", (r["kunden_id"],))
+            firma = cur.fetchone()["firma"]
+            an = kunden_empfaenger(cur, r["kunden_id"])
+            ids = push.kunde(cur, r["kunden_id"])
+        sd.kundenmail(r["kunden_id"], r["email"], f"Ihr Termin bei {firma} am {lokal} wurde freigegeben",
+                      f"Guten Tag {r['name']},\n\nleider ist die Anzahlung von {str(r['anzahlung']).replace('.', ',')} € für Ihren Termin am {lokal} nicht bei uns eingegangen. "
+                      f"Wir haben den Termin deshalb wieder freigegeben. Sie können gern jederzeit neu buchen.\n\nViele Grüße\n{firma}", art="termin")
+        for a in an:
+            mailer.senden(a, f"Termin freigegeben: {r['name']} ({r['ref'] or ''})",
+                          f"Für den Termin von {r['name']} am {lokal} ist innerhalb der Frist keine Anzahlung als erhalten markiert worden. Das Portal hat den Termin freigegeben und {r['name']} informiert. "
+                          f"Falls die Zahlung doch da ist, bitte den Termin neu eintragen." + mailer.SIGNATUR, kunden_id=r["kunden_id"], art="termin")
+        push.senden(ids, "Termin freigegeben", f"{r['name']}: keine Anzahlung bis zur Frist ({lokal}).", "/app#heute", "termin")
+        n += 1
+    return n

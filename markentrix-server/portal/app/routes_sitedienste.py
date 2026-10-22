@@ -151,6 +151,18 @@ def oeff_kontakt(site_id: str, request: Request, daten: dict = Depends(_korper))
     return _antwort({"ok": True}, kopf)
 
 
+@router.get("/site/{site_id}/leistungen", include_in_schema=False)
+def oeff_leistungen(site_id: str, request: Request):
+    """Preisliste für den Baustein data-mk="preise": immer der aktuelle Stand aus dem Portal."""
+    z = _site(site_id)
+    kopf = _cors(request, z)
+    rate_limit("siteleist:" + client_ip(request), 60, 300)
+    with tx("system") as cur:
+        cur.execute("SELECT name, beschreibung, preis, dauer_min FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (z["kunden_id"],))
+        l = [{"name": r["name"], "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "dauer": r["dauer_min"]} for r in cur.fetchall()]
+    return _antwort({"leistungen": l}, kopf)
+
+
 @router.get("/site/{site_id}/termine", include_in_schema=False)
 def oeff_termine(site_id: str, request: Request):
     z = _site(site_id)
@@ -183,7 +195,7 @@ def _termin_mails(kid, g: dict, z: dict, firma: str, an: list):
     anhang = ("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin bei " + firma, ort), "text/calendar")
     wer = " · ".join(x for x in (g.get("leistung_name"), ("bei " + g["mitarbeiter_name"]) if g.get("mitarbeiter_name") else "") if x)
     sd.kundenmail(kid, g["email"], f"Ihr Termin bei {firma} am {lokal}",
-                  f"Guten Tag {g['name']},\n\nIhr Termin ist gebucht: {lokal}.{(chr(10) + wer) if wer else ''}\n{ort}\n\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}",
+                  f"Guten Tag {g['name']},\n\nIhr Termin ist gebucht: {lokal}.{(chr(10) + wer) if wer else ''}\n{ort}\n{sd.zahlungsabsatz(z, g.get('anzahlung'))}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}",
                   anhang=anhang, art="termin")
     for a in an:
         sd.kundenmail(kid, a, f"Neuer Termin: {g['name']} am {lokal}",
@@ -637,7 +649,7 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
         z = sd.zeile(cur, kid)
         sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
-        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.email, w.telefon, w.nachricht, w.daten, w.anzahlung, w.erstellt_am, w.ergebnis,
+        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.email, w.telefon, w.nachricht, w.daten, w.anzahlung, w.anzahlung_betrag, w.preis_betrag, w.anzahlung_erhalten_am, w.bezahlt_am, w.erstellt_am, w.ergebnis,
                               l.name AS leistung, m.name AS mitarbeiter,
                               (SELECT count(*) FROM website_termine x WHERE x.kunden_id=w.kunden_id AND lower(x.email)=lower(w.email) AND x.ergebnis='nicht_erschienen') AS fehlt_bisher
                        FROM website_termine w LEFT JOIN website_leistungen l ON l.id=w.leistung_id LEFT JOIN website_mitarbeiter m ON m.id=w.mitarbeiter_id
@@ -653,10 +665,148 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
         d = r["daten"] or {}
         details = {k: v for k, v in d.items() if k not in ("typ", "name", "telefon", "email", "nachricht", "datum", "datum2", "uhrzeit") and v}
         eintrag = {"id": str(r["id"]), "ref": r["ref"] or "", "status": r["status"], "start": r["start"], "name": r["name"], "email": r["email"], "telefon": r["telefon"] or "",
-                   "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
+                   "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "preis": f"{r['preis_betrag']:.2f}" if r["preis_betrag"] is not None else "", "anzahlung_erhalten_am": r["anzahlung_erhalten_am"], "bezahlt_am": r["bezahlt_am"], "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
                    "ende": r["ende"], "fehlt_bisher": r["fehlt_bisher"]}
         (vorbei if r["start"] <= jetzt and r["status"] == "gebucht" and r["ergebnis"] is None else out).append(eintrag)
     return {"buchungen": out, "vergangen": vorbei, "freigabe": z["kal_freigabe"]}
+
+
+# ---------------------------------------------------------------- Excel-Übersicht
+def _zeitraum(art: str, von: str, bis: str) -> tuple[date, date, str]:
+    heute = datetime.now(TZ).date()
+    if art == "woche":
+        a = heute - timedelta(days=heute.weekday())
+        return a, a + timedelta(days=6), "Diese Woche"
+    if art == "vorwoche":
+        a = heute - timedelta(days=heute.weekday() + 7)
+        return a, a + timedelta(days=6), "Letzte Woche"
+    if art in ("monat", "vormonat"):
+        a = heute.replace(day=1)
+        if art == "vormonat":
+            a = (a - timedelta(days=1)).replace(day=1)
+        n = (a + timedelta(days=32)).replace(day=1)
+        return a, n - timedelta(days=1), a.strftime("%m/%Y")
+    try:
+        a, b = date.fromisoformat(von), date.fromisoformat(bis)
+    except ValueError:
+        raise HTTPException(400, "Bitte Von- und Bis-Datum angeben (Format JJJJ-MM-TT).")
+    if b < a or (b - a).days > 400:
+        raise HTTPException(400, "Der Zeitraum ist ungültig (höchstens 400 Tage).")
+    return a, b, f"{a.strftime('%d.%m.%Y')} bis {b.strftime('%d.%m.%Y')}"
+
+
+@kunde.get("/uebersicht.xlsx")
+def k_uebersicht(zeitraum: str = "monat", von: str = "", bis: str = "", user: dict = Depends(require_inhaber)):
+    from io import BytesIO
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+
+    kid = user["kunden_id"]
+    rate_limit("uebersicht:" + str(kid), 30, 600)
+    a, b, titel = _zeitraum(zeitraum, von, bis)
+    ab, bis_ = datetime.combine(a, datetime.min.time(), TZ), datetime.combine(b + timedelta(days=1), datetime.min.time(), TZ)
+    with tx("system") as cur:
+        cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+        firma = cur.fetchone()["firma"]
+        cur.execute("""SELECT w.*, l.name AS leistung, m.name AS mitarbeiter FROM website_termine w LEFT JOIN website_leistungen l ON l.id=w.leistung_id
+                       LEFT JOIN website_mitarbeiter m ON m.id=w.mitarbeiter_id WHERE w.kunden_id=%s AND w.start >= %s AND w.start < %s ORDER BY w.start LIMIT 5000""", (kid, ab, bis_))
+        termine = cur.fetchall()
+        cur.execute("SELECT * FROM website_gutscheine WHERE kunden_id=%s AND erstellt_am >= %s AND erstellt_am < %s ORDER BY erstellt_am LIMIT 2000", (kid, ab, bis_))
+        gutscheine = cur.fetchall()
+    kopf_stil, fuell = Font(bold=True, color="FFFFFF"), PatternFill("solid", fgColor="1F3A5F")
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Termine"
+    ws.append(["Datum", "Uhrzeit", "Name", "E-Mail", "Telefon", "Leistung", "Mitarbeiter", "Status", "Preis (€)", "Anzahlung (€)", "Anzahlung erhalten", "Komplett bezahlt", "Rest offen (€)", "Vorgang"])
+    summe = {"gebucht": 0, "abgesagt": 0, "nicht_erschienen": 0, "anz_soll": 0.0, "anz_da": 0.0, "preis": 0.0, "bezahlt": 0}
+    nach_leistung: dict = {}
+    for t in termine:
+        lokal = t["start"].astimezone(TZ)
+        status = {"gebucht": "gebucht", "reserviert": "wartet auf Bestätigung", "abgesagt": "abgesagt"}.get(t["status"], t["status"])
+        if t["ergebnis"] == "nicht_erschienen":
+            status = "nicht erschienen"
+        preis = float(t["preis_betrag"]) if t["preis_betrag"] is not None else None
+        anz = float(t["anzahlung_betrag"]) if t["anzahlung_betrag"] is not None else None
+        rest = None
+        if preis is not None and t["status"] in ("gebucht", "reserviert"):
+            rest = 0.0 if t["bezahlt_am"] else max(preis - (anz or 0.0 if t["anzahlung_erhalten_am"] else 0.0), 0.0)
+        ws.append([lokal.date(), lokal.strftime("%H:%M"), t["name"], t["email"], t["telefon"] or "", t["leistung"] or "", t["mitarbeiter"] or "", status, preis, anz,
+                   t["anzahlung_erhalten_am"].astimezone(TZ).date() if t["anzahlung_erhalten_am"] else ("" if anz else "–"),
+                   t["bezahlt_am"].astimezone(TZ).date() if t["bezahlt_am"] else "", rest, t["ref"] or ""])
+        if t["status"] == "abgesagt":
+            summe["abgesagt"] += 1
+            continue
+        if t["ergebnis"] == "nicht_erschienen":
+            summe["nicht_erschienen"] += 1
+        summe["gebucht"] += 1
+        if anz:
+            summe["anz_soll"] += anz
+            summe["anz_da"] += anz if t["anzahlung_erhalten_am"] else 0.0
+        if preis:
+            summe["preis"] += preis
+            e = nach_leistung.setdefault(t["leistung"] or "(ohne Leistung)", [0, 0.0])
+            e[0] += 1
+            e[1] += preis
+        summe["bezahlt"] += 1 if t["bezahlt_am"] else 0
+    for c in ws[1]:
+        c.font, c.fill = kopf_stil, fuell
+    for sp, br in zip("ABCDEFGHIJKLMN", (12, 8, 22, 28, 16, 24, 16, 22, 11, 14, 17, 16, 14, 16)):
+        ws.column_dimensions[sp].width = br
+    for row in ws.iter_rows(min_row=2):
+        row[0].number_format = "DD.MM.YYYY"
+        for c in (row[8], row[9], row[12]):
+            c.number_format = '#,##0.00 "€"'
+        for c in (row[10], row[11]):
+            if hasattr(c.value, "year"):
+                c.number_format = "DD.MM.YYYY"
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = ws.dimensions
+
+    zs = wb.create_sheet("Zusammenfassung")
+    zs.append([f"{firma}: Übersicht {titel}"])
+    zs["A1"].font = Font(bold=True, size=14)
+    zs.append([f"Zeitraum: {a.strftime('%d.%m.%Y')} bis {b.strftime('%d.%m.%Y')}. Zahlungen sind nur erfasst, wenn sie im Portal als erhalten markiert wurden."])
+    zs.append([])
+    zeilen = [("Termine (nicht abgesagt)", summe["gebucht"]), ("Abgesagt", summe["abgesagt"]), ("Nicht erschienen", summe["nicht_erschienen"]), ("Komplett bezahlt (Termine)", summe["bezahlt"]),
+              ("Anzahlungen fällig (€)", round(summe["anz_soll"], 2)), ("davon erhalten (€)", round(summe["anz_da"], 2)), ("noch offen (€)", round(summe["anz_soll"] - summe["anz_da"], 2)),
+              ("Preise der Termine zusammen (€)", round(summe["preis"], 2))]
+    for k, v in zeilen:
+        zs.append([k, v])
+        if "(€)" in k:
+            zs.cell(zs.max_row, 2).number_format = '#,##0.00 "€"'
+    zs.append([])
+    zs.append(["Leistung", "Anzahl", "Preise zusammen (€)"])
+    for c in zs[zs.max_row]:
+        c.font, c.fill = kopf_stil, fuell
+    for k, (n, summ) in sorted(nach_leistung.items(), key=lambda x: -x[1][1]):
+        zs.append([k, n, round(summ, 2)])
+        zs.cell(zs.max_row, 3).number_format = '#,##0.00 "€"'
+    zs.column_dimensions["A"].width = 44
+    zs.column_dimensions["B"].width = 16
+    zs.column_dimensions["C"].width = 22
+    zs["A2"].alignment = Alignment(wrap_text=False)
+
+    gs = wb.create_sheet("Gutscheine")
+    gs.append(["Angefragt am", "Name", "E-Mail", "Betrag (€)", "Status", "Code", "Gesendet am", "Vorgang"])
+    for c in gs[1]:
+        c.font, c.fill = kopf_stil, fuell
+    namen = {"angefragt": "neu", "zahlungslink_gesendet": "wartet auf Zahlung", "gesendet": "Code gesendet", "storniert": "storniert"}
+    for g in gutscheine:
+        gs.append([g["erstellt_am"].astimezone(TZ).date(), g["name"], g["email"] or "", float(g["betrag"]) if g["betrag"] is not None else None, namen.get(g["status"], g["status"]),
+                   g["code"] or "", g["gesendet_am"].astimezone(TZ).date() if g["gesendet_am"] else "", g["ref"]])
+        gs.cell(gs.max_row, 1).number_format = "DD.MM.YYYY"
+        gs.cell(gs.max_row, 4).number_format = '#,##0.00 "€"'
+        if g["gesendet_am"]:
+            gs.cell(gs.max_row, 7).number_format = "DD.MM.YYYY"
+    for sp, br in zip("ABCDEFGH", (14, 24, 28, 12, 22, 20, 14, 16)):
+        gs.column_dimensions[sp].width = br
+    ausgabe = BytesIO()
+    wb.save(ausgabe)
+    with tx("system") as cur:
+        audit(cur, user, "website_uebersicht_export", kid, {"von": str(a), "bis": str(b)})
+    name = f"Uebersicht-{a.isoformat()}-{b.isoformat()}.xlsx"
+    return Response(ausgabe.getvalue(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
 
 # ---------------------------------------------------------------- Gutscheine
@@ -837,8 +987,9 @@ def k_bestaetigen(bid: str, data: BestaetigenIn, bg: BackgroundTasks, user: dict
     with tx("system") as cur:
         z = sd.zeile(cur, kid)
         try:
-            cur.execute("""UPDATE website_termine SET status='gebucht', anzahlung=%s WHERE id=%s AND kunden_id=%s AND status='reserviert' AND start > now()
-                           RETURNING id, termin_id, start, ende, name, email, telefon, nachricht, token, ref""", (betrag or None, bid, kid))
+            cur.execute("""UPDATE website_termine SET status='gebucht', anzahlung=coalesce(%s, anzahlung), anzahlung_betrag=coalesce(%s::numeric, anzahlung_betrag)
+                           WHERE id=%s AND kunden_id=%s AND status='reserviert' AND start > now()
+                           RETURNING id, termin_id, start, ende, name, email, telefon, nachricht, token, ref, anzahlung""", (betrag or None, betrag or None, bid, kid))
         except Exception:
             raise HTTPException(400, "Ungültige Buchung.")
         g = cur.fetchone()
@@ -849,23 +1000,51 @@ def k_bestaetigen(bid: str, data: BestaetigenIn, bg: BackgroundTasks, user: dict
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
         firma = cur.fetchone()["firma"]
         audit(cur, user, "website_buchung_bestaetigt", kid, {"ref": g["ref"]})
-    bg.add_task(_bestaetigung_mail, kid, g, z, firma, betrag, data.hinweis.strip())
+    bg.add_task(_bestaetigung_mail, kid, g, z, firma, g["anzahlung"] or "", data.hinweis.strip())
     return {"ok": True}
 
 
 def _bestaetigung_mail(kid, g: dict, z: dict, firma: str, betrag: str, hinweis: str):
     lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
     absagen = f"{config.BASE_URL}/site/{z['site_id']}/termin/absagen?t={g['token']}"
-    zahlung = ""
-    if betrag:
-        me = (z["pp_me_link"] or "").strip().rstrip("/")
-        zahlung = f"\nZur Sicherung des Termins bitten wir um eine Anzahlung von {betrag.replace('.', ',')} €."
-        if z["pp_aktiv"] and me.startswith("https://"):
-            zahlung += f"\nSie können bequem per PayPal zahlen: {me}/{betrag}{z['pp_waehrung']}"
+    zahlung = sd.zahlungsabsatz(z, betrag or None)
     text = (f"Guten Tag {g['name']},\n\nIhr Termin ist bestätigt: {lokal}.{(chr(10) + z['kal_ort']) if z['kal_ort'] else ''}\n{zahlung}\n"
             f"{(chr(10) + hinweis + chr(10)) if hinweis else ''}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}")
     sd.kundenmail(kid, g["email"], f"Ihr Termin bei {firma} am {lokal} ist bestätigt", text,
                   anhang=("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin bei " + firma, z["kal_ort"] or ""), "text/calendar"), art="termin")
+
+
+@kunde.post("/buchungen/{bid}/anzahlung-erhalten")
+def k_anzahlung_erhalten(bid: str, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("buchanz:" + str(kid), 120, 600)
+    with tx("system") as cur:
+        try:
+            cur.execute("""UPDATE website_termine SET anzahlung_erhalten_am=coalesce(anzahlung_erhalten_am, now()) WHERE id=%s AND kunden_id=%s AND status IN ('gebucht','reserviert') RETURNING ref""", (bid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültige Buchung.")
+        r = cur.fetchone()
+        if not r:
+            raise HTTPException(409, "Diese Buchung gibt es nicht mehr oder sie ist abgesagt.")
+        audit(cur, user, "website_anzahlung_erhalten", kid, {"ref": r["ref"]})
+    return {"ok": True}
+
+
+@kunde.post("/buchungen/{bid}/bezahlt")
+def k_bezahlt(bid: str, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("buchbez:" + str(kid), 120, 600)
+    with tx("system") as cur:
+        try:
+            cur.execute("""UPDATE website_termine SET bezahlt_am=coalesce(bezahlt_am, now()), anzahlung_erhalten_am=coalesce(anzahlung_erhalten_am, now())
+                           WHERE id=%s AND kunden_id=%s AND status='gebucht' RETURNING ref""", (bid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültige Buchung.")
+        r = cur.fetchone()
+        if not r:
+            raise HTTPException(409, "Diese Buchung gibt es nicht oder sie ist nicht bestätigt.")
+        audit(cur, user, "website_bezahlt", kid, {"ref": r["ref"]})
+    return {"ok": True}
 
 
 class AblehnenIn(BaseModel):
@@ -961,15 +1140,17 @@ def _slug(text: str) -> str:
 
 
 def _team(cur, kid) -> dict:
-    cur.execute("SELECT id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, sort FROM website_leistungen WHERE kunden_id=%s ORDER BY sort, name", (kid,))
-    leist = [{**r, "id": str(r["id"]), "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or ""} for r in cur.fetchall()]
+    cur.execute("SELECT id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, sort, freigabe, anzahlung_art, anzahlung_wert FROM website_leistungen WHERE kunden_id=%s ORDER BY sort, name", (kid,))
+    leist = [{**r, "id": str(r["id"]), "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "anzahlung_wert": float(r["anzahlung_wert"]) if r["anzahlung_wert"] is not None else None,
+              "anzahlung": f"{x:.2f}" if (x := sd.anzahlung_berechnen(r)) else ""} for r in cur.fetchall()]
     cur.execute("SELECT * FROM website_mitarbeiter WHERE kunden_id=%s ORDER BY sort, name", (kid,))
     ms = cur.fetchall()
     cur.execute("SELECT mitarbeiter_id, leistung_id FROM website_mitarbeiter_leistungen WHERE mitarbeiter_id IN (SELECT id FROM website_mitarbeiter WHERE kunden_id=%s)", (kid,))
     bietet: dict = {}
     for r in cur.fetchall():
         bietet.setdefault(r["mitarbeiter_id"], []).append(str(r["leistung_id"]))
-    return {"leistungen": leist,
+    z = sd.zeile(cur, kid)
+    return {"leistungen": leist, "einstellung": {"frist_std": z["anz_frist_std"], "storno_std": z["storno_std"], "leistungen_freigabe": z["leistungen_freigabe"], "paypal_bereit": bool(z["pp_aktiv"] and (z["pp_me_link"] or "").startswith("https://"))},
             "mitarbeiter": [{"id": str(m["id"]), "schluessel": m["schluessel"], "name": m["name"], "aktiv": m["aktiv"], "wochentage": m["wochentage"] or [], "von": m["von"] or "",
                              "bis": m["bis"] or "", "zeiten": m["zeiten"] or "", "leistungen": bietet.get(m["id"], []), "ical_gesetzt": bool(m["ical_enc"]),
                              "ical_geprueft_am": m["ical_geprueft_am"]} for m in ms]}
@@ -989,6 +1170,19 @@ class LeistungIn(BaseModel):
     dauer_min: int = Field(default=30, ge=5, le=720)
     puffer_min: int = Field(default=0, ge=0, le=240)
     aktiv: bool = True
+    freigabe: bool = False                                         # Termine dieser Leistung bestätigt der Betrieb selbst
+    anzahlung_art: str = Field(default="keine", pattern=r"^(keine|betrag|prozent)$")
+    anzahlung_wert: float | None = Field(default=None, ge=0, le=100000)
+
+    def pruefen(self):
+        if self.anzahlung_art != "keine":
+            if not self.anzahlung_wert or self.anzahlung_wert <= 0:
+                raise HTTPException(400, "Bitte die Anzahlung als Zahl eintragen (Betrag in € oder Prozent).")
+            if self.anzahlung_art == "prozent" and self.anzahlung_wert > 100:
+                raise HTTPException(400, "Mehr als 100 Prozent sind nicht möglich.")
+            if self.anzahlung_art == "prozent" and sd.preis_zahl(self.preis) is None:
+                raise HTTPException(400, "Für eine Anzahlung in Prozent braucht die Leistung einen Preis mit Zahl, z. B. 45 €.")
+        return self
 
 
 def _schluessel(roh: str, name: str) -> str:
@@ -998,47 +1192,140 @@ def _schluessel(roh: str, name: str) -> str:
     return k
 
 
+def _leistung_neu(cur, kid, data: LeistungIn) -> dict:
+    k = _schluessel(data.schluessel, data.name)
+    cur.execute("SELECT count(*) AS n FROM website_leistungen WHERE kunden_id=%s", (kid,))
+    if cur.fetchone()["n"] >= 60:
+        raise HTTPException(400, "Mehr als 60 Leistungen sind nicht möglich.")
+    cur.execute("SELECT 1 FROM website_leistungen WHERE kunden_id=%s AND schluessel=%s", (kid, k))
+    if cur.fetchone():
+        raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
+    art = data.anzahlung_art
+    cur.execute("""INSERT INTO website_leistungen (kunden_id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, freigabe, anzahlung_art, anzahlung_wert, sort)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,(SELECT coalesce(max(sort),0)+1 FROM website_leistungen WHERE kunden_id=%s)) RETURNING id""",
+                (kid, k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, data.freigabe,
+                 art, data.anzahlung_wert if art != "keine" else None, kid))
+    neue_id = str(cur.fetchone()["id"])
+    sd.leistungen_wissen_sync(cur, kid)
+    return {"ok": True, "id": neue_id, "schluessel": k}
+
+
+def _leistung_aendern(cur, kid, lid, data: LeistungIn) -> dict:
+    cur.execute("SELECT schluessel FROM website_leistungen WHERE id=%s AND kunden_id=%s", (lid, kid))
+    alt = cur.fetchone()
+    if not alt:
+        raise HTTPException(404, "Diese Leistung gibt es nicht.")
+    k = _slug(data.schluessel) if data.schluessel.strip() else alt["schluessel"]
+    if not k:
+        raise HTTPException(400, "Der Kurzname ist ungültig.")
+    cur.execute("SELECT 1 FROM website_leistungen WHERE kunden_id=%s AND schluessel=%s AND id<>%s", (kid, k, lid))
+    if cur.fetchone():
+        raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
+    art = data.anzahlung_art
+    cur.execute("""UPDATE website_leistungen SET schluessel=%s, name=%s, beschreibung=%s, preis=%s, dauer_min=%s, puffer_min=%s, aktiv=%s, freigabe=%s, anzahlung_art=%s, anzahlung_wert=%s
+                   WHERE id=%s AND kunden_id=%s""",
+                (k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, data.freigabe,
+                 art, data.anzahlung_wert if art != "keine" else None, lid, kid))
+    sd.leistungen_wissen_sync(cur, kid)
+    return {"ok": True}
+
+
+def _leistung_weg(cur, kid, lid) -> dict:
+    cur.execute("DELETE FROM website_leistungen WHERE id=%s AND kunden_id=%s", (lid, kid))
+    sd.leistungen_wissen_sync(cur, kid)
+    return {"ok": True}
+
+
+def _vormerken(cur, user, aktion: str, lid, name: str, daten: dict) -> dict:
+    """Muss das Team Änderungen an Leistungen freigeben, wird die Änderung nur vorgemerkt."""
+    kid = user["kunden_id"]
+    cur.execute("SELECT count(*) AS n FROM website_leistung_aenderungen WHERE kunden_id=%s AND status='offen'", (kid,))
+    if cur.fetchone()["n"] >= 40:
+        raise HTTPException(409, "Es warten schon viele Änderungen auf Freigabe. Bitte warte, bis das Team sie bearbeitet hat.")
+    cur.execute("INSERT INTO website_leistung_aenderungen (kunden_id, aktion, leistung_id, name, daten, von) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",
+                (kid, aktion, lid, name[:80], json.dumps(daten, ensure_ascii=False), user["id"]))
+    aid = cur.fetchone()["id"]
+    cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+    firma = cur.fetchone()["firma"]
+    cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
+    a = cur.fetchone()
+    cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel) VALUES (%s,%s,%s,current_date + 2,'auto',%s) ON CONFLICT DO NOTHING""",
+                (kid, f"{firma}: Leistungs-Änderung prüfen ({name})"[:200], a and a["email"], f"leistung-{aid}"))
+    ids = push.admins(cur)
+    push.senden(ids, "Leistungen: Änderung wartet", f"{firma}: {name}", "/admin#kunden", "leistung")
+    return {"ok": True, "wartet": True, "id": str(aid)}
+
+
 @kunde.post("/leistungen")
 def k_leistung_neu(data: LeistungIn, user: dict = Depends(require_inhaber)):
     kid = user["kunden_id"]
-    k = _schluessel(data.schluessel, data.name)
+    data.pruefen()
     with tx("system") as cur:
-        cur.execute("SELECT count(*) AS n FROM website_leistungen WHERE kunden_id=%s", (kid,))
-        if cur.fetchone()["n"] >= 60:
-            raise HTTPException(400, "Mehr als 60 Leistungen sind nicht möglich.")
-        cur.execute("SELECT 1 FROM website_leistungen WHERE kunden_id=%s AND schluessel=%s", (kid, k))
-        if cur.fetchone():
-            raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
-        cur.execute("""INSERT INTO website_leistungen (kunden_id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, sort)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,(SELECT coalesce(max(sort),0)+1 FROM website_leistungen WHERE kunden_id=%s)) RETURNING id""",
-                    (kid, k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, kid))
-        return {"ok": True, "id": str(cur.fetchone()["id"]), "schluessel": k}
+        if sd.zeile(cur, kid)["leistungen_freigabe"]:
+            _schluessel(data.schluessel, data.name)
+            return _vormerken(cur, user, "neu", None, data.name, data.model_dump())
+        return _leistung_neu(cur, kid, data)
 
 
 @kunde.put("/leistungen/{lid}")
 def k_leistung_aendern(lid: str, data: LeistungIn, user: dict = Depends(require_inhaber)):
     kid = user["kunden_id"]
     lid = _uuid(lid)
+    data.pruefen()
     with tx("system") as cur:
-        cur.execute("SELECT schluessel FROM website_leistungen WHERE id=%s AND kunden_id=%s", (lid, kid))
-        alt = cur.fetchone()
-        if not alt:
-            raise HTTPException(404, "Diese Leistung gibt es nicht.")
-        k = _slug(data.schluessel) if data.schluessel.strip() else alt["schluessel"]
-        if not k:
-            raise HTTPException(400, "Der Kurzname ist ungültig.")
-        cur.execute("SELECT 1 FROM website_leistungen WHERE kunden_id=%s AND schluessel=%s AND id<>%s", (kid, k, lid))
-        if cur.fetchone():
-            raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
-        cur.execute("""UPDATE website_leistungen SET schluessel=%s, name=%s, beschreibung=%s, preis=%s, dauer_min=%s, puffer_min=%s, aktiv=%s WHERE id=%s AND kunden_id=%s""",
-                    (k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, lid, kid))
-    return {"ok": True}
+        if sd.zeile(cur, kid)["leistungen_freigabe"]:
+            cur.execute("SELECT 1 FROM website_leistungen WHERE id=%s AND kunden_id=%s", (lid, kid))
+            if not cur.fetchone():
+                raise HTTPException(404, "Diese Leistung gibt es nicht.")
+            return _vormerken(cur, user, "aendern", lid, data.name, data.model_dump())
+        return _leistung_aendern(cur, kid, lid, data)
 
 
 @kunde.delete("/leistungen/{lid}")
 def k_leistung_weg(lid: str, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    lid = _uuid(lid)
     with tx("system") as cur:
-        cur.execute("DELETE FROM website_leistungen WHERE id=%s AND kunden_id=%s", (_uuid(lid), user["kunden_id"]))
+        if sd.zeile(cur, kid)["leistungen_freigabe"]:
+            cur.execute("SELECT name FROM website_leistungen WHERE id=%s AND kunden_id=%s", (lid, kid))
+            r = cur.fetchone()
+            if not r:
+                raise HTTPException(404, "Diese Leistung gibt es nicht.")
+            return _vormerken(cur, user, "loeschen", lid, r["name"], {})
+        return _leistung_weg(cur, kid, lid)
+
+
+@kunde.get("/leistungen/aenderungen")
+def k_leistung_aenderungen(user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        cur.execute("""SELECT id, aktion, name, status, notiz, erstellt_am FROM website_leistung_aenderungen WHERE kunden_id=%s
+                       AND (status='offen' OR bearbeitet_am > now() - interval '14 days') ORDER BY (status='offen') DESC, erstellt_am DESC LIMIT 40""", (user["kunden_id"],))
+        return {"aenderungen": [{**r, "id": str(r["id"])} for r in cur.fetchall()]}
+
+
+@kunde.delete("/leistungen/aenderungen/{aid}")
+def k_leistung_zurueck(aid: str, user: dict = Depends(require_inhaber)):
+    with tx("system") as cur:
+        cur.execute("UPDATE website_leistung_aenderungen SET status='zurueckgezogen', bearbeitet_am=now() WHERE id=%s AND kunden_id=%s AND status='offen' RETURNING id", (_uuid(aid), user["kunden_id"]))
+        if not cur.fetchone():
+            raise HTTPException(409, "Diese Änderung ist nicht mehr offen.")
+        cur.execute("UPDATE aufgaben SET status='erledigt', erledigt_am=now(), erledigt_von='Kunde' WHERE auto_schluessel=%s AND status='offen'", (f"leistung-{aid}",))
+    return {"ok": True}
+
+
+class AnzahlungEinstellungIn(BaseModel):
+    frist_std: int = Field(default=0, ge=0, le=720)
+    storno_std: int = Field(default=24, ge=0, le=168)
+
+
+@kunde.put("/anzahlung")
+def k_anzahlung_einstellung(data: AnzahlungEinstellungIn, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        sd.zeile(cur, kid)
+        cur.execute("UPDATE website_dienste SET anz_frist_std=%s, storno_std=%s WHERE kunden_id=%s", (data.frist_std, data.storno_std, kid))
+        sd.leistungen_wissen_sync(cur, kid)
+        audit(cur, user, "website_anzahlung_einstellung", kid, data.model_dump())
     return {"ok": True}
 
 

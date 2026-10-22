@@ -69,3 +69,31 @@ export function wissenKarte(kid) {
     h('details', { class: 'hilfe', style: 'margin:8px 0' }, h('summary', {}, 'Eintrag von Hand schreiben'), h('div', { class: 'stack' }, titel, text, h('p', {}, knopf('Eintrag speichern', neu)))),
     wuensche, liste, editor);
 }
+
+/** Leistungen und Preise eines Kunden: Freigabepflicht umstellen und Änderungswünsche prüfen. */
+export function leistungsKarte(kid) {
+  const m = h('div'), box = h('div');
+  const pfad = '/api/admin/kunden/' + kid;
+  const AK = { neu: 'Neue Leistung', aendern: 'Änderung', loeschen: 'Löschen' };
+  const laden = async () => {
+    const r = await api(pfad + '/leistungs-aenderungen');
+    const cb = h('input', { type: 'checkbox', checked: r.freigabe, style: 'width:auto', onchange: async (e) => {
+      try { await api(pfad + '/leistungs-freigabe', { method: 'PUT', body: { freigabe: e.target.checked } }); melde(m, e.target.checked ? 'Änderungen des Kunden brauchen jetzt deine Freigabe.' : 'Änderungen des Kunden gehen sofort live.', 'ok'); } catch (x) { e.target.checked = !e.target.checked; fehler(m, x); }
+    } });
+    const feld = (v) => (v == null || v === '' ? '–' : String(v));
+    box.replaceChildren(h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-weight:600' }, cb, 'Änderungen an Leistungen und Preisen brauchen meine Freigabe'),
+      h('p', { class: 'small muted' }, 'Aus: Was der Kunde im Portal ändert, ist sofort auf seiner Website und im Wissen des Assistenten. An: Es erscheint hier als Wunsch, du übernimmst oder lehnst ab.'),
+      ...r.aenderungen.map(a => {
+        const d = a.daten || {};
+        return h('div', { class: 'card', style: 'margin:8px 0' }, h('p', {}, h('span', { class: 'pill ' + (a.status === 'offen' ? 'warn' : a.status === 'uebernommen' ? 'ok' : '') }, a.status), ' ', h('b', {}, AK[a.aktion] + ': ' + a.name), ' · ' + datum(a.erstellt_am)),
+          a.aktion !== 'loeschen' ? h('p', { class: 'small' }, 'Neu: Preis ' + feld(d.preis) + ' · Dauer ' + feld(d.dauer_min) + ' Min. · Pause ' + feld(d.puffer_min) + ' · Anzahlung ' + (d.anzahlung_art && d.anzahlung_art !== 'keine' ? d.anzahlung_wert + (d.anzahlung_art === 'prozent' ? ' %' : ' €') : 'keine') + (d.freigabe ? ' · Termin nur nach Bestätigung' : '') + (d.aktiv === false ? ' · ausgeschaltet' : '')) : '',
+          a.alt ? h('p', { class: 'small muted' }, 'Bisher: Preis ' + feld(a.alt.preis) + ' · Dauer ' + feld(a.alt.dauer) + ' Min.') : '',
+          a.notiz ? h('p', { class: 'small muted' }, 'Antwort: ' + a.notiz) : '',
+          a.status === 'offen' ? h('div', { class: 'row', style: 'gap:6px' },
+            knopf('Übernehmen', async () => { try { await api(pfad + '/leistungs-aenderungen/' + a.id + '/uebernehmen', { method: 'POST', body: {} }); await laden(); } catch (x) { fehler(m, x); } }, ''),
+            knopf('Ablehnen', async () => { const n = prompt('Kurze Begründung für den Kunden (optional):', ''); if (n === null) return; try { await api(pfad + '/leistungs-aenderungen/' + a.id + '/ablehnen', { method: 'POST', body: { notiz: n } }); await laden(); } catch (x) { fehler(m, x); } })) : '');
+      }));
+  };
+  laden().catch(x => fehler(m, x));
+  return h('div', { class: 'card', id: 'leistungsfreigabe' }, h('h2', {}, 'Leistungen und Preise: Freigabe'), m, box);
+}

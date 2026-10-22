@@ -396,6 +396,13 @@ Das Portal ist eine installierbare Web-App. Es gibt keine eigene APK-Datei und k
 ## Website-Dienste: Formular, Termine, PayPal, Bewertungen (Stand Oktober 2026)
 Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nutzen vier Dienste. Der Kunde (Inhaber) trägt seine Daten unter **Website-Dienste** im Kundenportal ein, wir bauen die Bausteine ein.
 
+**Leistungen, Anzahlung, Zahlungsstand, Excel (Kundenportal → Website-Dienste):**
+- Je Leistung: Dauer (Pflicht), Pause, Preis, Anzahlung (fester Betrag oder Prozent vom Preis) und das Häkchen „bestätige ich selbst“. Hat die Leistung eine Anzahlung, bekommt der Besucher den PayPal-Link sofort in der Mail, auch bei Sofortbuchung. Bei „bestätige ich selbst“ ist die Zeit nur vorgemerkt, bis der Inhaber bestätigt.
+- „Anzahlung und Absage“: Kostenlos absagen bis X Stunden vorher (Standard 24), danach ist der volle Betrag zu zahlen. Optional eine Frist für die Anzahlung: Ist bis dahin nichts als erhalten markiert, gibt das Portal den Termin frei und informiert Besucher und Betrieb.
+- Beim Termin klickt der Inhaber **„Anzahlung erhalten“** und später **„Alles bezahlt“**. Das Portal sieht PayPal nicht, die Markierung stammt vom Inhaber.
+- **Übersicht als Excel:** Woche, Monat oder eigener Zeitraum. Blätter: Termine (mit Preis, Anzahlung, Zahlungsstand, Rest), Zusammenfassung, Gutscheine.
+- Leistungen, Preise und Dauer stehen automatisch in der Wissensdatenbank (Eintrag „Leistungen und Preise (automatisch)“) und im Baustein `data-mk="preise"` der Website. Im Kundenblatt (Admin) stellst du je Kunde ein, ob seine Änderungen **sofort live** gehen (Standard) oder **deine Freigabe** brauchen (Karte „Leistungen und Preise: Freigabe“).
+
 **Gutscheine (Kunden-Websites):** Fragt ein Besucher über das Formular einen Gutschein an (`typ=gutschein`), erscheint er im Kundenportal unter Website-Dienste → **Gutschein-Anfragen**. Der Inhaber klickt **„Zahlungslink senden“** (braucht den PayPal.Me-Link bei PayPal; Betrag aus der Anfrage oder von Hand) und, sobald das Geld da ist, trägt er einen Code ein und klickt **„Gutschein senden“**. Beide Mails gehen im Namen des Betriebs raus. Das Portal sieht PayPal-Zahlungen nicht, deshalb prüft der Inhaber den Zahlungseingang selbst. Gilt für jede Kunden-Website ohne Änderung an der Seite.
 
 **Einbau in die Website** (Admin → Kunde → Karte „Website-Dienste“ zeigt den fertigen Code zum Kopieren):

@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    await domainKarte(), mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    await domainKarte(), mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
 
 // ---------------------------------------------------------------- Domain-Stand
@@ -234,6 +234,19 @@ function analyticsKarte(d) {
       h('p', {}, 'Noch kein Konto? Dort „Messung starten“ wählen, ein Konto und eine „Property“ anlegen und einen Web-Datenstream mit der Adresse deiner Website erstellen. Das dauert etwa 5 Minuten. Wenn du magst, machen wir das gemeinsam am Telefon.')));
 }
 
+// ---------------------------------------------------------------- Excel-Übersicht
+/** Übersicht über Termine, Anzahlungen und Gutscheine als Excel-Datei (Woche, Monat oder eigener Zeitraum). */
+function uebersichtKarte(d) {
+  if (!d.kalender.aktiv) return '';
+  const heute = new Date().toISOString().slice(0, 10);
+  const von = h('input', { type: 'date', value: heute, 'aria-label': 'Von' }), bis = h('input', { type: 'date', value: heute, 'aria-label': 'Bis' });
+  const link = (text, q) => h('a', { class: 'btn sec', href: '/api/kunde/website-dienste/uebersicht.xlsx?' + q }, text);
+  return h('div', { class: 'card' }, h('h2', {}, 'Übersicht als Excel'),
+    h('p', { class: 'small muted' }, 'Alle Termine mit Leistung, Preis, Anzahlung und Zahlungsstand, dazu eine Zusammenfassung und deine Gutschein-Anfragen. Zahlungen stehen nur drin, wenn du sie beim Termin als „Anzahlung erhalten“ oder „Alles bezahlt“ markiert hast.'),
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, link('Diese Woche', 'zeitraum=woche'), link('Letzte Woche', 'zeitraum=vorwoche'), link('Dieser Monat', 'zeitraum=monat'), link('Letzter Monat', 'zeitraum=vormonat')),
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px' }, 'Eigener Zeitraum:', von, bis, h('button', { class: 'btn sec', onclick: () => { location.href = '/api/kunde/website-dienste/uebersicht.xlsx?zeitraum=eigen&von=' + von.value + '&bis=' + bis.value; } }, 'Herunterladen')));
+}
+
 // ---------------------------------------------------------------- Gutscheine
 const GUT_STATUS = { angefragt: ['warn', 'neu'], zahlungslink_gesendet: ['warn', 'wartet auf Zahlung'], gesendet: ['ok', 'Code gesendet'], storniert: ['', 'storniert'] };
 
@@ -271,7 +284,7 @@ async function buchungenKarte(d, neu) {
   const r = await api('/api/kunde/website-dienste/buchungen');
   const m = h('div');
   const zeile = (b) => {
-    const betrag = h('input', { placeholder: 'Anzahlung in € (optional)', style: 'max-width:200px', maxlength: 20 });
+    const betrag = h('input', { placeholder: 'Anzahlung in € (optional)', value: b.anzahlung ? b.anzahlung.replace('.', ',') : '', style: 'max-width:200px', maxlength: 20, 'aria-label': 'Anzahlung in Euro' });
     const info = Object.entries(b.details).filter(([k]) => k !== 'leistung' && k !== 'mitarbeiter').map(([k, v]) => k.replace(/_/g, ' ') + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' · ');
     const tun = async (pfad, body) => { try { await api('/api/kunde/website-dienste/buchungen/' + b.id + '/' + pfad, { method: 'POST', body }); neu(); } catch (x) { melde(m, x.message); } };
     return h('div', { class: 'card', style: 'margin:8px 0' },
@@ -279,9 +292,11 @@ async function buchungenKarte(d, neu) {
       (b.leistung || b.mitarbeiter) ? h('p', { class: 'small' }, [b.leistung, b.mitarbeiter ? 'bei ' + b.mitarbeiter : ''].filter(Boolean).join(' · ')) : '',
       h('p', { class: 'small' }, b.email + (b.telefon ? ' · ' + b.telefon : '') + (b.ref ? ' · ' + b.ref : '')),
       info ? h('p', { class: 'small muted' }, info) : '', b.nachricht ? h('p', { class: 'small' }, b.nachricht) : '',
-      b.anzahlung ? h('p', { class: 'small' }, 'Anzahlung: ' + b.anzahlung.replace('.', ',') + ' €') : '',
+      b.anzahlung ? h('p', { class: 'small' }, 'Anzahlung: ' + b.anzahlung.replace('.', ',') + ' € ', h('span', { class: 'pill ' + (b.anzahlung_erhalten_am ? 'ok' : 'warn') }, b.anzahlung_erhalten_am ? 'erhalten' : 'noch offen'), b.preis ? ' · Preis ' + b.preis.replace('.', ',') + ' €' : '', b.bezahlt_am ? [' ', h('span', { class: 'pill ok' }, 'komplett bezahlt')] : '') : '',
       h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' },
         b.status === 'reserviert' ? [betrag, h('button', { class: 'btn', onclick: () => tun('bestaetigen', { anzahlung: betrag.value }) }, 'Bestätigen')] : '',
+        b.anzahlung && !b.anzahlung_erhalten_am ? h('button', { class: 'btn', onclick: () => tun('anzahlung-erhalten', {}) }, 'Anzahlung erhalten') : '',
+        b.status === 'gebucht' && !b.bezahlt_am ? h('button', { class: 'btn sec', onclick: () => tun('bezahlt', {}) }, 'Alles bezahlt') : '',
         h('button', { class: 'btn sec', onclick: () => { const g = prompt('Kurze Begründung für die Absage (optional):', ''); if (g !== null) tun('ablehnen', { grund: g }); } }, b.status === 'reserviert' ? 'Ablehnen' : 'Absagen')));
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Buchungen über die Website'),
@@ -323,17 +338,39 @@ async function teamKarte(d, neu) {
   const t = await api('/api/kunde/website-dienste/team');
   const m = h('div');
   const melden = (x) => melde(m, x.message);
-  const leistungZeile = (l) => {
-    const name = h('input', { value: l.name, maxlength: 80 }), dauer = h('input', { type: 'number', min: 5, max: 720, value: l.dauer_min, style: 'max-width:90px' });
-    const puffer = h('input', { type: 'number', min: 0, max: 240, value: l.puffer_min, style: 'max-width:90px' }), preis = h('input', { value: l.preis, maxlength: 40, placeholder: 'z. B. 45 €', style: 'max-width:110px' });
-    const an = schalter(l.aktiv, 'aktiv');
-    const body = () => ({ name: name.value, schluessel: l.schluessel, dauer_min: Number(dauer.value), puffer_min: Number(puffer.value), preis: preis.value, aktiv: an.c.checked });
-    return h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end;margin:6px 0' }, feld('Leistung', name, 'Name auf der Website: ' + l.schluessel), feld('Dauer (Min.)', dauer), feld('Pause danach', puffer), feld('Preis (Anzeige)', preis), an.el,
-      h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/kunde/website-dienste/leistungen/' + l.id, { method: 'PUT', body: body() }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melden(x); } } }, 'Speichern'),
-      h('button', { class: 'btn sec', onclick: async () => { if (!confirm('Leistung „' + l.name + '“ löschen?')) return; try { await api('/api/kunde/website-dienste/leistungen/' + l.id, { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Löschen'));
+  const frei = t.einstellung.leistungen_freigabe;
+  const ANZ = [['keine', 'keine Anzahlung'], ['betrag', 'fester Betrag (€)'], ['prozent', 'Prozent vom Preis']];
+  const anzahlungFelder = (l) => {
+    const art = h('select', { 'aria-label': 'Anzahlung', onchange: () => { wert.style.display = art.value === 'keine' ? 'none' : ''; } }, ANZ.map(([v, n]) => h('option', { value: v, selected: v === (l ? l.anzahlung_art : 'keine') }, n)));
+    const wert = h('input', { type: 'number', min: 0, step: '0.01', value: l && l.anzahlung_wert != null ? l.anzahlung_wert : '', style: 'max-width:90px;' + ((l ? l.anzahlung_art : 'keine') === 'keine' ? 'display:none' : ''), 'aria-label': 'Höhe der Anzahlung' });
+    return { art, wert, el: h('div', {}, h('label', {}, 'Anzahlung'), h('div', { class: 'row', style: 'gap:6px' }, art, wert), l && l.anzahlung ? h('div', { class: 'small muted' }, '= ' + l.anzahlung.replace('.', ',') + ' €') : '') };
   };
-  const nName = h('input', { placeholder: 'z. B. Damenhaarschnitt', maxlength: 80 }), nDauer = h('input', { type: 'number', min: 5, max: 720, value: 30, style: 'max-width:90px' }), nPuffer = h('input', { type: 'number', min: 0, max: 240, value: 0, style: 'max-width:90px' }), nPreis = h('input', { maxlength: 40, placeholder: 'z. B. 45 €', style: 'max-width:110px' });
-  const neuL = async () => { try { await api('/api/kunde/website-dienste/leistungen', { method: 'POST', body: { name: nName.value, dauer_min: Number(nDauer.value), puffer_min: Number(nPuffer.value), preis: nPreis.value } }); neu(); } catch (x) { melden(x); } };
+  const leistungZeile = (l) => {
+    const name = h('input', { value: l.name, maxlength: 80 }), dauer = h('input', { type: 'number', min: 5, max: 720, value: l.dauer_min, style: 'max-width:90px', required: true });
+    const puffer = h('input', { type: 'number', min: 0, max: 240, value: l.puffer_min, style: 'max-width:90px' }), preis = h('input', { value: l.preis, maxlength: 40, placeholder: 'z. B. 45 €', style: 'max-width:110px' });
+    const an = schalter(l.aktiv, 'aktiv'), fg = schalter(l.freigabe, 'bestätige ich selbst'), anz = anzahlungFelder(l);
+    const body = () => ({ name: name.value, schluessel: l.schluessel, dauer_min: Number(dauer.value), puffer_min: Number(puffer.value), preis: preis.value, aktiv: an.c.checked, freigabe: fg.c.checked, anzahlung_art: anz.art.value, anzahlung_wert: anz.art.value === 'keine' ? null : Number(anz.wert.value) });
+    const ergebnis = (r) => { if (r.wartet) { toast('Änderung gesendet. Sie wird nach Prüfung durch das Team live.', 'ok'); neu(); } else melde(m, 'Gespeichert.', 'ok'); };
+    return h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end;margin:6px 0;border-top:1px solid var(--linie, #e5e7eb);padding-top:8px' }, feld('Leistung', name, 'Name auf der Website: ' + l.schluessel), feld('Dauer (Min.)', dauer), feld('Pause danach', puffer), feld('Preis (Anzeige)', preis), anz.el, fg.el, an.el,
+      h('button', { class: 'btn sec', onclick: async () => { if (!(Number(dauer.value) >= 5)) { melde(m, 'Bitte die Dauer in Minuten eintragen.'); return; } try { ergebnis(await api('/api/kunde/website-dienste/leistungen/' + l.id, { method: 'PUT', body: body() })); } catch (x) { melden(x); } } }, 'Speichern'),
+      h('button', { class: 'btn sec', onclick: async () => { if (!confirm('Leistung „' + l.name + '“ löschen?')) return; try { const r = await api('/api/kunde/website-dienste/leistungen/' + l.id, { method: 'DELETE' }); if (r.wartet) { toast('Löschwunsch gesendet.', 'ok'); neu(); } else neu(); } catch (x) { melden(x); } } }, 'Löschen'));
+  };
+  const nName = h('input', { placeholder: 'z. B. Damenhaarschnitt', maxlength: 80 }), nDauer = h('input', { type: 'number', min: 5, max: 720, style: 'max-width:90px', required: true, placeholder: 'Min.' }), nPuffer = h('input', { type: 'number', min: 0, max: 240, value: 0, style: 'max-width:90px' }), nPreis = h('input', { maxlength: 40, placeholder: 'z. B. 45 €', style: 'max-width:110px' });
+  const nFg = schalter(false, 'bestätige ich selbst'), nAnz = anzahlungFelder(null);
+  const neuL = async () => {
+    if (!(Number(nDauer.value) >= 5)) { melde(m, 'Bitte die Dauer in Minuten eintragen. Ohne richtige Dauer plant das Portal die Termine falsch.'); return; }
+    try { const r = await api('/api/kunde/website-dienste/leistungen', { method: 'POST', body: { name: nName.value, dauer_min: Number(nDauer.value), puffer_min: Number(nPuffer.value), preis: nPreis.value, freigabe: nFg.c.checked, anzahlung_art: nAnz.art.value, anzahlung_wert: nAnz.art.value === 'keine' ? null : Number(nAnz.wert.value) } }); if (r.wartet) toast('Gesendet. Die Leistung geht nach Prüfung durch das Team live.', 'ok'); neu(); } catch (x) { melden(x); }
+  };
+  const fr = h('input', { type: 'number', min: 0, max: 720, value: t.einstellung.frist_std, style: 'max-width:90px', 'aria-label': 'Frist in Stunden' }), st = h('input', { type: 'number', min: 0, max: 168, value: t.einstellung.storno_std, style: 'max-width:90px', 'aria-label': 'Kostenlos absagen bis Stunden vorher' });
+  const regeln = h('div', { class: 'card', style: 'margin:8px 0' }, h('h3', {}, 'Anzahlung und Absage'),
+    h('p', { class: 'small muted' }, 'Hat eine Leistung eine Anzahlung, bekommt der Besucher sofort den PayPal-Link in der Mail. Wenn die Zahlung bei dir angekommen ist, klickst du beim Termin „Anzahlung erhalten“.' + (t.einstellung.paypal_bereit ? '' : ' Dafür brauchst du unten bei PayPal deinen PayPal.Me-Link.')),
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end' }, feld('Kostenlos absagen bis (Std. vorher)', st, 'Danach ist der volle Betrag zu zahlen.'), feld('Frist für die Anzahlung (Std., 0 = keine)', fr, 'Kommt bis dahin nichts an, gibt das Portal den Termin frei.'),
+      h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/kunde/website-dienste/anzahlung', { method: 'PUT', body: { frist_std: Number(fr.value), storno_std: Number(st.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melden(x); } } }, 'Speichern')));
+  const offen = (await api('/api/kunde/website-dienste/leistungen/aenderungen').catch(() => ({ aenderungen: [] }))).aenderungen;
+  const ST = { offen: ['warn', 'wartet auf Freigabe'], uebernommen: ['ok', 'live'], abgelehnt: ['bad', 'abgelehnt'], zurueckgezogen: ['', 'zurückgezogen'] };
+  const AK = { neu: 'Neue Leistung', aendern: 'Änderung', loeschen: 'Löschen' };
+  const wartend = offen.length ? h('div', { class: 'card', style: 'margin:8px 0' }, h('h3', {}, 'Meine Änderungen'), ...offen.map(a => h('p', { class: 'small' }, h('span', { class: 'pill ' + ST[a.status][0] }, ST[a.status][1]), ' ' + AK[a.aktion] + ': ' + a.name + (a.notiz ? ' – Antwort: ' + a.notiz : ''), ' ',
+    a.status === 'offen' ? h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/kunde/website-dienste/leistungen/aenderungen/' + a.id, { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Zurückziehen') : ''))) : '';
   const aktive = t.leistungen;
   const maBlock = (ma) => {
     const name = h('input', { value: ma ? ma.name : '', maxlength: 80, placeholder: 'Name' });
@@ -356,9 +393,10 @@ async function teamKarte(d, neu) {
           ma ? h('button', { class: 'btn sec', onclick: async () => { if (!confirm(ma.name + ' löschen? Bestehende Termine bleiben erhalten.')) return; try { await api('/api/kunde/website-dienste/mitarbeiter/' + ma.id, { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Löschen') : '')));
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Leistungen und Mitarbeiter'),
-    h('p', { class: 'small muted' }, 'Optional, zum Beispiel für Friseur, Kosmetik oder Praxis: Jede Leistung hat ihre eigene Dauer. Wer Mitarbeiter einträgt, bei dem wird ein Termin nur angeboten, wenn die gewünschte Person (oder irgendjemand, wenn der Besucher „egal“ wählt) für die ganze Dauer Zeit hat. Ohne Einträge gilt die Dauer aus der Terminbuchung oben.'), m,
+    h('p', { class: 'small muted' }, 'Optional, zum Beispiel für Friseur, Kosmetik, Fahrzeugpflege, Werkstatt oder Praxis: Jede Leistung hat ihre eigene Dauer, auf Wunsch eine Anzahlung und ein Häkchen „bestätige ich selbst“ (dann ist der Termin erst nach deiner Bestätigung fest). Wer Mitarbeiter einträgt, bei dem wird ein Termin nur angeboten, wenn die gewünschte Person (oder irgendjemand, wenn der Besucher „egal“ wählt) für die ganze Dauer Zeit hat. Ohne Einträge gilt die Dauer aus der Terminbuchung oben.'), m,
+    frei ? h('p', { class: 'msg info' }, 'Änderungen an Leistungen und Preisen prüft das Team, bevor sie auf deiner Website erscheinen.') : '', wartend, regeln,
     h('h3', {}, 'Leistungen'), t.leistungen.map(leistungZeile),
-    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end;margin:6px 0' }, feld('Neue Leistung', nName), feld('Dauer (Min.)', nDauer), feld('Pause danach', nPuffer), feld('Preis (Anzeige)', nPreis), h('button', { class: 'btn', onclick: neuL }, 'Hinzufügen')),
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end;margin:6px 0' }, feld('Neue Leistung', nName), feld('Dauer (Min.) *', nDauer), feld('Pause danach', nPuffer), feld('Preis (Anzeige)', nPreis), nAnz.el, nFg.el, h('button', { class: 'btn', onclick: neuL }, 'Hinzufügen')),
     h('h3', {}, 'Mitarbeiter'), t.mitarbeiter.map(maBlock), maBlock(null));
 }
 

@@ -39,7 +39,7 @@ V.wissen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Aktuell gespeichert'), r.eintraege.length ? h('div', {}, ...r.eintraege.map(e => h('div', { style: 'margin:10px 0;border-top:1px solid var(--linie, #e5e7eb);padding-top:8px' },
       h('p', {}, h('b', {}, e.schluessel), ' ', h('span', { class: 'pill ' + (e.aktiv ? 'ok' : '') }, e.aktiv ? 'aktiv' : 'aus'), ' ', h('span', { class: 'small muted' }, e.bereich + ' · ' + e.laenge + ' Zeichen')),
       h('p', { class: 'small' }, e.vorschau + (e.laenge > 240 ? ' …' : '')),
-      offen.has(e.schluessel) ? h('p', { class: 'small muted' }, 'Es wartet ein Vorschlag auf Prüfung.') : h('div', { class: 'row', style: 'gap:6px' },
+      e.quelle === 'system' ? h('p', { class: 'small muted' }, 'Dieser Eintrag entsteht automatisch aus deinen Leistungen und Preisen. Ändere sie unter Website-Dienste → Leistungen.') : offen.has(e.schluessel) ? h('p', { class: 'small muted' }, 'Es wartet ein Vorschlag auf Prüfung.') : h('div', { class: 'row', style: 'gap:6px' },
         h('button', { class: 'btn sec small', onclick: () => aendern(e) }, 'Ändern vorschlagen'),
         e.aktiv ? h('button', { class: 'btn sec small', onclick: () => { if (confirm('Soll der Assistent „' + e.schluessel + '“ nicht mehr nutzen? Das Team prüft den Wunsch.')) senden({ aktion: 'ausschalten', wissen_id: e.id }, 'Gesendet. Das Team prüft es.'); } }, 'Nicht mehr nutzen') : ''))))
       : h('p', { class: 'small muted' }, 'Noch nichts gespeichert. Das Team füllt das mit dir im Aufbau.')), editor);

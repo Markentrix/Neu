@@ -36,6 +36,7 @@ automatisch ein (NICHT selbst einbinden, kein data-site eintragen):
   <div data-mk="termin"></div>       Terminbuchung
   <div data-mk="bewertungen"></div>  Google-Bewertungen
   <div data-mk="paypal" data-betrag="49,90" data-titel="Gutschein"></div>
+  <div data-mk="preise"></div>      Preisliste, immer aktuell aus dem Portal (nie Preise fest in die Seite schreiben)
   <span data-mk="cookies"></span>    Statistik-Einstellung im Footer
   Die Bausteine lassen sich per CSS stylen (Klassen beginnen mit "mk-"). Ist ein Dienst im Portal ausgeschaltet, bleibt das Element leer: Platz dafür
   großzügig lassen und eine Alternative zeigen (Telefon, E-Mail).
@@ -62,7 +63,7 @@ Regeln für Variante B:
 - Gleichzeitige Buchung derselben Zeit: der Server lässt genau eine gewinnen, die andere bekommt 422 auf "uhrzeit": Slots neu laden und das zeigen.
 - Doppelklick verhindern (Button sperren während des Sendens), Eingaben bei Fehlern NICHT löschen.
 - Bei Fehlern oder fehlendem Server immer eine Ausweichmöglichkeit zeigen (Telefon, WhatsApp, E-Mail).
-- Preise, Pakete und Fahrzeugklassen kennt nur die Website, das Portal speichert sie als Text. Uhrzeiten müssen zu den "Festen Uhrzeiten" im Portal passen.
+- Leistungen, Preise, Dauer, Anzahlung und Freigabe pflegt der Betrieb im Portal. Preislisten und Auswahllisten IMMER aus /api/leistungen (oder data-mk="preise") bauen, nie fest eintragen. Pakete und Fahrzeugklassen kennt nur die Website, das Portal speichert sie als Text. Leistung hat freigabe:true oder selfBooking:false → Formular „Terminwunsch“, Hinweis „Wir bestätigen Ihren Termin“. Hat die Leistung eine Anzahlung, zeige den Betrag und den Hinweis „Den Zahlungslink bekommen Sie per E-Mail“. Uhrzeiten müssen zu den "Festen Uhrzeiten" im Portal passen.
 
 ZAHLUNG: Keine eigene Zahlungsabwicklung, keine Kartenfelder, kein eigenes PayPal-Skript. Nur das Element data-mk="paypal" (Variante A)
 oder ein PayPal.Me-Link (Anzahlung). Das Geld geht direkt an den Kunden. Gutscheine sind eine Anfrage (typ="gutschein", Felder name, email Pflicht, betrag z. B. "50" oder "50 €", empfaenger, widmung, einwilligung). Zahlungslink und Code verschickt der Inhaber im Portal (Website-Dienste → Gutschein-Anfragen); die Website zeigt dazu nur den Hinweis „Sie erhalten den Zahlungslink per E-Mail, den Code nach Zahlungseingang.“ Kein Code auf der Seite, keine PDF-Erzeugung, kein eigener Zahlungsablauf.

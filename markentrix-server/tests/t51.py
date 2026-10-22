@@ -46,7 +46,7 @@ chk("Doppelter Kurzname abgelehnt",leist(name="Herrenschnitt",dauer_min=30).stat
 chk("Dauer außerhalb abgelehnt",leist(name="Zu lang",dauer_min=2000).status_code==422)
 r=cA.put(f"{K}/leistungen/{lf}",json={"name":"Färben & Tönen","schluessel":"faerben","dauer_min":120,"puffer_min":15,"aktiv":True}); chk("Kurzname ändern",r.status_code==200,r.text)
 chk("Fremde Firma kann Leistung nicht ändern",cB.put(f"{K}/leistungen/{lh}",json={"name":"Hack","dauer_min":5}).status_code==404)
-chk("Fremde Firma sieht nichts",cB.get(K+"/team").json()=={"leistungen":[],"mitarbeiter":[]})
+chk("Fremde Firma sieht nichts",{k:v for k,v in cB.get(K+"/team").json().items() if k!="einstellung"}=={"leistungen":[],"mitarbeiter":[]})
 # ---- Mitarbeiter
 def ma(**kw): return cA.post(K+"/mitarbeiter",json=kw)
 r=ma(name="Anna",leistungen=[]); chk("Mitarbeiterin anlegen",r.status_code==200 and r.json()["schluessel"]=="anna",r.text); anna=r.json()["id"]
@@ -129,7 +129,7 @@ async def main():
         for t in ["Buchungen über die Website","Urlaub und Sperrtage","Besucher der letzten 30 Tage"]: chk("UI: Karte "+t,await pg.locator(f".card h2:text-is('{t}')").count()==1)
         c=pg.locator(".card:has(h2:text-is('Leistungen und Mitarbeiter'))")
         chk("UI: vorhandene Leistung mit Website-Kurzname","herrenschnitt" in await c.inner_text())
-        await c.locator("input[placeholder='z. B. Damenhaarschnitt']").fill("Bartpflege"); await c.get_by_role("button",name="Hinzufügen").click()
+        await c.locator("input[placeholder='z. B. Damenhaarschnitt']").fill("Bartpflege"); await c.locator("input[placeholder='Min.']").fill("30"); await c.get_by_role("button",name="Hinzufügen").click()
         await pg.wait_for_selector("text=Name auf der Website: bartpflege",timeout=8000); chk("UI: Leistung hinzugefügt",True)
         chk("UI: Leistung liegt in der Datenbank",sql(f"select count(*) from website_leistungen where kunden_id='{kA}' and schluessel='bartpflege'")=="1")
         await pg.screenshot(path="/var/tmp/pt/shots/team_kunde.png",full_page=True)

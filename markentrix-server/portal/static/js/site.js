@@ -170,6 +170,24 @@
     });
   }
 
+  // ------------------------------------------------------------ Preisliste (immer der aktuelle Stand aus dem Portal)
+  function preise(c) {
+    anfrage('GET', 'leistungen').then(function (d) {
+      var l = d.leistungen || [];
+      if (!l.length) { c.textContent = ''; return; }
+      var b = box(c), ul = el('ul', { class: 'mk-preise' });
+      l.forEach(function (x) {
+        var li = el('li', { class: 'mk-preis' });
+        li.appendChild(el('span', { class: 'mk-preis-name', text: x.name }));
+        if (x.beschreibung) li.appendChild(el('span', { class: 'mk-preis-text', text: x.beschreibung }));
+        if (x.dauer) li.appendChild(el('span', { class: 'mk-preis-dauer', text: 'ca. ' + x.dauer + ' Min.' }));
+        if (x.preis) li.appendChild(el('span', { class: 'mk-preis-betrag', text: x.preis }));
+        ul.appendChild(li);
+      });
+      b.appendChild(ul);
+    }).catch(function () { c.textContent = ''; });
+  }
+
   // ------------------------------------------------------------ Sicherheitsnetz für Einblend-Animationen
   // Manche Seiten verstecken Inhalte (.reveal) und blenden sie per IntersectionObserver beim Scrollen ein (.is-visible). Meldet der Beobachter
   // bei einzelnen Elementen nichts (z. B. weil der Browser abgeschnittene Elemente nicht als sichtbar zählt), bleiben ganze Bereiche weiß.
@@ -200,6 +218,7 @@
     (slots.kontakt || []).forEach(function (c) { if (cfg.kontakt) kontakt(c); else c.textContent = ''; });
     (slots.termin || []).forEach(function (c) { if (cfg.termin.aktiv) termin(c); else c.textContent = ''; });
     (slots.bewertungen || []).forEach(function (c) { if (cfg.bewertungen) bewertungen(c); else c.textContent = ''; });
+    (slots.preise || []).forEach(function (c) { preise(c); });
     (slots.paypal || []).forEach(function (c) { if (cfg.paypal.aktiv) paypal(c, cfg.paypal); else c.textContent = ''; });
   }).catch(function () { /* Dienst nicht erreichbar: die Seite bleibt ohne die Bausteine nutzbar */ });
 })();

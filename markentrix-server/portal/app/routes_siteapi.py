@@ -29,7 +29,7 @@ LABELS = {"name": "Name", "telefon": "Telefon", "email": "E-Mail", "nachricht": 
           "zustand": "Zustand", "extras": "Extras", "abholung": "Abholung", "datum": "Wunschtag", "datum2": "Ersatztag", "uhrzeit": "Uhrzeit", "zeitfenster": "Zeitfenster",
           "kanal": "Rückmeldung per", "gutscheincode": "Gutscheincode", "bewertung_ok": "Bewertung gewünscht", "quelle": "Gefunden über", "winterschutz": "Winterschutz",
           "art": "Art", "wunschbetrag": "Betrag", "betrag": "Betrag", "fuer": "Für", "von": "Von", "widmung": "Widmung", "zustellung": "Zustellung", "vorgang": "Vorgangsnummer",
-          "leistung": "Leistung", "mitarbeiter": "Mitarbeiter", "firma": "Firma", "anzahl": "Anzahl Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen"}
+          "leistung": "Leistung", "mitarbeiter": "Mitarbeiter", "haarlaenge": "Haarlänge", "haarzustand": "Haarzustand", "letzte_behandlung": "Letzte Behandlung", "wunschzeit": "Wunschzeit", "terminart": "Terminart", "kennzeichen": "Kennzeichen", "marke": "Marke", "modell": "Modell", "baujahr": "Baujahr", "fahrzeugtyp": "Fahrzeugtyp", "anliegen": "Anliegen", "firma": "Firma", "anzahl": "Anzahl Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen"}
 SCHLUESSEL = re.compile(r"^[a-z][a-z0-9_]{0,30}$")
 TELEFON = re.compile(r"^[0-9+()/ \-.]{5,40}$")
 BOT = re.compile(r"bot|crawl|spider|slurp|preview|headless|curl|wget|python|monitor|uptime|lighthouse|facebookexternal", re.I)
@@ -124,8 +124,9 @@ def leistungen(request: Request):
     rate_limit("api-leist:" + client_ip(request), 120, 60)
     z = _lade(request)
     with tx("system") as cur:
-        cur.execute("SELECT schluessel, name, beschreibung, preis, dauer_min FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (z["kunden_id"],))
-        l = [{"key": r["schluessel"], "name": r["name"], "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "dauer": r["dauer_min"]} for r in cur.fetchall()]
+        cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (z["kunden_id"],))
+        l = [{"key": r["schluessel"], "name": r["name"], "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "dauer": r["dauer_min"],
+              "freigabe": bool(z["kal_freigabe"] or r["freigabe"]), "anzahlung": f"{a:.2f}" if (a := sd.anzahlung_berechnen(r)) else ""} for r in cur.fetchall()]
     return _json({"leistungen": l})
 
 
@@ -164,7 +165,7 @@ def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = ""):
     zeiten = sorted(set(_zeiten(z)) | {x[0] for s in plan.values() for x in s}) if team else _zeiten(z)
     geschlossen = [d for d in range(7) if (7 if d == 0 else d) not in offen]
     return _json({"blocked": gesperrt, "blockedKeramik": gesperrt, "closedWeekdays": geschlossen, "nextFree": frei[0] if frei else None,
-                  "selfBooking": True, "slotTimes": zeiten})
+                  "selfBooking": not (z["kal_freigabe"] or (lz or {}).get("freigabe")), "slotTimes": zeiten})
 
 
 @router.get("/slots")
@@ -343,12 +344,14 @@ def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: 
     mail = felder.get("email", "")
     text = _zusammenfassung(felder)
     an = [a for a in _empfaenger((z["kal_empfaenger"] or z["mail_empfaenger"]) if buchung else z["mail_empfaenger"]) if EMAIL_RE.match(a)][:5]
-    if buchung and z["kal_freigabe"]:
+    if buchung and buchung["frei"]:
         kopf = f"Neue Terminanfrage ({ref}): {buchung['wann']}.\nDie Uhrzeit ist für {z['kal_halte_std']} Stunden vorgemerkt. Bitte im Kundenportal unter „Website-Dienste“ bestätigen oder ablehnen."
     elif buchung:
         kopf = f"Neue Online-Buchung ({ref}): {buchung['wann']}. Der Termin steht im Portal unter „Heute“."
     else:
         kopf = f"Neue {titel} über die Website ({ref})."
+    if buchung and buchung["zeile"].get("anzahlung"):
+        kopf += f"\nAnzahlung: {buchung['zeile']['anzahlung'].replace('.', ',')} € (der Besucher hat den Zahlungslink bekommen). Nach Zahlungseingang im Portal „Anzahlung erhalten“ klicken."
     fehler = ""
     for a in an:
         ok, via = sd.kundenmail(kid, a, f"{titel}: {felder.get('name', '')} ({ref})", f"{kopf}\n\n{text}\n\n—\nSie können direkt auf diese E-Mail antworten.", reply_to=mail or None, art="kontakt")
@@ -361,10 +364,12 @@ def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: 
     else:
         sd.ereignis(kid, "kontakt", True, f"{titel} gesendet")
     if mail:
-        if buchung and not z["kal_freigabe"]:
+        if buchung and not buchung["frei"]:
             _termin_mails(kid, buchung["zeile"], z, firma, [])          # sofort bestätigt: Einladung mit Absage-Link an den Kunden
             return
         extra = f"\nIhr Wunschtermin {buchung['wann']} ist für Sie vorgemerkt. Wir prüfen ihn und melden uns mit der Bestätigung." if buchung else ""
+        if buchung:
+            extra += sd.zahlungsabsatz(z, buchung["zeile"].get("anzahlung"))
         sd.kundenmail(kid, mail, f"Eingangsbestätigung: {titel} ({ref})",
                       f"Guten Tag {felder.get('name', '')},\n\nvielen Dank, Ihre {titel} ist bei uns eingegangen. Ihre Vorgangsnummer: {ref}.{extra}\n\nIhre Angaben:\n{text}\n\nMit freundlichen Grüßen\n{firma}",
                       art="kontakt")
@@ -419,23 +424,27 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
                     felder["leistung"] = lz["name"]
                 if mname:
                     felder["mitarbeiter"] = mname
-                frei_gabe = bool(z["kal_freigabe"])
+                frei_gabe = bool(z["kal_freigabe"] or (lz or {}).get("freigabe"))
+                anz = sd.anzahlung_berechnen(lz)
+                preis_b = sd.preis_zahl((lz or {}).get("preis"))
                 titel = " – ".join(x for x in ((lz or {}).get("name"), mname) if x) or "Termin über die Website"
                 cur.execute("""INSERT INTO termine (kunden_id, anfrage_id, titel, beginn, ende, kontakt_name, kontakt_info, status, notiz)
                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
                             (kid, aid, titel[:120], start, ende, felder["name"], kontakt, "geplant" if frei_gabe else "bestaetigt", _zusammenfassung(felder)[:1500]))
                 tid = cur.fetchone()["id"]
                 try:
-                    cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token, status, ref, daten, mitarbeiter_id, leistung_id, puffer_min)
-                                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                                   RETURNING id, start, ende, name, email, telefon, nachricht, token""",
+                    cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token, status, ref, daten, mitarbeiter_id, leistung_id, puffer_min,
+                                                                anzahlung, anzahlung_betrag, preis_betrag)
+                                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                                   RETURNING id, start, ende, name, email, telefon, nachricht, token, anzahlung, ref""",
                                 (kid, tid, start, ende, felder["name"], felder["email"], felder.get("telefon"), felder.get("nachricht"), secrets.token_urlsafe(24),
-                                 "reserviert" if frei_gabe else "gebucht", ref, json.dumps(felder, ensure_ascii=False), rid, (lz or {}).get("id"), (lz or {}).get("puffer_min") or 0))
+                                 "reserviert" if frei_gabe else "gebucht", ref, json.dumps(felder, ensure_ascii=False), rid, (lz or {}).get("id"), (lz or {}).get("puffer_min") or 0,
+                                 f"{anz:.2f}" if anz else None, anz, preis_b))
                 except Exception:
                     raise Ungueltig({"uhrzeit": "Diese Uhrzeit wurde gerade vergeben. Bitte eine andere wählen."})
                 g = cur.fetchone()
                 g["leistung_name"], g["mitarbeiter_name"] = (lz or {}).get("name", ""), mname
-                buchung = {"zeile": g, "wann": start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")}
+                buchung = {"zeile": g, "wann": start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr"), "frei": frei_gabe}
             ids = push.kunde(cur, kid)
     except Ungueltig as e:
         return fehlerantwort(422, "Bitte die markierten Angaben prüfen.", e.fehler)

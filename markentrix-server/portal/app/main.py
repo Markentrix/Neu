@@ -49,6 +49,7 @@ from . import preisaenderung, routes_betriebplus, routes_plattformstatus, routes
 from .routes_push import router as push_router
 from .routes_dashboard import router as dashboard_router
 from .routes_telefon import router as telefon_router
+from .routes_leistungsfreigabe import router as leistungsfreigabe_router
 from .routes_vorlagen import router as vorlagen_router
 from .routes_wissen import kunde as wissen_kunde_router
 from .routes_wissen import router as wissen_router
@@ -199,6 +200,7 @@ app.include_router(dashboard_router)
 app.include_router(telefon_router)
 app.include_router(vorlagen_router)
 app.include_router(wissen_router)
+app.include_router(leistungsfreigabe_router)
 app.include_router(wissen_kunde_router)
 app.include_router(werkzeuge_router)
 app.include_router(leadimport_router)

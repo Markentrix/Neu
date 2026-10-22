@@ -108,6 +108,79 @@ def betrag_lesen(text) -> float | None:
     return v if v == v and v not in (float("inf"), float("-inf")) else None
 
 
+def preis_zahl(text) -> float | None:
+    """Erste Zahl aus einem Preistext: „45 €“, „ab 49,90 €“, „1.200 EUR“. None, wenn keine Zahl darin steht."""
+    m = re.search(r"\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?", str(text or ""))
+    if not m:
+        return None
+    t = m.group(0)
+    t = t.replace(".", "").replace(",", ".") if "," in t or re.match(r"^\d{1,3}(\.\d{3})+$", t) else t
+    try:
+        return float(t)
+    except ValueError:
+        return None
+
+
+def anzahlung_berechnen(l: dict | None) -> float | None:
+    """Anzahlung einer Leistung in Euro (fester Betrag oder Prozent vom Preis). None = keine Anzahlung."""
+    if not l or (l.get("anzahlung_art") or "keine") == "keine" or l.get("anzahlung_wert") is None:
+        return None
+    wert = float(l["anzahlung_wert"])
+    if l["anzahlung_art"] == "prozent":
+        preis = preis_zahl(l.get("preis"))
+        if preis is None:
+            return None
+        wert = preis * wert / 100
+    wert = round(wert + 1e-9, 2)
+    return wert if wert >= 1 else None
+
+
+def zahlungsabsatz(z: dict, betrag) -> str:
+    """Textblock für Mails: Anzahlung, PayPal.Me-Link mit Betrag und Absageregel. Leer, wenn keine Anzahlung gilt."""
+    if betrag in (None, "", 0):
+        return ""
+    b = f"{float(betrag):.2f}"
+    text = f"\nZur Sicherung des Termins bitten wir um eine Anzahlung von {b.replace('.', ',')} €."
+    me = (z.get("pp_me_link") or "").strip().rstrip("/")
+    if z.get("pp_aktiv") and me.startswith("https://"):
+        text += f"\nSie können bequem per PayPal zahlen: {me}/{b}{z.get('pp_waehrung') or 'EUR'}"
+    n = z.get("storno_std", 24)
+    if n:
+        text += f"\nKostenlose Absage ist bis {n} Stunden vor dem Termin möglich, die Anzahlung wird dann erstattet. Danach ist der volle Betrag zu zahlen."
+    if z.get("anz_frist_std"):
+        text += f"\nBitte zahlen Sie innerhalb von {z['anz_frist_std']} Stunden, sonst geben wir den Termin wieder frei."
+    return text + "\n"
+
+
+def leistungen_wissen_sync(cur, kid):
+    """Hält die Leistungen (Preis, Dauer, Anzahlung) als automatischen Eintrag in der Wissensdatenbank aktuell, damit der Assistent dieselben Zahlen kennt wie die Website."""
+    z = zeile(cur, kid)
+    cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (kid,))
+    zeilen = cur.fetchall()
+    if not zeilen:
+        cur.execute("DELETE FROM wissensbasis WHERE kunden_id=%s AND bereich='leistungen' AND quelle='system'", (kid,))
+        return
+    teile = []
+    for l in zeilen:
+        t = f"- {l['name']}"
+        if l["preis"]:
+            t += f": {l['preis']}"
+        t += f", Dauer etwa {l['dauer_min']} Minuten"
+        a = anzahlung_berechnen(l)
+        if a:
+            t += f", Anzahlung {a:.2f}".replace(".", ",") + " €"
+        if l["freigabe"]:
+            t += " (Termin wird erst nach Bestätigung durch den Betrieb fest)"
+        if l["beschreibung"]:
+            t += f". {l['beschreibung']}"
+        teile.append(t)
+    text = "Leistungen und Preise (wird automatisch aus dem Portal erzeugt):\n" + "\n".join(teile)
+    if z["storno_std"]:
+        text += f"\n\nAbsage kostenlos bis {z['storno_std']} Stunden vor dem Termin, danach ist der volle Betrag zu zahlen."
+    cur.execute("""INSERT INTO wissensbasis (kunden_id, bereich, schluessel, wert, quelle, aktiv) VALUES (%s,'leistungen','Leistungen und Preise (automatisch)',%s,'system',true)
+                   ON CONFLICT (kunden_id, bereich, schluessel) DO UPDATE SET wert=EXCLUDED.wert""", (kid, text))
+
+
 def ereignis(kid, art: str, ok: bool, hinweis: str = ""):
     try:
         with tx("system") as cur:

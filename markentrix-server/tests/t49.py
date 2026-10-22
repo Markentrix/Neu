@@ -59,7 +59,7 @@ r=W.post(API+"/anfrage",headers={"Origin":"https://"+dom,"Content-Type":"applica
 # ---- Terminbuchung mit festen Zeiten, Limit und Freigabe
 r=cA.put("/api/kunde/website-dienste/kalender",json={"aktiv":True,"dauer":30,"tage":30,"von":"08:00","bis":"18:00","wochentage":[1,2,3,4,5,6,7],"vorlauf_std":0,"ort":"Salon, Hauptstr. 1","empfaenger":"","zeiten":"08:00, 09:00, 10:00","kapazitaet":2,"freigabe":True,"halte_std":72}); chk("Kalender mit festen Zeiten speichern",r.status_code==200,r.text)
 chk("Ungültige Uhrzeit abgelehnt",cA.put("/api/kunde/website-dienste/kalender",json={"aktiv":True,"zeiten":"8 Uhr","wochentage":[1]}).status_code==400)
-v=W.get(API+"/verfuegbarkeit").json(); chk("Selbstbuchung aktiv, Zeiten wie eingestellt",v["selfBooking"] and v["slotTimes"]==["08:00","09:00","10:00"] and v["closedWeekdays"]==[],v)
+v=W.get(API+"/verfuegbarkeit").json(); chk("Bestätigt der Betrieb jede Buchung selbst, meldet die Schnittstelle selfBooking=false; Zeiten wie eingestellt",v["selfBooking"] is False and v["slotTimes"]==["08:00","09:00","10:00"] and v["closedWeekdays"]==[],v)
 chk("Nächster freier Tag ist heute oder morgen",v["nextFree"] in (heute.isoformat(),morgen.isoformat()),v["nextFree"])
 chk("Zeitraum danach gesperrt",(heute+datetime.timedelta(days=40)).isoformat() in v["blocked"])
 tag=(heute+datetime.timedelta(days=3)).isoformat()
