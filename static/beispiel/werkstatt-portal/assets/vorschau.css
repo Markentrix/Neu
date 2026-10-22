@@ -1,0 +1,13 @@
+/* Nur Vorschau: Hinweisband und simulierte Portal-Bausteine. Gehört nicht zu website-fertig. */
+.vp-ribbon{background:#000;color:#fff;font-size:.8rem;text-align:center;padding:8px 14px;line-height:1.45}
+.vp-ribbon a{color:#fff}
+.vp-badge{display:inline-block;margin:0 0 8px;padding:2px 8px;border-radius:100px;background:#eef1f4;color:#3a4650;font-size:.72rem;font-weight:700;letter-spacing:.04em}
+.mk-box{display:grid;gap:10px;padding:16px;color:#3a4650}
+.mk-box label{display:grid;gap:5px;font-weight:600;font-size:.9rem;color:#10151a}
+.mk-box input,.mk-box textarea{font:inherit;font-weight:400;padding:10px 12px;border:1px solid #b9c2cb;border-radius:8px;width:100%}
+.mk-box button{font:inherit;font-weight:700;padding:11px 18px;border:0;border-radius:8px;background:#ff6a1a;color:#10151a;min-height:46px;cursor:pointer}
+.mk-box .mk-ok{color:#166534;font-weight:600;margin:0}
+.mk-rev{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mk-rev>div{border:1px dashed #b9c2cb;border-radius:12px;padding:16px;display:grid;gap:6px;color:#5b6772;font-size:.92rem;background:#fff}
+.mk-rev .stars{letter-spacing:2px;color:#b9c2cb;font-size:1.1rem}
+@media (max-width:700px){.mk-rev{grid-template-columns:minmax(0,1fr)}}
