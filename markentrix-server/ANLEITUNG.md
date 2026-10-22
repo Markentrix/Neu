@@ -414,6 +414,13 @@ Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nu
 
 **Demo-Adresse bei bestehendem Caddy:** `install.sh` legt `demo.<domain>` im vorhandenen Caddy selbst an (Datei im Caddy-Ordner), sofern dort noch kein Block dafür steht. Ohne diesen Eintrag zeigt der Browser bei Demos „ERR_SSL_PROTOCOL_ERROR“. Nachträglich: `mkctl caddy-neu`.
 
+**Agentur-Standard (Fristen, Bericht, Startpaket):**
+- **Änderungswünsche haben eine Frist:** „Änderung“ 3 Werktage, „Problem“ 2 Werktage ab Eingang. Der Kunde sieht unter Nachrichten „bis <Datum>“ und nach Erledigung „erledigt am <Datum>“. Ist die Frist überschritten, erscheint es in der Frühwarnung des Kunden (Admin → Start).
+- **Monatsbericht** enthält jetzt „Was wir für Sie erledigt haben“ (erledigte Änderungen, Aufträge, Probleme und Website-Updates des Monats).
+- **Livecheck** prüft zusätzlich Bild-Beschreibungen, Hauptüberschrift, Favicon und einen Telefon-/Mail-Link (nur Hinweise, die Ampel bleibt dadurch grün).
+- **Vertrag:** Der Onboarding-Punkt „Angebot/Vertrag unterschrieben“ hakt sich selbst ab, sobald ein Angebot als angenommen markiert ist. Hat der Kunde einen im Portal bereitgestellten AVV nach 3 Tagen nicht bestätigt, bekommt er eine höfliche Erinnerung (höchstens zwei, alle 3 Tage).
+- **Startpaket (Kunde öffnen → Onboarding-Checkliste → „Startpaket auslösen“):** legt Checkliste und die ersten Team-Aufgaben mit Fristen an (AVV, Material, Briefing, Domain falls Website-Modul, Abnahme-Termin) und schickt einmalig die Willkommensmail mit den Wünschen an den Kunden. Mehrfach klickbar, nichts wird doppelt angelegt.
+
 ## Website als ZIP hochladen (Admin → Websites & Demos → „Website hochladen“)
 So veröffentlichst du eine fertige Kunden-Website, ohne SSH oder WinSCP:
 1. Website als ZIP packen. Entweder die fertige Website (`index.html` oben) oder ein ganzes Projekt: Das Portal findet den Website-Ordner selbst (bevorzugt `website-fertig`, `dist`, `public`, sonst den höchsten Ordner mit `index.html`) und übernimmt nur diesen. Server-Code, Build-Skripte, Docker-Dateien und Doku bleiben draußen. Nach dem Hochladen steht, aus welchem Ordner die Dateien kamen.

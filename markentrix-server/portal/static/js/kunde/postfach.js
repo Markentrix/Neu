@@ -22,7 +22,7 @@ V.nachrichten = async (id) => {
   return h('div', { class: 'stack' },
     darfSchreiben() ? h('div', { class: 'card' }, h('h2', {}, 'Neue Nachricht an Markentrix'), h('p', { class: 'small muted' }, 'Fragen, Aufträge oder Änderungswünsche, z. B. neue Öffnungszeiten, ein Foto für die Website, ein Problem. Wir antworten hier und per E-Mail.'), m, form) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Deine Nachrichten'),
-      tabelle([['Nr.', z => h('a', { href: '#nachrichten/' + z.id }, z.nr)], ['Betreff', z => h('a', { href: '#nachrichten/' + z.id }, (z.kunde_ungelesen ? '● ' : '') + z.betreff)], ['Art', z => ARTEN[z.art] || z.art], ['Status', z => tstatus(z.status)], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Noch keine Nachrichten.')));
+      tabelle([['Nr.', z => h('a', { href: '#nachrichten/' + z.id }, z.nr)], ['Betreff', z => h('a', { href: '#nachrichten/' + z.id }, (z.kunde_ungelesen ? '● ' : '') + z.betreff)], ['Art', z => ARTEN[z.art] || z.art], ['Status', z => tstatus(z.status)], ['Frist', z => z.status === 'erledigt' ? (z.erledigt_am ? 'erledigt am ' + new Date(z.erledigt_am).toLocaleDateString('de-DE') : '') : (z.frist ? 'bis ' + new Date(z.frist).toLocaleDateString('de-DE') : '')], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Noch keine Nachrichten.')));
 };
 
 async function nachrichtDetail(id) {
@@ -54,7 +54,7 @@ async function nachrichtDetail(id) {
   }
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('div', { class: 'row' }, h('a', { href: '#nachrichten' }, '← Alle Nachrichten'), h('span', { class: 'grow' }), tstatus(t.status)),
-      h('h2', { style: 'margin-top:10px' }, t.nr + ' · ' + t.betreff), h('p', { class: 'small muted' }, (ARTEN[t.art] || t.art) + ' · eröffnet am ' + zeit(t.erstellt_am)),
+      h('h2', { style: 'margin-top:10px' }, t.nr + ' · ' + t.betreff), h('p', { class: 'small muted' }, (ARTEN[t.art] || t.art) + ' · eröffnet am ' + zeit(t.erstellt_am) + (t.status === 'erledigt' && t.erledigt_am ? ' · erledigt am ' + new Date(t.erledigt_am).toLocaleDateString('de-DE') : t.frist ? ' · wir melden uns bis ' + new Date(t.frist).toLocaleDateString('de-DE') : '')),
       h('div', { class: 'chatlog thread' }, bubbles), dateiLinks(t.dateien)),
     bewertung,
     darfSchreiben() ? h('div', { class: 'card' }, h('h3', {}, 'Antworten'), m, text, h('div', { class: 'row', style: 'margin-top:10px' }, h('div', { class: 'grow' }, h('label', { style: 'margin:0 0 4px' }, 'Datei anhängen (max. 8 MB, optional)'), datei), h('button', { class: 'btn', onclick: senden }, 'Senden'))) : '');

@@ -2,7 +2,7 @@
 
 VORLAGE = [
     # code, titel, hilfe, sortierung, modul, auto
-    ("vertrag", "Angebot/Vertrag unterschrieben", "Unterschriebenes Angebot oder Vertrag liegt vor und ist abgelegt.", 10, None, None),
+    ("vertrag", "Angebot/Vertrag unterschrieben", "Wird automatisch erledigt, sobald ein Angebot als angenommen markiert ist (Kunde hat im Portal zugestimmt). Sonst von Hand abhaken.", 10, None, "angebot_ok"),
     ("avv", "Auftragsverarbeitungsvertrag (AVV) unterschrieben", "Pflicht, sobald Daten von Kundinnen/Kunden des Kunden verarbeitet werden. Wird automatisch erledigt, sobald die unterschriebene Fassung abgelegt ist.", 20, None, "avv"),
     ("zugang", "Portal-Zugang eingerichtet", "Kunde hat sein Passwort gesetzt und sich einmal angemeldet.", 30, None, "zugang"),
     ("briefing", "Briefing ausgefüllt", "Der Kunde hat den Fragebogen zu Unternehmen, Zielen und Wünschen abgeschickt.", 35, None, "briefing"),
@@ -65,6 +65,9 @@ def auto_erkannt(cur, kid) -> set:
     cur.execute("SELECT 1 FROM belege WHERE kunden_id=%s AND art='rechnung' AND status IN ('gestellt','versendet','bezahlt') LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("rechnung")
+    cur.execute("SELECT 1 FROM belege WHERE kunden_id=%s AND art='angebot' AND status='angenommen' LIMIT 1", (kid,))
+    if cur.fetchone():
+        erkannt.add("angebot_ok")
     cur.execute("SELECT 1 FROM wissensbasis WHERE kunden_id=%s AND aktiv LIMIT 1", (kid,))
     if cur.fetchone():
         erkannt.add("wissen")

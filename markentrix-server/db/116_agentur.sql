@@ -1,0 +1,2 @@
+ALTER TABLE avv ADD COLUMN IF NOT EXISTS erinnert_am timestamptz;
+ALTER TABLE avv ADD COLUMN IF NOT EXISTS erinnerungen int NOT NULL DEFAULT 0;

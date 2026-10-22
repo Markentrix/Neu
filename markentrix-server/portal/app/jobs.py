@@ -169,6 +169,30 @@ def fehler_melden(cfg):
         mailer.senden(an, f"{len(rows)} Workflow-Fehler" if len(rows) > 1 else "Workflow-Fehler", "Es sind Fehler in Automationen aufgetreten:\n\n" + "\n".join(zeilen) + mailer.SIGNATUR)
 
 
+def avv_kunde_erinnerung(cfg):
+    """Werktags: Kunden, denen der AVV im Portal bereitliegt und die nach 3 Tagen noch nicht bestätigt haben, höflich erinnern (höchstens zweimal, alle 3 Tage)."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 8 or jetzt.weekday() >= 5 or not _marker("avvkunde-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    avv_kunde_erinnern()
+
+
+def avv_kunde_erinnern():
+    with tx("system") as cur:
+        cur.execute("""SELECT a.id, k.email, k.ansprechpartner FROM avv a JOIN kunden k ON k.id = a.kunden_id
+                       WHERE a.datei IS NULL AND a.portal_freigabe_am IS NOT NULL AND a.erinnerungen < 2 AND k.status IN ('onboarding','aktiv','pausiert')
+                         AND COALESCE(a.erinnert_am, a.portal_freigabe_am) < now() - interval '3 days' LIMIT 20""")
+        todo = cur.fetchall()
+    for r in todo:
+        try:
+            if (r["email"] or "").strip():
+                mailer.avv_erinnerung_kunde(r["email"].strip(), r["ansprechpartner"])
+            with tx("system") as cur:
+                cur.execute("UPDATE avv SET erinnert_am=now(), erinnerungen=erinnerungen+1 WHERE id=%s", (r["id"],))
+        except Exception:  # noqa: BLE001
+            log.exception("AVV-Erinnerung %s", r["id"])
+
+
 def avv_erinnerung(cfg):
     """Erinnert den Admin höchstens einmal pro Woche und Kunde, wenn drei Tage nach Anlage noch kein unterschriebener AVV vorliegt."""
     with tx("system") as cur:
@@ -702,7 +726,7 @@ def tick():
             betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

@@ -16,6 +16,7 @@ class _P(HTMLParser):
         self.title, self._in_title, self.desc, self.viewport, self.lang = "", False, "", False, False
         self.links, self.refs, self.forms, self.form_api, self.text = [], [], 0, False, []
         self._in_form = 0
+        self.img_ohne_alt, self.h1, self.icon, self.kontakt = 0, False, False, False
 
     def handle_starttag(self, tag, a):
         a = {k: (v or "") for k, v in a}
@@ -30,10 +31,18 @@ class _P(HTMLParser):
                 self.viewport = True
         elif tag == "a" and a.get("href"):
             self.links.append(a["href"])
+            if a["href"].lower().startswith(("tel:", "mailto:")):
+                self.kontakt = True
         elif tag in ("img", "script", "source", "iframe") and a.get("src"):
             self.refs.append(a["src"])
+            if tag == "img" and "alt" not in a:
+                self.img_ohne_alt += 1
         elif tag == "link" and a.get("href"):
             self.refs.append(a["href"])
+            if "icon" in a.get("rel", "").lower():
+                self.icon = True
+        if tag == "h1":
+            self.h1 = True
         elif tag == "form":
             self.forms += 1
             self._in_form += 1
@@ -111,6 +120,14 @@ def pruefen(wurzel: Path) -> dict:
             p("warn", "Viewport-Angabe fehlt: die Seite wird auf dem Handy nicht richtig skaliert.", rel)
         if ist_start and not ps.lang:
             p("hinweis", "Sprache im html-Tag fehlt (lang=\"de\").", rel)
+        if ps.img_ohne_alt:
+            p("hinweis", f"{ps.img_ohne_alt} Bild(er) ohne Beschreibung (alt-Text): wichtig für Google und Barrierefreiheit.", rel)
+        if ist_start and not ps.h1:
+            p("hinweis", "Keine Hauptüberschrift (h1) auf der Startseite.", rel)
+        if ist_start and not ps.icon and not (wurzel / "favicon.ico").is_file():
+            p("hinweis", "Kein Favicon (kleines Symbol im Browser-Tab).", rel)
+        if ist_start and not ps.kontakt and "/api/" not in roh:
+            p("hinweis", "Kein anklickbarer Telefon- oder E-Mail-Link (tel:/mailto:) auf der Startseite.", rel)
         if re.search(r"lorem ipsum", roh, re.I):
             p("warn", "Platzhaltertext „Lorem ipsum“ gefunden.", rel)
         if re.search(r"(localhost|127\.0\.0\.1)", roh):

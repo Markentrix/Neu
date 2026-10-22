@@ -153,6 +153,22 @@ def avv_portal(an: str, name: str | None) -> tuple[bool, str]:
     return senden(an, "Vertrag zur Auftragsverarbeitung: bitte bestätigen", text)
 
 
+def avv_erinnerung_kunde(an: str, name: str | None) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    text = (f"{hallo}\n\nkleine Erinnerung: Der Vertrag zur Auftragsverarbeitung (AVV) wartet in Ihrem Portal noch auf Ihre Bestätigung. "
+            f"Es dauert nur einen Klick: {config.BASE_URL}/app#avv\n\nOhne diesen Vertrag dürfen wir keine Daten Ihrer Kundinnen und Kunden verarbeiten." + SIGNATUR)
+    return senden(an, "Erinnerung: AVV bitte bestätigen", text)
+
+
+def willkommen_start(an: str, name: str | None, firma: str, punkte: list[str]) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    liste = "\n".join("- " + p for p in punkte)
+    text = (f"{hallo}\n\nschön, dass {firma} dabei ist! Damit wir zügig starten können, brauchen wir von Ihnen:\n\n{liste}\n\n"
+            f"Das meiste können Sie direkt in Ihrem Portal erledigen: {config.BASE_URL}/app. "
+            f"Dort sehen Sie auch jederzeit, wie weit wir sind. Bei Fragen schreiben Sie uns einfach über „Nachrichten“ im Portal." + SIGNATUR)
+    return senden(an, f"Willkommen bei Markentrix: so starten wir für {firma}", text)
+
+
 def avv_bestaetigt_team(an: str, firma: str, kundennummer: str, name: str, kid: str) -> tuple[bool, str]:
     t = (f"{firma} ({kundennummer}) hat den AVV im Portal bestätigt (durch {name}).\n\nAnsehen im Admin-Bereich: {config.BASE_URL}/admin#kunde/{kid}" + "\n\n(automatische Meldung des Portals)")
     return senden(an, f"AVV bestätigt: {firma}", t)

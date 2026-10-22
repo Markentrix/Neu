@@ -80,7 +80,7 @@ GUT='<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Salon Mus
 dg=f"gut{sfx}.de"
 r=up(zipb({"index.html":GUT,"impressum.html":"<html><title>I</title><body>x</body></html>","datenschutz.html":"<html><title>D</title><body>x</body></html>","logo.png":"x"*100}),dg,kA)
 c=r.json().get("check") or {}
-chk("Sauberer Upload: grün",r.status_code==200 and c.get("ampel")=="gruen" and not c.get("punkte"),c)
+chk("Sauberer Upload: grün",r.status_code==200 and c.get("ampel")=="gruen" and all(p["stufe"]=="hinweis" for p in c.get("punkte",[])),c)
 SCHLECHT='<html><head></head><body><a href="gibt-es-nicht.html">x</a><img src="bilder/gross.jpg"><img src="fehlt.png"><form action="/x"><input></form><p>Lorem ipsum dolor</p><a href="http://localhost:3000/">dev</a><link href="https://fonts.googleapis.com/css?family=X" rel="stylesheet"><a href="mailto:a@b.de">m</a><a href="#oben">o</a><a href="https://extern.de/x">e</a></body></html>'
 ds=f"schlecht{sfx}.de"
 r=up(zipb({"index.html":SCHLECHT,"bilder/gross.jpg":"x"*2_000_000}),ds,kB)

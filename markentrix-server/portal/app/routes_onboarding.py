@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import onboarding
+from . import mailer, onboarding
+from .routes_zusammenarbeit import werktage_ab
 from .db import tx
 from .security import audit, require_admin
 
@@ -85,3 +86,46 @@ def offen(user: dict = Depends(require_admin)):
                         "naechster": offen_p[0]["titel"] if offen_p else None, "tage_still": tage_still, "haengt": bool(offen_p) and tage_still >= 7})
     out.sort(key=lambda x: (not x["haengt"], -x["tage_still"]))
     return out
+
+
+# Startpaket: Aufgaben für das Team, Checkliste und Willkommensmail mit einem Klick (mehrfach klickbar, nichts wird doppelt angelegt)
+STARTAUFGABEN = [
+    ("avv", "AVV erstellen und im Portal freigeben", 3, None),
+    ("material", "Logo, Fotos, Öffnungszeiten beim Kunden anfragen", 3, None),
+    ("briefing", "Briefing mit dem Kunden durchgehen", 7, None),
+    ("domain", "Domain-Zugang klären und DNS vorbereiten", 7, "website"),
+    ("abnahme", "Abnahme-/Übergabe-Termin vereinbaren", 21, None),
+]
+
+
+@router.post("/kunden/{kid}/startpaket")
+def startpaket(kid: str, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        _pruefen(cur, kid)
+        punkte = onboarding.anlegen(cur, kid)
+        cur.execute("SELECT firma, email, ansprechpartner FROM kunden WHERE id=%s", (kid,))
+        k = cur.fetchone()
+        cur.execute("SELECT modul_code FROM kunden_module WHERE kunden_id=%s AND aktiv", (kid,))
+        module = {r["modul_code"] for r in cur.fetchall()}
+        heute = datetime.now(timezone.utc).date()
+        neu = 0
+        for code, titel, tage, modul in STARTAUFGABEN:
+            if modul and modul not in module:
+                continue
+            cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel) VALUES (%s,%s,%s,%s,'auto',%s)
+                           ON CONFLICT (auto_schluessel) DO NOTHING""", (kid, titel, user["email"], heute + (werktage_ab(heute, tage) - heute), f"start:{kid}:{code}"))
+            neu += cur.rowcount
+        cur.execute("SELECT 1 FROM audit_log WHERE kunden_id=%s AND aktion='startpaket_mail' LIMIT 1", (kid,))
+        schon = cur.fetchone() is not None
+        audit(cur, user, "startpaket", kid, {"aufgaben": neu, "punkte": punkte})
+        if not schon and (k["email"] or "").strip():
+            audit(cur, user, "startpaket_mail", kid)
+            senden = True
+        else:
+            senden = False
+    if senden:
+        wuensche = ["Logo (möglichst als PNG oder SVG) und Ihre Firmenfarben", "Fotos von Team, Betrieb und Ihren Leistungen",
+                    "Öffnungszeiten, Leistungen und Preise (oder bestehende Prospekte)", "das Briefing im Portal ausfüllen (ca. 10 Minuten)",
+                    "falls eine Website dazugehört: Zugang zu Ihrer Domain (z. B. beim Anbieter, bei dem sie registriert ist)"]
+        mailer.willkommen_start(k["email"].strip(), k["ansprechpartner"], k["firma"], wuensche)
+    return {"ok": True, "aufgaben": neu, "punkte": punkte, "mail": senden}

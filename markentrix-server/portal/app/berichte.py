@@ -55,12 +55,17 @@ def sammeln(cur, kid, von: date, bis: date) -> dict:
                    FROM website_qualitaet WHERE kunden_id=%s AND geprueft_am >= now() - interval '3 days'""", (kid,))
     q = cur.fetchone()
     qualitaet = {"median_ms": q["median_ms"], "tote": int(q["tote"]), "langsam": int(q["langsam"])} if q and q["n"] else None
+    cur.execute("""SELECT betreff, art FROM tickets WHERE kunden_id=%s AND status='erledigt' AND erledigt_am >= %s AND erledigt_am < %s AND art IN ('aenderung','auftrag','problem')
+                   ORDER BY erledigt_am DESC LIMIT 12""", (kid, von, bis))
+    erledigt = [{"betreff": r["betreff"], "art": r["art"]} for r in cur.fetchall()]
+    cur.execute("SELECT count(*) AS n FROM audit_log WHERE kunden_id=%s AND aktion='website_hochgeladen' AND zeit >= %s AND zeit < %s", (kid, von, bis))
+    updates = cur.fetchone()["n"]
     website = {"qualitaet": qualitaet, "besucher": ws["besucher"], "aufrufe": ws["aufrufe"], "whatsapp": ws["whatsapp"], "anrufe": ws["anrufe"], "anfragen": w_anf,
                "buchungen": wt["buchungen"], "nicht_erschienen": wt["weg"], "erschienen": wt["da"], "erreichbarkeit": webbetrieb.erreichbarkeit(cur, kid, von, bis)}
     return {"website": website, "anfragen": {"gesamt": a_ges, "vormonat": a_vor, "nach_quelle": a_quelle, "bearbeitet": ar["bearbeitet"], "spam": ar["spam"]},
             "termine": {"gesamt": sum(t.values()), "nach_status": t},
             "anrufe": anrufe, "nachrichten": {"ein": nach["ein"], "aus": nach["aus"], "automatisch": nach["automatisch"]},
-            "chat_fragen": chat, "automatische_ablaeufe": laeufe, "wochenangebote": wa, "bewertungsanfragen": bew}
+            "erledigt": erledigt, "website_updates": updates, "chat_fragen": chat, "automatische_ablaeufe": laeufe, "wochenangebote": wa, "bewertungsanfragen": bew}
 
 
 def erstellen(cur, kid, monat: date) -> str:
@@ -170,6 +175,12 @@ def pdf_erzeugen(cur, bericht_id, f: dict | None = None) -> tuple[bytes, str]:
             zeilen.append(f"Ladezeit der Website: typisch {qq['median_ms']} Millisekunden" + (f"; {_n(qq['langsam'], 'Seite', 'Seiten')} laden langsam." if qq["langsam"] else ".")
                           + (f" {_n(qq['tote'], 'Verweis', 'Verweise')} führen ins Leere, wir kümmern uns darum." if qq["tote"] else " Keine toten Verweise gefunden."))
     inhalt += [pdf.p("• " + z) for z in zeilen]
+    erl = d.get("erledigt") or []
+    if erl or d.get("website_updates"):
+        inhalt += [pdf.p("Was wir für Sie erledigt haben", pdf.H2)]
+        if d.get("website_updates"):
+            inhalt += [pdf.p("• " + (f"Ihre Website wurde {d['website_updates']}-mal aktualisiert." if d["website_updates"] > 1 else "Ihre Website wurde aktualisiert."))]
+        inhalt += [pdf.p("• " + {"aenderung": "Änderung: ", "auftrag": "Auftrag: ", "problem": "Problem gelöst: "}.get(x["art"], "") + x["betreff"]) for x in erl]
     ein, schritte = texte(b)
     inhalt += [pdf.p("Einordnung", pdf.H2), pdf.p(ein), pdf.p("Unsere nächsten Schritte", pdf.H2)] + [pdf.p("• " + z) for z in schritte]
     if a["nach_quelle"]:

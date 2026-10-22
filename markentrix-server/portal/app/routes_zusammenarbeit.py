@@ -72,10 +72,24 @@ class NachrichtIn(BaseModel):
     text: str = Field(min_length=1, max_length=10000)
 
 
+FRIST_WERKTAGE = {"aenderung": 3, "problem": 2}
+
+
+def werktage_ab(start, n: int):
+    """Datum n Werktage (Mo–Fr) nach start."""
+    d = start
+    while n > 0:
+        d += timedelta(days=1)
+        if d.weekday() < 5:
+            n -= 1
+    return d
+
+
 def ticket_anlegen(cur, kid, user: dict, betreff, art, text, prioritaet="normal", modul=None, von="kunde") -> dict:
-    cur.execute("""INSERT INTO tickets (kunden_id, betreff, art, prioritaet, modul_code, erstellt_von, ersteller_name, letzte_nachricht_von, kunde_ungelesen, team_ungelesen)
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, 'T-' || lpad(nummer::text, 4, '0') AS nr""",
-                (kid, betreff.strip(), art, prioritaet, modul, user["id"], _name(user) if von == "kunde" else None, von, von == "team", von == "kunde"))
+    frist = werktage_ab(date.today(), FRIST_WERKTAGE[art]) if art in FRIST_WERKTAGE else None
+    cur.execute("""INSERT INTO tickets (kunden_id, betreff, art, prioritaet, modul_code, erstellt_von, ersteller_name, letzte_nachricht_von, kunde_ungelesen, team_ungelesen, faellig_am)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, 'T-' || lpad(nummer::text, 4, '0') AS nr""",
+                (kid, betreff.strip(), art, prioritaet, modul, user["id"], _name(user) if von == "kunde" else None, von, von == "team", von == "kunde", frist))
     t = cur.fetchone()
     cur.execute("INSERT INTO ticket_nachrichten (ticket_id, kunden_id, von, autor_name, text) VALUES (%s,%s,%s,%s,%s)",
                 (t["id"], kid, von, _name(user) if von == "kunde" else team_name(user), text.strip()))
@@ -85,7 +99,8 @@ def ticket_anlegen(cur, kid, user: dict, betreff, art, text, prioritaet="normal"
 @kunde_router.get("/tickets")
 def k_liste(user: dict = Depends(require_kunde)):
     with tx("kunde", user["kunden_id"]) as cur:
-        cur.execute(f"""SELECT t.id, {NR} AS nr, t.betreff, t.art, t.status, t.letzte_nachricht_von, t.kunde_ungelesen, t.geaendert_am, t.erstellt_am,
+        cur.execute(f"""SELECT t.id, {NR} AS nr, t.betreff, t.art, t.status, t.letzte_nachricht_von, t.kunde_ungelesen, t.geaendert_am, t.erstellt_am, t.erledigt_am,
+                              CASE WHEN t.status<>'erledigt' THEN t.faellig_am END AS frist,
                               EXISTS (SELECT 1 FROM zufriedenheit z WHERE z.ticket_id = t.id) AS bewertet
                         FROM tickets t ORDER BY t.geaendert_am DESC LIMIT 200""")
         return cur.fetchall()
@@ -111,7 +126,7 @@ def k_neu(data: TicketIn, bg: BackgroundTasks, user: dict = Depends(require_kund
 def k_detail(tid: str, user: dict = Depends(require_kunde)):
     try:
         with tx("kunde", user["kunden_id"]) as cur:
-            cur.execute(f"SELECT t.id, {NR} AS nr, t.betreff, t.art, t.status, t.erstellt_am, t.geaendert_am, t.erledigt_am FROM tickets t WHERE t.id=%s", (tid,))
+            cur.execute(f"SELECT t.id, {NR} AS nr, t.betreff, t.art, t.status, t.erstellt_am, t.geaendert_am, t.erledigt_am, CASE WHEN t.status<>'erledigt' THEN t.faellig_am END AS frist FROM tickets t WHERE t.id=%s", (tid,))
             t = cur.fetchone()
             if not t:
                 raise nicht_gefunden()
