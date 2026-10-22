@@ -1272,3 +1272,8 @@ main:focus{outline:none}
 .feats{gap:18px 28px}
 .chk-offer{margin:10px 0 4px;padding:14px 16px;border:1px solid var(--border);border-left:3px solid var(--violet,#7C4DE0);border-radius:12px;background:rgba(255,255,255,.7)}
 .chk-offer p{margin:0 0 8px;color:var(--text-2,#3A4356)}
+
+/* ─── 52. Branchen-Verweis auf der Startseite ─── */
+.branch-more{margin:22px 0 0;color:var(--muted);font-size:.98rem;line-height:1.7;max-width:76ch}
+.branch-more a:not(.link-arrow){color:var(--link);font-weight:500}
+.branch-more .link-arrow{margin-left:6px;white-space:nowrap}
