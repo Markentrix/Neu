@@ -146,6 +146,22 @@ def avv(an: str, name: str | None, pdf_bytes: bytes) -> tuple[bool, str]:
     return senden(an, "Vertrag zur Auftragsverarbeitung (AVV)", text, ("Auftragsverarbeitungsvertrag.pdf", pdf_bytes, "application/pdf"))
 
 
+def vertrag_dokument(an: str, name: str | None, art: str, pdf_bytes: bytes, dateiname: str) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    if art == "referenz":
+        text = (f"{hallo}\n\nanbei erhalten Sie unseren Referenzvertrag. Damit dürfen wir Ihr Projekt in unserer Eigenwerbung zeigen, aber nur, was Sie ausdrücklich freigeben.\n\n"
+                "So geht es: Kreuzen Sie in Anlage 1 nur die Punkte an, die für Sie in Ordnung sind (alles andere bleibt tabu), und unterschreiben Sie. Das Formular lässt sich am Bildschirm ausfüllen. "
+                "Senden Sie es uns anschließend unterschrieben zurück (Scan oder Foto genügt).\n\n"
+                "Das ist freiwillig und völlig unabhängig von Ihrem Auftrag. Sie können es jederzeit ohne Begründung widerrufen, ohne dass Ihnen daraus ein Nachteil entsteht." + SIGNATUR)
+        betreff = "Referenzvertrag: Ihre Freigabe für unsere Referenzen"
+    else:
+        text = (f"{hallo}\n\nanbei erhalten Sie den Handelsvertretervertrag für Ihre Zusammenarbeit mit Markentrix.\n\n"
+                "Bitte lesen Sie ihn in Ruhe, ergänzen Sie Ihre Angaben (Anlage 3 mit den Fragen zu Ihrer Selbständigkeit) und unterschreiben Sie ihn. "
+                "Das Formular lässt sich am Bildschirm ausfüllen. Senden Sie es uns anschließend unterschrieben zurück (Scan oder Foto genügt). Bei Fragen melden Sie sich jederzeit." + SIGNATUR)
+        betreff = "Handelsvertretervertrag Markentrix"
+    return senden(an, betreff, text, (dateiname, pdf_bytes, "application/pdf"), art="vertrag")
+
+
 def avv_portal(an: str, name: str | None) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     text = (f"{hallo}\n\nder Vertrag zur Auftragsverarbeitung (AVV) nach Art. 28 DSGVO liegt in Ihrem Portal zur Bestätigung bereit. "

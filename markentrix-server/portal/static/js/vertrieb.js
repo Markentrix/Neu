@@ -131,6 +131,8 @@ V.willkommen = () => anleitungSeite('vertrieb');
 V.leitfaden = async () => {
   const d = await api('/api/vertrieb/leitfaden');
   return h('div', { class: 'stack' },
+    h('div', { class: 'card' }, h('h2', {}, 'Telefonleitfaden Kaltakquise (PDF)'), h('p', { class: 'small muted' }, 'Der ausführliche Leitfaden von Markentrix zum Ansehen, Ausdrucken und Nachschlagen. Darunter die Kurzfassung mit Einwänden und Antworten.'),
+      h('p', {}, h('a', { class: 'btn', href: '/api/vertrieb/telefonleitfaden.pdf', target: '_blank', rel: 'noopener' }, 'Leitfaden öffnen'), ' ', h('a', { class: 'btn sec', href: '/api/vertrieb/telefonleitfaden.pdf', download: 'Markentrix-Telefonleitfaden.pdf' }, 'Herunterladen'))),
     h('div', { class: 'card' }, h('h2', {}, 'Gesprächsleitfaden'), h('p', { class: 'small muted' }, 'Zum Üben und Nachschlagen, nicht zum Ablesen. Bei jedem Lead gibt es zusätzlich einen persönlichen Vorschlag (KI-Entwurf) und, wenn die Branche passt, einen Branchenhinweis.')),
     d.abschnitte.map(a => h('div', { class: 'card' }, h('h2', {}, a.titel), h('ul', {}, a.punkte.map(p => h('li', {}, p))))),
     h('div', { class: 'card' }, h('h2', {}, 'Wenn der Kunde sagt …'), d.einwaende.map(e => h('details', { style: 'margin:8px 0' }, h('summary', {}, h('b', {}, '„' + e.einwand + '“')), h('p', {}, e.antwort)))),
