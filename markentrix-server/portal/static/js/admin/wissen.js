@@ -3,7 +3,7 @@ import { fehler, knopf } from './kern.js';
 
 /** Wissensbasis eines Kunden: Dateien (TXT, MD, PDF) hochladen oder Einträge schreiben. Aktive Einträge nutzt der Assistent des Kunden. */
 export function wissenKarte(kid) {
-  const m = h('div'), liste = h('div'), editor = h('div');
+  const m = h('div'), liste = h('div'), editor = h('div'), wuensche = h('div');
   const pfad = '/api/admin/kunden/' + kid + '/wissen';
   const datei = h('input', { type: 'file', accept: '.txt,.md,.pdf,text/plain,application/pdf', multiple: true, 'aria-label': 'Dateien auswählen' });
   const bereich = h('input', { value: 'dokumente', maxlength: 40, style: 'max-width:180px', 'aria-label': 'Bereich' });
@@ -21,6 +21,20 @@ export function wissenKarte(kid) {
           if (!confirm('„' + e.schluessel + '“ wirklich löschen?')) return;
           try { await api(pfad + '/' + e.id, { method: 'DELETE' }); await laden(); } catch (x) { fehler(m, x); }
         })))))))));
+  };
+  const vorschlaege = async () => {
+    const r = await api('/api/admin/kunden/' + kid + '/wissen-vorschlaege');
+    if (!r.vorschlaege.length) { wuensche.replaceChildren(); return; }
+    const AK = { neu: 'Neues Wissen', aendern: 'Änderung', ausschalten: 'Ausschalten' };
+    const fertig = async () => { await vorschlaege(); await laden(); };
+    wuensche.replaceChildren(h('div', { class: 'card', style: 'margin:8px 0' }, h('h3', {}, 'Änderungswünsche des Kunden'), ...r.vorschlaege.map(v => h('div', { style: 'margin:8px 0' },
+      h('p', {}, h('span', { class: 'pill ' + (v.status === 'offen' ? 'warn' : v.status === 'uebernommen' ? 'ok' : '') }, v.status === 'offen' ? 'offen' : v.status), ' ', h('b', {}, AK[v.aktion] + ': ' + v.schluessel), ' · ' + datum(v.erstellt_am)),
+      v.aktion === 'aendern' ? h('details', {}, h('summary', {}, 'Bisher ansehen'), h('pre', { class: 'small', style: 'white-space:pre-wrap' }, v.alt_wert.slice(0, 3000))) : '',
+      v.wert ? h('pre', { class: 'small', style: 'white-space:pre-wrap;max-height:220px;overflow:auto' }, v.wert.slice(0, 3000) + (v.wert.length > 3000 ? ' …' : '')) : '',
+      v.notiz ? h('p', { class: 'small muted' }, 'Antwort: ' + v.notiz) : '',
+      v.status === 'offen' ? h('div', { class: 'row', style: 'gap:6px' },
+        knopf('Übernehmen', async () => { try { await api(pfad.replace('/wissen', '/wissen-vorschlaege') + '/' + v.id + '/uebernehmen', { method: 'POST', body: {} }); await fertig(); } catch (x) { fehler(m, x); } }, ''),
+        knopf('Ablehnen', async () => { const n = prompt('Kurze Begründung für den Kunden (optional):', ''); if (n === null) return; try { await api(pfad.replace('/wissen', '/wissen-vorschlaege') + '/' + v.id + '/ablehnen', { method: 'POST', body: { notiz: n } }); await fertig(); } catch (x) { fehler(m, x); } })) : ''))));
   };
   const bearbeiten = async (id) => {
     const e = await api(pfad + '/' + id), t = h('textarea', { rows: 14, maxlength: 200000, 'aria-label': 'Text' }, e.wert);
@@ -48,10 +62,10 @@ export function wissenKarte(kid) {
   const neu = async () => {
     try { await api(pfad, { method: 'POST', body: { bereich: bereich.value || 'allgemein', schluessel: titel.value, wert: text.value } }); titel.value = ''; text.value = ''; melde(m, 'Eintrag gespeichert.', 'ok'); await laden(); } catch (x) { fehler(m, x); }
   };
-  laden().catch(x => fehler(m, x));
+  laden().catch(x => fehler(m, x)); vorschlaege().catch(x => fehler(m, x));
   return h('div', { class: 'card', id: 'wissen' }, h('h2', {}, 'Wissensbasis für den Assistenten'),
     h('p', { class: 'small muted' }, 'Alles, was hier aktiv ist, darf der Assistent des Kunden nutzen (Leistungen, Preise, Öffnungszeiten, FAQ, Tonalität). Lade Dateien als TXT, MD oder PDF hoch: Wir lesen den Text und speichern ihn. Die Datei selbst wird nicht aufbewahrt. Gescannte PDFs ohne Texterkennung gehen nicht. Gleicher Titel im selben Bereich ersetzt den alten Eintrag. Nichts hochladen, was der Assistent nicht sagen soll.'),
     m, h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:center' }, datei, h('label', { style: 'color:inherit' }, 'Bereich '), bereich, knopf('Hochladen', hoch, '')),
     h('details', { class: 'hilfe', style: 'margin:8px 0' }, h('summary', {}, 'Eintrag von Hand schreiben'), h('div', { class: 'stack' }, titel, text, h('p', {}, knopf('Eintrag speichern', neu)))),
-    liste, editor);
+    wuensche, liste, editor);
 }

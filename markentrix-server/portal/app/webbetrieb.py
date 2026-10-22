@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 from . import config, mailer, push
 from . import sitedienste as sd
 from .db import tx
-from .routes_zusammenarbeit import admin_empfaenger
+from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
 log = logging.getLogger("webbetrieb")
 TZ = sd.TZ
@@ -333,3 +333,33 @@ def erreichbarkeit(cur, kid, von, bis):
                    WHERE w.kunden_id = %s AND t.tag >= %s AND t.tag < %s""", (kid, von, bis))
     r = cur.fetchone()
     return round(100.0 * r["ok"] / r["n"], 2) if r and r["n"] else None
+
+
+# ---------------------------------------------------------------- Gutschein-Anfragen, die einen Tag lang offen sind
+def gutschein_erinnerung(cfg=None):
+    """Erinnert den Betrieb einmal, wenn eine Gutschein-Anfrage nach einem Tag noch offen ist (Zahlungslink oder Code fehlt noch)."""
+    with tx("system") as cur:
+        cur.execute("""WITH f AS (SELECT g.id FROM website_gutscheine g JOIN kunden k ON k.id = g.kunden_id
+                                  WHERE g.status IN ('angefragt','zahlungslink_gesendet') AND g.erinnert_am IS NULL AND k.status IN ('onboarding','aktiv')
+                                    AND coalesce(g.zahlungslink_am, g.erstellt_am) < now() - interval '1 day' AND g.erstellt_am > now() - interval '30 days'
+                                  ORDER BY g.erstellt_am LIMIT 50 FOR UPDATE OF g SKIP LOCKED)
+                       UPDATE website_gutscheine g SET erinnert_am = now() FROM f WHERE g.id = f.id
+                       RETURNING g.kunden_id, g.name, g.ref, g.betrag, g.status""")
+        zeilen = cur.fetchall()
+    gesendet = 0
+    for r in zeilen:
+        with tx("system") as cur:
+            cur.execute("SELECT firma FROM kunden WHERE id=%s", (r["kunden_id"],))
+            firma = cur.fetchone()["firma"]
+            an = kunden_empfaenger(cur, r["kunden_id"])
+            ids = push.kunde(cur, r["kunden_id"])
+        betrag = f" über {r['betrag']:.2f}".replace(".", ",") + " €" if r["betrag"] is not None else ""
+        schritt = ("Der Zahlungslink wurde noch nicht gesendet." if r["status"] == "angefragt"
+                   else "Der Zahlungslink ging raus. Bitte prüfen, ob die Zahlung da ist, und dann den Gutschein-Code senden.")
+        text = (f"Hallo {firma},\n\ndie Gutschein-Anfrage von {r['name']}{betrag} ({r['ref']}) ist seit einem Tag offen. {schritt}\n\n"
+                f"Das geht im Portal unter Website-Dienste → Gutschein-Anfragen:\n{config.BASE_URL}/app#dienste" + mailer.SIGNATUR)
+        for a in an:
+            ok, _ = mailer.senden(a, f"Offene Gutschein-Anfrage: {r['name']} ({r['ref']})", text, kunden_id=r["kunden_id"], art="gutschein_erinnerung")
+            gesendet += 1 if ok else 0
+        push.senden(ids, "Gutschein-Anfrage offen", f"{r['name']}: seit einem Tag ohne Abschluss.", "/app#dienste", "gutschein")
+    return gesendet

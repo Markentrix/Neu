@@ -15,6 +15,7 @@ const SEITEN = [
   ['nachrichten', 'Nachrichten', null],
   ['freigaben', 'Freigaben', null],
   ['assistent', 'KI-Assistent', 'ki_chat'],
+  ['wissen', 'Mein Wissen für den Assistenten', 'ki_chat'],
   ['anfragen', 'Anfragen', 'anfragen_termine'],
   ['termine', 'Termine', 'anfragen_termine'],
   ['bewertungen', 'Bewertungen', 'anfragen_termine'],
@@ -41,12 +42,12 @@ const SEITEN = [
 const GRUPPEN = [
   ['Täglich', ['heute', 'anfragen', 'termine', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
   ['Verstehen', ['uebersicht', 'status', 'briefing', 'auswertung', 'berichte'], true],
-  ['Mein Betrieb', ['assistent', 'website', 'dienste', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
+  ['Mein Betrieb', ['assistent', 'wissen', 'website', 'dienste', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
   ['Verwaltung', ['willkommen', 'belege', 'avv', 'vertraege', 'team', 'hilfe', 'einstellungen'], false],
 ];
 export const inhaber = () => start.kunden_rolle === 'inhaber';
 const EMPFANG = ['heute', 'anfragen', 'termine', 'nachrichten', 'hilfe', 'einstellungen'];
-export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste', 'vertraege'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])));
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste', 'vertraege', 'wissen'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])));
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : id === 'vertraege' ? start.badges.vertraege : 0)) || 0;
 

@@ -748,6 +748,9 @@ def k_gutschein_code(gid: str, data: GutscheinCodeIn, user: dict = Depends(requi
         raise HTTPException(400, "Bitte einen Code mit 3 bis 40 Zeichen eintragen (Buchstaben, Zahlen, Bindestrich).")
     with tx("system") as cur:
         g = _gutschein_holen(cur, gid, kid)
+        cur.execute("SELECT 1 FROM website_gutscheine WHERE kunden_id=%s AND id<>%s AND lower(code)=lower(%s) AND status='gesendet'", (kid, gid, code))
+        if cur.fetchone():
+            raise HTTPException(409, "Diesen Code hast du schon an jemand anderen gesendet. Bitte einen neuen Code wählen.")
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
         firma = cur.fetchone()["firma"]
     betrag = f" über {g['betrag']:.2f}".replace(".", ",") + " €" if g["betrag"] is not None else ""

@@ -958,6 +958,10 @@ def website_erinnerungen(cfg):
     webbetrieb.erinnerungen(cfg)
 
 
+def gutschein_erinnerungen(cfg):
+    webbetrieb.gutschein_erinnerung(cfg)
+
+
 def kuendigungen_vollziehen(cfg):
     """Am Vertragsende: Kunde auf „gekündigt“, laufende Buchungen beenden, Team informieren (Übergabe der Domains, Export, Löschung)."""
     with tx("system") as cur:
@@ -1072,7 +1076,7 @@ def tick():
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
-    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         _lauf(job, cfg)   # ein kaputter Job darf die anderen nicht stoppen
 
 
