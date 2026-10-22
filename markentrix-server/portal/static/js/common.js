@@ -116,18 +116,20 @@ export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
   const m = h('div'), notiz = h('input', { placeholder: 'Kurze Notiz (freiwillig)', maxlength: 1500, 'aria-label': 'Notiz' }), wv = wiedervorlageWahl();
   let wahl = null; const knoepfe = [];
   const speichern = h('button', { class: 'btn', disabled: true }, 'Speichern'), weiter = extra.naechster ? h('button', { class: 'btn sec', disabled: true }, 'Speichern & nächster Lead') : '';
+  const grund = h('select', { 'aria-label': 'Grund für die Absage', style: 'display:none;width:auto' }, h('option', { value: '' }, 'Grund wählen …'), Object.entries(extra.verlustgruende || {}).map(([c, t]) => h('option', { value: c }, t)));
   const waehle = (o, b) => { wahl = o; knoepfe.forEach(x => x.classList.remove('gewaehlt')); b.classList.add('gewaehlt'); speichern.disabled = false; if (weiter) weiter.disabled = false;
-    wv.tag.value = tagIn(o.wiedervorlage_tage); };
+    wv.tag.value = tagIn(o.wiedervorlage_tage); grund.style.display = o.code === 'kein_interesse' && extra.verlustgruende ? '' : 'none'; };
   optionen.forEach(o => { const b = h('button', { type: 'button', class: 'btn sec small', onclick: () => waehle(o, b) }, o.text); knoepfe.push(b); });
   const los = async (danach) => { if (!wahl) return;
-    try { const r = await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null } });
+    if (wahl.code === 'kein_interesse' && extra.verlustgruende && !grund.value) { melde(m, 'Bitte den Grund der Absage wählen. Das hilft bei der Auswertung.'); return; }
+    try { const r = await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null, verlust_grund: grund.value || null } });
       if (danach) danach(r); else if (extra.nach) extra.nach(r); else location.reload(); } catch (x) { melde(m, x.message); } };
   speichern.onclick = () => los(null);
   if (weiter) /** @type {any} */ (weiter).onclick = () => los(extra.naechster);
   return h('div', { class: 'card' }, h('h2', {}, 'Kontakt festhalten'),
     h('p', { class: 'small muted' }, 'Was ist passiert? Der Verlauf und, wo es passt, der Status werden automatisch gesetzt.'), m,
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, knoepfe),
-    h('div', { class: 'row', style: 'margin-top:10px;align-items:flex-end;flex-wrap:wrap' }, h('div', { class: 'grow' }, notiz), wv.el, speichern, weiter),
+    h('div', { class: 'row', style: 'margin-top:10px;align-items:flex-end;flex-wrap:wrap' }, h('div', { class: 'grow' }, notiz), grund, wv.el, speichern, weiter),
     wiedervorlage ? h('p', { class: 'small muted' }, 'Aktuelle Wiedervorlage: ' + datum(wiedervorlage)) : '');
 }
 

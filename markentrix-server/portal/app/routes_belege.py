@@ -6,7 +6,7 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import belege, mailer, rechtstexte, zahlungsabgleich
+from . import angebotsfluss, belege, mailer, rechtstexte, zahlungsabgleich
 from .db import tx
 from .security import audit, require_admin, require_inhaber
 
@@ -363,8 +363,20 @@ def angebot_status(bid: str, data: AngebotStatus, user: dict = Depends(require_a
         b = _laden(cur, bid)
         if b["art"] != "angebot" or b["status"] not in ("gestellt", "versendet"):
             raise HTTPException(400, "Nur ausgestellte Angebote können angenommen oder abgelehnt werden.")
-        cur.execute("UPDATE belege SET status=%s, geaendert_am=now() WHERE id=%s", (data.status, bid))
+        info = None
+        if data.status == "angenommen" and b.get("lead_id"):
+            # Angebot an einen Lead: gleicher Ablauf wie bei der Online-Annahme (Verlauf, Aufgabe, Hinweise, Bestätigung)
+            cur.execute("SELECT firma AS lead_firma FROM leads WHERE id=%s", (b["lead_id"],))
+            b = {**b, **(cur.fetchone() or {})}
+            info = angebotsfluss.angenommen(cur, b, "telefonisch/schriftlich bestätigt", "team", user["email"], user=user)
+        else:
+            cur.execute("UPDATE belege SET status=%s, geaendert_am=now() WHERE id=%s", (data.status, bid))
+            if data.status == "abgelehnt" and b.get("lead_id"):
+                cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (b["lead_id"], f"Angebot {b['nummer']} abgelehnt (vom Team erfasst)", user["email"]))
+                cur.execute("UPDATE leads SET status=CASE WHEN status='angebot' THEN 'antwort' ELSE status END, wiedervorlage_am=current_date WHERE id=%s AND kunden_id IS NULL", (b["lead_id"],))
         audit(cur, user, "angebot_" + data.status, b["kunden_id"], {"nummer": b["nummer"]})
+    if info:
+        angebotsfluss.melden(info)
     return {"ok": True}
 
 

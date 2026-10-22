@@ -45,7 +45,7 @@ from .routes_system import router as system_router
 from .routes_loginlink import router as loginlink_router
 from .routes_zahlung import router as zahlung_router
 from .routes_fruehwarnung import router as fruehwarnung_router
-from . import preisaenderung, routes_betriebplus, routes_plattformstatus, routes_status, routes_rangliste, routes_referenzseite, routes_umfrage, routes_vertragportal, routes_vertraege
+from . import preisaenderung, routes_betriebplus, routes_plattformstatus, routes_status, routes_leadsteuerung, routes_leadtermin, routes_rangliste, routes_referenzseite, routes_umfrage, routes_vertragportal, routes_vertraege
 from .routes_push import router as push_router
 from .routes_dashboard import router as dashboard_router
 from .routes_telefon import router as telefon_router
@@ -187,6 +187,8 @@ app.include_router(routes_rangliste.vertrieb)
 app.include_router(routes_rangliste.admin)
 app.include_router(routes_referenzseite.admin)
 app.include_router(routes_umfrage.admin)
+app.include_router(routes_leadsteuerung.router)
+app.include_router(routes_leadtermin.router)
 app.include_router(routes_vertragportal.vertrieb)
 app.include_router(preisaenderung.admin)
 app.include_router(preisaenderung.public)

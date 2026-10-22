@@ -26,7 +26,7 @@ def neuer_kunde(name):
     c=httpx.Client(base_url=B,headers=H); r=c.post("/api/login",json={"email":f"{name.lower()}{sfx}@k.de","password":"InhaberPasswort1"}); assert r.status_code==200,r.text
     return k["id"],c,f"{name.lower()}{sfx}@k.de"
 def lead(firma,**kw):
-    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":"0511 5555","ort":"Celle",**kw}).json()["id"]; return i
+    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":f"0511 {time.time_ns()}","ort":"Celle",**kw}).json()["id"]; return i
 p=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb","email":f"vera{sfx}@v.de","status":"aktiv","einladen":True}).json()["id"]
 httpx.post(B+"/api/einladung",headers=H,json={"token":token(f"vera{sfx}@v.de"),"password":"VeraPasswort123"})
 v=httpx.Client(base_url=B,headers=H); assert v.post("/api/login",json={"email":f"vera{sfx}@v.de","password":"VeraPasswort123"}).status_code==200
@@ -103,7 +103,7 @@ chk("Nur Link: keine Mail, Link vorhanden",r2.json()["gesendet"] is False and "/
 sql(f"update belege set faellig_am=current_date-1 where id='{b2}'")
 chk("Abgelaufen: Seite meldet es, Annahme gesperrt",anon.get("/api/angebot/"+t2).json()["abgelaufen"] is True and anon.post(f"/api/angebot/{t2}/annehmen",json={"name":"Max Muster","bestaetigt":True}).status_code==400)
 sql(f"update belege set faellig_am=current_date+5 where id='{b2}'")
-t2b=a.post(f"/api/admin/leads/{L2}/angebote/{b2}/senden",json={"nur_link":True}).json()["link"].split("t=")[1]
+t2b=a.post(f"/api/admin/leads/{L2}/angebote/{b2}/senden",json={"nur_link":True,"neuer_link":True}).json()["link"].split("t=")[1]
 chk("Neuer Link macht den alten ungültig",anon.get("/api/angebot/"+t2).status_code==404 and anon.get("/api/angebot/"+t2b).status_code==200)
 chk("Ablehnen funktioniert",anon.post(f"/api/angebot/{t2b}/ablehnen",json={"grund":"zu teuer"}).status_code==200 and sql(f"select status from belege where id='{b2}'")=="abgelehnt")
 L3=lead("Gesperrt Angebot",email="g@x.de"); sql(f"update leads set status='consent_ausstehend' where id='{L3}'")

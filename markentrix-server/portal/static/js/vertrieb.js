@@ -277,18 +277,62 @@ function nachgespraechKarte(lid) {
   return h('div', { class: 'card' }, h('h2', {}, 'Nach dem Gespräch'), h('p', { class: 'small muted' }, 'Kurze Dankes-Mail mit Zusammenfassung als Entwurf.'), m, h('button', { class: 'btn sec', onclick: oeffnen }, 'Mail-Entwurf öffnen'));
 }
 
+const GRUNDLAGEN = { anfrage: 'Hat selbst angefragt', einwilligung: 'Hat zugestimmt', b2b_mutmasslich: 'Firmenkontakt (mutmaßliches Interesse)', empfehlung: 'Empfehlung', bestandskontakt: 'Bestandskontakt' };
+
+/** Kontaktdaten mit Anruf-/Mail-Links, Ansprache-Grundlage und Bearbeiten. */
+function datenKarte(lid, l, d, m) {
+  const zeigen = h('div'), felder = [['ansprechpartner', 'Ansprechpartner'], ['email', 'E-Mail'], ['telefon', 'Telefon'], ['website', 'Website'], ['branche', 'Branche'], ['plz', 'PLZ'], ['ort', 'Ort']];
+  const ansicht = () => {
+    zeigen.replaceChildren(h('div', { class: 'form2' }, felder.map(([k, t]) => h('div', {}, h('div', { class: 'small muted' }, t),
+      h('div', {}, !l[k] ? '–' : k === 'telefon' ? h('a', { href: 'tel:' + String(l[k]).replace(/[^+\d]/g, '') }, l[k]) : k === 'email' ? h('a', { href: 'mailto:' + l[k] }, l[k]) : l[k])))),
+    l.notiz && h('p', { class: 'muted' }, l.notiz),
+    h('p', { class: 'small' }, 'Grundlage der Ansprache: ', h('b', {}, GRUNDLAGEN[l.ansprache_grundlage] || 'nicht festgehalten'), !l.ansprache_grundlage && ' – bitte ergänzen'),
+    l.website_check && h('p', { class: 'small muted' }, 'Website-Check liegt vor, im Gespräch nutzbar.'),
+    h('button', { class: 'btn sec small', onclick: bearbeiten }, 'Daten ergänzen'));
+  };
+  const bearbeiten = () => {
+    const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); try { const o = formular(e.target); Object.keys(o).forEach(k => { if (o[k] === '') o[k] = null; }); Object.assign(l, await api('/api/vertrieb/leads/' + lid, { method: 'PATCH', body: o }).then(r => r.lead || o)); ansicht(); } catch (x) { melde(m, x.message); } } },
+      felder.map(([k, t]) => h('div', {}, h('label', {}, t), h('input', { name: k, value: l[k] || '' }))),
+      h('div', {}, h('label', {}, 'Grundlage der Ansprache'), h('select', { name: 'ansprache_grundlage' }, h('option', { value: '' }, 'bitte wählen'), Object.entries(GRUNDLAGEN).map(([c, t]) => h('option', { value: c, selected: c === l.ansprache_grundlage }, t)))),
+      h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')));
+    zeigen.replaceChildren(f);
+  };
+  ansicht();
+  return h('div', { class: 'card' }, zeigen);
+}
+
+/** Erstgespräch direkt buchen: freie Zeiten, Zustimmung des Kunden, Buchungslink zum Kopieren. */
+function terminKarte(lid, l) {
+  const m = h('div'), box = h('div');
+  const laden = async () => {
+    try {
+      const [s, b] = await Promise.all([api('/api/vertrieb/leads/' + lid + '/slots'), api('/api/vertrieb/buchungslink')]);
+      const zust = h('input', { type: 'checkbox', id: 'tz' });
+      box.replaceChildren(h('p', { class: 'small muted' }, 'Nur buchen, wenn der Kunde am Telefon zugestimmt hat.'),
+        h('label', { class: 'row' }, zust, ' Kunde hat dem Termin zugestimmt'),
+        h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, (s.slots || []).slice(0, 12).map(x => h('button', { class: 'btn sec small', onclick: async () => {
+          if (!zust.checked) { melde(m, 'Bitte erst die Zustimmung bestätigen.'); return; }
+          try { await api('/api/vertrieb/leads/' + lid + '/termin', { method: 'POST', body: { start: x.start, zugestimmt: true } }); location.reload(); } catch (e) { melde(m, e.message); }
+        } }, zeit(x.start)))),
+        (s.slots || []).length ? null : h('p', { class: 'muted' }, 'Aktuell keine freien Zeiten.'),
+        b.url && h('p', {}, h('button', { class: 'btn sec small', onclick: async () => { try { await navigator.clipboard.writeText(b.url); melde(m, 'Link kopiert.', 'ok'); } catch { melde(m, b.url); } } }, 'Buchungslink kopieren')));
+    } catch (x) { melde(m, x.message); }
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Erstgespräch buchen'), m, box, h('button', { class: 'btn sec', onclick: laden }, 'Freie Zeiten zeigen'));
+}
+
 async function leadDetail(lid) {
   const d = await api('/api/vertrieb/leads/' + lid), l = d.lead, m = h('div');
   const gesperrt = ['gewonnen', 'gesperrt', 'consent_ausstehend'].includes(l.status);
-  const st = h('select', { style: 'width:auto', disabled: gesperrt, onchange: async (e) => { try { await api('/api/vertrieb/leads/' + lid + '/status', { method: 'POST', body: { status: e.target.value } }); location.reload(); } catch (x) { melde(m, x.message); } } },
+  const st = h('select', { style: 'width:auto', disabled: gesperrt, onchange: async (e) => { try { const body = { status: e.target.value }; if (body.status === 'verloren') { const t = Object.entries(d.verlustgruende || {}); const w = window.prompt('Grund (' + t.map(([c, x], i) => (i + 1) + ' = ' + x).join(', ') + ')', '1'); const g = t[Number(w) - 1]; if (!g) { e.target.value = l.status; return; } body.verlust_grund = g[0]; } await api('/api/vertrieb/leads/' + lid + '/status', { method: 'POST', body }); location.reload(); } catch (x) { melde(m, x.message); } } },
     (gesperrt ? [l.status] : ['neu', 'kontaktiert', 'antwort', 'termin', 'angebot', 'verloren']).map(s => h('option', { value: s, selected: s === l.status }, s.replace(/_/g, ' '))));
   const akt = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/leads/' + lid + '/aktivitaet', { method: 'POST', body: formular(e.target) }); location.reload(); } catch (x) { melde(m, x.message); } } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, h('select', { name: 'art' }, ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'].map(a => h('option', { value: a }, a.replace(/_/g, ' '))))),
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
-    h('div', { class: 'card' }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
-    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid) }),
-    branchenKarte(lid), angebotKarte(lid, l), nachgespraechKarte(lid),
+    datenKarte(lid, l, d, m), h('div', { class: 'card', hidden: true }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
+    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende }),
+    terminKarte(lid, l), branchenKarte(lid), angebotKarte(lid, l), nachgespraechKarte(lid),
     skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
 }

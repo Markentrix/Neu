@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, mailer, push
+from . import config, einstellungen, leadeingang, mailer, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin
@@ -63,7 +63,7 @@ class KontaktIn(BaseModel):
 
 
 @router.post("/public/kontakt-lead")
-async def kontakt_lead(data: KontaktIn, request: Request):
+async def kontakt_lead(data: KontaktIn, request: Request, bg: BackgroundTasks):
     """Anfrage über das Kontaktformular der Website: legt einen Lead (heiß) an oder ergänzt den vorhandenen."""
     _schluessel_pruefen(request)
     email = data.email.strip().lower()
@@ -92,9 +92,14 @@ async def kontakt_lead(data: KontaktIn, request: Request):
                         ((data.telefon or "").strip() or None, lid))
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'website')", (lid, inhalt[:3900]))
         an = admin_empfaenger(cur)
+        partner_ids = leadeingang.bearbeiten(cur, lid, neu, "Kontaktformular")
+        push_ids = push.admins(cur)
         cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
                       VALUES (NULL, %s, %s, current_date, 'auto', %s) ON CONFLICT (auto_schluessel) DO NOTHING""",
                     (f"Anfrage beantworten: {firma}", an, f"lead-kontakt-{lid}-{__import__('datetime').datetime.now().strftime('%Y%m%d%H%M')}"))
+    push.senden(push_ids + partner_ids, "Neue Anfrage über die Website" if neu else "Erneute Anfrage über die Website", f"{firma}: bitte zeitnah antworten.", "/admin#lead/" + str(lid), "check")
+    if an:
+        bg.add_task(mailer.senden, an, f"Neue Anfrage: {firma}", f"{(data.name or '').strip() or firma} ({email}) hat über das Kontaktformular geschrieben.\n\n{inhalt[:1500]}\n\n{config.BASE_URL}/admin#lead/{lid}" + mailer.SIGNATUR)
     return {"ok": True, "neu": neu}
 
 
@@ -129,7 +134,7 @@ async def website_check(data: CheckIn, request: Request, bg: BackgroundTasks):
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'website')",
                     (lid, f"Website-Check für {website or 'ohne Website'}: {data.score if data.score is not None else '-'} von 100"))
         an = admin_empfaenger(cur)
-        push_ids = push.admins(cur)
+        push_ids = push.admins(cur) + leadeingang.bearbeiten(cur, lid, neu, "Website-Check")
         cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
                       VALUES (NULL, %s, %s, current_date + 1, 'auto', %s) ON CONFLICT (auto_schluessel) DO NOTHING""",
                     (f"Lead nachfassen: {firma}", an, f"lead-check-{lid}-{__import__('datetime').date.today().isoformat()}"))

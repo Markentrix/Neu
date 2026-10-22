@@ -108,7 +108,7 @@ def bericht_entwurf(api_key: str, modell: str, firma: str, branche: str | None, 
 
 SKRIPT_PROMPT = ("Du bist Gesprächs-Assistent für Vertriebsmitarbeiter der Markentrix (KI-Automatisierungsagentur aus Celle: Websites, automatische Anfragenbearbeitung, "
                  "Terminbuchung, Telefon-Assistent, Monatsberichte, alles DSGVO-konform in Deutschland gehostet). Erstelle einen kurzen Leitfaden für ein erstes Telefonat mit einem "
-                 "kleinen lokalen Betrieb, in der Sie-Form. Nutze nur die gelieferten Daten zum Betrieb, erfinde nichts (keine Umsätze, keine Aussagen über das Unternehmen, die nicht in den Daten stehen). "
+                 "kleinen lokalen Betrieb, in der Sie-Form. Nutze nur die gelieferten Daten zum Betrieb (auch „verlauf“ mit früheren Kontakten und „website_check“ als möglichen Gesprächseinstieg), erfinde nichts (keine Umsätze, keine Aussagen über das Unternehmen, die nicht in den Daten stehen). "
                  "Keine Preise, keine Garantien, keine Versprechen. Der Ton ist freundlich, ehrlich und nicht aufdringlich; wer kein Interesse hat, wird respektiert. "
                  "Antworte nur als JSON: {\"einstieg\": \"2 bis 3 Sätze zur Begrüßung und Grund des Anrufs\", \"fragen\": [\"3 offene Fragen\"], "
                  "\"nutzen\": \"2 bis 3 Sätze, was Markentrix für diesen Betrieb konkret tun könnte\", \"einwaende\": [{\"einwand\": \"...\", \"antwort\": \"...\"}] (genau 3), "
@@ -116,7 +116,7 @@ SKRIPT_PROMPT = ("Du bist Gesprächs-Assistent für Vertriebsmitarbeiter der Mar
 
 
 def skript_entwurf(api_key: str, modell: str, lead: dict) -> dict:
-    felder = {k: lead.get(k) for k in ("firma", "branche", "gruppe", "ort", "website", "notiz") if lead.get(k)}
+    felder = {k: lead.get(k) for k in ("firma", "branche", "gruppe", "ort", "website", "notiz", "verlauf", "website_check") if lead.get(k)}
     nachricht = "<daten>\n" + json.dumps(felder, ensure_ascii=False)[:2500] + "\n</daten>"
     text, _e, _a = fragen(api_key, modell, SKRIPT_PROMPT, [{"role": "user", "content": nachricht}], 1100)
     a, b = text.find("{"), text.rfind("}")

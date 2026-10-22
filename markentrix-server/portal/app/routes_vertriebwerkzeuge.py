@@ -24,11 +24,11 @@ def zahlen(user: dict = Depends(require_vertrieb)):
         cur.execute("""SELECT
               count(*) FILTER (WHERE a.art='anruf' AND a.zeit >= date_trunc('week', now()))                                        AS anrufe_woche,
               count(*) FILTER (WHERE a.art='anruf' AND a.zeit >= date_trunc('week', now()) - interval '7 days' AND a.zeit < date_trunc('week', now())) AS anrufe_vorwoche,
-              count(*) FILTER (WHERE a.art='anruf' AND a.inhalt LIKE 'Angerufen: erreicht%%' AND a.zeit >= date_trunc('week', now())) AS erreicht_woche,
-              count(*) FILTER (WHERE a.art='termin' AND a.zeit >= date_trunc('week', now()))                                       AS termine_woche,
+              count(*) FILTER (WHERE a.art='anruf' AND a.ergebnis='anruf_erreicht' AND a.zeit >= date_trunc('week', now())) AS erreicht_woche,
+              count(*) FILTER (WHERE a.art='termin' AND coalesce(a.von,'')<>'website' AND a.zeit >= date_trunc('week', now()))                                       AS termine_woche,
               count(*) FILTER (WHERE a.art='anruf' AND a.zeit >= date_trunc('month', now()))                                       AS anrufe_monat,
-              count(*) FILTER (WHERE a.art='anruf' AND a.inhalt LIKE 'Angerufen: erreicht%%' AND a.zeit >= date_trunc('month', now())) AS erreicht_monat,
-              count(*) FILTER (WHERE a.art='termin' AND a.zeit >= date_trunc('month', now()))                                      AS termine_monat,
+              count(*) FILTER (WHERE a.art='anruf' AND a.ergebnis='anruf_erreicht' AND a.zeit >= date_trunc('month', now())) AS erreicht_monat,
+              count(*) FILTER (WHERE a.art='termin' AND coalesce(a.von,'')<>'website' AND a.zeit >= date_trunc('month', now()))                                      AS termine_monat,
               count(*) FILTER (WHERE a.art='anruf' AND a.zeit::date = current_date)                                                AS anrufe_heute
               FROM lead_aktivitaeten a JOIN leads l ON l.id=a.lead_id WHERE l.vertriebspartner_id=%s""", (pid,))
         z = cur.fetchone()
@@ -36,7 +36,8 @@ def zahlen(user: dict = Depends(require_vertrieb)):
                               count(*) FILTER (WHERE erstellt_am >= date_trunc('month', now())) AS abschluesse_monat
                        FROM kunden WHERE vertriebspartner_id=%s""", (pid,))
         z.update(cur.fetchone())
-        cur.execute("SELECT count(*) AS n FROM leads WHERE vertriebspartner_id=%s AND status='angebot'", (pid,))
+        cur.execute("""SELECT count(DISTINCT b.lead_id) AS n FROM belege b JOIN leads l ON l.id=b.lead_id
+                       WHERE l.vertriebspartner_id=%s AND b.art='angebot' AND b.status IN ('gestellt','versendet') AND (b.faellig_am IS NULL OR b.faellig_am >= current_date)""", (pid,))
         offene_angebote = cur.fetchone()["n"]
         cur.execute("""SELECT coalesce(sum(betrag_cent) FILTER (WHERE status IN ('berechnet','freigegeben')),0) AS offen_cent,
                               coalesce(sum(betrag_cent) FILTER (WHERE monat = date_trunc('month', current_date) AND status<>'storniert'),0) AS monat_cent
@@ -136,9 +137,13 @@ class AnfrageIn(BaseModel):
 
 @router.get("/vertrieb/pakete")
 def pakete(user: dict = Depends(require_vertrieb)):
-    """Nur Namen, keine Preise: Preise nennt Markentrix im Gespräch."""
+    """Standard: nur Namen, Preise nennt Markentrix im Gespräch. Wenn im Admin eingeschaltet, sieht der Vertriebler auch die Preise."""
+    from . import zuweisung
     with tx("system") as cur:
-        cur.execute("SELECT code, name FROM produkte WHERE aktiv ORDER BY kategorie, name")
+        if zuweisung.einstellung(cur)["preise_sichtbar"]:
+            cur.execute("SELECT code, name, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, nur_auf_anfrage FROM v_preise_aktuell ORDER BY kategorie, name")
+        else:
+            cur.execute("SELECT code, name FROM produkte WHERE aktiv ORDER BY kategorie, name")
         return cur.fetchall()
 
 

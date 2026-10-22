@@ -11,9 +11,8 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import belege, config, mailer, push, rechtstexte
+from . import angebotsfluss, belege, config, einstellungen, mailer, push, rechtstexte
 from .db import tx
-from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin
 
 router = APIRouter()
@@ -152,6 +151,7 @@ class SendenIn(BaseModel):
     gueltig_tage: int = Field(default=30, ge=1, le=365)
     an: str | None = Field(default=None, max_length=200)
     erinnerung: bool = False        # kurze Nachfrage-Mail statt Erstversand
+    neuer_link: bool = False        # nur wenn ausdrücklich gewünscht: alter Link wird ungültig
     nur_link: bool = False          # nicht mailen (z. B. Mail nicht eingerichtet): Link zum Weitergeben per WhatsApp o. Ä.
 
 
@@ -182,7 +182,13 @@ def senden(lid: str, bid: str, data: SendenIn, user: dict = Depends(require_admi
                                   empfaenger=%s::jsonb, geaendert_am=now() WHERE id=%s""",
                         (nummer, date.today(), date.today() + timedelta(days=data.gueltig_tage), s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"],
                          json.dumps(empfaenger_lead(l)), bid))
-        cur.execute("UPDATE belege SET annahme_hash=%s, geaendert_am=now() WHERE id=%s", (_hash(token), bid))
+        nonlocal_token = None
+        if b.get("annahme_token_enc") and not data.neuer_link:     # derselbe Link bleibt gültig (auch der aus der ersten Mail)
+            alt = einstellungen.entschluesseln(b["annahme_token_enc"])
+            if alt and b["annahme_hash"] == _hash(alt):
+                nonlocal_token = alt
+        token = nonlocal_token or token
+        cur.execute("UPDATE belege SET annahme_hash=%s, annahme_token_enc=%s, geaendert_am=now() WHERE id=%s", (_hash(token), einstellungen.verschluesseln(token), bid))
         daten, name = belege.beleg_pdf(cur, bid, f)
         cur.execute("SELECT faellig_am FROM belege WHERE id=%s", (bid,))
         gueltig = cur.fetchone()["faellig_am"]
@@ -195,6 +201,8 @@ def senden(lid: str, bid: str, data: SendenIn, user: dict = Depends(require_admi
             cur.execute("UPDATE belege SET versendet_am=now(), status='versendet' WHERE id=%s", (bid,))
         if l["status"] in ("neu", "kontaktiert", "antwort", "termin"):
             cur.execute("UPDATE leads SET status='angebot' WHERE id=%s", (lid,))
+        if gesendet or data.nur_link:   # Nachfass-Termin setzen: nach Erstversand 4 Tage, nach Erinnerung 3 Tage
+            cur.execute("UPDATE leads SET wiedervorlage_am=current_date + %s, letzter_kontakt_am=now() WHERE id=%s", (3 if data.erinnerung else 4, lid))
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)",
                     (lid, "mail_gesendet" if gesendet else "notiz", f"Angebot {nummer} " + (("Erinnerung per E-Mail gesendet" if data.erinnerung else "per E-Mail gesendet") if gesendet else "erstellt (Link zum Weitergeben)"), user["email"]))
         cur.execute("UPDATE angebotsanfragen SET status='angebot_raus', geaendert_am=now() WHERE lead_id=%s AND status IN ('angefragt','in_pruefung')", (lid,))
@@ -277,22 +285,17 @@ def annehmen(token: str, data: AnnahmeIn, request: Request):
         if b["faellig_am"] and b["faellig_am"] < date.today():
             raise HTTPException(400, "Dieses Angebot ist abgelaufen. Bitte melden Sie sich bei uns, wir senden Ihnen gern ein neues.")
         name = data.name.strip()
-        cur.execute("UPDATE belege SET status='angenommen', angenommen_am=now(), angenommen_von=%s, geaendert_am=now() WHERE id=%s", (name, b["id"]))
-        cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,'Angebotsseite')", (b["lead_id"], f"Angebot {b['nummer']} online angenommen von {name}"))
-        cur.execute("UPDATE angebotsanfragen SET status='angenommen', geaendert_am=now() WHERE lead_id=%s AND status IN ('angefragt','in_pruefung','angebot_raus')", (b["lead_id"],))
-        cur.execute("INSERT INTO aufgaben (titel, beschreibung, faellig_am) VALUES (%s,%s,current_date)",
-                    (f"Angebot angenommen: Kunde anlegen ({b['lead_firma']})"[:200], f"{name} hat Angebot {b['nummer']} online angenommen. Im Lead „In Kunden umwandeln“ wählen, dann Onboarding starten."))
-        audit(cur, None, "lead_angebot_angenommen", None, {"lead": str(b["lead_id"]), "nummer": b["nummer"], "name": name, "ip": client_ip(request)})
-        ids = _empfaenger(cur, b)
-        an = admin_empfaenger(cur)
-    push.senden(ids, "Angebot angenommen 🎉", f"{b['lead_firma']} hat {b['nummer']} angenommen.", "/admin#lead/" + str(b["lead_id"]), "angebotsreaktion")
-    if an:
-        mailer.senden(an, f"Angebot {b['nummer']} wurde angenommen", f"{name} ({b['lead_firma']}) hat das Angebot {b['nummer']} online angenommen.\n\nNächster Schritt: Im Lead „In Kunden umwandeln“ wählen.\n{config.BASE_URL}/admin#lead/{b['lead_id']}" + mailer.SIGNATUR)
+        info = angebotsfluss.angenommen(cur, b, name, "online", "Angebotsseite", client_ip(request))
+    angebotsfluss.melden(info)
     return {"ok": True}
+
+
+GRUENDE = {"zu_teuer": "Zu teuer", "spaeter": "Später / gerade kein Thema", "anderer_anbieter": "Anderer Anbieter", "nicht_passend": "Passt nicht zu unserem Bedarf", "sonstiges": "Sonstiges"}
 
 
 class AblehnungIn(BaseModel):
     grund: str = Field(default="", max_length=500)
+    grund_code: str = Field(default="", max_length=30)
 
 
 @oeffentlich.post("/{token}/ablehnen")
@@ -304,7 +307,9 @@ def ablehnen(token: str, data: AblehnungIn, request: Request):
             raise HTTPException(400, "Dieses Angebot kann nicht mehr abgelehnt werden.")
         cur.execute("UPDATE belege SET status='abgelehnt', abgelehnt_am=now(), geaendert_am=now() WHERE id=%s", (b["id"],))
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,'Angebotsseite')",
-                    (b["lead_id"], f"Angebot {b['nummer']} online abgelehnt" + (f": {data.grund.strip()}" if data.grund.strip() else "")))
+                    (b["lead_id"], f"Angebot {b['nummer']} online abgelehnt" + (f" (Grund: {GRUENDE[data.grund_code]})" if data.grund_code in GRUENDE else "") + (f": {data.grund.strip()}" if data.grund.strip() else "")))
+        # Der Lead bleibt bearbeitbar: nicht mehr „Angebot“, heute auf die Wiedervorlage
+        cur.execute("UPDATE leads SET status=CASE WHEN status='angebot' THEN 'antwort' ELSE status END, wiedervorlage_am=current_date WHERE id=%s AND kunden_id IS NULL", (b["lead_id"],))
         cur.execute("UPDATE angebotsanfragen SET status='abgelehnt', geaendert_am=now() WHERE lead_id=%s AND status IN ('angefragt','in_pruefung','angebot_raus')", (b["lead_id"],))
         audit(cur, None, "lead_angebot_abgelehnt", None, {"lead": str(b["lead_id"]), "nummer": b["nummer"], "ip": client_ip(request)})
         ids = _empfaenger(cur, b)

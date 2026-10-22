@@ -26,7 +26,7 @@ k=a.post("/api/admin/kunden",json={"firma":"Werkzeug Kunde GmbH","ansprechpartne
 httpx.post(B+"/api/einladung",headers=H,json={"token":token("kunde@werkzeug.de"),"password":"InhaberPasswort1"})
 p=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb","email":"vera@werkzeug.de","status":"aktiv","einladen":True}).json()["id"]
 httpx.post(B+"/api/einladung",headers=H,json={"token":token("vera@werkzeug.de"),"password":"VeraPasswort123"})
-for i in range(5): a.post("/api/admin/leads",json={"firma":f"WLead {i} GmbH","telefon":"0511 555","ort":"Celle","vertriebspartner_id":p})
+for i in range(5): a.post("/api/admin/leads",json={"firma":f"WLead {i} GmbH","telefon":f"0511 {time.time_ns()}","ort":"Celle","vertriebspartner_id":p})
 import subprocess
 def sql(q): return subprocess.run(["su","postgres","-c",f"psql -q -t -A -h /var/tmp/pgtest -p 54329 markentrix -c \"{q}\""],capture_output=True,text=True).stdout.strip()
 kid=k["id"]

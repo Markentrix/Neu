@@ -43,7 +43,7 @@ chk("Status geht nie zurück",sql(f"select status from leads where id='{lid}'")=
 chk("Unbekanntes Ergebnis abgelehnt",a.post(f"/api/admin/leads/{lid}/kontakt",json={"ergebnis":"quatsch"}).status_code in (400,422))
 chk("Verlauf hat Einträge",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{lid}'"))>=4)
 a.post(f"/api/admin/leads/{lid}/kontakt",json={"ergebnis":"kein_interesse"}); chk("Kein Interesse = verloren",sql(f"select status from leads where id='{lid}'")=="verloren")
-lid_f=a.post("/api/admin/leads",json={"firma":"Falsche Nummer "+str(int(time.time())),"telefon":"0511 1","ort":"Celle"}).json()["id"]; a.post(f"/api/admin/leads/{lid_f}/kontakt",json={"ergebnis":"falsche_nummer"}); chk("Nummer falsch = abgelegt (tot), keine Wiedervorlage",sql(f"select status||coalesce(wiedervorlage_am::text,'-') from leads where id='{lid_f}'")=="tot-")
+lid_f=a.post("/api/admin/leads",json={"firma":"Falsche Nummer "+str(int(time.time())),"telefon":f"0511 {time.time_ns()}","ort":"Celle"}).json()["id"]; a.post(f"/api/admin/leads/{lid_f}/kontakt",json={"ergebnis":"falsche_nummer"}); chk("Nummer falsch = abgelegt (tot), keine Wiedervorlage",sql(f"select status||coalesce(wiedervorlage_am::text,'-') from leads where id='{lid_f}'")=="tot-")
 chk("Wiedervorlage gelöscht",sql(f"select wiedervorlage_am is null from leads where id='{lid}'")=="t")
 # Vertriebler
 p=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb","email":f"vera{sfx}@v.de","status":"aktiv"}).json(); pid=p["id"]
@@ -103,9 +103,9 @@ jobs.lead_folgemails(cfg); chk("Nicht doppelt",len(mail_an(f"fm1{sfx}@k.de"))==1
 sql(f"update leads set folge_gesendet_am=now()-interval '6 days' where id='{fa}'"); jobs.lead_folgemails(cfg)
 chk("Stufe 2 gesendet",len(mail_an(f"fm1{sfx}@k.de"))==2); jobs.lead_folgemails(cfg); chk("Nicht dritte Mail",len(mail_an(f"fm1{sfx}@k.de"))==2)
 tok=re.search(r"abmelden\?t=([\w-]+)",text(m1[0])).group(1)
-r=httpx.get(B+"/api/public/abmelden?t="+tok); chk("Abmelden",r.status_code==200 and "keine weiteren" in r.text,r.text[-200:])
+chk("Abmelden braucht Bestätigung (GET ändert nichts)","Ja, abmelden" in httpx.get(B+"/api/public/abmelden?t="+tok).text); r=httpx.post(B+"/api/public/abmelden",headers=H,data={"t":tok}); chk("Abmelden",r.status_code==200 and "keine weiteren" in r.text,r.text[-200:])
 chk("Abgemeldet markiert",sql(f"select abgemeldet from leads where id='{fa}'")=="t")
-chk("Falscher Token",("ungültig" in httpx.get(B+"/api/public/abmelden?t=gibtesnicht1234").text))
+chk("Falscher Token",("ungültig" in httpx.post(B+"/api/public/abmelden",headers=H,data={"t":"gibtesnicht1234"}).text))
 sql(f"update leads set folge_stufe=0, erstellt_am=now()-interval '5 days' where id='{fa}'"); n0=len(mail_an(f"fm1{sfx}@k.de")); jobs.lead_folgemails(cfg)
 chk("Abgemeldet: nie wieder",len(mail_an(f"fm1{sfx}@k.de"))==n0)
 # Kunden-Feedback
@@ -137,9 +137,9 @@ chk("Einwilligung im Verlauf",int(sql(f"select count(*) from lead_aktivitaeten a
 g=a.get("/api/admin/gespraeche").json(); chk("Admin sieht Gespräch",any(x["email"]==f"bb{sfx}@k.de" for x in g),g)
 chk("Kunde sieht Gespräche nicht",c.get("/api/admin/gespraeche").status_code==403)
 ab=re.search(r"absagen\?t=([\w-]+)",text(mm[0])).group(1)
-r=httpx.get(B+"/api/public/buchung/absagen?t="+ab); chk("Absagen",r.status_code==200 and "abgesagt" in r.text,r.text[-200:])
+chk("Absagen braucht Bestätigung","Ja, Termin absagen" in httpx.get(B+"/api/public/buchung/absagen?t="+ab).text); r=httpx.post(B+"/api/public/buchung/absagen",headers=H,data={"t":ab}); chk("Absagen",r.status_code==200 and "abgesagt" in r.text,r.text[-200:])
 sl3=httpx.get(B+"/api/public/buchung/slots").json(); chk("Slot wieder frei",slot["start"] in [s["start"] for d in sl3["tage"] for s in d["slots"]])
-chk("Zweites Absagen ohne Wirkung","nicht mehr aktiv" in httpx.get(B+"/api/public/buchung/absagen?t="+ab).text)
+chk("Zweites Absagen ohne Wirkung","nicht mehr aktiv" in httpx.post(B+"/api/public/buchung/absagen",headers=H,data={"t":ab}).text)
 # bestehender Lead wird wiederverwendet
 r=httpx.post(B+"/api/public/buchung",headers=H,json={"start":slot["start"],"name":"Bea Buchung","email":f"bb{sfx}@k.de","einwilligung":True}); chk("Erneut buchen",r.status_code==200,r.text)
 chk("Nur ein Lead je E-Mail",sql(f"select count(*) from leads where email='bb{sfx}@k.de'")=="1")

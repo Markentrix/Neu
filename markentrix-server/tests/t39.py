@@ -25,7 +25,7 @@ def neuer_kunde(name):
     c=httpx.Client(base_url=B,headers=H); r=c.post("/api/login",json={"email":f"{name.lower()}{sfx}@k.de","password":"InhaberPasswort1"}); assert r.status_code==200,r.text
     return k["id"],c,f"{name.lower()}{sfx}@k.de"
 def lead(firma,**kw):
-    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":"0511 5555","ort":"Celle",**kw}).json()["id"]; return i
+    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":f"0511 {time.time_ns()}","ort":"Celle",**kw}).json()["id"]; return i
 a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","steuernummer":"12/345/67890","iban":"DE89370400440532013000","bic":"COBADEFFXXX","bank":"Testbank","zahlungsziel_tage":14,"mwst_satz":19,"kleinunternehmer":False})
 kid,c,mail=neuer_kunde("Plus")
 pos=[{"text":"BUSINESS – monatlich","menge":1,"einheit":"Monat","preis_cent":19900},{"text":"Einrichtung BUSINESS","menge":1,"einheit":"","preis_cent":50000}]
@@ -66,8 +66,9 @@ pt=subprocess.run(["pdftotext","-","-"],input=httpx.get(B+f"/api/angebot/{tok1}/
 chk("PDF: Bedingungen stehen drin",("Bedingungen" in pt and "Es gelten unsere AGB" in pt) if pt else True,pt[:300])
 s2=a.post(f"/api/admin/leads/{L1}/angebote/{bid}/senden",json={"erinnerung":True}); chk("Erinnerung senden",s2.status_code==200 and s2.json()["gesendet"],s2.text)
 m=mail_an(f"alt{sfx}@x.de","Erinnerung"); chk("Erinnerungs-Mail mit neuem Link und Anhang",len(m)>=1 and "/angebot?t=" in text(m[-1]) and any(p.get_filename() for p in m[-1].walk()),[x["Subject"] for x in mails()][-3:])
-chk("Erinnerung: alter Link ist ungültig",httpx.get(B+f"/api/angebot/{tok1}",headers=H).status_code==404)
-chk("Erinnerung im Verlauf",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{L1}' and inhalt like '%Erinnerung%'"))==1)
+chk("Erinnerung: derselbe Link bleibt gültig",httpx.get(B+f"/api/angebot/{tok1}",headers=H).status_code==200 and tok1 in text(m[-1]))
+s3=a.post(f"/api/admin/leads/{L1}/angebote/{bid}/senden",json={"erinnerung":True,"neuer_link":True}); chk("Ausdrücklich neuer Link: alter ungültig",s3.status_code==200 and httpx.get(B+f"/api/angebot/{tok1}",headers=H).status_code==404 and httpx.get(B+"/api/angebot/"+s3.json()["link"].split("t=")[1],headers=H).status_code==200,s3.text)
+chk("Erinnerung im Verlauf",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{L1}' and inhalt like '%Erinnerung%'"))==2)
 # --- Auswertung
 au=a.get("/api/admin/belege-auswertung").json(); chk("Auswertung: Zahlen",au["gesendet"]>=1 and "quote" in au and isinstance(au["pakete"],list),au)
 chk("Auswertung: Paket erkannt",any(p["name"]=="BUSINESS" and p["angebote"]>=1 for p in au["pakete"]),au["pakete"])

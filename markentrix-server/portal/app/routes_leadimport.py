@@ -7,7 +7,9 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from . import push
+from collections import Counter
+
+from . import push, sperre, zuweisung
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -150,6 +152,8 @@ class ImportIn(BaseModel):
     temperatur: str | None = None          # Standard-Einstufung, wenn die Datei keine Prio-Spalte hat (Prio A/B/C = heiß/warm/kalt)
     vertriebspartner_id: str | None = None
     blaetter: list[str] | None = None      # welche Tabellenblätter importiert werden (leer = alle mit „Firma“-Spalte außer „ungeprüft“)
+    grundlage: str | None = None          # Grundlage der Ansprache (b2b_mutmasslich, einwilligung, empfehlung, bestandskontakt)
+    verteilen: bool = False                # gleichmäßig auf alle aktiven Vertriebler verteilen (wenn kein Vertriebler gewählt ist)
     nur_pruefen: bool = True
 
 
@@ -161,6 +165,8 @@ def _standard_blatt(name: str) -> bool:
 def importieren(data: ImportIn, user: dict = Depends(require_admin)):
     if data.quelle not in ("manuell", "lead_finder", "empfehlung", "akquise", "messe"):
         raise HTTPException(400, "Ungültige Quelle.")
+    if data.grundlage not in (None, "", "b2b_mutmasslich", "einwilligung", "empfehlung", "bestandskontakt"):
+        raise HTTPException(400, "Ungültige Grundlage der Ansprache.")
     if data.temperatur not in (None, "", "kalt", "warm", "heiss"):
         raise HTTPException(400, "Ungültige Einstufung.")
     try:
@@ -191,9 +197,11 @@ def importieren(data: ImportIn, user: dict = Depends(require_admin)):
             cur.execute("SELECT 1 FROM vertriebspartner WHERE id=%s", (data.vertriebspartner_id,))
             if not cur.fetchone():
                 raise HTTPException(400, "Vertriebler nicht gefunden.")
-        uebersicht, gesamt_neu = [], 0
+        cur.execute("SELECT art, wert FROM sperrliste")
+        gesperrt_set = {(r["art"], r["wert"]) for r in cur.fetchall()}
+        uebersicht, gesamt_neu, verteilt = [], 0, Counter()
         for name, zuordnung, kopf, daten in blaetter:
-            neu, doppelt, ungueltig = [], 0, []
+            neu, doppelt, ungueltig, gesperrt = [], 0, [], 0
             if name in gewaehlt:
                 m, f, t = mails, firmen, telefone
             else:  # nur zählen, nichts vormerken
@@ -211,6 +219,8 @@ def importieren(data: ImportIn, user: dict = Depends(require_admin)):
                         d[k] = d[k][:g]
                 if d.get("website"):
                     d["website"] = re.sub(r"^https?://", "", d["website"], flags=re.I).rstrip("/")[:253]
+                if any(k in gesperrt_set for k in sperre.schluessel(d.get("email"), d.get("telefon"), d.get("website"))):
+                    gesperrt += 1; continue
                 tel = re.sub(r"[^0-9]", "", d.get("telefon") or "")
                 fk = d["firma"].lower() + "|" + (d.get("plz") or "")
                 if (d.get("email") and d["email"] in m) or fk in f or (len(tel) >= 6 and tel in t):
@@ -222,21 +232,29 @@ def importieren(data: ImportIn, user: dict = Depends(require_admin)):
                     t.add(tel)
                 d["_liste"] = (data.liste.strip() + " · " if data.liste and data.liste.strip() else basis + " · ") + name
                 neu.append(d)
-            uebersicht.append({"name": name, "gewaehlt": name in gewaehlt, "zeilen": len(daten), "neu": len(neu), "doppelt": doppelt, "ungueltig": len(ungueltig),
+            uebersicht.append({"name": name, "gewaehlt": name in gewaehlt, "zeilen": len(daten), "neu": len(neu), "doppelt": doppelt, "gesperrt": gesperrt, "ungueltig": len(ungueltig),
                                "ungueltig_beispiele": ungueltig[:5], "vorschau": neu[:5], "erkannt": {k: str(kopf[i]).strip() for k, i in zuordnung.items()}})
             if name in gewaehlt:
                 gesamt_neu += len(neu)
                 if not data.nur_pruefen and neu:
-                    cur.executemany("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, branche, gruppe, plz, ort, notiz, quelle, temperatur, vertriebspartner_id, liste, loeschen_nach)
-                                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, current_date + interval '12 months')""",
+                    if data.vertriebspartner_id:
+                        pids = [data.vertriebspartner_id] * len(neu)
+                    elif data.verteilen:
+                        pids = zuweisung.verteilen(cur, len(neu)) or [None] * len(neu)
+                    else:
+                        pids = [None] * len(neu)
+                    verteilt.update(p for p in pids if p)
+                    cur.executemany("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, branche, gruppe, plz, ort, notiz, quelle, temperatur, vertriebspartner_id, liste, loeschen_nach, ansprache_grundlage)
+                                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, current_date + interval '12 months', %s)""",
                                     [(d["firma"], d.get("ansprechpartner"), d.get("email"), d.get("telefon"), d.get("website"), d.get("branche"), d.get("gruppe"), d.get("plz"), d.get("ort"),
-                                      d.get("notiz"), data.quelle, d["temperatur"], data.vertriebspartner_id, d["_liste"][:120]) for d in neu])
+                                      d.get("notiz"), data.quelle, d["temperatur"], pid, d["_liste"][:120], data.grundlage or None) for d, pid in zip(neu, pids)])
         if not data.nur_pruefen:
             audit(cur, user, "leads_import", None, {"datei": data.datei_name, "neu": gesamt_neu, "blaetter": sorted(gewaehlt)})
-    if not data.nur_pruefen and gesamt_neu and data.vertriebspartner_id:
-        with tx("system") as cur:
-            ids = push.partner(cur, data.vertriebspartner_id)
-        push.senden(ids, "Neue Leads", f"{gesamt_neu} neue Leads wurden Ihnen zugewiesen.", "/vertrieb#heute", "zugewiesen")
+    if not data.nur_pruefen and gesamt_neu and verteilt:
+        for pid, n in verteilt.items():
+            with tx("system") as cur:
+                ids = push.partner(cur, pid)
+            push.senden(ids, "Neue Leads", f"{n} neue Leads wurden Ihnen zugewiesen.", "/vertrieb#heute", "zugewiesen")
     for u in uebersicht:
         for d in u["vorschau"]:
             d.pop("_liste", None)

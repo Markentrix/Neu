@@ -1,3 +1,4 @@
+import json
 """Admin: Vertriebler, Leads, Preise und Konditionen, Datenschutz und Qualität."""
 import re
 from datetime import date
@@ -6,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors, sql
 from pydantic import BaseModel, Field
 
-from . import config, leadkontakt, push, zugang
+from . import config, leadkontakt, leadpruefung, onboarding, push, zugang
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -191,6 +192,8 @@ def provisionsuebersicht(user: dict = Depends(require_admin)):
 
 # ================================================================= Leads
 class LeadIn(BaseModel):
+    trotzdem: bool = False
+    ansprache_grundlage: str | None = None
     firma: str = Field(min_length=1, max_length=200)
     ansprechpartner: str | None = Field(default=None, max_length=200)
     email: str | None = Field(default=None, max_length=254)
@@ -219,6 +222,8 @@ class LeadPatch(BaseModel):
     branche: str | None = Field(default=None, max_length=120)
     plz: str | None = Field(default=None, max_length=10)
     ort: str | None = Field(default=None, max_length=120)
+    ansprache_grundlage: str | None = None
+    ansprache_hinweis: str | None = Field(default=None, max_length=300)
 
 
 KONTAKTFELDER = ("ansprechpartner", "email", "telefon", "website", "branche", "plz", "ort")
@@ -230,18 +235,21 @@ FILTER_WHERE = """(%(s)s='' OR l.status=%(s)s)
                          AND (%(t)s='' OR (%(t)s='keine' AND l.temperatur IS NULL) OR l.temperatur=%(t)s)
                          AND (%(v)s='' OR (%(v)s='keiner' AND l.vertriebspartner_id IS NULL) OR l.vertriebspartner_id::text=%(v)s)
                          AND (%(li)s='' OR l.liste=%(li)s)
-                         AND (%(g)s='' OR l.gruppe=%(g)s)"""
+                         AND (%(g)s='' OR l.gruppe=%(g)s)
+                         AND (%(fk)s='' OR (%(fk)s='ueberfaellig' AND l.wiedervorlage_am < current_date AND l.status IN ('neu','kontaktiert','antwort','termin','angebot'))
+                              OR (%(fk)s='ohne_kontakt' AND l.status IN ('kontaktiert','antwort','termin','angebot') AND coalesce(l.letzter_kontakt_am, l.erstellt_am) < now() - interval '7 days')
+                              OR (%(fk)s='heiss_unzugewiesen' AND l.vertriebspartner_id IS NULL AND l.temperatur='heiss' AND l.status IN ('neu','kontaktiert','antwort')))"""
 SEITE = 50
 
 
-def _filter(status="", q="", quelle="", temperatur="", vertriebler="", liste="", gruppe="") -> dict:
-    return {"s": status, "q": q, "l": f"%{q}%", "qu": quelle, "t": temperatur, "v": vertriebler, "li": liste, "g": gruppe}
+def _filter(status="", q="", quelle="", temperatur="", vertriebler="", liste="", gruppe="", fokus="") -> dict:
+    return {"s": status, "q": q, "l": f"%{q}%", "qu": quelle, "t": temperatur, "v": vertriebler, "li": liste, "g": gruppe, "fk": fokus if fokus in ("ueberfaellig", "ohne_kontakt", "heiss_unzugewiesen") else ""}
 
 
 @router.get("/leads")
-def leads_liste(status: str = "", q: str = "", quelle: str = "", temperatur: str = "", vertriebler: str = "", liste: str = "", gruppe: str = "", seite: int = 1, user: dict = Depends(require_admin)):
+def leads_liste(status: str = "", q: str = "", quelle: str = "", temperatur: str = "", vertriebler: str = "", liste: str = "", gruppe: str = "", fokus: str = "", seite: int = 1, user: dict = Depends(require_admin)):
     """Filter: Status, Suche, Quelle, Einstufung, Vertriebler (ID oder 'keiner'), Importliste, Branchengruppe. 50 Leads pro Seite."""
-    f = _filter(status, q, quelle, temperatur, vertriebler, liste, gruppe)
+    f = _filter(status, q, quelle, temperatur, vertriebler, liste, gruppe, fokus)
     seite = max(1, seite)
     with tx("admin") as cur:
         cur.execute(f"SELECT count(*) AS n FROM leads l WHERE {FILTER_WHERE}", f)
@@ -249,7 +257,7 @@ def leads_liste(status: str = "", q: str = "", quelle: str = "", temperatur: str
         cur.execute(f"""SELECT l.id, l.firma, l.ansprechpartner, l.email, l.telefon, l.ort, l.branche, l.quelle, l.status, l.temperatur, l.liste, l.gruppe, l.wiedervorlage_am, l.letzter_kontakt_am, l.score, l.erstellt_am, l.kunden_id, v.name AS vertriebler
                        FROM leads l LEFT JOIN vertriebspartner v ON v.id=l.vertriebspartner_id
                        WHERE {FILTER_WHERE}
-                       ORDER BY l.erstellt_am DESC, l.firma LIMIT {SEITE} OFFSET {(seite - 1) * SEITE}""", f)
+                       ORDER BY {"l.wiedervorlage_am NULLS LAST, coalesce(l.letzter_kontakt_am, l.erstellt_am), l.firma" if f["fk"] else "l.erstellt_am DESC, l.firma"} LIMIT {SEITE} OFFSET {(seite - 1) * SEITE}""", f)
         rows = cur.fetchall()
         cur.execute("SELECT status, count(*) AS n FROM leads GROUP BY status")
         zaehler = {r["status"]: r["n"] for r in cur.fetchall()}
@@ -277,7 +285,7 @@ def leads_bulk(data: BulkIn, user: dict = Depends(require_admin)):
         raise HTTPException(400, "Ungültige Einstufung.")
     if data.aktion == "status" and data.wert not in ("neu", "kontaktiert", "antwort", "termin", "angebot", "verloren", "tot"):
         raise HTTPException(400, "Ungültiger Status.")
-    f = _filter(**{k: str(v) for k, v in (data.filter or {}).items() if k in ("status", "q", "quelle", "temperatur", "vertriebler", "liste", "gruppe")})
+    f = _filter(**{k: str(v) for k, v in (data.filter or {}).items() if k in ("status", "q", "quelle", "temperatur", "vertriebler", "liste", "gruppe", "fokus")})
     push_ziel = None
     try:
         with tx("admin") as cur:
@@ -317,10 +325,14 @@ def leads_bulk(data: BulkIn, user: dict = Depends(require_admin)):
 @router.post("/leads")
 def lead_neu(data: LeadIn, user: dict = Depends(require_admin)):
     d = data.model_dump()
+    if d["ansprache_grundlage"] not in (None, "", "anfrage", "einwilligung", "b2b_mutmasslich", "empfehlung", "bestandskontakt"):
+        raise HTTPException(400, "Ungültige Grundlage der Ansprache.")
+    d["ansprache_grundlage"] = d["ansprache_grundlage"] or None
     try:
         with tx("admin") as cur:
-            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, branche, plz, ort, quelle, vertriebspartner_id, notiz)
-                           VALUES (%(firma)s,%(ansprechpartner)s,%(email)s,%(telefon)s,%(website)s,%(branche)s,%(plz)s,%(ort)s,%(quelle)s,%(vertriebspartner_id)s,%(notiz)s) RETURNING id""", d)
+            leadpruefung.pruefen(cur, d, trotzdem=d.pop("trotzdem"))
+            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, branche, plz, ort, quelle, vertriebspartner_id, notiz, ansprache_grundlage)
+                           VALUES (%(firma)s,%(ansprechpartner)s,%(email)s,%(telefon)s,%(website)s,%(branche)s,%(plz)s,%(ort)s,%(quelle)s,%(vertriebspartner_id)s,%(notiz)s,%(ansprache_grundlage)s) RETURNING id""", d)
             r = cur.fetchone()
             audit(cur, user, "lead_angelegt", None, {"firma": data.firma})
     except DB_FEHLER as e:
@@ -342,7 +354,7 @@ def lead_detail(lid: str, user: dict = Depends(require_admin)):
             checks = cur.fetchall()
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Lead nicht gefunden.")
-    return {"lead": l, "aktivitaeten": akt, "checks": checks, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche()}
+    return {"lead": l, "aktivitaeten": akt, "checks": checks, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche(), "verlustgruende": leadkontakt.VERLUSTGRUENDE}
 
 
 @router.patch("/leads/{lid}")
@@ -359,6 +371,8 @@ def lead_aendern(lid: str, data: LeadPatch, user: dict = Depends(require_admin))
         raise HTTPException(400, "Die Firma darf nicht leer sein.")
     if felder.get("email") and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", felder["email"]):
         raise HTTPException(400, "Bitte eine gültige E-Mail-Adresse eintragen.")
+    if felder.get("ansprache_grundlage") not in (None, "anfrage", "einwilligung", "b2b_mutmasslich", "empfehlung", "bestandskontakt"):
+        raise HTTPException(400, "Ungültige Grundlage der Ansprache.")
     if "temperatur" in felder:
         if felder["temperatur"] not in ("kalt", "warm", "heiss", ""):
             raise HTTPException(400, "Unbekannte Einstufung.")
@@ -373,10 +387,19 @@ def lead_aendern(lid: str, data: LeadPatch, user: dict = Depends(require_admin))
                 if alt["status"] != felder["status"]:
                     cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)",
                                 (lid, f"{alt['status']} → {felder['status']}", user["email"]))
+            neu_partner = None
+            if felder.get("vertriebspartner_id"):
+                cur.execute("SELECT vertriebspartner_id FROM leads WHERE id=%s", (lid,))
+                alt_p = cur.fetchone()
+                if alt_p and str(alt_p["vertriebspartner_id"] or "") != str(felder["vertriebspartner_id"]):
+                    neu_partner = felder["vertriebspartner_id"]
             felder_setzen(cur, "leads", lid, felder)
             audit(cur, user, "lead_geaendert", None, {"id": lid, "felder": list(felder)})
+            ids_p = push.partner(cur, neu_partner) if neu_partner else []
     except DB_FEHLER as e:
         raise fehler_db(e)
+    if ids_p:
+        push.senden(ids_p, "Neuer Lead für dich", "Ein Lead wurde dir zugewiesen.", "/vertrieb#lead/" + lid, "zugewiesen")
     return {"ok": True}
 
 
@@ -389,13 +412,14 @@ class KontaktIn(BaseModel):
     ergebnis: str
     notiz: str | None = Field(default=None, max_length=1500)
     wiedervorlage: date | None = None
+    verlust_grund: str | None = None
 
 
 @router.post("/leads/{lid}/kontakt")
 def lead_kontakt(lid: str, data: KontaktIn, user: dict = Depends(require_admin)):
     try:
         with tx("admin") as cur:
-            r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"])
+            r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"], verlust_grund=data.verlust_grund)
             audit(cur, user, "lead_kontakt", None, {"id": lid, "ergebnis": data.ergebnis})
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Lead nicht gefunden.")
@@ -430,9 +454,45 @@ def lead_aktivitaet(lid: str, data: AktIn, user: dict = Depends(require_admin)):
     return r
 
 
+class ZuKundeIn(BaseModel):
+    paket_code: str | None = None
+    beginn: date | None = None
+    einladen: bool = False
+    rabatt_cent: int = Field(default=0, ge=0)
+
+
+@router.get("/leads/{lid}/zu-kunde-vorschlag")
+def zu_kunde_vorschlag(lid: str, user: dict = Depends(require_admin)):
+    """Vorbelegung für den Assistenten „Kunde und Buchung aus Angebot“: Paket aus dem angenommenen Angebot oder der Angebotsanfrage."""
+    try:
+        with tx("admin") as cur:
+            cur.execute("SELECT id, firma, email, ansprechpartner, kunden_id, status FROM leads WHERE id=%s", (lid,))
+            l = cur.fetchone()
+            if not l:
+                raise HTTPException(404, "Lead nicht gefunden.")
+            cur.execute("SELECT id, nummer, status, positionen, brutto_cent FROM belege WHERE lead_id=%s AND art='angebot' AND status='angenommen' ORDER BY angenommen_am DESC NULLS LAST LIMIT 1", (lid,))
+            ang = cur.fetchone()
+            cur.execute("SELECT code, name, kategorie FROM produkte WHERE aktiv ORDER BY kategorie, name")
+            pakete = cur.fetchall()
+            vorschlag = None
+            if ang:
+                text = json.dumps(ang["positionen"], ensure_ascii=False).lower()
+                for p in sorted(pakete, key=lambda x: -len(x["name"])):
+                    if p["name"].lower() in text:
+                        vorschlag = p["code"]; break
+            if not vorschlag:
+                cur.execute("SELECT paket_code FROM angebotsanfragen WHERE lead_id=%s AND paket_code IS NOT NULL ORDER BY erstellt_am DESC LIMIT 1", (lid,))
+                r = cur.fetchone()
+                vorschlag = r and r["paket_code"]
+    except errors.InvalidTextRepresentation:
+        raise HTTPException(404, "Lead nicht gefunden.")
+    return {"lead": l, "angebot": ang and {"nummer": ang["nummer"], "brutto_cent": int(ang["brutto_cent"])}, "vorschlag": vorschlag, "pakete": pakete}
+
+
 @router.post("/leads/{lid}/zu-kunde")
-def lead_zu_kunde(lid: str, user: dict = Depends(require_admin)):
-    """Macht aus dem Lead einen Kunden (Status Onboarding) und übernimmt den Vertriebler."""
+def lead_zu_kunde(lid: str, data: ZuKundeIn | None = None, user: dict = Depends(require_admin)):
+    """Macht aus dem Lead einen Kunden (Status Onboarding), übernimmt den Vertriebler und legt auf Wunsch Paket, Buchung und Einladung gleich mit an."""
+    data = data or ZuKundeIn()
     with tx("admin") as cur:
         cur.execute("SELECT * FROM leads WHERE id=%s", (lid,))
         l = cur.fetchone()
@@ -442,15 +502,32 @@ def lead_zu_kunde(lid: str, user: dict = Depends(require_admin)):
             raise HTTPException(409, "Aus diesem Lead ist schon ein Kunde geworden.")
         if l["status"] in ("gesperrt", "consent_ausstehend"):
             raise HTTPException(400, "Dieser Lead ist gesperrt oder wartet auf Einwilligung.")
-        cur.execute("""INSERT INTO kunden (firma, ansprechpartner, email, telefon, branche, plz, ort, domain, vertriebspartner_id, status)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s,NULL,%s,'onboarding') RETURNING id, kundennummer""",
-                    (l["firma"], l["ansprechpartner"], l["email"], l["telefon"], l["branche"], l["plz"], l["ort"], l["vertriebspartner_id"]))
+        if data.einladen and not (l["email"] or "").strip():
+            raise HTTPException(400, "Zum Einladen braucht der Lead eine E-Mail-Adresse.")
+        if data.paket_code:
+            cur.execute("SELECT 1 FROM produkte WHERE code=%s AND aktiv", (data.paket_code,))
+            if not cur.fetchone():
+                raise HTTPException(400, "Unbekanntes Paket.")
+        cur.execute("""INSERT INTO kunden (firma, ansprechpartner, email, telefon, branche, plz, ort, domain, vertriebspartner_id, status, paket_code)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,NULL,%s,'onboarding',%s) RETURNING id, kundennummer""",
+                    (l["firma"], l["ansprechpartner"], l["email"], l["telefon"], l["branche"], l["plz"], l["ort"], l["vertriebspartner_id"], data.paket_code or None))
         k = cur.fetchone()
-        cur.execute("UPDATE leads SET kunden_id=%s, status='gewonnen' WHERE id=%s", (k["id"], lid))
+        cur.execute("UPDATE leads SET kunden_id=%s, status='gewonnen', wiedervorlage_am=NULL WHERE id=%s", (k["id"], lid))
         cur.execute("UPDATE belege SET kunden_id=%s WHERE lead_id=%s AND kunden_id IS NULL", (k["id"], lid))   # Angebote an den Lead wandern zum Kunden
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (lid, "Zum Kunden gemacht: " + k["kundennummer"], user["email"]))
-        audit(cur, user, "lead_zu_kunde", k["id"], {"lead": lid})
-    return k
+        if data.paket_code:
+            cur.execute("""INSERT INTO kunden_module (kunden_id, modul_code, aktiv) SELECT %s, modul_code, true FROM produkt_module WHERE produkt_code=%s
+                           ON CONFLICT (kunden_id, modul_code) DO UPDATE SET aktiv=true, geaendert_am=now()""", (k["id"], data.paket_code))
+        onboarding.anlegen(cur, k["id"])
+        link = zugang.link_erzeugen(cur, l["email"].strip(), l["ansprechpartner"], "kunde", kunden_id=k["id"]) if data.einladen else None
+        audit(cur, user, "lead_zu_kunde", k["id"], {"lead": lid, "paket": data.paket_code})
+    buchung_id = None
+    if data.paket_code:
+        from .routes_admin import BuchungIn, buchung_neu
+        b = buchung_neu(str(k["id"]), BuchungIn(produkt_code=data.paket_code, beginn=data.beginn, rabatt_cent=data.rabatt_cent, rabatt_grund="Aus Angebot" if data.rabatt_cent else None), user)
+        buchung_id = b["id"]
+    mail = zugang.per_mail(l["email"].strip(), l["ansprechpartner"], link, "kunde") if link else None
+    return {**k, "buchung_id": buchung_id, "einladungslink": link, "mail": mail}
 
 
 # ================================================================= Preise und Konditionen

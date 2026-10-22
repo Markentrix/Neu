@@ -2,11 +2,11 @@
 import secrets
 from html import escape
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from . import einstellungen
+from . import einstellungen, sperre
 from .db import tx
 from .security import audit, client_ip, rate_limit, require_admin
 
@@ -68,15 +68,30 @@ def _seite(text: str) -> HTMLResponse:
                         f'<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><h2>Markentrix</h2><p>{escape(text)}</p></body>')
 
 
+def _bestaetigen(text: str, knopf: str, t: str) -> HTMLResponse:
+    """Erst ein Klick auf den Knopf löst die Aktion aus (Mail-Scanner rufen Links vorab ab und würden sonst ungewollt abmelden)."""
+    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title>'
+                        f'<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><h2>Markentrix</h2><p>{escape(text)}</p>'
+                        f'<form method="post"><input type="hidden" name="t" value="{escape(t)}"><button style="font:inherit;padding:10px 18px;border-radius:8px;border:0;background:#0B1020;color:#fff;cursor:pointer">{escape(knopf)}</button></form></body>')
+
+
 @router.get("/public/abmelden")
-def abmelden(t: str, request: Request):
-    """Abmeldung von weiteren Nachrichten per Link aus der Mail."""
+def abmelden_frage(t: str):
+    if len(t) < 10 or len(t) > 100:
+        return _seite("Dieser Link ist ungültig.")
+    return _bestaetigen("Möchten Sie keine weiteren Nachrichten zu Ihrer Anfrage erhalten?", "Ja, abmelden", t)
+
+
+@router.post("/public/abmelden")
+def abmelden(request: Request, t: str = Form("")):
+    """Abmeldung von weiteren Nachrichten nach Bestätigung."""
     rate_limit("abmelden:" + client_ip(request), 20, 600)
     if len(t) < 10 or len(t) > 100:
         return _seite("Dieser Link ist ungültig.")
     with tx("system") as cur:
-        cur.execute("UPDATE leads SET abgemeldet=true, wiedervorlage_am=NULL WHERE abmelde_token=%s RETURNING id", (t,))
+        cur.execute("UPDATE leads SET abgemeldet=true, wiedervorlage_am=NULL WHERE abmelde_token=%s RETURNING id, email", (t,))
         r = cur.fetchone()
         if r:
+            sperre.eintragen(cur, "abmeldung", f"Lead {r['id']}", r["email"], None, None)
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz','Hat sich von weiteren Nachrichten abgemeldet','website')", (r["id"],))
     return _seite("Sie erhalten von uns keine weiteren Nachrichten zu Ihrer Anfrage." if r else "Dieser Link ist ungültig.")

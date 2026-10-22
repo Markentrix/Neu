@@ -1,4 +1,6 @@
 """Vertriebs-Arbeitsliste, KI-Gesprächsleitfaden und Vertriebs-Auswertung."""
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors
 
@@ -55,6 +57,13 @@ def _skript_erzeugen(lid: str, pid: str | None, user: dict):
     rate_limit("skript:" + str(user["id"]), 30, 3600)
     with tx("system") as cur:
         l, cfg = _skript(cur, lid, pid)
+        # Kontext für das Skript: bisheriger Verlauf und Ergebnis des Website-Checks
+        cur.execute("SELECT inhalt FROM lead_aktivitaeten WHERE lead_id=%s AND art IN ('notiz','anruf','antwort','termin') ORDER BY zeit DESC LIMIT 8", (lid,))
+        l["verlauf"] = " | ".join((r["inhalt"] or "")[:160] for r in cur.fetchall())
+        cur.execute("SELECT score, ergebnis FROM lead_checks WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 1", (lid,))
+        c = cur.fetchone()
+        if c:
+            l["website_check"] = f"Score {c['score']}/100. " + json.dumps(c["ergebnis"], ensure_ascii=False)[:600]
     if not cfg.get("api_key"):
         raise HTTPException(400, "Für den Gesprächsleitfaden fehlt der KI-Schlüssel (Einstellungen → KI). Bitte beim Team melden.")
     try:
@@ -106,8 +115,12 @@ def auswertung(user: dict = Depends(require_admin)):
         anrufe = {r["name"]: r for r in cur.fetchall()}
         cur.execute("SELECT count(*) AS n FROM gespraechstermine WHERE status='gebucht' AND start >= now()")
         gebucht = cur.fetchone()["n"]
+        cur.execute("SELECT verlust_grund AS grund, count(*) AS n FROM leads WHERE status='verloren' AND verlust_grund IS NOT NULL GROUP BY 1 ORDER BY 2 DESC")
+        verlustgruende = cur.fetchall()
+        cur.execute("""SELECT count(*) FILTER (WHERE ansprache_grundlage IS NULL AND status IN ('neu','kontaktiert','antwort','termin','angebot') AND quelle <> 'website') AS ohne_grundlage FROM leads""")
+        ohne_grundlage = cur.fetchone()["ohne_grundlage"]
     for r in je_vertriebler:
         a = anrufe.get(r["name"]) or {}
         r["anrufe_7t"] = a.get("anrufe_7t", 0)
         r["anrufe_heute"] = a.get("anrufe_heute", 0)
-    return {"gesamt": gesamt[0] if gesamt else None, "je_vertriebler": je_vertriebler, "je_liste": je_liste, "je_gruppe": je_gruppe, "je_quelle": je_quelle, "gebuchte_gespraeche": gebucht}
+    return {"gesamt": gesamt[0] if gesamt else None, "je_vertriebler": je_vertriebler, "je_liste": je_liste, "je_gruppe": je_gruppe, "je_quelle": je_quelle, "gebuchte_gespraeche": gebucht, "verlustgruende": verlustgruende, "ohne_grundlage": ohne_grundlage}

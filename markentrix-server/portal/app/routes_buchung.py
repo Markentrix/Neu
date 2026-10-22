@@ -5,11 +5,11 @@ from datetime import datetime, timedelta, timezone
 from html import escape
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, mailer, push
+from . import config, einstellungen, leadeingang, mailer, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin
@@ -178,7 +178,7 @@ def buchen(data: BuchenIn, bg: BackgroundTasks, request: Request):
                     (lid, "Gespräch gebucht für " + start.astimezone(TZ).strftime("%d.%m.%Y %H:%M") + " Uhr"))
         an = [x for x in [admin_empfaenger(cur)] if x]
         ort = c["ort"]
-        ids = push.admins(cur) + (push.partner(cur, lp["vertriebspartner_id"]) if (lp := _lead_partner(cur, lid)) else [])
+        ids = push.admins(cur) + leadeingang.bearbeiten(cur, lid, not l, "Terminbuchung")
     push.senden(ids, "Neues Gespräch gebucht", "Ein Interessent hat ein Erstgespräch gebucht.", "/admin#leads", "buchung")
     bg.add_task(_mails, g, ort, an)
     return {"ok": True, "wann": start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")}
@@ -190,7 +190,17 @@ def _seite(text: str) -> HTMLResponse:
 
 
 @router.get("/public/buchung/absagen")
-def absagen(t: str, request: Request, bg: BackgroundTasks):
+def absagen_frage(t: str):
+    """Erst nach Klick auf den Knopf wird abgesagt (Mail-Scanner rufen Links vorab ab)."""
+    if len(t) < 10 or len(t) > 100:
+        return _seite("Dieser Link ist ungültig.")
+    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title>'
+                        '<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><h2>Markentrix</h2><p>Möchten Sie Ihr Gespräch absagen?</p>'
+                        f'<form method="post"><input type="hidden" name="t" value="{escape(t)}"><button style="font:inherit;padding:10px 18px;border-radius:8px;border:0;background:#0B1020;color:#fff;cursor:pointer">Ja, Termin absagen</button></form></body>')
+
+
+@router.post("/public/buchung/absagen")
+def absagen(request: Request, bg: BackgroundTasks, t: str = Form("")):
     rate_limit("absagen:" + client_ip(request), 20, 600)
     if len(t) < 10 or len(t) > 100:
         return _seite("Dieser Link ist ungültig.")
@@ -199,9 +209,16 @@ def absagen(t: str, request: Request, bg: BackgroundTasks):
         g = cur.fetchone()
         if not g:
             return _seite("Dieser Termin ist nicht mehr aktiv.")
+        ids = []
         if g["lead_id"]:
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'termin','Gespräch vom Interessenten abgesagt','website')", (g["lead_id"],))
+            # Lead zurück in die Bearbeitung: nicht mehr „Termin“, Wiedervorlage heute, Zuständiger erfährt es
+            cur.execute("UPDATE leads SET status=CASE WHEN status='termin' THEN 'antwort' ELSE status END, wiedervorlage_am=current_date WHERE id=%s AND kunden_id IS NULL AND status NOT IN ('verloren','tot','gesperrt')", (g["lead_id"],))
+            lp = _lead_partner(cur, g["lead_id"])
+            ids = push.partner(cur, lp["vertriebspartner_id"]) if lp else []
         an = [x for x in [admin_empfaenger(cur)] if x]
+    if ids:
+        push.senden(ids, "Gespräch abgesagt", f"{g['name']} hat abgesagt. Bitte neu vereinbaren.", "/vertrieb#heute", "buchung")
     wann = g["start"].astimezone(TZ).strftime("%d.%m.%Y %H:%M")
     for a in an:
         bg.add_task(mailer.senden, a, f"Gespräch abgesagt: {g['name']}", f"{g['name']} hat das Gespräch am {wann} Uhr abgesagt.")

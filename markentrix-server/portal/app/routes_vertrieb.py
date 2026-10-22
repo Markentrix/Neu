@@ -1,12 +1,14 @@
 """Portal für Vertriebler: nur eigene Kunden, eigene Leads, eigene Provisionen.
 Die Abfragen laufen im Systemkontext, deshalb steht JEDE Abfrage ausdrücklich auf die eigene Vertriebler-ID."""
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from psycopg import errors
 from pydantic import BaseModel, Field
 
 from datetime import date
 
-from . import leadkontakt
+from . import leadkontakt, leadpruefung
 from .db import tx
 from .security import audit, check_password_rules, hash_password, require_vertrieb, verify_password
 
@@ -63,15 +65,24 @@ class LeadIn(BaseModel):
     plz: str | None = Field(default=None, max_length=10)
     ort: str | None = Field(default=None, max_length=120)
     notiz: str | None = Field(default=None, max_length=2000)
+    ansprache_grundlage: str | None = None
+    ansprache_hinweis: str | None = Field(default=None, max_length=300)
+
+
+GRUNDLAGEN = ("einwilligung", "b2b_mutmasslich", "empfehlung", "bestandskontakt")
 
 
 @router.post("/leads")
 def lead_neu(data: LeadIn, user: dict = Depends(require_vertrieb)):
     d = data.model_dump()
+    if d["ansprache_grundlage"] not in (None, "") + GRUNDLAGEN:
+        raise HTTPException(400, "Ungültige Grundlage der Ansprache.")
+    d["ansprache_grundlage"] = d["ansprache_grundlage"] or None
     d["pid"] = user["vertriebspartner_id"]
     with tx("system") as cur:
-        cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, branche, plz, ort, quelle, vertriebspartner_id, notiz)
-                       VALUES (%(firma)s,%(ansprechpartner)s,%(email)s,%(telefon)s,%(website)s,%(branche)s,%(plz)s,%(ort)s,'empfehlung',%(pid)s,%(notiz)s) RETURNING id""", d)
+        leadpruefung.pruefen(cur, d, eigener_partner=user["vertriebspartner_id"])
+        cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, branche, plz, ort, quelle, vertriebspartner_id, notiz, ansprache_grundlage, ansprache_hinweis)
+                       VALUES (%(firma)s,%(ansprechpartner)s,%(email)s,%(telefon)s,%(website)s,%(branche)s,%(plz)s,%(ort)s,'empfehlung',%(pid)s,%(notiz)s,%(ansprache_grundlage)s,%(ansprache_hinweis)s) RETURNING id""", d)
         r = cur.fetchone()
         audit(cur, user, "lead_angelegt_vertrieb", None, {"firma": data.firma})
     return r
@@ -94,13 +105,53 @@ def lead_detail(lid: str, user: dict = Depends(require_vertrieb)):
         l = eigener_lead(cur, lid, user["vertriebspartner_id"])
         cur.execute("SELECT art, inhalt, zeit, von FROM lead_aktivitaeten WHERE lead_id=%s ORDER BY zeit DESC LIMIT 200", (lid,))
         akt = cur.fetchall()
+        cur.execute("SELECT website, ergebnis, erstellt_am FROM lead_checks WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 1", (lid,))
+        check = cur.fetchone()
     for k in ("score", "loeschen_nach", "kunden_id", "vertriebspartner_id"):
         l.pop(k, None)
-    return {"lead": l, "aktivitaeten": akt, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche()}
+    return {"lead": l, "aktivitaeten": akt, "check": check, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche(), "verlustgruende": leadkontakt.VERLUSTGRUENDE}
+
+
+class LeadPatchIn(BaseModel):
+    ansprechpartner: str | None = Field(default=None, max_length=200)
+    email: str | None = Field(default=None, max_length=254)
+    telefon: str | None = Field(default=None, max_length=60)
+    website: str | None = Field(default=None, max_length=253)
+    ort: str | None = Field(default=None, max_length=120)
+    ansprache_grundlage: str | None = None
+    ansprache_hinweis: str | None = Field(default=None, max_length=300)
+
+
+@router.patch("/leads/{lid}")
+def lead_aendern(lid: str, data: LeadPatchIn, user: dict = Depends(require_vertrieb)):
+    """Kontaktdaten ergänzen oder korrigieren (z. B. richtige Mail oder Ansprechpartner aus dem Gespräch). Wird im Verlauf festgehalten."""
+    felder = {k: (v.strip() or None) for k, v in data.model_dump().items() if v is not None}
+    if not felder:
+        raise HTTPException(400, "Nichts zu ändern.")
+    if felder.get("ansprache_grundlage") not in (None,) + GRUNDLAGEN:
+        raise HTTPException(400, "Ungültige Grundlage der Ansprache.")
+    if felder.get("email") and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", felder["email"]):
+        raise HTTPException(400, "Bitte eine gültige E-Mail-Adresse eintragen.")
+    with tx("system") as cur:
+        l = eigener_lead(cur, lid, user["vertriebspartner_id"])
+        if l["status"] in ("gewonnen", "gesperrt", "consent_ausstehend"):
+            raise HTTPException(400, "Dieser Lead kann nur Markentrix ändern.")
+        neu = {**l, **felder}
+        if any(k in felder for k in ("email", "telefon", "website")):
+            leadpruefung.pruefen(cur, neu, eigener_partner=user["vertriebspartner_id"], trotzdem=True)
+            x = leadpruefung.dublette(cur, felder.get("email"), felder.get("telefon"), None, None, ausser=lid) if (felder.get("email") or felder.get("telefon")) else None
+            if x and x["art"] == "kunde":
+                raise HTTPException(409, f"„{x['firma']}“ ist bereits Kunde bei Markentrix.")
+        sets = ", ".join(f"{k}=%({k})s" for k in felder)
+        cur.execute(f"UPDATE leads SET {sets} WHERE id=%(id)s AND vertriebspartner_id=%(pid)s", {**felder, "id": lid, "pid": user["vertriebspartner_id"]})
+        geaendert = ", ".join(k for k in felder if k not in ("ansprache_hinweis",))
+        cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,%s)", (lid, f"Angaben ergänzt: {geaendert}", user["email"]))
+    return {"ok": True}
 
 
 class StatusIn(BaseModel):
     status: str
+    verlust_grund: str | None = None
 
 
 @router.post("/leads/{lid}/status")
@@ -112,7 +163,9 @@ def lead_status(lid: str, data: StatusIn, user: dict = Depends(require_vertrieb)
         if l["status"] in ("gewonnen", "gesperrt", "consent_ausstehend"):
             raise HTTPException(400, "Dieser Lead kann nur Markentrix ändern.")
         if l["status"] != data.status:
-            cur.execute("UPDATE leads SET status=%s WHERE id=%s", (data.status, lid))
+            if data.verlust_grund and data.verlust_grund not in leadkontakt.VERLUSTGRUENDE:
+                raise HTTPException(400, "Unbekannter Grund.")
+            cur.execute("UPDATE leads SET status=%s, verlust_grund=CASE WHEN %s='verloren' THEN %s ELSE verlust_grund END WHERE id=%s", (data.status, data.status, data.verlust_grund, lid))
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (lid, f"{l['status']} → {data.status}", user["email"]))
     return {"ok": True}
 
@@ -136,13 +189,14 @@ class KontaktIn(BaseModel):
     ergebnis: str
     notiz: str | None = Field(default=None, max_length=1500)
     wiedervorlage: date | None = None
+    verlust_grund: str | None = None
 
 
 @router.post("/leads/{lid}/kontakt")
 def lead_kontakt(lid: str, data: KontaktIn, user: dict = Depends(require_vertrieb)):
     with tx("system") as cur:
         l = eigener_lead(cur, lid, user["vertriebspartner_id"])
-        r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"], darf_status=l["status"] not in leadkontakt.GESPERRT)
+        r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"], darf_status=l["status"] not in leadkontakt.GESPERRT, verlust_grund=data.verlust_grund)
         audit(cur, user, "lead_kontakt_vertrieb", None, {"id": lid, "ergebnis": data.ergebnis})
     return r
 

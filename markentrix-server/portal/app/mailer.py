@@ -140,6 +140,23 @@ def lead_angebot(an: str, name: str | None, firma: str, nummer: str, pdf_bytes: 
     return senden(an, f"Ihr Angebot {nummer} von {absender}", text, (dateiname, pdf_bytes, "application/pdf"))
 
 
+def gespraech_erinnerung(an: str, name: str | None, wann: str, absagen: str, ort: str, stunden: int) -> tuple[bool, str]:
+    hallo = f"Guten Tag {name}," if name else "Guten Tag,"
+    wann_text = "morgen" if stunden >= 12 else "heute"
+    text = (f"{hallo}\n\nkurze Erinnerung an unser Gespräch {wann_text}: {wann}.\n{ort}\n\n"
+            f"Falls es nicht passt, sagen Sie bitte hier ab oder suchen Sie sich einen neuen Termin aus: {absagen}" + SIGNATUR)
+    return senden(an, f"Erinnerung: Unser Gespräch {wann_text}, {wann}", text)
+
+
+def angebot_bestaetigung(an: str, name: str | None, nummer: str) -> tuple[bool, str]:
+    hallo = f"Guten Tag {name}," if name else "Guten Tag,"
+    text = (f"{hallo}\n\nvielen Dank, wir haben Ihre Annahme des Angebots {nummer} erhalten und freuen uns auf die Zusammenarbeit.\n\n"
+            "So geht es weiter: Wir melden uns innerhalb von ein bis zwei Werktagen persönlich bei Ihnen, klären die letzten Fragen und legen Ihren Zugang an. "
+            "Sie bekommen dann eine Einladung zu Ihrem Kundenportal, in dem Sie alles Weitere ausfüllen und verfolgen können.\n\n"
+            "Wenn Sie vorher etwas wissen möchten, antworten Sie einfach auf diese Mail." + SIGNATUR)
+    return senden(an, f"Ihre Annahme von Angebot {nummer}: so geht es weiter", text)
+
+
 def avv(an: str, name: str | None, pdf_bytes: bytes) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     text = (f"{hallo}\n\nanbei erhalten Sie den Vertrag zur Auftragsverarbeitung (AVV) nach Art. 28 DSGVO. Er regelt, wie wir personenbezogene Daten in Ihrem Auftrag verarbeiten.\n\n"

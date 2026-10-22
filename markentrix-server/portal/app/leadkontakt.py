@@ -3,17 +3,22 @@ from datetime import date, timedelta
 
 from fastapi import HTTPException
 
+from . import sperre
+
+VERLUSTGRUENDE = {"kein_bedarf": "Kein Bedarf", "zu_teuer": "Zu teuer", "hat_anbieter": "Hat schon einen Anbieter", "spaeter": "Später / aktuell kein Thema", "falscher_ansprechpartner": "Falscher Ansprechpartner", "sonstiges": "Sonstiges"}
+
 # code, Beschriftung, Art im Verlauf, neuer Status (nur wenn der Lead noch davor steht), Tage bis zur Wiedervorlage (None = keine, 0 = löschen)
 OPTIONEN = [
-    ("anruf_erreicht", "Angerufen: erreicht", "anruf", "kontaktiert", None),
+    ("anruf_erreicht", "Angerufen: erreicht", "anruf", "kontaktiert", 3),
     ("anruf_nicht_erreicht", "Angerufen: nicht erreicht", "anruf", None, 2),
     ("anruf_mailbox", "Angerufen: Nachricht hinterlassen", "anruf", "kontaktiert", 3),
     ("mail_gesendet", "E-Mail geschickt", "mail_gesendet", "kontaktiert", 3),
-    ("antwort", "Hat geantwortet", "antwort", "antwort", None),
-    ("termin", "Termin vereinbart", "termin", "termin", None),
+    ("antwort", "Hat geantwortet", "antwort", "antwort", 2),
+    ("termin", "Termin vereinbart", "termin", "termin", 3),
     ("angebot", "Angebot geschickt", "notiz", "angebot", 5),
     ("rueckruf", "Bittet um Rückruf", "notiz", "antwort", 1),
     ("kein_interesse", "Kein Interesse", "notiz", "verloren", 0),
+    ("widerspruch", "Widerspricht der Ansprache / bittet um Löschung", "notiz", "gesperrt", 0),   # kommt auf die Sperrliste
     ("falsche_nummer", "Nummer falsch / nicht erreichbar", "notiz", "tot", 0),   # wird abgelegt (Status „tot“): taucht in keiner Anrufliste mehr auf
 ]
 _NACH = {o[0]: o for o in OPTIONEN}
@@ -26,22 +31,26 @@ def optionen_fuer_oberflaeche() -> list:
     return [{"code": c, "text": t, "wiedervorlage_tage": w} for c, t, _a, _s, w in OPTIONEN]
 
 
-def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | None, von: str, darf_status: bool = True) -> dict:
+def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | None, von: str, darf_status: bool = True, verlust_grund: str | None = None) -> dict:
     o = _NACH.get(ergebnis)
     if not o:
         raise HTTPException(400, "Unbekanntes Ergebnis.")
     _c, text, art, neuer_status, tage = o
-    cur.execute("SELECT status, firma FROM leads WHERE id=%s", (lid,))
+    if verlust_grund and verlust_grund not in VERLUSTGRUENDE:
+        raise HTTPException(400, "Unbekannter Grund.")
+    cur.execute("SELECT status, firma, email, telefon, website, wiedervorlage_am FROM leads WHERE id=%s", (lid,))
     l = cur.fetchone()
     if not l:
         raise HTTPException(404, "Lead nicht gefunden.")
     if wiedervorlage and wiedervorlage < date.today():
         raise HTTPException(400, "Die Wiedervorlage liegt in der Vergangenheit.")
     inhalt = text + (": " + notiz.strip() if notiz and notiz.strip() else "")
-    cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)", (lid, art, inhalt[:2000], von))
+    if verlust_grund and neuer_status == "verloren":
+        inhalt += f" (Grund: {VERLUSTGRUENDE[verlust_grund]})"
+    cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von, ergebnis) VALUES (%s,%s,%s,%s,%s)", (lid, art, inhalt[:2000], von, ergebnis))
     status = l["status"]
     if darf_status and neuer_status and status not in GESPERRT:
-        if neuer_status in ("verloren", "tot") or _RANG.get(neuer_status, 0) > _RANG.get(status, 0):
+        if neuer_status in ("verloren", "tot", "gesperrt") or _RANG.get(neuer_status, 0) > _RANG.get(status, 0):
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (lid, f"{status} → {neuer_status}", von))
             status = neuer_status
     if wiedervorlage:
@@ -49,8 +58,13 @@ def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | N
     elif tage:
         wv = date.today() + timedelta(days=tage)
     else:
+        wv = l["wiedervorlage_am"]       # eine bestehende Wiedervorlage bleibt erhalten
+    if tage == 0 or status in ("verloren", "gewonnen", "gesperrt", "tot"):
         wv = None
-    if tage == 0 or status in ("verloren", "gewonnen"):
-        wv = None
-    cur.execute("UPDATE leads SET status=%s, wiedervorlage_am=%s, letzter_kontakt_am=now() WHERE id=%s", (status, wv, lid))
+    # Aktivität verlängert die Löschfrist (nur wenn der Lead eine hat)
+    cur.execute("""UPDATE leads SET status=%s, wiedervorlage_am=%s, letzter_kontakt_am=now(),
+                          loeschen_nach = CASE WHEN loeschen_nach IS NOT NULL THEN greatest(loeschen_nach, current_date + interval '12 months') END,
+                          verlust_grund = CASE WHEN %s = 'verloren' THEN %s ELSE verlust_grund END WHERE id=%s""", (status, wv, status, verlust_grund, lid))
+    if ergebnis in ("kein_interesse", "widerspruch") and neuer_status:
+        sperre.eintragen(cur, "kein_interesse" if ergebnis == "kein_interesse" else "widerspruch", f"Lead {lid}", l["email"], l["telefon"], l["website"])
     return {"status": status, "wiedervorlage_am": wv}

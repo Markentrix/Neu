@@ -4,7 +4,7 @@ import json
 import logging
 import threading
 import time
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from . import abo, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push
 from .db import tx
@@ -136,7 +136,7 @@ def lead_folgemails(cfg):
         auftraege = []
         for l in faellig:
             auftraege.append((l, token_fuer(cur, l["id"])))
-            cur.execute("UPDATE leads SET folge_stufe=folge_stufe+1, folge_gesendet_am=now(), letzter_kontakt_am=now() WHERE id=%s", (l["id"],))
+            cur.execute("UPDATE leads SET folge_stufe=folge_stufe+1, folge_gesendet_am=now() WHERE id=%s", (l["id"],))
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'mail_gesendet',%s,'automatisch')", (l["id"], f"Automatische Folgemail {l['folge_stufe'] + 1}"))
     for l, tok in auftraege:
         n = l["folge_stufe"] + 1
@@ -208,6 +208,79 @@ def fehler_melden(cfg):
     if rows and an:
         zeilen = [f"- {r['zeit']:%d.%m. %H:%M} {r['workflow_name'] or 'Workflow'} / {r['knoten'] or '?'}: {(r['fehlertext'] or '')[:200]}" for r in rows]
         mailer.senden(an, f"{len(rows)} Workflow-Fehler" if len(rows) > 1 else "Workflow-Fehler", "Es sind Fehler in Automationen aufgetreten:\n\n" + "\n".join(zeilen) + mailer.SIGNATUR)
+
+
+def provisionsvorschau(cfg):
+    """Ab dem 2. des Monats: Vorschau der Provisionen des Vormonats ausrechnen und dem Admin melden (gebucht wird erst nach dem Klick im Portal)."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.day < 2 or jetzt.hour < 7:
+        return
+    vormonat = (jetzt.replace(day=1) - timedelta(days=1)).replace(day=1)
+    if not _marker("provvorschau-" + vormonat.strftime("%Y-%m")):
+        return
+    from .routes_verwaltung import BERECHNUNG
+    with tx("system") as cur:
+        cur.execute("SELECT count(*) AS n FROM provisionsregeln WHERE art='laufend' AND status='freigegeben'")
+        if cur.fetchone()["n"] == 0:
+            return
+        cur.execute("SELECT count(*) AS n FROM provisionen WHERE monat=%s", (vormonat.date(),))
+        if cur.fetchone()["n"]:
+            return
+        cur.execute("SELECT wert FROM konfiguration WHERE schluessel='provision.nachlauf_monate' ORDER BY version DESC LIMIT 1")
+        nl = cur.fetchone()
+        try:
+            nachlauf = int(str(nl["wert"]).strip('"')) if nl else 6
+        except ValueError:
+            nachlauf = 6
+        cur.execute(BERECHNUNG, {"m": vormonat.date().isoformat(), "nachlauf": nachlauf})
+        zeilen = cur.fetchall()
+        an = admin_empfaenger(cur)
+        ids = push.admins(cur)
+    if not zeilen or not an:
+        return
+    summe = sum(int(z["betrag_cent"]) for z in zeilen) / 100
+    text = f"Für {vormonat:%m/%Y} ergeben sich {len(zeilen)} Provisionspositionen mit zusammen {summe:,.2f} €.".replace(",", "X").replace(".", ",").replace("X", ".")
+    mailer.senden(an, f"Provisionen {vormonat:%m/%Y}: Vorschau liegt bereit", text + f"\n\nBitte prüfen und im Portal unter Vertrieb → Provisionen berechnen:\n{config.BASE_URL}/admin#vertrieb" + mailer.SIGNATUR)
+    push.senden(ids, "Provisions-Vorschau", text, "/admin#vertrieb", "provision")
+
+
+def gespraech_erinnerungen(cfg):
+    """Jede Minute: Interessenten 24 Stunden und 2 Stunden vor dem Erstgespräch erinnern; 2 Stunden vorher bekommt auch der Zuständige einen Hinweis."""
+    from .routes_buchung import TZ, lesen as buchung_lesen
+    with tx("system") as cur:
+        ort = buchung_lesen(cur)["ort"]
+        cur.execute("""WITH f AS (SELECT id, 24 AS std FROM gespraechstermine WHERE status='gebucht' AND NOT erinnert_24 AND start > now() + interval '3 hours' AND start <= now() + interval '25 hours'
+                                  UNION ALL SELECT id, 2 FROM gespraechstermine WHERE status='gebucht' AND NOT erinnert_2 AND start > now() AND start <= now() + interval '3 hours')
+                       SELECT g.id, g.name, g.email, g.start, g.token, g.lead_id, f.std, l.vertriebspartner_id FROM f JOIN gespraechstermine g ON g.id = f.id LEFT JOIN leads l ON l.id = g.lead_id LIMIT 40""")
+        faellig = cur.fetchall()
+        for g in faellig:   # zuerst markieren; bei Mailfehler unten zurücksetzen
+            cur.execute("UPDATE gespraechstermine SET erinnert_24=true WHERE id=%s" if g["std"] == 24 else "UPDATE gespraechstermine SET erinnert_2=true, erinnert_24=true WHERE id=%s", (g["id"],))
+        team = {g["id"]: (push.admins(cur) + (push.partner(cur, g["vertriebspartner_id"]) if g["vertriebspartner_id"] else [])) for g in faellig if g["std"] == 2}
+    for g in faellig:
+        lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+        ok, fehler = mailer.gespraech_erinnerung(g["email"], g["name"], lokal, f"{config.BASE_URL}/api/public/buchung/absagen?t={g['token']}", ort, g["std"])
+        if not ok:
+            log.warning("Gesprächserinnerung an %s fehlgeschlagen: %s", g["email"], fehler)
+            with tx("system") as cur:
+                cur.execute("UPDATE gespraechstermine SET erinnert_24=false, erinnert_2=false WHERE id=%s" if g["std"] == 2 else "UPDATE gespraechstermine SET erinnert_24=false WHERE id=%s", (g["id"],))
+        if g["std"] == 2 and team.get(g["id"]):
+            push.senden(team[g["id"]], "Gespräch in 2 Stunden", f"{g['name']} um {g['start'].astimezone(TZ):%H:%M} Uhr.", "/vertrieb#heute", "buchung")
+
+
+def anfragen_eskalation(cfg):
+    """Jede Minute: heiße Anfragen von der Website, die nach der Reaktionszeit noch niemand bearbeitet hat, einmal an Team und Zuständigen melden."""
+    from . import zuweisung
+    with tx("system") as cur:
+        stunden = zuweisung.einstellung(cur)["reaktionsstunden"]
+        cur.execute("""SELECT id, firma, vertriebspartner_id FROM leads WHERE quelle='website' AND temperatur='heiss' AND letzter_kontakt_am IS NULL AND kunden_id IS NULL
+                         AND status IN ('neu','antwort') AND erstellt_am < now() - make_interval(hours => %s) AND erstellt_am > now() - interval '7 days' LIMIT 20""", (stunden,))
+        offen = cur.fetchall()
+    for l in offen:
+        if not _marker("eskalation-" + str(l["id"])):
+            continue
+        with tx("system") as cur:
+            ids = push.admins(cur) + (push.partner(cur, l["vertriebspartner_id"]) if l["vertriebspartner_id"] else [])
+        push.senden(ids, "Anfrage wartet seit über %d Std." % stunden, f"{l['firma']}: bitte jetzt melden.", "/admin#lead/" + str(l["id"]), "check")
 
 
 def veroeffentlichung_wacht(cfg):
@@ -449,6 +522,33 @@ def aufgaben_automatisch(cfg):
             FROM kunden k
             WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '5 days'
               AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt)
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Angebot an einen Lead liegt seit 5 Tagen ohne Antwort: nachfassen
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT NULL, 'Angebot nachfassen: ' || coalesce(l.firma, b.nummer), {admin}, current_date, 'auto', 'angebotnachfassen-' || b.id
+            FROM belege b JOIN leads l ON l.id = b.lead_id
+            WHERE b.art = 'angebot' AND b.status IN ('gestellt', 'versendet') AND b.lead_id IS NOT NULL AND l.kunden_id IS NULL
+              AND coalesce(b.versendet_am, b.erstellt_am) < now() - interval '5 days' AND (b.faellig_am IS NULL OR b.faellig_am >= current_date)
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Kunde mit Vertriebler, aber ohne Buchung: es entsteht keine Provision (einmal pro Woche)
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT k.id, 'Keine Buchung, keine Provision: ' || k.firma, {admin}, current_date, 'auto', 'ohnebuchung-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
+            FROM kunden k
+            WHERE k.vertriebspartner_id IS NOT NULL AND k.status IN ('onboarding', 'aktiv') AND k.referenzkunde = false AND k.erstellt_am < now() - interval '3 days'
+              AND NOT EXISTS (SELECT 1 FROM buchungen b WHERE b.kunden_id = k.id AND b.status IN ('beauftragt', 'in_einrichtung', 'aktiv') AND b.beginn IS NOT NULL)
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Gespräch war vor über einer Stunde: Ergebnis im Lead festhalten
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT NULL, 'Gespräch-Ergebnis festhalten: ' || g.name, {admin}, current_date, 'auto', 'gespraechergebnis-' || g.id
+            FROM gespraechstermine g JOIN leads l ON l.id = g.lead_id
+            WHERE g.status = 'gebucht' AND g.start < now() - interval '1 hour' AND g.start > now() - interval '3 days' AND l.status IN ('termin', 'antwort', 'neu', 'kontaktiert')
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Angebot läuft in 3 Tagen ab
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT NULL, 'Angebot läuft bald ab: ' || coalesce(l.firma, b.nummer) || ' (bis ' || to_char(b.faellig_am, 'DD.MM.') || ')', {admin}, current_date, 'auto', 'angebotablauf-' || b.id
+            FROM belege b JOIN leads l ON l.id = b.lead_id
+            WHERE b.art = 'angebot' AND b.status IN ('gestellt', 'versendet') AND b.lead_id IS NOT NULL AND l.kunden_id IS NULL
+              AND b.faellig_am BETWEEN current_date AND current_date + 3
             ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
     ]
     neu, erinnern, onb = [], [], []
@@ -808,6 +908,11 @@ def fristen_ausfuehren() -> dict:
                     continue
             protokoll(name, n, regel)
 
+        # Leads im Status Termin/Angebot ohne jede Aktivität seit 12 Monaten: als verloren ablegen (danach greift die normale Löschfrist)
+        cur.execute("""UPDATE leads SET status='verloren', wiedervorlage_am=NULL WHERE kunden_id IS NULL AND status IN ('termin','angebot')
+                       AND coalesce(letzter_kontakt_am, geaendert_am) < now() - interval '12 months' RETURNING id""")
+        for r in cur.fetchall():
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel','Automatisch als verloren abgelegt: seit 12 Monaten keine Aktivität','automatisch')", (r["id"],))
         leads_loeschen("loeschen_nach IS NOT NULL AND loeschen_nach < current_date", (), "leads (Löschfrist abgelaufen)", regeln.get("leads"))
         if "leads" in regeln:
             leads_loeschen("status IN ('verloren','tot') AND geaendert_am < now() - make_interval(days => %s)", (regeln["leads"]["aufbewahrung_tage"],), "leads (verloren/tot)", regeln["leads"])
@@ -945,11 +1050,11 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, veroeffentlichung_wacht, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         _lauf(job, cfg)   # ein kaputter Job darf die anderen nicht stoppen
 
 
