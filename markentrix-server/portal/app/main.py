@@ -45,7 +45,7 @@ from .routes_system import router as system_router
 from .routes_loginlink import router as loginlink_router
 from .routes_zahlung import router as zahlung_router
 from .routes_fruehwarnung import router as fruehwarnung_router
-from . import preisaenderung, routes_betriebplus, routes_status
+from . import preisaenderung, routes_betriebplus, routes_plattformstatus, routes_status
 from .routes_push import router as push_router
 from .routes_dashboard import router as dashboard_router
 from .routes_telefon import router as telefon_router
@@ -176,6 +176,8 @@ app.include_router(routes_betriebplus.admin)
 app.include_router(routes_betriebplus.kunde)
 app.include_router(routes_status.kunde)
 app.include_router(routes_status.public)
+app.include_router(routes_plattformstatus.public)
+app.include_router(routes_plattformstatus.admin)
 app.include_router(preisaenderung.admin)
 app.include_router(preisaenderung.public)
 app.include_router(push_router)

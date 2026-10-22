@@ -40,6 +40,23 @@ const dnsZeigen = (r) => {
   dnsBox.scrollIntoView({ behavior: 'smooth' });
 };
 
+async function statusKarte() {
+  const m = h('div'), box = h('div');
+  const art = h('select', {}, [['stoerung', 'Störung'], ['wartung', 'Wartung'], ['info', 'Hinweis']].map(([v, t]) => h('option', { value: v }, t)));
+  const titel = h('input', { placeholder: 'Kurzer Titel, z. B. „Wartung am Sonntag“', maxlength: 120 });
+  const text = h('textarea', { rows: 2, maxlength: 1500, placeholder: 'Was ist los, was bedeutet das für Kunden?' });
+  const laden = async () => {
+    const l = await api('/api/admin/statusmeldungen');
+    box.replaceChildren(tabelle([['Art', z => ({ stoerung: 'Störung', wartung: 'Wartung', info: 'Hinweis' })[z.art]], ['Titel', z => z.titel], ['Seit', z => zeit(z.beginn)], ['Stand', z => z.beendet_am ? 'beendet ' + zeit(z.beendet_am) : h('span', { class: 'pill warn' }, 'aktiv')],
+      ['', z => z.beendet_am ? '' : knopf('Beenden', async () => { try { await api('/api/admin/statusmeldungen/' + z.id + '/beenden', { method: 'POST' }); laden(); } catch (x) { melde(m, x.message); } }, 'sec small')]], l.slice(0, 8), 'Keine Meldungen.'));
+  };
+  setTimeout(laden, 0);
+  const url = location.origin + '/status';
+  return h('div', { class: 'card' }, h('h2', {}, 'Statusseite'), h('p', { class: 'small muted' }, 'Öffentlich ohne Anmeldung: ', h('a', { href: '/status', target: '_blank' }, url), '. Zeigt Portal, Datenbank, Websites (nur Zahlen), E-Mail und Sicherung automatisch. Hier trägst du Störungen und Wartung ein, damit Kunden nicht anrufen müssen.'), m,
+    h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Art'), art), h('div', {}, h('label', {}, 'Titel'), titel)), h('label', {}, 'Text (optional)'), text,
+    h('p', {}, knopf('Meldung veröffentlichen', async () => { if (!titel.value.trim()) { melde(m, 'Bitte einen Titel eintragen.'); return; } try { await api('/api/admin/statusmeldungen', { method: 'POST', body: { art: art.value, titel: titel.value, text: text.value } }); titel.value = ''; text.value = ''; melde(m, 'Veröffentlicht.', 'ok'); laden(); } catch (x) { melde(m, x.message); } }, '')), box);
+}
+
 async function uploadKarte(d) {
   const kunden = await api('/api/admin/kunden'), m = h('div'), verlauf = h('div');
   const art = h('select', {}, [['live', 'Live-Website (eigene Domain)'], ['demo', 'Demo (demo.markentrix.de/name)']].map(([v, t]) => h('option', { value: v }, t)));
@@ -214,7 +231,7 @@ V.websites = async () => {
     const t = { wartet: ['warn', 'Freigabe wartet'], freigegeben: ['ok', 'vom Kunden freigegeben'], abgelehnt: ['bad', 'Änderung gewünscht'], zurueckgezogen: ['', 'zurückgezogen'] }[f.status] || ['', f.status];
     return h('span', {}, h('span', { class: 'pill ' + t[0], title: f.kommentar || '' }, t[1]), f.entschieden_am ? h('span', { class: 'small muted' }, ' ' + new Date(f.entschieden_am).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + (f.entschieden_name ? ' · ' + f.entschieden_name : '')) : '');
   };
-  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, dnsBox, await uploadKarte(d), await vorschauKarte(d), await sicherungKarte(d),
+  return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, dnsBox, await statusKarte(), await uploadKarte(d), await vorschauKarte(d), await sicherungKarte(d),
     h('div', { class: 'card' }, h('h2', {}, 'Aktiv'),
       tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Status', status], ['DNS', dnsKnopf], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', z => h('span', {}, checkKnopf(z), ' ', liveKnopf(z), ' ', loesch(z))]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
     h('div', { class: 'card' }, h('h2', {}, 'Papierkorb'), h('p', { class: 'small muted' }, 'Gelöschte Seiten bleiben ' + d.aufbewahrung_tage + ' Tage erhalten und werden dann endgültig entfernt.'),
