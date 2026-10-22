@@ -24,8 +24,23 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    await domainKarte(), mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
+
+// ---------------------------------------------------------------- Domain-Stand
+/** Wo steht meine Website? Wartet sie noch auf die Domain-Umstellung, steht hier in einfachen Worten, was zu tun ist. */
+async function domainKarte() {
+  let z; try { z = (await api('/api/kunde/website-dienste/domains')).domains; } catch { return ''; }
+  if (!z.length) return '';
+  const farbe = { live: 'ok', zertifikat: 'warn', wartet_dns: 'warn', neu: 'warn', gestoert: 'bad' };
+  return h('div', { class: 'card', id: 'domain-stand' }, h('h2', {}, 'Meine Website-Adresse'),
+    ...z.map(x => h('div', { style: 'margin:10px 0' },
+      h('p', {}, h('span', { class: 'pill ' + (farbe[x.stand] || 'warn') }, x.titel), ' ', h('b', {}, x.domain)),
+      h('p', { class: 'small' }, x.text),
+      x.stand === 'wartet_dns' && x.schritte.length ? h('div', {}, h('p', { class: 'small' }, h('b', {}, 'Das ist zu tun' + (x.dns_anbieter ? ' (Verwaltung der Domain bei ' + x.dns_anbieter + ')' : '') + ':')), h('ol', { class: 'small' }, ...x.schritte.map(t => h('li', {}, t))),
+        h('p', { class: 'small muted' }, 'Das ändert nur, wohin die Adresse zeigt. Deine E-Mails und andere Einträge bleiben unverändert. Bei Fragen helfen wir gern.')) : '',
+      x.stand === 'live' && x.seit ? h('p', { class: 'small muted' }, 'Online seit ' + datum(x.seit)) : '')));
+}
 
 // ---------------------------------------------------------------- E-Mail
 function mailKarte(d, neu) {

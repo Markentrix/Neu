@@ -201,6 +201,22 @@ def wiederherstellen(data: WiederIn, user: dict = Depends(require_admin)):
     return {"ok": True, "hinweis": "Wird innerhalb einer Minute wiederhergestellt."}
 
 
+class KorbLoeschIn(BaseModel):
+    id: str = ""
+    alle: bool = False
+
+
+@router.post("/papierkorb-loeschen")
+def papierkorb_loeschen(data: KorbLoeschIn, user: dict = Depends(require_admin)):
+    """Löscht Papierkorb-Einträge endgültig (einen oder alle). Der Server-Dienst führt es aus, eine Sicherung bleibt wie üblich in den Backups."""
+    if not data.alle and (not TRASH_ID.match(data.id) or not (SITES / ".papierkorb" / data.id).is_dir()):
+        raise HTTPException(404, "Eintrag nicht gefunden.")
+    auftrag({"aktion": "papierkorb_loeschen", "id": "" if data.alle else data.id, "alle": bool(data.alle)})
+    with tx("admin") as cur:
+        audit(cur, user, "papierkorb_geloescht", None, {"id": data.id, "alle": data.alle})
+    return {"ok": True, "hinweis": "Wird innerhalb einer Minute endgültig gelöscht."}
+
+
 class VorschauIn(BaseModel):
     kunden_id: str
     demo_name: str

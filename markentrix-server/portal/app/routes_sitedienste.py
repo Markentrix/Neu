@@ -1037,6 +1037,34 @@ def k_wacht(user: dict = Depends(require_inhaber)):
         return {"seiten": webbetrieb.status(cur, user["kunden_id"])}
 
 
+@kunde.get("/domains")
+def k_domains(user: dict = Depends(require_inhaber)):
+    """Stand der Domain(s) des Kunden in einfachen Worten: wartet auf DNS (mit Anleitung), Zertifikat wird eingerichtet, live oder gestört."""
+    with tx("system") as cur:
+        cur.execute("""SELECT w.domain, w.letzte_veroeffentlichung, p.ok AS dns_ok, p.geprueft_am AS dns_am, p.ergebnis, t.ok AS seite_ok, t.seit, t.fehler
+                       FROM websites w LEFT JOIN domain_pruefung p ON p.domain = w.domain LEFT JOIN website_wacht t ON t.domain = w.domain
+                       WHERE w.kunden_id = %s AND w.art = 'live' AND w.status = 'live' ORDER BY w.domain""", (user["kunden_id"],))
+        zeilen = cur.fetchall()
+    out = []
+    for z in zeilen:
+        erg = z["ergebnis"] or {}
+        if z["seite_ok"]:
+            stand, titel, text = "live", "Deine Website ist online", "Deine Website ist unter dieser Adresse erreichbar und wird laufend überwacht."
+        elif z["dns_ok"] is None:
+            stand, titel, text = "neu", "Wird gerade eingerichtet", "Wir richten deine Website ein. Sobald sie veröffentlicht ist, siehst du hier den Stand."
+        elif not z["dns_ok"]:
+            stand, titel, text = "wartet_dns", "Wartet auf die Umstellung deiner Domain", "Deine Website ist fertig. Damit sie unter deiner Adresse erscheint, muss die Domain noch auf unseren Server zeigen. Die nötigen Schritte stehen unten, wir helfen gern dabei."
+        elif z["fehler"] and "Zertifikat" in z["fehler"]:
+            stand, titel, text = "zertifikat", "Sicheres HTTPS wird eingerichtet", "Die Domain zeigt auf unseren Server. Das Sicherheitszertifikat (HTTPS) wird gerade ausgestellt. Das dauert meist wenige Minuten."
+        else:
+            stand, titel, text = "gestoert", "Wir prüfen deine Website", "Die Website ist im Moment nicht erreichbar. Wir sind informiert und kümmern uns darum."
+        out.append({"domain": z["domain"], "stand": stand, "titel": titel, "text": text, "dns_am": z["dns_am"], "seit": z["seit"] if stand == "live" else None,
+                    "schritte": [x for x in (erg.get("schritte") or []) if not x.startswith("Danach")] if stand == "wartet_dns" else [],
+                    "dns_anbieter": erg.get("dns_anbieter") if stand == "wartet_dns" else None,
+                    "server_ipv4": (erg.get("server_ipv4") or []) if stand == "wartet_dns" else []})
+    return {"domains": out}
+
+
 @kunde.get("/statistik")
 def k_statistik(tage: int = 30, user: dict = Depends(require_inhaber)):
     tage = max(1, min(tage, 365))

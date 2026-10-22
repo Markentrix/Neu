@@ -8,6 +8,7 @@ import stat
 import zipfile
 from pathlib import Path
 
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from . import config, livecheck
@@ -56,7 +57,7 @@ def webroot_waehlen(teile_liste: list) -> tuple:
     return sorted(kandidaten, key=rang)[0]
 
 
-def entpacken(zip_pfad: Path, ziel: Path) -> tuple:
+def entpacken(zip_pfad: Path, ziel: Path, index_noetig: bool = True) -> tuple:
     """Prüft die ZIP streng und entpackt die Website nach ziel. Gibt (Anzahl Dateien, verwendeter Ordner in der ZIP) zurück.
     Ganze Projektordner sind erlaubt: Es wird nur der Ordner mit der fertigen Website übernommen, alles andere (Server-Code, Build-Skripte, Doku) bleibt draußen."""
     try:
@@ -94,6 +95,8 @@ def entpacken(zip_pfad: Path, ziel: Path) -> tuple:
             wurzel_ordner = alle[0][1][0]
             alle = [(i, t[1:]) for i, t in alle]
         wr = webroot_waehlen([t for _, t in alle])
+        if wr is None and not index_noetig:
+            wr = ()            # weitere ZIPs einer mehrteiligen Website (nur Bilder, CSS …) brauchen keine eigene index.html
         if wr is None:
             raise HTTPException(400, "In der ZIP wurde keine index.html gefunden. Bitte die fertige Website (mit index.html) packen.")
         eintraege = [(i, t[len(wr):]) for i, t in alle if tuple(t[:len(wr)]) == wr and len(t) > len(wr)]
@@ -134,6 +137,24 @@ def entpacken(zip_pfad: Path, ziel: Path) -> tuple:
         return len(eintraege), verwendet
 
 
+def skript_ersetzen(ordner: Path, site_id: str) -> int:
+    """Setzt in Seiten, die das Dienste-Skript schon enthalten, die Kennung der Website auf die des Kunden (z. B. wenn die Demo einem anderen Kunden gehörte)."""
+    n = 0
+    muster = re.compile(r'(<script[^>]*' + re.escape(SKRIPT_MARKE) + r'[^>]*\sdata-site=")[^"]*(")', re.I)
+    for p in list(ordner.rglob("*.html")) + list(ordner.rglob("*.htm")):
+        if p.is_symlink() or not p.is_file() or p.stat().st_size > 3_000_000:
+            continue
+        try:
+            t = p.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        neu = muster.sub(lambda m: m.group(1) + site_id + m.group(2), t)
+        if neu != t:
+            p.write_text(neu, encoding="utf-8")
+            n += 1
+    return n
+
+
 def skript_einfuegen(ordner: Path, site_id: str, basis: str) -> int:
     """Fügt das Skript der Website-Dienste vor </body> jeder HTML-Seite ein (einmal, ohne Doppelung)."""
     tag = f'<script src="{basis}/static/js/site.js" data-site="{site_id}" defer></script>\n'
@@ -155,15 +176,8 @@ def skript_einfuegen(ordner: Path, site_id: str, basis: str) -> int:
     return n
 
 
-@router.post("/upload")
-def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str = Form(...), kunden_id: str = Form(""), dienste_skript: str = Form("0"),
-              user: dict = Depends(require_admin)):
-    rate_limit("webupload:" + str(user["id"]), 60, 600)
-    name = _ordner_name(art, name.strip().lower())
-    if not (datei.filename or "").lower().endswith(".zip"):
-        raise HTTPException(400, "Bitte eine ZIP-Datei wählen.")
-    if not config.SITES_LIVE.is_dir():
-        raise HTTPException(500, "Der Website-Ordner ist im Portal nicht verfügbar.")
+def _kunde_aufloesen(art: str, name: str, kunden_id: str) -> tuple:
+    """Kunde zur Website bestimmen (Auswahl, Kundennummer oder bestehende Domain). Gibt (Kunden-ID, Firma, Kundennummer) zurück."""
     kid, firma, nr = None, "", ""
     with tx("admin") as cur:
         if re.match(r"^MK-?\d+$", kunden_id.strip(), re.I):         # auch die Kundennummer (MK-1001) wird als Auswahl akzeptiert
@@ -194,41 +208,75 @@ def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str 
             firma, nr = k["firma"], k["kundennummer"]
             if art == "live" and not k.get("domain"):
                 cur.execute("UPDATE kunden SET domain=%s WHERE id=%s", (name, kid))
+    return kid, firma, nr
+
+
+def _abschliessen(user: dict, art: str, name: str, kid, firma: str, nr: str, stage: Path, inhalt: Path, n: int, verwendet: str, skript: bool,
+                  zusatz: dict | None = None) -> tuple:
+    """Gemeinsamer Schluss von Upload und „Demo live schalten“: Website-Dienste einbauen, Website eintragen, prüfen, Auftrag für den Server-Dienst ablegen."""
+    eingefuegt = 0
+    with tx("admin") as cur:
+        if kid and skript:
+            site_id = sd.zeile(cur, kid)["site_id"]
+            eingefuegt = skript_ersetzen(inhalt, site_id) + skript_einfuegen(inhalt, site_id, config.BASE_URL)
+        if art == "live":
+            cur.execute("""INSERT INTO websites (kunden_id, domain, art, status, letzte_veroeffentlichung) VALUES (%s,%s,'live','live',now())
+                           ON CONFLICT (domain) DO UPDATE SET status='live', letzte_veroeffentlichung=now()""", (kid, name))
+        audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet, **(zusatz or {})})
+    try:
+        check = livecheck.pruefen(inhalt)
+    except Exception:  # noqa: BLE001
+        check = None
+    # Der Server-Dienst erwartet den Inhalt direkt im Zwischenordner
+    for p in list(inhalt.iterdir()):
+        shutil.move(str(p), str(stage / p.name))
+    inhalt.rmdir()
+    auftrag({"aktion": "veroeffentlichen", "art": art, "name": name, "upload": stage.name.removeprefix(".upload-"), "kunde": (nr + " " + firma)[:60].strip()})
+    return eingefuegt, check
+
+
+@router.post("/upload")
+def hochladen(datei: list[UploadFile] = File(...), art: str = Form("live"), name: str = Form(...), kunden_id: str = Form(""), dienste_skript: str = Form("0"),
+              user: dict = Depends(require_admin)):
+    rate_limit("webupload:" + str(user["id"]), 60, 600)
+    name = _ordner_name(art, name.strip().lower())
+    if not datei or len(datei) > 10:
+        raise HTTPException(400, "Bitte 1 bis 10 ZIP-Dateien wählen.")
+    if any(not (d.filename or "").lower().endswith(".zip") for d in datei):
+        raise HTTPException(400, "Bitte eine ZIP-Datei wählen.")
+    if not config.SITES_LIVE.is_dir():
+        raise HTTPException(500, "Der Website-Ordner ist im Portal nicht verfügbar.")
+    kid, firma, nr = _kunde_aufloesen(art, name, kunden_id)
     uid = secrets.token_hex(8)
     stage = config.SITES_LIVE / f".upload-{uid}"
     try:
         stage.mkdir(mode=0o755)
-        zip_pfad = stage / "_upload.zip"
-        gross = 0
-        with open(zip_pfad, "wb") as z:
-            while True:
-                block = datei.file.read(1 << 20)
-                if not block:
-                    break
-                gross += len(block)
-                if gross > MAX_ZIP:
-                    raise HTTPException(400, "Die ZIP ist zu groß (über 120 MB). Bitte Bilder und Videos verkleinern.")
-                z.write(block)
         inhalt = stage / "inhalt"
-        n, verwendet = entpacken(zip_pfad, inhalt)
-        zip_pfad.unlink()
-        eingefuegt = 0
-        with tx("admin") as cur:
-            if kid and dienste_skript == "1":
-                eingefuegt = skript_einfuegen(inhalt, sd.zeile(cur, kid)["site_id"], config.BASE_URL)
-            if art == "live":
-                cur.execute("""INSERT INTO websites (kunden_id, domain, art, status, letzte_veroeffentlichung) VALUES (%s,%s,'live','live',now())
-                               ON CONFLICT (domain) DO UPDATE SET status='live', letzte_veroeffentlichung=now()""", (kid, name))
-            audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet})
-        try:
-            check = livecheck.pruefen(inhalt)
-        except Exception:  # noqa: BLE001
-            check = None
-        # Der Server-Dienst erwartet den Inhalt direkt im Zwischenordner
-        for p in list(inhalt.iterdir()):
-            shutil.move(str(p), str(stage / p.name))
-        inhalt.rmdir()
-        auftrag({"aktion": "veroeffentlichen", "art": art, "name": name, "upload": uid, "kunde": (nr + " " + firma)[:60].strip()})
+        n, teile, gross = 0, [], 0
+        for nr_zip, d in enumerate(datei, 1):
+            zip_pfad = stage / f"_upload{nr_zip}.zip"
+            with open(zip_pfad, "wb") as z:
+                while True:
+                    block = d.file.read(1 << 20)
+                    if not block:
+                        break
+                    gross += len(block)
+                    if gross > MAX_ZIP:
+                        raise HTTPException(400, "Die ZIP-Dateien sind zusammen zu groß (über 120 MB). Bitte Bilder und Videos verkleinern.")
+                    z.write(block)
+            try:
+                n1, v1 = entpacken(zip_pfad, inhalt, index_noetig=len(datei) == 1)
+            except HTTPException as e:
+                if len(datei) > 1:
+                    raise HTTPException(400, f"ZIP {nr_zip} ({d.filename}): {e.detail}")
+                raise
+            zip_pfad.unlink()
+            n += n1
+            teile.append(v1)
+        if not (inhalt / "index.html").is_file():
+            raise HTTPException(400, "Nach dem Zusammenführen fehlt die index.html. Mindestens eine ZIP muss sie enthalten.")
+        verwendet = " + ".join(teile)
+        eingefuegt, check = _abschliessen(user, art, name, kid, firma, nr, stage, inhalt, n, verwendet, dienste_skript == "1")
     except HTTPException:
         shutil.rmtree(stage, ignore_errors=True)
         raise
@@ -237,6 +285,85 @@ def hochladen(datei: UploadFile = File(...), art: str = Form("live"), name: str 
         raise HTTPException(500, "Die Dateien konnten nicht abgelegt werden (Speicherplatz oder Rechte).")
     return {"ok": True, "id": uid, "dateien": n, "ordner": verwendet, "skript_in_seiten": eingefuegt, "check": check,
             "hinweis": "Hochgeladen und geprüft. Die Website wird innerhalb einer Minute veröffentlicht, unten erscheint das Ergebnis."}
+
+
+def demo_kopieren(quelle: Path, ziel: Path) -> tuple:
+    """Kopiert den Inhalt einer Demo (ohne Verknüpfungen, versteckte Dateien, Wochenangebote und site.json) in einen Zwischenordner. Gibt (Anzahl, Größe) zurück."""
+    n, gesamt = 0, 0
+    wurzel = quelle.resolve()
+    ziel.mkdir(parents=True, exist_ok=True)
+    for pf in sorted(quelle.rglob("*")):
+        rel = pf.relative_to(quelle)
+        teile = rel.parts
+        if pf.is_symlink():
+            raise HTTPException(400, "Die Demo enthält Verknüpfungen (Symlinks) und kann nicht übernommen werden.")
+        if teile[0] in ("angebote", "site.json") or any(t.startswith(".") and t != ".well-known" for t in teile) or teile[-1].lower() in EGAL:
+            continue
+        if wurzel not in pf.resolve().parents:
+            raise HTTPException(400, "Die Demo enthält unsichere Pfade.")
+        if pf.is_dir():
+            (ziel / rel).mkdir(parents=True, exist_ok=True)
+            continue
+        if not pf.is_file():
+            raise HTTPException(400, "Die Demo enthält unerlaubte Dateien.")
+        ext = pf.suffix[1:].lower()
+        if ext not in ERLAUBT:
+            raise HTTPException(400, f"In der Demo liegt ein nicht erlaubter Dateityp: {rel}")
+        n += 1
+        gesamt += pf.stat().st_size
+        if n > MAX_DATEIEN or gesamt > MAX_GESAMT:
+            raise HTTPException(400, "Die Demo ist zu groß.")
+        (ziel / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(pf, ziel / rel)
+        (ziel / rel).chmod(0o644)
+    if not (ziel / "index.html").is_file():
+        raise HTTPException(400, "In der Demo fehlt die index.html.")
+    return n, gesamt
+
+
+class DemoLiveIn(BaseModel):
+    demo: str
+    domain: str
+    kunden_id: str = ""
+    trotzdem: bool = False
+
+
+@router.post("/demo-zu-live")
+def demo_zu_live(data: DemoLiveIn, user: dict = Depends(require_admin)):
+    """Eine geprüfte Demo mit einem Klick als Live-Website auf die Kundendomain legen (gleicher Weg wie der Upload: Check, Sicherung, Caddy, Zertifikat)."""
+    rate_limit("demolive:" + str(user["id"]), 20, 600)
+    demo = _ordner_name("demo", data.demo.strip().lower())
+    name = _ordner_name("live", data.domain.strip().lower())
+    quelle = config.SITES_ROOT / "demos" / demo
+    if quelle.is_symlink() or not quelle.is_dir():
+        raise HTTPException(404, "Diese Demo gibt es nicht.")
+    if not config.SITES_LIVE.is_dir():
+        raise HTTPException(500, "Der Website-Ordner ist im Portal nicht verfügbar.")
+    with tx("admin") as cur:
+        cur.execute("SELECT status FROM kundenfreigaben WHERE demo_name=%s ORDER BY angefragt_am DESC LIMIT 1", (demo,))
+        f = cur.fetchone()
+    freigabe = f["status"] if f else None
+    if freigabe and freigabe != "freigegeben" and not data.trotzdem:
+        raise HTTPException(409, {"wartet": "Der Kunde hat diese Vorschau noch nicht freigegeben", "abgelehnt": "Der Kunde hat diese Vorschau abgelehnt",
+                                  "zurueckgezogen": "Die Freigabe-Anfrage wurde zurückgezogen"}.get(freigabe, "Die Vorschau ist nicht freigegeben")
+                            + ". Wirklich trotzdem live schalten?")
+    kid, firma, nr = _kunde_aufloesen("live", name, data.kunden_id)
+    uid = secrets.token_hex(8)
+    stage = config.SITES_LIVE / f".upload-{uid}"
+    try:
+        stage.mkdir(mode=0o755)
+        inhalt = stage / "inhalt"
+        n, _ = demo_kopieren(quelle, inhalt)
+        eingefuegt, check = _abschliessen(user, "live", name, kid, firma, nr, stage, inhalt, n, "Demo " + demo, True,
+                                          {"aus_demo": demo, "freigabe": freigabe or "keine Anfrage"})
+    except HTTPException:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+    except OSError:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise HTTPException(500, "Die Dateien konnten nicht abgelegt werden (Speicherplatz oder Rechte).")
+    return {"ok": True, "id": uid, "dateien": n, "skript_in_seiten": eingefuegt, "check": check, "freigabe": freigabe,
+            "hinweis": f"Die Demo „{demo}“ wird innerhalb einer Minute als {name} veröffentlicht. Damit sie dort erreichbar ist, muss die Domain auf den Server zeigen; unter „DNS prüfen“ steht, was zu tun ist."}
 
 
 @router.post("/zurueck")

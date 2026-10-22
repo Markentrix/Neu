@@ -132,6 +132,25 @@ CADDY
         [ -e "$ziel/$n" ] || { cp "$f" "$ziel/$n"; echo "übernommen: $n"; }
       done
     fi
+    # Demo-Adresse (demo.<domain>) im bestehenden Caddy anlegen, falls dort noch kein Block dafür steht
+    if [ "$MODE" != own ] && [ -n "${DOMAIN:-}" ] && [ ! -e "$ziel/demo.$DOMAIN.caddy" ]; then
+      cat > "$ziel/demo.$DOMAIN.caddy" <<DEMO
+# Demo-Versionen: https://demo.$DOMAIN/<name>/ (von Markentrix angelegt)
+demo.$DOMAIN {
+	encode zstd gzip
+	root * /srv/sites/demos
+	header X-Robots-Tag "noindex, nofollow"
+	file_server
+}
+DEMO
+      chmod 644 "$ziel/demo.$DOMAIN.caddy"
+      if [ "$MODE" = docker ]; then
+        c="$(cat "$BASE/caddy-container" 2>/dev/null || true)"; docker exec "$c" caddy validate --config /etc/caddy/Caddyfile >/dev/null 2>&1 || ok=nein
+      else
+        caddy validate --config /etc/caddy/Caddyfile >/dev/null 2>&1 || ok=nein
+      fi
+      if [ "${ok:-}" = nein ]; then rm -f "$ziel/demo.$DOMAIN.caddy"; echo "Demo-Adresse steht schon im Caddy (oder die Prüfung schlug fehl): nichts angelegt."; else echo "Demo-Adresse demo.$DOMAIN im Caddy angelegt."; fi
+    fi
     reload_caddy
     ;;
 

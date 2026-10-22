@@ -410,10 +410,16 @@ Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nu
 
 **Vor dem ersten Kunden:** Domain des Kunden in der Domainverwaltung eintragen (sonst lehnt der Server die Website ab); Datenschutzerklärung der Website um Kontaktformular, Terminbuchung und ggf. Google-Bewertungen/PayPal ergänzen; AVV-Beschreibung der Leistungen und Anlage 3 (Unterauftragsverarbeiter: Google Places) vom Anwalt prüfen lassen (docs/ANWALT-CHECKLISTE.md).
 
+**Papierkorb:** Gelöschte Seiten liegen 14 Tage im Papierkorb (Websites & Demos, ganz unten). Dort gibt es „Wiederherstellen“, „Endgültig löschen“ (je Eintrag, mit Rückfrage) und „Papierkorb leeren“. Endgültig gelöscht ist nicht rückholbar, nur noch aus einer Sicherung.
+
+**Demo-Adresse bei bestehendem Caddy:** `install.sh` legt `demo.<domain>` im vorhandenen Caddy selbst an (Datei im Caddy-Ordner), sofern dort noch kein Block dafür steht. Ohne diesen Eintrag zeigt der Browser bei Demos „ERR_SSL_PROTOCOL_ERROR“. Nachträglich: `mkctl caddy-neu`.
+
 ## Website als ZIP hochladen (Admin → Websites & Demos → „Website hochladen“)
 So veröffentlichst du eine fertige Kunden-Website, ohne SSH oder WinSCP:
 1. Website als ZIP packen. Entweder die fertige Website (`index.html` oben) oder ein ganzes Projekt: Das Portal findet den Website-Ordner selbst (bevorzugt `website-fertig`, `dist`, `public`, sonst den höchsten Ordner mit `index.html`) und übernimmt nur diesen. Server-Code, Build-Skripte, Docker-Dateien und Doku bleiben draußen. Nach dem Hochladen steht, aus welchem Ordner die Dateien kamen.
 2. Im Admin **Websites & Demos** → **Website hochladen**: Art (Live oder Demo), Domain ohne www (z. B. `elbdetail.de`), **Kunde mit Kundennummer** (MK-1001 · Firma; die Domain des Kunden wird vorgeschlagen), ZIP wählen, **Hochladen und veröffentlichen**.
+   **Mehrere ZIPs (Zip 1 + Zip 2):** Beim Auswählen mehrere ZIP-Dateien gleichzeitig markieren (bis 10). Sie werden in der gewählten Reihenfolge zu einer Website zusammengeführt, gleichnamige Dateien aus einer späteren ZIP ersetzen frühere; mindestens eine ZIP braucht die `index.html`. Bei einem Fehler nennt die Meldung die betroffene ZIP, dann wird nichts veröffentlicht.
+
 3. Das Portal prüft die ZIP (keine Skripte wie .php/.exe, keine Symlinks, keine unsicheren Pfade, keine versteckten Dateien, Größenlimits: 120 MB ZIP, 400 MB entpackt) und legt einen Auftrag ab. Der Server-Dienst (läuft jede Minute) richtet bei einer neuen Domain den Webserver-Eintrag für `domain` und `www.domain` ein (HTTPS-Zertifikat automatisch, sobald die Domain per A-Eintrag auf den Server zeigt) und schaltet die Seite live. Das Ergebnis erscheint unter dem Formular, mit Link zur Seite.
 4. Haken „Website-Dienste automatisch einbauen“: fügt das Skript für Formular, Termine, Bewertungen und Statistik (Cookie-Abfrage) vor `</body>` jeder HTML-Seite ein, mit der Kennung dieses Kunden. Die Bausteine selbst (`data-mk=…`) setzt du dort, wo sie erscheinen sollen (Code im Kundenblatt → Website-Dienste).
 

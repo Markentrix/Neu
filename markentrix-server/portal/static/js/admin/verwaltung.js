@@ -1,5 +1,5 @@
 import { leistungstextKarte } from './angebotsplus.js';
-import { h, api, datum, zeit, euro, melde, formular } from '../common.js';
+import { h, api, datum, zeit, euro, melde, formular, dialog } from '../common.js';
 import { V, bestaetigt, cent, fehler, feld, fmtEuro, knopf, kopf, pill, tabelle } from './kern.js';
 
 V.katalog = async () => {
@@ -45,7 +45,7 @@ async function uploadKarte(d) {
   const art = h('select', {}, [['live', 'Live-Website (eigene Domain)'], ['demo', 'Demo (demo.markentrix.de/name)']].map(([v, t]) => h('option', { value: v }, t)));
   const name = h('input', { placeholder: 'Domain ohne www, z. B. elbdetail.de', maxlength: 253, autocomplete: 'off' });
   const kunde = h('select', {}, [h('option', { value: '' }, '– Kunde wählen –')].concat(kunden.map(k => h('option', { value: k.id, 'data-domain': k.domain || '' }, k.kundennummer + ' · ' + k.firma))));
-  const datei = h('input', { type: 'file', accept: '.zip,application/zip' });
+  const datei = h('input', { type: 'file', accept: '.zip,application/zip', multiple: true });
   const skript = h('input', { type: 'checkbox', style: 'width:auto', checked: true });
   const knopfHoch = h('button', { class: 'btn', type: 'button' }, 'Hochladen und veröffentlichen');
   art.addEventListener('change', () => { name.placeholder = art.value === 'live' ? 'Domain ohne www, z. B. elbdetail.de' : 'Name der Demo, z. B. anadolu'; });
@@ -85,7 +85,7 @@ async function uploadKarte(d) {
   knopfHoch.addEventListener('click', async () => {
     melde(m, '');
     if (!datei.files.length) { melde(m, 'Bitte eine ZIP-Datei wählen.'); return; }
-    const f = new FormData(); f.append('datei', datei.files[0]); f.append('art', art.value); f.append('name', name.value); f.append('kunden_id', kunde.value); f.append('dienste_skript', skript.checked ? '1' : '0');
+    const f = new FormData(); for (const x of datei.files) f.append('datei', x); f.append('art', art.value); f.append('name', name.value); f.append('kunden_id', kunde.value); f.append('dienste_skript', skript.checked ? '1' : '0');
     knopfHoch.disabled = true; knopfHoch.textContent = 'Lade hoch …';
     try { const r = await api('/api/admin/websites/upload', { method: 'POST', body: f }); melde(m, r.hinweis + ' (' + r.dateien + ' Dateien aus „' + r.ordner + '“' + (r.skript_in_seiten ? ', Website-Dienste in ' + r.skript_in_seiten + ' Seiten eingebaut' : '') + ')', 'ok'); if (r.check) checkZeigen(r.check, name.value); datei.value = ''; setTimeout(ladeVerlauf, 1500); }
     catch (x) { melde(m, x.message); }
@@ -99,7 +99,7 @@ async function uploadKarte(d) {
   setTimeout(ladeVerlauf, 0);
   const f = (t, el, tipp) => h('div', {}, h('label', {}, t), el, tipp ? h('div', { class: 'small muted' }, tipp) : '');
   return h('div', { class: 'card' }, h('h2', {}, 'Website hochladen'),
-    h('p', { class: 'small muted' }, 'Die fertige Website als ZIP (die index.html direkt oben). Der Server prüft die Dateien, richtet bei einer neuen Domain Website und HTTPS selbst ein und sichert die vorige Version. Erneutes Hochladen mit demselben Namen aktualisiert die Seite.'),
+    h('p', { class: 'small muted' }, 'Die fertige Website als ZIP (die index.html direkt oben). Besteht sie aus mehreren Teilen (z. B. Zip 1 = Seiten, Zip 2 = Bilder), alle ZIPs gleichzeitig auswählen: Sie werden in dieser Reihenfolge zusammengeführt, spätere ersetzen gleichnamige Dateien. Der Server prüft die Dateien, richtet bei einer neuen Domain Website und HTTPS selbst ein und sichert die vorige Version. Erneutes Hochladen mit demselben Namen aktualisiert die Seite.'),
     m, liste, h('div', { class: 'form2' }, f('Art', art), f('Name / Domain', name, 'Bei bestehenden Seiten wird der Name vorgeschlagen.'), f('Kunde (Kundennummer)', kunde, 'Bei neuen Live-Websites nötig. Die Domain des Kunden wird vorgeschlagen.'), f('ZIP-Datei', datei, 'Bis 120 MB.')),
     h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin-top:8px' }, skript, 'Website-Dienste (Formular, Termine, Statistik) automatisch in alle Seiten einbauen'),
     h('div', { class: 'row', style: 'margin-top:10px' }, knopfHoch, zurueckKnopf), verlauf);
@@ -156,10 +156,43 @@ V.websites = async () => {
       try { const r = await api('/api/admin/websites/loeschen', { method: 'POST', body: { art: z.art, name: z.name, bestaetigung: eingabe } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
       catch (x) { melde(m, x.message); }
     } }, 'Löschen');
+  /** Demo mit einem Klick als Live-Website auf die Kundendomain legen (Check, Sicherung, Webserver und Zertifikat laufen wie beim Upload). */
+  const liveKnopf = (z) => z.art !== 'demo' ? '' : h('button', { class: 'btn small', title: 'Diese Demo als Live-Website veröffentlichen', onclick: async () => {
+    const kunden = await api('/api/admin/kunden'), dm = h('div');
+    const nr = (z.kunde || '').split(' ')[0].toUpperCase();
+    const vorwahl = kunden.find(k => k.kundennummer && k.kundennummer.toUpperCase() === nr) || (z.freigabe && kunden.find(k => k.firma === z.freigabe.firma)) || null;
+    const kunde = h('select', {}, [h('option', { value: '' }, '– Kunde wählen –')].concat(kunden.map(k => h('option', { value: k.id, 'data-domain': k.domain || '', selected: !!vorwahl && vorwahl.id === k.id }, k.kundennummer + ' · ' + k.firma))));
+    const dom = h('input', { placeholder: 'Domain ohne www, z. B. elbdetail.de', maxlength: 253, autocomplete: 'off', value: vorwahl && vorwahl.domain ? String(vorwahl.domain).replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '') : '' });
+    kunde.addEventListener('change', () => { const x = (kunde.selectedOptions[0].getAttribute('data-domain') || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); if (x && !dom.value) dom.value = x; });
+    const st = z.freigabe ? { wartet: 'Der Kunde hat die Vorschau noch nicht freigegeben.', freigegeben: 'Der Kunde hat die Vorschau freigegeben.', abgelehnt: 'Der Kunde hat die Vorschau abgelehnt.', zurueckgezogen: 'Die Freigabe-Anfrage wurde zurückgezogen.' }[z.freigabe.status] : 'Zu dieser Demo gibt es keine Freigabe-Anfrage.';
+    const los = h('button', { class: 'btn', type: 'button' }, 'Jetzt live schalten');
+    const senden = async (trotzdem) => api('/api/admin/websites/demo-zu-live', { method: 'POST', body: { demo: z.name, domain: dom.value, kunden_id: kunde.value, trotzdem } });
+    const d = dialog('Demo „' + z.name + '“ live schalten', h('div', {}, h('p', { class: 'small' }, st), h('p', { class: 'small muted' }, 'Die Demo wird so, wie sie ist, auf die Kundendomain gelegt. Eine bestehende Live-Seite wird dabei ersetzt, die vorige Version bleibt gesichert.'),
+      h('label', {}, 'Domain der Kunden-Website'), dom, h('label', {}, 'Kunde'), kunde, dm, h('p', {}, los)));
+    los.addEventListener('click', async () => {
+      melde(dm, ''); los.disabled = true;
+      try {
+        let r;
+        try { r = await senden(false); }
+        catch (x) { if (/trotzdem live schalten/.test(x.message) && confirm(x.message)) r = await senden(true); else throw x; }
+        d.zu(); melde(m, r.hinweis, 'ok'); if (r.check) checkZeigen(r.check, dom.value); setTimeout(() => location.reload(), 4000);
+      } catch (x) { melde(dm, x.message); los.disabled = false; }
+    });
+  } }, 'Live schalten');
   const zurueck = (z) => h('button', { class: 'btn small sec', onclick: async () => {
     try { const r = await api('/api/admin/websites/wiederherstellen', { method: 'POST', body: { id: z.id } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
     catch (x) { melde(m, x.message); }
   } }, 'Wiederherstellen');
+  const korbWeg = (z) => h('button', { class: 'btn small bad', onclick: async () => {
+    if (!confirm('„' + z.name + '“ endgültig löschen? Das kann nicht rückgängig gemacht werden.')) return;
+    try { const r = await api('/api/admin/websites/papierkorb-loeschen', { method: 'POST', body: { id: z.id } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
+    catch (x) { melde(m, x.message); }
+  } }, 'Endgültig löschen');
+  const korbLeeren = () => h('button', { class: 'btn small bad', onclick: async () => {
+    if (!confirm('Den ganzen Papierkorb endgültig leeren? Das kann nicht rückgängig gemacht werden.')) return;
+    try { const r = await api('/api/admin/websites/papierkorb-loeschen', { method: 'POST', body: { alle: true } }); melde(m, r.hinweis, 'ok'); setTimeout(() => location.reload(), 1500); }
+    catch (x) { melde(m, x.message); }
+  } }, 'Papierkorb leeren');
   const checkKnopf = (z) => h('button', { class: 'btn small sec', onclick: async () => { try { checkZeigen(await api('/api/admin/websites/livecheck?art=' + z.art + '&name=' + encodeURIComponent(z.name)), z.name); } catch (x) { melde(m, x.message); } } }, 'Check');
   const dnsKnopf = (z) => z.art !== 'live' ? '' : h('span', {}, z.dns ? h('span', { class: 'pill ' + (z.dns.ok ? 'ok' : 'warn') }, z.dns.ok ? 'DNS ok' : 'DNS offen') : '', ' ',
     h('button', { class: 'btn small sec', onclick: async () => { try { dnsZeigen(await api('/api/admin/websites/domain/' + encodeURIComponent(z.name))); } catch (x) { melde(m, x.message); } } }, 'DNS prüfen'), ' ',
@@ -183,9 +216,9 @@ V.websites = async () => {
   };
   return h('div', { class: 'stack' }, kopf('Websites & Demos'), m, dnsBox, await uploadKarte(d), await vorschauKarte(d), await sicherungKarte(d),
     h('div', { class: 'card' }, h('h2', {}, 'Aktiv'),
-      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Status', status], ['DNS', dnsKnopf], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', z => h('span', {}, checkKnopf(z), ' ', loesch(z))]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
+      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Kunde', z => z.kunde], ['Status', status], ['DNS', dnsKnopf], ['Größe', z => mb(z.groesse)], ['Dateien', z => z.dateien], ['Zuletzt geändert', z => z.geaendert ? wann(z.geaendert) : ''], ['', z => h('span', {}, checkKnopf(z), ' ', liveKnopf(z), ' ', loesch(z))]], d.aktiv, 'Noch keine Seiten angelegt (mkctl site-add / demo-add).')),
     h('div', { class: 'card' }, h('h2', {}, 'Papierkorb'), h('p', { class: 'small muted' }, 'Gelöschte Seiten bleiben ' + d.aufbewahrung_tage + ' Tage erhalten und werden dann endgültig entfernt.'),
-      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Gelöscht', z => wann(z.geloescht)], ['Größe', z => mb(z.groesse)], ['', zurueck]], d.papierkorb, 'Papierkorb ist leer.')));
+      tabelle([['Art', z => z.art === 'live' ? 'Live' : 'Demo'], ['Name', z => z.name], ['Gelöscht', z => wann(z.geloescht)], ['Größe', z => mb(z.groesse)], ['', z => h('span', {}, zurueck(z), ' ', korbWeg(z))]], d.papierkorb, 'Papierkorb ist leer.'), d.papierkorb.length ? h('p', {}, korbLeeren()) : ''));
 };
 
 

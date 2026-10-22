@@ -99,6 +99,19 @@ def wiederherstellen(tid):
     log(f"wiederhergestellt: {art} {name}")
 
 
+def papierkorb_loeschen(a):
+    """Löscht einen oder alle Papierkorb-Einträge endgültig (nur Ordner mit gültiger ID, keine Symlinks)."""
+    ids = [p.name for p in TRASH.iterdir()] if a.get("alle") and TRASH.is_dir() else [str(a.get("id", ""))]
+    for tid in ids:
+        if not TRASH_ID.match(tid):
+            continue
+        q = TRASH / tid
+        if q.is_symlink() or not q.is_dir():
+            continue
+        shutil.rmtree(q, ignore_errors=True)
+        log(f"Papierkorb endgültig gelöscht: {tid}")
+
+
 UPLOAD = re.compile(r"^[0-9a-f]{16}$")
 VORVERSION = SITES / ".vorversionen"
 VOR_BEHALTEN = 3
@@ -439,6 +452,8 @@ def main():
                 zurueck(a)
             elif a.get("aktion") == "caddy_neu_laden":
                 reload_caddy()
+            elif a.get("aktion") == "papierkorb_loeschen":
+                papierkorb_loeschen(a)
             elif a.get("aktion") == "wiederherstellen":
                 wiederherstellen(str(a.get("id", "")))
             else:
