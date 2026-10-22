@@ -23,7 +23,7 @@ return [
         'lng'         => 9.9151511,
         'instagram'   => 'https://www.instagram.com/ajat.elier/',
         'priceRange'  => '€€',
-        'areaServed'  => ['Wettmar', 'Burgwedel', 'Großburgwedel', 'Kleinburgwedel', 'Thönse', 'Engensen', 'Fuhrberg', 'Isernhagen', 'Hannover'],
+        'areaServed'  => ['Wettmar', 'Burgwedel', 'Großburgwedel', 'Kleinburgwedel', 'Thönse', 'Engensen', 'Fuhrberg', 'Burgdorf', 'Wedemark', 'Isernhagen', 'Langenhagen', 'Lehrte', 'Hannover', 'Celle'],
     ],
 
     // Gutscheine: Anfrage über das Portal, Zahlung per PayPal.Me-Link vom Salon

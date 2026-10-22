@@ -41,11 +41,17 @@ Farbpreise werden nach Aufwand und Verbrauch berechnet; vor Ort gibt es einen in
 - Thönse: ca. 4 Min. (3,1 km)
 - Großburgwedel: ca. 7 Min. (5,4 km)
 - Fuhrberg: ca. 11 Min. (10,4 km)
+- Burgdorf (Zentrum): ca. 16 Min. (11,3 km)
+- Wedemark-Bissendorf: ca. 16 Min. (14,1 km)
+- Wedemark-Mellendorf: ca. 21 Min. (19,0 km)
 - Isernhagen H.B.: ca. 15 Min. (11,0 km)
 - Isernhagen Kirchhorst: ca. 15 Min. (11,7 km)
 - Langenhagen (Zentrum): ca. 27 Min. (17,1 km)
+- Lehrte (Zentrum): ca. 23 Min. (25,5 km)
 - Hannover-Bothfeld: ca. 22 Min. (24,7 km)
 - Hannover-List: ca. 31 Min. (29,5 km)
+- Celle-Westercelle: ca. 25 Min. (25,5 km)
+- Celle (Altstadt): ca. 30 Min. (29,8 km)
 
 ## Wichtige Seiten
 
@@ -56,9 +62,13 @@ Farbpreise werden nach Aufwand und Verbrauch berechnet; vor Ort gibt es einen in
 - [Kontakt & Anfahrt](https://www.aj-atelier-wettmar.de/kontakt)
 - [Häufige Fragen](https://www.aj-atelier-wettmar.de/faq)
 - [Friseur in Burgwedel](https://www.aj-atelier-wettmar.de/friseur-burgwedel)
+- [Friseur für Burgdorf](https://www.aj-atelier-wettmar.de/friseur-burgdorf)
+- [Friseur für die Wedemark](https://www.aj-atelier-wettmar.de/friseur-wedemark)
 - [Friseur für Isernhagen](https://www.aj-atelier-wettmar.de/friseur-isernhagen)
 - [Friseur für Langenhagen](https://www.aj-atelier-wettmar.de/friseur-langenhagen)
+- [Friseur für Lehrte](https://www.aj-atelier-wettmar.de/friseur-lehrte)
 - [Friseur für Hannover-Nord](https://www.aj-atelier-wettmar.de/friseur-hannover)
+- [Friseur für Celle](https://www.aj-atelier-wettmar.de/friseur-celle)
 
 ## Ratgeber
 
