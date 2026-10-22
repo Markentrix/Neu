@@ -132,7 +132,7 @@ footer.site{background:var(--dark);color:#B9B9B4;padding-block:3rem 5.5rem;font-
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 /* Responsive */
 @media (max-width:1060px){.collage{margin-top:1rem}.bikes{grid-template-columns:repeat(2,1fr)}.tiles{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:repeat(2,1fr)}.svc{grid-template-columns:repeat(2,1fr)}.hero .grid,.split,.detail,.band{grid-template-columns:1fr}.buy{position:static}.collage{max-width:28rem}.foot-grid{grid-template-columns:1fr 1fr}.finder{grid-template-columns:1fr 1fr}.finder .btn{grid-column:1/-1}}
-@media (max-width:880px){
+@media (max-width:1100px){
   header.site .wrap{flex-wrap:wrap;padding-block:.35rem}nav.main{order:3;width:100%}nav.main ul{flex-wrap:wrap;gap:.2rem 1.1rem}
   .js .menu-btn{display:inline-flex;align-items:center;justify-content:center}.js nav.main{display:none;padding:.4rem 0 1rem}.js nav.main[data-open="true"]{display:block}.js nav.main ul{flex-direction:column;gap:0}nav.main a{display:block;padding:.8rem 0;font-size:1.1rem}
   .hdr-cta .btn{display:none}.actionbar{display:flex}.filters{top:3.6rem}
@@ -154,7 +154,7 @@ footer.site{background:var(--dark);color:#B9B9B4;padding-block:3rem 5.5rem;font-
 
 .winter-strip .btn.ghost,.winter-hero .btn.ghost{color:#fff;border-color:#fff}.winter-strip .btn.ghost:hover,.winter-hero .btn.ghost:hover{background:#fff;color:var(--ice-dk)}
 .hdr-cta .btn{white-space:nowrap}
-@media (max-width:1240px) and (min-width:881px){.hdr-cta .btn.ghost{display:none}}
+@media (max-width:1400px) and (min-width:1101px){.hdr-cta .btn.ghost{display:none}}
 /* SEO/GEO: Brotkrumen, Kurzantworten, Fakten, Ratgeber */
 .crumbs-bar{background:var(--surface);border-bottom:1px solid var(--line);font-size:.86rem;color:var(--muted)}.crumbs-bar .wrap{padding-block:.55rem}.crumbs-bar a{color:var(--muted)}
 .answer{background:var(--surface);border-left:5px solid var(--red);padding:1rem 1.3rem;border-radius:8px;font-size:1.05rem;line-height:1.55;max-width:70ch;margin:0;box-shadow:0 1px 0 var(--line)}
@@ -180,3 +180,10 @@ footer.site{background:var(--dark);color:#B9B9B4;padding-block:3rem 5.5rem;font-
 
 .collage figure::before{content:"";position:absolute;inset:-12%;background:var(--bg) center/cover;filter:blur(14px) brightness(.7)}
 .collage figure img{position:relative;object-fit:contain}
+
+.bikes.compact{grid-template-columns:repeat(4,1fr);gap:1rem}
+.compact .ph{aspect-ratio:4/3}.compact .body{padding:.8rem .9rem 1rem;gap:.35rem}
+.compact h3,.compact h2{font-size:1.2rem}.compact .specs{font-size:.82rem;gap:.15rem .6rem}.compact .price b{font-size:1.4rem}
+.compact .acts .btn{min-height:42px;font-size:.9rem}.compact .acts .btn.ghost{display:none}.compact .badge{font-size:.7rem}
+@media (max-width:1060px){.bikes.compact{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:720px){.bikes.compact{grid-template-columns:repeat(2,1fr);gap:.7rem}.compact .specs li:nth-child(3){display:none}.compact .acts{display:none}.compact .body{padding:.65rem .7rem .8rem}.compact h3,.compact h2{font-size:1.05rem}}

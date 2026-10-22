@@ -64,7 +64,7 @@ og.make_all(BIKES, eur, kmf)
 
 WINTER = True   # Saison-Schalter: Winterlager-Kampagne (Banner, Startseiten-Streifen, Hero-Link). Im Frühjahr auf False oder durch Saisonstart-Kampagne ersetzen.
 SNOW = '<svg class="snow" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/><path d="M9 4l3 2 3-2M9 20l3-2 3 2M4 9.5l3.2.4-.9-3.1M20 14.5l-3.2-.4.9 3.1M4 14.5l3.2-.4-.9 3.1M20 9.5l-3.2.4.9-3.1"/></g></svg>'
-NAV = [('Motorräder', 'motorraeder.html'), ('Überwintern', 'ueberwintern.html'), ('Verkaufen', 'ankauf.html'), ('Service & Finanzierung', 'service.html'), ('Über uns', 'ueber-uns.html'), ('Kontakt', 'kontakt.html')]
+NAV = [('Motorräder', 'motorraeder.html'), ('Angebote', 'angebote.html'), ('Überwintern', 'ueberwintern.html'), ('Verkaufen', 'ankauf.html'), ('Service', 'service.html'), ('Über uns', 'ueber-uns.html'), ('Kontakt', 'kontakt.html')]
 
 def no_reveal_above_fold(body, n):
     parts = body.split('</section>')
@@ -171,7 +171,7 @@ LD_OLD = '<script type="application/ld+json">' + json.dumps({"@context": "https:
 
 # ================= START =================
 by_price = lambda lo, hi: sum(1 for b in BIKES if lo <= b['price'] <= hi)
-feat = BIKES[:6]
+feat = BIKES[:12]
 opt_m = ''.join(f'<option>{esc(x)}</option>' for x in BRANDS); opt_t = ''.join(f'<option>{esc(x)}</option>' for x in TYPES)
 col = [('a', 'kawasaki-z1000-2015-1.webp', 'Kawasaki Z 1000', 'Grüne Kawasaki Z 1000 vor der Verkaufshalle'), ('b', 'honda-crf1000-dct-a-2.webp', 'Honda CRF 1000', 'Honda CRF 1000 Africa Twin Seitenansicht'), ('c', 'suzuki-gsxr750-k1-1.webp', 'Suzuki GSX-R', 'Gelbe Suzuki GSX-R 750'), ('d', 'kawasaki-zx10r-2005-1.webp', 'Kawasaki ZX-10R', 'Kawasaki ZX-10R in Silber')]
 FP = ' fetchpriority="high"'
@@ -210,8 +210,9 @@ home = f'''<section class="hero"><div class="wrap"><div class="grid">
 </div></div></section>
 
 <section aria-labelledby="best-h"><div class="wrap">
-<div class="head" data-reveal><div><p class="eyebrow">Aktueller Bestand</p><h2 id="best-h">Highlights im Bestand</h2></div><p><a class="btn ghost sm" href="motorraeder.html">Alle {N} Motorräder</a></p></div>
-<ul class="bikes">{''.join(card(b, lazy=i > 2, d=(i % 3) * .06) for i, b in enumerate(feat))}</ul>
+<div class="head" data-reveal><div><p class="eyebrow">Aktueller Bestand</p><h2 id="best-h">Unsere Motorräder im Überblick</h2></div><p><a class="btn ghost sm" href="motorraeder.html">Alle {N} Motorräder</a></p></div>
+<ul class="bikes compact">{''.join(card(b, lazy=i > 3, d=(i % 4) * .05) for i, b in enumerate(feat))}</ul>
+<p style="margin-top:1.5rem"><a class="btn" href="motorraeder.html">Alle {N} Motorräder ansehen</a> <a class="btn ghost" href="angebote.html">Aktuelle Angebote</a></p>
 <p class="note" style="margin-top:1.2rem">VB = Verhandlungsbasis. Zwischenverkauf vorbehalten: Bitte bestätigen Sie die Verfügbarkeit kurz telefonisch.</p>
 </div></section>
 
@@ -371,6 +372,24 @@ layout('kontakt.html', 'Kontakt & Probefahrt | Motorradhandel-Celle', 'Kontakt z
 # ================= DANKE / RECHT / 404 =================
 dk = f'''<section class="page-hero"><div class="wrap"><p class="eyebrow">Danke</p><h1>Anfrage eingegangen.</h1><p>Wir melden uns bei Ihnen. <span class="ph-note">[Antwortzeit nur nennen, wenn der Kunde sie zusagt]</span></p></div></section>
 <section><div class="wrap"><h2 style="font-size:2rem">Während Sie warten</h2><ul class="bikes" style="margin-top:1rem">{''.join(card(b, d=i*.05) for i, b in enumerate(BIKES[:3]))}</ul><p style="margin-top:1.5rem"><a class="btn" href="motorraeder.html">Alle Motorräder ansehen</a> <a class="btn ghost" href="tel:{PHONE_TEL}">Lieber anrufen</a></p></div></section>'''
+def pick(fn): return [b for b in BIKES if fn(b)]
+ang_groups = [
+ ('Günstiger Einstieg', 'Motorräder und Roller bis 2.500 €.', pick(lambda b: b['price'] <= 2500)),
+ ('Wenig Kilometer', 'Motorräder mit unter 13.000 km laut Anzeige.', pick(lambda b: b['km'] < 13000)),
+ ('Beliebte Sportler', 'Supersportler bis 6.000 €.', pick(lambda b: b['typ'] == 'Sportler' and b['price'] <= 6000)[:4]),
+]
+def ang_sec(i, t, d, items):
+    alt = ' class="alt"' if i % 2 else ''
+    return f'<section{alt}><div class="wrap"><div class="head" data-reveal><div><p class="eyebrow">Bestand</p><h2>{t}</h2><p>{d}</p></div><p><a class="btn ghost sm" href="motorraeder.html">Gesamten Bestand ansehen</a></p></div><ul class="bikes compact">{"".join(card(b, d=(j % 4) * .05) for j, b in enumerate(items))}</ul></div></section>'
+ang_body = f'''<section style="padding-top:2.5rem"><div class="wrap"><p class="eyebrow">Angebote</p><h1 style="font-size:clamp(2.4rem,5.5vw,4rem)">Angebote bei Motorradhandel-Celle.</h1>
+<p class="lede">Hier finden Sie, was wir aktuell besonders empfehlen: Winterlager, ausgewählte Motorräder und Möglichkeiten, Ihr altes Motorrad loszuwerden.</p></div></section>
+{('<section class="winter-strip"><div class="wrap"><div class="ws" data-reveal><div class="ws-t"><p class="eyebrow">' + SNOW + ' Winterlager</p><h2>Ihr Motorrad überwintert bei uns.</h2><p>Stellen Sie Ihr Motorrad für den Winter bei uns ein und holen Sie es im Frühjahr wieder ab. Zeitraum und Konditionen sprechen wir persönlich mit Ihnen ab.</p><div class="acts"><a class="btn ice" href="ueberwintern.html#winterplatz">Winterplatz anfragen</a><a class="btn ghost" href="ueberwintern.html">Mehr erfahren</a></div></div></div></div></section>') if WINTER else ''}
+{''.join(ang_sec(i, *g) for i, g in enumerate(ang_groups) if g[2])}
+<section><div class="wrap"><div class="head" data-reveal><div><p class="eyebrow">Für Verkäufer und Käufer</p><h2>Weitere Möglichkeiten</h2></div></div>
+<div class="svc">{''.join(f'<article data-reveal style="--d:{i%3*.06}s"><div class="ic"></div><h3>{h}</h3><p>{t}</p></article>' for i, (h, t) in enumerate([('Inzahlungnahme', 'Wir nehmen Ihr Motorrad beim Kauf in Zahlung. <a href="ankauf.html">Angebot anfordern</a>'), ('Ankauf', 'Wir kaufen Ihr Motorrad. <a href="ankauf.html">Jetzt Angebot einholen</a>'), ('Kommission', 'Ihr Motorrad steht in unserer Verkaufshalle, wir verkaufen in Ihrem Auftrag.'), ('Finanzierung', 'Auf Anfrage vermitteln wir Finanzierungen. <a href="service.html">Mehr zum Service</a>'), ('Import und Wunschsuche', 'Ihr Wunschmodell ist nicht dabei? Sprechen Sie uns an.'), ('Probefahrt', 'Nach Terminabsprache fahren Sie jedes Motorrad im Bestand Probe. <a href="kontakt.html">Termin anfragen</a>')]))}</div></div></section>
+{cta_dark('Nichts Passendes dabei?', 'Rufen Sie an oder schreiben Sie uns. Wir suchen mit Ihnen das richtige Motorrad.')}'''
+layout('angebote.html', 'Angebote | Motorradhandel-Celle', 'Aktuelle Angebote von Motorradhandel-Celle in Celle: Winterlager, günstige Einsteiger-Motorräder, Modelle mit wenig Kilometern, Inzahlungnahme und Ankauf.', ang_body, active='angebote.html', fold=1, kind='CollectionPage', crumbs=[('Angebote', None)], images=[b['img'][0] for g in ang_groups for b in g[2][:4]])
+
 mk = f'''<section style="padding-top:2.5rem"><div class="wrap"><div class="head"><div><p class="eyebrow">Merkliste</p><h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Ihre gemerkten Motorräder.</h1></div></div>
 <p class="lede" id="ml-empty">Sie haben noch kein Motorrad gemerkt. Tippen Sie bei einem Fahrzeug auf das Herz, dann finden Sie es hier wieder. Die Merkliste bleibt nur auf diesem Gerät gespeichert.</p>
 <ul class="bikes" id="ml-list">{''.join(card(x, d=0, tag='h2') for x in BIKES)}</ul>
