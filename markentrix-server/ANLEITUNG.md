@@ -396,6 +396,8 @@ Das Portal ist eine installierbare Web-App. Es gibt keine eigene APK-Datei und k
 ## Website-Dienste: Formular, Termine, PayPal, Bewertungen (Stand Oktober 2026)
 Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nutzen vier Dienste. Der Kunde (Inhaber) trägt seine Daten unter **Website-Dienste** im Kundenportal ein, wir bauen die Bausteine ein.
 
+**Gutscheine (Kunden-Websites):** Fragt ein Besucher über das Formular einen Gutschein an (`typ=gutschein`), erscheint er im Kundenportal unter Website-Dienste → **Gutschein-Anfragen**. Der Inhaber klickt **„Zahlungslink senden“** (braucht den PayPal.Me-Link bei PayPal; Betrag aus der Anfrage oder von Hand) und, sobald das Geld da ist, trägt er einen Code ein und klickt **„Gutschein senden“**. Beide Mails gehen im Namen des Betriebs raus. Das Portal sieht PayPal-Zahlungen nicht, deshalb prüft der Inhaber den Zahlungseingang selbst. Gilt für jede Kunden-Website ohne Änderung an der Seite.
+
 **Einbau in die Website** (Admin → Kunde → Karte „Website-Dienste“ zeigt den fertigen Code zum Kopieren):
 `<script src="https://portal.markentrix.de/static/js/site.js" data-site="mk_…" defer></script>` einmal vor `</body>`, dann je Dienst `<div data-mk="kontakt|termin|bewertungen"></div>` und `<div data-mk="paypal" data-betrag="49,90" data-titel="Gutschein"></div>`. Die Seite enthält nie ein Passwort.
 

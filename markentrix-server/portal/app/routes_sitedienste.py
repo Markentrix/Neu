@@ -659,6 +659,128 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
     return {"buchungen": out, "vergangen": vorbei, "freigabe": z["kal_freigabe"]}
 
 
+# ---------------------------------------------------------------- Gutscheine
+CODE_RE = re.compile(r"^[A-Za-z0-9ÄÖÜäöüß][A-Za-z0-9ÄÖÜäöüß _.\-/]{2,39}$")
+
+
+def _gutschein_json(r: dict) -> dict:
+    return {"id": str(r["id"]), "ref": r["ref"], "name": r["name"], "email": r["email"] or "", "telefon": r["telefon"] or "",
+            "betrag": f"{r['betrag']:.2f}" if r["betrag"] is not None else "", "empfaenger": r["empfaenger"] or "", "widmung": r["widmung"] or "",
+            "status": r["status"], "code": r["code"] or "", "erstellt_am": r["erstellt_am"], "zahlungslink_am": r["zahlungslink_am"], "gesendet_am": r["gesendet_am"]}
+
+
+@kunde.get("/gutscheine")
+def k_gutscheine(user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        z = sd.zeile(cur, kid)
+        cur.execute("""SELECT * FROM website_gutscheine WHERE kunden_id=%s AND (status<>'storniert' OR erstellt_am > now() - interval '30 days')
+                       ORDER BY (status IN ('angefragt','zahlungslink_gesendet')) DESC, erstellt_am DESC LIMIT 100""", (kid,))
+        zeilen = cur.fetchall()
+    me = (z["pp_me_link"] or "").strip()
+    return {"gutscheine": [_gutschein_json(r) for r in zeilen], "paypal_bereit": bool(z["pp_aktiv"] and me.startswith("https://")), "waehrung": z["pp_waehrung"]}
+
+
+class ZahlungslinkIn(BaseModel):
+    betrag: str = Field(default="", max_length=20)
+
+
+def _gutschein_holen(cur, gid: str, kid):
+    try:
+        cur.execute("SELECT * FROM website_gutscheine WHERE id=%s AND kunden_id=%s FOR UPDATE", (gid, kid))
+    except Exception:
+        raise HTTPException(400, "Ungültiger Gutschein.")
+    g = cur.fetchone()
+    if not g:
+        raise HTTPException(404, "Gutschein nicht gefunden.")
+    if g["status"] == "storniert":
+        raise HTTPException(409, "Diese Anfrage ist storniert.")
+    if not g["email"] or not EMAIL_RE.match(g["email"]):
+        raise HTTPException(409, "Zu dieser Anfrage gibt es keine E-Mail-Adresse. Bitte den Kunden anrufen.")
+    return g
+
+
+@kunde.post("/gutscheine/{gid}/zahlungslink")
+def k_gutschein_link(gid: str, data: ZahlungslinkIn, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("gutlink:" + str(kid), 60, 600)
+    with tx("system") as cur:
+        z = sd.zeile(cur, kid)
+        me = (z["pp_me_link"] or "").strip().rstrip("/")
+        if not (z["pp_aktiv"] and me.startswith("https://")):
+            raise HTTPException(409, "Bitte zuerst oben bei PayPal deinen PayPal.Me-Link eintragen und PayPal einschalten.")
+        g = _gutschein_holen(cur, gid, kid)
+        if data.betrag.strip():
+            v = sd.betrag_lesen(data.betrag)
+        else:
+            v = float(g["betrag"]) if g["betrag"] is not None else None
+        if v is None or not 1 <= v <= 10000:
+            raise HTTPException(400, "Bitte den Betrag als Zahl eintragen, z. B. 50 oder 49,90.")
+        betrag = f"{v:.2f}"
+        cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+        firma = cur.fetchone()["firma"]
+    link = f"{me}/{betrag}{z['pp_waehrung']}"
+    fuer = f"\nDer Gutschein ist für: {g['empfaenger']}" if g["empfaenger"] else ""
+    text = (f"Guten Tag {g['name']},\n\nvielen Dank für Ihre Gutschein-Anfrage ({g['ref']}) über {betrag.replace('.', ',')} €.{fuer}\n\n"
+            f"Sie können den Betrag bequem per PayPal bezahlen:\n{link}\n\n"
+            f"Sobald die Zahlung bei uns eingegangen ist, senden wir Ihnen den Gutschein-Code per E-Mail.\n\nViele Grüße\n{firma}")
+    ok, via = sd.kundenmail(kid, g["email"], f"Ihr Gutschein bei {firma}: Zahlungslink ({g['ref']})", text, art="kontakt")
+    if not ok:
+        raise HTTPException(502, "Die E-Mail konnte nicht gesendet werden: " + str(via)[:200])
+    with tx("system") as cur:
+        cur.execute("""UPDATE website_gutscheine SET betrag=%s, status=CASE WHEN status='angefragt' THEN 'zahlungslink_gesendet' ELSE status END, zahlungslink_am=now()
+                       WHERE id=%s AND kunden_id=%s""", (betrag, gid, kid))
+        audit(cur, user, "website_gutschein_zahlungslink", kid, {"ref": g["ref"], "betrag": betrag})
+    return {"ok": True}
+
+
+class GutscheinCodeIn(BaseModel):
+    code: str = Field(min_length=3, max_length=40)
+    hinweis: str = Field(default="", max_length=600)
+
+
+@kunde.post("/gutscheine/{gid}/code")
+def k_gutschein_code(gid: str, data: GutscheinCodeIn, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("gutcode:" + str(kid), 60, 600)
+    code = data.code.strip()
+    if not CODE_RE.match(code):
+        raise HTTPException(400, "Bitte einen Code mit 3 bis 40 Zeichen eintragen (Buchstaben, Zahlen, Bindestrich).")
+    with tx("system") as cur:
+        g = _gutschein_holen(cur, gid, kid)
+        cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+        firma = cur.fetchone()["firma"]
+    betrag = f" über {g['betrag']:.2f}".replace(".", ",") + " €" if g["betrag"] is not None else ""
+    fuer = f"\nFür: {g['empfaenger']}" if g["empfaenger"] else ""
+    widmung = f"\nWidmung: {g['widmung']}" if g["widmung"] else ""
+    hinweis = f"\n{data.hinweis.strip()}\n" if data.hinweis.strip() else ""
+    text = (f"Guten Tag {g['name']},\n\nvielen Dank, Ihre Zahlung ist bei uns eingegangen. Hier ist Ihr Gutschein{betrag}:{fuer}{widmung}\n\n"
+            f"Gutschein-Code: {code}\n{hinweis}\nBitte nennen Sie den Code bei Ihrem Besuch oder bei der Buchung.\n\nViele Grüße\n{firma}")
+    ok, via = sd.kundenmail(kid, g["email"], f"Ihr Gutschein bei {firma} ({g['ref']})", text, art="kontakt")
+    if not ok:
+        raise HTTPException(502, "Die E-Mail konnte nicht gesendet werden: " + str(via)[:200])
+    with tx("system") as cur:
+        cur.execute("UPDATE website_gutscheine SET status='gesendet', code=%s, gesendet_am=now() WHERE id=%s AND kunden_id=%s", (code, gid, kid))
+        audit(cur, user, "website_gutschein_code", kid, {"ref": g["ref"]})
+    return {"ok": True}
+
+
+@kunde.post("/gutscheine/{gid}/storno")
+def k_gutschein_storno(gid: str, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("gutstorno:" + str(kid), 60, 600)
+    with tx("system") as cur:
+        try:
+            cur.execute("UPDATE website_gutscheine SET status='storniert' WHERE id=%s AND kunden_id=%s AND status IN ('angefragt','zahlungslink_gesendet') RETURNING ref", (gid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültiger Gutschein.")
+        r = cur.fetchone()
+        if not r:
+            raise HTTPException(409, "Diese Anfrage kann nicht mehr storniert werden.")
+        audit(cur, user, "website_gutschein_storno", kid, {"ref": r["ref"]})
+    return {"ok": True}
+
+
 class ErgebnisIn(BaseModel):
     ergebnis: str = Field(pattern=r"^(erschienen|nicht_erschienen)$")
 

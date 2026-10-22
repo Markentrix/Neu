@@ -94,12 +94,27 @@ def zeile(cur, kid) -> dict:
     return cur.fetchone()
 
 
+def betrag_lesen(text) -> float | None:
+    """Liest Beträge wie „50“, „50 €“, „49,90 EUR“, „1.000,50“. Gibt None zurück, wenn es keine Zahl ist."""
+    t = re.sub(r"(?i)eur(o)?|€|\s", "", str(text or ""))
+    if not t:
+        return None
+    if "," in t:
+        t = t.replace(".", "").replace(",", ".")
+    try:
+        v = float(t)
+    except ValueError:
+        return None
+    return v if v == v and v not in (float("inf"), float("-inf")) else None
+
+
 def ereignis(kid, art: str, ok: bool, hinweis: str = ""):
     try:
         with tx("system") as cur:
             cur.execute("INSERT INTO website_ereignisse (kunden_id, art, ok, hinweis) VALUES (%s,%s,%s,%s)", (kid, art, ok, hinweis[:300] or None))
             cur.execute("DELETE FROM website_ereignisse WHERE kunden_id=%s AND zeit < now() - interval '90 days'", (kid,))
             cur.execute("DELETE FROM website_termine WHERE kunden_id=%s AND ende < now() - interval '180 days'", (kid,))
+            cur.execute("DELETE FROM website_gutscheine WHERE kunden_id=%s AND erstellt_am < now() - interval '400 days'", (kid,))
     except Exception:  # noqa: BLE001 - Protokoll darf nie den eigentlichen Vorgang stören
         pass
 

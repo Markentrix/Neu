@@ -307,12 +307,10 @@ def _pruefen(d: dict, z: dict) -> dict:
         if u and not sd.ZEIT_RE.match(str(u)):
             fehler["uhrzeit"] = "Bitte eine gültige Uhrzeit wählen."
     if typ == "gutschein":
-        roh = str(felder.get("wunschbetrag") or felder.get("betrag") or "").replace(",", ".")
-        if roh:
-            try:
-                if not 1 <= float(roh) <= 10000:
-                    raise ValueError
-            except ValueError:
+        roh = felder.get("wunschbetrag") or felder.get("betrag") or ""
+        if str(roh).strip():
+            v = sd.betrag_lesen(roh)
+            if v is None or not 1 <= v <= 10000:
                 fehler["wunschbetrag"] = "Bitte einen gültigen Betrag angeben."
     if fehler:
         raise Ungueltig(fehler)
@@ -331,7 +329,7 @@ def _zusammenfassung(felder: dict) -> str:
             except ValueError:
                 pass
         if k in ("wunschbetrag", "betrag"):
-            v = f"{v} €"
+            v = v if "€" in str(v) else f"{v} €"
         if isinstance(v, list):
             v = ", ".join(v)
         zeilen.append(f"{LABELS.get(k, k.replace('_', ' ').capitalize())}: {v}")
@@ -397,6 +395,12 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
             cur.execute("INSERT INTO anfragen (kunden_id, name, kontakt, nachricht, quelle) VALUES (%s,%s,%s,%s,'website') RETURNING id",
                         (kid, felder["name"], kontakt, f"{TITEL[typ]} {ref}\n\n{_zusammenfassung(felder)}"[:6000]))
             aid = cur.fetchone()["id"]
+            if typ == "gutschein":
+                bt = sd.betrag_lesen(felder.get("wunschbetrag") or felder.get("betrag"))
+                cur.execute("""INSERT INTO website_gutscheine (kunden_id, anfrage_id, ref, name, email, telefon, betrag, empfaenger, widmung)
+                               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                            (kid, aid, ref, felder["name"], felder.get("email") or None, felder.get("telefon") or None, bt,
+                             str(felder.get("empfaenger") or felder.get("fuer") or "")[:120] or None, str(felder.get("widmung") or "")[:500] or None))
             if typ == "termin" and felder.get("uhrzeit") and z["kal_aktiv"] and felder.get("email"):
                 cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(kid),))
                 sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])

@@ -1,4 +1,4 @@
-import { h, api, melde, datum, zeit } from '../common.js';
+import { h, api, melde, datum, zeit, toast } from '../common.js';
 import { V, zeige } from './kern.js';
 
 /** @param {string} t @param {Element[]|string[]} inhalt */
@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    await domainKarte(), mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    await domainKarte(), mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
 
 // ---------------------------------------------------------------- Domain-Stand
@@ -232,6 +232,37 @@ function analyticsKarte(d) {
     hilfe('Wo finde ich die Mess-ID?',
       h('p', {}, 'analytics.google.com → unten links „Verwalten“ (Zahnrad) → „Datenstreams“ → „Web“ → deinen Stream öffnen → oben rechts steht die ', h('b', {}, 'Mess-ID'), ' (G-…).'),
       h('p', {}, 'Noch kein Konto? Dort „Messung starten“ wählen, ein Konto und eine „Property“ anlegen und einen Web-Datenstream mit der Adresse deiner Website erstellen. Das dauert etwa 5 Minuten. Wenn du magst, machen wir das gemeinsam am Telefon.')));
+}
+
+// ---------------------------------------------------------------- Gutscheine
+const GUT_STATUS = { angefragt: ['warn', 'neu'], zahlungslink_gesendet: ['warn', 'wartet auf Zahlung'], gesendet: ['ok', 'Code gesendet'], storniert: ['', 'storniert'] };
+
+/** Gutschein-Anfragen der Website: Zahlungslink (PayPal.Me) senden, nach dem Zahlungseingang den Code senden. */
+async function gutscheineKarte(neu) {
+  let r; try { r = await api('/api/kunde/website-dienste/gutscheine'); } catch { return ''; }
+  if (!r.gutscheine.length) return '';
+  const m = h('div');
+  const zeile = (g) => {
+    const betrag = h('input', { placeholder: 'Betrag in €', value: g.betrag.replace('.', ','), style: 'max-width:130px', maxlength: 20, 'aria-label': 'Betrag in Euro' });
+    const code = h('input', { placeholder: 'Code', value: g.code, style: 'max-width:200px', maxlength: 40, 'aria-label': 'Gutschein-Code' });
+    const tun = async (pfad, body, ok) => { try { await api('/api/kunde/website-dienste/gutscheine/' + g.id + '/' + pfad, { method: 'POST', body }); toast(ok, 'ok'); neu(); } catch (x) { melde(m, x.message); } };
+    const offen = g.status === 'angefragt' || g.status === 'zahlungslink_gesendet';
+    const st = GUT_STATUS[g.status] || ['', g.status];
+    return h('div', { class: 'card', style: 'margin:8px 0' },
+      h('p', {}, h('b', {}, g.name), ' ', h('span', { class: 'pill ' + st[0] }, st[1]), g.betrag ? ' · ' + g.betrag.replace('.', ',') + ' €' : ' · Betrag fehlt noch'),
+      h('p', { class: 'small' }, (g.email || 'keine E-Mail') + (g.telefon ? ' · ' + g.telefon : '') + ' · ' + g.ref + ' · ' + datum(g.erstellt_am)),
+      g.empfaenger || g.widmung ? h('p', { class: 'small muted' }, [g.empfaenger ? 'Für: ' + g.empfaenger : '', g.widmung ? 'Widmung: ' + g.widmung : ''].filter(Boolean).join(' · ')) : '',
+      g.zahlungslink_am ? h('p', { class: 'small muted' }, 'Zahlungslink gesendet am ' + datum(g.zahlungslink_am)) : '',
+      g.gesendet_am ? h('p', { class: 'small muted' }, 'Code ' + g.code + ' gesendet am ' + datum(g.gesendet_am)) : '',
+      g.status !== 'storniert' && g.email ? h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin-top:6px' },
+        offen ? [betrag, h('button', { class: 'btn', disabled: !r.paypal_bereit, onclick: () => tun('zahlungslink', { betrag: betrag.value }, 'Zahlungslink gesendet.') }, g.status === 'angefragt' ? 'Zahlungslink senden' : 'Zahlungslink erneut senden')] : '',
+        [code, h('button', { class: 'btn ' + (offen ? 'sec' : ''), onclick: () => tun('code', { code: code.value }, 'Gutschein gesendet.') }, g.status === 'gesendet' ? 'Gutschein erneut senden' : 'Gutschein senden')],
+        offen ? h('button', { class: 'btn sec', onclick: () => { if (confirm('Diese Anfrage stornieren?')) tun('storno', {}, 'Storniert.'); } }, 'Stornieren') : '') : '');
+  };
+  return h('div', { class: 'card' }, h('h2', {}, 'Gutschein-Anfragen'),
+    h('p', { class: 'small muted' }, 'So läuft es: 1. „Zahlungslink senden“ schickt dem Kunden deinen PayPal.Me-Link mit dem Betrag. 2. Sobald das Geld bei dir angekommen ist, trägst du einen Code ein und klickst „Gutschein senden“. Das Portal sieht deine PayPal-Zahlungen nicht, deshalb prüfst du den Eingang selbst.'),
+    r.paypal_bereit ? '' : h('p', { class: 'msg info' }, 'Für den Zahlungslink trägst du unten bei PayPal deinen PayPal.Me-Link ein und schaltest PayPal ein.'),
+    m, r.gutscheine.map(zeile));
 }
 
 // ---------------------------------------------------------------- Buchungsanfragen bestätigen

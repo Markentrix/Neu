@@ -65,7 +65,7 @@ Regeln für Variante B:
 - Preise, Pakete und Fahrzeugklassen kennt nur die Website, das Portal speichert sie als Text. Uhrzeiten müssen zu den "Festen Uhrzeiten" im Portal passen.
 
 ZAHLUNG: Keine eigene Zahlungsabwicklung, keine Kartenfelder, kein eigenes PayPal-Skript. Nur das Element data-mk="paypal" (Variante A)
-oder ein PayPal.Me-Link (Anzahlung). Das Geld geht direkt an den Kunden. Gutscheine sind eine Anfrage (typ="gutschein"), den Code vergibt der Inhaber.
+oder ein PayPal.Me-Link (Anzahlung). Das Geld geht direkt an den Kunden. Gutscheine sind eine Anfrage (typ="gutschein", Felder name, email Pflicht, betrag z. B. "50" oder "50 €", empfaenger, widmung, einwilligung). Zahlungslink und Code verschickt der Inhaber im Portal (Website-Dienste → Gutschein-Anfragen); die Website zeigt dazu nur den Hinweis „Sie erhalten den Zahlungslink per E-Mail, den Code nach Zahlungseingang.“ Kein Code auf der Seite, keine PDF-Erzeugung, kein eigener Zahlungsablauf.
 
 E-MAIL: Die Website verschickt nie selbst Mails (kein mailto-Formular, kein Formspree, kein SMTP). Anfragen laufen über das Portal:
 Der Inhaber bekommt Mail und Push, der Besucher eine Eingangsbestätigung mit Vorgangsnummer. Deshalb muss die E-Mail-Adresse des Besuchers
