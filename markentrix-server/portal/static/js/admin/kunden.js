@@ -147,7 +147,14 @@ export function vorlagenKarte(kid, k) {
       try { const r = await api('/api/admin/kunden/' + kid + '/vorlage', { method: 'POST', body: { code: sel.value } }); melde(m, r.name + ': ' + r.wissen + ' Wissenseinträge (inaktiv, bitte prüfen), ' + r.beitraege + ' Beitrags-Entwürfe, ' + r.aufgaben + ' Aufgaben angelegt.', 'ok'); box.replaceChildren(); } catch (x) { fehler(m, x); } }, '')));
   };
   laden().catch(x => fehler(m, x));
-  return h('div', { class: 'card' }, h('h2', {}, 'Branchenvorlage'), h('p', { class: 'small muted' }, 'Startpaket für typische Branchen: Wissenseinträge für den Assistenten (zunächst inaktiv, mit Platzhaltern zum Ausfüllen), Entwürfe für Beiträge und eine Aufgabenliste. Es wird nichts veröffentlicht.'), m, box);
+  const bm = h('div'), bbox = h('div');
+  api('/api/admin/buchungsvorlagen').then(liste => {
+    const sel = select('code', liste.map(v => [v.code, v.name + ' – ' + v.leistungen.join(', ')]), liste[0].code);
+    bbox.replaceChildren(h('div', { class: 'row' }, sel, knopf('Buchungsvorlage anwenden', async () => {
+      if (!confirm('Legt typische Leistungen (inaktiv, ohne Preis), Zusatzfragen und Arbeitszeiten an. Geht nur bei einem Kunden ohne Leistungen. Fortfahren?')) return;
+      try { const r = await api('/api/admin/kunden/' + kid + '/buchungsvorlage', { method: 'POST', body: { code: sel.value } }); melde(bm, r.name + ': ' + r.leistungen + ' Leistungen angelegt (inaktiv). Bitte Preise eintragen und die Leistungen im Kundenportal oder hier aktivieren.', 'ok'); } catch (x) { fehler(bm, x); } }, '')));
+  }).catch(x => fehler(bm, x));
+  return h('div', { class: 'card' }, h('h2', {}, 'Branchenvorlage'), h('div', { class: 'card' }, h('h3', {}, 'Buchung: Leistungen und Arbeitszeiten'), h('p', { class: 'small muted' }, 'Startpaket für die Terminbuchung: typische Leistungen mit Dauer und Zusatzfragen, Arbeitszeiten mit Pausen. Alles startet inaktiv und ohne Preise.'), bm, bbox), h('p', { class: 'small muted' }, 'Startpaket für typische Branchen: Wissenseinträge für den Assistenten (zunächst inaktiv, mit Platzhaltern zum Ausfüllen), Entwürfe für Beiträge und eine Aufgabenliste. Es wird nichts veröffentlicht.'), m, box);
 }
 
 const AVV_MODULE = [['portal', 'Portal (Basis): Kontaktverwaltung, Anfragen, Berichte', 0], ['website', 'Website: Hosting und Kontaktformular', 0], ['automationen', 'Automationen: Workflows (n8n)', 0],

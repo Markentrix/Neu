@@ -1,0 +1,193 @@
+{
+ "artikel": [
+  {
+   "t": "Lead anlegen (einzeln)",
+   "k": "lead anlegen neuer lead eintragen kontakt hinzufügen firma erfassen",
+   "wo": "Menü „Meine Leads“ → unten „Neuer Lead“",
+   "l": "#leads",
+   "s": [
+    "Öffne im Menü „Meine Leads“. Unter der Liste steht die Karte „Neuer Lead“.",
+    "Pflicht ist nur der Firmenname. Trage möglichst auch Ansprechpartner, Telefon, E-Mail, Website, Branche, PLZ und Ort ein. Mit Telefon und Ort kann das Portal Dubletten erkennen.",
+    "Wähle die Grundlage der Ansprache (z. B. Einwilligung, Empfehlung, Bestandskontakt, mutmaßliches B2B-Interesse) und notiere kurz, warum. Das ist deine Dokumentation, falls jemand nachfragt.",
+    "Klicke „Lead speichern“. Das Portal prüft automatisch auf Dubletten und auf die Sperrliste. Steht die Firma oder Nummer auf der Sperrliste, wird der Lead nicht angelegt.",
+    "Der neue Lead erscheint in „Meine Leads“ und, sobald er dran ist, unter „Heute anrufen“."
+   ],
+   "n": [
+    "Trage nur Kontakte ein, bei denen eine geschäftliche Ansprache zulässig ist. Im Zweifel frage Markentrix.",
+    "Mehrere Leads auf einmal: siehe „Leads importieren“."
+   ]
+  },
+  {
+   "t": "Leads importieren (Liste hochladen)",
+   "k": "import importieren excel csv liste hochladen viele leads",
+   "wo": "Über Markentrix (der Import läuft im Admin-Bereich)",
+   "l": "#leads",
+   "s": [
+    "Bereite eine Tabelle (CSV oder Excel) vor mit den Spalten Firma, Ansprechpartner, Telefon, E-Mail, Ort, Branche.",
+    "Der Import prüft jede Zeile auf Dubletten und Sperrliste. Doppelte und gesperrte Zeilen werden übersprungen und dir angezeigt.",
+    "Im Vertriebsportal gibt es keinen Import. Schicke die Liste an Markentrix, wir importieren sie für dich und weisen dir die Leads zu."
+   ],
+   "n": [
+    "Nur Kontakte importieren, die du ansprechen darfst."
+   ]
+  },
+  {
+   "t": "Anruf festhalten und Wiedervorlage setzen",
+   "k": "anruf ergebnis nicht erreicht gesprochen wiedervorlage rückruf festhalten kontakt eintragen",
+   "wo": "Menü „Heute anrufen“",
+   "l": "#heute",
+   "s": [
+    "Öffne „Heute anrufen“. Oben stehen fällige Wiedervorlagen, dann heiße Leads, dann neue Leads.",
+    "Tippe auf die Telefonnummer (am Handy startet der Anruf).",
+    "Danach das Ergebnis: „Nicht erreicht“ (ein Klick), „Gesprochen …“ (mit Notiz und optionaler Wiedervorlage), „Termin …“ (Gespräch vereinbart) oder „Kein Interesse“.",
+    "Bei „Gesprochen …“ wählst du das Ergebnis, schreibst eine kurze Notiz und setzt ein Datum für die nächste Wiedervorlage. Der Lead taucht dann an diesem Tag wieder oben auf."
+   ],
+   "n": [
+    "„Kein Interesse“ nimmt den Lead aus der Anrufliste. Er bleibt zur Dokumentation gespeichert."
+   ]
+  },
+  {
+   "t": "Erstgespräch mit dem Kunden buchen",
+   "k": "erstgespräch termin buchen buchungslink freie zeiten kundentermin vereinbaren",
+   "wo": "Im Lead → Karte „Erstgespräch buchen“",
+   "s": [
+    "Öffne den Lead und gehe zur Karte „Erstgespräch buchen“.",
+    "Klicke „Freie Zeiten zeigen“ und wähle eine Zeit, die der Interessent im Gespräch nennt.",
+    "Bestätige, dass der Interessent zugestimmt hat. Dann wird der Termin gebucht und der Interessent bekommt eine Bestätigung per Mail.",
+    "Alternativ kopierst du den Buchungslink und schickst ihn dem Interessenten, damit er selbst eine Zeit wählt."
+   ],
+   "n": [
+    "Gebuchte Gespräche der nächsten 3 Tage siehst du oben unter „Heute anrufen“."
+   ]
+  },
+  {
+   "t": "Angebot für einen Lead anfragen",
+   "k": "angebot anfragen angebotsanfrage preis paket offerte",
+   "wo": "Im Lead → Karte „Angebot anfragen“; Status unter „Angebotsanfragen“",
+   "l": "#angebote",
+   "s": [
+    "Öffne den Lead und wähle bei „Angebot anfragen“ das passende Paket und schreibe, was der Interessent braucht.",
+    "Sende die Anfrage ab. Markentrix prüft sie.",
+    "Unter „Angebotsanfragen“ siehst du den Stand: Angefragt, In Prüfung, Angebot ist raus, Angenommen oder Abgelehnt, plus Hinweise von Markentrix.",
+    "Ist das Angebot raus, kann der Interessent es online annehmen."
+   ],
+   "n": [
+    "Preise legt Markentrix fest. Du machst am Telefon keine Preiszusagen außerhalb der Pakete."
+   ]
+  },
+  {
+   "t": "Lead zum Kunden machen",
+   "k": "zum kunden machen kunde gewonnen abschluss angenommen onboarding",
+   "wo": "Im Lead → „Zum Kunden machen“ (nach angenommenem Angebot)",
+   "s": [
+    "Nimmt der Interessent das Angebot an, führt dich der Assistent „Zum Kunden machen“ durch die nötigen Angaben.",
+    "Danach legt Markentrix den Kunden an und startet das Onboarding. Der Kunde erscheint unter „Meine Kunden“, und deine Provision wird ab dem ersten Monat berechnet."
+   ]
+  },
+  {
+   "t": "Meine Provision verstehen",
+   "k": "provision provisionen verdienst geld auszahlung abrechnung prozent satz",
+   "wo": "Menü „Provisionen“",
+   "l": "#provisionen",
+   "s": [
+    "Oben siehst du „So wird deine Provision berechnet“: die gültigen Sätze je Art (laufend, Verlängerung …) und Vertragsmonat.",
+    "Darunter „Pro Monat“: Summe je Monat und die Abrechnung als PDF.",
+    "Unter „Einzelposten“ steht jede Provision mit Kunde, Art, Basis, Prozent und Betrag.",
+    "Status: berechnet → freigegeben → ausgezahlt. Rückbuchungen (z. B. bei Kündigung) stehen als eigene Zeile."
+   ],
+   "n": [
+    "Maßgeblich ist dein Vertrag. Die Anzeige hier dient nur der Information.",
+    "Umsatzsteuerpflichtige stellen aus der Abrechnung selbst eine Rechnung oder Gutschrift."
+   ]
+  },
+  {
+   "t": "Meine Zahlen und Wochenziel",
+   "k": "zahlen statistik wochenziel anrufe auswertung quote",
+   "wo": "Menü „Meine Zahlen“",
+   "l": "#uebersicht",
+   "s": [
+    "„Meine Zahlen“ zeigt Anrufe, Gespräche, Termine und Abschlüsse sowie den Stand deiner Provision.",
+    "Der Balken unter „Heute anrufen“ zeigt dein Wochenziel an Anrufen."
+   ]
+  },
+  {
+   "t": "Übungsmodus",
+   "k": "üben übung training demo testen probe beispiel gespräch lernen",
+   "wo": "Menü „Übungsmodus“",
+   "l": "#uebung",
+   "s": [
+    "Dort übst du mit erfundenen Betrieben, nichts wird gespeichert und niemand angerufen.",
+    "Klicke eine mögliche Kundenaussage an, dann siehst du eine passende Antwort."
+   ]
+  },
+  {
+   "t": "Telefonleitfaden und Einwände",
+   "k": "leitfaden einwand einwandbehandlung gespräch skript kaltakquise pdf",
+   "wo": "Menü „Leitfaden“",
+   "l": "#leitfaden",
+   "s": [
+    "Im Leitfaden findest du das PDF (zum Ausdrucken), eine Kurzfassung und eine Suche. Tippe z. B. „Preis“ oder „Einwand“ ein.",
+    "Im Lead gibt es zusätzlich einen Branchenhinweis und einen persönlichen Gesprächsvorschlag."
+   ]
+  },
+  {
+   "t": "Passwort ändern und Zwei-Faktor-Anmeldung",
+   "k": "passwort ändern zwei faktor 2fa sicherheit konto anmeldung login",
+   "wo": "Menü „Konto“",
+   "l": "#konto",
+   "s": [
+    "Unter „Konto“ änderst du dein Passwort und richtest die Zwei-Faktor-Anmeldung ein (Authenticator-App).",
+    "Bei Passwortwechsel endet die Anmeldung auf allen anderen Geräten."
+   ]
+  },
+  {
+   "t": "Mein Handelsvertretervertrag",
+   "k": "vertrag handelsvertreter bestätigen unterschreiben",
+   "wo": "Menü „Mein Vertrag“",
+   "l": "#vertrag",
+   "s": [
+    "Hat Markentrix dir einen Vertrag bereitgestellt, steht oben ein Formular. Prüfe deine Angaben, lies den Vertrag, setze den Haken und klicke „Vertrag bestätigen“.",
+    "Danach liegt er unter „Mein Handelsvertretervertrag“ zum Ansehen."
+   ]
+  },
+  {
+   "t": "App aufs Handy legen",
+   "k": "app handy installieren startbildschirm smartphone",
+   "wo": "Menü „So geht’s“",
+   "l": "#willkommen",
+   "s": [
+    "Unter „So geht’s“ findest du die Anleitung mit QR-Code, um das Portal wie eine App auf den Startbildschirm zu legen."
+   ]
+  }
+ ],
+ "titel": "Anleitung Vertriebsportal",
+ "untertitel": "Für Vertriebspartner von Markentrix",
+ "intro": [
+  "Im Partnerportal arbeitest du deine Leads ab, hältst Anrufe und Termine fest und behältst Kunden und Provisionen im Blick. Du erreichst es am Computer und am Handy.",
+  "Wichtig: Trage nur Kontakte ein, bei denen eine geschäftliche Ansprache zulässig ist. Halte Ergebnisse sofort nach dem Anruf fest, damit nichts doppelt angerufen wird."
+ ],
+ "start": [
+  "Öffne den Einladungslink aus deiner E-Mail und lege ein Passwort fest.",
+  "Melde dich danach mit deiner E-Mail-Adresse unter portal.markentrix.de an.",
+  "Am Handy: Portal im Browser öffnen und zum Startbildschirm hinzufügen (Android: Chrome-Menü → App installieren, iPhone: Safari → Teilen → Zum Home-Bildschirm). Eine Schritt-für-Schritt-Anleitung mit Bildern steht unter „So geht’s“ im Portal."
+ ],
+ "einstellungen": [
+  [
+   "Passwort und Zwei-Faktor-Anmeldung",
+   "Unter „Konto“ änderst du dein Passwort und richtest die Zwei-Faktor-Anmeldung mit einer Authenticator-App ein."
+  ],
+  [
+   "Benachrichtigungen",
+   "Unter „Konto“ kannst du Push-Nachrichten aufs Handy aktivieren (Wiedervorlagen, gebuchte Gespräche). Die Glocke oben zeigt neue Hinweise."
+  ],
+  [
+   "Wochenziel",
+   "Dein Wochenziel an Anrufen sieht du unter „Heute anrufen“ und „Meine Zahlen“."
+  ],
+  [
+   "Design",
+   "Mit dem Knopf oben im Menü wechselst du zwischen hellem und dunklem Design."
+  ]
+ ],
+ "hilfe": "Im Portal oben im Suchfeld „Hilfe“ eine Frage eingeben. Löst die Anleitung dein Problem nicht, kannst du es mit einem Klick an das Markentrix-Team melden."
+}

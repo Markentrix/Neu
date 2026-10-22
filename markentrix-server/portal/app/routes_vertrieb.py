@@ -47,6 +47,15 @@ def provisionen(user: dict = Depends(require_vertrieb)):
         return cur.fetchall()
 
 
+@router.get("/provisionsregeln")
+def provisionsregeln(user: dict = Depends(require_vertrieb)):
+    """Nur Anzeige: die gültigen Provisionssätze, damit der Vertriebler weiß, womit er rechnen kann."""
+    with tx("system") as cur:
+        cur.execute("""SELECT name, art, von_monat, bis_monat, prozent FROM provisionsregeln
+                       WHERE status='freigegeben' ORDER BY art, von_monat""")
+        return cur.fetchall()
+
+
 @router.get("/leads")
 def leads(user: dict = Depends(require_vertrieb)):
     with tx("system") as cur:

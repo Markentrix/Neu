@@ -77,6 +77,20 @@ r=hoch(3,dom,kA,info="0"); chk("Ohne Haken: nichts vorgemerkt",sql("select count
 # ---- Demo: nie
 r=hoch(1,f"demo{sfx}",None,info="1",art="demo"); chk("Demo-Upload ok",r.status_code==200,r.text); worker()
 chk("Demo: keine Kundenmeldung",sql(f"select count(*) from website_meldungen where domain='demo{sfx}'")=="0")
+# ---- Nur Startseite nötig, nicht die Website-API; Updates hängen nie ewig
+def ergebnis_datei(c,neu_):
+    open(f"{Q}/ergebnis-{c*16}.json","w").write(json.dumps({"ok":True,"text":"ok","aktion":"veroeffentlichen","art":"live","name":dom,"neu":neu_})); os.chmod(f"{Q}/ergebnis-{c*16}.json",0o644)
+sql(f"update website_wacht set ok=false, seite_ok=true, api_ok=false, geprueft_am=now() where domain='{dom}'")
+sql(f"insert into website_meldungen (kunden_id, domain, upload_id, hinweis) values ('{kA}','{dom}','{'d'*16}','nur Startseite')"); ergebnis_datei("d",False)
+jobs.website_online_meldungen({}); chk("Startseite ok, API fehlt: Meldung geht trotzdem raus",sql(f"select status from website_meldungen where upload_id='{'d'*16}'")=="gesendet")
+sql(f"update website_wacht set ok=false, seite_ok=false, api_ok=false, geprueft_am=now() where domain='{dom}'")
+sql(f"insert into website_meldungen (kunden_id, domain, upload_id, hinweis) values ('{kA}','{dom}','{'e'*16}','neue Seite')"); ergebnis_datei("e",True)
+sql(f"insert into website_meldungen (kunden_id, domain, upload_id, hinweis, erstellt_am) values ('{kA}','{dom}','{'f'*16}','altes Update',now()-interval '7 hours')"); ergebnis_datei("f",False)
+jobs.website_online_meldungen({})
+chk("Neue Seite ohne Antwort: wartet weiter",sql(f"select status from website_meldungen where upload_id='{'e'*16}'")=="offen")
+chk("Update nach 6 Stunden: wird gemeldet",sql(f"select status from website_meldungen where upload_id='{'f'*16}'")=="gesendet")
+sql(f"update website_meldungen set status='verworfen' where upload_id='{'e'*16}'")
+sql(f"update website_wacht set ok=true, seite_ok=true, api_ok=true, geprueft_am=now() where domain='{dom}'")
 # ---- Fehlgeschlagen / verschollen
 sql(f"insert into website_meldungen (kunden_id, domain, upload_id, hinweis) values ('{kA}','{dom}','{'a'*16}','')")
 sql(f"insert into website_meldungen (kunden_id, domain, upload_id, hinweis, erstellt_am) values ('{kA}','{dom}','{'b'*16}','',now()-interval '3 hours')")

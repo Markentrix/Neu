@@ -157,7 +157,7 @@ async def main():
         await pv.goto(B+"/vertrieb#willkommen"); await pv.reload(); await pv.wait_for_selector("h2:has-text('Deine Startcheckliste')",timeout=8000)
         chk("UI Vertrieb: Checkliste mit erledigten Punkten",await pv.locator("li:has-text('✅')").count()==2 and await pv.locator("li:has-text('⬜')").count()==3)
         await pv.goto(B+"/vertrieb#leitfaden"); await pv.reload(); await pv.wait_for_selector("h2:has-text('Im Leitfaden suchen')",timeout=8000)
-        await pv.fill("input[type=search]","Einwand"); await pv.wait_for_timeout(400)
+        await pv.fill("main .card input[type=search]","Einwand"); await pv.wait_for_timeout(400)
         chk("UI Vertrieb: Suche liefert Treffer mit Seitenangabe",await pv.get_by_text("Seite ").count()>=1)
         # Admin: Verträge-Seite
         pa_=await seite("chef@test.de",PW,"admin"); await pa_.goto(B+"/admin#vertraege"); await pa_.reload(); await pa_.wait_for_selector("h1:has-text('Verträge')",timeout=8000)

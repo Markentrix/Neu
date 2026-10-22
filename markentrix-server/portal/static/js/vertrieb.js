@@ -3,13 +3,14 @@ import { stapelTabellen } from './common.js';
 stapelTabellen();
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
+import { hilfeSuche } from './hilfe.js';
 
 const root = document.getElementById('app');
 let start = null;
-const NAV = [['willkommen', 'So geht’s'], ['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['vertrag', 'Mein Vertrag'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
+const NAV = [['willkommen', 'So geht’s'], ['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['uebung', 'Übungsmodus'], ['vertrag', 'Mein Vertrag'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
 
 /** @type {[string, string[]][]} */
-const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden']], ['Kunden & Geld', ['kunden', 'provisionen', 'vertrag', 'konto', 'willkommen']]];
+const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden', 'uebung']], ['Kunden & Geld', ['kunden', 'provisionen', 'vertrag', 'konto', 'willkommen']]];
 
 function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]);
@@ -18,7 +19,7 @@ function gerüst(aktiv, inhalt) {
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
       navGruppen(gruppen, aktiv, 'vertrieb'),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), installBanner(), inhalt, rechtFuss()),
+    h('main', { class: 'main' }, h('div', { class: 'top' }, h('h1', {}, start.partner.name), h('span', { class: 'pill ' + (start.partner.status === 'aktiv' ? 'ok' : 'warn') }, start.partner.status)), hilfeSuche('vertrieb'), installBanner(), inhalt, rechtFuss()),
     mobilLeiste({ aktiv, gruppen, feste: ['heute', 'leads', 'pipeline', 'uebersicht'], icons: { heute: '☎', leads: '☰', pipeline: '▦', uebersicht: '▥' }, kurz: { heute: 'Anrufe', leads: 'Leads', uebersicht: 'Zahlen' }, schluessel: 'vertrieb' }));
 }
 function tabelle(spalten, zeilen, leer) {
@@ -135,6 +136,36 @@ V.pipeline = async () => {
 
 const checkKarte = (e, kompakt) => h('div', { class: 'card' }, h('h2', {}, kompakt ? 'Dein Start: noch ' + e.punkte.filter(x => !x.erledigt).length + ' Schritte' : 'Deine Startcheckliste'),
   h('ul', { style: 'list-style:none;padding:0;margin:0' }, e.punkte.map(x => h('li', { style: 'margin:6px 0' }, x.erledigt ? '✅ ' : '⬜ ', x.erledigt ? x.text : h('a', { href: x.link }, x.text)))));
+/* Übungsmodus: erfundene Beispiel-Leads, es wird nichts gespeichert und nichts angerufen. */
+const UEBUNG = [
+  { firma: 'Autohaus Beispiel GmbH (Übung)', ansprechpartner: 'Herr Muster', branche: 'Kfz-Werkstatt', ort: 'Celle', tel: '05141 000000',
+    lage: 'Werkstatt mit 6 Mitarbeitern, Termine laufen per Telefon und Zettel. Inhaber ist skeptisch, hat wenig Zeit.',
+    ziel: 'Ziel: kurzes Erstgespräch (15 Minuten) vereinbaren, nicht verkaufen.',
+    antworten: [['Er sagt: „Ich habe keine Zeit.“', 'Gut: „Verstehe ich, deshalb nur 2 Minuten: Wir nehmen Ihnen Telefon und Terminchaos ab. Passt Ihnen Dienstag oder Mittwoch besser für 15 Minuten?“ Danach „Termin …“ eintragen.'],
+      ['Er sagt: „Schicken Sie mir etwas per Mail.“', 'Gut: Mailadresse notieren, Wiedervorlage in 2 Tagen setzen („Gesprochen …“ mit Wiedervorlage) und im Nachfassen konkret nach einem Termin fragen.'],
+      ['Er sagt: „Kein Interesse.“', 'Gut: einmal freundlich nachfragen warum, dann respektieren. „Kein Interesse“ eintragen, der Lead wird nicht mehr angerufen.']] },
+  { firma: 'Friseursalon Beispiel (Übung)', ansprechpartner: 'Frau Probe', branche: 'Friseur', ort: 'Hannover', tel: '0511 000000',
+    lage: 'Kleiner Salon, viele Terminausfälle, Buchung nur telefonisch.',
+    ziel: 'Ziel: Interesse an Online-Terminbuchung wecken und Gespräch buchen.',
+    antworten: [['Sie sagt: „Wie viel kostet das?“', 'Gut: nicht am Telefon verhandeln. „Das hängt vom Umfang ab, das zeige ich Ihnen in 15 Minuten ganz konkret. Wann passt es Ihnen?“'],
+      ['Sie sagt: „Das machen wir schon über Instagram.“', 'Gut: „Super, dann sind Sie schon online. Wir ergänzen das um feste Termine mit Erinnerung, damit weniger Kunden nicht erscheinen.“'],
+      ['Sie sagt: „Ja, erzählen Sie mal.“', 'Gut: in einem Satz den Nutzen nennen (weniger Ausfälle, weniger Telefon) und gleich einen Termin vorschlagen.']] },
+];
+V.uebung = async () => {
+  const wahl = h('div', { class: 'stack' });
+  const zeigen = (u) => wahl.replaceChildren(h('div', { class: 'card' },
+    h('h2', {}, u.firma), h('p', { class: 'small muted' }, [u.ansprechpartner, u.branche, u.ort].join(' · ')),
+    h('p', {}, u.lage), h('p', {}, h('b', {}, u.ziel)),
+    h('p', {}, h('span', { class: 'btn small', style: 'opacity:.6' }, '📞 ' + u.tel + ' (Übung, kein Anruf)')),
+    h('h3', {}, 'Was könnte der Kunde sagen? Klicke an, um die passende Antwort zu sehen:'),
+    u.antworten.map(([frage, antwort]) => { const box = h('div', { class: 'msg ok', hidden: true }, antwort);
+      return h('div', {}, h('button', { class: 'btn sec', style: 'margin:4px 0', onclick: () => { box.hidden = !box.hidden; } }, frage), box); }),
+    h('p', { class: 'small muted' }, 'Danach: Im echten Betrieb trägst du das Ergebnis unter „Heute anrufen“ ein (Nicht erreicht, Gesprochen …, Termin …, Kein Interesse). Hier wird nichts gespeichert.'),
+    h('button', { class: 'btn', onclick: () => zeigen(UEBUNG[(UEBUNG.indexOf(u) + 1) % UEBUNG.length]) }, 'Nächstes Übungsbeispiel')));
+  zeigen(UEBUNG[0]);
+  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Übungsmodus'),
+    h('p', {}, 'Hier übst du Gespräche mit erfundenen Betrieben. Es wird nichts gespeichert, niemand wird angerufen und die Zahlen in „Meine Zahlen“ bleiben unverändert.')), wahl);
+};
 V.willkommen = async () => { const e = await api('/api/vertrieb/einarbeitung'); return h('div', { class: 'stack' }, checkKarte(e, false), await anleitungSeite('vertrieb')); };
 { const heuteOrig = V.heute;
   V.heute = async () => { const [el, e] = await Promise.all([heuteOrig(), api('/api/vertrieb/einarbeitung').catch(() => ({ fertig: true }))]); return e.fertig ? el : h('div', { class: 'stack' }, checkKarte(e, true), el); }; }
@@ -202,10 +233,14 @@ V.kunden = async () => h('div', { class: 'card' }, h('h2', {}, 'Meine Kunden'),
   tabelle([['Nr.', z => z.kundennummer], ['Firma', z => z.firma], ['Paket', z => z.paket || '–'], ['Status', z => pill(z.status)], ['Seit', z => datum(z.erstellt_am)]], start.kunden, 'Noch keine Kunden zugeordnet.'));
 
 V.provisionen = async () => {
-  const d = await api('/api/vertrieb/provisionen');
+  const [d, regeln] = await Promise.all([api('/api/vertrieb/provisionen'), api('/api/vertrieb/provisionsregeln').catch(() => [])]);
   const nachMonat = {};
   d.filter(z => z.status !== 'storniert').forEach(z => { const k = String(z.monat).slice(0, 7); nachMonat[k] = (nachMonat[k] || 0) + z.betrag_cent; });
-  return h('div', { class: 'stack' },
+  const ARTEN = { laufend: 'Laufend', verlaengerung: 'Verlängerung', volumen: 'Volumen', nachlauf: 'Nachlauf', abloese: 'Ablöse' };
+  const regelKarte = regeln.length ? h('div', { class: 'card' }, h('h2', {}, 'So wird deine Provision berechnet'),
+    h('p', { class: 'small muted' }, 'Nur zur Information. Die Sätze legt Markentrix fest; maßgeblich ist dein Vertrag.'),
+    tabelle([['Regel', r => r.name], ['Art', r => ARTEN[r.art] || r.art], ['Vertragsmonat', r => r.bis_monat ? r.von_monat + ' bis ' + r.bis_monat : 'ab ' + r.von_monat], ['Satz', r => String(Number(r.prozent)).replace('.', ',') + ' %']], regeln, '')) : '';
+  return h('div', { class: 'stack' }, regelKarte,
     h('div', { class: 'card' }, h('h2', {}, 'Pro Monat'), tabelle([['Monat', z => z[0]], ['Summe', z => euro(z[1])], ['Abrechnung', z => h('a', { href: '/api/vertrieb/abrechnung/' + z[0], target: '_blank', rel: 'noopener' }, 'PDF')]], Object.entries(nachMonat), 'Noch keine Provisionen.')),
     h('div', { class: 'card' }, h('h2', {}, 'Einzelposten'), tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Art', z => ({ laufend: 'Laufend', verlaengerung: 'Verlängerung', rueckbuchung: 'Rückbuchung' })[z.art] || z.art], ['Vertragsmonat', z => z.vertragsmonat || '–'], ['Basis', z => euro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => euro(z.betrag_cent)], ['Status', z => pill(z.status)]], d, 'Noch keine Provisionen.')));
 };

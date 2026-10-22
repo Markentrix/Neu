@@ -44,15 +44,18 @@ def erinnerungen(cfg=None):
     gesendet = 0
     for r in zeilen:
         std1, std2 = stufen[r["id"]]
+        if not r["email"]:
+            continue                                   # von Hand eingetragener Termin ohne E-Mail-Adresse
         stunden = std2 if r["erinnerung"] == 2 else std1
         if r["erstellt_am"] > r["start"] - timedelta(hours=stunden + 1):
             continue                                   # erst kurz vorher gebucht: die Bestätigung genügt
         lokal = r["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
         wer = " · ".join(x for x in (r["leistung"], ("bei " + r["mitarbeiter"]) if r["mitarbeiter"] else "") if x)
         absagen = f"{config.BASE_URL}/site/{r['site_id']}/termin/absagen?t={r['token']}"
+        komme = f"{config.BASE_URL}/site/{r['site_id']}/termin/komme?t={r['token']}"
         bald = "morgen" if r["erinnerung"] == 1 and stunden >= 12 else "bald"
         text = (f"Guten Tag {r['name']},\n\nwir erinnern Sie an Ihren Termin {bald}: {lokal}.\n{wer + chr(10) if wer else ''}{r['kal_ort'] + chr(10) if r['kal_ort'] else ''}\n"
-                f"Falls Sie nicht kommen können, sagen Sie bitte hier ab, dann kann jemand anderes die Zeit nutzen:\n{absagen}\n\nWir freuen uns auf Sie!\n{r['firma']}")
+                f"Bitte bestätigen Sie kurz mit einem Klick, dass Sie kommen:\n{komme}\n\nFalls Sie nicht kommen können, sagen Sie bitte hier ab, dann kann jemand anderes die Zeit nutzen:\n{absagen}\n\nWir freuen uns auf Sie!\n{r['firma']}")
         ok, via = sd.kundenmail(r["kunden_id"], r["email"], f"Erinnerung: Ihr Termin bei {r['firma']} am {lokal}", text, art="erinnerung")
         sd.ereignis(r["kunden_id"], "erinnerung", ok, "gesendet" if ok else "Versand fehlgeschlagen: " + str(via)[:150])
         gesendet += 1 if ok else 0

@@ -32,7 +32,7 @@ def sql(q): return subprocess.run(["su","postgres","-c",f"psql -q -t -A -h /var/
 kid=k["id"]
 for i in range(8): sql(f"INSERT INTO anfragen (kunden_id,name,kontakt,nachricht,quelle,status,erstellt_am,benachrichtigt) VALUES ('{kid}','Anfrager {i}','a{i}@x.de','Bitte um Rückruf','{'telefon' if i%3==0 else 'website'}','{'beantwortet' if i<3 else 'neu'}',now()-interval '{i+1} days',true)")
 KUNDE="heute uebersicht status briefing nachrichten freigaben assistent anfragen termine bewertungen kontakte dokumente unterlagen auswertung berichte belege anrufe website wochenangebote werbung automationen avv team hilfe einstellungen".split()
-VERT="heute uebersicht leads pipeline angebote leitfaden kunden provisionen konto".split()
+VERT="heute uebersicht leads pipeline angebote leitfaden uebung kunden provisionen konto".split()
 
 async def login(br,m,pw,pfad,w):
     ctx=await br.new_context(viewport={"width":w,"height":900},bypass_csp=True); pg=await ctx.new_page()

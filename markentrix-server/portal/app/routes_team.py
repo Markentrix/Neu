@@ -23,9 +23,24 @@ MAX_LOGO = 400 * 1024
 @router.get("/team")
 def team(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
-        cur.execute("""SELECT id, email, name, kunden_rolle, aktiv, zugang_bis, letzter_login, passwort_hash IS NOT NULL AS angemeldet
-                       FROM benutzer WHERE kunden_id=%s ORDER BY erstellt_am""", (user["kunden_id"],))
+        cur.execute("""SELECT b.id, b.email, b.name, b.kunden_rolle, b.aktiv, b.zugang_bis, b.letzter_login, b.passwort_hash IS NOT NULL AS angemeldet,
+                              b.website_mitarbeiter_id, m.name AS person
+                       FROM benutzer b LEFT JOIN website_mitarbeiter m ON m.id = b.website_mitarbeiter_id WHERE b.kunden_id=%s ORDER BY b.erstellt_am""", (user["kunden_id"],))
         return cur.fetchall()
+
+
+def _person_pruefen(cur, kid, wert):
+    """Person der Terminbuchung, mit der ein Zugang verknüpft wird (leer = keine Bindung)."""
+    if not wert:
+        return None
+    try:
+        cur.execute("SELECT id FROM website_mitarbeiter WHERE id=%s AND kunden_id=%s", (wert, kid))
+    except Exception:
+        raise HTTPException(400, "Diese Person gibt es nicht.")
+    r = cur.fetchone()
+    if not r:
+        raise HTTPException(400, "Diese Person gibt es nicht.")
+    return r["id"]
 
 
 class EinladenIn(BaseModel):
@@ -33,6 +48,7 @@ class EinladenIn(BaseModel):
     name: str | None = Field(default=None, max_length=120)
     kunden_rolle: str = "mitarbeiter"
     zugang_bis: date | None = None             # Vertretung: Zugang endet automatisch nach diesem Tag
+    website_mitarbeiter_id: str = ""           # verknüpft den Zugang mit einer Person der Terminbuchung: sieht nur deren Termine
 
 
 @router.post("/team/einladen")
@@ -44,7 +60,8 @@ def einladen(data: EinladenIn, user: dict = Depends(require_inhaber)):
         raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
     with tx("system") as cur:
         link = zugang.link_erzeugen(cur, data.email, data.name, "kunde", kunden_id=user["kunden_id"], kunden_rolle=data.kunden_rolle)
-        cur.execute("UPDATE benutzer SET kunden_rolle=%s, zugang_bis=%s WHERE lower(email)=lower(%s) AND kunden_id=%s", (data.kunden_rolle, data.zugang_bis, data.email.strip(), user["kunden_id"]))
+        person = _person_pruefen(cur, user["kunden_id"], data.website_mitarbeiter_id)
+        cur.execute("UPDATE benutzer SET kunden_rolle=%s, zugang_bis=%s, website_mitarbeiter_id=%s WHERE lower(email)=lower(%s) AND kunden_id=%s", (data.kunden_rolle, data.zugang_bis, person, data.email.strip(), user["kunden_id"]))
         audit(cur, user, "team_eingeladen", user["kunden_id"], {"rolle": data.kunden_rolle})
     mail = zugang.per_mail(data.email, data.name, link, "kunde")
     return {"ok": True, "gemailt": bool(mail and mail.get("gesendet")), "einladungslink": None if (mail and mail.get("gesendet")) else link}
@@ -54,6 +71,7 @@ class MitgliedIn(BaseModel):
     aktiv: bool | None = None
     kunden_rolle: str | None = None
     zugang_bis: date | None = None
+    website_mitarbeiter_id: str | None = None
 
 
 @router.patch("/team/{bid}")
@@ -71,6 +89,8 @@ def mitglied(bid: str, data: MitgliedIn, user: dict = Depends(require_inhaber)):
             if str(m["id"]) == str(user["id"]) and (not neu_aktiv or neue_rolle != "inhaber"):
                 raise HTTPException(400, "Du kannst dir selbst weder den Zugang sperren noch die Rolle ändern.")
             cur.execute("UPDATE benutzer SET kunden_rolle=%s, aktiv=%s WHERE id=%s", (neue_rolle, neu_aktiv, bid))
+            if "website_mitarbeiter_id" in data.model_fields_set:
+                cur.execute("UPDATE benutzer SET website_mitarbeiter_id=%s WHERE id=%s", (_person_pruefen(cur, user["kunden_id"], data.website_mitarbeiter_id), bid))
             if "zugang_bis" in data.model_fields_set:
                 cur.execute("UPDATE benutzer SET zugang_bis=%s WHERE id=%s", (data.zugang_bis, bid))
             if not neu_aktiv:

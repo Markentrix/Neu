@@ -42,10 +42,10 @@ V.uebersicht = async () => {
   const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus'), fw = await sicherApi('/api/admin/fruehwarnung');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
   const STANDARD_AUS = ['system', 'fruehwarnung', 'heute'], ans = await ladeAnsicht(), aus = ausgeblendetSet(ans, STANDARD_AUS);
-  const cp = await sicherApi('/api/admin/cockpit');
-  const KARTEN = [['top3', 'Heute zuerst (die 3 wichtigsten Dinge)'], ['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['angebote', 'Angebote im Blick (angesehen, angenommen, offen)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
+  const cp = await sicherApi('/api/admin/cockpit'), ka = await sicherApi('/api/admin/kunden-ampel'), hr = await sicherApi('/api/admin/hilfe-rueckmeldungen');
+  const KARTEN = [['top3', 'Heute zuerst (die 3 wichtigsten Dinge)'], ['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['angebote', 'Angebote im Blick (angesehen, angenommen, offen)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['kundenampel', 'Kunden-Ampel (Website, Mail, Buchung je Kunde)'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
   const an = anpassenKnopf(KARTEN, STANDARD_AUS), zeige = (id, el) => aus.has(id) ? '' : el;
-  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('angebote', angebotsKarte(heute.angebote)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
+  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('angebote', angebotsKarte(heute.angebote)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), hilfeKarte(hr), zeige('kundenampel', ka ? kundenAmpelKarte(ka) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
     zeige('zahlen', h('div', { class: 'zahlenblock' },
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
@@ -183,6 +183,26 @@ export function prioritaetenKarte(heute, sys, fw) {
     h('div', { class: 'gesund small muted' }, h('span', { class: 'pill ' + (ok ? 'ok' : 'bad') }, ok ? 'System in Ordnung' : 'System: Handlungsbedarf'),
       h('span', { class: 'pill ' + (heute.rechnungen.length ? 'bad' : 'ok') }, heute.rechnungen.length ? heute.rechnungen.length + ' Rechnungen überfällig' : 'Keine Rechnung überfällig'),
       h('span', { class: 'pill ' + ((fw && fw.kunden && fw.kunden.some(k => k.stufe === 'hoch')) ? 'bad' : 'ok') }, (fw && fw.kunden && fw.kunden.some(k => k.stufe === 'hoch')) ? 'Kündigungsrisiko' : 'Kein Kündigungsrisiko')));
+}
+
+/** Kunden-Ampel: wer braucht gerade Aufmerksamkeit? Rot zuerst. */
+function hilfeKarte(d) {
+  if (!d || (!d.offen.length && !d.geloest_30 && !d.ungeloest_30)) return '';
+  const m = h('div');
+  return h('div', { class: 'card' }, h('h2', {}, 'Hilfe-Rückmeldungen', d.offen.length ? h('span', { class: 'badge', style: 'margin-left:8px' }, d.offen.length) : ''),
+    h('p', { class: 'small muted' }, 'Letzte 30 Tage: ' + d.geloest_30 + ' Mal geholfen, ' + d.ungeloest_30 + ' Mal nicht. Hier stehen Fragen, bei denen die Hilfe-Suche nicht reichte.'), m,
+    d.offen.length ? h('ul', { class: 'prio' }, d.offen.map(z => h('li', {}, h('span', { class: 'pill warn' }, z.rolle),
+      h('div', { class: 'pt' }, h('b', {}, z.frage), h('span', { class: 'small muted' }, [z.name, z.email, z.artikel ? 'Anleitung: ' + z.artikel : 'keine Anleitung gefunden', z.text].filter(Boolean).join(' · '))),
+      h('button', { class: 'btn sec small', onclick: async (e) => { try { await api('/api/admin/hilfe-rueckmeldungen/' + z.id + '/erledigt', { method: 'POST' }); e.target.closest('li').remove(); } catch (x) { m.replaceChildren(h('div', { class: 'msg err' }, x.message)); } } }, 'Erledigt')))) : h('p', { class: 'small muted' }, '✓ Keine offenen Rückmeldungen.'));
+}
+function kundenAmpelKarte(ka) {
+  const FARBE = { rot: ['bad', 'Handlungsbedarf'], gelb: ['warn', 'Hinweise'], gruen: ['ok', 'in Ordnung'] };
+  const nichtGruen = ka.kunden.filter(k => k.farbe !== 'gruen');
+  return h('div', { class: 'card' }, h('h2', {}, 'Kunden-Ampel'),
+    h('p', { class: 'small muted' }, ka.summe.rot + ' rot · ' + ka.summe.gelb + ' mit Hinweisen · ' + ka.summe.gruen + ' in Ordnung. Geprüft werden Website, Mail, Terminbuchung und offene Freigaben, Anfragen und Erstattungen.'),
+    nichtGruen.length ? h('ul', { class: 'prio' }, nichtGruen.slice(0, 12).map(k => h('li', {}, h('span', { class: 'pill ' + FARBE[k.farbe][0] }, FARBE[k.farbe][1]),
+      h('div', { class: 'pt' }, h('b', {}, k.firma), h('span', { class: 'small muted' }, [...k.rot, ...k.gelb].join(' '))), h('a', { class: 'btn sec small', href: '#kunde/' + k.id }, 'Öffnen')))) : h('p', { class: 'small muted' }, '✓ Bei allen Kunden sieht es gut aus.'),
+    nichtGruen.length > 12 ? h('p', { class: 'small muted' }, '… und ' + (nichtGruen.length - 12) + ' weitere.') : '');
 }
 
 const AMPEL_TXT = { ok: 'Alles in Ordnung', warn: 'Hinweise', bad: 'Handlungsbedarf', unbekannt: 'Noch keine Messwerte' };

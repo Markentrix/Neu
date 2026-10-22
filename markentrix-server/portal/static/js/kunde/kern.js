@@ -1,4 +1,5 @@
 import { h, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
+import { hilfeSuche } from '../hilfe.js';
 import { installBanner } from '../anleitung.js';
 
 export const root = document.getElementById('app');
@@ -18,6 +19,8 @@ const SEITEN = [
   ['wissen', 'Mein Wissen für den Assistenten', 'ki_chat'],
   ['anfragen', 'Anfragen', 'anfragen_termine'],
   ['termine', 'Termine', 'anfragen_termine'],
+  ['kalender', 'Kalender', 'anfragen_termine'],
+  ['stamm', 'Stammkunden', 'anfragen_termine'],
   ['bewertungen', 'Bewertungen', 'anfragen_termine'],
   ['kontakte', 'Kontakte', 'kontakte_angebote_vertraege'],
   ['dokumente', 'Meine Angebote an Kunden', 'kontakte_angebote_vertraege'],
@@ -40,14 +43,14 @@ const SEITEN = [
 /** Menügruppen: Täglich und Verstehen sind offen, selten Gebrauchtes klappt zu. */
 /** @type {[string, string[], boolean][]} */
 const GRUPPEN = [
-  ['Täglich', ['heute', 'anfragen', 'termine', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
+  ['Täglich', ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
   ['Verstehen', ['uebersicht', 'status', 'briefing', 'auswertung', 'berichte'], true],
   ['Mein Betrieb', ['assistent', 'wissen', 'website', 'dienste', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
   ['Verwaltung', ['willkommen', 'belege', 'avv', 'vertraege', 'team', 'hilfe', 'einstellungen'], false],
 ];
 export const inhaber = () => start.kunden_rolle === 'inhaber';
-const EMPFANG = ['heute', 'anfragen', 'termine', 'nachrichten', 'hilfe', 'einstellungen'];
-export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste', 'vertraege', 'wissen'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])));
+const EMPFANG = ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'nachrichten', 'hilfe', 'einstellungen'];
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste', 'vertraege', 'wissen'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : id === 'vertraege' ? start.badges.vertraege : 0)) || 0;
 
@@ -77,7 +80,7 @@ export function gerüst(aktiv, inhalt) {
         h('h1', {}, k.firma),
         h('span', { class: 'pill' }, 'Kundennr. ' + k.kundennummer),
         h('span', { class: 'pill ok' }, '● Online')),
-      installBanner(), inhalt, rechtFuss()),
+      hilfeSuche('kunde'), installBanner(), inhalt, rechtFuss()),
     tabbar(aktiv));
 }
 

@@ -54,6 +54,8 @@ Zweck: Alles, was man wissen muss, um am Markentrix-Server und am Portal sauber 
 - **Website-Anbindung:** Bausteine (`site.js`) und Website-API (`/api/…`), Kontaktformular, Terminbuchung mit Leistungen/Mitarbeitern, Gutschein-Anfragen (Zahlungslink und Code per Klick im Portal), Leistungen mit Anzahlung/Freigabe/Zusatzfragen/mehreren Leistungen je Termin, Absageregel (24 Std.), Umbuchen, Erstattungshinweis, Quittung (PDF), Zahlungsstand/Excel-Übersicht, Preisliste-Baustein, PayPal, Google-Bewertungen, Statistik ohne Cookies. Siehe `docs/WEBSITE-API.md` und den Prompt `docs/WEBSITE-PROMPT.md`.
 - **Betrieb:** Hintergrundjobs mit Fehlerzähler und Ampel, Veröffentlichungs-Alarm, Upload-Prüfung und Kontingent (500 MB je Kunde), Sitzungen enden bei Passwortwechsel, Wachdienst alle 5 Minuten, tägliche Sicherung.
 
+- **Neu (Oktober 2026):** Wochenplan, Branchen-Vorlagen, Kalender mit manuellen Terminen, Stammkunden, Mitarbeiter-Zugang, Ich-komme und Warteliste, Kunden-Ampel, Vertrieb-Übungsmodus, **Hilfe-Suche mit „Problem gelöst?“** (Rückmeldungen im Admin) und **PDF-Anleitungen** je Rolle (Quelle: `portal/app/hilfe/*.json`, Anhang der Einladungsmail). Tests t81 bis t87.
+
 ## 7. Offene Punkte (Stand heute)
 1. **Externes Backup** einrichten (z. B. Hetzner Storage Box, dann `mkctl offsite-setup`). Ohne das sind bei Serverausfall auch die Sicherungen weg. Ampel zeigt dort Gelb.
 2. **Externer Uptime-Monitor** (der interne Alarm fällt mit dem Server aus).

@@ -51,7 +51,7 @@ def start(user: dict = Depends(require_kunde)):
         v = cur.fetchone()
         badges["vertraege"], badges["vertraege_da"] = v["offen"], v["da"]
     return {"badges": badges, "kunde": kunde, "module": module, "anfragen_14d": reihe_anfragen, "termine_14d": reihe_termine,
-            "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"]}
+            "neue_anfragen": neue, "kommende_termine": kommende, "website": web, "kunden_rolle": user["kunden_rolle"], "personengebunden": bool(user.get("website_mitarbeiter_id"))}
 
 
 _erreichbar: dict = {}   # domain -> (Zeitpunkt, Ergebnis), 5 Minuten zwischengespeichert

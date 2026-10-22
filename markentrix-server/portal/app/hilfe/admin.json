@@ -1,0 +1,231 @@
+{
+ "artikel": [
+  {
+   "t": "Neuen Kunden anlegen",
+   "k": "neuer kunde anlegen onboarding kundennummer paket",
+   "wo": "Menü „Neuer Kunde“",
+   "l": "#neu",
+   "s": [
+    "Öffne „Neuer Kunde“, trage Firma, Ansprechpartner, E-Mail und Paket ein.",
+    "Nach dem Speichern startet das Onboarding (Menü „Onboarding“) und der Kunde bekommt einen Einladungslink für das Kundenportal.",
+    "Für Betriebe mit Buchung: in der Kundenansicht die Branchenvorlage wählen. Das legt passende Leistungen (zunächst inaktiv, ohne Preis) an."
+   ]
+  },
+  {
+   "t": "Vertriebler einladen und verwalten",
+   "k": "vertriebler einladen partner vertrieb zugang provision",
+   "wo": "Menü „Vertriebler“",
+   "l": "#vertrieb",
+   "s": [
+    "Lege den Vertriebler an (Name, E-Mail) und sende die Einladung.",
+    "Lege den Handelsvertretervertrag zur Bestätigung bereit (Menü „Verträge“ bzw. beim Vertriebler).",
+    "Provisionssätze legst du unter „Preise & Konditionen“ fest. Der Vertriebler sieht sie nur zur Information."
+   ]
+  },
+  {
+   "t": "Leads: Verteilung und Steuerung",
+   "k": "leads verteilung automatisch zuweisen reaktionszeit preise vertriebler steuerung",
+   "wo": "Menü „Leads“",
+   "l": "#leads",
+   "s": [
+    "Oben steuerst du die automatische Verteilung (Standard: aus), die Reaktionszeit und ob Vertriebler Preise sehen (Standard: aus).",
+    "Neue Leads weist du von Hand einem Vertriebler zu oder lässt sie nach Freigabe der Verteilung automatisch zuteilen."
+   ],
+   "n": [
+    "Diese Einstellungen betreffen Geld und Kundendaten. Ändere sie nur bewusst."
+   ]
+  },
+  {
+   "t": "Leads importieren",
+   "k": "import leads liste csv excel hochladen sperrliste dubletten",
+   "wo": "Menü „Leads“",
+   "l": "#leads",
+   "s": [
+    "Öffne „Leads“ und nutze den Import. Jede Zeile wird auf Dubletten und Sperrliste geprüft, betroffene Zeilen werden übersprungen.",
+    "Anschließend weist du die Leads einem Vertriebler zu."
+   ]
+  },
+  {
+   "t": "Rechnung oder Angebot erstellen",
+   "k": "rechnung angebot erstellen beleg pdf senden stornieren",
+   "wo": "Menü „Angebote & Rechnungen“",
+   "l": "#belege",
+   "s": [
+    "Wähle „Neu“, Kunde und Positionen. Speichere als Entwurf, prüfe die Vorschau und stelle den Beleg.",
+    "Versand erfolgt per Mail mit PDF. Stornieren erzeugt eine Storno-Rechnung, der alte Beleg bleibt erhalten."
+   ]
+  },
+  {
+   "t": "Zahlungserinnerung und Mahnungen",
+   "k": "mahnung mahnwesen zahlungserinnerung überfällig mahnen verzug",
+   "wo": "Menü „Angebote & Rechnungen“ (Mahnvorschläge) und „Einstellungen“ → Zahlung & Mahnwesen",
+   "l": "#belege",
+   "s": [
+    "Unter „Angebote & Rechnungen“ siehst du Mahnvorschläge für überfällige Rechnungen und kannst Erinnerung, 1. und 2. Mahnung einzeln senden.",
+    "Automatisch verschicken: In „Einstellungen“ → „Zahlung & Mahnwesen“ den Haken „Erinnerung und Mahnungen automatisch per Mail verschicken“ setzen und die Tage je Stufe eintragen."
+   ],
+   "n": [
+    "Standard ist aus. Automatische Mahnungen betreffen Geld und Rechtliches, aktiviere sie erst nach Prüfung."
+   ]
+  },
+  {
+   "t": "E-Mail-Versand (SMTP) einrichten",
+   "k": "smtp mail versand gmail passwort app-passwort einladung mails kommen nicht an",
+   "wo": "Menü „Einstellungen“ → „E-Mail-Versand (SMTP)“",
+   "l": "#einstellungen",
+   "s": [
+    "Trage Server (z. B. smtp.gmail.com), Port, Benutzer, Passwort und Absender ein.",
+    "Bei Gmail brauchst du ein App-Passwort (Konto → Sicherheit → Zwei-Faktor → App-Passwörter), nicht das normale Passwort.",
+    "Speichern und Testmail senden. Kommt sie nicht an, prüfe „Mail-Zustellbarkeit“ weiter unten (SPF, DKIM, DMARC)."
+   ],
+   "n": [
+    "Das Passwort wird verschlüsselt gespeichert. Der Schlüssel PORTAL_SECRET in /opt/markentrix/.env darf nie geändert oder verloren werden."
+   ]
+  },
+  {
+   "t": "KI-Assistent einrichten",
+   "k": "ki api key assistent chat claude schlüssel",
+   "wo": "Menü „Einstellungen“ → „KI-Assistent im Kunden-Chat“",
+   "l": "#einstellungen",
+   "s": [
+    "API-Key eintragen und speichern. Danach antwortet der Assistent im Kundenportal.",
+    "KI-Texte sollten als solche gekennzeichnet sein; klare Hinweise dazu stehen in der Anwaltscheckliste."
+   ]
+  },
+  {
+   "t": "Firmendaten, Impressum, Datenschutz",
+   "k": "firmendaten impressum datenschutz firma anschrift steuernummer ust",
+   "wo": "Menü „Einstellungen“ → „Firmendaten“ und „Impressum und Datenschutz“",
+   "l": "#einstellungen",
+   "s": [
+    "Trage deine Firmendaten ein. Sie erscheinen auf Rechnungen, Angeboten und in den Rechtstexten.",
+    "Die Standardtexte für Impressum und Datenschutz kannst du dort anpassen. Rechtliche Prüfung gehört zum Anwalt (docs/ANWALT-CHECKLISTE.md)."
+   ]
+  },
+  {
+   "t": "Website eines Kunden hochladen",
+   "k": "website demo hochladen zip domain upload veröffentlichen seite",
+   "wo": "Menü „Websites & Demos“",
+   "l": "#websites",
+   "s": [
+    "Lade die Website als ZIP hoch. Das Portal prüft den Inhalt und das Kontingent (500 MB je Kunde).",
+    "Die Domain muss in der Domainverwaltung stehen, sonst meldet die Website-API „Unbekannte Website“ (404) oder „Herkunft nicht erlaubt“ (403).",
+    "Dateien liegen auf dem Server in /srv/sites/<domain>."
+   ]
+  },
+  {
+   "t": "Freigaben und Nachrichten bearbeiten",
+   "k": "postfach nachrichten freigaben aufgaben kunde antwort",
+   "wo": "Menü „Nachrichten“, „Freigaben“, „Aufgaben“",
+   "l": "#postfach",
+   "s": [
+    "„Nachrichten“ zeigt Kundenanfragen. Antworte direkt im Portal.",
+    "„Freigaben“ zeigt, was Kunden bestätigen müssen. „Aufgaben“ sammelt Zu-tun-Punkte.",
+    "„Mein Tag“ zeigt zusammengefasst, was heute zu tun ist."
+   ]
+  },
+  {
+   "t": "Kunden-Ampel und Frühwarnung",
+   "k": "ampel kunde risiko frühwarnung gesundheit abwanderung rot gelb grün",
+   "wo": "Menü „Übersicht“",
+   "l": "#uebersicht",
+   "s": [
+    "Die Karte „Kunden-Ampel“ bewertet jeden Kunden (grün, gelb, rot) nach Aktivität, offenen Punkten und Zahlungen.",
+    "Rot zuerst bearbeiten, z. B. mit einem Anruf oder einer Nachricht."
+   ]
+  },
+  {
+   "t": "Server prüfen und aktualisieren",
+   "k": "server update aktualisieren selbsttest mkctl installieren git pull status backup",
+   "wo": "Per SSH auf dem Server",
+   "s": [
+    "Anmelden: ssh root@5.75.146.212.",
+    "Update: cd /root/Neu, git pull origin server-paket, cd markentrix-server, sudo bash install.sh, sudo mkctl selbsttest. Der Hinweis „Es läuft schon ein Caddy“ ist normal.",
+    "Status: mkctl status. Logs: docker logs mk-portal --tail 100.",
+    "Sicherung läuft täglich um 03:15 nach /opt/markentrix/backups; mkctl backup startet sie von Hand."
+   ],
+   "n": [
+    "Externes Backup ist noch einzurichten (mkctl offsite-setup)."
+   ]
+  },
+  {
+   "t": "Systemstatus und Protokoll",
+   "k": "systemstatus ampel protokoll audit fehler jobs",
+   "wo": "Menü „Protokoll“ und Übersicht",
+   "l": "#protokoll",
+   "s": [
+    "Das Protokoll zeigt, wer wann was geändert hat.",
+    "Die Ampel im Systemstatus zeigt Hintergrundjobs, Mail, Sicherung und Zertifikat."
+   ]
+  },
+  {
+   "t": "Preise und Pakete pflegen",
+   "k": "preise pakete katalog konditionen provision",
+   "wo": "Menü „Preise & Konditionen“ und „Pakete (Katalog)“",
+   "l": "#preise",
+   "s": [
+    "Pakete und Preise pflegst du im Katalog. Provisionsregeln stehen unter „Preise & Konditionen“.",
+    "Änderungen an Preisen wirken auf neue Angebote, bestehende Verträge bleiben."
+   ]
+  },
+  {
+   "t": "Mitarbeiter und Admin-Rechte",
+   "k": "admin rechte mitarbeiter zugang rolle bereich",
+   "wo": "Menü „Einstellungen“ → „Mitarbeiter & Rechte“",
+   "l": "#einstellungen",
+   "s": [
+    "Lege weitere Admin-Zugänge an und gib ihnen nur die Bereiche, die sie brauchen (z. B. nur Nachrichten)."
+   ]
+  }
+ ],
+ "titel": "Anleitung Admin-Bereich",
+ "untertitel": "Für die Verwaltung bei Markentrix",
+ "intro": [
+  "Der Admin-Bereich (portal.markentrix.de/admin) ist die Zentrale: Kunden, Vertrieb, Rechnungen, Einstellungen und Systemstatus.",
+  "Regel: Änderungen an Geld, Provisionen, Rechtlichem und Kundendaten (automatische Lead-Verteilung, Preise für Vertriebler, automatische Mahnungen) sind standardmäßig aus und werden nur bewusst eingeschaltet."
+ ],
+ "start": [
+  "Anmelden unter portal.markentrix.de/admin mit Admin-E-Mail und Passwort.",
+  "Zwei-Faktor-Anmeldung aktivieren (Einstellungen → Sicherheit).",
+  "Zuerst einrichten: E-Mail-Versand (SMTP), Firmendaten, danach Zahlung & Mahnwesen und Terminbuchung."
+ ],
+ "einstellungen": [
+  [
+   "E-Mail-Versand (SMTP)",
+   "Server, Zugangsdaten und Absender für alle Portalmails."
+  ],
+  [
+   "KI-Assistent",
+   "API-Key für den Chat im Kundenportal."
+  ],
+  [
+   "Firmendaten",
+   "Stammdaten für Rechnungen, Angebote, Impressum und Datenschutz."
+  ],
+  [
+   "Zahlung & Mahnwesen",
+   "Gläubiger-ID, SEPA-Vorlauf, Mahnstufen und Tage. Automatischer Versand ist standardmäßig aus."
+  ],
+  [
+   "Leads (Steuerung)",
+   "Automatische Verteilung (aus), Reaktionszeit, Preise für Vertriebler (aus)."
+  ],
+  [
+   "Terminbuchung",
+   "Erstgespräch-Buchung für Leads."
+  ],
+  [
+   "Folgemails, Benachrichtigungen, Textvorlagen",
+   "Automatische Mails und Vorlagen."
+  ],
+  [
+   "Mitarbeiter & Rechte",
+   "Weitere Admin-Zugänge mit eingeschränkten Bereichen."
+  ],
+  [
+   "Sicherheit",
+   "Zwei-Faktor-Anmeldung für Admin und Vertrieb."
+  ]
+ ],
+ "hilfe": "Im Admin-Bereich oben im Suchfeld „Hilfe“. Rückmeldungen von Kunden und Vertrieblern, die nicht weiterkamen, erscheinen auf der Übersicht in der Karte „Hilfe-Rückmeldungen“ und per Mail."
+}

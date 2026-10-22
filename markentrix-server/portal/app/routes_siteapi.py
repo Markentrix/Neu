@@ -23,11 +23,11 @@ from .security import EMAIL_RE, client_ip, rate_limit
 
 router = APIRouter(prefix="/siteapi/api", include_in_schema=False)
 TZ = sd.TZ
-TITEL = {"kontakt": "Anfrage", "termin": "Terminanfrage", "gutschein": "Gutscheinbestellung", "firma": "Firmenanfrage", "widerruf": "Widerruf"}
-PRAEFIX = {"kontakt": "K", "termin": "T", "gutschein": "G", "firma": "F", "widerruf": "W"}
+TITEL = {"kontakt": "Anfrage", "termin": "Terminanfrage", "gutschein": "Gutscheinbestellung", "firma": "Firmenanfrage", "widerruf": "Widerruf", "warteliste": "Wartelisten-Anfrage"}
+PRAEFIX = {"kontakt": "K", "termin": "T", "gutschein": "G", "firma": "F", "widerruf": "W", "warteliste": "L"}
 LABELS = {"name": "Name", "telefon": "Telefon", "email": "E-Mail", "nachricht": "Nachricht", "paket": "Paket", "klasse": "Fahrzeugklasse", "fahrzeug": "Fahrzeug",
           "zustand": "Zustand", "extras": "Extras", "abholung": "Abholung", "datum": "Wunschtag", "datum2": "Ersatztag", "uhrzeit": "Uhrzeit", "zeitfenster": "Zeitfenster",
-          "kanal": "Rückmeldung per", "gutscheincode": "Gutscheincode", "bewertung_ok": "Bewertung gewünscht", "quelle": "Gefunden über", "winterschutz": "Winterschutz",
+          "kanal": "Rückmeldung per", "personen": "Personen", "gutscheincode": "Gutscheincode", "bewertung_ok": "Bewertung gewünscht", "quelle": "Gefunden über", "winterschutz": "Winterschutz",
           "art": "Art", "wunschbetrag": "Betrag", "betrag": "Betrag", "fuer": "Für", "von": "Von", "widmung": "Widmung", "zustellung": "Zustellung", "vorgang": "Vorgangsnummer",
           "leistung": "Leistung", "mitarbeiter": "Mitarbeiter", "haarlaenge": "Haarlänge", "haarzustand": "Haarzustand", "letzte_behandlung": "Letzte Behandlung", "wunschzeit": "Wunschzeit", "terminart": "Terminart", "kennzeichen": "Kennzeichen", "marke": "Marke", "modell": "Modell", "baujahr": "Baujahr", "fahrzeugtyp": "Fahrzeugtyp", "anliegen": "Anliegen", "firma": "Firma", "anzahl": "Anzahl Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen"}
 SCHLUESSEL = re.compile(r"^[a-z][a-z0-9_]{0,30}$")
@@ -99,7 +99,14 @@ def gesund():
 EGAL = {"", "egal", "beliebig", "any", "keine", "0"}
 
 
-def _auswahl(cur, z: dict, leistung, mitarbeiter: str):
+def _personen(v) -> int:
+    try:
+        return max(1, min(5, int(str(v).strip() or 1)))
+    except ValueError:
+        return 1
+
+
+def _auswahl(cur, z: dict, leistung, mitarbeiter: str, personen=1):
     """Wunsch-Leistung(en) und -Mitarbeiter (Kurznamen der Website) -> (Leistung|None, Mitarbeiter-ID|None, Mitarbeitername).
     Mehrere Leistungen (Liste oder durch Komma getrennt) werden zu einer zusammengefasst: Dauer und Preis addiert."""
     mid, mname = None, ""
@@ -132,6 +139,11 @@ def _auswahl(cur, z: dict, leistung, mitarbeiter: str):
     lz = sd.leistungen_kombinieren(zeilen)
     if lz:
         lz = {**lz, "_einzeln": zeilen}
+        n = _personen(personen)
+        if n > 1:                                      # mehrere Personen nacheinander beim selben Mitarbeiter: Dauer, Preis und Anzahlung mal Anzahl
+            p = sd.preis_zahl(lz.get("preis"))
+            lz = {**lz, "dauer_min": lz["dauer_min"] * n, "preis": f"{p * n:.2f} €" if p else lz.get("preis"),
+                  "anzahlung_wert": (float(lz["anzahlung_wert"]) * n if lz.get("anzahlung_art") == "betrag" and lz.get("anzahlung_wert") is not None else lz.get("anzahlung_wert"))}
     if mitarbeiter not in EGAL:
         cur.execute("SELECT id, name FROM website_mitarbeiter WHERE kunden_id=%s AND aktiv AND (schluessel=%s OR lower(name)=%s)", (z["kunden_id"], mitarbeiter, mitarbeiter))
         m = cur.fetchone()
@@ -174,7 +186,7 @@ def mitarbeiter(request: Request):
 
 
 @router.get("/verfuegbarkeit")
-def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = ""):  # leistung: ein Schlüssel oder mehrere durch Komma
+def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = "", personen: int = 1):  # leistung: ein Schlüssel oder mehrere durch Komma
     rate_limit("api-verf:" + client_ip(request), 120, 60)
     z = _lade(request)
     heute = datetime.now(TZ).date()
@@ -183,7 +195,7 @@ def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = ""):
     try:
         with tx("system") as cur:
             sd.reservierungen_verfallen(cur, z["kunden_id"], z["kal_halte_std"])
-            lz, mid, _ = _auswahl(cur, z, leistung, mitarbeiter)
+            lz, mid, _ = _auswahl(cur, z, leistung, mitarbeiter, personen)
             plan = sd.slotplan(cur, z, leistung=lz, mitarbeiter=mid)
             res = sd.ressourcen(cur, z, (lz or {}).get("id"), mid)
             team = any(r["id"] for r in res)
@@ -194,14 +206,15 @@ def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = ""):
     ab = heute + timedelta(days=z["kal_tage"] + 1)
     gesperrt += [(ab + timedelta(days=i)).isoformat() for i in range(0, 400 - z["kal_tage"])]     # jenseits des Buchungszeitraums gibt es noch keine Termine
     frei = [d.isoformat() for d, s in sorted(plan.items()) if any(x[2] for x in s)]
-    zeiten = sorted(set(_zeiten(z)) | {x[0] for s in plan.values() for x in s}) if team else _zeiten(z)
+    alle_zeiten = {x[0] for s in plan.values() for x in s}
+    zeiten = sorted(alle_zeiten) if (z.get("kal_wochenplan") and alle_zeiten) else (sorted(set(_zeiten(z)) | alle_zeiten) if team else _zeiten(z))
     geschlossen = [d for d in range(7) if (7 if d == 0 else d) not in offen]
     return _json({"blocked": gesperrt, "blockedKeramik": gesperrt, "closedWeekdays": geschlossen, "nextFree": frei[0] if frei else None,
                   "selfBooking": not (z["kal_freigabe"] or (lz or {}).get("freigabe")), "slotTimes": zeiten})
 
 
 @router.get("/slots")
-def slots(request: Request, tag: str = "", leistung: str = "", mitarbeiter: str = ""):
+def slots(request: Request, tag: str = "", leistung: str = "", mitarbeiter: str = "", personen: int = 1):
     rate_limit("api-slots:" + client_ip(request), 120, 60)
     z = _lade(request)
     try:
@@ -213,12 +226,12 @@ def slots(request: Request, tag: str = "", leistung: str = "", mitarbeiter: str 
     try:
         with tx("system") as cur:
             sd.reservierungen_verfallen(cur, z["kunden_id"], z["kal_halte_std"])
-            lz, mid, _ = _auswahl(cur, z, leistung, mitarbeiter)
+            lz, mid, _ = _auswahl(cur, z, leistung, mitarbeiter, personen)
             plan = sd.slotplan(cur, z, leistung=lz, mitarbeiter=mid)
     except Ungueltig as e:
         return _json({"ok": False, "errors": e.fehler, "message": "Bitte die Auswahl prüfen."}, 422)
     vorhanden = {x[0]: x[2] for x in plan.get(d, [])}
-    zeiten = sorted(set(_zeiten(z)) | set(vorhanden))
+    zeiten = sorted(vorhanden) if z.get("kal_wochenplan") and vorhanden else sorted(set(_zeiten(z)) | set(vorhanden))
     return _json({"tag": tag, "slots": [{"zeit": t, "frei": bool(vorhanden.get(t, False))} for t in zeiten]})
 
 
@@ -313,14 +326,14 @@ def _pruefen(d: dict, z: dict) -> dict:
         fehler["email"] = "Bitte eine gültige E-Mail-Adresse angeben."
     if typ == "termin" and not tel:
         fehler["telefon"] = "Bitte eine Telefonnummer angeben."
-    if typ in ("gutschein", "firma", "widerruf") and not mail:
+    if typ in ("gutschein", "firma", "widerruf", "warteliste") and not mail:
         fehler["email"] = "Bitte eine E-Mail-Adresse angeben."
     if typ == "kontakt" and not tel and not mail:
         fehler["telefon"] = "Bitte Telefon oder E-Mail angeben."
     if typ != "widerruf" and d.get("einwilligung") not in ("ja", "on", True, "true", "1", 1):
         fehler["einwilligung"] = "Bitte die Datenschutzhinweise bestätigen."
     heute = datetime.now(TZ).date()
-    if typ == "termin":
+    if typ in ("termin", "warteliste"):
         for k in ("datum", "datum2"):
             raw = felder.get(k, "")
             if not raw:
@@ -433,6 +446,10 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
             cur.execute("INSERT INTO anfragen (kunden_id, name, kontakt, nachricht, quelle) VALUES (%s,%s,%s,%s,'website') RETURNING id",
                         (kid, felder["name"], kontakt, f"{TITEL[typ]} {ref}\n\n{_zusammenfassung(felder, labels)}"[:6000]))
             aid = cur.fetchone()["id"]
+            if typ == "warteliste":
+                lz, wunsch, _m = _auswahl(cur, z, felder.get("leistung", ""), felder.get("mitarbeiter", ""))
+                cur.execute("""INSERT INTO website_warteliste (kunden_id, ref, name, email, telefon, tag, leistung_id, mitarbeiter_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+                            (kid, ref, felder["name"], felder["email"], felder.get("telefon") or None, date.fromisoformat(felder["datum"]), (lz or {}).get("id"), wunsch))
             if typ == "gutschein":
                 bt = sd.betrag_lesen(felder.get("wunschbetrag") or felder.get("betrag"))
                 cur.execute("""INSERT INTO website_gutscheine (kunden_id, anfrage_id, ref, name, email, telefon, betrag, empfaenger, widmung)
@@ -442,7 +459,7 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
             if typ == "termin" and felder.get("uhrzeit") and z["kal_aktiv"] and felder.get("email"):
                 cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(kid),))
                 sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
-                lz, wunsch, mname = _auswahl(cur, z, felder.get("leistung", ""), felder.get("mitarbeiter", ""))
+                lz, wunsch, mname = _auswahl(cur, z, felder.get("leistung", ""), felder.get("mitarbeiter", ""), felder.get("personen", 1))
                 if lz:
                     labels = {f["key"]: f["label"] for l in lz["_einzeln"] for f in (l.get("felder") or [])}
                     miss = _pflichtfelder(lz, felder, lz["_einzeln"])

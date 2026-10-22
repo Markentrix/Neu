@@ -48,3 +48,8 @@ Der Vertrag bleibt stabil. Es kommen nur neue Felder dazu, bestehende ändern si
 - **Zusatzfragen je Leistung:** `GET /api/leistungen` liefert `felder:[{key,label,pflicht}]`. Die Website zeigt sie als Eingabefelder mit dem Namen `key`. Fehlt eine Pflichtangabe, antwortet `POST /api/anfrage` mit `422 {errors:{key:text}}`.
 - **Mehrere Leistungen in einem Termin:** `leistung` als Liste oder `a,b,c` (Kurznamen). Dauer, Preis und Anzahlung werden addiert, die Person muss alle anbieten, Freigabe gilt, wenn eine Leistung sie braucht. Gilt auch für `/api/slots` und `/api/verfuegbarkeit` (`?leistung=a,b`).
 - Datenschutz-Textbausteine für Zahlung, Anzahlung und Gutschein: `docs/DATENSCHUTZ-BAUSTEIN-ZAHLUNG.md`.
+
+## Wochenplan, Personenzahl, Warteliste (Ergänzung)
+- `/leistungen` und `/slots` richten sich nach dem **Wochenplan** (Zeiten je Wochentag mit Pausen); `personen` (Parameter bei `/slots`, `/verfuegbarkeit` und der Buchung) vervielfacht Dauer, Preis und Anzahlung.
+- Neuer Anfragetyp **`warteliste`** (Pflicht: E-Mail und Datum). Wird ein Termin frei, benachrichtigt das Portal bis zu 3 Wartende mit den freien Zeiten.
+- Termin-Links in Mails: absagen, verschieben und **„Ich komme“** (Bestätigung), alle als Seiten mit Bestätigungsschritt.

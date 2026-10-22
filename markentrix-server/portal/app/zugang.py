@@ -26,5 +26,16 @@ def per_mail(email: str, name: str | None, link: str, rolle: str) -> dict:
     """Versendet die Einladung, wenn E-Mail-Versand eingerichtet ist. Nach dem Commit aufrufen."""
     if not mailer.konfiguriert():
         return {"gesendet": False, "grund": "E-Mail-Versand ist noch nicht eingerichtet (Einstellungen). Bitte den Link selbst senden."}
-    ok, fehler = mailer.einladung(email.strip().lower(), name, link, rolle, config.INVITE_DAYS)
+    anhang = None
+    try:
+        from . import anleitung_pdf, einstellungen
+        from .db import tx
+        r = "vertrieb" if rolle == "vertrieb" else "kunde" if rolle == "kunde" else None
+        if r:
+            with tx("system") as cur:
+                firma = einstellungen.lesen(cur, "firma")
+            anhang = (f"Markentrix-Anleitung-{r}.pdf", anleitung_pdf.bauen(r, firma), "application/pdf")
+    except Exception:  # Anleitung ist nur ein Zusatz, die Einladung muss immer rausgehen
+        anhang = None
+    ok, fehler = mailer.einladung(email.strip().lower(), name, link, rolle, config.INVITE_DAYS, anhang)
     return {"gesendet": ok, "grund": fehler}

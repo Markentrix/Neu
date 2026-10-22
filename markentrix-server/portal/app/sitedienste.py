@@ -580,6 +580,39 @@ def zeiten_liste(z: dict) -> list[str]:
     return sorted({x.strip() for x in (z.get("kal_zeiten") or "").split(",") if ZEIT_RE.match(x.strip())})
 
 
+def plan_lesen(roh: dict | None) -> dict:
+    """Wochenplan aus Texteingaben prüfen: {"1": "09:00-12:00, 13:00-18:00", "6": "09:00-14:00"} -> {"1": [["09:00","12:00"],["13:00","18:00"]], ...}.
+    Tage ohne Eintrag sind geschlossen. Wirft ValueError mit verständlichem Text."""
+    out: dict = {}
+    for tag, text in (roh or {}).items():
+        if str(tag) not in "1234567" or len(str(tag)) != 1:
+            raise ValueError("Der Wochentag ist ungültig.")
+        fenster = []
+        for teil in [t.strip() for t in re.split(r"[,;]", str(text or "")) if t.strip()]:
+            m = re.match(r"^(\d{1,2}):(\d{2})\s*[-–bis ]+\s*(\d{1,2}):(\d{2})$", teil)
+            if not m:
+                raise ValueError("Die Zeiten bitte so eintragen: 09:00-12:00, 13:00-18:00.")
+            h1, m1, h2, m2 = map(int, m.groups())
+            if h1 > 23 or h2 > 24 or m1 > 59 or m2 > 59 or (h2 == 24 and m2) or (h1, m1) >= (h2, m2):
+                raise ValueError("Bei den Zeiten muss das Ende nach dem Beginn liegen (z. B. 09:00-12:00).")
+            fenster.append([f"{h1:02d}:{m1:02d}", f"{h2:02d}:{m2:02d}"])
+        fenster.sort()
+        if any(fenster[i][1] > fenster[i + 1][0] for i in range(len(fenster) - 1)) or len(fenster) > 4:
+            raise ValueError("Die Zeitfenster eines Tages überschneiden sich oder sind zu viele (höchstens 4).")
+        if fenster:
+            out[str(tag)] = fenster
+    return out
+
+
+def plan_text(plan: dict | None) -> dict:
+    return {t: ", ".join(f"{a}-{b}" for a, b in f) for t, f in (plan or {}).items()}
+
+
+def plan_grenzen(plan: dict) -> tuple[list[int], str, str]:
+    """(Wochentage, frühester Beginn, spätestes Ende) für die älteren Felder."""
+    return (sorted(int(t) for t in plan), min(f[0][0] for f in plan.values()), max(f[-1][1] for f in plan.values()))
+
+
 def reservierungen_verfallen(cur, kid, stunden: int):
     """Unbestätigte Reservierungen geben den Termin nach Ablauf der Haltefrist wieder frei."""
     cur.execute("""UPDATE website_termine SET status='abgesagt' WHERE kunden_id=%s AND status='reserviert' AND erstellt_am < now() - make_interval(hours => %s)
@@ -595,8 +628,17 @@ def ressourcen(cur, z: dict, leistung_id=None, mitarbeiter_id=None) -> list[dict
     alle_ma = cur.fetchall()
     ms = [m for m in alle_ma if m["aktiv"]]
     allg = {"wochentage": z["kal_wochentage"], "von": z["kal_von"], "bis": z["kal_bis"], "zeiten": zeiten_liste(z)}
+    bplan = z.get("kal_wochenplan") or None
+
+    def plan_von(wp, wochentage, von, bis):
+        """(Plan {isoweekday: [(von, bis)]}, ausdrücklich?)"""
+        if wp:
+            return {int(t): [tuple(x) for x in f] for t, f in wp.items()}, True
+        return {int(w): [(von, bis)] for w in wochentage}, False
+
     if not alle_ma:
-        return [{"id": None, "name": "", "ical_enc": None, **allg}]     # kein Team angelegt: der Betrieb selbst
+        pl, ex = plan_von(bplan, allg["wochentage"], allg["von"], allg["bis"])
+        return [{"id": None, "name": "", "ical_enc": None, **allg, "wochentage": sorted(pl), "plan": pl, "plan_explizit": ex}]     # kein Team angelegt: der Betrieb selbst
     if not ms:
         return []                                                       # Team angelegt, aber alle pausiert: nichts buchbar
     cur.execute("SELECT mitarbeiter_id, leistung_id FROM website_mitarbeiter_leistungen WHERE mitarbeiter_id = ANY(%s)", ([m["id"] for m in ms],))
@@ -611,9 +653,21 @@ def ressourcen(cur, z: dict, leistung_id=None, mitarbeiter_id=None) -> list[dict
         if gesucht and bietet.get(m["id"]) and not gesucht <= bietet[m["id"]]:
             continue
         own_z = zeiten_liste({"kal_zeiten": m["zeiten"]})
-        out.append({"id": m["id"], "name": m["name"], "ical_enc": m["ical_enc"], "wochentage": m["wochentage"] or allg["wochentage"],
-                    "von": m["von"] or allg["von"], "bis": m["bis"] or allg["bis"], "zeiten": own_z or allg["zeiten"]})
+        if m.get("wochenplan"):
+            pl, ex = plan_von(m["wochenplan"], [], "", "")
+        elif m["wochentage"] or m["von"]:
+            pl, ex = plan_von(None, m["wochentage"] or allg["wochentage"], m["von"] or allg["von"], m["bis"] or allg["bis"])
+            ex = False
+        else:
+            pl, ex = plan_von(bplan, allg["wochentage"], allg["von"], allg["bis"])
+        out.append({"id": m["id"], "name": m["name"], "ical_enc": m["ical_enc"], "wochentage": sorted(pl),
+                    "von": m["von"] or allg["von"], "bis": m["bis"] or allg["bis"], "zeiten": own_z or allg["zeiten"], "plan": pl, "plan_explizit": ex})
     return out
+
+
+def _hm(text: str) -> tuple[int, int]:
+    h, m = text.split(":")
+    return int(h), int(m)
 
 
 def slotplan(cur, z: dict, mit_ical: bool = True, tage: int | None = None, leistung: dict | None = None, mitarbeiter=None) -> dict:
@@ -652,25 +706,29 @@ def slotplan(cur, z: dict, mit_ical: bool = True, tage: int | None = None, leist
             except ValueError:
                 pass
         gesperrt = {s["tag"] for s in sperr if s["mitarbeiter_id"] in (None, r["id"])}
-        h1, m1 = map(int, r["von"].split(":"))
-        h2, m2 = map(int, r["bis"].split(":"))
         raster = timedelta(minutes=max(10, z["kal_dauer"]))
         for i in range(tage + 1):
             tag = heute + timedelta(days=i)
-            if tag.isoweekday() not in r["wochentage"]:
+            fenster = r["plan"].get(tag.isoweekday())
+            if not fenster:
                 continue
             anzahl = sum(1 for b0, _ in eigene if b0.astimezone(TZ).date() == tag)
             beginne = []
             if r["zeiten"]:
                 for f in r["zeiten"]:
                     hh, mm = map(int, f.split(":"))
-                    beginne.append(datetime(tag.year, tag.month, tag.day, hh, mm, tzinfo=TZ))
+                    t = datetime(tag.year, tag.month, tag.day, hh, mm, tzinfo=TZ)
+                    if not r["plan_explizit"] or any(_hm(a) <= (hh, mm) < _hm(b) for a, b in fenster):
+                        beginne.append(t)
             else:
-                t = datetime(tag.year, tag.month, tag.day, h1, m1, tzinfo=TZ)
-                schluss = datetime(tag.year, tag.month, tag.day, h2, m2, tzinfo=TZ)
-                while t + dauer <= schluss:
-                    beginne.append(t)
-                    t += raster
+                for a, b in fenster:
+                    h1, m1 = _hm(a)
+                    h2, m2 = _hm(b)
+                    t = datetime(tag.year, tag.month, tag.day, h1, m1, tzinfo=TZ)
+                    schluss = datetime(tag.year, tag.month, tag.day, 23, 59, tzinfo=TZ) + timedelta(minutes=1) if (h2, m2) == (24, 0) else datetime(tag.year, tag.month, tag.day, h2, m2, tzinfo=TZ)
+                    while t + dauer <= schluss:
+                        beginne.append(t)
+                        t += raster
             zu = tag in gesperrt or (kap > 0 and anzahl >= kap)
             for t in beginne:
                 u = t.astimezone(timezone.utc)
@@ -684,6 +742,40 @@ def slotplan(cur, z: dict, mit_ical: bool = True, tage: int | None = None, leist
         frei = sorted(zeitplan.get((tag, zeit), []))
         plan.setdefault(tag, []).append((zeit, alle[(tag, zeit)], bool(frei), frei[0][3] if frei else None))
     return plan
+
+
+def warteliste_benachrichtigen(kid, tag) -> int:
+    """Wird an einem Tag etwas frei, bekommen bis zu 3 Wartende (in der Reihenfolge ihrer Eintragung) eine Mail mit den freien Zeiten."""
+    with tx("system") as cur:
+        cur.execute("SELECT * FROM website_warteliste WHERE kunden_id=%s AND tag=%s AND status='offen' ORDER BY erstellt_am LIMIT 6", (kid, tag))
+        wl = cur.fetchall()
+        if not wl:
+            return 0
+        z = zeile(cur, kid)
+        cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
+        firma = cur.fetchone()["firma"]
+        cur.execute("SELECT domain FROM websites WHERE kunden_id=%s AND art='live' AND status='live' LIMIT 1", (kid,))
+        w0 = cur.fetchone()
+        todo = []
+        for w in wl:
+            lz = None
+            if w["leistung_id"]:
+                cur.execute("SELECT * FROM website_leistungen WHERE id=%s", (w["leistung_id"],))
+                lz = cur.fetchone()
+            frei = [t for t, _u, f, _r in slotplan(cur, z, leistung=lz, mitarbeiter=w["mitarbeiter_id"]).get(tag, []) if f]
+            if frei:
+                todo.append((w, frei[:6]))
+    n = 0
+    for w, frei in todo[:3]:
+        url = f"https://{w0['domain']}" if w0 else ""
+        text = (f"Guten Tag {w['name']},\n\nSie stehen bei {firma} auf der Warteliste für den {tag.strftime('%d.%m.%Y')}. Jetzt ist etwas frei geworden, zum Beispiel um {', '.join(frei)} Uhr.\n\n"
+                + (f"Buchen Sie direkt hier, wer zuerst kommt, bekommt den Termin:\n{url}\n" if url else "Bitte melden Sie sich bei uns, wenn Sie den Termin möchten.\n") + f"\nViele Grüße\n{firma}")
+        ok, _ = kundenmail(kid, w["email"], f"Ein Termin bei {firma} am {tag.strftime('%d.%m.%Y')} ist frei geworden", text, art="warteliste")
+        if ok:
+            n += 1
+            with tx("system") as cur:
+                cur.execute("UPDATE website_warteliste SET status='benachrichtigt', benachrichtigt_am=now() WHERE id=%s", (w["id"],))
+    return n
 
 
 def freie_slots(cur, z: dict, mit_ical: bool = True) -> list[datetime]:

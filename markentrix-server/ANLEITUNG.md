@@ -575,3 +575,19 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 **Kunde pflegt sein Wissen mit (Kundenportal → Mein Betrieb → „Mein Wissen für den Assistenten“, nur Inhaber):** Der Kunde sieht, was der Assistent weiß, und schlägt vor: neues Wissen (Text oder TXT/PDF-Datei), eine Änderung oder „nicht mehr nutzen“. Nichts wird sofort wirksam. Im Kundenblatt erscheint die Karte „Änderungswünsche des Kunden“ (zusätzlich eine Aufgabe und eine Push-Nachricht an dich). Mit **Übernehmen** gilt die Änderung, mit **Ablehnen** (optional mit Begründung) bekommt der Kunde die Antwort. Der Kunde kann offene Vorschläge zurückziehen.
 
 **Gutschein-Erinnerung:** Ist eine Gutschein-Anfrage nach einem Tag noch offen (Zahlungslink oder Code fehlt), bekommt der Betrieb einmal eine Mail und eine Push-Nachricht. Derselbe Code lässt sich nicht an zwei Käufer senden.
+
+## Hilfe-Suche und PDF-Anleitungen (Stand Oktober 2026)
+- **Suchfeld „Hilfe“** oben in Vertriebs-, Kunden- und Admin-Portal. Eine Frage eintippen (z. B. „Leads anlegen“, „Wo trage ich meinen PayPal-Link ein?“) liefert die passende, auf das Portal zugeschnittene Anleitung mit Schritten und Menüweg.
+- Nach jeder Anleitung fragt das Portal „Ist dein Problem damit gelöst?“. Bei **Nein** (mit kurzer Beschreibung) oder wenn keine Anleitung gefunden wurde („Frage an das Team senden“) bekommst du eine Mail (an die Firmen-Mailadresse aus Einstellungen → Firmendaten) und eine Karte **„Hilfe-Rückmeldungen“** auf der Admin-Übersicht, mit Knopf „Erledigt“. Die Karte zeigt auch, wie oft die Hilfe in 30 Tagen geholfen hat.
+- **Artikel erweitern:** Dateien `portal/app/hilfe/vertrieb.json`, `kunde.json`, `admin.json` (Felder: `t` Titel, `k` Suchwörter, `wo` Menüweg, `s` Schritte, `n` Hinweise, `l` Link). Dieselben Dateien speisen die Suche **und** die PDF. Dort stehen auch Einleitung (`intro`), Einstieg (`start`) und `einstellungen`.
+- **PDF-Anleitungen:** Vertriebler und Kunden bekommen die PDF automatisch als Anhang der Einladungs-Mail. Im Portal steht unter dem Suchfeld „Anleitung als PDF“ zum Herunterladen. Im Admin gibt es alle drei (Vertrieb, Kunden, Admin) zum Weitergeben.
+
+## Kalender, Wochenplan, Stammkunden, Rollen, Warteliste (Stand Oktober 2026)
+- **Wochenplan:** Zeiten je Wochentag mit Pausen (Betrieb und je Mitarbeiter), Urlaub/Sperrtage. Ohne Wochenplan gelten die alten einfachen Zeiten.
+- **Branchen-Vorlagen** (Admin → Kunde → Buchungsvorlage): Friseur, Kfz, Fahrzeugpflege, Kosmetik, Handwerk, Fitness. Leistungen starten inaktiv und ohne Preis.
+- **Kalender** im Kundenportal mit manuellen und wiederkehrenden Terminen, Gruppentermin (Personenzahl), **Stammkunden** mit Notizen.
+- **Mitarbeiter-Zugang:** Team-Mitglieder lassen sich einem Kalender-Mitarbeiter zuordnen und sehen dann nur ihre Termine.
+- **Weniger Ausfälle:** „Ich komme“-Link in der Erinnerung, **Warteliste** (bei Absage werden bis zu 3 Wartende benachrichtigt). SMS ist nicht gebaut.
+- **Kunden-Ampel** und **Hilfe-Rückmeldungen** auf der Admin-Übersicht.
+- **Vertrieb:** Übungsmodus (nichts wird gespeichert), Provisionssätze als Anzeige unter „Provisionen“. Mahnwesen automatisch ist standardmäßig aus.
+- Datenbank-Migrationen 127 bis 129 laufen mit `install.sh`.

@@ -66,7 +66,7 @@ def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | N
 SIGNATUR = "\n\nViele Grüße\nIhr Markentrix-Team"
 
 
-def einladung(an: str, name: str | None, link: str, rolle: str, tage: int) -> tuple[bool, str]:
+def einladung(an: str, name: str | None, link: str, rolle: str, tage: int, anhang: tuple[str, bytes, str] | None = None) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     if rolle == "kunde":
         wofuer = "Ihr Zugang zum Markentrix-Kundenportal ist eingerichtet."
@@ -80,8 +80,9 @@ def einladung(an: str, name: str | None, link: str, rolle: str, tage: int) -> tu
             f"Danach melden Sie sich mit dieser E-Mail-Adresse unter {config.BASE_URL} an.\n\n"
             "Tipp: Am Handy können Sie das Portal wie eine App nutzen. Öffnen Sie es dazu auf Android in Google Chrome "
             "bzw. auf dem iPhone in Safari. Nach der Anmeldung zeigt Ihnen das Portal in wenigen Schritten mit Bildern, wie die Installation geht "
-            "(Android: Menü ⋮ → „App installieren“, iPhone: Teilen → „Zum Home-Bildschirm“)." + SIGNATUR)
-    return senden(an, "Ihr Zugang zum Markentrix-Vertriebsportal" if rolle == "vertrieb" else "Ihr Zugang zum Markentrix-Portal", text)
+            "(Android: Menü ⋮ → „App installieren“, iPhone: Teilen → „Zum Home-Bildschirm“)."
+            + ("\n\nIm Anhang finden Sie die Anleitung als PDF. Sie steht auch jederzeit im Portal zum Herunterladen bereit." if anhang else "") + SIGNATUR)
+    return senden(an, "Ihr Zugang zum Markentrix-Vertriebsportal" if rolle == "vertrieb" else "Ihr Zugang zum Markentrix-Portal", text, anhang=anhang)
 
 
 def passwort_zuruecksetzen(an: str, link: str) -> tuple[bool, str]:

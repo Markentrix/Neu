@@ -8,7 +8,7 @@ def mails():
     except FileNotFoundError: return []
     out=[]
     for x in raw:
-        m=email.message_from_string(x); out.append("To: "+str(m["To"])+"\nSubject: "+str(email.header.make_header(email.header.decode_header(m["Subject"] or "")))+"\n"+m.get_payload(decode=True).decode("utf8"))
+        m=email.message_from_string(x); out.append("To: "+str(m["To"])+"\nSubject: "+str(email.header.make_header(email.header.decode_header(m["Subject"] or "")))+"\n"+next(q for q in m.walk() if q.get_content_type()=="text/plain").get_payload(decode=True).decode("utf8"))
     return out
 def link_aus(m): return re.search(r"(http://localhost:8000/einladung\?token=[A-Za-z0-9_-]+)",m).group(1).replace("http://localhost:8000","")
 def sql(q): return subprocess.run(["psql","-h","/var/tmp/pgtest","-p","54329","-U","markentrix","-d","markentrix","-Atc",q],capture_output=True,text=True).stdout.strip()

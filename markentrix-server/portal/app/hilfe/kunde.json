@@ -1,0 +1,207 @@
+{
+ "artikel": [
+  {
+   "t": "PayPal-Link eintragen",
+   "k": "paypal link paypal.me bezahlen zahlung anzahlung gutschein geld eintragen hinterlegen",
+   "wo": "Menü „Website-Dienste“ → Karte „PayPal“ (nur Inhaber)",
+   "l": "#dienste",
+   "s": [
+    "Öffne in der PayPal-App dein Profil → „PayPal.Me“ und kopiere den Link. Er sieht so aus: https://paypal.me/deinname. Hast du noch keinen, erstelle dort einen.",
+    "Gehe im Portal zu „Website-Dienste“ und suche die Karte „PayPal“.",
+    "Füge den Link bei „Dein PayPal.Me-Link“ ein, wähle die Währung (meist EUR) und klicke „Speichern“.",
+    "Auf deiner Website erscheint dann „Mit PayPal zahlen“ (bei Gutscheinen und Anzahlungen)."
+   ],
+   "n": [
+    "Das Geld geht direkt auf dein PayPal-Konto. Markentrix sieht und verarbeitet keine Zahlungen.",
+    "Dein normales PayPal-Konto reicht. Für den direkten PayPal-Knopf auf der Seite brauchst du ein Geschäftskonto und die Client-ID (Bereich „Erweitert“ in der Karte)."
+   ]
+  },
+  {
+   "t": "Welche Daten muss ich wofür hinterlegen?",
+   "k": "daten hinterlegen einrichten was brauche ich checkliste einstellungen website dienste angaben",
+   "wo": "Menü „Website-Dienste“",
+   "l": "#dienste",
+   "s": [
+    "Kontaktformular: E-Mail-Adresse, an die Anfragen gehen (Karte „Kontaktformular“).",
+    "Terminbuchung: Leistungen mit Dauer, Mitarbeiter, Öffnungszeiten je Wochentag, Urlaub/Sperrtage; optional Google-Kalender-Adresse.",
+    "Zahlung: PayPal.Me-Link (für Anzahlung und Gutscheine).",
+    "Bewertungen: Google Place-ID (zeigt Sterne auf der Website und für Bewertungsanfragen).",
+    "Statistik: Google-Analytics-Mess-ID, falls du Analytics nutzt (Markentrix-Statistik läuft ohne Cookies).",
+    "Eigenes Postfach: Absenderadresse und Passwort, damit Mails an deine Kunden von deiner Adresse kommen.",
+    "Firmendaten und Rechnungsanschrift: unter „Einstellungen“."
+   ],
+   "n": [
+    "Du musst nicht alles auf einmal einrichten. Beginne mit Kontaktformular und Terminbuchung."
+   ]
+  },
+  {
+   "t": "Terminbuchung einrichten (Leistungen, Zeiten, Mitarbeiter)",
+   "k": "terminbuchung leistungen öffnungszeiten wochenplan pause mitarbeiter dauer preis buchung einrichten kalender",
+   "wo": "Menü „Website-Dienste“ → „Leistungen und Mitarbeiter“ und „Terminbuchung mit deinem Kalender“",
+   "l": "#dienste",
+   "s": [
+    "Lege unter „Leistungen und Mitarbeiter“ jede Leistung an: Name, Dauer, optional Preis und Anzahlung, Zusatzfragen und Pflichtfelder.",
+    "Lege Mitarbeiter an und weise ihnen Leistungen zu. Jeder Mitarbeiter kann eigene Zeiten haben.",
+    "Stelle in „Terminbuchung mit deinem Kalender“ die Zeiten ein. Unter „Zeiten je Wochentag mit Pausen“ trägst du z. B. Montag 09:00-12:00 und 13:00-18:00 ein.",
+    "Trage Urlaub und Sperrtage unter „Urlaub und Sperrtage“ ein.",
+    "Teste die Buchung einmal selbst auf deiner Website."
+   ],
+   "n": [
+    "Die Zeiten auf der Website müssen zu den festen Uhrzeiten im Portal passen."
+   ]
+  },
+  {
+   "t": "Kalender ansehen und Termin selbst eintragen",
+   "k": "kalender termin manuell eintragen telefonisch walk-in serie wiederholen",
+   "wo": "Menü „Kalender“",
+   "l": "#kalender",
+   "s": [
+    "Im Kalender siehst du Termine der Woche. Klicke einen Termin für Details und für Ergebnis (erschienen, nicht erschienen).",
+    "Mit „Termin eintragen“ legst du telefonische oder persönliche Termine selbst an, auch als Serie (z. B. wöchentlich).",
+    "Der Termin blockiert die Zeit auf der Website, damit niemand doppelt bucht."
+   ]
+  },
+  {
+   "t": "Terminanfrage bestätigen oder ablehnen",
+   "k": "anfrage bestätigen ablehnen absagen termin buchung annehmen erstattung",
+   "wo": "Menü „Termine“ bzw. „Anfragen“",
+   "l": "#termine",
+   "s": [
+    "Neue Buchungen siehst du unter „Termine“. Bestätige oder lehne ab.",
+    "Beim Ablehnen entscheidest du, ob eine geleistete Anzahlung erstattet wird. Das Portal merkt sich offene Erstattungen, hake sie nach der Rückzahlung in PayPal ab.",
+    "Der Kunde bekommt automatisch eine Mail."
+   ],
+   "n": [
+    "Sagt ein Kunde mehr als 24 Stunden vorher ab, bleibt die Anzahlung nicht einbehalten, später schon (Regel gilt, wenn so eingestellt)."
+   ]
+  },
+  {
+   "t": "Mitarbeiter einladen und Rollen",
+   "k": "team mitarbeiter einladen rolle empfang nur lesen inhaber zugang",
+   "wo": "Menü „Team“ (nur Inhaber)",
+   "l": "#team",
+   "s": [
+    "Gehe zu „Team“ und lade eine Person per E-Mail ein.",
+    "Wähle die Rolle: Inhaber (alles), Mitarbeiter, Empfang (Termine und Nachrichten) oder Nur ansehen.",
+    "Optional ordnest du die Person einem Mitarbeiter im Kalender zu. Dann sieht sie nur die eigenen Termine.",
+    "Die Person bekommt einen Einladungslink per Mail."
+   ]
+  },
+  {
+   "t": "Freigaben prüfen",
+   "k": "freigabe freigeben posts texte genehmigen änderung wünschen",
+   "wo": "Menü „Freigaben“",
+   "l": "#freigaben",
+   "s": [
+    "Markentrix legt Inhalte (z. B. Social-Media-Posts, Texte, Angebote) zur Freigabe vor.",
+    "Öffne den Eintrag, prüfe ihn und wähle Freigeben oder Änderung wünschen mit kurzer Notiz.",
+    "Erst nach deiner Freigabe wird veröffentlicht."
+   ]
+  },
+  {
+   "t": "Nachricht an Markentrix schreiben",
+   "k": "nachricht schreiben support hilfe kontakt fragen team anhang",
+   "wo": "Menü „Nachrichten“",
+   "l": "#nachrichten",
+   "s": [
+    "Schreibe unter „Nachrichten“ dein Anliegen. Du kannst Dateien anhängen. Entwürfe werden zwischengespeichert.",
+    "Die Antwort kommt hier im Portal, du wirst benachrichtigt."
+   ]
+  },
+  {
+   "t": "Rechnungen und Angebote finden",
+   "k": "rechnung rechnungen angebot pdf beleg zahlung vertrag",
+   "wo": "Menü „Rechnungen von Markentrix“ (nur Inhaber)",
+   "l": "#belege",
+   "s": [
+    "Dort siehst du Angebote und Rechnungen als PDF, nimmst Angebote an und siehst den Zahlungsstand.",
+    "Eigene Angebote an deine Kunden liegen unter „Meine Angebote an Kunden“."
+   ]
+  },
+  {
+   "t": "Google-Bewertungen einrichten",
+   "k": "google bewertungen place id sterne bewertung anfragen",
+   "wo": "Menü „Website-Dienste“ → Karte „Google-Bewertungen“; Menü „Bewertungen“",
+   "l": "#dienste",
+   "s": [
+    "Suche deinen Betrieb im Place-ID-Finder von Google (Anleitung in der Karte „Wo finde ich die Place-ID?“).",
+    "Trage die Place-ID ein und speichere. Die Bewertungen erscheinen auf der Website.",
+    "Unter „Bewertungen“ kannst du festlegen, dass nach einem erschienenen Termin automatisch um eine Bewertung gebeten wird."
+   ]
+  },
+  {
+   "t": "Urlaub und Sperrtage eintragen",
+   "k": "urlaub sperrtag feiertag geschlossen ferien nicht buchbar",
+   "wo": "Menü „Website-Dienste“ → „Urlaub und Sperrtage“",
+   "l": "#dienste",
+   "s": [
+    "Trage Zeitraum und Grund ein und speichere. An diesen Tagen sind keine Termine buchbar.",
+    "Bereits gebuchte Termine in dem Zeitraum musst du selbst absagen oder verschieben."
+   ]
+  },
+  {
+   "t": "Stammkunden ansehen",
+   "k": "stammkunden kunden liste notiz kundenstamm wiederkehrend",
+   "wo": "Menü „Stammkunden“",
+   "l": "#stamm",
+   "s": [
+    "Zeigt Kunden, die über die Website oder per Hand gebucht haben, mit Besuchen und Notizen.",
+    "Notizen siehst du nur du und dein Team."
+   ]
+  },
+  {
+   "t": "Passwort, Zwei-Faktor, Einstellungen",
+   "k": "passwort ändern zwei faktor 2fa anschrift rechnungsanschrift benachrichtigungen einstellungen",
+   "wo": "Menü „Einstellungen“",
+   "l": "#einstellungen",
+   "s": [
+    "Dort änderst du Passwort, richtest die Zwei-Faktor-Anmeldung ein, wählst Benachrichtigungen (Push, Mail) und änderst als Inhaber die Rechnungsanschrift.",
+    "Firmenname und Rechtsform ändert Markentrix für dich: Schreibe uns unter „Nachrichten“."
+   ]
+  },
+  {
+   "t": "Datenschutz-Vertrag (AVV)",
+   "k": "datenschutz avv vertrag auftragsverarbeitung dsgvo daten",
+   "wo": "Menü „Datenschutz-Vertrag“",
+   "l": "#avv",
+   "s": [
+    "Dort liest und bestätigst du den Auftragsverarbeitungsvertrag. Bei Änderungen informieren wir dich vorab.",
+    "Wenn deine Website Buchung oder Zahlung nutzt, gibt es fertige Datenschutz-Bausteine, die Markentrix in deine Datenschutzerklärung einbaut."
+   ]
+  }
+ ],
+ "titel": "Anleitung Kundenportal",
+ "untertitel": "Für Kunden von Markentrix",
+ "intro": [
+  "Im Kundenportal siehst du, was Markentrix für dich tut, gibst Inhalte frei, beantwortest Anfragen und richtest die Dienste für deine Website ein (Kontaktformular, Terminbuchung, Zahlung, Bewertungen).",
+  "Nicht alle Menüpunkte sind für jede Person sichtbar. Das hängt vom Paket und von der Rolle ab (Inhaber, Mitarbeiter, Empfang, Nur ansehen)."
+ ],
+ "start": [
+  "Öffne den Einladungslink aus deiner E-Mail und lege ein Passwort fest.",
+  "Melde dich mit deiner E-Mail-Adresse unter portal.markentrix.de an. Danach zeigt dir eine kurze Tour die wichtigsten Bereiche.",
+  "Am Handy kannst du das Portal wie eine App auf den Startbildschirm legen (Android: Chrome-Menü → App installieren, iPhone: Safari → Teilen → Zum Home-Bildschirm)."
+ ],
+ "einstellungen": [
+  [
+   "Einstellungen",
+   "Passwort, Zwei-Faktor-Anmeldung, Benachrichtigungen (Push und E-Mail) und als Inhaber die Rechnungsanschrift."
+  ],
+  [
+   "Team",
+   "Als Inhaber lädst du Mitarbeiter ein und wählst ihre Rolle: Inhaber, Mitarbeiter, Empfang oder Nur ansehen. Optional ordnest du eine Person einem Kalender-Mitarbeiter zu."
+  ],
+  [
+   "Website-Dienste",
+   "Kontaktformular, Terminbuchung (Leistungen, Mitarbeiter, Zeiten je Wochentag mit Pausen, Urlaub, Absageregel), PayPal-Link, Google-Bewertungen, Analytics, eigenes Absender-Postfach."
+  ],
+  [
+   "Bewertungen",
+   "Automatische Bewertungsanfrage nach einem erschienenen Termin ein- oder ausschalten und die Wartezeit wählen."
+  ],
+  [
+   "Datenschutz-Vertrag",
+   "Auftragsverarbeitungsvertrag lesen und bestätigen."
+  ]
+ ],
+ "hilfe": "Im Portal oben im Suchfeld „Hilfe“ eine Frage eingeben, zum Beispiel „Wo trage ich meinen PayPal-Link ein?“. Löst die Anleitung dein Problem nicht, meldest du es mit einem Klick an das Markentrix-Team."
+}

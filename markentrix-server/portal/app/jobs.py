@@ -324,7 +324,8 @@ def website_online_meldungen(cfg):
     with tx("system") as cur:
         cur.execute("""SELECT m.id, m.kunden_id, m.domain, m.upload_id, m.hinweis, m.erstellt_am < now() - interval '2 hours' AS zu_alt_ohne_ergebnis,
                               m.erstellt_am < now() - interval '14 days' AS verfallen, k.ansprechpartner,
-                              EXISTS (SELECT 1 FROM website_wacht w WHERE w.domain = m.domain AND w.ok AND w.geprueft_am > now() - interval '30 minutes') AS erreichbar
+                              EXISTS (SELECT 1 FROM website_wacht w WHERE w.domain = m.domain AND w.seite_ok AND w.geprueft_am > now() - interval '30 minutes') AS erreichbar,
+                              m.erstellt_am < now() - interval '6 hours' AS lange_wartend
                        FROM website_meldungen m JOIN kunden k ON k.id = m.kunden_id
                        WHERE m.status = 'offen' ORDER BY m.erstellt_am LIMIT 20""")
         offen = cur.fetchall()
@@ -339,11 +340,15 @@ def website_online_meldungen(cfg):
             if not e.get("ok"):
                 _meldung_setzen(r["id"], "verworfen")
                 continue
-            if not r["erreichbar"]:
+            neu = bool(e.get("neu"))
+            # Es zählt, dass die Startseite antwortet; die Website-API (/api/health) ist dafür nicht nötig.
+            # Ein Update einer Seite, die schon online war, wird nach 6 Stunden auch ohne Check gemeldet, damit die Meldung nie ewig hängt.
+            if not r["erreichbar"] and not (not neu and r["lange_wartend"]):
                 if r["verfallen"]:
                     _meldung_setzen(r["id"], "verworfen")
+                elif r["zu_alt_ohne_ergebnis"]:
+                    log.warning("Website-Meldung %s wartet seit über 2 Stunden: Startseite von %s antwortet nicht", r["id"], r["domain"])
                 continue
-            neu = bool(e.get("neu"))
             with tx("system") as cur:
                 an = kunden_empfaenger(cur, r["kunden_id"])
                 ids = push.kunde(cur, r["kunden_id"])

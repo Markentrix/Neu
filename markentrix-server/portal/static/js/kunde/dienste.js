@@ -107,6 +107,17 @@ function smtpBereich(d, mm, neu) {
 
 // ---------------------------------------------------------------- Kalender
 const TAGE = [[1, 'Mo'], [2, 'Di'], [3, 'Mi'], [4, 'Do'], [5, 'Fr'], [6, 'Sa'], [7, 'So']];
+// Arbeitszeiten je Wochentag, auch mit Pause: „09:00-12:00, 13:00-18:00“. Leer = geschlossen.
+function planEditor(plan, hinweis) {
+  const felder = TAGE.map(([n, t]) => ({ n, t, i: h('input', { value: (plan || {})[String(n)] || '', placeholder: 'geschlossen / wie oben', maxlength: 60, 'aria-label': 'Arbeitszeit ' + t }) }));
+  return {
+    el: h('details', { class: 'hilfe', open: !!(plan && Object.keys(plan).length) }, h('summary', {}, 'Zeiten je Wochentag mit Pausen (optional)'),
+      h('p', { class: 'small muted' }, hinweis || 'Zum Beispiel Montag 09:00-12:00, 13:00-18:00 und Samstag 09:00-14:00. Sobald hier etwas steht, gelten diese Zeiten statt „Von/Bis“ und Arbeitstage.'),
+      h('div', { class: 'form2' }, felder.map(f => feld(f.t, f.i)))),
+    werte: () => Object.fromEntries(felder.filter(f => f.i.value.trim()).map(f => [String(f.n), f.i.value.trim()])),
+  };
+}
+
 function kalenderKarte(d, neu) {
   const k = d.kalender, m = h('div');
   const an = schalter(k.aktiv, 'Online-Terminbuchung einschalten');
@@ -124,10 +135,11 @@ function kalenderKarte(d, neu) {
   const erin = schalter(k.erinnerung !== false, 'Besucher per E-Mail an den Termin erinnern (mit Absage-Link)');
   const erin1 = h('input', { type: 'number', min: 0, max: 168, value: k.erinnerung_std1 ?? 24 }), erin2 = h('input', { type: 'number', min: 0, max: 48, value: k.erinnerung_std2 ?? 2 });
   const wt = TAGE.map(([n, t]) => ({ n, c: h('input', { type: 'checkbox', checked: k.wochentage.includes(n), style: 'width:auto' }), t }));
+  const pe = planEditor(k.plan);
   const speichern = async () => {
     melde(m, '');
     try {
-      await api('/api/kunde/website-dienste/kalender', { method: 'PUT', body: { aktiv: an.c.checked, ical_url: url.value, dauer: Number(dauer.value), tage: Number(tage.value), von: von.value, bis: bis.value, wochentage: wt.filter(x => x.c.checked).map(x => x.n), vorlauf_std: Number(vorlauf.value), ort: ort.value, empfaenger: emp.value, zeiten: zeiten.value, kapazitaet: Number(kap.value), freigabe: frei.c.checked, halte_std: Number(halte.value), erinnerung: erin.c.checked, erinnerung_std1: Number(erin1.value), erinnerung_std2: Number(erin2.value) } });
+      await api('/api/kunde/website-dienste/kalender', { method: 'PUT', body: { aktiv: an.c.checked, ical_url: url.value, dauer: Number(dauer.value), tage: Number(tage.value), von: von.value, bis: bis.value, wochentage: wt.filter(x => x.c.checked).map(x => x.n), plan: pe.werte(), vorlauf_std: Number(vorlauf.value), ort: ort.value, empfaenger: emp.value, zeiten: zeiten.value, kapazitaet: Number(kap.value), freigabe: frei.c.checked, halte_std: Number(halte.value), erinnerung: erin.c.checked, erinnerung_std1: Number(erin1.value), erinnerung_std2: Number(erin2.value) } });
       melde(m, 'Gespeichert.', 'ok'); if (url.value) setTimeout(neu, 1000);
     } catch (x) { melde(m, x.message); }
   };
@@ -149,6 +161,7 @@ function kalenderKarte(d, neu) {
     h('div', { style: 'margin:8px 0' }, erin.el),
     h('div', { class: 'form2' }, feld('Erste Erinnerung … Stunden vorher (0 = aus)', erin1), feld('Zweite Erinnerung … Stunden vorher (0 = aus)', erin2)),
     h('div', { class: 'row', style: 'gap:12px;margin:8px 0;flex-wrap:wrap' }, h('span', { class: 'small' }, 'Buchbar an:'), wt.map(x => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit' }, x.c, x.t))),
+    pe.el,
     h('div', { class: 'row' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Kalender testen'), k.ical_gesetzt ? h('button', { class: 'btn sec', onclick: weg }, 'Adresse löschen') : ''),
     k.offene_termine ? h('p', { class: 'small' }, k.offene_termine + ' kommende Termine über die Website gebucht.') : '',
     statusZeile(d.status, 'termin', 'Ereignisse'),
@@ -393,15 +406,17 @@ async function teamKarte(d, neu) {
     const wt = TAGE.map(([n, tx]) => ({ n, c: h('input', { type: 'checkbox', checked: ma ? ma.wochentage.includes(n) : false, style: 'width:auto' }), tx }));
     const von = h('input', { type: 'time', value: ma ? ma.von : '' }), bis = h('input', { type: 'time', value: ma ? ma.bis : '' });
     const zeiten = h('input', { value: ma ? ma.zeiten : '', maxlength: 300, placeholder: 'leer = wie der Betrieb' });
+    const pe = planEditor(ma ? ma.plan : null, 'Nur ausfüllen, wenn diese Person andere Zeiten hat als der Betrieb, zum Beispiel nur Dienstag und Donnerstag nachmittags. Leer = wie der Betrieb (oder die Angaben oben).');
     const url = h('input', { maxlength: 1500, autocomplete: 'off', placeholder: ma && ma.ical_gesetzt ? 'Kalender ist gespeichert (zum Ersetzen neu einfügen)' : 'Eigener Kalender (iCal), optional' });
     const ls = aktive.map(l => ({ id: l.id, c: h('input', { type: 'checkbox', checked: ma ? ma.leistungen.includes(l.id) : false, style: 'width:auto' }), n: l.name }));
-    const body = () => ({ name: name.value, aktiv: an.c.checked, wochentage: wt.filter(x => x.c.checked).map(x => x.n), von: von.value, bis: bis.value, zeiten: zeiten.value, leistungen: ls.filter(x => x.c.checked).map(x => x.id), ical_url: url.value });
+    const body = () => ({ name: name.value, aktiv: an.c.checked, wochentage: wt.filter(x => x.c.checked).map(x => x.n), von: von.value, bis: bis.value, plan: pe.werte(), zeiten: zeiten.value, leistungen: ls.filter(x => x.c.checked).map(x => x.id), ical_url: url.value });
     const speichern = async () => { try { await api('/api/kunde/website-dienste/mitarbeiter' + (ma ? '/' + ma.id : ''), { method: ma ? 'PUT' : 'POST', body: body() }); neu(); } catch (x) { melden(x); } };
     return h('details', { class: 'hilfe', open: !ma }, h('summary', {}, ma ? ma.name + (ma.aktiv ? '' : ' (pausiert)') : '+ Mitarbeiter hinzufügen'),
       h('div', { style: 'margin-top:6px' },
         h('div', { class: 'form2' }, feld('Name', name, ma ? 'Name auf der Website: ' + ma.schluessel : ''), feld('Eigener Kalender (iCal)', url, 'Belegte Zeiten in diesem Kalender werden nicht angeboten.'), feld('Arbeitet von', von), feld('bis', bis), feld('Feste Uhrzeiten (optional)', zeiten)),
         an.el,
         h('div', { class: 'row', style: 'gap:12px;margin:8px 0;flex-wrap:wrap' }, h('span', { class: 'small' }, 'Arbeitstage (leer = wie der Betrieb):'), wt.map(x => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit' }, x.c, x.tx))),
+        pe.el,
         ls.length ? h('div', { class: 'row', style: 'gap:12px;margin:8px 0;flex-wrap:wrap' }, h('span', { class: 'small' }, 'Bietet an (nichts angehakt = alles):'), ls.map(x => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit' }, x.c, x.n))) : '',
         h('div', { class: 'row', style: 'gap:8px' }, h('button', { class: 'btn', onclick: speichern }, ma ? 'Speichern' : 'Anlegen'),
           ma && ma.ical_gesetzt ? h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/kunde/website-dienste/mitarbeiter/' + ma.id + '/kalender-adresse', { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Kalender-Adresse löschen') : '',

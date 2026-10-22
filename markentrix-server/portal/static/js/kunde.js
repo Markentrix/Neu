@@ -10,6 +10,8 @@ import './kunde/auswertung.js';
 import './kunde/dokumente.js';
 import './kunde/website.js';
 import './kunde/dienste.js';
+import './kunde/kalender.js';
+import './kunde/stamm.js';
 import './kunde/wissen.js';
 import './kunde/belege.js';
 import './kunde/konto.js';

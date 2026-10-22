@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, ValidationError
 from . import config, einstellungen, push, quittung, webbetrieb
 from . import sitedienste as sd
 from .db import tx
-from .security import EMAIL_RE, audit, client_ip, rate_limit, require_admin, require_inhaber
+from .security import EMAIL_RE, audit, client_ip, current_user, rate_limit, require_admin, require_inhaber
 
 router = APIRouter()
 TZ = sd.TZ
@@ -287,6 +287,36 @@ def _anz_text(g: dict) -> str:
     return str(g["anzahlung_betrag"] if g["anzahlung_betrag"] is not None else (g["anzahlung"] or "")).replace(".", ",")
 
 
+@router.get("/site/{site_id}/termin/komme", include_in_schema=False)
+def oeff_komme(site_id: str, t: str, request: Request):
+    rate_limit("sitekomme:" + client_ip(request), 30, 600)
+    if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not 10 <= len(t) <= 100:
+        return _seite("Dieser Link ist ungültig.")
+    with tx("system") as cur:
+        g = _buchung_zu_token(cur, site_id, t)
+    if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
+        return _seite("Dieser Termin ist nicht mehr aktiv.")
+    lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    return _seite_html("Termin bestätigen", f'<h1 style="font-size:22px">Ich komme</h1><p><b>{escape(g["firma"])}</b><br>{escape(lokal)}</p><p>Bitte bestätigen Sie kurz, dass Sie den Termin wahrnehmen. Dann wissen wir Bescheid und planen mit Ihnen.</p>'
+                       f'<form method="post" action="/site/{site_id}/termin/komme"><input type="hidden" name="t" value="{escape(t)}"><button style="{_knopf_stil()}">Ja, ich komme</button></form>'
+                       f'<p><a href="/site/{site_id}/termin/absagen?t={escape(t)}">Ich kann doch nicht</a></p>')
+
+
+@router.post("/site/{site_id}/termin/komme", include_in_schema=False)
+async def oeff_komme_senden(site_id: str, request: Request):
+    rate_limit("sitekommep:" + client_ip(request), 20, 600)
+    form = await request.form()
+    t = str(form.get("t") or "")
+    if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not 10 <= len(t) <= 100:
+        return _seite("Dieser Link ist ungültig.")
+    with tx("system") as cur:
+        g = _buchung_zu_token(cur, site_id, t)
+        if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
+            return _seite("Dieser Termin ist nicht mehr aktiv.")
+        cur.execute("UPDATE website_termine SET kommt_am=coalesce(kommt_am, now()) WHERE id=%s", (g["id"],))
+    return _seite("Danke, wir haben Ihre Bestätigung. Bis bald!")
+
+
 @router.get("/site/{site_id}/termin/absagen", include_in_schema=False)
 def oeff_absagen(site_id: str, t: str, request: Request):
     """Zeigt die Absageregel und fragt nach. Absagen passiert erst nach dem Klick (Mail-Programme rufen Links manchmal von selbst auf)."""
@@ -331,6 +361,7 @@ async def oeff_absagen_senden(site_id: str, request: Request, bg: BackgroundTask
     erstatten = bool(frei and g["anzahlung_erhalten_am"] and anz)
     kosten = "" if frei else (f"\nDie Absage kam später als {g['storno_std']} Stunden vor dem Termin: Der volle Betrag ist fällig" + (f", die Anzahlung von {anz} € wird einbehalten." if g["anzahlung_erhalten_am"] and anz else "."))
     hinweis = f"\nBitte die Anzahlung von {anz} € zurückzahlen und im Portal beim Termin „Erstattet“ klicken." if erstatten else ""
+    bg.add_task(sd.warteliste_benachrichtigen, g["kunden_id"], g["start"].astimezone(TZ).date())
     push.senden(ids, "Termin abgesagt" + (" (Erstattung offen)" if erstatten else "" if frei else " (zu spät)"), f"{g['name']} hat den Termin am {wann} Uhr abgesagt.", "/app#dienste", "termin")
     for a in [x for x in _empfaenger(g["kal_empfaenger"] or g["mail_empfaenger"]) if EMAIL_RE.match(x)][:5]:
         bg.add_task(sd.kundenmail, g["kunden_id"], a, f"Termin abgesagt: {g['name']}", f"{g['name']} hat den Termin am {wann} Uhr abgesagt.{kosten}{hinweis}", None, None, "termin")
@@ -413,6 +444,7 @@ async def oeff_verschieben_senden(site_id: str, request: Request, bg: Background
         if g["termin_id"]:
             cur.execute("UPDATE termine SET beginn=%s, ende=%s WHERE id=%s", (start, start + dauer, g["termin_id"]))
         ids = push.kunde(cur, g["kunden_id"])
+    bg.add_task(sd.warteliste_benachrichtigen, g["kunden_id"], g["start"].astimezone(TZ).date())
     alt = g["start"].astimezone(TZ).strftime("%d.%m.%Y %H:%M")
     neu_txt = start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
     push.senden(ids, "Termin verschoben", f"{g['name']}: von {alt} auf {neu_txt}.", "/app#heute", "termin")
@@ -455,6 +487,15 @@ def oeff_bewertungen(site_id: str, request: Request):
 kunde = APIRouter(prefix="/api/kunde/website-dienste")
 
 
+def require_termine(request: Request, user: dict = Depends(current_user)) -> dict:
+    """Kalender, Termine von Hand und Stammkunden: Inhaber, Mitarbeiter und Empfang (nur lesen darf zusehen). Ist der Zugang mit einer Person verknüpft, sieht er nur deren Termine."""
+    if user["rolle"] != "kunde" or not user["kunden_id"]:
+        raise HTTPException(403, "Nur für Kunden.")
+    if user["kunden_rolle"] == "nur_lesen" and request.method not in ("GET", "HEAD"):
+        raise HTTPException(403, "Dein Zugang ist nur zum Ansehen freigegeben.")
+    return user
+
+
 def _status(cur, kid) -> dict:
     cur.execute("""SELECT art, count(*) FILTER (WHERE ok) AS ok, count(*) FILTER (WHERE NOT ok) AS fehler, max(zeit) AS zuletzt
                    FROM website_ereignisse WHERE kunden_id=%s AND zeit > now() - interval '30 days' GROUP BY art""", (kid,))
@@ -483,7 +524,7 @@ def _zustand(cur, kid) -> dict:
                      "tage": z["kal_tage"], "von": z["kal_von"], "bis": z["kal_bis"], "wochentage": z["kal_wochentage"], "vorlauf_std": z["kal_vorlauf_std"],
                      "ort": z["kal_ort"] or "", "empfaenger": z["kal_empfaenger"] or "", "offene_termine": offen,
                      "zeiten": z["kal_zeiten"] or "", "kapazitaet": z["kal_kapazitaet"], "freigabe": z["kal_freigabe"], "halte_std": z["kal_halte_std"],
-                     "erinnerung": z["erinnerung_aktiv"], "erinnerung_std1": z["erinnerung_std1"], "erinnerung_std2": z["erinnerung_std2"]},
+                     "plan": sd.plan_text(z.get("kal_wochenplan")), "erinnerung": z["erinnerung_aktiv"], "erinnerung_std1": z["erinnerung_std1"], "erinnerung_std2": z["erinnerung_std2"]},
         "paypal": {"aktiv": z["pp_aktiv"], "client_id": z["pp_client_id"] or "", "waehrung": z["pp_waehrung"], "me_link": z["pp_me_link"] or ""},
         "analytics": {"aktiv": z["ga_aktiv"], "id": z["ga_id"] or "", "statistik": z["stat_aktiv"]},
         "bewertungen": {"aktiv": z["bew_aktiv"], "place_id": z["bew_place_id"] or "", "sterne": float(z["bew_sterne"]) if z["bew_sterne"] is not None else None,
@@ -608,12 +649,21 @@ class KalenderIn(BaseModel):
     erinnerung: bool = True                                      # Erinnerungs-Mails an die Besucher
     erinnerung_std1: int = Field(default=24, ge=0, le=168)       # 0 = aus
     erinnerung_std2: int = Field(default=2, ge=0, le=48)
+    plan: dict[str, str] = Field(default_factory=dict, max_length=7)   # Arbeitszeiten je Wochentag, z. B. {"1": "09:00-12:00, 13:00-18:00"}; leer = von/bis/Wochentage
 
 
 @kunde.put("/kalender")
 def k_kalender(data: KalenderIn, user: dict = Depends(require_inhaber)):
     kid = user["kunden_id"]
     rate_limit("kalpruef:" + str(kid), 12, 600)
+    try:
+        plan = sd.plan_lesen(data.plan) if data.plan else {}
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    if data.plan and not plan:
+        raise HTTPException(400, "Bitte mindestens einen Tag mit Arbeitszeiten eintragen.")
+    if plan:
+        data.wochentage, data.von, data.bis = sd.plan_grenzen(plan)
     if data.von >= data.bis:
         raise HTTPException(400, "Das Ende muss nach dem Beginn liegen.")
     if not data.wochentage or any(w < 1 or w > 7 for w in data.wochentage):
@@ -634,11 +684,11 @@ def k_kalender(data: KalenderIn, user: dict = Depends(require_inhaber)):
         sd.zeile(cur, kid)
         cur.execute("""UPDATE website_dienste SET kal_aktiv=%s, kal_dauer=%s, kal_tage=%s, kal_von=%s, kal_bis=%s, kal_wochentage=%s, kal_vorlauf_std=%s,
                        kal_ort=%s, kal_empfaenger=%s, kal_ical_enc=coalesce(%s, kal_ical_enc), kal_ical_geprueft_am=coalesce(%s, kal_ical_geprueft_am),
-                       kal_zeiten=%s, kal_kapazitaet=%s, kal_freigabe=%s, kal_halte_std=%s,
+                       kal_zeiten=%s, kal_kapazitaet=%s, kal_freigabe=%s, kal_halte_std=%s, kal_wochenplan=%s::jsonb,
                        erinnerung_aktiv=%s, erinnerung_std1=%s, erinnerung_std2=%s, geaendert_am=now()
                        WHERE kunden_id=%s""",
                     (data.aktiv, data.dauer, data.tage, data.von, data.bis, sorted(set(data.wochentage)), data.vorlauf_std, data.ort.strip() or None, emp or None, enc, geprueft,
-                     ", ".join(sorted(set(zeiten))) or None, data.kapazitaet, data.freigabe, data.halte_std,
+                     ", ".join(sorted(set(zeiten))) or None, data.kapazitaet, data.freigabe, data.halte_std, json.dumps(plan) if plan else None,
                      data.erinnerung, data.erinnerung_std1, data.erinnerung_std2, kid))
         audit(cur, user, "website_dienste_kalender", kid, {"aktiv": data.aktiv})
     sd._ical_cache.pop(str(kid), None)
@@ -1085,13 +1135,14 @@ class ErgebnisIn(BaseModel):
 
 
 @kunde.post("/buchungen/{bid}/ergebnis")
-def k_ergebnis(bid: str, data: ErgebnisIn, user: dict = Depends(require_inhaber)):
+def k_ergebnis(bid: str, data: ErgebnisIn, user: dict = Depends(require_termine)):
     """Hat der Termin stattgefunden? Die Antwort steuert den Nichterschienen-Zähler und den Status des Termins im Portal."""
     kid = user["kunden_id"]
     rate_limit("buchergebnis:" + str(kid), 120, 600)
     with tx("system") as cur:
         try:
-            cur.execute("""UPDATE website_termine SET ergebnis=%s WHERE id=%s AND kunden_id=%s AND status='gebucht' AND start <= now() RETURNING termin_id""", (data.ergebnis, bid, kid))
+            cur.execute("""UPDATE website_termine SET ergebnis=%s WHERE id=%s AND kunden_id=%s AND status='gebucht' AND start <= now()
+                           AND (%s::uuid IS NULL OR mitarbeiter_id = %s::uuid) RETURNING termin_id""", (data.ergebnis, bid, kid, user.get("website_mitarbeiter_id"), user.get("website_mitarbeiter_id")))
         except Exception:
             raise HTTPException(400, "Ungültige Buchung.")
         g = cur.fetchone()
@@ -1198,13 +1249,14 @@ class AblehnenIn(BaseModel):
 
 
 @kunde.post("/buchungen/{bid}/ablehnen")
-def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Depends(require_inhaber)):
+def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Depends(require_termine)):
     kid = user["kunden_id"]
     rate_limit("buchabl:" + str(kid), 60, 600)
     with tx("system") as cur:
         try:
             cur.execute("""UPDATE website_termine SET status='abgesagt', abgesagt_am=now(), abgesagt_von='betrieb', storno_kostenlos=true WHERE id=%s AND kunden_id=%s AND status IN ('reserviert','gebucht') AND start > now()
-                           RETURNING termin_id, start, name, email, ref, anzahlung_erhalten_am, anzahlung_betrag""", (bid, kid))
+                           AND (%s::uuid IS NULL OR mitarbeiter_id = %s::uuid)
+                           RETURNING termin_id, start, name, email, ref, anzahlung_erhalten_am, anzahlung_betrag""", (bid, kid, user.get("website_mitarbeiter_id"), user.get("website_mitarbeiter_id")))
         except Exception:
             raise HTTPException(400, "Ungültige Buchung.")
         g = cur.fetchone()
@@ -1215,7 +1267,10 @@ def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Dep
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
         firma = cur.fetchone()["firma"]
         audit(cur, user, "website_buchung_abgelehnt", kid, {"ref": g["ref"]})
+    bg.add_task(sd.warteliste_benachrichtigen, kid, g["start"].astimezone(TZ).date())
     lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    if not g["email"]:
+        return {"ok": True, "erstatten": bool(g["anzahlung_erhalten_am"] and g["anzahlung_betrag"])}
     bg.add_task(sd.kundenmail, kid, g["email"], f"Zu Ihrem Termin am {lokal}",
                 f"Guten Tag {g['name']},\n\nleider können wir den gewünschten Termin am {lokal} nicht anbieten.\n{(data.grund.strip() + chr(10)) if data.grund.strip() else ''}"
                 f"{('Ihre Anzahlung von ' + str(g['anzahlung_betrag']).replace('.', ',') + ' € erstatten wir Ihnen.' + chr(10)) if g['anzahlung_erhalten_am'] and g['anzahlung_betrag'] else ''}"
@@ -1283,6 +1338,201 @@ def k_quittung_senden(bid: str, bg: BackgroundTasks, user: dict = Depends(requir
     bg.add_task(sd.kundenmail, kid, g["email"], f"Quittung über Ihre Anzahlung bei {b['firma']}",
                 f"Guten Tag {g['name']},\n\nanbei die Quittung über Ihre Anzahlung von {str(g['anzahlung_betrag']).replace('.', ',')} €.\n\nViele Grüße\n{b['firma']}",
                 None, (f"quittung-{g['ref'] or 'anzahlung'}.pdf", pdfb, "application/pdf"), "termin")
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------- Kalenderansicht und Termine von Hand
+@kunde.get("/kalender-ansicht")
+def k_kalender_ansicht(von: str = "", tage: int = 7, user: dict = Depends(require_termine)):
+    """Termine eines Zeitraums (1 bis 14 Tage) für die Tages- und Wochenansicht."""
+    try:
+        a = date.fromisoformat(von) if von else datetime.now(TZ).date()
+    except ValueError:
+        raise HTTPException(400, "Das Datum ist ungültig.")
+    tage = max(1, min(14, tage))
+    ab, bis_ = datetime.combine(a, datetime.min.time(), TZ), datetime.combine(a + timedelta(days=tage), datetime.min.time(), TZ)
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        z = sd.zeile(cur, kid)
+        sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
+        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.telefon, w.email, w.mitarbeiter_id, w.anzahlung_betrag, w.anzahlung_erhalten_am, w.bezahlt_am, w.nachricht, w.kommt_am, w.ergebnis,
+                              l.name AS leistung, m.name AS mitarbeiter, (w.daten->>'quelle') = 'manuell' AS manuell
+                       FROM website_termine w LEFT JOIN website_leistungen l ON l.id=w.leistung_id LEFT JOIN website_mitarbeiter m ON m.id=w.mitarbeiter_id
+                       WHERE w.kunden_id=%s AND w.status IN ('gebucht','reserviert') AND w.start >= %s AND w.start < %s
+                             AND (%s::uuid IS NULL OR w.mitarbeiter_id = %s::uuid) ORDER BY w.start LIMIT 800""", (kid, ab, bis_, user.get("website_mitarbeiter_id"), user.get("website_mitarbeiter_id")))
+        termine = cur.fetchall()
+        cur.execute("SELECT id, name FROM website_mitarbeiter WHERE kunden_id=%s AND aktiv AND (%s::uuid IS NULL OR id = %s::uuid) ORDER BY sort, name", (kid, user.get("website_mitarbeiter_id"), user.get("website_mitarbeiter_id")))
+        team = cur.fetchall()
+        cur.execute("""SELECT s.tag, s.grund, s.mitarbeiter_id FROM website_sperrtage s WHERE s.kunden_id=%s AND s.tag >= %s AND s.tag < %s""", (kid, a, a + timedelta(days=tage)))
+        sperr = cur.fetchall()
+        plan = {}
+        for r in sd.ressourcen(cur, z):
+            plan[str(r["id"] or "")] = {str(t): f for t, f in r["plan"].items()}
+    return {"von": a.isoformat(), "tage": tage, "mitarbeiter": [{"id": str(m["id"]), "name": m["name"]} for m in team],
+            "termine": [{"id": str(t["id"]), "ref": t["ref"] or "", "status": t["status"], "start": t["start"], "ende": t["ende"], "name": t["name"], "telefon": t["telefon"] or "",
+                         "email": t["email"] or "", "mitarbeiter_id": str(t["mitarbeiter_id"]) if t["mitarbeiter_id"] else "", "mitarbeiter": t["mitarbeiter"] or "", "leistung": t["leistung"] or "",
+                         "anzahlung": f"{t['anzahlung_betrag']:.2f}" if t["anzahlung_betrag"] else "", "anzahlung_erhalten": bool(t["anzahlung_erhalten_am"]), "bezahlt": bool(t["bezahlt_am"]),
+                         "notiz": t["nachricht"] or "", "manuell": bool(t["manuell"]), "kommt": bool(t["kommt_am"]), "ergebnis": t["ergebnis"] or ""} for t in termine],
+            "sperr": [{"tag": s["tag"].isoformat(), "grund": s["grund"] or "", "mitarbeiter_id": str(s["mitarbeiter_id"]) if s["mitarbeiter_id"] else ""} for s in sperr],
+            "arbeitszeit": plan}
+
+
+class ManuellIn(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    telefon: str = Field(default="", max_length=40)
+    email: str = Field(default="", max_length=200)
+    start: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$")      # Ortszeit, z. B. 2026-11-03T14:30
+    leistung_id: str = Field(default="", max_length=40)
+    dauer_min: int = Field(default=0, ge=0, le=720)                     # 0 = Dauer der Leistung
+    personen: int = Field(default=1, ge=1, le=5)                        # mehrere Personen nacheinander: Dauer mal Personenzahl
+    mitarbeiter_id: str = Field(default="", max_length=40)
+    notiz: str = Field(default="", max_length=600)
+    wiederholen: int = Field(default=0, ge=0, le=51)                    # so viele weitere Termine
+    abstand_tage: int = Field(default=7, ge=1, le=90)
+
+
+@kunde.get("/kalender-optionen")
+def k_kalender_optionen(user: dict = Depends(require_termine)):
+    """Auswahllisten für „Termin eintragen“ (Leistungen und Personen)."""
+    kid, eigene = user["kunden_id"], user.get("website_mitarbeiter_id")
+    with tx("system") as cur:
+        cur.execute("SELECT id, name, dauer_min FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (kid,))
+        ls = cur.fetchall()
+        cur.execute("SELECT id, name FROM website_mitarbeiter WHERE kunden_id=%s AND aktiv AND (%s::uuid IS NULL OR id = %s::uuid) ORDER BY sort, name", (kid, eigene, eigene))
+        ms = cur.fetchall()
+    return {"leistungen": [{"id": str(x["id"]), "name": x["name"], "dauer_min": x["dauer_min"]} for x in ls], "mitarbeiter": [{"id": str(x["id"]), "name": x["name"]} for x in ms], "eigene": str(eigene) if eigene else ""}
+
+
+@kunde.post("/buchungen/manuell")
+def k_manuell(data: ManuellIn, user: dict = Depends(require_termine)):
+    """Trägt einen Termin von Hand ein (Telefon, Laufkundschaft, Stammkunde). Er sperrt die Zeit wie eine Buchung über die Website; auch als Serie."""
+    kid = user["kunden_id"]
+    rate_limit("buchmanuell:" + str(kid), 60, 600)
+    if data.email.strip() and not EMAIL_RE.match(data.email.strip()):
+        raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
+    try:
+        start0 = datetime.fromisoformat(data.start).replace(tzinfo=TZ)
+    except ValueError:
+        raise HTTPException(400, "Die Zeit ist ungültig.")
+    if start0 < datetime.now(TZ) - timedelta(days=1):
+        raise HTTPException(400, "Der Termin liegt zu weit in der Vergangenheit.")
+    mid = _uuid(data.mitarbeiter_id) if data.mitarbeiter_id else None
+    if user.get("website_mitarbeiter_id"):
+        mid = str(user["website_mitarbeiter_id"])                     # verknüpfter Zugang trägt nur für sich selbst ein
+    angelegt, uebersprungen = [], []
+    with tx("system") as cur:
+        cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(kid),))
+        lz = None
+        if data.leistung_id:
+            cur.execute("SELECT * FROM website_leistungen WHERE id=%s AND kunden_id=%s", (_uuid(data.leistung_id), kid))
+            lz = cur.fetchone()
+            if not lz:
+                raise HTTPException(400, "Diese Leistung gibt es nicht.")
+        if mid:
+            cur.execute("SELECT 1 FROM website_mitarbeiter WHERE id=%s AND kunden_id=%s", (mid, kid))
+            if not cur.fetchone():
+                raise HTTPException(400, "Diesen Mitarbeiter gibt es nicht.")
+        z = sd.zeile(cur, kid)
+        minuten = (data.dauer_min or (lz or {}).get("dauer_min") or z["kal_dauer"]) * data.personen
+        puffer = (lz or {}).get("puffer_min") or 0
+        preis = sd.preis_zahl((lz or {}).get("preis"))
+        for i in range(data.wiederholen + 1):
+            start = (start0.replace(tzinfo=None) + timedelta(days=i * data.abstand_tage)).replace(tzinfo=TZ).astimezone(timezone.utc)
+            ende = start + timedelta(minutes=minuten)
+            cur.execute("""SELECT count(*) AS n FROM website_termine WHERE kunden_id=%s AND status IN ('gebucht','reserviert') AND start < %s AND ende + make_interval(mins => coalesce(puffer_min,0)) > %s
+                           AND (%s::uuid IS NULL OR mitarbeiter_id = %s::uuid OR mitarbeiter_id IS NULL)""", (kid, ende + timedelta(minutes=puffer), start, mid, mid))
+            lokal = start.astimezone(TZ).strftime("%d.%m.%Y %H:%M")
+            if cur.fetchone()["n"]:
+                uebersprungen.append({"wann": lokal, "grund": "Zu dieser Zeit ist schon ein Termin eingetragen."})
+                continue
+            titel = " – ".join(x for x in ((lz or {}).get("name"), data.name.strip()) if x)[:120]
+            kontakt = ", ".join(x for x in (data.email.strip(), data.telefon.strip()) if x)
+            cur.execute("""INSERT INTO termine (kunden_id, titel, beginn, ende, kontakt_name, kontakt_info, status, notiz) VALUES (%s,%s,%s,%s,%s,%s,'bestaetigt',%s) RETURNING id""",
+                        (kid, titel, start, ende, data.name.strip(), kontakt, data.notiz.strip()[:1500] or None))
+            tid = cur.fetchone()["id"]
+            ref = "M" + datetime.now(TZ).strftime("%y%m%d") + "-" + secrets.token_hex(2).upper()
+            try:
+                cur.execute("SAVEPOINT s1")
+                cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token, status, ref, daten, mitarbeiter_id, leistung_id, puffer_min, preis_betrag)
+                               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'gebucht',%s,%s,%s,%s,%s,%s) RETURNING id""",
+                            (kid, tid, start, ende, data.name.strip(), data.email.strip(), data.telefon.strip() or None, data.notiz.strip() or None, secrets.token_urlsafe(24), ref,
+                             json.dumps({"quelle": "manuell", "personen": data.personen}), mid, (lz or {}).get("id"), puffer, preis * data.personen if preis else None))
+                angelegt.append({"id": str(cur.fetchone()["id"]), "wann": lokal})
+            except Exception:
+                cur.execute("ROLLBACK TO SAVEPOINT s1")
+                cur.execute("DELETE FROM termine WHERE id=%s", (tid,))
+                uebersprungen.append({"wann": lokal, "grund": "Diese Zeit ist schon vergeben."})
+        audit(cur, user, "website_termin_manuell", kid, {"anzahl": len(angelegt)})
+    if not angelegt:
+        raise HTTPException(409, "Kein Termin angelegt: " + (uebersprungen[0]["grund"] if uebersprungen else "unbekannter Grund"))
+    return {"ok": True, "angelegt": angelegt, "uebersprungen": uebersprungen}
+
+
+# ---------------------------------------------------------------- Stammkunden
+def _stamm_schluessel(email, tel) -> str:
+    e = (email or "").strip().lower()
+    if e:
+        return e
+    z = re.sub(r"\D", "", tel or "")
+    return "tel:" + z if z else ""
+
+
+@kunde.get("/stamm")
+def k_stamm(q: str = "", user: dict = Depends(require_termine)):
+    """Wer kommt wie oft? Aus den Terminen zusammengestellt (E-Mail oder Telefon gleicht Personen ab), mit Notiz."""
+    if user.get("website_mitarbeiter_id"):
+        raise HTTPException(403, "Die Stammkundenliste sehen nur Inhaber, Empfang und Mitarbeiter ohne Personenbindung.")
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        cur.execute("SELECT name, email, telefon, start, status, ergebnis FROM website_termine WHERE kunden_id=%s ORDER BY start DESC LIMIT 6000", (kid,))
+        zeilen = cur.fetchall()
+        cur.execute("SELECT schluessel, notiz FROM website_stamm_notizen WHERE kunden_id=%s", (kid,))
+        notizen = {r["schluessel"]: r["notiz"] for r in cur.fetchall()}
+    jetzt = datetime.now(timezone.utc)
+    gruppen: dict = {}
+    for r in zeilen:                                                        # neueste zuerst: der Name der letzten Buchung gilt
+        k = _stamm_schluessel(r["email"], r["telefon"])
+        if not k:
+            continue
+        g = gruppen.setdefault(k, {"schluessel": k, "name": r["name"], "email": r["email"] or "", "telefon": r["telefon"] or "", "besuche": 0, "kommend": 0,
+                                   "nicht_erschienen": 0, "abgesagt": 0, "letzter": None, "naechster": None})
+        g["email"] = g["email"] or (r["email"] or "")
+        g["telefon"] = g["telefon"] or (r["telefon"] or "")
+        if r["status"] == "abgesagt":
+            g["abgesagt"] += 1
+        elif r["start"] > jetzt:
+            g["kommend"] += 1
+            g["naechster"] = r["start"] if g["naechster"] is None or r["start"] < g["naechster"] else g["naechster"]
+        else:
+            if r["ergebnis"] == "nicht_erschienen":
+                g["nicht_erschienen"] += 1
+            else:
+                g["besuche"] += 1
+                g["letzter"] = g["letzter"] or r["start"]
+    ql = q.strip().lower()
+    liste = [dict(g, notiz=notizen.get(g["schluessel"], "")) for g in gruppen.values()
+             if not ql or ql in (g["name"] or "").lower() or ql in g["email"].lower() or re.sub(r"\D", "", ql) and re.sub(r"\D", "", ql) in re.sub(r"\D", "", g["telefon"])]
+    liste.sort(key=lambda g: (g["naechster"] is None, g["naechster"] or datetime.max.replace(tzinfo=timezone.utc), -(g["letzter"] or datetime.min.replace(tzinfo=timezone.utc)).timestamp()))
+    return {"personen": liste[:200], "gesamt": len(liste)}
+
+
+class StammNotizIn(BaseModel):
+    schluessel: str = Field(min_length=3, max_length=200)
+    notiz: str = Field(default="", max_length=1000)
+
+
+@kunde.put("/stamm/notiz")
+def k_stamm_notiz(data: StammNotizIn, user: dict = Depends(require_termine)):
+    if user.get("website_mitarbeiter_id"):
+        raise HTTPException(403, "Nicht für diesen Zugang.")
+    kid = user["kunden_id"]
+    rate_limit("stammnotiz:" + str(kid), 120, 600)
+    with tx("system") as cur:
+        if data.notiz.strip():
+            cur.execute("""INSERT INTO website_stamm_notizen (kunden_id, schluessel, notiz) VALUES (%s,%s,%s)
+                           ON CONFLICT (kunden_id, schluessel) DO UPDATE SET notiz=EXCLUDED.notiz, geaendert_am=now()""", (kid, data.schluessel.strip().lower()[:200], data.notiz.strip()))
+        else:
+            cur.execute("DELETE FROM website_stamm_notizen WHERE kunden_id=%s AND schluessel=%s", (kid, data.schluessel.strip().lower()))
     return {"ok": True}
 
 
@@ -1361,7 +1611,7 @@ def _team(cur, kid) -> dict:
         bietet.setdefault(r["mitarbeiter_id"], []).append(str(r["leistung_id"]))
     z = sd.zeile(cur, kid)
     return {"leistungen": leist, "einstellung": {"frist_std": z["anz_frist_std"], "storno_std": z["storno_std"], "leistungen_freigabe": z["leistungen_freigabe"], "paypal_bereit": bool(z["pp_aktiv"] and (z["pp_me_link"] or "").startswith("https://"))},
-            "mitarbeiter": [{"id": str(m["id"]), "schluessel": m["schluessel"], "name": m["name"], "aktiv": m["aktiv"], "wochentage": m["wochentage"] or [], "von": m["von"] or "",
+            "mitarbeiter": [{"id": str(m["id"]), "schluessel": m["schluessel"], "name": m["name"], "aktiv": m["aktiv"], "wochentage": m["wochentage"] or [], "plan": sd.plan_text(m.get("wochenplan")), "von": m["von"] or "",
                              "bis": m["bis"] or "", "zeiten": m["zeiten"] or "", "leistungen": bietet.get(m["id"], []), "ical_gesetzt": bool(m["ical_enc"]),
                              "ical_geprueft_am": m["ical_geprueft_am"]} for m in ms]}
 
@@ -1564,9 +1814,18 @@ class MitarbeiterIn(BaseModel):
     zeiten: str = Field(default="", max_length=300)
     leistungen: list[str] = Field(default=[], max_length=60)       # leer = alle Leistungen
     ical_url: str = Field(default="", max_length=1500)             # leer = unverändert
+    plan: dict[str, str] = Field(default_factory=dict, max_length=7)   # Arbeitszeiten je Wochentag; leer = Wochentage/von/bis oder wie der Betrieb
 
 
 def _ma_pruefen(cur, kid, data: MitarbeiterIn):
+    try:
+        plan = sd.plan_lesen(data.plan) if data.plan else {}
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    if data.plan and not plan:
+        raise HTTPException(400, "Bitte mindestens einen Tag mit Arbeitszeiten eintragen.")
+    if plan:
+        data.wochentage, data.von, data.bis = sd.plan_grenzen(plan)
     if any(w < 1 or w > 7 for w in data.wochentage):
         raise HTTPException(400, "Die Wochentage sind ungültig.")
     if bool(data.von) != bool(data.bis) or (data.von and data.von >= data.bis):
@@ -1587,7 +1846,7 @@ def _ma_pruefen(cur, kid, data: MitarbeiterIn):
         except ValueError as e:
             raise HTTPException(400, str(e))
         enc, geprueft = einstellungen.verschluesseln(u), datetime.now(timezone.utc)
-    return ", ".join(sorted(set(zeiten))) or None, sorted(set(ids)), enc, geprueft
+    return ", ".join(sorted(set(zeiten))) or None, sorted(set(ids)), enc, geprueft, plan
 
 
 def _ma_leistungen(cur, mid, ids):
@@ -1608,10 +1867,10 @@ def k_ma_neu(data: MitarbeiterIn, user: dict = Depends(require_inhaber)):
         cur.execute("SELECT 1 FROM website_mitarbeiter WHERE kunden_id=%s AND schluessel=%s", (kid, k))
         if cur.fetchone():
             raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
-        zeiten, ids, enc, geprueft = _ma_pruefen(cur, kid, data)
-        cur.execute("""INSERT INTO website_mitarbeiter (kunden_id, schluessel, name, aktiv, sort, wochentage, von, bis, zeiten, ical_enc, ical_geprueft_am)
-                       VALUES (%s,%s,%s,%s,(SELECT coalesce(max(sort),0)+1 FROM website_mitarbeiter WHERE kunden_id=%s),%s,%s,%s,%s,%s,%s) RETURNING id""",
-                    (kid, k, data.name.strip(), data.aktiv, kid, sorted(set(data.wochentage)) or None, data.von or None, data.bis or None, zeiten, enc, geprueft))
+        zeiten, ids, enc, geprueft, plan = _ma_pruefen(cur, kid, data)
+        cur.execute("""INSERT INTO website_mitarbeiter (kunden_id, schluessel, name, aktiv, sort, wochentage, von, bis, zeiten, ical_enc, ical_geprueft_am, wochenplan)
+                       VALUES (%s,%s,%s,%s,(SELECT coalesce(max(sort),0)+1 FROM website_mitarbeiter WHERE kunden_id=%s),%s,%s,%s,%s,%s,%s,%s::jsonb) RETURNING id""",
+                    (kid, k, data.name.strip(), data.aktiv, kid, sorted(set(data.wochentage)) or None, data.von or None, data.bis or None, zeiten, enc, geprueft, json.dumps(plan) if plan else None))
         mid = cur.fetchone()["id"]
         _ma_leistungen(cur, mid, ids)
         return {"ok": True, "id": str(mid), "schluessel": k}
@@ -1631,10 +1890,10 @@ def k_ma_aendern(mid: str, data: MitarbeiterIn, user: dict = Depends(require_inh
         cur.execute("SELECT 1 FROM website_mitarbeiter WHERE kunden_id=%s AND schluessel=%s AND id<>%s", (kid, k, mid))
         if cur.fetchone():
             raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
-        zeiten, ids, enc, geprueft = _ma_pruefen(cur, kid, data)
+        zeiten, ids, enc, geprueft, plan = _ma_pruefen(cur, kid, data)
         cur.execute("""UPDATE website_mitarbeiter SET schluessel=%s, name=%s, aktiv=%s, wochentage=%s, von=%s, bis=%s, zeiten=%s,
-                       ical_enc=coalesce(%s, ical_enc), ical_geprueft_am=coalesce(%s, ical_geprueft_am) WHERE id=%s AND kunden_id=%s""",
-                    (k, data.name.strip(), data.aktiv, sorted(set(data.wochentage)) or None, data.von or None, data.bis or None, zeiten, enc, geprueft, mid, kid))
+                       ical_enc=coalesce(%s, ical_enc), ical_geprueft_am=coalesce(%s, ical_geprueft_am), wochenplan=%s::jsonb WHERE id=%s AND kunden_id=%s""",
+                    (k, data.name.strip(), data.aktiv, sorted(set(data.wochentage)) or None, data.von or None, data.bis or None, zeiten, enc, geprueft, json.dumps(plan) if plan else None, mid, kid))
         _ma_leistungen(cur, mid, ids)
     sd._ical_cache.pop("m:" + mid, None)
     return {"ok": True}

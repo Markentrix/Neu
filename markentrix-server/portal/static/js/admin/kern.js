@@ -1,4 +1,5 @@
 import { h, leerZustand, themeKnopf, navGruppen, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf, mobilLeiste } from '../common.js';
+import { hilfeSuche } from '../hilfe.js';
 
 
 export const NAV = [['uebersicht', 'Übersicht'], ['meintag', 'Mein Tag'], ['postfach', 'Nachrichten'], ['freigaben', 'Freigaben'], ['aufgaben', 'Aufgaben'], ['kennzahlen', 'Kennzahlen'], ['kunden', 'Kunden'], ['onboarding', 'Onboarding'], ['vertraege', 'Verträge'], ['zufriedenheit', 'Zufriedenheit'], ['neu', 'Neuer Kunde'], ['vertrieb', 'Vertriebler'], ['leads', 'Leads'], ['pipeline', 'Pipeline'], ['auswertung', 'Vertriebs-Auswertung'], ['websites', 'Websites & Demos'], ['belege', 'Angebote & Rechnungen'], ['preise', 'Preise & Konditionen'], ['compliance', 'Datenschutz & Qualität'], ['katalog', 'Pakete (Katalog)'], ['einstellungen', 'Einstellungen'], ['protokoll', 'Protokoll']];
@@ -35,7 +36,7 @@ export function gerüst(aktiv, inhalt) {
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, ich && !ich.zwei_faktor ? h('div', { class: 'msg info' }, 'Dein Admin-Konto hat noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten'), '.') : '', inhalt, rechtFuss()),
+    h('main', { class: 'main' }, hilfeSuche('admin'), ich && !ich.zwei_faktor ? h('div', { class: 'msg info' }, 'Dein Admin-Konto hat noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten'), '.') : '', inhalt, rechtFuss()),
     mobilLeiste({ aktiv, gruppen, feste: ['uebersicht', 'postfach', 'kunden', 'freigaben'], icons: { uebersicht: '⌂', postfach: '✉', kunden: '▦', freigaben: '✔', aufgaben: '☑' }, kurz: { uebersicht: 'Übersicht', postfach: 'Posteingang' }, schluessel: 'admin' }));
 }
 export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {

@@ -189,19 +189,22 @@ V.vertraege = async () => {
 
 V.team = async () => {
   const d = await api('/api/kunde/team'), m = h('div');
-  const ROLLE = { inhaber: 'Inhaber (alles)', mitarbeiter: 'Mitarbeiter (ohne Team und Rechnungen)', nur_lesen: 'Nur ansehen', empfang: 'Empfang (nur Anfragen, Termine, Nachrichten)' };
+  let personen = []; try { personen = (await api('/api/kunde/website-dienste/kalender-optionen')).mitarbeiter; } catch { /* ohne Terminbuchung keine Personen */ }
+  const ROLLE = { inhaber: 'Inhaber (alles)', mitarbeiter: 'Mitarbeiter (ohne Team und Rechnungen)', nur_lesen: 'Nur ansehen', empfang: 'Empfang (Anfragen, Termine, Kalender, Nachrichten)' };
   const neu = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); if (!o.zugang_bis) delete o.zugang_bis;
     try { const r = await api('/api/kunde/team/einladen', { method: 'POST', body: o }); melde(m, r.gemailt ? 'Einladung wurde per E-Mail versendet.' : 'Einladung erstellt. Bitte diesen Link weitergeben: ' + r.einladungslink, 'ok'); setTimeout(zeige, r.gemailt ? 900 : 8000); } catch (x) { melde(m, x.message); } } },
     h('div', {}, h('label', {}, 'E-Mail'), h('input', { name: 'email', type: 'email', required: true })),
     h('div', {}, h('label', {}, 'Name'), h('input', { name: 'name' })),
     h('div', {}, h('label', {}, 'Rolle'), h('select', { name: 'kunden_rolle' }, ...Object.entries(ROLLE).map(([v, t]) => h('option', { value: v, selected: v === 'mitarbeiter' }, t)))),
     h('div', {}, h('label', {}, 'Zugang endet am (leer = unbefristet, z. B. für Vertretung)'), h('input', { name: 'zugang_bis', type: 'date' })),
+    personen.length ? h('div', {}, h('label', {}, 'Verknüpft mit Person (sieht nur deren Termine)'), h('select', { name: 'website_mitarbeiter_id' }, h('option', { value: '' }, 'keine, sieht alle Termine'), ...personen.map(p => h('option', { value: p.id }, p.name)))) : '',
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Einladen')));
   const aend = async (z, body) => { try { await api('/api/kunde/team/' + z.id, { method: 'PATCH', body }); zeige(); } catch (x) { melde(m, x.message); } };
   const rolleWahl = (z) => h('select', { onchange: (e) => aend(z, { kunden_rolle: e.target.value }) }, ...Object.entries(ROLLE).map(([v, t]) => h('option', { value: v, selected: v === z.kunden_rolle }, t)));
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Team'), h('p', { class: 'small muted' }, 'Hier lädst du Kolleginnen und Kollegen ein. Jeder bekommt einen eigenen Zugang mit eigenem Passwort.'), m,
       tabelle([['Name', z => z.name || '–'], ['E-Mail', z => z.email], ['Rolle', rolleWahl], ['Status', z => h('span', { class: 'pill ' + (!z.aktiv ? 'bad' : z.angemeldet ? 'ok' : 'warn') }, !z.aktiv ? 'gesperrt' : z.angemeldet ? 'aktiv' : 'eingeladen')],
+        ...(personen.length ? [['Person', z => h('select', { 'aria-label': 'Verknüpfte Person', onchange: (e) => aend(z, { website_mitarbeiter_id: e.target.value }) }, h('option', { value: '' }, 'alle Termine'), ...personen.map(p => h('option', { value: p.id, selected: p.id === z.website_mitarbeiter_id }, p.name)))]] : []),
         ['Zugang bis', z => h('input', { type: 'date', value: z.zugang_bis ? String(z.zugang_bis).slice(0, 10) : '', onchange: (e) => aend(z, { zugang_bis: e.target.value || null }) })], ['Letzter Login', z => z.letzter_login ? zeit(z.letzter_login) : 'noch nie'], ['', z => h('button', { class: 'btn sec small', onclick: () => aend(z, { aktiv: !z.aktiv }) }, z.aktiv ? 'Sperren' : 'Entsperren')]], d, 'Noch keine Zugänge.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuen Zugang einladen'), neu));
 };
