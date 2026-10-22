@@ -123,12 +123,32 @@ def render(layout, meta, body, partials):
     return out
 
 
+def version_beispiele():
+    """Beispielseiten: demo.css und demo.js erhalten eine Inhalts-Version in der Adresse, damit Browser nach Änderungen nie alte Dateien zu neuem HTML laden."""
+    import hashlib
+    base = os.path.join(DIST, 'beispiel')
+    if not os.path.isdir(base):
+        return
+    for d in sorted(os.listdir(base)):
+        page = os.path.join(base, d, 'index.html')
+        if not os.path.isfile(page):
+            continue
+        t = open(page, encoding='utf-8').read()
+        for name in ('demo.css', 'demo.js'):
+            p = os.path.join(base, d, name)
+            if os.path.isfile(p):
+                v = hashlib.sha1(open(p, 'rb').read()).hexdigest()[:8]
+                t = t.replace(f'/beispiel/{d}/{name}"', f'/beispiel/{d}/{name}?v={v}"')
+        open(page, 'w', encoding='utf-8').write(t)
+
+
 def build(check=False):
     layout = open(os.path.join(SRC, 'layout.html'), encoding='utf-8').read()
     partials = load_partials()
     if os.path.isdir(DIST):
         shutil.rmtree(DIST)
     shutil.copytree(STATIC, DIST)
+    version_beispiele()
     pages = []
     for dirpath, _, files in os.walk(os.path.join(SRC, 'pages')):
         for f in sorted(files):

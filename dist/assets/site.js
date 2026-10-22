@@ -455,7 +455,8 @@
     $$('[data-mini]').forEach(function (mini) {
       var btn = $('[data-mini-toggle]', mini); if (!btn) return;
       if (/^\/referenzen/.test(w.location.pathname)) { btn.parentNode.hidden = true; return; }
-      mini.classList.add('is-collapsed');
+      var small = w.innerWidth <= 900;
+      if (small) mini.classList.add('is-collapsed'); else { btn.setAttribute('aria-expanded', 'true'); btn.textContent = 'Weniger anzeigen'; }
       on(btn, 'click', function () {
         var open = mini.classList.toggle('is-collapsed') === false;
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
