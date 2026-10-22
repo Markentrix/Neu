@@ -64,3 +64,6 @@ summary::after{content:"+";float:right;color:var(--terra-d)}details[open] summar
 .ph-note{font-size:.82rem;margin:14px 0 0}
 @media (max-width:560px){.gal{grid-template-columns:minmax(0,1fr)}}
 .hero-ph{aspect-ratio:4/3}
+.logo{white-space:nowrap}
+@media (max-width:380px){.top{gap:8px;padding:10px 10px}.logo{font-size:.98rem;gap:8px}.mark{width:32px;height:32px}.btn-call{padding:9px 9px;font-size:.84rem;gap:5px}}
+@media (max-width:340px){.btn-call svg{display:none}.logo{font-size:.9rem}.top{gap:6px}}

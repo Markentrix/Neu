@@ -1283,3 +1283,6 @@ main:focus{outline:none}
 .mini-frame.is-full:not(.mini-frame--m) iframe{height:calc(var(--ph) * 1px)}
 .mini-ph .mock-pic{background:url(/beispiel/elektro-muster/img/1-800.webp) center/cover,var(--soft)}
 .mini-ph .mock-pic::after{display:none}
+.mini-frame.is-full.mini-frame--m{aspect-ratio:auto;height:calc(var(--ph) * 1px * var(--s,.7))}
+.mini-frame.is-full.mini-frame--m iframe{height:calc(var(--ph) * 1px)}
+@media (max-width:600px){.mini-phone{max-width:340px}}
