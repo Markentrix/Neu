@@ -13,7 +13,7 @@ $faq = array_values(array_filter($faq, function ($q) use (&$seen) {
 
 page_start([
     'title' => 'Häufige Fragen | Friseur AJ Atelier Wettmar',
-    'description' => 'Antworten zu Terminbuchung, PayPal, Preisen, Balayage, Öffnungszeiten und Anfahrt bei AJ Atelier, Ihrem Friseur in Burgwedel-Wettmar.',
+    'description' => 'Antworten zu Terminbuchung, Bezahlung, Preisen, Balayage, Öffnungszeiten und Anfahrt bei AJ Atelier, Ihrem Friseur in Burgwedel-Wettmar.',
     'path' => '/faq',
     'crumbs' => $crumbs,
     'schema' => [faq_schema($faq)],

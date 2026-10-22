@@ -9,7 +9,7 @@ $faq = [];
 foreach ($o['routes'] as [$from, $km, $min]) {
     $faq[] = ["Wie weit ist AJ Atelier von {$from} entfernt?", "Von {$from} sind es rund {$fmtKm($km)} bzw. etwa {$min} Minuten mit dem Auto bis zu AJ Atelier in der {$s['street']}, {$s['zip']} {$s['city']}-{$s['district']}."];
 }
-$faq[] = ["Kann ich als Kundin oder Kunde aus {$o['name']} online buchen?", 'Ja. Termine buchen Sie rund um die Uhr online, mit sofortiger Bestätigung per E-Mail. Bezahlen können Sie per PayPal oder vor Ort.'];
+$faq[] = ["Kann ich als Kundin oder Kunde aus {$o['name']} online buchen?", 'Ja. Termine buchen Sie rund um die Uhr online, die Bestätigung kommt per E-Mail. Bezahlt wird nach dem Termin im Salon, bar oder mit Karte.'];
 
 page_start([
     'title' => $o['metaTitle'],

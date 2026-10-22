@@ -3,24 +3,6 @@ declare(strict_types=1);
 
 // Gemeinsamer Seitenrahmen (Kopf, Navigation, Fuß) und strukturierte Daten für alle Seiten.
 
-/** CSP ohne frame-ancestors (gilt auch als <meta> in den statischen Seiten) */
-function csp_policy(): string
-{
-    return "default-src 'self'; script-src 'self' https://www.paypal.com https://*.paypal.com; "
-        . "style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.paypal.com https://*.paypalobjects.com; "
-        . "connect-src 'self' https://*.paypal.com; frame-src https://*.paypal.com; font-src 'self'; "
-        . "form-action 'self'; base-uri 'self'";
-}
-
-function security_headers(): void
-{
-    if (headers_sent()) return;
-    header('X-Content-Type-Options: nosniff');
-    header('Referrer-Policy: strict-origin-when-cross-origin');
-    header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
-    header('Content-Security-Policy: ' . csp_policy() . "; frame-ancestors 'self'");
-}
-
 function opening_hours_schema(): array
 {
     $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -64,14 +46,14 @@ function local_business_schema(): array
         '@id' => site_url('/#salon'),
         'name' => $s['name'],
         'alternateName' => [$s['legalName'], 'AJ Atelier Wettmar', 'Friseur AJ Atelier Burgwedel'],
-        'description' => 'Friseursalon in Burgwedel-Wettmar für Balayage, Babylights, Färben, Damen- und Herrenschnitte, Hochsteckfrisuren, Haarpflege sowie Augenbrauen und Wimpern. Online-Terminbuchung mit PayPal.',
+        'description' => 'Friseursalon in Burgwedel-Wettmar für Balayage, Babylights, Färben, Damen- und Herrenschnitte, Hochsteckfrisuren, Haarpflege sowie Augenbrauen und Wimpern. Online-Terminbuchung rund um die Uhr.',
         'url' => site_url('/'),
         'logo' => site_url('/img/logo.png'),
         'image' => site_url('/img/og-image.png'),
         'telephone' => $s['phone'],
         'priceRange' => $s['priceRange'],
         'currenciesAccepted' => 'EUR',
-        'paymentAccepted' => 'Bargeld, EC-Karte, PayPal',
+        'paymentAccepted' => 'Bargeld, EC-Karte',
         'address' => [
             '@type' => 'PostalAddress',
             'streetAddress' => $s['street'],
@@ -131,7 +113,6 @@ function nav_link(string $href, string $label, string $current, string $class = 
 
 function page_start(array $o): void
 {
-    security_headers();
     $s = cfg()['salon'];
     $path = $o['path'] ?? '/';
     $robots = $o['robots'] ?? 'index, follow, max-image-preview:large, max-snippet:-1';
@@ -145,11 +126,12 @@ function page_start(array $o): void
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="<?= e(csp_policy()) ?>">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title><?= e($o['title']) ?></title>
   <meta name="description" content="<?= e($o['description']) ?>">
+<?php if ($o['canonical'] ?? true): ?>
   <link rel="canonical" href="<?= e(site_url($path)) ?>">
+<?php endif; ?>
   <meta name="robots" content="<?= e($robots) ?>">
   <meta name="theme-color" content="#f6f1e9">
   <meta name="geo.region" content="DE-NI">
@@ -169,9 +151,9 @@ function page_start(array $o): void
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="preload" href="/fonts/cormorant-garamond-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/jost-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/css/styles.css?v=<?= filemtime(__DIR__ . '/../public/css/styles.css') ?>">
+  <link rel="preload" href="/css/fonts/cormorant-garamond-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/css/fonts/jost-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/styles.css?v=<?= asset_version('css/styles.css') ?>">
   <?php foreach ($schema as $sc) echo json_ld($sc), "\n  "; ?>
 
 </head>
@@ -221,7 +203,8 @@ function page_start(array $o): void
 <?php
 }
 
-function page_end(bool $mobileCta = true): void
+/** $scripts: weitere Skripte der Seite (nach main.js, das die gemeinsamen Formular-Funktionen bereitstellt) */
+function page_end(bool $mobileCta = true, array $scripts = []): void
 {
     $s = cfg()['salon'];
     $c = cfg();
@@ -269,6 +252,7 @@ function page_end(bool $mobileCta = true): void
       <nav aria-label="Rechtliches">
         <a href="/impressum">Impressum</a>
         <a href="/datenschutz">Datenschutz</a>
+        <span class="mk-cookies" data-mk="cookies"></span>
       </nav>
     </div>
   </footer>
@@ -278,7 +262,10 @@ function page_end(bool $mobileCta = true): void
     <a class="btn btn-gold" href="/termin">Termin buchen</a>
   </div>
 <?php endif; ?>
-  <script defer src="/js/main.js?v=<?= filemtime(__DIR__ . '/../public/js/main.js') ?>"></script>
+  <script defer src="/js/main.js?v=<?= asset_version('js/main.js') ?>"></script>
+<?php foreach ($scripts as $js): ?>
+  <script defer src="/js/<?= e($js) ?>?v=<?= asset_version('js/' . $js) ?>"></script>
+<?php endforeach; ?>
 </body>
 </html>
 <?php

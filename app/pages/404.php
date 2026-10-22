@@ -1,9 +1,9 @@
 <?php
-http_response_code(404);
 page_start([
     'title' => 'Seite nicht gefunden | AJ Atelier',
     'description' => 'Diese Seite existiert nicht.',
-    'path' => '/',
+    'path' => '/404',
+    'canonical' => false,
     'robots' => 'noindex, follow',
 ]);
 ?>

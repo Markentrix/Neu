@@ -121,43 +121,39 @@ function service_price_box(array $ids): void
 <?php
 }
 
-function booking_data(): array
+/** Öffnungszeiten und Feiertage für „Jetzt geöffnet“ – nur einmal pro Seite ausgeben */
+function hours_data_script(): string
 {
-    $c = cfg();
-    $s = $c['salon'];
-    return [
-        'categories' => array_map(fn($cat) => [
-            'id' => $cat['id'], 'title' => $cat['title'],
-            'services' => array_map(function ($sv) {
-                $full = services()[$sv['id']];
-                return ['id' => $sv['id'], 'name' => $full['fullName'], 'price' => $sv['price'], 'from' => $full['from'], 'consult' => $full['consult'], 'duration' => $sv['duration'], 'payNow' => online_amount($full)];
-            }, $cat['services']),
-        ], $c['categories']),
-        'days' => bookable_days(),
-        'maxServices' => $c['booking']['maxServices'],
-        'paypalClientId' => paypal_enabled() ? $c['local']['paypal']['clientId'] : null,
-        'hours' => $c['hours'],
-        'holidays' => array_keys(holidays((int)date('Y')) + holidays((int)date('Y') + 1)),
-        'salon' => ['name' => $s['name'], 'address' => "{$s['street']}, {$s['zip']} {$s['city']}-{$s['district']}"],
-    ];
+    // Pro Seite nur einmal; der Build setzt den Merker vor jeder Seite zurück
+    if (!empty($GLOBALS['hours_data_done'])) return '';
+    $GLOBALS['hours_data_done'] = true;
+    $y = (int)date('Y');
+    $data = ['hours' => cfg()['hours'], 'holidays' => array_keys(holidays($y) + holidays($y + 1) + holidays($y + 2))];
+    return '<script type="application/json" id="hours-data">' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
 }
 
-/** Daten für Buchung und „Jetzt geöffnet“ – nur einmal pro Seite ausgeben */
-function booking_data_script(): string
+/** Ausweichmöglichkeit, wenn das Portal nicht erreichbar ist (Pflicht laut Website-Vertrag) */
+function fallback_contact(string $text): string
 {
-    // Pro Seite nur einmal; der Static-Build setzt den Merker vor jeder Seite zurück
-    if (!empty($GLOBALS['booking_data_done'])) return '';
-    $GLOBALS['booking_data_done'] = true;
-    return '<script type="application/json" id="booking-data">' . json_encode(booking_data(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
+    $s = cfg()['salon'];
+    return '<div class="fallback" data-fallback hidden role="alert"><p>' . e($text) . '</p><p class="fallback-actions">'
+        . '<a class="btn btn-gold" href="tel:' . e($s['phone']) . '">' . icon('phone') . ' ' . e($s['phoneDisplay']) . '</a>'
+        . '<a class="btn btn-ghost" href="' . e($s['instagram']) . '" target="_blank" rel="noopener">Nachricht über Instagram</a></p></div>'
+        . '<noscript><p class="form-error">Das Formular benötigt JavaScript. Rufen Sie uns gerne an: <a href="tel:' . e($s['phone']) . '">' . e($s['phoneDisplay']) . '</a>.</p></noscript>';
+}
+
+/** Pflicht-Einwilligung und Lockfeld für alle Formulare, die an /api/anfrage gehen */
+function form_consent(string $purpose): string
+{
+    return '<label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>'
+        . '<label class="check full"><input type="checkbox" name="einwilligung" value="ja" required> <span>Ich bin einverstanden, dass meine Angaben ' . e($purpose)
+        . ' verarbeitet werden. Details in der <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a>.*</span></label>';
 }
 
 function booking_widget(): void
 {
-    $c = cfg();
-    $s = $c['salon'];
-    $tel = e($s['phone']);
+    $s = cfg()['salon'];
     include __DIR__ . '/partials/booking-widget.php';
-    echo booking_data_script();
 }
 
 function hours_table(): void
@@ -173,7 +169,7 @@ function hours_table(): void
           <p class="open-now" data-open-now aria-live="polite"></p>
           <p class="hint">An gesetzlichen Feiertagen in Niedersachsen geschlossen.</p>
 <?php
-    echo booking_data_script();
+    echo hours_data_script();
 }
 
 function faq_schema(array $faq): array
@@ -213,7 +209,7 @@ function service_cards(?array $only = null, string $headingTag = 'h3'): void
 <?php
 }
 
-function cta_band(string $title = 'Lust auf einen neuen Look?', string $text = 'Freie Termine sehen Sie sofort online. Bezahlen Sie bequem per PayPal oder vor Ort.'): void
+function cta_band(string $title = 'Lust auf einen neuen Look?', string $text = 'Freie Termine sehen Sie sofort online und buchen rund um die Uhr.'): void
 {
     $s = cfg()['salon']; ?>
     <section class="cta-band">

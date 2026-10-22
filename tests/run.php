@@ -1,31 +1,16 @@
 <?php
 declare(strict_types=1);
 
-// Testsuite für Website und Buchungsdienst – nur PHP nötig:
+// Testsuite – nur PHP nötig:
 //   php tests/run.php
-// Arbeitet mit eigener Test-Datenbank in einem Temp-Ordner; echte Termine bleiben unberührt.
-// Exit-Code 0 = alles in Ordnung (deploy/update.sh bricht sonst ab).
+// Baut website-fertig/ in einen Temp-Ordner und prüft alles, was der Upload im Markentrix-Portal
+// verlangt (Website-Vertrag „mk-api v1“, Skill „Website mit Portal“), plus Logik und SEO-Grundlagen.
+// Exit-Code 0 = alles in Ordnung.
 
 if (PHP_SAPI !== 'cli') exit(1);
 $root = dirname(__DIR__);
-$tmp = sys_get_temp_dir() . '/ajtest-' . bin2hex(random_bytes(4));
-mkdir($tmp . '/data', 0777, true);
-$port = random_int(20000, 40000);
-$base = "http://127.0.0.1:{$port}";
-$password = 'test-passwort-' . bin2hex(random_bytes(3));
-
-file_put_contents("{$tmp}/config.local.php", '<?php return ' . var_export([
-    'siteUrl' => $base,
-    'adminPasswordHash' => password_hash($password, PASSWORD_DEFAULT),
-    'paypal' => ['env' => 'sandbox', 'clientId' => '', 'clientSecret' => ''],
-    'mail' => ['from' => '', 'salonEmail' => ''],
-    'alertEmail' => '',
-    'databasePath' => "{$tmp}/data/bookings.sqlite",
-], true) . ';');
-putenv("AJ_LOCAL_CONFIG={$tmp}/config.local.php");
-
 require $root . '/app/lib.php';
-require $root . '/app/vouchers.php';
+require $root . '/app/routes.php';
 
 // ---------- Mini-Testrahmen ----------
 $passed = 0;
@@ -42,197 +27,167 @@ function check(string $name, bool $ok, string $detail = ''): void
     }
 }
 function section(string $t): void { echo "\n{$t}\n"; }
+function short(array $list): string { return implode(', ', array_slice($list, 0, 5)) . (count($list) > 5 ? ' …' : ''); }
 
-$cookies = '';
-function http(string $method, string $path, ?array $json = null, array $headers = []): array
-{
-    global $base, $cookies;
-    $h = array_merge(['Content-Type: application/json'], $headers, $cookies ? ["Cookie: {$cookies}"] : []);
-    $ctx = stream_context_create(['http' => [
-        'method' => $method, 'header' => implode("\r\n", $h), 'ignore_errors' => true, 'timeout' => 20,
-        'follow_location' => 0, 'content' => $json === null ? '' : json_encode($json),
-    ]]);
-    $body = @file_get_contents($base . $path, false, $ctx);
-    $status = 0;
-    $type = '';
-    foreach ($http_response_header ?? [] as $line) {
-        if (preg_match('#^HTTP/\S+ (\d+)#', $line, $m)) $status = (int)$m[1];
-        if (stripos($line, 'Content-Type:') === 0) $type = trim(substr($line, 13));
-        if (stripos($line, 'Set-Cookie:') === 0 && preg_match('/^Set-Cookie:\s*([^;]+)/i', $line, $m)) $cookies = $m[1];
-    }
-    return [$status, $body === false ? '' : $body, json_decode((string)$body, true), $type];
-}
-
-// ---------- 1. Logik ohne Server ----------
-section('Öffnungszeiten, Feiertage, Preise');
+// ---------- 1. Logik ----------
+section('Feiertage und Adressen');
 $h = holidays(2026);
 check('Karfreitag 2026 = 03.04.', isset($h['2026-04-03']));
 check('Pfingstmontag 2026 = 25.05.', isset($h['2026-05-25']));
 check('Reformationstag (Niedersachsen)', isset($h['2026-10-31']));
-check('Sonntag geschlossen', opening_for('2026-11-01') === null);
-check('Montag geschlossen', opening_for('2026-11-02') === null);
-check('Dienstag 10–18 Uhr', opening_for('2026-11-03') === [600, 1080]);
-check('Samstag 10–14 Uhr', opening_for('2026-11-07') === [600, 840]);
-$sum = summarize(['h-schnitt', 'h-bart']);
-check('Herrenschnitt + Bart = 65 € / 55 Min.', $sum && $sum['price'] == 65.0 && $sum['duration'] === 55);
-check('Balayage: Anzahlung 50 €', summarize(['f-balayage'])['payNow'] == 50.0);
-check('Unbekannte Leistung wird abgelehnt', summarize(['gibts-nicht']) === null);
-check('Mehr als 5 Leistungen werden abgelehnt', summarize(['d-wsf-kurz', 'h-bart', 'f-glossing', 'b-zupfen', 'b-faerben', 'b-wimpern']) === null);
-$future = null;
-for ($i = 3; $i < 40 && !$future; $i++) if (opening_for(add_days(today(), $i))) $future = add_days(today(), $i);
-$slots = free_slots($future, 60, [[600, 660]]);
-check('Belegte Zeit 10–11 Uhr blockiert 10:00 und 10:45', !in_array('10:00', $slots, true) && !in_array('10:45', $slots, true));
-check('11:00 direkt danach ist frei', in_array('11:00', $slots, true));
-check('Termin muss vor Ladenschluss enden', !in_array(to_time(opening_for($future)[1] - 45), $slots, true));
+check('Startseite → index.html', page_file('/') === 'index.html');
+check('Unterseite liegt flach im Hauptordner', page_file('/leistungen/balayage') === 'leistungen-balayage.html');
+check('Parameter und Anker bleiben erhalten', page_file('/termin?leistung=f-balayage') === 'termin.html?leistung=f-balayage' && page_file('/#termin') === 'index.html#termin');
+check('Dateien behalten ihren Pfad', page_file('/css/styles.css?v=1') === 'css/styles.css?v=1');
+check('Canonical ohne .html (Server leitet um)', site_url('/leistungen/balayage') === rtrim(cfg()['siteUrl'], '/') . '/leistungen-balayage');
+check('Canonical der Startseite ohne index.html', site_url('/') === rtrim(cfg()['siteUrl'], '/') . '/');
+check('Jede Preislisten-Leistung hat Kurzname, Preis und Dauer', !array_filter(services(), fn($s) => !preg_match('/^[a-z0-9-]+$/', $s['id']) || !isset($s['price'], $s['duration'])));
 
-section('Gutscheine');
-check('Code-Format AJ-XXXX-XXXX', (bool)preg_match('/^AJ-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/', voucher_code()));
-check('Betrag 50 € erlaubt', voucher_amount_ok(50) === 50);
-check('Betrag 5 € abgelehnt', voucher_amount_ok(5) === null);
-check('Betrag 12,5 € abgelehnt', voucher_amount_ok(12.5) === null);
-$pdf = voucher_pdf(['code' => 'AJ-TEST-TEST', 'amount' => 75, 'recipient' => 'Jörg Müller', 'message' => 'Alles Gute!', 'valid_until' => voucher_valid_until()]);
-preg_match('/startxref\n(\d+)/', $pdf, $m);
-check('Gutschein-PDF gültig aufgebaut', str_starts_with($pdf, '%PDF-1.4') && str_ends_with($pdf, "%%EOF\n") && substr($pdf, (int)($m[1] ?? 0), 4) === 'xref');
+// ---------- 2. Build ----------
+section('Build');
+$out = sys_get_temp_dir() . '/ajtest-' . bin2hex(random_bytes(4)) . '/website-fertig';
+exec('php ' . escapeshellarg("{$root}/tools/build.php") . ' --out=' . escapeshellarg($out) . ' 2>&1', $buildOut, $buildCode);
+$buildText = implode("\n", $buildOut);
+check('Build läuft ohne Fehler und Warnungen', $buildCode === 0 && !preg_match('/Warning|Notice|Deprecated|Fatal/i', $buildText), $buildText);
+check('index.html liegt direkt im Ordner', is_file("{$out}/index.html"));
+foreach (['impressum.html', 'datenschutz.html', '404.html', 'danke.html', 'sitemap.xml', 'robots.txt', 'favicon.svg'] as $f) {
+    check("Pflichtdatei {$f}", is_file("{$out}/{$f}"));
+}
 
-// ---------- 2. Server starten ----------
-section('Testserver');
-$cmd = sprintf('AJ_LOCAL_CONFIG=%s exec php -S 127.0.0.1:%d -t %s %s',
-    escapeshellarg("{$tmp}/config.local.php"), $port, escapeshellarg("{$root}/public"), escapeshellarg("{$root}/dev-router.php"));
-$proc = proc_open($cmd, [1 => ['file', "{$tmp}/server.log", 'a'], 2 => ['file', "{$tmp}/server.log", 'a']], $pipes);
-register_shutdown_function(function () use ($proc, $tmp) {
-    if (is_resource($proc)) proc_terminate($proc);
-    exec('rm -rf ' . escapeshellarg($tmp));
-});
-for ($i = 0; $i < 50 && !@fsockopen('127.0.0.1', $port); $i++) usleep(100000);
-check('Server gestartet', (bool)@fsockopen('127.0.0.1', $port));
+// ---------- 3. Upload-Regeln ----------
+section('Upload-Regeln des Portals');
+$allowed = ['html', 'css', 'js', 'json', 'xml', 'txt', 'ico', 'png', 'jpg', 'webp', 'avif', 'gif', 'svg', 'woff', 'woff2', 'ttf', 'otf', 'webmanifest', 'pdf', 'mp4', 'webm', 'mp3'];
+$files = [];
+$bad = $hidden = $links = $big = [];
+$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($out, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+foreach ($it as $f) {
+    $rel = substr($f->getPathname(), strlen($out) + 1);
+    if ($f->isLink()) $links[] = $rel;
+    if (preg_match('#(^|/)\.#', $rel)) $hidden[] = $rel;
+    if ($f->isDir()) continue;
+    $files[] = $rel;
+    if (!in_array(strtolower(pathinfo($rel, PATHINFO_EXTENSION)), $allowed, true)) $bad[] = $rel;
+    if (preg_match('/\.(png|jpe?g|webp|avif|gif)$/i', $rel) && $f->getSize() > 1.5 * 1024 * 1024) $big[] = $rel;
+}
+check('Nur erlaubte Dateitypen', !$bad, short($bad));
+check('Keine versteckten Dateien', !$hidden, short($hidden));
+check('Keine Symlinks', !$links, short($links));
+check('Bilder unter 1,5 MB', !$big, short($big));
+check('Gesamtgröße unter 120 MB', array_sum(array_map(fn($f) => filesize("{$out}/{$f}"), $files)) < 120 * 1024 * 1024);
 
+$text = array_filter($files, fn($f) => preg_match('/\.(html|css|js|json|xml|txt|webmanifest|svg)$/', $f));
+$hits = fn(string $re) => array_values(array_filter($text, fn($f) => preg_match($re, file_get_contents("{$out}/{$f}"))));
+check('Kein localhost / 127.0.0.1', !($x = $hits('/localhost|127\.0\.0\.1/i')), short($x));
+check('Kein Lorem ipsum', !($x = $hits('/lorem/i')), short($x));
+check('Keine Google Fonts', !($x = $hits('/fonts\.(googleapis|gstatic)/i')), short($x));
+check('Keine Fremd-CDNs', !($x = $hits('/jsdelivr|cdnjs|unpkg|cdn\./i')), short($x));
+check('Keine .php-Verweise', !($x = $hits('/\.php\b/i')), short($x));
+check('Kein http:// in Links, Skripten und Formularen', !($x = $hits('/(?:src|href|action)\s*=\s*["\']http:\/\//i')), short($x));
+check('Kein „../“ in Pfaden', !($x = $hits('/(?:src|href|action)\s*=\s*["\'][^"\']*\.\.\/|url\(\s*["\']?\.\.\//i')), short($x));
+check('Keine Einbettungen von YouTube, Google Maps oder Facebook', !($x = $hits('/<iframe|youtube\.com\/embed|maps\.google\.[a-z]+\/maps\?.*output=embed|facebook\.com\/plugins/i')), short($x));
+check('Kein eigenes PayPal-Skript', !($x = $hits('/paypal\.com\/sdk/i')), short($x));
+check('Markentrix-Skript nicht selbst eingebunden', !($x = $hits('/data-site=|static\/js\/site\.js/i')), short($x));
+$fonts = glob("{$out}/css/fonts/*.woff2");
+check('Schriften lokal als woff2', count($fonts) >= 2);
+
+// ---------- 4. Jede Seite ----------
 section('Seiten');
-foreach (['/' => 200, '/preise' => 200, '/termin' => 200, '/leistungen/balayage' => 200, '/gutscheine' => 200, '/ratgeber' => 200, '/gibtsnicht' => 404] as $p => $want) {
-    [$st] = http('GET', $p);
-    check("{$p} → {$want}", $st === $want, "erhalten {$st}");
+$pages = array_values(array_filter($files, fn($f) => str_ends_with($f, '.html')));
+$dom = function (string $file): DOMDocument {
+    $d = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $d->loadHTML('<?xml encoding="utf-8"?>' . file_get_contents($file));
+    libxml_clear_errors();
+    return $d;
+};
+$problems = [];
+$broken = [];
+foreach ($pages as $p) {
+    $d = $dom("{$out}/{$p}");
+    $x = new DOMXPath($d);
+    $title = trim((string)$x->evaluate('string(//title)'));
+    $why = [];
+    if ($x->evaluate('string(//html/@lang)') !== 'de') $why[] = 'lang';
+    if ($title === '' || mb_strlen($title) >= 60) $why[] = "title ({$title})";
+    if (trim((string)$x->evaluate('string(//meta[@name="description"]/@content)')) === '') $why[] = 'description';
+    if (!str_contains((string)$x->evaluate('string(//meta[@name="viewport"]/@content)'), 'width=device-width')) $why[] = 'viewport';
+    if ($x->query('//h1')->length !== 1) $why[] = 'h1 × ' . $x->query('//h1')->length;
+    if ($x->query('//img[not(@alt)]')->length) $why[] = 'img ohne alt';
+    if ($x->query('//img[not(@width) or not(@height)]')->length) $why[] = 'img ohne width/height';
+    if (!$x->query('//footer//a[contains(@href,"impressum")]')->length || !$x->query('//footer//a[contains(@href,"datenschutz")]')->length) $why[] = 'Footer-Rechtslinks';
+    if ($x->query('//link[@rel="icon"]')->length === 0) $why[] = 'favicon';
+    if ($why) $problems[] = "{$p}: " . implode(', ', $why);
+
+    // Interne Verweise auflösen wie die Prüfung im Portal (/pfad → pfad.html → pfad/index.html)
+    foreach ($x->query('//*[@href or @src]') as $el) {
+        $ref = trim($el->getAttribute('href') ?: $el->getAttribute('src'));
+        if ($ref === '' || preg_match('#^(\#|mailto:|tel:|javascript:|data:|https?://|//)#i', $ref)) continue;
+        $path = rawurldecode((string)parse_url($ref, PHP_URL_PATH));
+        if ($path === '') continue;
+        $target = str_starts_with($path, '/') ? $out . $path : $out . '/' . $path;
+        if (!is_file($target) && !is_file("{$target}.html") && !is_file(rtrim($target, '/') . '/index.html')) $broken[] = "{$p} → {$ref}";
+    }
 }
-[$st, , , ] = http('GET', '/preise.php');
-[$st2, $body] = http('GET', '/sitemap.xml');
-check('Sitemap enthält mindestens 20 Seiten', substr_count($body, '<loc>') >= 20);
-[$st, , $cfg] = http('GET', '/api/booking-config.php');
-check('Live-Konfiguration liefert buchbare Tage', $st === 200 && count($cfg['days'] ?? []) > 30);
+check('Alle ' . count($pages) . ' Seiten: lang, title < 60, description, viewport, genau eine h1, Bilder mit alt, Footer-Links, Favicon', !$problems, short($problems));
+check('Keine toten internen Links', !$broken, short(array_unique($broken)));
+$index = file_get_contents("{$out}/index.html");
+check('Startseite hat tel:- oder mailto:-Link', (bool)preg_match('/href="(tel|mailto):/', $index));
+check('Statistik-Einstellungen im Footer (data-mk="cookies")', !array_filter($pages, fn($p) => !str_contains(file_get_contents("{$out}/{$p}"), 'data-mk="cookies"')));
+check('Google-Bewertungen als Baustein auf der Startseite', str_contains($index, 'data-mk="bewertungen"'));
+check('404-Seite nutzt Pfade ab der Wurzel', (bool)preg_match('#href="/css/styles\.css#', file_get_contents("{$out}/404.html")));
+check('danke.html und 404.html nicht in der Sitemap', !preg_match('#/(danke|404)<#', file_get_contents("{$out}/sitemap.xml")));
+$sitemap = file_get_contents("{$out}/sitemap.xml");
+check('Sitemap nennt alle Seiten mit sauberer Adresse', substr_count($sitemap, '<loc>') === count(array_filter(routes(), fn($r) => $r[2] !== null)) && !str_contains($sitemap, '.html<'));
+check('robots.txt verweist auf die Sitemap', str_contains(file_get_contents("{$out}/robots.txt"), 'Sitemap: ' . site_url('/sitemap.xml')));
+check('Strukturierte Daten (HairSalon) sind gültiges JSON', (function () use ($index) {
+    preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $index, $m);
+    $types = array_map(fn($j) => json_decode($j, true)['@type'] ?? null, $m[1]);
+    return in_array('HairSalon', $types, true) && !in_array(null, $types, true);
+})());
 
-section('Buchung');
-[$st, , $av] = http('GET', "/api/availability.php?date={$future}&services=h-schnitt");
-$t1 = $av['slots'][0] ?? null;
-check('Freie Zeiten werden geliefert', $st === 200 && $t1 !== null);
-$booking = ['services' => ['h-schnitt'], 'date' => $future, 'time' => $t1, 'name' => 'Test Kunde', 'phone' => '0511 123456',
-    'email' => 'kunde@example.org', 'consent' => true, 'payment' => 'onsite', 'followupOptin' => true];
-[$st, , $res] = http('POST', '/api/booking.php', $booking);
-check('Buchung wird angenommen', $st === 201 && ($res['ok'] ?? false));
-[$st] = http('POST', '/api/booking.php', $booking);
-check('Gleicher Termin ein zweites Mal → abgelehnt (409)', $st === 409);
-[$st] = http('POST', '/api/booking.php', ['time' => to_time(to_minutes($t1) + 15)] + $booking);
-check('Überlappender Termin → abgelehnt (409)', $st === 409);
-[$st] = http('POST', '/api/booking.php', ['email' => 'kein-mail'] + $booking);
-check('Ungültige E-Mail → 400', $st === 400);
-[$st] = http('POST', '/api/booking.php', ['consent' => false] + $booking);
-check('Ohne Einwilligung → 400', $st === 400);
-$before = (int)db()->query("SELECT COUNT(*) FROM entries")->fetchColumn();
-[$st] = http('POST', '/api/booking.php', ['website' => 'spam', 'time' => $av['slots'][8] ?? $t1] + $booking);
-check('Bot (Honeypot) wird still verworfen', $st === 200 && (int)db()->query("SELECT COUNT(*) FROM entries")->fetchColumn() === $before);
-$row = db()->query("SELECT * FROM entries WHERE type = 'booking' ORDER BY created_at DESC LIMIT 1")->fetch();
-check('Folgetermin-Einwilligung gespeichert', (int)$row['followup_optin'] === 1);
-[$st, , $av2] = http('GET', "/api/availability.php?date={$future}&services=h-schnitt");
-check('Gebuchte Zeit ist nicht mehr frei', !in_array($t1, $av2['slots'] ?? [], true));
-
-section('Storno');
-[$st] = http('POST', '/api/cancel.php', ['id' => $row['id'], 't' => 'falsch']);
-check('Falscher Storno-Link → 404', $st === 404);
-[$st, , $res] = http('POST', '/api/cancel.php', ['id' => $row['id'], 't' => $row['cancel_token']]);
-check('Storno mit gültigem Link', $st === 200 && ($res['ok'] ?? false));
-[$st, , $av3] = http('GET', "/api/availability.php?date={$future}&services=h-schnitt");
-check('Stornierte Zeit ist wieder frei', in_array($t1, $av3['slots'] ?? [], true));
-
-section('Verwaltung');
-[$st] = http('GET', "/api/admin.php?from={$future}");
-check('Ohne Anmeldung → 401', $st === 401);
-[$st] = http('POST', '/api/admin.php?action=login', ['password' => 'falsch']);
-check('Falsches Passwort → 401', $st === 401);
-[$st, , $login] = http('POST', '/api/admin.php?action=login', ['password' => $password]);
-check('Anmeldung', $st === 200 && !empty($login['csrf']));
-[$st, , $list] = http('GET', "/api/admin.php?from={$future}&days=1");
-check('Termine werden angezeigt', $st === 200 && count($list['entries'] ?? []) >= 1);
-[$st] = http('POST', '/api/admin.php', ['date' => $future, 'time' => '12:00', 'duration' => 60]);
-check('Blocken ohne Sicherheitstoken → 403', $st === 403);
-[$st] = http('POST', '/api/admin.php', ['date' => $future, 'time' => '12:00', 'duration' => 60, 'note' => 'Pause'], ['X-CSRF-Token: ' . $login['csrf']]);
-check('Zeit blocken', $st === 201);
-[$st, , $av4] = http('GET', "/api/availability.php?date={$future}&services=h-bart");
-check('Geblockte Zeit ist nicht buchbar', !in_array('12:00', $av4['slots'] ?? [], true) && !in_array('12:45', $av4['slots'] ?? [], true));
-
-section('Gutscheine (Server)');
-[$st] = http('POST', '/api/voucher-order.php', ['amount' => 50]);
-check('Ohne PayPal-Zugang → 503 statt Fehlbuchung', $st === 503);
-$v = ['id' => uuid(), 'code' => voucher_code(), 'amount' => 100, 'balance' => 100, 'buyer_name' => 'Test', 'buyer_email' => 't@example.org',
-    'recipient' => null, 'message' => null, 'paypal_order' => 'TEST' . bin2hex(random_bytes(4)), 'paypal_capture' => 'CAP', 'dl_token' => bin2hex(random_bytes(16)),
-    'valid_until' => voucher_valid_until(), 'created_at' => date('c')];
-db()->prepare('INSERT INTO vouchers (id, code, amount, balance, buyer_name, buyer_email, recipient, message, paypal_order, paypal_capture, dl_token, valid_until, created_at)
-    VALUES (:id, :code, :amount, :balance, :buyer_name, :buyer_email, :recipient, :message, :paypal_order, :paypal_capture, :dl_token, :valid_until, :created_at)')->execute($v);
-$csrf = ['X-CSRF-Token: ' . $login['csrf']];
-[$st, , $r1] = http('POST', '/api/admin.php?action=redeem', ['code' => $v['code'], 'amount' => 60], $csrf);
-check('Teilbetrag einlösen → Rest 40 €', $st === 200 && abs(($r1['balance'] ?? 0) - 40) < 0.01);
-[$st] = http('POST', '/api/admin.php?action=redeem', ['code' => $v['code'], 'amount' => 50], $csrf);
-check('Mehr als Restguthaben → abgelehnt', $st === 409);
-[$st] = http('POST', '/api/admin.php?action=redeem', ['code' => $v['code'], 'amount' => 40], $csrf);
-[$st2] = http('POST', '/api/admin.php?action=redeem', ['code' => $v['code'], 'amount' => 1], $csrf);
-check('Vollständig eingelöst → keine weitere Einlösung', $st === 200 && $st2 === 409);
-[$st, , , $type] = http('GET', '/gutschein-pdf?c=' . $v['code'] . '&t=' . $v['dl_token']);
-check('Gutschein-PDF herunterladbar', $st === 200 && str_starts_with($type, 'application/pdf'));
-[$st] = http('GET', '/gutschein-pdf?c=' . $v['code'] . '&t=falsch');
-check('PDF mit falschem Link → 404', $st === 404);
-
-section('Kontaktformular');
-[$st] = http('POST', '/api/contact.php', ['name' => 'Test', 'email' => 't@example.org', 'message' => 'Hallo, eine Frage.', 'consent' => false]);
-check('Ohne Einwilligung → 400', $st === 400);
-[$st] = http('POST', '/api/contact.php', ['name' => 'Test', 'email' => 't@example.org', 'message' => 'Hallo, eine Frage.', 'consent' => true]);
-check('Ohne Salon-Adresse → 503 mit Telefonhinweis', $st === 503);
-
-section('Erinnerungen (Cron)');
-$ins = db()->prepare("INSERT INTO entries (id, type, status, date, start_min, duration, services, name, phone, email, cancel_token, created_at, followup_optin)
-    VALUES (?, 'booking', 'confirmed', ?, ?, 40, ?, ?, '0511 1', ?, 'tok', ?, ?)");
-$soon = time() + 20 * 3600;
-$herren = json_encode([['id' => 'h-schnitt', 'name' => 'Herrenschnitt', 'price' => 45, 'from' => false]]);
-$ids = ['rem' => uuid(), 'fu' => uuid(), 'fu_skip' => uuid(), 'fu_later' => uuid(), 'fresh' => uuid()];
-$old = date('c', time() - 10 * 86400);
-$ins->execute([$ids['rem'], date('Y-m-d', $soon), (int)date('G', $soon) * 60, $herren, 'Erinnerung', 'a@example.org', $old, 0]);
-$ins->execute([$ids['fresh'], date('Y-m-d', $soon), (int)date('G', $soon) * 60, $herren, 'Gerade gebucht', 'f@example.org', date('c'), 0]);
-$ins->execute([$ids['fu'], add_days(today(), -30), 600, $herren, 'Folgetermin', 'b@example.org', $old, 1]);
-$ins->execute([$ids['fu_skip'], add_days(today(), -30), 600, $herren, 'Hat neuen Termin', 'c@example.org', $old, 1]);
-$ins->execute([$ids['fu_later'], add_days(today(), 5), 600, $herren, 'Hat neuen Termin', 'c@example.org', $old, 0]);
-exec(sprintf('AJ_LOCAL_CONFIG=%s AJ_IGNORE_HOURS=1 php %s 2>&1', escapeshellarg("{$tmp}/config.local.php"), escapeshellarg("{$root}/app/cron.php")), $out, $rc);
-check('Cron läuft fehlerfrei', $rc === 0, implode(' | ', $out));
-$get = fn(string $id, string $col) => db()->query("SELECT {$col} FROM entries WHERE id = " . db()->quote($id))->fetchColumn();
-check('Terminerinnerung für morgen versucht', $get($ids['rem'], 'reminder_sent_at') !== null);
-check('Keine Erinnerung bei ganz frischer Buchung', $get($ids['fresh'], 'reminder_sent_at') === null);
-check('Folgetermin-Erinnerung nach 4 Wochen (Herrenschnitt) versucht', $get($ids['fu'], 'followup_sent_at') !== null && !str_starts_with((string)$get($ids['fu'], 'followup_sent_at'), 'entfällt'));
-check('Keine Folgetermin-Mail, wenn schon neuer Termin gebucht', str_starts_with((string)$get($ids['fu_skip'], 'followup_sent_at'), 'entfällt'));
-exec(sprintf('AJ_LOCAL_CONFIG=%s AJ_IGNORE_HOURS=1 php %s 2>&1', escapeshellarg("{$tmp}/config.local.php"), escapeshellarg("{$root}/app/cron.php")), $out2);
-check('Zweiter Lauf verschickt nichts doppelt', count($out2) === 0, implode(' | ', $out2));
-
-section('Überwachung');
-[$st, , $health] = http('GET', '/api/health.php');
-check('Statusseite antwortet', in_array($st, [200, 503], true) && isset($health['checks']));
-check('Datenbank & Speicher in Ordnung', ($health['checks']['database'] ?? false) && ($health['checks']['disk'] ?? false));
-check('Cron-Lebenszeichen erkannt', $health['checks']['cron'] ?? false);
-check('Fehlender Mailzugang wird gemeldet (503)', $st === 503 && ($health['checks']['mail_configured'] ?? true) === false);
-
-section('Statische Seiten (dist)');
-exec(sprintf('php %s --url=%s --out=%s 2>&1', escapeshellarg("{$root}/tools/build-static.php"), escapeshellarg('https://example.org'), escapeshellarg("{$tmp}/dist")), $bout, $brc);
-check('Build läuft durch', $brc === 0, implode(' | ', $bout));
-foreach (['index.html', 'preise.html', 'termin.html', 'leistungen/balayage.html', '404.html', 'sitemap.xml', 'css/styles.css', 'js/main.js'] as $f) {
-    check("dist/{$f} vorhanden", is_file("{$tmp}/dist/{$f}"));
+// ---------- 5. Formulare ----------
+section('Formulare');
+$forms = [
+    'termin.html' => '[data-customer-form]',
+    'index.html' => '[data-customer-form]',
+    'kontakt.html' => '[data-anfrage="kontakt"]',
+    'gutscheine.html' => '[data-anfrage="gutschein"]',
+];
+foreach ($forms as $page => $sel) {
+    $d = $dom("{$out}/{$page}");
+    $x = new DOMXPath($d);
+    $attr = preg_match('/\[([\w-]+)(?:="([\w-]+)")?\]/', $sel, $m) ? $m : [];
+    $q = isset($attr[2]) ? "//form[@{$attr[1]}='{$attr[2]}']" : "//form[@{$attr[1]}]";
+    $form = $x->query($q)->item(0);
+    $ok = $form !== null;
+    $why = [];
+    if ($ok) {
+        $consent = $x->query('.//input[@type="checkbox"][@name="einwilligung"][@required]', $form)->item(0);
+        if (!$consent) $why[] = 'Einwilligung';
+        elseif (!$x->query('ancestor::label//a[contains(@href,"datenschutz")]', $consent)->length) $why[] = 'Link zur Datenschutzerklärung';
+        $hp = $x->query('.//input[@name="website"]', $form)->item(0);
+        if (!$hp || $hp->getAttribute('tabindex') !== '-1' || $hp->getAttribute('autocomplete') !== 'off') $why[] = 'Lockfeld';
+        if (!$x->query('.//input[@name="name"][@required]', $form)->length) $why[] = 'Name Pflicht';
+        if (!$x->query('.//input[@name="email"][@type="email"][@required]', $form)->length) $why[] = 'E-Mail Pflicht';
+        if (!$x->query('.//*[@data-form-error]', $form)->length) $why[] = 'Fehlertext';
+        if ($sel === '[data-customer-form]' && !$x->query('.//input[@name="telefon"][@required]', $form)->length) $why[] = 'Telefon Pflicht';
+    }
+    // Ausweichmöglichkeit (Telefon) für den Fall, dass das Portal nicht erreichbar ist
+    if (!$x->query('//*[@data-fallback]//a[starts-with(@href,"tel:")]')->length) $why[] = 'Ausweichmöglichkeit';
+    check("{$page}: Pflichtfelder, Einwilligung, Lockfeld, Fehlertext, Ausweichmöglichkeit", $ok && !$why, $ok ? implode(', ', $why) : 'Formular fehlt');
 }
-$idx = (string)@file_get_contents("{$tmp}/dist/index.html");
-check('Canonical zeigt auf die angegebene Domain', str_contains($idx, '<link rel="canonical" href="https://example.org/">'));
-check('Keine PHP-Reste in den Seiten', !preg_match('/<\?php|Warning:|Fatal error|Notice:/', $idx . @file_get_contents("{$tmp}/dist/termin.html")));
+$css = file_get_contents("{$out}/css/styles.css");
+check('Lockfeld ist unsichtbar (display:none)', (bool)preg_match('/\.hp\s*\{[^}]*display:\s*none/', $css));
+$js = file_get_contents("{$out}/js/main.js") . file_get_contents("{$out}/js/formulare.js");
+check('Anfragen gehen an /api/anfrage', str_contains($js, '"/api/anfrage"'));
+check('Danach Weiterleitung auf danke.html mit typ und ref', str_contains($js, 'danke.html?typ='));
+check('Buchung nutzt /api/leistungen, /api/mitarbeiter, /api/verfuegbarkeit, /api/slots', str_contains($js, '/api/leistungen') && str_contains($js, '/api/mitarbeiter') && str_contains($js, '/api/verfuegbarkeit') && str_contains($js, '/api/slots'));
+check('Nur freie Uhrzeiten (frei:true) werden angeboten', str_contains($js, 's.frei'));
+check('Terminwunsch, wenn das Portal keine Selbstbuchung erlaubt', str_contains($js, 'selfBooking') && str_contains($js, 'Terminwunsch senden'));
+check('429 wird als „später noch einmal“ gemeldet', str_contains($js, 'status === 429') && str_contains($js, 'noch einmal'));
+check('Doppelklick-Sperre beim Senden', substr_count($js, 'if (sending) return') + substr_count($js, 'if (state.sending) return') >= 2);
 
-$log = (string)@file_get_contents("{$tmp}/server.log");
-check('Keine PHP-Warnungen im Serverprotokoll', !preg_match('/(Warning|Fatal|Deprecated|Notice):/', $log), mb_substr($log, 0, 300));
-
-echo "\n" . ($failed ? '✗ ' . count($failed) . " Test(s) fehlgeschlagen, {$passed} bestanden\n" : "✓ Alle {$passed} Tests bestanden\n");
+// ---------- Ergebnis ----------
+exec('rm -rf ' . escapeshellarg(dirname($out)));
+echo "\n" . ($failed ? '✗ ' . count($failed) . " fehlgeschlagen, {$passed} bestanden\n" : "✓ Alle {$passed} Tests bestanden\n");
 exit($failed ? 1 : 0);

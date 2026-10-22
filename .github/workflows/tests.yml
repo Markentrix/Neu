@@ -1,4 +1,4 @@
-# Führt die Testsuite bei jedem Push aus. Ein roter Haken heißt: diese Version nicht installieren.
+# Prüft bei jedem Push, ob website-fertig/ alle Regeln des Markentrix-Portals erfüllt und im Browser funktioniert.
 name: Tests
 
 on:
@@ -13,9 +13,18 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: pdo_sqlite, mbstring, curl, intl
+          extensions: mbstring, dom
           coverage: none
       - name: Syntax prüfen
-        run: find app public tools tests -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
-      - name: Testsuite
+        run: find app tools tests -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+      - name: Upload-Regeln, SEO, Formulare
         run: php tests/run.php
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Browser-Test (Buchung, Kontakt, Gutschein, Ausfall, 390 px)
+        run: |
+          php tools/build.php
+          npm install --no-save --prefix /tmp/pw playwright@1.56.1
+          /tmp/pw/node_modules/.bin/playwright install --with-deps chromium
+          NODE_PATH=/tmp/pw/node_modules node tests/browser.cjs

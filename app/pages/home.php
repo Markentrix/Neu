@@ -4,9 +4,9 @@ $s = $c['salon'];
 $faq = array_slice(general_faq(), 0, 5);
 
 page_start([
-    'title' => 'Friseur Wettmar & Burgwedel | AJ Atelier – Balayage & Schnitt',
+    'title' => 'Friseur Wettmar & Burgwedel | AJ Atelier – Balayage',
     'ogTitle' => 'AJ Atelier – Friseur in Burgwedel-Wettmar',
-    'description' => 'AJ Atelier, Ihr Friseur in Burgwedel-Wettmar: Balayage, Babylights, Haarschnitt, Färben & Styling für Damen und Herren. Online Termin buchen, auch mit PayPal.',
+    'description' => 'AJ Atelier, Ihr Friseur in Burgwedel-Wettmar: Balayage, Babylights, Haarschnitt, Färben & Styling für Damen und Herren. Termin online buchen, rund um die Uhr.',
     'path' => '/',
     'schema' => [faq_schema($faq)],
 ]);
@@ -25,7 +25,7 @@ page_start([
           <ul class="hero-facts" aria-label="Auf einen Blick">
             <li><strong>Di–Fr</strong> 10–18 Uhr</li>
             <li><strong>Sa</strong> 10–14 Uhr</li>
-            <li><strong>PayPal</strong> oder vor Ort zahlen</li>
+            <li><strong>24/7</strong> online buchen</li>
           </ul>
         </div>
         <div class="hero-emblem" aria-hidden="true">
@@ -82,8 +82,8 @@ page_start([
       <div class="container">
         <header class="section-head">
           <p class="eyebrow">Online-Terminbuchung</p>
-          <h2 id="termin-title">Ihr Wunschtermin in 4 Schritten</h2>
-          <p>Rund um die Uhr buchen, sofortige Bestätigung per E-Mail. Bezahlen Sie bequem mit PayPal oder vor Ort.</p>
+          <h2 id="termin-title">Ihr Wunschtermin in 3 Schritten</h2>
+          <p>Rund um die Uhr buchen, Bestätigung per E-Mail. Bezahlt wird bequem im Salon.</p>
         </header>
         <?php booking_widget(); ?>
       </div>
@@ -98,7 +98,7 @@ page_start([
           <ul class="checklist">
             <li>Individuelle Farbberatung &amp; Kostenvoranschlag</li>
             <li>Haarschonende Aufhellung mit Bond Treatment</li>
-            <li>Online buchen, mit PayPal oder vor Ort zahlen</li>
+            <li>Rund um die Uhr online buchen, Gutscheine per PayPal</li>
           </ul>
           <p><a class="btn btn-ghost" href="/ueber-uns">Mehr über uns</a></p>
         </div>
@@ -109,7 +109,18 @@ page_start([
       </div>
     </section>
 
-    <section class="section" aria-labelledby="faq-title">
+    <section class="section reviews" aria-labelledby="bewertungen-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">Bewertungen</p>
+          <h2 id="bewertungen-title">Das sagen unsere Kundinnen und Kunden</h2>
+        </header>
+        <div class="mk-reviews" data-mk="bewertungen"></div>
+        <p class="reviews-fallback">Eindrücke aus dem Salon, Vorher-nachher-Bilder und Stimmen unserer Kundschaft finden Sie auf <a href="<?= e($s['instagram']) ?>" target="_blank" rel="noopener">Instagram @ajat.elier</a>.</p>
+      </div>
+    </section>
+
+    <section class="section marble" aria-labelledby="faq-title">
       <div class="container narrow">
         <header class="section-head">
           <p class="eyebrow">Häufige Fragen</p>

@@ -46,19 +46,18 @@ page_start([
           <h2 id="form-title">Schreiben Sie uns</h2>
           <p>Für Fragen zu Leistungen, Brautfrisuren oder Gruppenterminen. Termine selbst buchen Sie am schnellsten <a href="/termin">online</a>.</p>
         </header>
-        <form class="form-grid contact-form" data-contact-form novalidate>
-          <label>Name*<input id="c-name" name="name" autocomplete="name" required minlength="2" maxlength="80"></label>
-          <label>Telefon <small>(optional)</small><input id="c-phone" name="phone" type="tel" autocomplete="tel" maxlength="25"></label>
-          <label class="full">E-Mail*<input id="c-email" name="email" type="email" autocomplete="email" required maxlength="254"></label>
-          <label class="full">Ihre Nachricht*<textarea id="c-message" name="message" rows="5" required minlength="10" maxlength="2000"></textarea></label>
-          <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
-          <label class="check full"><input id="c-consent" type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass meine Angaben zur Beantwortung meiner Anfrage verarbeitet werden. Details in der <a href="/datenschutz">Datenschutzerklärung</a>.*</span></label>
-          <p class="form-error full" data-contact-error role="alert" hidden></p>
-          <p class="form-ok full" data-contact-ok role="status" hidden>Vielen Dank! Ihre Nachricht ist angekommen. Wir melden uns so schnell wie möglich.</p>
+        <?= fallback_contact('Die Nachricht konnte gerade nicht gesendet werden. Rufen Sie uns gerne an oder schreiben Sie uns auf Instagram.') ?>
+        <form class="form-grid contact-form" method="post" data-anfrage="kontakt" novalidate>
+          <label>Name*<input id="c-name" name="name" autocomplete="name" required minlength="2" maxlength="80"><small class="field-error" data-error-for="name"></small></label>
+          <label>Telefon <small>(optional)</small><input id="c-phone" name="telefon" type="tel" autocomplete="tel" maxlength="30"><small class="field-error" data-error-for="telefon"></small></label>
+          <label class="full">E-Mail*<input id="c-email" name="email" type="email" autocomplete="email" required maxlength="254"><small class="field-error" data-error-for="email"></small></label>
+          <label class="full">Ihre Nachricht*<textarea id="c-message" name="nachricht" rows="5" required minlength="10" maxlength="2000"></textarea><small class="field-error" data-error-for="nachricht"></small></label>
+          <?= form_consent('zur Beantwortung meiner Anfrage') ?>
+          <small class="field-error full" data-error-for="einwilligung"></small>
+          <p class="form-error full" data-form-error role="alert" hidden></p>
           <div class="full"><button class="btn btn-gold" type="submit">Nachricht senden</button></div>
         </form>
       </div>
     </section>
   </main>
-  <script defer src="/js/contact.js?v=<?= filemtime(__DIR__ . '/../../public/js/contact.js') ?>"></script>
-<?php page_end();
+<?php page_end(true, ['formulare.js']);

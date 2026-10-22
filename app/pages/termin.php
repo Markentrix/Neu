@@ -1,23 +1,22 @@
 <?php
-$c = cfg();
 $crumbs = [['Termin buchen', '/termin']];
 $faq = [
-    ['Wann bekomme ich eine Bestätigung?', 'Direkt nach der Buchung per E-Mail. Darin finden Sie alle Details und einen Link zum Stornieren.'],
-    ['Was passiert bei Leistungen mit „ab“-Preis?', 'Online zahlen Sie per PayPal nur eine Anzahlung, die vor Ort vollständig verrechnet wird. Den Endpreis besprechen wir vor Beginn mit Ihnen.'],
-    ['Wie storniere ich meinen Termin?', "Bis {$c['booking']['freeCancelHours']} Stunden vorher kostenfrei über den Link in der Bestätigungs-E-Mail. Online geleistete Zahlungen werden automatisch erstattet."],
+    ['Wann bekomme ich eine Bestätigung?', 'Direkt nach dem Absenden per E-Mail, mit Ihrer Vorgangsnummer und allen Details. Einen Tag vor dem Termin erinnern wir Sie noch einmal per E-Mail.'],
+    ['Was passiert bei Leistungen mit „ab“-Preis?', 'Den Endpreis besprechen wir vor Beginn mit Ihnen, er richtet sich nach Haarlänge, Dichte und Materialverbrauch. Bezahlt wird nach dem Termin im Salon.'],
+    ['Wie sage ich meinen Termin ab?', 'Über den Link in der Bestätigungs- oder Erinnerungs-E-Mail. Bitte sagen Sie spätestens 24 Stunden vorher ab, damit wir den Termin neu vergeben können.'],
     ['Ich finde keinen passenden Termin. Was nun?', 'Rufen Sie uns an. Manchmal werden kurzfristig Zeiten frei, die wir telefonisch vergeben.'],
 ];
 
 page_start([
     'title' => 'Termin online buchen | Friseur AJ Atelier Wettmar',
-    'description' => 'Friseurtermin bei AJ Atelier in Burgwedel-Wettmar online buchen: freie Zeiten sofort sehen, Bestätigung per E-Mail, mit PayPal oder vor Ort bezahlen.',
+    'description' => 'Friseurtermin bei AJ Atelier in Burgwedel-Wettmar online buchen: freie Zeiten sofort sehen, rund um die Uhr buchen, Bestätigung per E-Mail.',
     'path' => '/termin',
     'crumbs' => $crumbs,
     'schema' => [faq_schema($faq)],
 ]);
 ?>
   <main id="main">
-    <?php page_hero('Online-Terminbuchung', 'Termin buchen', 'Wählen Sie Ihre Leistungen und eine freie Uhrzeit. Die Bestätigung kommt sofort per E-Mail. Bezahlen Sie per PayPal oder vor Ort.', $crumbs, null); ?>
+    <?php page_hero('Online-Terminbuchung', 'Termin buchen', 'Wählen Sie Ihre Leistung und eine freie Uhrzeit. Die Bestätigung mit Vorgangsnummer kommt per E-Mail, bezahlt wird im Salon.', $crumbs, null); ?>
 
     <section id="termin" class="section booking-section" aria-labelledby="buchen-title">
       <div class="container">

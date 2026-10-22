@@ -25,15 +25,15 @@ page_start([
         <div class="info-grid">
           <div class="aside-card">
             <h3>Festpreise</h3>
-            <p>Haarschnitte, Waschen &amp; Föhnen und Wimpern färben haben feste Preise. Bei der Online-Buchung können Sie den Betrag direkt mit PayPal bezahlen.</p>
+            <p>Haarschnitte, Waschen &amp; Föhnen und Wimpern färben haben feste Preise. Was Sie online sehen, zahlen Sie auch im Salon.</p>
           </div>
           <div class="aside-card">
             <h3>„ab“-Preise</h3>
-            <p>Bei Farbe, Balayage und Pflege hängt der Preis von Haarlänge, Dichte und Materialverbrauch ab. Online zahlen Sie nur eine Anzahlung, die vor Ort vollständig verrechnet wird.</p>
+            <p>Bei Farbe, Balayage und Pflege hängt der Preis von Haarlänge, Dichte und Materialverbrauch ab. Vor dem Start bekommen Sie einen Kostenvoranschlag, damit es keine Überraschungen gibt.</p>
           </div>
           <div class="aside-card">
-            <h3>Vor Ort</h3>
-            <p>Sie möchten nicht online zahlen? Kein Problem. Wählen Sie bei der Buchung „Vor Ort bezahlen“ und zahlen Sie bar oder mit Karte im Salon.</p>
+            <h3>Im Salon &amp; Gutscheine</h3>
+            <p>Bezahlt wird nach dem Termin im Salon, bar oder mit Karte. Gutscheine können Sie <a href="/gutscheine">online anfragen</a> und bequem per PayPal bezahlen.</p>
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ return [
     'burgwedel' => [
         'name' => 'Burgwedel',
         'title' => 'Friseur in Burgwedel',
-        'metaTitle' => 'Friseur Burgwedel | AJ Atelier in Wettmar – Balayage, Schnitt & Farbe',
+        'metaTitle' => 'Friseur Burgwedel | AJ Atelier Wettmar – Balayage & Schnitt',
         'description' => 'Friseur für Burgwedel: AJ Atelier in Wettmar, wenige Minuten von Großburgwedel, Kleinburgwedel, Thönse, Engensen und Fuhrberg. Jetzt online Termin buchen.',
         'intro' => 'Wettmar ist ein Ortsteil von Burgwedel. Unser Salon in der Hauptstraße 64 liegt damit mitten in der Stadt, nur wenige Autominuten von den anderen Burgwedeler Ortsteilen entfernt. Ob Sie in Großburgwedel arbeiten, in Thönse wohnen oder aus Fuhrberg kommen: Zu uns ist es nicht weit.',
         'routes' => [
@@ -25,7 +25,7 @@ return [
     'isernhagen' => [
         'name' => 'Isernhagen',
         'title' => 'Friseur für Isernhagen',
-        'metaTitle' => 'Friseur für Isernhagen | AJ Atelier Wettmar – rund 15 Minuten entfernt',
+        'metaTitle' => 'Friseur nahe Isernhagen | AJ Atelier Wettmar',
         'description' => 'Friseur für Isernhagen: AJ Atelier in Burgwedel-Wettmar, rund 15 Minuten von Isernhagen H.B. und Kirchhorst. Balayage, Babylights, Schnitt und Farbe, online buchen.',
         'intro' => 'Von Isernhagen sind Sie in rund einer Viertelstunde bei uns in Wettmar. Gerade für aufwendige Farbtermine wie Balayage oder Babylights nehmen viele Kundinnen die kurze Fahrt gern in Kauf, um in Ruhe und ohne Hektik beraten zu werden.',
         'routes' => [
@@ -34,14 +34,14 @@ return [
         ],
         'text' => [
             'Ins Navi geben Sie einfach „Hauptstraße 64, 30938 Burgwedel“ ein. Der Salon liegt an der Hauptstraße in Wettmar.',
-            'Den Termin buchen Sie bequem online und sehen sofort, welche Zeiten frei sind. Bei Farbbehandlungen mit „ab“-Preis zahlen Sie online nur eine Anzahlung, der Rest wird nach Aufwand vor Ort berechnet.',
+            'Den Termin buchen Sie bequem online und sehen sofort, welche Zeiten frei sind. Bei Farbbehandlungen mit „ab“-Preis erhalten Sie vorab einen Kostenvoranschlag, bezahlt wird nach Aufwand im Salon.',
         ],
     ],
 
     'langenhagen' => [
         'name' => 'Langenhagen',
         'title' => 'Friseur für Langenhagen',
-        'metaTitle' => 'Friseur für Langenhagen | Balayage & Farbe bei AJ Atelier Wettmar',
+        'metaTitle' => 'Friseur für Langenhagen | Balayage bei AJ Atelier Wettmar',
         'description' => 'Aus Langenhagen in rund 25 Minuten zu AJ Atelier in Burgwedel-Wettmar: Balayage, Babylights, Blondierung, Schnitt & Styling. Online Termin buchen.',
         'intro' => 'Aus Langenhagen erreichen Sie unseren Salon in Wettmar in rund 25 Minuten. Viele Kundinnen verbinden den Weg mit einem längeren Termin für Farbe und Schnitt und genießen die ruhige Atmosphäre außerhalb der Stadt.',
         'routes' => [
@@ -56,7 +56,7 @@ return [
     'hannover' => [
         'name' => 'Hannover',
         'title' => 'Friseur für Hannover-Nord',
-        'metaTitle' => 'Friseur nördlich von Hannover | AJ Atelier Wettmar – Balayage & Farbe',
+        'metaTitle' => 'Friseur nördlich von Hannover | AJ Atelier Wettmar',
         'description' => 'Aus Hannover-Bothfeld oder der List in rund 20 bis 30 Minuten zu AJ Atelier in Burgwedel-Wettmar. Balayage, Babylights, Farbe und Schnitt, online buchen.',
         'intro' => 'Nördlich von Hannover, in Burgwedel-Wettmar, finden Sie das AJ Atelier. Aus den nördlichen Stadtteilen wie Bothfeld oder der List sind Sie in rund 20 bis 30 Minuten bei uns, ganz ohne Parkplatzsuche in der Innenstadt.',
         'routes' => [

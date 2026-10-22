@@ -1,9 +1,0 @@
-.git
-app/config.local.php
-app/data
-deploy
-*.md
-dev-router.php
-dist
-tools
-tests

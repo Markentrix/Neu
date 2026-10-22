@@ -3,69 +3,60 @@ $c = cfg();
 $v = $c['vouchers'];
 $crumbs = [['Gutscheine', '/gutscheine']];
 $faq = [
-    ['Wie lange ist ein Gutschein gültig?', "Gutscheine sind bis zum Ende des dritten Jahres nach dem Kauf gültig, ein im Jahr " . date('Y') . " gekaufter Gutschein also bis zum 31.12." . ((int)date('Y') + $v['validYears']) . '.'],
+    ['Wie lange ist ein Gutschein gültig?', 'Gutscheine sind drei Jahre gültig, gerechnet ab dem Ende des Jahres, in dem sie gekauft wurden. Ein im Mai gekaufter Gutschein gilt also bis zum 31. Dezember drei Jahre später.'],
     ['Wofür kann der Gutschein eingelöst werden?', 'Für alle Leistungen im AJ Atelier, auch in Teilbeträgen. Der Restbetrag bleibt auf dem Gutschein erhalten.'],
-    ['Wie bekomme ich den Gutschein?', 'Direkt nach der Zahlung per E-Mail als PDF zum Ausdrucken oder Weiterleiten. Sie können ihn außerdem sofort auf der Seite herunterladen.'],
-    ['Kann ich auch im Salon einen Gutschein kaufen?', 'Ja, natürlich. Sprechen Sie uns einfach bei Ihrem nächsten Besuch an.'],
+    ['Wie läuft die Bestellung ab?', 'Sie wählen Betrag und Widmung und senden die Anfrage ab. Per E-Mail erhalten Sie den Link zur Zahlung mit PayPal. Sobald die Zahlung da ist, bekommen Sie den Gutschein mit persönlichem Code zum Ausdrucken oder Weiterleiten.'],
+    ['Kann ich auch im Salon einen Gutschein kaufen?', 'Ja, natürlich. Sprechen Sie uns einfach bei Ihrem nächsten Besuch an, dort zahlen Sie bar oder mit Karte.'],
 ];
 page_start([
-    'title' => 'Gutschein online kaufen | Friseur AJ Atelier Wettmar',
-    'description' => 'Friseur-Gutschein von AJ Atelier in Burgwedel-Wettmar online kaufen: Betrag wählen, mit PayPal bezahlen, sofort als PDF per E-Mail erhalten. 3 Jahre gültig.',
+    'title' => 'Gutschein verschenken | Friseur AJ Atelier Wettmar',
+    'description' => 'Friseur-Gutschein von AJ Atelier in Burgwedel-Wettmar: Betrag wählen, online anfragen, bequem per PayPal bezahlen und per E-Mail erhalten. 3 Jahre gültig.',
     'path' => '/gutscheine',
     'crumbs' => $crumbs,
     'schema' => [faq_schema($faq), [
         '@context' => 'https://schema.org',
         '@type' => 'Product',
         'name' => 'Gutschein AJ Atelier',
-        'description' => 'Wertgutschein für alle Leistungen bei AJ Atelier in Burgwedel-Wettmar, als PDF per E-Mail.',
+        'description' => 'Wertgutschein für alle Leistungen bei AJ Atelier in Burgwedel-Wettmar, per E-Mail.',
         'brand' => ['@type' => 'Brand', 'name' => $c['salon']['name']],
         'offers' => ['@type' => 'AggregateOffer', 'priceCurrency' => 'EUR', 'lowPrice' => $v['min'], 'highPrice' => $v['max'], 'availability' => 'https://schema.org/InStock', 'url' => site_url('/gutscheine')],
     ]],
 ]);
 ?>
   <main id="main">
-    <?php page_hero('Gutscheine', 'Gutschein verschenken', 'Ein Friseur-Gutschein für Balayage, einen neuen Schnitt oder eine Pflege-Auszeit. Online bezahlen und sofort als PDF per E-Mail erhalten.', $crumbs, null); ?>
+    <?php page_hero('Gutscheine', 'Gutschein verschenken', 'Ein Friseur-Gutschein für Balayage, einen neuen Schnitt oder eine Pflege-Auszeit. Betrag wählen, anfragen und bequem per PayPal bezahlen.', $crumbs, null); ?>
 
     <section class="section">
       <div class="container content-grid">
-        <div class="voucher-shop" data-voucher-shop data-min="<?= (int)$v['min'] ?>" data-max="<?= (int)$v['max'] ?>" data-paypal="<?= e(paypal_enabled() ? $c['local']['paypal']['clientId'] : '') ?>">
-          <form class="form-grid voucher-form" data-voucher-form novalidate>
+        <div class="voucher-shop">
+          <?= fallback_contact('Die Anfrage konnte gerade nicht gesendet werden. Gutscheine bekommen Sie auch telefonisch oder direkt im Salon.') ?>
+          <form class="form-grid voucher-form" method="post" data-anfrage="gutschein" data-min="<?= (int)$v['min'] ?>" data-max="<?= (int)$v['max'] ?>" novalidate>
             <fieldset class="full amount-field">
               <legend>Betrag wählen</legend>
               <div class="amount-chips">
                 <?php foreach ($v['amounts'] as $i => $a): ?>
-                <label class="chip"><input type="radio" name="amount" value="<?= (int)$a ?>"<?= $i === 1 ? ' checked' : '' ?>><span><?= (int)$a ?> €</span></label>
+                <label class="chip"><input type="radio" name="betrag_wahl" value="<?= (int)$a ?>"<?= $i === 1 ? ' checked' : '' ?>><span><?= (int)$a ?> €</span></label>
                 <?php endforeach; ?>
-                <label class="chip chip-custom"><input type="radio" name="amount" value="custom"><span>Eigener Betrag</span></label>
+                <label class="chip chip-custom"><input type="radio" name="betrag_wahl" value="custom"><span>Eigener Betrag</span></label>
               </div>
               <label class="custom-amount" data-custom-amount hidden>Betrag in Euro (<?= (int)$v['min'] ?>–<?= (int)$v['max'] ?>)
-                <input id="v-custom" name="custom" type="number" inputmode="numeric" min="<?= (int)$v['min'] ?>" max="<?= (int)$v['max'] ?>" step="1">
+                <input id="v-custom" name="betrag_eigen" type="number" inputmode="numeric" min="<?= (int)$v['min'] ?>" max="<?= (int)$v['max'] ?>" step="1">
+                <small class="field-error" data-error-for="betrag_eigen"></small>
               </label>
             </fieldset>
-            <label>Für (optional)<input id="v-recipient" name="recipient" maxlength="60" placeholder="z. B. Maria"></label>
-            <label class="full">Persönliche Nachricht (optional, max. 200 Zeichen)<textarea id="v-message" name="message" rows="3" maxlength="200" placeholder="Alles Liebe zum Geburtstag!"></textarea></label>
-            <label>Ihr Name*<input id="v-buyer" name="buyerName" autocomplete="name" required maxlength="80"></label>
-            <label>Ihre E-Mail*<input id="v-email" name="buyerEmail" type="email" autocomplete="email" required maxlength="254"></label>
-            <label class="check full"><input id="v-consent" type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass meine Angaben zur Ausstellung und Zusendung des Gutscheins verarbeitet werden. Details in der <a href="/datenschutz">Datenschutzerklärung</a>.*</span></label>
-            <p class="form-error full" data-voucher-error role="alert" hidden></p>
-            <div class="full" data-voucher-pay>
-              <button class="btn btn-gold" type="submit" data-voucher-submit<?= paypal_enabled() ? '' : ' hidden' ?>>Weiter zur Zahlung</button>
-              <p class="notice" data-voucher-unavailable<?= paypal_enabled() ? ' hidden' : '' ?>>Online-Gutscheine sind gerade nicht verfügbar. Gutscheine erhalten Sie jederzeit im Salon oder telefonisch unter <a href="tel:<?= e($c['salon']['phone']) ?>"><?= e($c['salon']['phoneDisplay']) ?></a>.</p>
-            </div>
-            <div class="full paypal-box" data-voucher-paypal hidden>
-              <p class="hint">Gutschein über <strong data-voucher-sum></strong> – bezahlen Sie sicher mit PayPal:</p>
-              <div data-voucher-buttons></div>
-              <button class="btn btn-ghost btn-sm" type="button" data-voucher-edit>Angaben ändern</button>
+            <label>Für (optional)<input id="v-recipient" name="empfaenger" maxlength="60" placeholder="z. B. Maria"></label>
+            <label class="full">Persönliche Widmung (optional, max. 200 Zeichen)<textarea id="v-message" name="widmung" rows="3" maxlength="200" placeholder="Alles Liebe zum Geburtstag!"></textarea></label>
+            <label>Ihr Name*<input id="v-buyer" name="name" autocomplete="name" required minlength="2" maxlength="80"><small class="field-error" data-error-for="name"></small></label>
+            <label>Ihre E-Mail*<input id="v-email" name="email" type="email" autocomplete="email" required maxlength="254"><small class="field-error" data-error-for="email"></small></label>
+            <label class="full">Telefon <small>(optional, für Rückfragen)</small><input id="v-phone" name="telefon" type="tel" autocomplete="tel" maxlength="30"><small class="field-error" data-error-for="telefon"></small></label>
+            <?= form_consent('zur Ausstellung und Zusendung des Gutscheins') ?>
+            <small class="field-error full" data-error-for="einwilligung"></small>
+            <p class="form-error full" data-form-error role="alert" hidden></p>
+            <div class="full">
+              <button class="btn btn-gold" type="submit">Gutschein anfragen</button>
+              <p class="hint">Sie zahlen erst, wenn Sie den PayPal-Link von uns per E-Mail erhalten haben.</p>
             </div>
           </form>
-          <div class="voucher-done" data-voucher-done hidden tabindex="-1">
-            <div class="check-circle" aria-hidden="true"><svg viewBox="0 0 52 52"><path class="check-path" pathLength="1" d="M15 27l7.5 7.5L38 19" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span><span class="spark s5"></span><span class="spark s6"></span></div>
-            <h2>Vielen Dank für Ihren Kauf!</h2>
-            <p>Ihr Gutschein über <strong data-done-amount></strong> ist ausgestellt.</p>
-            <p class="voucher-code" data-done-code></p>
-            <p data-done-mail></p>
-            <p><a class="btn btn-gold" data-done-pdf href="#" target="_blank" rel="noopener">Gutschein als PDF öffnen</a></p>
-          </div>
         </div>
         <div class="content-aside">
           <div class="voucher-card" aria-hidden="true">
@@ -76,9 +67,9 @@ page_start([
           </div>
           <div class="aside-card">
             <h2>Gut zu wissen</h2>
-            <p><?= icon('calendar') ?> Gültig bis 31.12.<?= (int)date('Y') + $v['validYears'] ?></p>
+            <p><?= icon('calendar') ?> Drei Jahre gültig, bis zum Jahresende</p>
             <p><?= icon('sparkle') ?> Für alle Leistungen, auch in Teilbeträgen</p>
-            <p><?= icon('arrow') ?> Sofort als PDF per E-Mail</p>
+            <p><?= icon('arrow') ?> Bezahlung per PayPal, Gutschein per E-Mail</p>
           </div>
         </div>
       </div>
@@ -94,5 +85,4 @@ page_start([
       </div>
     </section>
   </main>
-  <script defer src="/js/voucher.js?v=<?= filemtime(__DIR__ . '/../../public/js/voucher.js') ?>"></script>
-<?php page_end();
+<?php page_end(true, ['formulare.js']);

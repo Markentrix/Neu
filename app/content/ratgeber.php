@@ -4,7 +4,7 @@
 return [
     'balayage-pflegen' => [
         'title' => 'Balayage pflegen: So bleibt die Farbe lange schön',
-        'metaTitle' => 'Balayage pflegen – 7 Tipps für lange schöne Farbe | AJ Atelier',
+        'metaTitle' => 'Balayage pflegen: 7 Tipps für schöne Farbe | AJ Atelier',
         'description' => 'Wie pflegt man eine Balayage richtig? Tipps vom Friseur aus Wettmar: Waschen, Silbershampoo, Hitzeschutz, Glossing und wann die Auffrischung fällig ist.',
         'teaser' => 'Waschen, Gelbstich vermeiden, Hitzeschutz: So hält Ihre Balayage möglichst lange.',
         'date' => '2026-10-21',
@@ -24,7 +24,7 @@ return [
 
     'ansatz-faerben-wie-oft' => [
         'title' => 'Wie oft sollte man den Ansatz färben?',
-        'metaTitle' => 'Ansatz färben: Wie oft ist sinnvoll? | Friseur AJ Atelier Wettmar',
+        'metaTitle' => 'Ansatz färben: Wie oft ist sinnvoll? | AJ Atelier Wettmar',
         'description' => 'Alle 4 Wochen oder seltener? Wie oft der Ansatz gefärbt werden sollte, hängt von Grauanteil und Farbunterschied ab. Tipps vom Friseur aus Burgwedel-Wettmar.',
         'teaser' => 'Grauabdeckung, Farbunterschied, Haarwachstum: So finden Sie Ihren Rhythmus.',
         'date' => '2026-10-21',
@@ -42,7 +42,7 @@ return [
 
     'blondieren-dunkel-zu-blond' => [
         'title' => 'Von dunkel zu blond: Was beim Blondieren wichtig ist',
-        'metaTitle' => 'Von dunkel zu blond – Blondieren ohne böse Überraschung | AJ Atelier',
+        'metaTitle' => 'Von dunkel zu blond: Blondieren ohne Risiko | AJ Atelier',
         'description' => 'Von Braun zu Blond in einem Termin? Was beim Blondieren wichtig ist, warum es manchmal mehrere Etappen braucht und wie Sie Ihr Haar schützen. Tipps aus Wettmar.',
         'teaser' => 'Warum der Weg zu hellem Blond manchmal mehrere Etappen braucht.',
         'date' => '2026-10-21',

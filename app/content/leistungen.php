@@ -34,7 +34,7 @@ return [
         'faq' => [
             ['Wie lange hält eine Balayage?', 'Weil der Übergang zum Ansatz weich ist, sieht eine Balayage auch nach drei bis vier Monaten noch gepflegt aus. Viele Kundinnen frischen sie zwei- bis dreimal im Jahr auf, dazwischen reicht oft ein Glossing.'],
             ['Schadet Balayage meinen Haaren?', 'Jede Aufhellung beansprucht das Haar. Wir arbeiten deshalb mit einem Bond Treatment, das die Haarstruktur während der Behandlung schützt, und empfehlen passende Pflege für zu Hause.'],
-            ['Muss ich bei der Online-Buchung schon bezahlen?', 'Sie können vor Ort bezahlen. Wer lieber online bucht und zahlt, leistet über PayPal eine Anzahlung von 50 €, die vollständig verrechnet wird.'],
+            ['Muss ich bei der Online-Buchung schon bezahlen?', 'Nein. Sie buchen online und bezahlen nach dem Termin im Salon, bar oder mit Karte. Bei sehr aufwendigen Farbbehandlungen kann der Salon vorab eine Anzahlung per PayPal erbitten, darüber informieren wir Sie mit der Terminbestätigung.'],
         ],
         'related' => ['babylights', 'farbe', 'pflege'],
     ],
@@ -84,7 +84,7 @@ return [
         'intro' => 'Ein guter Schnitt sieht nicht nur am ersten Tag gut aus, sondern auch dann, wenn Sie Ihr Haar morgens selbst stylen. Deshalb fragen wir vor dem Schneiden, wie viel Zeit Sie sich für Ihre Haare nehmen möchten, wie Ihr Haar fällt und was Sie bisher gestört hat.',
         'sections' => [
             ['Feste Preise nach Haarlänge', [
-                'Bei Damenhaarschnitten gelten bei uns feste Preise, gestaffelt nach kurz, mittel und lang. So wissen Sie schon bei der Buchung, was der Termin kostet, und können online direkt mit PayPal bezahlen.',
+                'Bei Damenhaarschnitten gelten bei uns feste Preise, gestaffelt nach kurz, mittel und lang. So wissen Sie schon bei der Buchung, was der Termin kostet.',
                 'Kurz bedeutet ungefähr bis zum Kinn, mittel bis zur Schulter, lang alles darüber hinaus. Im Zweifel buchen Sie die längere Variante, dann ist ausreichend Zeit eingeplant.',
             ]],
             ['Nur Waschen & Föhnen', [
@@ -122,7 +122,7 @@ return [
                 'Für Hochzeiten empfehlen wir einen Probetermin einige Wochen vorher. So können wir die Frisur in Ruhe ausprobieren und am großen Tag zügig und entspannt arbeiten. Für Probe und Termin buchen Sie jeweils die Leistung „Hochstecken“.',
             ]],
             ['Preis', [
-                'Hochsteckfrisuren beginnen ab 55 €. Der Preis hängt von Haarlänge und Aufwand ab. Bei der Online-Buchung können Sie eine Anzahlung von 20 € per PayPal leisten oder komplett vor Ort bezahlen.',
+                'Hochsteckfrisuren beginnen ab 55 €. Der Preis hängt von Haarlänge und Aufwand ab. Bezahlt wird nach dem Termin im Salon, bar oder mit Karte.',
             ]],
         ],
         'faq' => [
@@ -135,7 +135,7 @@ return [
     'herren' => [
         'name' => 'Herren & Bart',
         'title' => 'Herrenhaarschnitt & Bart',
-        'metaTitle' => 'Herrenfriseur Wettmar & Burgwedel | Haarschnitt & Bart | AJ Atelier',
+        'metaTitle' => 'Herrenfriseur Wettmar & Burgwedel | Schnitt & Bart',
         'description' => 'Herrenhaarschnitt inkl. Waschen & Styling für 45 €, Maschinenschnitt 30 €, Bart schneiden 20 € bei AJ Atelier in Burgwedel-Wettmar. Termin online buchen.',
         'teaser' => 'Klassischer Herrenschnitt, Maschinenschnitt und Bartpflege.',
         'icon' => 'razor',
@@ -220,7 +220,7 @@ return [
     'augenbrauen-wimpern' => [
         'name' => 'Augenbrauen & Wimpern',
         'title' => 'Augenbrauen & Wimpern',
-        'metaTitle' => 'Augenbrauen zupfen & färben, Wimpern färben in Wettmar | AJ Atelier',
+        'metaTitle' => 'Augenbrauen & Wimpern färben in Wettmar | AJ Atelier',
         'description' => 'Augenbrauen zupfen ab 15 €, Augenbrauen färben ab 15 €, Wimpern färben 16 € bei AJ Atelier in Burgwedel-Wettmar. Auch ideal zusammen mit dem Friseurtermin.',
         'teaser' => 'Zupfen und Färben für einen klaren Rahmen.',
         'icon' => 'eye',

@@ -31,7 +31,7 @@ page_start([
         </div>
         <div class="aside-card">
           <h3>Kombinieren erwünscht</h3>
-          <p>In der Online-Buchung können Sie bis zu <?= (int)cfg()['booking']['maxServices'] ?> Leistungen in einem Termin wählen, zum Beispiel Ansatzfarbe, Haarschnitt und Augenbrauen. Die Dauer rechnet das System automatisch zusammen.</p>
+          <p>Wählen Sie online die Hauptleistung, zum Beispiel Ansatzfarbe, und schreiben Sie weitere Wünsche wie Haarschnitt oder Augenbrauen ins Feld „Anmerkung“. Wir planen die Zeit passend ein und melden uns, falls etwas nicht passt.</p>
           <p><a class="btn btn-gold" href="/termin">Zur Terminbuchung</a></p>
         </div>
       </div>

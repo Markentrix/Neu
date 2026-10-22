@@ -27,7 +27,7 @@ page_start([
           <h2>Ehrlich bei Preisen</h2>
           <p>Schnitte und Styling haben bei uns feste Preise. Bei Farbe hängt der Aufwand stark vom Haar ab. Deshalb erhalten Sie vor jeder Farbbehandlung einen individuellen Kostenvoranschlag. So wissen Sie vorher, woran Sie sind.</p>
           <h2>Einfach buchen</h2>
-          <p>Termine buchen Sie bei uns rund um die Uhr online. Sie sehen sofort, welche Zeiten frei sind, und bezahlen wahlweise per PayPal oder vor Ort. Für Kurzfristiges sind wir telefonisch unter <a href="tel:<?= e($s['phone']) ?>"><?= e($s['phoneDisplay']) ?></a> erreichbar.</p>
+          <p>Termine buchen Sie bei uns rund um die Uhr online. Sie sehen sofort, welche Zeiten frei sind, und bezahlen ganz entspannt nach dem Termin im Salon. Für Kurzfristiges sind wir telefonisch unter <a href="tel:<?= e($s['phone']) ?>"><?= e($s['phoneDisplay']) ?></a> erreichbar.</p>
           <h2>Bald neu: Extensions</h2>
           <p>Mehr Länge und Fülle: Extensions kommen in Kürze ins Angebot. Auf <a href="<?= e($s['instagram']) ?>" rel="noopener" target="_blank">Instagram</a> erfahren Sie zuerst, wann es losgeht.</p>
         </article>
