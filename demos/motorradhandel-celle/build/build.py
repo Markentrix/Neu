@@ -175,7 +175,7 @@ feat = BIKES[:6]
 opt_m = ''.join(f'<option>{esc(x)}</option>' for x in BRANDS); opt_t = ''.join(f'<option>{esc(x)}</option>' for x in TYPES)
 col = [('a', 'kawasaki-z1000-2015-1.webp', 'Kawasaki Z 1000', 'Grüne Kawasaki Z 1000 vor der Verkaufshalle'), ('b', 'honda-crf1000-dct-a-2.webp', 'Honda CRF 1000', 'Honda CRF 1000 Africa Twin Seitenansicht'), ('c', 'suzuki-gsxr750-k1-1.webp', 'Suzuki GSX-R', 'Gelbe Suzuki GSX-R 750'), ('d', 'kawasaki-zx10r-2005-1.webp', 'Kawasaki ZX-10R', 'Kawasaki ZX-10R in Silber')]
 FP = ' fetchpriority="high"'
-collage = ''.join('<figure class="%s"><img src="assets/img/%s" width="%d" height="%d" alt="%s"%s><figcaption>%s</figcaption></figure>' % (c, f, isize(f)[0], isize(f)[1], esc(a), FP if c == 'a' else '', esc(cap)) for c, f, cap, a in col)
+collage = ''.join('<figure class="%s" style="--bg:url(assets/img/%s)"><img src="assets/img/%s" width="%d" height="%d" alt="%s"%s><figcaption>%s</figcaption></figure>' % (c, f, f, isize(f)[0], isize(f)[1], esc(a), FP if c == 'a' else '', esc(cap)) for c, f, cap, a in col)
 FAQ_HOME = [
  ('Kann mein Motorrad bei Ihnen überwintern?', 'Ja, Ihr Bike kann bei uns überwintern. Fragen Sie Ihren Winterplatz an, wir stimmen Zeitraum und Konditionen mit Ihnen ab. <a href="ueberwintern.html">Zum Winterlager</a>'),
  ('Kann ich ein Motorrad probefahren?', 'Ja. Bitte sprechen Sie vorher einen Termin ab, per Telefon oder über die Anfrage auf der Fahrzeugseite.'),

@@ -177,3 +177,6 @@ footer.site{background:var(--dark);color:#B9B9B4;padding-block:3rem 5.5rem;font-
 .calc-out{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem}.calc-out b{font-family:var(--head,inherit);font-size:2rem}
 .sticky-cta{display:none}
 @media (max-width:720px){.sticky-cta{display:flex;gap:.5rem;position:fixed;left:0;right:0;bottom:0;z-index:40;padding:.6rem .8rem calc(.6rem + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px)}.sticky-cta .btn{flex:1;min-height:48px;padding-inline:.5rem}body:has(.sticky-cta){padding-bottom:4.6rem}}
+
+.collage figure::before{content:"";position:absolute;inset:-12%;background:var(--bg) center/cover;filter:blur(14px) brightness(.7)}
+.collage figure img{position:relative;object-fit:contain}
