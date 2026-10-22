@@ -12,7 +12,7 @@ Quellen:
 
 Front-Matter-Schlüssel: title, description, path (URL-Pfad, z. B. /preise), robots,
 og_type, body_class, lastmod (YYYY-MM-DD), sitemap (true/false), ld (JSON-LD-Block),
-head_extra (zusätzliche Head-Zeilen).
+head_extra (zusätzliche Head-Zeilen), footer_cta (false blendet den Kontaktblock vor der Fußzeile aus; er entfällt ohnehin, wenn die Seite mit dem Abschlussband id="cta-title" endet).
 """
 import json, os, re, shutil, sys, time, html
 
@@ -75,6 +75,15 @@ def og_image_path(path):
     return '/og-image.png'
 
 
+FOOTER_CTA = '''    <div class="footer-cta">
+      <span class="eyebrow">Nächster Schritt</span>
+      <p class="footer-cta-title">Lassen Sie uns über Ihre Website sprechen.</p>
+      <div class="footer-cta-links"><a href="tel:+4917620370429">0176&nbsp;20370429</a><a href="mailto:info@markentrix.de">info@markentrix.de</a></div>
+      <p class="small muted">Mo–Do 09:00–17:00 Uhr, Fr 09:00–15:00 Uhr · Rückmeldung werktags innerhalb von 24 Stunden</p>
+    </div>
+'''
+
+
 def render(layout, meta, body, partials):
     def sub_partials(s):
         return re.sub(r'\{\{>\s*([\w-]+)\s*\}\}', lambda m: partials.get(m.group(1), f'<!-- partial {m.group(1)} fehlt -->'), s)
@@ -96,6 +105,7 @@ def render(layout, meta, body, partials):
         'head_extra': meta.get('head_extra', ''),
         'ld_json': ld,
         'content': body,
+        'footer_cta': '' if (meta.get('footer_cta', '').lower() == 'false' or 'id="cta-title"' in body) else FOOTER_CTA,
         'build': BUILD,
     }
     out = layout

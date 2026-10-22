@@ -1289,3 +1289,47 @@ main:focus{outline:none}
 /* Hero Startseite: Text oben verankert und beim Scrollen sichtbar, neben der hohen Vorschau */
 @media (min-width:901px){.hero--stage .hero-grid{align-items:start}.hero--stage .hero-grid>div:first-child{position:sticky;top:96px}}
 .footer-col h2.mt-2{margin-top:26px}
+
+/* Kontakt: Wunschtermin eingeklappt */
+.cal-wrap{border:1px solid var(--border-strong);border-radius:12px;background:#fff}
+.cal-wrap summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:10px 14px;cursor:pointer;list-style:none;font-weight:600;color:var(--navy);font-size:.95rem}
+.cal-wrap summary::-webkit-details-marker{display:none}
+.cal-wrap summary::after{content:"";flex:none;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin-left:2px}
+.cal-wrap[open] summary::after{transform:rotate(-135deg)}
+.cal-sum{margin-left:auto;font-weight:500;font-size:.88rem;color:var(--muted);text-align:right}
+.cal-wrap .cal{border:0;border-top:1px solid var(--border);border-radius:0 0 12px 12px}
+@media (max-width:420px){.cal-wrap summary{flex-wrap:wrap}.cal-sum{margin-left:0;text-align:left;order:3;flex-basis:100%}}
+
+/* Live-Miniatur: auf Startseite, Prozess und Webdesign zunächst der obere Teil, "Ganze Seite ansehen" öffnet sie komplett */
+.mini-frame.is-full{transition:height .45s ease}
+.mini.is-collapsed .mini-frame.is-full:not(.mini-frame--m){height:calc(680px * var(--s,.4))}
+.mini.is-collapsed .mini-frame.is-full.mini-frame--m{height:calc(640px * var(--s,.8))}
+.mini.is-collapsed .mini-frame.is-full::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(rgba(255,255,255,0),#fff);pointer-events:none;z-index:2}
+.mini-more{text-align:center;margin-top:14px}
+.mini-more[hidden]{display:none}
+
+/* Branchenfotos (KI-Symbolbilder) */
+.bphoto{position:relative;margin:0;border-radius:12px;overflow:hidden;background:var(--soft);aspect-ratio:4/3}
+.bphoto img{display:block;width:100%;height:100%;object-fit:cover}
+.bphoto figcaption{position:absolute;left:8px;bottom:8px;padding:2px 8px;border-radius:100px;background:rgba(11,16,32,.72);color:#fff;font-size:.68rem;font-weight:600;letter-spacing:.03em}
+.branch-hero{display:block;min-width:0}
+.branch-hero .bphoto{border-radius:var(--r-lg,18px);box-shadow:var(--shadow-lg)}
+
+/* Branchen-Übersicht: Kopf mit Bildmosaik */
+.br-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(28px,5vw,64px);align-items:center}
+.br-hero .sec-head{margin:0;max-width:none}
+.br-mosaic{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mosaic-tile{display:block;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--soft);box-shadow:0 10px 30px rgba(11,16,32,.10)}
+.mosaic-tile img{display:block;width:100%;height:100%;object-fit:cover}
+.mosaic-tile:nth-child(even){transform:translateY(18px)}
+.br-proof{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:8px;color:var(--text);font-size:.95rem}
+.br-proof li{position:relative;padding-left:26px}
+.br-proof li::before{content:"";position:absolute;left:4px;top:.45em;width:12px;height:7px;border-left:2px solid var(--blue);border-bottom:2px solid var(--blue);transform:rotate(-45deg)}
+.br-note{margin:30px 0 0;color:var(--muted)}
+@media (max-width:900px){.br-hero{grid-template-columns:minmax(0,1fr)}.br-mosaic{gap:8px}.mosaic-tile:nth-child(even){transform:none}}
+@media (max-width:480px){.br-mosaic{grid-template-columns:repeat(4,minmax(0,1fr))}.mosaic-tile{aspect-ratio:1}}
+/* Social-Streifen: neben dem Text 2 x 2 statt vier winziger Kacheln */
+@media (min-width:1100px){#social .feed{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}}
+.branch--more{background:linear-gradient(160deg,#F5FAFF,#EEF3FF);border-style:dashed;justify-content:center}
+.branch--more .pain{font-size:1.35rem}
+.branch-hero{padding:0;min-height:0}

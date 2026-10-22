@@ -261,6 +261,7 @@
         prev.disabled = view.getFullYear() === today.getFullYear() && view.getMonth() === today.getMonth();
       }
       function renderTimes() {
+        var sum = $('[data-cal-sum]', form); if (sum) sum.textContent = state.time ? api.label() : (state.date ? 'Uhrzeit wählen' : 'Keinen gewählt');
         times.innerHTML = ''; sel.hidden = true; if (!state.date) { times.hidden = true; return; }
         times.hidden = false;
         var list = TIMES[state.date.getDay() === 5 ? 5 : 1];
@@ -447,6 +448,20 @@
     size();
     try { if ('ResizeObserver' in f.contentWindow) new f.contentWindow.ResizeObserver(size).observe(f.contentDocument.body); } catch (e) { /* ohne Beobachter */ }
     setTimeout(size, 1200);
+  }
+
+  function initMiniToggle() {
+    $$('[data-mini]').forEach(function (mini) {
+      var btn = $('[data-mini-toggle]', mini); if (!btn) return;
+      if (/^\/referenzen/.test(w.location.pathname)) { btn.parentNode.hidden = true; return; }
+      mini.classList.add('is-collapsed');
+      on(btn, 'click', function () {
+        var open = mini.classList.toggle('is-collapsed') === false;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.textContent = open ? 'Weniger anzeigen' : 'Ganze Seite ansehen';
+        if (!open) { var top = mini.getBoundingClientRect().top; if (top < 0) mini.scrollIntoView({ block: 'start' }); }
+      });
+    });
   }
 
   function initMini() {
@@ -679,6 +694,6 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMini(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

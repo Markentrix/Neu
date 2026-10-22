@@ -10,11 +10,17 @@ ld: |
 <section class="sec sec--white" aria-labelledby="page-title">
   <div class="wrap">
     <ol class="breadcrumb"><li><a href="/">Startseite</a></li><li>Branchen</li></ol>
-    <div class="sec-head">
-      <span class="eyebrow">Für wen wir bauen</span>
-      <h1 id="page-title" class="h1--md">Websites für Betriebe, die vor Ort gefunden werden wollen.</h1>
-      <p class="lead">Jede Branche wird anders gesucht und anders entschieden. Wählen Sie Ihre, und Sie sehen, welche Suchen Ihre Kunden eingeben, was Ihre Website dafür leisten muss und was sie kostet.</p>
+    <div class="br-hero">
+      <div class="sec-head">
+        <span class="eyebrow">Für wen wir bauen</span>
+        <h1 id="page-title" class="h1--md">Websites für Betriebe, die vor Ort gefunden werden wollen.</h1>
+        <p class="lead">Jede Branche wird anders gesucht und anders entschieden. Wählen Sie Ihre, und Sie sehen, welche Suchen Ihre Kunden eingeben, was Ihre Website dafür leisten muss und was sie kostet.</p>
+        <div class="row"><a class="btn btn--primary btn--lg" href="/kontakt" data-open-modal>Potenzial-Check starten</a><a class="btn btn--ghost btn--lg" href="#liste-title">Branchen ansehen <svg class="arrow"><use href="#i-arrow"/></svg></a></div>
+        <ul class="br-proof"><li>Acht Branchen mit eigener Seite</li><li>Zu jeder Branche eine komplette Beispielseite</li><li>Festpreis, SEO und GEO inklusive</li></ul>
+      </div>
+      <div class="br-mosaic" aria-hidden="true"><span class="mosaic-tile"><img src="/img/branche-handwerk-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span><span class="mosaic-tile"><img src="/img/branche-praxis-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span><span class="mosaic-tile"><img src="/img/branche-gastro-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span><span class="mosaic-tile"><img src="/img/branche-werkstatt-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span><span class="mosaic-tile"><img src="/img/branche-salon-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span><span class="mosaic-tile"><img src="/img/branche-pension-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span><span class="mosaic-tile"><img src="/img/branche-studio-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span><span class="mosaic-tile"><img src="/img/branche-garten-240.webp" alt="" width="240" height="180" loading="eager" decoding="async"></span></div>
     </div>
+    <p class="tiny br-note">Bildmotive mit KI-Unterstützung erstellt. Sie dienen als Symbolbilder und zeigen keinen echten Betrieb.</p>
   </div>
 </section>
 
@@ -23,7 +29,7 @@ ld: |
     <h2 id="liste-title" class="sr-only">Branchen im Überblick</h2>
     <div class="grid grid--3">
       <div class="card branch reveal">
-        {{> ill-handwerk}}
+        {{> photo-handwerk}}
         <span class="card-step">Handwerk · Werkstatt · Bau</span>
         <h3 class="pain">Handwerk und Gewerbe</h3>
         <p class="sys">Eine Leistungsseite je Gewerk und Ort und ein Anfrageweg, der auch von der Baustelle aus funktioniert.</p>
@@ -31,7 +37,7 @@ ld: |
         <a class="link-arrow" href="/website-handwerker">Mehr zu Handwerk und Gewerbe</a>
       </div>
       <div class="card branch reveal" data-delay="1">
-        {{> ill-praxis}}
+        {{> photo-praxis}}
         <span class="card-step">Praxis · Kanzlei · Dienstleistung</span>
         <h3 class="pain">Praxen und Kanzleien</h3>
         <p class="sys">Vertrauen auf den ersten Blick, Team und Zeiten sichtbar, Terminanfrage ohne Warteschleife.</p>
@@ -39,7 +45,7 @@ ld: |
         <a class="link-arrow" href="/website-arztpraxis">Mehr zu Praxen und Kanzleien</a>
       </div>
       <div class="card branch reveal" data-delay="2">
-        {{> ill-gastro}}
+        {{> photo-gastro}}
         <span class="card-step">Gastronomie · Handel</span>
         <h3 class="pain">Gastronomie und Handel</h3>
         <p class="sys">Karte, Öffnungszeiten und Reservierung in Sekunden findbar, dazu ein gepflegtes Google-Profil.</p>
@@ -47,7 +53,7 @@ ld: |
         <a class="link-arrow" href="/website-gastronomie">Mehr zu Gastronomie und Handel</a>
       </div>
       <div class="card branch reveal">
-        {{> ill-handwerk}}
+        {{> photo-werkstatt}}
         <span class="card-step">Werkstatt · Autohaus · Fahrzeugpflege</span>
         <h3 class="pain">Autowerkstatt und Fahrzeugpflege</h3>
         <p class="sys">Eine Seite je Leistung, Terminanfrage und verständliche Richtpreise für Kunden, die schnell Hilfe suchen.</p>
@@ -55,7 +61,7 @@ ld: |
         <a class="link-arrow" href="/website-autowerkstatt">Mehr zu Autowerkstatt und Fahrzeugpflege</a>
       </div>
       <div class="card branch reveal" data-delay="1">
-        {{> ill-praxis}}
+        {{> photo-salon}}
         <span class="card-step">Friseur · Kosmetik · Beauty</span>
         <h3 class="pain">Friseur und Beauty</h3>
         <p class="sys">Leistungen, Preise und Termin ohne Umweg, mit echten Bildern Ihrer Arbeit.</p>
@@ -63,7 +69,7 @@ ld: |
         <a class="link-arrow" href="/website-friseur-beauty">Mehr zu Friseur und Beauty</a>
       </div>
       <div class="card branch reveal" data-delay="2">
-        {{> ill-gastro}}
+        {{> photo-pension}}
         <span class="card-step">Hotel · Pension · Ferienwohnung</span>
         <h3 class="pain">Hotel, Pension, Ferienwohnung</h3>
         <p class="sys">Zimmer, Lage und Preise klar, mit direktem Weg zur Anfrage statt nur über Portale.</p>
@@ -71,7 +77,7 @@ ld: |
         <a class="link-arrow" href="/website-hotel-pension">Mehr zu Hotel, Pension, Ferienwohnung</a>
       </div>
       <div class="card branch reveal">
-        {{> ill-local}}
+        {{> photo-studio}}
         <span class="card-step">Fitness · Sport · Wellness</span>
         <h3 class="pain">Fitness und Sport</h3>
         <p class="sys">Kursplan, Tarife und Probetraining-Anfrage auf einen Blick, mobil gedacht.</p>
@@ -79,15 +85,21 @@ ld: |
         <a class="link-arrow" href="/website-fitness-sport">Mehr zu Fitness und Sport</a>
       </div>
       <div class="card branch reveal" data-delay="1">
-        {{> ill-handwerk}}
+        {{> photo-garten}}
         <span class="card-step">Reinigung · Garten · Hausservice</span>
         <h3 class="pain">Reinigung, Garten, Hausservice</h3>
         <p class="sys">Leistungen und Einsatzgebiet verständlich, Anfrage vom Smartphone in wenigen Schritten.</p>
         <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="haus">Für meine Branche prüfen</a>
         <a class="link-arrow" href="/website-haus-garten">Mehr zu Reinigung, Garten, Hausservice</a>
       </div>
+      <div class="card branch branch--more reveal" data-delay="2">
+        <span class="card-step">Ihre Branche fehlt?</span>
+        <h3 class="pain">Das Prinzip gilt für jeden Betrieb.</h3>
+        <p class="sys">Wer in seiner Region gefunden werden will, braucht klare Leistungen, einen kurzen Anfrageweg und eine Seite, die Vertrauen schafft. Wir klären im kostenlosen Erstgespräch, wie das bei Ihnen aussieht.</p>
+        <a class="btn btn--primary btn--sm" href="/kontakt" data-open-modal>Potenzial-Check starten</a>
+        <a class="link-arrow" href="/kontakt">Erstgespräch vereinbaren</a>
+      </div>
     </div>
-    <p class="small muted mt-3">Ihre Branche steht nicht dabei? Das Prinzip gilt für jeden Betrieb, der in seiner Region gefunden werden will. Sprechen Sie uns im kostenlosen Erstgespräch an.</p>
   </div>
 </section>
 

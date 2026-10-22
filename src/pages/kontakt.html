@@ -2,7 +2,8 @@
 title: Kontakt: Kostenloses Erstgespräch in Celle | Markentrix
 description: Kontakt zu Markentrix in Celle: kostenloses Erstgespräch, Rückmeldung werktags innerhalb von 24 Stunden. Formular mit Wunschtermin, Telefon oder E-Mail.
 path: /kontakt
-lastmod: 2026-10-12
+lastmod: 2026-10-22
+footer_cta: false
 ld: |
   {"@context":"https://schema.org","@graph":[{"@type":"ContactPage","@id":"https://markentrix.de/kontakt#webpage","url":"https://markentrix.de/kontakt","name":"Kontakt: Kostenloses Erstgespräch in Celle | Markentrix","isPartOf":{"@id":"https://markentrix.de/#website"},"about":{"@id":"https://markentrix.de/#organization"},"inLanguage":"de-DE","dateModified":"2026-10-12","breadcrumb":{"@id":"https://markentrix.de/kontakt#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://markentrix.de/kontakt#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Startseite","item":"https://markentrix.de/"},{"@type":"ListItem","position":2,"name":"Kontakt","item":"https://markentrix.de/kontakt"}]}]}
 ---
@@ -43,7 +44,7 @@ ld: |
           </div>
           <div class="form-row">
             <div class="field"><label for="k-email">E-Mail *</label><input id="k-email" name="email" type="email" autocomplete="email" required></div>
-            <div class="field"><label for="k-tel">Telefon <span class="opt">(optional, für einen kurzen Rückruf)</span></label><input id="k-tel" name="tel" type="tel" autocomplete="tel"></div>
+            <div class="field"><label for="k-tel">Telefon <span class="opt">(optional)</span></label><input id="k-tel" name="tel" type="tel" autocomplete="tel"></div>
           </div>
           <div class="form-row">
             <div class="field"><label for="k-thema">Gewünschte Leistung</label>
@@ -68,9 +69,11 @@ ld: |
             <select id="k-kanal" name="kanal"><option value="">Bitte wählen</option><option>Google-Suche</option><option>Google Maps oder Unternehmensprofil</option><option>Empfehlung</option><option>Instagram oder Facebook</option><option>LinkedIn</option><option>YouTube oder TikTok</option><option>Anzeige</option><option>Sonstiges</option></select>
           </div>
           <div class="field">
-            <span class="sr-only" id="k-cal-label">Wunschtermin (optional)</span>
-            <label aria-hidden="true">Wunschtermin <span class="opt">(optional, Mo–Fr)</span></label>
-            <div data-calendar role="group" aria-labelledby="k-cal-label"></div>
+            <details class="cal-wrap">
+              <summary><span class="cal-sum-t">Wunschtermin <span class="opt">(optional, Mo–Fr)</span></span><span class="cal-sum" data-cal-sum>Keinen gewählt</span></summary>
+              <span class="sr-only" id="k-cal-label">Wunschtermin (optional)</span>
+              <div data-calendar role="group" aria-labelledby="k-cal-label"></div>
+            </details>
           </div>
           <div class="field"><label for="k-msg">Kurze Projektbeschreibung <span class="opt">(optional)</span></label><textarea id="k-msg" name="nachricht_text" rows="4" placeholder="Zum Beispiel: neue Website für einen Elektrobetrieb in Celle, bestehende Seite ist von 2018."></textarea></div>
           <div class="hp" aria-hidden="true"><label for="k-web">Website (bitte leer lassen)</label><input id="k-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
