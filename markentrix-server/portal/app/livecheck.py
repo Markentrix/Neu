@@ -95,6 +95,14 @@ def pruefen(wurzel: Path) -> dict:
     if not (wurzel / "index.html").is_file():
         p("fehler", "Es gibt keine index.html im Hauptordner. Die Startseite würde nicht angezeigt.")
     gesehen_extern, tot, grosse = set(), [], []
+    js_api = False                       # Formulare, die per JavaScript an die Portal-Schnittstelle senden (Skript liegt in eigener Datei)
+    for j in list(wurzel.rglob("*.js"))[:200]:
+        try:
+            if j.is_file() and not j.is_symlink() and "/api/" in j.read_text(errors="replace")[:400_000]:
+                js_api = True
+                break
+        except OSError:
+            continue
     impressum = datenschutz = False
     for f in seiten:
         rel = str(f.relative_to(wurzel))
@@ -134,8 +142,16 @@ def pruefen(wurzel: Path) -> dict:
             p("fehler", "Verweis auf localhost/127.0.0.1 gefunden. Das funktioniert nur auf dem eigenen Rechner.", rel)
         if re.search(r"""(?:src|href|action)\s*=\s*["']http://(?!localhost)""", roh, re.I):
             p("warn", "Unverschlüsselter Verweis (http://) auf der Seite: Browser warnen vor gemischten Inhalten.", rel)
-        if ps.forms and not ps.form_api and "/api/" not in roh and "mailto:" not in roh and "formspree" not in roh:
+        if ps.forms and not ps.form_api and not js_api and "/api/" not in roh and "mailto:" not in roh and "formspree" not in roh:
             p("warn", "Formular ohne erkennbares Ziel: Anfragen kommen vermutlich nirgends an.", rel)
+        if re.search(r"impressum|datenschutz|agb|widerruf", rel, re.I):
+            sichtbar = " ".join(ps.text)
+            luecken = [m for m in re.findall(r"\[[^\]\n]{2,80}\]", sichtbar) if re.search(r"[A-Za-zÄÖÜäöü]", m)]
+            if re.search(r"\b(XXX+|Musterstra(ß|ss)e|Mustermann|TODO)\b", sichtbar):
+                luecken.append("Platzhalter (XXX/Mustermann/TODO)")
+            if luecken:
+                bsp = ", ".join(dict.fromkeys(luecken[:4]))
+                p("fehler", f"Unausgefüllte Platzhalter in einem Pflichttext ({len(luecken)}×, z. B. {bsp}). Erst mit den echten Firmendaten füllen, dann online gehen.", rel)
         for url, name in EXTERN:
             if url in roh:
                 gesehen_extern.add(name)
