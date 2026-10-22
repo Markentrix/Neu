@@ -1,4 +1,10 @@
 // Kontaktformular
+(function () {
+"use strict";
+
+// Demo nur auf Vorschau-Adressen oder per Doppelklick (siehe main.js)
+const demoAllowed = () => location.protocol === "file:" || /\.vorschau\.markentrix\.de$|\.localhost$/.test(location.hostname);
+
 const form = document.querySelector("[data-contact-form]");
 const err = form?.querySelector("[data-contact-error]");
 const ok = form?.querySelector("[data-contact-ok]");
@@ -34,6 +40,12 @@ form?.addEventListener("submit", async (e) => {
     form.reset();
     ok.hidden = false;
   } catch (ex) {
+    if (demoAllowed() && !(ex instanceof Error && ex.message.startsWith("Bitte"))) {
+      form.reset();
+      ok.textContent = "Demo-Vorschau: Das Formular funktioniert, in der Demo wird aber nichts versendet.";
+      ok.hidden = false;
+      return;
+    }
     err.textContent = ex.message;
     err.hidden = false;
   } finally {
@@ -41,3 +53,4 @@ form?.addEventListener("submit", async (e) => {
     btn.textContent = "Nachricht senden";
   }
 });
+})();

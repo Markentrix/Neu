@@ -278,7 +278,7 @@ function page_end(bool $mobileCta = true): void
     <a class="btn btn-gold" href="/termin">Termin buchen</a>
   </div>
 <?php endif; ?>
-  <script type="module" src="/js/main.js?v=<?= filemtime(__DIR__ . '/../public/js/main.js') ?>"></script>
+  <script defer src="/js/main.js?v=<?= filemtime(__DIR__ . '/../public/js/main.js') ?>"></script>
 </body>
 </html>
 <?php

@@ -1,4 +1,6 @@
 // AJ Atelier – Navigation, Öffnungsstatus und Online-Terminbuchung
+(function () {
+"use strict";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -95,16 +97,62 @@ if (DATA) {
 }
 
 // ---------- Buchung ----------
+// Demo nur ohne Buchungsdienst UND auf einer Vorschau-Adresse oder per Doppelklick –
+// auf der echten Domain wird nie etwas „zum Schein“ gebucht.
+const demoAllowed = () => location.protocol === "file:" || /\.vorschau\.markentrix\.de$|\.localhost$/.test(location.hostname);
+
 const root = $("[data-booking]");
 if (root && DATA) initBooking(root, DATA);
 
 function initBooking(root, DATA) {
   const services = Object.fromEntries(DATA.categories.flatMap((c) => c.services.map((s) => [s.id, s])));
   // Die Seite ist statisch gebaut: buchbare Tage und PayPal-Status live nachladen
+  let demo = false;
   const fresh = fetch("/api/booking-config.php", { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : null))
-    .then((d) => { if (d?.days) Object.assign(DATA, d); })
-    .catch(() => {});
+    .then((d) => { if (d?.days) Object.assign(DATA, d); else enableDemo(); })
+    .catch(enableDemo);
+
+  // ---------- Demo-Vorschau (ohne Buchungsdienst) ----------
+  function enableDemo() {
+    if (!demoAllowed()) return;
+    demo = true;
+    DATA.paypalClientId = null;
+    const now = berlinNow();
+    const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
+    DATA.days = Array.from({ length: 61 }, (_, i) => {
+      const d = new Date(`${now.date}T12:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + i);
+      const date = d.toISOString().slice(0, 10);
+      const h = DATA.hours[d.getUTCDay()];
+      let open = Boolean(h) && !DATA.holidays.includes(date);
+      if (open && i === 0) open = now.minutes + 135 <= toMin(h[1]);
+      return { date, open };
+    });
+    root.insertAdjacentHTML("afterbegin", '<p class="demo-note" role="note"><strong>Demo-Vorschau:</strong> Die Buchung ist hier zum Ausprobieren freigeschaltet. Es wird nichts gespeichert und keine E-Mail verschickt.</p>');
+  }
+  function demoSlots(date, duration) {
+    const day = new Date(`${date}T12:00:00Z`).getUTCDay();
+    const h = DATA.hours[day];
+    if (!h) return [];
+    const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
+    const [open, close] = [toMin(h[0]), toMin(h[1])];
+    let seed = 0;
+    for (const ch of date) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+    const busy = Array.from({ length: 1 + (seed % 2) }, (_, i) => {
+      const len = [45, 60, 75, 90][(seed >> (i * 3)) % 4];
+      const start = open + ((seed >> (i * 5)) % Math.max(1, Math.floor((close - open - len) / 30))) * 30;
+      return [start, start + len];
+    });
+    const now = berlinNow();
+    const earliest = date === now.date ? now.minutes + 120 : 0;
+    const out = [];
+    for (let t = open; t + duration <= close; t += 15) {
+      if (t < earliest || busy.some(([a, b]) => a < t + duration && b > t)) continue;
+      out.push(`${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`);
+    }
+    return out;
+  }
   const state = { selected: [], date: null, time: null, step: 1, slotCache: new Map(), paypalRendered: false };
 
   const summary = () => {
@@ -259,6 +307,10 @@ function initBooking(root, DATA) {
     const k = key();
     try {
       let slots = state.slotCache.get(k);
+      if (!slots && demo) {
+        slots = demoSlots(date, summary().duration);
+        state.slotCache.set(k, slots);
+      }
       if (!slots) {
         const res = await fetch(`/api/availability.php?date=${date}&services=${encodeURIComponent(state.selected.join(","))}`);
         if (!res.ok) throw new Error();
@@ -360,6 +412,11 @@ function initBooking(root, DATA) {
   }
 
   async function submitBooking(extra) {
+    if (demo) {
+      const s = summary();
+      return done({ date: state.date, time: state.time, duration: s.duration, paid: 0,
+        services: s.items.map((it) => ({ id: it.id, name: it.name, price: it.price, from: it.from || it.consult })) });
+    }
     const res = await fetch("/api/booking.php", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload(extra)) });
     const data = await res.json().catch(() => ({}));
     if (res.ok) return done(data.booking);
@@ -465,3 +522,4 @@ function initBooking(root, DATA) {
     cb.dispatchEvent(new Event("change", { bubbles: true }));
   }
 }
+})();

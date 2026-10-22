@@ -1,12 +1,12 @@
 /* AJ Atelier – Hair · Beauty */
 
-@font-face { font-family: "Cormorant Garamond"; src: url("/fonts/cormorant-garamond-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Cormorant Garamond"; src: url("/fonts/cormorant-garamond-latin-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
-@font-face { font-family: "Cormorant Garamond"; src: url("/fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "Cormorant Garamond"; src: url("/fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
-@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("../fonts/cormorant-garamond-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("../fonts/cormorant-garamond-latin-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("../fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("../fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Jost"; src: url("../fonts/jost-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Jost"; src: url("../fonts/jost-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Jost"; src: url("../fonts/jost-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 
 :root {
   --cream: #f6f1e9;
@@ -449,6 +449,8 @@ input[aria-invalid="true"] { border-color: var(--error); }
 @media print {
   .site-header, .mobile-cta, .booking-section, .site-footer nav { display: none; }
 }
+
+.demo-note { margin: 0; padding: .8rem 1.2rem; background: #fbf4e6; border-bottom: 1px solid var(--line); font-size: .9rem; color: var(--ink-soft); text-align: center; }
 
 /* ---------- Animationen ---------- */
 /* Alles, was Inhalte anfangs versteckt, gilt nur ohne „Bewegung reduzieren“. */

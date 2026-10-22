@@ -80,6 +80,6 @@ $loggedIn = is_admin(); // vor jeder Ausgabe, da Session-Cookie
     </div>
     <?php endif; ?>
   </main>
-  <script type="module" src="/js/admin.js?v=<?= filemtime(__DIR__ . '/../js/admin.js') ?>"></script>
+  <script defer src="/js/admin.js?v=<?= filemtime(__DIR__ . '/../js/admin.js') ?>"></script>
 </body>
 </html>

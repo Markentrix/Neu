@@ -45,6 +45,24 @@ function render_page(string $page, array $params): string
     return ob_get_clean();
 }
 
+/**
+ * Macht alle Pfade relativ („/css/a.css“ → „css/a.css“ bzw. „../css/a.css“), damit dist/
+ * überall funktioniert: auf der eigenen Domain, in einem Unterordner und per Doppelklick vom PC.
+ * Absolute Adressen (https://…, Canonical, strukturierte Daten) bleiben unverändert.
+ */
+function relativize(string $html, int $depth): string
+{
+    $prefix = str_repeat('../', $depth);
+    $html = preg_replace_callback('/\b(href|src)="\/(?!\/)([^"]*)"/', function ($m) use ($prefix) {
+        $target = $m[2];
+        if ($target === '' || $target[0] === '#' || $target[0] === '?') $target = ($prefix ?: './') . $target;
+        else $target = $prefix . $target;
+        return "{$m[1]}=\"{$target}\"";
+    }, $html);
+    // Hilfsskript für das Öffnen per Doppelklick (ergänzt „.html“ an Links, nur bei file://)
+    return str_replace('</body>', '  <script src="' . $prefix . 'js/local-preview.js" defer></script>' . "\n</body>", $html);
+}
+
 function write_file(string $path, string $content): void
 {
     @mkdir(dirname($path), 0755, true);
@@ -55,9 +73,10 @@ $count = 0;
 foreach (routes() as $path => [$page, $params]) {
     if (in_array($page, $dynamic, true)) continue;
     $file = $path === '/' ? '/index.html' : $path . '.html';
-    write_file($out . $file, render_page($page, $params));
+    write_file($out . $file, relativize(render_page($page, $params), substr_count($file, '/') - 1));
     $count++;
 }
+// 404-Seite wird von Caddy für beliebige Pfade ausgeliefert → hier absolute Pfade behalten
 write_file($out . '/404.html', render_page('404', []));
 
 foreach (['robots.php' => 'robots.txt', 'sitemap.php' => 'sitemap.xml', 'llms.php' => 'llms.txt'] as $src => $dst) {

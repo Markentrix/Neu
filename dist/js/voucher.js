@@ -1,4 +1,9 @@
 // Gutschein online kaufen (PayPal)
+(function () {
+"use strict";
+
+// Demo nur auf Vorschau-Adressen oder per Doppelklick (siehe main.js)
+const demoAllowed = () => location.protocol === "file:" || /\.vorschau\.markentrix\.de$|\.localhost$/.test(location.hostname);
 
 const $ = (s, r = document) => r.querySelector(s);
 const shop = $("[data-voucher-shop]");
@@ -10,15 +15,23 @@ const customWrap = $("[data-custom-amount]", shop);
 const MIN = +shop.dataset.min, MAX = +shop.dataset.max;
 
 // Statisch gebaute Seite: PayPal-Status live vom Server holen
+let demo = false;
+const enableDemo = () => {
+  if (!demoAllowed()) return;
+  demo = true;
+  $("[data-voucher-submit]", shop).hidden = false;
+  $("[data-voucher-submit]", shop).textContent = "Demo: Gutschein ausstellen";
+  $("[data-voucher-unavailable]", shop).hidden = true;
+};
 fetch("/api/booking-config.php", { cache: "no-store" })
   .then((r) => (r.ok ? r.json() : null))
   .then((d) => {
-    if (!d) return;
+    if (!d) return enableDemo();
     shop.dataset.paypal = d.paypalClientId || "";
     $("[data-voucher-submit]", shop).hidden = !d.paypalClientId;
     $("[data-voucher-unavailable]", shop).hidden = Boolean(d.paypalClientId);
   })
-  .catch(() => {});
+  .catch(enableDemo);
 const euro = (n) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(n);
 
 function amount() {
@@ -84,6 +97,10 @@ const post = async (url, body) => {
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (demo) {
+    if (validate()) done({ amount: amount(), code: "AJ-DEMO-2026", mailed: false, demo: true });
+    return;
+  }
   if (!shop.dataset.paypal || !validate()) return;
   $("[data-voucher-sum]").textContent = euro(amount());
   lock(true);
@@ -133,7 +150,10 @@ function done(v) {
   $("[data-done-mail]", box).textContent = v.mailed
     ? `Der Gutschein ist als PDF an ${form.buyerEmail.value} unterwegs.`
     : "Die E-Mail konnte gerade nicht verschickt werden. Bitte speichern Sie den Gutschein jetzt als PDF.";
-  $("[data-done-pdf]", box).href = v.pdf;
+  $("[data-done-pdf]", box).href = v.pdf || "#";
+  $("[data-done-pdf]", box).hidden = Boolean(v.demo);
+  if (v.demo) $("[data-done-mail]", box).textContent = "Demo-Vorschau: In der echten Version kommt der Gutschein jetzt als PDF per E-Mail.";
   box.hidden = false;
   box.focus();
 }
+})();

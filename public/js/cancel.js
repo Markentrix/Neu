@@ -1,4 +1,7 @@
 // Kund:innen-Storno über den Link aus der Bestätigungs-Mail
+(function () {
+"use strict";
+
 const box = document.querySelector('[data-cancel]');
 const btn = box.querySelector('[data-cancel-btn]');
 btn?.addEventListener('click', async () => {
@@ -9,3 +12,4 @@ btn?.addEventListener('click', async () => {
   if (res.ok) { msg.textContent = 'Ihr Termin wurde storniert.' + (data.refunded ? ' Die Erstattung ist veranlasst.' : ''); btn.remove(); }
   else { msg.textContent = data.error || 'Stornierung fehlgeschlagen.'; btn.disabled = false; }
 });
+})();

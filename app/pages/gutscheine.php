@@ -94,5 +94,5 @@ page_start([
       </div>
     </section>
   </main>
-  <script type="module" src="/js/voucher.js?v=<?= filemtime(__DIR__ . '/../../public/js/voucher.js') ?>"></script>
+  <script defer src="/js/voucher.js?v=<?= filemtime(__DIR__ . '/../../public/js/voucher.js') ?>"></script>
 <?php page_end();

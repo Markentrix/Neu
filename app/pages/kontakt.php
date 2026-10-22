@@ -60,5 +60,5 @@ page_start([
       </div>
     </section>
   </main>
-  <script type="module" src="/js/contact.js?v=<?= filemtime(__DIR__ . '/../../public/js/contact.js') ?>"></script>
+  <script defer src="/js/contact.js?v=<?= filemtime(__DIR__ . '/../../public/js/contact.js') ?>"></script>
 <?php page_end();

@@ -31,5 +31,5 @@ page_start([
       <?php endif; ?>
     </div>
   </main>
-  <script type="module" src="/js/cancel.js"></script>
+  <script defer src="/js/cancel.js"></script>
 <?php page_end(false);

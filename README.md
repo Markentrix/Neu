@@ -29,6 +29,15 @@ oder speichern muss. Caddy leitet nur diese Adressen an den Container:
 
 Alles andere liefert Caddy direkt aus `/srv/sites/kunden/<Kundennummer>` (Baustein `kunden_site`).
 
+### Demo für Interessenten / Ansehen am PC
+
+- **Demo-Link:** Ordner `dist/` auf `pc/demo-veroeffentlichen.bat` ziehen, wie bei jeder anderen Demo.
+  Ohne Buchungsdienst schaltet die Seite auf Vorschau-Adressen (`*.vorschau.markentrix.de`) automatisch in
+  einen **Demo-Modus**: Buchung, Gutschein und Kontaktformular lassen sich durchklicken, es wird aber nichts
+  gespeichert oder verschickt (ein Hinweis steht dabei). Auf der echten Domain gibt es diesen Modus nie.
+- **Am PC ansehen:** `dist/index.html` doppelklicken. Alle Pfade in `dist/` sind relativ, daher funktionieren
+  Design, Navigation und Demo-Buchung auch ohne Server.
+
 ### `dist/` neu bauen (nach Text-, Preis- oder Domainänderungen)
 
 ```bash

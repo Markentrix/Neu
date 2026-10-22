@@ -1,4 +1,6 @@
 // Terminverwaltung für den Salon
+(function () {
+"use strict";
 
 const $ = (s, r = document) => r.querySelector(s);
 const API = "/api/admin.php";
@@ -188,3 +190,4 @@ vList?.addEventListener("click", async (e) => {
 });
 
 function alertBox(msg) { vList.innerHTML = `<p class="card form-error">${esc(msg)}</p>`; }
+})();
