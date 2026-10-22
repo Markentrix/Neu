@@ -79,7 +79,7 @@ def selbsttest() -> int:
             return e.code, e.read(2000)
         except Exception as e:  # noqa: BLE001
             return 0, str(e).encode()
-    basis = os.environ.get("SELBSTTEST_URL", "http://127.0.0.1:8090")
+    basis = os.environ.get("SELBSTTEST_URL", "http://127.0.0.1:8000")
     st, _ = http(basis + "/healthz"); zeile(st == 200, f"Portal antwortet (/healthz: {st})")
     st, _ = http(basis + "/api/login", json.dumps({"email": "selbsttest@invalid.example", "password": "falsch-falsch-falsch"}).encode(), {"Content-Type": "application/json", "X-MK": "1"})
     zeile(st in (400, 401, 403, 429), f"Anmeldung weist falsche Daten ab (Status {st})")
