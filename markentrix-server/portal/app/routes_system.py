@@ -61,6 +61,8 @@ def ampel(d: dict | None, smtp: dict, jobs: dict | None, mail: dict | None) -> l
         fehler = (jobs["wert"] or {}).get("fehler_job")
         if jobs["sekunden"] > 300:
             out.append(_punkt("jobs", "Hintergrundjobs", "bad", f"seit {jobs['sekunden'] // 60} Minuten kein Lauf"))
+        elif fehler and int((jobs["wert"] or {}).get("fehler_serie") or 0) >= 10:
+            out.append(_punkt("jobs", "Hintergrundjobs", "bad", f"der Job „{fehler}“ ist {int(jobs['wert']['fehler_serie'])}-mal hintereinander fehlgeschlagen"))
         elif fehler:
             out.append(_punkt("jobs", "Hintergrundjobs", "warn", f"laufen, aber der Job „{fehler}“ ist zuletzt fehlgeschlagen"))
         else:
@@ -76,6 +78,8 @@ def ampel(d: dict | None, smtp: dict, jobs: dict | None, mail: dict | None) -> l
             out.append(_punkt("mail", "E-Mail-Versand", "ok", "letzter Versand hat geklappt"))
         else:
             out.append(_punkt("mail", "E-Mail-Versand", "unbekannt", "eingerichtet, aber noch keine Mail verschickt"))
+    if einstellungen.defekt:
+        out.append(_punkt("geheimnis", "Gespeicherte Einstellungen", "bad", "nicht lesbar: " + ", ".join(sorted(einstellungen.defekt)) + ". Stimmt PORTAL_SECRET in der .env noch?"))
     return out
 
 

@@ -176,6 +176,7 @@ def k_anhang(tid: str, datei: UploadFile = File(...), user: dict = Depends(requi
             cur.execute("SELECT 1 FROM tickets WHERE id=%s", (tid,))
             if not cur.fetchone():
                 raise nicht_gefunden()
+            dateien.quota_pruefen(cur, kid, len(daten))
             cur.execute("""INSERT INTO dateien (kunden_id, ticket_id, bereich, name, mime, groesse, daten, von, hochgeladen_von) VALUES (%s,%s,'anhang',%s,%s,%s,%s,'kunde',%s) RETURNING id""",
                         (kid, tid, name, mime, len(daten), daten, user["id"]))
             fid = cur.fetchone()["id"]
@@ -246,6 +247,7 @@ def k_unterlage(datei: UploadFile = File(...), kategorie: str = Form("sonstiges"
         raise HTTPException(400, "Kategorie ungültig.")
     name, mime, daten = dateien.lesen(datei)
     with tx("kunde", user["kunden_id"]) as cur:
+        dateien.quota_pruefen(cur, user["kunden_id"], len(daten))
         cur.execute("""INSERT INTO dateien (kunden_id, bereich, kategorie, name, mime, groesse, daten, von, hochgeladen_von) VALUES (%s,'dokument',%s,%s,%s,%s,%s,'kunde',%s) RETURNING id""",
                     (user["kunden_id"], kategorie, name, mime, len(daten), daten, user["id"]))
         fid = cur.fetchone()["id"]

@@ -5,7 +5,12 @@ import json
 
 from cryptography.fernet import Fernet, InvalidToken
 
+import logging
+
 from . import config
+
+log = logging.getLogger("markentrix.einstellungen")
+defekt: set[str] = set()   # Schlüssel, die sich nicht entschlüsseln ließen (falsches PORTAL_SECRET?)
 
 
 def _fernet() -> Fernet:
@@ -20,8 +25,13 @@ def lesen(cur, schluessel: str) -> dict:
     if not r:
         return {}
     try:
-        return json.loads(_fernet().decrypt(r["wert"].encode()).decode())
+        wert = json.loads(_fernet().decrypt(r["wert"].encode()).decode())
+        defekt.discard(schluessel)
+        return wert
     except (InvalidToken, ValueError, RuntimeError):
+        if schluessel not in defekt:
+            log.error("Einstellung %s lässt sich nicht entschlüsseln – stimmt PORTAL_SECRET noch?", schluessel)
+        defekt.add(schluessel)
         return {}
 
 

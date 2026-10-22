@@ -24,7 +24,7 @@ VORLAGE = [
 KUNDE_AKTION = {
     "avv": ("avv", "Vertrag bestätigen"),
     "briefing": ("briefing", "Briefing ausfüllen"),
-    "branding": ("dokumente", "Logo und Fotos hochladen"),
+    "branding": ("unterlagen", "Logo und Fotos hochladen"),
     "konten": ("nachrichten", "Zugänge senden"),
     "stammdaten": ("briefing", "Angaben ergänzen"),
 }

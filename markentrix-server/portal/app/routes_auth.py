@@ -109,6 +109,7 @@ def einladung_annehmen(data: EinladungIn, request: Request):
             raise HTTPException(404, "Der Einladungslink ist ungültig oder abgelaufen.")
         cur.execute("UPDATE benutzer SET passwort_hash=%s, einladung_token_hash=NULL, einladung_ablauf=NULL, fehlversuche=0, gesperrt_bis=NULL WHERE id=%s",
                     (hash_password(data.password), u["id"]))
+        cur.execute("DELETE FROM sitzungen WHERE benutzer_id=%s", (u["id"],))  # alte Sitzungen enden
         audit(cur, {"id": u["id"]}, "passwort_gesetzt", u["kunden_id"])
     return {"ok": True}
 

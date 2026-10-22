@@ -51,6 +51,8 @@ def anfragen_mails(cfg):
         ok, fehler = mailer.neue_anfragen(_empfaenger(k), k["firma"], liste)
         if not ok:
             log.warning("Anfrage-Mail an %s fehlgeschlagen: %s", k["firma"], fehler)
+            with tx("system") as cur:   # nicht verloren geben: beim nächsten Lauf erneut versuchen (Fenster: 3 Tage)
+                cur.execute("UPDATE anfragen SET benachrichtigt=false WHERE id = ANY(%s)", ([x["id"] for x in liste],))
 
 
 def termin_erinnerungen(cfg):
@@ -60,7 +62,7 @@ def termin_erinnerungen(cfg):
         cur.execute("""WITH offen AS (SELECT t.id FROM termine t WHERE NOT t.erinnerung_gesendet AND t.status IN ('geplant','bestaetigt')
                                       AND t.beginn > now() AND t.beginn <= now() + make_interval(hours => %s) LIMIT 100 FOR UPDATE SKIP LOCKED)
                        UPDATE termine t SET erinnerung_gesendet = true FROM offen WHERE t.id = offen.id
-                       RETURNING t.kunden_id, t.titel, t.beginn, t.kontakt_name""", (int(cfg["termin_stunden"]),))
+                       RETURNING t.id, t.kunden_id, t.titel, t.beginn, t.kontakt_name""", (int(cfg["termin_stunden"]),))
         rows = cur.fetchall()
         kunden = {}
         for r in rows:
@@ -75,6 +77,8 @@ def termin_erinnerungen(cfg):
         ok, fehler = mailer.termin_erinnerung(_empfaenger(k), liste)
         if not ok:
             log.warning("Terminerinnerung an %s fehlgeschlagen: %s", k["firma"], fehler)
+            with tx("system") as cur:   # beim nächsten Lauf erneut versuchen (Termin liegt noch in der Zukunft)
+                cur.execute("UPDATE termine SET erinnerung_gesendet=false WHERE id = ANY(%s)", ([x["id"] for x in liste],))
 
 
 def monatsberichte(cfg):
@@ -204,6 +208,42 @@ def fehler_melden(cfg):
     if rows and an:
         zeilen = [f"- {r['zeit']:%d.%m. %H:%M} {r['workflow_name'] or 'Workflow'} / {r['knoten'] or '?'}: {(r['fehlertext'] or '')[:200]}" for r in rows]
         mailer.senden(an, f"{len(rows)} Workflow-Fehler" if len(rows) > 1 else "Workflow-Fehler", "Es sind Fehler in Automationen aufgetreten:\n\n" + "\n".join(zeilen) + mailer.SIGNATUR)
+
+
+def veroeffentlichung_wacht(cfg):
+    """Jede Minute: meldet dem Team, wenn eine Veröffentlichung fehlgeschlagen ist oder Aufträge liegen bleiben (Worker steht)."""
+    q = config.QUEUE_DIR
+    if not q.is_dir():
+        return
+    meldungen = []
+    for f in q.glob("ergebnis-*.json"):
+        try:
+            if time.time() - f.stat().st_mtime > 86400 * 2:
+                continue
+            e = json.loads(f.read_text())
+        except Exception:  # noqa: BLE001
+            continue
+        if e.get("ok") is False and e.get("aktion") in ("veroeffentlichen", "zurueck", "sicherung") and _marker("pubfehler-" + f.name):
+            meldungen.append(f"Veröffentlichung fehlgeschlagen: {e.get('name') or '?'} – {str(e.get('text') or '')[:200]}")
+    for f in q.glob("auftrag-*.json"):
+        try:
+            alt = time.time() - f.stat().st_mtime
+        except OSError:
+            continue
+        if alt > 900 and _marker("pubstau-" + f.name):
+            meldungen.append("Ein Auftrag für den Server wartet seit über 15 Minuten (läuft der Worker? Cron „bin/worker.py“ prüfen).")
+    if not meldungen:
+        return
+    with tx("system") as cur:
+        for m in meldungen:
+            cur.execute("INSERT INTO alarme (stufe, quelle, titel, details) VALUES ('kritisch','veroeffentlichung',%s,'{}'::jsonb)", (m[:200],))
+        ids = push.admins(cur)
+        cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
+        r = cur.fetchone()
+        an = cfg.get("alarm_email") or (r and r["email"])
+    push.senden(ids, "Veröffentlichung: Problem", meldungen[0], "/admin#websites", "betriebsalarm")
+    if an and mailer.konfiguriert():
+        mailer.senden(an, "Markentrix: Problem bei der Veröffentlichung", "\n".join(meldungen) + mailer.SIGNATUR)
 
 
 def website_online_meldungen(cfg):
@@ -482,8 +522,6 @@ def betriebs_alarm(cfg):
     jetzt_s = time.time()
     neu, rot, gruen = {}, [], []
     for p in punkte:
-        if p["id"] == "jobs":     # läuft dieser Job nicht, kann er auch nicht melden; das übernimmt der Wächter auf dem Server
-            continue
         vorher = alt.get(p["id"]) or {}
         if p["status"] == "bad":
             if vorher.get("status") != "bad" or jetzt_s - float(vorher.get("gemeldet", 0)) > 86400:
@@ -563,11 +601,45 @@ def wochenrueckblick(cfg):
                 push.senden(ids, "Dein Rückblick auf die letzte Woche", f"Letzte Woche: {r['kontakte']} Kontakte festgehalten, {r['neu']} neue Leads zugewiesen.", "/vertrieb#uebersicht", "wochenrueckblick")
 
 
+_lauf_lokal = threading.local()
+
+
 def _marker(schluessel: str) -> bool:
-    """True genau einmal je Schlüssel (verhindert Mehrfachläufe nach Neustart)."""
+    """True genau einmal je Schlüssel (verhindert Mehrfachläufe nach Neustart).
+    Stürzt der Job danach ab, gibt _lauf den Schlüssel wieder frei, damit er in der nächsten Minute erneut versucht wird."""
     with tx("system") as cur:
         cur.execute("INSERT INTO job_marker (schluessel) VALUES (%s) ON CONFLICT DO NOTHING", (schluessel,))
-        return cur.rowcount == 1
+        neu = cur.rowcount == 1
+    if neu and getattr(_lauf_lokal, "marker", None) is not None:
+        _lauf_lokal.marker.append(schluessel)
+    return neu
+
+
+_fehlserie: dict[str, int] = {}
+
+
+def _lauf(job, cfg) -> None:
+    """Führt einen Job aus. Bei einem Absturz werden seine Tagesmarker freigegeben (der Job wird wiederholt),
+    der Fehler wird gezählt und erst nach einem erfolgreichen Lauf wieder gelöscht."""
+    _lauf_lokal.marker = []
+    try:
+        job(cfg)
+    except Exception:
+        log.exception("Job %s fehlgeschlagen", job.__name__)
+        marker = _lauf_lokal.marker
+        if marker:
+            try:
+                with tx("system") as cur:
+                    cur.execute("DELETE FROM job_marker WHERE schluessel = ANY(%s)", (marker,))
+            except Exception:
+                log.exception("Marker konnten nicht freigegeben werden")
+        n = _fehlserie[job.__name__] = _fehlserie.get(job.__name__, 0) + 1
+        betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__, "fehler_serie": n})
+    else:
+        if _fehlserie.pop(job.__name__, None) is not None and not _fehlserie:
+            betrieb.notieren("jobs", {"fehler_job": None, "fehler_serie": 0})
+    finally:
+        _lauf_lokal.marker = None
 
 
 def mahnungen_automatisch(cfg):
@@ -699,6 +771,10 @@ def anrufe_bereinigen() -> int:
         n = cur.rowcount
         cur.execute("DELETE FROM job_marker WHERE am < now() - interval '60 days'")
         cur.execute("DELETE FROM benachrichtigungen WHERE erstellt_am < now() - interval '60 days'")
+        cur.execute("DELETE FROM alarme WHERE zeit < now() - interval '365 days' OR (bestaetigt_am IS NOT NULL AND zeit < now() - interval '180 days')")
+        cur.execute("DELETE FROM workflow_fehler WHERE zeit < now() - interval '180 days'")
+        cur.execute("DELETE FROM website_ereignisse WHERE zeit < now() - interval '180 days'")
+        cur.execute("DELETE FROM website_stat WHERE tag < current_date - 800")
     return n
 
 
@@ -869,20 +945,12 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
-        try:
-            job(cfg)
-        except Exception:
-            log.exception("Job %s fehlgeschlagen", job.__name__)
-            betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
+    for job in (vertrieb_morgens, veroeffentlichung_wacht, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+        _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
     for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
-        try:
-            job(cfg)
-        except Exception:  # ein kaputter Job darf die anderen nicht stoppen
-            log.exception("Job %s fehlgeschlagen", job.__name__)
-            betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
+        _lauf(job, cfg)   # ein kaputter Job darf die anderen nicht stoppen
 
 
 def _schleife():

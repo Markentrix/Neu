@@ -52,6 +52,9 @@ _versuche: dict[str, deque] = defaultdict(deque)
 
 def rate_limit(key: str, maximal: int = 10, fenster: int = 300):
     jetzt = time.time()
+    if len(_versuche) > 5000:   # Speicher begrenzen: leere und alte Einträge entfernen
+        for k in [k for k, v in _versuche.items() if not v or v[-1] < jetzt - 3600]:
+            _versuche.pop(k, None)
     q = _versuche[key]
     while q and q[0] < jetzt - fenster:
         q.popleft()

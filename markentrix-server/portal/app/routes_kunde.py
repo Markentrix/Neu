@@ -3,7 +3,7 @@ import urllib.error
 import urllib.request
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from psycopg import errors
 from pydantic import BaseModel, Field
 
@@ -505,13 +505,17 @@ def profil_aendern(data: ProfilIn, user: dict = Depends(require_kunde)):
 
 
 @router.post("/passwort")
-def passwort_aendern(data: PasswortIn, user: dict = Depends(require_kunde)):
+def passwort_aendern(data: PasswortIn, request: Request, user: dict = Depends(require_kunde)):
     check_password_rules(data.neu)
     with tx("system") as cur:
         cur.execute("SELECT passwort_hash FROM benutzer WHERE id=%s", (user["id"],))
         if not verify_password(data.alt, cur.fetchone()["passwort_hash"]):
             raise HTTPException(400, "Das aktuelle Passwort stimmt nicht.")
         cur.execute("UPDATE benutzer SET passwort_hash=%s WHERE id=%s", (hash_password(data.neu), user["id"]))
+        # andere Sitzungen beenden, die aktuelle bleibt
+        from .security import COOKIE as _C, token_hash as _th
+        _t = request.cookies.get(_C)
+        cur.execute("DELETE FROM sitzungen WHERE benutzer_id=%s AND token_hash IS DISTINCT FROM %s", (user["id"], _th(_t) if _t else None))
         audit(cur, user, "passwort_geaendert", user["kunden_id"])
     return {"ok": True}
 

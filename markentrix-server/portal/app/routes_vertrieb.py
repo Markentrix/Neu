@@ -1,6 +1,6 @@
 """Portal für Vertriebler: nur eigene Kunden, eigene Leads, eigene Provisionen.
 Die Abfragen laufen im Systemkontext, deshalb steht JEDE Abfrage ausdrücklich auf die eigene Vertriebler-ID."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from psycopg import errors
 from pydantic import BaseModel, Field
 
@@ -153,12 +153,16 @@ class PasswortIn(BaseModel):
 
 
 @router.post("/passwort")
-def passwort(data: PasswortIn, user: dict = Depends(require_vertrieb)):
+def passwort(data: PasswortIn, request: Request, user: dict = Depends(require_vertrieb)):
     check_password_rules(data.neu)
     with tx("system") as cur:
         cur.execute("SELECT passwort_hash FROM benutzer WHERE id=%s", (user["id"],))
         if not verify_password(data.alt, cur.fetchone()["passwort_hash"]):
             raise HTTPException(400, "Das aktuelle Passwort stimmt nicht.")
         cur.execute("UPDATE benutzer SET passwort_hash=%s WHERE id=%s", (hash_password(data.neu), user["id"]))
+        # andere Sitzungen beenden, die aktuelle bleibt
+        from .security import COOKIE as _C, token_hash as _th
+        _t = request.cookies.get(_C)
+        cur.execute("DELETE FROM sitzungen WHERE benutzer_id=%s AND token_hash IS DISTINCT FROM %s", (user["id"], _th(_t) if _t else None))
         audit(cur, user, "passwort_geaendert")
     return {"ok": True}

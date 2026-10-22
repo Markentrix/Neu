@@ -192,8 +192,13 @@ SQL
       fi
       done_n="$("${PSQL[@]}" -At -c "SELECT 1 FROM schema_migrations WHERE name='$n'")"
       if [ -z "$done_n" ]; then
-        "${PSQL[@]}" < "$f"
-        "${PSQL[@]}" -c "INSERT INTO schema_migrations(name) VALUES ('$n')"
+        # Datei und Eintrag in schema_migrations in EINER Transaktion: bricht etwas ab, bleibt nichts halb angewendet
+        MARK="INSERT INTO schema_migrations(name) VALUES ('$n') ON CONFLICT DO NOTHING;"
+        if grep -qE '^BEGIN;' "$f"; then
+          { cat "$f"; echo; echo "$MARK"; } | "${PSQL[@]}" || die "Migration $n fehlgeschlagen (nichts übernommen). Bitte Meldung prüfen und erneut: mkctl migrate"
+        else
+          { echo "BEGIN;"; cat "$f"; echo; echo "$MARK"; echo "COMMIT;"; } | "${PSQL[@]}" || die "Migration $n fehlgeschlagen (nichts übernommen). Bitte Meldung prüfen und erneut: mkctl migrate"
+        fi
         echo "Angewendet: $n"
       else
         echo "Schon vorhanden: $n"
