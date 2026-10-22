@@ -1286,3 +1286,6 @@ main:focus{outline:none}
 .mini-frame.is-full.mini-frame--m{aspect-ratio:auto;height:calc(var(--ph) * 1px * var(--s,.7))}
 .mini-frame.is-full.mini-frame--m iframe{height:calc(var(--ph) * 1px)}
 @media (max-width:600px){.mini-phone{max-width:340px}}
+/* Hero Startseite: Text oben verankert und beim Scrollen sichtbar, neben der hohen Vorschau */
+@media (min-width:901px){.hero--stage .hero-grid{align-items:start}.hero--stage .hero-grid>div:first-child{position:sticky;top:96px}}
+.footer-col h2.mt-2{margin-top:26px}
