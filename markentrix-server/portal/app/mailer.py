@@ -153,6 +153,23 @@ def avv_portal(an: str, name: str | None) -> tuple[bool, str]:
     return senden(an, "Vertrag zur Auftragsverarbeitung: bitte bestätigen", text)
 
 
+def website_aktualisiert(an: str, name: str | None, domain: str, hinweis: str, kid=None) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    was = f"\n\nDas haben wir geändert:\n{hinweis}" if hinweis.strip() else ""
+    text = (f"{hallo}\n\ndas Update Ihrer Website {domain} ist online.{was}\n\nBitte schauen Sie kurz drüber: https://{domain}\n\n"
+            f"Wenn Ihnen etwas auffällt oder noch etwas fehlt, schreiben Sie uns einfach im Portal unter „Nachrichten“: {config.BASE_URL}/app#nachrichten" + SIGNATUR)
+    return senden(an, f"Ihre Website ist aktualisiert: {domain}", text, kunden_id=kid, art="website")
+
+
+def website_online(an: str, name: str | None, domain: str, hinweis: str, kid=None) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    extra = f"\n\n{hinweis.strip()}" if hinweis.strip() else ""
+    text = (f"{hallo}\n\nIhre neue Website ist online: https://{domain}{extra}\n\nSie ist ab sofort für alle erreichbar. Bitte schauen Sie sich alles in Ruhe an, auch am Handy. "
+            f"Kleine Wünsche und Korrekturen schicken Sie uns bitte im Portal unter „Nachrichten“: {config.BASE_URL}/app#nachrichten\n\n"
+            f"Tipp: Tragen Sie die neue Adresse in Ihre E-Mail-Signatur, auf Visitenkarten und in Ihr Google-Unternehmensprofil ein." + SIGNATUR)
+    return senden(an, f"Ihre neue Website ist online: {domain}", text, kunden_id=kid, art="website")
+
+
 def avv_erinnerung_kunde(an: str, name: str | None) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     text = (f"{hallo}\n\nkleine Erinnerung: Der Vertrag zur Auftragsverarbeitung (AVV) wartet in Ihrem Portal noch auf Ihre Bestätigung. "

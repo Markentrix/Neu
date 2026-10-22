@@ -8,7 +8,7 @@ import stat
 import zipfile
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from . import config, livecheck
@@ -212,7 +212,7 @@ def _kunde_aufloesen(art: str, name: str, kunden_id: str) -> tuple:
 
 
 def _abschliessen(user: dict, art: str, name: str, kid, firma: str, nr: str, stage: Path, inhalt: Path, n: int, verwendet: str, skript: bool,
-                  zusatz: dict | None = None) -> tuple:
+                  zusatz: dict | None = None, melden: bool = False, hinweis: str = "") -> tuple:
     """Gemeinsamer Schluss von Upload und „Demo live schalten“: Website-Dienste einbauen, Website eintragen, prüfen, Auftrag für den Server-Dienst ablegen."""
     eingefuegt = 0
     with tx("admin") as cur:
@@ -222,7 +222,9 @@ def _abschliessen(user: dict, art: str, name: str, kid, firma: str, nr: str, sta
         if art == "live":
             cur.execute("""INSERT INTO websites (kunden_id, domain, art, status, letzte_veroeffentlichung) VALUES (%s,%s,'live','live',now())
                            ON CONFLICT (domain) DO UPDATE SET status='live', letzte_veroeffentlichung=now()""", (kid, name))
-        audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet, **(zusatz or {})})
+        audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet, "kunde_informiert": bool(melden and art == "live" and kid), **(zusatz or {})})
+        if melden and art == "live" and kid:
+            cur.execute("INSERT INTO website_meldungen (kunden_id, domain, upload_id, hinweis) VALUES (%s,%s,%s,%s)", (kid, name, stage.name.removeprefix(".upload-"), hinweis.strip()[:1000]))
     try:
         check = livecheck.pruefen(inhalt)
     except Exception:  # noqa: BLE001
@@ -236,7 +238,7 @@ def _abschliessen(user: dict, art: str, name: str, kid, firma: str, nr: str, sta
 
 
 @router.post("/upload")
-def hochladen(datei: list[UploadFile] = File(...), art: str = Form("live"), name: str = Form(...), kunden_id: str = Form(""), dienste_skript: str = Form("0"),
+def hochladen(datei: list[UploadFile] = File(...), art: str = Form("live"), name: str = Form(...), kunden_id: str = Form(""), dienste_skript: str = Form("0"), kunde_informieren: str = Form("0"), aenderung: str = Form(""),
               user: dict = Depends(require_admin)):
     rate_limit("webupload:" + str(user["id"]), 60, 600)
     name = _ordner_name(art, name.strip().lower())
@@ -276,7 +278,8 @@ def hochladen(datei: list[UploadFile] = File(...), art: str = Form("live"), name
         if not (inhalt / "index.html").is_file():
             raise HTTPException(400, "Nach dem Zusammenführen fehlt die index.html. Mindestens eine ZIP muss sie enthalten.")
         verwendet = " + ".join(teile)
-        eingefuegt, check = _abschliessen(user, art, name, kid, firma, nr, stage, inhalt, n, verwendet, dienste_skript == "1")
+        eingefuegt, check = _abschliessen(user, art, name, kid, firma, nr, stage, inhalt, n, verwendet, dienste_skript == "1",
+                                          melden=kunde_informieren == "1", hinweis=aenderung)
     except HTTPException:
         shutil.rmtree(stage, ignore_errors=True)
         raise
@@ -326,6 +329,8 @@ class DemoLiveIn(BaseModel):
     domain: str
     kunden_id: str = ""
     trotzdem: bool = False
+    kunde_informieren: bool = True
+    aenderung: str = Field(default="", max_length=1000)
 
 
 @router.post("/demo-zu-live")
@@ -355,7 +360,7 @@ def demo_zu_live(data: DemoLiveIn, user: dict = Depends(require_admin)):
         inhalt = stage / "inhalt"
         n, _ = demo_kopieren(quelle, inhalt)
         eingefuegt, check = _abschliessen(user, "live", name, kid, firma, nr, stage, inhalt, n, "Demo " + demo, True,
-                                          {"aus_demo": demo, "freigabe": freigabe or "keine Anfrage"})
+                                          {"aus_demo": demo, "freigabe": freigabe or "keine Anfrage"}, melden=data.kunde_informieren, hinweis=data.aenderung)
     except HTTPException:
         shutil.rmtree(stage, ignore_errors=True)
         raise

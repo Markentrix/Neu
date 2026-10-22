@@ -64,6 +64,8 @@ async function uploadKarte(d) {
   const kunde = h('select', {}, [h('option', { value: '' }, '– Kunde wählen –')].concat(kunden.map(k => h('option', { value: k.id, 'data-domain': k.domain || '' }, k.kundennummer + ' · ' + k.firma))));
   const datei = h('input', { type: 'file', accept: '.zip,application/zip', multiple: true });
   const skript = h('input', { type: 'checkbox', style: 'width:auto', checked: true });
+  const informieren = h('input', { type: 'checkbox', style: 'width:auto', checked: true });
+  const aenderung = h('input', { placeholder: 'Was wurde geändert? (steht in der Mail an den Kunden, optional)', maxlength: 1000 });
   const knopfHoch = h('button', { class: 'btn', type: 'button' }, 'Hochladen und veröffentlichen');
   art.addEventListener('change', () => { name.placeholder = art.value === 'live' ? 'Domain ohne www, z. B. elbdetail.de' : 'Name der Demo, z. B. anadolu'; });
   kunde.addEventListener('change', () => { const dom = (kunde.selectedOptions[0].getAttribute('data-domain') || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); if (dom && !name.value && art.value === 'live') name.value = dom; });
@@ -102,7 +104,7 @@ async function uploadKarte(d) {
   knopfHoch.addEventListener('click', async () => {
     melde(m, '');
     if (!datei.files.length) { melde(m, 'Bitte eine ZIP-Datei wählen.'); return; }
-    const f = new FormData(); for (const x of datei.files) f.append('datei', x); f.append('art', art.value); f.append('name', name.value); f.append('kunden_id', kunde.value); f.append('dienste_skript', skript.checked ? '1' : '0');
+    const f = new FormData(); for (const x of datei.files) f.append('datei', x); f.append('art', art.value); f.append('name', name.value); f.append('kunden_id', kunde.value); f.append('dienste_skript', skript.checked ? '1' : '0'); f.append('kunde_informieren', informieren.checked && art.value === 'live' ? '1' : '0'); f.append('aenderung', aenderung.value);
     knopfHoch.disabled = true; knopfHoch.textContent = 'Lade hoch …';
     try { const r = await api('/api/admin/websites/upload', { method: 'POST', body: f }); melde(m, r.hinweis + ' (' + r.dateien + ' Dateien aus „' + r.ordner + '“' + (r.skript_in_seiten ? ', Website-Dienste in ' + r.skript_in_seiten + ' Seiten eingebaut' : '') + ')', 'ok'); if (r.check) checkZeigen(r.check, name.value); datei.value = ''; setTimeout(ladeVerlauf, 1500); }
     catch (x) { melde(m, x.message); }
@@ -119,6 +121,7 @@ async function uploadKarte(d) {
     h('p', { class: 'small muted' }, 'Die fertige Website als ZIP (die index.html direkt oben). Besteht sie aus mehreren Teilen (z. B. Zip 1 = Seiten, Zip 2 = Bilder), alle ZIPs gleichzeitig auswählen: Sie werden in dieser Reihenfolge zusammengeführt, spätere ersetzen gleichnamige Dateien. Der Server prüft die Dateien, richtet bei einer neuen Domain Website und HTTPS selbst ein und sichert die vorige Version. Erneutes Hochladen mit demselben Namen aktualisiert die Seite.'),
     m, liste, h('div', { class: 'form2' }, f('Art', art), f('Name / Domain', name, 'Bei bestehenden Seiten wird der Name vorgeschlagen.'), f('Kunde (Kundennummer)', kunde, 'Bei neuen Live-Websites nötig. Die Domain des Kunden wird vorgeschlagen.'), f('ZIP-Datei', datei, 'Bis 120 MB.')),
     h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin-top:8px' }, skript, 'Website-Dienste (Formular, Termine, Statistik) automatisch in alle Seiten einbauen'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin-top:8px' }, informieren, 'Kunden per Mail und Glocke informieren, sobald die Seite online ist (nur Live-Websites)'), aenderung,
     h('div', { class: 'row', style: 'margin-top:10px' }, knopfHoch, zurueckKnopf), verlauf);
 }
 
@@ -183,9 +186,10 @@ V.websites = async () => {
     kunde.addEventListener('change', () => { const x = (kunde.selectedOptions[0].getAttribute('data-domain') || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); if (x && !dom.value) dom.value = x; });
     const st = z.freigabe ? { wartet: 'Der Kunde hat die Vorschau noch nicht freigegeben.', freigegeben: 'Der Kunde hat die Vorschau freigegeben.', abgelehnt: 'Der Kunde hat die Vorschau abgelehnt.', zurueckgezogen: 'Die Freigabe-Anfrage wurde zurückgezogen.' }[z.freigabe.status] : 'Zu dieser Demo gibt es keine Freigabe-Anfrage.';
     const los = h('button', { class: 'btn', type: 'button' }, 'Jetzt live schalten');
-    const senden = async (trotzdem) => api('/api/admin/websites/demo-zu-live', { method: 'POST', body: { demo: z.name, domain: dom.value, kunden_id: kunde.value, trotzdem } });
+    const info = h('input', { type: 'checkbox', style: 'width:auto', checked: true }), was = h('input', { placeholder: 'Was ist neu? (steht in der Mail an den Kunden, optional)', maxlength: 1000 });
+    const senden = async (trotzdem) => api('/api/admin/websites/demo-zu-live', { method: 'POST', body: { demo: z.name, domain: dom.value, kunden_id: kunde.value, trotzdem, kunde_informieren: info.checked, aenderung: was.value } });
     const d = dialog('Demo „' + z.name + '“ live schalten', h('div', {}, h('p', { class: 'small' }, st), h('p', { class: 'small muted' }, 'Die Demo wird so, wie sie ist, auf die Kundendomain gelegt. Eine bestehende Live-Seite wird dabei ersetzt, die vorige Version bleibt gesichert.'),
-      h('label', {}, 'Domain der Kunden-Website'), dom, h('label', {}, 'Kunde'), kunde, dm, h('p', {}, los)));
+      h('label', {}, 'Domain der Kunden-Website'), dom, h('label', {}, 'Kunde'), kunde, h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin-top:8px' }, info, 'Kunden informieren, sobald die Seite online ist'), was, dm, h('p', {}, los)));
     los.addEventListener('click', async () => {
       melde(dm, ''); los.disabled = true;
       try {

@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import date, datetime, timezone
 
-from . import abo, berichte, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push
+from . import abo, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -167,6 +167,47 @@ def fehler_melden(cfg):
     if rows and an:
         zeilen = [f"- {r['zeit']:%d.%m. %H:%M} {r['workflow_name'] or 'Workflow'} / {r['knoten'] or '?'}: {(r['fehlertext'] or '')[:200]}" for r in rows]
         mailer.senden(an, f"{len(rows)} Workflow-Fehler" if len(rows) > 1 else "Workflow-Fehler", "Es sind Fehler in Automationen aufgetreten:\n\n" + "\n".join(zeilen) + mailer.SIGNATUR)
+
+
+def website_online_meldungen(cfg):
+    """Jede Minute: sagt dem Kunden Bescheid, sobald seine neue Website online ist oder ein Update eingespielt wurde. Wartet, bis die Seite wirklich erreichbar ist."""
+    with tx("system") as cur:
+        cur.execute("""SELECT m.id, m.kunden_id, m.domain, m.upload_id, m.hinweis, m.erstellt_am < now() - interval '2 hours' AS zu_alt_ohne_ergebnis,
+                              m.erstellt_am < now() - interval '14 days' AS verfallen, k.ansprechpartner,
+                              EXISTS (SELECT 1 FROM website_wacht w WHERE w.domain = m.domain AND w.ok AND w.geprueft_am > now() - interval '30 minutes') AS erreichbar
+                       FROM website_meldungen m JOIN kunden k ON k.id = m.kunden_id
+                       WHERE m.status = 'offen' ORDER BY m.erstellt_am LIMIT 20""")
+        offen = cur.fetchall()
+    for r in offen:
+        try:
+            p = config.QUEUE_DIR / f"ergebnis-{r['upload_id']}.json"
+            if not p.is_file():
+                if r["zu_alt_ohne_ergebnis"]:
+                    _meldung_setzen(r["id"], "verworfen")
+                continue
+            e = json.loads(p.read_text())
+            if not e.get("ok"):
+                _meldung_setzen(r["id"], "verworfen")
+                continue
+            if not r["erreichbar"]:
+                if r["verfallen"]:
+                    _meldung_setzen(r["id"], "verworfen")
+                continue
+            neu = bool(e.get("neu"))
+            with tx("system") as cur:
+                an = kunden_empfaenger(cur, r["kunden_id"])
+                ids = push.kunde(cur, r["kunden_id"])
+            for a in an:
+                (mailer.website_online if neu else mailer.website_aktualisiert)(a, r["ansprechpartner"], r["domain"], r["hinweis"], r["kunden_id"])
+            push.senden(ids, "Ihre Website ist online" if neu else "Ihre Website ist aktualisiert", r["domain"], "/app#website", "websiteonline")
+            _meldung_setzen(r["id"], "gesendet")
+        except Exception:  # noqa: BLE001
+            log.exception("Website-Meldung %s", r["id"])
+
+
+def _meldung_setzen(mid, status):
+    with tx("system") as cur:
+        cur.execute("UPDATE website_meldungen SET status=%s, gesendet_am=CASE WHEN %s='gesendet' THEN now() END WHERE id=%s", (status, status, mid))
 
 
 def avv_kunde_erinnerung(cfg):
@@ -726,7 +767,7 @@ def tick():
             betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen
