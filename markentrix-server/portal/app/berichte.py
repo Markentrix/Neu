@@ -62,7 +62,9 @@ def sammeln(cur, kid, von: date, bis: date) -> dict:
     updates = cur.fetchone()["n"]
     website = {"qualitaet": qualitaet, "besucher": ws["besucher"], "aufrufe": ws["aufrufe"], "whatsapp": ws["whatsapp"], "anrufe": ws["anrufe"], "anfragen": w_anf,
                "buchungen": wt["buchungen"], "nicht_erschienen": wt["weg"], "erschienen": wt["da"], "erreichbarkeit": webbetrieb.erreichbarkeit(cur, kid, von, bis)}
-    return {"website": website, "anfragen": {"gesamt": a_ges, "vormonat": a_vor, "nach_quelle": a_quelle, "bearbeitet": ar["bearbeitet"], "spam": ar["spam"]},
+    cur.execute("SELECT modul_code FROM kunden_module WHERE kunden_id=%s AND aktiv", (kid,))
+    module = [r["modul_code"] for r in cur.fetchall()]
+    return {"module": module, "website": website, "anfragen": {"gesamt": a_ges, "vormonat": a_vor, "nach_quelle": a_quelle, "bearbeitet": ar["bearbeitet"], "spam": ar["spam"]},
             "termine": {"gesamt": sum(t.values()), "nach_status": t},
             "anrufe": anrufe, "nachrichten": {"ein": nach["ein"], "aus": nach["aus"], "automatisch": nach["automatisch"]},
             "erledigt": erledigt, "website_updates": updates, "chat_fragen": chat, "automatische_ablaeufe": laeufe, "wochenangebote": wa, "bewertungsanfragen": bew}
@@ -129,6 +131,37 @@ def einordnung_auto(d: dict) -> tuple[str, list[str]]:
     return " ".join(teile), schritte[:5]
 
 
+def empfehlung(d: dict) -> dict:
+    """Ein konkreter Tipp für den nächsten Monat. Regeln nach Wichtigkeit; nur was die Zahlen belegen. Gibt {titel, text} zurück."""
+    a, t, w, module = d["anfragen"], d["termine"], d.get("website") or {}, set(d.get("module") or [])
+    regeln = []
+    er = w.get("erreichbarkeit")
+    if er is not None and er < 99.5:
+        regeln.append((100, "Website zuverlässiger machen", f"Ihre Website war nur zu {str(er).replace('.', ',')} % erreichbar. Wir prüfen mit dem Hoster die Ursache und melden uns mit dem Ergebnis. Von Ihrer Seite ist nichts nötig."))
+    qq = w.get("qualitaet") or {}
+    if qq.get("tote"):
+        regeln.append((90, "Tote Verweise beheben", f"Auf Ihrer Website führen {_n(qq['tote'], 'Verweis', 'Verweise')} ins Leere. Das schadet dem Eindruck und der Auffindbarkeit. Wir beheben das im nächsten Monat, Sie müssen nichts tun."))
+    if a["gesamt"] >= 3 and a["bearbeitet"] < a["gesamt"] * 0.7:
+        regeln.append((85, "Anfragen schneller beantworten", f"Von {a['gesamt']} Anfragen sind erst {a['bearbeitet']} bearbeitet. Wer innerhalb weniger Stunden antwortet, gewinnt deutlich häufiger den Auftrag. Planen Sie im Portal täglich fünf Minuten dafür ein."))
+    nicht = t["nach_status"].get("nicht_erschienen", 0) + (w.get("nicht_erschienen") or 0)
+    if nicht >= 2:
+        regeln.append((80, "Terminausfälle verringern", f"{nicht} Termine wurden nicht wahrgenommen. Eine Erinnerung am Vortag verringert das erfahrungsgemäß spürbar. Sprechen Sie uns an, wir richten sie ein."))
+    if w.get("besucher", 0) >= 30 and not (w.get("whatsapp") or w.get("anrufe") or w.get("anfragen")):
+        regeln.append((70, "Besucher zu Kontakten machen", f"Ihre Website hatte {w['besucher']} Besucher, aber keinen Kontakt über Formular, Anruf oder WhatsApp. Wir prüfen, ob die Kontaktmöglichkeiten gut sichtbar sind, und schlagen eine Verbesserung vor."))
+    if a["gesamt"] == 0 and a["vormonat"] == 0 and w.get("besucher", 0) < 30:
+        regeln.append((65, "Mehr Sichtbarkeit aufbauen", "Es kamen kaum Besucher und keine Anfragen. Der nächste Schritt ist Sichtbarkeit: Google-Profil pflegen und ein bis zwei aktuelle Beiträge oder Angebote veröffentlichen. Wir unterstützen Sie dabei."))
+    if "wochenangebote" in module and not d.get("wochenangebote"):
+        regeln.append((60, "Wochenangebot veröffentlichen", "Ihr Modul für Wochenangebote war im letzten Monat nicht im Einsatz. Schicken Sie uns ein Foto und ein, zwei Sätze, wir veröffentlichen das Angebot für Sie."))
+    if a["gesamt"] >= 5 and not d.get("bewertungsanfragen"):
+        regeln.append((55, "Bewertungen sammeln", f"Sie hatten {a['gesamt']} Anfragen, aber keine Bewertungsanfrage ging raus. Zufriedene Kundinnen und Kunden um eine Google-Bewertung zu bitten, bringt neue Anfragen. Wir können das für Sie automatisieren."))
+    if a["vormonat"] > 0 and a["gesamt"] >= a["vormonat"] * 1.2 and a["gesamt"] >= 5:
+        regeln.append((40, "Schwung mitnehmen", f"Die Anfragen sind auf {a['gesamt']} gestiegen. Das ist ein guter Zeitpunkt, Kapazitäten und Antwortzeiten im Blick zu behalten, damit keine Anfrage liegen bleibt."))
+    if regeln:
+        _p, titel, text = max(regeln, key=lambda x: x[0])
+        return {"titel": titel, "text": text}
+    return {"titel": "Weiter so", "text": "Es gibt keinen akuten Handlungsbedarf. Wir beobachten die Entwicklung und melden uns, sobald sich etwas Auffälliges zeigt. Wenn Sie ein Ziel für den nächsten Monat haben (mehr Anfragen, mehr Termine), sprechen wir gern darüber."}
+
+
 def texte(b: dict) -> tuple[str, list[str]]:
     """Gespeicherte (bearbeitete) Texte, sonst die automatische Einordnung."""
     auto_t, auto_s = einordnung_auto(b["daten"])
@@ -183,6 +216,8 @@ def pdf_erzeugen(cur, bericht_id, f: dict | None = None) -> tuple[bytes, str]:
         inhalt += [pdf.p("• " + {"aenderung": "Änderung: ", "auftrag": "Auftrag: ", "problem": "Problem gelöst: "}.get(x["art"], "") + x["betreff"]) for x in erl]
     ein, schritte = texte(b)
     inhalt += [pdf.p("Einordnung", pdf.H2), pdf.p(ein), pdf.p("Unsere nächsten Schritte", pdf.H2)] + [pdf.p("• " + z) for z in schritte]
+    tipp = empfehlung(d)
+    inhalt += [pdf.Spacer(1, 6), pdf.leistungsbox("Unser Tipp für den nächsten Monat", ["## " + tipp["titel"], tipp["text"]])]
     if a["nach_quelle"]:
         inhalt += [pdf.p("Woher die Anfragen kamen", pdf.H2), pdf.tabelle(["Quelle", "Anzahl"], [[q.capitalize(), str(n)] for q, n in a["nach_quelle"].items()], breiten=[120 * pdf.mm, 50 * pdf.mm], rechts_ab=1)]
     if d["anrufe"]:

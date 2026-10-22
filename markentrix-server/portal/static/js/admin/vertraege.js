@@ -68,7 +68,7 @@ export async function einarbeitungKarte(pid) {
 }
 
 V.vertraege = async () => {
-  const [u, r] = await Promise.all([api('/api/admin/vertragsdokumente/uebersicht'), api('/api/admin/vertragsdokumente/referenzen')]), m = h('div');
+  const [u, r, rs] = await Promise.all([api('/api/admin/vertragsdokumente/uebersicht'), api('/api/admin/vertragsdokumente/referenzen'), api('/api/admin/referenzseite')]), m = h('div');
   const nurOffen = h('input', { type: 'checkbox', style: 'width:auto' }), kunden = h('div'), partner = h('div');
   const zeichne = () => {
     const k = u.kunden.filter(x => !nurOffen.checked || !x.avv_ok || x.referenz.stand === 'gesendet'), p = u.partner.filter(x => !nurOffen.checked || x.vertrag.stand !== 'unterschrieben' && !x.vereinbarung_am || x.einarbeitung_erledigt < x.einarbeitung_gesamt);
@@ -79,10 +79,16 @@ V.vertraege = async () => {
   nurOffen.addEventListener('change', zeichne); zeichne();
   const widerrufen = (z, an) => knopf(an ? 'Widerruf vermerken' : 'Widerruf zurücknehmen', async () => { if (!confirm(an ? 'Widerruf der Referenz von ' + z.firma + ' vermerken? Danach alle Inhalte entfernen.' : 'Widerruf wirklich zurücknehmen?')) return; try { await api('/api/admin/vertragsdokumente/' + z.id + '/widerruf', { method: 'POST', body: { widerrufen: an } }); location.reload(); } catch (x) { fehler(m, x); } }, 'sec small');
   const frei = (z) => z.strukturiert ? h('div', {}, h('div', { class: 'small' }, z.elemente.map(e => e.name + (e.text ? ' („' + e.text + '“)' : '')).join(' · ') || 'keine Elemente'), h('div', { class: 'small muted' }, 'Kanäle: ' + (z.kanaele.join(', ') || '–') + (z.personen ? ' · Personen erlaubt' : '') + (z.einschraenkungen && z.einschraenkungen !== 'keine' ? ' · Einschränkung: ' + z.einschraenkungen : ''))) : h('span', { class: 'small muted' }, 'laut unterschriebener Datei' + (z.hat_datei ? '' : ''));
+  const rsAktiv = h('input', { type: 'checkbox', checked: rs.aktiv, style: 'width:auto' }), rsTitel = h('input', { value: rs.titel, maxlength: 120, 'aria-label': 'Titel' }), rsIntro = h('input', { value: rs.intro, maxlength: 400, 'aria-label': 'Einleitung' });
+  const seitenKarte = h('div', { class: 'card' }, h('h2', {}, 'Referenzseite für die Website'),
+    h('p', { class: 'small muted' }, 'Zeigt automatisch nur, was Kunden ausdrücklich für „Website von Markentrix“ freigegeben haben und mit Wortlaut angegeben haben (Kurzbeschreibung, Kennzahlen, Zitat). Widerrufene Freigaben verschwinden sofort. Logos und Abbildungen fügst du bei Bedarf von Hand ein. Aktuell würden ' + rs.eintraege.length + ' Einträge erscheinen.'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, rsAktiv, 'Seite veröffentlichen (öffentlich unter /referenzen)'), h('label', {}, 'Titel'), rsTitel, h('label', {}, 'Einleitung'), rsIntro,
+    h('p', {}, knopf('Speichern', async () => { try { await api('/api/admin/referenzseite', { method: 'PUT', body: { aktiv: rsAktiv.checked, titel: rsTitel.value, intro: rsIntro.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } }), ' ', rs.aktiv ? h('a', { class: 'btn sec', href: '/referenzen', target: '_blank', rel: 'noopener' }, 'Seite ansehen') : ''));
   return h('div', { class: 'stack' }, kopf('Verträge', h('span', { class: 'pill ' + (u.offen.avv || u.offen.vertrag ? 'warn' : 'ok') }, 'AVV offen: ' + u.offen.avv + ' · HV-Vertrag offen: ' + u.offen.vertrag + ' · Referenz wartet: ' + u.offen.referenz_gesendet)), m,
     h('div', { class: 'card' }, h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, nurOffen, 'Nur Offenes zeigen')),
     h('div', { class: 'card' }, h('h2', {}, 'Kunden'), kunden), h('div', { class: 'card' }, h('h2', {}, 'Vertriebler'), partner),
     h('div', { class: 'card' }, h('h2', {}, 'Referenzen: was darf gezeigt werden?'), h('p', { class: 'small muted' }, 'Nur was hier steht, darf in der Eigenwerbung genutzt werden. Bei einem Widerruf alle Inhalte innerhalb von 7 Tagen entfernen.'),
       tabelle([['Kunde', z => h('a', { href: '#kunde/' + z.kunden_id }, z.firma)], ['Bestätigt', z => z.unterschrieben_am ? datum(z.unterschrieben_am) + (z.online_am ? ' (online)' : '') : '–'], ['Freigegeben', frei], ['', z => h('span', { class: 'row' }, z.hat_datei ? h('a', { class: 'btn sec small', href: '/api/admin/vertragsdokumente/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'Vertrag') : '', widerrufen(z, true))]], r.aktiv, 'Noch keine unterschriebenen Referenzverträge.')),
+    seitenKarte,
     r.widerrufen.length ? h('div', { class: 'card' }, h('h2', {}, 'Widerrufene Referenzen'), tabelle([['Kunde', z => z.firma], ['Widerrufen am', z => datum(z.widerrufen_am)], ['', z => widerrufen(z, false)]], r.widerrufen)) : '');
 };

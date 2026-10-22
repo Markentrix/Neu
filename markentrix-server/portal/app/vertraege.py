@@ -127,13 +127,13 @@ def pruefsumme(art: str, werte: dict, haken: list) -> str:
     return hashlib.sha256(json.dumps({"art": art, "vorlage": vorlage, "werte": werte, "haken": sorted(haken)}, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
-def mit_protokoll(pdf: bytes, art: str, firma: dict, name: str, email: str, zeit: str, ip: str, hashwert: str) -> bytes:
+def mit_protokoll(pdf: bytes, art: str, firma: dict, name: str, email: str, zeit: str, ip: str, hashwert: str, gegen: str = "") -> bytes:
     """Hängt dem ausgefüllten Vertrag eine Seite mit dem Bestätigungsprotokoll an."""
     from . import pdf as pdflib
     titel = {"referenz": "Referenzvertrag", "handelsvertreter": "Handelsvertretervertrag"}[art]
     inhalt = [pdflib.p("Elektronische Bestätigung", pdflib.H1), pdflib.Spacer(1, 6),
               pdflib.p(f"Der Vertrag „{titel}“ wurde von der unten genannten Person im Portal gelesen, ausgefüllt und bestätigt (einfache elektronische Signatur)."), pdflib.Spacer(1, 8),
-              pdflib.tabelle(["Angabe", "Wert"], [["Bestätigt von", name], ["Angemeldetes Konto", email], ["Zeitpunkt", zeit], ["IP-Adresse", ip], ["Prüfsumme (SHA-256)", hashwert]], breiten=[130, 350]),
+              pdflib.tabelle(["Angabe", "Wert"], [["Bestätigt von", name], ["Angemeldetes Konto", email], ["Zeitpunkt", zeit], ["IP-Adresse", ip], ["Prüfsumme (SHA-256)", hashwert]] + ([["Gegenzeichnung Markentrix", gegen]] if gegen else []), breiten=[130, 350]),
               pdflib.Spacer(1, 8), pdflib.p("Die Prüfsumme ergibt sich aus dem Vertragstext und allen eingetragenen Angaben. Wird nachträglich etwas verändert, stimmt sie nicht mehr überein.", pdflib.KLEIN)]
     zusatz = PdfReader(io.BytesIO(pdflib.dokument("Bestätigungsprotokoll", titel, inhalt, firma)))
     w = PdfWriter(clone_from=PdfReader(io.BytesIO(pdf)))

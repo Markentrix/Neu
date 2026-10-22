@@ -100,12 +100,14 @@ def bericht_senden(kid, monat: date, mail: bool = True) -> dict:
         cur.execute("SELECT firma, email, benachr_email FROM kunden WHERE id=%s", (kid,))
         k = cur.fetchone()
         daten, name = berichte.pdf_erzeugen(cur, bid)
+        cur.execute("SELECT daten FROM berichte WHERE id=%s", (bid,))
+        tipp = berichte.empfehlung(cur.fetchone()["daten"])
     an = _empfaenger(k)
     if not mail:
         return {"id": bid, "gesendet": False, "grund": ""}
     if not an:
         return {"id": bid, "gesendet": False, "grund": "Der Kunde hat keine E-Mail-Adresse hinterlegt."}
-    ok, fehler = mailer.monatsbericht(an, k["firma"], pdf.monat_name(monat), daten, name)
+    ok, fehler = mailer.monatsbericht(an, k["firma"], pdf.monat_name(monat), daten, name, tipp)
     if ok:
         with tx("system") as cur:
             cur.execute("UPDATE berichte SET versendet_am=now() WHERE id=%s", (bid,))
@@ -137,6 +139,40 @@ def lead_folgemails(cfg):
         mailer.lead_folge(l["email"], l["ansprechpartner"], l["firma"], f["betreff_%d" % n], f["text_%d" % n], tok)
 
 
+def umfragen_anlegen(cfg):
+    """Täglich: legt Zufriedenheitsumfragen an (30 Tage nach Start, danach alle 90 Tage). Beantwortet wird im Portal; eine Mail gibt es nur mit Einwilligung."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 7 or not _marker("umfragen-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    umfragen_erzeugen()
+
+
+def umfragen_erzeugen():
+    from .routes_umfrage import einwilligung
+    with tx("system") as cur:
+        cur.execute("UPDATE kunden_umfragen SET verfallen = true WHERE beantwortet_am IS NULL AND NOT verfallen AND angelegt_am < now() - interval '30 days'")
+        cur.execute("""INSERT INTO kunden_umfragen (kunden_id, art)
+                       SELECT k.id, CASE WHEN NOT EXISTS (SELECT 1 FROM kunden_umfragen u WHERE u.kunden_id = k.id) THEN 'start' ELSE 'quartal' END FROM kunden k
+                       WHERE k.status = 'aktiv' AND k.erstellt_am < now() - interval '30 days'
+                         AND NOT EXISTS (SELECT 1 FROM kunden_umfragen u WHERE u.kunden_id = k.id AND u.angelegt_am > now() - interval '90 days')
+                       LIMIT 50 RETURNING id, kunden_id""")
+        neu = cur.fetchall()
+        ziele = []
+        for u in neu:
+            if einwilligung(cur, u["kunden_id"]):
+                cur.execute("SELECT ansprechpartner, email FROM kunden WHERE id=%s", (u["kunden_id"],))
+                k = cur.fetchone()
+                ziele.append((u["id"], k["email"], k["ansprechpartner"]))
+    for uid, an, name in ziele:
+        try:
+            if (an or "").strip():
+                mailer.umfrage_einladung(an.strip(), name)
+                with tx("system") as cur:
+                    cur.execute("UPDATE kunden_umfragen SET mail_gesendet_am = now() WHERE id=%s", (uid,))
+        except Exception:  # noqa: BLE001
+            log.exception("Umfrage-Mail %s", uid)
+
+
 def kunden_feedback(cfg):
     """Eine Feedback-Mail 30 Tage nach Start, wenn in den Einstellungen eingeschaltet."""
     from .routes_folgemails import lesen as folge_lesen
@@ -144,7 +180,8 @@ def kunden_feedback(cfg):
         if not folge_lesen(cur)["kunden_feedback"]:
             return
         cur.execute("""UPDATE kunden k SET feedback_mail_am = now() WHERE k.id IN
-                         (SELECT id FROM kunden WHERE status = 'aktiv' AND feedback_mail_am IS NULL AND erstellt_am < now() - interval '30 days' LIMIT 20)
+                         (SELECT id FROM kunden WHERE status = 'aktiv' AND feedback_mail_am IS NULL AND erstellt_am < now() - interval '30 days'
+                            AND (SELECT erteilt FROM kunden_einwilligungen e WHERE e.kunden_id = kunden.id AND e.art = 'umfrage_mail' ORDER BY zeit DESC LIMIT 1) LIMIT 20)
                        RETURNING k.id, k.ansprechpartner""")
         kunden = cur.fetchall()
         ziele = [(kunden_empfaenger(cur, k["id"]), k["ansprechpartner"]) for k in kunden]
@@ -273,6 +310,38 @@ def vertrag_erinnern(cfg=None):
             zeilen = [f"- {r['wer']}: {'Referenzvertrag' if r['art'] == 'referenz' else 'Handelsvertretervertrag'} ({r['erinnerungen'] + 1}. Erinnerung)" for r in erledigt]
             mailer.senden(an, "Verträge noch offen: Erinnerungen verschickt", "Diese Verträge sind noch nicht bestätigt, die Empfänger wurden erinnert:\n\n" + "\n".join(zeilen) +
                           "\n\nÜbersicht im Portal: Admin → Verträge." + mailer.SIGNATUR)
+
+
+def vertrieb_erinnerung(cfg):
+    """Werktags morgens: erinnert jeden aktiven Vertriebler an Leads mit fälliger Wiedervorlage und an Leads, bei denen seit einer Woche nichts passiert ist (Mail und Push)."""
+    jetzt = datetime.now(timezone.utc)
+    if jetzt.hour < 6 or jetzt.weekday() >= 5 or not _marker("vertriebserinnerung-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    vertrieb_erinnern()
+
+
+def vertrieb_erinnern():
+    from . import push
+    with tx("system") as cur:
+        cur.execute("SELECT id, name, email FROM vertriebspartner WHERE status='aktiv' AND erinnerung_mail AND email IS NOT NULL AND (erinnerung_am IS NULL OR erinnerung_am < current_date) LIMIT 200")
+        partner = cur.fetchall()
+    for p in partner:
+        try:
+            with tx("system") as cur:
+                cur.execute("""SELECT firma, ort, wiedervorlage_am, letzter_kontakt_am, status FROM leads
+                               WHERE vertriebspartner_id=%s AND status NOT IN ('verloren','gewonnen','gesperrt','tot','consent_ausstehend')
+                                 AND (wiedervorlage_am <= current_date OR (status='kontaktiert' AND wiedervorlage_am IS NULL AND letzter_kontakt_am < now() - interval '7 days'))
+                               ORDER BY wiedervorlage_am NULLS LAST, letzter_kontakt_am LIMIT 50""", (p["id"],))
+                leads = cur.fetchall()
+                cur.execute("UPDATE vertriebspartner SET erinnerung_am=current_date WHERE id=%s", (p["id"],))
+                cur.execute("SELECT id FROM benutzer WHERE vertriebspartner_id=%s AND aktiv", (p["id"],))
+                ids = [r["id"] for r in cur.fetchall()]
+            if not leads:
+                continue
+            mailer.vertrieb_nachfassen((p["email"] or "").strip(), p["name"], leads)
+            push.senden(ids, "Heute nachfassen", f"{len(leads)} Leads warten auf dich", "/vertrieb#heute", "nachfassen")
+        except Exception:  # noqa: BLE001
+            log.exception("Vertriebs-Erinnerung %s", p["id"])
 
 
 def avv_erinnerung(cfg):
@@ -808,7 +877,7 @@ def tick():
             betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__})
     if not mailer.konfiguriert():
         return
-    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         try:
             job(cfg)
         except Exception:  # ein kaputter Job darf die anderen nicht stoppen

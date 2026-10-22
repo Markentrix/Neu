@@ -64,7 +64,11 @@ def _bestaetigen(zid: str, art: str, eigen: str, eigen_id, data: Antworten, requ
             alle_werte = {**_basis(cur, z)[0], **werte}
             hashwert = vertraege.pruefsumme(art, alle_werte, haken)
             firma = rechtstexte.firma(cur)
-            pdf_fertig = vertraege.mit_protokoll(pdf_roh, art, firma, name, user["email"], zeit, client_ip(request), hashwert)
+            gegen = ""
+            if z["gesendet_am"]:
+                gegen = (f"Markentrix hat den Vertrag am {z['gesendet_am'].astimezone(ZoneInfo('Europe/Berlin')):%d.%m.%Y um %H:%M Uhr} an {z['gesendet_an'] or 'den Empfänger'} versendet und damit seine Vertragserklärung abgegeben "
+                         "(Name sowie Ort und Datum von Markentrix sind im Vertrag eingetragen).")
+            pdf_fertig = vertraege.mit_protokoll(pdf_roh, art, firma, name, user["email"], zeit, client_ip(request), hashwert, gegen)
             cur.execute("""UPDATE vertragsdokumente SET datei=%s, datei_typ='application/pdf', datei_name=%s, unterschrieben_am=%s, hochgeladen_am=now(), online_am=now(),
                                   online_name=%s, online_email=%s, online_ip=%s, online_hash=%s, antworten=%s::jsonb WHERE id=%s""",
                         (pdf_fertig, dateiname.replace(".pdf", "-online-bestaetigt.pdf"), jetzt.date(), name, user["email"], client_ip(request), hashwert, json.dumps(sauber), zid))
@@ -241,3 +245,22 @@ def leitfaden_text(user: dict = Depends(require_vertrieb)):
         r = PdfReader(io.BytesIO((vertraege.DIR / "telefonleitfaden.pdf").read_bytes()))
         _TEXT = [{"seite": i + 1, "text": (s.extract_text() or "").strip()} for i, s in enumerate(r.pages)]
     return {"seiten": _TEXT}
+
+
+# ---------------------------------------------------------------- Tägliche Nachfass-Erinnerung (Einstellung des Vertrieblers)
+@vertrieb.get("/erinnerung")
+def erinnerung_lesen(user: dict = Depends(require_vertrieb)):
+    with tx("system") as cur:
+        cur.execute("SELECT erinnerung_mail FROM vertriebspartner WHERE id=%s", (user["vertriebspartner_id"],))
+        return {"an": cur.fetchone()["erinnerung_mail"]}
+
+
+class ErinnerungIn(BaseModel):
+    an: bool
+
+
+@vertrieb.put("/erinnerung")
+def erinnerung_setzen(data: ErinnerungIn, user: dict = Depends(require_vertrieb)):
+    with tx("system") as cur:
+        cur.execute("UPDATE vertriebspartner SET erinnerung_mail=%s WHERE id=%s", (data.an, user["vertriebspartner_id"]))
+    return {"ok": True}

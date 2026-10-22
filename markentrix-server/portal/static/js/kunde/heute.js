@@ -43,6 +43,18 @@ export async function antwortDialog(aid, danach) {
 
 const wartet = (hh) => hh === null || hh === undefined ? '' : (hh < 1 ? 'gerade eben' : hh < 24 ? 'seit ' + Math.floor(hh) + ' Std.' : 'seit ' + Math.floor(hh / 24) + ' Tg.');
 
+/** Kurze Zufriedenheitsumfrage (0 bis 10) direkt im Portal, ohne Mail. Erscheint, wenn eine Umfrage bereitliegt. */
+async function umfrageKarte() {
+  const o = await api('/api/kunde/umfrage').catch(() => ({ offen: null }));
+  if (!o.offen) return '';
+  const karte = h('div', { class: 'card' }), m = h('div'), kommentar = h('textarea', { rows: 2, maxlength: 1500, placeholder: 'Was läuft gut, was sollten wir besser machen? (freiwillig)', 'aria-label': 'Kommentar' });
+  const senden = async (p) => { try { const r = await api('/api/kunde/umfrage/' + o.offen.id, { method: 'POST', body: { punkte: p, kommentar: kommentar.value } });
+    karte.replaceChildren(h('h2', {}, 'Danke für deine Rückmeldung!'), p >= 9 && r.bewertungslink ? h('p', {}, 'Das freut uns sehr. Wenn du magst, hilft uns eine kurze öffentliche Bewertung: ', h('a', { href: r.bewertungslink, target: '_blank', rel: 'noopener' }, 'Bewertung schreiben')) : h('p', { class: 'muted' }, p <= 6 ? 'Wir melden uns persönlich bei dir, um es besser zu machen.' : 'Wir arbeiten weiter daran, noch besser zu werden.')); } catch (x) { melde(m, x.message); } };
+  karte.append(h('h2', {}, 'Wie zufrieden bist du mit Markentrix?'), h('p', { class: 'small muted' }, 'Ein Klick genügt: 0 = gar nicht, 10 = sehr. Das dauert zehn Sekunden.'), m,
+    h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px;margin:8px 0' }, Array.from({ length: 11 }, (_, i) => h('button', { class: 'btn sec small', style: 'min-width:40px', 'aria-label': i + ' von 10', onclick: () => senden(i) }, String(i)))), kommentar);
+  return karte;
+}
+
 V.heute = async () => {
   const d = await api('/api/kunde/heute');
   const meld = h('div'), karteAnfragen = h('div', { class: 'card' }), karteTermine = h('div', { class: 'card' });
@@ -93,5 +105,5 @@ V.heute = async () => {
   const hero = h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Schritt'),
     schritt ? [h('h2', {}, schritt.titel), h('p', { class: 'muted' }, schritt.text), schritt.link ? h('a', { class: 'btn', href: schritt.link }, schritt.knopf) : h('button', { class: 'btn', onclick: schritt.tun }, schritt.knopf)]
       : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf dich. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
-  return h('div', { class: 'stack' }, hero, kopf, meld, karteAnfragen, karteTermine, entscheidungen, bew);
+  return h('div', { class: 'stack' }, hero, kopf, meld, await umfrageKarte(), karteAnfragen, karteTermine, entscheidungen, bew);
 };

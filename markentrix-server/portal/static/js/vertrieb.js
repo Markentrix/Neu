@@ -103,11 +103,17 @@ function zahlenKarte(z) {
         : h('p', { class: 'small muted' }, p.offene_angebote ? 'Sobald die erste Provision berechnet wurde, siehst du hier ein Rechenbeispiel für deine offenen Angebote.' : 'Sobald Leads im Status „Angebot“ stehen, siehst du hier ein Rechenbeispiel.')));
 }
 
+const ranglisteKarte = async () => {
+  const r = await api('/api/vertrieb/rangliste').catch(() => ({ aktiv: false }));
+  if (!r.aktiv) return '';
+  return h('div', { class: 'card' }, h('h2', {}, 'Rangliste dieses Monats'), h('p', { class: 'small muted' }, 'Freundlicher Wettbewerb unter ' + r.teilnehmer + ' aktiven Vertrieblern. Gezählt wird ab dem 1. des Monats.'),
+    h('div', { class: 'grid3' }, Object.entries(r.listen).map(([art, liste]) => h('div', {}, h('h3', {}, r.titel[art]), h('ol', { style: 'padding-left:20px;margin:0' }, liste.map(x => h('li', { value: x.rang, style: x.ich ? 'font-weight:700' : '' }, x.name + ': ' + x.wert))))))); };
+
 V.uebersicht = async () => {
-  const z = await api('/api/vertrieb/zahlen');
+  const z = await api('/api/vertrieb/zahlen'), rang = await ranglisteKarte();
   const s = start.summen, l = start.leads;
   const offeneLeads = Object.entries(l).filter(([k]) => !['gewonnen', 'verloren', 'tot', 'gesperrt'].includes(k)).reduce((a, [, n]) => a + n, 0);
-  return h('div', { class: 'stack' }, zahlenKarte(z), h('div', { class: 'grid3' },
+  return h('div', { class: 'stack' }, zahlenKarte(z), rang, h('div', { class: 'grid3' },
     h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Provision offen'), h('b', {}, euro(s.offen_cent))),
     h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Dieser Monat'), h('b', {}, euro(s.dieser_monat_cent))),
     h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Ausgezahlt dieses Jahr'), h('b', {}, euro(s.ausgezahlt_jahr_cent))),
@@ -292,7 +298,11 @@ V.konto = async () => {
   const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/passwort', { method: 'POST', body: formular(e.target) }); melde(m, 'Passwort geändert.', 'ok'); e.target.reset(); } catch (x) { melde(m, x.message); } } },
     feld('Aktuelles Passwort', 'alt', { type: 'password', required: true, autocomplete: 'current-password' }), feld('Neues Passwort (mind. 10 Zeichen)', 'neu', { type: 'password', required: true, minlength: 10, autocomplete: 'new-password' }),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Passwort ändern')));
-  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f), pushKarte('vertrieb'), zweiFaktorKarte());
+  const er = await api('/api/vertrieb/erinnerung').catch(() => ({ an: true })), em = h('div');
+  const erBox = h('input', { type: 'checkbox', checked: er.an, style: 'width:auto', onchange: async () => { try { await api('/api/vertrieb/erinnerung', { method: 'PUT', body: { an: erBox.checked } }); melde(em, 'Gespeichert.', 'ok'); } catch (x) { erBox.checked = !erBox.checked; melde(em, x.message); } } });
+  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f),
+    h('div', { class: 'card' }, h('h2', {}, 'Nachfass-Erinnerung'), h('p', { class: 'small muted' }, 'Werktags morgens bekommst du eine Mail und eine Mitteilung, wenn Leads auf dein Nachfassen warten.'), em,
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, erBox, 'Tägliche Erinnerung per Mail')), pushKarte('vertrieb'), zweiFaktorKarte());
 };
 
 let aufruf = 0;

@@ -66,6 +66,18 @@ function datenKarte() {
 }
 
 V.willkommen = () => anleitungSeite('kunde', hat);
+/** Einwilligungen mit Nachweis: Umfrage per Mail (nur mit Zustimmung) und die Referenz-Freigabe samt Widerruf. */
+async function einwilligungenKarte() {
+  const e = await api('/api/kunde/einwilligungen'), m = h('div');
+  const box = h('input', { type: 'checkbox', checked: e.umfrage_mail, style: 'width:auto', onchange: async () => { try { await api('/api/kunde/einwilligungen', { method: 'PUT', body: { umfrage_mail: box.checked } }); melde(m, box.checked ? 'Danke, gespeichert.' : 'Zustimmung widerrufen.', 'ok'); } catch (x) { box.checked = !box.checked; melde(m, x.message); } } });
+  const ref = e.referenz ? (e.referenz.widerrufen_am ? 'Du hast die Referenz-Freigabe am ' + datum(e.referenz.widerrufen_am) + ' widerrufen.' : 'Du hast uns am ' + datum(e.referenz.unterschrieben_am) + ' Referenzen freigegeben.') : 'Du hast uns keine Referenz freigegeben.';
+  const letzte = e.verlauf[0];
+  return h('div', { class: 'card' }, h('h2', {}, 'Meine Einwilligungen'), h('p', { class: 'small muted' }, 'Alles hier ist freiwillig und jederzeit widerrufbar, ohne dass dir Nachteile entstehen.'), m,
+    h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:14px' }, box, 'Ich bin einverstanden, dass Markentrix mich gelegentlich per E-Mail um meine Meinung bittet (Zufriedenheitsumfrage). Ohne Zustimmung fragen wir nur im Portal.'),
+    letzte ? h('p', { class: 'small muted' }, 'Zuletzt geändert am ' + datum(letzte.zeit) + '.') : '',
+    h('p', {}, ref, ' ', e.referenz ? h('a', { href: '#vertraege' }, 'Ansehen oder widerrufen') : ''));
+}
+
 V.einstellungen = async () => {
   const p = await api('/api/kunde/profil');
   const vt = await api('/api/kunde/vertretung').catch(() => null), mv = h('div');
@@ -100,7 +112,7 @@ V.einstellungen = async () => {
         h('div', {}, h('label', {}, 'Von'), h('input', { name: 'von', type: 'date', value: vt.von ? String(vt.von).slice(0, 10) : '' })), h('div', {}, h('label', {}, 'Bis'), h('input', { name: 'bis', type: 'date', value: vt.bis ? String(vt.bis).slice(0, 10) : '' })),
         h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
-    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(), inhaber() ? await statusKarte() : '', inhaber() ? datenKarte() : '',
+    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(), inhaber() ? await statusKarte() : '', inhaber() ? await einwilligungenKarte() : '', inhaber() ? datenKarte() : '',
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
 };
 

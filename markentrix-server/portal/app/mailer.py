@@ -107,8 +107,9 @@ def termin_erinnerung(an: str, termine: list) -> tuple[bool, str]:
     return senden(an, "Erinnerung: anstehende Termine", text)
 
 
-def monatsbericht(an: str, firma: str, monat: str, pdf: bytes, dateiname: str) -> tuple[bool, str]:
+def monatsbericht(an: str, firma: str, monat: str, pdf: bytes, dateiname: str, tipp: dict | None = None) -> tuple[bool, str]:
     text = (f"Hallo,\n\nanbei Ihr Monatsbericht für {monat}: was bei {firma} über Ihre Website, Anfragen und Automatisierungen gelaufen ist.\n\n"
+            + (f"Unser Tipp für den nächsten Monat: {tipp['titel']}. {tipp['text']}\n\n" if tipp else "") +
             f"Den Bericht finden Sie auch jederzeit im Portal: {config.BASE_URL}/app#berichte\n\nBei Fragen melden Sie sich gern." + SIGNATUR)
     return senden(an, f"Ihr Monatsbericht {monat}", text, (dateiname, pdf, "application/pdf"))
 
@@ -192,6 +193,30 @@ def vertrag_erinnerung(an: str, name: str | None, art: str) -> tuple[bool, str]:
                 "Bei Fragen melden Sie sich jederzeit." + SIGNATUR)
         betreff = "Erinnerung: Handelsvertretervertrag"
     return senden(an, betreff, text)
+
+
+def umfrage_unzufrieden(an: str, firma: str, nr: str, punkte: int, kommentar: str, kid: str) -> tuple[bool, str]:
+    t = (f"{firma} ({nr}) hat in der Zufriedenheitsumfrage {punkte} von 10 Punkten gegeben.\n" + (f"Kommentar: {kommentar}\n" if kommentar else "") +
+         f"\nBitte zeitnah persönlich melden und nachfragen, was nicht gut läuft.\n\nKunde im Admin-Bereich: {config.BASE_URL}/admin#kunde/{kid}\n\n(automatische Meldung des Portals)")
+    return senden(an, f"Unzufriedener Kunde: {firma} ({punkte}/10)", t)
+
+
+def umfrage_einladung(an: str, name: str | None) -> tuple[bool, str]:
+    hallo = f"Hallo {name}," if name else "Hallo,"
+    text = (f"{hallo}\n\nSie haben zugestimmt, dass wir Sie gelegentlich per Mail um Ihre Meinung bitten. Wie zufrieden sind Sie mit uns? Die Antwort dauert zehn Sekunden: {config.BASE_URL}/app\n\n"
+            f"Die Zustimmung können Sie jederzeit in den Einstellungen des Portals widerrufen." + SIGNATUR)
+    return senden(an, "Wie zufrieden sind Sie mit Markentrix?", text)
+
+
+def vertrieb_nachfassen(an: str, name: str | None, leads: list) -> tuple[bool, str]:
+    zeilen = []
+    for l in leads[:10]:
+        wann = f"Wiedervorlage {l['wiedervorlage_am']:%d.%m.}" if l["wiedervorlage_am"] else "seit über einer Woche kein Kontakt"
+        zeilen.append(f"- {l['firma']}" + (f" ({l['ort']})" if l["ort"] else "") + f": {wann}")
+    mehr = f"\n… und {len(leads) - 10} weitere" if len(leads) > 10 else ""
+    text = (f"Guten Morgen {(name or '').split()[0] if name else ''},\n\nheute warten {len(leads)} Leads auf dein Nachfassen:\n\n" + "\n".join(zeilen) + mehr +
+            f"\n\nIm Portal (Heute anrufen) kannst du direkt anrufen und das Ergebnis festhalten: {config.BASE_URL}/vertrieb#heute\n\nDiese Erinnerung kannst du im Portal unter „Konto“ ausschalten." + SIGNATUR)
+    return senden(an, f"Heute nachfassen: {len(leads)} Leads", text)
 
 
 def avv_portal(an: str, name: str | None) -> tuple[bool, str]:

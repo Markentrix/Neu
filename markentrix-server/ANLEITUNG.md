@@ -525,3 +525,13 @@ Jede fertige Website ruft unter ihrer eigenen Domain `/api/anfrage`, `/api/slots
 - **Widerruf:** Der Kunde kann die Freigabe im Portal widerrufen (du bekommst eine Mail, Inhalte innerhalb von 7 Tagen entfernen). Kam der Widerruf per Mail oder Telefon, vermerkst du ihn in der Referenzliste.
 - **Einarbeitung:** Im Vertriebsportal steht auf „So geht’s“ und oben bei „Heute anrufen“ eine Checkliste (Vertrag, Leitfaden, Zwei-Faktor, IBAN, erster Anruf). Du siehst sie beim Vertriebler und in Admin → Verträge.
 - **Leitfaden:** Unter „Leitfaden“ gibt es jetzt eine Suche im Text des Telefonleitfadens und den Knopf „Ich habe den Leitfaden gelesen“.
+
+### Referenzseite, Zufriedenheit, Rangliste, Erinnerungen, Tipp im Monatsbericht
+
+- **Gegenzeichnung:** Die Protokollseite eines online bestätigten Vertrags nennt jetzt auch, wann Markentrix den Vertrag versendet und damit seine Erklärung abgegeben hat.
+- **Referenzseite (Admin → Verträge):** Die öffentliche Seite `/referenzen` zeigt nur, was Kunden für „Website von Markentrix“ freigegeben und mit Wortlaut angegeben haben (Kurzbeschreibung, Kennzahlen, Zitat, Link). Sie ist erst sichtbar, wenn du „Seite veröffentlichen“ einschaltest. Widerrufene Freigaben verschwinden sofort. Logos und Abbildungen fügst du bei Bedarf von Hand ein.
+- **Zufriedenheit (Admin → Zufriedenheit):** Kunden werden 30 Tage nach dem Start und danach alle 90 Tage auf ihrer Startseite im Portal gefragt (0 bis 10). Eine Mail dazu gibt es nur, wenn der Kunde unter Einstellungen → „Meine Einwilligungen“ zugestimmt hat (Umfragen per Mail gelten als Werbung). Bei 0–6 bekommst du sofort eine Mail, bei 9–10 sieht der Kunde deinen Bewertungslink. Du siehst NPS, Verlauf und Kommentare.
+- **Einwilligungen:** Der Kunde kann seine Zustimmung jederzeit im Portal widerrufen. Zustimmung und Widerruf werden mit Zeit und IP protokolliert.
+- **Rangliste (Admin → Vertriebs-Auswertung):** Einschalten zeigt den Vertrieblern ihre Monatsplatzierung (Anrufe, Termine, Abschlüsse). Auf Wunsch mit Vornamen, sonst „Vertriebler 2“.
+- **Nachfass-Erinnerung:** Werktags morgens bekommt jeder aktive Vertriebler eine Mail und eine Mitteilung mit den Leads, deren Wiedervorlage fällig ist oder bei denen seit einer Woche nichts passiert ist. Abschaltbar unter Konto.
+- **Monatsbericht:** Enthält jetzt „Unser Tipp für den nächsten Monat“ (ein konkreter Vorschlag aus den Zahlen), im PDF und in der Mail.

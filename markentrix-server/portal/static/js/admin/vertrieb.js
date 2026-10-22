@@ -152,13 +152,17 @@ V.leads = async () => {
 };
 
 V.auswertung = async () => {
-  const d = await api('/api/admin/vertrieb/auswertung');
+  const [d, rg] = await Promise.all([api('/api/admin/vertrieb/auswertung'), api('/api/admin/vertrieb/rangliste-einstellung')]), rm = h('div');
+  const rgA = h('input', { type: 'checkbox', checked: rg.aktiv, style: 'width:auto' }), rgN = h('input', { type: 'checkbox', checked: rg.namen, style: 'width:auto' });
+  const rgKarte = h('div', { class: 'card' }, h('h2', {}, 'Rangliste im Partnerportal'), h('p', { class: 'small muted' }, 'Zeigt den Vertrieblern ihre Monatsplatzierung bei Anrufen, Terminen und Abschlüssen (Top 5 plus eigene Position). Ohne Namen heißen die anderen „Vertriebler 2“ usw.'), rm,
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, rgA, 'Rangliste einschalten'), h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, rgN, 'Vornamen der anderen zeigen'),
+    h('p', {}, knopf('Speichern', async () => { try { await api('/api/admin/vertrieb/rangliste-einstellung', { method: 'PUT', body: { aktiv: rgA.checked, namen: rgN.checked } }); melde(rm, 'Gespeichert.', 'ok'); } catch (x) { fehler(rm, x); } })));
   const proz = (a, b) => b ? Math.round(a * 100 / b) + ' %' : '–';
   const tab = (titel, liste, extra = []) => h('div', { class: 'card' }, h('h2', {}, titel), tabelle([['', z => h('b', {}, z.name)], ['Leads', z => z.leads], ['Bearbeitet', z => z.bearbeitet + ' (' + proz(z.bearbeitet, z.leads) + ')'],
     ['Erreicht / Antwort', z => z.erreicht + ' (' + proz(z.erreicht, z.bearbeitet) + ')'], ['Termine', z => z.termine + ' (' + proz(z.termine, z.bearbeitet) + ')'], ['Kunden', z => h('b', {}, z.kunden)], ['Verloren', z => z.verloren], ...extra], liste, 'Noch keine Daten.'));
   const g = d.gesamt || { leads: 0, bearbeitet: 0, erreicht: 0, termine: 0, kunden: 0 };
   const stufe = (t, n, von) => h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, t), h('b', {}, n), von !== undefined ? h('span', { class: 'small muted' }, proz(n, von) + ' der Vorstufe') : '');
-  return h('div', { class: 'stack' }, kopf('Vertriebs-Auswertung'),
+  return h('div', { class: 'stack' }, kopf('Vertriebs-Auswertung'), rgKarte,
     h('p', { class: 'small muted' }, 'So viele Leads sind auf welcher Stufe angekommen. „Bearbeitet“ heißt: mindestens ein Kontakt festgehalten. Die Quoten zeigen, welche Liste, Branche und welcher Vertriebler wirklich Termine und Kunden bringt. Ein Lead zählt auf der höchsten Stufe, die er erreicht hat.'),
     h('div', { class: 'grid3' }, stufe('Leads', g.leads), stufe('Bearbeitet', g.bearbeitet, g.leads), stufe('Erreicht / Antwort', g.erreicht, g.bearbeitet), stufe('Termine', g.termine, g.erreicht), stufe('Kunden', g.kunden, g.termine),
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Gebuchte Gespräche (kommend)'), h('b', {}, d.gebuchte_gespraeche))),

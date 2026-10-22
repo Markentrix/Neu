@@ -111,6 +111,8 @@ chk("Abgemeldet: nie wieder",len(mail_an(f"fm1{sfx}@k.de"))==n0)
 # Kunden-Feedback
 a.put("/api/admin/einstellungen/folgemails",json={**f,"aktiv":True,"kunden_feedback":True})
 a.post(f"/api/admin/kunden/{kid}/status",json={"status":"aktiv"}); sql(f"update kunden set erstellt_am=now()-interval '40 days', feedback_mail_am=null where id='{kid}'")
+jobs.kunden_feedback(cfg); chk("Ohne Einwilligung keine Feedback-Mail",len(mail_an(kmail,"läuft es"))==0)
+sql(f"insert into kunden_einwilligungen (kunden_id, art, erteilt) values ('{kid}','umfrage_mail',true)"); sql(f"update kunden set feedback_mail_am=null where id='{kid}'")
 jobs.kunden_feedback(cfg); chk("Feedback-Mail",len(mail_an(kmail,"läuft es"))>=1)
 n=len(mail_an(kmail,"läuft es")); jobs.kunden_feedback(cfg); chk("Feedback nur einmal",len(mail_an(kmail,"läuft es"))==n)
 a.put("/api/admin/einstellungen/folgemails",json={**f,"aktiv":False})
