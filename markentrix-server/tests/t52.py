@@ -68,7 +68,7 @@ sql(f"update website_termine set start=now()+interval '10 hours', ende=now()+int
 webbetrieb.erinnerungen(); chk("Abgeschaltet: keine Erinnerung",not mail_an("olga@besucher.de","Erinnerung"))
 cA.put("/api/kunde/website-dienste/kalender",json={**KAL,"erinnerung":True,"erinnerung_std1":12,"erinnerung_std2":0})
 webbetrieb.erinnerungen(); chk("Eigene Zeiten (12 h) gelten",len(mail_an("olga@besucher.de","Erinnerung"))==1)
-r=W.get(absag,follow_redirects=True); chk("Absage-Link funktioniert",r.status_code==200 and sql(f"select status from website_termine where ref='{ref1}'")=="abgesagt",r.status_code)
+r=W.post(absag.split("?")[0],data={"t":absag.split("t=")[1]}); chk("Absage-Link funktioniert",r.status_code==200 and sql(f"select status from website_termine where ref='{ref1}'")=="abgesagt",r.status_code)
 sql(f"update website_termine set start=now()+interval '2 hours', erinnerung=1 where ref='{ref3}'")
 webbetrieb.erinnerungen(); chk("Stufe 2 aus (0): keine weitere Mail",len(mail_an("olga@besucher.de","Erinnerung"))==1)
 # ---- Nichterschienen

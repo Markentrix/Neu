@@ -400,6 +400,12 @@ Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nu
 - Je Leistung: Dauer (Pflicht), Pause, Preis, Anzahlung (fester Betrag oder Prozent vom Preis) und das Häkchen „bestätige ich selbst“. Hat die Leistung eine Anzahlung, bekommt der Besucher den PayPal-Link sofort in der Mail, auch bei Sofortbuchung. Bei „bestätige ich selbst“ ist die Zeit nur vorgemerkt, bis der Inhaber bestätigt.
 - „Anzahlung und Absage“: Kostenlos absagen bis X Stunden vorher (Standard 24), danach ist der volle Betrag zu zahlen. Optional eine Frist für die Anzahlung: Ist bis dahin nichts als erhalten markiert, gibt das Portal den Termin frei und informiert Besucher und Betrieb.
 - Beim Termin klickt der Inhaber **„Anzahlung erhalten“** und später **„Alles bezahlt“**. Das Portal sieht PayPal nicht, die Markierung stammt vom Inhaber.
+- **Absage und Umbuchen durch den Besucher:** Der Link in der Mail zeigt erst die Regel und sagt erst nach einem Klick ab. Bis zur Frist (Standard 24 Std.) ist es kostenlos und der Besucher kann stattdessen einen neuen Termin wählen. Danach ist der volle Betrag fällig, die Anzahlung bleibt beim Betrieb.
+- **Erstattung:** Bei rechtzeitiger Absage oder wenn der Betrieb absagt, erscheint „Anzahlung zurückzahlen“. Nach der Rückzahlung per PayPal klickt der Inhaber **„Erstattet“**.
+- **Quittung:** Beim Termin mit erhaltener Anzahlung: **„Quittung (PDF)“** oder **„Quittung per Mail“**. Es ist eine Zahlungsbestätigung, keine Rechnung mit Umsatzsteuer; die steuerliche Behandlung klärt die Steuerberatung.
+- **Zusatzfragen je Leistung:** Feld „Zusatzfragen“, z. B. `Haarlänge*, Haarzustand` (Stern = Pflicht). Die Website zeigt sie im Formular.
+- **Mehrere Leistungen in einem Termin:** Dauer, Preis und Anzahlung werden addiert; die Person muss alle Leistungen anbieten.
+- Datenschutz-Texte für Zahlung/Anzahlung/Gutschein: `docs/DATENSCHUTZ-BAUSTEIN-ZAHLUNG.md` (vom Anwalt prüfen lassen).
 - **Übersicht als Excel:** Woche, Monat oder eigener Zeitraum. Blätter: Termine (mit Preis, Anzahlung, Zahlungsstand, Rest), Zusammenfassung, Gutscheine.
 - Leistungen, Preise und Dauer stehen automatisch in der Wissensdatenbank (Eintrag „Leistungen und Preise (automatisch)“) und im Baustein `data-mk="preise"` der Website. Im Kundenblatt (Admin) stellst du je Kunde ein, ob seine Änderungen **sofort live** gehen (Standard) oder **deine Freigabe** brauchen (Karte „Leistungen und Preise: Freigabe“).
 

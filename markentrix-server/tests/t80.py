@@ -102,7 +102,7 @@ chk("Zeit ist wieder buchbar",post("/anfrage",T(tage[3],"08:00","politur",f"neu{
 # ---- Excel
 r=cA.get(D+f"/uebersicht.xlsx?zeitraum=eigen&von={heute.isoformat()}&bis={(heute+datetime.timedelta(days=30)).isoformat()}"); chk("Excel-Datei kommt",r.status_code==200 and r.content[:2]==b"PK" and "spreadsheetml" in r.headers["content-type"],r.status_code)
 wb=openpyxl.load_workbook(io.BytesIO(r.content)); chk("Drei Blätter",wb.sheetnames==["Termine","Zusammenfassung","Gutscheine"],wb.sheetnames)
-ws=wb["Termine"]; zeilen=list(ws.iter_rows(min_row=2,values_only=True)); refs={z[13]:z for z in zeilen}
+ws=wb["Termine"]; zeilen=list(ws.iter_rows(min_row=2,values_only=True)); refs={z[14]:z for z in zeilen}
 chk("Termine stehen mit Preis, Anzahlung und Zahlungsstand drin",len(zeilen)>=5 and refs[r2][8]==200 and refs[r2][9]==50 and refs[r2][11] is not None and refs[r2][12]==0,zeilen[:3])
 chk("Abgesagter Termin ist als abgesagt markiert",refs[r4][7]=="abgesagt")
 chk("Offener Rest wird gerechnet (Anzahlung erhalten, nicht komplett bezahlt)",refs[r5][12]==150,refs[r5])

@@ -16,7 +16,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import config, einstellungen, push, webbetrieb
+from . import config, einstellungen, push, quittung, webbetrieb
 from . import sitedienste as sd
 from .db import tx
 from .security import EMAIL_RE, audit, client_ip, rate_limit, require_admin, require_inhaber
@@ -262,26 +262,167 @@ def _seite(text: str) -> HTMLResponse:
                         f'<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><p>{escape(text)}</p></body>')
 
 
+def _seite_html(titel: str, inhalt: str) -> HTMLResponse:
+    return HTMLResponse('<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(titel) + '</title>'
+                        '<body style="font:16px system-ui;max-width:560px;margin:8vh auto;padding:0 20px;color:#0B1020;line-height:1.5">' + inhalt + '</body></html>')
+
+
+def _knopf_stil() -> str:
+    return "font:inherit;padding:10px 18px;border-radius:8px;border:1px solid #0B1020;background:#0B1020;color:#fff;cursor:pointer;margin:4px 6px 4px 0"
+
+
+def _buchung_zu_token(cur, site_id: str, t: str):
+    cur.execute("""SELECT w.*, d.site_id, d.storno_std, d.mail_empfaenger, d.kal_empfaenger, d.kal_ort, d.kal_dauer, k.firma
+                   FROM website_termine w JOIN website_dienste d ON d.kunden_id=w.kunden_id JOIN kunden k ON k.id=w.kunden_id WHERE w.token=%s AND d.site_id=%s""", (t, site_id))
+    return cur.fetchone()
+
+
+def _regel(g: dict) -> tuple[bool, float]:
+    """(kostenlos möglich, Stunden bis zum Termin)."""
+    std = (g["start"] - datetime.now(timezone.utc)).total_seconds() / 3600
+    return std >= g["storno_std"], std
+
+
+def _anz_text(g: dict) -> str:
+    return str(g["anzahlung_betrag"] if g["anzahlung_betrag"] is not None else (g["anzahlung"] or "")).replace(".", ",")
+
+
 @router.get("/site/{site_id}/termin/absagen", include_in_schema=False)
-def oeff_absagen(site_id: str, t: str, request: Request, bg: BackgroundTasks):
-    rate_limit("siteabsagen:" + client_ip(request), 20, 600)
+def oeff_absagen(site_id: str, t: str, request: Request):
+    """Zeigt die Absageregel und fragt nach. Absagen passiert erst nach dem Klick (Mail-Programme rufen Links manchmal von selbst auf)."""
+    rate_limit("siteabsagen:" + client_ip(request), 30, 600)
     if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not 10 <= len(t) <= 100:
         return _seite("Dieser Link ist ungültig.")
     with tx("system") as cur:
-        cur.execute("""UPDATE website_termine w SET status='abgesagt' FROM website_dienste d
-                       WHERE w.token=%s AND d.site_id=%s AND d.kunden_id=w.kunden_id AND w.status='gebucht' AND w.start > now()
-                       RETURNING w.kunden_id, w.start, w.name, w.termin_id, d.mail_empfaenger, d.kal_empfaenger""", (t, site_id))
-        g = cur.fetchone()
-        if not g:
+        g = _buchung_zu_token(cur, site_id, t)
+    if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
+        return _seite("Dieser Termin ist nicht mehr aktiv.")
+    lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    frei, _ = _regel(g)
+    anz = _anz_text(g)
+    if frei:
+        regel = "Die kostenlose Absage ist noch möglich." + (f" Ihre Anzahlung von {escape(anz)} € wird erstattet." if g["anzahlung_erhalten_am"] and anz else "")
+    else:
+        regel = (f"Die Absage liegt innerhalb der Frist von {g['storno_std']} Stunden vor dem Termin. Dann ist der volle Betrag zu zahlen" + (f", die Anzahlung von {escape(anz)} € wird nicht erstattet" if anz else "") +
+                 ". Wenn Sie den Termin nicht wahrnehmen können, sprechen Sie bitte direkt mit uns.")
+    umbuchen = f'<p><a href="/site/{site_id}/termin/verschieben?t={escape(t)}">Lieber einen anderen Termin wählen</a></p>' if frei else ""
+    return _seite_html("Termin absagen", f'<h1 style="font-size:22px">Termin absagen</h1><p><b>{escape(g["firma"])}</b><br>{escape(lokal)}</p><p>{regel}</p>'
+                       f'<form method="post" action="/site/{site_id}/termin/absagen"><input type="hidden" name="t" value="{escape(t)}"><button style="{_knopf_stil()}">Ja, Termin absagen</button></form>{umbuchen}')
+
+
+@router.post("/site/{site_id}/termin/absagen", include_in_schema=False)
+async def oeff_absagen_senden(site_id: str, request: Request, bg: BackgroundTasks):
+    rate_limit("siteabsagenp:" + client_ip(request), 20, 600)
+    form = await request.form()
+    t = str(form.get("t") or "")
+    if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not 10 <= len(t) <= 100:
+        return _seite("Dieser Link ist ungültig.")
+    with tx("system") as cur:
+        g = _buchung_zu_token(cur, site_id, t)
+        if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
             return _seite("Dieser Termin ist nicht mehr aktiv.")
+        frei, _ = _regel(g)
+        cur.execute("UPDATE website_termine SET status='abgesagt', abgesagt_am=now(), abgesagt_von='besucher', storno_kostenlos=%s WHERE id=%s", (frei, g["id"]))
         if g["termin_id"]:
             cur.execute("UPDATE termine SET status='abgesagt' WHERE id=%s", (g["termin_id"],))
         ids = push.kunde(cur, g["kunden_id"])
     wann = g["start"].astimezone(TZ).strftime("%d.%m.%Y %H:%M")
-    push.senden(ids, "Termin abgesagt", f"{g['name']} hat den Termin am {wann} Uhr abgesagt.", "/app#heute", "termin")
+    anz = _anz_text(g)
+    erstatten = bool(frei and g["anzahlung_erhalten_am"] and anz)
+    kosten = "" if frei else (f"\nDie Absage kam später als {g['storno_std']} Stunden vor dem Termin: Der volle Betrag ist fällig" + (f", die Anzahlung von {anz} € wird einbehalten." if g["anzahlung_erhalten_am"] and anz else "."))
+    hinweis = f"\nBitte die Anzahlung von {anz} € zurückzahlen und im Portal beim Termin „Erstattet“ klicken." if erstatten else ""
+    push.senden(ids, "Termin abgesagt" + (" (Erstattung offen)" if erstatten else "" if frei else " (zu spät)"), f"{g['name']} hat den Termin am {wann} Uhr abgesagt.", "/app#dienste", "termin")
     for a in [x for x in _empfaenger(g["kal_empfaenger"] or g["mail_empfaenger"]) if EMAIL_RE.match(x)][:5]:
-        bg.add_task(sd.kundenmail, g["kunden_id"], a, f"Termin abgesagt: {g['name']}", f"{g['name']} hat den Termin am {wann} Uhr abgesagt.", None, None, "termin")
-    return _seite("Ihr Termin wurde abgesagt. Sie können jederzeit einen neuen buchen.")
+        bg.add_task(sd.kundenmail, g["kunden_id"], a, f"Termin abgesagt: {g['name']}", f"{g['name']} hat den Termin am {wann} Uhr abgesagt.{kosten}{hinweis}", None, None, "termin")
+    gast = (f"Guten Tag {g['name']},\n\nIhr Termin am {wann} Uhr ist abgesagt." + ("\nIhre Anzahlung von " + anz + " € wird erstattet." if erstatten else "") + (kosten if not frei else "") +
+            f"\n\nViele Grüße\n{g['firma']}")
+    bg.add_task(sd.kundenmail, g["kunden_id"], g["email"], f"Absage bestätigt: Ihr Termin bei {g['firma']}", gast, None, None, "termin")
+    return _seite("Ihr Termin wurde abgesagt." + (" Die Anzahlung wird erstattet." if erstatten else "") + (" Da die Absage nach der Frist kam, ist der volle Betrag fällig." if not frei else "") + " Sie können jederzeit einen neuen buchen.")
+
+
+@router.get("/site/{site_id}/termin/verschieben", include_in_schema=False)
+def oeff_verschieben(site_id: str, t: str, request: Request):
+    rate_limit("siteverschieben:" + client_ip(request), 30, 600)
+    if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not 10 <= len(t) <= 100:
+        return _seite("Dieser Link ist ungültig.")
+    with tx("system") as cur:
+        g = _buchung_zu_token(cur, site_id, t)
+        if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
+            return _seite("Dieser Termin ist nicht mehr aktiv.")
+        frei, _ = _regel(g)
+        if not frei:
+            return _seite(f"Umbuchen ist bis {g['storno_std']} Stunden vor dem Termin möglich. Bitte sprechen Sie direkt mit uns.")
+        z = sd.zeile(cur, g["kunden_id"])
+        lz = None
+        if g["leistung_id"]:
+            cur.execute("SELECT * FROM website_leistungen WHERE id=%s", (g["leistung_id"],))
+            lz = cur.fetchone()
+        plan = sd.slotplan(cur, z, leistung=lz, mitarbeiter=g["mitarbeiter_id"])
+    tage = []
+    for tag, slots in sorted(plan.items()):
+        fr = [x for x in slots if x[2]]
+        if fr:
+            tage.append((tag, fr))
+        if len(tage) >= 14:
+            break
+    if not tage:
+        return _seite("Im Moment sind keine anderen Zeiten frei. Bitte sprechen Sie direkt mit uns.")
+    WT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+    teile = []
+    for tag, fr in tage:
+        knoepfe = "".join(f'<button name="neu" value="{escape(u.isoformat())}" style="{_knopf_stil()}">{escape(zt)}</button>' for zt, u, _f, _r in fr)
+        teile.append(f'<details style="margin:6px 0"><summary><b>{WT[tag.weekday()]}, {tag.strftime("%d.%m.%Y")}</b></summary>{knoepfe}</details>')
+    lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    return _seite_html("Termin verschieben", f'<h1 style="font-size:22px">Termin verschieben</h1><p>Ihr aktueller Termin: <b>{escape(lokal)}</b>. Bitte wählen Sie eine neue Zeit.</p>'
+                       f'<form method="post" action="/site/{site_id}/termin/verschieben"><input type="hidden" name="t" value="{escape(t)}">{"".join(teile)}</form>')
+
+
+@router.post("/site/{site_id}/termin/verschieben", include_in_schema=False)
+async def oeff_verschieben_senden(site_id: str, request: Request, bg: BackgroundTasks):
+    rate_limit("siteverschiebenp:" + client_ip(request), 20, 600)
+    form = await request.form()
+    t, neu = str(form.get("t") or ""), str(form.get("neu") or "")
+    if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not 10 <= len(t) <= 100:
+        return _seite("Dieser Link ist ungültig.")
+    try:
+        start = datetime.fromisoformat(neu).astimezone(timezone.utc)
+    except ValueError:
+        return _seite("Diese Zeit gibt es nicht. Bitte noch einmal wählen.")
+    with tx("system") as cur:
+        g = _buchung_zu_token(cur, site_id, t)
+        if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
+            return _seite("Dieser Termin ist nicht mehr aktiv.")
+        if not _regel(g)[0]:
+            return _seite(f"Umbuchen ist bis {g['storno_std']} Stunden vor dem Termin möglich. Bitte sprechen Sie direkt mit uns.")
+        cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(g["kunden_id"]),))
+        z = sd.zeile(cur, g["kunden_id"])
+        lz = None
+        if g["leistung_id"]:
+            cur.execute("SELECT * FROM website_leistungen WHERE id=%s", (g["leistung_id"],))
+            lz = cur.fetchone()
+        tag = start.astimezone(TZ).date()
+        treffer = [(u, rid) for zt, u, f, rid in sd.slotplan(cur, z, leistung=lz, mitarbeiter=g["mitarbeiter_id"]).get(tag, []) if u == start and f]
+        if not treffer:
+            return _seite("Diese Zeit ist leider nicht mehr frei. Bitte gehen Sie zurück und wählen Sie eine andere.")
+        dauer = g["ende"] - g["start"]
+        rid = treffer[0][1] or g["mitarbeiter_id"]
+        try:
+            cur.execute("UPDATE website_termine SET start=%s, ende=%s, mitarbeiter_id=%s, erinnerung=0, verschoben_am=now() WHERE id=%s ", (start, start + dauer, rid, g["id"]))
+        except Exception:
+            return _seite("Diese Zeit wurde gerade vergeben. Bitte wählen Sie eine andere.")
+        if g["termin_id"]:
+            cur.execute("UPDATE termine SET beginn=%s, ende=%s WHERE id=%s", (start, start + dauer, g["termin_id"]))
+        ids = push.kunde(cur, g["kunden_id"])
+    alt = g["start"].astimezone(TZ).strftime("%d.%m.%Y %H:%M")
+    neu_txt = start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    push.senden(ids, "Termin verschoben", f"{g['name']}: von {alt} auf {neu_txt}.", "/app#heute", "termin")
+    for a in [x for x in _empfaenger(g["kal_empfaenger"] or g["mail_empfaenger"]) if EMAIL_RE.match(x)][:5]:
+        bg.add_task(sd.kundenmail, g["kunden_id"], a, f"Termin verschoben: {g['name']}", f"{g['name']} hat den Termin von {alt} Uhr auf {neu_txt} verschoben.", None, None, "termin")
+    absagen = f"{config.BASE_URL}/site/{site_id}/termin/absagen?t={t}"
+    bg.add_task(sd.kundenmail, g["kunden_id"], g["email"], f"Ihr neuer Termin bei {g['firma']} am {neu_txt}",
+                f"Guten Tag {g['name']},\n\nIhr Termin wurde verschoben auf: {neu_txt}.\n{g['kal_ort'] or ''}\n\nDie neue Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{g['firma']}",
+                None, ("termin.ics", sd.ics(str(g["id"]), start, start + dauer, "Termin bei " + g["firma"], g["kal_ort"] or ""), "text/calendar"), "termin")
+    return _seite(f"Ihr Termin ist jetzt am {neu_txt}. Eine Bestätigung kommt per E-Mail.")
 
 
 @router.get("/site/{site_id}/bewertung/abmelden", include_in_schema=False)
@@ -649,7 +790,7 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
     with tx("system") as cur:
         z = sd.zeile(cur, kid)
         sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
-        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.email, w.telefon, w.nachricht, w.daten, w.anzahlung, w.anzahlung_betrag, w.preis_betrag, w.anzahlung_erhalten_am, w.bezahlt_am, w.erstellt_am, w.ergebnis,
+        cur.execute("""SELECT w.id, w.ref, w.status, w.start, w.ende, w.name, w.email, w.telefon, w.nachricht, w.daten, w.anzahlung, w.anzahlung_betrag, w.preis_betrag, w.anzahlung_erhalten_am, w.bezahlt_am, w.quittung_am, w.erstellt_am, w.ergebnis,
                               l.name AS leistung, m.name AS mitarbeiter,
                               (SELECT count(*) FROM website_termine x WHERE x.kunden_id=w.kunden_id AND lower(x.email)=lower(w.email) AND x.ergebnis='nicht_erschienen') AS fehlt_bisher
                        FROM website_termine w LEFT JOIN website_leistungen l ON l.id=w.leistung_id LEFT JOIN website_mitarbeiter m ON m.id=w.mitarbeiter_id
@@ -665,7 +806,7 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
         d = r["daten"] or {}
         details = {k: v for k, v in d.items() if k not in ("typ", "name", "telefon", "email", "nachricht", "datum", "datum2", "uhrzeit") and v}
         eintrag = {"id": str(r["id"]), "ref": r["ref"] or "", "status": r["status"], "start": r["start"], "name": r["name"], "email": r["email"], "telefon": r["telefon"] or "",
-                   "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "preis": f"{r['preis_betrag']:.2f}" if r["preis_betrag"] is not None else "", "anzahlung_erhalten_am": r["anzahlung_erhalten_am"], "bezahlt_am": r["bezahlt_am"], "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
+                   "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "preis": f"{r['preis_betrag']:.2f}" if r["preis_betrag"] is not None else "", "anzahlung_erhalten_am": r["anzahlung_erhalten_am"], "bezahlt_am": r["bezahlt_am"], "quittung_am": r["quittung_am"], "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
                    "ende": r["ende"], "fehlt_bisher": r["fehlt_bisher"]}
         (vorbei if r["start"] <= jetzt and r["status"] == "gebucht" and r["ergebnis"] is None else out).append(eintrag)
     return {"buchungen": out, "vergangen": vorbei, "freigabe": z["kal_freigabe"]}
@@ -718,7 +859,7 @@ def k_uebersicht(zeitraum: str = "monat", von: str = "", bis: str = "", user: di
     wb = Workbook()
     ws = wb.active
     ws.title = "Termine"
-    ws.append(["Datum", "Uhrzeit", "Name", "E-Mail", "Telefon", "Leistung", "Mitarbeiter", "Status", "Preis (€)", "Anzahlung (€)", "Anzahlung erhalten", "Komplett bezahlt", "Rest offen (€)", "Vorgang"])
+    ws.append(["Datum", "Uhrzeit", "Name", "E-Mail", "Telefon", "Leistung", "Mitarbeiter", "Status", "Preis (€)", "Anzahlung (€)", "Anzahlung erhalten", "Komplett bezahlt", "Rest offen (€)", "Erstattung", "Vorgang"])
     summe = {"gebucht": 0, "abgesagt": 0, "nicht_erschienen": 0, "anz_soll": 0.0, "anz_da": 0.0, "preis": 0.0, "bezahlt": 0}
     nach_leistung: dict = {}
     for t in termine:
@@ -726,6 +867,11 @@ def k_uebersicht(zeitraum: str = "monat", von: str = "", bis: str = "", user: di
         status = {"gebucht": "gebucht", "reserviert": "wartet auf Bestätigung", "abgesagt": "abgesagt"}.get(t["status"], t["status"])
         if t["ergebnis"] == "nicht_erschienen":
             status = "nicht erschienen"
+        if t["status"] == "abgesagt":
+            status = "abgesagt" if not t.get("abgesagt_von") else ("abgesagt (kostenlos)" if t.get("storno_kostenlos") else "zu spät abgesagt (voller Betrag)")
+        erstattung = ""
+        if t["status"] == "abgesagt" and t["anzahlung_erhalten_am"] and t.get("storno_kostenlos"):
+            erstattung = "erstattet" if t.get("erstattet_am") else "offen"
         preis = float(t["preis_betrag"]) if t["preis_betrag"] is not None else None
         anz = float(t["anzahlung_betrag"]) if t["anzahlung_betrag"] is not None else None
         rest = None
@@ -733,7 +879,7 @@ def k_uebersicht(zeitraum: str = "monat", von: str = "", bis: str = "", user: di
             rest = 0.0 if t["bezahlt_am"] else max(preis - (anz or 0.0 if t["anzahlung_erhalten_am"] else 0.0), 0.0)
         ws.append([lokal.date(), lokal.strftime("%H:%M"), t["name"], t["email"], t["telefon"] or "", t["leistung"] or "", t["mitarbeiter"] or "", status, preis, anz,
                    t["anzahlung_erhalten_am"].astimezone(TZ).date() if t["anzahlung_erhalten_am"] else ("" if anz else "–"),
-                   t["bezahlt_am"].astimezone(TZ).date() if t["bezahlt_am"] else "", rest, t["ref"] or ""])
+                   t["bezahlt_am"].astimezone(TZ).date() if t["bezahlt_am"] else "", rest, erstattung, t["ref"] or ""])
         if t["status"] == "abgesagt":
             summe["abgesagt"] += 1
             continue
@@ -751,7 +897,7 @@ def k_uebersicht(zeitraum: str = "monat", von: str = "", bis: str = "", user: di
         summe["bezahlt"] += 1 if t["bezahlt_am"] else 0
     for c in ws[1]:
         c.font, c.fill = kopf_stil, fuell
-    for sp, br in zip("ABCDEFGHIJKLMN", (12, 8, 22, 28, 16, 24, 16, 22, 11, 14, 17, 16, 14, 16)):
+    for sp, br in zip("ABCDEFGHIJKLMNO", (12, 8, 22, 28, 16, 24, 16, 22, 11, 14, 17, 16, 14, 12, 16)):
         ws.column_dimensions[sp].width = br
     for row in ws.iter_rows(min_row=2):
         row[0].number_format = "DD.MM.YYYY"
@@ -1057,8 +1203,8 @@ def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Dep
     rate_limit("buchabl:" + str(kid), 60, 600)
     with tx("system") as cur:
         try:
-            cur.execute("""UPDATE website_termine SET status='abgesagt' WHERE id=%s AND kunden_id=%s AND status IN ('reserviert','gebucht') AND start > now()
-                           RETURNING termin_id, start, name, email, ref""", (bid, kid))
+            cur.execute("""UPDATE website_termine SET status='abgesagt', abgesagt_am=now(), abgesagt_von='betrieb', storno_kostenlos=true WHERE id=%s AND kunden_id=%s AND status IN ('reserviert','gebucht') AND start > now()
+                           RETURNING termin_id, start, name, email, ref, anzahlung_erhalten_am, anzahlung_betrag""", (bid, kid))
         except Exception:
             raise HTTPException(400, "Ungültige Buchung.")
         g = cur.fetchone()
@@ -1072,7 +1218,71 @@ def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Dep
     lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
     bg.add_task(sd.kundenmail, kid, g["email"], f"Zu Ihrem Termin am {lokal}",
                 f"Guten Tag {g['name']},\n\nleider können wir den gewünschten Termin am {lokal} nicht anbieten.\n{(data.grund.strip() + chr(10)) if data.grund.strip() else ''}"
+                f"{('Ihre Anzahlung von ' + str(g['anzahlung_betrag']).replace('.', ',') + ' € erstatten wir Ihnen.' + chr(10)) if g['anzahlung_erhalten_am'] and g['anzahlung_betrag'] else ''}"
                 f"Auf unserer Website können Sie jederzeit einen anderen Termin wählen.\n\nViele Grüße\n{firma}", None, None, "termin")
+    return {"ok": True, "erstatten": bool(g["anzahlung_erhalten_am"] and g["anzahlung_betrag"])}
+
+
+@kunde.get("/erstattungen")
+def k_erstattungen(user: dict = Depends(require_inhaber)):
+    """Rechtzeitig oder vom Betrieb abgesagte Termine, deren Anzahlung noch zurückgezahlt werden muss."""
+    with tx("system") as cur:
+        cur.execute("""SELECT id, ref, name, email, start, anzahlung_betrag FROM website_termine WHERE kunden_id=%s AND status='abgesagt' AND storno_kostenlos
+                       AND anzahlung_erhalten_am IS NOT NULL AND erstattet_am IS NULL AND coalesce(anzahlung_betrag,0) > 0 ORDER BY abgesagt_am DESC LIMIT 100""", (user["kunden_id"],))
+        return {"erstattungen": [{"id": str(r["id"]), "ref": r["ref"] or "", "name": r["name"], "email": r["email"], "start": r["start"], "betrag": f"{r['anzahlung_betrag']:.2f}"} for r in cur.fetchall()]}
+
+
+@kunde.post("/buchungen/{bid}/erstattet")
+def k_erstattet(bid: str, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("buchers:" + str(kid), 120, 600)
+    with tx("system") as cur:
+        try:
+            cur.execute("""UPDATE website_termine SET erstattet_am=coalesce(erstattet_am, now()) WHERE id=%s AND kunden_id=%s AND status='abgesagt' AND anzahlung_erhalten_am IS NOT NULL RETURNING ref""", (bid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültige Buchung.")
+        r = cur.fetchone()
+        if not r:
+            raise HTTPException(409, "Zu dieser Buchung gibt es keine Erstattung.")
+        audit(cur, user, "website_anzahlung_erstattet", kid, {"ref": r["ref"]})
+    return {"ok": True}
+
+
+def _quittung_daten(kid, bid: str):
+    with tx("system") as cur:
+        try:
+            cur.execute("""SELECT w.id, w.ref, w.name, w.email, w.start, w.anzahlung_betrag, w.anzahlung_erhalten_am, w.status, l.name AS leistung
+                           FROM website_termine w LEFT JOIN website_leistungen l ON l.id=w.leistung_id WHERE w.id=%s AND w.kunden_id=%s""", (bid, kid))
+        except Exception:
+            raise HTTPException(400, "Ungültige Buchung.")
+        g = cur.fetchone()
+        if not g or not g["anzahlung_erhalten_am"] or not g["anzahlung_betrag"]:
+            raise HTTPException(409, "Für diesen Termin ist keine erhaltene Anzahlung eingetragen.")
+        cur.execute("SELECT firma, strasse, plz, ort FROM kunden WHERE id=%s", (kid,))
+        return g, cur.fetchone()
+
+
+@kunde.get("/buchungen/{bid}/quittung.pdf")
+def k_quittung(bid: str, user: dict = Depends(require_inhaber)):
+    g, b = _quittung_daten(user["kunden_id"], bid)
+    pdfb = quittung.quittung_pdf(b, g["name"], g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr"), g["leistung"] or "", float(g["anzahlung_betrag"]), g["anzahlung_erhalten_am"].astimezone(TZ), g["ref"] or "")
+    return Response(pdfb, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="quittung-{g["ref"] or "anzahlung"}.pdf"'})
+
+
+@kunde.post("/buchungen/{bid}/quittung-senden")
+def k_quittung_senden(bid: str, bg: BackgroundTasks, user: dict = Depends(require_inhaber)):
+    kid = user["kunden_id"]
+    rate_limit("buchquitt:" + str(kid), 60, 600)
+    g, b = _quittung_daten(kid, bid)
+    if not EMAIL_RE.match(g["email"] or ""):
+        raise HTTPException(409, "Zu diesem Termin gibt es keine gültige E-Mail-Adresse.")
+    pdfb = quittung.quittung_pdf(b, g["name"], g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr"), g["leistung"] or "", float(g["anzahlung_betrag"]), g["anzahlung_erhalten_am"].astimezone(TZ), g["ref"] or "")
+    with tx("system") as cur:
+        cur.execute("UPDATE website_termine SET quittung_am=now() WHERE id=%s", (bid,))
+        audit(cur, user, "website_quittung_gesendet", kid, {"ref": g["ref"]})
+    bg.add_task(sd.kundenmail, kid, g["email"], f"Quittung über Ihre Anzahlung bei {b['firma']}",
+                f"Guten Tag {g['name']},\n\nanbei die Quittung über Ihre Anzahlung von {str(g['anzahlung_betrag']).replace('.', ',')} €.\n\nViele Grüße\n{b['firma']}",
+                None, (f"quittung-{g['ref'] or 'anzahlung'}.pdf", pdfb, "application/pdf"), "termin")
     return {"ok": True}
 
 
@@ -1140,7 +1350,7 @@ def _slug(text: str) -> str:
 
 
 def _team(cur, kid) -> dict:
-    cur.execute("SELECT id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, sort, freigabe, anzahlung_art, anzahlung_wert FROM website_leistungen WHERE kunden_id=%s ORDER BY sort, name", (kid,))
+    cur.execute("SELECT id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, sort, freigabe, anzahlung_art, anzahlung_wert, felder FROM website_leistungen WHERE kunden_id=%s ORDER BY sort, name", (kid,))
     leist = [{**r, "id": str(r["id"]), "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "anzahlung_wert": float(r["anzahlung_wert"]) if r["anzahlung_wert"] is not None else None,
               "anzahlung": f"{x:.2f}" if (x := sd.anzahlung_berechnen(r)) else ""} for r in cur.fetchall()]
     cur.execute("SELECT * FROM website_mitarbeiter WHERE kunden_id=%s ORDER BY sort, name", (kid,))
@@ -1162,6 +1372,12 @@ def k_team(user: dict = Depends(require_inhaber)):
         return _team(cur, user["kunden_id"])
 
 
+class FeldIn(BaseModel):
+    label: str = Field(min_length=2, max_length=60)
+    key: str = Field(default="", max_length=30)
+    pflicht: bool = False
+
+
 class LeistungIn(BaseModel):
     name: str = Field(min_length=2, max_length=80)
     schluessel: str = Field(default="", max_length=40)
@@ -1173,8 +1389,17 @@ class LeistungIn(BaseModel):
     freigabe: bool = False                                         # Termine dieser Leistung bestätigt der Betrieb selbst
     anzahlung_art: str = Field(default="keine", pattern=r"^(keine|betrag|prozent)$")
     anzahlung_wert: float | None = Field(default=None, ge=0, le=100000)
+    felder: list[FeldIn] = Field(default_factory=list, max_length=12)      # Zusatzfragen im Buchungsformular, z. B. „Haarlänge“
 
     def pruefen(self):
+        belegt = {"name", "telefon", "email", "nachricht", "datum", "datum2", "uhrzeit", "leistung", "mitarbeiter", "typ", "website", "hp", "einwilligung"}
+        for f in self.felder:
+            f.label = f.label.strip()
+            f.key = (re.sub(r"[^a-z0-9]+", "_", (f.key or f.label).lower().replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")).strip("_")[:30]) or ""
+            if not re.match(r"^[a-z][a-z0-9_]*$", f.key) or f.key in belegt:
+                raise HTTPException(400, f"Die Zusatzfrage „{f.label}“ hat einen ungültigen oder reservierten Namen. Bitte anders benennen.")
+        if len({f.key for f in self.felder}) != len(self.felder):
+            raise HTTPException(400, "Zwei Zusatzfragen haben denselben Namen.")
         if self.anzahlung_art != "keine":
             if not self.anzahlung_wert or self.anzahlung_wert <= 0:
                 raise HTTPException(400, "Bitte die Anzahlung als Zahl eintragen (Betrag in € oder Prozent).")
@@ -1201,10 +1426,10 @@ def _leistung_neu(cur, kid, data: LeistungIn) -> dict:
     if cur.fetchone():
         raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
     art = data.anzahlung_art
-    cur.execute("""INSERT INTO website_leistungen (kunden_id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, freigabe, anzahlung_art, anzahlung_wert, sort)
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,(SELECT coalesce(max(sort),0)+1 FROM website_leistungen WHERE kunden_id=%s)) RETURNING id""",
+    cur.execute("""INSERT INTO website_leistungen (kunden_id, schluessel, name, beschreibung, preis, dauer_min, puffer_min, aktiv, freigabe, anzahlung_art, anzahlung_wert, felder, sort)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,(SELECT coalesce(max(sort),0)+1 FROM website_leistungen WHERE kunden_id=%s)) RETURNING id""",
                 (kid, k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, data.freigabe,
-                 art, data.anzahlung_wert if art != "keine" else None, kid))
+                 art, data.anzahlung_wert if art != "keine" else None, json.dumps([f.model_dump() for f in data.felder]), kid))
     neue_id = str(cur.fetchone()["id"])
     sd.leistungen_wissen_sync(cur, kid)
     return {"ok": True, "id": neue_id, "schluessel": k}
@@ -1222,10 +1447,10 @@ def _leistung_aendern(cur, kid, lid, data: LeistungIn) -> dict:
     if cur.fetchone():
         raise HTTPException(400, "Diesen Kurznamen gibt es schon. Bitte einen anderen wählen.")
     art = data.anzahlung_art
-    cur.execute("""UPDATE website_leistungen SET schluessel=%s, name=%s, beschreibung=%s, preis=%s, dauer_min=%s, puffer_min=%s, aktiv=%s, freigabe=%s, anzahlung_art=%s, anzahlung_wert=%s
+    cur.execute("""UPDATE website_leistungen SET schluessel=%s, name=%s, beschreibung=%s, preis=%s, dauer_min=%s, puffer_min=%s, aktiv=%s, freigabe=%s, anzahlung_art=%s, anzahlung_wert=%s, felder=%s::jsonb
                    WHERE id=%s AND kunden_id=%s""",
                 (k, data.name.strip(), data.beschreibung.strip() or None, data.preis.strip() or None, data.dauer_min, data.puffer_min, data.aktiv, data.freigabe,
-                 art, data.anzahlung_wert if art != "keine" else None, lid, kid))
+                 art, data.anzahlung_wert if art != "keine" else None, json.dumps([f.model_dump() for f in data.felder]), lid, kid))
     sd.leistungen_wissen_sync(cur, kid)
     return {"ok": True}
 

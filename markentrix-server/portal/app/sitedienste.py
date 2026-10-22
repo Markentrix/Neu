@@ -135,6 +135,22 @@ def anzahlung_berechnen(l: dict | None) -> float | None:
     return wert if wert >= 1 else None
 
 
+def leistungen_kombinieren(zeilen: list[dict]) -> dict | None:
+    """Mehrere Leistungen in einem Termin wie eine einzige behandeln: Dauer und Preis addieren, größter Puffer, Freigabe wenn eine sie braucht.
+    Mitarbeiter müssen alle Leistungen anbieten (siehe ressourcen, Schlüssel „ids“)."""
+    if not zeilen:
+        return None
+    if len(zeilen) == 1:
+        return zeilen[0]
+    preise = [preis_zahl(x.get("preis")) for x in zeilen]
+    anz = [anzahlung_berechnen(x) for x in zeilen]
+    summe_anz = round(sum(a for a in anz if a), 2)
+    return {**zeilen[0], "name": " + ".join(x["name"] for x in zeilen), "ids": [x["id"] for x in zeilen],
+            "dauer_min": sum(x.get("dauer_min") or 0 for x in zeilen), "puffer_min": max(x.get("puffer_min") or 0 for x in zeilen),
+            "preis": f"{sum(p for p in preise if p):.2f} €" if any(preise) else "", "freigabe": any(x.get("freigabe") for x in zeilen),
+            "anzahlung_art": "betrag" if summe_anz >= 1 else "keine", "anzahlung_wert": summe_anz if summe_anz >= 1 else None, "felder": []}
+
+
 def zahlungsabsatz(z: dict, betrag) -> str:
     """Textblock für Mails: Anzahlung, PayPal.Me-Link mit Betrag und Absageregel. Leer, wenn keine Anzahlung gilt."""
     if betrag in (None, "", 0):
@@ -591,7 +607,8 @@ def ressourcen(cur, z: dict, leistung_id=None, mitarbeiter_id=None) -> list[dict
     for m in ms:
         if mitarbeiter_id and m["id"] != mitarbeiter_id:
             continue
-        if leistung_id and bietet.get(m["id"]) and leistung_id not in bietet[m["id"]]:
+        gesucht = set(leistung_id) if isinstance(leistung_id, (list, tuple, set)) else ({leistung_id} if leistung_id else set())
+        if gesucht and bietet.get(m["id"]) and not gesucht <= bietet[m["id"]]:
             continue
         own_z = zeiten_liste({"kal_zeiten": m["zeiten"]})
         out.append({"id": m["id"], "name": m["name"], "ical_enc": m["ical_enc"], "wochentage": m["wochentage"] or allg["wochentage"],
@@ -609,7 +626,7 @@ def slotplan(cur, z: dict, mit_ical: bool = True, tage: int | None = None, leist
     ende_ges = jetzt + timedelta(days=tage + 2)
     dauer = timedelta(minutes=(leistung or {}).get("dauer_min") or z["kal_dauer"])
     puffer = timedelta(minutes=(leistung or {}).get("puffer_min") or 0)
-    res = ressourcen(cur, z, (leistung or {}).get("id"), mitarbeiter)
+    res = ressourcen(cur, z, (leistung or {}).get("ids") or (leistung or {}).get("id"), mitarbeiter)
     cur.execute("""SELECT mitarbeiter_id, start, ende, puffer_min FROM website_termine WHERE kunden_id=%s AND ende > %s AND start < %s
                    AND (status='gebucht' OR (status='reserviert' AND erstellt_am > now() - make_interval(hours => %s)))""",
                 (z["kunden_id"], jetzt - timedelta(days=1), ende_ges, z.get("kal_halte_std") or 72))

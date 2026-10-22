@@ -99,17 +99,39 @@ def gesund():
 EGAL = {"", "egal", "beliebig", "any", "keine", "0"}
 
 
-def _auswahl(cur, z: dict, leistung: str, mitarbeiter: str):
-    """Wunsch-Leistung und -Mitarbeiter (Kurznamen der Website) -> (Leistung|None, Mitarbeiter-ID|None, Mitarbeitername)."""
-    lz, mid, mname = None, None, ""
-    leistung, mitarbeiter = (leistung or "").strip().lower(), (mitarbeiter or "").strip().lower()
-    if leistung:
-        cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv AND (schluessel=%s OR lower(name)=%s)", (z["kunden_id"], leistung, leistung))
+def _auswahl(cur, z: dict, leistung, mitarbeiter: str):
+    """Wunsch-Leistung(en) und -Mitarbeiter (Kurznamen der Website) -> (Leistung|None, Mitarbeiter-ID|None, Mitarbeitername).
+    Mehrere Leistungen (Liste oder durch Komma getrennt) werden zu einer zusammengefasst: Dauer und Preis addiert."""
+    mid, mname = None, ""
+    if isinstance(leistung, list):
+        wuensche = [str(x).strip().lower() for x in leistung if str(x).strip()]
+    else:
+        wuensche = [(leistung or "").strip().lower()] if (leistung or "").strip() else []
+    mitarbeiter = (mitarbeiter or "").strip().lower()
+    zeilen = []
+    for w in wuensche:
+        cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv AND (schluessel=%s OR lower(name)=%s)", (z["kunden_id"], w, w))
         lz = cur.fetchone()
+        if not lz and "," in w:
+            for teil in [t.strip() for t in w.split(",") if t.strip()][:5]:
+                cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv AND (schluessel=%s OR lower(name)=%s)", (z["kunden_id"], teil, teil))
+                x = cur.fetchone()
+                if x:
+                    zeilen.append(x)
+                else:
+                    raise Ungueltig({"leistung": "Bitte nur Leistungen aus der Liste wählen."})
+            continue
         if not lz:
             cur.execute("SELECT count(*) AS n FROM website_leistungen WHERE kunden_id=%s AND aktiv", (z["kunden_id"],))
             if cur.fetchone()["n"]:
                 raise Ungueltig({"leistung": "Bitte eine Leistung wählen."})
+        else:
+            zeilen.append(lz)
+    ids = []
+    zeilen = [x for x in zeilen if not (x["id"] in ids or ids.append(x["id"]))][:5]
+    lz = sd.leistungen_kombinieren(zeilen)
+    if lz:
+        lz = {**lz, "_einzeln": zeilen}
     if mitarbeiter not in EGAL:
         cur.execute("SELECT id, name FROM website_mitarbeiter WHERE kunden_id=%s AND aktiv AND (schluessel=%s OR lower(name)=%s)", (z["kunden_id"], mitarbeiter, mitarbeiter))
         m = cur.fetchone()
@@ -119,6 +141,16 @@ def _auswahl(cur, z: dict, leistung: str, mitarbeiter: str):
     return lz, mid, mname
 
 
+def _pflichtfelder(lz: dict | None, felder: dict, einzeln: list[dict]) -> dict:
+    """Pflichtangaben der gewählten Leistung(en). Rückgabe: {Feldname: Fehlertext}."""
+    fehler = {}
+    for l in einzeln:
+        for f in (l.get("felder") or []):
+            if f.get("pflicht") and not felder.get(f["key"]):
+                fehler[f["key"]] = f"Bitte „{f['label']}“ angeben."
+    return fehler
+
+
 @router.get("/leistungen")
 def leistungen(request: Request):
     rate_limit("api-leist:" + client_ip(request), 120, 60)
@@ -126,7 +158,7 @@ def leistungen(request: Request):
     with tx("system") as cur:
         cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (z["kunden_id"],))
         l = [{"key": r["schluessel"], "name": r["name"], "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "dauer": r["dauer_min"],
-              "freigabe": bool(z["kal_freigabe"] or r["freigabe"]), "anzahlung": f"{a:.2f}" if (a := sd.anzahlung_berechnen(r)) else ""} for r in cur.fetchall()]
+              "freigabe": bool(z["kal_freigabe"] or r["freigabe"]), "felder": r["felder"] or [], "anzahlung": f"{a:.2f}" if (a := sd.anzahlung_berechnen(r)) else ""} for r in cur.fetchall()]
     return _json({"leistungen": l})
 
 
@@ -142,7 +174,7 @@ def mitarbeiter(request: Request):
 
 
 @router.get("/verfuegbarkeit")
-def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = ""):
+def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = ""):  # leistung: ein Schlüssel oder mehrere durch Komma
     rate_limit("api-verf:" + client_ip(request), 120, 60)
     z = _lade(request)
     heute = datetime.now(TZ).date()
@@ -319,7 +351,7 @@ def _pruefen(d: dict, z: dict) -> dict:
     return felder
 
 
-def _zusammenfassung(felder: dict) -> str:
+def _zusammenfassung(felder: dict, labels: dict | None = None) -> str:
     zeilen = []
     for k, v in felder.items():
         if k in ("typ", "nachricht") or v in ("", []):
@@ -333,16 +365,16 @@ def _zusammenfassung(felder: dict) -> str:
             v = v if "€" in str(v) else f"{v} €"
         if isinstance(v, list):
             v = ", ".join(v)
-        zeilen.append(f"{LABELS.get(k, k.replace('_', ' ').capitalize())}: {v}")
+        zeilen.append(f"{(labels or {}).get(k) or LABELS.get(k, k.replace('_', ' ').capitalize())}: {v}")
     if felder.get("nachricht"):
         zeilen.append("\nNachricht:\n" + felder["nachricht"])
     return "\n".join(zeilen)
 
 
-def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: dict | None):
+def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: dict | None, labels: dict | None = None):
     titel = TITEL[typ]
     mail = felder.get("email", "")
-    text = _zusammenfassung(felder)
+    text = _zusammenfassung(felder, labels)
     an = [a for a in _empfaenger((z["kal_empfaenger"] or z["mail_empfaenger"]) if buchung else z["mail_empfaenger"]) if EMAIL_RE.match(a)][:5]
     if buchung and buchung["frei"]:
         kopf = f"Neue Terminanfrage ({ref}): {buchung['wann']}.\nDie Uhrzeit ist für {z['kal_halte_std']} Stunden vorgemerkt. Bitte im Kundenportal unter „Website-Dienste“ bestätigen oder ablehnen."
@@ -395,10 +427,11 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
         typ = felder["typ"]
         ref = PRAEFIX[typ] + datetime.now(TZ).strftime("%y%m%d") + "-" + secrets.token_hex(2).upper()
         buchung = None
+        labels: dict = {}
         kontakt = felder.get("email", "") + (", " + felder["telefon"] if felder.get("telefon") and felder.get("email") else felder.get("telefon", ""))
         with tx("system") as cur:
             cur.execute("INSERT INTO anfragen (kunden_id, name, kontakt, nachricht, quelle) VALUES (%s,%s,%s,%s,'website') RETURNING id",
-                        (kid, felder["name"], kontakt, f"{TITEL[typ]} {ref}\n\n{_zusammenfassung(felder)}"[:6000]))
+                        (kid, felder["name"], kontakt, f"{TITEL[typ]} {ref}\n\n{_zusammenfassung(felder, labels)}"[:6000]))
             aid = cur.fetchone()["id"]
             if typ == "gutschein":
                 bt = sd.betrag_lesen(felder.get("wunschbetrag") or felder.get("betrag"))
@@ -410,6 +443,11 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
                 cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(kid),))
                 sd.reservierungen_verfallen(cur, kid, z["kal_halte_std"])
                 lz, wunsch, mname = _auswahl(cur, z, felder.get("leistung", ""), felder.get("mitarbeiter", ""))
+                if lz:
+                    labels = {f["key"]: f["label"] for l in lz["_einzeln"] for f in (l.get("felder") or [])}
+                    miss = _pflichtfelder(lz, felder, lz["_einzeln"])
+                    if miss:
+                        raise Ungueltig(miss)
                 tag = date.fromisoformat(felder["datum"])
                 treffer = [(u, rid) for t, u, f, rid in sd.slotplan(cur, z, leistung=lz, mitarbeiter=wunsch).get(tag, []) if t == felder["uhrzeit"] and f]
                 if not treffer:
@@ -430,7 +468,7 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
                 titel = " – ".join(x for x in ((lz or {}).get("name"), mname) if x) or "Termin über die Website"
                 cur.execute("""INSERT INTO termine (kunden_id, anfrage_id, titel, beginn, ende, kontakt_name, kontakt_info, status, notiz)
                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                            (kid, aid, titel[:120], start, ende, felder["name"], kontakt, "geplant" if frei_gabe else "bestaetigt", _zusammenfassung(felder)[:1500]))
+                            (kid, aid, titel[:120], start, ende, felder["name"], kontakt, "geplant" if frei_gabe else "bestaetigt", _zusammenfassung(felder, labels)[:1500]))
                 tid = cur.fetchone()["id"]
                 try:
                     cur.execute("""INSERT INTO website_termine (kunden_id, termin_id, start, ende, name, email, telefon, nachricht, token, status, ref, daten, mitarbeiter_id, leistung_id, puffer_min,
@@ -449,7 +487,7 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
     except Ungueltig as e:
         return fehlerantwort(422, "Bitte die markierten Angaben prüfen.", e.fehler)
     push.senden(ids, f"Neue {TITEL[typ]} über die Website", f"{felder['name']}" + (f": {buchung['wann']}" if buchung else ""), "/app#" + ("heute" if buchung else "anfragen"), "anfrage")
-    bg.add_task(_mails, kid, z, typ, ref, felder, firma, buchung)
+    bg.add_task(_mails, kid, z, typ, ref, felder, firma, buchung, labels)
     if formular:
         return Response(status_code=303, headers={"Location": f"/danke.html?typ={quote(typ)}&ref={quote(ref)}"})
     return _json({"ok": True, "ref": ref, "status": "neu"})
