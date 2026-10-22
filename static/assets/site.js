@@ -443,6 +443,7 @@
 
   /* Live-Miniatur: Desktop-Ansicht zeigt die ganze Seite ohne Scrollbalken */
   function miniFull(fr, f) {
+    try { f.contentDocument.documentElement.style.overflow = 'hidden'; } catch (e) { /* ohne Zugriff */ }
     function size() { try { var h = f.contentDocument.body.offsetHeight; if (h > 300) { fr.style.setProperty('--ph', h); fr.classList.add('is-full'); } } catch (e) { /* fremde Herkunft: Ausschnitt bleibt */ } }
     try { f.contentDocument.querySelectorAll('img[loading=lazy]').forEach(function (i) { i.loading = 'eager'; }); } catch (e) { /* ohne Zugriff */ }
     size();

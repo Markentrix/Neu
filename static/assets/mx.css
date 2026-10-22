@@ -1151,8 +1151,8 @@ main:focus{outline:none}
 .page-home .sec-head{max-width:880px}
 .page-home .sec-head h2{max-width:26ch}
 /* 42 · Hero-Vorschau: größere Darstellung (1024 px breite Ansicht statt 1280) */
-.mini-frame:not(.mini-frame--m){aspect-ratio:1024/680}
-.mini-frame:not(.mini-frame--m) iframe{width:1024px;height:680px}
+.mini-frame:not(.mini-frame--m){aspect-ratio:900/640}
+.mini-frame:not(.mini-frame--m) iframe{width:900px;height:640px}
 /* 43 · Druckansicht (Preise, Checkliste, Beiträge) */
 @media print{
   .site-header,.mobile-panel,.mobile-tabbar,.wa-float,.tabbar,.scroll-progress,.rail,#mx-modal,#mx-consent,.a11y-bar,.footer-cta,.band,.hero-visual,.device-toggle,.reveal-skip,.skip-link,.foot-social,.btn--primary,.row .btn,.filter{display:none!important}
@@ -1302,8 +1302,8 @@ main:focus{outline:none}
 
 /* Live-Miniatur: auf Startseite, Prozess und Webdesign zunächst der obere Teil, "Ganze Seite ansehen" öffnet sie komplett */
 .mini-frame.is-full{transition:height .45s ease}
-.mini.is-collapsed .mini-frame.is-full:not(.mini-frame--m){height:calc(680px * var(--s,.4))}
-.mini.is-collapsed .mini-frame.is-full.mini-frame--m{height:calc(640px * var(--s,.8))}
+.mini.is-collapsed .mini-frame.is-full:not(.mini-frame--m){height:calc(1000px * var(--s,.5))}
+.mini.is-collapsed .mini-frame.is-full.mini-frame--m{height:calc(900px * var(--s,.8))}
 .mini.is-collapsed .mini-frame.is-full::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(rgba(255,255,255,0),#fff);pointer-events:none;z-index:2}
 .mini-more{text-align:center;margin-top:14px}
 .mini-more[hidden]{display:none}
@@ -1333,3 +1333,5 @@ main:focus{outline:none}
 .branch--more{background:linear-gradient(160deg,#F5FAFF,#EEF3FF);border-style:dashed;justify-content:center}
 .branch--more .pain{font-size:1.35rem}
 .branch-hero{padding:0;min-height:0}
+.bphoto img{position:absolute;left:0;top:0}
+.mosaic-tile{position:relative}.mosaic-tile img{position:absolute;left:0;top:0}
