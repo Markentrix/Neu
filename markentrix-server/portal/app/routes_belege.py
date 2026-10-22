@@ -29,7 +29,7 @@ def _laden(cur, bid):
 
 
 def _pdf_antwort(daten, name):
-    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="{name}"'})
 
 
 @router.get("/belege-export.csv")

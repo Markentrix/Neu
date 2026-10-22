@@ -5,6 +5,7 @@ import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlag
 import { zeitachseKarte } from './start.js';
 import { referenzKarte } from './vertraege.js';
 import { qrKarte } from '../anleitung.js';
+import { wissenKarte } from './wissen.js';
 
 export const modulZelle = (z) => {
   const wrap = h('div', { class: 'modul-zelle' }), panel = h('div', { class: 'small', style: 'display:none;margin-top:6px' });
@@ -516,6 +517,7 @@ export async function kundeDetail(kid) {
     offboardingKarte(kid, k, await api('/api/admin/kunden/' + kid + '/domains')),
     await historieKarte(kid),
     vorlagenKarte(kid, k),
+    wissenKarte(kid),
     aufgabenpaketKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
 }

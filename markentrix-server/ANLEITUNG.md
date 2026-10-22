@@ -555,3 +555,6 @@ Jede fertige Website ruft unter ihrer eigenen Domain `/api/anfrage`, `/api/slots
 
 **Betrieb**
 - Bei Passwortwechsel enden alle anderen Sitzungen. Abstürzende Hintergrundjobs geben ihre Tagesmarke frei und lösen nach 10 Fehlern in Folge eine rote Ampel aus. Veröffentlichungsfehler lösen einen Alarm aus. Uploads werden auf Größe, Dateityp und Kunden-Kontingent (500 MB) geprüft. Nicht geändert: Upload-Grenzen je Datei und Offsite-Backup (braucht ein Ziel, z. B. Hetzner Storage Box), Image-Tags (`latest`) und `--forwarded-allow-ips`.
+
+## Wissensbasis für den Assistenten (Kundenblatt → „Wissensbasis für den Assistenten“)
+Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochladen** (TXT, MD oder PDF, bis 10 MB, mehrere auf einmal): Das Portal liest den Text und speichert ihn als Eintrag (Titel = Dateiname, Bereich frei wählbar, z. B. „preise“ oder „faq“). Die Datei selbst wird nicht aufbewahrt. Gescannte PDFs ohne Texterkennung, passwortgeschützte PDFs und Texte über 200.000 Zeichen werden mit einer verständlichen Meldung abgelehnt. Gleicher Titel im selben Bereich ersetzt den alten Eintrag. Einträge lassen sich ansehen, ändern, an- und ausschalten (nur „an“ nutzt der Assistent) und löschen. Zusätzlich kannst du Einträge von Hand schreiben. Nur für Admin.

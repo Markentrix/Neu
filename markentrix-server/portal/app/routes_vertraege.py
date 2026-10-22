@@ -186,7 +186,7 @@ def vorlage(zid: str, user: dict = Depends(require_admin)):
             pdf, name, _m, _a = _pdf(cur, _holen(cur, zid))
     except errors.InvalidTextRepresentation:
         raise _404()
-    return Response(pdf, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+    return Response(pdf, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="{name}"'})
 
 
 class SendenIn(BaseModel):

@@ -50,6 +50,7 @@ from .routes_push import router as push_router
 from .routes_dashboard import router as dashboard_router
 from .routes_telefon import router as telefon_router
 from .routes_vorlagen import router as vorlagen_router
+from .routes_wissen import router as wissen_router
 from .routes_werkzeuge import router as werkzeuge_router
 from .routes_leadimport import router as leadimport_router
 from .routes_mitarbeiter import router as mitarbeiter_router
@@ -196,6 +197,7 @@ app.include_router(push_router)
 app.include_router(dashboard_router)
 app.include_router(telefon_router)
 app.include_router(vorlagen_router)
+app.include_router(wissen_router)
 app.include_router(werkzeuge_router)
 app.include_router(leadimport_router)
 app.include_router(mitarbeiter_router)

@@ -24,7 +24,7 @@ def _404():
 
 
 def _antwort(daten: bytes, typ: str, name: str):
-    return Response(daten, media_type=typ, headers={"Content-Disposition": f'attachment; filename="{name}"'})
+    return Response(daten, media_type=typ, headers={"Content-Disposition": f'{"inline" if typ == "application/pdf" else "attachment"}; filename="{name}"', "X-Content-Type-Options": "nosniff"})
 
 
 # ---------------------------------------------------------------- Einstellung: Unterauftragsverarbeiter

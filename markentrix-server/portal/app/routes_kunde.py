@@ -541,4 +541,4 @@ def monatsbericht_pdf(bid: str, user: dict = Depends(require_kunde)):
             daten, name = bericht_modul.pdf_erzeugen(cur, bid, f)
     except (LookupError, errors.InvalidTextRepresentation):
         raise HTTPException(404, "Bericht nicht gefunden.")
-    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="{name}"'})

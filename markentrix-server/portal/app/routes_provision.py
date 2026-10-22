@@ -116,7 +116,7 @@ def _abrechnung(cur, pid: str, monat: date) -> bytes:
 
 
 def _pdf(daten, name):
-    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+    return Response(daten, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="{name}"'})
 
 
 @router.get("/vertrieb/{pid}/abrechnung/{monat}")
