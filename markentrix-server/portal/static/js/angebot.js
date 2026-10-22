@@ -47,7 +47,7 @@ function zeigen(d) {
       h('p', {}, ja));
     const nein = h('details', { class: 'small', style: 'margin-top:10px' }, h('summary', {}, 'Kein Interesse oder Rückfragen?'),
       h('p', {}, 'Rückfragen beantworten wir gern' + (d.kontakt.email ? ' unter ' + d.kontakt.email : '') + (d.kontakt.telefon ? ' oder ' + d.kontakt.telefon : '') + '.'),
-      h('button', { class: 'btn sec small', type: 'button', onclick: async () => { if (!confirm('Angebot ablehnen?')) return; try { await api('/api/angebot/' + encodeURIComponent(token) + '/ablehnen', { method: 'POST', body: { grund: '' } }); await laden(); } catch (x) { melde(m, x.message); } } }, 'Angebot ablehnen'));
+      h('button', { class: 'btn sec small', type: 'button', onclick: async () => { const W = ['Zu teuer', 'Später / gerade kein Thema', 'Anderer Anbieter', 'Passt nicht zu unserem Bedarf', 'Sonstiges'], C = ['zu_teuer', 'spaeter', 'anderer_anbieter', 'nicht_passend', 'sonstiges']; const w = window.prompt('Schade! Woran lag es? ' + W.map((t, i) => (i + 1) + ' = ' + t).join(', ') + ' (leer lassen = ohne Angabe abbrechen)', ''); if (w === null || w === '') return; try { await api('/api/angebot/' + encodeURIComponent(token) + '/ablehnen', { method: 'POST', body: { grund: '', grund_code: C[Number(w) - 1] || 'sonstiges' } }); await laden(); } catch (x) { melde(m, x.message); } } }, 'Angebot ablehnen'));
     teile.push(form, nein);
   }
   inhalt.replaceChildren(...teile);

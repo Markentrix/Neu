@@ -48,7 +48,7 @@ d=a.get(f"/api/admin/leads/{lid}").json(); chk("Admin sieht Checks im Lead",len(
 chk("Lead in Leadliste",any(l["id"]==lid for l in a.get("/api/admin/leads?q=Muster").json()["leads"]))
 chk("Status bleibt bei Wiederholung",sql(f"select status from leads where id='{lid}'")=="neu")
 a.patch(f"/api/admin/leads/{lid}",json={"status":"kontaktiert"}); httpx.post(U,headers=S,json=payload)
-chk("Bearbeiteter Status bleibt",sql(f"select status from leads where id='{lid}'")=="kontaktiert")
+chk("Erneuter Check holt den Lead zurück auf Antwort",sql(f"select status from leads where id='{lid}'")=="antwort")
 r=httpx.post(U,headers=S,json={"email":f"b{sfx}@x.de","einwilligung":True,"website":"www.beispiel.de/seite"}); chk("Ohne Firma: Domain als Name",r.status_code==200 and sql(f"select firma from leads where lower(email)='b{sfx}@x.de'")=="www.beispiel.de")
 chk("Neuer Schlüssel ersetzt alten",a.post("/api/admin/website-check/schluessel",json={}).status_code==200 and httpx.post(U,headers=S,json=payload).status_code==401)
 chk("Website-Lead startet als warm",sql(f"select temperatur from leads where id='{lid}'")=="warm")

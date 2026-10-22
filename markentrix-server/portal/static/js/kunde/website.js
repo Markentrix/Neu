@@ -1,9 +1,13 @@
-import { h, api, datum, zeit, groesse, melde } from '../common.js';
+import { h, api, datum, zeit, groesse, melde, toast } from '../common.js';
 import { tabelle, statusPill, zeige, V } from './kern.js';
 
 V.website = async () => {
   const d = await api('/api/kunde/website');
-  return h('div', { class: 'stack' },
+  const domainKarte = h('details', { class: 'card' }, h('summary', {}, h('b', {}, 'Meine Domain auf Markentrix umstellen')),
+    h('p', {}, 'Damit deine Website unter deiner eigenen Adresse erreichbar ist, muss bei deinem Domain-Anbieter (z. B. IONOS, Strato, GoDaddy) der Eintrag geändert werden. Das dauert etwa 10 Minuten.'),
+    h('ol', {}, h('li', {}, 'Melde dich bei deinem Domain-Anbieter an und öffne die DNS-Einstellungen deiner Domain.'), h('li', {}, 'Wir schicken dir die genauen Werte (A-Eintrag für „@“ und „www“) auf Wunsch per Nachricht.'), h('li', {}, 'Trage sie dort ein und gib uns Bescheid. Die Umstellung kann bis zu einigen Stunden dauern, wir prüfen sie automatisch.')),
+    h('p', {}, h('a', { class: 'btn', href: '#nachrichten' }, 'Anleitung anfordern oder Hilfe holen')), h('p', { class: 'small muted' }, 'Du kannst dich auch einfach melden, dann übernehmen wir das gemeinsam am Telefon.'));
+  return h('div', { class: 'stack' }, domainKarte,
     h('div', { class: 'card' }, h('h2', {}, 'Websites'), tabelle([['Domain', z => h('a', { href: 'https://' + z.domain, target: '_blank', rel: 'noopener' }, z.domain)], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Zuletzt aktualisiert', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Noch keine Website.')),
     h('div', { class: 'card' }, h('h2', {}, 'Projekte'), tabelle([['Titel', z => z.titel], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Link', z => z.url && h('a', { href: z.url, target: '_blank', rel: 'noopener' }, 'Öffnen')]], d.projekte, 'Keine Projekte.')));
 };
@@ -19,7 +23,7 @@ async function inhalteKarte() {
     return h('div', { class: 'sprachblock' }, h('label', {}, d.sprachnamen[sp] + (sp === 'de' ? ' (Hauptsprache)' : '')), titel[sp], text[sp]);
   });
   const preis = h('input', { maxlength: 40, placeholder: 'Preis, z. B. 1,99 € / kg (freiwillig)' }), von = h('input', { type: 'date' }), bis = h('input', { type: 'date' });
-  const nachher = (r) => { if (r.hinweis) alert(r.hinweis); zeige(); };
+  const nachher = (r) => { if (r.hinweis) toast(r.hinweis); zeige(); };
   const ziele = d.sprachen.filter(x => x !== 'de');
   const uebersetzen = async (e) => {
     const texte = {}; if (titel.de.value.trim()) texte.titel = titel.de.value; if (text.de.value.trim()) texte.text = text.de.value;

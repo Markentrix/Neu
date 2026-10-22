@@ -252,6 +252,15 @@ def k_unterlage(datei: UploadFile = File(...), kategorie: str = Form("sonstiges"
                     (user["kunden_id"], kategorie, name, mime, len(daten), daten, user["id"]))
         fid = cur.fetchone()["id"]
         audit(cur, user, "unterlage_hochgeladen", user["kunden_id"], {"name": name})
+    try:   # Team informieren (Logo/Fotos sind meist der Schritt, auf den wir warten)
+        with tx("system") as cur:
+            cur.execute("SELECT firma, status FROM kunden WHERE id=%s", (user["kunden_id"],))
+            k = cur.fetchone()
+            ids = push.admins(cur) if k and k["status"] == "onboarding" else []
+        if ids:
+            push.senden(ids, "Neue Unterlage vom Kunden", f"{k['firma']}: {name}", "/admin#kunde/" + str(user["kunden_id"]), "unterlage")
+    except Exception:  # noqa: BLE001
+        pass
     return {"id": fid}
 
 
@@ -388,6 +397,7 @@ def a_antwort(tid: str, data: AdminNachrichtIn, bg: BackgroundTasks, user: dict 
             cur.execute("INSERT INTO ticket_nachrichten (ticket_id, kunden_id, von, autor_name, intern, text) VALUES (%s,%s,'team',%s,%s,%s)",
                         (tid, t["kunden_id"], team_name(user), data.intern, data.text.strip()))
             ziele = []
+            push_ids = []
             if data.intern:
                 if data.status:
                     cur.execute("UPDATE tickets SET status=%s, geaendert_am=now() WHERE id=%s", (data.status, tid))
@@ -404,11 +414,14 @@ def a_antwort(tid: str, data: AdminNachrichtIn, bg: BackgroundTasks, user: dict 
                     r = cur.fetchone()
                     zusatz = r and r["email"]
                 ziele = kunden_empfaenger(cur, t["kunden_id"], zusatz)
+                push_ids = push.kunde(cur, t["kunden_id"])
                 cur.execute("SELECT ersteller_name FROM tickets WHERE id=%s", (tid,))
                 ans = cur.fetchone()["ersteller_name"]
             audit(cur, user, "ticket_antwort", t["kunden_id"], {"nr": t["nr"], "intern": data.intern})
     except errors.InvalidTextRepresentation:
         raise nicht_gefunden()
+    if push_ids:
+        push.senden(push_ids, "Antwort von Markentrix", t["betreff"][:80], "/app#nachrichten", "ticket")
     if not data.intern:
         _mails(bg, ziele, mailer.ticket_antwort_kunde, ans, t["nr"], t["betreff"], data.text, (data.status == "erledigt"))
     return {"ok": True}
@@ -581,9 +594,12 @@ def a_freigabe_neu(kid: str, data: FreigabeIn, bg: BackgroundTasks, user: dict =
             fid = cur.fetchone()["id"]
             link = _link_erzeugen(cur, fid)
             ziele = kunden_empfaenger(cur, kid)
+            push_ids = push.kunde(cur, kid)
             audit(cur, user, "kundenfreigabe_angefragt", kid, {"titel": data.titel})
     except errors.InvalidTextRepresentation:
         raise nicht_gefunden()
+    if push_ids:
+        push.senden(push_ids, "Bitte freigeben", data.titel[:80], "/app#freigaben", "freigabe")
     _mails(bg, ziele, mailer.freigabe_anfrage_kunde, k["ansprechpartner"], data.titel, link)
     return {"id": fid}
 

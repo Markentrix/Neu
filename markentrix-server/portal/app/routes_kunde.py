@@ -129,7 +129,8 @@ def startliste(user: dict = Depends(require_kunde)):
         a = onboarding.KUNDE_AKTION.get(p["code"])
         out.append({"titel": p["titel"], "fertig": p["fertig"], "phase": onboarding.phase_von(p["code"]), "seite": a[0] if a and not p["fertig"] else None, "aktion": a[1] if a and not p["fertig"] else None})
     stand = onboarding.phasenstand([{"code": p["code"], "fertig": p["fertig"]} for p in punkte if not (p["code"] in ("rechnung", "vertrag") or p["code"].startswith("x-"))])
-    return {"aktiv": True, "punkte": out, "fertig": sum(1 for p in out if p["fertig"]), "gesamt": len(out), "phasen": stand["phasen"], "aktuelle_phase": stand["aktuell"]}
+    zug = onboarding.am_zug([{"code": p["code"], "fertig": p["fertig"]} for p in punkte if not p["code"].startswith("x-")])
+    return {"aktiv": True, "am_zug": zug["wer"], "punkte": out, "fertig": sum(1 for p in out if p["fertig"]), "gesamt": len(out), "phasen": stand["phasen"], "aktuelle_phase": stand["aktuell"]}
 
 
 # ---------------------------------------------------------------- Chat

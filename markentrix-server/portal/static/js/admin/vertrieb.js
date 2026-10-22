@@ -1,4 +1,5 @@
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
+import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
 import { qrKarte } from '../anleitung.js';
 import { einarbeitungKarte, handelsvertreterKarte } from './vertraege.js';
 import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular, dialog } from '../common.js';
@@ -148,6 +149,7 @@ V.leads = async () => {
     h('p', { class: 'small muted', style: 'margin:10px 0 6px' }, d.gesamt + ' Leads' + (['status', 'q', 'quelle', 'temperatur', 'vertriebler', 'gruppe', 'liste'].some(k => g(k)) ? ' passen zum Filter' : '')), leiste,
     d.leads.length ? h('div', { class: 'tablewrap' }, h('table', { class: 'leadtab' }, h('thead', {}, h('tr', {}, h('th', { class: 'ck' }, alleHaken), ['Firma', 'Kontakt', 'Einstufung', 'Status', 'Vertriebler', 'Angelegt', ''].map(t => h('th', {}, t)))), h('tbody', {}, zeilen))) : h('p', { class: 'muted' }, 'Keine Leads.'), blaettern),
     await leadImportKarte(partner),
+    await steuerungKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
 };
 
@@ -219,7 +221,7 @@ export async function leadDetail(lid) {
   st.style.width = 'auto';
   const akt = h('form', { onsubmit: (e) => { e.preventDefault(); const o = formular(e.target); bestaetigt(m, () => api('/api/admin/leads/' + lid + '/aktivitaet', { method: 'POST', body: o }), 'Eingetragen.'); } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, select('art', ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'], 'notiz')), h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
-  const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => confirm('Aus diesem Lead einen Kunden anlegen?') && bestaetigt(m, async () => { const k = await api('/api/admin/leads/' + lid + '/zu-kunde', { method: 'POST' }); location.hash = '#kunde/' + k.id; }), 'btn');
+  const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => zuKundeDialog(lid, (k) => { location.hash = '#kunde/' + (k.kunden_id || k.id); }));
   const gesperrt = ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status);
   const ang = gesperrt ? '' : h('button', { class: 'btn small', onclick: () => angebotDialog(lid, () => location.reload()) }, 'Angebot senden');
   return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,

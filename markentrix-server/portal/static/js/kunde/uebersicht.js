@@ -14,6 +14,7 @@ function startKarte(sl) {
   const inPhase = (k) => sl.punkte.filter(p => p.phase === k);
   return h('div', { class: 'card' }, h('h2', {}, 'Dein Start bei Markentrix'),
     h('p', { class: 'small muted' }, sl.fertig + ' von ' + sl.gesamt + ' Schritten erledigt. Wir kümmern uns um die meisten, ein paar brauchen deine Hilfe.'),
+    sl.am_zug ? h('p', { class: 'small' }, sl.am_zug === 'kunde' ? '👉 Gerade bist du am Zug: bitte erledige die markierten Schritte, dann geht es sofort weiter.' : '⏳ Gerade ist Markentrix am Zug. Du musst nichts tun, wir melden uns bei Rückfragen.') : '',
     h('div', { class: 'fortschritt', role: 'progressbar', 'aria-valuenow': String(pct), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Fortschritt beim Start' }, h('div', { style: 'width:' + pct + '%' })),
     h('ol', { class: 'reise' }, schritte),
     aktuell ? h('div', {}, h('h3', {}, 'Jetzt dran: ' + aktuell.titel), inPhase(aktuell.schluessel).map(zeile)) : h('p', {}, 'Alle Schritte sind erledigt. 🎉'),

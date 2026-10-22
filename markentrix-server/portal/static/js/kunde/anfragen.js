@@ -1,4 +1,4 @@
-import { h, api, zeit, melde, formular } from '../common.js';
+import { h, api, zeit, melde, formular, toast } from '../common.js';
 import { tabelle, V, karten } from './kern.js';
 import { antwortDialog } from './heute.js';
 
@@ -28,7 +28,7 @@ V.assistent = async () => {
 V.anfragen = async () => {
   const daten = await api('/api/kunde/anfragen');
   const box = h('div');
-  const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/anfragen/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { alert(x.message); } } },
+  const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/anfragen/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { toast(x.message); } } },
     ['neu', 'in_bearbeitung', 'beantwortet', 'erledigt', 'spam'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
   box.append(tabelle([['Eingang', z => zeit(z.erstellt_am)], ['Name', z => z.name], ['Kontakt', z => z.kontakt], ['Nachricht', z => z.nachricht], ['Quelle', z => z.quelle], ['Status', status], ['', z => h('button', { class: 'btn small', onclick: () => antwortDialog(z.id, () => location.reload()) }, 'Antworten')]], daten, 'Noch keine Anfragen.'));
   return h('div', { class: 'card' }, h('h2', {}, 'Anfragen'), box);
@@ -51,7 +51,7 @@ V.termine = async () => {
     h('div', {}, h('label', {}, 'Name Kontakt'), h('input', { name: 'kontakt_name' })),
     h('div', {}, h('label', {}, 'Notiz'), h('input', { name: 'notiz' })),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Termin anlegen')));
-  const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/termine/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { alert(x.message); } } },
+  const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/termine/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { toast(x.message); } } },
     ['geplant', 'bestaetigt', 'abgesagt', 'erledigt', 'nicht_erschienen'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Termine'), tabelle([['Wann', z => zeit(z.beginn)], ['Titel', z => z.titel], ['Kontakt', z => z.kontakt_name], ['Notiz', z => z.notiz], ['Status', status]], daten, 'Keine Termine.')),
@@ -68,7 +68,7 @@ V.kontakte = async () => {
   } },
     ['name:Name', 'firma:Firma', 'email:E-Mail', 'telefon:Telefon', 'notiz:Notiz'].map(s => { const [n, l] = s.split(':'); return h('div', {}, h('label', {}, l), h('input', { name: n, required: n === 'name' })); }),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Kontakt speichern')));
-  const loesch = (z) => h('button', { class: 'btn small bad', onclick: async () => { if (!confirm('Kontakt löschen?')) return; try { await api('/api/kunde/kontakte/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { alert(x.message); } } }, 'Löschen');
+  const loesch = (z) => h('button', { class: 'btn small bad', onclick: async () => { if (!confirm('Kontakt löschen?')) return; try { await api('/api/kunde/kontakte/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { toast(x.message); } } }, 'Löschen');
   return h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Kontakte'), tabelle([['Name', z => z.name], ['Firma', z => z.firma], ['E-Mail', z => z.email], ['Telefon', z => z.telefon], ['Notiz', z => z.notiz], ['', loesch]], daten, 'Noch keine Kontakte.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Kontakt'), m, f));

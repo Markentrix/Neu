@@ -26,7 +26,7 @@ def neuer_kunde(name):
     c=httpx.Client(base_url=B,headers=H); r=c.post("/api/login",json={"email":f"{name.lower()}{sfx}@k.de","password":"InhaberPasswort1"}); assert r.status_code==200,r.text
     return k["id"],c,f"{name.lower()}{sfx}@k.de"
 def lead(firma,**kw):
-    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":"0511 5555","ort":"Celle",**kw}).json()["id"]; return i
+    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":f"0511 {time.time_ns()}","ort":"Celle",**kw}).json()["id"]; return i
 p=a.post("/api/admin/vertrieb/partner",json={"name":"Vera Vertrieb","email":f"vera{sfx}@v.de","status":"aktiv","einladen":True}).json()["id"]
 httpx.post(B+"/api/einladung",headers=H,json={"token":token(f"vera{sfx}@v.de"),"password":"VeraPasswort123"})
 v=httpx.Client(base_url=B,headers=H); assert v.post("/api/login",json={"email":f"vera{sfx}@v.de","password":"VeraPasswort123"}).status_code==200
@@ -60,7 +60,7 @@ chk("Board: Karte mit Fortschritt",all("fertig" in k and "gesamt" in k and "naec
 chk("Board: Kunde darf nicht",c.get("/api/admin/onboarding/board").status_code==403)
 
 # ---- Pipeline
-def lead_st(f,st): i=lead(f); sql(f"UPDATE leads SET status='{st}' WHERE id='{i}'"); return i
+def lead_st(f,st): i=lead(f+str(time.time_ns())); sql(f"UPDATE leads SET status='{st}' WHERE id='{i}'"); return i
 for st in ["neu","neu","kontaktiert","termin","angebot","angebot","gewonnen"]: lead_st("PL",st)
 for st in ["gewonnen"]*5+["verloren"]*5: lead_st("PE",st)
 pl=a.get("/api/admin/pipeline"); chk("Pipeline: 200",pl.status_code==200,pl.text[:300]); pl=pl.json()

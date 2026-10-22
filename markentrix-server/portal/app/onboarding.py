@@ -27,6 +27,7 @@ KUNDE_AKTION = {
     "branding": ("unterlagen", "Logo und Fotos hochladen"),
     "konten": ("nachrichten", "Zugänge senden"),
     "stammdaten": ("briefing", "Angaben ergänzen"),
+    "dns": ("website", "Domain umstellen"),
 }
 
 
@@ -119,3 +120,16 @@ def phasenstand(punkte: list) -> dict:
         out.append({"schluessel": schluessel, "titel": titel, "fertig": fertig, "gesamt": len(mine), "erledigt": bool(mine) and fertig == len(mine), "leer": not mine})
     aktuell = next((p["schluessel"] for p in out if not p["leer"] and not p["erledigt"]), None)
     return {"phasen": out, "aktuell": aktuell}
+
+
+# Schritte, bei denen der Kunde am Zug ist; alles andere erledigt das Team.
+KUNDE_AM_ZUG = ("zugang", "avv", "briefing", "stammdaten", "branding", "konten", "dns")
+
+
+def am_zug(punkte: list) -> dict:
+    """Wer ist gerade am Zug? 'kunde', solange ein Kunden-Schritt offen ist, sonst 'team'; None, wenn alles erledigt ist."""
+    offen = [p for p in punkte if not p["fertig"] and not p["code"] == "rechnung"]
+    wartet = [p for p in offen if p["code"] in KUNDE_AM_ZUG]
+    if wartet:
+        return {"wer": "kunde", "offen": len(wartet)}
+    return {"wer": "team", "offen": len(offen)} if offen else {"wer": None, "offen": 0}

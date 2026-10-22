@@ -523,6 +523,21 @@ def aufgaben_automatisch(cfg):
             WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '5 days'
               AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt)
             ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Einladung nie angenommen oder abgelaufen: Zugang neu schicken (einmal pro Woche)
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT k.id, 'Zugang prüfen, Einladung neu senden: ' || k.firma, {admin}, current_date, 'auto', 'einladung-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
+            FROM kunden k
+            WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '3 days'
+              AND NOT EXISTS (SELECT 1 FROM benutzer b WHERE b.kunden_id = k.id AND b.aktiv AND b.passwort_hash IS NOT NULL)
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+        # Stillstand: seit 14 Tagen nichts erledigt, der Kunde ist am Zug: anrufen statt noch eine Mail
+        f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+            SELECT k.id, 'Kunde anrufen (Stillstand im Onboarding): ' || k.firma, {admin}, current_date, 'auto', 'stillstand-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
+            FROM kunden k
+            WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '14 days'
+              AND NOT EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND p.erledigt_am > now() - interval '14 days')
+              AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt AND p.code = ANY(ARRAY['avv','briefing','stammdaten','branding','konten','dns','zugang']))
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
         # Angebot an einen Lead liegt seit 5 Tagen ohne Antwort: nachfassen
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT NULL, 'Angebot nachfassen: ' || coalesce(l.firma, b.nummer), {admin}, current_date, 'auto', 'angebotnachfassen-' || b.id
@@ -574,6 +589,9 @@ def aufgaben_automatisch(cfg):
                          AND (k.onboarding_erinnert_am IS NULL OR k.onboarding_erinnert_am < now() - interval '7 days') LIMIT 30""")
         for k in cur.fetchall():
             offen = (["das Briefing ausfüllen"] if k["briefing_offen"] else []) + (["den Vertrag zur Auftragsverarbeitung bestätigen"] if k["avv_offen"] else [])
+            cur.execute("SELECT code FROM onboarding_punkte WHERE kunden_id = %s AND NOT erledigt AND code IN ('branding','konten','dns')", (k["id"],))
+            codes = {r["code"] for r in cur.fetchall()}
+            offen += (["Ihr Logo und Fotos hochladen"] if "branding" in codes else []) + (["uns die Zugänge zu Ihren Konten (z. B. Google-Profil) senden"] if "konten" in codes else []) + (["die Domain auf unseren Server umstellen (wir erklären Ihnen im Portal, wie)"] if "dns" in codes else [])
             if not offen:
                 continue
             cur.execute("UPDATE kunden SET onboarding_erinnert_am = now() WHERE id = %s", (k["id"],))

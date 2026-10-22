@@ -535,3 +535,21 @@ Jede fertige Website ruft unter ihrer eigenen Domain `/api/anfrage`, `/api/slots
 - **Rangliste (Admin → Vertriebs-Auswertung):** Einschalten zeigt den Vertrieblern ihre Monatsplatzierung (Anrufe, Termine, Abschlüsse). Auf Wunsch mit Vornamen, sonst „Vertriebler 2“.
 - **Nachfass-Erinnerung:** Werktags morgens bekommt jeder aktive Vertriebler eine Mail und eine Mitteilung mit den Leads, deren Wiedervorlage fällig ist oder bei denen seit einer Woche nichts passiert ist. Abschaltbar unter Konto.
 - **Monatsbericht:** Enthält jetzt „Unser Tipp für den nächsten Monat“ (ein konkreter Vorschlag aus den Zahlen), im PDF und in der Mail.
+
+## Vertrieb, Onboarding und Kundenportal: Neuerungen (Stand Oktober 2026)
+
+**Vertrieb**
+- *Sperrliste* (Admin → Vertrieb → Steuerung): Wer „kein Interesse“ sagt, widerspricht oder sich abmeldet, landet automatisch auf der Sperrliste (Mail, Telefon, Website-Domain). Beim Anlegen und Importieren wird abgewiesen, eingehende Anfragen werden trotzdem angenommen. Einträge lassen sich von Hand ergänzen oder entfernen. Die rechtliche Bewertung (Art. 14 DSGVO, UWG) klärt bitte der Anwalt.
+- *Eingänge*: Neue Anfragen setzen den Lead auf „antwort“ mit Wiedervorlage heute. Automatische Verteilung an aktive Vertriebler ist **standardmäßig aus** (wegen der Provisionsansprüche), einschaltbar in der Steuerung. Dort stehen auch die Reaktionszeit für heiße Anfragen und die Sichtbarkeit der Paketpreise für Vertriebler (standardmäßig aus).
+- *Ansprache-Grundlage* je Lead (Anfrage, Einwilligung, Firmenkontakt, Empfehlung, Bestandskontakt) und *Verlustgrund* bei „kein Interesse“ / „verloren“; die Auswertung zeigt die Gründe.
+- *Angebot → Kunde*: Nimmt ein Interessent das Angebot an (Link oder Telefon), entsteht eine Aufgabe „Kunde anlegen“. Der Assistent „Zum Kunden machen“ legt Kunde, Paket, Buchung und Einladung in einem Schritt an. Angebotslinks bleiben bei Erinnerungen gültig; „neuer Link“ macht den alten ungültig.
+- *Erstgespräch*: Vertriebler buchen freie Zeiten direkt im Lead (mit Zustimmung des Kunden), Erinnerungen 24 h und 2 h vorher.
+
+**Onboarding**
+- Wöchentliche Aufgaben für das Team: „Zugang prüfen, Einladung neu senden“ und nach 14 Tagen Stillstand „Kunde anrufen“. Kunden-Erinnerungen nennen jetzt auch Logo/Fotos, Zugänge und die Domain-Umstellung. Die Startkarte zeigt, wer gerade am Zug ist. Das Team bekommt eine Push-Meldung, wenn ein Kunde im Onboarding Unterlagen hochlädt.
+
+**Kundenportal**
+- Push-Meldungen bei neuen Freigaben und Team-Antworten, Freigaben mit Veröffentlichungsdatum und Bestätigungsschritt, Nachrichtenformular mit Anhang, Entwurfsspeicher und Doppelsend-Schutz, Fehlermeldungen als Einblendung statt Browser-Fenster, klarere Menünamen, Hilfe zur Domain-Umstellung unter „Website“.
+
+**Betrieb**
+- Bei Passwortwechsel enden alle anderen Sitzungen. Abstürzende Hintergrundjobs geben ihre Tagesmarke frei und lösen nach 10 Fehlern in Folge eine rote Ampel aus. Veröffentlichungsfehler lösen einen Alarm aus. Uploads werden auf Größe, Dateityp und Kunden-Kontingent (500 MB) geprüft. Nicht geändert: Upload-Grenzen je Datei und Offsite-Backup (braucht ein Ziel, z. B. Hetzner Storage Box), Image-Tags (`latest`) und `--forwarded-allow-ips`.

@@ -1,4 +1,4 @@
-import { h, api, zeit, groesse, melde } from '../common.js';
+import { h, api, zeit, groesse, melde, toast } from '../common.js';
 import { start, tabelle, zeige, V } from './kern.js';
 import { ARTEN, STATUS_TXT } from './anfragen.js';
 
@@ -15,10 +15,18 @@ V.nachrichten = async (id) => {
   const betreff = h('input', { name: 'betreff', required: true, maxlength: 200, placeholder: 'Worum geht es?' });
   const art = h('select', { name: 'art' }, ...Object.entries(ARTEN).filter(([v]) => v !== 'modul').map(([v, t]) => h('option', { value: v }, t)));
   const text = h('textarea', { name: 'text', rows: 5, required: true, maxlength: 10000, placeholder: 'Beschreibe dein Anliegen. Je genauer, desto schneller können wir helfen.' });
-  const form = h('form', { onsubmit: async (e) => { e.preventDefault();
-    try { const r = await api('/api/kunde/tickets', { method: 'POST', body: { betreff: betreff.value, art: art.value, text: text.value } }); location.hash = '#nachrichten/' + r.id; } catch (x) { melde(m, x.message); } } },
+  try { text.value = localStorage.getItem('mk_entwurf_nachricht') || ''; } catch { /* ohne Speicher weiter */ }
+  text.addEventListener('input', () => { try { localStorage.setItem('mk_entwurf_nachricht', text.value); } catch { /* ignorieren */ } });
+  const foto = h('input', { type: 'file', accept: 'image/*,.pdf', 'aria-label': 'Foto oder Datei anhängen (freiwillig)' }), senden = h('button', { class: 'btn' }, 'Absenden');
+  const form = h('form', { onsubmit: async (e) => { e.preventDefault(); if (senden.disabled) return; senden.disabled = true; senden.textContent = 'Wird gesendet …';
+    try {
+      const r = await api('/api/kunde/tickets', { method: 'POST', body: { betreff: betreff.value, art: art.value, text: text.value } });
+      if (foto.files[0]) { try { const f = new FormData(); f.append('datei', foto.files[0]); await api('/api/kunde/tickets/' + r.id + '/dateien', { method: 'POST', body: f }); } catch (x) { toast('Die Nachricht ist angekommen, der Anhang leider nicht: ' + x.message); } }
+      try { localStorage.removeItem('mk_entwurf_nachricht'); } catch { /* ignorieren */ }
+      location.hash = '#nachrichten/' + r.id;
+    } catch (x) { senden.disabled = false; senden.textContent = 'Absenden'; melde(m, x.message + ' Dein Text bleibt erhalten, du kannst es noch einmal versuchen.'); } } },
     h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Art'), art)),
-    h('label', {}, 'Nachricht'), text, h('p', {}, h('button', { class: 'btn' }, 'Absenden')));
+    h('label', {}, 'Nachricht'), text, h('label', {}, 'Foto oder Datei (freiwillig)'), foto, h('p', { class: 'small muted' }, 'Wir antworten in der Regel innerhalb von einem Werktag, hier im Portal und per E-Mail.'), h('p', {}, senden));
   return h('div', { class: 'stack' },
     darfSchreiben() ? h('div', { class: 'card' }, h('h2', {}, 'Neue Nachricht an Markentrix'), h('p', { class: 'small muted' }, 'Fragen, Aufträge oder Änderungswünsche, z. B. neue Öffnungszeiten, ein Foto für die Website, ein Problem. Wir antworten hier und per E-Mail.'), m, form) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Deine Nachrichten'),
@@ -74,7 +82,7 @@ V.briefing = async () => {
   };
   const sammeln = () => Object.fromEntries(Object.entries(eingaben).map(([k, el]) => [k, el.value]));
   const los = async (abschicken) => {
-    try { await api('/api/kunde/briefing', { method: 'PUT', body: { daten: sammeln(), abschicken } }); if (abschicken) { alert('Danke! Dein Briefing ist beim Markentrix-Team angekommen.'); location.hash = '#uebersicht'; location.reload(); } else melde(m, 'Gespeichert. Du kannst jederzeit weitermachen.', 'ok'); } catch (x) { melde(m, x.message); }
+    try { await api('/api/kunde/briefing', { method: 'PUT', body: { daten: sammeln(), abschicken } }); if (abschicken) { toast('Danke! Dein Briefing ist beim Markentrix-Team angekommen.', 'ok'); location.hash = '#uebersicht'; setTimeout(() => location.reload(), 1500); } else melde(m, 'Gespeichert. Du kannst jederzeit weitermachen.', 'ok'); } catch (x) { melde(m, x.message); }
   };
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Briefing'),
     h('p', { class: 'small muted' }, 'Mit diesen Angaben bauen wir deine Website, Texte und Auswertungen. Du kannst zwischenspeichern und später weitermachen. Pflichtfelder sind mit * markiert. Logo und Bilder lädst du unter „Dokumente“ hoch.'),

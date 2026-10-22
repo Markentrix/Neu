@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, euro, melde } from '../common.js';
+import { h, api, datum, zeit, euro, melde, toast } from '../common.js';
 import { inhaber, tabelle, V } from './kern.js';
 
 V.belege = async () => {
@@ -55,6 +55,6 @@ V.berichte = async () => {
 V.automationen = async () => {
   const d = await api('/api/kunde/automationen');
   return h('div', { class: 'card' }, h('h2', {}, 'Automationen'),
-    d.map(a => h('div', { class: 'modul' }, h('div', { class: 'grow' }, h('b', {}, a.name), h('div', { class: 'small muted' }, a.beschreibung)), h('span', { class: 'pill ' + (a.aktiv ? 'ok' : '') }, a.aktiv ? 'aktiv' : 'nicht gebucht'), !a.aktiv && inhaber() ? h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Wir melden uns bei dir mit Details und Preis. Anfrage senden?')) return; try { const r = await api('/api/kunde/modul-anfrage', { method: 'POST', body: { modul_code: a.code } }); location.hash = '#nachrichten/' + r.id; } catch (x) { alert(x.message); } } }, 'Anfragen') : '')),
+    d.map(a => h('div', { class: 'modul' }, h('div', { class: 'grow' }, h('b', {}, a.name), h('div', { class: 'small muted' }, a.beschreibung)), h('span', { class: 'pill ' + (a.aktiv ? 'ok' : '') }, a.aktiv ? 'aktiv' : 'nicht gebucht'), !a.aktiv && inhaber() ? h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Wir melden uns bei dir mit Details und Preis. Anfrage senden?')) return; try { const r = await api('/api/kunde/modul-anfrage', { method: 'POST', body: { modul_code: a.code } }); location.hash = '#nachrichten/' + r.id; } catch (x) { toast(x.message); } } }, 'Anfragen') : '')),
     h('p', { class: 'muted small' }, 'Mit „Anfragen“ erhält das Markentrix-Team deine Nachricht und meldet sich mit Details und Preis.'));
 };

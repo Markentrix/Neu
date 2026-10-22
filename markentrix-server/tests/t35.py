@@ -26,7 +26,7 @@ def neuer_kunde(name):
     c=httpx.Client(base_url=B,headers=H); r=c.post("/api/login",json={"email":f"{name.lower()}{sfx}@k.de","password":"InhaberPasswort1"}); assert r.status_code==200,r.text
     return k["id"],c,f"{name.lower()}{sfx}@k.de"
 def lead(firma,**kw):
-    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":"0511 5555","ort":"Celle",**kw}).json()["id"]; return i
+    i=a.post("/api/admin/leads",json={"firma":f"{firma} {sfx}","telefon":f"0511 {time.time_ns()}","ort":"Celle",**kw}).json()["id"]; return i
 import os, datetime
 os.environ["BACKUP_DIR"]="/var/tmp/pt/bk"
 ROOT=os.path.dirname(os.environ["PYTHONPATH"].split(":")[0])

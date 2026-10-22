@@ -271,8 +271,11 @@ def willkommen_start(an: str, name: str | None, firma: str, punkte: list[str]) -
     hallo = f"Hallo {name}," if name else "Hallo,"
     liste = "\n".join("- " + p for p in punkte)
     text = (f"{hallo}\n\nschön, dass {firma} dabei ist! Damit wir zügig starten können, brauchen wir von Ihnen:\n\n{liste}\n\n"
-            f"Das meiste können Sie direkt in Ihrem Portal erledigen: {config.BASE_URL}/app. "
-            f"Dort sehen Sie auch jederzeit, wie weit wir sind. Bei Fragen schreiben Sie uns einfach über „Nachrichten“ im Portal." + SIGNATUR)
+            f"So geht es weiter:\n"
+            f"1. Sie erledigen die Punkte oben direkt im Portal: {config.BASE_URL}/app\n"
+            f"2. Wir prüfen Ihre Angaben und melden uns bei Rückfragen, in der Regel innerhalb von zwei Werktagen.\n"
+            f"3. Danach bauen wir auf und zeigen Ihnen das Ergebnis zur Freigabe. Im Portal sehen Sie jederzeit, wer gerade am Zug ist.\n\n"
+            f"Bei Fragen schreiben Sie uns einfach über „Nachrichten“ im Portal." + SIGNATUR)
     return senden(an, f"Willkommen bei Markentrix: so starten wir für {firma}", text)
 
 

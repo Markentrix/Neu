@@ -463,3 +463,9 @@ export function mobilLeiste({ aktiv, gruppen, feste, icons, kurz = {}, schluesse
       h('span', { class: 'ic', 'aria-hidden': 'true' }, icons[id] || '•', zahl(id) ? h('span', { class: 'badge' }, zahl(id)) : ''), h('span', {}, kurz[id] || alle.find(p => p[0] === id)[1]))),
     h('button', { type: 'button', class: !fest.includes(aktiv) ? 'on' : '', onclick: mehr }, h('span', { class: 'ic', 'aria-hidden': 'true' }, '☰', mehrZahl ? h('span', { class: 'badge' }, mehrZahl) : ''), h('span', {}, 'Menü')));
 }
+
+/** Kurze Meldung unten im Bild (statt alert): verschwindet von selbst, wird vorgelesen. */
+export function toast(text, art = 'bad') {
+  const t = h('div', { class: 'toast ' + art, role: 'status', 'aria-live': 'polite' }, text);
+  document.body.append(t); setTimeout(() => t.remove(), 6000);
+}

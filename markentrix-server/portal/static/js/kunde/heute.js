@@ -1,4 +1,4 @@
-import { h, leerZustand, api, melde, dialog, rueckgaengig } from '../common.js';
+import { h, leerZustand, api, melde, dialog, rueckgaengig, toast } from '../common.js';
 import { V } from './kern.js';
 
 /** Telefonnummer für wa.me: nur Ziffern, deutsche Nummern mit 0 am Anfang bekommen 49. */
@@ -24,7 +24,7 @@ export function kanalKnoepfe(kontakt, betreff, text, nachher) {
 /** Dialog „Antworten“: Vorlage wählen, Text anpassen, im eigenen Programm absenden. */
 export async function antwortDialog(aid, danach) {
   let d;
-  try { d = await api('/api/kunde/anfragen/' + aid + '/entwuerfe'); } catch (x) { alert(x.message); return; }
+  try { d = await api('/api/kunde/anfragen/' + aid + '/entwuerfe'); } catch (x) { toast(x.message); return; }
   const a = d.anfrage, m = h('div'), text = h('textarea', { rows: 7, maxlength: 1500, 'aria-label': 'Antworttext' });
   text.value = d.vorlagen[0].text;
   const waehler = h('select', { 'aria-label': 'Vorlage', onchange: () => { text.value = d.vorlagen.find(v => v.code === waehler.value).text; } }, d.vorlagen.map(v => h('option', { value: v.code }, v.name + (v.eigene ? ' (eigene)' : ''))));
