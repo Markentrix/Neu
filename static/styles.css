@@ -727,6 +727,13 @@ h2.display { font-size: clamp(2.1rem, 5vw, 3.3rem); color: var(--ink); }
 .ceramic-table caption { caption-side: top; text-align: left; padding: 14px 20px 10px; font-weight: 650; color: var(--ink); }
 .ceramic-table th, .ceramic-table td { padding: 11px 20px; }
 .ceramic-table .num { text-align: right; white-space: nowrap; color: var(--ink); font-weight: 650; font-variant-numeric: tabular-nums; }
+.ceramic-table th small { display: block; font-size: 0.78rem; font-weight: 650; color: var(--blue); margin-top: 2px; }
+.ceramic-table .price-was { color: var(--muted); font-weight: 500; margin-right: 4px; }
+.ceramic-table .price-promo { color: var(--blue); }
+.ceramic-table tr.is-promo { background: var(--blue-soft); }
+.promo-box { display: flex; gap: 12px; align-items: flex-start; margin: 18px 0 0; padding: 16px 18px; border-radius: var(--radius-m); background: var(--blue-soft); border: 1px solid rgba(28, 79, 156, 0.22); color: var(--ink); }
+.promo-box > svg { width: 22px; height: 22px; flex: none; color: var(--blue); margin-top: 2px; }
+.promo-box p { margin: 4px 0 0; color: var(--muted); font-size: 0.94rem; }
 .ceramic-notes { display: grid; gap: 6px; padding-left: 1.1em; font-size: 0.9rem; color: var(--muted); max-width: 80ch; }
 .ceramic-prices .btn { justify-self: start; }
 .prose .ceramic-grid { grid-template-columns: 1fr; }

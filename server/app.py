@@ -347,7 +347,7 @@ def mail_async(*a, **k):
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,190}\.[a-zA-Z]{2,}$")
 LABELS = {"name": "Name", "telefon": "Telefon", "email": "E-Mail", "paket": "Paket", "klasse": "Fahrzeugklasse", "fahrzeug": "Fahrzeug",
           "zustand": "Zustand", "extras": "Extras", "abholung": "Abholung", "datum": "Wunschtermin", "datum2": "Ausweichtermin",
-          "zeitfenster": "Zeitfenster", "uhrzeit": "Uhrzeit", "anzahlung": "Anzahlung", "winterschutz": "Schutz im Winterangebot", "gutscheincode": "Gutscheincode", "kanal": "Antwort per", "nachricht": "Nachricht",
+          "zeitfenster": "Zeitfenster", "uhrzeit": "Uhrzeit", "anzahlung": "Anzahlung", "winterschutz": "Schutz im Winterangebot", "scheibenumfang": "Scheiben", "gutscheincode": "Gutscheincode", "kanal": "Antwort per", "nachricht": "Nachricht",
           "bewertung_ok": "Bewertungsanfrage erlaubt", "art": "Gutscheinart", "wert": "Wert", "fuer": "Für", "von": "Von", "widmung": "Widmung",
           "zustellung": "Zustellung", "firma": "Firma", "anzahl": "Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen", "quelle": "Quelle", "vorgang": "Vorgang / Gutscheincode"}
 
@@ -414,7 +414,7 @@ def validate(d):
             errors["telefon"] = "Bitte Telefon oder E-Mail angeben."
     elif typ == "termin":
         out["paket"] = _s(d, "paket", 20, True, errors)
-        if out["paket"] and out["paket"] not in pkeys + ["beratung", "keramik", "care"] + (["winter"] if winter_offer() else []):
+        if out["paket"] and out["paket"] not in pkeys + ["beratung", "keramik", "care"] + (["winter"] if winter_offer() else []) + (["scheiben"] if scheiben_items() else []):
             errors["paket"] = "Bitte ein Paket wählen."
         out["klasse"] = _s(d, "klasse", 20, True, errors)
         if out["klasse"] and out["klasse"] not in ckeys:
@@ -422,6 +422,9 @@ def validate(d):
         out["fahrzeug"] = _s(d, "fahrzeug", 120, False, errors)
         out["zustand"] = _list(d, "zustand", ["tierhaare", "stark", "geruch", "leder", "flecken", "kratzer"])
         out["extras"] = _list(d, "extras", pr.get("extras"))
+        if out["paket"] == "scheiben":
+            sc = scheiben_items()
+            out["scheibenumfang"] = d.get("scheibenumfang") if d.get("scheibenumfang") in sc else next(iter(sc), "")
         if out["paket"] == "winter":
             out["winterschutz"] = WINTERSCHUTZ["keramik" if d.get("winterschutz") in ("keramik", WINTERSCHUTZ["keramik"]) else "wachs"]
         out["abholung"] = d.get("abholung") if d.get("abholung") in ("nein", "anfrage") else "nein"
@@ -498,7 +501,8 @@ def validate(d):
 def summary_text(data):
     pr = pricing()
     names = {p["key"]: p["name"] for p in pr.get("packages", [])}
-    names.update({"beratung": "Beratung / Einzelleistung", "keramik": "Keramikversiegelung", "care": "ElbDetail Care", "winter": (pricing().get("winter") or {}).get("name", "Winterangebot")})
+    names.update({"beratung": "Beratung / Einzelleistung", "keramik": "Keramikversiegelung", "care": "ElbDetail Care", "scheiben": "Scheibenkeramik (C² Glass Ceramic)",
+                  "winter": (pricing().get("winter") or {}).get("name", "Winterangebot")})
     cnames = {c["key"]: c["name"] for c in pr.get("classes", [])}
     lines = []
     for k, v in data.items():
@@ -525,8 +529,20 @@ def winter_offer():
     return w if w and (not w.get("validUntil") or w["validUntil"] >= today().isoformat()) else None
 
 
+def scheiben_items():
+    """Scheibenkeramik je Umfang mit gültigem Preis (laufende Aktion, z. B. Winter-Aktion, ersetzt den regulären Preis)."""
+    a = next((x for x in pricing().get("addons", []) if x.get("key") == "scheiben"), None)
+    if not a:
+        return {}
+    pr, t = a.get("promo") or {}, today().isoformat()
+    promo = pr.get("prices", {}) if (not pr.get("validFrom") or pr["validFrom"] <= t) and (not pr.get("validUntil") or pr["validUntil"] >= t) else {}
+    return {i["name"]: promo.get(i["name"], i["price"]) for i in a.get("items", []) if i.get("price") is not None}
+
+
 def condition_surcharge(data):
     """Zuschlag in Prozent für angeklickte Zustandsangaben (5 % je Angabe, Tierhaare 10 %, Ledersitze ausgenommen)."""
+    if data.get("paket") == "scheiben":
+        return 0  # Zustand von Innenraum und Lack spielt für die Scheiben keine Rolle
     cfg = (site_info().get("booking") or {}).get("conditionSurcharge") or {}
     pct, over = float(cfg.get("percent", 0) or 0), cfg.get("overrides") or {}
     return sum(float(over.get(z, pct)) for z in data.get("zustand") or [] if z not in cfg.get("exempt", []))
@@ -549,6 +565,8 @@ def ker_booking(d):
 
 
 def base_price(data):
+    if data.get("paket") == "scheiben":
+        return scheiben_items().get(data.get("scheibenumfang"))
     if data.get("paket") == "winter":
         if ker_booking(data):
             return None  # Aufpreis für C² CarCeramic legt René fest, auch die Anzahlung
@@ -975,6 +993,8 @@ def de_when(d):
 
 
 def stand_text(d):
+    if d.get("paket") == "scheiben":
+        return "Die Scheibenkeramik dauert etwa 1 Stunde."
     return ("Bei Versiegelung und Keramik bleibt Ihr Auto 3 Tage bei uns, damit die Beschichtung in Ruhe aushärten kann."
             if ker_booking(d) else "Optimal ist es, wenn Ihr Auto einen Tag bei uns bleiben kann. Bei Versiegelung und Keramik sind es 3 Tage.")
 
@@ -1597,7 +1617,8 @@ def google_event_body(ref, d):
     st = termin_start(d)
     end = st + dt.timedelta(minutes=booking_cfg()["slotMinutes"])
     names = {p["key"]: p["name"] for p in pr.get("packages", [])}
-    names.update({"beratung": "Beratung", "keramik": "Keramikversiegelung", "care": "ElbDetail Care", "winter": (pr.get("winter") or {}).get("name", "Winterangebot")})
+    names.update({"beratung": "Beratung", "keramik": "Keramikversiegelung", "care": "ElbDetail Care", "scheiben": "Scheibenkeramik (C² Glass Ceramic)",
+                  "winter": (pr.get("winter") or {}).get("name", "Winterangebot")})
     a = s.get("address", {})
     return {"summary": f"Abgabe: {d.get('name', '')} · {names.get(d.get('paket'), d.get('paket', ''))}",
             "location": f"{a.get('street', '')}, {a.get('zip', '')} {a.get('city', '')}",
@@ -1829,7 +1850,9 @@ def offer_state(o, day=None):
 
 def offers_live_signature():
     """Welche Angebote heute sichtbar sein müssen. Ändert sich das (Start- oder Enddatum erreicht), wird neu veröffentlicht."""
-    return ",".join(o["id"] for o in load_offers()["items"] if offer_state(o) == "aktiv")
+    sig = ",".join(o["id"] for o in load_offers()["items"] if offer_state(o) == "aktiv")
+    # Aktionspreise in pricing.json (Winterangebot, Scheiben-Aktion) laufen ebenfalls automatisch an und aus
+    return sig + f"|winter:{bool(winter_offer())}|scheiben:{sorted(scheiben_items().items())}"
 
 
 def clean_offer(d, media_dir):

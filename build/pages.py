@@ -228,15 +228,31 @@ def _eur(v):
 
 def addon_table(site, a):
     """Preistabelle einer Zusatz-Keramik (Felgen oder Scheiben)."""
-    rows = "".join(f'<tr><th scope="row">{ESC(i["name"])}</th><td class="num">{("ab " if a.get("from") and i["price"] is not None else "") + _eur(i["price"])}</td></tr>'
-                   for i in a["items"])
+    promo = site.addon_promo(a["key"])
+    cell = lambda p, reg: (f'<s class="price-was" aria-label="statt {_eur(reg)}">{_eur(reg)}</s> <strong class="price-promo">{_eur(p)}</strong>' if reg is not None
+                           else ("ab " if a.get("from") and p is not None else "") + _eur(p))
+    tag = f'<small>{ESC(promo["title"])} bis {_de(promo["validUntil"])}</small>' if promo else ""
+    rows = "".join(f'<tr{" class=is-promo" if reg is not None else ""}><th scope="row">{ESC(n)}{tag if reg is not None else ""}</th><td class="num">{cell(p, reg)}</td></tr>'
+                   for n, p, reg in site.addon_items(a["key"]))
+    dur = f' · Dauer {ESC(a["duration"])}' if a.get("duration") else ""
     return f'''<div class="price-scroll" tabindex="0" role="region" aria-label="Preise {ESC(a["title"])}">
             <table class="price-table ceramic-table">
-              <caption>{ESC(a["name"])} · {ESC(a["title"])}</caption>
+              <caption>{ESC(a["name"])} · {ESC(a["title"])}{dur}</caption>
               <thead><tr><th scope="col">{ESC(a["priceLabel"])}</th><th scope="col" class="num">Preis{" " + ESC(a["unit"]) if a.get("unit") else ""}</th></tr></thead>
               <tbody>{rows}</tbody>
             </table>
           </div>'''
+
+
+def promo_box(site, a, prefix=""):
+    """Hinweis auf eine laufende Aktion der Zusatz-Keramik."""
+    pr = site.addon_promo(a["key"])
+    if not pr:
+        return ""
+    items = " · ".join(f"{ESC(n)} {_eur(p)}" for n, p in pr["prices"].items())
+    dur = f' Dauer {ESC(a["duration"].rstrip("."))}.' if a.get("duration") else ""
+    return f'''<div class="promo-box">{I["snow"]}<div><strong>{ESC(pr["title"])} bis {_de(pr["validUntil"])}: {items}</strong>
+          <p>{ESC(pr.get("text", ""))}{dur}</p></div></div>'''
 
 
 def addon_details(site, a, prefix=""):
@@ -253,8 +269,9 @@ def addon_details(site, a, prefix=""):
             <ul class="includes">{pts}</ul>
           </div>
         </div>
+        {promo_box(site, a, prefix)}
         <p class="price-note">{ESC(pr.get("durabilityNote", ""))}</p>
-        <a class="btn btn-primary" href="{prefix}termin.html?paket=keramik">{I["cal"]}{ESC(a["title"])} anfragen</a>
+        <a class="btn btn-primary" href="{prefix}termin.html?paket={"scheiben" if a["key"] == "scheiben" else "keramik"}">{I["cal"]}{ESC(a["title"])} {"buchen" if a["key"] == "scheiben" else "anfragen"}</a>
       </div>'''
 
 
@@ -269,6 +286,7 @@ def addons_prices(site, prefix=""):
         <h2>Felgen- und Scheibenkeramik</h2>
         <p>Die Keramikbeschichtungen von C²Coating für Felgen und Scheiben buchen Sie einzeln oder zusammen mit der Lackkeramik.</p>
         <div class="ceramic-grid ceramic-grid--even">{"".join(addon_table(site, a) for a in ads)}</div>
+        {"".join(promo_box(site, a, prefix) for a in ads)}
         <p class="price-note">Standzeit laut Hersteller: {", ".join(f"{ESC(a['title'])} {ESC(a['durability'])}" for a in ads)}. {ESC(site.pricing.get("durabilityNote", ""))}</p>
         <p>{links}</p>
       </div>'''

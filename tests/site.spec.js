@@ -136,7 +136,7 @@ test("Felgen- und Scheibenkeramik: Karten auf der Startseite, Preise und Herstel
   await expect(page.locator("#keramik-preise")).toContainText("350");
   await expect(page.locator("#keramik-preise")).toContainText("laut Hersteller");
   await page.goto("/preise.html");
-  await expect(page.locator("#felgen-scheiben-preise")).toContainText("ab 179");
+  await expect(page.locator("#felgen-scheiben-preise")).toContainText("114 €");  // Winter-Aktion statt 179 €
 });
 
 test("Buchung: Zustandsangaben erhöhen den Richtpreis (Tierhaare 10 %, sonst 5 %, Ledersitze nicht)", async ({ page }) => {
@@ -177,6 +177,24 @@ test("Winterangebot: Inhalt sichtbar, C² CarCeramic statt Wachs wählbar", asyn
   await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 329 €");
   await page.locator('label.choice-card:has(input[value="essential"])').click();
   await expect(page.locator(".wz-winter")).toBeHidden();
+});
+
+test("Winter-Aktion Scheibenkeramik: Aktionspreise, Angebot und Buchung je Umfang", async ({ page }) => {
+  await page.goto("/leistungen/scheibenversiegelung-celle.html");
+  const t = page.locator("#keramik-preise .ceramic-table");
+  await expect(t.locator("tr.is-promo")).toHaveCount(2);
+  await expect(t).toContainText("99 €");
+  await expect(t).toContainText("114 €");
+  await expect(page.locator(".promo-box")).toContainText("bis 28.02.2027");
+  await page.goto("/angebote.html");
+  await expect(page.locator("main")).toContainText("alle Außenscheiben 99 €");
+  await page.goto("/termin.html?paket=scheiben");
+  await expect(page.locator(".wz-scheiben")).toBeVisible();
+  await expect(page.locator('input[name="scheibenumfang"][value="Alle Außenscheiben"]')).toBeChecked();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("99 €");
+  await page.locator('label.choice-pill:has(input[value="Alle Außenscheiben inklusive Panoramadach"])').click();
+  await expect(page.locator('[data-sum="preis"]')).toHaveText("114 €");
+  await expect(page.locator('[data-sum="anzahlung"]')).toContainText("17,1");
 });
 
 test("AGB und Widerruf: im Fuß verlinkt, Belehrung, Muster-Formular und Widerrufsformular", async ({ page }) => {

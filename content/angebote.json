@@ -20,6 +20,22 @@
     {
       "active": true,
       "highlight": false,
+      "icon": "shield",
+      "badge": "Winter-Aktion",
+      "title": "Scheibenkeramik für den Winter",
+      "text": "C² Glass Ceramic für alle Außenscheiben: Regen perlt ab, Schmutz und Insekten haften schlechter. Inklusive Reinigung und üblicher Vorbereitung, auch einzeln buchbar, ohne zusätzliche Aufbereitung. Dauer ca. 1 Stunde. Mit Panoramadach 114 €.",
+      "price": "alle Außenscheiben 99 €",
+      "validUntil": "2027-02-28",
+      "ctaLabel": "Scheibenkeramik buchen",
+      "ctaHref": "termin.html?paket=scheiben",
+      "id": "d4c0ffee",
+      "validFrom": "2026-10-21",
+      "image": "",
+      "imageAlt": ""
+    },
+    {
+      "active": true,
+      "highlight": false,
       "icon": "gift",
       "badge": "Geschenkidee",
       "title": "Gutschein zu Weihnachten",

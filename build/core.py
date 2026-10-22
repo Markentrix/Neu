@@ -115,13 +115,26 @@ class Site:
             return w
         return None
 
+    def addon_promo(self, key):
+        """Laufende Aktion einer Zusatz-Keramik (z. B. Winter-Aktion Scheibenkeramik), sonst None."""
+        pr = (self.addon(key) or {}).get("promo")
+        today = datetime.date.today().isoformat()
+        if pr and (not pr.get("validFrom") or pr["validFrom"] <= today) and (not pr.get("validUntil") or pr["validUntil"] >= today):
+            return pr
+        return None
+
+    def addon_items(self, key):
+        """Positionen mit gültigem Preis: [(Name, Preis, regulärer Preis oder None)]."""
+        promo = (self.addon_promo(key) or {}).get("prices", {})
+        return [(i["name"], promo.get(i["name"], i["price"]), i["price"] if i["name"] in promo else None) for i in self.addon(key)["items"]]
+
     def min_price(self, key):
         if key == "winter" and self.pricing.get("winter"):
             return min(self.pricing["winter"]["prices"].values())
         if key == "keramik":  # Einstieg der C² CarCeramic-Preisliste
             return min(c["price"] for c in self.pricing["ceramic"]["car"] if c.get("price") is not None)
         if self.addon(key):  # Felgen- und Scheibenkeramik
-            return min(i["price"] for i in self.addon(key)["items"] if i.get("price") is not None)
+            return min(p for _, p, _ in self.addon_items(key) if p is not None)
         return min(self.pkg(key)["prices"].values())
 
     def fill(self, obj):

@@ -711,7 +711,7 @@ class TestBooking(Base):
         app.set_setting("mailApproval", {})  # alles mit Freigabe: der Widerruf geht trotzdem sofort raus
         try:
             refs = []
-            for i, (day, mail_to) in enumerate([(next_workday(20), "w1@example.com"), (next_workday(21), "w2@example.com")]):
+            for i, (day, mail_to) in enumerate([(next_workday(20), "w1@example.com"), (next_workday(24), "w2@example.com")]):
                 code, j = self.book(day, "09:00", email=mail_to)
                 self.assertEqual(code, 200, j)
                 ref = j["ref"]
@@ -857,6 +857,22 @@ class TestBooking(Base):
         self.assertFalse(slots["08:00"])  # mittwochs erst ab 9 Uhr
         self.assertTrue(slots["09:00"] and slots["10:00"])
         self.assertTrue(app.free_slots(next_workday(3))[0]["frei"])
+
+    def test_scheiben_booking(self):
+        """Scheibenkeramik einzeln: Preis je Umfang (Winter-Aktion), keine Zustandszuschläge, keine 3-Tage-Sperre."""
+        day = next_workday(27)
+        code, j = self.req("POST", "/api/anfrage", {"typ": "termin", "paket": "scheiben", "scheibenumfang": "Alle Außenscheiben", "klasse": "suv",
+                                                    "zustand": ["tierhaare"], "datum": day, "uhrzeit": "10:00", "name": "Karla Kunde",
+                                                    "telefon": "0171 2223334", "email": "scheibe@example.com", "einwilligung": "ja"})
+        self.assertEqual(code, 200, j)
+        d = app.load_termin(j["ref"])[1]
+        promo = app.today().isoformat() <= "2027-02-28"
+        self.assertEqual(app.richtpreis(d), 99 if promo else 149)
+        self.assertEqual(d["anzahlung"], 14.85 if promo else 22.35)
+        self.assertFalse(app.ker_booking(d))
+        self.assertNotIn(day, app.blocked_days())
+        self.assertIn("1 Stunde", app.stand_text(d))
+        self.assertIn("Scheiben: Alle Außenscheiben", app.summary_text(d))
 
     def test_winter_offer_booking(self):
         day = next_workday(15)

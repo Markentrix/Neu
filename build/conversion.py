@@ -66,14 +66,34 @@ def build_termin(site, write):
             </span>
           </label>'''
     pk += "{WINTER_OPT}"
+    sa = site.addon("scheiben")
+    scheiben_card = ""
+    if sa:
+        sp = site.addon_promo("scheiben")
+        default = next(iter(sp["prices"])) if sp else sa["items"][0]["name"]  # in der Aktion: alle Außenscheiben vorauswählen
+        pills = "".join(
+            f'''<label class="choice-pill"><input type="radio" name="scheibenumfang" value="{ESC(n)}"{" checked" if n == default else ""} disabled><span><strong>{ESC(n)}</strong><small>{f"{p} € statt {reg} €" if reg is not None else f"ab {p} €"}</small></span></label>'''
+            for n, p, reg in site.addon_items("scheiben"))
+        promo_line = f'{ESC(sp["title"])} bis {".".join(reversed(sp["validUntil"].split("-")))}: ' + ", ".join(f"{ESC(n)} {p} €" for n, p in sp["prices"].items()) + ". " if sp else ""
+        scheiben_card = f'''<label class="choice-card">
+            <input type="radio" name="paket" value="scheiben">
+            <span class="choice-body">
+              <span class="choice-head"><strong>Scheibenkeramik</strong><span class="choice-price" data-price-for="scheiben">ab {site.min_price("scheiben")} €</span></span>
+              <span class="choice-sub">C² Glass Ceramic, Dauer {ESC(sa.get("duration", "").rstrip("."))}. {promo_line}Inklusive Reinigung und Vorbereitung, auch einzeln buchbar.</span>
+            </span>
+          </label>
+          <div class="form-row wz-scheiben" hidden style="grid-column: 1 / -1"><span class="label">Welche Scheiben?</span>
+            <div class="choice-pills">{pills}</div>
+          </div>'''
     pk += f'''<label class="choice-card">
             <input type="radio" name="paket" value="keramik">
             <span class="choice-body">
               <span class="choice-head"><strong>Keramikversiegelung</strong><span class="choice-price">ab {site.min_price("keramik")} €</span></span>
               <span class="choice-sub">C² CarCeramic für den Lack ab Paket Signature oder beim Neuwagen, dazu Felgenkeramik ab {site.min_price("felgen")} € und Scheibenkeramik ab {site.min_price("scheiben")} €.</span>
             </span>
-          </label>
-          <label class="choice-card">
+          </label>'''
+    pk += scheiben_card
+    pk += f'''<label class="choice-card">
             <input type="radio" name="paket" value="care">
             <span class="choice-body">
               <span class="choice-head"><strong>ElbDetail Care</strong><span class="choice-price">auf Anfrage</span></span>

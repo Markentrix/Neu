@@ -12,7 +12,11 @@
   function waLink(text) { return "https://wa.me/" + ELB.whatsapp + (text ? "?text=" + encodeURIComponent(text) : ""); }
   function pkg(key) { return (ELB.packages || []).filter(function (p) { return p.key === key; })[0]; }
   function cls(key) { return (ELB.classes || []).filter(function (c) { return c.key === key; })[0]; }
-  function price(pk, ck) { var p = pkg(pk); return p && p.prices ? p.prices[ck] : null; }
+  function price(pk, ck, scope) {
+    var p = pkg(pk); if (!p) return null;
+    if (p.scope) { if (scope) return p.scope[scope] != null ? p.scope[scope] : null; var v = Object.keys(p.scope).map(function (k) { return p.scope[k]; }); return v.length ? Math.min.apply(null, v) : null; }  // Scheibenkeramik: Preis je Umfang, nicht je Fahrzeugklasse
+    return p.prices ? p.prices[ck] : null;
+  }
   function radio(form, name) { var el = form.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
   function deDate(iso) { if (!iso) return ""; var p = iso.split("-"); return p.length === 3 ? p[2] + "." + p[1] + "." + p[0] : iso; }
   function todayIso() { var t = new Date(); return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0"); }
@@ -363,7 +367,7 @@
     klasse: "Fahrzeugklasse", fahrzeug: "Fahrzeug", zustand: "Zustand", extras: "Extras", abholung: "Abholung", datum: "Wunschtermin",
     datum2: "Ausweichtermin", zeitfenster: "Zeitfenster", uhrzeit: "Uhrzeit", gutscheincode: "Gutscheincode", kanal: "Antwort per", nachricht: "Nachricht",
     bewertung_ok: null, art: "Gutschein", betrag: "Betrag", wunschbetrag: "Wunschbetrag", fuer: "Für", von: "Von", widmung: "Widmung",
-    zustellung: "Zustellung", firma: "Firma", anzahl: "Fahrzeuge", intervall: "Intervall", leistungen: "Leistungen", vorgang: "Vorgang / Gutscheincode", winterschutz: "Schutz im Winterangebot"
+    zustellung: "Zustellung", firma: "Firma", anzahl: "Fahrzeuge", intervall: "Intervall", leistungen: "Leistungen", scheibenumfang: "Scheiben", vorgang: "Vorgang / Gutscheincode", winterschutz: "Schutz im Winterangebot"
   };
   var TITLES = { kontakt: "Anfrage", termin: "Terminanfrage", gutschein: "Gutscheinbestellung", firma: "Firmenanfrage", widerruf: "Widerruf" };
 
@@ -493,7 +497,12 @@
     function paketVal() { return (wz.querySelector('input[name="paket"]:checked') || {}).value || ""; }
     function winterKer() { var r = wz.querySelector('input[name="winterschutz"]:checked'); return paketVal() === "winter" && !!r && r.value === "keramik"; }
     function isKer() { return paketVal() === "keramik" || winterKer(); }
-    function syncWinter() { if (winterBox) { winterBox.hidden = paketVal() !== "winter"; $$("input", winterBox).forEach(function (r) { r.disabled = winterBox.hidden; }); } }
+    var scheibenBox = $(".wz-scheiben", wz);
+    function syncWinter() {
+      [[winterBox, "winter"], [scheibenBox, "scheiben"]].forEach(function (x) {
+        if (x[0]) { x[0].hidden = paketVal() !== x[1]; $$("input", x[0]).forEach(function (r) { r.disabled = x[0].hidden; }); }
+      });
+    }
     /* Freie Abgabezeiten des gewählten Tages vom Server holen (Auslastung, Keramik-Standzeit, Google Kalender) */
     var slotBox = $("#t-slots"), slotMsg = $("#t-slots-msg"), slotReq = 0;
     function loadSlots() {
@@ -530,7 +539,7 @@
       if (msg) { msg.textContent = txt; msg.className = "field-msg" + (txt ? " error" : ""); }
     }
     ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); if (n === "datum") loadSlots(); summary(); }); });
-    $$('input[name="paket"], input[name="winterschutz"]', wz).forEach(function (r) { r.addEventListener("change", function () { syncWinter(); ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); loadSlots(); }); });
+    $$('input[name="paket"], input[name="winterschutz"], input[name="scheibenumfang"]', wz).forEach(function (r) { r.addEventListener("change", function () { syncWinter(); ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); loadSlots(); }); });
 
     function show(i) {
       cur = Math.max(0, Math.min(steps.length - 1, i));
@@ -552,17 +561,19 @@
     steps.forEach(function (s) { s.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "checkbox" && cur < steps.length - 1) { e.preventDefault(); go(1); } }); });
 
     function summary() {
-      var d = collect(wz), p = pkg(d.paket), c = cls(d.klasse), v = p && c ? price(d.paket, d.klasse) : null, wk = winterKer();
+      var d = collect(wz), p = pkg(d.paket), c = cls(d.klasse), wk = winterKer(), sch = !!(p && p.scope);
+      var v = sch ? price(d.paket, null, d.scheibenumfang) : (p && c ? price(d.paket, d.klasse) : null);
       var sc = (ELB.booking || {}).surcharge || {}, zs = [].concat(d.zustand || []).filter(function (z) { return (sc.exempt || []).indexOf(z) === -1; });
       var surPct = zs.reduce(function (a, z) { return a + ((sc.overrides || {})[z] != null ? sc.overrides[z] : (sc.percent || 0)); }, 0);
+      if (sch) surPct = 0;  // Zustand des Innenraums spielt für die Scheiben keine Rolle
       if (v != null && surPct) v = Math.round(v * (1 + surPct / 100));
       var surEl = $("#t-surcharge"); if (surEl) surEl.textContent = surPct ? "Richtpreis inkl. " + surPct + " % Zuschlag für den Zustand." : "";
       var set = function (k, t) { var el = wz.parentNode.querySelector('[data-sum="' + k + '"]'); if (el) el.textContent = t; };
-      set("paket", (p ? p.name : (SPECIAL[d.paket] || "–")) + (wk ? " · C² CarCeramic statt Wachs" : ""));
+      set("paket", (p ? p.name : (SPECIAL[d.paket] || "–")) + (wk ? " · C² CarCeramic statt Wachs" : "") + (sch && d.scheibenumfang ? " · " + d.scheibenumfang : ""));
       set("klasse", (c ? c.name : "–") + (d.fahrzeug ? " · " + d.fahrzeug : ""));
       set("extras", d.extras && d.extras.length ? d.extras.join(", ") : "keine");
       set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + d.uhrzeit + " Uhr" : "") + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
-      set("preis", v != null ? "ab " + fmt(v) + " €" + (wk ? " + Aufpreis C² CarCeramic" : "") : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
+      set("preis", v != null ? (sch ? "" : "ab ") + fmt(v) + " €" + (wk ? " + Aufpreis C² CarCeramic" : "") : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
       var bk = ELB.booking || {}, base = wk ? null : (v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null));
       set("anzahlung", base ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " € per PayPal" : (d.paket ? "nach Absprache" : "–"));
       $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? "ab " + fmt(x) + " €" : "auf Anfrage"; });
