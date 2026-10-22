@@ -32,54 +32,57 @@ SJ="/var/tmp/pt/b/queue/sicherungen.json"; alt=open(SJ).read() if os.path.exists
 import datetime
 open(SJ,"w").write(json.dumps({"tage":[datetime.date.today().isoformat()]})); os.chmod(SJ,0o644)
 # ---- Öffentlich
-r=P.get("/status"); chk("Seite ohne Anmeldung erreichbar",r.status_code==200 and "Markentrix Status" in r.text,r.status_code)
+r=P.get("/status",follow_redirects=False); chk("Ohne Anmeldung: Weiterleitung zur Anmeldung, nichts zu sehen",r.status_code==303 and r.headers["location"]=="/" and "Bausteine" not in r.text,r.status_code)
+chk("Ohne Anmeldung: JSON gesperrt",P.get("/api/status").status_code==401)
+r=cA.get("/status"); chk("Angemeldeter Kunde sieht die Seite",r.status_code==200 and "Markentrix Status" in r.text,r.status_code)
+chk("Admin sieht die Seite",a.get("/status").status_code==200)
 chk("Seite: Bausteine genannt",all(x in r.text for x in ("Kunden-Portal","Datenbank","Kunden-Websites","E-Mail-Versand","Datensicherung")))
 chk("Nicht indexierbar-Kopf ok / kein Caching",r.headers.get("cache-control")=="no-store")
-j=P.get("/api/status").json(); chk("JSON: Stufe und Bausteine",j["stufe"] in ("ok","warn","bad") and len(j["komponenten"])==5,j)
+j=cA.get("/api/status").json(); chk("JSON: Stufe und Bausteine",j["stufe"] in ("ok","warn","bad") and len(j["komponenten"])==5,j)
 sql("delete from website_wacht"); sql("delete from website_wacht_tag")
-j=P.get("/api/status").json(); w=[k for k in j["komponenten"] if k["name"]=="Kunden-Websites"][0]; chk("Ohne Messung: kein Alarm",w["stufe"]=="ok")
+j=cA.get("/api/status").json(); w=[k for k in j["komponenten"] if k["name"]=="Kunden-Websites"][0]; chk("Ohne Messung: kein Alarm",w["stufe"]=="ok")
 # Websites messen: 2 ok, 1 gestört -> nur Zahlen, keine Namen
 doms=[f"ps{i}{sfx}.de" for i in range(3)]
 for i,d in enumerate(doms):
     sql(f"insert into websites (kunden_id, domain, art, status) values ('{kA}','{d}','live','live')")
     sql(f"insert into website_wacht (domain, kunden_id, ok, seite_ok, api_ok) values ('{d}','{kA}',{'true' if i<2 else 'false'},true,true)")
     sql(f"insert into website_wacht_tag (domain, tag, geprueft, ok) values ('{d}',current_date,10,{10 if i<2 else 5})")
-j=P.get("/api/status").json(); w=[k for k in j["komponenten"] if k["name"]=="Kunden-Websites"][0]
+j=cA.get("/api/status").json(); w=[k for k in j["komponenten"] if k["name"]=="Kunden-Websites"][0]
 chk("1 von 3 gestört: Warnung mit Zahlen",w["stufe"]=="warn" and "2 von 3" in w["text"],w); chk("Gesamt: eingeschränkt",j["stufe"]=="warn",j["stufe"])
-t=P.get("/status").text; chk("Keine Kundendomains auf der öffentlichen Seite",not any(d in t for d in doms) and "Firma" not in t)
+t=cA.get("/status").text; chk("Keine Kundendomains auf der öffentlichen Seite",not any(d in t for d in doms) and "Firma" not in t)
 chk("Verfügbarkeit 30 Tage berechnet",j["verfuegbarkeit_30_tage"]==83.33,j["verfuegbarkeit_30_tage"])
-sql("update website_wacht set ok=false"); j=P.get("/api/status").json(); chk("Mehrheit gestört: rot",j["stufe"]=="bad",j["stufe"])
+sql("update website_wacht set ok=false"); j=cA.get("/api/status").json(); chk("Mehrheit gestört: rot",j["stufe"]=="bad",j["stufe"])
 sql("update website_wacht set ok=true"); sql(f"update website_wacht set geprueft_am=now()-interval '2 hours'")
-j=P.get("/api/status").json(); chk("Veraltete Messung zählt nicht",[k for k in j["komponenten"] if k["name"]=="Kunden-Websites"][0]["text"]=="Keine Messung aktiv")
+j=cA.get("/api/status").json(); chk("Veraltete Messung zählt nicht",[k for k in j["komponenten"] if k["name"]=="Kunden-Websites"][0]["text"]=="Keine Messung aktiv")
 # ---- Meldungen
 chk("Kunde darf keine Meldung anlegen",cA.post("/api/admin/statusmeldungen",json={"art":"info","titel":"x"}).status_code==403)
 chk("Ohne Anmeldung gesperrt",P.post("/api/admin/statusmeldungen",headers=H,json={"art":"info","titel":"x"}).status_code in (401,403))
 chk("Ungültige Art",a.post("/api/admin/statusmeldungen",json={"art":"boese","titel":"x"}).status_code==422)
 chk("Leerer Titel",a.post("/api/admin/statusmeldungen",json={"art":"info","titel":""}).status_code==422)
 r=a.post("/api/admin/statusmeldungen",json={"art":"stoerung","titel":"Portal langsam <b>x</b>","text":"Wir arbeiten dran & prüfen"}); chk("Störung angelegt",r.status_code==200,r.text); mid=r.json()["id"]
-t=P.get("/status").text; j=P.get("/api/status").json()
+t=cA.get("/status").text; j=cA.get("/api/status").json()
 chk("Störung erscheint, Seite rot",j["stufe"]=="bad" and "Aktuelle Meldungen" in t and "Portal langsam" in t)
 chk("HTML in Meldung maskiert",("<b>x</b>" not in t) and "&lt;b&gt;x&lt;/b&gt;" in t)
 r=a.post(f"/api/admin/statusmeldungen/{mid}/beenden"); chk("Beenden",r.status_code==200)
 chk("Zweites Beenden: 404",a.post(f"/api/admin/statusmeldungen/{mid}/beenden").status_code==404)
-t=P.get("/status").text; j=P.get("/api/status").json()
+t=cA.get("/status").text; j=cA.get("/api/status").json()
 chk("Nach Ende: wieder grün, Eintrag im Verlauf",j["stufe"]=="ok" and "Letzte 30 Tage" in t and "Portal langsam" in t and "Aktuelle Meldungen" not in t,j["stufe"])
 a.post("/api/admin/statusmeldungen",json={"art":"wartung","titel":"Wartung Sonntag","beginn":"2099-01-01T00:00:00+00:00"})
-j=P.get("/api/status").json(); chk("Geplante Wartung in der Zukunft: noch grün",j["stufe"]=="ok")
-a.post("/api/admin/statusmeldungen",json={"art":"wartung","titel":"Wartung jetzt"}); j=P.get("/api/status").json(); chk("Laufende Wartung: eingeschränkt",j["stufe"]=="warn")
+j=cA.get("/api/status").json(); chk("Geplante Wartung in der Zukunft: noch grün",j["stufe"]=="ok")
+a.post("/api/admin/statusmeldungen",json={"art":"wartung","titel":"Wartung jetzt"}); j=cA.get("/api/status").json(); chk("Laufende Wartung: eingeschränkt",j["stufe"]=="warn")
 l=a.get("/api/admin/statusmeldungen").json(); chk("Admin sieht die Liste",len(l)>=3)
 chk("Löschen",a.delete(f"/api/admin/statusmeldungen/{mid}").status_code==200 and a.delete(f"/api/admin/statusmeldungen/{mid}").status_code==404)
 chk("Ungültige ID: 404",a.post("/api/admin/statusmeldungen/xyz/beenden").status_code==404)
 chk("Audit geschrieben",sql("select count(*) from audit_log where aktion='statusmeldung_neu'")>="3")
 sql("delete from statusmeldungen"); sql("delete from website_wacht"); sql("delete from website_wacht_tag")
 open(SJ,"w").write(json.dumps({"tage":[(datetime.date.today()-datetime.timedelta(days=5)).isoformat()]}))
-j=P.get("/api/status").json(); b=[k for k in j["komponenten"] if k["name"]=="Datensicherung"][0]; chk("Alte Sicherung (5 Tage): Warnung",b["stufe"]=="warn",b)
+j=cA.get("/api/status").json(); b=[k for k in j["komponenten"] if k["name"]=="Datensicherung"][0]; chk("Alte Sicherung (5 Tage): Warnung",b["stufe"]=="warn",b)
 (os.remove(SJ) if alt is None else open(SJ,'w').write(alt))
 # ---- Rate-Limit
 c=0
 for i in range(130):
-    if P.get("/api/status").status_code==429: c+=1
-chk("Rate-Limit schützt die öffentliche Seite",c>0,c)
+    if cA.get("/api/status").status_code==429: c+=1
+chk("Rate-Limit schützt die Seite",c>0,c)
 # ---- Oberfläche
 import asyncio
 from playwright.async_api import async_playwright
@@ -92,7 +95,7 @@ async def main():
         c=pg.locator(".card:has(h2:text-is('Statusseite'))"); await c.locator("input").first.fill("UI-Test Wartung"); await c.get_by_role("button",name="Meldung veröffentlichen").click()
         await c.get_by_text("Veröffentlicht.").wait_for(timeout=6000); await c.get_by_text("UI-Test Wartung").first.wait_for(timeout=6000); chk("UI: Meldung veröffentlicht und gelistet",True)
         await c.get_by_role("button",name="Beenden").first.click(); await c.get_by_text("beendet",exact=False).first.wait_for(timeout=6000); chk("UI: Meldung beendet",True)
-        pub=await ctx.new_page(); await pub.set_viewport_size({"width":390,"height":800}); await pub.goto(B+"/status"); await pub.screenshot(path="/var/tmp/pt/shots/status.png",full_page=True)
+        pub=await ctx.new_page(); await pub.set_viewport_size({"width":390,"height":800}); await pub.goto(B+"/status"); chk("UI: Seite für angemeldeten Admin sichtbar",await pub.get_by_text("Markentrix Status").count()>=1); await pub.screenshot(path="/var/tmp/pt/shots/status.png",full_page=True)
         chk("UI: Statusseite am Handy ohne seitliches Scrollen",await pub.evaluate("document.documentElement.scrollWidth<=window.innerWidth"))
         chk("Keine JS-Fehler",not errs,errs); await br.close()
 asyncio.run(main())

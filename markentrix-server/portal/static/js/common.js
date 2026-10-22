@@ -94,7 +94,7 @@ export function zweiFaktorKarte() {
 }
 
 // Fußzeile mit Impressum und Datenschutz
-export const rechtFuss = () => h('div', { class: 'rechtfuss small muted' }, h('a', { href: '/impressum' }, 'Impressum'), ' · ', h('a', { href: '/datenschutz' }, 'Datenschutz'));
+export const rechtFuss = () => h('div', { class: 'rechtfuss small muted' }, h('a', { href: '/impressum' }, 'Impressum'), ' · ', h('a', { href: '/datenschutz' }, 'Datenschutz'), ' · ', h('a', { href: '/status', target: '_blank', rel: 'noopener' }, 'Systemstatus'));
 
 
 // Kontaktergebnis zu einem Lead festhalten (Admin und Vertriebler): Schnellauswahl, Notiz, Wiedervorlage

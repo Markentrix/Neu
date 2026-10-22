@@ -52,7 +52,7 @@ async function statusKarte() {
   };
   setTimeout(laden, 0);
   const url = location.origin + '/status';
-  return h('div', { class: 'card' }, h('h2', {}, 'Statusseite'), h('p', { class: 'small muted' }, 'Öffentlich ohne Anmeldung: ', h('a', { href: '/status', target: '_blank' }, url), '. Zeigt Portal, Datenbank, Websites (nur Zahlen), E-Mail und Sicherung automatisch. Hier trägst du Störungen und Wartung ein, damit Kunden nicht anrufen müssen.'), m,
+  return h('div', { class: 'card' }, h('h2', {}, 'Statusseite'), h('p', { class: 'small muted' }, 'Für angemeldete Kunden, Vertriebler und dein Team (Link steht in der Fußzeile jedes Portals): ', h('a', { href: '/status', target: '_blank' }, url), '. Zeigt Portal, Datenbank, Websites (nur Zahlen), E-Mail und Sicherung automatisch. Hier trägst du Störungen und Wartung ein, damit Kunden nicht anrufen müssen.'), m,
     h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Art'), art), h('div', {}, h('label', {}, 'Titel'), titel)), h('label', {}, 'Text (optional)'), text,
     h('p', {}, knopf('Meldung veröffentlichen', async () => { if (!titel.value.trim()) { melde(m, 'Bitte einen Titel eintragen.'); return; } try { await api('/api/admin/statusmeldungen', { method: 'POST', body: { art: art.value, titel: titel.value, text: text.value } }); titel.value = ''; text.value = ''; melde(m, 'Veröffentlicht.', 'ok'); laden(); } catch (x) { melde(m, x.message); } }, '')), box);
 }

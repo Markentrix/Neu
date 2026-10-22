@@ -1,17 +1,17 @@
-"""Öffentliche Statusseite der Plattform (ohne Anmeldung): Portal, Datenbank, Kunden-Websites (nur Zahlen, keine Namen), E-Mail-Versand, Datensicherung
+"""Statusseite der Plattform (nur für angemeldete Benutzer: Kunden, Vertrieb, Team): Portal, Datenbank, Kunden-Websites (nur Zahlen, keine Namen), E-Mail-Versand, Datensicherung
 und Meldungen zu Störungen und Wartung. Admin pflegt die Meldungen."""
 from datetime import datetime, timedelta, timezone
 from html import escape
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from psycopg import errors
 from pydantic import BaseModel, Field
 
 from . import webbetrieb
 from .db import tx
 from .routes_status import _letzte_sicherung
-from .security import audit, client_ip, rate_limit, require_admin
+from .security import audit, current_user, rate_limit, require_admin
 
 public = APIRouter()
 admin = APIRouter(prefix="/api/admin/statusmeldungen")
@@ -86,7 +86,7 @@ def daten() -> dict:
 
 
 SEITE = """<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="120"><title>Status – Markentrix</title><style>
+<meta http-equiv="refresh" content="120"><meta name="robots" content="noindex,nofollow"><title>Status – Markentrix</title><style>
 :root{{--bg:#f6f7fb;--fg:#0B1020;--card:#fff;--mut:#5b6480;--ok:#14803c;--bad:#b42318;--warn:#a15c07;--line:#e3e6ef}}
 @media(prefers-color-scheme:dark){{:root{{--bg:#0B1020;--fg:#eef0f8;--card:#141b33;--mut:#9aa4c7;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24;--line:#26304f}}}}
 body{{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}}main{{max-width:720px;margin:0 auto;padding:24px 16px 48px}}
@@ -108,7 +108,12 @@ def _meldung(m) -> str:
 
 @public.get("/status", include_in_schema=False)
 def seite(request: Request):
-    rate_limit("plattformstatus:" + client_ip(request), 120, 300)
+    """Nur für angemeldete Benutzer (Kunden, Vertrieb, Team). Wer nicht angemeldet ist, wird zur Anmeldung geschickt."""
+    try:
+        user = current_user(request)
+    except HTTPException:
+        return RedirectResponse("/", 303, headers={"Cache-Control": "no-store"})
+    rate_limit("plattformstatus:" + str(user["id"]), 120, 300)
     with tx("system") as cur:
         komp = komponenten(cur)
         offen, erledigt = meldungen(cur)
@@ -123,8 +128,8 @@ def seite(request: Request):
 
 
 @public.get("/api/status", include_in_schema=False)
-def api_status(request: Request):
-    rate_limit("plattformstatus:" + client_ip(request), 120, 300)
+def api_status(request: Request, user: dict = Depends(current_user)):
+    rate_limit("plattformstatus:" + str(user["id"]), 120, 300)
     return JSONResponse(daten(), headers={"Cache-Control": "no-store"})
 
 
