@@ -1277,3 +1277,9 @@ main:focus{outline:none}
 .branch-more{margin:22px 0 0;color:var(--muted);font-size:.98rem;line-height:1.7;max-width:76ch}
 .branch-more a:not(.link-arrow){color:var(--link);font-weight:500}
 .branch-more .link-arrow{margin-left:6px;white-space:nowrap}
+
+/* 53 Live-Miniatur: ganze Seite sichtbar, ohne inneren Scrollbalken */
+.mini-frame.is-full:not(.mini-frame--m){aspect-ratio:auto;height:calc(var(--ph) * 1px * var(--s,.3))}
+.mini-frame.is-full:not(.mini-frame--m) iframe{height:calc(var(--ph) * 1px)}
+.mini-ph .mock-pic{background:url(/beispiel/elektro-muster/img/1-800.webp) center/cover,var(--soft)}
+.mini-ph .mock-pic::after{display:none}

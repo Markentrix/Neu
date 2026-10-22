@@ -440,11 +440,20 @@
     if (!mini && !d.documentElement.classList.contains('reduced') && w.innerWidth > 900) { auto = setInterval(function () { if (d.hidden) return; set(mode === 'desktop' ? 'mobile' : 'desktop'); }, 7000); }
   }
 
-  /* Live-Miniatur: Beispielseite im Rahmen skalieren, scrollbar bleibt sie */
+  /* Live-Miniatur: Desktop-Ansicht zeigt die ganze Seite ohne Scrollbalken */
+  function miniFull(fr, f) {
+    if (fr.classList.contains('mini-frame--m')) return;
+    function size() { try { var h = f.contentDocument.body.offsetHeight; if (h > 300) { fr.style.setProperty('--ph', h); fr.classList.add('is-full'); } } catch (e) { /* fremde Herkunft: Ausschnitt bleibt */ } }
+    try { f.contentDocument.querySelectorAll('img[loading=lazy]').forEach(function (i) { i.loading = 'eager'; }); } catch (e) { /* ohne Zugriff */ }
+    size();
+    try { if ('ResizeObserver' in f.contentWindow) new f.contentWindow.ResizeObserver(size).observe(f.contentDocument.body); } catch (e) { /* ohne Beobachter */ }
+    setTimeout(size, 1200);
+  }
+
   function initMini() {
     var frames = $$('.mini-frame'); if (!frames.length) return;
     var ready = false;
-    function load(fr) { var f = $('iframe', fr); if (!f || f.getAttribute('src')) return; on(f, 'load', function () { fr.classList.add('is-live'); }); f.setAttribute('src', f.getAttribute('data-src')); }
+    function load(fr) { var f = $('iframe', fr); if (!f || f.getAttribute('src')) return; f.onload = function () { fr.classList.add('is-live'); miniFull(fr, f); }; f.setAttribute('src', f.getAttribute('data-src')); }
     function fit(fr) { var base = +fr.getAttribute('data-base') || 1280, wdt = fr.clientWidth; if (wdt > 0) { fr.style.setProperty('--s', (wdt / base).toFixed(4)); if (ready) load(fr); } }
     function all() { frames.forEach(fit); }
     all();
@@ -465,8 +474,8 @@
         $$('.mini-frame', mini).forEach(function (fr) {
           var f = $('iframe', fr); if (!f) return;
           var src = (f.getAttribute('data-src') || '').replace(/[a-z]+-muster/, slug), mobile = fr.classList.contains('mini-frame--m');
-          f.setAttribute('data-src', src); f.setAttribute('title', 'Beispiel-Landingpage ' + name + ', ' + (mobile ? 'Smartphone' : 'Desktop') + '-Ansicht, scrollbar');
-          if (f.getAttribute('src')) { fr.classList.remove('is-live'); on(f, 'load', function () { fr.classList.add('is-live'); }); f.setAttribute('src', src); }
+          f.setAttribute('data-src', src); f.setAttribute('title', 'Beispiel-Landingpage ' + name + ', ' + (mobile ? 'Smartphone' : 'Desktop') + '-Ansicht');
+          if (f.getAttribute('src')) { fr.classList.remove('is-live'); f.onload = function () { fr.classList.add('is-live'); miniFull(fr, f); }; f.setAttribute('src', src); }
         });
         var url = $('.browser-bar .url', mini); if (url) url.textContent = b.getAttribute('data-url');
         $$('a[data-demo-link]', scope).forEach(function (a) { a.setAttribute('href', (a.getAttribute('href') || '').replace(/[a-z]+-muster/, slug)); });
