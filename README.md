@@ -70,16 +70,43 @@ deploy/einrichten.sh MX-XXXX aj-atelier-wettmar.de                              
 `45 3 * * * /srv/apps/aj-atelier/deploy/backup.sh >> /var/log/backup.log 2>&1`
 → täglich `/srv/backups/daily/aj-atelier-DATUM.sqlite`, 14 Tage aufbewahrt.
 
-### Cron-Job (Bewertungs-Mails)
+### Automatische Aufgaben (Cron) – einmal einrichten
 
-Einmal pro Stunde ausführen lassen (`crontab -e` als deploy):
+`crontab -e` als `deploy`, Domain anpassen:
 
 ```
-5 * * * * docker exec aj-atelier php /var/www/site/app/cron.php >> /var/log/aj-atelier-cron.log 2>&1
+# Erinnerungen & Bewertungsbitten (stündlich, verschickt nur tagsüber)
+5 * * * *    docker exec aj-atelier php /var/www/site/app/cron.php >> /var/log/aj-atelier-cron.log 2>&1
+# Sicherung der Termine (täglich)
+45 3 * * *   /srv/apps/aj-atelier/deploy/backup.sh >> /var/log/aj-atelier-backup.log 2>&1
+# Überwachung (alle 5 Minuten)
+*/5 * * * *  /srv/apps/aj-atelier/deploy/monitor.sh https://aj-atelier-wettmar.de >> /var/log/aj-atelier-monitor.log 2>&1
+# Backup-Prüfung mit Ergebnis-Mail (montags 7:10 Uhr)
+10 7 * * 1   /srv/apps/aj-atelier/deploy/backup-check.sh >> /var/log/aj-atelier-backup.log 2>&1
 ```
 
-Das Skript verschickt am Tag nach dem Termin die Bitte um eine Google-Bewertung, aber nur an Kund:innen,
-die bei der Buchung zugestimmt haben, nur einmal und nur zwischen 10 und 19 Uhr.
+Warnungen gehen an `alertEmail` in `app/config.local.php` (sonst an `salonEmail`).
+
+| Aufgabe | Was passiert |
+|---|---|
+| **Terminerinnerung** | ca. 24 Std. vor dem Termin, mit Adresse und Storno-Link. Gehört zum Termin, keine Einwilligung nötig. Nicht bei Buchungen, die jünger als 6 Std. sind. |
+| **Folgetermin-Erinnerung** | nur mit Häkchen bei der Buchung, einmalig, nach `rebookWeeks` der Leistung (`app/config.php`, z. B. Herrenschnitt 4, Ansatz 5, Balayage 14 Wochen). Entfällt, wenn schon ein neuer Termin gebucht ist. |
+| **Bitte um Google-Bewertung** | nur mit Häkchen und eingetragenem `reviewUrl`, am Tag nach dem Termin. |
+| **Überwachung** | prüft Startseite und `/api/health.php` (Datenbank, Speicher, Konfiguration, Mailversand der letzten Stunde, Cron). Nach 2 Fehlschlägen in Folge eine Warnmail, einmal pro Störung, plus Entwarnung. |
+| **Backup-Prüfung** | prüft, ob die letzte Sicherung jünger als 26 Std. und lesbar ist, und schickt das Ergebnis jede Woche per Mail, auch wenn alles in Ordnung ist. |
+
+### Updates sicher einspielen
+
+```bash
+cd /srv/apps/aj-atelier
+deploy/update.sh                                        # nur Buchungsdienst
+deploy/update.sh MX-XXXX https://aj-atelier-wettmar.de  # zusätzlich dist/ bauen und veröffentlichen
+```
+
+Das Skript holt die neue Version, **testet sie zuerst** (`tests/run.php`, ca. 80 Prüfungen: Buchung, Doppelbuchung,
+Storno, Admin, Gutscheine, Erinnerungen, Überwachung, Build) und schaltet nur um, wenn alles grün ist.
+Sonst läuft die bisherige Version weiter und es kommt eine Warnmail.
+Auf GitHub laufen dieselben Tests bei jedem Push (Reiter „Actions“).
 
 ### E-Mail auf Hetzner
 
@@ -159,6 +186,7 @@ location ~ \.php$ { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $docum
 ## Lokal testen
 
 ```bash
+php tests/run.php                                   # Testsuite (nur PHP nötig)
 php -S localhost:8000 -t public dev-router.php     # komplette Seite inkl. Buchung
 php tools/build-static.php --url=http://localhost:8000   # dist/ erzeugen
 ```

@@ -51,6 +51,7 @@
           <label class="full">E-Mail* <small>(für die Bestätigung)</small><input name="email" type="email" autocomplete="email" required maxlength="254"></label>
           <label class="full">Anmerkung <small>(optional, z. B. Haarlänge, Wunschfarbe)</small><textarea name="note" rows="3" maxlength="500"></textarea></label>
           <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+          <label class="check full"><input type="checkbox" name="followupOptin"> <span>Optional: Erinnert mich einmalig per E-Mail, wenn mein nächster Termin fällig ist (z. B. Ansatz oder Nachschnitt).</span></label>
           <?php if (!empty($s['reviewUrl'])): ?>
           <label class="check full"><input type="checkbox" name="reviewOptin"> <span>Optional: Nach dem Termin dürft ihr mich einmalig per E-Mail um eine Google-Bewertung bitten.</span></label>
           <?php endif; ?>

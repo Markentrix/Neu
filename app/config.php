@@ -39,6 +39,7 @@ return [
         'horizonDays'   => 60,   // so weit im Voraus buchbar
         'freeCancelHours' => 24, // kostenfreie Online-Stornierung bis X Std. vorher
         'maxServices'   => 5,
+        'reminderHours' => 24,   // Erinnerungsmail ca. X Std. vor dem Termin
     ],
 
     // 0 = Sonntag … 6 = Samstag; [Öffnung, Schluss] als "HH:MM", null = geschlossen
@@ -56,14 +57,15 @@ return [
     'closedDates' => [],
 
     // price = Grundpreis €, from = "ab"-Preis, consult = nach Beratung,
-    // duration = Minuten, deposit = online fällige Anzahlung bei "ab"-Preisen
+    // duration = Minuten, deposit = online fällige Anzahlung bei "ab"-Preisen,
+    // rebookWeeks = nach wie vielen Wochen die Folgetermin-Erinnerung kommt (nur mit Einwilligung)
     'categories' => [
         [
             'id' => 'damen', 'title' => 'Damen', 'subtitle' => 'Schnitt & Styling',
             'services' => [
-                ['id' => 'd-wsf-kurz',   'group' => 'Waschen, Schneiden & Föhnen', 'name' => 'kurz',   'price' => 55, 'duration' => 45],
-                ['id' => 'd-wsf-mittel', 'group' => 'Waschen, Schneiden & Föhnen', 'name' => 'mittel', 'price' => 60, 'duration' => 60],
-                ['id' => 'd-wsf-lang',   'group' => 'Waschen, Schneiden & Föhnen', 'name' => 'lang',   'price' => 70, 'duration' => 75],
+                ['id' => 'd-wsf-kurz',   'group' => 'Waschen, Schneiden & Föhnen', 'name' => 'kurz',   'price' => 55, 'duration' => 45, 'rebookWeeks' => 6],
+                ['id' => 'd-wsf-mittel', 'group' => 'Waschen, Schneiden & Föhnen', 'name' => 'mittel', 'price' => 60, 'duration' => 60, 'rebookWeeks' => 8],
+                ['id' => 'd-wsf-lang',   'group' => 'Waschen, Schneiden & Föhnen', 'name' => 'lang',   'price' => 70, 'duration' => 75, 'rebookWeeks' => 10],
                 ['id' => 'd-wf-kurz',    'group' => 'Waschen & Föhnen', 'name' => 'kurz',   'price' => 35, 'duration' => 30],
                 ['id' => 'd-wf-mittel',  'group' => 'Waschen & Föhnen', 'name' => 'mittel', 'price' => 40, 'duration' => 40],
                 ['id' => 'd-wf-lang',    'group' => 'Waschen & Föhnen', 'name' => 'lang',   'price' => 50, 'duration' => 50],
@@ -73,21 +75,21 @@ return [
         [
             'id' => 'herren', 'title' => 'Herren', 'subtitle' => 'Schnitt & Barber',
             'services' => [
-                ['id' => 'h-schnitt',  'name' => 'Herrenschnitt inkl. Waschen & Styling', 'price' => 45, 'duration' => 40],
-                ['id' => 'h-maschine', 'name' => 'Maschinenschnitt', 'price' => 30, 'duration' => 20],
-                ['id' => 'h-bart',     'name' => 'Bart schneiden', 'price' => 20, 'duration' => 15],
+                ['id' => 'h-schnitt',  'name' => 'Herrenschnitt inkl. Waschen & Styling', 'price' => 45, 'duration' => 40, 'rebookWeeks' => 4],
+                ['id' => 'h-maschine', 'name' => 'Maschinenschnitt', 'price' => 30, 'duration' => 20, 'rebookWeeks' => 3],
+                ['id' => 'h-bart',     'name' => 'Bart schneiden', 'price' => 20, 'duration' => 15, 'rebookWeeks' => 3],
             ],
         ],
         [
             'id' => 'farbe', 'title' => 'Farbe & Techniken', 'subtitle' => 'Individuell nach Aufwand',
             'note' => 'Alle Farbpreise werden nach Aufwand und Verbrauch berechnet. Vor Ort erstellen wir einen individuellen Kostenvoranschlag.',
             'services' => [
-                ['id' => 'f-ansatz',      'name' => 'Ansatzfarbe', 'price' => 55,  'from' => true, 'deposit' => 20, 'duration' => 90],
-                ['id' => 'f-faerben',     'name' => 'Färben',      'price' => 50,  'from' => true, 'deposit' => 20, 'duration' => 120],
-                ['id' => 'f-glossing',    'name' => 'Glossing',    'price' => 22,  'from' => true, 'deposit' => 10, 'duration' => 45],
-                ['id' => 'f-balayage',    'name' => 'Balayage',    'price' => 250, 'from' => true, 'deposit' => 50, 'duration' => 210],
-                ['id' => 'f-babylights',  'name' => 'Babylights',  'price' => 250, 'from' => true, 'deposit' => 50, 'duration' => 210],
-                ['id' => 'f-blondierung', 'name' => 'Blondierung', 'price' => 55,  'from' => true, 'deposit' => 20, 'duration' => 120],
+                ['id' => 'f-ansatz',      'name' => 'Ansatzfarbe', 'price' => 55,  'from' => true, 'deposit' => 20, 'duration' => 90, 'rebookWeeks' => 5],
+                ['id' => 'f-faerben',     'name' => 'Färben',      'price' => 50,  'from' => true, 'deposit' => 20, 'duration' => 120, 'rebookWeeks' => 6],
+                ['id' => 'f-glossing',    'name' => 'Glossing',    'price' => 22,  'from' => true, 'deposit' => 10, 'duration' => 45, 'rebookWeeks' => 8],
+                ['id' => 'f-balayage',    'name' => 'Balayage',    'price' => 250, 'from' => true, 'deposit' => 50, 'duration' => 210, 'rebookWeeks' => 14],
+                ['id' => 'f-babylights',  'name' => 'Babylights',  'price' => 250, 'from' => true, 'deposit' => 50, 'duration' => 210, 'rebookWeeks' => 12],
+                ['id' => 'f-blondierung', 'name' => 'Blondierung', 'price' => 55,  'from' => true, 'deposit' => 20, 'duration' => 120, 'rebookWeeks' => 8],
                 ['id' => 'f-correction',  'name' => 'Color Correction', 'price' => 0, 'consult' => true, 'duration' => 30, 'bookingName' => 'Color Correction – Beratungstermin'],
             ],
         ],
@@ -101,9 +103,9 @@ return [
         [
             'id' => 'brauen', 'title' => 'Augenbrauen & Wimpern', 'subtitle' => 'Der perfekte Rahmen',
             'services' => [
-                ['id' => 'b-zupfen',  'name' => 'Augenbrauen zupfen', 'price' => 15, 'from' => true, 'deposit' => 10, 'duration' => 15],
-                ['id' => 'b-faerben', 'name' => 'Augenbrauen färben', 'price' => 15, 'from' => true, 'deposit' => 10, 'duration' => 15],
-                ['id' => 'b-wimpern', 'name' => 'Wimpern färben',     'price' => 16, 'duration' => 20],
+                ['id' => 'b-zupfen',  'name' => 'Augenbrauen zupfen', 'price' => 15, 'from' => true, 'deposit' => 10, 'duration' => 15, 'rebookWeeks' => 4],
+                ['id' => 'b-faerben', 'name' => 'Augenbrauen färben', 'price' => 15, 'from' => true, 'deposit' => 10, 'duration' => 15, 'rebookWeeks' => 5],
+                ['id' => 'b-wimpern', 'name' => 'Wimpern färben',     'price' => 16, 'duration' => 20, 'rebookWeeks' => 5],
             ],
         ],
     ],

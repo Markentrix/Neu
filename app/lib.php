@@ -8,7 +8,8 @@ function cfg(): array
     static $cfg = null;
     if ($cfg === null) {
         $cfg = require __DIR__ . '/config.php';
-        $local = __DIR__ . '/config.local.php';
+        // AJ_LOCAL_CONFIG: alternative Zugangsdaten (z. B. für die Testsuite)
+        $local = getenv('AJ_LOCAL_CONFIG') ?: __DIR__ . '/config.local.php';
         $cfg['local'] = is_file($local) ? require $local : require __DIR__ . '/config.local.example.php';
         // Der Static-Build kann die Domain vorgeben: SITE_URL=https://… php tools/build-static.php
         if (getenv('SITE_URL')) $cfg['local']['siteUrl'] = rtrim((string)getenv('SITE_URL'), '/');
@@ -246,6 +247,10 @@ function db(): PDO
     $cols = array_column($pdo->query('PRAGMA table_info(entries)')->fetchAll(), 'name');
     if (!in_array('review_optin', $cols, true)) $pdo->exec('ALTER TABLE entries ADD COLUMN review_optin INTEGER NOT NULL DEFAULT 0');
     if (!in_array('review_sent_at', $cols, true)) $pdo->exec('ALTER TABLE entries ADD COLUMN review_sent_at TEXT');
+    foreach (['reminder_sent_at TEXT', 'followup_optin INTEGER NOT NULL DEFAULT 0', 'followup_sent_at TEXT'] as $def) {
+        if (!in_array(strtok($def, ' '), $cols, true)) $pdo->exec("ALTER TABLE entries ADD COLUMN {$def}");
+    }
+    $pdo->exec('CREATE TABLE IF NOT EXISTS mail_failures (at INTEGER NOT NULL, subject TEXT, error TEXT)');
     return $pdo;
 }
 
@@ -436,9 +441,16 @@ function send_mail(?string $to, string $subject, string $html, ?string $replyTo 
             smtp_send($mail['smtp'], $from, $to, $subject, $body, $headers);
             return true;
         }
-        return @mail($to, $subject, $body, implode("\r\n", $headers), "-f{$from}");
+        if (@mail($to, $subject, $body, implode("\r\n", $headers), "-f{$from}")) return true;
+        throw new RuntimeException('PHP mail() hat abgelehnt');
     } catch (Throwable $e) {
         error_log('Mailversand fehlgeschlagen: ' . $e->getMessage());
+        // Für die Überwachung festhalten (ohne Empfängeradresse)
+        try {
+            db()->prepare('INSERT INTO mail_failures (at, subject, error) VALUES (?, ?, ?)')
+                ->execute([time(), mb_substr(mb_decode_mimeheader($subject), 0, 120), mb_substr($e->getMessage(), 0, 300)]);
+        } catch (Throwable) {
+        }
         return false;
     }
 }

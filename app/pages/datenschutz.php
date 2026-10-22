@@ -29,19 +29,22 @@ page_start([
       <h2>5. Kontaktformular</h2>
       <p>Wenn Sie uns über das Kontaktformular schreiben, verarbeiten wir Name, E-Mail-Adresse, optional Telefonnummer und Ihre Nachricht, um Ihre Anfrage zu beantworten (Art. 6 Abs. 1 lit. b bzw. f DSGVO). Die Nachricht wird per E-Mail an uns übermittelt und nicht auf der Website gespeichert.</p>
 
-      <h2>6. Bitte um eine Google-Bewertung</h2>
+      <h2>6. Terminerinnerung und Folgetermin-Erinnerung</h2>
+      <p>Etwa 24 Stunden vor Ihrem Termin erhalten Sie eine Erinnerung per E-Mail. Sie dient der Durchführung des gebuchten Termins (Art. 6 Abs. 1 lit. b DSGVO). Nur wenn Sie bei der Buchung zusätzlich zustimmen, schicken wir Ihnen einmalig eine Erinnerung, wenn Ihr nächster Termin fällig ist, etwa für Ansatz oder Nachschnitt (Art. 6 Abs. 1 lit. a DSGVO). Diese Einwilligung können Sie jederzeit formlos widerrufen; haben Sie bereits einen neuen Termin gebucht, entfällt die Erinnerung.</p>
+
+      <h2>7. Bitte um eine Google-Bewertung</h2>
       <p>Nur wenn Sie bei der Buchung ausdrücklich zustimmen, schicken wir Ihnen am Tag nach dem Termin einmalig eine E-Mail mit der Bitte um eine Bewertung bei Google (Art. 6 Abs. 1 lit. a DSGVO). Sie können die Einwilligung jederzeit formlos widerrufen. Eine Bewertung bei Google geben Sie freiwillig und direkt bei Google ab; dafür gelten die Datenschutzbestimmungen von Google.</p>
 
-      <h2>7. Kauf von Gutscheinen</h2>
+      <h2>8. Kauf von Gutscheinen</h2>
       <p>Beim Online-Kauf eines Gutscheins verarbeiten wir Ihren Namen, Ihre E-Mail-Adresse, den Betrag sowie optional Empfängername und Nachricht, um den Gutschein auszustellen, zu versenden und später einzulösen (Art. 6 Abs. 1 lit. b DSGVO). Gutscheindaten bewahren wir bis zum Ablauf der Gültigkeit und der gesetzlichen Aufbewahrungsfristen auf.</p>
 
-      <h2>8. Zahlung mit PayPal</h2>
+      <h2>9. Zahlung mit PayPal</h2>
       <p>Wenn Sie „Jetzt mit PayPal bezahlen“ wählen, wird das PayPal-Skript geladen und Ihre Zahlung über PayPal (Europe) S.à r.l. et Cie, S.C.A., 22–24 Boulevard Royal, L-2449 Luxemburg abgewickelt. Dabei werden Zahlungsdaten und technische Daten an PayPal übermittelt (Art. 6 Abs. 1 lit. b DSGVO). Wählen Sie „Vor Ort bezahlen“, wird PayPal nicht geladen. Details: <a href="https://www.paypal.com/de/legalhub/privacy-full" rel="noopener" target="_blank">Datenschutzerklärung von PayPal</a>.</p>
 
-      <h2>9. Externe Links</h2>
+      <h2>10. Externe Links</h2>
       <p>Links zu Instagram, Google Maps und OpenStreetMap werden erst beim Anklicken geöffnet; vorher werden keine Daten an diese Anbieter übertragen.</p>
 
-      <h2>10. Ihre Rechte</h2>
+      <h2>11. Ihre Rechte</h2>
       <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch (Art. 15–21 DSGVO). Zudem können Sie sich bei einer Aufsichtsbehörde beschweren, z. B. bei der Landesbeauftragten für den Datenschutz Niedersachsen.</p>
     </div>
   </main>

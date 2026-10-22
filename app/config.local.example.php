@@ -30,6 +30,9 @@ return [
         ],
     ],
 
+    // Empfänger für Warnungen der Überwachung (Seite nicht erreichbar, Mailversand gestört, Backup fehlt)
+    'alertEmail' => '',
+
     // Speicherort der SQLite-Datenbank (Ordner muss beschreibbar sein)
     'databasePath' => __DIR__ . '/data/bookings.sqlite',
 ];

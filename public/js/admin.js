@@ -76,9 +76,14 @@ function renderEntry(e) {
     ? `<span class="tag paid">${e.refunded ? "erstattet" : `PayPal ${euro(Number(e.pay_amount))}`}</span>`
     : '<span class="tag">vor Ort</span>';
   const status = e.status === "cancelled" ? `<span class="tag">storniert (${e.cancelled_by === "customer" ? "Kund:in" : "Salon"})</span>` : "";
+  const mails = [
+    e.reminder_sent_at && !e.reminder_sent_at.includes("fehlgeschlagen") ? "Erinnerung ✓" : e.reminder_sent_at ? "Erinnerung ✗" : "",
+    Number(e.followup_optin) ? "Folgetermin-Mail erlaubt" : "",
+  ].filter(Boolean).map((t) => `<span class="tag">${t}</span>`).join("");
   return `<div class="${cls}"><div class="time">${e.time}<small>bis ${end}</small></div>
     <div><div class="who">${esc(e.name)} ${pay}${status}</div>
       <div class="meta">${services}</div>
+      ${mails ? `<div class="meta">${mails}</div>` : ""}
       <div class="meta"><a href="tel:${esc(e.phone)}">${esc(e.phone)}</a> · <a href="mailto:${esc(e.email)}">${esc(e.email)}</a></div>
       ${e.note ? `<div class="meta">„${esc(e.note)}“</div>` : ""}</div>
     <div class="actions">${e.status !== "cancelled" ? `<button class="link-btn" data-cancel="${e.id}" data-paid="${Number(e.pay_amount) > 0 && !e.refunded ? 1 : 0}">Absagen</button>` : ""}</div></div>`;

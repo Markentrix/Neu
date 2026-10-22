@@ -60,12 +60,13 @@ try {
     }
     $services = array_map(fn($s) => ['id' => $s['id'], 'name' => $s['fullName'], 'price' => $s['price'], 'from' => $s['from'] || $s['consult']], $summary['items']);
     $pdo->prepare('INSERT INTO entries (id, type, status, date, start_min, duration, services, price_estimate, name, phone, email, note,
-        pay_method, pay_amount, paypal_order, paypal_capture, cancel_token, created_at, review_optin)
-        VALUES (?, \'booking\', \'confirmed\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        pay_method, pay_amount, paypal_order, paypal_capture, cancel_token, created_at, review_optin, followup_optin)
+        VALUES (?, \'booking\', \'confirmed\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
         ->execute([$id, $date, to_minutes($time), $summary['duration'], json_encode($services, JSON_UNESCAPED_UNICODE), $summary['price'],
             $customer['name'], $customer['phone'], $customer['email'], $customer['note'],
             $payment['method'], $payment['amount'], $payment['order'], $payment['capture'], $token, date('c'),
-            ($in['reviewOptin'] ?? false) === true && !empty(cfg()['salon']['reviewUrl']) ? 1 : 0]);
+            ($in['reviewOptin'] ?? false) === true && !empty(cfg()['salon']['reviewUrl']) ? 1 : 0,
+            ($in['followupOptin'] ?? false) === true ? 1 : 0]);
     $pdo->exec('COMMIT');
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) $pdo->exec('ROLLBACK');

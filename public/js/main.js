@@ -351,7 +351,7 @@ function initBooking(root, DATA) {
     services: state.selected, date: state.date, time: state.time,
     name: form.name.value, phone: form.phone.value, email: form.email.value, note: form.note.value,
     website: form.website.value, consent: form.consent.checked,
-    reviewOptin: Boolean(form.reviewOptin?.checked), ...extra,
+    reviewOptin: Boolean(form.reviewOptin?.checked), followupOptin: Boolean(form.followupOptin?.checked), ...extra,
   });
 
   function showPayError(msg) {

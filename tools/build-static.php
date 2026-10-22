@@ -11,7 +11,7 @@ declare(strict_types=1);
 // Texte bitte in app/ ändern und neu bauen, nicht in dist/ – sonst gehen Änderungen beim nächsten Build verloren.
 
 if (PHP_SAPI !== 'cli') exit(1);
-$opts = getopt('', ['url:']);
+$opts = getopt('', ['url:', 'out:']);
 if (!empty($opts['url'])) putenv('SITE_URL=' . $opts['url']);
 
 $root = dirname(__DIR__);
@@ -20,7 +20,12 @@ require_once $root . '/app/layout.php';
 require_once $root . '/app/partials.php';
 require_once $root . '/app/routes.php';
 
-$out = $root . '/dist';
+$out = rtrim($opts['out'] ?? $root . '/dist', '/');
+// Sicherheitsnetz, weil der Zielordner vorher geleert wird: nur „…/dist“ oder ein Ordner im Temp-Verzeichnis
+if (basename($out) !== 'dist' && !str_starts_with($out, rtrim(sys_get_temp_dir(), '/') . '/')) {
+    fwrite(STDERR, "Zielordner muss „dist“ heißen oder im Temp-Verzeichnis liegen: {$out}\n");
+    exit(1);
+}
 $dynamic = ['gutschein-pdf', 'termin-stornieren']; // nur im Container
 
 // dist/ leeren (nur genau diesen Ordner)
