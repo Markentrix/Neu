@@ -116,7 +116,7 @@ def layout(fn, title, desc, body, sub=False, active=None, ld='', fold=1, probe='
 {demo_bar}{season_bar}<header class="site"><div class="wrap">
   <a class="brand" href="{p}index.html" aria-label="Motorradhandel-Celle, zur Startseite"><i aria-hidden="true"></i><span>Motorradhandel<small>CELLE · ALTENHAGEN</small></span></a>
   <nav class="main" id="nav" aria-label="Hauptnavigation" data-open="false"><ul>{nav}</ul></nav>
-  <div class="hdr-cta"><a class="btn ghost sm" href="tel:{PHONE_TEL}">{PHONE_TXT}</a><a class="btn sm" href="{p}{probe}">Probefahrt anfragen</a><button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menü</button></div>
+  <div class="hdr-cta"><a class="btn ghost sm" href="tel:{PHONE_TEL}">{PHONE_TXT}</a><a class="btn sm" href="{p}{probe}">Probefahrt anfragen</a><a class="fav-link" href="{p}merkliste.html" aria-label="Merkliste" hidden>{HEART}<b data-fav-count></b></a><button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menü</button></div>
 </div></header>
 {crumb_html}<main id="main">
 {body}
@@ -139,11 +139,13 @@ def layout(fn, title, desc, body, sub=False, active=None, ld='', fold=1, probe='
     if index and fn not in ('danke.html', '404.html'): PAGES.append(dict(fn=fn, images=images or []))
     print(fn, len(page) // 1024, 'KB')
 
+HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.8 5 6.2 5c2 0 3.5 1 5.8 3.3C14.3 6 15.8 5 17.8 5c3.4 0 5.3 3.4 3.8 6.8C19.5 16.4 12 21 12 21z"/></svg>'
+
 def card(b, lazy=True, pfx='', d=0, prio=False, tag='h3'):
     w, h = isize(b['img'][0])
     badge = f'<span class="badge red">{esc(b["hl"])}</span>' if b.get('hl') else '<span class="badge">TÜV neu</span>'
     return f'''<li class="bike" data-marke="{esc(b['brand'])}" data-typ="{esc(b['typ'])}" data-preis="{b['price']}" data-jahr="{b['year']}" data-km="{b['km']}" data-pos="{b['pos']}" data-reveal style="--d:{d}s">
-<div class="ph">{badge}<img src="{pfx}assets/img/{b['img'][0]}" width="{w}" height="{h}" alt="{esc(b['alts'][0])}"{' loading="lazy"' if lazy else ''}{' fetchpriority="high"' if prio else ''}></div>
+<div class="ph">{badge}<button type="button" class="fav" data-fav="{b['slug']}" aria-pressed="false" aria-label="{esc(b['name'])} merken" hidden>{HEART}</button><img src="{pfx}assets/img/{b['img'][0]}" width="{w}" height="{h}" alt="{esc(b['alts'][0])}"{' loading="lazy"' if lazy else ''}{' fetchpriority="high"' if prio else ''}></div>
 <div class="body"><{tag}><a href="{pfx}fahrzeug/{b['slug']}.html">{esc(b['name'])}</a></{tag}>
 <ul class="specs"><li>EZ {b['ez']}</li><li>{kmf(b['km'])}</li><li>{esc(b['typ'])}</li></ul>
 <div class="price"><b>{eur(b['price'])}</b><small>VB</small></div>
@@ -265,17 +267,19 @@ for b in BIKES:
     if len(sim) < 3: sim += [x for x in BIKES if x['slug'] != b['slug'] and x not in sim][:3 - len(sim)]
     simh = ''.join(card(x, pfx='../', d=i * .05) for i, x in enumerate(sim))
     extra = f'<li>{esc(b["hl"])}</li>' if b.get('hl') == 'Mehrfach vorhanden' else ''
+    CALC = '''<div class="calc" hidden><h2>Ratenrechner</h2><p class="note">Unverbindliche Beispielrechnung. Die tatsächlichen Konditionen nennt unser Finanzierungspartner nach Prüfung.</p><div class="calc-g"><label>Anzahlung (€)<input type="number" inputmode="numeric" min="0" step="100" value="0" data-c="down"></label><label>Laufzeit (Monate)<select data-c="term"><option>12</option><option>24</option><option selected>36</option><option>48</option><option>60</option></select></label><label>Beispielzins p. a. (%)<input type="number" inputmode="decimal" min="0" max="20" step="0.1" value="6.9" data-c="rate"></label></div><p class="calc-out" aria-live="polite"><span>Monatliche Rate ca.</span> <b data-c-out data-price="@@P@@"></b></p></div>'''.replace('@@P@@', str(b['price']))
     body = f'''<div class="wrap">
 <div class="detail"><div class="gal"><div class="main"><img src="../assets/img/{b['img'][0]}" width="{w}" height="{h}" alt="{esc(b['alts'][0])}" fetchpriority="high"></div>{f'<ul class="thumbs">{thumbs}</ul>' if thumbs else ''}</div>
 <div class="buy"><p class="eyebrow">{esc(b['typ'])} · {esc(b['brand'])}</p><h1>{esc(b['name'])}</h1>
 <div class="price"><b>{eur(b['price'])}</b><small>VB (Verhandlungsbasis)</small></div>
 <p class="lede">{esc(b['name'])}, Erstzulassung {b['ez']}, {kmf(b['km'])}: gebraucht zu verkaufen bei Motorradhandel-Celle in Celle-Altenhagen. Probefahrt nach Terminabsprache, Inzahlungnahme möglich.</p>
 <table class="spec-t"><tr><th>Erstzulassung</th><td>{b['ez']}</td></tr><tr><th>Kilometerstand</th><td>{kmf(b['km'])}</td></tr><tr><th>TÜV</th><td>neu (nach Vereinbarung)</td></tr><tr><th>Zustand</th><td>Gepflegt</td></tr><tr><th>Art</th><td>{esc(b['typ'])}</td></tr></table>
-<div class="ctas"><a class="btn" href="#anfrage">Probefahrt anfragen</a><a class="btn ghost" href="tel:{PHONE_TEL}">Anrufen: {PHONE_TXT}</a><a class="btn wa" href="https://wa.me/{PHONE_TEL.lstrip('+')}?text={esc(b['name'].replace(' ', '%20'))}" rel="noopener noreferrer" target="_blank">Per WhatsApp fragen</a></div>
-<ul class="trustline">{extra}<li>Probefahrt nach Terminabsprache</li><li>Inzahlungnahme Ihres Motorrads möglich</li><li>Finanzierung auf Anfrage</li></ul>
+<div class="ctas"><button type="button" class="btn ghost fav-btn" data-fav="{b['slug']}" aria-pressed="false" hidden>Merken</button><a class="btn" href="#anfrage">Probefahrt anfragen</a><a class="btn ghost" href="tel:{PHONE_TEL}">Anrufen: {PHONE_TXT}</a><a class="btn wa" href="https://wa.me/{PHONE_TEL.lstrip('+')}?text={esc(b['name'].replace(' ', '%20'))}" rel="noopener noreferrer" target="_blank">Per WhatsApp fragen</a></div>
+{CALC}<ul class="trustline">{extra}<li>Probefahrt nach Terminabsprache</li><li>Inzahlungnahme Ihres Motorrads möglich</li><li>Finanzierung auf Anfrage</li></ul>
 <p class="note" style="margin-top:1rem">Zwischenverkauf vorbehalten. Bitte bestätigen Sie die Verfügbarkeit kurz telefonisch.</p>
 <p class="note">Mehr: <a href="../{CAT_URL[('brand', b['brand'])] if ('brand', b['brand']) in CAT_URL else 'motorraeder.html'}">{'Alle ' + b['brand'] + ' im Bestand' if ('brand', b['brand']) in CAT_URL else 'Alle Motorräder'}</a>{(' · <a href="../' + CAT_URL[('typ', b['typ'])] + '">Alle ' + b['typ'] + '</a>') if ('typ', b['typ']) in CAT_URL else ''} · <a href="../ratgeber/gebrauchtes-motorrad-kaufen.html">Checkliste Gebrauchtkauf</a></p></div></div></div>
 <section class="alt" style="padding-top:2.5rem"><div class="wrap" style="max-width:46rem"><div id="probefahrt">{probe_form('anfrage', b['name'], 'Probefahrt anfragen', f'Sie interessieren sich für die {esc(b["name"])}? Wir melden uns bei Ihnen und sprechen einen Termin ab.', pfx='../')}</div></div></section>
+<div class="sticky-cta" aria-label="Schnellkontakt"><a class="btn ghost sm" href="tel:{PHONE_TEL}">Anrufen</a><a class="btn wa sm" href="https://wa.me/{PHONE_TEL.lstrip('+')}?text={esc(b['name'].replace(' ', '%20'))}" rel="noopener noreferrer" target="_blank">WhatsApp</a><a class="btn sm" href="#anfrage">Probefahrt</a></div>
 <section><div class="wrap"><div class="head"><div><p class="eyebrow">Weitere Motorräder</p><h2>Das könnte Ihnen auch gefallen.</h2></div><p><a href="../motorraeder.html">Alle ansehen</a></p></div><ul class="bikes">{simh}</ul></div></section>'''
     d_title = next(t for t in (f"{b['name']} gebraucht, {eur(b['price'])} | Motorradhandel-Celle", f"{b['name']}, {eur(b['price'])} | Motorradhandel-Celle", f"{SHORT.get(b['slug'], b['name'])}, {eur(b['price'])} | Motorradhandel-Celle", f"{SHORT.get(b['slug'], b['name'])} | Motorradhandel-Celle") if len(t) <= 60)
     d_desc = f"{b['name']}, EZ {b['ez']}, {kmf(b['km'])}, {eur(b['price'])} VB: gebraucht kaufen in Celle. Probefahrt nach Terminabsprache, Inzahlungnahme möglich."
@@ -367,6 +371,11 @@ layout('kontakt.html', 'Kontakt & Probefahrt | Motorradhandel-Celle', 'Kontakt z
 # ================= DANKE / RECHT / 404 =================
 dk = f'''<section class="page-hero"><div class="wrap"><p class="eyebrow">Danke</p><h1>Anfrage eingegangen.</h1><p>Wir melden uns bei Ihnen. <span class="ph-note">[Antwortzeit nur nennen, wenn der Kunde sie zusagt]</span></p></div></section>
 <section><div class="wrap"><h2 style="font-size:2rem">Während Sie warten</h2><ul class="bikes" style="margin-top:1rem">{''.join(card(b, d=i*.05) for i, b in enumerate(BIKES[:3]))}</ul><p style="margin-top:1.5rem"><a class="btn" href="motorraeder.html">Alle Motorräder ansehen</a> <a class="btn ghost" href="tel:{PHONE_TEL}">Lieber anrufen</a></p></div></section>'''
+mk = f'''<section style="padding-top:2.5rem"><div class="wrap"><div class="head"><div><p class="eyebrow">Merkliste</p><h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Ihre gemerkten Motorräder.</h1></div></div>
+<p class="lede" id="ml-empty">Sie haben noch kein Motorrad gemerkt. Tippen Sie bei einem Fahrzeug auf das Herz, dann finden Sie es hier wieder. Die Merkliste bleibt nur auf diesem Gerät gespeichert.</p>
+<ul class="bikes" id="ml-list">{''.join(card(x, d=0, tag='h2') for x in BIKES)}</ul>
+<p class="note" style="margin-top:1.5rem"><a href="motorraeder.html">Zum gesamten Bestand</a> · <a href="kontakt.html">Probefahrt für mehrere Motorräder anfragen</a></p></div></section>'''
+layout('merkliste.html', 'Merkliste | Motorradhandel-Celle', 'Ihre gemerkten Motorräder bei Motorradhandel-Celle in Celle-Altenhagen: Fahrzeuge vergleichen, Probefahrt anfragen und die Auswahl später wieder öffnen.', mk, fold=1, index=False, crumbs=[('Merkliste', None)])
 layout('danke.html', 'Danke für Ihre Anfrage | Motorradhandel-Celle', 'Ihre Anfrage bei Motorradhandel-Celle ist eingegangen. Wir melden uns bei Ihnen und sprechen alles Weitere persönlich mit Ihnen ab.', dk, fold=1, index=False)
 imp = f'''<section><div class="wrap legal-page"><h1 style="font-size:var(--fs-2)">Impressum</h1><p><strong class="ph-note">[Rechtstext liefert der Kunde (Generator oder Anwalt)]</strong> Markentrix bindet ihn ein und prüft nur die Vollständigkeit der Pflichtangaben.</p><h2 style="font-size:1.6rem;margin-top:1.5rem">Angaben der bisherigen Website (vom Kunden zu prüfen und zu aktualisieren)</h2><p>Firma: Motorradhandel-Celle<br>Inhaber: Ingo Werner<br>Lachtehäuserstraße 6<br>29223 Celle (Altenhagen)</p><p>Telefon: +49 1520 8880000<br>E-Mail: {MAIL}<br>Handelsregister: Celle<br>Umsatzsteuer-Identifikationsnummer nach § 27a UStG: DE174231599<br>Gerichtsstand: Celle</p></div></section>'''
 layout('impressum.html', 'Impressum | Motorradhandel-Celle', 'Impressum von Motorradhandel-Celle, Inhaber Ingo Werner, Lachtehäuserstraße 6, 29223 Celle-Altenhagen. Angaben nach Telemediengesetz.', imp, fold=0)

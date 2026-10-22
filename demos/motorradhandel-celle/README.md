@@ -31,3 +31,9 @@ Start, Bestand, Detailseite, Ankauf: Performance 100 · Barrierefreiheit 100 · 
 8. **Nicht übernommen:** E-Bikes/Speedrad.de (eigene externe Seite), Fahrrad-Werkstatt, Vermietung, Ausfahrten, YouTube-Testvideos (nur per Zwei-Klick zulässig), Foto des Inhabers.
 9. **Weiterleitungen:** alte URLs (`Seite21.html` usw.) per 301 auf neue Bestands-/Detailseiten.
 10. Formulare anbinden (Zustellung beim Kunden, SPF/DKIM, Foto-Upload mit Größenlimit und Datenschutz), Domain/DNS laut Anlage „Domain und Technik“.
+
+## Neu: Merkliste, Ratenrechner, mobile Kontaktleiste
+- Merkliste (Herz auf Karten und Detailseite, Zähler im Header, `merkliste.html`): nur lokal im Browser (localStorage), keine Daten an Server, daher keine Einwilligung nötig. Seite ist noindex.
+- Ratenrechner auf Fahrzeugseiten: reine Beispielrechnung mit editierbarem Zins. **Vor Go-live prüfen:** Sobald konkrete Zinssätze/Raten beworben werden, gelten die Pflichtangaben für Kreditwerbung (PAngV/BGB). Entweder Rechner mit Partnerbank-Konditionen und Pflichtangaben ausstatten (Rechtsprüfung) oder entfernen.
+- Mobile Leiste (Anrufen, WhatsApp, Probefahrt) auf Fahrzeugseiten.
+- Getestet: Lighthouse mobil (devtools-Drosselung) 100/100/100, SEO 69 nur wegen Demo-noindex.

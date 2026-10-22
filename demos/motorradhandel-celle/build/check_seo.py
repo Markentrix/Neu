@@ -31,7 +31,7 @@ for p in pages:
     if not can: F(p, 'Canonical fehlt')
     elif can.group(1) != url: F(p, f'Canonical {can.group(1)} != {url}')
     rob = re.search(r'<meta name="robots" content="([^"]+)"', s); rob = rob.group(1) if rob else ''
-    noidx = p in ('danke.html', '404.html')
+    noidx = p in ('danke.html', '404.html', 'merkliste.html')
     if live and not noidx and 'noindex' in rob: F(p, 'Live-Build mit noindex')
     if live and noidx and 'noindex' not in rob: F(p, 'danke/404 muss noindex sein')
     if not live and 'noindex' not in rob: F(p, 'Demo ohne noindex')
@@ -102,15 +102,15 @@ else:
         if l.startswith(DOMAIN + '/assets/'): continue
         path = l.replace(DOMAIN + '/', '') or 'index.html'
         if not os.path.exists(path): F('sitemap.xml', f'URL ohne Datei: {l}')
-        if path in ('danke.html', '404.html'): F('sitemap.xml', f'noindex-Seite in Sitemap: {l}')
+        if path in ('danke.html', '404.html', 'merkliste.html'): F('sitemap.xml', f'noindex-Seite in Sitemap: {l}')
     for im in re.findall(r'<image:loc>([^<]+)</image:loc>', sm):
         if not os.path.exists(im.replace(DOMAIN + '/', '')): F('sitemap.xml', f'Bild fehlt: {im}')
-    need = [p for p in pages if p not in ('danke.html', '404.html')]
+    need = [p for p in pages if p not in ('danke.html', '404.html', 'merkliste.html')]
     miss = [p for p in need if (DOMAIN + '/' + ('' if p == 'index.html' else p)) not in locs]
     if miss: W('sitemap.xml', f'{len(miss)} Seiten fehlen: {miss[:3]}')
 # robots, llms, redirects
 rb = open('robots.txt').read() if os.path.exists('robots.txt') else ''
-if live and ('Sitemap:' not in rb or 'Disallow: /\n' in rb.replace('Disallow: /danke.html\n', '')): F('robots.txt', 'Live-robots erlaubt nicht alles oder ohne Sitemap')
+if live and ('Sitemap:' not in rb or 'Disallow: /\n' in rb.replace('Disallow: /danke.html\nDisallow: /merkliste.html\n', '')): F('robots.txt', 'Live-robots erlaubt nicht alles oder ohne Sitemap')
 if not live and 'Disallow: /' not in rb: F('robots.txt', 'Demo-robots muss sperren')
 if os.path.exists('llms.txt'):
     for l in re.findall(r'\]\((https://motorradhandel-celle\.de/[^)#]*)', open('llms.txt').read()):

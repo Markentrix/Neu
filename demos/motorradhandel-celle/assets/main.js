@@ -58,3 +58,35 @@ document.querySelectorAll('form[data-demo-form]').forEach(f => f.addEventListene
   const s = f.querySelector('.status'); if (s) s.textContent = 'Demo: Es wurde nichts gesendet. In der echten Seite folgt jetzt die Danke-Seite.';
   setTimeout(() => { location.href = f.dataset.next || 'danke.html'; }, 900);
 }));
+
+// Merkliste (nur lokal im Browser, keine Daten gehen an einen Server)
+(() => {
+  let favs = []; try { favs = JSON.parse(localStorage.getItem('mh-favs') || '[]'); } catch (e) {}
+  const save = () => { try { localStorage.setItem('mh-favs', JSON.stringify(favs)); } catch (e) {} };
+  const paint = () => {
+    document.querySelectorAll('[data-fav]').forEach(b => {
+      const on = favs.includes(b.dataset.fav); b.hidden = false; b.setAttribute('aria-pressed', on);
+      if (b.classList.contains('fav-btn')) b.textContent = on ? 'Gemerkt' : 'Merken';
+    });
+    document.querySelectorAll('.fav-link').forEach(a => { a.hidden = false; a.querySelector('[data-fav-count]').textContent = favs.length || ''; a.setAttribute('aria-label', 'Merkliste, ' + favs.length + ' Fahrzeuge'); });
+    const ml = document.getElementById('ml-list');
+    if (ml) { let n = 0; ml.querySelectorAll('.bike').forEach(c => { const on = favs.includes(c.querySelector('[data-fav]').dataset.fav); c.hidden = !on; n += on; }); document.getElementById('ml-empty').hidden = n > 0; }
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-fav]'); if (!b) return;
+    const s = b.dataset.fav; favs = favs.includes(s) ? favs.filter(x => x !== s) : [...favs, s]; save(); paint();
+  });
+  paint();
+})();
+
+// Ratenrechner (Beispielrechnung)
+document.querySelectorAll('.calc').forEach(c => {
+  c.hidden = false;
+  const g = k => c.querySelector('[data-c=' + k + ']'), out = c.querySelector('[data-c-out]'), price = +out.dataset.price;
+  const run = () => {
+    const down = Math.min(Math.max(+g('down').value || 0, 0), price), n = +g('term').value, r = (+g('rate').value || 0) / 1200, P = price - down;
+    const m = P <= 0 ? 0 : (r ? P * r / (1 - Math.pow(1 + r, -n)) : P / n);
+    out.textContent = m.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }) + ' / Monat';
+  };
+  c.addEventListener('input', run); run();
+});

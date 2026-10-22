@@ -96,6 +96,7 @@ def robots(live):
 User-agent: *
 Allow: /
 Disallow: /danke.html
+Disallow: /merkliste.html
 
 # KI-Such- und Antwortdienste ausdrücklich erlaubt (Entscheidung des Inhabers; Training separat sperrbar, z. B. GPTBot, Google-Extended, CCBot).
 User-agent: OAI-SearchBot
