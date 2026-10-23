@@ -139,6 +139,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Nachtrag (23.10.2026, Blog ohne Autor, Quellen sichtbarer):** Christian Wien ist nicht der Autor der Blogbeiträge. In allen 15 Beiträgen entfernt: Zeile „Von Christian Wien“ (jetzt „Von Markentrix“), beide Autorenkästen mit Foto, die Angabe article:author und der Personenknoten samt Autorenverweis in den strukturierten Daten (Autor ist jetzt die Organisation Markentrix). Quellen: Jeder Beitrag hatte bereits einen Abschnitt „Quellen“ mit zwei bis sechs geprüften Links, Prüfdatum und die Quellen als „citation“ in den strukturierten Daten; neu ist ein Link „N Quellen“ in der Kopfzeile jedes Beitrags, der zum Abschnitt springt. Nicht gebaut: Fußnotenverweise im Fließtext, weil die Zuordnung einzelner Aussagen zu Quellen je Beitrag fachlich geprüft werden müsste. Der KI-Hinweis am Beitragsende bleibt unverändert. Prüfung: Build und Linkcheck ok, html-validate 0 Fehler, JSON-LD aller 15 Beiträge gültig und ohne Personenverweis, axe ohne Befund und kein Überlauf bei 320, 390 und 1280 px.
 
+**Nachtrag (23.10.2026, KI-Hinweis ohne Namen):** Der Hinweis unter den Blogbeiträgen lautet jetzt „Hinweis: Dieser Beitrag wurde mit KI erstellt und nicht geprüft. Markentrix übernimmt keine Haftung für den Inhalt.“ (vorher mit Nennung von Christian Wien). Ein Haftungsausschluss ersetzt keine Verantwortung nach Gesetz. Prüfung: Build und Linkcheck ok, Hinweis in allen 15 Beiträgen, kein Verweis auf die frühere Fassung im Auslieferungsstand.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.
