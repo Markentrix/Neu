@@ -5,7 +5,7 @@ Die Website läuft beim Markentrix-Portal. Abgegeben wird nur der Ordner `websit
 ## Muss vor dem Livegang erledigt sein
 
 - [ ] **Impressum:** Inhaber, Kleinunternehmer-Hinweis, Verantwortlicher nach § 18 MStV prüfen (`content/site.json` → `legal`). Steuernummer fehlt noch.
-- [ ] **Datenschutz:** Auftragsverarbeitungsvertrag mit Markentrix abschließen. Anschrift von Markentrix in `content/site.json` → `legal.hostingAddress` eintragen. Text anwaltlich prüfen lassen.
+- [ ] **Datenschutz:** Auftragsverarbeitungsvertrag mit Markentrix abschließen (Hetzner Online GmbH, Rechenzentrum Nürnberg, als Unterauftragsverarbeiter darin aufführen). Anschrift von Markentrix in `content/site.json` → `legal.hostingAddress` eintragen. Text anwaltlich prüfen lassen.
 - [ ] **Markentrix-Portal einrichten:** Termine an, feste Uhrzeiten wie auf der Website (8, 9, 10 Uhr; mittwochs ab 9 Uhr), Sonntag geschlossen. Kalender verbinden, falls gewünscht.
 - [ ] **Bausteine im Portal einschalten:** Bewertungen (Google-Profil verknüpfen), Statistik und Cookie-Hinweis (Google Analytics Mess-ID `G-LTV65F8GKJ` dort hinterlegen).
 - [ ] **PayPal.me-Namen** in `content/site.json` → `booking.paypalMe` eintragen (z. B. `elbdetail`). Danach zeigt die Danke-Seite den PayPal-Link mit dem Betrag der Anzahlung.

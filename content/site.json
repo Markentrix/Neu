@@ -93,7 +93,9 @@
     "mailProvider": "IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Deutschland",
     "hosting": "Markentrix",
     "smallBusiness": true,
-    "hostingAddress": ""
+    "hostingAddress": "",
+    "hostingServer": "Hetzner Online GmbH (Industriestr. 25, 91710 Gunzenhausen)",
+    "hostingLocation": "Nürnberg"
   },
   "vouchers": {
     "amounts": [
