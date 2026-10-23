@@ -591,3 +591,8 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 - **Kunden-Ampel** und **Hilfe-Rückmeldungen** auf der Admin-Übersicht.
 - **Vertrieb:** Übungsmodus (nichts wird gespeichert), Provisionssätze als Anzeige unter „Provisionen“. Mahnwesen automatisch ist standardmäßig aus.
 - Datenbank-Migrationen 127 bis 129 laufen mit `install.sh`.
+
+## Server härten, Rücknahme von Updates, automatische Tests (Stand Oktober 2026)
+- `sudo mkctl haerten --status` zeigt den Sicherheitsstand (automatische Updates, fail2ban, SSH, Firewall, Neustart nötig). `sudo mkctl haerten --anwenden` richtet automatische Sicherheitsupdates (ohne automatischen Neustart) und fail2ban für SSH ein. `sudo mkctl haerten --firewall` schaltet die lokale Firewall (SSH, 80, 443) nach Rückfrage ein. Zusätzlich empfohlen: Hetzner-Firewall in der Cloud-Konsole. Der Selbsttest weist auf Neustart, fehlende Updates und fehlendes fail2ban hin (nur als Warnung).
+- **Rücknahme:** `install.sh` hebt vor jedem Update den vorigen Programmstand auf (`/opt/markentrix/releases`, die letzten 5). `sudo mkctl rollback` setzt den Code auf den Stand davor zurück (mit Sicherung und Selbsttest), `mkctl rollback --liste` zeigt die Stände. Die Datenbank wird nicht zurückgesetzt; neue Tabellen bleiben und stören den alten Code nicht. Bei einem Datenproblem hilft die Wiederherstellung aus der Sicherung.
+- **Automatische Tests:** `.github/workflows/tests.yml` führt bei jedem Push auf `server-paket` die Prüfungen aus (Shell-Skripte, pyflakes, danach der Volltest `tests/run.sh`). Ergebnis unter „Actions“ auf GitHub; rot heißt: nicht auf den Server einspielen.

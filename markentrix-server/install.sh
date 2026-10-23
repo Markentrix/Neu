@@ -93,12 +93,18 @@ install -d -m 755 "$BASE" "$BASE/bin" "$BASE/caddy/sites" "$SITES/live" "$SITES/
 install -d -m 700 "$BASE/backups"
 install -d -m 755 "$BASE/backup-status"
 install -d -m 770 -o 10001 -g root "$BASE/queue"
+# Vorherigen Stand für "mkctl rollback" aufheben (die letzten 5 bleiben)
+if [ -d "$BASE/portal" ]; then
+  install -d -m 700 "$BASE/releases"
+  tar czf "$BASE/releases/$(date +%Y%m%d-%H%M%S).tgz" -C "$BASE" portal panel db docker-compose.yml 2>/dev/null || true
+  ls -1t "$BASE"/releases/*.tgz 2>/dev/null | tail -n +6 | xargs -r rm -f
+fi
 cp "$SRC/templates/docker-compose.yml" "$BASE/docker-compose.yml"
 cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"
 rm -rf "$BASE/db" && cp -r "$SRC/db" "$BASE/db"
 rm -rf "$BASE/portal" && cp -r "$SRC/portal" "$BASE/portal"
-install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$SRC/bin/selbsttest.sh" "$BASE/bin/"
+install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$SRC/bin/selbsttest.sh" "$SRC/bin/haerten.sh" "$BASE/bin/"
 ln -sf "$BASE/bin/mkctl" /usr/local/bin/mkctl
 [ -f "$BASE/caddy/sites/00-platzhalter.caddy" ] || echo "# Hier liegen die Kunden-Websites (mkctl site-add)" > "$BASE/caddy/sites/00-platzhalter.caddy"
 echo "$CADDY_MODE" > "$BASE/mode"

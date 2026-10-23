@@ -296,6 +296,27 @@ SQL
     else rm -f "$f"; die "Die SSH-Einstellung war fehlerhaft und wurde nicht übernommen."; fi
     ;;
 
+  haerten)
+    need_root; exec "$BASE/bin/haerten.sh" "$@" ;;
+
+  rollback)
+    need_root
+    ls "$BASE"/releases/*.tgz >/dev/null 2>&1 || die "Es gibt noch keinen gespeicherten Vorgängerstand. Er entsteht beim nächsten install.sh."
+    if [ "${1:-}" = "--liste" ]; then echo "Gespeicherte Stände (neuester zuerst):"; (cd "$BASE/releases" && ls -1t -- *.tgz); exit 0; fi
+    datei="${1:-$(ls -1t "$BASE"/releases/*.tgz | head -1)}"; [ -f "$datei" ] || datei="$BASE/releases/${1}"; [ -f "$datei" ] || die "Stand nicht gefunden. Liste: mkctl rollback --liste"
+    echo "Das setzt den Programmcode des Portals auf den Stand $(basename "$datei" .tgz) zurück."
+    echo "Die Datenbank wird NICHT zurückgesetzt. Neue Tabellen aus späteren Updates bleiben und stören den alten Code nicht."
+    read -r -p "Fortfahren? (ja/nein): " a; [ "$a" = ja ] || die "Abgebrochen. Nichts verändert."
+    echo "Sicherung vor der Rücknahme ..."; "$BASE/bin/backup.sh"
+    tar czf "$BASE/releases/vor-rollback-$(date +%Y%m%d-%H%M%S).tgz" -C "$BASE" portal panel db docker-compose.yml
+    rm -rf "$BASE/portal" "$BASE/panel" "$BASE/db"
+    tar xzf "$datei" -C "$BASE"
+    if [ "$MODE" = own ]; then "${COMPOSE[@]}" --profile own-caddy up -d --build; else "${COMPOSE[@]}" up -d --build; fi
+    for _ in $(seq 1 40); do [ "$(docker inspect -f '{{.State.Health.Status}}' mk-portal 2>/dev/null || true)" = healthy ] && break; sleep 3; done
+    "$BASE/bin/selbsttest.sh" || echo "Der Selbsttest meldet Fehler. Bitte Meldung lesen."
+    echo "Rücknahme fertig. Den Stand von vorher gibt es als vor-rollback-*.tgz (mkctl rollback --liste)."
+    ;;
+
   mail-check)
     need_root
     command -v dig >/dev/null || { apt-get update -qq && apt-get install -y -qq dnsutils >/dev/null; }
@@ -331,6 +352,8 @@ mkctl psql | migrate                   Datenbank-Konsole | Datenbankstruktur akt
 mkctl offsite-setup <benutzer@host> [verzeichnis]   Sicherung zusätzlich verschlüsselt auf eine Hetzner Storage Box
 mkctl offsite-test                     Prüft die externe Sicherung
 mkctl demo-daten / demo-daten-entfernen   Beispiel-Kunde, -Leads und -Anfragen zum gefahrlosen Üben anlegen bzw. löschen
+mkctl haerten [--status|--anwenden|--firewall]   Sicherheitsstand zeigen / Auto-Updates und fail2ban einrichten / Firewall
+mkctl rollback [--liste|Datei]         Programmcode auf den Stand vor dem letzten Update zurücksetzen (Datenbank bleibt)
 mkctl selbsttest                       Prüft nach einem Update, ob Anmeldung, Datenbank, Mail, Website-API, Aufträge und Sicherung arbeiten
 mkctl restore-test                     Spielt die letzte Sicherung testweise ein und prüft sie
 mkctl alarm-telegram <Token> <Chat-ID> Zweiter Alarmweg per Telegram einrichten

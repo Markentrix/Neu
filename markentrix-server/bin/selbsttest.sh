@@ -60,6 +60,10 @@ for d in /srv/sites/live/*/; do
 done
 # 6) Speicherplatz
 USE="$(df --output=pcent / | tail -1 | tr -dc 0-9)"; [ "${USE:-0}" -lt 85 ] && z ok "Festplatte zu ${USE} % belegt" || z fehler "Festplatte zu ${USE} % voll"
+# 7) System: Updates, Neustart, Schutz gegen Anmelde-Angriffe (nur Hinweise)
+[ -f /var/run/reboot-required ] && z warn "Neustart des Servers nötig (Systemupdate eingespielt). In einem ruhigen Moment: reboot"
+dpkg -s unattended-upgrades >/dev/null 2>&1 || z warn "Automatische Sicherheitsupdates fehlen: mkctl haerten --anwenden"
+systemctl is-active --quiet fail2ban 2>/dev/null || z warn "fail2ban läuft nicht: mkctl haerten --anwenden"
 echo
 if [ "$FEHLER" -eq 0 ]; then echo "Ergebnis: alles in Ordnung."; exit 0; fi
 echo "Ergebnis: $FEHLER Fehler."
