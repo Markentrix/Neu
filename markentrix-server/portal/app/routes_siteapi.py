@@ -74,6 +74,12 @@ def _lade(request: Request) -> dict:
     return z
 
 
+def _paypal_me(z: dict) -> str:
+    """PayPal.Me-Link des Betriebs aus dem Portal (nur wenn PayPal dort eingeschaltet ist), damit Websites ihn nicht selbst im Code tragen müssen."""
+    link = (z.get("pp_me_link") or "").strip().rstrip("/")
+    return link if z.get("pp_aktiv") and link.startswith("https://") else ""
+
+
 def _geschlossen(z: dict) -> list:
     """Ruhetage im JavaScript-Format (0 = Sonntag)."""
     return [d for d in range(7) if (7 if d == 0 else d) not in z["kal_wochentage"]]
@@ -191,7 +197,7 @@ def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = "", 
     z = _lade(request)
     heute = datetime.now(TZ).date()
     if not z["kal_aktiv"]:
-        return _json({"blocked": [], "blockedKeramik": [], "closedWeekdays": _geschlossen(z), "nextFree": None, "selfBooking": False, "slotTimes": _zeiten(z)})
+        return _json({"blocked": [], "blockedKeramik": [], "closedWeekdays": _geschlossen(z), "nextFree": None, "selfBooking": False, "slotTimes": _zeiten(z), "paypalMe": _paypal_me(z)})
     try:
         with tx("system") as cur:
             sd.reservierungen_verfallen(cur, z["kunden_id"], z["kal_halte_std"])
@@ -210,7 +216,7 @@ def verfuegbarkeit(request: Request, leistung: str = "", mitarbeiter: str = "", 
     zeiten = sorted(alle_zeiten) if (z.get("kal_wochenplan") and alle_zeiten) else (sorted(set(_zeiten(z)) | alle_zeiten) if team else _zeiten(z))
     geschlossen = [d for d in range(7) if (7 if d == 0 else d) not in offen]
     return _json({"blocked": gesperrt, "blockedKeramik": gesperrt, "closedWeekdays": geschlossen, "nextFree": frei[0] if frei else None,
-                  "selfBooking": not (z["kal_freigabe"] or (lz or {}).get("freigabe")), "slotTimes": zeiten})
+                  "selfBooking": not (z["kal_freigabe"] or (lz or {}).get("freigabe")), "slotTimes": zeiten, "paypalMe": _paypal_me(z)})
 
 
 @router.get("/slots")

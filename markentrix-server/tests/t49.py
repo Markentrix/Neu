@@ -43,6 +43,11 @@ chk("Portal-Adresse selbst: 404",web("portal.markentrix.de").get(API+"/verfuegba
 chk("www-Variante der Domain geht",web("www."+dom).get(API+"/verfuegbarkeit").status_code==200)
 chk("Health",W.get(API+"/health").json().get("ok") is True)
 v=W.get(API+"/verfuegbarkeit").json(); chk("Ohne Kalender: keine Selbstbuchung, Wochenende geschlossen",v["selfBooking"] is False and v["closedWeekdays"]==[0,6] and v["blocked"]==[],v)
+chk("PayPal.Me aus: Schnittstelle gibt keinen Link heraus",v.get("paypalMe")=="",v)
+sql(f"UPDATE website_dienste SET pp_aktiv=true, pp_me_link='https://paypal.me/testsalon/' WHERE kunden_id='{kA}'")
+v2=W.get(API+"/verfuegbarkeit").json(); chk("PayPal.Me aus dem Portal wird an die Website gegeben",v2.get("paypalMe")=="https://paypal.me/testsalon",v2)
+sql(f"UPDATE website_dienste SET pp_aktiv=false WHERE kunden_id='{kA}'")
+chk("PayPal im Portal ausgeschaltet: kein Link",W.get(API+"/verfuegbarkeit").json().get("paypalMe")=="")
 # ---- Anfragen
 cA.put("/api/kunde/website-dienste/mail",json={"aktiv":True,"empfaenger":f"chef@{dom}","betreff":"x","name":"Salon"})
 F=lambda **kw:{**{"typ":"kontakt","name":"Erika Muster","email":"erika@besucher.de","telefon":"0511 123","nachricht":"Bitte um Rückruf","einwilligung":"ja","paket":"schnitt"},**kw}

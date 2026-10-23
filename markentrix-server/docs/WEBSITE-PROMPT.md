@@ -43,7 +43,7 @@ automatisch ein (NICHT selbst einbinden, kein data-site eintragen):
 
 Variante B, eigene Oberfläche über die Website-API (volle Designfreiheit, z. B. Friseur/Werkstatt mit eigenem Buchungsformular).
 Gleiche Domain, relative Pfade, JSON:
-- GET  /api/verfuegbarkeit -> {blocked:[Datum], closedWeekdays:[0-6, 0=So], nextFree:Datum|null, selfBooking:bool, slotTimes:["08:00",…]}
+- GET  /api/verfuegbarkeit -> {blocked:[Datum], closedWeekdays:[0-6, 0=So], nextFree:Datum|null, selfBooking:bool, slotTimes:["08:00",…], paypalMe:"https://paypal.me/name"|""}
 - GET  /api/slots?tag=JJJJ-MM-TT -> {tag, slots:[{zeit:"08:00", frei:true|false}]}
 - GET  /api/leistungen -> {leistungen:[{key,name,beschreibung,preis,dauer}]}   (nur wenn der Betrieb Leistungen mit Dauer hat)
 - GET  /api/mitarbeiter -> {mitarbeiter:[{key,name,leistungen:[key]}]}        (nur wenn mehrere Personen buchbar sind)
@@ -65,7 +65,7 @@ Regeln für Variante B:
 - Bei Fehlern oder fehlendem Server immer eine Ausweichmöglichkeit zeigen (Telefon, WhatsApp, E-Mail).
 - Leistungen, Preise, Dauer, Anzahlung und Freigabe pflegt der Betrieb im Portal. Preislisten und Auswahllisten IMMER aus /api/leistungen (oder data-mk="preise") bauen, nie fest eintragen. Pakete und Fahrzeugklassen kennt nur die Website, das Portal speichert sie als Text. Leistung hat freigabe:true oder selfBooking:false → Formular „Terminwunsch“, Hinweis „Wir bestätigen Ihren Termin“. Hat die Leistung eine Anzahlung, zeige den Betrag und den Hinweis „Den Zahlungslink bekommen Sie per E-Mail“. Zusatzfragen: /api/leistungen liefert je Leistung `felder:[{key,label,pflicht}]`; zeige sie als Eingaben mit name=key, Pflichtfelder mit Stern. Mehrere Leistungen in einem Termin: `leistung` als `a,b` senden (Checkboxen), Slots mit `?leistung=a,b` laden. Absage- und Umbuchungslink kommen per Mail, die Website braucht dafür nichts. Hinweis im Formular: „Kostenlose Absage oder Umbuchung bis [24] Stunden vorher, danach ist der volle Betrag zu zahlen.“ Datenschutztext: docs/DATENSCHUTZ-BAUSTEIN-ZAHLUNG.md. Uhrzeiten müssen zu den "Festen Uhrzeiten" im Portal passen.
 
-ZAHLUNG: Keine eigene Zahlungsabwicklung, keine Kartenfelder, kein eigenes PayPal-Skript. Nur das Element data-mk="paypal" (Variante A)
+ZAHLUNG: Keine eigene Zahlungsabwicklung, keine Kartenfelder, kein eigenes PayPal-Skript. Den PayPal.Me-Link NIE fest in die Seite schreiben: Er steht im Portal und kommt als paypalMe aus GET /api/verfuegbarkeit (leer = PayPal im Portal aus, dann keinen Zahlungslink zeigen). Nur das Element data-mk="paypal" (Variante A)
 oder ein PayPal.Me-Link (Anzahlung). Das Geld geht direkt an den Kunden. Gutscheine sind eine Anfrage (typ="gutschein", Felder name, email Pflicht, betrag z. B. "50" oder "50 €", empfaenger, widmung, einwilligung). Zahlungslink und Code verschickt der Inhaber im Portal (Website-Dienste → Gutschein-Anfragen); die Website zeigt dazu nur den Hinweis „Sie erhalten den Zahlungslink per E-Mail, den Code nach Zahlungseingang.“ Kein Code auf der Seite, keine PDF-Erzeugung, kein eigener Zahlungsablauf.
 
 E-MAIL: Die Website verschickt nie selbst Mails (kein mailto-Formular, kein Formspree, kein SMTP). Anfragen laufen über das Portal:

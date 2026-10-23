@@ -7,7 +7,7 @@ Der Vertrag bleibt stabil. Es kommen nur neue Felder dazu, bestehende ändern si
 
 | Aufruf | Zweck |
 |---|---|
-| `GET /api/verfuegbarkeit` (optional `?leistung=key&mitarbeiter=key`) | `{blocked:[Datum], blockedKeramik:[Datum], closedWeekdays:[0-6, 0=So], nextFree:Datum, selfBooking:bool, slotTimes:["08:00",…]}` |
+| `GET /api/verfuegbarkeit` (optional `?leistung=key&mitarbeiter=key`) | `{blocked:[Datum], blockedKeramik:[Datum], closedWeekdays:[0-6, 0=So], nextFree:Datum, selfBooking:bool, slotTimes:["08:00",…], paypalMe:"https://paypal.me/…" oder ""}` (paypalMe = PayPal.Me-Link aus dem Portal, nur wenn PayPal dort eingeschaltet ist; nie fest in die Seite schreiben) |
 | `GET /api/slots?tag=JJJJ-MM-TT` (optional `&leistung=key&mitarbeiter=key`) | `{tag, slots:[{zeit:"08:00", frei:bool}]}` |
 | `POST /api/anfrage` | JSON oder Formular. Pflicht: `typ` (kontakt, termin, gutschein, firma, widerruf), `name`, `einwilligung`. Weitere Felder beliebig (z. B. `paket`, `fahrzeug`, `nachricht`). Für Terminbuchungen mit Dauer und Personen: `leistung` und `mitarbeiter` (Kurznamen aus den Listen; `mitarbeiter` leer oder „egal“ = beliebige Person). `website` ist das Lockfeld und bleibt leer. Antwort: `{ok:true, ref:"T261021-AB12", status:"neu"}`, bei Fehlern `422 {ok:false, errors:{feld:text}}` |
 | `GET /api/leistungen` | `{leistungen:[{key, name, beschreibung, preis, dauer}]}` – die buchbaren Leistungen (im Portal gepflegt) |
