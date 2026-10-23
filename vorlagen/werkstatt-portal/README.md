@@ -3,8 +3,7 @@
 Vorlage nach dem Skill „Website mit Portal“: statische Seite ohne eigenes Backend, die auf dem Markentrix-Server läuft und über das Portal Termine, Anfragen, Bewertungen und Statistik bezieht.
 
 - `website-fertig/` ist die Abgabe (index.html liegt direkt darin). Diesen Ordner hochladen.
-- `bauen.py` erzeugt den Ordner neu und die Vorschau unter `static/beispiel/werkstatt-portal/`.
-- `vorschau-api.js` und `vorschau.css` gehören nur zur Vorschau und simulieren Schnittstellen und Bausteine. Sie sind nicht Teil von `website-fertig/`.
+- `bauen.py` erzeugt den Ordner neu. Die Vorlage ist nicht Teil der veröffentlichten Website (keine Vorschau).
 
 Genutzte Portal-Funktionen: Terminanfrage über die Website-API (Variante B: `/api/verfuegbarkeit`, `/api/leistungen`, `/api/mitarbeiter`, `/api/slots`, `/api/anfrage`), Kontaktformular, Google-Bewertungen und Statistik-Einstellung als Bausteine (Variante A, `data-mk`).
 

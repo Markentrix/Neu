@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Erzeugt vorlagen/werkstatt-portal/website-fertig/ (portalfähige Kundenvorlage nach dem Skill "Website mit Portal")
-und die Vorschau-Kopie static/beispiel/werkstatt-portal/ (mit simulierten Schnittstellen). Aufruf: python3 vorlagen/werkstatt-portal/bauen.py"""
+"""Erzeugt vorlagen/werkstatt-portal/website-fertig/ (portalfähige Kundenvorlage nach dem Skill "Website mit Portal"). Aufruf: python3 vorlagen/werkstatt-portal/bauen.py"""
 import os, shutil, re
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 OUT = os.path.join(ROOT, 'vorlagen', 'werkstatt-portal', 'website-fertig')
-PREV = os.path.join(ROOT, 'static', 'beispiel', 'werkstatt-portal')
 SRC_IMG = os.path.join(ROOT, 'static', 'beispiel', 'werkstatt-muster', 'img')
 FONTS = os.path.join(ROOT, 'static', 'fonts')
 TEL, TELHREF = '05141&nbsp;00&nbsp;00&nbsp;03', 'tel:+495141000003'
@@ -569,18 +567,7 @@ def main():
     from PIL import Image
     Image.open(os.path.join(ROOT, 'static', 'apple-touch-icon.png')).convert('RGBA').save(os.path.join(OUT, 'favicon.ico'), format='ICO', sizes=[(16, 16), (32, 32), (48, 48)])
     print('website-fertig gebaut:', sum(len(f) for _, _, f in os.walk(OUT)), 'Dateien')
-    # Vorschau-Kopie
-    if os.path.isdir(PREV): shutil.rmtree(PREV)
-    shutil.copytree(OUT, PREV)
-    for dp, _, fs in os.walk(PREV):
-        for f in fs:
-            if f.endswith('.html'):
-                p = os.path.join(dp, f); t = open(p, encoding='utf-8').read()
-                t = t.replace('<script src="assets/app.js" defer></script>', '<script src="assets/vorschau-api.js"></script>\n<script src="assets/app.js" defer></script>')
-                open(p, 'w', encoding='utf-8').write(t)
-    shutil.copy(os.path.join(os.path.dirname(__file__), 'vorschau-api.js'), os.path.join(PREV, 'assets', 'vorschau-api.js'))
-    shutil.copy(os.path.join(os.path.dirname(__file__), 'vorschau.css'), os.path.join(PREV, 'assets', 'vorschau.css'))
-    print('Vorschau:', PREV)
+
 
 if __name__ == '__main__':
     main()
