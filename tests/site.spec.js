@@ -168,17 +168,36 @@ test("Ohne erreichbare Schnittstelle: Formular zeigt WhatsApp, E-Mail und Telefo
   await expect(page.locator('#t-slots-msg a[href^="tel:"]')).toBeVisible();
 });
 
-test("Danke-Seite: Anzahlung per PayPal.me mit Betrag und Vorgangsnummer", async ({ page }) => {
-  await page.route("**/config.js*", async (route) => {
-    const r = await route.fetch();
-    await route.fulfill({ response: r, body: (await r.text()) + '\nwindow.ELB.booking.paypalMe="elbdetail";' });
+// PayPal.me-Name liefert das Portal in /api/verfuegbarkeit; hier je Test eingespielt, damit parallele Tests unberührt bleiben
+async function portalPaypal(page, name) {
+  await page.route("**/api/verfuegbarkeit", async (route) => {
+    const r = await route.fetch(); const j = await r.json(); j.paypalMe = name;
+    await route.fulfill({ response: r, body: JSON.stringify(j) });
   });
+}
+
+test("Danke-Seite: Anzahlung per PayPal.me mit Betrag und Vorgangsnummer, Name aus dem Portal", async ({ page }) => {
+  await page.goto("/danke.html?typ=termin&ref=T261023-0001&anz=49.35");
+  await page.waitForTimeout(300);
+  await expect(page.locator("[data-thanks-pay]")).toBeHidden();  // Portal liefert keinen Namen: kein Zahlungslink
+  await portalPaypal(page, "https://paypal.me/elbdetail");
   await page.goto("/danke.html?typ=termin&ref=T261023-0001&anz=49.35");
   const a = page.locator('[data-thanks-pay] a[href^="https://paypal.me/"]');
   await expect(a).toHaveAttribute("href", "https://paypal.me/elbdetail/49.35EUR");
   await expect(page.locator("[data-thanks-pay]")).toContainText("T261023-0001");
   await page.goto("/danke.html?typ=kontakt&ref=K1&anz=49.35");
   await expect(page.locator("[data-thanks-pay]")).toBeHidden();
+});
+
+test("Buchung: Anzahlung per PayPal nur, wenn das Portal einen PayPal.me-Namen liefert", async ({ page }) => {
+  await page.goto("/termin.html?paket=essential&klasse=kompakt");
+  await expect(page.locator('[data-sum="anzahlung"]')).toHaveText("nach Absprache");
+  await expect(page.locator('#page-h ~ .lead [data-pay="on"]')).toBeHidden();
+  await portalPaypal(page, "elbdetail");
+  await page.goto("/termin.html?paket=essential&klasse=kompakt");
+  await expect(page.locator('[data-sum="anzahlung"]')).toContainText("49,35 € per PayPal");
+  await expect(page.locator('#page-h ~ .lead [data-pay="on"]')).toBeVisible();
+  await expect(page.locator("#bookingForm")).toHaveAttribute("data-anzahlung", "49.35");
 });
 
 test("Widerruf über das Formular geht als typ widerruf an das Portal", async ({ page }) => {

@@ -23,7 +23,7 @@ cd website-fertig && zip -r ../website-fertig.zip . && cd ..
 | Besucherzahlen ohne Cookies | `POST /api/e` | alle Seiten |
 | Google-Bewertungen | Baustein `<div data-mk="bewertungen">` | Startseite, Abschnitt Bewertungen |
 | Cookie-Hinweis und Statistik-Einstellungen | Baustein `<span data-mk="cookies">` | Fußbereich jeder Seite |
-| Anzahlung | PayPal.me-Link mit Betrag (`booking.paypalMe` in `content/site.json`) | Danke-Seite nach der Buchung |
+| Anzahlung | PayPal.me-Name aus `/api/verfuegbarkeit` (Feld `paypalMe`), Link mit Betrag; leer = kein Zahlungslink | Buchung, Danke-Seite |
 
 Pakete, Preise, Fahrzeugklassen und Zustandszuschläge kennt nur die Website. Das Portal speichert sie als Text in der Anfrage. `/api/leistungen` und `/api/mitarbeiter` braucht ElbDetail nicht, weil nur René bucht.
 

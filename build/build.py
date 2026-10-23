@@ -74,7 +74,7 @@ def config_js(site):
                        if site.addon("scheiben") else []),
         "vouchers": site.s["vouchers"],
         "voucherValidYear": int(site.s["standIso"][:4]) + 3,
-        "booking": {"owner": (site.s.get("about") or {}).get("name") or "", "paypalMe": ((site.s.get("booking") or {}).get("paypalMe") or "").strip(),
+        "booking": {"owner": (site.s.get("about") or {}).get("name") or "",
                     "depositPercent": (site.s.get("booking") or {}).get("depositPercent", 15),
                     "surcharge": (site.s.get("booking") or {}).get("conditionSurcharge") or {}, "keramikMin": site.min_price("keramik") if pr.get("ceramic") else None},
     }

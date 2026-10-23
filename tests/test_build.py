@@ -131,6 +131,7 @@ class TestPortalUpload(unittest.TestCase):
         cfg = read(os.path.join(SITE, "config.js"))
         self.assertNotIn("ga4", cfg)
         self.assertNotIn("hosts", cfg)
+        self.assertNotIn("paypalMe", cfg)  # kommt aus /api/verfuegbarkeit
 
     def test_forms_consent_honeypot_email(self):
         for p in files(".html"):

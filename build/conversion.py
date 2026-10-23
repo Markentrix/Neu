@@ -42,7 +42,6 @@ def build_termin(site, write):
           seo.crumbs(site, [("Startseite", "/"), ("Termin anfragen", path)])]
     cls0 = pr["classes"][0]["key"]
 
-    pay_me = bool(((s.get("booking") or {}).get("paypalMe") or "").strip())
     pk = ""
     for p in pr["packages"]:
         inc = "".join(f"<li>{ESC(f['text'])}</li>" for f in p["features"] if f.get("included"))[:]
@@ -131,7 +130,7 @@ def build_termin(site, write):
 {_page_hero("", [("Startseite", "index.html"), ("Termin anfragen", None)], "Online-Terminbuchung",
             '<span data-sb-text="Termin buchen">Termin anfragen</span> in <em>2 Minuten.</em>',
             "Paket wählen, Fahrzeug angeben, freien Tag und Uhrzeit aussuchen. Danach meldet sich " + owner + " telefonisch, sieht sich Ihr Fahrzeug vorab an und bestätigt den Termin."
-            + (" Die Anzahlung von " + str(dep) + " % leisten Sie bequem per PayPal." if pay_me else ""))}
+            + ' <span data-pay="on" hidden>Die Anzahlung von ' + str(dep) + ' % leisten Sie bequem per PayPal.</span>')}
   <section class="tight-top" aria-label="Terminanfrage">
     <div class="container booking">
       <form class="wizard js-form" id="bookingForm" data-form="termin" action="/api/anfrage" method="post" novalidate>
@@ -169,7 +168,7 @@ def build_termin(site, write):
 
         <fieldset class="wz-step" data-step="4">
           <legend><span class="wz-num">4</span>Termin wählen</legend>
-          <p class="wz-hint">Wählen Sie Tag und Uhrzeit für die Abgabe Ihres Autos. Angezeigt werden nur freie Zeiten. {f"Nach dem Absenden können Sie die Anzahlung von {dep} % per PayPal leisten, sie wird mit dem Endpreis verrechnet." if pay_me else "Die Anzahlung besprechen wir mit Ihnen am Telefon."}</p>
+          <p class="wz-hint">Wählen Sie Tag und Uhrzeit für die Abgabe Ihres Autos. Angezeigt werden nur freie Zeiten. <span data-pay="on" hidden>Nach dem Absenden können Sie die Anzahlung von {dep} % per PayPal leisten, sie wird mit dem Endpreis verrechnet.</span><span data-pay="off">Die Anzahlung besprechen wir mit Ihnen am Telefon.</span></p>
           <p class="wz-hint">Bei Versiegelung und Keramik für Lack und Felgen bleibt Ihr Auto 3 Tage bei uns, die Scheibenkeramik dauert etwa 1 Stunde. Bei allen anderen Leistungen ist es optimal, wenn es einen Tag bleiben kann.</p>
           <div class="form-row"><label for="t-date1">Tag*</label><input type="date" id="t-date1" name="datum" required aria-describedby="t-date1-msg"><span class="field-msg" id="t-date1-msg"></span><button class="next-free next-free--fill" type="button" data-next-free data-nf-fill hidden><span class="nf-dot" aria-hidden="true"></span>Nächster freier Tag: <strong data-nf-date></strong> · übernehmen</button></div>
           <div class="form-row"><span class="label" id="t-slots-l">Uhrzeit der Abgabe*</span>

@@ -30,6 +30,11 @@
     if (!availP) availP = IS_LIVE ? fetch(API + "/verfuegbarkeit").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) : Promise.resolve(null);
     return availP;
   }
+  /* PayPal.me-Name kommt aus dem Portal (/api/verfuegbarkeit → paypalMe). Leer = kein Zahlungslink. */
+  function payMeName(j) {
+    var v = String((j && j.paypalMe) || "").trim().replace(/^(https?:\/\/)?(www\.)?paypal\.me\//i, "").replace(/\/+$/, "");
+    return /^[A-Za-z0-9]{1,40}$/.test(v) ? v : "";
+  }
   function niceDate(iso) {
     var d = new Date(iso + "T12:00:00"), t = new Date(); t.setHours(12, 0, 0, 0);
     var diff = Math.round((d - t) / 86400000);
@@ -422,7 +427,7 @@
     document.documentElement.classList.add("wz-ready");
     var steps = $$(".wz-step", wz), inds = $$("[data-step-ind]", wz), cur = 0;
     var prev = $("[data-wz-prev]", wz), next = $("[data-wz-next]", wz), submit = $("[data-wz-submit]", wz);
-    var blocked = [], closedWeekdays = [0];
+    var blocked = [], closedWeekdays = [0], payMe = "";
 
     if (Q.paket) { var rp = wz.querySelector('input[name="paket"][value="' + Q.paket + '"]'); if (rp) rp.checked = true; }
     if (Q.schutz === "keramik") { var rw = wz.querySelector('input[name="winterschutz"][value="keramik"]'); if (rw) rw.checked = true; }
@@ -437,7 +442,10 @@
       blocked = j.blocked || []; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
       /* Direkte Buchung nur, wenn das Portal sie freigibt; sonst bleibt es beim Terminwunsch */
       if (j.selfBooking) $$("[data-sb-text]").forEach(function (el) { el.textContent = el.getAttribute("data-sb-text"); });
+      payMe = payMeName(j);
+      $$("[data-pay]").forEach(function (el) { el.hidden = (el.getAttribute("data-pay") === "on") !== !!payMe; });
       if (wz.datum.value) checkDate(wz.datum);
+      summary();
     });
 
     /* Winterangebot: Wachs inklusive oder C² CarCeramic statt Wachs (dann Keramik-Standzeit und Aufpreis nach Absprache) */
@@ -537,7 +545,7 @@
       set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + d.uhrzeit + " Uhr" : "") + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
       set("preis", v != null ? (sch ? "" : "ab ") + fmt(v) + " €" + (wk ? " + Aufpreis C² CarCeramic" : "") : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
       var bk = ELB.booking || {}, base = wk ? null : (v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null));
-      var anz = base && bk.paypalMe ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2) : "";
+      var anz = base && payMe ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2) : "";
       if (anz) wz.setAttribute("data-anzahlung", anz); else wz.removeAttribute("data-anzahlung");
       set("anzahlung", anz ? anz.replace(".", ",").replace(",00", "") + " € per PayPal nach dem Absenden" : (d.paket ? "nach Absprache" : "–"));
       $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? "ab " + fmt(x) + " €" : "auf Anfrage"; });
@@ -596,14 +604,15 @@
     if (T) { thanks.innerHTML = "Danke! <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " Ihre Vorgangsnummer: " + Q.ref + "." : ""); }
     /* Anzahlung per PayPal.me: Betrag steht im Link, die Vorgangsnummer als Verwendungszweck */
     var pay = $("[data-thanks-pay]"), amt = parseFloat(Q.anz || "");
-    if (pay && Q.typ === "termin" && bk.paypalMe && amt > 0 && amt < 10000) {
+    if (pay && Q.typ === "termin" && amt > 0 && amt < 10000) availability().then(function (j) {
+      var me = payMeName(j); if (!me) return;
       var eur = amt.toFixed(2).replace(".", ",").replace(",00", "") + " €";
       pay.innerHTML = '<h2>Anzahlung leisten</h2><p>Mit der Anzahlung von <strong>' + eur + '</strong> sichern Sie sich Ihren Termin. Sie wird mit dem Endpreis verrechnet. ' +
         'Bitte geben Sie bei PayPal als Verwendungszweck <strong>' + (Q.ref || "Ihren Namen").replace(/[^A-Za-z0-9 -]/g, "") + '</strong> an und zahlen Sie als „Waren oder Dienstleistungen“.</p>' +
-        '<a class="btn btn-primary btn-lg" href="https://paypal.me/' + encodeURIComponent(bk.paypalMe) + '/' + amt.toFixed(2) + 'EUR" target="_blank" rel="noopener">Anzahlung ' + eur + ' mit PayPal senden</a>' +
+        '<a class="btn btn-primary btn-lg" href="https://paypal.me/' + encodeURIComponent(me) + '/' + amt.toFixed(2) + 'EUR" target="_blank" rel="noopener">Anzahlung ' + eur + ' mit PayPal senden</a>' +
         '<p class="hint">Kommt der Termin nicht zustande oder widerrufen Sie innerhalb der Frist, erstatten wir die Anzahlung vollständig.</p>';
       pay.hidden = false;
-    }
+    });
   }
 
   /* ---------------------------------------------------------------- Einblenden beim Scrollen */
