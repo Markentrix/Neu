@@ -168,6 +168,23 @@
     "Dort liest und bestätigst du den Auftragsverarbeitungsvertrag. Bei Änderungen informieren wir dich vorab.",
     "Wenn deine Website Buchung oder Zahlung nutzt, gibt es fertige Datenschutz-Bausteine, die Markentrix in deine Datenschutzerklärung einbaut."
    ]
+  },
+  {
+   "t": "Paket oder Zusatzleistung dazubuchen",
+   "k": "paket dazubuchen buchen zusatz erweitern upgrade preisliste preis kosten website ci social media sichtbarkeit zusätzlich mehr leistung bestellen",
+   "wo": "Menü „Pakete & Zusatzleistungen“ (nur Inhaber)",
+   "l": "#pakete",
+   "s": [
+    "Öffne „Pakete & Zusatzleistungen“. Dort steht unsere Preisliste, nach Bereichen sortiert. Alle Preise sind netto, die Umsatzsteuer kommt dazu.",
+    "Wähle das gewünschte Paket und tippe auf „Dazubuchen“. Im Fenster siehst du Preis und Mindestlaufzeit.",
+    "Setze den Haken und bestätige. Markentrix prüft die Buchung und bestätigt sie dir per E-Mail. Bis dahin entstehen keine Kosten.",
+    "Bei Paketen „auf Anfrage“ schickst du einen Angebotswunsch. Wir melden uns mit einem Angebot."
+   ],
+   "n": [
+    "Als Referenzkunde sind Zusatzpakete für dich kostenfrei. Der reguläre Preis steht trotzdem dabei.",
+    "Ein bereits gebuchtes Paket kannst du nicht doppelt buchen. Der Status steht an der Karte.",
+    "Möchtest du ein Paket wechseln oder kündigen, schreib uns unter „Nachrichten“."
+   ]
   }
  ],
  "titel": "Anleitung Kundenportal",

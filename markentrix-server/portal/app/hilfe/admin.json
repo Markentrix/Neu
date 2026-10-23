@@ -176,6 +176,36 @@
    "s": [
     "Lege weitere Admin-Zugänge an und gib ihnen nur die Bereiche, die sie brauchen (z. B. nur Nachrichten)."
    ]
+  },
+  {
+   "t": "Paketbuchung eines Kunden bestätigen",
+   "k": "paketbuchung bestätigen ablehnen dazugebucht zusatzpaket kunde bucht paket buchung referenzkunde",
+   "wo": "Menü „Übersicht“ → Karte „Neue Paketbuchungen“",
+   "l": "#uebersicht",
+   "s": [
+    "Bucht ein Kunde im Portal ein Paket dazu, kommt eine Mail, eine Push-Meldung und eine Aufgabe. Die Karte „Neue Paketbuchungen“ zeigt Kunde, Paket und eingefrorenen Preis.",
+    "Mit „Bestätigen“ wird die Buchung beauftragt, die zugehörigen Module werden freigeschaltet und der Kunde bekommt eine Bestätigung.",
+    "Mit „Ablehnen“ wird die Buchung beendet. Der Kunde kann das Paket später erneut buchen.",
+    "Buchungen „Angebot gewünscht“ (Preis auf Anfrage) bestätigst du nicht direkt: Erstelle dem Kunden ein Angebot und lehne die Anfrage danach ab oder lasse sie stehen."
+   ],
+   "n": [
+    "Referenzkunden buchen zu 0 €. Prüfe bei der Bestätigung, ob das für dieses Paket gewollt ist.",
+    "Provisionen folgen den Buchungen. Dazugebuchte Pakete mit Preis können also Provision auslösen. Siehe docs/PREISLOGIK.md."
+   ]
+  },
+  {
+   "t": "Aktivität eines Vertrieblers ansehen",
+   "k": "vertriebler aktivität abgearbeitet anrufe termine leads bearbeitet auswertung leistung überblick einzeln",
+   "wo": "Menü „Vertrieb“ → Vertriebler öffnen → Karte „Aktivität“, oder Übersicht → „Vertriebler im Blick“ (Name anklicken)",
+   "l": "#vertrieb",
+   "s": [
+    "Öffne den Vertriebler (auch per Klick auf den Namen in „Vertriebler im Blick“).",
+    "Oben steht die Karte „Aktivität“. Wähle 7, 30 oder 90 Tage.",
+    "Du siehst Leads bearbeitet, Anrufe (erreicht), Termine, Notizen, aktive Tage, neue Leads und Kunden sowie die letzten Einträge. Die Balken zeigen die Aktivität je Tag."
+   ],
+   "n": [
+    "Gezählt wird nur, was der Vertriebler im Portal festgehalten hat."
+   ]
   }
  ],
  "titel": "Anleitung Admin-Bereich",

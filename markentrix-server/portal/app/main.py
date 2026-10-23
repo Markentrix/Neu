@@ -21,6 +21,9 @@ from .routes_vertrieb import router as vertrieb_router
 from .routes_2fa import router as zweifaktor_router
 from .routes_public import router as public_router
 from .routes_onboarding import router as onboarding_router
+from .routes_vertriebqualitaet import router as vqual_router
+from .routes_pakete import router as pakete_router
+from .routes_wert import router as wert_router
 from .routes_hilfe import router as hilfe_router
 from .routes_provision import router as provision_router, vertrieb_router as provision_vertrieb_router
 from .routes_team import router as team_router, admin_router as team_admin_router
@@ -224,6 +227,9 @@ app.include_router(uav_kunde_router)
 app.include_router(team_router)
 app.include_router(team_admin_router)
 app.include_router(hilfe_router)
+app.include_router(wert_router)
+app.include_router(pakete_router)
+app.include_router(vqual_router)
 app.include_router(provision_router)
 app.include_router(provision_vertrieb_router)
 

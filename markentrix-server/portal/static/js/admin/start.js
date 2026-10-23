@@ -42,10 +42,10 @@ V.uebersicht = async () => {
   const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus'), fw = await sicherApi('/api/admin/fruehwarnung');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
   const STANDARD_AUS = ['system', 'fruehwarnung', 'heute'], ans = await ladeAnsicht(), aus = ausgeblendetSet(ans, STANDARD_AUS);
-  const cp = await sicherApi('/api/admin/cockpit'), ka = await sicherApi('/api/admin/kunden-ampel'), hr = await sicherApi('/api/admin/hilfe-rueckmeldungen');
+  const cp = await sicherApi('/api/admin/cockpit'), ka = await sicherApi('/api/admin/kunden-ampel'), hr = await sicherApi('/api/admin/hilfe-rueckmeldungen'), vq = await sicherApi('/api/admin/vertrieb/qualitaet'), pb = await sicherApi('/api/admin/paket-buchungen');
   const KARTEN = [['top3', 'Heute zuerst (die 3 wichtigsten Dinge)'], ['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['angebote', 'Angebote im Blick (angesehen, angenommen, offen)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['kundenampel', 'Kunden-Ampel (Website, Mail, Buchung je Kunde)'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
   const an = anpassenKnopf(KARTEN, STANDARD_AUS), zeige = (id, el) => aus.has(id) ? '' : el;
-  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('angebote', angebotsKarte(heute.angebote)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), hilfeKarte(hr), zeige('kundenampel', ka ? kundenAmpelKarte(ka) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
+  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('angebote', angebotsKarte(heute.angebote)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), paketBuchungenKarte(pb), hilfeKarte(hr), vertriebQualitaetKarte(vq), zeige('kundenampel', ka ? kundenAmpelKarte(ka) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
     zeige('zahlen', h('div', { class: 'zahlenblock' },
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
@@ -186,6 +186,30 @@ export function prioritaetenKarte(heute, sys, fw) {
 }
 
 /** Kunden-Ampel: wer braucht gerade Aufmerksamkeit? Rot zuerst. */
+function vertriebQualitaetKarte(d) {
+  if (!d || !d.vertriebler.length) return '';
+  const FARBE = { rot: 'bad', gelb: 'warn', gruen: 'ok' };
+  return h('div', { class: 'card' }, h('h2', {}, 'Vertriebler im Blick'),
+    h('p', { class: 'small muted' }, d.summe.rot + ' rot · ' + d.summe.gelb + ' mit Hinweisen · ' + d.summe.gruen + ' in Ordnung. Grundlage: festgehaltene Anrufe, Termine und offene Leads der letzten Wochen.'),
+    h('div', { class: 'tablewrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['Vertriebler', 'Anrufe 7 Tage', 'Termine 30 Tage', 'Quote', 'Offene Leads', 'Hinweise'].map(t => h('th', {}, t)))),
+      h('tbody', {}, d.vertriebler.map(r => h('tr', {}, h('td', {}, h('a', { href: '#partner/' + r.id }, r.name)), h('td', {}, String(r.anrufe_7t) + (r.anrufe_vorwoche ? ' (Vorwoche ' + r.anrufe_vorwoche + ')' : '')), h('td', {}, String(r.termine_30t)),
+        h('td', {}, r.termin_quote === null ? '–' : String(r.termin_quote).replace('.', ',') + ' %'), h('td', {}, String(r.offene_leads)),
+        h('td', {}, r.hinweise.length ? h('div', {}, h('span', { class: 'pill ' + FARBE[r.ampel] }, r.ampel === 'rot' ? 'Handlungsbedarf' : 'Hinweis'), h('ul', { class: 'small', style: 'margin:4px 0 0 16px' }, r.hinweise.map(x => h('li', {}, x)))) : h('span', { class: 'pill ok' }, 'in Ordnung'))))))));
+}
+function paketBuchungenKarte(liste) {
+  if (!liste || !liste.length) return '';
+  const m = h('div');
+  const preis = (z) => z.auf_anfrage ? 'Angebot gewünscht' : [z.projekt_cent ? euro(z.projekt_cent) + ' einmalig' : '', z.einrichtung_cent ? euro(z.einrichtung_cent) + ' Einrichtung' : '', z.monatlich_cent ? euro(z.monatlich_cent) + '/Monat' : ''].filter(Boolean).join(' + ') || (z.referenzkunde ? '0 € (Referenzkunde)' : '0 €');
+  const aktion = (z, weg, text, pfad, body) => h('button', { class: 'btn small' + (weg ? ' sec' : ''), onclick: async (e) => {
+    e.target.disabled = true;
+    try { await api('/api/admin/buchungen/' + z.id + '/' + pfad, { method: 'POST', body }); e.target.closest('li').remove(); melde(m, weg ? 'Abgelehnt.' : 'Bestätigt, der Kunde ist informiert.', 'ok'); }
+    catch (x) { melde(m, x.message); e.target.disabled = false; } } }, text);
+  return h('div', { class: 'card' }, h('h2', {}, 'Neue Paketbuchungen', h('span', { class: 'badge', style: 'margin-left:8px' }, liste.length)),
+    h('p', { class: 'small muted' }, 'Kunden haben im Portal Pakete dazugebucht. Erst mit deiner Bestätigung wird das Paket aktiv.'), m,
+    h('ul', { class: 'prio' }, liste.map(z => h('li', {}, h('span', { class: 'pill warn' }, z.referenzkunde ? 'Referenz' : 'Neu'),
+      h('div', { class: 'pt' }, h('a', { href: '#kunde/' + z.kunden_id }, z.firma + ' (' + z.kundennummer + ')'), h('span', { class: 'small muted' }, z.produkt + ' · ' + preis(z) + (z.notiz ? ' · ' + z.notiz : ''))),
+      z.auf_anfrage ? '' : aktion(z, false, 'Bestätigen', 'bestaetigen', {}), aktion(z, true, 'Ablehnen', 'ablehnen', {})))));
+}
 function hilfeKarte(d) {
   if (!d || (!d.offen.length && !d.geloest_30 && !d.ungeloest_30)) return '';
   const m = h('div');

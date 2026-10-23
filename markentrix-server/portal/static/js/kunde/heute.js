@@ -55,6 +55,30 @@ async function umfrageKarte() {
   return karte;
 }
 
+
+const eur = (x) => Number(x).toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+/** „Das hat Markentrix dir gebracht“: nachvollziehbare Monatszahlen, nur was es wirklich gab. */
+async function wertKarte() {
+  let w; try { w = await api('/api/kunde/wertbilanz', { leise: true }); } catch { return ''; }
+  const a = w.dieser, v = w.letzter;
+  const kacheln = [
+    [a.anfragen, 'Anfragen eingegangen', v.anfragen],
+    [a.automatisch_beantwortet, 'Antworten automatisch verschickt', v.automatisch_beantwortet],
+    [a.termine_gebucht, 'Termine gebucht', v.termine_gebucht],
+    [a.erschienen, 'Kunden sind erschienen', v.erschienen],
+    [a.erinnerungen, 'Terminerinnerungen verschickt', v.erinnerungen],
+    [a.warteliste_benachrichtigt, 'Wartende über freie Termine informiert', v.warteliste_benachrichtigt],
+    [a.spam_abgefangen, 'Spam-Anfragen abgefangen', v.spam_abgefangen],
+    [a.bewertungsanfragen, 'Bewertungsanfragen verschickt', v.bewertungsanfragen],
+  ].filter(k => k[0] > 0);
+  const geld = [a.umsatz_erschienen > 0 ? [eur(a.umsatz_erschienen), 'Umsatz aus Terminen, die stattfanden'] : null, a.anzahlungen_summe > 0 ? [eur(a.anzahlungen_summe), 'Anzahlungen erhalten (' + a.anzahlungen_anzahl + ')'] : null].filter(Boolean);
+  if (!kacheln.length && !geld.length) return '';
+  const kachel = ([zahl, text, vor = 0]) => h('div', { class: 'kachel', style: 'min-width:140px;flex:1' }, h('div', { style: 'font-size:26px;font-weight:700' }, String(zahl)), h('div', { class: 'small' }, text), vor ? h('div', { class: 'small muted' }, 'Vormonat: ' + vor) : '');
+  return h('div', { class: 'card' }, h('h2', {}, 'Das hat Markentrix im ' + w.monat_name + ' für dich getan'),
+    h('div', { style: 'display:flex;flex-wrap:wrap;gap:12px' }, geld.map(g => kachel([g[0], g[1]])), kacheln.map(kachel)),
+    a.stunden_gespart >= 0.5 ? h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Grobe Schätzung: etwa ' + String(a.stunden_gespart).replace('.', ',') + ' Stunden Arbeit abgenommen (' + w.minuten_je_vorgang + ' Minuten je Vorgang, ' + a.vorgaenge + ' Vorgänge). Mehr dazu unter ', h('a', { href: '#auswertung' }, 'Auswertung'), '.') : '');
+}
+
 V.heute = async () => {
   const d = await api('/api/kunde/heute');
   const meld = h('div'), karteAnfragen = h('div', { class: 'card' }), karteTermine = h('div', { class: 'card' });
@@ -105,5 +129,5 @@ V.heute = async () => {
   const hero = h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Schritt'),
     schritt ? [h('h2', {}, schritt.titel), h('p', { class: 'muted' }, schritt.text), schritt.link ? h('a', { class: 'btn', href: schritt.link }, schritt.knopf) : h('button', { class: 'btn', onclick: schritt.tun }, schritt.knopf)]
       : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf dich. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
-  return h('div', { class: 'stack' }, hero, kopf, meld, await umfrageKarte(), karteAnfragen, karteTermine, entscheidungen, bew);
+  return h('div', { class: 'stack' }, hero, kopf, meld, await umfrageKarte(), karteAnfragen, karteTermine, entscheidungen, bew, await wertKarte());
 };

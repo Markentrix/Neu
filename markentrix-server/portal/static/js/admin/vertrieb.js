@@ -45,6 +45,28 @@ export function abrechnungsZeile(pid, liste, mp) {
       if (mon) bestaetigt(mp, () => api('/api/admin/vertrieb/provisionen/verlaengerung', { method: 'POST', body: { buchung_id: bid.trim(), monat: mon } })); }));
 }
 
+/** Aktivität eines Vertrieblers: Tagesbalken, Summen, letzte Einträge. */
+async function aktivitaetKarte(pid) {
+  const box = h('div', { class: 'card' });
+  const lade = async (tage) => {
+    const d = await api('/api/admin/vertrieb/partner/' + pid + '/aktivitaet?tage=' + tage), s = d.summe;
+    const max = Math.max(1, ...d.verlauf.map(v => Number(v.anrufe) + Number(v.termine) + Number(v.notizen) + Number(v.mails)));
+    const ART = { anruf: 'Anruf', termin: 'Termin', notiz: 'Notiz', mail_gesendet: 'Mail', antwort: 'Antwort' };
+    const kachel = (t, w) => h('div', { class: 'card stat', style: 'margin:0' }, h('span', { class: 'muted small' }, t), h('b', {}, String(w)));
+    box.replaceChildren(h('h2', {}, 'Aktivität'),
+      h('div', { class: 'row', role: 'group', 'aria-label': 'Zeitraum' }, [7, 30, 90].map(t => h('button', { class: 'btn small' + (t === d.tage ? '' : ' sec'), 'aria-pressed': String(t === d.tage), onclick: () => lade(t) }, t + ' Tage'))),
+      h('div', { class: 'stats', style: 'display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:12px 0' },
+        kachel('Leads bearbeitet', s.leads_bearbeitet), kachel('Anrufe (erreicht)', s.anrufe + ' (' + s.erreicht + ')'), kachel('Termine', s.termine), kachel('Notizen', s.notizen), kachel('Aktive Tage', s.aktive_tage + ' von ' + d.tage),
+        kachel('Neue Leads', s.neue_leads), kachel('Neue Kunden', s.neue_kunden), kachel('Offene Leads', s.offene_leads)),
+      h('div', { role: 'img', 'aria-label': 'Tägliche Aktivität der letzten ' + d.tage + ' Tage', style: 'display:flex;align-items:flex-end;gap:2px;height:80px;margin:8px 0' },
+        d.verlauf.map(v => { const n = Number(v.anrufe) + Number(v.termine) + Number(v.notizen) + Number(v.mails); return h('div', { title: datum(v.tag) + ': ' + v.anrufe + ' Anrufe, ' + v.termine + ' Termine, ' + v.notizen + ' Notizen', style: 'flex:1;min-width:2px;background:' + (n ? 'var(--primary,#8B5CF6)' : 'var(--border,#ddd)') + ';height:' + (n ? Math.max(6, Math.round(n / max * 80)) : 2) + 'px;border-radius:2px' }); })),
+      h('p', { class: 'small muted' }, 'Gezählt wird, was der Vertriebler im Portal festgehalten hat. Was nicht eingetragen ist, taucht hier nicht auf.'),
+      d.letzte.length ? tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => ART[z.art] || z.art], ['Lead', z => h('a', { href: '#lead/' + z.lead_id }, z.firma)], ['Inhalt', z => z.inhalt]], d.letzte) : h('p', { class: 'small muted' }, 'Noch keine Einträge.'));
+  };
+  try { await lade(30); } catch (x) { box.replaceChildren(h('h2', {}, 'Aktivität'), h('div', { class: 'msg err' }, x.message)); }
+  return box;
+}
+
 export async function partnerDetail(pid) {
   const d = await api('/api/admin/vertrieb/partner/' + pid), p = d.partner, m = h('div'), mp = h('div');
   const stamm = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); o.iban_hinterlegt = e.target.iban.checked; if (!o.vereinbarung_am) delete o.vereinbarung_am; delete o.iban;
@@ -66,7 +88,7 @@ export async function partnerDetail(pid) {
       knopf('Einladung erzeugen', async () => { try { const r = await api('/api/admin/vertrieb/partner/' + pid + '/einladung', { method: 'POST', body: { email: mail.value, per_mail: perMail.checked } });
         mz.replaceChildren(h('div', { class: 'msg info' }, 'Einladungslink (' + r.gueltig_tage + ' Tage gültig): ', h('br'), r.einladungslink), mailHinweis(r.mail)); } catch (x) { fehler(mz, x); } }, 'btn')));
   return h('div', { class: 'stack' }, kopf(p.name, pill(p.status), h('a', { class: 'btn sec small', href: '#vertrieb' }, '← Liste')),
-    h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), m, stamm), await handelsvertreterKarte(pid, p), await einarbeitungKarte(pid), zugang, await qrKarte('vertrieb', (p.name || '').split(' ')[0]),
+    h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), m, stamm), await aktivitaetKarte(pid), await handelsvertreterKarte(pid, p), await einarbeitungKarte(pid), zugang, await qrKarte('vertrieb', (p.name || '').split(' ')[0]),
     h('div', { class: 'card' }, h('h2', {}, 'Zugeordnete Kunden (' + d.kunden.length + ')'), tabelle([['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => z.firma], ['Paket', z => z.paket || '–'], ['Status', z => pill(z.status)], ['Monatlich', z => fmtEuro(z.monatlich_cent)]], d.kunden, 'Noch keine Kunden. Zuordnung im Kunden unter Stammdaten (Feld Vertriebler).')),
     h('div', { class: 'card' }, h('h2', {}, 'Provisionen'), h('p', { class: 'small muted' }, 'Offen (berechnet/freigegeben): ' + fmtEuro(summe)), mp,
       tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Art', z => ({ laufend: 'Laufend', verlaengerung: 'Verlängerung', rueckbuchung: 'Rückbuchung' })[z.art] || z.art], ['Vertragsmonat', z => z.vertragsmonat || '–'], ['Basis', z => fmtEuro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => fmtEuro(z.betrag_cent)], ['Status', z => pill(z.status)], ['', provAktion]], d.provisionen, 'Noch keine Provisionen berechnet.'),
@@ -90,7 +112,7 @@ V.leads = async () => {
   const setze = (k, w) => { const n = new URLSearchParams(P); if (k !== 'seite') n.delete('seite'); if (w) n.set(k, w); else n.delete(k); const t = n.toString(); location.hash = '#leads' + (t ? '?' + t : ''); };
   const tabs = h('div', { class: 'tabs' }, h('button', { class: filter === '' ? 'on' : '', onclick: () => setze('status', '') }, 'Alle'),
     LEAD_ST.filter(s => d.zaehler[s]).map(s => h('button', { class: filter === s ? 'on' : '', onclick: () => setze('status', s) }, s.replace(/_/g, ' ') + ' (' + d.zaehler[s] + ')')));
-  const fsel = (k, opt, w) => select('f_' + k, opt, w, { onchange: (e) => setze(k, e.target.value) });
+  const fsel = (k, opt, w) => select('f_' + k, opt, w, { 'aria-label': 'Filter ' + k.replace(/_/g, ' '), onchange: (e) => setze(k, e.target.value) });
   const suche = h('input', { placeholder: 'Suchen: Firma, Ort, E-Mail, Telefon, Branche, Notiz …', value: g('q'), onkeydown: (e) => { if (e.key === 'Enter') setze('q', e.target.value.trim()); } });
   const filterLeiste = h('div', { class: 'lfilter' },
     h('div', { class: 'lsuche' }, suche, knopf('Suchen', () => setze('q', suche.value.trim()), 'small')),
@@ -128,7 +150,7 @@ V.leads = async () => {
       knopf('Löschen', () => bulk('loeschen', null, 'endgültig löschen (inkl. Verlauf; bereits angelegte Kunden bleiben)'), 'bad small'),
       knopf('Auswahl aufheben', () => { gewaehlt.clear(); alleTreffer = false; document.querySelectorAll('.leadtab input[type=checkbox]').forEach((/** @type {any} */ c) => { c.checked = false; }); aktualisiere(); }, 'sec small'));
   };
-  const haken = (z) => h('input', { type: 'checkbox', style: 'width:auto', onchange: (e) => { if (e.target.checked) gewaehlt.add(z.id); else { gewaehlt.delete(z.id); alleTreffer = false; } aktualisiere(); } });
+  const haken = (z) => h('input', { type: 'checkbox', style: 'width:auto', 'aria-label': 'Lead auswählen', onchange: (e) => { if (e.target.checked) gewaehlt.add(z.id); else { gewaehlt.delete(z.id); alleTreffer = false; } aktualisiere(); } });
   const alleHaken = h('input', { type: 'checkbox', style: 'width:auto', title: 'Alle auf dieser Seite', onchange: (e) => { document.querySelectorAll('.leadtab tbody input[type=checkbox]').forEach((/** @type {any} */ c) => { if (c.checked !== e.target.checked) c.click(); }); } });
   const heute = new Date().toISOString().slice(0, 10);
   const zeilen = d.leads.map(z => h('tr', {},
