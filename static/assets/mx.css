@@ -1335,3 +1335,24 @@ main:focus{outline:none}
 .branch-hero{padding:0;min-height:0}
 .bphoto img{position:absolute;left:0;top:0}
 .mosaic-tile{position:relative}.mosaic-tile img{position:absolute;left:0;top:0}
+
+/* Referenzaktion: Plätze sichtbar machen (2 von 3 vergeben, 1 frei) */
+.slots{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 12px}
+.slot{display:grid;gap:2px;min-width:104px;padding:10px 16px;border-radius:12px;border:1px solid var(--border-strong);background:rgba(255,255,255,.7);text-align:center;line-height:1.25}
+.slot b{font-family:var(--f-head);font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.slot i{font-style:normal;font-size:1rem;font-weight:700;color:var(--muted)}
+.slot.is-taken{background:repeating-linear-gradient(135deg,rgba(11,16,32,.05) 0 8px,rgba(11,16,32,.02) 8px 16px)}
+.slot.is-taken i{text-decoration:line-through}
+.slot.is-free{border:2px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,var(--cyan),var(--blue),var(--violet)) border-box;box-shadow:0 8px 24px rgba(30,155,255,.28);animation:slotPulse 2.4s ease-in-out infinite}
+.slot.is-free b{color:var(--violet-text)}
+.slot.is-free i{color:var(--navy);font-size:1.25rem}
+.slots-t{margin:0 0 6px;font-family:var(--f-head);font-size:clamp(1.3rem,1.05rem + 1vw,1.8rem);font-weight:700;color:var(--navy);letter-spacing:-.01em}
+.slots-t span{background:linear-gradient(135deg,var(--cyan),var(--blue),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+@keyframes slotPulse{0%,100%{box-shadow:0 8px 24px rgba(30,155,255,.28)}50%{box-shadow:0 8px 34px rgba(139,92,246,.45)}}
+@media (prefers-reduced-motion:reduce){.slot.is-free{animation:none}}
+html.reduced .slot.is-free{animation:none}
+.slots-inline{display:inline-flex;gap:5px;vertical-align:middle;margin-right:8px}
+.slots-inline .s{display:inline-block;width:22px;height:22px;border-radius:7px;border:1px solid var(--border-strong);background:repeating-linear-gradient(135deg,rgba(11,16,32,.12) 0 4px,rgba(11,16,32,.04) 4px 8px)}
+.slots-inline .s.f{border:2px solid var(--violet);background:linear-gradient(135deg,var(--cyan),var(--blue))}
+.slots-inline-t{font-size:1.05rem;color:var(--navy)}
+@media (max-width:480px){.slot{flex:1 1 0;min-width:0;padding:9px 8px}}
