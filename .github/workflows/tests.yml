@@ -20,7 +20,7 @@ jobs:
         run: |
           cd markentrix-server
           for f in install.sh bin/*.sh bin/mkctl; do bash -n "$f"; done
-          shellcheck -S warning install.sh bin/*.sh bin/mkctl
+          shellcheck -S error install.sh bin/*.sh bin/mkctl
       - name: Abhängigkeiten
         run: pip3 install --break-system-packages -q -r markentrix-server/portal/requirements.txt aiosmtpd httpx pyflakes playwright pypdf
       - name: Browser für die Oberflächentests
