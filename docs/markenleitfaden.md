@@ -308,7 +308,7 @@ Geprüft nach WCAG 2.1. Ziel: AA (4,5:1 für Fließtext, 3:1 für große Schrift
 
 ### 8.3 Typografie
 
-Zwei Schriften, beide frei lizenziert (SIL OFL) und auf dem eigenen Server eingebunden:
+Zwei Schriften, beide frei lizenziert (SIL OFL) und lokal in der Website eingebunden (keine Google Fonts):
 
 - **Inter** für alles: Überschriften, Fließtext, Preise, Knöpfe. Ruhig, präzise, auf jedem Gerät gleich.
 - **Instrument Serif kursiv** nur als Akzent: das hervorgehobene Wort oder der Halbsatz in einer Überschrift (auf der Website in Blau bzw. Hellblau), die persönliche Nachricht auf Gutscheinen. Nie für Fließtext, nie für ganze Überschriften.

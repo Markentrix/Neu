@@ -1,4 +1,4 @@
-// Browser-Tests: startet den echten ElbDetail-Server mit Testdaten auf Port 8099.
+// Browser-Tests: baut die Website und liefert website-fertig/ mit einer Attrappe der Portal-Schnittstelle auf Port 8099 aus.
 const { defineConfig, devices } = require("@playwright/test");
 
 module.exports = defineConfig({
@@ -13,11 +13,11 @@ module.exports = defineConfig({
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1366, height: 900 } } },
-    { name: "mobil", use: { ...devices["Pixel 7"] }, testIgnore: /admin/ },
+    { name: "mobil", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
-    command: "bash tests/e2e-server.sh",
-    url: "http://127.0.0.1:8099/api/health",
+    command: "python3 build/build.py --quiet && node tests/portal-mock.js",
+    url: "http://127.0.0.1:8099/",
     reuseExistingServer: false,
     timeout: 60000,
   },

@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 """ElbDetail – statischer Website-Generator.
 
-    python3 build/build.py                         # baut nach ./dist
-    python3 build/build.py --content /data/content --out /srv/site/releases/xyz
+    python3 build/build.py                         # baut nach ./website-fertig (Upload ins Markentrix-Portal)
 
 Liest alle Inhalte aus content/ (JSON + Markdown), kopiert static/ und erzeugt
 die komplette Website inklusive Sitemap, robots.txt, llms.txt und config.js.
@@ -68,7 +67,6 @@ def config_js(site):
         "phoneDisplay": site.s["phoneDisplay"],
         "email": site.s["email"],
         "api": "/api",
-        "hosts": [site.url.split("//", 1)[-1], site.url.split("//", 1)[-1].replace("www.", "", 1), "localhost", "127.0.0.1"],
         "classes": [{"key": c["key"], "name": c["name"], "short": c["short"], "onRequest": bool(c.get("onRequest")), "note": c.get("note", "")} for c in pr["classes"]],
         "packages": [{"key": p["key"], "name": p["name"], "prices": p["prices"]} for p in pr["packages"]]
                     + ([{"key": "winter", "name": site.winter()["name"], "prices": site.winter()["prices"]}] if site.winter() else [])
@@ -76,8 +74,7 @@ def config_js(site):
                        if site.addon("scheiben") else []),
         "vouchers": site.s["vouchers"],
         "voucherValidYear": int(site.s["standIso"][:4]) + 3,
-        "ga4": ((site.s.get("analytics") or {}).get("ga4") or "").strip(),
-        "booking": {"holdHours": (site.s.get("booking") or {}).get("holdHours", 24), "owner": (site.s.get("about") or {}).get("name") or "",
+        "booking": {"owner": (site.s.get("about") or {}).get("name") or "", "paypalMe": ((site.s.get("booking") or {}).get("paypalMe") or "").strip(),
                     "depositPercent": (site.s.get("booking") or {}).get("depositPercent", 15),
                     "surcharge": (site.s.get("booking") or {}).get("conditionSurcharge") or {}, "keramikMin": site.min_price("keramik") if pr.get("ceramic") else None},
     }
@@ -182,7 +179,7 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     return {"files": len(written), "warnings": warnings}
 
 
-TITLE_MAX, DESC_MIN, DESC_MAX = 60, 110, 160
+TITLE_MAX, DESC_MIN, DESC_MAX = 59, 110, 160  # Markentrix: Titel unter 60 Zeichen
 
 
 def seo_lengths(out_dir, written):
@@ -208,7 +205,7 @@ def main():
     ap = argparse.ArgumentParser(description="ElbDetail Website bauen")
     ap.add_argument("--content", default=os.path.join(ROOT, "content"))
     ap.add_argument("--static", default=os.path.join(ROOT, "static"))
-    ap.add_argument("--out", default=os.path.join(ROOT, "dist"))
+    ap.add_argument("--out", default=os.path.join(ROOT, "website-fertig"))
     ap.add_argument("--quiet", action="store_true")
     a = ap.parse_args()
     build(a.content, a.out, a.static, a.quiet)

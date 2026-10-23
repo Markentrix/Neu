@@ -13,6 +13,8 @@ const PAGES = [
   "/ratgeber/auto-im-winter-waschen-streusalz.html", "/ratgeber/feuchtigkeit-im-auto-winter.html",
 ];
 
+// Desktop und Mobil laufen gleichzeitig gegen dieselbe Portal-Attrappe: je Projekt andere Tage, damit sich Buchungen nicht in die Quere kommen
+const dayShift = (info) => (info.project.name === "mobil" ? 40 : 0);
 function nextWorkday(days) {
   const d = new Date(); d.setDate(d.getDate() + days);
   while (d.getDay() === 0) d.setDate(d.getDate() + 1);
@@ -82,7 +84,7 @@ test("Buchung: Zurück und Absenden erst dann sichtbar, wenn sie gebraucht werde
   await expect(page.locator("[data-wz-submit]")).toBeHidden();
 });
 
-test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
+test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }, info) => {
   await page.goto("/termin.html?paket=essential&klasse=suv");
   await expect(page.locator('input[name="paket"][value="essential"]')).toBeChecked();
   await expect(page.locator('[data-sum="preis"]')).toHaveText("ab 449 €");
@@ -94,7 +96,7 @@ test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
   await page.locator("[data-wz-next]").click();
   await page.locator("[data-wz-next]").click();
   await expect(page.locator(".form-status")).toContainText("ergänzen");
-  await page.fill("#t-date1", nextWorkday(4));
+  await page.fill("#t-date1", nextWorkday(4 + dayShift(info)));
   await page.locator("#t-date1").dispatchEvent("change");
   await expect(page.locator("#t-slots-msg")).toContainText("frei");
   await page.locator('#t-slots label:has(input[value="10:00"])').click();
@@ -105,8 +107,90 @@ test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }) => {
   await page.fill("#t-email", "e2e@example.com");
   await page.locator('label[for="t-consent"]').click();
   await page.locator("[data-wz-submit]").click();
+  await expect(page.locator("#t-agb")).toHaveAttribute("aria-invalid", "true");  // AGB sind Pflicht
+  await page.check("#t-agb");  // nicht auf das Label klicken, darin steckt der Link zu den AGB
+  if (await page.locator("#t-vorzeitig").isEnabled()) await page.check("#t-vorzeitig");
+  await page.locator("[data-wz-submit]").click();
   await expect(page).toHaveURL(/danke\.html\?typ=termin&ref=T/);
   await expect(page.locator("h1")).toContainText("Terminanfrage eingegangen");
+  await expect(page.locator("[data-thanks-text]")).toContainText("Vorgangsnummer: T");
+  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  expect(sent).toMatchObject({ typ: "termin", paket: "essential", klasse: "suv", uhrzeit: "10:00", email: "e2e@example.com", einwilligung: "ja", agb: "ja", website: "" });
+  expect(sent.extras).toContain("Motorraumreinigung");
+});
+
+test("Buchung: nur freie Uhrzeiten aus dem Portal, Doppelbuchung lädt die Zeiten neu", async ({ page }, info) => {
+  const day = nextWorkday(9 + dayShift(info));
+  await page.request.post("/__mock/belegen", { data: { datum: day, uhrzeit: "08:00" } });
+  await page.goto("/termin.html?paket=refresh&datum=" + day);
+  for (let i = 0; i < 3; i++) await page.locator("[data-wz-next]").click();
+  await expect(page.locator('#t-slots input[value="08:00"]')).toBeDisabled();
+  await expect(page.locator('#t-slots input[value="09:00"]')).toBeEnabled();
+  await expect(page.locator("#page-h")).toContainText("Termin buchen");  // Portal meldet selfBooking: true
+  await page.locator('#t-slots label:has(input[value="09:00"])').click();
+  await page.locator("[data-wz-next]").click();
+  await page.fill("#t-name", "Zweite Kundin");
+  await page.fill("#t-phone", "0172 5555556");
+  await page.fill("#t-email", "zwei@example.com");
+  await page.locator('label[for="t-consent"]').click();
+  await page.check("#t-agb");  // nicht auf das Label klicken, darin steckt der Link zu den AGB
+  if (await page.locator("#t-vorzeitig").isEnabled()) await page.check("#t-vorzeitig");
+  await page.request.post("/__mock/belegen", { data: { datum: day, uhrzeit: "09:00" } });  // jemand war schneller
+  await page.locator("[data-wz-submit]").click();
+  await expect(page.locator("#t-slots-msg, [data-err]").first()).toBeVisible();
+  await expect(page.locator('#t-slots input[value="09:00"]')).toBeDisabled();
+  await expect(page.locator("#t-name")).toHaveValue("Zweite Kundin");  // Eingaben bleiben erhalten
+});
+
+test("Buchung: Termin in den nächsten 14 Tagen verlangt den vorzeitigen Beginn", async ({ page }) => {
+  await page.goto("/termin.html?datum=" + nextWorkday(3));
+  await expect(page.locator("[data-vorzeitig]")).not.toHaveAttribute("hidden", "");
+  await expect(page.locator("#t-vorzeitig")).toHaveAttribute("required", "");
+  await page.goto("/termin.html?datum=" + nextWorkday(30));
+  await expect(page.locator("[data-vorzeitig]")).toHaveAttribute("hidden", "");
+});
+
+test("Ohne erreichbare Schnittstelle: Formular zeigt WhatsApp, E-Mail und Telefon", async ({ page }) => {
+  await page.route("**/api/**", (route) => route.abort());
+  await page.goto("/kontakt.html");
+  await page.fill("#k-name", "Offline Test");
+  await page.fill("#k-email", "offline@example.com");
+  await page.selectOption("#k-package", { index: 1 });
+  await page.fill("#k-message", "Frage");
+  await page.locator('label[for="k-consent"]').click();
+  await page.locator('#contactForm button[type="submit"]').click();
+  const st = page.locator("#k-status");
+  await expect(st.locator('a[href^="https://wa.me/"]')).toBeVisible();
+  await expect(st.locator('a[href^="mailto:"]')).toBeVisible();
+  await expect(st.locator('a[href^="tel:"]')).toBeVisible();
+  await page.goto("/termin.html?datum=" + nextWorkday(9));
+  for (let i = 0; i < 3; i++) await page.locator("[data-wz-next]").click();
+  await expect(page.locator('#t-slots-msg a[href^="tel:"]')).toBeVisible();
+});
+
+test("Danke-Seite: Anzahlung per PayPal.me mit Betrag und Vorgangsnummer", async ({ page }) => {
+  await page.route("**/config.js*", async (route) => {
+    const r = await route.fetch();
+    await route.fulfill({ response: r, body: (await r.text()) + '\nwindow.ELB.booking.paypalMe="elbdetail";' });
+  });
+  await page.goto("/danke.html?typ=termin&ref=T261023-0001&anz=49.35");
+  const a = page.locator('[data-thanks-pay] a[href^="https://paypal.me/"]');
+  await expect(a).toHaveAttribute("href", "https://paypal.me/elbdetail/49.35EUR");
+  await expect(page.locator("[data-thanks-pay]")).toContainText("T261023-0001");
+  await page.goto("/danke.html?typ=kontakt&ref=K1&anz=49.35");
+  await expect(page.locator("[data-thanks-pay]")).toBeHidden();
+});
+
+test("Widerruf über das Formular geht als typ widerruf an das Portal", async ({ page }) => {
+  await page.goto("/widerruf.html");
+  await page.fill("#w-name", "Karla Kunde");
+  await page.fill("#w-email", "karla@example.com");
+  await page.fill("#w-vorgang", "T261023-0001");
+  await page.locator('label[for="w-consent"]').click();
+  await page.locator('#widerrufForm button[type="submit"]').click();
+  await expect(page).toHaveURL(/danke\.html\?typ=widerruf&ref=W/);
+  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  expect(sent).toMatchObject({ typ: "widerruf", vorgang: "T261023-0001", email: "karla@example.com" });
 });
 
 test("Kontaktformular zeigt Pflichtfelder an", async ({ page }) => {
@@ -194,7 +278,7 @@ test("Winter-Aktion Scheibenkeramik: Aktionspreise, Angebot und Buchung je Umfan
   await expect(page.locator('[data-sum="preis"]')).toHaveText("99 €");
   await page.locator('label.choice-pill:has(input[value="Alle Außenscheiben inklusive Panoramadach"])').click();
   await expect(page.locator('[data-sum="preis"]')).toHaveText("114 €");
-  await expect(page.locator('[data-sum="anzahlung"]')).toContainText("17,1");
+  await expect(page.locator('[data-sum="anzahlung"]')).toHaveText("nach Absprache");  // ohne PayPal.me-Namen klärt René die Anzahlung
 });
 
 test("AGB und Widerruf: im Fuß verlinkt, Belehrung, Muster-Formular und Widerrufsformular", async ({ page }) => {
@@ -209,7 +293,7 @@ test("AGB und Widerruf: im Fuß verlinkt, Belehrung, Muster-Formular und Widerru
   await page.goto("/widerruf.html");
   await expect(page.locator('#widerrufForm button[type="submit"]')).toHaveText("Widerruf bestätigen");
   await page.goto("/termin.html");
-  await expect(page.locator('#bookingForm .form-note a[href="agb.html"]')).toHaveCount(1);
+  await expect(page.locator('#bookingForm label[for="t-agb"] a[href="agb.html"]')).toHaveCount(1);
 });
 
 test("Preisseite: C² CarCeramic-Preisliste und optionale Versiegelung", async ({ page }) => {
@@ -283,61 +367,16 @@ test("Preisrechner: Sport / Luxus und Wohnmobil zeigen individuelles Angebot sta
   await expect(page.locator("#quoteValue")).toContainText("449");
 });
 
-test("Ohne Google-Analytics-ID: kein Einwilligungs-Hinweis, kein Google-Skript", async ({ page }) => {
+test("Kein eigenes Cookie-Banner und kein Google-Skript: Baustein des Portals im Fuß, Bewertungs-Baustein auf der Startseite", async ({ page }) => {
   const hosts = [];
   page.on("request", (r) => hosts.push(new URL(r.url()).hostname));
   await page.goto("/");
   await page.waitForTimeout(500);
   await expect(page.locator("#consent")).toHaveCount(0);
-  expect(hosts.filter((h) => /google/.test(h))).toEqual([]);
-});
-
-test("Mit Google-Analytics-ID: Google lädt erst nach Akzeptieren, Ablehnen bleibt ohne Google", async ({ page }) => {
-  await page.route("**/config.js*", async (route) => {
-    const r = await route.fetch(); const body = (await r.text()) + '\nwindow.ELB.ga4="G-TEST12345";';
-    await route.fulfill({ response: r, body });
-  });
-  const gtm = [];
-  await page.route("https://www.googletagmanager.com/**", (route) => { gtm.push(route.request().url()); route.fulfill({ status: 200, contentType: "text/javascript", body: "" }); });
-  await page.goto("/");
-  await expect(page.locator("#consent")).toBeVisible();
-  expect(gtm).toEqual([]);
-  await page.locator('#consent [data-c="denied"]').click();
-  await expect(page.locator("#consent")).toHaveCount(0);
-  await page.reload();
-  await expect(page.locator("#consent")).toHaveCount(0);
-  expect(gtm).toEqual([]);
-  await page.evaluate(() => localStorage.removeItem("elb-consent"));
-  await page.reload();
-  await page.locator('#consent [data-c="granted"]').click();
-  await expect.poll(() => gtm.length).toBeGreaterThan(0);
-  expect(gtm[0]).toContain("id=G-TEST12345");
-});
-
-test("Cookie-Banner: Einstellungen mit Kategorien, Auswahl speichern und über den Fuß wieder öffnen", async ({ page }) => {
-  await page.route("**/config.js*", async (route) => {
-    const r = await route.fetch(); const body = (await r.text()) + '\nwindow.ELB.ga4="G-TEST12345";';
-    await route.fulfill({ response: r, body });
-  });
-  const gtm = [];
-  await page.route("https://www.googletagmanager.com/**", (route) => { gtm.push(route.request().url()); route.fulfill({ status: 200, contentType: "text/javascript", body: "" }); });
-  await page.goto("/");
-  const c = page.locator("#consent");
-  await expect(c.locator("h2")).toHaveText("Cookies & Datenschutz");
-  await expect(c.locator('a[href$="impressum.html"]')).toBeVisible();
-  await c.locator("[data-c-more]").click();
-  await expect(c.locator(".consent-opt")).toHaveCount(2);
-  await expect(c.locator("[data-stat]")).not.toBeChecked();
-  await c.locator('[data-c="save"]').click();
-  await expect(c).toHaveCount(0);
-  expect(gtm).toEqual([]);
-  await page.locator("footer [data-consent-open]").click();
-  await page.locator("#consent [data-c-more]").click();
-  await page.locator("#consent .consent-opt:has([data-stat])").click();
-  await page.locator('#consent [data-c="save"]').click();
-  await expect.poll(() => gtm.length).toBeGreaterThan(0);
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("elb-consent")));
-  expect(saved.stat).toBe(true);
+  await expect(page.locator('footer [data-mk="cookies"]')).toHaveCount(1);
+  await expect(page.locator('#bewertungen [data-mk="bewertungen"]')).toHaveCount(1);
+  await expect(page.locator(".review-card").first()).toBeVisible();  // Ausweichinhalt, solange der Baustein leer bleibt
+  expect(hosts.filter((h) => /google|markentrix/.test(h))).toEqual([]);
 });
 
 test("Zertifikate: Vergrößern öffnet die Lightbox, Esc schließt sie", async ({ page }) => {

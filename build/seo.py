@@ -54,7 +54,7 @@ def business(site):
            if (s.get("about") or {}).get("name") else {}),
         "potentialAction": {"@type": "ReserveAction", "name": "Termin anfragen",
                             "target": {"@type": "EntryPoint", "urlTemplate": site.url + "/termin.html", "inLanguage": "de-DE",
-                                       "actionPlatform": ["http://schema.org/DesktopWebPlatform", "http://schema.org/MobileWebPlatform"]},
+                                       "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]},
                             "result": {"@type": "Reservation", "name": "Terminanfrage Fahrzeugaufbereitung"}},
     }
 
@@ -141,10 +141,10 @@ def credentials(site):
 def robots(site):
     bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User", "PerplexityBot",
             "Perplexity-User", "Google-Extended", "Applebot-Extended", "Bingbot", "DuckAssistBot", "MistralAI-User"]
-    t = "# ElbDetail – Fahrzeugaufbereitung Celle\nUser-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /gutschein/\nDisallow: /entwurf/\nDisallow: /danke.html\n\n"
+    t = "# ElbDetail – Fahrzeugaufbereitung Celle\nUser-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /entwurf/\nDisallow: /danke.html\n\n"
     t += "# KI-Suchmaschinen ausdrücklich erlaubt (Generative Engine Optimization)\n"
     for b in bots:
-        t += f"User-agent: {b}\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\n"
+        t += f"User-agent: {b}\nAllow: /\nDisallow: /api/\n\n"
     return t + f"Sitemap: {site.url}/sitemap.xml\n"
 
 

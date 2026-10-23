@@ -1,6 +1,6 @@
-# ElbDetail – Website, Buchung und Verwaltung
+# ElbDetail – Website
 
-Verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung in Celle**, inklusive Online-Terminbuchung, Gutscheinverkauf, Firmenkunden-Anfragen, Ratgeber, Verwaltungsportal und cookieloser Statistik. Alles läuft auf dem eigenen Server (Hetzner), ohne Fremddienste.
+Verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung in Celle**, mit Online-Terminbuchung, Gutscheinanfrage, Firmenkunden-Anfragen, Ratgeber, AGB und Widerruf. Die Website ist rein statisch und läuft beim **Markentrix-Portal**: Formulare, Termine, Bewertungen, Statistik und Cookie-Hinweis kommen von dort.
 
 ## Was drin ist
 
@@ -10,51 +10,34 @@ Verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung in
 | **SEO** | LocalBusiness/AutoDetailing-, Service-, FAQ-, BlogPosting-, Breadcrumb- und Product-Schema, Sitemap, RSS, Canonicals, Open Graph, sprechende Titel und Beschreibungen, interne Verlinkung |
 | **GEO (KI-Suche)** | `llms.txt` und `llms-full.txt`, KI-Crawler in `robots.txt` erlaubt, „Das Wichtigste in Kürze“ in jedem Artikel, Faktenblock, zitierfähige FAQ |
 | **Conversion** | Buchungsassistent mit Live-Preis und Sperrtagen, WhatsApp-Weg mit vorausgefüllter Nachricht, Gutscheinverkauf, Firmenanfrage, Danke-Seite, mobile Aktionsleiste |
-| **Verwaltungsportal** `/admin` | Übersicht mit Statistik, Anfragen-Postfach mit Antwortvorlagen und Bewertungsanfrage, Gutscheinverwaltung mit Code-Prüfung, Kalender mit Sperrtagen, Inhalts-Editor für Preise, Texte und Ratgeber, Foto-Upload, Veröffentlichen per Knopfdruck |
-| **Datenschutz** | Keine Cookies, keine Drittanbieter-Skripte, Statistik ohne IP-Speicherung, Google-Karte erst nach Klick, automatische Löschfristen |
-| **Qualität** | 31 Server-Tests, 106 Browser-Tests (Desktop und Mobil, inklusive axe-Barrierefreiheit), Lighthouse 97–99 / 100 / 100 / 100 |
+| **Markentrix-Portal** | Anfragen über `/api/anfrage`, freie Tage und Uhrzeiten über `/api/verfuegbarkeit` und `/api/slots`, Bausteine `bewertungen` und `cookies`, Statistik über `/api/e` (siehe `docs/portal-upload.md`) |
+| **Datenschutz** | Schriften lokal, keine Fremd-CDNs, kein eigenes Tracking, Cookie-Hinweis vom Portal, Google-Karte erst nach Klick |
+| **Qualität** | Generator-Tests mit den Upload-Regeln des Portals, Browser-Tests (Desktop und Mobil, axe-Barrierefreiheit) gegen eine Attrappe der Portal-Schnittstelle |
 
 ## Projektstruktur
 
 ```
-content/      Inhalte als JSON und Markdown (Startvorlage, auf dem Server im Portal pflegbar)
-static/       CSS, JavaScript, Schriften, Logo, Icons
-build/        Website-Generator (Python, nur Standardbibliothek + Pillow für Bilder)
-server/       App-Server und Verwaltungsportal (Python-Standardbibliothek)
-deploy/       Dockerfile, docker-compose, Caddyfile, .env-Vorlage, Backup- und Update-Skript
-tests/        Server-Tests (unittest) und Browser-Tests (Playwright)
-docs/         Betrieb, Portal-Anleitung, Livegang-Checkliste, Marketing-Unterlagen
+content/         Inhalte als JSON und Markdown (Texte, Preise, Bilder, Angebote, Ratgeber)
+static/          CSS, JavaScript, Schriften, Logo, Icons
+build/           Website-Generator (Python, Standardbibliothek + Pillow für Bilder), läuft nur beim Bauen
+website-fertig/  fertige Website zum Hochladen (wird erzeugt, nicht im Repository)
+tests/           Generator-Tests (unittest), Browser-Tests (Playwright) und Portal-Attrappe für die Tests
+docs/            Upload, Livegang-Checkliste, Marketing-Unterlagen
 ```
 
-## Lokal starten
-
-```bash
-python3 build/build.py                         # Website nach dist/ bauen
-ADMIN_PASSWORD=test COOKIE_SECURE=0 ELB_SERVE_STATIC=1 python3 server/app.py
-# → http://localhost:8080 und http://localhost:8080/admin (Benutzer: admin, Passwort: test)
-```
-
-Tests:
+## Bauen und prüfen
 
 ```bash
 pip install -r requirements.txt && npm ci
-npm test
+python3 build/build.py          # → website-fertig/
+npm test                        # Upload-Regeln, Seiten, Formulare, Barrierefreiheit
 ```
 
-## Auf dem Server
-
-Schritt-für-Schritt-Anleitung: [`docs/betrieb-hetzner.md`](docs/betrieb-hetzner.md). Kurzfassung:
-
-```bash
-git clone https://github.com/Markentrix/Neu.git /opt/elbdetail && cd /opt/elbdetail/deploy
-cp .env.example .env && nano .env
-docker compose up -d --build
-```
+Hochladen: Ordner `website-fertig/` als ZIP ins Markentrix-Portal, Anleitung in [`docs/portal-upload.md`](docs/portal-upload.md).
 
 ## Dokumente
 
-- [Betrieb auf Hetzner](docs/betrieb-hetzner.md)
-- [Verwaltungsportal](docs/verwaltungsportal.md)
+- [Upload ins Markentrix-Portal](docs/portal-upload.md)
 - [Livegang-Checkliste](docs/livegang-checkliste.md)
 - [Markenleitfaden](docs/markenleitfaden.md)
 - [Google-Unternehmensprofil-Kit](docs/google-unternehmensprofil.md)

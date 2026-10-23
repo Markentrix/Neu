@@ -37,13 +37,12 @@ def build_termin(site, write):
     s = site.s
     path = "/termin.html"
     title = "Termin anfragen: Fahrzeugaufbereitung Celle | ElbDetail"
-    desc = "Fahrzeugaufbereitung in Celle online buchen: Paket wählen, Fahrzeug angeben, Tag und Uhrzeit aussuchen und per E-Mail-Link verbindlich bestätigen."
+    desc = "Fahrzeugaufbereitung in Celle online anfragen: Paket wählen, Fahrzeug angeben, freien Tag und Uhrzeit aussuchen. René bestätigt persönlich."
     ld = [seo.webpage(site, path, title, {"potentialAction": {"@type": "ReserveAction", "target": site.url + path}}),
           seo.crumbs(site, [("Startseite", "/"), ("Termin anfragen", path)])]
     cls0 = pr["classes"][0]["key"]
 
-    slots = "".join(f'<label class="choice-pill"><input type="radio" name="uhrzeit" value="{t}" required><span><strong>{t} Uhr</strong></span></label>'
-                    for t in (s.get("booking") or {}).get("slotTimes", ["08:00", "10:00", "13:00", "15:00"]))
+    pay_me = bool(((s.get("booking") or {}).get("paypalMe") or "").strip())
     pk = ""
     for p in pr["packages"]:
         inc = "".join(f"<li>{ESC(f['text'])}</li>" for f in p["features"] if f.get("included"))[:]
@@ -130,8 +129,9 @@ def build_termin(site, write):
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Termin anfragen", None)], "Online-Terminbuchung",
-            "Termin buchen in <em>2 Minuten.</em>",
-            "Paket wählen, Fahrzeug angeben, Tag und Uhrzeit aussuchen. Mit einer Anzahlung von " + str(dep) + " % per PayPal ist Ihr Termin gebucht, danach meldet sich " + owner + " telefonisch und sieht sich Ihr Fahrzeug vorab an.")}
+            '<span data-sb-text="Termin buchen">Termin anfragen</span> in <em>2 Minuten.</em>',
+            "Paket wählen, Fahrzeug angeben, freien Tag und Uhrzeit aussuchen. Danach meldet sich " + owner + " telefonisch, sieht sich Ihr Fahrzeug vorab an und bestätigt den Termin."
+            + (" Die Anzahlung von " + str(dep) + " % leisten Sie bequem per PayPal." if pay_me else ""))}
   <section class="tight-top" aria-label="Terminanfrage">
     <div class="container booking">
       <form class="wizard js-form" id="bookingForm" data-form="termin" action="/api/anfrage" method="post" novalidate>
@@ -169,11 +169,11 @@ def build_termin(site, write):
 
         <fieldset class="wz-step" data-step="4">
           <legend><span class="wz-num">4</span>Termin wählen</legend>
-          <p class="wz-hint">Wählen Sie Tag und Uhrzeit für die Abgabe Ihres Autos. Sie bekommen danach eine E-Mail mit einem Link: Mit der Anzahlung von {dep} % per PayPal ist Ihr Termin verbindlich gebucht. Die Anzahlung wird mit dem Endpreis verrechnet.</p>
-          <p class="wz-hint">Bei Versiegelung und Keramik bleibt Ihr Auto 3 Tage bei uns. Bei allen anderen Leistungen ist es optimal, wenn es einen Tag bleiben kann.</p>
+          <p class="wz-hint">Wählen Sie Tag und Uhrzeit für die Abgabe Ihres Autos. Angezeigt werden nur freie Zeiten. {f"Nach dem Absenden können Sie die Anzahlung von {dep} % per PayPal leisten, sie wird mit dem Endpreis verrechnet." if pay_me else "Die Anzahlung besprechen wir mit Ihnen am Telefon."}</p>
+          <p class="wz-hint">Bei Versiegelung und Keramik für Lack und Felgen bleibt Ihr Auto 3 Tage bei uns, die Scheibenkeramik dauert etwa 1 Stunde. Bei allen anderen Leistungen ist es optimal, wenn es einen Tag bleiben kann.</p>
           <div class="form-row"><label for="t-date1">Tag*</label><input type="date" id="t-date1" name="datum" required aria-describedby="t-date1-msg"><span class="field-msg" id="t-date1-msg"></span><button class="next-free next-free--fill" type="button" data-next-free data-nf-fill hidden><span class="nf-dot" aria-hidden="true"></span>Nächster freier Tag: <strong data-nf-date></strong> · übernehmen</button></div>
           <div class="form-row"><span class="label" id="t-slots-l">Uhrzeit der Abgabe*</span>
-            <div class="slot-grid" id="t-slots" role="radiogroup" aria-labelledby="t-slots-l" aria-describedby="t-slots-msg">{slots}</div>
+            <div class="slot-grid" id="t-slots" role="radiogroup" aria-labelledby="t-slots-l" aria-describedby="t-slots-msg"></div>
             <span class="field-msg" id="t-slots-msg">Bitte zuerst einen Tag wählen.</span>
           </div>
           <div class="form-row"><label for="t-gutschein">Gutscheincode <span class="hint">(falls vorhanden)</span></label><input type="text" id="t-gutschein" name="gutscheincode" maxlength="20" placeholder="ELB-XXXX-XXXX" autocomplete="off"></div>
@@ -185,7 +185,7 @@ def build_termin(site, write):
             <div class="form-row"><label for="t-name">Name*</label><input type="text" id="t-name" name="name" autocomplete="name" required maxlength="120"></div>
             <div class="form-row"><label for="t-phone">Telefon / WhatsApp*</label><input type="tel" id="t-phone" name="telefon" autocomplete="tel" required maxlength="40"></div>
           </div>
-          <div class="form-row"><label for="t-email">E-Mail* <span class="hint">(für den Bestätigungslink und die Erinnerungen)</span></label><input type="email" id="t-email" name="email" autocomplete="email" required maxlength="160"></div>
+          <div class="form-row"><label for="t-email">E-Mail* <span class="hint">(für die Eingangsbestätigung mit Vorgangsnummer)</span></label><input type="email" id="t-email" name="email" autocomplete="email" required maxlength="160"></div>
           <div class="form-row"><span class="label">Antwort bevorzugt per</span>
             <div class="choice-pills choice-pills--3">
               <label class="choice-pill"><input type="radio" name="kanal" value="whatsapp" checked><span><strong>WhatsApp</strong></span></label>
@@ -200,13 +200,20 @@ def build_termin(site, write):
             <label for="t-review">Sie dürfen mich nach dem Termin einmalig fragen, ob ich eine Google-Bewertung schreiben möchte. <span class="hint">(optional, jederzeit widerrufbar)</span></label>
           </div>
           {core.consent_row("", "t-consent")}
-          {core.agb_note()}
+          <div class="consent-row">
+            <input type="checkbox" id="t-agb" name="agb" value="ja" required>
+            <label for="t-agb">Ich habe die <a href="agb.html">AGB</a> und die <a href="agb.html#widerruf">Widerrufsbelehrung</a> gelesen.*</label>
+          </div>
+          <div class="consent-row" data-vorzeitig hidden>
+            <input type="checkbox" id="t-vorzeitig" name="vorzeitig" value="ja" disabled>
+            <label for="t-vorzeitig">Mein Termin liegt innerhalb der 14-tägigen Widerrufsfrist. Ich verlange ausdrücklich, dass ElbDetail vor Ablauf der Widerrufsfrist mit der Leistung beginnt. Mir ist bekannt, dass ich bei einem Widerruf einen anteiligen Betrag für bereits erbrachte Leistungen zahle und mein Widerrufsrecht erlischt, sobald die Leistung vollständig erbracht ist.*</label>
+          </div>
         </fieldset>
 
         <div class="wz-nav">
           <button class="btn btn-line-light" type="button" data-wz-prev hidden>Zurück</button>
           <button class="btn btn-primary" type="button" data-wz-next hidden>Weiter {I["arrow"]}</button>
-          <button class="btn btn-primary" type="submit" data-wz-submit>{I["cal"]}Termin buchen</button>
+          <button class="btn btn-primary" type="submit" data-wz-submit>{I["cal"]}<span data-sb-text="Termin buchen">Terminwunsch senden</span></button>
         </div>
         <button class="wz-wa" type="button" data-wa-from-form>{I["wa"]}Stattdessen alles per WhatsApp senden</button>
         {core.form_status("t-status")}
@@ -247,7 +254,7 @@ def build_gutscheine(site, write):
         {"q": "Wie lange ist ein Gutschein gültig?", "a": f"Gutscheine sind drei Jahre gültig, gerechnet ab dem Ende des Kaufjahres. Ein 2026 gekaufter Gutschein gilt also bis 31.12.{year + 3}."},
         {"q": "Wie löse ich einen Gutschein ein?", "a": "Bei der Online-Terminanfrage den Gutscheincode eingeben oder ihn bei der WhatsApp-Anfrage nennen. Wir verrechnen den Wert mit dem Auftrag."},
         {"q": "Was passiert bei einem größeren Fahrzeug?", "a": "Paketgutscheine gelten für einen Kleinwagen. Bei größeren Fahrzeugen wird nur die Differenz zum Richtpreis der jeweiligen Fahrzeugklasse fällig."},
-        {"q": "Wie bezahle ich den Gutschein?", "a": "Nach Ihrer Bestellung erhalten Sie die Zahlungsdaten per E-Mail. Sie zahlen per Überweisung, per PayPal oder bei Abholung bar oder mit Karte. Nach Zahlungseingang erhalten Sie den Gutschein als Link zum Ausdrucken oder holen ihn gedruckt ab."},
+        {"q": "Wie bezahle ich den Gutschein?", "a": "Nach Ihrer Bestellung erhalten Sie die Zahlungsdaten per E-Mail. Sie zahlen per Überweisung, per PayPal oder bei Abholung bar oder mit Karte. Nach Zahlungseingang erhalten Sie den Gutschein als PDF per E-Mail oder holen ihn gedruckt ab."},
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Gutscheine", path)]), seo.faq(faq),
           {"@context": "https://schema.org", "@type": "Product", "name": "ElbDetail Gutschein Fahrzeugaufbereitung", "brand": {"@type": "Brand", "name": s["name"]},
@@ -528,7 +535,7 @@ def build_care(site, write):
     """ElbDetail Care: individuelles Pflegekonzept, nur auf Anfrage, ohne Paketpreise."""
     s = site.s
     path = "/elbdetail-care.html"
-    title = "ElbDetail Care: Regelmäßige Fahrzeugpflege Celle | ElbDetail"
+    title = "ElbDetail Care: Regelmäßige Autopflege Celle | ElbDetail"
     desc = ("ElbDetail Care: regelmäßige Fahrzeugpflege in Celle für Privat, Firmen und Flotten. "
             "Leistungen und Intervalle nach Maß, nur auf Anfrage.")
     faq = [

@@ -1,4 +1,1 @@
-# Bild-Pipeline (AVIF/WebP). Alles andere nutzt die Python-Standardbibliothek.
 Pillow==11.3.0
-# Zeitzonendaten für Europe/Berlin (Terminerinnerungen), da das schlanke Image keine mitbringt
-tzdata==2025.2

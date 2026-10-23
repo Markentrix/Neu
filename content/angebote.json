@@ -1,5 +1,5 @@
 {
-  "hinweis": "Angebote werden im Verwaltungsportal unter „Angebote“ gepflegt und gehen beim Speichern sofort live. Start- und Enddatum steuern die Sichtbarkeit automatisch.",
+  "hinweis": "Angebote mit Start- und Enddatum. Sichtbar ist ein Angebot nur, wenn die Website innerhalb der Laufzeit gebaut wurde: nach Ablauf neu bauen und hochladen.",
   "items": [
     {
       "active": true,

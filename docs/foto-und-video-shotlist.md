@@ -64,7 +64,7 @@ Bildstil, Farben und Logo-Regeln: siehe `docs/markenleitfaden.md`, Abschnitt 8.
 
 **Bildaufbau für mehrere Formate:** Hauptmotiv mittig mit Luft an allen Seiten fotografieren. So funktioniert aus einem Bild ein 16:9-, 4:3-, 4:5- und 1:1-Ausschnitt. Beim Hero links oder rechts Freiraum für Text lassen.
 
-`[PLATZHALTER: Prüfen, ob das Verwaltungsportal Bilder automatisch verkleinert oder bestimmte Maximalgrößen verlangt]`
+Der Generator verkleinert die Bilder automatisch. Das Markentrix-Portal nimmt Bilder bis 1,5 MB an, die fertigen Dateien liegen darunter.
 
 ### 2.4 Dateinamen-Schema
 
@@ -346,7 +346,7 @@ Gilt auch für den Inhaber selbst, für Aushilfen und für Kunden bei der Abnahm
 
 ## 7. Einsatz auf der Website
 
-**Hochladen:** Verwaltungsportal → Galerie hochladen. `[PLATZHALTER: Feldnamen im Portal prüfen, z. B. Titel, Alternativtext, Kategorie, Vorher/Nachher-Zuordnung]`
+**Hochladen:** Bilder in `content/media/` legen, in `content/gallery.json` eintragen (Titel, Alternativtext, Vorher/Nachher), Website neu bauen und den Ordner `website-fertig/` ins Markentrix-Portal hochladen. Der Generator verkleinert automatisch und erzeugt AVIF und WebP.
 
 | Bereich | Seite | Format | Motive aus der Shotlist |
 |---|---|---|---|
@@ -367,7 +367,7 @@ Gilt auch für den Inhaber selbst, für Aushilfen und für Kunden bei der Abnahm
 | Firmenkunden & Flotten | `/firmenkunden.html` | 16:9 | 44, 47, 68 |
 | Termin | `/termin.html` | 4:3 | 42, 43 |
 | Ratgeber | `/ratgeber/index.html` | 4:3 | 07, 26, 39 |
-| Galerie | Galerie im Verwaltungsportal | 4:3 | alle freigegebenen V/N-Paare und Details |
+| Galerie | `content/gallery.json` | 4:3 | alle freigegebenen V/N-Paare und Details |
 
 **Alternativtexte** sachlich beschreiben, ohne Kennzeichen oder Namen. Beispiele:
 - "Vorher: Fahrersitz eines Kombis mit Krümeln und Flecken"

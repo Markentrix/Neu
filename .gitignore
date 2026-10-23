@@ -1,8 +1,6 @@
 dist/
-data/
-site/
+website-fertig/
 content/.media-cache/
-deploy/.env
 node_modules/
 test-results/
 playwright-report/

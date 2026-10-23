@@ -91,9 +91,9 @@
     "vatId": "",
     "responsible": "René Triechelt, Lachtehäuser Straße 1, 29223 Celle",
     "mailProvider": "IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Deutschland",
-    "hosting": "Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland",
+    "hosting": "Markentrix",
     "smallBusiness": true,
-    "hostingLocation": "Nürnberg"
+    "hostingAddress": ""
   },
   "vouchers": {
     "amounts": [
@@ -193,27 +193,11 @@
     "alt": "Flasche C²Coating Car Ceramic auf einem frisch versiegelten dunklen Lack",
     "credit": "C²Coating"
   },
-  "analytics": {
-    "ga4": "G-LTV65F8GKJ",
-    "hinweis": "Google-Analytics-4-Mess-ID (Format G-XXXXXXXXXX). Leer = kein Google Analytics, kein Cookie-Banner."
-  },
   "booking": {
-    "selfBooking": true,
-    "slotTimes": [
-      "08:00",
-      "09:00",
-      "10:00"
-    ],
-    "slotMinutes": 30,
-    "holdHours": 24,
-    "reminderHours": [
-      24,
-      6
-    ],
-    "hinweis": "Abgabezeiten für die Online-Buchung. Jede E-Mail an Kunden (Anzahlungslink, Bestätigung, Erinnerungen) prüft und gibt René im Portal unter Postausgang frei. paypalMe: Name des PayPal.me-Links (z. B. elbdetail für paypal.me/elbdetail). Damit läuft die Anzahlung über PayPal.me, René bestätigt den Eingang im Portal. Ist die PayPal-Schnittstelle (PAYPAL_CLIENT_ID/SECRET) eingerichtet, hat sie Vorrang.",
+    "hinweis": "Buchung über das Markentrix-Portal: Tage, Uhrzeiten und ob Kunden direkt buchen können, kommen aus dem Portal (/api/verfuegbarkeit, /api/slots). depositPercent: Anzahlung in Prozent des Richtpreises. paypalMe: Name des PayPal.me-Links (z. B. elbdetail für paypal.me/elbdetail); ist er gefüllt, zeigt die Danke-Seite nach der Buchung den Link mit dem Betrag.",
     "depositPercent": 15,
     "paypalMe": "",
-    "policy": "Sie können Ihren Termin jederzeit kostenlos auf einen anderen Tag verschieben, die Anzahlung bleibt dabei erhalten. Innerhalb der gesetzlichen Widerrufsfrist von 14 Tagen ab Buchung erstatten wir die Anzahlung bei einer Absage vollständig. Sagen Sie den Termin danach ganz ab, wird die Anzahlung als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben. Ist uns kein oder ein geringerer Schaden entstanden, können Sie uns das nachweisen.",
+    "policy": "Sie können Ihren Termin jederzeit kostenlos verschieben, die Anzahlung bleibt dabei erhalten. Innerhalb der gesetzlichen Widerrufsfrist von 14 Tagen erstatten wir die Anzahlung bei einer Absage vollständig. Sagen Sie den Termin danach ganz ab, wird die Anzahlung als Ausfallpauschale einbehalten, weil wir den Termin für Sie freigehalten haben. Ist uns kein oder ein geringerer Schaden entstanden, können Sie uns das nachweisen.",
     "conditionSurcharge": {
       "percent": 5,
       "overrides": {
@@ -224,6 +208,5 @@
       ],
       "hinweis": "Zuschlag in Prozent je angeklickter Zustandsangabe; overrides = abweichender Satz (Tierhaare 10 %), exempt = ohne Zuschlag (leder = Ledersitze)."
     }
-  },
-  "googlePlaceId": ""
+  }
 }

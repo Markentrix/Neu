@@ -5,7 +5,7 @@ Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter) Inter-I
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
-http://scripts.sil.org/OFL
+https://openfontlicense.org
 
 
 -----------------------------------------------------------
@@ -100,7 +100,7 @@ Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrume
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
-http://scripts.sil.org/OFL
+https://openfontlicense.org
 
 
 -----------------------------------------------------------

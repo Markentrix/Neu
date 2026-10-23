@@ -602,7 +602,7 @@ Ansprache Sie. Kurze Sätze. Nur Fakten aus dem Markenleitfaden. Call-to-Action-
 
 ### 5.1 So wird gemessen
 
-Die Website hat eine **eigene, cookielose Statistik auf dem eigenen Server**. Sie zählt diese Ereignisse:
+Die Website meldet Seitenaufrufe und Ereignisse **cookielos an die Statistik des Markentrix-Portals** (`/api/e`). Gezählt werden:
 
 | Ereignis | Bedeutung | Hinweis |
 |---|---|---|
@@ -675,7 +675,7 @@ WhatsApp-Klicks und Anruf-Klicks sind Absichten, keine sicheren Anfragen. Deshal
 
 ### 5.4 Werbepixel
 
-**Google Analytics 4 ist vorbereitet** und lädt nur nach Einwilligung (Mess-ID im Portal eintragen). Google-Ads-Tag und Meta-Pixel sind bewusst nicht eingebaut; Conversions lassen sich über die Verknüpfung von Google Ads mit GA4 auswerten.
+**Google Analytics** steuert das Markentrix-Portal (Einwilligung über das Cookie-Fenster des Portals, „Analytics: an“ in den Kundeneinstellungen). Google-Ads-Tag und Meta-Pixel sind bewusst nicht eingebaut; Conversions lassen sich über die Verknüpfung von Google Ads mit GA4 auswerten.
 
 Folgen für die Kampagnen:
 - Die Werbeplattformen sehen keine Website-Conversions. Automatische Gebotsstrategien auf Conversions sind deshalb nicht sinnvoll. Gesteuert wird über Klicks, CPC-Limit und die eigene Auswertung.

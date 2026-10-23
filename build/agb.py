@@ -48,7 +48,7 @@ def build_agb(site, write):
     <h2 id="vertrag">§ 3 Vertragsschluss</h2>
     <ol class="agb-list">
       <li>Die Darstellung unserer Leistungen und Preise auf der Website ist kein verbindliches Angebot, sondern eine Einladung zur Buchung oder Anfrage.</li>
-      <li><strong>Online-Buchung:</strong> Der Kunde wählt Leistung, Fahrzeugklasse, Tag und Abgabezeit und sendet die Buchung ab. Wir reservieren die Abgabezeit und senden dem Kunden per E-Mail einen Link. Über diesen Link bestätigt der Kunde die Buchung verbindlich, bei vereinbarter Anzahlung durch die Zahlung per PayPal. Mit dieser Bestätigung kommt der Vertrag zustande. Wird die Buchung nicht innerhalb der in der E-Mail genannten Frist bestätigt, verfällt die Reservierung.</li>
+      <li><strong>Online-Buchung:</strong> Der Kunde wählt Leistung, Fahrzeugklasse, Tag und Abgabezeit, bestätigt diese AGB und sendet die Buchung ab. Er erhält eine Eingangsbestätigung mit Vorgangsnummer per E-Mail. Der Vertrag kommt zustande, wenn wir den Termin per E-Mail oder telefonisch bestätigen.</li>
       <li><strong>Anfrage per Telefon, WhatsApp, E-Mail oder Formular:</strong> Der Vertrag kommt zustande, wenn wir den Termin bestätigen und der Kunde den Termin wahrnimmt oder die Bestätigung annimmt.</li>
       <li>Vertragssprache ist Deutsch. Die Angaben zur Buchung und diese AGB senden wir dem Kunden mit der Bestätigung per E-Mail. Die AGB sind außerdem jederzeit auf dieser Seite abrufbar.</li>
     </ol>
@@ -62,14 +62,14 @@ def build_agb(site, write):
 
     <h2 id="zahlung">§ 5 Anzahlung und Zahlung</h2>
     <ol class="agb-list">
-      <li>Bei der Online-Buchung leistet der Kunde eine Anzahlung von {dep} % des Richtpreises per PayPal. Ist für eine Leistung kein fester Richtpreis hinterlegt, nennen wir die Höhe der Anzahlung vorab per E-Mail. Die Anzahlung wird mit dem Endpreis verrechnet.</li>
+      <li>Für gebuchte Termine bitten wir um eine Anzahlung von {dep} % des Richtpreises per PayPal. Den Link mit dem Betrag erhält der Kunde nach dem Absenden der Buchung. Ist für eine Leistung kein fester Richtpreis hinterlegt, nennen wir die Höhe der Anzahlung vorab. Die Anzahlung wird mit dem Endpreis verrechnet. Kommt der Vertrag nicht zustande, erstatten wir sie vollständig.</li>
       <li>Der Restbetrag ist bei Abholung des Fahrzeugs fällig. Möglich sind: {ESC(pay)}. Gutscheine rechnen wir auf den Endpreis an.</li>
       <li>Uns steht wegen unserer Forderungen aus dem Vertrag ein Pfandrecht an dem Fahrzeug zu (§ 647 BGB), solange es sich in unserem Besitz befindet.</li>
     </ol>
 
     <h2 id="absage">§ 6 Verschieben, Absage und Ausfallpauschale</h2>
     <ol class="agb-list">
-      <li>Der Kunde kann einen bestätigten Termin jederzeit kostenlos auf einen anderen freien Tag verschieben, über den Link in der Bestätigungs-E-Mail, telefonisch oder per WhatsApp. Eine geleistete Anzahlung bleibt dabei erhalten und wird auf den neuen Termin angerechnet.</li>
+      <li>Der Kunde kann einen bestätigten Termin jederzeit kostenlos auf einen anderen freien Tag verschieben, telefonisch, per WhatsApp oder per E-Mail. Eine geleistete Anzahlung bleibt dabei erhalten und wird auf den neuen Termin angerechnet.</li>
       <li>Das gesetzliche Widerrufsrecht für Verbraucher (§ 12 und Widerrufsbelehrung) bleibt unberührt. Sagt der Kunde den Termin innerhalb der Widerrufsfrist ab, behandeln wir die Absage als Widerruf und erstatten die Anzahlung vollständig.</li>
       <li>Sagt der Kunde einen bestätigten Termin nach Ablauf der Widerrufsfrist ab oder erscheint er ohne Absage nicht, behalten wir die Anzahlung als pauschalen Ersatz für den freigehaltenen Termin ein. Dem Kunden bleibt der Nachweis gestattet, dass uns kein oder ein wesentlich geringerer Schaden entstanden ist. In diesem Fall erstatten wir den Unterschied.</li>
       <li>Müssen wir einen Termin absagen, zum Beispiel wegen Krankheit, bieten wir einen Ersatztermin an. Wünscht der Kunde keinen Ersatztermin, erstatten wir die Anzahlung vollständig.</li>
@@ -151,8 +151,8 @@ def build_agb(site, write):
 def build_widerruf(site, write):
     s = site.s
     content = f'''
-    <p>Sie möchten einen Vertrag mit uns widerrufen, zum Beispiel eine Online-Buchung oder eine Gutscheinbestellung? Füllen Sie das Formular aus und klicken Sie auf „Widerruf bestätigen“. Sie erhalten sofort eine Eingangsbestätigung per E-Mail.</p>
-    <p><strong>Termin online gebucht?</strong> Dann geht es noch einfacher: Öffnen Sie den Link „Vertrag widerrufen“ in Ihrer Bestätigungs-E-Mail und klicken Sie auf „Widerruf bestätigen“. Sie müssen nichts ausfüllen. Alle Infos zu Fristen und Folgen stehen in der <a href="agb.html#widerruf">Widerrufsbelehrung</a>.</p>
+    <p>Sie möchten einen Vertrag mit uns widerrufen, zum Beispiel eine Online-Buchung oder eine Gutscheinbestellung? Füllen Sie das Formular aus und klicken Sie auf „Widerruf bestätigen“. Sie erhalten eine Eingangsbestätigung mit Vorgangsnummer per E-Mail.</p>
+    <p>Alle Infos zu Fristen und Folgen stehen in der <a href="agb.html#widerruf">Widerrufsbelehrung</a>.</p>
     <form class="widerruf-form js-form" id="widerrufForm" data-form="widerruf" action="/api/anfrage" method="post" novalidate>
       <input type="hidden" name="typ" value="widerruf">
       <div class="form-row"><label for="w-name">Ihr Name*</label><input type="text" id="w-name" name="name" autocomplete="name" required maxlength="120"></div>
@@ -160,7 +160,7 @@ def build_widerruf(site, write):
       <div class="form-row"><label for="w-vorgang">Vorgangsnummer oder Gutscheincode* <span class="hint">(steht in Ihrer E-Mail, z. B. T261021-AB12)</span></label><input type="text" id="w-vorgang" name="vorgang" required maxlength="40" autocapitalize="characters"></div>
       <div class="form-row"><label for="w-msg">Welcher Vertrag, bestellt am <span class="hint">(optional)</span></label><textarea id="w-msg" name="nachricht" rows="3" maxlength="2000" placeholder="z. B. Termin am 12.11. oder Gutschein über 100 €"></textarea></div>
       {core.honeypot("w-website")}
-      <p class="form-note" style="margin-left:0">Ihre Angaben verwenden wir nur, um den Widerruf zu bearbeiten (Art. 6 Abs. 1 lit. c DSGVO). Mehr in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+      {core.consent_row("", "w-consent")}
       <button class="btn btn-primary" type="submit">Widerruf bestätigen</button>
       {core.form_status("w-status")}
     </form>

@@ -339,7 +339,7 @@ def footer(site, prefix="", home=False):
       <li><a href="{prefix}datenschutz.html">Datenschutz</a></li>
       <li><a href="{prefix}agb.html">AGB</a></li>
       <li><a href="{prefix}widerruf.html">Vertrag widerrufen</a></li>
-      <li{"" if (s.get("analytics") or {}).get("ga4") else " hidden"} data-consent-li><button class="link-btn" type="button" data-consent-open>Cookie-Einstellungen</button></li>
+      <li class="mk-slot"><span data-mk="cookies"></span></li>
     </ul>
   </div>
 </footer>
@@ -423,7 +423,7 @@ def contact_section(site, prefix=""):
             <div class="form-row"><label for="k-name">Name*</label><input type="text" id="k-name" name="name" autocomplete="name" required maxlength="120"></div>
             <div class="form-row"><label for="k-phone">Telefon / WhatsApp <span class="hint">(für Rückruf)</span></label><input type="tel" id="k-phone" name="telefon" autocomplete="tel" maxlength="40"></div>
           </div>
-          <div class="form-row"><label for="k-email">E-Mail <span class="hint">(Telefon oder E-Mail angeben)</span></label><input type="email" id="k-email" name="email" autocomplete="email" maxlength="160"></div>
+          <div class="form-row"><label for="k-email">E-Mail* <span class="hint">(für die Eingangsbestätigung)</span></label><input type="email" id="k-email" name="email" autocomplete="email" required maxlength="160"></div>
           <div class="two-col">
             <div class="form-row"><label for="k-package">Gewünschtes Paket*</label><select id="k-package" name="paket" required>{package_options(site)}</select></div>
             <div class="form-row"><label for="k-vehicle">Fahrzeug <span class="hint">(Modell, Baujahr)</span></label><input type="text" id="k-vehicle" name="fahrzeug" maxlength="120" placeholder="z. B. VW Tiguan 2019"></div>
@@ -436,7 +436,7 @@ def contact_section(site, prefix=""):
             <button class="btn btn-line-light" type="button" data-wa-from-form>{I["wa"]}Lieber per WhatsApp</button>
           </div>
           {form_status("k-status")}
-          <p class="hint">*Pflichtfeld. Ihre Anfrage wird verschlüsselt an unseren eigenen Server in Deutschland übertragen und nur zur Bearbeitung verwendet.</p>
+          <p class="hint">*Pflichtfeld. Ihre Anfrage wird verschlüsselt übertragen und nur zur Bearbeitung verwendet. Sie erhalten eine Eingangsbestätigung mit Vorgangsnummer.</p>
         </form>
       </div>
 

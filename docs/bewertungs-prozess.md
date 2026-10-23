@@ -21,19 +21,16 @@ Eckige Klammern `[...]` sind Platzhalter. `[VORNAME]` ist der Vorname des Kunden
 
 **Bei einer Reklamation:** Erst das Problem lösen. Danach trotzdem ganz normal um eine Bewertung bitten. Alle Kunden werden gleich behandelt.
 
-### Der Knopf "Bewertung anfragen" im Verwaltungsportal
+### Bewertung anfragen
 
-Das ElbDetail-Verwaltungsportal läuft auf dem eigenen Server. Beim Auftrag gibt es den Knopf **"Bewertung anfragen"**. Er bereitet die WhatsApp-Nachricht nach Vorlage 1 vor, mit dem Vornamen des Kunden und dem Bewertungslink.
+Ob die Kundin oder der Kunde einer Bewertungsanfrage zugestimmt hat, steht in der Anfrage im Markentrix-Portal (Feld „bewertung_ok“ aus dem Buchungsformular).
 
-So nutzen Sie ihn:
-1. Auftrag im Portal öffnen.
-2. Prüfen: Hat der Kunde der Kontaktaufnahme zugestimmt?
-3. Auf "Bewertung anfragen" klicken.
-4. Text in WhatsApp kurz lesen. Vorname richtig? Link vorhanden?
-5. Selbst auf Senden tippen.
-6. Datum der Anfrage festhalten. Das Portal speichert automatisch, wann die Bewertung angefragt wurde. Hat die Kundin oder der Kunde im Buchungsformular nicht zugestimmt, zeigt das Portal vorher einen Warnhinweis.
+So gehen Sie vor:
+1. Anfrage im Markentrix-Portal öffnen und prüfen: Hat der Kunde zugestimmt?
+2. Vorlage 1 in WhatsApp Business als Schnellantwort öffnen, Vornamen einsetzen, Bewertungslink prüfen.
+3. Selbst auf Senden tippen und das Datum der Anfrage notieren.
 
-Für die Erinnerung nach 3 Tagen Vorlage 2 verwenden. Eine eigene Erinnerungsfunktion gibt es im Portal nicht. Vorlage 2 am besten als Schnellantwort in WhatsApp Business speichern.
+Für die Erinnerung nach 3 Tagen Vorlage 2 verwenden. Vorlage 2 am besten als Schnellantwort in WhatsApp Business speichern.
 
 ---
 
@@ -131,7 +128,7 @@ Ohne Einverständnis für WhatsApp nur:
 3. Auf **"Rezensionen einholen"** klicken. Je nach Ansicht heißt der Punkt auch "Bewertungsformular teilen" oder steht unter "Kunden" bzw. "Rezensionen".
 4. Den angezeigten Kurzlink kopieren. Er beginnt meist mit `https://g.page/r/`.
 5. Den Link einmal selbst im privaten Browserfenster testen. Öffnet sich das Bewertungsfenster von ElbDetail?
-6. Den Link im Verwaltungsportal hinterlegen, damit der Knopf "Bewertung anfragen" ihn einsetzt. Ort im Portal: Inhalte → Grunddaten & Kontakt → Feld „Google-Bewertungslink“, danach Speichern.
+6. Den Link in `content/site.json` unter `googleReviewUrl` eintragen, Website neu bauen und hochladen. Bisheriger Ort im Portal: Inhalte → Grunddaten & Kontakt → Feld „Google-Bewertungslink“, danach Speichern.
 7. Den Link als Schnellantwort in WhatsApp Business speichern.
 
 Den Link nicht kürzen oder über fremde Dienste umleiten. Den Original-Link von Google verwenden.
@@ -223,4 +220,4 @@ Fotos von Kunden nicht ungefragt für eigene Werbung verwenden. Für Website ode
 - Wie viele Abholungen gab es diese Woche? Wie viele Anfragen wurden gesendet?
 - Wer braucht noch die Erinnerung nach 3 Tagen?
 - Sind alle neuen Bewertungen beantwortet?
-- Neue Bewertungszahl notieren. Im Portal unter Inhalte → Grunddaten & Kontakt → Google-Bewertung → Anzahl eintragen und veröffentlichen.
+- Neue Bewertungszahl notieren. Die Bewertungen zeigt der Baustein des Markentrix-Portals automatisch. Die Zahl im Kopfbereich der Website steht in `content/site.json` unter `rating` und wird beim nächsten Upload mit aktualisiert.

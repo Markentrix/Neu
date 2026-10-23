@@ -655,6 +655,7 @@ def build_home(site, write):
           <div class="review-cta"><a class="btn btn-line-light btn-sm" href="{s["googleMapsUrl"]}" target="_blank" rel="noopener">Alle Bewertungen auf Google</a></div>
         </div>
       </div>
+      <div class="mk-reviews" data-mk="bewertungen"></div>
       <div class="review-grid stagger" tabindex="0" role="region" aria-label="Kundenbewertungen">{core.review_cards(site)}
       </div>{ref_strip(site)}
       <p class="gallery-note">Ausgewählte Google-Rezensionen im Wortlaut, teils gekürzt, ohne Emojis (Stand {ESC(s["rating"]["asOf"])}). <strong>Hinweis zur Echtheit:</strong> Wir prüfen nicht, ob alle Bewertenden unsere Leistung genutzt haben. Google prüft Bewertungen nach eigenen Richtlinien.</p>
@@ -1105,19 +1106,7 @@ def build_legal(site, write):
     </div>
 '''
     mail = _ph(L.get("mailProvider"), "E-Mail-Anbieter mit Anschrift, z. B. der Anbieter des Postfachs info@elbdetail.de")
-    ga = ((s.get("analytics") or {}).get("ga4") or "").strip()
-    if ga:
-        ga_section = """    <h2>4. Cookies und Google Analytics (nur mit Ihrer Einwilligung)</h2>
-    <p>Wenn Sie im Hinweisfenster auf „Akzeptieren“ klicken, nutzen wir Google Analytics 4, einen Webanalysedienst der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland („Google“). Ohne Ihre Einwilligung wird Google Analytics nicht geladen und es werden keine Cookies gesetzt.</p>
-    <p><strong>Zweck:</strong> Wir möchten verstehen, wie unsere Website genutzt wird (z. B. aufgerufene Seiten, Verweildauer, ungefährer Standort auf Stadtebene, Gerätetyp, Herkunft des Besuchs und Ereignisse wie Klicks auf „WhatsApp“ oder abgeschickte Anfragen), um Inhalte und Angebote zu verbessern.</p>
-    <p><strong>Cookies:</strong> Google Analytics speichert Cookies auf Ihrem Gerät (u. a. „_ga“ und „_ga_*“, Speicherdauer bis zu 2 Jahre), um wiederkehrende Besuche zu erkennen. IP-Adressen werden von Google Analytics 4 nach Angaben von Google nicht gespeichert.</p>
-    <p><strong>Rechtsgrundlage:</strong> Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen: über den Link „Cookie-Einstellungen“ unten auf jeder Seite.</p>
-    <p><strong>Übermittlung in die USA:</strong> Eine Übermittlung an Google LLC in die USA ist möglich. Google ist unter dem EU-US Data Privacy Framework zertifiziert (Angemessenheitsbeschluss der EU-Kommission, Art. 45 DSGVO). Mit Google besteht ein Vertrag zur Auftragsverarbeitung.</p>
-    <p>Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Datenschutzerklärung von Google</a>, <a href="https://support.google.com/analytics/answer/6004245" target="_blank" rel="noopener">Datenschutz in Google Analytics</a>.</p>
-    <p>Abgesehen davon bindet diese Website keine Werbe- oder Trackingdienste ein (kein Meta-Pixel). Ihre Entscheidung speichern wir im lokalen Speicher Ihres Browsers, damit das Hinweisfenster nicht bei jedem Besuch erscheint.</p>"""
-    else:
-        ga_section = """    <h2>4. Keine Cookies, keine Tracking-Dienste</h2>
-    <p>Diese Website setzt keine Cookies und bindet keine Analyse- oder Werbedienste Dritter ein (kein Google Analytics, kein Meta-Pixel). Ausnahme ist die freiwillig nachladbare Google-Karte (Ziffer 8).</p>"""
+    host = ESC(L.get("hosting") or "Markentrix") + (", " + ESC(L["hostingAddress"]) if L.get("hostingAddress") else "")
     ds = f'''
     <h2>1. Verantwortlicher</h2>
     <p>Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:<br>
@@ -1126,46 +1115,44 @@ def build_legal(site, write):
       E-Mail: <a href="mailto:{s["email"]}">{ESC(s["email"])}</a> · Telefon: {ESC(s["phoneIntl"])}</p>
     <h2>2. Grundsätzliches</h2>
     <p>Wir verarbeiten personenbezogene Daten nur, soweit dies zur Bereitstellung dieser Website, zur Bearbeitung von Anfragen und zur Durchführung unserer Leistungen erforderlich ist. Rechtsgrundlagen sind Art. 6 Abs. 1 lit. a DSGVO (Einwilligung), lit. b (Vertrag und Vertragsanbahnung), lit. c (rechtliche Pflichten) und lit. f (berechtigte Interessen).</p>
-    <h2>3. Hosting auf eigenem Server</h2>
-    <p>Diese Website, alle Formulare und die Besucherstatistik laufen auf einem von uns betriebenen Server im Rechenzentrum der {ESC(L.get("hosting") or "Hetzner Online GmbH")}. Serverstandort ist {ESC(L.get("hostingLocation") or "Deutschland")}, die Daten verbleiben in Deutschland. Mit dem Rechenzentrumsbetreiber besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO. Schriftarten und Skripte der Website liegen auf unserem Server{" (Google Analytics nur nach Ihrer Einwilligung, siehe Ziffer 4)" if ga else ""}.</p>
-    <p>Beim Aufruf werden technisch notwendige Daten (u. a. IP-Adresse, Zeitpunkt, aufgerufene Adresse, Browsertyp) verarbeitet, um die Seite auszuliefern und vor Missbrauch zu schützen (Art. 6 Abs. 1 lit. f DSGVO). Zugriffsprotokolle mit IP-Adressen speichern wir nicht dauerhaft.</p>
-{ga_section}
-    <h2>5. Eigene, cookielose Besucherstatistik</h2>
-    <p>Um die Website zu verbessern, zählen wir Seitenaufrufe und einzelne Ereignisse (z. B. Klick auf „WhatsApp“, abgeschickte Terminanfrage) mit einer selbst betriebenen Statistik auf unserem Server. Dabei werden keine Cookies gesetzt und nichts auf Ihrem Gerät gespeichert. Die IP-Adresse wird nicht gespeichert; zur Zählung eindeutiger Besuche wird aus IP-Adresse, Browserkennung und einem täglich wechselnden, nach 24 Stunden gelöschten Zufallswert ein nicht rückrechenbarer Kurzwert gebildet. Gespeichert werden: aufgerufene Seite, Herkunftsseite (nur Domain), Kampagnenparameter (utm), Gerätekategorie und Zeitpunkt. Eine Zuordnung zu einer Person ist nicht möglich. Rechtsgrundlage ist unser berechtigtes Interesse an einer bedarfsgerechten Gestaltung der Website (Art. 6 Abs. 1 lit. f DSGVO). Wenn Ihr Browser „Do Not Track“ oder „Global Privacy Control“ sendet, wird nichts gezählt.</p>
-    <h2>6. Anfragen über die Website-Formulare</h2>
-    <p>Wenn Sie das Kontakt-, Termin-, Gutschein- oder Firmenkundenformular nutzen, werden Ihre Angaben (z. B. Name, Telefonnummer, E-Mail-Adresse, Fahrzeug, Wunschtermin, Nachricht) verschlüsselt an unseren Server übertragen, dort in einer Datenbank gespeichert und zur Bearbeitung Ihrer Anfrage verwendet (Art. 6 Abs. 1 lit. b DSGVO). Zur Benachrichtigung senden wir uns eine E-Mail mit den Angaben; wenn Sie eine E-Mail-Adresse angeben, erhalten Sie eine Eingangsbestätigung. Für den E-Mail-Versand nutzen wir: {mail}.</p>
+    <h2>3. Hosting und Website-Portal</h2>
+    <p>Diese Website wird von {host} gehostet. Formulare, Terminanfragen, die Besucherstatistik und die Abfrage Ihrer Einwilligung laufen über das Website-Portal von Markentrix. Markentrix verarbeitet die Daten ausschließlich in unserem Auftrag und nach unserer Weisung; mit Markentrix besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO. Schriftarten und Skripte der Website werden vom selben Server geladen, es werden keine Schriften oder Skripte von Drittanbietern nachgeladen.</p>
+    <p><strong>Server-Logfiles:</strong> Beim Aufruf der Website werden technisch notwendige Daten verarbeitet (IP-Adresse, Datum und Uhrzeit, aufgerufene Adresse, Herkunftsseite, Browsertyp und Betriebssystem), um die Seite auszuliefern, die Stabilität zu sichern und Missbrauch abzuwehren. Rechtsgrundlage ist unser berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Die Logfiles werden nur so lange gespeichert, wie es dafür erforderlich ist.</p>
+    <h2>4. Statistik und Einwilligung</h2>
+    <p>Beim ersten Besuch fragt Sie ein Hinweisfenster des Markentrix-Portals, ob Sie der Besucherstatistik zustimmen. Statistik-Dienste, die Cookies setzen oder Daten auf Ihrem Gerät speichern, werden nur mit Ihrer Einwilligung geladen (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Welche Dienste das sind, wofür sie eingesetzt werden und wie lange Daten gespeichert werden, sehen Sie im Hinweisfenster. Ihre Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen oder ändern: über „Statistik-Einstellungen“ unten auf jeder Seite.</p>
+    <p>Unabhängig davon zählt das Portal Seitenaufrufe und einzelne Ereignisse (z. B. Klick auf „WhatsApp“, abgeschickte Anfrage) ohne Cookies und ohne Speicherung auf Ihrem Gerät. Übertragen werden die aufgerufene Seite, die Herkunftsseite (nur Domain), Kampagnenparameter (utm) und die Bildschirmbreite. Rechtsgrundlage ist unser berechtigtes Interesse an einer bedarfsgerechten Gestaltung der Website (Art. 6 Abs. 1 lit. f DSGVO). Wenn Ihr Browser „Do Not Track“ oder „Global Privacy Control“ sendet, wird nichts gezählt.</p>
+    <h2>5. Anfragen über die Website-Formulare</h2>
+    <p>Wenn Sie das Kontakt-, Termin-, Gutschein-, Firmenkunden- oder Widerrufsformular nutzen, werden Ihre Angaben (z. B. Name, Telefonnummer, E-Mail-Adresse, Fahrzeug, Wunschtermin, Nachricht) verschlüsselt an das Markentrix-Portal übertragen, dort gespeichert und zur Bearbeitung Ihrer Anfrage verwendet (Art. 6 Abs. 1 lit. b DSGVO, beim Widerruf lit. c). Der Inhaber wird per E-Mail und Push-Nachricht benachrichtigt. Sie erhalten an die angegebene E-Mail-Adresse eine Eingangsbestätigung mit Vorgangsnummer. Ein unsichtbares Prüffeld schützt die Formulare vor automatisierten Spam-Einträgen.</p>
     <p>Anfragen, aus denen kein Auftrag entsteht, löschen wir spätestens 12 Monate nach dem letzten Kontakt. Daten zu Aufträgen und Gutscheinen bewahren wir entsprechend den gesetzlichen Aufbewahrungsfristen (bis zu 10 Jahre für Buchungsbelege) auf.</p>
-    <h2>7. Kontakt per WhatsApp, E-Mail oder Telefon</h2>
-    <p>WhatsApp-Links führen zum Messenger-Dienst der WhatsApp Ireland Ltd. / Meta Platforms Ireland Limited, 4 Grand Canal Square, Dublin 2, Irland. Erst wenn Sie dort eine Nachricht senden, werden Daten an WhatsApp übertragen; es gilt die Datenschutzerklärung von WhatsApp, eine Übermittlung in die USA ist nicht auszuschließen. Die Nutzung ist freiwillig, alternativ erreichen Sie uns über das Formular, per E-Mail oder Telefon. Bei Kontakt per E-Mail oder Telefon verarbeiten wir Ihre Angaben zur Bearbeitung der Anfrage (Art. 6 Abs. 1 lit. b, f DSGVO).</p>
-    <h2>8. Google Maps</h2>
-    <p>Die Kartendarstellung wird erst nach Ihrem Klick auf „Karte laden“ eingebunden. Erst dann wird eine Verbindung zu Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland hergestellt, wobei IP-Adresse und ggf. Cookies übertragen werden können. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
-    <h2>9. Verweise auf soziale Netzwerke</h2>
+    <h2>6. Terminbuchung</h2>
+    <p>Bei der Terminbuchung fragt die Website beim Markentrix-Portal ab, an welchen Tagen und zu welchen Uhrzeiten Termine frei sind. Ihre Buchung (gewählte Leistung, Fahrzeug, Tag, Uhrzeit und Kontaktdaten) wird im Portal gespeichert. Wir bestätigen den Termin per E-Mail oder telefonisch und melden uns vorab, um das Fahrzeug anzusehen. Dies dient der Durchführung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO).</p>
+    <h2>7. Anzahlung per PayPal</h2>
+    <p>Für die Anzahlung können Sie nach der Buchung einen PayPal.me-Link öffnen. Erst mit dem Klick werden Sie zu PayPal weitergeleitet (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22–24 Boulevard Royal, L-2449 Luxemburg). Ihre Zahlungsdaten geben Sie direkt bei PayPal ein, die Website erhält sie nicht. Von PayPal erhalten wir Name, Betrag, Verwendungszweck und Zahlungsstatus. Rechtsgrundlage ist die Vertragsdurchführung (Art. 6 Abs. 1 lit. b DSGVO). Es gilt die <a href="https://www.paypal.com/de/legalhub/privacy-full" target="_blank" rel="noopener">Datenschutzerklärung von PayPal</a>.</p>
+    <h2>8. Google-Bewertungen</h2>
+    <p>Bewertungen aus unserem Google-Unternehmensprofil werden über das Markentrix-Portal auf dieser Website angezeigt. Außerdem zeigen wir einzelne öffentlich einsehbare Bewertungen auszugsweise (Anzeigename und Bewertungstext). Rechtsgrundlage ist unser berechtigtes Interesse an der Außendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf Wunsch entfernen wir ein Zitat umgehend nach Nachricht an <a href="mailto:{s["email"]}">{ESC(s["email"])}</a>.</p>
+    <h2>9. Kontakt per WhatsApp, E-Mail oder Telefon</h2>
+    <p>WhatsApp-Links führen zum Messenger-Dienst der WhatsApp Ireland Ltd. / Meta Platforms Ireland Limited, 4 Grand Canal Square, Dublin 2, Irland. Erst wenn Sie dort eine Nachricht senden, werden Daten an WhatsApp übertragen; es gilt die Datenschutzerklärung von WhatsApp, eine Übermittlung in die USA ist nicht auszuschließen. Die Nutzung ist freiwillig, alternativ erreichen Sie uns über das Formular, per E-Mail oder Telefon. Bei Kontakt per E-Mail oder Telefon verarbeiten wir Ihre Angaben zur Bearbeitung der Anfrage (Art. 6 Abs. 1 lit. b, f DSGVO). Unser E-Mail-Postfach liegt bei: {mail}.</p>
+    <h2>10. Google Maps</h2>
+    <p>Die Kartendarstellung wird erst nach Ihrem Klick auf „Karte laden“ eingebunden (Zwei-Klick-Lösung). Erst dann wird eine Verbindung zu Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland hergestellt, wobei IP-Adresse und ggf. Cookies übertragen werden können. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+    <h2>11. Verweise auf soziale Netzwerke</h2>
     <p>Diese Website enthält reine Verlinkungen (keine eingebetteten Plugins) zu Instagram und Facebook (Meta Platforms Ireland Limited) sowie TikTok (TikTok Technology Limited, Irland). Ohne Klick findet keine Datenübertragung an diese Anbieter statt.</p>
-    <h2>10. Kundenstimmen</h2>
-    <p>Wir zeigen auszugsweise öffentlich einsehbare Bewertungen aus unserem Google-Unternehmensprofil (Anzeigename und Bewertungstext). Rechtsgrundlage ist unser berechtigtes Interesse an der Außendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf Wunsch entfernen wir ein Zitat umgehend nach Nachricht an <a href="mailto:{s["email"]}">{ESC(s["email"])}</a>.</p>
-    <h2>11. Gutscheine</h2>
-    <p>Für bestellte Gutscheine speichern wir Käufer, Empfängername, Wert, Code und Einlösestatus zur Vertragsabwicklung und zur Erfüllung steuerlicher Pflichten (Art. 6 Abs. 1 lit. b, c DSGVO). Der Gutschein ist über einen nicht erratbaren Link abrufbar.</p>
-    <h2>12. Online-Terminbuchung, Erinnerungen und Kalender</h2>
-    <p>Bei der Online-Buchung reservieren wir die gewählte Uhrzeit und senden Ihnen an die angegebene E-Mail-Adresse einen Link zur Bestätigung, nach der Bestätigung eine Terminbestätigung mit Kalenderdatei sowie Erinnerungen 24 und 6 Stunden vor dem Termin. Dies dient der Durchführung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO). Nicht bestätigte Reservierungen geben wir automatisch wieder frei.</p>
-    <p>Bestätigte Termine (Name, Telefonnummer, Fahrzeug, Leistung, Datum und Uhrzeit) tragen wir zur Planung in den Kalender des Inhabers bei Google ein (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland). Dabei kann eine Übermittlung in die USA nicht ausgeschlossen werden; Google ist nach dem EU-US Data Privacy Framework zertifiziert. Rechtsgrundlage ist unser berechtigtes Interesse an einer zuverlässigen Terminplanung (Art. 6 Abs. 1 lit. f DSGVO).</p>
-    <h2>13. Anzahlung per PayPal</h2>
-    <p>Für die Anzahlung bei der Online-Buchung werden Sie zu PayPal weitergeleitet (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22–24 Boulevard Royal, L-2449 Luxemburg). Wir übermitteln dabei nur Betrag, Vorgangsnummer und Verwendungszweck; Ihre Zahlungsdaten geben Sie direkt bei PayPal ein. Von PayPal erhalten wir die Bestätigung der Zahlung und die Transaktionsnummer. Rechtsgrundlage ist die Vertragsdurchführung (Art. 6 Abs. 1 lit. b DSGVO). Es gilt die <a href="https://www.paypal.com/de/legalhub/privacy-full" target="_blank" rel="noopener">Datenschutzerklärung von PayPal</a>.</p>
-    <h2>14. Ihre Rechte</h2>
+    <h2>12. Gutscheine</h2>
+    <p>Für bestellte Gutscheine speichern wir Käufer, Empfängername, Wert, Code und Einlösestatus zur Vertragsabwicklung und zur Erfüllung steuerlicher Pflichten (Art. 6 Abs. 1 lit. b, c DSGVO).</p>
+    <h2>13. Ihre Rechte</h2>
     <ul>
       <li>Auskunft (Art. 15 DSGVO)</li><li>Berichtigung (Art. 16 DSGVO)</li><li>Löschung (Art. 17 DSGVO)</li>
       <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li><li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
       <li>Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21 DSGVO)</li><li>Widerruf erteilter Einwilligungen mit Wirkung für die Zukunft (Art. 7 Abs. 3 DSGVO)</li>
     </ul>
     <p>Zudem besteht ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde, z. B. bei der Landesbeauftragten für den Datenschutz Niedersachsen.</p>
-    <h2>15. Keine automatisierte Entscheidungsfindung</h2>
+    <h2>14. Keine automatisierte Entscheidungsfindung</h2>
     <p>Wir setzen keine automatisierte Entscheidungsfindung oder Profiling im Sinne des Art. 22 DSGVO ein.</p>
-    <h2>16. Verschlüsselung</h2>
+    <h2>15. Verschlüsselung</h2>
     <p>Diese Seite nutzt eine TLS-Verschlüsselung, erkennbar an „https://“ in der Adresszeile.</p>
-    <p class="legal-updated legal-note">Hinweis für den Seitenbetreiber: Diese Datenschutzerklärung ist eine sorgfältig erstellte Vorlage für den Betrieb auf eigenem Server. Bitte Platzhalter im Verwaltungsportal unter „Inhalte → Grunddaten → Rechtliches“ ausfüllen und vor Veröffentlichung rechtlich prüfen lassen.</p>
 '''
     for fname, title, desc, h1, sub, content in [
         ("impressum.html", "Impressum | ElbDetail Fahrzeugaufbereitung Celle", "Impressum von ElbDetail, Fahrzeugaufbereitung in Celle, Lachtehäuser Straße 1: Anbieterkennzeichnung, Kontakt und rechtliche Angaben nach DDG.", "Impressum", "Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)", imp),
-        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", ("Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, Google Analytics nur mit Einwilligung. Alle Infos zu Ihren Rechten." if ga else "Datenschutzerklärung von ElbDetail: Website auf eigenem Server in Deutschland, keine Cookies, keine Tracking-Dienste. Alle Infos zu Ihren Rechten."), "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
+        ("datenschutz.html", "Datenschutzerklärung | ElbDetail Fahrzeugaufbereitung Celle", "Datenschutzerklärung von ElbDetail: Hosting bei Markentrix, Formulare und Termine über das Website-Portal, Statistik nur mit Einwilligung. Ihre Rechte.", "Datenschutzerklärung", f"Stand: {s['stand']}", ds)]:
         body = f'''
 <main id="main" class="legal-main">
   <div class="container">
@@ -1206,6 +1193,7 @@ def build_danke(site, write):
       <p class="eyebrow">Anfrage eingegangen</p>
       <h1 id="page-h" data-thanks-title>Danke! <em>Wir melden uns schnell.</em></h1>
       <p class="lead" data-thanks-text>Ihre Anfrage ist bei uns angekommen. In der Regel antworten wir am selben oder nächsten Werktag mit einem verbindlichen Angebot und einem Terminvorschlag.</p>
+      <div class="thanks-pay" data-thanks-pay hidden></div>
       <div class="hero-actions">
         <a class="btn btn-wa btn-lg" href="{site.wa("Hallo ElbDetail, ich habe gerade eine Anfrage über die Website geschickt.")}" target="_blank" rel="noopener">{I["wa"]}Rückfrage per WhatsApp</a>
         <a class="btn btn-line" href="index.html">Zur Startseite</a>
@@ -1216,7 +1204,7 @@ def build_danke(site, write):
     <div class="container">
       <div class="section-head"><p class="eyebrow">So geht es weiter</p><h2 id="next-h" class="display">Die nächsten Schritte.</h2></div>
       <div class="process-rail">
-        <div class="process-cell"><span class="process-index">JETZT</span><h3>Eingangsbestätigung</h3><p>Haben Sie eine E-Mail-Adresse angegeben, erhalten Sie gleich eine Bestätigung mit Ihren Angaben.</p></div>
+        <div class="process-cell"><span class="process-index">JETZT</span><h3>Eingangsbestätigung</h3><p>Sie erhalten gleich eine E-Mail mit Ihren Angaben und der Vorgangsnummer.</p></div>
         <div class="process-cell"><span class="process-index">BALD</span><h3>Angebot &amp; Termin</h3><p>Wir prüfen Ihre Angaben und melden uns per WhatsApp, Telefon oder E-Mail, ganz nach Ihrem Wunsch.</p></div>
         <div class="process-cell"><span class="process-index">TIPP</span><h3>Fotos helfen</h3><p>Schick uns gern ein paar Fotos vom Zustand per WhatsApp. So wird das Angebot noch genauer.</p></div>
       </div>

@@ -1,4 +1,4 @@
-/* ElbDetail – Website-Skript. Ohne Abhängigkeiten. Drittanbieter (Google Analytics) nur nach Einwilligung. */
+/* ElbDetail – Website-Skript. Ohne Abhängigkeiten. Formulare, Termine und Statistik laufen über das Markentrix-Portal (relative /api-Adressen). */
 (function () {
   "use strict";
 
@@ -6,7 +6,7 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var API = ELB.api || "/api";
-  var IS_LIVE = (ELB.hosts || []).indexOf(location.hostname) !== -1;
+  var IS_LIVE = /^https?:$/.test(location.protocol);  // als Datei geöffnet: keine Portal-Schnittstelle, gleich die Ausweichwege zeigen
 
   function fmt(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
   function waLink(text) { return "https://wa.me/" + ELB.whatsapp + (text ? "?text=" + encodeURIComponent(text) : ""); }
@@ -37,7 +37,7 @@
     return diff === 0 ? "heute, " + txt : diff === 1 ? "morgen, " + txt : txt;
   }
 
-  /* ---------------------------------------------------------------- Statistik (eigener Server, cookielos) */
+  /* ---------------------------------------------------------------- Statistik über das Portal (/api/e), cookielos */
   var noTrack = navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true;
   function send(payload) {
     if (noTrack || !IS_LIVE) return;
@@ -49,74 +49,9 @@
   }
   function track(name, props) {
     send({ t: "ev", n: name, u: location.pathname, p: props || {} });
-    if (window.gtag && gaOn) window.gtag("event", name.toLowerCase().replace(/[^a-z0-9äöüß]+/g, "_"), props || {});
   }
 
-  /* ---------------------------------------------------------------- Google Analytics 4: nur nach Einwilligung */
-  var GA = (window.ELB && ELB.ga4) || "", gaOn = false, CKEY = "elb-consent", CMAX = 365 * 864e5;  // Einwilligung gilt 12 Monate
-  var store = { get: function () { try { return localStorage.getItem(CKEY); } catch (e) { return null; } },
-                set: function (v) { try { localStorage.setItem(CKEY, v); } catch (e) {} } };
-  /* Gespeicherte Wahl: {stat: true|false, t: Zeitpunkt}; ältere Einträge "granted"/"denied" gelten weiter */
-  function consent() {
-    var v = store.get(); if (!v) return null;
-    if (v === "granted" || v === "denied") return { stat: v === "granted", t: Date.now() };
-    try { var o = JSON.parse(v); return o && Date.now() - (o.t || 0) < CMAX ? o : null; } catch (e) { return null; }
-  }
-  function loadGa() {
-    if (!GA || gaOn || !/^G-[A-Z0-9]{4,}$/.test(GA)) return;
-    gaOn = true;
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () { window.dataLayer.push(arguments); };
-    window.gtag("consent", "default", { analytics_storage: "granted", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
-    window.gtag("js", new Date());
-    window.gtag("config", GA, { allow_google_signals: false, allow_ad_personalization_signals: false });
-    var sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(GA);
-    document.head.appendChild(sc);
-  }
-  function dropGaCookies() {
-    var host = location.hostname.replace(/^www\./, "");
-    document.cookie.split(";").forEach(function (c) {
-      var n = c.split("=")[0].trim();
-      if (/^_ga/.test(n)) ["", "." + host, host].forEach(function (d) { document.cookie = n + "=; Max-Age=0; path=/" + (d ? "; domain=" + d : ""); });
-    });
-  }
-  function consentBar() {
-    if (document.getElementById("consent")) return;
-    var cur = consent() || { stat: false };
-    var link = function (f) { var l = document.querySelector('a[href$="' + f + '"]'); return l ? l.getAttribute("href") : f; };
-    var bar = document.createElement("div");
-    bar.id = "consent"; bar.className = "consent"; bar.setAttribute("role", "dialog"); bar.setAttribute("aria-modal", "false"); bar.setAttribute("aria-labelledby", "consent-h");
-    bar.innerHTML = '<h2 id="consent-h">Cookies &amp; Datenschutz</h2>' +
-      '<p>Wir verwenden technisch notwendige Speicher, damit die Website funktioniert. Mit Ihrer Einwilligung nutzen wir zusätzlich Google Analytics, um zu verstehen, wie die Website genutzt wird, und sie zu verbessern. Dabei werden Cookies gesetzt und Daten an Google, auch in die USA, übermittelt. Ihre Einwilligung können Sie jederzeit über „Cookie-Einstellungen“ im Fußbereich widerrufen.</p>' +
-      '<div class="consent-opts" hidden>' +
-        '<label class="consent-opt"><input type="checkbox" checked disabled><span><strong>Notwendig</strong> Speichert Ihre Auswahl und sichert Formulare. Immer aktiv.</span></label>' +
-        '<label class="consent-opt"><input type="checkbox" data-stat' + (cur.stat ? " checked" : "") + '><span><strong>Statistik</strong> Google Analytics 4 (Google Ireland Ltd.). Reichweitenmessung ohne Werbezwecke.</span></label>' +
-      '</div>' +
-      '<div class="consent-actions"><button type="button" class="btn btn-line-light" data-c="denied">Nur notwendige</button><button type="button" class="btn btn-line-light" data-c="granted">Alle akzeptieren</button></div>' +
-      '<p class="consent-links"><button type="button" class="link-btn" data-c-more aria-expanded="false">Einstellungen</button><button type="button" class="link-btn" data-c="save" hidden>Auswahl speichern</button>' +
-      '<a href="' + link("datenschutz.html") + '">Datenschutz</a><a href="' + link("impressum.html") + '">Impressum</a></p>';
-    document.body.appendChild(bar);
-    bar.addEventListener("click", function (e) {
-      var more = e.target.closest("[data-c-more]");
-      if (more) {
-        var o = $(".consent-opts", bar); o.hidden = !o.hidden; more.setAttribute("aria-expanded", String(!o.hidden));
-        $('[data-c="save"]', bar).hidden = o.hidden; return;
-      }
-      var b = e.target.closest("[data-c]"); if (!b) return;
-      var v = b.getAttribute("data-c"), stat = v === "granted" || (v === "save" && $("[data-stat]", bar).checked);
-      store.set(JSON.stringify({ stat: stat, t: Date.now() }));
-      if (stat) loadGa(); else { dropGaCookies(); if (gaOn) location.reload(); }
-      bar.remove();
-    });
-    var first = $("[data-c=granted]", bar); if (first && !cur.t) first.focus({ preventScroll: true });
-  }
-  if (GA) {
-    $$("[data-consent-li]").forEach(function (li) { li.hidden = false; });
-    var cc = consent();
-    if (cc && cc.stat) loadGa();
-    else if (!cc) consentBar();
-    document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("[data-consent-open]")) consentBar(); });
-  }
+  /* Cookie-Hinweis und Statistik-Einstellungen liefert das Portal (Baustein data-mk="cookies" im Fußbereich). */
   window.elbTrack = track;
   (function pageview() {
     var ref = "";
@@ -272,7 +207,7 @@
   /* Faktenbox: auf schmalen Bildschirmen eingeklappt starten (im HTML offen für Suchmaschinen und ohne JS) */
   if (window.matchMedia && matchMedia("(max-width: 899.98px)").matches) $$("[data-close-narrow]").forEach(function (d) { d.open = false; });
 
-  /* Nächster freier Tag (nur live, aus dem Kalender im Verwaltungsportal) */
+  /* Nächster freier Tag (aus dem Markentrix-Portal, /api/verfuegbarkeit) */
   var nfEls = $$("[data-next-free]");
   if (nfEls.length) availability().then(function (j) {
     if (!j || !j.nextFree) return;
@@ -417,8 +352,16 @@
     var mail = "mailto:" + ELB.email + "?subject=" + encodeURIComponent((TITLES[data.typ] || "Anfrage") + " über die Website – " + (data.name || "")) +
       "&body=" + encodeURIComponent(asText(data));
     return '<span>' + reason + '</span><span class="fb-actions"><a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="' + waFromForm(form) +
-      '">Per WhatsApp senden</a><a class="btn btn-line-light btn-sm" href="' + mail + '">Per E-Mail senden</a></span><span class="hint">Oder ruf an: ' + ELB.phoneDisplay + '</span>';
+      '">Per WhatsApp senden</a><a class="btn btn-line-light btn-sm" href="' + mail + '">Per E-Mail senden</a></span><span class="hint">Oder rufen Sie an: <a href="tel:' + ELB.phone + '">' + ELB.phoneDisplay + '</a></span>';
   }
+  function fieldError(form, name, text) {
+    var el = form.querySelector('[name="' + name + '"]'); if (!el) return;
+    el.setAttribute("aria-invalid", "true");
+    var row = el.closest(".form-row, .consent-row") || el.parentNode, m = $("[data-err]", row);
+    if (!m) { m = document.createElement("span"); m.className = "field-msg error"; m.setAttribute("data-err", ""); row.appendChild(m); }
+    m.textContent = text;
+  }
+  function clearErrors(form) { $$("[data-err]", form).forEach(function (m) { m.remove(); }); }
   function validate(form, scope) {
     var ok = true, first = null;
     $$("input, select, textarea", scope || form).forEach(function (el) {
@@ -428,10 +371,6 @@
       el.setAttribute("aria-invalid", valid ? "false" : "true");
       if (!valid) { ok = false; first = first || el; }
     });
-    if (form.getAttribute("data-form") === "kontakt" && (!scope || scope === form)) {
-      var t = form.querySelector('[name="telefon"]'), m = form.querySelector('[name="email"]');
-      if (t && m && !t.value.trim() && !m.value.trim()) { ok = false; first = first || t; t.setAttribute("aria-invalid", "true"); }
-    }
     if (first) first.focus();
     return ok;
   }
@@ -447,9 +386,11 @@
       if (!validate(form)) { setStatus(form, "Bitte die markierten Pflichtfelder ausfüllen.", "error"); return; }
       var btn = form.querySelector('[type="submit"]:not([hidden])');
       if (!IS_LIVE) {
-        setStatus(form, "", "info", fallbackHtml(form, "Vorschau-Modus: Auf dieser Vorschau wird das Formular nicht übertragen. Senden Sie die Angaben direkt:"));
+        setStatus(form, "", "info", fallbackHtml(form, "Das Formular kann hier nicht übertragen werden. Senden Sie die Angaben direkt:"));
         return;
       }
+      if (btn && btn.disabled) return;  // Doppelklick: nur einmal senden
+      clearErrors(form);
       if (btn) { btn.disabled = true; btn.classList.add("is-loading"); }
       setStatus(form, "Wird gesendet …", "");
       fetch(API + "/anfrage", { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(collect(form)) })
@@ -457,10 +398,14 @@
         .then(function (j) {
           if (j.ok) {
             track("Anfrage gesendet", { typ: typ });
-            location.href = "danke.html?typ=" + encodeURIComponent(typ) + (j.ref ? "&ref=" + encodeURIComponent(j.ref) : "") + (j.status === "reserviert" ? "&s=reserviert" : "");
+            var anz = form.getAttribute("data-anzahlung");
+            location.href = "danke.html?typ=" + encodeURIComponent(typ) + (j.ref ? "&ref=" + encodeURIComponent(j.ref) : "") + (anz ? "&anz=" + encodeURIComponent(anz) : "");
+          } else if (j.status === 429) {
+            setStatus(form, "", "error", fallbackHtml(form, "Gerade kommen sehr viele Anfragen an. Bitte versuchen Sie es später noch einmal oder melden Sie sich direkt:"));
           } else if (j.errors) {
-            Object.keys(j.errors).forEach(function (k) { var el = form.querySelector('[name="' + k + '"]'); if (el) el.setAttribute("aria-invalid", "true"); });
+            Object.keys(j.errors).forEach(function (k) { fieldError(form, k, j.errors[k]); });
             setStatus(form, j.message || "Bitte die markierten Angaben prüfen.", "error");
+            form.dispatchEvent(new CustomEvent("elb:errors", { detail: j.errors }));
           } else throw new Error("server");
         })
         .catch(function () { setStatus(form, "", "error", fallbackHtml(form, "Die Anfrage konnte gerade nicht übertragen werden. Bitte senden Sie sie direkt:")); })
@@ -477,7 +422,7 @@
     document.documentElement.classList.add("wz-ready");
     var steps = $$(".wz-step", wz), inds = $$("[data-step-ind]", wz), cur = 0;
     var prev = $("[data-wz-prev]", wz), next = $("[data-wz-next]", wz), submit = $("[data-wz-submit]", wz);
-    var blocked = [], blockedKer = [], closedWeekdays = [0];
+    var blocked = [], closedWeekdays = [0];
 
     if (Q.paket) { var rp = wz.querySelector('input[name="paket"][value="' + Q.paket + '"]'); if (rp) rp.checked = true; }
     if (Q.schutz === "keramik") { var rw = wz.querySelector('input[name="winterschutz"][value="keramik"]'); if (rw) rw.checked = true; }
@@ -489,42 +434,60 @@
     if (Q.datum && /^\d{4}-\d{2}-\d{2}$/.test(Q.datum) && Q.datum >= todayIso() && wz.datum) wz.datum.value = Q.datum;
     availability().then(function (j) {
       if (!j) return;
-      blocked = j.blocked || []; blockedKer = j.blockedKeramik || blocked; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
+      blocked = j.blocked || []; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
+      /* Direkte Buchung nur, wenn das Portal sie freigibt; sonst bleibt es beim Terminwunsch */
+      if (j.selfBooking) $$("[data-sb-text]").forEach(function (el) { el.textContent = el.getAttribute("data-sb-text"); });
+      if (wz.datum.value) checkDate(wz.datum);
     });
 
     /* Winterangebot: Wachs inklusive oder C² CarCeramic statt Wachs (dann Keramik-Standzeit und Aufpreis nach Absprache) */
     var winterBox = $(".wz-winter", wz);
     function paketVal() { return (wz.querySelector('input[name="paket"]:checked') || {}).value || ""; }
     function winterKer() { var r = wz.querySelector('input[name="winterschutz"]:checked'); return paketVal() === "winter" && !!r && r.value === "keramik"; }
-    function isKer() { return paketVal() === "keramik" || winterKer(); }
     var scheibenBox = $(".wz-scheiben", wz);
     function syncWinter() {
       [[winterBox, "winter"], [scheibenBox, "scheiben"]].forEach(function (x) {
         if (x[0]) { x[0].hidden = paketVal() !== x[1]; $$("input", x[0]).forEach(function (r) { r.disabled = x[0].hidden; }); }
       });
     }
-    /* Freie Abgabezeiten des gewählten Tages vom Server holen (Auslastung, Keramik-Standzeit, Google Kalender) */
+    /* Freie Abgabezeiten des gewählten Tages aus dem Portal (/api/slots). Nur freie Zeiten sind wählbar. */
     var slotBox = $("#t-slots"), slotMsg = $("#t-slots-msg"), slotReq = 0;
-    function loadSlots() {
+    function loadSlots(keep) {
       if (!slotBox) return;
-      var day = wz.datum.value, radios = $$('input[name="uhrzeit"]', wz);
-      var say = function (t, err) { if (slotMsg) { slotMsg.textContent = t; slotMsg.className = "field-msg" + (err ? " error" : ""); } };
-      if (!day || wz.datum.validationMessage) { radios.forEach(function (r) { r.disabled = !day; }); say(day ? "" : "Bitte zuerst einen Tag wählen."); return; }
-      radios.forEach(function (r) { r.disabled = false; });
-      if (!IS_LIVE) { say(""); return; }
-      var my = ++slotReq, pk = paketVal();
+      var day = wz.datum.value, chosen = keep || radio(wz, "uhrzeit");
+      var say = function (t, err, html) { if (slotMsg) { if (html) slotMsg.innerHTML = t; else slotMsg.textContent = t; slotMsg.className = "field-msg" + (err ? " error" : ""); } };
+      var alt = 'Rufen Sie uns an (<a href="tel:' + ELB.phone + '">' + ELB.phoneDisplay + '</a>) oder schreiben Sie per <a href="' + waLink("Hallo ElbDetail, ich möchte einen Termin am " + deDate(day) + " vereinbaren.") + '" target="_blank" rel="noopener">WhatsApp</a>.';
+      if (!day || wz.datum.validationMessage) { slotBox.innerHTML = ""; say(day ? "" : "Bitte zuerst einen Tag wählen."); return; }
+      if (!IS_LIVE) { slotBox.innerHTML = ""; say("Freie Uhrzeiten können hier nicht geladen werden. " + alt, true, true); return; }
+      var my = ++slotReq;
       say("Freie Uhrzeiten werden geladen …");
-      fetch(API + "/slots?tag=" + encodeURIComponent(day) + "&paket=" + encodeURIComponent(pk) + (winterKer() ? "&winterschutz=keramik" : "")).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-        if (my !== slotReq || !j || !j.slots) { say(""); return; }
-        var free = 0;
-        j.slots.forEach(function (x) {
-          var r = wz.querySelector('input[name="uhrzeit"][value="' + x.zeit + '"]'); if (!r) return;
-          r.disabled = !x.frei; if (!x.frei && r.checked) r.checked = false; if (x.frei) free++;
-          r.parentNode.title = x.frei ? "" : "Bereits vergeben";
-        });
-        say(free ? free + (free === 1 ? " Uhrzeit" : " Uhrzeiten") + " frei an diesem Tag." : "An diesem Tag ist leider keine Uhrzeit mehr frei. Bitte einen anderen Tag wählen.", !free);
+      fetch(API + "/slots?tag=" + encodeURIComponent(day)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (my !== slotReq) return;
+        if (!j || !j.slots) { slotBox.innerHTML = ""; say("Die freien Uhrzeiten konnten gerade nicht geladen werden. " + alt, true, true); return; }
+        var free = j.slots.filter(function (x) { return x.frei; });
+        slotBox.innerHTML = j.slots.map(function (x) {
+          var t = String(x.zeit).replace(/[^0-9:]/g, "");
+          return '<label class="choice-pill"' + (x.frei ? "" : ' title="Bereits vergeben"') + '><input type="radio" name="uhrzeit" value="' + t + '" required' +
+            (x.frei ? "" : " disabled") + (x.frei && t === chosen ? " checked" : "") + '><span><strong>' + t + ' Uhr</strong></span></label>';
+        }).join("");
+        say(free.length ? free.length + (free.length === 1 ? " Uhrzeit" : " Uhrzeiten") + " frei an diesem Tag." : "An diesem Tag ist leider keine Uhrzeit mehr frei. Bitte einen anderen Tag wählen.", !free.length);
         summary();
-      }).catch(function () { say(""); });
+      }).catch(function () { if (my === slotReq) { slotBox.innerHTML = ""; say("Die freien Uhrzeiten konnten gerade nicht geladen werden. " + alt, true, true); } });
+    }
+    /* Zwei Buchungen zur selben Zeit: das Portal lässt nur eine gewinnen, die andere bekommt einen Hinweis an der Uhrzeit */
+    wz.addEventListener("elb:errors", function (e) {
+      var errs = e.detail || {}, k = Object.keys(errs)[0];
+      if (errs.uhrzeit) loadSlots("-");
+      var el = k && wz.querySelector('[name="' + k + '"]'), st = el && el.closest(".wz-step");
+      if (st) show(steps.indexOf(st));
+    });
+    /* Termin innerhalb von 14 Tagen: vorzeitigen Beginn ausdrücklich verlangen (Widerrufsrecht) */
+    var vzRow = $("[data-vorzeitig]", wz);
+    function syncVorzeitig() {
+      if (!vzRow) return;
+      var v = wz.datum.value, lim = new Date(); lim.setDate(lim.getDate() + 14);
+      var need = !!v && new Date(v + "T12:00:00") < lim;
+      vzRow.hidden = !need; var cb = $("input", vzRow); cb.disabled = !need; cb.required = need;
     }
     function checkDate(el) {
       var msg = $("#" + el.id + "-msg"), v = el.value, txt = "";
@@ -533,13 +496,12 @@
         if (v < todayIso()) txt = "Bitte ein Datum ab heute wählen.";
         else if (closedWeekdays.indexOf(d.getDay()) !== -1) txt = "An Sonntagen sind wir geschlossen. Bitte einen anderen Tag wählen.";
         else if (blocked.indexOf(v) !== -1) txt = "An diesem Tag sind wir leider ausgebucht oder geschlossen.";
-        else if (isKer() && blockedKer.indexOf(v) !== -1) txt = "Für eine Keramikversiegelung brauchen wir die Halle einen ganzen Tag. An diesem Tag ist dafür leider kein Platz frei.";
       }
       el.setCustomValidity(txt);
       if (msg) { msg.textContent = txt; msg.className = "field-msg" + (txt ? " error" : ""); }
     }
-    ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); if (n === "datum") loadSlots(); summary(); }); });
-    $$('input[name="paket"], input[name="winterschutz"], input[name="scheibenumfang"]', wz).forEach(function (r) { r.addEventListener("change", function () { syncWinter(); ["datum", "datum2"].forEach(function (n) { if (wz[n] && wz[n].value) checkDate(wz[n]); }); loadSlots(); }); });
+    ["datum", "datum2"].forEach(function (n) { if (wz[n]) wz[n].addEventListener("change", function () { checkDate(wz[n]); if (n === "datum") { loadSlots(); syncVorzeitig(); } summary(); }); });
+    $$('input[name="paket"], input[name="winterschutz"], input[name="scheibenumfang"]', wz).forEach(function (r) { r.addEventListener("change", syncWinter); });
 
     function show(i) {
       cur = Math.max(0, Math.min(steps.length - 1, i));
@@ -575,12 +537,14 @@
       set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + d.uhrzeit + " Uhr" : "") + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
       set("preis", v != null ? (sch ? "" : "ab ") + fmt(v) + " €" + (wk ? " + Aufpreis C² CarCeramic" : "") : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
       var bk = ELB.booking || {}, base = wk ? null : (v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null));
-      set("anzahlung", base ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " € per PayPal" : (d.paket ? "nach Absprache" : "–"));
+      var anz = base && bk.paypalMe ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2) : "";
+      if (anz) wz.setAttribute("data-anzahlung", anz); else wz.removeAttribute("data-anzahlung");
+      set("anzahlung", anz ? anz.replace(".", ",").replace(",00", "") + " € per PayPal nach dem Absenden" : (d.paket ? "nach Absprache" : "–"));
       $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? "ab " + fmt(x) + " €" : "auf Anfrage"; });
     }
     wz.addEventListener("change", summary); wz.addEventListener("input", summary);
-    if (wz.datum.value) { checkDate(wz.datum); loadSlots(); } else loadSlots();
-    syncWinter(); summary(); show(0);
+    if (wz.datum.value) checkDate(wz.datum);
+    loadSlots(); syncVorzeitig(); syncWinter(); summary(); show(0);
   }
 
   /* ---------------------------------------------------------------- Gutschein-Konfigurator */
@@ -621,15 +585,25 @@
   /* Danke-Seite */
   var thanks = $("[data-thanks-title]");
   if (thanks && Q.typ) {
+    var bk = ELB.booking || {}, owner = bk.owner || "Wir";
     var T = {
-      termin: Q.s === "reserviert"
-        ? ["Bitte bestätigen Sie Ihren Termin.", "Wir haben Ihnen eine E-Mail mit einem Link geschickt. Mit der Anzahlung von " + ((ELB.booking || {}).depositPercent || 15) + " % per PayPal ist der Termin verbindlich gebucht. Die Reservierung gilt " + ((ELB.booking || {}).holdHours || 24) + " Stunden. Danach meldet sich " + ((ELB.booking || {}).owner || "unser Team") + " telefonisch und sieht sich Ihr Fahrzeug vorab an."]
-        : ["Terminanfrage eingegangen.", "Wir prüfen Ihren Wunschtermin und melden uns mit Bestätigung und verbindlichem Angebot, in der Regel am selben oder nächsten Werktag."],
-      gutschein: ["Gutscheinbestellung eingegangen.", "Sie erhalten gleich eine E-Mail mit den Zahlungsdaten. Nach Zahlungseingang senden wir Ihnen den Gutschein."],
+      termin: ["Terminanfrage eingegangen.", owner + " meldet sich telefonisch, sieht sich Ihr Fahrzeug vorab an und bestätigt den Termin. Eine Eingangsbestätigung ist unterwegs an Ihre E-Mail-Adresse."],
+      kontakt: ["Anfrage eingegangen.", "Wir melden uns so schnell wie möglich, in der Regel am selben oder nächsten Werktag."],
+      gutschein: ["Gutscheinbestellung eingegangen.", "Sie erhalten eine Eingangsbestätigung per E-Mail. Die Zahlungsdaten schicken wir Ihnen in Kürze, nach Zahlungseingang erhalten Sie den Gutschein."],
       firma: ["Anfrage eingegangen.", "Vielen Dank für Ihr Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."],
-      widerruf: ["Ihr Widerruf ist eingegangen.", "Sie erhalten sofort eine Eingangsbestätigung per E-Mail. Bereits geleistete Zahlungen erstatten wir unverzüglich, spätestens binnen 14 Tagen."]
+      widerruf: ["Ihr Widerruf ist eingegangen.", "Sie erhalten eine Eingangsbestätigung per E-Mail. Bereits geleistete Zahlungen erstatten wir unverzüglich, spätestens binnen 14 Tagen."]
     }[Q.typ];
     if (T) { thanks.innerHTML = "Danke! <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " Ihre Vorgangsnummer: " + Q.ref + "." : ""); }
+    /* Anzahlung per PayPal.me: Betrag steht im Link, die Vorgangsnummer als Verwendungszweck */
+    var pay = $("[data-thanks-pay]"), amt = parseFloat(Q.anz || "");
+    if (pay && Q.typ === "termin" && bk.paypalMe && amt > 0 && amt < 10000) {
+      var eur = amt.toFixed(2).replace(".", ",").replace(",00", "") + " €";
+      pay.innerHTML = '<h2>Anzahlung leisten</h2><p>Mit der Anzahlung von <strong>' + eur + '</strong> sichern Sie sich Ihren Termin. Sie wird mit dem Endpreis verrechnet. ' +
+        'Bitte geben Sie bei PayPal als Verwendungszweck <strong>' + (Q.ref || "Ihren Namen").replace(/[^A-Za-z0-9 -]/g, "") + '</strong> an und zahlen Sie als „Waren oder Dienstleistungen“.</p>' +
+        '<a class="btn btn-primary btn-lg" href="https://paypal.me/' + encodeURIComponent(bk.paypalMe) + '/' + amt.toFixed(2) + 'EUR" target="_blank" rel="noopener">Anzahlung ' + eur + ' mit PayPal senden</a>' +
+        '<p class="hint">Kommt der Termin nicht zustande oder widerrufen Sie innerhalb der Frist, erstatten wir die Anzahlung vollständig.</p>';
+      pay.hidden = false;
+    }
   }
 
   /* ---------------------------------------------------------------- Einblenden beim Scrollen */

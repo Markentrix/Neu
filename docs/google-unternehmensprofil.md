@@ -224,7 +224,7 @@ Eingetragen im Profil und genauso auf der Website (Grunddaten → openingHours):
 - Mittwoch: 09:00 bis 17:00
 - Sonntag: geschlossen
 
-Ändern sich die Zeiten, zuerst Google ändern, dann im Portal unter Grunddaten → openingHours. Die Online-Buchung bietet dann automatisch nur Abgabezeiten innerhalb der Öffnungszeit an (mittwochs also kein 8-Uhr-Termin).
+Ändern sich die Zeiten, zuerst Google ändern, dann in `content/site.json` unter `openingHours` und die buchbaren Uhrzeiten im Markentrix-Portal (feste Uhrzeiten, mittwochs kein 8-Uhr-Termin). Danach Website neu bauen und hochladen.
 - Attribut "Termin erforderlich" aktivieren, falls verfügbar.
 - Unter "Weitere Öffnungszeiten" prüfen, ob es einen passenden Typ gibt (z. B. für Terminvereinbarung oder Fahrzeugannahme).
 - Feiertage und Betriebspausen immer vorher als "Sonderöffnungszeiten" eintragen. Für Ende 2026: `[BETRIEBSPAUSE ZWISCHEN DEN JAHREN, falls geplant]`.
