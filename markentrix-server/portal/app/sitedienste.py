@@ -199,6 +199,11 @@ def leistungen_wissen_sync(cur, kid):
 
 def ereignis(kid, art: str, ok: bool, hinweis: str = ""):
     try:
+        if not ok and hinweis:
+            from . import fehlerhilfe
+            tipp = fehlerhilfe.kurztipp(hinweis)
+            if tipp:
+                hinweis = hinweis[:200].rstrip() + " " + tipp
         with tx("system") as cur:
             cur.execute("INSERT INTO website_ereignisse (kunden_id, art, ok, hinweis) VALUES (%s,%s,%s,%s)", (kid, art, ok, hinweis[:300] or None))
             cur.execute("DELETE FROM website_ereignisse WHERE kunden_id=%s AND zeit < now() - interval '90 days'", (kid,))

@@ -116,29 +116,14 @@ async def http_fehler(request: Request, exc: StarletteHTTPException):
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=kopf)
 
 
-_letzter_alarm: dict = {}
-
-
 @app.exception_handler(Exception)
 async def unbehandelt(request: Request, exc: Exception):
-    """Unerwartete Fehler: nicht nur 500 zeigen, sondern als Alarm ins Protokoll (max. 1x je Pfad und 10 Minuten), damit sie auffallen."""
+    """Unerwartete Fehler: nicht nur 500 zeigen, sondern mit Erklärung und Lösungsvorschlag als Alarm ins Protokoll (Fehlerhilfe; je Pfad und Fehlerart höchstens alle 10 Minuten)."""
     import logging
-    import time
     logging.getLogger("uvicorn.error").exception("Unbehandelter Fehler bei %s", request.url.path, exc_info=exc)
-    pfad = request.url.path
-    jetzt = time.time()
-    if jetzt - _letzter_alarm.get(pfad, 0) > 600:
-        _letzter_alarm[pfad] = jetzt
-        try:
-            import json
-            with db.tx("system") as cur:
-                cur.execute("INSERT INTO alarme (stufe, quelle, titel, details) VALUES ('warnung','portal',%s,%s::jsonb)",
-                            ("Fehler im Portal: " + request.method + " " + pfad[:120], json.dumps({"fehler": type(exc).__name__, "text": str(exc)[:500]})))
-                from . import push
-                push.senden(push.admins(cur), "Fehler im Portal", "Ein unerwarteter Fehler wurde protokolliert (Admin → Übersicht → Systemstatus).", "/admin#uebersicht", "fehler")
-        except Exception:  # noqa: BLE001 - Alarm darf nie selbst den Fehler verdoppeln
-            pass
-    return JSONResponse({"detail": "Interner Fehler. Der Fehler wurde protokolliert."}, status_code=500)
+    from . import fehlerhilfe
+    nr = fehlerhilfe.melden("portal", exc, sperre_von="portal:" + request.url.path[:60], titel="Fehler im Portal: " + request.method + " " + request.url.path[:120], sperre_sek=600)
+    return JSONResponse({"detail": f"Interner Fehler. Der Fehler wurde protokolliert (Fehler-Nr. {nr})."}, status_code=500)
 
 
 @app.get("/healthz")

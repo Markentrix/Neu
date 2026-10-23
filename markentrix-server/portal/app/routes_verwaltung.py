@@ -615,7 +615,7 @@ def compliance(user: dict = Depends(require_admin)):
             "auskunft": q("SELECT id, person_ref, art, eingang_am, frist_bis, status, notiz FROM auskunftsanfragen WHERE status IN ('offen','in_bearbeitung') ORDER BY frist_bis NULLS LAST LIMIT 100"),
             "freigaben": q("SELECT f.id, k.kundennummer, f.art, f.vorschau, f.status, f.erstellt_am FROM freigaben f LEFT JOIN kunden k ON k.id=f.kunden_id WHERE f.status='offen' ORDER BY f.erstellt_am LIMIT 100"),
             "aenderungen": q("SELECT id, gegenstand, beschreibung, art, beantragt_von, beantragt_am, status FROM aenderungsfreigaben WHERE status='offen' ORDER BY beantragt_am LIMIT 100"),
-            "alarme": q("SELECT id, zeit, stufe, quelle, titel FROM alarme WHERE bestaetigt_am IS NULL ORDER BY zeit DESC LIMIT 100"),
+            "alarme": q("SELECT id, zeit, stufe, quelle, titel, details->'erklaerung'->>'ursache' AS ursache, details->'erklaerung'->'schritte'->>0 AS tipp, details->>'fehler_nr' AS fehler_nr FROM alarme WHERE bestaetigt_am IS NULL ORDER BY zeit DESC LIMIT 100"),
             "workflow_fehler": q("SELECT id, zeit, workflow_name, knoten, left(fehlertext, 300) AS fehlertext FROM workflow_fehler WHERE NOT behoben ORDER BY zeit DESC LIMIT 100"),
             "befunde": q("SELECT id, titel, schwere, status, regel_code, gefunden_am FROM befunde WHERE status IN ('offen','in_arbeit') ORDER BY (schwere='kritisch') DESC, gefunden_am DESC LIMIT 100"),
             "massnahmen": q("SELECT id, beschreibung, verantwortlich, faellig_am, status FROM massnahmen WHERE status IN ('geplant','in_arbeit') ORDER BY faellig_am NULLS LAST LIMIT 100"),

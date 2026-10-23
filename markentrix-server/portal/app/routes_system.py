@@ -6,8 +6,9 @@ from pathlib import Path
 
 import segno
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
 
-from . import betrieb, config, einstellungen
+from . import betrieb, config, einstellungen, fehlerhilfe
 from .db import tx
 from .security import require_admin
 
@@ -150,3 +151,78 @@ def vertragsstand(user: dict = Depends(require_admin)):
 def portal_qr(user: dict = Depends(require_admin)):
     """QR-Code der Portal-Adresse (Anmeldeseite), damit Kunden und Vertriebler das Portal direkt am Handy öffnen."""
     return {"url": config.BASE_URL, "svg": segno.make(config.BASE_URL, error="m").svg_data_uri(scale=6, border=2)}
+
+
+# ---------------------------------------------------------------- Fehlerhilfe
+@router.get("/admin/fehlerhilfe")
+def fehlerhilfe_liste(user: dict = Depends(require_admin)):
+    """Letzte Fehler-Alarme mit Ursache und Lösungsvorschlag (offene zuerst)."""
+    with tx("admin") as cur:
+        cur.execute("""SELECT id, zeit, stufe, quelle, titel, details, bestaetigt_am IS NOT NULL AS erledigt FROM alarme
+                       WHERE details ? 'erklaerung' ORDER BY (bestaetigt_am IS NULL) DESC, zeit DESC LIMIT 40""")
+        rows = cur.fetchall()
+    return [{"id": r["id"], "zeit": r["zeit"], "stufe": r["stufe"], "quelle": r["quelle"], "titel": r["titel"], "erledigt": r["erledigt"],
+             "fehler_nr": r["details"].get("fehler_nr"), "text": r["details"].get("text"), "erklaerung": r["details"].get("erklaerung")} for r in rows]
+
+
+class ErklaerIn(BaseModel):
+    text: str = Field(min_length=3, max_length=4000)
+
+
+@router.post("/admin/fehlerhilfe/erklaeren")
+def fehlerhilfe_erklaeren(data: ErklaerIn, user: dict = Depends(require_admin)):
+    """Eine Fehlermeldung einfügen (z. B. aus einer Mail oder vom Bildschirm): bekommt Ursache und Schritte."""
+    return fehlerhilfe.erklaeren(data.text)
+
+
+def _smtp_probe(c: dict) -> str:
+    """Prüft Verbindung und Anmeldung beim Mailserver, ohne etwas zu senden. Gibt "" bei Erfolg zurück, sonst den Fehlertext."""
+    import smtplib
+    import ssl
+    try:
+        host, port, mode = c["host"], int(c.get("port") or 587), c.get("sicherung", "starttls")
+        ctx = ssl.create_default_context()
+        sm = smtplib.SMTP_SSL(host, port, timeout=10, context=ctx) if mode == "ssl" else smtplib.SMTP(host, port, timeout=10)
+        with sm:
+            sm.ehlo()
+            if mode == "starttls":
+                sm.starttls(context=ctx)
+                sm.ehlo()
+            if c.get("benutzer"):
+                sm.login(c["benutzer"], c.get("passwort", ""))
+        return ""
+    except Exception as e:  # noqa: BLE001 - jeder Fehler ist hier das Ergebnis
+        return f"{type(e).__name__}: {str(e)[:200]}"
+
+
+@router.post("/admin/fehlerhilfe/pruefen")
+def fehlerhilfe_pruefen(user: dict = Depends(require_admin)):
+    """Prüft jetzt die wichtigsten Dinge und gibt bei jedem Problem Ursache und Lösungsvorschlag mit. Sendet keine Mails."""
+    import shutil
+    out = []
+
+    def punkt(id, titel, ok, detail="", fehler_text=""):
+        out.append({"id": id, "titel": titel, "ok": ok, "detail": detail, "vorschlag": None if ok else fehlerhilfe.erklaeren(fehler_text or detail)})
+    try:
+        with tx("system") as cur:
+            cur.execute("SELECT 1")
+            smtp = einstellungen.lesen(cur, "smtp") or {}
+            jobs = betrieb.lesen(cur, "jobs")
+        punkt("db", "Datenbank", True, "erreichbar")
+    except Exception as e:  # noqa: BLE001
+        punkt("db", "Datenbank", False, "nicht erreichbar", f"{type(e).__name__}: {e}")
+        return {"punkte": out, "ok": False}
+    frei = shutil.disk_usage("/")
+    pr = round(100 * (frei.total - frei.free) / frei.total)
+    punkt("platte", "Festplatte", pr < 90, f"{pr} % belegt", "No space left on device")
+    punkt("geheimnis", "Gespeicherte Einstellungen", not einstellungen.defekt, "lesbar" if not einstellungen.defekt else "nicht lesbar: " + ", ".join(sorted(einstellungen.defekt)), "InvalidToken PORTAL_SECRET")
+    if not smtp.get("host"):
+        punkt("mail", "E-Mail-Versand", False, "noch nicht eingerichtet", "SMTPConnectError nicht eingerichtet")
+    else:
+        f = _smtp_probe(smtp)
+        punkt("mail", "E-Mail-Versand (Anmeldung beim Mailserver)", not f, "Anmeldung klappt" if not f else f, "SMTP " + f)
+    if not jobs or jobs["sekunden"] > 300:
+        punkt("jobs", "Hintergrundjobs", False, "melden sich nicht (seit " + (str(jobs["sekunden"] // 60) + " Min." if jobs else "dem Start") + ")", "TimeoutError Hintergrundjobs")
+    else:
+        punkt("jobs", "Hintergrundjobs", True, "laufen")
+    return {"punkte": out, "ok": all(p["ok"] for p in out)}

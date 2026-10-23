@@ -241,6 +241,21 @@
    "n": [
     "Der Wachdienst prüft alle 5 Minuten. Nach der Korrektur wird die Ampel nach der nächsten Prüfung grün."
    ]
+  },
+  {
+   "t": "Fehler-Hilfe: Was tun, wenn etwas nicht klappt?",
+   "k": "fehler fehlermeldung problem alarm hilfe lösung mail geht nicht prüfen störung fehler-nr",
+   "wo": "Übersicht → Karte „Fehler-Hilfe“",
+   "l": "#uebersicht",
+   "s": [
+    "Das Portal erkennt Fehler selbst: unerwartete Fehler, abgestürzte Hintergrundjobs, Mail- und Website-Probleme. Es protokolliert sie als Alarm mit Ursache und einem Lösungsvorschlag und schickt dir eine Benachrichtigung.",
+    "Karte „Fehler-Hilfe“ in der Übersicht: „Jetzt alles prüfen“ testet Datenbank, Festplatte, gespeicherte Einstellungen, die Anmeldung beim Mailserver und die Hintergrundjobs. Es werden keine Mails verschickt. Bei jedem Problem steht dabei, was die Ursache ist und was du tun kannst.",
+    "Fehlermeldung bekommen, z. B. von einem Kunden oder aus einer Mail? Einfügen und „Fehler erklären“ klicken. Du bekommst die Ursache in einfachen Worten und die Schritte.",
+    "Meldet ein Kunde oder die Website „Interner Fehler (Fehler-Nr. …)“, suche die Nummer unter „Datenschutz & Qualität → Alarme“ oder in „Letzte Fehler“ in der Karte. Dort stehen Ursache, Vorschlag und der technische Text (Passwörter und Schlüssel sind entfernt).",
+    "Schritte mit grauem Befehl (z. B. sudo mkctl selbsttest) erledigst du auf dem Server per SSH. Alles andere geht direkt im Admin.",
+    "Wird ein Fehler nicht erkannt, kommt der allgemeine Hinweis mit der Fehler-Nr. Gib Nummer und Text weiter, danach lässt sich eine neue Regel in die Fehlerhilfe aufnehmen.",
+    "Alarme bestätigst du unter „Datenschutz & Qualität → Alarme“, wenn der Fehler behoben ist. Gleiche Fehler werden höchstens alle 30 Minuten neu gemeldet, damit du nicht überflutet wirst."
+   ]
   }
  ],
  "titel": "Anleitung Admin-Bereich",

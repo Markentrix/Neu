@@ -757,6 +757,9 @@ def _lauf(job, cfg) -> None:
             except Exception:
                 log.exception("Marker konnten nicht freigegeben werden")
         n = _fehlserie[job.__name__] = _fehlserie.get(job.__name__, 0) + 1
+        import sys
+        from . import fehlerhilfe
+        fehlerhilfe.melden("job:" + job.__name__, sys.exc_info()[1], titel=f"Hintergrundjob „{job.__name__}“ fehlgeschlagen", sperre_sek=3600)
         betrieb.notieren("jobs", {"fehler_am": betrieb.jetzt(), "fehler_job": job.__name__, "fehler_serie": n})
     else:
         if _fehlserie.pop(job.__name__, None) is not None and not _fehlserie:
