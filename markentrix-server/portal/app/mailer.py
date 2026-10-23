@@ -1,4 +1,5 @@
 """E-Mail-Versand über den eigenen SMTP-Zugang (Einstellungen im Admin-Bereich)."""
+import re
 import smtplib
 import ssl
 from email.message import EmailMessage
@@ -36,7 +37,7 @@ def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | N
         if reply_to:
             msg["Reply-To"] = reply_to
         msg["To"] = an
-        msg["Subject"] = betreff
+        msg["Subject"] = re.sub(r"[\r\n]+", " ", betreff)   # Zeilenumbrüche (z. B. in Namen) dürfen den Versand nie verhindern
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain=c["absender"].split("@")[-1])
         msg.set_content(text)

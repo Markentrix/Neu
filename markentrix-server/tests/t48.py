@@ -120,6 +120,27 @@ chk("Ohne Datenschutzseite kein Attribut",'data-datenschutz' not in idx and idx.
 r=up(zipb({"index.html":'<html><body><script src="https://alt.example/static/js/site.js" data-site="mk_alt" defer></script></body></html>',"datenschutz/index.html":"x"}),domD,kunde=kA); worker()
 idx=open(f"{S}/live/{domD}/index.html").read()
 chk("Vorhandenes Skript: Attribut ergänzt, nicht doppelt",idx.count("site.js")==1 and idx.count("data-datenschutz=")==1 and 'data-datenschutz="/datenschutz/"' in idx,idx)
+# Fremde Kennung (data-site eines anderen Kunden) darf nie mitveröffentlicht werden
+sidA=sql(f"select site_id from website_dienste where kunden_id='{kA}'"); sidB=sql(f"select site_id from website_dienste where kunden_id='{kB}'") or "mk_FREMDERKUNDE01"
+fremd=f'<html><body><script data-site="{sidB}" src="https://x.example/static/js/site.js" defer></script></body></html>'
+domF=f"fremd{sfx}.de"
+up(zipb({"index.html":fremd}),domF,kunde=kA,skript="1"); worker()
+idx=open(f"{S}/live/{domF}/index.html").read()
+chk("Fremde Kennung (Attribut vor src) wird durch die des Kunden ersetzt",f'data-site="{sidA}"' in idx and sidB not in idx and idx.count("site.js")==1,idx)
+domG=f"fremdg{sfx}.de"
+up(zipb({"index.html":fremd}),domG,kunde=kA,skript="0"); worker()
+idx=open(f"{S}/live/{domG}/index.html").read()
+chk("Ohne Dienste-Haken wird eine fremde Kennung entfernt",sidB not in idx and "data-site" not in idx,idx)
+up(zipb({"index.html":fremd}),f"demo{sfx}",art="demo",skript="1"); worker()
+idx=open(f"{S}/demos/demo{sfx}/index.html").read() if os.path.exists(f"{S}/demos/demo{sfx}/index.html") else ""
+chk("Demo ohne Kunde: fremde Kennung entfernt",idx and sidB not in idx and "data-site" not in idx,idx)
+einf=f"<html><body><script src='https://x.example/static/js/site.js' data-site='{sidB}' defer></script><script src=\"https://x.example/static/js/site.js\" data-site={sidB}></script></body></html>"
+domH=f"fremdh{sfx}.de"; up(zipb({"index.html":einf}),domH,kunde=kA,skript="0"); worker()
+idx=open(f"{S}/live/{domH}/index.html").read(); chk("Fremde Kennung in einfachen Anführungszeichen oder ohne wird entfernt",sidB not in idx and "data-site" not in idx,idx)
+domI=f"fremdi{sfx}.de"; up(zipb({"index.html":einf}),domI,kunde=kA,skript="1"); worker()
+idx=open(f"{S}/live/{domI}/index.html").read(); chk("…und mit Dienste-Haken durch die richtige ersetzt",sidB not in idx and idx.count(f'data-site="{sidA}"')>=1,idx)
+for bad in (f"www.test{sfx}.de","localhost"):
+    r=up(zipb({"index.html":"x"}),bad,kunde=kA); chk(f"Live-Name „{bad}“ abgelehnt",r.status_code==400,r.text)
 # Fremde Domain
 r=up(zipb({"index.html":"x"}),dom,kunde=kB); chk("Domain gehört schon einem anderen Kunden",r.status_code==400,r.text)
 # ---- Ganzes Projekt (wie ElbDetail): nur der Ordner website-fertig/ wird übernommen, Server-Code & Co. bleiben draußen

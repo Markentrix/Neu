@@ -36,6 +36,10 @@ def _site(site_id: str) -> dict:
         z = cur.fetchone()
         if not z:
             raise HTTPException(404, "Unbekannte Website.")
+        cur.execute("SELECT status FROM kunden WHERE id=%s", (z["kunden_id"],))
+        k = cur.fetchone()
+        if not k or k["status"] == "beendet":      # nach Vertragsende nimmt die Website keine Anfragen und Buchungen mehr an
+            raise HTTPException(404, "Unbekannte Website.")
         z["_hosts"] = sd.erlaubte_hosts(cur, z["kunden_id"], ROOT)
     return z
 
@@ -115,6 +119,8 @@ def oeff_kontakt(site_id: str, request: Request, daten: dict = Depends(_korper))
     kopf = _cors(request, z)
     rate_limit("kontakt:" + client_ip(request), 6, 600)
     rate_limit("kontaktsite:" + site_id, 150, 86400)
+    if z.get("verzug_pause"):
+        raise HTTPException(503, "Dieser Dienst ist vorübergehend nicht verfügbar. Bitte rufen Sie uns direkt an.")
     if not z["mail_aktiv"]:
         raise HTTPException(409, "Das Kontaktformular ist nicht aktiv.")
     d = _pruefen(KontaktIn, daten)
@@ -210,8 +216,12 @@ def oeff_termin(site_id: str, request: Request, bg: BackgroundTasks, daten: dict
     kopf = _cors(request, z)
     rate_limit("sitebuchen:" + client_ip(request), 8, 3600)
     rate_limit("sitebuchensite:" + site_id, 100, 86400)
+    if z.get("verzug_pause"):
+        raise HTTPException(503, "Dieser Dienst ist vorübergehend nicht verfügbar. Bitte rufen Sie uns direkt an.")
     if not z["kal_aktiv"]:
         raise HTTPException(409, "Die Terminbuchung ist nicht aktiv.")
+    if z["kal_freigabe"]:
+        raise HTTPException(409, "Dieser Betrieb bestätigt Termine persönlich. Bitte nutzen Sie das Kontaktformular für Ihre Terminanfrage.")
     d = _pruefen(TerminIn, daten)
     if d.hp:
         return _antwort({"ok": True, "wann": ""}, kopf)

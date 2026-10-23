@@ -495,6 +495,11 @@ def profil_aendern(data: ProfilIn, user: dict = Depends(require_kunde)):
     if data.benachr_email and not EMAIL_RE.match(data.benachr_email.strip()):
         raise HTTPException(400, "Die E-Mail-Adresse für Benachrichtigungen ist ungültig.")
     with tx("system") as cur:
+        if user["kunden_rolle"] != "inhaber":   # Adressen für Rechnungen und Benachrichtigungen leitet sonst z. B. ein Empfangs-Zugang um
+            cur.execute("SELECT email, benachr_email FROM kunden WHERE id=%s", (user["kunden_id"],))
+            alt = cur.fetchone() or {}
+            if (data.email is not None and data.email.strip() != (alt.get("email") or "")) or (data.benachr_email is not None and data.benachr_email.strip() != (alt.get("benachr_email") or "")):
+                raise HTTPException(403, "Die E-Mail-Adressen für Rechnungen und Benachrichtigungen kann nur der Inhaber ändern.")
         cur.execute("""UPDATE kunden SET ansprechpartner=coalesce(%s,ansprechpartner), email=coalesce(%s,email), telefon=coalesce(%s,telefon),
                        benachr_email=CASE WHEN %s::boolean THEN nullif(%s,'') ELSE benachr_email END,
                        benachr_anfragen=coalesce(%s,benachr_anfragen), benachr_termine=coalesce(%s,benachr_termine), benachr_bericht=coalesce(%s,benachr_bericht), benachr_nachrichten=coalesce(%s,benachr_nachrichten)

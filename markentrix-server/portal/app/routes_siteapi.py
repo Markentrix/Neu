@@ -61,7 +61,8 @@ def _lade(request: Request) -> dict:
         if oh not in (host, "www." + host):
             raise HTTPException(403, "Herkunft nicht erlaubt.")
     with tx("system") as cur:
-        cur.execute("SELECT kunden_id FROM websites WHERE domain=%s AND art='live' AND status IN ('live','pausiert')", (host,))
+        cur.execute("""SELECT w.kunden_id FROM websites w JOIN kunden k ON k.id=w.kunden_id
+                       WHERE w.domain=%s AND w.art='live' AND w.status IN ('live','pausiert') AND k.status<>'beendet'""", (host,))
         w = cur.fetchone()
         if not w:
             raise HTTPException(404, "Unbekannte Website.")

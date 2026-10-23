@@ -2,6 +2,7 @@
 Zwischenordner und legt einen Auftrag ab, den der Server-Dienst (bin/worker.py, jede Minute) ausführt (Caddy einrichten, Ordner tauschen)."""
 import json
 import re
+from urllib.parse import urlparse
 import secrets
 import shutil
 import stat
@@ -32,6 +33,11 @@ EGAL = {".ds_store", "thumbs.db", "desktop.ini"}
 def _ordner_name(art: str, name: str) -> str:
     if art not in NAME or not NAME[art].match(name):
         raise HTTPException(400, "Der Name ist ungültig. Bei einer Live-Website die Domain ohne www (z. B. firma.de), bei einer Demo nur Kleinbuchstaben, Zahlen und Bindestriche.")
+    if art == "live":
+        portal = (urlparse(config.BASE_URL).hostname or "").lower()
+        eigene = portal.split(".", 1)[1] if portal.count(".") >= 2 else portal
+        if name.startswith("www.") or name == portal or (eigene and (name == eigene or name.endswith("." + eigene))):
+            raise HTTPException(400, "Diese Adresse gehört zum Portal oder ist mit www angegeben. Bitte die Kundendomain ohne www eintragen (z. B. firma.de).")
     return name
 
 
@@ -149,22 +155,46 @@ def datenschutz_pfad(ordner: Path) -> str:
     return ""
 
 
-def skript_ersetzen(ordner: Path, site_id: str) -> int:
-    """Setzt in Seiten, die das Dienste-Skript schon enthalten, die Kennung der Website auf die des Kunden (z. B. wenn die Demo einem anderen Kunden gehörte)."""
-    n = 0
-    ds = datenschutz_pfad(ordner)
-    muster = re.compile(r'(<script[^>]*' + re.escape(SKRIPT_MARKE) + r'[^>]*\sdata-site=")[^"]*(")', re.I)
+SKRIPT_TAG = re.compile(r'<script\b[^>]*' + re.escape(SKRIPT_MARKE) + r'[^>]*>', re.I)
+KENNUNG = re.compile(r'(\sdata-site=)(["\']?)([^"\'\s>]*)\2', re.I)   # mit doppelten, einfachen oder ohne Anführungszeichen
+
+
+def _seiten(ordner: Path):
     for p in list(ordner.rglob("*.html")) + list(ordner.rglob("*.htm")):
         if p.is_symlink() or not p.is_file() or p.stat().st_size > 3_000_000:
             continue
         try:
-            t = p.read_text(encoding="utf-8")
+            yield p, p.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        neu = muster.sub(lambda m: m.group(1) + site_id + m.group(2), t)
-        if ds:
-            neu = re.sub(r'<script[^>]*' + re.escape(SKRIPT_MARKE) + r'[^>]*>',
-                         lambda m: m.group(0) if "data-datenschutz=" in m.group(0) else m.group(0)[:-1].rstrip() + f' data-datenschutz="{ds}">', neu, flags=re.I)
+
+
+def skript_ersetzen(ordner: Path, site_id: str) -> int:
+    """Setzt in Seiten, die das Dienste-Skript schon enthalten, die Kennung der Website auf die des Kunden (z. B. wenn die Demo einem anderen Kunden gehörte).
+    Die Reihenfolge der Attribute im Skript-Tag spielt keine Rolle."""
+    n = 0
+    ds = datenschutz_pfad(ordner)
+    for p, t in _seiten(ordner):
+        def tag(m):
+            x = KENNUNG.sub(lambda k: k.group(1) + '"' + site_id + '"', m.group(0))
+            if ds and "data-datenschutz=" not in x:
+                x = x[:-1].rstrip() + f' data-datenschutz="{ds}">'
+            return x
+        neu = SKRIPT_TAG.sub(tag, t)
+        if neu != t:
+            p.write_text(neu, encoding="utf-8")
+            n += 1
+    return n
+
+
+def fremde_kennung_entfernen(ordner: Path, erlaubt: str | None) -> int:
+    """Entfernt aus dem Dienste-Skript jede Kennung (data-site), die nicht zu diesem Kunden gehört. Ohne Kennung tut das Skript nichts,
+    so kann eine mitgebrachte Seite (Demo, Kopie einer anderen Kundenseite) nie Anfragen an das Postfach eines fremden Kunden schicken."""
+    n = 0
+    for p, t in _seiten(ordner):
+        def tag(m):
+            return KENNUNG.sub(lambda k: k.group(0) if erlaubt and k.group(3) == erlaubt else "", m.group(0))
+        neu = SKRIPT_TAG.sub(tag, t)
         if neu != t:
             p.write_text(neu, encoding="utf-8")
             n += 1
@@ -233,13 +263,19 @@ def _abschliessen(user: dict, art: str, name: str, kid, firma: str, nr: str, sta
     """Gemeinsamer Schluss von Upload und „Demo live schalten“: Website-Dienste einbauen, Website eintragen, prüfen, Auftrag für den Server-Dienst ablegen."""
     eingefuegt = 0
     with tx("admin") as cur:
+        site_id = None
         if kid and skript:
             site_id = sd.zeile(cur, kid)["site_id"]
             eingefuegt = skript_ersetzen(inhalt, site_id) + skript_einfuegen(inhalt, site_id, config.BASE_URL)
+        elif kid:
+            cur.execute("SELECT site_id FROM website_dienste WHERE kunden_id=%s", (kid,))
+            r = cur.fetchone()
+            site_id = r["site_id"] if r else None
+        entfernt = fremde_kennung_entfernen(inhalt, site_id)   # nie die Kennung eines anderen Kunden mitveröffentlichen
         if art == "live":
             cur.execute("""INSERT INTO websites (kunden_id, domain, art, status, letzte_veroeffentlichung) VALUES (%s,%s,'live','live',now())
                            ON CONFLICT (domain) DO UPDATE SET status='live', letzte_veroeffentlichung=now()""", (kid, name))
-        audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet, "kunde_informiert": bool(melden and art == "live" and kid), **(zusatz or {})})
+        audit(cur, user, "website_hochgeladen", kid, {"art": art, "name": name, "dateien": n, "ordner": verwendet, "kunde_informiert": bool(melden and art == "live" and kid), "fremde_kennung_entfernt": entfernt, **(zusatz or {})})
         if melden and art == "live" and kid:
             cur.execute("INSERT INTO website_meldungen (kunden_id, domain, upload_id, hinweis) VALUES (%s,%s,%s,%s)", (kid, name, stage.name.removeprefix(".upload-"), hinweis.strip()[:1000]))
     try:

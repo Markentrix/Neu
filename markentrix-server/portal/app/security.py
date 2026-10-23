@@ -75,7 +75,8 @@ def current_user(request: Request) -> dict:
         cur.execute(
             """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id, b.totp_aktiv, b.kunden_rolle, b.admin_rechte, b.website_mitarbeiter_id
                FROM sitzungen s JOIN benutzer b ON b.id = s.benutzer_id
-               WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv AND (b.zugang_bis IS NULL OR b.zugang_bis >= current_date)""",
+               WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv AND (b.zugang_bis IS NULL OR b.zugang_bis >= current_date)
+                 AND (b.vertriebspartner_id IS NULL OR NOT EXISTS (SELECT 1 FROM vertriebspartner p WHERE p.id = b.vertriebspartner_id AND p.status = 'beendet'))""",
             (token_hash(t),),
         )
         u = cur.fetchone()
