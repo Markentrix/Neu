@@ -48,6 +48,9 @@ async def alle(pg,name,pfad,seiten,w):
     schlecht=[];ueber=[];leer=[]
     for s in seiten:
         await pg.goto(B+pfad+"#"+s); await pg.wait_for_timeout(650)
+        try: await pg.wait_for_load_state("networkidle",timeout=8000)
+        except Exception: pass
+        await pg.wait_for_timeout(500)
         if await pg.locator("main h1, #main h1, h1").count()==0: leer.append(s)
         await pg.add_script_tag(content=AXE)
         ax=await pg.evaluate("axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")

@@ -45,6 +45,9 @@ async def pruefe(pg,name,pfad,seiten,w):
     schlecht=[];ueber=[];leer=[]
     for s in seiten:
         await pg.goto(B+pfad+"#"+s); await pg.wait_for_timeout(700)
+        try: await pg.wait_for_load_state("networkidle",timeout=8000)      # langsame Rechner: erst prüfen, wenn die Seite fertig geladen und beschriftet ist
+        except Exception: pass
+        await pg.wait_for_timeout(600)
         if await pg.locator("h1").count()==0: leer.append(s)
         await pg.add_script_tag(content=AXE)
         ax=await pg.evaluate("axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")
