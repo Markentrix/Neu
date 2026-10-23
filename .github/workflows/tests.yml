@@ -1,57 +1,48 @@
-name: Markentrix-Tests
-# Läuft bei jedem Push auf server-paket und bei Pull Requests. Gleiche Prüfungen wie "bash tests/run.sh" (rund 30 bis 45 Minuten).
+name: Tests
+# Läuft bei jedem Push auf server-paket/main und bei Pull Requests. Gleiche Prüfungen wie "bash tests/run.sh" (Volltest, rund 30 bis 45 Minuten).
 on:
   push:
-    branches: [server-paket]
+    branches: [server-paket, main]
   pull_request:
   workflow_dispatch:
-
 jobs:
-  schnell:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+  portal:
+    runs-on: ubuntu-latest
+    container: ubuntu:24.04   # läuft als root, damit der Testlauf eine eigene Test-Datenbank starten kann
+    timeout-minutes: 90
     steps:
+      - name: Programme installieren
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq git curl psmisc procps postgresql postgresql-client poppler-utils python3 python3-pip nodejs npm shellcheck >/dev/null
       - uses: actions/checkout@v4
       - name: Shell-Skripte prüfen
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
           cd markentrix-server
           for f in install.sh bin/*.sh bin/mkctl; do bash -n "$f"; done
           shellcheck -S warning install.sh bin/*.sh bin/mkctl
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - name: Python prüfen (pyflakes)
-        run: |
-          pip install pyflakes
-          python -m pyflakes markentrix-server/portal/app
-
-  volltest:
-    needs: schnell
-    runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - name: PostgreSQL 16 bereitstellen
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-16 postgresql-client-16 fonts-liberation
-          sudo systemctl stop postgresql || true
-      - name: Python-Pakete und Browser
-        run: |
-          python -m pip install -r markentrix-server/portal/requirements.txt aiosmtpd httpx pyflakes playwright pypdf
-          sudo mkdir -p /opt/pw && sudo chmod 777 /opt/pw
-          PLAYWRIGHT_BROWSERS_PATH=/opt/pw python -m playwright install --with-deps chromium
-          echo "PLAYWRIGHT_BROWSERS_PATH=/opt/pw" >> "$GITHUB_ENV"
+      - name: Abhängigkeiten
+        run: pip3 install --break-system-packages -q -r markentrix-server/portal/requirements.txt aiosmtpd httpx pyflakes playwright pypdf
+      - name: Browser für die Oberflächentests
+        run: python3 -m playwright install --with-deps chromium >/dev/null
       - name: Pfad wie auf dem Entwicklungsrechner (einige Tests lesen Dateien dort)
         run: |
-          sudo mkdir -p /home/claude
-          sudo ln -sfn "$GITHUB_WORKSPACE/markentrix-server" /home/claude/markentrix-server
-      - name: Volltest
-        run: sudo env "PATH=$PATH" "PLAYWRIGHT_BROWSERS_PATH=/opt/pw" bash markentrix-server/tests/run.sh | tee /tmp/ergebnis.txt; grep -q "ALLES OK" /tmp/ergebnis.txt
+          mkdir -p /home/claude
+          ln -sfn "$GITHUB_WORKSPACE/markentrix-server" /home/claude/markentrix-server
+      - name: Tests
+        run: |
+          bash markentrix-server/tests/run.sh > /tmp/testlauf.txt 2>&1 < /dev/null; rc=$?
+          cat /tmp/testlauf.txt
+          exit $rc
+        shell: bash
+      - name: Fehlerdetails als Hinweis ausgeben
+        if: failure()
+        shell: bash
+        run: |
+          T=$(tail -c 3000 /tmp/testlauf.txt | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+          echo "::error title=Testlauf::$T"
+          L=$(tail -c 1500 /var/tmp/pt/log 2>/dev/null | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+          echo "::error title=Portal-Log::$L"
       - name: Ausgaben der Tests sichern
         if: always()
         uses: actions/upload-artifact@v4
