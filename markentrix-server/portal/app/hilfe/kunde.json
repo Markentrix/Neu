@@ -187,6 +187,218 @@
     "Nachlässe aus der Preisliste (Kombi Website + KI, Kombi Identität + Website, Pilot-Nachlass auf die Einrichtung) werden automatisch berücksichtigt und stehen an der Karte.",
     "Das Werbebudget für Anzeigen zahlst du direkt an Google oder Meta. Es ist nicht im Paketpreis enthalten."
    ]
+  },
+  {
+   "t": "Website-Dienste einrichten: die richtige Reihenfolge",
+   "k": "website dienste einrichten anfang reihenfolge erste schritte kontaktformular termine paypal bewertungen statistik cookie alles einrichten starten checkliste",
+   "wo": "Menü „Website-Dienste“ (nur Inhaber)",
+   "l": "#dienste",
+   "s": [
+    "Öffne „Website-Dienste“. Oben steht „Meine Website-Adresse“. Prüfe, dass deine Adresse dort richtig steht und die Seite als erreichbar angezeigt wird.",
+    "Kontaktformular: Schalter „Kontaktformular einschalten“, E-Mail-Adresse für die Anfragen eintragen, „Speichern“ und mit „Testmail senden“ prüfen.",
+    "Leistungen und Mitarbeiter: Lege jede Leistung an, die man online buchen können soll (Name, Dauer, optional Preis und Anzahlung).",
+    "Terminbuchung: In der Karte „Terminbuchung mit deinem Kalender“ den Schalter „Online-Terminbuchung einschalten“ setzen, Zeiten und Wochentage eintragen und „Speichern“.",
+    "PayPal: In der Karte „PayPal“ deinen PayPal.Me-Link eintragen und „PayPal auf der Website anbieten“ einschalten (für Anzahlung und Gutscheine).",
+    "Google-Bewertungen: Place-ID eintragen und „Google-Bewertungen auf der Website zeigen“ einschalten.",
+    "Zum Schluss alles einmal selbst auf deiner Website ausprobieren: Formular absenden, Testtermin buchen (mit deiner eigenen E-Mail-Adresse)."
+   ],
+   "n": [
+    "Du musst nicht alles an einem Tag einrichten. Beginne mit Kontaktformular und Terminbuchung.",
+    "Ist ein Dienst ausgeschaltet, bleibt der Platz dafür auf der Website leer oder zeigt nur Telefon und E-Mail."
+   ]
+  },
+  {
+   "t": "Kontaktformular einschalten und testen",
+   "k": "kontaktformular formular anfragen mail empfänger testmail anfrage kommt nicht an einschalten",
+   "wo": "Menü „Website-Dienste“ → Karte „Kontaktformular: Anfragen per E-Mail“",
+   "l": "#dienste",
+   "s": [
+    "Setze den Schalter „Kontaktformular einschalten“.",
+    "Trage bei „Wohin sollen die Anfragen?“ die E-Mail-Adresse ein (bis zu 5, mit Komma getrennt). Betreff und Absendername kannst du anpassen.",
+    "Klicke „Speichern“ und dann „Testmail senden“. Die Mail sollte in wenigen Minuten ankommen.",
+    "Schau auch in den Spam-Ordner. Kommt die Mail dort an, markiere sie als „Kein Spam“.",
+    "Sende zum Schluss das Formular auf deiner Website einmal selbst ab. Die Anfrage erscheint unter „Anfragen“ im Portal."
+   ],
+   "n": [
+    "Jede Anfrage steht im Portal unter „Anfragen“, auch wenn die Mail verloren geht.",
+    "Wenn du antwortest, geht die Antwort direkt an die Person.",
+    "Weiter unten gibt es die Karte „Kommen die Mails an?“. Dort siehst du, ob Versand und Postfach funktionieren."
+   ]
+  },
+  {
+   "t": "Online-Terminbuchung einschalten (Schritt für Schritt)",
+   "k": "terminbuchung einschalten kalender termine online buchen uhrzeiten wochentage öffnungszeiten keine termine buchbar website zeigt keine zeiten slots feste uhrzeiten",
+   "wo": "Menü „Website-Dienste“ → Karte „Terminbuchung mit deinem Kalender“",
+   "l": "#dienste",
+   "s": [
+    "Setze den Schalter „Online-Terminbuchung einschalten“. Ohne diesen Schalter bietet die Website keine einzige Uhrzeit an.",
+    "Wähle unter „Buchbar an“ die Wochentage, an denen Termine möglich sind.",
+    "Trage „Von“ und „Bis“ (Tageszeit) und „Termin dauert (Minuten)“ ein. Oder trage unter „Feste Uhrzeiten“ genau die Uhrzeiten ein, die angeboten werden sollen (zum Beispiel 09:00, 09:30, 10:00 …).",
+    "Lege fest, wie weit im Voraus man buchen kann („So viele Tage im Voraus buchbar“) und ab wann frühestens („Frühestens in … Stunden“).",
+    "Optional: „Höchstens so viele Buchungen pro Tag“ (0 = unbegrenzt) und „Unbestätigte Reservierung hält … Stunden“.",
+    "Klicke „Speichern“. Teste dann auf deiner Website, ob Uhrzeiten erscheinen."
+   ],
+   "n": [
+    "Die Uhrzeiten im Portal müssen zu denen auf deiner Website passen. Bietet die Seite eine Uhrzeit an, die es im Portal nicht gibt, wird die Buchung abgelehnt.",
+    "Zeigt die Website keine freien Zeiten: Prüfe, ob der Schalter an ist, mindestens ein Wochentag gewählt ist, „Von/Bis“ oder „Feste Uhrzeiten“ ausgefüllt sind und der Tag nicht unter „Urlaub und Sperrtage“ steht.",
+    "Verbindest du zusätzlich deinen Google- oder Outlook-Kalender („Geheime Kalender-Adresse“), werden Zeiten, in denen du dort belegt bist, nicht angeboten. „Kalender testen“ prüft die Verbindung."
+   ]
+  },
+  {
+   "t": "Buchungen selbst bestätigen oder sofort gültig machen",
+   "k": "freigabe bestätigen buchung sofort gültig reserviert terminwunsch ich bestätige jede buchung selbst wartet auf dich",
+   "wo": "Menü „Website-Dienste“ → Karte „Terminbuchung mit deinem Kalender“ und „Leistungen und Mitarbeiter“",
+   "l": "#dienste",
+   "s": [
+    "Standard: Eine Buchung auf der Website ist sofort gültig.",
+    "Möchtest du jede Buchung vorher prüfen, setze den Schalter „Ich bestätige jede Buchung selbst (sonst ist sie sofort gültig)“ und speichere.",
+    "Möchtest du das nur für einzelne Leistungen, setze bei der Leistung „bestätige ich selbst“.",
+    "Solche Termine erscheinen in „Buchungen über die Website“ mit „wartet auf dich“. Bestätige oder lehne sie dort ab. Der Besucher bekommt automatisch eine Mail."
+   ],
+   "n": [
+    "Die Website nennt das Formular dann „Terminwunsch“ statt „Termin buchen“ und weist darauf hin, dass du bestätigst.",
+    "Der Termin hält die Zeit frei, bis du entschieden hast. „Unbestätigte Reservierung hält … Stunden“ legt fest, wie lange."
+   ]
+  },
+  {
+   "t": "Terminerinnerungen an Besucher einstellen",
+   "k": "erinnerung erinnerungen termin mail 24 stunden 6 stunden 2 stunden no show nicht erschienen absage link",
+   "wo": "Menü „Website-Dienste“ → Karte „Terminbuchung mit deinem Kalender“",
+   "l": "#dienste",
+   "s": [
+    "Setze den Schalter „Besucher per E-Mail an den Termin erinnern (mit Absage-Link)“.",
+    "Trage bei „Erste Erinnerung … Stunden vorher“ und „Zweite Erinnerung … Stunden vorher“ die Zeiten ein, zum Beispiel 24 und 6. 0 schaltet die jeweilige Erinnerung aus.",
+    "Klicke „Speichern“."
+   ],
+   "n": [
+    "Standardwerte sind 24 und 2 Stunden. Die erste darf bis 168 Stunden, die zweite bis 48 Stunden vorher liegen.",
+    "Die Mail enthält Links zum Absagen, Umbuchen und „Ich komme“. So fallen weniger Termine aus.",
+    "Unter „Vergangene Termine – hat es geklappt?“ markierst du mit einem Klick, ob jemand erschienen ist. Die Statistik zeigt deine Quote der Nichterschienenen."
+   ]
+  },
+  {
+   "t": "Anzahlung für Termine einrichten",
+   "k": "anzahlung einrichten paypal termin geld vorab prozent betrag zahlungslink anzahlung erhalten",
+   "wo": "Menü „Website-Dienste“ → Karten „PayPal“ und „Leistungen und Mitarbeiter“",
+   "l": "#dienste",
+   "s": [
+    "Trage in der Karte „PayPal“ deinen PayPal.Me-Link ein und setze „PayPal auf der Website anbieten“. Speichern.",
+    "Öffne „Leistungen und Mitarbeiter“ und trage bei der Leistung die Anzahlung ein (fester Betrag oder Prozent des Preises, je nach Auswahl in der Karte).",
+    "Bucht jemand diese Leistung, bekommt er sofort eine Mail mit dem PayPal-Zahlungslink für die Anzahlung.",
+    "Sobald das Geld da ist, klicke in „Buchungen über die Website“ beim Termin auf „Anzahlung erhalten“. Ist alles bezahlt, auf „Alles bezahlt“."
+   ],
+   "n": [
+    "Das Geld geht direkt auf dein PayPal-Konto. Markentrix sieht keine Zahlung. Du musst den Eingang deshalb selbst abhaken.",
+    "Hat deine Website eine eigene Anzahlungsberechnung, zeigt sie den Link aus deinem PayPal.Me-Eintrag im Portal. Du trägst ihn nur hier im Portal ein, nicht auf der Website.",
+    "Ist PayPal ausgeschaltet oder der Link leer, gibt es keinen Zahlungslink."
+   ]
+  },
+  {
+   "t": "Absage, Umbuchung und Rückzahlung der Anzahlung",
+   "k": "absage absagen stornieren umbuchen verschieben erstattet anzahlung zurückzahlen rückzahlung stornofrist 24 stunden kostenlos",
+   "wo": "Menü „Website-Dienste“ → Karte „Buchungen über die Website“",
+   "l": "#dienste",
+   "s": [
+    "Der Besucher bekommt in jeder Terminmail Links zum Absagen und Umbuchen. Abgesagt wird erst nach einem Klick auf die Bestätigung.",
+    "Bis zur Frist (Standard 24 Stunden vor dem Termin, im Portal einstellbar) ist die Absage kostenlos. Später ist der volle Betrag zu zahlen.",
+    "Bei rechtzeitiger Absage mit bezahlter Anzahlung bekommst du eine Meldung per Mail und Push. Der Termin erscheint in „Buchungen über die Website“ unter „Anzahlung zurückzahlen“.",
+    "Zahle die Anzahlung selbst per PayPal zurück und klicke danach beim Termin auf „Erstattet“.",
+    "Umbuchen kann der Besucher selbst (gleiche Leistung, nur bis zur Frist). Du und der Besucher bekommen eine Mail."
+   ],
+   "n": [
+    "Die Rückzahlung läuft nicht automatisch, du machst sie von Hand in PayPal.",
+    "Möchtest du selbst absagen, nutze in „Buchungen über die Website“ die Absage und gib bei Bedarf eine kurze Begründung an."
+   ]
+  },
+  {
+   "t": "Quittung für eine Anzahlung erstellen",
+   "k": "quittung pdf anzahlung beleg rechnung per mail senden",
+   "wo": "Menü „Website-Dienste“ → Karte „Buchungen über die Website“",
+   "l": "#dienste",
+   "s": [
+    "Hake beim Termin „Anzahlung erhalten“ ab.",
+    "Klicke „Quittung (PDF)“, um das Dokument zu sehen, oder „Quittung per Mail“, um es dem Kunden zu senden. „Quittung erneut senden“ geht jederzeit."
+   ],
+   "n": [
+    "Die Quittung ist keine Rechnung mit Umsatzsteuer. Wie sie steuerlich zu behandeln ist, klärst du bitte mit deiner Steuerberatung."
+   ]
+  },
+  {
+   "t": "Gutschein-Anfragen bearbeiten",
+   "k": "gutschein gutscheine anfrage code zahlungslink bezahlt senden gutscheinbestellung",
+   "wo": "Menü „Website-Dienste“ → Karte „Gutschein-Anfragen“ und Menü „Anfragen“",
+   "l": "#dienste",
+   "s": [
+    "Bestellt jemand einen Gutschein auf deiner Website, erscheint die Anfrage unter „Anfragen“ und in der Karte „Gutschein-Anfragen“. Du bekommst eine Mail und Push.",
+    "Sende dem Käufer per Klick den PayPal-Zahlungslink. Der Betrag aus der Bestellung ist schon eingetragen.",
+    "Sobald das Geld eingegangen ist, vergib einen Gutschein-Code und sende ihn mit „Gutschein senden“.",
+    "Die Mails gehen im Namen deines Betriebs raus."
+   ],
+   "n": [
+    "Dafür müssen PayPal eingeschaltet und dein PayPal.Me-Link eingetragen sein.",
+    "Das Portal sieht den PayPal-Zahlungseingang nicht. Prüfe ihn in PayPal, bevor du den Code sendest.",
+    "Der Code steht nie auf der Website."
+   ]
+  },
+  {
+   "t": "Warteliste: Was passiert, wenn ein Termin frei wird?",
+   "k": "warteliste wartende termin frei benachrichtigung ausgebucht",
+   "wo": "Läuft automatisch, wenn deine Website die Warteliste anbietet",
+   "l": "#termine",
+   "s": [
+    "Ist ein Tag ausgebucht, kann sich ein Besucher auf die Warteliste setzen (Name, E-Mail, Wunschtag).",
+    "Wird ein Termin frei, benachrichtigt das Portal bis zu 3 Wartende per Mail mit den freien Zeiten.",
+    "Der erste, der bucht, bekommt den Termin."
+   ],
+   "n": [
+    "Ob deine Website die Warteliste anbietet, hängt von der Seite ab. Frage bei Markentrix nach, wenn du sie möchtest."
+   ]
+  },
+  {
+   "t": "Cookie-Hinweis und Besucherstatistik",
+   "k": "cookie banner hinweis statistik besucher analytics google analytics datenschutz zählen besucherzahlen einwilligung",
+   "wo": "Menü „Website-Dienste“ → Karten „Besucher der letzten 30 Tage“ und „Google Analytics“",
+   "l": "#dienste",
+   "s": [
+    "Der Cookie-Hinweis kommt automatisch aus dem Portal. Auf deiner Website brauchst du nichts einzubauen. Im Fußbereich gibt es den Link „Statistik-Einstellungen“.",
+    "Setze unter „Besucher der letzten 30 Tage“ den Schalter „Einfache Besucherzahlen auf unserem Server mitzählen“. Das geht ohne Cookies und ohne Einwilligung.",
+    "Nutzt du Google Analytics, trage unter „Google Analytics“ deine Mess-ID ein (sie beginnt mit „G-“) und schalte es ein. Dann lädt es nur, wenn der Besucher zustimmt.",
+    "Auswertungen siehst du in „Besucher der letzten 30 Tage“."
+   ],
+   "n": [
+    "Erwähne Analytics in deiner Datenschutzerklärung. Eine rechtliche Prüfung nimmt dein Anwalt vor."
+   ]
+  },
+  {
+   "t": "Meine Website zeigt etwas nicht oder ein Formular geht nicht",
+   "k": "fehler problem website formular geht nicht kein termin baustein leer unbekannte website herkunft nicht erlaubt mails kommen nicht an zeiten fehlen gestört nicht erreichbar",
+   "wo": "Menü „Website-Dienste“",
+   "l": "#dienste",
+   "s": [
+    "Zeigt die Seite keine Terminzeiten: Prüfe „Online-Terminbuchung einschalten“, Wochentage, „Von/Bis“ oder „Feste Uhrzeiten“ und „Urlaub und Sperrtage“.",
+    "Bleibt ein Bereich auf der Website leer (Formular, Bewertungen, Termine): Der zugehörige Dienst ist wahrscheinlich ausgeschaltet. Schalte ihn in der jeweiligen Karte ein.",
+    "Meldet das Formular „Unbekannte Website“ oder „Herkunft nicht erlaubt“: Deine Domain steht nicht im Portal oder die Seite läuft unter einer anderen Adresse. Schreibe uns dann über „Nachrichten“.",
+    "Kommen Mails nicht an: Karte „Kommen die Mails an?“ prüfen, Spam-Ordner ansehen, Empfänger-Adresse kontrollieren.",
+    "Steht bei „Meine Website-Adresse“ oder in der Übersicht „gestört“, schreibe uns bitte. Wir sehen es meist selbst schon."
+   ],
+   "n": [
+    "Schreib uns über „Nachrichten“, wenn es nicht hilft. Nenne die Adresse der Seite, was du gemacht hast und die Uhrzeit."
+   ]
+  },
+  {
+   "t": "Texte, Bilder, Preise oder Zeiten meiner Website ändern",
+   "k": "website ändern text bild preis neu hochladen aktualisieren leistungen preise änderungen prüfen update online",
+   "wo": "Menü „Nachrichten“ und „Website-Dienste“",
+   "l": "#nachrichten",
+   "s": [
+    "Änderungen an Texten, Bildern oder dem Aussehen der Seite schreibst du uns über „Nachrichten“. Wir bauen sie ein und laden die Seite neu hoch.",
+    "Sobald die neue Version online ist, bekommst du eine Meldung.",
+    "Leistungen, Preise und Zeiten für die Terminbuchung änderst du selbst unter „Website-Dienste“ → „Leistungen und Mitarbeiter“ bzw. „Terminbuchung mit deinem Kalender“."
+   ],
+   "n": [
+    "Änderungen an Leistungen und Preisen prüft das Team, bevor sie auf deiner Website erscheinen.",
+    "Preise und Pakete, die nur auf deiner Seite stehen (zum Beispiel Fahrzeugklassen), ändert Markentrix für dich."
+   ]
   }
  ],
  "titel": "Anleitung Kundenportal",

@@ -206,6 +206,41 @@
    "n": [
     "Gezählt wird nur, was der Vertriebler im Portal festgehalten hat."
    ]
+  },
+  {
+   "t": "Website von einem eigenen Server ins Portal umziehen",
+   "k": "website umziehen migration eigener server hetzner portal hosting dns www domain zip upload dienste skript paypal demo kalender",
+   "wo": "Menü „Websites & Demos“",
+   "l": "#websites",
+   "s": [
+    "Prüfe vorher, dass die Seite kein eigenes Backend hat (kein Node, Python, PHP, keine eigene Datenbank). Formulare und Termine laufen über `/api/anfrage`, `/api/slots`, `/api/verfuegbarkeit`.",
+    "Trage die Domain im Portal ein, mit und ohne www.",
+    "Lade die ZIP (Ordner „website-fertig“ mit index.html) als Demo hoch und prüfe sie. Schalte „Website-Dienste automatisch einbauen“ ein.",
+    "Richte im Kundenportal „Website-Dienste“ ein: Kalender, Uhrzeiten, Erinnerungen, Freigabe, PayPal.Me-Link. Der PayPal-Link steht nur im Portal und kommt als `paypalMe` aus `/api/verfuegbarkeit`.",
+    "Teste Kontaktformular, Terminbuchung, Absage und Widerruf mit deiner eigenen E-Mail-Adresse.",
+    "Stelle den A-Eintrag von `@` und `www` beim Domain-Anbieter auf die Server-IP. Das Zertifikat kommt automatisch. Den alten Server lässt du einige Tage als Rückfall laufen.",
+    "Danach `sudo mkctl selbsttest` ausführen und die Kunden-Ampel ansehen."
+   ],
+   "n": [
+    "Die Rückzahlung von Anzahlungen läuft nicht automatisch, der Betrieb macht sie von Hand und klickt „Erstattet“.",
+    "Das Cookie-Banner und die Statistik kommen vom Portal. Eigene Banner und Google Analytics aus der Seite entfernen."
+   ]
+  },
+  {
+   "t": "Website-Dienste für einen Kunden prüfen (Ampel rot, Termine fehlen)",
+   "k": "website ampel rot gestört api health termine keine zeiten kalender aus paypal link website-dienste prüfen wachdienst",
+   "wo": "Menü „Kunden“ → Kunde → Karte „Website-Dienste“ und Übersicht „Kunden-Ampel“",
+   "l": "#kunden",
+   "s": [
+    "Die Kunden-Ampel nennt jetzt den Grund der Störung (zum Beispiel „Website-API antwortet nicht richtig“).",
+    "Startseite ok, aber `/api/health` nicht: Die Seite läuft nicht über das Portal oder die Domain fehlt in der Domainverwaltung.",
+    "Keine Zeiten auf der Seite: Im Kundenportal ist der Kalender (Online-Terminbuchung) ausgeschaltet oder es fehlen Wochentage/Uhrzeiten.",
+    "Kein Zahlungslink: PayPal ist im Kundenportal ausgeschaltet oder der PayPal.Me-Link fehlt.",
+    "Öffentlich prüfen kannst du mit `curl -s https://<domain>/api/health` (Antwort `{\"ok\":true}`) und `/api/verfuegbarkeit`."
+   ],
+   "n": [
+    "Der Wachdienst prüft alle 5 Minuten. Nach der Korrektur wird die Ampel nach der nächsten Prüfung grün."
+   ]
   }
  ],
  "titel": "Anleitung Admin-Bereich",
