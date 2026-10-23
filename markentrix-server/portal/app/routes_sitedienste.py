@@ -325,7 +325,7 @@ def oeff_absagen(site_id: str, t: str, request: Request):
         return _seite("Dieser Link ist ungültig.")
     with tx("system") as cur:
         g = _buchung_zu_token(cur, site_id, t)
-    if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
+    if not g or g["status"] not in ("gebucht", "reserviert") or g["start"] <= datetime.now(timezone.utc):
         return _seite("Dieser Termin ist nicht mehr aktiv.")
     lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
     frei, _ = _regel(g)
@@ -349,7 +349,7 @@ async def oeff_absagen_senden(site_id: str, request: Request, bg: BackgroundTask
         return _seite("Dieser Link ist ungültig.")
     with tx("system") as cur:
         g = _buchung_zu_token(cur, site_id, t)
-        if not g or g["status"] != "gebucht" or g["start"] <= datetime.now(timezone.utc):
+        if not g or g["status"] not in ("gebucht", "reserviert") or g["start"] <= datetime.now(timezone.utc):
             return _seite("Dieser Termin ist nicht mehr aktiv.")
         frei, _ = _regel(g)
         cur.execute("UPDATE website_termine SET status='abgesagt', abgesagt_am=now(), abgesagt_von='besucher', storno_kostenlos=%s WHERE id=%s", (frei, g["id"]))

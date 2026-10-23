@@ -79,6 +79,11 @@ r=post(W,"/anfrage",T(name="Zweite",email="zweite@besucher.de")); chk("Doppelbuc
 r=post(W,"/anfrage",T(uhrzeit="11:00",email="x@besucher.de")); chk("Nicht angebotene Uhrzeit abgelehnt",r.status_code==422,r.text)
 chk("Mail an Inhaber mit Hinweis zum Bestätigen",len(mail_an(f"chef@{dom}","bestätigen"))>=1)
 chk("Besucher bekommt Eingangsbestätigung mit Wunschtermin",len(mail_an("mia@besucher.de","vorgemerkt"))==1)
+import re as _re
+_t=text(mail_an("mia@besucher.de","vorgemerkt")[0]); _l=_re.search(r"/site/(mk_[A-Za-z0-9]+)/termin/absagen\?t=([A-Za-z0-9_-]+)",_t)
+chk("Eingangsbestätigung (Freigabe) enthält Absage-Link",bool(_l),_t[:300])
+if _l:
+    _g=web().get(f"/site/{_l.group(1)}/termin/absagen",params={"t":_l.group(2)}); chk("Absageseite für vorgemerkten Termin erreichbar",_g.status_code==200 and "Ja, Termin absagen" in _g.text,_g.text[:200])
 b=cA.get("/api/kunde/website-dienste/buchungen").json(); chk("Buchungsliste zeigt die Reservierung",b["freigabe"] and any(x["ref"]==tref and x["status"]=="reserviert" and x["details"].get("klasse")=="damen" for x in b["buchungen"]),b)
 bid=[x["id"] for x in b["buchungen"] if x["ref"]==tref][0]
 chk("Andere Firma kann nicht bestätigen",cB.post(f"/api/kunde/website-dienste/buchungen/{bid}/bestaetigen",json={}).status_code in (409,403))
