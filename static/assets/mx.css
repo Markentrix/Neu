@@ -1356,3 +1356,6 @@ html.reduced .slot.is-free{animation:none}
 .slots-inline .s.f{border:2px solid var(--violet);background:linear-gradient(135deg,var(--cyan),var(--blue))}
 .slots-inline-t{font-size:1.05rem;color:var(--navy)}
 @media (max-width:480px){.slot{flex:1 1 0;min-width:0;padding:9px 8px}}
+
+/* Blog: KI-Hinweis, bewusst klein, aber lesbar */
+.ki-note{margin:22px 0 0;font-size:.72rem;line-height:1.5;color:var(--muted)}
