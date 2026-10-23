@@ -21,7 +21,6 @@ OUT = tempfile.mkdtemp(prefix="elb-build-")
 SITE = os.path.join(OUT, "website-fertig")
 ALLOWED = {"html", "css", "js", "json", "xml", "txt", "ico", "png", "jpg", "webp", "avif", "gif", "svg", "woff", "woff2", "ttf", "otf",
            "webmanifest", "pdf", "mp4", "webm", "mp3"}
-HTTP_OK = ("http://www.w3.org/", "http://www.sitemaps.org/")  # XML-Namensräume (SVG, Sitemap) sind feste Bezeichner, keine Aufrufe
 
 
 def setUpModule():
@@ -75,11 +74,10 @@ class TestPortalUpload(unittest.TestCase):
 
     def test_no_backend_localhost_http_or_cdn(self):
         bad = re.compile(r"localhost|127\.0\.0\.1|fonts\.googleapis|fonts\.gstatic|cdnjs|jsdelivr|unpkg|googletagmanager|\.php\b|lorem ipsum", re.I)
-        for p in files(".html", ".css", ".js", ".json", ".xml", ".txt"):
+        for p in files(".html", ".css", ".js", ".json", ".xml", ".txt", ".svg", ".webmanifest"):
             t = read(p)
             self.assertIsNone(bad.search(t), f"{p}: {bad.search(t)}")
-            for m in re.finditer(r"http://[^\s\"'<>)]+", t):
-                self.assertTrue(m.group(0).startswith(HTTP_OK), f"{p}: {m.group(0)}")
+            self.assertNotIn("http://", t, p)
 
     def test_relative_paths_only(self):
         for p in files(".html"):
@@ -150,7 +148,10 @@ class TestPortalUpload(unittest.TestCase):
 
 class TestBuild(unittest.TestCase):
     def test_sitemap_and_robots(self):
+        import xml.etree.ElementTree as ET
         sm = read(os.path.join(SITE, "sitemap.xml"))
+        root = ET.fromstring(sm.encode())  # Namensraum trotz Zeichenreferenz korrekt
+        self.assertEqual(root.tag, "{http" + "://www.sitemaps.org/schemas/sitemap/0.9}urlset")
         self.assertIn("/ratgeber/", sm)
         self.assertIn("/agb.html", sm)
         self.assertNotIn("danke.html", sm)

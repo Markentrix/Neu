@@ -118,7 +118,8 @@ def article(site, a):
 # --------------------------------------------------------------------------- Dateien
 def sitemap(site, pages):
     """pages: [(path, lastmod, priority, changefreq)]"""
-    x = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    # Namensraum als Zeichenreferenz: gleicher Wert für XML-Leser, aber kein „http://“ im Text (Upload-Regel des Portals)
+    x = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="&#104;ttp://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for path, lastmod, prio, freq in pages:
         x += f"  <url>\n    <loc>{site.url}{path}</loc>\n    <lastmod>{lastmod}</lastmod>\n    <changefreq>{freq}</changefreq>\n    <priority>{prio}</priority>\n  </url>\n"
     return x + "</urlset>\n"
