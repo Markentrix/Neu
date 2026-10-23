@@ -137,9 +137,22 @@ def entpacken(zip_pfad: Path, ziel: Path, index_noetig: bool = True) -> tuple:
         return len(eintraege), verwendet
 
 
+DATENSCHUTZ_SEITEN = ("datenschutz.html", "datenschutz.htm", "datenschutzerklaerung.html", "datenschutz/index.html", "datenschutz/index.htm")
+
+
+def datenschutz_pfad(ordner: Path) -> str:
+    """Adresse der Datenschutzseite dieser Website, falls es eine gibt (z. B. /datenschutz.html). Das Skript verlinkt sonst /datenschutz, das bei Seiten mit .html-Endung 404 liefert."""
+    for name in DATENSCHUTZ_SEITEN:
+        f = ordner / name
+        if f.is_file() and not f.is_symlink():
+            return "/" + (name[:-len("index.html")] if name.endswith("/index.html") else name[:-len("index.htm")] if name.endswith("/index.htm") else name)
+    return ""
+
+
 def skript_ersetzen(ordner: Path, site_id: str) -> int:
     """Setzt in Seiten, die das Dienste-Skript schon enthalten, die Kennung der Website auf die des Kunden (z. B. wenn die Demo einem anderen Kunden gehörte)."""
     n = 0
+    ds = datenschutz_pfad(ordner)
     muster = re.compile(r'(<script[^>]*' + re.escape(SKRIPT_MARKE) + r'[^>]*\sdata-site=")[^"]*(")', re.I)
     for p in list(ordner.rglob("*.html")) + list(ordner.rglob("*.htm")):
         if p.is_symlink() or not p.is_file() or p.stat().st_size > 3_000_000:
@@ -149,6 +162,9 @@ def skript_ersetzen(ordner: Path, site_id: str) -> int:
         except (UnicodeDecodeError, OSError):
             continue
         neu = muster.sub(lambda m: m.group(1) + site_id + m.group(2), t)
+        if ds:
+            neu = re.sub(r'<script[^>]*' + re.escape(SKRIPT_MARKE) + r'[^>]*>',
+                         lambda m: m.group(0) if "data-datenschutz=" in m.group(0) else m.group(0)[:-1].rstrip() + f' data-datenschutz="{ds}">', neu, flags=re.I)
         if neu != t:
             p.write_text(neu, encoding="utf-8")
             n += 1
@@ -157,7 +173,8 @@ def skript_ersetzen(ordner: Path, site_id: str) -> int:
 
 def skript_einfuegen(ordner: Path, site_id: str, basis: str) -> int:
     """Fügt das Skript der Website-Dienste vor </body> jeder HTML-Seite ein (einmal, ohne Doppelung)."""
-    tag = f'<script src="{basis}/static/js/site.js" data-site="{site_id}" defer></script>\n'
+    ds = datenschutz_pfad(ordner)
+    tag = f'<script src="{basis}/static/js/site.js" data-site="{site_id}"' + (f' data-datenschutz="{ds}"' if ds else '') + ' defer></script>\n'
     n = 0
     for p in list(ordner.rglob("*.html")) + list(ordner.rglob("*.htm")):
         if p.is_symlink() or not p.is_file() or p.stat().st_size > 3_000_000:

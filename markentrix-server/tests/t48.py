@@ -71,6 +71,13 @@ chk("Website-Dienste-Skript mit Site-ID eingebaut (vor </body>)",f'data-site="{s
 chk("Dateien ohne Git/Mac-Reste, Unterordner da",os.path.isfile(f"{S}/live/{dom}/css/a.css") and not os.path.exists(f"{S}/live/{dom}/.git") and not os.path.exists(f"{S}/live/{dom}/.DS_Store") and not os.path.exists(f"{S}/live/{dom}/__MACOSX"))
 chk("Ordner für Wochenangebote angelegt",os.path.isdir(f"{S}/live/{dom}/angebote/archiv"))
 chk("Webserver-Eintrag für Domain und www",os.path.isfile(f"/var/tmp/pt/b/caddy/sites/{dom}.caddy") and f"{dom}, www.{dom}" in open(f"/var/tmp/pt/b/caddy/sites/{dom}.caddy").read())
+cfg=open(f"/var/tmp/pt/b/caddy/sites/{dom}.caddy").read()
+chk("Webserver: Adressen ohne .html (try_files) und eigene 404-Seite",'try_files {path} {path}.html {path}/index.html' in cfg and '/404.html' in cfg and 'handle /api/*' in cfg,cfg)
+chk("Ohne Datenschutzseite kein data-datenschutz",'data-datenschutz' not in idx,idx)
+domD=f"dsgvo{sfx}.de"
+r=up(zipb({"index.html":HTML.format(v=1),"datenschutz.html":"<html><body>DS</body></html>","unter/index.html":"<html><body>u</body></html>"}),domD,kunde=kA); worker()
+idxD=open(f"{S}/live/{domD}/index.html").read(); tagD=idxD[idxD.index("<script"):idxD.index("</script>")]
+chk("Datenschutzseite erkannt: Skript trägt data-datenschutz",'data-datenschutz="/datenschutz.html"' in tagD and idxD.count("site.js")==1 and idxD.count("data-datenschutz")==1,idxD)
 chk("Zwischenordner und Auftrag aufgeräumt",not glob.glob(S+"/live/.upload-*") and not glob.glob(Q+"/auftrag-*.json"))
 meta=json.load(open(f"{S}/live/{dom}/site.json")); nrA=sql(f"select kundennummer from kunden where id='{kA}'")
 chk("Kennung site.json mit Kundennummer und Firma",meta["name"]==dom and meta["kunde"].startswith(nrA) and "Upa" in meta["kunde"],(meta,nrA))
@@ -101,6 +108,18 @@ nrB=sql(f"select kundennummer from kunden where id='{kB}'"); dom2=f"nummer{sfx}.
 r=up(zipb({"index.html":"x"}),dom2,kunde=nrB.lower()); chk("Upload mit Kundennummer statt ID",r.status_code==200,r.text); worker()
 chk("Zuordnung zur Kundennummer",sql(f"select kunden_id from websites where domain='{dom2}'")==kB)
 chk("Unbekannte Kundennummer",up(zipb({"index.html":"x"}),f"y{sfx}.de",kunde="MK-999999").status_code==400)
+# Datenschutzseite wird erkannt: Skript verlinkt die echte Adresse
+domD=f"dsgvo{sfx}.de"
+r=up(zipb({"index.html":HTML.format(v=1),"datenschutz.html":"<html><body>DS</body></html>"}),domD,kunde=kA); worker()
+idx=open(f"{S}/live/{domD}/index.html").read()
+chk("Datenschutzseite erkannt: data-datenschutz im Skript",'data-datenschutz="/datenschutz.html"' in idx and idx.count("site.js")==1,idx)
+domN=f"keinds{sfx}.de"
+r=up(zipb({"index.html":HTML.format(v=1)}),domN,kunde=kA); worker()
+idx=open(f"{S}/live/{domN}/index.html").read()
+chk("Ohne Datenschutzseite kein Attribut",'data-datenschutz' not in idx and idx.count("site.js")==1,idx)
+r=up(zipb({"index.html":'<html><body><script src="https://alt.example/static/js/site.js" data-site="mk_alt" defer></script></body></html>',"datenschutz/index.html":"x"}),domD,kunde=kA); worker()
+idx=open(f"{S}/live/{domD}/index.html").read()
+chk("Vorhandenes Skript: Attribut ergänzt, nicht doppelt",idx.count("site.js")==1 and idx.count("data-datenschutz=")==1 and 'data-datenschutz="/datenschutz/"' in idx,idx)
 # Fremde Domain
 r=up(zipb({"index.html":"x"}),dom,kunde=kB); chk("Domain gehört schon einem anderen Kunden",r.status_code==400,r.text)
 # ---- Ganzes Projekt (wie ElbDetail): nur der Ordner website-fertig/ wird übernommen, Server-Code & Co. bleiben draußen

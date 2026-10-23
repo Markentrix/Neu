@@ -162,12 +162,17 @@ def portal_upstream():
     return "127.0.0.1:8090" if mode == "host" else "mk-portal:8000"
 
 
-def caddy_inhalt(domain):
+def caddy_inhalt(domain, version=2):
     """Statische Website plus die Website-API: /api/* der Kundendomain geht an das Portal (Pfad wird zu /siteapi/api/…, die Domain im Host bleibt erhalten).
-    Nur diese Pfade werden weitergeleitet, die übrige Portal-Schnittstelle ist über die Kundendomain nicht erreichbar."""
+    Nur diese Pfade werden weitergeleitet, die übrige Portal-Schnittstelle ist über die Kundendomain nicht erreichbar.
+    Version 2: Adressen ohne Endung (/datenschutz) finden datenschutz.html bzw. datenschutz/index.html; bei 404 kommt 404.html der Website, falls vorhanden."""
+    root = f"/srv/sites/live/{domain}"
+    statisch = f"\t\troot * {root}\n" + ("\t\ttry_files {path} {path}.html {path}/index.html\n" if version >= 2 else "") + "\t\tfile_server\n"
+    fehler = (f"\thandle_errors {{\n\t\t@nf expression {{http.error.status_code}} == 404\n\t\thandle @nf {{\n\t\t\troot * {root}\n\t\t\trewrite * /404.html\n\t\t\tfile_server\n\t\t}}\n\t}}\n"
+              if version >= 2 else "")
     return (f"{domain}, www.{domain} {{\n\tencode zstd gzip\n"
             f"\thandle /api/* {{\n\t\trewrite * /siteapi{{uri}}\n\t\treverse_proxy {portal_upstream()}\n\t}}\n"
-            f"\thandle {{\n\t\troot * /srv/sites/live/{domain}\n\t\tfile_server\n\t}}\n}}\n")
+            f"\thandle {{\n{statisch}\t}}\n{fehler}}}\n")
 
 
 def alt_inhalt(domain):
@@ -194,7 +199,7 @@ def caddy_nachruesten():
         if not NAME["live"].match(domain) or cf.is_symlink():
             continue
         try:
-            if cf.read_text() == alt_inhalt(domain):
+            if cf.read_text() in (alt_inhalt(domain), caddy_inhalt(domain, 1)):
                 cf.write_text(caddy_inhalt(domain))
                 geaendert = True
         except OSError:

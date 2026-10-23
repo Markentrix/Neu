@@ -48,6 +48,7 @@ import pathlib
 D=pathlib.Path(S)/"demos"/demo; (D/"css").mkdir(parents=True,exist_ok=True)
 (D/"index.html").write_text('<!doctype html><html><body><h1>Demo</h1><script src="https://portal.markentrix.de/static/js/site.js" data-site="mk_FREMDEKENNUNG" defer></script></body></html>')
 (D/"css"/"a.css").write_text("body{}"); (D/"site.json").write_text(json.dumps({"typ":"demo","name":demo,"kunde":"x"})); (D/"angebote").mkdir(exist_ok=True); (D/"angebote"/"w.json").write_text("{}")
+(D/"datenschutz.html").write_text("<html><body>DS</body></html>")
 (D/".git").mkdir(exist_ok=True); (D/".git"/"config").write_text("x")
 J=lambda **k: a.post("/api/admin/websites/demo-zu-live",json=k)
 # ---- Schutz
@@ -66,6 +67,7 @@ r=J(demo=demo,domain=dom,kunden_id=kA,trotzdem=True); chk("Mit Bestätigung trot
 out=worker(); chk("Server-Dienst veröffentlicht",os.path.isfile(f"{S}/live/{dom}/index.html") and "veröffentlicht" in out,out)
 sid=cA.get("/api/kunde/website-dienste").json()["site_id"]; idx=open(f"{S}/live/{dom}/index.html").read()
 chk("Kennung des Demo-Skripts auf die des Kunden gesetzt",f'data-site="{sid}"' in idx and "FREMDEKENNUNG" not in idx and idx.count("site.js")==1,idx)
+chk("Demo mit Datenschutzseite: Attribut ergänzt, genau einmal",idx.count("data-datenschutz=")==1 and 'data-datenschutz="/datenschutz.html"' in idx,idx)
 chk("CSS übernommen, Reste draußen (.git, Wochenangebote der Demo)",os.path.isfile(f"{S}/live/{dom}/css/a.css") and not os.path.exists(f"{S}/live/{dom}/.git") and not os.path.exists(f"{S}/live/{dom}/angebote/w.json"))
 chk("Eigene site.json der Live-Seite (Typ live, nicht von der Demo)",json.load(open(f"{S}/live/{dom}/site.json"))["typ"]=="live")
 chk("Webserver-Eintrag angelegt",os.path.isfile(f"/var/tmp/pt/b/caddy/sites/{dom}.caddy"))
