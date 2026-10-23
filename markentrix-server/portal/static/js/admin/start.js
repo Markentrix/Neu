@@ -207,7 +207,7 @@ function paketBuchungenKarte(liste) {
   return h('div', { class: 'card' }, h('h2', {}, 'Neue Paketbuchungen', h('span', { class: 'badge', style: 'margin-left:8px' }, liste.length)),
     h('p', { class: 'small muted' }, 'Kunden haben im Portal Pakete dazugebucht. Erst mit deiner Bestätigung wird das Paket aktiv.'), m,
     h('ul', { class: 'prio' }, liste.map(z => h('li', {}, h('span', { class: 'pill warn' }, z.referenzkunde ? 'Referenz' : 'Neu'),
-      h('div', { class: 'pt' }, h('a', { href: '#kunde/' + z.kunden_id }, z.firma + ' (' + z.kundennummer + ')'), h('span', { class: 'small muted' }, z.produkt + ' · ' + preis(z) + (z.notiz ? ' · ' + z.notiz : ''))),
+      h('div', { class: 'pt' }, h('a', { href: '#kunde/' + z.kunden_id }, z.firma + ' (' + z.kundennummer + ')'), h('span', { class: 'small muted' }, z.produkt + ' · ' + preis(z) + (z.rabatt_grund && !z.referenzkunde ? ' · Nachlass: ' + z.rabatt_grund : '') + (z.notiz ? ' · ' + z.notiz : ''))),
       z.auf_anfrage ? '' : aktion(z, false, 'Bestätigen', 'bestaetigen', {}), aktion(z, true, 'Ablehnen', 'ablehnen', {})))));
 }
 function hilfeKarte(d) {

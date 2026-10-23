@@ -23,6 +23,8 @@ def neuer_kunde(name):
     httpx.post(B+"/api/einladung",headers=H,json={"token":token(f"{name.lower()}{sfx}@k.de"),"password":"InhaberPasswort1"})
     c=httpx.Client(base_url=B,headers=H); r=c.post("/api/login",json={"email":f"{name.lower()}{sfx}@k.de","password":"InhaberPasswort1"}); assert r.status_code==200,r.text
     return k["id"],c,f"{name.lower()}{sfx}@k.de"
+sql("update buchungen set rabatt_grund=null where rabatt_grund like 'Pilot-Nachlass%'")
+sql("update konditionen set wert_zahl=2 where schluessel='pilot_plaetze_ki'")
 kA,cA,mA=neuer_kunde("Pak"); kR,cR,mR=neuer_kunde("Pakref")
 sql(f"update kunden set referenzkunde=true where id='{kR}'")
 k=cA.get("/api/kunde/paketkatalog"); chk("Katalog antwortet",k.status_code==200,k.text); k=k.json()
@@ -66,6 +68,33 @@ pr=[p for g in k["gruppen"] for p in g["produkte"] if p["code"]==b][0]
 chk("Referenzkunde: 0 € und regulärer Preis sichtbar",(pr["monatlich_cent"] or 0)==0 and (pr["projekt_cent"] or 0)==0 and (pr["einrichtung_cent"] or 0)==0 and pr.get("regulaer"),pr)
 r=cR.post(f"/api/kunde/pakete/{b}/dazubuchen",json={"bestaetigt":True}); chk("Referenzkunde kann dazubuchen",r.status_code==200,r.text)
 chk("Referenz-Buchung kostet 0 €",sql(f"select coalesce(monatlich_cent,0)+coalesce(projekt_cent,0)+coalesce(einrichtung_cent,0) from buchungen where id='{r.json()['id']}'")=="0")
+# ---- Nachlässe, Hinweise, neue Leistungen
+def buch(c,code):
+    r=c.post(f"/api/kunde/pakete/{code}/dazubuchen",json={"bestaetigt":True}); assert r.status_code==200,r.text
+    return sql(f"select coalesce(einrichtung_cent,0)||'|'||coalesce(projekt_cent,0)||'|'||coalesce(rabatt_grund,'') from buchungen where id='{r.json()['id']}'")
+sql("update buchungen set rabatt_grund=null where rabatt_grund like 'Pilot-Nachlass%'")
+kP1,cP1,_=neuer_kunde("Pilota"); kP2,cP2,_=neuer_kunde("Pilotb"); kK,cK,_=neuer_kunde("Kombi")
+kat=lambda c,code:[p for g in c.get("/api/kunde/paketkatalog").json()["gruppen"] for p in g["produkte"] if p["code"]==code][0]
+chk("Pilot-Nachlass schon im Katalog sichtbar",kat(cP1,"KI_BUSINESS")["einrichtung_cent"]==124500 and kat(cP1,"KI_BUSINESS")["listenpreis"]["einrichtung_cent"]==249000,kat(cP1,"KI_BUSINESS"))
+r1=buch(cP1,"KI_BUSINESS"); chk("Pilot 1: 50 % auf die Einrichtung",r1.startswith("124500|0|Pilot-Nachlass 50 %"),r1)
+r2=buch(cP2,"KI_KOMPLETT"); chk("Pilot 2: 50 % auf die Einrichtung",r2.startswith("174500|0|Pilot-Nachlass"),r2)
+chk("Monatspreis bleibt unverändert",sql(f"select monatlich_cent from buchungen where kunden_id='{kP1}' and produkt_code='KI_BUSINESS'")=="69900")
+chk("Kombi: ohne KI kein Nachlass auf Website",kat(cK,"WEB_BUSINESS")["projekt_cent"]==449000 and kat(cK,"WEB_BUSINESS")["nachlaesse"]==[])
+r3=buch(cK,"KI_BUSINESS"); chk("Dritter Kunde: kein Pilot-Nachlass mehr",r3=="249000|0|",r3)
+chk("Kombi: nach KI-BUSINESS 500 € weniger auf Website",kat(cK,"WEB_BUSINESS")["projekt_cent"]==399000)
+w=buch(cK,"WEB_BUSINESS"); chk("Kombi Website+KI gebucht",w.startswith("0|399000|Kombi-Nachlass Website und KI"),w)
+w2=buch(cK,"WEB_LANDING"); chk("Kombi nur einmal (zweite Website zum Listenpreis)",w2.startswith("0|229000|") and "Kombi" not in w2,w2)
+c1=buch(cK,"CI_BASIC"); chk("Kombi CI+Website: 500 € weniger",c1.startswith("0|79000|Kombi-Nachlass Corporate Identity und Website"),c1)
+kk=cK.get("/api/kunde/paketkatalog").json(); chk("Zusatzkosten-Hinweis und Werbebudget-Hinweis",("Werbebudget" in kk["zusatzkosten"]) and "Plattform" in kat(cK,"GOOGLE_ADS_AGENT")["hinweis"])
+chk("Referenzkunde bekommt keine zusätzlichen Nachlässe",kat(cR,"KI_BUSINESS")["nachlaesse"]==[] and kat(cR,"KI_BUSINESS")["einrichtung_cent"]==0)
+for code in ("WEB_RELAUNCH","WEB_PFLEGE","SEO_GEO","GOOGLE_PROFIL"):
+    pk=kat(cK,code); chk(f"{code}: auf Anfrage buchbar",pk["auf_anfrage"] is True)
+rr=cK.post("/api/kunde/pakete/SEO_GEO/dazubuchen",json={"bestaetigt":True}); chk("SEO/GEO als Angebotswunsch",rr.status_code==200,rr.text)
+chk("Preisstand 1. Oktober 2026",sql("select wert_text from konditionen where schluessel='preisstand'")=="Stand 1. Oktober 2026")
+# Suchmaschinen: Portal nicht indexieren
+for pf in ("/","/admin","/app","/vertrieb","/api/health"):
+    rr=httpx.get(B+pf); chk(f"noindex-Header auf {pf}","noindex" in rr.headers.get("x-robots-tag","") ,rr.headers)
+chk("Anmeldeseite mit robots-Meta",'name="robots"' in httpx.get(B+"/").text)
 # Rechte
 chk("Ohne Anmeldung nicht möglich",httpx.get(B+"/api/kunde/paketkatalog").status_code==401)
 t=cA.post("/api/kunde/team",json={"name":"Emma Empfang","email":f"emp{sfx}@k.de","rolle":"empfang"})
@@ -78,19 +107,20 @@ from playwright.async_api import async_playwright
 async def ui():
     async with async_playwright() as pw:
         br=await pw.chromium.launch()
-        for breite in (390,1280):
-            for m,pw_,pfad,hash_,erwartet,name in ((mA,"InhaberPasswort1","/app","#pakete","Pakete & Zusatzleistungen","Kunde"),("chef@test.de",ADMPW,"/admin","#uebersicht","Neue Paketbuchungen","Admin")):
-                ctx=await br.new_context(viewport={"width":breite,"height":900},bypass_csp=True); pg=await ctx.new_page(); errs=[]
-                pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("response",lambda r: errs.append(f"HTTP {r.status} {r.url}") if r.status>=500 else None)
-                await pg.goto(B+"/"); await pg.fill("#e",m); await pg.fill("#p",pw_); await pg.click("#b"); await pg.wait_for_url("**"+pfad+"*")
-                await pg.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})")
-                await pg.goto(B+pfad+hash_); await pg.wait_for_selector(f"h2:has-text('{erwartet}')",timeout=10000)
+        for m,pw_,pfad,hash_,erwartet,name in ((mA,"InhaberPasswort1","/app","#pakete","Pakete & Zusatzleistungen","Kunde"),("chef@test.de",ADMPW,"/admin","#uebersicht","Neue Paketbuchungen","Admin")):
+            ctx=await br.new_context(viewport={"width":390,"height":900},bypass_csp=True); pg=await ctx.new_page(); errs=[]
+            pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("response",lambda r: errs.append(f"HTTP {r.status} {r.url}") if r.status>=500 else None)
+            await pg.goto(B+"/"); await pg.fill("#e",m); await pg.fill("#p",pw_); await pg.click("#b"); await pg.wait_for_url("**"+pfad+"*")
+            await pg.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})")
+            for breite in (390,1280):
+                await pg.set_viewport_size({"width":breite,"height":900})
+                await pg.goto(B+pfad+hash_); await pg.reload(); await pg.wait_for_selector(f"h2:has-text('{erwartet}')",timeout=10000)
                 chk(f"{name}@{breite}: „{erwartet}“ sichtbar",True)
                 if name=="Kunde":
                     await pg.click("button:has-text('Dazubuchen') >> nth=0"); await pg.wait_for_selector(".dlg",timeout=5000)
                     chk(f"Kunde@{breite}: Dialog mit Preis und Bestätigung","netto" in (await pg.inner_text(".dlg")) or "Preis" in (await pg.inner_text(".dlg")))
                 chk(f"{name}@{breite}: kein seitliches Überlaufen",await pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"))
-                chk(f"{name}@{breite}: keine JS-Fehler",not errs,errs); await ctx.close()
+            chk(f"{name}: keine JS-Fehler",not errs,errs); await ctx.close()
         await br.close()
 asyncio.run(ui())
 print("fertig")

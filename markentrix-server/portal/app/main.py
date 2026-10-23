@@ -101,6 +101,7 @@ async def schutz(request: Request, call_next):
     r.headers["X-Frame-Options"] = "DENY"
     r.headers["Referrer-Policy"] = "no-referrer"
     r.headers["Cache-Control"] = "no-store"
+    r.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"   # Portal ist nicht öffentlich: nicht in Suchmaschinen aufnehmen
     if config.COOKIE_SECURE:
         r.headers["Strict-Transport-Security"] = "max-age=31536000"
     return r
