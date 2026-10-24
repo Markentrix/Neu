@@ -56,6 +56,10 @@ Gleiche Domain, relative Pfade, JSON:
     Lockfeld "website": unsichtbares Textfeld (display:none, tabindex=-1, autocomplete=off), muss LEER bleiben
   Erfolg: {ok:true, ref:"…"} -> weiterleiten auf danke.html?typ=<typ>&ref=<ref> und dort die Vorgangsnummer zeigen
   Fehler: HTTP 422 {ok:false, errors:{feldname:"Text"}} -> Text am Feld anzeigen; HTTP 429 -> "Bitte später noch einmal"
+- FOTOS (nur wenn GET /api/foto -> aktiv:true): Foto-Feld (input type=file, accept=image/*, multiple, bis max Stück) im Formular zeigen, mit dem Text aus
+  "hinweis" darunter (Löschfrist). Jedes gewählte Foto im Browser auf höchstens 1600 px verkleinern (Canvas, JPEG 0.82) und sofort mit
+  POST /api/foto (Body = Bild, Content-Type text/plain) hochladen -> {token}. Beim Absenden die Tokens als Liste im Feld "fotos" mitschicken.
+  Vorschau mit Entfernen-Knopf, Senden erst erlauben, wenn alle Uploads fertig sind. Ist aktiv:false, kein Foto-Feld zeigen.
 - POST /api/e {t:"pv"|"ev", u:Pfad, n:Name, w:Breite} per navigator.sendBeacon, ohne Cookies (optional, Besucherzahlen)
 Regeln für Variante B:
 - Uhrzeiten nur anbieten, wenn /api/slots frei:true meldet; gesperrte Tage aus /api/verfuegbarkeit sperren. Wenn selfBooking:false ist,

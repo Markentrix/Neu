@@ -29,6 +29,7 @@
     '.mk-falle{position:absolute!important;left:-9999px!important;height:0;overflow:hidden}.mk-check{display:flex!important;gap:8px;align-items:flex-start;font-size:.85em}.mk-check input{width:auto;margin-top:3px}' +
     '.mk-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.mk-chip{font:inherit;cursor:pointer;padding:8px 12px;border-radius:8px;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit}' +
     '.mk-chip[aria-pressed=true]{background:var(--mk-akzent,#1f6feb);color:#fff;border-color:transparent}.mk-sterne{font-size:1.6em;letter-spacing:2px;color:#f5a623}' +
+    '.mk-fotos{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.mk-foto{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:1px solid rgba(128,128,128,.5)}.mk-foto img{width:100%;height:100%;object-fit:cover;display:block}.mk-foto button{position:absolute;top:2px;right:2px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;line-height:1;font:inherit}.mk-foto.mk-lade{opacity:.5}' +
     '.mk-bew{margin:12px 0;padding:12px 14px;border:1px solid rgba(128,128,128,.35);border-radius:10px}.mk-klein{font-size:.8em;opacity:.7}';
   document.head.appendChild(el('style', { text: css }));
 
@@ -40,17 +41,65 @@
     var l = el('a', { href: c.getAttribute('data-datenschutz') || '/datenschutz', target: '_blank', rel: 'noopener', text: 'Datenschutzerklärung' });
     return { cb: cb, el: el('label', { class: 'mk-check' }, cb, el('span', {}, 'Ich stimme zu, dass meine Angaben zur Bearbeitung meiner Anfrage verarbeitet werden. Mehr in der ', l, '.')) };
   }
+  // ------------------------------------------------------------ Fotos (nur wenn der Betrieb sie im Portal eingeschaltet hat)
+  var fotoEinst = { aktiv: false, max: 5, tage: 90 };
+  function verkleinern(datei) {
+    // Foto im Browser auf höchstens 1600 Pixel verkleinern und als JPEG neu speichern (spart Datenvolumen, entfernt nebenbei Standort und Kameradaten)
+    return new Promise(function (ok, nein) {
+      var url = URL.createObjectURL(datei), bild = new Image();
+      bild.onload = function () {
+        var f = Math.min(1, 1600 / Math.max(bild.naturalWidth, bild.naturalHeight)), cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(bild.naturalWidth * f)); cv.height = Math.max(1, Math.round(bild.naturalHeight * f));
+        cv.getContext('2d').drawImage(bild, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url);
+        cv.toBlob(function (b) { if (b) ok(b); else nein(new Error('Das Foto konnte nicht verarbeitet werden.')); }, 'image/jpeg', 0.82);
+      };
+      bild.onerror = function () { URL.revokeObjectURL(url); nein(new Error('Dieses Foto kann nicht gelesen werden. Bitte ein JPG oder PNG wählen.')); };
+      bild.src = url;
+    });
+  }
+  function fotoHochladen(blob) {
+    return fetch(api + 'foto', { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain' }, body: blob })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(typeof j.detail === 'string' ? j.detail : 'Das Foto konnte nicht hochgeladen werden.'); return j.token; }); });
+  }
+  function fotoFeld(b) {
+    if (!fotoEinst.aktiv) return { el: null, tokens: function () { return []; }, bereit: function () { return true; }, zuruecksetzen: function () {} };
+    var liste = [], laeuft = 0, vorschau = el('div', { class: 'mk-fotos' }), meld = el('div', { class: 'mk-klein', role: 'status' }),
+      eingabe = el('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/*', multiple: true, 'aria-describedby': 'mk-fotohinweis' });
+    function zeigen() { meld.textContent = liste.length >= fotoEinst.max ? 'Mehr als ' + fotoEinst.max + ' Fotos sind nicht möglich.' : ''; }
+    eingabe.addEventListener('change', function () {
+      Array.prototype.slice.call(eingabe.files).forEach(function (datei) {
+        if (liste.length + laeuft >= fotoEinst.max) { zeigen(); return; }
+        laeuft++;
+        var kachel = el('div', { class: 'mk-foto mk-lade' }), bild = el('img', { alt: 'Hochgeladenes Foto' }), weg = el('button', { type: 'button', 'aria-label': 'Foto entfernen', text: '×' });
+        kachel.appendChild(bild); kachel.appendChild(weg); vorschau.appendChild(kachel);
+        verkleinern(datei).then(function (blob) {
+          bild.src = URL.createObjectURL(blob);
+          return fotoHochladen(blob);
+        }).then(function (token) {
+          laeuft--; kachel.classList.remove('mk-lade'); var eintrag = { token: token };
+          liste.push(eintrag); weg.addEventListener('click', function () { liste.splice(liste.indexOf(eintrag), 1); kachel.remove(); zeigen(); }); zeigen();
+        }).catch(function (er) { laeuft--; kachel.remove(); meldung(b, 'fehler', er.message); });
+      });
+      eingabe.value = '';
+    });
+    var hinweis = el('div', { class: 'mk-klein', id: 'mk-fotohinweis', text: 'Optional: bis zu ' + fotoEinst.max + ' Fotos, damit wir Ihre Anfrage besser einschätzen können. Nur wir sehen sie, sie werden nach ' + fotoEinst.tage + ' Tagen automatisch gelöscht.' });
+    return { el: el('div', {}, el('label', { text: 'Fotos (freiwillig)' }), eingabe, vorschau, meld, hinweis),
+      tokens: function () { return liste.map(function (x) { return x.token; }); }, bereit: function () { return laeuft === 0; },
+      zuruecksetzen: function () { liste = []; vorschau.textContent = ''; zeigen(); } };
+  }
   function falle() { return el('div', { class: 'mk-falle', 'aria-hidden': 'true' }, el('input', { name: 'hp', tabindex: '-1', autocomplete: 'off' })); }
 
   // ------------------------------------------------------------ Kontaktformular
   function kontakt(c) {
     var b = box(c), n = el('input', { required: true, maxlength: 120, autocomplete: 'name' }), m = el('input', { type: 'email', required: true, maxlength: 200, autocomplete: 'email' }),
-      t = el('input', { type: 'tel', maxlength: 60, autocomplete: 'tel' }), x = el('textarea', { required: true, maxlength: 3000 }), hp = falle(), z = zustimmung(c), knopf = el('button', { class: 'mk-btn', type: 'submit', text: 'Nachricht senden' });
-    var f = el('form', { novalidate: false }, feld('Ihr Name *', n), feld('Ihre E-Mail-Adresse *', m), feld('Telefon (freiwillig)', t), feld('Ihre Nachricht *', x), hp, z.el, knopf);
+      t = el('input', { type: 'tel', maxlength: 60, autocomplete: 'tel' }), x = el('textarea', { required: true, maxlength: 3000 }), hp = falle(), z = zustimmung(c), knopf = el('button', { class: 'mk-btn', type: 'submit', text: 'Nachricht senden' }), fo = fotoFeld(b);
+    var f = el('form', { novalidate: false }, feld('Ihr Name *', n), feld('Ihre E-Mail-Adresse *', m), feld('Telefon (freiwillig)', t), feld('Ihre Nachricht *', x), fo.el, hp, z.el, knopf);
     f.addEventListener('submit', function (e) {
-      e.preventDefault(); knopf.disabled = true; meldung(b, '', '');
-      anfrage('POST', 'kontakt', { name: n.value, email: m.value, telefon: t.value, nachricht: x.value, einwilligung: z.cb.checked, hp: hp.querySelector('input').value, seite: location.pathname })
-        .then(function () { f.reset(); meldung(b, 'ok', 'Vielen Dank! Ihre Nachricht ist angekommen, wir melden uns bei Ihnen.'); knopf.disabled = false; })
+      e.preventDefault(); meldung(b, '', '');
+      if (!fo.bereit()) { meldung(b, 'fehler', 'Bitte einen Moment warten, die Fotos werden noch hochgeladen.'); return; }
+      knopf.disabled = true;
+      anfrage('POST', 'kontakt', { name: n.value, email: m.value, telefon: t.value, nachricht: x.value, einwilligung: z.cb.checked, hp: hp.querySelector('input').value, seite: location.pathname, fotos: fo.tokens() })
+        .then(function () { f.reset(); fo.zuruecksetzen(); meldung(b, 'ok', 'Vielen Dank! Ihre Nachricht ist angekommen, wir melden uns bei Ihnen.'); knopf.disabled = false; })
         .catch(function (er) { meldung(b, 'fehler', er.message); knopf.disabled = false; });
     });
     b.appendChild(f);
@@ -82,11 +131,13 @@
       function formular() {
         form.textContent = '';
         var n = el('input', { required: true, maxlength: 120, autocomplete: 'name' }), m = el('input', { type: 'email', required: true, maxlength: 200, autocomplete: 'email' }), tel = el('input', { type: 'tel', maxlength: 60, autocomplete: 'tel' }),
-          x = el('textarea', { maxlength: 1500 }), hp = falle(), z = zustimmung(c), knopf = el('button', { class: 'mk-btn', type: 'submit', text: 'Termin verbindlich buchen' });
-        var f = el('form', {}, feld('Ihr Name *', n), feld('Ihre E-Mail-Adresse *', m), feld('Telefon (freiwillig)', tel), feld('Anliegen (freiwillig)', x), hp, z.el, knopf);
+          x = el('textarea', { maxlength: 1500 }), hp = falle(), z = zustimmung(c), knopf = el('button', { class: 'mk-btn', type: 'submit', text: 'Termin verbindlich buchen' }), fo = fotoFeld(b);
+        var f = el('form', {}, feld('Ihr Name *', n), feld('Ihre E-Mail-Adresse *', m), feld('Telefon (freiwillig)', tel), feld('Anliegen (freiwillig)', x), fo.el, hp, z.el, knopf);
         f.addEventListener('submit', function (e) {
-          e.preventDefault(); knopf.disabled = true; meldung(b, '', '');
-          anfrage('POST', 'termin', { start: slot.start, name: n.value, email: m.value, telefon: tel.value, nachricht: x.value, einwilligung: z.cb.checked, hp: hp.querySelector('input').value })
+          e.preventDefault(); meldung(b, '', '');
+          if (!fo.bereit()) { meldung(b, 'fehler', 'Bitte einen Moment warten, die Fotos werden noch hochgeladen.'); return; }
+          knopf.disabled = true;
+          anfrage('POST', 'termin', { start: slot.start, name: n.value, email: m.value, telefon: tel.value, nachricht: x.value, einwilligung: z.cb.checked, hp: hp.querySelector('input').value, fotos: fo.tokens() })
             .then(function (r) { b.textContent = ''; b.appendChild(el('div', { class: 'mk-ok', role: 'status', text: 'Ihr Termin ist gebucht: ' + (r.wann || tagText(tag.datum) + ' ' + slot.uhr + ' Uhr') + '. Sie bekommen eine Bestätigung mit Kalender-Einladung per E-Mail.' })); })
             .catch(function (er) { meldung(b, 'fehler', er.message); knopf.disabled = false; if (er.status === 409) { setTimeout(function () { termin(c); }, 1800); } });
         });
@@ -214,6 +265,7 @@
   var slots = {};
   Array.prototype.forEach.call(document.querySelectorAll('[data-mk]'), function (c) { var a = c.getAttribute('data-mk'); (slots[a] = slots[a] || []).push(c); });
   anfrage('GET', 'config').then(function (cfg) {
+    if (cfg.fotos) fotoEinst = cfg.fotos;
     statistik(cfg);
     (slots.kontakt || []).forEach(function (c) { if (cfg.kontakt) kontakt(c); else c.textContent = ''; });
     (slots.termin || []).forEach(function (c) { if (cfg.termin.aktiv) termin(c); else c.textContent = ''; });

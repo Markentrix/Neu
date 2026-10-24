@@ -15,7 +15,7 @@ from urllib.parse import parse_qs, quote, urlparse
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, Response
 
-from . import config, push
+from . import config, fotos, push
 from . import sitedienste as sd
 from .db import tx
 from .routes_sitedienste import _empfaenger, _termin_mails
@@ -246,6 +246,37 @@ async def _roh(request: Request) -> bytes:
     return (await request.body())[:30_001]
 
 
+async def _roh_foto(request: Request) -> bytes:
+    try:
+        if int(request.headers.get("content-length") or 0) > fotos.MAX_BYTES + 1024:
+            raise HTTPException(413, "Das Foto ist zu groß (höchstens 6 MB).")
+    except ValueError:
+        raise HTTPException(400, "Ungültige Anfrage.")
+    return (await request.body())[:fotos.MAX_BYTES + 1]
+
+
+@router.get("/foto")
+def foto_info(request: Request):
+    """Ob die Website Fotos annehmen darf, wie viele und wie lange sie gespeichert werden (für Hinweistext und Formular)."""
+    rate_limit("api-fotoinfo:" + client_ip(request), 120, 300)
+    z = _lade(request)
+    return _json({"aktiv": bool(z["foto_aktiv"]), "max": fotos.MAX_ANZAHL, "tage": z["foto_tage"], "max_mb": fotos.MAX_BYTES // (1024 * 1024),
+                  "hinweis": f"Ihre Fotos sehen nur wir und nur zur Beurteilung Ihrer Anfrage. Sie werden nach {z['foto_tage']} Tagen automatisch gelöscht."})
+
+
+@router.post("/foto")
+def foto_hochladen(request: Request, roh: bytes = Depends(_roh_foto)):
+    """Ein Foto (JPG, PNG oder WebP) als Rohdaten im Body. Antwort: {"ok":true,"token":"…"}. Die Kennung geht dann im Feld „fotos“ mit /api/anfrage mit."""
+    rate_limit("api-foto:" + client_ip(request), 30, 600)
+    z = _lade(request)
+    rate_limit("api-fotosite:" + z["site_id"], 300, 86400)
+    if not z["foto_aktiv"]:
+        raise HTTPException(409, "Foto-Upload ist für diese Website nicht eingeschaltet.")
+    with tx("system") as cur:
+        token = fotos.speichern(cur, z["kunden_id"], roh)
+    return _json({"ok": True, "token": token})
+
+
 @router.post("/e")
 def ereignis(request: Request, roh: bytes = Depends(_roh)):
     """Anonyme Besucherstatistik: kein Cookie, keine IP-Adresse. Die Besucherkennung ist ein Hash, der sich täglich ändert."""
@@ -400,7 +431,7 @@ def _zusammenfassung(felder: dict, labels: dict | None = None) -> str:
     return "\n".join(zeilen)
 
 
-def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: dict | None, labels: dict | None = None):
+def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: dict | None, labels: dict | None = None, foto_ids: list | None = None):
     titel = TITEL[typ]
     mail = felder.get("email", "")
     text = _zusammenfassung(felder, labels)
@@ -414,8 +445,13 @@ def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: 
     if buchung and buchung["zeile"].get("anzahlung"):
         kopf += f"\nAnzahlung: {buchung['zeile']['anzahlung'].replace('.', ',')} € (der Besucher hat den Zahlungslink bekommen). Nach Zahlungseingang im Portal „Anzahlung erhalten“ klicken."
     fehler = ""
+    anhang = None
+    if foto_ids:
+        with tx("system") as cur:
+            anhang = fotos.fuer_mail(cur, kid, foto_ids) or None
+        kopf += f"\nFotos: {len(foto_ids)} Stück " + ("im Anhang und " if anhang else "") + f"im Kundenportal unter „Anfragen“. Sie werden nach {z['foto_tage']} Tagen automatisch gelöscht."
     for a in an:
-        ok, via = sd.kundenmail(kid, a, f"{titel}: {felder.get('name', '')} ({ref})", f"{kopf}\n\n{text}\n\n—\nSie können direkt auf diese E-Mail antworten.", reply_to=mail or None, art="kontakt")
+        ok, via = sd.kundenmail(kid, a, f"{titel}: {felder.get('name', '')} ({ref})", f"{kopf}\n\n{text}\n\n—\nSie können direkt auf diese E-Mail antworten.", reply_to=mail or None, anhang=anhang, art="kontakt")
         if not ok:
             fehler = via
     if not an:
@@ -452,6 +488,9 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
     if d.get("website") or d.get("hp"):
         return _json({"ok": True, "ref": "OK", "status": "neu"})             # Lockfeld: so tun als ob, nichts speichern
     kid, firma = z["kunden_id"], z["_firma"]
+    tokens = fotos.kennungen(d.pop("fotos", None)) if z["foto_aktiv"] else []
+    d.pop("fotos", None)
+    foto_ids: list = []
     try:
         felder = _pruefen(d, z)
         typ = felder["typ"]
@@ -517,11 +556,12 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
                 g = cur.fetchone()
                 g["leistung_name"], g["mitarbeiter_name"] = (lz or {}).get("name", ""), mname
                 buchung = {"zeile": g, "wann": start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr"), "frei": frei_gabe}
+            foto_ids = fotos.verknuepfen(cur, kid, tokens, z["foto_tage"], aid, buchung["zeile"]["id"] if buchung else None)
             ids = push.kunde(cur, kid)
     except Ungueltig as e:
         return fehlerantwort(422, "Bitte die markierten Angaben prüfen.", e.fehler)
     push.senden(ids, f"Neue {TITEL[typ]} über die Website", f"{felder['name']}" + (f": {buchung['wann']}" if buchung else ""), "/app#" + ("heute" if buchung else "anfragen"), "anfrage")
-    bg.add_task(_mails, kid, z, typ, ref, felder, firma, buchung, labels)
+    bg.add_task(_mails, kid, z, typ, ref, felder, firma, buchung, labels, foto_ids)
     if formular:
         return Response(status_code=303, headers={"Location": f"/danke.html?typ={quote(typ)}&ref={quote(ref)}"})
     return _json({"ok": True, "ref": ref, "status": "neu"})

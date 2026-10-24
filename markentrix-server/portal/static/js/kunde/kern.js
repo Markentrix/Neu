@@ -1,4 +1,4 @@
-import { h, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
+import { h, api, datum, toast, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
 import { hilfeSuche } from '../hilfe.js';
 import { installBanner } from '../anleitung.js';
 
@@ -104,6 +104,24 @@ export function tabelle(spalten, zeilen, leer = 'Noch nichts vorhanden.') {
     h('thead', {}, h('tr', {}, spalten.map(s => h('th', {}, s[0])))),
     h('tbody', {}, zeilen.map(z => h('tr', {}, spalten.map(s => h('td', {}, s[1](z))))))));
 }
+/** Vorschaubilder der Fotos, die Besucher zu einer Anfrage oder einem Termin hochgeladen haben. Mit Löschdatum und Knopf zum früheren Löschen. */
+export function fotoReihe(fotos) {
+  if (!fotos || !fotos.length) return '';
+  const box = h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin:6px 0' });
+  fotos.forEach(f => {
+    const url = '/api/kunde/fotos/' + f.id;
+    const weg = h('button', { class: 'btn small sec', type: 'button', 'aria-label': 'Foto jetzt löschen', style: 'padding:2px 8px', onclick: async () => {
+      if (!confirm('Dieses Foto jetzt endgültig löschen?')) return;
+      try { await api(url, { method: 'DELETE' }); k.remove(); toast('Foto gelöscht.', 'ok'); } catch (x) { toast(x.message); }
+    } }, 'Löschen');
+    const k = h('div', { style: 'width:110px' },
+      h('a', { href: url, target: '_blank', rel: 'noopener', 'aria-label': 'Foto in voller Größe öffnen' }, h('img', { src: url, alt: 'Foto vom Besucher', loading: 'lazy', style: 'width:110px;height:110px;object-fit:cover;border-radius:8px;display:block' })),
+      h('div', { class: 'small muted' }, f.loeschen_am ? 'weg am ' + datum(f.loeschen_am) : ''), weg);
+    box.append(k);
+  });
+  return box;
+}
+
 export const statusPill = (s) => h('span', { class: 'pill ' + (['neu', 'geplant'].includes(s) ? 'warn' : ['erledigt', 'veroeffentlicht', 'bestaetigt', 'beantwortet'].includes(s) ? 'ok' : ['fehler', 'abgesagt', 'spam'].includes(s) ? 'bad' : '') }, String(s).replace('_', ' '));
 
 // ------------------------------------------------------------- Seiten

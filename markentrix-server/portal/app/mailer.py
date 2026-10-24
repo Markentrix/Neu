@@ -30,6 +30,13 @@ def konfiguriert() -> bool:
     return bool(c.get("host") and c.get("absender"))
 
 
+def anhaenge(anhang) -> list:
+    """Ein Anhang (Name, Daten, Typ), eine Liste davon oder nichts: immer als Liste."""
+    if not anhang:
+        return []
+    return [anhang] if isinstance(anhang, tuple) else list(anhang)
+
+
 def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
            von_name: str | None = None, kunden_id=None, art: str = "system", vorlage: dict | None = None) -> tuple[bool, str]:
     """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel und das Zustell-Protokoll festgehalten."""
@@ -58,8 +65,7 @@ def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | N
         if not vorlage:   # Mail von Markentrix selbst: gleiches saubere Layout, Text und Gruß bleiben unverändert
             vorlage = {"firma": c.get("absender_name") or "Markentrix", "farbe": "#4f46e5", "logo": _markentrix_logo(), "intern": True}
         mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"), vorlage.get("intern", False))
-        if anhang:
-            name, daten, mime = anhang
+        for name, daten, mime in anhaenge(anhang):
             maintype, subtype = mime.split("/")
             msg.add_attachment(daten, maintype=maintype, subtype=subtype, filename=name)
         host, port, mode = c["host"], int(c.get("port") or 587), c.get("sicherung", "starttls")

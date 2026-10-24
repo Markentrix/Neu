@@ -627,3 +627,11 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 - **Logo und Farbe:** Admin → Kunden → (Kunde) → Branding (PNG oder JPG, bis 400 KB; SVG zeigen Mail-Programme nicht). Das Logo erscheint auch auf der Absage-Seite.
 - **Signatur:** Der Kunde stellt sie unter Website-Dienste → Kontaktformular ein („Vorschlag aus meinen Firmendaten einfügen“). Leer = „Mit freundlichen Grüßen“ und Firmenname. Der Knopf „Testmail senden“ zeigt das Ergebnis.
 - Beschriftungen der Formularfelder kommen aus der Website (`name`-Feld) bzw. aus der Liste in `routes_siteapi.py` (`LABELS`); fehlt eine, steht der Feldname.
+
+## Fotos von Besuchern mit Löschfrist (Stand Oktober 2026)
+- Kundenportal → Website-Dienste → **Fotos von Besuchern**: Schalter (Standard **aus**) und **Löschfrist** (Standard 90 Tage, 7 bis 365). Die Frist gilt für neue Fotos, vorhandene behalten ihr Datum.
+- Besucher laden bis zu 5 Fotos (JPG, PNG, WebP) im Kontaktformular, in der Terminbuchung (Baustein `site.js`) oder über die Website-API (`/api/foto`, Feld `fotos` bei `/api/anfrage`, siehe `docs/WEBSITE-API.md`). Der Besucher sieht beim Hochladen, nach wie vielen Tagen die Fotos gelöscht werden.
+- Das Portal prüft den Bildinhalt, entfernt Standort und Kameradaten, speichert das Foto in der Datenbank (`website_fotos`, nur für den eigenen Betrieb lesbar) und zeigt es bei Anfragen, Terminen und Buchungen. Zusätzlich hängt es an der Mail an den Betrieb (bis 8 MB zusammen).
+- **Löschen:** Der Betrieb kann jedes Foto selbst löschen. Der Hintergrunddienst löscht abgelaufene Fotos und nie abgeschickte Uploads (nach 24 Stunden) und schreibt beides ins Löschprotokoll. Mit einer gelöschten Anfrage verschwinden ihre Fotos. Speichergrenze je Betrieb: 200 MB.
+- Der Datenexport bei Vertragsende enthält die Fotos (Ordner `fotos/`), die Löschung bei Offboarding entfernt sie.
+- Rechtlich: Hinweis in der Datenschutzerklärung des Betriebs nötig, Punkt steht in `docs/ANWALT-CHECKLISTE.md`.

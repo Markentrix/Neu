@@ -1,5 +1,5 @@
 import { h, api, zeit, melde, formular, toast } from '../common.js';
-import { tabelle, V, karten } from './kern.js';
+import { tabelle, V, karten, fotoReihe } from './kern.js';
 import { antwortDialog } from './heute.js';
 
 V.assistent = async () => {
@@ -30,7 +30,7 @@ V.anfragen = async () => {
   const box = h('div');
   const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/anfragen/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { toast(x.message); } } },
     ['neu', 'in_bearbeitung', 'beantwortet', 'erledigt', 'spam'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
-  box.append(tabelle([['Eingang', z => zeit(z.erstellt_am)], ['Name', z => z.name], ['Kontakt', z => z.kontakt], ['Nachricht', z => z.nachricht], ['Quelle', z => z.quelle], ['Status', status], ['', z => h('button', { class: 'btn small', onclick: () => antwortDialog(z.id, () => location.reload()) }, 'Antworten')]], daten, 'Noch keine Anfragen.'));
+  box.append(tabelle([['Eingang', z => zeit(z.erstellt_am)], ['Name', z => z.name], ['Kontakt', z => z.kontakt], ['Nachricht', z => h('div', {}, z.nachricht, fotoReihe(z.fotos))], ['Quelle', z => z.quelle], ['Status', status], ['', z => h('button', { class: 'btn small', onclick: () => antwortDialog(z.id, () => location.reload()) }, 'Antworten')]], daten, 'Noch keine Anfragen.'));
   return h('div', { class: 'card' }, h('h2', {}, 'Anfragen'), box);
 };
 
@@ -54,7 +54,7 @@ V.termine = async () => {
   const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/termine/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { toast(x.message); } } },
     ['geplant', 'bestaetigt', 'abgesagt', 'erledigt', 'nicht_erschienen'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
   return h('div', { class: 'stack' },
-    h('div', { class: 'card' }, h('h2', {}, 'Termine'), tabelle([['Wann', z => zeit(z.beginn)], ['Titel', z => z.titel], ['Kontakt', z => z.kontakt_name], ['Notiz', z => z.notiz], ['Status', status]], daten, 'Keine Termine.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Termine'), tabelle([['Wann', z => zeit(z.beginn)], ['Titel', z => z.titel], ['Kontakt', z => z.kontakt_name], ['Notiz', z => h('div', {}, z.notiz, fotoReihe(z.fotos))], ['Status', status]], daten, 'Keine Termine.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Termin'), m, f));
 };
 

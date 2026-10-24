@@ -53,3 +53,11 @@ Der Vertrag bleibt stabil. Es kommen nur neue Felder dazu, bestehende ändern si
 - `/leistungen` und `/slots` richten sich nach dem **Wochenplan** (Zeiten je Wochentag mit Pausen); `personen` (Parameter bei `/slots`, `/verfuegbarkeit` und der Buchung) vervielfacht Dauer, Preis und Anzahlung.
 - Neuer Anfragetyp **`warteliste`** (Pflicht: E-Mail und Datum). Wird ein Termin frei, benachrichtigt das Portal bis zu 3 Wartende mit den freien Zeiten.
 - Termin-Links in Mails: absagen, verschieben und **„Ich komme“** (Bestätigung), alle als Seiten mit Bestätigungsschritt.
+
+## Fotos zu Anfragen und Terminen (optional, pro Betrieb einzuschalten)
+Der Betrieb schaltet das im Kundenportal unter Website-Dienste → „Fotos von Besuchern“ ein und legt die **Löschfrist** fest (Standard 90 Tage, 7 bis 365). Ohne Schalter antwortet der Upload mit 409.
+- `GET /api/foto` → `{aktiv, max, tage, max_mb, hinweis}`. Den `hinweis` (Löschfrist!) direkt beim Foto-Feld anzeigen.
+- `POST /api/foto` mit dem Foto als **Rohdaten im Body** (JPG, PNG oder WebP, höchstens 6 MB) → `{ok:true, token:"…"}`. Am besten im Browser vorher auf höchstens 1600 Pixel verkleinern (Canvas, JPEG 0,82), das spart Datenvolumen und entfernt Standort und Kameradaten schon beim Besucher. Der Server prüft den Inhalt (nicht den Dateinamen) und entfernt Metadaten selbst noch einmal. Mit `Content-Type: text/plain` senden, dann entfällt die Vorabfrage (CORS).
+- `POST /api/anfrage` mit dem Zusatzfeld **`fotos`** (Liste der Kennungen, bis 5; bei einem normalen Formular mehrere Felder `fotos=…`). Gilt für alle Anfragetypen, auch Termin. Eine Kennung kann nur einmal verwendet werden.
+- Nicht abgeschickte Uploads löscht das Portal nach 24 Stunden. Abgeschickte Fotos löscht es nach der Frist des Betriebs automatisch (Eintrag im Löschprotokoll). Der Betrieb sieht sie bei Anfragen, Terminen und Buchungen und im Anhang der Mail (bis 8 MB zusammen, sonst nur im Portal) und kann sie vorher selbst löschen.
+- Der Baustein `site.js` (Kontaktformular und Terminbuchung) bringt das Foto-Feld mit Verkleinern und Löschhinweis automatisch mit, sobald der Betrieb es eingeschaltet hat.

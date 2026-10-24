@@ -302,8 +302,7 @@ def _nachricht(von: str, von_name: str, an: str, betreff: str, text: str, reply_
         mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"))
     else:
         msg.set_content(text)
-    if anhang:
-        name, daten, mime = anhang
+    for name, daten, mime in mailer.anhaenge(anhang):
         mt, st = mime.split("/")
         msg.add_attachment(daten, maintype=mt, subtype=st, filename=name)
     return msg

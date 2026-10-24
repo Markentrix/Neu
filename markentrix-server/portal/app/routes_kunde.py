@@ -1,13 +1,14 @@
 import json
 import urllib.error
 import urllib.request
+import uuid
 from datetime import date
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import berichte as bericht_modul, config, rechtstexte, einstellungen, ki, publish
+from . import berichte as bericht_modul, config, einstellungen, fotos, ki, publish, rechtstexte
 from .db import tx
 from .security import EMAIL_RE, audit, check_password_rules, hash_password, require_inhaber, require_kunde, require_modul, verify_password
 
@@ -219,7 +220,11 @@ def anfragen(user: dict = Depends(require_kunde)):
     with tx("kunde", user["kunden_id"]) as cur:
         gate(cur, user, "anfragen_termine")
         cur.execute("SELECT id, name, kontakt, nachricht, quelle, status, erstellt_am FROM anfragen ORDER BY erstellt_am DESC LIMIT 200")
-        return cur.fetchall()
+        zeilen = cur.fetchall()
+        bilder = fotos.liste(cur, user["kunden_id"], anfrage_ids=[z["id"] for z in zeilen])["anfrage"]
+        for z in zeilen:
+            z["fotos"] = bilder.get(str(z["id"]), [])
+        return zeilen
 
 
 @router.patch("/anfragen/{aid}")
@@ -235,13 +240,51 @@ def anfrage_status(aid: str, data: StatusIn, user: dict = Depends(require_kunde)
     return r
 
 
+FOTO_KOPF = {"X-Content-Type-Options": "nosniff"}
+
+
+@router.get("/fotos/{fid}")
+def foto_ansehen(fid: str, user: dict = Depends(require_kunde)):
+    try:
+        uuid.UUID(fid)
+    except ValueError:
+        raise HTTPException(404, "Nicht gefunden.")
+    with tx("kunde", user["kunden_id"]) as cur:
+        gate(cur, user, "anfragen_termine")
+        cur.execute("SELECT typ, daten FROM website_fotos WHERE id=%s AND loeschen_am IS NOT NULL", (fid,))
+        r = cur.fetchone()
+    if not r:
+        raise HTTPException(404, "Nicht gefunden. Das Foto wurde vielleicht schon gelöscht.")
+    return Response(bytes(r["daten"]), media_type=r["typ"], headers=FOTO_KOPF)
+
+
+@router.delete("/fotos/{fid}")
+def foto_loeschen(fid: str, user: dict = Depends(require_kunde)):
+    try:
+        uuid.UUID(fid)
+    except ValueError:
+        raise HTTPException(404, "Nicht gefunden.")
+    with tx("kunde", user["kunden_id"]) as cur:
+        gate(cur, user, "anfragen_termine")
+        cur.execute("DELETE FROM website_fotos WHERE id=%s RETURNING id", (fid,))
+        if not cur.fetchone():
+            raise HTTPException(404, "Nicht gefunden.")
+        audit(cur, user, "foto_geloescht", user["kunden_id"], {"foto": fid})
+    return {"ok": True}
+
+
 @router.get("/termine")
 def termine(user: dict = Depends(require_kunde)):
     with tx("kunde", user["kunden_id"]) as cur:
         gate(cur, user, "anfragen_termine")
-        cur.execute("""SELECT id, titel, beginn, ende, kontakt_name, kontakt_info, status, notiz FROM termine
+        cur.execute("""SELECT id, titel, beginn, ende, kontakt_name, kontakt_info, status, notiz, anfrage_id FROM termine
                        WHERE beginn >= now() - interval '30 days' ORDER BY beginn LIMIT 200""")
-        return cur.fetchall()
+        zeilen = cur.fetchall()
+        bilder = fotos.liste(cur, user["kunden_id"], anfrage_ids=[z["anfrage_id"] for z in zeilen if z["anfrage_id"]])["anfrage"]
+        for z in zeilen:
+            aid = z.pop("anfrage_id")
+            z["fotos"] = bilder.get(str(aid), []) if aid else []
+        return zeilen
 
 
 class TerminIn(BaseModel):

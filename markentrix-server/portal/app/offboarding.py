@@ -9,7 +9,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 
-from . import berichte, belege, config, rechtstexte
+from . import berichte, belege, config, fotos, rechtstexte
 
 EXPORT_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "websites",
@@ -22,7 +22,7 @@ KUNDE_OHNE_FELDER = {"belege": ("notiz",)}
 # Inhalte, die bei der Löschung entfernt werden (Reihenfolge ist egal, es gibt keine Abhängigkeiten untereinander außer SET NULL / CASCADE)
 LOESCH_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "agent_laeufe",
-                   "prompts", "freigaben", "projekte", "websites", "tickets", "kundenfreigaben", "zufriedenheit", "aufgaben", "dateien", "angebots_inhalte", "briefings", "kennzahlen_extern", "kunden_werkzeuge", "antwortvorlagen_kunde", "domains"]
+                   "prompts", "freigaben", "projekte", "websites", "tickets", "kundenfreigaben", "zufriedenheit", "aufgaben", "dateien", "angebots_inhalte", "briefings", "kennzahlen_extern", "kunden_werkzeuge", "antwortvorlagen_kunde", "domains", "website_fotos"]
 
 
 def _json(o):
@@ -58,6 +58,7 @@ def export_zip(cur, kid, fuer_kunde: bool = False) -> bytes:
                    "berichte/ Monatsberichte als PDF\n"
                    "avv/      Auftragsverarbeitungsvertrag (unterschrieben)\n"
                    "uploads/  hochgeladene Dateien (z. B. Wochenangebote)\n"
+                   "fotos/    Fotos, die Besucher Ihrer Website zu Anfragen und Terminen hochgeladen haben (werden nach der eingestellten Frist automatisch gelöscht)\n"
                    "dateien/  Dokumentenablage und Anhänge aus Nachrichten und Freigaben\n"
                    "websites/ die Dateien Ihrer Website(n)\n")
         z.writestr("daten/kunde.json", json.dumps(k, default=_json, ensure_ascii=False, indent=1))
@@ -92,6 +93,9 @@ def export_zip(cur, kid, fuer_kunde: bool = False) -> bytes:
         for d in cur.fetchall():
             z.writestr(f"dateien/{d['bereich']}/{str(d['id'])[:8]}-{d['name']}", bytes(d["daten"]))
         _websites_dazu(z, cur, kid)
+        cur.execute("SELECT id, typ, daten FROM website_fotos WHERE kunden_id=%s AND loeschen_am IS NOT NULL ORDER BY erstellt_am", (kid,))
+        for fo in cur.fetchall():
+            z.writestr(f"fotos/{str(fo['id'])[:8]}.{fotos.ENDUNG.get(fo['typ'], 'bin')}", bytes(fo["daten"]))
         basis = _upload_dir(kid)
         cur.execute("SELECT id, dateiname, dateipfad FROM wochenangebote_uploads WHERE kunden_id=%s", (kid,))
         for u in cur.fetchall():

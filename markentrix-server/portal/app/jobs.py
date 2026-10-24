@@ -957,6 +957,16 @@ def fristen_ausfuehren() -> dict:
     return ergebnis
 
 
+def fotos_aufraeumen(cfg):
+    """Löscht Fotos aus Anfragen/Terminen nach der Frist des Betriebs und nie verknüpfte Uploads nach 24 Stunden. Jede Löschung steht im Löschprotokoll."""
+    from . import fotos
+    with tx("system") as cur:
+        abgelaufen, verwaist = fotos.aufraeumen(cur)
+        for n, name in ((abgelaufen, "website_fotos (Löschfrist abgelaufen)"), (verwaist, "website_fotos (nie abgeschickt)")):
+            if n:
+                cur.execute("INSERT INTO loeschprotokoll (tabelle, geloescht_anzahl, ausgeloest_durch) VALUES (%s,%s,'automatik')", (name, n))
+
+
 def anrufe_aufraeumen(cfg):
     """Personenbezogene Angaben aus Telefonprotokollen nach 180 Tagen entfernen (Datensparsamkeit)."""
     if datetime.now(timezone.utc).hour < 2 or not _marker(f"anrufe-aufraeumen-{date.today()}"):
@@ -1086,7 +1096,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return

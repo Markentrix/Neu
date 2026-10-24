@@ -1,5 +1,5 @@
 import { h, api, melde, datum, zeit, toast } from '../common.js';
-import { V, zeige } from './kern.js';
+import { V, zeige, fotoReihe } from './kern.js';
 
 /** @param {string} t @param {Element[]|string[]} inhalt */
 const hilfe = (t, ...inhalt) => h('details', { class: 'hilfe' }, h('summary', {}, t), h('div', { class: 'small', style: 'margin-top:6px' }, ...inhalt));
@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    await domainKarte(), mailKarte(d, neu), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    await domainKarte(), mailKarte(d, neu), fotoKarte(d), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
 
 // ---------------------------------------------------------------- Domain-Stand
@@ -73,6 +73,19 @@ function mailKarte(d, neu) {
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Testmail senden')),
     statusZeile(d.status, 'kontakt', 'Anfragen'),
     smtpBereich(d, mm, neu), mm);
+}
+
+// ---------------------------------------------------------------- Fotos
+function fotoKarte(d) {
+  const f = d.fotos || { aktiv: false, tage: 90 };
+  const m = h('div'), an = schalter(f.aktiv, 'Besucher dürfen Fotos zu Anfragen und Terminen hochladen');
+  const tage = h('input', { type: 'number', min: 7, max: 365, value: f.tage, style: 'width:90px', 'aria-label': 'Löschfrist in Tagen' });
+  const sp = async () => { try { await api('/api/kunde/website-dienste/fotos', { method: 'PUT', body: { aktiv: an.c.checked, tage: Number(tage.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Fotos von Besuchern'),
+    h('p', { class: 'small muted' }, 'Besucher können bis zu 5 Fotos mitschicken, zum Beispiel vom Auto oder von den Haaren, damit du Aufwand und Preis besser einschätzen kannst. Du siehst sie bei „Anfragen“, bei „Termine“ und bei den Buchungen hier und im Anhang der E-Mail. Standortdaten und Kameradaten werden aus den Bildern entfernt.'),
+    h('p', { class: 'small muted' }, 'Die Fotos werden nach der Löschfrist automatisch gelöscht (Standard 90 Tage). Du kannst jedes Foto vorher selbst löschen. Der Besucher sieht den Hinweis zur Löschfrist direkt beim Hochladen. Nimm das Hochladen von Fotos bitte in deine Datenschutzerklärung auf.'),
+    m, an.el, h('div', { class: 'row', style: 'margin-top:6px;gap:8px;align-items:center' }, h('span', {}, 'Löschen nach'), tage, h('span', {}, 'Tagen (7 bis 365)'), h('button', { class: 'btn', onclick: sp }, 'Speichern')),
+    h('p', { class: 'small muted' }, 'Die Frist gilt für neue Fotos. Schon gespeicherte behalten ihr Löschdatum.'));
 }
 
 function smtpBereich(d, mm, neu) {
@@ -314,7 +327,7 @@ async function buchungenKarte(d, neu) {
       h('p', {}, h('b', {}, ZEIT(b.start)), ' · ' + b.name, ' ', h('span', { class: 'pill ' + (b.status === 'reserviert' ? 'warn' : 'ok') }, b.status === 'reserviert' ? 'wartet auf dich' : 'bestätigt')),
       (b.leistung || b.mitarbeiter) ? h('p', { class: 'small' }, [b.leistung, b.mitarbeiter ? 'bei ' + b.mitarbeiter : ''].filter(Boolean).join(' · ')) : '',
       h('p', { class: 'small' }, b.email + (b.telefon ? ' · ' + b.telefon : '') + (b.ref ? ' · ' + b.ref : '')),
-      info ? h('p', { class: 'small muted' }, info) : '', b.nachricht ? h('p', { class: 'small' }, b.nachricht) : '',
+      info ? h('p', { class: 'small muted' }, info) : '', b.nachricht ? h('p', { class: 'small' }, b.nachricht) : '', fotoReihe(b.fotos),
       b.anzahlung ? h('p', { class: 'small' }, 'Anzahlung: ' + b.anzahlung.replace('.', ',') + ' € ', h('span', { class: 'pill ' + (b.anzahlung_erhalten_am ? 'ok' : 'warn') }, b.anzahlung_erhalten_am ? 'erhalten' : 'noch offen'), b.preis ? ' · Preis ' + b.preis.replace('.', ',') + ' €' : '', b.bezahlt_am ? [' ', h('span', { class: 'pill ok' }, 'komplett bezahlt')] : '') : '',
       h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' },
         b.status === 'reserviert' ? [betrag, h('button', { class: 'btn', onclick: () => tun('bestaetigen', { anzahlung: betrag.value }) }, 'Bestätigen')] : '',

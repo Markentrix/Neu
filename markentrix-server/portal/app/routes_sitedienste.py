@@ -16,7 +16,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import config, einstellungen, push, quittung, webbetrieb
+from . import config, einstellungen, fotos, push, quittung, webbetrieb
 from . import sitedienste as sd
 from .db import tx
 from .security import EMAIL_RE, audit, client_ip, current_user, rate_limit, require_admin, require_inhaber
@@ -96,7 +96,33 @@ def oeff_config(site_id: str, request: Request):
                    "me_link": z["pp_me_link"] or ""},
         "bewertungen": bool(z["bew_aktiv"]),
         "analytics": {"aktiv": bool(z["ga_aktiv"] and z["ga_id"]), "id": z["ga_id"] or ""},
+        "fotos": {"aktiv": bool(z["foto_aktiv"]), "max": fotos.MAX_ANZAHL, "tage": z["foto_tage"]},
     }, kopf)
+
+
+async def _foto_korper(request: Request) -> bytes:
+    try:
+        if int(request.headers.get("content-length") or 0) > fotos.MAX_BYTES + 1024:
+            raise HTTPException(413, "Das Foto ist zu groß (höchstens 6 MB).")
+    except ValueError:
+        raise HTTPException(400, "Ungültige Anfrage.")
+    return (await request.body())[:fotos.MAX_BYTES + 1]
+
+
+@router.post("/site/{site_id}/foto", include_in_schema=False)
+def oeff_foto(site_id: str, request: Request, roh: bytes = Depends(_foto_korper)):
+    """Ein Foto als Rohdaten (JPG, PNG, WebP). Antwort: Kennung, die beim Absenden von Kontaktformular bzw. Termin im Feld „fotos“ mitgeschickt wird."""
+    z = _site(site_id)
+    kopf = _cors(request, z)
+    rate_limit("fotoup:" + client_ip(request), 30, 600)
+    rate_limit("fotoupsite:" + site_id, 300, 86400)
+    if z.get("verzug_pause"):
+        raise HTTPException(503, "Dieser Dienst ist vorübergehend nicht verfügbar. Bitte rufen Sie uns direkt an.")
+    if not z["foto_aktiv"]:
+        raise HTTPException(409, "Foto-Upload ist nicht eingeschaltet.")
+    with tx("system") as cur:
+        token = fotos.speichern(cur, z["kunden_id"], roh)
+    return _antwort({"ok": True, "token": token}, kopf)
 
 
 class KontaktIn(BaseModel):
@@ -135,19 +161,24 @@ def oeff_kontakt(site_id: str, request: Request, daten: dict = Depends(_korper))
     an = [a for a in _empfaenger(z["mail_empfaenger"]) if EMAIL_RE.match(a)][:5]
     kontakt = email + (", " + d.telefon.strip() if d.telefon.strip() else "")
     with tx("system") as cur:
-        cur.execute("INSERT INTO anfragen (kunden_id, name, kontakt, nachricht, quelle) VALUES (%s,%s,%s,%s,'website')",
+        cur.execute("INSERT INTO anfragen (kunden_id, name, kontakt, nachricht, quelle) VALUES (%s,%s,%s,%s,'website') RETURNING id",
                     (kid, d.name.strip(), kontakt, d.nachricht.strip()))
+        aid = cur.fetchone()["id"]
+        foto_ids = fotos.verknuepfen(cur, kid, fotos.kennungen(daten.get("fotos")), z["foto_tage"], aid) if z["foto_aktiv"] else []
+        anhang = fotos.fuer_mail(cur, kid, foto_ids) or None
         ids = push.kunde(cur, kid)
     push.senden(ids, "Neue Anfrage über die Website", f"{d.name.strip()} hat das Kontaktformular genutzt.", "/app#anfragen", "anfrage")
     betreff = z["mail_betreff"] or "Neue Anfrage über Ihre Website"
     text = (f"Neue Anfrage über das Kontaktformular Ihrer Website.\n\nName: {d.name.strip()}\nE-Mail: {email}\nTelefon: {d.telefon.strip() or '–'}\n\n"
-            f"Nachricht:\n{d.nachricht.strip()}\n\n—\nSie können direkt auf diese E-Mail antworten, die Antwort geht an {email}.")
+            f"Nachricht:\n{d.nachricht.strip()}\n\n"
+            + (f"Fotos: {len(foto_ids)} Stück " + ("im Anhang und " if anhang else "") + f"im Kundenportal unter „Anfragen“. Sie werden nach {z['foto_tage']} Tagen automatisch gelöscht.\n\n" if foto_ids else "")
+            + f"—\nSie können direkt auf diese E-Mail antworten, die Antwort geht an {email}.")
     if not an:
         sd.ereignis(kid, "kontakt", False, "Kein Empfänger eingetragen, die Anfrage liegt nur im Portal unter „Anfragen“.")
         return _antwort({"ok": True}, kopf)
     fehler = ""
     for a in an:
-        ok, via = sd.kundenmail(kid, a, betreff, text, reply_to=email, art="kontakt")
+        ok, via = sd.kundenmail(kid, a, betreff, text, reply_to=email, anhang=anhang, art="kontakt")
         if not ok:
             fehler = via
     if fehler:
@@ -194,7 +225,7 @@ class TerminIn(BaseModel):
     hp: str = Field(default="", max_length=200)
 
 
-def _termin_mails(kid, g: dict, z: dict, firma: str, an: list):
+def _termin_mails(kid, g: dict, z: dict, firma: str, an: list, foto_ids: list | None = None):
     lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
     ort = z["kal_ort"] or ""
     absagen = f"{config.BASE_URL}/site/{z['site_id']}/termin/absagen?t={g['token']}"
@@ -203,11 +234,16 @@ def _termin_mails(kid, g: dict, z: dict, firma: str, an: list):
     sd.kundenmail(kid, g["email"], f"Ihr Termin bei {firma} am {lokal}",
                   f"Guten Tag {g['name']},\n\nIhr Termin ist gebucht: {lokal}.{(chr(10) + wer) if wer else ''}\n{ort}\n{sd.zahlungsabsatz(z, g.get('anzahlung'))}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}",
                   anhang=anhang, art="termin")
+    bilder: list = []
+    if foto_ids and an:
+        with tx("system") as cur:
+            bilder = fotos.fuer_mail(cur, kid, foto_ids)
+    foto_text = (f"Fotos: {len(foto_ids)} Stück " + ("im Anhang und " if bilder else "") + f"im Kundenportal unter „Heute“. Sie werden nach {z['foto_tage']} Tagen automatisch gelöscht.\n\n") if foto_ids else ""
     for a in an:
         sd.kundenmail(kid, a, f"Neuer Termin: {g['name']} am {lokal}",
-                      f"{g['name']} ({g['email']}, {g.get('telefon') or 'keine Nummer'}) hat über Ihre Website einen Termin gebucht: {lokal}.\n\n{g.get('nachricht') or ''}\n\n"
+                      f"{g['name']} ({g['email']}, {g.get('telefon') or 'keine Nummer'}) hat über Ihre Website einen Termin gebucht: {lokal}.\n\n{g.get('nachricht') or ''}\n\n{foto_text}"
                       f"Der Termin steht im Portal unter „Heute“ und in der Einladung im Anhang.", reply_to=g["email"],
-                      anhang=("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin: " + g["name"], ort), "text/calendar"), art="termin")
+                      anhang=[("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin: " + g["name"], ort), "text/calendar")] + bilder, art="termin")
 
 
 @router.post("/site/{site_id}/termin", include_in_schema=False)
@@ -258,12 +294,13 @@ def oeff_termin(site_id: str, request: Request, bg: BackgroundTasks, daten: dict
         except Exception:
             raise HTTPException(409, voll)         # gleichzeitig gebucht: der Rest der Transaktion wird verworfen
         g = cur.fetchone()
+        foto_ids = fotos.verknuepfen(cur, kid, fotos.kennungen(daten.get("fotos")), z["foto_tage"], None, g["id"]) if z["foto_aktiv"] else []
         an = [a for a in _empfaenger(z["kal_empfaenger"] or z["mail_empfaenger"]) if EMAIL_RE.match(a)][:5]
         ids = push.kunde(cur, kid)
     wann = start.astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
     push.senden(ids, "Neuer Termin über die Website", f"{d.name.strip()}: {wann}", "/app#heute", "termin")
     sd.ereignis(kid, "termin", True, "gebucht")
-    bg.add_task(_termin_mails, kid, g, z, firma, an)
+    bg.add_task(_termin_mails, kid, g, z, firma, an, foto_ids)
     return _antwort({"ok": True, "wann": wann}, kopf)
 
 
@@ -556,6 +593,7 @@ def _zustand(cur, kid) -> dict:
     return {
         "site_id": z["site_id"], "domains": hosts, "basis": config.BASE_URL, "places_verfuegbar": places,
         "mail": {"aktiv": z["mail_aktiv"], "empfaenger": z["mail_empfaenger"] or "", "betreff": z["mail_betreff"] or "", "name": z["mail_name"] or "", "signatur": z["mail_signatur"] or "", "signatur_vorschlag": vorschlag, "bewertung": z["mail_bewertung"], "bewertung_link_da": bool(z["bew_link"] or z["bew_place_id"]), "facebook": z["mail_facebook"] or "", "instagram": z["mail_instagram"] or "", "hinweis": z["mail_hinweis"] or "", "smtp": smtp},
+        "fotos": {"aktiv": z["foto_aktiv"], "tage": z["foto_tage"]},
         "kalender": {"aktiv": z["kal_aktiv"], "ical_gesetzt": bool(z["kal_ical_enc"]), "ical_geprueft_am": z["kal_ical_geprueft_am"], "dauer": z["kal_dauer"],
                      "tage": z["kal_tage"], "von": z["kal_von"], "bis": z["kal_bis"], "wochentage": z["kal_wochentage"], "vorlauf_std": z["kal_vorlauf_std"],
                      "ort": z["kal_ort"] or "", "empfaenger": z["kal_empfaenger"] or "", "offene_termine": offen,
@@ -620,6 +658,21 @@ def k_mail(data: MailIn, user: dict = Depends(require_inhaber)):
                     (data.aktiv, emp or None, data.betreff.strip() or None, data.name.strip() or None, "\n".join(x.rstrip() for x in data.signatur.strip().splitlines()) or None,
                      data.bewertung, _link_pruefen(data.facebook, "Facebook"), _link_pruefen(data.instagram, "Instagram"), data.hinweis.strip() or None, user["kunden_id"]))
         audit(cur, user, "website_dienste_mail", user["kunden_id"], {"aktiv": data.aktiv})
+    return {"ok": True}
+
+
+class FotoIn(BaseModel):
+    aktiv: bool = False
+    tage: int = Field(default=fotos.STANDARD_TAGE, ge=7, le=365)
+
+
+@kunde.put("/fotos")
+def k_fotos(data: FotoIn, user: dict = Depends(require_inhaber)):
+    """Foto-Upload für Anfragen und Termine ein/aus und Löschfrist (Tage). Gilt für neue Fotos; bereits gespeicherte behalten ihr Löschdatum."""
+    with tx("system") as cur:
+        sd.zeile(cur, user["kunden_id"])
+        cur.execute("UPDATE website_dienste SET foto_aktiv=%s, foto_tage=%s, geaendert_am=now() WHERE kunden_id=%s", (data.aktiv, data.tage, user["kunden_id"]))
+        audit(cur, user, "website_dienste_fotos", user["kunden_id"], {"aktiv": data.aktiv, "tage": data.tage})
     return {"ok": True}
 
 
@@ -901,6 +954,7 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
                                                  OR (w.status='gebucht' AND w.ergebnis IS NULL AND w.start <= now() AND w.start > now() - interval '14 days'))
                        ORDER BY (w.status='reserviert') DESC, w.start LIMIT 150""", (kid,))
         zeilen = cur.fetchall()
+        bilder = fotos.liste(cur, kid, buchung_ids=[r["id"] for r in zeilen])["buchung"]
     out, vorbei = [], []
     jetzt = datetime.now(timezone.utc)
     for r in zeilen:
@@ -910,7 +964,7 @@ def k_buchungen(user: dict = Depends(require_inhaber)):
         details = {k: v for k, v in d.items() if k not in ("typ", "name", "telefon", "email", "nachricht", "datum", "datum2", "uhrzeit") and v}
         eintrag = {"id": str(r["id"]), "ref": r["ref"] or "", "status": r["status"], "start": r["start"], "name": r["name"], "email": r["email"], "telefon": r["telefon"] or "",
                    "nachricht": r["nachricht"] or "", "details": details, "anzahlung": r["anzahlung"] or "", "preis": f"{r['preis_betrag']:.2f}" if r["preis_betrag"] is not None else "", "anzahlung_erhalten_am": r["anzahlung_erhalten_am"], "bezahlt_am": r["bezahlt_am"], "quittung_am": r["quittung_am"], "leistung": r["leistung"] or "", "mitarbeiter": r["mitarbeiter"] or "",
-                   "ende": r["ende"], "fehlt_bisher": r["fehlt_bisher"]}
+                   "ende": r["ende"], "fehlt_bisher": r["fehlt_bisher"], "fotos": bilder.get(str(r["id"]), [])}
         (vorbei if r["start"] <= jetzt and r["status"] == "gebucht" and r["ergebnis"] is None else out).append(eintrag)
     return {"buchungen": out, "vergangen": vorbei, "freigabe": z["kal_freigabe"]}
 
