@@ -24,7 +24,7 @@ V.einstellungen = async () => {
   return h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    await zustellungKarte(), await vertragKarte(), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    await zustellungKarte(), await vertragKarte(), await angebotErinnerungKarte(), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk), m3);
 };
 
@@ -319,6 +319,20 @@ export async function zustellungKarte() {
     h('p', {}, h('button', { class: 'btn sec', onclick: pruefen }, 'Jetzt neu prüfen')));
 }
 
+
+/** Automatische Erinnerung an unbeantwortete Angebote (Standard aus). */
+export async function angebotErinnerungKarte() {
+  const d = await api('/api/admin/einstellungen/angebote'), m = h('div');
+  const an = h('input', { type: 'checkbox', style: 'width:auto', checked: d.auto_erinnerung, id: 'aerinn' });
+  an.addEventListener('change', async () => {
+    if (an.checked && !confirm('Ab jetzt gehen Erinnerungen an unbeantwortete Angebote automatisch im Namen deiner Firma raus (an Leads und Kunden). Einschalten?')) { an.checked = false; return; }
+    try { await api('/api/admin/einstellungen/angebote', { method: 'PUT', body: { auto_erinnerung: an.checked } }); melde(m, an.checked ? 'Automatische Erinnerung ist an.' : 'Automatische Erinnerung ist aus.', 'ok'); }
+    catch (x) { an.checked = !an.checked; melde(m, x.message); }
+  });
+  return h('div', { class: 'card' }, h('h2', {}, 'Angebote: automatisch erinnern'),
+    h('p', { class: 'small muted' }, 'Wenn ein gesendetes Angebot ' + d.min_tage + ' Tage ohne Antwort bleibt, geht werktags ab 9 Uhr automatisch eine Erinnerung raus, nach weiteren ' + d.min_tage + ' Tagen eine zweite mit der Frage, woran es liegt. Die dritte, letzte Nachfrage schickst du selbst. Standard: aus.'),
+    h('label', { class: 'row', style: 'gap:8px;align-items:center' }, an, 'Unbeantwortete Angebote automatisch erinnern'), m);
+}
 
 export async function vertragKarte() {
   const d = await api('/api/admin/einstellungen/vertrag').catch(() => null), m = h('div');

@@ -1,5 +1,5 @@
 """Erinnerung an ein Angebot ohne Antwort (an Leads und an bestehende Kunden): Vorschau mit änderbarem Text, Versand per Mail mit PDF.
-Nichts geht automatisch raus. Begrenzung: frühestens 3 Tage nach der letzten Mail zum Angebot, höchstens 3 Erinnerungen."""
+Von Hand mit Vorschau; eine Automatik (Stufe 1 und 2) gibt es nur, wenn sie in den Einstellungen eingeschaltet ist (Standard aus). Begrenzung: frühestens 3 Tage nach der letzten Mail zum Angebot, höchstens 3 Erinnerungen."""
 from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -37,11 +37,11 @@ def text_bauen(stufe: int, name: str | None, firma: str, nummer: str, gueltig, l
         schluss = "Gibt es Fragen oder soll etwas angepasst werden? Antworten Sie einfach auf diese Mail, wir melden uns gern."
         betreff = f"Erinnerung: Ihr Angebot {nummer} von {absender}"
     elif stufe == 2:
-        kern = f"wir melden uns noch einmal zu unserem Angebot {nummer} für {firma}. Sind noch Fragen offen, zum Umfang, zum Preis oder zum Ablauf?"
-        schluss = "Wenn Sie möchten, besprechen wir alles in einem kurzen Telefonat. Antworten Sie einfach auf diese Mail oder rufen Sie uns an."
-        betreff = f"Noch Fragen zu Ihrem Angebot {nummer}?"
+        kern = f"wir melden uns noch einmal zu unserem Angebot {nummer} für {firma}. Uns interessiert ehrlich, woran es liegt, dass Sie noch nicht entscheiden konnten. Zum Beispiel:\n- Der Preis oder die Laufzeit passt noch nicht.\n- Der Umfang ist unklar oder es fehlt etwas.\n- Der Zeitpunkt ist gerade ungünstig.\n- Sie vergleichen noch mit einem anderen Angebot.\n- Etwas anderes, das wir wissen sollten."
+        schluss = "Eine kurze Antwort auf diese Mail genügt, auch ein Stichwort hilft uns. Wenn Sie möchten, besprechen wir alles in einem kurzen Telefonat."
+        betreff = f"Noch Fragen zu Ihrem Angebot {nummer}? Woran liegt es?"
     else:
-        kern = f"zu unserem Angebot {nummer} für {firma} haben wir noch nichts von Ihnen gehört. Das ist völlig in Ordnung. Wir wollten nur sicher sein, dass es Sie erreicht hat und nichts offen geblieben ist."
+        kern = f"zu unserem Angebot {nummer} für {firma} haben wir noch nichts von Ihnen gehört. Das ist völlig in Ordnung. Wir wollten nur sicher sein, dass es Sie erreicht hat und nichts offen geblieben ist. Falls etwas gefehlt hat oder nicht gepasst hat, sagen Sie es uns gern ganz offen, das hilft uns, es besser zu machen."
         schluss = "Wir melden uns dazu nicht erneut von uns aus. Wenn Sie es später umsetzen möchten, schreiben Sie uns einfach, wir sind dann gern für Sie da."
         betreff = f"Ihr Angebot {nummer}: kurze Rückmeldung"
     return betreff, f"{hallo}\n\n{kern}\n\n{ort}{frist}\n\n{schluss}\n\nViele Grüße\n{absender}"
@@ -69,6 +69,8 @@ def _pruefen(cur, b: dict, user: dict | None = None) -> dict:
         l = cur.fetchone()
         if not l:
             raise HTTPException(404, "Lead nicht gefunden.")
+        if l.get("abgemeldet"):
+            raise HTTPException(400, "Dieser Lead hat sich von Mails abgemeldet.")
         if l["status"] in BLOCKIERT:
             raise HTTPException(400, "Für diesen Lead darf nichts gesendet werden (gesperrt, ohne Einwilligung, verloren oder tot).")
         an, name, firma, lead = (l.get("email") or "").strip(), l.get("ansprechpartner"), l["firma"], True
@@ -108,29 +110,79 @@ class SendenIn(BaseModel):
     betreff: str | None = Field(default=None, max_length=200)
 
 
-@router.post("/angebote-erinnerung/{bid}")
-def senden(bid: str, data: SendenIn, user: dict = Depends(require_admin)):
-    rate_limit("angebotserinnerung:" + str(user["id"]), 40, 3600)
+def ausfuehren(bid: str, benutzer: dict | None, text: str | None = None, betreff_neu: str | None = None, user: dict | None = None) -> dict:
+    """Prüft, baut (oder übernimmt) den Text, sendet mit PDF und hält Zähler, Wiedervorlage und Protokoll fest. Wirft HTTPException(400), wenn nicht möglich.
+    benutzer=None heißt automatischer Versand (Job)."""
     with tx("admin") as cur:
         b = _laden(cur, bid)
         p = _pruefen(cur, b, user)
         f = rechtstexte.firma(cur)
         absender = f["name"] or "Markentrix"
-        betreff, text = text_bauen(p["stufe"], p["name"], p["firma"], b["nummer"], b["faellig_am"], p["link"], absender, p["lead"])
-        if data.text and data.text.strip():
-            text = data.text.strip()
-            if p["lead"] and p["link"] not in text:
+        betreff, text_neu = text_bauen(p["stufe"], p["name"], p["firma"], b["nummer"], b["faellig_am"], p["link"], absender, p["lead"])
+        if text and text.strip():
+            text_neu = text.strip()
+            if p["lead"] and p["link"] not in text_neu:
                 raise HTTPException(400, "Der Link zum Angebot muss im Text stehen bleiben.")
-        if data.betreff and data.betreff.strip():
-            betreff = data.betreff.strip()
+        if betreff_neu and betreff_neu.strip():
+            betreff = betreff_neu.strip()
         pdf, name = belege.beleg_pdf(cur, bid, f) if p["lead"] else belege.beleg_pdf(cur, bid)
-    ok, grund = mailer.senden(p["an"], betreff, text, (name, pdf, "application/pdf"), kunden_id=b["kunden_id"], art="angebot")
+    ok, grund = mailer.senden(p["an"], betreff, text_neu, (name, pdf, "application/pdf"), kunden_id=b["kunden_id"], art="angebot")
     if ok:
         with tx("admin") as cur:
             cur.execute("UPDATE belege SET erinnerungen = erinnerungen + 1, erinnert_am = now(), geaendert_am = now() WHERE id=%s", (bid,))
             if b["lead_id"]:
                 cur.execute("UPDATE leads SET wiedervorlage_am = current_date + 3, letzter_kontakt_am = now() WHERE id=%s", (b["lead_id"],))
                 cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)",
-                            (b["lead_id"], "mail_gesendet", f"Angebot {b['nummer']}: Erinnerung {p['stufe']} per E-Mail gesendet", user["email"]))
-            audit(cur, user, "angebot_erinnert", b["kunden_id"], {"nummer": b["nummer"], "stufe": p["stufe"], "lead": str(b["lead_id"]) if b["lead_id"] else None})
+                            (b["lead_id"], "mail_gesendet", f"Angebot {b['nummer']}: Erinnerung {p['stufe']} per E-Mail gesendet" + (" (automatisch)" if benutzer is None else ""), benutzer["email"] if benutzer else "automatisch"))
+            audit(cur, benutzer, "angebot_erinnert", b["kunden_id"], {"nummer": b["nummer"], "stufe": p["stufe"], "lead": str(b["lead_id"]) if b["lead_id"] else None, "automatisch": benutzer is None})
     return {"gesendet": ok, "grund": grund, "stufe": p["stufe"], "an": p["an"]}
+
+
+@router.post("/angebote-erinnerung/{bid}")
+def senden(bid: str, data: SendenIn, user: dict = Depends(require_admin)):
+    rate_limit("angebotserinnerung:" + str(user["id"]), 40, 3600)
+    return ausfuehren(bid, user, data.text, data.betreff, user)
+
+
+# ---------------------------------------------------------------- Automatik (Standard aus)
+AUTO_MAX_STUFE = 2     # automatisch nur Stufe 1 und 2; die letzte Nachfrage (Stufe 3) schickst du selbst
+
+
+def auto_aktiv(cur) -> bool:
+    return bool((einstellungen.lesen(cur, "angebote") or {}).get("auto_erinnerung"))
+
+
+class AutoIn(BaseModel):
+    auto_erinnerung: bool
+
+
+@router.get("/einstellungen/angebote")
+def auto_lesen(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        return {"auto_erinnerung": auto_aktiv(cur), "min_tage": MIN_TAGE, "max_stufe": AUTO_MAX_STUFE}
+
+
+@router.put("/einstellungen/angebote")
+def auto_setzen(data: AutoIn, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        einstellungen.schreiben(cur, "angebote", {"auto_erinnerung": data.auto_erinnerung})
+        audit(cur, user, "einstellung_angebote", None, {"auto_erinnerung": data.auto_erinnerung})
+    return {"auto_erinnerung": data.auto_erinnerung}
+
+
+def auto_lauf(limit: int = 20) -> int:
+    """Sendet fällige Erinnerungen (Stufe 1 und 2), wenn die Automatik eingeschaltet ist. Gibt die Anzahl gesendeter Mails zurück."""
+    with tx("system") as cur:
+        if not auto_aktiv(cur):
+            return 0
+        cur.execute("""SELECT id FROM belege WHERE art='angebot' AND status='versendet' AND nummer IS NOT NULL AND erinnerungen < %s
+                         AND coalesce(erinnert_am, versendet_am) <= now() - make_interval(days => %s)
+                         AND (faellig_am IS NULL OR faellig_am >= current_date) ORDER BY coalesce(erinnert_am, versendet_am) LIMIT %s""", (AUTO_MAX_STUFE, MIN_TAGE, limit))
+        ids = [str(r["id"]) for r in cur.fetchall()]
+    n = 0
+    for bid in ids:
+        try:
+            n += 1 if ausfuehren(bid, None)["gesendet"] else 0
+        except HTTPException:
+            continue     # z. B. Lead gesperrt oder abgemeldet, keine Adresse: wird übersprungen
+    return n

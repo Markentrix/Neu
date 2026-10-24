@@ -1100,6 +1100,15 @@ def website_still(cfg):
     webbetrieb.anfragen_still(cfg)
 
 
+def angebote_erinnern(cfg):
+    """Werktags ab 9 Uhr, einmal täglich: unbeantwortete Angebote erinnern (Stufe 1 und 2), nur wenn in den Einstellungen eingeschaltet (Standard aus)."""
+    jetzt = datetime.now(webbetrieb.TZ)
+    if jetzt.hour < 9 or jetzt.weekday() >= 5 or not _marker("angebote-erinnern-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    from . import angebotserinnerung
+    angebotserinnerung.auto_lauf()
+
+
 def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
@@ -1108,7 +1117,7 @@ def tick():
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
-    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, website_still, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, website_still, angebote_erinnern, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         _lauf(job, cfg)   # ein kaputter Job darf die anderen nicht stoppen
 
 

@@ -619,9 +619,10 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 ## Angebot ohne Antwort: Erinnerung senden
 - Gilt für Angebote an Leads und an bestehende Kunden, solange das Angebot „gesendet“ ist (nicht angenommen, nicht abgelehnt, nicht abgelaufen).
 - Knopf **Erinnern** in „Angebote im Blick“ (Übersicht; erscheint, wenn die letzte Mail mindestens 3 Tage her ist), im Lead bei dem Angebot und auf der Angebotsseite beim Kunden.
-- Es öffnet sich eine Vorschau mit Betreff und Text zum Ändern. Erst „Erinnerung jetzt senden“ verschickt die Mail, das Angebot hängt als PDF an. Nichts geht automatisch raus.
-- Drei Stufen: 1 freundliche Nachfrage, 2 „Sind noch Fragen offen?“, 3 letzte Nachfrage (ohne weitere Mails). Mehr als 3 Erinnerungen und Erinnerungen vor Ablauf von 3 Tagen sind gesperrt.
-- Bei Leads bleibt der Online-Link gleich gültig, die Wiedervorlage springt auf 3 Tage später und im Lead steht ein Eintrag. Kunden-Angebote verweisen ins Kundenportal. Für Kunden-Angebote braucht ein Teil-Admin das Recht „Angebote, Rechnungen & Preise“.
+- Es öffnet sich eine Vorschau mit Betreff und Text zum Ändern. Erst „Erinnerung jetzt senden“ verschickt die Mail, das Angebot hängt als PDF an. Von Hand geht nichts ohne deinen Klick raus.
+- Drei Stufen: 1 freundliche Nachfrage, 2 Rückfrage, woran es liegt, dass noch nicht entschieden wurde (Preis, Umfang, Zeitpunkt, anderes Angebot), 3 letzte offene Nachfrage (ohne weitere Mails). Mehr als 3 Erinnerungen und Erinnerungen vor Ablauf von 3 Tagen sind gesperrt.
+- Bei Leads bleibt der Online-Link gleich gültig, die Wiedervorlage springt auf 3 Tage später und im Lead steht ein Eintrag. Kunden-Angebote verweisen ins Kundenportal. Für Kunden-Angebote braucht ein Teil-Admin das Recht „Angebote, Rechnungen & Preise“. Leads, die sich von Mails abgemeldet haben, bekommen nichts.
+- **Automatisch** (Einstellungen → „Angebote: automatisch erinnern“, Standard **aus**): Nach 3 Tagen ohne Antwort geht werktags ab 9 Uhr Erinnerung 1 raus, nach weiteren 3 Tagen Erinnerung 2. Die dritte schickst du selbst. Jede automatische Mail steht im Protokoll und im Lead.
 
 ## Fehler-Hilfe (Ursache und Lösungsvorschlag)
 - Code: `portal/app/fehlerhilfe.py`. Eine Liste von Regeln (Muster, Ursache, Schritte, wer es behebt); die erste passende gewinnt, sonst kommt ein allgemeiner Hinweis. Neue Regel = ein Eintrag in `REGELN` plus ein Fall in `tests/t90.py`.
