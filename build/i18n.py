@@ -9,6 +9,7 @@ Inline-Tags darin werden zu Platzhaltern: <t1>…</t1> für Elemente mit Inhalt,
 Beispiel:  "Termin <t1>online</t1> anfragen"  →  "Book <t1>online</t1>"
 """
 import glob
+import hashlib
 import html
 import json
 import os
@@ -452,6 +453,13 @@ def build_en(out_dir, written, content_dir, site_url, config_src, script_src):
     """Schreibt en/<seite> für jede deutsche Seite. Gibt fehlende Übersetzungen und Fehler zurück."""
     table = load_table(content_dir)
     missing, bad, done, seen = {}, [], [], {}
+    cfg_src = en_config(table, site_url, config_src, script_src, missing, seen, bad)
+    os.makedirs(os.path.join(out_dir, "en"), exist_ok=True)
+    with open(os.path.join(out_dir, "en", "config.js"), "w", encoding="utf-8") as f:
+        f.write(cfg_src)
+    done.append("en/config.js")
+    de_v = hashlib.sha1(config_src.encode("utf-8")).hexdigest()[:10]
+    en_v = hashlib.sha1(cfg_src.encode("utf-8")).hexdigest()[:10]
     for rel in sorted(w for w in written if w.endswith(".html")):
         p = os.path.join(out_dir, rel)
         with open(p, encoding="utf-8") as f:
@@ -468,9 +476,13 @@ def build_en(out_dir, written, content_dir, site_url, config_src, script_src):
         q = os.path.join(out_dir, "en", rel)
         os.makedirs(os.path.dirname(q), exist_ok=True)
         with open(q, "w", encoding="utf-8") as f:
-            f.write(fill_switch(en, rel, "en"))
+            f.write(fill_switch(en, rel, "en").replace(f"config.js?v={de_v}", f"config.js?v={en_v}"))
         done.append("en/" + rel)
-    # config.js: Namen und Hinweise übersetzt, dazu die Texte für script.js
+    return {"missing": missing, "bad": bad, "written": done, "seen": seen}
+
+
+def en_config(table, site_url, config_src, script_src, missing, seen, bad):
+    """config.js für /en/: Namen und Hinweise übersetzt, dazu die Texte für script.js (ELB.t)."""
     tr = Translator(table, site_url, "config.js")
     cfg = json.loads(re.search(r"window\.ELB=(.*);\s*$", config_src, re.S).group(1))
     for c in cfg.get("classes", []):
@@ -486,7 +498,4 @@ def build_en(out_dir, written, content_dir, site_url, config_src, script_src):
     for k, v in tr.seen.items():
         seen.setdefault(k, set()).update(v)
     bad += tr.bad
-    with open(os.path.join(out_dir, "en", "config.js"), "w", encoding="utf-8") as f:
-        f.write("/* automatisch erzeugt – nicht bearbeiten */\nwindow.ELB=" + json.dumps(cfg, ensure_ascii=False, separators=(",", ":")) + ";\n")
-    done.append("en/config.js")
-    return {"missing": missing, "bad": bad, "written": done, "seen": seen}
+    return "/* automatisch erzeugt – nicht bearbeiten */\nwindow.ELB=" + json.dumps(cfg, ensure_ascii=False, separators=(",", ":")) + ";\n"

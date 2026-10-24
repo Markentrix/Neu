@@ -1282,6 +1282,7 @@ section.tight-top { padding-top: clamp(28px, 4vw, 48px); }
 .choice-feats { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.82rem; color: var(--ink); }
 .choice-feats li::before { content: "✓ "; color: var(--blue); font-weight: 650; }
 .choice-card.is-featured .choice-head strong::after { content: "Empfehlung"; display: inline-block; margin-left: 8px; font-family: var(--font); font-size: 0.75rem; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: var(--blue); padding: 3px 8px; border-radius: 999px; vertical-align: middle; }
+:lang(en) .choice-card.is-featured .choice-head strong::after { content: "Recommended"; }
 
 .choice-pills { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
 .choice-pills--3 { grid-template-columns: repeat(3, 1fr); }

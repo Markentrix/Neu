@@ -128,7 +128,8 @@ class TestPortalUpload(unittest.TestCase):
         for p in files(".html"):
             t = read(p)
             self.assertIn('<span data-mk="cookies"></span>', t, p)
-            self.assertNotIn("consent", re.sub(r"consent-row|t-consent|k-consent|g-consent|f-consent|w-consent", "", t), p)
+            tags = " ".join(re.findall(r'(?:class|id|for|data-[a-z-]+)="([^"]*)"', t))  # nur Auszeichnung: im englischen Text steht „consent“
+            self.assertNotIn("consent", re.sub(r"consent-row|t-consent|k-consent|g-consent|f-consent|w-consent", "", tags), p)
             self.assertIsNone(re.search(r'<script[^>]+portal\.markentrix|data-site=', t), p)  # Skript setzt der Upload selbst ein
         self.assertIn('data-mk="bewertungen"', read(os.path.join(SITE, "index.html")))
         cfg = read(os.path.join(SITE, "config.js"))
@@ -267,7 +268,8 @@ class TestEnglish(unittest.TestCase):
             t = read(os.path.join(SITE, "en", rel))
             t = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", t, flags=re.S)
             t = re.sub(r'<a [^>]*lang="de"[^>]*>.*?</a>', " ", t)
-            for attr in re.findall(r'(?:alt|title|aria-label|placeholder|content)="([^"]*)"', t):
+            t = t.replace("Landesbeauftragte für den Datenschutz Niedersachsen", "")  # Behördenname bleibt deutsch, mit englischer Erklärung
+            for attr in re.findall(r'(?:alt|title|aria-label|placeholder|content)="(?!https?:)([^"]*)"', t):
                 hits += [f"{rel} [Attribut]: {attr[:80]}" for _ in pat.finditer(attr)][:1]
             text = html.unescape(re.sub(r"<[^>]+>", " ", t))
             hits += [f"{rel}: …{text[max(0, m.start() - 40):m.end() + 40]!r}" for m in pat.finditer(text)]
