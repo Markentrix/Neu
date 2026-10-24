@@ -88,7 +88,7 @@ def mitglied(bid: str, data: MitgliedIn, user: dict = Depends(require_inhaber)):
             neu_aktiv = m["aktiv"] if data.aktiv is None else data.aktiv
             if str(m["id"]) == str(user["id"]) and (not neu_aktiv or neue_rolle != "inhaber"):
                 raise HTTPException(400, "Du kannst dir selbst weder den Zugang sperren noch die Rolle ändern.")
-            cur.execute("UPDATE benutzer SET kunden_rolle=%s, aktiv=%s WHERE id=%s", (neue_rolle, neu_aktiv, bid))
+            cur.execute("UPDATE benutzer SET kunden_rolle=%s, aktiv=%s, gesperrt_manuell=%s WHERE id=%s", (neue_rolle, neu_aktiv, not neu_aktiv, bid))
             if "website_mitarbeiter_id" in data.model_fields_set:
                 cur.execute("UPDATE benutzer SET website_mitarbeiter_id=%s WHERE id=%s", (_person_pruefen(cur, user["kunden_id"], data.website_mitarbeiter_id), bid))
             if "zugang_bis" in data.model_fields_set:

@@ -1,9 +1,11 @@
 """Telefon-Assistent: Anrufprotokoll. Der Anbieter (z. B. Famulor) schickt nach jedem Gespräch eine Nachricht (Webhook);
 das Portal legt den Anruf an und macht bei Eingang eine Anfrage daraus, damit nichts im Postfach untergeht."""
+import base64
 import hmac
 import secrets
 from datetime import datetime, timezone
 
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from . import config, einstellungen, push
@@ -90,20 +92,58 @@ def probe(body: dict, kundennummer: str) -> dict:
     return {"zeit": datetime.now(timezone.utc).isoformat(timespec="seconds"), "kunde": kundennummer[:30], "felder": _pfade(body)[:60], "erkannt": erkannt, "nicht_erkannt": fehlt}
 
 
+def kunden_geheimnis(g: str, kundennummer: str) -> str:
+    """Eigenes Geheimnis je Kunde, abgeleitet aus dem Hauptgeheimnis. Wird eine Webhook-Adresse bekannt, gilt sie nur für diesen einen Kunden."""
+    mac = hmac.new(g.encode(), b"telefon:" + kundennummer.encode(), "sha256").digest()
+    return base64.urlsafe_b64encode(mac).decode().rstrip("=")[:32]
+
+
 # ---------------------------------------------------------------- Einrichtung (Admin)
 @router.get("/api/admin/einstellungen/telefon")
 def einstellung(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         c = einstellungen.lesen(cur, "telefon")
         p = einstellungen.lesen(cur, "telefon_probe") or None
-    return {"geheimnis_gesetzt": bool(c.get("geheimnis")), "url": config.BASE_URL + "/api/webhook/telefon/KUNDENNUMMER", "letzte_nachricht": p}
+    return {"geheimnis_gesetzt": bool(c.get("geheimnis")), "url": config.BASE_URL + "/api/webhook/telefon/KUNDENNUMMER", "letzte_nachricht": p,
+            "nur_pro_kunde": bool(c.get("nur_pro_kunde"))}
+
+
+class NurProKundeIn(BaseModel):
+    aktiv: bool
+
+
+@router.post("/api/admin/einstellungen/telefon/nur-pro-kunde")
+def nur_pro_kunde(data: NurProKundeIn, user: dict = Depends(require_admin)):
+    """Schaltet das gemeinsame Geheimnis ab: danach gelten nur noch die Adressen je Kunde (vorher alle Anbieter umstellen!)."""
+    with tx("admin") as cur:
+        c = einstellungen.lesen(cur, "telefon")
+        if not c.get("geheimnis"):
+            raise HTTPException(409, "Es ist noch kein Geheimnis erzeugt.")
+        einstellungen.schreiben(cur, "telefon", {**c, "nur_pro_kunde": data.aktiv})
+        audit(cur, user, "einstellungen_telefon", None, {"nur_pro_kunde": data.aktiv})
+    return {"ok": True, "nur_pro_kunde": data.aktiv}
+
+
+@router.get("/api/admin/kunden/{kundennummer}/telefon-adresse")
+def kunden_adresse(kundennummer: str, user: dict = Depends(require_admin)):
+    """Die Webhook-Adresse für genau diesen Kunden (mit seinem eigenen Geheimnis)."""
+    with tx("admin") as cur:
+        g = einstellungen.lesen(cur, "telefon").get("geheimnis")
+        if not g:
+            raise HTTPException(409, "Zuerst unter Einstellungen → Telefon-Assistent ein Geheimnis erzeugen.")
+        cur.execute("SELECT kundennummer FROM kunden WHERE kundennummer=%s", (kundennummer,))
+        k = cur.fetchone()
+        if not k:
+            raise HTTPException(404, "Kunde nicht gefunden.")
+        audit(cur, user, "telefon_adresse_gezeigt", None, {"kundennummer": kundennummer})
+    return {"url": f"{config.BASE_URL}/api/webhook/telefon/{kundennummer}?s={kunden_geheimnis(g, kundennummer)}"}
 
 
 @router.post("/api/admin/einstellungen/telefon/neues-geheimnis")
 def neues_geheimnis(user: dict = Depends(require_admin)):
     g = secrets.token_urlsafe(24)
     with tx("admin") as cur:
-        einstellungen.schreiben(cur, "telefon", {"geheimnis": g})
+        einstellungen.schreiben(cur, "telefon", {**einstellungen.lesen(cur, "telefon"), "geheimnis": g})
         audit(cur, user, "einstellungen_telefon", None, {"neues_geheimnis": True})
     return {"geheimnis": g}                      # wird nur dieses eine Mal angezeigt
 
@@ -113,9 +153,12 @@ def neues_geheimnis(user: dict = Depends(require_admin)):
 async def webhook(kundennummer: str, request: Request):
     rate_limit("telhook:" + client_ip(request), 300, 3600)
     with tx("system") as cur:
-        g = einstellungen.lesen(cur, "telefon").get("geheimnis")
+        c = einstellungen.lesen(cur, "telefon")
+    g = c.get("geheimnis")
     gegeben = request.headers.get("x-webhook-secret") or request.query_params.get("s") or ""
-    if not g or not hmac.compare_digest(g, gegeben):
+    eigenes = bool(g) and hmac.compare_digest(kunden_geheimnis(g, kundennummer).encode(), gegeben.encode())
+    gemeinsames = bool(g) and not c.get("nur_pro_kunde") and hmac.compare_digest(g.encode(), gegeben.encode())
+    if not (eigenes or gemeinsames):
         raise HTTPException(401, "Nicht berechtigt.")
     roh = await request.body()
     if len(roh) > 300_000:

@@ -703,7 +703,7 @@ def partner_einladung(pid: str, data: PartnerEinladungIn, user: dict = Depends(r
 def partner_zugang_aktiv(bid: str, data: dict, user: dict = Depends(require_admin)):
     aktiv = bool(data.get("aktiv"))
     with tx("admin") as cur:
-        cur.execute("UPDATE benutzer SET aktiv=%s WHERE id=%s AND rolle='vertrieb'", (aktiv, bid))
+        cur.execute("UPDATE benutzer SET aktiv=%s, gesperrt_manuell=%s WHERE id=%s AND rolle='vertrieb'", (aktiv, not aktiv, bid))
         if cur.rowcount == 0:
             raise HTTPException(404, "Zugang nicht gefunden.")
         if not aktiv:

@@ -87,6 +87,8 @@ case "$cmd" in
     need_root
     domain="${1:-}"; [ -n "$domain" ] || die "Aufruf: mkctl site-add <domain> [--from <Ordner>] [--kunde \"Name\"]"
     [[ "$domain" =~ ^([a-z0-9-]+\.)+[a-z]{2,}$ ]] || die "Das sieht nicht wie eine Domain aus: $domain"
+    [[ "$domain" != www.* ]] || die "Bitte die Domain ohne www angeben (www wird automatisch mit angelegt): ${domain#www.}"
+    [ "$domain" != "${DOMAIN:-}" ] && [[ "$domain" != *."${DOMAIN:-nicht-gesetzt.invalid}" ]] || die "Diese Domain gehört zum Portal selbst und kann keine Kunden-Website sein: $domain"
     shift
     from=""; kunde=""
     while [ $# -gt 0 ]; do

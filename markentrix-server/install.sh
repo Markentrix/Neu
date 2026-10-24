@@ -160,7 +160,11 @@ echo
 ok "Datenbank läuft"
 "$BASE/bin/mkctl" migrate
 ok "Datenbankstruktur angelegt (Kunden, Zugänge, Pakete, Module, Projekte, Anfragen, Termine, Uploads ...)"
-chown -R 10001:10001 "$SITES/live" 2>/dev/null || true
+# Das Portal (10001) darf den Ordner live selbst beschreiben (Upload-Zwischenordner) und je Website nur den Unterordner angebote.
+# Veröffentlichte Website-Dateien gehören root (Schutz vor Änderung durch das Portal): NICHT rekursiv zurückgeben.
+chown 10001:10001 "$SITES/live" 2>/dev/null || true
+for _a in "$SITES"/live/*/angebote; do [ -d "$_a" ] && [ ! -L "$_a" ] && chown -R -h 10001:10001 "$_a" 2>/dev/null || true; done
+mkdir -p "$SITES/.privat"; chown root:root "$SITES/.privat"; chmod 700 "$SITES/.privat"
 
 # ---------------------------------------------------------------- 6. n8n, Dashboard, Caddy
 say "6/8 n8n, Server-Dashboard, Portal und Webserver starten"

@@ -245,7 +245,8 @@ def kunde_status(kid: str, data: StatusIn, user: dict = Depends(require_admin)):
         pflicht(cur, kid)
         cur.execute("UPDATE kunden SET status=%s WHERE id=%s", (data.status, kid))
         # Pausiert oder beendet: Zugänge sperren, bei aktiv wieder freigeben
-        cur.execute("UPDATE benutzer SET aktiv=%s WHERE kunden_id=%s", (data.status in ("onboarding", "aktiv"), kid))
+        # (einzeln gesperrte Zugänge bleiben auch dann gesperrt: gesperrt_manuell)
+        cur.execute("UPDATE benutzer SET aktiv = (%s AND NOT gesperrt_manuell) WHERE kunden_id=%s", (data.status in ("onboarding", "aktiv"), kid))
         if data.status not in ("onboarding", "aktiv"):
             cur.execute("DELETE FROM sitzungen WHERE benutzer_id IN (SELECT id FROM benutzer WHERE kunden_id=%s)", (kid,))
         audit(cur, user, "kunde_status", kid, {"status": data.status})
@@ -288,7 +289,7 @@ def einladung(kid: str, data: EinladungIn, user: dict = Depends(require_admin)):
 @router.post("/benutzer/{bid}/aktiv")
 def benutzer_aktiv(bid: str, data: ModulIn, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        cur.execute("UPDATE benutzer SET aktiv=%s WHERE id=%s AND rolle='kunde' RETURNING kunden_id", (data.aktiv, bid))
+        cur.execute("UPDATE benutzer SET aktiv=%s, gesperrt_manuell=%s WHERE id=%s AND rolle='kunde' RETURNING kunden_id", (data.aktiv, not data.aktiv, bid))
         r = cur.fetchone()
         if not r:
             raise HTTPException(404, "Zugang nicht gefunden.")

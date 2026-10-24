@@ -14,6 +14,7 @@ UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 AUSZUG_NICHT = {"benutzer", "audit_log", "mail_protokoll", "website_stat", "website_wacht", "website_ereignisse", "login_versuche", "sitzungen", "push_abos", "loeschprotokoll"}
 TAG = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{4}$")
 TRASH = SITES / ".papierkorb"
+PRIV = SITES / ".privat"   # nur root: hierhin wandert ein Upload, bevor er geprüft wird (das Portal kann danach nichts mehr austauschen)
 KEEP_DAYS = 14
 NAME = {"live": re.compile(r"^(?=.{4,253}$)([a-z0-9-]{1,63}\.)+[a-z]{2,}$"), "demo": re.compile(r"^[a-z0-9]([a-z0-9-]{0,40}[a-z0-9])?$")}
 TRASH_ID = re.compile(r"^\d{8}-\d{6}__(live|demo)__[A-Za-z0-9.-]{1,253}$")
@@ -22,6 +23,22 @@ REQ = re.compile(r"^auftrag-[0-9a-f]{12,32}\.json$")
 
 def log(m):
     print(time.strftime("%F %T"), m, flush=True)
+
+
+def schreibe_sicher(p, text, besitzer=10001, modus=0o640):
+    """Schreibt eine Datei in den Auftragsordner, den das Portal beschreiben kann, ohne einem dort abgelegten Symlink zu folgen:
+    erst in eine neue Datei (O_EXCL), dann per rename an die Stelle (ersetzt einen Symlink, statt durch ihn zu schreiben)."""
+    tmp = Path(p).with_name(f".tmp-{os.getpid()}-{time.time_ns()}")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(text)
+            os.fchown(f.fileno(), besitzer, besitzer)
+            os.fchmod(f.fileno(), modus)
+        os.replace(tmp, p)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
 
 
 CONTAINER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,100}$")
@@ -63,6 +80,34 @@ def reload_caddy() -> bool:
     except (OSError, subprocess.TimeoutExpired) as e:
         log(f"Caddy konnte nicht neu geladen werden: {e}")
         return False
+
+
+UNGUELTIG = re.compile(r"adapting config|ambiguous site|parsing caddyfile|Caddyfile:\d+|unrecognized directive|wrong argument|already (defined|exists)", re.I)
+
+
+def caddy_gueltig() -> bool | None:
+    """Prüft die Webserver-Konfiguration samt aller Domain-Dateien (ohne etwas zu laden). True = gültig, False = erkennbar fehlerhaft,
+    None = nicht prüfbar (Befehl fehlt, Zeitüberschreitung, unklare Ausgabe): dann wird nichts entfernt."""
+    mode = (BASE / "mode").read_text().strip() if (BASE / "mode").exists() else "own"
+    if mode == "own":
+        cmd = ["docker", "compose", "--project-directory", str(BASE), "-f", str(BASE / "docker-compose.yml"),
+               "exec", "-T", "caddy", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+    elif mode == "docker":
+        c = (BASE / "caddy-container").read_text().strip() if (BASE / "caddy-container").exists() else ""
+        if not CONTAINER.match(c):
+            return None
+        cmd = ["docker", "exec", c, "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+    elif mode == "host":
+        cmd = ["caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+    else:
+        return None
+    try:
+        r = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if r.returncode == 0:
+        return True
+    return False if UNGUELTIG.search((r.stderr or "") + (r.stdout or "")) else None
 
 
 def loeschen(art, name):
@@ -122,10 +167,8 @@ def ergebnis(uid, a, ok, text, **extra):
     """Rückmeldung für das Portal (Admin → Verwaltung → Website hochladen). Lesbar für den Portal-Benutzer 10001."""
     try:
         p = QUEUE / f"ergebnis-{uid}.json"
-        p.write_text(json.dumps({"id": uid, "aktion": a.get("aktion"), "art": a.get("art"), "name": a.get("name"), "ok": ok, "text": text,
-                                 "zeit": time.strftime("%Y-%m-%dT%H:%M:%S"), **extra}))
-        os.chown(p, 10001, 10001)
-        p.chmod(0o640)
+        schreibe_sicher(p, json.dumps({"id": uid, "aktion": a.get("aktion"), "art": a.get("art"), "name": a.get("name"), "ok": ok, "text": text,
+                                       "zeit": time.strftime("%Y-%m-%dT%H:%M:%S"), **extra}))
     except OSError as e:
         log(f"Ergebnis nicht schreibbar: {e}")
 
@@ -185,6 +228,9 @@ def caddy_datei(domain):
         return False
     cf.parent.mkdir(parents=True, exist_ok=True)
     cf.write_text(caddy_inhalt(domain))
+    if caddy_gueltig() is False:   # eine fehlerhafte Datei würde beim nächsten Neustart ALLE Websites lahmlegen: nicht behalten
+        cf.unlink(missing_ok=True)
+        raise RuntimeError(f"Die Webserver-Einstellung für {domain} wurde vom Caddy abgelehnt (z. B. steht die Domain schon in einer anderen Datei). Es wurde nichts übernommen.")
     return True
 
 
@@ -199,8 +245,13 @@ def caddy_nachruesten():
         if not NAME["live"].match(domain) or cf.is_symlink():
             continue
         try:
-            if cf.read_text() in (alt_inhalt(domain), caddy_inhalt(domain, 1)):
+            alt = cf.read_text()
+            if alt in (alt_inhalt(domain), caddy_inhalt(domain, 1)):
                 cf.write_text(caddy_inhalt(domain))
+                if caddy_gueltig() is False:
+                    cf.write_text(alt)   # Rückgängig: lieber die alte, funktionierende Fassung
+                    log(f"Caddy-Nachrüstung für {domain} abgelehnt, alte Fassung bleibt")
+                    continue
                 geaendert = True
         except OSError:
             continue
@@ -222,15 +273,24 @@ def veroeffentlichen(a):
     art, name, uid = a.get("art"), str(a.get("name", "")), str(a.get("upload", ""))
     if art not in NAME or not NAME[art].match(name) or not UPLOAD.match(uid):
         raise RuntimeError("ungültiger Auftrag")
-    stage = SITES / "live" / f".upload-{uid}"
+    quelle = SITES / "live" / f".upload-{uid}"
+    stage = PRIV / f"upload-{uid}"
     try:
-        if stage.is_symlink() or not stage.is_dir():
+        PRIV.mkdir(mode=0o700, exist_ok=True)
+        if quelle.is_symlink():
+            raise RuntimeError("Der Upload ist ungültig")
+        if a.get("_intern"):
+            pass
+        elif quelle.is_dir():   # vom Portal abgelegt: sofort in den privaten Ordner (nur root), erst dort prüfen
+            shutil.rmtree(stage, ignore_errors=True)
+            os.rename(quelle, stage)
+        if stage.is_symlink() or not stage.is_dir():   # (aus_sicherung legt den Ordner selbst dort ab)
             raise RuntimeError("Der Upload ist nicht mehr vorhanden")
+        subprocess.run(["chown", "-R", "-h", "root:root", str(stage)], check=True, capture_output=True)
+        subprocess.run(["chmod", "-R", "u-s,g-s,go-w,a+rX", str(stage)], check=True, capture_output=True)
         baum_pruefen(stage)
         if not (stage / "index.html").is_file():
             raise RuntimeError("index.html fehlt")
-        subprocess.run(["chown", "-R", "-h", "root:root", str(stage)], check=True, capture_output=True)
-        subprocess.run(["chmod", "-R", "u-s,g-s,go-w,a+rX", str(stage)], check=True, capture_output=True)
         ziel = ziel_ordner(art, name)
         neu = not ziel.exists()
         if ziel.is_symlink() or (ziel.exists() and not ziel.is_dir()):
@@ -248,20 +308,27 @@ def veroeffentlichen(a):
         ziel.parent.mkdir(parents=True, exist_ok=True)
         os.rename(stage, ziel)
         angelegt, reload_ok = False, True
+        caddy_fehler = ""
         if art == "live":
-            angelegt = caddy_datei(name)
-            if angelegt:
-                reload_ok = reload_caddy()
+            try:
+                angelegt = caddy_datei(name)
+                if angelegt:
+                    reload_ok = reload_caddy()
+            except RuntimeError as e:
+                caddy_fehler, reload_ok = str(e), False
         vorversionen_aufraeumen(art, name)
         url = f"https://{name}/" if art == "live" else f"https://demo.{os.environ.get('MK_DOMAIN', 'markentrix.de')}/{name}/"
         text = ("Website neu angelegt und veröffentlicht. Damit sie erreichbar ist, muss die Domain per A-Eintrag (auch www) auf diesen Server zeigen, das HTTPS-Zertifikat kommt dann automatisch."
                 if neu and art == "live" else "Veröffentlicht. Die vorige Version ist gesichert und lässt sich zurückholen.")
-        if not reload_ok:
+        if caddy_fehler:
+            text += " ACHTUNG: " + caddy_fehler
+        elif not reload_ok:
             text += " ACHTUNG: Der Webserver (Caddy) konnte nicht neu geladen werden. Auf dem Server „mkctl caddy-neu“ ausführen."
         ergebnis(uid, a, True, text, url=url, neu=neu)
         log(f"veröffentlicht: {art} {name}")
     except Exception as e:  # noqa: BLE001
         shutil.rmtree(stage, ignore_errors=True)
+        shutil.rmtree(quelle, ignore_errors=True)
         ergebnis(uid if UPLOAD.match(uid) else "0" * 16, a, False, f"Fehlgeschlagen: {e}")
         raise
 
@@ -284,12 +351,14 @@ def aus_sicherung(a):
     if art not in NAME or not NAME[art].match(name) or not TAG.match(tag) or not UPLOAD.match(uid):
         raise RuntimeError("ungültiger Auftrag")
     archiv = BACKUPS / tag / "sites.tar.gz"
-    tmp = SITES / "live" / f".sicherung-{uid}"
-    stage = SITES / "live" / f".upload-{uid}"
+    tmp = PRIV / f"sicherung-{uid}"
+    stage = PRIV / f"upload-{uid}"
     try:
+        PRIV.mkdir(mode=0o700, exist_ok=True)
         if archiv.is_symlink() or not archiv.is_file():
             raise RuntimeError("Diese Sicherung gibt es nicht (mehr)")
         shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(stage, ignore_errors=True)
         tmp.mkdir(mode=0o700, parents=True)
         sub = "live" if art == "live" else "demos"
         r = subprocess.run(["tar", "-xzf", str(archiv), "-C", str(tmp), "--no-same-owner", "--no-same-permissions", f"sites/{sub}/{name}"], capture_output=True, text=True)
@@ -306,7 +375,7 @@ def aus_sicherung(a):
         ergebnis(uid if UPLOAD.match(uid) else "0" * 16, a, False, f"Wiederherstellung fehlgeschlagen: {e}")
         raise
     shutil.rmtree(tmp, ignore_errors=True)
-    veroeffentlichen({**a, "aktion": "veroeffentlichen"})
+    veroeffentlichen({**a, "aktion": "veroeffentlichen", "_intern": True})
     log(f"aus Sicherung {tag}: {art} {name}")
 
 
@@ -351,9 +420,7 @@ def kundenauszug(a):
             if zeilen:
                 aus[t] = zeilen
         p = QUEUE / f"kundenauszug-{uid}.json"
-        p.write_text(json.dumps({"id": uid, "kunden_id": kid, "tag": tag, "tabellen": aus, "ohne_dateiinhalt": uebersprungen, "zeit": time.strftime("%Y-%m-%dT%H:%M:%S")}))
-        os.chown(p, 10001, 10001)
-        p.chmod(0o640)
+        schreibe_sicher(p, json.dumps({"id": uid, "kunden_id": kid, "tag": tag, "tabellen": aus, "ohne_dateiinhalt": uebersprungen, "zeit": time.strftime("%Y-%m-%dT%H:%M:%S")}))
         ergebnis(uid, a, True, f"Auszug aus der Sicherung vom {tag[:10]} ist bereit.")
         log(f"Kundenauszug {kid} aus {tag}")
     except Exception as e:  # noqa: BLE001
@@ -387,7 +454,7 @@ def zurueck(a):
 def server_ip_ermitteln():
     """Öffentliche Adresse des Servers (stündlich) für den DNS-Assistenten im Portal."""
     p = QUEUE / "serverip.json"
-    if p.exists() and p.stat().st_mtime > time.time() - 3500:
+    if p.exists() and not p.is_symlink() and p.stat().st_mtime > time.time() - 3500:
         return
     import urllib.request
     d = {}
@@ -400,9 +467,7 @@ def server_ip_ermitteln():
     if d.get("v6") == d.get("v4") or (d.get("v6") and ":" not in d["v6"]):
         d.pop("v6", None)
     if d.get("v4"):
-        p.write_text(json.dumps(d))
-        os.chown(p, 10001, 10001)
-        p.chmod(0o640)
+        schreibe_sicher(p, json.dumps(d))
 
 
 def aufraeumen():
@@ -412,15 +477,13 @@ def aufraeumen():
         log(f"Server-IP nicht ermittelbar: {e}")
     try:   # Liste der vorhandenen Tagessicherungen für das Portal (Admin → Verwaltung → Aus Sicherung holen)
         p = QUEUE / "sicherungen.json"
-        p.write_text(json.dumps({"tage": sicherung_tage(), "db_tage": db_tage(), "stand": time.strftime("%Y-%m-%dT%H:%M:%S")}))
-        os.chown(p, 10001, 10001)
-        p.chmod(0o640)
+        schreibe_sicher(p, json.dumps({"tage": sicherung_tage(), "db_tage": db_tage(), "stand": time.strftime("%Y-%m-%dT%H:%M:%S")}))
     except OSError as e:
         log(f"Sicherungsliste nicht schreibbar: {e}")
     for f in QUEUE.glob("kundenauszug-*.json"):    # enthalten personenbezogene Daten: nach einem Tag weg
         if f.stat().st_mtime < time.time() - 86400:
             f.unlink(missing_ok=True)
-    for d in (SITES / "live").glob(".sicherung-*"):
+    for d in list(PRIV.glob("sicherung-*")) + list(PRIV.glob("upload-*")) + list((SITES / "live").glob(".sicherung-*")):
         if d.is_dir() and not d.is_symlink() and d.stat().st_mtime < time.time() - 86400:
             shutil.rmtree(d, ignore_errors=True)
     for d in (SITES / "live").glob(".upload-*"):
@@ -448,8 +511,10 @@ def main():
             if a.get("aktion") == "loeschen" and a.get("art") in NAME and NAME[a["art"]].match(str(a.get("name", ""))):
                 loeschen(a["art"], a["name"])
             elif a.get("aktion") == "veroeffentlichen":
+                a.pop("_intern", None)
                 veroeffentlichen(a)
             elif a.get("aktion") == "sicherung":
+                a.pop("_intern", None)
                 aus_sicherung(a)
             elif a.get("aktion") == "kundenauszug":
                 kundenauszug(a)

@@ -25,7 +25,7 @@ def admin_add(email: str, name: str | None):
         if u and u["rolle"] != "admin":
             sys.exit("Diese E-Mail gehört zu einem Kundenkonto.")
         if u:
-            cur.execute("UPDATE benutzer SET passwort_hash=%s, aktiv=true, fehlversuche=0, gesperrt_bis=NULL, totp_aktiv=false, totp_secret=NULL, totp_recovery='[]'::jsonb WHERE id=%s", (hash_password(pw), u["id"]))
+            cur.execute("UPDATE benutzer SET passwort_hash=%s, aktiv=true, gesperrt_manuell=false, fehlversuche=0, gesperrt_bis=NULL, totp_aktiv=false, totp_secret=NULL, totp_recovery='[]'::jsonb WHERE id=%s", (hash_password(pw), u["id"]))
             aktion = "admin_passwort_neu"
         else:
             cur.execute("INSERT INTO benutzer (email, name, rolle, passwort_hash) VALUES (%s,%s,'admin',%s)", (email, name, hash_password(pw)))

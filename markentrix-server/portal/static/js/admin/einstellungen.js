@@ -162,6 +162,18 @@ export async function zahlungKarte() {
   return h('div', { class: 'card' }, h('h2', {}, 'Zahlung & Mahnwesen'), m, f);
 }
 
+function telefonKunde(d, m) {
+  const nr = h('input', { placeholder: 'Kundennummer', 'aria-label': 'Kundennummer', style: 'width:auto' }), aus = h('div');
+  const schalter = h('input', { type: 'checkbox', id: 'tel-nur', checked: d.nur_pro_kunde });
+  schalter.addEventListener('change', async () => {
+    if (schalter.checked && !confirm('Danach funktionieren nur noch die Adressen je Kunde. Alle Telefon-Anbieter müssen vorher auf ihre eigene Adresse umgestellt sein. Fortfahren?')) { schalter.checked = false; return; }
+    try { await api('/api/admin/einstellungen/telefon/nur-pro-kunde', { method: 'POST', body: { aktiv: schalter.checked } }); } catch (x) { schalter.checked = !schalter.checked; fehler(m, x); } });
+  return h('div', { class: 'small', style: 'margin:8px 0' }, h('b', {}, 'Eigene Adresse je Kunde (empfohlen): '),
+    'Jeder Kunde bekommt ein eigenes Geheimnis. Wird eine Adresse bekannt, gilt sie nur für diesen Kunden. ', nr, ' ',
+    knopf('Adresse zeigen', async () => { try { const r = await api('/api/admin/kunden/' + encodeURIComponent(nr.value.trim()) + '/telefon-adresse'); aus.replaceChildren(h('code', {}, r.url)); } catch (x) { fehler(m, x); } }), aus,
+    h('div', {}, schalter, ' ', h('label', { for: 'tel-nur' }, 'Gemeinsames Geheimnis abschalten (nur noch Adressen je Kunde)')));
+}
+
 export async function telefonKarte() {
   const d = await api('/api/admin/einstellungen/telefon'), m = h('div'), box = h('div');
   return h('div', { class: 'card' }, h('h2', {}, 'Telefon-Assistent (Anrufprotokoll)'),
@@ -171,6 +183,7 @@ export async function telefonKarte() {
       h('div', {}, 'Erkannt: ', Object.entries(d.letzte_nachricht.erkannt).map(([k, v]) => k + ' ← ' + v).join(', ') || 'nichts'),
       h('div', { class: d.letzte_nachricht.nicht_erkannt.length ? 'muted' : '' }, 'Nicht gefunden: ' + (d.letzte_nachricht.nicht_erkannt.join(', ') || 'nichts')),
       h('details', {}, h('summary', {}, 'Alle gesendeten Feldnamen'), h('code', {}, d.letzte_nachricht.felder.join(', ')))) : h('p', { class: 'small muted' }, 'Es ist noch keine Nachricht eingegangen. Nach einem Testanruf siehst du hier, welche Felder der Anbieter sendet (nur Feldnamen, keine Inhalte).'),
+    d.geheimnis_gesetzt ? telefonKunde(d, m) : null,
     h('p', {}, knopf(d.geheimnis_gesetzt ? 'Neues Geheimnis erzeugen' : 'Geheimnis erzeugen', async () => {
       if (d.geheimnis_gesetzt && !confirm('Das alte Geheimnis wird ungültig. Alle Webhooks müssen angepasst werden. Fortfahren?')) return;
       try { const r = await api('/api/admin/einstellungen/telefon/neues-geheimnis', { method: 'POST' }); box.replaceChildren(h('div', { class: 'msg ok' }, 'Dein Geheimnis (wird nur jetzt angezeigt): ', h('code', {}, r.geheimnis))); } catch (x) { fehler(m, x); } })), box);

@@ -56,7 +56,7 @@ def aendern(bid: str, data: MitarbeiterPatch, user: dict = Depends(require_voll)
             _pruefen(data.rechte)
             cur.execute("UPDATE benutzer SET admin_rechte=%s WHERE id=%s", (data.rechte, bid))
         if data.aktiv is not None:
-            cur.execute("UPDATE benutzer SET aktiv=%s WHERE id=%s", (data.aktiv, bid))
+            cur.execute("UPDATE benutzer SET aktiv=%s, gesperrt_manuell=%s WHERE id=%s", (data.aktiv, not data.aktiv, bid))
             if not data.aktiv:
                 cur.execute("DELETE FROM sitzungen WHERE benutzer_id=%s", (bid,))
         audit(cur, user, "mitarbeiter_geaendert", None, {"id": bid, "rechte": data.rechte, "aktiv": data.aktiv})
