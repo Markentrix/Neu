@@ -611,6 +611,11 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 - **Neu buchbar (Preis auf Anfrage):** Website-Relaunch, Website-Pflege, SEO und GEO, Google-Unternehmensprofil. Preise trägst du im Admin unter Preise & Konditionen ein; dann sind sie direkt buchbar. Preisstand: 1. Oktober 2026. Werbebudget-Hinweis steht bei Leads/Anzeigen und oben auf der Seite.
 
 
+## Website-Wachdienst: Fehler erklärt, www und Altlasten
+- Zeigt die **Kunden-Ampel** „Website antwortet nicht richtig“, führt **Öffnen** zur Kundenseite. Ganz oben steht die Karte **Website-Problem** mit der genauen Fehlermeldung, der Ursache und den Lösungsschritten (z. B. fehlendes Zertifikat, DNS, Webserver, Website-API).
+- „www.firma.de“ wird nicht extra überwacht, wenn „firma.de“ desselben Kunden überwacht wird. Websites bitte **ohne „www.“** anlegen (Admin lehnt „www.“ ab).
+- Auf „offline“ gestellte Websites lösen keine Ampel und keinen Status mehr aus (alte Messwerte werden ignoriert).
+
 ## Fehler-Hilfe (Ursache und Lösungsvorschlag)
 - Code: `portal/app/fehlerhilfe.py`. Eine Liste von Regeln (Muster, Ursache, Schritte, wer es behebt); die erste passende gewinnt, sonst kommt ein allgemeiner Hinweis. Neue Regel = ein Eintrag in `REGELN` plus ein Fall in `tests/t90.py`.
 - Eingebunden an: unerwartete Fehler im Portal (Antwort nennt die Fehler-Nr.), abgestürzte Hintergrundjobs, Website-Protokoll beim Kunden (Zeile „Tipp: …“), Admin-Karte „Fehler-Hilfe“ in der Übersicht („Jetzt alles prüfen“ ohne Mailversand, „Fehler erklären“), Alarmliste unter Datenschutz & Qualität.

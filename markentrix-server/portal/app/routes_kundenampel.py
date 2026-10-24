@@ -1,6 +1,7 @@
 """Kunden-Ampel: pro aktivem Kunde auf einen Blick, ob Website, Mail und Terminbuchung laufen und was beim Team oder Kunden offen ist."""
 from fastapi import APIRouter, Depends
 
+from . import webbetrieb
 from .db import tx
 from .security import require_admin
 
@@ -9,8 +10,8 @@ router = APIRouter(prefix="/api/admin")
 SQL = """
 SELECT k.id, k.firma, k.kundennummer, k.status,
   (SELECT count(*) FROM websites w WHERE w.kunden_id=k.id AND w.art='live' AND w.status='live') AS web_live,
-  (SELECT count(*) FROM website_wacht x WHERE x.kunden_id=k.id AND NOT x.ok AND x.seit < now() - interval '1 hour') AS web_gestoert,
-  (SELECT string_agg(x.domain || ': ' || coalesce(x.fehler, 'unbekannt'), ' | ') FROM website_wacht x WHERE x.kunden_id=k.id AND NOT x.ok AND x.seit < now() - interval '1 hour') AS web_grund,
+  (SELECT count(*) FROM website_wacht x WHERE x.kunden_id=k.id AND NOT x.ok AND x.seit < now() - interval '1 hour' AND EXISTS (SELECT 1 FROM websites w WHERE w.domain=x.domain AND w.kunden_id=x.kunden_id AND w.art='live' AND w.status='live')) AS web_gestoert,
+  (SELECT string_agg(x.domain || ': ' || coalesce(x.fehler, 'unbekannt'), ' | ') FROM website_wacht x WHERE x.kunden_id=k.id AND NOT x.ok AND x.seit < now() - interval '1 hour' AND EXISTS (SELECT 1 FROM websites w WHERE w.domain=x.domain AND w.kunden_id=x.kunden_id AND w.art='live' AND w.status='live')) AS web_grund,
   (SELECT count(*) FROM mail_protokoll m WHERE m.kunden_id=k.id AND NOT m.ok AND m.zeit > now() - interval '7 days') AS mail_fehler,
   coalesce(d.mail_aktiv, false) AS mail_aktiv, coalesce(d.kal_aktiv, false) AS kal_aktiv, (d.kunden_id IS NOT NULL) AS hat_dienste,
   (SELECT count(*) FROM website_leistungen l WHERE l.kunden_id=k.id AND l.aktiv) AS leistungen_aktiv,
@@ -29,7 +30,7 @@ WHERE k.status IN ('aktiv','onboarding') ORDER BY k.firma LIMIT 500"""
 def bewerten(r: dict) -> dict:
     rot, gelb = [], []
     if r["web_gestoert"]:
-        rot.append("Website antwortet nicht richtig (seit über einer Stunde)." + (f" Grund: {r['web_grund']}" if r.get("web_grund") else ""))
+        rot.append("Website antwortet nicht richtig (seit über einer Stunde)." + (f" Grund: {r['web_grund']}" if r.get("web_grund") else "") + " Ursache und Lösung stehen unter „Öffnen“.")
     if r["mail_fehler"]:
         rot.append(f"{r['mail_fehler']} Mail(s) in den letzten 7 Tagen fehlgeschlagen.")
     if r["status"] == "aktiv" and not r["web_live"]:
@@ -59,3 +60,10 @@ def kunden_ampel(user: dict = Depends(require_admin)):
     rang = {"rot": 0, "gelb": 1, "gruen": 2}
     out.sort(key=lambda x: (rang[x["farbe"]], x["firma"].lower()))
     return {"kunden": out, "summe": {f: sum(1 for x in out if x["farbe"] == f) for f in rang}}
+
+
+@router.get("/kunden/{kid}/website-probleme")
+def website_probleme(kid: str, user: dict = Depends(require_admin)):
+    """Gestörte Websites des Kunden mit Fehlertext, Ursache und Lösungsschritten (Anzeige oben auf der Kundenseite)."""
+    with tx("system") as cur:
+        return webbetrieb.probleme(cur, kid)

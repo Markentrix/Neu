@@ -2,6 +2,7 @@
 Beides läuft als Hintergrundaufgabe des Portals (jobs.py). Mehrfachversand wird durch Markieren der Zeilen beim Abholen verhindert."""
 import logging
 import math
+import re
 import socket
 import ssl
 import time
@@ -171,6 +172,75 @@ def _mail_admin(cfg, betreff: str, text: str, titel_push: str | None = None):
             log.exception("Wachdienst-Mail")
 
 
+def ohne_www_doppel(seiten: list) -> list:
+    """„www.firma.de“ wird nicht extra überwacht, wenn „firma.de“ desselben Kunden schon überwacht wird (die Hauptadresse zählt)."""
+    haupt = {(s["kunden_id"], s["domain"]) for s in seiten}
+    return [s for s in seiten if not (s["domain"].startswith("www.") and (s["kunden_id"], s["domain"][4:]) in haupt)]
+
+
+def diagnose(domain: str, fehler: str) -> list[dict]:
+    """Erklärt die Fehlermeldung der Prüfung: je Problem {titel, ursache, schritte, wer}. Schritte mit `Befehl` in Backticks."""
+    f = fehler or ""
+    www = domain.startswith("www.")
+    haupt = domain[4:] if www else domain
+    aus = []
+    if "ALERT_INTERNAL_ERROR" in f or "tlsv1 alert internal error" in f:
+        if www:
+            aus.append({"titel": f"{domain}: Der Webserver hat für die www-Adresse kein Zertifikat",
+                        "ursache": f"Die Adresse {domain} wird zwar geprüft, ist aber nicht beim Webserver (Caddy) eingerichtet oder zeigt per DNS nicht auf den Server. Die Hauptadresse {haupt} ist davon meist nicht betroffen.",
+                        "schritte": [f"Wird {domain} gar nicht gebraucht: im Admin beim Kunden unter Websites die Zeile {domain} auf offline stellen oder löschen. Die Meldung verschwindet dann.",
+                                     f"Soll {domain} funktionieren: beim Domain-Anbieter (INWX/IONOS) einen A-Eintrag `www` auf `5.75.146.212` anlegen.",
+                                     f"Dann auf dem Server `mkctl site-list` prüfen und für {domain} eine Weiterleitung auf {haupt} im Webserver einrichten, danach 5 bis 10 Minuten warten (Zertifikat wird geholt)."],
+                        "wer": "server"})
+        else:
+            aus.append({"titel": f"{domain}: Kein Zertifikat beim Webserver",
+                        "ursache": "Der Webserver (Caddy) kennt diese Domain nicht oder konnte noch kein Zertifikat holen. Häufige Gründe: Domain noch nicht eingerichtet, DNS zeigt noch nicht auf den Server, DNS ist zu neu.",
+                        "schritte": [f"DNS prüfen: `dig +short {domain}` muss `5.75.146.212` liefern. Wenn nicht: beim Domain-Anbieter den A-Eintrag auf `5.75.146.212` setzen.",
+                                     f"Auf dem Server einmal `mkctl site-add {domain}` ausführen (legt Ordner und Webserver-Eintrag an).",
+                                     "Danach 5 bis 10 Minuten warten, bis das Zertifikat geholt ist. Mit `docker logs server-caddy-1 --tail 50` sieht man Fehler dazu."],
+                        "wer": "server"})
+    elif "Name or service not known" in f or "nodename nor servname" in f or "Temporary failure in name resolution" in f:
+        aus.append({"titel": f"{domain}: Die Domain wird nicht gefunden (DNS)",
+                    "ursache": "Die Domain hat keinen oder einen falschen DNS-Eintrag, oder die Domain ist abgelaufen.",
+                    "schritte": [f"`dig +short {domain}` auf dem Server ausführen. Keine Antwort heißt: A-Eintrag fehlt.",
+                                 f"Beim Domain-Anbieter einen A-Eintrag für {domain} auf `5.75.146.212` setzen und Laufzeit der Domain prüfen."], "wer": "admin"})
+    elif "timed out" in f or "Connection refused" in f or "Connection reset" in f or "Errno 111" in f or "Errno 110" in f:
+        aus.append({"titel": f"{domain}: Keine Verbindung zum Server",
+                    "ursache": "Die Domain zeigt auf eine Adresse, aber dort antwortet der Webserver nicht (Caddy gestoppt, Firewall oder falsche IP).",
+                    "schritte": [f"`dig +short {domain}` muss `5.75.146.212` zeigen.", "Auf dem Server `mkctl status` ausführen und prüfen, ob der Webserver läuft.", "Falls nicht: `docker restart server-caddy-1` und `mkctl selbsttest`."], "wer": "server"})
+    if "Zertifikat ungültig" in f:
+        aus.append({"titel": f"{domain}: Zertifikat ist ungültig oder abgelaufen",
+                    "ursache": "Das HTTPS-Zertifikat passt nicht zur Domain oder ist abgelaufen. Caddy erneuert es normalerweise selbst, das klappt nur, wenn die Domain auf den Server zeigt.",
+                    "schritte": [f"`dig +short {domain}` muss `5.75.146.212` zeigen.", "Fehler beim Erneuern ansehen: `docker logs server-caddy-1 --tail 100`.", "Nach Korrektur Caddy neu laden: `docker restart server-caddy-1`."], "wer": "server"})
+    m = re.search(r"Startseite antwortet mit Fehler (\d+)", f)
+    if m:
+        code = int(m.group(1))
+        ursache = {404: "Die Startseite fehlt im Website-Ordner oder die Domain ist nicht dem richtigen Ordner zugeordnet.",
+                   403: "Der Zugriff wird verweigert (Dateirechte im Website-Ordner oder Sperre).",
+                   502: "Der Webserver erreicht das Portal oder die Website nicht (Dienst gestoppt).", 503: "Der Dienst ist überlastet oder gestoppt.",
+                   500: "Auf dem Server ist ein interner Fehler aufgetreten."}.get(code, f"Die Startseite liefert den Fehlercode {code}.")
+        aus.append({"titel": f"{domain}: Startseite meldet Fehler {code}", "ursache": ursache,
+                    "schritte": [f"Seite im Browser öffnen: https://{domain}/", f"Ordner prüfen: `mkctl site-list` (muss {domain} mit einer index.html zeigen). Neu hochladen im Admin unter Websites & Demos.",
+                                 "Logs ansehen: `docker logs server-caddy-1 --tail 50` und `docker logs mk-portal --tail 50`."], "wer": "server"})
+    if "Website-API (/api/health) antwortet nicht richtig" in f or ("Website-API" in f and "nicht erreichbar" in f and not aus):
+        aus.append({"titel": f"{domain}: Website-API (/api/health) antwortet nicht",
+                    "ursache": "Kontaktformular, Terminbuchung und Bewertungen der Website brauchen die Website-API. Der Webserver leitet /api/ für diese Domain nicht ans Portal weiter oder das Portal läuft nicht.",
+                    "schritte": [f"`curl -s https://{domain}/api/health` ausführen: erwartet wird eine Antwort mit ok.", "Fehlt die Weiterleitung: Domain-Datei in `/srv/caddy-sites` prüfen oder `mkctl site-add " + haupt + "` erneut ausführen.",
+                                 "Läuft das Portal? `mkctl status` und `docker logs mk-portal --tail 50`."], "wer": "server"})
+    if not aus and f:
+        aus.append({"titel": f"{domain}: Prüfung meldet einen Fehler", "ursache": f"Meldung: {f}",
+                    "schritte": [f"Seite im Browser öffnen: https://{domain}/", "`mkctl selbsttest` auf dem Server ausführen und `docker logs server-caddy-1 --tail 50` ansehen.", "Hilft das nicht: Meldung unter Admin > Übersicht > Fehler-Hilfe einfügen."], "wer": "server"})
+    return aus
+
+
+def probleme(cur, kid) -> list[dict]:
+    """Gestörte, aktive Websites eines Kunden mit Fehlertext und Erklärung (für die Kundenseite im Admin)."""
+    cur.execute("""SELECT x.domain, x.fehler, x.seit, x.geprueft_am FROM website_wacht x
+                   WHERE x.kunden_id=%s AND NOT x.ok AND EXISTS (SELECT 1 FROM websites w WHERE w.domain=x.domain AND w.kunden_id=x.kunden_id AND w.art='live' AND w.status='live')
+                   ORDER BY x.domain""", (kid,))
+    return [{"domain": r["domain"], "fehler": r["fehler"] or "", "seit": r["seit"], "geprueft_am": r["geprueft_am"], "erklaerung": diagnose(r["domain"], r["fehler"] or "")} for r in cur.fetchall()]
+
+
 def wacht(cfg=None, erzwingen: bool = False):
     """Alle fünf Minuten: jede veröffentlichte Website prüfen. Alarm nach zwei Fehlschlägen in Folge, Entwarnung bei Erholung,
     Hinweis bei Zertifikat unter 14 Tagen. Neue Websites, deren Domain noch nicht auf den Server zeigt, lösen keinen Alarm aus."""
@@ -184,6 +254,7 @@ def wacht(cfg=None, erzwingen: bool = False):
                        FROM websites w JOIN kunden k ON k.id = w.kunden_id
                        WHERE w.art = 'live' AND w.status = 'live' ORDER BY w.domain LIMIT 500""")
         seiten = cur.fetchall()
+    seiten = ohne_www_doppel(seiten)
     if not seiten:
         return
     with ThreadPoolExecutor(max_workers=8) as pool:
@@ -324,7 +395,7 @@ def status(cur, kid=None) -> list:
                           (EXISTS (SELECT 1 FROM website_wacht_tag t WHERE t.domain = w.domain AND t.ok > 0) = false
                            AND COALESCE((SELECT x.letzte_veroeffentlichung FROM websites x WHERE x.domain = w.domain AND x.art = 'live'), now()) > now() - interval '3 days') AS wartet_dns
                    FROM website_wacht w LEFT JOIN website_qualitaet q ON q.domain = w.domain
-                   WHERE (%s::uuid IS NULL OR w.kunden_id = %s::uuid) ORDER BY w.domain""", (kid, kid))
+                   WHERE (%s::uuid IS NULL OR w.kunden_id = %s::uuid) AND EXISTS (SELECT 1 FROM websites z WHERE z.domain = w.domain AND z.kunden_id = w.kunden_id AND z.art = 'live' AND z.status = 'live') ORDER BY w.domain""", (kid, kid))
     return [{"domain": r["domain"], "kunden_id": str(r["kunden_id"]), "geprueft_am": r["geprueft_am"], "ok": r["ok"], "seite_ok": r["seite_ok"], "api_ok": r["api_ok"], "http": r["http"],
              "ms": r["ms"], "cert_tage": r["cert_tage"], "fehler": r["fehler"] or "", "wartet_dns": bool(r["wartet_dns"]) and not r["ok"], "seit": r["seit"], "prozent": float(r["prozent"]) if r["prozent"] is not None else None,
              "qualitaet": {"geprueft_am": r["q_am"], "seiten": r["q_seiten"], "median_ms": r["q_median"], "startseite_kb": r["q_kb"], "tote": r["q_tote"] or [], "langsam": r["q_langsam"] or []} if r["q_am"] else None}

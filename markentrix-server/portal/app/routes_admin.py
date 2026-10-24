@@ -374,6 +374,8 @@ def website_neu(kid: str, data: WebsiteIn, user: dict = Depends(require_admin)):
         raise HTTPException(400, "Die Domain ist ungültig (zum Beispiel firma.de).")
     if data.art not in ("live", "demo"):
         raise HTTPException(400, "Art muss live oder demo sein.")
+    if d.startswith("www."):
+        raise HTTPException(400, f"Bitte ohne „www.“ anlegen (also {d[4:]}). Die Hauptadresse wird überwacht; www kann im Webserver auf sie weiterleiten.")
     with tx("admin") as cur:
         pflicht(cur, kid)
         try:

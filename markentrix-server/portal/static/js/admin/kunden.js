@@ -1,6 +1,7 @@
 import { h, api, csvLaden, datum, dialog, zeit, euro, melde, formular, el, rueckgaengig } from '../common.js';
 import { belegeKarte } from './belege.js';
 import { V, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
+import { erklaerungBox } from './fehlerhilfe.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
 import { zeitachseKarte } from './start.js';
 import { referenzKarte } from './vertraege.js';
@@ -421,6 +422,18 @@ export async function externKarte(kid) {
     tabelle([['Monat', z => z.monat], ['Besucher', z => z.besucher ?? '–'], ['Google-Aufrufe', z => z.google_aufrufe ?? '–'], ['Bewertungen', z => z.google_bewertungen ?? '–'], ['Sterne', z => z.google_sterne ?? '–']], liste, 'Noch keine Zahlen.'));
 }
 
+/** Gestörte Websites: genauer Fehler, Ursache und Lösungsschritte (kommt von „Öffnen“ in der Kunden-Ampel). */
+async function websiteProblemKarte(kid) {
+  let liste = [];
+  try { liste = await api('/api/admin/kunden/' + kid + '/website-probleme', { leise: true }); } catch { return ''; }
+  if (!liste.length) return '';
+  return h('div', { class: 'card', id: 'website-probleme' }, h('h2', {}, 'Website-Problem'),
+    liste.map(p => h('div', { style: 'margin:8px 0' },
+      h('div', { class: 'small muted' }, 'Seit ' + zeit(p.seit) + ' · zuletzt geprüft ' + zeit(p.geprueft_am)),
+      p.erklaerung.map(erklaerungBox),
+      h('div', { class: 'small muted', style: 'word-break:break-word' }, 'Technische Meldung: ' + (p.fehler || 'keine')))));
+}
+
 export async function kundeDetail(kid) {
   const d = await api('/api/admin/kunden/' + kid), k = d.kunde;
   const neu = () => { const s = location.hash; location.hash = ''; setTimeout(() => { location.hash = s; }, 0); };
@@ -497,6 +510,7 @@ export async function kundeDetail(kid) {
 
   return h('div', { class: 'stack' },
     kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
+    await websiteProblemKarte(kid),
     await zeitachseKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
     await onboardingKarte(kid),
@@ -508,7 +522,7 @@ export async function kundeDetail(kid) {
     h('div', { class: 'card' }, h('h2', {}, 'Portal-Zugang'), zugaenge, h('div', { class: 'row', style: 'margin-top:12px' }, h('div', { class: 'grow' }, mail), einladen), linkbox),
     h('div', { class: 'card' }, h('h2', {}, 'Buchungen'), mb, buchungen, h('h3', { style: 'margin-top:18px' }, 'Neue Buchung'), bform),
     h('div', { class: 'card' }, h('h2', {}, 'Websites'), mw, webs, h('div', { style: 'height:10px' }), wform,
-      h('p', { class: 'small muted' }, 'Danach auf dem Server einmal: mkctl site-add <domain>, damit Ordner und Webserver bereit sind.')),
+      h('p', { class: 'small muted' }, 'Domain ohne „www.“ eintragen (Hauptadresse). Danach auf dem Server einmal: mkctl site-add <domain>, damit Ordner und Webserver bereit sind.')),
     await sicher(() => belegeKarte(kid, k.referenzkunde)),
     await briefingKarte(kid),
     await sicher(() => nachrichtenKundeKarte(kid, k)),
