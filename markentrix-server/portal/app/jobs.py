@@ -1092,6 +1092,14 @@ def website_wacht(cfg):
     webbetrieb.wacht(cfg)
 
 
+def website_still(cfg):
+    """Täglich ab 7 Uhr: Betriebe melden, bei denen die sonst regelmäßigen Website-Anfragen ungewöhnlich lange ausbleiben."""
+    jetzt = datetime.now(webbetrieb.TZ)
+    if jetzt.hour < 7 or not _marker("anfragen-still-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    webbetrieb.anfragen_still(cfg)
+
+
 def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
@@ -1100,7 +1108,7 @@ def tick():
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
-    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, website_still, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         _lauf(job, cfg)   # ein kaputter Job darf die anderen nicht stoppen
 
 

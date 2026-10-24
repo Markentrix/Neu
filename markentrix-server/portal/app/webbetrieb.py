@@ -1,6 +1,7 @@
 """Betrieb der Kunden-Websites: Terminerinnerungen an die Besucher und Überwachung (Erreichbarkeit, Zertifikat, Website-API).
 Beides läuft als Hintergrundaufgabe des Portals (jobs.py). Mehrfachversand wird durch Markieren der Zeilen beim Abholen verhindert."""
 import logging
+import math
 import socket
 import ssl
 import time
@@ -400,3 +401,81 @@ def anzahlung_frist(cfg=None):
         push.senden(ids, "Termin freigegeben", f"{r['name']}: keine Anzahlung bis zur Frist ({lokal}).", "/app#heute", "termin")
         n += 1
     return n
+
+
+# ---------------------------------------------------------------- Stillstand-Alarm und Start-Checkliste
+def still_schwelle(n60: int) -> int:
+    """Nach wie vielen Tagen ohne Anfrage fällt es auf: Kunden mit vielen Anfragen schon früh, mit wenigen spät (zwischen 4 und 14 Tagen).
+    Grundlage: Pause, die bei der bisherigen Anfragehäufigkeit nur in etwa 1 von 100 Fällen vorkommt."""
+    lam = max(n60, 1) / 60
+    return int(min(14, max(4, math.ceil(4.6 / lam))))
+
+
+def anfragen_still(cfg=None):
+    """Täglich: meldet Betriebe, bei denen über die Website sonst regelmäßig Anfragen kommen, jetzt aber seit ungewöhnlich langer Zeit keine mehr.
+    Das ist oft das einzige Anzeichen, dass ein Formular, die Mail oder die Verbindung zur Website kaputt ist, obwohl die Seite selbst erreichbar ist."""
+    with tx("system") as cur:
+        cur.execute("""SELECT k.id, k.firma, w.domain,
+                              (SELECT count(*) FROM anfragen a WHERE a.kunden_id=k.id AND a.quelle='website' AND a.erstellt_am > now() - interval '60 days') AS n60,
+                              (SELECT max(a.erstellt_am) FROM anfragen a WHERE a.kunden_id=k.id AND a.quelle='website') AS letzte,
+                              (SELECT count(*) FROM mail_protokoll m WHERE m.kunden_id=k.id AND NOT m.ok AND m.zeit > now() - interval '7 days') AS mailfehler
+                       FROM kunden k JOIN websites w ON w.kunden_id=k.id AND w.art='live' AND w.status='live'
+                       WHERE k.status='aktiv' ORDER BY k.firma LIMIT 500""")
+        zeilen = cur.fetchall()
+    jetzt = datetime.now(timezone.utc)
+    for z in zeilen:
+        if z["n60"] < 12 or not z["letzte"]:
+            continue
+        tage = (jetzt - z["letzte"]).days
+        if tage < still_schwelle(z["n60"]):
+            continue
+        if not _marker_neu(f"still-{z['id']}-{z['letzte']:%Y%m%d}"):
+            continue
+        _mail_admin(cfg, f"Keine Anfragen mehr bei {z['firma']}",
+                    f"Bei {z['firma']} ({z['domain']}) kamen in den letzten 60 Tagen {z['n60']} Anfragen über die Website, die letzte vor {tage} Tagen ({z['letzte'].astimezone(TZ):%d.%m.%Y}).\n"
+                    "Das ist für diesen Betrieb ungewöhnlich. Bitte prüfen:\n"
+                    "- Testanfrage über die Website absenden: Kommt sie im Portal unter „Anfragen“ an?\n"
+                    "- Kommt die Mail an den Betrieb? (Admin → Kunde → Website-Dienste, Zustellung)\n"
+                    "- Hat sich die Website geändert (neu hochgeladen)? Dann das Formular testen." + (f"\n- In den letzten 7 Tagen gab es {z['mailfehler']} fehlgeschlagene Mails." if z["mailfehler"] else ""),
+                    f"Keine Anfragen mehr: {z['firma']}")
+
+
+def _marker_neu(schluessel: str) -> bool:
+    with tx("system") as cur:
+        cur.execute("INSERT INTO job_marker (schluessel) VALUES (%s) ON CONFLICT DO NOTHING", (schluessel,))
+        return cur.rowcount == 1
+
+
+def start_checkliste(cur, kid) -> dict:
+    """Was fehlt, damit die Website eines Kunden wirklich funktioniert? Wird live berechnet, nichts davon ist von Hand abzuhaken."""
+    cur.execute("SELECT * FROM website_dienste WHERE kunden_id=%s", (kid,))
+    d = cur.fetchone() or {}
+    cur.execute("SELECT (logo IS NOT NULL) AS logo FROM kunden WHERE id=%s", (kid,))
+    logo = bool((cur.fetchone() or {}).get("logo"))
+    cur.execute("SELECT domain FROM websites WHERE kunden_id=%s AND art='live' AND status='live' ORDER BY domain LIMIT 1", (kid,))
+    web = cur.fetchone()
+    ok_seite = False
+    if web:
+        cur.execute("SELECT ok FROM website_wacht WHERE domain=%s", (web["domain"],))
+        w = cur.fetchone()
+        ok_seite = bool(w and w["ok"])
+    cur.execute("SELECT exists(SELECT 1 FROM mail_protokoll WHERE kunden_id=%s AND art='test' AND ok) AS t", (kid,))
+    test_ok = bool(cur.fetchone()["t"])
+    cur.execute("SELECT exists(SELECT 1 FROM anfragen WHERE kunden_id=%s AND quelle='website') AS a", (kid,))
+    anfrage_da = bool(cur.fetchone()["a"])
+    punkte = [
+        ("seite", "Website ist veröffentlicht und erreichbar", bool(web) and ok_seite, True, "Admin → Kunde → Websites: ZIP hochladen und veröffentlichen, Domain auf den Server zeigen lassen."),
+        ("empfaenger", "Anfragen gehen an eine E-Mail-Adresse des Betriebs", bool(d.get("mail_aktiv") and (d.get("mail_empfaenger") or "").strip()), True, "Website-Dienste → Kontaktformular: Formular einschalten und Adresse eintragen."),
+        ("logo", "Logo für die Mails ist hinterlegt", logo, True, "Admin → Kunde → Branding: Logo (PNG oder JPG) hochladen."),
+        ("signatur", "Signatur für Mails an die Gäste ist eingetragen", bool((d.get("mail_signatur") or "").strip()), True, "Website-Dienste → Kontaktformular: „Vorschlag aus meinen Firmendaten einfügen“."),
+        ("testmail", "Testmail erfolgreich gesendet", test_ok, True, "Website-Dienste → Kontaktformular: „Testmail senden“."),
+        ("anfrage", "Eine Testanfrage über die Website ist im Portal angekommen", anfrage_da, True, "Auf der echten Website das Formular absenden und unter „Anfragen“ nachsehen."),
+    ]
+    if d.get("kal_aktiv"):
+        cur.execute("SELECT exists(SELECT 1 FROM website_termine WHERE kunden_id=%s) AS t", (kid,))
+        punkte.append(("termin", "Eine Testbuchung ist angekommen", bool(cur.fetchone()["t"]), True, "Auf der Website einen Termin anfragen; er erscheint unter „Heute“ bzw. bei den Buchungen."))
+    if d.get("pp_aktiv"):
+        punkte.append(("paypal", "PayPal ist eingerichtet", bool(d.get("pp_me_link") or d.get("pp_client_id")), False, "Website-Dienste → PayPal: PayPal.Me-Link eintragen."))
+    liste = [{"code": c, "titel": t, "erledigt": e, "pflicht": p, "hinweis": h} for c, t, e, p, h in punkte]
+    pflicht = [x for x in liste if x["pflicht"]]
+    return {"punkte": liste, "fertig": all(x["erledigt"] for x in pflicht), "erledigt": sum(1 for x in pflicht if x["erledigt"]), "gesamt": len(pflicht)}

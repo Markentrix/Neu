@@ -99,6 +99,6 @@ sql(f"update website_dienste set bew_link='https://g.page/r/glanz/review' where 
 c.post("/api/kunde/website-dienste/mail/test",json={"an":mk}); time.sleep(1.5)
 m3=[m for m in mails() if mk in str(m["To"]) and "Testnachricht" in str(m["Subject"])][-1]
 h3=[p for p in m3.walk() if p.get_content_type()=="text/html"][0].get_payload(decode=True).decode()
-chk("Echte Mail: Bewertungs-Box, Facebook, Instagram und Hinweis",all(x in h3 for x in ("Jetzt Google-Bewertung abgeben","g.page/r/glanz/review",">Facebook<",">Instagram<","Vertraulich.")))
+chk("Echte Mail: Facebook, Instagram und Hinweis, aber keine Bewertungs-Box (die Bitte kommt separat nach dem Termin)",all(x in h3 for x in (">Facebook<",">Instagram<","Vertraulich.")) and "g.page/r/glanz/review" not in h3 and "Jetzt Google-Bewertung" not in h3)
 sql(f"update website_dienste set bew_link=null where kunden_id='{kid}'")
 print("FERTIG")

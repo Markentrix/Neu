@@ -682,6 +682,7 @@ def _zustand(cur, kid) -> dict:
                         "anzahl": z["bew_anzahl"], "link": z["bew_link"] or "", "stand": z["bew_stand"],
                         "nach_termin": z["bew_nach_termin"], "verzoegerung_std": z["bew_verzoegerung_std"]},
         "status": _status(cur, kid),
+        "start": webbetrieb.start_checkliste(cur, kid),
     }
 
 

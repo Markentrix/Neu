@@ -249,6 +249,8 @@ export async function diensteKarte(kid) {
   const kopieren = (t) => knopf('Kopieren', async () => { try { await navigator.clipboard.writeText(t); } catch { /* ältere Browser */ } }, 'sec small');
   return h('div', { class: 'card' }, h('h2', {}, 'Website-Dienste'),
     h('p', { class: 'small muted' }, 'Was der Kunde im Portal eingetragen hat. Zugangsdaten (Passwörter, Kalender-Adresse) sind verschlüsselt und für uns nicht lesbar. Der Kunde kann sie nur ersetzen.'),
+    d.start ? h('div', { style: 'margin:8px 0' }, h('b', {}, 'Start-Checkliste: ' + d.start.erledigt + ' von ' + d.start.gesamt + (d.start.fertig ? ' (fertig)' : '')),
+      d.start.punkte.map(p => h('div', { class: 'small' }, h('span', { class: 'pill ' + (p.erledigt ? 'ok' : 'warn') }, p.erledigt ? 'ok' : 'offen'), ' ' + p.titel + (p.erledigt ? '' : ' – ' + p.hinweis)))) : '',
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, ja(d.mail.aktiv, 'Formular'), ja(d.mail.smtp.gesetzt, 'Eigenes Postfach'), ja(d.kalender.aktiv, 'Termine'), ja(d.kalender.ical_gesetzt, 'Kalender verbunden'), ja(d.paypal.aktiv, 'PayPal'), ja(d.bewertungen.aktiv, 'Bewertungen'), ja(d.analytics.aktiv, 'Analytics')),
     h('p', { class: 'small' }, 'Erlaubte Seiten: ', d.domains.length ? d.domains.join(', ') : 'noch keine (Domain oben eintragen, sonst lehnt der Server die Website ab)'),
     h('p', { class: 'small' }, 'Formular: ' + st('kontakt') + ' · Termine: ' + st('termin') + ' · Bewertungen: ' + st('bewertungen') + ' · Test: ' + st('test')),

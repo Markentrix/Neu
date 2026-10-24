@@ -24,7 +24,7 @@ V.dienste = async () => {
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    await domainKarte(), mailKarte(d, neu), fotoKarte(d), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    startKarte(d.start), await domainKarte(), mailKarte(d, neu), fotoKarte(d), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
 };
 
 // ---------------------------------------------------------------- Domain-Stand
@@ -50,18 +50,17 @@ function mailKarte(d, neu) {
   const betreff = h('input', { value: d.mail.betreff, placeholder: 'Neue Anfrage über die Website', maxlength: 120 });
   const name = h('input', { value: d.mail.name, placeholder: 'Absendername, z. B. deine Firma', maxlength: 80 });
   const sig = h('textarea', { rows: 6, maxlength: 600, placeholder: 'Leer = „Mit freundlichen Grüßen“ und der Firmenname', 'aria-label': 'Signatur' }, d.mail.signatur || '');
-  const bew = schalter(d.mail.bewertung, 'Google-Bewertung in Mails anbieten');
   const fb = h('input', { value: d.mail.facebook, placeholder: 'https://facebook.com/deinefirma', maxlength: 300, 'aria-label': 'Facebook-Link' });
   const ig = h('input', { value: d.mail.instagram, placeholder: 'https://instagram.com/deinefirma', maxlength: 300, 'aria-label': 'Instagram-Link' });
   const hin = h('textarea', { rows: 3, maxlength: 600, placeholder: 'z. B. „Diese E-Mail enthält vertrauliche Informationen …“', 'aria-label': 'Hinweistext unter der Signatur' }, d.mail.hinweis || '');
   const speichern = async () => {
-    try { await api('/api/kunde/website-dienste/mail', { method: 'PUT', body: { aktiv: an.c.checked, empfaenger: emp.value, betreff: betreff.value, name: name.value, signatur: sig.value, bewertung: bew.c.checked, facebook: fb.value, instagram: ig.value, hinweis: hin.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
+    try { await api('/api/kunde/website-dienste/mail', { method: 'PUT', body: { aktiv: an.c.checked, empfaenger: emp.value, betreff: betreff.value, name: name.value, signatur: sig.value, bewertung: false, facebook: fb.value, instagram: ig.value, hinweis: hin.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
   };
   const vorschauBox = h('div');
   const vorschau = async (art) => {
     melde(m, '');
     try {
-      const r = await api('/api/kunde/website-dienste/mail/vorschau', { method: 'POST', body: { art, signatur: sig.value, bewertung: bew.c.checked, facebook: fb.value, instagram: ig.value, hinweis: hin.value } });
+      const r = await api('/api/kunde/website-dienste/mail/vorschau', { method: 'POST', body: { art, signatur: sig.value, bewertung: false, facebook: fb.value, instagram: ig.value, hinweis: hin.value } });
       const rahmen = h('iframe', { title: 'Vorschau der E-Mail', sandbox: '', srcdoc: r.html, style: 'width:100%;height:560px;border:1px solid var(--line,#ddd);border-radius:8px;background:#fff' });
       vorschauBox.replaceChildren(h('p', { class: 'small' }, h('b', {}, 'Betreff: '), r.betreff), rahmen,
         r.logo ? '' : h('p', { class: 'small muted' }, 'Es ist noch kein Logo hinterlegt, deshalb steht der Firmenname im Kopf. Das Logo hinterlegt das Team von Markentrix.'));
@@ -78,13 +77,21 @@ function mailKarte(d, neu) {
     h('div', { style: 'margin-top:8px' }, feld('Signatur unter Mails an deine Kunden', sig, 'Erscheint am Ende von Bestätigungen und Terminmails. Das Logo im Kopf der Mail kommt aus deinen Firmendaten (Logo bitte beim Team von Markentrix hinterlegen lassen).'),
       h('button', { class: 'btn sec', type: 'button', onclick: () => { sig.value = d.mail.signatur_vorschlag || ''; } }, 'Vorschlag aus meinen Firmendaten einfügen'),
       h('p', { class: 'small muted' }, 'Aufbau: erste Zeile „Mit freundlichen Grüßen“, dann Firmenname (fett), darunter Adresse, Telefon, E-Mail, Web. Das Logo steht links neben dem Text.'),
-      bew.el, d.mail.bewertung_link_da ? '' : h('div', { class: 'small muted' }, 'Dafür unter „Google-Bewertungen“ zuerst den Bewertungs-Link hinterlegen.'),
+      h('p', { class: 'small muted' }, 'Die Bitte um eine Google-Bewertung steht nicht in der Terminbestätigung. Sie geht separat nach dem Termin raus (siehe „Bewertungen anfragen“ weiter unten).'),
       h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Facebook (optional)', fb), feld('Instagram (optional)', ig)), feld('Hinweistext ganz unten (optional)', hin)),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Testmail senden')),
     h('div', { class: 'row', style: 'margin-top:8px;gap:8px;flex-wrap:wrap' }, h('button', { class: 'btn sec', type: 'button', onclick: () => vorschau('bestaetigung') }, 'Vorschau: Terminbestätigung'), h('button', { class: 'btn sec', type: 'button', onclick: () => vorschau('eingang') }, 'Vorschau: Eingangsbestätigung')),
     h('p', { class: 'small muted' }, 'Die Vorschau zeigt auch, was du gerade eingetippt, aber noch nicht gespeichert hast. Es wird nichts verschickt.'), vorschauBox,
     statusZeile(d.status, 'kontakt', 'Anfragen'),
     smtpBereich(d, mm, neu), mm);
+}
+
+// ---------------------------------------------------------------- Start-Checkliste
+function startKarte(s) {
+  if (!s || s.fertig) return '';
+  return h('div', { class: 'card' }, h('h2', {}, 'So startet deine Website richtig (' + s.erledigt + ' von ' + s.gesamt + ')'),
+    h('p', { class: 'small muted' }, 'Diese Punkte prüfen wir laufend. Sobald alles erledigt ist, verschwindet diese Karte.'),
+    s.punkte.map(p => h('div', { style: 'margin:6px 0' }, h('span', { class: 'pill ' + (p.erledigt ? 'ok' : 'warn') }, p.erledigt ? 'erledigt' : 'offen'), ' ', h('b', {}, p.titel), p.erledigt ? '' : h('div', { class: 'small muted' }, p.hinweis))));
 }
 
 // ---------------------------------------------------------------- Fotos
@@ -236,7 +243,7 @@ function anfrageBlock(b) {
   const sp = async () => { try { await api('/api/kunde/website-dienste/bewertungen/anfrage', { method: 'PUT', body: { aktiv: an.c.checked, verzoegerung_std: Number(std.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
   return h('div', { style: 'margin-top:14px;border-top:1px solid var(--line,#ddd);padding-top:10px' }, h('h3', {}, 'Bewertungen anfragen'),
     h('p', { class: 'small muted' }, 'Wenn du einen Termin als „erschienen“ markierst, bekommt der Besucher nach der gewählten Zeit eine freundliche Mail mit deinem Bewertungs-Link. Jede Mail enthält einen Abmeldelink. Schalte das nur ein, wenn deine Besucher bei der Buchung damit rechnen können (Hinweis in deiner Datenschutzerklärung).'),
-    m, an.el, h('div', { class: 'row', style: 'margin-top:6px' }, h('span', {}, 'Mail nach'), std, h('span', {}, 'Stunden'), h('button', { class: 'btn', onclick: sp }, 'Speichern')));
+    m, an.el, h('div', { class: 'row', style: 'margin-top:6px' }, h('span', {}, 'Mail nach'), std, h('span', {}, 'Stunden (zum Beispiel 24 oder 48)'), h('button', { class: 'btn', onclick: sp }, 'Speichern')));
 }
 
 function bewertungKarte(d, neu) {

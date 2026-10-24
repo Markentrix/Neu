@@ -319,7 +319,7 @@ def vorlage_fuer(kid, ueber: dict | None = None) -> tuple[dict, dict, str]:
         if ueber and feld in ueber:
             z[spalte] = ueber[feld]
     vorlage = {"firma": firma, "signatur": z.get("mail_signatur"), "farbe": kz.get("branding_farbe"), "logo": mailvorlage.bild_pruefen(kz.get("logo"), kz.get("logo_typ")),
-               "extras": {"bewertung_link": ("https://search.google.com/local/writereview?placeid=" + z["bew_place_id"] if z.get("bew_place_id") else z.get("bew_link")) if z.get("mail_bewertung") else None, "facebook": z.get("mail_facebook"), "instagram": z.get("mail_instagram"), "hinweis": z.get("mail_hinweis")}}
+               "extras": {"bewertung_link": None, "facebook": z.get("mail_facebook"), "instagram": z.get("mail_instagram"), "hinweis": z.get("mail_hinweis")}}   # Google-Bewertung erbitten wir nur in der eigenen Bewertungsbitte nach dem Termin
     return vorlage, z, (z.get("mail_name") or firma)[:80]
 
 
