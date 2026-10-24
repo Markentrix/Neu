@@ -354,11 +354,18 @@ async function sicherheitKarte() {
     try { await api('/api/admin/sicherheit', { method: 'PUT', body: { vertrieb_2fa: pflicht.checked } }); melde(m, pflicht.checked ? 'Für Vertriebs-Zugänge ist die Zwei-Faktor-Anmeldung jetzt Pflicht.' : 'Gespeichert.', 'ok'); }
     catch (x) { pflicht.checked = !pflicht.checked; melde(m, x.message); }
   });
+  const kpflicht = h('input', { type: 'checkbox', style: 'width:auto', checked: !!d.kunden_pflicht });
+  kpflicht.addEventListener('change', async () => {
+    if (kpflicht.checked && !confirm('Kunden-Inhaber ohne Zwei-Faktor-Anmeldung kommen danach nicht mehr in ihr Portal, bis sie eine Authenticator-App eingerichtet haben. Jetzt zur Pflicht machen?')) { kpflicht.checked = false; return; }
+    try { await api('/api/admin/sicherheit', { method: 'PUT', body: { kunden_2fa: kpflicht.checked } }); melde(m, kpflicht.checked ? 'Für Kunden-Inhaber ist die Zwei-Faktor-Anmeldung jetzt Pflicht.' : 'Gespeichert.', 'ok'); }
+    catch (x) { kpflicht.checked = !kpflicht.checked; melde(m, x.message); }
+  });
   const ohne = d.konten.filter(k => !k.totp_aktiv);
   return h('div', { class: 'card' }, h('h2', {}, 'Sicherheit: Zwei-Faktor-Anmeldung'),
     h('p', { class: 'small muted' }, 'Admin-Zugänge brauchen sie immer' + (d.admin_pflicht ? '' : ' (hier per Server-Einstellung abgeschaltet)') + '. Für Vertriebs-Zugänge kannst du sie vorschreiben.'),
     ohne.length ? h('p', {}, h('span', { class: 'pill warn' }, ohne.length + ' ohne 2FA'), ' ' + ohne.map(k => k.email).join(', ')) : h('p', {}, h('span', { class: 'pill ok' }, 'alle Konten geschützt')),
-    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, pflicht, 'Zwei-Faktor-Anmeldung für Vertriebs-Zugänge verpflichtend'), m,
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, pflicht, 'Zwei-Faktor-Anmeldung für Vertriebs-Zugänge verpflichtend'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, kpflicht, 'Zwei-Faktor-Anmeldung für Kunden-Inhaber verpflichtend'), m,
     h('div', { class: 'tablewrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['E-Mail', 'Rolle', '2FA', 'Letzter Login'].map(t => h('th', {}, t)))),
       h('tbody', {}, d.konten.map(k => h('tr', {}, h('td', {}, k.email), h('td', {}, k.rolle === 'admin' ? 'Admin' : 'Vertrieb'), h('td', {}, h('span', { class: 'pill ' + (k.totp_aktiv ? 'ok' : 'warn') }, k.totp_aktiv ? 'aktiv' : 'fehlt')), h('td', {}, k.letzter_login ? zeit(k.letzter_login) : '–')))))));
 }

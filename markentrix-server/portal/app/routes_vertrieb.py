@@ -150,7 +150,7 @@ def lead_aendern(lid: str, data: LeadPatchIn, user: dict = Depends(require_vertr
             leadpruefung.pruefen(cur, neu, eigener_partner=user["vertriebspartner_id"], trotzdem=True)
             x = leadpruefung.dublette(cur, felder.get("email"), felder.get("telefon"), None, None, ausser=lid) if (felder.get("email") or felder.get("telefon")) else None
             if x and x["art"] == "kunde":
-                raise HTTPException(409, f"„{x['firma']}“ ist bereits Kunde bei Markentrix.")
+                raise HTTPException(409, leadpruefung.DUBLETTE_VERTRIEB)
         sets = ", ".join(f"{k}=%({k})s" for k in felder)
         cur.execute(f"UPDATE leads SET {sets} WHERE id=%(id)s AND vertriebspartner_id=%(pid)s", {**felder, "id": lid, "pid": user["vertriebspartner_id"]})
         geaendert = ", ".join(k for k in felder if k not in ("ansprache_hinweis",))

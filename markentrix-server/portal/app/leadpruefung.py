@@ -5,6 +5,9 @@ from fastapi import HTTPException
 from . import sperre
 
 
+DUBLETTE_VERTRIEB = "Dieser Kontakt ist bei Markentrix bereits erfasst. Bitte sprich kurz mit dem Team, bevor du ihn ansprichst."
+
+
 def dublette(cur, email=None, telefon=None, firma=None, plz=None, ausser=None) -> dict | None:
     """Findet einen vorhandenen Lead oder Kunden mit derselben E-Mail, Telefonnummer oder Firma+PLZ."""
     m = sperre.mail(email)
@@ -38,10 +41,11 @@ def pruefen(cur, d: dict, eigener_partner=None, trotzdem: bool = False) -> None:
         return
     x = dublette(cur, d.get("email"), d.get("telefon"), d.get("firma"), d.get("plz"))
     if x:
+        if eigener_partner is not None:
+            # Vertriebler-Sicht: nur der eigene Lead wird genannt. Ob ein Kontakt Kunde oder Lead eines anderen ist, bleibt verborgen.
+            if x["art"] == "lead" and str(x["vertriebspartner_id"] or "") == str(eigener_partner):
+                raise HTTPException(409, f"„{x['firma']}“ ist schon in deiner Liste.")
+            raise HTTPException(409, DUBLETTE_VERTRIEB)
         if x["art"] == "kunde":
             raise HTTPException(409, f"„{x['firma']}“ ist bereits Kunde bei Markentrix.")
-        if eigener_partner is not None:
-            if str(x["vertriebspartner_id"] or "") == str(eigener_partner):
-                raise HTTPException(409, f"„{x['firma']}“ ist schon in deiner Liste.")
-            raise HTTPException(409, f"„{x['firma']}“ ist bei Markentrix bereits erfasst. Bitte sprich kurz mit dem Team, bevor du den Kontakt ansprichst.")
         raise HTTPException(409, f"„{x['firma']}“ gibt es schon als Lead. Zum Anlegen trotzdem „Trotzdem anlegen“ wählen.")

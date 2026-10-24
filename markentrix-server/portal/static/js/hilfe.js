@@ -28,6 +28,7 @@ export function suchen(rolle, frage) {
 function artikelKarte(a, frage) {
   return h('div', { class: 'stack' },
     h('p', { class: 'small muted' }, 'Wo: ' + a.wo),
+    a.bild ? h('figure', { style: 'margin:0' }, h('img', { src: a.bild, alt: 'So sieht die Seite „' + a.t + '“ aus (Beispieldaten)', loading: 'lazy', style: 'max-width:100%;border:1px solid var(--line);border-radius:10px', onerror: (e) => e.target.closest('figure').remove() }), h('figcaption', { class: 'small muted' }, 'So sieht die Seite aus (Beispieldaten).')) : '',
     h('ol', {}, a.s.map(x => h('li', { style: 'margin:6px 0' }, x))),
     a.n && a.n.length ? h('div', { class: 'msg' }, h('b', {}, 'Gut zu wissen'), h('ul', {}, a.n.map(x => h('li', {}, x)))) : '',
     a.l ? h('p', {}, h('a', { class: 'btn', href: a.l }, 'Dorthin gehen')) : '', rueckfrage(frage, a.t));

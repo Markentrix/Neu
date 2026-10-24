@@ -14,15 +14,41 @@ from . import berichte, belege, config, fotos, rechtstexte
 EXPORT_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "websites",
                    "angebote", "vertraege", "projekte", "buchungen", "belege", "avv", "agent_laeufe",
-                   "tickets", "ticket_nachrichten", "kundenfreigaben", "zufriedenheit", "angebots_inhalte", "briefings", "kennzahlen_extern", "kunden_werkzeuge", "antwortvorlagen_kunde", "domains", "website_termine", "website_leistungen", "website_gutscheine"]
+                   "tickets", "ticket_nachrichten", "kundenfreigaben", "zufriedenheit", "angebots_inhalte", "briefings", "kennzahlen_extern", "kunden_werkzeuge", "antwortvorlagen_kunde", "domains", "website_termine", "website_leistungen", "website_gutscheine", "website_warteliste", "website_mitarbeiter", "website_sperrtage", "website_stamm_notizen", "kunden_umfragen", "kuendigungswuensche"]
 # Selbstbedienungs-Export des Kunden: nur, was der Kunde auch im Portal sehen darf (entspricht den Richtlinien der Datenbank).
 # Die Abfragen laufen mit Systemrechten, deshalb wird die Sichtbarkeit hier ausdrücklich nachgebaut.
 KUNDE_SIEHT = {"ticket_nachrichten": "NOT intern", "belege": "status<>'entwurf'"}
 KUNDE_OHNE_FELDER = {"belege": ("notiz",)}
 # Inhalte, die bei der Löschung entfernt werden (Reihenfolge ist egal, es gibt keine Abhängigkeiten untereinander außer SET NULL / CASCADE)
-LOESCH_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
+LOESCH_TABELLEN = ["ticket_nachrichten", "website_termine", "website_warteliste", "website_gutscheine", "website_meldungen", "website_ereignisse", "website_stat", "website_wacht", "website_qualitaet",
+                   "website_leistung_aenderungen", "website_bewertung_sperre", "website_sperrtage", "website_stamm_notizen", "website_leistungen", "website_mitarbeiter", "website_dienste",
+                   "domain_pruefung", "statusseiten", "kunden_umfragen", "wissen_vorschlaege", "hilfe_rueckmeldungen", "onboarding_punkte", "workflow_fehler", "kosten_log",
+                   "anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "agent_laeufe",
                    "prompts", "freigaben", "projekte", "websites", "tickets", "kundenfreigaben", "zufriedenheit", "aufgaben", "dateien", "angebots_inhalte", "briefings", "kennzahlen_extern", "kunden_werkzeuge", "antwortvorlagen_kunde", "domains", "website_fotos"]
+
+# Bewusst behalten (gesetzliche Aufbewahrung, Nachweis oder keine Kundeninhalte). Ein Prüftest (t105) verlangt, dass JEDE Tabelle mit kunden_id entweder in LOESCH_TABELLEN
+# oder hier steht, damit neue Tabellen beim Vertragsende nicht vergessen werden. Neue Tabelle: hier mit Begründung eintragen oder in LOESCH_TABELLEN aufnehmen.
+AUFBEWAHREN = {
+    "belege": "Rechnungen und Angebote: gesetzliche Aufbewahrungsfrist (Frist vom Steuerberater/Anwalt bestätigen lassen)",
+    "avv": "Auftragsverarbeitungsvertrag: Nachweis",
+    "vertragsdokumente": "Verträge: gesetzliche Aufbewahrung und Nachweis",
+    "buchungen": "Buchhaltung",
+    "provisionen": "Provisionsabrechnung gegenüber dem Vertriebler (Buchhaltung)",
+    "abrechnungsplaene": "Abrechnung: Buchhaltung",
+    "sepa_mandate": "Lastschriftmandat: Nachweisfrist nach Vorgabe des Anwalts (offen)",
+    "kunden_einwilligungen": "Nachweis erteilter Einwilligungen (Rechenschaftspflicht)",
+    "uav_mitteilungen": "Nachweis von Änderungen der Unterauftragsverarbeiter",
+    "preisaenderung_kunden": "Nachweis zugestellter Preisänderungen",
+    "kuendigungswuensche": "Nachweis der Kündigung",
+    "kunden_module": "Vertragshistorie (gebuchte Module)",
+    "audit_log": "Protokoll wesentlicher Aktionen: eigene Frist (12 Monate, automatisch)",
+    "mail_protokoll": "Zustell-Protokoll ohne Adresse und Inhalt (nur Domain): eigene Frist",
+    "angebote": "Ältere Angebotsablage: Geschäftsunterlage, gesetzliche Aufbewahrung",
+    "vertraege": "Verträge: gesetzliche Aufbewahrung und Nachweis",
+    "benutzer": "Zugänge werden in loeschen() gesondert entfernt (nicht über diese Liste)",
+    "leads": "Lead-Akte des Vertriebs: eigene Löschfristen (Job fristen_loeschen)",
+}
 
 
 def _json(o):

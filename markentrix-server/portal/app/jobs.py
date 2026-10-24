@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import date, datetime, timedelta, timezone
 
-from . import abo, aufgabendetail, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push
+from . import abo, aufgabendetail, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push, security
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -1100,6 +1100,15 @@ def website_still(cfg):
     webbetrieb.anfragen_still(cfg)
 
 
+def rate_aufraeumen(cfg):
+    """Täglich: alte Zähler der Anfragen-Begrenzung entfernen."""
+    jetzt = datetime.now(webbetrieb.TZ)
+    if not _marker("rate-aufraeumen-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    with tx("system") as cur:
+        security.rate_aufraeumen(cur)
+
+
 def angebote_erinnern(cfg):
     """Werktags ab 9 Uhr, einmal täglich: unbeantwortete Angebote erinnern (Stufe 1 und 2), nur wenn in den Einstellungen eingeschaltet (Standard aus)."""
     jetzt = datetime.now(webbetrieb.TZ)
@@ -1109,15 +1118,24 @@ def angebote_erinnern(cfg):
     angebotserinnerung.auto_lauf()
 
 
+def angebote_abgelaufen(cfg):
+    """Einmal täglich: abgelaufene, noch offene Angebote melden."""
+    jetzt = datetime.now(webbetrieb.TZ)
+    if jetzt.hour < 8 or not _marker("angebote-abgelaufen-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    from . import angebotserinnerung
+    angebotserinnerung.abgelaufen_melden()
+
+
 def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
-    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, website_still, angebote_erinnern, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, website_still, angebote_erinnern, angebote_abgelaufen, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
         _lauf(job, cfg)   # ein kaputter Job darf die anderen nicht stoppen
 
 

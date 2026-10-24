@@ -73,6 +73,19 @@ export async function angebotErinnerungDialog(bid, nachher) {
   } catch (x) { inhalt.replaceChildren(h('div', { class: 'msg err' }, x.message)); }
 }
 
+/** Gültigkeit eines Angebots verlängern (auch abgelaufen). Der Online-Link bleibt gleich, danach ist wieder eine Erinnerung möglich. */
+export function angebotVerlaengernDialog(bid, nachher) {
+  const m = h('div'), tage = h('select', { 'aria-label': 'Verlängern um' }, [7, 14, 30, 60].map(t => h('option', { value: t, selected: t === 14 }, t + ' Tage ab heute')));
+  const d = dialog('Angebot: Gültigkeit verlängern', h('div', {}, h('p', { class: 'small muted' }, 'Das Angebot gilt danach wieder bis zum gewählten Tag. Der Link und das PDF bleiben gleich, die Erinnerungen fangen von vorn an. Es wird nichts verschickt; danach kannst du „Erinnerung senden“ nutzen.'),
+    h('label', {}, 'Gültig noch'), tage, m, h('p', {}, knopf('Verlängern', async () => {
+      try { const r = await api('/api/admin/angebote-erinnerung/' + bid + '/verlaengern', { method: 'POST', body: { tage: Number(tage.value) } }); melde(m, 'Gültig bis ' + datum(r.faellig_am) + '.', 'ok'); setTimeout(() => { d.zu(); if (nachher) nachher(); else location.reload(); }, 900); }
+      catch (x) { fehler(m, x); }
+    }, 'btn'))), true);
+}
+
+/** Hinweis „Mail nicht zugestellt“ (leer, wenn alles gut war). */
+export const mailFehlerHinweis = (z) => z.mail_fehler ? h('div', { class: 'msg err small' }, 'Mail nicht zugestellt (' + datum(z.mail_fehler_am) + '): ' + z.mail_fehler + ' Bitte E-Mail-Adresse prüfen und erneut senden.') : '';
+
 /** Grund festhalten, warum ein Angebot noch nicht angenommen wurde (Auswahl und kurzer Text). Fließt in die Auswertung ein. */
 export async function angebotGrundDialog(bid, aktuell, nachher) {
   const inhalt = h('div', {}, h('p', { class: 'small muted' }, 'Lade …')), d = dialog('Angebot: Grund festhalten', inhalt, true);
@@ -189,13 +202,14 @@ export async function belegEditor(id, kid, art) {
     }
     if (b.art === 'rechnung' && !b.storno_von && ['gestellt', 'versendet', 'bezahlt'].includes(b.status)) knoepfe.push(aktion('Stornieren', '/api/admin/belege/' + id + '/stornieren', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'bad', 'Rechnung stornieren? Es wird eine Stornorechnung mit eigener Nummer erzeugt.'));
     if (b.art === 'angebot' && ['gestellt', 'versendet', 'abgelehnt'].includes(b.status)) knoepfe.push(knopf(b.grund_code ? 'Grund ändern' : 'Grund festhalten', () => angebotGrundDialog(id, { code: b.grund_code, text: b.grund_text }), 'sec'));
+    if (b.art === 'angebot' && ['gestellt', 'versendet'].includes(b.status)) knoepfe.push(knopf('Gültigkeit verlängern', () => angebotVerlaengernDialog(id), 'sec'));
     if (b.art === 'angebot' && b.status === 'versendet') knoepfe.push(knopf('Erinnerung senden' + (b.erinnerungen ? ' (' + b.erinnerungen + '× erinnert)' : ''), () => angebotErinnerungDialog(id), 'sec'));
     if (b.art === 'angebot' && ['gestellt', 'versendet'].includes(b.status)) knoepfe.push(aktion('Angenommen', '/api/admin/belege/' + id + '/angebot-status', { status: 'angenommen' }, neu), aktion('Abgelehnt', '/api/admin/belege/' + id + '/angebot-status', { status: 'abgelehnt' }, neu, 'sec'));
     if (b.art === 'angebot' && ['gestellt', 'versendet', 'angenommen'].includes(b.status) && !k.referenzkunde) knoepfe.push(aktion('Rechnung daraus erstellen', '/api/admin/belege/' + id + '/rechnung', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec'));
   } else knoepfe.push(speichern);
   const titel = (b.storno_von ? 'Stornorechnung' : art === 'rechnung' || b.art === 'rechnung' ? 'Rechnung' : 'Angebot') + (b.nummer ? ' ' + b.nummer : ' (Entwurf)');
   return h('div', { class: 'stack' }, kopf(titel, belegPill(b), h('a', { class: 'btn sec small', href: '#kunde/' + (b.kunden_id || kid) }, '← ' + k.firma)),
-    k.referenzkunde && (b.art || art) === 'rechnung' ? h('div', { class: 'msg err' }, 'Das ist ein Referenzkunde – Rechnungen sind für Referenzkunden gesperrt.') : '', m,
+    k.referenzkunde && (b.art || art) === 'rechnung' ? h('div', { class: 'msg err' }, 'Das ist ein Referenzkunde – Rechnungen sind für Referenzkunden gesperrt.') : '', mailFehlerHinweis(b), m,
     h('div', { class: 'card' }, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Leistungszeitraum'), zeitraum)),
       h('label', {}, 'Einleitung (optional)'), einl, h('h3', { style: 'margin-top:16px' }, 'Positionen'), h('div', { class: 'small muted' }, 'Beschreibung · Menge · Einheit · Einzelpreis netto in €'), box,
       frei ? knopf('+ Position', () => { zeilen.push({ text: '', menge: 1, einheit: '', preis_cent: 0 }); zeichne(); }) : '', sum,

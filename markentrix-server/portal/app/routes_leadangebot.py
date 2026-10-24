@@ -141,7 +141,7 @@ def vorschau(lid: str, bid: str, user: dict = Depends(require_admin)):
 def liste(lid: str, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         _lead(cur, lid)
-        cur.execute("""SELECT id, nummer, status, betreff, datum, faellig_am, netto_cent, brutto_cent, versendet_am, angesehen_am, angenommen_am, angenommen_von, abgelehnt_am, erinnerungen, erinnert_am, grund_code, grund_text,
+        cur.execute("""SELECT id, nummer, status, betreff, datum, faellig_am, netto_cent, brutto_cent, versendet_am, angesehen_am, angenommen_am, angenommen_von, abgelehnt_am, erinnerungen, erinnert_am, grund_code, grund_text, mail_fehler, mail_fehler_am,
                               (annahme_hash IS NOT NULL) AS hat_link FROM belege WHERE lead_id=%s AND art='angebot' ORDER BY erstellt_am DESC""", (lid,))
         return cur.fetchall()
 
@@ -196,6 +196,8 @@ def senden(lid: str, bid: str, data: SendenIn, user: dict = Depends(require_admi
     gesendet, grund = False, ""
     if not data.nur_link:
         gesendet, grund = mailer.lead_angebot(an, l.get("ansprechpartner"), l["firma"], nummer, daten, name, gueltig, link, f["name"], erinnerung=data.erinnerung and b["status"] != "entwurf")
+        from . import angebotserinnerung
+        angebotserinnerung.mail_ergebnis(bid, gesendet, grund)
     with tx("admin") as cur:
         if gesendet:
             cur.execute("UPDATE belege SET versendet_am=now(), status='versendet' WHERE id=%s", (bid,))

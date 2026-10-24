@@ -29,6 +29,8 @@ const BILDER = {
     + t(24, 128, 'Kopieren', 7.5) + t(24, 148, 'Lesezeichen', 7.5) + r(18, 156, 124, 20, '#fde68a', 6) + t(24, 170, 'Zum Home-Bildschirm  ＋', 7.5, FARBE.text, 700) + t(24, 194, 'Drucken', 7.5) + ring(16, 154, 128, 24), 'Teilen-Menü mit „Zum Home-Bildschirm“'),
   'sa-hinzu': () => handy(r(14, 22, 132, 224, '#fff', 0) + t(24, 42, 'Abbrechen', 7.5, FARBE.akzent) + t(80, 42, 'Zum Home-Bildschirm', 6.5, FARBE.text, 700, 'middle') + t(136, 42, 'Hinzufügen', 7.5, FARBE.akzent, 700, 'end') + ring(92, 30, 52, 18)
     + logo(24, 64, 28) + r(58, 70, 76, 16, FARBE.hell, 5) + t(64, 81, 'Markentrix', 7.5) + zeile(24, 108, 110) + zeile(24, 120, 90), 'Dialog „Zum Home-Bildschirm“ mit „Hinzufügen“'),
+  push: () => handy(r(20, 40, 120, 52, '#fff', 12, `stroke="${FARBE.linie}"`) + logo(28, 48, 22) + t(58, 62, 'Markentrix', 8, FARBE.text, 700) + t(58, 76, 'Neue Nachricht für dich', 7.5) + t(58, 87, 'jetzt', 6.5, '#6b7396')
+    + r(26, 128, 108, 78, '#fff', 12, `stroke="${FARBE.linie}"`) + t(80, 148, 'Benachrichtigungen', 8, FARBE.text, 700, 'middle') + t(80, 160, 'zulassen?', 8, FARBE.text, 700, 'middle') + t(52, 196, 'Nicht jetzt', 7, '#6b7396', 500, 'middle') + r(84, 182, 44, 18, FARBE.akzent, 9) + t(106, 194, 'Zulassen', 7.5, '#fff', 700, 'middle') + ring(82, 180, 48, 22), 'Handy fragt, ob Benachrichtigungen erlaubt sein sollen, „Zulassen“ ist markiert'),
   // ---- Kunde
   heute: () => handy(t(22, 38, 'Heute', 11, FARBE.text, 700) + r(20, 48, 120, 62, FARBE.hell, 10) + t(28, 64, 'Dein nächster Schritt', 7, '#6b7396') + t(28, 78, 'Eine Freigabe wartet', 8, FARBE.text, 700) + knopf(28, 88, 70, 'Freigaben prüfen') + r(20, 118, 120, 34, '#fff', 8, `stroke="${FARBE.linie}"`) + t(28, 132, 'Anfragen: keine offen', 7.5) + zeile(28, 140, 60) + r(20, 160, 120, 34, '#fff', 8, `stroke="${FARBE.linie}"`) + t(28, 174, 'Termine heute: 1', 7.5) + zeile(28, 182, 70) + leiste(0, ['Heute', 'Anfragen', 'Termine', 'Menü']), 'Seite Heute mit nächstem Schritt'),
   freigabe: () => handy(t(22, 38, 'Freigaben', 11, FARBE.text, 700) + r(20, 48, 120, 120, '#fff', 10, `stroke="${FARBE.linie}"`) + t(28, 64, 'Instagram-Beitrag', 8, FARBE.text, 700) + r(28, 70, 40, 12, '#fef3c7', 6) + t(48, 79, 'wartet', 6.5, '#92400e', 600, 'middle') + r(28, 90, 104, 40, FARBE.hell, 6) + zeile(34, 98, 80) + zeile(34, 108, 60) + zeile(34, 118, 70)
@@ -64,6 +66,7 @@ const INSTALL = {
     ['ch-menue', 'Menü ⋮ öffnen, „App installieren“ wählen', 'Oben rechts auf die drei Punkte tippen. Steht dort „App installieren“, tippe darauf. Alternativ „Zum Startbildschirm hinzufügen“.'],
     ['ch-install', 'Mit „Installieren“ bestätigen', 'Chrome fragt noch einmal nach. Tippe auf „Installieren“. Das dauert ein paar Sekunden.'],
     ['home', 'Fertig', 'Das Markentrix-Symbol liegt jetzt auf deinem Startbildschirm. Ab jetzt öffnest du das Portal wie jede andere App. Updates passieren von selbst.'],
+    ['push', 'Benachrichtigungen erlauben', 'Beim ersten Öffnen der App fragt dich Markentrix, ob du Benachrichtigungen aufs Handy bekommen möchtest. Tippe auf „Ja, benachrichtigen“ und danach beim Handy auf „Zulassen“. So erfährst du sofort, wenn etwas Wichtiges passiert. Du kannst das jederzeit unter „Konto“ bzw. „Einstellungen“ → „App & Benachrichtigungen“ ändern.'],
   ],
   iphone: [
     ['login', 'Portal in Safari öffnen', 'Öffne das Portal in Safari (nicht in Chrome oder in einer anderen App) und melde dich an.'],
@@ -71,6 +74,7 @@ const INSTALL = {
     ['sa-liste', '„Zum Home-Bildschirm“ wählen', 'In der Liste etwas nach unten wischen, bis „Zum Home-Bildschirm“ erscheint, und darauf tippen.'],
     ['sa-hinzu', '„Hinzufügen“ tippen', 'Oben rechts auf „Hinzufügen“ tippen. Der Name „Markentrix“ passt so.'],
     ['home', 'Fertig', 'Das Symbol liegt auf dem Home-Bildschirm. Erst jetzt, in der App, kannst du auch Benachrichtigungen einschalten (Konto → App & Benachrichtigungen).'],
+    ['push', 'Benachrichtigungen erlauben', 'Öffne die App vom Home-Bildschirm (nicht aus Safari). Dort fragt dich Markentrix, ob du Benachrichtigungen aufs Handy bekommen möchtest. Tippe auf „Ja, benachrichtigen“ und danach beim Handy auf „Zulassen“. So erfährst du sofort, wenn etwas Wichtiges passiert. Du kannst das jederzeit unter „Konto“ bzw. „Einstellungen“ → „App & Benachrichtigungen“ ändern.'],
   ],
 };
 

@@ -50,7 +50,8 @@ def check_password_rules(pw: str):
 _versuche: dict[str, deque] = defaultdict(deque)
 
 
-def rate_limit(key: str, maximal: int = 10, fenster: int = 300):
+def _rate_speicher(key: str, maximal: int, fenster: int):
+    """Notlösung im Arbeitsspeicher, falls die Datenbank gerade nicht erreichbar ist."""
     jetzt = time.time()
     if len(_versuche) > 5000:   # Speicher begrenzen: leere und alte Einträge entfernen
         for k in [k for k, v in _versuche.items() if not v or v[-1] < jetzt - 3600]:
@@ -61,6 +62,30 @@ def rate_limit(key: str, maximal: int = 10, fenster: int = 300):
     if len(q) >= maximal:
         raise HTTPException(429, "Zu viele Versuche. Bitte in ein paar Minuten erneut probieren.")
     q.append(jetzt)
+
+
+def rate_limit(key: str, maximal: int = 10, fenster: int = 300):
+    """Begrenzt Versuche je Schlüssel auf `maximal` pro Zeitfenster (Sekunden). Der Zähler liegt in der Datenbank (überlebt Neustarts, gilt für alle Prozesse);
+    das Fenster beginnt beim ersten Versuch und läuft fest ab."""
+    try:
+        with tx("system") as cur:
+            cur.execute("""INSERT INTO rate_zaehler (schluessel, fenster_start, anzahl) VALUES (%s, now(), 1)
+                           ON CONFLICT (schluessel) DO UPDATE SET
+                             fenster_start = CASE WHEN rate_zaehler.fenster_start < now() - make_interval(secs => %s) THEN now() ELSE rate_zaehler.fenster_start END,
+                             anzahl = CASE WHEN rate_zaehler.fenster_start < now() - make_interval(secs => %s) THEN 1 ELSE rate_zaehler.anzahl + 1 END
+                           RETURNING anzahl""", (key[:200], fenster, fenster))
+            n = cur.fetchone()["anzahl"]
+    except Exception:  # noqa: BLE001 - Datenbank nicht erreichbar: Notlösung im Speicher
+        _rate_speicher(key, maximal, fenster)
+        return
+    if n > maximal:
+        raise HTTPException(429, "Zu viele Versuche. Bitte in ein paar Minuten erneut probieren.")
+
+
+def rate_aufraeumen(cur) -> int:
+    """Löscht Zähler, deren Fenster längst vorbei ist (täglicher Job)."""
+    cur.execute("DELETE FROM rate_zaehler WHERE fenster_start < now() - interval '2 days'")
+    return cur.rowcount
 
 
 def client_ip(request: Request) -> str:
@@ -102,20 +127,30 @@ def recht_fuer_pfad(pfad: str) -> str:
     return _BEREICH.get(erst, "einstellungen")
 
 
-_vertrieb_2fa = (0.0, False)
+_sicherheit_cache = (0.0, {})
 
 
-def vertrieb_2fa_pflicht(neu_laden: bool = False) -> bool:
-    """Ist die Zwei-Faktor-Anmeldung für Vertriebs-Zugänge Pflicht? (Einstellung „sicherheit“, 60 Sekunden zwischengespeichert)"""
-    global _vertrieb_2fa
-    if neu_laden or time.time() - _vertrieb_2fa[0] > 60:
+def _sicherheit(neu_laden: bool = False) -> dict:
+    """Einstellung „sicherheit“ (60 Sekunden zwischengespeichert)."""
+    global _sicherheit_cache
+    if neu_laden or time.time() - _sicherheit_cache[0] > 60:
         try:
             from . import einstellungen
             with tx("system") as cur:
-                _vertrieb_2fa = (time.time(), bool(einstellungen.lesen(cur, "sicherheit").get("vertrieb_2fa")))
+                _sicherheit_cache = (time.time(), dict(einstellungen.lesen(cur, "sicherheit") or {}))
         except Exception:  # noqa: BLE001
-            _vertrieb_2fa = (time.time(), False)
-    return _vertrieb_2fa[1]
+            _sicherheit_cache = (time.time(), {})
+    return _sicherheit_cache[1]
+
+
+def vertrieb_2fa_pflicht(neu_laden: bool = False) -> bool:
+    """Ist die Zwei-Faktor-Anmeldung für Vertriebs-Zugänge Pflicht?"""
+    return bool(_sicherheit(neu_laden).get("vertrieb_2fa"))
+
+
+def kunden_2fa_pflicht(neu_laden: bool = False) -> bool:
+    """Ist die Zwei-Faktor-Anmeldung für Kunden-Inhaber Pflicht? (Standard aus)"""
+    return bool(_sicherheit(neu_laden).get("kunden_2fa"))
 
 
 def _zwei_faktor_fehlt(user: dict) -> bool:
@@ -124,6 +159,8 @@ def _zwei_faktor_fehlt(user: dict) -> bool:
         return False
     if user["rolle"] == "admin":
         return bool(config.ADMIN_2FA_PFLICHT)
+    if user["rolle"] == "kunde" and user.get("kunden_rolle") == "inhaber":
+        return kunden_2fa_pflicht()
     return user["rolle"] == "vertrieb" and vertrieb_2fa_pflicht()
 
 
@@ -159,6 +196,8 @@ EMPFANG_ERLAUBT = {"start", "status", "startliste", "heute", "anfragen", "termin
 def require_kunde(request: Request, user: dict = Depends(current_user)) -> dict:
     if user["rolle"] != "kunde" or not user["kunden_id"]:
         raise HTTPException(403, "Nur für Kunden.")
+    if _zwei_faktor_fehlt(user):
+        raise HTTPException(403, "Für Ihren Zugang ist die Zwei-Faktor-Anmeldung Pflicht. Bitte zuerst einrichten (Konto).")
     if user["kunden_rolle"] == "empfang":
         teile = request.url.path.split("/")      # ["", "api", "kunde", <bereich>, …]
         bereich = teile[3] if len(teile) > 3 else ""

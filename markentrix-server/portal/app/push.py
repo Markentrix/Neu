@@ -8,6 +8,8 @@ import threading
 import time
 from urllib.parse import urlsplit
 
+import ipaddress
+import socket
 import urllib.error
 import urllib.request
 from cryptography.hazmat.primitives import hashes, serialization
@@ -68,12 +70,45 @@ def _vapid_kopf(endpoint: str, k: dict) -> str:
     return f"vapid t={kopf}.{claims}.{sig}, k={k['public']}"
 
 
+# Push-Adressen gehören den Push-Diensten der Browser. Alles andere (eigene Server, interne Adressen) wird weder angenommen noch angerufen.
+ERLAUBTE_PUSH_DIENSTE = ("googleapis.com", "push.services.mozilla.com", "notify.windows.com", "push.apple.com", "push.samsungosp.com")
+
+
+def ziel_erlaubt(endpoint: str, aufloesen: bool = True) -> bool:
+    """True, wenn die Adresse https ist, auf einen bekannten Push-Dienst zeigt und (bei aufloesen) nur öffentliche IP-Adressen liefert."""
+    from . import config
+    if config.PUSH_HTTP_ERLAUBT:      # nur für Tests mit lokalem Gegenstellen-Server
+        return True
+    try:
+        u = urlsplit(endpoint)
+        host = (u.hostname or "").lower()
+        if u.scheme != "https" or u.username or u.password or u.port not in (None, 443) or not host:
+            return False
+        if not any(host == d or host.endswith("." + d) for d in ERLAUBTE_PUSH_DIENSTE):
+            return False
+        if aufloesen:
+            for info in socket.getaddrinfo(host, 443, proto=socket.IPPROTO_TCP):
+                ip = ipaddress.ip_address(info[4][0])
+                if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified:
+                    return False
+        return True
+    except (ValueError, OSError):
+        return False
+
+
+class _KeineWeiterleitung(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **kw):
+        return None
+
+
 def _senden_an(abo: dict, nutzlast: bytes, k: dict) -> int:
+    if not ziel_erlaubt(abo["endpoint"]):
+        return 410                    # wird wie ein abgemeldetes Gerät behandelt und entfernt
     req = urllib.request.Request(abo["endpoint"], data=verschluesseln(nutzlast, abo["p256dh"], abo["auth"]), method="POST",
                                  headers={"Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", "TTL": "86400", "Urgency": "normal",
                                           "Authorization": _vapid_kopf(abo["endpoint"], k)})
     try:
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.build_opener(_KeineWeiterleitung).open(req, timeout=10) as r:
             return r.status
     except urllib.error.HTTPError as e:
         return e.code

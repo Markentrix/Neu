@@ -1,4 +1,4 @@
-import { angebotErinnerungDialog, erinnerungsDialog } from './belege.js';
+import { angebotErinnerungDialog, angebotVerlaengernDialog, erinnerungsDialog } from './belege.js';
 import { fehlerhilfeKarte } from './fehlerhilfe.js';
 import { dialog, h, api, datum, zeit, euro, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta, rueckgaengig } from '../common.js';
 import { V, kopf, pill, sicherApi, tabelle, zeige } from './kern.js';
@@ -37,8 +37,8 @@ export function angebotsKarte(liste) {
   return h('div', { class: 'card' }, h('h2', {}, 'Angebote im Blick', offen ? h('span', { class: 'badge', style: 'margin-left:8px' }, offen) : ''),
     L.length ? h('p', { class: 'small muted' }, offen + ' offen mit zusammen ' + euro(summeCent) + ' brutto. Angenommene und abgelehnte bleiben 30 Tage sichtbar.') : '',
     L.length ? h('ul', { class: 'prio' }, L.map(({ z, s }) => h('li', {}, h('span', { class: 'punkt ' + s.ton, 'aria-hidden': 'true' }),
-      h('div', { class: 'pt' }, h('b', {}, z.firma + ' · ' + z.nummer), h('span', { class: 'small muted' }, euro(z.brutto_cent) + ' · ' + s.hinweis)),
-      h('span', { class: 'pill ' + s.ton }, s.text), erinnerbar(z) ? h('button', { class: 'btn sec small', onclick: () => angebotErinnerungDialog(z.id) }, 'Erinnern' + (z.erinnerungen ? ' (' + z.erinnerungen + '×)' : '')) : '', h('a', { class: 'btn sec small', href: angebotLink(z) }, 'Öffnen'))))
+      h('div', { class: 'pt' }, h('b', {}, z.firma + ' · ' + z.nummer), h('span', { class: 'small muted' }, euro(z.brutto_cent) + ' · ' + s.hinweis), z.mail_fehler ? h('span', { class: 'small', style: 'color:var(--bad,#c0392b)' }, 'Mail nicht zugestellt: ' + z.mail_fehler) : ''),
+      h('span', { class: 'pill ' + s.ton }, s.text), s.text === 'Abgelaufen' && ['gestellt', 'versendet'].includes(z.status) ? h('button', { class: 'btn sec small', onclick: () => angebotVerlaengernDialog(z.id) }, 'Gültigkeit verlängern') : '', erinnerbar(z) ? h('button', { class: 'btn sec small', onclick: () => angebotErinnerungDialog(z.id) }, 'Erinnern' + (z.erinnerungen ? ' (' + z.erinnerungen + '×)' : '')) : '', h('a', { class: 'btn sec small', href: angebotLink(z) }, 'Öffnen'))))
       : h('p', { class: 'muted' }, 'Noch keine verschickten Angebote. Unter „Angebote & Rechnungen“ geht es mit „+ Angebot an Neukunden“.'));
 }
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import belege, config, einstellungen, mailer, rechtstexte
+from . import belege, config, einstellungen, mailer, push, rechtstexte
 from .db import tx
 from .security import audit, rate_limit, require_admin
 
@@ -89,6 +89,19 @@ def _pruefen(cur, b: dict, user: dict | None = None) -> dict:
     return {"an": an, "name": name, "firma": firma, "lead": lead, "link": link, "stufe": b["erinnerungen"] + 1}
 
 
+def mail_ergebnis(bid, ok: bool, grund: str = "") -> None:
+    """Hält fest, ob die letzte Mail zum Angebot rausging. Bei Fehler steht der Grund am Angebot (sichtbar im Admin), bei Erfolg wird er gelöscht.
+    Nicht erkannt werden können Mails, die später zurückkommen (Bounce): dafür gibt es keinen Postfach-Abruf."""
+    try:
+        with tx("admin") as cur:
+            if ok:
+                cur.execute("UPDATE belege SET mail_fehler=NULL, mail_fehler_am=NULL WHERE id=%s AND mail_fehler IS NOT NULL", (bid,))
+            else:
+                cur.execute("UPDATE belege SET mail_fehler=%s, mail_fehler_am=now() WHERE id=%s", ((grund or "Unbekannter Fehler")[:300], bid))
+    except Exception:
+        pass
+
+
 @router.get("/angebote-erinnerung/{bid}")
 def vorschau(bid: str, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
@@ -127,6 +140,7 @@ def ausfuehren(bid: str, benutzer: dict | None, text: str | None = None, betreff
             betreff = betreff_neu.strip()
         pdf, name = belege.beleg_pdf(cur, bid, f) if p["lead"] else belege.beleg_pdf(cur, bid)
     ok, grund = mailer.senden(p["an"], betreff, text_neu, (name, pdf, "application/pdf"), kunden_id=b["kunden_id"], art="angebot")
+    mail_ergebnis(bid, ok, grund)
     if ok:
         with tx("admin") as cur:
             cur.execute("UPDATE belege SET erinnerungen = erinnerungen + 1, erinnert_am = now(), geaendert_am = now() WHERE id=%s", (bid,))
@@ -185,4 +199,50 @@ def auto_lauf(limit: int = 20) -> int:
             n += 1 if ausfuehren(bid, None)["gesendet"] else 0
         except HTTPException:
             continue     # z. B. Lead gesperrt oder abgemeldet, keine Adresse: wird übersprungen
+    return n
+
+
+# ---------------------------------------------------------------- Abgelaufene Angebote
+class VerlaengernIn(BaseModel):
+    tage: int = Field(default=14, ge=7, le=60)
+
+
+@router.post("/angebote-erinnerung/{bid}/verlaengern")
+def verlaengern(bid: str, data: VerlaengernIn, user: dict = Depends(require_admin)):
+    """Gültigkeit eines offenen (auch abgelaufenen) Angebots ab heute verlängern. Der Online-Link bleibt gleich. Danach ist wieder eine Erinnerung möglich."""
+    with tx("admin") as cur:
+        b = _laden(cur, bid)
+        if b["kunden_id"]:
+            r = user.get("admin_rechte")
+            if r is not None and "finanzen" not in r:
+                raise HTTPException(403, "Dafür fehlt dir das Recht „Angebote, Rechnungen & Preise“.")
+        if b["status"] not in ("gestellt", "versendet") or not b["nummer"]:
+            raise HTTPException(400, "Nur ein offenes, gesendetes Angebot kann verlängert werden.")
+        neu = date.today().toordinal() + data.tage
+        cur.execute("UPDATE belege SET faellig_am=%s, ablauf_gemeldet_am=NULL, erinnerungen=0, erinnert_am=NULL, geaendert_am=now() WHERE id=%s", (date.fromordinal(neu), bid))
+        if b["lead_id"]:
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)",
+                        (b["lead_id"], "notiz", f"Angebot {b['nummer']}: Gültigkeit bis {date.fromordinal(neu):%d.%m.%Y} verlängert", user["email"]))
+        audit(cur, user, "angebot_verlaengert", b["kunden_id"], {"nummer": b["nummer"], "bis": str(date.fromordinal(neu))})
+    return {"faellig_am": date.fromordinal(neu).isoformat()}
+
+
+def abgelaufen_melden(limit: int = 50) -> int:
+    """Täglich: gesendete Angebote, deren Gültigkeit vorbei ist, einmal melden (Glocke/Push an Admins und den Vertriebler, Aktivität im Lead, Wiedervorlage heute)."""
+    n = 0
+    with tx("system") as cur:
+        cur.execute("""SELECT b.id, b.nummer, b.lead_id, coalesce(k.firma, l.firma) AS firma, l.vertriebspartner_id FROM belege b
+                       LEFT JOIN kunden k ON k.id=b.kunden_id LEFT JOIN leads l ON l.id=b.lead_id
+                       WHERE b.art='angebot' AND b.status IN ('gestellt','versendet') AND b.nummer IS NOT NULL AND b.faellig_am < current_date
+                         AND b.ablauf_gemeldet_am IS NULL ORDER BY b.faellig_am LIMIT %s""", (limit,))
+        zeilen = cur.fetchall()
+        for z in zeilen:
+            cur.execute("UPDATE belege SET ablauf_gemeldet_am=now() WHERE id=%s", (z["id"],))
+            if z["lead_id"]:
+                cur.execute("UPDATE leads SET wiedervorlage_am=current_date WHERE id=%s", (z["lead_id"],))
+                cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,%s,%s,%s)",
+                            (z["lead_id"], "notiz", f"Angebot {z['nummer']} ist abgelaufen. Bitte nachfassen oder die Gültigkeit verlängern.", "automatisch"))
+            ids = push.admins(cur) + (push.partner(cur, z["vertriebspartner_id"]) if z["vertriebspartner_id"] else [])
+            push.senden(ids, "Angebot abgelaufen", f"{z['firma']}: Angebot {z['nummer']}", "/admin#start", "angebotsstatus")
+            n += 1
     return n

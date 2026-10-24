@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from . import config, einstellungen, zweifaktor
 from .db import tx
 from .einstellungen import entschluesseln, verschluesseln
-from .security import audit, current_user, rate_limit, require_admin, verify_password
+from .security import audit, current_user, rate_limit, require_admin, require_voll, verify_password
 
 router = APIRouter(prefix="/api")
 
@@ -86,7 +86,7 @@ def deaktivieren(data: AusIn, request: Request, user: dict = Depends(current_use
 
 
 @router.post("/admin/benutzer/{bid}/2fa-zuruecksetzen")
-def admin_reset(bid: str, user: dict = Depends(require_admin)):
+def admin_reset(bid: str, user: dict = Depends(require_voll)):
     try:
         with tx("admin") as cur:
             cur.execute("UPDATE benutzer SET totp_aktiv=false, totp_secret=NULL, totp_recovery='[]'::jsonb, totp_letzter_schritt=0 WHERE id=%s RETURNING kunden_id", (bid,))
@@ -108,11 +108,13 @@ def sicherheit(user: dict = Depends(require_admin)):
         cur.execute("""SELECT id, email, name, rolle, aktiv, totp_aktiv, letzter_login FROM benutzer WHERE rolle IN ('admin','vertrieb') AND aktiv
                        ORDER BY rolle, lower(email)""")
         konten = cur.fetchall()
-    return {"vertrieb_pflicht": vertrieb_2fa_pflicht(True), "admin_pflicht": config.ADMIN_2FA_PFLICHT, "konten": konten}
+    from .security import kunden_2fa_pflicht
+    return {"vertrieb_pflicht": vertrieb_2fa_pflicht(True), "kunden_pflicht": kunden_2fa_pflicht(True), "admin_pflicht": config.ADMIN_2FA_PFLICHT, "konten": konten}
 
 
 class SicherheitIn(BaseModel):
-    vertrieb_2fa: bool
+    vertrieb_2fa: bool | None = None
+    kunden_2fa: bool | None = None
 
 
 @router.put("/admin/sicherheit")
@@ -120,7 +122,13 @@ def sicherheit_speichern(data: SicherheitIn, user: dict = Depends(require_admin)
     from .security import vertrieb_2fa_pflicht
     with tx("admin") as cur:
         alt = einstellungen.lesen(cur, "sicherheit")
-        einstellungen.schreiben(cur, "sicherheit", {**alt, "vertrieb_2fa": data.vertrieb_2fa})
-        audit(cur, user, "sicherheit_vertrieb_2fa", None, {"pflicht": data.vertrieb_2fa})
+        neu = {**alt}
+        if data.vertrieb_2fa is not None:
+            neu["vertrieb_2fa"] = data.vertrieb_2fa
+            audit(cur, user, "sicherheit_vertrieb_2fa", None, {"pflicht": data.vertrieb_2fa})
+        if data.kunden_2fa is not None:
+            neu["kunden_2fa"] = data.kunden_2fa
+            audit(cur, user, "sicherheit_kunden_2fa", None, {"pflicht": data.kunden_2fa})
+        einstellungen.schreiben(cur, "sicherheit", neu)
     vertrieb_2fa_pflicht(True)
     return {"ok": True}

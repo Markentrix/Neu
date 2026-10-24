@@ -239,6 +239,9 @@ def senden(bid: str, user: dict = Depends(require_admin)):
     if not k["email"]:
         raise HTTPException(400, "Beim Kunden ist keine E-Mail-Adresse hinterlegt.")
     ok, fehler = mailer.beleg(k["email"], b["art"], b["nummer"], k["ansprechpartner"], daten, name, b["faellig_am"], angebot_link=b["art"] == "angebot")
+    if b["art"] == "angebot":
+        from . import angebotserinnerung
+        angebotserinnerung.mail_ergebnis(bid, ok, fehler)
     if ok:
         with tx("admin") as cur:
             cur.execute("UPDATE belege SET versendet_am=now(), status='versendet', geaendert_am=now() WHERE id=%s", (bid,))

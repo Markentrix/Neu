@@ -1,4 +1,4 @@
-import { h, api, nutzung, zweiFaktorKarte, stapelTabellen } from './common.js';
+import { h, api, nutzung, zweiFaktorKarte, stapelTabellen, pushNachfrage } from './common.js';
 stapelTabellen();
 import { belegEditor } from './admin/belege.js';
 import {V, gerüst, zaehlerAdmin, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
@@ -51,5 +51,6 @@ setzeZeige(seiteZeigen);
   } catch (e) { return; }
   window.addEventListener('hashchange', seiteZeigen);
   seiteZeigen();
+  setTimeout(pushNachfrage, 2500);
 })();
 

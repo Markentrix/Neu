@@ -13,6 +13,7 @@ Die Fristen stehen in der Datenbank (`loeschregeln`, im Portal unter „Datensch
 | Glocke (Benachrichtigungen) | 60 Tage | automatisch |
 | Abgelaufene Sitzungen | beim nächsten Login | automatisch |
 | Kunden nach Vertragsende | Offboarding: Inhalte, Benutzer und Dateien werden gelöscht, Stammdaten anonymisiert; vorher Datenexport (ZIP) für den Kunden | per Knopfdruck im Admin (Offboarding) |
+| Daten der Website-Besucher (Buchungen, Wartelisten, Gutscheine, Statistik) | mit dem Vertragsende | Offboarding löscht sie jetzt mit; Test t105 prüft, dass keine Tabelle vergessen wird |
 | Rechnungen und Belege | gesetzliche Aufbewahrungsfrist | **offen: Anwalt/Steuerberater bestätigt die Frist.** Bis dahin werden Belege nicht gelöscht |
 | SEPA-Mandate | Widerruf/Vertragsende, Nachweisfrist nach Anwaltsvorgabe | **offen** |
 | Sicherungen (Backups) | rotierend nach Aufbewahrungsregel des Backup-Skripts | gelöschte Daten verschwinden mit dem Ablauf der Sicherungen |

@@ -30,6 +30,8 @@ def anmelden(data: AboIn, user: dict = Depends(current_user)):
     rate_limit("pushabo:" + str(user["id"]), 20, 3600)
     if not data.endpoint.startswith("https://") and not config.PUSH_HTTP_ERLAUBT:
         raise HTTPException(400, "Ungültige Geräte-Anmeldung.")
+    if not push.ziel_erlaubt(data.endpoint):
+        raise HTTPException(400, "Diese Geräte-Adresse gehört nicht zu einem bekannten Push-Dienst.")
     try:
         if len(push._unb64(data.p256dh)) != 65 or len(push._unb64(data.auth)) < 8:
             raise ValueError

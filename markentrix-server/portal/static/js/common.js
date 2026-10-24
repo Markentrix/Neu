@@ -159,6 +159,38 @@ if (typeof window !== 'undefined') {
 }
 const b64zuBytes = (s) => { const p = '='.repeat((4 - s.length % 4) % 4), r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(r, c => c.charCodeAt(0)); };
 
+/** Schaltet Push auf diesem Gerät ein (Erlaubnis, Abo, Speichern). Wirft bei Ablehnung/Fehler einen Error mit verständlichem Text. */
+export async function pushEinschalten() {
+  if (await Notification.requestPermission() !== 'granted') throw new Error('Die Erlaubnis wurde abgelehnt. Du kannst sie später unter „App & Benachrichtigungen“ im Konto einschalten.');
+  const reg = await navigator.serviceWorker.ready, st = await api('/api/push/status');
+  const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64zuBytes(st.schluessel) });
+  const j = neu.toJSON();
+  await api('/api/push/abo', { method: 'POST', body: { endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, geraet: navigator.userAgent.slice(0, 150) } });
+}
+
+/** In der installierten App (Handy): einmal freundlich fragen, ob Benachrichtigungen aufs Handy kommen sollen. „Später“ fragt nach 7 Tagen wieder, „Nein danke“ nie mehr. */
+export async function pushNachfrage() {
+  try {
+    const standalone = typeof matchMedia !== 'undefined' && matchMedia('(display-mode: standalone)').matches || /** @type {any} */ (navigator).standalone === true;
+    if (!standalone || !/android|iphone|ipad/i.test(navigator.userAgent) || !('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) return;
+    if (Notification.permission !== 'default' || location.hash === '#willkommen') return;
+    let vermerk = '';
+    try { vermerk = localStorage.getItem('mk-pushfrage') || ''; } catch { /* ohne Speicher fragen wir höchstens einmal je Sitzung */ }
+    if (vermerk === 'nein' || (vermerk.startsWith('spaeter:') && Date.now() - Number(vermerk.slice(8)) < 7 * 864e5)) return;
+    const reg = await navigator.serviceWorker.ready;
+    if (await reg.pushManager.getSubscription()) return;
+    const setze = (v) => { try { localStorage.setItem('mk-pushfrage', v); } catch { /* egal */ } };
+    const m = h('div'), inhalt = h('div', {},
+      h('p', {}, 'Möchtest du Benachrichtigungen aufs Handy bekommen? Du erfährst sofort, wenn etwas Wichtiges passiert (zum Beispiel eine neue Nachricht, eine Freigabe oder eine Anfrage).'),
+      h('p', { class: 'small muted' }, 'In den Meldungen stehen keine Namen oder Inhalte, nur der Anlass. Du kannst das jederzeit im Konto unter „App & Benachrichtigungen“ ändern. Gleich fragt dich dein Handy noch einmal, bitte dort „Zulassen“ tippen.'), m,
+      h('div', { class: 'row' },
+        h('button', { class: 'btn', onclick: async () => { try { await pushEinschalten(); setze('ja'); d.zu(); } catch (x) { setze('nein'); melde(m, x.message || 'Das hat nicht geklappt.'); } } }, 'Ja, benachrichtigen'),
+        h('button', { class: 'btn sec', onclick: () => { setze('spaeter:' + Date.now()); d.zu(); } }, 'Später'),
+        h('button', { class: 'btn sec', onclick: () => { setze('nein'); d.zu(); } }, 'Nein danke')));
+    const d = dialog('Benachrichtigungen aufs Handy?', inhalt);
+  } catch { /* die Nachfrage ist nur ein Angebot, nie ein Fehler */ }
+}
+
 export function pushKarte(rolle) {
   const m = h('div'), box = h('div'), install = h('div'), anlass = h('div');
   const ios = /iphone|ipad/i.test(navigator.userAgent), standalone = window.matchMedia && matchMedia('(display-mode: standalone)').matches;

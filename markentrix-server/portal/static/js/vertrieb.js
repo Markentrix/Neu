@@ -1,7 +1,7 @@
 import { pipelineBoard } from './pipeline.js';
 import { stapelTabellen } from './common.js';
 stapelTabellen();
-import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
+import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
 import { hilfeSuche } from './hilfe.js';
 
@@ -446,5 +446,5 @@ async function zeige() {
   try { const me = await api('/api/me'); if (me.rolle !== 'vertrieb') { location.href = me.rolle === 'admin' ? '/admin' : '/app'; return; }
     if (me.zwei_faktor_pflicht) { root.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Zwei-Faktor-Anmeldung einrichten'), h('p', {}, 'Für Vertriebs-Zugänge ist die Zwei-Faktor-Anmeldung Pflicht. Bitte jetzt mit einer Authenticator-App einrichten, danach geht es direkt weiter.'), zweiFaktorKarte(), h('p', {}, h('button', { class: 'btn', onclick: () => location.reload() }, 'Weiter zum Portal')))); return; }
     start = await api('/api/vertrieb/start'); } catch (e) { return; }
-  window.addEventListener('hashchange', zeige); zeige(); erstStart().catch(() => {});
+  window.addEventListener('hashchange', zeige); zeige(); erstStart().then(() => setTimeout(pushNachfrage, 2500)).catch(() => {});
 })();
