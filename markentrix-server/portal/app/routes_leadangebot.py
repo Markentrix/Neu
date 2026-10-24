@@ -11,7 +11,7 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import angebotsfluss, belege, config, einstellungen, mailer, push, rechtstexte
+from . import angebotsfluss, angebotsgrund, belege, config, einstellungen, mailer, push, rechtstexte
 from .db import tx
 from .security import audit, client_ip, rate_limit, require_admin
 
@@ -141,7 +141,7 @@ def vorschau(lid: str, bid: str, user: dict = Depends(require_admin)):
 def liste(lid: str, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         _lead(cur, lid)
-        cur.execute("""SELECT id, nummer, status, betreff, datum, faellig_am, netto_cent, brutto_cent, versendet_am, angesehen_am, angenommen_am, angenommen_von, abgelehnt_am, erinnerungen, erinnert_am,
+        cur.execute("""SELECT id, nummer, status, betreff, datum, faellig_am, netto_cent, brutto_cent, versendet_am, angesehen_am, angenommen_am, angenommen_von, abgelehnt_am, erinnerungen, erinnert_am, grund_code, grund_text,
                               (annahme_hash IS NOT NULL) AS hat_link FROM belege WHERE lead_id=%s AND art='angebot' ORDER BY erstellt_am DESC""", (lid,))
         return cur.fetchall()
 
@@ -305,7 +305,8 @@ def ablehnen(token: str, data: AblehnungIn, request: Request):
         b = _holen(cur, token)
         if b["status"] not in ("gestellt", "versendet"):
             raise HTTPException(400, "Dieses Angebot kann nicht mehr abgelehnt werden.")
-        cur.execute("UPDATE belege SET status='abgelehnt', abgelehnt_am=now(), geaendert_am=now() WHERE id=%s", (b["id"],))
+        cur.execute("UPDATE belege SET status='abgelehnt', abgelehnt_am=now(), geaendert_am=now(), grund_code=%s, grund_text=%s, grund_am=CASE WHEN %s::text IS NULL THEN NULL ELSE now() END WHERE id=%s",
+                    (angebotsgrund.ONLINE.get(data.grund_code), data.grund.strip()[:500] or None, angebotsgrund.ONLINE.get(data.grund_code), b["id"]))
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,'Angebotsseite')",
                     (b["lead_id"], f"Angebot {b['nummer']} online abgelehnt" + (f" (Grund: {GRUENDE[data.grund_code]})" if data.grund_code in GRUENDE else "") + (f": {data.grund.strip()}" if data.grund.strip() else "")))
         # Der Lead bleibt bearbeitbar: nicht mehr „Angebot“, heute auf die Wiedervorlage

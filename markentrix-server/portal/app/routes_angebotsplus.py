@@ -83,7 +83,7 @@ def kopieren(bid: str, data: KopieIn, user: dict = Depends(require_admin)):
 def auswertung(tage: int = 180, user: dict = Depends(require_admin)):
     tage = max(30, min(tage, 730))
     with tx("admin") as cur:
-        cur.execute("""SELECT b.id, b.status, b.brutto_cent, b.positionen, b.datum, b.faellig_am, b.versendet_am, b.angesehen_am, b.angenommen_am, b.abgelehnt_am
+        cur.execute("""SELECT b.id, b.status, b.brutto_cent, b.positionen, b.datum, b.faellig_am, b.versendet_am, b.angesehen_am, b.angenommen_am, b.abgelehnt_am, b.grund_code
                        FROM belege b WHERE b.art='angebot' AND b.nummer IS NOT NULL AND b.datum > current_date - %s""", (tage,))
         rows = cur.fetchall()
         cur.execute("SELECT name FROM produkte WHERE aktiv ORDER BY length(name) DESC")
@@ -108,7 +108,13 @@ def auswertung(tage: int = 180, user: dict = Depends(require_admin)):
             e = pakete.setdefault(n, {"name": n, "angebote": 0, "angenommen": 0})
             e["angebote"] += 1
             e["angenommen"] += r["status"] == "angenommen"
-    return {"tage": tage, "gesendet": gesamt, "angesehen": len(angesehen), "angenommen": len(angenommen), "abgelehnt": len(abgelehnt), "abgelaufen": len(abgelaufen),
+    from .angebotsgrund import GRUENDE
+    gz: dict = {}
+    for r in rows:
+        if r["grund_code"] in GRUENDE and r["status"] != "angenommen":
+            gz[r["grund_code"]] = gz.get(r["grund_code"], 0) + 1
+    gruende = sorted(({"code": k, "name": GRUENDE[k], "anzahl": n} for k, n in gz.items()), key=lambda e: (-e["anzahl"], e["name"]))
+    return {"tage": tage, "gruende": gruende, "gesendet": gesamt, "angesehen": len(angesehen), "angenommen": len(angenommen), "abgelehnt": len(abgelehnt), "abgelaufen": len(abgelaufen),
             "offen": gesamt - len(angenommen) - len(abgelehnt) - len(abgelaufen),
             "quote": round(100 * len(angenommen) / gesamt) if gesamt else None,
             "tage_bis_annahme": round(sum(dauern) / len(dauern), 1) if dauern else None,

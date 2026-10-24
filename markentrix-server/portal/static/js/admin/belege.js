@@ -73,6 +73,22 @@ export async function angebotErinnerungDialog(bid, nachher) {
   } catch (x) { inhalt.replaceChildren(h('div', { class: 'msg err' }, x.message)); }
 }
 
+/** Grund festhalten, warum ein Angebot noch nicht angenommen wurde (Auswahl und kurzer Text). Fließt in die Auswertung ein. */
+export async function angebotGrundDialog(bid, aktuell, nachher) {
+  const inhalt = h('div', {}, h('p', { class: 'small muted' }, 'Lade …')), d = dialog('Angebot: Grund festhalten', inhalt, true);
+  try {
+    const { gruende } = await api('/api/admin/angebote-grund'), m = h('div');
+    const wahl = h('select', { 'aria-label': 'Grund' }, h('option', { value: '' }, '– kein Grund –'), gruende.map(g => h('option', { value: g.code, selected: g.code === (aktuell || {}).code }, g.name)));
+    const text = h('input', { maxlength: 500, placeholder: 'Kurz in eigenen Worten (optional)', 'aria-label': 'Anmerkung', value: (aktuell || {}).text || '' });
+    inhalt.replaceChildren(h('p', { class: 'small muted' }, 'Woran liegt es, dass das Angebot noch nicht angenommen wurde? Das hilft dir zu sehen, ob Preis, Umfang oder Zeitpunkt der häufigste Grund ist.'),
+      h('label', {}, 'Grund'), wahl, h('label', {}, 'Anmerkung'), text, m,
+      h('p', {}, knopf('Speichern', async () => {
+        try { await api('/api/admin/angebote-grund/' + bid, { method: 'POST', body: { code: wahl.value, text: text.value } }); melde(m, 'Gespeichert.', 'ok'); setTimeout(() => { d.zu(); if (nachher) nachher(); else location.reload(); }, 700); }
+        catch (x) { fehler(m, x); }
+      }, 'btn')));
+  } catch (x) { inhalt.replaceChildren(h('div', { class: 'msg err' }, x.message)); }
+}
+
 export async function abgleichKarte() {
   const m = h('div'), erg = h('div'); let csvText = '';
   const datei = h('input', { type: 'file', accept: '.csv,.txt,text/csv', onchange: (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { csvText = String(r.result); }; r.readAsText(f, 'utf-8'); } });
@@ -172,6 +188,7 @@ export async function belegEditor(id, kid, art) {
       if (new Date(b.faellig_am) < new Date()) for (const st of [1, 2, 3]) if (st > b.mahnstufe) knoepfe.push(aktion({ 1: 'Zahlungserinnerung senden', 2: '1. Mahnung senden', 3: '2. Mahnung senden' }[st], '/api/admin/belege/' + id + '/mahnung', { stufe: st, senden: true }, (r) => { melde(m, r.gesendet ? 'Gesendet.' : 'Nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(neu, 800); }, 'sec', 'Schreiben jetzt per E-Mail an den Kunden senden?'));
     }
     if (b.art === 'rechnung' && !b.storno_von && ['gestellt', 'versendet', 'bezahlt'].includes(b.status)) knoepfe.push(aktion('Stornieren', '/api/admin/belege/' + id + '/stornieren', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'bad', 'Rechnung stornieren? Es wird eine Stornorechnung mit eigener Nummer erzeugt.'));
+    if (b.art === 'angebot' && ['gestellt', 'versendet', 'abgelehnt'].includes(b.status)) knoepfe.push(knopf(b.grund_code ? 'Grund ändern' : 'Grund festhalten', () => angebotGrundDialog(id, { code: b.grund_code, text: b.grund_text }), 'sec'));
     if (b.art === 'angebot' && b.status === 'versendet') knoepfe.push(knopf('Erinnerung senden' + (b.erinnerungen ? ' (' + b.erinnerungen + '× erinnert)' : ''), () => angebotErinnerungDialog(id), 'sec'));
     if (b.art === 'angebot' && ['gestellt', 'versendet'].includes(b.status)) knoepfe.push(aktion('Angenommen', '/api/admin/belege/' + id + '/angebot-status', { status: 'angenommen' }, neu), aktion('Abgelehnt', '/api/admin/belege/' + id + '/angebot-status', { status: 'abgelehnt' }, neu, 'sec'));
     if (b.art === 'angebot' && ['gestellt', 'versendet', 'angenommen'].includes(b.status) && !k.referenzkunde) knoepfe.push(aktion('Rechnung daraus erstellen', '/api/admin/belege/' + id + '/rechnung', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec'));

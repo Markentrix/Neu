@@ -25,6 +25,7 @@ export async function angebotsAuswertungKarte() {
       kachel('Angenommen', d.angenommen, d.quote === null ? '' : 'Quote ' + d.quote + ' %'),
       kachel('Zeit bis zur Annahme', d.tage_bis_annahme === null ? '–' : String(d.tage_bis_annahme).replace('.', ',') + ' Tage', d.angenommen ? euro(d.summe_angenommen_cent) + ' angenommen (brutto)' : '')),
       h('p', { class: 'small muted' }, d.offen + ' noch offen · ' + d.abgelehnt + ' abgelehnt · ' + d.abgelaufen + ' abgelaufen'),
+      d.gruende && d.gruende.length ? [h('h3', {}, 'Woran Angebote scheitern'), h('table', {}, h('thead', {}, h('tr', {}, ['Grund', 'Angebote'].map(t => h('th', {}, t)))), h('tbody', {}, d.gruende.map(g => h('tr', {}, h('td', {}, g.name), h('td', {}, g.anzahl)))))] : h('p', { class: 'small muted' }, 'Tipp: Mit „Grund festhalten“ am Angebot siehst du hier, woran Angebote scheitern.'),
       d.pakete.length ? h('table', {}, h('thead', {}, h('tr', {}, ['Paket', 'Angebote', 'Angenommen'].map(t => h('th', {}, t)))), h('tbody', {}, d.pakete.map(p => h('tr', {}, h('td', {}, p.name), h('td', {}, p.angebote), h('td', {}, p.angenommen))))) : '']
       : h('p', { class: 'muted' }, 'Noch keine verschickten Angebote.'));
 }

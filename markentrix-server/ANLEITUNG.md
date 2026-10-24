@@ -616,6 +616,11 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 - „www.firma.de“ wird nicht extra überwacht, wenn „firma.de“ desselben Kunden überwacht wird. Websites bitte **ohne „www.“** anlegen (Admin lehnt „www.“ ab).
 - Auf „offline“ gestellte Websites lösen keine Ampel und keinen Status mehr aus (alte Messwerte werden ignoriert).
 
+## Angebote: Grund festhalten und Auswertung
+- Beim Angebot (Lead-Karte oder Angebotsseite beim Kunden) gibt es **Grund festhalten**: Auswahl (zu teuer, Umfang, Zeitpunkt, Konkurrenz, kein Bedarf, interne Entscheidung, keine Antwort, sonstiges) plus kurze Anmerkung. Das geht bei gesendeten und abgelehnten Angeboten, nicht bei angenommenen.
+- Lehnt der Empfänger online ab und wählt einen Grund, wird er automatisch übernommen. Beim Ablehnen durch das Team kann der Grund gleich mitgegeben werden.
+- Die Karte **Angebote: Auswertung** zeigt „Woran Angebote scheitern“ nach Häufigkeit. Bei Leads steht der Grund außerdem im Verlauf.
+
 ## Angebot ohne Antwort: Erinnerung senden
 - Gilt für Angebote an Leads und an bestehende Kunden, solange das Angebot „gesendet“ ist (nicht angenommen, nicht abgelehnt, nicht abgelaufen).
 - Knopf **Erinnern** in „Angebote im Blick“ (Übersicht; erscheint, wenn die letzte Mail mindestens 3 Tage her ist), im Lead bei dem Angebot und auf der Angebotsseite beim Kunden.

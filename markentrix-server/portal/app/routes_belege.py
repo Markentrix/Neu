@@ -6,14 +6,14 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import angebotsfluss, belege, mailer, rechtstexte, zahlungsabgleich
+from . import angebotsfluss, angebotsgrund, belege, mailer, rechtstexte, zahlungsabgleich
 from .db import tx
 from .security import audit, require_admin, require_inhaber
 
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
 
-FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, erinnerungen, erinnert_am, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
+FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, erinnerungen, erinnert_am, grund_code, grund_text, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
 UEBERFAELLIG = "(art='rechnung' AND status IN ('gestellt','versendet') AND faellig_am < current_date)"
 
 
@@ -355,6 +355,8 @@ def stornieren(bid: str, user: dict = Depends(require_admin)):
 
 class AngebotStatus(BaseModel):
     status: str = Field(pattern="^(angenommen|abgelehnt)$")
+    grund_code: str = Field(default="", max_length=30)
+    grund_text: str = Field(default="", max_length=500)
 
 
 @router.post("/belege/{bid}/angebot-status")
@@ -371,6 +373,8 @@ def angebot_status(bid: str, data: AngebotStatus, user: dict = Depends(require_a
             info = angebotsfluss.angenommen(cur, b, "telefonisch/schriftlich bestätigt", "team", user["email"], user=user)
         else:
             cur.execute("UPDATE belege SET status=%s, geaendert_am=now() WHERE id=%s", (data.status, bid))
+            if data.status == "abgelehnt" and data.grund_code in angebotsgrund.GRUENDE:
+                cur.execute("UPDATE belege SET grund_code=%s, grund_text=%s, grund_am=now() WHERE id=%s", (data.grund_code, data.grund_text.strip() or None, bid))
             if data.status == "abgelehnt" and b.get("lead_id"):
                 cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'statuswechsel',%s,%s)", (b["lead_id"], f"Angebot {b['nummer']} abgelehnt (vom Team erfasst)", user["email"]))
                 cur.execute("UPDATE leads SET status=CASE WHEN status='angebot' THEN 'antwort' ELSE status END, wiedervorlage_am=current_date WHERE id=%s AND kunden_id IS NULL", (b["lead_id"],))

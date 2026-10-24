@@ -1,6 +1,6 @@
 import { h, api, datum, zeit, euro, melde, dialog } from '../common.js';
 import { knopf } from './kern.js';
-import { angebotErinnerungDialog } from './belege.js';
+import { angebotErinnerungDialog, angebotGrundDialog } from './belege.js';
 
 const zuCent = (t) => { const z = parseFloat(String(t).trim().replace(/\./g, '').replace(',', '.')); return Number.isFinite(z) ? Math.round(z * 100) : null; };
 const alsEuroText = (c) => (c / 100).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -101,13 +101,14 @@ export async function leadAngebotKarte(lid, lead, m) {
     try { const r = await api('/api/admin/leads/' + lid + '/angebote/' + a.id + '/senden', { method: 'POST', body: {} }); melde(m, r.gesendet ? 'Erneut gesendet.' : 'Nicht gesendet: ' + (r.grund || ''), r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); }
   }, 'sec');
   const erinnern = (a) => lead.email && a.status === 'versendet' ? knopf('Erinnerung senden' + (a.erinnerungen ? ' (' + a.erinnerungen + '×)' : ''), () => angebotErinnerungDialog(a.id), 'sec') : '';
+  const grundKnopf = (a) => ['gestellt', 'versendet', 'abgelehnt'].includes(a.status) ? knopf(a.grund_code ? 'Grund ändern' : 'Grund festhalten', () => angebotGrundDialog(a.id, { code: a.grund_code, text: a.grund_text }), 'sec') : '';
   const zeile = (a) => {
     const [t, k] = STATUS[a.status] || [a.status, ''];
     const stand = a.angenommen_am ? 'angenommen am ' + datum(a.angenommen_am) + (a.angenommen_von ? ' von ' + a.angenommen_von : '') : a.abgelehnt_am ? 'abgelehnt am ' + datum(a.abgelehnt_am) : a.angesehen_am ? 'angesehen am ' + zeit(a.angesehen_am) : a.versendet_am ? 'gesendet am ' + datum(a.versendet_am) + ', noch nicht angesehen' : '';
     return h('div', { class: 'heutezeile' }, h('div', { class: 'heutekopf' }, h('div', { class: 'grow' }, h('b', {}, a.nummer || 'Entwurf'), ' ', h('span', { class: 'pill ' + k }, t), h('div', { class: 'small muted' }, euro(a.brutto_cent) + (a.faellig_am ? ' · gültig bis ' + datum(a.faellig_am) : '') + (stand ? ' · ' + stand : '')))),
       h('div', { class: 'heuteknoepfe' }, h('a', { class: 'btn sec small', href: '/api/admin/leads/' + lid + '/angebote/' + a.id + '/pdf', target: '_blank', rel: 'noopener' }, 'PDF'),
         a.status === 'entwurf' ? knopf('Bearbeiten und senden', () => angebotDialog(lid, () => location.reload()), 'btn') : '',
-        a.status === 'gestellt' || a.status === 'versendet' ? [erneut(a), erinnern(a), neuLink(a)] : '',
+        a.status === 'gestellt' || a.status === 'versendet' ? [erneut(a), erinnern(a), neuLink(a)] : '', grundKnopf(a),
         knopf('Kopieren', async () => { try { const r = await api('/api/admin/belege/' + a.id + '/kopie', { method: 'POST', body: {} }); await angebotDialog(lid, () => location.reload()); } catch (x) { melde(m, x.message); } }, 'sec'),
         (a.status === 'gestellt' || a.status === 'versendet') ? [knopf('Angenommen (telefonisch)', async () => { if (!confirm('Als angenommen markieren?')) return; try { await api('/api/admin/belege/' + a.id + '/angebot-status', { method: 'POST', body: { status: 'angenommen' } }); location.reload(); } catch (x) { melde(m, x.message); } }, 'sec'),
           knopf('Abgelehnt', async () => { try { await api('/api/admin/belege/' + a.id + '/angebot-status', { method: 'POST', body: { status: 'abgelehnt' } }); location.reload(); } catch (x) { melde(m, x.message); } }, 'sec')] : '',
