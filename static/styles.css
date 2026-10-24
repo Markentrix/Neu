@@ -1483,3 +1483,12 @@ blockquote.note p { color: #4d3a0f; }
 /* Bausteine des Markentrix-Portals: leer, solange der Dienst im Portal aus ist */
 .mk-reviews:empty, .mk-slot:has(> [data-mk]:empty) { display: none; }
 .mk-reviews:not(:empty) { margin: 28px 0; min-height: 120px; }
+
+/* Fotos vom Fahrzeug */
+.foto-row input[type="file"] { padding: 10px; }
+.foto-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.foto-item { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-s); font-size: 0.88rem; }
+.foto-item img { width: 64px; height: 64px; object-fit: cover; border-radius: 4px; background: var(--soft); }
+.foto-item.is-busy .foto-state { color: var(--muted); }
+.foto-item.is-error .foto-state { color: var(--error); }
+.foto-item .link-btn { min-height: 44px; color: var(--blue); }

@@ -380,6 +380,68 @@
     return ok;
   }
 
+  /* ---------------------------------------------------------------- Fotos vom Fahrzeug (Markentrix-Portal: /api/foto) */
+  var fotoCfgP = null;
+  function fotoCfg() {
+    if (!fotoCfgP) fotoCfgP = IS_LIVE ? fetch(API + "/foto").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) : Promise.resolve(null);
+    return fotoCfgP;
+  }
+  /* Im Browser auf höchstens 1600 Pixel verkleinern und als JPEG neu zeichnen: spart Datenvolumen, Standortdaten fallen weg */
+  function shrink(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var f = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(img.naturalWidth * f)); c.height = Math.max(1, Math.round(img.naturalHeight * f));
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { if (b) resolve(b); else reject(new Error("")); }, "image/jpeg", 0.85);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Dieses Bildformat lässt sich hier nicht verarbeiten. Bitte ein JPG oder PNG wählen.")); };
+      img.src = url;
+    });
+  }
+  $$("[data-foto]").forEach(function (row) {
+    var form = row.closest("form"), input = $("[data-foto-input]", row), list = $("[data-foto-list]", row), hint = $("[data-foto-hint]", row);
+    var items = [];
+    form.__fotos = items;
+    var sync = function () {
+      var busy = items.some(function (x) { return x.busy; });
+      $$('[type="submit"]', form).forEach(function (b) { b.disabled = busy; });
+      input.disabled = items.length >= row.__max;
+    };
+    fotoCfg().then(function (cfg) {
+      if (!cfg || !cfg.aktiv) return;
+      row.__max = Math.max(1, parseInt(cfg.max, 10) || 5);
+      hint.textContent = (cfg.hinweis ? cfg.hinweis + " " : "") + "Höchstens " + row.__max + (row.__max === 1 ? " Foto." : " Fotos.");
+      row.hidden = false;
+      input.addEventListener("change", function () {
+        var files = [].slice.call(input.files || []); input.value = "";
+        files.forEach(function (file) {
+          if (items.length >= row.__max) return;
+          var it = { token: "", busy: true }, li = document.createElement("li");
+          li.className = "foto-item is-busy";
+          li.innerHTML = '<img alt="" width="64" height="64"><span class="foto-state">Wird hochgeladen …</span><button type="button" class="link-btn">Entfernen</button>';
+          $("img", li).alt = "Vorschau " + file.name;
+          items.push(it); list.appendChild(li); sync();
+          $("button", li).addEventListener("click", function () { items.splice(items.indexOf(it), 1); li.remove(); sync(); });
+          shrink(file).then(function (blob) {
+            $("img", li).src = URL.createObjectURL(blob);
+            return fetch(API + "/foto", { method: "POST", headers: { "Content-Type": "text/plain" }, body: blob });
+          }).then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.token) throw new Error(j.message || ""); return j; });
+          }).then(function (j) {
+            it.token = j.token; it.busy = false; li.classList.remove("is-busy"); $(".foto-state", li).textContent = "Hochgeladen";
+            track("Foto hochgeladen");
+          }).catch(function (e) {
+            it.busy = false; li.classList.remove("is-busy"); li.classList.add("is-error");
+            $(".foto-state", li).textContent = (e && e.message) || "Dieses Foto konnte nicht hochgeladen werden.";
+          }).then(sync);
+        });
+      });
+    });
+  });
+
   $$("form.js-form").forEach(function (form) {
     var typ = form.getAttribute("data-form");
     $$("[data-wa-from-form]", form).forEach(function (b) {
@@ -394,11 +456,17 @@
         setStatus(form, "", "info", fallbackHtml(form, "Das Formular kann hier nicht übertragen werden. Senden Sie die Angaben direkt:"));
         return;
       }
+      var fotos = form.__fotos || [];
+      if (fotos.some(function (x) { return x.busy; })) { setStatus(form, "Einen Moment bitte, die Fotos werden noch hochgeladen.", "info"); return; }
       if (btn && btn.disabled) return;  // Doppelklick: nur einmal senden
       clearErrors(form);
       if (btn) { btn.disabled = true; btn.classList.add("is-loading"); }
       setStatus(form, "Wird gesendet …", "");
-      fetch(API + "/anfrage", { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(collect(form)) })
+      fetch(API + "/anfrage", { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify((function () {
+        var d = collect(form), tk = fotos.filter(function (x) { return x.token; }).map(function (x) { return x.token; });
+        if (tk.length) d.fotos = tk;
+        return d;
+      })()) })
         .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { j.status = r.status; return j; }); })
         .then(function (j) {
           if (j.ok) {

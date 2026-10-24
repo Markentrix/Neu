@@ -12,7 +12,8 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": 
 const SLOT_TIMES = ["08:00", "09:00", "10:00"];
 const booked = new Set();   // "JJJJ-MM-TT 08:00": vergeben
 const anfragen = [];
-let paypalMe = "";          // PayPal.me-Name, wie ihn das Portal in /api/verfuegbarkeit liefert
+let paypalMe = "";
+let fotos = 0;          // PayPal.me-Name, wie ihn das Portal in /api/verfuegbarkeit liefert
 let n = 0;
 
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -30,6 +31,11 @@ function api(req, res, url, body) {
     return json(res, 200, { tag, slots: SLOT_TIMES.map((z) => ({ zeit: z, frei: !booked.has(tag + " " + z) })) });
   }
   if (url.pathname === "/api/e") { res.writeHead(204); return res.end(); }
+  if (url.pathname === "/api/foto" && req.method === "GET") return json(res, 200, { aktiv: true, max: 3, tage: 30, hinweis: "Die Fotos werden nach 30 Tagen automatisch gelöscht." });
+  if (url.pathname === "/api/foto" && req.method === "POST") {
+    if (!body || body.length < 100) return json(res, 422, { ok: false, message: "Kein Bild erkannt." });
+    fotos++; return json(res, 200, { token: "foto-" + fotos });
+  }
   if (url.pathname === "/api/anfrage" && req.method === "POST") {
     let d = {};
     try { d = JSON.parse(body || "{}"); } catch (e) { return json(res, 400, { ok: false }); }

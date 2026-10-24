@@ -8,6 +8,7 @@ Die Website läuft beim Markentrix-Portal. Abgegeben wird nur der Ordner `websit
 - [ ] **Datenschutz:** Auftragsverarbeitungsvertrag mit Markentrix abschließen (Hetzner Online GmbH, Rechenzentrum Nürnberg, als Unterauftragsverarbeiter darin aufführen). Anschrift von Markentrix ist eingetragen (Heinrich-Hüdig-Straße 1, 29227 Celle). Text anwaltlich prüfen lassen.
 - [ ] **Markentrix-Portal einrichten:** Termine an, feste Uhrzeiten wie auf der Website (8, 9, 10 Uhr; mittwochs ab 9 Uhr), Sonntag geschlossen. Kalender verbinden, falls gewünscht.
 - [ ] **Bausteine im Portal einschalten:** Bewertungen (Google-Profil verknüpfen), Statistik und Cookie-Hinweis (Google Analytics Mess-ID `G-LTV65F8GKJ` dort hinterlegen).
+- [ ] **Foto-Upload im Markentrix-Portal** einschalten, falls gewünscht (Anzahl und Löschfrist dort festlegen). Abschnitt „Fotos vom Fahrzeug“ in der Datenschutzerklärung anwaltlich prüfen lassen.
 - [ ] **PayPal.me-Namen im Markentrix-Portal** hinterlegen (z. B. `elbdetail`). Die Website liest ihn aus `/api/verfuegbarkeit` (Feld `paypalMe`) und zeigt dann in der Buchung und auf der Danke-Seite den PayPal-Link mit dem Betrag der Anzahlung. Ist das Feld leer, gibt es keinen Zahlungslink.
 - [ ] **Preise prüfen:** Richtpreise der vier Pakete je Fahrzeugklasse und Keramikpreise (C² CarCeramic, Felgen, Scheiben).
 - [ ] **Aussagen prüfen:** Öffnungszeiten (Mo bis Sa 8 bis 17 Uhr, Mi ab 9 Uhr), „Abholung nach Absprache“, Firmenkunden-Seite, Gutschein-Regeln (Gültigkeit 3 Jahre, Paketgutschein für einen Kleinwagen).

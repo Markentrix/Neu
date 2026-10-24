@@ -152,6 +152,7 @@ def build_termin(site, write):
           <div class="form-row"><label for="t-vehicle">Marke, Modell, Baujahr <span class="hint">(optional)</span></label><input type="text" id="t-vehicle" name="fahrzeug" maxlength="120" placeholder="z. B. VW Golf 7, 2018"></div>
           <div class="form-row"><span class="label">Zustand <span class="hint">(hilft uns bei der Planung)</span></span><div class="check-grid">{zustand}</div>
             {f'<p class="wz-hint">Jede Angabe außer Ledersitze erhöht den Richtpreis um {sur} %{tier}, weil der Aufwand größer ist. <strong id="t-surcharge" aria-live="polite"></strong></p>' if sur else ""}</div>
+          {core.foto_row("t-fotos")}
         </fieldset>
 
         <fieldset class="wz-step" data-step="3">

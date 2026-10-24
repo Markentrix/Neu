@@ -180,7 +180,7 @@ class TestBuild(unittest.TestCase):
 
     def test_formal_address_everywhere(self):
         """Kund:innen werden gesiezt: keine Du-Ansprache in Seiten, Texten und Skripten."""
-        pat = re.compile(r"\b(du|dich|dir|dein|deine|deinen|deinem|deiner|deines|euch|euer|eure|euren|eurem|eurer|ruf)\b", re.I)
+        pat = re.compile(r"\b(du|dich|dir|dein|deine|deinen|deinem|deiner|deines|euch|euer|eure|euren|eurem|eurer|ruf|schick|melde)\b", re.I)
         hits = []
         for p in files(".html", ".txt", ".xml", ".js"):
             t = read(p)

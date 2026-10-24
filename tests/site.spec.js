@@ -200,6 +200,36 @@ test("Buchung: Anzahlung per PayPal nur, wenn das Portal einen PayPal.me-Namen l
   await expect(page.locator("#bookingForm")).toHaveAttribute("data-anzahlung", "49.35");
 });
 
+const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAACgAAAAeCAIAAADRv8uKAAAALklEQVR4nO3NMQEAMAgAoLkgZjKiUa3g5wMFiKx+F/7JKhaLxWKxWCwWi8XilQGqaAFKUX5nMwAAAABJRU5ErkJggg==", "base64");
+
+test("Fotos vom Fahrzeug: Feld nur bei aktivem Portal, Upload mit Vorschau, Tokens gehen mit der Anfrage", async ({ page }) => {
+  await page.goto("/kontakt.html");
+  const row = page.locator("#contactForm [data-foto]");
+  await expect(row).toBeVisible();
+  await expect(row.locator("[data-foto-hint]")).toContainText("30 Tagen");
+  await expect(row.locator("[data-foto-hint]")).toContainText("Höchstens 3 Fotos");
+  await row.locator("input[type=file]").setInputFiles([{ name: "auto1.png", mimeType: "image/png", buffer: PNG }, { name: "auto2.png", mimeType: "image/png", buffer: PNG }]);
+  await expect(row.locator(".foto-item")).toHaveCount(2);
+  await expect(row.locator(".foto-item .foto-state").first()).toHaveText("Hochgeladen");
+  await expect(row.locator(".foto-item .foto-state").nth(1)).toHaveText("Hochgeladen");
+  await row.locator(".foto-item").nth(1).locator("button").click();  // Entfernen
+  await expect(row.locator(".foto-item")).toHaveCount(1);
+  await page.fill("#k-name", "Foto Test");
+  await page.fill("#k-email", "foto@example.com");
+  await page.selectOption("#k-package", { index: 1 });
+  await page.locator('label[for="k-consent"]').click();
+  await page.locator('#contactForm button[type="submit"]').click();
+  await expect(page).toHaveURL(/danke\.html\?typ=kontakt/);
+  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  expect(sent.fotos).toHaveLength(1);
+  expect(sent.fotos[0]).toMatch(/^foto-\d+$/);
+  // Portal hat Fotos aus: Feld bleibt verborgen
+  await page.route("**/api/foto", (route) => route.fulfill({ status: 200, contentType: "application/json", body: '{"aktiv":false}' }));
+  await page.goto("/termin.html");
+  await page.waitForTimeout(300);
+  await expect(page.locator("#bookingForm [data-foto]")).toHaveAttribute("hidden", "");
+});
+
 test("Widerruf über das Formular geht als typ widerruf an das Portal", async ({ page }) => {
   await page.goto("/widerruf.html");
   await page.fill("#w-name", "Karla Kunde");

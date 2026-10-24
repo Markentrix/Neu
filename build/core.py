@@ -379,6 +379,16 @@ def agb_note(prefix=""):
     return f'<p class="form-note">Es gelten unsere <a href="{prefix}agb.html">AGB</a>. Informationen zu Ihrem Widerrufsrecht finden Sie in der <a href="{prefix}agb.html#widerruf">Widerrufsbelehrung</a>.</p>'
 
 
+def foto_row(fid):
+    """Foto-Feld für das Markentrix-Portal. Bleibt verborgen, bis /api/foto meldet, dass Fotos erlaubt sind."""
+    return f'''<div class="form-row foto-row" data-foto hidden>
+            <label for="{fid}">Fotos vom Fahrzeug <span class="hint">(optional, hilft bei der Einschätzung)</span></label>
+            <input type="file" id="{fid}" accept="image/*" multiple data-foto-input aria-describedby="{fid}-hint">
+            <p class="hint" id="{fid}-hint" data-foto-hint></p>
+            <ul class="foto-list" data-foto-list aria-live="polite"></ul>
+          </div>'''
+
+
 def honeypot(fid):
     return f'<div class="hp" aria-hidden="true"><label for="{fid}">Website</label><input type="text" id="{fid}" name="website" tabindex="-1" autocomplete="off"></div>'
 
@@ -429,6 +439,7 @@ def contact_section(site, prefix=""):
             <div class="form-row"><label for="k-vehicle">Fahrzeug <span class="hint">(Modell, Baujahr)</span></label><input type="text" id="k-vehicle" name="fahrzeug" maxlength="120" placeholder="z. B. VW Tiguan 2019"></div>
           </div>
           <div class="form-row"><label for="k-message">Nachricht <span class="hint">(optional)</span></label><textarea id="k-message" name="nachricht" rows="3" maxlength="2000" placeholder="Zustand, besondere Wünsche, Leasingrückgabe-Termin …"></textarea></div>
+          {foto_row("k-fotos")}
           {honeypot("k-website")}
           {consent_row(prefix, "k-consent")}
           <div class="form-actions">
