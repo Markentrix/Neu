@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import date, datetime, timedelta, timezone
 
-from . import abo, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push
+from . import abo, aufgabendetail, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -496,45 +496,45 @@ def aufgaben_automatisch(cfg):
                    'ticket-antwort-' || t.id || '-' || (SELECT max(n.id) FROM ticket_nachrichten n WHERE n.ticket_id = t.id)
             FROM tickets t JOIN kunden k ON k.id = t.kunden_id
             WHERE t.status IN ('offen','in_arbeit') AND t.letzte_nachricht_von = 'kunde' AND t.geaendert_am < now() - interval '24 hours'
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Wir warten seit einer Woche auf den Kunden
         f"""INSERT INTO aufgaben (kunden_id, ticket_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT t.kunden_id, t.id, 'Nachfassen: ' || k.firma || ' – ' || t.betreff, {admin}, current_date, 'auto', 'nachfassen-' || t.id || '-' || to_char(t.geaendert_am, 'YYYYMMDDHH24MISS')
             FROM tickets t JOIN kunden k ON k.id = t.kunden_id
             WHERE t.status = 'wartet_auf_kunde' AND t.geaendert_am < now() - interval '7 days'
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Rechnung überfällig
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT b.kunden_id, 'Rechnung ' || b.nummer || ' überfällig: ' || k.firma, {admin}, current_date, 'auto', 'rechnung-' || b.id
             FROM belege b JOIN kunden k ON k.id = b.kunden_id
             WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Mindestlaufzeit endet in den nächsten 60 Tagen
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT b.kunden_id, 'Vertrag: Mindestlaufzeit endet am ' || to_char(b.mindestlaufzeit_ende, 'DD.MM.YYYY') || ' – ' || k.firma, {admin}, current_date, 'auto', 'vertrag-' || b.id || '-' || b.mindestlaufzeit_ende
             FROM buchungen b JOIN kunden k ON k.id = b.kunden_id
             WHERE b.status = 'aktiv' AND b.mindestlaufzeit_ende BETWEEN current_date AND current_date + 60 AND k.status = 'aktiv'
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Domain läuft in den nächsten 60 Tagen ab (auch bei automatischer Verlängerung: Zahlungsmittel und Kundenabsprache prüfen)
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT d.kunden_id, 'Domain läuft ab: ' || d.domain || ' am ' || to_char(d.ablauf_am, 'DD.MM.YYYY') || ' – ' || k.firma, {admin}, current_date, 'auto', 'domain-' || d.id || '-' || to_char(d.ablauf_am, 'YYYYMMDD')
             FROM domains d JOIN kunden k ON k.id = d.kunden_id
             WHERE d.status = 'aktiv' AND d.ablauf_am BETWEEN current_date AND current_date + 60 AND k.status IN ('onboarding', 'aktiv', 'pausiert')
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Kunde hängt im Onboarding: seit 5 Tagen angelegt, einmal pro Woche eine Aufgabe zum Nachfassen
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT k.id, 'Onboarding nachfassen: ' || k.firma, {admin}, current_date, 'auto', 'onboarding-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
             FROM kunden k
             WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '5 days'
               AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt)
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Einladung nie angenommen oder abgelaufen: Zugang neu schicken (einmal pro Woche)
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT k.id, 'Zugang prüfen, Einladung neu senden: ' || k.firma, {admin}, current_date, 'auto', 'einladung-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
             FROM kunden k
             WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '3 days'
               AND NOT EXISTS (SELECT 1 FROM benutzer b WHERE b.kunden_id = k.id AND b.aktiv AND b.passwort_hash IS NOT NULL)
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Stillstand: seit 14 Tagen nichts erledigt, der Kunde ist am Zug: anrufen statt noch eine Mail
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT k.id, 'Kunde anrufen (Stillstand im Onboarding): ' || k.firma, {admin}, current_date, 'auto', 'stillstand-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
@@ -542,40 +542,42 @@ def aufgaben_automatisch(cfg):
             WHERE k.status = 'onboarding' AND k.erstellt_am < now() - interval '14 days'
               AND NOT EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND p.erledigt_am > now() - interval '14 days')
               AND EXISTS (SELECT 1 FROM onboarding_punkte p WHERE p.kunden_id = k.id AND NOT p.erledigt AND p.code = ANY(ARRAY['avv','briefing','stammdaten','branding','konten','dns','zugang']))
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Angebot an einen Lead liegt seit 5 Tagen ohne Antwort: nachfassen
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT NULL, 'Angebot nachfassen: ' || coalesce(l.firma, b.nummer), {admin}, current_date, 'auto', 'angebotnachfassen-' || b.id
             FROM belege b JOIN leads l ON l.id = b.lead_id
             WHERE b.art = 'angebot' AND b.status IN ('gestellt', 'versendet') AND b.lead_id IS NOT NULL AND l.kunden_id IS NULL
               AND coalesce(b.versendet_am, b.erstellt_am) < now() - interval '5 days' AND (b.faellig_am IS NULL OR b.faellig_am >= current_date)
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Kunde mit Vertriebler, aber ohne Buchung: es entsteht keine Provision (einmal pro Woche)
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT k.id, 'Keine Buchung, keine Provision: ' || k.firma, {admin}, current_date, 'auto', 'ohnebuchung-' || k.id || '-' || to_char(current_date, 'IYYY-IW')
             FROM kunden k
             WHERE k.vertriebspartner_id IS NOT NULL AND k.status IN ('onboarding', 'aktiv') AND k.referenzkunde = false AND k.erstellt_am < now() - interval '3 days'
               AND NOT EXISTS (SELECT 1 FROM buchungen b WHERE b.kunden_id = k.id AND b.status IN ('beauftragt', 'in_einrichtung', 'aktiv') AND b.beginn IS NOT NULL)
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Gespräch war vor über einer Stunde: Ergebnis im Lead festhalten
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT NULL, 'Gespräch-Ergebnis festhalten: ' || g.name, {admin}, current_date, 'auto', 'gespraechergebnis-' || g.id
             FROM gespraechstermine g JOIN leads l ON l.id = g.lead_id
             WHERE g.status = 'gebucht' AND g.start < now() - interval '1 hour' AND g.start > now() - interval '3 days' AND l.status IN ('termin', 'antwort', 'neu', 'kontaktiert')
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
         # Angebot läuft in 3 Tagen ab
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
             SELECT NULL, 'Angebot läuft bald ab: ' || coalesce(l.firma, b.nummer) || ' (bis ' || to_char(b.faellig_am, 'DD.MM.') || ')', {admin}, current_date, 'auto', 'angebotablauf-' || b.id
             FROM belege b JOIN leads l ON l.id = b.lead_id
             WHERE b.art = 'angebot' AND b.status IN ('gestellt', 'versendet') AND b.lead_id IS NOT NULL AND l.kunden_id IS NULL
               AND b.faellig_am BETWEEN current_date AND current_date + 3
-            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING titel""",
+            ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
     ]
     neu, erinnern, onb = [], [], []
     with tx("system") as cur:
         for sql_text in regeln:
             cur.execute(sql_text)
-            neu += [r["titel"] for r in cur.fetchall()]
+            gefunden = cur.fetchall()
+            for r in gefunden:
+                neu.append(aufgabendetail.beschreibe(cur, r))
         # Freigabe wartet seit 3 Tagen: Kunde einmal erinnern
         cur.execute("""WITH offen AS (SELECT id FROM kundenfreigaben WHERE status = 'wartet' AND erinnert_am IS NULL AND angefragt_am < now() - interval '3 days' LIMIT 50 FOR UPDATE SKIP LOCKED)
                        UPDATE kundenfreigaben f SET erinnert_am = now() FROM offen WHERE f.id = offen.id RETURNING f.kunden_id, f.titel""")

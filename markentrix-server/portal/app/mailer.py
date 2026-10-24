@@ -2,11 +2,26 @@
 import re
 import smtplib
 import ssl
+from pathlib import Path
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 
 from . import betrieb, config, einstellungen, mailvorlage, zustellung
 from .db import tx
+
+
+_LOGO: list = []
+
+
+def _markentrix_logo():
+    """Das „M“-Zeichen des Portals als eingebettetes Mail-Logo (einmal gelesen). Fehlt die Datei, geht die Mail ohne Logo raus."""
+    if not _LOGO:
+        try:
+            _LOGO.append(("image", "png", (Path(__file__).resolve().parent.parent / "static" / "icons" / "icon-192.png").read_bytes()))
+        except OSError:
+            _LOGO.append(None)
+    x = _LOGO[0]
+    return (x[2], x[0], x[1]) if x else None
 
 
 def konfiguriert() -> bool:
@@ -40,10 +55,9 @@ def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | N
         msg["Subject"] = re.sub(r"[\r\n]+", " ", betreff)   # Zeilenumbrüche (z. B. in Namen) dürfen den Versand nie verhindern
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain=c["absender"].split("@")[-1])
-        if vorlage:   # Mail im Namen eines Kunden: HTML-Layout mit Logo und Signatur
-            mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"))
-        else:
-            msg.set_content(text)
+        if not vorlage:   # Mail von Markentrix selbst: gleiches saubere Layout, Text und Gruß bleiben unverändert
+            vorlage = {"firma": c.get("absender_name") or "Markentrix", "farbe": "#4f46e5", "logo": _markentrix_logo(), "intern": True}
+        mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"), vorlage.get("intern", False))
         if anhang:
             name, daten, mime = anhang
             maintype, subtype = mime.split("/")
@@ -395,9 +409,15 @@ def freigabe_entschieden_team(an: str, firma: str, titel: str, status: str, komm
     return senden(an, f"Freigabe {ergebnis}: {titel} ({firma})", t)
 
 
-def aufgaben_digest_team(an: str, zeilen: list[str]) -> tuple[bool, str]:
-    t = ("Neue Aufgaben im Portal:\n\n" + "\n".join(f"- {z}" for z in zeilen) + f"\n\nAlle Aufgaben: {config.BASE_URL}/admin#aufgaben" + "\n\n(automatische Meldung des Portals)")
-    return senden(an, f"{len(zeilen)} neue Aufgabe" + ("n" if len(zeilen) != 1 else ""), t)
+def aufgaben_digest_team(an: str, aufgaben: list) -> tuple[bool, str]:
+    """Sammelmail „neue Aufgaben“. Jeder Eintrag: Text oder {'titel', 'detail': [Zeilen], 'link'} (was genau offen ist und wohin man klicken muss)."""
+    teile = []
+    for i, a in enumerate(aufgaben, 1):
+        if isinstance(a, str):
+            a = {"titel": a, "detail": [], "link": f"{config.BASE_URL}/admin#aufgaben"}
+        teile.append(f"{i}. {a['titel']}\n" + "".join(z + "\n" for z in a.get("detail") or []) + (a.get("link") or ""))
+    t = (f"Neue Aufgaben im Portal ({len(aufgaben)}):\n\n" + "\n\n".join(teile) + f"\n\nAlle Aufgaben: {config.BASE_URL}/admin#aufgaben" + "\n\n(automatische Meldung des Portals)")
+    return senden(an, f"{len(aufgaben)} neue Aufgabe" + ("n" if len(aufgaben) != 1 else ""), t)
 
 
 def stammdaten_geaendert_team(an: str, firma: str, kundennummer: str, aenderung: str) -> tuple[bool, str]:

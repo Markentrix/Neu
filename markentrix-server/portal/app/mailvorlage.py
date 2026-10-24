@@ -17,6 +17,8 @@ def _knopf_text(url: str, davor: str) -> str:
         return "Termin absagen"
     if "/termin/verschieben" in u:
         return "Termin verschieben"
+    if "/admin#" in u or "/app#" in u or "/vertrieb#" in u:
+        return "Im Portal öffnen"
     if "zahl" in d or "paypal" in u or "anzahlung" in d:
         return "Jetzt bezahlen"
     if "bewert" in d or "review" in u:
@@ -65,6 +67,44 @@ def text_mit_signatur(text: str, firma: str, eigene: str | None, extras: dict | 
     return koerper + "\n\n" + signatur_text(firma, eigene) + text_extras(extras) + (("\n\n" + nachsatz) if nachsatz else "")
 
 
+def _absatz(zeilen: list[str], html: list[str]) -> None:
+    """Textzeilen als Absatz, „- Punkt“-Zeilen als Liste, eine Zeile nur mit Adresse als Knopf (Beschriftung nach dem Text davor)."""
+    text: list[str] = []
+    punkte: list[str] = []
+    davor = ""
+
+    def text_aus():
+        nonlocal davor
+        if text:
+            davor = " ".join(text)
+            teile = [(f'<b>{_verlinken(z)}</b>' if z.strip().endswith(":") and len(z.strip()) <= 30 else _verlinken(z)) for z in text]
+            html.append(f'<p style="margin:0 0 12px;line-height:1.55;color:#111827">{"<br>".join(teile)}</p>')
+            text.clear()
+
+    def punkte_aus():
+        if punkte:
+            html.append('<ul style="margin:0 0 14px;padding-left:20px;line-height:1.55;color:#111827">' + "".join(f'<li style="margin:2px 0">{_verlinken(x)}</li>' for x in punkte) + "</ul>")
+            punkte.clear()
+
+    for z in zeilen:
+        st = z.strip()
+        if st.startswith("- "):
+            text_aus()
+            punkte.append(st[2:])
+            continue
+        punkte_aus()
+        m = URL.fullmatch(st)
+        if m:
+            text_aus()
+            url = m.group(0)
+            html.append(f'<p style="margin:4px 0 18px"><a href="{escape(url, quote=True)}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;'
+                        f'padding:11px 20px;border-radius:8px;font-weight:600">{escape(_knopf_text(url, davor))}</a></p>')
+        else:
+            text.append(z)
+    text_aus()
+    punkte_aus()
+
+
 def _bloecke(koerper: str, firma: str) -> list[str]:
     html: list[str] = []
     for block in re.split(r"\n\s*\n", koerper.strip()):
@@ -72,6 +112,11 @@ def _bloecke(koerper: str, firma: str) -> list[str]:
         if not zeilen:
             continue
         if len(zeilen) == 1 and HINWEIS_ZEILE.match(zeilen[0].strip()) and zeilen[0].strip() in ("—", "--"):
+            continue
+        karte = re.match(r"^(\d{1,2})\.\s+(\S.{0,200})$", zeilen[0])
+        if karte:   # nummerierter Eintrag (z. B. Aufgabenliste): Überschrift, darunter Einzelheiten
+            html.append(f'<p style="margin:22px 0 8px;padding-top:14px;border-top:1px solid #e5e7eb;font-weight:700;font-size:17px;color:#111827">{karte.group(1)}. {escape(karte.group(2))}</p>')
+            _absatz(zeilen[1:], html)
             continue
         # Abschnitt „Nachricht:“ / „Ihre Angaben:“ mit Überschrift
         kopf = None
@@ -91,19 +136,7 @@ def _bloecke(koerper: str, firma: str) -> list[str]:
             continue
         if kopf:
             zeilen = [kopf + ":"] + zeilen
-        # Absatz mit Adresse(n): Text davor als Absatz, Adresse als Knopf
-        text_zeilen, knoepfe = [], []
-        for z in zeilen:
-            m = URL.fullmatch(z.strip())
-            if m:
-                knoepfe.append((m.group(0), " ".join(text_zeilen)))
-            else:
-                text_zeilen.append(z)
-        if text_zeilen:
-            html.append(f'<p style="margin:0 0 14px;line-height:1.55;color:#111827">{"<br>".join(_verlinken(z) for z in text_zeilen)}</p>')
-        for url, davor in knoepfe:
-            html.append(f'<p style="margin:4px 0 18px"><a href="{escape(url, quote=True)}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;'
-                        f'padding:11px 20px;border-radius:8px;font-weight:600">{escape(_knopf_text(url, davor))}</a></p>')
+        _absatz(zeilen, html)
     return html
 
 
@@ -190,16 +223,24 @@ def text_extras(extras: dict | None) -> str:
     return t
 
 
-def html_mail(firma: str, text: str, signatur: str | None = None, farbe: str | None = None, logo_cid: str | None = None, extras: dict | None = None) -> str:
+def html_mail(firma: str, text: str, signatur: str | None = None, farbe: str | None = None, logo_cid: str | None = None, extras: dict | None = None, intern: bool = False) -> str:
     koerper, gast, nachsatz = _koerper_ohne_gruss(text)
+    if intern:   # Mail von Markentrix selbst: Text bleibt wie er ist (Gruß inklusive), keine Kunden-Signatur
+        koerper, gast, nachsatz = text.rstrip(), False, ""
     # Hinweis „Sie können direkt auf diese E-Mail antworten …“ klein ans Ende
     hinweis = ""
     teile = re.split(r"\n\s*—\s*\n", koerper)
     if len(teile) > 1 and HINWEIS_ZEILE.match(teile[-1].strip()):
         hinweis, koerper = teile[-1].strip(), "\n—\n".join(teile[:-1])
+    m_auto = re.search(r"\n\s*\n(\(automatische [^\n]*\))\s*$", koerper)
+    if m_auto:
+        hinweis, koerper = m_auto.group(1), koerper[:m_auto.start()].rstrip()
     farbe = farbe if farbe and re.fullmatch(r"#[0-9a-fA-F]{6}", farbe) else "#111827"
     # Mail an einen Gast: Logo steht in der Signatur, im Kopf nur der Firmenname. Mail ans Team (ohne Signatur): Logo im Kopf.
-    if logo_cid and not gast:
+    if intern and logo_cid:
+        kopf = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td><img src="cid:{logo_cid}" alt="" width="40" height="40" style="display:block;border:0;border-radius:8px"></td>'
+                f'<td style="padding-left:12px;font-size:20px;font-weight:700;color:#111827">{escape(firma)}</td></tr></table>')
+    elif logo_cid and not gast:
         kopf = f'<img src="cid:{logo_cid}" alt="{escape(firma, quote=True)}" style="max-height:56px;max-width:220px;display:block;border:0">'
     else:
         kopf = f'<div style="font-size:20px;font-weight:700;color:#111827">{escape(firma)}</div>'
@@ -223,11 +264,11 @@ def bild_pruefen(logo: bytes | None, typ: str | None) -> tuple[bytes, str, str] 
     return bytes(logo), "image", BILD_TYPEN[typ]
 
 
-def inhalt_setzen(msg, text: str, firma: str, signatur: str | None = None, farbe: str | None = None, logo: tuple[bytes, str, str] | None = None, extras: dict | None = None) -> None:
+def inhalt_setzen(msg, text: str, firma: str, signatur: str | None = None, farbe: str | None = None, logo: tuple[bytes, str, str] | None = None, extras: dict | None = None, intern: bool = False) -> None:
     """Setzt Text und HTML (mit eingebettetem Logo) in eine EmailMessage. Der Aufrufer hängt danach Anhänge an."""
-    msg.set_content(text_mit_signatur(text, firma, signatur, extras))
+    msg.set_content(text if intern else text_mit_signatur(text, firma, signatur, extras))
     cid = "logo@mail" if logo else None
-    msg.add_alternative(html_mail(firma, text, signatur, farbe, cid, extras), subtype="html")
+    msg.add_alternative(html_mail(firma, text, signatur, farbe, cid, extras, intern), subtype="html")
     if logo:
         daten, haupt, unter = logo
         msg.get_payload()[1].add_related(daten, maintype=haupt, subtype=unter, cid=f"<{cid}>", disposition="inline")
