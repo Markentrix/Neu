@@ -18,7 +18,7 @@ from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 from zoneinfo import ZoneInfo
 
-from . import config, einstellungen, mailer, zustellung
+from . import config, einstellungen, mailer, mailvorlage, zustellung
 from .db import tx
 
 TZ = ZoneInfo("Europe/Berlin")
@@ -289,7 +289,7 @@ def smtp_pruefen(c: dict) -> str:
         return smtp_fehlertext(e, key)
 
 
-def _nachricht(von: str, von_name: str, an: str, betreff: str, text: str, reply_to: str | None, anhang) -> EmailMessage:
+def _nachricht(von: str, von_name: str, an: str, betreff: str, text: str, reply_to: str | None, anhang, vorlage: dict | None = None) -> EmailMessage:
     msg = EmailMessage()
     msg["From"] = formataddr((von_name, von))
     msg["To"] = an
@@ -298,7 +298,10 @@ def _nachricht(von: str, von_name: str, an: str, betreff: str, text: str, reply_
     msg["Message-ID"] = make_msgid(domain=von.split("@")[-1])
     if reply_to:
         msg["Reply-To"] = reply_to
-    msg.set_content(text)
+    if vorlage:
+        mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"))
+    else:
+        msg.set_content(text)
     if anhang:
         name, daten, mime = anhang
         mt, st = mime.split("/")
@@ -311,8 +314,11 @@ def kundenmail(kid, an: str, betreff: str, text: str, reply_to: str | None = Non
     Gibt (ok, 'eigen'|'markentrix'|Fehlertext) zurück."""
     with tx("system") as cur:
         z = zeile(cur, kid)
-        cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
-        firma = (cur.fetchone() or {}).get("firma") or "Website"
+        cur.execute("SELECT firma, branding_farbe, logo, logo_typ FROM kunden WHERE id=%s", (kid,))
+        kz = cur.fetchone() or {}
+        firma = kz.get("firma") or "Website"
+    vorlage = {"firma": firma, "signatur": z.get("mail_signatur"), "farbe": kz.get("branding_farbe"), "logo": mailvorlage.bild_pruefen(kz.get("logo"), kz.get("logo_typ")),
+               "extras": {"bewertung_link": ("https://search.google.com/local/writereview?placeid=" + z["bew_place_id"] if z.get("bew_place_id") else z.get("bew_link")) if z.get("mail_bewertung") else None, "facebook": z.get("mail_facebook"), "instagram": z.get("mail_instagram"), "hinweis": z.get("mail_hinweis")}}
     name = (z.get("mail_name") or firma)[:80]
     grund = ""
     if z.get("smtp_enc") and z.get("smtp_absender"):
@@ -320,14 +326,14 @@ def kundenmail(kid, an: str, betreff: str, text: str, reply_to: str | None = Non
             c = json.loads(einstellungen.entschluesseln(z["smtp_enc"]) or "{}")
             s = smtp_verbinden(c)
             with s:
-                s.send_message(_nachricht(z["smtp_absender"], name, an, betreff, text, reply_to, anhang))
+                s.send_message(_nachricht(z["smtp_absender"], name, an, betreff, text, reply_to, anhang, vorlage))
             zustellung.protokoll(kid, art, an, True)
             return True, "eigen"
         except Exception as e:  # noqa: BLE001
             grund = str(e) if isinstance(e, ValueError) else smtp_fehlertext(e, vorschlag(z["smtp_absender"]).get("schluessel", ""))
             zustellung.protokoll(kid, art, an, False, f"{type(e).__name__}: {e}")
             ereignis(kid, art, False, "Eigenes Postfach fehlgeschlagen, Versand über Markentrix. " + grund)
-    ok, fehler = mailer.senden(an, betreff, text, anhang, reply_to=reply_to, von_name=name, kunden_id=kid, art=art)
+    ok, fehler = mailer.senden(an, betreff, text, anhang, reply_to=reply_to, von_name=name, kunden_id=kid, art=art, vorlage=vorlage)
     return (True, "markentrix") if ok else (False, fehler)
 
 

@@ -53,7 +53,7 @@ cA.put("/api/kunde/website-dienste/mail",json={"aktiv":True,"empfaenger":f"chef@
 F=lambda **kw:{**{"typ":"kontakt","name":"Erika Muster","email":"erika@besucher.de","telefon":"0511 123","nachricht":"Bitte um Rückruf","einwilligung":"ja","paket":"schnitt"},**kw}
 r=W.post(API+"/anfrage",headers={"Origin":"https://boese.de","Content-Type":"application/json","User-Agent":"Mozilla"},content=json.dumps(F()).encode()); chk("Fremde Herkunft: 403",r.status_code==403,r.text)
 r=post(W,"/anfrage",F()); chk("Anfrage ok mit Vorgangsnummer",r.status_code==200 and r.json()["ok"] and re.match(r"^K\d{6}-[0-9A-F]{4}$",r.json()["ref"]),r.text); ref=r.json()["ref"]
-n=sql(f"select count(*) from anfragen where kunden_id='{kA}' and quelle='website' and nachricht like '%{ref}%' and nachricht like '%schnitt%'"); chk("Anfrage liegt im Kundenportal",n=="1",n)
+n=sql(f"select count(*) from anfragen where kunden_id='{kA}' and quelle='website' and nachricht like '%{ref}%' and nachricht ilike '%schnitt%'"); chk("Anfrage liegt im Kundenportal",n=="1",n)
 chk("Mail an den Inhaber",len(mail_an(f"chef@{dom}",ref))==1)
 chk("Eingangsbestätigung an den Besucher",len(mail_an("erika@besucher.de",ref))==1)
 r=post(W,"/anfrage",F(name="",email="kaputt",einwilligung="")); j=r.json(); chk("Ungültige Eingabe: 422 mit Feldfehlern",r.status_code==422 and {"name","email","einwilligung"}<=set(j["errors"]),r.text)

@@ -49,8 +49,13 @@ function mailKarte(d, neu) {
   const emp = h('input', { value: d.mail.empfaenger, placeholder: 'info@deinefirma.de, zweite@…', maxlength: 400 });
   const betreff = h('input', { value: d.mail.betreff, placeholder: 'Neue Anfrage über die Website', maxlength: 120 });
   const name = h('input', { value: d.mail.name, placeholder: 'Absendername, z. B. deine Firma', maxlength: 80 });
+  const sig = h('textarea', { rows: 6, maxlength: 600, placeholder: 'Leer = „Mit freundlichen Grüßen“ und der Firmenname', 'aria-label': 'Signatur' }, d.mail.signatur || '');
+  const bew = schalter(d.mail.bewertung, 'Google-Bewertung in Mails anbieten');
+  const fb = h('input', { value: d.mail.facebook, placeholder: 'https://facebook.com/deinefirma', maxlength: 300, 'aria-label': 'Facebook-Link' });
+  const ig = h('input', { value: d.mail.instagram, placeholder: 'https://instagram.com/deinefirma', maxlength: 300, 'aria-label': 'Instagram-Link' });
+  const hin = h('textarea', { rows: 3, maxlength: 600, placeholder: 'z. B. „Diese E-Mail enthält vertrauliche Informationen …“', 'aria-label': 'Hinweistext unter der Signatur' }, d.mail.hinweis || '');
   const speichern = async () => {
-    try { await api('/api/kunde/website-dienste/mail', { method: 'PUT', body: { aktiv: an.c.checked, empfaenger: emp.value, betreff: betreff.value, name: name.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
+    try { await api('/api/kunde/website-dienste/mail', { method: 'PUT', body: { aktiv: an.c.checked, empfaenger: emp.value, betreff: betreff.value, name: name.value, signatur: sig.value, bewertung: bew.c.checked, facebook: fb.value, instagram: ig.value, hinweis: hin.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
   };
   const test = async (e) => {
     const b = e.target; b.disabled = true; melde(m, '');
@@ -60,6 +65,11 @@ function mailKarte(d, neu) {
   return h('div', { class: 'card' }, h('h2', {}, 'Kontaktformular: Anfragen per E-Mail'),
     h('p', { class: 'small muted' }, 'Wer das Formular auf deiner Website ausfüllt, landet hier im Portal unter „Anfragen“ und bekommt zusätzlich per E-Mail bei dir an. Wenn du antwortest, geht die Antwort direkt an die Person.'),
     m, an.el, h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Wohin sollen die Anfragen? *', emp, 'Bis zu 5 Adressen, mit Komma getrennt.'), feld('Betreff der E-Mail', betreff), feld('Absendername', name)),
+    h('div', { style: 'margin-top:8px' }, feld('Signatur unter Mails an deine Kunden', sig, 'Erscheint am Ende von Bestätigungen und Terminmails. Das Logo im Kopf der Mail kommt aus deinen Firmendaten (Logo bitte beim Team von Markentrix hinterlegen lassen).'),
+      h('button', { class: 'btn sec', type: 'button', onclick: () => { sig.value = d.mail.signatur_vorschlag || ''; } }, 'Vorschlag aus meinen Firmendaten einfügen'),
+      h('p', { class: 'small muted' }, 'Aufbau: erste Zeile „Mit freundlichen Grüßen“, dann Firmenname (fett), darunter Adresse, Telefon, E-Mail, Web. Das Logo steht links neben dem Text.'),
+      bew.el, d.mail.bewertung_link_da ? '' : h('div', { class: 'small muted' }, 'Dafür unter „Google-Bewertungen“ zuerst den Bewertungs-Link hinterlegen.'),
+      h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Facebook (optional)', fb), feld('Instagram (optional)', ig)), feld('Hinweistext ganz unten (optional)', hin)),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Testmail senden')),
     statusZeile(d.status, 'kontakt', 'Anfragen'),
     smtpBereich(d, mm, neu), mm);

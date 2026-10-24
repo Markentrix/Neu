@@ -29,7 +29,7 @@ LABELS = {"name": "Name", "telefon": "Telefon", "email": "E-Mail", "nachricht": 
           "zustand": "Zustand", "extras": "Extras", "abholung": "Abholung", "datum": "Wunschtag", "datum2": "Ersatztag", "uhrzeit": "Uhrzeit", "zeitfenster": "Zeitfenster",
           "kanal": "Rückmeldung per", "personen": "Personen", "gutscheincode": "Gutscheincode", "bewertung_ok": "Bewertung gewünscht", "quelle": "Gefunden über", "winterschutz": "Winterschutz",
           "art": "Art", "wunschbetrag": "Betrag", "betrag": "Betrag", "fuer": "Für", "von": "Von", "widmung": "Widmung", "zustellung": "Zustellung", "vorgang": "Vorgangsnummer",
-          "leistung": "Leistung", "mitarbeiter": "Mitarbeiter", "haarlaenge": "Haarlänge", "haarzustand": "Haarzustand", "letzte_behandlung": "Letzte Behandlung", "wunschzeit": "Wunschzeit", "terminart": "Terminart", "kennzeichen": "Kennzeichen", "marke": "Marke", "modell": "Modell", "baujahr": "Baujahr", "fahrzeugtyp": "Fahrzeugtyp", "anliegen": "Anliegen", "firma": "Firma", "anzahl": "Anzahl Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen"}
+          "leistung": "Leistung", "mitarbeiter": "Mitarbeiter", "haarlaenge": "Haarlänge", "haarzustand": "Haarzustand", "letzte_behandlung": "Letzte Behandlung", "wunschzeit": "Wunschzeit", "terminart": "Terminart", "kennzeichen": "Kennzeichen", "marke": "Marke", "modell": "Modell", "baujahr": "Baujahr", "fahrzeugtyp": "Fahrzeugtyp", "anliegen": "Anliegen", "firma": "Firma", "anzahl": "Anzahl Fahrzeuge", "intervall": "Intervall", "leistungen": "Leistungen", "agb": "AGB akzeptiert", "vorzeitig": "Vorzeitiger Leistungsbeginn"}
 SCHLUESSEL = re.compile(r"^[a-z][a-z0-9_]{0,30}$")
 TELEFON = re.compile(r"^[0-9+()/ \-.]{5,40}$")
 BOT = re.compile(r"bot|crawl|spider|slurp|preview|headless|curl|wget|python|monitor|uptime|lighthouse|facebookexternal", re.I)
@@ -371,6 +371,14 @@ def _pruefen(d: dict, z: dict) -> dict:
     return felder
 
 
+def _wert_schoen(v):
+    """Aus Kürzeln der Website wird lesbarer Text: „tierhaare, flecken“ → „Tierhaare, Flecken“, „ja“ → „Ja“, „email“ → „E-Mail“."""
+    if not isinstance(v, str) or not v or v != v.lower() or any(c.isdigit() or c in "@:/" for c in v):
+        return v
+    teile = [t.strip() for t in v.split(",")]
+    return ", ".join({"email": "E-Mail", "whatsapp": "WhatsApp", "sms": "SMS"}.get(t, t[:1].upper() + t[1:]) for t in teile)
+
+
 def _zusammenfassung(felder: dict, labels: dict | None = None) -> str:
     zeilen = []
     for k, v in felder.items():
@@ -384,7 +392,8 @@ def _zusammenfassung(felder: dict, labels: dict | None = None) -> str:
         if k in ("wunschbetrag", "betrag"):
             v = v if "€" in str(v) else f"{v} €"
         if isinstance(v, list):
-            v = ", ".join(v)
+            v = ", ".join(str(x) for x in v)
+        v = _wert_schoen(v)
         zeilen.append(f"{(labels or {}).get(k) or LABELS.get(k, k.replace('_', ' ').capitalize())}: {v}")
     if felder.get("nachricht"):
         zeilen.append("\nNachricht:\n" + felder["nachricht"])

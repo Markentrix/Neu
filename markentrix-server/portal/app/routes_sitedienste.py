@@ -268,13 +268,35 @@ def oeff_termin(site_id: str, request: Request, bg: BackgroundTasks, daten: dict
 
 
 def _seite(text: str) -> HTMLResponse:
-    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Termin</title>'
-                        f'<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><p>{escape(text)}</p></body>')
+    return _seite_html("Termin", f"<p style=\"margin:0\">{escape(text)}</p>")
 
 
-def _seite_html(titel: str, inhalt: str) -> HTMLResponse:
+def _seite_html(titel: str, inhalt: str, kopf: str = "") -> HTMLResponse:
     return HTMLResponse('<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(titel) + '</title>'
-                        '<body style="font:16px system-ui;max-width:560px;margin:8vh auto;padding:0 20px;color:#0B1020;line-height:1.5">' + inhalt + '</body></html>')
+                        '<body style="margin:0;background:#f3f4f6;font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0B1020;line-height:1.5">'
+                        '<main style="max-width:560px;margin:6vh auto;padding:0 16px"><div style="background:#fff;border-radius:12px;padding:24px 26px;box-shadow:0 1px 3px rgba(0,0,0,.08)">'
+                        + kopf + inhalt + '</div></main></body></html>')
+
+
+def _seitenkopf(site_id: str, firma: str, hat_logo: bool) -> str:
+    """Kopf der Absage- und Umbuchungsseiten: Logo des Betriebs (falls hinterlegt), sonst der Firmenname."""
+    if hat_logo:
+        return f'<img src="/site/{escape(site_id)}/logo" alt="{escape(firma, quote=True)}" style="max-height:56px;max-width:220px;display:block;margin:0 0 16px">'
+    return f'<div style="font-weight:700;font-size:18px;margin:0 0 14px">{escape(firma)}</div>'
+
+
+@router.get("/site/{site_id}/logo", include_in_schema=False)
+def oeff_logo(site_id: str, request: Request):
+    """Logo des Betriebs für die Absage-Seiten (dasselbe Bild steht in den Mails an die Gäste)."""
+    rate_limit("sitelogo:" + client_ip(request), 120, 300)
+    if not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id):
+        raise HTTPException(404, "Nicht gefunden.")
+    with tx("system") as cur:
+        cur.execute("SELECT k.logo, k.logo_typ FROM website_dienste d JOIN kunden k ON k.id=d.kunden_id WHERE d.site_id=%s AND k.status<>'beendet'", (site_id,))
+        r = cur.fetchone()
+    if not r or not r["logo"] or r["logo_typ"] not in ("image/png", "image/jpeg"):
+        raise HTTPException(404, "Nicht gefunden.")
+    return Response(bytes(r["logo"]), media_type=r["logo_typ"], headers={"Cache-Control": "public, max-age=3600", "X-Content-Type-Options": "nosniff"})
 
 
 def _knopf_stil() -> str:
@@ -282,7 +304,7 @@ def _knopf_stil() -> str:
 
 
 def _buchung_zu_token(cur, site_id: str, t: str):
-    cur.execute("""SELECT w.*, d.site_id, d.storno_std, d.mail_empfaenger, d.kal_empfaenger, d.kal_ort, d.kal_dauer, k.firma
+    cur.execute("""SELECT w.*, d.site_id, d.storno_std, d.mail_empfaenger, d.kal_empfaenger, d.kal_ort, d.kal_dauer, k.firma, (k.logo IS NOT NULL) AS hat_logo
                    FROM website_termine w JOIN website_dienste d ON d.kunden_id=w.kunden_id JOIN kunden k ON k.id=w.kunden_id WHERE w.token=%s AND d.site_id=%s""", (t, site_id))
     return cur.fetchone()
 
@@ -346,8 +368,8 @@ def oeff_absagen(site_id: str, t: str, request: Request):
         regel = (f"Die Absage liegt innerhalb der Frist von {g['storno_std']} Stunden vor dem Termin. Dann ist der volle Betrag zu zahlen" + (f", die Anzahlung von {escape(anz)} € wird nicht erstattet" if anz else "") +
                  ". Wenn Sie den Termin nicht wahrnehmen können, sprechen Sie bitte direkt mit uns.")
     umbuchen = f'<p><a href="/site/{site_id}/termin/verschieben?t={escape(t)}">Lieber einen anderen Termin wählen</a></p>' if frei else ""
-    return _seite_html("Termin absagen", f'<h1 style="font-size:22px">Termin absagen</h1><p><b>{escape(g["firma"])}</b><br>{escape(lokal)}</p><p>{regel}</p>'
-                       f'<form method="post" action="/site/{site_id}/termin/absagen"><input type="hidden" name="t" value="{escape(t)}"><button style="{_knopf_stil()}">Ja, Termin absagen</button></form>{umbuchen}')
+    return _seite_html("Termin absagen", f'<h1 style="font-size:22px;margin:0 0 10px">Termin absagen</h1><p><b>{escape(lokal)}</b></p><p>{regel}</p>'
+                       f'<form method="post" action="/site/{site_id}/termin/absagen"><input type="hidden" name="t" value="{escape(t)}"><button style="{_knopf_stil()}">Ja, Termin absagen</button></form>{umbuchen}', _seitenkopf(site_id, g["firma"], g["hat_logo"]))
 
 
 @router.post("/site/{site_id}/termin/absagen", include_in_schema=False)
@@ -522,6 +544,10 @@ def _zustand(cur, kid) -> dict:
     offen = cur.fetchone()["n"]
     places = bool(einstellungen.lesen(cur, "places").get("api_key"))
     hosts = sorted(h for h in sd.erlaubte_hosts(cur, kid, ROOT) if not h.startswith("demo.") and not h.startswith("www."))
+    cur.execute("SELECT firma, strasse, plz, ort, telefon, email FROM kunden WHERE id=%s", (kid,))
+    kz = cur.fetchone() or {}
+    vorschlag = "\n".join(x for x in ("Mit freundlichen Grüßen", kz.get("firma") or "", kz.get("strasse") or "", " ".join(y for y in (kz.get("plz"), kz.get("ort")) if y),
+                                      ("Tel. " + kz["telefon"]) if kz.get("telefon") else "", kz.get("email") or "") if x)
     smtp = {}
     if z["smtp_enc"]:
         c = json.loads(einstellungen.entschluesseln(z["smtp_enc"]) or "{}")
@@ -529,7 +555,7 @@ def _zustand(cur, kid) -> dict:
                 "benutzer": c.get("benutzer", ""), "geprueft_am": z["smtp_geprueft_am"]}
     return {
         "site_id": z["site_id"], "domains": hosts, "basis": config.BASE_URL, "places_verfuegbar": places,
-        "mail": {"aktiv": z["mail_aktiv"], "empfaenger": z["mail_empfaenger"] or "", "betreff": z["mail_betreff"] or "", "name": z["mail_name"] or "", "smtp": smtp},
+        "mail": {"aktiv": z["mail_aktiv"], "empfaenger": z["mail_empfaenger"] or "", "betreff": z["mail_betreff"] or "", "name": z["mail_name"] or "", "signatur": z["mail_signatur"] or "", "signatur_vorschlag": vorschlag, "bewertung": z["mail_bewertung"], "bewertung_link_da": bool(z["bew_link"] or z["bew_place_id"]), "facebook": z["mail_facebook"] or "", "instagram": z["mail_instagram"] or "", "hinweis": z["mail_hinweis"] or "", "smtp": smtp},
         "kalender": {"aktiv": z["kal_aktiv"], "ical_gesetzt": bool(z["kal_ical_enc"]), "ical_geprueft_am": z["kal_ical_geprueft_am"], "dauer": z["kal_dauer"],
                      "tage": z["kal_tage"], "von": z["kal_von"], "bis": z["kal_bis"], "wochentage": z["kal_wochentage"], "vorlauf_std": z["kal_vorlauf_std"],
                      "ort": z["kal_ort"] or "", "empfaenger": z["kal_empfaenger"] or "", "offene_termine": offen,
@@ -569,6 +595,20 @@ class MailIn(BaseModel):
     empfaenger: str = Field(default="", max_length=400)
     betreff: str = Field(default="", max_length=120)
     name: str = Field(default="", max_length=80)
+    signatur: str = Field(default="", max_length=600)
+    bewertung: bool = False
+    facebook: str = Field(default="", max_length=300)
+    instagram: str = Field(default="", max_length=300)
+    hinweis: str = Field(default="", max_length=600)
+
+
+def _link_pruefen(u: str, name: str) -> str | None:
+    u = u.strip()
+    if not u:
+        return None
+    if not re.fullmatch(r"https://[^\s<>\"']{4,290}", u):
+        raise HTTPException(400, f"Der Link zu {name} muss mit https:// beginnen.")
+    return u
 
 
 @kunde.put("/mail")
@@ -576,8 +616,9 @@ def k_mail(data: MailIn, user: dict = Depends(require_inhaber)):
     emp = _empf_pruefen(data.empfaenger, data.aktiv)
     with tx("system") as cur:
         sd.zeile(cur, user["kunden_id"])
-        cur.execute("UPDATE website_dienste SET mail_aktiv=%s, mail_empfaenger=%s, mail_betreff=%s, mail_name=%s, geaendert_am=now() WHERE kunden_id=%s",
-                    (data.aktiv, emp or None, data.betreff.strip() or None, data.name.strip() or None, user["kunden_id"]))
+        cur.execute("UPDATE website_dienste SET mail_aktiv=%s, mail_empfaenger=%s, mail_betreff=%s, mail_name=%s, mail_signatur=%s, mail_bewertung=%s, mail_facebook=%s, mail_instagram=%s, mail_hinweis=%s, geaendert_am=now() WHERE kunden_id=%s",
+                    (data.aktiv, emp or None, data.betreff.strip() or None, data.name.strip() or None, "\n".join(x.rstrip() for x in data.signatur.strip().splitlines()) or None,
+                     data.bewertung, _link_pruefen(data.facebook, "Facebook"), _link_pruefen(data.instagram, "Instagram"), data.hinweis.strip() or None, user["kunden_id"]))
         audit(cur, user, "website_dienste_mail", user["kunden_id"], {"aktiv": data.aktiv})
     return {"ok": True}
 
@@ -635,7 +676,9 @@ def k_mail_test(data: TestIn, user: dict = Depends(require_inhaber)):
     rate_limit("mailtest:" + str(kid), 8, 600)
     if not EMAIL_RE.match(data.an.strip()):
         raise HTTPException(400, "Die E-Mail-Adresse ist ungültig.")
-    ok, via = sd.kundenmail(kid, data.an.strip(), "Testnachricht von Ihrer Website", "Das ist eine Testnachricht. Das Kontaktformular Ihrer Website kann E-Mails versenden.", art="test")
+    ok, via = sd.kundenmail(kid, data.an.strip(), "Testnachricht von Ihrer Website",
+                          "Guten Tag,\n\ndas ist eine Testnachricht. Das Kontaktformular Ihrer Website kann E-Mails versenden. So sehen Mails an Ihre Kunden aus: mit Ihrem Logo (falls hinterlegt) und Ihrer Signatur.\n\n"
+                          "Beispiel für Angaben:\nTermin: 27.10.2026 um 08:00 Uhr\nLeistung: Beispielleistung\n\nMit freundlichen Grüßen\n" + "Ihr Team", art="test")
     if not ok:
         raise HTTPException(400, "Der Versand ist fehlgeschlagen: " + via)
     return {"ok": True, "ueber": via}

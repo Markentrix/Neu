@@ -621,3 +621,9 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 - `install.sh` gibt veröffentlichte Website-Dateien nicht mehr an das Portal zurück (nur `live/` selbst und `angebote/`).
 - Einzeln gesperrte Zugänge bleiben auch nach „Kunde pausiert → aktiv“ gesperrt.
 - GitHub prüft wöchentlich die Python-Pakete (`pip-audit`) und das Repository auf versehentliche Schlüssel (gitleaks); Dependabot schlägt Updates vor. Meldet die Prüfung ein Paket: Version in `portal/requirements.txt` anheben, `bash tests/run.sh`, dann `mkctl update`.
+
+## Mails im Namen des Kunden (Layout, Logo, Signatur)
+- Alle Mails, die über die Website-Dienste im Namen eines Kunden verschickt werden (Eingangsbestätigung, Terminbestätigung, Absage, Erinnerung, Anfragen ans Team), kommen als HTML-Mail: Kopf mit Logo (oder Firmenname) in der Markenfarbe, Angaben als Tabelle, Absage/Bezahlen als Knopf, Signatur. Die Textfassung bleibt als Alternative erhalten.
+- **Logo und Farbe:** Admin → Kunden → (Kunde) → Branding (PNG oder JPG, bis 400 KB; SVG zeigen Mail-Programme nicht). Das Logo erscheint auch auf der Absage-Seite.
+- **Signatur:** Der Kunde stellt sie unter Website-Dienste → Kontaktformular ein („Vorschlag aus meinen Firmendaten einfügen“). Leer = „Mit freundlichen Grüßen“ und Firmenname. Der Knopf „Testmail senden“ zeigt das Ergebnis.
+- Beschriftungen der Formularfelder kommen aus der Website (`name`-Feld) bzw. aus der Liste in `routes_siteapi.py` (`LABELS`); fehlt eine, steht der Feldname.

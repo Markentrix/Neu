@@ -77,7 +77,7 @@ m=mail_an(f"politur{sfx}@besucher.de","paypal.me"); chk("Politur: Zahlungslink s
 r=post("/anfrage",T(tage[2],"10:00","balayage",f"balayage{sfx}@besucher.de")); chk("Balayage angefragt",r.status_code==200,r.text); r3=r.json()["ref"]
 chk("Balayage: nur vorgemerkt (Freigabe der Leistung)",sql(f"select status||anzahlung from website_termine where ref='{r3}'")=="reserviert50.00")
 m=mail_an(f"balayage{sfx}@besucher.de","Eingangsbestätigung"); chk("Balayage: Zahlungslink schon in der Eingangsbestätigung",len(m)==1 and "paypal.me/salona/50.00EUR" in text(m[0]),[text(x) for x in m])
-m=mail_an(f"chef@{dom}",r3); chk("Inhaber wird auf Zahlungseingang hingewiesen",len(m)==1 and "Anzahlung erhalten" in text(m[0]) and "Haarlänge: lang" in text(m[0]),[text(x) for x in m])
+m=mail_an(f"chef@{dom}",r3); chk("Inhaber wird auf Zahlungseingang hingewiesen",len(m)==1 and "Anzahlung erhalten" in text(m[0]) and "Haarlänge: Lang" in text(m[0]),[text(x) for x in m])
 b=cA.get(D+"/buchungen").json()["buchungen"]; bm={x["ref"]:x for x in b}
 chk("Portal zeigt Anzahlung, Preis und offenen Zahlungsstand",bm[r2]["anzahlung"]=="50.00" and bm[r2]["preis"]=="200.00" and bm[r2]["anzahlung_erhalten_am"] is None,bm[r2])
 r=cA.post(D+f"/buchungen/{bm[r2]['id']}/bezahlt"); chk("Alles bezahlt geht bei bestätigtem Termin",r.status_code==200,r.text)
@@ -136,4 +136,4 @@ ca=cA.get(D+"/leistungen/aenderungen").json()["aenderungen"]; chk("Kunde sieht A
 r=cA.post(D+"/leistungen",json=L(name="Nochmal",dauer_min=20)); aid=r.json()["id"]; r=cA.delete(D+f"/leistungen/aenderungen/{aid}"); chk("Kunde zieht Wunsch zurück",r.status_code==200,r.text)
 r=cB.post(A+f"/leistungs-aenderungen/{aid}/uebernehmen"); chk("Kunde darf nicht freigeben",r.status_code==403,r.text)
 r=a.put(A+"/leistungs-freigabe",json={"freigabe":False}); r=cA.post(D+"/leistungen",json=L(name="Sofort",dauer_min=20)); chk("Ohne Freigabepflicht sofort live",r.status_code==200 and "wartet" not in r.json(),r.text)
-chk("Lesbare Feldnamen in der Mail an den Inhaber","Haarzustand: normal" in text(mail_an(f"chef@{dom}",r3)[0]))
+chk("Lesbare Feldnamen in der Mail an den Inhaber","Haarzustand: Normal" in text(mail_an(f"chef@{dom}",r3)[0]))

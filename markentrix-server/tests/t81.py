@@ -64,7 +64,7 @@ def buchen(tag,uhr,leistung,mail,**extra):
     return post("/anfrage",{"typ":"termin","name":"Peter Besucher","email":mail,"telefon":"0511 123456","datum":tag,"uhrzeit":uhr,"leistung":leistung,"einwilligung":"ja",**extra})
 r=buchen(tage[0],"08:00","schnitt","p0@besucher.de"); chk("Pflichtfeld fehlt: 422",r.status_code==422 and "haarlaenge" in r.json().get("errors",{}),r.text)
 r=buchen(tage[0],"08:00","schnitt","p0@besucher.de",haarlaenge="lang",haarzustand="trocken"); chk("Mit Pflichtfeld gebucht",r.status_code==200,r.text)
-m=mail_an(f"chef@{dom}"); chk("Besitzer-Mail zeigt Beschriftung der Zusatzfrage",bool(m) and "Haarlänge: lang" in text(m[-1]),[text(x)[:200] for x in m[-1:]])
+m=mail_an(f"chef@{dom}"); chk("Besitzer-Mail zeigt Beschriftung der Zusatzfrage",bool(m) and "Haarlänge: Lang" in text(m[-1]),[text(x)[:200] for x in m[-1:]])
 # ---- mehrere Leistungen
 r=buchen(tage[1],"08:00","schnitt,faerben","p1@besucher.de",haarlaenge="kurz"); chk("Zwei Leistungen in einem Termin",r.status_code==200,r.text)
 row=sql(f"select (extract(epoch from ende-start)/60)::int || '|' || preis_betrag from website_termine where email='p1@besucher.de'"); chk("Dauer und Preis addiert",row=="60|105.00",row)

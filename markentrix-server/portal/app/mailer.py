@@ -5,7 +5,7 @@ import ssl
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 
-from . import betrieb, config, einstellungen, zustellung
+from . import betrieb, config, einstellungen, mailvorlage, zustellung
 from .db import tx
 
 
@@ -16,9 +16,9 @@ def konfiguriert() -> bool:
 
 
 def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
-           von_name: str | None = None, kunden_id=None, art: str = "system") -> tuple[bool, str]:
+           von_name: str | None = None, kunden_id=None, art: str = "system", vorlage: dict | None = None) -> tuple[bool, str]:
     """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel und das Zustell-Protokoll festgehalten."""
-    ok, grund = _senden(an, betreff, text, anhang, reply_to, von_name)
+    ok, grund = _senden(an, betreff, text, anhang, reply_to, von_name, vorlage)
     if grund != "E-Mail-Versand ist noch nicht eingerichtet.":
         zustellung.protokoll(kunden_id, art, an, ok, grund)
         betrieb.notieren("mail", {"ok_am": betrieb.jetzt()} if ok else {"fehler_am": betrieb.jetzt(), "fehler": grund[:200]})
@@ -26,7 +26,7 @@ def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | No
 
 
 def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
-            von_name: str | None = None) -> tuple[bool, str]:
+            von_name: str | None = None, vorlage: dict | None = None) -> tuple[bool, str]:
     try:
         with tx("system") as cur:
             c = einstellungen.lesen(cur, "smtp")
@@ -40,7 +40,10 @@ def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | N
         msg["Subject"] = re.sub(r"[\r\n]+", " ", betreff)   # Zeilenumbrüche (z. B. in Namen) dürfen den Versand nie verhindern
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain=c["absender"].split("@")[-1])
-        msg.set_content(text)
+        if vorlage:   # Mail im Namen eines Kunden: HTML-Layout mit Logo und Signatur
+            mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"))
+        else:
+            msg.set_content(text)
         if anhang:
             name, daten, mime = anhang
             maintype, subtype = mime.split("/")
