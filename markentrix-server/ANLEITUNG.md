@@ -616,6 +616,13 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 - „www.firma.de“ wird nicht extra überwacht, wenn „firma.de“ desselben Kunden überwacht wird. Websites bitte **ohne „www.“** anlegen (Admin lehnt „www.“ ab).
 - Auf „offline“ gestellte Websites lösen keine Ampel und keinen Status mehr aus (alte Messwerte werden ignoriert).
 
+## Angebot ohne Antwort: Erinnerung senden
+- Gilt für Angebote an Leads und an bestehende Kunden, solange das Angebot „gesendet“ ist (nicht angenommen, nicht abgelehnt, nicht abgelaufen).
+- Knopf **Erinnern** in „Angebote im Blick“ (Übersicht; erscheint, wenn die letzte Mail mindestens 3 Tage her ist), im Lead bei dem Angebot und auf der Angebotsseite beim Kunden.
+- Es öffnet sich eine Vorschau mit Betreff und Text zum Ändern. Erst „Erinnerung jetzt senden“ verschickt die Mail, das Angebot hängt als PDF an. Nichts geht automatisch raus.
+- Drei Stufen: 1 freundliche Nachfrage, 2 „Sind noch Fragen offen?“, 3 letzte Nachfrage (ohne weitere Mails). Mehr als 3 Erinnerungen und Erinnerungen vor Ablauf von 3 Tagen sind gesperrt.
+- Bei Leads bleibt der Online-Link gleich gültig, die Wiedervorlage springt auf 3 Tage später und im Lead steht ein Eintrag. Kunden-Angebote verweisen ins Kundenportal. Für Kunden-Angebote braucht ein Teil-Admin das Recht „Angebote, Rechnungen & Preise“.
+
 ## Fehler-Hilfe (Ursache und Lösungsvorschlag)
 - Code: `portal/app/fehlerhilfe.py`. Eine Liste von Regeln (Muster, Ursache, Schritte, wer es behebt); die erste passende gewinnt, sonst kommt ein allgemeiner Hinweis. Neue Regel = ein Eintrag in `REGELN` plus ein Fall in `tests/t90.py`.
 - Eingebunden an: unerwartete Fehler im Portal (Antwort nennt die Fehler-Nr.), abgestürzte Hintergrundjobs, Website-Protokoll beim Kunden (Zeile „Tipp: …“), Admin-Karte „Fehler-Hilfe“ in der Übersicht („Jetzt alles prüfen“ ohne Mailversand, „Fehler erklären“), Alarmliste unter Datenschutz & Qualität.

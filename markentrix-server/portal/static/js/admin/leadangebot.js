@@ -1,5 +1,6 @@
 import { h, api, datum, zeit, euro, melde, dialog } from '../common.js';
 import { knopf } from './kern.js';
+import { angebotErinnerungDialog } from './belege.js';
 
 const zuCent = (t) => { const z = parseFloat(String(t).trim().replace(/\./g, '').replace(',', '.')); return Number.isFinite(z) ? Math.round(z * 100) : null; };
 const alsEuroText = (c) => (c / 100).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -99,10 +100,7 @@ export async function leadAngebotKarte(lid, lead, m) {
     if (!confirm('Angebot ' + a.nummer + ' erneut per Mail an ' + (lead.email || 'den Lead') + ' senden? Dabei wird ein neuer Link erzeugt.')) return;
     try { const r = await api('/api/admin/leads/' + lid + '/angebote/' + a.id + '/senden', { method: 'POST', body: {} }); melde(m, r.gesendet ? 'Erneut gesendet.' : 'Nicht gesendet: ' + (r.grund || ''), r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); }
   }, 'sec');
-  const erinnern = (a) => lead.email && a.status === 'versendet' ? knopf('Erinnerung senden', async () => {
-    if (!confirm('Kurze Nachfrage-Mail mit dem Angebot ' + a.nummer + ' an ' + lead.email + ' senden? Dabei wird ein neuer Link erzeugt, der bisherige gilt dann nicht mehr.')) return;
-    try { const r = await api('/api/admin/leads/' + lid + '/angebote/' + a.id + '/senden', { method: 'POST', body: { erinnerung: true } }); melde(m, r.gesendet ? 'Erinnerung gesendet.' : 'Nicht gesendet: ' + (r.grund || ''), r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); }
-  }, 'sec') : '';
+  const erinnern = (a) => lead.email && a.status === 'versendet' ? knopf('Erinnerung senden' + (a.erinnerungen ? ' (' + a.erinnerungen + '×)' : ''), () => angebotErinnerungDialog(a.id), 'sec') : '';
   const zeile = (a) => {
     const [t, k] = STATUS[a.status] || [a.status, ''];
     const stand = a.angenommen_am ? 'angenommen am ' + datum(a.angenommen_am) + (a.angenommen_von ? ' von ' + a.angenommen_von : '') : a.abgelehnt_am ? 'abgelehnt am ' + datum(a.abgelehnt_am) : a.angesehen_am ? 'angesehen am ' + zeit(a.angesehen_am) : a.versendet_am ? 'gesendet am ' + datum(a.versendet_am) + ', noch nicht angesehen' : '';

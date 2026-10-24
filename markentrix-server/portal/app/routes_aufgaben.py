@@ -240,7 +240,7 @@ def heute(user: dict = Depends(require_admin)):
         avv_fehlt = [{"id": r["id"], "firma": r["firma"]} for r in fehlende(cur)][:6]
         avv_veraltet = [{"id": r["id"], "firma": r["firma"]} for r in veraltete(cur)][:6]
         # Angebote im Blick: offene (gesendet, evtl. angesehen) und kürzlich beantwortete, für Leads und Kunden
-        cur.execute("""SELECT b.id, b.nummer, b.status, b.brutto_cent, b.lead_id, b.kunden_id, b.datum, b.faellig_am, b.versendet_am, b.angesehen_am, b.angenommen_am, b.abgelehnt_am,
+        cur.execute("""SELECT b.id, b.nummer, b.status, b.brutto_cent, b.lead_id, b.kunden_id, b.datum, b.faellig_am, b.versendet_am, b.angesehen_am, b.angenommen_am, b.abgelehnt_am, b.erinnerungen, b.erinnert_am,
                               coalesce(k.firma, l.firma) AS firma, (l.kunden_id IS NOT NULL) AS lead_ist_kunde
                        FROM belege b LEFT JOIN kunden k ON k.id = b.kunden_id LEFT JOIN leads l ON l.id = b.lead_id
                        WHERE b.art = 'angebot' AND b.nummer IS NOT NULL

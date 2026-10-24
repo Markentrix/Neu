@@ -52,6 +52,27 @@ export async function erinnerungsDialog(nurIds, fokus) {
   } catch (x) { inhalt.replaceChildren(h('div', { class: 'msg err' }, x.message)); }
 }
 
+/** Erinnerung an ein Angebot ohne Antwort: zeigt den Mailtext zum Prüfen und Ändern, verschickt erst nach Klick. */
+export async function angebotErinnerungDialog(bid, nachher) {
+  const inhalt = h('div', {}, h('p', { class: 'small muted' }, 'Lade …')), d = dialog('Angebot: Erinnerung senden', inhalt, true);
+  try {
+    const v = await api('/api/admin/angebote-erinnerung/' + bid), m = h('div');
+    if (!v.moeglich) { inhalt.replaceChildren(h('div', { class: 'msg info' }, v.grund), h('p', { class: 'small muted' }, v.erinnerungen ? v.erinnerungen + ' Erinnerung(en) wurden bereits gesendet.' : '')); return; }
+    const betreff = h('input', { value: v.betreff, maxlength: 200, 'aria-label': 'Betreff' }), text = h('textarea', { rows: 14, maxlength: 6000, 'aria-label': 'Mailtext' }, v.text);
+    inhalt.replaceChildren(
+      h('p', { class: 'small muted' }, 'Es wird nichts automatisch verschickt. Prüfe den Text, ändere ihn bei Bedarf und sende dann. Das Angebot hängt als PDF an. Das ist Erinnerung ' + v.stufe + ' von 3.' + (v.hinweis ? ' ' + v.hinweis : '')),
+      h('p', { class: 'small' }, h('b', {}, 'An: '), v.an), h('label', {}, 'Betreff'), betreff, h('label', {}, 'Text'), text, m,
+      h('p', {}, knopf('Erinnerung jetzt senden', async () => {
+        if (!confirm('Erinnerung mit PDF jetzt an ' + v.an + ' senden?')) return;
+        try {
+          const r = await api('/api/admin/angebote-erinnerung/' + bid, { method: 'POST', body: { text: text.value, betreff: betreff.value } });
+          melde(m, r.gesendet ? 'Erinnerung gesendet.' : 'Nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err');
+          if (r.gesendet) setTimeout(() => { d.zu(); if (nachher) nachher(); else location.reload(); }, 1200);
+        } catch (x) { fehler(m, x); }
+      }, 'btn')));
+  } catch (x) { inhalt.replaceChildren(h('div', { class: 'msg err' }, x.message)); }
+}
+
 export async function abgleichKarte() {
   const m = h('div'), erg = h('div'); let csvText = '';
   const datei = h('input', { type: 'file', accept: '.csv,.txt,text/csv', onchange: (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { csvText = String(r.result); }; r.readAsText(f, 'utf-8'); } });
@@ -151,6 +172,7 @@ export async function belegEditor(id, kid, art) {
       if (new Date(b.faellig_am) < new Date()) for (const st of [1, 2, 3]) if (st > b.mahnstufe) knoepfe.push(aktion({ 1: 'Zahlungserinnerung senden', 2: '1. Mahnung senden', 3: '2. Mahnung senden' }[st], '/api/admin/belege/' + id + '/mahnung', { stufe: st, senden: true }, (r) => { melde(m, r.gesendet ? 'Gesendet.' : 'Nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(neu, 800); }, 'sec', 'Schreiben jetzt per E-Mail an den Kunden senden?'));
     }
     if (b.art === 'rechnung' && !b.storno_von && ['gestellt', 'versendet', 'bezahlt'].includes(b.status)) knoepfe.push(aktion('Stornieren', '/api/admin/belege/' + id + '/stornieren', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'bad', 'Rechnung stornieren? Es wird eine Stornorechnung mit eigener Nummer erzeugt.'));
+    if (b.art === 'angebot' && b.status === 'versendet') knoepfe.push(knopf('Erinnerung senden' + (b.erinnerungen ? ' (' + b.erinnerungen + '× erinnert)' : ''), () => angebotErinnerungDialog(id), 'sec'));
     if (b.art === 'angebot' && ['gestellt', 'versendet'].includes(b.status)) knoepfe.push(aktion('Angenommen', '/api/admin/belege/' + id + '/angebot-status', { status: 'angenommen' }, neu), aktion('Abgelehnt', '/api/admin/belege/' + id + '/angebot-status', { status: 'abgelehnt' }, neu, 'sec'));
     if (b.art === 'angebot' && ['gestellt', 'versendet', 'angenommen'].includes(b.status) && !k.referenzkunde) knoepfe.push(aktion('Rechnung daraus erstellen', '/api/admin/belege/' + id + '/rechnung', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec'));
   } else knoepfe.push(speichern);

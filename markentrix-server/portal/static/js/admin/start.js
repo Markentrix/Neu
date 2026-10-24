@@ -1,4 +1,4 @@
-import { erinnerungsDialog } from './belege.js';
+import { angebotErinnerungDialog, erinnerungsDialog } from './belege.js';
 import { fehlerhilfeKarte } from './fehlerhilfe.js';
 import { h, api, datum, zeit, euro, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta, rueckgaengig } from '../common.js';
 import { V, kopf, pill, sicherApi, tabelle, zeige } from './kern.js';
@@ -27,6 +27,9 @@ export function angebotStand(z) {
   if (z.angesehen_am) return { ton: 'warn', text: 'Angesehen', hinweis: 'vor ' + (tageSeit(z.angesehen_am) < 1 ? 'wenigen Stunden' : tageSeit(z.angesehen_am) + ' Tagen') + ', noch keine Antwort', rang: 1 };
   return { ton: '', text: z.status === 'versendet' ? 'Gesendet, noch nicht geöffnet' : 'Erstellt, nicht verschickt', hinweis: z.versendet_am ? (tageSeit(z.versendet_am) < 1 ? 'heute gesendet' : 'seit ' + tageSeit(z.versendet_am) + (tageSeit(z.versendet_am) === 1 ? ' Tag' : ' Tagen')) : '', rang: 2 };
 }
+/** Gesendet, nicht beantwortet, nicht abgelaufen und die letzte Mail liegt mindestens 3 Tage zurück (höchstens 3 Erinnerungen). */
+const erinnerbar = (z) => z.status === 'versendet' && !z.angenommen_am && !z.abgelehnt_am && (z.erinnerungen || 0) < 3 && (z.erinnert_am || z.versendet_am) && tageSeit(z.erinnert_am || z.versendet_am) >= 3
+  && !(z.faellig_am && new Date(z.faellig_am) < new Date(new Date().toDateString()));
 const angebotLink = (z) => z.lead_id ? '#lead/' + z.lead_id : '#beleg/' + z.id;
 export function angebotsKarte(liste) {
   const L = (liste || []).map(z => ({ z, s: angebotStand(z) })).sort((a, b) => a.s.rang - b.s.rang);
@@ -35,7 +38,7 @@ export function angebotsKarte(liste) {
     L.length ? h('p', { class: 'small muted' }, offen + ' offen mit zusammen ' + euro(summeCent) + ' brutto. Angenommene und abgelehnte bleiben 30 Tage sichtbar.') : '',
     L.length ? h('ul', { class: 'prio' }, L.map(({ z, s }) => h('li', {}, h('span', { class: 'punkt ' + s.ton, 'aria-hidden': 'true' }),
       h('div', { class: 'pt' }, h('b', {}, z.firma + ' · ' + z.nummer), h('span', { class: 'small muted' }, euro(z.brutto_cent) + ' · ' + s.hinweis)),
-      h('span', { class: 'pill ' + s.ton }, s.text), h('a', { class: 'btn sec small', href: angebotLink(z) }, 'Öffnen'))))
+      h('span', { class: 'pill ' + s.ton }, s.text), erinnerbar(z) ? h('button', { class: 'btn sec small', onclick: () => angebotErinnerungDialog(z.id) }, 'Erinnern' + (z.erinnerungen ? ' (' + z.erinnerungen + '×)' : '')) : '', h('a', { class: 'btn sec small', href: angebotLink(z) }, 'Öffnen'))))
       : h('p', { class: 'muted' }, 'Noch keine verschickten Angebote. Unter „Angebote & Rechnungen“ geht es mit „+ Angebot an Neukunden“.'));
 }
 

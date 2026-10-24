@@ -13,7 +13,7 @@ from .security import audit, require_admin, require_inhaber
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
 
-FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
+FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, erinnerungen, erinnert_am, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
 UEBERFAELLIG = "(art='rechnung' AND status IN ('gestellt','versendet') AND faellig_am < current_date)"
 
 
