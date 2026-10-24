@@ -8,9 +8,10 @@ export async function steuerungKarte() {
   const m = h('div'), liste = h('div');
   const auto = h('input', { type: 'checkbox', checked: !!s.auto_zuweisung, id: 'st_auto', style: 'width:auto' });
   const preise = h('input', { type: 'checkbox', checked: !!s.preise_sichtbar, id: 'st_preise', style: 'width:auto' });
+  const vang = h('input', { type: 'checkbox', checked: !!s.vertrieb_angebote, id: 'st_vang', style: 'width:auto' });
   const std = h('input', { type: 'number', min: 1, max: 168, value: s.reaktionsstunden || 24, style: 'width:90px', 'aria-label': 'Reaktionszeit in Stunden' });
   const speichern = async () => {
-    try { await api('/api/admin/vertrieb/steuerung', { method: 'PUT', body: { auto_zuweisung: auto.checked, preise_sichtbar: preise.checked, reaktionsstunden: Number(std.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
+    try { await api('/api/admin/vertrieb/steuerung', { method: 'PUT', body: { auto_zuweisung: auto.checked, preise_sichtbar: preise.checked, vertrieb_angebote: vang.checked, reaktionsstunden: Number(std.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
   };
   const zeigen = (eintraege) => liste.replaceChildren(tabelle([['Seit', z => datum(z.erstellt_am)], ['Art', z => z.art || ''], ['Grund', z => (z.grund || '').replace(/_/g, ' ')], ['Eintrag', z => z.wert || '–'], ['', z => knopf('Entfernen', async () => {
     if (!window.confirm('Eintrag von der Sperrliste nehmen? Der Kontakt darf dann wieder angesprochen werden.')) return;
@@ -24,6 +25,7 @@ export async function steuerungKarte() {
   return h('div', { class: 'card' }, h('h2', {}, 'Steuerung und Sperrliste'), m,
     h('label', { style: 'display:flex;align-items:center;gap:8px' }, auto, ' Neue Anfragen automatisch auf aktive Vertriebler verteilen'),
     h('label', { style: 'display:flex;align-items:center;gap:8px' }, preise, ' Vertriebler sehen die Paketpreise'),
+    h('label', { style: 'display:flex;align-items:center;gap:8px' }, vang, ' Vertriebler dürfen Angebote zu den Katalogpreisen selbst senden (Preisänderungen nur mit deiner Freigabe)'),
     h('div', { class: 'row' }, h('span', {}, 'Heiße Anfragen eskalieren nach'), std, h('span', {}, 'Stunden ohne Kontakt')),
     h('p', {}, h('button', { class: 'btn', onclick: speichern }, 'Speichern')),
     h('h3', {}, 'Sperrliste'), h('p', { class: 'small muted' }, 'Wer hier steht, wird beim Import und beim Anlegen abgewiesen. Eingehende Anfragen werden trotzdem angenommen.'), neu, liste);

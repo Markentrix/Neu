@@ -97,7 +97,7 @@ export async function leadAngebotKarte(lid, lead, m) {
     try { const r = await api('/api/admin/leads/' + lid + '/angebote/' + a.id + '/senden', { method: 'POST', body: { nur_link: true } }); dialog('Link zum Angebot ' + r.nummer, h('div', {}, h('input', { value: r.link, readonly: true, onfocus: (e) => e.target.select(), 'aria-label': 'Link' }), h('p', { class: 'small muted' }, 'Diesen Link kannst du dem Empfänger schicken.'))); } catch (x) { melde(m, x.message); }
   }, 'sec');
   const erneut = (a) => knopf('Erneut per Mail senden', async () => {
-    if (!confirm('Angebot ' + a.nummer + ' erneut per Mail an ' + (lead.email || 'den Lead') + ' senden? Dabei wird ein neuer Link erzeugt.')) return;
+    if (!confirm('Angebot ' + a.nummer + ' erneut per Mail an ' + (lead.email || 'den Lead') + ' senden? Der bisherige Link bleibt gültig.')) return;
     try { const r = await api('/api/admin/leads/' + lid + '/angebote/' + a.id + '/senden', { method: 'POST', body: {} }); melde(m, r.gesendet ? 'Erneut gesendet.' : 'Nicht gesendet: ' + (r.grund || ''), r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); }
   }, 'sec');
   const erinnern = (a) => lead.email && a.status === 'versendet' ? knopf('Erinnerung senden' + (a.erinnerungen ? ' (' + a.erinnerungen + '×)' : ''), () => angebotErinnerungDialog(a.id), 'sec') : '';

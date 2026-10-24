@@ -273,6 +273,52 @@ function branchenKarte(lid) {
   return k;
 }
 
+/** Angebot direkt senden (nur zu Katalogpreisen) und Preisänderung anfragen. Erscheint nur, wenn der Admin es erlaubt hat. */
+function direktAngebotKarte(lid, l) {
+  const k = h('div', { class: 'card' }), m = h('div');
+  const TXT = { offen: ['Wartet auf Freigabe', 'warn'], genehmigt: ['Freigegeben', 'ok'], abgelehnt: ['Abgelehnt', 'bad'] };
+  const preis = (o) => [['einrichtung_cent', 'Einrichtung'], ['monatlich_cent', 'monatlich'], ['projekt_cent', 'Projekt']].filter(([x]) => o && o[x]).map(([x, n]) => euro(o[x]) + ' ' + n).join(' + ') || '–';
+  const zuCent = (t) => { const z = parseFloat(String(t).trim().replace(/\./g, '').replace(',', '.')); return Number.isFinite(z) && z >= 0 ? Math.round(z * 100) : null; };
+  const laden = async () => {
+    const st = await api('/api/vertrieb/leads/' + lid + '/angebot-start');
+    if (!st.erlaubt) { k.replaceChildren(); return; }
+    const anf = await api('/api/vertrieb/leads/' + lid + '/preisanfragen');
+    const boxen = st.pakete.map(p => ({ p, cb: h('input', { type: 'checkbox', style: 'width:auto', disabled: !!p.grund, 'aria-label': p.name })}));
+    const gueltig = h('select', { 'aria-label': 'Gültig für' }, [[14, '14 Tage'], [30, '30 Tage'], [60, '60 Tage']].map(([w, t]) => h('option', { value: w, selected: w === 30 }, t)));
+    const senden = h('button', { class: 'btn', onclick: async (e) => {
+      const codes = boxen.filter(b => b.cb.checked).map(b => b.p.code);
+      if (!codes.length) { melde(m, 'Bitte mindestens ein Paket wählen.'); return; }
+      if (!confirm('Angebot jetzt an ' + st.email + ' senden? Es gelten die Katalogpreise.')) return;
+      e.target.disabled = true;
+      try { const r = await api('/api/vertrieb/leads/' + lid + '/angebot-senden', { method: 'POST', body: { paket_codes: codes, gueltig_tage: Number(gueltig.value) } }); melde(m, r.gesendet ? 'Angebot ' + r.nummer + ' ist raus.' : 'Nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(() => location.reload(), 1200); else e.target.disabled = false; }
+      catch (x) { melde(m, x.message); e.target.disabled = false; }
+    } }, 'Angebot senden');
+    // Preisanfrage
+    const mit = st.pakete.filter(p => !p.grund || /Ab/.test(p.grund));
+    const pw = h('select', { 'aria-label': 'Paket für die Preisanfrage' }, mit.map(p => h('option', { value: p.code }, p.name + ' (' + preis(p) + ')')));
+    const prozent = h('input', { inputmode: 'decimal', placeholder: 'z. B. 10', style: 'width:90px', 'aria-label': 'Nachlass in Prozent' });
+    const bg = h('textarea', { rows: 2, maxlength: 1000, 'aria-label': 'Begründung', placeholder: 'Warum soll der Preis anders sein? (mindestens 10 Zeichen)' });
+    const anfragen = h('button', { class: 'btn sec', onclick: async (e) => {
+      const n = parseFloat(String(prozent.value).replace(',', '.'));
+      if (!(n > 0 && n <= 100)) { melde(m, 'Bitte einen Nachlass in Prozent eintragen (zum Beispiel 10).'); return; }
+      e.target.disabled = true;
+      try { await api('/api/vertrieb/leads/' + lid + '/preisanfrage', { method: 'POST', body: { paket_code: pw.value, nachlass_prozent: n, begruendung: bg.value } }); await laden(); melde(m, 'Die Preisanfrage ist bei Markentrix. Du bekommst Bescheid, sobald entschieden ist.', 'ok'); }
+      catch (x) { melde(m, x.message); e.target.disabled = false; }
+    } }, 'Preisänderung anfragen');
+    k.replaceChildren(h('h2', {}, 'Angebot senden'),
+      h('p', { class: 'small muted' }, 'Zu den offiziellen Katalogpreisen. Das Angebot geht per Mail an ' + (st.email || '(keine Adresse hinterlegt)') + '. Preise kannst du hier nicht ändern. Für einen anderen Preis stellst du unten eine Preisanfrage.'), m,
+      st.lead_gesperrt ? h('p', { class: 'small muted' }, 'Für diesen Lead ist kein Angebot mehr möglich.')
+        : !st.email ? h('p', { class: 'small muted' }, 'Bitte zuerst eine E-Mail-Adresse beim Lead eintragen.')
+          : h('div', {}, boxen.map(({ p, cb }) => h('label', { style: 'display:flex;gap:8px;align-items:center;margin:4px 0' }, cb, h('span', {}, h('b', {}, p.name), ' ', h('span', { class: 'small muted' }, p.grund ? p.grund : preis(p))))),
+            h('label', {}, 'Gültig für'), gueltig, h('p', {}, senden),
+            h('h3', {}, 'Anderer Preis?'), st.preisanfrage_offen ? h('p', { class: 'small muted' }, 'Es wartet bereits eine Preisanfrage auf Freigabe.')
+              : mit.length ? h('div', {}, h('label', {}, 'Paket'), pw, h('label', {}, 'Nachlass in Prozent'), prozent, h('label', {}, 'Begründung'), bg, h('p', {}, anfragen)) : ''),
+      anf.length ? h('ul', {}, anf.map(a => h('li', {}, h('span', { class: 'pill ' + TXT[a.status][1] }, TXT[a.status][0]), ' ' + a.paket + ': ' + preis(a.katalog) + ' → ' + preis(a.freigegeben || a.wunsch) + (a.admin_notiz ? ' · ' + a.admin_notiz : '')))) : '');
+  };
+  laden().catch(x => k.replaceChildren(h('h2', {}, 'Angebot senden'), h('div', { class: 'msg err' }, x.message)));
+  return k;
+}
+
 function angebotKarte(lid, l) {
   const k = h('div', { class: 'card' }), m = h('div');
   const TXT = { angefragt: 'Angefragt', in_pruefung: 'In Prüfung', angebot_raus: 'Angebot ist raus', angenommen: 'Angenommen', abgelehnt: 'Abgelehnt' };
@@ -369,7 +415,7 @@ async function leadDetail(lid) {
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     datenKarte(lid, l, d, m), h('div', { class: 'card', hidden: true }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende }),
-    terminKarte(lid), branchenKarte(lid), angebotKarte(lid, l), nachgespraechKarte(lid),
+    terminKarte(lid), branchenKarte(lid), direktAngebotKarte(lid, l), angebotKarte(lid, l), nachgespraechKarte(lid),
     skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
 }

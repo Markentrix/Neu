@@ -59,6 +59,7 @@ from .routes_buchungsvorlagen import router as buchungsvorlagen_router
 from .routes_kundenampel import router as kundenampel_router
 from .angebotserinnerung import router as angebotserinnerung_router
 from .angebotsgrund import router as angebotsgrund_router
+from .vertriebangebot import router as vertriebangebot_router
 from .routes_wissen import kunde as wissen_kunde_router
 from .routes_wissen import router as wissen_router
 from .routes_werkzeuge import router as werkzeuge_router
@@ -197,6 +198,7 @@ app.include_router(buchungsvorlagen_router)
 app.include_router(kundenampel_router)
 app.include_router(angebotserinnerung_router)
 app.include_router(angebotsgrund_router)
+app.include_router(vertriebangebot_router)
 app.include_router(wissen_router)
 app.include_router(leistungsfreigabe_router)
 app.include_router(wissen_kunde_router)

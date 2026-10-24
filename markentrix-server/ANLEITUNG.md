@@ -616,6 +616,13 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 - „www.firma.de“ wird nicht extra überwacht, wenn „firma.de“ desselben Kunden überwacht wird. Websites bitte **ohne „www.“** anlegen (Admin lehnt „www.“ ab).
 - Auf „offline“ gestellte Websites lösen keine Ampel und keinen Status mehr aus (alte Messwerte werden ignoriert).
 
+## Vertriebler senden Angebote (mit Preisfreigabe)
+- Einschalten: Admin → Leads → Steuerung → „Vertriebler dürfen Angebote zu den Katalogpreisen selbst senden“. Standard: **aus**. Ist der Schalter aus, bleibt nur die bisherige Angebotsanfrage.
+- Der Vertriebler wählt im Lead (Karte „Angebot senden“) ein oder mehrere Pakete und die Gültigkeit. Das Angebot geht per Mail an den Lead. Die Preise kommen vom Server aus dem Katalog („Preise & Konditionen“), der Vertriebler kann sie nicht ändern. Pakete „nur auf Anfrage“, „ab“-Preise und Pakete ohne Preis kann er nicht direkt senden.
+- Du bekommst bei jedem Angebot einen Push und einen Eintrag im Lead-Verlauf. Das Angebot erscheint wie gewohnt unter „Angebote im Blick“ (Erinnerung und Grund funktionieren wie bei deinen eigenen).
+- **Anderer Preis:** Der Vertriebler stellt eine Preisanfrage (Nachlass in Prozent plus Begründung, mindestens 10 Zeichen). Du bekommst Push, Aufgabe und die Karte **Preisfreigaben** auf der Übersicht. „Prüfen und freigeben“ lässt dich die Preise noch ändern und sendet das Angebot sofort mit den freigegebenen Preisen. „Ablehnen“ informiert den Vertriebler, es gilt der Katalogpreis. Vor der Freigabe geht nichts an den Lead.
+- Alles steht im Protokoll (Audit): Angebot vom Vertriebler, Preisanfrage, Freigabe mit Preisen, Ablehnung.
+
 ## Angebote: Grund festhalten und Auswertung
 - Beim Angebot (Lead-Karte oder Angebotsseite beim Kunden) gibt es **Grund festhalten**: Auswahl (zu teuer, Umfang, Zeitpunkt, Konkurrenz, kein Bedarf, interne Entscheidung, keine Antwort, sonstiges) plus kurze Anmerkung. Das geht bei gesendeten und abgelehnten Angeboten, nicht bei angenommenen.
 - Lehnt der Empfänger online ab und wählt einen Grund, wird er automatisch übernommen. Beim Ablehnen durch das Team kann der Grund gleich mitgegeben werden.

@@ -6,7 +6,7 @@ OFFEN = ('neu', 'kontaktiert', 'antwort', 'termin', 'angebot')
 
 def einstellung(cur) -> dict:
     e = einstellungen.lesen(cur, "vertrieb") or {}
-    return {"auto_zuweisung": bool(e.get("auto_zuweisung")), "reaktionsstunden": int(e.get("reaktionsstunden") or 4), "preise_sichtbar": bool(e.get("preise_sichtbar"))}
+    return {"auto_zuweisung": bool(e.get("auto_zuweisung")), "reaktionsstunden": int(e.get("reaktionsstunden") or 4), "preise_sichtbar": bool(e.get("preise_sichtbar")), "vertrieb_angebote": bool(e.get("vertrieb_angebote"))}
 
 
 def aktive_partner(cur) -> list[dict]:

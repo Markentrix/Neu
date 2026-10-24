@@ -1,6 +1,6 @@
 import { angebotErinnerungDialog, erinnerungsDialog } from './belege.js';
 import { fehlerhilfeKarte } from './fehlerhilfe.js';
-import { h, api, datum, zeit, euro, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta, rueckgaengig } from '../common.js';
+import { dialog, h, api, datum, zeit, euro, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta, rueckgaengig } from '../common.js';
 import { V, kopf, pill, sicherApi, tabelle, zeige } from './kern.js';
 
 export function heuteKarte(t) {
@@ -46,10 +46,10 @@ V.uebersicht = async () => {
   const d = await api('/api/admin/uebersicht'), ob = (await sicherApi('/api/admin/onboarding/offen')) || [], heute = await api('/api/admin/heute'), sys = await sicherApi('/api/admin/systemstatus'), fw = await sicherApi('/api/admin/fruehwarnung');
   const s = d.kunden_status, summe = Object.values(s).reduce((a, b) => a + b, 0);
   const STANDARD_AUS = ['system', 'fruehwarnung', 'heute'], ans = await ladeAnsicht(), aus = ausgeblendetSet(ans, STANDARD_AUS);
-  const cp = await sicherApi('/api/admin/cockpit'), ka = await sicherApi('/api/admin/kunden-ampel'), hr = await sicherApi('/api/admin/hilfe-rueckmeldungen'), vq = await sicherApi('/api/admin/vertrieb/qualitaet'), pb = await sicherApi('/api/admin/paket-buchungen');
+  const cp = await sicherApi('/api/admin/cockpit'), ka = await sicherApi('/api/admin/kunden-ampel'), hr = await sicherApi('/api/admin/hilfe-rueckmeldungen'), vq = await sicherApi('/api/admin/vertrieb/qualitaet'), pb = await sicherApi('/api/admin/paket-buchungen'), pa = await sicherApi('/api/admin/preisanfragen');
   const KARTEN = [['top3', 'Heute zuerst (die 3 wichtigsten Dinge)'], ['prio', 'Jetzt wichtig (alles Dringende in einer Liste)'], ['angebote', 'Angebote im Blick (angesehen, angenommen, offen)'], ['betrieb', 'Betriebs-Ampel (Server, Sicherung, Mail, Jobs)'], ['system', 'Systemstatus'], ['fehlerhilfe', 'Fehler-Hilfe (Ursache und Lösungsvorschlag)'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['kundenampel', 'Kunden-Ampel (Website, Mail, Buchung je Kunde)'], ['cockpit', 'Geschäftszahlen'], ['heute', 'Heute zu tun'], ['zahlen', 'Kennzahlen-Kacheln'], ['avv', 'AVV fehlt'], ['onboarding', 'Neue Kunden im Onboarding'], ['aktionen', 'Letzte Aktionen']];
   const an = anpassenKnopf(KARTEN, STANDARD_AUS), zeige = (id, el) => aus.has(id) ? '' : el;
-  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('angebote', angebotsKarte(heute.angebote)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fehlerhilfe', fehlerhilfeKarte()), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), paketBuchungenKarte(pb), hilfeKarte(hr), vertriebQualitaetKarte(vq), zeige('kundenampel', ka ? kundenAmpelKarte(ka) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
+  return h('div', {}, kopf('Übersicht', an.knopf), an.panel, zeige('top3', heuteZuerstKarte(heute, sys, fw)), zeige('prio', prioritaetenKarte(heute, sys, fw)), zeige('angebote', angebotsKarte(heute.angebote)), zeige('betrieb', sys && sys.ampel ? betriebsKarte(sys) : ''), zeige('system', sys ? systemKarte(sys) : ''), zeige('fehlerhilfe', fehlerhilfeKarte()), zeige('fruehwarnung', fw ? fruehwarnKarte(fw) : ''), preisanfragenKarte(pa), paketBuchungenKarte(pb), hilfeKarte(hr), vertriebQualitaetKarte(vq), zeige('kundenampel', ka ? kundenAmpelKarte(ka) : ''), zeige('cockpit', cp ? cockpitKarte(cp) : ''), zeige('heute', heuteKarte(heute)),
     zeige('zahlen', h('div', { class: 'zahlenblock' },
     h('div', { class: 'grid3' },
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Kunden gesamt'), h('b', {}, summe)),
@@ -199,6 +199,41 @@ function vertriebQualitaetKarte(d) {
       h('tbody', {}, d.vertriebler.map(r => h('tr', {}, h('td', {}, h('a', { href: '#partner/' + r.id }, r.name)), h('td', {}, String(r.anrufe_7t) + (r.anrufe_vorwoche ? ' (Vorwoche ' + r.anrufe_vorwoche + ')' : '')), h('td', {}, String(r.termine_30t)),
         h('td', {}, r.termin_quote === null ? '–' : String(r.termin_quote).replace('.', ',') + ' %'), h('td', {}, String(r.offene_leads)),
         h('td', {}, r.hinweise.length ? h('div', {}, h('span', { class: 'pill ' + FARBE[r.ampel] }, r.ampel === 'rot' ? 'Handlungsbedarf' : 'Hinweis'), h('ul', { class: 'small', style: 'margin:4px 0 0 16px' }, r.hinweise.map(x => h('li', {}, x)))) : h('span', { class: 'pill ok' }, 'in Ordnung'))))))));
+}
+/** Preisanfragen der Vertriebler: Katalogpreis, Wunsch, Begründung. Freigabe sendet das Angebot sofort an den Lead. */
+const PREIS_NAMEN = [['einrichtung_cent', 'Einrichtung'], ['monatlich_cent', 'Monatlich'], ['projekt_cent', 'Projektpreis']];
+const preisText = (o) => PREIS_NAMEN.filter(([k]) => o && o[k]).map(([k, n]) => n + ' ' + euro(o[k])).join(' · ') || '–';
+const zuCentP = (t) => { const z = parseFloat(String(t).trim().replace(/\./g, '').replace(',', '.')); return Number.isFinite(z) && z >= 0 ? Math.round(z * 100) : null; };
+function preisanfragenKarte(liste) {
+  const offen = (liste || []).filter(a => a.status === 'offen');
+  if (!offen.length) return '';
+  const m = h('div');
+  const genehmigen = (a) => {
+    const felder = PREIS_NAMEN.filter(([k]) => a.katalog[k] || a.wunsch[k]).map(([k, n]) => [k, n, h('input', { value: ((a.wunsch[k] || 0) / 100).toFixed(2).replace('.', ','), inputmode: 'decimal', 'aria-label': n + ' in Euro', style: 'width:120px' })]);
+    const notiz = h('input', { maxlength: 500, placeholder: 'Anmerkung für den Vertriebler (optional)', 'aria-label': 'Anmerkung' }), mm = h('div');
+    const d = dialog('Preis freigeben: ' + a.firma, h('div', {},
+      h('p', { class: 'small muted' }, 'Katalog: ' + preisText(a.katalog) + ' · Wunsch: ' + preisText(a.wunsch) + (a.nachlass_prozent ? ' (' + a.nachlass_prozent + ' % Nachlass)' : '')),
+      h('p', { class: 'small' }, h('b', {}, 'Begründung: '), a.begruendung),
+      ...felder.map(([, n, i]) => h('div', {}, h('label', {}, n + ' (Euro, netto)'), i)), h('label', {}, 'Anmerkung'), notiz, mm,
+      h('p', { class: 'small muted' }, 'Mit „Freigeben und senden“ geht das Angebot sofort mit diesen Preisen per Mail an ' + (a.email || 'den Lead') + '.'),
+      h('p', {}, h('button', { class: 'btn', onclick: async (e) => {
+        if (!confirm('Angebot mit diesen Preisen jetzt an ' + (a.email || 'den Lead') + ' senden?')) return;
+        const body = { notiz: notiz.value }; for (const [k, , i] of felder) { const c = zuCentP(i.value); if (c === null) { melde(mm, 'Bitte gültige Beträge eintragen.'); return; } body[k] = c; }
+        e.target.disabled = true;
+        try { const r = await api('/api/admin/preisanfragen/' + a.id + '/genehmigen', { method: 'POST', body }); melde(mm, r.gesendet ? 'Freigegeben, Angebot ' + r.nummer + ' gesendet.' : 'Freigegeben, aber nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err'); setTimeout(() => { d.zu(); location.reload(); }, 1500); }
+        catch (x) { melde(mm, x.message); e.target.disabled = false; }
+      } }, 'Freigeben und senden'))));
+  };
+  const ablehnen = (a) => h('button', { class: 'btn sec small', onclick: async (e) => {
+    const n = prompt('Kurze Anmerkung für den Vertriebler (optional):', ''); if (n === null) return;
+    e.target.disabled = true;
+    try { await api('/api/admin/preisanfragen/' + a.id + '/ablehnen', { method: 'POST', body: { notiz: n } }); e.target.closest('li').remove(); melde(m, 'Abgelehnt, der Vertriebler ist informiert.', 'ok'); } catch (x) { melde(m, x.message); e.target.disabled = false; }
+  } }, 'Ablehnen');
+  return h('div', { class: 'card' }, h('h2', {}, 'Preisfreigaben', h('span', { class: 'badge', style: 'margin-left:8px' }, offen.length)),
+    h('p', { class: 'small muted' }, 'Vertriebler möchten bei einem Angebot vom Katalogpreis abweichen. Ohne deine Freigabe geht nichts raus.'), m,
+    h('ul', { class: 'prio' }, offen.map(a => h('li', {}, h('span', { class: 'pill warn' }, 'Freigabe'),
+      h('div', { class: 'pt' }, h('a', { href: '#lead/' + a.lead_id }, a.firma + ' · ' + a.paket), h('span', { class: 'small muted' }, (a.vertriebler || 'Vertriebler') + ': ' + preisText(a.katalog) + ' → ' + preisText(a.wunsch) + ' · ' + a.begruendung)),
+      h('button', { class: 'btn small', onclick: () => genehmigen(a) }, 'Prüfen und freigeben'), ablehnen(a)))));
 }
 function paketBuchungenKarte(liste) {
   if (!liste || !liste.length) return '';

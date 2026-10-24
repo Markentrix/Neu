@@ -23,13 +23,14 @@ class SteuerungIn(BaseModel):
     auto_zuweisung: bool = False
     reaktionsstunden: int = Field(default=4, ge=1, le=72)
     preise_sichtbar: bool = False
+    vertrieb_angebote: bool = False
 
 
 @router.put("/steuerung")
 def steuerung_setzen(data: SteuerungIn, user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        einstellungen.schreiben(cur, "vertrieb", {"auto_zuweisung": data.auto_zuweisung, "reaktionsstunden": data.reaktionsstunden, "preise_sichtbar": data.preise_sichtbar})
-        audit(cur, user, "vertrieb_steuerung", None, {"auto_zuweisung": data.auto_zuweisung, "reaktionsstunden": data.reaktionsstunden})
+        einstellungen.schreiben(cur, "vertrieb", {"auto_zuweisung": data.auto_zuweisung, "reaktionsstunden": data.reaktionsstunden, "preise_sichtbar": data.preise_sichtbar, "vertrieb_angebote": data.vertrieb_angebote})
+        audit(cur, user, "vertrieb_steuerung", None, {"auto_zuweisung": data.auto_zuweisung, "reaktionsstunden": data.reaktionsstunden, "vertrieb_angebote": data.vertrieb_angebote})
     return {"ok": True}
 
 
