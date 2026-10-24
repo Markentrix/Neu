@@ -4,6 +4,9 @@ Drei Teile:
  - /site/<site-id>/…           öffentlich, wird vom Skript der Website aufgerufen (Herkunftsprüfung, Begrenzung, Lockfeld)
  - /api/kunde/website-dienste  der Inhaber trägt seine Daten ein (Zugangsdaten nur schreibbar, nie lesbar)
  - /api/admin/…                Status ohne Geheimnisse"""
+import base64
+import hashlib
+import hmac
 import json
 import re
 import secrets
@@ -16,7 +19,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import config, einstellungen, fotos, push, quittung, webbetrieb
+from . import config, einstellungen, fotos, mailvorlage, push, quittung, webbetrieb
 from . import sitedienste as sd
 from .db import tx
 from .security import EMAIL_RE, audit, client_ip, current_user, rate_limit, require_admin, require_inhaber
@@ -232,7 +235,7 @@ def _termin_mails(kid, g: dict, z: dict, firma: str, an: list, foto_ids: list | 
     anhang = ("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin bei " + firma, ort), "text/calendar")
     wer = " · ".join(x for x in (g.get("leistung_name"), ("bei " + g["mitarbeiter_name"]) if g.get("mitarbeiter_name") else "") if x)
     sd.kundenmail(kid, g["email"], f"Ihr Termin bei {firma} am {lokal}",
-                  f"Guten Tag {g['name']},\n\nIhr Termin ist gebucht: {lokal}.{(chr(10) + wer) if wer else ''}\n{ort}\n{sd.zahlungsabsatz(z, g.get('anzahlung'))}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}",
+                  f"Guten Tag {g['name']},\n\nIhr Termin ist gebucht: {lokal}.{(chr(10) + wer) if wer else ''}\n{ort}\n{sd.zahlungsabsatz(z, g.get('anzahlung'))}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n\nViele Grüße\n{firma}",
                   anhang=anhang, art="termin")
     bilder: list = []
     if foto_ids and an:
@@ -386,6 +389,80 @@ async def oeff_komme_senden(site_id: str, request: Request):
     return _seite("Danke, wir haben Ihre Bestätigung. Bis bald!")
 
 
+AKTIONEN = {"bestaetigen": "bestätigen", "ablehnen": "ablehnen"}
+
+
+def aktionstoken(bid, aktion: str) -> str:
+    """Unterschriebener Schlüssel für den Knopf in der Mail an den Betrieb (nicht erratbar, an Buchung und Aktion gebunden)."""
+    mac = hmac.new(config.PORTAL_SECRET.encode(), f"mailaktion:{aktion}:{bid}".encode(), hashlib.sha256).digest()
+    return base64.urlsafe_b64encode(mac).decode().rstrip("=")[:32]
+
+
+def aktionslink(site_id: str, bid, aktion: str) -> str:
+    return f"{config.BASE_URL}/site/{site_id}/buchung/{bid}/{aktion}?k={aktionstoken(bid, aktion)}"
+
+
+def _aktion_laden(cur, site_id: str, bid: str, aktion: str, k: str):
+    """Buchung zum Knopf oder eine Fehlermeldung (Text)."""
+    if aktion not in AKTIONEN or not re.match(r"^mk_[A-Za-z0-9]{6,40}$", site_id) or not re.match(r"^[0-9a-f-]{36}$", bid) or not hmac.compare_digest(k, aktionstoken(bid, aktion)):
+        return None, "Dieser Link ist ungültig."
+    cur.execute("""SELECT w.id, w.kunden_id, w.status, w.start, w.name, w.email, w.telefon, w.nachricht, w.ref, k.firma, (k.logo IS NOT NULL) AS hat_logo,
+                          l.name AS leistung, m.name AS mitarbeiter
+                   FROM website_termine w JOIN website_dienste d ON d.kunden_id=w.kunden_id JOIN kunden k ON k.id=w.kunden_id
+                        LEFT JOIN website_leistungen l ON l.id=w.leistung_id LEFT JOIN website_mitarbeiter m ON m.id=w.mitarbeiter_id
+                   WHERE w.id=%s AND d.site_id=%s""", (bid, site_id))
+    g = cur.fetchone()
+    if not g:
+        return None, "Diese Buchung gibt es nicht mehr."
+    if g["status"] == "gebucht" and aktion == "bestaetigen":
+        return None, "Dieser Termin ist schon bestätigt."
+    if g["status"] == "abgesagt":
+        return None, "Dieser Termin ist schon abgesagt oder abgelehnt."
+    if aktion == "bestaetigen" and g["status"] != "reserviert":
+        return None, "Diese Buchung wartet nicht mehr auf Bestätigung (abgelaufen oder bearbeitet)."
+    if g["start"] <= datetime.now(timezone.utc):
+        return None, "Dieser Termin liegt in der Vergangenheit."
+    return g, ""
+
+
+@router.get("/site/{site_id}/buchung/{bid}/{aktion}", include_in_schema=False)
+def oeff_aktion(site_id: str, bid: str, aktion: str, k: str, request: Request):
+    """Zeigt die Buchung und fragt nach. Ausgeführt wird erst nach dem Klick (Mail-Programme rufen Links manchmal von selbst auf)."""
+    rate_limit("siteaktion:" + client_ip(request), 30, 600)
+    with tx("system") as cur:
+        g, fehler = _aktion_laden(cur, site_id, bid, aktion, k)
+    if not g:
+        return _seite(fehler)
+    lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
+    zeilen = "".join(f"<p style=\"margin:2px 0\">{escape(x)}</p>" for x in (g["leistung"], ("bei " + g["mitarbeiter"]) if g["mitarbeiter"] else "", g["name"],
+                                                                        " · ".join(y for y in (g["email"], g["telefon"]) if y), g["nachricht"] or "") if x)
+    titel = "Termin bestätigen" if aktion == "bestaetigen" else "Termin ablehnen"
+    extra = "" if aktion == "bestaetigen" else '<label style="display:block;margin:12px 0 4px;font-size:14px">Kurze Begründung für den Gast (freiwillig)</label><textarea name="grund" maxlength="600" rows="3" style="width:100%;box-sizing:border-box;font:inherit;padding:8px"></textarea>'
+    frage = "Der Gast bekommt eine Bestätigung mit Kalender-Einladung." if aktion == "bestaetigen" else "Der Gast bekommt eine freundliche Absage."
+    return _seite_html(titel, f'<h1 style="font-size:22px;margin:0 0 10px">{titel}</h1><p><b>{escape(lokal)}</b></p>{zeilen}<p style="margin-top:12px">{frage}</p>'
+                       f'<form method="post" action="/site/{escape(site_id)}/buchung/{escape(bid)}/{aktion}"><input type="hidden" name="k" value="{escape(k)}">{extra}'
+                       f'<button style="{_knopf_stil()}">Ja, {AKTIONEN[aktion]}</button></form>', _seitenkopf(site_id, g["firma"], g["hat_logo"]))
+
+
+@router.post("/site/{site_id}/buchung/{bid}/{aktion}", include_in_schema=False)
+async def oeff_aktion_senden(site_id: str, bid: str, aktion: str, request: Request, bg: BackgroundTasks):
+    rate_limit("siteaktionp:" + client_ip(request), 20, 600)
+    form = await request.form()
+    k = str(form.get("k") or "")
+    with tx("system") as cur:
+        g, fehler = _aktion_laden(cur, site_id, bid, aktion, k)
+    if not g:
+        return _seite(fehler)
+    try:
+        if aktion == "bestaetigen":
+            _bestaetigen(g["kunden_id"], bid, "", "", bg, None)
+            return _seite("Der Termin ist bestätigt. Der Gast bekommt die Bestätigung per E-Mail.")
+        _ablehnen(g["kunden_id"], bid, str(form.get("grund") or "")[:600], bg, None)
+        return _seite("Der Termin ist abgelehnt. Der Gast wurde per E-Mail informiert.")
+    except HTTPException as e:
+        return _seite(str(e.detail))
+
+
 @router.get("/site/{site_id}/termin/absagen", include_in_schema=False)
 def oeff_absagen(site_id: str, t: str, request: Request):
     """Zeigt die Absageregel und fragt nach. Absagen passiert erst nach dem Klick (Mail-Programme rufen Links manchmal von selbst auf)."""
@@ -521,7 +598,7 @@ async def oeff_verschieben_senden(site_id: str, request: Request, bg: Background
         bg.add_task(sd.kundenmail, g["kunden_id"], a, f"Termin verschoben: {g['name']}", f"{g['name']} hat den Termin von {alt} Uhr auf {neu_txt} verschoben.", None, None, "termin")
     absagen = f"{config.BASE_URL}/site/{site_id}/termin/absagen?t={t}"
     bg.add_task(sd.kundenmail, g["kunden_id"], g["email"], f"Ihr neuer Termin bei {g['firma']} am {neu_txt}",
-                f"Guten Tag {g['name']},\n\nIhr Termin wurde verschoben auf: {neu_txt}.\n{g['kal_ort'] or ''}\n\nDie neue Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{g['firma']}",
+                f"Guten Tag {g['name']},\n\nIhr Termin wurde verschoben auf: {neu_txt}.\n{g['kal_ort'] or ''}\n\nDie neue Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n\nViele Grüße\n{g['firma']}",
                 None, ("termin.ics", sd.ics(str(g["id"]), start, start + dauer, "Termin bei " + g["firma"], g["kal_ort"] or ""), "text/calendar"), "termin")
     return _seite(f"Ihr Termin ist jetzt am {neu_txt}. Eine Bestätigung kommt per E-Mail.")
 
@@ -735,6 +812,39 @@ def k_mail_test(data: TestIn, user: dict = Depends(require_inhaber)):
     if not ok:
         raise HTTPException(400, "Der Versand ist fehlgeschlagen: " + via)
     return {"ok": True, "ueber": via}
+
+
+class VorschauIn(BaseModel):
+    art: str = Field(default="bestaetigung", pattern="^(bestaetigung|eingang)$")
+    signatur: str = Field(default="", max_length=600)
+    bewertung: bool = False
+    facebook: str = Field(default="", max_length=300)
+    instagram: str = Field(default="", max_length=300)
+    hinweis: str = Field(default="", max_length=600)
+
+
+@kunde.post("/mail/vorschau")
+def k_mail_vorschau(data: VorschauIn, user: dict = Depends(require_inhaber)):
+    """So sieht eine Mail an deine Kunden aus (mit den Werten aus dem Formular, auch ungespeichert). Es wird nichts verschickt."""
+    kid = user["kunden_id"]
+    rate_limit("mailvorschau:" + str(kid), 60, 600)
+    ueber = {"signatur": "\n".join(x.rstrip() for x in data.signatur.strip().splitlines()) or None, "bewertung": data.bewertung,
+             "facebook": _link_pruefen(data.facebook, "Facebook"), "instagram": _link_pruefen(data.instagram, "Instagram"), "hinweis": data.hinweis.strip() or None}
+    vorlage, z, _name = sd.vorlage_fuer(kid, ueber)
+    firma, wann = vorlage["firma"], (datetime.now(TZ) + timedelta(days=5)).replace(hour=9, minute=0).strftime("%d.%m.%Y um %H:%M Uhr")
+    if data.art == "bestaetigung":
+        betreff = f"Ihr Termin bei {firma} am {wann} ist bestätigt"
+        text = (f"Guten Tag Maria Beispiel,\n\nIhr Termin ist bestätigt: {wann}.\n{z.get('kal_ort') or ''}\n\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n"
+                f"{config.BASE_URL}/site/{z['site_id']}/termin/absagen?t=beispiel1234567890\n\nBis bald!\n\nViele Grüße\n{firma}")
+    else:
+        betreff = "Eingangsbestätigung: Terminanfrage (T261024-0000)"
+        text = (f"Guten Tag Maria Beispiel,\n\nvielen Dank, Ihre Terminanfrage ist bei uns eingegangen. Ihre Vorgangsnummer: T261024-0000.\nIhr Wunschtermin {wann} ist für Sie vorgemerkt. Wir prüfen ihn und melden uns mit der Bestätigung.\n\n"
+                "Ihre Angaben:\nLeistung: Beispielleistung\nTelefon: 0511 123456\n\nMit freundlichen Grüßen\n" + firma)
+    logo = vorlage.get("logo")
+    html = mailvorlage.html_mail(firma, text, vorlage.get("signatur"), vorlage.get("farbe"), "logo@mail" if logo else None, vorlage.get("extras"))
+    if logo:
+        html = html.replace("cid:logo@mail", f"data:{logo[1]}/{logo[2]};base64," + base64.b64encode(logo[0]).decode())
+    return {"betreff": betreff, "html": html, "logo": bool(logo)}
 
 
 class KalenderIn(BaseModel):
@@ -1287,7 +1397,11 @@ def _betrag(text: str) -> str:
 def k_bestaetigen(bid: str, data: BestaetigenIn, bg: BackgroundTasks, user: dict = Depends(require_inhaber)):
     kid = user["kunden_id"]
     rate_limit("buchbest:" + str(kid), 60, 600)
-    betrag = _betrag(data.anzahlung)
+    return _bestaetigen(kid, bid, _betrag(data.anzahlung), data.hinweis.strip(), bg, user)
+
+
+def _bestaetigen(kid, bid: str, betrag: str, hinweis: str, bg: BackgroundTasks, user: dict | None):
+    """Bestätigt eine vorgemerkte Buchung und schickt dem Gast die Bestätigung. Gemeinsam für das Portal und den Knopf in der Mail (user=None)."""
     with tx("system") as cur:
         z = sd.zeile(cur, kid)
         try:
@@ -1304,7 +1418,7 @@ def k_bestaetigen(bid: str, data: BestaetigenIn, bg: BackgroundTasks, user: dict
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
         firma = cur.fetchone()["firma"]
         audit(cur, user, "website_buchung_bestaetigt", kid, {"ref": g["ref"]})
-    bg.add_task(_bestaetigung_mail, kid, g, z, firma, g["anzahlung"] or "", data.hinweis.strip())
+    bg.add_task(_bestaetigung_mail, kid, g, z, firma, g["anzahlung"] or "", hinweis)
     return {"ok": True}
 
 
@@ -1313,7 +1427,7 @@ def _bestaetigung_mail(kid, g: dict, z: dict, firma: str, betrag: str, hinweis: 
     absagen = f"{config.BASE_URL}/site/{z['site_id']}/termin/absagen?t={g['token']}"
     zahlung = sd.zahlungsabsatz(z, betrag or None)
     text = (f"Guten Tag {g['name']},\n\nIhr Termin ist bestätigt: {lokal}.{(chr(10) + z['kal_ort']) if z['kal_ort'] else ''}\n{zahlung}\n"
-            f"{(chr(10) + hinweis + chr(10)) if hinweis else ''}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n{firma}")
+            f"{(chr(10) + hinweis + chr(10)) if hinweis else ''}\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab:\n{absagen}\n\nBis bald!\n\nViele Grüße\n{firma}")
     sd.kundenmail(kid, g["email"], f"Ihr Termin bei {firma} am {lokal} ist bestätigt", text,
                   anhang=("termin.ics", sd.ics(str(g["id"]), g["start"], g["ende"], "Termin bei " + firma, z["kal_ort"] or ""), "text/calendar"), art="termin")
 
@@ -1359,11 +1473,16 @@ class AblehnenIn(BaseModel):
 def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Depends(require_termine)):
     kid = user["kunden_id"]
     rate_limit("buchabl:" + str(kid), 60, 600)
+    return _ablehnen(kid, bid, data.grund, bg, user, user.get("website_mitarbeiter_id"))
+
+
+def _ablehnen(kid, bid: str, grund: str, bg: BackgroundTasks, user: dict | None, mitarbeiter_id=None):
+    """Lehnt eine Buchung ab bzw. sagt sie ab und informiert den Gast. Gemeinsam für das Portal und den Knopf in der Mail (user=None)."""
     with tx("system") as cur:
         try:
             cur.execute("""UPDATE website_termine SET status='abgesagt', abgesagt_am=now(), abgesagt_von='betrieb', storno_kostenlos=true WHERE id=%s AND kunden_id=%s AND status IN ('reserviert','gebucht') AND start > now()
                            AND (%s::uuid IS NULL OR mitarbeiter_id = %s::uuid)
-                           RETURNING termin_id, start, name, email, ref, anzahlung_erhalten_am, anzahlung_betrag""", (bid, kid, user.get("website_mitarbeiter_id"), user.get("website_mitarbeiter_id")))
+                           RETURNING termin_id, start, name, email, ref, anzahlung_erhalten_am, anzahlung_betrag""", (bid, kid, mitarbeiter_id, mitarbeiter_id))
         except Exception:
             raise HTTPException(400, "Ungültige Buchung.")
         g = cur.fetchone()
@@ -1379,7 +1498,7 @@ def k_ablehnen(bid: str, data: AblehnenIn, bg: BackgroundTasks, user: dict = Dep
     if not g["email"]:
         return {"ok": True, "erstatten": bool(g["anzahlung_erhalten_am"] and g["anzahlung_betrag"])}
     bg.add_task(sd.kundenmail, kid, g["email"], f"Zu Ihrem Termin am {lokal}",
-                f"Guten Tag {g['name']},\n\nleider können wir den gewünschten Termin am {lokal} nicht anbieten.\n{(data.grund.strip() + chr(10)) if data.grund.strip() else ''}"
+                f"Guten Tag {g['name']},\n\nleider können wir den gewünschten Termin am {lokal} nicht anbieten.\n{(grund.strip() + chr(10)) if grund.strip() else ''}"
                 f"{('Ihre Anzahlung von ' + str(g['anzahlung_betrag']).replace('.', ',') + ' € erstatten wir Ihnen.' + chr(10)) if g['anzahlung_erhalten_am'] and g['anzahlung_betrag'] else ''}"
                 f"Auf unserer Website können Sie jederzeit einen anderen Termin wählen.\n\nViele Grüße\n{firma}", None, None, "termin")
     return {"ok": True, "erstatten": bool(g["anzahlung_erhalten_am"] and g["anzahlung_betrag"])}

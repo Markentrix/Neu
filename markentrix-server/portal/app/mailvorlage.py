@@ -13,6 +13,10 @@ BILD_TYPEN = {"image/png": "png", "image/jpeg": "jpeg", "image/gif": "gif"}
 
 def _knopf_text(url: str, davor: str) -> str:
     u, d = url.lower(), davor.lower()
+    if "/bestaetigen?" in u:
+        return "Termin bestätigen"
+    if "/ablehnen?" in u:
+        return "Termin ablehnen"
     if "/termin/absagen" in u:
         return "Termin absagen"
     if "/termin/verschieben" in u:

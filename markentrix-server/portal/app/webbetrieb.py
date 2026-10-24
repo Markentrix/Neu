@@ -55,7 +55,7 @@ def erinnerungen(cfg=None):
         komme = f"{config.BASE_URL}/site/{r['site_id']}/termin/komme?t={r['token']}"
         bald = "morgen" if r["erinnerung"] == 1 and stunden >= 12 else "bald"
         text = (f"Guten Tag {r['name']},\n\nwir erinnern Sie an Ihren Termin {bald}: {lokal}.\n{wer + chr(10) if wer else ''}{r['kal_ort'] + chr(10) if r['kal_ort'] else ''}\n"
-                f"Bitte bestätigen Sie kurz mit einem Klick, dass Sie kommen:\n{komme}\n\nFalls Sie nicht kommen können, sagen Sie bitte hier ab, dann kann jemand anderes die Zeit nutzen:\n{absagen}\n\nWir freuen uns auf Sie!\n{r['firma']}")
+                f"Bitte bestätigen Sie kurz mit einem Klick, dass Sie kommen:\n{komme}\n\nFalls Sie nicht kommen können, sagen Sie bitte hier ab, dann kann jemand anderes die Zeit nutzen:\n{absagen}\n\nWir freuen uns auf Sie!\n\nViele Grüße\n{r['firma']}")
         ok, via = sd.kundenmail(r["kunden_id"], r["email"], f"Erinnerung: Ihr Termin bei {r['firma']} am {lokal}", text, art="erinnerung")
         sd.ereignis(r["kunden_id"], "erinnerung", ok, "gesendet" if ok else "Versand fehlgeschlagen: " + str(via)[:150])
         gesendet += 1 if ok else 0

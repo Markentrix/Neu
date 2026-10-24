@@ -57,6 +57,16 @@ function mailKarte(d, neu) {
   const speichern = async () => {
     try { await api('/api/kunde/website-dienste/mail', { method: 'PUT', body: { aktiv: an.c.checked, empfaenger: emp.value, betreff: betreff.value, name: name.value, signatur: sig.value, bewertung: bew.c.checked, facebook: fb.value, instagram: ig.value, hinweis: hin.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
   };
+  const vorschauBox = h('div');
+  const vorschau = async (art) => {
+    melde(m, '');
+    try {
+      const r = await api('/api/kunde/website-dienste/mail/vorschau', { method: 'POST', body: { art, signatur: sig.value, bewertung: bew.c.checked, facebook: fb.value, instagram: ig.value, hinweis: hin.value } });
+      const rahmen = h('iframe', { title: 'Vorschau der E-Mail', sandbox: '', srcdoc: r.html, style: 'width:100%;height:560px;border:1px solid var(--line,#ddd);border-radius:8px;background:#fff' });
+      vorschauBox.replaceChildren(h('p', { class: 'small' }, h('b', {}, 'Betreff: '), r.betreff), rahmen,
+        r.logo ? '' : h('p', { class: 'small muted' }, 'Es ist noch kein Logo hinterlegt, deshalb steht der Firmenname im Kopf. Das Logo hinterlegt das Team von Markentrix.'));
+    } catch (x) { melde(m, x.message); }
+  };
   const test = async (e) => {
     const b = e.target; b.disabled = true; melde(m, '');
     try { const r = await api('/api/kunde/website-dienste/mail/test', { method: 'POST', body: { an: emp.value.split(/[,;\s]+/)[0] } }); melde(m, 'Testmail gesendet' + (r.ueber === 'eigen' ? ' (über dein Postfach).' : ' (über Markentrix).') + ' Schau in deinem Posteingang und im Spam-Ordner nach.', 'ok'); } catch (x) { melde(m, x.message); }
@@ -71,6 +81,8 @@ function mailKarte(d, neu) {
       bew.el, d.mail.bewertung_link_da ? '' : h('div', { class: 'small muted' }, 'Dafür unter „Google-Bewertungen“ zuerst den Bewertungs-Link hinterlegen.'),
       h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Facebook (optional)', fb), feld('Instagram (optional)', ig)), feld('Hinweistext ganz unten (optional)', hin)),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Testmail senden')),
+    h('div', { class: 'row', style: 'margin-top:8px;gap:8px;flex-wrap:wrap' }, h('button', { class: 'btn sec', type: 'button', onclick: () => vorschau('bestaetigung') }, 'Vorschau: Terminbestätigung'), h('button', { class: 'btn sec', type: 'button', onclick: () => vorschau('eingang') }, 'Vorschau: Eingangsbestätigung')),
+    h('p', { class: 'small muted' }, 'Die Vorschau zeigt auch, was du gerade eingetippt, aber noch nicht gespeichert hast. Es wird nichts verschickt.'), vorschauBox,
     statusZeile(d.status, 'kontakt', 'Anfragen'),
     smtpBereich(d, mm, neu), mm);
 }

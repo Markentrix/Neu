@@ -18,7 +18,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from . import config, fotos, push
 from . import sitedienste as sd
 from .db import tx
-from .routes_sitedienste import _empfaenger, _termin_mails
+from .routes_sitedienste import _empfaenger, _termin_mails, aktionslink
 from .security import EMAIL_RE, client_ip, rate_limit
 
 router = APIRouter(prefix="/siteapi/api", include_in_schema=False)
@@ -437,7 +437,10 @@ def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: 
     text = _zusammenfassung(felder, labels)
     an = [a for a in _empfaenger((z["kal_empfaenger"] or z["mail_empfaenger"]) if buchung else z["mail_empfaenger"]) if EMAIL_RE.match(a)][:5]
     if buchung and buchung["frei"]:
-        kopf = f"Neue Terminanfrage ({ref}): {buchung['wann']}.\nDie Uhrzeit ist für {z['kal_halte_std']} Stunden vorgemerkt. Bitte im Kundenportal unter „Website-Dienste“ bestätigen oder ablehnen."
+        bid = buchung["zeile"]["id"]
+        kopf = (f"Neue Terminanfrage ({ref}): {buchung['wann']}.\nDie Uhrzeit ist für {z['kal_halte_std']} Stunden vorgemerkt. Ein Klick genügt:\n\n"
+                f"{aktionslink(z['site_id'], bid, 'bestaetigen')}\n\n{aktionslink(z['site_id'], bid, 'ablehnen')}\n\n"
+                "Sie können auch im Kundenportal unter „Website-Dienste“ bestätigen oder ablehnen. Diese Links gelten nur für diese eine Anfrage; bitte nicht weiterleiten.")
     elif buchung:
         kopf = f"Neue Online-Buchung ({ref}): {buchung['wann']}. Der Termin steht im Portal unter „Heute“."
     else:

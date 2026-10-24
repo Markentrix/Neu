@@ -308,17 +308,25 @@ def _nachricht(von: str, von_name: str, an: str, betreff: str, text: str, reply_
     return msg
 
 
-def kundenmail(kid, an: str, betreff: str, text: str, reply_to: str | None = None, anhang=None, art: str = "mail") -> tuple[bool, str]:
-    """Verschickt eine Mail im Namen des Kunden. Erst über sein eigenes Postfach (wenn eingerichtet), sonst oder bei Fehler über Markentrix.
-    Gibt (ok, 'eigen'|'markentrix'|Fehlertext) zurück."""
+def vorlage_fuer(kid, ueber: dict | None = None) -> tuple[dict, dict, str]:
+    """Mail-Aufmachung des Betriebs (Firma, Signatur, Farbe, Logo, Zusätze) und Absendername. Mit `ueber` lässt sich Ungespeichertes ausprobieren (Vorschau)."""
     with tx("system") as cur:
-        z = zeile(cur, kid)
+        z = dict(zeile(cur, kid))
         cur.execute("SELECT firma, branding_farbe, logo, logo_typ FROM kunden WHERE id=%s", (kid,))
         kz = cur.fetchone() or {}
         firma = kz.get("firma") or "Website"
+    for feld, spalte in (("signatur", "mail_signatur"), ("bewertung", "mail_bewertung"), ("facebook", "mail_facebook"), ("instagram", "mail_instagram"), ("hinweis", "mail_hinweis")):
+        if ueber and feld in ueber:
+            z[spalte] = ueber[feld]
     vorlage = {"firma": firma, "signatur": z.get("mail_signatur"), "farbe": kz.get("branding_farbe"), "logo": mailvorlage.bild_pruefen(kz.get("logo"), kz.get("logo_typ")),
                "extras": {"bewertung_link": ("https://search.google.com/local/writereview?placeid=" + z["bew_place_id"] if z.get("bew_place_id") else z.get("bew_link")) if z.get("mail_bewertung") else None, "facebook": z.get("mail_facebook"), "instagram": z.get("mail_instagram"), "hinweis": z.get("mail_hinweis")}}
-    name = (z.get("mail_name") or firma)[:80]
+    return vorlage, z, (z.get("mail_name") or firma)[:80]
+
+
+def kundenmail(kid, an: str, betreff: str, text: str, reply_to: str | None = None, anhang=None, art: str = "mail") -> tuple[bool, str]:
+    """Verschickt eine Mail im Namen des Kunden. Erst über sein eigenes Postfach (wenn eingerichtet), sonst oder bei Fehler über Markentrix.
+    Gibt (ok, 'eigen'|'markentrix'|Fehlertext) zurück."""
+    vorlage, z, name = vorlage_fuer(kid)
     grund = ""
     if z.get("smtp_enc") and z.get("smtp_absender"):
         try:
