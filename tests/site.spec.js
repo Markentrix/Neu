@@ -437,3 +437,88 @@ test("Zertifikate: Vergrößern öffnet die Lightbox, Esc schließt sie", async 
   await page.keyboard.press("Escape");
   await expect(page.locator("dialog.lightbox")).not.toHaveAttribute("open", "");
 });
+
+/* ---------------------------------------------------------------- Englische Fassung (/en/) */
+const EN_PAGES = PAGES.map((p) => "/en" + p);
+for (const path of EN_PAGES) {
+  test(`EN ${path}: lädt fehlerfrei, englisch, kein Querscrollen`, async ({ page }) => {
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    page.on("console", (m) => { if (m.type() === "error" && !/maps|google/.test(m.text())) errors.push(m.text()); });
+    const res = await page.goto(path);
+    expect(res.status()).toBe(200);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator('.lang-switch a[aria-current="true"]')).toHaveText("EN");
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const path of ["/en/", "/en/termin.html", "/en/preise.html", "/en/gutscheine.html"]) {
+  test(`Barrierefreiheit EN ${path}: keine schweren axe-Verstöße`, async ({ page }) => {
+    await page.goto(path);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.evaluate(() => document.querySelectorAll(".reveal").forEach((e) => e.classList.add("is-visible")));
+    await page.waitForFunction(() => [...document.querySelectorAll(".reveal")].every((e) => getComputedStyle(e).opacity === "1"), null, { timeout: 5000 });
+    const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    const serious = r.violations.filter((v) => ["serious", "critical"].includes(v.impact || ""));
+    expect(serious.map((v) => `${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`)).toEqual([]);
+  });
+}
+
+test("Sprachumschalter wechselt auf dieselbe Seite in der anderen Sprache", async ({ page }) => {
+  await page.goto("/leistungen/lackpolitur-celle.html");
+  await page.locator('.lang-switch a[hreflang="en"]').click();
+  await expect(page).toHaveURL(/\/en\/leistungen\/lackpolitur-celle\.html$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await page.locator('.lang-switch a[hreflang="de"]').click();
+  await expect(page).toHaveURL(/\/leistungen\/lackpolitur-celle\.html$/);
+  expect(page.url()).not.toContain("/en/");
+  await page.goto("/en/");
+  await page.locator('.lang-switch a[hreflang="de"]').click();
+  await expect(page).toHaveURL(/\/index\.html$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "de");
+});
+
+test("EN: Richtpreis-Rechner zeigt Euro englisch", async ({ page }) => {
+  await page.goto("/en/");
+  await page.locator('#quoteForm label:has(input[value="suv"])').click();
+  await page.locator('#quoteForm label:has(input[value="excellence"])').click();
+  await expect(page.locator("#quoteValue")).toContainText("€899");
+  await expect(page.locator("#quoteBook")).toHaveAttribute("href", /^termin\.html\?paket=excellence&klasse=suv/);
+});
+
+test("EN: Terminbuchung komplett, Anfrage mit sprache=en und deutschen Werten", async ({ page }, info) => {
+  await page.goto("/en/termin.html?paket=essential&klasse=suv");
+  await expect(page.locator('[data-sum="preis"]')).toContainText("€449");
+  await page.locator("[data-wz-next]").click();
+  await page.fill("#t-vehicle", "VW Tiguan 2020");
+  await page.locator("[data-wz-next]").click();
+  await page.locator('label.check:has(input[value="Motorraumreinigung"])').click();
+  await expect(page.locator('[data-sum="extras"]')).not.toContainText("Motorraumreinigung");
+  await page.locator("[data-wz-next]").click();
+  await page.locator("[data-wz-next]").click();
+  await page.fill("#t-date1", nextWorkday(5 + dayShift(info)));
+  await page.locator("#t-date1").dispatchEvent("change");
+  await expect(page.locator('#t-slots input[value="09:00"]')).toBeEnabled();
+  await expect(page.locator("#t-slots-msg")).not.toContainText("Uhrzeit");
+  await page.locator('#t-slots label:has(input[value="09:00"])').click();
+  await expect(page.locator('[data-sum="datum"]')).not.toContainText("Uhr");
+  await page.locator("[data-wz-next]").click();
+  await page.fill("#t-name", "E2E English");
+  await page.fill("#t-phone", "0172 5555556");
+  await page.fill("#t-email", "en@example.com");
+  await page.locator('label[for="t-consent"]').click();
+  await page.check("#t-agb");
+  if (await page.locator("#t-vorzeitig").isEnabled()) await page.check("#t-vorzeitig");
+  await page.locator("[data-wz-submit]").click();
+  await expect(page).toHaveURL(/\/en\/danke\.html\?typ=termin&ref=T/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("h1")).not.toContainText("eingegangen");
+  await expect(page.locator("[data-thanks-text]")).toContainText("T26");
+  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  expect(sent).toMatchObject({ typ: "termin", paket: "essential", klasse: "suv", uhrzeit: "09:00", sprache: "en", email: "en@example.com" });
+  expect(sent.extras).toContain("Motorraumreinigung");
+});

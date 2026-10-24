@@ -34,12 +34,23 @@ Ist die Schnittstelle nicht erreichbar, zeigen die Formulare WhatsApp, E-Mail un
 
 Alle Texte, Preise und Bilder liegen in `content/` (JSON und Markdown). Ändern, neu bauen, hochladen. Zeitlich begrenzte Angebote in `content/angebote.json` blenden sich am Ablaufdatum selbst aus. Aktionspreise in `content/pricing.json` (Winterangebot, Scheiben-Aktion) verschwinden erst mit dem nächsten Upload nach Ablauf.
 
+## Englische Fassung
+
+Jede Seite gibt es auch auf Englisch unter `/en/` mit demselben Pfad, z. B. `/en/termin.html`. Oben rechts im Kopf schaltet DE/EN auf dieselbe Seite in der anderen Sprache um. Suchmaschinen finden beide Fassungen über `hreflang` und die Sitemap.
+
+- Die englischen Seiten entstehen beim Bauen aus den deutschen. Die Übersetzungen liegen in `content/i18n/en/*.json` als Paare „deutscher Text“ → „englischer Text“.
+- Ändert sich ein deutscher Text, fehlt seine Übersetzung. Der Build meldet das, und die englische Seite zeigt so lange den deutschen Text. `python3 build/i18n_tool.py fehlend` listet alle fehlenden Texte mit Seite, `python3 build/i18n_tool.py pruefen` prüft Platzhalter, Zahlen und Titellängen.
+- Anfragen von der englischen Seite kommen mit dem Feld `sprache: en` im Portal an. Paket, Extras und Klassen bleiben als deutsche Werte, damit René sie direkt versteht. Bitte auf Englisch antworten.
+- Die englischen Rechtstexte sind eine Übersetzung mit dem Hinweis, dass nur die deutsche Fassung verbindlich ist.
+- Fehlermeldungen des Portals sind deutsch. Die englische Seite zeigt dafür eigene englische Hinweise. Den Text zur Löschfrist der Fotos baut sie aus `tage` von `/api/foto`.
+
 ## Prüfungen
 
 `npm test` baut die Website und prüft:
 
 - die Upload-Regeln: nur erlaubte Dateitypen, kein localhost, kein http://, keine Google Fonts oder Fremd-CDNs, keine .php-Dateien, eine H1, Titel unter 60 Zeichen, Bilder mit Größe und Alt-Text, Einwilligung und Lockfeld in jedem Formular;
 - alle Seiten in Desktop und Mobil (390 px, kein Querscrollen) und die Barrierefreiheit mit axe;
-- Buchung, Doppelbuchung, Formulare ohne Schnittstelle, Widerruf und Danke-Seite.
+- Buchung, Doppelbuchung, Formulare ohne Schnittstelle, Widerruf und Danke-Seite;
+- die englische Fassung: jede Seite vorhanden und vollständig übersetzt, Sprachumschalter, hreflang, Buchung auf Englisch.
 
 Die Browser-Tests nutzen dafür `tests/portal-mock.js`, eine Attrappe der Portal-Schnittstelle. Sie gehört nicht zur Website.

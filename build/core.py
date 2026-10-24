@@ -190,6 +190,9 @@ def head(site, title, desc, path, prefix="", ld=None, noindex=False, og_type="we
 <title>{ESC(title)}</title>
 <meta name="description" content="{ESC(desc)}">
 <link rel="canonical" href="{ESC(url)}">
+<link rel="alternate" hreflang="de" href="{ESC(url)}">
+<link rel="alternate" hreflang="en" href="{ESC(site.url + "/en" + path)}">
+<link rel="alternate" hreflang="x-default" href="{ESC(url)}">
 <meta name="robots" content="{robots}">
 <meta name="theme-color" content="#1e2229">
 <meta name="geo.region" content="DE-NI">
@@ -253,6 +256,7 @@ def header(site, prefix="", home=False, current=None):
       </div>
       <a class="btn btn-icon btn-wa-ghost" href="{site.wa()}" target="_blank" rel="noopener" aria-label="WhatsApp schreiben">{I["wa"]}</a>
       <a class="btn btn-primary btn-sm header-book" href="{prefix}termin.html">{I["cal"]}<span class="btn-label">Termin anfragen</span></a>
+      <!--lang-switch-->
       <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Menü öffnen">{I["menu"]}</button>
     </div>
   </div>

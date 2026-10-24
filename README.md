@@ -7,6 +7,7 @@ Verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung in
 | Bereich | Inhalt |
 |---|---|
 | **Website** | Kompakte Startseite mit Richtpreis-Rechner, Preisseite mit Vergleich je Fahrzeugklasse, Kontaktseite mit Formular und Karte, Über-uns-Seite, ElbDetail Care, 7 Leistungsseiten (inkl. Keramikversiegelung und Lederaufbereitung), Online-Terminbuchung in 5 Schritten, Gutschein-Konfigurator mit Live-Vorschau, Firmenkunden-Seite, Winter-Aktionsseite, Ratgeber mit 10 Artikeln, Impressum, Datenschutz, 404, Danke-Seite |
+| **Englisch** | Jede Seite auch unter `/en/`, Umschalter DE/EN im Kopf, `hreflang` und Sitemap für beide Sprachen, Übersetzungen in `content/i18n/en/` (siehe `docs/portal-upload.md`) |
 | **SEO** | LocalBusiness/AutoDetailing-, Service-, FAQ-, BlogPosting-, Breadcrumb- und Product-Schema, Sitemap, RSS, Canonicals, Open Graph, sprechende Titel und Beschreibungen, interne Verlinkung |
 | **GEO (KI-Suche)** | `llms.txt` und `llms-full.txt`, KI-Crawler in `robots.txt` erlaubt, „Das Wichtigste in Kürze“ in jedem Artikel, Faktenblock, zitierfähige FAQ |
 | **Conversion** | Buchungsassistent mit Live-Preis und Sperrtagen, WhatsApp-Weg mit vorausgefüllter Nachricht, Gutscheinverkauf, Firmenanfrage, Danke-Seite, mobile Aktionsleiste |
@@ -17,7 +18,7 @@ Verkaufsorientierte Website für **ElbDetail – Premium Fahrzeugaufbereitung in
 ## Projektstruktur
 
 ```
-content/         Inhalte als JSON und Markdown (Texte, Preise, Bilder, Angebote, Ratgeber)
+content/         Inhalte als JSON und Markdown (Texte, Preise, Bilder, Angebote, Ratgeber), englische Übersetzungen in content/i18n/en/
 static/          CSS, JavaScript, Schriften, Logo, Icons
 build/           Website-Generator (Python, Standardbibliothek + Pillow für Bilder), läuft nur beim Bauen
 website-fertig/  fertige Website zum Hochladen (wird erzeugt, nicht im Repository)

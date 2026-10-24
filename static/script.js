@@ -7,8 +7,13 @@
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var API = ELB.api || "/api";
   var IS_LIVE = /^https?:$/.test(location.protocol);  // als Datei geöffnet: keine Portal-Schnittstelle, gleich die Ausweichwege zeigen
+  /* Englische Fassung (/en/): Texte kommen aus config.js (ELB.t), {name} wird ersetzt. Ohne Eintrag bleibt der deutsche Text. */
+  var EN = ELB.lang === "en", I18N = ELB.t || {};
+  function t(s, v) { var r = I18N[s] || s; if (v) Object.keys(v).forEach(function (k) { r = r.split("{" + k + "}").join(v[k]); }); return r; }
 
-  function fmt(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+  function fmt(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, EN ? "," : "."); }
+  function eur(v) { return EN ? "€" + fmt(v) : fmt(v) + "\u00a0€"; }
+  function eurCt(v) { var s = Number(v).toFixed(2).replace(".00", ""); return EN ? "€" + s : s.replace(".", ",") + "\u00a0€"; }
   function waLink(text) { return "https://wa.me/" + ELB.whatsapp + (text ? "?text=" + encodeURIComponent(text) : ""); }
   function pkg(key) { return (ELB.packages || []).filter(function (p) { return p.key === key; })[0]; }
   function cls(key) { return (ELB.classes || []).filter(function (c) { return c.key === key; })[0]; }
@@ -18,11 +23,11 @@
     return p.prices ? p.prices[ck] : null;
   }
   function radio(form, name) { var el = form.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
-  function deDate(iso) { if (!iso) return ""; var p = iso.split("-"); return p.length === 3 ? p[2] + "." + p[1] + "." + p[0] : iso; }
+  function deDate(iso) { if (!iso) return ""; var p = iso.split("-"), sep = EN ? "/" : "."; return p.length === 3 ? p[2] + sep + p[1] + sep + p[0] : iso; }
   function todayIso() { var t = new Date(); return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0"); }
   function params() { var o = {}; location.search.replace(/^\?/, "").split("&").forEach(function (kv) { if (!kv) return; var p = kv.split("="); o[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || "").replace(/\+/g, " ")); }); return o; }
   var Q = params();
-  var SPECIAL = { beratung: "Beratung / Einzelleistung", keramik: "Keramikversiegelung", care: "ElbDetail Care" };  // Anfragen ohne Paketpreis
+  var SPECIAL = { beratung: t("Beratung / Einzelleistung"), keramik: t("Keramikversiegelung"), care: "ElbDetail Care" };  // Anfragen ohne Paketpreis
 
   /* Verfügbarkeit (Sperrtage, Ruhetage, nächster freier Tag) – einmal laden, mehrfach nutzen */
   var availP = null;
@@ -38,8 +43,8 @@
   function niceDate(iso) {
     var d = new Date(iso + "T12:00:00"), t = new Date(); t.setHours(12, 0, 0, 0);
     var diff = Math.round((d - t) / 86400000);
-    var txt = d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
-    return diff === 0 ? "heute, " + txt : diff === 1 ? "morgen, " + txt : txt;
+    var txt = d.toLocaleDateString(EN ? "en-GB" : "de-DE", { weekday: "short", day: "numeric", month: "short" });
+    return diff === 0 ? t("heute, {d}", { d: txt }) : diff === 1 ? t("morgen, {d}", { d: txt }) : txt;
   }
 
   /* ---------------------------------------------------------------- Statistik über das Portal (/api/e), cookielos */
@@ -120,7 +125,7 @@
   if (menuToggle && mobileNav) {
     var setMenu = function (open) {
       menuToggle.setAttribute("aria-expanded", String(open));
-      menuToggle.setAttribute("aria-label", open ? "Menü schließen" : "Menü öffnen");
+      menuToggle.setAttribute("aria-label", open ? t("Menü schließen") : t("Menü öffnen"));
       mobileNav.hidden = !open;
     };
     menuToggle.addEventListener("click", function () { setMenu(menuToggle.getAttribute("aria-expanded") !== "true"); });
@@ -158,8 +163,8 @@
     var qReduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     var showQuoteValue = function (v) {
       var from = lastV; lastV = v;
-      var paint = function (n) { qv.innerHTML = "<small>ab</small>" + fmt(n) + " €"; };
-      if (v == null) { qv.innerHTML = '<small>Preis</small>auf Anfrage'; return; }
+      var paint = function (n) { qv.innerHTML = "<small>" + t("ab") + "</small>" + eur(n); };
+      if (v == null) { qv.innerHTML = "<small>" + t("Preis") + "</small>" + t("auf Anfrage"); return; }
       if (from == null || from === v || qReduce || !window.requestAnimationFrame) { paint(v); return; }
       qBox.setAttribute("aria-busy", "true");
       qBox.classList.remove("bump"); void qBox.offsetWidth; qBox.classList.add("bump");
@@ -178,13 +183,14 @@
       var onReq = v == null;  // z. B. Sportwagen / Premium-Segment: immer individuelles Angebot
       var note = $("#quoteNote");
       if (note) note.textContent = onReq
-        ? (c.note || "Für dieses Fahrzeug erstellen wir nach einer kurzen Begutachtung ein individuelles Angebot.")
-        : "Richtwert für normalen Pflegezustand. Der verbindliche Preis hängt von Fahrzeug und Zustand ab und wird vor dem Termin bestätigt.";
-      $("#quoteBook").lastChild.textContent = onReq ? "Individuelles Angebot anfragen" : "Dieses Paket anfragen";
+        ? (c.note || t("Für dieses Fahrzeug erstellen wir nach einer kurzen Begutachtung ein individuelles Angebot."))
+        : t("Richtwert für normalen Pflegezustand. Der verbindliche Preis hängt von Fahrzeug und Zustand ab und wird vor dem Termin bestätigt.");
+      $("#quoteBook").lastChild.textContent = onReq ? t("Individuelles Angebot anfragen") : t("Dieses Paket anfragen");
       showQuoteValue(v);
       $("#quotePkgName").textContent = p.name;
       $("#quoteBook").href = "termin.html?paket=" + pk + "&klasse=" + ck;
-      $("#quoteWa").href = waLink("Hallo ElbDetail, ich interessiere mich für das Paket „" + p.name + "“ (" + c.name + (onReq ? ", bitte um ein individuelles Angebot" : ", Richtpreis ab " + fmt(v) + " €") + "). Fahrzeug: … Wunschtermin: …");
+      $("#quoteWa").href = waLink(t("Hallo ElbDetail, ich interessiere mich für das Paket „{paket}“ ({klasse}). Fahrzeug: … Wunschtermin: …",
+        { paket: p.name, klasse: c.name + (onReq ? t(", bitte um ein individuelles Angebot") : t(", Richtpreis ab {preis}", { preis: eur(v) })) }));
       if (user) track("Rechner genutzt", { paket: p.name, klasse: c.short });
     };
     quote.addEventListener("change", function () { updateQuote(true); });
@@ -199,10 +205,11 @@
       $$("[data-plan]").forEach(function (plan) {
         var pk = plan.getAttribute("data-plan"), v = price(pk, ck), p = pkg(pk);
         var amount = $(".amount", plan), from = $(".from", plan);
-        if (amount) amount.textContent = v != null ? fmt(v) + " €" : "auf Anfrage";
+        if (amount) amount.textContent = v != null ? eur(v) : t("auf Anfrage");
         if (from) from.hidden = v == null;
         var book = $("[data-book]", plan); if (book) book.href = "termin.html?paket=" + pk + "&klasse=" + ck;
-        var wa = $("[data-wa-plan]", plan); if (wa) wa.href = waLink("Hallo ElbDetail, ich möchte das Paket „" + p.name + "“ anfragen (" + c.name + (v != null ? ", Richtpreis ab " + fmt(v) + " €" : ", bitte um ein individuelles Angebot") + "). Fahrzeug: … Wunschtermin: …");
+        var wa = $("[data-wa-plan]", plan); if (wa) wa.href = waLink(t("Hallo ElbDetail, ich möchte das Paket „{paket}“ anfragen ({klasse}). Fahrzeug: … Wunschtermin: …",
+          { paket: p.name, klasse: c.name + (v != null ? t(", Richtpreis ab {preis}", { preis: eur(v) }) : t(", bitte um ein individuelles Angebot")) }));
       });
       var lbl = $("#priceClassLabel"); if (lbl && c) lbl.textContent = c.name;
     };
@@ -239,7 +246,7 @@
   if (lbLinks.length && window.HTMLDialogElement) {
     var dlg = document.createElement("dialog");
     dlg.className = "lightbox";
-    dlg.innerHTML = '<button type="button" class="lightbox-close" aria-label="Schließen">×</button><img alt="">';
+    dlg.innerHTML = '<button type="button" class="lightbox-close" aria-label="' + t("Schließen") + '">×</button><img alt="">';
     document.body.appendChild(dlg);
     var lbImg = dlg.querySelector("img");
     dlg.addEventListener("click", function (e) { if (e.target === dlg || e.target.closest(".lightbox-close")) dlg.close(); });
@@ -296,20 +303,21 @@
   if (mapBtn && mapPh) mapBtn.addEventListener("click", function () {
     var f = document.createElement("iframe");
     f.className = "map-frame"; f.loading = "lazy"; f.referrerPolicy = "no-referrer-when-downgrade";
-    f.title = "Standort ElbDetail, Lachtehäuser Straße 1, 29223 Celle";
+    f.title = t("Standort ElbDetail, Lachtehäuser Straße 1, 29223 Celle");
     f.src = "https://www.google.com/maps?q=Lachteh%C3%A4user%20Stra%C3%9Fe%201,%2029223%20Celle&output=embed";
     mapPh.replaceWith(f); track("Karte geladen");
   });
 
   /* ---------------------------------------------------------------- Formulare */
   var LABELS = {
-    typ: null, website: null, einwilligung: null, quelle: null, name: "Name", telefon: "Telefon", email: "E-Mail", paket: "Paket",
-    klasse: "Fahrzeugklasse", fahrzeug: "Fahrzeug", zustand: "Zustand", extras: "Extras", abholung: "Abholung", datum: "Wunschtermin",
-    datum2: "Ausweichtermin", zeitfenster: "Zeitfenster", uhrzeit: "Uhrzeit", gutscheincode: "Gutscheincode", kanal: "Antwort per", nachricht: "Nachricht",
-    bewertung_ok: null, art: "Gutschein", betrag: "Betrag", wunschbetrag: "Wunschbetrag", fuer: "Für", von: "Von", widmung: "Widmung",
-    zustellung: "Zustellung", firma: "Firma", anzahl: "Fahrzeuge", intervall: "Intervall", leistungen: "Leistungen", scheibenumfang: "Scheiben", vorgang: "Vorgang / Gutscheincode", winterschutz: "Schutz im Winterangebot"
+    typ: null, website: null, einwilligung: null, quelle: null, sprache: null, name: t("Name"), telefon: t("Telefon"), email: t("E-Mail"), paket: t("Paket"),
+    klasse: t("Fahrzeugklasse"), fahrzeug: t("Fahrzeug"), zustand: t("Zustand"), extras: t("Extras"), abholung: t("Abholung"), datum: t("Wunschtermin"),
+    datum2: t("Ausweichtermin"), zeitfenster: t("Zeitfenster"), uhrzeit: t("Uhrzeit"), gutscheincode: t("Gutscheincode"), kanal: t("Antwort per"), nachricht: t("Nachricht"),
+    bewertung_ok: null, art: t("Gutschein"), betrag: t("Betrag"), wunschbetrag: t("Wunschbetrag"), fuer: t("Für"), von: t("Von"), widmung: t("Widmung"),
+    zustellung: t("Zustellung"), firma: t("Firma"), anzahl: t("Fahrzeuge"), intervall: t("Intervall"), leistungen: t("Leistungen"), scheibenumfang: t("Scheiben"),
+    vorgang: t("Vorgang / Gutscheincode"), winterschutz: t("Schutz im Winterangebot")
   };
-  var TITLES = { kontakt: "Anfrage", termin: "Terminanfrage", gutschein: "Gutscheinbestellung", firma: "Firmenanfrage", widerruf: "Widerruf" };
+  var TITLES = { kontakt: t("Anfrage"), termin: t("Terminanfrage"), gutschein: t("Gutscheinbestellung"), firma: t("Firmenanfrage"), widerruf: t("Widerruf") };
 
   function collect(form) {
     var data = {};
@@ -321,14 +329,15 @@
         (data[el.name] = data[el.name] || []).push(v);
       } else data[el.name] = v;
     });
+    if (EN) data.sprache = "en";  // René sieht, dass auf Englisch geantwortet werden sollte
     return data;
   }
   function pretty(k, v) {
     if (k === "paket") { var p = pkg(v); return p ? p.name : (SPECIAL[v] || v); }
     if (k === "klasse") { var c = cls(v); return c ? c.name : v; }
     if (k === "datum" || k === "datum2") return deDate(v);
-    if (k === "betrag" || k === "wunschbetrag") return v + " €";
-    if (k === "winterschutz") return v === "keramik" ? "C² CarCeramic statt Wachs (Aufpreis nach Absprache)" : "Wachsversiegelung (inklusive)";
+    if (k === "betrag" || k === "wunschbetrag") return eur(v);
+    if (k === "winterschutz") return v === "keramik" ? t("C² CarCeramic statt Wachs (Aufpreis nach Absprache)") : t("Wachsversiegelung (inklusive)");
     return Array.isArray(v) ? v.join(", ") : v;
   }
   function asText(data) {
@@ -341,7 +350,7 @@
   }
   function waFromForm(form) {
     var data = collect(form), typ = data.typ || "kontakt";
-    return waLink("Hallo ElbDetail, hier meine " + (TITLES[typ] || "Anfrage") + ":\n" + asText(data));
+    return waLink(t("Hallo ElbDetail, hier meine {titel}:", { titel: TITLES[typ] || t("Anfrage") }) + "\n" + asText(data));
   }
   function openWa(href) {
     var a = document.createElement("a"); a.href = href; a.target = "_blank"; a.rel = "noopener";
@@ -354,10 +363,10 @@
   }
   function fallbackHtml(form, reason) {
     var data = collect(form);
-    var mail = "mailto:" + ELB.email + "?subject=" + encodeURIComponent((TITLES[data.typ] || "Anfrage") + " über die Website – " + (data.name || "")) +
+    var mail = "mailto:" + ELB.email + "?subject=" + encodeURIComponent(t("{titel} über die Website", { titel: TITLES[data.typ] || t("Anfrage") }) + " – " + (data.name || "")) +
       "&body=" + encodeURIComponent(asText(data));
     return '<span>' + reason + '</span><span class="fb-actions"><a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="' + waFromForm(form) +
-      '">Per WhatsApp senden</a><a class="btn btn-line-light btn-sm" href="' + mail + '">Per E-Mail senden</a></span><span class="hint">Oder rufen Sie an: <a href="tel:' + ELB.phone + '">' + ELB.phoneDisplay + '</a></span>';
+      '">' + t("Per WhatsApp senden") + '</a><a class="btn btn-line-light btn-sm" href="' + mail + '">' + t("Per E-Mail senden") + '</a></span><span class="hint">' + t("Oder rufen Sie an:") + ' <a href="tel:' + ELB.phone + '">' + ELB.phoneDisplay + '</a></span>';
   }
   function fieldError(form, name, text) {
     var el = form.querySelector('[name="' + name + '"]'); if (!el) return;
@@ -397,7 +406,7 @@
         URL.revokeObjectURL(url);
         c.toBlob(function (b) { if (b) resolve(b); else reject(new Error("")); }, "image/jpeg", 0.85);
       };
-      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Dieses Bildformat lässt sich hier nicht verarbeiten. Bitte ein JPG oder PNG wählen.")); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error(t("Dieses Bildformat lässt sich hier nicht verarbeiten. Bitte ein JPG oder PNG wählen."))); };
       img.src = url;
     });
   }
@@ -413,7 +422,9 @@
     fotoCfg().then(function (cfg) {
       if (!cfg || !cfg.aktiv) return;
       row.__max = Math.max(1, parseInt(cfg.max, 10) || 5);
-      hint.textContent = (cfg.hinweis ? cfg.hinweis + " " : "") + "Höchstens " + row.__max + (row.__max === 1 ? " Foto." : " Fotos.");
+      /* Hinweis zur Löschfrist kommt vom Portal auf Deutsch; die englische Seite formuliert ihn aus der Anzahl der Tage selbst */
+      var fh = EN ? (cfg.tage ? t("Die Fotos werden nach {n} Tagen automatisch gelöscht.", { n: parseInt(cfg.tage, 10) }) : "") : (cfg.hinweis || "");
+      hint.textContent = (fh ? fh + " " : "") + (row.__max === 1 ? t("Höchstens {n} Foto.", { n: 1 }) : t("Höchstens {n} Fotos.", { n: row.__max }));
       row.hidden = false;
       input.addEventListener("change", function () {
         var files = [].slice.call(input.files || []); input.value = "";
@@ -421,8 +432,8 @@
           if (items.length >= row.__max) return;
           var it = { token: "", busy: true }, li = document.createElement("li");
           li.className = "foto-item is-busy";
-          li.innerHTML = '<img alt="" width="64" height="64"><span class="foto-state">Wird hochgeladen …</span><button type="button" class="link-btn">Entfernen</button>';
-          $("img", li).alt = "Vorschau " + file.name;
+          li.innerHTML = '<img alt="" width="64" height="64"><span class="foto-state">' + t("Wird hochgeladen …") + '</span><button type="button" class="link-btn">' + t("Entfernen") + '</button>';
+          $("img", li).alt = t("Vorschau {name}", { name: file.name });
           items.push(it); list.appendChild(li); sync();
           $("button", li).addEventListener("click", function () { items.splice(items.indexOf(it), 1); li.remove(); sync(); });
           shrink(file).then(function (blob) {
@@ -431,11 +442,11 @@
           }).then(function (r) {
             return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.token) throw new Error(j.message || ""); return j; });
           }).then(function (j) {
-            it.token = j.token; it.busy = false; li.classList.remove("is-busy"); $(".foto-state", li).textContent = "Hochgeladen";
+            it.token = j.token; it.busy = false; li.classList.remove("is-busy"); $(".foto-state", li).textContent = t("Hochgeladen");
             track("Foto hochgeladen");
           }).catch(function (e) {
             it.busy = false; li.classList.remove("is-busy"); li.classList.add("is-error");
-            $(".foto-state", li).textContent = (e && e.message) || "Dieses Foto konnte nicht hochgeladen werden.";
+            $(".foto-state", li).textContent = (e && e.message && !EN ? e.message : "") || t("Dieses Foto konnte nicht hochgeladen werden.");
           }).then(sync);
         });
       });
@@ -450,18 +461,18 @@
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       if (form.website && form.website.value) return;
-      if (!validate(form)) { setStatus(form, "Bitte die markierten Pflichtfelder ausfüllen.", "error"); return; }
+      if (!validate(form)) { setStatus(form, t("Bitte die markierten Pflichtfelder ausfüllen."), "error"); return; }
       var btn = form.querySelector('[type="submit"]:not([hidden])');
       if (!IS_LIVE) {
-        setStatus(form, "", "info", fallbackHtml(form, "Das Formular kann hier nicht übertragen werden. Senden Sie die Angaben direkt:"));
+        setStatus(form, "", "info", fallbackHtml(form, t("Das Formular kann hier nicht übertragen werden. Senden Sie die Angaben direkt:")));
         return;
       }
       var fotos = form.__fotos || [];
-      if (fotos.some(function (x) { return x.busy; })) { setStatus(form, "Einen Moment bitte, die Fotos werden noch hochgeladen.", "info"); return; }
+      if (fotos.some(function (x) { return x.busy; })) { setStatus(form, t("Einen Moment bitte, die Fotos werden noch hochgeladen."), "info"); return; }
       if (btn && btn.disabled) return;  // Doppelklick: nur einmal senden
       clearErrors(form);
       if (btn) { btn.disabled = true; btn.classList.add("is-loading"); }
-      setStatus(form, "Wird gesendet …", "");
+      setStatus(form, t("Wird gesendet …"), "");
       fetch(API + "/anfrage", { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify((function () {
         var d = collect(form), tk = fotos.filter(function (x) { return x.token; }).map(function (x) { return x.token; });
         if (tk.length) d.fotos = tk;
@@ -474,14 +485,17 @@
             var anz = form.getAttribute("data-anzahlung");
             location.href = "danke.html?typ=" + encodeURIComponent(typ) + (j.ref ? "&ref=" + encodeURIComponent(j.ref) : "") + (anz ? "&anz=" + encodeURIComponent(anz) : "");
           } else if (j.status === 429) {
-            setStatus(form, "", "error", fallbackHtml(form, "Gerade kommen sehr viele Anfragen an. Bitte versuchen Sie es später noch einmal oder melden Sie sich direkt:"));
+            setStatus(form, "", "error", fallbackHtml(form, t("Gerade kommen sehr viele Anfragen an. Bitte versuchen Sie es später noch einmal oder melden Sie sich direkt:")));
           } else if (j.errors) {
-            Object.keys(j.errors).forEach(function (k) { fieldError(form, k, j.errors[k]); });
-            setStatus(form, j.message || "Bitte die markierten Angaben prüfen.", "error");
+            /* Fehlertexte des Portals sind deutsch; die englische Seite zeigt eigene */
+            Object.keys(j.errors).forEach(function (k) {
+              fieldError(form, k, !EN ? j.errors[k] : k === "uhrzeit" ? t("Diese Uhrzeit wurde gerade vergeben. Bitte eine andere wählen.") : t("Bitte diese Angabe prüfen."));
+            });
+            setStatus(form, (!EN && j.message) || t("Bitte die markierten Angaben prüfen."), "error");
             form.dispatchEvent(new CustomEvent("elb:errors", { detail: j.errors }));
           } else throw new Error("server");
         })
-        .catch(function () { setStatus(form, "", "error", fallbackHtml(form, "Die Anfrage konnte gerade nicht übertragen werden. Bitte senden Sie sie direkt:")); })
+        .catch(function () { setStatus(form, "", "error", fallbackHtml(form, t("Die Anfrage konnte gerade nicht übertragen werden. Bitte senden Sie sie direkt:"))); })
         .then(function () { if (btn) { btn.disabled = false; btn.classList.remove("is-loading"); } });
     });
     $$("input, select, textarea", form).forEach(function (el) {
@@ -532,23 +546,25 @@
       if (!slotBox) return;
       var day = wz.datum.value, chosen = keep || radio(wz, "uhrzeit");
       var say = function (t, err, html) { if (slotMsg) { if (html) slotMsg.innerHTML = t; else slotMsg.textContent = t; slotMsg.className = "field-msg" + (err ? " error" : ""); } };
-      var alt = 'Rufen Sie uns an (<a href="tel:' + ELB.phone + '">' + ELB.phoneDisplay + '</a>) oder schreiben Sie per <a href="' + waLink("Hallo ElbDetail, ich möchte einen Termin am " + deDate(day) + " vereinbaren.") + '" target="_blank" rel="noopener">WhatsApp</a>.';
-      if (!day || wz.datum.validationMessage) { slotBox.innerHTML = ""; say(day ? "" : "Bitte zuerst einen Tag wählen."); return; }
-      if (!IS_LIVE) { slotBox.innerHTML = ""; say("Freie Uhrzeiten können hier nicht geladen werden. " + alt, true, true); return; }
+      var alt = t("Rufen Sie uns an ({tel}) oder schreiben Sie per {wa}.", { tel: '<a href="tel:' + ELB.phone + '">' + ELB.phoneDisplay + '</a>',
+        wa: '<a href="' + waLink(t("Hallo ElbDetail, ich möchte einen Termin am {datum} vereinbaren.", { datum: deDate(day) })) + '" target="_blank" rel="noopener">WhatsApp</a>' });
+      if (!day || wz.datum.validationMessage) { slotBox.innerHTML = ""; say(day ? "" : t("Bitte zuerst einen Tag wählen.")); return; }
+      if (!IS_LIVE) { slotBox.innerHTML = ""; say(t("Freie Uhrzeiten können hier nicht geladen werden.") + " " + alt, true, true); return; }
       var my = ++slotReq;
-      say("Freie Uhrzeiten werden geladen …");
+      say(t("Freie Uhrzeiten werden geladen …"));
       fetch(API + "/slots?tag=" + encodeURIComponent(day)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
         if (my !== slotReq) return;
-        if (!j || !j.slots) { slotBox.innerHTML = ""; say("Die freien Uhrzeiten konnten gerade nicht geladen werden. " + alt, true, true); return; }
+        if (!j || !j.slots) { slotBox.innerHTML = ""; say(t("Die freien Uhrzeiten konnten gerade nicht geladen werden.") + " " + alt, true, true); return; }
         var free = j.slots.filter(function (x) { return x.frei; });
         slotBox.innerHTML = j.slots.map(function (x) {
-          var t = String(x.zeit).replace(/[^0-9:]/g, "");
-          return '<label class="choice-pill"' + (x.frei ? "" : ' title="Bereits vergeben"') + '><input type="radio" name="uhrzeit" value="' + t + '" required' +
-            (x.frei ? "" : " disabled") + (x.frei && t === chosen ? " checked" : "") + '><span><strong>' + t + ' Uhr</strong></span></label>';
+          var z = String(x.zeit).replace(/[^0-9:]/g, "");
+          return '<label class="choice-pill"' + (x.frei ? "" : ' title="' + t("Bereits vergeben") + '"') + '><input type="radio" name="uhrzeit" value="' + z + '" required' +
+            (x.frei ? "" : " disabled") + (x.frei && z === chosen ? " checked" : "") + '><span><strong>' + t("{zeit} Uhr", { zeit: z }) + '</strong></span></label>';
         }).join("");
-        say(free.length ? free.length + (free.length === 1 ? " Uhrzeit" : " Uhrzeiten") + " frei an diesem Tag." : "An diesem Tag ist leider keine Uhrzeit mehr frei. Bitte einen anderen Tag wählen.", !free.length);
+        say(free.length ? (free.length === 1 ? t("{n} Uhrzeit frei an diesem Tag.", { n: 1 }) : t("{n} Uhrzeiten frei an diesem Tag.", { n: free.length }))
+          : t("An diesem Tag ist leider keine Uhrzeit mehr frei. Bitte einen anderen Tag wählen."), !free.length);
         summary();
-      }).catch(function () { if (my === slotReq) { slotBox.innerHTML = ""; say("Die freien Uhrzeiten konnten gerade nicht geladen werden. " + alt, true, true); } });
+      }).catch(function () { if (my === slotReq) { slotBox.innerHTML = ""; say(t("Die freien Uhrzeiten konnten gerade nicht geladen werden.") + " " + alt, true, true); } });
     }
     /* Zwei Buchungen zur selben Zeit: das Portal lässt nur eine gewinnen, die andere bekommt einen Hinweis an der Uhrzeit */
     wz.addEventListener("elb:errors", function (e) {
@@ -569,9 +585,9 @@
       var msg = $("#" + el.id + "-msg"), v = el.value, txt = "";
       if (v) {
         var d = new Date(v + "T12:00:00");
-        if (v < todayIso()) txt = "Bitte ein Datum ab heute wählen.";
-        else if (closedWeekdays.indexOf(d.getDay()) !== -1) txt = "An Sonntagen sind wir geschlossen. Bitte einen anderen Tag wählen.";
-        else if (blocked.indexOf(v) !== -1) txt = "An diesem Tag sind wir leider ausgebucht oder geschlossen.";
+        if (v < todayIso()) txt = t("Bitte ein Datum ab heute wählen.");
+        else if (closedWeekdays.indexOf(d.getDay()) !== -1) txt = t("An Sonntagen sind wir geschlossen. Bitte einen anderen Tag wählen.");
+        else if (blocked.indexOf(v) !== -1) txt = t("An diesem Tag sind wir leider ausgebucht oder geschlossen.");
       }
       el.setCustomValidity(txt);
       if (msg) { msg.textContent = txt; msg.className = "field-msg" + (txt ? " error" : ""); }
@@ -587,7 +603,7 @@
       track("Buchung Schritt", { schritt: cur + 1 });
     }
     function go(d) {
-      if (d > 0 && !validate(wz, steps[cur])) { setStatus(wz, "Bitte die markierten Angaben ergänzen.", "error"); return; }
+      if (d > 0 && !validate(wz, steps[cur])) { setStatus(wz, t("Bitte die markierten Angaben ergänzen."), "error"); return; }
       setStatus(wz, "", "");
       show(cur + d);
       var lg = $("legend", steps[cur]); if (lg) { lg.setAttribute("tabindex", "-1"); lg.focus(); }
@@ -605,18 +621,21 @@
       var surPct = zs.reduce(function (a, z) { return a + ((sc.overrides || {})[z] != null ? sc.overrides[z] : (sc.percent || 0)); }, 0);
       if (sch) surPct = 0;  // Zustand des Innenraums spielt für die Scheiben keine Rolle
       if (v != null && surPct) v = Math.round(v * (1 + surPct / 100));
-      var surEl = $("#t-surcharge"); if (surEl) surEl.textContent = surPct ? "Richtpreis inkl. " + surPct + " % Zuschlag für den Zustand." : "";
-      var set = function (k, t) { var el = wz.parentNode.querySelector('[data-sum="' + k + '"]'); if (el) el.textContent = t; };
-      set("paket", (p ? p.name : (SPECIAL[d.paket] || "–")) + (wk ? " · C² CarCeramic statt Wachs" : "") + (sch && d.scheibenumfang ? " · " + d.scheibenumfang : ""));
+      var surEl = $("#t-surcharge"); if (surEl) surEl.textContent = surPct ? t("Richtpreis inkl. {p} % Zuschlag für den Zustand.", { p: surPct }) : "";
+      var set = function (k, x) { var el = wz.parentNode.querySelector('[data-sum="' + k + '"]'); if (el) el.textContent = x; };
+      var shown = function (name) {  // angezeigter Text der Auswahl (die Werte bleiben deutsch, damit René sie versteht)
+        return $$('input[name="' + name + '"]:checked', wz).map(function (el) { var s = $("strong", el.parentNode) || el.nextElementSibling; return s ? s.textContent.trim() : el.value; });
+      };
+      set("paket", (p ? p.name : (SPECIAL[d.paket] || "–")) + (wk ? " · " + t("C² CarCeramic statt Wachs") : "") + (sch && d.scheibenumfang ? " · " + shown("scheibenumfang").join("") : ""));
       set("klasse", (c ? c.name : "–") + (d.fahrzeug ? " · " + d.fahrzeug : ""));
-      set("extras", d.extras && d.extras.length ? d.extras.join(", ") : "keine");
-      set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + d.uhrzeit + " Uhr" : "") + (d.datum2 ? " (alt. " + deDate(d.datum2) + ")" : "") : "–");
-      set("preis", v != null ? (sch ? "" : "ab ") + fmt(v) + " €" + (wk ? " + Aufpreis C² CarCeramic" : "") : (SPECIAL[d.paket] ? "nach Begutachtung" : "–"));
+      set("extras", d.extras && d.extras.length ? shown("extras").join(", ") : t("keine"));
+      set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + t("{zeit} Uhr", { zeit: d.uhrzeit }) : "") + (d.datum2 ? " (" + t("alt.") + " " + deDate(d.datum2) + ")" : "") : "–");
+      set("preis", v != null ? (sch ? "" : t("ab") + " ") + eur(v) + (wk ? " + " + t("Aufpreis C² CarCeramic") : "") : (SPECIAL[d.paket] ? t("nach Begutachtung") : "–"));
       var bk = ELB.booking || {}, base = wk ? null : (v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null));
       var anz = base && payMe ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2) : "";
       if (anz) wz.setAttribute("data-anzahlung", anz); else wz.removeAttribute("data-anzahlung");
-      set("anzahlung", anz ? anz.replace(".", ",").replace(",00", "") + " € per PayPal nach dem Absenden" : (d.paket ? "nach Absprache" : "–"));
-      $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? "ab " + fmt(x) + " €" : "auf Anfrage"; });
+      set("anzahlung", anz ? t("{betrag} per PayPal nach dem Absenden", { betrag: eurCt(anz) }) : (d.paket ? t("nach Absprache") : "–"));
+      $$("[data-price-for]", wz).forEach(function (el) { var x = price(el.getAttribute("data-price-for"), d.klasse || ELB.classes[0].key); el.textContent = x != null ? t("ab") + " " + eur(x) : t("auf Anfrage"); });
     }
     wz.addEventListener("change", summary); wz.addEventListener("input", summary);
     if (wz.datum.value) checkDate(wz.datum);
@@ -633,10 +652,10 @@
       $(".vf-wert", vf).hidden = art !== "wert"; $(".vf-paket", vf).hidden = art !== "paket";
       if (art === "paket") {
         var p = pkg(vf.paket.value);
-        setVc("value", p ? p.name : "Paket"); setVc("desc", "Fahrzeugaufbereitung für einen Kleinwagen" + (p ? " · Wert " + p.prices[ELB.classes[0].key] + " €" : ""));
+        setVc("value", p ? p.name : t("Paket")); setVc("desc", t("Fahrzeugaufbereitung für einen Kleinwagen") + (p ? " · " + t("Wert {preis}", { preis: eur(p.prices[ELB.classes[0].key]) }) : ""));
       } else {
         var c = vf.wunschbetrag.value ? parseInt(vf.wunschbetrag.value, 10) : parseInt(radio(vf, "betrag") || "0", 10);
-        setVc("value", (c || 0) + " €"); setVc("desc", "für eine Fahrzeugaufbereitung nach Wahl");
+        setVc("value", eur(c || 0)); setVc("desc", t("für eine Fahrzeugaufbereitung nach Wahl"));
       }
       setVc("fuer", vf.fuer.value.trim() || "…"); setVc("von", vf.von.value.trim() || "…"); setVc("msg", vf.widmung.value.trim());
     };
@@ -661,24 +680,24 @@
   /* Danke-Seite */
   var thanks = $("[data-thanks-title]");
   if (thanks && Q.typ) {
-    var bk = ELB.booking || {}, owner = bk.owner || "Wir";
+    var bk = ELB.booking || {}, owner = bk.owner || t("Wir");
     var T = {
-      termin: ["Terminanfrage eingegangen.", owner + " meldet sich telefonisch, sieht sich Ihr Fahrzeug vorab an und bestätigt den Termin. Eine Eingangsbestätigung ist unterwegs an Ihre E-Mail-Adresse."],
-      kontakt: ["Anfrage eingegangen.", "Wir melden uns so schnell wie möglich, in der Regel am selben oder nächsten Werktag."],
-      gutschein: ["Gutscheinbestellung eingegangen.", "Sie erhalten eine Eingangsbestätigung per E-Mail. Die Zahlungsdaten schicken wir Ihnen in Kürze, nach Zahlungseingang erhalten Sie den Gutschein."],
-      firma: ["Anfrage eingegangen.", "Vielen Dank für Ihr Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen."],
-      widerruf: ["Ihr Widerruf ist eingegangen.", "Sie erhalten eine Eingangsbestätigung per E-Mail. Bereits geleistete Zahlungen erstatten wir unverzüglich, spätestens binnen 14 Tagen."]
+      termin: [t("Terminanfrage eingegangen."), t("{owner} meldet sich telefonisch, sieht sich Ihr Fahrzeug vorab an und bestätigt den Termin. Eine Eingangsbestätigung ist unterwegs an Ihre E-Mail-Adresse.", { owner: owner })],
+      kontakt: [t("Anfrage eingegangen."), t("Wir melden uns so schnell wie möglich, in der Regel am selben oder nächsten Werktag.")],
+      gutschein: [t("Gutscheinbestellung eingegangen."), t("Sie erhalten eine Eingangsbestätigung per E-Mail. Die Zahlungsdaten schicken wir Ihnen in Kürze, nach Zahlungseingang erhalten Sie den Gutschein.")],
+      firma: [t("Anfrage eingegangen."), t("Vielen Dank für Ihr Interesse. Wir melden uns mit einem Vorschlag für Umfang, Intervalle und Konditionen.")],
+      widerruf: [t("Ihr Widerruf ist eingegangen."), t("Sie erhalten eine Eingangsbestätigung per E-Mail. Bereits geleistete Zahlungen erstatten wir unverzüglich, spätestens binnen 14 Tagen.")]
     }[Q.typ];
-    if (T) { thanks.innerHTML = "Danke! <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " Ihre Vorgangsnummer: " + Q.ref + "." : ""); }
+    if (T) { thanks.innerHTML = t("Danke!") + " <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " " + t("Ihre Vorgangsnummer: {ref}.", { ref: Q.ref }) : ""); }
     /* Anzahlung per PayPal.me: Betrag steht im Link, die Vorgangsnummer als Verwendungszweck */
     var pay = $("[data-thanks-pay]"), amt = parseFloat(Q.anz || "");
     if (pay && Q.typ === "termin" && amt > 0 && amt < 10000) availability().then(function (j) {
       var me = payMeName(j); if (!me) return;
-      var eur = amt.toFixed(2).replace(".", ",").replace(",00", "") + " €";
-      pay.innerHTML = '<h2>Anzahlung leisten</h2><p>Mit der Anzahlung von <strong>' + eur + '</strong> sichern Sie sich Ihren Termin. Sie wird mit dem Endpreis verrechnet. ' +
-        'Bitte geben Sie bei PayPal als Verwendungszweck <strong>' + (Q.ref || "Ihren Namen").replace(/[^A-Za-z0-9 -]/g, "") + '</strong> an und zahlen Sie als „Waren oder Dienstleistungen“.</p>' +
-        '<a class="btn btn-primary btn-lg" href="https://paypal.me/' + encodeURIComponent(me) + '/' + amt.toFixed(2) + 'EUR" target="_blank" rel="noopener">Anzahlung ' + eur + ' mit PayPal senden</a>' +
-        '<p class="hint">Kommt der Termin nicht zustande oder widerrufen Sie innerhalb der Frist, erstatten wir die Anzahlung vollständig.</p>';
+      var amtTxt = eurCt(amt), ref = (Q.ref || t("Ihren Namen")).replace(/[^A-Za-z0-9 -]/g, "");
+      pay.innerHTML = '<h2>' + t("Anzahlung leisten") + '</h2><p>' + t("Mit der Anzahlung von {betrag} sichern Sie sich Ihren Termin. Sie wird mit dem Endpreis verrechnet.", { betrag: "<strong>" + amtTxt + "</strong>" }) + " " +
+        t("Bitte geben Sie bei PayPal als Verwendungszweck {ref} an und zahlen Sie als „Waren oder Dienstleistungen“.", { ref: "<strong>" + ref + "</strong>" }) + '</p>' +
+        '<a class="btn btn-primary btn-lg" href="https://paypal.me/' + encodeURIComponent(me) + '/' + amt.toFixed(2) + 'EUR" target="_blank" rel="noopener">' + t("Anzahlung {betrag} mit PayPal senden", { betrag: amtTxt }) + '</a>' +
+        '<p class="hint">' + t("Kommt der Termin nicht zustande oder widerrufen Sie innerhalb der Frist, erstatten wir die Anzahlung vollständig.") + '</p>';
       pay.hidden = false;
     });
   }

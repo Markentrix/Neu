@@ -25,6 +25,7 @@ sys.path.insert(0, HERE)
 import agb  # noqa: E402
 import core  # noqa: E402
 import conversion  # noqa: E402
+import i18n  # noqa: E402
 import images  # noqa: E402
 import pages  # noqa: E402
 import ratgeber  # noqa: E402
@@ -140,6 +141,10 @@ def build(content_dir, out_dir, static_dir, quiet=False):
            ("/aktion/winterschutz.html", iso, "0.7", "monthly"), ("/ratgeber/index.html", iso, "0.7", "weekly"), ("/ratgeber/winter.html", iso, "0.7", "monthly")]
     sm += [(f"/ratgeber/{a['slug']}.html", a.get("updated") or a.get("date") or iso, "0.6", "monthly") for a in site.articles]
     sm += [("/impressum.html", iso, "0.2", "yearly"), ("/datenschutz.html", iso, "0.2", "yearly"), ("/agb.html", iso, "0.2", "yearly")]
+    with open(os.path.join(static_dir, "script.js"), encoding="utf-8") as f:
+        en = i18n.build_en(out_dir, written, content_dir, site.url, config_js(site), f.read())
+    written += en["written"]
+    sm += [("/en" + p, d, pr, f) for p, d, pr, f in sm]
     write("sitemap.xml", seo.sitemap(site, sm))
     write("robots.txt", seo.robots(site))
     write("llms.txt", seo.llms(site))
@@ -170,13 +175,16 @@ def build(content_dir, out_dir, static_dir, quiet=False):
         warnings.append("Foto von René fehlt (Grunddaten → Über uns → Foto)")
     if not (site.s.get("about") or {}).get("name"):
         warnings.append("Inhaber-Karte fehlt (Grunddaten → Über uns: Name, Foto, kurzer Text)")
+    if en["missing"]:
+        warnings.append(f"{len(en['missing'])} Texte ohne englische Übersetzung (python3 build/i18n_tool.py fehlend)")
+    warnings += en["bad"]
     warnings += seo_lengths(out_dir, written)
     if not quiet:
         print(f"Fertig: {len(written)} Dateien, {len([w for w in written if w.endswith('.html')])} Seiten, {len(site.articles)} Artikel, "
               f"{len(site.media)} Bilder in {time.time() - t0:.1f}s → {out_dir}")
         for w in warnings:
             print("Hinweis:", w)
-    return {"files": len(written), "warnings": warnings}
+    return {"files": len(written), "warnings": warnings, "missing": en["missing"], "seen": en["seen"]}
 
 
 TITLE_MAX, DESC_MIN, DESC_MAX = 59, 110, 160  # Markentrix: Titel unter 60 Zeichen

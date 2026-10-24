@@ -17,6 +17,7 @@ Die Website läuft beim Markentrix-Portal. Abgegeben wird nur der Ordner `websit
 - [x] **Domain:** www.elbdetail.de.
 - [x] **Referenzen:** Freigabe aller 5 Firmen für Logo und Namen liegt bei René vor.
 - [x] **Foto von René** auf der Startseite und unter „Über uns“.
+- [ ] **Englische Fassung** (`/en/`) einmal durchklicken. Englische Rechtstexte (Impressum, Datenschutz, AGB, Widerruf) sind Übersetzungen mit Hinweis auf die verbindliche deutsche Fassung. Beim Anwalt mitprüfen lassen.
 - [ ] **Testanfrage** über jedes Formular (Kontakt, Termin, Gutschein, Firma, Widerruf) schicken und prüfen, dass Mail, Push und Eingangsbestätigung ankommen.
 
 ## Direkt nach dem Livegang

@@ -23,8 +23,11 @@ ALLOWED = {"html", "css", "js", "json", "xml", "txt", "ico", "png", "jpg", "webp
            "webmanifest", "pdf", "mp4", "webm", "mp3"}
 
 
+RESULT = {}
+
+
 def setUpModule():
-    builder.build(os.path.join(ROOT, "content"), SITE, os.path.join(ROOT, "static"), quiet=True)
+    RESULT.update(builder.build(os.path.join(ROOT, "content"), SITE, os.path.join(ROOT, "static"), quiet=True))
 
 
 def tearDownModule():
@@ -89,13 +92,13 @@ class TestPortalUpload(unittest.TestCase):
         for p in files(".html"):
             t = read(p)
             rel = os.path.relpath(p, SITE)
-            self.assertIn('<html lang="de"', t, rel)
+            self.assertIn('<html lang="en"' if rel.startswith("en" + os.sep) else '<html lang="de"', t, rel)
             self.assertIn('<meta name="viewport" content="width=device-width, initial-scale=1', t, rel)
             title = html.unescape(re.search(r"<title>(.*?)</title>", t, re.S).group(1))
             self.assertLess(len(title), 60, rel)
             self.assertRegex(t, r'<meta name="description" content="[^"]{20,}"', rel)
             self.assertEqual(len(re.findall(r"<h1\b", t)), 1, rel)
-            self.assertRegex(t, r'href="(/|(\.\./)*)impressum\.html"', rel)
+            self.assertRegex(t, r'href="(/en/|/|(\.\./)*)impressum\.html"', rel)
             self.assertIn('datenschutz.html"', t, rel)
             for img in re.findall(r"<img\b[^>]*>", t):
                 self.assertRegex(img, r'\balt="', f"{rel}: {img}")
@@ -225,6 +228,65 @@ class TestBuild(unittest.TestCase):
             self.assertIn("is-promo", t)
         ld = read(os.path.join(SITE, "index.html"))
         self.assertIn('"dayOfWeek":["Wednesday"],"opens":"09:00"', ld)
+
+
+class TestEnglish(unittest.TestCase):
+    """Englische Fassung unter /en/: vollständig übersetzt, gleiche Struktur, Umschalter und hreflang."""
+
+    def de_pages(self):
+        return sorted(os.path.relpath(p, SITE) for p in files(".html") if not os.path.relpath(p, SITE).startswith("en" + os.sep))
+
+    def test_every_page_has_english_twin(self):
+        for rel in self.de_pages():
+            self.assertTrue(os.path.exists(os.path.join(SITE, "en", rel)), rel)
+
+    def test_nothing_missing_and_no_broken_translation(self):
+        self.assertEqual(list(RESULT["missing"])[:10], [])
+        self.assertEqual([w for w in RESULT["warnings"] if "Platzhalter" in w or "Zahlen" in w], [])
+
+    def test_lang_meta_hreflang_and_switch(self):
+        for rel in self.de_pages():
+            de, en = read(os.path.join(SITE, rel)), read(os.path.join(SITE, "en", rel))
+            url = "/" + rel.replace(os.sep, "/")
+            url = "/" if url == "/index.html" else url
+            self.assertIn('<meta property="og:locale" content="en_GB">', en, rel)
+            self.assertIn(f'<link rel="canonical" href="https://www.elbdetail.de/en{url}">', en, rel)
+            for t in (de, en):
+                self.assertIn(f'hreflang="en" href="https://www.elbdetail.de/en{url}"', t, rel)
+                self.assertIn(f'hreflang="de" href="https://www.elbdetail.de{url}"', t, rel)
+                self.assertIn('hreflang="x-default"', t, rel)
+                self.assertEqual(t.count('class="lang-switch"'), 1, rel)
+                self.assertNotIn("<!--lang-switch-->", t, rel)
+            self.assertRegex(en, r'<a href="[^"]+" hreflang="en" lang="en" aria-label="English" aria-current="true">EN</a>', rel)
+            self.assertRegex(de, r'<a href="[^"]+" hreflang="de" lang="de" aria-label="Deutsch" aria-current="true">DE</a>', rel)
+
+    def test_no_german_left_in_english_pages(self):
+        pat = re.compile(r"\b(und|oder|nicht|Sie|Ihr|Ihre|Ihren|Ihrem|für|mit|bei|wir|unser|unsere|ist|sind|werden|auf|zum|zur|vom)\b")
+        hits = []
+        for rel in self.de_pages():
+            t = read(os.path.join(SITE, "en", rel))
+            t = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", t, flags=re.S)
+            t = re.sub(r'<a [^>]*lang="de"[^>]*>.*?</a>', " ", t)
+            for attr in re.findall(r'(?:alt|title|aria-label|placeholder|content)="([^"]*)"', t):
+                hits += [f"{rel} [Attribut]: {attr[:80]}" for _ in pat.finditer(attr)][:1]
+            text = html.unescape(re.sub(r"<[^>]+>", " ", t))
+            hits += [f"{rel}: …{text[max(0, m.start() - 40):m.end() + 40]!r}" for m in pat.finditer(text)]
+        self.assertEqual(hits[:15], [])
+
+    def test_english_config_and_legal_note(self):
+        cfg = read(os.path.join(SITE, "en", "config.js"))
+        self.assertIn('"lang":"en"', cfg)
+        self.assertIn('"t":{', cfg)
+        self.assertNotIn("paypalMe", cfg)
+        for rel in ("impressum.html", "datenschutz.html", "agb.html", "widerruf.html"):
+            self.assertIn("Only the German version is legally binding", read(os.path.join(SITE, "en", rel)), rel)
+            self.assertNotIn("legal-lang-note", read(os.path.join(SITE, rel)), rel)
+        self.assertIn('data-mk="bewertungen"', read(os.path.join(SITE, "en", "index.html")))
+
+    def test_sitemap_has_both_languages(self):
+        sm = read(os.path.join(SITE, "sitemap.xml"))
+        self.assertIn("<loc>https://www.elbdetail.de/en/</loc>", sm)
+        self.assertIn("<loc>https://www.elbdetail.de/en/termin.html</loc>", sm)
 
 
 if __name__ == "__main__":

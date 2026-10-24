@@ -247,7 +247,20 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, div[tabindex="-1"]:focu
 .header-social a { width: 36px; height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted-on-anthracite); border-radius: 10px; transition: color 0.2s ease, background-color 0.2s ease; }
 .header-social a:hover, .header-social a:focus-visible { color: #fff; background: rgba(255,255,255,0.07); }
 .header-social svg { width: 18px; height: 18px; }
-@media (min-width: 1360px) { .header-social { display: inline-flex; } }
+/* Die Social-Links stehen im mobilen Menü und im Fußbereich; im Desktop-Kopf hat der Sprachumschalter Vorrang */
+.brand { flex-shrink: 0; }
+@media (min-width: 1100px) and (max-width: 1279.98px) {
+  .header-cta .header-book { width: 44px; padding: 0; gap: 0; }
+  .header-cta .header-book .btn-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* Sprachumschalter DE/EN: zwei kleine Felder, die aktive Sprache hervorgehoben */
+.lang-switch { display: inline-flex; align-items: center; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+.lang-switch a { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 36px; padding: 0 8px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: var(--muted-on-anthracite); text-decoration: none; transition: color 0.2s ease, background-color 0.2s ease; }
+.lang-switch a:hover, .lang-switch a:focus-visible { color: #fff; }
+.lang-switch a[aria-current] { background: rgba(255,255,255,0.14); color: #fff; }
+@media (max-width: 379.98px) { .lang-switch a { min-width: 30px; padding: 0 6px; } }
+.legal-lang-note { margin: 0 0 24px; padding: 12px 16px; border-left: 3px solid var(--blue-bright); background: rgba(46, 125, 214, 0.08); border-radius: 8px; font-size: 0.95rem; }
 @media (max-width: 1439.98px) { .main-nav ul { gap: 16px; } }
 .mobile-social { display: flex; align-items: center; gap: 10px; margin: 10px 14px 6px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); color: var(--muted-on-anthracite); font-size: 0.9rem; font-weight: 600; }
 .mobile-social span { margin-left: 4px; }
