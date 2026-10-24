@@ -316,6 +316,7 @@
     var PAIN = { handwerk: 'Für Handwerk und Bau heißt das: Kunden suchen „Elektriker Celle“ oder „Dachdecker in der Nähe“ und entscheiden auf dem Handy in Sekunden. Eine Leistungsseite je Gewerk und Ort ist deshalb Teil des Konzepts.',
       praxis: 'Für Praxen und Kanzleien heißt das: Neue Patienten und Mandanten vergleichen Website, Bewertungen und Öffnungszeiten, oft außerhalb der Sprechzeiten. Terminanfrage und Antworten auf die häufigsten Fragen gehören auf die Seite.',
       gastro: 'Für Gastronomie und Handel heißt das: Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy. Wer das nicht in zehn Sekunden findet, geht weiter.',
+      b2b: 'Für Dienstleister und Gewerbe heißt das: Geschäftskunden vergleichen Anbieter in Ruhe und wollen sofort Leistungsprofil, Ansprechpartner, Nachweise und einen klaren Weg zur Angebotsanfrage sehen.',
       sonstige: 'Interessenten suchen online, vergleichen und melden sich dann. Die Website entscheidet, ob daraus eine Anfrage wird.' };
     var BEDARF = { landingpage: '<b>Passendes Paket: LANDING, 2.290 € einmalig, Pflege 59 € im Monat.</b> Ein Conversion-Onepager mit Texten, Bildern und Terminbuchung für ein Angebot. Wenn Sie Texte und Bilder selbst liefern, geht LANDING START auf Vorlagenbasis ab 1.290 €.',
       website: '<b>Passendes Paket: BUSINESS WEB, 4.490 € einmalig, Pflege 89 € im Monat.</b> Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.',
