@@ -4,9 +4,9 @@
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS vorlage text NOT NULL DEFAULT 'standard' CHECK (vorlage IN ('standard','website_check'));
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS kicker text NOT NULL DEFAULT '';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS check_mail boolean NOT NULL DEFAULT false;
-ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS check_betreff text NOT NULL DEFAULT 'Ihr Website-Check für {website}: {ampel}';
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS check_betreff text NOT NULL DEFAULT 'Ihr Website-Check für {website}: {score} von 100 Punkten';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS check_text text NOT NULL DEFAULT
-  E'Guten Tag {name},\n\nIhr Website-Check ist fertig, das PDF hängt an.\n\nKurz zusammengefasst: Ihre Website steht auf {ampel}.\n{punkte}\n\nWir rufen Sie kurz an, um das Ergebnis zu erklären. Wenn Ihnen ein fester Termin lieber ist, wählen Sie hier 15 Minuten: {buchen}';
+  E'Guten Tag {name},\n\nIhr Website-Check ist fertig, das PDF hängt an.\n\nKurz zusammengefasst: {zusammenfassung} Ihre Website erreicht {score} von 100 Punkten.\n{punkte}\n\nWir rufen Sie kurz an, um das Ergebnis zu erklären. Wenn Ihnen ein fester Termin lieber ist, wählen Sie hier 15 Minuten: {buchen}';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_aktiv boolean NOT NULL DEFAULT false;
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_tage int[] NOT NULL DEFAULT '{1,3,7}';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_betreffe text[] NOT NULL DEFAULT ARRAY[

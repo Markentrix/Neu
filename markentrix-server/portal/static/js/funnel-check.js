@@ -1,4 +1,4 @@
-// Funnel-Vorlage „Website-Check“ (/f/<name>): Formular, dann Danke-Ansicht mit Ampel. Ohne Cookies; gibt UTM-Angaben an das Portal weiter.
+// Funnel-Vorlage „Website-Check“ (/f/<name>): Formular, dann Danke-Ansicht mit Gesamtwert und Prüfpunkten. Ohne Cookies; gibt UTM-Angaben an das Portal weiter.
 import { api, h } from './common.js';
 
 const slug = decodeURIComponent(location.pathname.split('/')[2] || '');
@@ -7,6 +7,7 @@ const el = (id) => /** @type {HTMLElement} */ (document.getElementById(id));
 const inp = (id) => /** @type {HTMLInputElement} */ (document.getElementById(id));
 const f = /** @type {HTMLFormElement} */ (el('f'));
 const FELDER = ['w', 'n', 't', 'e', 'c'];
+const WORT = { gut: 'gut', mittel: 'teilweise', schlecht: 'fehlt' };
 /** @type {any} */ let kamp = null;
 let website = '';
 
@@ -43,16 +44,16 @@ async function laden() {
     el('weg').hidden = false; return;
   }
   document.title = kamp.titel || kamp.name;
-  el('firma').textContent = el('fussname').textContent = kamp.firma;
+  el('firma').textContent = kamp.firma;
   if (kamp.kicker) { el('kicker').textContent = kamp.kicker; el('kicker').hidden = false; }
   if (kamp.titel) el('titel').textContent = kamp.titel;
-  el('untertitel').textContent = kamp.untertitel || '';
+  if (kamp.untertitel) el('untertitel').textContent = kamp.untertitel;
   el('nutzen').replaceChildren(...(kamp.nutzen || []).map(n => h('li', {}, n)));
   el('ew').textContent = kamp.einwilligung_text;
   el('b').textContent = kamp.button;
   el('tl').textContent = kamp.telefon_pflicht ? 'Telefon' : 'Telefon (freiwillig)';
   inp('t').required = !!kamp.telefon_pflicht;
-  el('el').textContent = kamp.check_mail ? 'E-Mail (hierhin kommt das Ergebnis als PDF)' : 'E-Mail';
+  el('el').textContent = kamp.check_mail ? 'E-Mail (für den Bericht)' : 'E-Mail';
   kontaktLinks();
   f.hidden = false;
 }
@@ -104,13 +105,16 @@ function danke(r) {
   window.scrollTo(0, 0);
   el('dt').setAttribute('tabindex', '-1'); el('dt').focus();
   if (r.check) abfragen(r.check, 0);
-  else ampel('', 'Wir sehen uns Ihre Website an und melden uns.');
+  else wert(null, 'Wir sehen uns Ihre Website an und melden uns.');
 }
 
-function ampel(farbe, text) {
-  const a = el('ampel');
-  a.setAttribute('data-farbe', farbe);
-  a.setAttribute('aria-label', 'Ampel: ' + text);
+/** Gesamtwert im Ring anzeigen (null = kein Wert, nur Text). */
+function wert(score, text) {
+  const ring = el('ring');
+  ring.classList.remove('laeuft');
+  ring.style.setProperty('--p', String(score ?? 0));
+  el('score').textContent = score === null ? '–' : String(score);
+  ring.setAttribute('aria-label', score === null ? text : 'Gesamtwert ' + score + ' von 100');
   el('urteil').textContent = text;
 }
 
@@ -118,14 +122,14 @@ async function abfragen(token, n) {
   let s = null;
   try { s = await api('/api/public/funnel/' + encodeURIComponent(slug) + '/check/' + encodeURIComponent(token), { leise: true }); } catch (e) { s = null; }
   if (s && s.status === 'fertig') {
-    ampel(s.ampel, s.zusammenfassung);
-    el('liste').replaceChildren(...s.punkte.map(p => h('li', {}, h('span', { class: 'dot ' + p.status, 'aria-hidden': 'true' }),
+    wert(s.score, s.zusammenfassung);
+    el('liste').replaceChildren(...s.punkte.map(p => h('li', {}, h('span', { class: 'chip ' + p.status }, WORT[p.status] || p.status),
       h('span', {}, h('b', {}, p.titel), h('span', { class: 't' }, p.text)))));
     el('liste').hidden = false;
-    if (s.mail) el('dx').textContent = (kamp.danke_text ? kamp.danke_text + ' ' : '') + 'Das ausführliche Ergebnis kommt als PDF per E-Mail.';
+    if (s.mail) el('dx').textContent = (kamp.danke_text ? kamp.danke_text + ' ' : '') + 'Der ausführliche Bericht kommt als PDF per E-Mail.';
     return;
   }
-  if ((s && s.status === 'fehler') || n >= 40) { ampel('', 'Die Schnell-Ampel ist gerade nicht verfügbar. Wir sehen uns Ihre Website trotzdem an und melden uns.'); return; }
+  if ((s && s.status === 'fehler') || n >= 40) { wert(null, 'Das Ergebnis ist gerade nicht verfügbar. Wir sehen uns Ihre Website trotzdem an und melden uns.'); return; }
   setTimeout(() => abfragen(token, n + 1), 3000);
 }
 

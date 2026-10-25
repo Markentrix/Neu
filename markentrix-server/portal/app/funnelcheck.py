@@ -23,12 +23,21 @@ from .db import tx
 log = logging.getLogger("markentrix.funnelcheck")
 GRENZE = 1_500_000
 AMPEL_WORT = {"gruen": "Grün", "gelb": "Gelb", "rot": "Rot"}
-ZUSAMMENFASSUNG = {"gruen": "Grün: Ihre Website ist technisch ordentlich aufgestellt.",
-                   "gelb": "Gelb: eine solide Grundlage, aber an einigen Stellen gehen Anfragen verloren.",
-                   "rot": "Rot: Hier gehen Ihnen vermutlich Kunden verloren."}
+ZUSAMMENFASSUNG = {"gruen": "Gut aufgestellt: Ihre Website ist technisch ordentlich.",
+                   "gelb": "Solide Grundlage, aber hier gehen Anfragen verloren.",
+                   "rot": "Hier gehen Ihnen vermutlich Kunden verloren."}
 # Gewicht je Prüfpunkt (Summe 100) und Reihenfolge, in der fehlende Punkte als „wichtigster Punkt“ gelten
-GEWICHT = {"handy": 15, "sicher": 15, "tempo": 15, "anrufen": 12, "anfrage": 12, "google": 10, "recht": 7, "preise": 7, "vertrauen": 7}
-WICHTIG = ["handy", "sicher", "anrufen", "anfrage", "tempo", "google", "recht", "preise", "vertrauen"]
+GEWICHT = {"handy": 12, "sicher": 10, "tempo": 12, "anrufen": 10, "anfrage": 10, "google": 8, "barriere": 8, "lokal": 7, "recht": 6, "preise": 5,
+           "vertrauen": 5, "teilen": 3, "extern": 2, "aktuell": 2}
+WICHTIG = ["handy", "sicher", "anrufen", "anfrage", "tempo", "google", "lokal", "barriere", "recht", "preise", "vertrauen", "teilen", "extern", "aktuell"]
+EXTERNE = [("fonts.googleapis.com", "Google Fonts"), ("fonts.gstatic.com", "Google Fonts"), ("googletagmanager.com", "Google Tag Manager"),
+           ("google-analytics.com", "Google Analytics"), ("connect.facebook.net", "Facebook-Pixel"), ("youtube.com/embed", "YouTube-Videos"),
+           ("youtube-nocookie.com/embed", "YouTube-Videos"), ("maps.googleapis.com", "Google Maps"), ("google.com/maps/embed", "Google Maps")]
+EINWILLIGUNG = re.compile(r"cookiebot|usercentrics|borlabs|consentmanager|klaro|cookieyes|onetrust|complianz|cookie-?consent|ccm19|data-mk=\"cookies\"", re.I)
+FIRMENDATEN = re.compile(r'"@type"\s*:\s*\[?\s*"(?:[A-Za-z]*Business|[A-Za-z]*Contractor|[A-Za-z]*Store|AutoRepair|Electrician|Plumber|HousePainter|Locksmith|Roofer|'
+                         r'ProfessionalService|Restaurant|Dentist|Physician|LegalService|Organization)"', re.I)
+PLZ_ORT = re.compile(r"\b\d{5}\s+[A-ZÄÖÜ][a-zäöüß]{2,}")
+JAHR = re.compile(r"(?:©|\(c\)|copyright)\s*(?:\d{4}\s*[-–]\s*)?(\d{4})", re.I)
 TERMIN = re.compile(r"termin\s*(online\s*)?(buchen|vereinbaren|wählen|anfragen)|online[\s-]*(termin|buchung|buchen)|terminbuchung|calendly|jetzt buchen|data-mk=\"termin\"", re.I)
 # Ohne verschachtelte Wiederholungen (kein Rückverfolgen bei langen Ziffernfolgen); der Text wird vorher ohnehin gekürzt
 PREIS = re.compile(r"\d{1,7}(?:[.,]\d{1,3})?\s?(?:€|eur\b|euro\b)|(?:€|eur)\s?\d|preisliste|preise\b", re.I)
@@ -186,9 +195,26 @@ class _Leser(HTMLParser):
         self.tel, self.mailto, self.whatsapp, self.form = False, False, False, False
         self.hrefs, self.texte, self._titel, self._skip = [], [], False, 0
         self.termin_attr = False
+        self.lang, self.bilder, self.bilder_ohne_alt, self.zoom_gesperrt = False, 0, 0, False
+        self.felder, self.label_fuer, self._label, self.og_titel, self.og_bild, self.quellen = [], set(), 0, False, False, []
 
     def handle_starttag(self, tag, a):
         a = {k: (v or "") for k, v in a}
+        if tag == "html" and a.get("lang", "").strip():
+            self.lang = True
+        elif tag == "img":
+            self.bilder += 1
+            self.bilder_ohne_alt += "alt" not in a
+        elif tag == "label":
+            self._label += 1
+            if a.get("for"):
+                self.label_fuer.add(a["for"])
+        elif tag in ("input", "select", "textarea") and a.get("type", "").lower() not in ("hidden", "submit", "button", "reset", "image"):
+            self.felder.append({"id": a.get("id", ""), "benannt": bool(self._label or a.get("aria-label") or a.get("aria-labelledby") or a.get("title"))})
+        if tag in ("img", "script", "iframe", "source", "video", "audio") and a.get("src"):
+            self.quellen.append(a["src"].strip().lower())
+        elif tag == "link" and a.get("href") and "stylesheet" in a.get("rel", "").lower():
+            self.quellen.append(a["href"].strip().lower())
         if tag == "title":
             self._titel = True
         elif tag in ("script", "style", "noscript"):
@@ -197,8 +223,15 @@ class _Leser(HTMLParser):
             n = a.get("name", "").lower()
             if n == "description":
                 self.desc = a.get("content", "").strip()
-            elif n == "viewport" and "width=device-width" in a.get("content", "").replace(" ", "").lower():
-                self.viewport = True
+            elif n == "viewport":
+                inhalt = a.get("content", "").replace(" ", "").lower()
+                self.viewport = self.viewport or "width=device-width" in inhalt
+                self.zoom_gesperrt = self.zoom_gesperrt or "user-scalable=no" in inhalt or "user-scalable=0" in inhalt or re.search(r"maximum-scale=1(\.0)?(,|$)", inhalt) is not None
+            eigenschaft = a.get("property", "").lower()
+            if eigenschaft == "og:title" and a.get("content", "").strip():
+                self.og_titel = True
+            elif eigenschaft == "og:image" and a.get("content", "").strip():
+                self.og_bild = True
         elif tag == "h1":
             self.h1 = True
         elif tag == "form":
@@ -217,6 +250,8 @@ class _Leser(HTMLParser):
             self.form = True
 
     def handle_endtag(self, tag):
+        if tag == "label" and self._label:
+            self._label -= 1
         if tag == "title":
             self._titel = False
         elif tag in ("script", "style", "noscript") and self._skip:
@@ -230,14 +265,14 @@ class _Leser(HTMLParser):
 
 
 def _pagespeed(url: str, schluessel: str | None) -> dict | None:
-    adr = (f"{config.PAGESPEED_BASE_URL}?url={quote(url, safe='')}&strategy=mobile&locale=de&category=performance&category=seo"
+    adr = (f"{config.PAGESPEED_BASE_URL}?url={quote(url, safe='')}&strategy=mobile&locale=de&category=performance&category=seo&category=accessibility"
            + (f"&key={quote(schluessel, safe='')}" if schluessel else ""))
     try:
         with urllib.request.urlopen(urllib.request.Request(adr, headers={"Accept": "application/json"}), timeout=60) as r:
             d = json.loads(r.read(3_000_000))
         c, au = d["lighthouseResult"]["categories"], d["lighthouseResult"].get("audits", {})
         lcp = (au.get("largest-contentful-paint") or {}).get("displayValue")
-        return {"tempo": c["performance"]["score"], "google": (c.get("seo") or {}).get("score"), "lcp": lcp}
+        return {"tempo": c["performance"]["score"], "google": (c.get("seo") or {}).get("score"), "barriere": (c.get("accessibility") or {}).get("score"), "lcp": lcp}
     except Exception as e:  # noqa: BLE001 - PageSpeed ist nur eine Ergänzung, die eigene Messung reicht
         log.info("PageSpeed nicht verfügbar: %s", str(e)[:150])
         return None
@@ -263,9 +298,14 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
     hrefs = " ".join(le.hrefs)
     p = []
     sicher = seite["url"].startswith("https://")
-    p.append(_punkt("sicher", "Sichere Verbindung (https)", "gut" if sicher else "schlecht",
-                    "Die Seite läuft verschlüsselt über https." if sicher else "Die Seite läuft ohne https. Browser zeigen dann „Nicht sicher“ an.",
-                    "Ein Zertifikat einrichten und alle Aufrufe auf https umleiten."))
+    unsicher = sum(1 for q in le.quellen if q.startswith("http://")) if sicher else 0
+    if not sicher:
+        st, txt = "schlecht", "Die Seite läuft ohne https. Browser zeigen dann „Nicht sicher“ an."
+    elif unsicher:
+        st, txt = "mittel", f"Die Seite läuft über https, lädt aber {unsicher} Inhalt{'e' if unsicher > 1 else ''} unverschlüsselt (http)."
+    else:
+        st, txt = "gut", "Die Seite läuft verschlüsselt über https."
+    p.append(_punkt("sicher", "Sichere Verbindung (https)", st, txt, "Ein Zertifikat einrichten, alle Aufrufe auf https umleiten und alle Inhalte über https laden."))
     p.append(_punkt("handy", "Fürs Handy eingerichtet", "gut" if le.viewport else "schlecht",
                     "Die Seite passt sich der Bildschirmbreite an." if le.viewport else "Die Seite ist nicht fürs Handy eingerichtet: Kunden müssen zoomen und schieben.",
                     "Die Seite für Handys umbauen. Die meisten Kunden suchen abends auf dem Handy."))
@@ -312,6 +352,60 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
     p.append(_punkt("recht", "Impressum und Datenschutz", "gut" if imp and ds else "schlecht",
                     "Impressum und Datenschutz sind verlinkt." if imp and ds else "Es fehlt ein Link zu " + " und ".join(x for x, ok in (("Impressum", imp), ("Datenschutz", ds)) if not ok) + ".",
                     "Impressum und Datenschutzerklärung von jeder Seite aus verlinken."))
+    # Barrierefreiheit (Grundlagen, mit PageSpeed: Googles Wert)
+    ohne_label = sum(1 for f in le.felder if not f["benannt"] and not (f["id"] and f["id"] in le.label_fuer))
+    maengel = [x for x, schlecht in (("die Sprache der Seite ist nicht angegeben", not le.lang),
+                                     (f"{le.bilder_ohne_alt} Bild{'er' if le.bilder_ohne_alt > 1 else ''} ohne Alternativtext", le.bilder_ohne_alt > 0),
+                                     ("Zoomen auf dem Handy ist gesperrt", le.zoom_gesperrt),
+                                     (f"{ohne_label} Formularfeld{'er' if ohne_label > 1 else ''} ohne Beschriftung", ohne_label > 0)) if schlecht]
+    if ps and ps.get("barriere") is not None:
+        b = ps["barriere"]
+        st = "gut" if b >= 0.9 else "mittel" if b >= 0.7 else "schlecht"
+        txt = f"Google-Wert Barrierefreiheit: {round(b * 100)} von 100." + (f" Auffällig: {', '.join(maengel)}." if maengel else "")
+    else:
+        st = "gut" if not maengel else "mittel" if len(maengel) == 1 else "schlecht"
+        txt = "Sprache, Alternativtexte, Zoom und Beschriftungen sind in Ordnung." if not maengel else "Auffällig: " + ", ".join(maengel) + "."
+    p.append(_punkt("barriere", "Barrierefreiheit", st, txt,
+                    "Bildern Alternativtexte geben, Zoomen erlauben und Formularfelder beschriften. Das hilft allen Besuchern, nicht nur Menschen mit Einschränkungen."))
+    # Lokal bei Google: Adresse mit Ort, Firmendaten für Google, Kartenlink
+    adresse = bool(PLZ_ORT.search(text))
+    daten = bool(FIRMENDATEN.search(roh))
+    karte = any(x in hrefs for x in ("google.com/maps", "goo.gl/maps", "maps.app.goo.gl", "maps.google."))
+    if adresse and daten:
+        st, txt = "gut", "Adresse mit Ort und Firmendaten für Google sind hinterlegt."
+    elif adresse or daten or karte:
+        st = "mittel"
+        txt = ("Die Adresse steht auf der Seite, aber Firmendaten für Google (strukturierte Daten) fehlen." if adresse
+               else "Firmendaten für Google sind hinterlegt, aber keine Adresse mit Ort auf der Startseite." if daten
+               else "Es gibt einen Kartenlink, aber keine Adresse mit Ort auf der Startseite.")
+    else:
+        st, txt = "schlecht", "Auf der Startseite stehen weder Adresse mit Ort noch Firmendaten für Google."
+    p.append(_punkt("lokal", "Lokal bei Google gefunden", st, txt,
+                    "Adresse mit Ort auf die Seite setzen und Firmendaten für Google hinterlegen, passend zum Google-Unternehmensprofil."))
+    # Vorschau beim Teilen (Open Graph)
+    if le.og_titel and le.og_bild:
+        st, txt = "gut", "Titel und Vorschaubild für WhatsApp und Facebook sind hinterlegt."
+    elif le.og_titel or le.og_bild:
+        st, txt = "mittel", "Für die Vorschau beim Teilen fehlt " + ("das Vorschaubild." if le.og_titel else "der Titel.")
+    else:
+        st, txt = "schlecht", "Beim Teilen in WhatsApp oder Facebook erscheint keine gestaltete Vorschau."
+    p.append(_punkt("teilen", "Vorschau beim Teilen", st, txt, "Titel und Vorschaubild für WhatsApp und Facebook hinterlegen (Open Graph)."))
+    # Externe Dienste beim Laden
+    gefunden = sorted({name for muster, name in EXTERNE if muster in roh.lower()})
+    if gefunden and not EINWILLIGUNG.search(roh):
+        st, txt = "mittel", "Die Seite lädt " + ", ".join(gefunden) + " direkt beim Aufruf, ein Einwilligungs-Banner ist nicht erkennbar."
+    elif gefunden:
+        st, txt = "gut", "Externe Dienste (" + ", ".join(gefunden) + ") laufen über ein Einwilligungs-Werkzeug."
+    else:
+        st, txt = "gut", "Beim Laden der Startseite werden keine bekannten externen Dienste eingebunden."
+    p.append(_punkt("extern", "Externe Dienste", st, txt, "Externe Dienste erst nach Einwilligung laden oder Schriften selbst einbinden. Im Zweifel rechtlich prüfen lassen."))
+    # Aktualität (Jahreszahl im Fuß)
+    jahre = [int(j) for j in JAHR.findall(text) if 1995 <= int(j) <= date.today().year + 1]
+    if jahre and max(jahre) < date.today().year - 1:
+        st, txt = "mittel", f"Im Fuß der Seite steht © {max(jahre)}. Das wirkt, als würde die Seite nicht mehr gepflegt."
+    else:
+        st, txt = "gut", "Kein Hinweis auf veraltete Inhalte gefunden." if not jahre else f"Die Jahreszahl ist aktuell (© {max(jahre)})."
+    p.append(_punkt("aktuell", "Aktualität", st, txt, "Jahreszahl und Inhalte aktuell halten. Ein altes Datum wirkt, als wäre der Betrieb nicht mehr aktiv."))
     wert = {"gut": 1, "mittel": 0.5, "schlecht": 0}
     score = round(sum(GEWICHT[x["id"]] * wert[x["status"]] for x in p))
     rot = score < 50 or any(x["id"] in ("handy", "sicher") and x["status"] == "schlecht" for x in p)
@@ -320,6 +414,9 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
     offen = [nach[i] for i in WICHTIG if nach[i]["status"] == "schlecht"] + [nach[i] for i in WICHTIG if nach[i]["status"] == "mittel"]
     return {"erreichbar": True, "score": score, "ampel": ampel, "punkte": p, "wichtigster_punkt": offen[0]["tipp"] if offen else "",
             "zusammenfassung": ZUSAMMENFASSUNG[ampel]}
+
+
+STATUS_WORT = {"gut": "gut", "mittel": "teilweise", "schlecht": "fehlt"}
 
 
 def pruefen(website: str, cfg: dict | None = None) -> dict:
@@ -343,14 +440,17 @@ def host(url: str | None) -> str:
 
 
 # ---------------------------------------------------------------- PDF
-def _ampel_bild(farbe: str):
-    from reportlab.graphics.shapes import Circle, Drawing, Rect
+def _ring_bild(score: int):
+    """Gesamtwert als Ring (Markentrix-Blau), Zahl in der Mitte."""
+    from reportlab.graphics.shapes import Circle, Drawing, String, Wedge
     from reportlab.lib import colors
     from reportlab.lib.units import mm
-    d = Drawing(36 * mm, 13 * mm)
-    d.add(Rect(0, 0, 36 * mm, 13 * mm, rx=6.5 * mm, ry=6.5 * mm, fillColor=colors.HexColor("#1D2026"), strokeColor=None))
-    for i, (f, hexf) in enumerate((("rot", "#D2463F"), ("gelb", "#E8A800"), ("gruen", "#1E9E5A"))):
-        d.add(Circle((7 + i * 11) * mm, 6.5 * mm, 4 * mm, fillColor=colors.HexColor(hexf if f == farbe else "#3A3E46"), strokeColor=None))
+    d, r, m = Drawing(30 * mm, 30 * mm), 14 * mm, 15 * mm
+    d.add(Circle(m, m, r, fillColor=colors.HexColor("#E6E9F3"), strokeColor=None))
+    if score > 0:
+        d.add(Wedge(m, m, r, 90 - 3.6 * min(score, 99.9), 90, fillColor=colors.HexColor("#1E9BFF"), strokeColor=None))
+    d.add(Circle(m, m, r - 3 * mm, fillColor=colors.white, strokeColor=None))
+    d.add(String(m, m - 3 * mm, str(score), fontName=pdf.F_TITEL, fontSize=20, fillColor=pdf.NAVY, textAnchor="middle"))
     return d
 
 
@@ -359,7 +459,7 @@ def _punkt_bild(status: str):
     from reportlab.lib import colors
     from reportlab.lib.units import mm
     d = Drawing(5 * mm, 5 * mm)
-    d.add(Circle(2.5 * mm, 2.2 * mm, 1.9 * mm, fillColor=colors.HexColor({"gut": "#1E9E5A", "mittel": "#E8A800"}.get(status, "#D2463F")), strokeColor=None))
+    d.add(Circle(2.5 * mm, 2.2 * mm, 1.9 * mm, fillColor=colors.HexColor({"gut": "#16A34A", "mittel": "#D97706"}.get(status, "#DC2626")), strokeColor=None))
     return d
 
 
@@ -374,7 +474,7 @@ def pdf_bauen(e: dict, firma: dict) -> bytes:
     except ValueError:
         am = date.today()
     inhalt = [Paragraph("Ihr Website-Check", pdf.H1), pdf.p(f"{host(e.get('website'))} · geprüft am {pdf.datum(am)}", pdf.KLEIN), Spacer(1, 6 * mm)]
-    kopf = Table([[_ampel_bild(e["ampel"]), [Paragraph(pdf.esc(e["zusammenfassung"]), gross), pdf.p(f"Gesamtwert: {e['score']} von 100 Punkten")]]], colWidths=[42 * mm, 128 * mm])
+    kopf = Table([[_ring_bild(e["score"]), [Paragraph(pdf.esc(e["zusammenfassung"]), gross), pdf.p(f"Gesamtwert: {e['score']} von 100 Punkten · {len(e['punkte'])} Prüfpunkte")]]], colWidths=[36 * mm, 134 * mm])
     kopf.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("BACKGROUND", (0, 0), (-1, -1), pdf.HELL), ("TOPPADDING", (0, 0), (-1, -1), 9), ("BOTTOMPADDING", (0, 0), (-1, -1), 9), ("LEFTPADDING", (0, 0), (-1, -1), 9)]))
     inhalt += [kopf, Paragraph("Ergebnis im Einzelnen", pdf.H2)]
     zeilen = []
@@ -382,6 +482,7 @@ def pdf_bauen(e: dict, firma: dict) -> bytes:
         zeilen.append([_punkt_bild(x["status"]), Paragraph(pdf.esc(x["titel"]), fett),
                        Paragraph(pdf.esc(x["text"]) + (f"<br/><font color='#6B7390'>Tipp: {pdf.esc(x['tipp'])}</font>" if x.get("tipp") else ""), pdf.TXT)])
     inhalt.append(pdf.tabelle(["", "Prüfpunkt", "Ergebnis"], zeilen, breiten=[9 * mm, 48 * mm, 113 * mm]))
+    inhalt.append(pdf.p("Grün = gut, Orange = teilweise, Rot = fehlt.", pdf.KLEIN))
     nach = {x["id"]: x for x in e["punkte"]}
     schritte = [nach[i]["tipp"] for i in WICHTIG if i in nach and nach[i]["status"] == "schlecht"] + [nach[i]["tipp"] for i in WICHTIG if i in nach and nach[i]["status"] == "mittel"]
     if not e.get("erreichbar", True):
