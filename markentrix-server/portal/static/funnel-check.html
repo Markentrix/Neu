@@ -39,14 +39,17 @@
 
       <form id="f" novalidate hidden>
         <div>
-          <h2>Website-Check anfordern</h2>
-          <p class="sub">Dauert 30 Sekunden.</p>
+          <p class="schritt" id="schritt">Schritt 1 von 2</p>
+          <h2 id="formtitel">Website-Check anfordern</h2>
+          <p class="sub" id="formsub">Dauert 30 Sekunden.</p>
         </div>
         <div class="feld">
           <label for="w">Ihre Website-Adresse</label>
           <input id="w" name="website" type="text" inputmode="url" autocomplete="url" placeholder="z. B. www.ihr-betrieb.de" required maxlength="300" aria-describedby="f-w">
           <div class="fehler" id="f-w" aria-live="polite"></div>
         </div>
+        <button type="button" id="weiter">Jetzt prüfen</button>
+        <div id="schritt2" class="stapel2" hidden>
         <div class="feld">
           <label for="n">Ihr Name</label>
           <input id="n" name="name" type="text" autocomplete="name" required minlength="2" maxlength="200" aria-describedby="f-n">
@@ -76,6 +79,7 @@
           <div class="fehler" id="f-c" aria-live="polite"></div>
         </div>
         <button type="submit" id="b">Website-Check anfragen</button>
+        </div>
         <p class="klein">Kein Abo, keine Kosten. Ihre Daten geben wir nicht weiter.</p>
         <div class="meldung" id="m" role="alert" hidden></div>
       </form>
@@ -139,8 +143,18 @@
     </div>
   </section>
 
+  <section class="weiss rand" id="referenz" hidden>
+    <div class="wrap schmal">
+      <figure class="zitat">
+        <blockquote id="reftext"></blockquote>
+        <figcaption><span id="refname"></span> <a id="reflink" href="/" target="_blank" rel="noopener" hidden>Bewertung bei Google ansehen</a></figcaption>
+      </figure>
+    </div>
+  </section>
+
   <section>
     <div class="wrap schmal person">
+      <img id="foto" class="foto" alt="Christian Wien, Gründer von Markentrix" width="640" height="480" hidden>
       <p class="oben">Wer hinter dem Check steht</p>
       <h2>Ein System statt Einzelmaßnahmen.</h2>
       <p class="mut">Ich bin Christian Wien, Gründer von Markentrix in Celle. Wir verbinden Website, Werbung und Automatisierung, damit aus Besuchern Anfragen werden. Wenn Sie möchten, gehen wir Ihr Ergebnis in 15 Minuten am Telefon oder per Video durch. Ehrlich, auch wenn die Antwort „passt so“ lautet.</p>
@@ -189,6 +203,8 @@
     </div>
   </div>
 </main>
+
+<a class="mitlaufend" id="mitlaufend" href="#f" hidden>Website-Check anfragen</a>
 
 <footer class="fuss">
   <div class="wrap">

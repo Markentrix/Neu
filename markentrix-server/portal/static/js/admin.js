@@ -16,7 +16,7 @@ import './admin/postfach.js';
 import './admin/pipeline.js';
 import './admin/onboardingboard.js';
 import './admin/meintag.js';
-import './admin/funnel.js';
+import { liveHinweis } from './admin/funnel.js';
 const root = document.getElementById('app');
 
 async function seiteZeigen() {
@@ -53,5 +53,6 @@ setzeZeige(seiteZeigen);
   window.addEventListener('hashchange', seiteZeigen);
   seiteZeigen();
   setTimeout(pushNachfrage, 2500);
+  liveHinweis();
 })();
 

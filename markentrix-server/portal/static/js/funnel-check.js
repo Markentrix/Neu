@@ -55,16 +55,54 @@ async function laden() {
   inp('t').required = !!kamp.telefon_pflicht;
   el('el').textContent = kamp.check_mail ? 'E-Mail (für den Bericht)' : 'E-Mail';
   kontaktLinks();
+  if (kamp.referenz) {
+    el('reftext').textContent = kamp.referenz.text;
+    el('refname').textContent = kamp.referenz.name || '';
+    if (kamp.referenz.link) { /** @type {HTMLAnchorElement} */ (el('reflink')).href = kamp.referenz.link; el('reflink').hidden = false; }
+    el('referenz').hidden = false;
+  }
+  if (kamp.foto) {
+    const bild = /** @type {HTMLImageElement} */ (el('foto'));
+    bild.addEventListener('load', () => { bild.hidden = false; });
+    bild.src = kamp.foto;
+  }
   f.hidden = false;
+  mitlaufen();
 }
+
+/** Knopf, der auf dem Handy unten mitläuft, solange das Formular nicht zu sehen ist. */
+function mitlaufen() {
+  const k = el('mitlaufend');
+  if (!('IntersectionObserver' in window)) return;
+  new IntersectionObserver((e) => { k.hidden = e[0].isIntersecting || !el('danke').hidden; }).observe(f);
+  k.addEventListener('click', (ev) => { ev.preventDefault(); f.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => inp('w').focus({ preventScroll: true }), 400); });
+}
+
+/** Schritt 1: nur die Website-Adresse. Erst danach Name, Telefon, E-Mail und Einwilligung. */
+function adresse() {
+  let w = inp('w').value.trim();
+  if (w && !/^https?:\/\//i.test(w)) w = 'https://' + w;
+  try { const u = new URL(w); if (!u.hostname.includes('.')) w = ''; } catch (e) { w = ''; }
+  return w;
+}
+
+el('weiter').addEventListener('click', () => {
+  fehler('w', '');
+  if (!adresse()) { fehler('w', 'Bitte eine gültige Adresse eingeben, z. B. www.ihr-betrieb.de'); inp('w').focus(); return; }
+  el('weiter').hidden = true;
+  el('schritt2').hidden = false;
+  el('schritt').textContent = 'Schritt 2 von 2';
+  el('formtitel').textContent = 'Fast fertig: Wohin dürfen wir das Ergebnis schicken?';
+  el('formsub').textContent = 'Danach sehen Sie Ihr Ergebnis sofort.';
+  inp('n').focus();
+});
+inp('w').addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && el('schritt2').hidden) { ev.preventDefault(); el('weiter').click(); } });
 
 function pruefen() {
   FELDER.forEach(x => fehler(x, ''));
   let erstes = '';
   const fail = (id, t) => { fehler(id, t); if (!erstes) erstes = id; };
-  let w = inp('w').value.trim();
-  if (w && !/^https?:\/\//i.test(w)) w = 'https://' + w;
-  try { const u = new URL(w); if (!u.hostname.includes('.')) w = ''; } catch (e) { w = ''; }
+  const w = adresse();
   if (!w) fail('w', 'Bitte eine gültige Adresse eingeben, z. B. www.ihr-betrieb.de');
   if (inp('n').value.trim().length < 2) fail('n', 'Bitte Ihren Namen eingeben.');
   const tel = inp('t').value.replace(/\D/g, '');
@@ -97,7 +135,7 @@ f.addEventListener('submit', async (ev) => {
 });
 
 function danke(r) {
-  el('seite').hidden = true; el('danke').hidden = false;
+  el('seite').hidden = true; el('danke').hidden = false; el('mitlaufend').hidden = true;
   el('dt').textContent = kamp.danke_titel || 'Danke! Ihr Check läuft.';
   el('dx').textContent = kamp.danke_text || '';
   el('terminbox').hidden = !r.termin;

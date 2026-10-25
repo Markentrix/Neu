@@ -9,7 +9,8 @@ const centAusEuro = (t) => t === '' ? 0 : Math.round(Number(String(t).replace(',
 function kampagneDialog(k, danach, vorgabe = {}) {
   const m = h('div', { role: 'status' }), neu = !k;
   k = k || { slug: '', name: '', titel: '', untertitel: '', nutzen: [], button: 'Kostenlos anfragen', einwilligung_text: '', danke_titel: 'Vielen Dank!', danke_text: 'Wir melden uns in Kürze bei Ihnen.', telefon_pflicht: true, website_abfragen: true, termin_anbieten: true, kosten_cent: 0, rechtlich_geprueft: false, aktiv: false, vorlage: 'website_check', kicker: '', check_mail: false, check_betreff: vorgabe.check_betreff || '', check_text: vorgabe.check_text || '',
-    folge_aktiv: false, folge_tage: vorgabe.folge_tage || [], folge_betreffe: vorgabe.folge_betreffe || [], folge_texte: vorgabe.folge_texte || [] };
+    folge_aktiv: false, folge_tage: vorgabe.folge_tage || [], folge_betreffe: vorgabe.folge_betreffe || [], folge_texte: vorgabe.folge_texte || [],
+    referenz_text: '', referenz_name: '', referenz_link: '' };
   const ta = (id, label, wert, zeilen = 4) => [h('label', { for: id }, label), h('textarea', { id, rows: zeilen, maxlength: 4000 }, wert || '')];
   const stufen = [0, 1, 2].map(i => ({ tag: (k.folge_tage || [])[i] ?? '', betreff: (k.folge_betreffe || [])[i] || '', text: (k.folge_texte || [])[i] || '' }));
   const vorlage = h('select', { id: 'fk_vorlage' }, h('option', { value: 'website_check', selected: k.vorlage !== 'standard' }, 'Website-Check (Ampel, Ergebnis als PDF)'), h('option', { value: 'standard', selected: k.vorlage === 'standard' }, 'Standard (einfaches Formular)'));
@@ -24,6 +25,10 @@ function kampagneDialog(k, danach, vorgabe = {}) {
     ...t('fk_dt', 'Überschrift nach dem Absenden', k.danke_titel), ...t('fk_dx', 'Text nach dem Absenden', k.danke_text),
     h('label', { for: 'fk_vorlage' }, 'Vorlage der Seite'), vorlage,
     ...t('fk_kicker', 'Zeile über der Überschrift (z. B. „Für Betriebe in Frankfurt & Rhein-Main“)', k.kicker, { maxlength: 120 }),
+    h('h3', {}, 'Kundenstimme (nur echte, mit Erlaubnis des Kunden)'),
+    ...ta('fk_rt', 'Zitat, z. B. aus der Google-Bewertung (leer = Abschnitt wird nicht gezeigt)', k.referenz_text, 3),
+    ...t('fk_rn', 'Name und Firma, z. B. „Inhaber, ElbDetail Celle“', k.referenz_name, { maxlength: 120 }),
+    ...t('fk_rl', 'Link zur Bewertung (https://…, freiwillig)', k.referenz_link, { maxlength: 400 }),
     h('h3', {}, 'Ergebnis-Mail mit PDF (nur Vorlage Website-Check)'),
     box('fk_cm', 'Ergebnis direkt nach der Prüfung per E-Mail schicken (mit PDF)', k.check_mail),
     ...t('fk_cb', 'Betreff', k.check_betreff, { maxlength: 200 }), ...ta('fk_ct', 'Text', k.check_text, 7), h('p', { class: 'small muted' }, platz),
@@ -42,13 +47,40 @@ function kampagneDialog(k, danach, vorgabe = {}) {
         button: val('fk_button').value, einwilligung_text: val('fk_ew').value, danke_titel: val('fk_dt').value, danke_text: val('fk_dx').value, telefon_pflicht: val('fk_tel').checked, website_abfragen: val('fk_web').checked,
         termin_anbieten: val('fk_term').checked, kosten_cent: centAusEuro(val('fk_kosten').value), rechtlich_geprueft: val('fk_geprueft').checked, aktiv: val('fk_aktiv').checked,
         vorlage: val('fk_vorlage').value, kicker: val('fk_kicker').value, check_mail: val('fk_cm').checked, check_betreff: val('fk_cb').value || undefined, check_text: val('fk_ct').value || undefined,
-        folge_aktiv: val('fk_fa').checked };
+        folge_aktiv: val('fk_fa').checked, referenz_text: val('fk_rt').value, referenz_name: val('fk_rn').value, referenz_link: val('fk_rl').value.trim() };
       const st = [0, 1, 2].filter(i => val('fk_ft' + i).value.trim() !== '');
       body.folge_tage = st.map(i => Number(val('fk_ft' + i).value));
       body.folge_betreffe = st.map(i => val('fk_fb' + i).value);
       body.folge_texte = st.map(i => val('fk_fx' + i).value);
-      try { await api(neu ? '/api/admin/funnel' : '/api/admin/funnel/' + k.id, { method: neu ? 'POST' : 'PUT', body }); d.close(); danach(); } catch (x) { fehler(m, x); e.target.disabled = false; }
+      try { await api(neu ? '/api/admin/funnel' : '/api/admin/funnel/' + k.id, { method: neu ? 'POST' : 'PUT', body }); d.zu(); danach(); } catch (x) { fehler(m, x); e.target.disabled = false; }
     } }, 'Speichern')));
+}
+
+/** Hinweisfenster: Ein neuer Funnel-Lead geht sofort auf, damit der Anruf in den ersten Minuten klappt. Prüft alle 20 Sekunden. */
+export function liveHinweis() {
+  /** @type {Set<string>} */ let gezeigt;
+  try { gezeigt = new Set(JSON.parse(sessionStorage.getItem('mk-funnel-gezeigt') || '[]')); } catch (e) { gezeigt = new Set(); }
+  const merken = () => { try { sessionStorage.setItem('mk-funnel-gezeigt', JSON.stringify([...gezeigt].slice(-50))); } catch (e) { /* egal */ } };
+  const titel = document.title;
+  const pruefen = async () => {
+    let d;
+    try { d = await api('/api/admin/funnel/neu', { leise: true }); } catch (e) { return; }
+    const neu = d.leads.filter(l => !gezeigt.has(l.id));
+    if (!neu.length || document.querySelector('.dlgoverlay')) return;
+    const l = neu[0];
+    gezeigt.add(l.id); merken();
+    document.title = '(Neuer Lead) ' + titel;
+    const tel = (l.telefon || '').replace(/[^\d+]/g, '');
+    const dd = dialog('Neuer Lead: jetzt anrufen', h('div', { class: 'stack' },
+      h('p', { style: 'font-size:20px;margin:0' }, h('b', {}, l.ansprechpartner || l.firma), l.ansprechpartner ? ' · ' + l.firma : ''),
+      h('p', { class: 'muted', style: 'margin:0' }, 'Über „' + l.kampagne + '“' + (l.website ? ' · ' + l.website : '') + (l.score !== null && l.score !== undefined ? ' · Website-Check ' + l.score + ' von 100' : '')),
+      h('p', { class: 'small muted', style: 'margin:0' }, 'Wer in den ersten Minuten anruft, erreicht die meisten Interessenten noch am Rechner.'),
+      tel ? h('a', { class: 'btn', href: 'tel:' + tel, style: 'font-size:20px;text-align:center' }, 'Anrufen: ' + l.telefon) : h('p', {}, 'Keine Telefonnummer angegeben.'),
+      h('div', { class: 'row' }, h('a', { class: 'btn sec', href: '#lead/' + l.id, onclick: () => { dd.zu(); document.title = titel; } }, 'Zum Lead'),
+        h('button', { class: 'btn sec', onclick: () => { dd.zu(); document.title = titel; } }, 'Später'))));
+  };
+  setTimeout(pruefen, 3000);
+  setInterval(pruefen, 20000);
 }
 
 async function checkKarte() {
@@ -92,7 +124,7 @@ V.funnel = async () => {
             const st = h('select', { 'aria-label': 'Status' }, ...['offen', 'ausgezahlt', 'verworfen'].map(s => h('option', { value: s, selected: s === z.praemie_status }, s)));
             const bt = h('input', { inputmode: 'decimal', placeholder: 'Betrag in €', value: z.betrag_cent !== null && z.betrag_cent !== undefined ? (z.betrag_cent / 100).toFixed(2).replace('.', ',') : '' }), nt = h('input', { placeholder: 'Notiz', value: z.notiz || '' }), dm = h('div');
             const dd = dialog('Prämie für ' + z.geber, h('div', { class: 'stack' }, h('p', { class: 'small muted' }, 'Empfohlen: ' + z.lead_firma), st, bt, nt, dm, h('button', { class: 'btn', onclick: async () => {
-              try { await api('/api/admin/empfehlung/' + z.lead_id, { method: 'PUT', body: { status: st.value, betrag_cent: bt.value ? centAusEuro(bt.value) : null, notiz: nt.value || null } }); dd.close(); zeichne(); } catch (x) { fehler(dm, x); } } }, 'Speichern')));
+              try { await api('/api/admin/empfehlung/' + z.lead_id, { method: 'PUT', body: { status: st.value, betrag_cent: bt.value ? centAusEuro(bt.value) : null, notiz: nt.value || null } }); dd.zu(); zeichne(); } catch (x) { fehler(dm, x); } } }, 'Speichern')));
           })]], em.eintraege, 'Noch keine Empfehlungen.')));
   };
   await zeichne();

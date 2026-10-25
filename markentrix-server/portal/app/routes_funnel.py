@@ -51,7 +51,9 @@ def seite(slug: str, request: Request):
             "einwilligung_text": k["einwilligung_text"], "danke_titel": k["danke_titel"], "danke_text": k["danke_text"],
             "telefon_pflicht": k["telefon_pflicht"], "website_abfragen": k["website_abfragen"] or k["vorlage"] == "website_check", "termin_anbieten": k["termin_anbieten"],
             "vorlage": k["vorlage"], "kicker": k["kicker"], "check_mail": k["vorlage"] == "website_check" and k["check_mail"],
-            "firma": firma.get("name") or "Markentrix", "kontakt": {"telefon": firma.get("telefon") or "", "email": firma.get("email") or ""}}
+            "firma": firma.get("name") or "Markentrix", "kontakt": {"telefon": firma.get("telefon") or "", "email": firma.get("email") or ""},
+            "referenz": {"text": k["referenz_text"], "name": k["referenz_name"], "link": k["referenz_link"]} if k["referenz_text"] else None,
+            "foto": "/static/funnel/inhaber.webp" if (config.STATIC_DIR / "funnel" / "inhaber.webp").is_file() else None}
 
 
 def seite_datei(slug: str) -> str:
@@ -137,7 +139,7 @@ def anmelden(slug: str, data: AnmeldungIn, request: Request, bg: BackgroundTasks
         push_ids = push.admins(cur)
         cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
                       VALUES (NULL, %s, %s, current_date, 'auto', %s) ON CONFLICT (auto_schluessel) DO NOTHING""",
-                    (f"Neuer Funnel-Lead, bitte innerhalb einer Stunde anrufen: {firma}", an, f"lead-funnel-{lid}-{date.today().isoformat()}"))
+                    (f"Neuer Funnel-Lead, bitte sofort anrufen (am besten in 5 Minuten): {firma}", an, f"lead-funnel-{lid}-{date.today().isoformat()}"))
         termin = bool(k["termin_anbieten"])
         name = k["name"]
         check_token = check_id = None
@@ -204,14 +206,18 @@ class KampagneIn(BaseModel):
     folge_tage: list[int] | None = Field(default=None, max_length=5)
     folge_betreffe: list[str] | None = Field(default=None, max_length=5)
     folge_texte: list[str] | None = Field(default=None, max_length=5)
+    referenz_text: str | None = Field(default=None, max_length=600)
+    referenz_name: str | None = Field(default=None, max_length=120)
+    referenz_link: str | None = Field(default=None, max_length=400, pattern=r"^(|https://\S+)$")
 
 
-ZUSATZ = ("vorlage", "kicker", "check_mail", "check_betreff", "check_text", "folge_aktiv", "folge_tage", "folge_betreffe", "folge_texte")
+ZUSATZ = ("vorlage", "kicker", "check_mail", "check_betreff", "check_text", "folge_aktiv", "folge_tage", "folge_betreffe", "folge_texte",
+          "referenz_text", "referenz_name", "referenz_link")
 
 
 def _zusatz_speichern(cur, kid, d: KampagneIn):
     werte = {f: getattr(d, f) for f in ZUSATZ if getattr(d, f) is not None}
-    for f in ("kicker", "check_betreff", "check_text"):
+    for f in ("kicker", "check_betreff", "check_text", "referenz_text", "referenz_name", "referenz_link"):
         if f in werte:
             werte[f] = werte[f].strip()
     for f in ("folge_betreffe", "folge_texte"):
@@ -321,6 +327,21 @@ def kampagne_weg(kid: str, user: dict = Depends(require_admin)):
         cur.execute("DELETE FROM lead_kampagnen WHERE id=%s", (kid,))
         audit(cur, user, "funnel_weg", None, {"slug": k["slug"]})
     return {"ok": True}
+
+
+# ------------------------------------------------------------------ Admin: neue Funnel-Leads sofort anzeigen
+
+@admin.get("/funnel/neu")
+def neue_leads(user: dict = Depends(require_admin)):
+    """Funnel-Leads der letzten 30 Minuten, die noch niemand angerufen hat (für das Hinweisfenster im Portal)."""
+    with tx("admin") as cur:
+        cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.telefon, l.website, l.score, k.name AS kampagne,
+                              coalesce(l.kampagne_seit, l.erstellt_am) AS seit
+                       FROM leads l JOIN lead_kampagnen k ON k.id = l.kampagne_id
+                       WHERE coalesce(l.kampagne_seit, l.erstellt_am) > now() - interval '30 minutes'
+                         AND NOT EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art IN ('anruf','termin') AND a.zeit > coalesce(l.kampagne_seit, l.erstellt_am))
+                       ORDER BY seit DESC LIMIT 5""")
+        return {"leads": cur.fetchall()}
 
 
 # ------------------------------------------------------------------ Admin: Website-Check (Einstellungen, Probe, PDF)

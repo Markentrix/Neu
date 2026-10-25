@@ -412,8 +412,12 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
     ampel = "rot" if rot else "gelb" if score < 80 else "gruen"
     nach = {x["id"]: x for x in p}
     offen = [nach[i] for i in WICHTIG if nach[i]["status"] == "schlecht"] + [nach[i] for i in WICHTIG if nach[i]["status"] == "mittel"]
+    zusammenfassung = ZUSAMMENFASSUNG[ampel]
+    if ampel == "rot" and score >= 50:   # guter Wert, aber Handy oder https fehlt
+        kritisch = [x["titel"] for x in p if x["id"] in ("handy", "sicher") and x["status"] == "schlecht"]
+        zusammenfassung = "Guter Grundwert, aber ein wichtiger Punkt fehlt: " + " und ".join(kritisch) + "."
     return {"erreichbar": True, "score": score, "ampel": ampel, "punkte": p, "wichtigster_punkt": offen[0]["tipp"] if offen else "",
-            "zusammenfassung": ZUSAMMENFASSUNG[ampel]}
+            "zusammenfassung": zusammenfassung}
 
 
 STATUS_WORT = {"gut": "gut", "mittel": "teilweise", "schlecht": "fehlt"}

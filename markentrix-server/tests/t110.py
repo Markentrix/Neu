@@ -251,6 +251,20 @@ chk("Veraltete Jahreszahl erkannt",s_["aktuell"]["status"]=="mittel" and "2019" 
 e2=funnelcheck.bewerten({"ok":True,"url":"https://alt.de/","ms":500,"bytes":2000,"html":html_.replace("</head>",'<script src="https://consent.cookiebot.com/uc.js"></script></head>')})
 chk("Mit Einwilligungs-Werkzeug gelten externe Dienste als in Ordnung",[p for p in e2["punkte"] if p["id"]=="extern"][0]["status"]=="gut")
 
+# ---------------------------------------------------------------- Kundenstimme, Foto, Hinweisfenster
+r=a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"referenz_text":"Schnell, ehrlich, und die neue Seite bringt Anfragen.","referenz_name":"Inhaber, ElbDetail Celle","referenz_link":"https://g.page/r/beispiel"})
+g=pub.get(f"/api/public/funnel/{slug}").json()
+chk("Kundenstimme wird gespeichert und öffentlich ausgeliefert",r.status_code==200 and g["referenz"]=={"text":"Schnell, ehrlich, und die neue Seite bringt Anfragen.","name":"Inhaber, ElbDetail Celle","link":"https://g.page/r/beispiel"},g.get("referenz"))
+chk("Link der Kundenstimme nur mit https",a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"referenz_link":"javascript:alert(1)"}).status_code==422)
+chk("Ohne Fotodatei kein Foto",g["foto"] is None)
+mail7=f"sofort{sfx}@lead.de"; pub.post(f"/api/public/funnel/{slug}",json={**kam,"email":mail7,"website":WEB+"/gut"}); lid7=sql(f"select id from leads where email='{mail7}'")
+n_=a.get("/api/admin/funnel/neu").json()["leads"]
+chk("Hinweisfenster: frischer Lead ohne Anruf wird gemeldet",any(x["id"]==lid7 and x["telefon"]=="069 99" for x in n_),n_)
+chk("Aufgabe heißt jetzt „sofort anrufen“",int(sql(f"select count(*) from aufgaben where auto_schluessel like 'lead-funnel-{lid7}-%' and titel like '%sofort anrufen%'"))==1)
+sql(f"insert into lead_aktivitaeten (lead_id, art, inhalt, von) values ('{lid7}','anruf','angerufen','chef')")
+chk("Nach dem Anruf verschwindet er aus dem Hinweis",not any(x["id"]==lid7 for x in a.get("/api/admin/funnel/neu").json()["leads"]))
+chk("Hinweis nur für Admins",pub.get("/api/admin/funnel/neu").status_code in (401,403))
+
 # ---------------------------------------------------------------- Browser: Seite und Danke-Ansicht
 AXEJS="/var/tmp/axe/node_modules/axe-core/axe.min.js"
 async def browser():
@@ -268,12 +282,26 @@ async def browser():
             chk(f"Seite @{w}px: ohne Barrierefreiheits-Verstoß und ohne Überlaufen",not ax and ov<=0,(ax,ov))
             chk(f"Seite @{w}px: Inhalte aus der Kampagne",await pg.text_content("#kicker")==basis["kicker"] and await pg.inner_text("#b")==basis["button"] and "Bericht" in await pg.inner_text("#el"))
             await pg.screenshot(path=f"/var/tmp/pt/funnel_{w}.png",full_page=True)
-            await pg.click("#b"); chk(f"Seite @{w}px: Pflichtfelder werden angemahnt",(await pg.inner_text("#f-w")).startswith("Bitte"))
-            await pg.fill("#w",f"127.0.0.1:8997/gut"); await pg.fill("#n","Bea Browser"); await pg.fill("#t","069 777"); await pg.fill("#e",f"b{w}{sfx}@lead.de"); await pg.check("#c")
+            chk(f"Seite @{w}px: Schritt 1 zeigt nur die Website-Adresse",await pg.is_visible("#w") and not await pg.is_visible("#n") and not await pg.is_visible("#b"))
+            chk(f"Seite @{w}px: Kundenstimme sichtbar",await pg.is_visible("#referenz") and "ElbDetail" in await pg.inner_text("#referenz"))
+            await pg.click("#weiter"); chk(f"Seite @{w}px: ohne Adresse geht es nicht weiter",(await pg.inner_text("#f-w")).startswith("Bitte") and not await pg.is_visible("#n"))
+            await pg.fill("#w",f"127.0.0.1:8997/gut"); await pg.press("#w","Enter")
+            chk(f"Seite @{w}px: Schritt 2 mit Name, Telefon, E-Mail",await pg.is_visible("#n") and await pg.text_content("#schritt")=="Schritt 2 von 2")
+            await pg.evaluate(AXE)
+            ax=await pg.evaluate("axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")
+            chk(f"Schritt 2 @{w}px: ohne Barrierefreiheits-Verstoß",not ax,ax)
+            await pg.evaluate("window.scrollTo(0, document.body.scrollHeight)"); await pg.wait_for_timeout(400)
+            sichtbar=await pg.is_visible("#mitlaufend")
+            chk(f"Seite @{w}px: mitlaufender Knopf nur auf dem Handy",sichtbar==(w<860),sichtbar)
+            if w<860:
+                await pg.click("#mitlaufend"); await pg.wait_for_timeout(900); chk(f"Seite @{w}px: mitlaufender Knopf führt zum Formular",await pg.is_visible("#n") and not await pg.is_visible("#mitlaufend"))
+            await pg.click("#b"); chk(f"Seite @{w}px: Pflichtfelder werden angemahnt",(await pg.inner_text("#f-n")).startswith("Bitte"))
+            await pg.fill("#n","Bea Browser"); await pg.fill("#t","069 777"); await pg.fill("#e",f"b{w}{sfx}@lead.de"); await pg.check("#c")
             await pg.click("#b"); await pg.wait_for_selector("#danke:not([hidden])",timeout=10000)
             await pg.wait_for_selector("#liste:not([hidden])",timeout=30000)
             chk(f"Danke-Ansicht @{w}px: Gesamtwert und 14 Prüfpunkte erscheinen",(await pg.inner_text("#score")).isdigit() and await pg.locator("#liste li").count()==14 and await pg.locator("#liste .chip").count()==14)
             await pg.screenshot(path=f"/var/tmp/pt/danke_{w}.png",full_page=True)
+            chk(f"Danke-Ansicht @{w}px: kein mitlaufender Knopf mehr",not await pg.is_visible("#mitlaufend"))
             chk(f"Danke-Ansicht @{w}px: Termin-Knopf und Anruf-Link",await pg.get_attribute("#terminbox a.knopf","href")=="/buchen" and (await pg.get_attribute("#anruf","href")).startswith("tel:"))
             await pg.evaluate(AXE)
             ax=await pg.evaluate("axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))")

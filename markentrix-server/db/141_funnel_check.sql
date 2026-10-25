@@ -8,6 +8,10 @@ ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS check_betreff text NOT NULL 
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS check_text text NOT NULL DEFAULT
   E'Guten Tag {name},\n\nIhr Website-Check ist fertig, das PDF hängt an.\n\nKurz zusammengefasst: {zusammenfassung} Ihre Website erreicht {score} von 100 Punkten.\n{punkte}\n\nWir rufen Sie kurz an, um das Ergebnis zu erklären. Wenn Ihnen ein fester Termin lieber ist, wählen Sie hier 15 Minuten: {buchen}';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_aktiv boolean NOT NULL DEFAULT false;
+-- Echte Kundenstimme auf der Seite (nur mit Erlaubnis des Kunden; leer = Abschnitt ausgeblendet)
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS referenz_text text NOT NULL DEFAULT '';
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS referenz_name text NOT NULL DEFAULT '';
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS referenz_link text NOT NULL DEFAULT '';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_tage int[] NOT NULL DEFAULT '{1,3,7}';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_betreffe text[] NOT NULL DEFAULT ARRAY[
   'Der wichtigste Punkt aus Ihrem Website-Check',
