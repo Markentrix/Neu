@@ -6,9 +6,14 @@ const box = (id, label, an) => h('label', { style: 'display:flex;align-items:cen
 const val = (id) => /** @type {HTMLInputElement} */ (document.getElementById(id));
 const centAusEuro = (t) => t === '' ? 0 : Math.round(Number(String(t).replace(',', '.')) * 100);
 
-function kampagneDialog(k, danach) {
+function kampagneDialog(k, danach, vorgabe = {}) {
   const m = h('div', { role: 'status' }), neu = !k;
-  k = k || { slug: '', name: '', titel: '', untertitel: '', nutzen: [], button: 'Kostenlos anfragen', einwilligung_text: '', danke_titel: 'Vielen Dank!', danke_text: 'Wir melden uns in Kürze bei Ihnen.', telefon_pflicht: true, website_abfragen: true, termin_anbieten: true, kosten_cent: 0, rechtlich_geprueft: false, aktiv: false };
+  k = k || { slug: '', name: '', titel: '', untertitel: '', nutzen: [], button: 'Kostenlos anfragen', einwilligung_text: '', danke_titel: 'Vielen Dank!', danke_text: 'Wir melden uns in Kürze bei Ihnen.', telefon_pflicht: true, website_abfragen: true, termin_anbieten: true, kosten_cent: 0, rechtlich_geprueft: false, aktiv: false, vorlage: 'website_check', kicker: '', check_mail: false, check_betreff: vorgabe.check_betreff || '', check_text: vorgabe.check_text || '',
+    folge_aktiv: false, folge_tage: vorgabe.folge_tage || [], folge_betreffe: vorgabe.folge_betreffe || [], folge_texte: vorgabe.folge_texte || [] };
+  const ta = (id, label, wert, zeilen = 4) => [h('label', { for: id }, label), h('textarea', { id, rows: zeilen, maxlength: 4000 }, wert || '')];
+  const stufen = [0, 1, 2].map(i => ({ tag: (k.folge_tage || [])[i] ?? '', betreff: (k.folge_betreffe || [])[i] || '', text: (k.folge_texte || [])[i] || '' }));
+  const vorlage = h('select', { id: 'fk_vorlage' }, h('option', { value: 'website_check', selected: k.vorlage !== 'standard' }, 'Website-Check (Ampel, Ergebnis als PDF)'), h('option', { value: 'standard', selected: k.vorlage === 'standard' }, 'Standard (einfaches Formular)'));
+  const platz = 'Platzhalter: {name}, {firma}, {website}, {ampel}, {score}, {punkte}, {wichtigster_punkt}, {buchen}. Gruß „Ihr Markentrix-Team“ und Abmeldelink kommen automatisch dazu.';
   const t = (id, label, wert, extra = {}) => [h('label', { for: id }, label), h('input', { id, value: wert || '', ...extra })];
   const d = dialog(neu ? 'Neue Funnel-Seite' : 'Funnel-Seite bearbeiten', h('div', { class: 'stack' },
     ...(neu ? t('fk_slug', 'Seitenname (wird Teil der Adresse, z. B. werkstatt-2026)', k.slug, { maxlength: 40 }) : [h('p', { class: 'small muted' }, 'Adresse: ' + k.link)]),
@@ -17,6 +22,16 @@ function kampagneDialog(k, danach) {
     ...t('fk_button', 'Beschriftung des Knopfs', k.button),
     h('label', { for: 'fk_ew' }, 'Einwilligungstext (neben dem Haken, vom Anwalt prüfen lassen)'), h('textarea', { id: 'fk_ew', rows: 3, maxlength: 800 }, k.einwilligung_text || ''),
     ...t('fk_dt', 'Überschrift nach dem Absenden', k.danke_titel), ...t('fk_dx', 'Text nach dem Absenden', k.danke_text),
+    h('label', { for: 'fk_vorlage' }, 'Vorlage der Seite'), vorlage,
+    ...t('fk_kicker', 'Zeile über der Überschrift (z. B. „Für Betriebe in Frankfurt & Rhein-Main“)', k.kicker, { maxlength: 120 }),
+    h('h3', {}, 'Ergebnis-Mail mit PDF (nur Vorlage Website-Check)'),
+    box('fk_cm', 'Ergebnis direkt nach der Prüfung per E-Mail schicken (mit PDF)', k.check_mail),
+    ...t('fk_cb', 'Betreff', k.check_betreff, { maxlength: 200 }), ...ta('fk_ct', 'Text', k.check_text, 7), h('p', { class: 'small muted' }, platz),
+    h('h3', {}, 'Nachfass-Mails'),
+    h('p', { class: 'small muted' }, 'Gehen nur an Leads mit Einwilligung, zwischen 8 und 19 Uhr, und hören auf, sobald ein Termin gebucht ist, der Lead antwortet, sich abmeldet oder du den Status weiter setzt. Eine Stufe ohne Tag wird nicht verschickt.'),
+    box('fk_fa', 'Nachfass-Mails dieser Seite verschicken', k.folge_aktiv),
+    ...stufen.flatMap((s, i) => [h('label', { for: 'fk_ft' + i }, `Mail ${i + 1}: nach wie vielen Tagen`), h('input', { id: 'fk_ft' + i, value: String(s.tag), inputmode: 'numeric', maxlength: 2 }),
+      ...t('fk_fb' + i, `Mail ${i + 1}: Betreff`, s.betreff, { maxlength: 200 }), ...ta('fk_fx' + i, `Mail ${i + 1}: Text`, s.text, 5)]),
     box('fk_tel', 'Telefonnummer ist Pflicht', k.telefon_pflicht), box('fk_web', 'Nach der Website fragen', k.website_abfragen), box('fk_term', 'Nach dem Absenden einen Termin anbieten', k.termin_anbieten),
     ...t('fk_kosten', 'Werbekosten gesamt in € (für „Kosten pro Lead“, freiwillig)', k.kosten_cent ? (k.kosten_cent / 100).toFixed(2).replace('.', ',') : '', { inputmode: 'decimal' }),
     box('fk_geprueft', 'Rechtlich geprüft (Einwilligung, Datenschutz, Impressum)', k.rechtlich_geprueft),
@@ -25,9 +40,27 @@ function kampagneDialog(k, danach) {
       e.target.disabled = true;
       const body = { slug: neu ? val('fk_slug').value.trim() : undefined, name: val('fk_name').value, titel: val('fk_titel').value, untertitel: val('fk_unter').value, nutzen: val('fk_nutzen').value.split('\n').map(x => x.trim()).filter(Boolean),
         button: val('fk_button').value, einwilligung_text: val('fk_ew').value, danke_titel: val('fk_dt').value, danke_text: val('fk_dx').value, telefon_pflicht: val('fk_tel').checked, website_abfragen: val('fk_web').checked,
-        termin_anbieten: val('fk_term').checked, kosten_cent: centAusEuro(val('fk_kosten').value), rechtlich_geprueft: val('fk_geprueft').checked, aktiv: val('fk_aktiv').checked };
+        termin_anbieten: val('fk_term').checked, kosten_cent: centAusEuro(val('fk_kosten').value), rechtlich_geprueft: val('fk_geprueft').checked, aktiv: val('fk_aktiv').checked,
+        vorlage: val('fk_vorlage').value, kicker: val('fk_kicker').value, check_mail: val('fk_cm').checked, check_betreff: val('fk_cb').value || undefined, check_text: val('fk_ct').value || undefined,
+        folge_aktiv: val('fk_fa').checked };
+      const st = [0, 1, 2].filter(i => val('fk_ft' + i).value.trim() !== '');
+      body.folge_tage = st.map(i => Number(val('fk_ft' + i).value));
+      body.folge_betreffe = st.map(i => val('fk_fb' + i).value);
+      body.folge_texte = st.map(i => val('fk_fx' + i).value);
       try { await api(neu ? '/api/admin/funnel' : '/api/admin/funnel/' + k.id, { method: neu ? 'POST' : 'PUT', body }); d.close(); danach(); } catch (x) { fehler(m, x); e.target.disabled = false; }
     } }, 'Speichern')));
+}
+
+async function checkKarte() {
+  const c = await api('/api/admin/funnel-check/einstellungen'), m = h('div', { role: 'status' });
+  const probe = h('input', { id: 'fc_probe', placeholder: 'www.beispiel.de', maxlength: 300 });
+  return h('div', { class: 'card' }, h('h2', {}, 'Website-Check'),
+    h('p', { class: 'small muted' }, 'Ohne Google wird die Startseite vom Server aus gemessen. Mit Google PageSpeed kommen genauere Werte für Ladezeit und Google dazu; dabei geht die Website-Adresse an Google (in der Datenschutzerklärung nennen). Ein eigener Schlüssel ist freiwillig und erhöht nur das Tageskontingent.'),
+    box('fc_ps', 'Google PageSpeed zusätzlich nutzen', c.pagespeed),
+    h('label', { for: 'fc_key' }, c.pagespeed_key_gesetzt ? 'PageSpeed-Schlüssel (hinterlegt; leer lassen = behalten, „-“ = löschen)' : 'PageSpeed-Schlüssel (freiwillig)'), h('input', { id: 'fc_key', type: 'password', autocomplete: 'off', maxlength: 200 }),
+    h('p', {}, knopf('Speichern', async () => { try { await api('/api/admin/funnel-check/einstellungen', { method: 'PUT', body: { pagespeed: val('fc_ps').checked, pagespeed_key: val('fc_key').value || null } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } }, 'btn')),
+    h('label', { for: 'fc_probe' }, 'Probe-Check: Website prüfen und das PDF ansehen (legt keinen Lead an)'), h('div', { class: 'row' }, probe,
+      knopf('Prüfen', () => { if (probe.value.trim()) window.open('/api/admin/funnel-check/probe?website=' + encodeURIComponent(probe.value.trim()), '_blank', 'noopener'); })), m);
 }
 
 V.funnel = async () => {
@@ -35,10 +68,12 @@ V.funnel = async () => {
   const zeichne = async () => {
     const [d, em] = await Promise.all([lade(), api('/api/admin/empfehlung/liste')]);
     const e = d.empfehlung, besch = h('textarea', { id: 'em_besch', rows: 3, maxlength: 1000, 'aria-label': 'Text für Kunden' }, e.beschreibung || '');
-    wurzel.replaceChildren(kopf('Lead-Funnel', knopf('Neue Seite', () => kampagneDialog(null, zeichne), 'btn')),
+    wurzel.replaceChildren(kopf('Lead-Funnel', knopf('Neue Seite', () => kampagneDialog(null, zeichne, d.vorgabe), 'btn')),
       h('div', { class: 'card' }, h('h2', {}, 'So funktioniert es'),
-        h('p', { class: 'small muted' }, 'Jede Anzeige führt auf eine eigene Seite mit Formular. Wer sich einträgt, wird als heißer Lead angelegt (mit Einwilligung, Kampagne und UTM-Angaben), das Team bekommt eine Aufgabe „innerhalb einer Stunde anrufen“, der Interessent kann gleich einen Termin wählen. Eine Seite geht erst live, wenn der Rechtstext als geprüft eingetragen ist.')),
-      h('div', { class: 'card' }, tabelle([['Seite', z => h('div', {}, h('b', {}, z.name), h('div', { class: 'small muted' }, z.link))], ['Status', z => z.aktiv ? pill('aktiv') : z.rechtlich_geprueft ? h('span', { class: 'pill warn' }, 'aus') : h('span', { class: 'pill bad' }, 'Recht offen')],
+        h('p', { class: 'small muted' }, 'Jede Anzeige führt auf eine eigene Seite mit Formular. Wer sich einträgt, wird als heißer Lead angelegt (mit Einwilligung, Kampagne und UTM-Angaben), das Team bekommt eine Aufgabe „innerhalb einer Stunde anrufen“, der Interessent kann gleich einen Termin wählen. Eine Seite geht erst live, wenn der Rechtstext als geprüft eingetragen ist.'),
+        h('p', { class: 'small muted' }, 'Vorlage „Website-Check“: Die Seite prüft die Website des Interessenten, zeigt sofort eine Ampel und schickt auf Wunsch das Ergebnis als PDF. Das Ergebnis steht auch beim Lead. Eigene Landingpages: siehe docs/FUNNEL-LANDINGPAGE.md.')),
+      await checkKarte(),
+      h('div', { class: 'card' }, tabelle([['Seite', z => h('div', {}, h('b', {}, z.name), h('div', { class: 'small muted' }, z.link), h('div', { class: 'small muted' }, (z.vorlage === 'website_check' ? 'Website-Check' : 'Standard') + (z.check_mail ? ' · PDF-Mail' : '') + (z.folge_aktiv ? ' · Nachfassen Tag ' + z.folge_tage.join(', ') : '')))], ['Status', z => z.aktiv ? pill('aktiv') : z.rechtlich_geprueft ? h('span', { class: 'pill warn' }, 'aus') : h('span', { class: 'pill bad' }, 'Recht offen')],
         ['Aufrufe', z => z.aufrufe], ['Leads', z => z.leads], ['Termine', z => z.termine], ['Kunden', z => z.kunden], ['Kosten/Lead', z => z.kosten_pro_lead_cent ? fmtEuro(z.kosten_pro_lead_cent) : '–'], ['Kosten/Kunde', z => z.kosten_pro_kunde_cent ? fmtEuro(z.kosten_pro_kunde_cent) : '–'],
         ['', z => h('div', { class: 'row' }, knopf('Bearbeiten', () => kampagneDialog(z, zeichne)), knopf('Link kopieren', async (ev) => { try { await navigator.clipboard.writeText(z.link); ev.target.textContent = 'Kopiert ✓'; } catch (x) { prompt('Link:', z.link); } }),
           z.feste ? '' : knopf('Löschen', async () => { if (confirm('Seite „' + z.name + '“ löschen? Die Leads bleiben erhalten.')) { try { await api('/api/admin/funnel/' + z.id, { method: 'DELETE' }); zeichne(); } catch (x) { fehler(m, x); } } }, 'bad'))]], d.kampagnen.filter(z => !z.feste), 'Noch keine Seite angelegt.')),

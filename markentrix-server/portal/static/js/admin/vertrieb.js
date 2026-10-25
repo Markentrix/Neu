@@ -4,6 +4,7 @@ import { qrKarte } from '../anleitung.js';
 import { einarbeitungKarte, handelsvertreterKarte } from './vertraege.js';
 import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular, dialog } from '../common.js';
 import { filterKarte, V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
+const AMPEL = { gruen: 'Grün', gelb: 'Gelb', rot: 'Rot' };
 
 // ---------------------------------------------------------------- Vertriebler
 V.vertrieb = async () => {
@@ -252,8 +253,12 @@ export async function leadDetail(lid) {
     await leadAngebotKarte(lid, l, m),
     kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am, { verlustgruende: d.verlustgruende }),
     skriptKarte(l.skript, l.skript_am, '/api/admin/leads/' + lid + '/skript'),
-    d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0' }, h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null ? '–' : c.score + ' von 100')),
-      h('div', { class: 'freitext' }, JSON.stringify(c.ergebnis, null, 2))))) : '',
+    d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0', open: c === d.checks[0] && !!(c.ergebnis && c.ergebnis.punkte) },
+      h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null || c.score === undefined ? (c.status === 'laeuft' ? 'läuft noch' : '–') : c.score + ' von 100') + (c.ampel ? ' · ' + AMPEL[c.ampel] : '')),
+      c.ergebnis && c.ergebnis.punkte ? h('div', { class: 'stack' }, h('p', {}, c.ergebnis.zusammenfassung),
+        tabelle([['', z => h('span', { class: 'pill ' + (z.status === 'gut' ? 'ok' : z.status === 'mittel' ? 'warn' : 'bad') }, z.status)], ['Prüfpunkt', z => z.titel], ['Ergebnis', z => z.text]], c.ergebnis.punkte),
+        h('p', {}, h('a', { class: 'btn sec small', href: '/api/admin/leads/' + lid + '/checks/' + c.id + '/pdf', target: '_blank', rel: 'noopener' }, 'PDF ansehen')))
+        : h('div', { class: 'freitext' }, JSON.stringify(c.ergebnis, null, 2))))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt], ['Von', z => z.von]], d.aktivitaeten, 'Noch keine Einträge.')));
 }
 

@@ -7,9 +7,10 @@ from datetime import date
 from urllib.parse import quote
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, leadeingang, mailer, push
+from . import config, einstellungen, funnelcheck, leadeingang, mailer, push
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin, require_kunde
@@ -45,9 +46,22 @@ def seite(slug: str, request: Request):
             raise HTTPException(404, "Diese Seite gibt es nicht.")
         cur.execute("""INSERT INTO lead_kampagnen_tage (kampagne_id, tag, aufrufe) VALUES (%s, current_date, 1)
                        ON CONFLICT (kampagne_id, tag) DO UPDATE SET aufrufe = lead_kampagnen_tage.aufrufe + 1""", (k["id"],))
+        firma = einstellungen.lesen(cur, "firma") or {}
     return {"name": k["name"], "titel": k["titel"], "untertitel": k["untertitel"], "nutzen": k["nutzen"], "button": k["button"],
             "einwilligung_text": k["einwilligung_text"], "danke_titel": k["danke_titel"], "danke_text": k["danke_text"],
-            "telefon_pflicht": k["telefon_pflicht"], "website_abfragen": k["website_abfragen"], "termin_anbieten": k["termin_anbieten"]}
+            "telefon_pflicht": k["telefon_pflicht"], "website_abfragen": k["website_abfragen"] or k["vorlage"] == "website_check", "termin_anbieten": k["termin_anbieten"],
+            "vorlage": k["vorlage"], "kicker": k["kicker"], "check_mail": k["vorlage"] == "website_check" and k["check_mail"],
+            "firma": firma.get("name") or "Markentrix", "kontakt": {"telefon": firma.get("telefon") or "", "email": firma.get("email") or ""}}
+
+
+def seite_datei(slug: str) -> str:
+    """Welche HTML-Datei /f/<slug> ausliefert (die Inhalte lädt die Seite selbst über die öffentliche Schnittstelle)."""
+    if not SLUG.match(slug or ""):
+        return "funnel.html"
+    with tx("system") as cur:
+        cur.execute("SELECT vorlage FROM lead_kampagnen WHERE slug=%s", (slug,))
+        k = cur.fetchone()
+    return "funnel-check.html" if k and k["vorlage"] == "website_check" else "funnel.html"
 
 
 class AnmeldungIn(BaseModel):
@@ -83,7 +97,12 @@ def anmelden(slug: str, data: AnmeldungIn, request: Request, bg: BackgroundTasks
         if k["telefon_pflicht"] and not telefon:
             raise HTTPException(400, "Bitte geben Sie eine Telefonnummer an, unter der wir Sie erreichen.")
         website = (data.website or "").strip() or None
-        firma = (data.firma or "").strip() or data.name.strip()
+        check = k["vorlage"] == "website_check"
+        if check:
+            website = funnelcheck.normalisieren(website)
+            if not website:
+                raise HTTPException(400, "Bitte geben Sie die Adresse Ihrer Website an, z. B. www.ihr-betrieb.de.")
+        firma = (data.firma or "").strip() or (funnelcheck.host(website) if check else "") or data.name.strip()
         geber = None
         if slug == "empfehlung" and data.ref:
             cur.execute("SELECT id FROM kunden WHERE empfehlungscode=%s AND status NOT IN ('beendet')", (data.ref.strip().upper(),))
@@ -117,11 +136,37 @@ def anmelden(slug: str, data: AnmeldungIn, request: Request, bg: BackgroundTasks
                     (f"Neuer Funnel-Lead, bitte innerhalb einer Stunde anrufen: {firma}", an, f"lead-funnel-{lid}-{date.today().isoformat()}"))
         termin = bool(k["termin_anbieten"])
         name = k["name"]
+        check_token = check_id = None
+        if check:
+            check_token = secrets.token_urlsafe(18)
+            cur.execute("INSERT INTO lead_checks (lead_id, website, status, token, kampagne_id) VALUES (%s,%s,'laeuft',%s,%s) RETURNING id", (lid, website[:300], check_token, k["id"]))
+            check_id = cur.fetchone()["id"]
     push.senden(push_ids + partner_ids, "Neuer Lead", f"{firma} über „{name}“: jetzt anrufen.", "/admin#lead/" + str(lid), "check")
     if an:
         bg.add_task(mailer.senden, an, f"Neuer Lead über „{name}“: {firma}",
                     f"{data.name.strip()} ({email}{', ' + telefon if telefon else ''}) hat sich über „{name}“ angemeldet. Bitte innerhalb einer Stunde anrufen.\n\n{config.BASE_URL}/admin#lead/{lid}")
-    return {"ok": True, "termin": termin, "neu": neu}
+    if check_id:
+        bg.add_task(funnelcheck.ausfuehren, check_id)
+    return {"ok": True, "termin": termin, "neu": neu, "check": check_token}
+
+
+@public.get("/funnel/{slug}/check/{token}")
+def check_stand(slug: str, token: str, request: Request):
+    """Stand des Website-Checks für die Danke-Ansicht (nur über das geheime Kennzeichen aus der Anmeldung)."""
+    rate_limit("funnel-check:" + client_ip(request), 200, 600)
+    if len(token) < 20 or len(token) > 40:
+        raise HTTPException(404, "Nicht gefunden.")
+    with tx("system") as cur:
+        cur.execute("""SELECT c.status, c.ergebnis, k.check_mail FROM lead_checks c JOIN lead_kampagnen k ON k.id = c.kampagne_id
+                       WHERE c.token=%s AND k.slug=%s""", (token, slug))
+        c = cur.fetchone()
+    if not c:
+        raise HTTPException(404, "Nicht gefunden.")
+    if c["status"] != "fertig":
+        return {"status": c["status"], "mail": c["check_mail"]}
+    e = c["ergebnis"] or {}
+    return {"status": "fertig", "mail": c["check_mail"], "ampel": e.get("ampel"), "score": e.get("score"), "zusammenfassung": e.get("zusammenfassung"),
+            "website": funnelcheck.host(e.get("website")), "punkte": [{"titel": x["titel"], "status": x["status"], "text": x["text"]} for x in e.get("punkte", [])]}
 
 
 # ------------------------------------------------------------------ Admin: Kampagnen
@@ -143,6 +188,44 @@ class KampagneIn(BaseModel):
     notiz: str | None = Field(default=None, max_length=1000)
     rechtlich_geprueft: bool = False
     aktiv: bool = False
+    # Vorlage „Website-Check“ und Nachfass-Mails (None = unverändert lassen bzw. Standard der Datenbank)
+    vorlage: str | None = Field(default=None, pattern="^(standard|website_check)$")
+    kicker: str | None = Field(default=None, max_length=120)
+    check_mail: bool | None = None
+    check_betreff: str | None = Field(default=None, max_length=200)
+    check_text: str | None = Field(default=None, max_length=4000)
+    folge_aktiv: bool | None = None
+    folge_tage: list[int] | None = Field(default=None, max_length=5)
+    folge_betreffe: list[str] | None = Field(default=None, max_length=5)
+    folge_texte: list[str] | None = Field(default=None, max_length=5)
+
+
+ZUSATZ = ("vorlage", "kicker", "check_mail", "check_betreff", "check_text", "folge_aktiv", "folge_tage", "folge_betreffe", "folge_texte")
+
+
+def _zusatz_speichern(cur, kid, d: KampagneIn):
+    werte = {f: getattr(d, f) for f in ZUSATZ if getattr(d, f) is not None}
+    for f in ("kicker", "check_betreff", "check_text"):
+        if f in werte:
+            werte[f] = werte[f].strip()
+    for f in ("folge_betreffe", "folge_texte"):
+        if f in werte:
+            werte[f] = [x.strip()[:4000] for x in werte[f]]
+    if werte:
+        cur.execute("UPDATE lead_kampagnen SET " + ", ".join(f"{f}=%s" for f in werte) + " WHERE id=%s", (*werte.values(), kid))
+    cur.execute("SELECT vorlage, check_mail, check_betreff, check_text, folge_aktiv, folge_tage, folge_betreffe, folge_texte FROM lead_kampagnen WHERE id=%s", (kid,))
+    k = cur.fetchone()
+    if k["check_mail"] and k["vorlage"] != "website_check":
+        raise HTTPException(400, "Die Ergebnis-Mail gibt es nur bei der Vorlage „Website-Check“.")
+    if k["check_mail"] and (len(k["check_betreff"]) < 3 or len(k["check_text"]) < 10):
+        raise HTTPException(400, "Für die Ergebnis-Mail braucht es einen Betreff und einen Text.")
+    tage = k["folge_tage"] or []
+    if not (len(tage) == len(k["folge_betreffe"]) == len(k["folge_texte"])):
+        raise HTTPException(400, "Je Nachfass-Mail braucht es einen Tag, einen Betreff und einen Text.")
+    if any(t < 1 or t > 60 for t in tage) or any(b >= a for b, a in zip(tage, tage[1:])):
+        raise HTTPException(400, "Die Tage der Nachfass-Mails müssen zwischen 1 und 60 liegen und aufsteigen (z. B. 1, 3, 7).")
+    if k["folge_aktiv"] and (not tage or any(len(b) < 3 for b in k["folge_betreffe"]) or any(len(x) < 10 for x in k["folge_texte"])):
+        raise HTTPException(400, "Für die Nachfass-Mails braucht jede Stufe einen Betreff und einen Text.")
 
 
 def _link(slug: str) -> str:
@@ -159,13 +242,19 @@ def kampagnen(user: dict = Depends(require_admin)):
                        FROM lead_kampagnen k LEFT JOIN leads l ON l.kampagne_id = k.id GROUP BY k.id ORDER BY k.erstellt_am""")
         rows = cur.fetchall()
         einst = _empfehlung_einst(cur)
+        # Standardtexte für neue Seiten direkt aus den Vorgaben der Datenbank (Probezeile, wird sofort verworfen)
+        cur.execute("SAVEPOINT vorgabe")
+        cur.execute("""INSERT INTO lead_kampagnen (slug, name) VALUES ('zz-vorgabe-probe', 'Vorgabe')
+                       RETURNING check_betreff, check_text, folge_tage, folge_betreffe, folge_texte""")
+        vorgabe = cur.fetchone()
+        cur.execute("ROLLBACK TO SAVEPOINT vorgabe")
     for r in rows:
         r["link"] = _link(r["slug"])
         r["kosten_pro_lead_cent"] = round(r["kosten_cent"] / r["leads"]) if r["kosten_cent"] and r["leads"] else None
         r["kosten_pro_kunde_cent"] = round(r["kosten_cent"] / r["kunden"]) if r["kosten_cent"] and r["kunden"] else None
         r["feste"] = r["slug"] in FESTE
         r["rechtlich_geprueft"] = bool(r["rechtlich_geprueft_am"])
-    return {"kampagnen": rows, "empfehlung": einst}
+    return {"kampagnen": rows, "empfehlung": einst, "vorgabe": vorgabe}
 
 
 def _pruefen(d: KampagneIn):
@@ -191,6 +280,7 @@ def kampagne_neu(d: KampagneIn, user: dict = Depends(require_admin)):
                      d.danke_titel.strip(), d.danke_text.strip(), d.telefon_pflicht, d.website_abfragen, d.termin_anbieten, d.kosten_cent, d.notiz,
                      d.aktiv, date.today() if d.rechtlich_geprueft else None))
         kid = cur.fetchone()["id"]
+        _zusatz_speichern(cur, kid, d)
         audit(cur, user, "funnel_neu", None, {"slug": slug})
     return {"id": kid, "link": _link(slug)}
 
@@ -208,7 +298,8 @@ def kampagne_aendern(kid: str, d: KampagneIn, user: dict = Depends(require_admin
                          website_abfragen=%s, termin_anbieten=%s, kosten_cent=%s, notiz=%s, aktiv=%s, rechtlich_geprueft_am=%s WHERE id=%s""",
                     (d.name.strip(), d.titel.strip(), d.untertitel.strip(), [n.strip() for n in d.nutzen if n.strip()], d.button.strip(), d.einwilligung_text.strip(),
                      d.danke_titel.strip(), d.danke_text.strip(), d.telefon_pflicht, d.website_abfragen, d.termin_anbieten, d.kosten_cent, d.notiz, d.aktiv, geprueft, kid))
-        audit(cur, user, "funnel_aendern", None, {"slug": alt["slug"], "aktiv": d.aktiv})
+        _zusatz_speichern(cur, kid, d)
+        audit(cur, user, "funnel_aendern", None, {"slug": alt["slug"], "aktiv": d.aktiv, "check_mail": d.check_mail, "folge_aktiv": d.folge_aktiv})
     return {"ok": True}
 
 
@@ -224,6 +315,64 @@ def kampagne_weg(kid: str, user: dict = Depends(require_admin)):
         cur.execute("DELETE FROM lead_kampagnen WHERE id=%s", (kid,))
         audit(cur, user, "funnel_weg", None, {"slug": k["slug"]})
     return {"ok": True}
+
+
+# ------------------------------------------------------------------ Admin: Website-Check (Einstellungen, Probe, PDF)
+
+class CheckEinstIn(BaseModel):
+    pagespeed: bool = False
+    pagespeed_key: str | None = Field(default=None, max_length=200)
+
+
+@admin.get("/funnel-check/einstellungen")
+def check_einst(user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        c = einstellungen.lesen(cur, "funnel_check") or {}
+    return {"pagespeed": bool(c.get("pagespeed")), "pagespeed_key_gesetzt": bool(c.get("pagespeed_key"))}
+
+
+@admin.put("/funnel-check/einstellungen")
+def check_einst_speichern(d: CheckEinstIn, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        alt = einstellungen.lesen(cur, "funnel_check") or {}
+        key = (d.pagespeed_key or "").strip() or alt.get("pagespeed_key")
+        if d.pagespeed_key is not None and d.pagespeed_key.strip() == "-":
+            key = None
+        einstellungen.schreiben(cur, "funnel_check", {"pagespeed": d.pagespeed, "pagespeed_key": key})
+        audit(cur, user, "funnel_check_einstellungen", None, {"pagespeed": d.pagespeed})
+    return {"ok": True}
+
+
+def _pdf_antwort(e: dict) -> Response:
+    with tx("system") as cur:
+        firma = einstellungen.lesen(cur, "firma") or {}
+    return Response(funnelcheck.pdf_bauen(e, firma), media_type="application/pdf",
+                    headers={"Content-Disposition": f'inline; filename="{funnelcheck.dateiname(e)}"'})
+
+
+@admin.get("/funnel-check/probe")
+def check_probe(website: str, user: dict = Depends(require_admin)):
+    """Probe-Check einer beliebigen Website als PDF (z. B. vor dem Start einer Kampagne). Legt keinen Lead an."""
+    rate_limit("funnel-probe:" + str(user["id"]), 20, 600)
+    url = funnelcheck.normalisieren(website)
+    if not url:
+        raise HTTPException(400, "Bitte eine gültige Website-Adresse eingeben, z. B. www.beispiel.de.")
+    with tx("admin") as cur:
+        cfg = einstellungen.lesen(cur, "funnel_check") or {}
+    return _pdf_antwort(funnelcheck.pruefen(url, cfg))
+
+
+@admin.get("/leads/{lid}/checks/{cid}/pdf")
+def check_pdf(lid: str, cid: int, user: dict = Depends(require_admin)):
+    with tx("admin") as cur:
+        try:
+            cur.execute("SELECT ergebnis FROM lead_checks WHERE id=%s AND lead_id=%s AND status='fertig'", (cid, lid))
+        except Exception:
+            raise HTTPException(404, "Nicht gefunden.")
+        c = cur.fetchone()
+    if not c or not (c["ergebnis"] or {}).get("punkte"):
+        raise HTTPException(404, "Für diesen Check gibt es kein PDF.")
+    return _pdf_antwort(c["ergebnis"])
 
 
 # ------------------------------------------------------------------ Admin: Empfehlungsprogramm

@@ -249,7 +249,11 @@ app.get("/buchen", include_in_schema=False)(seite("buchen.html"))
 app.get("/angebot", include_in_schema=False)(seite("angebot.html"))
 app.get("/freigabe", include_in_schema=False)(seite("freigabe.html"))
 app.get("/anmelden", include_in_schema=False)(seite("anmelden.html"))
-app.get("/f/{slug}", include_in_schema=False)(seite("funnel.html"))
+@app.get("/f/{slug}", include_in_schema=False)
+def funnel_seite(slug: str):
+    return FileResponse(config.STATIC_DIR / routes_funnel.seite_datei(slug), media_type="text/html")
+
+
 app.get("/datenschutz-anfrage", include_in_schema=False)(seite("dsgvo.html"))
 app.get("/impressum", include_in_schema=False)(seite("recht.html"))
 app.get("/datenschutz", include_in_schema=False)(seite("recht.html"))

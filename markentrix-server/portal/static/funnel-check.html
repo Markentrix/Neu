@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Kostenloser Website-Check</title>
+<meta name="description" content="Kostenloser Website-Check: Handy, Tempo, Google und Kontaktwege. Mit Ampel und Ergebnis per E-Mail.">
+<link rel="icon" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/css/funnel-check.css">
+</head>
+<body>
+<header class="wrap kopf">
+  <div class="logo"><span class="ampelpunkte" aria-hidden="true"><i></i><i></i><i></i></span><span id="firma">Markentrix</span></div>
+</header>
+
+<main id="seite">
+  <div class="wrap hero">
+    <div>
+      <p class="kicker" id="kicker" hidden></p>
+      <h1 id="titel">Wie gut ist Ihre Website wirklich?</h1>
+      <p class="lead" id="untertitel"></p>
+      <ul class="punkte" id="nutzen"></ul>
+    </div>
+
+    <form id="f" novalidate hidden>
+      <h2>Website-Check anfordern</h2>
+      <p class="sub">Dauert 30 Sekunden.</p>
+      <div class="feld">
+        <label for="w">Ihre Website-Adresse</label>
+        <input id="w" name="website" type="text" inputmode="url" autocomplete="url" placeholder="z. B. www.ihr-betrieb.de" required maxlength="300" aria-describedby="f-w">
+        <div class="fehler" id="f-w" aria-live="polite"></div>
+      </div>
+      <div class="feld">
+        <label for="n">Ihr Name</label>
+        <input id="n" name="name" type="text" autocomplete="name" required minlength="2" maxlength="200" aria-describedby="f-n">
+        <div class="fehler" id="f-n" aria-live="polite"></div>
+      </div>
+      <div class="feld">
+        <label for="t" id="tl">Telefon</label>
+        <input id="t" name="telefon" type="tel" inputmode="tel" autocomplete="tel" maxlength="60" aria-describedby="f-t">
+        <div class="fehler" id="f-t" aria-live="polite"></div>
+      </div>
+      <div class="feld">
+        <label for="e" id="el">E-Mail</label>
+        <input id="e" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="320" aria-describedby="f-e">
+        <div class="fehler" id="f-e" aria-live="polite"></div>
+      </div>
+      <div class="lock" aria-hidden="true">
+        <label for="z">Bitte leer lassen</label>
+        <input id="z" name="zweitfeld" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="feld">
+        <label class="check" for="c">
+          <input id="c" name="einwilligung" type="checkbox" required aria-describedby="f-c">
+          <span><span id="ew"></span> Mehr in der <a href="/datenschutz">Datenschutzerklärung</a>.</span>
+        </label>
+        <div class="fehler" id="f-c" aria-live="polite"></div>
+      </div>
+      <button type="submit" id="b">Kostenlos prüfen lassen</button>
+      <p class="klein">Kostenlos und ohne Verpflichtung.</p>
+      <div class="meldung" id="m" role="alert" hidden></div>
+    </form>
+    <div class="meldung" id="weg" role="alert" hidden>Diese Seite ist gerade nicht erreichbar.</div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2>Was wir prüfen</h2>
+      <div class="raster">
+        <div class="karte"><h3>Handy</h3><p>Lässt sich alles mit dem Daumen bedienen? Ist die Schrift lesbar, ohne zu zoomen?</p></div>
+        <div class="karte"><h3>Tempo</h3><p>Wie schnell ist die Seite da? Wer warten muss, ist weg.</p></div>
+        <div class="karte"><h3>Google</h3><p>Findet Google, was Sie anbieten und wo Sie arbeiten?</p></div>
+        <div class="karte"><h3>Kontaktwege</h3><p>Kann ein Kunde Sie sofort anrufen, schreiben oder einen Termin buchen?</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Warum sich der Blick lohnt</h2>
+      <div class="zahlen">
+        <div class="karte"><div class="zahl">40&nbsp;%</div><p>schließen einen Betrieb ohne eigene Website als Auftragnehmer aus.</p></div>
+        <div class="karte"><div class="zahl">88&nbsp;%</div><p>der geprüften Handwerker-Websites nennen keinerlei Preise.</p></div>
+        <div class="karte"><div class="zahl">4 von 500</div><p>bieten eine Online-Terminbuchung an.</p></div>
+      </div>
+      <p class="quelle">Quellen: Bitkom-Umfrage, Juni 2025 (1.004 Befragte). Studie „Team handwerk-digital“ über 500 Handwerker-Websites in fünf Städten, veröffentlicht in der Deutschen Handwerks Zeitung, Juli 2025.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Häufige Fragen</h2>
+      <details><summary>Was kostet der Check?</summary><p>Nichts. Sie bekommen das Ergebnis und können damit machen, was Sie möchten.</p></details>
+      <details><summary>Muss ich danach etwas kaufen?</summary><p>Nein. Wenn Sie möchten, besprechen wir in einem kurzen Erstgespräch, was sich lohnt. Wenn nicht, ist das auch in Ordnung.</p></details>
+      <details><summary>Warum rufen Sie an?</summary><p>Um das Ergebnis kurz zu erklären und Ihre Fragen zu beantworten. Das dauert etwa zehn Minuten.</p></details>
+      <details><summary>Und wenn meine Website erneuert werden sollte?</summary><p>Dann bauen wir Ihnen eine neue: schnell, fürs Handy gemacht, mit Anfrage- und Terminformular. Sie bekommen vorher ein festes Angebot.</p></details>
+      <a class="cta2" href="#f">Jetzt kostenlos prüfen</a>
+    </div>
+  </section>
+</main>
+
+<main id="danke" hidden>
+  <div class="wrap schmal">
+    <h1 id="dt">Danke! Ihr Check läuft.</h1>
+    <p class="lead" id="dx"></p>
+    <div class="box">
+      <h2>Ihre Schnell-Ampel</h2>
+      <p id="adresse"></p>
+      <div class="ampel" id="ampel" data-farbe="laeuft" role="img" aria-label="Ampel: wird geprüft"><i></i><i></i><i></i></div>
+      <p class="urteil" id="urteil" aria-live="polite">Wird geprüft …</p>
+      <ul class="liste" id="liste" hidden></ul>
+    </div>
+    <div class="box" id="terminbox" hidden>
+      <h2>Lieber gleich ein Erstgespräch?</h2>
+      <p>15 Minuten am Telefon oder per Video. Wir gehen das Ergebnis durch und sagen Ihnen ehrlich, ob sich eine Erneuerung lohnt.</p>
+      <a class="knopf" href="/buchen">Termin für das Erstgespräch wählen</a>
+      <a class="knopf hell" id="anruf" href="/buchen" hidden>Oder direkt anrufen</a>
+    </div>
+  </div>
+</main>
+
+<footer class="wrap fuss">
+  <div id="fussname">Markentrix</div>
+  <nav aria-label="Rechtliches">
+    <a id="fusstel" href="/impressum" hidden>Anrufen</a>
+    <a id="fussmail" href="/impressum" hidden>E-Mail schreiben</a>
+    <a href="/impressum">Impressum</a>
+    <a href="/datenschutz">Datenschutz</a>
+  </nav>
+</footer>
+<script src="/static/js/funnel-check.js" type="module"></script>
+</body>
+</html>

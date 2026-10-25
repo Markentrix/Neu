@@ -341,6 +341,12 @@ def lead_folge(an: str, name: str | None, firma: str, betreff: str, text: str, t
     return senden(an, betreff, body + SIGNATUR + f"\n\n--\nSie möchten dazu nichts mehr von uns erhalten? Hier abmelden: {abmelden}")
 
 
+def funnel_mail(an: str, betreff: str, text: str, token: str, anhang: tuple[str, bytes, str] | None = None) -> tuple[bool, str]:
+    """Mail an einen Funnel-Lead (Ergebnis des Website-Checks oder Nachfass-Mail): fertiger Text, Gruß vom Team und Abmeldelink."""
+    abmelden = config.BASE_URL.rstrip("/") + "/api/public/abmelden?t=" + token
+    return senden(an, betreff, text.rstrip() + SIGNATUR + f"\n\n--\nSie möchten dazu nichts mehr von uns erhalten? Hier abmelden: {abmelden}", anhang=anhang, art="lead")
+
+
 def kunden_feedback(an: str, name: str | None) -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     text = (f"{hallo}\n\nSie sind jetzt seit gut einem Monat bei uns. Wie läuft es aus Ihrer Sicht? Im Portal können Sie uns in zehn Sekunden eine Bewertung geben, "

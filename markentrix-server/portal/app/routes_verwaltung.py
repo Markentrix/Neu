@@ -350,7 +350,7 @@ def lead_detail(lid: str, user: dict = Depends(require_admin)):
                 raise HTTPException(404, "Lead nicht gefunden.")
             cur.execute("SELECT id, art, inhalt, zeit, von FROM lead_aktivitaeten WHERE lead_id=%s ORDER BY zeit DESC LIMIT 200", (lid,))
             akt = cur.fetchall()
-            cur.execute("SELECT id, website, score, ergebnis, erstellt_am FROM lead_checks WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 20", (lid,))
+            cur.execute("SELECT id, website, score, ergebnis, erstellt_am, status, ampel FROM lead_checks WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 20", (lid,))
             checks = cur.fetchall()
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Lead nicht gefunden.")
