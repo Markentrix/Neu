@@ -19,7 +19,7 @@ an=lambda adr: [m for m in mails() if adr in str(m["To"])]
 GUT='''<!doctype html><html lang="de"><head><title>Malerbetrieb Muster in Frankfurt</title><meta name="description" content="Malerbetrieb in Frankfurt: Innen, Fassade, Tapeten. Festpreise ab 18 Euro und Termine online buchen.">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta property="og:title" content="Malerbetrieb Muster"><meta property="og:image" content="/bild.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"HousePainter","name":"Malerbetrieb Muster"}</script></head><body><h1>Malerbetrieb Muster</h1><a href="tel:+4969123">Anrufen</a><p>Innen ab 18 € je m²</p>
-<p>4,9 Sterne, Kundenstimmen</p><a href="/termin">Termin online buchen</a><p>Musterweg 1, 60311 Frankfurt</p><a href="/impressum">Impressum</a> <a href="/datenschutz">Datenschutz</a><p>© '''+str(__import__('datetime').date.today().year)+''' Malerbetrieb Muster</p></body></html>'''
+<p>4,9 Sterne, Kundenstimmen</p><a href="/termin">Termin online buchen</a><p>Musterweg 1, 29221 Celle</p><p>Öffnungszeiten: Mo–Fr 8:00–17:00</p><a href="/impressum">Impressum</a> <a href="/datenschutz">Datenschutz</a><p>© '''+str(__import__('datetime').date.today().year)+''' Malerbetrieb Muster</p></body></html>'''
 SCHLECHT='<html><head><title>Home</title></head><body><p>Willkommen auf unserer Homepage</p></body></html>'
 PSI={"lighthouseResult":{"categories":{"performance":{"score":0.42},"seo":{"score":0.83},"accessibility":{"score":0.77}},"audits":{"largest-contentful-paint":{"displayValue":"6,8 s"}}}}
 class W(BaseHTTPRequestHandler):
@@ -63,9 +63,9 @@ d=a.get("/api/admin/funnel").json(); v=d.get("vorgabe") or {}
 chk("Vorgaben für neue Seiten: 3 Nachfass-Mails (Tag 1, 3, 7) und Ergebnis-Mail",v.get("folge_tage")==[1,3,7] and len(v.get("folge_texte",[]))==3 and "{score}" in v.get("check_betreff",""),v)
 chk("Probezeile für die Vorgaben wird nicht gespeichert",sql("select count(*) from lead_kampagnen where slug='zz-vorgabe-probe'")=="0")
 slug=f"check-{sfx}"
-basis={"slug":slug,"name":"Website-Check Frankfurt","titel":"Wie gut ist Ihre Website wirklich?","untertitel":"Wir prüfen Ihre Website kostenlos.","nutzen":["Ampel","PDF","Kostenlos"],
+basis={"slug":slug,"name":"Website-Check Niedersachsen","titel":"Wie gut ist Ihre Website wirklich?","untertitel":"Wir prüfen Ihre Website kostenlos.","nutzen":["Ampel","PDF","Kostenlos"],
        "button":"Kostenlos prüfen lassen","einwilligung_text":"Ich bin einverstanden, dass Markentrix mich zum Website-Check per E-Mail und Telefon kontaktiert.","kosten_cent":10000,
-       "vorlage":"website_check","kicker":"Für Betriebe in Frankfurt & Rhein-Main","check_mail":True,"folge_aktiv":True,"folge_tage":[1,3,7],
+       "vorlage":"website_check","kicker":"Für Betriebe in Niedersachsen","check_mail":True,"folge_aktiv":True,"folge_tage":[1,3,7],
        "folge_betreffe":v["folge_betreffe"],"folge_texte":v["folge_texte"],"rechtlich_geprueft":True,"aktiv":True}
 r=a.post("/api/admin/funnel",json={**basis,"slug":f"x{sfx}","vorlage":"standard"}); chk("PDF-Mail nur mit Vorlage Website-Check",r.status_code==400 and "Website-Check" in r.text,r.text)
 chk("Abgelehnte Seite wurde nicht angelegt",sql(f"select count(*) from lead_kampagnen where slug='x{sfx}'")=="0")
@@ -97,7 +97,7 @@ for _ in range(40):
     if st["status"]!="laeuft": break
     time.sleep(0.5)
 schlecht_=[p["titel"] for p in st.get("punkte",[]) if p["status"]!="gut"]
-chk("Prüfung ist nach kurzer Zeit fertig: 14 Prüfpunkte, nur https fehlt (Testseite läuft über http)",st["status"]=="fertig" and len(st["punkte"])==14 and schlecht_==["Sichere Verbindung (https)"] and st["ampel"]=="rot" and st["score"]==90 and st["mail"],st)
+chk("Prüfung ist nach kurzer Zeit fertig: 15 Prüfpunkte, nur https fehlt (Testseite läuft über http)",st["status"]=="fertig" and len(st["punkte"])==15 and schlecht_==["Sichere Verbindung (https)"] and st["ampel"]=="rot" and st["score"]==90 and st["mail"],st)
 chk("Status-Abfrage gibt keine persönlichen Daten heraus",not any(x in json.dumps(st) for x in (mail,"Max Muster","069")),st)
 chk("Falsches Kennzeichen oder falsche Seite: nicht gefunden",pub.get(f"/api/public/funnel/{slug}/check/{'x'*24}").status_code==404 and pub.get(f"/api/public/funnel/{std}/check/{tok}").status_code==404)
 chk("Lead: Firma aus der Website, Punktzahl, UTM und Kampagne",sql(f"select firma||'|'||score||'|'||(utm->>'utm_content')||'|'||(kampagne_id='{kid}') from leads where id='{lid}'")=="127.0.0.1|90|A|true",sql(f"select firma, score from leads where id='{lid}'"))
@@ -112,7 +112,7 @@ if m:
     chk("PDF hängt an",len(pdfteil)==1 and pdfteil[0].get_filename()=="Website-Check-127.0.0.1.pdf",[p.get_content_type() for p in m[0].walk()])
     from pypdf import PdfReader
     t=" ".join(p.extract_text() for p in PdfReader(io.BytesIO(pdfteil[0].get_payload(decode=True))).pages)
-    chk("PDF enthält Ampel-Ergebnis und Prüfpunkte",("Ihr Website-Check" in t) and ("90 von 100" in t) and ("14 Prüfpunkte" in t) and ("Ihre nächsten Schritte" in t) and ("Mit einem Tipp anrufen" in t),t[:300])
+    chk("PDF enthält Ampel-Ergebnis und Prüfpunkte",("Ihr Website-Check" in t) and ("90 von 100" in t) and ("15 Prüfpunkte" in t) and ("Ihre nächsten Schritte" in t) and ("Mit einem Tipp anrufen" in t),t[:300])
 chk("Versand im Verlauf vermerkt",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{lid}' and art='mail_gesendet' and inhalt like '%PDF%'"))==1)
 chk("Ergebnis-Mail wird nicht doppelt geschickt",funnelcheck.mail_senden(int(sql(f"select id from lead_checks where lead_id='{lid}'")))==False and len([x for x in an(mail) if "Website-Check" in betreff(x)])==1)
 
@@ -135,7 +135,7 @@ chk("Schlüssel lässt sich löschen",a.get("/api/admin/funnel-check/einstellung
 
 # ---------------------------------------------------------------- Admin: Lead, PDF, Probe, Rechte
 ld=a.get(f"/api/admin/leads/{lid}").json(); c=ld["checks"][0]
-chk("Lead-Ansicht zeigt den Check mit Ampel",c["status"]=="fertig" and c["ampel"]=="rot" and len(c["ergebnis"]["punkte"])==14,c.get("status"))
+chk("Lead-Ansicht zeigt den Check mit Ampel",c["status"]=="fertig" and c["ampel"]=="rot" and len(c["ergebnis"]["punkte"])==15,c.get("status"))
 r=a.get(f"/api/admin/leads/{lid}/checks/{c['id']}/pdf"); chk("PDF des Checks im Admin abrufbar",r.status_code==200 and r.headers["content-type"]=="application/pdf" and r.content[:4]==b"%PDF",r.status_code)
 chk("PDF zu fremdem Lead oder ohne Anmeldung: nein",a.get(f"/api/admin/leads/{lid2}/checks/{c['id']}/pdf").status_code==404 and pub.get(f"/api/admin/leads/{lid}/checks/{c['id']}/pdf").status_code in (401,403))
 r=a.get("/api/admin/funnel-check/probe",params={"website":WEB+"/weiter"}); chk("Probe-Check folgt Umleitungen und liefert ein PDF",r.status_code==200 and r.content[:4]==b"%PDF",r.status_code)
@@ -241,7 +241,7 @@ html_='''<html><head><title>Malerbetrieb Alt in Hannover</title><meta name="view
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto"><script src="http://cdn.example.de/alt.js"></script></head>
 <body><h1>Maler</h1><img src="a.jpg"><img src="b.jpg" alt=""><form><input id="x" type="text"><input type="email" aria-label="E-Mail"></form><p>© 2019</p></body></html>'''
 e=funnelcheck.bewerten({"ok":True,"url":"https://alt.de/","ms":500,"bytes":2000,"html":html_}); s_={p["id"]:p for p in e["punkte"]}
-chk("14 Prüfpunkte, Gewichte ergeben 100",len(e["punkte"])==14 and sum(funnelcheck.GEWICHT.values())==100)
+chk("15 Prüfpunkte, Gewichte ergeben 100",len(e["punkte"])==15 and sum(funnelcheck.GEWICHT.values())==100)
 chk("https mit unverschlüsselten Inhalten: teilweise",s_["sicher"]["status"]=="mittel" and "1 Inhalt" in s_["sicher"]["text"],s_["sicher"])
 chk("Barrierefreiheit: fehlende Sprache, Bild ohne Alt, Zoom gesperrt, Feld ohne Beschriftung erkannt",s_["barriere"]["status"]=="schlecht" and all(x in s_["barriere"]["text"] for x in ("Sprache","1 Bild ohne","Zoomen","1 Formularfeld")),s_["barriere"])
 chk("Lokal: ohne Adresse und Firmendaten fehlt es",s_["lokal"]["status"]=="schlecht",s_["lokal"])
@@ -249,6 +249,10 @@ chk("Vorschau beim Teilen fehlt",s_["teilen"]["status"]=="schlecht")
 chk("Externe Dienste ohne Einwilligung erkannt (Google Fonts)",s_["extern"]["status"]=="mittel" and "Google Fonts" in s_["extern"]["text"],s_["extern"])
 chk("Veraltete Jahreszahl erkannt",s_["aktuell"]["status"]=="mittel" and "2019" in s_["aktuell"]["text"],s_["aktuell"])
 e2=funnelcheck.bewerten({"ok":True,"url":"https://alt.de/","ms":500,"bytes":2000,"html":html_.replace("</head>",'<script src="https://consent.cookiebot.com/uc.js"></script></head>')})
+chk("Öffnungszeiten fehlen: erkannt",s_["oeffnung"]["status"]=="schlecht")
+cafe='<html lang="de"><body><h1>Café Mühle</h1><p>Geöffnet Di bis So 9:00 – 18:00</p><a href="/r">Tisch reservieren</a></body></html>'
+e3={p["id"]:p for p in funnelcheck.bewerten({"ok":True,"url":"https://cafe.de/","ms":300,"bytes":900,"html":cafe})["punkte"]}
+chk("Café: Öffnungszeiten und Tischreservierung werden erkannt",e3["oeffnung"]["status"]=="gut" and e3["anfrage"]["status"]=="gut",(e3["oeffnung"],e3["anfrage"]))
 chk("Mit Einwilligungs-Werkzeug gelten externe Dienste als in Ordnung",[p for p in e2["punkte"] if p["id"]=="extern"][0]["status"]=="gut")
 
 # ---------------------------------------------------------------- Kundenstimme, Foto, Hinweisfenster
@@ -316,7 +320,7 @@ async def browser():
             await pg.fill("#n","Bea Browser"); await pg.fill("#t","069 777"); await pg.fill("#e",f"b{w}{sfx}@lead.de"); await pg.check("#c")
             await pg.click("#b"); await pg.wait_for_selector("#danke:not([hidden])",timeout=10000)
             await pg.wait_for_selector("#liste:not([hidden])",timeout=30000)
-            chk(f"Danke-Ansicht @{w}px: Gesamtwert und 14 Prüfpunkte erscheinen",(await pg.inner_text("#score")).isdigit() and await pg.locator("#liste li").count()==14 and await pg.locator("#liste .chip").count()==14)
+            chk(f"Danke-Ansicht @{w}px: Gesamtwert und 15 Prüfpunkte erscheinen",(await pg.inner_text("#score")).isdigit() and await pg.locator("#liste li").count()==15 and await pg.locator("#liste .chip").count()==15)
             await pg.screenshot(path=f"/var/tmp/pt/danke_{w}.png",full_page=True)
             chk(f"Danke-Ansicht @{w}px: kein mitlaufender Knopf mehr",not await pg.is_visible("#mitlaufend"))
             chk(f"Danke-Ansicht @{w}px: Termin-Knopf und Anruf-Link",await pg.get_attribute("#terminbox a.knopf","href")=="/buchen" and (await pg.get_attribute("#anruf","href")).startswith("tel:"))

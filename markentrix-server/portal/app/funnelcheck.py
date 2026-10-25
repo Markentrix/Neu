@@ -27,9 +27,10 @@ ZUSAMMENFASSUNG = {"gruen": "Gut aufgestellt: Ihre Website ist technisch ordentl
                    "gelb": "Solide Grundlage, aber hier gehen Anfragen verloren.",
                    "rot": "Hier gehen Ihnen vermutlich Kunden verloren."}
 # Gewicht je Prüfpunkt (Summe 100) und Reihenfolge, in der fehlende Punkte als „wichtigster Punkt“ gelten
-GEWICHT = {"handy": 12, "sicher": 10, "tempo": 12, "anrufen": 10, "anfrage": 10, "google": 8, "barriere": 8, "lokal": 7, "recht": 6, "preise": 5,
-           "vertrauen": 5, "teilen": 3, "extern": 2, "aktuell": 2}
-WICHTIG = ["handy", "sicher", "anrufen", "anfrage", "tempo", "google", "lokal", "barriere", "recht", "preise", "vertrauen", "teilen", "extern", "aktuell"]
+GEWICHT = {"handy": 11, "sicher": 10, "tempo": 11, "anrufen": 9, "anfrage": 9, "google": 8, "barriere": 8, "lokal": 7, "recht": 6, "preise": 5,
+           "vertrauen": 5, "oeffnung": 4, "teilen": 3, "extern": 2, "aktuell": 2}
+WICHTIG = ["handy", "sicher", "anrufen", "anfrage", "tempo", "google", "lokal", "oeffnung", "barriere", "recht", "preise", "vertrauen", "teilen", "extern", "aktuell"]
+OEFFNUNG = re.compile(r"öffnungszeit|geöffnet|ge(?:ö|oe)ffnet|\b(?:mo|di|mi|do|fr|sa|so)\.?\s*(?:[-–]|bis)\s*(?:mo|di|mi|do|fr|sa|so)\b|\bmontag\b|nach vereinbarung|\b\d{1,2}[:.]\d{2}\s*(?:[-–]|bis)\s*\d{1,2}[:.]\d{2}", re.I)
 EXTERNE = [("fonts.googleapis.com", "Google Fonts"), ("fonts.gstatic.com", "Google Fonts"), ("googletagmanager.com", "Google Tag Manager"),
            ("google-analytics.com", "Google Analytics"), ("connect.facebook.net", "Facebook-Pixel"), ("youtube.com/embed", "YouTube-Videos"),
            ("youtube-nocookie.com/embed", "YouTube-Videos"), ("maps.googleapis.com", "Google Maps"), ("google.com/maps/embed", "Google Maps")]
@@ -38,7 +39,8 @@ FIRMENDATEN = re.compile(r'"@type"\s*:\s*\[?\s*"(?:[A-Za-z]*Business|[A-Za-z]*Co
                          r'ProfessionalService|Restaurant|Dentist|Physician|LegalService|Organization)"', re.I)
 PLZ_ORT = re.compile(r"\b\d{5}\s+[A-ZÄÖÜ][a-zäöüß]{2,}")
 JAHR = re.compile(r"(?:©|\(c\)|copyright)\s*(?:\d{4}\s*[-–]\s*)?(\d{4})", re.I)
-TERMIN = re.compile(r"termin\s*(online\s*)?(buchen|vereinbaren|wählen|anfragen)|online[\s-]*(termin|buchung|buchen)|terminbuchung|calendly|jetzt buchen|data-mk=\"termin\"", re.I)
+TERMIN = re.compile(r"termin\s*(online\s*)?(buchen|vereinbaren|wählen|anfragen)|online[\s-]*(termin|buchung|buchen|bestell|reserv)|terminbuchung|calendly|jetzt buchen|data-mk=\"termin\""
+                    r"|tisch\s*reservieren|reservier(en|ung)|jetzt\s*bestellen|vorbestell|click\s*&(amp;)?\s*collect|treatwell|shore\.com|opentable|quandoo|resmio", re.I)
 # Ohne verschachtelte Wiederholungen (kein Rückverfolgen bei langen Ziffernfolgen); der Text wird vorher ohnehin gekürzt
 PREIS = re.compile(r"\d{1,7}(?:[.,]\d{1,3})?\s?(?:€|eur\b|euro\b)|(?:€|eur)\s?\d|preisliste|preise\b", re.I)
 TEXT_MAX = 200_000
@@ -327,18 +329,19 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
         st = "gut" if n == 3 else "mittel" if n == 2 else "schlecht"
         fehlt = [x for x, ok in (("ein guter Seitentitel", 10 <= len(le.title.strip()) <= 70), ("eine Beschreibung für Google", len(le.desc) >= 50), ("eine Hauptüberschrift", le.h1)) if not ok]
         txt = "Titel, Beschreibung und Überschrift sind vorhanden." if not fehlt else "Es fehlt " + " und ".join(fehlt) + "."
-    p.append(_punkt("google", "Für Google lesbar", st, txt, "Titel und Beschreibung mit Leistung und Ort ergänzen, z. B. „Malerbetrieb in Frankfurt“."))
+    p.append(_punkt("google", "Für Google lesbar", st, txt, "Titel und Beschreibung mit Angebot und Ort ergänzen, z. B. „Friseur in Celle“ oder „Hofladen bei Uelzen“."))
     p.append(_punkt("anrufen", "Mit einem Tipp anrufen", "gut" if le.tel else "schlecht",
                     "Die Telefonnummer ist als Anruf-Link hinterlegt." if le.tel else "Auf dem Handy kann man nicht direkt aus der Seite anrufen.",
                     "Einen Anruf-Knopf ganz oben einbauen. Viele Kunden wollen sofort anrufen."))
     termin = bool(TERMIN.search(text) or TERMIN.search(roh) or le.termin_attr)
     if termin:
-        st, txt = "gut", "Kunden können online einen Termin wählen oder anfragen."
+        st, txt = "gut", "Kunden können online einen Termin wählen, reservieren oder bestellen."
     elif le.form or le.whatsapp:
-        st, txt = "mittel", "Es gibt ein Formular oder WhatsApp, aber keine Online-Terminbuchung."
+        st, txt = "mittel", "Es gibt ein Formular oder WhatsApp, aber keine Online-Buchung, Reservierung oder Bestellung."
     else:
-        st, txt = "schlecht", "Es gibt kein Anfrage- oder Terminformular." + (" Nur eine E-Mail-Adresse." if le.mailto else "")
-    p.append(_punkt("anfrage", "Anfrage und Termin online", st, txt, "Ein kurzes Anfrage- oder Terminformular einbauen, das auch abends funktioniert."))
+        st, txt = "schlecht", "Es gibt kein Anfrage-, Termin- oder Reservierungsformular." + (" Nur eine E-Mail-Adresse." if le.mailto else "")
+    p.append(_punkt("anfrage", "Anfrage, Termin oder Reservierung online", st, txt,
+                    "Eine einfache Online-Anfrage, Terminbuchung oder Reservierung einbauen, die auch abends funktioniert."))
     preis = bool(PREIS.search(text))
     p.append(_punkt("preise", "Preise oder Preisrahmen", "gut" if preis else "schlecht",
                     "Auf der Startseite stehen Preise oder ein Preisrahmen." if preis else "Auf der Startseite stehen keine Preise.",
@@ -352,6 +355,11 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
     p.append(_punkt("recht", "Impressum und Datenschutz", "gut" if imp and ds else "schlecht",
                     "Impressum und Datenschutz sind verlinkt." if imp and ds else "Es fehlt ein Link zu " + " und ".join(x for x, ok in (("Impressum", imp), ("Datenschutz", ds)) if not ok) + ".",
                     "Impressum und Datenschutzerklärung von jeder Seite aus verlinken."))
+    # Öffnungs- oder Erreichbarkeitszeiten
+    oeffnung = bool(OEFFNUNG.search(text))
+    p.append(_punkt("oeffnung", "Öffnungszeiten", "gut" if oeffnung else "schlecht",
+                    "Öffnungs- oder Erreichbarkeitszeiten stehen auf der Startseite." if oeffnung else "Auf der Startseite stehen keine Öffnungs- oder Erreichbarkeitszeiten.",
+                    "Öffnungszeiten gut sichtbar auf die Startseite setzen, gleich wie im Google-Unternehmensprofil."))
     # Barrierefreiheit (Grundlagen, mit PageSpeed: Googles Wert)
     ohne_label = sum(1 for f in le.felder if not f["benannt"] and not (f["id"] and f["id"] in le.label_fuer))
     maengel = [x for x, schlecht in (("die Sprache der Seite ist nicht angegeben", not le.lang),
