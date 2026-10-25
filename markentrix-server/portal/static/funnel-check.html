@@ -14,7 +14,7 @@
 <header class="kopf">
   <div class="wrap">
     <div class="logo">
-      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0B1020"/><path d="M7 22 C 12 21, 14 17, 17 15 S 23 10, 25 8" fill="none" stroke="#28C7F7" stroke-width="2.6" stroke-linecap="round"/><circle cx="25" cy="8" r="2.4" fill="#8B5CF6"/></svg>
+      <img src="/static/funnel/logo.webp" alt="" width="38" height="32">
       <span id="firma">Markentrix</span>
     </div>
     <span class="claim">Automatisierung. Werbung. Wachstum.</span>
@@ -146,8 +146,9 @@
   <section class="weiss rand" id="referenz" hidden>
     <div class="wrap schmal">
       <figure class="zitat">
+        <p class="sterne" id="refsterne" hidden></p>
         <blockquote id="reftext"></blockquote>
-        <figcaption><span id="refname"></span> <a id="reflink" href="/" target="_blank" rel="noopener" hidden>Bewertung bei Google ansehen</a></figcaption>
+        <figcaption><span id="refname"></span> <a id="reflink" href="/" target="_blank" rel="noopener" hidden>Ansehen</a></figcaption>
       </figure>
     </div>
   </section>
@@ -159,6 +160,22 @@
       <h2>Ein System statt Einzelmaßnahmen.</h2>
       <p class="mut">Ich bin Christian Wien, Gründer von Markentrix in Celle. Wir verbinden Website, Werbung und Automatisierung, damit aus Besuchern Anfragen werden. Wenn Sie möchten, gehen wir Ihr Ergebnis in 15 Minuten am Telefon oder per Video durch. Ehrlich, auch wenn die Antwort „passt so“ lautet.</p>
       <p><b>Christian Wien · Markentrix, Celle</b></p>
+    </div>
+  </section>
+
+  <section id="angebot" hidden>
+    <div class="wrap">
+      <div class="preisbox">
+        <div class="preistext">
+          <p class="oben">Was kostet eine neue Website?</p>
+          <p class="preis"><span id="preis"></span> <small id="preiszusatz"></small></p>
+          <p class="mut" id="preisinfo"></p>
+        </div>
+        <div class="preisaktion">
+          <p class="plaetze" id="plaetze" hidden><span class="balken" id="balken" aria-hidden="true"></span><span id="plaetzetext"></span></p>
+          <a class="knopf" href="#f" id="preisknopf">Erst kostenlos prüfen lassen</a>
+        </div>
+      </div>
     </div>
   </section>
 

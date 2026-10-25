@@ -252,11 +252,17 @@ e2=funnelcheck.bewerten({"ok":True,"url":"https://alt.de/","ms":500,"bytes":2000
 chk("Mit Einwilligungs-Werkzeug gelten externe Dienste als in Ordnung",[p for p in e2["punkte"] if p["id"]=="extern"][0]["status"]=="gut")
 
 # ---------------------------------------------------------------- Kundenstimme, Foto, Hinweisfenster
-r=a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"referenz_text":"Schnell, ehrlich, und die neue Seite bringt Anfragen.","referenz_name":"Inhaber, ElbDetail Celle","referenz_link":"https://g.page/r/beispiel"})
+r=a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"referenz_text":"Schnell, ehrlich, und die neue Seite bringt Anfragen.","referenz_name":"Inhaber, ElbDetail Celle","referenz_link":"https://g.page/r/beispiel","referenz_sterne":5,
+                                         "angebot_preis":"ab 999 €","angebot_zusatz":"netto","plaetze_frei":2,"plaetze_gesamt":3,"plaetze_zeitraum":"im November"})
 g=pub.get(f"/api/public/funnel/{slug}").json()
-chk("Kundenstimme wird gespeichert und öffentlich ausgeliefert",r.status_code==200 and g["referenz"]=={"text":"Schnell, ehrlich, und die neue Seite bringt Anfragen.","name":"Inhaber, ElbDetail Celle","link":"https://g.page/r/beispiel"},g.get("referenz"))
+chk("Kundenstimme wird gespeichert und öffentlich ausgeliefert",r.status_code==200 and g["referenz"]=={"text":"Schnell, ehrlich, und die neue Seite bringt Anfragen.","name":"Inhaber, ElbDetail Celle","link":"https://g.page/r/beispiel","sterne":5},g.get("referenz"))
+chk("Preis-Abschnitt mit Platz-Zähler",g["angebot"] and g["angebot"]["preis"]=="ab 999 €" and g["angebot"]["frei"]==2 and g["angebot"]["gesamt"]==3,g.get("angebot"))
+chk("Mehr freie als vorhandene Plätze wird abgelehnt",a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"plaetze_frei":5,"plaetze_gesamt":3}).status_code==400)
+a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"plaetze_frei":0})
+chk("Alle Plätze vergeben: Preis-Abschnitt verschwindet",pub.get(f"/api/public/funnel/{slug}").json()["angebot"] is None)
+a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"plaetze_frei":2})
 chk("Link der Kundenstimme nur mit https",a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"referenz_link":"javascript:alert(1)"}).status_code==422)
-chk("Ohne Fotodatei kein Foto",g["foto"] is None)
+chk("Foto des Inhabers wird ausgeliefert",g["foto"]=="/static/funnel/inhaber.webp" and pub.get("/static/funnel/inhaber.webp").status_code==200)
 mail7=f"sofort{sfx}@lead.de"; pub.post(f"/api/public/funnel/{slug}",json={**kam,"email":mail7,"website":WEB+"/gut"}); lid7=sql(f"select id from leads where email='{mail7}'")
 n_=a.get("/api/admin/funnel/neu").json()["leads"]
 chk("Hinweisfenster: frischer Lead ohne Anruf wird gemeldet",any(x["id"]==lid7 and x["telefon"]=="069 99" for x in n_),n_)
@@ -283,7 +289,9 @@ async def browser():
             chk(f"Seite @{w}px: Inhalte aus der Kampagne",await pg.text_content("#kicker")==basis["kicker"] and await pg.inner_text("#b")==basis["button"] and "Bericht" in await pg.inner_text("#el"))
             await pg.screenshot(path=f"/var/tmp/pt/funnel_{w}.png",full_page=True)
             chk(f"Seite @{w}px: Schritt 1 zeigt nur die Website-Adresse",await pg.is_visible("#w") and not await pg.is_visible("#n") and not await pg.is_visible("#b"))
-            chk(f"Seite @{w}px: Kundenstimme sichtbar",await pg.is_visible("#referenz") and "ElbDetail" in await pg.inner_text("#referenz"))
+            chk(f"Seite @{w}px: Kundenstimme mit Sternen und Google-Link sichtbar",await pg.is_visible("#referenz") and "ElbDetail" in await pg.inner_text("#referenz") and "5 von 5" in await pg.text_content("#refsterne") and await pg.inner_text("#reflink")=="Bewertung bei Google ansehen")
+            chk(f"Seite @{w}px: Preis und Plätze sichtbar",await pg.is_visible("#angebot") and await pg.inner_text("#preis")=="ab 999 €" and "Noch 2 von 3 Plätzen frei im November" in await pg.inner_text("#plaetze") and await pg.locator("#balken i.frei").count()==2)
+            chk(f"Seite @{w}px: Foto und Logo geladen",await pg.is_visible("#foto") and await pg.evaluate("document.querySelector('.logo img').naturalWidth>0"))
             await pg.click("#weiter"); chk(f"Seite @{w}px: ohne Adresse geht es nicht weiter",(await pg.inner_text("#f-w")).startswith("Bitte") and not await pg.is_visible("#n"))
             await pg.fill("#w",f"127.0.0.1:8997/gut"); await pg.press("#w","Enter")
             chk(f"Seite @{w}px: Schritt 2 mit Name, Telefon, E-Mail",await pg.is_visible("#n") and await pg.text_content("#schritt")=="Schritt 2 von 2")

@@ -58,8 +58,28 @@ async function laden() {
   if (kamp.referenz) {
     el('reftext').textContent = kamp.referenz.text;
     el('refname').textContent = kamp.referenz.name || '';
-    if (kamp.referenz.link) { /** @type {HTMLAnchorElement} */ (el('reflink')).href = kamp.referenz.link; el('reflink').hidden = false; }
+    if (kamp.referenz.link) {
+      const a = /** @type {HTMLAnchorElement} */ (el('reflink'));
+      a.href = kamp.referenz.link;
+      a.textContent = /google\.|g\.page|goo\.gl/.test(kamp.referenz.link) ? 'Bewertung bei Google ansehen' : 'Website ansehen: ' + new URL(kamp.referenz.link).hostname.replace(/^www\./, '');
+      a.hidden = false;
+    }
+    if (kamp.referenz.sterne) {
+      el('refsterne').replaceChildren(h('b', { 'aria-hidden': 'true' }, '★'.repeat(kamp.referenz.sterne)), h('span', {}, 'Bewertung: ' + kamp.referenz.sterne + ' von 5 Sternen'));
+      el('refsterne').hidden = false;
+    }
     el('referenz').hidden = false;
+  }
+  if (kamp.angebot) {
+    const a = kamp.angebot;
+    el('preis').textContent = a.preis; el('preiszusatz').textContent = a.zusatz || ''; el('preisinfo').textContent = a.text || '';
+    if (a.gesamt) {
+      el('balken').replaceChildren(...Array.from({ length: Math.min(a.gesamt, 10) }, (_, i) => h('i', { class: i < a.frei ? 'frei' : '' })));
+      el('plaetzetext').textContent = 'Noch ' + a.frei + ' von ' + a.gesamt + ' Plätzen frei' + (a.zeitraum ? ' ' + a.zeitraum : '');
+      el('plaetze').hidden = false;
+    }
+    el('angebot').hidden = false;
+    el('preisknopf').addEventListener('click', (ev) => { ev.preventDefault(); f.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => inp('w').focus({ preventScroll: true }), 400); });
   }
   if (kamp.foto) {
     const bild = /** @type {HTMLImageElement} */ (el('foto'));

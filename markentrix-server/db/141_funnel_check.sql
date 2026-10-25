@@ -12,6 +12,14 @@ ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_aktiv boolean NOT NULL
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS referenz_text text NOT NULL DEFAULT '';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS referenz_name text NOT NULL DEFAULT '';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS referenz_link text NOT NULL DEFAULT '';
+-- Preis-Abschnitt (leer = nicht gezeigt) und Platz-Zähler: nur echte Begrenzung eintragen; bei 0 freien Plätzen verschwindet das Angebot
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS angebot_preis text NOT NULL DEFAULT '';
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS angebot_zusatz text NOT NULL DEFAULT 'netto';
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS angebot_text text NOT NULL DEFAULT 'Fürs Handy gebaut, mit Anruf-Knopf, Anfrage- und Terminformular. Sie bekommen vorher ein festes Angebot, ohne Überraschungen.';
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS plaetze_frei int CHECK (plaetze_frei IS NULL OR plaetze_frei >= 0);
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS plaetze_gesamt int CHECK (plaetze_gesamt IS NULL OR plaetze_gesamt > 0);
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS plaetze_zeitraum text NOT NULL DEFAULT '';
+ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS referenz_sterne int CHECK (referenz_sterne IS NULL OR referenz_sterne BETWEEN 1 AND 5);
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_tage int[] NOT NULL DEFAULT '{1,3,7}';
 ALTER TABLE lead_kampagnen ADD COLUMN IF NOT EXISTS folge_betreffe text[] NOT NULL DEFAULT ARRAY[
   'Der wichtigste Punkt aus Ihrem Website-Check',

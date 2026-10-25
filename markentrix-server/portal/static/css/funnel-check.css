@@ -89,6 +89,8 @@ section h2{margin:0;font-size:clamp(28px,4vw,40px);line-height:1.1}
 .zitat{margin:0;display:flex;flex-direction:column;gap:14px}
 .zitat blockquote{margin:0;font-family:"Space Grotesk",Inter,sans-serif;font-weight:700;font-size:clamp(22px,3.2vw,30px);line-height:1.3;letter-spacing:-.02em}
 .zitat blockquote::before{content:"„"}.zitat blockquote::after{content:"“"}
+.sterne{margin:0;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.sterne b{color:#E8A800;font-size:20px;letter-spacing:2px;font-weight:400}
 .zitat figcaption{color:var(--text2);display:flex;flex-wrap:wrap;gap:6px 14px}
 .mitlaufend{position:fixed;left:12px;right:12px;bottom:12px;z-index:20;display:block;text-align:center;padding:16px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--blau));color:var(--navy);font-weight:600;font-size:17px;text-decoration:none;box-shadow:0 10px 30px rgba(11,16,32,.25)}
 @media(min-width:860px){.mitlaufend{display:none!important}}
@@ -110,3 +112,10 @@ details p{margin:10px 0 0;color:var(--text2)}
 .box{background:var(--weiss);border:1px solid var(--linie);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .box h2{margin:0;font-size:22px;line-height:1.25}
 .box p{margin:0;color:var(--text2)}
+.preisbox{background:var(--weiss);border:1px solid var(--linie);border-radius:22px;padding:clamp(24px,5vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:32px;align-items:center;box-shadow:0 1px 2px rgba(11,16,32,.05),0 18px 48px rgba(11,16,32,.06)}
+.preistext{display:flex;flex-direction:column;gap:12px}.preistext p{margin:0}
+.preis{font-family:"Space Grotesk",Inter,sans-serif;font-weight:700;font-size:clamp(34px,5vw,52px);letter-spacing:-.03em;line-height:1.05}
+.preis small{font-size:.45em;color:var(--mut);letter-spacing:0;font-weight:600}
+.preisaktion{display:flex;flex-direction:column;gap:14px}
+.plaetze{margin:0;display:flex;align-items:center;gap:12px;font-weight:600}
+.balken{display:flex;gap:6px}.balken i{width:28px;height:10px;border-radius:5px;background:var(--linie);display:block}.balken i.frei{background:var(--blau)}

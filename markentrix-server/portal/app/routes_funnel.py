@@ -52,8 +52,18 @@ def seite(slug: str, request: Request):
             "telefon_pflicht": k["telefon_pflicht"], "website_abfragen": k["website_abfragen"] or k["vorlage"] == "website_check", "termin_anbieten": k["termin_anbieten"],
             "vorlage": k["vorlage"], "kicker": k["kicker"], "check_mail": k["vorlage"] == "website_check" and k["check_mail"],
             "firma": firma.get("name") or "Markentrix", "kontakt": {"telefon": firma.get("telefon") or "", "email": firma.get("email") or ""},
-            "referenz": {"text": k["referenz_text"], "name": k["referenz_name"], "link": k["referenz_link"]} if k["referenz_text"] else None,
+            "referenz": {"text": k["referenz_text"], "name": k["referenz_name"], "link": k["referenz_link"], "sterne": k["referenz_sterne"]} if k["referenz_text"] else None,
+            "angebot": _angebot(k),
             "foto": "/static/funnel/inhaber.webp" if (config.STATIC_DIR / "funnel" / "inhaber.webp").is_file() else None}
+
+
+def _angebot(k: dict) -> dict | None:
+    """Preis-Abschnitt nur mit Preis; sind alle Plätze vergeben, wird er nicht mehr gezeigt."""
+    if not k["angebot_preis"] or (k["plaetze_frei"] is not None and k["plaetze_frei"] <= 0):
+        return None
+    zaehler = k["plaetze_frei"] is not None and k["plaetze_gesamt"]
+    return {"preis": k["angebot_preis"], "zusatz": k["angebot_zusatz"], "text": k["angebot_text"],
+            "frei": k["plaetze_frei"] if zaehler else None, "gesamt": k["plaetze_gesamt"] if zaehler else None, "zeitraum": k["plaetze_zeitraum"] if zaehler else ""}
 
 
 def seite_datei(slug: str) -> str:
@@ -209,20 +219,36 @@ class KampagneIn(BaseModel):
     referenz_text: str | None = Field(default=None, max_length=600)
     referenz_name: str | None = Field(default=None, max_length=120)
     referenz_link: str | None = Field(default=None, max_length=400, pattern=r"^(|https://\S+)$")
+    referenz_sterne: int | None = Field(default=None, ge=0, le=5)   # 0 = ohne Sterne
+    angebot_preis: str | None = Field(default=None, max_length=40)
+    angebot_zusatz: str | None = Field(default=None, max_length=40)
+    angebot_text: str | None = Field(default=None, max_length=400)
+    plaetze_frei: int | None = Field(default=None, ge=-1, le=999)     # -1 = ohne Zähler
+    plaetze_gesamt: int | None = Field(default=None, ge=0, le=999)    # 0 = ohne Zähler
+    plaetze_zeitraum: str | None = Field(default=None, max_length=40)
 
 
 ZUSATZ = ("vorlage", "kicker", "check_mail", "check_betreff", "check_text", "folge_aktiv", "folge_tage", "folge_betreffe", "folge_texte",
-          "referenz_text", "referenz_name", "referenz_link")
+          "referenz_text", "referenz_name", "referenz_link", "referenz_sterne",
+          "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_frei", "plaetze_gesamt", "plaetze_zeitraum")
 
 
 def _zusatz_speichern(cur, kid, d: KampagneIn):
     werte = {f: getattr(d, f) for f in ZUSATZ if getattr(d, f) is not None}
-    for f in ("kicker", "check_betreff", "check_text", "referenz_text", "referenz_name", "referenz_link"):
+    for f in ("kicker", "check_betreff", "check_text", "referenz_text", "referenz_name", "referenz_link", "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_zeitraum"):
         if f in werte:
             werte[f] = werte[f].strip()
     for f in ("folge_betreffe", "folge_texte"):
         if f in werte:
             werte[f] = [x.strip()[:4000] for x in werte[f]]
+    if werte.get("plaetze_frei") == -1:
+        werte["plaetze_frei"] = None
+    if werte.get("plaetze_gesamt") == 0:
+        werte["plaetze_gesamt"] = None
+    if werte.get("referenz_sterne") == 0:
+        werte["referenz_sterne"] = None
+    if "referenz_sterne" in werte or d.referenz_sterne == 0:
+        werte["referenz_sterne"] = werte.get("referenz_sterne")
     if werte:
         cur.execute("UPDATE lead_kampagnen SET " + ", ".join(f"{f}=%s" for f in werte) + " WHERE id=%s", (*werte.values(), kid))
     cur.execute("SELECT vorlage, check_mail, check_betreff, check_text, folge_aktiv, folge_tage, folge_betreffe, folge_texte FROM lead_kampagnen WHERE id=%s", (kid,))
@@ -236,6 +262,10 @@ def _zusatz_speichern(cur, kid, d: KampagneIn):
         raise HTTPException(400, "Je Nachfass-Mail braucht es einen Tag, einen Betreff und einen Text.")
     if any(t < 1 or t > 60 for t in tage) or any(b >= a for b, a in zip(tage, tage[1:])):
         raise HTTPException(400, "Die Tage der Nachfass-Mails müssen zwischen 1 und 60 liegen und aufsteigen (z. B. 1, 3, 7).")
+    cur.execute("SELECT plaetze_frei, plaetze_gesamt FROM lead_kampagnen WHERE id=%s", (kid,))
+    pl = cur.fetchone()
+    if pl["plaetze_frei"] is not None and pl["plaetze_gesamt"] and pl["plaetze_frei"] > pl["plaetze_gesamt"]:
+        raise HTTPException(400, "Es können nicht mehr Plätze frei sein, als es insgesamt gibt.")
     if k["folge_aktiv"] and (not tage or any(len(b) < 3 for b in k["folge_betreffe"]) or any(len(x) < 10 for x in k["folge_texte"])):
         raise HTTPException(400, "Für die Nachfass-Mails braucht jede Stufe einen Betreff und einen Text.")
 
@@ -257,7 +287,7 @@ def kampagnen(user: dict = Depends(require_admin)):
         # Standardtexte für neue Seiten direkt aus den Vorgaben der Datenbank (Probezeile, wird sofort verworfen)
         cur.execute("SAVEPOINT vorgabe")
         cur.execute("""INSERT INTO lead_kampagnen (slug, name) VALUES (%s, 'Vorgabe')
-                       RETURNING check_betreff, check_text, folge_tage, folge_betreffe, folge_texte""", ("zz-" + secrets.token_hex(12),))
+                       RETURNING check_betreff, check_text, folge_tage, folge_betreffe, folge_texte, angebot_text""", ("zz-" + secrets.token_hex(12),))
         vorgabe = cur.fetchone()
         cur.execute("ROLLBACK TO SAVEPOINT vorgabe")
     for r in rows:
