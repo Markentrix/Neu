@@ -17,7 +17,7 @@ from datetime import date
 from html.parser import HTMLParser
 from urllib.parse import quote, urlparse
 
-from . import config, einstellungen, mailer, pdf, sitedienste, sperre
+from . import config, einstellungen, funnelmail, mailer, pdf, sitedienste, sperre
 from .db import tx
 
 log = logging.getLogger("markentrix.funnelcheck")
@@ -530,7 +530,8 @@ def platzhalter(lead: dict, e: dict | None) -> dict:
     return _Fest(name=(lead.get("ansprechpartner") or "").strip() or "Sie", firma=lead.get("firma") or "", website=host((e or {}).get("website") or lead.get("website")),
                  ampel=AMPEL_WORT.get((e or {}).get("ampel"), ""), score=(e or {}).get("score", ""), punkte=punkte,
                  wichtigster_punkt=(e or {}).get("wichtigster_punkt") or "eine Website, auf der Kunden Sie sofort anrufen und einen Termin wählen können.",
-                 zusammenfassung=(e or {}).get("zusammenfassung", ""), buchen=config.BASE_URL.rstrip("/") + "/buchen")
+                 zusammenfassung=(e or {}).get("zusammenfassung", ""), buchen=config.BASE_URL.rstrip("/") + "/buchen",
+                 ergebnis=(f"Ergebnis: {e['score']} von 100 Punkten. {e.get('zusammenfassung', '')}\n{punkte}".strip() if e else ""))
 
 
 def fuellen(vorlage: str, werte: dict) -> str:
@@ -614,7 +615,8 @@ def mail_senden(cid: int) -> bool:
         log.exception("PDF für Check %s fehlgeschlagen", cid)
         datei = None
     ok, grund = (False, "PDF konnte nicht erstellt werden.") if datei is None else mailer.funnel_mail(
-        r["email"], fuellen(r["check_betreff"], werte), fuellen(r["check_text"], werte), token, (dateiname(e), datei, "application/pdf"))
+        r["email"], fuellen(r["check_betreff"], werte), fuellen(r["check_text"], werte), token, (dateiname(e), datei, "application/pdf"),
+        html_text=fuellen(r["check_text"], _Fest({**werte, "punkte": funnelmail.MARKE, "ergebnis": funnelmail.MARKE})), ergebnis=e)
     with tx("system") as cur:
         if ok:
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'mail_gesendet','Ergebnis des Website-Checks mit PDF verschickt','automatisch')", (r["lead_id"],))

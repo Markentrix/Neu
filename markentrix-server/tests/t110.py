@@ -109,6 +109,10 @@ chk("Ergebnis-Mail an den Interessenten mit Ampel im Betreff",len(m)==1 and betr
 if m:
     tx_=text(m[0]); pdfteil=[p for p in m[0].walk() if p.get_content_type()=="application/pdf"]
     chk("Mail: Anrede, Punkte, Terminlink, Gruß vom Team, Abmeldelink, kein KI-Name",tx_.startswith("Guten Tag Max Muster,") and "- Gut:" in tx_ and "/buchen" in tx_ and "Ihr Markentrix-Team" in tx_ and "/api/public/abmelden?t=" in tx_ and "Claude" not in tx_,tx_[:600])
+    hm=(teil(m[0],"text/html") or b"").decode("utf-8","replace")
+    chk("HTML-Mail im CI: Ergebnis-Karte, Termin-Knopf, Logo, Gruß, Abmeldelink, keine Tabelle aus „Angabe: Wert“",">90<" in hm and "von 100" in hm and "15-Minuten-Termin wählen" in hm and "cid:logo@mail" in hm
+        and any(p.get_content_type()=="image/png" for p in m[0].walk()) and "Ihr Markentrix-Team" in hm and "/api/public/abmelden?t=" in hm and "Kurz zusammengefasst" not in hm and "Claude" not in hm, hm[:400])
+    chk("Neuer Standardtext der Ergebnis-Mail nutzt {ergebnis}", "{ergebnis}" in sql("select column_default from information_schema.columns where table_name='lead_kampagnen' and column_name='check_text'"))
     chk("PDF hängt an",len(pdfteil)==1 and pdfteil[0].get_filename()=="Website-Check-127.0.0.1.pdf",[p.get_content_type() for p in m[0].walk()])
     from pypdf import PdfReader
     t=" ".join(p.extract_text() for p in PdfReader(io.BytesIO(pdfteil[0].get_payload(decode=True))).pages)
@@ -166,6 +170,7 @@ jobs.funnel_folgemails(cfg(),stunde=21); chk("Abends (nach 19 Uhr) wird nichts v
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1)
 m=an(mail); b1=[x for x in m if betreff(x)==v["folge_betreffe"][0]]
 chk("Nach 1 Tag: Nachfass-Mail 1 mit wichtigstem Punkt bzw. Terminlink",len(b1)==1 and "/buchen" in text(b1[0]) and "Ihr Markentrix-Team" in text(b1[0]) and "/api/public/abmelden?t=" in text(b1[0]),[betreff(x) for x in m])
+chk("Nachfass-Mail im CI-Layout mit Termin-Knopf",bool(b1) and "15-Minuten-Termin wählen" in (teil(b1[0],"text/html") or b"").decode("utf-8","replace"))
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1); chk("Kein zweites Mal am selben Tag",len([x for x in an(mail) if betreff(x)==v["folge_betreffe"][0]])==1 and int(sql(f"select count(*) from lead_funnel_folge where lead_id='{lid}'"))==1)
 sql(f"update leads set kampagne_seit=now()-interval '4 days' where id='{lid}'"); sql(f"update lead_funnel_folge set gesendet_am=now()-interval '3 days' where lead_id='{lid}'")
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1); chk("Nach 3 Tagen: Nachfass-Mail 2",len([x for x in an(mail) if betreff(x)==v["folge_betreffe"][1]])==1)

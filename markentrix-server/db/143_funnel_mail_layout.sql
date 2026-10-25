@@ -1,0 +1,6 @@
+-- Ergebnis-Mail im neuen Layout: Platzhalter {ergebnis} wird in der HTML-Mail zur Ergebnis-Karte (Punktzahl, Ampel, wichtigste Punkte).
+-- Neuer Standardtext; Kampagnen, die noch den alten Standardtext haben, bekommen den neuen. Eigene Texte bleiben unverändert.
+ALTER TABLE lead_kampagnen ALTER COLUMN check_text SET DEFAULT
+  E'Guten Tag {name},\n\nIhr Website-Check für {website} ist fertig. Hier das Wichtigste auf einen Blick, den ausführlichen Bericht mit allen Punkten finden Sie im PDF im Anhang.\n\n{ergebnis}\n\nWir rufen Sie in Kürze an und erklären Ihnen das Ergebnis. Wenn Ihnen ein fester Termin lieber ist, wählen Sie hier 15 Minuten:\n{buchen}';
+UPDATE lead_kampagnen SET check_text = E'Guten Tag {name},\n\nIhr Website-Check für {website} ist fertig. Hier das Wichtigste auf einen Blick, den ausführlichen Bericht mit allen Punkten finden Sie im PDF im Anhang.\n\n{ergebnis}\n\nWir rufen Sie in Kürze an und erklären Ihnen das Ergebnis. Wenn Ihnen ein fester Termin lieber ist, wählen Sie hier 15 Minuten:\n{buchen}'
+ WHERE check_text = E'Guten Tag {name},\n\nIhr Website-Check ist fertig, das PDF hängt an.\n\nKurz zusammengefasst: {zusammenfassung} Ihre Website erreicht {score} von 100 Punkten.\n{punkte}\n\nWir rufen Sie kurz an, um das Ergebnis zu erklären. Wenn Ihnen ein fester Termin lieber ist, wählen Sie hier 15 Minuten: {buchen}';

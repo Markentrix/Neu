@@ -15,7 +15,7 @@ function kampagneDialog(k, danach, vorgabe = {}) {
   const ta = (id, label, wert, zeilen = 4) => [h('label', { for: id }, label), h('textarea', { id, rows: zeilen, maxlength: 4000 }, wert || '')];
   const stufen = [0, 1, 2].map(i => ({ tag: (k.folge_tage || [])[i] ?? '', betreff: (k.folge_betreffe || [])[i] || '', text: (k.folge_texte || [])[i] || '' }));
   const vorlage = h('select', { id: 'fk_vorlage' }, h('option', { value: 'website_check', selected: k.vorlage !== 'standard' }, 'Website-Check (Ampel, Ergebnis als PDF)'), h('option', { value: 'standard', selected: k.vorlage === 'standard' }, 'Standard (einfaches Formular)'));
-  const platz = 'Platzhalter: {name}, {firma}, {website}, {ampel}, {score}, {punkte}, {wichtigster_punkt}, {buchen}. Gruß „Ihr Markentrix-Team“ und Abmeldelink kommen automatisch dazu.';
+  const platz = 'Platzhalter: {name}, {firma}, {website}, {ergebnis} (Punktzahl und wichtigste Punkte, in der Mail als Ergebnis-Karte), {score}, {zusammenfassung}, {punkte}, {wichtigster_punkt}, {buchen} (wird zum Termin-Knopf, wenn er allein in einer Zeile steht). Gruß „Ihr Markentrix-Team“ und Abmeldelink kommen automatisch dazu.';
   const t = (id, label, wert, extra = {}) => [h('label', { for: id }, label), h('input', { id, value: wert || '', ...extra })];
   const d = dialog(neu ? 'Neue Funnel-Seite' : 'Funnel-Seite bearbeiten', h('div', { class: 'stack' },
     ...(neu ? t('fk_slug', 'Seitenname (wird Teil der Adresse, z. B. werkstatt-2026)', k.slug, { maxlength: 40 }) : [h('p', { class: 'small muted' }, 'Adresse: ' + k.link)]),
