@@ -56,7 +56,8 @@ async function laden() {
   el('el').textContent = kamp.check_mail ? 'E-Mail (für den Bericht)' : 'E-Mail';
   kontaktLinks();
   if (kamp.referenz) {
-    el('reftext').textContent = kamp.referenz.text;
+    // Die Seite setzt die Anführungszeichen selbst; mitkopierte Zeichen am Anfang und Ende entfernen
+    el('reftext').textContent = kamp.referenz.text.trim().replace(/^["„“”»«']+|["„“”»«']+$/g, '').trim();
     el('refname').textContent = kamp.referenz.name || '';
     if (kamp.referenz.link) {
       const a = /** @type {HTMLAnchorElement} */ (el('reflink'));
