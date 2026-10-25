@@ -17,7 +17,9 @@ def _markentrix_logo():
     """Das „M“-Zeichen des Portals als eingebettetes Mail-Logo (einmal gelesen). Fehlt die Datei, geht die Mail ohne Logo raus."""
     if not _LOGO:
         try:
-            _LOGO.append(("image", "png", (Path(__file__).resolve().parent.parent / "static" / "icons" / "icon-192.png").read_bytes()))
+            ordner = Path(__file__).resolve().parent.parent / "static"
+            datei = ordner / "funnel" / "logo-mail.png"
+            _LOGO.append(("image", "png", (datei if datei.is_file() else ordner / "icons" / "icon-192.png").read_bytes()))
         except OSError:
             _LOGO.append(None)
     x = _LOGO[0]
@@ -70,7 +72,7 @@ def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | N
                 msg.get_payload()[1].add_related(html[1], maintype="image", subtype="png", cid="<logo@mail>", disposition="inline")
         else:
             if not vorlage:   # Mail von Markentrix selbst: gleiches saubere Layout, Text und Gruß bleiben unverändert
-                vorlage = {"firma": c.get("absender_name") or "Markentrix", "farbe": "#4f46e5", "logo": _markentrix_logo(), "intern": True}
+                vorlage = {"firma": c.get("absender_name") or "Markentrix", "farbe": "#1E9BFF", "logo": _markentrix_logo(), "intern": True}
             mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"), vorlage.get("intern", False))
         for name, daten, mime in anhaenge(anhang):
             maintype, subtype = mime.split("/")

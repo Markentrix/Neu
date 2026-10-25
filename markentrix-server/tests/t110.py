@@ -102,6 +102,11 @@ chk("Status-Abfrage gibt keine persönlichen Daten heraus",not any(x in json.dum
 chk("Falsches Kennzeichen oder falsche Seite: nicht gefunden",pub.get(f"/api/public/funnel/{slug}/check/{'x'*24}").status_code==404 and pub.get(f"/api/public/funnel/{std}/check/{tok}").status_code==404)
 chk("Lead: Firma aus der Website, Punktzahl, UTM und Kampagne",sql(f"select firma||'|'||score||'|'||(utm->>'utm_content')||'|'||(kampagne_id='{kid}') from leads where id='{lid}'")=="127.0.0.1|90|A|true",sql(f"select firma, score from leads where id='{lid}'"))
 chk("Check gespeichert (fertig, grün, Kampagne)",sql(f"select status||'|'||ampel||'|'||(kampagne_id='{kid}') from lead_checks where lead_id='{lid}'")=="fertig|rot|true")
+time.sleep(1)
+tm=[x for x in mails() if betreff(x).startswith("Neuer Lead:") and "bitte jetzt anrufen" in betreff(x)]
+thm=(teil(tm[-1],"text/html") or b"").decode("utf-8","replace") if tm else ""
+chk("Mail ans Team im CI: Logo, Verlaufsbalken, Angaben als Tabelle, Telefon anklickbar, Knopf ins Portal",bool(tm) and "linear-gradient(90deg,#28C7F7" in thm and "cid:logo@mail" in thm
+    and 'href="tel:' in thm and "Im Portal öffnen" in thm and "5 Minuten" in thm,[betreff(x) for x in mails()][-5:])
 chk("Aufgabe „innerhalb einer Stunde anrufen“ bleibt",int(sql(f"select count(*) from aufgaben where auto_schluessel like 'lead-funnel-{lid}-%'"))==1)
 time.sleep(1.5)
 m=[x for x in an(mail) if "Website-Check" in betreff(x)]

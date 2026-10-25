@@ -167,8 +167,11 @@ def anmelden(slug: str, data: AnmeldungIn, request: Request, bg: BackgroundTasks
             check_id = cur.fetchone()["id"]
     push.senden(push_ids + partner_ids, "Neuer Lead", f"{firma} über „{name}“: jetzt anrufen.", "/admin#lead/" + str(lid), "check")
     if an:
-        bg.add_task(mailer.senden, an, f"Neuer Lead über „{name}“: {firma}",
-                    f"{data.name.strip()} ({email}{', ' + telefon if telefon else ''}) hat sich über „{name}“ angemeldet. Bitte innerhalb einer Stunde anrufen.\n\n{config.BASE_URL}/admin#lead/{lid}")
+        angaben = [("Name", data.name.strip()), ("Firma", firma if firma not in (data.name.strip(), funnelcheck.host(website) if website else "") else ""), ("Telefon", telefon or ""), ("E-Mail", email),
+                   ("Website", funnelcheck.host(website) if website else ""), ("Seite", name)]
+        bg.add_task(mailer.senden, an, f"Neuer Lead: {firma}, bitte jetzt anrufen",
+                    f"Neuer Lead über „{name}“. Bitte sofort anrufen, am besten in den nächsten 5 Minuten.\n\n"
+                    + "\n".join(f"{k}: {v}" for k, v in angaben if v) + f"\n\n{config.BASE_URL}/admin#lead/{lid}")
     if check_id:
         bg.add_task(funnelcheck.ausfuehren, check_id)
     return {"ok": True, "termin": termin, "neu": neu, "check": check_token}
