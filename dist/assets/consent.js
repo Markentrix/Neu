@@ -4,7 +4,7 @@
   var GA_ID = 'G-E1VP4SYQ7K';
   var METRICOOL_HASH = 'd4608fdaed9383e42d93839cf230e49f';
   var KEY = 'mx-consent', VERSION = 2, MAX_AGE = 1000 * 60 * 60 * 24 * 180; // 6 Monate
-  var DS = '/datenschutz#s5';
+  var DS = '/datenschutz#s11';
 
   function read() {
     try { var c = JSON.parse(localStorage.getItem(KEY)); if (c && c.v === VERSION && Date.now() - c.ts < MAX_AGE) return c; } catch (e) {}
