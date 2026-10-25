@@ -62,8 +62,16 @@ def _angebot(k: dict) -> dict | None:
     if not k["angebot_preis"] or (k["plaetze_frei"] is not None and k["plaetze_frei"] <= 0):
         return None
     zaehler = k["plaetze_frei"] is not None and k["plaetze_gesamt"]
+    zeitraum = k["plaetze_zeitraum"]
+    if zaehler and k["plaetze_monatlich"]:
+        from zoneinfo import ZoneInfo
+        from datetime import datetime
+        zeitraum = "im " + MONATE[datetime.now(ZoneInfo("Europe/Berlin")).month - 1]
     return {"preis": k["angebot_preis"], "zusatz": k["angebot_zusatz"], "text": k["angebot_text"],
-            "frei": k["plaetze_frei"] if zaehler else None, "gesamt": k["plaetze_gesamt"] if zaehler else None, "zeitraum": k["plaetze_zeitraum"] if zaehler else ""}
+            "frei": k["plaetze_frei"] if zaehler else None, "gesamt": k["plaetze_gesamt"] if zaehler else None, "zeitraum": zeitraum if zaehler else ""}
+
+
+MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]
 
 
 def seite_datei(slug: str) -> str:
@@ -226,11 +234,12 @@ class KampagneIn(BaseModel):
     plaetze_frei: int | None = Field(default=None, ge=-1, le=999)     # -1 = ohne Zähler
     plaetze_gesamt: int | None = Field(default=None, ge=0, le=999)    # 0 = ohne Zähler
     plaetze_zeitraum: str | None = Field(default=None, max_length=40)
+    plaetze_monatlich: bool | None = None
 
 
 ZUSATZ = ("vorlage", "kicker", "check_mail", "check_betreff", "check_text", "folge_aktiv", "folge_tage", "folge_betreffe", "folge_texte",
           "referenz_text", "referenz_name", "referenz_link", "referenz_sterne",
-          "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_frei", "plaetze_gesamt", "plaetze_zeitraum")
+          "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_frei", "plaetze_gesamt", "plaetze_zeitraum", "plaetze_monatlich")
 
 
 def _zusatz_speichern(cur, kid, d: KampagneIn):
@@ -262,6 +271,9 @@ def _zusatz_speichern(cur, kid, d: KampagneIn):
         raise HTTPException(400, "Je Nachfass-Mail braucht es einen Tag, einen Betreff und einen Text.")
     if any(t < 1 or t > 60 for t in tage) or any(b >= a for b, a in zip(tage, tage[1:])):
         raise HTTPException(400, "Die Tage der Nachfass-Mails müssen zwischen 1 und 60 liegen und aufsteigen (z. B. 1, 3, 7).")
+    # Monatszähler: der laufende Monat gilt als begonnen, damit der Hintergrunddienst den eingetragenen Stand nicht sofort überschreibt
+    cur.execute("""UPDATE lead_kampagnen SET plaetze_monat = date_trunc('month', (now() AT TIME ZONE 'Europe/Berlin'))::date
+                   WHERE id=%s AND plaetze_monatlich AND plaetze_monat IS NULL""", (kid,))
     cur.execute("SELECT plaetze_frei, plaetze_gesamt FROM lead_kampagnen WHERE id=%s", (kid,))
     pl = cur.fetchone()
     if pl["plaetze_frei"] is not None and pl["plaetze_gesamt"] and pl["plaetze_frei"] > pl["plaetze_gesamt"]:

@@ -261,6 +261,15 @@ chk("Mehr freie als vorhandene Plätze wird abgelehnt",a.put(f"/api/admin/funnel
 a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"plaetze_frei":0})
 chk("Alle Plätze vergeben: Preis-Abschnitt verschwindet",pub.get(f"/api/public/funnel/{slug}").json()["angebot"] is None)
 a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"plaetze_frei":2})
+a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"plaetze_monatlich":True,"plaetze_frei":1})
+import datetime as _dt, zoneinfo as _zi
+monat=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"][_dt.datetime.now(_zi.ZoneInfo("Europe/Berlin")).month-1]
+g2=pub.get(f"/api/public/funnel/{slug}").json()["angebot"]
+chk("Plätze pro Monat: Seite nennt den laufenden Monat, eingetragener Stand bleibt",g2["zeitraum"]=="im "+monat and g2["frei"]==1,g2)
+jobs.funnel_plaetze_monat(cfg()); chk("Im selben Monat setzt der Dienst nichts zurück",pub.get(f"/api/public/funnel/{slug}").json()["angebot"]["frei"]==1)
+sql(f"update lead_kampagnen set plaetze_monat=plaetze_monat - interval '1 month' where id='{kid}'")
+jobs.funnel_plaetze_monat(cfg()); chk("Neuer Monat: wieder alle Plätze frei",pub.get(f"/api/public/funnel/{slug}").json()["angebot"]["frei"]==3)
+a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"plaetze_monatlich":False,"plaetze_frei":2})
 chk("Link der Kundenstimme nur mit https",a.put(f"/api/admin/funnel/{kid}",json={**{x:basis[x] for x in basis if x!="slug"},"referenz_link":"javascript:alert(1)"}).status_code==422)
 chk("Foto des Inhabers wird ausgeliefert",g["foto"]=="/static/funnel/inhaber.webp" and pub.get("/static/funnel/inhaber.webp").status_code==200)
 mail7=f"sofort{sfx}@lead.de"; pub.post(f"/api/public/funnel/{slug}",json={**kam,"email":mail7,"website":WEB+"/gut"}); lid7=sql(f"select id from leads where email='{mail7}'")

@@ -11,7 +11,7 @@ function kampagneDialog(k, danach, vorgabe = {}) {
   k = k || { slug: '', name: '', titel: '', untertitel: '', nutzen: [], button: 'Kostenlos anfragen', einwilligung_text: '', danke_titel: 'Vielen Dank!', danke_text: 'Wir melden uns in Kürze bei Ihnen.', telefon_pflicht: true, website_abfragen: true, termin_anbieten: true, kosten_cent: 0, rechtlich_geprueft: false, aktiv: false, vorlage: 'website_check', kicker: '', check_mail: false, check_betreff: vorgabe.check_betreff || '', check_text: vorgabe.check_text || '',
     folge_aktiv: false, folge_tage: vorgabe.folge_tage || [], folge_betreffe: vorgabe.folge_betreffe || [], folge_texte: vorgabe.folge_texte || [],
     referenz_text: '', referenz_name: '', referenz_link: '', referenz_sterne: null,
-    angebot_preis: '', angebot_zusatz: 'netto', angebot_text: vorgabe.angebot_text || '', plaetze_frei: null, plaetze_gesamt: null, plaetze_zeitraum: '' };
+    angebot_preis: '', angebot_zusatz: 'netto', angebot_text: vorgabe.angebot_text || '', plaetze_frei: null, plaetze_gesamt: null, plaetze_zeitraum: '', plaetze_monatlich: false };
   const ta = (id, label, wert, zeilen = 4) => [h('label', { for: id }, label), h('textarea', { id, rows: zeilen, maxlength: 4000 }, wert || '')];
   const stufen = [0, 1, 2].map(i => ({ tag: (k.folge_tage || [])[i] ?? '', betreff: (k.folge_betreffe || [])[i] || '', text: (k.folge_texte || [])[i] || '' }));
   const vorlage = h('select', { id: 'fk_vorlage' }, h('option', { value: 'website_check', selected: k.vorlage !== 'standard' }, 'Website-Check (Ampel, Ergebnis als PDF)'), h('option', { value: 'standard', selected: k.vorlage === 'standard' }, 'Standard (einfaches Formular)'));
@@ -36,7 +36,8 @@ function kampagneDialog(k, danach, vorgabe = {}) {
     ...ta('fk_at', 'Kurzer Text zum Preis', k.angebot_text, 2),
     h('p', { class: 'small muted' }, 'Plätze nur eintragen, wenn sie wirklich begrenzt sind (sonst irreführende Werbung). Bei 0 freien Plätzen verschwindet der Abschnitt.'),
     ...t('fk_pf', 'Plätze frei (leer = ohne Zähler)', k.plaetze_frei ?? '', { inputmode: 'numeric', maxlength: 3 }), ...t('fk_pg', 'Plätze insgesamt', k.plaetze_gesamt ?? '', { inputmode: 'numeric', maxlength: 3 }),
-    ...t('fk_pz', 'Zeitraum, z. B. „im November“ (freiwillig)', k.plaetze_zeitraum, { maxlength: 40 }),
+    box('fk_pm', 'Plätze gelten pro Monat (am 1. stehen automatisch wieder alle frei, die Seite nennt den Monat)', k.plaetze_monatlich),
+    ...t('fk_pz', 'Zeitraum, falls nicht pro Monat, z. B. „bis 30.11.“ (freiwillig)', k.plaetze_zeitraum, { maxlength: 40 }),
     h('h3', {}, 'Ergebnis-Mail mit PDF (nur Vorlage Website-Check)'),
     box('fk_cm', 'Ergebnis direkt nach der Prüfung per E-Mail schicken (mit PDF)', k.check_mail),
     ...t('fk_cb', 'Betreff', k.check_betreff, { maxlength: 200 }), ...ta('fk_ct', 'Text', k.check_text, 7), h('p', { class: 'small muted' }, platz),
@@ -56,7 +57,7 @@ function kampagneDialog(k, danach, vorgabe = {}) {
         termin_anbieten: val('fk_term').checked, kosten_cent: centAusEuro(val('fk_kosten').value), rechtlich_geprueft: val('fk_geprueft').checked, aktiv: val('fk_aktiv').checked,
         vorlage: val('fk_vorlage').value, kicker: val('fk_kicker').value, check_mail: val('fk_cm').checked, check_betreff: val('fk_cb').value || undefined, check_text: val('fk_ct').value || undefined,
         folge_aktiv: val('fk_fa').checked, referenz_text: val('fk_rt').value, referenz_name: val('fk_rn').value, referenz_link: val('fk_rl').value.trim(), referenz_sterne: Number(val('fk_rs').value) || 0,
-        angebot_preis: val('fk_ap').value, angebot_zusatz: val('fk_az').value, angebot_text: val('fk_at').value, plaetze_zeitraum: val('fk_pz').value,
+        angebot_preis: val('fk_ap').value, angebot_zusatz: val('fk_az').value, angebot_text: val('fk_at').value, plaetze_zeitraum: val('fk_pz').value, plaetze_monatlich: val('fk_pm').checked,
         plaetze_frei: val('fk_pf').value.trim() === '' ? -1 : Number(val('fk_pf').value), plaetze_gesamt: val('fk_pg').value.trim() === '' ? 0 : Number(val('fk_pg').value) };
       const st = [0, 1, 2].filter(i => val('fk_ft' + i).value.trim() !== '');
       body.folge_tage = st.map(i => Number(val('fk_ft' + i).value));

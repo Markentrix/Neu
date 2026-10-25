@@ -144,6 +144,14 @@ def lead_folgemails(cfg):
         mailer.lead_folge(l["email"], l["ansprechpartner"], l["firma"], f["betreff_%d" % n], f["text_%d" % n], tok)
 
 
+def funnel_plaetze_monat(cfg):
+    """Plätze pro Monat: am Monatsanfang „frei“ wieder auf „insgesamt“ setzen (nur Kampagnen mit Monatszähler)."""
+    with tx("system") as cur:
+        cur.execute("""UPDATE lead_kampagnen SET plaetze_frei = plaetze_gesamt, plaetze_monat = date_trunc('month', (now() AT TIME ZONE 'Europe/Berlin'))::date
+                       WHERE plaetze_monatlich AND plaetze_gesamt IS NOT NULL
+                         AND (plaetze_monat IS NULL OR plaetze_monat < date_trunc('month', (now() AT TIME ZONE 'Europe/Berlin'))::date)""")
+
+
 def funnel_checks_nachholen(cfg):
     """Website-Checks, die nach der Anmeldung nicht fertig wurden (z. B. Neustart), erneut ausführen; nach 3 Versuchen als Fehler markieren."""
     from . import funnelcheck
@@ -1216,7 +1224,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
