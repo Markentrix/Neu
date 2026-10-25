@@ -53,9 +53,29 @@ function rueckfrage(frage, artikel, direkt = false) {
   return box;
 }
 
+/** Schwebender „?“-Knopf auf jeder Seite: öffnet die Anleitung (mit Bild) zur gerade offenen Seite, sonst die Suche. */
+function hilfeKnopf(rolle) {
+  if (typeof document === 'undefined' || document.getElementById('hilfeknopf')) return;
+  const knopf = h('button', { id: 'hilfeknopf', class: 'hilfeknopf', type: 'button', 'aria-label': 'Hilfe zu dieser Seite', title: 'Hilfe zu dieser Seite', onclick: async () => {
+    const liste = await laden(rolle), seite = location.hash.replace(/^#/, '').split('/')[0] || 'heute';
+    const passend = liste.filter(a => (a.l || '').replace(/^#/, '') === seite);
+    if (passend.length === 1) { dialog(passend[0].t, artikelKarte(passend[0], passend[0].t)); return; }
+    const feld = h('input', { type: 'search', placeholder: 'Wobei brauchst du Hilfe?', 'aria-label': 'Hilfe durchsuchen' }), ergebnis = h('div', { class: 'stack' });
+    const zeige = () => {
+      const t = feld.value.trim() ? suchen(rolle, feld.value) : passend;
+      ergebnis.replaceChildren(...(t.length ? t.slice(0, 8).map(a => h('button', { class: 'btn sec', style: 'display:block;width:100%;text-align:left', onclick: () => { d.zu(); dialog(a.t, artikelKarte(a, feld.value.trim() || a.t)); } }, a.t))
+        : [h('p', { class: 'small muted' }, 'Dazu habe ich keine Anleitung gefunden. Versuche ein anderes Wort.')]));
+    };
+    feld.addEventListener('input', zeige);
+    const d = dialog('Hilfe' + (passend.length ? ' zu dieser Seite' : ''), h('div', { class: 'stack' }, feld, ergebnis, h('p', { class: 'small' }, h('a', { href: '/api/hilfe/anleitung.pdf?rolle=' + rolle, target: '_blank', rel: 'noopener' }, '📄 Ganze Anleitung als PDF'))));
+    zeige(); feld.focus();
+  } }, '?');
+  document.body.append(knopf);
+}
+
 /** Suchfeld für die Kopfzeile eines Portals. rolle: 'vertrieb' | 'kunde' | 'admin'. */
 export function hilfeSuche(rolle) {
-  laden(rolle);
+  laden(rolle); hilfeKnopf(rolle);
   const feld = h('input', { type: 'search', placeholder: 'Hilfe: Frage eingeben, z. B. „Leads anlegen“', 'aria-label': 'Hilfe durchsuchen', style: 'width:100%' });
   const liste = h('div', { class: 'hilfetreffer', role: 'list' });
   const pdfLinks = (rolle === 'admin' ? [['vertrieb', 'Vertrieb'], ['kunde', 'Kunden'], ['admin', 'Admin']] : [[rolle, '']])

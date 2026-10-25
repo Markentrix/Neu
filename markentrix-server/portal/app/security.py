@@ -98,7 +98,7 @@ def current_user(request: Request) -> dict:
         raise HTTPException(401, "Nicht angemeldet.")
     with tx("system") as cur:
         cur.execute(
-            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id, b.totp_aktiv, b.kunden_rolle, b.admin_rechte, b.website_mitarbeiter_id
+            """SELECT b.id, b.email, b.name, b.rolle, b.kunden_id, b.vertriebspartner_id, b.totp_aktiv, b.kunden_rolle, b.admin_rechte, b.website_mitarbeiter_id, s.passkey
                FROM sitzungen s JOIN benutzer b ON b.id = s.benutzer_id
                WHERE s.token_hash = %s AND s.ablauf > now() AND b.aktiv AND (b.zugang_bis IS NULL OR b.zugang_bis >= current_date)
                  AND (b.vertriebspartner_id IS NULL OR NOT EXISTS (SELECT 1 FROM vertriebspartner p WHERE p.id = b.vertriebspartner_id AND p.status = 'beendet'))""",
@@ -113,7 +113,7 @@ def current_user(request: Request) -> dict:
 # Bereiche für Mitarbeiter mit eingeschränkten Rechten (admin_rechte NULL = alles)
 RECHTE = {"kunden": "Kunden & Projekte", "nachrichten": "Nachrichten", "leads": "Leads & Vertrieb", "finanzen": "Angebote, Rechnungen & Preise", "einstellungen": "Einstellungen & Protokoll"}
 _IMMER = {"uebersicht", "heute", "aufgaben", "suche", "textvorlagen", "meine-filter"}
-_BEREICH = {"tickets": "nachrichten", "leads": "leads", "gespraeche": "leads", "vertrieb": "leads", "website-check": "leads", "provisionsregeln": "leads",
+_BEREICH = {"tickets": "nachrichten", "leads": "leads", "gespraeche": "leads", "vertrieb": "leads", "website-check": "leads", "funnel": "leads", "empfehlung": "leads", "datenschutz-anfragen": "einstellungen", "provisionsregeln": "leads",
             "belege": "finanzen", "belege-export.csv": "finanzen", "belege-auswertung": "finanzen", "preise": "finanzen", "konditionen": "finanzen", "katalog": "finanzen", "kennzahlen": "finanzen",
             "kunden": "kunden", "berichte": "kunden", "avv": "kunden", "avv-fehlt": "kunden", "avv-veraltet": "kunden", "avv-vorschlag": "kunden", "avv-vorschau": "kunden", "uav-aenderungen": "kunden", "domains": "kunden", "portal-qr": "kunden", "freigabe-vorlagen": "kunden", "freigabe-kalender": "kunden", "domains-ablauf": "kunden", "onboarding": "kunden", "dateien": "kunden", "websites": "kunden", "vertragsdokumente": "kunden", "umfragen": "kunden", "referenzseite": "kunden",
             "freigaben-kunden": "kunden", "unterlagen": "kunden", "buchungen": "kunden", "paket-buchungen": "kunden", "fruehwarnung": "kunden", "vorlagen": "kunden", "buchungsvorlagen": "kunden", "kunden-ampel": "kunden", "angebote-erinnerung": "leads", "angebote-grund": "leads", "preisanfragen": "leads", "hilfe-rueckmeldungen": "nachrichten", "cockpit": "finanzen", "lastschrift": "finanzen", "mahnvorschlaege": "finanzen", "mahnungen": "finanzen", "angebotsanfragen": "leads", "pipeline": "leads"}
@@ -155,7 +155,7 @@ def kunden_2fa_pflicht(neu_laden: bool = False) -> bool:
 
 def _zwei_faktor_fehlt(user: dict) -> bool:
     from . import config
-    if user.get("totp_aktiv"):
+    if user.get("totp_aktiv") or user.get("passkey"):   # Passkey mit Gerätesperre zählt als zwei Faktoren
         return False
     if user["rolle"] == "admin":
         return bool(config.ADMIN_2FA_PFLICHT)

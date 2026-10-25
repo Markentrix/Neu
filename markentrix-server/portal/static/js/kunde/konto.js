@@ -1,4 +1,4 @@
-import { h, api, datum, zeit, melde, zweiFaktorKarte, pushKarte, formular, dialog } from '../common.js';
+import { h, api, datum, zeit, melde, passkeyKarte, zweiFaktorKarte, pushKarte, formular, dialog } from '../common.js';
 import { inhaber, tabelle, statusPill, zeige, V, hat } from './kern.js';
 import { anleitungSeite } from '../anleitung.js';
 
@@ -112,7 +112,7 @@ V.einstellungen = async () => {
         h('div', {}, h('label', {}, 'Von'), h('input', { name: 'von', type: 'date', value: vt.von ? String(vt.von).slice(0, 10) : '' })), h('div', {}, h('label', {}, 'Bis'), h('input', { name: 'bis', type: 'date', value: vt.bis ? String(vt.bis).slice(0, 10) : '' })),
         h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
-    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), zweiFaktorKarte(), inhaber() ? await statusKarte() : '', inhaber() ? await einwilligungenKarte() : '', inhaber() ? datenKarte() : '',
+    h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), passkeyKarte(), zweiFaktorKarte(), inhaber() ? await statusKarte() : '', inhaber() ? await einwilligungenKarte() : '', inhaber() ? datenKarte() : '',
     h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
 };
 

@@ -1127,11 +1127,34 @@ def angebote_abgelaufen(cfg):
     angebotserinnerung.abgelaufen_melden()
 
 
+def dsgvo_fristen(cfg):
+    """Täglich: Datenschutz-Anfragen, deren Frist (ein Monat) in 7 Tagen oder früher endet, als dringende Aufgabe melden (einmal je Anfrage)."""
+    jetzt = datetime.now(webbetrieb.TZ)
+    if jetzt.hour < 7 or not _marker("dsgvo-fristen-" + jetzt.strftime("%Y-%m-%d")):
+        return
+    dsgvo_fristen_pruefen()
+
+
+def dsgvo_fristen_pruefen() -> int:
+    """Legt für bald ablaufende Anfragen je eine Aufgabe an (einmal je Anfrage). Gibt die Zahl der neuen Aufgaben zurück."""
+    neu = 0
+    with tx("system") as cur:
+        cur.execute("SELECT id, art, name, frist_am FROM datenschutz_anfragen WHERE status IN ('neu','in_arbeit') AND frist_am <= current_date + 7")
+        for a in cur.fetchall():
+            cur.execute("""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
+                           VALUES (NULL, %s, %s, %s, 'auto', %s) ON CONFLICT (auto_schluessel) DO NOTHING""",
+                        (f"Frist läuft ab: Datenschutz-Anfrage von {a['name'][:80]} ({a['frist_am'].strftime('%d.%m.%Y')})", admin_empfaenger(cur), a["frist_am"], f"dsgvo-frist-{a['id']}"))
+            if cur.rowcount:
+                neu += 1
+                push.senden(push.admins(cur), "Datenschutz-Anfrage: Frist läuft ab", f"{a['name'][:60]}: Frist am {a['frist_am'].strftime('%d.%m.%Y')}.", "/admin#dsgvo", "dsgvo")
+    return neu
+
+
 def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return

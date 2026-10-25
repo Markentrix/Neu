@@ -16,6 +16,7 @@ import './admin/postfach.js';
 import './admin/pipeline.js';
 import './admin/onboardingboard.js';
 import './admin/meintag.js';
+import './admin/funnel.js';
 const root = document.getElementById('app');
 
 async function seiteZeigen() {

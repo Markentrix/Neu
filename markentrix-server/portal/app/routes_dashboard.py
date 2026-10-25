@@ -184,6 +184,7 @@ class AnsichtIn(BaseModel):
     ausgeblendet: list[str] | None = Field(default=None, max_length=40)
     push_aus: list[str] | None = Field(default=None, max_length=40)
     tour_gesehen: bool | None = None
+    erste_woche_zu: bool | None = None
 
 
 @router.get("/me/ansicht")
@@ -209,6 +210,8 @@ def ansicht_speichern(data: AnsichtIn, user: dict = Depends(current_user)):
             a["push_aus"] = sorted(set(data.push_aus))
         if data.tour_gesehen is not None:
             a["tour_gesehen"] = data.tour_gesehen
+        if data.erste_woche_zu is not None:
+            a["erste_woche_zu"] = data.erste_woche_zu
         cur.execute("UPDATE benutzer SET ansicht=%s::jsonb WHERE id=%s", (json.dumps(a), user["id"]))
     return {"ok": True}
 

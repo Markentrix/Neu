@@ -20,6 +20,7 @@ from .routes_einstellungen import router as einstellungen_router
 from .routes_vertrieb import router as vertrieb_router
 from .routes_2fa import router as zweifaktor_router
 from .routes_public import router as public_router
+from . import routes_dsgvo, routes_funnel
 from .routes_onboarding import router as onboarding_router
 from .routes_vertriebqualitaet import router as vqual_router
 from .routes_pakete import router as pakete_router
@@ -47,6 +48,8 @@ from .routes_nutzung import router as nutzung_router
 from .routes_leadangebot import router as leadangebot_router, oeffentlich as angebot_oeffentlich_router
 from .routes_system import router as system_router
 from .routes_loginlink import router as loginlink_router
+from .routes_passkey import router as passkey_router
+from .ersteswoche import router as ersteswoche_router
 from .routes_zahlung import router as zahlung_router
 from .routes_fruehwarnung import router as fruehwarnung_router
 from . import preisaenderung, routes_betriebplus, routes_plattformstatus, routes_status, routes_leadsteuerung, routes_leadtermin, routes_rangliste, routes_referenzseite, routes_umfrage, routes_vertragportal, routes_vertraege
@@ -168,6 +171,8 @@ app.include_router(nutzung_router)
 app.include_router(angebot_oeffentlich_router)
 app.include_router(system_router)
 app.include_router(loginlink_router)
+app.include_router(passkey_router)
+app.include_router(ersteswoche_router)
 app.include_router(zahlung_router)
 app.include_router(fruehwarnung_router)
 app.include_router(routes_betriebplus.admin)
@@ -224,6 +229,11 @@ app.include_router(pakete_router)
 app.include_router(vqual_router)
 app.include_router(provision_router)
 app.include_router(provision_vertrieb_router)
+app.include_router(routes_funnel.public)
+app.include_router(routes_funnel.admin)
+app.include_router(routes_funnel.kunde)
+app.include_router(routes_dsgvo.public)
+app.include_router(routes_dsgvo.admin)
 
 
 def seite(name):
@@ -239,6 +249,8 @@ app.get("/buchen", include_in_schema=False)(seite("buchen.html"))
 app.get("/angebot", include_in_schema=False)(seite("angebot.html"))
 app.get("/freigabe", include_in_schema=False)(seite("freigabe.html"))
 app.get("/anmelden", include_in_schema=False)(seite("anmelden.html"))
+app.get("/f/{slug}", include_in_schema=False)(seite("funnel.html"))
+app.get("/datenschutz-anfrage", include_in_schema=False)(seite("dsgvo.html"))
 app.get("/impressum", include_in_schema=False)(seite("recht.html"))
 app.get("/datenschutz", include_in_schema=False)(seite("recht.html"))
 @app.get("/manifest.webmanifest", include_in_schema=False)

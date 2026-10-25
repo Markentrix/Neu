@@ -2,9 +2,10 @@
 import json
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 from psycopg import errors
 
-from . import einstellungen, ki, leadkontakt
+from . import einstellungen, heissleads, ki, leadkontakt
 from .db import tx
 from .security import audit, rate_limit, require_admin, require_vertrieb
 
@@ -28,6 +29,16 @@ def vertrieb_heute(user: dict = Depends(require_vertrieb)):
                         AND (l.wiedervorlage_am IS NULL OR l.wiedervorlage_am > current_date)
                         ORDER BY (l.temperatur='warm') DESC NULLS LAST, l.geaendert_am DESC LIMIT 15""", (pid,))
         neu = cur.fetchall()
+        # Leads mit frischem Signal (Angebot angesehen, Antwort, Terminbuchung) gehören nach oben, auch wenn sie schon einmal kontaktiert wurden
+        bekannt = {str(z["id"]) for z in wiedervorlagen + heiss}
+        cur.execute(f"""SELECT {felder} FROM leads l WHERE l.vertriebspartner_id=%s AND l.status NOT IN {OFFEN} AND (
+                          EXISTS (SELECT 1 FROM belege b WHERE b.lead_id=l.id AND b.art='angebot' AND b.status IN ('gestellt','versendet') AND b.angesehen_am > now() - interval '7 days')
+                          OR EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id=l.id AND a.art='antwort' AND a.zeit > now() - interval '7 days'))
+                        ORDER BY l.geaendert_am DESC LIMIT 15""", (pid,))
+        extra = [z for z in cur.fetchall() if str(z["id"]) not in bekannt]
+        heiss += extra
+        neu[:] = [z for z in neu if str(z["id"]) not in {str(e["id"]) for e in extra}]
+        heissleads.anreichern(cur, wiedervorlagen, heiss, neu)
         cur.execute("""SELECT count(*) AS n FROM lead_aktivitaeten a JOIN leads l ON l.id=a.lead_id
                        WHERE l.vertriebspartner_id=%s AND a.art='anruf' AND a.zeit::date = current_date""", (pid,))
         heute_anrufe = cur.fetchone()["n"]
@@ -75,6 +86,27 @@ def _skript_erzeugen(lid: str, pid: str | None, user: dict):
         cur.execute("UPDATE leads SET skript=%s::jsonb, skript_am=now() WHERE id=%s", (json.dumps(s, ensure_ascii=False), lid))
         audit(cur, user, "lead_skript", None, {"id": lid})
     return s
+
+
+class NotizIn(BaseModel):
+    text: str = Field(min_length=5, max_length=4000)
+
+
+@router.post("/vertrieb/notiz-zusammenfassen")
+def notiz_zusammenfassen(data: NotizIn, user: dict = Depends(require_vertrieb)):
+    """Fasst eine diktierte oder getippte Gesprächsnotiz zusammen. Es geht nur der Text an die KI, keine Daten des Leads."""
+    rate_limit("notiz-ki:" + str(user["id"]), 60, 3600)
+    with tx("system") as cur:
+        cfg = einstellungen.lesen(cur, "ki") or {}
+    if not cfg.get("api_key"):
+        raise HTTPException(400, "Die Zusammenfassung ist noch nicht eingerichtet (KI-Schlüssel fehlt). Bitte beim Team melden. Die Notiz kannst du trotzdem speichern.")
+    try:
+        text = ki.notiz_zusammenfassen(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, data.text)
+    except Exception:
+        raise HTTPException(502, "Der KI-Dienst hat nicht geantwortet. Die Notiz kannst du trotzdem speichern.")
+    if not text:
+        raise HTTPException(502, "Es kam keine Zusammenfassung zurück. Bitte noch einmal versuchen.")
+    return {"zusammenfassung": text}
 
 
 @router.post("/vertrieb/leads/{lid}/skript")

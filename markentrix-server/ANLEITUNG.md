@@ -681,3 +681,21 @@ Hier pflegst du, was der KI-Assistent eines Kunden wissen darf. **Dateien hochla
 
 ## App: Frage nach Benachrichtigungen (Stand Oktober 2026)
 In der auf dem Handy installierten App (nicht im normalen Browser) fragt das Portal einmal freundlich: „Möchtest du Benachrichtigungen aufs Handy bekommen?“ (Ja / Später / Nein danke). „Später“ fragt nach 7 Tagen erneut, „Nein danke“ nie wieder. Erst nach „Ja“ erscheint die Abfrage des Handys. Zu sehen für Kunden, Vertriebler und Admins. Jederzeit änderbar unter Konto → „App & Benachrichtigungen“. Auf dem iPhone geht Push nur aus der installierten App heraus.
+
+## Anmeldung mit Fingerabdruck / Face-ID (Passkey)
+Jeder Benutzer kann in seinem Konto bis zu 10 Passkeys einrichten. Die Anmeldeseite zeigt dann „Mit Fingerabdruck / Face-ID anmelden“. Ein Passkey zählt als zweiter Faktor. Migration 139. Funktioniert nur über die Portal-Adresse (`BASE_URL`). Auf echten Handys noch nicht getestet.
+
+## Hilfe-Knopf, „Deine erste Woche“, Anruf-Nachfrage, Sprachnotiz, heiße Leads
+- Runder „?“-Knopf unten rechts öffnet die Anleitung zur aktuellen Seite oder die Suche.
+- Kunden sehen 30 Tage lang auf „Heute“ die Karte „Deine erste Woche“ mit Fortschrittsbalken (`ersteswoche.py`).
+- Vertriebler: Nach Tippen auf eine Telefonnummer fragt die App bei Rückkehr nach dem Ergebnis (8 Sekunden bis 3 Stunden). Notizen lassen sich diktieren (Browser-Spracherkennung, Aufnahme kann an Google/Apple gehen, Anwaltsthema) und per KI zusammenfassen (braucht den KI-Schlüssel).
+- „Heute“ zeigt heiße Leads mit Begründung (`heissleads.py`).
+
+## Lead-Funnel (Admin → Lead-Funnel)
+Je Kampagne eine Seite unter `/f/<name>` mit Formular, Einwilligung, Roboterfalle und Bremse (20/Stunde je IP). Der Lead entsteht heiß mit Kampagne und UTM-Angaben, das Team bekommt Push, Mail und die Aufgabe „innerhalb einer Stunde anrufen“, danach kann der Besucher einen Termin buchen. **Eine Seite geht nur live, wenn „Rechtlich geprüft“ gesetzt ist.** Auswertung: Aufrufe, Leads, Termine, Kunden, Kosten pro Lead/Kunde (Kosten manuell). Migration 140.
+
+## Empfehlungsprogramm
+Ab Werk aus. Einschalten: Seite „Empfehlung durch Kunden“ prüfen lassen und live setzen, dann in der Karte „Empfehlungsprogramm“ aktivieren. Kunden bekommen einen persönlichen Link (`/f/empfehlung?ref=CODE`). Prämien legt der Admin je Empfehlung fest, es gibt keinen Standardbetrag und keine automatische Auszahlung.
+
+## Datenschutz-Anfragen (Admin → Datenschutz-Anfragen)
+Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tage vorher, Datensuche, Auskunftsdatei (JSON), Lead-Löschung mit Löschprotokoll und optionaler Sperrliste. Öffentliches Formular: `/datenschutz-anfrage` (in der Datenschutzerklärung verlinken). Kundenkonten werden weiter über Export/Offboarding behandelt. Rechtliche Bewertung: Anwalt.

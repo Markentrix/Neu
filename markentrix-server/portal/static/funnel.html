@@ -1,0 +1,17 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Markentrix</title><link rel="icon" href="/static/icons/icon-192.png"><script src="/static/js/theme.js"></script><link rel="stylesheet" href="/static/css/portal.css"></head>
+<body><main class="center"><div class="card login" style="max-width:560px;width:100%"><div class="logo">M</div>
+<h1 id="titel">Markentrix</h1><p class="muted" id="untertitel" style="text-align:center;margin-top:-6px"></p>
+<ul id="nutzen" style="margin:12px 0 18px;padding-left:20px"></ul><div id="m" role="status"></div>
+<form id="f" hidden>
+<label for="n">Ihr Name</label><input id="n" required minlength="2" maxlength="200" autocomplete="name">
+<div id="firmaBox"><label for="fi">Firma (optional)</label><input id="fi" maxlength="200" autocomplete="organization"></div>
+<label for="e">E-Mail</label><input id="e" type="email" required maxlength="320" autocomplete="email">
+<label for="t" id="tl">Telefon</label><input id="t" type="tel" maxlength="60" autocomplete="tel">
+<div id="webBox"><label for="w">Ihre Website (optional)</label><input id="w" maxlength="300" autocomplete="url" placeholder="www.beispiel.de"></div>
+<div style="position:absolute;left:-9999px" aria-hidden="true"><label for="z">Bitte leer lassen</label><input id="z" tabindex="-1" autocomplete="off"></div>
+<label style="display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:13px;margin:12px 0"><input type="checkbox" id="c" required style="width:auto;margin-top:3px"><span id="ew"></span></label>
+<p><button class="btn" style="width:100%" id="b"></button></p></form>
+<div id="danke" hidden><h2 id="dt"></h2><p id="dx"></p><p id="tp" hidden><a class="btn" href="/buchen">Gleich einen Termin wählen</a></p></div>
+<p class="muted small" style="text-align:center;margin-top:16px"><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></p>
+</div></main><script type="module" src="/static/js/funnel.js"></script></body></html>

@@ -20,7 +20,7 @@ EXPORT_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "
 KUNDE_SIEHT = {"ticket_nachrichten": "NOT intern", "belege": "status<>'entwurf'"}
 KUNDE_OHNE_FELDER = {"belege": ("notiz",)}
 # Inhalte, die bei der Löschung entfernt werden (Reihenfolge ist egal, es gibt keine Abhängigkeiten untereinander außer SET NULL / CASCADE)
-LOESCH_TABELLEN = ["ticket_nachrichten", "website_termine", "website_warteliste", "website_gutscheine", "website_meldungen", "website_ereignisse", "website_stat", "website_wacht", "website_qualitaet",
+LOESCH_TABELLEN = ["empfehlungs_praemien", "ticket_nachrichten", "website_termine", "website_warteliste", "website_gutscheine", "website_meldungen", "website_ereignisse", "website_stat", "website_wacht", "website_qualitaet",
                    "website_leistung_aenderungen", "website_bewertung_sperre", "website_sperrtage", "website_stamm_notizen", "website_leistungen", "website_mitarbeiter", "website_dienste",
                    "domain_pruefung", "statusseiten", "kunden_umfragen", "wissen_vorschlaege", "hilfe_rueckmeldungen", "onboarding_punkte", "workflow_fehler", "kosten_log",
                    "anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",

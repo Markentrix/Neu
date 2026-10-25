@@ -1,4 +1,4 @@
-import { api, melde, el } from './common.js';
+import { api, melde, el, passkeyGeht, passkeyAnmelden } from './common.js';
 const f = el('f'), m = el('m'), b = el('b');
 api('/api/me', { leise: true }).then(u => { location.href = u.rolle === 'admin' ? '/admin' : '/app'; }).catch(() => {});
 f.addEventListener('submit', async (ev) => {
@@ -30,3 +30,12 @@ f3.addEventListener('submit', async (ev) => {
   catch (e) { melde(m3, e.message); }
   b3.disabled = false;
 });
+
+// Anmeldung ohne Passwort (Passkey)
+if (passkeyGeht()) {
+  el('pkw').hidden = false;
+  el('pk').addEventListener('click', async () => {
+    el('pk').disabled = true; melde(m, '');
+    try { location.href = await passkeyAnmelden(); } catch (e) { melde(m, e.message); el('pk').disabled = false; }
+  });
+}

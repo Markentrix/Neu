@@ -33,7 +33,7 @@ httpx.post(B+"/api/einladung",headers=H,json={"token":token(VM),"password":"Vera
 lid=a.post("/api/admin/leads",json={"firma":f"Browser Lead {sfx}","telefon":f"0511 {time.time_ns()}","email":f"bl{sfx}@bl{sfx}.de","ort":"Celle","vertriebspartner_id":p}).json()["id"]
 a.post("/api/admin/vertrieb/steuerung" if False else "/api/admin/leads/"+lid+"/notiz",json={}) if False else None
 fid=a.post(f"/api/admin/kunden/{kid}/freigaben-kunden",json={"titel":"Browser Beitrag","art":"social","inhalt":"Text","veroeffentlichung_am":"2030-01-02"}).json()["id"]
-ADMIN="uebersicht meintag postfach freigaben aufgaben kennzahlen kunden onboarding vertraege zufriedenheit neu vertrieb leads pipeline auswertung websites belege preise compliance katalog einstellungen protokoll".split()
+ADMIN="uebersicht meintag postfach freigaben aufgaben kennzahlen kunden onboarding vertraege zufriedenheit neu vertrieb leads pipeline auswertung funnel dsgvo websites belege preise compliance katalog einstellungen protokoll".split()
 os.makedirs("/var/tmp/pt/shots",exist_ok=True)
 async def login(br,m,pw,pfad,w):
     ctx=await br.new_context(viewport={"width":w,"height":900 if w>500 else 800},bypass_csp=True); pg=await ctx.new_page()

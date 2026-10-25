@@ -112,8 +112,32 @@ export function wiedervorlageWahl(start = '') {
  * Kontaktergebnis festhalten. Optionen: { nach: (r) => void } wird statt Neuladen aufgerufen,
  * { naechster: () => void } blendet „Speichern & nächster Lead“ ein.
  */
+/** Knöpfe unter einem Notizfeld: Diktieren (Spracherkennung des Browsers) und Zusammenfassen (KI). Gibt '' zurück, wenn beides nicht geht. */
+export function notizWerkzeug(feld, m) {
+  const SR = typeof window !== 'undefined' && (/** @type {any} */ (window).SpeechRecognition || /** @type {any} */ (window).webkitSpeechRecognition);
+  let erkenner = null, laeuft = false;
+  const mik = SR ? h('button', { type: 'button', class: 'btn sec small', 'aria-pressed': 'false', onclick: () => {
+    if (laeuft && erkenner) { erkenner.stop(); return; }
+    erkenner = new SR(); erkenner.lang = 'de-DE'; erkenner.continuous = true; erkenner.interimResults = false;
+    const vorher = feld.value ? feld.value.replace(/\s+$/, '') + ' ' : '';
+    let gesamt = '';
+    erkenner.onresult = (e) => { gesamt = Array.from(e.results).map(r => r[0].transcript).join(' '); feld.value = (vorher + gesamt).slice(0, Number(feld.maxLength) > 0 ? Number(feld.maxLength) : 1500); feld.dispatchEvent(new Event('input')); };
+    erkenner.onend = () => { laeuft = false; mik.textContent = '🎤 Diktieren'; mik.setAttribute('aria-pressed', 'false'); };
+    erkenner.onerror = (e) => { melde(m, e.error === 'not-allowed' ? 'Bitte erlaube dem Browser den Zugriff aufs Mikrofon.' : 'Die Spracherkennung hat nicht geklappt. Du kannst auch die Mikrofon-Taste deiner Handy-Tastatur benutzen.'); };
+    try { erkenner.start(); laeuft = true; mik.textContent = '⏹ Fertig'; mik.setAttribute('aria-pressed', 'true'); melde(m, 'Ich höre zu … Sprich jetzt. Nenne keine Gesundheits- oder Zahlungsdaten.', 'info'); } catch { melde(m, 'Das Diktieren konnte nicht starten.'); }
+  } }, '🎤 Diktieren') : '';
+  const ki = h('button', { type: 'button', class: 'btn sec small', onclick: async () => {
+    if (feld.value.trim().length < 20) { melde(m, 'Die Notiz ist für eine Zusammenfassung noch zu kurz.'); return; }
+    ki.disabled = true; melde(m, 'Wird zusammengefasst …', 'info');
+    try { const r = await api('/api/vertrieb/notiz-zusammenfassen', { method: 'POST', body: { text: feld.value } }); feld.value = r.zusammenfassung.slice(0, Number(feld.maxLength) > 0 ? Number(feld.maxLength) : 1500); melde(m, 'Zusammengefasst. Bitte kurz prüfen. Dieser Text wurde mit KI-Unterstützung vorbereitet.', 'ok'); }
+    catch (x) { melde(m, x.message); }
+    ki.disabled = false;
+  } }, '✨ Zusammenfassen');
+  return h('div', { class: 'row', style: 'gap:6px;flex-wrap:wrap;margin:4px 0' }, mik, ki, h('span', { class: 'small muted' }, SR ? 'Diktieren geht über den Browser (Google bzw. Apple).' : 'Zum Diktieren die Mikrofon-Taste der Handy-Tastatur nutzen.'));
+}
+
 export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
-  const m = h('div'), notiz = h('input', { placeholder: 'Kurze Notiz (freiwillig)', maxlength: 1500, 'aria-label': 'Notiz' }), wv = wiedervorlageWahl();
+  const m = h('div'), notiz = h('textarea', { rows: 2, placeholder: 'Kurze Notiz (freiwillig) – du kannst sie auch diktieren', maxlength: 1500, 'aria-label': 'Notiz' }), wv = wiedervorlageWahl();
   let wahl = null; const knoepfe = [];
   const speichern = h('button', { class: 'btn', disabled: true }, 'Speichern'), weiter = extra.naechster ? h('button', { class: 'btn sec', disabled: true }, 'Speichern & nächster Lead') : '';
   const grund = h('select', { 'aria-label': 'Grund für die Absage', style: 'display:none;width:auto' }, h('option', { value: '' }, 'Grund wählen …'), Object.entries(extra.verlustgruende || {}).map(([c, t]) => h('option', { value: c }, t)));
@@ -129,7 +153,8 @@ export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
   return h('div', { class: 'card' }, h('h2', {}, 'Kontakt festhalten'),
     h('p', { class: 'small muted' }, 'Was ist passiert? Der Verlauf und, wo es passt, der Status werden automatisch gesetzt.'), m,
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, knoepfe),
-    h('div', { class: 'row', style: 'margin-top:10px;align-items:flex-end;flex-wrap:wrap' }, h('div', { class: 'grow' }, notiz), grund, wv.el, speichern, weiter),
+    h('div', { style: 'margin-top:10px' }, notiz, notizWerkzeug(notiz, m)),
+    h('div', { class: 'row', style: 'margin-top:6px;align-items:flex-end;flex-wrap:wrap' }, grund, wv.el, speichern, weiter),
     wiedervorlage ? h('p', { class: 'small muted' }, 'Aktuelle Wiedervorlage: ' + datum(wiedervorlage)) : '');
 }
 
@@ -158,6 +183,60 @@ if (typeof window !== 'undefined') {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 const b64zuBytes = (s) => { const p = '='.repeat((4 - s.length % 4) % 4), r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(r, c => c.charCodeAt(0)); };
+
+// ---------------------------------------------------------------- Passkey (Fingerabdruck, Face-ID, Geräte-PIN)
+const pkBytes = (s) => { const p = '='.repeat((4 - s.length % 4) % 4), r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(r, c => c.charCodeAt(0)); };
+const pkText = (buf) => { let t = ''; for (const b of new Uint8Array(buf)) t += String.fromCharCode(b); return btoa(t).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+export const passkeyGeht = () => typeof window !== 'undefined' && !!window.PublicKeyCredential && !!navigator.credentials;
+
+/** Anmeldung ohne Passwort. Gibt das Ziel (z. B. „/app“) zurück. Wirft einen Error mit verständlichem Text. */
+export async function passkeyAnmelden() {
+  const o = await api('/api/passkey/login/start', { method: 'POST', body: {} });
+  let c;
+  try {
+    c = await navigator.credentials.get({ publicKey: { challenge: pkBytes(o.challenge), rpId: o.rpId, timeout: o.timeout, userVerification: 'required', allowCredentials: [] } });
+  } catch (e) {
+    throw new Error(e && e.name === 'NotAllowedError' ? 'Abgebrochen oder auf diesem Gerät ist kein Passkey vorhanden. Melde dich mit dem Passwort an und richte unter „Konto“ einen Passkey ein.' : 'Die Passkey-Anmeldung hat nicht geklappt.');
+  }
+  const pc = /** @type {PublicKeyCredential} */ (c), r = /** @type {AuthenticatorAssertionResponse} */ (pc.response);
+  const res = await api('/api/passkey/login/fertig', { method: 'POST', body: { id: pkText(pc.rawId), clientDataJSON: pkText(r.clientDataJSON), authenticatorData: pkText(r.authenticatorData), signature: pkText(r.signature) } });
+  return res.ziel;
+}
+
+/** Passkey auf diesem Gerät einrichten (Konto angemeldet). */
+export async function passkeyEinrichten(name) {
+  const o = await api('/api/passkey/registrieren/start', { method: 'POST', body: {} });
+  let c;
+  try {
+    c = await navigator.credentials.create({ publicKey: { challenge: pkBytes(o.challenge), rp: o.rp, user: { id: pkBytes(o.user.id), name: o.user.name, displayName: o.user.displayName }, pubKeyCredParams: o.pubKeyCredParams,
+      excludeCredentials: o.excludeCredentials.map(x => ({ type: 'public-key', id: pkBytes(x.id) })), timeout: o.timeout, attestation: 'none', authenticatorSelection: o.authenticatorSelection } });
+  } catch (e) {
+    throw new Error(e && e.name === 'InvalidStateError' ? 'Auf diesem Gerät ist schon ein Passkey eingerichtet.' : e && e.name === 'NotAllowedError' ? 'Abgebrochen. Zum Einrichten bitte das Gerät bestätigen (Fingerabdruck, Gesicht oder PIN).' : 'Das Einrichten hat nicht geklappt. Hat dein Gerät eine Bildschirmsperre?');
+  }
+  const r = /** @type {AuthenticatorAttestationResponse} */ (/** @type {PublicKeyCredential} */ (c).response);
+  await api('/api/passkey/registrieren/fertig', { method: 'POST', body: { clientDataJSON: pkText(r.clientDataJSON), attestationObject: pkText(r.attestationObject), name: name || null } });
+}
+
+/** Karte „Anmeldung mit Fingerabdruck / Face-ID“ für die Konto-Seiten. */
+export function passkeyKarte() {
+  const m = h('div'), box = h('div');
+  const laden = async () => {
+    let liste = [];
+    try { liste = await api('/api/passkey'); } catch (e) { melde(m, e.message); return; }
+    box.replaceChildren(
+      liste.length ? h('ul', { class: 'prio' }, liste.map(p => h('li', {}, h('div', { class: 'pt' }, h('b', {}, p.name), h('span', { class: 'small muted' }, 'eingerichtet am ' + datum(p.erstellt_am) + (p.zuletzt_am ? ' · zuletzt benutzt ' + datum(p.zuletzt_am) : ''))),
+        h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Diesen Passkey entfernen?')) return; try { await api('/api/passkey/' + p.id, { method: 'DELETE' }); laden(); } catch (x) { melde(m, x.message); } } }, 'Entfernen'))))
+        : h('p', { class: 'muted' }, 'Noch kein Passkey eingerichtet.'),
+      passkeyGeht() ? h('p', {}, h('button', { class: 'btn', onclick: async () => {
+        const name = (prompt('Wie soll das Gerät heißen? (zum Beispiel „Mein Handy“)', /iphone|ipad/i.test(navigator.userAgent) ? 'Mein iPhone' : /android/i.test(navigator.userAgent) ? 'Mein Android-Handy' : 'Dieser Computer') || '').trim();
+        if (!name) return;
+        try { await passkeyEinrichten(name); melde(m, 'Eingerichtet. Ab jetzt kannst du dich auf der Anmeldeseite mit „Mit Fingerabdruck / Face-ID anmelden“ einloggen.', 'ok'); laden(); } catch (x) { melde(m, x.message); }
+      } }, 'Passkey auf diesem Gerät einrichten')) : h('p', { class: 'small muted' }, 'Dieser Browser unterstützt keine Passkeys. Nutze Chrome oder Safari in einer aktuellen Version.'));
+  };
+  laden();
+  return h('div', { class: 'card' }, h('h2', {}, 'Anmeldung mit Fingerabdruck oder Face-ID (Passkey)'),
+    h('p', { class: 'small muted' }, 'Kein Passwort mehr eintippen: Du bestätigst die Anmeldung mit Fingerabdruck, Gesicht oder der Gerätesperre. Das ist schneller und sicherer als ein Passwort und zählt als Zwei-Faktor-Anmeldung. Richte es am besten auf jedem Gerät ein, das du benutzt.'), m, box);
+}
 
 /** Schaltet Push auf diesem Gerät ein (Erlaubnis, Abo, Speichern). Wirft bei Ablehnung/Fehler einen Error mit verständlichem Text. */
 export async function pushEinschalten() {

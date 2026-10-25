@@ -1,0 +1,14 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Datenschutz-Anfrage – Markentrix</title><link rel="icon" href="/static/icons/icon-192.png"><script src="/static/js/theme.js"></script><link rel="stylesheet" href="/static/css/portal.css"></head>
+<body><main class="center"><div class="card login" style="max-width:560px;width:100%"><div class="logo">M</div><h1>Datenschutz-Anfrage</h1>
+<p class="muted small" style="text-align:center;margin-top:-6px">Auskunft, Löschung, Berichtigung oder Widerspruch: Wir antworten innerhalb eines Monats. Zur Prüfung Ihrer Identität können wir Rückfragen stellen.</p>
+<div id="m" role="status"></div>
+<form id="f">
+<label for="a">Ihr Anliegen</label><select id="a"><option value="auskunft">Auskunft: Welche Daten haben Sie über mich?</option><option value="loeschung">Löschung meiner Daten</option><option value="berichtigung">Berichtigung falscher Daten</option><option value="widerspruch">Widerspruch gegen die Verarbeitung</option><option value="einschraenkung">Einschränkung der Verarbeitung</option><option value="uebertragung">Daten übertragen lassen</option><option value="sonstiges">Etwas anderes</option></select>
+<label for="n">Ihr Name</label><input id="n" required minlength="2" maxlength="200" autocomplete="name">
+<label for="e">E-Mail-Adresse, unter der wir Sie kennen</label><input id="e" type="email" required maxlength="320" autocomplete="email">
+<label for="x">Nachricht (optional)</label><textarea id="x" rows="4" maxlength="3000"></textarea>
+<div style="position:absolute;left:-9999px" aria-hidden="true"><label for="z">Bitte leer lassen</label><input id="z" tabindex="-1" autocomplete="off"></div>
+<p><button class="btn" style="width:100%" id="b">Anfrage absenden</button></p></form>
+<p class="muted small" style="text-align:center"><a href="/datenschutz">Datenschutzerklärung</a></p></div></main>
+<script type="module" src="/static/js/dsgvo.js"></script></body></html>

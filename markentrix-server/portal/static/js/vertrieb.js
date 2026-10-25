@@ -1,7 +1,7 @@
 import { pipelineBoard } from './pipeline.js';
 import { stapelTabellen } from './common.js';
 stapelTabellen();
-import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
+import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
 import { hilfeSuche } from './hilfe.js';
 
@@ -38,7 +38,7 @@ function gespraechDialog(z, optionen, vorwahl, fertig) {
   const sel = h('select', { 'aria-label': 'Ergebnis', onchange: () => vorbelegen() }, optionen.map(o => h('option', { value: o.code, selected: o.code === vorwahl }, o.text)));
   const vorbelegen = () => { const o = optionen.find(x => x.code === sel.value); wv.tag.value = o && o.wiedervorlage_tage ? new Date(Date.now() + o.wiedervorlage_tage * 864e5).toISOString().slice(0, 10) : ''; };
   vorbelegen();
-  const d = dialog(z.firma, h('div', {}, h('label', {}, 'Was ist passiert?'), sel, h('label', {}, 'Notiz'), notiz, wv.el, m,
+  const d = dialog(z.firma, h('div', {}, h('label', {}, 'Was ist passiert?'), sel, h('label', {}, 'Notiz'), notiz, notizWerkzeug(notiz, m), wv.el, m,
     h('p', {}, h('button', { class: 'btn', onclick: async () => {
       try { const r = await api('/api/vertrieb/leads/' + z.id + '/kontakt', { method: 'POST', body: { ergebnis: sel.value, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null } }); d.zu(); fertig(r); } catch (x) { melde(m, x.message); }
     } }, 'Festhalten'))));
@@ -64,8 +64,9 @@ V.heute = async () => {
     const el = h('div', { class: 'heutezeile' });
     el.append(
       h('div', { class: 'heutekopf' }, h('div', { class: 'grow' }, h('a', { href: '#lead/' + l.id, style: 'font-weight:600;text-decoration:none' }, (TEMP[l.temperatur] || '') + ' ' + l.firma),
-        h('div', { class: 'small muted' }, [l.ansprechpartner, l.gruppe || l.branche, l.ort].filter(Boolean).join(' · ') + (l.wiedervorlage_am ? ' · Wiedervorlage ' + datum(l.wiedervorlage_am) : ''))),
-        l.telefon ? h('a', { class: 'btn small', href: 'tel:' + l.telefon.replace(/[^+\d]/g, '') }, '📞 ' + l.telefon) : h('span', { class: 'small muted' }, 'keine Nummer')),
+        h('div', { class: 'small muted' }, [l.ansprechpartner, l.gruppe || l.branche, l.ort].filter(Boolean).join(' · ') + (l.wiedervorlage_am ? ' · Wiedervorlage ' + datum(l.wiedervorlage_am) : '')),
+        (l.gruende || []).length ? h('ul', { class: 'small', style: 'margin:4px 0 0;padding-left:18px' }, l.gruende.map(g => h('li', {}, g))) : ''),
+        l.telefon ? h('a', { class: 'btn small', href: 'tel:' + l.telefon.replace(/[^+\d]/g, ''), 'data-lead': l.id, 'data-firma': l.firma }, '📞 ' + l.telefon) : h('span', { class: 'small muted' }, 'keine Nummer')),
       h('div', { class: 'heuteknoepfe' },
         h('button', { class: 'btn sec small', onclick: () => schnell(l, 'anruf_nicht_erreicht', el) }, 'Nicht erreicht'),
         h('button', { class: 'btn sec small', onclick: () => gespraechDialog(l, opt.filter(o => o.code !== 'anruf_nicht_erreicht'), 'anruf_erreicht', (r) => erledigt(el, r, true)) }, 'Gesprochen …'),
@@ -77,7 +78,7 @@ V.heute = async () => {
   const block = (titel, liste, leer) => h('div', { class: 'card' }, h('h2', {}, titel, liste.length ? h('span', { class: 'badge', style: 'margin-left:8px' }, liste.length) : ''), liste.length ? liste.map(zeile) : h('p', { class: 'muted' }, leer));
   return h('div', { class: 'stack' }, kopfKarte, meldung,
     block('Wiedervorlage fällig', d.wiedervorlagen, 'Keine Wiedervorlagen für heute.'),
-    block('🔥 Heiße Leads, noch nicht angerufen', d.heiss, 'Keine heißen Leads offen.'),
+    block('🔥 Heiße Leads: jetzt anrufen', d.heiss, 'Keine heißen Leads offen.'),
     block('Neu zugewiesen', d.neu, 'Keine neuen Leads.'));
 };
 
@@ -365,7 +366,7 @@ function datenKarte(lid, l, d, m) {
   const zeigen = h('div'), felder = [['ansprechpartner', 'Ansprechpartner'], ['email', 'E-Mail'], ['telefon', 'Telefon'], ['website', 'Website'], ['branche', 'Branche'], ['plz', 'PLZ'], ['ort', 'Ort']];
   const ansicht = () => {
     zeigen.replaceChildren(h('div', { class: 'form2' }, felder.map(([k, t]) => h('div', {}, h('div', { class: 'small muted' }, t),
-      h('div', {}, !l[k] ? '–' : k === 'telefon' ? h('a', { href: 'tel:' + String(l[k]).replace(/[^+\d]/g, '') }, l[k]) : k === 'email' ? h('a', { href: 'mailto:' + l[k] }, l[k]) : l[k])))),
+      h('div', {}, !l[k] ? '–' : k === 'telefon' ? h('a', { href: 'tel:' + String(l[k]).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, l[k]) : k === 'email' ? h('a', { href: 'mailto:' + l[k] }, l[k]) : l[k])))),
     l.notiz ? h('p', { class: 'muted' }, l.notiz) : '',
     h('p', { class: 'small' }, 'Grundlage der Ansprache: ', h('b', {}, GRUNDLAGEN[l.ansprache_grundlage] || 'nicht festgehalten'), !l.ansprache_grundlage ? ' – bitte ergänzen' : ''),
     l.website_check ? h('p', { class: 'small muted' }, 'Website-Check liegt vor, im Gespräch nutzbar.') : '',
@@ -429,7 +430,7 @@ V.konto = async () => {
   const erBox = h('input', { type: 'checkbox', checked: er.an, style: 'width:auto', onchange: async () => { try { await api('/api/vertrieb/erinnerung', { method: 'PUT', body: { an: erBox.checked } }); melde(em, 'Gespeichert.', 'ok'); } catch (x) { erBox.checked = !erBox.checked; melde(em, x.message); } } });
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f),
     h('div', { class: 'card' }, h('h2', {}, 'Nachfass-Erinnerung'), h('p', { class: 'small muted' }, 'Werktags morgens bekommst du eine Mail und eine Mitteilung, wenn Leads auf dein Nachfassen warten.'), em,
-      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, erBox, 'Tägliche Erinnerung per Mail')), pushKarte('vertrieb'), zweiFaktorKarte());
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, erBox, 'Tägliche Erinnerung per Mail')), pushKarte('vertrieb'), passkeyKarte(), zweiFaktorKarte());
 };
 
 let aufruf = 0;
@@ -442,6 +443,33 @@ async function zeige() {
   if (dieser !== aufruf) return;   // inzwischen wurde eine andere Seite geöffnet
   root.replaceChildren(gerüst(seite === 'lead' ? 'leads' : (V[seite] ? seite : 'heute'), inhalt));
 }
+// ---------------------------------------------------------------- Nach dem Anruf: App fragt „Wie lief es?“
+const ANRUF = 'mk-anruf';
+document.addEventListener('click', (e) => {
+  const a = e.target instanceof Element ? e.target.closest('a[href^="tel:"]') : null;
+  if (!a) return;
+  const lid = a.getAttribute('data-lead') || ((location.hash.match(/^#lead\/([\w-]+)/) || [])[1]);
+  if (!lid) return;
+  try { localStorage.setItem(ANRUF, JSON.stringify({ lid, firma: a.getAttribute('data-firma') || '', t: Date.now() })); } catch { /* ohne Speicher keine Nachfrage */ }
+});
+async function anrufNachfragen() {
+  let o = null;
+  try { o = JSON.parse(localStorage.getItem(ANRUF) || 'null'); } catch { /* leer */ }
+  if (!o) return;
+  const alter = Date.now() - o.t;
+  if (alter < 8000) return;                       // Anruf läuft wahrscheinlich noch
+  try { localStorage.removeItem(ANRUF); } catch { /* egal */ }
+  if (alter > 3 * 36e5) return;                   // zu alt, nicht mehr nachfragen
+  try {
+    const d = await api('/api/vertrieb/leads/' + o.lid, { leise: true });
+    const dlg = dialog('Wie lief der Anruf' + (o.firma ? ' bei ' + o.firma : '') + '?', h('div', {},
+      kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + o.lid + '/kontakt', null, { verlustgruende: d.verlustgruende, nach: () => { dlg.zu(); location.reload(); } }),
+      h('p', {}, h('button', { class: 'btn sec', onclick: () => dlg.zu() }, 'Später / nicht angerufen'))), true);
+  } catch { /* Nachfrage ist nur ein Angebot */ }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') anrufNachfragen(); });
+window.addEventListener('pageshow', () => { setTimeout(anrufNachfragen, 1200); });
+
 (async () => {
   try { const me = await api('/api/me'); if (me.rolle !== 'vertrieb') { location.href = me.rolle === 'admin' ? '/admin' : '/app'; return; }
     if (me.zwei_faktor_pflicht) { root.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Zwei-Faktor-Anmeldung einrichten'), h('p', {}, 'Für Vertriebs-Zugänge ist die Zwei-Faktor-Anmeldung Pflicht. Bitte jetzt mit einer Authenticator-App einrichten, danach geht es direkt weiter.'), zweiFaktorKarte(), h('p', {}, h('button', { class: 'btn', onclick: () => location.reload() }, 'Weiter zum Portal')))); return; }

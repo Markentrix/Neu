@@ -1,3 +1,4 @@
+import { empfehlungKarte } from './empfehlung.js';
 import { h, api, melde, ladeAnsicht, anpassenKnopf, ausgeblendetSet, delta as vormonat } from '../common.js';
 import { start, hat, V, karten } from './kern.js';
 
@@ -48,7 +49,7 @@ function wertKarte(w, z, sl) {
 }
 
 V.uebersicht = async () => {
-  const [z, sl, w] = await Promise.all([api('/api/kunde/kennzahlen'), api('/api/kunde/startliste'), api('/api/kunde/wert', { leise: true }).catch(() => null)]);
+  const [z, sl, w, empf] = await Promise.all([api('/api/kunde/kennzahlen'), api('/api/kunde/startliste'), api('/api/kunde/wert', { leise: true }).catch(() => null), empfehlungKarte()]);
   const karte = (titel, zahl, text, link) => h('a', { class: 'card', href: link, style: 'text-decoration:none;color:inherit' }, h('h3', {}, titel), h('div', { class: 'stat' }, h('b', {}, zahl), h('span', { class: 'muted small' }, text)));
   const zusatz = [
     karte('Nachrichten', z.nachrichten_offen, z.wartet_auf_dich ? z.wartet_auf_dich + ' warten auf dich' : 'offen', '#nachrichten'),
@@ -57,7 +58,7 @@ V.uebersicht = async () => {
     z.antwortzeit_h !== null ? h('div', { class: 'card' }, h('h3', {}, 'Antwortzeit des Teams'), h('div', { class: 'stat' }, h('b', {}, String(z.antwortzeit_h).replace('.', ',') + ' h'), h('span', { class: 'muted small' }, 'im Schnitt, letzte 90 Tage'))) : '',
   ];
   const ans = await ladeAnsicht(), aus = ausgeblendetSet(ans), an = anpassenKnopf([['wert', 'Dein Monat mit Markentrix'], ['zufriedenheit', 'Zufriedenheits-Abfrage'], ['karten', 'Kennzahlen-Kacheln']]);
-  return h('div', { class: 'stack' }, h('div', { class: 'row' }, h('div', { class: 'grow' }), an.knopf), an.panel, w && !aus.has('wert') ? wertKarte(w, z, sl) : '', startKarte(sl), start.badges && start.badges.briefing && !sl.aktiv ? h('div', { class: 'card' }, h('h2', {}, 'Dein Briefing fehlt noch'), h('p', { class: 'small muted' }, 'Mit ein paar Angaben zu deinem Unternehmen können wir deine Website und Texte viel schneller fertigstellen. Es dauert etwa 10 Minuten.'), h('a', { class: 'btn', href: '#briefing' }, 'Jetzt ausfüllen')) : '', z.bewertung_faellig && !aus.has('zufriedenheit') ? zufriedenheitKarte() : '', aus.has('karten') ? '' : h('div', { class: 'grid3' }, karten(), zusatz));
+  return h('div', { class: 'stack' }, h('div', { class: 'row' }, h('div', { class: 'grow' }), an.knopf), an.panel, w && !aus.has('wert') ? wertKarte(w, z, sl) : '', startKarte(sl), start.badges && start.badges.briefing && !sl.aktiv ? h('div', { class: 'card' }, h('h2', {}, 'Dein Briefing fehlt noch'), h('p', { class: 'small muted' }, 'Mit ein paar Angaben zu deinem Unternehmen können wir deine Website und Texte viel schneller fertigstellen. Es dauert etwa 10 Minuten.'), h('a', { class: 'btn', href: '#briefing' }, 'Jetzt ausfüllen')) : '', z.bewertung_faellig && !aus.has('zufriedenheit') ? zufriedenheitKarte() : '', aus.has('karten') ? '' : h('div', { class: 'grid3' }, karten(), zusatz), empf);
 };
 
 function zufriedenheitKarte() {

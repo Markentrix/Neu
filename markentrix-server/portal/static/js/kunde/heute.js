@@ -79,6 +79,23 @@ async function wertKarte() {
     a.stunden_gespart >= 0.5 ? h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Grobe Schätzung: etwa ' + String(a.stunden_gespart).replace('.', ',') + ' Stunden Arbeit abgenommen (' + w.minuten_je_vorgang + ' Minuten je Vorgang, ' + a.vorgaenge + ' Vorgänge). Mehr dazu unter ', h('a', { href: '#auswertung' }, 'Auswertung'), '.') : '');
 }
 
+/** „Deine erste Woche“: Fortschrittsbalken mit den ersten Schritten. Verschwindet, wenn alles erledigt ist oder wenn man sie ausblendet. */
+async function ersteWocheKarte() {
+  let e; try { e = await api('/api/kunde/erste-woche', { leise: true }); } catch { return ''; }
+  if (!e.aktiv) return '';
+  const app = typeof matchMedia !== 'undefined' && (matchMedia('(display-mode: standalone)').matches || /** @type {any} */ (navigator).standalone === true);
+  const st = e.schritte.map(s => s.code === 'app' ? { ...s, fertig: app } : s);
+  const fertig = st.filter(s => s.fertig).length, pct = Math.round(100 * fertig / st.length);
+  if (fertig === st.length) return '';
+  const karte = h('div', { class: 'card' }, h('h2', {}, 'Deine erste Woche'),
+    h('p', { class: 'small muted' }, fertig + ' von ' + st.length + ' Schritten erledigt. Jeder dauert nur ein bis zwei Minuten.'),
+    h('div', { class: 'fortschritt', role: 'progressbar', 'aria-valuenow': String(pct), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Fortschritt in der ersten Woche' }, h('div', { style: 'width:' + pct + '%' })),
+    h('ul', { class: 'prio' }, st.map(s => h('li', {}, h('span', { class: 'punkt ' + (s.fertig ? 'ok' : ''), 'aria-hidden': 'true' }),
+      h('div', { class: 'pt' }, h('b', {}, (s.fertig ? '✓ ' : '') + s.titel)), s.fertig ? h('span', { class: 'pill ok' }, 'erledigt') : h('a', { class: 'btn sec small', href: s.link }, s.knopf)))),
+    h('p', { class: 'small' }, h('a', { href: '#', onclick: async (ev) => { ev.preventDefault(); try { await api('/api/me/ansicht', { method: 'PUT', body: { erste_woche_zu: true } }); karte.remove(); } catch { /* bleibt sichtbar */ } } }, 'Nicht mehr anzeigen')));
+  return karte;
+}
+
 V.heute = async () => {
   const d = await api('/api/kunde/heute');
   const meld = h('div'), karteAnfragen = h('div', { class: 'card' }), karteTermine = h('div', { class: 'card' });
@@ -129,5 +146,5 @@ V.heute = async () => {
   const hero = h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Schritt'),
     schritt ? [h('h2', {}, schritt.titel), h('p', { class: 'muted' }, schritt.text), schritt.link ? h('a', { class: 'btn', href: schritt.link }, schritt.knopf) : h('button', { class: 'btn', onclick: schritt.tun }, schritt.knopf)]
       : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf dich. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
-  return h('div', { class: 'stack' }, hero, kopf, meld, await umfrageKarte(), karteAnfragen, karteTermine, entscheidungen, bew, await wertKarte());
+  return h('div', { class: 'stack' }, hero, await ersteWocheKarte(), kopf, meld, await umfrageKarte(), karteAnfragen, karteTermine, entscheidungen, bew, await wertKarte());
 };
