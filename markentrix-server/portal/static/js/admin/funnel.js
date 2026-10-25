@@ -25,7 +25,7 @@ function kampagneDialog(k, danach, vorgabe = {}) {
     h('label', { for: 'fk_ew' }, 'Einwilligungstext (neben dem Haken, vom Anwalt prüfen lassen)'), h('textarea', { id: 'fk_ew', rows: 3, maxlength: 800 }, k.einwilligung_text || ''),
     ...t('fk_dt', 'Überschrift nach dem Absenden', k.danke_titel), ...t('fk_dx', 'Text nach dem Absenden', k.danke_text),
     h('label', { for: 'fk_vorlage' }, 'Vorlage der Seite'), vorlage,
-    ...t('fk_kicker', 'Zeile über der Überschrift (z. B. „Für Betriebe in Frankfurt & Rhein-Main“)', k.kicker, { maxlength: 120 }),
+    ...t('fk_kicker', 'Zeile über der Überschrift (z. B. „Für Betriebe in Hannover, Braunschweig und ganz Niedersachsen“)', k.kicker, { maxlength: 120 }),
     h('h3', {}, 'Kundenstimme (nur echte, mit Erlaubnis des Kunden)'),
     ...ta('fk_rt', 'Zitat, z. B. aus der Google-Bewertung (leer = Abschnitt wird nicht gezeigt)', k.referenz_text, 3),
     ...t('fk_rn', 'Name und Firma, z. B. „Inhaber, ElbDetail Celle“', k.referenz_name, { maxlength: 120 }),

@@ -7,7 +7,7 @@ So kommt eine Anmeldung sauber als Lead im Portal an. Stand: Migration 141.
 | Weg | Adresse | Aufwand |
 |---|---|---|
 | **A. Vorlage im Portal** (empfohlen) | `https://portal.markentrix.de/f/<seitenname>` | Nur im Admin anlegen. Kein Caddy, keine eigene Datei. |
-| **B. Eigene Landingpage** | z. B. `https://markentrix.de/check-frankfurt/` | Eigene HTML-Seite plus eine Caddy-Weiterleitung (unten). |
+| **B. Eigene Landingpage** | z. B. `https://markentrix.de/check-niedersachsen/` | Eigene HTML-Seite plus eine Caddy-Weiterleitung (unten). |
 
 Bei beiden Wegen gilt: Die **Kampagne** im Admin (Admin → Lead-Funnel) ist die Quelle für Einwilligungstext, Mails und Auswertung. Ohne aktive und „rechtlich geprüfte“ Kampagne nimmt das Portal nichts an (404).
 
