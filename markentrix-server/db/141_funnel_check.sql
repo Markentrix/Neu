@@ -24,6 +24,10 @@ ALTER TABLE lead_checks ADD COLUMN IF NOT EXISTS ampel text CHECK (ampel IS NULL
 ALTER TABLE lead_checks ADD COLUMN IF NOT EXISTS kampagne_id uuid REFERENCES lead_kampagnen(id) ON DELETE SET NULL;
 ALTER TABLE lead_checks ADD COLUMN IF NOT EXISTS versuche int NOT NULL DEFAULT 0;
 ALTER TABLE lead_checks ADD COLUMN IF NOT EXISTS mail_gesendet_am timestamptz;
+ALTER TABLE lead_checks ADD COLUMN IF NOT EXISTS mail_versuche int NOT NULL DEFAULT 0;
+ALTER TABLE lead_checks ADD COLUMN IF NOT EXISTS mail_versucht_am timestamptz;
+-- Seit wann der Lead zur Kampagne gehört (Nachfass-Tage zählen ab hier, nicht ab dem ersten Kontakt)
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS kampagne_seit timestamptz;
 CREATE INDEX IF NOT EXISTS lead_checks_offen_idx ON lead_checks (erstellt_am) WHERE status = 'laeuft';
 
 -- Welche Nachfass-Mail einer Kampagne ein Lead schon bekommen hat (je Stufe genau einmal)

@@ -3,6 +3,8 @@ gibt eine Ampel, baut das PDF und verschickt die Ergebnis-Mail.
 
 Sicherheit: Es werden nur öffentliche Adressen abgerufen (auch nach Umleitungen), höchstens 1,5 MB, mit Zeitlimit. Google PageSpeed wird nur gefragt,
 wenn es im Admin eingeschaltet ist (dabei geht die Website-Adresse an Google)."""
+import http.client
+import ipaddress
 import json
 import logging
 import re
@@ -15,7 +17,7 @@ from datetime import date
 from html.parser import HTMLParser
 from urllib.parse import quote, urlparse
 
-from . import config, einstellungen, mailer, pdf, sitedienste
+from . import config, einstellungen, mailer, pdf, sitedienste, sperre
 from .db import tx
 
 log = logging.getLogger("markentrix.funnelcheck")
@@ -28,7 +30,11 @@ ZUSAMMENFASSUNG = {"gruen": "Grün: Ihre Website ist technisch ordentlich aufges
 GEWICHT = {"handy": 15, "sicher": 15, "tempo": 15, "anrufen": 12, "anfrage": 12, "google": 10, "recht": 7, "preise": 7, "vertrauen": 7}
 WICHTIG = ["handy", "sicher", "anrufen", "anfrage", "tempo", "google", "recht", "preise", "vertrauen"]
 TERMIN = re.compile(r"termin\s*(online\s*)?(buchen|vereinbaren|wählen|anfragen)|online[\s-]*(termin|buchung|buchen)|terminbuchung|calendly|jetzt buchen|data-mk=\"termin\"", re.I)
-PREIS = re.compile(r"(\d[\d.,]*\s?(€|eur\b|euro\b))|((€|eur)\s?\d)|\bab\s+\d+[\d.,]*\s?(€|euro)|preisliste|preise\b", re.I)
+# Ohne verschachtelte Wiederholungen (kein Rückverfolgen bei langen Ziffernfolgen); der Text wird vorher ohnehin gekürzt
+PREIS = re.compile(r"\d{1,7}(?:[.,]\d{1,3})?\s?(?:€|eur\b|euro\b)|(?:€|eur)\s?\d|preisliste|preise\b", re.I)
+TEXT_MAX = 200_000
+TAGESGRENZE = 100   # höchstens so viele Ergebnis-Mails in 24 Stunden (Schutz vor Missbrauch des Formulars)
+GESAMTFRIST = 20   # Sekunden für den ganzen Abruf (auch bei tröpfchenweise antwortenden Servern)
 VERTRAUEN = re.compile(r"bewertung|rezension|kundenstimme|referenz|testimonial|sterne|★|google[\s-]*reviews|das sagen unsere kunden", re.I)
 
 
@@ -75,8 +81,57 @@ class _Umleitung(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+def _gegenstelle_pruefen(sock):
+    """Nach dem Verbinden: Ist die tatsächlich erreichte Adresse öffentlich? (Schutz gegen DNS-Tricks zwischen Prüfung und Verbindung)"""
+    if config.SITE_LOKAL_ERLAUBT:
+        return
+    ip = ipaddress.ip_address(sock.getpeername()[0].split("%")[0])
+    if getattr(ip, "ipv4_mapped", None):
+        ip = ip.ipv4_mapped
+    if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
+        sock.close()
+        raise urllib.error.URLError("Verbindung zu einer nicht öffentlichen Adresse abgelehnt")
+
+
+class _HttpSicher(http.client.HTTPConnection):
+    def connect(self):
+        super().connect()
+        _gegenstelle_pruefen(self.sock)
+
+
+class _HttpsSicher(http.client.HTTPSConnection):
+    def connect(self):
+        http.client.HTTPConnection.connect(self)   # erst TCP, Gegenstelle prüfen, dann TLS
+        _gegenstelle_pruefen(self.sock)
+        self.sock = self._context.wrap_socket(self.sock, server_hostname=self.host)
+
+
+class _HttpHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(_HttpSicher, req)
+
+
+class _HttpsHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(_HttpsSicher, req, context=self._context)
+
+
 def _oeffner():
-    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _Umleitung(), urllib.request.HTTPSHandler(context=ssl.create_default_context()))
+    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _Umleitung(), _HttpHandler(), _HttpsHandler(context=ssl.create_default_context()))
+
+
+def _lesen(r, t0: float) -> bytes:
+    """In Stücken lesen, höchstens GRENZE + 1 Byte und höchstens GESAMTFRIST Sekunden insgesamt."""
+    teile, n = [], 0
+    while n <= GRENZE:
+        if time.time() - t0 > GESAMTFRIST:
+            raise TimeoutError("Gesamtfrist überschritten")
+        stueck = r.read1(65536) if hasattr(r, "read1") else r.read(65536)
+        if not stueck:
+            break
+        teile.append(stueck)
+        n += len(stueck)
+    return b"".join(teile)
 
 
 def abrufen(url: str) -> dict:
@@ -86,24 +141,30 @@ def abrufen(url: str) -> dict:
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Linux; Android 14) Markentrix-Website-Check/1", "Accept": "text/html,*/*;q=0.5", "Accept-Language": "de"})
     t0 = time.time()
     try:
-        with _oeffner().open(req, timeout=12) as r:
-            daten = r.read(GRENZE + 1)
+        with _oeffner().open(req, timeout=8) as r:
+            daten = _lesen(r, t0)
             ms = int((time.time() - t0) * 1000)
             zeichensatz = r.headers.get_content_charset() or "utf-8"
+            try:
+                html = daten[:GRENZE].decode(zeichensatz, "replace")
+            except LookupError:   # unbekannter Zeichensatz in der Kopfzeile
+                html = daten[:GRENZE].decode("utf-8", "replace")
             return {"ok": 200 <= r.status < 400, "url": r.geturl(), "status": r.status, "ms": ms, "bytes": len(daten), "zu_gross": len(daten) > GRENZE,
-                    "html": daten[:GRENZE].decode(zeichensatz, "replace"), "fehler": None, "zertifikat_fehler": False}
+                    "html": html, "fehler": None, "zertifikat_fehler": False}
     except urllib.error.HTTPError as e:
         return {"ok": False, "url": url, "status": e.code, "fehler": f"Die Seite antwortet mit Fehler {e.code}."}
     except ssl.SSLCertVerificationError:
         return {"ok": False, "url": url, "fehler": "Das Sicherheitszertifikat (https) ist ungültig.", "zertifikat_fehler": True}
     except urllib.error.URLError as e:
         grund = e.reason
+        while isinstance(grund, urllib.error.URLError):   # eigene Ablehnung beim Verbinden kommt verpackt an
+            grund = grund.reason
         if isinstance(grund, ssl.SSLCertVerificationError):
             return {"ok": False, "url": url, "fehler": "Das Sicherheitszertifikat (https) ist ungültig.", "zertifikat_fehler": True}
         return {"ok": False, "url": url, "fehler": "Die Seite ist nicht erreichbar." if not isinstance(grund, str) else grund}
     except (socket.timeout, TimeoutError):
-        return {"ok": False, "url": url, "fehler": "Die Seite hat nicht rechtzeitig geantwortet (über 12 Sekunden)."}
-    except (OSError, ValueError, ssl.SSLError):
+        return {"ok": False, "url": url, "fehler": f"Die Seite hat nicht rechtzeitig geantwortet (über {GESAMTFRIST} Sekunden)."}
+    except (OSError, ValueError, LookupError, ssl.SSLError, http.client.HTTPException):
         return {"ok": False, "url": url, "fehler": "Die Seite ist nicht erreichbar."}
 
 
@@ -197,8 +258,8 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
         le.feed(seite.get("html") or "")
     except Exception:  # noqa: BLE001 - kaputtes HTML: mit dem auswerten, was gelesen wurde
         pass
-    text = " ".join(le.texte)
-    roh = seite.get("html") or ""
+    text = " ".join(le.texte)[:TEXT_MAX]
+    roh = (seite.get("html") or "")[:TEXT_MAX]
     hrefs = " ".join(le.hrefs)
     p = []
     sicher = seite["url"].startswith("https://")
@@ -230,7 +291,7 @@ def bewerten(seite: dict, ps: dict | None = None) -> dict:
     p.append(_punkt("anrufen", "Mit einem Tipp anrufen", "gut" if le.tel else "schlecht",
                     "Die Telefonnummer ist als Anruf-Link hinterlegt." if le.tel else "Auf dem Handy kann man nicht direkt aus der Seite anrufen.",
                     "Einen Anruf-Knopf ganz oben einbauen. Viele Kunden wollen sofort anrufen."))
-    termin = bool(TERMIN.search(text) or TERMIN.search(roh[:400000]) or le.termin_attr)
+    termin = bool(TERMIN.search(text) or TERMIN.search(roh) or le.termin_attr)
     if termin:
         st, txt = "gut", "Kunden können online einen Termin wählen oder anfragen."
     elif le.form or le.whatsapp:
@@ -392,6 +453,13 @@ def ausfuehren(cid: int):
     mail_senden(cid)
 
 
+def mail_wird_verschickt(cur, lead_id) -> bool:
+    """Für die Danke-Ansicht: Bekommt dieser Lead die Ergebnis-Mail überhaupt (nicht abgemeldet, nicht gesperrt)?"""
+    cur.execute("SELECT email, abgemeldet FROM leads WHERE id=%s", (lead_id,))
+    l = cur.fetchone()
+    return bool(l and l["email"] and not l["abgemeldet"] and not sperre.treffer(cur, email=l["email"]))
+
+
 def mail_senden(cid: int) -> bool:
     """Ergebnis-Mail mit PDF, genau einmal je Check (nur mit Einwilligung, nicht nach Abmeldung, nur wenn in der Kampagne eingeschaltet)."""
     with tx("system") as cur:
@@ -403,6 +471,21 @@ def mail_senden(cid: int) -> bool:
             return False
         cur.execute("SELECT 1 FROM lead_aktivitaeten WHERE lead_id=%s AND art='consent'", (r["lead_id"],))
         if not cur.fetchone():
+            return False
+        grund = None
+        if sperre.treffer(cur, email=r["email"]):
+            grund = "Adresse steht auf der Sperrliste"
+        else:
+            cur.execute("SELECT 1 FROM lead_checks WHERE lead_id=%s AND id<>%s AND mail_gesendet_am > now() - interval '24 hours'", (r["lead_id"], cid))
+            if cur.fetchone():
+                grund = "an diese Adresse ging in den letzten 24 Stunden schon ein Ergebnis"
+            else:
+                cur.execute("SELECT count(*) AS n FROM lead_checks WHERE mail_gesendet_am > now() - interval '24 hours'")
+                if cur.fetchone()["n"] >= TAGESGRENZE:
+                    grund = f"Tagesgrenze von {TAGESGRENZE} Ergebnis-Mails erreicht"
+        if grund:
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'automatisch')",
+                        (r["lead_id"], f"Ergebnis-Mail des Website-Checks nicht verschickt: {grund}"))
             return False
         cur.execute("UPDATE lead_checks SET mail_gesendet_am=now() WHERE id=%s AND mail_gesendet_am IS NULL RETURNING id", (cid,))
         if not cur.fetchone():
@@ -423,7 +506,7 @@ def mail_senden(cid: int) -> bool:
         if ok:
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'mail_gesendet','Ergebnis des Website-Checks mit PDF verschickt','automatisch')", (r["lead_id"],))
         else:
-            cur.execute("UPDATE lead_checks SET mail_gesendet_am=NULL WHERE id=%s", (cid,))
+            cur.execute("UPDATE lead_checks SET mail_gesendet_am=NULL, mail_versuche=mail_versuche+1, mail_versucht_am=now() WHERE id=%s", (cid,))
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'automatisch')",
                         (r["lead_id"], f"Ergebnis-Mail des Website-Checks nicht verschickt: {grund[:200]}"))
     return ok

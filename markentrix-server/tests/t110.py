@@ -27,6 +27,13 @@ class W(BaseHTTPRequestHandler):
             body=json.dumps(PSI).encode(); self.send_response(200); self.send_header("Content-Type","application/json")
         elif self.path.startswith("/weiter"):
             self.send_response(302); self.send_header("Location","/gut"); self.end_headers(); return
+        elif self.path.startswith("/tropf"):
+            self.send_response(200); self.send_header("Content-Type","text/html"); self.end_headers()
+            try:
+                for _ in range(30): self.wfile.write(b"x"); self.wfile.flush(); time.sleep(1)
+            except Exception: pass
+            return
+        elif self.path.startswith("/zeichensatz"): body=GUT.encode(); self.send_response(200); self.send_header("Content-Type","text/html; charset=none")
         elif self.path.startswith("/gut"): body=GUT.encode(); self.send_response(200); self.send_header("Content-Type","text/html; charset=utf-8")
         elif self.path.startswith("/schlecht"): body=SCHLECHT.encode(); self.send_response(200); self.send_header("Content-Type","text/html")
         else: body=b"weg"; self.send_response(404)
@@ -152,19 +159,19 @@ chk("Nach 3 Fehlversuchen: als Fehler markiert und im Verlauf vermerkt",sql(f"se
 # ---------------------------------------------------------------- Nachfass-Mails Tag 1, 3, 7
 vorher=len(mails())
 jobs.funnel_folgemails(cfg(),stunde=10); chk("Am ersten Tag noch keine Nachfass-Mail",len(mails())==vorher)
-sql(f"update leads set erstellt_am=now()-interval '26 hours' where id='{lid}'")
+sql(f"update leads set kampagne_seit=now()-interval '26 hours' where id='{lid}'")
 jobs.funnel_folgemails(cfg(),stunde=21); chk("Abends (nach 19 Uhr) wird nichts verschickt",len(mails())==vorher)
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1)
 m=an(mail); b1=[x for x in m if betreff(x)==v["folge_betreffe"][0]]
 chk("Nach 1 Tag: Nachfass-Mail 1 mit wichtigstem Punkt bzw. Terminlink",len(b1)==1 and "/buchen" in text(b1[0]) and "Ihr Markentrix-Team" in text(b1[0]) and "/api/public/abmelden?t=" in text(b1[0]),[betreff(x) for x in m])
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1); chk("Kein zweites Mal am selben Tag",len([x for x in an(mail) if betreff(x)==v["folge_betreffe"][0]])==1 and int(sql(f"select count(*) from lead_funnel_folge where lead_id='{lid}'"))==1)
-sql(f"update leads set erstellt_am=now()-interval '4 days' where id='{lid}'"); sql(f"update lead_funnel_folge set gesendet_am=now()-interval '3 days' where lead_id='{lid}'")
+sql(f"update leads set kampagne_seit=now()-interval '4 days' where id='{lid}'"); sql(f"update lead_funnel_folge set gesendet_am=now()-interval '3 days' where lead_id='{lid}'")
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1); chk("Nach 3 Tagen: Nachfass-Mail 2",len([x for x in an(mail) if betreff(x)==v["folge_betreffe"][1]])==1)
 sql(f"insert into lead_aktivitaeten (lead_id, art, inhalt, von) values ('{lid}','termin','Gespräch gebucht','website')")
-sql(f"update leads set erstellt_am=now()-interval '8 days' where id='{lid}'"); sql(f"update lead_funnel_folge set gesendet_am=now()-interval '5 days' where lead_id='{lid}'")
+sql(f"update leads set kampagne_seit=now()-interval '8 days' where id='{lid}'"); sql(f"update lead_funnel_folge set gesendet_am=now()-interval '5 days' where lead_id='{lid}'")
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1); chk("Nach gebuchtem Termin keine weitere Nachfass-Mail",len([x for x in an(mail) if betreff(x)==v["folge_betreffe"][2]])==0)
 # Abmeldung stoppt ebenfalls
-sql(f"update leads set erstellt_am=now()-interval '2 days', abgemeldet=true where id='{lid2}'")
+sql(f"update leads set kampagne_seit=now()-interval '2 days', abgemeldet=true where id='{lid2}'")
 jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1); chk("Nach Abmeldung keine Nachfass-Mail",len([x for x in an(mail2) if betreff(x)==v["folge_betreffe"][0]])==0)
 # allgemeine Folgemails lassen Funnel-Leads mit eigenen Nachfass-Mails aus
 a.put("/api/admin/einstellungen/folgemails",json={"aktiv":True,"tage_1":1,"tage_2":7})
@@ -172,6 +179,60 @@ mail3=f"check3{sfx}@lead.de"; pub.post(f"/api/public/funnel/{slug}",json={**kam,
 sql(f"update leads set erstellt_am=now()-interval '3 days' where id='{lid3}'")
 jobs.lead_folgemails(cfg()); time.sleep(1)
 chk("Allgemeine Folgemails gehen nicht zusätzlich an Funnel-Leads mit eigenen Nachfass-Mails",sql(f"select folge_stufe from leads where id='{lid3}'")=="0")
+
+# ---------------------------------------------------------------- Befunde der Code-Prüfung
+def warten(sl,tk):
+    for _ in range(60):
+        s_=pub.get(f"/api/public/funnel/{sl}/check/{tk}").json()
+        if s_["status"]!="laeuft": return s_
+        time.sleep(0.5)
+    return s_
+# Sperrliste: keine Ergebnis-Mail, Danke-Ansicht verspricht keine
+mail4=f"gesperrt{sfx}@lead.de"
+with tx("system") as cur:
+    from app import sperre; sperre.eintragen(cur,"widerspruch","Test",mail4,None,None)
+r=pub.post(f"/api/public/funnel/{slug}",json={**kam,"email":mail4,"website":WEB+"/gut"}); s4=warten(slug,r.json()["check"]); time.sleep(1)
+lid4=sql(f"select id from leads where email='{mail4}'")
+chk("Adresse auf der Sperrliste: keine Ergebnis-Mail, Vermerk im Verlauf, Danke-Ansicht ohne PDF-Zusage",not an(mail4) and not s4["mail"] and int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{lid4}' and inhalt like '%Sperrliste%'"))==1,s4)
+# Gleiche Adresse innerhalb von 24 Stunden: kein zweites PDF
+r=pub.post(f"/api/public/funnel/{slug}",json={**kam,"website":WEB+"/schlecht"}); warten(slug,r.json()["check"]); time.sleep(1)
+chk("Zweite Anmeldung derselben Adresse am selben Tag: kein zweites PDF, Vermerk",len([x for x in an(mail) if betreff(x).startswith("Ihr Website-Check")])==1 and int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{lid}' and inhalt like '%24 Stunden%'"))==1)
+# Bekannter Lead ohne Einwilligung (z. B. importiert): Einwilligung wird jetzt festgehalten, Mail geht raus
+mail5=f"alt{sfx}@lead.de"
+sql(f"insert into leads (firma, email, quelle, status, erstellt_am) values ('Altbetrieb {sfx}','{mail5}','manuell','neu', now()-interval '20 days')")
+lid5=sql(f"select id from leads where email='{mail5}'")
+r=pub.post(f"/api/public/funnel/{slug}",json={**kam,"email":mail5,"website":WEB+"/gut"}); s5=warten(slug,r.json()["check"]); time.sleep(1)
+chk("Bekannter Lead ohne Einwilligung: Einwilligung festgehalten, Ergebnis-Mail verschickt",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{lid5}' and art='consent'"))==1 and len([x for x in an(mail5) if "Website-Check" in betreff(x)])==1 and s5["mail"],s5)
+chk("Nachfass-Tage zählen ab der Anmeldung bei der Kampagne, nicht ab dem ersten Kontakt",sql(f"select kampagne_seit > now()-interval '5 minutes' from leads where id='{lid5}'")=="t")
+jobs.funnel_folgemails(cfg(),stunde=10); time.sleep(1)
+chk("Alter Lead bekommt nach der Anmeldung nicht sofort Nachfass-Mails",len([x for x in an(mail5) if betreff(x)==v["folge_betreffe"][0]])==0)
+# Fehlgeschlagene Ergebnis-Mail wird nachgeholt
+a.put("/api/admin/einstellungen/smtp",json={"host":"127.0.0.1","port":8026,"sicherung":"keine","absender":"info@markentrix.de"})
+mail6=f"spaeter{sfx}@lead.de"; r=pub.post(f"/api/public/funnel/{slug}",json={**kam,"email":mail6,"website":WEB+"/gut"}); warten(slug,r.json()["check"]); time.sleep(1)
+lid6=sql(f"select id from leads where email='{mail6}'")
+chk("Mailserver weg: Versuch gezählt, Vermerk im Verlauf",sql(f"select mail_versuche from lead_checks where lead_id='{lid6}'")=="1" and not an(mail6))
+a.put("/api/admin/einstellungen/smtp",json={"host":"127.0.0.1","port":8025,"sicherung":"keine","absender":"info@markentrix.de"})
+sql(f"update lead_checks set mail_versucht_am=now()-interval '20 minutes' where lead_id='{lid6}'")
+jobs.funnel_checks_nachholen(cfg()); time.sleep(1)
+chk("Mailserver wieder da: Ergebnis-Mail wird nachgeholt",len([x for x in an(mail6) if "Website-Check" in betreff(x)])==1 and sql(f"select mail_gesendet_am is not null from lead_checks where lead_id='{lid6}'")=="t")
+# Robustheit des Abrufs
+funnelcheck.GESAMTFRIST=3; t0=time.time(); s=funnelcheck.abrufen(WEB+"/tropf"); dauer=time.time()-t0; funnelcheck.GESAMTFRIST=20
+chk("Tröpfchenweise antwortender Server: Abbruch nach der Gesamtfrist",not s["ok"] and "rechtzeitig" in (s.get("fehler") or "") and dauer<8,(s,dauer))
+s=funnelcheck.abrufen(WEB+"/zeichensatz"); chk("Unbekannter Zeichensatz: kein Absturz, Seite wird gelesen",s["ok"] and "Malerbetrieb" in s["html"],s.get("fehler"))
+t0=time.time(); e=funnelcheck.bewerten({"ok":True,"url":"https://x.de/","ms":1,"bytes":1,"html":"<p>"+"1"*1_500_000+"</p>"})
+chk("1,5 MB Ziffern ohne €: Bewertung in unter 2 Sekunden (kein Rückverfolgen im Muster)",time.time()-t0<2,time.time()-t0)
+config.SITE_LOKAL_ERLAUBT=False; alt_=funnelcheck._erlaubt; funnelcheck._erlaubt=lambda u: True
+s=funnelcheck.abrufen("http://127.0.0.1:8997/gut")
+funnelcheck._erlaubt=alt_; config.SITE_LOKAL_ERLAUBT=True
+chk("DNS-Trick: auch wenn die Vorprüfung überlistet wird, scheitert die Verbindung an der echten Gegenstelle",not s["ok"] and "nicht öffentlichen" in (s.get("fehler") or ""),s)
+import ssl as _ssl, tempfile
+d_=tempfile.mkdtemp(); subprocess.run(["openssl","req","-x509","-newkey","rsa:2048","-nodes","-keyout",d_+"/k.pem","-out",d_+"/c.pem","-days","1","-subj","/CN=127.0.0.1"],capture_output=True)
+srv=ThreadingHTTPServer(("127.0.0.1",8996),W); ctx=_ssl.SSLContext(_ssl.PROTOCOL_TLS_SERVER); ctx.load_cert_chain(d_+"/c.pem",d_+"/k.pem"); srv.socket=ctx.wrap_socket(srv.socket,server_side=True)
+threading.Thread(target=srv.serve_forever,daemon=True).start()
+s=funnelcheck.abrufen("https://127.0.0.1:8996/gut"); chk("https mit ungültigem Zertifikat wird erkannt (eigener sicherer Verbindungsaufbau)",not s["ok"] and s.get("zertifikat_fehler"),s)
+from app import security
+chk("Lead-Funnel-Seite auch für Mitarbeiter mit Recht „Leads“",security.recht_fuer_pfad("/api/admin/funnel-check/einstellungen")=="leads")
+chk("Übersicht mehrfach abrufbar (Probezeile mit Zufallsnamen)",all(a.get("/api/admin/funnel").status_code==200 for _ in range(3)) and sql("select count(*) from lead_kampagnen where slug like 'zz-%'")=="0")
 
 # ---------------------------------------------------------------- Browser: Seite und Danke-Ansicht
 AXEJS="/var/tmp/axe/node_modules/axe-core/axe.min.js"

@@ -52,7 +52,9 @@ function kampagneDialog(k, danach, vorgabe = {}) {
 }
 
 async function checkKarte() {
-  const c = await api('/api/admin/funnel-check/einstellungen'), m = h('div', { role: 'status' });
+  let c;
+  try { c = await api('/api/admin/funnel-check/einstellungen'); } catch (x) { return ''; }
+  const m = h('div', { role: 'status' });
   const probe = h('input', { id: 'fc_probe', placeholder: 'www.beispiel.de', maxlength: 300 });
   return h('div', { class: 'card' }, h('h2', {}, 'Website-Check'),
     h('p', { class: 'small muted' }, 'Ohne Google wird die Startseite vom Server aus gemessen. Mit Google PageSpeed kommen genauere Werte für Ladezeit und Google dazu; dabei geht die Website-Adresse an Google (in der Datenschutzerklärung nennen). Ein eigener Schlüssel ist freiwillig und erhöht nur das Tageskontingent.'),

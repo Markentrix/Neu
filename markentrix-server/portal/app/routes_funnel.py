@@ -113,8 +113,8 @@ def anmelden(slug: str, data: AnmeldungIn, request: Request, bg: BackgroundTasks
         l = cur.fetchone()
         neu = not l
         if neu:
-            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, quelle, temperatur, loeschen_nach, notiz, kampagne_id, utm, empfohlen_von)
-                           VALUES (%s,%s,%s,%s,%s,%s,'heiss', current_date + interval '12 months', %s, %s, %s::jsonb, %s) RETURNING id""",
+            cur.execute("""INSERT INTO leads (firma, ansprechpartner, email, telefon, website, quelle, temperatur, loeschen_nach, notiz, kampagne_id, utm, empfohlen_von, kampagne_seit)
+                           VALUES (%s,%s,%s,%s,%s,%s,'heiss', current_date + interval '12 months', %s, %s, %s::jsonb, %s, now()) RETURNING id""",
                         (firma, data.name.strip(), email, telefon, website, quelle, f"Über die Seite „{k['name']}“", k["id"],
                          __import__("json").dumps(utm), geber))
             lid = cur.fetchone()["id"]
@@ -123,7 +123,11 @@ def anmelden(slug: str, data: AnmeldungIn, request: Request, bg: BackgroundTasks
         else:
             lid = l["id"]
             cur.execute("""UPDATE leads SET temperatur='heiss', telefon=coalesce(telefon,%s), website=coalesce(website,%s), kampagne_id=coalesce(kampagne_id,%s),
+                           kampagne_seit=CASE WHEN kampagne_id IS NULL THEN now() ELSE kampagne_seit END,
                            loeschen_nach=greatest(loeschen_nach, current_date + interval '12 months') WHERE id=%s""", (telefon, website, k["id"], lid))
+            # Neue Einwilligung auch bei bekannten Leads festhalten (z. B. importiert oder früher ohne Einwilligung)
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'consent',%s,'website')",
+                        (lid, f"Einwilligung auf der Seite „{k['name']}“ erteilt (Text: {k['einwilligung_text'][:400]})"))
         if geber and neu:
             cur.execute("INSERT INTO empfehlungs_praemien (lead_id, kunden_id) VALUES (%s,%s) ON CONFLICT DO NOTHING", (lid, geber))
         cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'website')",
@@ -157,9 +161,11 @@ def check_stand(slug: str, token: str, request: Request):
     if len(token) < 20 or len(token) > 40:
         raise HTTPException(404, "Nicht gefunden.")
     with tx("system") as cur:
-        cur.execute("""SELECT c.status, c.ergebnis, k.check_mail FROM lead_checks c JOIN lead_kampagnen k ON k.id = c.kampagne_id
+        cur.execute("""SELECT c.status, c.ergebnis, c.lead_id, k.check_mail FROM lead_checks c JOIN lead_kampagnen k ON k.id = c.kampagne_id
                        WHERE c.token=%s AND k.slug=%s""", (token, slug))
         c = cur.fetchone()
+        if c:
+            c["check_mail"] = bool(c["check_mail"]) and funnelcheck.mail_wird_verschickt(cur, c["lead_id"])
     if not c:
         raise HTTPException(404, "Nicht gefunden.")
     if c["status"] != "fertig":
@@ -244,8 +250,8 @@ def kampagnen(user: dict = Depends(require_admin)):
         einst = _empfehlung_einst(cur)
         # Standardtexte für neue Seiten direkt aus den Vorgaben der Datenbank (Probezeile, wird sofort verworfen)
         cur.execute("SAVEPOINT vorgabe")
-        cur.execute("""INSERT INTO lead_kampagnen (slug, name) VALUES ('zz-vorgabe-probe', 'Vorgabe')
-                       RETURNING check_betreff, check_text, folge_tage, folge_betreffe, folge_texte""")
+        cur.execute("""INSERT INTO lead_kampagnen (slug, name) VALUES (%s, 'Vorgabe')
+                       RETURNING check_betreff, check_text, folge_tage, folge_betreffe, folge_texte""", ("zz-" + secrets.token_hex(12),))
         vorgabe = cur.fetchone()
         cur.execute("ROLLBACK TO SAVEPOINT vorgabe")
     for r in rows:

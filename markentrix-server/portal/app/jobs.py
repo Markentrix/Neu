@@ -153,28 +153,36 @@ def funnel_checks_nachholen(cfg):
             cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz','Website-Check ließ sich nicht durchführen (Seite bitte von Hand ansehen)','automatisch')", (r["lead_id"],))
         cur.execute("SELECT id FROM lead_checks WHERE status='laeuft' AND versuche < 3 AND erstellt_am < now() - interval '5 minutes' ORDER BY erstellt_am LIMIT 1")
         offen = [r["id"] for r in cur.fetchall()]
+        # Ergebnis-Mails, deren Versand fehlschlug (z. B. Mailserver kurz weg): bis zu 3 Versuche im Abstand von 15 Minuten, nur am ersten Tag
+        cur.execute("""SELECT c.id FROM lead_checks c JOIN lead_kampagnen k ON k.id = c.kampagne_id
+                       WHERE c.status='fertig' AND c.mail_gesendet_am IS NULL AND k.check_mail AND c.mail_versuche BETWEEN 1 AND 2
+                         AND c.mail_versucht_am < now() - interval '15 minutes' AND c.erstellt_am > now() - interval '1 day' ORDER BY c.erstellt_am LIMIT 5""")
+        mails = [r["id"] for r in cur.fetchall()]
     for cid in offen:
         funnelcheck.ausfuehren(cid)
+    if mails and mailer.konfiguriert():
+        for cid in mails:
+            funnelcheck.mail_senden(cid)
 
 
 def funnel_folgemails(cfg, stunde: int | None = None):
     """Nachfass-Mails je Funnel-Kampagne (z. B. Tag 1, 3, 7) an Leads mit Einwilligung, solange kein Gespräch und keine Antwort da ist.
     Nur zwischen 8 und 19 Uhr, je Lead höchstens eine Mail in 20 Stunden, jede Stufe genau einmal."""
     from zoneinfo import ZoneInfo
-    from . import funnelcheck
+    from . import funnelcheck, sperre
     from .routes_folgemails import token_fuer
     if not 8 <= (datetime.now(ZoneInfo("Europe/Berlin")).hour if stunde is None else stunde) < 19:
         return
     auftraege = []
     with tx("system") as cur:
-        cur.execute("SELECT id, folge_tage, folge_betreffe, folge_texte FROM lead_kampagnen WHERE folge_aktiv AND aktiv AND cardinality(folge_tage) > 0")
+        cur.execute("SELECT id, folge_tage, folge_betreffe, folge_texte FROM lead_kampagnen WHERE folge_aktiv AND cardinality(folge_tage) > 0")
         for k in cur.fetchall():
             for stufe, tag in enumerate(k["folge_tage"], start=1):
                 cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.email, l.website FROM leads l
                                WHERE l.kampagne_id=%s AND l.email IS NOT NULL AND NOT l.abgemeldet AND l.kunden_id IS NULL AND l.status IN ('neu','kontaktiert')
                                  AND EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art = 'consent')
                                  AND NOT EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art IN ('antwort','termin'))
-                                 AND l.erstellt_am < now() - make_interval(days => %s) AND l.erstellt_am > now() - interval '90 days'
+                                 AND coalesce(l.kampagne_seit, l.erstellt_am) < now() - make_interval(days => %s) AND coalesce(l.kampagne_seit, l.erstellt_am) > now() - interval '90 days'
                                  AND (SELECT count(*) FROM lead_funnel_folge f WHERE f.lead_id = l.id) = %s
                                  AND NOT EXISTS (SELECT 1 FROM lead_funnel_folge f WHERE f.lead_id = l.id AND f.gesendet_am > now() - interval '20 hours')
                                ORDER BY l.erstellt_am LIMIT 20""", (k["id"], tag, stufe - 1))
@@ -185,10 +193,16 @@ def funnel_folgemails(cfg, stunde: int | None = None):
                     cur.execute("SELECT ergebnis FROM lead_checks WHERE lead_id=%s AND status='fertig' ORDER BY erstellt_am DESC LIMIT 1", (l["id"],))
                     c = cur.fetchone()
                     werte = funnelcheck.platzhalter(l, c and c["ergebnis"] if c and (c["ergebnis"] or {}).get("punkte") else None)
+                    if sperre.treffer(cur, email=l["email"]):
+                        cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'automatisch')", (l["id"], f"Nachfass-Mail {stufe} nicht verschickt: Adresse steht auf der Sperrliste"))
+                        continue
                     cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'mail_gesendet',%s,'automatisch')", (l["id"], f"Nachfass-Mail {stufe} der Kampagne"))
-                    auftraege.append((l["email"], funnelcheck.fuellen(k["folge_betreffe"][stufe - 1], werte), funnelcheck.fuellen(k["folge_texte"][stufe - 1], werte), token_fuer(cur, l["id"])))
-    for an, betreff, text, tok in auftraege:
-        mailer.funnel_mail(an, betreff, text, tok)
+                    auftraege.append((l["id"], stufe, l["email"], funnelcheck.fuellen(k["folge_betreffe"][stufe - 1], werte), funnelcheck.fuellen(k["folge_texte"][stufe - 1], werte), token_fuer(cur, l["id"])))
+    for lid, stufe, an, betreff, text, tok in auftraege:
+        ok, grund = mailer.funnel_mail(an, betreff, text, tok)
+        if not ok:
+            with tx("system") as cur:
+                cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'automatisch')", (lid, f"Nachfass-Mail {stufe} nicht zugestellt: {grund[:200]}"))
 
 
 def umfragen_anlegen(cfg):
