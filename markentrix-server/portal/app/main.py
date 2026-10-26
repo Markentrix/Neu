@@ -241,6 +241,7 @@ app.include_router(kalenderabo.vertrieb)
 app.include_router(kalenderabo.public)
 app.include_router(visitenkarte.router)
 app.include_router(routes_vertriebfluss.router)
+app.include_router(routes_vertriebfluss.admin)
 
 
 def seite(name):

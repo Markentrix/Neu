@@ -1,3 +1,4 @@
+import { anrufModus } from './anrufmodus.js';
 import { pipelineBoard } from './pipeline.js';
 import { visitenkarteKarte, visitenkarteKnopf } from './visitenkarte.js';
 import { stapelTabellen, listenKnopf } from './common.js';
@@ -295,46 +296,9 @@ V.leads = async () => {
       h('p', {}, h('button', { class: 'btn sec', type: 'button', onclick: () => datei.click() }, '📷 Foto aufnehmen oder wählen'), datei, h('span', { class: 'small muted' }, ' Visitenkarte, Firmenschild oder Fahrzeug: Die Felder werden vorausgefüllt, du prüfst und speicherst. Das Foto wird nicht gespeichert.')), m, f));
 };
 
-const MODUS = 'mk-anrufmodus';
-const modusLesen = () => { try { return JSON.parse(sessionStorage.getItem(MODUS) || 'null'); } catch { return null; } };
-const modusSchreiben = (x) => { try { if (x) sessionStorage.setItem(MODUS, JSON.stringify(x)); else sessionStorage.removeItem(MODUS); } catch { /* ohne Speicher gibt es keinen Anruf-Modus */ } };
-const MODUS_TEXT = { heiss: 'Heiße Leads der Reihe nach', zufall: 'Zufällig aus den heißen Leads' };
-
-/** Springt zum nächsten Lead. Im Anruf-Modus zum nächsten heißen (der Reihe nach oder zufällig), sonst zum nächsten der „Heute“-Liste. */
-async function naechsterLead(aktuell) {
-  const mo = modusLesen();
-  try {
-    if (mo) {
-      if (aktuell && !mo.erledigt.includes(aktuell)) mo.erledigt.push(aktuell);
-      const r = await api('/api/vertrieb/naechster?modus=' + mo.modus + '&ausser=' + mo.erledigt.join(','));
-      if (r.id) { modusSchreiben(mo); location.hash = '#lead/' + r.id; return; }
-      try { sessionStorage.setItem('mk-modus-ende', String(mo.erledigt.length)); } catch { /* egal */ }
-      modusSchreiben(null); location.hash = '#heute'; return;
-    }
-    const d = await api('/api/vertrieb/heute');
-    const n = [...d.wiedervorlagen, ...d.heiss, ...d.neu].find(x => x.id !== aktuell);
-    location.hash = n ? '#lead/' + n.id : '#heute';
-  } catch { location.hash = '#heute'; }
-}
-
-/** Karte auf „Heute“: Anruf-Modus starten. */
-function anrufModusKarte(m) {
-  const sel = h('select', { 'aria-label': 'Reihenfolge' }, Object.entries(MODUS_TEXT).map(([k, t]) => h('option', { value: k }, t)));
-  let ende = null; try { ende = sessionStorage.getItem('mk-modus-ende'); sessionStorage.removeItem('mk-modus-ende'); } catch { /* egal */ }
-  return h('div', { class: 'card' }, h('h2', {}, '📞 Anruf-Modus'),
-    ende ? h('div', { class: 'msg ok' }, 'Anruf-Modus beendet: keine weiteren Leads in der Liste. ' + ende + ' abgearbeitet.') : '',
-    h('p', { class: 'small muted' }, 'Nach jedem festgehaltenen Gespräch springt das Portal automatisch zum nächsten heißen Lead. Sind keine heißen mehr übrig, folgen fällige Wiedervorlagen und neue Leads. Am Computer wählst du das Ergebnis mit den Tasten 1 bis 9, „N“ speichert und springt weiter.'),
-    h('div', { class: 'row', style: 'gap:8px;align-items:center;flex-wrap:wrap' }, sel, h('button', { class: 'btn', onclick: async () => { modusSchreiben({ modus: sel.value, erledigt: [], start: Date.now() }); await naechsterLead(null); const mo = modusLesen(); if (!mo) melde(m, 'Es gibt gerade keinen Lead zum Anrufen.', 'info'); } }, 'Anruf-Modus starten')));
-}
-
-/** Leiste oben im Lead, solange der Anruf-Modus läuft. */
-function modusLeiste(lid) {
-  const mo = modusLesen(); if (!mo) return '';
-  return h('div', { class: 'card', style: 'border-left:4px solid var(--akzent, #1E9BFF)' }, h('div', { class: 'row', style: 'align-items:center;gap:8px;flex-wrap:wrap' },
-    h('b', {}, '📞 Anruf-Modus'), h('span', { class: 'small muted grow' }, MODUS_TEXT[mo.modus] + ' · ' + mo.erledigt.length + ' abgearbeitet'),
-    h('button', { class: 'btn sec small', onclick: () => naechsterLead(lid) }, 'Überspringen'),
-    h('button', { class: 'btn sec small', onclick: () => { modusSchreiben(null); location.hash = '#heute'; } }, 'Beenden')));
-}
+const modus = anrufModus({ schluessel: 'mk-anrufmodus', url: '/api/vertrieb/naechster', leadHash: '#lead/', heimHash: '#heute',
+  ohneModus: async (aktuell) => { const d = await api('/api/vertrieb/heute'); const n = [...d.wiedervorlagen, ...d.heiss, ...d.neu].find(x => x.id !== aktuell); return n ? n.id : null; } });
+const naechsterLead = modus.naechster, anrufModusKarte = (m) => modus.karte(m), modusLeiste = modus.leiste;
 
 function branchenKarte(lid) {
   const k = h('div');
@@ -490,7 +454,7 @@ async function leadDetail(lid) {
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), st, ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l), listenKnopf(['leads', 'heute', 'pipeline'])), m,
     datenKarte(lid, l, d, m), h('div', { class: 'card', hidden: true }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
-    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: !!modusLesen() }),
+    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: modus.aktiv() }),
     terminKarte(lid), branchenKarte(lid), h('div', { id: 'angebotbereich', class: 'stack' }, direktAngebotKarte(lid, l), angebotKarte(lid, l)), nachgespraechKarte(lid),
     skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));

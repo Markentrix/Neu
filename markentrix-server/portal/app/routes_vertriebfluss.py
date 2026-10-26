@@ -7,9 +7,10 @@ from pydantic import BaseModel, Field
 
 from . import einstellungen, ki
 from .db import tx
-from .security import rate_limit, require_vertrieb
+from .security import rate_limit, require_admin, require_vertrieb
 
 router = APIRouter(prefix="/api/vertrieb")
+admin = APIRouter(prefix="/api/admin")
 OFFEN = "('verloren','gewonnen','gesperrt','tot','consent_ausstehend')"
 SEITE = 50
 STATUS = ("neu", "kontaktiert", "antwort", "termin", "angebot", "gewonnen", "verloren", "tot")
@@ -56,25 +57,41 @@ def leadsuche(q: str = "", status: str = "", faellig: int = 0, temperatur: str =
     return {"leads": leads, "gesamt": gesamt, "seite": seite, "seiten": max(1, -(-gesamt // SEITE)), "zaehler": zaehler, "faellig": faellig_n}
 
 
-@router.get("/naechster")
-def naechster(modus: str = "heiss", ausser: str = "", user: dict = Depends(require_vertrieb)):
-    """Anruf-Modus: der nächste Lead. Zuerst heiße Leads (fällige Wiedervorlage, dann ohne Kontakt, dann am längsten nicht angerufen) oder zufällig aus den heißen;
-    gibt es keinen heißen mehr, folgen fällige Wiedervorlagen und neue Leads. Bereits abgearbeitete Leads (`ausser`) kommen nicht noch einmal."""
+def _naechster_lead(modus: str, ausser: str, wo: str, par: list) -> dict:
+    """Wählt den nächsten Lead für den Anruf-Modus. `wo` ist die Einschränkung auf Vertriebler (SQL mit %s), `par` ihre Werte."""
     if modus not in ("heiss", "zufall"):
         raise HTTPException(400, "Unbekannter Modus.")
     ids = [x for x in ausser.split(",") if UUID.match(x)][:300]
-    pid = user["vertriebspartner_id"]
     ordnung = "random()" if modus == "zufall" else "(l.wiedervorlage_am <= current_date) DESC NULLS LAST, (l.letzter_kontakt_am IS NULL) DESC, l.letzter_kontakt_am, l.erstellt_am"
-    basis = f"FROM leads l WHERE l.vertriebspartner_id=%s AND l.status NOT IN {OFFEN} AND l.id <> ALL(%s::uuid[]) AND (l.wiedervorlage_am IS NULL OR l.wiedervorlage_am <= current_date)"
+    basis = f"FROM leads l WHERE {wo} AND l.status NOT IN {OFFEN} AND l.id <> ALL(%s::uuid[]) AND (l.wiedervorlage_am IS NULL OR l.wiedervorlage_am <= current_date)"
     with tx("system") as cur:
         for quelle, extra, order in (("heiss", " AND l.temperatur='heiss'", ordnung),
                                      ("wiedervorlage", " AND coalesce(l.temperatur,'') <> 'heiss' AND l.wiedervorlage_am <= current_date", "l.wiedervorlage_am"),
                                      ("neu", " AND coalesce(l.temperatur,'') <> 'heiss' AND l.status='neu' AND l.letzter_kontakt_am IS NULL", "(l.temperatur='warm') DESC NULLS LAST, l.erstellt_am DESC")):
-            cur.execute(f"SELECT l.id, l.firma, (SELECT count(*)::int {basis}{extra}) AS uebrig {basis}{extra} ORDER BY {order} LIMIT 1", (pid, ids, pid, ids))
+            cur.execute(f"SELECT l.id, l.firma, (SELECT count(*)::int {basis}{extra}) AS uebrig {basis}{extra} ORDER BY {order} LIMIT 1", [*par, ids, *par, ids])
             z = cur.fetchone()
             if z:
                 return {"id": str(z["id"]), "firma": z["firma"], "quelle": quelle, "uebrig": z["uebrig"]}
     return {"id": None, "firma": None, "quelle": None, "uebrig": 0}
+
+
+@router.get("/naechster")
+def naechster(modus: str = "heiss", ausser: str = "", user: dict = Depends(require_vertrieb)):
+    """Anruf-Modus: der nächste Lead. Zuerst heiße Leads (fällige Wiedervorlage, dann ohne Kontakt, dann am längsten nicht angerufen) oder zufällig aus den heißen;
+    gibt es keinen heißen mehr, folgen fällige Wiedervorlagen und neue Leads. Bereits abgearbeitete Leads (`ausser`) kommen nicht noch einmal."""
+    return _naechster_lead(modus, ausser, "l.vertriebspartner_id=%s", [user["vertriebspartner_id"]])
+
+
+@admin.get("/anrufmodus/naechster")
+def admin_naechster(modus: str = "heiss", ausser: str = "", vertriebler: str = "", user: dict = Depends(require_admin)):
+    """Anruf-Modus für den Admin: wie beim Vertrieb, aber über alle Leads oder nur die eines Vertrieblers (`vertriebler` = ID, „keiner“ = nicht zugeordnet)."""
+    if vertriebler == "keiner":
+        return _naechster_lead(modus, ausser, "l.vertriebspartner_id IS NULL", [])
+    if vertriebler:
+        if not UUID.match(vertriebler):
+            raise HTTPException(400, "Unbekannter Vertriebler.")
+        return _naechster_lead(modus, ausser, "l.vertriebspartner_id=%s", [vertriebler])
+    return _naechster_lead(modus, ausser, "true", [])
 
 
 class FotoIn(BaseModel):

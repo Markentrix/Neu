@@ -1,4 +1,5 @@
 import { listenKnopf, listenZiel } from '../common.js';
+import { anrufModus } from '../anrufmodus.js';
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
 import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
@@ -170,7 +171,7 @@ V.leads = async () => {
     knopf('← Zurück', () => setze('seite', d.seite > 2 ? String(d.seite - 1) : ''), 'sec small'), h('span', { class: 'small muted' }, 'Seite ' + d.seite + ' von ' + seiten),
     knopf('Weiter →', () => setze('seite', String(d.seite + 1)), 'sec small')) : '';
   if (d.seite > 1 && !d.leads.length) { setze('seite', ''); }
-  return h('div', { class: 'stack' }, kopf('Leads'), m, h('div', { class: 'card' }, await filterKarte('leads'), tabs, filterLeiste,
+  return h('div', { class: 'stack' }, kopf('Leads'), m, modus.karte(m, [['', 'Alle Leads'], ['keiner', 'Nicht zugeordnet'], ...partner.map(p => [p.id, 'Nur ' + p.name])]), h('div', { class: 'card' }, await filterKarte('leads'), tabs, filterLeiste,
     h('p', { class: 'small muted', style: 'margin:10px 0 6px' }, d.gesamt + ' Leads' + (['status', 'q', 'quelle', 'temperatur', 'vertriebler', 'gruppe', 'liste'].some(k => g(k)) ? ' passen zum Filter' : '')), leiste,
     d.leads.length ? h('div', { class: 'tablewrap' }, h('table', { class: 'leadtab' }, h('thead', {}, h('tr', {}, h('th', { class: 'ck' }, alleHaken), ['Firma', 'Kontakt', 'Einstufung', 'Status', 'Vertriebler', 'Angelegt', ''].map(t => h('th', {}, t)))), h('tbody', {}, zeilen))) : h('p', { class: 'muted' }, 'Keine Leads.'), blaettern),
     await leadImportKarte(partner),
@@ -240,6 +241,8 @@ function anfragenKarte(liste) {
         h('div', { class: 'row', style: 'flex-wrap:wrap;align-items:flex-end' }, st, h('div', { class: 'grow' }, hin), knopf('Speichern', () => bestaetigtOhneReload(m, async () => { await api('/api/admin/angebotsanfragen/' + a.id, { method: 'PATCH', body: { status: st.value, admin_notiz: hin.value || null } }); melde(m, 'Gespeichert.', 'ok'); }), 'btn')), m); }));
 }
 
+const modus = anrufModus({ schluessel: 'mk-anrufmodus-admin', url: '/api/admin/anrufmodus/naechster', leadHash: '#lead/', heimHash: '#leads' });
+
 export async function leadDetail(lid) {
   const [d, anfragen] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/leads/' + lid + '/angebotsanfragen')]), l = d.lead, m = h('div');
   const st = h('select', { onchange: (e) => bestaetigt(m, () => api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: e.target.value } }), 'Status geändert.') }, LEAD_ST.map(s => h('option', { value: s, selected: s === l.status }, s.replace(/_/g, ' '))));
@@ -249,11 +252,11 @@ export async function leadDetail(lid) {
   const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => zuKundeDialog(lid, (k) => { location.hash = '#kunde/' + (k.kunden_id || k.id); }));
   const gesperrt = ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status);
   const ang = gesperrt ? '' : h('button', { class: 'btn small', onclick: () => angebotDialog(lid, () => location.reload()) }, 'Angebot senden');
-  return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, gesperrt ? '' : visitenkarteKnopf('/api/admin', lid, l), zuK, leadLoeschen(l, m, () => { location.hash = listenZiel('leads'); }), listenKnopf('leads')), m,
+  return h('div', { class: 'stack' }, modus.leiste(lid), kopf(l.firma, st, tempWahl(l, m), ang, gesperrt ? '' : visitenkarteKnopf('/api/admin', lid, l), zuK, leadLoeschen(l, m, () => { location.hash = listenZiel('leads'); }), listenKnopf('leads')), m,
     h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     anfragenKarte(anfragen),
     await leadAngebotKarte(lid, l, m),
-    kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am, { verlustgruende: d.verlustgruende }),
+    kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am, { verlustgruende: d.verlustgruende, naechster: modus.aktiv() ? () => modus.naechster(lid) : undefined, kurzwahl: modus.aktiv() }),
     skriptKarte(l.skript, l.skript_am, '/api/admin/leads/' + lid + '/skript'),
     d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0', open: c === d.checks[0] && !!(c.ergebnis && c.ergebnis.punkte) },
       h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null || c.score === undefined ? (c.status === 'laeuft' ? 'läuft noch' : '–') : c.score + ' von 100') + (c.ampel ? ' · ' + AMPEL[c.ampel] : '')),

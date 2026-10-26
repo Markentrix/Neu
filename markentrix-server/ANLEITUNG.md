@@ -725,5 +725,6 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 ## Vertrieb schneller arbeiten, KI-Fehlergrund
 - **Meine Leads**: Suche, Reiter (Status, ⏰ Fällig, 🔥 HOT), 50 pro Seite. Der Zurück-Knopf im Lead führt zur Liste mit denselben Filtern.
 - **Anruf-Modus** (Heute anrufen): nach „Speichern & nächster Lead“ geht es automatisch zum nächsten heißen Lead (Reihenfolge oder zufällig), danach fällige Wiedervorlagen und neue Leads. Tasten 1 bis 9, N und S am Computer.
+- **Anruf-Modus im Admin** (Leads, Karte oben): wie beim Vertrieb, wahlweise über alle Leads, nur nicht zugeordnete oder nur die eines Vertrieblers.
 - **Lead per Foto**: KI liest Visitenkarte, Schild oder Fahrzeug, Vertriebler prüfen und speichern. Das Foto wird nicht gespeichert. Kosten wie andere KI-Aufrufe (Protokoll Kosten).
 - **KI-Fehler**: Admins sehen den genauen Grund in der Meldung, der letzte Fehler steht im Systemstatus („KI-Dienst“).

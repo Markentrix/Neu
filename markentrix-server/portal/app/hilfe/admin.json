@@ -1440,6 +1440,18 @@
         "Der letzte Fehler steht zusätzlich im Systemstatus unter „KI-Dienst“ (gelb). Nach dem nächsten erfolgreichen Aufruf verschwindet er.",
         "Häufige Ursachen: Schlüssel falsch oder abgelaufen, Guthaben aufgebraucht, Modellname falsch (Einstellungen → KI), Server ohne Internet."
       ]
+    },
+    {
+      "t": "Anruf-Modus: Leads der Reihe nach durchtelefonieren",
+      "k": "anruf modus nächster lead hot heiß zufällig tastenkürzel taste durchtelefonieren admin",
+      "wo": "Leads → Karte „Anruf-Modus“",
+      "l": "#leads",
+      "s": [
+        "Wähle die Reihenfolge und, wer angerufen wird: alle Leads, nur nicht zugeordnete oder nur die eines Vertrieblers. Dann „Anruf-Modus starten“.",
+        "Halte das Gespräch fest und klicke „Speichern & nächster Lead“. Das Portal springt zum nächsten heißen Lead, danach folgen fällige Wiedervorlagen und neue Leads.",
+        "Am Computer: Tasten 1 bis 9 wählen das Ergebnis, „N“ speichert und springt weiter, „S“ speichert nur.",
+        "„Überspringen“ lässt den Lead aus, „Beenden“ verlässt den Modus. Gesperrte Leads und Leads ohne Einwilligung werden nie angeboten."
+      ]
     }
   ],
   "titel": "Anleitung Admin-Bereich",
