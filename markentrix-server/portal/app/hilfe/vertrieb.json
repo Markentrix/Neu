@@ -850,6 +850,19 @@
         "Prüfe alle Felder, ergänze sie und klicke „Lead speichern“. Das Foto selbst wird nicht gespeichert.",
         "Trage nur Kontakte ein, bei denen eine geschäftliche Ansprache zulässig ist."
       ]
+    },
+    {
+      "t": "Push-Erinnerung vor einem vereinbarten Anruf",
+      "k": "push erinnerung rückruf uhrzeit termin anruf handy 1 stunde 5 minuten vorher benachrichtigung",
+      "wo": "Lead → Kontakt festhalten → Wiedervorlage mit Uhrzeit",
+      "l": "#heute",
+      "s": [
+        "Hast du mit einem Lead eine Anrufzeit vereinbart, wähle beim Festhalten das Datum der Wiedervorlage und trage daneben die Uhrzeit ein.",
+        "Das Portal schickt dir 1 Stunde und 5 Minuten vorher eine Push-Nachricht aufs Handy. Tippst du darauf, öffnet sich der Lead.",
+        "Dasselbe gilt für Erstgespräche, die ein Lead selbst bucht oder die du für ihn buchst.",
+        "Die Push-Nachrichten kommen nur, wenn du sie unter Konto → Benachrichtigungen aufs Handy eingeschaltet hast.",
+        "Ohne Uhrzeit bleibt es bei der Wiedervorlage am Tag, ohne Push zur Uhrzeit."
+      ]
     }
   ],
   "titel": "Anleitung Vertriebsportal",
@@ -1056,6 +1069,10 @@
     [
       "Warum springt der Anruf-Modus nicht zu einem bestimmten Lead?",
       "Er wählt nach Einstufung: erst heiße Leads, dann fällige Wiedervorlagen, dann neue Leads. Leads mit Wiedervorlage in der Zukunft kommen erst an dem Tag wieder."
+    ],
+    [
+      "Warum bekomme ich keine Push-Erinnerung vor dem Anruf?",
+      "Prüfe, ob die Benachrichtigungen unter Konto eingeschaltet sind und ob bei der Wiedervorlage eine Uhrzeit eingetragen war. Bei weniger als einer Stunde Vorlauf kommt nur die Erinnerung 5 Minuten vorher."
     ]
   ]
 }

@@ -315,7 +315,7 @@ def provisionsvorschau(cfg):
 
 
 def gespraech_erinnerungen(cfg):
-    """Jede Minute: Interessenten 24 Stunden und 2 Stunden vor dem Erstgespräch erinnern; 2 Stunden vorher bekommt auch der Zuständige einen Hinweis."""
+    """Jede Minute: Interessenten 24 Stunden und 2 Stunden vor dem Erstgespräch per Mail erinnern (die Push-Erinnerung an den Vertriebler macht `anruf_pushes`)."""
     from .routes_buchung import TZ, lesen as buchung_lesen
     with tx("system") as cur:
         ort = buchung_lesen(cur)["ort"]
@@ -325,7 +325,6 @@ def gespraech_erinnerungen(cfg):
         faellig = cur.fetchall()
         for g in faellig:   # zuerst markieren; bei Mailfehler unten zurücksetzen
             cur.execute("UPDATE gespraechstermine SET erinnert_24=true WHERE id=%s" if g["std"] == 24 else "UPDATE gespraechstermine SET erinnert_2=true, erinnert_24=true WHERE id=%s", (g["id"],))
-        team = {g["id"]: (push.admins(cur) + (push.partner(cur, g["vertriebspartner_id"]) if g["vertriebspartner_id"] else [])) for g in faellig if g["std"] == 2}
     for g in faellig:
         lokal = g["start"].astimezone(TZ).strftime("%d.%m.%Y um %H:%M Uhr")
         ok, fehler = mailer.gespraech_erinnerung(g["email"], g["name"], lokal, f"{config.BASE_URL}/api/public/buchung/absagen?t={g['token']}", ort, g["std"])
@@ -333,8 +332,45 @@ def gespraech_erinnerungen(cfg):
             log.warning("Gesprächserinnerung an %s fehlgeschlagen: %s", g["email"], fehler)
             with tx("system") as cur:
                 cur.execute("UPDATE gespraechstermine SET erinnert_24=false, erinnert_2=false WHERE id=%s" if g["std"] == 2 else "UPDATE gespraechstermine SET erinnert_24=false WHERE id=%s", (g["id"],))
-        if g["std"] == 2 and team.get(g["id"]):
-            push.senden(team[g["id"]], "Gespräch in 2 Stunden", f"{g['name']} um {g['start'].astimezone(TZ):%H:%M} Uhr.", "/vertrieb#heute", "buchung")
+
+
+def anruf_pushes(cfg):
+    """Jede Minute: Push aufs Handy 1 Stunde und 5 Minuten vor einem vereinbarten Anruf. Gemeint sind gebuchte Erstgespräche und am Lead
+    vereinbarte Rückrufzeiten. Es geht an den zuständigen Vertriebler, bei Leads ohne Zuständigen an die Admins."""
+    from . import push
+    from .leadkontakt import TZ
+    jetzt = datetime.now(timezone.utc)
+    mit_pruefung = "l.status NOT IN ('verloren','gewonnen','gesperrt','tot','consent_ausstehend')"
+    with tx("system") as cur:
+        cur.execute(f"""SELECT 'lead' AS art, l.id AS id, l.id AS lead_id, l.firma, l.telefon, l.rueckruf_am AS start, (l.rueckruf_push & 1) > 0 AS fertig60, (l.rueckruf_push & 2) > 0 AS fertig5, l.vertriebspartner_id
+                        FROM leads l WHERE l.rueckruf_am IS NOT NULL AND l.rueckruf_push < 3 AND l.rueckruf_am > now() - interval '2 minutes' AND l.rueckruf_am <= now() + interval '61 minutes' AND {mit_pruefung}
+                        UNION ALL
+                        SELECT 'termin', g.id, g.lead_id, coalesce(l.firma, g.name), coalesce(l.telefon, g.telefon), g.start, g.push_60, g.push_5, l.vertriebspartner_id
+                        FROM gespraechstermine g LEFT JOIN leads l ON l.id = g.lead_id
+                        WHERE g.status='gebucht' AND NOT (g.push_60 AND g.push_5) AND g.start > now() - interval '2 minutes' AND g.start <= now() + interval '61 minutes' LIMIT 60""")
+        faellig = cur.fetchall()
+        senden = []
+        for z in faellig:
+            minuten = (z["start"] - jetzt).total_seconds() / 60
+            if minuten <= 5.5 and not z["fertig5"]:
+                stufe = 5
+            elif 5.5 < minuten <= 61 and not z["fertig60"]:
+                stufe = 60
+            else:
+                continue
+            if z["art"] == "lead":
+                cur.execute("UPDATE leads SET rueckruf_push = CASE WHEN %s = 5 THEN 3 ELSE rueckruf_push | 1 END WHERE id=%s", (stufe, z["id"]))
+            else:
+                cur.execute("UPDATE gespraechstermine SET push_60 = true, push_5 = (push_5 OR %s = 5) WHERE id=%s", (stufe, z["id"]))
+            ids = push.partner(cur, z["vertriebspartner_id"]) if z["vertriebspartner_id"] else push.admins(cur)
+            senden.append((z, stufe, minuten, ids, bool(z["vertriebspartner_id"])))
+    for z, stufe, minuten, ids, partner in senden:
+        wann = "in 5 Minuten" if stufe == 5 else ("in 1 Stunde" if minuten >= 50 else f"in {max(6, round(minuten))} Minuten")
+        titel = ("Anruf " if z["art"] == "lead" else "Erstgespräch ") + wann
+        text = f"{z['firma']}" + (f" · {z['telefon']}" if z["telefon"] else "") + f" um {z['start'].astimezone(TZ):%H:%M} Uhr"
+        url = ("/vertrieb" if partner else "/admin") + (f"#lead/{z['lead_id']}" if z["lead_id"] else "#heute")
+        if ids:
+            push.senden(ids, titel, text, url, f"anruf-{z['id']}", sofort=stufe == 5)
 
 
 def anfragen_eskalation(cfg):
@@ -1224,7 +1260,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (vertrieb_morgens, anruf_pushes, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return

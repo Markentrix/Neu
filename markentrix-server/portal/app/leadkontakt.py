@@ -1,5 +1,7 @@
 """Kontaktergebnis zu einem Lead festhalten (Angerufen, Mail, Termin …): Verlaufseintrag, Status und Wiedervorlage in einem Schritt."""
-from datetime import date, timedelta
+import re
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
 
@@ -24,6 +26,8 @@ OPTIONEN = [
 _NACH = {o[0]: o for o in OPTIONEN}
 # Reihenfolge der Status: ein Ergebnis setzt den Status nur vor, nie zurück
 _RANG = {"neu": 0, "kontaktiert": 1, "antwort": 2, "termin": 3, "angebot": 4}
+TZ = ZoneInfo("Europe/Berlin")
+ZEIT = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 GESPERRT = ("gewonnen", "gesperrt", "consent_ausstehend")
 
 
@@ -31,7 +35,7 @@ def optionen_fuer_oberflaeche() -> list:
     return [{"code": c, "text": t, "wiedervorlage_tage": w} for c, t, _a, _s, w in OPTIONEN]
 
 
-def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | None, von: str, darf_status: bool = True, verlust_grund: str | None = None) -> dict:
+def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | None, von: str, darf_status: bool = True, verlust_grund: str | None = None, zeit: str | None = None) -> dict:
     o = _NACH.get(ergebnis)
     if not o:
         raise HTTPException(400, "Unbekanntes Ergebnis.")
@@ -44,6 +48,10 @@ def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | N
         raise HTTPException(404, "Lead nicht gefunden.")
     if wiedervorlage and wiedervorlage < date.today():
         raise HTTPException(400, "Die Wiedervorlage liegt in der Vergangenheit.")
+    if zeit and not ZEIT.match(zeit):
+        raise HTTPException(400, "Die Uhrzeit ist ungültig (Format 14:30).")
+    if zeit and not wiedervorlage:
+        raise HTTPException(400, "Für eine Uhrzeit bitte auch das Datum der Wiedervorlage wählen.")
     inhalt = text + (": " + notiz.strip() if notiz and notiz.strip() else "")
     if verlust_grund and neuer_status == "verloren":
         inhalt += f" (Grund: {VERLUSTGRUENDE[verlust_grund]})"
@@ -61,10 +69,17 @@ def erfassen(cur, lid, ergebnis: str, notiz: str | None, wiedervorlage: date | N
         wv = l["wiedervorlage_am"]       # eine bestehende Wiedervorlage bleibt erhalten
     if tage == 0 or status in ("verloren", "gewonnen", "gesperrt", "tot"):
         wv = None
+    rueckruf = None
+    if zeit and wv:
+        rueckruf = datetime.combine(wv, time(int(zeit[:2]), int(zeit[3:])), tzinfo=TZ)
+        if rueckruf <= datetime.now(TZ):
+            raise HTTPException(400, "Die vereinbarte Uhrzeit liegt in der Vergangenheit.")
+    neu_gesetzt = bool(zeit or wiedervorlage or tage) or wv is None   # sonst bleibt eine bestehende Rückrufzeit erhalten
     # Aktivität verlängert die Löschfrist (nur wenn der Lead eine hat)
     cur.execute("""UPDATE leads SET status=%s, wiedervorlage_am=%s, letzter_kontakt_am=now(),
+                          rueckruf_am = CASE WHEN %s THEN %s ELSE rueckruf_am END, rueckruf_push = CASE WHEN %s THEN 0 ELSE rueckruf_push END,
                           loeschen_nach = CASE WHEN loeschen_nach IS NOT NULL THEN greatest(loeschen_nach, current_date + interval '12 months') END,
-                          verlust_grund = CASE WHEN %s = 'verloren' THEN %s ELSE verlust_grund END WHERE id=%s""", (status, wv, status, verlust_grund, lid))
+                          verlust_grund = CASE WHEN %s = 'verloren' THEN %s ELSE verlust_grund END WHERE id=%s""", (status, wv, neu_gesetzt, rueckruf, neu_gesetzt, status, verlust_grund, lid))
     if ergebnis in ("kein_interesse", "widerspruch") and neuer_status:
         sperre.eintragen(cur, "kein_interesse" if ergebnis == "kein_interesse" else "widerspruch", f"Lead {lid}", l["email"], l["telefon"], l["website"])
-    return {"status": status, "wiedervorlage_am": wv}
+    return {"status": status, "wiedervorlage_am": wv, "rueckruf_am": rueckruf}

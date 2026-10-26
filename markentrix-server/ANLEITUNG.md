@@ -733,3 +733,8 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - Die Lead-Seite zeigt vier Reiter: **Anrufen** (Daten, Kontakt festhalten), **Gespräch** (Leitfaden, Branchenhinweis, Nachgespräch, Website-Check), **Angebot** (Angebote, Erstgespräch) und **Verlauf**. Der gewählte Reiter bleibt je Lead erhalten.
 - Selten gebrauchte Knöpfe (Visitenkarte, Zum Kunden machen, Löschen) stehen im Menü „⋯ Mehr“.
 - Die Daten zeigen nur ausgefüllte Felder, Telefon, E-Mail und Website sind anklickbar, lange Notizen sind eingeklappt.
+
+## Push-Erinnerung vor vereinbarten Anrufen
+- Beim Festhalten eines Kontakts lässt sich neben dem Datum der Wiedervorlage eine **Uhrzeit** eintragen (Vertrieb und Admin). Das Portal sendet dem zuständigen Vertriebler **1 Stunde und 5 Minuten vorher** eine Push-Nachricht aufs Handy (Admins, wenn der Lead niemandem zugeordnet ist). Bei weniger als einer Stunde Vorlauf kommt nur die 5-Minuten-Erinnerung.
+- Dasselbe gilt für gebuchte Erstgespräche. Die frühere Push-Meldung „Gespräch in 2 Stunden“ entfällt; die Mails an den Interessenten (24 und 2 Stunden vorher) bleiben.
+- Technik: Job `anruf_pushes` (jede Minute), Spalten `leads.rueckruf_am`, `leads.rueckruf_push`, `gespraechstermine.push_60/push_5` (Migration 146). Push braucht, dass das Gerät Benachrichtigungen erlaubt hat (Konto).

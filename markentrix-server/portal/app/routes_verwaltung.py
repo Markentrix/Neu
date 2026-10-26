@@ -412,6 +412,7 @@ class KontaktIn(BaseModel):
     ergebnis: str
     notiz: str | None = Field(default=None, max_length=1500)
     wiedervorlage: date | None = None
+    wiedervorlage_zeit: str | None = Field(default=None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
     verlust_grund: str | None = None
 
 
@@ -419,7 +420,7 @@ class KontaktIn(BaseModel):
 def lead_kontakt(lid: str, data: KontaktIn, user: dict = Depends(require_admin)):
     try:
         with tx("admin") as cur:
-            r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"], verlust_grund=data.verlust_grund)
+            r = leadkontakt.erfassen(cur, lid, data.ergebnis, data.notiz, data.wiedervorlage, user["email"], verlust_grund=data.verlust_grund, zeit=data.wiedervorlage_zeit)
             audit(cur, user, "lead_kontakt", None, {"id": lid, "ergebnis": data.ergebnis})
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Lead nicht gefunden.")

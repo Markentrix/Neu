@@ -112,8 +112,9 @@ const tagIn = (n) => n ? new Date(Date.now() + n * 864e5).toISOString().slice(0,
 /** Wiedervorlage-Feld mit Schnellwahl (Morgen, in 3 Tagen, nächste Woche …). Gibt { el, tag } zurück. */
 export function wiedervorlageWahl(start = '') {
   const tag = h('input', { type: 'date', style: 'max-width:170px', value: start, 'aria-label': 'Wiedervorlage' });
+  const zeit = h('input', { type: 'time', style: 'max-width:120px', 'aria-label': 'Uhrzeit für die Erinnerung (freiwillig)' });
   const chips = h('div', { class: 'row', style: 'gap:6px;flex-wrap:wrap;margin-top:4px' }, WV_SCHNELL.map(([t, n]) => h('button', { type: 'button', class: 'btn sec small', onclick: () => { tag.value = tagIn(n); } }, t)));
-  return { tag, el: h('div', {}, h('label', { style: 'margin:0' }, 'Wiedervorlage'), tag, chips) };
+  return { tag, zeit, el: h('div', {}, h('label', { style: 'margin:0' }, 'Wiedervorlage'), h('div', { class: 'row', style: 'gap:8px;align-items:center;flex-wrap:wrap' }, tag, zeit, h('span', { class: 'small muted' }, 'Uhrzeit = Push 1 Std. und 5 Min. vorher')), chips) };
 }
 
 /**
@@ -153,8 +154,9 @@ export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
     wv.tag.value = tagIn(o.wiedervorlage_tage); grund.style.display = o.code === 'kein_interesse' && extra.verlustgruende ? '' : 'none'; };
   optionen.forEach((o, i) => { const b = h('button', { type: 'button', class: 'btn sec small', onclick: () => waehle(o, b) }, extra.kurzwahl && i < 9 ? h('span', { class: 'muted', style: 'margin-right:4px' }, (i + 1) + ' ·') : '', o.text); knoepfe.push(b); });
   const los = async (danach) => { if (!wahl) return;
+    if (wv.zeit.value && !wv.tag.value) { melde(m, 'Für die Uhrzeit bitte auch ein Datum wählen.'); return; }
     if (wahl.code === 'kein_interesse' && extra.verlustgruende && !grund.value) { melde(m, 'Bitte den Grund der Absage wählen. Das hilft bei der Auswertung.'); return; }
-    try { const r = await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null, verlust_grund: grund.value || null } });
+    try { const r = await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null, wiedervorlage_zeit: wv.zeit.value || null, verlust_grund: grund.value || null } });
       if (danach) danach(r); else if (extra.nach) extra.nach(r); else location.reload(); } catch (x) { melde(m, x.message); } };
   speichern.onclick = () => los(null);
   if (weiter) /** @type {any} */ (weiter).onclick = () => los(extra.naechster);

@@ -17,10 +17,10 @@ OFFEN = "('verloren','gewonnen','gesperrt','tot','consent_ausstehend')"
 def vertrieb_heute(user: dict = Depends(require_vertrieb)):
     """Arbeitsliste für heute: fällige Wiedervorlagen, HOT-Leads ohne Kontakt, neu zugewiesene Leads."""
     pid = user["vertriebspartner_id"]
-    felder = "l.id, l.firma, l.ansprechpartner, l.telefon, l.ort, l.gruppe, l.branche, l.temperatur, l.status, l.wiedervorlage_am, l.letzter_kontakt_am"
+    felder = "l.id, l.firma, l.ansprechpartner, l.telefon, l.ort, l.gruppe, l.branche, l.temperatur, l.status, l.wiedervorlage_am, l.rueckruf_am, l.letzter_kontakt_am"
     with tx("system") as cur:
         cur.execute(f"""SELECT {felder} FROM leads l WHERE l.vertriebspartner_id=%s AND l.wiedervorlage_am <= current_date AND l.status NOT IN {OFFEN}
-                        ORDER BY l.wiedervorlage_am LIMIT 30""", (pid,))
+                        ORDER BY l.wiedervorlage_am, l.rueckruf_am NULLS LAST LIMIT 30""", (pid,))
         wiedervorlagen = cur.fetchall()
         cur.execute(f"""SELECT {felder} FROM leads l WHERE l.vertriebspartner_id=%s AND l.status='neu' AND l.temperatur='heiss' AND l.letzter_kontakt_am IS NULL
                         AND (l.wiedervorlage_am IS NULL OR l.wiedervorlage_am > current_date) ORDER BY l.erstellt_am DESC LIMIT 30""", (pid,))

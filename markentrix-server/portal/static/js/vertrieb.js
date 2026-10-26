@@ -42,7 +42,7 @@ function gespraechDialog(z, optionen, vorwahl, fertig) {
   vorbelegen();
   const d = dialog(z.firma, h('div', {}, h('label', {}, 'Was ist passiert?'), sel, h('label', {}, 'Notiz'), notiz, notizWerkzeug(notiz, m), wv.el, m,
     h('p', {}, h('button', { class: 'btn', onclick: async () => {
-      try { const r = await api('/api/vertrieb/leads/' + z.id + '/kontakt', { method: 'POST', body: { ergebnis: sel.value, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null } }); d.zu(); fertig(r); } catch (x) { melde(m, x.message); }
+      try { const r = await api('/api/vertrieb/leads/' + z.id + '/kontakt', { method: 'POST', body: { ergebnis: sel.value, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null, wiedervorlage_zeit: wv.zeit.value || null } }); d.zu(); fertig(r); } catch (x) { melde(m, x.message); }
     } }, 'Festhalten'))));
 }
 
@@ -66,7 +66,7 @@ V.heute = async () => {
     const el = h('div', { class: 'heutezeile' });
     el.append(
       h('div', { class: 'heutekopf' }, h('div', { class: 'grow' }, h('a', { href: '#lead/' + l.id, style: 'font-weight:600;text-decoration:none' }, (TEMP[l.temperatur] || '') + ' ' + l.firma),
-        h('div', { class: 'small muted' }, [l.ansprechpartner, l.gruppe || l.branche, l.ort].filter(Boolean).join(' · ') + (l.wiedervorlage_am ? ' · Wiedervorlage ' + datum(l.wiedervorlage_am) : '')),
+        h('div', { class: 'small muted' }, [l.ansprechpartner, l.gruppe || l.branche, l.ort].filter(Boolean).join(' · ') + (l.wiedervorlage_am ? ' · Wiedervorlage ' + datum(l.wiedervorlage_am) + (l.rueckruf_am ? ', Rückruf ' + new Date(l.rueckruf_am).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : '') : '')),
         (l.gruende || []).length ? h('ul', { class: 'small', style: 'margin:4px 0 0;padding-left:18px' }, l.gruende.map(g => h('li', {}, g))) : ''),
         l.telefon ? h('a', { class: 'btn small', href: 'tel:' + l.telefon.replace(/[^+\d]/g, ''), 'data-lead': l.id, 'data-firma': l.firma }, '📞 ' + l.telefon) : h('span', { class: 'small muted' }, 'keine Nummer')),
       h('div', { class: 'heuteknoepfe' },
