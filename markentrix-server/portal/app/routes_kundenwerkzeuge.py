@@ -251,8 +251,8 @@ def ki_vorschlag(aid: str, user: dict = Depends(require_kunde)):
         raise HTTPException(400, "Der Antwortvorschlag ist noch nicht eingerichtet. Nutze die Vorlagen oder frag das Markentrix-Team.")
     try:
         text, ein, aus = ki.antwort_vorschlag(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, firma, a["name"], a["nachricht"] or "")
-    except Exception:
-        raise HTTPException(502, "Der Vorschlag ist gerade nicht erreichbar. Bitte nimm eine Vorlage.")
+    except Exception as e:
+        raise ki.fehler(e, user, "Der Vorschlag ist gerade nicht erreichbar. Bitte nimm eine Vorlage.")
     if not text:
         raise HTTPException(502, "Es kam kein Vorschlag zurück. Bitte nimm eine Vorlage.")
     with tx("system") as cur:

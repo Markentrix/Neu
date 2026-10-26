@@ -1428,6 +1428,18 @@
         "Jeder Versand steht im Verlauf des Leads. Gesperrte Leads, Leads ohne Einwilligung und verlorene Leads sind ausgenommen.",
         "Jeder Vertriebler pflegt seine eigene Karte unter Konto. Für Kunden gibt es keine Visitenkarte."
       ]
+    },
+    {
+      "t": "KI-Fehler: genauen Grund sehen",
+      "k": "ki fehler grund api key schlüssel nicht geantwortet 502 modell guthaben limit verbindung systemstatus",
+      "wo": "Fehlermeldung bei KI-Funktionen; Systemstatus → „KI-Dienst“",
+      "l": "#einstellungen",
+      "s": [
+        "Wenn eine KI-Funktion (Gesprächsleitfaden, Notiz zusammenfassen, Übersetzung, Antwortvorschlag, Foto) nicht klappt, siehst du als Admin in der Meldung den genauen Grund, zum Beispiel „HTTP 401 … API-Schlüssel abgelehnt“, „Modell unbekannt“, „Limit erreicht“ oder „Keine Verbindung zum KI-Dienst“.",
+        "Vertriebler und Kunden sehen nur die freundliche Meldung ohne technische Details.",
+        "Der letzte Fehler steht zusätzlich im Systemstatus unter „KI-Dienst“ (gelb). Nach dem nächsten erfolgreichen Aufruf verschwindet er.",
+        "Häufige Ursachen: Schlüssel falsch oder abgelaufen, Guthaben aufgebraucht, Modellname falsch (Einstellungen → KI), Server ohne Internet."
+      ]
     }
   ],
   "titel": "Anleitung Admin-Bereich",

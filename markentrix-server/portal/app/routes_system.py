@@ -33,7 +33,7 @@ def _stunden(h):
     return "über 400 Tage" if h >= 9999 else (f"{h} Std." if h < 48 else f"{h // 24} Tage")
 
 
-def ampel(d: dict | None, smtp: dict, jobs: dict | None, mail: dict | None) -> list[dict]:
+def ampel(d: dict | None, smtp: dict, jobs: dict | None, mail: dict | None, kistatus: dict | None = None) -> list[dict]:
     """Übersetzt die Messwerte in eine Ampel: ok (grün), warn (gelb), bad (rot), unbekannt (grau)."""
     out = []
     if d is None:
@@ -79,6 +79,9 @@ def ampel(d: dict | None, smtp: dict, jobs: dict | None, mail: dict | None) -> l
             out.append(_punkt("mail", "E-Mail-Versand", "ok", "letzter Versand hat geklappt"))
         else:
             out.append(_punkt("mail", "E-Mail-Versand", "unbekannt", "eingerichtet, aber noch keine Mail verschickt"))
+    w = (kistatus or {}).get("wert") or {}
+    if w.get("fehler_am") and (not w.get("ok_am") or w["fehler_am"] > w["ok_am"]):   # nur Hinweis: KI-Funktionen sind Zusatz, der Betrieb läuft weiter
+        out.append(_punkt("ki", "KI-Dienst", "warn", "letzter Aufruf fehlgeschlagen: " + str(w.get("fehler", ""))[:300]))
     if einstellungen.defekt:
         out.append(_punkt("geheimnis", "Gespeicherte Einstellungen", "bad", "nicht lesbar: " + ", ".join(sorted(einstellungen.defekt)) + ". Stimmt PORTAL_SECRET in der .env noch?"))
     return out
@@ -90,13 +93,13 @@ def systemstatus(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         smtp = einstellungen.lesen(cur, "smtp") or {}
         ki = einstellungen.lesen(cur, "ki") or {}
-        jobs, mail = betrieb.lesen(cur, "jobs"), betrieb.lesen(cur, "mail")
+        jobs, mail, kistatus = betrieb.lesen(cur, "jobs"), betrieb.lesen(cur, "mail"), betrieb.lesen(cur, "ki")
     probleme = list(d["probleme"]) if d else []
     if d and d["alter_minuten"] > 30:
         probleme.append(f"Die Server-Überwachung hat sich seit {d['alter_minuten']} Minuten nicht gemeldet")
     if not smtp.get("host"):
         probleme.append("E-Mail-Versand ist noch nicht eingerichtet (Einstellungen → E-Mail)")
-    punkte = ampel(d, smtp, jobs, mail)
+    punkte = ampel(d, smtp, jobs, mail, kistatus)
     for p in punkte:   # Rote Punkte aus der Datenbank erscheinen auch in der Problemliste (Jetzt wichtig)
         if p["status"] == "bad" and p["id"] in ("jobs", "mail"):   # Server-Themen meldet der Wächter schon selbst
             probleme.append(f"{p['titel']}: {p['detail']}")

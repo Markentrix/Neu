@@ -721,3 +721,9 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - **Messung auf Funnel-Seiten**: Meta-Pixel-ID, Google-Tag-ID, Conversion-Label je Seite. Laden erst nach Zustimmung im Banner (Einverstanden/Ablehnen). Die Sicherheitsrichtlinie der Seite wird nur dann um Meta/Google erweitert. Datenschutzerklärung und Banner-Text vom Anwalt prüfen lassen (`docs/ANWALT-CHECKLISTE.md`).
 - **Digitale Visitenkarte** (nur Team, nicht für Kunden): eigene Karte unter Konto bzw. Einstellungen, Versand aus dem Lead per E-Mail (.vcf-Anhang), Teilen/WhatsApp oder Datei. Vermerk im Lead-Verlauf. Nicht an gesperrte Leads, Leads ohne Einwilligung oder verlorene Leads.
 - **Migrations-Hinweis**: Nach dem Zusammenführen mit dem Funnel-Website-Check gibt es 141 (Check), 142 (Plätze), 143 (Mail-Layout), 144 und 145 (diese Funktionen). Die Ampel aus der früheren Fassung entfällt.
+
+## Vertrieb schneller arbeiten, KI-Fehlergrund
+- **Meine Leads**: Suche, Reiter (Status, ⏰ Fällig, 🔥 HOT), 50 pro Seite. Der Zurück-Knopf im Lead führt zur Liste mit denselben Filtern.
+- **Anruf-Modus** (Heute anrufen): nach „Speichern & nächster Lead“ geht es automatisch zum nächsten heißen Lead (Reihenfolge oder zufällig), danach fällige Wiedervorlagen und neue Leads. Tasten 1 bis 9, N und S am Computer.
+- **Lead per Foto**: KI liest Visitenkarte, Schild oder Fahrzeug, Vertriebler prüfen und speichern. Das Foto wird nicht gespeichert. Kosten wie andere KI-Aufrufe (Protokoll Kosten).
+- **KI-Fehler**: Admins sehen den genauen Grund in der Meldung, der letzte Fehler steht im Systemstatus („KI-Dienst“).

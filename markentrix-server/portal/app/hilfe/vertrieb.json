@@ -813,6 +813,43 @@
         "„Per WhatsApp / Teilen“ öffnet auf dem Handy das Teilen-Menü mit der Karte. Am Computer wird die Datei gespeichert und WhatsApp Web geöffnet; dort die Datei anhängen.",
         "Jeder Versand steht im Verlauf des Leads. An gesperrte Leads, Leads ohne Einwilligung und verlorene Leads geht nichts."
       ]
+    },
+    {
+      "t": "Leads suchen und filtern",
+      "k": "leads suche suchen filter status fällig hot seite liste finden telefon ort",
+      "wo": "Meine Leads",
+      "l": "#leads",
+      "s": [
+        "Oben tippst du Firma, Ort, Ansprechpartner, Telefon oder E-Mail ein und drückst Enter.",
+        "Die Reiter filtern nach Status, „⏰ Fällig“ (Wiedervorlage heute oder überfällig) und „🔥 HOT“. „Zurücksetzen“ löscht alle Filter.",
+        "Fällige Leads stehen immer oben. Es werden 50 Leads je Seite gezeigt, unten blätterst du weiter.",
+        "Aus einem Lead kommst du mit „← Liste“ genau dorthin zurück, mit denselben Filtern."
+      ]
+    },
+    {
+      "t": "Anruf-Modus: immer zum nächsten heißen Lead",
+      "k": "anruf modus nächster lead hot heiß zufällig tastenkürzel taste schnell durchtelefonieren",
+      "wo": "Heute anrufen → Karte „Anruf-Modus“",
+      "l": "#heute",
+      "s": [
+        "Wähle die Reihenfolge („Heiße Leads der Reihe nach“ oder „Zufällig aus den heißen Leads“) und klicke „Anruf-Modus starten“.",
+        "Das Portal öffnet den ersten Lead. Halte das Gespräch fest und klicke „Speichern & nächster Lead“. Das Portal springt zum nächsten heißen Lead.",
+        "Sind keine heißen mehr übrig, folgen fällige Wiedervorlagen und neue Leads. Ein Lead, den du gerade festgehalten hast, kommt erst nach seiner Wiedervorlage wieder.",
+        "Am Computer: Tasten 1 bis 9 wählen das Ergebnis, „N“ speichert und springt weiter, „S“ speichert nur. Die Tasten wirken nicht, solange du in einem Textfeld schreibst.",
+        "„Überspringen“ lässt den Lead aus, „Beenden“ verlässt den Anruf-Modus. Gesperrte Leads und Leads ohne Einwilligung werden nie angeboten."
+      ]
+    },
+    {
+      "t": "Lead per Foto anlegen",
+      "k": "foto bild visitenkarte schild kamera lead anlegen ki scannen fahrzeug",
+      "wo": "Meine Leads → „Neuer Lead“ → „📷 Foto aufnehmen oder wählen“",
+      "l": "#leads",
+      "s": [
+        "Fotografiere eine Visitenkarte, ein Firmenschild oder ein Fahrzeug. Auf dem Handy öffnet sich die Kamera.",
+        "Die KI liest Firma, Ansprechpartner, Telefon, E-Mail, Website, Branche und Ort ab und füllt das Formular vor. Nicht lesbare Felder bleiben leer.",
+        "Prüfe alle Felder, ergänze sie und klicke „Lead speichern“. Das Foto selbst wird nicht gespeichert.",
+        "Trage nur Kontakte ein, bei denen eine geschäftliche Ansprache zulässig ist."
+      ]
     }
   ],
   "titel": "Anleitung Vertriebsportal",
@@ -1015,6 +1052,10 @@
     [
       "Wer sieht meine Visitenkarte?",
       "Nur die Person, der du sie schickst. Eine öffentliche Seite gibt es nicht. Die Karte gibt es nur für das Markentrix-Team, nicht für Kunden."
+    ],
+    [
+      "Warum springt der Anruf-Modus nicht zu einem bestimmten Lead?",
+      "Er wählt nach Einstufung: erst heiße Leads, dann fällige Wiedervorlagen, dann neue Leads. Leads mit Wiedervorlage in der Zukunft kommen erst an dem Tag wieder."
     ]
   ]
 }

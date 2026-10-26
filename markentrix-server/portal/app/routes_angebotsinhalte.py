@@ -213,8 +213,8 @@ def uebersetzen(data: UebersetzenIn, user: dict = Depends(require_kunde)):
         raise HTTPException(429, "Für heute ist das Limit für automatische Übersetzungen erreicht. Morgen geht es weiter.")
     try:
         ergebnis, ein, aus = ki.uebersetzen(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, texte, ziele)
-    except Exception:
-        raise HTTPException(502, "Die Übersetzung hat gerade nicht geklappt. Bitte versuche es gleich noch einmal oder trage den Text selbst ein.")
+    except Exception as e:
+        raise ki.fehler(e, user, "Die Übersetzung hat gerade nicht geklappt. Bitte versuche es gleich noch einmal oder trage den Text selbst ein.")
     kosten = (ein * float(cfg.get("preis_ein_eur", 3.0)) + aus * float(cfg.get("preis_aus_eur", 15.0))) / 1_000_000 * 100
     with tx("system") as cur:
         cur.execute("INSERT INTO kosten_log (kunden_id, dienst, einheit, menge, kosten_cent) VALUES (%s,'anthropic','uebersetzung',%s,%s)", (kid, ein + aus, round(kosten, 4)))

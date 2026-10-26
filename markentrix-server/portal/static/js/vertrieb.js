@@ -77,7 +77,7 @@ V.heute = async () => {
     return el;
   };
   const block = (titel, liste, leer) => h('div', { class: 'card' }, h('h2', {}, titel, liste.length ? h('span', { class: 'badge', style: 'margin-left:8px' }, liste.length) : ''), liste.length ? liste.map(zeile) : h('p', { class: 'muted' }, leer));
-  return h('div', { class: 'stack' }, kopfKarte, meldung,
+  return h('div', { class: 'stack' }, anrufModusKarte(meldung), kopfKarte, meldung,
     block('Wiedervorlage fällig', d.wiedervorlagen, 'Keine Wiedervorlagen für heute.'),
     block('🔥 Heiße Leads: jetzt anrufen', d.heiss, 'Keine heißen Leads offen.'),
     block('Neu zugewiesen', d.neu, 'Keine neuen Leads.'));
@@ -247,24 +247,93 @@ V.provisionen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Einzelposten'), tabelle([['Monat', z => String(z.monat).slice(0, 7)], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Art', z => ({ laufend: 'Laufend', verlaengerung: 'Verlängerung', rueckbuchung: 'Rückbuchung' })[z.art] || z.art], ['Vertragsmonat', z => z.vertragsmonat || '–'], ['Basis', z => euro(z.basis_cent)], ['%', z => z.prozent], ['Betrag', z => euro(z.betrag_cent)], ['Status', z => pill(z.status)]], d, 'Noch keine Provisionen.')));
 };
 
+const LEAD_STATUS = ['neu', 'kontaktiert', 'antwort', 'termin', 'angebot', 'gewonnen', 'verloren', 'tot'];
+
+/** Verkleinert ein Foto auf höchstens 1600 Pixel und gibt es als JPEG (Base64) zurück. */
+async function fotoVorbereiten(datei) {
+  const bmp = await createImageBitmap(datei);
+  const f = Math.min(1, 1600 / Math.max(bmp.width, bmp.height)), c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * f); c.height = Math.round(bmp.height * f);
+  /** @type {CanvasRenderingContext2D} */ (c.getContext('2d')).drawImage(bmp, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.85).split(',')[1];
+}
+
 V.leads = async () => {
-  const d = await api('/api/vertrieb/leads'), m = h('div');
-  const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); Object.keys(o).forEach(k => { if (o[k] === '') delete o[k]; });
+  const P = new URLSearchParams(location.hash.split('?')[1] || ''), g = (k) => P.get(k) || '';
+  const d = await api('/api/vertrieb/leadsuche?' + P.toString()), m = h('div');
+  const setze = (k, w) => { const n = new URLSearchParams(P); if (k !== 'seite') n.delete('seite'); if (w) n.set(k, w); else n.delete(k); const t = n.toString(); location.hash = '#leads' + (t ? '?' + t : ''); };
+  const f = /** @type {HTMLFormElement} */ (h('form', { onsubmit: async (e) => { e.preventDefault(); const o = formular(e.target); Object.keys(o).forEach(k => { if (o[k] === '') delete o[k]; });
     try { await api('/api/vertrieb/leads', { method: 'POST', body: o }); location.reload(); } catch (x) { melde(m, x.message); } } },
     h('div', { class: 'form2' }, feld('Firma *', 'firma', { required: true }), feld('Ansprechpartner', 'ansprechpartner'), feld('E-Mail', 'email'), feld('Telefon', 'telefon'), feld('Branche', 'branche'), feld('PLZ', 'plz'), feld('Ort', 'ort'), feld('Website', 'website')),
-    h('label', {}, 'Notiz'), h('textarea', { name: 'notiz', rows: 2 }), h('p', {}, h('button', { class: 'btn' }, 'Lead speichern')));
+    h('label', {}, 'Notiz'), h('textarea', { name: 'notiz', rows: 2 }), h('p', {}, h('button', { class: 'btn' }, 'Lead speichern'))));
+  const datei = /** @type {HTMLInputElement} */ (h('input', { type: 'file', accept: 'image/*', hidden: true, 'aria-label': 'Foto wählen' }));
+  datei.onchange = async () => {
+    const bild = datei.files && datei.files[0]; if (!bild) return;
+    melde(m, 'Das Foto wird gelesen …', 'info');
+    try {
+      const r = await api('/api/vertrieb/leads/foto', { method: 'POST', body: { typ: 'image/jpeg', daten: await fotoVorbereiten(bild) } });
+      for (const [k, w] of Object.entries(r.felder)) { const feldEl = /** @type {HTMLInputElement|undefined} */ (f.elements.namedItem(k)); if (feldEl && w) feldEl.value = /** @type {string} */ (w); }
+      melde(m, r.hinweis, 'ok'); f.scrollIntoView({ behavior: 'smooth' });
+    } catch (x) { melde(m, x.message); }
+    datei.value = '';
+  };
+  const tabs = h('div', { class: 'tabs' }, h('button', { class: !g('status') && !g('faellig') && !g('temperatur') ? 'on' : '', onclick: () => location.hash = '#leads' }, 'Alle (' + Object.values(d.zaehler).reduce((a, b) => a + b, 0) + ')'),
+    d.faellig ? h('button', { class: g('faellig') ? 'on' : '', onclick: () => setze('faellig', g('faellig') ? '' : '1') }, '⏰ Fällig (' + d.faellig + ')') : '',
+    h('button', { class: g('temperatur') === 'heiss' ? 'on' : '', onclick: () => setze('temperatur', g('temperatur') === 'heiss' ? '' : 'heiss') }, '🔥 HOT'),
+    LEAD_STATUS.filter(s => d.zaehler[s]).map(s => h('button', { class: g('status') === s ? 'on' : '', onclick: () => setze('status', g('status') === s ? '' : s) }, s.replace(/_/g, ' ') + ' (' + d.zaehler[s] + ')')));
+  const suche = h('input', { type: 'search', placeholder: 'Suchen: Firma, Ort, Ansprechpartner, Telefon, E-Mail …', value: g('q'), 'aria-label': 'Leads durchsuchen', onkeydown: (e) => { if (e.key === 'Enter') setze('q', e.target.value.trim()); } });
+  const tel = (z) => z.telefon ? h('a', { href: 'tel:' + String(z.telefon).replace(/[^+\d]/g, ''), 'data-lead': z.id, 'data-firma': z.firma }, z.telefon) : '–';
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Meine Leads'),
-    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Ort', z => z.ort], ['Branche', z => z.branche], ['Status', z => pill(z.status)], ['Einstufung', z => ({ kalt: '❄ Cold', warm: '☀ Warm', heiss: '🔥 HOT' })[z.temperatur] || ''], ['Wiedervorlage', z => z.wiedervorlage_am ? datum(z.wiedervorlage_am) : ''], ['Zuletzt kontaktiert', z => z.letzter_kontakt_am ? datum(z.letzter_kontakt_am) : '–'], ['Angelegt', z => datum(z.erstellt_am)]], d, 'Noch keine Leads.')),
-    h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), h('p', { class: 'small muted' }, 'Bitte nur Kontakte eintragen, bei denen eine geschäftliche Ansprache zulässig ist.'), m, f));
+    h('div', { class: 'row', style: 'gap:8px;margin-bottom:8px' }, h('div', { class: 'grow' }, suche), h('button', { class: 'btn small', onclick: () => setze('q', suche.value.trim()) }, 'Suchen'),
+      g('q') || g('status') || g('faellig') || g('temperatur') ? h('button', { class: 'btn sec small', onclick: () => { location.hash = '#leads'; } }, 'Zurücksetzen') : ''),
+    tabs, h('p', { class: 'small muted' }, d.gesamt + (d.gesamt === 1 ? ' Lead' : ' Leads') + (g('q') ? ' zu „' + g('q') + '“' : '')),
+    tabelle([['Firma', z => h('a', { href: '#lead/' + z.id }, z.firma)], ['Telefon', tel], ['Ort', z => z.ort], ['Branche', z => z.branche], ['Status', z => pill(z.status)], ['Einstufung', z => ({ kalt: '❄ Cold', warm: '☀ Warm', heiss: '🔥 HOT' })[z.temperatur] || ''], ['Wiedervorlage', z => z.wiedervorlage_am ? datum(z.wiedervorlage_am) : ''], ['Zuletzt kontaktiert', z => z.letzter_kontakt_am ? datum(z.letzter_kontakt_am) : '–'], ['Angelegt', z => datum(z.erstellt_am)]], d.leads, 'Keine Leads gefunden.'),
+    d.seiten > 1 ? h('div', { class: 'row', style: 'margin-top:8px;align-items:center;gap:8px' },
+      d.seite > 1 ? h('button', { class: 'btn sec small', onclick: () => setze('seite', d.seite > 2 ? String(d.seite - 1) : '') }, '← Zurück') : '', h('span', { class: 'small muted' }, 'Seite ' + d.seite + ' von ' + d.seiten),
+      d.seite < d.seiten ? h('button', { class: 'btn sec small', onclick: () => setze('seite', String(d.seite + 1)) }, 'Weiter →') : '') : ''),
+    h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), h('p', { class: 'small muted' }, 'Bitte nur Kontakte eintragen, bei denen eine geschäftliche Ansprache zulässig ist.'),
+      h('p', {}, h('button', { class: 'btn sec', type: 'button', onclick: () => datei.click() }, '📷 Foto aufnehmen oder wählen'), datei, h('span', { class: 'small muted' }, ' Visitenkarte, Firmenschild oder Fahrzeug: Die Felder werden vorausgefüllt, du prüfst und speicherst. Das Foto wird nicht gespeichert.')), m, f));
 };
 
-/** Springt zum nächsten Lead der „Heute“-Liste, sonst zurück zur Liste. */
+const MODUS = 'mk-anrufmodus';
+const modusLesen = () => { try { return JSON.parse(sessionStorage.getItem(MODUS) || 'null'); } catch { return null; } };
+const modusSchreiben = (x) => { try { if (x) sessionStorage.setItem(MODUS, JSON.stringify(x)); else sessionStorage.removeItem(MODUS); } catch { /* ohne Speicher gibt es keinen Anruf-Modus */ } };
+const MODUS_TEXT = { heiss: 'Heiße Leads der Reihe nach', zufall: 'Zufällig aus den heißen Leads' };
+
+/** Springt zum nächsten Lead. Im Anruf-Modus zum nächsten heißen (der Reihe nach oder zufällig), sonst zum nächsten der „Heute“-Liste. */
 async function naechsterLead(aktuell) {
+  const mo = modusLesen();
   try {
+    if (mo) {
+      if (aktuell && !mo.erledigt.includes(aktuell)) mo.erledigt.push(aktuell);
+      const r = await api('/api/vertrieb/naechster?modus=' + mo.modus + '&ausser=' + mo.erledigt.join(','));
+      if (r.id) { modusSchreiben(mo); location.hash = '#lead/' + r.id; return; }
+      try { sessionStorage.setItem('mk-modus-ende', String(mo.erledigt.length)); } catch { /* egal */ }
+      modusSchreiben(null); location.hash = '#heute'; return;
+    }
     const d = await api('/api/vertrieb/heute');
     const n = [...d.wiedervorlagen, ...d.heiss, ...d.neu].find(x => x.id !== aktuell);
     location.hash = n ? '#lead/' + n.id : '#heute';
   } catch { location.hash = '#heute'; }
+}
+
+/** Karte auf „Heute“: Anruf-Modus starten. */
+function anrufModusKarte(m) {
+  const sel = h('select', { 'aria-label': 'Reihenfolge' }, Object.entries(MODUS_TEXT).map(([k, t]) => h('option', { value: k }, t)));
+  let ende = null; try { ende = sessionStorage.getItem('mk-modus-ende'); sessionStorage.removeItem('mk-modus-ende'); } catch { /* egal */ }
+  return h('div', { class: 'card' }, h('h2', {}, '📞 Anruf-Modus'),
+    ende ? h('div', { class: 'msg ok' }, 'Anruf-Modus beendet: keine weiteren Leads in der Liste. ' + ende + ' abgearbeitet.') : '',
+    h('p', { class: 'small muted' }, 'Nach jedem festgehaltenen Gespräch springt das Portal automatisch zum nächsten heißen Lead. Sind keine heißen mehr übrig, folgen fällige Wiedervorlagen und neue Leads. Am Computer wählst du das Ergebnis mit den Tasten 1 bis 9, „N“ speichert und springt weiter.'),
+    h('div', { class: 'row', style: 'gap:8px;align-items:center;flex-wrap:wrap' }, sel, h('button', { class: 'btn', onclick: async () => { modusSchreiben({ modus: sel.value, erledigt: [], start: Date.now() }); await naechsterLead(null); const mo = modusLesen(); if (!mo) melde(m, 'Es gibt gerade keinen Lead zum Anrufen.', 'info'); } }, 'Anruf-Modus starten')));
+}
+
+/** Leiste oben im Lead, solange der Anruf-Modus läuft. */
+function modusLeiste(lid) {
+  const mo = modusLesen(); if (!mo) return '';
+  return h('div', { class: 'card', style: 'border-left:4px solid var(--akzent, #1E9BFF)' }, h('div', { class: 'row', style: 'align-items:center;gap:8px;flex-wrap:wrap' },
+    h('b', {}, '📞 Anruf-Modus'), h('span', { class: 'small muted grow' }, MODUS_TEXT[mo.modus] + ' · ' + mo.erledigt.length + ' abgearbeitet'),
+    h('button', { class: 'btn sec small', onclick: () => naechsterLead(lid) }, 'Überspringen'),
+    h('button', { class: 'btn sec small', onclick: () => { modusSchreiben(null); location.hash = '#heute'; } }, 'Beenden')));
 }
 
 function branchenKarte(lid) {
@@ -419,9 +488,9 @@ async function leadDetail(lid) {
   const akt = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/leads/' + lid + '/aktivitaet', { method: 'POST', body: formular(e.target) }); location.reload(); } catch (x) { melde(m, x.message); } } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, h('select', { name: 'art' }, ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'].map(a => h('option', { value: a }, a.replace(/_/g, ' '))))),
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
-  return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l), listenKnopf(['leads', 'heute', 'pipeline'])), m,
+  return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), st, ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l), listenKnopf(['leads', 'heute', 'pipeline'])), m,
     datenKarte(lid, l, d, m), h('div', { class: 'card', hidden: true }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
-    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende }),
+    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: !!modusLesen() }),
     terminKarte(lid), branchenKarte(lid), h('div', { id: 'angebotbereich', class: 'stack' }, direktAngebotKarte(lid, l), angebotKarte(lid, l)), nachgespraechKarte(lid),
     skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
@@ -461,7 +530,7 @@ V.konto = async () => {
 let aufruf = 0;
 async function zeige() {
   const dieser = ++aufruf;
-  const hash = (location.hash || '#heute').slice(1), seite = hash.split('/')[0];
+  const hash = (location.hash || '#heute').slice(1), seite = hash.split('/')[0].split('?')[0];
   nutzung(V[seite] || seite === 'lead' ? seite : 'heute');
   let inhalt;
   try { inhalt = seite === 'lead' ? await leadDetail(hash.split('/')[1]) : await (V[seite] || V.heute)(); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }

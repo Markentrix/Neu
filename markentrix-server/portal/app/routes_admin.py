@@ -528,8 +528,8 @@ def bericht_ki_entwurf(bid: str, user: dict = Depends(require_admin)):
         raise HTTPException(400, "Für den KI-Entwurf fehlt der Schlüssel unter Einstellungen → KI.")
     try:
         ergebnis = ki.bericht_entwurf(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, b["firma"], b["branche"], b["daten"])
-    except Exception:
-        raise HTTPException(502, "Der KI-Dienst hat nicht geantwortet. Bitte später erneut versuchen.")
+    except Exception as e:
+        raise ki.fehler(e, user, "Der KI-Dienst hat nicht geantwortet. Bitte später erneut versuchen.")
     return ergebnis
 
 

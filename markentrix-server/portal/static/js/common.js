@@ -151,19 +151,30 @@ export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
   const grund = h('select', { 'aria-label': 'Grund für die Absage', style: 'display:none;width:auto' }, h('option', { value: '' }, 'Grund wählen …'), Object.entries(extra.verlustgruende || {}).map(([c, t]) => h('option', { value: c }, t)));
   const waehle = (o, b) => { wahl = o; knoepfe.forEach(x => x.classList.remove('gewaehlt')); b.classList.add('gewaehlt'); speichern.disabled = false; if (weiter) weiter.disabled = false;
     wv.tag.value = tagIn(o.wiedervorlage_tage); grund.style.display = o.code === 'kein_interesse' && extra.verlustgruende ? '' : 'none'; };
-  optionen.forEach(o => { const b = h('button', { type: 'button', class: 'btn sec small', onclick: () => waehle(o, b) }, o.text); knoepfe.push(b); });
+  optionen.forEach((o, i) => { const b = h('button', { type: 'button', class: 'btn sec small', onclick: () => waehle(o, b) }, extra.kurzwahl && i < 9 ? h('span', { class: 'muted', style: 'margin-right:4px' }, (i + 1) + ' ·') : '', o.text); knoepfe.push(b); });
   const los = async (danach) => { if (!wahl) return;
     if (wahl.code === 'kein_interesse' && extra.verlustgruende && !grund.value) { melde(m, 'Bitte den Grund der Absage wählen. Das hilft bei der Auswertung.'); return; }
     try { const r = await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null, verlust_grund: grund.value || null } });
       if (danach) danach(r); else if (extra.nach) extra.nach(r); else location.reload(); } catch (x) { melde(m, x.message); } };
   speichern.onclick = () => los(null);
   if (weiter) /** @type {any} */ (weiter).onclick = () => los(extra.naechster);
-  return h('div', { class: 'card' }, h('h2', {}, 'Kontakt festhalten'),
+  const box = h('div', { class: 'card' }, h('h2', {}, 'Kontakt festhalten'),
     h('p', { class: 'small muted' }, 'Was ist passiert? Der Verlauf und, wo es passt, der Status werden automatisch gesetzt.'), m,
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, knoepfe),
     h('div', { style: 'margin-top:10px' }, notiz, notizWerkzeug(notiz, m)),
     h('div', { class: 'row', style: 'margin-top:6px;align-items:flex-end;flex-wrap:wrap' }, grund, wv.el, speichern, weiter),
     wiedervorlage ? h('p', { class: 'small muted' }, 'Aktuelle Wiedervorlage: ' + datum(wiedervorlage)) : '');
+  // Tastenkürzel am Computer: 1 bis 9 wählt das Ergebnis, N speichert und springt zum nächsten Lead, S speichert
+  const taste = (/** @type {KeyboardEvent} */ e) => {
+    if (!document.body.contains(box)) { document.removeEventListener('keydown', taste); return; }
+    const t = /** @type {HTMLElement|null} */ (e.target);
+    if (e.ctrlKey || e.metaKey || e.altKey || (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable))) return;
+    if (/^[1-9]$/.test(e.key) && knoepfe[Number(e.key) - 1]) { e.preventDefault(); knoepfe[Number(e.key) - 1].click(); }
+    else if (e.key.toLowerCase() === 'n' && weiter && wahl) { e.preventDefault(); /** @type {HTMLElement} */ (weiter).click(); }
+    else if (e.key.toLowerCase() === 's' && wahl) { e.preventDefault(); speichern.click(); }
+  };
+  document.addEventListener('keydown', taste);
+  return box;
 }
 
 // Gesprächsleitfaden (KI) für einen Lead: zeigt den gespeicherten Entwurf, Knopf erzeugt oder erneuert ihn

@@ -79,8 +79,8 @@ def _skript_erzeugen(lid: str, pid: str | None, user: dict):
         raise HTTPException(400, "Für den Gesprächsleitfaden fehlt der KI-Schlüssel (Einstellungen → KI). Bitte beim Team melden.")
     try:
         s = ki.skript_entwurf(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, l)
-    except Exception:
-        raise HTTPException(502, "Der KI-Dienst hat nicht geantwortet. Bitte später erneut versuchen.")
+    except Exception as e:
+        raise ki.fehler(e, user, "Der KI-Dienst hat nicht geantwortet. Bitte später erneut versuchen.")
     import json
     with tx("system") as cur:
         cur.execute("UPDATE leads SET skript=%s::jsonb, skript_am=now() WHERE id=%s", (json.dumps(s, ensure_ascii=False), lid))
@@ -102,8 +102,8 @@ def notiz_zusammenfassen(data: NotizIn, user: dict = Depends(require_vertrieb)):
         raise HTTPException(400, "Die Zusammenfassung ist noch nicht eingerichtet (KI-Schlüssel fehlt). Bitte beim Team melden. Die Notiz kannst du trotzdem speichern.")
     try:
         text = ki.notiz_zusammenfassen(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, data.text)
-    except Exception:
-        raise HTTPException(502, "Der KI-Dienst hat nicht geantwortet. Die Notiz kannst du trotzdem speichern.")
+    except Exception as e:
+        raise ki.fehler(e, user, "Der KI-Dienst hat nicht geantwortet. Die Notiz kannst du trotzdem speichern.")
     if not text:
         raise HTTPException(502, "Es kam keine Zusammenfassung zurück. Bitte noch einmal versuchen.")
     return {"zusammenfassung": text}
