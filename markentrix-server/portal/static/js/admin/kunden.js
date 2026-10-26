@@ -1,4 +1,4 @@
-import { h, api, csvLaden, datum, dialog, zeit, euro, melde, formular, el, rueckgaengig } from '../common.js';
+import { listenKnopf, h, api, csvLaden, datum, dialog, zeit, euro, melde, formular, el, rueckgaengig } from '../common.js';
 import { belegeKarte } from './belege.js';
 import { V, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
 import { erklaerungBox } from './fehlerhilfe.js';
@@ -509,7 +509,7 @@ export async function kundeDetail(kid) {
   }
 
   return h('div', { class: 'stack' },
-    kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, h('a', { class: 'btn sec small', href: '#kunden' }, '← Liste')),
+    kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, listenKnopf('kunden')),
     await websiteProblemKarte(kid),
     await zeitachseKarte(kid),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),

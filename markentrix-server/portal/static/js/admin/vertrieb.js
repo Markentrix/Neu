@@ -1,3 +1,4 @@
+import { listenKnopf, listenZiel } from '../common.js';
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
 import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
@@ -248,7 +249,7 @@ export async function leadDetail(lid) {
   const zuK = l.kunden_id ? h('a', { class: 'btn sec small', href: '#kunde/' + l.kunden_id }, 'Zum Kunden') : knopf('Zum Kunden machen', () => zuKundeDialog(lid, (k) => { location.hash = '#kunde/' + (k.kunden_id || k.id); }));
   const gesperrt = ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status);
   const ang = gesperrt ? '' : h('button', { class: 'btn small', onclick: () => angebotDialog(lid, () => location.reload()) }, 'Angebot senden');
-  return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, gesperrt ? '' : visitenkarteKnopf('/api/admin', lid, l), zuK, leadLoeschen(l, m, () => { location.hash = '#leads'; }), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
+  return h('div', { class: 'stack' }, kopf(l.firma, st, tempWahl(l, m), ang, gesperrt ? '' : visitenkarteKnopf('/api/admin', lid, l), zuK, leadLoeschen(l, m, () => { location.hash = listenZiel('leads'); }), listenKnopf('leads')), m,
     h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ['Quelle', l.quelle], ['Vertriebler', l.vertriebler || '–'], ['Score', l.score ?? '–']].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     anfragenKarte(anfragen),
     await leadAngebotKarte(lid, l, m),

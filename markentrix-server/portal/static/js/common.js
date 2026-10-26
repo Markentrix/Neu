@@ -588,3 +588,34 @@ export function toast(text, art = 'bad') {
   const t = h('div', { class: 'toast ' + art, role: 'status', 'aria-live': 'polite' }, text);
   document.body.append(t); setTimeout(() => t.remove(), 6000);
 }
+
+// ---------------------------------------------------------------- Zurück zur Liste (Filter, Suche, Seite und Scrollstand bleiben erhalten)
+const VORHER = 'mk-vorher', SCROLL = 'mk-scroll';
+const lesen = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+const schreiben = (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) { /* ohne Speicher funktioniert es einfach wie bisher */ } };
+let scrollTimer = 0;
+window.addEventListener('scroll', () => {
+  clearTimeout(scrollTimer);
+  scrollTimer = window.setTimeout(() => { try { const s = JSON.parse(lesen(SCROLL) || '{}'); s[location.hash] = Math.round(window.scrollY); schreiben(SCROLL, JSON.stringify(s)); } catch (e) { /* egal */ } }, 150);
+}, { passive: true });
+window.addEventListener('hashchange', (e) => {
+  const alt = (e.oldURL.split('#')[1] || '');
+  if (alt) schreiben(VORHER, '#' + alt);
+  // Zurück aus einem Datensatz: Scrollstand der Liste wiederherstellen (die Seite baut sich erst nach dem Laden auf)
+  if (alt.startsWith('lead/') || alt.startsWith('kunde/')) {
+    let y = 0; try { y = JSON.parse(lesen(SCROLL) || '{}')[location.hash] || 0; } catch (x) { /* egal */ }
+    if (y > 50) [150, 500, 1100, 2000].forEach(t => setTimeout(() => { if (Math.abs(window.scrollY - y) > 8 && document.documentElement.scrollHeight >= y + window.innerHeight) window.scrollTo(0, y); }, t));
+  }
+});
+
+/** Ziel für „Zurück zur Liste“: die Liste mit ihren Filtern, wenn man von dort kam, sonst die Standardliste.
+ * @param {string} std z. B. 'leads' */
+export function listenZiel(std) {
+  const v = lesen(VORHER) || '', liste = [].concat(std);
+  return liste.some(s => v === '#' + s || v.startsWith('#' + s + '?')) ? v : '#' + liste[0];
+}
+
+/** Knopf „← Liste“, der zur zuletzt gesehenen Liste mit denselben Filtern führt. */
+export function listenKnopf(std, text = '← Liste') {
+  return h('a', { class: 'btn sec small', href: listenZiel(std), onclick: (e) => { e.preventDefault(); location.hash = listenZiel(std); } }, text);
+}
