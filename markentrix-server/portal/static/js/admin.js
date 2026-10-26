@@ -1,4 +1,4 @@
-import { h, api, nutzung, zweiFaktorKarte, stapelTabellen, pushNachfrage } from './common.js';
+import { h, api, nutzung, zweiFaktorKarte, stapelTabellen, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
 stapelTabellen();
 import { belegEditor } from './admin/belege.js';
 import {V, gerüst, zaehlerAdmin, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
@@ -16,7 +16,7 @@ import './admin/postfach.js';
 import './admin/pipeline.js';
 import './admin/onboardingboard.js';
 import './admin/meintag.js';
-import './admin/funnel.js';
+import { liveHinweis } from './admin/funnel.js';
 const root = document.getElementById('app');
 
 async function seiteZeigen() {
@@ -39,7 +39,7 @@ setzeZeige(seiteZeigen);
 (async () => {
   try {
     const me = await api('/api/me');
-    if (me.rolle !== 'admin') { location.href = '/app'; return; }
+    if (me.rolle !== 'admin') { location.href = zielFuerRolle(me.rolle); return; }
     if (me.zwei_faktor_pflicht) {   // Pflicht laut AVV: ohne Zwei-Faktor-Anmeldung kein Zugriff auf das Admin-Portal
       root.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Zwei-Faktor-Anmeldung einrichten'),
         h('p', {}, 'Für Administrator-Zugänge ist die Zwei-Faktor-Anmeldung Pflicht. Bitte jetzt einrichten, danach geht es direkt weiter.'), zweiFaktorKarte(),
@@ -49,9 +49,10 @@ setzeZeige(seiteZeigen);
     setzeIch(me);
     setzePakete((await api('/api/admin/katalog')).produkte);
     try { const z = (await api('/api/admin/uebersicht')).zusammenarbeit; zaehlerAdmin.postfach = z.tickets_ungelesen; zaehlerAdmin.freigaben = z.freigaben_wartend; zaehlerAdmin.aufgaben = z.aufgaben_ueberfaellig; } catch (e) { /* Zähler sind optional */ }
-  } catch (e) { return; }
+  } catch (e) { startFehler(root, e); return; }
   window.addEventListener('hashchange', seiteZeigen);
   seiteZeigen();
   setTimeout(pushNachfrage, 2500);
+  liveHinweis();
 })();
 

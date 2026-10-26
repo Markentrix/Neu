@@ -71,7 +71,7 @@ def text_mit_signatur(text: str, firma: str, eigene: str | None, extras: dict | 
     return koerper + "\n\n" + signatur_text(firma, eigene) + text_extras(extras) + (("\n\n" + nachsatz) if nachsatz else "")
 
 
-def _absatz(zeilen: list[str], html: list[str]) -> None:
+def _absatz(zeilen: list[str], html: list[str], ci: bool = False) -> None:
     """Textzeilen als Absatz, „- Punkt“-Zeilen als Liste, eine Zeile nur mit Adresse als Knopf (Beschriftung nach dem Text davor)."""
     text: list[str] = []
     punkte: list[str] = []
@@ -101,15 +101,20 @@ def _absatz(zeilen: list[str], html: list[str]) -> None:
         if m:
             text_aus()
             url = m.group(0)
-            html.append(f'<p style="margin:4px 0 18px"><a href="{escape(url, quote=True)}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;'
-                        f'padding:11px 20px;border-radius:8px;font-weight:600">{escape(_knopf_text(url, davor))}</a></p>')
+            if ci:   # Mail von Markentrix an das eigene Team: Knopf im CI (Cyan → Blau, Schrift Navy)
+                html.append(f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 18px"><tr><td bgcolor="#28C7F7" style="border-radius:12px;background:#28C7F7;'
+                            f'background-image:linear-gradient(135deg,#28C7F7,#1E9BFF)"><a href="{escape(url, quote=True)}" style="display:inline-block;padding:13px 22px;color:#0B1020;'
+                            f'text-decoration:none;font-weight:700;border-radius:12px">{escape(_knopf_text(url, davor))}<span> &rarr;</span></a></td></tr></table>')
+            else:
+                html.append(f'<p style="margin:4px 0 18px"><a href="{escape(url, quote=True)}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;'
+                            f'padding:11px 20px;border-radius:8px;font-weight:600">{escape(_knopf_text(url, davor))}</a></p>')
         else:
             text.append(z)
     text_aus()
     punkte_aus()
 
 
-def _bloecke(koerper: str, firma: str) -> list[str]:
+def _bloecke(koerper: str, firma: str, ci: bool = False) -> list[str]:
     html: list[str] = []
     for block in re.split(r"\n\s*\n", koerper.strip()):
         zeilen = [z.rstrip() for z in block.split("\n") if z.strip() != ""]
@@ -120,7 +125,7 @@ def _bloecke(koerper: str, firma: str) -> list[str]:
         karte = re.match(r"^(\d{1,2})\.\s+(\S.{0,200})$", zeilen[0])
         if karte:   # nummerierter Eintrag (z. B. Aufgabenliste): Überschrift, darunter Einzelheiten
             html.append(f'<p style="margin:22px 0 8px;padding-top:14px;border-top:1px solid #e5e7eb;font-weight:700;font-size:17px;color:#111827">{karte.group(1)}. {escape(karte.group(2))}</p>')
-            _absatz(zeilen[1:], html)
+            _absatz(zeilen[1:], html, ci)
             continue
         # Abschnitt „Nachricht:“ / „Ihre Angaben:“ mit Überschrift
         kopf = None
@@ -129,10 +134,10 @@ def _bloecke(koerper: str, firma: str) -> list[str]:
         paare = [ZEILE_WERT.match(z) for z in zeilen]
         if zeilen and all(paare) and not any(URL.search(z) for z in zeilen):
             zl = "".join(f'<tr><td style="padding:6px 14px 6px 0;color:#6b7280;vertical-align:top;white-space:nowrap">{escape(m.group(1))}</td>'
-                         f'<td style="padding:6px 0;color:#111827;vertical-align:top">{_verlinken(m.group(2))}</td></tr>' for m in paare)
+                         f'<td style="padding:6px 0;color:#111827;vertical-align:top">{_wert(m.group(1), m.group(2))}</td></tr>' for m in paare)
             if kopf:
                 html.append(f'<p style="margin:18px 0 6px;font-weight:600;color:#111827">{escape(kopf)}</p>')
-            html.append(f'<table role="presentation" cellpadding="0" cellspacing="0" style="border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;width:100%;margin:0 0 8px">{zl}</table>')
+            html.append(f'<table role="presentation" cellpadding="0" cellspacing="0" style="border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;width:100%;margin:0 0 14px">{zl}</table>')
             continue
         if kopf and not any(URL.search(z) for z in zeilen):
             html.append(f'<p style="margin:18px 0 6px;font-weight:600;color:#111827">{escape(kopf)}</p>'
@@ -140,8 +145,18 @@ def _bloecke(koerper: str, firma: str) -> list[str]:
             continue
         if kopf:
             zeilen = [kopf + ":"] + zeilen
-        _absatz(zeilen, html)
+        _absatz(zeilen, html, ci)
     return html
+
+
+def _wert(label: str, wert: str) -> str:
+    """Wert in der Tabelle „Angabe: Wert“: Telefonnummern und Mail-Adressen anklickbar."""
+    lab = label.strip().lower()
+    if lab in ("telefon", "tel.", "mobil", "handy") and re.fullmatch(r"\+?[0-9][0-9 /()\-]{4,}[0-9]", wert.strip()):
+        return f'<a href="tel:{escape(re.sub(r"[^0-9+]", "", wert), quote=True)}" style="color:#1d4ed8;text-decoration:none;font-weight:600">{escape(wert.strip())}</a>'
+    if re.fullmatch(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", wert.strip()):
+        return f'<a href="mailto:{escape(wert.strip(), quote=True)}" style="color:#1d4ed8;text-decoration:none">{escape(wert.strip())}</a>'
+    return _verlinken(wert)
 
 
 KONTAKT = re.compile(r"(?P<mail>[\w.+-]+@[\w-]+(?:\.[\w-]+)+)|(?P<url>https?://[^\s<>\"']+)|(?i:(?P<lab>web|internet|homepage)\s*:\s*)(?P<dom>(?:https?://)?[\w-]+(?:\.[\w-]+)+(?:/\S*)?)|(?i:(?P<tel>tel\.?|telefon|mobil|handy)\s*:?\s*)(?P<nr>\+?[0-9][0-9 /()\-]{5,}[0-9])")
@@ -241,10 +256,9 @@ def html_mail(firma: str, text: str, signatur: str | None = None, farbe: str | N
         hinweis, koerper = m_auto.group(1), koerper[:m_auto.start()].rstrip()
     farbe = farbe if farbe and re.fullmatch(r"#[0-9a-fA-F]{6}", farbe) else "#111827"
     # Mail an einen Gast: Logo steht in der Signatur, im Kopf nur der Firmenname. Mail ans Team (ohne Signatur): Logo im Kopf.
-    if intern and logo_cid:
-        kopf = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td><img src="cid:{logo_cid}" alt="" width="40" height="40" style="display:block;border:0;border-radius:8px"></td>'
-                f'<td style="padding-left:12px;font-size:20px;font-weight:700;color:#111827">{escape(firma)}</td></tr></table>')
-    elif logo_cid and not gast:
+    if intern:
+        return _intern_html(firma, koerper, logo_cid, hinweis)
+    if logo_cid and not gast:
         kopf = f'<img src="cid:{logo_cid}" alt="{escape(firma, quote=True)}" style="max-height:56px;max-width:220px;display:block;border:0">'
     else:
         kopf = f'<div style="font-size:20px;font-weight:700;color:#111827">{escape(firma)}</div>'
@@ -259,6 +273,24 @@ def html_mail(firma: str, text: str, signatur: str | None = None, farbe: str | N
             f'<tr><td style="padding:22px 28px 16px;border-bottom:3px solid {farbe}">{kopf}</td></tr>'
             f'<tr><td style="padding:24px 28px 28px">{"".join(_bloecke(koerper, firma))}{sig}{fuss}</td></tr></table>'
             '</td></tr></table></body></html>')
+
+
+def _intern_html(firma: str, koerper: str, logo_cid: str | None, hinweis: str) -> str:
+    """Mails von Markentrix an das eigene Team (neuer Lead, Alarme, Aufgaben) im Markentrix-CI."""
+    schrift = "Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+    logo = f'<td valign="middle" style="padding-right:10px"><img src="cid:{logo_cid}" alt="" width="40" height="34" style="display:block;border:0;width:40px;height:34px"></td>' if logo_cid else ""
+    fuss = f'<p style="margin:16px 0 0;font-size:12px;color:#667085">{escape(hinweis)}</p>' if hinweis else ""
+    return ('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>'
+            f'<body style="margin:0;padding:0;background:#F8FAFC;font-family:{schrift};font-size:16px">'
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC"><tr><td align="center" style="padding:24px 12px">'
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px">'
+            f'<tr><td style="padding:0 4px 14px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>{logo}'
+            f'<td valign="middle" style="font-family:{schrift};font-size:20px;font-weight:800;letter-spacing:-.02em;color:#0B1020">{escape(firma)}</td></tr></table></td></tr>'
+            '<tr><td style="background:#FFFFFF;border:1px solid #E6E9F3;border-radius:18px;overflow:hidden">'
+            '<div style="height:4px;line-height:4px;font-size:0;background:#28C7F7;background-image:linear-gradient(90deg,#28C7F7,#1E9BFF)">&nbsp;</div>'
+            f'<div style="padding:24px 22px 22px;font-family:{schrift}">{"".join(_bloecke(koerper, firma, True))}{fuss}</div></td></tr>'
+            '</table></td></tr></table></body></html>')
 
 
 def bild_pruefen(logo: bytes | None, typ: str | None) -> tuple[bytes, str, str] | None:

@@ -17,7 +17,9 @@ def _markentrix_logo():
     """Das „M“-Zeichen des Portals als eingebettetes Mail-Logo (einmal gelesen). Fehlt die Datei, geht die Mail ohne Logo raus."""
     if not _LOGO:
         try:
-            _LOGO.append(("image", "png", (Path(__file__).resolve().parent.parent / "static" / "icons" / "icon-192.png").read_bytes()))
+            ordner = Path(__file__).resolve().parent.parent / "static"
+            datei = ordner / "funnel" / "logo-mail.png"
+            _LOGO.append(("image", "png", (datei if datei.is_file() else ordner / "icons" / "icon-192.png").read_bytes()))
         except OSError:
             _LOGO.append(None)
     x = _LOGO[0]
@@ -38,9 +40,10 @@ def anhaenge(anhang) -> list:
 
 
 def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
-           von_name: str | None = None, kunden_id=None, art: str = "system", vorlage: dict | None = None) -> tuple[bool, str]:
-    """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel und das Zustell-Protokoll festgehalten."""
-    ok, grund = _senden(an, betreff, text, anhang, reply_to, von_name, vorlage)
+           von_name: str | None = None, kunden_id=None, art: str = "system", vorlage: dict | None = None, html: tuple[str, bytes | None] | None = None) -> tuple[bool, str]:
+    """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel und das Zustell-Protokoll festgehalten.
+    html = (fertiges HTML, PNG-Logo für cid:logo@mail oder None): eigenes Layout statt der Standard-Mailvorlage."""
+    ok, grund = _senden(an, betreff, text, anhang, reply_to, von_name, vorlage, html)
     if grund != "E-Mail-Versand ist noch nicht eingerichtet.":
         zustellung.protokoll(kunden_id, art, an, ok, grund)
         betrieb.notieren("mail", {"ok_am": betrieb.jetzt()} if ok else {"fehler_am": betrieb.jetzt(), "fehler": grund[:200]})
@@ -48,7 +51,7 @@ def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | No
 
 
 def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
-            von_name: str | None = None, vorlage: dict | None = None) -> tuple[bool, str]:
+            von_name: str | None = None, vorlage: dict | None = None, html: tuple[str, bytes | None] | None = None) -> tuple[bool, str]:
     try:
         with tx("system") as cur:
             c = einstellungen.lesen(cur, "smtp")
@@ -62,9 +65,15 @@ def _senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | N
         msg["Subject"] = re.sub(r"[\r\n]+", " ", betreff)   # Zeilenumbrüche (z. B. in Namen) dürfen den Versand nie verhindern
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain=c["absender"].split("@")[-1])
-        if not vorlage:   # Mail von Markentrix selbst: gleiches saubere Layout, Text und Gruß bleiben unverändert
-            vorlage = {"firma": c.get("absender_name") or "Markentrix", "farbe": "#4f46e5", "logo": _markentrix_logo(), "intern": True}
-        mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"), vorlage.get("intern", False))
+        if html:   # eigenes Layout (z. B. Funnel-Mails im Markentrix-CI)
+            msg.set_content(text)
+            msg.add_alternative(html[0], subtype="html")
+            if html[1]:
+                msg.get_payload()[1].add_related(html[1], maintype="image", subtype="png", cid="<logo@mail>", disposition="inline")
+        else:
+            if not vorlage:   # Mail von Markentrix selbst: gleiches saubere Layout, Text und Gruß bleiben unverändert
+                vorlage = {"firma": c.get("absender_name") or "Markentrix", "farbe": "#1E9BFF", "logo": _markentrix_logo(), "intern": True}
+            mailvorlage.inhalt_setzen(msg, text, vorlage["firma"], vorlage.get("signatur"), vorlage.get("farbe"), vorlage.get("logo"), vorlage.get("extras"), vorlage.get("intern", False))
         for name, daten, mime in anhaenge(anhang):
             maintype, subtype = mime.split("/")
             msg.add_attachment(daten, maintype=maintype, subtype=subtype, filename=name)
@@ -339,6 +348,29 @@ def lead_folge(an: str, name: str | None, firma: str, betreff: str, text: str, t
         body = text
     abmelden = config.BASE_URL.rstrip("/") + "/api/public/abmelden?t=" + token
     return senden(an, betreff, body + SIGNATUR + f"\n\n--\nSie möchten dazu nichts mehr von uns erhalten? Hier abmelden: {abmelden}")
+
+
+def _funnel_logo() -> bytes | None:
+    try:
+        return (Path(__file__).resolve().parent.parent / "static" / "funnel" / "logo-mail.png").read_bytes()
+    except OSError:
+        return None
+
+
+def funnel_mail(an: str, betreff: str, text: str, token: str, anhang: tuple[str, bytes, str] | None = None,
+                html_text: str | None = None, ergebnis: dict | None = None) -> tuple[bool, str]:
+    """Mail an einen Funnel-Lead (Ergebnis des Website-Checks oder Nachfass-Mail): fertiger Text, Gruß vom Team und Abmeldelink.
+    HTML im Markentrix-CI; html_text = derselbe Text mit Markierung für die Ergebnis-Karte (sonst text)."""
+    from . import funnelmail
+    abmelden = config.BASE_URL.rstrip("/") + "/api/public/abmelden?t=" + token
+    try:
+        with tx("system") as cur:
+            firma = einstellungen.lesen(cur, "firma") or {}
+        logo = _funnel_logo()
+        html = (funnelmail.html_mail(html_text or text, firma, abmelden, config.BASE_URL.rstrip("/") + "/impressum", ergebnis, "logo@mail" if logo else None), logo)
+    except Exception:  # noqa: BLE001 - ohne gestaltete Fassung geht die Mail im Standard-Layout raus
+        html = None
+    return senden(an, betreff, text.rstrip() + SIGNATUR + f"\n\n--\nSie möchten dazu nichts mehr von uns erhalten? Hier abmelden: {abmelden}", anhang=anhang, art="lead", html=html)
 
 
 def kunden_feedback(an: str, name: str | None) -> tuple[bool, str]:

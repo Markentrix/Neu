@@ -129,6 +129,7 @@ def lead_folgemails(cfg):
                        WHERE l.email IS NOT NULL AND NOT l.abgemeldet AND l.status IN ('neu','kontaktiert')
                          AND EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art = 'consent')
                          AND NOT EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art IN ('antwort','termin'))
+                         AND NOT EXISTS (SELECT 1 FROM lead_kampagnen k WHERE k.id = l.kampagne_id AND k.folge_aktiv)   -- eigene Nachfass-Mails der Kampagne
                          AND ((l.folge_stufe = 0 AND l.erstellt_am < now() - make_interval(days => %s))
                            OR (l.folge_stufe = 1 AND l.folge_gesendet_am < now() - make_interval(days => %s)))
                        ORDER BY l.erstellt_am LIMIT 20""", (f["tage_1"], max(1, f["tage_2"] - f["tage_1"])))
@@ -141,6 +142,75 @@ def lead_folgemails(cfg):
     for l, tok in auftraege:
         n = l["folge_stufe"] + 1
         mailer.lead_folge(l["email"], l["ansprechpartner"], l["firma"], f["betreff_%d" % n], f["text_%d" % n], tok)
+
+
+def funnel_plaetze_monat(cfg):
+    """Plätze pro Monat: am Monatsanfang „frei“ wieder auf „insgesamt“ setzen (nur Kampagnen mit Monatszähler)."""
+    with tx("system") as cur:
+        cur.execute("""UPDATE lead_kampagnen SET plaetze_frei = plaetze_gesamt, plaetze_monat = date_trunc('month', (now() AT TIME ZONE 'Europe/Berlin'))::date
+                       WHERE plaetze_monatlich AND plaetze_gesamt IS NOT NULL
+                         AND (plaetze_monat IS NULL OR plaetze_monat < date_trunc('month', (now() AT TIME ZONE 'Europe/Berlin'))::date)""")
+
+
+def funnel_checks_nachholen(cfg):
+    """Website-Checks, die nach der Anmeldung nicht fertig wurden (z. B. Neustart), erneut ausführen; nach 3 Versuchen als Fehler markieren."""
+    from . import funnelcheck
+    with tx("system") as cur:
+        cur.execute("""UPDATE lead_checks SET status='fehler' WHERE status='laeuft' AND versuche >= 3 AND erstellt_am < now() - interval '30 minutes' RETURNING lead_id""")
+        for r in cur.fetchall():
+            cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz','Website-Check ließ sich nicht durchführen (Seite bitte von Hand ansehen)','automatisch')", (r["lead_id"],))
+        cur.execute("SELECT id FROM lead_checks WHERE status='laeuft' AND versuche < 3 AND erstellt_am < now() - interval '5 minutes' ORDER BY erstellt_am LIMIT 1")
+        offen = [r["id"] for r in cur.fetchall()]
+        # Ergebnis-Mails, deren Versand fehlschlug (z. B. Mailserver kurz weg): bis zu 3 Versuche im Abstand von 15 Minuten, nur am ersten Tag
+        cur.execute("""SELECT c.id FROM lead_checks c JOIN lead_kampagnen k ON k.id = c.kampagne_id
+                       WHERE c.status='fertig' AND c.mail_gesendet_am IS NULL AND k.check_mail AND c.mail_versuche BETWEEN 1 AND 2
+                         AND c.mail_versucht_am < now() - interval '15 minutes' AND c.erstellt_am > now() - interval '1 day' ORDER BY c.erstellt_am LIMIT 5""")
+        mails = [r["id"] for r in cur.fetchall()]
+    for cid in offen:
+        funnelcheck.ausfuehren(cid)
+    if mails and mailer.konfiguriert():
+        for cid in mails:
+            funnelcheck.mail_senden(cid)
+
+
+def funnel_folgemails(cfg, stunde: int | None = None):
+    """Nachfass-Mails je Funnel-Kampagne (z. B. Tag 1, 3, 7) an Leads mit Einwilligung, solange kein Gespräch und keine Antwort da ist.
+    Nur zwischen 8 und 19 Uhr, je Lead höchstens eine Mail in 20 Stunden, jede Stufe genau einmal."""
+    from zoneinfo import ZoneInfo
+    from . import funnelcheck, sperre
+    from .routes_folgemails import token_fuer
+    if not 8 <= (datetime.now(ZoneInfo("Europe/Berlin")).hour if stunde is None else stunde) < 19:
+        return
+    auftraege = []
+    with tx("system") as cur:
+        cur.execute("SELECT id, folge_tage, folge_betreffe, folge_texte FROM lead_kampagnen WHERE folge_aktiv AND cardinality(folge_tage) > 0")
+        for k in cur.fetchall():
+            for stufe, tag in enumerate(k["folge_tage"], start=1):
+                cur.execute("""SELECT l.id, l.firma, l.ansprechpartner, l.email, l.website FROM leads l
+                               WHERE l.kampagne_id=%s AND l.email IS NOT NULL AND NOT l.abgemeldet AND l.kunden_id IS NULL AND l.status IN ('neu','kontaktiert')
+                                 AND EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art = 'consent')
+                                 AND NOT EXISTS (SELECT 1 FROM lead_aktivitaeten a WHERE a.lead_id = l.id AND a.art IN ('antwort','termin'))
+                                 AND coalesce(l.kampagne_seit, l.erstellt_am) < now() - make_interval(days => %s) AND coalesce(l.kampagne_seit, l.erstellt_am) > now() - interval '90 days'
+                                 AND (SELECT count(*) FROM lead_funnel_folge f WHERE f.lead_id = l.id) = %s
+                                 AND NOT EXISTS (SELECT 1 FROM lead_funnel_folge f WHERE f.lead_id = l.id AND f.gesendet_am > now() - interval '20 hours')
+                               ORDER BY l.erstellt_am LIMIT 20""", (k["id"], tag, stufe - 1))
+                for l in cur.fetchall():
+                    cur.execute("INSERT INTO lead_funnel_folge (lead_id, stufe) VALUES (%s,%s) ON CONFLICT DO NOTHING RETURNING lead_id", (l["id"], stufe))
+                    if not cur.fetchone():
+                        continue
+                    cur.execute("SELECT ergebnis FROM lead_checks WHERE lead_id=%s AND status='fertig' ORDER BY erstellt_am DESC LIMIT 1", (l["id"],))
+                    c = cur.fetchone()
+                    werte = funnelcheck.platzhalter(l, c and c["ergebnis"] if c and (c["ergebnis"] or {}).get("punkte") else None)
+                    if sperre.treffer(cur, email=l["email"]):
+                        cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'automatisch')", (l["id"], f"Nachfass-Mail {stufe} nicht verschickt: Adresse steht auf der Sperrliste"))
+                        continue
+                    cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'mail_gesendet',%s,'automatisch')", (l["id"], f"Nachfass-Mail {stufe} der Kampagne"))
+                    auftraege.append((l["id"], stufe, l["email"], funnelcheck.fuellen(k["folge_betreffe"][stufe - 1], werte), funnelcheck.fuellen(k["folge_texte"][stufe - 1], werte), token_fuer(cur, l["id"])))
+    for lid, stufe, an, betreff, text, tok in auftraege:
+        ok, grund = mailer.funnel_mail(an, betreff, text, tok)
+        if not ok:
+            with tx("system") as cur:
+                cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'automatisch')", (lid, f"Nachfass-Mail {stufe} nicht zugestellt: {grund[:200]}"))
 
 
 def umfragen_anlegen(cfg):
@@ -1154,11 +1224,11 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (vertrieb_morgens, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return
-    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, website_still, angebote_erinnern, angebote_abgelaufen, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, kunden_feedback, ueberwachung_stumm):
+    for job in (gespraech_erinnerungen, provisionsvorschau, mahnungen_automatisch, fruehwarnung_woche, geschaeftszahlen_mail, anfragen_mails, termin_erinnerungen, gutschein_erinnerungen, anzahlung_fristen, website_erinnerungen, website_bewertungen, domain_erinnerung, website_still, angebote_erinnern, angebote_abgelaufen, monatsberichte, fehler_melden, avv_erinnerung, avv_kunde_erinnerung, vertrag_erinnerung, umfragen_anlegen, vertrieb_erinnerung, website_online_meldungen, aufgaben_automatisch, lead_folgemails, funnel_folgemails, kunden_feedback, ueberwachung_stumm):
         _lauf(job, cfg)   # ein kaputter Job darf die anderen nicht stoppen
 
 

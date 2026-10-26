@@ -694,14 +694,21 @@ Jeder Benutzer kann in seinem Konto bis zu 10 Passkeys einrichten. Die Anmeldese
 ## Lead-Funnel (Admin → Lead-Funnel)
 Je Kampagne eine Seite unter `/f/<name>` mit Formular, Einwilligung, Roboterfalle und Bremse (20/Stunde je IP). Der Lead entsteht heiß mit Kampagne und UTM-Angaben, das Team bekommt Push, Mail und die Aufgabe „innerhalb einer Stunde anrufen“, danach kann der Besucher einen Termin buchen. **Eine Seite geht nur live, wenn „Rechtlich geprüft“ gesetzt ist.** Auswertung: Aufrufe, Leads, Termine, Kunden, Kosten pro Lead/Kunde (Kosten manuell). Migration 140.
 
+### Vorlage „Website-Check“ (Migration 141)
+Beim Anlegen einer Seite „Vorlage: Website-Check“ wählen. Die Seite fragt Website, Name, Telefon, E-Mail und Einwilligung ab. Nach dem Absenden prüft das Portal die Startseite (Handy, https, Ladezeit, Google, Anruf-Link, Anfrage/Termin, Preise, Bewertungen, Impressum/Datenschutz), zeigt sofort eine Ampel und legt das Ergebnis beim Lead ab (Admin → Lead → „Website-Check“, mit PDF).
+- **Ergebnis-Mail mit PDF**: je Seite einschaltbar (ab Werk aus). Betreff und Text mit Platzhaltern, Gruß „Ihr Markentrix-Team“ und Abmeldelink kommen automatisch dazu.
+- **Nachfass-Mails**: je Seite bis zu 3 Stufen (Vorgabe Tag 1, 3, 7), ab Werk aus. Nur mit Einwilligung, 8 bis 19 Uhr, stoppen bei Termin, Antwort, Abmeldung oder Status ab „Antwort“. Die allgemeinen Folgemails lassen diese Leads aus.
+- **Google PageSpeed**: freiwillig (Karte „Website-Check“), ohne wird vom Server aus gemessen. Mit PageSpeed geht die Website-Adresse an Google: in der Datenschutzerklärung nennen.
+- **Probe-Check**: Karte „Website-Check“ → Adresse eingeben → PDF, ohne Lead.
+- Eigene Landingpages statt der Vorlage: `docs/FUNNEL-LANDINGPAGE.md`.
+
 ## Empfehlungsprogramm
 Ab Werk aus. Einschalten: Seite „Empfehlung durch Kunden“ prüfen lassen und live setzen, dann in der Karte „Empfehlungsprogramm“ aktivieren. Kunden bekommen einen persönlichen Link (`/f/empfehlung?ref=CODE`). Prämien legt der Admin je Empfehlung fest, es gibt keinen Standardbetrag und keine automatische Auszahlung.
 
 ## Datenschutz-Anfragen (Admin → Datenschutz-Anfragen)
 Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tage vorher, Datensuche, Auskunftsdatei (JSON), Lead-Löschung mit Löschprotokoll und optionaler Sperrliste. Öffentliches Formular: `/datenschutz-anfrage` (in der Datenschutzerklärung verlinken). Kundenkonten werden weiter über Export/Offboarding behandelt. Rechtliche Bewertung: Anwalt.
 
-## Funnel: Website-Ampel, Zeitraum, KI-Antwortvorschlag (Migration 141)
-- Danke-Seite zeigt eine Ampel zur Startseite der Interessenten (`webcheck.py`): https, Ladezeit, Handy-Ansicht, Titel, Beschreibung, Kontaktmöglichkeit, Links zu Impressum/Datenschutz. Zugriff nur auf öffentliche Adressen (Namen werden aufgelöst, interne Adressen und Ports außer 80/443 abgelehnt, Weiterleitungen werden neu geprüft). Je Seite abschaltbar. Hinweis „Kein Rechtsurteil“. Das Ergebnis steht im Lead.
+## Funnel: Zeitraum, KI-Antwortvorschlag
 - Auswertung nach Zeitraum (7/30/90 Tage) mit Vergleich zum Zeitraum davor. Aufrufe ohne Roboter und ohne angemeldete Besucher.
 - Kunden: „✨ Antwort vorschlagen lassen“ im Antwort-Dialog (Entwurf der KI, Versand wie bisher nur durch den Kunden, Tagesgrenze 40).
 - Vertrieb: „Angebot für diesen Lead“ im Anruf-Dialog.

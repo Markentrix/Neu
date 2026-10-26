@@ -1,6 +1,6 @@
-import { api, melde, el, passkeyGeht, passkeyAnmelden } from './common.js';
+import { api, melde, el, passkeyGeht, passkeyAnmelden, zielFuerRolle } from './common.js';
 const f = el('f'), m = el('m'), b = el('b');
-api('/api/me', { leise: true }).then(u => { location.href = u.rolle === 'admin' ? '/admin' : '/app'; }).catch(() => {});
+api('/api/me', { leise: true }).then(u => { location.href = zielFuerRolle(u.rolle); }).catch(() => {});
 f.addEventListener('submit', async (ev) => {
   ev.preventDefault(); b.disabled = true; melde(m, '');
   try {

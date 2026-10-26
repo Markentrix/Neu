@@ -21,6 +21,7 @@ RESET_HOURS = 2
 PUSH_HTTP_ERLAUBT = os.environ.get("PUSH_HTTP_ERLAUBT", "0") == "1"   # nur für Tests mit lokalem Push-Server
 SITE_LOKAL_ERLAUBT = os.environ.get("SITE_LOKAL_ERLAUBT", "0") == "1"   # nur für Tests: lokale Mail-/Kalender-Server und http erlauben
 PLACES_BASE_URL = os.environ.get("PLACES_BASE_URL", "https://places.googleapis.com").rstrip("/")
+PAGESPEED_BASE_URL = os.environ.get("PAGESPEED_BASE_URL", "https://www.googleapis.com/pagespeedonline/v5/runPagespeed")   # Website-Check der Funnel-Seiten (Tests: lokaler Ersatz)
 
 SERVER_IPV4 = [x.strip() for x in os.environ.get("SERVER_IPV4", "").split(",") if x.strip()]   # Öffentliche IP des Servers (sonst vom Server-Dienst ermittelt)
 SERVER_IPV6 = [x.strip() for x in os.environ.get("SERVER_IPV6", "").split(",") if x.strip()]
