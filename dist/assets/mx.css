@@ -1363,3 +1363,12 @@ html.reduced .slot.is-free{animation:none}
 /* Branchenübersicht: Hinweiskarte über die ganze Breite */
 @media (min-width:901px){.grid--3>.branch--more{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px 28px}.grid--3>.branch--more .pain,.grid--3>.branch--more .card-step{flex:0 0 100%}.grid--3>.branch--more .sys{flex:1 1 380px}}
 .hero-call{margin:12px 0 0;max-width:56ch}
+
+/* Seitenübersicht */
+.sitemap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px) clamp(24px,5vw,64px);margin-top:8px}
+.sitemap-grid h2{font-size:1.15rem;margin:0 0 .6em}
+.sitemap-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.sitemap-list li a{display:inline-block;padding:7px 0}
+.sitemap-list li.sub{padding-left:18px}
+.sitemap-list li.sub a{color:var(--muted);font-size:.95rem}
+@media (max-width:760px){.sitemap-grid{grid-template-columns:minmax(0,1fr)}}

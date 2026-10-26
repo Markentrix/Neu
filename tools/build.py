@@ -84,7 +84,40 @@ FOOTER_CTA = '''    <div class="footer-cta">
 '''
 
 
-def render(layout, meta, body, partials):
+
+def seitenuebersicht(pages):
+    """Alle indexierbaren Seiten nach Gruppen: HTML-Seitenübersicht für Besucher und als interne Verlinkung."""
+    items = []
+    for meta, rel in pages:
+        if meta.get('sitemap', 'true').lower() == 'false' or 'noindex' in meta.get('robots', ''):
+            continue
+        pth = meta.get('path', '/')
+        name = re.sub(r'\s*\|\s*Markentrix(?: Blog)?\s*$', '', meta['title'])
+        items.append((pth, name))
+    items.sort()
+    def grp(pth):
+        if pth.startswith('/blog/'): return 'Blog'
+        if pth.startswith('/leistungen/'): return 'Leistungen'
+        if pth in ('/impressum', '/datenschutz', '/agb'): return 'Rechtliches'
+        if pth.startswith('/website-') and pth not in ('/website-check', '/website-checkliste'): return 'Branchen'
+        if pth == '/branchen': return 'Branchen'
+        if pth.startswith('/ki-marketing-') or pth in ('/seo-celle', '/seo-braunschweig'): return 'Regionen'
+        if pth in ('/website-check', '/website-checkliste', '/seo-checkliste', '/roi-rechner'): return 'Werkzeuge und Checklisten'
+        return 'Unternehmen'
+    order = ['Unternehmen', 'Leistungen', 'Branchen', 'Regionen', 'Werkzeuge und Checklisten', 'Blog', 'Rechtliches']
+    groups = {g: [] for g in order}
+    for pth, name in items:
+        groups[grp(pth)].append((pth, name))
+    out = []
+    for g in order:
+        lis = []
+        for pth, name in groups[g]:
+            deep = g == 'Leistungen' and pth.count('/') >= 3
+            lis.append(f'<li{" class=\"sub\"" if deep else ""}><a href="{pth}">{html.escape(name)}</a></li>')
+        out.append(f'<section aria-labelledby="so-{g[:3].lower()}"><h2 id="so-{g[:3].lower()}">{g}</h2><ul class="sitemap-list">{"".join(lis)}</ul></section>')
+    return '\n'.join(out)
+
+def render(layout, meta, body, partials, overview=''):
     def sub_partials(s):
         return re.sub(r'\{\{>\s*([\w-]+)\s*\}\}', lambda m: partials.get(m.group(1), f'<!-- partial {m.group(1)} fehlt -->'), s)
     body = sub_partials(body)
@@ -107,6 +140,7 @@ def render(layout, meta, body, partials):
         'content': body,
         'footer_cta': '' if (meta.get('footer_cta', '').lower() == 'false' or 'id="cta-title"' in body) else FOOTER_CTA,
         'build': BUILD,
+        'seitenuebersicht': overview,
     }
     out = layout
     n = [0]
@@ -149,7 +183,7 @@ def build(check=False):
         shutil.rmtree(DIST)
     shutil.copytree(STATIC, DIST)
     version_beispiele()
-    pages = []
+    parsed = []
     for dirpath, _, files in os.walk(os.path.join(SRC, 'pages')):
         for f in sorted(files):
             if not f.endswith('.html'):
@@ -158,11 +192,15 @@ def build(check=False):
             meta, body = parse_front_matter(open(src, encoding='utf-8').read())
             rel = os.path.relpath(src, os.path.join(SRC, 'pages'))
             meta.setdefault('path', '/' if rel == 'index.html' else '/' + rel[:-5])
-            out_path = os.path.join(DIST, rel)
-            os.makedirs(os.path.dirname(out_path), exist_ok=True)
-            html_out = render(layout, meta, body, partials)
-            open(out_path, 'w', encoding='utf-8').write(html_out)
-            pages.append((meta, rel, html_out))
+            parsed.append((meta, body, rel))
+    overview = seitenuebersicht([(m, r) for m, _, r in parsed])
+    pages = []
+    for meta, body, rel in parsed:
+        out_path = os.path.join(DIST, rel)
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        html_out = render(layout, meta, body, partials, overview)
+        open(out_path, 'w', encoding='utf-8').write(html_out)
+        pages.append((meta, rel, html_out))
     # Sitemap
     urls = []
     for meta, rel, _ in pages:

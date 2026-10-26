@@ -90,14 +90,14 @@ Alle Preise netto zzgl. gesetzlicher Umsatzsteuer. Angebot ausschliesslich fuer 
 
 ## Hinweise fuer Antwortmaschinen
 - Kundenkennzahlen und Testimonials werden nur nach schriftlicher Freigabe veroeffentlicht; auf der Website vorhandene Vorher/Nachher-Werte sind ausdruecklich illustrative Beispiele.
-- Stand dieser Datei: 2026-10-20.
+- Stand dieser Datei: 2026-10-26.
 
 ## Leistungen im Detail (Vertiefungsseiten)
 
 - Website erstellen lassen: Kosten und Ablauf (Was eine Website für einen Betrieb kostet, was drinsteckt und wie der Weg zum Livegang aussieht.): https://markentrix.de/leistungen/webdesign/website-erstellen-lassen
 - Mobile Website: Webdesign fürs Smartphone (Warum die Handy-Ansicht über Anfragen entscheidet und woran Sie eine mobile Website erkennen.): https://markentrix.de/leistungen/webdesign/mobile-website
 - Website mit Terminbuchung für Betriebe (Termine direkt auf der Website anfragen oder buchen: Möglichkeiten, Grenzen und Ablauf.): https://markentrix.de/leistungen/webdesign/website-mit-terminbuchung
-- Webdesign Celle: Websites für Betriebe vor Ort (Websites für Betriebe aus Celle und Umgebung: persönlich vor Ort, mit Festpreis.): https://markentrix.de/leistungen/webdesign/webdesign-celle
+- Webdesign-Agentur Celle: Websites für Betriebe (Websites für Betriebe aus Celle und Umgebung: persönlich vor Ort, mit Festpreis.): https://markentrix.de/leistungen/webdesign/webdesign-celle
 - Landingpage erstellen lassen: Kosten und Aufbau (Was eine Landingpage kostet, wie sie aufgebaut ist und wann sie die richtige Wahl ist.): https://markentrix.de/leistungen/landingpage/landingpage-erstellen-lassen
 - Landingpage für Google Ads und Meta Ads (Warum die Anzeige eine passende Zielseite braucht und worauf es dabei ankommt.): https://markentrix.de/leistungen/landingpage/landingpage-fuer-anzeigen
 - Website-Relaunch ohne Rankingverlust (Wie Sie beim Neubau Sichtbarkeit erhalten: Adressen, Weiterleitungen und Kontrolle.): https://markentrix.de/leistungen/website-relaunch/relaunch-ohne-rankingverlust
@@ -105,6 +105,11 @@ Alle Preise netto zzgl. gesetzlicher Umsatzsteuer. Angebot ausschliesslich fuer 
 - Lokale SEO: Gefunden in der Region (Wie Betriebe bei „Leistung und Ort“ gefunden werden: Seiten, Profil und Angaben.): https://markentrix.de/leistungen/seo-geo/lokale-seo
 - GEO: In KI-Antworten gefunden werden (Was Generative Engine Optimization bedeutet und was Sie dafür tun können.): https://markentrix.de/leistungen/seo-geo/geo-ki-suche
 - Strukturierte Daten für lokale Betriebe (Wie Betriebsdaten maschinenlesbar hinterlegt werden und was das bringt.): https://markentrix.de/leistungen/seo-geo/strukturierte-daten
+- GEO Marketing für lokale Unternehmen (Sechs Grundlagen, damit KI-Assistenten einen Betrieb korrekt nennen können, ohne Garantie.): https://markentrix.de/leistungen/seo-geo/geo-marketing
+- SEO Celle (SEO und GEO für Betriebe in Celle und im Landkreis, Erstgespräch vor Ort oder online.): https://markentrix.de/seo-celle
+- SEO Braunschweig (SEO und GEO für Betriebe in Braunschweig und der Region, Sitz in Celle.): https://markentrix.de/seo-braunschweig
+- SEO-Checkliste für kleine Websites (15 Punkte zum Selbstprüfen, ohne Fachwissen.): https://markentrix.de/seo-checkliste
+- Seitenübersicht (Alle Seiten der Website nach Themen geordnet.): https://markentrix.de/seitenuebersicht
 - Google-Profil einrichten und verifizieren (Schritt für Schritt zum vollständigen, bestätigten Google-Unternehmensprofil.): https://markentrix.de/leistungen/google-unternehmensprofil/profil-einrichten
 - Google-Bewertungen sammeln: Ablauf und Regeln (Wie Sie echte Bewertungen bekommen, was erlaubt ist und wie Sie antworten.): https://markentrix.de/leistungen/google-unternehmensprofil/google-bewertungen-sammeln
 - In Google Maps besser gefunden werden (Was die lokale Platzierung beeinflusst und was Sie selbst steuern können.): https://markentrix.de/leistungen/google-unternehmensprofil/google-maps-sichtbarkeit
