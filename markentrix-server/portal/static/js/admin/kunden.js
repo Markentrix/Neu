@@ -82,8 +82,11 @@ V.kunden = async () => {
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(lade, 250); });
   await lade();
-  return h('div', {}, kopf('Kunden', h('a', { class: 'btn', href: '#neu' }, '+ Neuer Kunde')), h('div', { class: 'card' }, await filterKarte('kunden'), h('div', { class: 'filterzeile' }, q, status, avv),
-    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-top:8px' }, nurRef, 'Nur Referenzkunden'), h('div', { style: 'height:12px' }), leiste, box));
+  return h('div', {}, kopf('Kunden', h('a', { class: 'btn', href: '#neu' }, '+ Neuer Kunde')), h('div', { class: 'card' }, q,
+    h('details', { class: 'filterklapp', open: !!(P.get('status') || P.get('avv') || P.get('ref')) }, h('summary', { class: 'small' }, 'Filter und gespeicherte Ansichten' + (P.get('status') || P.get('avv') || P.get('ref') ? ' (aktiv)' : '')),
+      await filterKarte('kunden'), h('div', { class: 'filterzeile' }, status, avv),
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin-top:8px' }, nurRef, 'Nur Referenzkunden')),
+    h('div', { style: 'height:12px' }), leiste, box));
 };
 
 V.neu = async () => {

@@ -346,3 +346,12 @@ pre.code{background:rgba(128,128,128,.12);padding:10px 12px;border-radius:8px;fo
 .mehr-liste .btn,.mehr-liste a{width:100%;text-align:left;justify-content:flex-start}
 .leadnotiz{margin:6px 0 0;max-width:80ch}
 .card:empty{display:none}
+@media(max-width:700px){.hilfesuche .pdflinks{display:none}.hilfesuche{margin-bottom:6px!important}}
+[hidden]{display:none!important}
+.filterklapp{margin-top:8px}.filterklapp>summary{cursor:pointer;color:var(--muted,#5b6785);padding:4px 0}.filterklapp[open]>summary{margin-bottom:8px}
+.einkl>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}
+.einkl>summary::-webkit-details-marker{display:none}
+.einkl>summary::after{content:'▾';margin-left:auto;color:var(--muted,#5b6785)}
+.einkl[open]>summary::after{content:'▴'}
+.einkl>summary h2{margin:0;font-size:inherit}
+.einkl[open]>summary{margin-bottom:10px}

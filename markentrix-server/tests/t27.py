@@ -85,7 +85,7 @@ async def main():
                 chk("Admin: Kundenliste Sammelleiste erscheint",await pg.locator(".sammelleiste:visible").count()==1)
                 await pg.click(".sammelleiste >> text=Aufgabe anlegen"); await pg.wait_for_selector(".dlg"); await pg.fill(".dlg input[maxlength='200']","Browser-Sammelaufgabe"); await pg.click(".dlg >> text=Aufgaben anlegen")
                 await pg.wait_for_selector("text=1 Aufgaben angelegt",timeout=5000); chk("Admin: Sammelaufgabe angelegt",True); await pg.keyboard.press("Escape")
-                await pg.select_option("select[name=status]","onboarding"); await pg.wait_for_timeout(600)
+                await pg.click("summary:has-text('Filter und gespeicherte Ansichten')"); await pg.select_option("select[name=status]","onboarding"); await pg.wait_for_timeout(600)
                 pg.once("dialog",lambda d: asyncio.ensure_future(d.accept("Onboarding-Kunden")))
                 await pg.click("text=Aktuelle Auswahl speichern"); await pg.wait_for_timeout(1200)
                 chk("Admin: Filter gespeichert und auswählbar",await pg.locator("select[aria-label='Gespeicherte Filter'] option:has-text('Onboarding-Kunden')").count()==1)

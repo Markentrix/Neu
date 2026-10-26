@@ -67,7 +67,7 @@ function hilfeKnopf(rolle) {
         : [h('p', { class: 'small muted' }, 'Dazu habe ich keine Anleitung gefunden. Versuche ein anderes Wort.')]));
     };
     feld.addEventListener('input', zeige);
-    const d = dialog('Hilfe' + (passend.length ? ' zu dieser Seite' : ''), h('div', { class: 'stack' }, feld, ergebnis, h('p', { class: 'small' }, h('a', { href: '/api/hilfe/anleitung.pdf?rolle=' + rolle, target: '_blank', rel: 'noopener' }, '📄 Ganze Anleitung als PDF'))));
+    const d = dialog('Hilfe' + (passend.length ? ' zu dieser Seite' : ''), h('div', { class: 'stack' }, feld, ergebnis, h('p', { class: 'small' }, (rolle === 'admin' ? [['vertrieb', 'Vertrieb'], ['kunde', 'Kunden'], ['admin', 'Admin']] : [[rolle, '']]).map(([r, n]) => h('a', { href: '/api/hilfe/anleitung.pdf?rolle=' + r, target: '_blank', rel: 'noopener', style: 'margin-right:12px' }, '📄 Anleitung' + (n ? ' ' + n : '') + ' als PDF')))));
     zeige(); feld.focus();
   } }, '?');
   document.body.append(knopf);
@@ -80,7 +80,7 @@ export function hilfeSuche(rolle) {
   const liste = h('div', { class: 'hilfetreffer', role: 'list' });
   const pdfLinks = (rolle === 'admin' ? [['vertrieb', 'Vertrieb'], ['kunde', 'Kunden'], ['admin', 'Admin']] : [[rolle, '']])
     .map(([r, n]) => h('a', { href: '/api/hilfe/anleitung.pdf?rolle=' + r, target: '_blank', rel: 'noopener', style: 'margin-right:12px' }, '📄 Anleitung' + (n ? ' ' + n : '') + ' als PDF'));
-  const box = h('div', { class: 'hilfesuche', style: 'position:relative;margin:0 0 12px' }, feld, liste, h('p', { class: 'small', style: 'margin:4px 0 0' }, pdfLinks));
+  const box = h('div', { class: 'hilfesuche', style: 'position:relative;margin:0 0 12px' }, feld, liste, h('p', { class: 'small pdflinks', style: 'margin:4px 0 0' }, pdfLinks));
   const zeigeArtikel = (a) => { const frage = feld.value.trim(); liste.replaceChildren(); feld.value = ''; dialog(a.t, artikelKarte(a, frage || a.t)); };
   feld.addEventListener('input', async () => {
     await laden(rolle);

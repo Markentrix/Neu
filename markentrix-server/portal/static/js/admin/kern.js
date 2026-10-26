@@ -36,7 +36,7 @@ export function gerüst(aktiv, inhalt) {
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, hilfeSuche('admin'), ich && !ich.zwei_faktor ? h('div', { class: 'msg info' }, 'Dein Admin-Konto hat noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten'), '.') : '', inhalt, rechtFuss()),
+    h('main', { class: 'main' }, hilfeSuche('admin'), ich && !ich.zwei_faktor && !zweiFaktorWeg() ? h('div', { class: 'msg info row small', style: 'align-items:center;gap:8px;padding:6px 10px' }, h('span', { class: 'grow' }, 'Noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten')), h('button', { class: 'btn sec small', 'aria-label': 'Hinweis ausblenden', onclick: (e) => { try { sessionStorage.setItem('mk-2fa-weg', '1'); } catch { /* egal */ } e.target.closest('.msg').remove(); } }, '×')) : '', inhalt, rechtFuss()),
     mobilLeiste({ aktiv, gruppen, feste: ['uebersicht', 'postfach', 'kunden', 'freigaben'], icons: { uebersicht: '⌂', postfach: '✉', kunden: '▦', freigaben: '✔', aufgaben: '☑' }, kurz: { uebersicht: 'Übersicht', postfach: 'Posteingang' }, schluessel: 'admin' }));
 }
 export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
@@ -46,6 +46,18 @@ export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
     h('tbody', {}, zeilen.map(z => h('tr', {}, spalten.map(s => h('td', {}, s[1](z))))))));
 }
 export const pill = (s) => h('span', { class: 'pill ' + (['aktiv', 'live', 'veroeffentlicht'].includes(s) ? 'ok' : ['pausiert', 'onboarding', 'beauftragt', 'in_einrichtung', 'demo'].includes(s) ? 'warn' : ['gekuendigt', 'beendet', 'fehler'].includes(s) ? 'bad' : '') }, String(s).replace('_', ' '));
+/** Macht aus den Karten einer Seite einklappbare Abschnitte (Überschrift + Status). `status`: Titel → [in Ordnung?, Text]. Abschnitte, die noch etwas brauchen, sind offen. */
+export function einklappen(wurzel, status = {}) {
+  [...wurzel.children].forEach((karte) => {
+    const ueb = karte.classList && karte.classList.contains('card') ? karte.querySelector(':scope > h2') : null;
+    if (!ueb) return;
+    const titel = ueb.textContent || '', st = status[titel];
+    const d = h('details', { class: 'card einkl', open: !!st && !st[0] }, h('summary', {}, h('h2', {}, titel), st ? h('span', { class: 'pill ' + (st[0] ? 'ok' : 'warn') }, st[1]) : ''));
+    ueb.remove(); d.append(...karte.childNodes); karte.replaceWith(d);
+  });
+  return wurzel;
+}
+const zweiFaktorWeg = () => { try { return !!sessionStorage.getItem('mk-2fa-weg'); } catch { return false; } };
 export const kopf = (t, ...r) => h('div', { class: 'top' }, h('h1', {}, t), r);
 export const feld = (label, name, wert = '', extra = {}) => h('div', {}, h('label', {}, label), h('input', { name, value: wert || '', ...extra }));
 export const leerzu = (o) => { Object.keys(o).forEach(k => { if (o[k] === '') delete o[k]; }); return o; };

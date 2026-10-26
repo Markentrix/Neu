@@ -1,6 +1,6 @@
 import { visitenkarteKarte } from '../visitenkarte.js';
 import { h, api, datum, dialog, zeit, euro, melde, passkeyKarte, zweiFaktorKarte, pushKarte, formular } from '../common.js';
-import { V, fehler, feld, ich, knopf, kopf, pill, select, tabelle } from './kern.js';
+import { V, einklappen, fehler, feld, ich, knopf, kopf, pill, select, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Einstellungen
 V.einstellungen = async () => {
@@ -22,11 +22,11 @@ V.einstellungen = async () => {
       feld('Modell', 'modell', d.ki.modell), feld('Nachrichten pro Kunde und Tag', 'tageslimit', d.ki.tageslimit, { type: 'number', min: 1, max: 1000 }),
         feld('Preis Eingabe, € je 1 Mio. Tokens', 'preis_ein_eur', d.ki.preis_ein_eur, { type: 'number', step: '0.01', min: 0 }), feld('Preis Ausgabe, € je 1 Mio. Tokens', 'preis_aus_eur', d.ki.preis_aus_eur, { type: 'number', step: '0.01', min: 0 })),
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
-  return h('div', { class: 'stack' }, kopf('Einstellungen'),
+  return einklappen(h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
     await zustellungKarte(), await vertragKarte(), await angebotErinnerungKarte(), passkeyKarte(), await visitenkarteKarte('/api/admin'), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
-    h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk, h('p', {}, knopf('KI-Verbindung testen', async () => { melde(m3, 'Der Test läuft …', 'info'); try { const r = await api('/api/admin/einstellungen/ki-test', { method: 'POST' }); melde(m3, 'Verbindung steht. Modell ' + r.modell + ' hat geantwortet: „' + r.antwort + '“', 'ok'); } catch (x) { melde(m3, x.message); } }, 'sec'))), m3);
+    h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk, h('p', {}, knopf('KI-Verbindung testen', async () => { melde(m3, 'Der Test läuft …', 'info'); try { const r = await api('/api/admin/einstellungen/ki-test', { method: 'POST' }); melde(m3, 'Verbindung steht. Modell ' + r.modell + ' hat geantwortet: „' + r.antwort + '“', 'ok'); } catch (x) { melde(m3, x.message); } }, 'sec'))), m3), { 'E-Mail-Versand (SMTP)': [!!(d.smtp.host && d.smtp.absender), d.smtp.host && d.smtp.absender ? 'eingerichtet' : 'fehlt'], 'KI-Assistent im Kunden-Chat': [!!d.ki.key_gesetzt, d.ki.key_gesetzt ? 'Key hinterlegt' : 'Key fehlt'] });
 };
 
 export const kk = (label, wert, set) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', checked: wert, style: 'width:auto', onchange: (e) => set(e.target.checked) }), label);

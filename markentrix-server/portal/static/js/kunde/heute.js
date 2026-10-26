@@ -91,11 +91,15 @@ async function ersteWocheKarte() {
   const st = e.schritte.map(s => s.code === 'app' ? { ...s, fertig: app } : s);
   const fertig = st.filter(s => s.fertig).length, pct = Math.round(100 * fertig / st.length);
   if (fertig === st.length) return '';
+  const zeile = (s) => h('li', {}, h('span', { class: 'punkt ' + (s.fertig ? 'ok' : ''), 'aria-hidden': 'true' }),
+    h('div', { class: 'pt' }, h('b', {}, (s.fertig ? '✓ ' : '') + s.titel)), s.fertig ? h('span', { class: 'pill ok' }, 'erledigt') : h('a', { class: 'btn sec small', href: s.link }, s.knopf));
+  const geordnet = [...st.filter(x => !x.fertig), ...st.filter(x => x.fertig)], liste = h('ul', { class: 'prio' }, geordnet.slice(0, 3).map(zeile));
+  const mehr = geordnet.length > 3 ? h('p', { class: 'small' }, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); liste.replaceChildren(...geordnet.map(zeile)); ev.target.remove(); } }, 'Alle ' + geordnet.length + ' Schritte zeigen')) : '';
   const karte = h('div', { class: 'card' }, h('h2', {}, 'Deine erste Woche'),
     h('p', { class: 'small muted' }, fertig + ' von ' + st.length + ' Schritten erledigt. Jeder dauert nur ein bis zwei Minuten.'),
     h('div', { class: 'fortschritt', role: 'progressbar', 'aria-valuenow': String(pct), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Fortschritt in der ersten Woche' }, h('div', { style: 'width:' + pct + '%' })),
-    h('ul', { class: 'prio' }, st.map(s => h('li', {}, h('span', { class: 'punkt ' + (s.fertig ? 'ok' : ''), 'aria-hidden': 'true' }),
-      h('div', { class: 'pt' }, h('b', {}, (s.fertig ? '✓ ' : '') + s.titel)), s.fertig ? h('span', { class: 'pill ok' }, 'erledigt') : h('a', { class: 'btn sec small', href: s.link }, s.knopf)))),
+    liste,
+    mehr,
     h('p', { class: 'small' }, h('a', { href: '#', onclick: async (ev) => { ev.preventDefault(); try { await api('/api/me/ansicht', { method: 'PUT', body: { erste_woche_zu: true } }); karte.remove(); } catch { /* bleibt sichtbar */ } } }, 'Nicht mehr anzeigen')));
   return karte;
 }
