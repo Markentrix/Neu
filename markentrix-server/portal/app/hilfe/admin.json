@@ -1324,8 +1324,7 @@
         "Wer sich einträgt, wird als heißer Lead angelegt (Einwilligung im Verlauf, Kampagne, UTM). Das Team bekommt Push, Mail und die Aufgabe „innerhalb einer Stunde anrufen“. Ist die automatische Verteilung eingeschaltet, geht der Lead gleich an einen Vertriebler.",
         "Eine bekannte E-Mail-Adresse legt keinen zweiten Lead an, sondern ergänzt den vorhandenen. Eine Roboterfalle und eine Bremse (20 Anmeldungen pro Stunde je Anschluss) schützen das Formular.",
         "Nach dem Absenden kann die Seite einen Termin anbieten (Knopf zur Erstgespräch-Buchung). Die Buchung muss dafür unter Einstellungen eingerichtet sein.",
-        "Das Formular nutzt keine Cookies. Die Aufrufzahl wird nur als Tageszähler je Seite gezählt.",
-        "Die Prüfung ruft nur öffentliche Internetadressen ab. Interne oder ungewöhnliche Adressen (zum Beispiel mit Port) werden abgelehnt, dann zeigt die Seite höflich, dass die Prüfung nicht möglich war."
+        "Das Formular nutzt keine Cookies. Die Aufrufzahl wird nur als Tageszähler je Seite gezählt."
       ]
     },
     {
