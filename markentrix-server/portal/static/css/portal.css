@@ -338,3 +338,11 @@ pre.code{background:rgba(128,128,128,.12);padding:10px 12px;border-radius:8px;fo
 .hilfeknopf:focus-visible{outline:3px solid var(--gelb,#f59e0b);outline-offset:2px}
 @media (min-width:900px){.hilfeknopf{bottom:22px}}
 @media print{.hilfeknopf{display:none}}
+
+.mehr{position:relative;display:inline-block}
+.mehr>summary{list-style:none;cursor:pointer;display:inline-block}
+.mehr>summary::-webkit-details-marker{display:none}
+.mehr-liste{position:absolute;right:0;top:calc(100% + 4px);z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;gap:4px;min-width:200px}
+.mehr-liste .btn,.mehr-liste a{width:100%;text-align:left;justify-content:flex-start}
+.leadnotiz{margin:6px 0 0;max-width:80ch}
+.card:empty{display:none}

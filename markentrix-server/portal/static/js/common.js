@@ -177,6 +177,44 @@ export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
   return box;
 }
 
+/** Lead-Daten in Kurzform: nur ausgefüllte Felder, Telefon und E-Mail zum Anklicken, lange Notizen eingeklappt. */
+export function leadDatenAnsicht(l, zusatz = []) {
+  const felder = [['Ansprechpartner', l.ansprechpartner], ['Telefon', l.telefon, 'tel'], ['E-Mail', l.email, 'mail'], ['Website', l.website, 'web'], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ...zusatz].filter(f => f[1] !== undefined && f[1] !== null && f[1] !== '' && f[1] !== '–');
+  const wert = ([, w, art]) => art === 'tel' ? h('a', { href: 'tel:' + String(w).replace(/[^+\d]/g, ''), 'data-lead': l.id, 'data-firma': l.firma }, w)
+    : art === 'mail' ? h('a', { href: 'mailto:' + w }, w)
+      : art === 'web' ? h('a', { href: /^https?:/.test(w) ? w : 'https://' + w, target: '_blank', rel: 'noopener' }, String(w).replace(/^https?:\/\//, '').replace(/\/$/, '')) : String(w);
+  const lang = l.notiz && l.notiz.length > 140;
+  return h('div', {}, felder.length ? h('div', { class: 'form2' }, felder.map(f => h('div', {}, h('div', { class: 'small muted' }, f[0]), h('div', {}, wert(f))))) : h('p', { class: 'muted' }, 'Noch keine Kontaktdaten. Mit „Daten bearbeiten“ ergänzen.'),
+    l.notiz ? (lang ? h('details', { class: 'leadnotiz' }, h('summary', { class: 'small muted' }, 'Notiz: ' + l.notiz.slice(0, 90) + ' …'), h('p', { class: 'muted' }, l.notiz)) : h('p', { class: 'muted leadnotiz' }, l.notiz)) : '');
+}
+
+/** Reiter für die Lead-Seite: zeigt immer nur einen Bereich. Der gewählte Reiter bleibt je Lead erhalten (auch nach dem Neuladen). */
+export function leadReiter(lid, reiter, standard) {
+  const KEY = 'mk-leadreiter';
+  const lesen = () => { try { const o = JSON.parse(sessionStorage.getItem(KEY) || 'null'); return o && o.lid === lid ? o.k : null; } catch { return null; } };
+  let aktiv = lesen(); if (!reiter.some(r => r[0] === aktiv)) aktiv = standard || reiter[0][0];
+  const leiste = h('div', { class: 'tabs', role: 'tablist' }), felder = h('div', { class: 'stack' });
+  const zeige = (k) => {
+    aktiv = k; try { sessionStorage.setItem(KEY, JSON.stringify({ lid, k })); } catch { /* egal */ }
+    leiste.replaceChildren(...reiter.map(([key, text]) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(key === k), class: key === k ? 'on' : '', onclick: () => zeige(key) }, text)));
+    felder.replaceChildren(...reiter.filter(r => r[0] === k).map(r => r[2]));
+  };
+  zeige(aktiv);
+  return h('div', { class: 'stack' }, leiste, felder);
+}
+/** Merkt den Reiter vor dem Öffnen eines Leads (z. B. „Angebot“ direkt nach dem Anruf-Dialog). */
+export function leadReiterSetzen(lid, k) { try { sessionStorage.setItem('mk-leadreiter', JSON.stringify({ lid, k })); } catch { /* egal */ } }
+
+/** „⋯ Mehr“: selten gebrauchte Knöpfe in einem kleinen Menü. */
+export function mehrMenue(...knoepfe) {
+  const items = knoepfe.flat().filter(Boolean);
+  if (!items.length) return '';
+  const d = /** @type {HTMLDetailsElement} */ (h('details', { class: 'mehr' }, h('summary', { class: 'btn sec small' }, '⋯ Mehr'), h('div', { class: 'mehr-liste' }, items)));
+  const aus = (/** @type {Event} */ e) => { if (!document.body.contains(d)) { document.removeEventListener('click', aus); return; } if (!d.contains(/** @type {Node} */ (e.target))) d.open = false; };
+  document.addEventListener('click', aus);
+  return d;
+}
+
 // Gesprächsleitfaden (KI) für einen Lead: zeigt den gespeicherten Entwurf, Knopf erzeugt oder erneuert ihn
 export function skriptKarte(skript, skriptAm, url) {
   const m = h('div'), box = h('div');

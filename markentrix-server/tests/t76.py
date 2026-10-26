@@ -69,7 +69,7 @@ async def main():
             chk(f"Admin @{w}px: Steuerung speichern",a.get("/api/admin/vertrieb/steuerung").json()["auto_zuweisung"] is True)
             a.put("/api/admin/vertrieb/steuerung",json={"auto_zuweisung":False,"reaktionsstunden":24,"preise_sichtbar":False})
             # Zum Kunden machen
-            await pg.goto(B+"/admin#lead/"+lid); await pg.wait_for_selector("button:text('Zum Kunden machen')",timeout=8000); await pg.click("button:text('Zum Kunden machen')")
+            await pg.goto(B+"/admin#lead/"+lid); await pg.wait_for_selector("summary:text('Mehr')",timeout=8000); await pg.click("summary:text('Mehr')"); await pg.click("button:text('Zum Kunden machen'), a:text('Zum Kunden machen')")
             await pg.wait_for_selector(".dlg select[aria-label='Paket']"); chk(f"Admin @{w}px: Assistent „Zum Kunden machen“ öffnet",True)
             await pg.screenshot(path=f"/var/tmp/pt/shots/zukunde_{w}.png"); await pg.click(".dlgkopf button"); await ctx.close()
             # Vertrieb
@@ -78,7 +78,7 @@ async def main():
             chk(f"Vertrieb @{w}px: Anruflink vorhanden",await pg.locator("a[href^='tel:']").count()>=1)
             await pg.click("button:text('Daten ergänzen')"); await pg.fill("input[name=ansprechpartner]","Frau Browser"); await pg.select_option("select[name=ansprache_grundlage]","einwilligung"); await pg.click("button:text('Speichern')"); await pg.wait_for_timeout(900)
             chk(f"Vertrieb @{w}px: Daten ergänzen speichert",sql(f"select ansprechpartner||'|'||ansprache_grundlage from leads where id='{lid}'")=="Frau Browser|einwilligung")
-            await pg.click("button:text('Freie Zeiten zeigen')"); await pg.wait_for_timeout(900); chk(f"Vertrieb @{w}px: Terminkarte lädt",await pg.locator("text=Kunde hat dem Termin zugestimmt").count()==1)
+            await pg.click("button[role=tab]:text('Angebot')"); await pg.click("button:text('Freie Zeiten zeigen')"); await pg.wait_for_timeout(900); chk(f"Vertrieb @{w}px: Terminkarte lädt",await pg.locator("text=Kunde hat dem Termin zugestimmt").count()==1)
             chk(f"Vertrieb @{w}px: kein „undefined“/„null“ im Lead",not re.search(r"\b(undefined|null)\b",await pg.locator("main, #main, body").first.inner_text()));
             await pg.screenshot(path=f"/var/tmp/pt/shots/lead_vertrieb_{w}.png"); chk(f"Vertrieb @{w}px: keine JavaScript-Fehler",not errs,errs); await ctx.close()
             # Kunde

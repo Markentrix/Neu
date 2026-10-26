@@ -728,3 +728,8 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - **Anruf-Modus im Admin** (Leads, Karte oben): wie beim Vertrieb, wahlweise über alle Leads, nur nicht zugeordnete oder nur die eines Vertrieblers.
 - **Lead per Foto**: KI liest Visitenkarte, Schild oder Fahrzeug, Vertriebler prüfen und speichern. Das Foto wird nicht gespeichert. Kosten wie andere KI-Aufrufe (Protokoll Kosten).
 - **KI-Fehler**: Admins sehen den genauen Grund in der Meldung, der letzte Fehler steht im Systemstatus („KI-Dienst“).
+
+## Lead-Seite übersichtlicher (Vertrieb und Admin)
+- Die Lead-Seite zeigt vier Reiter: **Anrufen** (Daten, Kontakt festhalten), **Gespräch** (Leitfaden, Branchenhinweis, Nachgespräch, Website-Check), **Angebot** (Angebote, Erstgespräch) und **Verlauf**. Der gewählte Reiter bleibt je Lead erhalten.
+- Selten gebrauchte Knöpfe (Visitenkarte, Zum Kunden machen, Löschen) stehen im Menü „⋯ Mehr“.
+- Die Daten zeigen nur ausgefüllte Felder, Telefon, E-Mail und Website sind anklickbar, lange Notizen sind eingeklappt.

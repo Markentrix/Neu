@@ -106,7 +106,7 @@ async def main():
         await pg.goto(B+"/vertrieb#leitfaden"); await pg.wait_for_timeout(900); chk("Vertrieb: Leitfaden lädt",await pg.locator("h1").count()>=1)
         await pg.goto(B+"/vertrieb#pipeline"); await pg.wait_for_selector(".kanban",timeout=8000); chk("Vertrieb: Pipeline-Board mit Spalten",await pg.locator(".kspalte").count()>=4)
         await pg.goto(B+"/vertrieb#leads"); await pg.wait_for_selector("table a",timeout=8000); await pg.locator("table a").first.click()
-        await pg.wait_for_selector("button:text('Angebot anfragen')",timeout=8000); await pg.click("button:text('Angebot anfragen')"); await pg.wait_for_selector("button:text('Mail-Entwurf öffnen')",timeout=8000)
+        await pg.wait_for_selector("button[role=tab]:text('Angebot')",timeout=8000); await pg.click("button[role=tab]:text('Angebot')"); await pg.wait_for_selector("button:text('Angebot anfragen')",timeout=8000); await pg.click("button:text('Angebot anfragen')"); await pg.wait_for_timeout(800); await pg.click("button[role=tab]:text('Gespräch')"); await pg.wait_for_selector("button:text('Mail-Entwurf öffnen')",timeout=8000)
         chk("Vertrieb: Angebotsanfrage mit Mail-Entwurf",True)
         chk("Vertrieb: Menü in 3 Gruppen, Mein Tag zuerst",await pg.locator(".navgruppe").count()==3 and (await pg.locator("a.nav").first.get_attribute("href"))=="#heute")
         chk("Vertrieb: keine JavaScript-Fehler in den Abläufen",not errs,errs); await ctx.close()
@@ -139,7 +139,7 @@ async def main():
         await pg.screenshot(path="/var/tmp/pt/shots/dashboard.png",full_page=True)
         lid3=a.post("/api/admin/leads",json={"firma":"Entwurf Test GmbH","email":"entwurf@test-x.de","ort":"Celle"}).json()["id"]
         a.post(f"/api/admin/leads/{lid3}/angebote",json={"betreff":"Mein Entwurf","einleitung":"E","schluss":"S","positionen":[{"text":"Eigene Leistung A","menge":2,"einheit":"Std","preis_cent":5000},{"text":"Eigene Leistung B","menge":1,"einheit":"","preis_cent":12000}],"leistungen":["Alpha","Beta"]})
-        await pg.goto(B+"/admin#lead/"+lid3); await pg.reload(); await pg.wait_for_selector("button:text('Bearbeiten und senden')",timeout=8000); await pg.click("button:text('Bearbeiten und senden')"); await pg.wait_for_selector(".dlg select[aria-label='Paket hinzufügen']")
+        await pg.goto(B+"/admin#lead/"+lid3); await pg.reload(); await pg.wait_for_selector("button[role=tab]:text('Angebot')",timeout=8000); await pg.click("button[role=tab]:text('Angebot')"); await pg.wait_for_selector("button:text('Bearbeiten und senden')",timeout=8000); await pg.click("button:text('Bearbeiten und senden')"); await pg.wait_for_selector(".dlg select[aria-label='Paket hinzufügen']")
         chk("Entwurf wieder öffnen: Positionen, Texte und Leistungen sind da",await pg.locator(".dlg input[aria-label='Leistung']").count()==2 and "Alpha\nBeta"==await pg.locator(".dlg textarea[aria-label='Das bekommt der Kunde']").input_value() and await pg.locator(".dlg input[aria-label='Betreff']").input_value()=="Mein Entwurf")
         await pg.screenshot(path="/var/tmp/pt/shots/angebotdialog.png")
         await pg.reload(); await pg.wait_for_selector("button:text('Kopieren')"); await pg.screenshot(path="/var/tmp/pt/shots/lead.png",full_page=True)

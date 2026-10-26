@@ -1,7 +1,7 @@
 import { anrufModus } from './anrufmodus.js';
 import { pipelineBoard } from './pipeline.js';
 import { visitenkarteKarte, visitenkarteKnopf } from './visitenkarte.js';
-import { stapelTabellen, listenKnopf } from './common.js';
+import { stapelTabellen, listenKnopf, leadReiter, leadReiterSetzen, mehrMenue, leadDatenAnsicht } from './common.js';
 stapelTabellen();
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste, zielFuerRolle, startFehler } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
@@ -399,9 +399,7 @@ const GRUNDLAGEN = { anfrage: 'Hat selbst angefragt', einwilligung: 'Hat zugesti
 function datenKarte(lid, l, d, m) {
   const zeigen = h('div'), felder = [['ansprechpartner', 'Ansprechpartner'], ['email', 'E-Mail'], ['telefon', 'Telefon'], ['website', 'Website'], ['branche', 'Branche'], ['plz', 'PLZ'], ['ort', 'Ort']];
   const ansicht = () => {
-    zeigen.replaceChildren(h('div', { class: 'form2' }, felder.map(([k, t]) => h('div', {}, h('div', { class: 'small muted' }, t),
-      h('div', {}, !l[k] ? '–' : k === 'telefon' ? h('a', { href: 'tel:' + String(l[k]).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, l[k]) : k === 'email' ? h('a', { href: 'mailto:' + l[k] }, l[k]) : l[k])))),
-    l.notiz ? h('p', { class: 'muted' }, l.notiz) : '',
+    zeigen.replaceChildren(leadDatenAnsicht(l),
     h('p', { class: 'small' }, 'Grundlage der Ansprache: ', h('b', {}, GRUNDLAGEN[l.ansprache_grundlage] || 'nicht festgehalten'), !l.ansprache_grundlage ? ' – bitte ergänzen' : ''),
     l.website_check ? h('p', { class: 'small muted' }, 'Website-Check liegt vor, im Gespräch nutzbar.') : '',
     h('button', { class: 'btn sec small', onclick: bearbeiten }, 'Daten ergänzen'));
@@ -440,6 +438,7 @@ function terminKarte(lid) {
 }
 
 async function leadDetail(lid) {
+  try { if (sessionStorage.getItem('mk-zum-angebot') === lid) leadReiterSetzen(lid, 'angebot'); } catch { /* egal */ }
   setTimeout(() => {   // kommt der Vertriebler aus dem Anruf-Dialog („Angebot für diesen Lead“), gleich zum Angebotsbereich springen
     let z = null; try { z = sessionStorage.getItem('mk-zum-angebot'); sessionStorage.removeItem('mk-zum-angebot'); } catch { /* egal */ }
     const ziel = z === lid ? document.getElementById('angebotbereich') : null;
@@ -452,12 +451,15 @@ async function leadDetail(lid) {
   const akt = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/leads/' + lid + '/aktivitaet', { method: 'POST', body: formular(e.target) }); location.reload(); } catch (x) { melde(m, x.message); } } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, h('select', { name: 'art' }, ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'].map(a => h('option', { value: a }, a.replace(/_/g, ' '))))),
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
-  return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), st, ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l), listenKnopf(['leads', 'heute', 'pipeline'])), m,
-    datenKarte(lid, l, d, m), h('div', { class: 'card', hidden: true }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
-    kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: modus.aktiv() }),
-    terminKarte(lid), branchenKarte(lid), h('div', { id: 'angebotbereich', class: 'stack' }, direktAngebotKarte(lid, l), angebotKarte(lid, l)), nachgespraechKarte(lid),
-    skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
-    h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
+  const mehr = mehrMenue(['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l));
+  return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), st, mehr, listenKnopf(['leads', 'heute', 'pipeline'])), m,
+    leadReiter(lid, [
+      ['anrufen', 'Anrufen', h('div', { class: 'stack' }, datenKarte(lid, l, d, m),
+        kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: modus.aktiv() }))],
+      ['gespraech', 'Gespräch', h('div', { class: 'stack' }, skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'), branchenKarte(lid), nachgespraechKarte(lid))],
+      ['angebot', 'Angebot & Termin', h('div', { class: 'stack' }, terminKarte(lid), h('div', { id: 'angebotbereich', class: 'stack' }, direktAngebotKarte(lid, l), angebotKarte(lid, l)))],
+      ['verlauf', 'Verlauf', h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.'))]
+    ]));
 }
 
 /** Kalender-Abo: Wiedervorlagen und Erstgespräche im Handy-Kalender. */
