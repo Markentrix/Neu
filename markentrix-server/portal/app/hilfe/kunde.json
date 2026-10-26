@@ -1459,6 +1459,28 @@
         "Das Portal verschickt nichts. Mit den Knöpfen darunter öffnest du dein eigenes Mail-, WhatsApp- oder SMS-Programm. Erst danach gilt die Anfrage als beantwortet.",
         "Es gibt eine Tagesgrenze (40 Vorschläge). Ist die KI nicht eingerichtet oder nicht erreichbar, bekommst du eine Meldung und nimmst eine Vorlage."
       ]
+    },
+    {
+      "t": "„Ein Tipp für dich“ auf der Übersicht",
+      "k": "tipp hinweis paket empfehlung zusatz upgrade bewertungen newsletter telefon assistent",
+      "wo": "Übersicht → Karte „Ein Tipp für dich“",
+      "l": "#uebersicht",
+      "s": [
+        "Manchmal zeigt die Übersicht einen Hinweis auf ein passendes Paket, zum Beispiel wenn viele Anfragen per Telefon kommen oder viele Termine erledigt wurden.",
+        "Der Hinweis stützt sich auf deine eigenen Zahlen im Portal. Er nennt keinen Preis und verspricht kein Ergebnis.",
+        "„Paket ansehen“ führt zur Seite Pakete. Dort siehst du Inhalt und Preis. Gebucht wird nichts, ohne dass du es bestätigst.",
+        "„Nein danke“ blendet den Hinweis aus. Er kommt frühestens nach 90 Tagen wieder."
+      ]
+    },
+    {
+      "t": "Kündigen: Hauptgrund angeben",
+      "k": "kündigen kündigung grund hauptgrund auswahl feedback",
+      "wo": "Konto → Vertrag kündigen",
+      "l": "#konto",
+      "s": [
+        "Beim Kündigen kannst du einen Hauptgrund auswählen, zum Beispiel „zu teuer“ oder „Wechsel zu einem anderen Anbieter“. Die Angabe ist freiwillig.",
+        "Sie hilft uns zu verstehen, was wir besser machen können. Das Datum des Vertragsendes ändert sich dadurch nicht."
+      ]
     }
   ],
   "titel": "Anleitung Kundenportal",
@@ -1688,6 +1710,10 @@
     [
       "Kann die KI Anfragen für mich beantworten?",
       "Sie schlägt dir einen Text vor, den du prüfst und selbst abschickst. Sie sendet nichts von allein."
+    ],
+    [
+      "Warum sehe ich „Ein Tipp für dich“?",
+      "Das Portal hat in deinen eigenen Zahlen etwas gefunden, wofür ein Paket passen könnte. Du kannst den Hinweis ablehnen, dann bleibt er 90 Tage weg."
     ]
   ]
 }

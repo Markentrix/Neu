@@ -1382,6 +1382,52 @@
         "Die Suche zeigt nur, was im Portal liegt. Daten in deinem Mail-Postfach, auf Papier oder in anderen Programmen prüfst du selbst.",
         "Rechtlich Offenes (Aufbewahrungspflichten, Ablehnungsgründe, Wortlaut der Antwort) gehört zum Anwalt."
       ]
+    },
+    {
+      "t": "Hinweise im Kundenportal („Ein Tipp für dich“)",
+      "k": "zusatzverkauf tipp hinweis upgrade paket kundenportal einschalten bewertungen newsletter",
+      "wo": "Pakete (Katalog) → Karte „Hinweise im Kundenportal“",
+      "l": "#katalog",
+      "s": [
+        "Ab Werk aus. Mit dem Schalter zeigt die Übersicht des Inhabers höchstens einen Hinweis auf ein passendes Paket.",
+        "Regeln: viele Telefonanfragen bei ONE → Paket mit Telefon-Assistent; viele erledigte Termine → Bewertungsanfragen; viele Kontakte → Newsletter. Nur für aktive Kunden ab 30 Tagen, nie für bereits gebuchte Pakete.",
+        "Es werden keine Preise genannt. Lehnt der Kunde ab, bleibt der Hinweis 90 Tage weg.",
+        "Die Tabelle zeigt je Paket, wie oft der Hinweis gezeigt, angeklickt und abgelehnt wurde."
+      ]
+    },
+    {
+      "t": "Kündigungsgründe auswerten",
+      "k": "kündigung grund auswertung abwanderung churn zufriedenheit preis wechsel",
+      "wo": "Zufriedenheit → Karte „Kündigungsgründe“",
+      "l": "#zufriedenheit",
+      "s": [
+        "Kunden wählen beim Kündigen einen Hauptgrund (freiwillig). Die Karte zählt die Gründe der letzten 12 Monate.",
+        "Zurückgenommene Kündigungen zählen nicht. In der Liste der Kündigungswünsche und in der Admin-Mail steht der Hauptgrund ebenfalls."
+      ]
+    },
+    {
+      "t": "Funnel-Seite messen (Meta-Pixel, Google-Tag)",
+      "k": "pixel meta facebook google tag conversion messung tracking einwilligung banner funnel",
+      "wo": "Lead-Funnel → Seite bearbeiten → „Messung der Werbung“",
+      "l": "#funnel",
+      "s": [
+        "Trage die Meta-Pixel-ID (nur Ziffern) und/oder die Google-Tag-ID (G-… oder AW-…) ein. Für Google-Ads-Conversions zusätzlich „AW-…/Label“. Leer lassen = keine Messung.",
+        "Besucher sehen zuerst einen Hinweis mit „Einverstanden“ und „Ablehnen“. Ohne Zustimmung wird nichts von Meta oder Google geladen.",
+        "Nach einer Anmeldung wird das Ereignis „Lead“ bzw. die Conversion gemeldet, aber nur bei Zustimmung.",
+        "Wichtig: Vor dem Einsatz Datenschutzerklärung und Banner-Text vom Anwalt prüfen lassen (Übermittlung an Meta/Google). Das Portal erlaubt für diese Seite nur die jeweils nötigen Dienste."
+      ]
+    },
+    {
+      "t": "Meine Visitenkarte und Versand an Leads",
+      "k": "visitenkarte vcard vcf kontakt whatsapp mail anhang lead senden adressbuch",
+      "wo": "Einstellungen → „Meine Visitenkarte“; im Lead oben „Visitenkarte senden“",
+      "l": "#einstellungen",
+      "s": [
+        "Unter Einstellungen → „Meine Visitenkarte“ Name, Funktion, Telefon, E-Mail und Internetseite eintragen. Firma und Anschrift kommen aus den Firmendaten.",
+        "Im Lead „Visitenkarte senden“: per E-Mail (Anhang .vcf, Antworten gehen an deine Adresse), per WhatsApp/Teilen oder als Datei.",
+        "Jeder Versand steht im Verlauf des Leads. Gesperrte Leads, Leads ohne Einwilligung und verlorene Leads sind ausgenommen.",
+        "Jeder Vertriebler pflegt seine eigene Karte unter Konto. Für Kunden gibt es keine Visitenkarte."
+      ]
     }
   ],
   "titel": "Anleitung Admin-Bereich",
@@ -1673,6 +1719,10 @@
     [
       "Eine Person verlangt Auskunft oder Löschung. Was nun?",
       "Menü „Datenschutz-Anfragen“ → „Anfrage erfassen“. Identität prüfen, „Daten suchen“, „Auskunft als Datei“ oder Leads löschen. Die Frist ist ein Monat."
+    ],
+    [
+      "Warum kommen die „Hinweise im Kundenportal“ nicht an?",
+      "Sie sind ab Werk aus. Einschalten unter Pakete (Katalog) → „Hinweise im Kundenportal“. Sie erscheinen nur bei aktiven Kunden ab 30 Tagen und nur, wenn die Zahlen passen."
     ]
   ]
 }

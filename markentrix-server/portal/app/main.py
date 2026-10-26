@@ -20,7 +20,7 @@ from .routes_einstellungen import router as einstellungen_router
 from .routes_vertrieb import router as vertrieb_router
 from .routes_2fa import router as zweifaktor_router
 from .routes_public import router as public_router
-from . import routes_dsgvo, routes_funnel
+from . import kalenderabo, routes_dsgvo, routes_funnel, tipps, visitenkarte
 from .routes_onboarding import router as onboarding_router
 from .routes_vertriebqualitaet import router as vqual_router
 from .routes_pakete import router as pakete_router
@@ -102,7 +102,8 @@ async def schutz(request: Request, call_next):
         if origin and urlparse(origin).netloc != urlparse(config.BASE_URL).netloc and urlparse(origin).netloc != request.headers.get("host"):
             return JSONResponse({"detail": "Ungültige Herkunft."}, status_code=403)
     r = await call_next(request)
-    r.headers["Content-Security-Policy"] = CSP
+    if "Content-Security-Policy" not in r.headers:   # einzelne Seiten (Funnel mit Messung) setzen eine eigene, erweiterte Richtlinie
+        r.headers["Content-Security-Policy"] = CSP
     r.headers["X-Content-Type-Options"] = "nosniff"
     r.headers["X-Frame-Options"] = "DENY"
     r.headers["Referrer-Policy"] = "no-referrer"
@@ -234,6 +235,11 @@ app.include_router(routes_funnel.admin)
 app.include_router(routes_funnel.kunde)
 app.include_router(routes_dsgvo.public)
 app.include_router(routes_dsgvo.admin)
+app.include_router(tipps.kunde)
+app.include_router(tipps.admin)
+app.include_router(kalenderabo.vertrieb)
+app.include_router(kalenderabo.public)
+app.include_router(visitenkarte.router)
 
 
 def seite(name):
@@ -251,7 +257,7 @@ app.get("/freigabe", include_in_schema=False)(seite("freigabe.html"))
 app.get("/anmelden", include_in_schema=False)(seite("anmelden.html"))
 @app.get("/f/{slug}", include_in_schema=False)
 def funnel_seite(slug: str):
-    return FileResponse(config.STATIC_DIR / routes_funnel.seite_datei(slug), media_type="text/html")
+    return routes_funnel.seite_antwort(slug)
 
 
 app.get("/datenschutz-anfrage", include_in_schema=False)(seite("dsgvo.html"))

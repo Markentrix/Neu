@@ -1,4 +1,5 @@
 import { pipelineBoard } from './pipeline.js';
+import { visitenkarteKarte, visitenkarteKnopf } from './visitenkarte.js';
 import { stapelTabellen } from './common.js';
 stapelTabellen();
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste, zielFuerRolle, startFehler } from './common.js';
@@ -418,12 +419,31 @@ async function leadDetail(lid) {
   const akt = h('form', { onsubmit: async (e) => { e.preventDefault(); try { await api('/api/vertrieb/leads/' + lid + '/aktivitaet', { method: 'POST', body: formular(e.target) }); location.reload(); } catch (x) { melde(m, x.message); } } },
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, h('select', { name: 'art' }, ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'].map(a => h('option', { value: a }, a.replace(/_/g, ' '))))),
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
-  return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
+  return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l), h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     datenKarte(lid, l, d, m), h('div', { class: 'card', hidden: true }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende }),
     terminKarte(lid), branchenKarte(lid), h('div', { id: 'angebotbereich', class: 'stack' }, direktAngebotKarte(lid, l), angebotKarte(lid, l)), nachgespraechKarte(lid),
     skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
+}
+
+/** Kalender-Abo: Wiedervorlagen und Erstgespräche im Handy-Kalender. */
+async function kalenderKarte() {
+  const m = h('div'), box = h('div', { class: 'card' });
+  const zeichne = (l) => box.replaceChildren(h('h2', {}, 'Wiedervorlagen im Handy-Kalender'),
+    h('p', { class: 'small muted' }, 'Deine fälligen Wiedervorlagen und gebuchten Erstgespräche erscheinen in deinem Kalender und werden stündlich aktualisiert. Der Link ist geheim: Wer ihn kennt, sieht Firmen und Telefonnummern deiner Wiedervorlagen. Gib ihn nicht weiter. Mit „Neuen Link erzeugen“ wird der alte ungültig.'),
+    l ? h('div', { class: 'stack' }, h('input', { value: l.https, readonly: true, 'aria-label': 'Kalender-Link', onfocus: (e) => e.target.select() }),
+      h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px' }, h('a', { class: 'btn', href: l.webcal }, 'Im Kalender abonnieren'),
+        h('button', { class: 'btn sec', onclick: async () => { try { await navigator.clipboard.writeText(l.https); melde(m, 'Link kopiert.', 'ok'); } catch (e) { melde(m, 'Bitte den Link markieren und kopieren.', 'info'); } } }, 'Link kopieren'),
+        h('button', { class: 'btn sec', onclick: () => neu(true) }, 'Neuen Link erzeugen')))
+      : h('p', {}, h('button', { class: 'btn', onclick: () => neu(false) }, 'Kalender-Link erzeugen')), m);
+  const neu = async (ersetzen) => {
+    if (ersetzen && !confirm('Der bisherige Link funktioniert danach nicht mehr. Fortfahren?')) return;
+    try { const r = await api('/api/vertrieb/kalender-link/neu', { method: 'POST' }); zeichne(r.link); } catch (x) { melde(m, x.message); }
+  };
+  let l = null; try { l = (await api('/api/vertrieb/kalender-link')).link; } catch (e) { /* nur Anzeige */ }
+  zeichne(l);
+  return box;
 }
 
 V.konto = async () => {
@@ -435,7 +455,7 @@ V.konto = async () => {
   const erBox = h('input', { type: 'checkbox', checked: er.an, style: 'width:auto', onchange: async () => { try { await api('/api/vertrieb/erinnerung', { method: 'PUT', body: { an: erBox.checked } }); melde(em, 'Gespeichert.', 'ok'); } catch (x) { erBox.checked = !erBox.checked; melde(em, x.message); } } });
   return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Passwort ändern'), m, f),
     h('div', { class: 'card' }, h('h2', {}, 'Nachfass-Erinnerung'), h('p', { class: 'small muted' }, 'Werktags morgens bekommst du eine Mail und eine Mitteilung, wenn Leads auf dein Nachfassen warten.'), em,
-      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, erBox, 'Tägliche Erinnerung per Mail')), pushKarte('vertrieb'), passkeyKarte(), zweiFaktorKarte());
+      h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit' }, erBox, 'Tägliche Erinnerung per Mail')), await visitenkarteKarte('/api/vertrieb'), await kalenderKarte(), pushKarte('vertrieb'), passkeyKarte(), zweiFaktorKarte());
 };
 
 let aufruf = 0;

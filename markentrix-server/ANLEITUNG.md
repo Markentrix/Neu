@@ -712,3 +712,12 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - Auswertung nach Zeitraum (7/30/90 Tage) mit Vergleich zum Zeitraum davor. Aufrufe ohne Roboter und ohne angemeldete Besucher.
 - Kunden: „✨ Antwort vorschlagen lassen“ im Antwort-Dialog (Entwurf der KI, Versand wie bisher nur durch den Kunden, Tagesgrenze 40).
 - Vertrieb: „Angebot für diesen Lead“ im Anruf-Dialog.
+
+
+## Hinweise, Kündigungsgrund, Kalender-Abo, Messung, Visitenkarte (Migrationen 144 und 145)
+- **Hinweise im Kundenportal** („Ein Tipp für dich“): ab Werk aus, Schalter unter Pakete (Katalog). Regeln siehe Hilfe. Keine Preise, 90 Tage Ruhe nach „Nein danke“.
+- **Kündigungsgrund**: Auswahl beim Kündigen (freiwillig), Auswertung unter Zufriedenheit.
+- **Kalender-Abo** für Vertriebler (Konto): geheimer .ics-Link mit Wiedervorlagen und Erstgesprächen, stündlich aktualisiert, jederzeit erneuerbar.
+- **Messung auf Funnel-Seiten**: Meta-Pixel-ID, Google-Tag-ID, Conversion-Label je Seite. Laden erst nach Zustimmung im Banner (Einverstanden/Ablehnen). Die Sicherheitsrichtlinie der Seite wird nur dann um Meta/Google erweitert. Datenschutzerklärung und Banner-Text vom Anwalt prüfen lassen (`docs/ANWALT-CHECKLISTE.md`).
+- **Digitale Visitenkarte** (nur Team, nicht für Kunden): eigene Karte unter Konto bzw. Einstellungen, Versand aus dem Lead per E-Mail (.vcf-Anhang), Teilen/WhatsApp oder Datei. Vermerk im Lead-Verlauf. Nicht an gesperrte Leads, Leads ohne Einwilligung oder verlorene Leads.
+- **Migrations-Hinweis**: Nach dem Zusammenführen mit dem Funnel-Website-Check gibt es 141 (Check), 142 (Plätze), 143 (Mail-Layout), 144 und 145 (diese Funktionen). Die Ampel aus der früheren Fassung entfällt.

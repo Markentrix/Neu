@@ -2,9 +2,19 @@ import { leistungstextKarte } from './angebotsplus.js';
 import { h, api, datum, zeit, euro, melde, formular, dialog } from '../common.js';
 import { V, bestaetigt, cent, fehler, feld, fmtEuro, knopf, kopf, pill, tabelle } from './kern.js';
 
+/** Schalter und Auswertung für die Hinweise auf weitere Pakete im Kundenportal. */
+function zusatzKarte(z) {
+  const m = h('div'), an = h('input', { type: 'checkbox', id: 'zv_an', checked: !!z.aktiv, style: 'width:auto' });
+  return h('div', { class: 'card' }, h('h2', {}, 'Hinweise im Kundenportal'),
+    h('p', { class: 'small muted' }, 'Ab Werk aus. Eingeschaltet sieht der Inhaber eines Kunden (mindestens 30 Tage, Status aktiv) auf der Übersicht höchstens einen Hinweis auf ein passendes Paket, wenn die eigenen Zahlen dafür sprechen: viele Telefonanfragen bei ONE, viele erledigte Termine ohne Bewertungsanfragen, viele Kontakte ohne Newsletter. Es werden keine Preise genannt. Der Kunde kann ablehnen (90 Tage Ruhe) oder die Pakete ansehen. Gebucht wird nur über den bekannten Ablauf mit deiner Bestätigung.'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center' }, an, ' Hinweise einschalten'),
+    h('p', {}, knopf('Speichern', async () => { try { await api('/api/admin/zusatzverkauf', { method: 'PUT', body: { aktiv: an.checked } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } }, 'btn')), m,
+    z.zahlen.length ? tabelle([['Paket', r => r.code], ['Gezeigt', r => r.gezeigt], ['Interesse', r => r.interesse], ['Abgelehnt', r => r.nein]], z.zahlen) : h('p', { class: 'small muted' }, 'Noch keine Hinweise angezeigt.'));
+}
+
 V.katalog = async () => {
-  const d = await api('/api/admin/katalog');
-  return h('div', { class: 'stack' }, kopf('Pakete & Preise'),
+  const d = await api('/api/admin/katalog'), zv = await api('/api/admin/zusatzverkauf').catch(() => ({ aktiv: false, zahlen: [] }));
+  return h('div', { class: 'stack' }, kopf('Pakete & Preise'), zusatzKarte(zv),
     h('div', { class: 'card' }, h('h2', {}, 'Produkte (aktuelle Preise)'),
       tabelle([['Code', z => z.code], ['Name', z => z.name], ['Einrichtung', z => euro(z.einrichtung_cent)], ['Monatlich', z => euro(z.monatlich_cent)], ['Projekt', z => euro(z.projekt_cent)]], d.produkte)),
     h('div', { class: 'card' }, h('h2', {}, 'Module'), tabelle([['Code', z => z.code], ['Name', z => z.name], ['Art', z => z.art], ['Beschreibung', z => z.beschreibung]], d.module)),

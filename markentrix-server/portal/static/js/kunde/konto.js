@@ -34,6 +34,8 @@ async function statusKarte() {
 function datenKarte() {
   const m = h('div'), box = h('div');
   const grund = h('textarea', { rows: 3, maxlength: 1500, placeholder: 'Was können wir besser machen? (freiwillig)' });
+  const GRUENDE = [['', 'Bitte wählen (freiwillig)'], ['preis', 'Zu teuer'], ['nicht_genutzt', 'Wird bei uns nicht genutzt'], ['wenig_zeit', 'Keine Zeit dafür'], ['wechsel', 'Wechsel zu einem anderen Anbieter'], ['betrieb_aufgegeben', 'Betrieb aufgegeben oder verkauft'], ['leistung', 'Mit der Leistung unzufrieden'], ['sonstiges', 'Sonstiges']];
+  const code = h('select', { 'aria-label': 'Hauptgrund' }, GRUENDE.map(([v, l]) => h('option', { value: v }, l)));
   const datumF = h('input', { type: 'date' });
   const haken = h('input', { type: 'checkbox', style: 'width:auto' });
   const vorschau = h('div', { class: 'msg info', style: 'margin:8px 0' });
@@ -54,10 +56,10 @@ function datenKarte() {
     box.replaceChildren(h('details', {}, h('summary', {}, 'Vertrag kündigen'),
       h('p', { class: 'small muted' }, 'Deine Kündigung ist mit dem Absenden verbindlich (Textform). Das Vertragsende ergibt sich aus Kündigungsfrist und Mindestlaufzeit und gilt zum Monatsende. Du bekommst sofort eine Bestätigung per E-Mail.'),
       vorschau,
-      h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Späteres Ende gewünscht? (optional)'), datumF), h('div', {}, h('label', {}, 'Grund (optional)'), grund)),
+      h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Späteres Ende gewünscht? (optional)'), datumF), h('div', {}, h('label', {}, 'Hauptgrund (optional)'), code, h('label', {}, 'Weitere Anmerkung (optional)'), grund)),
       h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:8px 0' }, haken, 'Ja, ich kündige meinen Vertrag verbindlich.'),
       h('p', {}, h('button', { class: 'btn bad', onclick: async () => {
-        try { const r = await api('/api/kunde/kuendigung', { method: 'POST', body: { grund: grund.value, wunschdatum: datumF.value || null, bestaetigt: haken.checked } }); melde(m, 'Gekündigt zum ' + datum(r.ende) + '. Die Bestätigung kommt per E-Mail.', 'ok'); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Verbindlich kündigen'))));
+        try { const r = await api('/api/kunde/kuendigung', { method: 'POST', body: { grund_code: code.value || null, grund: grund.value, wunschdatum: datumF.value || null, bestaetigt: haken.checked } }); melde(m, 'Gekündigt zum ' + datum(r.ende) + '. Die Bestätigung kommt per E-Mail.', 'ok'); zeigeStand(); } catch (x) { melde(m, x.message); } } }, 'Verbindlich kündigen'))));
   };
   zeigeStand();
   return h('div', { class: 'card' }, h('h2', {}, 'Meine Daten und Kündigung'),

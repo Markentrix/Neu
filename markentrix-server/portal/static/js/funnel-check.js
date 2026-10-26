@@ -1,5 +1,6 @@
 // Funnel-Vorlage „Website-Check“ (/f/<name>): Formular, dann Danke-Ansicht mit Gesamtwert und Prüfpunkten. Ohne Cookies; gibt UTM-Angaben an das Portal weiter.
 import { api, h } from './common.js';
+import { messungFragen, leadMelden } from './messung.js';
 
 const slug = decodeURIComponent(location.pathname.split('/')[2] || '');
 const q = new URLSearchParams(location.search);
@@ -156,6 +157,7 @@ f.addEventListener('submit', async (ev) => {
 });
 
 function danke(r) {
+  leadMelden(kamp.tracking);
   el('seite').hidden = true; el('danke').hidden = false; el('mitlaufend').hidden = true;
   el('dt').textContent = kamp.danke_titel || 'Danke! Ihr Check läuft.';
   el('dx').textContent = kamp.danke_text || '';
@@ -192,4 +194,5 @@ async function abfragen(token, n) {
   setTimeout(() => abfragen(token, n + 1), 3000);
 }
 
-laden();
+await laden();
+if (kamp && kamp.tracking) messungFragen(kamp.tracking);

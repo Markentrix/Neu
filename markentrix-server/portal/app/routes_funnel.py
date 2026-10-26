@@ -7,7 +7,7 @@ from datetime import date
 from urllib.parse import quote
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from . import config, einstellungen, funnelcheck, leadeingang, mailer, push
@@ -35,6 +35,9 @@ def _oeffentlich_bereit(k: dict | None, cur) -> bool:
 
 
 # ------------------------------------------------------------------ öffentlich
+META_ID = re.compile(r"^[0-9]{8,20}$")
+GOOGLE_ID = re.compile(r"^(G|AW|GT)-[A-Z0-9]{4,20}$")
+GOOGLE_LABEL = re.compile(r"^AW-[0-9]+/[A-Za-z0-9_-]{6,40}$")
 
 ROBOTER = re.compile(r"bot|crawl|spider|slurp|facebookexternalhit|preview|headless|curl|wget|python|httpx", re.I)
 
@@ -59,7 +62,8 @@ def seite(slug: str, request: Request):
             "firma": firma.get("name") or "Markentrix", "kontakt": {"telefon": firma.get("telefon") or "", "email": firma.get("email") or ""},
             "referenz": {"text": k["referenz_text"], "name": k["referenz_name"], "link": k["referenz_link"], "sterne": k["referenz_sterne"]} if k["referenz_text"] else None,
             "angebot": _angebot(k),
-            "foto": "/static/funnel/inhaber.webp" if (config.STATIC_DIR / "funnel" / "inhaber.webp").is_file() else None}
+            "foto": "/static/funnel/inhaber.webp" if (config.STATIC_DIR / "funnel" / "inhaber.webp").is_file() else None,
+            "tracking": {"meta": k["meta_pixel_id"], "google": k["google_tag_id"], "google_label": k["google_lead_label"]} if (k["meta_pixel_id"] or k["google_tag_id"]) else None}
 
 
 def _angebot(k: dict) -> dict | None:
@@ -243,18 +247,25 @@ class KampagneIn(BaseModel):
     plaetze_gesamt: int | None = Field(default=None, ge=0, le=999)    # 0 = ohne Zähler
     plaetze_zeitraum: str | None = Field(default=None, max_length=40)
     plaetze_monatlich: bool | None = None
+    # Messung (leer = keine Messung, kein Banner)
+    meta_pixel_id: str | None = Field(default=None, max_length=30, pattern=r"^([0-9]{8,20})?$")
+    google_tag_id: str | None = Field(default=None, max_length=30, pattern=r"^((G|AW|GT)-[A-Z0-9]{4,20})?$")
+    google_lead_label: str | None = Field(default=None, max_length=80, pattern=r"^(AW-[0-9]+/[A-Za-z0-9_-]{6,40})?$")
 
 
 ZUSATZ = ("vorlage", "kicker", "check_mail", "check_betreff", "check_text", "folge_aktiv", "folge_tage", "folge_betreffe", "folge_texte",
           "referenz_text", "referenz_name", "referenz_link", "referenz_sterne",
-          "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_frei", "plaetze_gesamt", "plaetze_zeitraum", "plaetze_monatlich")
+          "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_frei", "plaetze_gesamt", "plaetze_zeitraum", "plaetze_monatlich",
+          "meta_pixel_id", "google_tag_id", "google_lead_label")
 
 
 def _zusatz_speichern(cur, kid, d: KampagneIn):
     werte = {f: getattr(d, f) for f in ZUSATZ if getattr(d, f) is not None}
-    for f in ("kicker", "check_betreff", "check_text", "referenz_text", "referenz_name", "referenz_link", "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_zeitraum"):
+    for f in ("kicker", "check_betreff", "check_text", "referenz_text", "referenz_name", "referenz_link", "angebot_preis", "angebot_zusatz", "angebot_text", "plaetze_zeitraum", "meta_pixel_id", "google_tag_id", "google_lead_label"):
         if f in werte:
             werte[f] = werte[f].strip()
+            if f in ("meta_pixel_id", "google_tag_id", "google_lead_label") and not werte[f]:
+                werte[f] = None
     for f in ("folge_betreffe", "folge_texte"):
         if f in werte:
             werte[f] = [x.strip()[:4000] for x in werte[f]]
@@ -534,3 +545,28 @@ def meine_empfehlung(user: dict = Depends(require_kunde)):
     link = f"{_link('empfehlung')}?ref={code}"
     return {"aktiv": True, "code": code, "link": link, "beschreibung": einst["beschreibung"], "gesamt": z["gesamt"], "kunden": z["kunden"],
             "whatsapp": "https://wa.me/?text=" + quote(f"Ich arbeite mit Markentrix und bin zufrieden. Schau dir das mal an: {link}")}
+
+
+def seite_antwort(slug: str):
+    """Die Seite /f/<name>; wird gemessen (Meta/Google), erlaubt die Sicherheitsrichtlinie genau diese Dienste, sonst bleibt sie streng."""
+    antwort = FileResponse(config.STATIC_DIR / seite_datei(slug), media_type="text/html")
+    if not SLUG.match(slug or ""):
+        return antwort
+    with tx("system") as cur:
+        cur.execute("SELECT aktiv, rechtlich_geprueft_am, meta_pixel_id, google_tag_id FROM lead_kampagnen WHERE slug=%s", (slug,))
+        k = cur.fetchone()
+    if not (k and k["aktiv"] and k["rechtlich_geprueft_am"] and (k["meta_pixel_id"] or k["google_tag_id"])):
+        return antwort
+    skript, verbinden, bild = ["'self'"], ["'self'"], ["'self'", "data:"]
+    if k["meta_pixel_id"]:
+        skript += ["https://connect.facebook.net"]
+        verbinden += ["https://www.facebook.com", "https://connect.facebook.net"]
+        bild += ["https://www.facebook.com"]
+    if k["google_tag_id"]:
+        skript += ["https://www.googletagmanager.com"]
+        google = ["https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com", "https://*.g.doubleclick.net", "https://www.google.com"]
+        verbinden += google
+        bild += google
+    antwort.headers["Content-Security-Policy"] = (f"default-src 'self'; script-src {' '.join(skript)}; style-src 'self' 'unsafe-inline'; img-src {' '.join(bild)}; font-src 'self'; "
+                                                  f"connect-src {' '.join(verbinden)}; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+    return antwort

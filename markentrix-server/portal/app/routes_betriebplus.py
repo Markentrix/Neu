@@ -118,8 +118,13 @@ def k_export(user: dict = Depends(require_inhaber)):
     return Response(daten, media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="Datenexport-{k["kundennummer"]}.zip"', "Cache-Control": "no-store"})
 
 
+GRUENDE = {"preis": "zu teuer", "nicht_genutzt": "wird nicht genutzt", "wenig_zeit": "keine Zeit dafür", "wechsel": "Wechsel zu einem anderen Anbieter", "betrieb_aufgegeben": "Betrieb aufgegeben oder verkauft",
+           "leistung": "mit der Leistung unzufrieden", "sonstiges": "sonstiger Grund"}
+
+
 class KuendigungIn(BaseModel):
     grund: str = Field(default="", max_length=1500)
+    grund_code: str | None = Field(default=None, pattern="^(preis|nicht_genutzt|wenig_zeit|wechsel|betrieb_aufgegeben|leistung|sonstiges)$")
     wunschdatum: date | None = None
     bestaetigt: bool = False
 
@@ -182,8 +187,8 @@ def k_kuendigung_senden(data: KuendigungIn, request: Request, user: dict = Depen
         if k["status"] in ("gekuendigt", "beendet"):
             raise HTTPException(400, "Dein Vertrag ist bereits gekündigt.")
         v = vertragsende(cur, kid, data.wunschdatum)
-        cur.execute("""INSERT INTO kuendigungswuensche (kunden_id, grund, wunschdatum, ende_am, von_name, von_email, ip) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id, erstellt_am""",
-                    (kid, data.grund.strip() or None, data.wunschdatum, v["ende"], user.get("name"), user.get("email"), client_ip(request)))
+        cur.execute("""INSERT INTO kuendigungswuensche (kunden_id, grund, grund_code, wunschdatum, ende_am, von_name, von_email, ip) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, erstellt_am""",
+                    (kid, data.grund.strip() or None, data.grund_code, data.wunschdatum, v["ende"], user.get("name"), user.get("email"), client_ip(request)))
         neu = cur.fetchone()
         audit(cur, user, "kuendigung", kid, {"ende": str(v["ende"]), "wunschdatum": str(data.wunschdatum or "")})
         ids = push.admins(cur)
@@ -196,7 +201,7 @@ def k_kuendigung_senden(data: KuendigungIn, request: Request, user: dict = Depen
         if an_admin:
             mailer.senden(an_admin, f"Kündigung: {k['firma']} ({k['kundennummer']}) zum {ende_txt}",
                           f"{k['firma']} hat am {wann} im Kundenportal gekündigt (von {user.get('name') or user.get('email')}).\n\nVertragsende laut Berechnung: {ende_txt} ({v['massgeblich']})\n"
-                          f"Wunschdatum: {data.wunschdatum or 'nicht angegeben'}\nGrund: {data.grund.strip() or 'nicht angegeben'}\n\nDie Kündigung ist verbindlich und wurde dem Kunden automatisch bestätigt. Zum Vertragsende wird der Kunde automatisch auf „gekündigt“ gesetzt." + mailer.SIGNATUR)
+                          f"Wunschdatum: {data.wunschdatum or 'nicht angegeben'}\nHauptgrund: {GRUENDE.get(data.grund_code, 'nicht angegeben')}\nAnmerkung: {data.grund.strip() or 'keine'}\n\nDie Kündigung ist verbindlich und wurde dem Kunden automatisch bestätigt. Zum Vertragsende wird der Kunde automatisch auf „gekündigt“ gesetzt." + mailer.SIGNATUR)
         ziel = user.get("email") or k["email"]
         if ziel:
             mailer.senden(ziel, f"Bestätigung deiner Kündigung zum {ende_txt}",
@@ -221,10 +226,20 @@ def k_kuendigung_zurueck(user: dict = Depends(require_inhaber)):
     return {"ok": True}
 
 
+@admin.get("/kuendigungsgruende")
+def a_gruende(user: dict = Depends(require_admin)):
+    """Hauptgründe der Kündigungen der letzten 12 Monate (zurückgenommene zählen nicht)."""
+    with tx("admin") as cur:
+        cur.execute("""SELECT coalesce(grund_code, 'ohne') AS code, count(*)::int AS n FROM kuendigungswuensche
+                       WHERE status <> 'zurueckgenommen' AND erstellt_am > now() - interval '365 days' GROUP BY 1 ORDER BY 2 DESC""")
+        zeilen = cur.fetchall()
+    return {"gruende": [{**z, "text": GRUENDE.get(z["code"], "ohne Angabe")} for z in zeilen], "gesamt": sum(z["n"] for z in zeilen)}
+
+
 @admin.get("/kuendigungswuensche")
 def a_kuendigungen(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
-        cur.execute("""SELECT w.id, w.kunden_id, k.firma, k.kundennummer, w.grund, w.wunschdatum, w.ende_am, w.erstellt_am, w.von_name, w.status
+        cur.execute("""SELECT w.id, w.kunden_id, k.firma, k.kundennummer, w.grund, w.grund_code, w.wunschdatum, w.ende_am, w.erstellt_am, w.von_name, w.status
                        FROM kuendigungswuensche w JOIN kunden k ON k.id = w.kunden_id WHERE w.status IN ('offen','bearbeitet') AND w.vollzogen_am IS NULL ORDER BY w.ende_am NULLS LAST, w.erstellt_am""")
         return cur.fetchall()
 

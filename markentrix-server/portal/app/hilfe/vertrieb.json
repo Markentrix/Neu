@@ -788,6 +788,31 @@
         "Ein Lead, der durch ein Signal (Angebot angesehen oder Antwort) hochrutscht, verschwindet aus der Liste „Neu“ und steht nur noch bei den heißen.",
         "Das sind Hinweise aus den Daten im Portal, keine Garantie. Dein Gespür zählt."
       ]
+    },
+    {
+      "t": "Wiedervorlagen im Handy-Kalender (Kalender-Abo)",
+      "k": "kalender abo ics webcal handy outlook google apple wiedervorlage erstgespräch termine synchron",
+      "wo": "Konto → Karte „Wiedervorlagen im Handy-Kalender“",
+      "l": "#konto",
+      "s": [
+        "Klicke auf „Kalender-Link erzeugen“. Danach erscheint dein persönlicher Link.",
+        "„Im Kalender abonnieren“ öffnet den Link in deiner Kalender-App. Alternativ „Link kopieren“ und in Google Kalender (Weitere Kalender → Per URL) oder Outlook (Kalender abonnieren) einfügen.",
+        "Fällige Wiedervorlagen erscheinen als ganztägige Termine „Anrufen: Firma“, gebuchte Erstgespräche mit Uhrzeit. Der Kalender aktualisiert sich etwa stündlich (bei Google kann es länger dauern).",
+        "Der Link ist geheim: Wer ihn kennt, sieht Firmen und Telefonnummern deiner Wiedervorlagen. Gib ihn nicht weiter. Mit „Neuen Link erzeugen“ wird der alte ungültig."
+      ]
+    },
+    {
+      "t": "Digitale Visitenkarte senden",
+      "k": "visitenkarte vcard vcf kontakt adressbuch whatsapp mail teilen anhang qr",
+      "wo": "Konto → „Meine Visitenkarte“; im Lead oben „Visitenkarte senden“",
+      "l": "#konto",
+      "s": [
+        "Trage unter Konto → „Meine Visitenkarte“ Name, Funktion, Telefon, Mobil, E-Mail und Internetseite ein und speichere.",
+        "Im Lead klickst du oben auf „Visitenkarte senden“.",
+        "„Per E-Mail senden“ schickt die Karte als .vcf-Anhang. Der Empfänger öffnet sie mit einem Klick und speichert dich im Adressbuch, wie bei Outlook.",
+        "„Per WhatsApp / Teilen“ öffnet auf dem Handy das Teilen-Menü mit der Karte. Am Computer wird die Datei gespeichert und WhatsApp Web geöffnet; dort die Datei anhängen.",
+        "Jeder Versand steht im Verlauf des Leads. An gesperrte Leads, Leads ohne Einwilligung und verlorene Leads geht nichts."
+      ]
     }
   ],
   "titel": "Anleitung Vertriebsportal",
@@ -986,6 +1011,10 @@
     [
       "Was passiert mit meiner Sprachaufnahme?",
       "Die Aufnahme verarbeitet der Browser deines Handys, bei Chrome und Safari kann sie dafür an Google bzw. Apple gehen. Das Portal selbst speichert nur den Text, den du bestätigst."
+    ],
+    [
+      "Wer sieht meine Visitenkarte?",
+      "Nur die Person, der du sie schickst. Eine öffentliche Seite gibt es nicht. Die Karte gibt es nur für das Markentrix-Team, nicht für Kunden."
     ]
   ]
 }

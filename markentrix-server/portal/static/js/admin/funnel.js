@@ -48,6 +48,8 @@ function kampagneDialog(k, danach, vorgabe = {}) {
       ...t('fk_fb' + i, `Mail ${i + 1}: Betreff`, s.betreff, { maxlength: 200 }), ...ta('fk_fx' + i, `Mail ${i + 1}: Text`, s.text, 5)]),
     box('fk_tel', 'Telefonnummer ist Pflicht', k.telefon_pflicht), box('fk_web', 'Nach der Website fragen', k.website_abfragen), box('fk_term', 'Nach dem Absenden einen Termin anbieten', k.termin_anbieten),
     ...t('fk_kosten', 'Werbekosten gesamt in € (für „Kosten pro Lead“, freiwillig)', k.kosten_cent ? (k.kosten_cent / 100).toFixed(2).replace('.', ',') : '', { inputmode: 'decimal' }),
+    h('h3', {}, 'Messung der Werbung (freiwillig)'), h('p', { class: 'small muted' }, 'Leer lassen = keine Messung, kein Banner. Sonst fragt die Seite zuerst um Einwilligung und lädt Meta/Google erst nach „Einverstanden“. Datenschutzerklärung und Banner-Text vom Anwalt prüfen lassen.'),
+    ...t('fk_meta', 'Meta-Pixel-ID (nur Ziffern)', k.meta_pixel_id, { inputmode: 'numeric', maxlength: 20 }), ...t('fk_gtag', 'Google-Tag-ID (G-… oder AW-…)', k.google_tag_id, { maxlength: 30 }), ...t('fk_glabel', 'Google-Conversion (AW-123456789/AbCdEf…)', k.google_lead_label, { maxlength: 80 }),
     box('fk_geprueft', 'Rechtlich geprüft (Einwilligung, Datenschutz, Impressum)', k.rechtlich_geprueft),
     box('fk_aktiv', 'Seite ist live (nur möglich, wenn rechtlich geprüft)', k.aktiv), m,
     h('button', { class: 'btn', onclick: async (e) => {
@@ -57,7 +59,7 @@ function kampagneDialog(k, danach, vorgabe = {}) {
         termin_anbieten: val('fk_term').checked, kosten_cent: centAusEuro(val('fk_kosten').value), rechtlich_geprueft: val('fk_geprueft').checked, aktiv: val('fk_aktiv').checked,
         vorlage: val('fk_vorlage').value, kicker: val('fk_kicker').value, check_mail: val('fk_cm').checked, check_betreff: val('fk_cb').value || undefined, check_text: val('fk_ct').value || undefined,
         folge_aktiv: val('fk_fa').checked, referenz_text: val('fk_rt').value, referenz_name: val('fk_rn').value, referenz_link: val('fk_rl').value.trim(), referenz_sterne: Number(val('fk_rs').value) || 0,
-        angebot_preis: val('fk_ap').value, angebot_zusatz: val('fk_az').value, angebot_text: val('fk_at').value, plaetze_zeitraum: val('fk_pz').value, plaetze_monatlich: val('fk_pm').checked,
+        angebot_preis: val('fk_ap').value, angebot_zusatz: val('fk_az').value, angebot_text: val('fk_at').value, plaetze_zeitraum: val('fk_pz').value, plaetze_monatlich: val('fk_pm').checked, meta_pixel_id: val('fk_meta').value.trim(), google_tag_id: val('fk_gtag').value.trim(), google_lead_label: val('fk_glabel').value.trim(),
         plaetze_frei: val('fk_pf').value.trim() === '' ? -1 : Number(val('fk_pf').value), plaetze_gesamt: val('fk_pg').value.trim() === '' ? 0 : Number(val('fk_pg').value) };
       const st = [0, 1, 2].filter(i => val('fk_ft' + i).value.trim() !== '');
       body.folge_tage = st.map(i => Number(val('fk_ft' + i).value));

@@ -1,5 +1,6 @@
 // Öffentliche Anmeldeseite einer Lead-Kampagne (/f/<name>), ohne Cookies. Gibt UTM-Angaben und den Empfehlungscode an das Portal weiter.
 import { api, melde, h, el } from './common.js';
+import { messungFragen, leadMelden } from './messung.js';
 const slug = decodeURIComponent(location.pathname.split('/')[2] || '');
 const q = new URLSearchParams(location.search);
 const m = el('m'), f = /** @type {HTMLFormElement} */ (el('f'));
@@ -22,6 +23,7 @@ async function laden() {
   el('tl').textContent = kamp.telefon_pflicht ? 'Telefon' : 'Telefon (optional)';
   el('webBox').hidden = !kamp.website_abfragen;
   f.hidden = false;
+  if (kamp.tracking) messungFragen(kamp.tracking);
 }
 f.addEventListener('submit', async (ev) => {
   ev.preventDefault(); const b = /** @type {HTMLButtonElement} */ (el('b')); b.disabled = true; melde(m, '');
@@ -33,6 +35,7 @@ f.addEventListener('submit', async (ev) => {
       website: kamp.website_abfragen ? (input('w').value || null) : null, einwilligung: input('c').checked, ref: q.get('ref'), utm, zweitfeld: input('z').value || null } });
     f.hidden = true; el('untertitel').hidden = true; el('nutzen').hidden = true;
     el('titel').textContent = kamp.danke_titel; el('dt').hidden = true; el('dx').textContent = kamp.danke_text;
+    leadMelden(kamp.tracking);
     el('tp').hidden = !r.termin; el('danke').hidden = false;
   } catch (z) { melde(m, z.message); b.disabled = false; }
 });
