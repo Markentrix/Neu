@@ -1,7 +1,7 @@
 import { pipelineBoard } from './pipeline.js';
 import { stapelTabellen } from './common.js';
 stapelTabellen();
-import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste } from './common.js';
+import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste, zielFuerRolle, startFehler } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
 import { hilfeSuche } from './hilfe.js';
 
@@ -471,8 +471,8 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('pageshow', () => { setTimeout(anrufNachfragen, 1200); });
 
 (async () => {
-  try { const me = await api('/api/me'); if (me.rolle !== 'vertrieb') { location.href = me.rolle === 'admin' ? '/admin' : '/app'; return; }
+  try { const me = await api('/api/me'); if (me.rolle !== 'vertrieb') { location.href = zielFuerRolle(me.rolle); return; }
     if (me.zwei_faktor_pflicht) { root.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Zwei-Faktor-Anmeldung einrichten'), h('p', {}, 'Für Vertriebs-Zugänge ist die Zwei-Faktor-Anmeldung Pflicht. Bitte jetzt mit einer Authenticator-App einrichten, danach geht es direkt weiter.'), zweiFaktorKarte(), h('p', {}, h('button', { class: 'btn', onclick: () => location.reload() }, 'Weiter zum Portal')))); return; }
-    start = await api('/api/vertrieb/start'); } catch (e) { return; }
+    start = await api('/api/vertrieb/start'); } catch (e) { startFehler(root, e); return; }
   window.addEventListener('hashchange', zeige); zeige(); erstStart().then(() => setTimeout(pushNachfrage, 2500)).catch(() => {});
 })();

@@ -48,6 +48,14 @@ export async function abmelden() {
   try { await api('/api/logout', { method: 'POST' }); } catch (e) { /* egal */ }
   location.href = '/';
 }
+/** Zielseite je Rolle: dieselbe Zuordnung wie beim Anmelden auf dem Server (routes_auth.py). @param {string} rolle */
+export const zielFuerRolle = (rolle) => rolle === 'admin' ? '/admin' : rolle === 'vertrieb' ? '/vertrieb' : '/app';
+/** Start einer Portalseite ist fehlgeschlagen: sichtbare Meldung statt einer leeren (im Dunkelmodus schwarzen) Seite. @param {any} wurzel @param {any} e */
+export function startFehler(wurzel, e) {
+  wurzel.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;width:calc(100% - 24px);margin:24px auto' }, h('h1', {}, 'Das Portal konnte nicht gestartet werden'),
+    h('p', {}, (e && e.message) || 'Unbekannter Fehler.'),
+    h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => location.reload() }, 'Neu laden'), h('button', { class: 'btn sec', onclick: abmelden }, 'Abmelden'))));
+}
 export function sparkline(werte, farbe = '#8B5CF6') {
   const ns = 'http://www.w3.org/2000/svg', w = 280, hh = 46, max = Math.max(1, ...werte);
   const svg = document.createElementNS(ns, 'svg');
