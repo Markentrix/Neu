@@ -699,3 +699,9 @@ Ab Werk aus. Einschalten: Seite „Empfehlung durch Kunden“ prüfen lassen und
 
 ## Datenschutz-Anfragen (Admin → Datenschutz-Anfragen)
 Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tage vorher, Datensuche, Auskunftsdatei (JSON), Lead-Löschung mit Löschprotokoll und optionaler Sperrliste. Öffentliches Formular: `/datenschutz-anfrage` (in der Datenschutzerklärung verlinken). Kundenkonten werden weiter über Export/Offboarding behandelt. Rechtliche Bewertung: Anwalt.
+
+## Funnel: Website-Ampel, Zeitraum, KI-Antwortvorschlag (Migration 141)
+- Danke-Seite zeigt eine Ampel zur Startseite der Interessenten (`webcheck.py`): https, Ladezeit, Handy-Ansicht, Titel, Beschreibung, Kontaktmöglichkeit, Links zu Impressum/Datenschutz. Zugriff nur auf öffentliche Adressen (Namen werden aufgelöst, interne Adressen und Ports außer 80/443 abgelehnt, Weiterleitungen werden neu geprüft). Je Seite abschaltbar. Hinweis „Kein Rechtsurteil“. Das Ergebnis steht im Lead.
+- Auswertung nach Zeitraum (7/30/90 Tage) mit Vergleich zum Zeitraum davor. Aufrufe ohne Roboter und ohne angemeldete Besucher.
+- Kunden: „✨ Antwort vorschlagen lassen“ im Antwort-Dialog (Entwurf der KI, Versand wie bisher nur durch den Kunden, Tagesgrenze 40).
+- Vertrieb: „Angebot für diesen Lead“ im Anruf-Dialog.

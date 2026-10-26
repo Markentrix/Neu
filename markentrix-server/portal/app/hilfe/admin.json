@@ -1313,7 +1313,7 @@
     },
     {
       "t": "Lead-Funnel: eigene Anmeldeseite für eine Kampagne anlegen",
-      "k": "funnel kampagne landingpage anzeige meta google ads anmeldeseite formular leads werbung f seite utm",
+      "k": "funnel kampagne landingpage anzeige meta google ads anmeldeseite formular leads werbung f seite utm website ampel kurzprüfung danke seite tempo handy impressum",
       "wo": "Menü „Lead-Funnel“ (Gruppe Vertrieb)",
       "l": "#funnel",
       "s": [
@@ -1324,7 +1324,9 @@
         "Wer sich einträgt, wird als heißer Lead angelegt (Einwilligung im Verlauf, Kampagne, UTM). Das Team bekommt Push, Mail und die Aufgabe „innerhalb einer Stunde anrufen“. Ist die automatische Verteilung eingeschaltet, geht der Lead gleich an einen Vertriebler.",
         "Eine bekannte E-Mail-Adresse legt keinen zweiten Lead an, sondern ergänzt den vorhandenen. Eine Roboterfalle und eine Bremse (20 Anmeldungen pro Stunde je Anschluss) schützen das Formular.",
         "Nach dem Absenden kann die Seite einen Termin anbieten (Knopf zur Erstgespräch-Buchung). Die Buchung muss dafür unter Einstellungen eingerichtet sein.",
-        "Das Formular nutzt keine Cookies. Die Aufrufzahl wird nur als Tageszähler je Seite gezählt."
+        "Das Formular nutzt keine Cookies. Die Aufrufzahl wird nur als Tageszähler je Seite gezählt.",
+        "Website-Ampel: Trägt der Interessent seine Website ein, prüft das Portal die Startseite kurz (https, Ladezeit, Handy-Ansicht, Titel, Beschreibung, Kontaktmöglichkeit, Links zu Impressum und Datenschutz) und zeigt auf der Danke-Seite eine Ampel mit Punktzahl. Das Ergebnis steht auch im Lead (Verlauf und Website-Check). Es ist ein Hinweis aus einer automatischen Kurzprüfung, kein Rechtsurteil. Abschalten: im Bearbeiten-Dialog den Haken „Website des Interessenten kurz prüfen“ entfernen.",
+        "Die Prüfung ruft nur öffentliche Internetadressen ab. Interne oder ungewöhnliche Adressen (zum Beispiel mit Port) werden abgelehnt, dann zeigt die Seite höflich, dass die Prüfung nicht möglich war."
       ]
     },
     {
@@ -1333,10 +1335,10 @@
       "wo": "Lead-Funnel → Tabelle der Seiten",
       "l": "#funnel",
       "s": [
+        "Oben wählst du den Zeitraum: seit Start, letzte 7, 30 oder 90 Tage. Bei einem Zeitraum steht hinter Aufrufen und Leads in Klammern der Unterschied zum gleich langen Zeitraum davor.",
         "Die Tabelle zeigt je Seite: Aufrufe, Leads, Termine (Leads ab Status Termin), Kunden und die Kosten.",
-        "Trage bei der Seite die Werbekosten gesamt in Euro ein (freiwillig), dann rechnet das Portal Kosten pro Lead und Kosten pro Kunde aus.",
-        "Die Werte sind Gesamtsummen seit Start der Seite. Für einen Zeitraum ziehst du die Kosten bei jeder Auswertung selbst nach.",
-        "Aufrufe zählen jeden Seitenaufruf, auch eigene und von Robotern. Rechne also mit einer Rundung nach oben."
+        "Trage bei der Seite die Werbekosten gesamt in Euro ein (freiwillig). Dann rechnet das Portal €/Lead und €/Kunde aus. Das gibt es nur bei „Seit Start“, weil die Kosten eine Gesamtsumme sind.",
+        "Aufrufe zählen keine Roboter (zum Beispiel Suchmaschinen und Vorschau-Dienste der Werbenetzwerke) und keine angemeldeten Besucher, also nicht deine eigenen Tests im Portal. Wer ohne Anmeldung testet, wird mitgezählt."
       ]
     },
     {

@@ -8,7 +8,7 @@ const centAusEuro = (t) => t === '' ? 0 : Math.round(Number(String(t).replace(',
 
 function kampagneDialog(k, danach) {
   const m = h('div', { role: 'status' }), neu = !k;
-  k = k || { slug: '', name: '', titel: '', untertitel: '', nutzen: [], button: 'Kostenlos anfragen', einwilligung_text: '', danke_titel: 'Vielen Dank!', danke_text: 'Wir melden uns in Kürze bei Ihnen.', telefon_pflicht: true, website_abfragen: true, termin_anbieten: true, kosten_cent: 0, rechtlich_geprueft: false, aktiv: false };
+  k = k || { slug: '', name: '', titel: '', untertitel: '', nutzen: [], button: 'Kostenlos anfragen', einwilligung_text: '', danke_titel: 'Vielen Dank!', danke_text: 'Wir melden uns in Kürze bei Ihnen.', telefon_pflicht: true, website_abfragen: true, termin_anbieten: true, ampel_zeigen: true, kosten_cent: 0, rechtlich_geprueft: false, aktiv: false };
   const t = (id, label, wert, extra = {}) => [h('label', { for: id }, label), h('input', { id, value: wert || '', ...extra })];
   const d = dialog(neu ? 'Neue Funnel-Seite' : 'Funnel-Seite bearbeiten', h('div', { class: 'stack' },
     ...(neu ? t('fk_slug', 'Seitenname (wird Teil der Adresse, z. B. werkstatt-2026)', k.slug, { maxlength: 40 }) : [h('p', { class: 'small muted' }, 'Adresse: ' + k.link)]),
@@ -17,7 +17,7 @@ function kampagneDialog(k, danach) {
     ...t('fk_button', 'Beschriftung des Knopfs', k.button),
     h('label', { for: 'fk_ew' }, 'Einwilligungstext (neben dem Haken, vom Anwalt prüfen lassen)'), h('textarea', { id: 'fk_ew', rows: 3, maxlength: 800 }, k.einwilligung_text || ''),
     ...t('fk_dt', 'Überschrift nach dem Absenden', k.danke_titel), ...t('fk_dx', 'Text nach dem Absenden', k.danke_text),
-    box('fk_tel', 'Telefonnummer ist Pflicht', k.telefon_pflicht), box('fk_web', 'Nach der Website fragen', k.website_abfragen), box('fk_term', 'Nach dem Absenden einen Termin anbieten', k.termin_anbieten),
+    box('fk_tel', 'Telefonnummer ist Pflicht', k.telefon_pflicht), box('fk_web', 'Nach der Website fragen', k.website_abfragen), box('fk_term', 'Nach dem Absenden einen Termin anbieten', k.termin_anbieten), box('fk_ampel', 'Website des Interessenten kurz prüfen und das Ergebnis als Ampel zeigen', k.ampel_zeigen !== false),
     ...t('fk_kosten', 'Werbekosten gesamt in € (für „Kosten pro Lead“, freiwillig)', k.kosten_cent ? (k.kosten_cent / 100).toFixed(2).replace('.', ',') : '', { inputmode: 'decimal' }),
     box('fk_geprueft', 'Rechtlich geprüft (Einwilligung, Datenschutz, Impressum)', k.rechtlich_geprueft),
     box('fk_aktiv', 'Seite ist live (nur möglich, wenn rechtlich geprüft)', k.aktiv), m,
@@ -25,23 +25,28 @@ function kampagneDialog(k, danach) {
       e.target.disabled = true;
       const body = { slug: neu ? val('fk_slug').value.trim() : undefined, name: val('fk_name').value, titel: val('fk_titel').value, untertitel: val('fk_unter').value, nutzen: val('fk_nutzen').value.split('\n').map(x => x.trim()).filter(Boolean),
         button: val('fk_button').value, einwilligung_text: val('fk_ew').value, danke_titel: val('fk_dt').value, danke_text: val('fk_dx').value, telefon_pflicht: val('fk_tel').checked, website_abfragen: val('fk_web').checked,
-        termin_anbieten: val('fk_term').checked, kosten_cent: centAusEuro(val('fk_kosten').value), rechtlich_geprueft: val('fk_geprueft').checked, aktiv: val('fk_aktiv').checked };
+        termin_anbieten: val('fk_term').checked, ampel_zeigen: val('fk_ampel').checked, kosten_cent: centAusEuro(val('fk_kosten').value), rechtlich_geprueft: val('fk_geprueft').checked, aktiv: val('fk_aktiv').checked };
       try { await api(neu ? '/api/admin/funnel' : '/api/admin/funnel/' + k.id, { method: neu ? 'POST' : 'PUT', body }); d.close(); danach(); } catch (x) { fehler(m, x); e.target.disabled = false; }
     } }, 'Speichern')));
 }
 
 V.funnel = async () => {
-  const lade = async () => api('/api/admin/funnel'), m = h('div'), wurzel = h('div', { class: 'stack' });
+  let tage = 0;
+  const lade = async () => api('/api/admin/funnel?tage=' + tage), m = h('div'), wurzel = h('div', { class: 'stack' });
+  const mitVergleich = (jetzt, vorher) => tage && (jetzt || vorher) ? jetzt + (vorher ? ' (' + (jetzt >= vorher ? '+' : '') + (jetzt - vorher) + ')' : '') : String(jetzt);
   const zeichne = async () => {
     const [d, em] = await Promise.all([lade(), api('/api/admin/empfehlung/liste')]);
     const e = d.empfehlung, besch = h('textarea', { id: 'em_besch', rows: 3, maxlength: 1000, 'aria-label': 'Text für Kunden' }, e.beschreibung || '');
-    wurzel.replaceChildren(kopf('Lead-Funnel', knopf('Neue Seite', () => kampagneDialog(null, zeichne), 'btn')),
+    const zeitraum = h('select', { 'aria-label': 'Zeitraum der Auswertung', onchange: (ev) => { tage = Number(ev.target.value); zeichne(); } },
+      ...[[0, 'Seit Start'], [7, 'Letzte 7 Tage'], [30, 'Letzte 30 Tage'], [90, 'Letzte 90 Tage']].map(([v, l]) => h('option', { value: v, selected: v === tage }, l)));
+    wurzel.replaceChildren(kopf('Lead-Funnel', zeitraum, knopf('Neue Seite', () => kampagneDialog(null, zeichne), 'btn')),
       h('div', { class: 'card' }, h('h2', {}, 'So funktioniert es'),
-        h('p', { class: 'small muted' }, 'Jede Anzeige führt auf eine eigene Seite mit Formular. Wer sich einträgt, wird als heißer Lead angelegt (mit Einwilligung, Kampagne und UTM-Angaben), das Team bekommt eine Aufgabe „innerhalb einer Stunde anrufen“, der Interessent kann gleich einen Termin wählen. Eine Seite geht erst live, wenn der Rechtstext als geprüft eingetragen ist.')),
-      h('div', { class: 'card' }, tabelle([['Seite', z => h('div', {}, h('b', {}, z.name), h('div', { class: 'small muted' }, z.link))], ['Status', z => z.aktiv ? pill('aktiv') : z.rechtlich_geprueft ? h('span', { class: 'pill warn' }, 'aus') : h('span', { class: 'pill bad' }, 'Recht offen')],
-        ['Aufrufe', z => z.aufrufe], ['Leads', z => z.leads], ['Termine', z => z.termine], ['Kunden', z => z.kunden], ['Kosten/Lead', z => z.kosten_pro_lead_cent ? fmtEuro(z.kosten_pro_lead_cent) : '–'], ['Kosten/Kunde', z => z.kosten_pro_kunde_cent ? fmtEuro(z.kosten_pro_kunde_cent) : '–'],
-        ['', z => h('div', { class: 'row' }, knopf('Bearbeiten', () => kampagneDialog(z, zeichne)), knopf('Link kopieren', async (ev) => { try { await navigator.clipboard.writeText(z.link); ev.target.textContent = 'Kopiert ✓'; } catch (x) { prompt('Link:', z.link); } }),
-          z.feste ? '' : knopf('Löschen', async () => { if (confirm('Seite „' + z.name + '“ löschen? Die Leads bleiben erhalten.')) { try { await api('/api/admin/funnel/' + z.id, { method: 'DELETE' }); zeichne(); } catch (x) { fehler(m, x); } } }, 'bad'))]], d.kampagnen.filter(z => !z.feste), 'Noch keine Seite angelegt.')),
+        h('p', { class: 'small muted' }, 'Aufrufe zählen ohne angemeldete Besucher und ohne Roboter. Bei Zeiträumen steht in Klammern der Unterschied zum gleich langen Zeitraum davor. Kosten pro Lead/Kunde gibt es nur bei „Seit Start“, weil die Werbekosten eine Gesamtsumme sind.'), h('p', { class: 'small muted' }, 'Jede Anzeige führt auf eine eigene Seite mit Formular. Wer sich einträgt, wird als heißer Lead angelegt (mit Einwilligung, Kampagne und UTM-Angaben), das Team bekommt eine Aufgabe „innerhalb einer Stunde anrufen“, der Interessent kann gleich einen Termin wählen. Eine Seite geht erst live, wenn der Rechtstext als geprüft eingetragen ist.')),
+      h('div', { class: 'card' }, tabelle([['Seite', z => h('div', {}, h('b', {}, z.name), h('div', { class: 'small muted', style: 'word-break:break-all' }, z.link),
+          h('div', { class: 'row', style: 'margin-top:6px;flex-wrap:wrap;gap:6px' }, knopf('Bearbeiten', () => kampagneDialog(z, zeichne)), knopf('Link kopieren', async (ev) => { try { await navigator.clipboard.writeText(z.link); ev.target.textContent = 'Kopiert ✓'; } catch (x) { prompt('Link:', z.link); } }),
+            z.feste ? '' : knopf('Löschen', async () => { if (confirm('Seite „' + z.name + '“ löschen? Die Leads bleiben erhalten.')) { try { await api('/api/admin/funnel/' + z.id, { method: 'DELETE' }); zeichne(); } catch (x) { fehler(m, x); } } }, 'bad')))],
+        ['Status', z => h('span', { style: 'white-space:nowrap' }, z.aktiv ? pill('aktiv') : z.rechtlich_geprueft ? h('span', { class: 'pill warn' }, 'aus') : h('span', { class: 'pill bad' }, 'Recht offen'))],
+        ['Aufrufe', z => mitVergleich(z.aufrufe, z.aufrufe_vorher)], ['Leads', z => mitVergleich(z.leads, z.leads_vorher)], ['Termine', z => z.termine], ['Kunden', z => z.kunden], ['€/Lead', z => z.kosten_pro_lead_cent ? fmtEuro(z.kosten_pro_lead_cent) : '–'], ['€/Kunde', z => z.kosten_pro_kunde_cent ? fmtEuro(z.kosten_pro_kunde_cent) : '–']], d.kampagnen.filter(z => !z.feste), 'Noch keine Seite angelegt.')),
       h('div', { class: 'card' }, h('h2', {}, 'Empfehlungsprogramm'),
         h('p', { class: 'small muted' }, 'Kunden bekommen im Portal einen persönlichen Link. Wer darüber eine Anfrage stellt, wird als Empfehlung angelegt. Beträge und Auszahlung legst du je Empfehlung selbst fest, es gibt keine Standardprämie. Zum Einschalten die feste Seite „Empfehlung durch Kunden“ unten prüfen lassen und aktivieren.'),
         tabelle([['Seite', z => z.name], ['Status', z => z.aktiv ? pill('aktiv') : h('span', { class: 'pill warn' }, 'aus')], ['Aufrufe', z => z.aufrufe], ['Leads', z => z.leads], ['Kunden', z => z.kunden], ['', z => knopf('Bearbeiten', () => kampagneDialog(z, zeichne))]], d.kampagnen.filter(z => z.feste)),

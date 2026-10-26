@@ -39,7 +39,14 @@ try:
     from PIL import Image
 except Exception: Image=None
 OUT="/home/claude/markentrix-server/portal/static/hilfe"
-ADMIN="uebersicht kunden onboarding neu vertrieb leads belege websites einstellungen protokoll preise katalog".split()
+ADMIN="uebersicht kunden onboarding neu vertrieb leads belege websites einstellungen protokoll preise katalog funnel dsgvo zufriedenheit pipeline compliance".split()
+# Beispieldaten für Funnel, Empfehlung und Datenschutz-Anfragen
+fk=a.post("/api/admin/funnel",json={"slug":"werkstatt-herbst","name":"Werkstatt-Herbst","titel":"Mehr Aufträge für Ihre Werkstatt","untertitel":"Wir automatisieren Ihre Anfragen","nutzen":["Weniger Büroarbeit","Mehr Termine"],"button":"Jetzt anfragen","einwilligung_text":"Ich willige ein, dass Markentrix mich kontaktiert.","kosten_cent":25000,"aktiv":True,"rechtlich_geprueft":True}).json()["id"]
+pub=httpx.Client(base_url=B,headers={**H,"User-Agent":"Mozilla/5.0 Safari"})
+for i in range(6): pub.get("/api/public/funnel/werkstatt-herbst")
+for i,n in enumerate(["Kfz Neumann","Elektro Wolf","Autohaus Reimers"]): pub.post("/api/public/funnel/werkstatt-herbst",json={"name":n,"firma":n,"email":f"demo{i}@beispiel.de","telefon":f"0511 99{i}","einwilligung":True,"ampel":None})
+a.post("/api/admin/datenschutz-anfragen",json={"art":"auskunft","name":"Paula Beispiel","email":"paula@beispiel.de","quelle":"mail","nachricht":"Bitte teilen Sie mir mit, welche Daten Sie über mich gespeichert haben."})
+a.post("/api/admin/datenschutz-anfragen",json={"art":"loeschung","name":"Karl Muster","email":"karl@beispiel.de","quelle":"brief"})
 # etwas mehr Beispieldaten
 a.post("/api/admin/kunden",json={"firma":"Tischlerei Hahn","ansprechpartner":"Frau Hahn","email":"hahn@example.org","telefon":"05141 123","strasse":"Hauptstr. 2","plz":"29221","ort":"Celle","paket_code":"KI_ONE"})
 async def knips(pg,rolle,seite,pfad,w,h_):
@@ -49,6 +56,8 @@ async def knips(pg,rolle,seite,pfad,w,h_):
     await pg.wait_for_timeout(500)
     # Scrollleisten/Hinweise ausblenden, Banner "App installieren" weg
     await pg.add_style_tag(content=".appbanner{display:none!important}")
+    await pg.evaluate("""()=>{const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(n.nodeValue.includes('http://localhost:8000'))n.nodeValue=n.nodeValue.replaceAll('http://localhost:8000','https://portal.markentrix.de');}
+      document.querySelectorAll('input').forEach(i=>{if(i.value&&i.value.includes('http://localhost:8000'))i.value=i.value.replaceAll('http://localhost:8000','https://portal.markentrix.de')});}""")
     png=await pg.screenshot(full_page=False,type="png")
     os.makedirs(f"{OUT}/{rolle}",exist_ok=True)
     pfad_png=f"{OUT}/{rolle}/{seite}.png"

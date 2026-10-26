@@ -32,7 +32,11 @@ export async function antwortDialog(aid, danach) {
   const dlg = dialog('Antworten: ' + (a.name || 'Anfrage'), h('div', {},
     h('p', { class: 'small muted' }, '„' + (a.nachricht || '') + '“'),
     h('p', { class: 'small' }, 'Kontakt: ', h('b', {}, a.kontakt || 'keine Angabe')),
-    h('label', {}, 'Vorlage'), waehler, h('label', {}, 'Text (kannst du anpassen)'), text, m,
+    h('label', {}, 'Vorlage'), waehler, h('label', {}, 'Text (kannst du anpassen)'), text,
+    h('p', {}, h('button', { class: 'btn sec small', type: 'button', onclick: async (e) => {
+      const b = /** @type {HTMLButtonElement} */ (e.target); b.disabled = true; b.textContent = 'Der Vorschlag wird geschrieben …';
+      try { const r = await api('/api/kunde/anfragen/' + aid + '/ki-vorschlag', { method: 'POST' }); text.value = r.text; melde(m, 'Das ist ein Entwurf der KI. Bitte lesen und anpassen, bevor du ihn abschickst.', 'info'); } catch (x) { melde(m, x.message); }
+      b.disabled = false; b.textContent = '✨ Antwort vorschlagen lassen'; } }, '✨ Antwort vorschlagen lassen')), m,
     h('p', { class: 'small muted' }, 'Das Portal verschickt nichts. Die Schaltflächen öffnen dein eigenes Mail-, WhatsApp- oder SMS-Programm mit dem Text. Danach wird die Anfrage als beantwortet markiert.'),
     h('div', { class: 'heuteknoepfe' },
       a.kontakt ? kanalKnoepfe(a.kontakt, 'Ihre Anfrage', text, markieren) : '',

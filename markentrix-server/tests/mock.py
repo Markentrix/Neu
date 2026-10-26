@@ -15,6 +15,9 @@ class H(BaseHTTPRequestHandler):
         if "Gesprächs-Assistent" in str(b.get("system","")):
             out=json.dumps({"content":[{"type":"text","text":"Hier: "+json.dumps({"einstieg":"Guten Tag, hier ist Markentrix.","fragen":["Wie kommen Kunden zu Ihnen?","Wer beantwortet Anfragen?","Haben Sie eine Website?"],"nutzen":"Wir können Anfragen automatisch bearbeiten.","einwaende":[{"einwand":"Keine Zeit","antwort":"Ich fasse mich kurz."},{"einwand":"Zu teuer","antwort":"Wir sprechen erst über Ihren Bedarf."},{"einwand":"Haben wir schon","antwort":"Gern ergänzend."}],"abschluss":"Darf ich einen kurzen Termin vorschlagen?"},ensure_ascii=False)}],"usage":{"input_tokens":50,"output_tokens":30}}).encode()
             self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
+        if "Antwort-Assistent" in str(b.get("system","")):
+            out=json.dumps({"content":[{"type":"text","text":"Guten Tag Herr Test,\n\nvielen Dank für Ihre Anfrage. Wir melden uns telefonisch.\n\nFreundliche Grüße\nTestbetrieb"}],"usage":{"input_tokens":50,"output_tokens":30}}).encode()
+            self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return
         if "Notiz-Assistent" in str(b.get("system","")):
             out=json.dumps({"content":[{"type":"text","text":"• Interesse an Terminbuchung\n• Inhaber ruft zurück\nNächster Schritt: Montag nachfassen"}],"usage":{"input_tokens":50,"output_tokens":30}}).encode()
             self.send_response(200); self.send_header("content-type","application/json"); self.end_headers(); self.wfile.write(out); return

@@ -1446,6 +1446,19 @@
         "Unter dem Link siehst du, wie viele Empfehlungen angekommen sind und wie viele davon Kunde geworden sind.",
         "Ob und welches Dankeschön es gibt, steht in der Karte, sobald wir es festgelegt haben. Beträge legt das Markentrix-Team je Empfehlung persönlich fest."
       ]
+    },
+    {
+      "t": "Antwort vorschlagen lassen (KI-Entwurf)",
+      "k": "antwort vorschlagen ki entwurf anfrage text schreiben hilfe formulieren antworten vorschlag",
+      "wo": "Seite „Heute“ oder „Anfragen“ → „Antworten“ → „✨ Antwort vorschlagen lassen“",
+      "l": "#anfragen",
+      "s": [
+        "Öffne eine Anfrage mit „Antworten“. Dort stehen Vorlagen und ein Textfeld.",
+        "Klicke auf „✨ Antwort vorschlagen lassen“. Nach wenigen Sekunden steht ein Entwurf im Textfeld, der zur Anfrage passt.",
+        "Lies den Entwurf und passe ihn an. Die KI kennt weder deine Preise noch deine Zeiten und soll nichts erfinden. Prüfe deshalb Zusagen, bevor du sendest.",
+        "Das Portal verschickt nichts. Mit den Knöpfen darunter öffnest du dein eigenes Mail-, WhatsApp- oder SMS-Programm. Erst danach gilt die Anfrage als beantwortet.",
+        "Es gibt eine Tagesgrenze (40 Vorschläge). Ist die KI nicht eingerichtet oder nicht erreichbar, bekommst du eine Meldung und nimmst eine Vorlage."
+      ]
     }
   ],
   "titel": "Anleitung Kundenportal",
@@ -1671,6 +1684,10 @@
     [
       "Wo ist mein Empfehlungslink?",
       "Auf der Übersicht in der Karte „Markentrix weiterempfehlen“. Sie erscheint nur, wenn das Programm eingeschaltet ist. Siehst du sie nicht, frag uns kurz."
+    ],
+    [
+      "Kann die KI Anfragen für mich beantworten?",
+      "Sie schlägt dir einen Text vor, den du prüfst und selbst abschickst. Sie sendet nichts von allein."
     ]
   ]
 }

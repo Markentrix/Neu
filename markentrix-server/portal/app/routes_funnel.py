@@ -9,10 +9,10 @@ from urllib.parse import quote
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, leadeingang, mailer, push
+from . import config, einstellungen, leadeingang, mailer, push, webcheck
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger
-from .security import audit, client_ip, rate_limit, require_admin, require_kunde
+from .security import COOKIE, audit, client_ip, rate_limit, require_admin, require_kunde
 
 public = APIRouter(prefix="/api/public")
 admin = APIRouter(prefix="/api/admin")
@@ -21,6 +21,7 @@ EMAIL = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,255}\.[A-Za-z]{2,}$")
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,39}$")
 CODE_ZEICHEN = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 FESTE = ("empfehlung",)
+ROBOTER = re.compile(r"bot|crawl|spider|slurp|facebookexternalhit|preview|headless|curl|wget|python|httpx", re.I)
 
 
 def _empfehlung_einst(cur) -> dict:
@@ -43,11 +44,13 @@ def seite(slug: str, request: Request):
         k = cur.fetchone()
         if not _oeffentlich_bereit(k, cur):
             raise HTTPException(404, "Diese Seite gibt es nicht.")
-        cur.execute("""INSERT INTO lead_kampagnen_tage (kampagne_id, tag, aufrufe) VALUES (%s, current_date, 1)
-                       ON CONFLICT (kampagne_id, tag) DO UPDATE SET aufrufe = lead_kampagnen_tage.aufrufe + 1""", (k["id"],))
+        # Eigene Besuche (angemeldet) und Roboter zählen nicht mit
+        if not request.cookies.get(COOKIE) and not ROBOTER.search(request.headers.get("user-agent", "robot")):
+            cur.execute("""INSERT INTO lead_kampagnen_tage (kampagne_id, tag, aufrufe) VALUES (%s, current_date, 1)
+                           ON CONFLICT (kampagne_id, tag) DO UPDATE SET aufrufe = lead_kampagnen_tage.aufrufe + 1""", (k["id"],))
     return {"name": k["name"], "titel": k["titel"], "untertitel": k["untertitel"], "nutzen": k["nutzen"], "button": k["button"],
             "einwilligung_text": k["einwilligung_text"], "danke_titel": k["danke_titel"], "danke_text": k["danke_text"],
-            "telefon_pflicht": k["telefon_pflicht"], "website_abfragen": k["website_abfragen"], "termin_anbieten": k["termin_anbieten"]}
+            "telefon_pflicht": k["telefon_pflicht"], "website_abfragen": k["website_abfragen"], "termin_anbieten": k["termin_anbieten"], "ampel_zeigen": k["ampel_zeigen"]}
 
 
 class AnmeldungIn(BaseModel):
@@ -117,11 +120,24 @@ def anmelden(slug: str, data: AnmeldungIn, request: Request, bg: BackgroundTasks
                     (f"Neuer Funnel-Lead, bitte innerhalb einer Stunde anrufen: {firma}", an, f"lead-funnel-{lid}-{date.today().isoformat()}"))
         termin = bool(k["termin_anbieten"])
         name = k["name"]
+        ampel_pruefen = bool(k["ampel_zeigen"] and k["website_abfragen"] and website)
     push.senden(push_ids + partner_ids, "Neuer Lead", f"{firma} über „{name}“: jetzt anrufen.", "/admin#lead/" + str(lid), "check")
     if an:
         bg.add_task(mailer.senden, an, f"Neuer Lead über „{name}“: {firma}",
                     f"{data.name.strip()} ({email}{', ' + telefon if telefon else ''}) hat sich über „{name}“ angemeldet. Bitte innerhalb einer Stunde anrufen.\n\n{config.BASE_URL}/admin#lead/{lid}")
-    return {"ok": True, "termin": termin, "neu": neu}
+    ampel = None
+    if ampel_pruefen:
+        ampel = webcheck.pruefen(website)    # nach dem Speichern des Leads; ein Fehler hier verliert nichts
+        with tx("system") as cur:
+            if "fehler" in ampel:
+                cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'website')", (lid, f"Website-Ampel für {website[:120]}: {ampel['fehler']}"))
+            else:
+                cur.execute("INSERT INTO lead_checks (lead_id, website, score, ergebnis) VALUES (%s,%s,%s,%s::jsonb)", (lid, website[:300], ampel["score"], __import__("json").dumps(ampel)))
+                cur.execute("UPDATE leads SET score=coalesce(score,%s) WHERE id=%s", (ampel["score"], lid))
+                schwach = ", ".join(x["titel"] for x in ampel["punkte"] if x["status"] != "ok")
+                cur.execute("INSERT INTO lead_aktivitaeten (lead_id, art, inhalt, von) VALUES (%s,'notiz',%s,'website')",
+                            (lid, f"Website-Ampel für {website[:120]}: {ampel['score']} von 100" + (f". Auffällig: {schwach}" if schwach else "")))
+    return {"ok": True, "termin": termin, "neu": neu, "ampel": ampel}
 
 
 # ------------------------------------------------------------------ Admin: Kampagnen
@@ -139,6 +155,7 @@ class KampagneIn(BaseModel):
     telefon_pflicht: bool = True
     website_abfragen: bool = True
     termin_anbieten: bool = True
+    ampel_zeigen: bool = True
     kosten_cent: int = Field(default=0, ge=0, le=100_000_000)
     notiz: str | None = Field(default=None, max_length=1000)
     rechtlich_geprueft: bool = False
@@ -149,30 +166,37 @@ def _link(slug: str) -> str:
     return f"{config.BASE_URL.rstrip('/')}/f/{slug}"
 
 
-@admin.get("/funnel")
-def kampagnen(user: dict = Depends(require_admin)):
-    with tx("admin") as cur:
-        cur.execute("""SELECT k.*, coalesce((SELECT sum(aufrufe) FROM lead_kampagnen_tage t WHERE t.kampagne_id = k.id), 0)::int AS aufrufe,
-                         count(l.id)::int AS leads,
-                         count(l.id) FILTER (WHERE l.status IN ('termin','angebot','gewonnen'))::int AS termine,
-                         count(l.id) FILTER (WHERE l.status = 'gewonnen' OR l.kunden_id IS NOT NULL)::int AS kunden
-                       FROM lead_kampagnen k LEFT JOIN leads l ON l.kampagne_id = k.id GROUP BY k.id ORDER BY k.erstellt_am""")
-        rows = cur.fetchall()
-        einst = _empfehlung_einst(cur)
-    for r in rows:
-        r["link"] = _link(r["slug"])
-        r["kosten_pro_lead_cent"] = round(r["kosten_cent"] / r["leads"]) if r["kosten_cent"] and r["leads"] else None
-        r["kosten_pro_kunde_cent"] = round(r["kosten_cent"] / r["kunden"]) if r["kosten_cent"] and r["kunden"] else None
-        r["feste"] = r["slug"] in FESTE
-        r["rechtlich_geprueft"] = bool(r["rechtlich_geprueft_am"])
-    return {"kampagnen": rows, "empfehlung": einst}
-
-
 def _pruefen(d: KampagneIn):
     if d.aktiv and not d.rechtlich_geprueft:
         raise HTTPException(400, "Die Seite geht erst live, wenn der Rechtstext (Einwilligung, Datenschutz) geprüft ist. Bitte zuerst „Rechtlich geprüft“ eintragen.")
     if d.aktiv and not (d.titel.strip() and d.einwilligung_text.strip()):
         raise HTTPException(400, "Für eine aktive Seite braucht es eine Überschrift und den Einwilligungstext.")
+
+
+@admin.get("/funnel")
+def kampagnen(tage: int = 0, user: dict = Depends(require_admin)):
+    """`tage` = 0: alles seit Start; sonst die letzten 7/30/90 Tage mit Vergleich zur Zeit davor."""
+    if tage not in (0, 7, 30, 90):
+        raise HTTPException(400, "Zeitraum: 0, 7, 30 oder 90 Tage.")
+    with tx("admin") as cur:
+        cur.execute("""SELECT k.*,
+                         coalesce((SELECT sum(aufrufe) FROM lead_kampagnen_tage t WHERE t.kampagne_id = k.id AND (%(t)s = 0 OR t.tag > current_date - %(t)s)), 0)::int AS aufrufe,
+                         coalesce((SELECT sum(aufrufe) FROM lead_kampagnen_tage t WHERE t.kampagne_id = k.id AND %(t)s > 0 AND t.tag <= current_date - %(t)s AND t.tag > current_date - 2 * %(t)s), 0)::int AS aufrufe_vorher,
+                         count(l.id) FILTER (WHERE %(t)s = 0 OR l.erstellt_am > now() - make_interval(days => %(t)s))::int AS leads,
+                         count(l.id) FILTER (WHERE %(t)s > 0 AND l.erstellt_am <= now() - make_interval(days => %(t)s) AND l.erstellt_am > now() - make_interval(days => 2 * %(t)s))::int AS leads_vorher,
+                         count(l.id) FILTER (WHERE l.status IN ('termin','angebot','gewonnen') AND (%(t)s = 0 OR l.erstellt_am > now() - make_interval(days => %(t)s)))::int AS termine,
+                         count(l.id) FILTER (WHERE (l.status = 'gewonnen' OR l.kunden_id IS NOT NULL) AND (%(t)s = 0 OR l.erstellt_am > now() - make_interval(days => %(t)s)))::int AS kunden
+                       FROM lead_kampagnen k LEFT JOIN leads l ON l.kampagne_id = k.id GROUP BY k.id ORDER BY k.erstellt_am""", {"t": tage})
+        rows = cur.fetchall()
+        einst = _empfehlung_einst(cur)
+    for r in rows:
+        r["link"] = _link(r["slug"])
+        # Kosten sind eine Gesamtsumme seit Start, deshalb nur im Zeitraum „alles“ sinnvoll
+        r["kosten_pro_lead_cent"] = round(r["kosten_cent"] / r["leads"]) if tage == 0 and r["kosten_cent"] and r["leads"] else None
+        r["kosten_pro_kunde_cent"] = round(r["kosten_cent"] / r["kunden"]) if tage == 0 and r["kosten_cent"] and r["kunden"] else None
+        r["feste"] = r["slug"] in FESTE
+        r["rechtlich_geprueft"] = bool(r["rechtlich_geprueft_am"])
+    return {"kampagnen": rows, "empfehlung": einst, "tage": tage}
 
 
 @admin.post("/funnel")
@@ -186,9 +210,9 @@ def kampagne_neu(d: KampagneIn, user: dict = Depends(require_admin)):
         if cur.fetchone():
             raise HTTPException(409, "Diesen Seitennamen gibt es schon.")
         cur.execute("""INSERT INTO lead_kampagnen (slug, name, titel, untertitel, nutzen, button, einwilligung_text, danke_titel, danke_text, telefon_pflicht, website_abfragen,
-                         termin_anbieten, kosten_cent, notiz, aktiv, rechtlich_geprueft_am) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                         termin_anbieten, ampel_zeigen, kosten_cent, notiz, aktiv, rechtlich_geprueft_am) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
                     (slug, d.name.strip(), d.titel.strip(), d.untertitel.strip(), [n.strip() for n in d.nutzen if n.strip()], d.button.strip(), d.einwilligung_text.strip(),
-                     d.danke_titel.strip(), d.danke_text.strip(), d.telefon_pflicht, d.website_abfragen, d.termin_anbieten, d.kosten_cent, d.notiz,
+                     d.danke_titel.strip(), d.danke_text.strip(), d.telefon_pflicht, d.website_abfragen, d.termin_anbieten, d.ampel_zeigen, d.kosten_cent, d.notiz,
                      d.aktiv, date.today() if d.rechtlich_geprueft else None))
         kid = cur.fetchone()["id"]
         audit(cur, user, "funnel_neu", None, {"slug": slug})
@@ -205,9 +229,9 @@ def kampagne_aendern(kid: str, d: KampagneIn, user: dict = Depends(require_admin
             raise HTTPException(404, "Seite nicht gefunden.")
         geprueft = (alt["rechtlich_geprueft_am"] or date.today()) if d.rechtlich_geprueft else None
         cur.execute("""UPDATE lead_kampagnen SET name=%s, titel=%s, untertitel=%s, nutzen=%s, button=%s, einwilligung_text=%s, danke_titel=%s, danke_text=%s, telefon_pflicht=%s,
-                         website_abfragen=%s, termin_anbieten=%s, kosten_cent=%s, notiz=%s, aktiv=%s, rechtlich_geprueft_am=%s WHERE id=%s""",
+                         website_abfragen=%s, termin_anbieten=%s, ampel_zeigen=%s, kosten_cent=%s, notiz=%s, aktiv=%s, rechtlich_geprueft_am=%s WHERE id=%s""",
                     (d.name.strip(), d.titel.strip(), d.untertitel.strip(), [n.strip() for n in d.nutzen if n.strip()], d.button.strip(), d.einwilligung_text.strip(),
-                     d.danke_titel.strip(), d.danke_text.strip(), d.telefon_pflicht, d.website_abfragen, d.termin_anbieten, d.kosten_cent, d.notiz, d.aktiv, geprueft, kid))
+                     d.danke_titel.strip(), d.danke_text.strip(), d.telefon_pflicht, d.website_abfragen, d.termin_anbieten, d.ampel_zeigen, d.kosten_cent, d.notiz, d.aktiv, geprueft, kid))
         audit(cur, user, "funnel_aendern", None, {"slug": alt["slug"], "aktiv": d.aktiv})
     return {"ok": True}
 

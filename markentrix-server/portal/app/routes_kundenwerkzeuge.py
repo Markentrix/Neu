@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from . import kundenwerkzeuge as kw
+from . import einstellungen, ki, kundenwerkzeuge as kw
 from .db import tx
 from .security import audit, modul_aktiv, rate_limit, require_kunde
 
@@ -230,3 +230,32 @@ def bitte_verwerfen(bid: str, user: dict = Depends(require_kunde)):
     except Exception:
         raise HTTPException(404, "Entwurf nicht gefunden oder schon erledigt.")
     return {"ok": True}
+
+
+@router.post("/anfragen/{aid}/ki-vorschlag")
+def ki_vorschlag(aid: str, user: dict = Depends(require_kunde)):
+    """Entwurf für eine Antwort auf eine Anfrage. Das Portal verschickt nichts; der Kunde prüft und sendet selbst."""
+    kid = user["kunden_id"]
+    rate_limit(f"ki-vorschlag:{kid}", 40, 86400)
+    with tx("kunde", kid) as cur:
+        if not modul_aktiv(cur, kid, "anfragen_termine"):
+            raise HTTPException(403, "Dieses Modul ist für dein Konto nicht freigeschaltet.")
+        cur.execute("SELECT name, nachricht FROM anfragen WHERE id=%s", (aid,))
+        a = cur.fetchone()
+        if not a:
+            raise HTTPException(404, "Anfrage nicht gefunden.")
+        firma = _firma(cur, kid)
+    with tx("system") as cur:
+        cfg = einstellungen.lesen(cur, "ki")
+    if not cfg.get("api_key"):
+        raise HTTPException(400, "Der Antwortvorschlag ist noch nicht eingerichtet. Nutze die Vorlagen oder frag das Markentrix-Team.")
+    try:
+        text, ein, aus = ki.antwort_vorschlag(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, firma, a["name"], a["nachricht"] or "")
+    except Exception:
+        raise HTTPException(502, "Der Vorschlag ist gerade nicht erreichbar. Bitte nimm eine Vorlage.")
+    if not text:
+        raise HTTPException(502, "Es kam kein Vorschlag zurück. Bitte nimm eine Vorlage.")
+    with tx("system") as cur:
+        kosten = (ein * float(cfg.get("preis_ein_eur", 3.0)) + aus * float(cfg.get("preis_aus_eur", 15.0))) / 1_000_000 * 100
+        cur.execute("INSERT INTO kosten_log (kunden_id, dienst, einheit, menge, kosten_cent) VALUES (%s,'anthropic','tokens',%s,%s)", (kid, ein + aus, round(kosten, 4)))
+    return {"text": text}

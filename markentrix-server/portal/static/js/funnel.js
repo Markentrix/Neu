@@ -34,6 +34,16 @@ f.addEventListener('submit', async (ev) => {
     f.hidden = true; el('untertitel').hidden = true; el('nutzen').hidden = true;
     el('titel').textContent = kamp.danke_titel; el('dt').hidden = true; el('dx').textContent = kamp.danke_text;
     el('tp').hidden = !r.termin; el('danke').hidden = false;
+    if (r.ampel) zeigeAmpel(r.ampel);
   } catch (z) { melde(m, z.message); b.disabled = false; }
 });
+const FARBE = { ok: '🟢', warn: '🟡', bad: '🔴' };
+/** Zeigt das Ergebnis der Website-Kurzprüfung als Ampelliste. */
+function zeigeAmpel(a) {
+  const box = el('ampel'); box.hidden = false;
+  if (a.fehler) { box.replaceChildren(h('h3', {}, 'Ihre Website'), h('p', { class: 'small muted' }, 'Die Kurzprüfung war leider nicht möglich: ' + a.fehler + ' Wir schauen uns Ihre Seite im Gespräch gern persönlich an.')); return; }
+  box.replaceChildren(h('h3', {}, 'Ihre Website: ' + a.score + ' von 100 Punkten'),
+    h('ul', { style: 'list-style:none;padding:0;margin:8px 0' }, ...a.punkte.map(x => h('li', { style: 'margin:6px 0' }, h('span', { 'aria-hidden': 'true' }, FARBE[x.status] + ' '), h('b', {}, x.titel + ': '), x.text))),
+    h('p', { class: 'small muted' }, a.hinweis));
+}
 laden();

@@ -757,6 +757,7 @@
         "Tippst du im Portal auf eine Telefonnummer, ruft dein Handy an. Das Portal merkt sich, welchen Lead du angerufen hast.",
         "Kommst du zurück ins Portal, fragt es: „Wie ist das Gespräch gelaufen?“ mit den bekannten Ergebnissen (erreicht, nicht erreicht, Rückruf, kein Interesse …) und einem Notizfeld.",
         "Ergebnis wählen, Notiz eintragen, speichern: Verlauf und Wiedervorlage sind aktualisiert.",
+        "Im Dialog gibt es außerdem „Angebot für diesen Lead“: Der Knopf bringt dich in den Lead und springt zum Angebotsbereich (Angebot senden, wenn freigeschaltet, oder Angebot anfragen).",
         "Die Frage kommt nur, wenn zwischen Anruf und Rückkehr mindestens 8 Sekunden und höchstens 3 Stunden liegen. Das verhindert Fehlalarme beim Antippen ohne Anruf.",
         "Hast du den Dialog weggeklickt, öffnest du den Lead einfach und hältst das Gespräch dort fest."
       ]

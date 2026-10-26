@@ -33,8 +33,9 @@ from app.db import tx
 db.open_pool()
 
 from app import jobs
+from app import webcheck
 a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","kleinunternehmer":True,"mwst_satz":19})
-pub=httpx.Client(base_url=B,headers=H)
+pub=httpx.Client(base_url=B,headers={**H,"User-Agent":"Mozilla/5.0 (iPhone) Safari"})
 slug=f"werk-{sfx}"
 basis={"slug":slug,"name":"Werkstatt-Kampagne","titel":"Mehr Aufträge für Ihre Werkstatt","untertitel":"Wir automatisieren Ihre Anfragen","nutzen":["Weniger Büroarbeit","Mehr Termine"],"button":"Jetzt anfragen","einwilligung_text":"Ich willige ein, dass Markentrix mich kontaktiert.","kosten_cent":20000}
 # ---------------------------------------------------------------- Rechtssperre
@@ -95,5 +96,37 @@ chk("Änderung steht im Protokoll",int(sql("select count(*) from audit_log where
 a.put("/api/admin/empfehlung",json={"aktiv":False,"beschreibung":""}); chk("Programm ausschalten: Kunde sieht nichts, Link tot",kc.get("/api/kunde/empfehlung").json()=={"aktiv":False} and pub.get("/api/public/funnel/empfehlung").status_code==404)
 # ---------------------------------------------------------------- Löschen und Bremse
 r=a.delete(f"/api/admin/funnel/{kid}"); chk("Eigene Seite löschen klappt, Lead bleibt",r.status_code==200 and sql(f"select count(*) from leads where id='{lid}'")=="1" and sql(f"select coalesce(kampagne_id::text,'-') from leads where id='{lid}'")=="-")
+
+# ---------------------------------------------------------------- Zeitraum, Roboter, Ampel
+slug2=f"zeit-{sfx}"; r=a.post("/api/admin/funnel",json={**basis,"slug":slug2,"aktiv":True,"rechtlich_geprueft":True}); k2=r.json()["id"]
+pub.get(f"/api/public/funnel/{slug2}")
+httpx.get(B+f"/api/public/funnel/{slug2}",headers={**H,"User-Agent":"Googlebot/2.1"})
+httpx.get(B+f"/api/public/funnel/{slug2}",headers={**H,"User-Agent":"facebookexternalhit/1.1"})
+httpx.get(B+f"/api/public/funnel/{slug2}",headers={**H,"User-Agent":"Mozilla/5.0 Safari"},cookies={"mk_session":a.cookies.get("mk_session")})
+z=[x for x in a.get("/api/admin/funnel?tage=7").json()["kampagnen"] if x["slug"]==slug2][0]
+chk("Aufrufe zählen weder Roboter noch angemeldete Besucher",z["aufrufe"]==1,z["aufrufe"])
+sql(f"update lead_kampagnen_tage set tag=current_date-10 where kampagne_id='{k2}'")
+sql(f"insert into lead_kampagnen_tage (kampagne_id,tag,aufrufe) values ('{k2}',current_date,3)")
+z7=[x for x in a.get("/api/admin/funnel?tage=7").json()["kampagnen"] if x["slug"]==slug2][0]; z30=[x for x in a.get("/api/admin/funnel?tage=30").json()["kampagnen"] if x["slug"]==slug2][0]; z0=[x for x in a.get("/api/admin/funnel").json()["kampagnen"] if x["slug"]==slug2][0]
+chk("Zeitraum 7 Tage: jüngere Aufrufe, Vergleich mit Zeit davor",z7["aufrufe"]==3 and z7["aufrufe_vorher"]==1,(z7["aufrufe"],z7["aufrufe_vorher"]))
+chk("Zeitraum 30 Tage und „seit Start“ zählen alles",z30["aufrufe"]==4 and z0["aufrufe"]==4)
+chk("Kosten pro Lead nur bei „seit Start“",all(x["kosten_pro_lead_cent"] is None for x in a.get("/api/admin/funnel?tage=7").json()["kampagnen"]))
+chk("Ungültiger Zeitraum wird abgelehnt",a.get("/api/admin/funnel?tage=5").status_code==400)
+# Auswertung ohne Netz
+ok_html='<html><head><title>Autohaus Meyer Celle</title><meta name="viewport" content="width=device-width"><meta name="description" content="x"></head><body><a href="tel:0511">Anrufen</a><a href="/impressum.html">Impressum</a><a href="/datenschutz">Datenschutz</a></body></html>'
+g=webcheck.analysieren(ok_html,"https://beispiel.de/",900)
+chk("Ampel: gute Seite bekommt 100 Punkte und grün",g["score"]==100 and g["ampel"]=="gruen",g)
+sch=webcheck.analysieren("<html><body>Hallo</body></html>","http://beispiel.de/",5000)
+chk("Ampel: schwache Seite wird rot mit Hinweisen",sch["ampel"]=="rot" and {x["code"] for x in sch["punkte"] if x["status"]=="bad"}>={"https","tempo","handy","kontakt"},sch)
+chk("Ampel: Hinweis nennt keine Rechtsgewähr",("Kein Rechtsurteil" in sch["hinweis"]))
+for adr in ("http://127.0.0.1/","http://localhost/","http://10.0.0.5/","http://169.254.169.254/latest","http://[::1]/","file:///etc/passwd","http://user:pw@example.com/","http://example.com:8080/","kein adresse"):
+    r=webcheck.pruefen(adr); chk("Ampel: interne/ungültige Adresse abgewiesen: "+adr,"fehler" in r,r)
+slug3=f"amp-{sfx}"; r=a.post("/api/admin/funnel",json={**basis,"slug":slug3,"aktiv":True,"rechtlich_geprueft":True}); k3=r.json()["id"]
+r=pub.post(f"/api/public/funnel/{slug3}",json={"name":"Anna Ampel","email":f"amp{sfx}@lead.de","telefon":"0511 77","website":"http://127.0.0.1:1/","einwilligung":True})
+chk("Anmeldung mit interner Website-Adresse klappt, Ampel meldet Fehler statt Zugriff",r.status_code==200 and r.json()["ampel"] and "fehler" in r.json()["ampel"],r.text)
+chk("Fehler der Ampel steht im Verlauf des Leads",int(sql(f"select count(*) from lead_aktivitaeten a join leads l on l.id=a.lead_id where l.email='amp{sfx}@lead.de' and a.inhalt like 'Website-Ampel%'"))==1)
+a.put(f"/api/admin/funnel/{k3}",json={**basis,"slug":slug3,"aktiv":True,"rechtlich_geprueft":True,"ampel_zeigen":False})
+r=pub.post(f"/api/public/funnel/{slug3}",json={"name":"Bert Ampel","email":f"amq{sfx}@lead.de","telefon":"0511 78","website":"www.beispiel.de","einwilligung":True})
+chk("Ampel lässt sich je Seite abschalten",r.status_code==200 and r.json()["ampel"] is None,r.text)
 st=[pub.post(f"/api/public/funnel/{slug}",json={**kam,"zweitfeld":"Bot"}).status_code for _ in range(25)]
 chk("Zu viele Anmeldungen vom selben Anschluss werden gebremst",429 in st,st)

@@ -406,6 +406,11 @@ function terminKarte(lid) {
 }
 
 async function leadDetail(lid) {
+  setTimeout(() => {   // kommt der Vertriebler aus dem Anruf-Dialog („Angebot für diesen Lead“), gleich zum Angebotsbereich springen
+    let z = null; try { z = sessionStorage.getItem('mk-zum-angebot'); sessionStorage.removeItem('mk-zum-angebot'); } catch { /* egal */ }
+    const ziel = z === lid ? document.getElementById('angebotbereich') : null;
+    if (ziel) ziel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 1200);
   const d = await api('/api/vertrieb/leads/' + lid), l = d.lead, m = h('div');
   const gesperrt = ['gewonnen', 'gesperrt', 'consent_ausstehend'].includes(l.status);
   const st = h('select', { style: 'width:auto', disabled: gesperrt, onchange: async (e) => { try { const body = { status: e.target.value }; if (body.status === 'verloren') { const t = Object.entries(d.verlustgruende || {}); const w = window.prompt('Grund (' + t.map(([c, x], i) => (i + 1) + ' = ' + x).join(', ') + ')', '1'); const g = t[Number(w) - 1]; if (!g) { e.target.value = l.status; return; } body.verlust_grund = g[0]; } await api('/api/vertrieb/leads/' + lid + '/status', { method: 'POST', body }); location.reload(); } catch (x) { melde(m, x.message); } } },
@@ -416,7 +421,7 @@ async function leadDetail(lid) {
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, l.firma), st, h('a', { class: 'btn sec small', href: '#leads' }, '← Liste')), m,
     datenKarte(lid, l, d, m), h('div', { class: 'card', hidden: true }, h('div', { class: 'form2' }, [['Ansprechpartner', l.ansprechpartner], ['E-Mail', l.email], ['Telefon', l.telefon], ['Website', l.website], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')]].map(([a, b]) => h('div', {}, h('div', { class: 'small muted' }, a), h('div', {}, b || '–')))), l.notiz && h('p', { class: 'muted' }, l.notiz)),
     kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende }),
-    terminKarte(lid), branchenKarte(lid), direktAngebotKarte(lid, l), angebotKarte(lid, l), nachgespraechKarte(lid),
+    terminKarte(lid), branchenKarte(lid), h('div', { id: 'angebotbereich', class: 'stack' }, direktAngebotKarte(lid, l), angebotKarte(lid, l)), nachgespraechKarte(lid),
     skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'),
     h('div', { class: 'card' }, h('h2', {}, 'Verlauf'), akt, h('div', { style: 'height:10px' }), tabelle([['Wann', z => zeit(z.zeit)], ['Art', z => z.art.replace(/_/g, ' ')], ['Inhalt', z => z.inhalt]], d.aktivitaeten, 'Noch keine Einträge.')));
 }
@@ -464,7 +469,8 @@ async function anrufNachfragen() {
     const d = await api('/api/vertrieb/leads/' + o.lid, { leise: true });
     const dlg = dialog('Wie lief der Anruf' + (o.firma ? ' bei ' + o.firma : '') + '?', h('div', {},
       kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + o.lid + '/kontakt', null, { verlustgruende: d.verlustgruende, nach: () => { dlg.zu(); location.reload(); } }),
-      h('p', {}, h('button', { class: 'btn sec', onclick: () => dlg.zu() }, 'Später / nicht angerufen'))), true);
+      h('p', { class: 'row' }, h('button', { class: 'btn sec', onclick: () => { try { sessionStorage.setItem('mk-zum-angebot', o.lid); } catch { /* egal */ } dlg.zu(); location.hash = '#lead/' + o.lid; } }, 'Angebot für diesen Lead'),
+        h('button', { class: 'btn sec', onclick: () => dlg.zu() }, 'Später / nicht angerufen'))), true);
   } catch { /* Nachfrage ist nur ein Angebot */ }
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') anrufNachfragen(); });
