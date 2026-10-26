@@ -38,3 +38,6 @@ chk("Systemstatus nennt den letzten KI-Fehler",ki_p and "Grund A" in ki_p[0]["de
 ok=v.post("/api/vertrieb/notiz-zusammenfassen",json={"text":"Gespraech mit dem Inhaber, wollte sich melden"}).status_code
 chk("Notiz-KI über Mock klappt wieder (Erfolg löscht die Warnung)",ok==200,ok)
 st=a.get("/api/admin/systemstatus").json(); chk("Warnung danach weg",not [p for p in st["ampel"] if p["id"]=="ki"],[p for p in st["ampel"] if p["id"]=="ki"])
+# Testknopf in den Einstellungen
+r=a.post("/api/admin/einstellungen/ki-test"); chk("KI-Test gegen Mock klappt",r.status_code==200 and r.json()["ok"] is True and r.json()["modell"]=="claude-sonnet-5-5",r.text)
+chk("KI-Test nur für Admins",v.post("/api/admin/einstellungen/ki-test").status_code==403)

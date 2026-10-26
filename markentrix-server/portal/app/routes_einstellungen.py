@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from . import config, einstellungen, jobs, mailer, rechtstexte
+from . import config, einstellungen, jobs, ki, mailer, rechtstexte
 from .db import tx
 from .ki import STANDARD_MODELL
 from .security import EMAIL_RE, audit, rate_limit, require_admin
@@ -73,6 +73,23 @@ def ki_speichern(data: KiIn, user: dict = Depends(require_admin)):
         einstellungen.schreiben(cur, "ki", neu)
         audit(cur, user, "einstellungen_ki", None, {"modell": neu["modell"]})
     return {"ok": True}
+
+
+@router.post("/ki-test")
+def ki_test(user: dict = Depends(require_admin)):
+    """Kleine Testfrage an den KI-Dienst mit den gespeicherten Einstellungen. Bei einem Fehler steht der genaue Grund in der Antwort."""
+    rate_limit("ki-test:" + user["email"], 10, 600)
+    with tx("admin") as cur:
+        cfg = einstellungen.lesen(cur, "ki")
+    if not cfg.get("api_key"):
+        raise HTTPException(400, "Es ist noch kein API-Key gespeichert.")
+    modell = cfg.get("modell") or STANDARD_MODELL
+    try:
+        antwort, _e, _a = ki.fragen(cfg["api_key"], modell, "Antworte mit genau einem Wort.", [{"role": "user", "content": "Sag OK."}], 20)
+    except Exception as e:
+        ki.fehler(e, user, "")
+        raise HTTPException(400, f"Der Test ist fehlgeschlagen. Grund: {ki.grund(e)} (Modell: {modell})")
+    return {"ok": True, "modell": modell, "antwort": antwort[:80]}
 
 
 class TestIn(BaseModel):
