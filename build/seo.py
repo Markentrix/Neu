@@ -142,7 +142,9 @@ def credentials(site):
 def robots(site):
     bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User", "PerplexityBot",
             "Perplexity-User", "Google-Extended", "Applebot-Extended", "Bingbot", "DuckAssistBot", "MistralAI-User"]
-    t = "# ElbDetail – Fahrzeugaufbereitung Celle\nUser-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /entwurf/\nDisallow: /danke.html\n\n"
+    # Danke- und 404-Seite nicht sperren: Sie tragen „noindex“, das Google nur sieht, wenn es die Seite abrufen darf.
+    # Eine gesperrte Seite kann trotzdem im Index landen („Indexiert, obwohl durch robots.txt blockiert“).
+    t = "# ElbDetail – Fahrzeugaufbereitung Celle\nUser-agent: *\nAllow: /\nDisallow: /api/\n\n"
     t += "# KI-Suchmaschinen ausdrücklich erlaubt (Generative Engine Optimization)\n"
     for b in bots:
         t += f"User-agent: {b}\nAllow: /\nDisallow: /api/\n\n"

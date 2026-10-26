@@ -24,7 +24,7 @@
   }
   function radio(form, name) { var el = form.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
   function deDate(iso) { if (!iso) return ""; var p = iso.split("-"), sep = EN ? "/" : "."; return p.length === 3 ? p[2] + sep + p[1] + sep + p[0] : iso; }
-  function todayIso() { var t = new Date(); return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0"); }
+  function todayIso() { var n = new Date(); return n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0"); }
   function params() { var o = {}; location.search.replace(/^\?/, "").split("&").forEach(function (kv) { if (!kv) return; var p = kv.split("="); o[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || "").replace(/\+/g, " ")); }); return o; }
   var Q = params();
   var SPECIAL = { beratung: t("Beratung / Einzelleistung"), keramik: t("Keramikversiegelung"), care: "ElbDetail Care" };  // Anfragen ohne Paketpreis
@@ -41,8 +41,8 @@
     return /^[A-Za-z0-9]{1,40}$/.test(v) ? v : "";
   }
   function niceDate(iso) {
-    var d = new Date(iso + "T12:00:00"), t = new Date(); t.setHours(12, 0, 0, 0);
-    var diff = Math.round((d - t) / 86400000);
+    var d = new Date(iso + "T12:00:00"), now = new Date(); now.setHours(12, 0, 0, 0);  // nicht „t“ nennen: das ist die Übersetzungsfunktion
+    var diff = Math.round((d - now) / 86400000);
     var txt = d.toLocaleDateString(EN ? "en-GB" : "de-DE", { weekday: "short", day: "numeric", month: "short" });
     return diff === 0 ? t("heute, {d}", { d: txt }) : diff === 1 ? t("morgen, {d}", { d: txt }) : txt;
   }
@@ -80,14 +80,14 @@
   });
 
   /* ---------------------------------------------------------------- Navigation & Basis */
-  function focusTarget(t) {
-    var had = t.hasAttribute("tabindex");
-    if (!had) t.setAttribute("tabindex", "-1");
-    t.focus({ preventScroll: true });
-    if (!had) t.addEventListener("blur", function () { t.removeAttribute("tabindex"); }, { once: true });
+  function focusTarget(el) {
+    var had = el.hasAttribute("tabindex");
+    if (!had) el.setAttribute("tabindex", "-1");
+    el.focus({ preventScroll: true });
+    if (!had) el.addEventListener("blur", function () { el.removeAttribute("tabindex"); }, { once: true });
   }
   if (location.hash && /^#[\w-]+$/.test(location.hash)) {
-    var toHash = function () { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView({ block: "start" }); };
+    var toHash = function () { var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ block: "start" }); };
     toHash();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(toHash);
     window.addEventListener("load", toHash);
@@ -107,12 +107,12 @@
     var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
     if (!link || e.defaultPrevented) return;
     var id = link.getAttribute("href").slice(1);
-    var t = id ? document.getElementById(id) : null;
-    if (t) {
+    var el = id ? document.getElementById(id) : null;
+    if (el) {
       e.preventDefault();
       var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      t.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
-      history.pushState(null, "", "#" + id); focusTarget(t);
+      el.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+      history.pushState(null, "", "#" + id); focusTarget(el);
     }
   });
 
@@ -169,9 +169,9 @@
       qBox.setAttribute("aria-busy", "true");
       qBox.classList.remove("bump"); void qBox.offsetWidth; qBox.classList.add("bump");
       var t0 = null, dur = 480;
-      var step = function (t) {
-        if (t0 === null) t0 = t;
-        var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      var step = function (ts) {
+        if (t0 === null) t0 = ts;
+        var k = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - k, 3);
         paint(Math.round(from + (v - from) * e));
         if (k < 1) requestAnimationFrame(step); else qBox.setAttribute("aria-busy", "false");
       };
@@ -275,10 +275,10 @@
       ["pointerdown", "keydown", "touchstart"].forEach(function (ev) { r.addEventListener(ev, stop, { once: true, passive: true }); });
       var keys = [[0, 50], [550, 66], [1250, 36], [1800, 50]], t0 = null;
       var ease = function (k) { return k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; };
-      var step = function (t) {
+      var step = function (ts) {
         if (touched) { ba.style.setProperty("--pos", r.value + "%"); return; }
-        if (t0 === null) t0 = t;
-        var e = t - t0, i = 1;
+        if (t0 === null) t0 = ts;
+        var e = ts - t0, i = 1;
         while (i < keys.length - 1 && e > keys[i][0]) i++;
         var a = keys[i - 1], b = keys[i], k = Math.max(0, Math.min(1, (e - a[0]) / (b[0] - a[0])));
         ba.style.setProperty("--pos", (a[1] + (b[1] - a[1]) * ease(k)) + "%");
@@ -545,7 +545,7 @@
     function loadSlots(keep) {
       if (!slotBox) return;
       var day = wz.datum.value, chosen = keep || radio(wz, "uhrzeit");
-      var say = function (t, err, html) { if (slotMsg) { if (html) slotMsg.innerHTML = t; else slotMsg.textContent = t; slotMsg.className = "field-msg" + (err ? " error" : ""); } };
+      var say = function (msg, err, html) { if (slotMsg) { if (html) slotMsg.innerHTML = msg; else slotMsg.textContent = msg; slotMsg.className = "field-msg" + (err ? " error" : ""); } };
       var alt = t("Rufen Sie uns an ({tel}) oder schreiben Sie per {wa}.", { tel: '<a href="tel:' + ELB.phone + '">' + ELB.phoneDisplay + '</a>',
         wa: '<a href="' + waLink(t("Hallo ElbDetail, ich möchte einen Termin am {datum} vereinbaren.", { datum: deDate(day) })) + '" target="_blank" rel="noopener">WhatsApp</a>' });
       if (!day || wz.datum.validationMessage) { slotBox.innerHTML = ""; say(day ? "" : t("Bitte zuerst einen Tag wählen.")); return; }

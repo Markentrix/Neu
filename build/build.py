@@ -145,6 +145,7 @@ def build(content_dir, out_dir, static_dir, quiet=False):
         en = i18n.build_en(out_dir, written, content_dir, site.url, config_js(site), f.read())
     written += en["written"]
     sm += [("/en" + p, d, pr, f) for p, d, pr, f in sm]
+    home_links(out_dir, [w for w in written if w.endswith(".html")])
     write("sitemap.xml", seo.sitemap(site, sm))
     write("robots.txt", seo.robots(site))
     write("llms.txt", seo.llms(site))
@@ -185,6 +186,31 @@ def build(content_dir, out_dir, static_dir, quiet=False):
         for w in warnings:
             print("Hinweis:", w)
     return {"files": len(written), "warnings": warnings, "missing": en["missing"], "seen": en["seen"]}
+
+
+HOMES = ("index.html", "en/index.html")  # Startseiten: kanonisch ist die Ordner-Adresse („/“ bzw. „/en/“)
+
+
+def home_links(out_dir, pages):
+    """Links auf index.html der Startseite auf die Ordner-Adresse umstellen (index.html → ./, ../index.html → ../).
+    Sonst kennt Google zwei Adressen derselben Seite und meldet „Alternative Seite mit richtigem kanonischen Tag“."""
+    pat = re.compile(r'href="(/|(?:\.\./)*)((?:en/)?)index\.html(#[^"]*)?"')
+    for rel in pages:
+        p = os.path.join(out_dir, rel)
+        with open(p, encoding="utf-8") as f:
+            src = f.read()
+        base = os.path.dirname(rel)
+
+        def rep(m):
+            pre, en, frag = m.group(1), m.group(2), m.group(3) or ""
+            target = (en + "index.html") if pre == "/" else os.path.normpath(os.path.join(base, pre + en + "index.html")).replace(os.sep, "/")
+            if target not in HOMES:
+                return m.group(0)  # z. B. ratgeber/index.html: bleibt, so steht sie auch als kanonische Adresse
+            return f'href="{(pre + en) or "./"}{frag}"'
+        new = pat.sub(rep, src)
+        if new != src:
+            with open(p, "w", encoding="utf-8") as f:
+                f.write(new)
 
 
 TITLE_MAX, DESC_MIN, DESC_MAX = 59, 110, 160  # Markentrix: Titel unter 60 Zeichen

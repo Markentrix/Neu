@@ -163,6 +163,13 @@ class TestBuild(unittest.TestCase):
         robots = read(os.path.join(SITE, "robots.txt"))
         self.assertIn("Disallow: /api/", robots)
         self.assertNotIn("/admin", robots)
+        self.assertNotIn("danke.html", robots)  # gesperrt sähe Google das noindex nicht
+        self.assertIn('content="noindex', read(os.path.join(SITE, "danke.html")))
+        for p in files(".html"):  # Startseite nur unter ihrer kanonischen Ordner-Adresse verlinken
+            rel = os.path.relpath(p, SITE)
+            for u in re.findall(r'href="([^"#?]*index\.html)', read(p)):
+                target = os.path.normpath(os.path.join(SITE, u.lstrip("/")) if u.startswith("/") else os.path.join(os.path.dirname(p), u))
+                self.assertNotIn(os.path.relpath(target, SITE), ("index.html", os.path.join("en", "index.html")), f"{rel}: {u}")
         self.assertIn("GPTBot", robots)
 
     def test_json_ld_valid(self):
@@ -274,6 +281,11 @@ class TestEnglish(unittest.TestCase):
             text = html.unescape(re.sub(r"<[^>]+>", " ", t))
             hits += [f"{rel}: …{text[max(0, m.start() - 40):m.end() + 40]!r}" for m in pat.finditer(text)]
         self.assertEqual(hits[:15], [])
+
+    def test_translation_function_not_shadowed(self):
+        """script.js übersetzt mit t(); eine lokale Variable t würde es verdecken (Fehler „t is not a function“)."""
+        js = read(os.path.join(ROOT, "static", "script.js"))
+        self.assertEqual(re.findall(r"\bvar t\b|[,(]\s*t\s*=[^=]|function\s*\w*\s*\(\s*t\s*[,)]", js), [])
 
     def test_english_config_and_legal_note(self):
         cfg = read(os.path.join(SITE, "en", "config.js"))

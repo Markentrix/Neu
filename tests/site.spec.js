@@ -478,7 +478,7 @@ test("Sprachumschalter wechselt auf dieselbe Seite in der anderen Sprache", asyn
   expect(page.url()).not.toContain("/en/");
   await page.goto("/en/");
   await page.locator('.lang-switch a[hreflang="de"]').click();
-  await expect(page).toHaveURL(/\/index\.html$/);
+  await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);  // Startseite über die kanonische Ordner-Adresse
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
 });
 
