@@ -742,3 +742,8 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 ## Terminbestätigung und beste Anrufzeit
 - **Terminbestätigung:** Steht ein Anruf fest (Rückrufzeit oder gebuchtes Erstgespräch), zeigt der Lead „✉ Bestätigung senden“. Der Text mit Datum und Uhrzeit ist vorgeschrieben und änderbar; WhatsApp, SMS oder E-Mail öffnen die jeweilige App, gesendet wird erst dort. Der Verlauf vermerkt es. Rechtlich wie die Visitenkarte: nur an Leads, mit denen schon gesprochen wurde (Anwaltsliste).
 - **Beste Anrufzeit:** `anrufzeiten.py` wertet je Branche und Stunde aus, wie oft ein Anruf „erreicht“ war (letzte 12 Monate, nur Zähler, keine Personen). Ab 20 Anrufen je Branche erscheint im Lead „🕒 Beste Anrufzeit für …“, und der Anruf-Modus bietet „Heiße Leads, beste Uhrzeit zuerst“.
+
+## Untere Menüleiste am Handy
+- **Kunde:** Heute, Anfragen, Termine, Nachrichten, Mehr. Freigaben stehen im Menü „Mehr“ mit Zähler.
+- **Admin:** Heute (= Mein Tag), Nachrichten, Kunden, Leads, Menü. Übersicht und Freigaben stehen im Menü (Zähler am Menü-Knopf).
+- **Vertrieb:** Anrufen, Leads, Pipeline, Zahlen, Menü; im Lead steht oben der Knopf „📞 Anrufen“ (Vertrieb und Admin).

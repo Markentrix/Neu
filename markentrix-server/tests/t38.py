@@ -60,7 +60,7 @@ async def main():
         await pg.reload(); await pg.wait_for_selector(".tabbar"); await pg.wait_for_timeout(800)
         chk("Anleitung kommt nicht wieder","willkommen" not in pg.url)
         chk("Handy-Leiste sichtbar",await pg.locator(".tabbar").is_visible())
-        chk("Leiste: Heute, zwei Seiten, Mehr",await pg.locator(".tabbar > *").count()==4)
+        chk("Leiste: Heute, Anfragen, Termine, Nachrichten, Mehr",await pg.locator(".tabbar > *").count()==5)
         b=await pg.locator(".tabbar a").first.bounding_box(); chk("Tippfläche mind. 44px",b["height"]>=44,b)
         chk("Seitenleiste am Handy ohne Menüpunkte",await pg.locator(".side a.nav").first.is_hidden())
         ueber=await pg.evaluate("document.documentElement.scrollWidth>document.documentElement.clientWidth"); chk("Kein Seitwärts-Scrollen",not ueber)

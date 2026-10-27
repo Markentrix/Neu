@@ -454,7 +454,7 @@ async function leadDetail(lid) {
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, h('select', { name: 'art' }, ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'].map(a => h('option', { value: a }, a.replace(/_/g, ' '))))),
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   const mehr = mehrMenue(['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l));
-  return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), st, mehr, listenKnopf(['leads', 'heute', 'pipeline'])), m,
+  return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', st, mehr, listenKnopf(['leads', 'heute', 'pipeline'])), m,
     leadReiter(lid, [
       ['anrufen', 'Anrufen', h('div', { class: 'stack' }, datenKarte(lid, l, d, m),
         kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: modus.aktiv() }))],

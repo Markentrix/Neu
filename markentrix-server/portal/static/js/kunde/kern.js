@@ -55,15 +55,15 @@ export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['bel
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : id === 'vertraege' ? start.badges.vertraege : 0)) || 0;
 
-/** Feste Leiste unten am Handy: die drei wichtigsten Seiten und „Mehr“ mit dem ganzen Menü. */
+/** Feste Leiste unten am Handy: Heute, Anfragen, Termine, Nachrichten und „Mehr“ mit dem ganzen Menü (Freigaben stehen dort mit Zähler). */
 function tabbar(aktiv) {
-  const ids = sichtbar().map(x => x[0]), feste = ['heute', ids.includes('anfragen') ? 'anfragen' : 'nachrichten', ids.includes('termine') ? 'termine' : 'uebersicht'];
-  const ICON = { heute: '⌂', anfragen: '✉', termine: '▦', nachrichten: '✉', uebersicht: '◔' };
+  const ids = sichtbar().map(x => x[0]), feste = [...new Set(['heute', ids.includes('anfragen') ? 'anfragen' : 'nachrichten', ids.includes('termine') ? 'termine' : 'uebersicht', 'nachrichten'])].filter(i => i === 'heute' || ids.includes(i)).slice(0, 4);
+  const ICON = { heute: '⌂', anfragen: '☎', termine: '▦', nachrichten: '✉', uebersicht: '◔' };
   const rest = ids.filter(i => !feste.includes(i)), mehrZahl = rest.reduce((n, i) => n + zaehler(i), 0);
   const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt' }, navGruppen(GRUPPEN.map(([titel, g]) => [titel, sichtbar().filter(x => g.includes(x[0])).map(x => [x[0], x[1], zaehler(x[0])]), true]), aktiv, 'kunde-mehr'),
     h('div', { class: 'brandzeile', style: 'margin-top:10px' }, themeKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
   return h('nav', { class: 'tabbar', 'aria-label': 'Schnellzugriff' },
-    feste.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null }, h('span', { class: 'ic', 'aria-hidden': 'true' }, ICON[id] || '•'), h('span', {}, (SEITEN.find(x => x[0] === id) || [id, id])[1].replace('Angebote & Rechnungen', 'Rechnungen')))),
+    feste.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null }, h('span', { class: 'ic', 'aria-hidden': 'true' }, ICON[id] || '•', zaehler(id) ? h('span', { class: 'badge' }, zaehler(id)) : ''), h('span', {}, (SEITEN.find(x => x[0] === id) || [id, id])[1].replace('Angebote & Rechnungen', 'Rechnungen')))),
     h('button', { type: 'button', class: !feste.includes(aktiv) ? 'on' : '', onclick: mehr }, h('span', { class: 'ic', 'aria-hidden': 'true' }, '☰', mehrZahl ? h('span', { class: 'badge' }, mehrZahl) : ''), h('span', {}, 'Mehr')));
 }
 

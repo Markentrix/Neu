@@ -37,7 +37,7 @@ export function gerüst(aktiv, inhalt) {
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' }, hilfeSuche('admin'), ich && !ich.zwei_faktor && !zweiFaktorWeg() ? h('div', { class: 'msg info row small', style: 'align-items:center;gap:8px;padding:6px 10px' }, h('span', { class: 'grow' }, 'Noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten')), h('button', { class: 'btn sec small', 'aria-label': 'Hinweis ausblenden', onclick: (e) => { try { sessionStorage.setItem('mk-2fa-weg', '1'); } catch { /* egal */ } e.target.closest('.msg').remove(); } }, '×')) : '', inhalt, rechtFuss()),
-    mobilLeiste({ aktiv, gruppen, feste: ['uebersicht', 'postfach', 'kunden', 'freigaben'], icons: { uebersicht: '⌂', postfach: '✉', kunden: '▦', freigaben: '✔', aufgaben: '☑' }, kurz: { uebersicht: 'Übersicht', postfach: 'Posteingang' }, schluessel: 'admin' }));
+    mobilLeiste({ aktiv, gruppen, feste: ['meintag', 'postfach', 'kunden', 'leads'], icons: { meintag: '⌂', postfach: '✉', kunden: '▦', leads: '☎', freigaben: '✔', aufgaben: '☑' }, kurz: { meintag: 'Heute', postfach: 'Nachrichten' }, schluessel: 'admin' }));
 }
 export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
   if (!zeilen.length) return leerZustand(leer);
