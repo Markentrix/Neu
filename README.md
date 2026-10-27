@@ -39,3 +39,9 @@ Favicon und App-Icons in `website-fertig/` entstehen aus derselben Marke (`pytho
 
 Palette „Warmweiß, Tiefgrün, Kupfer“: Fläche `#f7f4ee`, Text `#1c2a24`, Marke/Struktur Tannengrün `#1f4d3a`, Kaufknopf Kupfer `#9e6230` (nur für Warenkorb und Bestellen), Fehler `#b23a2e`.
 Alle Farben sind Tokens in `website-fertig/assets/css/style.css` (`:root`, hell und dunkel). Logo- und Illustrationsfarben stehen in `build/logo.py` und `build/images.py`.
+
+## Echte Produktfotos
+
+Foto als JPG unter `build/fotos/<artikel-id>.jpg` ablegen, im Artikel in `build/produkte.py` `foto=True` setzen
+(optional `crop=(links, oben, rechts, unten)` in Pixeln des Originals), dann `python3 build/images.py` und `python3 build/build.py`.
+Der Generator schneidet auf 4:3 zu, skaliert auf 1200 × 900 und speichert WebP. Artikel ohne `foto` behalten ihre Illustration.

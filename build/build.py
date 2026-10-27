@@ -306,7 +306,7 @@ def build_products():
   <div class="wrap">
     <nav aria-label="Pfad" class="small muted" style="margin-bottom:16px"><a href="../index.html">Start</a> › <a href="../shop.html">Shop</a> › <a href="../shop.html#{p['kat']}">{E(KATEGORIEN[p['kat']])}</a></nav>
     <div class="product">
-      <div class="product-media"><img src="../assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="{E(p['name'])}, Illustration in {E(FARBEN[p['farben'][0]][0])}"></div>
+      <div class="product-media"><img src="../assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="{E(p['name'])}{', gedruckt in ' + E(FARBEN[p['farben'][0]][0]) if p.get('foto') else ', Illustration in ' + E(FARBEN[p['farben'][0]][0])}"></div>
       <div class="product-info">
         <span class="eyebrow">{E(KATEGORIEN[p['kat']])}</span>
         <h1>{E(p['name'])}</h1>
@@ -331,7 +331,7 @@ def build_products():
         </dl>
         <h2 style="font-size:1.15rem">Beschreibung</h2>
         <p>{E(p['lang'])}</p>
-        <p class="small muted">Hinweis: 3D-gedruckte Teile zeigen feine Schichtlinien, das ist Teil des Verfahrens. Farben können je nach Filamentcharge leicht abweichen. Die Abbildung ist eine Illustration des Artikels.</p>
+        <p class="small muted">Hinweis: 3D-gedruckte Teile zeigen feine Schichtlinien, das ist Teil des Verfahrens. Farben können je nach Filamentcharge leicht abweichen.{'' if p.get('foto') else ' Die Abbildung ist eine Illustration des Artikels.'}</p>
         {widerruf}
       </div>
     </div>

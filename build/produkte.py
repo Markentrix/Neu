@@ -10,6 +10,7 @@ FARBEN = {
     "grau": ("Steingrau", "#8a8f99"),
     "blau": ("Nachtblau", "#2f4d8a"),
     "holz": ("Holzton (Wood-PLA)", "#b98557"),
+    "orange-silk": ("Orange Silk (glänzend)", "#e07a2a"),
 }
 
 KATEGORIEN = {
@@ -22,6 +23,12 @@ KATEGORIEN = {
 }
 
 PRODUKTE = [
+    dict(id="kuerbis-mini", name="Kleiner Kürbis", kat="wohnen", preis=0.99,
+         kurz="Lächelnder Mini-Kürbis aus glänzendem Silk-PLA. Für Fensterbank, Schreibtisch oder als Zugabe zum Geschenk.",
+         lang="Der kleine Kürbis kommt mit geschnitztem Gesicht und Stiel direkt vom Druckbett, in einem Stück und ohne Nacharbeit. Das Silk-Filament schimmert metallisch und fängt das Licht, dadurch wirkt er wie lackiert. Beliebt als Tischdeko im Herbst, als Mitbringsel oder zu mehreren als Fensterbank-Parade. Nicht als Kinderspielzeug unter 3 Jahren geeignet.",
+         masse="ca. 3,5 cm hoch", material="PLA+ Silk (glänzend)", gewicht="ca. 6 g",
+         farben=["orange-silk"], tags=["neu"], foto=True,
+         crop=(240, 490, 2630, 2290)),
     dict(id="pflanztopf-terra", name="Pflanztopf „Terra“ 12 cm", kat="garten", preis=14.90,
          kurz="Geometrischer Übertopf mit Facettenschliff und Ablaufloch, passend für 12-cm-Töpfe.",
          lang="Der Übertopf „Terra“ bringt klare Kanten auf die Fensterbank. Die Facetten fangen das Licht, innen passt jeder handelsübliche 12-cm-Kunststofftopf. Ein Ablaufloch samt Untersetzer ist dabei, Staunässe hat keine Chance. Gedruckt aus pflanzenbasiertem PLA mit 0,2 mm Schichthöhe und nachbearbeiteter Oberfläche.",

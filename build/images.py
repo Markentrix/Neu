@@ -218,6 +218,20 @@ def main():
     tmp = tempfile.mkdtemp()
     jobs = []
     for p in PRODUKTE:
+        if p.get("foto"):
+            src = os.path.join(os.path.dirname(__file__), "fotos", p["id"] + ".jpg")
+            from PIL import ImageOps
+            im = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
+            if p.get("crop"):
+                im = im.crop(p["crop"])
+            w, h = im.size
+            if w / h > 4 / 3:
+                nw = int(h * 4 / 3); im = im.crop(((w - nw) // 2, 0, (w - nw) // 2 + nw, h))
+            else:
+                nh = int(w * 3 / 4); im = im.crop((0, (h - nh) // 2, w, (h - nh) // 2 + nh))
+            im = im.resize((1200, 900), Image.LANCZOS)
+            im.save(os.path.join(OUT, p["id"] + ".webp"), "WEBP", quality=84, method=6)
+            continue
         svg = frame(draw(p))
         path = os.path.join(tmp, p["id"] + ".svg")
         with open(path, "w") as f:
