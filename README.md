@@ -10,7 +10,7 @@ Kein eigenes Backend: Bestellungen, Anfragen, Widerrufe, Google-Bewertungen, Coo
 
 ## Vor dem Hochladen
 
-1. `build/config.py` ausfüllen: Inhaber, Anschrift, Telefon, E-Mail, Steuernummer, Kleinunternehmer ja/nein, PayPal.Me-Link.
+1. `build/config.py` prüfen: Firmendaten sind wie bei Markentrix eingetragen. Offen: PayPal.Me-Link, USt-IdNr. nach Erteilung, ggf. eigene Shop-E-Mail-Adresse.
 2. `python3 build/build.py` ausführen (erzeugt alle Seiten neu).
 3. Produktfotos: Datei `website-fertig/assets/img/produkte/<artikel-id>.webp` (800×600) ersetzen, sonst nichts ändern.
 4. Im Portal den Shop als eigenen Kunden/Site „Schichtwerk“ mit eigenen Daten anlegen (eigene Absender-Mail, eigener Google-Bewertungslink).

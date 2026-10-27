@@ -599,7 +599,8 @@ def build_imprint():
     <span class="eyebrow">Rechtliches</span>
     <h1>Impressum</h1>
     <h2>Angaben gemäß § 5 DDG</h2>
-    <p>{E(C.FIRMA)}<br>Inhaber: {E(C.INHABER)}<br>{E(C.STRASSE)}<br>{E(C.PLZ_ORT)}</p>
+    <p>{E(C.FIRMA)}<br>Inhaber: {E(C.INHABER)} (Einzelunternehmen)<br>{E(C.STRASSE)}<br>{E(C.PLZ_ORT)}</p>
+    <p class="small muted">„{E(C.MARKE)}“ ist eine Geschäftsbezeichnung des Einzelunternehmens von {E(C.INHABER)}, Celle, zu dem auch die Marketingagentur Markentrix gehört.</p>
     <h2>Kontakt</h2>
     <p>Telefon: <a href="{TEL_HREF}">{E(C.TELEFON)}</a><br>E-Mail: <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a></p>
     <h2>Umsatzsteuer</h2>
