@@ -14,7 +14,7 @@ TODAY = datetime.date.today().isoformat()
 
 SVG_CART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg>'
 SVG_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
-SVG_LOGO = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="14" y="40" width="36" height="8" rx="3" fill="#e8561f"/><rect x="18" y="29" width="28" height="8" rx="3" fill="#ff8a55"/><rect x="22" y="18" width="20" height="8" rx="3" fill="#ffb08c"/><path d="M32 8v8" stroke="#f1efe9" stroke-width="3" stroke-linecap="round"/></svg>'
+SVG_LOGO = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#ff8a55"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#e8561f"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#bf3e0b"/></svg>'
 SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
 ICONS = {
     "layer": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 13 10 5 10-5"/><path d="m2 18 10 5 10-5"/></svg>',
@@ -52,7 +52,7 @@ def header(rel, current=""):
         return f'<a href="{rel}{href}"{cur}>{label}</a>'
     return f"""<header class="site-header">
   <div class="wrap">
-    <a class="logo" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{SVG_LOGO}<span>{E(C.MARKE)}</span></a>
+    <a class="logo" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{SVG_LOGO}<span>Schicht<em>werk</em></span></a>
     <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu">{SVG_MENU}</button>
     <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
       {nav("shop.html", "Shop", "shop")}
@@ -75,7 +75,7 @@ def footer(rel):
     <div class="trust-strip footer-trust"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span><span>{SVG_CHECK} Gefertigt in Deutschland</span></div>
     <div class="cols">
       <div>
-        <a class="logo" href="{rel}index.html">{SVG_LOGO}<span>{E(C.MARKE)}</span></a>
+        <a class="logo" href="{rel}index.html">{SVG_LOGO}<span>Schicht<em>werk</em></span></a>
         <p style="margin-top:12px">{E(C.CLAIM)}. Jedes Teil wird nach Ihrer Bestellung in unserer Werkstatt gedruckt, geprüft und verpackt.</p>
         <p><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
       </div>

@@ -77,6 +77,7 @@ p{margin:0 0 1em}
 .site-header .wrap{display:flex;align-items:center;gap:16px;min-height:68px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:700;font-size:1.15rem;letter-spacing:-.02em}
 .logo svg{width:34px;height:34px;flex:none}
+.logo em{font-style:normal;color:var(--accent)}
 .nav{margin-left:auto;display:flex;align-items:center;gap:4px}
 .nav a{color:var(--ink-2);text-decoration:none;font-weight:600;padding:10px 12px;border-radius:999px}
 .nav a:hover,.nav a[aria-current="page"]{background:var(--surface-2);color:var(--ink)}

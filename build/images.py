@@ -209,12 +209,7 @@ def draw(p):
     return box(300, 250, 200, 180, 60, c)
 
 
-LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">'
-            '<rect width="64" height="64" rx="14" fill="#171a1f"/>'
-            '<rect x="14" y="40" width="36" height="8" rx="3" fill="#e8561f"/>'
-            '<rect x="18" y="29" width="28" height="8" rx="3" fill="#ff8a55"/>'
-            '<rect x="22" y="18" width="20" height="8" rx="3" fill="#ffb08c"/>'
-            '<path d="M32 8 v8" stroke="#f1efe9" stroke-width="3" stroke-linecap="round"/></svg>')
+LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">' + '<rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#ff8a55"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#e8561f"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#bf3e0b"/>' + '</svg>')
 
 
 def main():

@@ -28,3 +28,9 @@ Kein eigenes Backend: Bestellungen, Anfragen, Widerrufe, Google-Bewertungen, Coo
 | Zahlung | PayPal.Me-Link (aus config) auf danke.html, sonst Vorkasse | danke.html |
 
 Artikel ändern: `build/produkte.py` bearbeiten, dann `python3 build/images.py` (nur bei neuen Artikeln) und `python3 build/build.py`.
+
+## Logo
+
+`brand/` enthält das Logo (Bildmarke: drei Schichten bilden ein S; Wortmarke „Schicht·werk“ in Inter Bold als Pfade):
+SVG hell/dunkel, mit und ohne Kachel, einfarbig, sowie PNG-Exporte (2400 px Logo, 1024 px Marke). Erzeugt mit `python3 build/logo.py`.
+Favicon und App-Icons in `website-fertig/` entstehen aus derselben Marke (`python3 build/images.py`).
