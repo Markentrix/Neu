@@ -1,0 +1,3 @@
+Inter (c) 2016-2023 The Inter Project Authors (https://github.com/rsms/inter)
+Lizenz: SIL Open Font License 1.1 - https://openfontlicense.org
+Die Schrift ist lokal eingebunden, es werden keine Anfragen an Fremdserver gestellt.

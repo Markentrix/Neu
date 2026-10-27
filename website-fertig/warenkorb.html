@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warenkorb · Schichtwerk</title>
+<meta name="description" content="Warenkorb und Bestellung bei Schichtwerk: Artikel prüfen, Lieferadresse angeben, per PayPal oder Überweisung bezahlen.">
+<meta name="theme-color" content="#f6f4ef">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="assets/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css">
+<meta name="robots" content="noindex"></head>
+<body data-root="">
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Schichtwerk Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="14" y="40" width="36" height="8" rx="3" fill="#e8561f"/><rect x="18" y="29" width="28" height="8" rx="3" fill="#ff8a55"/><rect x="22" y="18" width="20" height="8" rx="3" fill="#ffb08c"/><path d="M32 8v8" stroke="#f1efe9" stroke-width="3" stroke-linecap="round"/></svg><span>Schichtwerk</span></a>
+    <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
+      <a href="shop.html">Shop</a>
+      <a href="kontakt.html">Eigenes Modell</a>
+      <a href="versand.html">Versand</a>
+      <a href="ueber-uns.html">Über uns</a>
+    </nav>
+    <a class="cart-link" href="warenkorb.html" aria-label="Warenkorb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg><span class="cart-badge" aria-live="polite"></span></a>
+  </div>
+</header>
+<main id="main">
+<section class="section-tight" id="warenkorb">
+  <div class="wrap">
+    <span class="eyebrow">Warenkorb</span>
+    <h1>Ihre Bestellung</h1>
+    <div class="empty" id="cart-empty"><p>Ihr Warenkorb ist leer.</p><a class="btn btn-primary" href="shop.html">Zum Shop</a></div>
+    <div class="cart-layout">
+      <div>
+        <div class="cart-list" id="cart-list" aria-live="polite"></div>
+        <form class="form" id="bestellformular" style="margin-top:32px" hidden>
+          <h2>Lieferadresse</h2>
+          <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande, danach erhalten Sie die Rechnung mit Zahlungsdaten. Gedruckt wird nach Zahlungseingang.</p>
+          <div class="alert" role="alert"></div>
+          <div class="field"><label for="b-name">Vor- und Nachname</label><input type="text" id="b-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
+          <div class="row">
+            <div class="field"><label for="b-email">E-Mail <span class="opt">(für Bestätigung und Rechnung)</span></label><input type="email" id="b-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
+            <div class="field"><label for="b-tel">Telefon <span class="opt">(optional, für Rückfragen)</span></label><input type="tel" id="b-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
+          </div>
+          <div class="field"><label for="b-strasse">Straße und Hausnummer</label><input type="text" id="b-strasse" name="strasse" required autocomplete="street-address" data-err="Bitte die Straße eintragen."><p class="msg"></p></div>
+          <div class="row">
+            <div class="field"><label for="b-plz">PLZ</label><input type="text" id="b-plz" name="plz" required inputmode="numeric" autocomplete="postal-code" data-err="Bitte die Postleitzahl eintragen."><p class="msg"></p></div>
+            <div class="field"><label for="b-ort">Ort</label><input type="text" id="b-ort" name="ort" required autocomplete="address-level2" data-err="Bitte den Ort eintragen."><p class="msg"></p></div>
+          </div>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zahlungsart</legend>
+            <label class="check"><input type="radio" name="zahlungsart" value="paypal" checked> PayPal (Zahlungslink kommt mit der Bestätigung)</label>
+            <label class="check"><input type="radio" name="zahlungsart" value="ueberweisung"> Vorkasse per Überweisung (Bankdaten kommen mit der Rechnung)</label>
+          </fieldset>
+          <div class="field"><label for="b-anm">Anmerkung <span class="opt">(optional)</span></label><textarea id="b-anm" name="anmerkung" rows="3"></textarea><p class="msg"></p></div>
+          <div class="field hp" aria-hidden="true"><label for="b-web">Website</label><input type="text" id="b-web" name="website" tabindex="-1" autocomplete="off"></div>
+          <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
+          <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
+          <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
+          <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:«E-Mail-Adresse»">Bestellung per E-Mail schicken</a> oder anrufen: <a href="tel:">«Telefonnummer»</a>.</p>
+        </form>
+      </div>
+      <div class="summary" id="cart-summary" hidden>
+        <h2 style="font-size:1.1rem">Zusammenfassung</h2>
+        <div class="line"><span>Zwischensumme</span><strong id="s-zwischen">0,00 €</strong></div>
+        <div class="line"><span>Versand (Deutschland)</span><strong id="s-versand">0,00 €</strong></div>
+        <div class="line total"><span>Gesamt</span><span id="s-gesamt">0,00 €</span></div>
+        <p class="small muted" id="s-hint"></p>
+        <p class="small muted">Keine Umsatzsteuer nach § 19 UStG. Produktion 2 bis 4 Werktage plus Versand 2 bis 3 Werktage.</p>
+        <a class="btn btn-ghost btn-block" href="shop.html">Weiter einkaufen</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="logo" href="index.html"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="14" y="40" width="36" height="8" rx="3" fill="#e8561f"/><rect x="18" y="29" width="28" height="8" rx="3" fill="#ff8a55"/><rect x="22" y="18" width="20" height="8" rx="3" fill="#ffb08c"/><path d="M32 8v8" stroke="#f1efe9" stroke-width="3" stroke-linecap="round"/></svg><span>Schichtwerk</span></a>
+        <p style="margin-top:12px">3D-Druck-Manufaktur. Jedes Teil wird nach Ihrer Bestellung in unserer Werkstatt gedruckt, geprüft und verpackt.</p>
+        <p><a href="mailto:«E-Mail-Adresse»">«E-Mail-Adresse»</a><br><a href="tel:">«Telefonnummer»</a></p>
+      </div>
+      <div>
+        <h2>Shop</h2>
+        <ul>
+          <li><a href="shop.html">Alle Artikel</a></li>
+          <li><a href="kontakt.html">Eigenes Modell drucken lassen</a></li>
+          <li><a href="versand.html">Versand &amp; Zahlung</a></li>
+          <li><a href="warenkorb.html">Warenkorb</a></li>
+          <li><a href="ueber-uns.html">Über uns</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Rechtliches</h2>
+        <ul>
+          <li><a href="impressum.html">Impressum</a></li>
+          <li><a href="datenschutz.html">Datenschutz</a></li>
+          <li><a href="agb.html">AGB</a></li>
+          <li><a href="widerruf.html">Widerrufsrecht</a></li>
+          <li><span data-mk="cookies"></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 Schichtwerk 3D-Druck</span>
+      <span>Gehostet bei Markentrix · Keine Tracking-Cookies</span>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/produkte.js"></script>
+<script src="assets/js/shop.js"></script>
+</body>
+</html>

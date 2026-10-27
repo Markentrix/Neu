@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop · Alle 3D-Druck-Artikel · Schichtwerk</title>
+<meta name="description" content="Alle 3D-gedruckten Artikel von Schichtwerk: Wohnen, Schreibtisch, Küche, Gadgets, Spiel und Garten. Farbe wählen, bestellen, in wenigen Tagen geliefert.">
+<meta name="theme-color" content="#f6f4ef">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="assets/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-root="">
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Schichtwerk Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="14" y="40" width="36" height="8" rx="3" fill="#e8561f"/><rect x="18" y="29" width="28" height="8" rx="3" fill="#ff8a55"/><rect x="22" y="18" width="20" height="8" rx="3" fill="#ffb08c"/><path d="M32 8v8" stroke="#f1efe9" stroke-width="3" stroke-linecap="round"/></svg><span>Schichtwerk</span></a>
+    <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
+      <a href="shop.html" aria-current="page">Shop</a>
+      <a href="kontakt.html">Eigenes Modell</a>
+      <a href="versand.html">Versand</a>
+      <a href="ueber-uns.html">Über uns</a>
+    </nav>
+    <a class="cart-link" href="warenkorb.html" aria-label="Warenkorb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg><span class="cart-badge" aria-live="polite"></span></a>
+  </div>
+</header>
+<main id="main">
+<section class="section-tight">
+  <div class="wrap">
+    <span class="eyebrow">Shop</span>
+    <h1>Alle Artikel</h1>
+    <p class="muted" style="max-width:60ch">20 Artikel, alle auf Bestellung gedruckt. Preise sind Endpreise, Versand 4,90 € innerhalb Deutschlands, ab 49,00 € kostenlos.</p>
+    <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
+      <button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button><button class="chip" type="button" data-kat="wohnen" aria-pressed="false">Wohnen &amp; Deko</button><button class="chip" type="button" data-kat="schreibtisch" aria-pressed="false">Schreibtisch &amp; Büro</button><button class="chip" type="button" data-kat="kueche" aria-pressed="false">Küche &amp; Bad</button><button class="chip" type="button" data-kat="gadgets" aria-pressed="false">Gadgets</button><button class="chip" type="button" data-kat="spiel" aria-pressed="false">Spiel &amp; Hobby</button><button class="chip" type="button" data-kat="garten" aria-pressed="false">Garten &amp; Pflanzen</button>
+      <label class="sr-only" for="sortierung">Sortierung</label>
+      <select id="sortierung"><option value="standard">Empfohlen</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A–Z</option></select>
+    </div>
+    <p class="small muted" id="treffer" aria-live="polite">20 Artikel</p>
+    <div class="grid" id="shop-grid"><article class="card" data-kat="garten" data-preis="14.9" data-name="Pflanztopf „Terra“ 12 cm" data-pos="0">
+  <a class="card-img" href="produkt/pflanztopf-terra.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/pflanztopf-terra.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Garten &amp; Pflanzen</span>
+    <h2><a href="produkt/pflanztopf-terra.html">Pflanztopf „Terra“ 12 cm</a></h2>
+    <p class="small muted" style="margin:0">Geometrischer Übertopf mit Facettenschliff und Ablaufloch, passend für 12-cm-Töpfe.</p>
+    <div class="price">14,90 € <span class="badge badge-accent">Bestseller</span></div>
+    <a class="btn btn-ghost" href="produkt/pflanztopf-terra.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="garten" data-preis="17.9" data-name="Selbstbewässernder Kräutertopf" data-pos="1">
+  <a class="card-img" href="produkt/kraeutertopf-selbstbewaessernd.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/kraeutertopf-selbstbewaessernd.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Garten &amp; Pflanzen</span>
+    <h2><a href="produkt/kraeutertopf-selbstbewaessernd.html">Selbstbewässernder Kräutertopf</a></h2>
+    <p class="small muted" style="margin:0">Zweiteiliger Topf mit Wasserreservoir und Docht: Basilikum und Co. versorgen sich bis zu 10 Tage selbst.</p>
+    <div class="price">17,90 € <span class="badge">Neu</span></div>
+    <a class="btn btn-ghost" href="produkt/kraeutertopf-selbstbewaessernd.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="schreibtisch" data-preis="8.9" data-name="Handy-Halter „Lean“" data-pos="2">
+  <a class="card-img" href="produkt/handyhalter-lean.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/handyhalter-lean.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Schreibtisch &amp; Büro</span>
+    <h2><a href="produkt/handyhalter-lean.html">Handy-Halter „Lean“</a></h2>
+    <p class="small muted" style="margin:0">Flacher Ständer für Smartphones bis 7 Zoll, mit Kabelschlitz zum Laden im Stehen.</p>
+    <div class="price">8,90 € <span class="badge badge-accent">Bestseller</span></div>
+    <a class="btn btn-ghost" href="produkt/handyhalter-lean.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="schreibtisch" data-preis="16.9" data-name="Kopfhörer-Ständer „Arc“" data-pos="3">
+  <a class="card-img" href="produkt/kopfhoererstaender-arc.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/kopfhoererstaender-arc.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Schreibtisch &amp; Büro</span>
+    <h2><a href="produkt/kopfhoererstaender-arc.html">Kopfhörer-Ständer „Arc“</a></h2>
+    <p class="small muted" style="margin:0">Bogenförmiger Ständer für Over-Ear-Kopfhörer mit breiter, polsterschonender Auflage.</p>
+    <div class="price">16,90 € </div>
+    <a class="btn btn-ghost" href="produkt/kopfhoererstaender-arc.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="schreibtisch" data-preis="5.9" data-name="Kabelclips „Clip“ 6er-Set" data-pos="4">
+  <a class="card-img" href="produkt/kabelclips-6er.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/kabelclips-6er.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Schreibtisch &amp; Büro</span>
+    <h2><a href="produkt/kabelclips-6er.html">Kabelclips „Clip“ 6er-Set</a></h2>
+    <p class="small muted" style="margin:0">Sechs selbstklebende Clips für Lade- und USB-Kabel an Schreibtischkante oder Nachttisch.</p>
+    <div class="price">5,90 € </div>
+    <a class="btn btn-ghost" href="produkt/kabelclips-6er.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="schreibtisch" data-preis="19.9" data-name="Schreibtisch-Organizer „Grid“" data-pos="5">
+  <a class="card-img" href="produkt/organizer-grid.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/organizer-grid.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Schreibtisch &amp; Büro</span>
+    <h2><a href="produkt/organizer-grid.html">Schreibtisch-Organizer „Grid“</a></h2>
+    <p class="small muted" style="margin:0">Modularer Organizer mit sechs Fächern für Stifte, Notizzettel, Handy und Kleinkram.</p>
+    <div class="price">19,90 € <span class="badge badge-accent">Bestseller</span></div>
+    <a class="btn btn-ghost" href="produkt/organizer-grid.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="kueche" data-preis="11.9" data-name="Untersetzer „Hex“ 4er-Set" data-pos="6">
+  <a class="card-img" href="produkt/untersetzer-hex-4er.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/untersetzer-hex-4er.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Küche &amp; Bad</span>
+    <h2><a href="produkt/untersetzer-hex-4er.html">Untersetzer „Hex“ 4er-Set</a></h2>
+    <p class="small muted" style="margin:0">Vier sechseckige Untersetzer mit Wabenmuster und Halter, hitzebeständig bis 80 °C.</p>
+    <div class="price">11,90 € </div>
+    <a class="btn btn-ghost" href="produkt/untersetzer-hex-4er.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="wohnen" data-preis="15.9" data-name="Vase „Spiral“" data-pos="7">
+  <a class="card-img" href="produkt/vase-spiral.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/vase-spiral.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Wohnen &amp; Deko</span>
+    <h2><a href="produkt/vase-spiral.html">Vase „Spiral“</a></h2>
+    <p class="small muted" style="margin:0">Im Vasenmodus gedruckte Spiralvase mit fließender, nahtloser Oberfläche. Für Trockenblumen.</p>
+    <div class="price">15,90 € <span class="badge">Neu</span></div>
+    <a class="btn btn-ghost" href="produkt/vase-spiral.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="wohnen" data-preis="34.9" data-name="Lithophan-Lampe mit eigenem Foto" data-pos="8">
+  <a class="card-img" href="produkt/lithophan-lampe.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/lithophan-lampe.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Wohnen &amp; Deko</span>
+    <h2><a href="produkt/lithophan-lampe.html">Lithophan-Lampe mit eigenem Foto</a></h2>
+    <p class="small muted" style="margin:0">Ihr Foto wird in eine Lichtwand gedruckt: Ausgeschaltet weiß, eingeschaltet erscheint das Bild.</p>
+    <div class="price">34,90 € <span class="badge badge-accent">Bestseller</span></div>
+    <a class="btn btn-ghost" href="produkt/lithophan-lampe.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="spiel" data-preis="12.9" data-name="Flexi-Drache „Ember“" data-pos="9">
+  <a class="card-img" href="produkt/flexi-drache.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/flexi-drache.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Spiel &amp; Hobby</span>
+    <h2><a href="produkt/flexi-drache.html">Flexi-Drache „Ember“</a></h2>
+    <p class="small muted" style="margin:0">Beweglicher Drache mit 18 Gelenken, in einem Stück gedruckt. Zappelspielzeug für Groß und Klein.</p>
+    <div class="price">12,90 € <span class="badge badge-accent">Bestseller</span></div>
+    <a class="btn btn-ghost" href="produkt/flexi-drache.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="spiel" data-preis="24.9" data-name="Würfelturm „Keep“" data-pos="10">
+  <a class="card-img" href="produkt/wuerfelturm-keep.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/wuerfelturm-keep.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Spiel &amp; Hobby</span>
+    <h2><a href="produkt/wuerfelturm-keep.html">Würfelturm „Keep“</a></h2>
+    <p class="small muted" style="margin:0">Burgturm mit drei Prallstufen und Auffangwanne für faire Würfe am Spieltisch.</p>
+    <div class="price">24,90 € </div>
+    <a class="btn btn-ghost" href="produkt/wuerfelturm-keep.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="gadgets" data-preis="4.9" data-name="Schlüsselanhänger mit Wunschtext" data-pos="11">
+  <a class="card-img" href="produkt/schluesselanhaenger-wunschtext.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/schluesselanhaenger-wunschtext.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Gadgets</span>
+    <h2><a href="produkt/schluesselanhaenger-wunschtext.html">Schlüsselanhänger mit Wunschtext</a></h2>
+    <p class="small muted" style="margin:0">Zweifarbiger Anhänger mit Ihrem Namen oder Wort (bis 12 Zeichen), Ring aus Edelstahl inklusive.</p>
+    <div class="price">4,90 € <span class="badge">Personalisierbar</span></div>
+    <a class="btn btn-ghost" href="produkt/schluesselanhaenger-wunschtext.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="wohnen" data-preis="9.9" data-name="Wandhaken „Fold“ 3er-Set" data-pos="12">
+  <a class="card-img" href="produkt/wandhaken-fold-3er.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/wandhaken-fold-3er.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Wohnen &amp; Deko</span>
+    <h2><a href="produkt/wandhaken-fold-3er.html">Wandhaken „Fold“ 3er-Set</a></h2>
+    <p class="small muted" style="margin:0">Drei minimalistische Haken für Jacken, Taschen oder Handtücher. Mit Schrauben und Dübeln.</p>
+    <div class="price">9,90 € </div>
+    <a class="btn btn-ghost" href="produkt/wandhaken-fold-3er.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="kueche" data-preis="14.9" data-name="Tablet- und Kochbuchständer" data-pos="13">
+  <a class="card-img" href="produkt/kochbuchstaender.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/kochbuchstaender.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Küche &amp; Bad</span>
+    <h2><a href="produkt/kochbuchstaender.html">Tablet- und Kochbuchständer</a></h2>
+    <p class="small muted" style="margin:0">Klappbarer Ständer für Tablets und Kochbücher, mit Spritzschutzkante und zwei Neigungswinkeln.</p>
+    <div class="price">14,90 € </div>
+    <a class="btn btn-ghost" href="produkt/kochbuchstaender.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="kueche" data-preis="7.9" data-name="Zahnbürstenhalter „Wave“" data-pos="14">
+  <a class="card-img" href="produkt/zahnbuerstenhalter-wave.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/zahnbuerstenhalter-wave.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Küche &amp; Bad</span>
+    <h2><a href="produkt/zahnbuerstenhalter-wave.html">Zahnbürstenhalter „Wave“</a></h2>
+    <p class="small muted" style="margin:0">Halter für bis zu vier Zahnbürsten oder elektrische Aufsätze, mit Belüftung von unten.</p>
+    <div class="price">7,90 € </div>
+    <a class="btn btn-ghost" href="produkt/zahnbuerstenhalter-wave.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="gadgets" data-preis="13.9" data-name="Controller-Halter für zwei Gamepads" data-pos="15">
+  <a class="card-img" href="produkt/controllerhalter.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/controllerhalter.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Gadgets</span>
+    <h2><a href="produkt/controllerhalter.html">Controller-Halter für zwei Gamepads</a></h2>
+    <p class="small muted" style="margin:0">Standfuß für zwei Controller (PlayStation, Xbox, Switch Pro) mit Headset-Haken.</p>
+    <div class="price">13,90 € </div>
+    <a class="btn btn-ghost" href="produkt/controllerhalter.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="schreibtisch" data-preis="22.9" data-name="Schubladenbox für Kleinteile" data-pos="16">
+  <a class="card-img" href="produkt/schubladenbox-kleinteile.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/schubladenbox-kleinteile.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Schreibtisch &amp; Büro</span>
+    <h2><a href="produkt/schubladenbox-kleinteile.html">Schubladenbox für Kleinteile</a></h2>
+    <p class="small muted" style="margin:0">Stapelbare Box mit sechs Schubladen für Schrauben, Perlen, Nähzeug oder Elektronik.</p>
+    <div class="price">22,90 € <span class="badge">Neu</span></div>
+    <a class="btn btn-ghost" href="produkt/schubladenbox-kleinteile.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="schreibtisch" data-preis="8.9" data-name="Stiftehalter „Honeycomb“" data-pos="17">
+  <a class="card-img" href="produkt/stiftehalter-honeycomb.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/stiftehalter-honeycomb.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Schreibtisch &amp; Büro</span>
+    <h2><a href="produkt/stiftehalter-honeycomb.html">Stiftehalter „Honeycomb“</a></h2>
+    <p class="small muted" style="margin:0">Stiftebecher mit Wabenstruktur, der auch als Pinselhalter oder für Schminkutensilien taugt.</p>
+    <div class="price">8,90 € </div>
+    <a class="btn btn-ghost" href="produkt/stiftehalter-honeycomb.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="kueche" data-preis="18.9" data-name="Kapselspender für Kaffeekapseln" data-pos="18">
+  <a class="card-img" href="produkt/kapselspender.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/kapselspender.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Küche &amp; Bad</span>
+    <h2><a href="produkt/kapselspender.html">Kapselspender für Kaffeekapseln</a></h2>
+    <p class="small muted" style="margin:0">Wandhalter für 20 Nespresso-kompatible Kapseln, mit Entnahme von unten.</p>
+    <div class="price">18,90 € </div>
+    <a class="btn btn-ghost" href="produkt/kapselspender.html">Ansehen</a>
+  </div>
+</article>
+<article class="card" data-kat="wohnen" data-preis="11.9" data-name="Tür- und Namensschild mit Wunschtext" data-pos="19">
+  <a class="card-img" href="produkt/namensschild-wunschtext.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/namensschild-wunschtext.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Wohnen &amp; Deko</span>
+    <h2><a href="produkt/namensschild-wunschtext.html">Tür- und Namensschild mit Wunschtext</a></h2>
+    <p class="small muted" style="margin:0">Zweifarbiges Schild mit bis zu zwei Zeilen Wunschtext, für Haustür, Kinderzimmer oder Büro.</p>
+    <div class="price">11,90 € <span class="badge">Personalisierbar</span></div>
+    <a class="btn btn-ghost" href="produkt/namensschild-wunschtext.html">Ansehen</a>
+  </div>
+</article></div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="logo" href="index.html"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="14" y="40" width="36" height="8" rx="3" fill="#e8561f"/><rect x="18" y="29" width="28" height="8" rx="3" fill="#ff8a55"/><rect x="22" y="18" width="20" height="8" rx="3" fill="#ffb08c"/><path d="M32 8v8" stroke="#f1efe9" stroke-width="3" stroke-linecap="round"/></svg><span>Schichtwerk</span></a>
+        <p style="margin-top:12px">3D-Druck-Manufaktur. Jedes Teil wird nach Ihrer Bestellung in unserer Werkstatt gedruckt, geprüft und verpackt.</p>
+        <p><a href="mailto:«E-Mail-Adresse»">«E-Mail-Adresse»</a><br><a href="tel:">«Telefonnummer»</a></p>
+      </div>
+      <div>
+        <h2>Shop</h2>
+        <ul>
+          <li><a href="shop.html">Alle Artikel</a></li>
+          <li><a href="kontakt.html">Eigenes Modell drucken lassen</a></li>
+          <li><a href="versand.html">Versand &amp; Zahlung</a></li>
+          <li><a href="warenkorb.html">Warenkorb</a></li>
+          <li><a href="ueber-uns.html">Über uns</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Rechtliches</h2>
+        <ul>
+          <li><a href="impressum.html">Impressum</a></li>
+          <li><a href="datenschutz.html">Datenschutz</a></li>
+          <li><a href="agb.html">AGB</a></li>
+          <li><a href="widerruf.html">Widerrufsrecht</a></li>
+          <li><span data-mk="cookies"></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 Schichtwerk 3D-Druck</span>
+      <span>Gehostet bei Markentrix · Keine Tracking-Cookies</span>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/produkte.js"></script>
+<script src="assets/js/shop.js"></script>
+</body>
+</html>
