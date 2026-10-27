@@ -5,7 +5,7 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from . import einstellungen, ki
+from . import anrufzeiten, einstellungen, ki
 from .db import tx
 from .security import rate_limit, require_admin, require_vertrieb
 
@@ -59,16 +59,20 @@ def leadsuche(q: str = "", status: str = "", faellig: int = 0, temperatur: str =
 
 def _naechster_lead(modus: str, ausser: str, wo: str, par: list) -> dict:
     """Wählt den nächsten Lead für den Anruf-Modus. `wo` ist die Einschränkung auf Vertriebler (SQL mit %s), `par` ihre Werte."""
-    if modus not in ("heiss", "zufall"):
+    if modus not in ("heiss", "zufall", "zeit"):
         raise HTTPException(400, "Unbekannter Modus.")
     ids = [x for x in ausser.split(",") if UUID.match(x)][:300]
     ordnung = "random()" if modus == "zufall" else "(l.wiedervorlage_am <= current_date) DESC NULLS LAST, (l.letzter_kontakt_am IS NULL) DESC, l.letzter_kontakt_am, l.erstellt_am"
+    zusatz: list = []
     basis = f"FROM leads l WHERE {wo} AND l.status NOT IN {OFFEN} AND l.id <> ALL(%s::uuid[]) AND (l.wiedervorlage_am IS NULL OR l.wiedervorlage_am <= current_date)"
     with tx("system") as cur:
+        if modus == "zeit":   # Branchen, die jetzt am besten erreichbar sind, zuerst
+            zusatz = [anrufzeiten.gruppen_jetzt(cur)]
+            ordnung = f"({anrufzeiten.GRUPPE_SQL} = ANY(%s::text[])) DESC NULLS LAST, " + ordnung
         for quelle, extra, order in (("heiss", " AND l.temperatur='heiss'", ordnung),
                                      ("wiedervorlage", " AND coalesce(l.temperatur,'') <> 'heiss' AND l.wiedervorlage_am <= current_date", "l.wiedervorlage_am"),
                                      ("neu", " AND coalesce(l.temperatur,'') <> 'heiss' AND l.status='neu' AND l.letzter_kontakt_am IS NULL", "(l.temperatur='warm') DESC NULLS LAST, l.erstellt_am DESC")):
-            cur.execute(f"SELECT l.id, l.firma, (SELECT count(*)::int {basis}{extra}) AS uebrig {basis}{extra} ORDER BY {order} LIMIT 1", [*par, ids, *par, ids])
+            cur.execute(f"SELECT l.id, l.firma, (SELECT count(*)::int {basis}{extra}) AS uebrig {basis}{extra} ORDER BY {order} LIMIT 1", [*par, ids, *par, ids, *(zusatz if "%s" in order else [])])
             z = cur.fetchone()
             if z:
                 return {"id": str(z["id"]), "firma": z["firma"], "quelle": quelle, "uebrig": z["uebrig"]}

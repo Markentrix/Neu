@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from datetime import date
 
-from . import leadkontakt, leadpruefung
+from . import anrufzeiten, leadkontakt, leadpruefung
 from .db import tx
 from .security import audit, check_password_rules, hash_password, require_vertrieb, verify_password
 
@@ -116,9 +116,11 @@ def lead_detail(lid: str, user: dict = Depends(require_vertrieb)):
         akt = cur.fetchall()
         cur.execute("SELECT website, ergebnis, erstellt_am FROM lead_checks WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 1", (lid,))
         check = cur.fetchone()
+        termin = anrufzeiten.naechster_termin(cur, lid)
+        zeit_hinweis = anrufzeiten.hinweis(cur, l.get("gruppe"), l.get("branche"))
     for k in ("score", "loeschen_nach", "kunden_id", "vertriebspartner_id"):
         l.pop(k, None)
-    return {"lead": l, "aktivitaeten": akt, "check": check, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche(), "verlustgruende": leadkontakt.VERLUSTGRUENDE}
+    return {"lead": l, "aktivitaeten": akt, "check": check, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche(), "verlustgruende": leadkontakt.VERLUSTGRUENDE, "termin": termin, "anrufzeit": zeit_hinweis}
 
 
 class LeadPatchIn(BaseModel):

@@ -2,7 +2,7 @@
 // Gemeinsam für Vertrieb und Admin; die Unterschiede (Adresse, Zielseite, Filter) kommen über `cfg`.
 import { h, api, melde } from './common.js';
 
-const TEXT = { heiss: 'Heiße Leads der Reihe nach', zufall: 'Zufällig aus den heißen Leads' };
+const TEXT = { heiss: 'Heiße Leads der Reihe nach', zufall: 'Zufällig aus den heißen Leads', zeit: 'Heiße Leads, beste Uhrzeit zuerst' };
 
 /**
  * @param {{ schluessel: string, url: string, leadHash: string, heimHash: string, ohneModus?: (aktuell: string|null) => Promise<string|null> }} cfg

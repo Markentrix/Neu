@@ -1,12 +1,13 @@
 import { listenKnopf, listenZiel, leadReiter, mehrMenue, leadDatenAnsicht } from '../common.js';
 import { anrufModus } from '../anrufmodus.js';
+import { bestaetigungKnopf } from '../terminbestaetigung.js';
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
 import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
 import { qrKarte } from '../anleitung.js';
 import { einarbeitungKarte, handelsvertreterKarte } from './vertraege.js';
 import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular, dialog } from '../common.js';
-import { filterKarte, V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
+import { filterKarte, ich, V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
 const AMPEL = { gruen: 'Grün', gelb: 'Gelb', rot: 'Rot' };
 
 // ---------------------------------------------------------------- Vertriebler
@@ -257,7 +258,7 @@ export async function leadDetail(lid) {
   return h('div', { class: 'stack' }, modus.leiste(lid), kopf(l.firma, st, tw, ang, mehr, listenKnopf('leads')), m,
     leadReiter(lid, [
       ['anrufen', 'Anrufen', h('div', { class: 'stack' },
-        h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), leadDatenAnsicht(l, [['Quelle', l.quelle], ['Vertriebler', l.vertriebler]])),
+        h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), bestaetigungKnopf('/api/admin', lid, l, d.termin, (ich && (ich.name || ich.email)) || ''), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), leadDatenAnsicht(l, [['Quelle', l.quelle], ['Vertriebler', l.vertriebler]]), d.anrufzeit ? h('p', { class: 'small' }, '🕒 ' + d.anrufzeit.text) : ''),
         kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am, { verlustgruende: d.verlustgruende, naechster: modus.aktiv() ? () => modus.naechster(lid) : undefined, kurzwahl: modus.aktiv() }))],
       ['gespraech', 'Gespräch', h('div', { class: 'stack' },
         skriptKarte(l.skript, l.skript_am, '/api/admin/leads/' + lid + '/skript'),

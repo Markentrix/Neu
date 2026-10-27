@@ -1,4 +1,5 @@
 import { anrufModus } from './anrufmodus.js';
+import { bestaetigungKnopf } from './terminbestaetigung.js';
 import { pipelineBoard } from './pipeline.js';
 import { visitenkarteKarte, visitenkarteKnopf } from './visitenkarte.js';
 import { stapelTabellen, listenKnopf, leadReiter, leadReiterSetzen, mehrMenue, leadDatenAnsicht } from './common.js';
@@ -402,7 +403,8 @@ function datenKarte(lid, l, d, m) {
     zeigen.replaceChildren(leadDatenAnsicht(l),
     h('p', { class: 'small' }, 'Grundlage der Ansprache: ', h('b', {}, GRUNDLAGEN[l.ansprache_grundlage] || 'nicht festgehalten'), !l.ansprache_grundlage ? ' – bitte ergänzen' : ''),
     l.website_check ? h('p', { class: 'small muted' }, 'Website-Check liegt vor, im Gespräch nutzbar.') : '',
-    h('button', { class: 'btn sec small', onclick: bearbeiten }, 'Daten ergänzen'));
+    d.anrufzeit ? h('p', { class: 'small' }, '🕒 ' + d.anrufzeit.text) : '',
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, h('button', { class: 'btn sec small', onclick: bearbeiten }, 'Daten ergänzen'), bestaetigungKnopf('/api/vertrieb', lid, l, d.termin, start && start.partner ? start.partner.name : '')));
   };
   const bearbeiten = () => {
     const f = h('form', { class: 'form2', onsubmit: async (e) => { e.preventDefault(); try { const o = formular(e.target); Object.keys(o).forEach(k => { if (o[k] === '') o[k] = null; }); Object.assign(l, await api('/api/vertrieb/leads/' + lid, { method: 'PATCH', body: o }).then(r => r.lead || o)); ansicht(); } catch (x) { melde(m, x.message); } } },

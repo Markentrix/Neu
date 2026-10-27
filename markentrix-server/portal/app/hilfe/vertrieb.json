@@ -863,6 +863,30 @@
         "Die Push-Nachrichten kommen nur, wenn du sie unter Konto → Benachrichtigungen aufs Handy eingeschaltet hast.",
         "Ohne Uhrzeit bleibt es bei der Wiedervorlage am Tag, ohne Push zur Uhrzeit."
       ]
+    },
+    {
+      "t": "Terminbestätigung per WhatsApp, SMS oder E-Mail",
+      "k": "bestätigung termin whatsapp sms mail rückruf erstgespräch nachricht senden",
+      "wo": "Lead → Daten → „✉ Bestätigung senden“",
+      "l": "#heute",
+      "s": [
+        "Sobald mit einem Lead ein Anruf vereinbart ist (Rückrufzeit oder gebuchtes Erstgespräch), erscheint im Lead der Knopf „✉ Bestätigung senden“.",
+        "Das Portal schreibt dir einen kurzen Text mit Datum und Uhrzeit vor. Du kannst ihn ändern.",
+        "Wähle WhatsApp, SMS oder E-Mail. Die App öffnet sich mit dem Text, gesendet wird erst dort. Im Verlauf des Leads wird es vermerkt.",
+        "Schicke die Bestätigung nur an Leads, mit denen du schon gesprochen hast."
+      ]
+    },
+    {
+      "t": "Beste Anrufzeit je Branche",
+      "k": "beste anrufzeit uhrzeit branche erreichbarkeit anruf modus beste uhrzeit zuerst",
+      "wo": "Lead → Daten (Hinweis „🕒“) und Anruf-Modus",
+      "l": "#heute",
+      "s": [
+        "Aus den bisherigen Anrufen berechnet das Portal, zu welcher Uhrzeit Betriebe einer Branche am häufigsten abnehmen.",
+        "Im Lead steht dann „🕒 Beste Anrufzeit für …“. Das erscheint erst, wenn für die Branche mindestens 20 Anrufe vorliegen.",
+        "Im Anruf-Modus gibt es die Reihenfolge „Heiße Leads, beste Uhrzeit zuerst“: Es kommen zuerst die Branchen dran, die gerade besonders gut erreichbar sind.",
+        "Je mehr Anrufe mit Ergebnis festgehalten werden, desto genauer wird die Empfehlung."
+      ]
     }
   ],
   "titel": "Anleitung Vertriebsportal",

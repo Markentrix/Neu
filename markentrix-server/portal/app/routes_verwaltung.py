@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors, sql
 from pydantic import BaseModel, Field
 
-from . import config, leadkontakt, leadpruefung, onboarding, push, zugang
+from . import anrufzeiten, config, leadkontakt, leadpruefung, onboarding, push, zugang
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -352,9 +352,11 @@ def lead_detail(lid: str, user: dict = Depends(require_admin)):
             akt = cur.fetchall()
             cur.execute("SELECT id, website, score, ergebnis, erstellt_am, status, ampel FROM lead_checks WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 20", (lid,))
             checks = cur.fetchall()
+            termin = anrufzeiten.naechster_termin(cur, lid)
+            zeit_hinweis = anrufzeiten.hinweis(cur, l.get("gruppe"), l.get("branche"))
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Lead nicht gefunden.")
-    return {"lead": l, "aktivitaeten": akt, "checks": checks, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche(), "verlustgruende": leadkontakt.VERLUSTGRUENDE}
+    return {"lead": l, "aktivitaeten": akt, "checks": checks, "kontakt_optionen": leadkontakt.optionen_fuer_oberflaeche(), "verlustgruende": leadkontakt.VERLUSTGRUENDE, "termin": termin, "anrufzeit": zeit_hinweis}
 
 
 @router.patch("/leads/{lid}")

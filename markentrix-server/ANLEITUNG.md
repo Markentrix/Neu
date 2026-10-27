@@ -738,3 +738,7 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - Beim Festhalten eines Kontakts lässt sich neben dem Datum der Wiedervorlage eine **Uhrzeit** eintragen (Vertrieb und Admin). Das Portal sendet dem zuständigen Vertriebler **1 Stunde und 5 Minuten vorher** eine Push-Nachricht aufs Handy (Admins, wenn der Lead niemandem zugeordnet ist). Bei weniger als einer Stunde Vorlauf kommt nur die 5-Minuten-Erinnerung.
 - Dasselbe gilt für gebuchte Erstgespräche. Die frühere Push-Meldung „Gespräch in 2 Stunden“ entfällt; die Mails an den Interessenten (24 und 2 Stunden vorher) bleiben.
 - Technik: Job `anruf_pushes` (jede Minute), Spalten `leads.rueckruf_am`, `leads.rueckruf_push`, `gespraechstermine.push_60/push_5` (Migration 146). Push braucht, dass das Gerät Benachrichtigungen erlaubt hat (Konto).
+
+## Terminbestätigung und beste Anrufzeit
+- **Terminbestätigung:** Steht ein Anruf fest (Rückrufzeit oder gebuchtes Erstgespräch), zeigt der Lead „✉ Bestätigung senden“. Der Text mit Datum und Uhrzeit ist vorgeschrieben und änderbar; WhatsApp, SMS oder E-Mail öffnen die jeweilige App, gesendet wird erst dort. Der Verlauf vermerkt es. Rechtlich wie die Visitenkarte: nur an Leads, mit denen schon gesprochen wurde (Anwaltsliste).
+- **Beste Anrufzeit:** `anrufzeiten.py` wertet je Branche und Stunde aus, wie oft ein Anruf „erreicht“ war (letzte 12 Monate, nur Zähler, keine Personen). Ab 20 Anrufen je Branche erscheint im Lead „🕒 Beste Anrufzeit für …“, und der Anruf-Modus bietet „Heiße Leads, beste Uhrzeit zuerst“.
