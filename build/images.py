@@ -25,9 +25,9 @@ def layers(x, y, w, h, color, step=7, rx=0):
     return "".join(out)
 
 
-def frame(inner, bg="#efeadf"):
+def frame(inner, bg="#ece7dd"):
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
-            '<defs><radialGradient id="g" cx="50%%" cy="40%%" r="70%%"><stop offset="0" stop-color="#fbf9f4"/><stop offset="1" stop-color="%s"/></radialGradient>'
+            '<defs><radialGradient id="g" cx="50%%" cy="40%%" r="70%%"><stop offset="0" stop-color="#fcfaf5"/><stop offset="1" stop-color="%s"/></radialGradient>'
             '<filter id="sh" x="-20%%" y="-20%%" width="140%%" height="160%%"><feGaussianBlur stdDeviation="14"/></filter></defs>'
             '<rect width="%d" height="%d" fill="url(#g)"/>'
             '<ellipse cx="400" cy="470" rx="230" ry="34" fill="#000" opacity=".16" filter="url(#sh)"/>'
@@ -61,7 +61,7 @@ def draw(p):
     if c.lower() in ("#f4f2ec",):
         c = "#e9e5db"
     pid = p["id"]
-    a = "#e8561f"  # Akzent
+    a = "#b8763f"  # Akzent (Kupfer)
     if pid == "pflanztopf-terra":
         pot = ('<path d="M250 250 L300 460 H500 L550 250 Z" fill="%s"/>' % c +
                '<path d="M400 250 L400 460" stroke="%s" stroke-width="2" opacity=".5"/>' % shade(c, .8) +
@@ -98,7 +98,7 @@ def draw(p):
         return (box(200, 300, 400, 150, 60, c) + '<rect x="200" y="300" width="400" height="150" fill="%s" opacity=".0"/>' % c +
                 '<rect x="215" y="312" width="110" height="126" rx="6" fill="%s"/>' % shade(c, .72) + '<rect x="335" y="312" width="110" height="126" rx="6" fill="%s"/>' % shade(c, .72) +
                 '<rect x="455" y="312" width="130" height="60" rx="6" fill="%s"/>' % shade(c, .72) + '<rect x="455" y="380" width="130" height="58" rx="6" fill="%s"/>' % shade(c, .72) +
-                '<rect x="240" y="180" width="12" height="150" rx="4" fill="#e8561f"/><rect x="262" y="200" width="12" height="130" rx="4" fill="#2f4d8a"/><rect x="284" y="190" width="12" height="140" rx="4" fill="#1f9e8a"/>' +
+                '<rect x="240" y="180" width="12" height="150" rx="4" fill="#b8763f"/><rect x="262" y="200" width="12" height="130" rx="4" fill="#2f4d8a"/><rect x="284" y="190" width="12" height="140" rx="4" fill="#1f9e8a"/>' +
                 '<rect x="350" y="240" width="80" height="100" rx="4" fill="#fff6c2"/><rect x="470" y="330" width="90" height="30" rx="6" fill="#2b2e34"/>')
     if pid == "untersetzer-hex-4er":
         s = ""
@@ -139,7 +139,7 @@ def draw(p):
             s += '<rect x="%d" y="170" width="24" height="32" fill="%s"/>' % (300 + i * 32, c)
         s += '<rect x="330" y="240" width="40" height="60" rx="20" fill="%s"/><rect x="400" y="240" width="40" height="60" rx="20" fill="%s"/>' % (shade(c, .5), shade(c, .5))
         s += box(240, 420, 320, 40, 60, shade(c, .9))
-        for (x, y, col) in [(290, 395, "#e8561f"), (360, 400, "#f4f2ec"), (420, 392, "#2f4d8a")]:
+        for (x, y, col) in [(290, 395, "#b8763f"), (360, 400, "#f4f2ec"), (420, 392, "#2f4d8a")]:
             s += '<rect x="%d" y="%d" width="40" height="40" rx="8" fill="%s" transform="rotate(12 %d %d)"/>' % (x, y, col, x + 20, y + 20)
             s += '<circle cx="%d" cy="%d" r="4" fill="#111"/><circle cx="%d" cy="%d" r="4" fill="#111"/><circle cx="%d" cy="%d" r="4" fill="#111"/>' % (x + 10, y + 10, x + 20, y + 20, x + 30, y + 30)
         return s
@@ -159,11 +159,11 @@ def draw(p):
         return ('<path d="M250 450 L300 220 L560 220 L510 450 Z" fill="%s"/>' % c + layers(260, 225, 290, 220, c, 9) +
                 '<path d="M235 450 H525 L540 470 H250 Z" fill="%s"/>' % shade(c, .8) + '<rect x="310" y="240" width="200" height="190" rx="8" fill="#fff" transform="skewX(-12)"/>' +
                 '<rect x="325" y="260" width="140" height="10" fill="#d8d2c4" transform="skewX(-12)"/><rect x="325" y="280" width="170" height="10" fill="#d8d2c4" transform="skewX(-12)"/><rect x="325" y="300" width="120" height="10" fill="#d8d2c4" transform="skewX(-12)"/>' +
-                '<rect x="330" y="330" width="130" height="80" rx="6" fill="#e8561f" opacity=".8" transform="skewX(-12)"/>')
+                '<rect x="330" y="330" width="130" height="80" rx="6" fill="#b8763f" opacity=".8" transform="skewX(-12)"/>')
     if pid == "zahnbuerstenhalter-wave":
         s = '<path d="M250 460 V330 q 75 -40 150 0 t 150 0 V460 Z" fill="%s"/>' % c + layers(250, 330, 300, 130, c, 8)
         for i, x in enumerate((300, 370, 440, 510)):
-            s += '<rect x="%d" y="180" width="16" height="170" rx="8" fill="%s"/><rect x="%d" y="170" width="20" height="36" rx="6" fill="%s"/>' % (x - 8, ["#f4f2ec", "#2f4d8a", "#1f9e8a", "#e8561f"][i], x - 10, "#fff")
+            s += '<rect x="%d" y="180" width="16" height="170" rx="8" fill="%s"/><rect x="%d" y="170" width="20" height="36" rx="6" fill="%s"/>' % (x - 8, ["#f4f2ec", "#2f4d8a", "#1f9e8a", "#b8763f"][i], x - 10, "#fff")
         return s
     if pid == "controllerhalter":
         s = box(240, 420, 320, 36, 50, c) + '<rect x="290" y="250" width="30" height="180" rx="8" fill="%s"/><rect x="480" y="250" width="30" height="180" rx="8" fill="%s"/>' % (c, c)
@@ -189,7 +189,7 @@ def draw(p):
             for xx in range(300, 510, 36):
                 off = 18 if (yy // 34) % 2 else 0
                 s += '<polygon points="%s" fill="%s"/>' % (" ".join("%d,%d" % (xx + off + 13 * [1, .5, -.5, -1, -.5, .5][k], yy + 12 * [0, 1, 1, 0, -1, -1][k]) for k in range(6)), "#efeadf")
-        for i, (x, col) in enumerate([(340, "#e8561f"), (380, "#2f4d8a"), (420, "#1f9e8a"), (460, "#f2c94c")]):
+        for i, (x, col) in enumerate([(340, "#b8763f"), (380, "#2f4d8a"), (420, "#1f9e8a"), (460, "#f2c94c")]):
             s += '<rect x="%d" y="%d" width="14" height="160" rx="4" fill="%s" transform="rotate(%d %d 250)"/>' % (x, 110, col, (i - 1.5) * 6, x + 7)
         return s
     if pid == "kapselspender":
@@ -209,7 +209,7 @@ def draw(p):
     return box(300, 250, 200, 180, 60, c)
 
 
-LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">' + '<rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#ff8a55"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#e8561f"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#bf3e0b"/>' + '</svg>')
+LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">' + '<rect width="64" height="64" rx="14" fill="#1f4d3a"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f"/>' + '</svg>')
 
 
 def main():

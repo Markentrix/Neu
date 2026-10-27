@@ -31,6 +31,11 @@ Artikel ändern: `build/produkte.py` bearbeiten, dann `python3 build/images.py` 
 
 ## Logo
 
-`brand/` enthält das Logo (Bildmarke: drei Schichten bilden ein S; Wortmarke „Schicht·werk“ in Inter Bold als Pfade):
+`brand/` enthält das Logo (Bildmarke: drei Schichten in Sand und Kupfer auf Tannengrün bilden ein S; Wortmarke „Schicht·werk“ in Inter Bold als Pfade):
 SVG hell/dunkel, mit und ohne Kachel, einfarbig, sowie PNG-Exporte (2400 px Logo, 1024 px Marke). Erzeugt mit `python3 build/logo.py`.
 Favicon und App-Icons in `website-fertig/` entstehen aus derselben Marke (`python3 build/images.py`).
+
+## Farben
+
+Palette „Warmweiß, Tiefgrün, Kupfer“: Fläche `#f7f4ee`, Text `#1c2a24`, Marke/Struktur Tannengrün `#1f4d3a`, Kaufknopf Kupfer `#9e6230` (nur für Warenkorb und Bestellen), Fehler `#b23a2e`.
+Alle Farben sind Tokens in `website-fertig/assets/css/style.css` (`:root`, hell und dunkel). Logo- und Illustrationsfarben stehen in `build/logo.py` und `build/images.py`.

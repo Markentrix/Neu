@@ -14,7 +14,7 @@ TODAY = datetime.date.today().isoformat()
 
 SVG_CART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg>'
 SVG_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
-SVG_LOGO = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#ff8a55"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#e8561f"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#bf3e0b"/></svg>'
+SVG_LOGO = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1f4d3a"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f"/></svg>'
 SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
 ICONS = {
     "layer": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 13 10 5 10-5"/><path d="m2 18 10 5 10-5"/></svg>',
@@ -32,7 +32,7 @@ def head(title, desc, rel, canonical_name, extra=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
-<meta name="theme-color" content="#f6f4ef">
+<meta name="theme-color" content="#f7f4ee">
 <link rel="icon" href="{rel}favicon.ico" sizes="any">
 <link rel="icon" href="{rel}favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{rel}apple-touch-icon.png">
@@ -152,19 +152,19 @@ def build_index():
     cards = "\n".join(card(p, "", i) for i, p in enumerate(featured))
     cats = "\n".join(f'<a class="chip" href="shop.html#{k}">{E(v)}</a>' for k, v in KATEGORIEN.items())
     hero_art = """<svg viewBox="0 0 400 400" role="img" aria-label="Stilisierter 3D-Drucker, der schichtweise ein orangefarbenes Objekt aufbaut">
-      <rect x="40" y="340" width="320" height="22" rx="8" fill="#171a1f"/>
-      <rect x="60" y="60" width="14" height="290" rx="4" fill="#2b2e34"/><rect x="326" y="60" width="14" height="290" rx="4" fill="#2b2e34"/>
-      <rect x="60" y="48" width="280" height="16" rx="6" fill="#2b2e34"/>
-      <rect x="60" y="150" width="280" height="10" rx="4" fill="#4a505b"/>
-      <rect x="175" y="130" width="50" height="44" rx="6" fill="#4a505b"/><path d="M190 174 l10 18 l10 -18z" fill="#e8561f"/>
-      <rect x="80" y="318" width="240" height="22" rx="6" fill="#8a8f99"/>
-      <g fill="#e8561f">
+      <rect x="40" y="340" width="320" height="22" rx="8" fill="#1c2a24"/>
+      <rect x="60" y="60" width="14" height="290" rx="4" fill="#2e3f37"/><rect x="326" y="60" width="14" height="290" rx="4" fill="#2e3f37"/>
+      <rect x="60" y="48" width="280" height="16" rx="6" fill="#2e3f37"/>
+      <rect x="60" y="150" width="280" height="10" rx="4" fill="#4e5b55"/>
+      <rect x="175" y="130" width="50" height="44" rx="6" fill="#4e5b55"/><path d="M190 174 l10 18 l10 -18z" fill="#b8763f"/>
+      <rect x="80" y="318" width="240" height="22" rx="6" fill="#8e968f"/>
+      <g fill="#b8763f">
         <rect x="150" y="300" width="100" height="18" rx="4"/><rect x="155" y="282" width="90" height="18" rx="4" opacity=".92"/>
         <rect x="160" y="264" width="80" height="18" rx="4" opacity=".84"/><rect x="165" y="246" width="70" height="18" rx="4" opacity=".76"/>
         <rect x="170" y="228" width="60" height="18" rx="4" opacity=".68"/><rect x="175" y="210" width="50" height="14" rx="4" opacity=".55"/>
       </g>
-      <path d="M200 192 v18" stroke="#ff8a55" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="200" cy="192" r="4" fill="#ffb08c"/>
+      <path d="M200 192 v18" stroke="#d9a06b" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="200" cy="192" r="4" fill="#f1e6d2"/>
     </svg>"""
     body = f"""<section class="hero">
   <div class="wrap">
@@ -715,7 +715,7 @@ def build_data():
         f.write("User-agent: *\nAllow: /\nDisallow: /warenkorb.html\nDisallow: /danke.html\n")
     with open(os.path.join(ROOT, "site.webmanifest"), "w", encoding="utf-8") as f:
         json.dump({"name": f"{C.MARKE} {C.CLAIM}", "short_name": C.MARKE, "start_url": "index.html", "display": "browser",
-                   "background_color": "#f6f4ef", "theme_color": "#e8561f",
+                   "background_color": "#f6f4ef", "theme_color": "#b8763f",
                    "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png"}, {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}]}, f, ensure_ascii=False, indent=2)
 
 
@@ -853,12 +853,12 @@ def build_service():
     </div>
     <div class="hero-art">
       <svg viewBox="0 0 400 400" role="img" aria-label="Von der Datei zum gedruckten Teil">
-        <rect x="40" y="70" width="150" height="190" rx="12" fill="#2b2e34"/>
-        <rect x="56" y="88" width="118" height="12" rx="4" fill="#8a8f99"/><rect x="56" y="110" width="90" height="12" rx="4" fill="#8a8f99"/><rect x="56" y="132" width="104" height="12" rx="4" fill="#8a8f99"/>
-        <text x="115" y="230" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700" font-size="26" fill="#ffb08c">.STL</text>
-        <path d="M200 165 h60" stroke="#bf3e0b" stroke-width="8" stroke-linecap="round"/><path d="M250 148 l24 17 l-24 17z" fill="#bf3e0b"/>
-        <g fill="#bf3e0b"><rect x="280" y="236" width="90" height="16" rx="4"/><rect x="284" y="220" width="82" height="16" rx="4" opacity=".92"/><rect x="288" y="204" width="74" height="16" rx="4" opacity=".84"/><rect x="292" y="188" width="66" height="16" rx="4" opacity=".76"/><rect x="296" y="172" width="58" height="16" rx="4" opacity=".68"/><rect x="300" y="156" width="50" height="12" rx="4" opacity=".55"/></g>
-        <rect x="260" y="256" width="130" height="18" rx="6" fill="#8a8f99"/>
+        <rect x="40" y="70" width="150" height="190" rx="12" fill="#2e3f37"/>
+        <rect x="56" y="88" width="118" height="12" rx="4" fill="#8e968f"/><rect x="56" y="110" width="90" height="12" rx="4" fill="#8e968f"/><rect x="56" y="132" width="104" height="12" rx="4" fill="#8e968f"/>
+        <text x="115" y="230" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700" font-size="26" fill="#f1e6d2">.STL</text>
+        <path d="M200 165 h60" stroke="#9e6230" stroke-width="8" stroke-linecap="round"/><path d="M250 148 l24 17 l-24 17z" fill="#9e6230"/>
+        <g fill="#9e6230"><rect x="280" y="236" width="90" height="16" rx="4"/><rect x="284" y="220" width="82" height="16" rx="4" opacity=".92"/><rect x="288" y="204" width="74" height="16" rx="4" opacity=".84"/><rect x="292" y="188" width="66" height="16" rx="4" opacity=".76"/><rect x="296" y="172" width="58" height="16" rx="4" opacity=".68"/><rect x="300" y="156" width="50" height="12" rx="4" opacity=".55"/></g>
+        <rect x="260" y="256" width="130" height="18" rx="6" fill="#8e968f"/>
         <ellipse cx="325" cy="300" rx="80" ry="12" fill="#000" opacity=".12"/>
       </svg>
     </div>

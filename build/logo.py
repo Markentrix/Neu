@@ -8,8 +8,8 @@ from fontTools.pens.transformPen import TransformPen
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 OUT = os.path.join(ROOT, "brand")
 FONT = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
-NAVY, CREAM = "#171a1f", "#f1efe9"
-L1, L2, L3 = "#ff8a55", "#e8561f", "#bf3e0b"   # Schichten hell -> dunkel
+NAVY, CREAM = "#1f4d3a", "#f1ede4"
+L1, L2, L3 = "#f1e6d2", "#d9a06b", "#b8763f"   # Schichten hell -> dunkel (Sand -> Kupfer)
 
 
 def mark(tile=True, mono=None):
@@ -60,7 +60,7 @@ def logo_svg(dark_bg=False, with_tile=True):
     p2, w2 = wordmark_paths("werk", size, x0 + w1, baseline)
     text_col = CREAM if dark_bg else NAVY
     width = int(x0 + w1 + w2 + 2)
-    paths = "".join(f'<path d="{d}" fill="{text_col}"/>' for d in p1) + "".join(f'<path d="{d}" fill="{L2}"/>' for d in p2)
+    paths = "".join(f'<path d="{d}" fill="{text_col}"/>' for d in p1) + "".join(f'<path d="{d}" fill="{"#d9a06b" if dark_bg else "#9e6230"}"/>' for d in p2)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} 64" width="{width}" height="64" role="img" aria-label="Schichtwerk">'
             f'{mark(tile=with_tile)}{paths}</svg>')
 
@@ -73,7 +73,7 @@ def main():
         "schichtwerk-logo-ohne-kachel-dunkel.svg": logo_svg(True, False),
         "schichtwerk-marke.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(True)}</svg>',
         "schichtwerk-marke-ohne-kachel.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(False)}</svg>',
-        "schichtwerk-marke-einfarbig.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(False, NAVY)}</svg>',
+        "schichtwerk-marke-einfarbig.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(False, "#1c2a24")}</svg>',
     }
     for name, svg in files.items():
         with open(os.path.join(OUT, name), "w") as f:

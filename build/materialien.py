@@ -2,7 +2,7 @@
 
 MATERIALIEN = [
     dict(
-        id="pla", name="PLA", titel="3D-Druck mit PLA", farbe="#bf3e0b",
+        id="pla", name="PLA", titel="3D-Druck mit PLA", farbe="#9e6230",
         claim="Das Standardmaterial: präzise, pflanzenbasiert, in den meisten Farben.",
         kurz="Polylactid aus Maisstärke und Zuckerrohr. Druckt sehr maßhaltig, riecht nicht und ergibt die saubersten Oberflächen. Für alles, was drinnen steht und nicht heiß wird.",
         eigenschaften=[("Wärmebeständig bis", "ca. 55 °C"), ("Festigkeit", "hoch, aber spröde bei Schlag"), ("Oberfläche", "sehr sauber, matt oder seidenglänzend"), ("Maßhaltigkeit", "±0,2 mm"), ("Außeneinsatz", "nicht geeignet"), ("Lebensmittelkontakt", "nur trocken, nicht spülmaschinenfest")],
@@ -15,7 +15,7 @@ MATERIALIEN = [
              ("Wie stabil ist PLA?", "Zugfest etwa wie ABS, aber weniger schlagzäh. Für einen Haken oder einen Halter reicht es locker, für ein Zahnrad unter Dauerlast nehmen wir PETG oder ASA.")],
     ),
     dict(
-        id="petg", name="PETG", titel="3D-Druck mit PETG", farbe="#13695b",
+        id="petg", name="PETG", titel="3D-Druck mit PETG", farbe="#1f4d3a",
         claim="Zäh, wasserfest, lebensmittelecht: das Material für Küche, Bad und Technik.",
         kurz="Glykol-modifiziertes PET, derselbe Grundstoff wie Getränkeflaschen. Etwas flexibler als PLA, nimmt Schläge weg, verträgt Feuchtigkeit und Wärme bis etwa 75 °C.",
         eigenschaften=[("Wärmebeständig bis", "ca. 75 °C"), ("Festigkeit", "hoch und schlagzäh"), ("Oberfläche", "leicht glänzend, etwas weniger Detail als PLA"), ("Maßhaltigkeit", "±0,3 mm"), ("Außeneinsatz", "bedingt (Schatten, Regen ok)"), ("Lebensmittelkontakt", "Filament lebensmittelecht, Druckteil spülbar von Hand")],
@@ -40,7 +40,7 @@ MATERIALIEN = [
              ("ABS oder ASA?", "Gleiche Mechanik, aber ASA ist UV-stabil. Alles, was draußen bleibt, drucken wir in ASA.")],
     ),
     dict(
-        id="asa", name="ASA", titel="3D-Druck mit ASA", farbe="#8a5a2b",
+        id="asa", name="ASA", titel="3D-Druck mit ASA", farbe="#5a6b7a",
         claim="Für draußen: UV-beständig, wetterfest, so robust wie ABS.",
         kurz="Acrylnitril-Styrol-Acrylat, der Outdoor-Bruder von ABS. Vergilbt nicht, wird in der Sonne nicht spröde und hält Regen, Frost und Hitze über Jahre aus.",
         eigenschaften=[("Wärmebeständig bis", "ca. 95 °C"), ("Festigkeit", "hoch, schlagzäh"), ("Oberfläche", "matt, seidig"), ("Maßhaltigkeit", "±0,3 mm"), ("Außeneinsatz", "uneingeschränkt"), ("Lebensmittelkontakt", "nicht empfohlen")],
