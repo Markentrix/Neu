@@ -361,12 +361,21 @@ async function sicherheitKarte() {
     try { await api('/api/admin/sicherheit', { method: 'PUT', body: { kunden_2fa: kpflicht.checked } }); melde(m, kpflicht.checked ? 'Für Kunden-Inhaber ist die Zwei-Faktor-Anmeldung jetzt Pflicht.' : 'Gespeichert.', 'ok'); }
     catch (x) { kpflicht.checked = !kpflicht.checked; melde(m, x.message); }
   });
+  const schalter = (feldName, wert, frage, ok) => { const c = h('input', { type: 'checkbox', style: 'width:auto', checked: !!wert });
+    c.addEventListener('change', async () => {
+      if (c.checked && !confirm(frage)) { c.checked = false; return; }
+      try { await api('/api/admin/sicherheit', { method: 'PUT', body: { [feldName]: c.checked } }); melde(m, c.checked ? ok : 'Ausgeschaltet.', 'ok'); } catch (x) { c.checked = !c.checked; melde(m, x.message); } });
+    return c; };
+  const lang = schalter('lange_sitzung', d.lange_sitzung, 'Vertriebler und Kunden können sich dann für 30 Tage auf ihrem Handy angemeldet halten (Administratoren nie). Ein verlorenes, entsperrtes Handy hätte so länger Zugriff. Erlauben?', 'Angemeldet bleiben ist jetzt für Vertrieb und Kunden möglich (Auswahl bei der Anmeldung).');
+  const offline = schalter('offline_daten', d.offline_daten, 'Auf dem Handy werden dann zuletzt gesehene Seiten (Heute, Leads, offene Leads) im Gerätespeicher abgelegt, damit sie ohne Netz lesbar sind. Beim Abmelden wird alles gelöscht. Das ist eine Datenschutz-Entscheidung (Anwaltsliste). Erlauben?', 'Offline-Ansicht ist eingeschaltet. Gilt ab dem nächsten Öffnen der App.');
   const ohne = d.konten.filter(k => !k.totp_aktiv);
   return h('div', { class: 'card' }, h('h2', {}, 'Sicherheit: Zwei-Faktor-Anmeldung'),
     h('p', { class: 'small muted' }, 'Admin-Zugänge brauchen sie immer' + (d.admin_pflicht ? '' : ' (hier per Server-Einstellung abgeschaltet)') + '. Für Vertriebs-Zugänge kannst du sie vorschreiben.'),
     ohne.length ? h('p', {}, h('span', { class: 'pill warn' }, ohne.length + ' ohne 2FA'), ' ' + ohne.map(k => k.email).join(', ')) : h('p', {}, h('span', { class: 'pill ok' }, 'alle Konten geschützt')),
     h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, pflicht, 'Zwei-Faktor-Anmeldung für Vertriebs-Zugänge verpflichtend'),
-    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, kpflicht, 'Zwei-Faktor-Anmeldung für Kunden-Inhaber verpflichtend'), m,
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, kpflicht, 'Zwei-Faktor-Anmeldung für Kunden-Inhaber verpflichtend'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, lang, '„Angemeldet bleiben“ (30 Tage) für Vertrieb und Kunden erlauben'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;margin:8px 0' }, offline, 'Offline-Ansicht auf dem Handy erlauben (Seiten werden im Gerätespeicher abgelegt)'), m,
     h('div', { class: 'tablewrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['E-Mail', 'Rolle', '2FA', 'Letzter Login'].map(t => h('th', {}, t)))),
       h('tbody', {}, d.konten.map(k => h('tr', {}, h('td', {}, k.email), h('td', {}, k.rolle === 'admin' ? 'Admin' : 'Vertrieb'), h('td', {}, h('span', { class: 'pill ' + (k.totp_aktiv ? 'ok' : 'warn') }, k.totp_aktiv ? 'aktiv' : 'fehlt')), h('td', {}, k.letzter_login ? zeit(k.letzter_login) : '–')))))));
 }

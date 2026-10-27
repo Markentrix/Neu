@@ -747,3 +747,15 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - **Kunde:** Heute, Anfragen, Termine, Nachrichten, Mehr. Freigaben stehen im Menü „Mehr“ mit Zähler.
 - **Admin:** Heute (= Mein Tag), Nachrichten, Kunden, Leads, Menü. Übersicht und Freigaben stehen im Menü (Zähler am Menü-Knopf).
 - **Vertrieb:** Anrufen, Leads, Pipeline, Zahlen, Menü; im Lead steht oben der Knopf „📞 Anrufen“ (Vertrieb und Admin).
+
+## Handy-Betrieb (Offline, Bedienung)
+- **Warteschlange:** Kontakt-Einträge zu Leads (`/leads/<id>/kontakt`, `/aktivitaet`) werden bei fehlendem Netz im Browser (localStorage `mk-queue`) gemerkt und beim nächsten Netz, beim Start und jede Minute nachgesendet. Orange Leiste `#offlineleiste` zeigt Stand. Risiko: bricht die Verbindung nach dem Senden ab, kann ein Eintrag doppelt ankommen.
+- **Offline-Ansicht** (Einstellungen → Sicherheit → „Offline-Ansicht“, Standard **aus**): Heute- und Lead-Seiten werden in localStorage (`mk-oc:`) zwischengespeichert, beim Abmelden und beim Ausschalten gelöscht. Datenschutzfrage an den Anwalt.
+- **Angemeldet bleiben** (Standard **aus**): Haken im Login, 30 Tage, nie für Admins.
+- Service Worker (`sw.js`) speichert nur `/static/…`, nie `/api`. Manifest hochkant, `viewport-fit=cover`, Dialoge als Blatt von unten, Ziehen zum Aktualisieren, Tastatur-Hinweise (`eingabeHilfen`). Test: t121.
+- Nicht gebaut: Teilen-Ziel für Fotos (share_target).
+
+## Kurzbefehle, Zahl am Symbol und „Dein Tag“
+- **Kurzbefehle** (lange auf das App-Symbol drücken): `/manifest.webmanifest?r=<vertrieb|kunde|admin>` liefert je Rolle Ziele (in `main.py` `_KURZBEFEHLE`). `#anrufen` startet im Vertriebs- und Admin-Portal den Anruf-Modus (heiße Leads). Neue Kurzbefehle erscheinen erst nach Neuinstallation der App (Android).
+- **Zahl am Symbol:** `GET /api/me/badge` (`tagesblick.py`: Vertrieb = fällige Leads, Kunde = neue Anfragen + Freigaben + Nachrichten, Admin = Nachrichten + Freigaben + überfällige Aufgaben). Die App ruft sie beim Öffnen, bei Rückkehr und alle 5 Minuten ab und setzt `navigator.setAppBadge`; ein Push setzt im Service Worker einen Punkt.
+- **Morgen-Push „Dein Tag“** (Job `tag_pushes`, ersetzt `vertrieb_morgens`): Uhrzeit je Benutzer in der Ansicht (`tag_zeit`, „aus“ möglich). Standard Vertrieb 08:00 (wie bisher), Kunden **aus**. Nur werktags, höchstens einmal am Tag, bis 3 Stunden nach der Zeit, nie ohne Inhalt; Text ohne Namen. Test: t123.

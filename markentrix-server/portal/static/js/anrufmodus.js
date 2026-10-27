@@ -1,6 +1,6 @@
 // Anruf-Modus: nach jedem festgehaltenen Gespräch springt das Portal zum nächsten heißen Lead.
 // Gemeinsam für Vertrieb und Admin; die Unterschiede (Adresse, Zielseite, Filter) kommen über `cfg`.
-import { h, api, melde } from './common.js';
+import { h, api, melde, vibriere } from './common.js';
 
 const TEXT = { heiss: 'Heiße Leads der Reihe nach', zufall: 'Zufällig aus den heißen Leads', zeit: 'Heiße Leads, beste Uhrzeit zuerst' };
 
@@ -17,6 +17,7 @@ export function anrufModus(cfg) {
     try {
       if (mo) {
         if (aktuell && !mo.erledigt.includes(aktuell)) mo.erledigt.push(aktuell);
+        if (aktuell) { mo.zurueck = (mo.zurueck || []).filter(x => x !== aktuell); mo.zurueck.push(aktuell); }
         const r = await api(cfg.url + '?modus=' + mo.modus + '&ausser=' + mo.erledigt.join(',') + (mo.filter ? '&vertriebler=' + encodeURIComponent(mo.filter) : ''));
         if (r.id) { schreiben(mo); location.hash = cfg.leadHash + r.id; return; }
         try { sessionStorage.setItem(cfg.schluessel + '-ende', String(mo.erledigt.length)); } catch { /* egal */ }
@@ -25,6 +26,35 @@ export function anrufModus(cfg) {
       const id = cfg.ohneModus ? await cfg.ohneModus(aktuell) : null;
       location.hash = id ? cfg.leadHash + id : cfg.heimHash;
     } catch { location.hash = cfg.heimHash; }
+  }
+
+  /** Zurück zum vorigen Lead dieses Anruf-Modus (Wischen nach rechts). */
+  function zurueck(aktuell) {
+    const mo = lesen(); if (!mo || !mo.zurueck || !mo.zurueck.length) return false;
+    const id = mo.zurueck.pop();
+    if (id === aktuell) return zurueck(aktuell);
+    mo.erledigt = mo.erledigt.filter(x => x !== id); schreiben(mo); location.hash = cfg.leadHash + id; return true;
+  }
+
+  /** Wischen am Handy: nach links = nächster Lead, nach rechts = vorheriger. Nur auf der Lead-Seite, solange der Modus läuft. */
+  let wischAn = false;
+  function wischen(lid) {
+    if (wischAn) return; wischAn = true;
+    let x0 = 0, y0 = 0, ok = false;
+    document.addEventListener('touchstart', (e) => {
+      const t = /** @type {Element|null} */ (e.target instanceof Element ? e.target : null);
+      ok = e.touches.length === 1 && !!lesen() && !document.querySelector('.dlgoverlay') && !(t && t.closest('input,textarea,select,.tabs,.tabbar,table,.pipeboard,[data-nicht-wischen]'));
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      if (!ok) return; ok = false;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      if (Math.abs(dx) < 120 || Math.abs(dy) > 60 || Math.abs(dx) < 2.5 * Math.abs(dy)) return;
+      const jetzt = (location.hash.match(/^#lead\/([\w-]+)/) || [])[1] || lid;
+      if (!jetzt) return;
+      vibriere(12);
+      if (dx < 0) naechster(jetzt); else zurueck(jetzt);
+    }, { passive: true });
   }
 
   /** Karte zum Starten. */
@@ -43,11 +73,19 @@ export function anrufModus(cfg) {
   /** Leiste oben im Lead, solange der Modus läuft. */
   function leiste(lid) {
     const mo = lesen(); if (!mo) return '';
+    wischen(lid);
     return h('div', { class: 'card', style: 'border-left:4px solid var(--akzent, #1E9BFF)' }, h('div', { class: 'row', style: 'align-items:center;gap:8px;flex-wrap:wrap' },
-      h('b', {}, '📞 Anruf-Modus'), h('span', { class: 'small muted grow' }, TEXT[mo.modus] + ' · ' + mo.erledigt.length + ' abgearbeitet'),
+      h('b', {}, '📞 Anruf-Modus'), h('span', { class: 'small muted grow' }, TEXT[mo.modus] + ' · ' + mo.erledigt.length + ' abgearbeitet · ← wischen: nächster, → zurück'),
       h('button', { class: 'btn sec small', onclick: () => naechster(lid) }, 'Überspringen'),
       h('button', { class: 'btn sec small', onclick: () => { schreiben(null); location.hash = cfg.heimHash; } }, 'Beenden')));
   }
 
-  return { aktiv: () => !!lesen(), naechster, karte, leiste };
+  /** Startet den Modus ohne die Startkarte (Kurzbefehl am App-Symbol). Gibt false zurück, wenn kein Lead zum Anrufen da ist. */
+  async function starten(modus = 'heiss') {
+    schreiben({ modus, filter: '', erledigt: [], start: Date.now() });
+    await naechster(null);
+    return !!lesen();
+  }
+
+  return { aktiv: () => !!lesen(), naechster, karte, leiste, starten };
 }

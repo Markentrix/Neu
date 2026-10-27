@@ -1,4 +1,6 @@
 import httpx, time, re, email, subprocess, io
+import datetime as _dt
+VON=(_dt.date.today()+_dt.timedelta(days=30)).isoformat(); BIS=(_dt.date.today()+_dt.timedelta(days=31)).isoformat()   # immer in der Zukunft
 B="http://localhost:8000"; H={"X-MK":"1"}
 def chk(n,c,i=""): print("OK  " if c else "FAIL",n,"" if c else str(i)[:300])
 def sql(q): return subprocess.run(["su","postgres","-c",f"psql -q -t -A -h /var/tmp/pgtest -p 54329 markentrix -c \"{q}\""],capture_output=True,text=True).stdout.strip()
@@ -45,17 +47,17 @@ chk("Seite: English fällt auf Deutsch zurück",'lang="en"><h3>Tomaten' in h)
 chk("Seite: HTML maskiert","<script>alert(1)</script>" not in h and "&lt;script&gt;" in h)
 chk("Seite: Datei bleibt",'src="aktuell.pdf"' in h and os.path.exists(seite+"aktuell.pdf"))
 chk("Seite: Sprachwahl",'data-sp="tr"' in h and 'data-sp="ar"' in h)
-r=c.post("/api/kunde/angebots-inhalte",json={"art":"event","titel":{"de":"Grillfest"},"gueltig_von":"2026-10-24","gueltig_bis":"2026-10-25"}); chk("Event",r.status_code==200,r.text)
+r=c.post("/api/kunde/angebots-inhalte",json={"art":"event","titel":{"de":"Grillfest"},"gueltig_von":VON,"gueltig_bis":BIS}); chk("Event",r.status_code==200,r.text)
 r=c.post("/api/kunde/angebots-inhalte",json={"art":"geschlossen","text":{"de":"Inventur","tr":"Sayım"}}); chk("Heute geschlossen (ohne Titel)",r.status_code==200,r.text)
 h=open(seite+"index.html",encoding="utf8").read()
 chk("Seite: geschlossen in 4 Sprachen",all(x in h for x in ["Heute geschlossen","Bugün kapalıyız","Closed today","مغلق اليوم","Sayım"]))
 chk("Seite: geschlossen mit heutigem Datum",'class="zu" data-von="'+time.strftime("%Y-%m-%d") in h)
-chk("Seite: Event mit Gültigkeit",'data-von="2026-10-24"' in h and "Grillfest" in h)
+chk("Seite: Event mit Gültigkeit",f'data-von="{VON}"' in h and "Grillfest" in h)
 m=json.load(open(seite+"aktuell.json",encoding="utf8")); chk("json: Inhalte + Sprachen",len(m["inhalte"])==3 and m["sprachen"]==["de","tr","en","ar"] and m["datei"]=="aktuell.pdf",m)
 # Validierung
 chk("ohne deutschen Titel",c.post("/api/kunde/angebots-inhalte",json={"art":"angebot","titel":{"tr":"Domates"}}).status_code==400)
 chk("unbekannte Sprache",c.post("/api/kunde/angebots-inhalte",json={"art":"angebot","titel":{"de":"x","fr":"y"}}).status_code==400)
-chk("Enddatum vor Start",c.post("/api/kunde/angebots-inhalte",json={"art":"event","titel":{"de":"x"},"gueltig_von":"2026-10-25","gueltig_bis":"2026-10-24"}).status_code==400)
+chk("Enddatum vor Start",c.post("/api/kunde/angebots-inhalte",json={"art":"event","titel":{"de":"x"},"gueltig_von":BIS,"gueltig_bis":VON}).status_code==400)
 chk("Art ungültig",c.post("/api/kunde/angebots-inhalte",json={"art":"spam","titel":{"de":"x"}}).status_code==422)
 chk("Titel zu lang",c.post("/api/kunde/angebots-inhalte",json={"art":"angebot","titel":{"de":"x"*201}}).status_code==400)
 # Ändern, ausblenden, löschen

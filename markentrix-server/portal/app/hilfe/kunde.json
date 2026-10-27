@@ -1481,6 +1481,28 @@
         "Beim Kündigen kannst du einen Hauptgrund auswählen, zum Beispiel „zu teuer“ oder „Wechsel zu einem anderen Anbieter“. Die Angabe ist freiwillig.",
         "Sie hilft uns zu verstehen, was wir besser machen können. Das Datum des Vertragsendes ändert sich dadurch nicht."
       ]
+    },
+    {
+      "t": "Morgens „Dein Tag“",
+      "k": "dein tag morgen push uhrzeit benachrichtigung anfragen heute",
+      "wo": "Einstellungen → App & Benachrichtigungen",
+      "l": "#einstellungen",
+      "s": [
+        "Auf Wunsch kommt jeden Werktag zur gewählten Uhrzeit eine Nachricht mit neuen Anfragen, Terminen und wartenden Freigaben.",
+        "Standardmäßig ist sie aus. Unter „App & Benachrichtigungen“ → „Morgens „Dein Tag““ wählst du eine Uhrzeit.",
+        "Ist nichts zu tun, kommt keine Nachricht."
+      ]
+    },
+    {
+      "t": "App-Symbol: Kurzbefehle und Zahl",
+      "k": "app symbol kurzbefehl lange drücken zahl badge punkt startbildschirm",
+      "wo": "Startbildschirm deines Handys",
+      "l": "#einstellungen",
+      "s": [
+        "Installierte App lange auf dem Symbol drücken: Es erscheinen Kurzbefehle zu den wichtigsten Seiten.",
+        "Eine Zahl am Symbol zeigt, was Aufmerksamkeit braucht (neue Anfragen, Freigaben, Nachrichten).",
+        "Das geht nur bei installierter App und nicht auf jedem Handy. Neue Kurzbefehle erscheinen auf Android nach einer Neuinstallation der App."
+      ]
     }
   ],
   "titel": "Anleitung Kundenportal",

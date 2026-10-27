@@ -348,10 +348,48 @@ pre.code{background:rgba(128,128,128,.12);padding:10px 12px;border-radius:8px;fo
 .card:empty{display:none}
 @media(max-width:700px){.hilfesuche .pdflinks{display:none}.hilfesuche{margin-bottom:6px!important}}
 [hidden]{display:none!important}
-.filterklapp{margin-top:8px}.filterklapp>summary{cursor:pointer;color:var(--muted,#5b6785);padding:4px 0}.filterklapp[open]>summary{margin-bottom:8px}
+.filterklapp{margin-top:8px}.filterklapp>summary{cursor:pointer;color:var(--mut);padding:4px 0}.filterklapp[open]>summary{margin-bottom:8px}
 .einkl>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}
 .einkl>summary::-webkit-details-marker{display:none}
-.einkl>summary::after{content:'▾';margin-left:auto;color:var(--muted,#5b6785)}
+.einkl>summary::after{content:'▾';margin-left:auto;color:var(--mut)}
 .einkl[open]>summary::after{content:'▴'}
 .einkl>summary h2{margin:0;font-size:inherit}
 .einkl[open]>summary{margin-bottom:10px}
+
+/* ---- Handy-Feinschliff: Offline-Leiste, Blatt-Dialoge, große Ziele, Aktionsleiste unten, Ziehen zum Aktualisieren ---- */
+#offlineleiste{position:sticky;top:0;z-index:70;background:#92400e;color:#fff;font:600 13px "Inter",sans-serif;padding:6px 12px calc(6px) 12px;padding-top:calc(6px + env(safe-area-inset-top));text-align:center}
+#ziehen{position:fixed;top:calc(env(safe-area-inset-top) + 4px);left:50%;margin-left:-110px;width:220px;text-align:center;z-index:80;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:6px 10px;font:600 12px "Inter",sans-serif;color:var(--mut);pointer-events:none}
+#ziehen.bereit{color:var(--link);border-color:var(--link)}
+@media(max-width:700px){
+  body{overscroll-behavior-y:contain}
+  .btn{min-height:44px}.btn.small{min-height:40px;padding-left:12px;padding-right:12px}
+  input,select,textarea{font-size:16px;min-height:44px}
+  .dlgoverlay{align-items:flex-end;padding:0}
+  .dlg,.dlg.breit{width:100%;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom));animation:blattauf .18s ease-out}
+  .dlgkopf{position:sticky;top:-14px;background:var(--surface);z-index:1;padding-top:6px}
+  .dlgkopf::before{content:"";position:absolute;top:-4px;left:50%;margin-left:-20px;width:40px;height:4px;border-radius:2px;background:var(--line)}
+  @keyframes blattauf{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+  /* Kontakt festhalten: Ergebnisse in zwei Spalten, Speichern-Knöpfe unten fest */
+  .kontaktkarte .row>.btn.sec.small,.card .row[style*="flex-wrap:wrap;gap:6px"]>.btn.sec.small{flex:1 1 46%;justify-content:center}
+  .tabbar{padding-left:max(4px,env(safe-area-inset-left));padding-right:max(4px,env(safe-area-inset-right))}
+  .topbar,header.top{padding-top:env(safe-area-inset-top)}
+}
+@media(max-width:700px){
+  .aktionsleiste{display:flex;gap:8px;width:100%;position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));background:var(--surface);padding:8px 0;z-index:5;border-top:1px solid var(--line)}
+  .aktionsleiste .btn{flex:1;justify-content:center}
+  .dlg .aktionsleiste{bottom:0}
+}
+@media(min-width:701px){.aktionsleiste{display:contents}}
+@media(prefers-reduced-motion:reduce){.dlg{animation:none}}
+
+/* ---- Ladezustand: Gerüst statt leerer Fläche, dünner Balken bei langsamen Abfragen ---- */
+.skelett{max-width:900px;margin:0 auto;padding:18px 14px;display:grid;gap:12px}
+.skel{height:92px;border-radius:14px;background:linear-gradient(90deg,var(--line) 25%,var(--tint,#eef2ff) 50%,var(--line) 75%);background-size:200% 100%;animation:skelglanz 1.3s linear infinite}
+.skel.kopf{height:34px;width:60%}.skel.kurz{height:56px;width:80%}
+@keyframes skelglanz{from{background-position:200% 0}to{background-position:-200% 0}}
+#ladebalken{position:fixed;top:0;left:0;right:0;height:3px;z-index:90;background:linear-gradient(90deg,transparent,var(--link,#1E9BFF),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:balkenlauf 1s ease-in-out infinite}
+@keyframes balkenlauf{from{background-position:-40% 0}to{background-position:140% 0}}
+@media(prefers-reduced-motion:reduce){.skel,#ladebalken{animation:none}}
+/* schmale Handys (320–360 px): Raster-Kinder dürfen schrumpfen, der Verkaufstrichter bekommt weniger Beschriftungsbreite */
+.grid2>*,.grid3>*,.grid4>*{min-width:0}
+@media(max-width:420px){.trichter .stufe>span:first-child{width:92px}.trichter .stufe{gap:6px}}

@@ -242,7 +242,7 @@ function anfragenKarte(liste) {
         h('div', { class: 'row', style: 'flex-wrap:wrap;align-items:flex-end' }, st, h('div', { class: 'grow' }, hin), knopf('Speichern', () => bestaetigtOhneReload(m, async () => { await api('/api/admin/angebotsanfragen/' + a.id, { method: 'PATCH', body: { status: st.value, admin_notiz: hin.value || null } }); melde(m, 'Gespeichert.', 'ok'); }), 'btn')), m); }));
 }
 
-const modus = anrufModus({ schluessel: 'mk-anrufmodus-admin', url: '/api/admin/anrufmodus/naechster', leadHash: '#lead/', heimHash: '#leads' });
+export const modus = anrufModus({ schluessel: 'mk-anrufmodus-admin', url: '/api/admin/anrufmodus/naechster', leadHash: '#lead/', heimHash: '#leads' });
 
 export async function leadDetail(lid) {
   const [d, anfragen] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/leads/' + lid + '/angebotsanfragen')]), l = d.lead, m = h('div');

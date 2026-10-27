@@ -1476,6 +1476,41 @@
         "Im Anruf-Modus gibt es die Reihenfolge „Heiße Leads, beste Uhrzeit zuerst“: Es kommen zuerst die Branchen dran, die gerade besonders gut erreichbar sind.",
         "Je mehr Anrufe mit Ergebnis festgehalten werden, desto genauer wird die Empfehlung."
       ]
+    },
+    {
+      "t": "Schlechtes Netz am Handy",
+      "k": "offline kein netz warteschlange funkgloch empfang nachsenden",
+      "wo": "Oben die orange Leiste",
+      "l": "#leads",
+      "s": [
+        "Ohne Netz zeigt eine orange Leiste oben „Kein Netz“.",
+        "Kontakte, die du zu einem Lead festhältst, werden auf dem Handy gemerkt und automatisch gesendet, sobald wieder Netz da ist. Die Leiste zeigt, wie viele Einträge noch warten.",
+        "Alles andere (z. B. Angebote, Einstellungen) braucht Netz und meldet das sofort.",
+        "Offline-Ansicht der Lead-Daten und „angemeldet bleiben 30 Tage“ schaltest du unter Einstellungen → Sicherheit ein (Standard aus; Datenschutz: vorher mit dem Anwalt klären). Admins bleiben immer bei der normalen Sitzungsdauer."
+      ]
+    },
+    {
+      "t": "Bedienung am Handy",
+      "k": "handy wischen ziehen aktualisieren tastatur dialog",
+      "wo": "Überall",
+      "l": "#leads",
+      "s": [
+        "Fenster öffnen sich von unten. Am Kopf nach unten wischen schließt sie.",
+        "Zum Aktualisieren ganz oben auf der Seite nach unten ziehen und loslassen.",
+        "Telefon-, E-Mail- und Zahlenfelder zeigen automatisch die passende Tastatur.",
+        "„Speichern“ beim Kontakt festhalten bleibt unten am Bildschirm sichtbar."
+      ]
+    },
+    {
+      "t": "App-Symbol: Kurzbefehle und Zahl",
+      "k": "app symbol kurzbefehl lange drücken zahl badge punkt startbildschirm",
+      "wo": "Startbildschirm deines Handys",
+      "l": "#einstellungen",
+      "s": [
+        "Installierte App lange auf dem Symbol drücken: Es erscheinen Kurzbefehle zu den wichtigsten Seiten.",
+        "Eine Zahl am Symbol zeigt, was Aufmerksamkeit braucht (Nachrichten, Freigaben, überfällige Aufgaben).",
+        "Das geht nur bei installierter App und nicht auf jedem Handy. Neue Kurzbefehle erscheinen auf Android nach einer Neuinstallation der App."
+      ]
     }
   ],
   "titel": "Anleitung Admin-Bereich",

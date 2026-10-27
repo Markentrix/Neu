@@ -5,7 +5,7 @@ f.addEventListener('submit', async (ev) => {
   ev.preventDefault(); b.disabled = true; melde(m, '');
   try {
     const cw = el('cw');
-    const r = await api('/api/login', { method: 'POST', body: { email: el('e').value, password: el('p').value, code: cw.hidden ? null : el('c').value } });
+    const r = await api('/api/login', { method: 'POST', body: { email: el('e').value, password: el('p').value, code: cw.hidden ? null : el('c').value, bleiben: el('bl').checked } });
     if (r.zwei_faktor) { cw.hidden = false; el('c').focus(); melde(m, 'Bitte den Code aus deiner Authenticator-App eingeben.', 'info'); b.disabled = false; return; }
     location.href = r.ziel;
   } catch (e) { melde(m, e.message); b.disabled = false; }
@@ -31,11 +31,15 @@ f3.addEventListener('submit', async (ev) => {
   b3.disabled = false;
 });
 
-// Anmeldung ohne Passwort (Passkey)
+// „Angemeldet bleiben“ nur, wenn der Admin es erlaubt hat (Einstellungen → Sicherheit)
+api('/api/public/login-optionen', { leise: true }).then(o => { el('bw').hidden = !o.bleiben; }).catch(() => {});
+
+// Anmeldung ohne Passwort (Passkey); am Handy steht sie ganz oben
 if (passkeyGeht()) {
   el('pkw').hidden = false;
+  if (matchMedia('(pointer: coarse)').matches) { const erst = f.querySelector('label[for=e]'); if (erst) f.insertBefore(el('pkw'), erst); }
   el('pk').addEventListener('click', async () => {
     el('pk').disabled = true; melde(m, '');
-    try { location.href = await passkeyAnmelden(); } catch (e) { melde(m, e.message); el('pk').disabled = false; }
+    try { location.href = await passkeyAnmelden(el('bl').checked); } catch (e) { melde(m, e.message); el('pk').disabled = false; }
   });
 }

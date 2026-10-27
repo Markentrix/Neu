@@ -983,20 +983,42 @@ def geschaeftszahlen_mail(cfg):
                   f"Aktuell: {d['aktiv']} aktive Kunden, wiederkehrender Umsatz {eur(d['mrr_cent'])} im Monat, offene Rechnungen {eur(d['offen_cent'])} (davon überfällig {eur(d['ueberfaellig_cent'])}), Kündigungsquote 90 Tage {str(d['churn_prozent']).replace('.', ',')} %." + mailer.SIGNATUR)
 
 
-def vertrieb_morgens(cfg):
-    """Täglich werktags: Push an Vertriebler mit der Zahl der heute fälligen Anrufe."""
-    jetzt = datetime.now(timezone.utc)
-    if jetzt.hour < 6 or jetzt.weekday() >= 5 or not _marker(f"vertrieb-morgens-{jetzt.date()}"):
+def tag_pushes(cfg):
+    """Jede Minute: Morgen-Push „Dein Tag“ zur Uhrzeit, die jeder Benutzer selbst gewählt hat (Einstellung „tag_zeit“ in der Ansicht).
+    Standard: Vertriebler 08:00 Uhr (wie bisher), Kunden aus. Nur werktags, bis 3 Stunden nach der gewählten Zeit, höchstens einmal am Tag, nie ohne Inhalt."""
+    from . import push, tagesblick
+    from .leadkontakt import TZ
+    jetzt = datetime.now(TZ)
+    if jetzt.weekday() >= 5:
         return
+    standard = {"vertrieb": "08:00", "kunde": "aus"}
     with tx("system") as cur:
-        cur.execute("""SELECT l.vertriebspartner_id AS pid, count(*) AS n FROM leads l
-                       WHERE l.vertriebspartner_id IS NOT NULL AND l.status NOT IN ('verloren','gewonnen','gesperrt','tot','consent_ausstehend')
-                         AND (l.wiedervorlage_am <= current_date OR (l.status='neu' AND l.temperatur='heiss' AND l.letzter_kontakt_am IS NULL))
-                       GROUP BY 1""")
-        liste = cur.fetchall()
-        ziele = [(push.partner(cur, r["pid"]), r["n"]) for r in liste]
-    for ids, n in ziele:
-        push.senden(ids, "Heute anrufen", f"{n} Lead(s) warten auf Ihren Anruf.", "/vertrieb#heute", "heute")
+        cur.execute("SELECT id, rolle, kunden_id, vertriebspartner_id, ansicht FROM benutzer WHERE aktiv AND rolle IN ('vertrieb','kunde')")
+        kandidaten = cur.fetchall()
+    for u in kandidaten:
+        z = (u["ansicht"] or {}).get("tag_zeit") or standard[u["rolle"]]
+        if z == "aus" or "heute" in ((u["ansicht"] or {}).get("push_aus") or []):
+            continue
+        try:
+            std, minute = z.split(":")
+            seit = jetzt.hour * 60 + jetzt.minute - (int(std) * 60 + int(minute))
+        except ValueError:
+            continue
+        if not 0 <= seit < 180 or not _marker(f"tag-{u['id']}-{jetzt.date()}"):
+            continue
+        if u["rolle"] == "vertrieb" and u["vertriebspartner_id"]:
+            with tx("system") as cur:
+                d = tagesblick.vertrieb(cur, u["vertriebspartner_id"])
+            url = "/vertrieb#heute"
+        elif u["rolle"] == "kunde" and u["kunden_id"]:
+            with tx("kunde", u["kunden_id"]) as cur:
+                d = tagesblick.kunde(cur)
+            url = "/app#heute"
+        else:
+            continue
+        t = tagesblick.push_text(u["rolle"], d)
+        if t:
+            push.senden([u["id"]], t[0], t[1], url, "heute")
 
 
 def anrufe_bereinigen() -> int:
@@ -1260,7 +1282,7 @@ def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (vertrieb_morgens, anruf_pushes, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (tag_pushes, anruf_pushes, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return

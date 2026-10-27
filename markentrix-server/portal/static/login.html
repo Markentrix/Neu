@@ -1,10 +1,11 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Markentrix Portal – Anmeldung</title><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Markentrix"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#4F46E5"><link rel="icon" href="/static/icons/icon-192.png"><link rel="apple-touch-icon" href="/static/icons/icon-192.png"><script src="/static/js/theme.js"></script><link rel="stylesheet" href="/static/css/portal.css"></head>
 <body><div class="center"><form class="card login" id="f"><div class="logo">M</div><h1>Markentrix Portal</h1>
 <p class="muted small" style="text-align:center;margin-top:-6px">Melde dich mit deiner E-Mail-Adresse an.</p>
 <div id="m"></div><label for="e">E-Mail</label><input id="e" type="email" autocomplete="username" required>
 <label for="p">Passwort</label><input id="p" type="password" autocomplete="current-password" required>
 <div id="cw" hidden><label for="c">Code aus der Authenticator-App (oder Notfallcode)</label><input id="c" inputmode="text" autocomplete="one-time-code"></div>
+<label id="bw" hidden style="display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0"><input type="checkbox" id="bl" style="width:auto"> Auf diesem Gerät angemeldet bleiben (30 Tage)</label>
 <p><button class="btn" style="width:100%" id="b">Anmelden</button></p>
 <p id="pkw" hidden><button type="button" class="btn sec" style="width:100%" id="pk">Mit Fingerabdruck / Face-ID anmelden</button></p>
 <p style="text-align:center;margin:0"><a href="#" id="v" class="small">Passwort vergessen?</a> · <a href="#" id="l" class="small">Anmelde-Link per E-Mail</a></p></form>

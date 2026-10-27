@@ -20,15 +20,96 @@ export const el = (id) => document.getElementById(id);
 /** Formularfelder als einfaches Objekt. @param {any} f @returns {Record<string, any>} */
 export const formular = (f) => Object.fromEntries(new FormData(f));
 
+// ---------------------------------------------------------------- Schlechtes Netz: Warteschlange und Offline-Ansicht
+// Einträge zu Leads (Kontakt festhalten, Notiz) gehen bei fehlendem Netz in eine Warteschlange auf dem Gerät und werden nachgesendet.
+// Gelesene Seiten (Heute, Leads) werden nur zwischengespeichert, wenn der Admin die Offline-Ansicht erlaubt hat; beim Abmelden wird alles gelöscht.
+const OFFLINE_LESEN = /^\/api\/(vertrieb\/(heute|leadsuche|leads\/[\w-]+)|kunde\/heute|admin\/(heute|leads\/[\w-]+))(\?.*)?$/;
+const WARTEND = /^\/api\/(vertrieb|admin)\/leads\/[\w-]+\/(kontakt|aktivitaet)$/;
+const OC = 'mk-oc:', QK = 'mk-queue';
+/** Zahl am App-Symbol (Android/iPhone, nur bei installierter App): was Aufmerksamkeit braucht. */
+async function badgeAktualisieren() {
+  const nav = /** @type {any} */ (navigator);
+  if (!nav.setAppBadge) return;
+  try {
+    const r = await fetch('/api/me/badge', { headers: { 'X-MK': '1' }, credentials: 'same-origin' });
+    if (!r.ok) return;
+    const { n } = await r.json();
+    if (n > 0) await nav.setAppBadge(n); else await nav.clearAppBadge();
+  } catch (e) { /* Zahl am Symbol ist nur ein Zusatz */ }
+}
+let offlineErlaubt = false, offline = false, sendet = false;
+const lsLesen = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSchreiben = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } };
+function cacheLesen(path) { try { return JSON.parse(lsLesen(OC + path) || 'null'); } catch (e) { return null; } }
+function cacheSchreiben(path, d) { lsSchreiben(OC + path, JSON.stringify({ t: Date.now(), d })); }
+export function offlineLoeschen() { try { Object.keys(localStorage).filter(k => k.startsWith(OC)).forEach(k => localStorage.removeItem(k)); } catch (e) { /* egal */ } }
+const queueLesen = () => { try { return JSON.parse(lsLesen(QK) || '[]'); } catch (e) { return []; } };
+const queueSchreiben = (q) => { if (q.length) lsSchreiben(QK, JSON.stringify(q)); else { try { localStorage.removeItem(QK); } catch (e) { /* egal */ } } };
+export const wartendeEintraege = () => queueLesen().length;
+function warteschlangeAnlegen(path, body) { const q = queueLesen(); q.push({ path, body, t: Date.now() }); queueSchreiben(q); offline = true; statusLeiste(); }
+/** Schmale Leiste oben: kein Netz und/oder wartende Einträge. */
+export function statusLeiste(stand) {
+  if (typeof document === 'undefined') return;
+  let b = document.getElementById('offlineleiste');
+  const n = wartendeEintraege(), aus = offline || (typeof navigator !== 'undefined' && navigator.onLine === false);
+  if (!aus && !n) { if (b) b.remove(); return; }
+  if (!b) { b = document.createElement('div'); b.id = 'offlineleiste'; b.setAttribute('role', 'status'); document.body.prepend(b); }
+  b.textContent = (aus ? 'Kein Netz.' + (stand ? ' Stand von ' + new Date(stand).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr.' : '') : 'Verbunden.') + (n ? ' ' + n + (n === 1 ? ' Eintrag wartet' : ' Einträge warten') + ' auf das Senden.' : '');
+}
+/** Wartende Einträge der Reihe nach senden. Bei Netzfehler wird später weiter versucht, bei einem Fehler des Servers wird der Eintrag gemeldet und entfernt. */
+export async function warteschlangeSenden() {
+  if (sendet || !queueLesen().length) return;
+  sendet = true; let ok = 0;
+  try {
+    for (let q = queueLesen(); q.length; q = queueLesen()) {
+      const e = q[0]; let r;
+      try { r = await fetch(e.path, { method: 'POST', headers: { 'X-MK': '1', 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(e.body) }); } catch (x) { offline = true; break; }
+      if (r.status === 401) break;
+      q.shift(); queueSchreiben(q);
+      if (r.ok) ok++;
+      else { let t = 'Fehler ' + r.status; try { const d = await r.json(); if (typeof d.detail === 'string') t = d.detail; } catch (x) { /* leer */ } toast('Ein gespeicherter Eintrag konnte nicht gesendet werden: ' + t); }
+    }
+  } finally { sendet = false; if (!queueLesen().length && ok) offline = false; statusLeiste(); }
+  if (ok) toast(ok + (ok === 1 ? ' Eintrag wurde nachgesendet.' : ' Einträge wurden nachgesendet.'), 'ok');
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => { offline = false; statusLeiste(); warteschlangeSenden(); });
+  window.addEventListener('offline', () => { offline = true; statusLeiste(); });
+  setInterval(() => { if (queueLesen().length) warteschlangeSenden(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && /^\/(app|vertrieb|admin)/.test(location.pathname)) badgeAktualisieren(); });
+  setInterval(() => { if (document.visibilityState === 'visible' && /^\/(app|vertrieb|admin)/.test(location.pathname)) badgeAktualisieren(); }, 300000);
+  if (/^\/(app|vertrieb|admin)/.test(location.pathname)) {
+    fetch('/api/me', { headers: { 'X-MK': '1' }, credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(m => {
+      offlineErlaubt = !!(m && m.offline_daten); if (m && !offlineErlaubt) offlineLoeschen();
+      statusLeiste(); setTimeout(warteschlangeSenden, 2500); badgeAktualisieren();
+    }).catch(() => { statusLeiste(); });
+  }
+}
+let laufend = 0, balkenT = null;
+/** Schmaler Balken oben, wenn eine Abfrage länger als 0,3 s dauert (statt leerer Fläche). */
+function ladeBalken(an) {
+  laufend += an ? 1 : -1; if (laufend < 0) laufend = 0;
+  clearTimeout(balkenT);
+  if (laufend > 0) balkenT = setTimeout(() => { if (!document.getElementById('ladebalken')) { const b = document.createElement('div'); b.id = 'ladebalken'; b.setAttribute('aria-hidden', 'true'); document.body.append(b); } }, 300);
+  else { const b = document.getElementById('ladebalken'); if (b) b.remove(); }
+}
 export async function api(path, opt = {}) {
   /** @type {any} */
   const o = { method: opt.method || 'GET', headers: { 'X-MK': '1' }, credentials: 'same-origin' };
   if (opt.body instanceof FormData) o.body = opt.body;
   else if (opt.body !== undefined) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(opt.body); }
   let r;
-  try { r = await fetch(path, o); } catch (e) { throw new Error('Keine Verbindung zum Server.'); }
+  const lang = o.method === 'GET' && !opt.leise; if (lang) ladeBalken(true);
+  try { r = await fetch(path, o); } catch (e) {
+    if (o.method === 'GET' && offlineErlaubt && OFFLINE_LESEN.test(path)) { const c = cacheLesen(path); if (c) { offline = true; statusLeiste(c.t); return c.d; } }
+    if (o.method === 'POST' && WARTEND.test(path) && opt.body !== undefined && !(opt.body instanceof FormData)) { warteschlangeAnlegen(path, opt.body); return { queued: true }; }
+    offline = true; statusLeiste();
+    throw new Error('Keine Verbindung zum Server.');
+  } finally { if (lang) ladeBalken(false); }
+  if (offline) { offline = false; statusLeiste(); warteschlangeSenden(); }
   let d = null;
   try { d = await r.json(); } catch (e) { /* leer */ }
+  if (r.ok && o.method === 'GET' && offlineErlaubt && OFFLINE_LESEN.test(path) && d) cacheSchreiben(path, d);
   if (r.status === 401 && !opt.leise && !path.includes('/login')) { location.href = '/'; throw new Error('Bitte neu anmelden.'); }
   if (!r.ok) {
     let t = d && d.detail;
@@ -46,6 +127,8 @@ export function melde(box, text, art = 'err') {
 }
 export async function abmelden() {
   try { await api('/api/logout', { method: 'POST' }); } catch (e) { /* egal */ }
+  offlineLoeschen(); try { localStorage.removeItem(QK); } catch (e) { /* egal */ }
+  try { const nav = /** @type {any} */ (navigator); if (nav.clearAppBadge) nav.clearAppBadge(); } catch (e) { /* egal */ }
   location.href = '/';
 }
 /** Zielseite je Rolle: dieselbe Zuordnung wie beim Anmelden auf dem Server (routes_auth.py). @param {string} rolle */
@@ -157,14 +240,16 @@ export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
     if (wv.zeit.value && !wv.tag.value) { melde(m, 'Für die Uhrzeit bitte auch ein Datum wählen.'); return; }
     if (wahl.code === 'kein_interesse' && extra.verlustgruende && !grund.value) { melde(m, 'Bitte den Grund der Absage wählen. Das hilft bei der Auswertung.'); return; }
     try { const r = await api(url, { method: 'POST', body: { ergebnis: wahl.code, notiz: notiz.value || null, wiedervorlage: wv.tag.value || null, wiedervorlage_zeit: wv.zeit.value || null, verlust_grund: grund.value || null } });
+      if (r && r.queued) { toast('Kein Netz: Der Eintrag ist gespeichert und wird gesendet, sobald wieder Netz da ist.', 'ok'); notiz.value = ''; return; }
+      vibriere(25);
       if (danach) danach(r); else if (extra.nach) extra.nach(r); else location.reload(); } catch (x) { melde(m, x.message); } };
   speichern.onclick = () => los(null);
   if (weiter) /** @type {any} */ (weiter).onclick = () => los(extra.naechster);
-  const box = h('div', { class: 'card' }, h('h2', {}, 'Kontakt festhalten'),
+  const box = h('div', { class: 'card kontaktkarte' }, h('h2', {}, 'Kontakt festhalten'),
     h('p', { class: 'small muted' }, 'Was ist passiert? Der Verlauf und, wo es passt, der Status werden automatisch gesetzt.'), m,
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' }, knoepfe),
     h('div', { style: 'margin-top:10px' }, notiz, notizWerkzeug(notiz, m)),
-    h('div', { class: 'row', style: 'margin-top:6px;align-items:flex-end;flex-wrap:wrap' }, grund, wv.el, speichern, weiter),
+    h('div', { class: 'row', style: 'margin-top:6px;align-items:flex-end;flex-wrap:wrap' }, grund, wv.el, h('div', { class: 'aktionsleiste' }, speichern, weiter)),
     wiedervorlage ? h('p', { class: 'small muted' }, 'Aktuelle Wiedervorlage: ' + datum(wiedervorlage)) : '');
   // Tastenkürzel am Computer: 1 bis 9 wählt das Ergebnis, N speichert und springt zum nächsten Lead, S speichert
   const taste = (/** @type {KeyboardEvent} */ e) => {
@@ -249,7 +334,7 @@ const pkText = (buf) => { let t = ''; for (const b of new Uint8Array(buf)) t += 
 export const passkeyGeht = () => typeof window !== 'undefined' && !!window.PublicKeyCredential && !!navigator.credentials;
 
 /** Anmeldung ohne Passwort. Gibt das Ziel (z. B. „/app“) zurück. Wirft einen Error mit verständlichem Text. */
-export async function passkeyAnmelden() {
+export async function passkeyAnmelden(bleiben = false) {
   const o = await api('/api/passkey/login/start', { method: 'POST', body: {} });
   let c;
   try {
@@ -359,6 +444,14 @@ export function pushKarte(rolle) {
         try { await api('/api/me/ansicht', { method: 'PUT', body: { push_aus: [...aus] } }); a.push_aus = [...aus]; melde(m, ''); } catch (x) { e.target.checked = !e.target.checked; melde(m, x.message); }
       } }), name)));
   }).catch(() => {});
+  const tagZeile = h('div');
+  if (rolle === 'vertrieb' || rolle === 'kunde') ladeAnsicht().then(a => {
+    const stand = a.tag_zeit || (rolle === 'vertrieb' ? '08:00' : 'aus');
+    const zeiten = ['aus', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '10:00'];
+    const sel = h('select', { 'aria-label': 'Uhrzeit für „Dein Tag“', style: 'width:auto' }, zeiten.map(z => h('option', { value: z, selected: z === stand }, z === 'aus' ? 'aus' : z + ' Uhr')));
+    sel.onchange = async () => { try { await api('/api/me/ansicht', { method: 'PUT', body: { tag_zeit: sel.value } }); a.tag_zeit = sel.value; melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
+    tagZeile.replaceChildren(h('h3', {}, 'Morgens „Dein Tag“'), h('p', { class: 'small muted' }, rolle === 'vertrieb' ? 'Eine Nachricht pro Werktag mit fälligen Anrufen und Terminen. Ist nichts los, kommt keine.' : 'Eine Nachricht pro Werktag mit neuen Anfragen, Terminen und Freigaben. Ist nichts los, kommt keine.'), h('label', { class: 'row', style: 'gap:8px;align-items:center' }, 'Uhrzeit ', sel));
+  }).catch(() => {});
   const ua = navigator.userAgent, android = /android/i.test(ua), fremd = android && /SamsungBrowser|OPR\/|Opera|Vivaldi|Firefox|DuckDuckGo|EdgA|Brave|MiuiBrowser|UCBrowser/i.test(ua);
   if (!standalone) install.replaceChildren(
     installAngebot ? h('p', {}, h('button', { class: 'btn small', onclick: async () => { installAngebot.prompt(); installAngebot = null; install.replaceChildren(); } }, 'Als App installieren')) : '',
@@ -367,7 +460,7 @@ export function pushKarte(rolle) {
       : android ? 'Android: in Google Chrome das Menü ⋮ öffnen, dann „App installieren“ (oder „Zum Startbildschirm hinzufügen“) wählen. Die App ist immer auf dem neuesten Stand, Updates brauchen nichts zu tun.'
         : 'Am Rechner: in Chrome oder Edge in der Adressleiste auf das Installieren-Symbol klicken.'));
   return h('div', { class: 'card' }, h('h2', {}, 'App & Benachrichtigungen'),
-    h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, install);
+    h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, tagZeile, install);
 }
 
 const LEER_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><path d="M10 28h14l3 6h10l3-6h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".35"/><circle cx="48" cy="16" r="7" fill="#8B5CF6" opacity=".9"/><path d="M45 16l2 2 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -420,7 +513,7 @@ export function navGruppen(gruppen, aktiv, schluessel) {
 // ---------------------------------------------------------------- Glocke, Suche, Ansicht
 const ANLAESSE = {
   admin: [['buchung', 'Gespräch gebucht'], ['check', 'Website-Check'], ['ticket', 'Kundennachricht'], ['zahlung', 'Zahlung / Lastschrift'], ['fruehwarnung', 'Kunden-Frühwarnung'], ['fehler', 'Fehler im Portal'], ['angebotsanfrage', 'Vertriebler bittet um Angebot'], ['betriebsalarm', 'Betriebsalarm: Server, Sicherung, Mail'], ['wochenrueckblick', 'Montags: Wochenrückblick'], ['angebotsreaktion', 'Angebot angesehen, angenommen oder abgelehnt']],
-  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['heute', 'Morgens: Anrufe des Tages'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage'], ['angebotsreaktion', 'Angebot angesehen, angenommen oder abgelehnt'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
+  vertrieb: [['zugewiesen', 'Neue Leads zugewiesen'], ['buchung', 'Gespräch gebucht'], ['angebotsstatus', 'Status einer Angebotsanfrage'], ['angebotsreaktion', 'Angebot angesehen, angenommen oder abgelehnt'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
   kunde: [['anfrage', 'Neue Anfrage'], ['anruf', 'Neuer Anruf'], ['wochenrueckblick', 'Montags: Wochenrückblick']],
 };
 let _ansicht = null;
@@ -555,6 +648,14 @@ export function dialog(titel, inhalt, breit = false) {
     h('div', { class: 'dlg' + (breit ? ' breit' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': titel },
       h('div', { class: 'dlgkopf' }, h('h2', {}, titel), h('button', { class: 'btn sec small', 'aria-label': 'Schließen', onclick: zu }, '✕')), inhalt));
   document.addEventListener('keydown', esc); window.addEventListener('hashchange', zu); document.body.append(ov);
+  // Am Handy: Dialog als Blatt von unten, am Kopf nach unten wischen schließt ihn
+  const kopf = ov.querySelector('.dlgkopf'), blatt = /** @type {HTMLElement} */ (ov.querySelector('.dlg'));
+  let y0 = null;
+  if (kopf) {
+    kopf.addEventListener('touchstart', (e) => { y0 = e.touches[0].clientY; }, { passive: true });
+    kopf.addEventListener('touchmove', (e) => { if (y0 === null) return; const d = e.touches[0].clientY - y0; if (d > 0) blatt.style.transform = 'translateY(' + d + 'px)'; }, { passive: true });
+    kopf.addEventListener('touchend', (e) => { if (y0 === null) return; const d = e.changedTouches[0].clientY - y0; y0 = null; if (d > 90) zu(); else blatt.style.transform = ''; });
+  }
   return { zu };
 }
 
@@ -635,7 +736,13 @@ export function mobilLeiste({ aktiv, gruppen, feste, icons, kurz = {}, schluesse
 }
 
 /** Kurze Meldung unten im Bild (statt alert): verschwindet von selbst, wird vorgelesen. */
+/** @param {number|number[]} [muster] */
+export function vibriere(muster = 15) {
+  try { if (navigator.vibrate && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) navigator.vibrate(muster); } catch { /* ohne Vibration */ }
+}
+
 export function toast(text, art = 'bad') {
+  vibriere(art === 'ok' ? 15 : [30, 50, 30]);
   const t = h('div', { class: 'toast ' + art, role: 'status', 'aria-live': 'polite' }, text);
   document.body.append(t); setTimeout(() => t.remove(), 6000);
 }
@@ -669,4 +776,62 @@ export function listenZiel(std) {
 /** Knopf „← Liste“, der zur zuletzt gesehenen Liste mit denselben Filtern führt. */
 export function listenKnopf(std, text = '← Liste') {
   return h('a', { class: 'btn sec small', href: listenZiel(std), onclick: (e) => { e.preventDefault(); location.hash = listenZiel(std); } }, text);
+}
+
+// ---------------------------------------------------------------- Handy-Feinschliff
+/** Passende Tastatur und Eingabehilfen je Feld (ohne bestehende Angaben zu überschreiben). */
+export function eingabeHilfen(wurzel = document) {
+  wurzel.querySelectorAll('input').forEach((el) => {
+    const i = /** @type {HTMLInputElement} */ (el), n = ((i.name || '') + ' ' + (i.id || '') + ' ' + (i.placeholder || '')).toLowerCase();
+    if (i.type === 'tel' || /telefon|handy|phone/.test(n)) { if (!i.inputMode) i.inputMode = 'tel'; if (!i.autocomplete) i.autocomplete = 'tel'; }
+    else if (i.type === 'email') { if (!i.inputMode) i.inputMode = 'email'; if (!i.autocapitalize) i.autocapitalize = 'none'; if (!i.autocomplete) i.setAttribute('autocomplete', 'email'); }
+    else if (/plz|postleitzahl/.test(n) && !i.inputMode) { i.inputMode = 'numeric'; i.setAttribute('autocomplete', 'postal-code'); }
+    else if (i.type === 'number' && !i.inputMode) i.inputMode = 'decimal';
+    else if (i.type === 'url' && !i.inputMode) { i.inputMode = 'url'; i.autocapitalize = 'none'; }
+  });
+}
+if (typeof document !== 'undefined') {
+  let t = null;
+  new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => eingabeHilfen(), 150); }).observe(document.documentElement, { childList: true, subtree: true });
+  // Zum Aktualisieren ganz oben nach unten ziehen (nur Touch, nur wenn die Seite ganz oben steht)
+  let sy = null, zug = 0;
+  const ind = () => { let e = document.getElementById('ziehen'); if (!e) { e = document.createElement('div'); e.id = 'ziehen'; e.textContent = '↓ Loslassen zum Aktualisieren'; document.body.append(e); } return e; };
+  document.addEventListener('touchstart', (e) => { sy = (window.scrollY <= 0 && !document.querySelector('.dlgoverlay') && e.touches.length === 1) ? e.touches[0].clientY : null; zug = 0; }, { passive: true });
+  document.addEventListener('touchmove', (e) => { if (sy === null) return; zug = e.touches[0].clientY - sy; const i = document.getElementById('ziehen'); if (zug > 20) { const x = ind(); x.style.transform = 'translateY(' + Math.min(zug, 90) / 2 + 'px)'; x.classList.toggle('bereit', zug > 90); } else if (i) i.remove(); }, { passive: true });
+  document.addEventListener('touchend', () => { const i = document.getElementById('ziehen'); if (i) i.remove(); if (sy !== null && zug > 90 && !document.querySelector('textarea:focus, input:focus')) location.reload(); sy = null; zug = 0; });
+}
+
+// ---------------------------------------------------------------- Nach dem Anruf: App fragt „Wie lief es?“ (Vertrieb und Admin)
+/**
+ * Merkt sich, welchen Lead man anruft, und fragt nach der Rückkehr in die App nach dem Ergebnis.
+ * @param {{ leadApi: string, leadHash: string, angebot?: boolean }} cfg
+ */
+export function anrufNachfrage(cfg) {
+  const ANRUF = 'mk-anruf';
+  document.addEventListener('click', (e) => {
+    const a = e.target instanceof Element ? e.target.closest('a[href^="tel:"]') : null;
+    if (!a) return;
+    const lid = a.getAttribute('data-lead') || ((location.hash.match(/^#lead\/([\w-]+)/) || [])[1]);
+    if (!lid) return;
+    try { localStorage.setItem(ANRUF, JSON.stringify({ lid, firma: a.getAttribute('data-firma') || '', t: Date.now(), basis: cfg.leadApi })); } catch { /* ohne Speicher keine Nachfrage */ }
+  });
+  async function nachfragen() {
+    let o = null;
+    try { o = JSON.parse(localStorage.getItem(ANRUF) || 'null'); } catch { /* leer */ }
+    if (!o || o.basis !== cfg.leadApi) return;
+    const alter = Date.now() - o.t;
+    if (alter < 8000) return;                       // Anruf läuft wahrscheinlich noch
+    try { localStorage.removeItem(ANRUF); } catch { /* egal */ }
+    if (alter > 3 * 36e5) return;                   // zu alt, nicht mehr nachfragen
+    try {
+      const d = await api(cfg.leadApi + o.lid, { leise: true });
+      vibriere([20, 40, 20]);
+      const dlg = dialog('Wie lief der Anruf' + (o.firma ? ' bei ' + o.firma : '') + '?', h('div', {},
+        kontaktKarte(d.kontakt_optionen, cfg.leadApi + o.lid + '/kontakt', null, { verlustgruende: d.verlustgruende, nach: () => { dlg.zu(); location.reload(); } }),
+        h('p', { class: 'row' }, cfg.angebot ? h('button', { class: 'btn sec', onclick: () => { try { sessionStorage.setItem('mk-zum-angebot', o.lid); } catch { /* egal */ } dlg.zu(); location.hash = cfg.leadHash + o.lid; } }, 'Angebot für diesen Lead') : '',
+          h('button', { class: 'btn sec', onclick: () => dlg.zu() }, 'Später / nicht angerufen'))), true);
+    } catch { /* Nachfrage ist nur ein Angebot */ }
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nachfragen(); });
+  window.addEventListener('pageshow', () => { setTimeout(nachfragen, 1200); });
 }

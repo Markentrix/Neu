@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 import os
@@ -265,9 +265,21 @@ def funnel_seite(slug: str):
 app.get("/datenschutz-anfrage", include_in_schema=False)(seite("dsgvo.html"))
 app.get("/impressum", include_in_schema=False)(seite("recht.html"))
 app.get("/datenschutz", include_in_schema=False)(seite("recht.html"))
+# Kurzbefehle beim langen Drücken auf das App-Symbol (Android). Je Rolle andere Ziele; die Seite wählt die passende Datei über ?r=
+_KURZBEFEHLE = {
+    "vertrieb": [("Heute", "Rückrufe und Termine", "/vertrieb#heute"), ("Anruf-Modus", "Nächster Lead", "/vertrieb#anrufen"), ("Leads", "Alle Leads", "/vertrieb#leads")],
+    "kunde": [("Heute", "Was steht an", "/app#heute"), ("Anfragen", "Neue Anfragen", "/app#anfragen"), ("Freigaben", "Beiträge freigeben", "/app#freigaben"), ("Nachrichten", "Ans Team schreiben", "/app#nachrichten")],
+    "admin": [("Mein Tag", "Was heute ansteht", "/admin#meintag"), ("Leads", "Alle Leads", "/admin#leads"), ("Nachrichten", "Postfach", "/admin#postfach"), ("Freigaben", "Wartende Freigaben", "/admin#freigaben")],
+}
+
+
 @app.get("/manifest.webmanifest", include_in_schema=False)
-def manifest():
-    return FileResponse(config.STATIC_DIR / "manifest.webmanifest", media_type="application/manifest+json")
+def manifest(r: str = ""):
+    import json
+    daten = json.loads((config.STATIC_DIR / "manifest.webmanifest").read_text("utf-8"))
+    if r in _KURZBEFEHLE:
+        daten["shortcuts"] = [{"name": n, "short_name": n, "description": d, "url": u, "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png"}]} for n, d, u in _KURZBEFEHLE[r]]
+    return Response(json.dumps(daten, ensure_ascii=False), media_type="application/manifest+json")
 
 
 @app.get("/sw.js", include_in_schema=False)

@@ -143,6 +143,12 @@ def _sicherheit(neu_laden: bool = False) -> dict:
     return _sicherheit_cache[1]
 
 
+def sitzung_stunden(rolle: str, bleiben: bool) -> int:
+    """Dauer der Anmeldung: Standard 12 Stunden. „Angemeldet bleiben“ (30 Tage) nur, wenn der Admin es erlaubt hat, und nie für Administratoren."""
+    from . import config
+    return 720 if bleiben and rolle != "admin" and _sicherheit().get("lange_sitzung") else config.SESSION_HOURS
+
+
 def vertrieb_2fa_pflicht(neu_laden: bool = False) -> bool:
     """Ist die Zwei-Faktor-Anmeldung für Vertriebs-Zugänge Pflicht?"""
     return bool(_sicherheit(neu_laden).get("vertrieb_2fa"))

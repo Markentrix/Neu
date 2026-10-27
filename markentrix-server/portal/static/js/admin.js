@@ -1,9 +1,9 @@
-import { h, api, nutzung, zweiFaktorKarte, stapelTabellen, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
+import { anrufNachfrage, toast, h, api, nutzung, zweiFaktorKarte, stapelTabellen, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
 stapelTabellen();
 import { belegEditor } from './admin/belege.js';
 import {V, gerüst, zaehlerAdmin, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
 import { kundeDetail } from './admin/kunden.js';
-import { leadDetail, partnerDetail } from './admin/vertrieb.js';
+import { leadDetail, partnerDetail, modus as anrufmodus } from './admin/vertrieb.js';
 import './admin/start.js';
 import './admin/kunden.js';
 import './admin/verwaltung.js';
@@ -22,6 +22,10 @@ const root = document.getElementById('app');
 async function seiteZeigen() {
   const hash = (location.hash || '#uebersicht').slice(1);
   let seite = hash.split('/')[0].split('?')[0], inhalt;
+  if (seite === 'anrufen') {   // Kurzbefehl „Anruf-Modus“ vom App-Symbol
+    if (!(await anrufmodus.starten())) { location.hash = '#leads'; toast('Gerade kein Lead zum Anrufen.', 'ok'); }
+    return;
+  }
   nutzung(seite);
   try {
     if (seite === 'kunde') inhalt = await kundeDetail(hash.split('/')[1]);
@@ -36,8 +40,10 @@ async function seiteZeigen() {
 }
 
 setzeZeige(seiteZeigen);
+anrufNachfrage({ leadApi: '/api/admin/leads/', leadHash: '#lead/' });
 (async () => {
   try {
+    const katP = api('/api/admin/katalog'); katP.catch(() => {});
     const me = await api('/api/me');
     if (me.rolle !== 'admin') { location.href = zielFuerRolle(me.rolle); return; }
     if (me.zwei_faktor_pflicht) {   // Pflicht laut AVV: ohne Zwei-Faktor-Anmeldung kein Zugriff auf das Admin-Portal
@@ -47,7 +53,7 @@ setzeZeige(seiteZeigen);
       return;
     }
     setzeIch(me);
-    setzePakete((await api('/api/admin/katalog')).produkte);
+    setzePakete((await katP).produkte);
     try { const z = (await api('/api/admin/uebersicht')).zusammenarbeit; zaehlerAdmin.postfach = z.tickets_ungelesen; zaehlerAdmin.freigaben = z.freigaben_wartend; zaehlerAdmin.aufgaben = z.aufgaben_ueberfaellig; } catch (e) { /* Zähler sind optional */ }
   } catch (e) { startFehler(root, e); return; }
   window.addEventListener('hashchange', seiteZeigen);

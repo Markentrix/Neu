@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from . import config, passkey
 from .db import tx
-from .security import COOKIE, audit, client_ip, current_user, new_token, rate_limit, token_hash
+from .security import COOKIE, audit, client_ip, current_user, new_token, rate_limit, sitzung_stunden, token_hash
 
 router = APIRouter(prefix="/api/passkey")
 MAX_PRO_BENUTZER = 10
@@ -87,6 +87,7 @@ class LoginIn(BaseModel):
     clientDataJSON: str = Field(max_length=4000)
     authenticatorData: str = Field(max_length=2000)
     signature: str = Field(max_length=2000)
+    bleiben: bool = False
 
 
 @router.post("/login/fertig")
@@ -115,12 +116,13 @@ def login_fertig(data: LoginIn, request: Request, response: Response):
         if not fehler:
             cur.execute("UPDATE passkeys SET sign_count=%s, zuletzt_am=now() WHERE id=%s", (zaehler, u["pid"]))
             tok = new_token()
+            stunden = sitzung_stunden(u["rolle"], data.bleiben)
             cur.execute("INSERT INTO sitzungen (token_hash, benutzer_id, ablauf, ip, passkey) VALUES (%s,%s,now()+make_interval(hours=>%s),%s,true)",
-                        (token_hash(tok), u["id"], config.SESSION_HOURS, client_ip(request)))
+                        (token_hash(tok), u["id"], stunden, client_ip(request)))
             cur.execute("UPDATE benutzer SET fehlversuche=0, gesperrt_bis=NULL, letzter_login=now() WHERE id=%s", (u["id"],))
             audit(cur, {"id": u["id"]}, "login_passkey", u["kunden_id"])
             cur.execute("DELETE FROM sitzungen WHERE ablauf < now()")
     if fehler:
         raise HTTPException(401, fehler)
-    response.set_cookie(COOKIE, tok, max_age=config.SESSION_HOURS * 3600, httponly=True, secure=config.COOKIE_SECURE, samesite="lax", path="/")
+    response.set_cookie(COOKIE, tok, max_age=stunden * 3600, httponly=True, secure=config.COOKIE_SECURE, samesite="lax", path="/")
     return {"rolle": u["rolle"], "ziel": {"admin": "/admin", "vertrieb": "/vertrieb"}.get(u["rolle"], "/app")}

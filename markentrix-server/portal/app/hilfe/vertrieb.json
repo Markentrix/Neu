@@ -114,7 +114,7 @@
         "Beim Öffnen der App fragt das Portal einmal: „Möchtest du Benachrichtigungen aufs Handy bekommen?“ Tippe „Ja, benachrichtigen“ und danach in der Abfrage deines Handys auf „Zulassen“.",
         "„Später“ fragt nach 7 Tagen erneut, „Nein danke“ fragt nie wieder. Du kannst es jederzeit nachholen: „Konto“ → „App & Benachrichtigungen“ → „Benachrichtigungen auf diesem Gerät einschalten“.",
         "Mit „Testnachricht“ prüfst du, ob alles ankommt. „Ausschalten“ meldet dieses Gerät ab.",
-        "Darunter steht „Wobei soll ich dich benachrichtigen?“. Dort schaltest du die Anlässe einzeln an oder aus: Neue Leads zugewiesen, Morgens: Anrufe des Tages, Gespräch gebucht, Status einer Angebotsanfrage, Angebot angesehen/angenommen/abgelehnt, Montags: Wochenrückblick."
+        "Darunter steht „Wobei soll ich dich benachrichtigen?“. Dort schaltest du die Anlässe einzeln an oder aus: Neue Leads zugewiesen, Gespräch gebucht, Status einer Angebotsanfrage, Angebot angesehen/angenommen/abgelehnt, Montags: Wochenrückblick."
       ],
       "n": [
         "Die Meldungen enthalten keine Namen oder Inhalte, nur den Anlass. Die Details siehst du im Portal.",
@@ -887,6 +887,52 @@
         "Im Anruf-Modus gibt es die Reihenfolge „Heiße Leads, beste Uhrzeit zuerst“: Es kommen zuerst die Branchen dran, die gerade besonders gut erreichbar sind.",
         "Je mehr Anrufe mit Ergebnis festgehalten werden, desto genauer wird die Empfehlung."
       ]
+    },
+    {
+      "t": "Schlechtes Netz am Handy",
+      "k": "offline kein netz warteschlange funkgloch empfang nachsenden",
+      "wo": "Oben die orange Leiste",
+      "l": "#heute",
+      "s": [
+        "Ohne Netz zeigt eine orange Leiste oben „Kein Netz“.",
+        "Kontakte, die du zu einem Lead festhältst, werden auf dem Handy gemerkt und automatisch gesendet, sobald wieder Netz da ist. Die Leiste zeigt, wie viele Einträge noch warten.",
+        "Alles andere (z. B. Angebote, Einstellungen) braucht Netz und meldet das sofort.",
+        "Die Offline-Ansicht der letzten Lead-Daten ist nur sichtbar, wenn der Admin sie erlaubt hat."
+      ]
+    },
+    {
+      "t": "Bedienung am Handy",
+      "k": "handy wischen ziehen aktualisieren tastatur dialog",
+      "wo": "Überall",
+      "l": "#heute",
+      "s": [
+        "Fenster öffnen sich von unten. Am Kopf nach unten wischen schließt sie.",
+        "Zum Aktualisieren ganz oben auf der Seite nach unten ziehen und loslassen.",
+        "Telefon-, E-Mail- und Zahlenfelder zeigen automatisch die passende Tastatur.",
+        "„Speichern“ beim Kontakt festhalten bleibt unten am Bildschirm sichtbar."
+      ]
+    },
+    {
+      "t": "Morgens „Dein Tag“",
+      "k": "dein tag morgen push uhrzeit benachrichtigung anrufe heute",
+      "wo": "Konto → App & Benachrichtigungen",
+      "l": "#konto",
+      "s": [
+        "Jeden Werktag kommt zur gewählten Uhrzeit eine Nachricht: wie viele Leads auf deinen Anruf warten und wie viele Erstgespräche heute anstehen.",
+        "Die Uhrzeit stellst du unter „App & Benachrichtigungen“ → „Morgens „Dein Tag““ ein (Standard 08:00 Uhr, oder „aus“).",
+        "Ist nichts zu tun, kommt keine Nachricht."
+      ]
+    },
+    {
+      "t": "App-Symbol: Kurzbefehle und Zahl",
+      "k": "app symbol kurzbefehl lange drücken zahl badge punkt startbildschirm",
+      "wo": "Startbildschirm deines Handys",
+      "l": "#konto",
+      "s": [
+        "Installierte App lange auf dem Symbol drücken: Es erscheinen Kurzbefehle zu den wichtigsten Seiten (z. B. Anruf-Modus starten).",
+        "Eine Zahl am Symbol zeigt, was Aufmerksamkeit braucht (fällige Anrufe).",
+        "Das geht nur bei installierter App und nicht auf jedem Handy. Neue Kurzbefehle erscheinen auf Android nach einer Neuinstallation der App."
+      ]
     }
   ],
   "titel": "Anleitung Vertriebsportal",
@@ -960,7 +1006,7 @@
     ],
     [
       "Welche Benachrichtigungen kann ich bekommen?",
-      "Neue Leads zugewiesen, Morgens: Anrufe des Tages, Gespräch gebucht, Status einer Angebotsanfrage, Angebot angesehen/angenommen/abgelehnt und der Montags-Wochenrückblick. Jeden Anlass schaltest du einzeln an oder aus."
+      "Neue Leads zugewiesen, Gespräch gebucht, Status einer Angebotsanfrage, Angebot angesehen/angenommen/abgelehnt und der Montags-Wochenrückblick. Jeden Anlass schaltest du einzeln an oder aus."
     ],
     [
       "Was zeigt mir „Heute anrufen“?",

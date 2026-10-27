@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from . import config, einstellungen, zweifaktor
 from .db import tx
 from .einstellungen import entschluesseln, verschluesseln
-from .security import audit, current_user, rate_limit, require_admin, require_voll, verify_password
+from .security import _sicherheit, audit, current_user, rate_limit, require_admin, require_voll, verify_password
 
 router = APIRouter(prefix="/api")
 
@@ -109,12 +109,14 @@ def sicherheit(user: dict = Depends(require_admin)):
                        ORDER BY rolle, lower(email)""")
         konten = cur.fetchall()
     from .security import kunden_2fa_pflicht
-    return {"vertrieb_pflicht": vertrieb_2fa_pflicht(True), "kunden_pflicht": kunden_2fa_pflicht(True), "admin_pflicht": config.ADMIN_2FA_PFLICHT, "konten": konten}
+    return {"vertrieb_pflicht": vertrieb_2fa_pflicht(True), "kunden_pflicht": kunden_2fa_pflicht(True), "admin_pflicht": config.ADMIN_2FA_PFLICHT, "lange_sitzung": bool(_sicherheit(True).get("lange_sitzung")), "offline_daten": bool(_sicherheit().get("offline_daten")), "konten": konten}
 
 
 class SicherheitIn(BaseModel):
     vertrieb_2fa: bool | None = None
     kunden_2fa: bool | None = None
+    lange_sitzung: bool | None = None
+    offline_daten: bool | None = None
 
 
 @router.put("/admin/sicherheit")
@@ -129,6 +131,12 @@ def sicherheit_speichern(data: SicherheitIn, user: dict = Depends(require_admin)
         if data.kunden_2fa is not None:
             neu["kunden_2fa"] = data.kunden_2fa
             audit(cur, user, "sicherheit_kunden_2fa", None, {"pflicht": data.kunden_2fa})
+        if data.lange_sitzung is not None:
+            neu["lange_sitzung"] = data.lange_sitzung
+            audit(cur, user, "sicherheit_lange_sitzung", None, {"erlaubt": data.lange_sitzung})
+        if data.offline_daten is not None:
+            neu["offline_daten"] = data.offline_daten
+            audit(cur, user, "sicherheit_offline_daten", None, {"erlaubt": data.offline_daten})
         einstellungen.schreiben(cur, "sicherheit", neu)
     vertrieb_2fa_pflicht(True)
     return {"ok": True}

@@ -2,7 +2,7 @@ import { anrufModus } from './anrufmodus.js';
 import { bestaetigungKnopf } from './terminbestaetigung.js';
 import { pipelineBoard } from './pipeline.js';
 import { visitenkarteKarte, visitenkarteKnopf } from './visitenkarte.js';
-import { stapelTabellen, listenKnopf, leadReiter, leadReiterSetzen, mehrMenue, leadDatenAnsicht } from './common.js';
+import { anrufNachfrage, toast, stapelTabellen, listenKnopf, leadReiter, leadReiterSetzen, mehrMenue, leadDatenAnsicht } from './common.js';
 stapelTabellen();
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste, zielFuerRolle, startFehler } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
@@ -499,43 +499,23 @@ let aufruf = 0;
 async function zeige() {
   const dieser = ++aufruf;
   const hash = (location.hash || '#heute').slice(1), seite = hash.split('/')[0].split('?')[0];
+  if (seite === 'anrufen') {   // Kurzbefehl „Anruf-Modus“ vom App-Symbol
+    if (!(await modus.starten())) { location.hash = '#heute'; toast('Gerade kein Lead zum Anrufen.', 'ok'); }
+    return;
+  }
   nutzung(V[seite] || seite === 'lead' ? seite : 'heute');
   let inhalt;
   try { inhalt = seite === 'lead' ? await leadDetail(hash.split('/')[1]) : await (V[seite] || V.heute)(); } catch (e) { inhalt = h('div', { class: 'msg err' }, e.message); }
   if (dieser !== aufruf) return;   // inzwischen wurde eine andere Seite geöffnet
   root.replaceChildren(gerüst(seite === 'lead' ? 'leads' : (V[seite] ? seite : 'heute'), inhalt));
 }
-// ---------------------------------------------------------------- Nach dem Anruf: App fragt „Wie lief es?“
-const ANRUF = 'mk-anruf';
-document.addEventListener('click', (e) => {
-  const a = e.target instanceof Element ? e.target.closest('a[href^="tel:"]') : null;
-  if (!a) return;
-  const lid = a.getAttribute('data-lead') || ((location.hash.match(/^#lead\/([\w-]+)/) || [])[1]);
-  if (!lid) return;
-  try { localStorage.setItem(ANRUF, JSON.stringify({ lid, firma: a.getAttribute('data-firma') || '', t: Date.now() })); } catch { /* ohne Speicher keine Nachfrage */ }
-});
-async function anrufNachfragen() {
-  let o = null;
-  try { o = JSON.parse(localStorage.getItem(ANRUF) || 'null'); } catch { /* leer */ }
-  if (!o) return;
-  const alter = Date.now() - o.t;
-  if (alter < 8000) return;                       // Anruf läuft wahrscheinlich noch
-  try { localStorage.removeItem(ANRUF); } catch { /* egal */ }
-  if (alter > 3 * 36e5) return;                   // zu alt, nicht mehr nachfragen
-  try {
-    const d = await api('/api/vertrieb/leads/' + o.lid, { leise: true });
-    const dlg = dialog('Wie lief der Anruf' + (o.firma ? ' bei ' + o.firma : '') + '?', h('div', {},
-      kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + o.lid + '/kontakt', null, { verlustgruende: d.verlustgruende, nach: () => { dlg.zu(); location.reload(); } }),
-      h('p', { class: 'row' }, h('button', { class: 'btn sec', onclick: () => { try { sessionStorage.setItem('mk-zum-angebot', o.lid); } catch { /* egal */ } dlg.zu(); location.hash = '#lead/' + o.lid; } }, 'Angebot für diesen Lead'),
-        h('button', { class: 'btn sec', onclick: () => dlg.zu() }, 'Später / nicht angerufen'))), true);
-  } catch { /* Nachfrage ist nur ein Angebot */ }
-}
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') anrufNachfragen(); });
-window.addEventListener('pageshow', () => { setTimeout(anrufNachfragen, 1200); });
+// Nach dem Anruf: App fragt „Wie lief es?“ (gemeinsamer Baustein)
+anrufNachfrage({ leadApi: '/api/vertrieb/leads/', leadHash: '#lead/', angebot: true });
 
 (async () => {
+  const startP = api('/api/vertrieb/start'); startP.catch(() => {});
   try { const me = await api('/api/me'); if (me.rolle !== 'vertrieb') { location.href = zielFuerRolle(me.rolle); return; }
     if (me.zwei_faktor_pflicht) { root.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Zwei-Faktor-Anmeldung einrichten'), h('p', {}, 'Für Vertriebs-Zugänge ist die Zwei-Faktor-Anmeldung Pflicht. Bitte jetzt mit einer Authenticator-App einrichten, danach geht es direkt weiter.'), zweiFaktorKarte(), h('p', {}, h('button', { class: 'btn', onclick: () => location.reload() }, 'Weiter zum Portal')))); return; }
-    start = await api('/api/vertrieb/start'); } catch (e) { startFehler(root, e); return; }
+    start = await startP; } catch (e) { startFehler(root, e); return; }
   window.addEventListener('hashchange', zeige); zeige(); erstStart().then(() => setTimeout(pushNachfrage, 2500)).catch(() => {});
 })();

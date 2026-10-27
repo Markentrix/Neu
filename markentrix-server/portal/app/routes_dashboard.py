@@ -185,6 +185,7 @@ class AnsichtIn(BaseModel):
     push_aus: list[str] | None = Field(default=None, max_length=40)
     tour_gesehen: bool | None = None
     erste_woche_zu: bool | None = None
+    tag_zeit: str | None = Field(default=None, pattern=r"^(aus|([01]\d|2[0-3]):[0-5]\d)$")
 
 
 @router.get("/me/ansicht")
@@ -192,7 +193,7 @@ def ansicht_lesen(user: dict = Depends(current_user)):
     with tx("system") as cur:
         cur.execute("SELECT ansicht FROM benutzer WHERE id=%s", (user["id"],))
         a = cur.fetchone()["ansicht"] or {}
-    return {"ausgeblendet": a.get("ausgeblendet", []), "push_aus": a.get("push_aus", []), "gesetzt": "ausgeblendet" in a, "tour_gesehen": bool(a.get("tour_gesehen"))}
+    return {"ausgeblendet": a.get("ausgeblendet", []), "push_aus": a.get("push_aus", []), "gesetzt": "ausgeblendet" in a, "tour_gesehen": bool(a.get("tour_gesehen")), "tag_zeit": a.get("tag_zeit")}
 
 
 @router.put("/me/ansicht")
@@ -212,8 +213,32 @@ def ansicht_speichern(data: AnsichtIn, user: dict = Depends(current_user)):
             a["tour_gesehen"] = data.tour_gesehen
         if data.erste_woche_zu is not None:
             a["erste_woche_zu"] = data.erste_woche_zu
+        if data.tag_zeit is not None:
+            a["tag_zeit"] = data.tag_zeit
+            if data.tag_zeit != "aus":   # frühere Stummschaltung des Morgen-Pushs aufheben, die Uhrzeit ist jetzt die Einstellung
+                a["push_aus"] = [x for x in a.get("push_aus", []) if x != "heute"]
         cur.execute("UPDATE benutzer SET ansicht=%s::jsonb WHERE id=%s", (json.dumps(a), user["id"]))
     return {"ok": True}
+
+
+@router.get("/me/badge")
+def app_badge(user: dict = Depends(current_user)):
+    """Zahl für das App-Symbol auf dem Startbildschirm."""
+    from . import tagesblick
+    rolle = user["rolle"]
+    try:
+        if rolle == "vertrieb":
+            with tx("system") as cur:
+                n = tagesblick.zahl(rolle, tagesblick.vertrieb(cur, user["vertriebspartner_id"]))
+        elif rolle == "admin":
+            with tx("admin") as cur:
+                n = tagesblick.zahl(rolle, tagesblick.admin(cur))
+        else:
+            with tx("kunde", user["kunden_id"]) as cur:
+                n = tagesblick.zahl(rolle, tagesblick.kunde(cur))
+    except Exception:
+        n = 0
+    return {"n": min(int(n), 99)}
 
 
 @router.get("/benachrichtigungen")

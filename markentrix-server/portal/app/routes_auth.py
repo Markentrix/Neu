@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 from . import config, mailer, zweifaktor
 from .db import tx
-from .security import (COOKIE, EMAIL_RE, _zwei_faktor_fehlt, audit, check_password_rules, client_ip, current_user, hash_password,
-                       new_token, rate_limit, token_hash, verify_password)
+from .security import (COOKIE, EMAIL_RE, _sicherheit, _zwei_faktor_fehlt, audit, check_password_rules, client_ip, current_user, hash_password,
+                       new_token, rate_limit, sitzung_stunden, token_hash, verify_password)
 
 router = APIRouter(prefix="/api")
 
@@ -16,6 +16,7 @@ class LoginIn(BaseModel):
     email: str
     password: str
     code: str | None = None
+    bleiben: bool = False
 
 
 class EinladungIn(BaseModel):
@@ -64,13 +65,20 @@ def login(data: LoginIn, request: Request, response: Response):
         return {"zwei_faktor": True}
     with tx("system") as cur:
         tok = new_token()
+        stunden = sitzung_stunden(u["rolle"], data.bleiben)
         cur.execute("INSERT INTO sitzungen (token_hash, benutzer_id, ablauf, ip) VALUES (%s,%s,now()+make_interval(hours=>%s),%s)",
-                    (token_hash(tok), u["id"], config.SESSION_HOURS, client_ip(request)))
+                    (token_hash(tok), u["id"], stunden, client_ip(request)))
         cur.execute("UPDATE benutzer SET fehlversuche=0, gesperrt_bis=NULL, letzter_login=now() WHERE id=%s", (u["id"],))
         audit(cur, {"id": u["id"]}, "login", u["kunden_id"])
         cur.execute("DELETE FROM sitzungen WHERE ablauf < now()")
-    response.set_cookie(COOKIE, tok, max_age=config.SESSION_HOURS * 3600, httponly=True, secure=config.COOKIE_SECURE, samesite="lax", path="/")
+    response.set_cookie(COOKIE, tok, max_age=stunden * 3600, httponly=True, secure=config.COOKIE_SECURE, samesite="lax", path="/")
     return {"rolle": u["rolle"], "ziel": {"admin": "/admin", "vertrieb": "/vertrieb"}.get(u["rolle"], "/app")}
+
+
+@router.get("/public/login-optionen")
+def login_optionen():
+    """Für die Anmeldeseite: darf „Angemeldet bleiben“ angeboten werden?"""
+    return {"bleiben": bool(_sicherheit().get("lange_sitzung"))}
 
 
 @router.post("/logout")
@@ -85,7 +93,7 @@ def logout(request: Request, response: Response):
 
 @router.get("/me")
 def me(user: dict = Depends(current_user)):
-    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"], "zwei_faktor": user["totp_aktiv"], "zwei_faktor_pflicht": _zwei_faktor_fehlt(user), "kunden_rolle": user["kunden_rolle"], "admin_rechte": user.get("admin_rechte")}
+    return {"id": user["id"], "email": user["email"], "name": user["name"], "rolle": user["rolle"], "kunden_id": user["kunden_id"], "vertriebspartner_id": user["vertriebspartner_id"], "zwei_faktor": user["totp_aktiv"], "zwei_faktor_pflicht": _zwei_faktor_fehlt(user), "kunden_rolle": user["kunden_rolle"], "admin_rechte": user.get("admin_rechte"), "offline_daten": bool(_sicherheit().get("offline_daten"))}
 
 
 @router.get("/einladung/{token}")
