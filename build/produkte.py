@@ -27,7 +27,7 @@ PRODUKTE = [
          kurz="Lächelnder Mini-Kürbis aus glänzendem Silk-PLA. Für Fensterbank, Schreibtisch oder als Zugabe zum Geschenk.",
          lang="Der kleine Kürbis kommt mit geschnitztem Gesicht und Stiel direkt vom Druckbett, in einem Stück und ohne Nacharbeit. Das Silk-Filament schimmert metallisch und fängt das Licht, dadurch wirkt er wie lackiert. Beliebt als Tischdeko im Herbst, als Mitbringsel oder zu mehreren als Fensterbank-Parade. Nicht als Kinderspielzeug unter 3 Jahren geeignet.",
          masse="ca. 3,5 cm hoch", material="PLA+ Silk (glänzend)", gewicht="ca. 6 g",
-         farben=["orange-silk"], tags=["neu"], foto=True,
+         farben=["orange-silk"], tags=["neu"], foto=True, freistellen=True,
          crop=(240, 490, 2630, 2290)),
     dict(id="pflanztopf-terra", name="Pflanztopf „Terra“ 12 cm", kat="garten", preis=14.90,
          kurz="Geometrischer Übertopf mit Facettenschliff und Ablaufloch, passend für 12-cm-Töpfe.",

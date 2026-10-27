@@ -45,3 +45,4 @@ Alle Farben sind Tokens in `website-fertig/assets/css/style.css` (`:root`, hell 
 Foto als JPG unter `build/fotos/<artikel-id>.jpg` ablegen, im Artikel in `build/produkte.py` `foto=True` setzen
 (optional `crop=(links, oben, rechts, unten)` in Pixeln des Originals), dann `python3 build/images.py` und `python3 build/build.py`.
 Der Generator schneidet auf 4:3 zu, skaliert auf 1200 × 900 und speichert WebP. Artikel ohne `foto` behalten ihre Illustration.
+Mit `freistellen=True` wird der Hintergrund einmalig per rembg entfernt (`pip install rembg onnxruntime`), das Ergebnis liegt als `build/fotos/<id>-cut.png` und wird auf den hellen Shop-Hintergrund mit Schatten gesetzt.

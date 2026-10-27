@@ -212,6 +212,28 @@ def draw(p):
 LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">' + '<rect width="64" height="64" rx="14" fill="#1f4d3a"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f"/>' + '</svg>')
 
 
+def compose_cutout(obj, out_path, W=1200, H=900):
+    """Freigestelltes Objekt mittig auf den hellen Shop-Hintergrund setzen, mit weichem Schatten."""
+    from PIL import Image, ImageFilter, ImageDraw
+    obj = obj.crop(obj.getbbox())
+    small = Image.new("RGB", (60, 45)); px = small.load()
+    for y in range(45):
+        for x in range(60):
+            d = ((x - 30) / 30) ** 2 + ((y - 18) / 22) ** 2
+            f = min(1.0, d ** 0.5)
+            c1, c2 = (252, 250, 245), (236, 231, 221)
+            px[x, y] = tuple(int(c1[k] + (c2[k] - c1[k]) * f) for k in range(3))
+    bg = small.resize((W, H), Image.BICUBIC).convert("RGBA")
+    scale = min((W * 0.62) / obj.width, (H * 0.74) / obj.height)
+    o = obj.resize((int(obj.width * scale), int(obj.height * scale)), Image.LANCZOS)
+    x = (W - o.width) // 2; y = int(H * 0.84) - o.height
+    shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).ellipse((x + o.width * 0.08, y + o.height - 28, x + o.width * 0.92, y + o.height + 36), fill=(30, 25, 15, 95))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(22))
+    bg.alpha_composite(shadow); bg.alpha_composite(o, (x, y))
+    bg.convert("RGB").save(out_path, "WEBP", quality=86, method=6)
+
+
 def main():
     from PIL import Image
     os.makedirs(OUT, exist_ok=True)
@@ -221,6 +243,18 @@ def main():
         if p.get("foto"):
             src = os.path.join(os.path.dirname(__file__), "fotos", p["id"] + ".jpg")
             from PIL import ImageOps
+            cut = os.path.join(os.path.dirname(__file__), "fotos", p["id"] + "-cut.png")
+            if p.get("freistellen") and not os.path.exists(cut):
+                # einmalig freistellen (rembg), Ergebnis wird als -cut.png gespeichert
+                from rembg import remove, new_session
+                base = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
+                if p.get("crop"): base = base.crop(p["crop"])
+                remove(base, session=new_session("isnet-general-use"), alpha_matting=True,
+                       alpha_matting_foreground_threshold=240, alpha_matting_background_threshold=15,
+                       alpha_matting_erode_size=8).save(cut)
+            if os.path.exists(cut):
+                compose_cutout(Image.open(cut).convert("RGBA"), os.path.join(OUT, p["id"] + ".webp"))
+                continue
             im = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
             if p.get("crop"):
                 im = im.crop(p["crop"])
