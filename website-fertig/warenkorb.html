@@ -33,12 +33,14 @@
 <main id="main">
 <section class="section-tight" id="warenkorb">
   <div class="wrap">
-    <span class="eyebrow">Warenkorb</span>
+    <ol class="checkout-steps" aria-label="Bestellschritte"><li aria-current="step">Warenkorb</li><li>Adresse &amp; Zahlung</li><li>Bestätigung per E-Mail</li></ol>
     <h1>Ihre Bestellung</h1>
     <div class="empty" id="cart-empty"><p>Ihr Warenkorb ist leer.</p><a class="btn btn-primary" href="shop.html">Zum Shop</a></div>
     <div class="cart-layout">
       <div>
+        <div class="ship-progress" id="ship-progress" hidden><div class="ship-bar"><span id="ship-fill"></span></div><p class="small" id="ship-text"></p></div>
         <div class="cart-list" id="cart-list" aria-live="polite"></div>
+        <div id="cross-sell" hidden><h2 style="font-size:1.1rem;margin-top:28px">Dazu passt</h2><div class="grid grid-small" id="cross-sell-grid"></div></div>
         <form class="form" id="bestellformular" style="margin-top:32px" hidden>
           <h2>Lieferadresse</h2>
           <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande, danach erhalten Sie die Rechnung mit Zahlungsdaten. Gedruckt wird nach Zahlungseingang.</p>
@@ -62,6 +64,7 @@
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
+          <div class="trust-list"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Sie zahlen erst nach unserer Bestätigung</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> PayPal-Käuferschutz oder Überweisung</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> 14 Tage Rückgaberecht, Nachdruck-Garantie</span></div>
           <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:«E-Mail-Adresse»">Bestellung per E-Mail schicken</a> oder anrufen: <a href="tel:">«Telefonnummer»</a>.</p>
         </form>
       </div>
@@ -71,6 +74,7 @@
         <div class="line"><span>Versand (Deutschland)</span><strong id="s-versand">0,00 €</strong></div>
         <div class="line total"><span>Gesamt</span><span id="s-gesamt">0,00 €</span></div>
         <p class="small muted" id="s-hint"></p>
+        <p class="small" data-delivery>Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
         <p class="small muted">Keine Umsatzsteuer nach § 19 UStG. Produktion 2 bis 4 Werktage plus Versand 2 bis 3 Werktage.</p>
         <a class="btn btn-ghost btn-block" href="shop.html">Weiter einkaufen</a>
       </div>
@@ -80,6 +84,7 @@
 </main>
 <footer class="site-footer">
   <div class="wrap">
+    <div class="trust-strip footer-trust"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Versandfrei ab 49,00 €</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> 14 Tage Rückgaberecht</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> PayPal-Käuferschutz</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Nachdruck-Garantie</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Gefertigt in Deutschland</span></div>
     <div class="cols">
       <div>
         <a class="logo" href="index.html"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#171a1f"/><rect x="14" y="40" width="36" height="8" rx="3" fill="#e8561f"/><rect x="18" y="29" width="28" height="8" rx="3" fill="#ff8a55"/><rect x="22" y="18" width="20" height="8" rx="3" fill="#ffb08c"/><path d="M32 8v8" stroke="#f1efe9" stroke-width="3" stroke-linecap="round"/></svg><span>Schichtwerk</span></a>

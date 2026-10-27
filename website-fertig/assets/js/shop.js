@@ -77,7 +77,7 @@
   if (grid) {
     var chips = $$(".chip"); var sort = $("#sortierung"); var cards = $$(".card", grid); var active = "alle";
     function apply() {
-      var vis = cards.filter(function (c) { return active === "alle" || c.dataset.kat === active; });
+      var vis = cards.filter(function (c) { return active === "alle" || c.dataset.kat === active || (c.dataset.tags || "").split(" ").indexOf(active) >= 0; });
       cards.forEach(function (c) { c.style.display = vis.indexOf(c) >= 0 ? "" : "none"; });
       var mode = sort ? sort.value : "standard";
       vis.sort(function (a, b) {
@@ -178,12 +178,14 @@
   var wf = $("#widerrufsformular"); if (wf) bindForm(wf, "widerruf");
 
   /* ---------- Warenkorb-Seite ---------- */
+  var renderCart = null;
   var cartPage = $("#warenkorb");
   if (cartPage) {
     var list = $("#cart-list"); var sumBox = $("#cart-summary"); var empty = $("#cart-empty"); var checkout = $("#bestellformular");
     function render() {
       var c = loadCart().filter(function (i) { return findProduct(i.id); });
       list.innerHTML = "";
+      renderExtras(c);
       if (!c.length) { empty.hidden = false; sumBox.hidden = true; if (checkout) checkout.hidden = true; return; }
       empty.hidden = true; sumBox.hidden = false; if (checkout) checkout.hidden = false;
       c.forEach(function (i, idx) {
@@ -209,9 +211,31 @@
         mailBtn.href = "mailto:" + CFG.email + "?subject=" + encodeURIComponent("Bestellung Schichtwerk") + "&body=" + encodeURIComponent("Hallo Schichtwerk,\n\nich möchte folgende Artikel bestellen:\n\n" + cartAsText(c) + "\n\nGesamt inkl. Versand: " + EUR(t.gesamt) + "\n\nLieferadresse:\n\n");
       }
     }
+    function renderExtras(c) {
+      var t = cartTotals(c); var prog = $("#ship-progress"); var cs = $("#cross-sell");
+      if (!c.length) { if (prog) prog.hidden = true; if (cs) cs.hidden = true; return; }
+      if (prog) {
+        prog.hidden = false; var pct = Math.min(100, Math.round(t.zwischensumme / CFG.versandfreiAb * 100));
+        $("#ship-fill").style.width = pct + "%"; prog.classList.toggle("done", t.versand === 0);
+        $("#ship-text").innerHTML = t.versand === 0 ? "<strong>Versandkostenfrei.</strong> Sie sparen " + EUR(CFG.versandPauschale) + "." : "Noch <strong>" + EUR(CFG.versandfreiAb - t.zwischensumme) + "</strong> bis zum kostenlosen Versand.";
+      }
+      if (cs) {
+        var inCart = c.map(function (i) { return i.id; }); var rest = CFG.versandfreiAb - t.zwischensumme;
+        var cands = P.filter(function (p) { return inCart.indexOf(p.id) < 0 && !p.text; });
+        cands.sort(function (a, b) { var da = rest > 0 ? Math.abs(a.preis - rest) : a.preis; var db = rest > 0 ? Math.abs(b.preis - rest) : b.preis; return da - db; });
+        var pick = cands.slice(0, 3); var g = $("#cross-sell-grid"); g.innerHTML = "";
+        pick.forEach(function (p) {
+          var el = document.createElement("article"); el.className = "card";
+          el.innerHTML = '<a class="card-img" href="' + ROOT + 'produkt/' + p.id + '.html" tabindex="-1" aria-hidden="true"><img src="' + ROOT + 'assets/img/produkte/' + p.id + '.webp" width="800" height="600" alt="" loading="lazy"></a><div class="card-body"><h3><a href="' + ROOT + 'produkt/' + p.id + '.html">' + p.name + '</a></h3><div class="price">' + EUR(p.preis) + '</div><button class="btn btn-primary" type="button" data-add="' + p.id + '">In den Warenkorb</button></div>';
+          g.appendChild(el);
+        });
+        cs.hidden = pick.length === 0;
+      }
+    }
     function setQty(idx, v) { var c = loadCart(); c[idx].menge = Math.min(20, Math.max(1, v)); saveCart(c); render(); }
     function escapeHtml(s) { return s.replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
     render();
+    renderCart = render;
     if (checkout) bindForm(checkout, "kontakt", function () {
       var c = loadCart().filter(function (i) { return findProduct(i.id); }); var t = cartTotals(c);
       var adr = [$("[name=strasse]", checkout).value, $("[name=plz]", checkout).value + " " + $("[name=ort]", checkout).value].join(", ");
@@ -252,6 +276,36 @@
       navigator.sendBeacon(ROOT + "api/e", new Blob([payload], { type: "application/json" }));
     }
   } catch (e) { /* still */ }
+
+  /* ---------- Direktkauf von Produktkarten ---------- */
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-add]"); if (!b) return;
+    var p = findProduct(b.dataset.add); if (!p) return;
+    addToCart(p.id, p.farben[0], "", 1);
+    var label = b.textContent; b.textContent = "✓ Im Warenkorb"; b.disabled = true;
+    setTimeout(function () { b.textContent = label; b.disabled = false; }, 1800);
+    toast(p.name + " liegt im Warenkorb");
+    if (cartPage) renderCart();
+  });
+
+  /* ---------- Sticky-Kaufleiste (Handy, Produktseite) ---------- */
+  var sticky = $(".sticky-buy");
+  if (sticky && buy) {
+    var submitBtn = buy.querySelector("button[type=submit]");
+    $("[data-sticky-buy]", sticky).addEventListener("click", function () { submitBtn.scrollIntoView({ block: "center" }); if (buy.requestSubmit) buy.requestSubmit(); else submitBtn.click(); });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) { var hidden = en[0].isIntersecting || en[0].boundingClientRect.top < 0 && false; sticky.classList.toggle("show", !en[0].isIntersecting && en[0].boundingClientRect.top < 0); }, { threshold: 0 }).observe(submitBtn);
+    }
+  }
+
+  /* ---------- Voraussichtliches Lieferdatum (Werktage) ---------- */
+  function addWorkdays(d, n) { var x = new Date(d); while (n > 0) { x.setDate(x.getDate() + 1); if (x.getDay() !== 0 && x.getDay() !== 6) n--; } return x; }
+  function fmt(d) { return d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "long" }); }
+  $$("[data-delivery]").forEach(function (el) {
+    var now = new Date(); if (now.getHours() >= 14) now = addWorkdays(now, 1);
+    var a = addWorkdays(now, (CFG.produktionMin || 2) + (CFG.versandMin || 2)); var b = addWorkdays(now, (CFG.produktionMax || 4) + (CFG.versandMax || 3));
+    var r = $("[data-delivery-range]", el); if (r) r.textContent = "zwischen " + fmt(a) + " und " + fmt(b);
+  });
 
   updateBadge();
 })();

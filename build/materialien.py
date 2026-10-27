@@ -10,7 +10,6 @@ MATERIALIEN = [
         nicht=["Im Auto oder auf der Fensterbank in praller Sonne (verformt sich ab ca. 55 °C)", "Teile, die dauerhaft unter Last stehen (PLA kriecht)", "Draußen über Monate (UV und Feuchte)"],
         schicht="0,12 bis 0,28 mm", duesen="190 bis 220 °C", bett="55 bis 60 °C", dichte="1,24 g/cm³",
         farben="Schwarz, Weiß, Orange, Mint, Steingrau, Nachtblau, Holzton; weitere auf Anfrage",
-        preis="ab 0,20 € pro Gramm plus Maschinenzeit, Mindestbestellwert 10 €",
         faq=[("Ist PLA biologisch abbaubar?", "Nur in industriellen Kompostieranlagen bei über 60 °C. Im Gartenkompost oder in der Natur baut es sich praktisch nicht ab. Wir sammeln Reste und Fehldrucke und geben sie zum Recycling."),
              ("Kann ich PLA lackieren?", "Ja. Nach leichtem Anschleifen hält Acryllack und Sprühlack gut. Füller gleicht die Schichtlinien aus."),
              ("Wie stabil ist PLA?", "Zugfest etwa wie ABS, aber weniger schlagzäh. Für einen Haken oder einen Halter reicht es locker, für ein Zahnrad unter Dauerlast nehmen wir PETG oder ASA.")],
@@ -24,7 +23,6 @@ MATERIALIEN = [
         nicht=["Feinste Details und scharfe Kanten (PETG zieht Fäden)", "Pralle Sonne über Jahre (vergilbt leicht)", "Spülmaschine (zu heiß)"],
         schicht="0,16 bis 0,28 mm", duesen="230 bis 250 °C", bett="70 bis 85 °C", dichte="1,27 g/cm³",
         farben="Schwarz, Weiß, Mint, Steingrau, Transparent; weitere auf Anfrage",
-        preis="ab 0,22 € pro Gramm plus Maschinenzeit, Mindestbestellwert 10 €",
         faq=[("Ist PETG lebensmittelecht?", "Das Filament ist es. Ein gedrucktes Teil hat aber feine Rillen zwischen den Schichten, in denen sich Rückstände halten können. Für trockene Lebensmittel und kurzen Kontakt unproblematisch, für dauerhafte Lagerung empfehlen wir einen Innenbehälter."),
              ("PETG oder PLA?", "Draußen, nass, warm oder unter Last: PETG. Detailreich, dekorativ, maßgenau: PLA. Im Zweifel beraten wir bei der Anfrage.")],
     ),
@@ -37,7 +35,6 @@ MATERIALIEN = [
         nicht=["Sehr große flache Teile (Verzug beim Abkühlen)", "Draußen ohne Lack (wird spröde durch UV)", "Dekoration mit feinen Details (PLA ist schärfer)"],
         schicht="0,16 bis 0,28 mm", duesen="240 bis 260 °C", bett="95 bis 110 °C, geschlossener Bauraum", dichte="1,04 g/cm³",
         farben="Schwarz, Weiß, Grau; weitere auf Anfrage",
-        preis="ab 0,25 € pro Gramm plus Maschinenzeit, Mindestbestellwert 15 €",
         faq=[("Warum ist ABS teurer als PLA?", "ABS braucht einen beheizten, geschlossenen Bauraum und druckt langsamer. Dafür bekommen Sie ein Teil, das 95 °C aushält und sich wie Spritzguss nachbearbeiten lässt."),
              ("Was ist Aceton-Glätten?", "ABS löst sich in Acetondampf oberflächlich an. Die Schichtlinien verschwinden, das Teil wird glänzend und dichter. Wir bieten das als Option an, Details werden dabei etwas weicher."),
              ("ABS oder ASA?", "Gleiche Mechanik, aber ASA ist UV-stabil. Alles, was draußen bleibt, drucken wir in ASA.")],
@@ -51,7 +48,6 @@ MATERIALIEN = [
         nicht=["Teile mit sehr feinen Details", "Große flache Platten (Verzug wie bei ABS)", "Innenräume ohne Belüftung beim Druck (daher drucken wir ASA nur im geschlossenen Drucker)"],
         schicht="0,16 bis 0,28 mm", duesen="240 bis 260 °C", bett="95 bis 110 °C, geschlossener Bauraum", dichte="1,07 g/cm³",
         farben="Schwarz, Weiß, Grau, Anthrazit; weitere auf Anfrage",
-        preis="ab 0,28 € pro Gramm plus Maschinenzeit, Mindestbestellwert 15 €",
         faq=[("Wie lange hält ASA draußen?", "Herstellerangaben und unsere eigenen Teile im Garten sagen: mehrere Jahre ohne sichtbare Veränderung. Farben bleiben, das Material wird nicht spröde."),
              ("Kann ich ASA lackieren?", "Ja, aber meist unnötig, weil ASA selbst UV-stabil ist. Anschleifen und Kunststoffhaftgrund, dann hält jeder Lack.")],
     ),
@@ -64,7 +60,6 @@ MATERIALIEN = [
         nicht=["Dünne hohe Teile (knicken)", "Scharfe Kanten und feine Details", "Teile, die steif sein müssen"],
         schicht="0,16 bis 0,24 mm", duesen="220 bis 235 °C", bett="40 bis 60 °C, langsamer Druck", dichte="1,21 g/cm³",
         farben="Schwarz, Weiß, Orange, Transparent; weitere auf Anfrage",
-        preis="ab 0,30 € pro Gramm plus Maschinenzeit, Mindestbestellwert 15 €",
         faq=[("Wie weich ist Shore 95A?", "Etwa wie die Sohle eines Turnschuhs oder ein Skateboard-Rad. Ein 2 mm dünnes Teil lässt sich leicht biegen, ein 10 mm dicker Block kaum."),
              ("Gibt es weicheres TPU?", "Ja, Shore 85A und weicher. Das drucken wir auf Anfrage, es ist langsamer und etwas teurer.")],
     ),
@@ -77,7 +72,6 @@ VERGLEICH = [
     ("Detailtreue", ["sehr gut", "gut", "gut", "gut", "mittel"]),
     ("Draußen", ["nein", "bedingt", "nur lackiert", "ja", "ja"]),
     ("Wasser", ["kurz ok", "ja", "ja", "ja", "ja"]),
-    ("Preis pro g", ["ab 0,20 €", "ab 0,22 €", "ab 0,25 €", "ab 0,28 €", "ab 0,30 €"]),
 ]
 
 FAQ = [

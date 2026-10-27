@@ -72,6 +72,7 @@ def footer(rel):
     return f"""</main>
 <footer class="site-footer">
   <div class="wrap">
+    <div class="trust-strip footer-trust"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span><span>{SVG_CHECK} Gefertigt in Deutschland</span></div>
     <div class="cols">
       <div>
         <a class="logo" href="{rel}index.html">{SVG_LOGO}<span>{E(C.MARKE)}</span></a>
@@ -132,14 +133,15 @@ def card(p, rel, pos, h="h3"):
     if "bestseller" in p["tags"]: tags = '<span class="badge badge-accent">Bestseller</span>'
     elif "neu" in p["tags"]: tags = '<span class="badge">Neu</span>'
     elif "personalisiert" in p["tags"]: tags = '<span class="badge">Personalisierbar</span>'
-    return f"""<article class="card" data-kat="{p['kat']}" data-preis="{p['preis']}" data-name="{E(p['name'])}" data-pos="{pos}">
+    return f"""<article class="card" data-kat="{p['kat']}" data-tags="{' '.join(p['tags'])}" data-preis="{p['preis']}" data-name="{E(p['name'])}" data-pos="{pos}">
   <a class="card-img" href="{rel}produkt/{p['id']}.html" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="" loading="lazy"></a>
   <div class="card-body">
     <span class="card-cat">{E(KATEGORIEN[p['kat']])}</span>
     <{h}><a href="{rel}produkt/{p['id']}.html">{E(p['name'])}</a></{h}>
     <p class="small muted" style="margin:0">{E(p['kurz'])}</p>
     <div class="price">{EUR(p['preis'])} {tags}</div>
-    <a class="btn btn-ghost" href="{rel}produkt/{p['id']}.html">Ansehen</a>
+    {'<a class="btn btn-primary" href="' + rel + 'produkt/' + p['id'] + '.html">Jetzt gestalten</a>' if p.get('text') else '<button class="btn btn-primary" type="button" data-add="' + p['id'] + '">In den Warenkorb</button>'}
+    <a class="card-more" href="{rel}produkt/{p['id']}.html">Details ansehen</a>
   </div>
 </article>"""
 
@@ -168,15 +170,16 @@ def build_index():
   <div class="wrap">
     <div>
       <span class="eyebrow">{E(C.CLAIM)}</span>
-      <h1>Nützliche Dinge, Schicht für Schicht gedruckt.</h1>
-      <p class="lead">Pflanztöpfe, Halter, Organizer und kleine Geschenke aus dem 3D-Drucker. Auf Bestellung gefertigt, aus pflanzenbasiertem Filament, in Ihrer Wunschfarbe.</p>
+      <h1>Dinge, die es so nur für Sie gibt.</h1>
+      <p class="lead">Pflanztöpfe, Halter, Organizer und persönliche Geschenke aus dem 3D-Drucker. Jedes Stück wird erst nach Ihrer Bestellung gedruckt, in Ihrer Farbe, auf Wunsch mit Ihrem Namen. In wenigen Tagen bei Ihnen.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="shop.html">Zum Shop</a>
         <a class="btn btn-ghost" href="druckservice.html">Druckservice für eigene Dateien</a>
       </div>
       <div class="hero-facts">
         <span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span>
-        <span>{SVG_CHECK} In {E(C.PRODUKTIONSZEIT)} gedruckt</span>
+        <span>{SVG_CHECK} 14 Tage Rückgaberecht</span>
+        <span>{SVG_CHECK} Nachdruck-Garantie</span>
         <span>{SVG_CHECK} 7 Farben zur Wahl</span>
       </div>
     </div>
@@ -193,9 +196,9 @@ def build_index():
 <section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Beliebt</span>
-    <h2>Unsere Bestseller</h2>
+    <h2>Das bestellen unsere Kunden am häufigsten</h2>
     <div class="grid">{cards}</div>
-    <p style="margin-top:24px"><a class="btn btn-ghost" href="shop.html">Alle {len(PRODUKTE)} Artikel ansehen</a></p>
+    <p style="margin-top:24px"><a class="btn btn-ghost" href="shop.html">Alle {len(PRODUKTE)} Artikel ansehen</a> <a class="btn btn-ghost" href="shop.html#personalisiert">Geschenke mit Namen</a></p>
   </div>
 </section>
 
@@ -226,6 +229,17 @@ def build_index():
 
 <section class="section-tight">
   <div class="wrap">
+    <div class="guarantee">
+      <div class="guarantee-badge">{SVG_CHECK}</div>
+      <div>
+        <h2>Unsere Nachdruck-Garantie</h2>
+        <p class="muted" style="margin:0">Kommt ein Teil beschädigt an oder passt nicht wie beschrieben, schicken Sie uns ein Foto. Wir drucken kostenlos nach, ohne Rücksendung, ohne Diskussion. Dazu das gesetzliche Rückgaberecht von 14 Tagen für alle Artikel ohne Personalisierung.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap">
     <span class="eyebrow">Kundenstimmen</span>
     <h2>Das sagen unsere Kunden</h2>
     <div class="reviews-box">
@@ -250,13 +264,15 @@ def build_index():
 # ---------------------------------------------------------------- Shop
 def build_shop():
     chips = '<button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button>' + "".join(
-        f'<button class="chip" type="button" data-kat="{k}" aria-pressed="false">{E(v)}</button>' for k, v in KATEGORIEN.items())
-    cards = "\n".join(card(p, "", i, "h2") for i, p in enumerate(PRODUKTE))
+        f'<button class="chip" type="button" data-kat="{k}" aria-pressed="false">{E(v)}</button>' for k, v in KATEGORIEN.items()) + '<button class="chip" type="button" data-kat="personalisiert" aria-pressed="false">Mit Wunschtext</button>'
+    ordered = sorted(PRODUKTE, key=lambda p: (0 if "bestseller" in p["tags"] else 1 if "neu" in p["tags"] else 2))
+    cards = "\n".join(card(p, "", i, "h2") for i, p in enumerate(ordered))
     body = f"""<section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Shop</span>
     <h1>Alle Artikel</h1>
-    <p class="muted" style="max-width:60ch">{len(PRODUKTE)} Artikel, alle auf Bestellung gedruckt. Preise sind Endpreise, Versand {EUR(VERSAND_PAUSCHALE)} innerhalb Deutschlands, ab {EUR(VERSANDFREI_AB)} kostenlos.</p>
+    <p class="muted" style="max-width:60ch">{len(PRODUKTE)} Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos. 14 Tage Rückgabe.</p>
+    <div class="trust-strip"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span></div>
     <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
       {chips}
       <label class="sr-only" for="sortierung">Sortierung</label>
@@ -305,6 +321,8 @@ def build_products():
           </div>
           <p class="added" role="status">Liegt im Warenkorb. <a href="../warenkorb.html">Zum Warenkorb</a> oder <a href="../shop.html">weiter stöbern</a>.</p>
         </form>
+        <p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
+        <div class="trust-list"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}, sonst {EUR(VERSAND_PAUSCHALE)}</span><span>{SVG_CHECK} {'Personalisiert für Sie gefertigt, Vorschau vor dem Druck' if p.get('text') else '14 Tage Rückgaberecht'}</span><span>{SVG_CHECK} PayPal-Käuferschutz oder Überweisung</span><span>{SVG_CHECK} Nachdruck-Garantie bei Transportschäden</span></div>
         <dl class="specs">
           <dt>Maße</dt><dd>{E(p['masse'])}</dd>
           <dt>Material</dt><dd>{E(p['material'])}</dd>
@@ -321,10 +339,12 @@ def build_products():
 </section>
 <section class="section">
   <div class="wrap">
-    <h2>Passt dazu</h2>
+    <h2>Oft zusammen bestellt</h2>
+    <p class="muted">Ab {EUR(VERSANDFREI_AB)} liefern wir versandkostenfrei. Alles aus einer Bestellung wird zusammen gedruckt und verschickt.</p>
     <div class="grid">{rel_cards}</div>
   </div>
 </section>
+<div class="sticky-buy" aria-hidden="true"><span class="sticky-price">{EUR(p['preis'])}</span><button class="btn btn-primary" type="button" data-sticky-buy>In den Warenkorb</button></div>
 """
         title = f"{p['name']} · {C.MARKE}"
         if len(title) > 60:
@@ -336,12 +356,14 @@ def build_products():
 def build_cart():
     body = f"""<section class="section-tight" id="warenkorb">
   <div class="wrap">
-    <span class="eyebrow">Warenkorb</span>
+    <ol class="checkout-steps" aria-label="Bestellschritte"><li aria-current="step">Warenkorb</li><li>Adresse &amp; Zahlung</li><li>Bestätigung per E-Mail</li></ol>
     <h1>Ihre Bestellung</h1>
     <div class="empty" id="cart-empty"><p>Ihr Warenkorb ist leer.</p><a class="btn btn-primary" href="shop.html">Zum Shop</a></div>
     <div class="cart-layout">
       <div>
+        <div class="ship-progress" id="ship-progress" hidden><div class="ship-bar"><span id="ship-fill"></span></div><p class="small" id="ship-text"></p></div>
         <div class="cart-list" id="cart-list" aria-live="polite"></div>
+        <div id="cross-sell" hidden><h2 style="font-size:1.1rem;margin-top:28px">Dazu passt</h2><div class="grid grid-small" id="cross-sell-grid"></div></div>
         <form class="form" id="bestellformular" style="margin-top:32px" hidden>
           <h2>Lieferadresse</h2>
           <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande, danach erhalten Sie die Rechnung mit Zahlungsdaten. Gedruckt wird nach Zahlungseingang.</p>
@@ -365,6 +387,7 @@ def build_cart():
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
+          <div class="trust-list"><span>{SVG_CHECK} Sie zahlen erst nach unserer Bestätigung</span><span>{SVG_CHECK} PayPal-Käuferschutz oder Überweisung</span><span>{SVG_CHECK} 14 Tage Rückgaberecht, Nachdruck-Garantie</span></div>
           <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:{E(C.EMAIL)}">Bestellung per E-Mail schicken</a> oder anrufen: <a href="{TEL_HREF}">{E(C.TELEFON)}</a>.</p>
         </form>
       </div>
@@ -374,6 +397,7 @@ def build_cart():
         <div class="line"><span>Versand ({E(C.VERSANDLAND)})</span><strong id="s-versand">0,00 €</strong></div>
         <div class="line total"><span>Gesamt</span><span id="s-gesamt">0,00 €</span></div>
         <p class="small muted" id="s-hint"></p>
+        <p class="small" data-delivery>Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
         <p class="small muted">{'Keine Umsatzsteuer nach § 19 UStG.' if C.KLEINUNTERNEHMER else 'Alle Preise inkl. gesetzlicher MwSt.'} Produktion {E(C.PRODUKTIONSZEIT)} plus Versand {E(C.LIEFERZEIT)}.</p>
         <a class="btn btn-ghost btn-block" href="shop.html">Weiter einkaufen</a>
       </div>
@@ -672,8 +696,8 @@ def build_404():
 
 # ---------------------------------------------------------------- Daten, Sitemap, Robots, Manifest
 def build_data():
-    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text"))) for p in PRODUKTE]
-    cfg = dict(email=C.EMAIL, telefon=C.TELEFON, paypalMe=C.PAYPAL_ME, versandPauschale=VERSAND_PAUSCHALE, versandfreiAb=VERSANDFREI_AB)
+    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text")), farben=p["farben"], kurz=p["kurz"]) for p in PRODUKTE]
+    cfg = dict(email=C.EMAIL, telefon=C.TELEFON, paypalMe=C.PAYPAL_ME, versandPauschale=VERSAND_PAUSCHALE, versandfreiAb=VERSANDFREI_AB, produktionMin=2, produktionMax=4, versandMin=2, versandMax=3)
     farben = {k: [v[0], v[1]] for k, v in FARBEN.items()}
     with open(os.path.join(ROOT, "assets", "js", "produkte.js"), "w", encoding="utf-8") as f:
         f.write("/* generiert von build/build.py */\n")
@@ -722,13 +746,13 @@ def build_materials():
   <div class="wrap">
     <h2>Vergleich auf einen Blick</h2>
     <div class="table-scroll"><table class="compare"><thead><tr><th scope="col">Eigenschaft</th>{head_row}</tr></thead><tbody>{rows}</tbody></table></div>
-    <p class="small muted">Richtwerte für Standard-Filamente bei 0,2 mm Schichthöhe. Preise pro Gramm Material zuzüglich Maschinenzeit, Endpreis vorab im Angebot.</p>
+    <p class="small muted">Richtwerte für Standard-Filamente bei 0,2 mm Schichthöhe. Den Festpreis für Ihr Teil nennen wir im kostenlosen Angebot.</p>
   </div>
 </section>
 <section class="section-tight">
   <div class="wrap">
     <div class="feature-grid">
-      <div class="feature"><h3>Drinnen, dekorativ, maßgenau</h3><p class="muted">PLA. Die sauberste Oberfläche, die meisten Farben, der günstigste Preis.</p></div>
+      <div class="feature"><h3>Drinnen, dekorativ, maßgenau</h3><p class="muted">PLA. Die sauberste Oberfläche, die meisten Farben, am schnellsten geliefert.</p></div>
       <div class="feature"><h3>Nass, warm oder unter Last</h3><p class="muted">PETG. Zäh und wasserfest, für Küche, Bad, Clips und Gehäuse.</p></div>
       <div class="feature"><h3>Heiß oder nachbearbeitet</h3><p class="muted">ABS. Bis 95 °C, schleifbar, mit Aceton glättbar, für Ersatzteile.</p></div>
       <div class="feature"><h3>Draußen über Jahre</h3><p class="muted">ASA. UV-stabil und wetterfest, für Garten, Auto und Fassade.</p></div>
@@ -739,13 +763,13 @@ def build_materials():
 <section class="section">
   <div class="wrap">
     <div class="cta-band">
-      <div><h2>Unsicher, welches Material?</h2><p style="margin:6px 0 0;opacity:.85">Beschreiben Sie Einsatzort und Belastung, wir schlagen das passende Material vor und nennen den Preis.</p></div>
+      <div><h2>Unsicher, welches Material?</h2><p style="margin:6px 0 0;opacity:.85">Beschreiben Sie Einsatzort und Belastung, wir schlagen das passende Material vor und schicken innerhalb eines Werktags ein kostenloses Angebot.</p></div>
       <a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a>
     </div>
   </div>
 </section>
 """
-    page("materialien.html", f"Materialien für den 3D-Druck · {C.MARKE}", "PLA, PETG, ABS, ASA und TPU im Vergleich: Wärmebeständigkeit, Festigkeit, Außeneinsatz, Preis pro Gramm. Welches Material passt zu Ihrem 3D-Druck-Teil?", body, "material")
+    page("materialien.html", f"Materialien für den 3D-Druck · {C.MARKE}", "PLA, PETG, ABS, ASA und TPU im Vergleich: Wärmebeständigkeit, Festigkeit, Außeneinsatz, Detailtreue. Welches Material passt zu Ihrem 3D-Druck-Teil?", body, "material")
 
     for i, m in enumerate(MATERIALIEN):
         rel = "../"
@@ -767,7 +791,7 @@ def build_materials():
         <h1>{E(m['titel'])}</h1>
         <p class="lead">{E(m['claim'])}</p>
         <p class="muted" style="max-width:60ch">{E(m['kurz'])}</p>
-        <div class="hero-actions"><a class="btn btn-primary" href="../kontakt.html">Druck in {E(m['name'])} anfragen</a><a class="btn btn-ghost" href="../materialien.html">Alle Materialien</a></div>
+        <div class="hero-actions"><a class="btn btn-primary" href="../kontakt.html">Kostenloses Angebot für {E(m['name'])}</a><a class="btn btn-ghost" href="../materialien.html">Alle Materialien</a></div>
       </div>
       <div class="mat-art">{spool(m['farbe'], 220)}</div>
     </div>
@@ -787,7 +811,8 @@ def build_materials():
         <ul class="list-check">{gut}</ul>
         <h2>Nicht geeignet für</h2>
         <ul class="list-cross">{nicht}</ul>
-        <div class="notice"><strong>Farben:</strong> {E(m['farben'])}<br><strong>Preis:</strong> {E(m['preis'])}</div>
+        <div class="notice"><strong>Farben:</strong> {E(m['farben'])}</div>
+        <div class="trust-list"><span>{SVG_CHECK} Kostenloses Angebot innerhalb eines Werktags</span><span>{SVG_CHECK} Festpreis vor dem Druck, keine Überraschungen</span><span>{SVG_CHECK} Nachdruck-Garantie bei Transportschäden</span></div>
       </div>
     </div>
   </div>
@@ -818,11 +843,11 @@ def build_service():
       <span class="eyebrow">Druckservice</span>
       <h1>Ihre Datei, unser Drucker.</h1>
       <p class="lead">Ersatzteile, Prototypen, Kleinserien, Vereinslogos: Schicken Sie uns Ihre STL-, 3MF- oder STEP-Datei oder beschreiben Sie das Teil. Sie bekommen innerhalb eines Werktags einen Festpreis.</p>
-      <div class="hero-actions"><a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a><a class="btn btn-ghost" href="materialien.html">Materialien vergleichen</a></div>
+      <div class="hero-actions"><a class="btn btn-primary" href="kontakt.html">Kostenloses Angebot anfordern</a><a class="btn btn-ghost" href="materialien.html">Materialien vergleichen</a></div>
       <div class="hero-facts">
+        <span>{SVG_CHECK} Kostenloses Angebot in 24 h</span>
         <span>{SVG_CHECK} Festpreis vor dem Druck</span>
         <span>{SVG_CHECK} Ab 1 Stück</span>
-        <span>{SVG_CHECK} Bauraum 25 × 25 × 25 cm</span>
       </div>
     </div>
     <div class="hero-art">
@@ -864,8 +889,9 @@ def build_service():
 </section>
 <section class="section-tight">
   <div class="wrap prose">
-    <h2>So berechnen wir den Preis</h2>
-    <p>Der Preis setzt sich aus Material (Gewicht × Grammpreis), Maschinenzeit (ab 1,50 € pro Stunde) und einer Rüstpauschale von 5 € je Auftrag zusammen. Nachbearbeitung und Konstruktion rechnen wir nach Aufwand ab und nennen sie vorher. Ein Beispiel: Ein Halter mit 40 g PLA und 3 Stunden Druckzeit kostet 8 € Material, 4,50 € Maschinenzeit und 5 € Pauschale, zusammen 17,50 €. Ab 10 gleichen Teilen entfällt die Pauschale anteilig.</p>
+    <h2>Festpreis statt Überraschung</h2>
+    <p>Sie bekommen vor dem Druck einen Festpreis mit Liefertermin, kostenlos und unverbindlich. Erst wenn Sie freigeben, läuft der Drucker. Nachbearbeitung und Konstruktion stehen getrennt im Angebot, es kommt nichts dazu, was nicht vorher besprochen wurde. Ab zehn gleichen Teilen gibt es Mengenpreise.</p>
+    <div class="trust-list"><span>{SVG_CHECK} Angebot innerhalb eines Werktags</span><span>{SVG_CHECK} Unverbindlich, keine Vorkasse für das Angebot</span><span>{SVG_CHECK} Ab 1 Stück, Mengenpreise ab 10 Stück</span><span>{SVG_CHECK} Nachdruck kostenlos, wenn ein Teil nicht passt wie besprochen</span></div>
     <h2>Voraussetzungen für die Datei</h2>
     <ul>
       <li>Format STL, 3MF, STEP oder OBJ, Einheit Millimeter, Modell geschlossen („wasserdicht“)</li>
