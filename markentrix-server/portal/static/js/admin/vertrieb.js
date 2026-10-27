@@ -6,7 +6,7 @@ import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
 import { qrKarte } from '../anleitung.js';
 import { einarbeitungKarte, handelsvertreterKarte } from './vertraege.js';
-import { kontaktKarte, skriptKarte, h, api, datum, zeit, melde, formular, dialog } from '../common.js';
+import { kontaktKarte, leitfadenKnopf, skriptKarte, h, api, datum, zeit, melde, formular, dialog } from '../common.js';
 import { filterKarte, ich, V, bestaetigt, bestaetigtOhneReload, fehler, feld, fmtEuro, knopf, kopf, leerzu, mailHinweis, pill, select, tabelle } from './kern.js';
 const AMPEL = { gruen: 'Grün', gelb: 'Gelb', rot: 'Rot' };
 
@@ -255,7 +255,7 @@ export async function leadDetail(lid) {
   const ang = gesperrt ? '' : h('button', { class: 'btn small', onclick: () => angebotDialog(lid, () => location.reload()) }, 'Angebot senden');
   const tw = tempWahl(l, m); tw.style.width = 'auto';
   const mehr = mehrMenue(gesperrt ? '' : visitenkarteKnopf('/api/admin', lid, l, 'btn sec small'), zuK, leadLoeschen(l, m, () => { location.hash = listenZiel('leads'); }));
-  return h('div', { class: 'stack' }, modus.leiste(lid), kopf(l.firma, l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', st, tw, ang, mehr, listenKnopf('leads')), m,
+  return h('div', { class: 'stack' }, modus.leiste(lid), kopf(l.firma, l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', gesperrt ? '' : leitfadenKnopf('/api/admin', lid, l), st, tw, ang, mehr, listenKnopf('leads')), m,
     leadReiter(lid, [
       ['anrufen', 'Anrufen', h('div', { class: 'stack' },
         h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), bestaetigungKnopf('/api/admin', lid, l, d.termin, (ich && (ich.name || ich.email)) || ''), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), leadDatenAnsicht(l, [['Quelle', l.quelle], ['Vertriebler', l.vertriebler]]), d.anrufzeit ? h('p', { class: 'small' }, '🕒 ' + d.anrufzeit.text) : ''),

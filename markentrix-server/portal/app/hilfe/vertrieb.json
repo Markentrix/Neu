@@ -933,6 +933,39 @@
         "Eine Zahl am Symbol zeigt, was Aufmerksamkeit braucht (fällige Anrufe).",
         "Das geht nur bei installierter App und nicht auf jedem Handy. Neue Kurzbefehle erscheinen auf Android nach einer Neuinstallation der App."
       ]
+    },
+    {
+      "t": "Schnell anlegen",
+      "k": "schnell anlegen lead neu telefonnummer einfügen zwischenablage vorwahl ort dublette",
+      "wo": "Leads → ⚡ Schnell anlegen",
+      "l": "#leads",
+      "s": [
+        "Nummer eintippen oder mit „Aus Zwischenablage“ einfügen, dazu den Firmennamen. Der Ort wird aus der Vorwahl vorgeschlagen (bitte prüfen).",
+        "Den Rest ergänzt du danach im Lead. Dubletten und die Sperrliste prüft das Portal wie beim normalen Anlegen.",
+        "Nur Kontakte eintragen, bei denen eine geschäftliche Ansprache zulässig ist."
+      ]
+    },
+    {
+      "t": "Leitfaden beim Anrufen",
+      "k": "leitfaden gespräch einwand blatt nachlesen anruf skript",
+      "wo": "Lead → 📋 Leitfaden",
+      "l": "#leads",
+      "s": [
+        "Der Knopf „📋 Leitfaden“ oben im Lead öffnet den Gesprächsleitfaden als Blatt. Du bleibst im Lead und kannst während des Anrufs nachlesen.",
+        "Gibt es noch keinen Leitfaden zu diesem Betrieb, erstellst du ihn dort mit einem Tipp (KI-Entwurf). Nicht ablesen, nichts versprechen, keine Preise nennen.",
+        "Darunter steht der Link zum allgemeinen Leitfaden mit Einwand-Antworten."
+      ]
+    },
+    {
+      "t": "Tagesziel",
+      "k": "tagesziel wochenziel anrufe heute balken erreicht",
+      "wo": "Heute und im Anruf-Modus",
+      "l": "#heute",
+      "s": [
+        "Das Tagesziel ist dein Wochenziel geteilt durch 5 (aufgerundet).",
+        "Der Balken auf „Heute“ und die Zeile im Anruf-Modus zeigen, wie viele Anrufe heute schon festgehalten sind.",
+        "Beim Erreichen kommt einmal pro Tag eine Meldung. Das Wochenziel änderst du unter „Meine Zahlen“."
+      ]
     }
   ],
   "titel": "Anleitung Vertriebsportal",

@@ -1,8 +1,9 @@
 import { anrufModus } from './anrufmodus.js';
+import { nummerBereinigen, ortZurVorwahl, ausText } from './vorwahl.js';
 import { bestaetigungKnopf } from './terminbestaetigung.js';
 import { pipelineBoard } from './pipeline.js';
 import { visitenkarteKarte, visitenkarteKnopf } from './visitenkarte.js';
-import { anrufNachfrage, toast, stapelTabellen, listenKnopf, leadReiter, leadReiterSetzen, mehrMenue, leadDatenAnsicht } from './common.js';
+import { anrufNachfrage, leitfadenKnopf, vibriere, toast, stapelTabellen, listenKnopf, leadReiter, leadReiterSetzen, mehrMenue, leadDatenAnsicht } from './common.js';
 stapelTabellen();
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste, zielFuerRolle, startFehler } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
@@ -33,7 +34,9 @@ const pill = (s) => h('span', { class: 'pill ' + (['aktiv', 'ausgezahlt', 'gewon
 const feld = (label, name, extra = {}) => h('div', {}, h('label', {}, label), h('input', { name, ...extra }));
 const V = {};
 
-const fortschrittBalken = (ist, ziel) => h('div', { class: 'fortschritt', role: 'progressbar', 'aria-valuenow': String(ist), 'aria-valuemax': String(ziel), 'aria-label': 'Wochenziel' }, h('div', { style: 'width:' + Math.min(100, Math.round(100 * ist / Math.max(1, ziel))) + '%' }));
+/** Tagesziel: Wochenziel auf fünf Werktage verteilt (aufgerundet). */
+const tagesZiel = (wochenziel) => Math.max(1, Math.ceil((wochenziel || 0) / 5));
+const fortschrittBalken = (ist, ziel, name = 'Wochenziel') => h('div', { class: 'fortschritt', role: 'progressbar', 'aria-valuenow': String(ist), 'aria-valuemax': String(ziel), 'aria-label': name }, h('div', { style: 'width:' + Math.min(100, Math.round(100 * ist / Math.max(1, ziel))) + '%' }));
 
 /** Dialog: Ergebnis eines Gesprächs mit Notiz und Wiedervorlage festhalten, ohne die Liste zu verlassen. */
 function gespraechDialog(z, optionen, vorwahl, fertig) {
@@ -54,6 +57,7 @@ V.heute = async () => {
   const kopfKarte = h('div', { class: 'card' }), meldung = h('div');
   const kopfNeu = () => kopfKarte.replaceChildren(
     h('p', {}, 'Heute schon ', h('b', {}, heuteAnrufe), ' Anrufe festgehalten. ', offen ? 'Noch ' + offen + ' Leads auf deiner Liste.' : 'Deine Liste ist leer, melde dich bei Markentrix für neue Leads.'),
+    fortschrittBalken(heuteAnrufe, tagesZiel(z.wochenziel), 'Tagesziel'), h('p', { class: 'small muted' }, 'Heute ' + heuteAnrufe + ' von ' + tagesZiel(z.wochenziel) + ' Anrufen (Tagesziel: Wochenziel geteilt durch 5).'),
     fortschrittBalken(woche, z.wochenziel), h('p', { class: 'small muted' }, 'Diese Woche ' + woche + ' von ' + z.wochenziel + ' Anrufen (dein Wochenziel).'),
     d.termine.length ? h('p', { class: 'small' }, '📅 Gebuchte Gespräche in den nächsten 3 Tagen: ' + d.termine.map(t => t.name + ' (' + zeit(t.start) + ')').join(', ')) : '');
   kopfNeu();
@@ -260,6 +264,27 @@ async function fotoVorbereiten(datei) {
   return c.toDataURL('image/jpeg', 0.85).split(',')[1];
 }
 
+
+/** Schnell anlegen: Nummer eintippen oder einfügen, Firma dazu, Ort kommt als Vorschlag aus der Vorwahl. Dubletten und Sperrliste prüft der Server wie beim normalen Anlegen. */
+function schnellAnlegen() {
+  const m = h('div'), tel = h('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off', placeholder: 'Telefonnummer', 'aria-label': 'Telefonnummer' }), firma = h('input', { placeholder: 'Firma', 'aria-label': 'Firma', autocomplete: 'off' }), ort = h('input', { placeholder: 'Ort', 'aria-label': 'Ort', autocomplete: 'off' });
+  const hinweis = h('p', { class: 'small muted' });
+  let ortVorschlag = '';
+  const vorschlag = () => { const o = ortZurVorwahl(tel.value); if (o && (!ort.value || ort.value === ortVorschlag)) { ort.value = o; ortVorschlag = o; hinweis.textContent = 'Ort „' + o + '“ aus der Vorwahl vorgeschlagen. Bitte prüfen.'; } else if (!o) hinweis.textContent = ''; };
+  tel.oninput = vorschlag;
+  const einfuegen = h('button', { type: 'button', class: 'btn sec', onclick: async () => {
+    try { const t = await navigator.clipboard.readText(), r = ausText(t); if (!r.telefon && !r.firma) { melde(m, 'In der Zwischenablage steht keine Telefonnummer.', 'info'); return; } if (r.telefon) tel.value = r.telefon; if (r.firma && !firma.value) firma.value = r.firma; vorschlag(); melde(m, ''); } catch { melde(m, 'Die Zwischenablage ist nicht freigegeben. Bitte die Nummer eintippen oder einfügen.', 'info'); } } }, '📋 Aus Zwischenablage');
+  const los = h('button', { class: 'btn', onclick: async (e) => {
+    if (nummerBereinigen(tel.value).length < 6) { melde(m, 'Bitte eine Telefonnummer eintragen.'); return; }
+    if (!firma.value.trim()) { melde(m, 'Bitte den Namen der Firma eintragen.'); return; }
+    const b = /** @type {HTMLButtonElement} */ (e.target); b.disabled = true;
+    try { const r = await api('/api/vertrieb/leads', { method: 'POST', body: { firma: firma.value.trim(), telefon: tel.value.trim(), ort: ort.value.trim() || undefined } }); vibriere(20); dlg.zu(); location.hash = '#lead/' + r.id; }
+    catch (x) { melde(m, x.message); b.disabled = false; } } }, 'Lead anlegen');
+  const dlg = dialog('⚡ Schnell anlegen', h('div', { class: 'stack' }, h('p', { class: 'small muted' }, 'Nur Kontakte eintragen, bei denen eine geschäftliche Ansprache zulässig ist. Weitere Angaben ergänzt du danach im Lead.'), m,
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, h('div', { class: 'grow' }, tel), einfuegen), firma, ort, hinweis, h('div', { class: 'row' }, los)));
+  setTimeout(() => tel.focus(), 80);
+}
+
 V.leads = async () => {
   const P = new URLSearchParams(location.hash.split('?')[1] || ''), g = (k) => P.get(k) || '';
   const d = await api('/api/vertrieb/leadsuche?' + P.toString()), m = h('div');
@@ -285,7 +310,7 @@ V.leads = async () => {
     LEAD_STATUS.filter(s => d.zaehler[s]).map(s => h('button', { class: g('status') === s ? 'on' : '', onclick: () => setze('status', g('status') === s ? '' : s) }, s.replace(/_/g, ' ') + ' (' + d.zaehler[s] + ')')));
   const suche = h('input', { type: 'search', placeholder: 'Suchen: Firma, Ort, Ansprechpartner, Telefon, E-Mail …', value: g('q'), 'aria-label': 'Leads durchsuchen', onkeydown: (e) => { if (e.key === 'Enter') setze('q', e.target.value.trim()); } });
   const tel = (z) => z.telefon ? h('a', { href: 'tel:' + String(z.telefon).replace(/[^+\d]/g, ''), 'data-lead': z.id, 'data-firma': z.firma }, z.telefon) : '–';
-  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('h2', {}, 'Meine Leads'),
+  return h('div', { class: 'stack' }, h('div', { class: 'card' }, h('div', { class: 'row', style: 'align-items:center' }, h('h2', { class: 'grow' }, 'Meine Leads'), h('button', { class: 'btn small', onclick: schnellAnlegen }, '⚡ Schnell anlegen')),
     h('div', { class: 'row', style: 'gap:8px;margin-bottom:8px' }, h('div', { class: 'grow' }, suche), h('button', { class: 'btn small', onclick: () => setze('q', suche.value.trim()) }, 'Suchen'),
       g('q') || g('status') || g('faellig') || g('temperatur') ? h('button', { class: 'btn sec small', onclick: () => { location.hash = '#leads'; } }, 'Zurücksetzen') : ''),
     tabs, h('p', { class: 'small muted' }, d.gesamt + (d.gesamt === 1 ? ' Lead' : ' Leads') + (g('q') ? ' zu „' + g('q') + '“' : '')),
@@ -298,6 +323,7 @@ V.leads = async () => {
 };
 
 const modus = anrufModus({ schluessel: 'mk-anrufmodus', url: '/api/vertrieb/naechster', leadHash: '#lead/', heimHash: '#heute',
+  fortschritt: async () => { const z = await api('/api/vertrieb/zahlen', { leise: true }); return { ist: z.anrufe_heute, ziel: tagesZiel(z.wochenziel) }; },
   ohneModus: async (aktuell) => { const d = await api('/api/vertrieb/heute'); const n = [...d.wiedervorlagen, ...d.heiss, ...d.neu].find(x => x.id !== aktuell); return n ? n.id : null; } });
 const naechsterLead = modus.naechster, anrufModusKarte = (m) => modus.karte(m), modusLeiste = modus.leiste;
 
@@ -454,7 +480,7 @@ async function leadDetail(lid) {
     h('div', { class: 'row' }, h('div', { style: 'width:170px' }, h('select', { name: 'art' }, ['notiz', 'anruf', 'mail_gesendet', 'antwort', 'termin'].map(a => h('option', { value: a }, a.replace(/_/g, ' '))))),
       h('div', { class: 'grow' }, h('input', { name: 'inhalt', placeholder: 'Was ist passiert?', required: true })), h('button', { class: 'btn' }, 'Eintragen')));
   const mehr = mehrMenue(['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l));
-  return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', st, mehr, listenKnopf(['leads', 'heute', 'pipeline'])), m,
+  return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', gesperrt ? '' : leitfadenKnopf('/api/vertrieb', lid, l, '#leitfaden'), st, mehr, listenKnopf(['leads', 'heute', 'pipeline'])), m,
     leadReiter(lid, [
       ['anrufen', 'Anrufen', h('div', { class: 'stack' }, datenKarte(lid, l, d, m),
         kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: modus.aktiv() }))],

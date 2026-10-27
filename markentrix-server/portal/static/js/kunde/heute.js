@@ -25,6 +25,7 @@ export function kanalKnoepfe(kontakt, betreff, text, nachher) {
 export async function antwortDialog(aid, danach) {
   let d;
   try { d = await api('/api/kunde/anfragen/' + aid + '/entwuerfe'); } catch (x) { toast(x.message); return; }
+  const rueck = h('button', { class: 'btn sec small', type: 'button', hidden: true }, '↩ Rückgängig');
   const a = d.anfrage, m = h('div'), text = h('textarea', { rows: 7, maxlength: 1500, 'aria-label': 'Antworttext' });
   text.value = d.vorlagen[0].text;
   const waehler = h('select', { 'aria-label': 'Vorlage', onchange: () => { text.value = d.vorlagen.find(v => v.code === waehler.value).text; } }, d.vorlagen.map(v => h('option', { value: v.code }, v.name + (v.eigene ? ' (eigene)' : ''))));
@@ -36,7 +37,13 @@ export async function antwortDialog(aid, danach) {
     h('p', {}, h('button', { class: 'btn sec small', type: 'button', onclick: async (e) => {
       const b = /** @type {HTMLButtonElement} */ (e.target); b.disabled = true; b.textContent = 'Der Vorschlag wird geschrieben …';
       try { const r = await api('/api/kunde/anfragen/' + aid + '/ki-vorschlag', { method: 'POST' }); text.value = r.text; melde(m, 'Das ist ein Entwurf der KI. Bitte lesen und anpassen, bevor du ihn abschickst.', 'info'); } catch (x) { melde(m, x.message); }
-      b.disabled = false; b.textContent = '✨ Antwort vorschlagen lassen'; } }, '✨ Antwort vorschlagen lassen')), m,
+      b.disabled = false; b.textContent = '✨ Antwort vorschlagen lassen'; } }, '✨ Antwort vorschlagen lassen')),
+    h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px;margin-bottom:6px', role: 'group', 'aria-label': 'Text umschreiben lassen' }, [['kuerzer', 'Kürzer'], ['freundlicher', 'Freundlicher'], ['foermlicher', 'Förmlicher'], ['rueckfrage', 'Mit Rückfrage statt Zusage']].map(([code, name]) =>
+      h('button', { class: 'btn sec small', type: 'button', onclick: async (e) => {
+        const b = /** @type {HTMLButtonElement} */ (e.target); if (!text.value.trim()) { melde(m, 'Bitte zuerst einen Text wählen oder vorschlagen lassen.', 'info'); return; }
+        const davor = text.value; b.disabled = true;
+        try { const r = await api('/api/kunde/anfragen/' + aid + '/ki-vorschlag', { method: 'POST', body: { anweisung: code, text: text.value } }); text.value = r.text; rueck.hidden = false; rueck.onclick = () => { text.value = davor; rueck.hidden = true; }; melde(m, 'Das ist ein Entwurf der KI. Bitte lesen und anpassen, bevor du ihn abschickst.', 'info'); } catch (x) { melde(m, x.message); }
+        b.disabled = false; } }, name)), rueck), m,
     h('p', { class: 'small muted' }, 'Das Portal verschickt nichts. Die Schaltflächen öffnen dein eigenes Mail-, WhatsApp- oder SMS-Programm mit dem Text. Danach wird die Anfrage als beantwortet markiert.'),
     h('div', { class: 'heuteknoepfe' },
       a.kontakt ? kanalKnoepfe(a.kontakt, 'Ihre Anfrage', text, markieren) : '',

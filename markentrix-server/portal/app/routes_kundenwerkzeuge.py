@@ -232,8 +232,13 @@ def bitte_verwerfen(bid: str, user: dict = Depends(require_kunde)):
     return {"ok": True}
 
 
+class KiVorschlagIn(BaseModel):
+    anweisung: str | None = Field(default=None, pattern="^(kuerzer|freundlicher|foermlicher|rueckfrage)$")
+    text: str | None = Field(default=None, max_length=1800)
+
+
 @router.post("/anfragen/{aid}/ki-vorschlag")
-def ki_vorschlag(aid: str, user: dict = Depends(require_kunde)):
+def ki_vorschlag(aid: str, data: KiVorschlagIn | None = None, user: dict = Depends(require_kunde)):
     """Entwurf für eine Antwort auf eine Anfrage. Das Portal verschickt nichts; der Kunde prüft und sendet selbst."""
     kid = user["kunden_id"]
     rate_limit(f"ki-vorschlag:{kid}", 40, 86400)
@@ -250,7 +255,10 @@ def ki_vorschlag(aid: str, user: dict = Depends(require_kunde)):
     if not cfg.get("api_key"):
         raise HTTPException(400, "Der Antwortvorschlag ist noch nicht eingerichtet. Nutze die Vorlagen oder frag das Markentrix-Team.")
     try:
-        text, ein, aus = ki.antwort_vorschlag(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, firma, a["name"], a["nachricht"] or "")
+        if data and data.anweisung and (data.text or "").strip():   # vorhandenen Text umschreiben (kürzer, freundlicher …)
+            text, ein, aus = ki.antwort_ueberarbeiten(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, data.text.strip(), data.anweisung)
+        else:
+            text, ein, aus = ki.antwort_vorschlag(cfg["api_key"], cfg.get("modell") or ki.STANDARD_MODELL, firma, a["name"], a["nachricht"] or "")
     except Exception as e:
         raise ki.fehler(e, user, "Der Vorschlag ist gerade nicht erreichbar. Bitte nimm eine Vorlage.")
     if not text:

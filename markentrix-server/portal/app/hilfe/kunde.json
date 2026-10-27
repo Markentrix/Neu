@@ -1503,6 +1503,17 @@
         "Eine Zahl am Symbol zeigt, was Aufmerksamkeit braucht (neue Anfragen, Freigaben, Nachrichten).",
         "Das geht nur bei installierter App und nicht auf jedem Handy. Neue Kurzbefehle erscheinen auf Android nach einer Neuinstallation der App."
       ]
+    },
+    {
+      "t": "Antwort umschreiben lassen",
+      "k": "antwort kürzer freundlicher förmlicher rückfrage ki vorschlag umschreiben",
+      "wo": "Heute → Antworten",
+      "l": "#heute",
+      "s": [
+        "Unter dem Antworttext gibt es die Knöpfe „Kürzer“, „Freundlicher“, „Förmlicher“ und „Mit Rückfrage statt Zusage“. Sie schreiben den Text um, der gerade im Feld steht (auch eine Vorlage oder dein eigener Text).",
+        "Mit „↩ Rückgängig“ holst du die vorige Fassung zurück.",
+        "Das ist ein Entwurf mit KI-Unterstützung. Bitte lesen und anpassen, bevor du ihn abschickst. Das Portal verschickt nichts selbst. An die KI geht nur der Text im Feld, keine weiteren Daten der Anfrage."
+      ]
     }
   ],
   "titel": "Anleitung Kundenportal",

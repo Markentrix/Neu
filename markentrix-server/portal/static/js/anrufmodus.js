@@ -1,11 +1,11 @@
 // Anruf-Modus: nach jedem festgehaltenen Gespräch springt das Portal zum nächsten heißen Lead.
 // Gemeinsam für Vertrieb und Admin; die Unterschiede (Adresse, Zielseite, Filter) kommen über `cfg`.
-import { h, api, melde, vibriere } from './common.js';
+import { h, api, melde, vibriere, toast } from './common.js';
 
 const TEXT = { heiss: 'Heiße Leads der Reihe nach', zufall: 'Zufällig aus den heißen Leads', zeit: 'Heiße Leads, beste Uhrzeit zuerst' };
 
 /**
- * @param {{ schluessel: string, url: string, leadHash: string, heimHash: string, ohneModus?: (aktuell: string|null) => Promise<string|null> }} cfg
+ * @param {{ schluessel: string, url: string, leadHash: string, heimHash: string, fortschritt?: () => Promise<{ist: number, ziel: number}>, ohneModus?: (aktuell: string|null) => Promise<string|null> }} cfg
  */
 export function anrufModus(cfg) {
   const lesen = () => { try { return JSON.parse(sessionStorage.getItem(cfg.schluessel) || 'null'); } catch { return null; } };
@@ -74,8 +74,18 @@ export function anrufModus(cfg) {
   function leiste(lid) {
     const mo = lesen(); if (!mo) return '';
     wischen(lid);
+    const stand = h('span', { class: 'small grow' });
+    if (cfg.fortschritt) cfg.fortschritt().then(({ ist, ziel }) => {
+      stand.textContent = 'Heute ' + ist + ' von ' + ziel + ' Anrufen';
+      const heute = new Date().toISOString().slice(0, 10), key = 'mk-ziel-' + cfg.schluessel;
+      let schon = null; try { schon = localStorage.getItem(key); } catch { /* egal */ }
+      if (ist >= ziel && schon !== heute) {   // Tagesziel erreicht: einmal pro Tag freuen
+        try { localStorage.setItem(key, heute); } catch { /* egal */ }
+        vibriere([30, 60, 30, 60, 90]); toast('🎉 Tagesziel erreicht: ' + ist + ' Anrufe heute. Stark!', 'ok');
+      }
+    }).catch(() => {});
     return h('div', { class: 'card', style: 'border-left:4px solid var(--akzent, #1E9BFF)' }, h('div', { class: 'row', style: 'align-items:center;gap:8px;flex-wrap:wrap' },
-      h('b', {}, '📞 Anruf-Modus'), h('span', { class: 'small muted grow' }, TEXT[mo.modus] + ' · ' + mo.erledigt.length + ' abgearbeitet · ← wischen: nächster, → zurück'),
+      h('b', {}, '📞 Anruf-Modus'), stand, h('span', { class: 'small muted grow' }, TEXT[mo.modus] + ' · ' + mo.erledigt.length + ' abgearbeitet · ← wischen: nächster, → zurück'),
       h('button', { class: 'btn sec small', onclick: () => naechster(lid) }, 'Überspringen'),
       h('button', { class: 'btn sec small', onclick: () => { schreiben(null); location.hash = cfg.heimHash; } }, 'Beenden')));
   }

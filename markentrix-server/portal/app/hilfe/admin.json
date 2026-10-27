@@ -1511,6 +1511,16 @@
         "Eine Zahl am Symbol zeigt, was Aufmerksamkeit braucht (Nachrichten, Freigaben, überfällige Aufgaben).",
         "Das geht nur bei installierter App und nicht auf jedem Handy. Neue Kurzbefehle erscheinen auf Android nach einer Neuinstallation der App."
       ]
+    },
+    {
+      "t": "Leitfaden beim Anrufen",
+      "k": "leitfaden gespräch einwand blatt nachlesen anruf skript",
+      "wo": "Lead → 📋 Leitfaden",
+      "l": "#leads",
+      "s": [
+        "Der Knopf „📋 Leitfaden“ oben im Lead öffnet den Gesprächsleitfaden als Blatt, ohne die Seite zu verlassen.",
+        "Gibt es noch keinen, erstellst du ihn dort mit einem Tipp (KI-Entwurf)."
+      ]
     }
   ],
   "titel": "Anleitung Admin-Bereich",

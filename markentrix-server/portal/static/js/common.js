@@ -264,6 +264,15 @@ export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
   return box;
 }
 
+/** Knopf „Leitfaden“: öffnet den Gesprächsleitfaden zum Lead als Blatt, ohne die Seite zu verlassen (zum Nachlesen während des Anrufs).
+ * @param {string} basis '/api/vertrieb' oder '/api/admin' */
+export function leitfadenKnopf(basis, lid, l, allgemein = '') {
+  return h('button', { type: 'button', class: 'btn sec small', onclick: () => dialog('Leitfaden: ' + l.firma, h('div', { class: 'stack' },
+    skriptKarte(l.skript, l.skript_am, basis + '/leads/' + lid + '/skript'),
+    h('p', { class: 'small muted' }, 'Merkhilfe: freundlich einsteigen, zuerst zuhören und fragen, dann einen konkreten Nutzen nennen, am Ende einen kleinen nächsten Schritt vorschlagen (Rückruf oder Termin). Bei „kein Interesse“ höflich verabschieden.'),
+    allgemein ? h('p', {}, h('a', { href: allgemein, onclick: () => { document.querySelector('.dlgoverlay')?.remove(); } }, 'Allgemeiner Leitfaden mit Einwand-Antworten')) : '')) }, '📋 Leitfaden');
+}
+
 /** Lead-Daten in Kurzform: nur ausgefüllte Felder, Telefon und E-Mail zum Anklicken, lange Notizen eingeklappt. */
 export function leadDatenAnsicht(l, zusatz = []) {
   const felder = [['Ansprechpartner', l.ansprechpartner], ['Telefon', l.telefon, 'tel'], ['E-Mail', l.email, 'mail'], ['Website', l.website, 'web'], ['Branche', l.branche], ['Ort', [l.plz, l.ort].filter(Boolean).join(' ')], ...zusatz].filter(f => f[1] !== undefined && f[1] !== null && f[1] !== '' && f[1] !== '–');
