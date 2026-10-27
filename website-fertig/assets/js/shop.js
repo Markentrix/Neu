@@ -47,9 +47,15 @@
 
   /* ---------- Menü ---------- */
   var mb = $(".menu-btn");
-  if (mb) mb.addEventListener("click", function () {
-    var nav = $(".nav"); var open = nav.classList.toggle("open"); mb.setAttribute("aria-expanded", open ? "true" : "false");
-  });
+  if (mb) {
+    mb.addEventListener("click", function (e) {
+      e.stopPropagation(); var nav = $(".nav"); var open = nav.classList.toggle("open"); mb.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.addEventListener("click", function (e) {
+      var nav = $(".nav"); if (nav.classList.contains("open") && !nav.contains(e.target)) { nav.classList.remove("open"); mb.setAttribute("aria-expanded", "false"); }
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $(".nav").classList.remove("open"); mb.setAttribute("aria-expanded", "false"); } });
+  }
 
   /* ---------- Produktseite ---------- */
   var buy = $("#kaufen");
