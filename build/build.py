@@ -4,6 +4,7 @@ import os, sys, json, html, datetime
 sys.path.insert(0, os.path.dirname(__file__))
 import config as C
 from produkte import PRODUKTE, FARBEN, KATEGORIEN, VERSAND_PAUSCHALE, VERSANDFREI_AB
+from materialien import MATERIALIEN, VERGLEICH, FAQ
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "website-fertig"))
 E = html.escape
@@ -55,8 +56,9 @@ def header(rel, current=""):
     <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu">{SVG_MENU}</button>
     <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
       {nav("shop.html", "Shop", "shop")}
-      {nav("kontakt.html", "Eigenes Modell", "kontakt")}
-      {nav("versand.html", "Versand", "versand")}
+      {nav("druckservice.html", "Druckservice", "service")}
+      {nav("materialien.html", "Materialien", "material")}
+      {nav("faq.html", "FAQ", "faq")}
       {nav("ueber-uns.html", "Über uns", "ueber")}
     </nav>
     <a class="cart-link" href="{rel}warenkorb.html" aria-label="Warenkorb">{SVG_CART}<span class="cart-badge" aria-live="polite"></span></a>
@@ -80,10 +82,18 @@ def footer(rel):
         <h2>Shop</h2>
         <ul>
           <li><a href="{rel}shop.html">Alle Artikel</a></li>
-          <li><a href="{rel}kontakt.html">Eigenes Modell drucken lassen</a></li>
+          <li><a href="{rel}druckservice.html">Druckservice</a></li>
+          <li><a href="{rel}kontakt.html">Anfrage stellen</a></li>
           <li><a href="{rel}versand.html">Versand &amp; Zahlung</a></li>
-          <li><a href="{rel}warenkorb.html">Warenkorb</a></li>
+          <li><a href="{rel}faq.html">Fragen &amp; Antworten</a></li>
           <li><a href="{rel}ueber-uns.html">Über uns</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Materialien</h2>
+        <ul>
+          <li><a href="{rel}materialien.html">Übersicht &amp; Vergleich</a></li>
+          {"".join(f'<li><a href="{rel}material/{m["id"]}.html">{E(m["titel"])}</a></li>' for m in MATERIALIEN)}
         </ul>
       </div>
       <div>
@@ -162,7 +172,7 @@ def build_index():
       <p class="lead">Pflanztöpfe, Halter, Organizer und kleine Geschenke aus dem 3D-Drucker. Auf Bestellung gefertigt, aus pflanzenbasiertem Filament, in Ihrer Wunschfarbe.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="shop.html">Zum Shop</a>
-        <a class="btn btn-ghost" href="kontakt.html">Eigenes Modell drucken lassen</a>
+        <a class="btn btn-ghost" href="druckservice.html">Druckservice für eigene Dateien</a>
       </div>
       <div class="hero-facts">
         <span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span>
@@ -229,7 +239,7 @@ def build_index():
   <div class="wrap">
     <div class="cta-band">
       <div><h2>Sie haben eine eigene Datei?</h2><p style="margin:6px 0 0;opacity:.85">Wir drucken auch Ihre STL- oder 3MF-Datei: Ersatzteile, Prototypen, Vereinslogos. Anfrage mit Maßen und Stückzahl genügt.</p></div>
-      <a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a><a class="btn btn-ghost" style="border-color:currentColor;color:inherit" href="materialien.html">Materialien vergleichen</a></div>
     </div>
   </div>
 </section>
@@ -395,7 +405,7 @@ def build_contact():
           </div>
           <div class="row">
             <div class="field"><label for="k-stueck">Stückzahl <span class="opt">(optional)</span></label><input type="number" id="k-stueck" name="stueckzahl" min="1" max="999"><p class="msg"></p></div>
-            <div class="field"><label for="k-mat">Material-Wunsch <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option><option>PLA (Standard, biobasiert)</option><option>PETG (wasserfest, belastbar)</option><option>TPU (flexibel)</option></select><p class="msg"></p></div>
+            <div class="field"><label for="k-mat">Material-Wunsch <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option><option>PLA (Standard, biobasiert)</option><option>PETG (wasserfest, belastbar)</option><option>ABS (hitzefest, schleifbar)</option><option>ASA (wetterfest, für draußen)</option><option>TPU (flexibel)</option></select><p class="msg"></p></div>
           </div>
           <div class="field"><label for="k-msg">Beschreibung <span class="opt">(Maße, Einsatzzweck, Farbe)</span></label><textarea id="k-msg" name="nachricht" required data-err="Bitte beschreiben Sie kurz Ihr Vorhaben."></textarea><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="k-web">Website</label><input type="text" id="k-web" name="website" tabindex="-1" autocomplete="off"></div>
@@ -414,7 +424,7 @@ def build_contact():
           <h2 style="font-size:1.1rem">Was wir drucken können</h2>
           <ul class="small" style="padding-left:1.2em;margin:0">
             <li>Bauraum bis 25 × 25 × 25 cm, größere Teile in Segmenten</li>
-            <li>PLA, PETG, TPU; Schichthöhe 0,12 bis 0,28 mm</li>
+            <li><a href="materialien.html">PLA, PETG, ABS, ASA, TPU</a>; Schichthöhe 0,12 bis 0,28 mm</li>
             <li>Zwei Farben in einem Teil (Schrift, Logos)</li>
             <li>Dateiformate STL, 3MF, STEP, OBJ</li>
           </ul>
@@ -670,7 +680,7 @@ def build_data():
         f.write("window.SW_CONFIG=" + json.dumps(cfg, ensure_ascii=False) + ";\n")
         f.write("window.SW_FARBEN=" + json.dumps(farben, ensure_ascii=False) + ";\n")
         f.write("window.SW_PRODUKTE=" + json.dumps(data, ensure_ascii=False) + ";\n")
-    pages = ["index.html", "shop.html", "kontakt.html", "versand.html", "ueber-uns.html", "agb.html", "widerruf.html", "impressum.html", "datenschutz.html"] + [f"produkt/{p['id']}.html" for p in PRODUKTE]
+    pages = ["index.html", "shop.html", "druckservice.html", "materialien.html", "faq.html", "kontakt.html", "versand.html", "ueber-uns.html", "agb.html", "widerruf.html", "impressum.html", "datenschutz.html"] + [f"material/{m['id']}.html" for m in MATERIALIEN] + [f"produkt/{p['id']}.html" for p in PRODUKTE]
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
         for u in pages:
@@ -684,8 +694,216 @@ def build_data():
                    "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png"}, {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}]}, f, ensure_ascii=False, indent=2)
 
 
+# ---------------------------------------------------------------- Materialien
+def spool(color, size=72):
+    return f"""<svg class="spool" viewBox="0 0 72 72" width="{size}" height="{size}" aria-hidden="true"><circle cx="36" cy="36" r="33" fill="{color}"/><circle cx="36" cy="36" r="24" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2" stroke-dasharray="3 3"/><circle cx="36" cy="36" r="18" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2" stroke-dasharray="3 3"/><circle cx="36" cy="36" r="9" fill="var(--bg)"/><circle cx="36" cy="36" r="4" fill="{color}"/></svg>"""
+
+
+def mat_card(m, rel, h="h3"):
+    return f"""<a class="mat-card" href="{rel}material/{m['id']}.html" style="--mat:{m['farbe']}">
+  {spool(m['farbe'], 56)}
+  <div><span class="mat-name">{E(m['name'])}</span><{h}>{E(m['titel'])}</{h}><p class="small muted">{E(m['claim'])}</p></div>
+</a>"""
+
+
+def build_materials():
+    cards = "\n".join(mat_card(m, "", "h2") for m in MATERIALIEN)
+    head_row = "".join(f'<th scope="col"><a href="material/{m["id"]}.html">{E(m["name"])}</a></th>' for m in MATERIALIEN)
+    rows = "".join(f'<tr><th scope="row">{E(k)}</th>' + "".join(f"<td>{E(v)}</td>" for v in vals) + "</tr>" for k, vals in VERGLEICH)
+    body = f"""<section class="section-tight">
+  <div class="wrap">
+    <span class="eyebrow">Materialien</span>
+    <h1>Welches Material passt zu Ihrem Teil?</h1>
+    <p class="lead muted" style="max-width:62ch">Fünf Kunststoffe decken fast alles ab, was im Alltag gedruckt wird. Hier steht, was jedes Material kann, wo seine Grenzen liegen und was der Druck kostet. Im Zweifel beraten wir bei der <a href="kontakt.html">Anfrage</a>.</p>
+    <div class="mat-grid">{cards}</div>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    <h2>Vergleich auf einen Blick</h2>
+    <div class="table-scroll"><table class="compare"><thead><tr><th scope="col">Eigenschaft</th>{head_row}</tr></thead><tbody>{rows}</tbody></table></div>
+    <p class="small muted">Richtwerte für Standard-Filamente bei 0,2 mm Schichthöhe. Preise pro Gramm Material zuzüglich Maschinenzeit, Endpreis vorab im Angebot.</p>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap">
+    <div class="feature-grid">
+      <div class="feature"><h3>Drinnen, dekorativ, maßgenau</h3><p class="muted">PLA. Die sauberste Oberfläche, die meisten Farben, der günstigste Preis.</p></div>
+      <div class="feature"><h3>Nass, warm oder unter Last</h3><p class="muted">PETG. Zäh und wasserfest, für Küche, Bad, Clips und Gehäuse.</p></div>
+      <div class="feature"><h3>Heiß oder nachbearbeitet</h3><p class="muted">ABS. Bis 95 °C, schleifbar, mit Aceton glättbar, für Ersatzteile.</p></div>
+      <div class="feature"><h3>Draußen über Jahre</h3><p class="muted">ASA. UV-stabil und wetterfest, für Garten, Auto und Fassade.</p></div>
+      <div class="feature"><h3>Weich und flexibel</h3><p class="muted">TPU. Gummiartig, reißfest, für Dichtungen, Puffer und Hüllen.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    <div class="cta-band">
+      <div><h2>Unsicher, welches Material?</h2><p style="margin:6px 0 0;opacity:.85">Beschreiben Sie Einsatzort und Belastung, wir schlagen das passende Material vor und nennen den Preis.</p></div>
+      <a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a>
+    </div>
+  </div>
+</section>
+"""
+    page("materialien.html", f"Materialien für den 3D-Druck · {C.MARKE}", "PLA, PETG, ABS, ASA und TPU im Vergleich: Wärmebeständigkeit, Festigkeit, Außeneinsatz, Preis pro Gramm. Welches Material passt zu Ihrem 3D-Druck-Teil?", body, "material")
+
+    for i, m in enumerate(MATERIALIEN):
+        rel = "../"
+        props = "".join(f"<dt>{E(k)}</dt><dd>{E(v)}</dd>" for k, v in m["eigenschaften"])
+        gut = "".join(f"<li>{E(x)}</li>" for x in m["gut"])
+        nicht = "".join(f"<li>{E(x)}</li>" for x in m["nicht"])
+        faq = "".join(f'<details class="faq-item"><summary>{E(q)}</summary><p>{E(a)}</p></details>' for q, a in m["faq"])
+        others = "\n".join(mat_card(o, rel) for o in MATERIALIEN if o["id"] != m["id"])
+        shop_examples = [p for p in PRODUKTE if m["name"] in p["material"]][:3]
+        examples = ""
+        if shop_examples:
+            examples = f"""<section class="section-tight"><div class="wrap"><h2>Aus {E(m['name'])} im Shop</h2><div class="grid">{"".join(card(p, rel, k) for k, p in enumerate(shop_examples))}</div></div></section>"""
+        body = f"""<section class="section-tight">
+  <div class="wrap">
+    <nav aria-label="Pfad" class="small muted" style="margin-bottom:16px"><a href="../index.html">Start</a> › <a href="../materialien.html">Materialien</a> › {E(m['name'])}</nav>
+    <div class="mat-hero" style="--mat:{m['farbe']}">
+      <div>
+        <span class="eyebrow">Material</span>
+        <h1>{E(m['titel'])}</h1>
+        <p class="lead">{E(m['claim'])}</p>
+        <p class="muted" style="max-width:60ch">{E(m['kurz'])}</p>
+        <div class="hero-actions"><a class="btn btn-primary" href="../kontakt.html">Druck in {E(m['name'])} anfragen</a><a class="btn btn-ghost" href="../materialien.html">Alle Materialien</a></div>
+      </div>
+      <div class="mat-art">{spool(m['farbe'], 220)}</div>
+    </div>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap">
+    <div class="mat-cols">
+      <div>
+        <h2>Eigenschaften</h2>
+        <dl class="specs">{props}</dl>
+        <h2>Druckparameter</h2>
+        <dl class="specs"><dt>Schichthöhe</dt><dd>{E(m['schicht'])}</dd><dt>Düsentemperatur</dt><dd>{E(m['duesen'])}</dd><dt>Druckbett</dt><dd>{E(m['bett'])}</dd><dt>Dichte</dt><dd>{E(m['dichte'])}</dd></dl>
+      </div>
+      <div>
+        <h2>Geeignet für</h2>
+        <ul class="list-check">{gut}</ul>
+        <h2>Nicht geeignet für</h2>
+        <ul class="list-cross">{nicht}</ul>
+        <div class="notice"><strong>Farben:</strong> {E(m['farben'])}<br><strong>Preis:</strong> {E(m['preis'])}</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap prose">
+    <h2>Häufige Fragen zu {E(m['name'])}</h2>
+    {faq}
+  </div>
+</section>
+{examples}
+<section class="section">
+  <div class="wrap">
+    <h2>Andere Materialien</h2>
+    <div class="mat-grid">{others}</div>
+  </div>
+</section>
+"""
+        page(f"material/{m['id']}.html", f"{m['titel']} · {C.MARKE}", (m["claim"] + " " + m["kurz"])[:155], body, "material", rel)
+
+
+# ---------------------------------------------------------------- Druckservice
+def build_service():
+    mats = "\n".join(mat_card(m, "") for m in MATERIALIEN)
+    body = f"""<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Druckservice</span>
+      <h1>Ihre Datei, unser Drucker.</h1>
+      <p class="lead">Ersatzteile, Prototypen, Kleinserien, Vereinslogos: Schicken Sie uns Ihre STL-, 3MF- oder STEP-Datei oder beschreiben Sie das Teil. Sie bekommen innerhalb eines Werktags einen Festpreis.</p>
+      <div class="hero-actions"><a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a><a class="btn btn-ghost" href="materialien.html">Materialien vergleichen</a></div>
+      <div class="hero-facts">
+        <span>{SVG_CHECK} Festpreis vor dem Druck</span>
+        <span>{SVG_CHECK} Ab 1 Stück</span>
+        <span>{SVG_CHECK} Bauraum 25 × 25 × 25 cm</span>
+      </div>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 400 400" role="img" aria-label="Von der Datei zum gedruckten Teil">
+        <rect x="40" y="70" width="150" height="190" rx="12" fill="#2b2e34"/>
+        <rect x="56" y="88" width="118" height="12" rx="4" fill="#8a8f99"/><rect x="56" y="110" width="90" height="12" rx="4" fill="#8a8f99"/><rect x="56" y="132" width="104" height="12" rx="4" fill="#8a8f99"/>
+        <text x="115" y="230" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700" font-size="26" fill="#ffb08c">.STL</text>
+        <path d="M200 165 h60" stroke="#bf3e0b" stroke-width="8" stroke-linecap="round"/><path d="M250 148 l24 17 l-24 17z" fill="#bf3e0b"/>
+        <g fill="#bf3e0b"><rect x="280" y="236" width="90" height="16" rx="4"/><rect x="284" y="220" width="82" height="16" rx="4" opacity=".92"/><rect x="288" y="204" width="74" height="16" rx="4" opacity=".84"/><rect x="292" y="188" width="66" height="16" rx="4" opacity=".76"/><rect x="296" y="172" width="58" height="16" rx="4" opacity=".68"/><rect x="300" y="156" width="50" height="12" rx="4" opacity=".55"/></g>
+        <rect x="260" y="256" width="130" height="18" rx="6" fill="#8a8f99"/>
+        <ellipse cx="325" cy="300" rx="80" ry="12" fill="#000" opacity=".12"/>
+      </svg>
+    </div>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap">
+    <span class="eyebrow">Leistungen</span>
+    <h2>Was wir für Sie drucken</h2>
+    <div class="feature-grid">
+      <div class="feature">{ICONS['pen']}<h3>Ersatzteile</h3><p class="muted">Abgebrochene Halter, Zahnräder, Knöpfe, Abdeckungen, Clips. Mit Datei oder nach Foto und Maßen nachkonstruiert.</p></div>
+      <div class="feature">{ICONS['layer']}<h3>Prototypen</h3><p class="muted">Formstudien, Passungsmuster und Funktionsmuster für Entwickler, Handwerker und Studierende. Schnell, auch über Nacht.</p></div>
+      <div class="feature">{ICONS['truck']}<h3>Kleinserien</h3><p class="muted">10 bis 500 Stück, zum Beispiel Vereinsanhänger, Messe-Giveaways, Halterungen für Betriebe. Mengenrabatt ab 10 Stück.</p></div>
+      <div class="feature">{ICONS['leaf']}<h3>Nachbearbeitung</h3><p class="muted">Schleifen, Füllern, Lackieren, Aceton-Glätten bei ABS, Gewindeeinsätze einpressen, Magnete einkleben.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    <span class="eyebrow">Ablauf</span>
+    <h2>Vom Upload zum Paket</h2>
+    <div class="steps">
+      <div class="step"><h3>Anfrage</h3><p class="muted">Formular ausfüllen: Stückzahl, Material, Einsatzzweck. Die Datei schicken Sie per Mail an die Adresse aus unserer Antwort.</p></div>
+      <div class="step"><h3>Prüfung und Festpreis</h3><p class="muted">Wir prüfen Wandstärken, Überhänge und Maße, schlagen bei Bedarf Material oder Ausrichtung vor und nennen einen Festpreis mit Liefertermin.</p></div>
+      <div class="step"><h3>Druck und Kontrolle</h3><p class="muted">Nach Ihrer Freigabe und Zahlung wird gedruckt. Jedes Teil wird vermessen und von Stützmaterial befreit.</p></div>
+      <div class="step"><h3>Versand</h3><p class="muted">Verpackt in Papier und Karton, mit DHL und Sendungsnummer. Abholung nach Absprache möglich.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap prose">
+    <h2>So berechnen wir den Preis</h2>
+    <p>Der Preis setzt sich aus Material (Gewicht × Grammpreis), Maschinenzeit (ab 1,50 € pro Stunde) und einer Rüstpauschale von 5 € je Auftrag zusammen. Nachbearbeitung und Konstruktion rechnen wir nach Aufwand ab und nennen sie vorher. Ein Beispiel: Ein Halter mit 40 g PLA und 3 Stunden Druckzeit kostet 8 € Material, 4,50 € Maschinenzeit und 5 € Pauschale, zusammen 17,50 €. Ab 10 gleichen Teilen entfällt die Pauschale anteilig.</p>
+    <h2>Voraussetzungen für die Datei</h2>
+    <ul>
+      <li>Format STL, 3MF, STEP oder OBJ, Einheit Millimeter, Modell geschlossen („wasserdicht“)</li>
+      <li>Wandstärke mindestens 1,2 mm, bei TPU 2 mm</li>
+      <li>Maximal 25 × 25 × 25 cm am Stück, größere Teile segmentieren wir</li>
+      <li>Keine Waffen, keine Markenprodukte zum Weiterverkauf, keine sicherheitsrelevanten Teile</li>
+    </ul>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap">
+    <h2>Materialien zur Auswahl</h2>
+    <div class="mat-grid">{mats}</div>
+  </div>
+</section>
+"""
+    page("druckservice.html", f"3D-Druckservice für eigene Dateien · {C.MARKE}", "3D-Druck auf Bestellung: Ersatzteile, Prototypen und Kleinserien aus PLA, PETG, ABS, ASA oder TPU. Festpreis innerhalb eines Werktags, ab 1 Stück.", body, "service")
+
+
+# ---------------------------------------------------------------- FAQ
+def build_faq():
+    groups = ""
+    for title, items in FAQ:
+        groups += f'<h2>{E(title)}</h2>' + "".join(f'<details class="faq-item"><summary>{E(q)}</summary><p>{E(a)}</p></details>' for q, a in items)
+    body = f"""<section class="section-tight">
+  <div class="wrap prose">
+    <span class="eyebrow">Hilfe</span>
+    <h1>Fragen und Antworten</h1>
+    <p class="muted">Die häufigsten Fragen zu Bestellung, Material und Druckservice. Nicht dabei? <a href="kontakt.html">Schreiben Sie uns</a>.</p>
+    {groups}
+  </div>
+</section>
+"""
+    page("faq.html", f"Fragen und Antworten · {C.MARKE}", "Antworten zu Lieferzeit, Zahlung, Materialwahl, Dateiformaten, Rückgabe und Reklamation im Schichtwerk-Shop.", body, "faq")
+
+
 if __name__ == "__main__":
-    for fn in (build_data, build_index, build_shop, build_products, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404):
+    for fn in (build_data, build_index, build_shop, build_products, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404, build_materials, build_service, build_faq):
         fn()
     n = sum(len(f) for _, _, f in os.walk(ROOT))
     print("Fertig:", n, "Dateien in", ROOT)

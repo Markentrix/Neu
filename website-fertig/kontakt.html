@@ -22,8 +22,9 @@
     <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
       <a href="shop.html">Shop</a>
-      <a href="kontakt.html" aria-current="page">Eigenes Modell</a>
-      <a href="versand.html">Versand</a>
+      <a href="druckservice.html">Druckservice</a>
+      <a href="materialien.html">Materialien</a>
+      <a href="faq.html">FAQ</a>
       <a href="ueber-uns.html">Über uns</a>
     </nav>
     <a class="cart-link" href="warenkorb.html" aria-label="Warenkorb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg><span class="cart-badge" aria-live="polite"></span></a>
@@ -49,7 +50,7 @@
           </div>
           <div class="row">
             <div class="field"><label for="k-stueck">Stückzahl <span class="opt">(optional)</span></label><input type="number" id="k-stueck" name="stueckzahl" min="1" max="999"><p class="msg"></p></div>
-            <div class="field"><label for="k-mat">Material-Wunsch <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option><option>PLA (Standard, biobasiert)</option><option>PETG (wasserfest, belastbar)</option><option>TPU (flexibel)</option></select><p class="msg"></p></div>
+            <div class="field"><label for="k-mat">Material-Wunsch <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option><option>PLA (Standard, biobasiert)</option><option>PETG (wasserfest, belastbar)</option><option>ABS (hitzefest, schleifbar)</option><option>ASA (wetterfest, für draußen)</option><option>TPU (flexibel)</option></select><p class="msg"></p></div>
           </div>
           <div class="field"><label for="k-msg">Beschreibung <span class="opt">(Maße, Einsatzzweck, Farbe)</span></label><textarea id="k-msg" name="nachricht" required data-err="Bitte beschreiben Sie kurz Ihr Vorhaben."></textarea><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="k-web">Website</label><input type="text" id="k-web" name="website" tabindex="-1" autocomplete="off"></div>
@@ -68,7 +69,7 @@
           <h2 style="font-size:1.1rem">Was wir drucken können</h2>
           <ul class="small" style="padding-left:1.2em;margin:0">
             <li>Bauraum bis 25 × 25 × 25 cm, größere Teile in Segmenten</li>
-            <li>PLA, PETG, TPU; Schichthöhe 0,12 bis 0,28 mm</li>
+            <li><a href="materialien.html">PLA, PETG, ABS, ASA, TPU</a>; Schichthöhe 0,12 bis 0,28 mm</li>
             <li>Zwei Farben in einem Teil (Schrift, Logos)</li>
             <li>Dateiformate STL, 3MF, STEP, OBJ</li>
           </ul>
@@ -90,10 +91,18 @@
         <h2>Shop</h2>
         <ul>
           <li><a href="shop.html">Alle Artikel</a></li>
-          <li><a href="kontakt.html">Eigenes Modell drucken lassen</a></li>
+          <li><a href="druckservice.html">Druckservice</a></li>
+          <li><a href="kontakt.html">Anfrage stellen</a></li>
           <li><a href="versand.html">Versand &amp; Zahlung</a></li>
-          <li><a href="warenkorb.html">Warenkorb</a></li>
+          <li><a href="faq.html">Fragen &amp; Antworten</a></li>
           <li><a href="ueber-uns.html">Über uns</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Materialien</h2>
+        <ul>
+          <li><a href="materialien.html">Übersicht &amp; Vergleich</a></li>
+          <li><a href="material/pla.html">3D-Druck mit PLA</a></li><li><a href="material/petg.html">3D-Druck mit PETG</a></li><li><a href="material/abs.html">3D-Druck mit ABS</a></li><li><a href="material/asa.html">3D-Druck mit ASA</a></li><li><a href="material/tpu.html">3D-Druck mit TPU</a></li>
         </ul>
       </div>
       <div>
