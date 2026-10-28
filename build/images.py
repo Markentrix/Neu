@@ -7,6 +7,8 @@ from produkte import PRODUKTE, FARBEN
 ROOT = os.path.join(os.path.dirname(__file__), "..", "website-fertig")
 OUT = os.path.join(ROOT, "assets", "img", "produkte")
 W, H = 800, 600
+# Startseiten-Foto: Quelle in build/fotos/, Zuschnitt in Pixeln des (gedrehten) Originals, quadratisch
+HERO = dict(quelle="kuerbis-mini", crop=(540, 420, 2340, 2220))
 
 
 def shade(hexc, f):
@@ -283,6 +285,13 @@ def main():
         with open(path, "w") as f:
             f.write(svg)
         jobs.append({"svg": path, "png": os.path.join(tmp, p["id"] + ".png"), "w": W, "h": H})
+    # Hero-Foto der Startseite (echtes Werkstattfoto, quadratisch)
+    hero_src = os.path.join(os.path.dirname(__file__), "fotos", HERO["quelle"] + ".jpg")
+    if os.path.exists(hero_src):
+        from PIL import ImageOps
+        h = ImageOps.exif_transpose(Image.open(hero_src)).convert("RGB").crop(HERO["crop"])
+        h = h.resize((1200, 1200), Image.LANCZOS)
+        h.save(os.path.join(ROOT, "assets", "img", "hero.webp"), "WEBP", quality=82, method=6)
     # Gutschein-Karte
     gs = frame('<rect x="190" y="170" width="420" height="270" rx="18" fill="#1f4d3a"/>'
                '<rect x="190" y="170" width="420" height="270" rx="18" fill="none" stroke="#f1e6d2" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 6" transform="translate(10 10) scale(.952)"/>'

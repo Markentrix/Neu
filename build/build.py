@@ -155,27 +155,13 @@ def build_index():
     featured = ([p for p in AKTIV if "bestseller" in p["tags"]] + [p for p in AKTIV if "bestseller" not in p["tags"]])[:4]
     cards = "\n".join(card(p, "", i) for i, p in enumerate(featured))
     cats = "\n".join(f'<a class="chip" href="shop.html#{k}">{E(v)}</a>' for k, v in KAT_AKTIV.items())
-    hero_art = """<svg viewBox="0 0 400 400" role="img" aria-label="Stilisierter 3D-Drucker, der schichtweise ein orangefarbenes Objekt aufbaut">
-      <rect x="40" y="340" width="320" height="22" rx="8" fill="#1c2a24"/>
-      <rect x="60" y="60" width="14" height="290" rx="4" fill="#2e3f37"/><rect x="326" y="60" width="14" height="290" rx="4" fill="#2e3f37"/>
-      <rect x="60" y="48" width="280" height="16" rx="6" fill="#2e3f37"/>
-      <rect x="60" y="150" width="280" height="10" rx="4" fill="#4e5b55"/>
-      <rect x="175" y="130" width="50" height="44" rx="6" fill="#4e5b55"/><path d="M190 174 l10 18 l10 -18z" fill="#b8763f"/>
-      <rect x="80" y="318" width="240" height="22" rx="6" fill="#8e968f"/>
-      <g fill="#b8763f">
-        <rect x="150" y="300" width="100" height="18" rx="4"/><rect x="155" y="282" width="90" height="18" rx="4" opacity=".92"/>
-        <rect x="160" y="264" width="80" height="18" rx="4" opacity=".84"/><rect x="165" y="246" width="70" height="18" rx="4" opacity=".76"/>
-        <rect x="170" y="228" width="60" height="18" rx="4" opacity=".68"/><rect x="175" y="210" width="50" height="14" rx="4" opacity=".55"/>
-      </g>
-      <path d="M200 192 v18" stroke="#d9a06b" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="200" cy="192" r="4" fill="#f1e6d2"/>
-    </svg>"""
+    hero_art = """<img src="assets/img/hero.webp" width="1200" height="1200" alt="Frisch gedruckter kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett in der Schichtwerk-Werkstatt" fetchpriority="high">"""
     body = f"""<section class="hero">
   <div class="wrap">
     <div>
       <span class="eyebrow">{E(C.CLAIM)}</span>
       <h1>Dinge, die es so nur für Sie gibt.</h1>
-      <p class="lead">Pflanztöpfe, Halter, Organizer und persönliche Geschenke aus dem 3D-Drucker. Jedes Stück wird erst nach Ihrer Bestellung gedruckt, in Ihrer Farbe, auf Wunsch mit Ihrem Namen. In wenigen Tagen bei Ihnen.</p>
+      <p class="lead">Kleine Dinge mit Charakter aus dem 3D-Drucker: Deko, Halter und persönliche Geschenke. Jedes Stück wird erst nach Ihrer Bestellung gedruckt, in unserer Werkstatt in Celle. In wenigen Tagen bei Ihnen.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="shop.html">Zum Shop</a>
         <a class="btn btn-ghost" href="druckservice.html">Druckservice für eigene Dateien</a>

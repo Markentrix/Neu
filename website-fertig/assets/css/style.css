@@ -102,6 +102,7 @@ p{margin:0 0 1em}
 .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
 .hero-art{position:relative;aspect-ratio:1/1;max-width:460px;margin-inline:auto;width:100%}
 .hero-art svg{width:100%;height:100%}
+.hero-art img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius);box-shadow:var(--shadow)}
 .hero-facts{display:flex;flex-wrap:wrap;gap:18px 28px;margin-top:28px;color:var(--ink-2);font-size:.95rem}
 .hero-facts span{display:inline-flex;align-items:center;gap:8px}
 .hero-facts svg{width:18px;height:18px;color:var(--accent)}
