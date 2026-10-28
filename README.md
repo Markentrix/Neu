@@ -25,7 +25,7 @@ Kein eigenes Backend: Bestellungen, Anfragen, Widerrufe, Google-Bewertungen, Coo
 | Google-Bewertungen | Baustein `data-mk="bewertungen"` | index.html |
 | Statistik-Einstellung | Baustein `data-mk="cookies"` | Footer |
 | Besucherzahl | `POST /api/e` per sendBeacon | alle Seiten |
-| Zahlung | PayPal.Me-Link (aus config) auf danke.html, sonst Vorkasse | danke.html |
+| Zahlung | PayPal (PayPal.Me-Link aus config auf danke.html, sonst Link per Mail) oder Abholung in Celle mit Zahlung vor Ort | warenkorb.html, danke.html |
 
 Artikel ändern: `build/produkte.py` bearbeiten, dann `python3 build/images.py` (nur bei neuen Artikeln) und `python3 build/build.py`.
 
@@ -52,3 +52,8 @@ Foto als JPG unter `build/fotos/<artikel-id>.jpg` ablegen, im Artikel in `build/
 Der Generator schneidet auf 4:3 zu, skaliert auf 1200 × 900 und speichert WebP. Artikel ohne `foto` behalten ihre Illustration.
 Das Startseiten-Foto (`assets/img/hero.webp`, quadratisch) kommt aus `HERO` in `build/images.py`: Quelle und Zuschnitt dort ändern.
 Mit `freistellen=True` wird der Hintergrund einmalig per rembg entfernt (`pip install rembg onnxruntime`), das Ergebnis liegt als `build/fotos/<id>-cut.png` und wird auf den hellen Shop-Hintergrund mit Schatten gesetzt.
+
+## Farben pflegen
+
+Zentrale Farbliste `FARBEN` in `build/produkte.py` (Schlüssel, Anzeigename, Farbwert). Pro Artikel `farben=[...]`, der erste Eintrag ist die
+Vorauswahl. `STANDARDFARBEN` für Artikel, die es in allen Farben gibt. Die Karten zeigen „in N Farben“, die Produktseite die Farbfelder.

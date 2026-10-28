@@ -143,6 +143,7 @@ def card(p, rel, pos, h="h3"):
     <{h}><a href="{rel}produkt/{p['id']}.html">{E(p['name'])}</a></{h}>
     <p class="small muted" style="margin:0">{E(p['kurz'])}</p>
     <div class="price">{EUR(p['preis'])} {tags}</div>
+    {('<span class="card-colors">in ' + str(len(p['farben'])) + ' Farben</span>') if len(p['farben']) > 1 else ''}
     {'<a class="btn btn-primary" href="' + rel + 'produkt/' + p['id'] + '.html">Jetzt gestalten</a>' if p.get('text') else '<button class="btn btn-primary" type="button" data-add="' + p['id'] + '">In den Warenkorb</button>'}
     <a class="card-more" href="{rel}produkt/{p['id']}.html">Details ansehen</a>
   </div>
@@ -314,7 +315,7 @@ def build_products():
           <p class="added" role="status">Liegt im Warenkorb. <a href="../warenkorb.html">Zum Warenkorb</a> oder <a href="../shop.html">weiter stöbern</a>.</p>
         </form>
         <p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
-        <div class="trust-list"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}, sonst {EUR(VERSAND_PAUSCHALE)}</span><span>{SVG_CHECK} {'Personalisiert für Sie gefertigt, Vorschau vor dem Druck' if p.get('text') else '14 Tage Rückgaberecht'}</span><span>{SVG_CHECK} PayPal-Käuferschutz oder Überweisung</span><span>{SVG_CHECK} Nachdruck-Garantie bei Transportschäden</span></div>
+        <div class="trust-list"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}, sonst {EUR(VERSAND_PAUSCHALE)}</span><span>{SVG_CHECK} {'Personalisiert für Sie gefertigt, Vorschau vor dem Druck' if p.get('text') else '14 Tage Rückgaberecht'}</span><span>{SVG_CHECK} PayPal-Käuferschutz, oder Abholung in Celle</span><span>{SVG_CHECK} Nachdruck-Garantie bei Transportschäden</span></div>
         <dl class="specs">
           <dt>Maße</dt><dd>{E(p['masse'])}</dd>
           <dt>Material</dt><dd>{E(p['material'])}</dd>
@@ -397,7 +398,7 @@ def build_voucher():
           <div class="field hp" aria-hidden="true"><label for="g-web">Website</label><input type="text" id="g-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir den Gutschein nicht ausstellen."><span>Ich bin einverstanden, dass meine Angaben zur Ausstellung des Gutscheins gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary" type="submit">Gutschein zahlungspflichtig bestellen</button>
-          <div class="trust-list"><span>{SVG_CHECK} Rechnung per E-Mail, Gutscheincode nach Zahlungseingang</span><span>{SVG_CHECK} PayPal oder Überweisung</span><span>{SVG_CHECK} 3 Jahre gültig, einlösbar für Shop und Druckservice</span></div>
+          <div class="trust-list"><span>{SVG_CHECK} Rechnung per E-Mail, Gutscheincode nach Zahlungseingang</span><span>{SVG_CHECK} Zahlung per PayPal mit Käuferschutz</span><span>{SVG_CHECK} 3 Jahre gültig, einlösbar für Shop und Druckservice</span></div>
         </form>
       </div>
     </div>
@@ -420,36 +421,42 @@ def build_cart():
         <div class="cart-list" id="cart-list" aria-live="polite"></div>
         <div id="cross-sell" hidden><h2 style="font-size:1.1rem;margin-top:28px">Dazu passt</h2><div class="grid grid-small" id="cross-sell-grid"></div></div>
         <form class="form" id="bestellformular" style="margin-top:32px" hidden>
-          <h2>Lieferadresse</h2>
-          <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande, danach erhalten Sie die Rechnung mit Zahlungsdaten. Gedruckt wird nach Zahlungseingang.</p>
+          <h2>Lieferung und Zahlung</h2>
+          <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande. Bei Versand erhalten Sie damit den PayPal-Zahlungslink, gedruckt wird nach Zahlungseingang. Bei Abholung zahlen Sie vor Ort.</p>
           <div class="alert" role="alert"></div>
           <div class="field"><label for="b-name">Vor- und Nachname</label><input type="text" id="b-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
           <div class="row">
             <div class="field"><label for="b-email">E-Mail <span class="opt">(für Bestätigung und Rechnung)</span></label><input type="email" id="b-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
             <div class="field"><label for="b-tel">Telefon <span class="opt">(optional, für Rückfragen)</span></label><input type="tel" id="b-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
           </div>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Lieferung</legend>
+            <label class="check"><input type="radio" name="lieferart" value="versand" checked> Versand per DHL innerhalb Deutschlands ({EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos)</label>
+            <label class="check"><input type="radio" name="lieferart" value="abholung"> Abholung in Celle, kostenlos ({E(C.STRASSE)}, nach Terminabsprache)</label>
+          </fieldset>
+          <div id="adresse-felder">
           <div class="field"><label for="b-strasse">Straße und Hausnummer</label><input type="text" id="b-strasse" name="strasse" required autocomplete="street-address" data-err="Bitte die Straße eintragen."><p class="msg"></p></div>
           <div class="row">
             <div class="field"><label for="b-plz">PLZ</label><input type="text" id="b-plz" name="plz" required inputmode="numeric" autocomplete="postal-code" data-err="Bitte die Postleitzahl eintragen."><p class="msg"></p></div>
             <div class="field"><label for="b-ort">Ort</label><input type="text" id="b-ort" name="ort" required autocomplete="address-level2" data-err="Bitte den Ort eintragen."><p class="msg"></p></div>
           </div>
-          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zahlungsart</legend>
-            <label class="check"><input type="radio" name="zahlungsart" value="paypal" checked> PayPal (Zahlungslink kommt mit der Bestätigung)</label>
-            <label class="check"><input type="radio" name="zahlungsart" value="ueberweisung"> Vorkasse per Überweisung (Bankdaten kommen mit der Rechnung)</label>
+          </div>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zahlung</legend>
+            <label class="check"><input type="radio" name="zahlungsart" value="paypal" checked> PayPal, mit Käuferschutz {"(Zahlungslink direkt nach dem Absenden)" if C.PAYPAL_ME else "(Zahlungslink kommt mit der Bestätigung per E-Mail)"}</label>
+            <label class="check" id="zahlung-abholung" hidden><input type="radio" name="zahlungsart" value="abholung"> Bei Abholung, bar oder per PayPal vor Ort</label>
           </fieldset>
           <div class="field"><label for="b-anm">Anmerkung <span class="opt">(optional)</span></label><textarea id="b-anm" name="anmerkung" rows="3"></textarea><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="b-web">Website</label><input type="text" id="b-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
-          <div class="trust-list"><span>{SVG_CHECK} Sie zahlen erst nach unserer Bestätigung</span><span>{SVG_CHECK} PayPal-Käuferschutz oder Überweisung</span><span>{SVG_CHECK} 14 Tage Rückgaberecht, Nachdruck-Garantie</span></div>
+          <div class="trust-list"><span>{SVG_CHECK} Sie zahlen erst nach unserer Bestätigung</span><span>{SVG_CHECK} PayPal-Käuferschutz oder Zahlung bei Abholung</span><span>{SVG_CHECK} 14 Tage Rückgaberecht, Nachdruck-Garantie</span></div>
           <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:{E(C.EMAIL)}">Bestellung per E-Mail schicken</a> oder anrufen: <a href="{TEL_HREF}">{E(C.TELEFON)}</a>.</p>
         </form>
       </div>
       <div class="summary" id="cart-summary" hidden>
         <h2 style="font-size:1.1rem">Zusammenfassung</h2>
         <div class="line"><span>Zwischensumme</span><strong id="s-zwischen">0,00 €</strong></div>
-        <div class="line"><span>Versand ({E(C.VERSANDLAND)})</span><strong id="s-versand">0,00 €</strong></div>
+        <div class="line"><span id="s-versand-label">Versand ({E(C.VERSANDLAND)})</span><strong id="s-versand">0,00 €</strong></div>
         <div class="line total"><span>Gesamt</span><span id="s-gesamt">0,00 €</span></div>
         <p class="small muted" id="s-hint"></p>
         <p class="small" data-delivery>Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
@@ -460,7 +467,7 @@ def build_cart():
   </div>
 </section>
 """
-    page("warenkorb.html", f"Warenkorb · {C.MARKE}", "Warenkorb und Bestellung bei Schichtwerk: Artikel prüfen, Lieferadresse angeben, per PayPal oder Überweisung bezahlen.", body, "", "", '<meta name="robots" content="noindex">')
+    page("warenkorb.html", f"Warenkorb · {C.MARKE}", "Warenkorb und Bestellung bei Schichtwerk: Artikel prüfen, Versand oder Abholung in Celle wählen, per PayPal bezahlen.", body, "", "", '<meta name="robots" content="noindex">')
 
 
 # ---------------------------------------------------------------- Kontakt / eigenes Modell
@@ -549,20 +556,22 @@ def build_shipping():
       <tr><td>{E(C.VERSANDLAND)}</td><td>{EUR(VERSAND_PAUSCHALE)} pro Bestellung</td><td>{EUR(VERSANDFREI_AB)} Bestellwert</td></tr>
     </table>
     <p>Wir versenden mit DHL als Päckchen oder Paket. Die Sendungsnummer bekommen Sie per E-Mail, sobald das Paket abgegeben ist. Lieferungen in andere Länder sind auf Anfrage möglich, schreiben Sie uns vorher.</p>
+    <h2>Abholung in Celle</h2>
+    <p>Wer in der Nähe wohnt, spart den Versand: Im Warenkorb „Abholung“ wählen, wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse: {E(C.STRASSE)}, {E(C.PLZ_ORT)}. Bezahlt wird bei Abholung bar oder per PayPal.</p>
     <h2>Lieferzeit</h2>
     <p>Alle Artikel werden nach Bestellung gedruckt. Rechnen Sie mit {E(C.PRODUKTIONSZEIT)} Produktion nach Zahlungseingang plus {E(C.LIEFERZEIT)} Versand. Bei personalisierten Artikeln stimmen wir den Text oder das Motiv vorher mit Ihnen ab, die Produktionszeit beginnt mit Ihrer Freigabe.</p>
     <h2>Zahlungsarten</h2>
     <ul>
-      <li><strong>PayPal:</strong> Mit der Bestellbestätigung erhalten Sie einen PayPal-Zahlungslink über den Gesamtbetrag. Käuferschutz von PayPal inklusive.</li>
-      <li><strong>Vorkasse per Überweisung:</strong> Die Bankverbindung steht auf der Rechnung, die Sie mit der Bestätigung bekommen. Nach Zahlungseingang beginnt der Druck.</li>
+      <li><strong>PayPal:</strong> Sie erhalten einen PayPal-Zahlungslink über den Gesamtbetrag, Käuferschutz von PayPal inklusive. Nach Zahlungseingang beginnt der Druck.</li>
+      <li><strong>Abholung in Celle:</strong> Sie holen Ihre Bestellung bei uns ab ({E(C.STRASSE)}, {E(C.PLZ_ORT)}, nach Terminabsprache) und zahlen vor Ort bar oder per PayPal. Keine Versandkosten.</li>
     </ul>
-    <div class="notice">Wir speichern keine Zahlungsdaten auf dieser Website. Die Zahlung läuft direkt über PayPal oder Ihre Bank.</div>
+    <div class="notice">Wir speichern keine Zahlungsdaten auf dieser Website. Die Zahlung läuft direkt über PayPal oder bei der Abholung.</div>
     <h2>Rückgabe</h2>
     <p>Für Lagerartikel aus dem Shop gilt das gesetzliche <a href="widerruf.html">Widerrufsrecht</a> von 14 Tagen. Personalisierte Artikel mit Wunschtext oder eigenem Foto sind davon ausgenommen. Kommt ein Teil beschädigt an, schicken Sie uns bitte ein Foto an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a>, wir drucken kostenlos nach.</p>
   </div>
 </section>
 """
-    page("versand.html", f"Versand und Zahlung · {C.MARKE}", f"Versandkosten {EUR(VERSAND_PAUSCHALE)}, versandfrei ab {EUR(VERSANDFREI_AB)}. Zahlung per PayPal oder Überweisung, Lieferzeit und Rückgabe bei Schichtwerk.", body, "versand")
+    page("versand.html", f"Versand und Zahlung · {C.MARKE}", f"Versandkosten {EUR(VERSAND_PAUSCHALE)}, versandfrei ab {EUR(VERSANDFREI_AB)}. Zahlung per PayPal oder Abholung in Celle, Lieferzeit und Rückgabe bei Schichtwerk.", body, "versand")
 
 
 # ---------------------------------------------------------------- AGB
@@ -581,9 +590,9 @@ def build_agb():
     <h2>3. Preise und Versandkosten</h2>
     <p>{ust} Zusätzlich fallen Versandkosten in Höhe von {EUR(VERSAND_PAUSCHALE)} pro Bestellung innerhalb von {E(C.VERSANDLAND)} an; ab einem Bestellwert von {EUR(VERSANDFREI_AB)} liefern wir versandkostenfrei. Lieferungen in andere Länder nur nach vorheriger Absprache.</p>
     <h2>4. Zahlung</h2>
-    <p>Wir bieten Zahlung per PayPal (Zahlungslink) oder Vorkasse per Überweisung an. Der Rechnungsbetrag ist innerhalb von 7 Tagen nach Erhalt der Bestätigung fällig. Die Produktion beginnt nach Zahlungseingang. Geht innerhalb von 14 Tagen keine Zahlung ein, können wir vom Vertrag zurücktreten.</p>
+    <p>Bei Versand bieten wir Zahlung per PayPal (Zahlungslink) an. Der Rechnungsbetrag ist innerhalb von 7 Tagen nach Erhalt der Bestätigung fällig; die Produktion beginnt nach Zahlungseingang. Geht innerhalb von 14 Tagen keine Zahlung ein, können wir vom Vertrag zurücktreten. Bei Abholung erfolgt die Zahlung bei Übergabe in bar oder per PayPal.</p>
     <h2>5. Fertigung und Lieferung</h2>
-    <p>Alle Artikel werden nach Bestellung gefertigt. Die Produktionszeit beträgt in der Regel {E(C.PRODUKTIONSZEIT)} nach Zahlungseingang, bei personalisierten Artikeln nach Ihrer Freigabe des Textes oder Motivs. Hinzu kommt die Versandzeit von etwa {E(C.LIEFERZEIT)}. Die Lieferung erfolgt an die von Ihnen angegebene Adresse. Bei Verbrauchern geht die Gefahr des zufälligen Untergangs mit Übergabe der Ware an Sie über.</p>
+    <p>Alle Artikel werden nach Bestellung gefertigt. Die Produktionszeit beträgt in der Regel {E(C.PRODUKTIONSZEIT)} nach Zahlungseingang, bei personalisierten Artikeln nach Ihrer Freigabe des Textes oder Motivs. Hinzu kommt die Versandzeit von etwa {E(C.LIEFERZEIT)}. Die Lieferung erfolgt an die von Ihnen angegebene Adresse oder, wenn Sie Abholung gewählt haben, durch Übergabe an unserem Standort in Celle nach Terminabsprache. Bei Verbrauchern geht die Gefahr des zufälligen Untergangs mit Übergabe der Ware an Sie über. Abgeholt werden kann innerhalb von 14 Tagen nach unserer Fertigmeldung.</p>
     <h2>6. Beschaffenheit 3D-gedruckter Teile</h2>
     <p>Unsere Artikel entstehen im Schichtverfahren (FDM). Sichtbare Schichtlinien, leichte Farbabweichungen zwischen Filamentchargen und Maßtoleranzen von etwa ±0,3 mm sind verfahrensbedingt und stellen keinen Mangel dar. Die Produktbilder im Shop sind Illustrationen. Angaben zu Belastbarkeit und Temperaturbeständigkeit sind Richtwerte für den üblichen Gebrauch.</p>
     <h2>7. Personalisierte Artikel</h2>
@@ -733,7 +742,8 @@ def build_thanks():
     </div>
     <p>Ihre Vorgangsnummer:<br><span class="ref" id="ref"></span></p>
     <p hidden><a class="btn btn-primary" id="paypal-link" href="#" rel="noopener">Jetzt <span id="danke-summe"></span> per PayPal bezahlen</a></p>
-    <p class="notice" id="bank-hinweis" hidden style="text-align:left">Sie haben Vorkasse gewählt: Die Bankverbindung steht auf der Rechnung, die Sie mit der Bestellbestätigung per E-Mail erhalten. Bitte geben Sie die Vorgangsnummer als Verwendungszweck an.</p>
+    <p class="notice" id="paypal-hinweis" hidden style="text-align:left">Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestellbestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
+    <p class="notice" id="abhol-hinweis" hidden style="text-align:left">Sie holen in Celle ab: Wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse {E(C.STRASSE)}, {E(C.PLZ_ORT)}. Bezahlt wird bei Abholung bar oder per PayPal.</p>
     <p class="small muted">Keine E-Mail erhalten? Prüfen Sie den Spam-Ordner oder schreiben Sie an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a>.</p>
     <p><a class="btn btn-ghost" href="shop.html">Zurück zum Shop</a></p>
   </div>

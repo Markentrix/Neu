@@ -79,7 +79,8 @@ FAQ = [
         ("Wie lange dauert meine Bestellung?", "Shop-Artikel drucken wir innerhalb von 2 bis 4 Werktagen nach Zahlungseingang, dann 2 bis 3 Werktage Versand mit DHL. Bei personalisierten Artikeln beginnt die Frist mit Ihrer Freigabe der Vorschau."),
         ("Kann ich mehrere Artikel in einer Bestellung kombinieren?", "Ja, alles im Warenkorb wird zusammen gedruckt und in einem Paket verschickt. Ab 49 € Bestellwert entfallen die Versandkosten."),
         ("Liefert ihr auch nach Österreich oder in die Schweiz?", "Auf Anfrage. Schreiben Sie uns vor der Bestellung, wir nennen Ihnen die Versandkosten."),
-        ("Wie bezahle ich?", "Per PayPal über einen Zahlungslink, den Sie mit der Bestellbestätigung erhalten, oder per Überweisung mit den Bankdaten auf der Rechnung. Auf der Website selbst werden keine Zahlungsdaten eingegeben."),
+        ("Wie bezahle ich?", "Per PayPal über einen Zahlungslink, mit Käuferschutz. Oder Sie holen in Celle ab und zahlen vor Ort bar oder per PayPal. Auf der Website selbst werden keine Zahlungsdaten eingegeben."),
+        ("Kann ich abholen?", "Ja. Im Warenkorb „Abholung in Celle“ wählen, dann entfallen die Versandkosten. Sobald Ihr Teil fertig ist, vereinbaren wir per E-Mail einen Termin."),
     ]),
     ("Material und Qualität", [
         ("Sieht man die Schichten?", "Ja, feine Linien von 0,12 bis 0,28 mm gehören zum Verfahren. Bei Sichtteilen drucken wir feiner, auf Wunsch schleifen und lackieren wir."),

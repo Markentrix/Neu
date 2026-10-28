@@ -1,5 +1,8 @@
 # Produktdaten für den Schichtwerk-Shop.
-# Preise in Euro (Endpreise). Farben sind Filament-Standardfarben.
+# Preise in Euro (Endpreise).
+# FARBEN: zentrale Farbliste (Schlüssel -> Anzeigename, Farbwert für das Farbfeld). Neue Filamentfarbe hier EINMAL eintragen,
+#   dann bei den Artikeln in "farben" aufführen. Der erste Eintrag eines Artikels ist die Vorauswahl und die Farbe für den Schnellkauf.
+#   Artikel, die es in allen Standardfarben gibt: farben=STANDARDFARBEN
 # "text": True = personalisierbar (Wunschtext), vom Widerruf ausgenommen.
 # "entwurf": True = Beispielartikel, wird NICHT in den Shop gebaut (keine Seite, keine Karte, kein Bild).
 #   Freischalten: Foto unter build/fotos/<id>.jpg ablegen, Maße/Gewicht prüfen, entwurf entfernen, foto=True setzen.
@@ -14,6 +17,8 @@ FARBEN = {
     "holz": ("Holzton (Wood-PLA)", "#b98557"),
     "orange-silk": ("Orange Silk (glänzend)", "#e07a2a"),
 }
+
+STANDARDFARBEN = ["schwarz", "weiss", "orange", "mint", "grau", "blau", "holz"]
 
 KATEGORIEN = {
     "wohnen": "Wohnen & Deko",

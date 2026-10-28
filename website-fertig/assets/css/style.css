@@ -38,6 +38,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;overflow-x:hidden}
 img,svg{max-width:100%;height:auto;display:block}
@@ -122,6 +123,7 @@ p{margin:0 0 1em}
 .card .price{font-weight:700;font-size:1.1rem;margin-top:auto}
 .card .btn{margin-top:8px}
 .card-more{font-size:.88rem;color:var(--ink-2);text-align:center;margin-top:4px}
+.card-colors{font-size:.8rem;color:var(--ink-3);margin-top:-2px}
 .card-gutschein{border-color:var(--brand)}
 .badge{display:inline-block;background:var(--mint-soft);color:var(--mint);font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:999px}
 .badge-accent{background:var(--accent-soft);color:#7e4b20}

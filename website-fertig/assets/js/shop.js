@@ -27,11 +27,13 @@
     c.push({ id: id, farbe: farbe, text: text || "", menge: menge });
     saveCart(c);
   }
+  function lieferart() { var r = document.querySelector("input[name=lieferart]:checked"); return r ? r.value : "versand"; }
   function cartTotals(c) {
     var sum = 0;
     c.forEach(function (i) { var p = findProduct(i.id); if (p) sum += p.preis * i.menge; });
-    var versand = sum === 0 ? 0 : (sum >= CFG.versandfreiAb ? 0 : CFG.versandPauschale);
-    return { zwischensumme: sum, versand: versand, gesamt: sum + versand };
+    var abholung = lieferart() === "abholung";
+    var versand = (sum === 0 || abholung) ? 0 : (sum >= CFG.versandfreiAb ? 0 : CFG.versandPauschale);
+    return { zwischensumme: sum, versand: versand, gesamt: sum + versand, abholung: abholung };
   }
   function cartAsText(c) {
     return c.map(function (i) {
@@ -170,6 +172,7 @@
             if (data.art) q += "&art=" + encodeURIComponent(data.art);
             if (data.summe) q += "&summe=" + encodeURIComponent(data.summe);
             if (data.zahlungsart) q += "&zahlung=" + encodeURIComponent(data.zahlungsart);
+            if (data.lieferart) q += "&liefer=" + encodeURIComponent(data.lieferart);
             location.href = ROOT + q; return;
           }
           showAlert(form, fallbackHtml(form), false);
@@ -236,8 +239,9 @@
       var t = cartTotals(c);
       $("#s-zwischen").textContent = EUR(t.zwischensumme);
       $("#s-versand").textContent = t.versand === 0 ? "kostenlos" : EUR(t.versand);
+      var vl = $("#s-versand-label"); if (vl) vl.textContent = t.abholung ? "Abholung in Celle" : "Versand (Deutschland)";
       $("#s-gesamt").textContent = EUR(t.gesamt);
-      var hint = $("#s-hint"); if (hint) hint.textContent = t.versand > 0 ? "Noch " + EUR(CFG.versandfreiAb - t.zwischensumme) + " bis zum kostenlosen Versand." : "Versandkostenfrei innerhalb Deutschlands.";
+      var hint = $("#s-hint"); if (hint) hint.textContent = t.abholung ? "Abholung nach Terminabsprache, keine Versandkosten." : t.versand > 0 ? "Noch " + EUR(CFG.versandfreiAb - t.zwischensumme) + " bis zum kostenlosen Versand." : "Versandkostenfrei innerhalb Deutschlands.";
       var mailBtn = $("#cart-mail");
       if (mailBtn && CFG.email) {
         mailBtn.href = "mailto:" + CFG.email + "?subject=" + encodeURIComponent("Bestellung Schichtwerk") + "&body=" + encodeURIComponent("Hallo Schichtwerk,\n\nich möchte folgende Artikel bestellen:\n\n" + cartAsText(c) + "\n\nGesamt inkl. Versand: " + EUR(t.gesamt) + "\n\nLieferadresse:\n\n");
@@ -247,7 +251,7 @@
       var t = cartTotals(c); var prog = $("#ship-progress"); var cs = $("#cross-sell");
       if (!c.length) { if (prog) prog.hidden = true; if (cs) cs.hidden = true; return; }
       if (prog) {
-        prog.hidden = false; var pct = Math.min(100, Math.round(t.zwischensumme / CFG.versandfreiAb * 100));
+        prog.hidden = t.abholung; var pct = Math.min(100, Math.round(t.zwischensumme / CFG.versandfreiAb * 100));
         $("#ship-fill").style.width = pct + "%"; prog.classList.toggle("done", t.versand === 0);
         $("#ship-text").innerHTML = t.versand === 0 ? "<strong>Versandkostenfrei.</strong> Sie sparen " + EUR(CFG.versandPauschale) + "." : "Noch <strong>" + EUR(CFG.versandfreiAb - t.zwischensumme) + "</strong> bis zum kostenlosen Versand.";
       }
@@ -268,16 +272,30 @@
     function escapeHtml(s) { return s.replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
     render();
     renderCart = render;
+    if (checkout) {
+      var adrBox = $("#adresse-felder", checkout); var zaAbh = $("#zahlung-abholung", checkout);
+      function applyLieferart() {
+        var abh = lieferart() === "abholung";
+        adrBox.hidden = abh; $$("input", adrBox).forEach(function (i) { i.required = !abh; });
+        zaAbh.hidden = !abh;
+        var pay = checkout.querySelector("input[name=zahlungsart][value=paypal]");
+        if (!abh) pay.checked = true;
+        render();
+      }
+      $$("input[name=lieferart]", checkout).forEach(function (r) { r.addEventListener("change", applyLieferart); });
+      applyLieferart();
+    }
     if (checkout) bindForm(checkout, "kontakt", function () {
       var c = loadCart().filter(function (i) { return findProduct(i.id); }); var t = cartTotals(c);
-      var adr = [$("[name=strasse]", checkout).value, $("[name=plz]", checkout).value + " " + $("[name=ort]", checkout).value].join(", ");
+      var la = lieferart();
+      var adr = la === "abholung" ? "Abholung in Celle" : [$("[name=strasse]", checkout).value, $("[name=plz]", checkout).value + " " + $("[name=ort]", checkout).value].join(", ");
       var za = (checkout.querySelector("input[name=zahlungsart]:checked") || {}).value || "";
       return {
         art: "bestellung",
         bestellung: cartAsText(c),
         zwischensumme: EUR(t.zwischensumme), versand: t.versand === 0 ? "kostenlos" : EUR(t.versand), summe: EUR(t.gesamt),
-        lieferadresse: adr, zahlungsart: za,
-        nachricht: "BESTELLUNG über den Online-Shop\n\n" + cartAsText(c) + "\n\nZwischensumme: " + EUR(t.zwischensumme) + "\nVersand: " + (t.versand === 0 ? "kostenlos" : EUR(t.versand)) + "\nGesamt: " + EUR(t.gesamt) + "\nZahlungsart: " + za + "\nLieferadresse: " + adr + "\n\nAnmerkung des Kunden: " + ($("[name=anmerkung]", checkout).value || "–")
+        lieferadresse: adr, zahlungsart: za, lieferart: la,
+        nachricht: "BESTELLUNG über den Online-Shop\n\n" + cartAsText(c) + "\n\nZwischensumme: " + EUR(t.zwischensumme) + "\nLieferung: " + (la === "abholung" ? "Abholung in Celle" : "Versand DHL") + "\nVersand: " + (t.versand === 0 ? "kostenlos" : EUR(t.versand)) + "\nGesamt: " + EUR(t.gesamt) + "\nZahlungsart: " + za + "\nLieferadresse: " + adr + "\n\nAnmerkung des Kunden: " + ($("[name=anmerkung]", checkout).value || "–")
       };
     }, function () { saveCart([]); });
   }
@@ -297,7 +315,8 @@
       if (isOrder && q.zahlung === "paypal" && CFG.paypalMe && amount) { pp.href = CFG.paypalMe.replace(/\/$/, "") + "/" + amount + "EUR"; pp.parentElement.hidden = false; }
       else pp.parentElement.hidden = true;
     }
-    var bank = $("#bank-hinweis"); if (bank) bank.hidden = !(isOrder && q.zahlung === "ueberweisung");
+    var ph = $("#paypal-hinweis"); if (ph) ph.hidden = !(isOrder && q.zahlung === "paypal" && !(CFG.paypalMe && q.summe));
+    var ah = $("#abhol-hinweis"); if (ah) ah.hidden = !(isOrder && q.liefer === "abholung");
     var sumEl = $("#danke-summe"); if (sumEl && q.summe) sumEl.textContent = q.summe;
   }
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Warenkorb · Schichtwerk</title>
-<meta name="description" content="Warenkorb und Bestellung bei Schichtwerk: Artikel prüfen, Lieferadresse angeben, per PayPal oder Überweisung bezahlen.">
+<meta name="description" content="Warenkorb und Bestellung bei Schichtwerk: Artikel prüfen, Versand oder Abholung in Celle wählen, per PayPal bezahlen.">
 <meta name="theme-color" content="#f7f4ee">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -42,36 +42,42 @@
         <div class="cart-list" id="cart-list" aria-live="polite"></div>
         <div id="cross-sell" hidden><h2 style="font-size:1.1rem;margin-top:28px">Dazu passt</h2><div class="grid grid-small" id="cross-sell-grid"></div></div>
         <form class="form" id="bestellformular" style="margin-top:32px" hidden>
-          <h2>Lieferadresse</h2>
-          <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande, danach erhalten Sie die Rechnung mit Zahlungsdaten. Gedruckt wird nach Zahlungseingang.</p>
+          <h2>Lieferung und Zahlung</h2>
+          <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande. Bei Versand erhalten Sie damit den PayPal-Zahlungslink, gedruckt wird nach Zahlungseingang. Bei Abholung zahlen Sie vor Ort.</p>
           <div class="alert" role="alert"></div>
           <div class="field"><label for="b-name">Vor- und Nachname</label><input type="text" id="b-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
           <div class="row">
             <div class="field"><label for="b-email">E-Mail <span class="opt">(für Bestätigung und Rechnung)</span></label><input type="email" id="b-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
             <div class="field"><label for="b-tel">Telefon <span class="opt">(optional, für Rückfragen)</span></label><input type="tel" id="b-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
           </div>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Lieferung</legend>
+            <label class="check"><input type="radio" name="lieferart" value="versand" checked> Versand per DHL innerhalb Deutschlands (4,90 €, ab 49,00 € kostenlos)</label>
+            <label class="check"><input type="radio" name="lieferart" value="abholung"> Abholung in Celle, kostenlos (Heinrich-Hüdig-Str. 1, nach Terminabsprache)</label>
+          </fieldset>
+          <div id="adresse-felder">
           <div class="field"><label for="b-strasse">Straße und Hausnummer</label><input type="text" id="b-strasse" name="strasse" required autocomplete="street-address" data-err="Bitte die Straße eintragen."><p class="msg"></p></div>
           <div class="row">
             <div class="field"><label for="b-plz">PLZ</label><input type="text" id="b-plz" name="plz" required inputmode="numeric" autocomplete="postal-code" data-err="Bitte die Postleitzahl eintragen."><p class="msg"></p></div>
             <div class="field"><label for="b-ort">Ort</label><input type="text" id="b-ort" name="ort" required autocomplete="address-level2" data-err="Bitte den Ort eintragen."><p class="msg"></p></div>
           </div>
-          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zahlungsart</legend>
-            <label class="check"><input type="radio" name="zahlungsart" value="paypal" checked> PayPal (Zahlungslink kommt mit der Bestätigung)</label>
-            <label class="check"><input type="radio" name="zahlungsart" value="ueberweisung"> Vorkasse per Überweisung (Bankdaten kommen mit der Rechnung)</label>
+          </div>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zahlung</legend>
+            <label class="check"><input type="radio" name="zahlungsart" value="paypal" checked> PayPal, mit Käuferschutz (Zahlungslink kommt mit der Bestätigung per E-Mail)</label>
+            <label class="check" id="zahlung-abholung" hidden><input type="radio" name="zahlungsart" value="abholung"> Bei Abholung, bar oder per PayPal vor Ort</label>
           </fieldset>
           <div class="field"><label for="b-anm">Anmerkung <span class="opt">(optional)</span></label><textarea id="b-anm" name="anmerkung" rows="3"></textarea><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="b-web">Website</label><input type="text" id="b-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
-          <div class="trust-list"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Sie zahlen erst nach unserer Bestätigung</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> PayPal-Käuferschutz oder Überweisung</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> 14 Tage Rückgaberecht, Nachdruck-Garantie</span></div>
+          <div class="trust-list"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Sie zahlen erst nach unserer Bestätigung</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> PayPal-Käuferschutz oder Zahlung bei Abholung</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> 14 Tage Rückgaberecht, Nachdruck-Garantie</span></div>
           <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:info@markentrix.de">Bestellung per E-Mail schicken</a> oder anrufen: <a href="tel:017620370429">0176 20370429</a>.</p>
         </form>
       </div>
       <div class="summary" id="cart-summary" hidden>
         <h2 style="font-size:1.1rem">Zusammenfassung</h2>
         <div class="line"><span>Zwischensumme</span><strong id="s-zwischen">0,00 €</strong></div>
-        <div class="line"><span>Versand (Deutschland)</span><strong id="s-versand">0,00 €</strong></div>
+        <div class="line"><span id="s-versand-label">Versand (Deutschland)</span><strong id="s-versand">0,00 €</strong></div>
         <div class="line total"><span>Gesamt</span><span id="s-gesamt">0,00 €</span></div>
         <p class="small muted" id="s-hint"></p>
         <p class="small" data-delivery>Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
