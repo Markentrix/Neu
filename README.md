@@ -31,7 +31,7 @@ Artikel ändern: `build/produkte.py` bearbeiten, dann `python3 build/images.py` 
 
 ## Logo
 
-`brand/` enthält das Logo (Bildmarke: drei Schichten in Sand und Kupfer auf Tannengrün bilden ein S; Wortmarke „Schicht·werk“ in Inter Bold als Pfade):
+`brand/` enthält das Logo (Bildmarke: drei Schichten in Sand und Kupfer auf Tannengrün bilden ein S; Wortmarke „Schicht·werk“ in Fraunces als Pfade):
 SVG hell/dunkel, mit und ohne Kachel, einfarbig, sowie PNG-Exporte (2400 px Logo, 1024 px Marke). Erzeugt mit `python3 build/logo.py`.
 Favicon und App-Icons in `website-fertig/` entstehen aus derselben Marke (`python3 build/images.py`).
 
@@ -57,3 +57,8 @@ Mit `freistellen=True` wird der Hintergrund einmalig per rembg entfernt (`pip in
 
 Zentrale Farbliste `FARBEN` in `build/produkte.py` (Schlüssel, Anzeigename, Farbwert). Pro Artikel `farben=[...]`, der erste Eintrag ist die
 Vorauswahl. `STANDARDFARBEN` für Artikel, die es in allen Farben gibt. Die Karten zeigen „in N Farben“, die Produktseite die Farbfelder.
+
+## Schriften
+
+Überschriften, Produktnamen, Preise und Wortmarke: Fraunces (variabel, SIL OFL), Fließtext und Bedienelemente: Inter. Beide liegen lokal
+unter `website-fertig/assets/fonts/`, Lizenzhinweise in `OFL.txt`. Betonte Wörter in Überschriften stehen in `<em>` (kursiv, grün).

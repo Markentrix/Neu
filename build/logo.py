@@ -7,7 +7,8 @@ from fontTools.pens.transformPen import TransformPen
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 OUT = os.path.join(ROOT, "brand")
-FONT = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
+FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "website-fertig", "assets", "fonts", "Fraunces-normal.woff2")
+FONT_LOCATION = {"wght": 600, "opsz": 72}
 NAVY, CREAM = "#1f4d3a", "#f1ede4"
 L1, L2, L3 = "#f1e6d2", "#d9a06b", "#b8763f"   # Schichten hell -> dunkel (Sand -> Kupfer)
 
@@ -24,9 +25,9 @@ def mark(tile=True, mono=None):
     return s
 
 
-def wordmark_paths(text, size, x0, baseline, tracking=-0.03):
+def wordmark_paths(text, size, x0, baseline, tracking=0.0):
     """Text als SVG-Pfade aus Inter Bold. Gibt (pfade, breite) zurück."""
-    font = TTFont(FONT); gs = font.getGlyphSet(); cmap = font.getBestCmap(); upm = font["head"].unitsPerEm
+    font = TTFont(FONT); gs = font.getGlyphSet(location=FONT_LOCATION) if "fvar" in font else font.getGlyphSet(); cmap = font.getBestCmap(); upm = font["head"].unitsPerEm
     kern = {}
     try:
         gpos = font["GPOS"].table
@@ -55,7 +56,7 @@ def wordmark_paths(text, size, x0, baseline, tracking=-0.03):
 
 def logo_svg(dark_bg=False, with_tile=True):
     """Horizontales Logo: Marke + Wortmarke. Höhe 64, Breite dynamisch."""
-    size = 40; gap = 16; x0 = 64 + gap; baseline = 32 + size * 0.36
+    size = 44; gap = 16; x0 = 64 + gap; baseline = 32 + size * 0.34
     p1, w1 = wordmark_paths("Schicht", size, x0, baseline)
     p2, w2 = wordmark_paths("werk", size, x0 + w1, baseline)
     text_col = CREAM if dark_bg else NAVY

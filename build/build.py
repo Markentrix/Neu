@@ -161,7 +161,7 @@ def build_index():
   <div class="wrap">
     <div>
       <span class="eyebrow">{E(C.CLAIM)}</span>
-      <h1>Dinge, die es so nur für Sie gibt.</h1>
+      <h1>Dinge, die es so <em>nur für Sie</em> gibt.</h1>
       <p class="lead">Kleine Dinge mit Charakter aus dem 3D-Drucker: Deko, Halter und persönliche Geschenke. Jedes Stück wird erst nach Ihrer Bestellung gedruckt, in unserer Werkstatt in Celle. In wenigen Tagen bei Ihnen.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="shop.html">Zum Shop</a>
@@ -528,7 +528,7 @@ def build_about():
     body = f"""<section class="section-tight">
   <div class="wrap prose">
     <span class="eyebrow">Über uns</span>
-    <h1>Eine kleine Werkstatt, ein paar Drucker, viel Geduld.</h1>
+    <h1>Eine kleine Werkstatt, ein paar Drucker, <em>viel Geduld.</em></h1>
     <p class="lead">{E(C.MARKE)} ist eine Ein-Personen-Manufaktur für 3D-gedruckte Alltagsgegenstände. Was Sie hier kaufen, wird nicht aus einem Lager geholt, sondern nach Ihrer Bestellung auf unseren Druckern gefertigt.</p>
     <h2>Wie wir arbeiten</h2>
     <p>Jedes Modell im Shop haben wir selbst entworfen oder sorgfältig angepasst, viele Male probegedruckt und im Alltag getestet. Erst wenn ein Teil stabil ist, sauber vom Druckbett kommt und sich gut anfühlt, landet es im Shop. Wir drucken mit 0,2 mm Schichthöhe, bei Sichtteilen feiner, und prüfen jedes Stück von Hand, bevor es in den Karton geht.</p>
@@ -808,7 +808,7 @@ def build_materials():
     body = f"""<section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Materialien</span>
-    <h1>Welches Material passt zu Ihrem Teil?</h1>
+    <h1>Welches Material passt <em>zu Ihrem Teil?</em></h1>
     <p class="lead muted" style="max-width:62ch">Fünf Kunststoffe decken fast alles ab, was im Alltag gedruckt wird. Hier steht, was jedes Material kann, wo seine Grenzen liegen und was der Druck kostet. Im Zweifel beraten wir bei der <a href="kontakt.html">Anfrage</a>.</p>
     <div class="mat-grid">{cards}</div>
   </div>
@@ -912,7 +912,7 @@ def build_service():
   <div class="wrap">
     <div>
       <span class="eyebrow">Druckservice</span>
-      <h1>Ihre Datei, unser Drucker.</h1>
+      <h1>Ihre Datei, <em>unser Drucker.</em></h1>
       <p class="lead">Ersatzteile, Prototypen, Kleinserien, Vereinslogos: Schicken Sie uns Ihre STL-, 3MF- oder STEP-Datei oder beschreiben Sie das Teil. Sie bekommen innerhalb eines Werktags einen Festpreis.</p>
       <div class="hero-actions"><a class="btn btn-primary" href="kontakt.html">Kostenloses Angebot anfordern</a><a class="btn btn-ghost" href="materialien.html">Materialien vergleichen</a></div>
       <div class="hero-facts">
