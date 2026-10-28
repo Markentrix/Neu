@@ -491,7 +491,7 @@ def build_contact():
           </div>
           <div class="row">
             <div class="field"><label for="k-stueck">Stückzahl <span class="opt">(optional)</span></label><input type="number" id="k-stueck" name="stueckzahl" min="1" max="999"><p class="msg"></p></div>
-            <div class="field"><label for="k-mat">Material-Wunsch <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option><option>PLA (Standard, biobasiert)</option><option>PETG (wasserfest, belastbar)</option><option>ABS (hitzefest, schleifbar)</option><option>ASA (wetterfest, für draußen)</option><option>TPU (flexibel)</option></select><p class="msg"></p></div>
+            <div class="field"><label for="k-mat">Material-Wunsch <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option><option>PLA (Standard, biobasiert)</option><option>PETG (wasserfest, belastbar)</option><option>ABS (hitzefest, schleifbar)</option><option>TPU (flexibel)</option></select><p class="msg"></p></div>
           </div>
           <div class="field"><label for="k-msg">Beschreibung <span class="opt">(Maße, Einsatzzweck, Farbe)</span></label><textarea id="k-msg" name="nachricht" required data-err="Bitte beschreiben Sie kurz Ihr Vorhaben."></textarea><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="k-web">Website</label><input type="text" id="k-web" name="website" tabindex="-1" autocomplete="off"></div>
@@ -510,7 +510,7 @@ def build_contact():
           <h2 style="font-size:1.1rem">Was wir drucken können</h2>
           <ul class="small" style="padding-left:1.2em;margin:0">
             <li>Bauraum bis 25 × 25 × 25 cm, größere Teile in Segmenten</li>
-            <li><a href="materialien.html">PLA, PETG, ABS, ASA, TPU</a>; Schichthöhe 0,12 bis 0,28 mm</li>
+            <li><a href="materialien.html">{", ".join(m["name"] for m in MATERIALIEN)}</a>; Schichthöhe 0,12 bis 0,28 mm</li>
             <li>Zwei Farben in einem Teil (Schrift, Logos)</li>
             <li>Dateiformate STL, 3MF, STEP, OBJ</li>
           </ul>
@@ -804,7 +804,7 @@ def mat_card(m, rel, h="h3"):
 def build_materials():
     cards = "\n".join(mat_card(m, "", "h2") for m in MATERIALIEN)
     head_row = "".join(f'<th scope="col"><a href="material/{m["id"]}.html">{E(m["name"])}</a></th>' for m in MATERIALIEN)
-    rows = "".join(f'<tr><th scope="row">{E(k)}</th>' + "".join(f"<td>{E(v)}</td>" for v in vals) + "</tr>" for k, vals in VERGLEICH)
+    rows = "".join(f'<tr><th scope="row">{E(k)}</th>' + "".join(f"<td>{E(vals[m['id']])}</td>" for m in MATERIALIEN) + "</tr>" for k, vals in VERGLEICH)
     body = f"""<section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Materialien</span>
@@ -826,7 +826,6 @@ def build_materials():
       <div class="feature"><h3>Drinnen, dekorativ, maßgenau</h3><p class="muted">PLA. Die sauberste Oberfläche, die meisten Farben, am schnellsten geliefert.</p></div>
       <div class="feature"><h3>Nass, warm oder unter Last</h3><p class="muted">PETG. Zäh und wasserfest, für Küche, Bad, Clips und Gehäuse.</p></div>
       <div class="feature"><h3>Heiß oder nachbearbeitet</h3><p class="muted">ABS. Bis 95 °C, schleifbar, mit Aceton glättbar, für Ersatzteile.</p></div>
-      <div class="feature"><h3>Draußen über Jahre</h3><p class="muted">ASA. UV-stabil und wetterfest, für Garten, Auto und Fassade.</p></div>
       <div class="feature"><h3>Weich und flexibel</h3><p class="muted">TPU. Gummiartig, reißfest, für Dichtungen, Puffer und Hüllen.</p></div>
     </div>
   </div>
@@ -840,8 +839,13 @@ def build_materials():
   </div>
 </section>
 """
-    page("materialien.html", f"Materialien für den 3D-Druck · {C.MARKE}", "PLA, PETG, ABS, ASA und TPU im Vergleich: Wärmebeständigkeit, Festigkeit, Außeneinsatz, Detailtreue. Welches Material passt zu Ihrem 3D-Druck-Teil?", body, "material")
+    page("materialien.html", f"Materialien für den 3D-Druck · {C.MARKE}", "PLA, PETG, ABS und TPU im Vergleich: Wärmebeständigkeit, Festigkeit, Außeneinsatz, Detailtreue. Welches Material passt zu Ihrem 3D-Druck-Teil?", body, "material")
 
+    mdir = os.path.join(ROOT, "material")
+    if os.path.isdir(mdir):
+        keep = {m["id"] + ".html" for m in MATERIALIEN}
+        for f in os.listdir(mdir):
+            if f not in keep: os.remove(os.path.join(mdir, f))
     for i, m in enumerate(MATERIALIEN):
         rel = "../"
         props = "".join(f"<dt>{E(k)}</dt><dd>{E(v)}</dd>" for k, v in m["eigenschaften"])
@@ -979,7 +983,7 @@ def build_service():
   </div>
 </section>
 """
-    page("druckservice.html", f"3D-Druckservice für eigene Dateien · {C.MARKE}", "3D-Druck auf Bestellung: Ersatzteile, Prototypen und Kleinserien aus PLA, PETG, ABS, ASA oder TPU. Festpreis innerhalb eines Werktags, ab 1 Stück.", body, "service")
+    page("druckservice.html", f"3D-Druckservice für eigene Dateien · {C.MARKE}", "3D-Druck auf Bestellung: Ersatzteile, Prototypen und Kleinserien aus PLA, PETG, ABS oder TPU. Festpreis innerhalb eines Werktags, ab 1 Stück.", body, "service")
 
 
 # ---------------------------------------------------------------- FAQ

@@ -1,6 +1,6 @@
 # Materialseiten für den Druckservice. Werte sind übliche Richtwerte für FDM-Druck.
 
-MATERIALIEN = [
+MATERIALIEN_ALLE = [
     dict(
         id="pla", name="PLA", titel="3D-Druck mit PLA", farbe="#9e6230",
         claim="Das Standardmaterial: präzise, pflanzenbasiert, in den meisten Farben.",
@@ -12,7 +12,7 @@ MATERIALIEN = [
         farben="Schwarz, Weiß, Orange, Mint, Steingrau, Nachtblau, Holzton; weitere auf Anfrage",
         faq=[("Ist PLA biologisch abbaubar?", "Nur in industriellen Kompostieranlagen bei über 60 °C. Im Gartenkompost oder in der Natur baut es sich praktisch nicht ab. Wir sammeln Reste und Fehldrucke und geben sie zum Recycling."),
              ("Kann ich PLA lackieren?", "Ja. Nach leichtem Anschleifen hält Acryllack und Sprühlack gut. Füller gleicht die Schichtlinien aus."),
-             ("Wie stabil ist PLA?", "Zugfest etwa wie ABS, aber weniger schlagzäh. Für einen Haken oder einen Halter reicht es locker, für ein Zahnrad unter Dauerlast nehmen wir PETG oder ASA.")],
+             ("Wie stabil ist PLA?", "Zugfest etwa wie ABS, aber weniger schlagzäh. Für einen Haken oder einen Halter reicht es locker, für ein Zahnrad unter Dauerlast nehmen wir PETG oder ABS.")],
     ),
     dict(
         id="petg", name="PETG", titel="3D-Druck mit PETG", farbe="#1f4d3a",
@@ -37,10 +37,10 @@ MATERIALIEN = [
         farben="Schwarz, Weiß, Grau; weitere auf Anfrage",
         faq=[("Warum ist ABS teurer als PLA?", "ABS braucht einen beheizten, geschlossenen Bauraum und druckt langsamer. Dafür bekommen Sie ein Teil, das 95 °C aushält und sich wie Spritzguss nachbearbeiten lässt."),
              ("Was ist Aceton-Glätten?", "ABS löst sich in Acetondampf oberflächlich an. Die Schichtlinien verschwinden, das Teil wird glänzend und dichter. Wir bieten das als Option an, Details werden dabei etwas weicher."),
-             ("ABS oder ASA?", "Gleiche Mechanik, aber ASA ist UV-stabil. Alles, was draußen bleibt, drucken wir in ASA.")],
+             ("Geht ABS auch draußen?", "Nur lackiert, weil UV-Licht es mit der Zeit spröde macht. Für Teile, die dauerhaft draußen bleiben, beraten wir zur passenden Alternative.")],
     ),
     dict(
-        id="asa", name="ASA", titel="3D-Druck mit ASA", farbe="#5a6b7a",
+        id="asa", name="ASA", titel="3D-Druck mit ASA", farbe="#5a6b7a", entwurf=True,   # später freischalten: entwurf entfernen
         claim="Für draußen: UV-beständig, wetterfest, so robust wie ABS.",
         kurz="Acrylnitril-Styrol-Acrylat, der Outdoor-Bruder von ABS. Vergilbt nicht, wird in der Sonne nicht spröde und hält Regen, Frost und Hitze über Jahre aus.",
         eigenschaften=[("Wärmebeständig bis", "ca. 95 °C"), ("Festigkeit", "hoch, schlagzäh"), ("Oberfläche", "matt, seidig"), ("Maßhaltigkeit", "±0,3 mm"), ("Außeneinsatz", "uneingeschränkt"), ("Lebensmittelkontakt", "nicht empfohlen")],
@@ -65,13 +65,13 @@ MATERIALIEN = [
     ),
 ]
 
-# Vergleichstabelle (Reihenfolge wie MATERIALIEN)
+# Vergleichstabelle, Werte je Material-ID (Spalten folgen den aktiven Materialien)
 VERGLEICH = [
-    ("Wärme bis", ["55 °C", "75 °C", "95 °C", "95 °C", "80 °C"]),
-    ("Schlagzäh", ["gering", "hoch", "hoch", "hoch", "sehr hoch"]),
-    ("Detailtreue", ["sehr gut", "gut", "gut", "gut", "mittel"]),
-    ("Draußen", ["nein", "bedingt", "nur lackiert", "ja", "ja"]),
-    ("Wasser", ["kurz ok", "ja", "ja", "ja", "ja"]),
+    ("Wärme bis", {"pla": "55 °C", "petg": "75 °C", "abs": "95 °C", "asa": "95 °C", "tpu": "80 °C"}),
+    ("Schlagzäh", {"pla": "gering", "petg": "hoch", "abs": "hoch", "asa": "hoch", "tpu": "sehr hoch"}),
+    ("Detailtreue", {"pla": "sehr gut", "petg": "gut", "abs": "gut", "asa": "gut", "tpu": "mittel"}),
+    ("Draußen", {"pla": "nein", "petg": "bedingt", "abs": "nur lackiert", "asa": "ja", "tpu": "ja"}),
+    ("Wasser", {"pla": "kurz ok", "petg": "ja", "abs": "ja", "asa": "ja", "tpu": "ja"}),
 ]
 
 FAQ = [
@@ -84,7 +84,7 @@ FAQ = [
     ]),
     ("Material und Qualität", [
         ("Sieht man die Schichten?", "Ja, feine Linien von 0,12 bis 0,28 mm gehören zum Verfahren. Bei Sichtteilen drucken wir feiner, auf Wunsch schleifen und lackieren wir."),
-        ("Welches Material soll ich nehmen?", "Drinnen und dekorativ: PLA. Nass, warm oder unter Last: PETG. Hitze und Nachbearbeitung: ABS. Draußen: ASA. Flexibel: TPU. Die Übersicht auf der Seite Materialien vergleicht alle fünf."),
+        ("Welches Material soll ich nehmen?", "Drinnen und dekorativ: PLA. Nass, warm oder unter Last: PETG. Hitze und Nachbearbeitung: ABS. Flexibel: TPU. Die Übersicht auf der Seite Materialien vergleicht alle."),
         ("Sind die Teile spülmaschinenfest?", "Nein. PLA verformt sich ab 55 °C, PETG ab 75 °C. Von Hand mit warmem Wasser spülen."),
         ("Weichen Farben ab?", "Zwischen Filamentchargen kann der Ton leicht variieren. Bei Nachbestellungen zu einem bestehenden Satz sagen Sie uns Bescheid, dann drucken wir aus derselben Rolle."),
     ]),
@@ -99,3 +99,5 @@ FAQ = [
         ("Das Teil kam beschädigt an.", "Foto an uns, wir drucken kostenlos nach. Nichts zurückschicken, bevor wir uns gemeldet haben."),
     ]),
 ]
+
+MATERIALIEN = [m for m in MATERIALIEN_ALLE if not m.get("entwurf")]
