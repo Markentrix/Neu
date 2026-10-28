@@ -12,3 +12,6 @@ Die fertige, statische Website liegt in `website-fertig/` und wird so hochgelade
 - `js/` enthält die lesbaren Skripte; `website-fertig/assets/js/` bekommt die mit terser minifizierten Fassungen:
   `npx terser@5.31.0 tools/js/main.js -c -m -o website-fertig/assets/js/main.js --comments false` (ebenso buchen.js)
 - `mock-portal-gzip.py` ist der Testserver mit gzip wie bei einem echten Hoster (für Lighthouse-Messungen).
+- Demo-Version mit Markentrix-Wasserzeichen, noindex und gesperrter robots.txt (zum Zeigen beim Kunden):
+  `DEMO=1 python3 tools/build/build.py` erzeugt `website-demo/`; ZIP: `cd website-demo && zip -r -X ../celler-kartbahn-demo.zip . -x ".*"`
+- `css/style.css` ist die CSS-Quelle; sie wird beim Build minifiziert in jede Seite eingebettet (keine separate CSS-Datei im Upload).

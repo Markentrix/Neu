@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "website-fertig") + os.sep
+DEMO = os.environ.get("DEMO") == "1"
+CSS_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "css", "style.css")
+_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+OUT = os.environ.get("OUT", os.path.join(_ROOT, "website-demo") + os.sep if DEMO else os.path.join(_ROOT, "website-fertig") + os.sep)
 TEL = "05141 908650"
 TEL_LINK = "tel:+495141908650"
 WA_LINK = "https://wa.me/4915231394662"
@@ -220,11 +223,43 @@ def page_jsonld(name, html):
            "speakable": {"@type": "SpeakableSpecification", "cssSelector": ["h1", ".lead"]}}
     return '<script type="application/ld+json">' + _json.dumps(obj, ensure_ascii=False) + '</script>'
 
+WATERMARK = None
+def watermark():
+    global WATERMARK
+    if WATERMARK is None:
+        import urllib.parse
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="420" height="260"><text x="210" y="150" text-anchor="middle" transform="rotate(-28 210 130)" '
+               'font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700" fill="#ffffff" fill-opacity="0.16">© Markentrix · Entwurf</text></svg>')
+        uri = "data:image/svg+xml;utf8," + urllib.parse.quote(svg)
+        WATERMARK = ('<style>.mkwm{position:fixed;inset:0;z-index:9998;pointer-events:none;background:url("' + uri + '") repeat;background-size:420px 260px}'
+          '.mkwm-badge{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(5.2rem + env(safe-area-inset-bottom,0px));z-index:9999;pointer-events:none;'
+          'background:rgba(225,6,0,.92);color:#fff;font:700 .78rem/1.3 Inter,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:.45rem .9rem;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.5);white-space:nowrap}'
+          '@media(min-width:1000px){.mkwm-badge{bottom:1rem;left:auto;right:1rem;transform:none}}</style>'
+          '<div class="mkwm" aria-hidden="true"></div><div class="mkwm-badge" aria-hidden="true">Entwurf © Markentrix 2026 · Vorschau, nicht zur Weitergabe</div>')
+    return WATERMARK
+
+def ensure_assets():
+    import shutil, os
+    src = os.path.join(_ROOT, "website-fertig") + os.sep
+    if os.path.abspath(OUT) != os.path.abspath(src):
+        for d in ("assets", "downloads"):
+            if os.path.isdir(OUT + d): shutil.rmtree(OUT + d)
+            shutil.copytree(src + d, OUT + d)
+        for f in ("favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"):
+            shutil.copy(src + f, OUT + f)
+    if os.path.isdir(OUT + "assets/css"): shutil.rmtree(OUT + "assets/css")
+
 def write(name, html):
     if name.endswith(".html"):
         html = responsive(html)
-        css = open(OUT + "assets/css/style.css", encoding="utf-8").read()
-        html = html.replace('<link rel="stylesheet" href="assets/css/style.css">', "<style>" + minify_css(css) + "</style>")
+        if DEMO:
+            import re as _re
+            html = _re.sub(r'<meta name="robots" content="[^"]*">', '<meta name="robots" content="noindex,nofollow,noarchive">', html)
+            html = html.replace("</body>", watermark() + "</body>", 1)
+        import os as _os
+        if not _os.path.isdir(OUT + "assets"): ensure_assets()
+        css = open(CSS_SRC, encoding="utf-8").read()
+        html = html.replace('<link rel="stylesheet" href="assets/css/style.css">', "<style>" + minify_css(css).replace('url("/assets/fonts/', 'url("assets/fonts/') + "</style>")
         import re as _re
         m = _re.search(r'<picture><source media="\(max-width: 700px\)" srcset="([^"]+)"><img class="hero__img" src="([^"]+)"', html)
         if m:

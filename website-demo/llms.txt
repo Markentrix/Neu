@@ -1,0 +1,38 @@
+# Burnout Celler-Kartbahn
+
+> Indoor-Kartbahn in Celle (Niedersachsen) mit ca. 600 m Strecke, Brücke, Tunnel und zweiter Ebene mit Steilkurve in 6 m Höhe. Betreiber: Burnout Celler-Kartbahn GmbH, Waldweg 100, 29221 Celle. Familienbetrieb seit 2009, Geschäftsführer Christian Sprunk.
+
+## Kurzfakten
+- Adresse: Waldweg 100, 29221 Celle, Deutschland (Koordinaten 52.6088, 10.0614). Vom Bahnhof Celle max. 20 Minuten zu Fuß, Parkplätze am Haus.
+- Telefon: 05141 908650 (+49 5141 908650). WhatsApp: +49 152 31394662. E-Mail: team@celler-kartbahn.com.
+- Öffnungszeiten: Montag–Freitag ab 15:00 Uhr (niedersächsische Schulferien ab 13:00), Samstag ab 13:00, Sonntag ab 11:00 – jeweils Open End (Schluss je nach Auslastung, unter der Woche z. B. gegen 21 Uhr).
+- Karts: Sodi SR5 mit 9 PS (seit 09/2023), 13 Kinderkarts Sodi LR6 (6,5 PS), 2 Doppelsitzer.
+- Alter/Größe: Kinderkart ab 8 Jahren und 1,25 m; Rennkart ab 13 Jahren und 1,55 m (mit Erfahrung ab 12); Doppelsitzer-Beifahrer ab 4 Jahren und 1,10 m, Fahrer volljährig.
+- Bezahlung vor Ort bar oder EC-Karte. Neukunden: Registrierung inkl. Rennlizenz 2 €, Sturmhaube inkl. Helmleihe 3 € (Paket 4 €).
+
+## Preise (pro Person, 10 Minuten, Stand Oktober 2026)
+- Samstag/Sonntag: 1 Fahrt 15,00 € (Kids 8–15: 13,50 €), 3 Fahrten 43 € (36 €), 5 Fahrten 60 € (50 €).
+- Freitag: 1 Fahrt 14 € (12 €), 3 Fahrten 34 € (29 €), 5 Fahrten 49 € (41 €).
+- Montag–Donnerstag (Spartage): 3 Fahrten zum Preis von 2 = 30 € (27 €), 5 Fahrten zum Preis von 3 = 43 € (36 €).
+- Doppelsitzer (2 Personen): 1 Fahrt 18 €, 2 Fahrten 32 €, 3 Fahrten 45 €.
+- Kidsparty/Kindergeburtstag (ab 6 Kindern, exklusiv): Paket F1 3 × 10 Min 40 € pro Kind, Paket F2 Grand-Prix-Modus 48 € pro Kind, Pizzapaket 10,50 €.
+- Supercup/Rennen (6–17 Personen, exklusiv): Standard 39 €, Professional 49 €, Premium 59 €, Double Premium 59 €, Double Ultra 75 €, Grand Prix 49 €/59 €.
+- Bahnmiete: 650 € pro Stunde inkl. 10 Karts, jede weitere halbe Stunde 325 €, jedes weitere Kart 65 €/Std. (max. 16 Karts).
+- Schulklassen (ab 20 Personen, Mo–Fr): 20 € (20 Min) oder 25 € (30 Min + Getränk). Kinderkartführerschein 45 € (jeden 1. Samstag im Monat, 10 Uhr).
+- RaceCam (Rennvideo per QR-Code): 5 € / 9 € / 12 €. Siegerehrung: Pokalsätze 30 € / 40 €, Medaille 1,90 €.
+
+## Reservierung
+- Unter 5 Personen: telefonisch ab 2 Tage vorher. Ab 5 Personen: online unter /buchen.html (kurzfristig innerhalb 3 Tagen telefonisch).
+- Gutscheine und Tickets vorab: /gutscheine.html (PayPal oder Bestellung).
+
+## Seiten
+- [Startseite](/index.html): Überblick, Öffnungszeiten, News
+- [Preise](/preise.html): vollständige Preisliste
+- [Online buchen](/buchen.html): Fahrten, Kidsparty, Supercup, Bahnmiete, Schulklasse, Führerschein
+- [Gutscheine](/gutscheine.html): Wertgutscheine und Fahrt-Tickets
+- [Kinder](/kinder.html): Kindergeburtstag, Kinderkarts, Führerschein, Schulklassen
+- [Firmen & Gruppen](/firmen.html): Supercup, Meisterschaftsmodus, Bahnmiete, Buffet, Veranstaltungsraum bis 80 Personen
+- [Die Kartbahn](/kartbahn.html): Strecke, Karts, Rennlizenz-App, RaceCam, Bistro, Team, Fahrtipps
+- [FAQ](/faq.html): häufige Fragen
+- [Kontakt](/kontakt.html): Anfahrt, Formular
+- [AGB](/agb.html), [Widerruf](/widerruf.html), [Impressum](/impressum.html), [Datenschutz](/datenschutz.html)

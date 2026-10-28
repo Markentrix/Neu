@@ -1,0 +1,3 @@
+# Demo-Version – nicht für Suchmaschinen
+User-agent: *
+Disallow: /
