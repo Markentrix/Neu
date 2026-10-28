@@ -233,7 +233,7 @@ def watermark():
         uri = "data:image/svg+xml;utf8," + urllib.parse.quote(svg)
         WATERMARK = ('<style>.mkwm{position:fixed;inset:0;z-index:9998;pointer-events:none;background:url("' + uri + '") repeat;background-size:420px 260px}'
           '.mkwm-badge{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(5.2rem + env(safe-area-inset-bottom,0px));z-index:9999;pointer-events:none;'
-          'background:rgba(225,6,0,.92);color:#fff;font:700 .78rem/1.3 Inter,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:.45rem .9rem;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.5);white-space:nowrap}'
+          'background:rgba(225,6,0,.92);color:#fff;font:700 .78rem/1.3 Inter,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:.45rem .9rem;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.5);max-width:calc(100vw - 2rem);text-align:center}'
           '@media(min-width:1000px){.mkwm-badge{bottom:1rem;left:auto;right:1rem;transform:none}}</style>'
           '<div class="mkwm" aria-hidden="true"></div><div class="mkwm-badge" aria-hidden="true">Entwurf © Markentrix 2026 · Vorschau, nicht zur Weitergabe</div>')
     return WATERMARK
