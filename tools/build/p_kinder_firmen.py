@@ -64,7 +64,7 @@ html += f'''
     <h2>Wichtig für Eltern</h2>
     <div class="grid grid-2">
       <div class="notice notice--warn">
-        <p><strong>Einverständniserklärung:</strong> Eltern haften für ihre Kinder. Für jedes minderjährige Kind bitte die <a href="downloads/haftungsausschluss-minderjaehrige.pdf">Einverständniserklärung (PDF)</a> ausgefüllt mitbringen – sonst kann das Kind leider nicht teilnehmen.</p>
+        <p><strong>Einverständniserklärung:</strong> Eltern haften für ihre Kinder. Für jedes minderjährige Kind bitte die <a href="downloads/haftungsausschluss-minderjaehrige.pdf" target="_blank" rel="noopener">Einverständniserklärung (PDF)</a> ausgefüllt mitbringen – sonst kann das Kind leider nicht teilnehmen.</p>
       </div>
       <div class="notice">
         <p><strong>Essen &amp; Trinken:</strong> Durch unsere Gastronomie sind eigene Speisen, Kuchen, Gebäck und Getränke nicht gestattet. Der Geburtstagstisch ist ausreichend mit Süßigkeiten und Chips gedeckt und wird bei Bedarf aufgefüllt.</p>
@@ -203,7 +203,7 @@ html += f'''
         <li>Kombination mit dem <a href="https://www.dartraum-celle.de" rel="noopener" target="_blank">Dartraum Celle</a>: erst Kart, dann Dart</li>
       </ul>
       <div class="pill-row">
-        <a class="btn btn--ghost" href="downloads/buffet-2026-2027.jpg">Buffetangebot 2026/2027 ansehen</a>
+        <a class="btn btn--ghost" href="buffet.html">Buffetangebot 2026/2027 ansehen</a>
         <a class="btn btn--primary" href="kontakt.html">Individuelles Angebot anfragen</a>
       </div>
     </div>
@@ -223,3 +223,27 @@ html += f'''
 </section>
 ''' + contact_strip() + footer() + end()
 write("firmen.html", html)
+
+# ---------------- BUFFET ----------------
+html = head("Buffetangebot 2026/2027 | Burnout Celler-Kartbahn", "Buffetauswahl für Firmenevents, Weihnachtsfeiern und Gruppen ab 20 Personen im Veranstaltungsraum der Celler Kartbahn – der Raum ist bei Buffetbestellung kostenfrei.", breadcrumb("Buffet","buffet.html")) + header()
+html += f'''
+<section class="section section--tight">
+  <div class="wrap">
+    <p><a href="firmen.html#buffet">← Zurück zu Firmen &amp; Gruppen</a></p>
+    <span class="eyebrow">Veranstaltungsraum</span>
+    <h1>Buffetangebot 2026/2027</h1>
+    <p class="lead">Für Gruppen ab 20 Personen. Bei einer Buffetbestellung steht euch der Veranstaltungsraum (bis 80 Personen) kostenfrei zur Verfügung, unser Servicepersonal kümmert sich um euch.</p>
+    <figure style="margin:0 0 1.5rem">
+      <img src="downloads/buffet-2026-2027.jpg" width="1400" height="933" alt="Buffetangebot 2026/2027 der Burnout Celler-Kartbahn mit allen Speisen und Preisen" style="border-radius:14px;width:100%;height:auto" decoding="async">
+      <figcaption class="small" style="margin-top:.5rem">Tipp: Auf dem Handy mit zwei Fingern zoomen. <a href="downloads/buffet-2026-2027.jpg" target="_blank" rel="noopener">Bild in voller Größe öffnen</a>.</figcaption>
+    </figure>
+    <div class="pill-row">
+      <a class="btn btn--primary" href="buchen.html?angebot=bahnmiete">Event mit Buffet anfragen</a>
+      <a class="btn btn--ghost" href="firmen.html">Rennpakete ansehen</a>
+      <a class="btn btn--ghost" href="kontakt.html">Kontakt</a>
+    </div>
+    <p class="small" style="margin-top:1rem">Angebot gültig für die Saison 2026/2027, Änderungen vorbehalten. Buffet bitte spätestens bei der Buchung mit angeben.</p>
+  </div>
+</section>
+''' + contact_strip() + footer() + end()
+write("buffet.html", html)

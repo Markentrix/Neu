@@ -56,7 +56,7 @@ html += f'''
         <ul class="checks">
           <li>Beifahrer ab 4 Jahren und 1,10 m Mindestgröße</li>
           <li>Am Steuer sitzt eine volljährige Person; bei Beifahrern unter 18 Jahren die erziehungsberechtigte Person</li>
-          <li>Unter 18 und zum ersten Mal da? <a href="downloads/haftungsausschluss-minderjaehrige.pdf">Einverständniserklärung</a> ausgefüllt mitbringen</li>
+          <li>Unter 18 und zum ersten Mal da? <a href="downloads/haftungsausschluss-minderjaehrige.pdf" target="_blank" rel="noopener">Einverständniserklärung</a> ausgefüllt mitbringen</li>
           <li>Reservierung telefonisch ab 2 Tage vorher: <a href="{TEL_LINK}">{TEL}</a></li>
           <li>Bei Rennen oder Bahnmieten: einmalig 10 € Zusatzgebühr</li>
         </ul>
@@ -209,7 +209,7 @@ html += f'''
             <div class="field"><label for="erw1620">Mitfahrende Erwachsene 16–20 J. (+5 €)</label><input type="number" id="erw1620" name="erw1620" min="0" max="30" value="0" inputmode="numeric"></div>
             <div class="field"><label for="erw21">Mitfahrende Erwachsene ab 21 J. (+7,50 €)</label><input type="number" id="erw21" name="erw21" min="0" max="30" value="0" inputmode="numeric"></div>
           </div>
-          <p class="small">Bitte die <a href="downloads/haftungsausschluss-minderjaehrige.pdf">Einverständniserklärung der Eltern</a> für jedes Kind mitbringen. Eigene Speisen, Kuchen und Getränke sind nicht gestattet – der Partytisch ist gedeckt.</p>
+          <p class="small">Bitte die <a href="downloads/haftungsausschluss-minderjaehrige.pdf" target="_blank" rel="noopener">Einverständniserklärung der Eltern</a> für jedes Kind mitbringen. Eigene Speisen, Kuchen und Getränke sind nicht gestattet – der Partytisch ist gedeckt.</p>
         </div>
         <div data-for="supercup">
           <div class="fields-2">
@@ -255,7 +255,7 @@ html += f'''
           <div class="field"><label for="email">E-Mail *</label><input type="email" id="email" name="email" autocomplete="email" inputmode="email" required><span class="hint">Dorthin senden wir die Bestätigung.</span><span class="error"></span></div>
         </div>
         <div class="field hp" aria-hidden="true"><label for="website">Website</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>
-        <div class="field field--check"><input type="checkbox" id="agb" name="agb" value="ja" required><label for="agb">Ich habe die <a href="agb.html">AGB</a> gelesen und akzeptiere sie. Mir ist bekannt, dass alle Teilnehmer 30 Minuten vor Startzeit eintreffen und minderjährige Teilnehmer eine <a href="downloads/haftungsausschluss-minderjaehrige.pdf">Einverständniserklärung</a> benötigen. *</label><span class="error"></span></div>
+        <div class="field field--check"><input type="checkbox" id="agb" name="agb" value="ja" required><label for="agb">Ich habe die <a href="agb.html">AGB</a> gelesen und akzeptiere sie. Mir ist bekannt, dass alle Teilnehmer 30 Minuten vor Startzeit eintreffen und minderjährige Teilnehmer eine <a href="downloads/haftungsausschluss-minderjaehrige.pdf" target="_blank" rel="noopener">Einverständniserklärung</a> benötigen. *</label><span class="error"></span></div>
         <div class="field field--check"><input type="checkbox" id="einwilligung" name="einwilligung" value="ja" required><label for="einwilligung">Ich bin damit einverstanden, dass meine Angaben zur Bearbeitung der Buchung gespeichert und verarbeitet werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>. *</label><span class="error"></span></div>
         <div class="form-status" role="alert" aria-live="polite"></div>
         {fallback_box("Online-Buchung gerade nicht möglich? Reserviert direkt bei uns:")}
