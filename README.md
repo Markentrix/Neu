@@ -40,6 +40,11 @@ Favicon und App-Icons in `website-fertig/` entstehen aus derselben Marke (`pytho
 Palette „Warmweiß, Tiefgrün, Kupfer“: Fläche `#f7f4ee`, Text `#1c2a24`, Marke/Struktur Tannengrün `#1f4d3a`, Kaufknopf Kupfer `#9e6230` (nur für Warenkorb und Bestellen), Fehler `#b23a2e`.
 Alle Farben sind Tokens in `website-fertig/assets/css/style.css` (`:root`, hell und dunkel). Logo- und Illustrationsfarben stehen in `build/logo.py` und `build/images.py`.
 
+## Beispielartikel und Freischalten
+
+Die 20 Beispielartikel in `build/produkte.py` tragen `entwurf=True` und werden nicht gebaut. Ein Artikel kommt in den Shop, sobald
+`entwurf` entfernt ist; Maße, Gewicht, Material und Preis vorher prüfen, Foto wie unten ablegen. Kategorien und Filter erscheinen automatisch nur für Artikel, die es gibt.
+
 ## Echte Produktfotos
 
 Foto als JPG unter `build/fotos/<artikel-id>.jpg` ablegen, im Artikel in `build/produkte.py` `foto=True` setzen

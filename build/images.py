@@ -244,6 +244,10 @@ def main():
     tmp = tempfile.mkdtemp()
     jobs = []
     for p in PRODUKTE:
+        if p.get("entwurf"):
+            stale = os.path.join(OUT, p["id"] + ".webp")
+            if os.path.exists(stale): os.remove(stale)
+            continue
         if p.get("foto"):
             src = os.path.join(os.path.dirname(__file__), "fotos", p["id"] + ".jpg")
             from PIL import ImageOps
@@ -279,6 +283,16 @@ def main():
         with open(path, "w") as f:
             f.write(svg)
         jobs.append({"svg": path, "png": os.path.join(tmp, p["id"] + ".png"), "w": W, "h": H})
+    # Gutschein-Karte
+    gs = frame('<rect x="190" y="170" width="420" height="270" rx="18" fill="#1f4d3a"/>'
+               '<rect x="190" y="170" width="420" height="270" rx="18" fill="none" stroke="#f1e6d2" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 6" transform="translate(10 10) scale(.952)"/>'
+               '<g transform="translate(220 200) scale(.9)"><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f"/></g>'
+               '<text x="300" y="235" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="26" fill="#f1ede4">Schicht<tspan fill="#d9a06b">werk</tspan></text>'
+               '<text x="220" y="330" font-family="Inter,Arial,sans-serif" font-weight="600" font-size="16" fill="#f1ede4" fill-opacity=".8" letter-spacing="3">GESCHENKGUTSCHEIN</text>'
+               '<text x="220" y="395" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="54" fill="#f1ede4">20 €</text>'
+               '<text x="560" y="412" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" fill="#f1ede4" fill-opacity=".7">3 Jahre gültig</text>')
+    gp = os.path.join(tmp, "gutschein.svg"); open(gp, "w").write(gs)
+    jobs.append({"svg": gp, "png": os.path.join(tmp, "gutschein.png"), "w": W, "h": H})
     # Favicon
     fav = os.path.join(tmp, "favicon.svg")
     with open(fav, "w") as f:
@@ -300,7 +314,7 @@ def main():
     im.resize((192, 192), Image.LANCZOS).save(os.path.join(ROOT, "icon-192.png"))
     im.resize((512, 512), Image.LANCZOS).save(os.path.join(ROOT, "icon-512.png"))
     im.save(os.path.join(ROOT, "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
-    print("Bilder erzeugt:", len(PRODUKTE))
+    print("Bilder erzeugt:", len([p for p in PRODUKTE if not p.get("entwurf")]), "+ Gutschein")
 
 
 if __name__ == "__main__":

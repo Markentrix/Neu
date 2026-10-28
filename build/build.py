@@ -5,6 +5,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 import config as C
 from produkte import PRODUKTE, FARBEN, KATEGORIEN, VERSAND_PAUSCHALE, VERSANDFREI_AB
 from materialien import MATERIALIEN, VERGLEICH, FAQ
+AKTIV = [p for p in PRODUKTE if not p.get("entwurf")]          # nur freigeschaltete Artikel
+KAT_AKTIV = {k: v for k, v in KATEGORIEN.items() if any(p["kat"] == k for p in AKTIV)}
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "website-fertig"))
 E = html.escape
@@ -83,6 +85,7 @@ def footer(rel):
         <h2>Shop</h2>
         <ul>
           <li><a href="{rel}shop.html">Alle Artikel</a></li>
+          <li><a href="{rel}gutschein.html">Geschenkgutschein</a></li>
           <li><a href="{rel}druckservice.html">Druckservice</a></li>
           <li><a href="{rel}kontakt.html">Anfrage stellen</a></li>
           <li><a href="{rel}versand.html">Versand &amp; Zahlung</a></li>
@@ -148,9 +151,10 @@ def card(p, rel, pos, h="h3"):
 
 # ---------------------------------------------------------------- Startseite
 def build_index():
-    featured = [p for p in PRODUKTE if "bestseller" in p["tags"]][:4]
+    nfarben = len({f for p in AKTIV for f in p["farben"]})
+    featured = ([p for p in AKTIV if "bestseller" in p["tags"]] + [p for p in AKTIV if "bestseller" not in p["tags"]])[:4]
     cards = "\n".join(card(p, "", i) for i, p in enumerate(featured))
-    cats = "\n".join(f'<a class="chip" href="shop.html#{k}">{E(v)}</a>' for k, v in KATEGORIEN.items())
+    cats = "\n".join(f'<a class="chip" href="shop.html#{k}">{E(v)}</a>' for k, v in KAT_AKTIV.items())
     hero_art = """<svg viewBox="0 0 400 400" role="img" aria-label="Stilisierter 3D-Drucker, der schichtweise ein orangefarbenes Objekt aufbaut">
       <rect x="40" y="340" width="320" height="22" rx="8" fill="#1c2a24"/>
       <rect x="60" y="60" width="14" height="290" rx="4" fill="#2e3f37"/><rect x="326" y="60" width="14" height="290" rx="4" fill="#2e3f37"/>
@@ -180,25 +184,21 @@ def build_index():
         <span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span>
         <span>{SVG_CHECK} 14 Tage Rückgaberecht</span>
         <span>{SVG_CHECK} Nachdruck-Garantie</span>
-        <span>{SVG_CHECK} 7 Farben zur Wahl</span>
+        <span>{SVG_CHECK} {("%d Farben zur Wahl" % nfarben) if nfarben >= 3 else "Gefertigt in Celle"}</span>
       </div>
     </div>
     <div class="hero-art">{hero_art}</div>
   </div>
 </section>
 
-<section class="section-tight">
-  <div class="wrap">
-    <div class="filterbar" aria-label="Kategorien">{cats}</div>
-  </div>
-</section>
+{'<section class="section-tight"><div class="wrap"><div class="filterbar" aria-label="Kategorien">' + cats + '</div></div></section>' if len(KAT_AKTIV) > 1 else ''}
 
 <section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Beliebt</span>
     <h2>Das bestellen unsere Kunden am häufigsten</h2>
     <div class="grid">{cards}</div>
-    <p style="margin-top:24px"><a class="btn btn-ghost" href="shop.html">Alle {len(PRODUKTE)} Artikel ansehen</a> <a class="btn btn-ghost" href="shop.html#personalisiert">Geschenke mit Namen</a></p>
+    <p style="margin-top:24px"><a class="btn btn-ghost" href="shop.html">Alle {len(AKTIV)} Artikel ansehen</a> <a class="btn btn-ghost" href="gutschein.html">Geschenkgutschein</a></p>
   </div>
 </section>
 
@@ -264,22 +264,22 @@ def build_index():
 # ---------------------------------------------------------------- Shop
 def build_shop():
     chips = '<button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button>' + "".join(
-        f'<button class="chip" type="button" data-kat="{k}" aria-pressed="false">{E(v)}</button>' for k, v in KATEGORIEN.items()) + '<button class="chip" type="button" data-kat="personalisiert" aria-pressed="false">Mit Wunschtext</button>'
-    ordered = sorted(PRODUKTE, key=lambda p: (0 if "bestseller" in p["tags"] else 1 if "neu" in p["tags"] else 2))
+        f'<button class="chip" type="button" data-kat="{k}" aria-pressed="false">{E(v)}</button>' for k, v in KAT_AKTIV.items()) + ('<button class="chip" type="button" data-kat="personalisiert" aria-pressed="false">Mit Wunschtext</button>' if any(p.get("text") for p in AKTIV) else "")
+    ordered = sorted(AKTIV, key=lambda p: (0 if "bestseller" in p["tags"] else 1 if "neu" in p["tags"] else 2))
     cards = "\n".join(card(p, "", i, "h2") for i, p in enumerate(ordered))
     body = f"""<section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Shop</span>
     <h1>Alle Artikel</h1>
-    <p class="muted" style="max-width:60ch">{len(PRODUKTE)} Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos. 14 Tage Rückgabe.</p>
+    <p class="muted" style="max-width:60ch">{len(AKTIV)} Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos. 14 Tage Rückgabe.</p>
     <div class="trust-strip"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span></div>
     <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
       {chips}
       <label class="sr-only" for="sortierung">Sortierung</label>
       <select id="sortierung"><option value="standard">Empfohlen</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A–Z</option></select>
     </div>
-    <p class="small muted" id="treffer" aria-live="polite">{len(PRODUKTE)} Artikel</p>
-    <div class="grid" id="shop-grid">{cards}</div>
+    <p class="small muted" id="treffer" aria-live="polite">{len(AKTIV)} Artikel</p>
+    <div class="grid" id="shop-grid">{cards}{gutschein_card("")}</div>
   </div>
 </section>
 """
@@ -288,7 +288,13 @@ def build_shop():
 
 # ---------------------------------------------------------------- Produktseiten
 def build_products():
-    for i, p in enumerate(PRODUKTE):
+    # Seiten von Entwürfen oder gelöschten Artikeln entfernen
+    pdir = os.path.join(ROOT, "produkt")
+    if os.path.isdir(pdir):
+        keep = {p["id"] + ".html" for p in AKTIV}
+        for f in os.listdir(pdir):
+            if f not in keep: os.remove(os.path.join(pdir, f))
+    for i, p in enumerate(AKTIV):
         rel = "../"
         sw = ""
         for j, f in enumerate(p["farben"]):
@@ -297,9 +303,9 @@ def build_products():
         textfield = ""
         if p.get("text"):
             textfield = f"""<div class="field"><label for="wunschtext">{E(p['textlabel'])}</label><input type="text" id="wunschtext" name="wunschtext" maxlength="80" required autocomplete="off"><p class="msg">Bitte den Wunschtext eintragen.</p></div>"""
-        related = [q for q in PRODUKTE if q["kat"] == p["kat"] and q["id"] != p["id"]][:3]
+        related = [q for q in AKTIV if q["kat"] == p["kat"] and q["id"] != p["id"]][:3]
         if len(related) < 3:
-            related += [q for q in PRODUKTE if q["id"] != p["id"] and q not in related][:3 - len(related)]
+            related += [q for q in AKTIV if q["id"] != p["id"] and q not in related][:3 - len(related)]
         rel_cards = "\n".join(card(q, rel, k) for k, q in enumerate(related))
         widerruf = ('<p class="small muted">Personalisierter Artikel: Nach Ihrer Freigabe des Textes ist der Kauf vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB). <a href="../widerruf.html">Mehr dazu</a>.</p>' if p.get("text") else "")
         body = f"""<section class="section-tight">
@@ -349,7 +355,70 @@ def build_products():
         title = f"{p['name']} · {C.MARKE}"
         if len(title) > 60:
             title = p["name"][:57].rstrip() + "…"
+        ld = json.dumps({"name": p["name"], "description": p["kurz"], "sku": p["id"], "image": f"assets/img/produkte/{p['id']}.webp",
+                         "url": f"produkt/{p['id']}.html", "price": "%.2f" % p["preis"], "material": p["material"], "category": KATEGORIEN[p["kat"]],
+                         "brand": C.MARKE, "seller": C.FIRMA, "shipping": "%.2f" % VERSAND_PAUSCHALE, "freeFrom": "%.2f" % VERSANDFREI_AB,
+                         "breadcrumbs": [["Start", "index.html"], ["Shop", "shop.html"], [p["name"], f"produkt/{p['id']}.html"]]}, ensure_ascii=False)
+        body = body.replace('<div class="sticky-buy"', f'<script type="application/json" id="produkt-daten">{ld}</script>\n<div class="sticky-buy"', 1)
         page(f"produkt/{p['id']}.html", title, p["kurz"][:155], body, "shop", rel)
+
+
+# ---------------------------------------------------------------- Gutschein
+def gutschein_card(rel):
+    return f"""<article class="card card-gutschein" data-kat="geschenk" data-preis="10" data-name="Geschenkgutschein" data-pos="999">
+  <a class="card-img" href="{rel}gutschein.html" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/gutschein.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <div class="card-body">
+    <span class="card-cat">Geschenk</span>
+    <h3><a href="{rel}gutschein.html">Geschenkgutschein</a></h3>
+    <p class="small muted" style="margin:0">Wunschbetrag ab 10 €, als Karte per Post oder zum Ausdrucken per E-Mail. 3 Jahre gültig.</p>
+    <div class="price">ab 10,00 €</div>
+    <a class="btn btn-primary" href="{rel}gutschein.html">Gutschein wählen</a>
+  </div>
+</article>"""
+
+
+def build_voucher():
+    amounts = "".join(f'<label class="swatch"><input type="radio" name="betrag" value="{a}"{" checked" if a == 20 else ""}><span>{a} €</span></label>' for a in (10, 20, 30, 50))
+    body = f"""<section class="section-tight">
+  <div class="wrap">
+    <nav aria-label="Pfad" class="small muted" style="margin-bottom:16px"><a href="index.html">Start</a> › <a href="shop.html">Shop</a> › Geschenkgutschein</nav>
+    <div class="product">
+      <div class="product-media"><img src="assets/img/produkte/gutschein.webp" width="800" height="600" alt="Geschenkgutschein von Schichtwerk, Karte mit Logo und Wunschbetrag"></div>
+      <div class="product-info">
+        <span class="eyebrow">Geschenk</span>
+        <h1>Geschenkgutschein</h1>
+        <p class="price">ab 10,00 € <small>Wunschbetrag, kein Aufschlag, 3 Jahre gültig</small></p>
+        <p>Für alle, die sich lieber selbst etwas aussuchen: Der Gutschein gilt für alle Artikel im Shop und für den Druckservice. Als gedruckte Karte per Post oder als PDF per E-Mail zum Selbstausdrucken, auf Wunsch mit persönlicher Nachricht.</p>
+        <form class="form" id="gutscheinformular">
+          <div class="alert" role="alert"></div>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Betrag</legend><div class="swatches">{amounts}</div></fieldset>
+          <div class="field"><label for="g-frei">Anderer Betrag in Euro <span class="opt">(optional, mindestens 10)</span></label><input type="number" id="g-frei" name="betrag_frei" min="10" max="500" step="1" inputmode="numeric"><p class="msg"></p></div>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zustellung</legend>
+            <label class="check"><input type="radio" name="zustellung" value="E-Mail (PDF)" checked> Per E-Mail als PDF, meist am selben Werktag</label>
+            <label class="check"><input type="radio" name="zustellung" value="Post (Karte)"> Als gedruckte Karte per Post, versandkostenfrei</label>
+          </fieldset>
+          <div class="row">
+            <div class="field"><label for="g-fuer">Für wen? <span class="opt">(Name auf dem Gutschein)</span></label><input type="text" id="g-fuer" name="empfaenger" maxlength="60"><p class="msg"></p></div>
+            <div class="field"><label for="g-von">Von <span class="opt">(optional)</span></label><input type="text" id="g-von" name="absender" maxlength="60"><p class="msg"></p></div>
+          </div>
+          <div class="field"><label for="g-msg">Persönliche Nachricht <span class="opt">(optional, bis 200 Zeichen)</span></label><textarea id="g-msg" name="gutscheintext" rows="3" maxlength="200"></textarea><p class="msg"></p></div>
+          <h2 style="font-size:1.1rem;margin:8px 0 0">Ihre Daten</h2>
+          <div class="row">
+            <div class="field"><label for="g-name">Ihr Name</label><input type="text" id="g-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
+            <div class="field"><label for="g-email">Ihre E-Mail <span class="opt">(für Rechnung und Gutschein)</span></label><input type="email" id="g-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
+          </div>
+          <div class="field" id="g-adresse" hidden><label for="g-adr">Postanschrift für die Karte</label><input type="text" id="g-adr" name="anschrift" autocomplete="street-address"><p class="msg"></p></div>
+          <div class="field hp" aria-hidden="true"><label for="g-web">Website</label><input type="text" id="g-web" name="website" tabindex="-1" autocomplete="off"></div>
+          <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir den Gutschein nicht ausstellen."><span>Ich bin einverstanden, dass meine Angaben zur Ausstellung des Gutscheins gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
+          <button class="btn btn-primary" type="submit">Gutschein zahlungspflichtig bestellen</button>
+          <div class="trust-list"><span>{SVG_CHECK} Rechnung per E-Mail, Gutscheincode nach Zahlungseingang</span><span>{SVG_CHECK} PayPal oder Überweisung</span><span>{SVG_CHECK} 3 Jahre gültig, einlösbar für Shop und Druckservice</span></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+"""
+    page("gutschein.html", f"Geschenkgutschein · {C.MARKE}", "Geschenkgutschein für 3D-gedruckte Artikel und Druckservice bei Schichtwerk: Wunschbetrag ab 10 €, per E-Mail oder als Karte per Post, 3 Jahre gültig.", body, "shop")
 
 
 # ---------------------------------------------------------------- Warenkorb
@@ -535,6 +604,8 @@ def build_agb():
     <p>Bei Artikeln mit Wunschtext oder eigenem Foto senden wir Ihnen vor dem Druck eine Vorschau zur Freigabe. Für Rechtschreibung und Inhalt Ihres Textes sind Sie verantwortlich. Wir drucken keine Inhalte, die Rechte Dritter verletzen oder strafbar sind. Personalisierte Artikel sind vom Widerrufsrecht ausgenommen (§ 312g Abs. 2 Nr. 1 BGB).</p>
     <h2>8. Widerrufsrecht</h2>
     <p>Verbrauchern steht ein Widerrufsrecht nach den Bestimmungen der <a href="widerruf.html">Widerrufsbelehrung</a> zu.</p>
+    <h2>8a. Geschenkgutscheine</h2>
+    <p>Gutscheine werden nach Zahlungseingang mit einem Code ausgestellt und sind drei Jahre ab Ausstellung gültig. Sie sind für alle Artikel im Shop und für Leistungen des Druckservice einlösbar, eine Barauszahlung ist ausgeschlossen. Ein Restguthaben bleibt bis zum Ablauf erhalten. Für den Kauf eines Gutscheins gilt das Widerrufsrecht; ein bereits eingelöster Gutschein kann nicht widerrufen werden.</p>
     <h2>9. Eigentumsvorbehalt</h2>
     <p>Die Ware bleibt bis zur vollständigen Bezahlung unser Eigentum.</p>
     <h2>10. Gewährleistung</h2>
@@ -668,6 +739,9 @@ def build_thanks():
     <div data-show="widerruf" data-h1="Ihr Widerruf ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb von zwei Werktagen mit den nächsten Schritten zur Rücksendung und Erstattung.</p>
     </div>
+    <div data-show="gutschein" data-h1="Ihre Gutschein-Bestellung ist eingegangen." hidden>
+      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail, danach die Rechnung mit Zahlungsdaten. Nach Zahlungseingang schicken wir den Gutschein mit Code als PDF oder als Karte per Post.</p>
+    </div>
     <div data-show="kontakt" data-h1="Ihre Anfrage ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb eines Werktags mit Preis und Lieferzeit.</p>
     </div>
@@ -697,7 +771,7 @@ def build_404():
 
 # ---------------------------------------------------------------- Daten, Sitemap, Robots, Manifest
 def build_data():
-    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text")), farben=p["farben"], kurz=p["kurz"]) for p in PRODUKTE]
+    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text")), farben=p["farben"], kurz=p["kurz"]) for p in AKTIV]
     cfg = dict(email=C.EMAIL, telefon=C.TELEFON, paypalMe=C.PAYPAL_ME, versandPauschale=VERSAND_PAUSCHALE, versandfreiAb=VERSANDFREI_AB, produktionMin=2, produktionMax=4, versandMin=2, versandMax=3)
     farben = {k: [v[0], v[1]] for k, v in FARBEN.items()}
     with open(os.path.join(ROOT, "assets", "js", "produkte.js"), "w", encoding="utf-8") as f:
@@ -705,7 +779,7 @@ def build_data():
         f.write("window.SW_CONFIG=" + json.dumps(cfg, ensure_ascii=False) + ";\n")
         f.write("window.SW_FARBEN=" + json.dumps(farben, ensure_ascii=False) + ";\n")
         f.write("window.SW_PRODUKTE=" + json.dumps(data, ensure_ascii=False) + ";\n")
-    pages = ["index.html", "shop.html", "druckservice.html", "materialien.html", "faq.html", "kontakt.html", "versand.html", "ueber-uns.html", "agb.html", "widerruf.html", "impressum.html", "datenschutz.html"] + [f"material/{m['id']}.html" for m in MATERIALIEN] + [f"produkt/{p['id']}.html" for p in PRODUKTE]
+    pages = ["index.html", "shop.html", "druckservice.html", "materialien.html", "faq.html", "kontakt.html", "versand.html", "ueber-uns.html", "agb.html", "widerruf.html", "impressum.html", "datenschutz.html", "gutschein.html"] + [f"material/{m['id']}.html" for m in MATERIALIEN] + [f"produkt/{p['id']}.html" for p in AKTIV]
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
         for u in pages:
@@ -779,7 +853,7 @@ def build_materials():
         nicht = "".join(f"<li>{E(x)}</li>" for x in m["nicht"])
         faq = "".join(f'<details class="faq-item"><summary>{E(q)}</summary><p>{E(a)}</p></details>' for q, a in m["faq"])
         others = "\n".join(mat_card(o, rel) for o in MATERIALIEN if o["id"] != m["id"])
-        shop_examples = [p for p in PRODUKTE if m["name"] in p["material"]][:3]
+        shop_examples = [p for p in AKTIV if m["name"] in p["material"]][:3]
         examples = ""
         if shop_examples:
             examples = f"""<section class="section-tight"><div class="wrap"><h2>Aus {E(m['name'])} im Shop</h2><div class="grid">{"".join(card(p, rel, k) for k, p in enumerate(shop_examples))}</div></div></section>"""
@@ -930,7 +1004,7 @@ def build_faq():
 
 
 if __name__ == "__main__":
-    for fn in (build_data, build_index, build_shop, build_products, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404, build_materials, build_service, build_faq):
+    for fn in (build_data, build_index, build_shop, build_products, build_voucher, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404, build_materials, build_service, build_faq):
         fn()
     n = sum(len(f) for _, _, f in os.walk(ROOT))
     print("Fertig:", n, "Dateien in", ROOT)

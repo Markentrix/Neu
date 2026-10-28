@@ -182,6 +182,32 @@
   /* ---------- Kontakt / Widerruf ---------- */
   var kf = $("#kontaktformular"); if (kf) bindForm(kf, "kontakt");
   var wf = $("#widerrufsformular"); if (wf) bindForm(wf, "widerruf");
+  var gf = $("#gutscheinformular");
+  if (gf) {
+    var adr = $("#g-adresse", gf); var adrIn = $("#g-adr", gf);
+    $$("input[name=zustellung]", gf).forEach(function (r) { r.addEventListener("change", function () { var post = r.value.indexOf("Post") === 0 && r.checked; adr.hidden = !post; adrIn.required = post; adrIn.dataset.err = "Bitte die Postanschrift eintragen."; }); });
+    bindForm(gf, "gutschein", function () {
+      var frei = parseInt(($("[name=betrag_frei]", gf).value || "").trim(), 10);
+      var fix = (gf.querySelector("input[name=betrag]:checked") || {}).value;
+      var betrag = frei >= 10 ? frei : parseInt(fix, 10);
+      return { betrag: betrag + " €", summe: EUR(betrag), nachricht: "GUTSCHEIN " + betrag + " € · Zustellung: " + ((gf.querySelector("input[name=zustellung]:checked") || {}).value || "") + " · Für: " + ($("[name=empfaenger]", gf).value || "–") + " · Von: " + ($("[name=absender]", gf).value || "–") + " · Text: " + ($("[name=gutscheintext]", gf).value || "–") };
+    });
+  }
+
+  /* ---------- Strukturierte Daten für Suchmaschinen (Produktseite) ---------- */
+  var pd = $("#produkt-daten");
+  if (pd) {
+    try {
+      var d = JSON.parse(pd.textContent); var base = location.origin + location.pathname.replace(/produkt\/[^/]*$/, "");
+      var ld = [{ "@context": "https://schema.org", "@type": "Product", "name": d.name, "description": d.description, "sku": d.sku, "image": [base + d.image], "material": d.material, "category": d.category,
+        "brand": { "@type": "Brand", "name": d.brand },
+        "offers": { "@type": "Offer", "url": base + d.url, "priceCurrency": "EUR", "price": d.price, "availability": "https://schema.org/MadeToOrder", "itemCondition": "https://schema.org/NewCondition", "seller": { "@type": "Organization", "name": d.seller },
+          "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": d.shipping, "currency": "EUR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "DE" } },
+          "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "DE", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 14, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/ReturnShippingFees" } } },
+        { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": d.breadcrumbs.map(function (b, i) { return { "@type": "ListItem", "position": i + 1, "name": b[0], "item": base + b[1] }; }) }];
+      var sc = document.createElement("script"); sc.type = "application/ld+json"; sc.textContent = JSON.stringify(ld); document.head.appendChild(sc);
+    } catch (e) { /* ohne strukturierte Daten weiter */ }
+  }
 
   /* ---------- Warenkorb-Seite ---------- */
   var renderCart = null;
@@ -263,7 +289,7 @@
     var refEl = $("#ref"); if (refEl) { if (q.ref) refEl.textContent = q.ref; else refEl.parentElement.hidden = true; }
     var isOrder = q.art === "bestellung";
     var isWiderruf = q.typ === "widerruf";
-    var mode = isOrder ? "bestellung" : isWiderruf ? "widerruf" : "kontakt";
+    var mode = isOrder ? "bestellung" : isWiderruf ? "widerruf" : q.typ === "gutschein" ? "gutschein" : "kontakt";
     $$("[data-show]").forEach(function (el) { el.hidden = el.dataset.show !== mode; if (el.dataset.show === mode && el.dataset.h1) $("#danke-h1").textContent = el.dataset.h1; });
     var pp = $("#paypal-link");
     if (pp) {
