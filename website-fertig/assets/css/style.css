@@ -51,7 +51,10 @@ small,.small{font-size:.875rem;color:var(--muted)}
 /* Header */
 .header{position:sticky;top:0;z-index:50;background:rgba(11,11,13,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:64px}
-.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:#fff}
+.brand{display:flex;align-items:center;text-decoration:none;color:#fff;padding:.3rem 0}
+.brand__img{height:42px;width:auto;display:block}
+@media(max-width:700px){.brand__img{height:38px}}
+.footer__logo{height:48px;width:auto;margin-bottom:.9rem}
 .brand__logo{width:40px;height:40px;flex:none}
 .brand__name{font-family:var(--display);font-weight:800;font-size:1.05rem;line-height:1.05}
 .brand__name span{display:block;font-family:var(--font);font-weight:600;font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}

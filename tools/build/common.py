@@ -75,7 +75,7 @@ def header():
     mlinks = "".join(f'<li><a href="{h}">{t}</a></li>' for h,t in NAV)
     return f'''<header class="header">
   <div class="wrap">
-    <a class="brand" href="index.html" title="Zur Startseite">{LOGO}<span class="brand__name">BURNOUT<span>Celler-Kartbahn</span></span></a>
+    <a class="brand" href="index.html" title="Zur Startseite"><img class="brand__img" src="assets/img/logo.webp" width="264" height="84" alt="Burnout Celler-Kartbahn" fetchpriority="low"></a>
     <nav class="nav" aria-label="Hauptnavigation"><ul>{links}<li><a class="btn btn--primary btn--sm" href="buchen.html">Jetzt buchen</a></li><li><a class="btn btn--ghost btn--sm" href="gutscheine.html">Gutscheine</a></li></ul></nav>
     <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menü öffnen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
@@ -93,6 +93,7 @@ def footer():
   <div class="wrap">
     <div class="grid grid-4">
       <div>
+        <img class="footer__logo" src="assets/img/logo.webp" width="264" height="84" alt="Burnout Celler-Kartbahn" loading="lazy" decoding="async">
         <h2>Burnout Celler-Kartbahn GmbH</h2>
         <ul>
           <li>Waldweg 100<br>29221 Celle</li>

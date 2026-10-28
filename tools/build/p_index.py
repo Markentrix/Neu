@@ -7,7 +7,7 @@ JSONLD = '''<script type="application/ld+json">
   "name":"Burnout Celler-Kartbahn","alternateName":"Celler Kartbahn","legalName":"Burnout Celler-Kartbahn GmbH",
   "description":"Indoor-Kartbahn in Celle mit ca. 600 m Strecke, Brücke, Tunnel und zweiter Ebene mit Steilkurve. Sodi-Karts mit 9 PS, Kinderkarts ab 8 Jahren, Doppelsitzer, Kindergeburtstage, Firmenevents, Bistro und Veranstaltungsraum.",
   "image":["/assets/img/og-image.jpg","/assets/img/kartflotte.webp","/assets/img/zweite-ebene.webp"],
-  "logo":"/apple-touch-icon.png","url":"/",
+  "logo":{"@type":"ImageObject","url":"/assets/img/logo.png","width":329,"height":105},"url":"/",
   "telephone":"+49 5141 908650","faxNumber":"+49 5141 908652","email":"team@celler-kartbahn.com",
   "address":{"@type":"PostalAddress","streetAddress":"Waldweg 100","postalCode":"29221","addressLocality":"Celle","addressRegion":"Niedersachsen","addressCountry":"DE"},
   "geo":{"@type":"GeoCoordinates","latitude":52.6088,"longitude":10.0614},
