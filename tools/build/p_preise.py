@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from common import *
 
-def ptable(caption, rows, cols=("Fahrten","Erwachsene ab 16 J.","Kids 8–15 J.")):
+def ptable(caption, rows, cols=("Fahrten","Erw. 16+","Kids 8–15")):
     th = "".join(f'<th{" class=price" if i else ""}>{c}</th>' for i,c in enumerate(cols))
     tr = "".join("<tr>"+"".join(f'<td{" class=price" if i else ""}>{c}</td>' for i,c in enumerate(r))+"</tr>" for r in rows)
     return f'<div class="table-wrap"><table><caption>{caption}</caption><thead><tr>{th}</tr></thead><tbody>{tr}</tbody></table><p class="price-hint">Preise pro Person. Tickets sind nicht übertragbar und müssen am Kaufdatum verfahren werden.</p></div>'
@@ -268,6 +268,7 @@ def pp(betrag, titel, desc):
       <h3>{titel}</h3><p>{desc}</p>
       <p><strong style="color:#fff;font-size:1.5rem">{betrag} €</strong></p>
       <div data-mk="paypal" data-betrag="{betrag}" data-titel="Gutschein {titel} – Burnout Celler-Kartbahn" class="mk-slot"></div>
+      <a class="btn btn--ghost btn--sm" href="#bestellen">Ohne PayPal bestellen</a>
     </div>'''
 
 html += f'''

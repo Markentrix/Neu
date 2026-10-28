@@ -180,7 +180,22 @@ def contact_strip():
 def breadcrumb(name, file):
     return f'''<script type="application/ld+json">{{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{{"@type":"ListItem","position":1,"name":"Start","item":"/index.html"}},{{"@type":"ListItem","position":2,"name":"{name}","item":"/{file}"}}]}}</script>'''
 
+HERO_MOBILE = {"hero-rennen":"strecke-start","hero-strecke":"strecke-boxengasse","hero-duell":"kart-detail","karts-boxengasse":"karts-boxengasse","strecke-start":"strecke-start","kartflotte":"kartflotte"}
+HAS_800 = {"hero-rennen","hero-strecke","hero-duell","kart-sodi-front","anmeldung-theke","bistro-bar","zweite-ebene","kartflotte","karts-boxengasse","kart-detail","kart-motor","strecke-start","strecke-boxengasse","bistro-theke","bistro-lounge","veranstaltungsraum"}
+def responsive(html):
+    import re as _re
+    html = _re.sub(r'<img class="hero__img" src="assets/img/([a-z0-9-]+)\.webp"[^>]*>', lambda m: (lambda name, tag: f'<picture><source media="(max-width: 700px)" srcset="assets/img/{(HERO_MOBILE.get(name,name)+"-800") if HERO_MOBILE.get(name,name) in HAS_800 else HERO_MOBILE.get(name,name)}.webp">{tag}</picture>')(m.group(1), m.group(0)), html)
+    def srcset(m):
+        tag = m.group(0); name = m.group(1)
+        if "hero__img" in tag or name not in HAS_800 or "srcset" in tag: return tag
+        w = _re.search(r'width="(\d+)"', tag); w = w.group(1) if w else "1400"
+        sizes = "100vw" if "zweite-ebene" in name else "(min-width: 860px) 560px, 100vw"
+        return tag[:-1] + f' srcset="assets/img/{name}-800.webp 800w, assets/img/{name}.webp {w}w" sizes="{sizes}">'
+    html = _re.sub(r'<img [^>]*src="assets/img/([a-z0-9-]+)\.webp"[^>]*>', srcset, html)
+    return html
+
 def write(name, html):
+    if name.endswith(".html"): html = responsive(html)
     with open(OUT + name, "w", encoding="utf-8") as f:
         f.write(html)
     print("wrote", name, len(html))

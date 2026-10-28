@@ -99,7 +99,7 @@ html += f'''
         <div class="table-wrap">
           <table>
             <caption>Ticketfahrten im Überblick</caption>
-            <thead><tr><th>Tag</th><th>Angebot</th><th class="price">Erwachsene</th><th class="price">Kids</th></tr></thead>
+            <thead><tr><th>Tag</th><th>Angebot</th><th class="price">Erw.</th><th class="price">Kids</th></tr></thead>
             <tbody>
               <tr><td>Mo–Do</td><td>Spartage: 3 Fahrten für 2</td><td class="price">30 €</td><td class="price">27 €</td></tr>
               <tr><td>Mo–Do</td><td>Spartage: 5 Fahrten für 3</td><td class="price">43 €</td><td class="price">36 €</td></tr>

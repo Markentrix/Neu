@@ -8,7 +8,7 @@ html = head("Kindergeburtstag Kartbahn Celle – Kidsparty ab 8 J.",
 
 html += f'''
 <section class="hero hero--sub">
-  <img class="hero__img" src="assets/img/kids-siegerehrung.webp" width="400" height="267" alt="Kinder jubeln auf dem Siegerpodest der Celler Kartbahn" fetchpriority="high">
+  <img class="hero__img" src="assets/img/kartflotte.webp" width="1400" height="934" alt="Die Kartflotte der Celler Kartbahn – bereit für die Kidsparty" fetchpriority="high">
   <div class="wrap">
     <span class="eyebrow">Kinder &amp; Jugend</span>
     <h1>Kindergeburtstag mit Vollgas</h1>
