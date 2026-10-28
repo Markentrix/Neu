@@ -8,7 +8,17 @@ def ptable(caption, rows, cols=("Fahrten","Erw. 16+","Kids 8–15")):
 
 html = head("Preise Kartfahren Celle ab 12 € | Burnout Kartbahn",
  "Alle Preise der Celler Kartbahn: Ticketfahrten Sa/So, Spartage Mo–Do (3 für 2, 5 für 3), Freitagsspecial, Doppelsitzer, Kidsparty, Supercup, Bahnmiete, Schulklassen und Kinderkartführerschein.",
- breadcrumb("Preise","preise.html")) + header()
+ breadcrumb("Preise","preise.html") + '''<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Preisliste Burnout Celler-Kartbahn (Stand Oktober 2026)","itemListOrder":"https://schema.org/ItemListUnordered","numberOfItems":10,"itemListElement":[
+{"@type":"ListItem","position":1,"item":{"@type":"Offer","name":"Ticketfahrt 10 Minuten Erwachsene Sa/So","price":"15.00","priceCurrency":"EUR","url":"/preise.html#tickets"}},
+{"@type":"ListItem","position":2,"item":{"@type":"Offer","name":"Ticketfahrt 10 Minuten Kinder 8–15 Sa/So","price":"13.50","priceCurrency":"EUR","url":"/preise.html#tickets"}},
+{"@type":"ListItem","position":3,"item":{"@type":"Offer","name":"Spartag Mo–Do: 3 Fahrten für 2 (Erwachsene)","price":"30.00","priceCurrency":"EUR","url":"/preise.html#spartage"}},
+{"@type":"ListItem","position":4,"item":{"@type":"Offer","name":"Freitag: 1 Fahrt Erwachsene","price":"14.00","priceCurrency":"EUR","url":"/preise.html#freitag"}},
+{"@type":"ListItem","position":5,"item":{"@type":"Offer","name":"Doppelsitzer 1 Fahrt (2 Personen)","price":"18.00","priceCurrency":"EUR","url":"/preise.html#doppelsitzer"}},
+{"@type":"ListItem","position":6,"item":{"@type":"Offer","name":"Registrierung inkl. Rennlizenz (einmalig)","price":"2.00","priceCurrency":"EUR","url":"/preise.html#neukunden"}},
+{"@type":"ListItem","position":7,"item":{"@type":"Offer","name":"Kidsparty F1 pro Kind","price":"40.00","priceCurrency":"EUR","url":"/preise.html#kids"}},
+{"@type":"ListItem","position":8,"item":{"@type":"Offer","name":"Supercup Standard pro Person","price":"39.00","priceCurrency":"EUR","url":"/preise.html#supercup"}},
+{"@type":"ListItem","position":9,"item":{"@type":"Offer","name":"Bahnmiete 1 Stunde inkl. 10 Karts","price":"650.00","priceCurrency":"EUR","url":"/preise.html#bahnmiete"}},
+{"@type":"ListItem","position":10,"item":{"@type":"Offer","name":"Kinderkartführerschein","price":"45.00","priceCurrency":"EUR","url":"/preise.html#fuehrerschein"}}]}</script>''') + header()
 
 html += f'''
 <section class="hero hero--sub">
@@ -107,7 +117,7 @@ html += f'''
         <p><strong>Jeden 1. Samstag im Monat um 10 Uhr</strong>, bitte um 09:30 Uhr im Haus eintreffen. Voranmeldung über die Online-Buchung.</p>
         <a class="btn btn--primary btn--sm" href="buchen.html?angebot=fuehrerschein">Führerschein buchen</a>
       </div>
-      <img src="assets/img/kids-start.webp" width="400" height="267" alt="Kind mit rotem Helm im Kinderkart am Start" loading="lazy">
+      <img src="assets/img/kids-start.webp" width="400" height="267" alt="Kind mit rotem Helm im Kinderkart am Start" loading="lazy" decoding="async">
     </div>
 
     <h2 id="racecam" style="margin-top:2.5rem">RaceCam – dein Rennen auf Video</h2>
@@ -261,7 +271,8 @@ write("buchen.html", html)
 # ---------------- GUTSCHEINE ----------------
 html = head("Gutscheine & Tickets vorab | Burnout Kartbahn Celle",
  "Kart-Gutscheine für Celle online kaufen: Wertgutscheine und Fahrt-Tickets per PayPal, Gutschein per E-Mail. Das Geschenk für Rennfahrer ab 8 Jahren.",
- breadcrumb("Gutscheine","gutscheine.html")) + header()
+ breadcrumb("Gutscheine","gutscheine.html") + '''<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Gutschein Burnout Celler-Kartbahn","description":"Wertgutschein oder Fahrt-Ticket für die Indoor-Kartbahn in Celle, per E-Mail als PDF, 3 Jahre gültig, einlösbar für alle Fahrten, Pakete und im Bistro.","brand":{"@type":"Brand","name":"Burnout Celler-Kartbahn"},"image":"/assets/img/og-image.jpg","category":"Gutschein",
+"offers":[{"@type":"Offer","name":"Wertgutschein 25 €","price":"25.00","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"/gutscheine.html","seller":{"@id":"/#kartbahn"}},{"@type":"Offer","name":"Wertgutschein 50 €","price":"50.00","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"/gutscheine.html"},{"@type":"Offer","name":"Wertgutschein 100 €","price":"100.00","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"/gutscheine.html"},{"@type":"Offer","name":"3 Fahrten Wochenende Erwachsene","price":"43.00","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"/gutscheine.html"},{"@type":"Offer","name":"3 Fahrten Kids","price":"36.00","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"/gutscheine.html"},{"@type":"Offer","name":"Supercup Premium","price":"59.00","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"/gutscheine.html"}]}</script>''') + header()
 
 def pp(betrag, titel, desc):
     return f'''<div class="card card--accent">

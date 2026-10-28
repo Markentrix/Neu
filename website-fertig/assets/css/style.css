@@ -1,8 +1,6 @@
 /* Burnout Celler-Kartbahn – Stylesheet (mobile first) */
 @font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url("/assets/fonts/inter-400.woff2") format("woff2")}
-@font-face{font-family:"Inter";font-style:normal;font-weight:600;font-display:swap;src:url("/assets/fonts/inter-600.woff2") format("woff2")}
-@font-face{font-family:"Inter";font-style:normal;font-weight:700;font-display:swap;src:url("/assets/fonts/inter-700.woff2") format("woff2")}
-@font-face{font-family:"Inter Display";font-style:normal;font-weight:800;font-display:swap;src:url("/assets/fonts/interdisplay-800.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:600 800;font-display:swap;src:url("/assets/fonts/inter-700.woff2") format("woff2")}
 
 :root{
   --bg:#0b0b0d;--bg-2:#141418;--bg-3:#1d1d23;--line:#2a2a32;
@@ -11,7 +9,7 @@
   --ok:#2ecc71;--warn:#ffb020;
   --radius:14px;--radius-s:8px;
   --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --display:"Inter Display","Inter",system-ui,sans-serif;
+  --display:"Inter",system-ui,sans-serif;
   --max:1180px;--gutter:16px;
   --shadow:0 10px 30px rgba(0,0,0,.45);
 }
@@ -271,3 +269,10 @@ tr.total td{background:rgba(225,6,0,.08)}
 .news time{color:var(--red-2);font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.08em}
 .mk-slot{min-height:60px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* Fakten-Box (Start) */
+.facts{display:grid;gap:.6rem;margin:0;grid-template-columns:1fr}
+@media(min-width:700px){.facts{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.facts{grid-template-columns:repeat(3,1fr)}}
+.facts>div{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-s);padding:.8rem 1rem}
+.facts dt{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--red-2);font-weight:700;margin-bottom:.2rem}
+.facts dd{margin:0;color:#e6e6ea;font-size:.95rem}

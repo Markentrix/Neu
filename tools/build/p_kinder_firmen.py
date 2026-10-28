@@ -4,7 +4,11 @@ from common import *
 # ---------------- KINDER ----------------
 html = head("Kindergeburtstag Kartbahn Celle – Kidsparty ab 8 J.",
  "Kindergeburtstag in Celle: Kidsparty ab 6 Kindern exklusiv auf der Kartbahn, Pakete ab 40 € mit Partytisch, Kinderkarts Sodi LR6, Kinderkartführerschein und Schulklassen-Angebote.",
- breadcrumb("Kinder","kinder.html")) + header()
+ breadcrumb("Kinder","kinder.html") + '''<script type="application/ld+json">{"@context":"https://schema.org","@graph":[
+{"@type":"HowTo","name":"So läuft die Kidsparty auf der Celler Kartbahn ab","totalTime":"PT2H","supply":[{"@type":"HowToSupply","name":"Einverständniserklärung der Eltern"}],
+ "step":[{"@type":"HowToStep","name":"Registrierung","text":"Alle Kinder registrieren sich bei der Ankunft, 30 Minuten vor der gebuchten Startzeit."},{"@type":"HowToStep","name":"Partytisch","text":"Der eingedeckte Tisch im Bistro ist Treffpunkt; von dort verfolgen die Kids das Rennen auf Livemonitoren."},{"@type":"HowToStep","name":"Einweisung","text":"Sturmhauben verteilen, dann Erklärung von Kart, Regeln und Flaggen im Einweisungsraum."},{"@type":"HowToStep","name":"Fahrten","text":"Die Gruppe fährt exklusiv; zwischen den Fahrten 15–25 Minuten Pause."},{"@type":"HowToStep","name":"Siegerehrung","text":"Nach der letzten Fahrt Siegerehrung mit Medaillen oder Pokalen auf dem Podest."}]},
+{"@type":"Service","name":"Kindergeburtstag auf der Kartbahn (Kidsparty)","serviceType":"Kindergeburtstag","provider":{"@id":"/#kartbahn"},"areaServed":"Celle und Region Hannover","audience":{"@type":"PeopleAudience","suggestedMinAge":8,"suggestedMaxAge":15},
+ "offers":[{"@type":"Offer","name":"Paket F1 – 3 × 10 Minuten","price":"40.00","priceCurrency":"EUR","eligibleQuantity":{"@type":"QuantitativeValue","minValue":6}},{"@type":"Offer","name":"Paket F2 – Grand-Prix-Modus","price":"48.00","priceCurrency":"EUR","eligibleQuantity":{"@type":"QuantitativeValue","minValue":6}},{"@type":"Offer","name":"Kinderkartführerschein","price":"45.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Schulklasse Angebot 1","price":"20.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Schulklasse Angebot 2","price":"25.00","priceCurrency":"EUR"}]}]}</script>''') + header()
 
 html += f'''
 <section class="hero hero--sub">
@@ -45,12 +49,12 @@ html += f'''
       <li><h3>Siegerehrung</h3><p class="muted">Nach der letzten Fahrt organisieren wir gern eine Siegerehrung mit Medaillen oder Pokalen. Der Tisch steht euch danach noch bis zu 45 Minuten (mit Snackpaket 60 Minuten) zur Verfügung.</p></li>
     </ol>
     <div class="gallery" style="margin-top:1.5rem">
-      <figure><img src="assets/img/kids-registrierung.webp" width="400" height="267" alt="Kinder registrieren sich am Check-in-Terminal" loading="lazy"><figcaption>Registrierung</figcaption></figure>
-      <figure><img src="assets/img/kids-einweisung.webp" width="400" height="267" alt="Kinder mit Sturmhauben bei der Einweisung" loading="lazy"><figcaption>Einweisung</figcaption></figure>
-      <figure><img src="assets/img/kids-start.webp" width="400" height="267" alt="Kind mit rotem Helm im Kinderkart am Start" loading="lazy"><figcaption>Start</figcaption></figure>
-      <figure><img src="assets/img/kids-pause.webp" width="400" height="267" alt="Kinder schauen sich die Rennergebnisse an" loading="lazy"><figcaption>Rennergebnisse</figcaption></figure>
-      <figure><img src="assets/img/kids-bistro.webp" width="400" height="267" alt="Geburtstagstisch im Bistro mit jubelnden Kindern" loading="lazy"><figcaption>Partytisch</figcaption></figure>
-      <figure><img src="assets/img/kids-siegerehrung.webp" width="400" height="267" alt="Siegerehrung auf dem Podest" loading="lazy"><figcaption>Siegerehrung</figcaption></figure>
+      <figure><img src="assets/img/kids-registrierung.webp" width="400" height="267" alt="Kinder registrieren sich am Check-in-Terminal" loading="lazy" decoding="async"><figcaption>Registrierung</figcaption></figure>
+      <figure><img src="assets/img/kids-einweisung.webp" width="400" height="267" alt="Kinder mit Sturmhauben bei der Einweisung" loading="lazy" decoding="async"><figcaption>Einweisung</figcaption></figure>
+      <figure><img src="assets/img/kids-start.webp" width="400" height="267" alt="Kind mit rotem Helm im Kinderkart am Start" loading="lazy" decoding="async"><figcaption>Start</figcaption></figure>
+      <figure><img src="assets/img/kids-pause.webp" width="400" height="267" alt="Kinder schauen sich die Rennergebnisse an" loading="lazy" decoding="async"><figcaption>Rennergebnisse</figcaption></figure>
+      <figure><img src="assets/img/kids-bistro.webp" width="400" height="267" alt="Geburtstagstisch im Bistro mit jubelnden Kindern" loading="lazy" decoding="async"><figcaption>Partytisch</figcaption></figure>
+      <figure><img src="assets/img/kids-siegerehrung.webp" width="400" height="267" alt="Siegerehrung auf dem Podest" loading="lazy" decoding="async"><figcaption>Siegerehrung</figcaption></figure>
     </div>
   </div>
 </section>
@@ -77,7 +81,7 @@ html += f'''
 
 <section class="section section--alt" id="kinderkarts">
   <div class="wrap split">
-    <img src="assets/img/kartflotte.webp" width="1400" height="934" alt="Die Kartflotte der Celler Kartbahn in Reihe aufgestellt" loading="lazy">
+    <img src="assets/img/kartflotte.webp" width="1400" height="934" alt="Die Kartflotte der Celler Kartbahn in Reihe aufgestellt" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Junior Racing</span>
       <h2>13 Kinderkarts Sodi LR6</h2>
@@ -120,7 +124,13 @@ write("kinder.html", html)
 # ---------------- FIRMEN ----------------
 html = head("Firmenevents & Gruppen | Burnout Celler-Kartbahn Celle",
  "Firmenevent, Weihnachtsfeier, Junggesellenabschied oder Vereinsfeier auf der Celler Kartbahn: Supercup für 6–17 Personen, Bahnmiete und Meisterschaftsmodus bis 80 Gäste, Buffet im Clubraum.",
- breadcrumb("Firmen & Gruppen","firmen.html")) + header()
+ breadcrumb("Firmen & Gruppen","firmen.html") + '''<script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"Firmenevents und Gruppenrennen auf der Celler Kartbahn","serviceType":"Firmenevent, Teambuilding, Weihnachtsfeier, Junggesellenabschied","provider":{"@id":"/#kartbahn"},"areaServed":["Celle","Hannover","Niedersachsen"],
+"hasOfferCatalog":{"@type":"OfferCatalog","name":"Rennpakete","itemListElement":[
+{"@type":"Offer","name":"Supercup Standard – 10 Min Qualifying + 20 Min Rennen","price":"39.00","priceCurrency":"EUR","eligibleQuantity":{"@type":"QuantitativeValue","minValue":6,"maxValue":17}},
+{"@type":"Offer","name":"Supercup Professional – 10 + 30 Min","price":"49.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Supercup Premium – 10 + 40 Min","price":"59.00","priceCurrency":"EUR"},
+{"@type":"Offer","name":"Supercup Double Premium – 10 + 2 × 20 Min","price":"59.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Supercup Double Ultra – 10 + 2 × 30 Min","price":"75.00","priceCurrency":"EUR"},
+{"@type":"Offer","name":"Grand Prix – Training, Qualifying, 20 Min Rennen","price":"49.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Grand Prix Premium – 30 Min Rennen","price":"59.00","priceCurrency":"EUR"},
+{"@type":"Offer","name":"Bahnmiete 1 Stunde inkl. 10 Karts (exklusiv)","price":"650.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Bahnmiete jede weitere halbe Stunde","price":"325.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Jedes weitere Kart pro Stunde","price":"65.00","priceCurrency":"EUR"}]}}</script>''') + header()
 
 html += f'''
 <section class="hero hero--sub">
@@ -164,7 +174,7 @@ html += f'''
 
 <section class="section" id="meisterschaft">
   <div class="wrap split">
-    <img src="assets/img/strecke-boxengasse.webp" width="1400" height="934" alt="Boxengasse und Reifenstapel der Celler Kartbahn" loading="lazy">
+    <img src="assets/img/strecke-boxengasse.webp" width="1400" height="934" alt="Boxengasse und Reifenstapel der Celler Kartbahn" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">ab 18 Personen</span>
       <h2>Meisterschaftsmodus &amp; Bahnmiete</h2>
@@ -182,7 +192,7 @@ html += f'''
 
 <section class="section section--alt" id="buffet">
   <div class="wrap split split--rev">
-    <img src="assets/img/veranstaltungsraum.webp" width="1400" height="933" alt="Festlich eingedeckter Veranstaltungsraum der Celler Kartbahn" loading="lazy">
+    <img src="assets/img/veranstaltungsraum.webp" width="1400" height="933" alt="Festlich eingedeckter Veranstaltungsraum der Celler Kartbahn" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Nach dem Rennen</span>
       <h2>Buffet &amp; Clubraum</h2>

@@ -53,13 +53,16 @@ def head(title, desc, jsonld="", img="assets/img/og-image.jpg", noindex=False):
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:image" content="/{img}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Kart-Duell auf der Indoor-Strecke der Burnout Celler-Kartbahn">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="author" content="Burnout Celler-Kartbahn GmbH">
+<meta name="format-detection" content="telephone=yes">
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="preload" href="assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/interdisplay-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css">
 {jsonld}
 </head>
@@ -180,7 +183,7 @@ def contact_strip():
 def breadcrumb(name, file):
     return f'''<script type="application/ld+json">{{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{{"@type":"ListItem","position":1,"name":"Start","item":"/index.html"}},{{"@type":"ListItem","position":2,"name":"{name}","item":"/{file}"}}]}}</script>'''
 
-HERO_MOBILE = {"hero-rennen":"strecke-start","hero-strecke":"strecke-boxengasse","hero-duell":"kart-detail","karts-boxengasse":"karts-boxengasse","strecke-start":"strecke-start","kartflotte":"kartflotte"}
+HERO_MOBILE = {"hero-rennen":"strecke-start","hero-strecke":"strecke-boxengasse","hero-duell":"kart-detail","karts-boxengasse":"karts-boxengasse","strecke-start":"strecke-start","kartflotte":"karts-boxengasse"}
 HAS_800 = {"hero-rennen","hero-strecke","hero-duell","kart-sodi-front","anmeldung-theke","bistro-bar","zweite-ebene","kartflotte","karts-boxengasse","kart-detail","kart-motor","strecke-start","strecke-boxengasse","bistro-theke","bistro-lounge","veranstaltungsraum"}
 def responsive(html):
     import re as _re
@@ -194,8 +197,40 @@ def responsive(html):
     html = _re.sub(r'<img [^>]*src="assets/img/([a-z0-9-]+)\.webp"[^>]*>', srcset, html)
     return html
 
+def minify_css(css):
+    import re as _re
+    css = _re.sub(r"/\*.*?\*/", "", css, flags=_re.S)
+    css = _re.sub(r"\s+", " ", css)
+    css = _re.sub(r"\s*([{};])\s*", r"\1", css)
+    return css.strip()
+
+def page_jsonld(name, html):
+    import re as _re, datetime, json as _json
+    t = _re.search(r"<title>(.*?)</title>", html); d = _re.search(r'<meta name="description" content="(.*?)">', html)
+    if not t or not d or name in ("danke.html", "404.html"): return ""
+    typ = {"kontakt.html": "ContactPage", "faq.html": "FAQPage", "impressum.html": "AboutPage", "kartbahn.html": "AboutPage"}.get(name, "WebPage")
+    if name == "faq.html": return ""
+    obj = {"@context": "https://schema.org", "@type": typ, "@id": "/" + name + "#webpage", "url": "/" + name,
+           "name": t.group(1).replace("&amp;", "&"), "description": d.group(1).replace("&amp;", "&"), "inLanguage": "de-DE",
+           "isPartOf": {"@type": "WebSite", "name": "Burnout Celler-Kartbahn", "url": "/"},
+           "about": {"@id": "/#kartbahn"}, "publisher": {"@id": "/#kartbahn"},
+           "datePublished": "2026-10-28", "dateModified": datetime.date.today().isoformat(),
+           "primaryImageOfPage": {"@type": "ImageObject", "url": "/assets/img/og-image.jpg", "width": 1200, "height": 630},
+           "speakable": {"@type": "SpeakableSpecification", "cssSelector": ["h1", ".lead"]}}
+    return '<script type="application/ld+json">' + _json.dumps(obj, ensure_ascii=False) + '</script>'
+
 def write(name, html):
-    if name.endswith(".html"): html = responsive(html)
+    if name.endswith(".html"):
+        html = responsive(html)
+        css = open(OUT + "assets/css/style.css", encoding="utf-8").read()
+        html = html.replace('<link rel="stylesheet" href="assets/css/style.css">', "<style>" + minify_css(css) + "</style>")
+        import re as _re
+        m = _re.search(r'<picture><source media="\(max-width: 700px\)" srcset="([^"]+)"><img class="hero__img" src="([^"]+)"', html)
+        if m:
+            pre = f'<link rel="preload" as="image" href="{m.group(1)}" media="(max-width: 700px)" fetchpriority="high">\n<link rel="preload" as="image" href="{m.group(2)}" media="(min-width: 701px)" fetchpriority="high">\n'
+            html = html.replace("</head>", pre + "</head>", 1)
+        html = html.replace("</head>", page_jsonld(name, html) + "\n</head>", 1)
+        html = "\n".join(l.strip() for l in html.splitlines() if l.strip())
     with open(OUT + name, "w", encoding="utf-8") as f:
         f.write(html)
     print("wrote", name, len(html))

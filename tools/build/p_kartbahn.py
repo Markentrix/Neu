@@ -28,7 +28,7 @@ html += f'''
 
 <section class="section section--alt" id="strecke">
   <div class="wrap split">
-    <img src="assets/img/zweite-ebene.webp" width="1600" height="595" alt="Rampe und Steilkurve der zweiten Ebene" loading="lazy">
+    <img src="assets/img/zweite-ebene.webp" width="1600" height="595" alt="Rampe und Steilkurve der zweiten Ebene" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Strecke</span>
       <h2>Rampe hoch, Steilkurve, Rückenwind bergab</h2>
@@ -48,7 +48,7 @@ html += f'''
     <h2>Die Karts</h2>
     <div class="grid grid-2">
       <div class="card card--img">
-        <img src="assets/img/kart-sodi-front.webp" width="1260" height="430" alt="Sodi SR5 Rennkart von vorn mit Startnummer 4" loading="lazy">
+        <img src="assets/img/kart-sodi-front.webp" width="1260" height="430" alt="Sodi SR5 Rennkart von vorn mit Startnummer 4" loading="lazy" decoding="async">
         <div class="card__body">
           <h3>Sodi SR5 – seit 09/2023 im Einsatz</h3>
           <p>Die fünfte neue Kartflotte seit 2009. Diesmal Sodi aus Frankreich – geniales Handling, volle Ausstattung.</p>
@@ -63,7 +63,7 @@ html += f'''
         </div>
       </div>
       <div class="card card--img">
-        <img src="assets/img/karts-boxengasse.webp" width="1400" height="933" alt="Kinderkarts und Rennkarts in der Boxengasse" loading="lazy">
+        <img src="assets/img/karts-boxengasse.webp" width="1400" height="933" alt="Kinderkarts und Rennkarts in der Boxengasse" loading="lazy" decoding="async">
         <div class="card__body">
           <h3>Sodi LR6 (2025) – 13 Kinderkarts</h3>
           <p>Für die kleinen Piloten ab 8 Jahren und 1,25 m. Jeder fängt klein an.</p>
@@ -87,7 +87,7 @@ html += f'''
 
 <section class="section section--alt" id="lizenz">
   <div class="wrap split split--rev">
-    <img src="assets/img/anmeldung-theke.webp" width="1260" height="430" alt="Anmeldung und Check-in der Celler Kartbahn" loading="lazy">
+    <img src="assets/img/anmeldung-theke.webp" width="1260" height="430" alt="Anmeldung und Check-in der Celler Kartbahn" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Neukunden</span>
       <h2>Registrierung &amp; Rennlizenz fürs Smartphone</h2>

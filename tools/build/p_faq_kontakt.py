@@ -54,6 +54,7 @@ html += f'''
     <span class="eyebrow">Kontakt &amp; Anfahrt</span>
     <h1>Wir freuen uns auf euch</h1>
     <p class="lead">Fragen zu Terminen, Gruppen oder Angeboten? Ruft an, schreibt per WhatsApp oder nutzt das Formular – ihr bekommt eine Eingangsbestätigung mit Vorgangsnummer.</p>
+    <h2 class="sr-only">Kontaktwege</h2>
     <div class="grid grid-3">
       <a class="card card--link" href="{TEL_LINK}"><div class="card__icon">{ICONS["phone"]}</div><h3>Telefon</h3><p>{TEL}<br><span class="small">während der Öffnungszeiten · Fax 05141 908652</span></p></a>
       <a class="card card--link" href="{WA_LINK}" rel="noopener" target="_blank"><div class="card__icon">{ICONS["wa"]}</div><h3>WhatsApp</h3><p>+49 152 31394662<br><span class="small">Nachricht schreiben, wir antworten schnell</span></p></a>

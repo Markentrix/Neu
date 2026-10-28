@@ -3,7 +3,7 @@ from common import *
 
 JSONLD = '''<script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
- {"@type":["EntertainmentBusiness","SportsActivityLocation","LocalBusiness"],"@id":"#kartbahn",
+ {"@type":["EntertainmentBusiness","SportsActivityLocation","LocalBusiness"],"@id":"/#kartbahn",
   "name":"Burnout Celler-Kartbahn","alternateName":"Celler Kartbahn","legalName":"Burnout Celler-Kartbahn GmbH",
   "description":"Indoor-Kartbahn in Celle mit ca. 600 m Strecke, Brücke, Tunnel und zweiter Ebene mit Steilkurve. Sodi-Karts mit 9 PS, Kinderkarts ab 8 Jahren, Doppelsitzer, Kindergeburtstage, Firmenevents, Bistro und Veranstaltungsraum.",
   "image":["/assets/img/og-image.jpg","/assets/img/kartflotte.webp","/assets/img/zweite-ebene.webp"],
@@ -17,7 +17,21 @@ JSONLD = '''<script type="application/ld+json">
    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"15:00"},
    {"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"13:00"},
    {"@type":"OpeningHoursSpecification","dayOfWeek":"Sunday","opens":"11:00"}],
-  "priceRange":"€€","currenciesAccepted":"EUR","paymentAccepted":"Bar, EC-Karte",
+  "priceRange":"€€","currenciesAccepted":"EUR","paymentAccepted":"Bar, EC-Karte","foundingDate":"2009-01","slogan":"Vollgas auf 600 Metern – mit Brücke, Tunnel und Steilkurve",
+  "openingHours":["Mo-Fr 15:00-23:00","Sa 13:00-23:00","Su 11:00-23:00"],
+  "contactPoint":[{"@type":"ContactPoint","contactType":"customer service","telephone":"+49 5141 908650","email":"team@celler-kartbahn.com","availableLanguage":"de","areaServed":"DE"},{"@type":"ContactPoint","contactType":"reservations","telephone":"+49 152 31394662","contactOption":"TollFree","availableLanguage":"de"}],
+  "knowsAbout":["Kartfahren","Indoor-Kartbahn","Kindergeburtstag","Firmenevent","Teambuilding","Junggesellenabschied","Weihnachtsfeier","Schulausflug"],
+  "hasOfferCatalog":{"@type":"OfferCatalog","name":"Angebote der Burnout Celler-Kartbahn","itemListElement":[
+   {"@type":"OfferCatalog","name":"Ticketfahrten (10 Minuten, pro Person)","itemListElement":[
+    {"@type":"Offer","name":"1 Fahrt Erwachsene Sa/So","price":"15.00","priceCurrency":"EUR"},{"@type":"Offer","name":"1 Fahrt Kinder 8–15 Sa/So","price":"13.50","priceCurrency":"EUR"},
+    {"@type":"Offer","name":"1 Fahrt Erwachsene Freitag","price":"14.00","priceCurrency":"EUR"},{"@type":"Offer","name":"1 Fahrt Kinder Freitag","price":"12.00","priceCurrency":"EUR"},
+    {"@type":"Offer","name":"Spartag Mo–Do: 3 Fahrten für 2, Erwachsene","price":"30.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Spartag Mo–Do: 5 Fahrten für 3, Erwachsene","price":"43.00","priceCurrency":"EUR"},
+    {"@type":"Offer","name":"Doppelsitzer 1 Fahrt (2 Personen)","price":"18.00","priceCurrency":"EUR"}]},
+   {"@type":"OfferCatalog","name":"Kindergeburtstag (pro Kind, ab 6 Kindern)","itemListElement":[
+    {"@type":"Offer","name":"Kidsparty F1 – 3 × 10 Minuten","price":"40.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Kidsparty F2 – Grand-Prix-Modus 40 Minuten","price":"48.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Pizzapaket","price":"10.50","priceCurrency":"EUR"}]},
+   {"@type":"OfferCatalog","name":"Gruppen & Firmen","itemListElement":[
+    {"@type":"Offer","name":"Supercup Standard (6–17 Personen, p.P.)","price":"39.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Supercup Premium (p.P.)","price":"59.00","priceCurrency":"EUR"},
+    {"@type":"Offer","name":"Bahnmiete 1 Stunde inkl. 10 Karts","price":"650.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Schulklasse Angebot 1 (p.P., ab 20)","price":"20.00","priceCurrency":"EUR"},{"@type":"Offer","name":"Kinderkartführerschein","price":"45.00","priceCurrency":"EUR"}]}]},
   "sameAs":["https://www.facebook.com/BurnoutCellerKartbahn/"],
   "amenityFeature":[{"@type":"LocationFeatureSpecification","name":"Bistro","value":true},{"@type":"LocationFeatureSpecification","name":"Veranstaltungsraum bis 80 Personen","value":true},{"@type":"LocationFeatureSpecification","name":"Terrasse","value":true},{"@type":"LocationFeatureSpecification","name":"Kinderkarts","value":true},{"@type":"LocationFeatureSpecification","name":"Doppelsitzer-Kart","value":true}],
   "makesOffer":[
@@ -26,10 +40,10 @@ JSONLD = '''<script type="application/ld+json">
    {"@type":"Offer","name":"Supercup Standard – Qualifying + 20 Min Rennen","price":"39.00","priceCurrency":"EUR","url":"/firmen.html"},
    {"@type":"Offer","name":"Bahnmiete 1 Stunde inkl. 10 Karts","price":"650.00","priceCurrency":"EUR","url":"/firmen.html"}]
  },
- {"@type":"WebSite","name":"Burnout Celler-Kartbahn","url":"/","inLanguage":"de-DE","publisher":{"@id":"#kartbahn"}},
+ {"@type":"WebSite","name":"Burnout Celler-Kartbahn","url":"/","inLanguage":"de-DE","publisher":{"@id":"/#kartbahn"}},
  {"@type":"Event","name":"Flatratefahren Oktober 2026","startDate":"2026-10-30T19:00:00+01:00","eventStatus":"https://schema.org/EventScheduled","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",
   "location":{"@type":"Place","name":"Burnout Celler-Kartbahn","address":{"@type":"PostalAddress","streetAddress":"Waldweg 100","postalCode":"29221","addressLocality":"Celle","addressCountry":"DE"}},
-  "description":"Flatratefahren in 3 Gruppen mit 12-Minuten-Durchgängen im Wechsel. Ab 22 Uhr Discolicht und Nebel auf der Strecke.","organizer":{"@id":"#kartbahn"},"offers":{"@type":"Offer","url":"/buchen.html?angebot=event","availability":"https://schema.org/InStock"}}
+  "description":"Flatratefahren in 3 Gruppen mit 12-Minuten-Durchgängen im Wechsel. Ab 22 Uhr Discolicht und Nebel auf der Strecke.","organizer":{"@id":"/#kartbahn"},"offers":{"@type":"Offer","url":"/buchen.html?angebot=event","availability":"https://schema.org/InStock"}}
 ]}
 </script>'''
 
@@ -58,6 +72,19 @@ html += f'''
   </div>
 </section>
 
+<section class="section section--tight" id="fakten">
+  <div class="wrap">
+    <h2 class="sr-only">Auf einen Blick</h2>
+    <dl class="facts">
+      <div><dt>Adresse</dt><dd>Burnout Celler-Kartbahn GmbH, Waldweg 100, 29221 Celle (Niedersachsen)</dd></div>
+      <div><dt>Öffnungszeiten</dt><dd>Mo–Fr ab 15 Uhr (Ferien ab 13 Uhr), Sa ab 13 Uhr, So ab 11 Uhr – Open End</dd></div>
+      <div><dt>Preise</dt><dd>10-Minuten-Fahrt ab 12 € (Kids) bzw. 14 € (Erwachsene), Kidsparty ab 40 € pro Kind, Supercup ab 39 € p.P.</dd></div>
+      <div><dt>Alter</dt><dd>Kinderkart ab 8 Jahren und 1,25 m, Rennkart ab 13 Jahren und 1,55 m, Doppelsitzer-Beifahrer ab 4 Jahren</dd></div>
+      <div><dt>Strecke</dt><dd>ca. 600 m indoor mit Brücke, Tunnel und Steilkurve in 6 m Höhe, Sodi SR5 mit 9 PS, 13 Kinderkarts</dd></div>
+      <div><dt>Kontakt</dt><dd><a href="{TEL_LINK}">05141 908650</a>, <a href="mailto:{MAIL}">{MAIL}</a>, WhatsApp +49 152 31394662</dd></div>
+    </dl>
+  </div>
+</section>
 <section class="section">
   <div class="wrap">
     <h2 class="sr-only">Unsere Angebote</h2>
@@ -72,7 +99,7 @@ html += f'''
 
 <section class="section section--alt">
   <div class="wrap split">
-    <img src="assets/img/zweite-ebene.webp" width="1600" height="595" alt="Die zweite Ebene der Celler Kartbahn mit Rampe und Steilkurve in sechs Metern Höhe" loading="lazy">
+    <img src="assets/img/zweite-ebene.webp" width="1600" height="595" alt="Die zweite Ebene der Celler Kartbahn mit Rampe und Steilkurve in sechs Metern Höhe" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Neu: 2. Ebene</span>
       <h2>Bist du bereit für das nächste Level?</h2>
@@ -167,7 +194,7 @@ html += f'''
 
 <section class="section">
   <div class="wrap split split--rev">
-    <img src="assets/img/bistro-theke.webp" width="1400" height="934" alt="Bistro-Theke der Celler Kartbahn mit Livemonitoren und roter Beleuchtung" loading="lazy">
+    <img src="assets/img/bistro-theke.webp" width="1400" height="934" alt="Bistro-Theke der Celler Kartbahn mit Livemonitoren und roter Beleuchtung" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Erst Kart, dann Dart?</span>
       <h2>Bistro, Clubraum &amp; Dartraum</h2>
