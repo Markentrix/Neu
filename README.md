@@ -72,4 +72,4 @@ Ohne Antwort des Portals gilt die eingebaute Liste aus `build/produkte.py`. Arti
 
 `python3 build/logo_lockup.py` erzeugt aus der Schrift der Website (Fraunces, Inter, Pinyon Script, alle SIL OFL, als Pfade) das lange Logo:
 `brand/schichtatelier-logo-voll*.svg` (Wortmarke mit Düse im „i“, Druckspur-Linie, „3D MANUFAKTUR“, Leistungszeile, Signatur „Y & C“, hell und dunkel, dazu PNG 2400 px)
-und `brand/schichtatelier-wortmarke*.svg` (ohne Zeile und Signatur). Die Wortmarke steht im Footer der Website, der Seitenkopf nutzt die kompakte Variante mit Schicht-S.
+und `brand/schichtatelier-wortmarke*.svg` (ohne Zeile und Signatur). Die Wortmarke steht im Seitenkopf (ohne Zeilen) und im Footer (mit „3D MANUFAKTUR“), das Schicht-S bleibt Favicon, App-Icon und Siegel.

@@ -19,6 +19,7 @@ SVG_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wi
 from logo import mark as _mark
 from logo_lockup import inline_svg as _lockup
 LOCKUP_FOOTER = _lockup(False, "lockup")
+LOCKUP_HEAD = _lockup(False, "lockup lockup-head", sub=False)
 def SVG_LOGO_ID(uid):
     return '<svg viewBox="0 0 64 64" aria-hidden="true">' + _mark(True, uid=uid, small=True) + '</svg>'
 SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
@@ -57,7 +58,7 @@ def header(rel, current=""):
         return f'<a href="{rel}{href}"{cur}>{label}</a>'
     return f"""<header class="site-header">
   <div class="wrap">
-    <a class="logo" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{SVG_LOGO_ID("mkH")}<span>Schicht<em>atelier</em></span></a>
+    <a class="lockup-link" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{LOCKUP_HEAD}</a>
     <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu">{SVG_MENU}</button>
     <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
       {nav("shop.html", "Shop", "shop")}
