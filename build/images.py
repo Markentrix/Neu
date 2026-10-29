@@ -211,7 +211,9 @@ def draw(p):
     return box(300, 250, 200, 180, 60, c)
 
 
-LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">' + '<rect width="64" height="64" rx="14" fill="#1f4d3a"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f"/>' + '</svg>')
+import sys as _sys; _sys.path.insert(0, os.path.dirname(__file__))
+from logo import mark as _mark
+LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">' + _mark(True, uid="fav", small=True) + '</svg>'
 
 
 def compose_cutout(obj, out_path, W=1200, H=900, anordnung=None):
@@ -295,7 +297,7 @@ def main():
     # Gutschein-Karte
     gs = frame('<rect x="190" y="170" width="420" height="270" rx="18" fill="#1f4d3a"/>'
                '<rect x="190" y="170" width="420" height="270" rx="18" fill="none" stroke="#f1e6d2" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 6" transform="translate(10 10) scale(.952)"/>'
-               '<g transform="translate(220 200) scale(.9)"><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f"/></g>'
+               '<g transform="translate(214 194) scale(1.0)">' + _mark(False, uid="gs") + '</g>'
                '<text x="300" y="235" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="26" fill="#f1ede4">Schicht<tspan fill="#d9a06b">werk</tspan></text>'
                '<text x="220" y="330" font-family="Inter,Arial,sans-serif" font-weight="600" font-size="16" fill="#f1ede4" fill-opacity=".8" letter-spacing="3">GESCHENKGUTSCHEIN</text>'
                '<text x="220" y="395" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="54" fill="#f1ede4">20 €</text>'
@@ -305,7 +307,7 @@ def main():
     # Favicon
     fav = os.path.join(tmp, "favicon.svg")
     with open(fav, "w") as f:
-        f.write(LOGO_SVG)
+        f.write(LOGO_SVG.replace('width="64" height="64"', 'width="512" height="512"', 1))
     jobs.append({"svg": fav, "png": os.path.join(tmp, "favicon.png"), "w": 512, "h": 512})
     with open(os.path.join(ROOT, "favicon.svg"), "w") as f:
         f.write(LOGO_SVG)

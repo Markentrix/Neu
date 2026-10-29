@@ -31,7 +31,7 @@ Artikel ändern: `build/produkte.py` bearbeiten, dann `python3 build/images.py` 
 
 ## Logo
 
-`brand/` enthält das Logo (Bildmarke: drei Schichten in Sand und Kupfer auf Tannengrün bilden ein S; Wortmarke „Schicht·werk“ in Fraunces als Pfade):
+`brand/` enthält das Logo (Bildmarke: ein S aus Druckschichten in Sand bis Kupfer auf Tannengrün; Wortmarke „Schicht·werk“ in Fraunces als Pfade; dazu ein rundes Siegel für Verpackung und Aufkleber):
 SVG hell/dunkel, mit und ohne Kachel, einfarbig, sowie PNG-Exporte (2400 px Logo, 1024 px Marke). Erzeugt mit `python3 build/logo.py`.
 Favicon und App-Icons in `website-fertig/` entstehen aus derselben Marke (`python3 build/images.py`).
 

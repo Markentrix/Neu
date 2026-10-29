@@ -16,7 +16,9 @@ TODAY = datetime.date.today().isoformat()
 
 SVG_CART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg>'
 SVG_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
-SVG_LOGO = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1f4d3a"/><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f"/></svg>'
+from logo import mark as _mark
+def SVG_LOGO_ID(uid):
+    return '<svg viewBox="0 0 64 64" aria-hidden="true">' + _mark(True, uid=uid, small=True) + '</svg>'
 SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
 ICONS = {
     "layer": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 13 10 5 10-5"/><path d="m2 18 10 5 10-5"/></svg>',
@@ -54,7 +56,7 @@ def header(rel, current=""):
         return f'<a href="{rel}{href}"{cur}>{label}</a>'
     return f"""<header class="site-header">
   <div class="wrap">
-    <a class="logo" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{SVG_LOGO}<span>Schicht<em>werk</em></span></a>
+    <a class="logo" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{SVG_LOGO_ID("mkH")}<span>Schicht<em>werk</em></span></a>
     <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu">{SVG_MENU}</button>
     <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
       {nav("shop.html", "Shop", "shop")}
@@ -77,7 +79,7 @@ def footer(rel):
     <div class="trust-strip footer-trust"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span><span>{SVG_CHECK} Gefertigt in Deutschland</span></div>
     <div class="cols">
       <div>
-        <a class="logo" href="{rel}index.html">{SVG_LOGO}<span>Schicht<em>werk</em></span></a>
+        <a class="logo" href="{rel}index.html">{SVG_LOGO_ID("mkF")}<span>Schicht<em>werk</em></span></a>
         <p style="margin-top:12px">{E(C.CLAIM)}. Jedes Teil wird nach Ihrer Bestellung in unserer Werkstatt gedruckt, geprüft und verpackt.</p>
         <p><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
       </div>
@@ -768,7 +770,7 @@ def build_404():
     body = f"""<section class="hero-mini">
   <div class="wrap" style="max-width:640px">
     <div class="lost-art" aria-hidden="true">
-      <svg viewBox="0 0 64 64"><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f" transform="rotate(-9 35 45) translate(6 4)"/></svg>
+      <svg viewBox="0 0 64 64">{_mark(False, uid="lost", missing=5)}</svg>
     </div>
     <span class="eyebrow">Fehler 404</span>
     <h1>Diese Schicht <em>fehlt noch.</em></h1>
