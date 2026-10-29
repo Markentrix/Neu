@@ -114,3 +114,23 @@ Felder, die die Website bereits sendet: `betrag`, `zustellung`, `empfaenger`, `a
 4. Danke-Seite zeigt `paypalUrl` aus der Antwort als Zahlknopf.
 
 Bis dahin funktioniert alles wie jetzt: Artikel in `build/produkte.py`, Bilder in `build/fotos/`, Bestellungen als Kontakt-Anfrage mit Bestelltext.
+
+## 5. Stand der Website-Anbindung (umgesetzt)
+
+Die Website nutzt die Endpunkte so, wie oben beschrieben. Getestet gegen einen nachgebauten Portal-Server, nicht gegen das echte Portal.
+
+- **`GET /api/produkte`** wird beim Laden jeder Seite abgerufen (4 s Zeitlimit) und 10 Minuten im Browser zwischengespeichert.
+  Antwort ersetzt Artikel, Farben, Kategorien, Versandpauschale, Versandfrei-Grenze und Abholung. Fehlt oder scheitert der Endpunkt,
+  läuft die Seite mit der eingebauten Liste weiter. Artikel mit `aktiv: false` werden nicht angezeigt.
+- **Shop und Startseite** bauen Raster, Kategorie-Filter, „Mit Wunschtext“-Filter und Zähler aus dem Katalog neu auf.
+- **Artikel ohne eigene HTML-Datei** öffnen `produkt.html?id=<id>`. Diese allgemeine Seite ist auf `noindex` gesetzt.
+  Für Google bleibt das Erzeugen von `produkt/<id>.html` durch das Portal die bessere Lösung (siehe Abschnitt 4).
+- **Statische Produktseiten** übernehmen Preis (sichtbar und in den strukturierten Daten) aus dem Portal. Fehlt der Artikel im Katalog,
+  ist der Kauf-Button gesperrt und ein Hinweis erscheint.
+- **Kasse** sendet `typ="bestellung"` mit `positionen`, `adresse`, `lieferart`, `zahlungsart` und numerischen Summen; zusätzlich bleiben
+  `nachricht` und `bestellung` als Freitext erhalten. Kennt das Portal den Typ nicht (HTTP 400/404/501 oder 422 mit Fehler auf `typ`),
+  wird einmal als `typ="kontakt"` wiederholt. 422 auf `summe` oder `positionen` führt zu „Preise haben sich geändert“ und lädt den Katalog neu.
+- **`paypalUrl`** aus der Antwort wird auf der Danke-Seite als Zahlknopf gezeigt, nur wenn sie mit `https://paypal.com/…`, `https://www.paypal.com/…` oder `https://paypal.me/…` beginnt.
+- **`GET /api/gutschein`** setzt Beträge, Mindest- und Höchstbetrag; `aktiv: false` blendet Gutscheinkarte und Formular aus.
+
+Annahmen, bitte gegen das echte Portal prüfen: Feldnamen wie in Abschnitt 1, Bild-URLs mit führendem `/`, Preise als Zahl, `farben` je Artikel als Liste von Schlüsseln.

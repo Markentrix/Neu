@@ -62,3 +62,8 @@ Vorauswahl. `STANDARDFARBEN` für Artikel, die es in allen Farben gibt. Die Kart
 
 Überschriften, Produktnamen, Preise und Wortmarke: Fraunces (variabel, SIL OFL), Fließtext und Bedienelemente: Inter. Beide liegen lokal
 unter `website-fertig/assets/fonts/`, Lizenzhinweise in `OFL.txt`. Betonte Wörter in Überschriften stehen in `<em>` (kursiv, grün).
+
+## Portal-Katalog
+
+Die Seite lädt Artikel zusätzlich aus `GET /api/produkte` (Spezifikation und Stand der Umsetzung: `docs/portal-schnittstelle-shop.md`).
+Ohne Antwort des Portals gilt die eingebaute Liste aus `build/produkte.py`. Artikel, die nur im Portal existieren, öffnen `produkt.html?id=…`.

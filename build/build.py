@@ -186,8 +186,8 @@ def build_index():
   <div class="wrap">
     <span class="eyebrow">Beliebt</span>
     <h2>Das bestellen unsere Kunden am häufigsten</h2>
-    <div class="grid">{cards}</div>
-    <p style="margin-top:24px"><a class="btn btn-ghost" href="shop.html">Alle {len(AKTIV)} Artikel ansehen</a> <a class="btn btn-ghost" href="gutschein.html">Geschenkgutschein</a></p>
+    <div class="grid" id="featured-grid">{cards}</div>
+    <p style="margin-top:24px"><a class="btn btn-ghost" href="shop.html">Alle <span id="alle-anzahl">{len(AKTIV)}</span> Artikel ansehen</a> <a class="btn btn-ghost" href="gutschein.html">Geschenkgutschein</a></p>
   </div>
 </section>
 
@@ -257,10 +257,10 @@ def build_shop():
   <div class="wrap">
     <span class="eyebrow">Shop</span>
     <h1>Alle Artikel</h1>
-    <p class="muted" style="max-width:60ch">{len(AKTIV)} Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos. 14 Tage Rückgabe.</p>
+    <p class="muted" style="max-width:60ch"><span id="shop-anzahl">{len(AKTIV)}</span> Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos. 14 Tage Rückgabe.</p>
     <div class="trust-strip"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span></div>
     <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
-      {chips}
+      <span id="kat-chips" class="chips-wrap">{chips}</span>
       <label class="sr-only" for="sortierung">Sortierung</label>
       <select id="sortierung"><option value="standard">Empfohlen</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A–Z</option></select>
     </div>
@@ -349,6 +349,18 @@ def build_products():
         page(f"produkt/{p['id']}.html", title, p["kurz"][:155], body, "shop", rel)
 
 
+# ---------------------------------------------------------------- Allgemeine Produktseite (Artikel aus dem Portal)
+def build_product_dyn():
+    body = """<section class="section-tight">
+  <div class="wrap" id="produkt-dyn">
+    <h1>Artikel wird geladen …</h1>
+    <noscript><p>Für die Artikelansicht wird JavaScript benötigt. Alle Artikel finden Sie im <a href="shop.html">Shop</a>.</p></noscript>
+  </div>
+</section>
+"""
+    page("produkt.html", f"Artikel · {C.MARKE}", "Artikel im Online-Shop von Schichtatelier: Farbe wählen, in den Warenkorb legen, auf Bestellung gedruckt.", body, "shop", "", '<meta name="robots" content="noindex">')
+
+
 # ---------------------------------------------------------------- Gutschein
 def gutschein_card(rel):
     return f"""<article class="card card-gutschein" data-kat="geschenk" data-preis="10" data-name="Geschenkgutschein" data-pos="999">
@@ -377,7 +389,7 @@ def build_voucher():
         <p>Für alle, die sich lieber selbst etwas aussuchen: Der Gutschein gilt für alle Artikel im Shop und für den Druckservice. Als gedruckte Karte per Post oder als PDF per E-Mail zum Selbstausdrucken, auf Wunsch mit persönlicher Nachricht.</p>
         <form class="form" id="gutscheinformular">
           <div class="alert" role="alert"></div>
-          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Betrag</legend><div class="swatches">{amounts}</div></fieldset>
+          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Betrag</legend><div class="swatches" id="g-betraege">{amounts}</div></fieldset>
           <div class="field"><label for="g-frei">Anderer Betrag in Euro <span class="opt">(optional, mindestens 10)</span></label><input type="number" id="g-frei" name="betrag_frei" min="10" max="500" step="1" inputmode="numeric"><p class="msg"></p></div>
           <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zustellung</legend>
             <label class="check"><input type="radio" name="zustellung" value="E-Mail (PDF)" checked> Per E-Mail als PDF, meist am selben Werktag</label>
@@ -789,14 +801,17 @@ def build_404():
 
 # ---------------------------------------------------------------- Daten, Sitemap, Robots, Manifest
 def build_data():
-    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text")), farben=p["farben"], kurz=p["kurz"]) for p in AKTIV]
-    cfg = dict(email=C.EMAIL, telefon=C.TELEFON, paypalMe=C.PAYPAL_ME, versandPauschale=VERSAND_PAUSCHALE, versandfreiAb=VERSANDFREI_AB, produktionMin=2, produktionMax=4, versandMin=2, versandMax=3)
+    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text")), textlabel=p.get("textlabel", ""), farben=p["farben"], kurz=p["kurz"], lang=p["lang"], material=p["material"], masse=p["masse"], gewicht=p["gewicht"], tags=p["tags"]) for p in AKTIV]
+    cfg = dict(email=C.EMAIL, telefon=C.TELEFON, paypalMe=C.PAYPAL_ME, versandPauschale=VERSAND_PAUSCHALE, versandfreiAb=VERSANDFREI_AB, produktionMin=2, produktionMax=4, versandMin=2, versandMax=3, marke=C.MARKE, abholung=True, produktion=C.PRODUKTIONSZEIT,
+               preishinweis=("Endpreis, keine Umsatzsteuer nach § 19 UStG" if C.KLEINUNTERNEHMER else "inkl. MwSt."))
     farben = {k: [v[0], v[1]] for k, v in FARBEN.items()}
     with open(os.path.join(ROOT, "assets", "js", "produkte.js"), "w", encoding="utf-8") as f:
         f.write("/* generiert von build/build.py */\n")
         f.write("window.SW_CONFIG=" + json.dumps(cfg, ensure_ascii=False) + ";\n")
         f.write("window.SW_FARBEN=" + json.dumps(farben, ensure_ascii=False) + ";\n")
         f.write("window.SW_PRODUKTE=" + json.dumps(data, ensure_ascii=False) + ";\n")
+        f.write("window.SW_KATEGORIEN=" + json.dumps(KAT_AKTIV, ensure_ascii=False) + ";\n")
+        f.write("window.SW_STATIC=" + json.dumps([p["id"] for p in AKTIV]) + ";\n")
     pages = ["index.html", "shop.html", "druckservice.html", "materialien.html", "faq.html", "kontakt.html", "versand.html", "ueber-uns.html", "agb.html", "widerruf.html", "impressum.html", "datenschutz.html", "gutschein.html"] + [f"material/{m['id']}.html" for m in MATERIALIEN] + [f"produkt/{p['id']}.html" for p in AKTIV]
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
@@ -1026,7 +1041,7 @@ def build_faq():
 
 
 if __name__ == "__main__":
-    for fn in (build_data, build_index, build_shop, build_products, build_voucher, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404, build_materials, build_service, build_faq):
+    for fn in (build_data, build_index, build_shop, build_products, build_product_dyn, build_voucher, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404, build_materials, build_service, build_faq):
         fn()
     n = sum(len(f) for _, _, f in os.walk(ROOT))
     print("Fertig:", n, "Dateien in", ROOT)

@@ -35,10 +35,10 @@
   <div class="wrap">
     <span class="eyebrow">Shop</span>
     <h1>Alle Artikel</h1>
-    <p class="muted" style="max-width:60ch">3 Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand 4,90 €, ab 49,00 € kostenlos. 14 Tage Rückgabe.</p>
+    <p class="muted" style="max-width:60ch"><span id="shop-anzahl">3</span> Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand 4,90 €, ab 49,00 € kostenlos. 14 Tage Rückgabe.</p>
     <div class="trust-strip"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Versandfrei ab 49,00 €</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> 14 Tage Rückgaberecht</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> PayPal-Käuferschutz</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Nachdruck-Garantie</span></div>
     <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
-      <button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button><button class="chip" type="button" data-kat="wohnen" aria-pressed="false">Wohnen &amp; Deko</button>
+      <span id="kat-chips" class="chips-wrap"><button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button><button class="chip" type="button" data-kat="wohnen" aria-pressed="false">Wohnen &amp; Deko</button></span>
       <label class="sr-only" for="sortierung">Sortierung</label>
       <select id="sortierung"><option value="standard">Empfohlen</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A–Z</option></select>
     </div>
