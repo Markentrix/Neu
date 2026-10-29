@@ -1,4 +1,4 @@
-# Produktdaten für den Schichtwerk-Shop.
+# Produktdaten für den Schichtatelier-Shop.
 # Preise in Euro (Endpreise).
 # FARBEN: zentrale Farbliste (Schlüssel -> Anzeigename, Farbwert für das Farbfeld). Neue Filamentfarbe hier EINMAL eintragen,
 #   dann bei den Artikeln in "farben" aufführen. Der erste Eintrag eines Artikels ist die Vorauswahl und die Farbe für den Schnellkauf.

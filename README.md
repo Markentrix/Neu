@@ -1,4 +1,4 @@
-# Schichtwerk – Online-Shop für 3D-Druck-Artikel
+# Schichtatelier – Online-Shop für 3D-Druck-Artikel
 
 Statischer Shop (ca. 20 Artikel) für das Hosting auf dem Markentrix-Server mit Anbindung an das Markentrix-Portal.
 Kein eigenes Backend: Bestellungen, Anfragen, Widerrufe, Google-Bewertungen, Cookie-Einstellung und Besucherzählung laufen über das Portal.
@@ -13,7 +13,7 @@ Kein eigenes Backend: Bestellungen, Anfragen, Widerrufe, Google-Bewertungen, Coo
 1. `build/config.py` prüfen: Firmendaten sind wie bei Markentrix eingetragen. Offen: PayPal.Me-Link, USt-IdNr. nach Erteilung, ggf. eigene Shop-E-Mail-Adresse.
 2. `python3 build/build.py` ausführen (erzeugt alle Seiten neu).
 3. Produktfotos: Datei `website-fertig/assets/img/produkte/<artikel-id>.webp` (800×600) ersetzen, sonst nichts ändern.
-4. Im Portal den Shop als eigenen Kunden/Site „Schichtwerk“ mit eigenen Daten anlegen (eigene Absender-Mail, eigener Google-Bewertungslink).
+4. Im Portal den Shop als eigenen Kunden/Site „Schichtatelier“ mit eigenen Daten anlegen (eigene Absender-Mail, eigener Google-Bewertungslink).
 
 ## Portal-Funktionen
 

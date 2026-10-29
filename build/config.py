@@ -2,9 +2,9 @@
 # Firmendaten wie bei Markentrix (Einzelunternehmen Christian Wien, Celle). Noch OFFEN: PayPal.Me-Link, USt-IdNr. nach Erteilung.
 # Danach: python3 build/build.py  (erzeugt website-fertig/ neu)
 
-MARKE = "Schichtwerk"
+MARKE = "Schichtatelier"
 CLAIM = "3D-Druck-Manufaktur"
-FIRMA = "Schichtwerk 3D-Druck"
+FIRMA = "Schichtatelier 3D-Druck"
 INHABER = "Christian Wien"
 STRASSE = "Heinrich-Hüdig-Str. 1"
 PLZ_ORT = "29227 Celle"

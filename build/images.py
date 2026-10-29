@@ -298,7 +298,7 @@ def main():
     gs = frame('<rect x="190" y="170" width="420" height="270" rx="18" fill="#1f4d3a"/>'
                '<rect x="190" y="170" width="420" height="270" rx="18" fill="none" stroke="#f1e6d2" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 6" transform="translate(10 10) scale(.952)"/>'
                '<g transform="translate(214 194) scale(1.0)">' + _mark(False, uid="gs") + '</g>'
-               '<text x="300" y="235" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="26" fill="#f1ede4">Schicht<tspan fill="#d9a06b">werk</tspan></text>'
+               '<text x="300" y="235" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="22" fill="#f1ede4">Schicht<tspan fill="#d9a06b">atelier</tspan></text>'
                '<text x="220" y="330" font-family="Inter,Arial,sans-serif" font-weight="600" font-size="16" fill="#f1ede4" fill-opacity=".8" letter-spacing="3">GESCHENKGUTSCHEIN</text>'
                '<text x="220" y="395" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="54" fill="#f1ede4">20 €</text>'
                '<text x="560" y="412" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" fill="#f1ede4" fill-opacity=".7">3 Jahre gültig</text>')

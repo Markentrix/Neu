@@ -1,4 +1,4 @@
-"""Erzeugt die Schichtwerk-Logodateien in brand/ (SVG mit Schrift als Pfade, PNG-Exporte).
+"""Erzeugt die Schichtatelier-Logodateien in brand/ (SVG mit Schrift als Pfade, PNG-Exporte).
 Aufruf: python3 build/logo.py"""
 import os, sys, subprocess, json, tempfile
 from fontTools.ttLib import TTFont
@@ -101,11 +101,11 @@ def logo_svg(dark_bg=False, with_tile=True):
     """Horizontales Logo: Marke + Wortmarke. Höhe 64, Breite dynamisch."""
     size = 44; gap = 16; x0 = 64 + gap; baseline = 32 + size * 0.34
     p1, w1 = wordmark_paths("Schicht", size, x0, baseline)
-    p2, w2 = wordmark_paths("werk", size, x0 + w1, baseline)
+    p2, w2 = wordmark_paths("atelier", size, x0 + w1, baseline)
     text_col = CREAM if dark_bg else NAVY
     width = int(x0 + w1 + w2 + 2)
     paths = "".join(f'<path d="{d}" fill="{text_col}"/>' for d in p1) + "".join(f'<path d="{d}" fill="{"#d9a06b" if dark_bg else "#9e6230"}"/>' for d in p2)
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} 64" width="{width}" height="64" role="img" aria-label="Schichtwerk">'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} 64" width="{width}" height="64" role="img" aria-label="Schichtatelier">'
             f'{mark(tile=with_tile, uid="lg")}{paths}</svg>')
 
 
@@ -115,7 +115,7 @@ def main():
     # Siegel-Umschrift aus Inter Bold als Pfade entlang des Kreises
     import math
     ifont = TTFont("/usr/share/fonts/opentype/inter/Inter-Bold.otf"); igs = ifont.getGlyphSet(); icmap = ifont.getBestCmap(); iupm = ifont["head"].unitsPerEm
-    text = "SCHICHTWERK · 3D-DRUCK-MANUFAKTUR · CELLE · "; fsize = 7.0; r = 44.5; sc = fsize / iupm
+    text = "SCHICHTATELIER · 3D-DRUCK-MANUFAKTUR · CELLE · "; fsize = 6.5; r = 44.5; sc = fsize / iupm
     total = sum(igs[icmap[ord(ch)]].width * sc + 1.6 for ch in text); ang = -90 - 360 * 0 ; circ = 2 * math.pi * r
     step_deg = 360 / circ
     a = -90.0
@@ -129,14 +129,14 @@ def main():
         if d: ring_paths += f'<path d="{d}" fill="{CREAM}" transform="translate({cx:.2f} {cy:.2f}) rotate({rot:.2f})"/>'
         a += adv * step_deg
     files = {
-        "schichtwerk-logo.svg": logo_svg(False, True),
-        "schichtwerk-logo-dunkel.svg": logo_svg(True, True),
-        "schichtwerk-logo-ohne-kachel-dunkel.svg": logo_svg(True, False),
-        "schichtwerk-marke.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(True)}</svg>',
-        "schichtwerk-marke-ohne-kachel.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(False)}</svg>',
-        "schichtwerk-marke-einfarbig.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(False, "#1c2a24")}</svg>',
-        "schichtwerk-marke-klein.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(True, small=True)}</svg>',
-        "schichtwerk-siegel.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="240" height="240">{seal()}{ring_paths}</svg>',
+        "schichtatelier-logo.svg": logo_svg(False, True),
+        "schichtatelier-logo-dunkel.svg": logo_svg(True, True),
+        "schichtatelier-logo-ohne-kachel-dunkel.svg": logo_svg(True, False),
+        "schichtatelier-marke.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(True)}</svg>',
+        "schichtatelier-marke-ohne-kachel.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(False)}</svg>',
+        "schichtatelier-marke-einfarbig.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(False, "#1c2a24")}</svg>',
+        "schichtatelier-marke-klein.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">{mark(True, small=True)}</svg>',
+        "schichtatelier-siegel.svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="240" height="240">{seal()}{ring_paths}</svg>',
     }
     for name, svg in files.items():
         with open(os.path.join(OUT, name), "w") as f:
@@ -150,11 +150,11 @@ def main():
         return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}"><rect width="{w}" height="{h}" fill="{bg}"/>'
                 f'<g transform="translate({w/2},{h/2}) scale({scale})">{svg}</g></svg>')
     inner = logo_svg(False, True); vb = int(inner.split('viewBox="0 0 ')[1].split(' ')[0])
-    job(pad(f'<g transform="translate({-vb/2},-32)">{inner.split(">",1)[1][:-6]}</g>', 2400, 800, "#ffffff", 6), "schichtwerk-logo-2400", 2400, 800, "#ffffff")
+    job(pad(f'<g transform="translate({-vb/2},-32)">{inner.split(">",1)[1][:-6]}</g>', 2400, 800, "#ffffff", 6), "schichtatelier-logo-2400", 2400, 800, "#ffffff")
     inner = logo_svg(True, True)
-    job(pad(f'<g transform="translate({-vb/2},-32)">{inner.split(">",1)[1][:-6]}</g>', 2400, 800, NAVY, 6), "schichtwerk-logo-dunkel-2400", 2400, 800, NAVY)
-    job(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="1024" height="1024">{mark(True)}</svg>', "schichtwerk-marke-1024", 1024, 1024, "")
-    job(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="1024" height="1024">{seal()}{ring_paths}</svg>', "schichtwerk-siegel-1024", 1024, 1024, "")
+    job(pad(f'<g transform="translate({-vb/2},-32)">{inner.split(">",1)[1][:-6]}</g>', 2400, 800, NAVY, 6), "schichtatelier-logo-dunkel-2400", 2400, 800, NAVY)
+    job(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="1024" height="1024">{mark(True)}</svg>', "schichtatelier-marke-1024", 1024, 1024, "")
+    job(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="1024" height="1024">{seal()}{ring_paths}</svg>', "schichtatelier-siegel-1024", 1024, 1024, "")
     jf = os.path.join(tmp, "jobs.json"); json.dump(jobs, open(jf, "w"))
     subprocess.run(["node", os.path.join(ROOT, "build", "render.js"), jf], check=True)
     print("Logo-Dateien:", sorted(os.listdir(OUT)))

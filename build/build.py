@@ -56,7 +56,7 @@ def header(rel, current=""):
         return f'<a href="{rel}{href}"{cur}>{label}</a>'
     return f"""<header class="site-header">
   <div class="wrap">
-    <a class="logo" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{SVG_LOGO_ID("mkH")}<span>Schicht<em>werk</em></span></a>
+    <a class="logo" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{SVG_LOGO_ID("mkH")}<span>Schicht<em>atelier</em></span></a>
     <button class="menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="hauptmenu">{SVG_MENU}</button>
     <nav class="nav" id="hauptmenu" aria-label="Hauptmenü">
       {nav("shop.html", "Shop", "shop")}
@@ -79,7 +79,7 @@ def footer(rel):
     <div class="trust-strip footer-trust"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span><span>{SVG_CHECK} Gefertigt in Deutschland</span></div>
     <div class="cols">
       <div>
-        <a class="logo" href="{rel}index.html">{SVG_LOGO_ID("mkF")}<span>Schicht<em>werk</em></span></a>
+        <a class="logo" href="{rel}index.html">{SVG_LOGO_ID("mkF")}<span>Schicht<em>atelier</em></span></a>
         <p style="margin-top:12px">{E(C.CLAIM)}. Jedes Teil wird nach Ihrer Bestellung in unserer Werkstatt gedruckt, geprüft und verpackt.</p>
         <p><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
       </div>
@@ -158,7 +158,7 @@ def build_index():
     featured = ([p for p in AKTIV if "bestseller" in p["tags"]] + [p for p in AKTIV if "bestseller" not in p["tags"]])[:4]
     cards = "\n".join(card(p, "", i) for i, p in enumerate(featured))
     cats = "\n".join(f'<a class="chip" href="shop.html#{k}">{E(v)}</a>' for k, v in KAT_AKTIV.items())
-    hero_art = """<img src="assets/img/hero.webp" width="1200" height="1200" alt="Frisch gedruckter kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett in der Schichtwerk-Werkstatt" fetchpriority="high">"""
+    hero_art = """<img src="assets/img/hero.webp" width="1200" height="1200" alt="Frisch gedruckter kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett in der Schichtatelier-Werkstatt" fetchpriority="high">"""
     body = f"""<section class="hero">
   <div class="wrap">
     <div>
@@ -193,7 +193,7 @@ def build_index():
 
 <section class="section">
   <div class="wrap">
-    <span class="eyebrow">Warum Schichtwerk</span>
+    <span class="eyebrow">Warum Schichtatelier</span>
     <h2>Gedruckt, wenn Sie bestellen. Nicht vorher.</h2>
     <div class="feature-grid">
       <div class="feature">{ICONS['layer']}<h3>Auf Bestellung gefertigt</h3><p class="muted">Kein Lager, keine Überproduktion. Jedes Teil entsteht erst, wenn Sie es bestellen, in der Farbe, die Sie wählen.</p></div>
@@ -269,7 +269,7 @@ def build_shop():
   </div>
 </section>
 """
-    page("shop.html", f"Shop · Alle 3D-Druck-Artikel · {C.MARKE}", "Alle 3D-gedruckten Artikel von Schichtwerk: Wohnen, Schreibtisch, Küche, Gadgets, Spiel und Garten. Farbe wählen, bestellen, in wenigen Tagen geliefert.", body, "shop")
+    page("shop.html", f"Shop · Alle 3D-Druck-Artikel · {C.MARKE}", "Alle 3D-gedruckten Artikel von Schichtatelier: Wohnen, Schreibtisch, Küche, Gadgets, Spiel und Garten. Farbe wählen, bestellen, in wenigen Tagen geliefert.", body, "shop")
 
 
 # ---------------------------------------------------------------- Produktseiten
@@ -369,7 +369,7 @@ def build_voucher():
   <div class="wrap">
     <nav aria-label="Pfad" class="crumbs"><a href="index.html">Start</a> › <a href="shop.html">Shop</a> › Geschenkgutschein</nav>
     <div class="product">
-      <div class="product-media"><img src="assets/img/produkte/gutschein.webp" width="800" height="600" alt="Geschenkgutschein von Schichtwerk, Karte mit Logo und Wunschbetrag"></div>
+      <div class="product-media"><img src="assets/img/produkte/gutschein.webp" width="800" height="600" alt="Geschenkgutschein von Schichtatelier, Karte mit Logo und Wunschbetrag"></div>
       <div class="product-info">
         <span class="eyebrow">Geschenk</span>
         <h1>Geschenkgutschein</h1>
@@ -404,7 +404,7 @@ def build_voucher():
   </div>
 </section>
 """
-    page("gutschein.html", f"Geschenkgutschein · {C.MARKE}", "Geschenkgutschein für 3D-gedruckte Artikel und Druckservice bei Schichtwerk: Wunschbetrag ab 10 €, per E-Mail oder als Karte per Post, 3 Jahre gültig.", body, "shop")
+    page("gutschein.html", f"Geschenkgutschein · {C.MARKE}", "Geschenkgutschein für 3D-gedruckte Artikel und Druckservice bei Schichtatelier: Wunschbetrag ab 10 €, per E-Mail oder als Karte per Post, 3 Jahre gültig.", body, "shop")
 
 
 # ---------------------------------------------------------------- Warenkorb
@@ -466,7 +466,7 @@ def build_cart():
   </div>
 </section>
 """
-    page("warenkorb.html", f"Warenkorb · {C.MARKE}", "Warenkorb und Bestellung bei Schichtwerk: Artikel prüfen, Versand oder Abholung in Celle wählen, per PayPal bezahlen.", body, "", "", '<meta name="robots" content="noindex">')
+    page("warenkorb.html", f"Warenkorb · {C.MARKE}", "Warenkorb und Bestellung bei Schichtatelier: Artikel prüfen, Versand oder Abholung in Celle wählen, per PayPal bezahlen.", body, "", "", '<meta name="robots" content="noindex">')
 
 
 # ---------------------------------------------------------------- Kontakt / eigenes Modell
@@ -540,7 +540,7 @@ def build_about():
   </div>
 </section>
 """
-    page("ueber-uns.html", f"Über uns · {C.MARKE}", "Schichtwerk ist eine kleine 3D-Druck-Manufaktur: eigene Entwürfe, pflanzenbasiertes Material, Fertigung auf Bestellung und plastikfreie Verpackung.", body, "ueber")
+    page("ueber-uns.html", f"Über uns · {C.MARKE}", "Schichtatelier ist eine kleine 3D-Druck-Manufaktur: eigene Entwürfe, pflanzenbasiertes Material, Fertigung auf Bestellung und plastikfreie Verpackung.", body, "ueber")
 
 
 # ---------------------------------------------------------------- Versand & Zahlung
@@ -570,7 +570,7 @@ def build_shipping():
   </div>
 </section>
 """
-    page("versand.html", f"Versand und Zahlung · {C.MARKE}", f"Versandkosten {EUR(VERSAND_PAUSCHALE)}, versandfrei ab {EUR(VERSANDFREI_AB)}. Zahlung per PayPal oder Abholung in Celle, Lieferzeit und Rückgabe bei Schichtwerk.", body, "versand")
+    page("versand.html", f"Versand und Zahlung · {C.MARKE}", f"Versandkosten {EUR(VERSAND_PAUSCHALE)}, versandfrei ab {EUR(VERSANDFREI_AB)}. Zahlung per PayPal oder Abholung in Celle, Lieferzeit und Rückgabe bei Schichtatelier.", body, "versand")
 
 
 # ---------------------------------------------------------------- AGB
@@ -613,7 +613,7 @@ def build_agb():
   </div>
 </section>
 """
-    page("agb.html", f"AGB · {C.MARKE}", "Allgemeine Geschäftsbedingungen des Schichtwerk-Online-Shops: Vertragsschluss, Preise, Zahlung, Lieferung, Gewährleistung und Besonderheiten 3D-gedruckter Teile.", body)
+    page("agb.html", f"AGB · {C.MARKE}", "Allgemeine Geschäftsbedingungen des Schichtatelier-Online-Shops: Vertragsschluss, Preise, Zahlung, Lieferung, Gewährleistung und Besonderheiten 3D-gedruckter Teile.", body)
 
 
 # ---------------------------------------------------------------- Widerruf
@@ -654,7 +654,7 @@ def build_widerruf():
   </div>
 </section>
 """
-    page("widerruf.html", f"Widerrufsrecht · {C.MARKE}", "Widerrufsbelehrung und Widerrufsformular für Bestellungen im Schichtwerk-Shop. 14 Tage Widerrufsrecht, Ausnahme für personalisierte Artikel.", body)
+    page("widerruf.html", f"Widerrufsrecht · {C.MARKE}", "Widerrufsbelehrung und Widerrufsformular für Bestellungen im Schichtatelier-Shop. 14 Tage Widerrufsrecht, Ausnahme für personalisierte Artikel.", body)
 
 
 # ---------------------------------------------------------------- Impressum
@@ -681,7 +681,7 @@ def build_imprint():
   </div>
 </section>
 """
-    page("impressum.html", f"Impressum · {C.MARKE}", "Impressum und Anbieterkennzeichnung von Schichtwerk 3D-Druck.", body)
+    page("impressum.html", f"Impressum · {C.MARKE}", "Impressum und Anbieterkennzeichnung von Schichtatelier 3D-Druck.", body)
 
 
 # ---------------------------------------------------------------- Datenschutz
@@ -718,7 +718,7 @@ def build_privacy():
   </div>
 </section>
 """
-    page("datenschutz.html", f"Datenschutz · {C.MARKE}", "Datenschutzerklärung von Schichtwerk: Hosting bei Markentrix, Bestell- und Kontaktformular, Warenkorb, PayPal, Google-Bewertungen und Statistik ohne Cookies.", body)
+    page("datenschutz.html", f"Datenschutz · {C.MARKE}", "Datenschutzerklärung von Schichtatelier: Hosting bei Markentrix, Bestell- und Kontaktformular, Warenkorb, PayPal, Google-Bewertungen und Statistik ohne Cookies.", body)
 
 
 # ---------------------------------------------------------------- Danke / 404
@@ -763,7 +763,7 @@ def build_thanks():
   </div>
 </section>
 """
-    page("danke.html", f"Danke · {C.MARKE}", "Bestätigung: Ihre Bestellung oder Anfrage bei Schichtwerk ist eingegangen.", body, "", "", '<meta name="robots" content="noindex">')
+    page("danke.html", f"Danke · {C.MARKE}", "Bestätigung: Ihre Bestellung oder Anfrage bei Schichtatelier ist eingegangen.", body, "", "", '<meta name="robots" content="noindex">')
 
 
 def build_404():
@@ -1022,7 +1022,7 @@ def build_faq():
   </div>
 </section>
 """
-    page("faq.html", f"Fragen und Antworten · {C.MARKE}", "Antworten zu Lieferzeit, Zahlung, Materialwahl, Dateiformaten, Rückgabe und Reklamation im Schichtwerk-Shop.", body, "faq")
+    page("faq.html", f"Fragen und Antworten · {C.MARKE}", "Antworten zu Lieferzeit, Zahlung, Materialwahl, Dateiformaten, Rückgabe und Reklamation im Schichtatelier-Shop.", body, "faq")
 
 
 if __name__ == "__main__":

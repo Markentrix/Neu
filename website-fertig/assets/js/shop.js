@@ -1,4 +1,4 @@
-/* Schichtwerk Shop – Warenkorb, Formulare, Portal-Anbindung (Variante B: Website-API) */
+/* Schichtatelier Shop – Warenkorb, Formulare, Portal-Anbindung (Variante B: Website-API) */
 (function () {
   "use strict";
   var CFG = window.SW_CONFIG || {};
@@ -244,7 +244,7 @@
       var hint = $("#s-hint"); if (hint) hint.textContent = t.abholung ? "Abholung nach Terminabsprache, keine Versandkosten." : t.versand > 0 ? "Noch " + EUR(CFG.versandfreiAb - t.zwischensumme) + " bis zum kostenlosen Versand." : "Versandkostenfrei innerhalb Deutschlands.";
       var mailBtn = $("#cart-mail");
       if (mailBtn && CFG.email) {
-        mailBtn.href = "mailto:" + CFG.email + "?subject=" + encodeURIComponent("Bestellung Schichtwerk") + "&body=" + encodeURIComponent("Hallo Schichtwerk,\n\nich möchte folgende Artikel bestellen:\n\n" + cartAsText(c) + "\n\nGesamt inkl. Versand: " + EUR(t.gesamt) + "\n\nLieferadresse:\n\n");
+        mailBtn.href = "mailto:" + CFG.email + "?subject=" + encodeURIComponent("Bestellung Schichtatelier") + "&body=" + encodeURIComponent("Hallo Schichtatelier,\n\nich möchte folgende Artikel bestellen:\n\n" + cartAsText(c) + "\n\nGesamt inkl. Versand: " + EUR(t.gesamt) + "\n\nLieferadresse:\n\n");
       }
     }
     function renderExtras(c) {
