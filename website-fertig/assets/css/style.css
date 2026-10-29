@@ -449,5 +449,6 @@ input:invalid:not(:placeholder-shown){border-color:var(--line)}
 .lockup-link{display:inline-block;max-width:100%}
 .lockup{display:block;width:min(270px,100%);height:auto}
 .lockup.lockup-head{width:auto;height:32px}
-@media (min-width:601px){.lockup.lockup-head{height:40px}}
+@media (min-width:380px){.lockup.lockup-head{height:42px}}
+@media (min-width:601px){.lockup.lockup-head{height:50px}}
 .site-header .lockup-link{display:flex;align-items:center}

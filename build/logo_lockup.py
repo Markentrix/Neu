@@ -53,7 +53,7 @@ class Face:
         return sum(self.gs[g].width * sc for g in glyphs) + tracking * size * (len(glyphs) - 1)
 
 
-def build(theme="hell", full=True, E=200.0, padf=0.22, sub=True):
+def build(theme="hell", full=True, E=200.0, padf=0.22, sub=True, subscale=1.0):
     """Liefert (svg_innen, viewBox) für das Logo. E = Schriftgröße der Wortmarke."""
     T = THEMES[theme]
     fr = Face(FRAUNCES, {"wght": 640, "opsz": 144})
@@ -85,7 +85,7 @@ def build(theme="hell", full=True, E=200.0, padf=0.22, sub=True):
         top = ntop - 0.03 * E; pad = padf * E; bottom = yl + sw / 2
         return body, (-pad, top - pad, W + 2 * pad, bottom - top + 2 * pad)
     # 3D MANUFAKTUR (zentriert unter der Wortmarke)
-    s2 = 0.168 * E; tr2 = 0.62
+    s2 = 0.168 * E * subscale; tr2 = 0.62
     gs2 = [inter.name(c) if c != " " else inter.name(" ") for c in "3D MANUFAKTUR"]
     w2 = inter.width(gs2, s2, tr2); y2 = base + 0.43 * E
     pp, _, _ = inter.run(gs2, s2, (W - w2) / 2, y2, tr2)
@@ -117,9 +117,9 @@ def svg_file(theme, full, bg=None):
             f'{bgr}{body}</svg>')
 
 
-def inline_svg(full=False, cls="lockup", sub=True):
+def inline_svg(full=False, cls="lockup", sub=True, subscale=1.3):
     """Theme-fähiges Inline-SVG für die Website (Farben aus CSS-Variablen)."""
-    body, (x, y, w, h) = build("css", full, padf=0.02, sub=sub)
+    body, (x, y, w, h) = build("css", full, padf=0.02, sub=sub, subscale=subscale)
     return f'<svg class="{cls}" viewBox="{x:.1f} {y:.1f} {w:.1f} {h:.1f}" role="img" aria-label="Schichtatelier 3D-Manufaktur">{body}</svg>'
 
 
