@@ -320,6 +320,18 @@
     var sumEl = $("#danke-summe"); if (sumEl && q.summe) sumEl.textContent = q.summe;
   }
 
+  /* ---------- Kundenstimmen nur zeigen, wenn der Portal-Baustein Bewertungen liefert ---------- */
+  var ks = $("#kundenstimmen");
+  if (ks) {
+    var slot = $('[data-mk="bewertungen"]', ks);
+    function checkReviews() { if (slot && slot.children.length > 0 && slot.textContent.trim().length > 20) { ks.hidden = false; return true; } return false; }
+    if (!checkReviews() && "MutationObserver" in window) {
+      var mo = new MutationObserver(function () { if (checkReviews()) mo.disconnect(); });
+      mo.observe(slot, { childList: true, subtree: true, characterData: true });
+      setTimeout(function () { mo.disconnect(); checkReviews(); }, 20000);
+    }
+  }
+
   /* ---------- Besucherzahl (Portal, ohne Cookies) ---------- */
   try {
     if (navigator.sendBeacon) {

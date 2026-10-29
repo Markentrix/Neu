@@ -32,11 +32,12 @@
 </header>
 <main id="main">
 <section class="hero-mini" id="danke">
-  <div class="wrap" style="max-width:640px">
+  <div class="wrap" style="max-width:720px">
+    <div class="done-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
     <span class="eyebrow">Vielen Dank</span>
-    <h1 id="danke-h1">Ihre Bestellung ist eingegangen.</h1>
+    <h1 id="danke-h1">Ihre Bestellung ist <em>eingegangen.</em></h1>
     <div data-show="bestellung">
-      <p class="muted">Sie erhalten in wenigen Minuten eine Eingangsbestätigung per E-Mail. Innerhalb von zwei Werktagen folgt unsere Bestellbestätigung mit Rechnung und Zahlungsdaten. Nach Zahlungseingang beginnt der Druck.</p>
+      <p class="muted">Sie erhalten in wenigen Minuten eine Eingangsbestätigung per E-Mail. Innerhalb von zwei Werktagen folgt unsere Bestellbestätigung.</p>
     </div>
     <div data-show="widerruf" data-h1="Ihr Widerruf ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb von zwei Werktagen mit den nächsten Schritten zur Rücksendung und Erstattung.</p>
@@ -47,12 +48,26 @@
     <div data-show="kontakt" data-h1="Ihre Anfrage ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb eines Werktags mit Preis und Lieferzeit.</p>
     </div>
-    <p>Ihre Vorgangsnummer:<br><span class="ref" id="ref"></span></p>
+    <div class="ref-card"><span class="small muted">Ihre Vorgangsnummer</span><span class="ref" id="ref"></span><span class="small muted">Bitte bei Rückfragen angeben.</span></div>
     <p hidden><a class="btn btn-primary" id="paypal-link" href="#" rel="noopener">Jetzt <span id="danke-summe"></span> per PayPal bezahlen</a></p>
     <p class="notice" id="paypal-hinweis" hidden style="text-align:left">Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestellbestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
     <p class="notice" id="abhol-hinweis" hidden style="text-align:left">Sie holen in Celle ab: Wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse Heinrich-Hüdig-Str. 1, 29227 Celle. Bezahlt wird bei Abholung bar oder per PayPal.</p>
+  </div>
+</section>
+<section class="section-tight" data-show="bestellung">
+  <div class="wrap" style="max-width:860px">
+    <h2 class="center">Was jetzt passiert</h2>
+    <div class="steps">
+      <div class="step"><h3>Bestätigung</h3><p class="muted">Wir prüfen die Bestellung und schicken innerhalb von zwei Werktagen die Bestätigung mit Rechnung und Zahlungslink.</p></div>
+      <div class="step"><h3>Druck</h3><p class="muted">Nach Zahlungseingang drucken wir Ihr Teil in 2 bis 4 Werktage, prüfen es und befreien es von Stützmaterial.</p></div>
+      <div class="step"><h3>Versand oder Abholung</h3><p class="muted">Sie bekommen die Sendungsnummer per E-Mail, oder wir vereinbaren einen Abholtermin in Celle.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap center" style="max-width:720px">
     <p class="small muted">Keine E-Mail erhalten? Prüfen Sie den Spam-Ordner oder schreiben Sie an <a href="mailto:info@markentrix.de">info@markentrix.de</a>.</p>
-    <p><a class="btn btn-ghost" href="shop.html">Zurück zum Shop</a></p>
+    <p><a class="btn btn-ghost" href="shop.html">Zurück zum Shop</a> <a class="btn btn-ghost" href="gutschein.html">Gutschein verschenken</a></p>
   </div>
 </section>
 </main>

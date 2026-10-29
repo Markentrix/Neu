@@ -225,14 +225,11 @@ def build_index():
     </div>
   </div>
 </section>
-<section class="section-tight">
+<section class="section-tight" id="kundenstimmen" hidden>
   <div class="wrap">
     <span class="eyebrow">Kundenstimmen</span>
     <h2>Das sagen unsere Kunden</h2>
-    <div class="reviews-box">
-      <div data-mk="bewertungen"></div>
-      <p class="reviews-fallback">Bewertungen werden über Google geladen. Sie haben bei uns bestellt? Wir freuen uns über Ihre Rückmeldung per <a href="mailto:{E(C.EMAIL)}">E-Mail</a>.</p>
-    </div>
+    <div class="reviews-box"><div data-mk="bewertungen"></div></div>
   </div>
 </section>
 
@@ -297,7 +294,7 @@ def build_products():
         widerruf = ('<p class="small muted">Personalisierter Artikel: Nach Ihrer Freigabe des Textes ist der Kauf vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB). <a href="../widerruf.html">Mehr dazu</a>.</p>' if p.get("text") else "")
         body = f"""<section class="section-tight">
   <div class="wrap">
-    <nav aria-label="Pfad" class="small muted" style="margin-bottom:16px"><a href="../index.html">Start</a> › <a href="../shop.html">Shop</a> › <a href="../shop.html#{p['kat']}">{E(KATEGORIEN[p['kat']])}</a></nav>
+    <nav aria-label="Pfad" class="crumbs"><a href="../index.html">Start</a> › <a href="../shop.html">Shop</a> › <a href="../shop.html#{p['kat']}">{E(KATEGORIEN[p['kat']])}</a></nav>
     <div class="product">
       <div class="product-media"><img src="../assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="{E(p['name'])}{', gedruckt in ' + E(FARBEN[p['farben'][0]][0]) if p.get('foto') else ', Illustration in ' + E(FARBEN[p['farben'][0]][0])}"></div>
       <div class="product-info">
@@ -368,7 +365,7 @@ def build_voucher():
     amounts = "".join(f'<label class="swatch"><input type="radio" name="betrag" value="{a}"{" checked" if a == 20 else ""}><span>{a} €</span></label>' for a in (10, 20, 30, 50))
     body = f"""<section class="section-tight">
   <div class="wrap">
-    <nav aria-label="Pfad" class="small muted" style="margin-bottom:16px"><a href="index.html">Start</a> › <a href="shop.html">Shop</a> › Geschenkgutschein</nav>
+    <nav aria-label="Pfad" class="crumbs"><a href="index.html">Start</a> › <a href="shop.html">Shop</a> › Geschenkgutschein</nav>
     <div class="product">
       <div class="product-media"><img src="assets/img/produkte/gutschein.webp" width="800" height="600" alt="Geschenkgutschein von Schichtwerk, Karte mit Logo und Wunschbetrag"></div>
       <div class="product-info">
@@ -725,11 +722,12 @@ def build_privacy():
 # ---------------------------------------------------------------- Danke / 404
 def build_thanks():
     body = f"""<section class="hero-mini" id="danke">
-  <div class="wrap" style="max-width:640px">
+  <div class="wrap" style="max-width:720px">
+    <div class="done-mark" aria-hidden="true">{SVG_CHECK}</div>
     <span class="eyebrow">Vielen Dank</span>
-    <h1 id="danke-h1">Ihre Bestellung ist eingegangen.</h1>
+    <h1 id="danke-h1">Ihre Bestellung ist <em>eingegangen.</em></h1>
     <div data-show="bestellung">
-      <p class="muted">Sie erhalten in wenigen Minuten eine Eingangsbestätigung per E-Mail. Innerhalb von zwei Werktagen folgt unsere Bestellbestätigung mit Rechnung und Zahlungsdaten. Nach Zahlungseingang beginnt der Druck.</p>
+      <p class="muted">Sie erhalten in wenigen Minuten eine Eingangsbestätigung per E-Mail. Innerhalb von zwei Werktagen folgt unsere Bestellbestätigung.</p>
     </div>
     <div data-show="widerruf" data-h1="Ihr Widerruf ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb von zwei Werktagen mit den nächsten Schritten zur Rücksendung und Erstattung.</p>
@@ -740,12 +738,26 @@ def build_thanks():
     <div data-show="kontakt" data-h1="Ihre Anfrage ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb eines Werktags mit Preis und Lieferzeit.</p>
     </div>
-    <p>Ihre Vorgangsnummer:<br><span class="ref" id="ref"></span></p>
+    <div class="ref-card"><span class="small muted">Ihre Vorgangsnummer</span><span class="ref" id="ref"></span><span class="small muted">Bitte bei Rückfragen angeben.</span></div>
     <p hidden><a class="btn btn-primary" id="paypal-link" href="#" rel="noopener">Jetzt <span id="danke-summe"></span> per PayPal bezahlen</a></p>
     <p class="notice" id="paypal-hinweis" hidden style="text-align:left">Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestellbestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
     <p class="notice" id="abhol-hinweis" hidden style="text-align:left">Sie holen in Celle ab: Wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse {E(C.STRASSE)}, {E(C.PLZ_ORT)}. Bezahlt wird bei Abholung bar oder per PayPal.</p>
+  </div>
+</section>
+<section class="section-tight" data-show="bestellung">
+  <div class="wrap" style="max-width:860px">
+    <h2 class="center">Was jetzt passiert</h2>
+    <div class="steps">
+      <div class="step"><h3>Bestätigung</h3><p class="muted">Wir prüfen die Bestellung und schicken innerhalb von zwei Werktagen die Bestätigung mit Rechnung und Zahlungslink.</p></div>
+      <div class="step"><h3>Druck</h3><p class="muted">Nach Zahlungseingang drucken wir Ihr Teil in {E(C.PRODUKTIONSZEIT)}, prüfen es und befreien es von Stützmaterial.</p></div>
+      <div class="step"><h3>Versand oder Abholung</h3><p class="muted">Sie bekommen die Sendungsnummer per E-Mail, oder wir vereinbaren einen Abholtermin in Celle.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap center" style="max-width:720px">
     <p class="small muted">Keine E-Mail erhalten? Prüfen Sie den Spam-Ordner oder schreiben Sie an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a>.</p>
-    <p><a class="btn btn-ghost" href="shop.html">Zurück zum Shop</a></p>
+    <p><a class="btn btn-ghost" href="shop.html">Zurück zum Shop</a> <a class="btn btn-ghost" href="gutschein.html">Gutschein verschenken</a></p>
   </div>
 </section>
 """
@@ -754,11 +766,19 @@ def build_thanks():
 
 def build_404():
     body = f"""<section class="hero-mini">
-  <div class="wrap" style="max-width:600px">
+  <div class="wrap" style="max-width:640px">
+    <div class="lost-art" aria-hidden="true">
+      <svg viewBox="0 0 64 64"><rect x="18" y="14" width="34" height="11" rx="4" fill="#f1e6d2"/><rect x="12" y="27" width="34" height="11" rx="4" fill="#d9a06b"/><rect x="18" y="40" width="34" height="11" rx="4" fill="#b8763f" transform="rotate(-9 35 45) translate(6 4)"/></svg>
+    </div>
     <span class="eyebrow">Fehler 404</span>
-    <h1>Diese Seite gibt es nicht.</h1>
-    <p class="muted">Vielleicht ist der Link veraltet oder der Artikel nicht mehr im Sortiment. Im Shop finden Sie alle aktuellen Artikel.</p>
-    <p><a class="btn btn-primary" href="shop.html">Zum Shop</a> <a class="btn btn-ghost" href="index.html">Zur Startseite</a></p>
+    <h1>Diese Schicht <em>fehlt noch.</em></h1>
+    <p class="muted">Die Seite gibt es nicht oder der Artikel ist nicht mehr im Sortiment. Vielleicht hilft einer dieser Wege weiter.</p>
+    <div class="lost-links">
+      <a href="shop.html"><strong>Shop</strong><span>Alle Artikel, auf Bestellung gedruckt</span></a>
+      <a href="druckservice.html"><strong>Druckservice</strong><span>Eigene Datei oder Ersatzteil anfragen</span></a>
+      <a href="faq.html"><strong>Fragen &amp; Antworten</strong><span>Lieferung, Material, Rückgabe</span></a>
+      <a href="kontakt.html"><strong>Kontakt</strong><span>Wir antworten innerhalb eines Werktags</span></a>
+    </div>
   </div>
 </section>
 """
@@ -859,7 +879,7 @@ def build_materials():
             examples = f"""<section class="section-tight"><div class="wrap"><h2>Aus {E(m['name'])} im Shop</h2><div class="grid">{"".join(card(p, rel, k) for k, p in enumerate(shop_examples))}</div></div></section>"""
         body = f"""<section class="section-tight">
   <div class="wrap">
-    <nav aria-label="Pfad" class="small muted" style="margin-bottom:16px"><a href="../index.html">Start</a> › <a href="../materialien.html">Materialien</a> › {E(m['name'])}</nav>
+    <nav aria-label="Pfad" class="crumbs"><a href="../index.html">Start</a> › <a href="../materialien.html">Materialien</a> › {E(m['name'])}</nav>
     <div class="mat-hero" style="--mat:{m['farbe']}">
       <div>
         <span class="eyebrow">Material</span>
