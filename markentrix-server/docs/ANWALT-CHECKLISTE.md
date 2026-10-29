@@ -53,3 +53,11 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Zahlungsverzug: Die Pause von Formular und Terminbuchung (Option) ist eine Leistungsbeschränkung; sie muss im Vertrag/den AGB vorgesehen sein (Zurückbehaltungsrecht, § 320 BGB) und nach Zahlung sofort enden (macht das Portal automatisch). Standardmäßig aus.
 - Rolle Empfang und befristete Zugänge: Zugriffsbeschränkung nach dem Erforderlichkeitsprinzip; Enddatum wird erzwungen, Vorgänge stehen im Audit-Log.
 - Fotos von Besuchern (Anfrage/Termin): Das Foto-Feld ist freiwillig und pro Betrieb abschaltbar; Besucher sehen die Löschfrist (Standard 90 Tage, 7 bis 365) direkt beim Hochladen. Standort- und Kameradaten werden entfernt, Fotos liegen nur in der Datenbank des Betriebs, sind für andere Kunden nicht abrufbar und werden nach der Frist automatisch gelöscht (nicht abgeschickte Uploads nach 24 Stunden). Zu prüfen: Hinweis in der Datenschutzerklärung des Betriebs (Zweck: Einschätzung von Aufwand und Preis, Rechtsgrundlage vorvertragliche Maßnahmen bzw. Einwilligung), ob die gewählte Standardfrist angemessen ist, Fotos mit erkennbaren Personen oder Kennzeichen, Aufnahme in das Löschkonzept und den AVV (Mail-Anhang an den Betrieb, Datenexport bei Vertragsende).
+
+
+## Online-Shop (Kunden-Websites mit kleinem Shop)
+- Bestellungen enthalten personenbezogene Daten der Endkundschaft (Name, Adresse, Mail, Bestellung). Bitte AVV und Löschkonzept prüfen: Export und Löschung beim Vertragsende sind eingebaut, die Aufbewahrungsfrist je Betrieb (Handelsrecht/Steuerrecht) ist nicht geklärt.
+- Pflichtangaben im Shop sind Sache der Website und des Betriebs (AGB, Widerrufsbelehrung, Preisangaben, Versandkosten, Lieferzeit, Impressum, Button „zahlungspflichtig bestellen“). Das Portal fordert nur die Häkchen „Datenschutz“ und „AGB“ ein.
+- Bestell-Mails und die Bestätigung sind **keine Rechnung**. Ob und wie Rechnungen mit Umsatzsteuer oder Kleinunternehmer-Hinweis erzeugt werden sollen, bitte mit Steuerberatung klären.
+- Zahlung läuft nur über PayPal.Me-Link oder bei Abholung. Das Portal prüft keinen Zahlungseingang. Eine mögliche Zahlungsdienst-Einordnung bitte mitprüfen lassen.
+- Personalisierte Artikel (Wunschtext): Hinweis zum Ausschluss des Widerrufsrechts bei Anfertigung nach Kundenwunsch gehört in die AGB des Betriebs.

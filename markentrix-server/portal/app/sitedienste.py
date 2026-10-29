@@ -208,7 +208,8 @@ def ereignis(kid, art: str, ok: bool, hinweis: str = ""):
             cur.execute("INSERT INTO website_ereignisse (kunden_id, art, ok, hinweis) VALUES (%s,%s,%s,%s)", (kid, art, ok, hinweis[:300] or None))
             cur.execute("DELETE FROM website_ereignisse WHERE kunden_id=%s AND zeit < now() - interval '90 days'", (kid,))
             cur.execute("DELETE FROM website_termine WHERE kunden_id=%s AND ende < now() - interval '180 days'", (kid,))
-            cur.execute("DELETE FROM website_gutscheine WHERE kunden_id=%s AND erstellt_am < now() - interval '400 days'", (kid,))
+            cur.execute("""DELETE FROM website_gutscheine WHERE kunden_id=%s AND erstellt_am < now() - interval '400 days'
+                           AND (status<>'gesendet' OR gueltig_bis IS NULL OR gueltig_bis < current_date OR coalesce(betrag,0) <= eingeloest)""", (kid,))   # gültige Gutscheine mit Restguthaben bleiben
     except Exception:  # noqa: BLE001 - Protokoll darf nie den eigentlichen Vorgang stören
         pass
 

@@ -97,12 +97,13 @@ export async function api(path, opt = {}) {
   /** @type {any} */
   const o = { method: opt.method || 'GET', headers: { 'X-MK': '1' }, credentials: 'same-origin' };
   if (opt.body instanceof FormData) o.body = opt.body;
+  else if (opt.body instanceof Blob) { o.headers['Content-Type'] = opt.body.type || 'application/octet-stream'; o.body = opt.body; }
   else if (opt.body !== undefined) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(opt.body); }
   let r;
   const lang = o.method === 'GET' && !opt.leise; if (lang) ladeBalken(true);
   try { r = await fetch(path, o); } catch (e) {
     if (o.method === 'GET' && offlineErlaubt && OFFLINE_LESEN.test(path)) { const c = cacheLesen(path); if (c) { offline = true; statusLeiste(c.t); return c.d; } }
-    if (o.method === 'POST' && WARTEND.test(path) && opt.body !== undefined && !(opt.body instanceof FormData)) { warteschlangeAnlegen(path, opt.body); return { queued: true }; }
+    if (o.method === 'POST' && WARTEND.test(path) && opt.body !== undefined && !(opt.body instanceof FormData) && !(opt.body instanceof Blob)) { warteschlangeAnlegen(path, opt.body); return { queued: true }; }
     offline = true; statusLeiste();
     throw new Error('Keine Verbindung zum Server.');
   } finally { if (lang) ladeBalken(false); }

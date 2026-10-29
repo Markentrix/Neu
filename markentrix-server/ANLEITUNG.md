@@ -765,3 +765,20 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - **Leitfaden-Blatt** (`leitfadenKnopf` in `common.js`): zeigt den vorhandenen KI-Leitfaden (`skriptKarte`) als Dialog, in Vertrieb und Admin.
 - **Tagesziel** = aufgerundet Wochenziel ÷ 5, Balken auf Heute, Zeile im Anruf-Modus, Meldung einmal pro Tag (localStorage `mk-ziel-…`).
 - **Antwort umschreiben:** `POST /api/kunde/anfragen/<id>/ki-vorschlag` mit `{anweisung: kuerzer|freundlicher|foermlicher|rueckfrage, text}`; es geht nur der Entwurfstext an die KI. Kosten stehen im `kosten_log`. Test: t113.
+
+
+## Online-Shop für Kunden-Websites (Migration 147, Modul „shop“)
+- Neue Tabellen `shop_*` (Einstellungen, Kategorien, Farben, Artikel, Bilder, Bestellungen, Positionen) mit Row-Level-Security je Kunde. Neues Modul „Online-Shop“ (Admin → Kunde → Module buchen).
+- Öffentlich (über die Kundendomain, wie die übrige Website-API): `GET /api/produkte`, `/api/produkte/{id}`, `/api/farben`, `/api/kategorien`, `/api/gutschein`, `/api/medien/{id}.webp` und `POST /api/anfrage` mit `typ="bestellung"`. Vertrag und Regeln: `docs/WEBSITE-API.md`, Abschnitt „Online-Shop“. Code: `app/shop.py` (Logik), `app/routes_shop.py` (Routen), Aufruf der Bestellung aus `routes_siteapi.anfrage`.
+- Kundenportal: Menü „Online-Shop“ (Mein Betrieb, nur Inhaber): Bestellungen bearbeiten, Artikel und Bilder pflegen, Farben und Kategorien, Einstellungen. Oberfläche `static/js/kunde/shop.js`; Bilder werden im Browser zugeschnitten und als WebP gesendet (keine neue Bibliothek auf dem Server).
+- Inbetriebnahme je Kunde: Modul buchen, im Portal Farben/Kategorien/Artikel anlegen (Artikel auf „aktiv“), PayPal unter Website-Dienste eintragen, in „Online-Shop → Einstellungen“ den Shop einschalten. Erst dann liefert die Schnittstelle aus; bis dahin nutzt die Website ihre eingebaute Liste.
+- Die Middleware setzt überall `Cache-Control: no-store`, nur `public,…` unter `/siteapi/api/` bleibt erhalten (Katalog mit ETag).
+- Beim Vertragsende werden Shop-Daten exportiert und gelöscht (Bestellungen enthalten Daten der Endkundschaft). Ob Bestellungen länger aufbewahrt werden müssen, ist Sache des Betriebs und des Anwalts.
+- Tests: `t125` (Schnittstelle, Bestellungen, Mandantentrennung, Mails), `t126` (Oberfläche mit Handy/Desktop/dunkel, Bild-Upload, Bestellung bearbeiten).
+
+### Gutscheine im Shop einlösen (Migration 148)
+- `website_gutscheine` bekommt `gueltig_bis` (beim Senden des Codes: Shop-Einstellung „Gültig (Monate)“, Standard 36) und `eingeloest`. `shop_bestellungen` merkt sich Gutschein, Code und abgezogenen Betrag.
+- Kasse: `POST /api/gutschein/pruefen` (stark begrenzt) und Feld `gutscheincode` in `typ="bestellung"`. Abzug höchstens bis zur Summe, Rest bleibt stehen, Storno bucht zurück. Ist alles bezahlt, steht die Bestellung sofort auf „Bezahlt“.
+- Portal: Website-Dienste → Gutscheine zeigt Gültigkeit und Restguthaben, „Code erzeugen“ liefert einen nicht erratbaren Code (XXXX-XXXX-XXXX). Handgeschriebene kurze Codes bleiben möglich, sind aber leichter zu erraten.
+- Die tägliche Aufräumregel löscht gültige Gutscheine mit Restguthaben nicht mehr nach 400 Tagen.
+- Tests: `t125` (159 Prüfungen, mit Gutschein-Einlösung).

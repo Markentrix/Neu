@@ -52,7 +52,7 @@ from .routes_passkey import router as passkey_router
 from .ersteswoche import router as ersteswoche_router
 from .routes_zahlung import router as zahlung_router
 from .routes_fruehwarnung import router as fruehwarnung_router
-from . import preisaenderung, routes_betriebplus, routes_plattformstatus, routes_status, routes_leadsteuerung, routes_leadtermin, routes_rangliste, routes_referenzseite, routes_umfrage, routes_vertragportal, routes_vertraege
+from . import preisaenderung, routes_betriebplus, routes_shop, routes_plattformstatus, routes_status, routes_leadsteuerung, routes_leadtermin, routes_rangliste, routes_referenzseite, routes_umfrage, routes_vertragportal, routes_vertraege
 from .routes_push import router as push_router
 from .routes_dashboard import router as dashboard_router
 from .routes_telefon import router as telefon_router
@@ -107,7 +107,8 @@ async def schutz(request: Request, call_next):
     r.headers["X-Content-Type-Options"] = "nosniff"
     r.headers["X-Frame-Options"] = "DENY"
     r.headers["Referrer-Policy"] = "no-referrer"
-    r.headers["Cache-Control"] = "no-store"
+    if not (r.headers.get("Cache-Control", "").startswith("public,") and request.url.path.startswith("/siteapi/api/")):   # nur der öffentliche Shop-Katalog darf zwischengespeichert werden
+        r.headers["Cache-Control"] = "no-store"
     r.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"   # Portal ist nicht öffentlich: nicht in Suchmaschinen aufnehmen
     if config.COOKIE_SECURE:
         r.headers["Strict-Transport-Security"] = "max-age=31536000"
@@ -162,6 +163,8 @@ app.include_router(folge_router)
 app.include_router(buchung_router)
 app.include_router(site_router)
 app.include_router(siteapi_router)
+app.include_router(routes_shop.public)
+app.include_router(routes_shop.kunde)
 app.include_router(site_kunde_router)
 app.include_router(site_admin_router)
 app.include_router(webupload_router)

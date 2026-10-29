@@ -61,3 +61,34 @@ Der Betrieb schaltet das im Kundenportal unter Website-Dienste → „Fotos von 
 - `POST /api/anfrage` mit dem Zusatzfeld **`fotos`** (Liste der Kennungen, bis 5; bei einem normalen Formular mehrere Felder `fotos=…`). Gilt für alle Anfragetypen, auch Termin. Eine Kennung kann nur einmal verwendet werden.
 - Nicht abgeschickte Uploads löscht das Portal nach 24 Stunden. Abgeschickte Fotos löscht es nach der Frist des Betriebs automatisch (Eintrag im Löschprotokoll). Der Betrieb sieht sie bei Anfragen, Terminen und Buchungen und im Anhang der Mail (bis 8 MB zusammen, sonst nur im Portal) und kann sie vorher selbst löschen.
 - Der Baustein `site.js` (Kontaktformular und Terminbuchung) bringt das Foto-Feld mit Verkleinern und Löschhinweis automatisch mit, sobald der Betrieb es eingeschaltet hat.
+
+
+## Online-Shop (Modul „shop“, Migration 147)
+Das Portal führt Artikel, Farben, Kategorien, Bilder und Bestellungen. Die Website bleibt statisch und holt alles über dieselben relativen Pfade wie bisher. Der Shop liefert erst aus, wenn das Modul „Online-Shop“ beim Kunden gebucht **und** im Kundenportal (Online-Shop → Einstellungen) eingeschaltet ist. Sonst antworten alle Shop-Pfade mit `404 {"ok":false}`: Die Website nimmt dann ihre eingebaute Liste als Rückfall.
+
+| Aufruf | Antwort |
+|---|---|
+| `GET /api/produkte` | `{stand, versand:{pauschale, versandfreiAb, abholung, produktionszeit, lieferzeit}, kategorien:[{key,name,sort}], farben:[{key,name,hex}], produkte:[…]}`. Nur aktive Artikel in Anzeigereihenfolge. Leere Kategorien fehlen. |
+| `GET /api/produkte/{id}` | Ein Artikel, zusätzlich `verwandt:[id]` (nur aktive). 404 `{ok:false}`, wenn inaktiv oder unbekannt. |
+| `GET /api/farben`, `GET /api/kategorien` | Die zentralen Listen. |
+| `GET /api/gutschein` | `{aktiv:true, einloesen:true, betraege:[10,20,…], min, max, gueltigkeitMonate, zustellung:[…]}` oder `{aktiv:false}`. |
+| `POST /api/gutschein/pruefen` `{code}` | `{ok:true, gueltig:true, rest:20.0, ablauf:"2029-10-29"}` oder `{ok:true, gueltig:false, message}`. Für die Kasse (Feld „Gutscheincode“). Stark begrenzt (10 Versuche je 10 Minuten und IP, dann `429`); die Meldung verrät nicht, ob es den Code gibt. |
+| `GET /api/medien/{bild-id}.webp` | Das Bild (nur von aktiven Artikeln), `Cache-Control: public, max-age=86400`. |
+
+Artikel: `{id, name, kategorie, preis (Euro, Zahl), kurz, lang, material, masse, gewicht, farben:[key], tags, personalisierbar, textlabel, textmax, bilder:[{url,w,h,alt}], sort, aktiv, geaendert}`. Bild-URLs sind relativ und liegen unter `/api/medien/…` (nicht `/media/…`), damit die bestehende Caddy-Weiterleitung `/api/*` ausreicht. Die Kataloge sind cachebar: `Cache-Control: public, max-age=300` und `ETag` (Antwort 304 bei `If-None-Match`). Das ist die einzige Ausnahme vom allgemeinen `no-store` des Portals.
+
+### Bestellung: `POST /api/anfrage` mit `typ="bestellung"` (nur JSON)
+Felder: `name`, `email` (Pflicht), `telefon`, `einwilligung`, `agb` (beide `"ja"`), `lieferart` (`versand`|`abholung`), `adresse:{strasse,plz,ort,land}` (nur bei Versand), `zahlungsart` (`paypal`|`abholung`; Zahlung bei Abholung nur mit Abholung), `positionen:[{id,name,farbe,text,menge,einzelpreis}]`, `zwischensumme`, `versand`, `summe`, `anmerkung`, `website` (Lockfeld).
+- Das **Portal rechnet mit seinen eigenen Preisen nach**. Artikelnamen und Preise der Website werden nie übernommen. Weicht `einzelpreis`, `zwischensumme`, `versand` oder `summe` ab (zum Beispiel nach einer Preisänderung), antwortet es `422 {errors:{summe:…}}`. Fehlen die Summenfelder, rechnet das Portal ohne Vergleich.
+- Prüfungen: Artikel aktiv, Menge 1 bis 99, Farbe aus der Auswahl des Artikels, Wunschtext Pflicht und höchstens `textmax` Zeichen bei `personalisierbar` (sonst ignoriert), Adresse bei Versand. Fehler je Feld als `422 {errors:{…}}`.
+- Versand: bei Abholung 0, ab `versandfreiAb` 0, sonst die Pauschale.
+- Antwort wie bisher `{ok:true, ref:"SA-2026-0001", status:"neu"}`, bei PayPal und eingetragenem PayPal.Me-Link zusätzlich `paypalUrl` (Betrag und Währung eingebaut). Die Nummer ist fortlaufend je Kunde und Jahr, das Präfix stellt der Kunde ein.
+- Danach: Push und Mail an den Betrieb, Bestätigungs-Mail mit Positionen, Summe und Zahlhinweis an die Kundin bzw. den Kunden. **Keine Rechnung (PDF) und keine Umsatzsteuer-Ausweisung**: das ist bewusst nicht gebaut (steuerliche Einordnung, siehe Anwalts-Checkliste).
+- **Gutschein einlösen:** Feld `gutscheincode` in der Bestellung. Das Portal zieht höchstens den Rest des Gutscheins ab (nie mehr als die Summe aus Waren und Versand) und bucht ihn ab. `summe` bleibt Waren plus Versand (ohne Gutschein), die Antwort enthält zusätzlich `gutschein:{abgezogen, rest, zuZahlen}`. `paypalUrl` gilt nur für `zuZahlen`, ist es 0, gibt es keinen PayPal-Link und die Bestellung steht sofort auf „Bezahlt“. Ungültiger, abgelaufener oder aufgebrauchter Code: `422 {errors:{gutscheincode:…}}`. Bei Stornierung der Bestellung im Portal wird der Betrag zurückgebucht. Ein Gutschein gilt nur im Shop des Kunden, der ihn gesendet hat, und nur nach dem Versand des Codes (Portal → Website-Dienste → Gutscheine). Ablauf: die im Shop eingestellten Monate (Standard 36) ab Versand.
+- `typ="gutschein"` prüft den Betrag zusätzlich gegen `min` und `max` aus dem Shop (nur wenn die Gutschein-Einstellung des Shops eingeschaltet ist).
+
+### Kundenportal: Online-Shop (nur Inhaber, Modul „shop“)
+Bestellungen (Status eingegangen, bestätigt, bezahlt, in Produktion, versendet, abholbereit, abgeholt, storniert; Sendungsnummer, Abholtermin, interne Notiz; optional Mail an die Kundschaft bei Statuswechsel), Artikel (Entwurf oder aktiv, Farben, Tags, Wunschtext, „oft zusammen bestellt“), Bilder (der Browser schneidet auf 4:3 zu, 1200 × 900, und wandelt in WebP um; bis 600 KB, bis 8 je Artikel, 100 MB je Kunde), zentrale Farben und Kategorien, Einstellungen (Versand, Abholung, Zeiten, Bestellnummer-Präfix, Gutschein-Vorgaben).
+
+### Noch nicht gebaut
+Freistellen von Bildern; automatisch erzeugte Artikelseiten `produkt/<id>.html` mit `sitemap.xml` (die Website nutzt dafür bis auf Weiteres ihre eigenen Seiten oder `produkt.html?id=…`); Rechnung/Quittung zur Bestellung; Einlösen von Gutscheinen an der Ladenkasse außerhalb des Shops (Restguthaben wird nur bei Online-Bestellungen abgebucht, im Geschäft trägt der Inhaber nichts ein); automatische Zahlungsprüfung (der Inhaber setzt „Bezahlt“ selbst nach Blick ins PayPal-Konto).

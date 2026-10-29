@@ -321,10 +321,12 @@ async function gutscheineKarte(neu) {
       h('p', { class: 'small' }, (g.email || 'keine E-Mail') + (g.telefon ? ' · ' + g.telefon : '') + ' · ' + g.ref + ' · ' + datum(g.erstellt_am)),
       g.empfaenger || g.widmung ? h('p', { class: 'small muted' }, [g.empfaenger ? 'Für: ' + g.empfaenger : '', g.widmung ? 'Widmung: ' + g.widmung : ''].filter(Boolean).join(' · ')) : '',
       g.zahlungslink_am ? h('p', { class: 'small muted' }, 'Zahlungslink gesendet am ' + datum(g.zahlungslink_am)) : '',
-      g.gesendet_am ? h('p', { class: 'small muted' }, 'Code ' + g.code + ' gesendet am ' + datum(g.gesendet_am)) : '',
+      g.gesendet_am ? h('p', { class: 'small muted' }, 'Code ' + g.code + ' gesendet am ' + datum(g.gesendet_am) + (g.gueltig_bis ? ' · gültig bis ' + datum(g.gueltig_bis) : '')) : '',
+      g.status === 'gesendet' && g.rest !== '' ? h('p', { class: 'small' }, 'Restguthaben: ', h('b', {}, g.rest.replace('.', ',') + ' €'), Number(g.eingeloest) > 0 ? ' (eingelöst: ' + g.eingeloest.replace('.', ',') + ' €)' : '') : '',
       g.status !== 'storniert' && g.email ? h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin-top:6px' },
         offen ? [betrag, h('button', { class: 'btn', disabled: !r.paypal_bereit, onclick: () => tun('zahlungslink', { betrag: betrag.value }, 'Zahlungslink gesendet.') }, g.status === 'angefragt' ? 'Zahlungslink senden' : 'Zahlungslink erneut senden')] : '',
-        [code, h('button', { class: 'btn ' + (offen ? 'sec' : ''), onclick: () => tun('code', { code: code.value }, 'Gutschein gesendet.') }, g.status === 'gesendet' ? 'Gutschein erneut senden' : 'Gutschein senden')],
+        [code, h('button', { class: 'btn sec', onclick: async () => { try { code.value = (await api('/api/kunde/website-dienste/gutscheine/code-vorschlag')).code; } catch (x) { melde(m, x.message); } } }, 'Code erzeugen'),
+          h('button', { class: 'btn ' + (offen ? 'sec' : ''), onclick: () => tun('code', { code: code.value }, 'Gutschein gesendet.') }, g.status === 'gesendet' ? 'Gutschein erneut senden' : 'Gutschein senden')],
         offen ? h('button', { class: 'btn sec', onclick: () => { if (confirm('Diese Anfrage stornieren?')) tun('storno', {}, 'Storniert.'); } }, 'Stornieren') : '') : '');
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Gutschein-Anfragen'),

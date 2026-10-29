@@ -1514,6 +1514,21 @@
         "Mit „↩ Rückgängig“ holst du die vorige Fassung zurück.",
         "Das ist ein Entwurf mit KI-Unterstützung. Bitte lesen und anpassen, bevor du ihn abschickst. Das Portal verschickt nichts selbst. An die KI geht nur der Text im Feld, keine weiteren Daten der Anfrage."
       ]
+    },
+    {
+      "t": "Online-Shop: Artikel, Bilder und Bestellungen",
+      "k": "online shop artikel bestellung bestellungen produkt bild farben kategorie versand paypal gutschein shop einschalten sendungsnummer abholung gutschein code einlösen restguthaben",
+      "wo": "Menü → Mein Betrieb → Online-Shop",
+      "l": "#shop",
+      "s": [
+        "Öffne im Menü „Online-Shop“. Der Eintrag erscheint nur, wenn dein Paket den Shop enthält. Frag sonst das Markentrix-Team.",
+        "Lege unter „Farben und Kategorien“ deine Farben und Kategorien an. Danach legst du unter „Artikel“ deine Artikel an: Name, Preis (Endpreis in Euro), Texte, Farben und, wenn du willst, einen Wunschtext.",
+        "Speichere den Artikel einmal. Danach kannst du Bilder hochladen. Das Bild wird automatisch auf 4:3 zugeschnitten. Setze den Haken „aktiv“, damit der Artikel auf der Website erscheint. Ohne Haken bleibt er ein Entwurf.",
+        "Stelle unter „Einstellungen“ Versandpauschale, „versandkostenfrei ab“ und Abholung ein und schalte den Shop ein. Erst dann sieht die Website deine Artikel.",
+        "Neue Bestellungen erscheinen oben unter „Bestellungen“. Du bekommst eine Meldung und eine Mail. Stelle den Status weiter (bestätigt, bezahlt, in Produktion, versendet oder abholbereit). Mit dem Haken „per Mail informieren“ bekommt deine Kundschaft automatisch eine Nachricht, bei Versand mit der Sendungsnummer.",
+        "Zahlungen per PayPal prüfst du in deinem PayPal-Konto. Das Portal merkt nicht von selbst, dass bezahlt wurde. Stelle die Bestellung danach auf „Bezahlt“.",
+        "Gutscheine: Unter „Website-Dienste“ → „Gutschein-Anfragen“ schickst du den Code. Mit „Code erzeugen“ bekommst du einen Code, den niemand erraten kann. Wer den Code an der Kasse deines Shops eingibt, bekommt den Betrag abgezogen. Ein Restbetrag bleibt stehen. Dort siehst du auch das Restguthaben."
+      ]
     }
   ],
   "titel": "Anleitung Kundenportal",

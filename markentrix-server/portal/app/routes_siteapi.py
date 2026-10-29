@@ -490,6 +490,11 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
 
     if d.get("website") or d.get("hp"):
         return _json({"ok": True, "ref": "OK", "status": "neu"})             # Lockfeld: so tun als ob, nichts speichern
+    if d.get("typ") == "bestellung":
+        if formular:
+            return fehlerantwort(422, "Bestellungen bitte als JSON senden.")
+        from .routes_shop import bestellung_annehmen   # spät, weil routes_shop diese Datei importiert
+        return bestellung_annehmen(request, bg, d, z)
     kid, firma = z["kunden_id"], z["_firma"]
     tokens = fotos.kennungen(d.pop("fotos", None)) if z["foto_aktiv"] else []
     d.pop("fotos", None)
@@ -511,6 +516,10 @@ def anfrage(request: Request, bg: BackgroundTasks, roh: bytes = Depends(_roh)):
                             (kid, ref, felder["name"], felder["email"], felder.get("telefon") or None, date.fromisoformat(felder["datum"]), (lz or {}).get("id"), wunsch))
             if typ == "gutschein":
                 bt = sd.betrag_lesen(felder.get("wunschbetrag") or felder.get("betrag"))
+                cur.execute("SELECT gutschein_min, gutschein_max FROM shop_einstellungen WHERE kunden_id=%s AND aktiv AND gutschein_aktiv", (kid,))
+                gr = cur.fetchone()
+                if gr and bt is not None and not gr["gutschein_min"] <= bt <= gr["gutschein_max"]:
+                    raise Ungueltig({"wunschbetrag": f"Bitte einen Betrag zwischen {gr['gutschein_min']} und {gr['gutschein_max']} € wählen."})
                 cur.execute("""INSERT INTO website_gutscheine (kunden_id, anfrage_id, ref, name, email, telefon, betrag, empfaenger, widmung)
                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                             (kid, aid, ref, felder["name"], felder.get("email") or None, felder.get("telefon") or None, bt,

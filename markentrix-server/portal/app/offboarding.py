@@ -14,13 +14,13 @@ from . import berichte, belege, config, fotos, rechtstexte
 EXPORT_TABELLEN = ["anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",
                    "content_plaene", "content_beitraege", "newsletter_kampagnen", "einwilligungen", "wochenangebote_uploads", "websites",
                    "angebote", "vertraege", "projekte", "buchungen", "belege", "avv", "agent_laeufe",
-                   "tickets", "ticket_nachrichten", "kundenfreigaben", "zufriedenheit", "angebots_inhalte", "briefings", "kennzahlen_extern", "kunden_werkzeuge", "antwortvorlagen_kunde", "domains", "website_termine", "website_leistungen", "website_gutscheine", "website_warteliste", "website_mitarbeiter", "website_sperrtage", "website_stamm_notizen", "kunden_umfragen", "kuendigungswuensche"]
+                   "tickets", "ticket_nachrichten", "kundenfreigaben", "zufriedenheit", "angebots_inhalte", "briefings", "kennzahlen_extern", "kunden_werkzeuge", "antwortvorlagen_kunde", "domains", "website_termine", "website_leistungen", "website_gutscheine", "shop_bestellungen", "shop_positionen", "shop_produkte", "shop_kategorien", "shop_farben", "shop_einstellungen", "website_warteliste", "website_mitarbeiter", "website_sperrtage", "website_stamm_notizen", "kunden_umfragen", "kuendigungswuensche"]
 # Selbstbedienungs-Export des Kunden: nur, was der Kunde auch im Portal sehen darf (entspricht den Richtlinien der Datenbank).
 # Die Abfragen laufen mit Systemrechten, deshalb wird die Sichtbarkeit hier ausdrücklich nachgebaut.
 KUNDE_SIEHT = {"ticket_nachrichten": "NOT intern", "belege": "status<>'entwurf'"}
 KUNDE_OHNE_FELDER = {"belege": ("notiz",)}
 # Inhalte, die bei der Löschung entfernt werden (Reihenfolge ist egal, es gibt keine Abhängigkeiten untereinander außer SET NULL / CASCADE)
-LOESCH_TABELLEN = ["empfehlungs_praemien", "kunden_tipps", "ticket_nachrichten", "website_termine", "website_warteliste", "website_gutscheine", "website_meldungen", "website_ereignisse", "website_stat", "website_wacht", "website_qualitaet",
+LOESCH_TABELLEN = ["empfehlungs_praemien", "kunden_tipps", "ticket_nachrichten", "website_termine", "website_warteliste", "website_gutscheine", "shop_positionen", "shop_bestellungen", "shop_bilder", "shop_produkte", "shop_kategorien", "shop_farben", "shop_einstellungen", "website_meldungen", "website_ereignisse", "website_stat", "website_wacht", "website_qualitaet",
                    "website_leistung_aenderungen", "website_bewertung_sperre", "website_sperrtage", "website_stamm_notizen", "website_leistungen", "website_mitarbeiter", "website_dienste",
                    "domain_pruefung", "statusseiten", "kunden_umfragen", "wissen_vorschlaege", "hilfe_rueckmeldungen", "onboarding_punkte", "workflow_fehler", "kosten_log",
                    "anfragen", "termine", "kontakte", "nachrichten", "anrufe", "chat_verlauf", "wissensbasis", "berichte", "bewertungsanfragen",

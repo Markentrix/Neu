@@ -31,6 +31,7 @@ const SEITEN = [
   ['anrufe', 'Anrufe', null],
   ['website', 'Website & Landingpages', 'website'],
   ['dienste', 'Website-Dienste', 'website'],
+  ['shop', 'Online-Shop', 'shop'],
   ['wochenangebote', 'Wochenangebote', 'wochenangebote'],
   ['werbung', 'Werbung & Berichte', 'werbung_berichte'],
   ['automationen', 'Automationen', 'automationen'],
@@ -46,12 +47,12 @@ const SEITEN = [
 const GRUPPEN = [
   ['Täglich', ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
   ['Verstehen', ['uebersicht', 'status', 'briefing', 'auswertung', 'berichte'], true],
-  ['Mein Betrieb', ['assistent', 'wissen', 'website', 'dienste', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
+  ['Mein Betrieb', ['assistent', 'wissen', 'website', 'dienste', 'shop', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
   ['Verwaltung', ['willkommen', 'belege', 'avv', 'vertraege', 'team', 'pakete', 'hilfe', 'einstellungen'], false],
 ];
 export const inhaber = () => start.kunden_rolle === 'inhaber';
 const EMPFANG = ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'nachrichten', 'hilfe', 'einstellungen'];
-export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste', 'vertraege', 'wissen', 'pakete'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste', 'shop', 'vertraege', 'wissen', 'pakete'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : id === 'vertraege' ? start.badges.vertraege : 0)) || 0;
 

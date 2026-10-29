@@ -1230,7 +1230,9 @@ CODE_RE = re.compile(r"^[A-Za-z0-9ÄÖÜäöüß][A-Za-z0-9ÄÖÜäöüß _.\-/]
 def _gutschein_json(r: dict) -> dict:
     return {"id": str(r["id"]), "ref": r["ref"], "name": r["name"], "email": r["email"] or "", "telefon": r["telefon"] or "",
             "betrag": f"{r['betrag']:.2f}" if r["betrag"] is not None else "", "empfaenger": r["empfaenger"] or "", "widmung": r["widmung"] or "",
-            "status": r["status"], "code": r["code"] or "", "erstellt_am": r["erstellt_am"], "zahlungslink_am": r["zahlungslink_am"], "gesendet_am": r["gesendet_am"]}
+            "status": r["status"], "code": r["code"] or "", "erstellt_am": r["erstellt_am"], "zahlungslink_am": r["zahlungslink_am"], "gesendet_am": r["gesendet_am"],
+            "gueltig_bis": r["gueltig_bis"], "eingeloest": f"{r['eingeloest']:.2f}",
+            "rest": f"{max(0, (r['betrag'] or 0) - r['eingeloest']):.2f}" if r["status"] == "gesendet" and r["betrag"] is not None else ""}
 
 
 @kunde.get("/gutscheine")
@@ -1298,6 +1300,22 @@ def k_gutschein_link(gid: str, data: ZahlungslinkIn, user: dict = Depends(requir
     return {"ok": True}
 
 
+CODE_ZEICHEN = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"      # ohne 0, O, 1, I: gut ablesbar
+
+
+@kunde.get("/gutscheine/code-vorschlag")
+def k_gutschein_code_vorschlag(user: dict = Depends(require_inhaber)):
+    """Zufälliger Code, nicht zu erraten (wichtig, sobald Gutscheine im Shop eingelöst werden können). Form XXXX-XXXX-XXXX."""
+    kid = user["kunden_id"]
+    with tx("system") as cur:
+        for _ in range(20):
+            code = "-".join("".join(secrets.choice(CODE_ZEICHEN) for _ in range(4)) for _ in range(3))
+            cur.execute("SELECT 1 FROM website_gutscheine WHERE kunden_id=%s AND lower(code)=lower(%s)", (kid, code))
+            if not cur.fetchone():
+                return {"code": code}
+    raise HTTPException(500, "Bitte noch einmal versuchen.")
+
+
 class GutscheinCodeIn(BaseModel):
     code: str = Field(min_length=3, max_length=40)
     hinweis: str = Field(default="", max_length=600)
@@ -1317,17 +1335,22 @@ def k_gutschein_code(gid: str, data: GutscheinCodeIn, user: dict = Depends(requi
             raise HTTPException(409, "Diesen Code hast du schon an jemand anderen gesendet. Bitte einen neuen Code wählen.")
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
         firma = cur.fetchone()["firma"]
+        cur.execute("SELECT gutschein_monate FROM shop_einstellungen WHERE kunden_id=%s", (kid,))
+        mon = cur.fetchone()
+        monate = mon["gutschein_monate"] if mon else 36
+        cur.execute("SELECT coalesce(%s::date, (current_date + make_interval(months => %s))::date) AS bis", (g["gueltig_bis"], monate))
+        bis = cur.fetchone()["bis"]
     betrag = f" über {g['betrag']:.2f}".replace(".", ",") + " €" if g["betrag"] is not None else ""
     fuer = f"\nFür: {g['empfaenger']}" if g["empfaenger"] else ""
     widmung = f"\nWidmung: {g['widmung']}" if g["widmung"] else ""
     hinweis = f"\n{data.hinweis.strip()}\n" if data.hinweis.strip() else ""
     text = (f"Guten Tag {g['name']},\n\nvielen Dank, Ihre Zahlung ist bei uns eingegangen. Hier ist Ihr Gutschein{betrag}:{fuer}{widmung}\n\n"
-            f"Gutschein-Code: {code}\n{hinweis}\nBitte nennen Sie den Code bei Ihrem Besuch oder bei der Buchung.\n\nViele Grüße\n{firma}")
+            f"Gutschein-Code: {code}\nGültig bis: {bis.strftime('%d.%m.%Y')}\n{hinweis}\nBitte nennen Sie den Code bei Ihrem Besuch oder bei der Buchung.\n\nViele Grüße\n{firma}")
     ok, via = sd.kundenmail(kid, g["email"], f"Ihr Gutschein bei {firma} ({g['ref']})", text, art="kontakt")
     if not ok:
         raise HTTPException(502, "Die E-Mail konnte nicht gesendet werden: " + str(via)[:200])
     with tx("system") as cur:
-        cur.execute("UPDATE website_gutscheine SET status='gesendet', code=%s, gesendet_am=now() WHERE id=%s AND kunden_id=%s", (code, gid, kid))
+        cur.execute("UPDATE website_gutscheine SET status='gesendet', code=%s, gesendet_am=now(), gueltig_bis=%s WHERE id=%s AND kunden_id=%s", (code, bis, gid, kid))
         audit(cur, user, "website_gutschein_code", kid, {"ref": g["ref"]})
     return {"ok": True}
 
