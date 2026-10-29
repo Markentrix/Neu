@@ -7,7 +7,6 @@
 <meta name="description" content="Bestätigung: Ihre Bestellung oder Anfrage bei Schichtatelier ist eingegangen.">
 <meta name="theme-color" content="#f7f4ee">
 <link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -43,7 +42,7 @@
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb von zwei Werktagen mit den nächsten Schritten zur Rücksendung und Erstattung.</p>
     </div>
     <div data-show="gutschein" data-h1="Ihre Gutschein-Bestellung ist eingegangen." hidden>
-      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail, danach die Rechnung mit Zahlungsdaten. Nach Zahlungseingang schicken wir den Gutschein mit Code als PDF oder als Karte per Post.</p>
+      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Nach Zahlungseingang schicken wir den Gutschein mit Code als PDF oder als Karte per Post.</p>
     </div>
     <div data-show="kontakt" data-h1="Ihre Anfrage ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb eines Werktags mit Preis und Lieferzeit.</p>
@@ -51,6 +50,7 @@
     <div class="ref-card"><span class="small muted">Ihre Vorgangsnummer</span><span class="ref" id="ref"></span><span class="small muted">Bitte bei Rückfragen angeben.</span></div>
     <p hidden><a class="btn btn-primary" id="paypal-link" href="#" rel="noopener">Jetzt <span id="danke-summe"></span> per PayPal bezahlen</a></p>
     <p class="notice" id="paypal-hinweis" hidden style="text-align:left">Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestellbestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
+    <p class="notice" id="gutschein-hinweis" hidden style="text-align:left"></p>
     <p class="notice" id="abhol-hinweis" hidden style="text-align:left">Sie holen in Celle ab: Wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse Heinrich-Hüdig-Str. 1, 29227 Celle. Bezahlt wird bei Abholung bar oder per PayPal.</p>
   </div>
 </section>
@@ -58,7 +58,7 @@
   <div class="wrap" style="max-width:860px">
     <h2 class="center">Was jetzt passiert</h2>
     <div class="steps">
-      <div class="step"><h3>Bestätigung</h3><p class="muted">Wir prüfen die Bestellung und schicken innerhalb von zwei Werktagen die Bestätigung mit Rechnung und Zahlungslink.</p></div>
+      <div class="step"><h3>Bestätigung</h3><p class="muted">Wir prüfen die Bestellung und melden uns innerhalb von zwei Werktagen mit der Bestätigung, bei PayPal mit dem Zahlungslink.</p></div>
       <div class="step"><h3>Druck</h3><p class="muted">Nach Zahlungseingang drucken wir Ihr Teil in 2 bis 4 Werktage, prüfen es und befreien es von Stützmaterial.</p></div>
       <div class="step"><h3>Versand oder Abholung</h3><p class="muted">Sie bekommen die Sendungsnummer per E-Mail, oder wir vereinbaren einen Abholtermin in Celle.</p></div>
     </div>

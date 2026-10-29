@@ -435,3 +435,9 @@ input:invalid:not(:placeholder-shown){border-color:var(--line)}
 .thumbs button[aria-current="true"]{border-color:var(--brand)}
 .thumbs img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
 .offline-note{background:var(--danger-soft);color:var(--danger);border-radius:var(--radius-s);padding:10px 14px;margin:14px 0 0;font-size:.95rem}
+
+.code-row{display:flex;gap:10px}
+.code-row input{flex:1;min-width:0}
+.code-msg{margin:6px 0 0;font-size:.9rem;min-height:1.2em}
+.code-msg.ok{color:var(--brand)}
+.code-msg.bad{color:var(--danger)}

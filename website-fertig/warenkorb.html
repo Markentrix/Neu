@@ -7,7 +7,6 @@
 <meta name="description" content="Warenkorb und Bestellung bei Schichtatelier: Artikel prüfen, Versand oder Abholung in Celle wählen, per PayPal bezahlen.">
 <meta name="theme-color" content="#f7f4ee">
 <link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -47,7 +46,7 @@
           <div class="alert" role="alert"></div>
           <div class="field"><label for="b-name">Vor- und Nachname</label><input type="text" id="b-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
           <div class="row">
-            <div class="field"><label for="b-email">E-Mail <span class="opt">(für Bestätigung und Rechnung)</span></label><input type="email" id="b-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
+            <div class="field"><label for="b-email">E-Mail <span class="opt">(für die Bestätigung)</span></label><input type="email" id="b-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
             <div class="field"><label for="b-tel">Telefon <span class="opt">(optional, für Rückfragen)</span></label><input type="tel" id="b-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
           </div>
           <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Lieferung</legend>
@@ -65,6 +64,7 @@
             <label class="check"><input type="radio" name="zahlungsart" value="paypal" checked> PayPal, mit Käuferschutz (Zahlungslink kommt mit der Bestätigung per E-Mail)</label>
             <label class="check" id="zahlung-abholung" hidden><input type="radio" name="zahlungsart" value="abholung"> Bei Abholung, bar oder per PayPal vor Ort</label>
           </fieldset>
+          <div class="field" id="gutscheincode-box" hidden><label for="b-code">Gutscheincode <span class="opt">(optional)</span></label><div class="code-row"><input type="text" id="b-code" autocomplete="off" autocapitalize="characters" maxlength="40"><button class="btn btn-ghost" type="button" id="code-pruefen">Einlösen</button></div><p class="code-msg" id="code-msg" role="status"></p></div>
           <div class="field"><label for="b-anm">Anmerkung <span class="opt">(optional)</span></label><textarea id="b-anm" name="anmerkung" rows="3"></textarea><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="b-web">Website</label><input type="text" id="b-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
@@ -78,7 +78,8 @@
         <h2 style="font-size:1.1rem">Zusammenfassung</h2>
         <div class="line"><span>Zwischensumme</span><strong id="s-zwischen">0,00 €</strong></div>
         <div class="line"><span id="s-versand-label">Versand (Deutschland)</span><strong id="s-versand">0,00 €</strong></div>
-        <div class="line total"><span>Gesamt</span><span id="s-gesamt">0,00 €</span></div>
+        <div class="line" id="s-gutschein-row" hidden><span>Gutschein</span><strong id="s-gutschein">−0,00 €</strong></div>
+        <div class="line total"><span id="s-gesamt-label">Gesamt</span><span id="s-gesamt">0,00 €</span></div>
         <p class="small muted" id="s-hint"></p>
         <p class="small" data-delivery>Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
         <p class="small muted">Alle Preise inkl. gesetzlicher MwSt. Produktion 2 bis 4 Werktage plus Versand 2 bis 3 Werktage.</p>

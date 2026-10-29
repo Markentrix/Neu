@@ -309,8 +309,6 @@ def main():
     with open(fav, "w") as f:
         f.write(LOGO_SVG.replace('width="64" height="64"', 'width="512" height="512"', 1))
     jobs.append({"svg": fav, "png": os.path.join(tmp, "favicon.png"), "w": 512, "h": 512})
-    with open(os.path.join(ROOT, "favicon.svg"), "w") as f:
-        f.write(LOGO_SVG)
     jobfile = os.path.join(tmp, "jobs.json")
     with open(jobfile, "w") as f:
         json.dump(jobs, f)

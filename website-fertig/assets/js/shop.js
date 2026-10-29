@@ -11,7 +11,7 @@
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var ROOT = (document.body.getAttribute("data-root") || "");
   var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-  var VOUCHER = null, catalogLoaded = false, catalogHooks = [];
+  var VOUCHER = null, coupon = null, catalogLoaded = false, catalogHooks = [];
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
   function safeColor(h) { return /^#[0-9a-f]{3,8}$/i.test(h || "") ? h : "#cccccc"; }
@@ -28,6 +28,7 @@
   var P = (window.SW_PRODUKTE || []).map(norm);
   function findProduct(id) { for (var i = 0; i < P.length; i++) if (P[i].id === id) return P[i]; return null; }
   function colorName(k) { return FARBEN[k] ? FARBEN[k][0] : k; }
+  function imgDim(p) { var b = p.bilder && p.bilder[0]; return { w: (b && b.w) || 800, h: (b && b.h) || 600 }; }
   function imgOf(p) {
     var b = p.bilder && p.bilder[0]; var u = b && (b.url || b);
     if (typeof u === "string" && u) return /^(\/|https?:)/.test(u) ? u : ROOT + u;
@@ -57,7 +58,9 @@
     c.forEach(function (i) { var p = findProduct(i.id); if (p) sum += p.preis * i.menge; });
     var abholung = lieferart() === "abholung";
     var versand = (sum === 0 || abholung) ? 0 : (sum >= CFG.versandfreiAb ? 0 : CFG.versandPauschale);
-    return { zwischensumme: sum, versand: versand, gesamt: sum + versand, abholung: abholung };
+    var r2 = function (x) { return Math.round(x * 100) / 100; };
+    var gesamt = r2(sum + versand); var abz = coupon ? r2(Math.min(coupon.rest, gesamt)) : 0;
+    return { zwischensumme: r2(sum), versand: versand, gesamt: gesamt, abholung: abholung, gutschein: abz, zuZahlen: r2(gesamt - abz) };
   }
   function cartAsText(c) {
     return c.map(function (i) {
@@ -90,7 +93,7 @@
     var action = p.text ? '<a class="btn btn-primary" href="' + esc(href) + '">Jetzt gestalten</a>' : '<button class="btn btn-primary" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
     var tags = p.tags.concat(p.text && p.tags.indexOf("personalisiert") < 0 ? ["personalisiert"] : []).join(" ");
     return '<article class="card" data-kat="' + esc(p.kat) + '" data-tags="' + esc(tags) + '" data-preis="' + p.preis + '" data-name="' + esc(p.name) + '" data-pos="' + (p._pos || 0) + '">' +
-      '<a class="card-img" href="' + esc(href) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="800" height="600" alt="" loading="lazy"></a>' +
+      '<a class="card-img" href="' + esc(href) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="' + imgDim(p).w + '" height="' + imgDim(p).h + '" alt="" loading="lazy"></a>' +
       '<div class="card-body"><span class="card-cat">' + esc(KAT[p.kat] || "") + '</span><' + h + '><a href="' + esc(href) + '">' + esc(p.name) + '</a></' + h + '>' +
       '<p class="small muted" style="margin:0">' + esc(p.kurz) + '</p><div class="price">' + EUR(p.preis) + ' ' + badge + '</div>' +
       (p.farben.length > 1 ? '<span class="card-colors">in ' + p.farben.length + ' Farben</span>' : "") + action +
@@ -103,7 +106,7 @@
     buy = form; if (!form) return;
     var qtyIn = $("#menge", form);
     $$(".qty button", form).forEach(function (b) {
-      b.addEventListener("click", function () { var v = parseInt(qtyIn.value, 10) || 1; v += parseInt(b.dataset.d, 10); qtyIn.value = Math.min(20, Math.max(1, v)); });
+      b.addEventListener("click", function () { var v = parseInt(qtyIn.value, 10) || 1; v += parseInt(b.dataset.d, 10); qtyIn.value = Math.min(99, Math.max(1, v)); });
     });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -112,7 +115,7 @@
       var textEl = $("#wunschtext", form);
       var text = textEl ? textEl.value.trim() : "";
       if (textEl && textEl.required && !text) { textEl.focus(); textEl.closest(".field").classList.add("err"); return; }
-      var menge = Math.min(20, Math.max(1, parseInt(qtyIn.value, 10) || 1));
+      var menge = Math.min(99, Math.max(1, parseInt(qtyIn.value, 10) || 1));
       addToCart(id, farbe, text, menge);
       var ok = $(".added"); if (ok) { ok.classList.add("show"); }
       toast("In den Warenkorb gelegt");
@@ -132,7 +135,8 @@
     }
     if (note) note.remove(); if (btn) btn.disabled = false;
     if (pr && pr.firstChild && pr.firstChild.nodeType === 3) pr.firstChild.nodeValue = EUR(p.preis) + " ";
-    var sp = $(".sticky-price"); if (sp) sp.textContent = EUR(p.preis);
+    var spr = $(".sticky-price"); if (spr) spr.textContent = EUR(p.preis);
+    if (p.bilder.length) { var mi = $(".product-media img"); var b0 = p.bilder[0]; if (mi && b0 && b0.url) { mi.src = imgOf(p); if (b0.w) mi.width = b0.w; if (b0.h) mi.height = b0.h; if (b0.alt) mi.alt = b0.alt; } }
     var ld = $("#ld-json"); var pd = $("#produkt-daten");
     if (pd) { try { var d = JSON.parse(pd.textContent); d.price = p.preis.toFixed(2); renderLd(d); } catch (e) { /* weiter */ } }
   });
@@ -184,22 +188,27 @@
         (P.some(function (p) { return p.text; }) ? '<button class="chip" type="button" data-kat="personalisiert" aria-pressed="false">Mit Wunschtext</button>' : "");
       bindChips();
     }
+    if (!P.length) grid.insertAdjacentHTML("afterbegin", '<div class="empty" style="grid-column:1/-1"><p>Zurzeit ist kein Artikel bestellbar. Schreiben Sie uns gern: ' + contactLinks() + '.</p></div>');
     var n = $("#shop-anzahl"); if (n) n.textContent = P.length;
     applyFilter();
   });
   /* Startseite: erste vier Artikel, Bestseller zuerst */
   catalogHooks.push(function () {
     var fg = $("#featured-grid"); if (!fg) return;
+    var fsec = fg.closest("section"); if (fsec) fsec.hidden = !P.length;
     var best = P.filter(function (p) { return p.tags.indexOf("bestseller") >= 0; }); var rest = P.filter(function (p) { return p.tags.indexOf("bestseller") < 0; });
     fg.innerHTML = best.concat(rest).slice(0, 4).map(function (p) { return cardHtml(p, "h3"); }).join("");
     var n = $("#alle-anzahl"); if (n) n.textContent = P.length;
   });
 
   /* ---------- Formular-Hilfen (Portal: POST /api/anfrage) ---------- */
-  function fallbackHtml() {
+  function contactLinks() {
     var mail = CFG.email ? '<a href="mailto:' + CFG.email + '">' + CFG.email + "</a>" : "";
     var tel = CFG.telefon ? '<a href="tel:' + CFG.telefon.replace(/[^+\d]/g, "") + '">' + CFG.telefon + "</a>" : "";
-    var alt = [mail, tel].filter(Boolean).join(" oder ");
+    return [mail, tel].filter(Boolean).join(" oder ");
+  }
+  function fallbackHtml() {
+    var alt = contactLinks();
     return "Das Senden hat gerade nicht geklappt. Bitte versuchen Sie es in ein paar Minuten noch einmal" + (alt ? " oder schreiben Sie uns direkt: " + alt : "") + ".";
   }
   function clearErrors(form) {
@@ -237,14 +246,15 @@
   }
   function safePaypal(u) { return typeof u === "string" && /^https:\/\/(www\.)?paypal\.(com|me)\//i.test(u) ? u : ""; }
   /* fallbackTyp: kennt das Portal den Typ nicht, geht die Anfrage einmal als Kontakt-Anfrage mit Freitext raus */
-  function bindForm(form, typ, extra, onDone, fallbackTyp) {
+  function bindForm(form, typ, extra, onDone, fallbackTyp, check) {
     form.setAttribute("novalidate", "");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       clearErrors(form);
       var errors = validate(form);
+      if (check) { var ce = check(); for (var ck in ce) errors[ck] = ce[ck]; }
       if (Object.keys(errors).length) { showErrors(form, errors); return; }
-      var data = { typ: typ };
+      var data = { typ: typ }; var priv = {};
       $$("input,select,textarea", form).forEach(function (el) {
         if (!el.name) return;
         if (el.type === "checkbox") { if (el.checked) data[el.name] = el.value || "ja"; return; }
@@ -254,6 +264,7 @@
       if (data.website) return; /* Lockfeld gefüllt: nichts senden */
       data.website = "";
       if (extra) { var ex = extra(); for (var k in ex) data[k] = ex[k]; }
+      Object.keys(data).forEach(function (k) { if (k.charAt(0) === "_") { priv[k] = data[k]; delete data[k]; } });
       var btn = form.querySelector('button[type=submit]'); var label = btn.textContent;
       btn.disabled = true; btn.textContent = "Wird gesendet …";
       send(data)
@@ -274,8 +285,8 @@
           if (res.body && res.body.ok && res.body.ref) {
             if (onDone) onDone();
             var pu = safePaypal(res.body.paypalUrl);
-            try { if (pu) sessionStorage.setItem("sw_paypal", JSON.stringify({ ref: res.body.ref, url: pu })); else sessionStorage.removeItem("sw_paypal"); } catch (e2) { /* ohne Speicher weiter */ }
-            var sm = data.summe; if (typeof sm === "number") sm = EUR(sm);
+            try { sessionStorage.setItem("sw_paypal", JSON.stringify({ ref: res.body.ref, url: pu, gutschein: res.body.gutschein || null })); } catch (e2) { /* ohne Speicher weiter */ }
+            var sm = priv._zuzahlen != null ? priv._zuzahlen : data.summe; if (typeof sm === "number") sm = EUR(sm);
             var q = "danke.html?typ=" + encodeURIComponent(data.typ) + "&ref=" + encodeURIComponent(res.body.ref);
             if (data.art) q += "&art=" + encodeURIComponent(data.art);
             if (sm) q += "&summe=" + encodeURIComponent(sm);
@@ -294,30 +305,51 @@
   var kf = $("#kontaktformular"); if (kf) bindForm(kf, "kontakt");
   var wf = $("#widerrufsformular"); if (wf) bindForm(wf, "widerruf");
 
-  /* ---------- Gutschein (Betrag, Zustellung); Konfiguration aus GET /api/gutschein ---------- */
+  /* ---------- Gutschein verkaufen (Formular) und einlösen (Kasse); Konfiguration aus GET /api/gutschein ---------- */
   var gf = $("#gutscheinformular");
   function voucherMin() { return (VOUCHER && Number(VOUCHER.min)) || 10; }
+  function voucherMax() { return (VOUCHER && Number(VOUCHER.max)) || 500; }
+  var updateAdr = function () {};
   if (gf) {
     var adr = $("#g-adresse", gf); var adrIn = $("#g-adr", gf);
-    $$("input[name=zustellung]", gf).forEach(function (r) { r.addEventListener("change", function () { var post = r.value.indexOf("Post") === 0 && r.checked; adr.hidden = !post; adrIn.required = post; adrIn.dataset.err = "Bitte die Postanschrift eintragen."; }); });
+    updateAdr = function () { var r = gf.querySelector("input[name=zustellung]:checked"); var post = !!r && /post/i.test(r.value); adr.hidden = !post; adrIn.required = post; adrIn.dataset.err = "Bitte die Postanschrift eintragen."; };
+    gf.addEventListener("change", function (e) { if (e.target.name === "zustellung") updateAdr(); });
     bindForm(gf, "gutschein", function () {
       var frei = parseInt(($("[name=betrag_frei]", gf).value || "").trim(), 10);
       var fix = (gf.querySelector("input[name=betrag]:checked") || {}).value;
-      var betrag = frei >= voucherMin() ? frei : parseInt(fix, 10);
-      return { betrag: betrag + " €", summe: EUR(betrag), nachricht: "GUTSCHEIN " + betrag + " € · Zustellung: " + ((gf.querySelector("input[name=zustellung]:checked") || {}).value || "") + " · Für: " + ($("[name=empfaenger]", gf).value || "–") + " · Von: " + ($("[name=absender]", gf).value || "–") + " · Text: " + ($("[name=gutscheintext]", gf).value || "–") };
+      var betrag = frei > 0 ? frei : parseInt(fix, 10);
+      return { betrag: betrag, nachricht: "GUTSCHEIN " + betrag + " € · Zustellung: " + ((gf.querySelector("input[name=zustellung]:checked") || {}).value || "") + " · Für: " + ($("[name=empfaenger]", gf).value || "–") + " · Von: " + ($("[name=absender]", gf).value || "–") + " · Text: " + ($("[name=gutscheintext]", gf).value || "–") };
+    }, null, null, function () {
+      var errs = {}; var raw = ($("[name=betrag_frei]", gf).value || "").trim();
+      if (raw) { var v = Number(raw); if (!(v >= voucherMin() && v <= voucherMax()) || Math.floor(v) !== v) errs.betrag_frei = "Bitte einen ganzen Betrag zwischen " + voucherMin() + " und " + voucherMax() + " Euro eingeben."; }
+      return errs;
     });
   }
   function applyVoucher() {
     if (!VOUCHER) return;
-    var card = $(".card-gutschein"); if (card && VOUCHER.aktiv === false) card.remove();
+    var active = VOUCHER.aktiv !== false;
+    var card = $(".card-gutschein"); if (card && !active) card.remove();
+    var codeBox = $("#gutscheincode-box"); if (codeBox) codeBox.hidden = !(active && VOUCHER.einloesen);
+    if (!active && coupon) { coupon = null; if (renderCart) renderCart(); }
     if (!gf) return;
-    if (VOUCHER.aktiv === false) { gf.hidden = true; if (!$(".offline-note")) { var n = document.createElement("p"); n.className = "offline-note"; n.textContent = "Geschenkgutscheine sind im Moment nicht bestellbar. Schreiben Sie uns gern eine Nachricht."; gf.parentNode.insertBefore(n, gf); } return; }
+    var note = $(".offline-note", gf.parentNode);
+    if (!active) {
+      gf.hidden = true;
+      if (!note) { note = document.createElement("p"); note.className = "offline-note"; note.innerHTML = "Geschenkgutscheine sind im Moment nicht bestellbar. Schreiben Sie uns gern: " + contactLinks() + "."; gf.parentNode.insertBefore(note, gf); }
+      return;
+    }
+    gf.hidden = false; if (note) note.remove();
     var box = $("#g-betraege", gf);
     if (box && Array.isArray(VOUCHER.betraege) && VOUCHER.betraege.length) {
       var def = VOUCHER.betraege.indexOf(20) >= 0 ? 20 : VOUCHER.betraege[0];
       box.innerHTML = VOUCHER.betraege.map(function (a) { return '<label class="swatch"><input type="radio" name="betrag" value="' + esc(a) + '"' + (a === def ? " checked" : "") + '><span>' + esc(a) + ' €</span></label>'; }).join("");
     }
-    var fr = $("#g-frei", gf); if (fr) { fr.min = voucherMin(); if (VOUCHER.max) fr.max = VOUCHER.max; }
+    var zs = $("#g-zustellung", gf);
+    if (zs && Array.isArray(VOUCHER.zustellung) && VOUCHER.zustellung.length) {
+      zs.innerHTML = '<legend style="font-weight:600;margin-bottom:8px">Zustellung</legend>' + VOUCHER.zustellung.map(function (z, i) { return '<label class="check"><input type="radio" name="zustellung" value="' + esc(z) + '"' + (i === 0 ? " checked" : "") + '> ' + esc(z) + '</label>'; }).join("");
+      updateAdr();
+    }
+    var fr = $("#g-frei", gf); if (fr) { fr.min = voucherMin(); fr.max = voucherMax(); }
   }
 
   /* ---------- Strukturierte Daten für Suchmaschinen (Produktseite) ---------- */
@@ -351,7 +383,7 @@
         var el = document.createElement("div"); el.className = "cart-item";
         el.innerHTML = '<img src="' + esc(imgOf(p)) + '" width="84" height="63" alt="">' +
           '<div><h3><a href="' + esc(hrefOf(p)) + '">' + esc(p.name) + '</a></h3><div class="meta">' + (f ? "Farbe: " + esc(f) + " · " : "") + (i.text ? "Text: „" + esc(i.text) + "“ · " : "") + EUR(p.preis) + ' / Stück</div>' +
-          '<div class="buyrow" style="margin-top:8px"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" min="1" max="20" value="' + i.menge + '" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span> <button type="button" class="remove">Entfernen</button></div></div>' +
+          '<div class="buyrow" style="margin-top:8px"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" min="1" max="99" value="' + i.menge + '" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span> <button type="button" class="remove">Entfernen</button></div></div>' +
           '<div class="line-price">' + EUR(p.preis * i.menge) + "</div>";
         var inp = $("input", el);
         $$(".qty button", el).forEach(function (b) { b.addEventListener("click", function () { setQty(idx, (parseInt(inp.value, 10) || 1) + parseInt(b.dataset.d, 10)); }); });
@@ -363,7 +395,9 @@
       $("#s-zwischen").textContent = EUR(t.zwischensumme);
       $("#s-versand").textContent = t.versand === 0 ? "kostenlos" : EUR(t.versand);
       var vl = $("#s-versand-label"); if (vl) vl.textContent = t.abholung ? "Abholung in Celle" : "Versand (Deutschland)";
-      $("#s-gesamt").textContent = EUR(t.gesamt);
+      var gr = $("#s-gutschein-row"); if (gr) { gr.hidden = !(coupon && t.gutschein > 0); $("#s-gutschein").textContent = "−" + EUR(t.gutschein); }
+      var gl = $("#s-gesamt-label"); if (gl) gl.textContent = coupon ? "Zu zahlen" : "Gesamt";
+      $("#s-gesamt").textContent = EUR(t.zuZahlen);
       var hint = $("#s-hint"); if (hint) hint.textContent = t.abholung ? "Abholung nach Terminabsprache, keine Versandkosten." : t.versand > 0 ? "Noch " + EUR(CFG.versandfreiAb - t.zwischensumme) + " bis zum kostenlosen Versand." : "Versandkostenfrei innerhalb Deutschlands.";
       var mailBtn = $("#cart-mail");
       if (mailBtn && CFG.email) {
@@ -391,7 +425,7 @@
         cs.hidden = pick.length === 0;
       }
     };
-    var setQty = function (idx, v) { var c = loadCart(); c[idx].menge = Math.min(20, Math.max(1, v)); saveCart(c); render(); };
+    var setQty = function (idx, v) { var c = loadCart(); c[idx].menge = Math.min(99, Math.max(1, v)); saveCart(c); render(); };
     render();
     renderCart = render;
     if (checkout) {
@@ -411,20 +445,46 @@
         if (opt && CFG.abholung === false) { opt.closest("label").hidden = true; if (opt.checked) { checkout.querySelector("input[name=lieferart][value=versand]").checked = true; applyLieferart(); } }
         render();
       });
+      var codeIn = $("#b-code", checkout), codeBtn = $("#code-pruefen", checkout), codeMsg = $("#code-msg", checkout), codeBusy = false;
+      var setCodeMsg = function (txt, ok) { codeMsg.textContent = txt; codeMsg.className = "code-msg " + (txt ? (ok ? "ok" : "bad") : ""); };
+      var fmtDate = function (iso) { var d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString("de-DE"); };
+      if (codeBtn) {
+        codeBtn.addEventListener("click", function () {
+          if (coupon) { coupon = null; codeIn.value = ""; codeIn.readOnly = false; codeBtn.textContent = "Einlösen"; setCodeMsg("", true); render(); return; }
+          var code = codeIn.value.trim();
+          if (!code) { setCodeMsg("Bitte den Gutscheincode eingeben.", false); return; }
+          if (codeBusy) return; codeBusy = true; codeBtn.disabled = true; setCodeMsg("Wird geprüft …", true);
+          fetch(ROOT + "api/gutschein/pruefen", { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify({ code: code }) })
+            .then(function (r) { if (r.status === 429) return { limit: true }; return r.json().then(function (j) { return { body: j }; }, function () { return { body: null }; }); })
+            .then(function (res) {
+              if (res.limit) { setCodeMsg("Bitte später noch einmal.", false); return; }
+              var bd = res.body;
+              if (bd && bd.ok && bd.gueltig && Number(bd.rest) > 0) {
+                coupon = { code: code, rest: Number(bd.rest), ablauf: bd.ablauf || "" }; codeIn.readOnly = true; codeBtn.textContent = "Entfernen";
+                setCodeMsg("Gutschein gilt: Guthaben " + EUR(coupon.rest) + (coupon.ablauf ? ", gültig bis " + fmtDate(coupon.ablauf) : "") + ".", true); render();
+              } else setCodeMsg("Dieser Gutscheincode konnte nicht eingelöst werden.", false);
+            })
+            .catch(function () { setCodeMsg("Der Gutschein konnte gerade nicht geprüft werden. Bitte versuchen Sie es später noch einmal.", false); })
+            .then(function () { codeBusy = false; codeBtn.disabled = false; });
+        });
+        codeIn.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); codeBtn.click(); } });
+      }
       bindForm(checkout, "bestellung", function () {
         var c = loadCart().filter(function (i) { return findProduct(i.id); }); var t = cartTotals(c);
         var la = lieferart();
         var strasse = $("[name=strasse]", checkout).value, plz = $("[name=plz]", checkout).value, ort = $("[name=ort]", checkout).value;
         var adr = la === "abholung" ? "Abholung in Celle" : [strasse, plz + " " + ort].join(", ");
         var za = (checkout.querySelector("input[name=zahlungsart]:checked") || {}).value || "";
-        return {
+        var o = {
           art: "bestellung", lieferart: la, zahlungsart: za,
           adresse: la === "abholung" ? null : { strasse: strasse, plz: plz, ort: ort, land: "DE" },
           positionen: c.map(function (i) { var p = findProduct(i.id); return { id: p.id, name: p.name, farbe: i.farbe || "", farbeName: i.farbe ? colorName(i.farbe) : "", text: i.text || "", menge: i.menge, einzelpreis: p.preis }; }),
-          zwischensumme: Math.round(t.zwischensumme * 100) / 100, versand: Math.round(t.versand * 100) / 100, summe: Math.round(t.gesamt * 100) / 100,
-          bestellung: cartAsText(c), lieferadresse: adr,
-          nachricht: "BESTELLUNG über den Online-Shop\n\n" + cartAsText(c) + "\n\nZwischensumme: " + EUR(t.zwischensumme) + "\nLieferung: " + (la === "abholung" ? "Abholung in Celle" : "Versand DHL") + "\nVersand: " + (t.versand === 0 ? "kostenlos" : EUR(t.versand)) + "\nGesamt: " + EUR(t.gesamt) + "\nZahlungsart: " + za + "\nLieferadresse: " + adr + "\n\nAnmerkung des Kunden: " + ($("[name=anmerkung]", checkout).value || "–")
+          zwischensumme: t.zwischensumme, versand: t.versand, summe: t.gesamt,
+          bestellung: cartAsText(c), lieferadresse: adr, _zuzahlen: t.zuZahlen,
+          nachricht: "BESTELLUNG über den Online-Shop\n\n" + cartAsText(c) + "\n\nZwischensumme: " + EUR(t.zwischensumme) + "\nLieferung: " + (la === "abholung" ? "Abholung in Celle" : "Versand DHL") + "\nVersand: " + (t.versand === 0 ? "kostenlos" : EUR(t.versand)) + "\nGesamt: " + EUR(t.gesamt) + (coupon ? "\nGutschein " + coupon.code + ": −" + EUR(t.gutschein) + "\nZu zahlen: " + EUR(t.zuZahlen) : "") + "\nZahlungsart: " + za + "\nLieferadresse: " + adr + "\n\nAnmerkung des Kunden: " + ($("[name=anmerkung]", checkout).value || "–")
         };
+        if (coupon) o.gutscheincode = coupon.code;
+        return o;
       }, function () { saveCart([]); }, "kontakt");
     }
   }
@@ -438,15 +498,18 @@
     var isWiderruf = q.typ === "widerruf";
     var mode = isOrder ? "bestellung" : isWiderruf ? "widerruf" : q.typ === "gutschein" ? "gutschein" : "kontakt";
     $$("[data-show]").forEach(function (el) { el.hidden = el.dataset.show !== mode; if (el.dataset.show === mode && el.dataset.h1) $("#danke-h1").textContent = el.dataset.h1; });
-    var pp = $("#paypal-link"); var payUrl = "";
+    var pp = $("#paypal-link"); var payUrl = ""; var gInfo = null; var sp = null;
+    try { sp = JSON.parse(sessionStorage.getItem("sw_paypal") || "null"); if (sp && sp.ref === q.ref) { payUrl = safePaypal(sp.url); gInfo = sp.gutschein || null; } else sp = null; } catch (e) { sp = null; }
+    var paidByVoucher = !!(gInfo && Number(gInfo.zuZahlen) === 0);
+    var amount = (q.summe || "").replace(/[^\d,]/g, "").replace(",", ".");
+    if (!payUrl && !sp && CFG.paypalMe && amount) payUrl = CFG.paypalMe.replace(/\/$/, "") + "/" + amount + "EUR";
     if (pp) {
-      var amount = (q.summe || "").replace(/[^\d,]/g, "").replace(",", ".");
-      try { var sp = JSON.parse(sessionStorage.getItem("sw_paypal") || "null"); if (sp && sp.ref === q.ref) payUrl = safePaypal(sp.url); } catch (e) { /* ohne Speicher */ }
-      if (!payUrl && CFG.paypalMe && amount) payUrl = CFG.paypalMe.replace(/\/$/, "") + "/" + amount + "EUR";
-      if (isOrder && q.zahlung === "paypal" && payUrl) { pp.href = payUrl; pp.parentElement.hidden = false; }
+      if (isOrder && q.zahlung === "paypal" && payUrl && !paidByVoucher) { pp.href = payUrl; pp.parentElement.hidden = false; }
       else pp.parentElement.hidden = true;
     }
-    var ph = $("#paypal-hinweis"); if (ph) ph.hidden = !(isOrder && q.zahlung === "paypal" && !payUrl);
+    var ph = $("#paypal-hinweis"); if (ph) ph.hidden = !(isOrder && q.zahlung === "paypal" && !payUrl && !paidByVoucher);
+    var gh = $("#gutschein-hinweis");
+    if (gh && isOrder && gInfo) { gh.textContent = paidByVoucher ? "Ihre Bestellung ist vollständig mit Gutschein bezahlt." : "Gutschein abgezogen: " + EUR(gInfo.abgezogen) + ". Noch zu zahlen: " + EUR(gInfo.zuZahlen) + "."; gh.hidden = false; }
     var ah = $("#abhol-hinweis"); if (ah) ah.hidden = !(isOrder && q.liefer === "abholung");
     var sumEl = $("#danke-summe"); if (sumEl && q.summe) sumEl.textContent = q.summe;
   }
@@ -511,10 +574,8 @@
 
   /* ---------- Allgemeine Produktseite (Artikel, die nicht als eigene Datei existieren) ---------- */
   var dynDone = false;
-  function renderProductPage() {
+  function renderProductPage(p, id) {
     var host = $("#produkt-dyn"); if (!host || dynDone) return; dynDone = true;
-    var m = location.search.match(/[?&]id=([^&]+)/); var id = m ? decodeURIComponent(m[1]) : "";
-    var p = findProduct(id);
     if (!p) {
       host.innerHTML = '<h1>Artikel nicht gefunden</h1><p class="muted">Diesen Artikel gibt es nicht oder nicht mehr. Im Shop finden Sie alle aktuellen Artikel.</p><p><a class="btn btn-primary" href="' + ROOT + 'shop.html">Zum Shop</a></p>';
       document.title = "Artikel nicht gefunden · " + (CFG.marke || ""); return;
@@ -533,11 +594,11 @@
     related.forEach(function (q, j) { q._pos = j; });
     var abh = CFG.abholung === false ? "" : ", oder Abholung in Celle";
     host.innerHTML = '<nav aria-label="Pfad" class="crumbs"><a href="' + ROOT + 'index.html">Start</a> › <a href="' + ROOT + 'shop.html">Shop</a> › ' + esc(KAT[p.kat] || "Artikel") + '</nav>' +
-      '<div class="product"><div><div class="product-media"><img id="pd-img" src="' + esc(/^(\/|https?:)/.test(mainUrl) ? mainUrl : ROOT + mainUrl) + '" width="1200" height="900" alt="' + esc(mainAlt) + '"></div>' + thumbs + '</div>' +
+      '<div class="product"><div><div class="product-media"><img id="pd-img" src="' + esc(/^(\/|https?:)/.test(mainUrl) ? mainUrl : ROOT + mainUrl) + '" width="' + ((main && main.w) || 1200) + '" height="' + ((main && main.h) || 900) + '" alt="' + esc(mainAlt) + '"></div>' + thumbs + '</div>' +
       '<div class="product-info"><span class="eyebrow">' + esc(KAT[p.kat] || "") + '</span><h1>' + esc(p.name) + '</h1>' +
       '<p class="price">' + EUR(p.preis) + ' <small>' + esc(CFG.preishinweis || "") + ', zzgl. <a href="' + ROOT + 'versand.html">Versand</a></small></p><p>' + esc(p.kurz) + '</p>' +
       '<form id="kaufen" data-id="' + esc(p.id) + '" novalidate>' + (p.farben.length ? '<fieldset style="border:0;padding:0;margin:0 0 14px"><legend style="font-weight:600;margin-bottom:8px">Farbe</legend><div class="swatches">' + sw + '</div></fieldset>' : "") + textField +
-      '<div class="buyrow"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="20" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span><button class="btn btn-primary" type="submit">In den Warenkorb</button></div>' +
+      '<div class="buyrow"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="99" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span><button class="btn btn-primary" type="submit">In den Warenkorb</button></div>' +
       '<p class="added" role="status">Liegt im Warenkorb. <a href="' + ROOT + 'warenkorb.html">Zum Warenkorb</a> oder <a href="' + ROOT + 'shop.html">weiter stöbern</a>.</p></form>' +
       '<p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>' +
       '<div class="trust-list"><span>' + CHECK + ' Versandfrei ab ' + EUR(CFG.versandfreiAb) + ', sonst ' + EUR(CFG.versandPauschale) + '</span><span>' + CHECK + (p.text ? ' Personalisiert für Sie gefertigt, Vorschau vor dem Druck' : ' 14 Tage Rückgaberecht') + '</span><span>' + CHECK + ' PayPal-Käuferschutz' + abh + '</span><span>' + CHECK + ' Nachdruck-Garantie bei Transportschäden</span></div>' +
@@ -557,6 +618,21 @@
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ms || 4000) : null;
     return fetch(ROOT + path, { headers: { "Accept": "application/json" }, signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { if (timer) clearTimeout(timer); if (!r.ok) throw new Error("http " + r.status); return r.json(); }, function (e) { if (timer) clearTimeout(timer); throw e; });
+  }
+  function fetchRaw(path, ms) {
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ms || 4000) : null;
+    return fetch(ROOT + path, { headers: { "Accept": "application/json" }, signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { if (timer) clearTimeout(timer); return r.json().then(function (j) { return { status: r.status, body: j }; }, function () { return { status: r.status, body: null }; }); }, function (e) { if (timer) clearTimeout(timer); throw e; });
+  }
+  /* GET /api/produkte/{id}: Artikel (normalisiert), null = Portal sagt "unbekannt oder inaktiv", undefined = nicht erreichbar */
+  function fetchProduct(id) {
+    return fetchRaw("api/produkte/" + encodeURIComponent(id)).then(function (res) {
+      var a = res.body && (res.body.produkt || res.body);
+      if (res.status === 200 && a && a.id) return norm(a);
+      if (res.status === 404 && res.body && res.body.ok === false) return null;
+      return undefined;
+    }).catch(function () { return undefined; });
   }
   function applyCatalog(j) {
     if (!j || !Array.isArray(j.produkte)) return false;
@@ -581,11 +657,21 @@
     var fromCache = cached && Date.now() - cached.t < 600000 && applyCatalog(cached.d);
     if (fromCache) runHooks();
     var settled = false;
-    function settle() { if (settled) return; settled = true; renderProductPage(); }
+    function settle() {
+      if (settled) return; settled = true;
+      if (!$("#produkt-dyn")) return;
+      var m = location.search.match(/[?&]id=([^&]+)/); var id = m ? decodeURIComponent(m[1]) : "";
+      fetchProduct(id).then(function (a) { renderProductPage(a === undefined ? findProduct(id) : a, id); });
+    }
     if (fromCache) settle();
     refreshCatalog().then(settle);
-    if ($("#shop-grid") || gf) {
-      fetchJson("api/gutschein").then(function (j) { VOUCHER = j; applyVoucher(); }).catch(function () { /* Standardwerte der Seite */ });
+    if ($("#shop-grid") || gf || $("#bestellformular")) {
+      fetchRaw("api/gutschein").then(function (res) {
+        if (res.status === 404) VOUCHER = { aktiv: false };
+        else if (res.status === 200 && res.body) VOUCHER = res.body;
+        else return;
+        applyVoucher();
+      }).catch(function () { /* Portal nicht erreichbar: Standardwerte der Seite */ });
     }
   })();
 

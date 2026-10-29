@@ -38,7 +38,6 @@ def head(title, desc, rel, canonical_name, extra=""):
 <meta name="description" content="{E(desc)}">
 <meta name="theme-color" content="#f7f4ee">
 <link rel="icon" href="{rel}favicon.ico" sizes="any">
-<link rel="icon" href="{rel}favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{rel}apple-touch-icon.png">
 <link rel="manifest" href="{rel}site.webmanifest">
 <link rel="preload" href="{rel}assets/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -210,7 +209,7 @@ def build_index():
     <h2>In drei Schritten zum fertigen Teil</h2>
     <div class="steps">
       <div class="step"><h3>Aussuchen</h3><p class="muted">Artikel, Farbe und Menge wählen, bei personalisierten Teilen den Wunschtext eintragen, in den Warenkorb legen.</p></div>
-      <div class="step"><h3>Bestellen</h3><p class="muted">Adresse und Zahlungsart angeben. Sie bekommen sofort eine Eingangsbestätigung mit Vorgangsnummer, dann die Rechnung mit Zahlungsdaten.</p></div>
+      <div class="step"><h3>Bestellen</h3><p class="muted">Adresse und Zahlungsart angeben. Sie bekommen sofort eine Eingangsbestätigung mit Vorgangsnummer, danach melden wir uns mit der Bestätigung.</p></div>
       <div class="step"><h3>Drucken &amp; liefern</h3><p class="muted">Nach Zahlungseingang drucken wir Ihr Teil, prüfen es und schicken es los. Sie erhalten die Sendungsnummer per Mail.</p></div>
     </div>
   </div>
@@ -308,7 +307,7 @@ def build_products():
           <fieldset style="border:0;padding:0;margin:0 0 14px"><legend style="font-weight:600;margin-bottom:8px">Farbe</legend><div class="swatches">{sw}</div></fieldset>
           {textfield}
           <div class="buyrow">
-            <span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="20" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span>
+            <span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="99" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span>
             <button class="btn btn-primary" type="submit">In den Warenkorb</button>
           </div>
           <p class="added" role="status">Liegt im Warenkorb. <a href="../warenkorb.html">Zum Warenkorb</a> oder <a href="../shop.html">weiter stöbern</a>.</p>
@@ -391,7 +390,7 @@ def build_voucher():
           <div class="alert" role="alert"></div>
           <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Betrag</legend><div class="swatches" id="g-betraege">{amounts}</div></fieldset>
           <div class="field"><label for="g-frei">Anderer Betrag in Euro <span class="opt">(optional, mindestens 10)</span></label><input type="number" id="g-frei" name="betrag_frei" min="10" max="500" step="1" inputmode="numeric"><p class="msg"></p></div>
-          <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zustellung</legend>
+          <fieldset id="g-zustellung" style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Zustellung</legend>
             <label class="check"><input type="radio" name="zustellung" value="E-Mail (PDF)" checked> Per E-Mail als PDF, meist am selben Werktag</label>
             <label class="check"><input type="radio" name="zustellung" value="Post (Karte)"> Als gedruckte Karte per Post, versandkostenfrei</label>
           </fieldset>
@@ -403,13 +402,13 @@ def build_voucher():
           <h2 style="font-size:1.1rem;margin:8px 0 0">Ihre Daten</h2>
           <div class="row">
             <div class="field"><label for="g-name">Ihr Name</label><input type="text" id="g-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
-            <div class="field"><label for="g-email">Ihre E-Mail <span class="opt">(für Rechnung und Gutschein)</span></label><input type="email" id="g-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
+            <div class="field"><label for="g-email">Ihre E-Mail <span class="opt">(für Bestätigung und Gutschein)</span></label><input type="email" id="g-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
           </div>
           <div class="field" id="g-adresse" hidden><label for="g-adr">Postanschrift für die Karte</label><input type="text" id="g-adr" name="anschrift" autocomplete="street-address"><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="g-web">Website</label><input type="text" id="g-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir den Gutschein nicht ausstellen."><span>Ich bin einverstanden, dass meine Angaben zur Ausstellung des Gutscheins gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary" type="submit">Gutschein zahlungspflichtig bestellen</button>
-          <div class="trust-list"><span>{SVG_CHECK} Rechnung per E-Mail, Gutscheincode nach Zahlungseingang</span><span>{SVG_CHECK} Zahlung per PayPal mit Käuferschutz</span><span>{SVG_CHECK} 3 Jahre gültig, einlösbar für Shop und Druckservice</span></div>
+          <div class="trust-list"><span>{SVG_CHECK} Bestätigung per E-Mail, Gutscheincode nach Zahlungseingang</span><span>{SVG_CHECK} Zahlung per PayPal mit Käuferschutz</span><span>{SVG_CHECK} 3 Jahre gültig, einlösbar für Shop und Druckservice</span></div>
         </form>
       </div>
     </div>
@@ -437,7 +436,7 @@ def build_cart():
           <div class="alert" role="alert"></div>
           <div class="field"><label for="b-name">Vor- und Nachname</label><input type="text" id="b-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
           <div class="row">
-            <div class="field"><label for="b-email">E-Mail <span class="opt">(für Bestätigung und Rechnung)</span></label><input type="email" id="b-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
+            <div class="field"><label for="b-email">E-Mail <span class="opt">(für die Bestätigung)</span></label><input type="email" id="b-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
             <div class="field"><label for="b-tel">Telefon <span class="opt">(optional, für Rückfragen)</span></label><input type="tel" id="b-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
           </div>
           <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Lieferung</legend>
@@ -455,6 +454,7 @@ def build_cart():
             <label class="check"><input type="radio" name="zahlungsart" value="paypal" checked> PayPal, mit Käuferschutz {"(Zahlungslink direkt nach dem Absenden)" if C.PAYPAL_ME else "(Zahlungslink kommt mit der Bestätigung per E-Mail)"}</label>
             <label class="check" id="zahlung-abholung" hidden><input type="radio" name="zahlungsart" value="abholung"> Bei Abholung, bar oder per PayPal vor Ort</label>
           </fieldset>
+          <div class="field" id="gutscheincode-box" hidden><label for="b-code">Gutscheincode <span class="opt">(optional)</span></label><div class="code-row"><input type="text" id="b-code" autocomplete="off" autocapitalize="characters" maxlength="40"><button class="btn btn-ghost" type="button" id="code-pruefen">Einlösen</button></div><p class="code-msg" id="code-msg" role="status"></p></div>
           <div class="field"><label for="b-anm">Anmerkung <span class="opt">(optional)</span></label><textarea id="b-anm" name="anmerkung" rows="3"></textarea><p class="msg"></p></div>
           <div class="field hp" aria-hidden="true"><label for="b-web">Website</label><input type="text" id="b-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
@@ -468,7 +468,8 @@ def build_cart():
         <h2 style="font-size:1.1rem">Zusammenfassung</h2>
         <div class="line"><span>Zwischensumme</span><strong id="s-zwischen">0,00 €</strong></div>
         <div class="line"><span id="s-versand-label">Versand ({E(C.VERSANDLAND)})</span><strong id="s-versand">0,00 €</strong></div>
-        <div class="line total"><span>Gesamt</span><span id="s-gesamt">0,00 €</span></div>
+        <div class="line" id="s-gutschein-row" hidden><span>Gutschein</span><strong id="s-gutschein">−0,00 €</strong></div>
+        <div class="line total"><span id="s-gesamt-label">Gesamt</span><span id="s-gesamt">0,00 €</span></div>
         <p class="small muted" id="s-hint"></p>
         <p class="small" data-delivery>Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
         <p class="small muted">{'Keine Umsatzsteuer nach § 19 UStG.' if C.KLEINUNTERNEHMER else 'Alle Preise inkl. gesetzlicher MwSt.'} Produktion {E(C.PRODUKTIONSZEIT)} plus Versand {E(C.LIEFERZEIT)}.</p>
@@ -597,11 +598,11 @@ def build_agb():
     <h2>1. Geltungsbereich</h2>
     <p>Diese AGB gelten für alle Bestellungen von Verbrauchern und Unternehmern über den Online-Shop von {E(C.FIRMA)}, {E(C.INHABER)}, {E(C.STRASSE)}, {E(C.PLZ_ORT)} (nachfolgend „wir“). Verbraucher ist jede natürliche Person, die ein Rechtsgeschäft zu Zwecken abschließt, die überwiegend weder ihrer gewerblichen noch ihrer selbständigen beruflichen Tätigkeit zugerechnet werden können.</p>
     <h2>2. Vertragsschluss</h2>
-    <p>Die Darstellung der Artikel im Shop ist kein verbindliches Angebot, sondern eine Aufforderung zur Bestellung. Mit dem Klick auf „Zahlungspflichtig bestellen“ geben Sie ein verbindliches Angebot ab. Sie erhalten umgehend eine automatische Eingangsbestätigung mit Vorgangsnummer, diese ist noch keine Annahme. Der Vertrag kommt zustande, wenn wir Ihre Bestellung innerhalb von zwei Werktagen per E-Mail bestätigen und die Rechnung mit Zahlungsdaten übersenden. Vor dem Absenden können Sie Ihre Eingaben im Warenkorb jederzeit prüfen und ändern. Der Vertragstext wird von uns gespeichert und Ihnen mit der Bestätigung zugeschickt. Vertragssprache ist Deutsch.</p>
+    <p>Die Darstellung der Artikel im Shop ist kein verbindliches Angebot, sondern eine Aufforderung zur Bestellung. Mit dem Klick auf „Zahlungspflichtig bestellen“ geben Sie ein verbindliches Angebot ab. Sie erhalten umgehend eine automatische Eingangsbestätigung mit Vorgangsnummer, diese ist noch keine Annahme. Der Vertrag kommt zustande, wenn wir Ihre Bestellung innerhalb von zwei Werktagen per E-Mail bestätigen und, bei Zahlung per PayPal, den Zahlungslink übersenden. Vor dem Absenden können Sie Ihre Eingaben im Warenkorb jederzeit prüfen und ändern. Der Vertragstext wird von uns gespeichert und Ihnen mit der Bestätigung zugeschickt. Vertragssprache ist Deutsch.</p>
     <h2>3. Preise und Versandkosten</h2>
     <p>{ust} Zusätzlich fallen Versandkosten in Höhe von {EUR(VERSAND_PAUSCHALE)} pro Bestellung innerhalb von {E(C.VERSANDLAND)} an; ab einem Bestellwert von {EUR(VERSANDFREI_AB)} liefern wir versandkostenfrei. Lieferungen in andere Länder nur nach vorheriger Absprache.</p>
     <h2>4. Zahlung</h2>
-    <p>Bei Versand bieten wir Zahlung per PayPal (Zahlungslink) an. Der Rechnungsbetrag ist innerhalb von 7 Tagen nach Erhalt der Bestätigung fällig; die Produktion beginnt nach Zahlungseingang. Geht innerhalb von 14 Tagen keine Zahlung ein, können wir vom Vertrag zurücktreten. Bei Abholung erfolgt die Zahlung bei Übergabe in bar oder per PayPal.</p>
+    <p>Bei Versand bieten wir Zahlung per PayPal (Zahlungslink) an. Der Gesamtbetrag ist innerhalb von 7 Tagen nach Erhalt der Bestätigung fällig; die Produktion beginnt nach Zahlungseingang. Geht innerhalb von 14 Tagen keine Zahlung ein, können wir vom Vertrag zurücktreten. Bei Abholung erfolgt die Zahlung bei Übergabe in bar oder per PayPal.</p>
     <h2>5. Fertigung und Lieferung</h2>
     <p>Alle Artikel werden nach Bestellung gefertigt. Die Produktionszeit beträgt in der Regel {E(C.PRODUKTIONSZEIT)} nach Zahlungseingang, bei personalisierten Artikeln nach Ihrer Freigabe des Textes oder Motivs. Hinzu kommt die Versandzeit von etwa {E(C.LIEFERZEIT)}. Die Lieferung erfolgt an die von Ihnen angegebene Adresse oder, wenn Sie Abholung gewählt haben, durch Übergabe an unserem Standort in Celle nach Terminabsprache. Bei Verbrauchern geht die Gefahr des zufälligen Untergangs mit Übergabe der Ware an Sie über. Abgeholt werden kann innerhalb von 14 Tagen nach unserer Fertigmeldung.</p>
     <h2>6. Beschaffenheit 3D-gedruckter Teile</h2>
@@ -648,7 +649,7 @@ def build_widerruf():
     <form class="form" id="widerrufsformular">
       <div class="alert" role="alert"></div>
       <p>Hiermit widerrufe ich den von mir abgeschlossenen Vertrag über den Kauf der folgenden Waren:</p>
-      <div class="field"><label for="w-ware">Bestellte Waren und Vorgangs- oder Rechnungsnummer</label><textarea id="w-ware" name="nachricht" required data-err="Bitte die Waren und die Vorgangsnummer angeben."></textarea><p class="msg"></p></div>
+      <div class="field"><label for="w-ware">Bestellte Waren und Vorgangsnummer</label><textarea id="w-ware" name="nachricht" required data-err="Bitte die Waren und die Vorgangsnummer angeben."></textarea><p class="msg"></p></div>
       <div class="row">
         <div class="field"><label for="w-bestellt">Bestellt am</label><input type="date" id="w-bestellt" name="bestellt_am" required data-err="Bitte das Bestelldatum angeben."><p class="msg"></p></div>
         <div class="field"><label for="w-erhalten">Erhalten am</label><input type="date" id="w-erhalten" name="erhalten_am"><p class="msg"></p></div>
@@ -747,7 +748,7 @@ def build_thanks():
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb von zwei Werktagen mit den nächsten Schritten zur Rücksendung und Erstattung.</p>
     </div>
     <div data-show="gutschein" data-h1="Ihre Gutschein-Bestellung ist eingegangen." hidden>
-      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail, danach die Rechnung mit Zahlungsdaten. Nach Zahlungseingang schicken wir den Gutschein mit Code als PDF oder als Karte per Post.</p>
+      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Nach Zahlungseingang schicken wir den Gutschein mit Code als PDF oder als Karte per Post.</p>
     </div>
     <div data-show="kontakt" data-h1="Ihre Anfrage ist eingegangen." hidden>
       <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb eines Werktags mit Preis und Lieferzeit.</p>
@@ -755,6 +756,7 @@ def build_thanks():
     <div class="ref-card"><span class="small muted">Ihre Vorgangsnummer</span><span class="ref" id="ref"></span><span class="small muted">Bitte bei Rückfragen angeben.</span></div>
     <p hidden><a class="btn btn-primary" id="paypal-link" href="#" rel="noopener">Jetzt <span id="danke-summe"></span> per PayPal bezahlen</a></p>
     <p class="notice" id="paypal-hinweis" hidden style="text-align:left">Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestellbestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
+    <p class="notice" id="gutschein-hinweis" hidden style="text-align:left"></p>
     <p class="notice" id="abhol-hinweis" hidden style="text-align:left">Sie holen in Celle ab: Wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse {E(C.STRASSE)}, {E(C.PLZ_ORT)}. Bezahlt wird bei Abholung bar oder per PayPal.</p>
   </div>
 </section>
@@ -762,7 +764,7 @@ def build_thanks():
   <div class="wrap" style="max-width:860px">
     <h2 class="center">Was jetzt passiert</h2>
     <div class="steps">
-      <div class="step"><h3>Bestätigung</h3><p class="muted">Wir prüfen die Bestellung und schicken innerhalb von zwei Werktagen die Bestätigung mit Rechnung und Zahlungslink.</p></div>
+      <div class="step"><h3>Bestätigung</h3><p class="muted">Wir prüfen die Bestellung und melden uns innerhalb von zwei Werktagen mit der Bestätigung, bei PayPal mit dem Zahlungslink.</p></div>
       <div class="step"><h3>Druck</h3><p class="muted">Nach Zahlungseingang drucken wir Ihr Teil in {E(C.PRODUKTIONSZEIT)}, prüfen es und befreien es von Stützmaterial.</p></div>
       <div class="step"><h3>Versand oder Abholung</h3><p class="muted">Sie bekommen die Sendungsnummer per E-Mail, oder wir vereinbaren einen Abholtermin in Celle.</p></div>
     </div>
