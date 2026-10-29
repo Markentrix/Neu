@@ -67,3 +67,9 @@ unter `website-fertig/assets/fonts/`, Lizenzhinweise in `OFL.txt`. Betonte Wört
 
 Die Seite lädt Artikel zusätzlich aus `GET /api/produkte` (Spezifikation und Stand der Umsetzung: `docs/portal-schnittstelle-shop.md`).
 Ohne Antwort des Portals gilt die eingebaute Liste aus `build/produkte.py`. Artikel, die nur im Portal existieren, öffnen `produkt.html?id=…`.
+
+## Langes Logo
+
+`python3 build/logo_lockup.py` erzeugt aus der Schrift der Website (Fraunces, Inter, Pinyon Script, alle SIL OFL, als Pfade) das lange Logo:
+`brand/schichtatelier-logo-voll*.svg` (Wortmarke mit Düse im „i“, Druckspur-Linie, „3D MANUFAKTUR“, Leistungszeile, Signatur „Y & C“, hell und dunkel, dazu PNG 2400 px)
+und `brand/schichtatelier-wortmarke*.svg` (ohne Zeile und Signatur). Die Wortmarke steht im Footer der Website, der Seitenkopf nutzt die kompakte Variante mit Schicht-S.

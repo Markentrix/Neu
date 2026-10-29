@@ -17,6 +17,8 @@ TODAY = datetime.date.today().isoformat()
 SVG_CART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg>'
 SVG_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
 from logo import mark as _mark
+from logo_lockup import inline_svg as _lockup
+LOCKUP_FOOTER = _lockup(False, "lockup")
 def SVG_LOGO_ID(uid):
     return '<svg viewBox="0 0 64 64" aria-hidden="true">' + _mark(True, uid=uid, small=True) + '</svg>'
 SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
@@ -78,7 +80,7 @@ def footer(rel):
     <div class="trust-strip footer-trust"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span><span>{SVG_CHECK} Gefertigt in Deutschland</span></div>
     <div class="cols">
       <div>
-        <a class="logo" href="{rel}index.html">{SVG_LOGO_ID("mkF")}<span>Schicht<em>atelier</em></span></a>
+        <a class="lockup-link" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{LOCKUP_FOOTER}</a>
         <p style="margin-top:12px">{E(C.CLAIM)}. Jedes Teil wird nach Ihrer Bestellung in unserer Werkstatt gedruckt, geprüft und verpackt.</p>
         <p><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
       </div>

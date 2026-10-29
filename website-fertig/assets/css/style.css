@@ -441,3 +441,10 @@ input:invalid:not(:placeholder-shown){border-color:var(--line)}
 .code-msg{margin:6px 0 0;font-size:.9rem;min-height:1.2em}
 .code-msg.ok{color:var(--brand)}
 .code-msg.bad{color:var(--danger)}
+
+/* Langes Logo im Footer (Farben folgen dem Theme) */
+:root{--logo-main:#1f4d3a;--logo-accent:var(--accent);--logo-sub:#2f6b52}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--logo-main:#f1ede4;--logo-sub:#7fbfa2}}
+:root[data-theme="dark"]{--logo-main:#f1ede4;--logo-sub:#7fbfa2}
+.lockup-link{display:inline-block;max-width:100%}
+.lockup{display:block;width:min(270px,100%);height:auto}
