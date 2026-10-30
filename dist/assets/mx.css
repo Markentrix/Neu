@@ -1386,3 +1386,8 @@ html.reduced .slot.is-free{animation:none}
 /* Website-Check: Kurzfassung je Bereich */
 .chk-sum{margin:0 0 10px;color:var(--muted);font-size:.95rem}
 .chk-sum.is-open{color:var(--text);font-weight:600}
+
+/* Portal: Beispielbild */
+.portal-shot{margin:0}
+.portal-shot img{display:block;width:100%;height:auto;border-radius:var(--r-lg,18px);box-shadow:var(--shadow-lg)}
+.portal-shot figcaption{margin-top:10px;font-size:.8rem;color:var(--muted)}
