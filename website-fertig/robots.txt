@@ -9,5 +9,3 @@ User-agent: PerplexityBot
 Allow: /
 User-agent: Google-Extended
 Allow: /
-
-Sitemap: https://www.pizzeria-molise-celle.de/sitemap.xml

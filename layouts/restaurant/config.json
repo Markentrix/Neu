@@ -8,14 +8,14 @@
   "phoneHref": "+495141214421",
   "whatsapp": "495141214421",
   "indexable": true,
-  "base": "https://www.pizzeria-molise-celle.de",
+  "base": "",
   "headline": [
     "Heute schon",
     "Pizza",
     "gehabt?"
   ],
   "highlight": 1,
-  "lead": "Frisch aus dem Ofen in der Piltzergasse. Am Tisch genießen oder als Handpizza mitnehmen.",
+  "lead": "Frisch aus dem Ofen in der Piltzergasse. Am Tisch essen oder als Handpizza am Fenster mitnehmen.",
   "hours": {
     "open": "11:00",
     "close": "20:00",
@@ -196,7 +196,7 @@
     "stickerPrice": "5,50 €"
   },
   "seo": {
-    "title": "Pizzeria Molise Celle | Pizza & Pasta in der Altstadt, Tisch reservieren",
-    "description": "Pizzeria Molise in der Celler Altstadt: Pizza, Pasta, Flammkuchen und Handpizza zum Mitnehmen. Speisekarte ansehen und online Tisch reservieren oder anrufen: 05141 21 44 21."
+    "title": "Pizzeria Molise Celle: Pizza, Pasta, Tisch reservieren",
+    "description": "Pizzeria Molise in der Celler Altstadt: Pizza, Pasta, Flammkuchen und Handpizza zum Mitnehmen. Speisekarte ansehen und online einen Tisch reservieren."
   }
 }
