@@ -22,13 +22,6 @@ LOCKUP_FOOTER = _lockup(False, "lockup")
 LOCKUP_HEAD = _lockup(False, "lockup lockup-head")
 def SVG_LOGO_ID(uid):
     return '<svg viewBox="0 0 64 64" aria-hidden="true">' + _mark(True, uid=uid, small=True) + '</svg>'
-SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
-ICONS = {
-    "layer": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 13 10 5 10-5"/><path d="m2 18 10 5 10-5"/></svg>',
-    "leaf": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20c0-9 5-14 15-15-1 10-6 15-15 15z"/><path d="M5 20c3-5 6-8 10-11"/></svg>',
-    "truck": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
-    "pen": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 4-1 11-11-3-3L5 16l-1 4z"/><path d="m14 7 3 3"/></svg>',
-}
 
 
 def head(title, desc, rel, canonical_name, extra=""):
@@ -39,12 +32,12 @@ def head(title, desc, rel, canonical_name, extra=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
-<meta name="theme-color" content="#f7f4ee">
+<meta name="theme-color" content="#f3f5f1">
 <link rel="icon" href="{rel}favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="{rel}apple-touch-icon.png">
 <link rel="manifest" href="{rel}site.webmanifest">
-<link rel="preload" href="{rel}assets/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{rel}assets/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{rel}assets/fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{rel}assets/fonts/AbrilFatface.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
 {extra}</head>
 <body data-root="{rel}">
@@ -78,35 +71,31 @@ def footer(rel):
     return f"""</main>
 <footer class="site-footer">
   <div class="wrap">
-    <div class="trust-strip footer-trust"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span><span>{SVG_CHECK} Gefertigt in Deutschland</span></div>
-    <div class="cols">
+    <div class="footer-top">
       <div>
         <a class="lockup-link" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{LOCKUP_FOOTER}</a>
-        <p style="margin-top:12px">{E(C.CLAIM)}. Jedes Teil wird nach Ihrer Bestellung in unserer Werkstatt gedruckt, geprüft und verpackt.</p>
-        <p><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
+        <div class="footer-kontakt">
+          <p>{E(C.STRASSE)}, {E(C.PLZ_ORT)}<br>Abholung nach Terminabsprache</p>
+          <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br>
+          <a href="{TEL_HREF}">{E(C.TELEFON)}</a>
+        </div>
       </div>
       <div>
-        <h2>Shop</h2>
+        <h2>Kaufen und anfragen</h2>
         <ul>
-          <li><a href="{rel}shop.html">Alle Artikel</a></li>
+          <li><a href="{rel}shop.html">Shop</a></li>
           <li><a href="{rel}gutschein.html">Geschenkgutschein</a></li>
           <li><a href="{rel}druckservice.html">Druckservice</a></li>
-          <li><a href="{rel}kontakt.html">Anfrage stellen</a></li>
-          <li><a href="{rel}versand.html">Versand &amp; Zahlung</a></li>
-          <li><a href="{rel}faq.html">Fragen &amp; Antworten</a></li>
+          <li><a href="{rel}kontakt.html">Angebot anfordern</a></li>
+          <li><a href="{rel}versand.html">Versand und Zahlung</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Wissen und Recht</h2>
+        <ul>
+          <li><a href="{rel}materialien.html">Materialien</a></li>
+          <li><a href="{rel}faq.html">Fragen und Antworten</a></li>
           <li><a href="{rel}ueber-uns.html">Über uns</a></li>
-        </ul>
-      </div>
-      <div>
-        <h2>Materialien</h2>
-        <ul>
-          <li><a href="{rel}materialien.html">Übersicht &amp; Vergleich</a></li>
-          {"".join(f'<li><a href="{rel}material/{m["id"]}.html">{E(m["titel"])}</a></li>' for m in MATERIALIEN)}
-        </ul>
-      </div>
-      <div>
-        <h2>Rechtliches</h2>
-        <ul>
           <li><a href="{rel}impressum.html">Impressum</a></li>
           <li><a href="{rel}datenschutz.html">Datenschutz</a></li>
           <li><a href="{rel}agb.html">AGB</a></li>
@@ -115,9 +104,10 @@ def footer(rel):
         </ul>
       </div>
     </div>
-    <div class="bottom">
+    <div class="footer-bottom">
       <span>© {datetime.date.today().year} {E(C.FIRMA)}</span>
-      <span>Gehostet bei Markentrix · Keine Tracking-Cookies</span>
+      <span>Gehostet bei Markentrix</span>
+      <span>Keine Tracking-Cookies</span>
     </div>
   </div>
 </footer>
@@ -136,142 +126,132 @@ def page(name, title, desc, body, current="", rel="", extra=""):
 
 
 def card(p, rel, pos, h="h3"):
-    tags = ""
-    if "bestseller" in p["tags"]: tags = '<span class="badge badge-accent">Bestseller</span>'
-    elif "neu" in p["tags"]: tags = '<span class="badge">Neu</span>'
-    elif "personalisiert" in p["tags"]: tags = '<span class="badge">Personalisierbar</span>'
+    href = f"{rel}produkt/{p['id']}.html"
+    notes = []
+    if p.get("text"): notes.append("Mit Wunschtext")
+    if len(p["farben"]) > 1: notes.append(f"in {len(p['farben'])} Farben")
+    note = f'<span class="card-note">{E(", ".join(notes))}</span>' if notes else ""
+    action = (f'<a class="btn btn-primary" href="{href}">Text und Farbe wählen</a>' if p.get("text")
+              else f'<button class="btn btn-primary" type="button" data-add="{p["id"]}">In den Warenkorb</button>')
     return f"""<article class="card" data-kat="{p['kat']}" data-tags="{' '.join(p['tags'])}" data-preis="{p['preis']}" data-name="{E(p['name'])}" data-pos="{pos}">
-  <a class="card-img" href="{rel}produkt/{p['id']}.html" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <a class="card-img" href="{href}" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="" loading="lazy"></a>
   <div class="card-body">
-    <span class="card-cat">{E(KATEGORIEN[p['kat']])}</span>
-    <{h}><a href="{rel}produkt/{p['id']}.html">{E(p['name'])}</a></{h}>
-    <p class="small muted" style="margin:0">{E(p['kurz'])}</p>
-    <div class="price">{EUR(p['preis'])} {tags}</div>
-    {('<span class="card-colors">in ' + str(len(p['farben'])) + ' Farben</span>') if len(p['farben']) > 1 else ''}
-    {'<a class="btn btn-primary" href="' + rel + 'produkt/' + p['id'] + '.html">Jetzt gestalten</a>' if p.get('text') else '<button class="btn btn-primary" type="button" data-add="' + p['id'] + '">In den Warenkorb</button>'}
-    <a class="card-more" href="{rel}produkt/{p['id']}.html">Details ansehen</a>
+    <{h}><a href="{href}">{E(p['name'])}</a></{h}>
+    <p class="small">{E(p['kurz'])}</p>
+    <div class="price">{EUR(p['preis'])}</div>
+    {note}
+    {action}
+    <a class="card-more" href="{href}">Details ansehen</a>
   </div>
 </article>"""
 
 
-# ---------------------------------------------------------------- Startseite
-def build_index():
-    nfarben = len({f for p in AKTIV for f in p["farben"]})
-    featured = ([p for p in AKTIV if "bestseller" in p["tags"]] + [p for p in AKTIV if "bestseller" not in p["tags"]])[:4]
-    cards = "\n".join(card(p, "", i) for i, p in enumerate(featured))
-    cats = "\n".join(f'<a class="chip" href="shop.html#{k}">{E(v)}</a>' for k, v in KAT_AKTIV.items())
-    hero_art = """<img src="assets/img/hero.webp" width="1200" height="1200" alt="Frisch gedruckter kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett in der Schichtatelier-Werkstatt" fetchpriority="high">"""
-    body = f"""<section class="hero">
-  <div class="wrap">
-    <div>
-      <span class="eyebrow">{E(C.CLAIM)}</span>
-      <h1>Dinge, die es so <em>nur für Sie</em> gibt.</h1>
-      <p class="lead">Kleine Dinge mit Charakter aus dem 3D-Drucker: Deko, Halter und persönliche Geschenke. Jedes Stück wird erst nach Ihrer Bestellung gedruckt, in unserer Werkstatt in Celle. In wenigen Tagen bei Ihnen.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="shop.html">Zum Shop</a>
-        <a class="btn btn-ghost" href="druckservice.html">Druckservice für eigene Dateien</a>
-      </div>
-      <div class="hero-facts">
-        <span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span>
-        <span>{SVG_CHECK} 14 Tage Rückgaberecht</span>
-        <span>{SVG_CHECK} Nachdruck-Garantie</span>
-        <span>{SVG_CHECK} {("%d Farben zur Wahl" % nfarben) if nfarben >= 3 else "Gefertigt in Celle"}</span>
-      </div>
-    </div>
-    <div class="hero-art">{hero_art}</div>
-  </div>
-</section>
-
-{'<section class="section-tight"><div class="wrap"><div class="filterbar" aria-label="Kategorien">' + cats + '</div></div></section>' if len(KAT_AKTIV) > 1 else ''}
-
-<section class="section-tight">
-  <div class="wrap">
-    <span class="eyebrow">Beliebt</span>
-    <h2>Das bestellen unsere Kunden am häufigsten</h2>
-    <div class="grid" id="featured-grid">{cards}</div>
-    <p style="margin-top:24px"><a class="btn btn-ghost" href="shop.html">Alle <span id="alle-anzahl">{len(AKTIV)}</span> Artikel ansehen</a> <a class="btn btn-ghost" href="gutschein.html">Geschenkgutschein</a></p>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <span class="eyebrow">Warum Schichtatelier</span>
-    <h2>Gedruckt, wenn Sie bestellen. Nicht vorher.</h2>
-    <div class="feature-grid">
-      <div class="feature">{ICONS['layer']}<h3>Auf Bestellung gefertigt</h3><p class="muted">Kein Lager, keine Überproduktion. Jedes Teil entsteht erst, wenn Sie es bestellen, in der Farbe, die Sie wählen.</p></div>
-      <div class="feature">{ICONS['leaf']}<h3>Pflanzenbasiertes Material</h3><p class="muted">Wir drucken mit PLA aus Maisstärke und Zuckerrohr. Für Bad, Küche und draußen nehmen wir wasserfestes PETG.</p></div>
-      <div class="feature">{ICONS['pen']}<h3>Mit Wunschtext</h3><p class="muted">Schlüsselanhänger, Namensschilder und Lampen mit Ihrem Text oder Foto. Die Vorschau stimmen wir vor dem Druck mit Ihnen ab.</p></div>
-      <div class="feature">{ICONS['truck']}<h3>Schnell bei Ihnen</h3><p class="muted">Druck in {E(C.PRODUKTIONSZEIT)}, Versand mit DHL in {E(C.LIEFERZEIT)}. Ab {EUR(VERSANDFREI_AB)} Bestellwert versandkostenfrei.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section-tight">
-  <div class="wrap">
-    <span class="eyebrow">So läuft es</span>
-    <h2>In drei Schritten zum fertigen Teil</h2>
-    <div class="steps">
-      <div class="step"><h3>Aussuchen</h3><p class="muted">Artikel, Farbe und Menge wählen, bei personalisierten Teilen den Wunschtext eintragen, in den Warenkorb legen.</p></div>
-      <div class="step"><h3>Bestellen</h3><p class="muted">Adresse und Zahlungsart angeben. Sie bekommen sofort eine Eingangsbestätigung mit Vorgangsnummer, danach melden wir uns mit der Bestätigung.</p></div>
-      <div class="step"><h3>Drucken &amp; liefern</h3><p class="muted">Nach Zahlungseingang drucken wir Ihr Teil, prüfen es und schicken es los. Sie erhalten die Sendungsnummer per Mail.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section-tight">
-  <div class="wrap">
-    <div class="guarantee">
-      <div class="guarantee-badge">{SVG_CHECK}</div>
-      <div>
-        <h2>Unsere Nachdruck-Garantie</h2>
-        <p class="muted" style="margin:0">Kommt ein Teil beschädigt an oder passt nicht wie beschrieben, schicken Sie uns ein Foto. Wir drucken kostenlos nach, ohne Rücksendung, ohne Diskussion. Dazu das gesetzliche Rückgaberecht von 14 Tagen für alle Artikel ohne Personalisierung.</p>
-      </div>
-    </div>
-  </div>
-</section>
-<section class="section-tight" id="kundenstimmen" hidden>
-  <div class="wrap">
-    <span class="eyebrow">Kundenstimmen</span>
-    <h2>Das sagen unsere Kunden</h2>
-    <div class="reviews-box"><div data-mk="bewertungen"></div></div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="cta-band">
-      <div><h2>Sie haben eine eigene Datei?</h2><p style="margin:6px 0 0;opacity:.85">Wir drucken auch Ihre STL- oder 3MF-Datei: Ersatzteile, Prototypen, Vereinslogos. Anfrage mit Maßen und Stückzahl genügt.</p></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a><a class="btn btn-ghost" style="border-color:currentColor;color:inherit" href="materialien.html">Materialien vergleichen</a></div>
-    </div>
+def datei_band(titel, text, knopf, href):
+    return f"""<section class="datei on-deep">
+  <div class="wrap in">
+    <h2>{E(titel)}</h2>
+    <div><p>{E(text)}</p><a class="btn btn-primary" href="{href}">{E(knopf)}</a></div>
   </div>
 </section>
 """
-    page("index.html", f"{C.MARKE} · 3D-gedruckte Alltagshelfer kaufen", "Online-Shop für 3D-gedruckte Pflanztöpfe, Halter, Organizer und personalisierte Geschenke. Auf Bestellung gedruckt, pflanzenbasiertes Material, versandfrei ab 49 €.", body, "index")
+
+
+# ---------------------------------------------------------------- Startseite
+def build_index():
+    best = AKTIV[:4]
+    cards = "\n".join(card(p, "", i) for i, p in enumerate(best))
+    mat_rows = "".join(
+        f'<li><a href="material/{m["id"]}.html"><span class="mname">{E(m["name"])}</span><span class="muse">{E(m["einsatz"])}</span><span class="mtemp">{E(m["temp"])}</span></a></li>'
+        for m in MATERIALIEN)
+    body = f"""<section class="hero-dark on-deep">
+  <div class="hero-in">
+    <div class="hero-copy">
+      <h1>Gedruckt in Celle, Schicht für Schicht.</h1>
+      <p>Kleine Dinge aus dem 3D-Drucker von {E(C.INHABER)}: Deko, Geschenke und Teile nach Ihrer Datei. Jedes Stück entsteht erst nach Ihrer Bestellung.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="shop.html">Im Shop ansehen</a>
+        <a class="textlink" href="druckservice.html">Eigene Datei drucken lassen</a>
+      </div>
+    </div>
+    <figure class="hero-photo">
+      <img src="assets/img/hero.webp" width="1200" height="1200" alt="Kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett eines Bambu Lab X1 Carbon, im Hintergrund weitere frisch gedruckte Kürbisse" fetchpriority="high">
+      <figcaption>Kleiner Kürbis aus Orange Silk, frisch vom Druckbett des Bambu Lab X1 Carbon.</figcaption>
+    </figure>
+  </div>
+</section>
+<div class="schichtkante" aria-hidden="true"></div>
+
+<section class="section">
+  <div class="wrap shop-block">
+    <div class="side">
+      <h2>Im Shop</h2>
+      <p>Farbe wählen, bei Wunschtext-Artikeln den Text eintragen, in den Warenkorb legen. Gedruckt wird nach der Bestellung.</p>
+      <p><a class="textlink" href="shop.html">Alle <span id="alle-anzahl">{len(AKTIV)}</span> Artikel ansehen</a><br><a class="textlink" href="gutschein.html">Geschenkgutschein</a></p>
+    </div>
+    <div id="featured-grid">{cards}</div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap zeit">
+    <div>
+      <h2>Wann es bei Ihnen ist</h2>
+      <p class="muted">Gedruckt wird nach Ihrer Bestellung. Bei Artikeln mit Wunschtext beginnt der Druck nach Ihrer Freigabe. Die Zeiten sind Richtwerte.</p>
+    </div>
+    <div>
+      <div class="zeit-bar" role="img" aria-label="Druck {E(C.PRODUKTIONSZEIT)}, danach Versand {E(C.LIEFERZEIT)}"><span class="z-order"></span><span class="z-print"></span><span class="z-ship"></span></div>
+      <div class="zeit-legend"><span><strong>Tag 0</strong>Bestellung</span><span><strong>{E(C.PRODUKTIONSZEIT)}</strong>Druck</span><span><strong>{E(C.LIEFERZEIT)}</strong>Versand</span></div>
+    </div>
+  </div>
+</section>
+
+{datei_band("Sie haben eine Datei?", "STL, 3MF oder STEP, ein kaputtes Teil als Foto mit Maßen oder nur eine Idee. Schreiben Sie, was Sie brauchen, und Sie bekommen Preis und Lieferzeit.", "Angebot für meine Datei anfordern", "kontakt.html")}
+
+<section class="section">
+  <div class="wrap shop-block">
+    <div class="side">
+      <h2>Welches Material?</h2>
+      <p>Vier Kunststoffe, je nach Einsatzort. Die Temperatur ist die Grenze, ab der das Teil weich wird.</p>
+      <p><a class="textlink" href="materialien.html">Alle im Vergleich</a></p>
+    </div>
+    <ul class="materialliste">{mat_rows}</ul>
+  </div>
+</section>
+
+<section class="section-tight" id="kundenstimmen" hidden>
+  <div class="wrap">
+    <h2>Das sagen Kunden</h2>
+    <div class="reviews-box"><div data-mk="bewertungen"></div></div>
+  </div>
+</section>
+"""
+    page("index.html", f"{C.MARKE} · 3D-gedruckte Alltagshelfer kaufen", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index")
 
 
 # ---------------------------------------------------------------- Shop
 def build_shop():
     chips = '<button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button>' + "".join(
         f'<button class="chip" type="button" data-kat="{k}" aria-pressed="false">{E(v)}</button>' for k, v in KAT_AKTIV.items()) + ('<button class="chip" type="button" data-kat="personalisiert" aria-pressed="false">Mit Wunschtext</button>' if any(p.get("text") for p in AKTIV) else "")
-    ordered = sorted(AKTIV, key=lambda p: (0 if "bestseller" in p["tags"] else 1 if "neu" in p["tags"] else 2))
-    cards = "\n".join(card(p, "", i, "h2") for i, p in enumerate(ordered))
-    body = f"""<section class="section-tight">
+    cards = "\n".join(card(p, "", i, "h2") for i, p in enumerate(AKTIV))
+    body = f"""<section class="page-head">
   <div class="wrap">
-    <span class="eyebrow">Shop</span>
     <h1>Alle Artikel</h1>
-    <p class="muted" style="max-width:60ch"><span id="shop-anzahl">{len(AKTIV)}</span> Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Endpreise, Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos. 14 Tage Rückgabe.</p>
-    <div class="trust-strip"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}</span><span>{SVG_CHECK} 14 Tage Rückgaberecht</span><span>{SVG_CHECK} PayPal-Käuferschutz</span><span>{SVG_CHECK} Nachdruck-Garantie</span></div>
+    <p class="lead"><span id="shop-anzahl">{len(AKTIV)}</span> Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos, Abholung in Celle ohne Versandkosten.</p>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap">
     <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
       <span id="kat-chips" class="chips-wrap">{chips}</span>
       <label class="sr-only" for="sortierung">Sortierung</label>
-      <select id="sortierung"><option value="standard">Empfohlen</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A–Z</option></select>
+      <select id="sortierung"><option value="standard">Reihenfolge im Shop</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A bis Z</option></select>
     </div>
     <p class="small muted" id="treffer" aria-live="polite">{len(AKTIV)} Artikel</p>
     <div class="grid" id="shop-grid">{cards}{gutschein_card("")}</div>
   </div>
 </section>
 """
-    page("shop.html", f"Shop · Alle 3D-Druck-Artikel · {C.MARKE}", "Alle 3D-gedruckten Artikel von Schichtatelier: Wohnen, Schreibtisch, Küche, Gadgets, Spiel und Garten. Farbe wählen, bestellen, in wenigen Tagen geliefert.", body, "shop")
+    page("shop.html", f"Shop · Alle 3D-Druck-Artikel · {C.MARKE}", "Alle Artikel von Schichtatelier: auf Bestellung in Celle gedruckt, Farbe wählbar, Versand oder Abholung, Zahlung per PayPal.", body, "shop")
 
 
 # ---------------------------------------------------------------- Produktseiten
@@ -302,7 +282,6 @@ def build_products():
     <div class="product">
       <div class="product-media"><img src="../assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="{E(p['name'])}{', gedruckt in ' + E(FARBEN[p['farben'][0]][0]) if p.get('foto') else ', Illustration in ' + E(FARBEN[p['farben'][0]][0])}"></div>
       <div class="product-info">
-        <span class="eyebrow">{E(KATEGORIEN[p['kat']])}</span>
         <h1>{E(p['name'])}</h1>
         <p class="price">{EUR(p['preis'])} <small>{'inkl. MwSt.' if not C.KLEINUNTERNEHMER else 'Endpreis, keine Umsatzsteuer nach § 19 UStG'}, zzgl. <a href="../versand.html">Versand</a></small></p>
         <p>{E(p['kurz'])}</p>
@@ -316,14 +295,14 @@ def build_products():
           <p class="added" role="status">Liegt im Warenkorb. <a href="../warenkorb.html">Zum Warenkorb</a> oder <a href="../shop.html">weiter stöbern</a>.</p>
         </form>
         <p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
-        <div class="trust-list"><span>{SVG_CHECK} Versandfrei ab {EUR(VERSANDFREI_AB)}, sonst {EUR(VERSAND_PAUSCHALE)}</span><span>{SVG_CHECK} {'Personalisiert für Sie gefertigt, Vorschau vor dem Druck' if p.get('text') else '14 Tage Rückgaberecht'}</span><span>{SVG_CHECK} PayPal-Käuferschutz, oder Abholung in Celle</span><span>{SVG_CHECK} Nachdruck-Garantie bei Transportschäden</span></div>
+        <dl class="konditionen"><dt>Versand</dt><dd>{EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos</dd><dt>Abholung</dt><dd>Celle, kostenlos, nach Terminabsprache</dd><dt>Zahlung</dt><dd>PayPal oder bei Abholung</dd><dt>Rückgabe</dt><dd>{'ausgeschlossen, weil nach Ihrem Text gefertigt' if p.get('text') else '14 Tage'}</dd></dl>
         <dl class="specs">
           <dt>Maße</dt><dd>{E(p['masse'])}</dd>
           <dt>Material</dt><dd>{E(p['material'])}</dd>
           <dt>Gewicht</dt><dd>{E(p['gewicht'])}</dd>
           <dt>Fertigung</dt><dd>Druck in {E(C.PRODUKTIONSZEIT)}, dann Versand</dd>
         </dl>
-        <h2 style="font-size:1.15rem">Beschreibung</h2>
+        <h2 class="sub">Beschreibung</h2>
         <p>{E(p['lang'])}</p>
         <p class="small muted">Hinweis: 3D-gedruckte Teile zeigen feine Schichtlinien, das ist Teil des Verfahrens. Farben können je nach Filamentcharge leicht abweichen.{'' if p.get('foto') else ' Die Abbildung ist eine Illustration des Artikels.'}</p>
         {widerruf}
@@ -333,8 +312,8 @@ def build_products():
 </section>
 <section class="section">
   <div class="wrap">
-    <h2>Oft zusammen bestellt</h2>
-    <p class="muted">Ab {EUR(VERSANDFREI_AB)} liefern wir versandkostenfrei. Alles aus einer Bestellung wird zusammen gedruckt und verschickt.</p>
+    <h2>Weitere Artikel</h2>
+    <p class="muted">Ab {EUR(VERSANDFREI_AB)} Bestellwert entfallen die Versandkosten. Alles aus einer Bestellung wird zusammen gedruckt und verschickt.</p>
     <div class="grid">{rel_cards}</div>
   </div>
 </section>
@@ -368,7 +347,6 @@ def gutschein_card(rel):
     return f"""<article class="card card-gutschein" data-kat="geschenk" data-preis="10" data-name="Geschenkgutschein" data-pos="999">
   <a class="card-img" href="{rel}gutschein.html" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/gutschein.webp" width="800" height="600" alt="" loading="lazy"></a>
   <div class="card-body">
-    <span class="card-cat">Geschenk</span>
     <h3><a href="{rel}gutschein.html">Geschenkgutschein</a></h3>
     <p class="small muted" style="margin:0">Wunschbetrag ab 10 €, als Karte per Post oder zum Ausdrucken per E-Mail. 3 Jahre gültig.</p>
     <div class="price">ab 10,00 €</div>
@@ -385,7 +363,6 @@ def build_voucher():
     <div class="product">
       <div class="product-media"><img src="assets/img/produkte/gutschein.webp" width="800" height="600" alt="Geschenkgutschein von Schichtatelier, Karte mit Logo und Wunschbetrag"></div>
       <div class="product-info">
-        <span class="eyebrow">Geschenk</span>
         <h1>Geschenkgutschein</h1>
         <p class="price">ab 10,00 € <small>Wunschbetrag, kein Aufschlag, 3 Jahre gültig</small></p>
         <p>Für alle, die sich lieber selbst etwas aussuchen: Der Gutschein gilt für alle Artikel im Shop und für den Druckservice. Als gedruckte Karte per Post oder als PDF per E-Mail zum Selbstausdrucken, auf Wunsch mit persönlicher Nachricht.</p>
@@ -402,7 +379,7 @@ def build_voucher():
             <div class="field"><label for="g-von">Von <span class="opt">(optional)</span></label><input type="text" id="g-von" name="absender" maxlength="60"><p class="msg"></p></div>
           </div>
           <div class="field"><label for="g-msg">Persönliche Nachricht <span class="opt">(optional, bis 200 Zeichen)</span></label><textarea id="g-msg" name="gutscheintext" rows="3" maxlength="200"></textarea><p class="msg"></p></div>
-          <h2 style="font-size:1.1rem;margin:8px 0 0">Ihre Daten</h2>
+          <h2 class="sub" style="margin:8px 0 0">Ihre Daten</h2>
           <div class="row">
             <div class="field"><label for="g-name">Ihr Name</label><input type="text" id="g-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
             <div class="field"><label for="g-email">Ihre E-Mail <span class="opt">(für Bestätigung und Gutschein)</span></label><input type="email" id="g-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
@@ -411,7 +388,7 @@ def build_voucher():
           <div class="field hp" aria-hidden="true"><label for="g-web">Website</label><input type="text" id="g-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir den Gutschein nicht ausstellen."><span>Ich bin einverstanden, dass meine Angaben zur Ausstellung des Gutscheins gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary" type="submit">Gutschein zahlungspflichtig bestellen</button>
-          <div class="trust-list"><span>{SVG_CHECK} Bestätigung per E-Mail, Gutscheincode nach Zahlungseingang</span><span>{SVG_CHECK} Zahlung per PayPal mit Käuferschutz</span><span>{SVG_CHECK} 3 Jahre gültig, einlösbar für Shop und Druckservice</span></div>
+          <dl class="konditionen"><dt>Gültigkeit</dt><dd>3 Jahre</dd><dt>Einlösbar</dt><dd>Shop und Druckservice</dd><dt>Code</dt><dd>nach Zahlungseingang per E-Mail oder Post</dd></dl>
         </form>
       </div>
     </div>
@@ -432,7 +409,7 @@ def build_cart():
       <div>
         <div class="ship-progress" id="ship-progress" hidden><div class="ship-bar"><span id="ship-fill"></span></div><p class="small" id="ship-text"></p></div>
         <div class="cart-list" id="cart-list" aria-live="polite"></div>
-        <div id="cross-sell" hidden><h2 style="font-size:1.1rem;margin-top:28px">Dazu passt</h2><div class="grid grid-small" id="cross-sell-grid"></div></div>
+        <div id="cross-sell" hidden><h2 class="sub" style="margin-top:32px">Dazu passt</h2><div class="grid grid-small" id="cross-sell-grid"></div></div>
         <form class="form" id="bestellformular" style="margin-top:32px" hidden>
           <h2>Lieferung und Zahlung</h2>
           <p class="muted small">Sie bestellen verbindlich. Der Vertrag kommt mit unserer Bestätigung per E-Mail zustande. Bei Versand erhalten Sie damit den PayPal-Zahlungslink, gedruckt wird nach Zahlungseingang. Bei Abholung zahlen Sie vor Ort.</p>
@@ -443,7 +420,7 @@ def build_cart():
             <div class="field"><label for="b-tel">Telefon <span class="opt">(optional, für Rückfragen)</span></label><input type="tel" id="b-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
           </div>
           <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:8px">Lieferung</legend>
-            <label class="check"><input type="radio" name="lieferart" value="versand" checked> Versand per DHL innerhalb Deutschlands ({EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos)</label>
+            <label class="check"><input type="radio" name="lieferart" value="versand" checked> Versand innerhalb Deutschlands ({EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos)</label>
             <label class="check"><input type="radio" name="lieferart" value="abholung"> Abholung in Celle, kostenlos ({E(C.STRASSE)}, nach Terminabsprache)</label>
           </fieldset>
           <div id="adresse-felder">
@@ -463,12 +440,11 @@ def build_cart():
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
           <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
-          <div class="trust-list"><span>{SVG_CHECK} Sie zahlen erst nach unserer Bestätigung</span><span>{SVG_CHECK} PayPal-Käuferschutz oder Zahlung bei Abholung</span><span>{SVG_CHECK} 14 Tage Rückgaberecht, Nachdruck-Garantie</span></div>
           <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:{E(C.EMAIL)}">Bestellung per E-Mail schicken</a> oder anrufen: <a href="{TEL_HREF}">{E(C.TELEFON)}</a>.</p>
         </form>
       </div>
       <div class="summary" id="cart-summary" hidden>
-        <h2 style="font-size:1.1rem">Zusammenfassung</h2>
+        <h2 class="sub" style="margin:0 0 .6em">Zusammenfassung</h2>
         <div class="line"><span>Zwischensumme</span><strong id="s-zwischen">0,00 €</strong></div>
         <div class="line"><span id="s-versand-label">Versand ({E(C.VERSANDLAND)})</span><strong id="s-versand">0,00 €</strong></div>
         <div class="line" id="s-gutschein-row" hidden><span>Gutschein</span><strong id="s-gutschein">−0,00 €</strong></div>
@@ -487,90 +463,89 @@ def build_cart():
 
 # ---------------------------------------------------------------- Kontakt / eigenes Modell
 def build_contact():
-    body = f"""<section class="section-tight">
+    body = f"""<section class="page-head">
   <div class="wrap">
-    <span class="eyebrow">Anfrage</span>
-    <h1>Eigenes Modell drucken lassen</h1>
-    <div class="contact-grid">
-      <div>
-        <p class="muted" style="max-width:60ch">Sie haben eine STL-, 3MF- oder STEP-Datei, ein kaputtes Ersatzteil oder nur eine Idee? Beschreiben Sie kurz, was Sie brauchen. Wir melden uns innerhalb eines Werktags mit Preis und Lieferzeit. Die Datei schicken Sie uns dann per E-Mail, die Adresse steht in unserer Antwort.</p>
-        <form class="form" id="kontaktformular">
-          <div class="alert" role="alert"></div>
-          <div class="row">
-            <div class="field"><label for="k-name">Name</label><input type="text" id="k-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
-            <div class="field"><label for="k-email">E-Mail</label><input type="email" id="k-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
-          </div>
-          <div class="row">
-            <div class="field"><label for="k-tel">Telefon <span class="opt">(optional)</span></label><input type="tel" id="k-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
-            <div class="field"><label for="k-art">Worum geht es?</label><select id="k-art" name="projekt"><option>Eigene Datei drucken</option><option>Ersatzteil nachbauen</option><option>Größere Stückzahl eines Shop-Artikels</option><option>Frage zu einer Bestellung</option><option>Etwas anderes</option></select><p class="msg"></p></div>
-          </div>
-          <div class="row">
-            <div class="field"><label for="k-stueck">Stückzahl <span class="opt">(optional)</span></label><input type="number" id="k-stueck" name="stueckzahl" min="1" max="999"><p class="msg"></p></div>
-            <div class="field"><label for="k-mat">Material-Wunsch <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option><option>PLA (Standard, biobasiert)</option><option>PETG (wasserfest, belastbar)</option><option>ABS (hitzefest, schleifbar)</option><option>TPU (flexibel)</option></select><p class="msg"></p></div>
-          </div>
-          <div class="field"><label for="k-msg">Beschreibung <span class="opt">(Maße, Einsatzzweck, Farbe)</span></label><textarea id="k-msg" name="nachricht" required data-err="Bitte beschreiben Sie kurz Ihr Vorhaben."></textarea><p class="msg"></p></div>
-          <div class="field hp" aria-hidden="true"><label for="k-web">Website</label><input type="text" id="k-web" name="website" tabindex="-1" autocomplete="off"></div>
-          <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Anfrage nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
-          <button class="btn btn-primary" type="submit">Anfrage senden</button>
-        </form>
+    <h1>Eigene Datei drucken lassen</h1>
+    <p class="lead">Beschreiben Sie, was Sie brauchen: eine Datei, ein kaputtes Teil oder nur die Idee. Sie bekommen Preis und Lieferzeit, bevor gedruckt wird.</p>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap kontakt-grid">
+    <form class="form" id="kontaktformular">
+      <div class="alert" role="alert"></div>
+      <div class="row">
+        <div class="field"><label for="k-name">Name</label><input type="text" id="k-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
+        <div class="field"><label for="k-email">E-Mail</label><input type="email" id="k-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
       </div>
-      <div>
-        <div class="contact-card">
-          <h2 style="font-size:1.1rem">Direkt erreichen</h2>
-          <p><strong>E-Mail</strong><br><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a></p>
-          <p><strong>Telefon</strong><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
-          <p class="small muted">Antwort meist innerhalb eines Werktags.</p>
-        </div>
-        <div class="contact-card" style="margin-top:16px">
-          <h2 style="font-size:1.1rem">Was wir drucken können</h2>
-          <ul class="small" style="padding-left:1.2em;margin:0">
-            <li>Bauraum bis 25 × 25 × 25 cm, größere Teile in Segmenten</li>
-            <li><a href="materialien.html">{", ".join(m["name"] for m in MATERIALIEN)}</a>; Schichthöhe 0,12 bis 0,28 mm</li>
-            <li>Zwei Farben in einem Teil (Schrift, Logos)</li>
-            <li>Dateiformate STL, 3MF, STEP, OBJ</li>
-          </ul>
-        </div>
+      <div class="row">
+        <div class="field"><label for="k-tel">Telefon <span class="opt">(optional)</span></label><input type="tel" id="k-tel" name="telefon" autocomplete="tel"><p class="msg"></p></div>
+        <div class="field"><label for="k-art">Worum geht es?</label><select id="k-art" name="projekt"><option>Eigene Datei drucken</option><option>Ersatzteil nachbauen</option><option>Größere Stückzahl eines Shop-Artikels</option><option>Frage zu einer Bestellung</option><option>Etwas anderes</option></select><p class="msg"></p></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="k-stueck">Stückzahl <span class="opt">(optional)</span></label><input type="number" id="k-stueck" name="stueckzahl" min="1" max="999"><p class="msg"></p></div>
+        <div class="field"><label for="k-mat">Material <span class="opt">(optional)</span></label><select id="k-mat" name="material"><option>Egal, bitte empfehlen</option>{"".join(f'<option>{E(m["name"])} ({E(m["einsatz"])})</option>' for m in MATERIALIEN)}</select><p class="msg"></p></div>
+      </div>
+      <div class="field"><label for="k-msg">Beschreibung <span class="opt">(Maße, Einsatzzweck, Farbe)</span></label><textarea id="k-msg" name="nachricht" required data-err="Bitte beschreiben Sie kurz Ihr Vorhaben."></textarea><p class="msg"></p></div>
+      <div class="field hp" aria-hidden="true"><label for="k-web">Website</label><input type="text" id="k-web" name="website" tabindex="-1" autocomplete="off"></div>
+      <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Anfrage nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
+      <button class="btn btn-primary" type="submit">Anfrage senden</button>
+    </form>
+    <div>
+      <div class="kontakt-info">
+        <h2>Direkt erreichen</h2>
+        <p><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
+        <p class="small muted" style="margin:0">{E(C.STRASSE)}, {E(C.PLZ_ORT)}. Abholung nach Terminabsprache.</p>
+      </div>
+      <div class="kontakt-info">
+        <h2>Was sich drucken lässt</h2>
+        <ul class="small">
+          <li>Bis 25 cm Kantenlänge am Stück</li>
+          <li><a href="materialien.html">{", ".join(m["name"] for m in MATERIALIEN)}</a></li>
+          <li>Schichthöhe 0,12 bis 0,28 mm</li>
+          <li>Dateien als STL, 3MF, STEP oder OBJ</li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 """
-    page("kontakt.html", f"Eigenes Modell drucken lassen · {C.MARKE}", "3D-Druck-Service: eigene STL-Datei, Ersatzteil oder Kleinserie anfragen. Antwort mit Preis und Lieferzeit innerhalb eines Werktags.", body, "kontakt")
+    page("kontakt.html", f"Eigene Datei drucken lassen · {C.MARKE}", "Eigene STL-Datei, Ersatzteil oder Kleinserie anfragen: Preis und Lieferzeit vor dem Druck, gedruckt in Celle.", body, "kontakt")
 
 
 # ---------------------------------------------------------------- Über uns
 def build_about():
-    body = f"""<section class="section-tight">
+    body = f"""<section class="page-head">
+  <div class="wrap">
+    <h1>Das Atelier von {E(C.INHABER)} in Celle.</h1>
+    <p class="lead">{E(C.MARKE)} druckt kleine Dinge erst dann, wenn jemand sie bestellt. Gedruckt wird auf einem Bambu Lab X1 Carbon.</p>
+  </div>
+</section>
+<section class="section-tight">
   <div class="wrap prose">
-    <span class="eyebrow">Über uns</span>
-    <h1>Eine kleine Werkstatt, ein paar Drucker, <em>viel Geduld.</em></h1>
-    <p class="lead">{E(C.MARKE)} ist eine Ein-Personen-Manufaktur für 3D-gedruckte Alltagsgegenstände. Was Sie hier kaufen, wird nicht aus einem Lager geholt, sondern nach Ihrer Bestellung auf unseren Druckern gefertigt.</p>
-    <h2>Wie wir arbeiten</h2>
-    <p>Jedes Modell im Shop haben wir selbst entworfen oder sorgfältig angepasst, viele Male probegedruckt und im Alltag getestet. Erst wenn ein Teil stabil ist, sauber vom Druckbett kommt und sich gut anfühlt, landet es im Shop. Wir drucken mit 0,2 mm Schichthöhe, bei Sichtteilen feiner, und prüfen jedes Stück von Hand, bevor es in den Karton geht.</p>
-    <h2>Material</h2>
-    <p>Standardmaterial ist PLA, ein Kunststoff aus Maisstärke und Zuckerrohr. Er ist formstabil, geruchsneutral und fühlt sich hochwertig an. Für Bad, Küche und draußen verwenden wir PETG, das Feuchtigkeit und Wärme besser verträgt. Unsere Filamente beziehen wir von europäischen Herstellern, Reste und Fehldrucke sammeln wir zum Recycling.</p>
-    <h2>Verpackung und Versand</h2>
-    <p>Wir verschicken in Kartons aus Altpapier, gepolstert mit Papier statt Plastik. Der Versand läuft über DHL, in der Regel {E(C.LIEFERZEIT)} nach dem Druck.</p>
-    <h2>Fragen, Wünsche, Sonderanfertigungen</h2>
-    <p>Schreiben Sie uns an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a>, rufen Sie an unter <a href="{TEL_HREF}">{E(C.TELEFON)}</a> oder nutzen Sie das <a href="kontakt.html">Anfrageformular</a>. Für eigene Dateien und Ersatzteile machen wir Ihnen gern ein Angebot.</p>
+    <h2>Der Drucker</h2>
+    <p>Der X1 Carbon hat einen geschlossenen Bauraum. Darin lassen sich neben PLA und PETG auch ABS und TPU drucken, Teile bis 25 cm Kantenlänge am Stück. Die Schichtlinien, die dabei entstehen, gehören zum Verfahren. Sie bleiben am fertigen Teil sichtbar.</p>
+    <h2>Was hier entsteht</h2>
+    <p>Deko und Geschenke im Shop, dazu Teile nach Ihrer Datei oder Ihrer Beschreibung. Stückzahlen ab eins. Was der Shop zeigt, ist wirklich vorhanden und wird nach der Bestellung gedruckt, nicht aus einem Lager geholt.</p>
+    <h2>So erreichen Sie uns</h2>
+    <p>{E(C.STRASSE)}, {E(C.PLZ_ORT)}<br><a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a><br><a href="{TEL_HREF}">{E(C.TELEFON)}</a></p>
+    <p>Abholung ist nach Terminabsprache möglich. Für eigene Dateien und Ersatzteile nutzen Sie das <a href="kontakt.html">Anfrageformular</a>.</p>
   </div>
 </section>
 """
-    page("ueber-uns.html", f"Über uns · {C.MARKE}", "Schichtatelier ist eine kleine 3D-Druck-Manufaktur: eigene Entwürfe, pflanzenbasiertes Material, Fertigung auf Bestellung und plastikfreie Verpackung.", body, "ueber")
+    page("ueber-uns.html", f"Über uns · {C.MARKE}", "Schichtatelier in Celle: 3D-Druck auf einem Bambu Lab X1 Carbon, kleine Stückzahlen nach Bestellung, Deko, Geschenke und Teile nach eigener Datei.", body, "ueber")
 
 
 # ---------------------------------------------------------------- Versand & Zahlung
 def build_shipping():
     body = f"""<section class="section-tight">
   <div class="wrap prose">
-    <span class="eyebrow">Service</span>
     <h1>Versand und Zahlung</h1>
     <h2>Versandkosten</h2>
     <table>
       <tr><th>Lieferland</th><th>Kosten</th><th>Versandfrei ab</th></tr>
       <tr><td>{E(C.VERSANDLAND)}</td><td>{EUR(VERSAND_PAUSCHALE)} pro Bestellung</td><td>{EUR(VERSANDFREI_AB)} Bestellwert</td></tr>
     </table>
-    <p>Wir versenden mit DHL als Päckchen oder Paket. Die Sendungsnummer bekommen Sie per E-Mail, sobald das Paket abgegeben ist. Lieferungen in andere Länder sind auf Anfrage möglich, schreiben Sie uns vorher.</p>
+    <p>Wir versenden als Päckchen oder Paket innerhalb Deutschlands. Sobald das Paket unterwegs ist, melden wir uns per E-Mail. Lieferungen in andere Länder sind auf Anfrage möglich, schreiben Sie uns vorher.</p>
     <h2>Abholung in Celle</h2>
     <p>Wer in der Nähe wohnt, spart den Versand: Im Warenkorb „Abholung“ wählen, wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse: {E(C.STRASSE)}, {E(C.PLZ_ORT)}. Bezahlt wird bei Abholung bar oder per PayPal.</p>
     <h2>Lieferzeit</h2>
@@ -582,7 +557,7 @@ def build_shipping():
     </ul>
     <div class="notice">Wir speichern keine Zahlungsdaten auf dieser Website. Die Zahlung läuft direkt über PayPal oder bei der Abholung.</div>
     <h2>Rückgabe</h2>
-    <p>Für Lagerartikel aus dem Shop gilt das gesetzliche <a href="widerruf.html">Widerrufsrecht</a> von 14 Tagen. Personalisierte Artikel mit Wunschtext oder eigenem Foto sind davon ausgenommen. Kommt ein Teil beschädigt an, schicken Sie uns bitte ein Foto an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a>, wir drucken kostenlos nach.</p>
+    <p>Für Lagerartikel aus dem Shop gilt das gesetzliche <a href="widerruf.html">Widerrufsrecht</a> von 14 Tagen. Personalisierte Artikel mit Wunschtext oder eigenem Foto sind davon ausgenommen. Kommt ein Teil beschädigt an, schicken Sie uns bitte ein Foto an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a>. Wir klären dann, ob neu gedruckt oder erstattet wird.</p>
   </div>
 </section>
 """
@@ -595,7 +570,6 @@ def build_agb():
            else "Alle Preise verstehen sich inklusive der gesetzlichen Umsatzsteuer.")
     body = f"""<section class="section-tight">
   <div class="wrap prose">
-    <span class="eyebrow">Rechtliches</span>
     <h1>Allgemeine Geschäftsbedingungen</h1>
     <p class="muted">Stand: {datetime.date.today().strftime("%d.%m.%Y")}</p>
     <h2>1. Geltungsbereich</h2>
@@ -609,7 +583,7 @@ def build_agb():
     <h2>5. Fertigung und Lieferung</h2>
     <p>Alle Artikel werden nach Bestellung gefertigt. Die Produktionszeit beträgt in der Regel {E(C.PRODUKTIONSZEIT)} nach Zahlungseingang, bei personalisierten Artikeln nach Ihrer Freigabe des Textes oder Motivs. Hinzu kommt die Versandzeit von etwa {E(C.LIEFERZEIT)}. Die Lieferung erfolgt an die von Ihnen angegebene Adresse oder, wenn Sie Abholung gewählt haben, durch Übergabe an unserem Standort in Celle nach Terminabsprache. Bei Verbrauchern geht die Gefahr des zufälligen Untergangs mit Übergabe der Ware an Sie über. Abgeholt werden kann innerhalb von 14 Tagen nach unserer Fertigmeldung.</p>
     <h2>6. Beschaffenheit 3D-gedruckter Teile</h2>
-    <p>Unsere Artikel entstehen im Schichtverfahren (FDM). Sichtbare Schichtlinien, leichte Farbabweichungen zwischen Filamentchargen und Maßtoleranzen von etwa ±0,3 mm sind verfahrensbedingt und stellen keinen Mangel dar. Die Produktbilder im Shop sind Illustrationen. Angaben zu Belastbarkeit und Temperaturbeständigkeit sind Richtwerte für den üblichen Gebrauch.</p>
+    <p>Unsere Artikel entstehen im Schichtverfahren (FDM). Sichtbare Schichtlinien, leichte Farbabweichungen zwischen Filamentchargen und Maßtoleranzen von etwa ±0,3 mm sind verfahrensbedingt und stellen keinen Mangel dar. Abbildungen können Illustrationen oder Fotos eines Musterstücks sein. Angaben zu Belastbarkeit und Temperaturbeständigkeit sind Richtwerte für den üblichen Gebrauch.</p>
     <h2>7. Personalisierte Artikel</h2>
     <p>Bei Artikeln mit Wunschtext oder eigenem Foto senden wir Ihnen vor dem Druck eine Vorschau zur Freigabe. Für Rechtschreibung und Inhalt Ihres Textes sind Sie verantwortlich. Wir drucken keine Inhalte, die Rechte Dritter verletzen oder strafbar sind. Personalisierte Artikel sind vom Widerrufsrecht ausgenommen (§ 312g Abs. 2 Nr. 1 BGB).</p>
     <h2>8. Widerrufsrecht</h2>
@@ -636,7 +610,6 @@ def build_agb():
 def build_widerruf():
     body = f"""<section class="section-tight">
   <div class="wrap prose">
-    <span class="eyebrow">Rechtliches</span>
     <h1>Widerrufsbelehrung</h1>
     <h2>Widerrufsrecht</h2>
     <p>Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag, an dem Sie oder ein von Ihnen benannter Dritter, der nicht der Beförderer ist, die Waren in Besitz genommen haben bzw. hat.</p>
@@ -677,7 +650,6 @@ def build_widerruf():
 def build_imprint():
     body = f"""<section class="section-tight">
   <div class="wrap prose">
-    <span class="eyebrow">Rechtliches</span>
     <h1>Impressum</h1>
     <h2>Angaben gemäß § 5 DDG</h2>
     <p>{E(C.FIRMA)}<br>Inhaber: {E(C.INHABER)} (Einzelunternehmen)<br>{E(C.STRASSE)}<br>{E(C.PLZ_ORT)}</p>
@@ -693,7 +665,7 @@ def build_imprint():
     <h2>Haftung für Inhalte und Links</h2>
     <p>Die Inhalte dieser Seiten wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität übernehmen wir keine Gewähr. Für Inhalte verlinkter externer Seiten sind deren Betreiber verantwortlich.</p>
     <h2>Bildnachweis</h2>
-    <p>Produktillustrationen, Logo und Grafiken: eigene Erstellung. Schrift „Inter“ von Rasmus Andersson, SIL Open Font License, lokal eingebunden.</p>
+    <p>Produktillustrationen, Logo und Grafiken: eigene Erstellung. Schriften „Abril Fatface“ (TypeTogether) und „Hanken Grotesk“ (Hanken Design Co.), jeweils SIL Open Font License, lokal eingebunden.</p>
   </div>
 </section>
 """
@@ -704,7 +676,6 @@ def build_imprint():
 def build_privacy():
     body = f"""<section class="section-tight">
   <div class="wrap prose">
-    <span class="eyebrow">Rechtliches</span>
     <h1>Datenschutzerklärung</h1>
     <p class="muted">Stand: {datetime.date.today().strftime("%d.%m.%Y")}</p>
     <h2>1. Verantwortlicher</h2>
@@ -712,7 +683,7 @@ def build_privacy():
     <h2>2. Hosting und Server-Logs</h2>
     <p>Diese Website wird bei Markentrix gehostet. Beim Aufruf speichert der Server automatisch Zugriffsdaten (aufgerufene Seite, Datum und Uhrzeit, übertragene Datenmenge, Browsertyp, Betriebssystem, verweisende Seite, IP-Adresse) in Protokolldateien. Diese Daten dienen der Sicherheit und dem störungsfreien Betrieb und werden nach spätestens 14 Tagen gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb). Mit Markentrix besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO.</p>
     <h2>3. Bestellungen über den Shop</h2>
-    <p>Wenn Sie bestellen, erheben wir Name, E-Mail-Adresse, Lieferadresse, gewählte Zahlungsart, die bestellten Artikel und gegebenenfalls Telefonnummer, Wunschtexte und Anmerkungen. Die Daten werden über das Markentrix-Portal an uns übermittelt und dort gespeichert; Sie erhalten eine Eingangsbestätigung mit Vorgangsnummer an die angegebene E-Mail-Adresse. Wir verwenden die Daten zur Vertragsabwicklung, Rechnungsstellung und Lieferung (Art. 6 Abs. 1 lit. b DSGVO). Die Lieferadresse geben wir an das Versandunternehmen (DHL) weiter. Rechnungsdaten bewahren wir nach den steuer- und handelsrechtlichen Fristen bis zu zehn Jahre auf.</p>
+    <p>Wenn Sie bestellen, erheben wir Name, E-Mail-Adresse, Lieferadresse, gewählte Zahlungsart, die bestellten Artikel und gegebenenfalls Telefonnummer, Wunschtexte und Anmerkungen. Die Daten werden über das Markentrix-Portal an uns übermittelt und dort gespeichert; Sie erhalten eine Eingangsbestätigung mit Vorgangsnummer an die angegebene E-Mail-Adresse. Wir verwenden die Daten zur Vertragsabwicklung, Rechnungsstellung und Lieferung (Art. 6 Abs. 1 lit. b DSGVO). Die Lieferadresse geben wir an den Versanddienstleister weiter. Rechnungsdaten bewahren wir nach den steuer- und handelsrechtlichen Fristen bis zu zehn Jahre auf.</p>
     <h2>4. Kontakt- und Anfrageformular, Widerrufsformular</h2>
     <p>Angaben aus den Formularen (Name, E-Mail, optional Telefon, Ihre Nachricht) werden über das Markentrix-Portal an uns übermittelt, dort gespeichert und zur Bearbeitung Ihrer Anfrage genutzt (Art. 6 Abs. 1 lit. b DSGVO, bei allgemeinen Anfragen Art. 6 Abs. 1 lit. a DSGVO auf Grundlage Ihrer Einwilligung). Sie erhalten eine automatische Eingangsbestätigung mit Vorgangsnummer. Anfragen ohne Vertragsschluss löschen wir nach spätestens zwölf Monaten. Ein unsichtbares Formularfeld dient ausschließlich der Spam-Abwehr.</p>
     <h2>5. Warenkorb (lokale Speicherung)</h2>
@@ -726,7 +697,7 @@ def build_privacy():
     <h2>9. Schriften und externe Dienste</h2>
     <p>Die verwendete Schrift ist lokal auf dem Server gespeichert. Es werden keine Schriften, Skripte oder Inhalte von Fremdservern (Google Fonts, Content Delivery Networks, soziale Netzwerke) nachgeladen.</p>
     <h2>10. Empfänger der Daten</h2>
-    <p>Markentrix (Hosting und Portal, Auftragsverarbeitung), DHL (Versand), PayPal (bei gewählter Zahlungsart), Steuerberatung und Finanzbehörden (Rechnungsdaten, soweit gesetzlich erforderlich). Eine Übermittlung in Drittländer findet durch uns nicht statt; PayPal kann Daten nach seiner eigenen Datenschutzerklärung übermitteln.</p>
+    <p>Markentrix (Hosting und Portal, Auftragsverarbeitung), Versanddienstleister, PayPal (bei gewählter Zahlungsart), Steuerberatung und Finanzbehörden (Rechnungsdaten, soweit gesetzlich erforderlich). Eine Übermittlung in Drittländer findet durch uns nicht statt; PayPal kann Daten nach seiner eigenen Datenschutzerklärung übermitteln.</p>
     <h2>11. Ihre Rechte</h2>
     <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Eine erteilte Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen. Außerdem haben Sie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Wenden Sie sich dafür an die oben genannte Kontaktadresse.</p>
     <h2>12. Datensicherheit</h2>
@@ -739,44 +710,42 @@ def build_privacy():
 
 # ---------------------------------------------------------------- Danke / 404
 def build_thanks():
-    body = f"""<section class="hero-mini" id="danke">
-  <div class="wrap" style="max-width:720px">
-    <div class="done-mark" aria-hidden="true">{SVG_CHECK}</div>
-    <span class="eyebrow">Vielen Dank</span>
-    <h1 id="danke-h1">Ihre Bestellung ist <em>eingegangen.</em></h1>
+    body = f"""<section class="danke" id="danke">
+  <div class="wrap">
+    <h1 id="danke-h1">Danke, Ihre Bestellung ist eingegangen.</h1>
     <div data-show="bestellung">
-      <p class="muted">Sie erhalten in wenigen Minuten eine Eingangsbestätigung per E-Mail. Innerhalb von zwei Werktagen folgt unsere Bestellbestätigung.</p>
+      <p class="lead">Sie erhalten in wenigen Minuten eine Eingangsbestätigung per E-Mail. Innerhalb von zwei Werktagen melden wir uns mit der Bestätigung.</p>
     </div>
-    <div data-show="widerruf" data-h1="Ihr Widerruf ist eingegangen." hidden>
-      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb von zwei Werktagen mit den nächsten Schritten zur Rücksendung und Erstattung.</p>
+    <div data-show="widerruf" data-h1="Danke, Ihr Widerruf ist eingegangen." hidden>
+      <p class="lead">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb von zwei Werktagen mit den nächsten Schritten zur Rücksendung und Erstattung.</p>
     </div>
-    <div data-show="gutschein" data-h1="Ihre Gutschein-Bestellung ist eingegangen." hidden>
-      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Nach Zahlungseingang schicken wir den Gutschein mit Code als PDF oder als Karte per Post.</p>
+    <div data-show="gutschein" data-h1="Danke, Ihre Gutschein-Bestellung ist eingegangen." hidden>
+      <p class="lead">Sie erhalten eine Eingangsbestätigung per E-Mail. Nach Zahlungseingang schicken wir den Gutschein mit Code als PDF oder als Karte per Post.</p>
     </div>
-    <div data-show="kontakt" data-h1="Ihre Anfrage ist eingegangen." hidden>
-      <p class="muted">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns innerhalb eines Werktags mit Preis und Lieferzeit.</p>
+    <div data-show="kontakt" data-h1="Danke, Ihre Anfrage ist eingegangen." hidden>
+      <p class="lead">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns mit Preis und Lieferzeit.</p>
     </div>
-    <div class="ref-card"><span class="small muted">Ihre Vorgangsnummer</span><span class="ref" id="ref"></span><span class="small muted">Bitte bei Rückfragen angeben.</span></div>
+    <div class="ref-card"><span class="small">Ihre Vorgangsnummer, bitte bei Rückfragen angeben</span><span class="ref" id="ref"></span></div>
     <p hidden><a class="btn btn-primary" id="paypal-link" href="#" rel="noopener">Jetzt <span id="danke-summe"></span> per PayPal bezahlen</a></p>
-    <p class="notice" id="paypal-hinweis" hidden style="text-align:left">Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestellbestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
-    <p class="notice" id="gutschein-hinweis" hidden style="text-align:left"></p>
-    <p class="notice" id="abhol-hinweis" hidden style="text-align:left">Sie holen in Celle ab: Wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse {E(C.STRASSE)}, {E(C.PLZ_ORT)}. Bezahlt wird bei Abholung bar oder per PayPal.</p>
+    <p class="notice" id="paypal-hinweis" hidden>Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
+    <p class="notice" id="gutschein-hinweis" hidden></p>
+    <p class="notice" id="abhol-hinweis" hidden>Sie holen in Celle ab: Wir melden uns per E-Mail, sobald Ihr Teil fertig ist, und vereinbaren einen Termin. Abholadresse {E(C.STRASSE)}, {E(C.PLZ_ORT)}. Bezahlt wird bei Abholung bar oder per PayPal.</p>
   </div>
 </section>
 <section class="section-tight" data-show="bestellung">
-  <div class="wrap" style="max-width:860px">
-    <h2 class="center">Was jetzt passiert</h2>
-    <div class="steps">
-      <div class="step"><h3>Bestätigung</h3><p class="muted">Wir prüfen die Bestellung und melden uns innerhalb von zwei Werktagen mit der Bestätigung, bei PayPal mit dem Zahlungslink.</p></div>
-      <div class="step"><h3>Druck</h3><p class="muted">Nach Zahlungseingang drucken wir Ihr Teil in {E(C.PRODUKTIONSZEIT)}, prüfen es und befreien es von Stützmaterial.</p></div>
-      <div class="step"><h3>Versand oder Abholung</h3><p class="muted">Sie bekommen die Sendungsnummer per E-Mail, oder wir vereinbaren einen Abholtermin in Celle.</p></div>
-    </div>
+  <div class="wrap">
+    <h2>Wie es weitergeht</h2>
+    <ol class="ablauf">
+      <li><h3>Bestätigung</h3><p>Wir prüfen Ihre Bestellung und melden uns per E-Mail, bei PayPal mit dem Zahlungslink.</p></li>
+      <li><h3>Druck</h3><p>Nach Zahlungseingang drucken wir Ihr Teil, Richtwert {E(C.PRODUKTIONSZEIT)}.</p></li>
+      <li><h3>Versand oder Abholung</h3><p>Sie bekommen eine Nachricht, sobald das Paket unterwegs ist oder zur Abholung bereitsteht.</p></li>
+    </ol>
   </div>
 </section>
 <section class="section-tight">
-  <div class="wrap center" style="max-width:720px">
+  <div class="wrap">
     <p class="small muted">Keine E-Mail erhalten? Prüfen Sie den Spam-Ordner oder schreiben Sie an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a>.</p>
-    <p><a class="btn btn-ghost" href="shop.html">Zurück zum Shop</a> <a class="btn btn-ghost" href="gutschein.html">Gutschein verschenken</a></p>
+    <p><a class="btn btn-ghost" href="shop.html">Zurück zum Shop</a></p>
   </div>
 </section>
 """
@@ -784,19 +753,15 @@ def build_thanks():
 
 
 def build_404():
-    body = f"""<section class="hero-mini">
-  <div class="wrap" style="max-width:640px">
-    <div class="lost-art" aria-hidden="true">
-      <svg viewBox="0 0 64 64">{_mark(False, uid="lost", missing=5)}</svg>
-    </div>
-    <span class="eyebrow">Fehler 404</span>
-    <h1>Diese Schicht <em>fehlt noch.</em></h1>
-    <p class="muted">Die Seite gibt es nicht oder der Artikel ist nicht mehr im Sortiment. Vielleicht hilft einer dieser Wege weiter.</p>
+    body = f"""<section class="danke">
+  <div class="wrap">
+    <h1>Diese Schicht fehlt noch.</h1>
+    <p class="lead">Die Seite gibt es nicht oder der Artikel ist nicht mehr im Shop. Vielleicht hilft einer dieser Wege.</p>
     <div class="lost-links">
       <a href="shop.html"><strong>Shop</strong><span>Alle Artikel, auf Bestellung gedruckt</span></a>
       <a href="druckservice.html"><strong>Druckservice</strong><span>Eigene Datei oder Ersatzteil anfragen</span></a>
-      <a href="faq.html"><strong>Fragen &amp; Antworten</strong><span>Lieferung, Material, Rückgabe</span></a>
-      <a href="kontakt.html"><strong>Kontakt</strong><span>Wir antworten innerhalb eines Werktags</span></a>
+      <a href="faq.html"><strong>Fragen und Antworten</strong><span>Lieferung, Material, Rückgabe</span></a>
+      <a href="kontakt.html"><strong>Kontakt</strong><span>Schreiben oder anrufen</span></a>
     </div>
   </div>
 </section>
@@ -832,54 +797,29 @@ def build_data():
 
 
 # ---------------------------------------------------------------- Materialien
-def spool(color, size=72):
-    return f"""<svg class="spool" viewBox="0 0 72 72" width="{size}" height="{size}" aria-hidden="true"><circle cx="36" cy="36" r="33" fill="{color}"/><circle cx="36" cy="36" r="24" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2" stroke-dasharray="3 3"/><circle cx="36" cy="36" r="18" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2" stroke-dasharray="3 3"/><circle cx="36" cy="36" r="9" fill="var(--bg)"/><circle cx="36" cy="36" r="4" fill="{color}"/></svg>"""
-
-
-def mat_card(m, rel, h="h3"):
-    return f"""<a class="mat-card" href="{rel}material/{m['id']}.html" style="--mat:{m['farbe']}">
-  {spool(m['farbe'], 56)}
-  <div><span class="mat-name">{E(m['name'])}</span><{h}>{E(m['titel'])}</{h}><p class="small muted">{E(m['claim'])}</p></div>
-</a>"""
-
-
 def build_materials():
-    cards = "\n".join(mat_card(m, "", "h2") for m in MATERIALIEN)
+    rows = "".join(
+        f'<li><a href="material/{m["id"]}.html"><span class="mname">{E(m["name"])}</span><span class="muse">{E(m["einsatz"])}</span><span class="mtemp">{E(m["temp"])}</span></a></li>'
+        for m in MATERIALIEN)
     head_row = "".join(f'<th scope="col"><a href="material/{m["id"]}.html">{E(m["name"])}</a></th>' for m in MATERIALIEN)
-    rows = "".join(f'<tr><th scope="row">{E(k)}</th>' + "".join(f"<td>{E(vals[m['id']])}</td>" for m in MATERIALIEN) + "</tr>" for k, vals in VERGLEICH)
-    body = f"""<section class="section-tight">
+    trs = "".join(f'<tr><th scope="row">{E(k)}</th>' + "".join(f"<td>{E(vals[m['id']])}</td>" for m in MATERIALIEN) + "</tr>" for k, vals in VERGLEICH)
+    body = f"""<section class="page-head">
   <div class="wrap">
-    <span class="eyebrow">Materialien</span>
-    <h1>Welches Material passt <em>zu Ihrem Teil?</em></h1>
-    <p class="lead muted" style="max-width:62ch">Fünf Kunststoffe decken fast alles ab, was im Alltag gedruckt wird. Hier steht, was jedes Material kann, wo seine Grenzen liegen und was der Druck kostet. Im Zweifel beraten wir bei der <a href="kontakt.html">Anfrage</a>.</p>
-    <div class="mat-grid">{cards}</div>
-  </div>
-</section>
-<section class="section">
-  <div class="wrap">
-    <h2>Vergleich auf einen Blick</h2>
-    <div class="table-scroll"><table class="compare"><thead><tr><th scope="col">Eigenschaft</th>{head_row}</tr></thead><tbody>{rows}</tbody></table></div>
-    <p class="small muted">Richtwerte für Standard-Filamente bei 0,2 mm Schichthöhe. Den Festpreis für Ihr Teil nennen wir im kostenlosen Angebot.</p>
+    <h1>Welches Material passt zu Ihrem Teil?</h1>
+    <p class="lead">Vier Kunststoffe decken fast alles ab, was im Alltag gedruckt wird. Hier steht, wofür welcher taugt und wo seine Grenzen liegen.</p>
   </div>
 </section>
 <section class="section-tight">
-  <div class="wrap">
-    <div class="feature-grid">
-      <div class="feature"><h3>Drinnen, dekorativ, maßgenau</h3><p class="muted">PLA. Die sauberste Oberfläche, die meisten Farben, am schnellsten geliefert.</p></div>
-      <div class="feature"><h3>Nass, warm oder unter Last</h3><p class="muted">PETG. Zäh und wasserfest, für Küche, Bad, Clips und Gehäuse.</p></div>
-      <div class="feature"><h3>Heiß oder nachbearbeitet</h3><p class="muted">ABS. Bis 95 °C, schleifbar, mit Aceton glättbar, für Ersatzteile.</p></div>
-      <div class="feature"><h3>Weich und flexibel</h3><p class="muted">TPU. Gummiartig, reißfest, für Dichtungen, Puffer und Hüllen.</p></div>
-    </div>
-  </div>
+  <div class="wrap"><ul class="materialliste">{rows}</ul></div>
 </section>
 <section class="section">
   <div class="wrap">
-    <div class="cta-band">
-      <div><h2>Unsicher, welches Material?</h2><p style="margin:6px 0 0;opacity:.85">Beschreiben Sie Einsatzort und Belastung, wir schlagen das passende Material vor und schicken innerhalb eines Werktags ein kostenloses Angebot.</p></div>
-      <a class="btn btn-primary" href="kontakt.html">Anfrage stellen</a>
-    </div>
+    <h2>Im Vergleich</h2>
+    <div class="table-scroll"><table class="compare"><thead><tr><th scope="col"><span class="sr-only">Eigenschaft</span></th>{head_row}</tr></thead><tbody>{trs}</tbody></table></div>
+    <p class="small muted">Richtwerte für Standard-Filamente bei 0,2 mm Schichthöhe. Den Preis für Ihr Teil nennen wir im Angebot.</p>
   </div>
 </section>
+{datei_band("Unsicher, welches Material?", "Beschreiben Sie Einsatzort und Belastung. Wir schlagen ein Material vor und nennen den Preis.", "Angebot anfordern", "kontakt.html")}
 """
     page("materialien.html", f"Materialien für den 3D-Druck · {C.MARKE}", "PLA, PETG, ABS und TPU im Vergleich: Wärmebeständigkeit, Festigkeit, Außeneinsatz, Detailtreue. Welches Material passt zu Ihrem 3D-Druck-Teil?", body, "material")
 
@@ -888,49 +828,41 @@ def build_materials():
         keep = {m["id"] + ".html" for m in MATERIALIEN}
         for f in os.listdir(mdir):
             if f not in keep: os.remove(os.path.join(mdir, f))
-    for i, m in enumerate(MATERIALIEN):
+    for m in MATERIALIEN:
         rel = "../"
         props = "".join(f"<dt>{E(k)}</dt><dd>{E(v)}</dd>" for k, v in m["eigenschaften"])
         gut = "".join(f"<li>{E(x)}</li>" for x in m["gut"])
         nicht = "".join(f"<li>{E(x)}</li>" for x in m["nicht"])
         faq = "".join(f'<details class="faq-item"><summary>{E(q)}</summary><p>{E(a)}</p></details>' for q, a in m["faq"])
-        others = "\n".join(mat_card(o, rel) for o in MATERIALIEN if o["id"] != m["id"])
+        others = "".join(
+            f'<li><a href="{rel}material/{o["id"]}.html"><span class="mname">{E(o["name"])}</span><span class="muse">{E(o["einsatz"])}</span><span class="mtemp">{E(o["temp"])}</span></a></li>'
+            for o in MATERIALIEN if o["id"] != m["id"])
         shop_examples = [p for p in AKTIV if m["name"] in p["material"]][:3]
         examples = ""
         if shop_examples:
             examples = f"""<section class="section-tight"><div class="wrap"><h2>Aus {E(m['name'])} im Shop</h2><div class="grid">{"".join(card(p, rel, k) for k, p in enumerate(shop_examples))}</div></div></section>"""
-        body = f"""<section class="section-tight">
+        body = f"""<section class="mat-head">
   <div class="wrap">
     <nav aria-label="Pfad" class="crumbs"><a href="../index.html">Start</a> › <a href="../materialien.html">Materialien</a> › {E(m['name'])}</nav>
-    <div class="mat-hero" style="--mat:{m['farbe']}">
-      <div>
-        <span class="eyebrow">Material</span>
-        <h1>{E(m['titel'])}</h1>
-        <p class="lead">{E(m['claim'])}</p>
-        <p class="muted" style="max-width:60ch">{E(m['kurz'])}</p>
-        <div class="hero-actions"><a class="btn btn-primary" href="../kontakt.html">Kostenloses Angebot für {E(m['name'])}</a><a class="btn btn-ghost" href="../materialien.html">Alle Materialien</a></div>
-      </div>
-      <div class="mat-art">{spool(m['farbe'], 220)}</div>
-    </div>
+    <h1>{E(m['titel'])}</h1>
+    <p class="lead">{E(m['claim'])}</p>
+    <p class="muted" style="max-width:36em">{E(m['kurz'])}</p>
+    <a class="btn btn-primary" href="../kontakt.html">Angebot für {E(m['name'])}-Teile anfordern</a>
   </div>
 </section>
 <section class="section-tight">
-  <div class="wrap">
-    <div class="mat-cols">
-      <div>
-        <h2>Eigenschaften</h2>
-        <dl class="specs">{props}</dl>
-        <h2>Druckparameter</h2>
-        <dl class="specs"><dt>Schichthöhe</dt><dd>{E(m['schicht'])}</dd><dt>Düsentemperatur</dt><dd>{E(m['duesen'])}</dd><dt>Druckbett</dt><dd>{E(m['bett'])}</dd><dt>Dichte</dt><dd>{E(m['dichte'])}</dd></dl>
-      </div>
-      <div>
-        <h2>Geeignet für</h2>
-        <ul class="list-check">{gut}</ul>
-        <h2>Nicht geeignet für</h2>
-        <ul class="list-cross">{nicht}</ul>
-        <div class="notice"><strong>Farben:</strong> {E(m['farben'])}</div>
-        <div class="trust-list"><span>{SVG_CHECK} Kostenloses Angebot innerhalb eines Werktags</span><span>{SVG_CHECK} Festpreis vor dem Druck, keine Überraschungen</span><span>{SVG_CHECK} Nachdruck-Garantie bei Transportschäden</span></div>
-      </div>
+  <div class="wrap mat-cols">
+    <div>
+      <h2>Eigenschaften</h2>
+      <dl class="specs">{props}</dl>
+      <h2>Druckparameter</h2>
+      <dl class="specs"><dt>Schichthöhe</dt><dd>{E(m['schicht'])}</dd><dt>Düsentemperatur</dt><dd>{E(m['duesen'])}</dd><dt>Druckbett</dt><dd>{E(m['bett'])}</dd><dt>Dichte</dt><dd>{E(m['dichte'])}</dd></dl>
+    </div>
+    <div>
+      <h2>Geeignet für</h2>
+      <ul class="liste-ja">{gut}</ul>
+      <h2>Nicht geeignet für</h2>
+      <ul class="liste-nein">{nicht}</ul>
     </div>
   </div>
 </section>
@@ -944,7 +876,7 @@ def build_materials():
 <section class="section">
   <div class="wrap">
     <h2>Andere Materialien</h2>
-    <div class="mat-grid">{others}</div>
+    <ul class="materialliste">{others}</ul>
   </div>
 </section>
 """
@@ -953,79 +885,46 @@ def build_materials():
 
 # ---------------------------------------------------------------- Druckservice
 def build_service():
-    mats = "\n".join(mat_card(m, "") for m in MATERIALIEN)
-    body = f"""<section class="hero">
+    mats = ", ".join(f'<a href="material/{m["id"]}.html">{E(m["name"])}</a>' for m in MATERIALIEN)
+    body = f"""<section class="page-head">
   <div class="wrap">
-    <div>
-      <span class="eyebrow">Druckservice</span>
-      <h1>Ihre Datei, <em>unser Drucker.</em></h1>
-      <p class="lead">Ersatzteile, Prototypen, Kleinserien, Vereinslogos: Schicken Sie uns Ihre STL-, 3MF- oder STEP-Datei oder beschreiben Sie das Teil. Sie bekommen innerhalb eines Werktags einen Festpreis.</p>
-      <div class="hero-actions"><a class="btn btn-primary" href="kontakt.html">Kostenloses Angebot anfordern</a><a class="btn btn-ghost" href="materialien.html">Materialien vergleichen</a></div>
-      <div class="hero-facts">
-        <span>{SVG_CHECK} Kostenloses Angebot in 24 h</span>
-        <span>{SVG_CHECK} Festpreis vor dem Druck</span>
-        <span>{SVG_CHECK} Ab 1 Stück</span>
-      </div>
-    </div>
-    <div class="hero-art">
-      <svg viewBox="0 0 400 400" role="img" aria-label="Von der Datei zum gedruckten Teil">
-        <rect x="40" y="70" width="150" height="190" rx="12" fill="#2e3f37"/>
-        <rect x="56" y="88" width="118" height="12" rx="4" fill="#8e968f"/><rect x="56" y="110" width="90" height="12" rx="4" fill="#8e968f"/><rect x="56" y="132" width="104" height="12" rx="4" fill="#8e968f"/>
-        <text x="115" y="230" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700" font-size="26" fill="#f1e6d2">.STL</text>
-        <path d="M200 165 h60" stroke="#9e6230" stroke-width="8" stroke-linecap="round"/><path d="M250 148 l24 17 l-24 17z" fill="#9e6230"/>
-        <g fill="#9e6230"><rect x="280" y="236" width="90" height="16" rx="4"/><rect x="284" y="220" width="82" height="16" rx="4" opacity=".92"/><rect x="288" y="204" width="74" height="16" rx="4" opacity=".84"/><rect x="292" y="188" width="66" height="16" rx="4" opacity=".76"/><rect x="296" y="172" width="58" height="16" rx="4" opacity=".68"/><rect x="300" y="156" width="50" height="12" rx="4" opacity=".55"/></g>
-        <rect x="260" y="256" width="130" height="18" rx="6" fill="#8e968f"/>
-        <ellipse cx="325" cy="300" rx="80" ry="12" fill="#000" opacity=".12"/>
-      </svg>
-    </div>
-  </div>
-</section>
-<section class="section-tight">
-  <div class="wrap">
-    <span class="eyebrow">Leistungen</span>
-    <h2>Was wir für Sie drucken</h2>
-    <div class="feature-grid">
-      <div class="feature">{ICONS['pen']}<h3>Ersatzteile</h3><p class="muted">Abgebrochene Halter, Zahnräder, Knöpfe, Abdeckungen, Clips. Mit Datei oder nach Foto und Maßen nachkonstruiert.</p></div>
-      <div class="feature">{ICONS['layer']}<h3>Prototypen</h3><p class="muted">Formstudien, Passungsmuster und Funktionsmuster für Entwickler, Handwerker und Studierende. Schnell, auch über Nacht.</p></div>
-      <div class="feature">{ICONS['truck']}<h3>Kleinserien</h3><p class="muted">10 bis 500 Stück, zum Beispiel Vereinsanhänger, Messe-Giveaways, Halterungen für Betriebe. Mengenrabatt ab 10 Stück.</p></div>
-      <div class="feature">{ICONS['leaf']}<h3>Nachbearbeitung</h3><p class="muted">Schleifen, Füllern, Lackieren, Aceton-Glätten bei ABS, Gewindeeinsätze einpressen, Magnete einkleben.</p></div>
-    </div>
+    <h1>Ihre Datei, gedruckt in Celle.</h1>
+    <p class="lead">Schicken Sie eine STL-, 3MF- oder STEP-Datei, ein Foto vom kaputten Teil oder eine Beschreibung. Sie erfahren Preis und Lieferzeit, bevor gedruckt wird.</p>
+    <p><a class="btn btn-primary" href="kontakt.html">Angebot für meine Datei anfordern</a></p>
   </div>
 </section>
 <section class="section">
-  <div class="wrap">
-    <span class="eyebrow">Ablauf</span>
-    <h2>Vom Upload zum Paket</h2>
-    <div class="steps">
-      <div class="step"><h3>Anfrage</h3><p class="muted">Formular ausfüllen: Stückzahl, Material, Einsatzzweck. Die Datei schicken Sie per Mail an die Adresse aus unserer Antwort.</p></div>
-      <div class="step"><h3>Prüfung und Festpreis</h3><p class="muted">Wir prüfen Wandstärken, Überhänge und Maße, schlagen bei Bedarf Material oder Ausrichtung vor und nennen einen Festpreis mit Liefertermin.</p></div>
-      <div class="step"><h3>Druck und Kontrolle</h3><p class="muted">Nach Ihrer Freigabe und Zahlung wird gedruckt. Jedes Teil wird vermessen und von Stützmaterial befreit.</p></div>
-      <div class="step"><h3>Versand</h3><p class="muted">Verpackt in Papier und Karton, mit DHL und Sendungsnummer. Abholung nach Absprache möglich.</p></div>
-    </div>
+  <div class="wrap shop-block">
+    <div class="side"><h2>Was sich drucken lässt</h2></div>
+    <dl class="spaltenliste">
+      <div><dt>Größe</dt><dd>Bis 25 cm Kantenlänge am Stück. Größeres besprechen wir einzeln.</dd></div>
+      <div><dt>Material</dt><dd>{mats}. Der <a href="materialien.html">Vergleich</a> zeigt, was wofür taugt.</dd></div>
+      <div><dt>Schichthöhe</dt><dd>0,12 bis 0,28 mm. Feinere Schichten dauern länger.</dd></div>
+      <div><dt>Dateien</dt><dd>STL, 3MF, STEP oder OBJ in Millimetern, Modell geschlossen.</dd></div>
+      <div><dt>Wandstärke</dt><dd>Mindestens 1,2 mm, bei TPU 2 mm.</dd></div>
+      <div><dt>Stückzahl</dt><dd>Ab 1 Stück.</dd></div>
+    </dl>
   </div>
 </section>
 <section class="section-tight">
-  <div class="wrap prose">
-    <h2>Festpreis statt Überraschung</h2>
-    <p>Sie bekommen vor dem Druck einen Festpreis mit Liefertermin, kostenlos und unverbindlich. Erst wenn Sie freigeben, läuft der Drucker. Nachbearbeitung und Konstruktion stehen getrennt im Angebot, es kommt nichts dazu, was nicht vorher besprochen wurde. Ab zehn gleichen Teilen gibt es Mengenpreise.</p>
-    <div class="trust-list"><span>{SVG_CHECK} Angebot innerhalb eines Werktags</span><span>{SVG_CHECK} Unverbindlich, keine Vorkasse für das Angebot</span><span>{SVG_CHECK} Ab 1 Stück, Mengenpreise ab 10 Stück</span><span>{SVG_CHECK} Nachdruck kostenlos, wenn ein Teil nicht passt wie besprochen</span></div>
-    <h2>Voraussetzungen für die Datei</h2>
-    <ul>
-      <li>Format STL, 3MF, STEP oder OBJ, Einheit Millimeter, Modell geschlossen („wasserdicht“)</li>
-      <li>Wandstärke mindestens 1,2 mm, bei TPU 2 mm</li>
-      <li>Maximal 25 × 25 × 25 cm am Stück, größere Teile segmentieren wir</li>
-      <li>Keine Waffen, keine Markenprodukte zum Weiterverkauf, keine sicherheitsrelevanten Teile</li>
-    </ul>
+  <div class="wrap shop-block">
+    <div class="side"><h2>So läuft es</h2></div>
+    <ol class="ablauf">
+      <li><h3>Anfrage</h3><p>Formular ausfüllen. Die Datei schicken Sie per E-Mail an die Adresse aus unserer Antwort.</p></li>
+      <li><h3>Prüfung und Preis</h3><p>Wir prüfen Wandstärken, Überhänge und Maße und nennen Preis und Liefertermin.</p></li>
+      <li><h3>Druck</h3><p>Nach Ihrer Freigabe wird gedruckt.</p></li>
+      <li><h3>Übergabe</h3><p>Versand innerhalb Deutschlands oder Abholung in Celle.</p></li>
+    </ol>
   </div>
 </section>
-<section class="section-tight">
-  <div class="wrap">
-    <h2>Materialien zur Auswahl</h2>
-    <div class="mat-grid">{mats}</div>
+<section class="section">
+  <div class="wrap shop-block">
+    <div class="side"><h2>Was wir nicht drucken</h2></div>
+    <p class="prose" style="margin:0">Keine Waffen oder Waffenteile, keine markengeschützten Teile zum Weiterverkauf und keine Teile, deren Versagen Menschen gefährden kann, etwa tragende Fahrzeugteile oder Druckbehälter.</p>
   </div>
 </section>
 """
-    page("druckservice.html", f"3D-Druckservice für eigene Dateien · {C.MARKE}", "3D-Druck auf Bestellung: Ersatzteile, Prototypen und Kleinserien aus PLA, PETG, ABS oder TPU. Festpreis innerhalb eines Werktags, ab 1 Stück.", body, "service")
+    page("druckservice.html", f"3D-Druckservice für eigene Dateien · {C.MARKE}", "Eigene Datei, Ersatzteil oder Kleinserie in PLA, PETG, ABS oder TPU drucken lassen: Preis und Lieferzeit vor dem Druck, ab 1 Stück.", body, "service")
 
 
 # ---------------------------------------------------------------- FAQ
@@ -1033,11 +932,14 @@ def build_faq():
     groups = ""
     for title, items in FAQ:
         groups += f'<h2>{E(title)}</h2>' + "".join(f'<details class="faq-item"><summary>{E(q)}</summary><p>{E(a)}</p></details>' for q, a in items)
-    body = f"""<section class="section-tight">
-  <div class="wrap prose">
-    <span class="eyebrow">Hilfe</span>
+    body = f"""<section class="page-head">
+  <div class="wrap">
     <h1>Fragen und Antworten</h1>
-    <p class="muted">Die häufigsten Fragen zu Bestellung, Material und Druckservice. Nicht dabei? <a href="kontakt.html">Schreiben Sie uns</a>.</p>
+    <p class="lead">Zu Bestellung, Material und Druckservice. Nicht dabei? <a href="kontakt.html">Schreiben Sie uns</a>.</p>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap prose">
     {groups}
   </div>
 </section>

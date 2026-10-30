@@ -31,7 +31,7 @@ Artikel ändern: `build/produkte.py` bearbeiten, dann `python3 build/images.py` 
 
 ## Logo
 
-`brand/` enthält das Logo (Bildmarke: ein S aus Druckschichten in Sand bis Kupfer auf Tannengrün; Wortmarke „Schicht·werk“ in Fraunces als Pfade; dazu ein rundes Siegel für Verpackung und Aufkleber):
+`brand/` enthält das Logo (Bildmarke: ein S aus Druckschichten in Sand bis Kupfer auf Tannengrün; Wortmarke „Schichtatelier“ in Abril Fatface als Pfade; dazu ein rundes Siegel für Verpackung und Aufkleber):
 SVG hell/dunkel, mit und ohne Kachel, einfarbig, sowie PNG-Exporte (2400 px Logo, 1024 px Marke). Erzeugt mit `python3 build/logo.py`.
 Favicon und App-Icons in `website-fertig/` entstehen aus derselben Marke (`python3 build/images.py`).
 
@@ -60,7 +60,7 @@ Vorauswahl. `STANDARDFARBEN` für Artikel, die es in allen Farben gibt. Die Kart
 
 ## Schriften
 
-Überschriften, Produktnamen, Preise und Wortmarke: Fraunces (variabel, SIL OFL), Fließtext und Bedienelemente: Inter. Beide liegen lokal
+Überschriften, große Preise und Wortmarke: Abril Fatface (SIL OFL), Fließtext, Menü, Buttons und Kartentitel: Hanken Grotesk (variabel, SIL OFL). Beide liegen lokal
 unter `website-fertig/assets/fonts/`, Lizenzhinweise in `OFL.txt`. Betonte Wörter in Überschriften stehen in `<em>` (kursiv, grün).
 
 ## Portal-Katalog
@@ -70,6 +70,6 @@ Ohne Antwort des Portals gilt die eingebaute Liste aus `build/produkte.py`. Arti
 
 ## Langes Logo
 
-`python3 build/logo_lockup.py` erzeugt aus der Schrift der Website (Fraunces, Inter, Pinyon Script, alle SIL OFL, als Pfade) das lange Logo:
+`python3 build/logo_lockup.py` erzeugt aus der Schrift der Website (Abril Fatface, Hanken Grotesk, Pinyon Script, alle SIL OFL, als Pfade) das lange Logo:
 `brand/schichtatelier-logo-voll*.svg` (Wortmarke mit Düse im „i“, Druckspur-Linie, „3D MANUFAKTUR“, Leistungszeile, Signatur „Y & C“, hell und dunkel, dazu PNG 2400 px)
 und `brand/schichtatelier-wortmarke*.svg` (ohne Zeile und Signatur). Die Wortmarke steht im Seitenkopf (ohne Zeilen) und im Footer (mit „3D MANUFAKTUR“), das Schicht-S bleibt Favicon, App-Icon und Siegel.

@@ -27,9 +27,9 @@ def layers(x, y, w, h, color, step=7, rx=0):
     return "".join(out)
 
 
-def frame(inner, bg="#ece7dd"):
+def frame(inner, bg="#e4eae5"):
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
-            '<defs><radialGradient id="g" cx="50%%" cy="40%%" r="70%%"><stop offset="0" stop-color="#fcfaf5"/><stop offset="1" stop-color="%s"/></radialGradient>'
+            '<defs><radialGradient id="g" cx="50%%" cy="40%%" r="70%%"><stop offset="0" stop-color="#f6f9f5"/><stop offset="1" stop-color="%s"/></radialGradient>'
             '<filter id="sh" x="-20%%" y="-20%%" width="140%%" height="160%%"><feGaussianBlur stdDeviation="14"/></filter></defs>'
             '<rect width="%d" height="%d" fill="url(#g)"/>'
             '<ellipse cx="400" cy="470" rx="230" ry="34" fill="#000" opacity=".16" filter="url(#sh)"/>'
@@ -225,7 +225,7 @@ def compose_cutout(obj, out_path, W=1200, H=900, anordnung=None):
         for x in range(60):
             d = ((x - 30) / 30) ** 2 + ((y - 18) / 22) ** 2
             f = min(1.0, d ** 0.5)
-            c1, c2 = (252, 250, 245), (236, 231, 221)
+            c1, c2 = (246, 249, 245), (226, 233, 228)
             px[x, y] = tuple(int(c1[k] + (c2[k] - c1[k]) * f) for k in range(3))
     bg = small.resize((W, H), Image.BICUBIC).convert("RGBA")
     base_scale = min((W * 0.62) / obj.width, (H * 0.74) / obj.height)

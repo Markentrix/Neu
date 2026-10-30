@@ -7,16 +7,16 @@ from fontTools.pens.transformPen import TransformPen
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 OUT = os.path.join(ROOT, "brand")
-FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "website-fertig", "assets", "fonts", "Fraunces-normal.woff2")
-FONT_LOCATION = {"wght": 600, "opsz": 72}
+FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "website-fertig", "assets", "fonts", "AbrilFatface.woff2")
+FONT_LOCATION = {}
 NAVY, CREAM = "#1f4d3a", "#f1ede4"
 L1, L2, L3 = "#f1e6d2", "#d9a06b", "#b8763f"   # Schichten hell -> dunkel (Sand -> Kupfer)
 
 
 def s_path():
-    """Umriss des S aus Fraunces (Bold, opsz 144), zentriert in 64x64."""
+    """Umriss des S aus Abril Fatface, zentriert in 64x64."""
     from fontTools.pens.boundsPen import BoundsPen
-    font = TTFont(FONT); gs = font.getGlyphSet(location={"wght": 700, "opsz": 144}); g = gs[font.getBestCmap()[ord("S")]]
+    font = TTFont(FONT); gs = font.getGlyphSet(); g = gs[font.getBestCmap()[ord("S")]]
     upm = font["head"].unitsPerEm; size = 56; sc = size / upm
     bp = BoundsPen(gs); g.draw(bp); b = bp.bounds
     gw = (b[2] - b[0]) * sc; gh = (b[3] - b[1]) * sc
@@ -69,7 +69,7 @@ def seal(size=240):
 
 
 def wordmark_paths(text, size, x0, baseline, tracking=0.0):
-    """Text als SVG-Pfade aus Inter Bold. Gibt (pfade, breite) zurück."""
+    """Text als SVG-Pfade aus Hanken Grotesk. Gibt (pfade, breite) zurück."""
     font = TTFont(FONT); gs = font.getGlyphSet(location=FONT_LOCATION) if "fvar" in font else font.getGlyphSet(); cmap = font.getBestCmap(); upm = font["head"].unitsPerEm
     kern = {}
     try:
@@ -112,9 +112,9 @@ def logo_svg(dark_bg=False, with_tile=True):
 def main():
     os.makedirs(OUT, exist_ok=True)
     ring_paths = ""
-    # Siegel-Umschrift aus Inter Bold als Pfade entlang des Kreises
+    # Siegel-Umschrift aus Hanken Grotesk als Pfade entlang des Kreises
     import math
-    ifont = TTFont("/usr/share/fonts/opentype/inter/Inter-Bold.otf"); igs = ifont.getGlyphSet(); icmap = ifont.getBestCmap(); iupm = ifont["head"].unitsPerEm
+    ifont = TTFont(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "website-fertig", "assets", "fonts", "HankenGrotesk.woff2")); igs = ifont.getGlyphSet(); icmap = ifont.getBestCmap(); iupm = ifont["head"].unitsPerEm
     text = "SCHICHTATELIER · 3D-DRUCK-MANUFAKTUR · CELLE · "; fsize = 6.5; r = 44.5; sc = fsize / iupm
     total = sum(igs[icmap[ord(ch)]].width * sc + 1.6 for ch in text); ang = -90 - 360 * 0 ; circ = 2 * math.pi * r
     step_deg = 360 / circ

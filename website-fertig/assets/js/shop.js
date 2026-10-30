@@ -10,7 +10,6 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var ROOT = (document.body.getAttribute("data-root") || "");
-  var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   var VOUCHER = null, coupon = null, catalogLoaded = false, catalogHooks = [];
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
@@ -89,14 +88,14 @@
   /* ---------- Karten (gleiches Markup wie der Generator) ---------- */
   function cardHtml(p, h) {
     h = h || "h3"; var href = hrefOf(p);
-    var badge = p.tags.indexOf("bestseller") >= 0 ? '<span class="badge badge-accent">Bestseller</span>' : p.tags.indexOf("neu") >= 0 ? '<span class="badge">Neu</span>' : (p.tags.indexOf("personalisiert") >= 0 || p.text) ? '<span class="badge">Personalisierbar</span>' : "";
-    var action = p.text ? '<a class="btn btn-primary" href="' + esc(href) + '">Jetzt gestalten</a>' : '<button class="btn btn-primary" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
+    var notes = []; if (p.text) notes.push("Mit Wunschtext"); if (p.farben.length > 1) notes.push("in " + p.farben.length + " Farben");
+    var action = p.text ? '<a class="btn btn-primary" href="' + esc(href) + '">Text und Farbe wählen</a>' : '<button class="btn btn-primary" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
     var tags = p.tags.concat(p.text && p.tags.indexOf("personalisiert") < 0 ? ["personalisiert"] : []).join(" ");
     return '<article class="card" data-kat="' + esc(p.kat) + '" data-tags="' + esc(tags) + '" data-preis="' + p.preis + '" data-name="' + esc(p.name) + '" data-pos="' + (p._pos || 0) + '">' +
       '<a class="card-img" href="' + esc(href) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="' + imgDim(p).w + '" height="' + imgDim(p).h + '" alt="" loading="lazy"></a>' +
-      '<div class="card-body"><span class="card-cat">' + esc(KAT[p.kat] || "") + '</span><' + h + '><a href="' + esc(href) + '">' + esc(p.name) + '</a></' + h + '>' +
-      '<p class="small muted" style="margin:0">' + esc(p.kurz) + '</p><div class="price">' + EUR(p.preis) + ' ' + badge + '</div>' +
-      (p.farben.length > 1 ? '<span class="card-colors">in ' + p.farben.length + ' Farben</span>' : "") + action +
+      '<div class="card-body"><' + h + '><a href="' + esc(href) + '">' + esc(p.name) + '</a></' + h + '>' +
+      '<p class="small">' + esc(p.kurz) + '</p><div class="price">' + EUR(p.preis) + '</div>' +
+      (notes.length ? '<span class="card-note">' + esc(notes.join(", ")) + '</span>' : "") + action +
       '<a class="card-more" href="' + esc(href) + '">Details ansehen</a></div></article>';
   }
 
@@ -481,7 +480,7 @@
           positionen: c.map(function (i) { var p = findProduct(i.id); return { id: p.id, name: p.name, farbe: i.farbe || "", farbeName: i.farbe ? colorName(i.farbe) : "", text: i.text || "", menge: i.menge, einzelpreis: p.preis }; }),
           zwischensumme: t.zwischensumme, versand: t.versand, summe: t.gesamt,
           bestellung: cartAsText(c), lieferadresse: adr, _zuzahlen: t.zuZahlen,
-          nachricht: "BESTELLUNG über den Online-Shop\n\n" + cartAsText(c) + "\n\nZwischensumme: " + EUR(t.zwischensumme) + "\nLieferung: " + (la === "abholung" ? "Abholung in Celle" : "Versand DHL") + "\nVersand: " + (t.versand === 0 ? "kostenlos" : EUR(t.versand)) + "\nGesamt: " + EUR(t.gesamt) + (coupon ? "\nGutschein " + coupon.code + ": −" + EUR(t.gutschein) + "\nZu zahlen: " + EUR(t.zuZahlen) : "") + "\nZahlungsart: " + za + "\nLieferadresse: " + adr + "\n\nAnmerkung des Kunden: " + ($("[name=anmerkung]", checkout).value || "–")
+          nachricht: "BESTELLUNG über den Online-Shop\n\n" + cartAsText(c) + "\n\nZwischensumme: " + EUR(t.zwischensumme) + "\nLieferung: " + (la === "abholung" ? "Abholung in Celle" : "Versand") + "\nVersand: " + (t.versand === 0 ? "kostenlos" : EUR(t.versand)) + "\nGesamt: " + EUR(t.gesamt) + (coupon ? "\nGutschein " + coupon.code + ": −" + EUR(t.gutschein) + "\nZu zahlen: " + EUR(t.zuZahlen) : "") + "\nZahlungsart: " + za + "\nLieferadresse: " + adr + "\n\nAnmerkung des Kunden: " + ($("[name=anmerkung]", checkout).value || "–")
         };
         if (coupon) o.gutscheincode = coupon.code;
         return o;
@@ -595,17 +594,17 @@
     var abh = CFG.abholung === false ? "" : ", oder Abholung in Celle";
     host.innerHTML = '<nav aria-label="Pfad" class="crumbs"><a href="' + ROOT + 'index.html">Start</a> › <a href="' + ROOT + 'shop.html">Shop</a> › ' + esc(KAT[p.kat] || "Artikel") + '</nav>' +
       '<div class="product"><div><div class="product-media"><img id="pd-img" src="' + esc(/^(\/|https?:)/.test(mainUrl) ? mainUrl : ROOT + mainUrl) + '" width="' + ((main && main.w) || 1200) + '" height="' + ((main && main.h) || 900) + '" alt="' + esc(mainAlt) + '"></div>' + thumbs + '</div>' +
-      '<div class="product-info"><span class="eyebrow">' + esc(KAT[p.kat] || "") + '</span><h1>' + esc(p.name) + '</h1>' +
+      '<div class="product-info"><h1>' + esc(p.name) + '</h1>' +
       '<p class="price">' + EUR(p.preis) + ' <small>' + esc(CFG.preishinweis || "") + ', zzgl. <a href="' + ROOT + 'versand.html">Versand</a></small></p><p>' + esc(p.kurz) + '</p>' +
       '<form id="kaufen" data-id="' + esc(p.id) + '" novalidate>' + (p.farben.length ? '<fieldset style="border:0;padding:0;margin:0 0 14px"><legend style="font-weight:600;margin-bottom:8px">Farbe</legend><div class="swatches">' + sw + '</div></fieldset>' : "") + textField +
       '<div class="buyrow"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="99" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span><button class="btn btn-primary" type="submit">In den Warenkorb</button></div>' +
       '<p class="added" role="status">Liegt im Warenkorb. <a href="' + ROOT + 'warenkorb.html">Zum Warenkorb</a> oder <a href="' + ROOT + 'shop.html">weiter stöbern</a>.</p></form>' +
       '<p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>' +
-      '<div class="trust-list"><span>' + CHECK + ' Versandfrei ab ' + EUR(CFG.versandfreiAb) + ', sonst ' + EUR(CFG.versandPauschale) + '</span><span>' + CHECK + (p.text ? ' Personalisiert für Sie gefertigt, Vorschau vor dem Druck' : ' 14 Tage Rückgaberecht') + '</span><span>' + CHECK + ' PayPal-Käuferschutz' + abh + '</span><span>' + CHECK + ' Nachdruck-Garantie bei Transportschäden</span></div>' +
-      '<dl class="specs">' + specs + '</dl><h2 style="font-size:1.15rem">Beschreibung</h2>' + desc +
+      '<dl class="konditionen"><dt>Versand</dt><dd>' + EUR(CFG.versandPauschale) + ', ab ' + EUR(CFG.versandfreiAb) + ' kostenlos</dd>' + (CFG.abholung === false ? "" : '<dt>Abholung</dt><dd>Celle, kostenlos, nach Terminabsprache</dd>') + '<dt>Zahlung</dt><dd>PayPal' + (CFG.abholung === false ? "" : " oder bei Abholung") + '</dd><dt>Rückgabe</dt><dd>' + (p.text ? "ausgeschlossen, weil nach Ihrem Text gefertigt" : "14 Tage") + '</dd></dl>' +
+      '<dl class="specs">' + specs + '</dl><h2 class="sub">Beschreibung</h2>' + desc +
       '<p class="small muted">Hinweis: 3D-gedruckte Teile zeigen feine Schichtlinien, das ist Teil des Verfahrens. Farben können je nach Filamentcharge leicht abweichen.</p>' +
       (p.text ? '<p class="small muted">Personalisierter Artikel: Nach Ihrer Freigabe des Textes ist der Kauf vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB). <a href="' + ROOT + 'widerruf.html">Mehr dazu</a>.</p>' : "") + '</div></div>' +
-      (related.length ? '<h2 style="margin-top:40px">Oft zusammen bestellt</h2><div class="grid">' + related.map(function (q) { return cardHtml(q, "h3"); }).join("") + "</div>" : "");
+      (related.length ? '<h2 style="margin-top:56px">Weitere Artikel</h2><div class="grid">' + related.map(function (q) { return cardHtml(q, "h3"); }).join("") + "</div>" : "");
     var sticky = document.createElement("div"); sticky.className = "sticky-buy"; sticky.setAttribute("aria-hidden", "true");
     sticky.innerHTML = '<span class="sticky-price">' + EUR(p.preis) + '</span><button class="btn btn-primary" type="button" data-sticky-buy>In den Warenkorb</button>'; document.body.appendChild(sticky);
     bindBuy($("#kaufen")); setupSticky(); initDelivery();

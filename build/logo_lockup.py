@@ -1,5 +1,5 @@
 """Langes Logo "Schichtatelier": Wortmarke mit Druckdüse im „i“ und Druckspur-Linie, dazu Zeilen und Signatur.
-Alle Schrift wird als Pfade ausgegeben (Fraunces, Inter, Pinyon Script; alle SIL OFL).
+Alle Schrift wird als Pfade ausgegeben (Abril Fatface, Hanken Grotesk, Pinyon Script; alle SIL OFL).
 Aufruf: python3 build/logo_lockup.py  (schreibt brand/schichtatelier-logo-voll*.svg, -wortmarke*.svg und PNGs)
 """
 import os, sys, json, subprocess, tempfile
@@ -11,15 +11,14 @@ from fontTools.pens.boundsPen import BoundsPen
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 OUT = os.path.join(ROOT, "brand")
-FRAUNCES = os.path.join(ROOT, "website-fertig", "assets", "fonts", "Fraunces-normal.woff2")
-INTER = "/usr/share/fonts/opentype/inter/Inter-Medium.otf"
-INTER_REG = "/usr/share/fonts/opentype/inter/Inter-Regular.otf"
+DISPLAY = os.path.join(ROOT, "website-fertig", "assets", "fonts", "AbrilFatface.woff2")
+TEXT = os.path.join(ROOT, "website-fertig", "assets", "fonts", "HankenGrotesk.woff2")
 PINYON = os.path.join(HERE, "brand-src", "PinyonScript.woff2")
 
 # Farbwelten: main = "Schicht", acc = "atelier" und Linie, sub = "3D MANUFAKTUR", ink = Zeile, sig = Signatur
 THEMES = {
-    "hell": dict(main="#1f4d3a", acc="#9e6230", sub="#2f6b52", ink="#1c2a24", sig="#9e6230"),
-    "dunkel": dict(main="#f1ede4", acc="#d9a06b", sub="#7fbfa2", ink="#f1ede4", sig="#d9a06b"),
+    "hell": dict(main="#1f4d3a", acc="#9e6230", sub="#2f6b52", ink="#15231c", sig="#9e6230"),
+    "dunkel": dict(main="#f1ede4", acc="#e2ae7c", sub="#8fc7ab", ink="#f1ede4", sig="#e2ae7c"),
     "css": dict(main="var(--logo-main)", acc="var(--logo-accent)", sub="var(--logo-sub)", ink="var(--ink)", sig="var(--logo-accent)"),
 }
 
@@ -56,8 +55,8 @@ class Face:
 def build(theme="hell", full=True, E=200.0, padf=0.22, sub=True, subscale=1.0):
     """Liefert (svg_innen, viewBox) für das Logo. E = Schriftgröße der Wortmarke."""
     T = THEMES[theme]
-    fr = Face(FRAUNCES, {"wght": 640, "opsz": 144})
-    inter = Face(INTER); interr = Face(INTER_REG); sig = Face(PINYON)
+    fr = Face(DISPLAY)
+    inter = Face(TEXT, {"wght": 600}); interr = Face(TEXT, {"wght": 450}); sig = Face(PINYON)
     # Wortmarke: Schicht + atel + (i ohne Punkt) + er
     g1 = [fr.name(c) for c in "Schicht"]
     g2 = [fr.name(c) for c in "atel"] + ["dotlessi"] + [fr.name(c) for c in "er"]
