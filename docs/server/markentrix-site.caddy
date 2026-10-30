@@ -1,4 +1,5 @@
-# Konfiguration der Markentrix-Website (statisches dist/). Stand 19.10.2026.
+# Konfiguration der Markentrix-Website (statisches dist/). Stand 30.10.2026.
+# Neu am 30.10.2026: Weiterleitung /pfad/ -> /pfad (vorher 404). Nach dem Einspielen Caddy neu laden.
 # Neu am 19.10.2026: zweiter Endpunkt /api/check.php (Website-Check) neben /api/anfrage.php.
 # Ziel: /opt/neu/server/caddy/snippets/markentrix-site.caddy (ersetzt die Fassung vom 07.10.2026).
 # Verwendung in /srv/caddy-sites/markentrix.de.caddy bleibt unverändert:  root * /srv/sites/markentrix  +  import markentrix_site
@@ -57,6 +58,13 @@
                 not path /404.html
         }
         redir @dothtml /{re.dothtml.1} 301
+
+        # Abschließender Schrägstrich: /preise/ -> /preise (301). Beispielseiten unter /beispiel/ bleiben mit Schrägstrich erreichbar.
+        @slash {
+                path_regexp slash ^/(.+)/$
+                not path /beispiel/*
+        }
+        redir @slash /{re.slash.1} 301
 
         # Caching
         @longcache path /assets/* /fonts/* /beispiel/*/*.css /beispiel/*/*.js
