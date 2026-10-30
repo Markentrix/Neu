@@ -22,4 +22,4 @@ Lokal ansehen: `cd dist && python3 -m http.server 8080` → http://localhost:808
 Inhalte stehen in `src/pages/**.html`, Gestaltung ausschließlich in `static/assets/mx.css`. Konventionen und Komponentenkatalog: `docs/SEITENBAU.md`. Nach jeder Änderung bauen und `dist/` mit committen.
 
 ## Deployment
-Produktiv läuft die Seite auf einem Hetzner-Server mit nginx (`docs/nginx-markentrix.conf`, inkl. PHP-Endpunkt für die Formulare). `netlify.toml` bleibt für Vorschau-Deploys. Details: `docs/DEPLOY.md`.
+Produktiv läuft die Seite auf einem Hetzner-Server mit Caddy und PHP-FPM (`docs/server/markentrix-site.caddy`, Einspielen und Veröffentlichen: `docs/server/`). Die Formulare laufen über `static/api/anfrage.php`, der Website-Check über `static/api/check.php`. `docs/nginx-markentrix.conf` und `netlify.toml` sind ältere Stände und nur noch für Vorschau-Deploys gedacht. Details: `docs/DEPLOY.md`.
