@@ -445,3 +445,42 @@ textarea{min-height:140px;resize:vertical}
   .nav.open,.sticky-buy.show{animation:none}
   .toast{transform:translateX(-50%)}
 }
+
+
+/* ===== Bewegung: ein Wortschatz, die Schicht ===================================
+   Alles baut sich in harten Stufen auf (steps + clip-path), von unten nach oben wie ein Druck
+   oder von links nach rechts wie der Druckkopf. Keine weichen Einblendungen, kein Bounce, kein Zoom. */
+@keyframes up{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes quer{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes kopf{from{top:100%;opacity:1}90%{opacity:1}to{top:0;opacity:0}}
+
+/* Hero: Text druckt sich nacheinander, der Druckkopf läuft mit dem Foto nach oben */
+.hero-copy h1{animation:up .9s steps(9,end) .05s backwards}
+.hero-copy p{animation:up .5s steps(6,end) .5s backwards}
+.hero-actions{animation:up .4s steps(4,end) .8s backwards}
+.hero-photo::after{content:"";position:absolute;left:0;right:0;top:100%;height:4px;background:var(--accent-hi);pointer-events:none;animation:kopf 1.2s steps(14,end) both}
+.page-head h1{animation:up .6s steps(8,end) backwards}
+.page-head .lead{animation:up .45s steps(6,end) .25s backwards}
+
+/* Beim Scrollen: Überschriften, Karten, Listenzeilen und das Datei-Band bauen sich einmal auf */
+.rv.pre{clip-path:inset(100% 0 0 0)}
+.rv.run{animation:up .55s steps(7,end) var(--d,0s) backwards}
+.materialliste li.rv.pre,.ablauf li.rv.pre,.spaltenliste>div.rv.pre{clip-path:inset(0 100% 0 0)}
+.materialliste li.rv.run,.ablauf li.rv.run,.spaltenliste>div.rv.run{animation:quer .6s steps(12,end) var(--d,0s) backwards}
+.datei.rv.run{animation-duration:.9s;animation-timing-function:steps(14,end)}
+.card.rv.run{animation-duration:.6s}
+
+/* Kartentitel: Kupferlinie läuft beim Überfahren von links ein (nur mit Maus) */
+.card h2 a,.card h3 a{background:linear-gradient(var(--accent),var(--accent)) 0 calc(100% - .55em)/0 2px no-repeat;transition:background-size .28s var(--ease-out)}
+@media (hover:hover){.card h2 a:hover,.card h3 a:hover{text-decoration:none;background-size:100% 2px}}
+
+/* Seitenwechsel: kurzer Übergang in Browsern, die ihn kennen */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.16s;animation-timing-function:var(--ease-out)}
+
+@media (prefers-reduced-motion:reduce){
+  .hero-copy h1,.hero-copy p,.hero-actions,.page-head h1,.page-head .lead,.hero-photo::after{animation:none}
+  .hero-photo::after{display:none}
+  .rv.pre{clip-path:none}.rv.run{animation:none}
+  @view-transition{navigation:none}
+}

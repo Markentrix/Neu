@@ -78,9 +78,20 @@ Unterseiten nutzen dieselben Tokens, Navigation und Footer. Rhythmus: Hero sehr 
 
 ## Signatur (genau eine)
 
-**Die Schicht.** Der Seitenaufbau druckt sich Schicht für Schicht: das Hero-Foto erscheint von unten nach oben in 14 harten Stufen (`steps()`), danach steht die Schichtkante als Treppe unter dem Hero.
-Dieselbe Idee steckt im Logo (Druckspur-Linie in die Düse) und im Schicht-S. Sonst gibt es keine Effekte; alles andere ist ruhig.
-Mit `prefers-reduced-motion` steht das Foto sofort.
+**Die Schicht.** Der Seitenaufbau druckt sich Schicht für Schicht: das Hero-Foto erscheint von unten nach oben in 14 harten Stufen (`steps()`), ein Druckkopf (kupferne Linie) läuft mit der Kante nach oben, danach steht die Schichtkante als Treppe unter dem Hero.
+Dieselbe Idee steckt im Logo (Druckspur-Linie in die Düse) und im Schicht-S.
+
+## Bewegung (auf ausdrücklichen Wunsch des Kunden ausgebaut)
+
+Der Kunde wollte eine lebendigere, animierte Seite. Die Verbote der Vorgabe (dasselbe Fade-up an jeder Sektion, Bounce, hochzählende Zahlen, Zoom auf Bildern, `transition: all`) bleiben trotzdem tabu. Statt eines Effekts pro Abschnitt gibt es **einen Wortschatz**, abgeleitet aus dem Druck:
+
+- Alles baut sich in **harten Stufen** auf (`steps()` mit `clip-path`), von unten nach oben wie eine Schicht oder von links nach rechts wie der Druckkopf. Keine weichen Einblendungen.
+- Seitenaufbau: Hero-Headline, Text und Knopf drucken sich nacheinander, das Foto folgt mit Druckkopf-Linie, dann die Schichtkante. Unterseiten drucken Titel und Einleitung.
+- Beim Scrollen bauen sich Überschriften, Karten, Listenzeilen (Materialien, Ablauf) und das vollbreite Datei-Band einmal auf; Geschwister mit kleinem Versatz. Die Lieferzeit-Balken laufen nacheinander von links nach rechts.
+- Rückmeldung: Knöpfe schrumpfen beim Drücken auf 97 %, der Warenkorb-Zähler pulsiert beim Hinzufügen, Kartentitel zeigen beim Überfahren eine einlaufende Kupferlinie.
+- Alles Weiche (Hover, Menü, Hinweis) nutzt eine Ease-out-Kurve unter 300 ms. Hover nur mit Maus.
+- Seitenwechsel mit kurzem Übergang (View Transitions) in Browsern, die ihn kennen.
+- `prefers-reduced-motion`: alles steht sofort, keine Animation.
 
 ## Plan gegen die VERBOTEN-Liste (Schritt 3)
 

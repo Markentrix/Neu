@@ -680,6 +680,38 @@
 
   updateBadge();
 
+  // Aufbau beim Scrollen: markierte Elemente bauen sich einmal in Stufen auf, wenn sie ins Bild kommen
+  (function () {
+    if (!("IntersectionObserver" in window) || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    var SEL = "main h2:not(.card h2), main .datei, .materialliste li, .ablauf li, .spaltenliste > div, .card";
+    // Kein IntersectionObserver: Chrome zählt ein weggeschnittenes Ziel (clip-path) als unsichtbar und löst nie aus
+    var pending = [], queued = false;
+    function check() {
+      queued = false; var n = 0, lim = window.innerHeight * 0.94;
+      pending = pending.filter(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.bottom < 0) { el.classList.remove("pre"); return false; }  // übersprungen (Sprungmarke): sofort zeigen
+        if (r.top > lim) return true;                                     // noch unterhalb: warten
+        el.style.setProperty("--d", Math.min(n++, 4) * 0.09 + "s");
+        el.classList.remove("pre"); el.classList.add("run"); return false;
+      });
+      if (!pending.length) { window.removeEventListener("scroll", ask); window.removeEventListener("resize", ask); }
+    }
+    function ask() { if (!queued) { queued = true; requestAnimationFrame(check); } }
+    function scan(root) {
+      $$(SEL, root || document).forEach(function (el) {
+        if (el.classList.contains("rv") || el.closest(".hero-dark") || el.closest("[hidden]")) return;
+        el.classList.add("rv", "pre"); pending.push(el);
+      });
+      if (pending.length) { window.addEventListener("scroll", ask, { passive: true }); window.addEventListener("resize", ask); ask(); }
+    }
+    scan();
+    ["#featured-grid", "#shop-grid", ".grid-small"].forEach(function (g) {
+      var node = $(g); if (!node) return;
+      new MutationObserver(function () { scan(node); }).observe(node, { childList: true });
+    });
+  })();
+
   // Lieferzeit-Balken bauen sich einmal auf, sobald sie im Bild sind
   (function () {
     var z = $(".zeit");
