@@ -271,7 +271,7 @@ def check_links(pages):
             print(f'  ✗ {meta["path"]}: {len(h1)} h1-Elemente'); errors += 1
         if len(meta['title']) > 65:
             print(f'  ! {meta["path"]}: Titel {len(meta["title"])} Zeichen')
-        if len(meta['description']) > 165:
+        if len(meta['description']) > 160:
             print(f'  ! {meta["path"]}: Description {len(meta["description"])} Zeichen')
     print('Linkcheck: ' + ('ok' if not errors else f'{errors} Fehler'))
     return 1 if errors else 0
