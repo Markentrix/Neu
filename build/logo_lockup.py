@@ -79,7 +79,7 @@ def build(theme="hell", full=True, E=200.0, padf=0.22, sub=True, subscale=1.0):
               f'<path d="M{xs - nw / 2 + 0.012 * E:.1f} {ntop + nh - 1:.1f}H{xs + nw / 2 - 0.012 * E:.1f}L{xs + 0.034 * E:.1f} {ntop + nh + 0.085 * E:.1f}H{xs - 0.034 * E:.1f}Z" fill="{T["acc"]}"/>'
               f'<circle cx="{xs:.1f}" cy="{ntop + nh + 0.085 * E + 0.052 * E:.1f}" r="{0.027 * E:.1f}" fill="{T["acc"]}"/>')
     body = "".join(f'<path d="{d}" fill="{T["main"]}"/>' for d in p1) + "".join(f'<path d="{d}" fill="{T["acc"]}"/>' for d in p2)
-    body += f'<path d="{line}" fill="none" stroke="{T["acc"]}" stroke-width="{sw:.1f}"/>' + nozzle
+    body += f'<path class="spur" pathLength="100" d="{line}" fill="none" stroke="{T["acc"]}" stroke-width="{sw:.1f}"/>' + f'<g class="duese">{nozzle}</g>'
     if not sub:  # nur Wortmarke mit Düse und Linie (Seitenkopf)
         top = ntop - 0.03 * E; pad = padf * E; bottom = yl + sw / 2
         return body, (-pad, top - pad, W + 2 * pad, bottom - top + 2 * pad)

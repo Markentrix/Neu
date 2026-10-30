@@ -266,7 +266,7 @@ textarea{min-height:140px;resize:vertical}
 .empty{padding:40px 20px;text-align:center;background:var(--surface-2);border-radius:var(--r);color:var(--ink-2)}
 .ship-progress{margin:0 0 18px}
 .ship-bar{height:8px;background:var(--surface-2);border-radius:2px;overflow:hidden}
-.ship-bar span{display:block;height:100%;width:0;background:var(--accent);transition:width .4s var(--ease-out)}
+.ship-bar span{display:block;height:100%;width:0;background:var(--accent);transition:width .6s steps(12,end)}
 .ship-progress.done .ship-bar span{background:var(--brand)}
 .ship-progress p{margin:8px 0 0;color:var(--ink-2)}
 .checkout-steps{list-style:none;display:flex;flex-wrap:wrap;gap:4px 24px;padding:0;margin:0 0 18px;font-size:var(--t-s);font-weight:650;color:var(--ink-3)}
@@ -288,12 +288,12 @@ textarea{min-height:140px;resize:vertical}
 .z-order{flex:0 0 12%;background:var(--ink)}
 .z-print{flex:4 1 0;background:repeating-linear-gradient(0deg,var(--brand) 0 6px,var(--hero) 6px 9px)}
 .z-ship{flex:3 1 0;background:var(--accent)}
-.zeit.pre .zeit-bar span{clip-path:inset(0 100% 0 0)}
-.zeit.run .zeit-bar span{animation:druck .8s steps(10,end) both}
-.zeit.run .z-print{animation-delay:.2s}
-.zeit.run .z-ship{animation-delay:.9s}
+.zeit.pre .zeit-bar span,.danke-zeit.pre .zeit-bar span{clip-path:inset(0 100% 0 0)}
+.zeit.run .zeit-bar span,.danke-zeit.run .zeit-bar span{animation:druck .8s steps(10,end) both}
+.zeit.run .z-print,.danke-zeit.run .z-print{animation-delay:.2s}
+.zeit.run .z-ship,.danke-zeit.run .z-ship{animation-delay:.9s}
 @keyframes druck{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-@media (prefers-reduced-motion:reduce){.zeit.pre .zeit-bar span{clip-path:none}.zeit.run .zeit-bar span{animation:none}}
+@media (prefers-reduced-motion:reduce){.zeit.pre .zeit-bar span,.danke-zeit.pre .zeit-bar span{clip-path:none}.zeit.run .zeit-bar span,.danke-zeit.run .zeit-bar span{animation:none}}
 .zeit-legend{display:flex;margin-top:12px;font-size:var(--t-s);color:var(--ink-2)}
 .zeit-legend span:nth-child(1){flex:0 0 12%;white-space:nowrap}
 .zeit-legend span:nth-child(2){flex:4 1 0;padding-left:10px}
@@ -483,4 +483,65 @@ textarea{min-height:140px;resize:vertical}
   .hero-photo::after{display:none}
   .rv.pre{clip-path:none}.rv.run{animation:none}
   @view-transition{navigation:none}
+}
+
+
+/* ===== Mehr Bewegung, gleicher Wortschatz ===================================== */
+
+/* 1 Druckfortschritt: Kupferlinie unter dem Kopf wächst mit der Scrolltiefe (nur CSS) */
+@supports (animation-timeline:scroll()){
+  .site-header{position:sticky}
+  .site-header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--accent);transform-origin:0 50%;transform:scaleX(0);animation:fortschritt steps(60,end) both;animation-timeline:scroll(root)}
+  @keyframes fortschritt{to{transform:scaleX(1)}}
+}
+
+/* 2 Logo: Düse setzt auf, Druckspur wird gezogen (einmal pro Sitzung) */
+.lockup-head .spur{stroke-dasharray:100;animation:zieh .9s steps(18,end) .35s backwards}
+.lockup-head .duese{animation:setzen .35s steps(5,end) backwards;transform-box:fill-box}
+@keyframes zieh{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@keyframes setzen{from{transform:translateY(-70px);opacity:0}to{transform:none;opacity:1}}
+.seen .lockup-head .spur,.seen .lockup-head .duese{animation:none}
+
+/* 3 Artikel fliegt in den Warenkorb */
+.fly{position:fixed;z-index:70;margin:0;object-fit:cover;pointer-events:none;box-shadow:0 8px 22px rgba(0,0,0,.22);border-radius:var(--r)}
+
+/* 4 Danke-Seite: Vorgangsnummer druckt sich, Ablaufbalken darunter */
+.danke h1{animation:up .6s steps(8,end) backwards}
+.ref{animation:quer .9s steps(12,end) .35s backwards}
+.danke-zeit{max-width:44rem;margin:0 0 28px}
+.danke-zeit .zeit-bar{height:56px}
+
+/* 6 Materialzeilen: beim Überfahren füllt sich die Zeile in Stufen */
+.materialliste li{position:relative;isolation:isolate}
+.materialliste li::before{content:"";position:absolute;inset:0 -14px;background:var(--surface-2);z-index:-1;clip-path:inset(0 100% 0 0);transition:clip-path .35s steps(8,end)}
+@media (hover:hover){.materialliste li:hover::before{clip-path:inset(0 0 0 0)}}
+
+/* 7 404: Treppe baut sich auf, die fehlende Stufe füllt sich zuletzt */
+.treppe{display:flex;align-items:flex-end;gap:6px;height:120px;max-width:34rem;margin:8px 0 36px}
+.treppe span{flex:1;background:var(--brand);animation:up .4s steps(5,end) backwards}
+.treppe span:nth-child(1){height:20%}.treppe span:nth-child(2){height:36%;animation-delay:.12s}.treppe span:nth-child(3){height:52%;animation-delay:.24s}
+.treppe span:nth-child(4){height:68%;animation-delay:.36s}.treppe span:nth-child(5){height:84%;animation-delay:.48s}.treppe span:nth-child(6){height:100%;animation-delay:.6s}
+.treppe .fehlt{background:transparent;box-shadow:inset 0 0 0 2px var(--brand);animation:up .4s steps(5,end) .36s backwards,fuellen .5s steps(6,end) 2.2s forwards}
+@keyframes fuellen{to{background:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}}
+
+/* 8 Hero-Foto: minimale Parallaxe gegen den Text (nur transform, nur mit Scroll-Zeitleiste) */
+@supports (animation-timeline:scroll()){
+  .hero-photo{overflow:hidden}
+  .hero-photo img{transform:scale(1.1);animation:schicht 1.2s steps(14,end) both,parallaxe linear both;animation-timeline:auto,scroll(root);animation-range:normal,0 90vh}
+  @keyframes parallaxe{from{transform:scale(1.1) translateY(0)}to{transform:scale(1.1) translateY(7%)}}
+}
+
+/* 9 Handy-Menü: Einträge nacheinander */
+@media (max-width:860px){
+  .nav.open a{animation:up .3s steps(4,end) backwards}
+  .nav.open a:nth-child(2){animation-delay:.04s}.nav.open a:nth-child(3){animation-delay:.08s}.nav.open a:nth-child(4){animation-delay:.12s}.nav.open a:nth-child(5){animation-delay:.16s}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .site-header::after{animation:none;transform:scaleX(0)}
+  .lockup-head .spur,.lockup-head .duese,.danke h1,.ref,.treppe span,.nav.open a{animation:none}
+  .treppe .fehlt{animation:none;background:var(--accent);box-shadow:none}
+  .materialliste li::before{transition:none}
+  .hero-photo img{animation:none;transform:none}
+  .fly{display:none}
 }

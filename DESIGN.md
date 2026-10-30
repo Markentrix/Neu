@@ -90,6 +90,11 @@ Der Kunde wollte eine lebendigere, animierte Seite. Die Verbote der Vorgabe (das
 - Beim Scrollen bauen sich Überschriften, Karten, Listenzeilen (Materialien, Ablauf) und das vollbreite Datei-Band einmal auf; Geschwister mit kleinem Versatz. Die Lieferzeit-Balken laufen nacheinander von links nach rechts.
 - Rückmeldung: Knöpfe schrumpfen beim Drücken auf 97 %, der Warenkorb-Zähler pulsiert beim Hinzufügen, Kartentitel zeigen beim Überfahren eine einlaufende Kupferlinie.
 - Alles Weiche (Hover, Menü, Hinweis) nutzt eine Ease-out-Kurve unter 300 ms. Hover nur mit Maus.
+- Druckfortschritt: Kupferlinie unter dem Kopf wächst mit der Scrolltiefe (CSS, 60 Stufen). Das Hero-Foto bewegt sich minimal gegen den Text (Parallaxe, nur `transform`).
+- Logo im Kopf: Düse setzt auf, Druckspur wird gezogen, einmal pro Sitzung.
+- Warenkorb: das Artikelbild fliegt in 9 Stufen zum Warenkorb-Symbol, danach pulsiert der Zähler. Der Versand-Fortschritt füllt sich in Stufen.
+- Danke-Seite: Vorgangsnummer druckt sich, darunter der Ablaufbalken Bestellung, Druck, Versand. 404: Treppe baut sich auf, die fehlende Stufe füllt sich zuletzt.
+- Materialzeilen füllen sich beim Überfahren in Stufen. Handy-Menü: Einträge nacheinander.
 - Seitenwechsel mit kurzem Übergang (View Transitions) in Browsern, die ihn kennen.
 - `prefers-reduced-motion`: alles steht sofort, keine Animation.
 

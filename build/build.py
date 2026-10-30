@@ -38,6 +38,7 @@ def head(title, desc, rel, canonical_name, extra=""):
 <link rel="manifest" href="{rel}site.webmanifest">
 <link rel="preload" href="{rel}assets/fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{rel}assets/fonts/AbrilFatface.woff2" as="font" type="font/woff2" crossorigin>
+<script>try{{if(sessionStorage.getItem("sw_logo"))document.documentElement.classList.add("seen")}}catch(e){{}}</script>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
 {extra}</head>
 <body data-root="{rel}">
@@ -726,6 +727,10 @@ def build_thanks():
       <p class="lead">Sie erhalten eine Eingangsbestätigung per E-Mail. Wir melden uns mit Preis und Lieferzeit.</p>
     </div>
     <div class="ref-card"><span class="small">Ihre Vorgangsnummer, bitte bei Rückfragen angeben</span><span class="ref" id="ref"></span></div>
+    <div class="danke-zeit" data-show="bestellung" aria-label="Ablauf nach der Bestellung">
+      <div class="zeit-bar" role="img" aria-label="Bestellung eingegangen, danach Druck, danach Versand"><span class="z-order"></span><span class="z-print"></span><span class="z-ship"></span></div>
+      <div class="zeit-legend"><span><strong>Heute</strong>Bestellung</span><span><strong>{E(C.PRODUKTIONSZEIT)}</strong>Druck</span><span><strong>{E(C.LIEFERZEIT)}</strong>Versand</span></div>
+    </div>
     <p hidden><a class="btn btn-primary" id="paypal-link" href="#" rel="noopener">Jetzt <span id="danke-summe"></span> per PayPal bezahlen</a></p>
     <p class="notice" id="paypal-hinweis" hidden>Den PayPal-Zahlungslink über den Gesamtbetrag erhalten Sie mit der Bestätigung per E-Mail. Nach Zahlungseingang beginnt der Druck.</p>
     <p class="notice" id="gutschein-hinweis" hidden></p>
@@ -757,6 +762,7 @@ def build_404():
   <div class="wrap">
     <h1>Diese Schicht fehlt noch.</h1>
     <p class="lead">Die Seite gibt es nicht oder der Artikel ist nicht mehr im Shop. Vielleicht hilft einer dieser Wege.</p>
+    <div class="treppe" aria-hidden="true"><span></span><span></span><span></span><span class="fehlt"></span><span></span><span></span></div>
     <div class="lost-links">
       <a href="shop.html"><strong>Shop</strong><span>Alle Artikel, auf Bestellung gedruckt</span></a>
       <a href="druckservice.html"><strong>Druckservice</strong><span>Eigene Datei oder Ersatzteil anfragen</span></a>
