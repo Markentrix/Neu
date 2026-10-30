@@ -176,29 +176,6 @@ def version_beispiele():
         open(page, 'w', encoding='utf-8').write(t)
 
 
-def write_chat_data():
-    """Wissensbasis des Chat-Assistenten: FAQ-Seite (automatisch, bleibt aktuell) plus src/chat-extra.json (Handtexte)."""
-    extra = json.load(open(os.path.join(SRC, 'chat-extra.json'), encoding='utf-8'))
-    faq = open(os.path.join(SRC, 'pages', 'faq.html'), encoding='utf-8').read()
-    entries = []
-    for i, (q, a) in enumerate(re.findall(r'<summary>(.*?)</summary>\s*<div class="faq-body">(.*?)</div>', faq, re.S)):
-        q = html.unescape(re.sub(r'<[^>]+>', '', q)).strip()
-        links = [{'label': html.unescape(re.sub(r'<[^>]+>', '', t)).strip(), 'href': h} for h, t in re.findall(r'<a [^>]*href="(/[^"]*)"[^>]*>(.*?)</a>', a, re.S)]
-        text = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', a))).strip()
-        text = re.sub(r'\s+([.,;:])', r'\1', text)
-        kw = next((v for k, v in extra['faq_kw'].items() if q.startswith(k)), [])
-        entries.append({'id': f'faq-{i + 1}', 'q': q, 'kw': kw, 'a': text, 'links': links})
-    entries += extra['entries']
-    ids = [e['id'] for e in entries]
-    assert len(ids) == len(set(ids)), 'doppelte Chat-IDs'
-    for e in entries:
-        for l in e.get('links', []):
-            assert l['href'].startswith('/') or l.get('ext'), f"Chat-Link unklar: {l}"
-    with open(os.path.join(DIST, 'assets', 'chat-data.json'), 'w', encoding='utf-8') as f:
-        json.dump({'entries': entries}, f, ensure_ascii=False, separators=(',', ':'))
-    return len(entries)
-
-
 def build(check=False):
     layout = open(os.path.join(SRC, 'layout.html'), encoding='utf-8').read()
     partials = load_partials()
@@ -206,7 +183,6 @@ def build(check=False):
         shutil.rmtree(DIST)
     shutil.copytree(STATIC, DIST)
     version_beispiele()
-    write_chat_data()
     parsed = []
     for dirpath, _, files in os.walk(os.path.join(SRC, 'pages')):
         for f in sorted(files):
