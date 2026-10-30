@@ -39,9 +39,13 @@
   function loadCart() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
   function saveCart(c) { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) { /* privater Modus */ } updateBadge(); }
   function cartCount() { return loadCart().reduce(function (s, i) { return s + i.menge; }, 0); }
+  var lastCount = null;
   function updateBadge() {
-    var n = cartCount();
-    $$(".cart-badge").forEach(function (b) { b.textContent = n; b.classList.toggle("show", n > 0); });
+    var n = cartCount(); var more = lastCount !== null && n > lastCount; lastCount = n;
+    $$(".cart-badge").forEach(function (b) {
+      b.textContent = n; b.classList.toggle("show", n > 0);
+      if (more) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
+    });
   }
   function addToCart(id, farbe, text, menge) {
     var c = loadCart();
@@ -675,4 +679,15 @@
   })();
 
   updateBadge();
+
+  // Lieferzeit-Balken bauen sich einmal auf, sobald sie im Bild sind
+  (function () {
+    var z = $(".zeit");
+    if (!z || !("IntersectionObserver" in window) || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    z.classList.add("pre");
+    new IntersectionObserver(function (en, io) {
+      if (!en[0].isIntersecting) return;
+      z.classList.remove("pre"); z.classList.add("run"); io.disconnect();
+    }, { threshold: 0.4 }).observe(z);
+  })();
 })();

@@ -105,6 +105,9 @@ p{margin:0 0 1em}
 .cart-link svg{width:24px;height:24px}
 .cart-badge{position:absolute;top:2px;right:0;min-width:19px;height:19px;padding:0 5px;border-radius:2px;background:var(--accent);color:var(--accent-ink);font-size:.72rem;font-weight:700;display:none;align-items:center;justify-content:center}
 .cart-badge.show{display:inline-flex}
+.cart-badge.bump{animation:bump .4s steps(4,end)}
+@keyframes bump{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+@media (prefers-reduced-motion:reduce){.cart-badge.bump{animation:none}}
 .menu-btn{display:none;width:44px;height:44px;border:0;background:transparent;color:var(--ink);border-radius:var(--r);cursor:pointer}
 .menu-btn svg{width:26px;height:26px;margin:auto}
 @media (max-width:900px){
@@ -133,7 +136,10 @@ p{margin:0 0 1em}
   .hero-copy{padding:36px 20px 40px}
   .hero-photo{min-height:0;aspect-ratio:1/1}
 }
-@media (prefers-reduced-motion:reduce){.hero-photo img{animation:none}}
+/* Schichtkante baut sich nach dem Foto in Stufen auf */
+.schichtkante{transform-origin:top;animation:kante .6s steps(5,end) 1.2s both}
+@keyframes kante{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media (prefers-reduced-motion:reduce){.hero-photo img,.schichtkante{animation:none}}
 
 /* Seiten-Kopfbereich für Unterseiten */
 .page-head{padding:clamp(40px,6vw,80px) 0 clamp(16px,3vw,32px)}
@@ -286,6 +292,12 @@ textarea{min-height:140px;resize:vertical}
 .z-order{flex:0 0 12%;background:var(--ink)}
 .z-print{flex:4 1 0;background:repeating-linear-gradient(0deg,var(--brand) 0 6px,var(--hero) 6px 9px)}
 .z-ship{flex:3 1 0;background:var(--accent)}
+.zeit.pre .zeit-bar span{clip-path:inset(0 100% 0 0)}
+.zeit.run .zeit-bar span{animation:druck .8s steps(10,end) both}
+.zeit.run .z-print{animation-delay:.2s}
+.zeit.run .z-ship{animation-delay:.9s}
+@keyframes druck{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){.zeit.pre .zeit-bar span{clip-path:none}.zeit.run .zeit-bar span{animation:none}}
 .zeit-legend{display:flex;margin-top:12px;font-size:var(--t-s);color:var(--ink-2)}
 .zeit-legend span:nth-child(1){flex:0 0 12%;white-space:nowrap}
 .zeit-legend span:nth-child(2){flex:4 1 0;padding-left:10px}
