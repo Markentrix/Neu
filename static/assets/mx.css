@@ -1391,3 +1391,5 @@ html.reduced .slot.is-free{animation:none}
 .portal-shot{margin:0}
 .portal-shot img{display:block;width:100%;height:auto;border-radius:var(--r-lg,18px);box-shadow:var(--shadow-lg)}
 .portal-shot figcaption{margin-top:10px;font-size:.8rem;color:var(--muted)}
+.price-line{margin:0 0 6px;font-weight:700;color:var(--navy)}
+.price-line{margin:0 0 6px;font-weight:700;color:var(--navy)}
