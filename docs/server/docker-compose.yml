@@ -35,6 +35,11 @@ services:
       MX_MAIL_TO: info@markentrix.de
       MX_MAIL_FROM: info@markentrix.de         # muss bei Gmail die Kontoadresse sein
       MX_LOG_FILE: /srv/markentrix-daten/anfragen.log
+      # KI-Chat (docs/server/CHAT-KI.md). Ohne MX_AI_KEY bleibt der Chat bei den vorgefertigten Antworten.
+      MX_AI_KEY: ${MX_AI_KEY:-}                # API-Schlüssel aus .env, nie in dieser Datei
+      MX_AI_PROVIDER: ${MX_AI_PROVIDER:-anthropic}   # anthropic oder openai
+      MX_AI_MODEL: ${MX_AI_MODEL:-}            # leer = Standardmodell des Anbieters (siehe chat.php)
+      MX_AI_DAILY_MAX: "400"                   # höchstens so viele KI-Antworten je Tag
     networks: [web]
 
 volumes:

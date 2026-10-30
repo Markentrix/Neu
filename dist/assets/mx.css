@@ -1431,3 +1431,7 @@ html.reduced .slot.is-free{animation:none}
 @media (prefers-reduced-motion:no-preference){.mx-chat-launcher{transition:transform .2s var(--ease)}}
 @media print{.mx-chat-launcher,.chat-panel{display:none!important}}
 .chat-check a,.chat-foot a{text-decoration:underline;text-underline-offset:.15em}
+.chat-gate{padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#fff;font-size:.88rem;line-height:1.5}
+.chat-gate p{margin:0 0 8px}
+.chat-gate a{text-decoration:underline;text-underline-offset:.15em}
+.chat-typing{color:var(--muted);font-style:italic}

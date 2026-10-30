@@ -1,13 +1,16 @@
 /* Markentrix · Chat-Assistent (regelbasiert, ohne KI).
- * Sucht zur Frage die passende Antwort aus der Wissensbasis (/assets/chat-data.json: FAQ-Seite plus Handtexte).
- * Eingaben bleiben im Browser. Nur wenn Besucher das Formular im Chat absenden, gehen Name, E-Mail und Frage an /api/anfrage.php.
- * Für Besucher klar gekennzeichnet als automatischer Assistent. */
+ * Zwei Modi: (1) KI-Modus, wenn /api/chat.php aktiv ist (Schlüssel auf dem Server) und der Besucher zugestimmt hat: Die KI antwortet
+ * ausschließlich anhand der Wissensbasis. (2) Vorgefertigte Antworten ohne KI aus /assets/chat-data.json (FAQ-Seite plus Handtexte),
+ * auch als Rückfall bei Fehlern, Limits oder ohne Zustimmung. Im Modus ohne KI bleiben Eingaben im Browser.
+ * Nur wenn Besucher das Formular im Chat absenden, gehen Name, E-Mail und Frage an /api/anfrage.php.
+ * Für Besucher klar gekennzeichnet (KI oder automatischer Assistent ohne KI). */
 (function (w, d) {
   'use strict';
   if (!d.querySelector || !w.fetch) return;
   var script = d.currentScript, VER = (script && /[?&]v=([\w-]+)/.exec(script.src) || [])[1] || '';
   var DATA = null, loading = null, built = false, lastText = '';
-  var root, launcher, panel, log, input, form;
+  var root, launcher, panel, log, input, form, subEl, footEl, footLink;
+  var mode = 'rule', hist = [], aiCount = 0, noticed = false;
 
   function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function track(name, p) { try { if (typeof w.gtag === 'function') w.gtag('event', name, p || {}); } catch (e) { } }
@@ -87,6 +90,10 @@
       if (/^(danke|vielen dank|dankeschoen|super|prima|perfekt|alles klar|ok|okay)( |$)/.test(n) && n.split(' ').length <= 4) { say('Gern geschehen! Wenn noch etwas offen ist, fragen Sie einfach weiter.'); return; }
       if (/^(tschuess|tschues|auf wiedersehen|ciao|bye)( |$)/.test(n)) { say('Auf Wiedersehen, und melden Sie sich gern, wenn Sie Fragen haben.'); return; }
     }
+    if (!forced && mode === 'ai') { askAI(text); return; }
+    ruleAnswer(text, forced);
+  }
+  function ruleAnswer(text, forced) {
     var res = forced ? [{ e: forced, s: 99 }] : search(text), best = res[0];
     track('chat_question', { treffer: best && best.s >= 2 ? best.e.id : 'keiner' });
     if (best && best.s >= 3.5) { answer(best.e); return; }
@@ -97,6 +104,60 @@
       return;
     }
     fallback();
+  }
+
+  /* ── KI-Modus ───────────────────────────────────────────────────────── */
+  var PHONE = [{ label: 'Anrufen: 0176 20370429', href: 'tel:+4917620370429' }];
+  function typing() { var row = bubble('bot', el('p', 'chat-typing', 'Der Assistent schreibt …')); return row; }
+  function toRule(why) {
+    mode = 'rule'; setSub();
+    if (why && !noticed) { noticed = true; say(why); }
+  }
+  function askAI(text) {
+    if (aiCount >= 20) { toRule('Sie haben viele Fragen gestellt, ich antworte ab jetzt mit vorgefertigten Antworten ohne KI.'); ruleAnswer(text); return; }
+    aiCount++; hist.push({ role: 'user', content: text });
+    var wait = typing(), done = false;
+    var timer = setTimeout(function () { if (!done) { wait.remove(); } }, 24000);
+    fetch('/api/chat.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: hist.slice(-6) }) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'server' }; }); })
+      .then(function (j) {
+        done = true; clearTimeout(timer); wait.remove();
+        if (j && j.ok && j.answer) {
+          hist.push({ role: 'assistant', content: j.answer });
+          track('chat_question', { treffer: j.handoff ? 'weiterleitung' : 'ki' });
+          say(j.answer); links(j.links);
+          if (j.handoff) { chips([{ label: 'Frage an uns senden', run: openForm }]); links(PHONE); }
+          return;
+        }
+        var err = j && j.error;
+        hist.pop();
+        if (err === 'rate') { say('Sie haben in kurzer Zeit viele Fragen gestellt. Bitte versuchen Sie es später noch einmal oder erreichen Sie uns direkt.'); links(PHONE); toRule(); return; }
+        if (err === 'disabled' || err === 'busy') toRule('Der KI-Assistent ist gerade nicht verfügbar. Ich antworte mit vorgefertigten Antworten ohne KI.');
+        ruleAnswer(text);
+      })
+      .catch(function () { done = true; clearTimeout(timer); wait.remove(); hist.pop(); ruleAnswer(text); });
+  }
+  function aiGreeting() {
+    say('Guten Tag! Ich bin der KI-Assistent von Markentrix und beantworte Fragen zu Websites, Preisen, Ablauf und Datenschutz. Ich antworte nur anhand der Informationen dieser Website. Wählen Sie eine Frage oder schreiben Sie Ihre eigene.');
+    startChips();
+  }
+  function ruleGreeting() {
+    say('Guten Tag! Ich beantworte Fragen zu Websites, Preisen, Ablauf und Datenschutz. Wählen Sie eine Frage oder schreiben Sie Ihre eigene.');
+    startChips();
+  }
+  function consentGate() {
+    var box = el('div', 'chat-gate');
+    box.appendChild(el('p', null, 'Dieser Chat kann von einer KI beantwortet werden. Sie schreiben dann mit einer KI, nicht mit einem Menschen. Ihre Nachrichten werden dazu an unseren KI-Dienstleister in den USA übermittelt (Auftragsverarbeitung, Details in der Datenschutzerklärung). Bitte geben Sie keine sensiblen Daten ein.'));
+    var a = el('a', null, 'Datenschutzerklärung lesen'); a.href = '/datenschutz#chat-assistent'; var pp = el('p'); pp.appendChild(a); box.appendChild(pp);
+    var row = bubble('bot', box); row.classList.add('chat-msg--plain', 'chat-msg--wide');
+    chips([
+      { label: 'Einverstanden, mit KI chatten', run: function () { try { sessionStorage.setItem('mx-chat-ai', '1'); } catch (e) { } mode = 'ai'; setSub(); track('chat_ki_start'); aiGreeting(); } },
+      { label: 'Ohne KI: vorgefertigte Antworten', run: function () { mode = 'rule'; setSub(); ruleGreeting(); } }
+    ]);
+  }
+  function aiAvailable() {
+    var ctrl = ('AbortController' in w) ? new AbortController() : null, timer = ctrl && setTimeout(function () { ctrl.abort(); }, 3500);
+    return fetch('/api/chat.php?status=1', { signal: ctrl ? ctrl.signal : undefined }).then(function (r) { return r.json(); }).then(function (j) { clearTimeout(timer); return !!(j && j.ok && j.enabled); }).catch(function () { return false; });
   }
 
   /* ── Frage an uns senden (Formular im Chat) ─────────────────────────── */
@@ -141,11 +202,16 @@
     if (!loading) loading = fetch('/assets/chat-data.json' + (VER ? '?v=' + VER : '')).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) { DATA = j; return j; });
     return loading;
   }
+  function setSub() {
+    if (!subEl) return;
+    if (footEl) footEl.firstChild.nodeValue = mode === 'ai' ? 'Im KI-Modus gehen Ihre Nachrichten zur Beantwortung an unseren KI-Dienstleister, wir speichern sie nicht. Das Frageformular sendet Ihre Angaben an uns. ' : 'Ihre Eingaben bleiben in Ihrem Browser. Nur wenn Sie das Formular absenden, erhalten wir Ihre Angaben. ';
+    subEl.textContent = mode === 'ai' ? 'KI-Assistent. Sie schreiben mit einer KI, nicht mit einem Menschen. Antworten können Fehler enthalten.' : 'Automatischer Assistent, keine KI. Die Antworten stammen aus den Seiten dieser Website.';
+  }
   function build() {
     built = true;
     panel = el('section', 'chat-panel'); panel.id = 'mx-chat'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'false'); panel.setAttribute('aria-labelledby', 'mx-chat-title'); panel.hidden = true;
     var head = el('div', 'chat-head'), ht = el('div'); var h = el('h2', null, 'Fragen an Markentrix'); h.id = 'mx-chat-title';
-    ht.appendChild(h); ht.appendChild(el('p', null, 'Automatischer Assistent, keine KI. Die Antworten stammen aus den Seiten dieser Website.'));
+    subEl = el('p', null, ''); setSub(); ht.appendChild(h); ht.appendChild(subEl);
     var close = el('button', 'chat-close'); close.type = 'button'; close.setAttribute('aria-label', 'Chat schließen'); close.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     close.addEventListener('click', closePanel); head.appendChild(ht); head.appendChild(close);
     log = el('div', 'chat-log'); log.setAttribute('role', 'log'); log.setAttribute('aria-live', 'polite'); log.tabIndex = 0; log.setAttribute('aria-label', 'Gespräch');
@@ -155,7 +221,7 @@
     var go = el('button', 'chat-send', 'Senden'); go.type = 'submit';
     form.appendChild(lab); form.appendChild(input); form.appendChild(go);
     form.addEventListener('submit', function (ev) { ev.preventDefault(); var v = input.value; input.value = ''; ask(v); input.focus(); });
-    var foot = el('p', 'chat-foot'); foot.appendChild(d.createTextNode('Ihre Eingaben bleiben in Ihrem Browser. Nur wenn Sie das Formular absenden, erhalten wir Ihre Angaben. '));
+    var foot = el('p', 'chat-foot'); footEl = foot; foot.appendChild(d.createTextNode('Ihre Eingaben bleiben in Ihrem Browser. Nur wenn Sie das Formular absenden, erhalten wir Ihre Angaben. '));
     var fl = el('a', null, 'Datenschutz'); fl.href = '/datenschutz#chat-assistent'; foot.appendChild(fl);
     panel.appendChild(head); panel.appendChild(log); panel.appendChild(form); panel.appendChild(foot);
     d.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && panel && !panel.hidden) { closePanel(); } });
@@ -165,8 +231,13 @@
     if (!built) build();
     launcher.setAttribute('aria-expanded', 'true'); launcher.hidden = true; panel.hidden = false;
     track('chat_open');
-    load().then(function () {
-      if (!log.firstChild) { say('Guten Tag! Ich beantworte Fragen zu Websites, Preisen, Ablauf und Datenschutz. Wählen Sie eine Frage oder schreiben Sie Ihre eigene.'); startChips(); }
+    load().then(function () { return log.firstChild ? false : aiAvailable(); }).then(function (ai) {
+      if (!log.firstChild) {
+        var ok = false; try { ok = sessionStorage.getItem('mx-chat-ai') === '1'; } catch (e) { }
+        if (ai && ok) { mode = 'ai'; setSub(); aiGreeting(); }
+        else if (ai) consentGate();
+        else ruleGreeting();
+      }
       input.focus();
     }).catch(function () {
       if (!log.firstChild) { say('Der Assistent ist gerade nicht erreichbar. Sie erreichen uns telefonisch unter 0176 20370429 oder über das Kontaktformular.'); links([{ label: 'Zum Kontaktformular', href: '/kontakt' }]); }
