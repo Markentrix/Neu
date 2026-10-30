@@ -1,0 +1,556 @@
+{
+ "faq_kw": {
+  "Was kostet eine Website": [
+   "preis",
+   "preise",
+   "kosten",
+   "kostet",
+   "website",
+   "webseite",
+   "homepage",
+   "landingpage",
+   "paket",
+   "pakete",
+   "euro",
+   "teuer",
+   "preisliste",
+   "angebot",
+   "wie viel"
+  ],
+  "Wie lange dauert es": [
+   "dauer",
+   "dauert",
+   "lange",
+   "livegang",
+   "fertig",
+   "zeit",
+   "wann online",
+   "werktage",
+   "tage",
+   "schnell"
+  ],
+  "Was ist in der monatlichen Pflege": [
+   "pflege",
+   "hosting",
+   "wartung",
+   "monatlich",
+   "updates",
+   "sicherung",
+   "backup",
+   "ssl",
+   "domain",
+   "server"
+  ],
+  "Kann ich Inhalte selbst": [
+   "selbst",
+   "aendern",
+   "bearbeiten",
+   "inhalte",
+   "texte",
+   "anpassen",
+   "aenderungen"
+  ],
+  "Was bedeutet SEO und GEO": [
+   "seo",
+   "geo",
+   "suchmaschinenoptimierung",
+   "google",
+   "gefunden",
+   "ki suche",
+   "auffindbar",
+   "sichtbar"
+  ],
+  "Garantieren Sie Platz 1": [
+   "garantie",
+   "garantieren",
+   "platz 1",
+   "ranking",
+   "platzierung",
+   "erste seite",
+   "nummer eins"
+  ],
+  "Was kosten lokale Sichtbarkeit": [
+   "local visibility",
+   "social media",
+   "instagram",
+   "facebook",
+   "sichtbarkeit",
+   "google profil",
+   "bewertungen",
+   "social"
+  ],
+  "Wann startet der KI-Assistent": [
+   "ki assistent",
+   "assistent",
+   "pilot",
+   "pilotkunde",
+   "november",
+   "chatbot",
+   "telefonassistent",
+   "whatsapp assistent"
+  ],
+  "Was kosten die KI-Pakete": [
+   "ki pakete",
+   "ki preis",
+   "ki kosten",
+   "telefonassistent",
+   "whatsapp",
+   "minuten",
+   "business",
+   "komplett",
+   "one"
+  ],
+  "Was passiert, wenn der Assistent": [
+   "nicht beantworten",
+   "weiterleitung",
+   "uebergabe",
+   "rueckruf",
+   "assistent frage"
+  ],
+  "Ist das alles DSGVO": [
+   "dsgvo",
+   "datenschutz",
+   "avv",
+   "auftragsverarbeitung",
+   "daten",
+   "cookies",
+   "datensicherheit",
+   "rechtssicher"
+  ],
+  "In welchen Regionen": [
+   "region",
+   "regionen",
+   "standort",
+   "celle",
+   "hannover",
+   "braunschweig",
+   "gifhorn",
+   "bundesweit",
+   "remote",
+   "vor ort",
+   "wo",
+   "sitz",
+   "sitzt",
+   "sitzen",
+   "adresse",
+   "anschrift",
+   "wo seid ihr",
+   "wo sind sie",
+   "firmensitz",
+   "niedersachsen"
+  ]
+ },
+ "entries": [
+  {
+   "id": "kontakt",
+   "q": "Wie erreiche ich Sie?",
+   "kw": [
+    "erreichen",
+    "kontakt",
+    "telefon",
+    "anrufen",
+    "anruf",
+    "nummer",
+    "mail",
+    "email",
+    "whatsapp",
+    "sprechen",
+    "ansprechpartner",
+    "rueckruf",
+    "erreichbar",
+    "oeffnungszeiten",
+    "zeiten",
+    "wann erreichbar",
+    "telefonnummer"
+   ],
+   "a": "Telefon: 0176 20370429, Montag bis Donnerstag 09:00 bis 17:00 Uhr, Freitag 09:00 bis 15:00 Uhr. E-Mail: info@markentrix.de. Auch per WhatsApp. Anfragen beantworten wir werktags innerhalb von 24 Stunden, auf Wunsch per Rückruf.",
+   "links": [
+    {
+     "label": "Zum Kontaktformular",
+     "href": "/kontakt"
+    },
+    {
+     "label": "WhatsApp schreiben",
+     "href": "https://wa.me/4917620370429?text=Hallo%20Markentrix%2C%20ich%20habe%20eine%20Frage%20zu%20meiner%20Website.",
+     "ext": true
+    }
+   ]
+  },
+  {
+   "id": "erstberatung",
+   "q": "Wie läuft die Erstberatung ab?",
+   "kw": [
+    "erstberatung",
+    "erstgespraech",
+    "beratung",
+    "kostenlos",
+    "gratis",
+    "termin",
+    "gespraech",
+    "unverbindlich",
+    "kennenlernen",
+    "vereinbaren",
+    "beratungsgespraech",
+    "potenzial check"
+   ],
+   "a": "Die Erstberatung ist kostenlos und unverbindlich. Sie dauert rund 30 Minuten und findet per Telefon oder online statt, auf Wunsch auch vor Ort in Celle. Wir klären Ausgangslage, Ziel und Umfang, danach erhalten Sie ein Angebot mit Festpreis.",
+   "links": [
+    {
+     "label": "Erstberatung anfragen",
+     "href": "/kontakt#anfrage"
+    }
+   ]
+  },
+  {
+   "id": "ablauf",
+   "q": "Wie läuft die Zusammenarbeit ab?",
+   "kw": [
+    "ablauf",
+    "zusammenarbeit",
+    "vorgehen",
+    "schritte",
+    "prozess",
+    "projekt",
+    "starten",
+    "beginn",
+    "wie geht es weiter",
+    "ablaufen",
+    "arbeitsweise"
+   ],
+   "a": "Erstens Erstberatung, zweitens Angebot mit Festpreis, drittens Auftrag mit 50 % Anzahlung, viertens Umsetzung und Abnahme mit den weiteren 50 %, fünftens Betrieb und Pflege. Sie haben vom Erstgespräch bis zur Pflege einen festen Ansprechpartner.",
+   "links": [
+    {
+     "label": "Ablauf und Zahlung",
+     "href": "/preise#zusammenarbeit"
+    },
+    {
+     "label": "Prozess im Detail",
+     "href": "/prozess"
+    }
+   ]
+  },
+  {
+   "id": "zahlung",
+   "q": "Wie läuft die Zahlung ab?",
+   "kw": [
+    "zahlung",
+    "zahlen",
+    "bezahlen",
+    "rechnung",
+    "anzahlung",
+    "lastschrift",
+    "sepa",
+    "zahlungsweise",
+    "buchhaltung",
+    "steuer",
+    "umsatzsteuer",
+    "mwst",
+    "netto",
+    "brutto",
+    "e rechnung",
+    "erechnung",
+    "zahlungsziel"
+   ],
+   "a": "Bei Projekten zahlen Sie 50 % bei Auftragserteilung und 50 % bei Abnahme. Sie erhalten eine Rechnung mit ausgewiesener Umsatzsteuer, auf Wunsch als E-Rechnung nach § 14 UStG. Laufende Leistungen werden per SEPA-Lastschrift zu Monatsbeginn oder innerhalb der auf der Rechnung genannten Frist von 7 bis 14 Tagen abgerechnet. Alle Preise sind netto, das Angebot gilt nur für Unternehmen.",
+   "links": [
+    {
+     "label": "Mehr zu Rechnung und Zahlung",
+     "href": "/preise#zusammenarbeit"
+    }
+   ]
+  },
+  {
+   "id": "laufzeit",
+   "q": "Wie lange läuft ein Vertrag, und kann ich kündigen?",
+   "kw": [
+    "laufzeit",
+    "kuendigen",
+    "kuendigung",
+    "vertrag",
+    "mindestlaufzeit",
+    "monatlich kuendbar",
+    "binden",
+    "bindung",
+    "abo",
+    "vertragsende",
+    "daten zurueck"
+   ],
+   "a": "Laufende Leistungen wie die Pflege haben 12 Monate Mindestlaufzeit und sind danach monatlich kündbar. Zum Vertragsende erhalten Sie auf Wunsch Ihre Daten innerhalb von 30 Tagen in einem gängigen Format.",
+   "links": [
+    {
+     "label": "Allgemeine Geschäftsbedingungen",
+     "href": "/agb"
+    },
+    {
+     "label": "Preise und Pakete",
+     "href": "/preise"
+    }
+   ]
+  },
+  {
+   "id": "texte",
+   "q": "Muss ich Texte und Bilder liefern?",
+   "kw": [
+    "texte",
+    "bilder",
+    "fotos",
+    "liefern",
+    "inhalte erstellen",
+    "texten",
+    "selber schreiben",
+    "material",
+    "logo"
+   ],
+   "a": "Das hängt vom Paket ab. Bei LANDING START liefern Sie Texte und Bilder. Bei BUSINESS WEB entstehen Struktur, Texte und Bilder bei uns. Was bei Ihrem Vorhaben sinnvoll ist, klären wir in der Erstberatung.",
+   "links": [
+    {
+     "label": "Pakete vergleichen",
+     "href": "/preise#pp-web"
+    }
+   ]
+  },
+  {
+   "id": "check",
+   "q": "Was ist der Website-Check?",
+   "kw": [
+    "website check",
+    "check",
+    "pruefen",
+    "analyse",
+    "testen",
+    "bewertung meiner seite",
+    "wie sichtbar",
+    "auswertung",
+    "pruefung"
+   ],
+   "a": "Der Website-Check ist kostenlos: Sie geben die Adresse Ihrer Website ein und sehen in Sekunden Gesamtwert und Bereichswerte zu SEO, lokaler Sichtbarkeit, GEO, Technik, Smartphone und Vertrauen. Eine Kurzfassung senden wir Ihnen auf Wunsch per E-Mail, die einzelnen Punkte besprechen wir im Erstgespräch.",
+   "links": [
+    {
+     "label": "Website-Check starten",
+     "href": "/website-check"
+    }
+   ]
+  },
+  {
+   "id": "referenzen",
+   "q": "Welche Referenzen haben Sie?",
+   "kw": [
+    "referenz",
+    "referenzen",
+    "beispiele",
+    "projekte",
+    "kunden",
+    "arbeiten",
+    "portfolio",
+    "elbdetail",
+    "pony",
+    "bisherige",
+    "muster",
+    "demo"
+   ],
+   "a": "Live umgesetzt haben wir die Websites für ElbDetail (Fahrzeugaufbereitung, Celle) und Pony Club Lila (Reitunterricht, Tornesch), beide mit Zustimmung veröffentlicht. Dazu gibt es acht Beispielseiten für fiktive Betriebe zum Durchklicken.",
+   "links": [
+    {
+     "label": "Referenzen ansehen",
+     "href": "/referenzen"
+    },
+    {
+     "label": "ElbDetail im Detail",
+     "href": "/referenzen/elbdetail"
+    }
+   ]
+  },
+  {
+   "id": "branchen",
+   "q": "Für welche Branchen bauen Sie Websites?",
+   "kw": [
+    "branche",
+    "branchen",
+    "handwerk",
+    "handwerker",
+    "praxis",
+    "arzt",
+    "kanzlei",
+    "gastro",
+    "gastronomie",
+    "restaurant",
+    "friseur",
+    "beauty",
+    "hotel",
+    "pension",
+    "werkstatt",
+    "autowerkstatt",
+    "fitness",
+    "garten",
+    "reinigung",
+    "b2b",
+    "dienstleister",
+    "gewerbe",
+    "elektriker",
+    "dachdecker"
+   ],
+   "a": "Wir bauen Websites für Handwerk, Praxen und Kanzleien, Gastronomie und Handel, Autowerkstätten, Friseur und Beauty, Hotels und Pensionen, Fitness und Sport, Reinigung, Garten und Hausservice sowie B2B-Dienstleister. Für jede Branche gibt es eine eigene Seite mit Beispiel.",
+   "links": [
+    {
+     "label": "Alle Branchen",
+     "href": "/branchen"
+    }
+   ]
+  },
+  {
+   "id": "ueber",
+   "q": "Wer steckt hinter Markentrix?",
+   "kw": [
+    "wer",
+    "christian",
+    "wien",
+    "inhaber",
+    "gruender",
+    "firma",
+    "ueber",
+    "team",
+    "agentur",
+    "mitarbeiter",
+    "hinter"
+   ],
+   "a": "Markentrix ist Christian Wien aus Celle. Sie sprechen vom Erstgespräch bis zur laufenden Pflege mit derselben Person, ohne Ticketsystem und ohne Call-Center.",
+   "links": [
+    {
+     "label": "Über Markentrix",
+     "href": "/ueber-uns"
+    }
+   ]
+  },
+  {
+   "id": "unternehmer",
+   "q": "Gilt das Angebot auch für Privatpersonen?",
+   "kw": [
+    "privat",
+    "privatperson",
+    "privatkunde",
+    "verbraucher",
+    "unternehmer",
+    "gewerbe",
+    "gewerbetreibende",
+    "zielgruppe",
+    "fuer wen",
+    "selbststaendig",
+    "freiberufler"
+   ],
+   "a": "Unser Angebot richtet sich ausschließlich an Unternehmer im Sinne des § 14 BGB, also an Betriebe, Praxen, Selbstständige und Dienstleister. Alle Preise verstehen sich netto zuzüglich Umsatzsteuer.",
+   "links": [
+    {
+     "label": "Preise und Pakete",
+     "href": "/preise"
+    }
+   ]
+  },
+  {
+   "id": "partner",
+   "q": "Kann ich mich als Partner bewerben?",
+   "kw": [
+    "partner",
+    "vertrieb",
+    "provision",
+    "fotograf",
+    "fotografin",
+    "bewerben",
+    "bewerbung",
+    "job",
+    "stelle",
+    "arbeiten bei",
+    "selbststaendiger"
+   ],
+   "a": "Wir nehmen Bewerbungen von selbstständigen Vertriebspartnern auf Provisionsbasis und von selbstständigen Fotografinnen und Fotografen entgegen. Das Formular finden Sie auf der Partnerseite.",
+   "links": [
+    {
+     "label": "Partner werden",
+     "href": "/partner-werden"
+    }
+   ]
+  },
+  {
+   "id": "rechtliches",
+   "q": "Wo finde ich AGB, Impressum und Datenschutz?",
+   "kw": [
+    "agb",
+    "impressum",
+    "bedingungen",
+    "geschaeftsbedingungen",
+    "rechtliches",
+    "datenschutzerklaerung",
+    "anbieter"
+   ],
+   "a": "Die Allgemeinen Geschäftsbedingungen, das Impressum und die Datenschutzerklärung finden Sie im Seitenfuß jeder Seite.",
+   "links": [
+    {
+     "label": "AGB",
+     "href": "/agb"
+    },
+    {
+     "label": "Impressum",
+     "href": "/impressum"
+    },
+    {
+     "label": "Datenschutz",
+     "href": "/datenschutz"
+    }
+   ]
+  },
+  {
+   "id": "bot",
+   "q": "Sind Sie ein Mensch?",
+   "kw": [
+    "bot",
+    "chatbot",
+    "roboter",
+    "mensch",
+    "echte person",
+    "automatisch",
+    "wer antwortet",
+    "maschine",
+    "kuenstliche intelligenz",
+    "bist du",
+    "sind sie",
+    "sind sie ein bot",
+    "bist du ein bot",
+    "mit wem schreibe ich"
+   ],
+   "a": "Nein, ich bin ein automatischer Assistent ohne KI. Ich suche zu Ihrer Frage die passende Antwort aus den Seiten dieser Website. Wenn ich nichts Passendes finde, können Sie Ihre Frage an uns senden, dann antwortet Christian Wien persönlich.",
+   "links": [
+    {
+     "label": "Zum Kontaktformular",
+     "href": "/kontakt#anfrage"
+    }
+   ]
+  },
+  {
+   "id": "sitemap",
+   "q": "Wo finde ich alle Seiten?",
+   "kw": [
+    "alle seiten",
+    "uebersicht",
+    "seitenuebersicht",
+    "navigation",
+    "finde ich",
+    "leistungen",
+    "angebot",
+    "was bieten sie",
+    "was machen sie",
+    "leistung",
+    "services"
+   ],
+   "a": "Wir bauen Websites und Landingpages mit SEO und GEO, betreuen Google-Profil, Bewertungen und Social Media, gestalten Logo und Erscheinungsbild und bieten ab November 2026 KI-Assistenten für Telefon, WhatsApp und E-Mail an.",
+   "links": [
+    {
+     "label": "Leistungen im Überblick",
+     "href": "/leistungen/webdesign"
+    },
+    {
+     "label": "Seitenübersicht",
+     "href": "/seitenuebersicht"
+    }
+   ]
+  }
+ ]
+}
