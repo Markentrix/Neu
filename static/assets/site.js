@@ -148,26 +148,23 @@
     var MSG = { url: 'Bitte geben Sie eine gültige Adresse an, zum Beispiel www.ihre-seite.de.', rate: 'Sie haben in kurzer Zeit viele Prüfungen gestartet. Bitte versuchen Sie es in ein paar Minuten erneut.', busy: 'Gerade laufen viele Prüfungen. Bitte versuchen Sie es in einer Minute erneut.', server: 'Der Check ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.', origin: 'Der Check ist nur über markentrix.de nutzbar.' };
     function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
     function fail(t) { msg.className = 'chk-msg is-error'; msg.textContent = t; }
-    var IMPACT = { high: 'Gewicht: hoch', mid: 'Gewicht: mittel', low: 'Gewicht: gering' };
     var HEAD = { stark: 'Starke Grundlagen, wenige Lücken.', gut: 'Solide, aber mit spürbaren Lücken.', mittel: 'Mittelmaß: hier bleiben Anfragen liegen.', schwach: 'Erheblicher Rückstand bei Auffindbarkeit und Vertrauen.' };
     function renderFindings(r) {
       found.textContent = '';
-      var order = { bad: 0, warn: 1, ok: 2, info: 3 };
       r.categories.forEach(function (g) {
-        var sec = el('section', 'chk-group'); sec.appendChild(el('h3', null, g.title));
-        var ul = el('ul', 'chk-list');
-        g.items.slice().sort(function (a, b) { return order[a.status] - order[b.status]; }).forEach(function (it) {
-          var li = el('li', 'chk-item is-' + it.status);
-          li.appendChild(el('span', 'chk-badge', LABEL[it.status] || ''));
-          var body = el('div'); body.appendChild(el('b', null, it.title)); body.appendChild(el('p', null, it.detail));
-          if (it.status === 'bad' || it.status === 'warn') body.appendChild(el('span', 'chk-impact', IMPACT[it.impact] || ''));
-          li.appendChild(body); ul.appendChild(li);
-        });
-        sec.appendChild(ul); found.appendChild(sec);
+        var sec = el('section', 'chk-group'); sec.appendChild(el('h3', null, g.title + ' · ' + g.score + ' von 100'));
+        var open = g.open || 0, high = g.open_high || 0;
+        sec.appendChild(el('p', 'chk-sum' + (open ? ' is-open' : ''), open === 0 ? 'Keine offenen Punkte.' : open + (open === 1 ? ' offener Punkt' : ' offene Punkte') + (high ? ', davon ' + high + ' mit hohem Gewicht.' : '.')));
+        if (g.good && g.good.length) {
+          var ul = el('ul', 'chk-list');
+          g.good.forEach(function (title) { var li = el('li', 'chk-item is-ok'); li.appendChild(el('span', 'chk-badge', LABEL.ok)); var body = el('div'); body.appendChild(el('b', null, title)); li.appendChild(body); ul.appendChild(li); });
+          sec.appendChild(ul);
+        }
+        found.appendChild(sec);
       });
       var cta = el('div', 'card card--lg card--soft chk-cta');
-      cta.appendChild(el('h3', null, 'Ergebnis gemeinsam einordnen?'));
-      cta.appendChild(el('p', 'muted', 'Im kostenlosen Potenzial-Check besprechen wir, was davon für Ihren Betrieb wirklich zählt. Unverbindlich, Rückmeldung werktags innerhalb von 24 Stunden.'));
+      cta.appendChild(el('h3', null, 'Welche Punkte zuerst, und was bringen sie?'));
+      cta.appendChild(el('p', 'muted', 'Die einzelnen Befunde, ihre Reihenfolge und die Umsetzung besprechen wir im kostenlosen Erstgespräch. Rund 30 Minuten, unverbindlich, Rückmeldung werktags innerhalb von 24 Stunden.'));
       var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Potenzial-Check anfragen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
       var b2 = el('a', 'btn btn--secondary btn--lg', 'SEO und GEO ansehen'); b2.href = '/leistungen/seo-geo'; row.appendChild(b2); cta.appendChild(row); found.appendChild(cta);
       var smp = (r.sample && r.sample.length) ? ' Stichprobe interner Seiten: ' + r.sample.map(function (x) { return x.path; }).join(', ') + '.' : '';

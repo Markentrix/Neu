@@ -3,8 +3,9 @@
  * Markentrix · Website-Check (Endpunkt für /website-check).
  *
  * Eingang:  POST /api/check.php  mit JSON {"url":"https://beispiel.de"}
- * Ausgang:  JSON mit Gesamtwertung, Bereichswerten, Prioritäten und allen Befunden
- *           (status: ok | warn | bad | info, impact: high | mid | low). Keine Handlungsempfehlungen, nur Feststellungen.
+ * Ausgang:  JSON mit Gesamtwertung, Bereichswerten und Kurzbefund je Bereich (Anzahl offener Punkte, davon mit hohem Gewicht,
+ *           sowie die Titel dessen, was bereits in Ordnung ist). Die einzelnen Befunde zu offenen Punkten (Titel, Beschreibung)
+ *           verlassen den Server nicht: Sie liegen nur im internen Bericht (temporärer Speicher) und gehen an Markentrix.
  *
  * Was passiert: Die angegebene öffentliche Adresse wird abgerufen (Startseite, robots.txt, Sitemap, llms.txt,
  * eine nicht existierende Adresse zur Prüfung der Fehlerseite, bis zu drei interne Seiten als Stichprobe)
@@ -644,8 +645,18 @@ $report = ['host' => $host, 'url' => $finalUrl, 'score' => $score, 'grade' => $g
            'categories' => $cats, 'sample' => $samplePublic, 'date' => date('d.m.Y'), 'created' => time()];
 foreach ((array) glob(sys_get_temp_dir() . '/mx-report-*.json') as $old) { if (@filemtime($old) < time() - 7200) @unlink($old); }
 @file_put_contents(sys_get_temp_dir() . '/mx-report-' . $token . '.json', json_encode($report, JSON_UNESCAPED_UNICODE));
+// Öffentliche Kurzfassung: keine Titel oder Beschreibungen zu offenen Punkten, nur Zähler und was bereits in Ordnung ist
+$pubCats = array_map(function ($c) {
+  $open = array_values(array_filter($c['items'], fn($i) => in_array($i['status'], ['warn', 'bad'], true)));
+  $good = array_values(array_filter($c['items'], fn($i) => $i['status'] === 'ok'));
+  return [
+    'key' => $c['key'], 'title' => $c['title'], 'score' => $c['score'], 'counts' => $c['counts'],
+    'open' => count($open), 'open_high' => count(array_filter($open, fn($i) => $i['impact'] === 'high')),
+    'good' => array_map(fn($i) => $i['title'], array_slice($good, 0, 4)),
+  ];
+}, $cats);
 respond(200, [
   'ok' => true, 'token' => $token, 'url' => $finalUrl, 'host' => $host, 'status' => $status, 'score' => $score, 'grade' => $grade, 'cap' => $capReason,
-  'counts' => $counts, 'categories' => $cats, 'sample' => $samplePublic, 'checks' => count($all) - $counts['info'],
+  'counts' => $counts, 'categories' => $pubCats, 'sample' => $samplePublic, 'checks' => count($all) - $counts['info'],
   'seconds' => round(microtime(true) - $T0, 1),
 ]);
