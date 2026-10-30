@@ -168,7 +168,7 @@
       var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Potenzial-Check anfragen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
       var b2 = el('a', 'btn btn--secondary btn--lg', 'SEO und GEO ansehen'); b2.href = '/leistungen/seo-geo'; row.appendChild(b2); cta.appendChild(row); found.appendChild(cta);
       var smp = (r.sample && r.sample.length) ? ' Stichprobe interner Seiten: ' + r.sample.map(function (x) { return x.path; }).join(', ') + '.' : '';
-      found.appendChild(el('p', 'tiny mt-3', 'Geprüft wurden Startseite, robots.txt, Sitemap, llms.txt, eine nicht vorhandene Adresse und eine Stichprobe interner Seiten, einmalig und ohne Speicherung, in ' + r.seconds + ' Sekunden.' + smp + ' Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
+      found.appendChild(el('p', 'tiny mt-3', 'Geprüft wurden Startseite, robots.txt, Sitemap, llms.txt, eine nicht vorhandene Adresse und eine Stichprobe interner Seiten, einmalig, in ' + r.seconds + ' Sekunden.' + smp + ' Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
       found.hidden = false;
     }
     on(d, 'mx:lead', function (e) { if (e.detail && e.detail.quelle === 'Website-Check' && last) { renderFindings(last); if (found.scrollIntoView) found.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' }); } });

@@ -10,8 +10,9 @@
  * Was passiert: Die angegebene öffentliche Adresse wird abgerufen (Startseite, robots.txt, Sitemap, llms.txt,
  * eine nicht existierende Adresse zur Prüfung der Fehlerseite, bis zu drei interne Seiten als Stichprobe)
  * und nach überprüfbaren Merkmalen aus den Bereichen SEO, lokale Sichtbarkeit, GEO (Auffindbarkeit in KI-Antworten),
- * Technik und Tempo, Zugänglichkeit sowie Vertrauen und Anfrage ausgewertet. Es werden weder Adresse noch Ergebnis
- * protokolliert. Das Ergebnis liegt höchstens zwei Stunden im temporären Ordner (Zufalls-Token, ohne Personenbezug), damit es auf Wunsch
+ * Technik und Tempo, Zugänglichkeit sowie Vertrauen und Anfrage ausgewertet. Adresse und Ergebnis werden nicht protokolliert,
+ * gehen aber als interne Benachrichtigung per E-Mail an Markentrix (ohne Name, ohne IP-Adresse; abschaltbar mit MX_CHECK_NOTIFY=0,
+ * Empfänger MX_MAIL_TO, SMTP wie in anfrage.php). Das Ergebnis liegt höchstens zwei Stunden im temporären Ordner (Zufalls-Token, ohne Personenbezug), damit es auf Wunsch
  * per E-Mail zugesandt werden kann (siehe anfrage.php); außerdem Dateien für die Begrenzung (Hash der IP, Platzhalter).
  *
  * Schutz gegen Missbrauch: nur http/https auf Port 80/443, nur öffentliche IP-Adressen (auch nach Weiterleitungen, die
@@ -615,6 +616,46 @@ if ($hasForm && $fieldCount > 0) add('trust', $fieldCount <= 6 ? 'ok' : ($fieldC
 add('trust', $social ? 'ok' : 'info', 'low', $social ? 'Social-Profile verlinkt (' . implode(', ', array_keys($social)) . ')' : 'Keine Social-Profile verlinkt', $social ? 'Besucher finden weitere Eindrücke, und die Profile lassen sich als sameAs zuordnen.' : 'Verlinkte Profile stärken Vertrauen und die Zuordnung der Marke.', '');
 add('trust', $hasWa ? 'ok' : 'info', 'low', $hasWa ? 'WhatsApp als Kontaktweg' : 'Kein WhatsApp-Kontakt', $hasWa ? 'Viele Kunden schreiben lieber, als anzurufen.' : 'Für viele lokale Betriebe ist WhatsApp ein bequemer Einstieg. Optional.', '');
 
+/**
+ * Interne Benachrichtigung über einen durchgeführten Check (ohne Name, ohne IP-Adresse): Adresse, Wert, Bereichswerte und
+ * die offenen Punkte (Status, Gewicht) als Gesprächsgrundlage, falls sich der Besucher später meldet. Begrenzung: dieselbe Adresse höchstens
+ * einmal je 6 Stunden, insgesamt höchstens 40 Mails je Stunde. Abschalten mit MX_CHECK_NOTIFY=0.
+ */
+function notify_owner(array $r): void {
+  if (getenv('MX_CHECK_NOTIFY') === '0') return;
+  $dir = sys_get_temp_dir();
+  $now = time();
+  $dup = $dir . '/mx-notify-' . hash('sha256', strtolower((string) $r['host'])) . '.txt';
+  if (is_file($dup) && @filemtime($dup) > $now - 6 * 3600) return;
+  $cnt = $dir . '/mx-notify-count.json';
+  $hits = is_file($cnt) ? (json_decode((string) @file_get_contents($cnt), true) ?: []) : [];
+  $hits = array_values(array_filter($hits, fn($x) => $now - (int) $x < 3600));
+  if (count($hits) >= 40) return;
+  $hits[] = $now; @file_put_contents($cnt, json_encode($hits)); @touch($dup);
+  require_once __DIR__ . '/mx-mail.php';
+  $c = [
+    'smtp_host' => getenv('MX_SMTP_HOST') ?: '', 'smtp_port' => (int) (getenv('MX_SMTP_PORT') ?: 465), 'smtp_user' => getenv('MX_SMTP_USER') ?: '',
+    'smtp_pass' => getenv('MX_SMTP_PASS') ?: '', 'smtp_security' => getenv('MX_SMTP_SECURITY') ?: '', 'from' => getenv('MX_MAIL_FROM') ?: 'website@markentrix.de',
+  ];
+  $to = getenv('MX_MAIL_TO') ?: 'info@markentrix.de';
+  $L = ['Ein Besucher hat den kostenlosen Website-Check genutzt.', '',
+        'Adresse     : ' . $r['url'], 'Zeitpunkt   : ' . date('d.m.Y H:i') . ' Uhr',
+        'Wert        : ' . $r['score'] . ' von 100 (' . $r['grade'] . ')' . ($r['cap'] ? ', gedeckelt: ' . $r['cap'] : ''),
+        'Merkmale    : ' . $r['checks'] . ' geprüft, ' . $r['counts']['ok'] . ' in Ordnung, ' . $r['counts']['warn'] . ' auffällig, ' . $r['counts']['bad'] . ' mangelhaft', '', 'Bereichswerte'];
+  foreach ($r['categories'] as $cat) $L[] = '  ' . str_pad((string) $cat['score'], 3, ' ', STR_PAD_LEFT) . '  ' . $cat['title'];
+  $L[] = ''; $L[] = 'Offene Punkte (Status, Gewicht)';
+  $n = 0;
+  foreach ($r['categories'] as $cat) foreach ($cat['items'] as $it) {
+    if (in_array($it['status'], ['bad', 'warn'], true)) { $n++; $L[] = '  [' . ($it['status'] === 'bad' ? 'mangelhaft' : 'auffällig') . ', ' . ['high' => 'hoch', 'mid' => 'mittel', 'low' => 'gering'][$it['impact']] . '] ' . $cat['title'] . ': ' . $it['title']; }
+  }
+  if ($n === 0) $L[] = '  keine';
+  $L[] = ''; $L[] = 'Der Besucher hat keinen Namen und keine Kontaktdaten angegeben. Fordert er die Kurzfassung per E-Mail an, kommt eine eigene Mail mit seinen Angaben (Quelle: Website-Check).';
+  $L[] = 'Diese Mail enthält weder eine IP-Adresse noch einen Namen.';
+  $subject = '[markentrix.de] Website-Check: ' . $r['host'] . ' (' . $r['score'] . ' von 100)';
+  $headers = ['From: =?UTF-8?B?' . base64_encode('Markentrix Website') . '?= <' . $c['from'] . '>', 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit', 'X-Mailer: markentrix-website'];
+  deliver($c, $to, '=?UTF-8?B?' . base64_encode($subject) . '?=', implode("\n", $L) . "\n", $headers);
+}
+
 // ── Auswertung ───────────────────────────────────────────────────────────────
 $cats = []; $totalW = 0.0; $sum = 0.0; $all = [];
 foreach ($CATS as $key => $meta) {
@@ -655,8 +696,15 @@ $pubCats = array_map(function ($c) {
     'good' => array_map(fn($i) => $i['title'], array_slice($good, 0, 4)),
   ];
 }, $cats);
-respond(200, [
+$response = [
   'ok' => true, 'token' => $token, 'url' => $finalUrl, 'host' => $host, 'status' => $status, 'score' => $score, 'grade' => $grade, 'cap' => $capReason,
   'counts' => $counts, 'categories' => $pubCats, 'sample' => $samplePublic, 'checks' => count($all) - $counts['info'],
   'seconds' => round(microtime(true) - $T0, 1),
-]);
+];
+http_response_code(200);
+echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+// Antwort zuerst ausliefern, dann die interne Benachrichtigung senden (der Besucher wartet nicht auf den Mailversand)
+if (function_exists('fastcgi_finish_request')) { fastcgi_finish_request(); }
+try { notify_owner($report); } catch (Throwable $e) { /* Benachrichtigung darf den Check nie stören */ }
+exit;
+

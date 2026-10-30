@@ -48,6 +48,10 @@ Monatlich auszählen: `grep -c '"quelle":"Website-Check"' anfragen.log` (Bericht
 
 Bewerbungen von der Seite `/partner-werden` tragen die Quelle „Bewerbung“ (Mail „Neue Bewerbung über markentrix.de“, Betreff „[markentrix.de] Bewerbung: Name“). Zählen: `grep -c '"quelle":"Bewerbung"' anfragen.log`, nach Rolle: `grep -o '"rolle":"[^"]*"' anfragen.log | sort | uniq -c`. Nach Abschluss des Verfahrens die Einträge im Protokoll und die Mails löschen (Löschfrist laut Datenschutzerklärung: spätestens sechs Monate).
 
+### Benachrichtigung bei jedem Check
+
+Jeder durchgeführte Check löst eine interne Mail „[markentrix.de] Website-Check: <Adresse> (<Wert> von 100)“ an `MX_MAIL_TO` aus (Adresse, Zeitpunkt, Wert, Bereichswerte, offene Punkte mit Status und Gewicht; ohne Name, ohne IP). Dieselbe Adresse höchstens einmal in 6 Stunden, insgesamt höchstens 40 Mails je Stunde. Abschalten: Umgebungsvariable `MX_CHECK_NOTIFY=0` im PHP-Container. Die Mail wird erst nach der Antwort an den Besucher gesendet. Fordert der Besucher die Kurzfassung an, kommt zusätzlich wie bisher die Mail „Neue Anfrage über markentrix.de“ mit seinen Kontaktdaten.
+
 ## Wochenbericht
 
 Jeden Montag kommt eine Mail „Wochenbericht markentrix.de: N Anfragen“ mit Quellen, Herkunft, Vorwochenvergleich und allen Eingängen der letzten sieben Tage. Einrichtung und Test: `docs/server/WOCHENBERICHT.md`. Die Auswertung am Monatsende unten bleibt als Gegenprobe möglich.
