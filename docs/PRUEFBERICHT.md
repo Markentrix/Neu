@@ -183,6 +183,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Nachtrag (02.11.2026, Online-Shop nachträglich buchbar):** Der Inhaber bestätigt: Der Shop kann später zu einer bestehenden Website dazugebucht werden. Eingetragen auf /portal und /preise mit dem Zusatz „die Konditionen dafür nennen wir im Angebot“. Nicht angegeben: ob der Aufbau bei nachträglicher Buchung im Preis enthalten ist (die Zusage „Aufbau im Websitepreis enthalten“ gilt nach Angabe für den Kauf mit der Website) und ob nachträglich auch für Landingpages möglich ist. Die Seite macht dazu keine Aussage; bitte festlegen.
 
+**Nachtrag (02.11.2026, Online-Shop nachträglich: Aufbau gesondert):** Der Inhaber bestätigt: Bei nachträglicher Buchung wird der Aufbau des Shops gesondert berechnet; nachträgliches Dazubuchen gilt nicht für Landingpages. Geändert auf /portal und /preise: „Bei einer bestehenden Website ab BUSINESS WEB lässt sich der Shop auch später dazubuchen, der Aufbau wird dann gesondert berechnet.“ Den Preis für den nachträglichen Aufbau nennt die Seite nicht; er steht im Angebot. Damit sind alle Fragen zu den Shop-Konditionen geklärt (9,99 € netto im Monat, 12 Monate, Aufbau bei Kauf mit der Website ab BUSINESS WEB enthalten, nachträglich gesondert, keine Landingpages). Weiter offen: Hinweis „Preisliste vom 1. Oktober 2026“ nennt den Shop nicht.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.
