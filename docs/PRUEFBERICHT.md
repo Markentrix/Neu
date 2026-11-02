@@ -177,6 +177,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Nachtrag (02.11.2026, Online-Shop: Arbeitsteilung):** Klargestellt nach Angabe des Inhabers: Markentrix baut den Online-Shop in die Website des Kunden ein, der Kunde legt Artikel und Gutscheine im Portal an und sieht dort seine Bestellungen; Zahlung per PayPal direkt an den Kunden (Portal-Vorgabe: das Portal erstellt keine Rechnung und prüft keine PayPal-Zahlung automatisch, der Betrieb setzt den Status selbst; das steht nicht auf der Seite, weil nichts anderes versprochen wird). Der Satz „die Einrichtung übernehmen wir“ wurde durch „Wir bauen den Shop in Ihre Website ein“ ersetzt. Ob der Aufbau des Shops im Preis der Website, im Shop-Preis von 9,99 € im Monat oder extra berechnet wird, steht weiterhin nirgends auf der Seite und ist nicht angegeben; bitte festlegen und als Satz ergänzen.
 
+**Nachtrag (02.11.2026, Online-Shop: Aufbau im Websitepreis):** Der Inhaber bestätigt: Der Aufbau des Online-Shops ist im Websitepreis enthalten, berechnet werden nur die 9,99 € im Monat (netto, 12 Monate Mindestlaufzeit). Eingetragen auf /portal („der Aufbau ist im Websitepreis enthalten“) und /preise („Aufbau im Websitepreis enthalten“). Damit ist die offene Frage zum Aufbau aus dem vorigen Nachtrag erledigt. Zu prüfen: Gilt das für jedes Websitepaket (auch LANDING START auf Vorlagenbasis) und für eine nachträgliche Buchung bei einer bestehenden Website? Die Seite sagt es allgemein.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.
