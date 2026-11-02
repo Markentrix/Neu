@@ -175,6 +175,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Nachtrag (02.11.2026, Online-Shop: Konditionen bestätigt):** Der Inhaber bestätigt: 9,99 € im Monat netto zzgl. Umsatzsteuer, Mindestlaufzeit 12 Monate, die Einrichtung übernimmt Markentrix. Eingetragen auf /portal und /preise („Einrichtung durch uns, 12 Monate Mindestlaufzeit“). Ob die Einrichtung berechnet wird, ist nicht angegeben und steht deshalb nicht auf der Seite; die Formulierung „die Einrichtung übernehmen wir“ sagt weder kostenlos noch kostenpflichtig, bitte bei Bedarf präzisieren. Offen: Der Hinweis „Preisliste vom 1. Oktober 2026“ unter den Preisen auf /preise nennt den Shop nicht; Preisliste ergänzen oder Hinweis anpassen.
 
+**Nachtrag (02.11.2026, Online-Shop: Arbeitsteilung):** Klargestellt nach Angabe des Inhabers: Markentrix baut den Online-Shop in die Website des Kunden ein, der Kunde legt Artikel und Gutscheine im Portal an und sieht dort seine Bestellungen; Zahlung per PayPal direkt an den Kunden (Portal-Vorgabe: das Portal erstellt keine Rechnung und prüft keine PayPal-Zahlung automatisch, der Betrieb setzt den Status selbst; das steht nicht auf der Seite, weil nichts anderes versprochen wird). Der Satz „die Einrichtung übernehmen wir“ wurde durch „Wir bauen den Shop in Ihre Website ein“ ersetzt. Ob der Aufbau des Shops im Preis der Website, im Shop-Preis von 9,99 € im Monat oder extra berechnet wird, steht weiterhin nirgends auf der Seite und ist nicht angegeben; bitte festlegen und als Satz ergänzen.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.
