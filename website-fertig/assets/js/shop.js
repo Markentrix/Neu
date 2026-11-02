@@ -209,7 +209,7 @@
       bindChips();
     }
     if (!P.length) grid.insertAdjacentHTML("afterbegin", '<div class="empty" style="grid-column:1/-1"><p>Zurzeit ist kein Artikel bestellbar. Schreiben Sie uns gern: ' + contactLinks() + '.</p></div>');
-    var n = $("#shop-anzahl"); if (n) n.textContent = P.length;
+    
     applyFilter();
   });
   /* Startseite: erste vier Artikel, Bestseller zuerst */
@@ -218,7 +218,7 @@
     var fsec = fg.closest("section"); if (fsec) fsec.hidden = !P.length;
     var best = P.filter(function (p) { return p.tags.indexOf("bestseller") >= 0; }); var rest = P.filter(function (p) { return p.tags.indexOf("bestseller") < 0; });
     fg.innerHTML = best.concat(rest).slice(0, 4).map(function (p) { return cardHtml(p, "h3"); }).join("");
-    var n = $("#alle-anzahl"); if (n) n.textContent = P.length;
+    var n = $("#alle-link"); if (n && P.length) n.textContent = "Alle " + P.length + " Artikel ansehen";
   });
 
   /* ---------- Formular-Hilfen (Portal: POST /api/anfrage) ---------- */
@@ -671,7 +671,7 @@
   }
   function runHooks() { if (catalogLoaded) catalogHooks.forEach(function (h) { try { h(); } catch (e) { /* ein Fehler stoppt nicht die anderen */ } }); }
   function refreshCatalog() {
-    return fetchJson("api/produkte").then(function (j) { if (applyCatalog(j)) { try { sessionStorage.setItem(CKEY, JSON.stringify({ t: Date.now(), d: j })); } catch (e) { /* ohne Speicher */ } } }).catch(function () { /* Rückfall bleibt */ }).then(runHooks);
+    return fetchJson("api/produkte").then(function (j) { if (applyCatalog(j)) { try { sessionStorage.setItem(CKEY, JSON.stringify({ t: Date.now(), d: j })); } catch (e) { /* ohne Speicher */ } } }).catch(function () { /* Rückfall bleibt */ }).then(function () { if (!P.length) catalogLoaded = true; runHooks(); });
   }
   (function startCatalog() {
     var cached = null; try { cached = JSON.parse(sessionStorage.getItem(CKEY) || "null"); } catch (e) { cached = null; }

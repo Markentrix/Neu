@@ -10,7 +10,7 @@ echtes Foto vom Druckbett vorn, Lieferzeit als Druckzeit-Balken, Material mit Te
 
 ## Material und Bestand (Schritt 1)
 
-Vorhanden und echt: Logo (Wortmarke, Schicht-S, Düse im „i“), ein Foto des Kleinen Kürbis auf dem Druckbett des X1 Carbon, Firmendaten (Impressum Markentrix), Preise der drei Kürbis-Artikel, Gutscheinidee.
+Vorhanden und echt: Logo (Wortmarke, Schicht-S, Düse im „i“), ein Foto des Kleinen Kürbis auf dem Druckbett des X1 Carbon, Firmendaten (Impressum Markentrix), Gutscheinidee. Die drei Kürbis-Artikel wurden entfernt, Artikel kommen künftig aus dem Portal.
 Nicht vorhanden: weitere Fotos (Werkstatt, Drucker, Inhaber, weitere Artikel), Kundenstimmen, Zahlen, Texte vom Inhaber. Alles davon steht als OFFEN am Ende der Antwort und wird nicht erfunden.
 Entfernt, weil nicht belegt: „Bestseller“, „Das bestellen unsere Kunden am häufigsten“, „ein paar Drucker“, „Filamente von europäischen Herstellern“, „Recycling“, „plastikfreie Verpackung“, „DHL“, „Gefertigt in Deutschland“, Nachbearbeitungs-Leistungen, Farbangaben auf Materialseiten.
 

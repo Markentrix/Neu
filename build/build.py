@@ -187,7 +187,7 @@ def build_index():
     <div class="side">
       <h2>Im Shop</h2>
       <p>Farbe wählen, bei Wunschtext-Artikeln den Text eintragen, in den Warenkorb legen. Gedruckt wird nach der Bestellung.</p>
-      <p><a class="textlink" href="shop.html">Alle <span id="alle-anzahl">{len(AKTIV)}</span> Artikel ansehen</a><br><a class="textlink" href="gutschein.html">Geschenkgutschein</a></p>
+      <p><a class="textlink" id="alle-link" href="shop.html">{"Alle " + str(len(AKTIV)) + " Artikel ansehen" if AKTIV else "Zum Shop"}</a><br><a class="textlink" href="gutschein.html">Geschenkgutschein</a></p>
     </div>
     <div id="featured-grid">{cards}</div>
   </div>
@@ -237,7 +237,7 @@ def build_shop():
     body = f"""<section class="page-head">
   <div class="wrap">
     <h1>Alle Artikel</h1>
-    <p class="lead"><span id="shop-anzahl">{len(AKTIV)}</span> Artikel, jeder wird erst nach Ihrer Bestellung gedruckt. Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos, Abholung in Celle ohne Versandkosten.</p>
+    <p class="lead">Jeder Artikel wird erst nach Ihrer Bestellung gedruckt. Versand {EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos, Abholung in Celle ohne Versandkosten.</p>
   </div>
 </section>
 <section class="section-tight">
@@ -247,8 +247,8 @@ def build_shop():
       <label class="sr-only" for="sortierung">Sortierung</label>
       <select id="sortierung"><option value="standard">Reihenfolge im Shop</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A bis Z</option></select>
     </div>
-    <p class="small muted" id="treffer" aria-live="polite">{len(AKTIV)} Artikel</p>
-    <div class="grid" id="shop-grid">{cards}{gutschein_card("")}</div>
+    <p class="small muted" id="treffer" aria-live="polite">{str(len(AKTIV)) + " Artikel" if AKTIV else ""}</p>
+    <div class="grid" id="shop-grid">{cards}{gutschein_card("", "h2")}</div>
   </div>
 </section>
 """
@@ -344,11 +344,11 @@ def build_product_dyn():
 
 
 # ---------------------------------------------------------------- Gutschein
-def gutschein_card(rel):
+def gutschein_card(rel, h="h3"):
     return f"""<article class="card card-gutschein" data-kat="geschenk" data-preis="10" data-name="Geschenkgutschein" data-pos="999">
   <a class="card-img" href="{rel}gutschein.html" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/gutschein.webp" width="800" height="600" alt="" loading="lazy"></a>
   <div class="card-body">
-    <h3><a href="{rel}gutschein.html">Geschenkgutschein</a></h3>
+    <{h}><a href="{rel}gutschein.html">Geschenkgutschein</a></{h}>
     <p class="small muted" style="margin:0">Wunschbetrag ab 10 €, als Karte per Post oder zum Ausdrucken per E-Mail. 3 Jahre gültig.</p>
     <div class="price">ab 10,00 €</div>
     <a class="btn btn-primary" href="{rel}gutschein.html">Gutschein wählen</a>
