@@ -181,6 +181,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Nachtrag (02.11.2026, Online-Shop nur ab BUSINESS WEB):** Der Inhaber stellt klar: Der Shop-Aufbau ist ab dem Paket BUSINESS WEB (4.490 €) im Websitepreis enthalten, nicht für Landingpages (LANDING START, LANDING). Geändert auf /portal (Karte „Online-Shop und Gutscheine“) und /preise (Liste der Bausteine und Satz darunter). Zu klären: Gilt der Shop auch für WEB + FUNNEL (die Seite sagt „ab BUSINESS WEB“, also ja), und ist eine nachträgliche Buchung bei einer bestehenden Website möglich? Dazu steht nichts auf der Seite.
 
+**Nachtrag (02.11.2026, Online-Shop nachträglich buchbar):** Der Inhaber bestätigt: Der Shop kann später zu einer bestehenden Website dazugebucht werden. Eingetragen auf /portal und /preise mit dem Zusatz „die Konditionen dafür nennen wir im Angebot“. Nicht angegeben: ob der Aufbau bei nachträglicher Buchung im Preis enthalten ist (die Zusage „Aufbau im Websitepreis enthalten“ gilt nach Angabe für den Kauf mit der Website) und ob nachträglich auch für Landingpages möglich ist. Die Seite macht dazu keine Aussage; bitte festlegen.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.
