@@ -159,7 +159,7 @@ def datei_band(titel, text, knopf, href):
 
 # ---------------------------------------------------------------- Startseite
 def build_index():
-    best = AKTIV[:4]
+    best = AKTIV[:(5 if len(AKTIV) >= 5 else 3 if len(AKTIV) >= 3 else len(AKTIV))]
     cards = "\n".join(card(p, "", i) for i, p in enumerate(best))
     mat_rows = "".join(
         f'<li><a href="material/{m["id"]}.html"><span class="mname">{E(m["name"])}</span><span class="muse">{E(m["einsatz"])}</span><span class="mtemp">{E(m["temp"])}</span></a></li>'
@@ -352,6 +352,7 @@ def gutschein_card(rel, h="h3"):
     <p class="small muted" style="margin:0">Wunschbetrag ab 10 €, als Karte per Post oder zum Ausdrucken per E-Mail. 3 Jahre gültig.</p>
     <div class="price">ab 10,00 €</div>
     <a class="btn btn-primary" href="{rel}gutschein.html">Gutschein wählen</a>
+    <a class="card-more" href="{rel}gutschein.html">Details ansehen</a>
   </div>
 </article>"""
 

@@ -175,7 +175,7 @@
       if (mode === "name") return a.dataset.name.localeCompare(b.dataset.name, "de");
       return a.dataset.pos - b.dataset.pos;
     }).forEach(function (c) { grid.appendChild(c); });
-    var cnt = $("#treffer"); if (cnt) cnt.textContent = vis.length + " Artikel";
+    var cnt = $("#treffer"); if (cnt) cnt.textContent = vis.filter(function (c) { return !c.classList.contains("card-gutschein"); }).length + " Artikel";
   }
   function bindChips() {
     var chips = $$(".chip");
@@ -217,8 +217,8 @@
     var fg = $("#featured-grid"); if (!fg) return;
     var fsec = fg.closest("section"); if (fsec) fsec.hidden = !P.length;
     var best = P.filter(function (p) { return p.tags.indexOf("bestseller") >= 0; }); var rest = P.filter(function (p) { return p.tags.indexOf("bestseller") < 0; });
-    fg.innerHTML = best.concat(rest).slice(0, 4).map(function (p) { return cardHtml(p, "h3"); }).join("");
-    var n = $("#alle-link"); if (n && P.length) n.textContent = "Alle " + P.length + " Artikel ansehen";
+    fg.innerHTML = best.concat(rest).slice(0, P.length >= 5 ? 5 : P.length >= 3 ? 3 : P.length).map(function (p) { return cardHtml(p, "h3"); }).join("");
+    var n = $("#alle-link"); if (n && P.length) n.textContent = P.length > 1 ? "Alle " + P.length + " Artikel ansehen" : "Zum Shop";
   });
 
   /* ---------- Formular-Hilfen (Portal: POST /api/anfrage) ---------- */
