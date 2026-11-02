@@ -179,6 +179,8 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 
 **Nachtrag (02.11.2026, Online-Shop: Aufbau im Websitepreis):** Der Inhaber bestätigt: Der Aufbau des Online-Shops ist im Websitepreis enthalten, berechnet werden nur die 9,99 € im Monat (netto, 12 Monate Mindestlaufzeit). Eingetragen auf /portal („der Aufbau ist im Websitepreis enthalten“) und /preise („Aufbau im Websitepreis enthalten“). Damit ist die offene Frage zum Aufbau aus dem vorigen Nachtrag erledigt. Zu prüfen: Gilt das für jedes Websitepaket (auch LANDING START auf Vorlagenbasis) und für eine nachträgliche Buchung bei einer bestehenden Website? Die Seite sagt es allgemein.
 
+**Nachtrag (02.11.2026, Online-Shop nur ab BUSINESS WEB):** Der Inhaber stellt klar: Der Shop-Aufbau ist ab dem Paket BUSINESS WEB (4.490 €) im Websitepreis enthalten, nicht für Landingpages (LANDING START, LANDING). Geändert auf /portal (Karte „Online-Shop und Gutscheine“) und /preise (Liste der Bausteine und Satz darunter). Zu klären: Gilt der Shop auch für WEB + FUNNEL (die Seite sagt „ab BUSINESS WEB“, also ja), und ist eine nachträgliche Buchung bei einer bestehenden Website möglich? Dazu steht nichts auf der Seite.
+
 ## 3. Prüfung des Ergebnisses
 - Build mit Linkcheck: alle internen Links und Anker aufgelöst, genau eine h1 je Seite, Titel ≤ 65 und Description ≤ 165 Zeichen.
 - HTML-Validierung (html-validate, recommended): ohne Fehler.
