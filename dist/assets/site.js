@@ -165,7 +165,7 @@
       var cta = el('div', 'card card--lg card--soft chk-cta');
       cta.appendChild(el('h3', null, 'Welche Punkte zuerst, und was bringen sie?'));
       cta.appendChild(el('p', 'muted', 'Die einzelnen Befunde, ihre Reihenfolge und die Umsetzung besprechen wir im kostenlosen Erstgespräch. Rund 30 Minuten, unverbindlich, Rückmeldung werktags innerhalb von 24 Stunden.'));
-      var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Potenzial-Check anfragen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
+      var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Erstberatung anfragen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
       var b2 = el('a', 'btn btn--secondary btn--lg', 'SEO und GEO ansehen'); b2.href = '/leistungen/seo-geo'; row.appendChild(b2); cta.appendChild(row); found.appendChild(cta);
       var smp = (r.sample && r.sample.length) ? ' Stichprobe interner Seiten: ' + r.sample.map(function (x) { return x.path; }).join(', ') + '.' : '';
       found.appendChild(el('p', 'tiny mt-3', 'Geprüft wurden Startseite, robots.txt, Sitemap, llms.txt, eine nicht vorhandene Adresse und eine Stichprobe interner Seiten, einmalig, in ' + r.seconds + ' Sekunden.' + smp + ' Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
@@ -328,10 +328,10 @@
       quartal: 'Das passt zum üblichen Ablauf: Erstgespräch, Angebot, 5 bis 15 Werktage Umsetzung, Freigabegespräch, Livegang.',
       offen: 'Kein Druck. Das Erstgespräch ist unverbindlich, das Angebot hat einen Festpreis. Sie entscheiden in Ruhe.' };
     function val(name) { var r = $('input[name=' + name + ']:checked', form); return r ? r.value : ''; }
-    function label(name) { var r = $('input[name=' + name + ']:checked', form); return r ? (r.closest('.choice').textContent || '').trim() : ''; }
+    function label(name) { var r = $('input[name=' + name + ']:checked', form); if (!r) return ''; var c = r.closest('.choice').cloneNode(true), h = $('.choice-hint', c); if (h) h.remove(); return (c.textContent || '').trim(); }
     function show(i) {
       var dir = i > cur ? 'wz-in' : 'wz-back', changed = i !== cur;
-      cur = i;
+      cur = i; if (changed) track('wizard_step', { schritt: i + 1 });
       steps.forEach(function (s, k) { s.hidden = k !== i; s.classList.remove('wz-in', 'wz-back'); if (k === i && changed) s.classList.add(dir); });
       prog.forEach(function (p, k) { p.classList.toggle('is-done', k < i); p.classList.toggle('is-current', k === i); if (k === i) p.setAttribute('aria-current', 'step'); else p.removeAttribute('aria-current'); });
       if (prevB) prevB.hidden = i === 0;
@@ -352,7 +352,7 @@
       if (result) result.innerHTML = html;
       if (reco) reco.value = 'Bedarf: ' + (label('bedarf') || 'offen') + ' | Ausgangslage: ' + (label('status') || 'offen') + ' | Zeitplan: ' + (label('zeitplan') || 'offen') + (br ? ' | Branche: ' + br : '');
     }
-    on(nextB, 'click', function () { if (valid(cur)) show(cur + 1); });
+    on(nextB, 'click', function () { if (cur < steps.length - 1 && valid(cur)) show(cur + 1); });
     on(prevB, 'click', function () { show(Math.max(0, cur - 1)); });
     on(form, 'keydown', function (e) { if (e.key === 'Enter' && cur < steps.length - 1 && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); nextB.click(); } });
     $$('.choice input', form).forEach(function (r) { on(r, 'change', function () { if (cur < steps.length - 1) setTimeout(function () { nextB.click(); }, 160); }); });
