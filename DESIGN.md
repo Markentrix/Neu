@@ -95,6 +95,8 @@ Der Kunde wollte eine lebendigere, animierte Seite. Die Verbote der Vorgabe (das
 - Warenkorb: das Artikelbild fliegt in 9 Stufen zum Warenkorb-Symbol, danach pulsiert der Zähler. Der Versand-Fortschritt füllt sich in Stufen.
 - Danke-Seite: Vorgangsnummer druckt sich, darunter der Ablaufbalken Bestellung, Druck, Versand. 404: Treppe baut sich auf, die fehlende Stufe füllt sich zuletzt.
 - Materialzeilen füllen sich beim Überfahren in Stufen. Handy-Menü: Einträge nacheinander.
+- Aktionsband im November und Dezember: letzter Bestelltag für Weihnachten, berechnet aus den Richtwerten (Druck + Versand + 2 Werktage Bestätigung), verschwindet danach von selbst.
+- Wunschtext-Vorschau (Kachel in der gewählten Farbe mit Schichtlinien), Bildergalerie mit Pfeilen und Wischen, Suche ab 8 Artikeln, Merkliste und Zuletzt angesehen im Browser des Besuchers.
 - Seitenwechsel mit kurzem Übergang (View Transitions) in Browsern, die ihn kennen.
 - `prefers-reduced-motion`: alles steht sofort, keine Animation.
 

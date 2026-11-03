@@ -33,6 +33,18 @@ Das Portal erzeugt keine Seiten. Artikel, die im Generator stehen, haben eine ei
 Neue Artikel aus dem Portal erscheinen sofort im Shop und öffnen `produkt.html?id=…`; diese Seite ist auf `noindex` gesetzt.
 Für eine eigene, auffindbare Seite pro Artikel muss der Artikel in `build/produkte.py` ergänzt und die Website neu hochgeladen werden.
 
+### Eigene Seiten für Portal-Artikel (SEO)
+
+`build/portal_katalog.py` holt den Katalog (`GET /api/produkte`) und legt ihn als `build/katalog-portal.json` ab. `build/build.py` baut daraus für jeden Artikel eine eigene Seite mit strukturierten Daten, Karten, Sitemap-Einträge und den eingebauten Rückfall-Katalog.
+Ablauf nach neuen oder geänderten Artikeln:
+
+```
+python3 build/portal_katalog.py https://IHRE-DOMAIN/api/produkte
+python3 build/build.py
+```
+
+Danach den Ordner `website-fertig/` neu hochladen. Preise, Verfügbarkeit und Bilder holt die Seite im Browser weiter live aus dem Portal. `python3 build/portal_katalog.py --entfernen` stellt den Zustand ohne Katalogdatei wieder her.
+
 ## Was das Portal nicht tut
 
 Das Portal erstellt keine Rechnung und prüft keine PayPal-Zahlung. Der Betrieb setzt den Status „bezahlt“ selbst. Die Website verspricht nichts anderes.

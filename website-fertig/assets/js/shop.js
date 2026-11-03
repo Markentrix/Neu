@@ -111,7 +111,7 @@
     var notes = []; if (p.text) notes.push("Mit Wunschtext"); if (p.farben.length > 1) notes.push("in " + p.farben.length + " Farben");
     var action = p.text ? '<a class="btn btn-primary" href="' + esc(href) + '">Text und Farbe wählen</a>' : '<button class="btn btn-primary" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
     var tags = p.tags.concat(p.text && p.tags.indexOf("personalisiert") < 0 ? ["personalisiert"] : []).join(" ");
-    return '<article class="card" data-kat="' + esc(p.kat) + '" data-tags="' + esc(tags) + '" data-preis="' + p.preis + '" data-name="' + esc(p.name) + '" data-pos="' + (p._pos || 0) + '">' +
+    return '<article class="card" data-kat="' + esc(p.kat) + '" data-tags="' + esc(tags) + '" data-preis="' + p.preis + '" data-name="' + esc(p.name) + '" data-pos="' + (p._pos || 0) + '" data-id="' + esc(p.id) + '" data-suche="' + esc([p.name, p.kurz, p.material].join(" ").toLowerCase()) + '">' +
       '<a class="card-img" href="' + esc(href) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="' + imgDim(p).w + '" height="' + imgDim(p).h + '" alt="" loading="lazy"></a>' +
       '<div class="card-body"><' + h + '><a href="' + esc(href) + '">' + esc(p.name) + '</a></' + h + '>' +
       '<p class="small">' + esc(p.kurz) + '</p><div class="price">' + EUR(p.preis) + '</div>' +
@@ -166,7 +166,13 @@
   function applyFilter() {
     var grid = $("#shop-grid"); if (!grid) return;
     var cards = $$(".card", grid); var sort = $("#sortierung");
-    var vis = cards.filter(function (c) { return activeKat === "alle" || c.dataset.kat === activeKat || (c.dataset.tags || "").split(" ").indexOf(activeKat) >= 0; });
+    var merk = merkIds(); var words = plain(suchterm).split(/\s+/).filter(Boolean);
+    var vis = cards.filter(function (c) {
+      var katOk = activeKat === "alle" || c.dataset.kat === activeKat || (c.dataset.tags || "").split(" ").indexOf(activeKat) >= 0 || (activeKat === "merk" && merk.indexOf(c.dataset.id) >= 0);
+      if (!katOk) return false;
+      var hay = plain(c.dataset.suche || c.dataset.name);
+      return words.every(function (w) { return hay.indexOf(w) >= 0; });
+    });
     cards.forEach(function (c) { c.style.display = vis.indexOf(c) >= 0 ? "" : "none"; });
     var mode = sort ? sort.value : "standard";
     vis.sort(function (a, b) {
@@ -176,17 +182,18 @@
       return a.dataset.pos - b.dataset.pos;
     }).forEach(function (c) { grid.appendChild(c); });
     var cnt = $("#treffer"); if (cnt) cnt.textContent = vis.filter(function (c) { return !c.classList.contains("card-gutschein"); }).length + " Artikel";
+    var kt = $("#keine-treffer"); if (kt) kt.hidden = vis.length > 0 || !P.length;
   }
+  function setChips() { $$(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.kat === activeKat ? "true" : "false"); }); }
   function bindChips() {
-    var chips = $$(".chip");
-    chips.forEach(function (ch) {
-      ch.setAttribute("aria-pressed", ch.dataset.kat === activeKat ? "true" : "false");
-      ch.addEventListener("click", function () { activeKat = ch.dataset.kat; chips.forEach(function (x) { x.setAttribute("aria-pressed", x === ch ? "true" : "false"); }); applyFilter(); });
-    });
+    var wrap = $("#kat-chips"); if (!wrap) return;
+    setChips(); ensureMerkChip();
+    if (wrap.dataset.bound) return; wrap.dataset.bound = "1";
+    wrap.addEventListener("click", function (e) { var ch = e.target.closest(".chip"); if (!ch) return; activeKat = ch.dataset.kat; setChips(); applyFilter(); });
   }
   function setupShop() {
     var grid = $("#shop-grid"); if (!grid) return;
-    bindChips();
+    bindChips(); setupSearch(); renderZuletzt($("#zuletzt-host"), "");
     var sort = $("#sortierung"); if (sort && !sortBound) { sort.addEventListener("change", applyFilter); sortBound = true; }
     var hk = location.hash.replace("#", "");
     if (hk && !hashApplied) { hashApplied = true; var hc = $$(".chip").filter(function (c) { return c.dataset.kat === hk; })[0]; if (hc) hc.click(); }
@@ -208,6 +215,7 @@
         (P.some(function (p) { return p.text; }) ? '<button class="chip" type="button" data-kat="personalisiert" aria-pressed="false">Mit Wunschtext</button>' : "");
       bindChips();
     }
+    setupSearch(); renderZuletzt($("#zuletzt-host"), "");
     if (!P.length) grid.insertAdjacentHTML("afterbegin", '<div class="empty" style="grid-column:1/-1"><p>Zurzeit ist kein Artikel bestellbar. Schreiben Sie uns gern: ' + contactLinks() + '.</p></div>');
     
     applyFilter();
@@ -629,7 +637,7 @@
       (related.length ? '<h2 style="margin-top:56px">Weitere Artikel</h2><div class="grid">' + related.map(function (q) { return cardHtml(q, "h3"); }).join("") + "</div>" : "");
     var sticky = document.createElement("div"); sticky.className = "sticky-buy"; sticky.setAttribute("aria-hidden", "true");
     sticky.innerHTML = '<span class="sticky-price">' + EUR(p.preis) + '</span><button class="btn btn-primary" type="button" data-sticky-buy>In den Warenkorb</button>'; document.body.appendChild(sticky);
-    bindBuy($("#kaufen")); setupSticky(); initDelivery();
+    bindBuy($("#kaufen")); setupSticky(); initDelivery(); initPreview(); initGallery(); addMerkLink($("#kaufen")); trackSeen(p.id); renderZuletzt(host, p.id);
     $$(".thumbs button", host).forEach(function (tb) { tb.addEventListener("click", function () { var im = $("#pd-img"); im.src = tb.dataset.img; im.alt = tb.dataset.alt; $$(".thumbs button", host).forEach(function (x) { x.removeAttribute("aria-current"); }); tb.setAttribute("aria-current", "true"); }); });
   }
 
@@ -695,6 +703,145 @@
       }).catch(function () { /* Portal nicht erreichbar: Standardwerte der Seite */ });
     }
   })();
+
+
+  /* ---------- Zusatzfunktionen: Suche, Merkliste, Zuletzt angesehen ---------- */
+  var suchterm = "";
+  function plain(t) { t = String(t || "").toLowerCase().replace(/ß/g, "ss"); try { t = t.normalize("NFD").replace(/[̀-ͯ]/g, ""); } catch (e) { /* ältere Browser */ } return t; }
+  function lsList(k) { try { var l = JSON.parse(localStorage.getItem(k) || "[]"); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
+  function lsSave(k, l) { try { localStorage.setItem(k, JSON.stringify(l)); } catch (e) { /* privater Modus */ } }
+  function merkIds() { return lsList("sw_merk"); }
+  function setupSearch() {
+    var si = $("#suche"); if (!si) return;
+    si.hidden = P.length < 8;                                   // erst ab 8 Artikeln sinnvoll
+    if (si.dataset.bound) return; si.dataset.bound = "1";
+    si.addEventListener("input", function () { suchterm = si.value; applyFilter(); });
+    var rs = $("#suche-zurueck"); if (rs) rs.addEventListener("click", function () { si.value = ""; suchterm = ""; activeKat = "alle"; setChips(); applyFilter(); si.focus(); });
+  }
+  var HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"/></svg>';
+  function decorateCards() {
+    $$(".card[data-id]:not(.card-gutschein)").forEach(function (c) {
+      if (c.querySelector(".merk")) return;
+      var b = document.createElement("button"); b.type = "button"; b.className = "merk"; b.dataset.merk = c.dataset.id; b.dataset.name = c.dataset.name || ""; b.innerHTML = HEART; c.appendChild(b);
+    });
+    refreshMerk();
+  }
+  function ensureMerkChip() {
+    var wrap = $("#kat-chips"); if (!wrap || $(".chip[data-kat=merk]", wrap)) return;
+    var c = document.createElement("button"); c.className = "chip"; c.type = "button"; c.dataset.kat = "merk"; c.setAttribute("aria-pressed", activeKat === "merk" ? "true" : "false"); c.hidden = true; wrap.appendChild(c);
+    refreshMerk();
+  }
+  function refreshMerk() {
+    var l = merkIds();
+    $$(".merk").forEach(function (b) {
+      var on = l.indexOf(b.dataset.merk) >= 0; b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.setAttribute("aria-label", (on ? "Von der Merkliste entfernen: " : "Auf die Merkliste: ") + (b.dataset.name || ""));
+    });
+    $$(".merk-link").forEach(function (b) { var on = l.indexOf(b.dataset.merk) >= 0; b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "Auf der Merkliste, entfernen" : "Auf die Merkliste"; });
+    var chip = $(".chip[data-kat=merk]");
+    if (chip) {
+      chip.hidden = !l.length; chip.textContent = "Merkliste (" + l.length + ")";
+      if (!l.length && activeKat === "merk") { activeKat = "alle"; setChips(); applyFilter(); } else if (activeKat === "merk") applyFilter();
+    }
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-merk]"); if (!b) return;
+    var id = b.dataset.merk, l = merkIds(), i = l.indexOf(id);
+    if (i >= 0) l.splice(i, 1); else l.unshift(id);
+    lsSave("sw_merk", l.slice(0, 50)); refreshMerk();
+  });
+  var decoQueued = false;
+  if ("MutationObserver" in window) new MutationObserver(function () { if (decoQueued) return; decoQueued = true; requestAnimationFrame(function () { decoQueued = false; decorateCards(); }); }).observe(document.body, { childList: true, subtree: true });
+  function trackSeen(id) { var l = lsList("sw_zuletzt").filter(function (x) { return x !== id; }); l.unshift(id); lsSave("sw_zuletzt", l.slice(0, 8)); }
+  function renderZuletzt(host, excludeId) {
+    if (!host) return;
+    var old = $(".zuletzt", host.parentNode || host); if (old) old.remove();
+    var ps = lsList("sw_zuletzt").filter(function (x) { return x !== excludeId; }).map(findProduct).filter(Boolean).slice(0, 4);
+    if (!ps.length) return;
+    ps.forEach(function (p, j) { p._pos = j; });
+    var sec = document.createElement("section"); sec.className = "zuletzt";
+    sec.innerHTML = '<h2 class="sub">Zuletzt angesehen</h2><div class="grid grid-small">' + ps.map(function (p) { return cardHtml(p, "h3"); }).join("") + "</div>";
+    host.appendChild(sec);
+  }
+  function addMerkLink(form) {
+    if (!form || $(".merk-link")) return;
+    var p = document.createElement("p"); p.style.margin = "10px 0 0";
+    p.innerHTML = '<button type="button" class="textlink merk-link" data-merk="' + esc(form.dataset.id) + '" aria-pressed="false">Auf die Merkliste</button>';
+    form.parentNode.insertBefore(p, form.nextSibling); refreshMerk();
+  }
+
+  /* ---------- Wunschtext-Vorschau ---------- */
+  function initPreview() {
+    var inp = $("#wunschtext"); if (!inp || $(".vorschau")) return;
+    var field = inp.closest(".field"); if (!field) return;
+    var box = document.createElement("div"); box.className = "vorschau";
+    box.innerHTML = '<div class="vorschau-tile" aria-hidden="true"><span class="vorschau-text"></span></div><p class="small muted">Vorschau zur Orientierung. Schrift und Größe stimmen wir vor dem Druck mit Ihnen ab.</p>';
+    field.parentNode.insertBefore(box, field.nextSibling);
+    var tile = $(".vorschau-tile", box), t = $(".vorschau-text", box);
+    function update() {
+      var v = inp.value.trim(), sw = $("input[name=farbe]:checked"), dot = sw && sw.nextElementSibling && sw.nextElementSibling.querySelector("i");
+      var c = dot ? getComputedStyle(dot).backgroundColor : "rgb(201,210,204)";
+      var m = c.match(/\d+/g) || [201, 210, 204]; var lum = (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) / 255;
+      tile.style.backgroundColor = c; tile.style.color = lum > 0.55 ? "#15231c" : "#f3f5f1";
+      var txt = v || "Ihr Text"; t.textContent = txt; t.classList.toggle("leer", !v);
+      t.style.fontSize = Math.max(18, Math.min(54, 600 / Math.max(txt.length, 8))) + "px";
+    }
+    inp.addEventListener("input", update);
+    $$("input[name=farbe]").forEach(function (r) { r.addEventListener("change", update); });
+    update();
+  }
+
+  /* ---------- Bildergalerie: Pfeile, Tastatur, Wischen ---------- */
+  function initGallery() {
+    var media = $(".product-media"), thumbs = $$(".thumbs button");
+    if (!media || thumbs.length < 2 || media.dataset.gal) return; media.dataset.gal = "1";
+    var img = $("img", media), idx = 0, cnt = document.createElement("span");
+    media.tabIndex = 0; media.setAttribute("role", "group"); media.setAttribute("aria-label", "Bildergalerie, Pfeiltasten wechseln das Bild");
+    cnt.className = "gal-count"; cnt.setAttribute("aria-hidden", "true");
+    function mk(cls, label, ch) { var b = document.createElement("button"); b.type = "button"; b.className = "gal-btn " + cls; b.setAttribute("aria-label", label); b.textContent = ch; media.appendChild(b); return b; }
+    var prev = mk("prev", "Vorheriges Bild", "‹"), next = mk("next", "Nächstes Bild", "›"); media.appendChild(cnt);
+    function show(i, silent) {
+      idx = (i + thumbs.length) % thumbs.length; var tb = thumbs[idx];
+      img.src = tb.dataset.img; img.alt = tb.dataset.alt;
+      thumbs.forEach(function (x) { x.removeAttribute("aria-current"); }); tb.setAttribute("aria-current", "true");
+      cnt.textContent = (idx + 1) + " / " + thumbs.length;
+      if (!silent) { media.classList.remove("wechsel"); void media.offsetWidth; media.classList.add("wechsel"); }
+    }
+    thumbs.forEach(function (tb, k) { tb.addEventListener("click", function () { show(k); }); var im = new Image(); im.src = tb.dataset.img; });
+    prev.addEventListener("click", function () { show(idx - 1); }); next.addEventListener("click", function () { show(idx + 1); });
+    media.addEventListener("keydown", function (e) { if (e.key === "ArrowLeft") { show(idx - 1); e.preventDefault(); } else if (e.key === "ArrowRight") { show(idx + 1); e.preventDefault(); } });
+    var x0 = null;
+    media.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    media.addEventListener("touchend", function (e) { if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) show(idx + (dx < 0 ? 1 : -1)); });
+    show(0, true);
+  }
+
+  /* ---------- Aktionsband vor Weihnachten: letzter Bestelltag aus den Richtwerten ---------- */
+  (function () {
+    var seite = location.pathname.split("/").pop() || "index.html";
+    if (/^(warenkorb|danke|404)/.test(seite)) return;
+    try { if (sessionStorage.getItem("sw_aktion_zu")) return; } catch (e) { /* ohne Speicher: Band bleibt */ }
+    var heute = new Date(); heute.setHours(0, 0, 0, 0);
+    var liefer = new Date(heute.getFullYear(), 11, 23);              // Heiligabend ist der 24., Lieferung bis zum 23.
+    if (heute > liefer || heute.getMonth() < 10) return;             // nur November und Dezember
+    var tage = (CFG.produktionMax || 4) + (CFG.versandMax || 3) + 2;  // Druck + Versand + Bestätigung und Zahlung
+    var d = new Date(liefer), n = 0;
+    while (n < tage) { d.setDate(d.getDate() - 1); var w = d.getDay(); if (w !== 0 && w !== 6) n++; }
+    if (heute > d) return;
+    var el = document.createElement("aside"); el.className = "aktion"; el.setAttribute("aria-label", "Hinweis zu Weihnachten");
+    var tag = d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" });
+    el.innerHTML = '<p>Als Geschenk zu Weihnachten: Bestellen Sie bis <strong>' + esc(tag) + '</strong>, dann kommt es nach unseren Richtwerten rechtzeitig an.' + (/^shop/.test(seite) ? "" : ' <a href="' + ROOT + 'shop.html">Zum Shop</a>') + '</p><button type="button" aria-label="Hinweis schließen">×</button>';
+    $("button", el).addEventListener("click", function () { el.remove(); try { sessionStorage.setItem("sw_aktion_zu", "1"); } catch (e) { /* egal */ } });
+    document.body.insertBefore(el, $(".site-header") || document.body.firstChild);
+  })();
+
+  // Start: Zusatzfunktionen auf statischen Produktseiten und der Shopseite
+  if ($("#kaufen") && !$("#produkt-dyn")) {
+    initPreview(); initGallery(); addMerkLink($("#kaufen")); trackSeen($("#kaufen").dataset.id);
+    var mainEl = $("main") || document.body, zs = document.createElement("section"); zs.className = "section-tight"; zs.innerHTML = '<div class="wrap" id="zuletzt-host"></div>'; mainEl.appendChild(zs);
+    renderZuletzt($("#zuletzt-host"), $("#kaufen").dataset.id);
+  }
+  decorateCards();
 
   updateBadge();
   try { sessionStorage.setItem("sw_logo", "1"); } catch (e) { /* ohne Speicher: Logo animiert jedes Mal */ }

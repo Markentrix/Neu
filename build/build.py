@@ -5,7 +5,20 @@ sys.path.insert(0, os.path.dirname(__file__))
 import config as C
 from produkte import PRODUKTE, FARBEN, KATEGORIEN, VERSAND_PAUSCHALE, VERSANDFREI_AB
 from materialien import MATERIALIEN, VERGLEICH, FAQ
-AKTIV = [p for p in PRODUKTE if not p.get("entwurf")]          # nur freigeschaltete Artikel
+import portal_katalog
+_PORTAL = portal_katalog.lesen()                                # build/katalog-portal.json, falls vorhanden
+if _PORTAL:                                                     # Artikel, Farben, Kategorien und Versand aus dem Portal
+    AKTIV = portal_katalog.als_artikel(_PORTAL)
+    FARBEN = dict(FARBEN); KATEGORIEN = dict(KATEGORIEN)
+    for f in _PORTAL.get("farben", []): FARBEN[f["key"]] = (f.get("name", f["key"]), f.get("hex", "#cccccc"))
+    for k in _PORTAL.get("kategorien", []): KATEGORIEN[k["key"]] = k.get("name", k["key"])
+    for p in AKTIV:
+        KATEGORIEN.setdefault(p["kat"], p["kat"].capitalize())
+        for f in p["farben"]: FARBEN.setdefault(f, (f, "#cccccc"))
+    _v = _PORTAL.get("versand") or {}
+    VERSAND_PAUSCHALE = float(_v.get("pauschale", VERSAND_PAUSCHALE)); VERSANDFREI_AB = float(_v.get("versandfreiAb", VERSANDFREI_AB))
+else:
+    AKTIV = [p for p in PRODUKTE if not p.get("entwurf")]       # nur freigeschaltete Artikel
 KAT_AKTIV = {k: v for k, v in KATEGORIEN.items() if any(p["kat"] == k for p in AKTIV)}
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "website-fertig"))
@@ -126,6 +139,15 @@ def page(name, title, desc, body, current="", rel="", extra=""):
         f.write(head(title, desc, rel, name, extra) + header(rel, current) + body + footer(rel))
 
 
+def bild(p, rel):
+    """(src, breite, höhe) des ersten Bildes: aus dem Portal-Katalog oder aus assets/img/produkte."""
+    b = (p.get("bilder") or [None])[0]
+    if b and b.get("url"):
+        u = b["url"]
+        return (u if u.startswith(("/", "https://")) else rel + u), int(b.get("w") or 800), int(b.get("h") or 600)
+    return f"{rel}assets/img/produkte/{p['id']}.webp", 800, 600
+
+
 def card(p, rel, pos, h="h3"):
     href = f"{rel}produkt/{p['id']}.html"
     notes = []
@@ -134,8 +156,8 @@ def card(p, rel, pos, h="h3"):
     note = f'<span class="card-note">{E(", ".join(notes))}</span>' if notes else ""
     action = (f'<a class="btn btn-primary" href="{href}">Text und Farbe wählen</a>' if p.get("text")
               else f'<button class="btn btn-primary" type="button" data-add="{p["id"]}">In den Warenkorb</button>')
-    return f"""<article class="card" data-kat="{p['kat']}" data-tags="{' '.join(p['tags'])}" data-preis="{p['preis']}" data-name="{E(p['name'])}" data-pos="{pos}">
-  <a class="card-img" href="{href}" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="" loading="lazy"></a>
+    return f"""<article class="card" data-kat="{p['kat']}" data-tags="{' '.join(p['tags'])}" data-preis="{p['preis']}" data-name="{E(p['name'])}" data-pos="{pos}" data-id="{E(p['id'])}" data-suche="{E(' '.join([p['name'], p['kurz'], p.get('material', '')]).lower())}">
+  <a class="card-img" href="{href}" tabindex="-1" aria-hidden="true"><img src="{bild(p, rel)[0]}" width="{bild(p, rel)[1]}" height="{bild(p, rel)[2]}" alt="" loading="lazy"></a>
   <div class="card-body">
     <{h}><a href="{href}">{E(p['name'])}</a></{h}>
     <p class="small">{E(p['kurz'])}</p>
@@ -244,11 +266,15 @@ def build_shop():
   <div class="wrap">
     <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
       <span id="kat-chips" class="chips-wrap">{chips}</span>
+      <label class="sr-only" for="suche">Artikel suchen</label>
+      <input type="search" id="suche" class="suche" placeholder="Artikel suchen" autocomplete="off" hidden>
       <label class="sr-only" for="sortierung">Sortierung</label>
       <select id="sortierung"><option value="standard">Reihenfolge im Shop</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A bis Z</option></select>
     </div>
     <p class="small muted" id="treffer" aria-live="polite">{str(len(AKTIV)) + " Artikel" if AKTIV else ""}</p>
+    <p id="keine-treffer" hidden>Dazu haben wir nichts gefunden. <button type="button" class="textlink" id="suche-zurueck">Suche zurücksetzen</button> oder <a href="kontakt.html">fragen Sie uns nach Ihrem Wunsch</a>.</p>
     <div class="grid" id="shop-grid">{cards}{gutschein_card("", "h2")}</div>
+    <div id="zuletzt-host"></div>
   </div>
 </section>
 """
@@ -271,17 +297,22 @@ def build_products():
             sw += f'<label class="swatch"><input type="radio" name="farbe" value="{f}"{" checked" if j == 0 else ""}><span><i style="background:{hexc}"></i>{E(name)}</span></label>'
         textfield = ""
         if p.get("text"):
-            textfield = f"""<div class="field"><label for="wunschtext">{E(p['textlabel'])}</label><input type="text" id="wunschtext" name="wunschtext" maxlength="80" required autocomplete="off"><p class="msg">Bitte den Wunschtext eintragen.</p></div>"""
+            textfield = f"""<div class="field"><label for="wunschtext">{E(p['textlabel'])}</label><input type="text" id="wunschtext" name="wunschtext" maxlength="{p.get('textmax', 80)}" required autocomplete="off"><p class="msg">Bitte den Wunschtext eintragen.</p></div>"""
         related = [q for q in AKTIV if q["kat"] == p["kat"] and q["id"] != p["id"]][:3]
         if len(related) < 3:
             related += [q for q in AKTIV if q["id"] != p["id"] and q not in related][:3 - len(related)]
         rel_cards = "\n".join(card(q, rel, k) for k, q in enumerate(related))
+        thumbs = ""
+        if len(p.get("bilder") or []) > 1:
+            thumbs = '<div class="thumbs">' + "".join(
+                f'<button type="button" data-img="{E(bild({"bilder": [b], "id": p["id"]}, rel)[0])}" data-alt="{E(b.get("alt") or p["name"])}"{" aria-current=\"true\"" if k == 0 else ""} aria-label="Bild {k + 1}"><img src="{E(bild({"bilder": [b], "id": p["id"]}, rel)[0])}" alt="" width="144" height="108" loading="lazy"></button>'
+                for k, b in enumerate(p["bilder"])) + "</div>"
         widerruf = ('<p class="small muted">Personalisierter Artikel: Nach Ihrer Freigabe des Textes ist der Kauf vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB). <a href="../widerruf.html">Mehr dazu</a>.</p>' if p.get("text") else "")
         body = f"""<section class="section-tight">
   <div class="wrap">
     <nav aria-label="Pfad" class="crumbs"><a href="../index.html">Start</a> › <a href="../shop.html">Shop</a> › <a href="../shop.html#{p['kat']}">{E(KATEGORIEN[p['kat']])}</a></nav>
     <div class="product">
-      <div class="product-media"><img src="../assets/img/produkte/{p['id']}.webp" width="800" height="600" alt="{E(p['name'])}{', gedruckt in ' + E(FARBEN[p['farben'][0]][0]) if p.get('foto') else ', Illustration in ' + E(FARBEN[p['farben'][0]][0])}"></div>
+      <div><div class="product-media"><img src="{bild(p, rel)[0]}" width="{bild(p, rel)[1]}" height="{bild(p, rel)[2]}" alt="{E(((p.get('bilder') or [{}])[0].get('alt')) or (p['name'] + (', gedruckt in ' + FARBEN[p['farben'][0]][0] if p.get('foto') and p['farben'] else ', Illustration' if not p.get('foto') else '')))}"></div>{thumbs}</div>
       <div class="product-info">
         <h1>{E(p['name'])}</h1>
         <p class="price">{EUR(p['preis'])} <small>{'inkl. MwSt.' if not C.KLEINUNTERNEHMER else 'Endpreis, keine Umsatzsteuer nach § 19 UStG'}, zzgl. <a href="../versand.html">Versand</a></small></p>
@@ -298,9 +329,7 @@ def build_products():
         <p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
         <dl class="konditionen"><dt>Versand</dt><dd>{EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos</dd><dt>Abholung</dt><dd>Celle, kostenlos, nach Terminabsprache</dd><dt>Zahlung</dt><dd>PayPal oder bei Abholung</dd><dt>Rückgabe</dt><dd>{'ausgeschlossen, weil nach Ihrem Text gefertigt' if p.get('text') else '14 Tage'}</dd></dl>
         <dl class="specs">
-          <dt>Maße</dt><dd>{E(p['masse'])}</dd>
-          <dt>Material</dt><dd>{E(p['material'])}</dd>
-          <dt>Gewicht</dt><dd>{E(p['gewicht'])}</dd>
+          {"".join(f"<dt>{k}</dt><dd>{E(v)}</dd>" for k, v in (("Maße", p["masse"]), ("Material", p["material"]), ("Gewicht", p["gewicht"])) if v)}
           <dt>Fertigung</dt><dd>Druck in {E(C.PRODUKTIONSZEIT)}, dann Versand</dd>
         </dl>
         <h2 class="sub">Beschreibung</h2>
@@ -323,7 +352,7 @@ def build_products():
         title = f"{p['name']} · {C.MARKE}"
         if len(title) > 60:
             title = p["name"][:57].rstrip() + "…"
-        ld = json.dumps({"name": p["name"], "description": p["kurz"], "sku": p["id"], "image": f"assets/img/produkte/{p['id']}.webp",
+        ld = json.dumps({"name": p["name"], "description": p["kurz"], "sku": p["id"], "image": bild(p, "")[0].lstrip("/") if not bild(p, "")[0].startswith("https://") else bild(p, "")[0],
                          "url": f"produkt/{p['id']}.html", "price": "%.2f" % p["preis"], "material": p["material"], "category": KATEGORIEN[p["kat"]],
                          "brand": C.MARKE, "seller": C.FIRMA, "shipping": "%.2f" % VERSAND_PAUSCHALE, "freeFrom": "%.2f" % VERSANDFREI_AB,
                          "breadcrumbs": [["Start", "index.html"], ["Shop", "shop.html"], [p["name"], f"produkt/{p['id']}.html"]]}, ensure_ascii=False)
@@ -778,7 +807,7 @@ def build_404():
 
 # ---------------------------------------------------------------- Daten, Sitemap, Robots, Manifest
 def build_data():
-    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text")), textlabel=p.get("textlabel", ""), farben=p["farben"], kurz=p["kurz"], lang=p["lang"], material=p["material"], masse=p["masse"], gewicht=p["gewicht"], tags=p["tags"]) for p in AKTIV]
+    data = [dict(id=p["id"], name=p["name"], preis=p["preis"], kat=p["kat"], text=bool(p.get("text")), textlabel=p.get("textlabel", ""), farben=p["farben"], kurz=p["kurz"], lang=p["lang"], material=p["material"], masse=p["masse"], gewicht=p["gewicht"], tags=p["tags"], textmax=p.get("textmax", 80), bilder=[dict(url=b["url"], w=b.get("w"), h=b.get("h"), alt=b.get("alt", "")) for b in p.get("bilder", []) if b.get("url")]) for p in AKTIV]
     cfg = dict(email=C.EMAIL, telefon=C.TELEFON, paypalMe=C.PAYPAL_ME, versandPauschale=VERSAND_PAUSCHALE, versandfreiAb=VERSANDFREI_AB, produktionMin=2, produktionMax=4, versandMin=2, versandMax=3, marke=C.MARKE, abholung=True, produktion=C.PRODUKTIONSZEIT,
                preishinweis=("Endpreis, keine Umsatzsteuer nach § 19 UStG" if C.KLEINUNTERNEHMER else "inkl. MwSt."))
     farben = {k: [v[0], v[1]] for k, v in FARBEN.items()}

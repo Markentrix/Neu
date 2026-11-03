@@ -41,10 +41,13 @@
   <div class="wrap">
     <div class="filterbar" role="group" aria-label="Nach Kategorie filtern">
       <span id="kat-chips" class="chips-wrap"><button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button></span>
+      <label class="sr-only" for="suche">Artikel suchen</label>
+      <input type="search" id="suche" class="suche" placeholder="Artikel suchen" autocomplete="off" hidden>
       <label class="sr-only" for="sortierung">Sortierung</label>
       <select id="sortierung"><option value="standard">Reihenfolge im Shop</option><option value="preis-auf">Preis aufsteigend</option><option value="preis-ab">Preis absteigend</option><option value="name">Name A bis Z</option></select>
     </div>
     <p class="small muted" id="treffer" aria-live="polite"></p>
+    <p id="keine-treffer" hidden>Dazu haben wir nichts gefunden. <button type="button" class="textlink" id="suche-zurueck">Suche zurücksetzen</button> oder <a href="kontakt.html">fragen Sie uns nach Ihrem Wunsch</a>.</p>
     <div class="grid" id="shop-grid"><article class="card card-gutschein" data-kat="geschenk" data-preis="10" data-name="Geschenkgutschein" data-pos="999">
   <a class="card-img" href="gutschein.html" tabindex="-1" aria-hidden="true"><img src="assets/img/produkte/gutschein.webp" width="800" height="600" alt="" loading="lazy"></a>
   <div class="card-body">
@@ -55,6 +58,7 @@
     <a class="card-more" href="gutschein.html">Details ansehen</a>
   </div>
 </article></div>
+    <div id="zuletzt-host"></div>
   </div>
 </section>
 </main>
