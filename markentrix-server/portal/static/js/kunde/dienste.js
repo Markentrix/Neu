@@ -165,7 +165,7 @@ function kalenderKarte(d, neu) {
   const an = schalter(k.aktiv, 'Online-Terminbuchung einschalten');
   const url = h('input', { placeholder: k.ical_gesetzt ? 'Adresse ist gespeichert (zum Ersetzen neu einfügen)' : 'https://calendar.google.com/calendar/ical/…/basic.ics', maxlength: 1500, autocomplete: 'off' });
   const dauer = h('input', { type: 'number', min: 10, max: 240, value: k.dauer });
-  const tage = h('input', { type: 'number', min: 1, max: 90, value: k.tage });
+  const tage = h('input', { type: 'number', min: 1, max: 180, value: k.tage });
   const von = h('input', { type: 'time', value: k.von }), bis = h('input', { type: 'time', value: k.bis });
   const vorlauf = h('input', { type: 'number', min: 0, max: 240, value: k.vorlauf_std });
   const ort = h('input', { value: k.ort, placeholder: 'z. B. Praxis, Hauptstr. 1 – oder „Videocall, Link folgt“', maxlength: 300 });
@@ -195,7 +195,7 @@ function kalenderKarte(d, neu) {
     h('p', { class: 'small muted' }, 'Besucher wählen auf deiner Website einen freien Termin. Zeiten, in denen du laut Kalender belegt bist, werden nicht angeboten. Beide Seiten bekommen eine E-Mail mit Kalender-Einladung, der Termin steht bei dir unter „Heute“.'),
     m, an.el,
     h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Geheime Kalender-Adresse (iCal)', url, k.ical_gesetzt ? 'Gespeichert' + (k.ical_geprueft_am ? ' am ' + datum(k.ical_geprueft_am) : '') + '. Aus Sicherheitsgründen zeigen wir sie nicht mehr an.' : 'Funktioniert mit Google, Outlook, Apple, IONOS und vielen mehr. Anleitung unten.'),
-      feld('Termin dauert (Minuten)', dauer), feld('Von', von), feld('Bis', bis), feld('So viele Tage im Voraus buchbar', tage), feld('Frühestens in … Stunden', vorlauf),
+      feld('Termin dauert (Minuten)', dauer), feld('Von', von), feld('Bis', bis), feld('So viele Tage im Voraus buchbar (1 bis 180)', tage), feld('Frühestens in … Stunden', vorlauf),
       feld('Ort / Hinweis in der Einladung', ort), feld('Benachrichtigung an', emp),
       feld('Feste Uhrzeiten (optional)', zeiten, 'Zum Beispiel für Fahrzeugabgabe oder feste Termine. Muss zu den Uhrzeiten auf deiner Website passen.'),
       feld('Höchstens so viele Buchungen pro Tag (0 = unbegrenzt)', kap), feld('Unbestätigte Reservierung hält … Stunden', halte)),

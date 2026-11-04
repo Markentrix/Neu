@@ -852,7 +852,7 @@ class KalenderIn(BaseModel):
     aktiv: bool = False
     ical_url: str = Field(default="", max_length=1500)          # leer = unverändert
     dauer: int = Field(default=30, ge=10, le=240)
-    tage: int = Field(default=14, ge=1, le=90)
+    tage: int = Field(default=90, ge=1, le=180)
     von: str = Field(default="09:00", pattern=r"^\d{2}:\d{2}$")
     bis: str = Field(default="17:00", pattern=r"^\d{2}:\d{2}$")
     wochentage: list[int] = Field(default=[1, 2, 3, 4, 5], max_length=7)

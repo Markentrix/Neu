@@ -643,7 +643,7 @@
         "Setze den Schalter „Online-Terminbuchung einschalten“. Ohne diesen Schalter bietet die Website keine einzige Uhrzeit an.",
         "Wähle unter „Buchbar an“ die Wochentage, an denen Termine möglich sind.",
         "Trage „Von“ und „Bis“ (Tageszeit) und „Termin dauert (Minuten)“ ein. Oder trage unter „Feste Uhrzeiten“ genau die Uhrzeiten ein, die angeboten werden sollen (zum Beispiel 09:00, 09:30, 10:00 …).",
-        "Lege fest, wie weit im Voraus man buchen kann („So viele Tage im Voraus buchbar“) und ab wann frühestens („Frühestens in … Stunden“).",
+        "Lege fest, wie weit im Voraus man buchen kann („So viele Tage im Voraus buchbar“, Standard 90, bis zu 180 Tage) und ab wann frühestens („Frühestens in … Stunden“).",
         "Optional: „Höchstens so viele Buchungen pro Tag“ (0 = unbegrenzt), „Ort / Hinweis in der Einladung“ und „Benachrichtigung an“ (E-Mail für neue Buchungen).",
         "Klicke auf „Speichern“. Teste dann auf deiner Website, ob Uhrzeiten erscheinen."
       ],
