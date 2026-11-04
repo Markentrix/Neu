@@ -1397,3 +1397,11 @@ html.reduced .slot.is-free{animation:none}
 /* Anfrage-Dialog: Preisorientierung je Option */
 .choice span{flex-wrap:wrap;row-gap:2px}.choice-hint{flex:0 0 100%;margin:0;padding:0;font-style:normal;font-weight:500;font-size:.82rem;color:var(--muted)}
 .wz-pricenote{margin:10px 0 0;color:var(--muted)}.choices .wz-pricenote{grid-column:1/-1;margin:2px 0 0}
+
+/* Startseite Desktop: Hauptaufruf im ersten Bildschirm (ab 1366 x 768 sichtbar) */
+@media (min-width:901px){
+  .hero--stage{padding-top:clamp(28px,2.2rem + 1vw,52px);padding-bottom:clamp(32px,2rem + 2vw,64px)}
+  .hero--stage h1{max-width:none;font-size:clamp(2.5rem,1.2rem + 2.7vw,3.5rem);line-height:1.05;margin-bottom:.35em}
+  .hero--stage .lead{font-size:1.06rem;line-height:1.55;margin-bottom:1.1rem}
+  .hero--stage .hero-grid>div:first-child{top:84px}
+}

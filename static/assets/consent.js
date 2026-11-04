@@ -21,6 +21,16 @@
   window.gtag = window.gtag || gtag;
   gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', wait_for_update: 500 });
 
+  /* Eigene Besuche markieren: einmal /?intern=1 aufrufen (pro Browser), mit /?intern=0 wieder aufheben. */
+  function isInternal() {
+    try {
+      var m = /[?&]intern=([01])/.exec(location.search);
+      if (m) { if (m[1] === '1') localStorage.setItem('mx-intern', '1'); else localStorage.removeItem('mx-intern'); }
+      return localStorage.getItem('mx-intern') === '1';
+    } catch (e) { return false; }
+  }
+  isInternal();
+
   var loaded = false;
   var mcLoaded = false;
   function loadMetricool() {
@@ -38,7 +48,9 @@
         var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
         document.head.appendChild(s);
         gtag('js', new Date());
-        gtag('config', GA_ID, { anonymize_ip: true, allow_google_signals: false, allow_ad_personalization_signals: false });
+        var cfg = { anonymize_ip: true, allow_google_signals: false, allow_ad_personalization_signals: false };
+        if (isInternal()) cfg.traffic_type = 'internal'; // Eigene Besuche: in Analytics per Datenfilter ausschließen
+        gtag('config', GA_ID, cfg);
       }
     } else {
       gtag('consent', 'update', { analytics_storage: 'denied' });

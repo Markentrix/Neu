@@ -21,6 +21,27 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 2. Optional zusätzlich ein Ereignis „danke_aufgerufen“ anlegen: Bedingung `page_location` enthält `/danke`. Als Schlüsselereignis markieren. Das ist die robustere Zählung, weil sie auch bei langsamer Verbindung greift.
 3. Berichte → Akquisition → Traffic-Akquisition: Spalte „Schlüsselereignisse“ einblenden.
 
+## Ereignisse (Stand 04.11.2026)
+
+| Ereignis | Bedeutung | Parameter |
+|---|---|---|
+| `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `erstberatung` (Anfrage-Dialog), `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert); `location`, `channel` |
+| `form_submit` | Absendeversuch, vor der Serverantwort. Kann höher sein als `generate_lead` (Fehler, Zeitüberschreitung). Nicht als Schlüsselereignis markieren. | `lead_type`, `location` |
+| `website_check` | Ein Check wurde durchgeführt (noch kein Kontakt). | `score` |
+| `wizard_step` | Schritt 1 bis 4 im Anfrage-Dialog erreicht. | `schritt` |
+| `modal_open` | Anfrage-Dialog geöffnet. | – |
+| `phone_click`, `mail_click` | Klick auf Telefonnummer oder E-Mail-Adresse (getrennt von Formularen). | `location` (Seite) |
+
+Auswertung des Dialogs: Untersuchen → Trichterauswertung mit `modal_open` → `wizard_step` (schritt 2, 3, 4) → `generate_lead`.
+
+## Eigene Besuche ausschließen
+
+Die Website markiert Besuche, die vom eigenen Browser kommen, mit `traffic_type=internal`:
+
+1. In jedem eigenen Browser (Laptop, Handy, Büro) einmal `https://markentrix.de/?intern=1` aufrufen und der Reichweitenmessung zustimmen. Aufheben mit `?intern=0`.
+2. GA4: Verwaltung → Dateneinstellungen → Datenfilter → Filter „Interner Datenverkehr“ auf **Aktiv** stellen (steht anfangs auf „Testen“). Damit fließen markierte Besuche nicht mehr in die Berichte ein; rückwirkend gilt das nicht.
+3. Testanfragen im Formular trotzdem nur mit einem erkennbaren Namen („Test“) absenden, damit sie in `anfragen.log` und im Wochenbericht auffallen.
+
 ## Search Console
 
 - Property `markentrix.de` per DNS bestätigt, Sitemap `https://markentrix.de/sitemap.xml` einreichen.

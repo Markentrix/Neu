@@ -16,6 +16,11 @@
   function on(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
   function fmtEUR(n) { return Math.round(n).toLocaleString('de-DE') + ' €'; }
   function track(name, params) { try { if (typeof w.gtag === 'function') w.gtag('event', name, params || {}); } catch (e) { } }
+  /* Telefon- und E-Mail-Klicks als eigene Ereignisse (getrennt von Formularanfragen) */
+  d.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="tel:"], a[href^="mailto:"]') : null; if (!a) return;
+    track(a.getAttribute('href').indexOf('tel:') === 0 ? 'phone_click' : 'mail_click', { location: location.pathname });
+  });
 
   /* ── Navigation ─────────────────────────────────────────────────────── */
   function initNav() {
@@ -125,10 +130,11 @@
           .map(function (k) { return k + ': ' + payload[k]; }).join('\n');
         busy = true; var orig = btn ? btn.innerHTML : '';
         if (btn) { btn.classList.add('is-loading'); btn.innerHTML = 'Wird gesendet …'; }
-        track('form_submit', { location: payload.quelle });
+        var leadType = payload.quelle === 'Website-Check' ? 'website_check_bericht' : payload.quelle === 'Potenzial-Check' ? 'erstberatung' : 'kontaktformular';
+        track('form_submit', { location: payload.quelle, lead_type: leadType });
         postLead(payload).then(function (res) {
           busy = false; if (btn) { btn.classList.remove('is-loading'); btn.innerHTML = orig; }
-          if (res.ok) { form.reset(); if (cal) cal.reset(); if (form.__wizard) form.__wizard.reset(); showOk(); track('generate_lead', { location: payload.quelle, channel: payload.kanal || payload.utm_source || payload.utm_referrer || 'direkt' }); if (form.hasAttribute('data-no-redirect')) { d.dispatchEvent(new CustomEvent('mx:lead', { detail: { quelle: payload.quelle, email: payload.email } })); } else setTimeout(function () { location.href = '/danke?form=' + encodeURIComponent(form.getAttribute('name') || 'anfrage'); }, 700); }
+          if (res.ok) { form.reset(); if (cal) cal.reset(); if (form.__wizard) form.__wizard.reset(); showOk(); track('generate_lead', { location: payload.quelle, lead_type: leadType, channel: payload.kanal || payload.utm_source || payload.utm_referrer || 'direkt' }); if (form.hasAttribute('data-no-redirect')) { d.dispatchEvent(new CustomEvent('mx:lead', { detail: { quelle: payload.quelle, email: payload.email } })); } else setTimeout(function () { location.href = '/danke?form=' + encodeURIComponent(form.getAttribute('name') || 'anfrage'); }, 700); }
           else if (msg) { msg.className = 'form-msg is-error'; msg.textContent = res.timeout ? 'Die Verbindung hat zu lange gedauert. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.' : 'Ihre Anfrage konnte nicht übermittelt werden. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.'; }
         });
         function showOk() {
