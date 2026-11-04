@@ -1,0 +1,25 @@
+{
+ "fach_importiert_route": [
+  "angebotsfluss -> routes_zusammenarbeit",
+  "tipps -> routes_pakete",
+  "vertriebangebot -> routes_leadangebot",
+  "vertriebangebot -> routes_vertrieb",
+  "visitenkarte -> routes_leadangebot",
+  "visitenkarte -> routes_vertrieb",
+  "webbetrieb -> routes_zusammenarbeit"
+ ],
+ "schicht": [
+  "angebotsfluss (Schicht 2) -> routes_zusammenarbeit (Schicht 3)",
+  "routes_admin (Schicht 3) -> jobs (Schicht 4)",
+  "routes_einstellungen (Schicht 3) -> jobs (Schicht 4)",
+  "tipps (Schicht 2) -> routes_pakete (Schicht 3)",
+  "vertriebangebot (Schicht 2) -> routes_leadangebot (Schicht 3)",
+  "vertriebangebot (Schicht 2) -> routes_vertrieb (Schicht 3)",
+  "visitenkarte (Schicht 2) -> routes_leadangebot (Schicht 3)",
+  "visitenkarte (Schicht 2) -> routes_vertrieb (Schicht 3)",
+  "webbetrieb (Schicht 2) -> routes_zusammenarbeit (Schicht 3)"
+ ],
+ "zu_gross": [
+  "routes_sitedienste (2273 Zeilen)"
+ ]
+}

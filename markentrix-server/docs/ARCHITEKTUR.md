@@ -32,3 +32,14 @@ Nummerierte SQL-Dateien, werden beim Update der Reihe nach angewendet. Neue Tabe
 
 ## Sicherheits-Grundsätze
 Keine Geheimnisse im Klartext in der Datenbank (`einstellungen.*` verschlüsselt), IBAN verschlüsselt, Passwörter gehasht, Sitzungstoken nur als Hash, Rate-Limits auf Anmeldung und öffentlichen Schnittstellen, Abhängigkeiten regelmäßig mit `pip-audit -r portal/requirements.txt` prüfen.
+
+## Struktur-Wächter
+
+`python3 tools/struktur.py` prüft bei jedem Testlauf (`tests/run.sh`, Schritt „[struktur]“) ohne Datenbank, was genutzt wird und was zusammengehört:
+
+- Jedes Python-Modul unter `portal/app` steht in genau einer Gruppe (`tools/struktur_gruppen.json`). Ein neues Modul muss dort eingetragen werden, sonst scheitert der Lauf.
+- Schichten: 1 Grundlagen, 2 Fachlogik, 3 Routen (`routes_*`), 4 Start (`main`, `cli`, `jobs`). Beim Laden darf ein Modul nur gleiche oder niedrigere Schichten importieren. Verzögerte Importe in Funktionen sind erlaubt.
+- Keine Importschleifen, keine verwaisten Module oder JavaScript-Dateien, jedes `APIRouter`-Objekt ist in `main.py` eingebunden, Dateien über 1500 Zeilen sind nur als Altlast erlaubt.
+- `docs/MODULKARTE.md` ist die erzeugte Übersicht (Gruppe, Schicht, Zeilen, wer nutzt das Modul). Aktualisieren mit `python3 tools/struktur.py --karte`.
+- Bekannte Altlasten stehen in `tools/struktur_basis.json`. Neue Verstöße lassen den Lauf scheitern; behobene Altlasten meldet der Wächter, dann die Basis mit `--basis` kürzen. Die Basis nie nutzen, um einen neuen Verstoß zu verstecken.
+- Test `t128` prüft, dass der Wächter selbst funktioniert (er muss künstliche Fehler finden).

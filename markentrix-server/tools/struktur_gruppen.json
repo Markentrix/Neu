@@ -1,0 +1,207 @@
+{
+ "gruppen": {
+  "kern": {
+   "titel": "Grundlagen",
+   "zweck": "Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen anderen Bereichen genutzt, nutzt selbst keinen Fachbereich.",
+   "grundlage": true,
+   "module": [
+    "__init__",
+    "betrieb",
+    "config",
+    "dateien",
+    "db",
+    "einstellungen",
+    "fehlerhilfe",
+    "ki",
+    "mailer",
+    "mailvorlage",
+    "pdf",
+    "push",
+    "security",
+    "zustellung"
+   ]
+  },
+  "zugang": {
+   "titel": "Anmeldung und Zugänge",
+   "zweck": "Einladungen, Passwort-Zurücksetzen, Zwei-Faktor, Passkeys, Anmelde-Links, Team-Zugänge und Mitarbeiter-Rechte.",
+   "grundlage": false,
+   "module": [
+    "passkey",
+    "routes_2fa",
+    "routes_auth",
+    "routes_loginlink",
+    "routes_mitarbeiter",
+    "routes_passkey",
+    "routes_team",
+    "zugang",
+    "zweifaktor"
+   ]
+  },
+  "website": {
+   "titel": "Kunden-Websites",
+   "zweck": "Website-API, Terminbuchung, Online-Shop, Gutscheine, Upload, Domains, Statusseite und Livegang-Prüfungen.",
+   "grundlage": false,
+   "module": [
+    "buchungsvorlagen",
+    "domaincheck",
+    "fotos",
+    "livecheck",
+    "publish",
+    "routes_angebotsinhalte",
+    "routes_buchungsvorlagen",
+    "routes_domains",
+    "routes_referenzseite",
+    "routes_shop",
+    "routes_siteapi",
+    "routes_sitedienste",
+    "routes_status",
+    "routes_websites",
+    "routes_webupload",
+    "shop",
+    "sitedienste",
+    "webbetrieb"
+   ]
+  },
+  "funnel": {
+   "titel": "Lead-Funnel und Website-Check",
+   "zweck": "Kampagnenseiten, Website-Check, Funnel-Mails und Folgemails an Leads.",
+   "grundlage": false,
+   "module": [
+    "funnelcheck",
+    "funnelmail",
+    "routes_folgemails",
+    "routes_funnel",
+    "routes_websitecheck"
+   ]
+  },
+  "vertrieb": {
+   "titel": "Vertrieb",
+   "zweck": "Leads, Zuweisung, Sperrliste, Gesprächsleitfaden, Anruf-Modus, Erstgespräche, Rangliste und Vertriebs-Auswertung.",
+   "grundlage": false,
+   "module": [
+    "anrufzeiten",
+    "heissleads",
+    "kalenderabo",
+    "leadeingang",
+    "leadkontakt",
+    "leadpruefung",
+    "leitfaden",
+    "routes_buchung",
+    "routes_leadimport",
+    "routes_leadsteuerung",
+    "routes_leadtermin",
+    "routes_rangliste",
+    "routes_vertrieb",
+    "routes_vertriebfluss",
+    "routes_vertriebqualitaet",
+    "routes_vertriebsplus",
+    "routes_vertriebwerkzeuge",
+    "sperre",
+    "visitenkarte",
+    "zuweisung"
+   ]
+  },
+  "geld": {
+   "titel": "Angebote, Rechnungen, Zahlung",
+   "zweck": "Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Preisänderung, Provisionen und Pakete.",
+   "grundlage": false,
+   "module": [
+    "abo",
+    "angebotserinnerung",
+    "angebotsfluss",
+    "angebotsgrund",
+    "belege",
+    "preisaenderung",
+    "quittung",
+    "routes_angebotsplus",
+    "routes_belege",
+    "routes_leadangebot",
+    "routes_pakete",
+    "routes_provision",
+    "routes_zahlung",
+    "vertriebangebot",
+    "zahlungsabgleich"
+   ]
+  },
+  "recht": {
+   "titel": "Verträge und Datenschutz",
+   "zweck": "AVV, Verträge, Datenschutz-Anfragen (DSGVO), Rechtstexte, Unterauftragsverarbeiter und Vertragsende.",
+   "grundlage": false,
+   "module": [
+    "avv",
+    "avv_text",
+    "offboarding",
+    "rechtstexte",
+    "routes_avv",
+    "routes_dsgvo",
+    "routes_offboarding",
+    "routes_public",
+    "routes_uav",
+    "routes_vertraege",
+    "routes_vertragportal",
+    "vertraege"
+   ]
+  },
+  "kunde": {
+   "titel": "Kundenportal und Betreuung",
+   "zweck": "Heute-Seite, Anfragen, Briefing, Onboarding, Zusammenarbeit, Wissen, Berichte, Diagramme, Telefon-Assistent und Hilfe.",
+   "grundlage": false,
+   "module": [
+    "anleitung_pdf",
+    "aufgabendetail",
+    "berichte",
+    "branchenvorlagen",
+    "diagramme",
+    "ersteswoche",
+    "kundenwerkzeuge",
+    "onboarding",
+    "routes_aufgaben",
+    "routes_briefing",
+    "routes_diagramme",
+    "routes_freigabelink",
+    "routes_fruehwarnung",
+    "routes_hilfe",
+    "routes_kunde",
+    "routes_kundenampel",
+    "routes_kundenwerkzeuge",
+    "routes_onboarding",
+    "routes_telefon",
+    "routes_umfrage",
+    "routes_vorlagen",
+    "routes_wert",
+    "routes_wissen",
+    "routes_zusammenarbeit",
+    "tagesblick",
+    "tipps"
+   ]
+  },
+  "admin": {
+   "titel": "Admin und Betrieb",
+   "zweck": "Kunden- und Systemverwaltung, Einstellungen, Dashboard, Werkzeuge, Systemstatus und Nutzungsmessung.",
+   "grundlage": false,
+   "module": [
+    "routes_admin",
+    "routes_betriebplus",
+    "routes_dashboard",
+    "routes_einstellungen",
+    "routes_leistungsfreigabe",
+    "routes_nutzung",
+    "routes_plattformstatus",
+    "routes_push",
+    "routes_system",
+    "routes_verwaltung",
+    "routes_werkzeuge"
+   ]
+  },
+  "start": {
+   "titel": "Start und Hintergrund",
+   "zweck": "Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werden von Fachbereichen nicht importiert.",
+   "grundlage": false,
+   "module": [
+    "cli",
+    "jobs",
+    "main"
+   ]
+  }
+ }
+}
