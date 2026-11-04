@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request
+from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -36,7 +37,8 @@ from .routes_offboarding import router as offboarding_router
 from .routes_zusammenarbeit import router as zus_router, kunde_router as zus_kunde_router
 from .routes_websitecheck import router as wcheck_router
 from .routes_folgemails import router as folge_router
-from .routes_buchung import router as buchung_router
+from .routes_buchung import herkunft_erlaubt, router as buchung_router
+from .routes_kalender import router as kalender_router
 from .routes_sitedienste import admin as site_admin_router
 from .routes_webupload import router as webupload_router
 from .routes_sitedienste import kunde as site_kunde_router
@@ -93,15 +95,24 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
 
 @app.middleware("http")
 async def schutz(request: Request, call_next):
+    # Buchungs-Baustein auf der eigenen Website (markentrix.de): nur die Buchungs-Schnittstellen sind für freigegebene Seiten offen
+    herkunft = request.headers.get("origin")
+    baustein = bool(herkunft and request.url.path.startswith("/api/public/buchung") and not request.url.path.endswith("/absagen")
+                    and await run_in_threadpool(herkunft_erlaubt, herkunft))
+    cors = {"Access-Control-Allow-Origin": herkunft, "Vary": "Origin", "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, X-MK", "Access-Control-Max-Age": "600"} if baustein else {}
+    if baustein and request.method == "OPTIONS":
+        return Response(status_code=204, headers=cors)
     # Änderungen nur von der eigenen Seite aus (zusätzlich zu SameSite-Cookie)
     if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.url.path.startswith("/api/") and not request.url.path.startswith("/api/webhook/"):
         # /api/webhook/… wird von fremden Diensten (Stripe, Telefon-Assistent) aufgerufen und prüft Signatur bzw. Geheimnis selbst
         if request.headers.get("x-mk") != "1":
             return JSONResponse({"detail": "Ungültige Anfrage."}, status_code=403)
         origin = request.headers.get("origin")
-        if origin and urlparse(origin).netloc != urlparse(config.BASE_URL).netloc and urlparse(origin).netloc != request.headers.get("host"):
+        if origin and not baustein and urlparse(origin).netloc != urlparse(config.BASE_URL).netloc and urlparse(origin).netloc != request.headers.get("host"):
             return JSONResponse({"detail": "Ungültige Herkunft."}, status_code=403)
     r = await call_next(request)
+    r.headers.update(cors)
     if "Content-Security-Policy" not in r.headers:   # einzelne Seiten (Funnel mit Messung) setzen eine eigene, erweiterte Richtlinie
         r.headers["Content-Security-Policy"] = CSP
     r.headers["X-Content-Type-Options"] = "nosniff"
@@ -161,6 +172,7 @@ app.include_router(aufgaben_router)
 app.include_router(wcheck_router)
 app.include_router(folge_router)
 app.include_router(buchung_router)
+app.include_router(kalender_router)
 app.include_router(site_router)
 app.include_router(siteapi_router)
 app.include_router(routes_shop.public)

@@ -6,7 +6,7 @@
       "wo": "Linke Seitenleiste im Admin (auf dem Handy die Leiste unten, „Mehr“ öffnet das ganze Menü)",
       "l": "#uebersicht",
       "s": [
-        "Täglich: „Übersicht“, „Mein Tag“, „Nachrichten“, „Freigaben“, „Aufgaben“.",
+        "Täglich: „Übersicht“, „Mein Tag“, „Kalender“, „Nachrichten“, „Freigaben“, „Aufgaben“.",
         "Kunden: „Kunden“, „Onboarding“, „Verträge“, „Zufriedenheit“, „Neuer Kunde“, „Websites & Demos“.",
         "Vertrieb: „Vertriebler“, „Leads“, „Pipeline“, „Vertriebs-Auswertung“.",
         "Geld & Zahlen: „Kennzahlen“, „Angebote & Rechnungen“, „Preise & Konditionen“, „Pakete (Katalog)“.",
@@ -17,6 +17,21 @@
       "n": [
         "Eine Gruppe lässt sich per Klick auf den Gruppennamen auf- und zuklappen. Ist sie zu, zeigt sie die Zahl offener Hinweise.",
         "Mitarbeiter mit eingeschränkten Rechten sehen nur die Bereiche, die du ihnen freigegeben hast (siehe „Mitarbeiter und Admin-Rechte“)."
+      ]
+    },
+    {
+      "t": "Kalender: Erstgespräche, eigene Termine und Sperren",
+      "k": "kalender termin gespräch erstgespräch verschieben absagen sperre urlaub wiedervorlage buchung website baustein einbetten",
+      "wo": "Menü „Täglich“ → „Kalender“",
+      "l": "#kalender",
+      "s": [
+        "Der Kalender zeigt als Monat oder Woche: gebuchte Erstgespräche (türkis), eigene Termine (violett), Sperren (rot) und Wiedervorlagen deiner Leads. Ein Klick auf einen Eintrag öffnet ihn.",
+        "„+ Eintrag“: eigener Termin (z. B. ein Anruf) oder Sperre (z. B. Urlaub), auch ganztägig und über mehrere Tage. In dieser Zeit kann auf der Website niemand ein Erstgespräch buchen.",
+        "Erstgespräch verschieben: Eintrag öffnen, neue Zeit wählen, „Verschieben“. Der Interessent bekommt eine Mail mit aktualisierter Kalendereinladung (Haken bei „per Mail informieren“ abwählbar). Absagen geht genauso, der Lead springt zurück auf „Antwort“.",
+        "Für die Website: Einstellungen → Terminbuchung zeigt den Einbettungscode (zwei Zeilen) und die Liste der Domains, die den Baustein nutzen dürfen (Standard markentrix.de und www.markentrix.de, nur https)."
+      ],
+      "n": [
+        "Der Kalender gleicht sich nicht mit Google oder dem Handy ab. Er gilt nur im Portal. Die Zeiten der Online-Buchung (Wochentage, Uhrzeiten, Dauer) stellst du weiterhin unter Einstellungen → Terminbuchung ein."
       ]
     },
     {

@@ -51,3 +51,8 @@ Zusätzlich zur Sicherung auf dem Server (und dem externen Backup) kann ein PC d
 - PC (Windows): Der Ordner `Markentrix-Server-Backup` mit `Einrichten.bat` (einmalig, fragt das Root-Passwort, speichert es nicht), `Sicherung-holen.ps1` (täglich per Aufgabenplanung, prüft per SHA-256, löscht Kopien nach 30 Tagen, die 3 neuesten bleiben) und `LIES-MICH.txt`.
 - Die Sicherungen enthalten Kundendaten und die `.env`: nur auf verschlüsselten Laufwerken ablegen (siehe `docs/ANWALT-CHECKLISTE.md`, Aufbewahrung).
 - Test `t129` prüft den Abholdienst (nur feste Befehle, nur fertige Sicherungen, keine Einschleusung).
+
+## Admin-Kalender und Buchungs-Baustein (Migration 150)
+- Tabelle `kalender_eintraege` (eigene Termine und Sperren, `rls_intern`). `routes_buchung._slots` schließt gebuchte Gespräche und diese Einträge nach Zeitüberschneidung aus, nicht nur bei gleichem Beginn.
+- `routes_kalender.py`: `GET /api/admin/kalender?von&bis` (höchstens 70 Tage: Gespräche, Einträge, Wiedervorlagen), Einträge anlegen/ändern/löschen, `POST /api/admin/gespraeche/{id}/verschieben|absagen` (optional Mail mit .ics, SEQUENCE steigt, Absage als METHOD:CANCEL). Rechtebereich „kalender“ → leads.
+- Website-Baustein `static/js/erstgespraech.js` (Shadow-DOM, `data-mk-erstgespraech`): ruft `/api/public/buchung/*` von einer fremden Domain auf. Die Middleware in `main.py` gibt nur für diese Pfade (ohne `/absagen`) CORS frei, wenn die Herkunft https ist und in `buchung.erlaubte_seiten` steht (60 s zwischengespeichert). `X-MK: 1` bleibt Pflicht.

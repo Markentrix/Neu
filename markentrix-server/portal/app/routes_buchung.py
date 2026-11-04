@@ -19,7 +19,7 @@ TZ = ZoneInfo("Europe/Berlin")
 EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 STANDARD = {"aktiv": False, "dauer": 30, "tage": 14, "von": "09:00", "bis": "17:00", "wochentage": [1, 2, 3, 4, 5],
-            "vorlauf_std": 12, "ort": "Telefon oder Videocall, wir melden uns zum Termin bei Ihnen."}
+            "vorlauf_std": 12, "ort": "Telefon oder Videocall, wir melden uns zum Termin bei Ihnen.", "erlaubte_seiten": "markentrix.de, www.markentrix.de"}
 
 
 class BuchungEinst(BaseModel):
@@ -31,10 +31,27 @@ class BuchungEinst(BaseModel):
     wochentage: list[int] = Field(default=[1, 2, 3, 4, 5], max_length=7)
     vorlauf_std: int = Field(default=12, ge=0, le=240)
     ort: str = Field(default=STANDARD["ort"], max_length=300)
+    erlaubte_seiten: str = Field(default=STANDARD["erlaubte_seiten"], max_length=300)   # Domains, auf denen der Buchungs-Baustein eingebettet sein darf
 
 
 def lesen(cur) -> dict:
     return {**STANDARD, **(einstellungen.lesen(cur, "buchung") or {})}
+
+
+_herkunft_cache: tuple[float, set] = (0.0, set())
+
+
+def herkunft_erlaubt(origin: str) -> bool:
+    """Darf diese Website (https) den Buchungs-Baustein einbetten? Liste aus den Einstellungen, 60 Sekunden zwischengespeichert."""
+    global _herkunft_cache
+    import time
+    from urllib.parse import urlparse
+    if time.time() - _herkunft_cache[0] > 60:
+        with tx("system") as cur:
+            roh = lesen(cur)["erlaubte_seiten"]
+        _herkunft_cache = (time.time(), {x.strip().lower() for x in re.split(r"[,\s]+", roh or "") if x.strip()})
+    u = urlparse(origin)
+    return u.scheme == "https" and (u.hostname or "").lower() in _herkunft_cache[1]
 
 
 @router.get("/admin/einstellungen/buchung")
@@ -51,6 +68,8 @@ def einst_speichern(data: BuchungEinst, user: dict = Depends(require_admin)):
         raise HTTPException(400, "Ungültiger Wochentag.")
     with tx("admin") as cur:
         einstellungen.schreiben(cur, "buchung", data.model_dump())
+        global _herkunft_cache
+        _herkunft_cache = (0.0, set())
         audit(cur, user, "einstellungen_buchung", None, {"aktiv": data.aktiv})
     return {"ok": True}
 
@@ -70,8 +89,9 @@ def _slots(cur, c: dict) -> list[datetime]:
     h1, m1 = map(int, c["von"].split(":"))
     h2, m2 = map(int, c["bis"].split(":"))
     ende_ges = jetzt + timedelta(days=c["tage"] + 1)
-    cur.execute("SELECT start FROM gespraechstermine WHERE status='gebucht' AND start >= %s AND start < %s", (jetzt, ende_ges))
-    belegt = {r["start"] for r in cur.fetchall()}
+    cur.execute("""SELECT start, ende FROM gespraechstermine WHERE status='gebucht' AND ende > %s AND start < %s
+                   UNION ALL SELECT start, ende FROM kalender_eintraege WHERE ende > %s AND start < %s""", (jetzt, ende_ges, jetzt, ende_ges))
+    belegt = [(r["start"], r["ende"]) for r in cur.fetchall()]     # gebuchte Gespräche und eigene Termine/Sperren aus dem Admin-Kalender
     heute = datetime.now(TZ).date()
     liste = []
     for i in range(c["tage"] + 1):
@@ -82,7 +102,7 @@ def _slots(cur, c: dict) -> list[datetime]:
         schluss = datetime(tag.year, tag.month, tag.day, h2, m2, tzinfo=TZ)
         while t + timedelta(minutes=c["dauer"]) <= schluss:
             u = t.astimezone(timezone.utc)
-            if u >= frueh and u not in belegt:
+            if u >= frueh and not any(b0 < u + timedelta(minutes=c["dauer"]) and b1 > u for b0, b1 in belegt):
                 liste.append(u)
             t += timedelta(minutes=c["dauer"])
     return liste
@@ -111,10 +131,10 @@ class BuchenIn(BaseModel):
     einwilligung: bool = False
 
 
-def ics(g_id: str, start: datetime, ende: datetime, titel: str, ort: str, abgesagt: bool = False) -> bytes:
+def ics(g_id: str, start: datetime, ende: datetime, titel: str, ort: str, abgesagt: bool = False, sequenz: int = 0) -> bytes:
     f = lambda d: d.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     z = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Markentrix//Portal//DE", "METHOD:" + ("CANCEL" if abgesagt else "PUBLISH"), "BEGIN:VEVENT",
-         f"UID:{g_id}@markentrix.de", f"DTSTAMP:{f(datetime.now(timezone.utc))}", f"DTSTART:{f(start)}", f"DTEND:{f(ende)}",
+         f"UID:{g_id}@markentrix.de", f"SEQUENCE:{sequenz}", f"DTSTAMP:{f(datetime.now(timezone.utc))}", f"DTSTART:{f(start)}", f"DTEND:{f(ende)}",
          f"SUMMARY:{titel}", f"LOCATION:{ort.replace(chr(10), ' ').replace(',', ' ')}", "STATUS:" + ("CANCELLED" if abgesagt else "CONFIRMED"), "END:VEVENT", "END:VCALENDAR"]
     return ("\r\n".join(z) + "\r\n").encode()
 

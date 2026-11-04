@@ -87,6 +87,7 @@
     "leadpruefung",
     "leitfaden",
     "routes_buchung",
+    "routes_kalender",
     "routes_leadimport",
     "routes_leadsteuerung",
     "routes_leadtermin",

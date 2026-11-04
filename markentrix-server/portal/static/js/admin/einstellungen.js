@@ -125,13 +125,16 @@ export async function buchungKarte() {
   const wt = h('div', { class: 'row' }, ...tageN.map((t, i) => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', 'data-wt': i + 1, checked: d.wochentage.includes(i + 1), style: 'width:auto' }), t)));
   const f = h('form', { onsubmit: async (e) => { e.preventDefault(); const x = e.target;
     try { await api('/api/admin/einstellungen/buchung', { method: 'PUT', body: { aktiv: x.aktiv.checked, dauer: Number(x.dauer.value), tage: Number(x.tage.value), von: x.von.value, bis: x.bis.value,
-      wochentage: [...wt.querySelectorAll('input')].filter(i => i.checked).map(i => Number(i.dataset.wt)), vorlauf_std: Number(x.vorlauf.value), ort: x.ort.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } } },
+      wochentage: [...wt.querySelectorAll('input')].filter(i => i.checked).map(i => Number(i.dataset.wt)), vorlauf_std: Number(x.vorlauf.value), ort: x.ort.value, erlaubte_seiten: x.seiten.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (z) { fehler(m, z); } } },
     cb('aktiv', d.aktiv, 'Terminbuchung einschalten (öffentliche Seite: ' + location.origin + '/buchen)'),
     h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Dauer (Minuten)'), h('input', { name: 'dauer', type: 'number', min: 15, max: 120, step: 5, value: d.dauer })), h('div', {}, h('label', {}, 'Wie viele Tage im Voraus'), h('input', { name: 'tage', type: 'number', min: 1, max: 60, value: d.tage }))),
     h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Von (Uhr)'), h('input', { name: 'von', type: 'time', value: d.von })), h('div', {}, h('label', {}, 'Bis (Uhr)'), h('input', { name: 'bis', type: 'time', value: d.bis }))),
     h('label', {}, 'Wochentage'), wt,
     h('label', {}, 'Frühestens in (Stunden)'), h('input', { name: 'vorlauf', type: 'number', min: 0, max: 240, value: d.vorlauf_std }),
     h('label', {}, 'Ort / Hinweis in der Bestätigung'), h('input', { name: 'ort', value: d.ort }),
+    h('label', {}, 'Websites, auf denen der Buchungs-Baustein erscheinen darf (Domains, mit Komma getrennt)'), h('input', { name: 'seiten', value: d.erlaubte_seiten, maxlength: 300 }),
+    h('p', { class: 'small muted' }, 'Zum Einbetten in die Website diese zwei Zeilen an die gewünschte Stelle setzen:'),
+    h('pre', { class: 'small', style: 'white-space:pre-wrap;user-select:all;background:var(--soft);padding:10px;border-radius:8px' }, '<div data-mk-erstgespraech></div>\n<script src="' + location.origin + '/static/js/erstgespraech.js" defer></script>'),
     h('p', {}, h('button', { class: 'btn' }, 'Speichern')));
   return h('div', { class: 'card' }, h('h2', {}, 'Terminbuchung'), h('p', { class: 'small muted' }, 'Interessenten buchen selbst ein Erstgespräch. Der Lead wird automatisch angelegt oder auf „Termin“ gesetzt, ihr bekommt eine Mail mit Kalendereinladung. Zeiten gelten für Deutschland.'), m, f,
     h('h3', { style: 'margin-top:16px' }, 'Kommende Gespräche'),
