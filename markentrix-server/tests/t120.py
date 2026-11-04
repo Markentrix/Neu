@@ -25,7 +25,7 @@ def anrufe(std,n,ok):
         sql(f"insert into lead_aktivitaeten (lead_id,art,inhalt,von,ergebnis,zeit) values ('{stat}','anruf','x','t','{erg}',((current_date-{3+k%3})::timestamp + interval '{std} hours') at time zone 'Europe/Berlin')")
 anrufe(8,8,7); anrufe(11,8,4); anrufe(14,8,1)
 h=v.get(f"/api/vertrieb/leads/{fris}").json()["anrufzeit"]
-chk("Hinweis nennt die beste Stunde und die Branche",h and GR in h["text"] and "8–9 Uhr" in h["text"] and "11" not in h["text"] and "14" not in h["text"],h)
+chk("Hinweis nennt die beste Stunde und die Branche",h and GR in h["text"] and "8–9 Uhr" in h["text"] and "11" not in h["text"].replace(GR,"") and "14" not in h["text"].replace(GR,""),h)   # Branchenname enthält Zufallsziffern
 chk("Hinweis auch im Admin",GR in (a.get(f"/api/admin/leads/{fris}").json()["anrufzeit"] or {}).get("text",""))
 chk("Fremde Branche ohne Hinweis",v.get(f"/api/vertrieb/leads/{andere}").json()["anrufzeit"] is None)
 # zu wenige Anrufe: keine Empfehlung
