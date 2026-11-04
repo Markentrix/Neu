@@ -35,6 +35,8 @@ services:
       MX_MAIL_TO: info@markentrix.de
       MX_MAIL_FROM: info@markentrix.de         # muss bei Gmail die Kontoadresse sein
       MX_LOG_FILE: /srv/markentrix-daten/anfragen.log
+      MX_GOOGLE_API_KEY: ${MX_GOOGLE_API_KEY:-}      # optional, aus .env, siehe docs/server/BEWERTUNGEN.md (leer = keine Bewertungen auf der Website)
+      MX_GOOGLE_PLACE_ID: ${MX_GOOGLE_PLACE_ID:-}
     networks: [web]
 
 volumes:

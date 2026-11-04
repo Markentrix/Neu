@@ -67,39 +67,6 @@ def load_partials():
     return parts
 
 
-def google_bewertungen():
-    """Baustein {{> google-bewertungen}} aus src/data/google-bewertungen.json.
-    Zeigt nur eingetragene, echte Bewertungen. Ohne Einträge bleibt der Baustein leer (keine Platzhalter, keine Erfindungen).
-    Bewusst ohne AggregateRating-Markup: Google wertet Eigenbewertungen auf der eigenen Seite nicht als Rich-Result."""
-    f = os.path.join(SRC, 'data', 'google-bewertungen.json')
-    if not os.path.isfile(f):
-        return ''
-    d = json.load(open(f, encoding='utf-8'))
-    revs = [r for r in d.get('bewertungen', []) if r.get('text') and r.get('name') and r.get('sterne')]
-    if not revs:
-        return ''
-    esc = html.escape
-    stars = lambda n: '<span class="rev-stars" role="img" aria-label="%d von 5 Sternen">%s</span>' % (n, '★' * n + '☆' * (5 - n))
-    head = ''
-    if d.get('gesamt') and d.get('anzahl'):
-        g = str(d['gesamt']).replace('.', ',')
-        head = '<p class="rev-sum"><b>%s von 5</b> bei Google, %s Bewertungen%s</p>' % (esc(g), esc(str(d['anzahl'])), (', Stand ' + esc(d['stand'])) if d.get('stand') else '')
-    cards = ''.join(
-        '<figure class="card rev-card reveal">%s<blockquote><p>%s</p></blockquote><figcaption><b>%s</b>%s</figcaption></figure>'
-        % (stars(int(r['sterne'])), esc(r['text']), esc(r['name']), (' · ' + esc(r['datum'])) if r.get('datum') else '')
-        for r in revs)
-    links = ''
-    if d.get('profil_url'):
-        links += '<a class="link-arrow" href="%s" target="_blank" rel="noopener">Alle Bewertungen auf Google</a>' % esc(d['profil_url'], quote=True)
-    if d.get('bewertung_schreiben_url'):
-        links += '<a class="link-arrow" href="%s" target="_blank" rel="noopener">Selbst eine Bewertung schreiben</a>' % esc(d['bewertung_schreiben_url'], quote=True)
-    return ('<section class="sec sec--white sec--tight" aria-labelledby="rev-title"><div class="wrap">'
-            '<div class="sec-head"><span class="eyebrow">Google-Bewertungen</span><h2 id="rev-title">Das sagen Kunden über Markentrix.</h2>%s</div>'
-            '<div class="rev-grid">%s</div>'
-            '<p class="tiny muted mt-2">Auszüge aus öffentlichen Google-Bewertungen, unverändert übernommen. Kürzungen sind mit „…“ gekennzeichnet.</p>'
-            '<div class="row mt-2">%s</div></div></section>') % (head, cards, links)
-
-
 def og_image_path(path):
     """Vorschaubild je Seite: static/img/og/<name>.png (erzeugt von tools/og.mjs), sonst das allgemeine Bild."""
     name = 'home' if path == '/' else path.strip('/').replace('/', '-')
@@ -212,7 +179,6 @@ def version_beispiele():
 def build(check=False):
     layout = open(os.path.join(SRC, 'layout.html'), encoding='utf-8').read()
     partials = load_partials()
-    partials['google-bewertungen'] = google_bewertungen()
     if os.path.isdir(DIST):
         shutil.rmtree(DIST)
     shutil.copytree(STATIC, DIST)

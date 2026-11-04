@@ -701,6 +701,29 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); }
+  /* ── Google-Bewertungen: aktuelle Daten vom eigenen Server (/api/bewertungen.php), nur textContent ── */
+  function initReviews() {
+    var sec = $('[data-reviews]'); if (!sec || !('fetch' in w)) return;
+    function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+    var list = $('[data-rev-list]', sec), sum = $('[data-rev-sum]', sec), prof = $('[data-rev-profile]', sec); if (!list) return;
+    fetch('/api/bewertungen.php', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.ok || !j.bewertungen || !j.bewertungen.length) return;
+        j.bewertungen.slice(0, 6).forEach(function (r) {
+          var fig = el('figure', 'card rev-card'), n = Math.max(1, Math.min(5, r.sterne | 0));
+          var st = el('span', 'rev-stars'); st.setAttribute('role', 'img'); st.setAttribute('aria-label', n + ' von 5 Sternen'); st.textContent = '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); fig.appendChild(st);
+          if (r.text) { var bq = el('blockquote'); bq.appendChild(el('p', null, r.text)); fig.appendChild(bq); }
+          var cap = el('figcaption'); cap.appendChild(el('b', null, r.name || 'Google-Nutzer')); if (r.zeit) cap.appendChild(d.createTextNode(' · ' + r.zeit)); fig.appendChild(cap);
+          list.appendChild(fig);
+        });
+        if (sum && j.gesamt && j.anzahl) { sum.textContent = ''; sum.appendChild(el('b', null, String(j.gesamt).replace('.', ',') + ' von 5')); sum.appendChild(d.createTextNode(' bei Google, ' + j.anzahl + ' Bewertungen')); }
+        if (prof && j.profil) { prof.href = j.profil; prof.hidden = false; }
+        sec.hidden = false;
+      })
+      .catch(function () { });
+  }
+
+  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();
