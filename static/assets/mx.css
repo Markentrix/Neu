@@ -1405,3 +1405,14 @@ html.reduced .slot.is-free{animation:none}
   .hero--stage .lead{font-size:1.06rem;line-height:1.55;margin-bottom:1.1rem}
   .hero--stage .hero-grid>div:first-child{top:84px}
 }
+
+/* Google-Bewertungen (nur echte, eingetragene Auszüge) */
+.rev-sum{margin:.5rem 0 0;color:var(--muted)}
+.rev-sum b{color:var(--navy)}
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:clamp(14px,2vw,24px)}
+.rev-card{margin:0;display:flex;flex-direction:column;gap:10px}
+.rev-card blockquote{margin:0}
+.rev-card blockquote p{margin:0;color:var(--navy);line-height:1.55}
+.rev-card figcaption{margin-top:auto;color:var(--muted);font-size:.9rem}
+.rev-card figcaption b{color:var(--navy)}
+.rev-stars{color:#B45309;letter-spacing:2px;font-size:1.05rem}
