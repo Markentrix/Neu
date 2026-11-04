@@ -61,3 +61,6 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Bestell-Mails und die Bestätigung sind **keine Rechnung**. Ob und wie Rechnungen mit Umsatzsteuer oder Kleinunternehmer-Hinweis erzeugt werden sollen, bitte mit Steuerberatung klären.
 - Zahlung läuft nur über PayPal.Me-Link oder bei Abholung. Das Portal prüft keinen Zahlungseingang. Eine mögliche Zahlungsdienst-Einordnung bitte mitprüfen lassen.
 - Personalisierte Artikel (Wunschtext): Hinweis zum Ausschluss des Widerrufsrechts bei Anfertigung nach Kundenwunsch gehört in die AGB des Betriebs.
+
+## Sicherungskopie auf dem PC des Inhabers
+- Der Inhaber holt täglich die neueste Server-Sicherung auf seinen Windows-PC (Ordner „Markentrix-Server-Backup“, 30 Tage Aufbewahrung, die 3 neuesten bleiben). Die Sicherung enthält Kundendaten (auch Endkunden-Daten aus Shop und Anfragen) und die Zugangsdaten der `.env`. Zu klären: Passt die Kopie auf dem PC zum Löschkonzept und zum AVV (Anlage 2, Aufbewahrung 30 Tage)? Pflicht zu verschlüsseltem Laufwerk (BitLocker) und keiner Cloud-Synchronisation? Eintrag im Verzeichnis der Verarbeitungstätigkeiten.

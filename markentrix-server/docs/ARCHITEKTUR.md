@@ -43,3 +43,11 @@ Keine Geheimnisse im Klartext in der Datenbank (`einstellungen.*` verschlüsselt
 - `docs/MODULKARTE.md` ist die erzeugte Übersicht (Gruppe, Schicht, Zeilen, wer nutzt das Modul). Aktualisieren mit `python3 tools/struktur.py --karte`.
 - Bekannte Altlasten stehen in `tools/struktur_basis.json`. Neue Verstöße lassen den Lauf scheitern; behobene Altlasten meldet der Wächter, dann die Basis mit `--basis` kürzen. Die Basis nie nutzen, um einen neuen Verstoß zu verstecken.
 - Test `t128` prüft, dass der Wächter selbst funktioniert (er muss künstliche Fehler finden).
+
+## Sicherungen auf den eigenen PC holen
+
+Zusätzlich zur Sicherung auf dem Server (und dem externen Backup) kann ein PC die neueste Sicherung täglich abholen.
+- Server: `mkctl abholschluessel < schluessel.pub` legt den Benutzer `mkabholer` an. Sein SSH-Schlüssel ist mit `restrict` und einem festen Befehl gebunden: Er führt nur `bin/backup-abholen.sh` aus (über sudo, nur dieses Skript) und kennt nur `liste`, `hash`, `holen` und `groesse` für **fertige** Sicherungen (mit `config.tar.gz`). Es gibt keine Shell und kein Root. Entfernen mit `mkctl abholschluessel --entfernen`. Die Abholungen stehen im Systemprotokoll (`mk-abholen`).
+- PC (Windows): Der Ordner `Markentrix-Server-Backup` mit `Einrichten.bat` (einmalig, fragt das Root-Passwort, speichert es nicht), `Sicherung-holen.ps1` (täglich per Aufgabenplanung, prüft per SHA-256, löscht Kopien nach 30 Tagen, die 3 neuesten bleiben) und `LIES-MICH.txt`.
+- Die Sicherungen enthalten Kundendaten und die `.env`: nur auf verschlüsselten Laufwerken ablegen (siehe `docs/ANWALT-CHECKLISTE.md`, Aufbewahrung).
+- Test `t129` prüft den Abholdienst (nur feste Befehle, nur fertige Sicherungen, keine Einschleusung).

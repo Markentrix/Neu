@@ -259,6 +259,30 @@ SQL
     "$BASE/bin/offsite.sh" --test
     ;;
 
+  abholschluessel)
+    # Richtet einen eingeschränkten Zugang ein, mit dem ein PC die Sicherungen abholen kann (kein Root, keine Shell, nur 4 feste Befehle).
+    # Aufruf:  mkctl abholschluessel < oeffentlicher_schluessel.pub      oder   mkctl abholschluessel --entfernen
+    need_root
+    BENUTZER=mkabholer
+    if [ "${1:-}" = "--entfernen" ]; then
+      rm -f "/home/$BENUTZER/.ssh/authorized_keys" /etc/sudoers.d/mk-abholer
+      echo "Der Abhol-Zugang wurde entfernt (der Benutzer $BENUTZER bleibt ohne Schlüssel bestehen)."; exit 0
+    fi
+    schluessel="$(head -c 2000 | tr -d '\r' | head -n 1)"
+    [[ "$schluessel" =~ ^ssh-ed25519\ [A-Za-z0-9+/=]+(\ [A-Za-z0-9._@-]+)?$ ]] || die "Das ist kein gültiger öffentlicher ed25519-Schlüssel (Datei .pub)."
+    id "$BENUTZER" >/dev/null 2>&1 || useradd --create-home --shell /bin/sh --comment "Abholdienst fuer Sicherungen" "$BENUTZER"
+    passwd -l "$BENUTZER" >/dev/null 2>&1 || true
+    install -d -m 700 -o "$BENUTZER" -g "$BENUTZER" "/home/$BENUTZER/.ssh"
+    zeile='restrict,command="sudo /opt/markentrix/bin/backup-abholen.sh \"$SSH_ORIGINAL_COMMAND\""'
+    printf '%s %s\n' "$zeile" "$schluessel" > "/home/$BENUTZER/.ssh/authorized_keys"
+    chown "$BENUTZER:$BENUTZER" "/home/$BENUTZER/.ssh/authorized_keys"; chmod 600 "/home/$BENUTZER/.ssh/authorized_keys"
+    printf '%s ALL=(root) NOPASSWD: /opt/markentrix/bin/backup-abholen.sh\n' "$BENUTZER" > /etc/sudoers.d/mk-abholer.neu
+    chmod 440 /etc/sudoers.d/mk-abholer.neu
+    if visudo -cf /etc/sudoers.d/mk-abholer.neu >/dev/null; then mv /etc/sudoers.d/mk-abholer.neu /etc/sudoers.d/mk-abholer
+    else rm -f /etc/sudoers.d/mk-abholer.neu; die "Die Berechtigung war fehlerhaft und wurde nicht übernommen."; fi
+    echo "OK: Der Schlüssel darf jetzt nur noch Sicherungen auflisten und abholen (Benutzer $BENUTZER). Entfernen: mkctl abholschluessel --entfernen"
+    ;;
+
   restore-test)
     need_root
     "$BASE/bin/restore-test.sh"
@@ -353,6 +377,7 @@ mkctl admin-add <E-Mail>               Admin fürs Portal anlegen oder Passwort 
 mkctl psql | migrate                   Datenbank-Konsole | Datenbankstruktur aktualisieren
 mkctl offsite-setup <benutzer@host> [verzeichnis]   Sicherung zusätzlich verschlüsselt auf eine Hetzner Storage Box
 mkctl offsite-test                     Prüft die externe Sicherung
+mkctl abholschluessel < schluessel.pub   Eingeschränkten Zugang für die Abholung der Sicherungen auf einen PC einrichten (--entfernen löscht ihn)
 mkctl demo-daten / demo-daten-entfernen   Beispiel-Kunde, -Leads und -Anfragen zum gefahrlosen Üben anlegen bzw. löschen
 mkctl haerten [--status|--anwenden|--firewall]   Sicherheitsstand zeigen / Auto-Updates und fail2ban einrichten / Firewall
 mkctl rollback [--liste|Datei]         Programmcode auf den Stand vor dem letzten Update zurücksetzen (Datenbank bleibt)

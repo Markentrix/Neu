@@ -104,7 +104,7 @@ cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"
 rm -rf "$BASE/db" && cp -r "$SRC/db" "$BASE/db"
 rm -rf "$BASE/portal" && cp -r "$SRC/portal" "$BASE/portal"
-install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$SRC/bin/selbsttest.sh" "$SRC/bin/haerten.sh" "$BASE/bin/"
+install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$SRC/bin/selbsttest.sh" "$SRC/bin/haerten.sh" "$SRC/bin/backup-abholen.sh" "$BASE/bin/"
 ln -sf "$BASE/bin/mkctl" /usr/local/bin/mkctl
 [ -f "$BASE/caddy/sites/00-platzhalter.caddy" ] || echo "# Hier liegen die Kunden-Websites (mkctl site-add)" > "$BASE/caddy/sites/00-platzhalter.caddy"
 echo "$CADDY_MODE" > "$BASE/mode"
