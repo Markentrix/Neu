@@ -2,3 +2,5 @@ node_modules/
 .DS_Store
 *.log
 markentrix-website.zip
+
+__pycache__/

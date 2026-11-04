@@ -114,6 +114,8 @@
     $$('form[data-lead]').forEach(function (form) {
       var msg = $('.form-msg', form), btn = $('[type=submit]', form), busy = false;
       $$('input,select,textarea', form).forEach(function (i) { on(i, 'input', function () { clearError(i); }); });
+      var started = false; // form_start: erste Eingabe, einmal je Seitenaufruf
+      on(form, 'input', function () { if (started) return; started = true; track('form_start', { location: form.getAttribute('data-lead') }); });
       on(form, 'submit', function (e) {
         e.preventDefault(); if (busy) return;
         if (msg) { msg.className = 'form-msg'; msg.textContent = ''; }
@@ -153,7 +155,7 @@
     var LABEL = { ok: 'In Ordnung', warn: 'Auffällig', bad: 'Mangelhaft', info: 'Hinweis' };
     var MSG = { url: 'Bitte geben Sie eine gültige Adresse an, zum Beispiel www.ihre-seite.de.', rate: 'Sie haben in kurzer Zeit viele Prüfungen gestartet. Bitte versuchen Sie es in ein paar Minuten erneut.', busy: 'Gerade laufen viele Prüfungen. Bitte versuchen Sie es in einer Minute erneut.', server: 'Der Check ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.', origin: 'Der Check ist nur über markentrix.de nutzbar.' };
     function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-    function fail(t) { msg.className = 'chk-msg is-error'; msg.textContent = t; }
+    function fail(t) { msg.className = 'chk-msg is-error'; msg.textContent = t; track('website_check_error'); }
     var HEAD = { stark: 'Starke Grundlagen, wenige Lücken.', gut: 'Solide, aber mit spürbaren Lücken.', mittel: 'Mittelmaß: hier bleiben Anfragen liegen.', schwach: 'Erheblicher Rückstand bei Auffindbarkeit und Vertrauen.' };
     function renderFindings(r) {
       found.textContent = '';
@@ -205,7 +207,7 @@
       e.preventDefault(); if (busy) return;
       var v = input.value.trim(); msg.className = 'chk-msg'; msg.textContent = '';
       if (!v || v.indexOf('.') < 0 && !/^https?:\/\//i.test(v)) { fail(MSG.url); input.focus(); return; }
-      busy = true; var orig = btn.textContent; btn.textContent = 'Prüfe …'; btn.disabled = true; form.setAttribute('aria-busy', 'true'); out.hidden = true;
+      busy = true; track('website_check_start'); var orig = btn.textContent; btn.textContent = 'Prüfe …'; btn.disabled = true; form.setAttribute('aria-busy', 'true'); out.hidden = true;
       msg.textContent = 'Wir prüfen Ihre Seite gründlich. Das dauert bis zu 20 Sekunden.';
       var ctrl = ('AbortController' in w) ? new AbortController() : null, timer = ctrl && setTimeout(function () { ctrl.abort(); }, 45000);
       fetch('/api/check.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }), signal: ctrl ? ctrl.signal : undefined })

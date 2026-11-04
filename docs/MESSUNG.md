@@ -18,7 +18,8 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 ## Einmalig einrichten (Google Analytics 4)
 
 1. Verwaltung → Ereignisse: `generate_lead` als **Schlüsselereignis** markieren.
-2. Optional zusätzlich ein Ereignis „danke_aufgerufen“ anlegen: Bedingung `page_location` enthält `/danke`. Als Schlüsselereignis markieren. Das ist die robustere Zählung, weil sie auch bei langsamer Verbindung greift.
+2. Ein Ereignis „danke_aufgerufen“ (Bedingung `page_location` enthält `/danke`) ist nur als Gegenprobe gedacht und wird **nicht** als Schlüsselereignis markiert, sonst zählt jede Anfrage doppelt.
+2a. Als Schlüsselereignis markieren: ausschließlich `generate_lead`. `website_check`, `form_start`, `form_submit`, `phone_click` bleiben normale Ereignisse. Unter Verwaltung → Benutzerdefinierte Definitionen den Parameter `lead_type` als ereignisbezogene Dimension anlegen, damit Leads nach Art getrennt auswertbar sind (ohne diesen Schritt zeigt GA4 den Parameter nicht in Berichten).
 3. Berichte → Akquisition → Traffic-Akquisition: Spalte „Schlüsselereignisse“ einblenden.
 
 ## Ereignisse (Stand 04.11.2026)
@@ -27,7 +28,10 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 |---|---|---|
 | `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `erstberatung` (Anfrage-Dialog), `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert); `location`, `channel` |
 | `form_submit` | Absendeversuch, vor der Serverantwort. Kann höher sein als `generate_lead` (Fehler, Zeitüberschreitung). Nicht als Schlüsselereignis markieren. | `lead_type`, `location` |
-| `website_check` | Ein Check wurde durchgeführt (noch kein Kontakt). | `score` |
+| `website_check_start` | Adresse abgeschickt, Prüfung läuft. | – |
+| `website_check` | Prüfung abgeschlossen, Ergebnis angezeigt (noch kein Kontakt). | `score` (hoch, mittel, niedrig) |
+| `website_check_error` | Prüfung fehlgeschlagen (ungültige Adresse, Zeitüberschreitung, Server). | – |
+| `form_start` | Erste Eingabe in einem Formular (Anfrage-Dialog, Kontaktformular, Check-Kurzfassung), einmal je Seitenaufruf. | `location` (Formularquelle) |
 | `wizard_step` | Schritt 1 bis 4 im Anfrage-Dialog erreicht. | `schritt` |
 | `modal_open` | Anfrage-Dialog geöffnet. | – |
 | `phone_click`, `mail_click` | Klick auf Telefonnummer oder E-Mail-Adresse (getrennt von Formularen). | `location` (Seite) |
