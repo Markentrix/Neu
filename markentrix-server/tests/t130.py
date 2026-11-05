@@ -93,7 +93,7 @@ r=o.post("/api/public/buchung/absagen",headers={"Origin":"https://markentrix.de"
 a.put("/api/admin/einstellungen/buchung",json={**E,"erlaubte_seiten":"andere.de"})
 r=o.get("/api/public/buchung/slots",headers={"Origin":"https://markentrix.de"}); chk("Einstellung gilt sofort: markentrix.de nicht mehr freigegeben","access-control-allow-origin" not in r.headers)
 a.put("/api/admin/einstellungen/buchung",json=E)
-r=o.get("/static/js/erstgespraech.js"); chk("Baustein-Skript wird ausgeliefert",r.status_code==200 and "data-mk-erstgespraech" in r.text and "attachShadow" in r.text)
+r=o.get("/static/js/erstgespraech.js"); chk("Baustein-Skript wird ausgeliefert",r.status_code==200 and "data-mk-erstgespraech" in r.text and "attachShadow" in r.text and "mk-erstgespraech-gebucht" in r.text)
 sql("delete from kalender_eintraege")
 # Oberfläche
 AXE=open("/var/tmp/axe/node_modules/axe-core/axe.min.js").read()

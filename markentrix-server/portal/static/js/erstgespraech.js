@@ -69,6 +69,8 @@
         ev.preventDefault(); if (!gewaehlt) return; knopf.disabled = true; fehler.textContent = '';
         api('/api/public/buchung', { method: 'POST', body: JSON.stringify({ start: gewaehlt, name: n.value, email: e.value, telefon: t.value || null, nachricht: x.value || null, einwilligung: c.checked }) })
           .then(function (r) {
+            // Ereignis für Messung (z. B. GA4 generate_lead): ohne persönliche Daten, steigt bis zum document auf
+            wirt.dispatchEvent(new CustomEvent('mk-erstgespraech-gebucht', { bubbles: true, composed: true, detail: { wann: r.wann } }));
             box.replaceChildren(h('h3', {}, 'Vielen Dank!'), h('p', { class: 'ok', role: 'status' }, 'Ihr Termin am ' + r.wann + ' ist gebucht. Eine Bestätigung mit Kalendereinladung ist unterwegs zu Ihnen.'));
           }).catch(function (z) {
             fehler.textContent = z.message; knopf.disabled = false;
