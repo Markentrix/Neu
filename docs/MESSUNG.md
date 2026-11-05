@@ -26,7 +26,7 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 
 | Ereignis | Bedeutung | Parameter |
 |---|---|---|
-| `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `erstberatung` (Anfrage-Dialog), `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert); `location`, `channel` |
+| `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `erstberatung` (Anfrage-Dialog), `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert), `terminbuchung` (Termin im Portal-Kalender gebucht, Ereignis `mk-erstgespraech-gebucht` des Portal-Bausteins, ohne Termindaten); `location`, `channel` |
 | `form_submit` | Absendeversuch, vor der Serverantwort. Kann höher sein als `generate_lead` (Fehler, Zeitüberschreitung). Nicht als Schlüsselereignis markieren. | `lead_type`, `location` |
 | `website_check_start` | Adresse abgeschickt, Prüfung läuft. | – |
 | `website_check` | Prüfung abgeschlossen, Ergebnis angezeigt (noch kein Kontakt). | `score` (hoch, mittel, niedrig) |

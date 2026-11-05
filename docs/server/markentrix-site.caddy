@@ -1,5 +1,5 @@
 # Konfiguration der Markentrix-Website (statisches dist/). Stand 30.10.2026.
-# Neu am 05.11.2026: Content-Security-Policy erlaubt portal.markentrix.de (Buchungs-Widget auf /kontakt).
+# Neu am 05.11.2026: Content-Security-Policy erlaubt portal.markentrix.de nur in script-src und connect-src (Buchungs-Baustein auf /kontakt).
 # Neu am 04.11.2026: dritter Endpunkt /api/bewertungen.php (aktuelle Google-Bewertungen, nur mit MX_GOOGLE_* im php-Container aktiv).
 # Neu am 30.10.2026: Weiterleitung /pfad/ -> /pfad (vorher 404). Nach dem Einspielen Caddy neu laden.
 # Neu am 19.10.2026: zweiter Endpunkt /api/check.php (Website-Check) neben /api/anfrage.php.
@@ -18,7 +18,7 @@
                 Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), interest-cohort=()"
                 Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
                 Cross-Origin-Opener-Policy "same-origin"
-                Content-Security-Policy "default-src 'self'; script-src 'self' https://portal.markentrix.de https://www.googletagmanager.com https://*.googletagmanager.com https://tracker.metricool.com; style-src 'self' https://portal.markentrix.de 'unsafe-inline'; img-src 'self' https://portal.markentrix.de data: https://*.google-analytics.com https://*.googletagmanager.com https://tracker.metricool.com; font-src 'self' https://portal.markentrix.de; connect-src 'self' https://portal.markentrix.de https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://tracker.metricool.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+                Content-Security-Policy "default-src 'self'; script-src 'self' https://portal.markentrix.de https://www.googletagmanager.com https://*.googletagmanager.com https://tracker.metricool.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://tracker.metricool.com; font-src 'self'; connect-src 'self' https://portal.markentrix.de https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://tracker.metricool.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
                 -Server
         }
 

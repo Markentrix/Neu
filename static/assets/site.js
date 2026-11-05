@@ -704,6 +704,8 @@
   /* ── Terminbuchung (Portal-Baustein): bleibt der Kalender leer (Skript blockiert oder Portal nicht erreichbar), erscheint der Alternativtext ── */
   function initBooking() {
     var host = $('[data-mk-erstgespraech]'); if (!host) return;
+    // Erfolgreiche Buchung: Ereignis des Portal-Bausteins (enthält nur den Termin als Text, wird nicht weitergegeben). Zählt nur nach Einwilligung (track).
+    d.addEventListener('mk-erstgespraech-gebucht', function () { track('generate_lead', { location: 'Terminbuchung', lead_type: 'terminbuchung' }); });
     function check() {
       if (host.childNodes.length || host.shadowRoot) return;
       var intro = $('[data-book-intro]'); if (intro) intro.hidden = true;
