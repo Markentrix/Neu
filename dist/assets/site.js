@@ -701,6 +701,17 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
+  /* ── Terminbuchung (Portal-Baustein): bleibt der Kalender leer (Skript blockiert oder Portal nicht erreichbar), erscheint der Alternativtext ── */
+  function initBooking() {
+    var host = $('[data-mk-erstgespraech]'); if (!host) return;
+    function check() {
+      if (host.childNodes.length || host.shadowRoot) return;
+      var intro = $('[data-book-intro]'); if (intro) intro.hidden = true;
+      var alt = host.getAttribute('data-alternative'); if (alt) { host.textContent = alt; host.className = 'note'; }
+    }
+    if (d.readyState === 'complete') setTimeout(check, 3500); else w.addEventListener('load', function () { setTimeout(check, 3500); });
+  }
+
   /* ── Google-Bewertungen: aktuelle Daten vom eigenen Server (/api/bewertungen.php), nur textContent ── */
   function initReviews() {
     var sec = $('[data-reviews]'); if (!sec || !('fetch' in w)) return;
@@ -724,6 +735,6 @@
       .catch(function () { });
   }
 
-  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();
