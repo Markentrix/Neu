@@ -94,6 +94,10 @@ r=o.post("/api/public/buchung/absagen",headers={"Origin":"https://markentrix.de"
 for pfad in ("/api/public/buchung/absagen","/api/public/abmelden"):
     r=o.post(pfad,headers={"Origin":B},data={"t":"x"*24}); chk(f"Formular-Absendung ohne X-MK klappt ({pfad})",r.status_code!=403,(r.status_code,r.text[:80]))
     r=o.post(pfad,headers={"Origin":"https://fremd.example"},data={"t":"x"*24}); chk(f"Formular von fremder Herkunft: 403 ({pfad})",r.status_code==403)
+for pfad in ("/api/public/buchung/absagen","/api/public/abmelden"):
+    r=o.post(pfad,headers={"Origin":"null","Sec-Fetch-Site":"same-origin"},data={"t":"x"*24}); chk(f"Formular mit Herkunft „null“ (Browser, gleiche Seite) klappt ({pfad})",r.status_code!=403,(r.status_code,r.text[:80]))
+    r=o.post(pfad,headers={"Origin":"null","Sec-Fetch-Site":"cross-site"},data={"t":"x"*24}); chk(f"Formular „null“ von fremder Seite: 403 ({pfad})",r.status_code==403)
+r=o.post("/api/public/buchung",headers={"Origin":"null","X-MK":"1"},json={"start":start,"name":"N","email":"n@x.de","einwilligung":True}); chk("Buchung mit Herkunft „null“ bleibt 403",r.status_code==403)
 a.put("/api/admin/einstellungen/buchung",json={**E,"erlaubte_seiten":"andere.de"})
 r=o.get("/api/public/buchung/slots",headers={"Origin":"https://markentrix.de"}); chk("Einstellung gilt sofort: markentrix.de nicht mehr freigegeben","access-control-allow-origin" not in r.headers)
 a.put("/api/admin/einstellungen/buchung",json=E)

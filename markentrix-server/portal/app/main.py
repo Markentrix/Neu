@@ -113,6 +113,9 @@ async def schutz(request: Request, call_next):
         if request.headers.get("x-mk") != "1" and request.url.path not in FORMULAR_PFADE:
             return JSONResponse({"detail": "Ungültige Anfrage."}, status_code=403)
         origin = request.headers.get("origin")
+        # Wegen „Referrer-Policy: no-referrer“ senden Browser bei HTML-Formularen als Herkunft „null“: für die Formularseiten zulassen, außer der Browser meldet fremde Herkunft
+        if origin == "null" and request.url.path in FORMULAR_PFADE and request.headers.get("sec-fetch-site", "same-origin") in ("same-origin", "none"):
+            origin = None
         if origin and not baustein and urlparse(origin).netloc != urlparse(config.BASE_URL).netloc and urlparse(origin).netloc != request.headers.get("host"):
             return JSONResponse({"detail": "Ungültige Herkunft."}, status_code=403)
     r = await call_next(request)
