@@ -93,6 +93,9 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
        "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
 
 
+FORMULAR_PFADE = ("/api/public/buchung/absagen", "/api/public/abmelden")
+
+
 @app.middleware("http")
 async def schutz(request: Request, call_next):
     # Buchungs-Baustein auf der eigenen Website (markentrix.de): nur die Buchungs-Schnittstellen sind für freigegebene Seiten offen
@@ -106,7 +109,8 @@ async def schutz(request: Request, call_next):
     # Änderungen nur von der eigenen Seite aus (zusätzlich zu SameSite-Cookie)
     if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.url.path.startswith("/api/") and not request.url.path.startswith("/api/webhook/"):
         # /api/webhook/… wird von fremden Diensten (Stripe, Telefon-Assistent) aufgerufen und prüft Signatur bzw. Geheimnis selbst
-        if request.headers.get("x-mk") != "1":
+        # Seiten mit normalem HTML-Formular (Absage-Link, Abmelden aus Mails) können die Kopfzeile nicht senden; sie sind durch ihren Token geschützt, die Herkunftsprüfung gilt weiter
+        if request.headers.get("x-mk") != "1" and request.url.path not in FORMULAR_PFADE:
             return JSONResponse({"detail": "Ungültige Anfrage."}, status_code=403)
         origin = request.headers.get("origin")
         if origin and not baustein and urlparse(origin).netloc != urlparse(config.BASE_URL).netloc and urlparse(origin).netloc != request.headers.get("host"):

@@ -90,6 +90,10 @@ r=o.post("/api/public/buchung",headers={"Origin":"https://fremd.example","X-MK":
 r=o.post("/api/public/buchung",headers={"Origin":"https://markentrix.de","X-MK":"1"},json={"start":neu,"name":"Web Besucher","email":f"web{sfx}@interessent.de","einwilligung":True}); chk("Buchen über den Baustein (markentrix.de)",r.status_code==200 and r.headers.get("access-control-allow-origin")=="https://markentrix.de",r.text)
 r=o.post("/api/public/buchung",headers={"Origin":"https://markentrix.de"},json={"start":neu,"name":"Ohne Kopf","email":"o@x.de","einwilligung":True}); chk("Ohne X-MK-Kopfzeile: 403",r.status_code==403)
 r=o.post("/api/public/buchung/absagen",headers={"Origin":"https://markentrix.de","X-MK":"1"},data={"t":"x"*24}); chk("Absage-Link nicht für Fremdseiten (kein CORS)","access-control-allow-origin" not in r.headers)
+# Absage-Seite aus der Mail: normales HTML-Formular ohne X-MK-Kopfzeile (Browser), gleiche Herkunft
+for pfad in ("/api/public/buchung/absagen","/api/public/abmelden"):
+    r=o.post(pfad,headers={"Origin":B},data={"t":"x"*24}); chk(f"Formular-Absendung ohne X-MK klappt ({pfad})",r.status_code!=403,(r.status_code,r.text[:80]))
+    r=o.post(pfad,headers={"Origin":"https://fremd.example"},data={"t":"x"*24}); chk(f"Formular von fremder Herkunft: 403 ({pfad})",r.status_code==403)
 a.put("/api/admin/einstellungen/buchung",json={**E,"erlaubte_seiten":"andere.de"})
 r=o.get("/api/public/buchung/slots",headers={"Origin":"https://markentrix.de"}); chk("Einstellung gilt sofort: markentrix.de nicht mehr freigegeben","access-control-allow-origin" not in r.headers)
 a.put("/api/admin/einstellungen/buchung",json=E)
