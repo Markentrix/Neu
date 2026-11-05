@@ -173,7 +173,7 @@
       var cta = el('div', 'card card--lg card--soft chk-cta');
       cta.appendChild(el('h3', null, 'Welche Punkte zuerst, und was bringen sie?'));
       cta.appendChild(el('p', 'muted', 'Die einzelnen Befunde, ihre Reihenfolge und die Umsetzung besprechen wir im kostenlosen Erstgespräch. Rund 30 Minuten, unverbindlich, Rückmeldung werktags innerhalb von 24 Stunden.'));
-      var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Erstberatung anfragen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
+      var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Erstgespräch buchen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
       var b2 = el('a', 'btn btn--secondary btn--lg', 'SEO und GEO ansehen'); b2.href = '/leistungen/seo-geo'; row.appendChild(b2); cta.appendChild(row); found.appendChild(cta);
       var smp = (r.sample && r.sample.length) ? ' Stichprobe interner Seiten: ' + r.sample.map(function (x) { return x.path; }).join(', ') + '.' : '';
       found.appendChild(el('p', 'tiny mt-3', 'Geprüft wurden Startseite, robots.txt, Sitemap, llms.txt, eine nicht vorhandene Adresse und eine Stichprobe interner Seiten, einmalig, in ' + r.seconds + ' Sekunden.' + smp + ' Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
@@ -294,7 +294,7 @@
   function initModal() {
     var modal = $('#mx-modal'); if (!modal) return;
     var box = $('.modal-box', modal), last = null;
-    function open(branche, bedarf, aktion) { var pb = $('.burger'); if (pb && pb.getAttribute('aria-expanded') === 'true') pb.click(); modal.hidden = false; modal.classList.add('is-open'); var wf = $('form[data-wizard]', modal); var ak = wf && $('input[name=aktion]', wf); if (ak) ak.value = aktion || ''; if (wf && wf.__wizard) { if (branche || bedarf) wf.__wizard.preset(branche, bedarf); else wf.__wizard.show(wf.__wizard.current()); } d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
+    function open(branche, bedarf, aktion) { var pb = $('.burger'); if (pb && pb.getAttribute('aria-expanded') === 'true') pb.click(); modal.hidden = false; modal.classList.add('is-open'); loadBooking(); d.body.classList.add('menu-open'); last = d.activeElement; var f = $('input,select,textarea,button', box); if (f) f.focus(); track('modal_open'); }
     function close() { modal.classList.remove('is-open'); modal.hidden = true; d.body.classList.remove('menu-open'); if (last && last.focus) last.focus(); }
     on(d, 'click', function (e) {
       var t = e.target.closest('[data-open-modal]'); if (t) { e.preventDefault(); open(t.getAttribute('data-branche'), t.getAttribute('data-bedarf'), t.getAttribute('data-aktion')); return; }
@@ -309,63 +309,6 @@
       }
     });
     if (location.hash === '#potenzial-check') open();
-  }
-
-
-  /* ── Potenzial-Check als Dialog ─────────────────────────────────────── */
-  function initWizard() {
-    var form = $('form[data-wizard]'); if (!form) return;
-    var steps = $$('fieldset[data-step]', form), prog = $$('.wz-progress li', form);
-    var prevB = $('[data-wz=prev]', form), nextB = $('[data-wz=next]', form), submitB = $('[type=submit]', form);
-    var result = $('[data-wz-result]', form), reco = $('input[name=empfehlung]', form), branche = $('input[name=branche]', form), cur = 0;
-    var PAIN = { handwerk: 'Für Handwerk und Bau heißt das: Kunden suchen „Elektriker Celle“ oder „Dachdecker in der Nähe“ und entscheiden auf dem Handy in Sekunden. Eine Leistungsseite je Gewerk und Ort ist deshalb Teil des Konzepts.',
-      praxis: 'Für Praxen und Kanzleien heißt das: Neue Patienten und Mandanten vergleichen Website, Bewertungen und Öffnungszeiten, oft außerhalb der Sprechzeiten. Terminanfrage und Antworten auf die häufigsten Fragen gehören auf die Seite.',
-      gastro: 'Für Gastronomie und Handel heißt das: Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy. Wer das nicht in zehn Sekunden findet, geht weiter.',
-      b2b: 'Für Dienstleister und Gewerbe heißt das: Geschäftskunden vergleichen Anbieter in Ruhe und wollen sofort Leistungsprofil, Ansprechpartner, Nachweise und einen klaren Weg zur Angebotsanfrage sehen.',
-      sonstige: 'Interessenten suchen online, vergleichen und melden sich dann. Die Website entscheidet, ob daraus eine Anfrage wird.' };
-    var BEDARF = { landingpage: '<b>Passendes Paket: LANDING, 2.290 € einmalig, Pflege 59 € im Monat.</b> Ein Conversion-Onepager mit Texten, Bildern und Terminbuchung für ein Angebot. Wenn Sie Texte und Bilder selbst liefern, geht LANDING START auf Vorlagenbasis ab 1.290 €.',
-      website: '<b>Passendes Paket: BUSINESS WEB, 4.490 € einmalig, Pflege 89 € im Monat.</b> Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.',
-      relaunch: '<b>Passendes Paket: je nach Umfang LANDING (2.290 €) oder BUSINESS WEB (4.490 €).</b> Wir prüfen zuerst, was von der bestehenden Seite bleibt: Domain, Inhalte, Bewertungen. Darauf entsteht die neue Struktur.',
-      funnel: '<b>Passendes Paket: WEB + FUNNEL, 6.990 € einmalig, Pflege 129 € im Monat.</b> Bis zwölf Seiten mit einer Anfrage- oder Verkaufsstrecke, die Besucher Schritt für Schritt zur Anfrage führt.',
-      unklar: '<b>Noch offen, das ist in Ordnung.</b> Die meisten Betriebe starten mit LANDING (2.290 €) für ein konkretes Angebot. Im Erstgespräch klären wir in rund 30 Minuten, was zuerst Sinn ergibt.' };
-    var STATUS = { keine: 'Ohne Website entscheidet heute allein das Google-Profil, ob jemand anfragt. Eine erste Seite mit Leistungen, Ort und Anfrageweg ändert das.',
-      veraltet: 'Eine veraltete Seite kostet Vertrauen, besonders auf dem Handy. Domain und brauchbare Inhalte übernehmen wir, der Rest wird neu aufgebaut.',
-      keineanfragen: 'Eine Seite ohne Anfragen hat meist kein klares Angebot und keinen klaren Anfrageweg. Genau das prüfen wir als Erstes.',
-      gut: 'Gute Basis. Dann geht es um Erweiterung: Leistungsseiten je Ort, eine Landingpage je Angebot, ein sauberer Anfrageweg.' };
-    var ZEIT = { schnell: 'Live in der Regel 5 bis 15 Werktage nach Freigabe der Inhalte. Je schneller Texte, Bilder und Freigaben vorliegen, desto früher.',
-      quartal: 'Das passt zum üblichen Ablauf: Erstgespräch, Angebot, 5 bis 15 Werktage Umsetzung, Freigabegespräch, Livegang.',
-      offen: 'Kein Druck. Das Erstgespräch ist unverbindlich, das Angebot hat einen Festpreis. Sie entscheiden in Ruhe.' };
-    function val(name) { var r = $('input[name=' + name + ']:checked', form); return r ? r.value : ''; }
-    function label(name) { var r = $('input[name=' + name + ']:checked', form); if (!r) return ''; var c = r.closest('.choice').cloneNode(true), h = $('.choice-hint', c); if (h) h.remove(); return (c.textContent || '').trim(); }
-    function show(i) {
-      var dir = i > cur ? 'wz-in' : 'wz-back', changed = i !== cur;
-      cur = i; if (changed) track('wizard_step', { schritt: i + 1 });
-      steps.forEach(function (s, k) { s.hidden = k !== i; s.classList.remove('wz-in', 'wz-back'); if (k === i && changed) s.classList.add(dir); });
-      prog.forEach(function (p, k) { p.classList.toggle('is-done', k < i); p.classList.toggle('is-current', k === i); if (k === i) p.setAttribute('aria-current', 'step'); else p.removeAttribute('aria-current'); });
-      if (prevB) prevB.hidden = i === 0;
-      if (nextB) nextB.hidden = i === steps.length - 1;
-      if (submitB) submitB.hidden = i !== steps.length - 1;
-      if (i === steps.length - 1) buildResult();
-      var f = $('input:not([type=hidden]):not([type=radio]), input[type=radio]:checked, input[type=radio]', steps[i]); if (f && changed) f.focus({ preventScroll: true });
-    }
-    function valid(i) {
-      var req = steps[i].getAttribute('data-require'); if (!req) return true;
-      var ok = !!$('input[name=' + req + ']:checked', form); var err = $('.error', steps[i]); if (err) err.style.display = ok ? '' : 'block';
-      return ok;
-    }
-    function buildResult() {
-      var b = val('bedarf') || 'unklar', st = val('status'), z = val('zeitplan'), br = branche ? branche.value : '';
-      var items = [BEDARF[b]]; if (STATUS[st]) items.push(STATUS[st]); if (ZEIT[z]) items.push(ZEIT[z]); if (PAIN[br]) items.push(PAIN[br]);
-      var html = '<b>Kurz zusammengefasst</b><ul>' + items.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul><p class="tiny">Erste Einschätzung ohne Zusicherung. Alle Preise netto zzgl. USt., Preisliste vom 1. Oktober 2026. Das verbindliche Angebot folgt nach dem Erstgespräch.</p>';
-      if (result) result.innerHTML = html;
-      if (reco) reco.value = 'Bedarf: ' + (label('bedarf') || 'offen') + ' | Ausgangslage: ' + (label('status') || 'offen') + ' | Zeitplan: ' + (label('zeitplan') || 'offen') + (br ? ' | Branche: ' + br : '');
-    }
-    on(nextB, 'click', function () { if (cur < steps.length - 1 && valid(cur)) show(cur + 1); });
-    on(prevB, 'click', function () { show(Math.max(0, cur - 1)); });
-    on(form, 'keydown', function (e) { if (e.key === 'Enter' && cur < steps.length - 1 && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); nextB.click(); } });
-    $$('.choice input', form).forEach(function (r) { on(r, 'change', function () { if (cur < steps.length - 1) setTimeout(function () { nextB.click(); }, 160); }); });
-    form.__wizard = { show: show, current: function () { return cur; }, reset: function () { if (branche) branche.value = ''; show(0); }, preset: function (b, bd) { if (branche) branche.value = b || ''; var r = bd && $('input[name=bedarf][value="' + bd + '"]', form); if (r) { r.checked = true; show(1); } else show(0); } };
-    show(0);
   }
 
 
@@ -701,17 +644,27 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
-  /* ── Terminbuchung (Portal-Baustein): bleibt der Kalender leer (Skript blockiert oder Portal nicht erreichbar), erscheint der Alternativtext ── */
+  /* ── Terminbuchung (Portal-Baustein, Shadow DOM): Skript wird erst bei Bedarf geladen (Seite mit Kalender oder Öffnen des Dialogs).
+        Bleibt ein Kalender leer (Skript blockiert, Portal nicht erreichbar), erscheint der Alternativtext. ── */
+  var bookingState = 0; // 0 nicht geladen, 1 geladen
+  function loadBooking() {
+    if (bookingState) return; bookingState = 1;
+    var s = d.createElement('script'); s.src = 'https://portal.markentrix.de/static/js/erstgespraech.js'; s.defer = true;
+    function check() {
+      $$('[data-mk-erstgespraech]').forEach(function (host) {
+        if (host.childNodes.length || host.shadowRoot) return;
+        var intro = $('[data-book-intro]'); if (intro) intro.hidden = true;
+        var alt = host.getAttribute('data-alternative'); if (alt) { host.textContent = alt; host.className = 'note'; }
+      });
+    }
+    on(s, 'error', check); on(s, 'load', function () { setTimeout(check, 3000); });
+    d.head.appendChild(s);
+  }
   function initBooking() {
-    var host = $('[data-mk-erstgespraech]'); if (!host) return;
     // Erfolgreiche Buchung: Ereignis des Portal-Bausteins (enthält nur den Termin als Text, wird nicht weitergegeben). Zählt nur nach Einwilligung (track).
     d.addEventListener('mk-erstgespraech-gebucht', function () { track('generate_lead', { location: 'Terminbuchung', lead_type: 'terminbuchung' }); });
-    function check() {
-      if (host.childNodes.length || host.shadowRoot) return;
-      var intro = $('[data-book-intro]'); if (intro) intro.hidden = true;
-      var alt = host.getAttribute('data-alternative'); if (alt) { host.textContent = alt; host.className = 'note'; }
-    }
-    if (d.readyState === 'complete') setTimeout(check, 3500); else w.addEventListener('load', function () { setTimeout(check, 3500); });
+    var onPage = $$('[data-mk-erstgespraech]').filter(function (h) { return !h.closest('#mx-modal'); });
+    if (onPage.length) loadBooking();
   }
 
   /* ── Google-Bewertungen: aktuelle Daten vom eigenen Server (/api/bewertungen.php), nur textContent ── */
@@ -737,6 +690,6 @@
       .catch(function () { });
   }
 
-  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initWizard(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

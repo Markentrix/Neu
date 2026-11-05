@@ -26,17 +26,16 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 
 | Ereignis | Bedeutung | Parameter |
 |---|---|---|
-| `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `erstberatung` (Anfrage-Dialog), `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert), `terminbuchung` (Termin im Portal-Kalender gebucht, Ereignis `mk-erstgespraech-gebucht` des Portal-Bausteins, ohne Termindaten); `location`, `channel` |
+| `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert), `terminbuchung` (Termin im Portal-Kalender gebucht, Ereignis `mk-erstgespraech-gebucht` des Portal-Bausteins, ohne Termindaten); `location`, `channel` |
 | `form_submit` | Absendeversuch, vor der Serverantwort. Kann höher sein als `generate_lead` (Fehler, Zeitüberschreitung). Nicht als Schlüsselereignis markieren. | `lead_type`, `location` |
 | `website_check_start` | Adresse abgeschickt, Prüfung läuft. | – |
 | `website_check` | Prüfung abgeschlossen, Ergebnis angezeigt (noch kein Kontakt). | `score` (hoch, mittel, niedrig) |
 | `website_check_error` | Prüfung fehlgeschlagen (ungültige Adresse, Zeitüberschreitung, Server). | – |
 | `form_start` | Erste Eingabe in einem Formular (Anfrage-Dialog, Kontaktformular, Check-Kurzfassung), einmal je Seitenaufruf. | `location` (Formularquelle) |
-| `wizard_step` | Schritt 1 bis 4 im Anfrage-Dialog erreicht. | `schritt` |
-| `modal_open` | Anfrage-Dialog geöffnet. | – |
+| `modal_open` | Dialog „Erstgespräch buchen“ (Portal-Kalender) geöffnet. | – |
 | `phone_click`, `mail_click` | Klick auf Telefonnummer oder E-Mail-Adresse (getrennt von Formularen). | `location` (Seite) |
 
-Auswertung des Dialogs: Untersuchen → Trichterauswertung mit `modal_open` → `wizard_step` (schritt 2, 3, 4) → `generate_lead`.
+Auswertung der Terminbuchung: Untersuchen → Trichterauswertung `modal_open` → `generate_lead` mit `lead_type=terminbuchung`. Der Fragenassistent mit Preisangaben (`wizard_step`) wurde am 05.11.2026 durch den Portal-Kalender ersetzt.
 
 ## Eigene Besuche ausschließen
 
