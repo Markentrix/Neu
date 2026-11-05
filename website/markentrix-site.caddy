@@ -1,4 +1,7 @@
-# Konfiguration der Markentrix-Website (statisches dist/). Stand 19.10.2026.
+# Konfiguration der Markentrix-Website (statisches dist/). Stand 30.10.2026.
+# Neu am 05.11.2026: Content-Security-Policy erlaubt portal.markentrix.de nur in script-src und connect-src (Buchungs-Baustein auf /kontakt).
+# Neu am 04.11.2026: dritter Endpunkt /api/bewertungen.php (aktuelle Google-Bewertungen, nur mit MX_GOOGLE_* im php-Container aktiv).
+# Neu am 30.10.2026: Weiterleitung /pfad/ -> /pfad (vorher 404). Nach dem Einspielen Caddy neu laden.
 # Neu am 19.10.2026: zweiter Endpunkt /api/check.php (Website-Check) neben /api/anfrage.php.
 # Ziel: /opt/neu/server/caddy/snippets/markentrix-site.caddy (ersetzt die Fassung vom 07.10.2026).
 # Verwendung in /srv/caddy-sites/markentrix.de.caddy bleibt unverändert:  root * /srv/sites/markentrix  +  import markentrix_site
@@ -15,7 +18,7 @@
                 Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), interest-cohort=()"
                 Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
                 Cross-Origin-Opener-Policy "same-origin"
-                Content-Security-Policy "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://*.googletagmanager.com https://tracker.metricool.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://tracker.metricool.com; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://tracker.metricool.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+                Content-Security-Policy "default-src 'self'; script-src 'self' https://portal.markentrix.de https://www.googletagmanager.com https://*.googletagmanager.com https://tracker.metricool.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://tracker.metricool.com; font-src 'self'; connect-src 'self' https://portal.markentrix.de https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://tracker.metricool.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
                 -Server
         }
 
@@ -58,21 +61,28 @@
         }
         redir @dothtml /{re.dothtml.1} 301
 
+        # Abschließender Schrägstrich: /preise/ -> /preise (301). Beispielseiten unter /beispiel/ bleiben mit Schrägstrich erreichbar.
+        @slash {
+                path_regexp slash ^/(.+)/$
+                not path /beispiel/*
+        }
+        redir @slash /{re.slash.1} 301
+
         # Caching
         @longcache path /assets/* /fonts/* /beispiel/*/*.css /beispiel/*/*.js
         header @longcache Cache-Control "public, max-age=31536000, immutable"
         @imgcache path /img/*
         header @imgcache Cache-Control "public, max-age=2592000"
 
-        # PHP-Endpunkte: nur diese beiden Dateien (Formular und Website-Check), alles andere mit .php -> 404
+        # PHP-Endpunkte: nur diese drei Dateien (Formular, Website-Check, Google-Bewertungen), alles andere mit .php -> 404
         @otherphp {
                 path *.php
-                not path /api/anfrage.php /api/check.php
+                not path /api/anfrage.php /api/check.php /api/bewertungen.php
         }
         handle @otherphp {
                 error 404
         }
-        @phpapi path /api/anfrage.php /api/check.php
+        @phpapi path /api/anfrage.php /api/check.php /api/bewertungen.php
         php_fastcgi @phpapi php:9000
 
         # /preise -> preise.html, /leistungen/webdesign -> leistungen/webdesign.html, /beispiel/x/ -> index.html
