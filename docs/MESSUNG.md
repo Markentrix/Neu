@@ -37,13 +37,6 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 
 Auswertung der Terminbuchung: Untersuchen → Trichterauswertung `modal_open` → `generate_lead` mit `lead_type=terminbuchung`. Der Fragenassistent mit Preisangaben (`wizard_step`) wurde am 05.11.2026 durch den Portal-Kalender ersetzt.
 
-## Google Ads (Stand 08.11.2026)
-
-- Google-Tag `AW-18514574463` wird nur nach Einwilligung in die eigene Kategorie „Werbung“ im Banner geladen (Consent Mode: `ad_storage` und `ad_user_data` nur dann `granted`, `ad_personalization` immer `denied`, Remarketing aus). Analytics und Werbung sind getrennt wählbar.
-- Conversion-Ereignis `ads_conversion_Kontakt_1` wird zusammen mit `generate_lead` ausgelöst: nach erfolgreichem Kontaktformular, Website-Check-Kurzfassung und Terminbuchung (Ereignis `mk-erstgespraech-gebucht`). Ohne Werbe-Einwilligung wird es nicht gesendet.
-- In Google Ads prüfen: Ziele → Conversions → Status „Aktiv“ (nach der ersten Messung kann es bis zu 24 Stunden dauern). Das Conversion-Ziel „Kontakt_1“ dort als primäres Ziel nutzen und in GA4 nicht zusätzlich importieren, sonst zählt jede Anfrage doppelt.
-- Weil nur Besucher mit Einwilligung gemessen werden, liegt die in Google Ads sichtbare Zahl unter der tatsächlichen Zahl der Anfragen. Die Wahrheit steht in `anfragen.log` und im Wochenbericht.
-
 ## Eigene Besuche ausschließen
 
 Die Website markiert Besuche, die vom eigenen Browser kommen, mit `traffic_type=internal`:
