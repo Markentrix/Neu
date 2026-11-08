@@ -15,6 +15,10 @@
   function $$(sel, root) { return [].slice.call((root || d).querySelectorAll(sel)); }
   function on(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
   function fmtEUR(n) { return Math.round(n).toLocaleString('de-DE') + ' €'; }
+  /* Google-Ads-Conversion (Ereignis aus dem Google-Tag, Kontakt_1): nur mit Einwilligung in die Kategorie „Werbung“ */
+  function trackAdsConversion() {
+    try { var c = w.mxConsent && w.mxConsent.get(); if (c && c.ads && typeof w.gtag === 'function') w.gtag('event', 'ads_conversion_Kontakt_1', {}); } catch (e) { }
+  }
   function track(name, params) { try { if (typeof w.gtag === 'function') w.gtag('event', name, params || {}); } catch (e) { } }
   /* Telefon- und E-Mail-Klicks als eigene Ereignisse (getrennt von Formularanfragen) */
   d.addEventListener('click', function (e) {
@@ -136,7 +140,7 @@
         track('form_submit', { location: payload.quelle, lead_type: leadType });
         postLead(payload).then(function (res) {
           busy = false; if (btn) { btn.classList.remove('is-loading'); btn.innerHTML = orig; }
-          if (res.ok) { form.reset(); if (cal) cal.reset(); if (form.__wizard) form.__wizard.reset(); showOk(); track('generate_lead', { location: payload.quelle, lead_type: leadType, channel: payload.kanal || payload.utm_source || payload.utm_referrer || 'direkt' }); if (form.hasAttribute('data-no-redirect')) { d.dispatchEvent(new CustomEvent('mx:lead', { detail: { quelle: payload.quelle, email: payload.email } })); } else setTimeout(function () { location.href = '/danke?form=' + encodeURIComponent(form.getAttribute('name') || 'anfrage'); }, 700); }
+          if (res.ok) { form.reset(); if (cal) cal.reset(); if (form.__wizard) form.__wizard.reset(); showOk(); trackAdsConversion(); track('generate_lead', { location: payload.quelle, lead_type: leadType, channel: payload.kanal || payload.utm_source || payload.utm_referrer || 'direkt' }); if (form.hasAttribute('data-no-redirect')) { d.dispatchEvent(new CustomEvent('mx:lead', { detail: { quelle: payload.quelle, email: payload.email } })); } else setTimeout(function () { location.href = '/danke?form=' + encodeURIComponent(form.getAttribute('name') || 'anfrage'); }, 700); }
           else if (msg) { msg.className = 'form-msg is-error'; msg.textContent = res.timeout ? 'Die Verbindung hat zu lange gedauert. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.' : 'Ihre Anfrage konnte nicht übermittelt werden. Bitte versuchen Sie es erneut oder schreiben Sie an info@markentrix.de.'; }
         });
         function showOk() {
@@ -662,7 +666,7 @@
   }
   function initBooking() {
     // Erfolgreiche Buchung: Ereignis des Portal-Bausteins (enthält nur den Termin als Text, wird nicht weitergegeben). Zählt nur nach Einwilligung (track).
-    d.addEventListener('mk-erstgespraech-gebucht', function () { track('generate_lead', { location: 'Terminbuchung', lead_type: 'terminbuchung' }); });
+    d.addEventListener('mk-erstgespraech-gebucht', function () { trackAdsConversion(); track('generate_lead', { location: 'Terminbuchung', lead_type: 'terminbuchung' }); });
     var onPage = $$('[data-mk-erstgespraech]').filter(function (h) { return !h.closest('#mx-modal'); });
     if (onPage.length) loadBooking();
   }
