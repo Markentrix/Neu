@@ -1449,3 +1449,13 @@ html.reduced .slot.is-free{animation:none}
 @media (prefers-reduced-motion:no-preference){.person-photo::before{animation:mx-tilt 9s ease-in-out infinite alternate}@keyframes mx-tilt{from{transform:rotate(-3deg)}to{transform:rotate(-1deg) scale(1.01)}}}
 @media (max-width:860px){.person-grid,.value-grid,.trust-grid--2{grid-template-columns:minmax(0,1fr)}.person-photo{max-width:260px}}
 @media (max-width:420px){.hero-person-img{width:52px;height:52px}}
+
+/* ── Unterseiten: persönlicher Streifen und getönte Seitenköpfe ── */
+.person-strip{padding:clamp(8px,2vw,24px) 0 clamp(20px,3vw,40px)}
+.person-strip-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:center;padding:clamp(20px,3vw,32px);border-radius:22px;border:1px solid #DCD0F7;background:linear-gradient(120deg,#F1EBFF 0%,#E6F6FE 100%)}
+.person-strip-img{width:104px;height:104px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 4px #fff,0 0 0 7px rgba(139,92,246,.45)}
+.person-strip-quote{margin:0;font:500 clamp(1.1rem,.95rem + .7vw,1.4rem)/1.5 var(--f-head);color:var(--navy)}
+.person-strip-sign{margin:10px 0 0;color:var(--muted);font-size:.95rem}
+.person-strip-sign b{color:var(--navy)}
+section[aria-labelledby="page-title"]{background-image:radial-gradient(55% 90% at 96% 0%,rgba(139,92,246,.10),transparent 62%),radial-gradient(45% 80% at 0% 100%,rgba(40,199,247,.12),transparent 62%)}
+@media (max-width:700px){.person-strip-card{grid-template-columns:minmax(0,1fr);justify-items:start}.person-strip-img{width:84px;height:84px}}
