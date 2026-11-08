@@ -31,11 +31,11 @@
 <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/mx.css?v=202611081838">
+<link rel="stylesheet" href="/assets/mx.css?v=202611081906">
 
 
-<script src="/assets/consent.js?v=202611081838" defer></script>
-<script src="/assets/site.js?v=202611081838" defer></script>
+<script src="/assets/consent.js?v=202611081906" defer></script>
+<script src="/assets/site.js?v=202611081906" defer></script>
 </head>
 <body class="">
 <!-- Markentrix Icon-Set · Linienlogik der Wortmarke: 24er-Raster, Strich 2, runde Enden, genau ein gefüllter Datenpunkt je Icon.
@@ -155,13 +155,25 @@
     <div class="sec-head center">
       <span class="eyebrow">Anfrage eingegangen</span>
       <h1 id="page-title" class="h1--md">Vielen Dank für Ihre Anfrage.</h1>
-      <p class="lead">Wir haben Ihre Nachricht erhalten und melden uns werktags innerhalb von 24 Stunden persönlich bei Ihnen.</p>
+      <p class="lead" data-danke-lead data-lead-rueckruf="Wir rufen Sie werktags zur gewünschten Zeit zurück, kostenlos und ohne Verkaufsdruck." data-lead-bewerbung="Wir haben Ihre Bewerbung erhalten und melden uns zeitnah persönlich bei Ihnen." data-lead-checkliste-pdf="Die E-Mail mit Ihrer Checkliste ist unterwegs und kommt in wenigen Minuten an. Schauen Sie bei Bedarf im Spam-Ordner nach.">Wir haben Ihre Nachricht erhalten und melden uns werktags innerhalb von 24 Stunden persönlich bei Ihnen.</p>
     </div>
-    <div class="note"><svg><use href="#i-check"/></svg><div><b>Bestätigung per E-Mail.</b><br>Sie erhalten in der Regel zusätzlich eine kurze Bestätigung an die angegebene Adresse. Wenn sie nicht ankommt, schauen Sie bitte im Spam-Ordner nach.</div></div>
+    <div class="note" data-danke-remove="rueckruf checkliste-pdf bewerbung"><svg><use href="#i-check"/></svg><div><b>Bestätigung per E-Mail.</b><br>Sie erhalten in der Regel zusätzlich eine kurze Bestätigung an die angegebene Adresse. Wenn sie nicht ankommt, schauen Sie bitte im Spam-Ordner nach.</div></div>
   </div>
 </section>
 
-<section class="sec" aria-labelledby="weiter-title">
+<section class="sec sec--tight" aria-labelledby="book-title" data-danke-remove="bewerbung checkliste-pdf">
+  <div class="wrap wrap--narrow">
+    <div class="card card--lg book-card reveal">
+      <span class="eyebrow">Gleich festmachen</span>
+      <h2 id="book-title" class="h3">Möchten Sie sich direkt einen Termin aussuchen?</h2>
+      <p class="muted small">Dann steht Ihr Erstgespräch schon, ohne auf unseren Rückruf zu warten.</p>
+      <div data-mk-erstgespraech data-datenschutz="/datenschutz#s7" data-alternative="Gerade ist online kein Termin buchbar. Rufen Sie uns an: 0176 20370429, oder schreiben Sie uns über das Kontaktformular."></div>
+    </div>
+  </div>
+</section>
+
+
+<section class="sec" aria-labelledby="weiter-title" data-danke-remove="checkliste-pdf">
   <div class="wrap wrap--narrow">
     <div class="sec-head center">
       <h2 id="weiter-title">So geht es weiter.</h2>

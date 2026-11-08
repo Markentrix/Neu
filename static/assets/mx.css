@@ -1504,3 +1504,22 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
 @media (prefers-reduced-motion:reduce){.real-slide,.real-phone{transition:none}.portal-toast{opacity:1;transform:none;animation:none}.timeline li::after{transform:none!important;transition:none}}
 @media (max-width:720px){.real-phone{right:-6px;width:27%;bottom:40px}.portal-toast{left:6px;bottom:44px}}
 .real-slide figcaption a{text-decoration:underline;text-underline-offset:2px}
+
+/* ── Rückruf, Checkliste als PDF, Termin nach Anfrage, Anzeigen-Seiten ── */
+.rueckruf-sec{padding:clamp(24px,4vw,56px) 0}
+.rueckruf{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,48px);align-items:start;background:linear-gradient(120deg,#F1EBFF 0%,#E6F6FE 100%);border-color:#DCD0F7}
+.rueckruf-copy h2{margin:6px 0 8px}
+.rueckruf .field select,.rueckruf .field input{background:#fff}
+.pdf-card{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,40px);align-items:start;border-color:#DCD0F7;background:linear-gradient(120deg,#FBF9FF 0%,#EFF9FE 100%)}
+.pdf-card h2{margin:6px 0 8px;font-size:clamp(1.3rem,1.1rem + .8vw,1.7rem)}
+.book-card{background:linear-gradient(120deg,#FBF9FF 0%,#EFF9FE 100%);border-color:#DCD0F7}
+.chk-book{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.lp-head{background:#fff;border-bottom:1px solid var(--border)}
+.lp-head-in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:14px;padding-bottom:14px}
+.lp-head .brand{display:inline-flex;align-items:center;gap:10px;font:700 1.15rem var(--f-head);color:var(--navy)}
+.lp-phone{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--navy);text-decoration:none;min-height:44px;padding:0 4px}
+.lp-phone svg{width:18px;height:18px;color:var(--blue-text)}
+.lp-foot{padding:28px 0;border-top:1px solid var(--border);background:var(--soft);font-size:.88rem;color:var(--muted)}
+.lp-foot p{margin:0}
+.lp-hero{padding-top:clamp(28px,4vw,56px)}
+@media (max-width:860px){.rueckruf,.pdf-card{grid-template-columns:minmax(0,1fr)}}

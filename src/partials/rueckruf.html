@@ -1,0 +1,24 @@
+<section class="rueckruf-sec" aria-labelledby="rr-title">
+  <div class="wrap">
+    <div class="rueckruf card card--lg reveal">
+      <div class="rueckruf-copy">
+        <span class="eyebrow">Rückruf</span>
+        <h2 id="rr-title">Lieber zurückgerufen werden?</h2>
+        <p class="muted">Name und Nummer genügen. Wir rufen Sie werktags zur gewünschten Zeit an, kostenlos und ohne Verkaufsdruck.</p>
+      </div>
+      <form class="form rueckruf-form" name="rueckruf" data-lead="Rückruf" novalidate>
+        <div class="form-row">
+          <div class="field"><label for="rr-name">Name</label><input id="rr-name" name="name" type="text" autocomplete="name" required></div>
+          <div class="field"><label for="rr-tel">Telefon</label><input id="rr-tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" required></div>
+        </div>
+        <div class="field"><label for="rr-zeit">Wann passt es Ihnen?</label>
+          <select id="rr-zeit" name="wunschzeit"><option>So bald wie möglich</option><option>Vormittags</option><option>Nachmittags</option></select>
+        </div>
+        <div class="hp" aria-hidden="true"><label for="rr-web">Website (bitte leer lassen)</label><input id="rr-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <label class="check"><input type="checkbox" name="einwilligung" required><span>Ich willige ein, dass Markentrix meine Angaben zur Bearbeitung des Rückrufs verarbeitet. Details in der <a href="/datenschutz#s5">Datenschutzerklärung</a>. Die Einwilligung ist jederzeit widerrufbar.</span></label>
+        <div class="form-msg" role="alert" aria-live="polite"></div>
+        <button type="submit" class="btn btn--primary btn--lg">Rückruf anfordern</button>
+      </form>
+    </div>
+  </div>
+</section>

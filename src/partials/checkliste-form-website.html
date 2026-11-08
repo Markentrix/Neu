@@ -1,0 +1,22 @@
+<section class="sec sec--white sec--tight" aria-labelledby="pdf-title">
+  <div class="wrap wrap--narrow">
+    <div class="pdf-card card card--lg reveal">
+      <div>
+        <span class="eyebrow">Zum Mitnehmen</span>
+        <h2 id="pdf-title">Die Website-Checkliste als PDF per E-Mail.</h2>
+        <p class="muted">Zum Ausdrucken oder Abhaken am Bildschirm, im Markentrix-Design. Sie bekommen genau eine E-Mail mit dem Download-Link. Keine Verteilerliste, keine Werbung.</p>
+      </div>
+      <form class="form" name="checkliste-pdf" data-lead="Checkliste-PDF" novalidate>
+        <input type="hidden" name="checkliste" value="website">
+        <div class="form-row">
+          <div class="field"><label for="pdf-name">Vorname</label><input id="pdf-name" name="name" type="text" autocomplete="given-name" required></div>
+          <div class="field"><label for="pdf-email">E-Mail</label><input id="pdf-email" name="email" type="email" autocomplete="email" required></div>
+        </div>
+        <div class="hp" aria-hidden="true"><label for="pdf-web">Website (bitte leer lassen)</label><input id="pdf-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <label class="check"><input type="checkbox" name="einwilligung" required><span>Ich möchte die Checkliste per E-Mail erhalten und willige in die Verarbeitung meiner Angaben zu diesem Zweck ein. Ich erhalte keine weiteren Werbe-E-Mails. Details in der <a href="/datenschutz#s5">Datenschutzerklärung</a>.</span></label>
+        <div class="form-msg" role="alert" aria-live="polite"></div>
+        <button type="submit" class="btn btn--primary btn--lg">Checkliste per E-Mail erhalten</button>
+      </form>
+    </div>
+  </div>
+</section>

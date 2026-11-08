@@ -26,7 +26,7 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 
 | Ereignis | Bedeutung | Parameter |
 |---|---|---|
-| `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert), `terminbuchung` (Termin im Portal-Kalender gebucht, Ereignis `mk-erstgespraech-gebucht` des Portal-Bausteins, ohne Termindaten); `location`, `channel` |
+| `generate_lead` | **Die einzige Lead-Zählung.** Nur nach erfolgreichem Versand eines Formulars. | `lead_type`: `kontaktformular`, `website_check_bericht` (Kurzfassung angefordert), `rueckruf` (Rückruf-Karte), `checkliste_pdf` (Checkliste per E-Mail angefordert), `terminbuchung` (Termin im Portal-Kalender gebucht, Ereignis `mk-erstgespraech-gebucht` des Portal-Bausteins, ohne Termindaten); `location`, `channel` |
 | `form_submit` | Absendeversuch, vor der Serverantwort. Kann höher sein als `generate_lead` (Fehler, Zeitüberschreitung). Nicht als Schlüsselereignis markieren. | `lead_type`, `location` |
 | `website_check_start` | Adresse abgeschickt, Prüfung läuft. | – |
 | `website_check` | Prüfung abgeschlossen, Ergebnis angezeigt (noch kein Kontakt). | `score` (hoch, mittel, niedrig) |
@@ -36,6 +36,23 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 | `phone_click`, `mail_click` | Klick auf Telefonnummer oder E-Mail-Adresse (getrennt von Formularen). | `location` (Seite) |
 
 Auswertung der Terminbuchung: Untersuchen → Trichterauswertung `modal_open` → `generate_lead` mit `lead_type=terminbuchung`. Der Fragenassistent mit Preisangaben (`wizard_step`) wurde am 05.11.2026 durch den Portal-Kalender ersetzt.
+
+## Anzeigen-Seiten (Stand 08.11.2026)
+
+Für bezahlte Anzeigen gibt es zwei schlanke Seiten ohne Menü, mit genau einem Ziel (nicht im Suchindex, nicht in der Sitemap):
+
+| Seite | Zweck | Ziel der Anzeige |
+|---|---|---|
+| `https://markentrix.de/lp/website-check` | Adresse prüfen, Kurzfassung, Termin | Lead-Magnet-Kampagne „Website-Check“ |
+| `https://markentrix.de/lp/webdesign-celle` | Angebot, echte Projekte, Termin, Rückruf | Suchanzeigen „Webdesign Celle“, „Website erstellen lassen Celle“ |
+
+Anzeigen-Links immer mit Herkunft versehen, zum Beispiel `?utm_source=google&utm_medium=cpc&utm_campaign=webdesign-celle`. Die Parameter landen in der Anfrage-Mail und (nach Einwilligung) in Analytics.
+
+## Rückruf und Checkliste
+
+- **Rückruf-Karte** (Startseite, Kontakt, Preise, Anzeigen-Seiten): Name und Telefonnummer genügen, keine E-Mail nötig. Die Mail an Sie zeigt „Jetzt anrufen“ als Hauptschaltfläche. Quelle `Rückruf`, `lead_type=rueckruf`.
+- **Checkliste per E-Mail** (Seiten Website-Checkliste und SEO-Checkliste): Die PDFs (`static/downloads/`) entstehen mit `python3 tools/make_checklists.py` aus den Listen auf den Seiten und müssen nach Änderungen an den Listen neu erzeugt werden. Der Besucher bekommt genau eine E-Mail mit dem Link, keine Verteilerliste, keine Werbung. Quelle `Checkliste-PDF`, `lead_type=checkliste_pdf`. Der Ordner `/downloads/` ist in der robots.txt gesperrt.
+- **Termin nach der Anfrage:** Die Danke-Seite (`/danke`) und die Bestätigung nach der Website-Check-Kurzfassung zeigen den Portal-Kalender. Bei Bewerbungen und Checklisten entfällt er.
 
 ## Eigene Besuche ausschließen
 

@@ -12,7 +12,7 @@ Quellen:
 
 Front-Matter-Schlüssel: title, description, path (URL-Pfad, z. B. /preise), robots,
 og_type, body_class, lastmod (YYYY-MM-DD), sitemap (true/false), ld (JSON-LD-Block),
-head_extra (zusätzliche Head-Zeilen), footer_cta (false blendet den Kontaktblock vor der Fußzeile aus; er entfällt ohnehin, wenn die Seite mit dem Abschlussband id="cta-title" endet).
+layout (lp = schlankes Layout ohne Menü für Anzeigen-Seiten), head_extra (zusätzliche Head-Zeilen), footer_cta (false blendet den Kontaktblock vor der Fußzeile aus; er entfällt ohnehin, wenn die Seite mit dem Abschlussband id="cta-title" endet).
 """
 import json, os, re, shutil, sys, time, html
 
@@ -178,6 +178,7 @@ def version_beispiele():
 
 def build(check=False):
     layout = open(os.path.join(SRC, 'layout.html'), encoding='utf-8').read()
+    layout_lp = open(os.path.join(SRC, 'layout-lp.html'), encoding='utf-8').read()  # schlankes Layout für Anzeigen-Seiten (layout: lp)
     partials = load_partials()
     if os.path.isdir(DIST):
         shutil.rmtree(DIST)
@@ -198,7 +199,7 @@ def build(check=False):
     for meta, body, rel in parsed:
         out_path = os.path.join(DIST, rel)
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
-        html_out = render(layout, meta, body, partials, overview)
+        html_out = render(layout_lp if meta.get('layout') == 'lp' else layout, meta, body, partials, overview)
         open(out_path, 'w', encoding='utf-8').write(html_out)
         pages.append((meta, rel, html_out))
     # Sitemap

@@ -132,7 +132,7 @@
           .map(function (k) { return k + ': ' + payload[k]; }).join('\n');
         busy = true; var orig = btn ? btn.innerHTML : '';
         if (btn) { btn.classList.add('is-loading'); btn.innerHTML = 'Wird gesendet …'; }
-        var leadType = payload.quelle === 'Website-Check' ? 'website_check_bericht' : payload.quelle === 'Potenzial-Check' ? 'erstberatung' : 'kontaktformular';
+        var leadType = payload.quelle === 'Website-Check' ? 'website_check_bericht' : payload.quelle === 'Rückruf' ? 'rueckruf' : payload.quelle === 'Checkliste-PDF' ? 'checkliste_pdf' : payload.quelle === 'Potenzial-Check' ? 'erstberatung' : 'kontaktformular';
         track('form_submit', { location: payload.quelle, lead_type: leadType });
         postLead(payload).then(function (res) {
           busy = false; if (btn) { btn.classList.remove('is-loading'); btn.innerHTML = orig; }
@@ -678,6 +678,14 @@
     on(s, 'error', check); on(s, 'load', function () { setTimeout(check, 3000); });
     d.head.appendChild(s);
   }
+  /* Danke-Seite: je nach Formular andere Texte, nicht passende Bereiche entfallen (z. B. Terminangebot bei Bewerbung) */
+  function initDanke() {
+    if (!/\/danke(\.html)?$/.test(w.location.pathname)) return;
+    var f = ''; try { f = new URLSearchParams(w.location.search).get('form') || ''; } catch (e) { }
+    $$('[data-danke-remove]').forEach(function (el) { if (el.getAttribute('data-danke-remove').split(' ').indexOf(f) >= 0) el.parentNode.removeChild(el); });
+    var lead = $('[data-danke-lead]'); if (lead && f) { var t = lead.getAttribute('data-lead-' + f); if (t) lead.textContent = t; }
+  }
+
   function initBooking() {
     // Erfolgreiche Buchung: Ereignis des Portal-Bausteins (enthält nur den Termin als Text, wird nicht weitergegeben). Zählt nur nach Einwilligung (track).
     d.addEventListener('mk-erstgespraech-gebucht', function () { track('generate_lead', { location: 'Terminbuchung', lead_type: 'terminbuchung' }); });
@@ -708,6 +716,6 @@
       .catch(function () { });
   }
 
-  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); initReal(); }
+  function init() { initDanke(); initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); initReal(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

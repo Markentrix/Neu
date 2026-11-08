@@ -7,6 +7,9 @@ Disallow: /kunden-dashboard
 # Technische Endpunkte (Formular, Website-Check)
 Disallow: /api/
 
+# PDF-Downloads (Zustellung per E-Mail), nicht für die Suche gedacht
+Disallow: /downloads/
+
 # Impressum, AGB und Datenschutz sind bewusst indexierbar (Vertrauenssignal)
 # und stehen in der Sitemap. Die KI-Checkliste ist per meta robots auf noindex.
 

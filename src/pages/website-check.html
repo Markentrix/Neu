@@ -15,41 +15,7 @@ ld: |
       <h1 id="page-title" class="h1--md">Wie sichtbar ist Ihre Website?</h1>
       <p class="lead">Sie wollen wissen, wie Ihre Website dasteht? Geben Sie die Adresse ein. In wenigen Sekunden sehen Sie, wie es bei Google, auf dem Smartphone und beim Vertrauen steht, ehrlich und ohne Fachchinesisch.</p>
     </div>
-    <form class="chk-form" data-check novalidate>
-      <label for="chk-url">Adresse Ihrer Website</label>
-      <div class="chk-row">
-        <input id="chk-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="www.ihre-seite.de" required>
-        <button type="submit" class="btn btn--primary btn--lg">Jetzt prüfen</button>
-      </div>
-      <p class="tiny">Wir rufen die Seite einmal ab. Die geprüfte Adresse und das Ergebnis erhalten wir per E-Mail zur internen Auswertung, ohne Ihren Namen und ohne Ihre IP-Adresse. Außerdem liegt das Ergebnis höchstens zwei Stunden im temporären Speicher, damit wir Ihnen die Kurzfassung zusenden können. <a href="/datenschutz#website-check">Datenschutz</a></p>
-      <div class="chk-msg" role="alert" aria-live="polite"></div>
-    </form>
-    <div class="chk-result" data-check-result aria-live="polite" tabindex="-1" hidden></div>
-    <section class="chk-gate card card--lg" data-check-gate aria-labelledby="gate-title" hidden>
-      <span class="eyebrow">Kurzfassung</span>
-      <h2 id="gate-title">Die Kurzfassung per E-Mail.</h2>
-      <p class="muted">Sie sehen oben die Bewertung. Die Kurzfassung zeigt je Bereich, wie viele Punkte offen sind, davon wie viele mit hohem Gewicht, und was bei Ihnen schon gut läuft. Die einzelnen Befunde besprechen wir im kostenlosen Erstgespräch. Wir senden die Kurzfassung an Ihre E-Mail-Adresse und zeigen sie Ihnen danach hier an.</p>
-      <form class="form chk-gate-form" name="website-check-bericht" data-lead="Website-Check" data-no-redirect data-success="#chk-danke" novalidate>
-        <div class="form-row">
-          <div class="field"><label for="g-name">Name</label><input id="g-name" name="name" type="text" autocomplete="name" required></div>
-          <div class="field"><label for="g-email">E-Mail</label><input id="g-email" name="email" type="email" autocomplete="email" required></div>
-        </div>
-        <div class="field"><label for="g-tel">Telefon <span class="muted">(optional, für einen kurzen Rückruf)</span></label><input id="g-tel" name="tel" type="tel" autocomplete="tel"></div>
-        <div class="hp" aria-hidden="true"><label for="g-web">Website (bitte leer lassen)</label><input id="g-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-        <label class="check"><input type="checkbox" name="einwilligung" required><span>Ich möchte die Kurzfassung per E-Mail erhalten und willige in die Verarbeitung meiner Angaben gemäß <a href="/datenschutz#website-check">Datenschutzerklärung</a> ein. Die Einwilligung ist jederzeit widerrufbar. *</span></label>
-        <div class="chk-offer" data-check-offer hidden>
-          <p><b>Ihr Wert liegt unter 100 von 100.</b> Wenn Sie möchten, melden wir uns bei Ihnen und sprechen in Ruhe darüber, was dahintersteckt und was sich lohnt. Das ist freiwillig und für die Kurzfassung nicht nötig.</p>
-          <label class="check"><input type="checkbox" name="kontakt_gewuenscht"><span>Ja, bitte melden Sie sich zum Ergebnis bei mir (E-Mail oder, falls angegeben, Telefon). Die Einwilligung ist jederzeit widerrufbar.</span></label>
-        </div>
-        <p class="form-note">Wir senden Ihnen die Kurzfassung einmalig. Weitere Werbe-E-Mails erhalten Sie nur mit Ihrer ausdrücklichen Einwilligung. Angebot nur für Gewerbetreibende.</p>
-        <div class="form-msg" role="alert" aria-live="polite"></div>
-        <button type="submit" class="btn btn--primary btn--lg">Kurzfassung per E-Mail erhalten</button>
-      </form>
-      <div id="chk-danke" hidden>
-        <div class="note"><svg><use href="#i-check"/></svg><div><b>Die Kurzfassung ist unterwegs.</b><br>Sie erhalten sie in wenigen Minuten per E-Mail, bitte schauen Sie bei Bedarf im Spam-Ordner nach. Die Übersicht sehen Sie unten.</div></div>
-      </div>
-    </section>
-    <div class="chk-findings" data-check-findings aria-live="polite" hidden></div>
+{{> check-widget}}
   </div>
 </section>
 

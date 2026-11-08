@@ -76,7 +76,16 @@ foreach ($data as $key => $value) {
 
 $name  = $clean['name']  ?? '';
 $email = $clean['email'] ?? '';
-if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+$isCallback = (($clean['quelle'] ?? '') === 'Rückruf');
+if ($isCallback) {
+  // Rückrufwunsch: Name und Telefonnummer genügen, eine E-Mail-Adresse ist optional
+  $digits = preg_replace('/\D/', '', (string) ($clean['tel'] ?? ''));
+  if ($name === '' || strlen($digits) < 6 || strlen($digits) > 16) {
+    respond(422, ['ok' => false, 'error' => 'fields']);
+  }
+  if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $email = '';
+  $clean['email'] = $email;
+} elseif ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
   respond(422, ['ok' => false, 'error' => 'fields']);
 }
 if (($clean['einwilligung'] ?? '') !== 'ja') {
@@ -101,7 +110,7 @@ $hits[] = $now;
 
 // E-Mail zusammensetzen
 $quelle  = $clean['quelle'] ?? 'Website';
-$order   = ['quelle', 'name', 'firma', 'email', 'tel', 'thema', 'budget', 'aktion', 'bedarf', 'status', 'zeitplan', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'termin_iso', 'nachricht_text', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_referrer', 'website_check', 'kontakt_gewuenscht', 'rolle', 'region', 'link', 'seite', 'zeit'];
+$order   = ['quelle', 'name', 'firma', 'email', 'tel', 'thema', 'budget', 'aktion', 'bedarf', 'status', 'zeitplan', 'branche', 'kanal', 'anfragen', 'empfehlung', 'wunschtermin', 'wunschzeit', 'checkliste', 'termin_iso', 'nachricht_text', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_referrer', 'website_check', 'kontakt_gewuenscht', 'rolle', 'region', 'link', 'seite', 'zeit'];
 $lines   = [];
 foreach ($order as $k) {
   if (isset($clean[$k]) && $clean[$k] !== '') $lines[] = str_pad($k, 14) . ': ' . $clean[$k];
@@ -137,7 +146,7 @@ require_once __DIR__ . '/mx-template.php';
 [$ownerBody, $ownerType] = mx_multipart($body, owner_mail_html($clean, $report, $quelle, 'ja (' . gmdate('c') . ' UTC, IP-Hash ' . substr(hash('sha256', $ip), 0, 12) . ')'));
 $headers  = [
   'From: ' . $fromName . ' <' . $CONFIG['from'] . '>',
-  'Reply-To: ' . $email,
+  ...($email !== '' ? ['Reply-To: ' . $email] : []),
   'MIME-Version: 1.0',
   $ownerType,
   'X-Mailer: markentrix-website',
@@ -151,7 +160,7 @@ function mx_labels(): array {
   return [
   'thema' => 'Gewünschte Leistung', 'budget' => 'Budget', 'bedarf' => 'Bedarf', 'status' => 'Ausgangslage', 'zeitplan' => 'Zeitplan',
   'branche' => 'Branche', 'aktion' => 'Aktion', 'anfragen' => 'Anfragen pro Monat', 'empfehlung' => 'Einschätzung', 'rolle' => 'Rolle', 'region' => 'Region',
-  'link' => 'Link', 'kontakt_gewuenscht' => 'Kontakt gewünscht',
+  'link' => 'Link', 'kontakt_gewuenscht' => 'Kontakt gewünscht', 'wunschzeit' => 'Rückruf gewünscht', 'checkliste' => 'Checkliste',
   ];
 }
 
@@ -160,7 +169,8 @@ function owner_mail_html(array $c, ?array $report, string $quelle, string $conse
   $name = (string) ($c['name'] ?? ''); $email = (string) ($c['email'] ?? ''); $tel = (string) ($c['tel'] ?? '');
   $when = (new DateTime('now', new DateTimeZone('Europe/Berlin')))->format('d.m.Y, H:i') . ' Uhr';
   $isJob = $quelle === 'Bewerbung';
-  $tag = $isJob ? 'Neue Bewerbung' : ($report ? 'Website-Check' : 'Neue Anfrage');
+  $isCb = $quelle === 'Rückruf';
+  $tag = $isJob ? 'Neue Bewerbung' : ($isCb ? 'Rückruf' : ($quelle === 'Checkliste-PDF' ? 'Checkliste' : ($report ? 'Website-Check' : 'Neue Anfrage')));
   $link = fn(string $href, string $label): string => '<a href="' . mx_h($href) . '" style="color:#0B63C6;text-decoration:underline">' . mx_h($label) . '</a>';
   $in = mx_title($quelle . ' · ' . $when, $name, mx_chip($quelle) . ($report ? ' ' . mx_chip($report['host'] . ': ' . $report['score'] . ' von 100', '#F3EFFD', '#4B2BA6') : ''));
   // Kontakt und Schnellaktionen
@@ -169,8 +179,10 @@ function owner_mail_html(array $c, ?array $report, string $quelle, string $conse
     ['E-Mail', $email !== '' ? $link('mailto:' . $email, $email) : ''],
     ['Telefon', $tel !== '' ? $link('tel:' . $tel_clean, $tel) : ''],
     ['Unternehmen', mx_h((string) ($c['firma'] ?? ''))],
-  ]) . '<div style="padding-top:12px">' . mx_btn('mailto:' . $email . '?subject=' . rawurlencode('Ihre Anfrage bei Markentrix'), 'Antworten')
-    . ($tel_clean !== '' ? mx_btn('tel:' . $tel_clean, 'Anrufen', false) : '') . '</div>');
+  ]) . '<div style="padding-top:12px">'
+    . ($isCb && $tel_clean !== '' ? mx_btn('tel:' . $tel_clean, 'Jetzt anrufen: ' . $tel) : '')
+    . ($email !== '' ? mx_btn('mailto:' . $email . '?subject=' . rawurlencode('Ihre Anfrage bei Markentrix'), 'Antworten', !$isCb) : '')
+    . (!$isCb && $tel_clean !== '' ? mx_btn('tel:' . $tel_clean, 'Anrufen', false) : '') . '</div>');
   // Anliegen
   $rows = [];
   foreach (mx_labels() as $k => $label) {
@@ -181,7 +193,7 @@ function owner_mail_html(array $c, ?array $report, string $quelle, string $conse
   if (!empty($c['wunschtermin'])) $rows[] = ['Wunschtermin', '<b>' . mx_h((string) $c['wunschtermin']) . '</b>'];
   $body = mx_rows($rows);
   if (!empty($c['nachricht_text'])) $body .= '<div style="padding-top:12px">' . mx_quote((string) $c['nachricht_text']) . '</div>';
-  if ($body !== '') $in .= mx_section($isJob ? 'Bewerbung' : 'Anliegen', $body);
+  if ($body !== '') $in .= mx_section($isJob ? 'Bewerbung' : ($isCb ? 'Rückruf' : 'Anliegen'), $body);
   // Website-Check
   if ($report) {
     $col = fn(int $sc): string => $sc >= 80 ? '#15803D' : ($sc >= 55 ? '#D97706' : '#B91C1C');
@@ -206,7 +218,7 @@ function owner_mail_html(array $c, ?array $report, string $quelle, string $conse
   ]);
   if ($src !== '') $in .= mx_section('Herkunft', $src);
   $in .= '<tr><td style="padding:10px 26px 22px"></td></tr>';
-  $foot = 'Einwilligung: ' . mx_h($consent) . '<br>Automatisch erzeugt von markentrix.de. Antworten geht direkt an ' . mx_h($email) . '.';
+  $foot = 'Einwilligung: ' . mx_h($consent) . '<br>Automatisch erzeugt von markentrix.de.' . ($email !== '' ? ' Antworten geht direkt an ' . mx_h($email) . '.' : ' Keine E-Mail-Adresse angegeben, bitte telefonisch zurückrufen.');
   return mx_shell($tag, $in, $foot, $name . ': ' . ($c['thema'] ?? $quelle));
 }
 
@@ -240,6 +252,26 @@ function confirm_mail(array $c, string $name, string $quelle, string $text): arr
         . ($isJob ? 'für das Bewerbungsverfahren und löschen sie spätestens sechs Monate nach Abschluss. ' : 'zur Bearbeitung Ihrer Anfrage. ')
         . '<a href="https://markentrix.de/datenschutz" style="color:#0B63C6">Hinweise zum Datenschutz</a><br><br>Markentrix · Christian Wien · Celle<br><a href="https://markentrix.de" style="color:#0B63C6">markentrix.de</a> · <a href="mailto:info@markentrix.de" style="color:#0B63C6">info@markentrix.de</a> · <a href="https://markentrix.de/impressum" style="color:#0B63C6">Impressum</a>';
   return [$text, mx_shell($isJob ? 'Bewerbung' : 'Bestätigung', $in, $foot, $isJob ? 'Ihre Bewerbung bei Markentrix ist eingegangen.' : 'Ihre Anfrage bei Markentrix ist eingegangen.')];
+}
+
+/** Checkliste als PDF per E-Mail (einmalige Zustellung, keine Werbung, keine Liste). */
+function checklist_mail(array $c, string $name): array {
+  $seo = (($c['checkliste'] ?? '') === 'seo');
+  $title = $seo ? 'SEO-Checkliste' : 'Website-Checkliste';
+  $points = $seo ? '15 Punkte' : '12 Punkte';
+  $url = 'https://markentrix.de/downloads/Markentrix-' . ($seo ? 'SEO' : 'Website') . '-Checkliste.pdf';
+  $first = preg_replace('/[\x00-\x1F\x7F]/', '', mb_substr($name, 0, 80));
+  $text = 'Guten Tag ' . $first . ",\n\nwie gewünscht: hier ist Ihre " . $title . ' (' . $points . ") als PDF.\n\n" . $url . "\n\n"
+    . "Sie können die Liste ausdrucken oder am Bildschirm abhaken. Fragen dazu? Antworten Sie einfach auf diese E-Mail.\n\n"
+    . "Diese Nachricht ist einmalig. Wir tragen Ihre Adresse in keine Verteilerliste ein und senden Ihnen keine Werbung. Hinweise zum Datenschutz: https://markentrix.de/datenschutz\n\n"
+    . "Markentrix · Christian Wien · Celle\nhttps://markentrix.de · info@markentrix.de\nImpressum: https://markentrix.de/impressum\n";
+  $in = mx_title('Ihre Checkliste', 'Hier ist Ihre ' . $title . '.', 'Wie gewünscht: ' . $points . ' zum Abhaken, als PDF zum Ausdrucken oder am Bildschirm.');
+  $in .= '<tr><td style="padding:18px 26px 6px">' . mx_btn($url, 'PDF herunterladen') . '</td></tr>';
+  $in .= '<tr><td style="padding:6px 26px 24px;font-size:14px;line-height:1.6;color:#47506A">Fragen dazu? Antworten Sie einfach auf diese E-Mail, wir antworten persönlich.</td></tr>';
+  $foot = 'Diese Nachricht ist einmalig. Wir tragen Ihre Adresse in keine Verteilerliste ein und senden Ihnen keine Werbung. '
+        . '<a href="https://markentrix.de/datenschutz" style="color:#0B63C6">Hinweise zum Datenschutz</a><br><br>Markentrix · Christian Wien · Celle<br>'
+        . '<a href="https://markentrix.de" style="color:#0B63C6">markentrix.de</a> · <a href="mailto:info@markentrix.de" style="color:#0B63C6">info@markentrix.de</a> · <a href="https://markentrix.de/impressum" style="color:#0B63C6">Impressum</a>';
+  return [$text, mx_shell('Checkliste', $in, $foot, 'Ihre ' . $title . ' als PDF'), 'Ihre ' . $title . ' als PDF'];
 }
 
 /**
@@ -325,9 +357,23 @@ if ($sent && $report) {
   }
 }
 
-// Bestätigung an den Absender: kurze, sachliche Eingangsbestätigung ohne Werbung.
+// Checkliste als PDF: einmalige Zustellung an die angegebene Adresse (höchstens drei je Adresse und Tag)
 $confirmed = false;
-if ($sent && $CONFIG['confirm'] && !$report) {
+if ($sent && $quelle === 'Checkliste-PDF' && $email !== '') {
+  $lrate = sys_get_temp_dir() . '/mx-list-' . hash('sha256', strtolower($email)) . '.json';
+  $lhits = is_file($lrate) ? (json_decode((string) file_get_contents($lrate), true) ?: []) : [];
+  $lhits = array_values(array_filter($lhits, fn($t) => $now - (int) $t < 86400));
+  if (count($lhits) < 3) {
+    [$lText, $lHtml, $lSubject] = checklist_mail($clean, $name);
+    [$lBody, $lType] = mx_multipart($lText, $lHtml);
+    $lHeaders = ['From: ' . $fromName . ' <' . $CONFIG['from'] . '>', 'Reply-To: ' . $CONFIG['to'], 'MIME-Version: 1.0', $lType, 'Auto-Submitted: auto-generated', 'X-Mailer: markentrix-website'];
+    $confirmed = deliver($CONFIG, $email, '=?UTF-8?B?' . base64_encode($lSubject) . '?=', $lBody, $lHeaders);
+    if ($confirmed) { $lhits[] = $now; @file_put_contents($lrate, json_encode($lhits)); }
+  }
+}
+
+// Bestätigung an den Absender: kurze, sachliche Eingangsbestätigung ohne Werbung.
+if ($sent && $CONFIG['confirm'] && !$report && $email !== '' && $quelle !== 'Checkliste-PDF') {
   $crate = sys_get_temp_dir() . '/mx-conf-' . hash('sha256', strtolower($email)) . '.json';
   $chits = is_file($crate) ? (json_decode((string) file_get_contents($crate), true) ?: []) : [];
   $chits = array_values(array_filter($chits, fn($t) => $now - (int) $t < 86400));
