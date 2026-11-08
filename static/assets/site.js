@@ -644,6 +644,24 @@
     function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; if (out) out.textContent = n + ' von ' + total + ' Punkten erfüllt'; root.setAttribute('data-done', n === total ? 'all' : (n ? 'some' : 'none')); }
     boxes.forEach(function (b) { on(b, 'change', upd); }); upd();
   }
+  /* ── Hero: echte Projekte, ruhiger Wechsel (nur im Sichtfeld, pausiert bei Hover und Fokus, aus bei reduzierter Bewegung) ── */
+  function initReal() {
+    var root = $('[data-real]'); if (!root) return;
+    var tabs = $$('[data-real-tab]', root), slides = $$('[data-real-slide]', root), cur = 0, visible = false, held = false, stopped = false;
+    function show(i) {
+      cur = i;
+      slides.forEach(function (sl, k) { sl.classList.toggle('is-active', k === i); });
+      tabs.forEach(function (t, k) { t.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
+    }
+    function tick() { if (!visible || held || stopped || d.hidden) return; show((cur + 1) % slides.length); }
+    on(root, 'click', function (e) { var b = e.target.closest('[data-real-tab]'); if (!b) return; stopped = true; show(+b.getAttribute('data-real-tab')); });
+    on(root, 'mouseenter', function () { held = true; }); on(root, 'mouseleave', function () { held = false; });
+    on(root, 'focusin', function () { held = true; }); on(root, 'focusout', function () { held = false; });
+    if (d.documentElement.classList.contains('reduced') || slides.length < 2) return;
+    if ('IntersectionObserver' in w) new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }, { threshold: 0.3 }).observe(root); else visible = true;
+    setInterval(tick, 7000);
+  }
+
   /* ── Terminbuchung (Portal-Baustein, Shadow DOM): Skript wird erst bei Bedarf geladen (Seite mit Kalender oder Öffnen des Dialogs).
         Bleibt ein Kalender leer (Skript blockiert, Portal nicht erreichbar), erscheint der Alternativtext. ── */
   var bookingState = 0; // 0 nicht geladen, 1 geladen
@@ -690,6 +708,6 @@
       .catch(function () { });
   }
 
-  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); }
+  function init() { initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); initReal(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

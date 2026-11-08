@@ -20,7 +20,7 @@ ld: |
           <a class="btn btn--secondary btn--lg" href="/kontakt" data-open-modal>Erstgespräch buchen</a>
         </div>
         <div class="hero-person">
-          <img class="avatar avatar--md hero-person-img" src="/img/christian-wien-480.webp" alt="Christian Wien, Inhaber von Markentrix" width="480" height="480" decoding="async">
+          <img class="avatar avatar--md hero-person-img" src="/img/christian-wien-128.webp" srcset="/img/christian-wien-128.webp 128w, /img/christian-wien-192.webp 192w" sizes="64px" alt="Christian Wien, Inhaber von Markentrix" width="128" height="128" decoding="async">
           <p class="small"><b>Lieber direkt sprechen?</b> Ich bin Christian Wien und nehme mir 30 Minuten Zeit für Ihren Betrieb, kostenlos und ohne Verkaufsdruck. Rufen Sie an: <a href="tel:+4917620370429">0176&nbsp;20370429</a>. <a href="/preise#zusammenarbeit">Ablauf, Zahlung und Laufzeit</a> können Sie vorab nachlesen.</p>
         </div>
         <div class="hero-proof" role="group" aria-label="Rahmenbedingungen">
@@ -30,17 +30,12 @@ ld: |
         </div>
       </div>
       <div class="hero-visual reveal" data-delay="1">
-        <div class="device-toggle" role="group" aria-label="Ansicht wechseln">
-          <button type="button" data-device="desktop" aria-pressed="true"><svg><use href="#i-layout"/></svg>Desktop</button>
-          <button type="button" data-device="mobile" aria-pressed="false"><svg><use href="#i-chat"/></svg>Smartphone</button>
-        </div>
-        {{> mini-site}}
+        {{> hero-real}}
         <div class="seq seq--row" role="group" aria-label="Beispielablauf: Anfrage wird zum Termin">
           <div class="seq-item"><span class="ic"><svg><use href="#i-chat"/></svg></span><div><b>Anfrage per WhatsApp</b><span>„Haben Sie Samstag noch einen Termin?“</span></div><time>21:47</time></div>
           <div class="seq-item is-ai"><span class="ic"><svg><use href="#i-calendar"/></svg></span><div><b>Termin im Kalender</b><span>Samstag 10:00 Uhr, automatisch eingetragen</span></div><time>21:48</time></div>
           <div class="seq-item"><span class="ic"><svg><use href="#i-check"/></svg></span><div><b>Bestätigung gesendet</b><span>Erinnerung am Vortag geplant</span></div><time>21:48</time></div>
         </div>
-        <p class="tiny center mt-2">Acht echte Beispielseiten für fiktive Betriebe, oben wählbar, „Ganze Seite ansehen“ zeigt sie komplett · <a href="/beispiel/elektro-muster/" data-demo-link target="_blank" rel="noopener">In voller Größe öffnen</a> · <button type="button" class="seq-replay"><svg><use href="#i-arrow"/></svg>Ablauf erneut</button></p>
       </div>
     </div>
     <div class="stats mt-5 reveal" role="group" aria-label="Eckdaten">
@@ -162,8 +157,20 @@ ld: |
         </ul>
         <div class="row mt-3"><a class="btn btn--primary btn--lg" href="/portal#dazubuchen">Was sich dazubuchen lässt</a><a class="btn btn--ghost btn--lg" href="/portal">Das Portal im Überblick</a></div>
       </div>
-      <div class="reveal" data-delay="1">{{> portal-beispiel}}</div>
+      <div class="reveal portal-visual" data-delay="1">{{> portal-beispiel}}
+        <div class="portal-toast" role="status" aria-label="Beispiel: neue Anfrage im Portal">
+          <span class="ic"><svg><use href="#i-mail"/></svg></span>
+          <div><b>Neue Anfrage</b><span>Beispiel: „Heizung prüfen, Celle“ · gerade eben</span></div>
+        </div>
+      </div>
     </div>
+  </div>
+</section>
+
+<!-- ══ Aussage ══ -->
+<section class="claim-band" aria-label="Kernaussage">
+  <div class="wrap">
+    <p class="claim-text reveal">Wer etwas braucht, vergleicht in <span class="hl hl--violet">Sekunden</span> und ruft den an, bei dem es sich <span class="hl">gut anfühlt</span>.</p>
   </div>
 </section>
 
@@ -173,7 +180,7 @@ ld: |
     <div class="sec-head">
       <span class="eyebrow"><span class="num">01<small> / 05</small></span>Für wen</span>
       <h2 id="branchen-title">Drei Betriebe, drei Suchanfragen, <span class="hl hl--violet">eine Website</span>, die antwortet.</h2>
-      <p class="lead">Eine Visitenkarte im Netz reicht nicht mehr. Wer etwas braucht, vergleicht in Sekunden und ruft den an, bei dem es sich gut anfühlt. Wo erkennen Sie sich wieder?</p>
+      <p class="lead">Eine Visitenkarte im Netz reicht nicht mehr. Wo erkennen Sie sich wieder?</p>
     </div>
     <div class="grid grid--3 swipe" data-swipe>
       <div class="card branch reveal">
@@ -200,6 +207,16 @@ ld: |
         <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="gastro">Für Gastro und Handel prüfen</a>
         <a class="link-arrow" href="/website-gastronomie">Mehr für Gastronomie und Handel</a>
       </div>
+    </div>
+    <div class="demo-block reveal">
+      <h3 class="demo-title">Acht Beispielseiten zum Ausprobieren</h3>
+      <p class="muted small center">Fiktive Betriebe, echte Seiten: Branche wählen, zwischen Desktop und Smartphone wechseln, mit „Ganze Seite ansehen“ komplett öffnen.</p>
+        <div class="device-toggle" role="group" aria-label="Ansicht wechseln">
+          <button type="button" data-device="desktop" aria-pressed="true"><svg><use href="#i-layout"/></svg>Desktop</button>
+          <button type="button" data-device="mobile" aria-pressed="false"><svg><use href="#i-chat"/></svg>Smartphone</button>
+        </div>
+        {{> mini-site}}
+      <p class="tiny center mt-2">Beispielseiten für fiktive Betriebe, Formular und Nummer sind nicht aktiv · <a href="/beispiel/elektro-muster/" data-demo-link target="_blank" rel="noopener">In voller Größe öffnen</a></p>
     </div>
     <p class="branch-more">Auch für <a href="/website-autowerkstatt">Autowerkstätten</a>, <a href="/website-friseur-beauty">Friseure und Beauty</a>, <a href="/website-hotel-pension">Hotels und Pensionen</a>, <a href="/website-fitness-sport">Fitness und Sport</a> <a href="/website-haus-garten">Reinigung, Garten und Hausservice</a> sowie <a href="/website-b2b-dienstleister">B2B-Dienstleister und Gewerbe</a>. <a class="link-arrow" href="/branchen">Alle Branchen</a></p>
   </div>
