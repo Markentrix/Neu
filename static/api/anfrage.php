@@ -130,20 +130,117 @@ $body    = ($quelle === 'Bewerbung' ? "Neue Bewerbung über markentrix.de" : "Ne
 $subject = $CONFIG['subject_prefix'] . $quelle . ': ' . $name;
 
 $fromName = '=?UTF-8?B?' . base64_encode('Markentrix Website') . '?=';
+// SMTP-Versand und deliver() liegen in mx-mail.php (wird auch vom Wochenbericht genutzt), die HTML-Vorlage in mx-template.php
+require_once __DIR__ . '/mx-mail.php';
+require_once __DIR__ . '/mx-template.php';
+
+[$ownerBody, $ownerType] = mx_multipart($body, owner_mail_html($clean, $report, $quelle, 'ja (' . gmdate('c') . ' UTC, IP-Hash ' . substr(hash('sha256', $ip), 0, 12) . ')'));
 $headers  = [
   'From: ' . $fromName . ' <' . $CONFIG['from'] . '>',
   'Reply-To: ' . $email,
   'MIME-Version: 1.0',
-  'Content-Type: text/plain; charset=UTF-8',
-  'Content-Transfer-Encoding: 8bit',
+  $ownerType,
   'X-Mailer: markentrix-website',
 ];
 $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
 
-// SMTP-Versand und deliver() liegen in mx-mail.php (wird auch vom Wochenbericht genutzt)
-require_once __DIR__ . '/mx-mail.php';
+$sent = deliver($CONFIG, $CONFIG['to'], $encodedSubject, $ownerBody, $headers);
 
-$sent = deliver($CONFIG, $CONFIG['to'], $encodedSubject, $body, $headers);
+/** Bezeichnungen der Formularfelder für die interne Mail. */
+function mx_labels(): array {
+  return [
+  'thema' => 'Gewünschte Leistung', 'budget' => 'Budget', 'bedarf' => 'Bedarf', 'status' => 'Ausgangslage', 'zeitplan' => 'Zeitplan',
+  'branche' => 'Branche', 'aktion' => 'Aktion', 'anfragen' => 'Anfragen pro Monat', 'empfehlung' => 'Einschätzung', 'rolle' => 'Rolle', 'region' => 'Region',
+  'link' => 'Link', 'kontakt_gewuenscht' => 'Kontakt gewünscht',
+  ];
+}
+
+/** Interne Anfrage-Mail an Markentrix (HTML im Markentrix-Design). Alle Werte werden maskiert. */
+function owner_mail_html(array $c, ?array $report, string $quelle, string $consent): string {
+  $name = (string) ($c['name'] ?? ''); $email = (string) ($c['email'] ?? ''); $tel = (string) ($c['tel'] ?? '');
+  $when = (new DateTime('now', new DateTimeZone('Europe/Berlin')))->format('d.m.Y, H:i') . ' Uhr';
+  $isJob = $quelle === 'Bewerbung';
+  $tag = $isJob ? 'Neue Bewerbung' : ($report ? 'Website-Check' : 'Neue Anfrage');
+  $link = fn(string $href, string $label): string => '<a href="' . mx_h($href) . '" style="color:#0B63C6;text-decoration:underline">' . mx_h($label) . '</a>';
+  $in = mx_title($quelle . ' · ' . $when, $name, mx_chip($quelle) . ($report ? ' ' . mx_chip($report['host'] . ': ' . $report['score'] . ' von 100', '#F3EFFD', '#4B2BA6') : ''));
+  // Kontakt und Schnellaktionen
+  $tel_clean = preg_replace('/[^0-9+]/', '', $tel);
+  $in .= mx_section('Kontakt', mx_rows([
+    ['E-Mail', $email !== '' ? $link('mailto:' . $email, $email) : ''],
+    ['Telefon', $tel !== '' ? $link('tel:' . $tel_clean, $tel) : ''],
+    ['Unternehmen', mx_h((string) ($c['firma'] ?? ''))],
+  ]) . '<div style="padding-top:12px">' . mx_btn('mailto:' . $email . '?subject=' . rawurlencode('Ihre Anfrage bei Markentrix'), 'Antworten')
+    . ($tel_clean !== '' ? mx_btn('tel:' . $tel_clean, 'Anrufen', false) : '') . '</div>');
+  // Anliegen
+  $rows = [];
+  foreach (mx_labels() as $k => $label) {
+    if (empty($c[$k])) continue;
+    $v = (string) $c[$k];
+    $rows[] = [$label, ($k === 'link' && preg_match('#^https?://#i', $v)) ? $link($v, $v) : mx_h($v)];
+  }
+  if (!empty($c['wunschtermin'])) $rows[] = ['Wunschtermin', '<b>' . mx_h((string) $c['wunschtermin']) . '</b>'];
+  $body = mx_rows($rows);
+  if (!empty($c['nachricht_text'])) $body .= '<div style="padding-top:12px">' . mx_quote((string) $c['nachricht_text']) . '</div>';
+  if ($body !== '') $in .= mx_section($isJob ? 'Bewerbung' : 'Anliegen', $body);
+  // Website-Check
+  if ($report) {
+    $col = fn(int $sc): string => $sc >= 80 ? '#15803D' : ($sc >= 55 ? '#D97706' : '#B91C1C');
+    $h = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFD;border:1px solid #E3E8F0;border-radius:12px;margin-bottom:10px"><tr>'
+       . '<td style="padding:14px 18px;width:90px"><div style="font-size:38px;line-height:1;font-weight:bold;color:' . $col((int) $report['score']) . '">' . (int) $report['score'] . '</div><div style="font-size:12px;color:#5B6478">von 100</div></td>'
+       . '<td style="padding:14px 18px 14px 0;font-size:14px;color:#0B1020"><b>' . mx_h((string) $report['host']) . '</b><br><span style="font-size:13px;color:#5B6478">Note ' . mx_h((string) $report['grade']) . ($report['cap'] ? ', gedeckelt: ' . mx_h((string) $report['cap']) : '') . '</span></td></tr></table>';
+    foreach ($report['categories'] as $cat) {
+      $sc = (int) $cat['score'];
+      $h .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px"><tr><td style="font-size:13px;padding-bottom:3px">' . mx_h((string) $cat['title']) . '</td><td align="right" style="font-size:13px;font-weight:bold;color:' . $col($sc) . '">' . $sc . '</td></tr>'
+          . '<tr><td colspan="2" style="background:#E8ECF3;border-radius:6px;height:8px;line-height:8px;font-size:0"><div style="width:' . max(2, $sc) . '%;background:' . $col($sc) . ';height:8px;border-radius:6px"></div></td></tr></table>';
+    }
+    $worst = [];
+    foreach ($report['categories'] as $cat) foreach ($cat['items'] as $it) if ($it['status'] === 'bad') $worst[] = (string) $it['title'];
+    if ($worst) $h .= '<p style="margin:10px 0 4px;font-size:13px;font-weight:bold;color:#B91C1C">Mangelhaft</p><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:#2C3446">' . implode('', array_map(fn($w) => '<li>' . mx_h($w) . '</li>', array_slice($worst, 0, 12))) . '</ul>';
+    $in .= mx_section('Website-Check', $h);
+  }
+  // Herkunft
+  $src = mx_rows([
+    ['Aufmerksam geworden', mx_h((string) ($c['kanal'] ?? ''))],
+    ['Kampagne', mx_h(implode(' / ', array_filter([(string) ($c['utm_source'] ?? ''), (string) ($c['utm_medium'] ?? ''), (string) ($c['utm_campaign'] ?? ''), (string) ($c['utm_referrer'] ?? '')])))],
+    ['Seite', mx_h((string) ($c['seite'] ?? ''))],
+  ]);
+  if ($src !== '') $in .= mx_section('Herkunft', $src);
+  $in .= '<tr><td style="padding:10px 26px 22px"></td></tr>';
+  $foot = 'Einwilligung: ' . mx_h($consent) . '<br>Automatisch erzeugt von markentrix.de. Antworten geht direkt an ' . mx_h($email) . '.';
+  return mx_shell($tag, $in, $foot, $name . ': ' . ($c['thema'] ?? $quelle));
+}
+
+/** Bestätigung an den Absender (Anfrage oder Bewerbung): Text und HTML. */
+function confirm_mail(array $c, string $name, string $quelle, string $text): array {
+  $isJob = $quelle === 'Bewerbung';
+  $first = preg_replace('/[\x00-\x1F\x7F]/', '', mb_substr($name, 0, 80));
+  $labels = ['landingpage' => 'Landingpage', 'website' => 'Unternehmenswebsite', 'relaunch' => 'Relaunch einer bestehenden Website', 'funnel' => 'Website mit Anfragestrecke', 'unklar' => 'Noch offen, Beratung gewünscht'];
+  $rows = [];
+  if ($isJob) {
+    if (!empty($c['rolle'])) $rows[] = ['Rolle', mx_h(mb_substr((string) $c['rolle'], 0, 80))];
+  } else {
+    if (!empty($c['bedarf']) && isset($labels[$c['bedarf']])) $rows[] = ['Anliegen', mx_h($labels[$c['bedarf']])];
+    if (!empty($c['thema'])) $rows[] = ['Thema', mx_h(mb_substr((string) $c['thema'], 0, 120))];
+    if (!empty($c['wunschtermin'])) $rows[] = ['Wunschtermin', mx_h(mb_substr((string) $c['wunschtermin'], 0, 120))];
+  }
+  $steps = $isJob
+    ? [['Wir lesen Ihre Angaben', 'und sehen uns Ihr Profil oder Portfolio an.'], ['Kurzes Kennenlernen', 'Wir vereinbaren einen Termin per Telefon oder Video.'], ['Zusammenarbeit', 'Wir besprechen offen Aufgaben und Konditionen, bei Vertriebspartnern auch die Provision.']]
+    : [['Rückmeldung', 'Wir lesen Ihre Anfrage und melden uns werktags innerhalb von 24 Stunden.'], ['Erstgespräch', 'Rund 30 Minuten, kostenlos: Ausgangslage und Ziel.'], ['Angebot', 'Festpreis und klarer Umfang. Sie entscheiden in Ruhe.']];
+  $in = mx_title($isJob ? 'Bewerbung eingegangen' : 'Anfrage eingegangen', 'Vielen Dank, ' . $first . '.',
+    $isJob ? 'Ihre Bewerbung ist bei uns eingegangen. Wir melden uns zeitnah per E-Mail oder Telefon bei Ihnen.'
+           : 'Ihre Anfrage ist bei uns eingegangen. Wir melden uns werktags innerhalb von 24 Stunden persönlich bei Ihnen.');
+  $sum = mx_rows($rows);
+  if (!empty($c['nachricht_text'])) $sum .= '<div style="padding-top:12px"><p style="margin:0 0 6px;font-size:13px;color:#5B6478">Ihre Nachricht</p>' . mx_quote(mb_substr((string) $c['nachricht_text'], 0, 400)) . '</div>';
+  if ($sum !== '') $in .= mx_section('Ihre Angaben im Überblick', $sum);
+  $in .= mx_section('Wie es weitergeht', mx_steps($steps));
+  $in .= '<tr><td style="padding:8px 26px 24px"><div style="background:#F3EFFD;border:1px solid #DCD0F7;border-radius:12px;padding:18px 20px"><p style="margin:0 0 6px;font-size:16px;font-weight:bold;color:#0B1020">' . ($isJob ? 'Fragen?' : 'Eilig?') . '</p>'
+       . '<p style="margin:0 0 12px;font-size:14px;line-height:1.5">Rufen Sie uns an oder antworten Sie einfach auf diese E-Mail.<br><span style="color:#5B6478;font-size:13px">Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr</span></p>'
+       . mx_btn('tel:+4917620370429', 'Anrufen: 0176 20370429') . mx_btn('mailto:info@markentrix.de', 'Antworten', false) . '</div></td></tr>';
+  $foot = 'Diese Nachricht wurde automatisch versendet, weil Sie das ' . ($isJob ? 'Bewerbungsformular' : 'Formular') . ' auf markentrix.de ausgefüllt haben. Ihre Angaben verwenden wir ausschließlich '
+        . ($isJob ? 'für das Bewerbungsverfahren und löschen sie spätestens sechs Monate nach Abschluss. ' : 'zur Bearbeitung Ihrer Anfrage. ')
+        . '<a href="https://markentrix.de/datenschutz" style="color:#0B63C6">Hinweise zum Datenschutz</a><br><br>Markentrix · Christian Wien · Celle<br><a href="https://markentrix.de" style="color:#0B63C6">markentrix.de</a> · <a href="mailto:info@markentrix.de" style="color:#0B63C6">info@markentrix.de</a> · <a href="https://markentrix.de/impressum" style="color:#0B63C6">Impressum</a>';
+  return [$text, mx_shell($isJob ? 'Bewerbung' : 'Bestätigung', $in, $foot, $isJob ? 'Ihre Bewerbung bei Markentrix ist eingegangen.' : 'Ihre Anfrage bei Markentrix ist eingegangen.')];
+}
 
 /**
  * Baut die Kurzbericht-Mail (Text und HTML) aus dem Ergebnis des Website-Checks.
@@ -252,16 +349,6 @@ if ($sent && $CONFIG['confirm'] && !$report) {
       . "Eilig? Rufen Sie uns an: 0176 20370429, Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr. Oder antworten Sie einfach auf diese E-Mail.\n\n"
       . "Diese Nachricht wurde automatisch versendet, weil Sie das Formular auf markentrix.de ausgefüllt haben. Ihre Angaben verwenden wir ausschließlich zur Bearbeitung Ihrer Anfrage. Hinweise zum Datenschutz: https://markentrix.de/datenschutz\n\n"
       . "Markentrix · Christian Wien · Celle\nhttps://markentrix.de · info@markentrix.de\nImpressum: https://markentrix.de/impressum\n";
-    $cheaders = [
-      'From: ' . $fromName . ' <' . $CONFIG['from'] . '>',
-      'Reply-To: ' . $CONFIG['to'],
-      'MIME-Version: 1.0',
-      'Content-Type: text/plain; charset=UTF-8',
-      'Content-Transfer-Encoding: 8bit',
-      'Auto-Submitted: auto-replied',
-      'X-Auto-Response-Suppress: All',
-      'X-Mailer: markentrix-website',
-    ];
     $csubject = 'Ihre Anfrage bei Markentrix ist eingegangen';
     if ($quelle === 'Bewerbung') {
       $csubject = 'Ihre Bewerbung bei Markentrix ist eingegangen';
@@ -276,7 +363,18 @@ if ($sent && $CONFIG['confirm'] && !$report) {
         . "Diese Nachricht wurde automatisch versendet, weil Sie das Bewerbungsformular auf markentrix.de ausgefüllt haben. Ihre Angaben verwenden wir ausschließlich für das Bewerbungsverfahren und löschen sie spätestens sechs Monate nach dessen Abschluss, sofern Sie nicht in eine längere Speicherung eingewilligt haben. Hinweise zum Datenschutz: https://markentrix.de/datenschutz#bewerbung\n\n"
         . "Markentrix · Christian Wien · Celle\nhttps://markentrix.de · info@markentrix.de\nImpressum: https://markentrix.de/impressum\n";
     }
-    $confirmed = deliver($CONFIG, $email, '=?UTF-8?B?' . base64_encode($csubject) . '?=', $cbody, $cheaders);
+    [$cText, $cHtml] = confirm_mail($clean, $name, $quelle, $cbody);
+    [$cMulti, $cType] = mx_multipart($cText, $cHtml);
+    $cheaders = [
+      'From: ' . $fromName . ' <' . $CONFIG['from'] . '>',
+      'Reply-To: ' . $CONFIG['to'],
+      'MIME-Version: 1.0',
+      $cType,
+      'Auto-Submitted: auto-replied',
+      'X-Auto-Response-Suppress: All',
+      'X-Mailer: markentrix-website',
+    ];
+    $confirmed = deliver($CONFIG, $email, '=?UTF-8?B?' . base64_encode($csubject) . '?=', $cMulti, $cheaders);
     if ($confirmed) { $chits[] = $now; @file_put_contents($crate, json_encode($chits)); }
   }
 }
