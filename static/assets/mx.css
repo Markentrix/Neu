@@ -1416,3 +1416,36 @@ html.reduced .slot.is-free{animation:none}
 .rev-card figcaption{margin-top:auto;color:var(--muted);font-size:.9rem}
 .rev-card figcaption b{color:var(--navy)}
 .rev-stars{color:#B45309;letter-spacing:2px;font-size:1.05rem}
+
+/* ── Wärme und Rhythmus (Startseite): Textmarker, Ich-Band, Wertekarten, Gesicht im Hero ── */
+.hl{background-image:linear-gradient(transparent 64%,rgba(40,199,247,.38) 64%,rgba(40,199,247,.38) 92%,transparent 92%);padding:0 .06em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hl--violet{background-image:linear-gradient(transparent 64%,rgba(139,92,246,.30) 64%,rgba(139,92,246,.30) 92%,transparent 92%)}
+.hl--cyan{background-image:linear-gradient(transparent 64%,rgba(40,199,247,.5) 64%,rgba(40,199,247,.5) 92%,transparent 92%)}
+.hero-person{display:flex;gap:16px;align-items:flex-start;margin:20px 0 0;max-width:58ch}
+.hero-person p{margin:0;color:var(--muted)}
+.hero-person p b{color:var(--navy)}
+.hero-person-img{width:64px;height:64px;box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(40,199,247,.75)}
+.hero-person+.hero-proof{margin-top:16px}
+.person-band{overflow:hidden;background-image:radial-gradient(60% 80% at 12% 40%,rgba(139,92,246,.28),transparent 62%),radial-gradient(45% 60% at 92% 80%,rgba(40,199,247,.20),transparent 60%),radial-gradient(rgba(255,255,255,.08) 1px,transparent 1.3px);background-size:auto,auto,22px 22px}
+.person-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(32px,5vw,80px);align-items:center}
+.person-photo{position:relative;width:100%;max-width:380px;justify-self:center}
+.person-photo::before{content:"";position:absolute;inset:-14px;border-radius:34px;background:linear-gradient(135deg,#28C7F7,#8B5CF6 68%,#D85CFF);transform:rotate(-3deg)}
+.person-photo img{position:relative;display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:24px;border:3px solid #fff}
+.person-quote{margin:14px 0 0;font:500 clamp(1.15rem,.95rem + 1vw,1.55rem)/1.5 var(--f-head);color:#fff}
+.person-sign{margin:16px 0 0;color:rgba(255,255,255,.8)}
+.person-sign b{color:#fff}
+.person-note{margin:16px 0 0;color:rgba(255,255,255,.66)}
+.btn--ghost-light{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.4)}
+.btn--ghost-light:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.trust-grid--2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.value-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2vw,24px)}
+.value{display:flex;flex-direction:column;gap:10px;padding:26px 24px;border-radius:18px;border:1px solid transparent;color:var(--navy)}
+.value b{font:700 clamp(1.35rem,1.1rem + 1vw,1.85rem)/1.15 var(--f-head)}
+.value span{color:#2C3446;line-height:1.55}
+.value--cyan{background:linear-gradient(160deg,#E4F7FE,#D3EEFC);border-color:#BFE6F8}
+.value--violet{background:linear-gradient(160deg,#EFE9FE,#E2D8FC);border-color:#D4C6F8}
+.value--magenta{background:linear-gradient(160deg,#FBE9FE,#F5D8FB);border-color:#EEC6F7}
+#branchen{background:linear-gradient(180deg,#F1F9FD 0,#FFFFFF 70%)}
+@media (prefers-reduced-motion:no-preference){.person-photo::before{animation:mx-tilt 9s ease-in-out infinite alternate}@keyframes mx-tilt{from{transform:rotate(-3deg)}to{transform:rotate(-1deg) scale(1.01)}}}
+@media (max-width:860px){.person-grid,.value-grid,.trust-grid--2{grid-template-columns:minmax(0,1fr)}.person-photo{max-width:260px}}
+@media (max-width:420px){.hero-person-img{width:52px;height:52px}}
