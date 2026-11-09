@@ -686,6 +686,24 @@
     var lead = $('[data-danke-lead]'); if (lead && f) { var t = lead.getAttribute('data-lead-' + f); if (t) lead.textContent = t; }
   }
 
+  /* Befristetes Angebot: nach Ablauf (Ende des Tages, Berliner Zeit) verschwindet der Abschnitt von selbst; sonst Hinweis auf die Restzeit */
+  function initDeal() {
+    var sec = $('[data-deal-until]'); if (!sec) return;
+    var until = sec.getAttribute('data-deal-until'), m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(until); if (!m) return;
+    var end = new Date(m[1] + '-' + m[2] + '-' + m[3] + 'T23:59:59+01:00'), now = new Date();
+    if (now > end) { sec.parentNode.removeChild(sec); return; }
+    var left = $('[data-deal-left]', sec); if (!left) return;
+    var days = Math.ceil((end - now) / 86400000);
+    left.textContent = days <= 1 ? 'Heute letzter Tag' : 'Noch ' + days + ' Tage';
+  }
+
+  /* Aktionscode aus der Adresse (?aktion=…) in die Formulare übernehmen, damit die Anfrage dem Angebot zugeordnet wird */
+  function initAktion() {
+    var a = ''; try { a = new URLSearchParams(w.location.search).get('aktion') || ''; } catch (e) { }
+    if (!/^[a-z0-9-]{1,40}$/.test(a)) return;
+    $$('form input[name=aktion]').forEach(function (i) { if (!i.value) i.value = a; });
+  }
+
   function initBooking() {
     // Erfolgreiche Buchung: Ereignis des Portal-Bausteins (enthält nur den Termin als Text, wird nicht weitergegeben). Zählt nur nach Einwilligung (track).
     d.addEventListener('mk-erstgespraech-gebucht', function () { track('generate_lead', { location: 'Terminbuchung', lead_type: 'terminbuchung' }); });
@@ -716,6 +734,6 @@
       .catch(function () { });
   }
 
-  function init() { initDanke(); initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); initReal(); }
+  function init() { initDanke(); initDeal(); initAktion(); initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); initReal(); }
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();

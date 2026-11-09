@@ -30,6 +30,6 @@ In Beiträgen, die auf eine bestimmte Seite führen, die Seite mit anhängen, zu
 - Name, Profilbild und Kurzbeschreibung auf allen vier Kanälen einheitlich, mit Ort Celle und dem Nutzen in einem Satz.
 - Link zur Website mit den Parametern oben, Kontaktschaltfläche auf Facebook und Instagram aktivieren.
 - Impressum: Auf Facebook und YouTube ist ein Impressumsfeld vorhanden, bei Instagram und TikTok steht die Angabe in der Bio oder per Link auf https://markentrix.de/impressum.
-- Angeheftete Beiträge: Aktion für Referenzkunden und der Potenzial-Check.
+- Angeheftete Beiträge: Befristete Angebote bis 13.11.2026 (Landingpage 599 € + 29,99 € im Monat, Website 1.099 € + 39,90 € im Monat, je 12 Monate) und der Potenzial-Check.
 - Beiträge, die mit KI erstellt wurden, weiterhin kennzeichnen, wie es der Beitragsplan bereits tut.
 - YouTube und TikTok: Erst verlinkt lassen, wenn dort Inhalte stehen. Ein leerer Kanal schadet dem Eindruck.

@@ -31,11 +31,11 @@
 <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/mx.css?v=202611081909">
+<link rel="stylesheet" href="/assets/mx.css?v=202611091353">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"ContactPage","@id":"https://markentrix.de/kontakt#webpage","url":"https://markentrix.de/kontakt","name":"Kontakt: Kostenloses Erstgespräch in Celle | Markentrix","isPartOf":{"@id":"https://markentrix.de/#website"},"about":{"@id":"https://markentrix.de/#organization"},"inLanguage":"de-DE","dateModified":"2026-10-12","breadcrumb":{"@id":"https://markentrix.de/kontakt#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://markentrix.de/kontakt#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Startseite","item":"https://markentrix.de/"},{"@type":"ListItem","position":2,"name":"Kontakt","item":"https://markentrix.de/kontakt"}]}]}</script>
-<script src="/assets/consent.js?v=202611081909" defer></script>
-<script src="/assets/site.js?v=202611081909" defer></script>
+<script src="/assets/consent.js?v=202611091353" defer></script>
+<script src="/assets/site.js?v=202611091353" defer></script>
 </head>
 <body class="">
 <!-- Markentrix Icon-Set · Linienlogik der Wortmarke: 24er-Raster, Strich 2, runde Enden, genau ein gefüllter Datenpunkt je Icon.
@@ -194,6 +194,7 @@
         <h2 class="h3">Oder schreiben Sie uns.</h2>
         <p class="muted small">Pflicht sind nur Name, E-Mail und Einwilligung. Alles andere hilft uns, besser vorbereitet zu sein.</p>
         <form class="form" name="kontakt" data-lead="Kontaktformular" data-success="#kontakt-danke" novalidate>
+          <input type="hidden" name="aktion" value="">
           <div class="form-row">
             <div class="field"><label for="k-name">Name *</label><input id="k-name" name="name" type="text" autocomplete="name" required></div>
             <div class="field"><label for="k-firma">Unternehmen</label><input id="k-firma" name="firma" type="text" autocomplete="organization"></div>
@@ -250,6 +251,7 @@
         <p class="muted">Name und Nummer genügen. Wir rufen Sie werktags zur gewünschten Zeit an, kostenlos und ohne Verkaufsdruck.</p>
       </div>
       <form class="form rueckruf-form" name="rueckruf" data-lead="Rückruf" novalidate>
+        <input type="hidden" name="aktion" value="">
         <div class="form-row">
           <div class="field"><label for="rr-name">Name</label><input id="rr-name" name="name" type="text" autocomplete="name" required></div>
           <div class="field"><label for="rr-tel">Telefon</label><input id="rr-tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" required></div>
