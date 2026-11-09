@@ -470,9 +470,9 @@
   /* Preise: Paket wählen */
   function initPick() {
     var root = $('[data-pick]'); if (!root) return;
-    var P = { landing: { name: 'LANDING', price: '2.290 €', care: '59 € im Monat', bedarf: 'landingpage', text: 'Conversion-Onepager mit Texten, Bildern und Terminbuchung. Struktur, Texte und Bildauswahl entstehen bei uns.', hint: 'Texte und Bilder selbst liefern? LANDING START auf Vorlagenbasis ab 1.290 €.' },
-      business: { name: 'BUSINESS WEB', price: '4.490 €', care: '89 € im Monat', bedarf: 'website', text: 'Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.', hint: 'Kombivorteil: 500 € Nachlass bei Website und KI-Kommunikation zusammen, ab Paket BUSINESS.' },
-      funnel: { name: 'WEB + FUNNEL', price: '6.990 €', care: '129 € im Monat', bedarf: 'funnel', text: 'Bis zwölf Seiten mit Anfrage- oder Verkaufsstrecke, die Besucher Schritt für Schritt zur Anfrage führt.', hint: 'Abweichender Umfang wird vorab schriftlich vereinbart.' } };
+    var P = { landing: { name: 'LANDING', price: 'Auf Anfrage', care: 'Monatlich, im Angebot festgelegt', bedarf: 'landingpage', text: 'Conversion-Onepager mit Texten, Bildern und Terminbuchung. Struktur, Texte und Bildauswahl entstehen bei uns.', hint: 'Texte und Bilder selbst liefern? LANDING START arbeitet auf Vorlagenbasis.' },
+      business: { name: 'BUSINESS WEB', price: 'Auf Anfrage', care: 'Monatlich, im Angebot festgelegt', bedarf: 'website', text: 'Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.', hint: 'Kombivorteil: Nachlass bei Website und KI-Kommunikation zusammen, ab Paket BUSINESS.' },
+      funnel: { name: 'WEB + FUNNEL', price: 'Auf Anfrage', care: 'Monatlich, im Angebot festgelegt', bedarf: 'funnel', text: 'Bis zwölf Seiten mit Anfrage- oder Verkaufsstrecke, die Besucher Schritt für Schritt zur Anfrage führt.', hint: 'Abweichender Umfang wird vorab schriftlich vereinbart.' } };
     var outs = {}; $$('[data-pick-out]', root).forEach(function (el) { outs[el.getAttribute('data-pick-out')] = el; });
     function choose(k) {
       var p = P[k] || P.landing;
@@ -555,27 +555,20 @@
   function initRoi() {
     var root = $('[data-roi]'); if (!root) return;
     var f = {};
-    ['missed', 'order', 'recover', 'sched', 'wage', 'pkg'].forEach(function (k) { f[k] = $('[name=' + k + ']', root); });
+    ['missed', 'order', 'recover', 'sched', 'wage'].forEach(function (k) { f[k] = $('[name=' + k + ']', root); });
     var o = {};
-    ['pkg', 'pkgPrice', 'pkgNote', 'lost', 'recovered', 'hours', 'payback', 'paybackNote'].forEach(function (k) { o[k] = $('[data-out=' + k + ']', root); });
-    var PK = { landing: { name: 'LANDING', price: 2290, care: 59, note: 'Conversion-Onepager mit Texten, Bildern und Terminbuchung, Pflege 59 € im Monat' },
-      business: { name: 'BUSINESS WEB', price: 4490, care: 89, note: 'Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, Pflege 89 € im Monat' },
-      funnel: { name: 'WEB + FUNNEL', price: 6990, care: 129, note: 'Bis zwölf Seiten mit Anfrage- oder Verkaufsstrecke, Pflege 129 € im Monat' } };
+    ['lost', 'recovered', 'hours', 'payback'].forEach(function (k) { o[k] = $('[data-out=' + k + ']', root); });
     function paint(inp, fmt) { if (!inp || inp.type !== 'range') return; var pct = (inp.value - inp.min) / (inp.max - inp.min) * 100; inp.style.setProperty('--pct', pct + '%'); var out = $('output[for=' + inp.id + ']', root); if (out) out.textContent = fmt(inp.value); }
     function calc() {
       paint(f.missed, function (v) { return v; }); paint(f.order, fmtEUR); paint(f.recover, function (v) { return v + ' %'; });
       paint(f.sched, function (v) { return v + ' h'; }); paint(f.wage, function (v) { return v + ' €'; });
       var missed = +f.missed.value, order = +f.order.value, rec = +f.recover.value / 100, sched = +f.sched.value, wage = +f.wage.value;
-      var pk = PK[f.pkg.value] || PK.landing;
       var lost = missed * 4.33 * 0.2 * order;                 // entgangener Umsatz je Monat
       var recovered = lost * rec;                              // davon zurückholbar
       var hours = sched * 4.33 * 0.5;                          // vermeidbare Stunden je Monat
-      var gain = recovered + hours * wage - pk.care;           // monatlicher Gewinn gegenüber Pflege
-      o.pkg.textContent = pk.name; o.pkgPrice.textContent = fmtEUR(pk.price); o.pkgNote.textContent = pk.note;
       tween(o.lost, lost, fmtEUR); tween(o.recovered, recovered, fmtEUR);
       tween(o.hours, Math.round(hours), function (v) { return Math.round(v) + ' h'; });
-      if (gain > 0) { var m = Math.ceil(pk.price / gain); o.payback.textContent = m + (m === 1 ? ' Monat' : ' Monaten'); o.paybackNote.textContent = 'bei ' + fmtEUR(Math.round(gain)) + ' Gewinn je Monat nach Pflege'; }
-      else { o.payback.textContent = 'offen'; o.paybackNote.textContent = 'Mit diesen Angaben trägt sich das Paket nicht über zurückgeholte Anfragen. Im Erstgespräch prüfen wir andere Hebel.'; }
+      tween(o.payback, recovered + hours * wage, fmtEUR);
     }
     Object.keys(f).forEach(function (k) { if (f[k]) { on(f[k], 'input', calc); on(f[k], 'change', calc); } });
     calc();
