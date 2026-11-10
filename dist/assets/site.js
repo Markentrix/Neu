@@ -470,9 +470,9 @@
   /* Preise: Paket wählen */
   function initPick() {
     var root = $('[data-pick]'); if (!root) return;
-    var P = { landing: { name: 'LANDING', price: 'Auf Anfrage', care: 'Monatlich, im Angebot festgelegt', bedarf: 'landingpage', text: 'Conversion-Onepager mit Texten, Bildern und Terminbuchung. Struktur, Texte und Bildauswahl entstehen bei uns.', hint: 'Texte und Bilder selbst liefern? LANDING START arbeitet auf Vorlagenbasis.' },
-      business: { name: 'BUSINESS WEB', price: 'Auf Anfrage', care: 'Monatlich, im Angebot festgelegt', bedarf: 'website', text: 'Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.', hint: 'Kombivorteil: Nachlass bei Website und KI-Kommunikation zusammen, ab Paket BUSINESS.' },
-      funnel: { name: 'WEB + FUNNEL', price: 'Auf Anfrage', care: 'Monatlich, im Angebot festgelegt', bedarf: 'funnel', text: 'Bis zwölf Seiten mit Anfrage- oder Verkaufsstrecke, die Besucher Schritt für Schritt zur Anfrage führt.', hint: 'Abweichender Umfang wird vorab schriftlich vereinbart.' } };
+    var P = { landing: { name: 'LANDING', price: 'Im Erstgespräch', care: 'Monatlich, im Angebot festgelegt', bedarf: 'landingpage', text: 'Conversion-Onepager mit Texten, Bildern und Terminbuchung. Struktur, Texte und Bildauswahl entstehen bei uns.', hint: 'Texte und Bilder selbst liefern? LANDING START arbeitet auf Vorlagenbasis.' },
+      business: { name: 'BUSINESS WEB', price: 'Im Erstgespräch', care: 'Monatlich, im Angebot festgelegt', bedarf: 'website', text: 'Bis sieben Inhaltsseiten mit Struktur, Texten und Bildern, zum Beispiel eine Leistungsseite je Gewerk oder Ort.', hint: 'Kombivorteil: Nachlass bei Website und KI-Kommunikation zusammen, ab Paket BUSINESS.' },
+      funnel: { name: 'WEB + FUNNEL', price: 'Im Erstgespräch', care: 'Monatlich, im Angebot festgelegt', bedarf: 'funnel', text: 'Bis zwölf Seiten mit Anfrage- oder Verkaufsstrecke, die Besucher Schritt für Schritt zur Anfrage führt.', hint: 'Abweichender Umfang wird vorab schriftlich vereinbart.' } };
     var outs = {}; $$('[data-pick-out]', root).forEach(function (el) { outs[el.getAttribute('data-pick-out')] = el; });
     function choose(k) {
       var p = P[k] || P.landing;

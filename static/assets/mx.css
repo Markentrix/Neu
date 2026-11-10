@@ -1562,3 +1562,7 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
   #mx-consent button[id^=mxc-]:not(#mxc-more){flex:1 1 0!important;min-height:34px!important;padding:4px 8px!important;font-size:12.5px!important;border-radius:8px!important}
   #mx-consent #mxc-more{min-height:26px!important;margin-top:0!important;padding:0!important;font-size:11.5px!important}
 }
+
+/* ── Paketkarten: Preis wird im Erstgespräch genannt (Text statt Zahl, daher kleiner) ── */
+.price-card .price{font-size:clamp(1.25rem,1.05rem + .7vw,1.6rem);letter-spacing:-.02em;line-height:1.15}
+.pick-price b{font-size:clamp(1.7rem,1.3rem + 1.4vw,2.3rem)}
