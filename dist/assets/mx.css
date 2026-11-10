@@ -1553,6 +1553,8 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
   #mx-consent{left:8px!important;right:8px!important;bottom:8px!important;padding:10px 12px 4px!important;border-radius:12px!important;font-size:11.5px!important;line-height:1.36!important;max-height:52vh!important;box-shadow:0 12px 32px rgba(11,16,32,.22)!important}
   #mx-consent #mxc-t{margin:0 0 3px!important;font-size:13.5px!important;line-height:1.25!important;outline:none!important}
   #mx-consent #mxc-d{margin:0 0 7px!important;font-size:11.5px!important}
+  #mx-consent #mxc-rest{display:none}
+  #mx-consent.mxc-open #mxc-rest{display:inline}
   #mx-consent #mxc-det{margin:0 0 8px!important}
   #mx-consent #mxc-det>div{padding:8px 10px!important;gap:10px!important}
   #mx-consent #mxc-det span{font-size:11.5px!important}
