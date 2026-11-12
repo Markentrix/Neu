@@ -143,3 +143,16 @@ Domain: `schichtatelier.de`. Der normale Export bleibt ohne feste Domain (Upload
 - Produktseite: Preis, Farbe, Menge, Knopf und Lieferdatum in einer hinterlegten Kaufbox. Maße und Material sowie Versand und Zahlung klappen auf.
 - Kopfzeile mit genau einer Aktion (Angebot anfordern), Fußzeile mit dem Schlusssatz „Schicht für Schicht.“.
 - Platzhalterkacheln im Shop, solange der Katalog lädt.
+
+## Skill V4 (Überarbeitung 12.11.2026)
+
+- **Adressen:** Sitemap, `Sitemap:` in der robots.txt, Canonical, og:url, og:image und JSON-LD tragen den Platzhalter `{{SITE_URL}}` (Uploader ersetzt ihn). Im Code steht keine feste Domain.
+- **Widerruf:** Link „Vertrag widerrufen“ in der Fußzeile jeder Seite, `widerruf.html` mit Formular in zwei Schritten (Angaben, dann „Widerruf bestätigen“), darunter die Belehrung.
+- **Startseite:** H1 „3D-Druck aus Celle.“ (Leistung und Ort, zwei Zeilen), „Schicht für Schicht“ im Stützsatz und als Schlusssatz der Fußzeile. Titel nach dem Muster „Leistung in Ort | Firma“.
+- **Verbotene Trenner entfernt:** Haarlinien an Kopfzeile, FAQ, Warenkorb, Materialliste, Tabellen und Fußzeile sind durch Tonstufen, Abstand und gefüllte Flächen ersetzt. Bleibt: die Zeitlinie im Ablauf (echte Reihenfolge) und Rahmen an Eingabefeldern und Knöpfen (Bedienelemente).
+- **Fußzeile** ohne Sitemap: Kontakt und Pflichtlinks.
+- **Handy:** flache Aktionsleiste (Anrufen, Angebot anfordern) am unteren Rand auf Inhaltsseiten, nicht auf Produkt-, Kontakt-, Kasse- und Formularseiten.
+- **Bewegung:** Aufbau beim Scrollen nur noch für Datei-Band, Materialzeilen und Ablaufschritte. Überschriften und Karten erscheinen sofort (häufig gesehene Flächen).
+- **Ereignisse an das Portal (`ev`):** anruf_klick, mail_klick, in_den_warenkorb, kontakt_gesendet, bestellung_gesendet, gutschein_gesendet, widerruf_gesendet, je Name einmal.
+- **Härtetest:** 0, 1 und 62 Artikel, lange Namen und Wörter, Preis 0 („auf Anfrage“), Preis über 10.000 € (Tausenderpunkt), fehlende Bilder („Foto folgt“), Menge 99. Bei 1440, 390 und 320 px ohne Überlauf.
+

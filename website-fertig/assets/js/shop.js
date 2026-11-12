@@ -6,11 +6,12 @@
   var KAT = window.SW_KATEGORIEN || {};
   var STATIC = window.SW_STATIC || [];
   var KEY = "sw_warenkorb", CKEY = "sw_katalog";
-  var EUR = function (n) { return Number(n).toFixed(2).replace(".", ",") + " €"; };
+  var EURF = null; try { EURF = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }); } catch (e) { EURF = null; }
+  var EUR = function (n) { n = Number(n); if (!isFinite(n)) return "auf Anfrage"; return EURF ? EURF.format(n).replace(/\u00a0/g, " ") : n.toFixed(2).replace(".", ",") + " €"; };
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var ROOT = (document.body.getAttribute("data-root") || "");
-  var VOUCHER = null, coupon = null, catalogLoaded = false, catalogHooks = [];
+  var sent = {}, VOUCHER = null, coupon = null, catalogLoaded = false, catalogHooks = [];
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
   function safeColor(h) { return /^#[0-9a-f]{3,8}$/i.test(h || "") ? h : "#cccccc"; }
@@ -65,6 +66,7 @@
     };
   }
   function addToCart(id, farbe, text, menge) {
+    track("in_den_warenkorb");
     var c = loadCart();
     for (var i = 0; i < c.length; i++) {
       if (c[i].id === id && c[i].farbe === farbe && (c[i].text || "") === (text || "")) { c[i].menge += menge; saveCart(c); return; }
@@ -110,14 +112,15 @@
   function cardHtml(p, h) {
     h = h || "h3"; var href = hrefOf(p);
     var notes = []; if (p.text) notes.push("Mit Wunschtext"); if (p.farben.length > 1) notes.push("in " + p.farben.length + " Farben");
-    var action = p.text ? '<a class="btn btn-card" href="' + esc(href) + '">Text und Farbe wählen</a>' : '<button class="btn btn-card" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
+    var preisOk = p.preis > 0;
+    var action = !preisOk ? '<a class="btn btn-card" href="' + ROOT + 'kontakt.html">Preis anfragen</a>' : p.text ? '<a class="btn btn-card" href="' + esc(href) + '">Text und Farbe wählen</a>' : '<button class="btn btn-card" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
     var tags = p.tags.concat(p.text && p.tags.indexOf("personalisiert") < 0 ? ["personalisiert"] : []).join(" ");
     return '<article class="card" data-kat="' + esc(p.kat) + '" data-tags="' + esc(tags) + '" data-preis="' + p.preis + '" data-name="' + esc(p.name) + '" data-pos="' + (p._pos || 0) + '" data-id="' + esc(p.id) + '" data-suche="' + esc([p.name, p.kurz, p.material].join(" ").toLowerCase()) + '">' +
-      '<a class="card-img" href="' + esc(href) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="' + imgDim(p).w + '" height="' + imgDim(p).h + '" alt="" loading="lazy"></a>' +
+      '<a class="card-img" href="' + esc(href) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="' + imgDim(p).w + '" height="' + imgDim(p).h + '" alt="" loading="lazy" decoding="async"></a>' +
       '<div class="card-body"><' + h + '><a href="' + esc(href) + '">' + esc(p.name) + '</a></' + h + '>' +
       '<p class="small">' + esc(p.kurz) + '</p>' +
       (notes.length ? '<span class="card-note">' + esc(notes.join(", ")) + '</span>' : "") +
-      '<div class="card-foot"><span class="price">' + EUR(p.preis) + '</span>' + action + '</div></div></article>';
+      '<div class="card-foot"><span class="price">' + (preisOk ? EUR(p.preis) : "auf Anfrage") + '</span>' + action + '</div></div></article>';
   }
 
   /* ---------- Produktseite (Kaufformular) ---------- */
@@ -217,6 +220,7 @@
       bindChips();
     }
     setupSearch(); renderZuletzt($("#zuletzt-host"), "");
+    grid.classList.add("fertig");
     if (!P.length) grid.insertAdjacentHTML("afterbegin", '<div class="empty" style="grid-column:1/-1"><p>Zurzeit ist kein Artikel bestellbar. Schreiben Sie uns gern: ' + contactLinks() + '.</p></div>');
     
     applyFilter();
@@ -338,7 +342,30 @@
 
   /* ---------- Kontakt / Widerruf ---------- */
   var kf = $("#kontaktformular"); if (kf) bindForm(kf, "kontakt");
-  var wf = $("#widerrufsformular"); if (wf) bindForm(wf, "widerruf");
+  var wf = $("#widerrufsformular");
+  if (wf) {
+    // Stufe 1: Angaben prüfen und zusammenfassen. Stufe 2: Knopf "Widerruf bestätigen" sendet (bindForm).
+    var wBtn = $("#w-weiter", wf), wZu = $("#w-zusammenfassung", wf), wFelder = $(".w-felder", wf), wPruefen = $(".w-pruefen", wf);
+    function wStufe(n) {
+      wf.dataset.stufe = String(n); wFelder.hidden = n === 2; wPruefen.hidden = n !== 2;
+      wBtn.textContent = n === 2 ? "Widerruf bestätigen" : "Weiter zur Bestätigung";
+      (n === 2 ? wPruefen.querySelector("h2") : wFelder.querySelector("input,textarea")).scrollIntoView({ block: "center" });
+    }
+    wf.addEventListener("submit", function (e) {
+      if (wf.dataset.stufe === "2") return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      clearErrors(wf); var errs = validate(wf);
+      if (Object.keys(errs).length) { showErrors(wf, errs); return; }
+      wZu.textContent = "";
+      [["Vorgangsnummer", "ref"], ["Waren", "nachricht"], ["Bestellt am", "bestellt_am"], ["Erhalten am", "erhalten_am"], ["Name", "name"], ["E-Mail", "email"], ["Anschrift", "anschrift"]].forEach(function (r) {
+        var el = wf.querySelector('[name="' + r[1] + '"]'); if (!el || !el.value.trim()) return;
+        var dt = document.createElement("dt"), dd = document.createElement("dd"); dt.textContent = r[0]; dd.textContent = el.value.trim(); wZu.appendChild(dt); wZu.appendChild(dd);
+      });
+      wStufe(2);
+    });
+    $("#w-zurueck", wf).addEventListener("click", function () { wStufe(1); });
+    bindForm(wf, "widerruf");
+  }
 
   /* ---------- Gutschein verkaufen (Formular) und einlösen (Kasse); Konfiguration aus GET /api/gutschein ---------- */
   var gf = $("#gutscheinformular");
@@ -454,7 +481,7 @@
         var pick = cands.slice(0, 3); var g = $("#cross-sell-grid"); g.innerHTML = "";
         pick.forEach(function (p) {
           var el = document.createElement("article"); el.className = "card";
-          el.innerHTML = '<a class="card-img" href="' + esc(hrefOf(p)) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="800" height="600" alt="" loading="lazy"></a><div class="card-body"><h3><a href="' + esc(hrefOf(p)) + '">' + esc(p.name) + '</a></h3><div class="price">' + EUR(p.preis) + '</div><button class="btn btn-primary" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button></div>';
+          el.innerHTML = '<a class="card-img" href="' + esc(hrefOf(p)) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="800" height="600" alt="" loading="lazy" decoding="async"></a><div class="card-body"><h3><a href="' + esc(hrefOf(p)) + '">' + esc(p.name) + '</a></h3><div class="price">' + EUR(p.preis) + '</div><button class="btn btn-primary" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button></div>';
           g.appendChild(el);
         });
         cs.hidden = pick.length === 0;
@@ -532,6 +559,7 @@
     var isOrder = q.art === "bestellung" || q.typ === "bestellung";
     var isWiderruf = q.typ === "widerruf";
     var mode = isOrder ? "bestellung" : isWiderruf ? "widerruf" : q.typ === "gutschein" ? "gutschein" : "kontakt";
+    try { var evKey = "sw_ev_" + (q.ref || mode); if (!sessionStorage.getItem(evKey)) { sessionStorage.setItem(evKey, "1"); track(mode + "_gesendet"); } } catch (e) { track(mode + "_gesendet"); }
     $$("[data-show]").forEach(function (el) { el.hidden = el.dataset.show !== mode; if (el.dataset.show === mode && el.dataset.h1) $("#danke-h1").textContent = el.dataset.h1; });
     var pp = $("#paypal-link"); var payUrl = ""; var gInfo = null; var sp = null;
     try { sp = JSON.parse(sessionStorage.getItem("sw_paypal") || "null"); if (sp && sp.ref === q.ref) { payUrl = safePaypal(sp.url); gInfo = sp.gutschein || null; } else sp = null; } catch (e) { sp = null; }
@@ -569,6 +597,22 @@
     }
   } catch (e) { /* still */ }
 
+  /* Conversions als Ereignis "ev", je Name einmal pro Seitenaufruf (ohne Cookies) */
+  function track(name) {
+    if (sent[name]) return; sent[name] = 1;
+    try { if (navigator.sendBeacon) navigator.sendBeacon(ROOT + "api/e", new Blob([JSON.stringify({ t: "ev", u: location.pathname, n: name, w: window.innerWidth })], { type: "application/json" })); } catch (e) { /* still */ }
+  }
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("a[href^='tel:'],a[href^='mailto:']"); if (!a) return;
+    track(a.getAttribute("href").indexOf("tel:") === 0 ? "anruf_klick" : "mail_klick");
+  });
+
+  document.addEventListener("error", function (e) {
+    var i = e.target; if (!i || i.tagName !== "IMG" || i.dataset.fehlt) return;
+    i.dataset.fehlt = "1"; i.style.visibility = "hidden";
+    var h = i.closest(".card-img,.product-media"); if (h) h.classList.add("bild-fehlt");
+  }, true);
+
   /* ---------- Direktkauf von Produktkarten ---------- */
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-add]"); if (!b) return;
@@ -586,6 +630,7 @@
   function setupSticky() {
     var sticky = $(".sticky-buy"); if (!sticky || !buy) return;
     var submitBtn = buy.querySelector("button[type=submit]"); var form = buy;
+    if (!submitBtn) { sticky.remove(); return; }   // Preis auf Anfrage: keine Kaufleiste
     var sb = $("[data-sticky-buy]", sticky);
     sb.addEventListener("click", function () { submitBtn.scrollIntoView({ block: "center" }); if (form.requestSubmit) form.requestSubmit(); else submitBtn.click(); });
     if ("IntersectionObserver" in window) {
@@ -632,9 +677,9 @@
     host.innerHTML = '<nav aria-label="Pfad" class="crumbs"><a href="' + ROOT + 'index.html">Start</a> › <a href="' + ROOT + 'shop.html">Shop</a> › ' + esc(KAT[p.kat] || "Artikel") + '</nav>' +
       '<div class="product"><div><div class="product-media"><img id="pd-img" src="' + esc(/^(\/|https?:)/.test(mainUrl) ? mainUrl : ROOT + mainUrl) + '" width="' + ((main && main.w) || 1200) + '" height="' + ((main && main.h) || 900) + '" alt="' + esc(mainAlt) + '"></div>' + thumbs + '</div>' +
       '<div class="product-info"><h1>' + esc(p.name) + '</h1><div class="kaufbox">' +
-      '<p class="price">' + EUR(p.preis) + ' <small>' + esc(CFG.preishinweis || "") + ', zzgl. <a href="' + ROOT + 'versand.html">Versand</a></small></p><p>' + esc(p.kurz) + '</p>' +
+      '<p class="price">' + (p.preis > 0 ? EUR(p.preis) : "auf Anfrage") + ' <small>' + esc(CFG.preishinweis || "") + ', zzgl. <a href="' + ROOT + 'versand.html">Versand</a></small></p><p>' + esc(p.kurz) + '</p>' +
       '<form id="kaufen" data-id="' + esc(p.id) + '" novalidate>' + (p.farben.length ? '<fieldset style="border:0;padding:0;margin:0 0 14px"><legend style="font-weight:600;margin-bottom:8px">Farbe</legend><div class="swatches">' + sw + '</div></fieldset>' : "") + textField +
-      '<div class="buyrow"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="99" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span><button class="btn btn-primary" type="submit">In den Warenkorb</button></div>' +
+      '<div class="buyrow"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="99" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span>' + (p.preis > 0 ? '<button class="btn btn-primary" type="submit">In den Warenkorb</button>' : '<a class="btn btn-primary" href="' + ROOT + 'kontakt.html">Preis anfragen</a>') + '</div>' +
       '<p class="added" role="status">Liegt im Warenkorb. <a href="' + ROOT + 'warenkorb.html">Zum Warenkorb</a> oder <a href="' + ROOT + 'shop.html">weiter stöbern</a>.</p></form>' +
       '<p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>' +
       '</div><details class="faq-item" open><summary>Maße und Material</summary><dl class="specs">' + specs + '</dl></details>' +
@@ -824,25 +869,6 @@
     show(0, true);
   }
 
-  /* ---------- Aktionsband vor Weihnachten: letzter Bestelltag aus den Richtwerten ---------- */
-  (function () {
-    var seite = location.pathname.split("/").pop() || "index.html";
-    if (/^(warenkorb|danke|404)/.test(seite)) return;
-    try { if (sessionStorage.getItem("sw_aktion_zu")) return; } catch (e) { /* ohne Speicher: Band bleibt */ }
-    var heute = new Date(); heute.setHours(0, 0, 0, 0);
-    var liefer = new Date(heute.getFullYear(), 11, 23);              // Heiligabend ist der 24., Lieferung bis zum 23.
-    if (heute > liefer || heute.getMonth() < 10) return;             // nur November und Dezember
-    var tage = (CFG.produktionMax || 4) + (CFG.versandMax || 3) + 2;  // Druck + Versand + Bestätigung und Zahlung
-    var d = new Date(liefer), n = 0;
-    while (n < tage) { d.setDate(d.getDate() - 1); var w = d.getDay(); if (w !== 0 && w !== 6) n++; }
-    if (heute > d) return;
-    var el = document.createElement("aside"); el.className = "aktion"; el.setAttribute("aria-label", "Hinweis zu Weihnachten");
-    var tag = d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" });
-    el.innerHTML = '<p>Als Geschenk zu Weihnachten: Bestellen Sie bis <strong>' + esc(tag) + '</strong>, dann kommt es nach unseren Richtwerten rechtzeitig an.' + (/^shop/.test(seite) ? "" : ' <a href="' + ROOT + 'shop.html">Zum Shop</a>') + '</p><button type="button" aria-label="Hinweis schließen">×</button>';
-    $("button", el).addEventListener("click", function () { el.remove(); try { sessionStorage.setItem("sw_aktion_zu", "1"); } catch (e) { /* egal */ } });
-    document.body.insertBefore(el, $(".site-header") || document.body.firstChild);
-  })();
-
   // Start: Zusatzfunktionen auf statischen Produktseiten und der Shopseite
   if ($("#kaufen") && !$("#produkt-dyn")) {
     initPreview(); initGallery(); addMerkLink($("#kaufen")); trackSeen($("#kaufen").dataset.id);
@@ -857,7 +883,7 @@
   // Aufbau beim Scrollen: markierte Elemente bauen sich einmal in Stufen auf, wenn sie ins Bild kommen
   (function () {
     if (!("IntersectionObserver" in window) || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
-    var SEL = "main h2:not(.card h2), main .datei, .materialliste li, .ablauf li, .spaltenliste > div, .card";
+    var SEL = "main .datei, .materialliste li, .ablauf li, .spaltenliste > div";
     // Kein IntersectionObserver: Chrome zählt ein weggeschnittenes Ziel (clip-path) als unsichtbar und löst nie aus
     var pending = [], queued = false;
     function check() {

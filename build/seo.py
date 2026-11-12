@@ -1,9 +1,7 @@
 """Suchmaschinen- und KI-Auffindbarkeit: Open Graph, strukturierte Daten, llms.txt, Teilen-Bild.
 
-Ohne Domain bleibt alles relativ (Upload auf beliebige Domain). Für den Livegang mit fester Domain:
-  python3 build/build.py --live                      (Domain aus build/config.py)
-  python3 build/build.py --domain https://schichtatelier.de
-setzt zusätzlich kanonische Adressen, absolute Sitemap, og:url und og:image.
+Absolute Adressen (Sitemap, robots.txt, Canonical, og:url, og:image, JSON-LD) tragen den Platzhalter {{SITE_URL}};
+der Uploader ersetzt ihn durch die Live-Adresse. Nur zum lokalen Prüfen: python3 build/build.py --domain https://beispiel.de
 """
 import os, sys, json, html
 import config as C
@@ -13,17 +11,18 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", "website-fertig"))
 
 
+PLATZHALTER = "{{SITE_URL}}"   # Der Uploader ersetzt ihn beim Hochladen durch die Live-Adresse.
+
+
 def site_url():
-    if "--live" in sys.argv:
-        return getattr(C, "DOMAIN", "").rstrip("/")
     for i, a in enumerate(sys.argv):
         if a == "--domain" and i + 1 < len(sys.argv):
             return sys.argv[i + 1].rstrip("/")
-    return os.environ.get("SITE_URL", "").rstrip("/")
+    return os.environ.get("SITE_URL", PLATZHALTER).rstrip("/")
 
 
 SITE = site_url()
-if SITE and not SITE.startswith("https://"):
+if SITE != PLATZHALTER and not SITE.startswith("https://"):
     raise SystemExit("--domain muss mit https:// beginnen")
 
 
@@ -118,7 +117,7 @@ def llms_txt(materialien, versand_pauschale, versandfrei_ab):
           "- [Versand und Zahlung](versand.html)",
           "- [Über uns](ueber-uns.html)",
           "- [Kontakt und Anfrage](kontakt.html)", ""]
-    if SITE:  # Links absolut machen, wenn die Domain bekannt ist
+    if SITE != PLATZHALTER:  # nur bei --domain: absolute Links
         import re
         z = [re.sub(r"\]\(([^)]+)\)", lambda m: f"]({SITE}/{m.group(1)})", l) for l in z]
     return "\n".join(z)

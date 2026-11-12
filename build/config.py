@@ -20,6 +20,4 @@ VERSANDLAND = "Deutschland"
 PRODUKTIONSZEIT = "2 bis 4 Werktage"
 LIEFERZEIT = "2 bis 3 Werktage"
 
-# Domain für den Livegang. Wird nur mit "python3 build/build.py --live" verwendet (kanonische Adressen, Sitemap, Teilen-Bild).
-# Der normale Export bleibt ohne feste Domain, wie es der Uploader verlangt.
-DOMAIN = "https://schichtatelier.de"
+# Domain des Betriebs (nur zur Information): schichtatelier.de. Im Export steht {{SITE_URL}}, den der Uploader ersetzt.

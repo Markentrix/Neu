@@ -38,6 +38,7 @@ def SVG_LOGO_ID(uid):
 
 
 def head(title, desc, rel, canonical_name, extra=""):
+    title = title.replace(" · ", " | ")
     return f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -45,17 +46,18 @@ def head(title, desc, rel, canonical_name, extra=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
-<meta name="theme-color" content="#f3f5f1">
+<meta name="theme-color" content="#f3f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14291f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="{rel}favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="{rel}apple-touch-icon.png">
 <link rel="manifest" href="{rel}site.webmanifest">
-<link rel="preload" href="{rel}assets/fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{rel}assets/fonts/AbrilFatface.woff2" as="font" type="font/woff2" crossorigin>
 <script>try{{if(sessionStorage.getItem("sw_logo"))document.documentElement.classList.add("seen")}}catch(e){{}}</script>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
 {seo.meta(canonical_name, title, desc, extra)}{extra}</head>
 <body data-root="{rel}">
 <a class="skip" href="#main">Zum Inhalt springen</a>
+<script>(function(){{try{{var d=new Date();d.setHours(0,0,0,0);var l=new Date(d.getFullYear(),11,23);if(d>l||d.getMonth()<10||/^(warenkorb|danke|404|produkt)/.test(location.pathname.split("/").pop()))return;if(sessionStorage.getItem("sw_aktion_zu"))return;var n=0,t=new Date(l);while(n<9){{t.setDate(t.getDate()-1);var w=t.getDay();if(w!==0&&w!==6)n++}}if(d>t)return;var s=/^shop/.test(location.pathname.split("/").pop());var e=document.createElement("aside");e.className="aktion";e.setAttribute("aria-label","Hinweis zu Weihnachten");var p=document.createElement("p");p.appendChild(document.createTextNode("Als Geschenk zu Weihnachten: Bestellen Sie bis "));var st=document.createElement("strong");st.textContent=t.toLocaleDateString("de-DE",{{weekday:"long",day:"numeric",month:"long"}});p.appendChild(st);p.appendChild(document.createTextNode(", dann kommt es nach unseren Richtwerten rechtzeitig an."));if(!s){{var a=document.createElement("a");a.href="{rel}shop.html";a.textContent="Zum Shop";p.appendChild(document.createTextNode(" "));p.appendChild(a)}}var c=document.createElement("button");c.type="button";c.setAttribute("aria-label","Hinweis schließen");c.textContent="×";c.onclick=function(){{e.remove();try{{sessionStorage.setItem("sw_aktion_zu","1")}}catch(x){{}}}};e.appendChild(p);e.appendChild(c);document.body.insertBefore(e,document.querySelector(".skip").nextSibling)}}catch(x){{}}}})()</script>
 """
 
 
@@ -82,7 +84,11 @@ def header(rel, current=""):
 """
 
 
-def footer(rel):
+LEISTE_SEITEN = ("index", "shop", "service", "material", "faq", "ueber")
+
+
+def footer(rel, current=""):
+    leiste = (f'<nav class="aktionsleiste" aria-label="Schnellzugriff"><a href="{TEL_HREF}">Anrufen</a><a class="leiste-haupt" href="{rel}kontakt.html">Angebot anfordern</a></nav>\n' if current in LEISTE_SEITEN else "")
     return f"""</main>
 <footer class="site-footer">
   <div class="wrap">
@@ -97,25 +103,12 @@ def footer(rel):
         </div>
       </div>
       <div>
-        <h2>Kaufen und anfragen</h2>
+        <h2>Rechtliches</h2>
         <ul>
-          <li><a href="{rel}shop.html">Shop</a></li>
-          <li><a href="{rel}gutschein.html">Geschenkgutschein</a></li>
-          <li><a href="{rel}druckservice.html">Druckservice</a></li>
-          <li><a href="{rel}kontakt.html">Angebot anfordern</a></li>
-          <li><a href="{rel}versand.html">Versand und Zahlung</a></li>
-        </ul>
-      </div>
-      <div>
-        <h2>Wissen und Recht</h2>
-        <ul>
-          <li><a href="{rel}materialien.html">Materialien</a></li>
-          <li><a href="{rel}faq.html">Fragen und Antworten</a></li>
-          <li><a href="{rel}ueber-uns.html">Über uns</a></li>
           <li><a href="{rel}impressum.html">Impressum</a></li>
           <li><a href="{rel}datenschutz.html">Datenschutz</a></li>
           <li><a href="{rel}agb.html">AGB</a></li>
-          <li><a href="{rel}widerruf.html">Widerrufsrecht</a></li>
+          <li><a href="{rel}widerruf.html">Vertrag widerrufen</a></li>
           <li><a href="{rel}barrierefreiheit.html">Barrierefreiheit</a></li>
           <li><span data-mk="cookies"></span></li>
         </ul>
@@ -128,8 +121,8 @@ def footer(rel):
     </div>
   </div>
 </footer>
-<script src="{rel}assets/js/produkte.js"></script>
-<script src="{rel}assets/js/shop.js"></script>
+{leiste}<script src="{rel}assets/js/produkte.js" defer></script>
+<script src="{rel}assets/js/shop.js" defer></script>
 </body>
 </html>
 """
@@ -139,7 +132,7 @@ def page(name, title, desc, body, current="", rel="", extra=""):
     out = os.path.join(ROOT, name)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
-        f.write(head(title, desc, rel, name, extra + ("" if "noindex" in extra else seo.breadcrumb(name, title))) + header(rel, current) + body + footer(rel))
+        f.write(head(title, desc, rel, name, extra + ("" if "noindex" in extra else seo.breadcrumb(name, title))) + header(rel, current) + body + footer(rel, "" if name.startswith("produkt") else current))
 
 
 def bild(p, rel):
@@ -160,7 +153,7 @@ def card(p, rel, pos, h="h3"):
     action = (f'<a class="btn btn-card" href="{href}">Text und Farbe wählen</a>' if p.get("text")
               else f'<button class="btn btn-card" type="button" data-add="{p["id"]}">In den Warenkorb</button>')
     return f"""<article class="card" data-kat="{p['kat']}" data-tags="{' '.join(p['tags'])}" data-preis="{p['preis']}" data-name="{E(p['name'])}" data-pos="{pos}" data-id="{E(p['id'])}" data-suche="{E(' '.join([p['name'], p['kurz'], p.get('material', '')]).lower())}">
-  <a class="card-img" href="{href}" tabindex="-1" aria-hidden="true"><img src="{bild(p, rel)[0]}" width="{bild(p, rel)[1]}" height="{bild(p, rel)[2]}" alt="" loading="lazy"></a>
+  <a class="card-img" href="{href}" tabindex="-1" aria-hidden="true"><img src="{bild(p, rel)[0]}" width="{bild(p, rel)[1]}" height="{bild(p, rel)[2]}" alt="" loading="lazy" decoding="async"></a>
   <div class="card-body">
     <{h}><a href="{href}">{E(p['name'])}</a></{h}>
     <p class="small">{E(p['kurz'])}</p>
@@ -190,8 +183,8 @@ def build_index():
     body = f"""<section class="hero-dark on-deep">
   <div class="hero-in">
     <div class="hero-copy">
-      <h1>Gedruckt in Celle, Schicht für Schicht.</h1>
-      <p>Kleine Dinge aus dem 3D-Drucker von {E(C.INHABER)}: Deko, Geschenke und Teile nach Ihrer Datei. Jedes Stück entsteht erst nach Ihrer Bestellung.</p>
+      <h1>3D-Druck aus Celle.</h1>
+      <p>Schicht für Schicht gedruckt von {E(C.INHABER)}: Deko, Geschenke und Teile nach Ihrer Datei. Jedes Stück entsteht erst nach Ihrer Bestellung.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="shop.html">Im Shop ansehen</a>
         <a class="textlink" href="druckservice.html">Eigene Datei drucken lassen</a>
@@ -249,7 +242,7 @@ def build_index():
   </div>
 </section>
 """
-    page("index.html", f"{C.MARKE} · 3D-Druck aus Celle, Shop und Service", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index", "", '<link rel="preload" as="image" href="assets/img/hero.webp" imagesrcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" imagesizes="(max-width: 860px) 100vw, 50vw" type="image/webp" fetchpriority="high">\n' + seo.ld(seo.organisation()) + seo.ld(seo.website()))
+    page("index.html", f"3D-Druck in Celle · {C.MARKE}", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index", "", '<link rel="preload" as="image" href="assets/img/hero.webp" imagesrcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" imagesizes="(max-width: 860px) 100vw, 50vw" type="image/webp" fetchpriority="high">\n' + seo.ld(seo.organisation()) + seo.ld(seo.website()))
 
 
 # ---------------------------------------------------------------- Shop
@@ -275,12 +268,12 @@ def build_shop():
     </div>
     <p class="small muted" id="treffer" aria-live="polite">{str(len(AKTIV)) + " Artikel" if AKTIV else ""}</p>
     <p id="keine-treffer" hidden>Dazu haben wir nichts gefunden. <button type="button" class="textlink" id="suche-zurueck">Suche zurücksetzen</button> oder <a href="kontakt.html">fragen Sie uns nach Ihrem Wunsch</a>.</p>
-    <div class="grid" id="shop-grid">{cards}{skel}{gutschein_card("", "h2")}</div>
+    <div class="grid{" fertig" if AKTIV else ""}" id="shop-grid">{cards}{skel}{gutschein_card("", "h2")}</div>
     <div id="zuletzt-host"></div>
   </div>
 </section>
 """
-    page("shop.html", f"Shop · Alle 3D-Druck-Artikel · {C.MARKE}", "Alle Artikel von Schichtatelier: auf Bestellung in Celle gedruckt, Farbe wählbar, Versand oder Abholung, Zahlung per PayPal.", body, "shop")
+    page("shop.html", f"3D-Druck-Shop aus Celle · {C.MARKE}", "Alle Artikel von Schichtatelier: auf Bestellung in Celle gedruckt, Farbe wählbar, Versand oder Abholung, Zahlung per PayPal.", body, "shop")
 
 
 # ---------------------------------------------------------------- Produktseiten
@@ -383,7 +376,7 @@ def build_product_dyn():
 # ---------------------------------------------------------------- Gutschein
 def gutschein_card(rel, h="h3"):
     return f"""<article class="card card-gutschein" data-kat="geschenk" data-preis="10" data-name="Geschenkgutschein" data-pos="999">
-  <a class="card-img" href="{rel}gutschein.html" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/gutschein.webp" width="800" height="600" alt="" loading="lazy"></a>
+  <a class="card-img" href="{rel}gutschein.html" tabindex="-1" aria-hidden="true"><img src="{rel}assets/img/produkte/gutschein.webp" width="800" height="600" alt="" loading="lazy" decoding="async"></a>
   <div class="card-body">
     <{h}><a href="{rel}gutschein.html">Geschenkgutschein</a></{h}>
     <p class="small muted" style="margin:0">Wunschbetrag ab 10 €, als Karte per Post oder zum Ausdrucken per E-Mail. 3 Jahre gültig.</p>
@@ -647,8 +640,37 @@ def build_agb():
 def build_widerruf():
     body = f"""<section class="section-tight">
   <div class="wrap prose">
-    <h1>Widerrufsbelehrung</h1>
-    <h2>Widerrufsrecht</h2>
+    <h1>Vertrag widerrufen</h1>
+    <p>Sie können einen online geschlossenen Vertrag hier in zwei Schritten widerrufen: erst Ihre Angaben, dann die Bestätigung. Sie erhalten eine Eingangsbestätigung mit Vorgangsnummer.</p>
+    <form class="form" id="widerrufsformular" data-stufe="1">
+      <div class="alert" role="alert"></div>
+      <div class="w-felder">
+        <p>Hiermit widerrufe ich den von mir abgeschlossenen Vertrag über den Kauf der folgenden Waren:</p>
+        <div class="field"><label for="w-ref">Vorgangsnummer <span class="muted">(steht in Ihrer Bestätigung, optional)</span></label><input type="text" id="w-ref" name="ref" autocomplete="off" maxlength="40"><p class="msg"></p></div>
+        <div class="field"><label for="w-ware">Bestellte Waren</label><textarea id="w-ware" name="nachricht" required data-err="Bitte die Waren angeben, die Sie widerrufen."></textarea><p class="msg"></p></div>
+        <div class="row">
+          <div class="field"><label for="w-bestellt">Bestellt am</label><input type="date" id="w-bestellt" name="bestellt_am" required data-err="Bitte das Bestelldatum angeben."><p class="msg"></p></div>
+          <div class="field"><label for="w-erhalten">Erhalten am <span class="muted">(optional)</span></label><input type="date" id="w-erhalten" name="erhalten_am"><p class="msg"></p></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="w-name">Name des Verbrauchers</label><input type="text" id="w-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
+          <div class="field"><label for="w-email">E-Mail</label><input type="email" id="w-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
+        </div>
+        <div class="field"><label for="w-adr">Anschrift des Verbrauchers</label><input type="text" id="w-adr" name="anschrift" required autocomplete="street-address" data-err="Bitte Ihre Anschrift eintragen."><p class="msg"></p></div>
+        <div class="field hp" aria-hidden="true"><label for="w-web">Website</label><input type="text" id="w-web" name="website" tabindex="-1" autocomplete="off"></div>
+        <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir den Widerruf nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung des Widerrufs gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
+      </div>
+      <div class="w-pruefen" hidden>
+        <h2 class="sub">Bitte prüfen</h2>
+        <p>Mit dem Knopf „Widerruf bestätigen“ widerrufen Sie verbindlich.</p>
+        <dl class="specs" id="w-zusammenfassung"></dl>
+        <button class="btn btn-ghost" type="button" id="w-zurueck">Angaben ändern</button>
+      </div>
+      <button class="btn btn-primary" type="submit" id="w-weiter">Weiter zur Bestätigung</button>
+      <p class="small muted">Alternativ per E-Mail an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a> oder per Post an die Anschrift in der Belehrung unten.</p>
+    </form>
+
+    <h2>Widerrufsbelehrung</h2>
     <p>Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag, an dem Sie oder ein von Ihnen benannter Dritter, der nicht der Beförderer ist, die Waren in Besitz genommen haben bzw. hat.</p>
     <p>Um Ihr Widerrufsrecht auszuüben, müssen Sie uns ({E(C.FIRMA)}, {E(C.INHABER)}, {E(C.STRASSE)}, {E(C.PLZ_ORT)}, Telefon {E(C.TELEFON)}, E-Mail {E(C.EMAIL)}) mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief oder eine E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen, informieren. Sie können dafür das unten stehende Formular verwenden, das ist jedoch nicht vorgeschrieben. Zur Wahrung der Widerrufsfrist reicht es aus, dass Sie die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.</p>
     <h2>Folgen des Widerrufs</h2>
@@ -656,31 +678,10 @@ def build_widerruf():
     <p>Sie haben die Waren unverzüglich und in jedem Fall spätestens binnen vierzehn Tagen ab dem Tag, an dem Sie uns über den Widerruf dieses Vertrags unterrichten, an uns zurückzusenden oder zu übergeben. Die Frist ist gewahrt, wenn Sie die Waren vor Ablauf der Frist von vierzehn Tagen absenden. Sie tragen die unmittelbaren Kosten der Rücksendung der Waren. Sie müssen für einen etwaigen Wertverlust der Waren nur aufkommen, wenn dieser Wertverlust auf einen zur Prüfung der Beschaffenheit, Eigenschaften und Funktionsweise der Waren nicht notwendigen Umgang mit ihnen zurückzuführen ist.</p>
     <h2>Ausschluss des Widerrufsrechts</h2>
     <p>Das Widerrufsrecht besteht nicht bei Verträgen zur Lieferung von Waren, die nicht vorgefertigt sind und für deren Herstellung eine individuelle Auswahl oder Bestimmung durch den Verbraucher maßgeblich ist oder die eindeutig auf die persönlichen Bedürfnisse des Verbrauchers zugeschnitten sind (§ 312g Abs. 2 Nr. 1 BGB). Das betrifft in unserem Shop die Artikel mit Wunschtext oder eigenem Foto.</p>
-
-    <h2 id="formular">Widerrufsformular</h2>
-    <p>Wenn Sie den Vertrag widerrufen wollen, füllen Sie dieses Formular aus. Sie erhalten eine Eingangsbestätigung mit Vorgangsnummer.</p>
-    <form class="form" id="widerrufsformular">
-      <div class="alert" role="alert"></div>
-      <p>Hiermit widerrufe ich den von mir abgeschlossenen Vertrag über den Kauf der folgenden Waren:</p>
-      <div class="field"><label for="w-ware">Bestellte Waren und Vorgangsnummer</label><textarea id="w-ware" name="nachricht" required data-err="Bitte die Waren und die Vorgangsnummer angeben."></textarea><p class="msg"></p></div>
-      <div class="row">
-        <div class="field"><label for="w-bestellt">Bestellt am</label><input type="date" id="w-bestellt" name="bestellt_am" required data-err="Bitte das Bestelldatum angeben."><p class="msg"></p></div>
-        <div class="field"><label for="w-erhalten">Erhalten am</label><input type="date" id="w-erhalten" name="erhalten_am"><p class="msg"></p></div>
-      </div>
-      <div class="row">
-        <div class="field"><label for="w-name">Name des Verbrauchers</label><input type="text" id="w-name" name="name" required autocomplete="name" data-err="Bitte Ihren Namen eintragen."><p class="msg"></p></div>
-        <div class="field"><label for="w-email">E-Mail</label><input type="email" id="w-email" name="email" required autocomplete="email" data-err="Bitte Ihre E-Mail-Adresse eintragen."><p class="msg"></p></div>
-      </div>
-      <div class="field"><label for="w-adr">Anschrift des Verbrauchers</label><input type="text" id="w-adr" name="anschrift" required autocomplete="street-address" data-err="Bitte Ihre Anschrift eintragen."><p class="msg"></p></div>
-      <div class="field hp" aria-hidden="true"><label for="w-web">Website</label><input type="text" id="w-web" name="website" tabindex="-1" autocomplete="off"></div>
-      <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir den Widerruf nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung des Widerrufs gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
-      <button class="btn btn-primary" type="submit">Widerruf senden</button>
-      <p class="small muted">Alternativ per E-Mail an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a> oder per Post an die oben genannte Anschrift.</p>
-    </form>
   </div>
 </section>
 """
-    page("widerruf.html", f"Widerrufsrecht · {C.MARKE}", "Widerrufsbelehrung und Widerrufsformular für Bestellungen im Schichtatelier-Shop. 14 Tage Widerrufsrecht, Ausnahme für personalisierte Artikel.", body)
+    page("widerruf.html", f"Vertrag widerrufen | {C.MARKE}", "Vertrag online widerrufen: Formular mit Bestätigung und Widerrufsbelehrung für Bestellungen bei Schichtatelier. 14 Tage Widerrufsrecht, Ausnahme für personalisierte Artikel.", body, "")
 
 
 # ---------------------------------------------------------------- Impressum
@@ -970,7 +971,7 @@ def build_service():
   </div>
 </section>
 """
-    page("druckservice.html", f"3D-Druckservice für eigene Dateien · {C.MARKE}", "Eigene Datei, Ersatzteil oder Kleinserie in PLA, PETG, ABS oder TPU drucken lassen: Preis und Lieferzeit vor dem Druck, ab 1 Stück.", body, "service")
+    page("druckservice.html", f"3D-Druckservice in Celle · {C.MARKE}", "Eigene Datei, Ersatzteil oder Kleinserie in PLA, PETG, ABS oder TPU drucken lassen: Preis und Lieferzeit vor dem Druck, ab 1 Stück.", body, "service")
 
 
 # ---------------------------------------------------------------- FAQ

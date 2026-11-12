@@ -1,2 +1,5 @@
-__pycache__/
 *.pyc
+.taste-skill/
+__pycache__/
+node_modules
+shots/

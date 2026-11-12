@@ -76,5 +76,9 @@ und `brand/schichtatelier-wortmarke*.svg` (ohne Zeile und Signatur). Die Wortmar
 
 ## Suchmaschinen und KI-Auffindbarkeit
 
-`python3 build/build.py` erzeugt Open Graph, strukturierte Daten (Betrieb, Website, Breadcrumbs, FAQ), `llms.txt` und das Teilen-Bild `assets/img/teilen.jpg`. Ohne Domain bleiben alle Adressen relativ.
-Für den Livegang: `python3 build/build.py --live` (Domain `schichtatelier.de` steht in `build/config.py`) oder `--domain https://IHRE-DOMAIN` setzt zusätzlich kanonische Adressen, absolute Sitemap-Einträge, `Sitemap:` in der robots.txt, og:url und og:image. Danach `website-fertig/` hochladen.
+`python3 build/build.py` erzeugt Open Graph, strukturierte Daten (Betrieb, Website, Breadcrumbs, FAQ), `llms.txt` und das Teilen-Bild `assets/img/teilen.jpg`.
+Absolute Adressen (sitemap.xml, `Sitemap:` in der robots.txt, Canonical, og:url, og:image, JSON-LD) tragen den Platzhalter `{{SITE_URL}}` ohne Slash am Ende. Der Uploader ersetzt ihn beim Hochladen durch die Live-Adresse (zum Beispiel `https://schichtatelier.de`). Nur zum lokalen Prüfen gibt es `python3 build/build.py --domain https://beispiel.de`.
+
+## Prüfen
+
+Neben `website-fertig/` liegen `mock.mjs` (Portal-Nachbau auf Port 8787) und `pruefe.mjs` (Messung bei 1440, 768, 390 und 320 px). `node mock.mjs`, dann `node pruefe.mjs /seite.html`. Beide gehören nicht in den Upload.
