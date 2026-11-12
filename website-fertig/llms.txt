@@ -1,0 +1,29 @@
+# Schichtatelier
+
+> Schichtatelier ist ein kleines 3D-Druck-Atelier in Celle. Christian Wien druckt Deko, Geschenke und Teile nach eigener Datei auf einem Bambu Lab X1 Carbon, jeweils erst nach der Bestellung.
+
+## Das Wichtigste
+
+- Ort: Heinrich-Hüdig-Str. 1, 29227 Celle. Abholung nach Terminabsprache.
+- Kontakt: info@markentrix.de, 0176 20370429
+- Produktion: 2 bis 4 Werktage, danach Versand (2 bis 3 Werktage). Alle Zeiten sind Richtwerte.
+- Versand innerhalb Deutschlands: 4,90 Euro, ab 49,00 Euro Bestellwert kostenlos. Abholung in Celle kostenlos.
+- Zahlung per PayPal oder bei Abholung. Bestellungen werden per E-Mail bestätigt.
+- Druckservice: eigene Dateien (STL, 3MF, STEP, OBJ), Ersatzteile, Einzelstücke und Kleinserien ab 1 Stück, bis 25 cm Kantenlänge, Preis und Lieferzeit vor dem Druck.
+
+## Materialien (Wärmegrenze laut Seite)
+
+- PLA: Dekoration, Halter, Figuren, Prototypen, bis 55 °C
+- PETG: Küche, Bad, Clips, Gehäuse, bis 75 °C
+- ABS: Ersatzteile, Teile, die warm werden, bis 95 °C
+- TPU: Dichtungen, Puffer, Hüllen, Griffe, bis 80 °C
+
+## Seiten
+
+- [Shop](shop.html): Artikel mit Farbwahl, teils mit Wunschtext
+- [Druckservice](druckservice.html): eigene Datei drucken lassen
+- [Materialien](materialien.html): PLA, PETG, ABS und TPU im Vergleich
+- [Fragen und Antworten](faq.html)
+- [Versand und Zahlung](versand.html)
+- [Über uns](ueber-uns.html)
+- [Kontakt und Anfrage](kontakt.html)

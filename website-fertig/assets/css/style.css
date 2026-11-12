@@ -548,7 +548,7 @@ textarea{min-height:140px;resize:vertical}
 
 
 /* ===== Zusatzfunktionen: Aktionsband, Vorschau, Galerie, Suche, Merkliste ===== */
-.aktion{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:var(--on-deep);padding:0 8px 0 16px;font-size:var(--t-s);text-align:center}
+.aktion{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--deep);color:var(--on-deep);padding:0 8px 0 16px;font-size:var(--t-s);text-align:center}
 .aktion p{margin:0;padding:10px 0;line-height:1.35}
 .aktion strong{color:var(--accent-hi)}
 .aktion a{color:var(--on-deep);text-decoration:underline;margin-left:.4em;white-space:nowrap}
@@ -589,3 +589,17 @@ textarea{min-height:140px;resize:vertical}
 
 @media (max-width:640px){.aktion{text-align:left;justify-content:space-between}}
 @media (prefers-reduced-motion:reduce){.product-media.wechsel img{animation:none}.vorschau-tile{transition:none}}
+
+
+/* Windows-Kontrastmodus: Knöpfe, Karten und Balken behalten sichtbare Kanten */
+@media (forced-colors:active){
+  .btn,.chip,.merk,.gal-btn,.swatch span,.qty,.vorschau-tile{border:2px solid ButtonText}
+  .zeit-bar span,.treppe span{border:1px solid CanvasText}
+  .site-header::after{background:Highlight}
+  .hero-photo::after{background:Highlight}
+}
+
+/* Schmale Bildschirme (320 px): lange Wörter trennen, Grid-Kinder dürfen schrumpfen */
+h1,h2{overflow-wrap:break-word;hyphens:auto}
+.product>*{min-width:0}
+@media (max-width:420px){.product-info .price small{display:block;margin-top:2px}}

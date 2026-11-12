@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import config as C
 from produkte import PRODUKTE, FARBEN, KATEGORIEN, VERSAND_PAUSCHALE, VERSANDFREI_AB
 from materialien import MATERIALIEN, VERGLEICH, FAQ
-import portal_katalog
+import portal_katalog, seo
 _PORTAL = portal_katalog.lesen()                                # build/katalog-portal.json, falls vorhanden
 if _PORTAL:                                                     # Artikel, Farben, Kategorien und Versand aus dem Portal
     AKTIV = portal_katalog.als_artikel(_PORTAL)
@@ -53,7 +53,7 @@ def head(title, desc, rel, canonical_name, extra=""):
 <link rel="preload" href="{rel}assets/fonts/AbrilFatface.woff2" as="font" type="font/woff2" crossorigin>
 <script>try{{if(sessionStorage.getItem("sw_logo"))document.documentElement.classList.add("seen")}}catch(e){{}}</script>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
-{extra}</head>
+{seo.meta(canonical_name, title, desc, extra)}{extra}</head>
 <body data-root="{rel}">
 <a class="skip" href="#main">Zum Inhalt springen</a>
 """
@@ -114,6 +114,7 @@ def footer(rel):
           <li><a href="{rel}datenschutz.html">Datenschutz</a></li>
           <li><a href="{rel}agb.html">AGB</a></li>
           <li><a href="{rel}widerruf.html">Widerrufsrecht</a></li>
+          <li><a href="{rel}barrierefreiheit.html">Barrierefreiheit</a></li>
           <li><span data-mk="cookies"></span></li>
         </ul>
       </div>
@@ -136,7 +137,7 @@ def page(name, title, desc, body, current="", rel="", extra=""):
     out = os.path.join(ROOT, name)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
-        f.write(head(title, desc, rel, name, extra) + header(rel, current) + body + footer(rel))
+        f.write(head(title, desc, rel, name, extra + ("" if "noindex" in extra else seo.breadcrumb(name, title))) + header(rel, current) + body + footer(rel))
 
 
 def bild(p, rel):
@@ -248,7 +249,7 @@ def build_index():
   </div>
 </section>
 """
-    page("index.html", f"{C.MARKE} · 3D-gedruckte Alltagshelfer kaufen", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index")
+    page("index.html", f"{C.MARKE} · 3D-Druck aus Celle, Shop und Service", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index", "", seo.ld(seo.organisation()) + seo.ld(seo.website()))
 
 
 # ---------------------------------------------------------------- Shop
@@ -540,7 +541,7 @@ def build_contact():
   </div>
 </section>
 """
-    page("kontakt.html", f"Eigene Datei drucken lassen · {C.MARKE}", "Eigene STL-Datei, Ersatzteil oder Kleinserie anfragen: Preis und Lieferzeit vor dem Druck, gedruckt in Celle.", body, "kontakt")
+    page("kontakt.html", f"Kontakt und Anfrage · {C.MARKE}", "Eigene STL-Datei, Ersatzteil oder Kleinserie anfragen: Preis und Lieferzeit vor dem Druck, gedruckt in Celle.", body, "kontakt")
 
 
 # ---------------------------------------------------------------- Über uns
@@ -818,14 +819,18 @@ def build_data():
         f.write("window.SW_PRODUKTE=" + json.dumps(data, ensure_ascii=False) + ";\n")
         f.write("window.SW_KATEGORIEN=" + json.dumps(KAT_AKTIV, ensure_ascii=False) + ";\n")
         f.write("window.SW_STATIC=" + json.dumps([p["id"] for p in AKTIV]) + ";\n")
-    pages = ["index.html", "shop.html", "druckservice.html", "materialien.html", "faq.html", "kontakt.html", "versand.html", "ueber-uns.html", "agb.html", "widerruf.html", "impressum.html", "datenschutz.html", "gutschein.html"] + [f"material/{m['id']}.html" for m in MATERIALIEN] + [f"produkt/{p['id']}.html" for p in AKTIV]
+    pages = ["index.html", "shop.html", "druckservice.html", "materialien.html", "faq.html", "kontakt.html", "versand.html", "ueber-uns.html", "agb.html", "widerruf.html", "impressum.html", "datenschutz.html", "gutschein.html", "barrierefreiheit.html"] + [f"material/{m['id']}.html" for m in MATERIALIEN] + [f"produkt/{p['id']}.html" for p in AKTIV]
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
         for u in pages:
-            f.write(f"  <url><loc>/{u}</loc><lastmod>{TODAY}</lastmod></url>\n")
+            f.write(f"  <url><loc>{seo.SITE}/{'' if u == 'index.html' else u}</loc></url>\n")
         f.write("</urlset>\n")
     with open(os.path.join(ROOT, "robots.txt"), "w") as f:
         f.write("User-agent: *\nAllow: /\nDisallow: /warenkorb.html\nDisallow: /danke.html\n")
+        if seo.SITE: f.write(f"\nSitemap: {seo.SITE}/sitemap.xml\n")
+    with open(os.path.join(ROOT, "llms.txt"), "w", encoding="utf-8") as f:
+        f.write(seo.llms_txt(MATERIALIEN, VERSAND_PAUSCHALE, VERSANDFREI_AB))
+    seo.teilen_bild()
     with open(os.path.join(ROOT, "site.webmanifest"), "w", encoding="utf-8") as f:
         json.dump({"name": f"{C.MARKE} {C.CLAIM}", "short_name": C.MARKE, "start_url": "index.html", "display": "browser",
                    "background_color": "#f6f4ef", "theme_color": "#b8763f",
@@ -916,7 +921,7 @@ def build_materials():
   </div>
 </section>
 """
-        page(f"material/{m['id']}.html", f"{m['titel']} · {C.MARKE}", (m["claim"] + " " + m["kurz"])[:155], body, "material", rel)
+        page(f"material/{m['id']}.html", f"{m['titel']} · {C.MARKE}", (m["claim"] + " " + m["kurz"])[:155], body, "material", rel, seo.faq(m["faq"]))
 
 
 # ---------------------------------------------------------------- Druckservice
@@ -980,11 +985,46 @@ def build_faq():
   </div>
 </section>
 """
-    page("faq.html", f"Fragen und Antworten · {C.MARKE}", "Antworten zu Lieferzeit, Zahlung, Materialwahl, Dateiformaten, Rückgabe und Reklamation im Schichtatelier-Shop.", body, "faq")
+    page("faq.html", f"Fragen und Antworten · {C.MARKE}", "Antworten zu Lieferzeit, Zahlung, Materialwahl, Dateiformaten, Rückgabe und Reklamation im Schichtatelier-Shop.", body, "faq", "", seo.faq([qa for _, items in FAQ for qa in items]))
+
+
+def build_a11y():
+    body = f"""<section class="page-head">
+  <div class="wrap">
+    <h1>Barrierefreiheit</h1>
+    <p class="lead">Die Seite soll sich mit Tastatur, Screenreader und großer Schrift bedienen lassen. Hier steht, was dafür gemacht ist und was wir nicht geprüft haben.</p>
+  </div>
+</section>
+<section class="section-tight">
+  <div class="wrap prose">
+    <h2>Was umgesetzt ist</h2>
+    <ul>
+      <li>Alles lässt sich mit der Tastatur bedienen. Der Fokus ist sichtbar, ein Sprunglink führt direkt zum Inhalt.</li>
+      <li>Text und Bedienelemente haben mindestens 4,5 zu 1 Kontrast, auch im Dunkelmodus Ihres Geräts.</li>
+      <li>Die Seite lässt sich bis 200 Prozent vergrößern, ohne seitlich zu scrollen. Antippflächen sind mindestens 44 Pixel hoch.</li>
+      <li>Alle Bilder haben einen Alternativtext. Bilder von Artikeln beschreibt der Betrieb im Portal.</li>
+      <li>Formularfehler stehen am Feld und werden vorgelesen. Eingaben bleiben bei Fehlern erhalten.</li>
+      <li>Bewegung ist auf Hinweise und den Seitenaufbau begrenzt. Wer in den Geräteeinstellungen „Bewegung reduzieren“ gewählt hat, sieht alles ohne Animation.</li>
+    </ul>
+    <h2>Wie geprüft wurde</h2>
+    <p>Mit automatischen Prüfwerkzeugen (axe und Lighthouse) und von Hand mit der Tastatur. Mit Screenreader-Nutzern wurde die Seite noch nicht getestet.</p>
+    <h2>Bekannte Einschränkungen</h2>
+    <ul>
+      <li>Die Vorschau eines Wunschtextes ist eine Grafik. Den eingegebenen Text lesen Screenreader im Eingabefeld.</li>
+      <li>Die Zahlung läuft bei PayPal. Dafür gelten deren Seiten.</li>
+    </ul>
+    <h2>Barriere gefunden?</h2>
+    <p>Schreiben Sie uns an <a href="mailto:{E(C.EMAIL)}">{E(C.EMAIL)}</a> oder rufen Sie an unter <a href="{TEL_HREF}">{E(C.TELEFON)}</a>. Wir antworten in der Regel innerhalb von zwei Werktagen und helfen auch direkt bei einer Bestellung.</p>
+    <p class="small muted">Stand: {datetime.date.today().strftime("%d.%m.%Y")}</p>
+  </div>
+</section>
+"""
+    page("barrierefreiheit.html", f"Barrierefreiheit · {C.MARKE}", "Was bei Schichtatelier für Tastatur, Screenreader und große Schrift umgesetzt ist und wie Sie eine Barriere melden.", body, "")
+
 
 
 if __name__ == "__main__":
-    for fn in (build_data, build_index, build_shop, build_products, build_product_dyn, build_voucher, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404, build_materials, build_service, build_faq):
+    for fn in (build_data, build_a11y, build_index, build_shop, build_products, build_product_dyn, build_voucher, build_cart, build_contact, build_about, build_shipping, build_agb, build_widerruf, build_imprint, build_privacy, build_thanks, build_404, build_materials, build_service, build_faq):
         fn()
     n = sum(len(f) for _, _, f in os.walk(ROOT))
     print("Fertig:", n, "Dateien in", ROOT)

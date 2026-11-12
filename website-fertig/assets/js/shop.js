@@ -42,6 +42,7 @@
   var lastCount = null;
   function updateBadge() {
     var n = cartCount(); var more = lastCount !== null && n > lastCount; lastCount = n;
+    $$(".cart-link").forEach(function (a) { a.setAttribute("aria-label", n > 0 ? "Warenkorb, " + n + " Stück" : "Warenkorb"); });
     $$(".cart-badge").forEach(function (b) {
       b.textContent = n; b.classList.toggle("show", n > 0);
       if (more) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
@@ -102,7 +103,7 @@
     document.addEventListener("click", function (e) {
       var nav = $(".nav"); if (nav.classList.contains("open") && !nav.contains(e.target)) { nav.classList.remove("open"); mb.setAttribute("aria-expanded", "false"); }
     });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $(".nav").classList.remove("open"); mb.setAttribute("aria-expanded", "false"); } });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { var nv = $(".nav"); var war = nv.classList.contains("open"); nv.classList.remove("open"); mb.setAttribute("aria-expanded", "false"); if (war && nv.contains(document.activeElement)) mb.focus(); } });
   }
 
   /* ---------- Karten (gleiches Markup wie der Generator) ---------- */
@@ -133,7 +134,7 @@
       var farbe = (form.querySelector("input[name=farbe]:checked") || {}).value || "";
       var textEl = $("#wunschtext", form);
       var text = textEl ? textEl.value.trim() : "";
-      if (textEl && textEl.required && !text) { textEl.focus(); textEl.closest(".field").classList.add("err"); return; }
+      if (textEl && textEl.required && !text) { textEl.focus(); var tf = textEl.closest(".field"); tf.classList.add("err"); markInvalid(textEl, $(".msg", tf)); return; }
       var menge = Math.min(99, Math.max(1, parseInt(qtyIn.value, 10) || 1));
       addToCart(id, farbe, text, menge);
       flyToCart($(".product-media img") || $(".product-media-main img"));
@@ -239,8 +240,13 @@
     var alt = contactLinks();
     return "Das Senden hat gerade nicht geklappt. Bitte versuchen Sie es in ein paar Minuten noch einmal" + (alt ? " oder schreiben Sie uns direkt: " + alt : "") + ".";
   }
+  var msgSeq = 0;
+  function markInvalid(el, m) {
+    el.setAttribute("aria-invalid", "true");
+    if (m) { if (!m.id) m.id = "fehler-" + (++msgSeq); el.setAttribute("aria-describedby", m.id); }
+  }
   function clearErrors(form) {
-    $$(".field", form).forEach(function (f) { f.classList.remove("err"); var m = $(".msg", f); if (m) m.textContent = ""; });
+    $$(".field", form).forEach(function (f) { f.classList.remove("err"); var m = $(".msg", f); if (m) m.textContent = ""; $$("input,select,textarea", f).forEach(function (el) { el.removeAttribute("aria-invalid"); el.removeAttribute("aria-describedby"); }); });
     var a = $(".alert", form); if (a) { a.classList.remove("show"); a.innerHTML = ""; }
   }
   function showErrors(form, errors) {
@@ -249,6 +255,7 @@
       var el = form.querySelector('[name="' + (map[name] || name) + '"]'); if (!el) return;
       var f = el.closest(".field"); if (!f) return;
       f.classList.add("err"); var m = $(".msg", f); if (m) m.textContent = errors[name]; if (!first) first = el;
+      markInvalid(el, m);
     });
     if (first) first.focus();
   }

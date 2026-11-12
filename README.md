@@ -73,3 +73,8 @@ Ohne Antwort des Portals gilt die eingebaute Liste aus `build/produkte.py`. Arti
 `python3 build/logo_lockup.py` erzeugt aus der Schrift der Website (Abril Fatface, Hanken Grotesk, Pinyon Script, alle SIL OFL, als Pfade) das lange Logo:
 `brand/schichtatelier-logo-voll*.svg` (Wortmarke mit Düse im „i“, Druckspur-Linie, „3D MANUFAKTUR“, Leistungszeile, Signatur „Y & C“, hell und dunkel, dazu PNG 2400 px)
 und `brand/schichtatelier-wortmarke*.svg` (ohne Zeile und Signatur). Die Wortmarke steht im Seitenkopf (ohne Zeilen) und im Footer (mit „3D MANUFAKTUR“), das Schicht-S bleibt Favicon, App-Icon und Siegel.
+
+## Suchmaschinen und KI-Auffindbarkeit
+
+`python3 build/build.py` erzeugt Open Graph, strukturierte Daten (Betrieb, Website, Breadcrumbs, FAQ), `llms.txt` und das Teilen-Bild `assets/img/teilen.jpg`. Ohne Domain bleiben alle Adressen relativ.
+Für den Livegang mit fester Domain: `python3 build/build.py --domain https://IHRE-DOMAIN` setzt zusätzlich kanonische Adressen, absolute Sitemap-Einträge, `Sitemap:` in der robots.txt, og:url und og:image. Danach `website-fertig/` hochladen.
