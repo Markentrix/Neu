@@ -25,8 +25,8 @@
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Schichtatelier: 3D-Druck aus Celle">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preload" as="image" href="assets/img/hero.webp" imagesrcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" imagesizes="(max-width: 860px) 100vw, 50vw" type="image/webp" fetchpriority="high">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Schichtatelier","legalName":"Schichtatelier 3D-Druck","description":"3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt auf Bestellung auf einem Bambu Lab X1 Carbon.","telephone":"0176 20370429","email":"info@markentrix.de","founder":{"@type":"Person","name":"Christian Wien"},"address":{"@type":"PostalAddress","streetAddress":"Heinrich-Hüdig-Str. 1","postalCode":"29227","addressLocality":"Celle","addressCountry":"DE"},"areaServed":{"@type":"Country","name":"Deutschland"},"knowsAbout":["3D-Druck","PLA","PETG","ABS","TPU","Ersatzteile","Geschenke"],"url":"{{SITE_URL}}/","@id":"{{SITE_URL}}/#betrieb","logo":"{{SITE_URL}}/apple-touch-icon.png","image":"{{SITE_URL}}/assets/img/teilen.jpg"}</script>
+<link rel="preload" as="image" href="assets/img/hero-m.webp" media="(max-width: 860px)" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/hero-w.webp" media="(min-width: 861px)" type="image/webp" fetchpriority="high"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Schichtatelier","legalName":"Schichtatelier 3D-Druck","description":"3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt auf Bestellung auf einem Bambu Lab X1 Carbon.","telephone":"0176 20370429","email":"info@markentrix.de","founder":{"@type":"Person","name":"Christian Wien"},"address":{"@type":"PostalAddress","streetAddress":"Heinrich-Hüdig-Str. 1","postalCode":"29227","addressLocality":"Celle","addressCountry":"DE"},"areaServed":{"@type":"Country","name":"Deutschland"},"knowsAbout":["3D-Druck","PLA","PETG","ABS","TPU","Ersatzteile","Geschenke"],"url":"{{SITE_URL}}/","@id":"{{SITE_URL}}/#betrieb","logo":"{{SITE_URL}}/apple-touch-icon.png","image":"{{SITE_URL}}/assets/img/teilen.jpg"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Schichtatelier","inLanguage":"de-DE","url":"{{SITE_URL}}/"}</script>
 </head>
 <body data-root="">
@@ -48,7 +48,11 @@
   </div>
 </header>
 <main id="main">
-<section class="hero-dark on-deep">
+<section class="hero-dark hero-poster on-deep">
+  <figure class="hero-photo">
+    <picture><source media="(max-width: 860px)" srcset="assets/img/hero-m.webp" width="900" height="1125"><img src="assets/img/hero-w.webp" width="1920" height="1000" alt="Kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett eines Bambu Lab X1 Carbon, im Hintergrund weitere frisch gedruckte Kürbisse" fetchpriority="high"></picture>
+    <figcaption>Kleiner Kürbis aus Orange Silk, frisch vom Druckbett des Bambu Lab X1 Carbon.</figcaption>
+  </figure>
   <div class="hero-in">
     <div class="hero-copy">
       <h1>3D-Druck aus Celle.</h1>
@@ -58,10 +62,6 @@
         <a class="textlink" href="druckservice.html">Eigene Datei drucken lassen</a>
       </div>
     </div>
-    <figure class="hero-photo">
-      <img src="assets/img/hero.webp" srcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" sizes="(max-width: 860px) 100vw, 50vw" width="1200" height="1200" alt="Kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett eines Bambu Lab X1 Carbon, im Hintergrund weitere frisch gedruckte Kürbisse" fetchpriority="high">
-      <figcaption>Kleiner Kürbis aus Orange Silk, frisch vom Druckbett des Bambu Lab X1 Carbon.</figcaption>
-    </figure>
   </div>
 </section>
 <div class="schichtkante" aria-hidden="true"></div>
@@ -77,7 +77,7 @@
   </div>
 </section>
 
-<section class="section-tight">
+<section class="section-tight feld-bronze">
   <div class="wrap zeit">
     <div>
       <h2>Wann es bei Ihnen ist</h2>
@@ -87,6 +87,16 @@
       <div class="zeit-bar" role="img" aria-label="Druck 2 bis 4 Werktage, danach Versand 2 bis 3 Werktage"><span class="z-order"></span><span class="z-print"></span><span class="z-ship"></span></div>
       <div class="zeit-legend"><span><strong>Tag 0</strong>Bestellung</span><span><strong>2 bis 4 Werktage</strong>Druck</span><span><strong>2 bis 3 Werktage</strong>Versand</span></div>
     </div>
+  </div>
+</section>
+<section class="section feld-flaeche">
+  <div class="wrap zeichnung-block">
+    <div class="zb-text">
+      <h2>So entsteht ein Teil.</h2>
+      <p>Der Drucker legt das Teil Schicht für Schicht aus Filament, von unten nach oben. Jede Schicht ist 0,12 bis 0,28 mm hoch. Feinere Schichten sehen glatter aus und dauern länger. Teile wachsen bis 25 cm Kantenlänge.</p>
+      <p><a class="textlink" href="druckservice.html">Was sich drucken lässt</a></p>
+    </div>
+    <figure class="zeichnung"><svg class="zsvg" viewBox="0 0 720 560" role="img" aria-label="Schematische Zeichnung: Ein Gefäß wächst Schicht für Schicht von unten nach oben, die Druckdüse zieht jede Schicht. Teile bis 25 cm, Schichthöhe 0,12 bis 0,28 Millimeter."><rect class="zl zl1" style="--i:0" x="255.0" y="489" width="150.0" height="10" rx="1.5"/><rect class="zl zl2" style="--i:1" x="253.5" y="478" width="153.1" height="10" rx="1.5"/><rect class="zl zl1" style="--i:2" x="249.5" y="467" width="161.0" height="10" rx="1.5"/><rect class="zl zl2" style="--i:3" x="244.2" y="456" width="171.6" height="10" rx="1.5"/><rect class="zl zl1" style="--i:4" x="238.6" y="445" width="182.8" height="10" rx="1.5"/><rect class="zl zl2" style="--i:5" x="233.7" y="434" width="192.6" height="10" rx="1.5"/><rect class="zl zl1" style="--i:6" x="230.6" y="423" width="198.8" height="10" rx="1.5"/><rect class="zl zl2" style="--i:7" x="229.8" y="412" width="200.4" height="10" rx="1.5"/><rect class="zl zl1" style="--i:8" x="227.7" y="401" width="204.6" height="10" rx="1.5"/><rect class="zl zl2" style="--i:9" x="224.0" y="390" width="212.0" height="10" rx="1.5"/><rect class="zl zl1" style="--i:10" x="219.5" y="379" width="220.9" height="10" rx="1.5"/><rect class="zl zl2" style="--i:11" x="215.2" y="368" width="229.6" height="10" rx="1.5"/><rect class="zl zl1" style="--i:12" x="211.7" y="357" width="236.5" height="10" rx="1.5"/><rect class="zl zl2" style="--i:13" x="210.1" y="346" width="239.9" height="10" rx="1.5"/><rect class="zl zl1" style="--i:14" x="210.7" y="335" width="238.7" height="10" rx="1.5"/><rect class="zl zl2" style="--i:15" x="213.1" y="324" width="233.9" height="10" rx="1.5"/><rect class="zl zl1" style="--i:16" x="216.7" y="313" width="226.6" height="10" rx="1.5"/><rect class="zl zl2" style="--i:17" x="221.0" y="302" width="217.9" height="10" rx="1.5"/><rect class="zl zl1" style="--i:18" x="225.5" y="291" width="208.9" height="10" rx="1.5"/><rect class="zl zl2" style="--i:19" x="229.7" y="280" width="200.6" height="10" rx="1.5"/><rect class="zl zl1" style="--i:20" x="233.0" y="269" width="194.1" height="10" rx="1.5"/><rect class="zl zl2" style="--i:21" x="234.8" y="258" width="190.4" height="10" rx="1.5"/><rect class="zl zl1" style="--i:22" x="235.6" y="247" width="188.7" height="10" rx="1.5"/><rect class="zl zl2" style="--i:23" x="239.5" y="236" width="180.9" height="10" rx="1.5"/><rect class="zl zl1" style="--i:24" x="245.8" y="225" width="168.4" height="10" rx="1.5"/><rect class="zl zl2" style="--i:25" x="253.1" y="214" width="153.8" height="10" rx="1.5"/><rect class="zl zl1" style="--i:26" x="260.0" y="203" width="139.9" height="10" rx="1.5"/><rect class="zl zl2" style="--i:27" x="265.3" y="192" width="129.4" height="10" rx="1.5"/><rect class="zl zl1" style="--i:28" x="267.5" y="181" width="125.0" height="10" rx="1.5"/><rect class="zl zl2" style="--i:29" x="268.8" y="170" width="122.4" height="10" rx="1.5"/><rect class="zl zl1" style="--i:30" x="271.6" y="159" width="116.7" height="10" rx="1.5"/><rect class="zl zl2" style="--i:31" x="273.8" y="148" width="112.4" height="10" rx="1.5"/><rect class="zl zl3" style="--i:32" x="269.2" y="137" width="121.6" height="10" rx="1.5"/><rect class="zl zl3" style="--i:33" x="260.0" y="126" width="140.0" height="10" rx="1.5"/><g class="zduese"><g transform="translate(330 126)"><rect x="-27" y="-58" width="54" height="24" rx="5"/><path d="M-24 -34H24L7 -17H-7Z"/><circle cx="0" cy="-12" r="5"/></g></g><g class="zmass"><path d="M70 126 V 500"/><path d="M62 126H78M62 500H78"/><text x="86" y="313" class="zt">bis 25 cm</text><path d="M490 126 h 10 v 22 h -10"/><text x="512" y="137" class="zt">Schicht:</text><text x="512" y="156" class="zt">0,12 bis 0,28 mm</text></g></svg><figcaption class="small muted">Schematisch, nicht maßstäblich.</figcaption></figure>
   </div>
 </section>
 

@@ -72,6 +72,11 @@
           <div class="field hp" aria-hidden="true"><label for="b-web">Website</label><input type="text" id="b-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
+          <div class="bestelluebersicht" id="bestelluebersicht" aria-label="Ihre Bestellung im Überblick">
+            <h3 class="sub">Ihre Bestellung im Überblick</h3>
+            <ul id="bu-liste"></ul>
+            <dl id="bu-summen"></dl>
+          </div>
           <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
           <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:info@markentrix.de">Bestellung per E-Mail schicken</a> oder anrufen: <a href="tel:017620370429">0176 20370429</a>.</p>
         </form>

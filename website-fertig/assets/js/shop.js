@@ -460,6 +460,19 @@
       var gr = $("#s-gutschein-row"); if (gr) { gr.hidden = !(coupon && t.gutschein > 0); $("#s-gutschein").textContent = "−" + EUR(t.gutschein); }
       var gl = $("#s-gesamt-label"); if (gl) gl.textContent = coupon ? "Zu zahlen" : "Gesamt";
       $("#s-gesamt").textContent = EUR(t.zuZahlen);
+      var bl = $("#bu-liste"), bs = $("#bu-summen");
+      if (bl && bs) {
+        bl.textContent = ""; bs.textContent = "";
+        c.forEach(function (i) {
+          var p = findProduct(i.id); if (!p) return;
+          var det = [i.farbe ? colorName(i.farbe) : "", i.text ? "Text: " + i.text : ""].filter(Boolean).join(", ");
+          var li = document.createElement("li"); li.textContent = i.menge + "× " + p.name + (det ? " (" + det + ")" : "") + ": " + EUR(p.preis * i.menge); bl.appendChild(li);
+        });
+        [["Zwischensumme", EUR(t.zwischensumme)], [t.abholung ? "Abholung in Celle" : "Versand", t.versand === 0 ? "kostenlos" : EUR(t.versand)]]
+          .concat(coupon && t.gutschein > 0 ? [["Gutschein", "−" + EUR(t.gutschein)]] : [])
+          .concat([[coupon ? "Zu zahlen" : "Gesamt", EUR(t.zuZahlen)]])
+          .forEach(function (r) { var dt = document.createElement("dt"), dd = document.createElement("dd"); dt.textContent = r[0]; dd.textContent = r[1]; bs.appendChild(dt); bs.appendChild(dd); });
+      }
       var hint = $("#s-hint"); if (hint) hint.textContent = t.abholung ? "Abholung nach Terminabsprache, keine Versandkosten." : t.versand > 0 ? "Noch " + EUR(CFG.versandfreiAb - t.zwischensumme) + " bis zum kostenlosen Versand." : "Versandkostenfrei innerhalb Deutschlands.";
       var mailBtn = $("#cart-mail");
       if (mailBtn && CFG.email) {
@@ -914,7 +927,7 @@
 
   // Lieferzeit-Balken bauen sich einmal auf, sobald sie im Bild sind
   (function () {
-    $$(".zeit, .danke-zeit").forEach(function (z) {
+    $$(".zeit, .danke-zeit, .zeichnung").forEach(function (z) {
     if (!z || !("IntersectionObserver" in window) || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
     z.classList.add("pre");
     new IntersectionObserver(function (en, io) {

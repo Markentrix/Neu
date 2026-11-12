@@ -156,3 +156,12 @@ Domain: `schichtatelier.de`. Der normale Export bleibt ohne feste Domain (Upload
 - **Ereignisse an das Portal (`ev`):** anruf_klick, mail_klick, in_den_warenkorb, kontakt_gesendet, bestellung_gesendet, gutschein_gesendet, widerruf_gesendet, je Name einmal.
 - **Härtetest:** 0, 1 und 62 Artikel, lange Namen und Wörter, Preis 0 („auf Anfrage“), Preis über 10.000 € (Tausenderpunkt), fehlende Bilder („Foto folgt“), Menge 99. Bei 1440, 390 und 320 px ohne Überlauf.
 
+## Plakat-Überarbeitung (12.11.2026)
+
+Ideensatz: Auf dieser Seite wird die Schicht des Druckers zu Aufbau, Farbfeldern und einer Zeichnung, die sich Schicht für Schicht aufbaut.
+- **Hero als Plakat:** Das Foto vom Druckbett läuft über die ganze Breite (Desktop 1920 × 1000, Handy 900 × 1125), die Überschrift „3D-Druck aus Celle.“ steht groß darüber. Der Verlauf unter dem Text ist ein neutraler Scrim auf dem Foto (erlaubte Ausnahme). Links ist die dunkle Matte weich verlängert, damit der Kürbis rechts sitzt.
+- **Farbfelder wechseln:** Papier (Shop) → Bronze (Lieferzeit, Text in Weiß, 4,95:1) → Fläche (Zeichnung) → Tiefgrün (Datei-Band) → Papier (Materialien) → Fußzeile. Jede Sektion hat eine andere Komposition.
+- **Zeichnung „So entsteht ein Teil“:** Ein Gefäß wächst in 34 Schichten, die Düse wandert mit. Angaben nur aus der Seite selbst: Schichthöhe 0,12 bis 0,28 mm, Teile bis 25 cm. Unterschrift „Schematisch, nicht maßstäblich.“ Beim Scrollen einmal, mit „Bewegung reduzieren“ sofort fertig.
+- **Bestellübersicht** direkt vor „Zahlungspflichtig bestellen“ (Artikel, Preise, Versand, Gutschein, Summe).
+- **Offen:** AGB und Widerrufsbelehrung sind selbst formulierte Entwürfe und müssen durch geprüfte Texte ersetzt werden (Skill: nur aus geprüften Bausteinen oder vom Betrieb).
+

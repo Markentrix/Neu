@@ -173,6 +173,32 @@ def datei_band(titel, text, knopf, href):
 """
 
 
+def schicht_zeichnung():
+    """Schematische Zeichnung: ein Gefäß wächst in Schichten, die Düse zieht jede Schicht. Reine Illustration, nicht maßstäblich."""
+    pts = [(0, 150), (0.2, 200), (0.4, 240), (0.65, 190), (0.85, 125), (0.95, 112), (1, 140)]
+    def breite(t):
+        for (t0, w0), (t1, w1) in zip(pts, pts[1:]):
+            if t0 <= t <= t1:
+                u = (t - t0) / (t1 - t0); u = u * u * (3 - 2 * u)
+                return w0 + (w1 - w0) * u
+        return pts[-1][1]
+    n, h, gap, boden, cx = 34, 10, 1, 500, 330
+    layers = []
+    for i in range(n):
+        w = breite(i / (n - 1)); y = boden - (i + 1) * (h + gap)
+        kl = "zl3" if i >= n - 2 else ("zl2" if i % 2 else "zl1")
+        layers.append(f'<rect class="zl {kl}" style="--i:{i}" x="{cx - w / 2:.1f}" y="{y}" width="{w:.1f}" height="{h}" rx="1.5"/>')
+    top = boden - n * (h + gap)
+    duese = ('<g class="zduese"><g transform="translate(%d %d)">'
+             '<rect x="-27" y="-58" width="54" height="24" rx="5"/><path d="M-24 -34H24L7 -17H-7Z"/><circle cx="0" cy="-12" r="5"/></g></g>' % (cx, top))
+    masz = (f'<g class="zmass"><path d="M70 {top} V {boden}"/><path d="M62 {top}H78M62 {boden}H78"/>'
+            f'<text x="86" y="{(top + boden) // 2}" class="zt">bis 25 cm</text>'
+            f'<path d="M{cx + 160} {boden - n * (h + gap) + 0} h 10 v 22 h -10"/>'
+            f'<text x="{cx + 182}" y="{top + 11}" class="zt">Schicht:</text><text x="{cx + 182}" y="{top + 30}" class="zt">0,12 bis 0,28 mm</text></g>')
+    return ('<svg class="zsvg" viewBox="0 0 720 560" role="img" aria-label="Schematische Zeichnung: Ein Gefäß wächst Schicht für Schicht von unten nach oben, die Druckdüse zieht jede Schicht. Teile bis 25 cm, Schichthöhe 0,12 bis 0,28 Millimeter.">'
+            + "".join(layers) + duese + masz + '</svg>')
+
+
 # ---------------------------------------------------------------- Startseite
 def build_index():
     best = AKTIV[:(5 if len(AKTIV) >= 5 else 3 if len(AKTIV) >= 3 else len(AKTIV))]
@@ -180,7 +206,11 @@ def build_index():
     mat_rows = "".join(
         f'<li><a href="material/{m["id"]}.html"><span class="mname">{E(m["name"])}</span><span class="muse">{E(m["einsatz"])}</span><span class="mtemp">{E(m["temp"])}</span></a></li>'
         for m in MATERIALIEN)
-    body = f"""<section class="hero-dark on-deep">
+    body = f"""<section class="hero-dark hero-poster on-deep">
+  <figure class="hero-photo">
+    <picture><source media="(max-width: 860px)" srcset="assets/img/hero-m.webp" width="900" height="1125"><img src="assets/img/hero-w.webp" width="1920" height="1000" alt="Kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett eines Bambu Lab X1 Carbon, im Hintergrund weitere frisch gedruckte Kürbisse" fetchpriority="high"></picture>
+    <figcaption>Kleiner Kürbis aus Orange Silk, frisch vom Druckbett des Bambu Lab X1 Carbon.</figcaption>
+  </figure>
   <div class="hero-in">
     <div class="hero-copy">
       <h1>3D-Druck aus Celle.</h1>
@@ -190,10 +220,6 @@ def build_index():
         <a class="textlink" href="druckservice.html">Eigene Datei drucken lassen</a>
       </div>
     </div>
-    <figure class="hero-photo">
-      <img src="assets/img/hero.webp" srcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" sizes="(max-width: 860px) 100vw, 50vw" width="1200" height="1200" alt="Kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett eines Bambu Lab X1 Carbon, im Hintergrund weitere frisch gedruckte Kürbisse" fetchpriority="high">
-      <figcaption>Kleiner Kürbis aus Orange Silk, frisch vom Druckbett des Bambu Lab X1 Carbon.</figcaption>
-    </figure>
   </div>
 </section>
 <div class="schichtkante" aria-hidden="true"></div>
@@ -209,7 +235,7 @@ def build_index():
   </div>
 </section>
 
-<section class="section-tight">
+<section class="section-tight feld-bronze">
   <div class="wrap zeit">
     <div>
       <h2>Wann es bei Ihnen ist</h2>
@@ -219,6 +245,16 @@ def build_index():
       <div class="zeit-bar" role="img" aria-label="Druck {E(C.PRODUKTIONSZEIT)}, danach Versand {E(C.LIEFERZEIT)}"><span class="z-order"></span><span class="z-print"></span><span class="z-ship"></span></div>
       <div class="zeit-legend"><span><strong>Tag 0</strong>Bestellung</span><span><strong>{E(C.PRODUKTIONSZEIT)}</strong>Druck</span><span><strong>{E(C.LIEFERZEIT)}</strong>Versand</span></div>
     </div>
+  </div>
+</section>
+<section class="section feld-flaeche">
+  <div class="wrap zeichnung-block">
+    <div class="zb-text">
+      <h2>So entsteht ein Teil.</h2>
+      <p>Der Drucker legt das Teil Schicht für Schicht aus Filament, von unten nach oben. Jede Schicht ist 0,12 bis 0,28 mm hoch. Feinere Schichten sehen glatter aus und dauern länger. Teile wachsen bis 25 cm Kantenlänge.</p>
+      <p><a class="textlink" href="druckservice.html">Was sich drucken lässt</a></p>
+    </div>
+    <figure class="zeichnung">{schicht_zeichnung()}<figcaption class="small muted">Schematisch, nicht maßstäblich.</figcaption></figure>
   </div>
 </section>
 
@@ -242,7 +278,7 @@ def build_index():
   </div>
 </section>
 """
-    page("index.html", f"3D-Druck in Celle · {C.MARKE}", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index", "", '<link rel="preload" as="image" href="assets/img/hero.webp" imagesrcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" imagesizes="(max-width: 860px) 100vw, 50vw" type="image/webp" fetchpriority="high">\n' + seo.ld(seo.organisation()) + seo.ld(seo.website()))
+    page("index.html", f"3D-Druck in Celle · {C.MARKE}", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index", "", '<link rel="preload" as="image" href="assets/img/hero-m.webp" media="(max-width: 860px)" type="image/webp" fetchpriority="high">\n<link rel="preload" as="image" href="assets/img/hero-w.webp" media="(min-width: 861px)" type="image/webp" fetchpriority="high">' + seo.ld(seo.organisation()) + seo.ld(seo.website()))
 
 
 # ---------------------------------------------------------------- Shop
@@ -469,6 +505,11 @@ def build_cart():
           <div class="field hp" aria-hidden="true"><label for="b-web">Website</label><input type="text" id="b-web" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field"><label class="check"><input type="checkbox" name="agb" value="ja" required data-err="Bitte die AGB und die Widerrufsbelehrung bestätigen."><span>Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie.</span></label><p class="msg"></p></div>
           <div class="field"><label class="check"><input type="checkbox" name="einwilligung" value="ja" required data-err="Ohne Einwilligung können wir die Bestellung nicht bearbeiten."><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Bestellung gespeichert werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label><p class="msg"></p></div>
+          <div class="bestelluebersicht" id="bestelluebersicht" aria-label="Ihre Bestellung im Überblick">
+            <h3 class="sub">Ihre Bestellung im Überblick</h3>
+            <ul id="bu-liste"></ul>
+            <dl id="bu-summen"></dl>
+          </div>
           <button class="btn btn-primary btn-block" type="submit">Zahlungspflichtig bestellen</button>
           <p class="small muted">Klappt das Senden nicht? <a id="cart-mail" href="mailto:{E(C.EMAIL)}">Bestellung per E-Mail schicken</a> oder anrufen: <a href="{TEL_HREF}">{E(C.TELEFON)}</a>.</p>
         </form>

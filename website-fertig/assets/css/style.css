@@ -677,3 +677,66 @@ h1,h2,h3,.card a,.crumbs,.cart-item,.kaufbox{overflow-wrap:anywhere}
 
 /* Platz reservieren, solange der Katalog lädt (kein Sprung der Fußzeile) */
 #shop-grid:not(.fertig){min-height:80vh;align-content:start}
+
+
+/* ===== Plakat-Hero, Farbfelder und Schicht-Zeichnung ===== */
+.hero-poster{position:relative;display:flex;align-items:flex-end;min-height:clamp(600px,90svh,860px)}
+.hero-poster .hero-photo{position:absolute;inset:0;min-height:0;aspect-ratio:auto;margin:0;background:#0c1511}
+.hero-poster .hero-photo picture{position:absolute;inset:0;display:block}
+.hero-poster .hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:68% 50%}
+.hero-poster .hero-photo::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(7,18,12,.88) 0,rgba(7,18,12,.66) 32%,rgba(7,18,12,0) 64%)}
+.hero-poster .hero-photo figcaption{z-index:2;left:auto;right:0;bottom:0;max-width:24em;background:rgba(7,18,12,.72);color:var(--on-deep)}
+.hero-poster .hero-in{position:relative;z-index:2;display:block;min-height:0;width:100%}
+.hero-poster .hero-copy{width:min(100%,calc(46rem + max(20px,(100vw - var(--maxw)) / 2)));padding:clamp(140px,24svh,260px) clamp(20px,4vw,56px) clamp(80px,10vw,136px) max(20px,calc((100vw - var(--maxw)) / 2))}
+.hero-poster .hero-copy h1{font-size:clamp(3.8rem,10vw,9rem);line-height:.9;letter-spacing:-.025em}
+.hero-poster .hero-copy p{color:var(--on-deep)}
+.hero-poster + .schichtkante{background:#0c1511}
+@media (max-width:860px){
+  .hero-poster{min-height:max(620px,150vw)}
+  .hero-poster .hero-photo::before{background:linear-gradient(0deg,rgba(7,18,12,.9) 0,rgba(7,18,12,.7) 42%,rgba(7,18,12,0) 78%)}
+  .hero-poster .hero-photo img{object-position:50% 25%}
+  .hero-poster .hero-copy{width:100%;padding:150px 20px 64px}
+  .hero-poster .hero-photo figcaption{display:none}
+}
+
+.feld-bronze{background:var(--accent);color:var(--accent-ink)}
+.feld-bronze h2,.feld-bronze p,.feld-bronze strong,.feld-bronze .muted,.feld-bronze .zeit-legend{color:var(--accent-ink)}
+.feld-bronze .z-order{background:var(--deep)}
+.feld-bronze .z-print{background:repeating-linear-gradient(0deg,var(--hero) 0 6px,var(--deep) 6px 9px)}
+.feld-bronze .z-ship{background:var(--bg)}
+.feld-flaeche{background:var(--surface-2)}
+
+.zeichnung-block{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,6vw,96px);align-items:center}
+.zb-text h2{margin:0 0 .5em}
+.zb-text p{max-width:30em}
+.zeichnung{margin:0}
+.zsvg{width:100%;height:auto;display:block}
+.zl{transform-box:fill-box;transform-origin:50% 50%}
+.zl1{fill:var(--brand)}.zl2{fill:var(--logo-sub)}.zl3{fill:var(--accent)}
+.zduese rect,.zduese path,.zduese circle{fill:var(--accent)}
+.zmass path{fill:none;stroke:var(--ink-2);stroke-width:1.5}
+.zt{fill:var(--ink);font-family:var(--font);font-size:15px;font-weight:600}
+.zeichnung figcaption{margin-top:6px}
+.zeichnung.pre .zl{opacity:0}
+.zeichnung.pre .zduese{opacity:0}
+.zeichnung.pre .zmass{opacity:0}
+.zeichnung.run .zl{animation:zeile .3s steps(4,end) calc(var(--i) * 45ms) backwards}
+.zeichnung.run .zduese{animation:zhoch 1.6s steps(34,end) backwards}
+.zeichnung.run .zmass{animation:fadein .4s var(--ease-out) 1.6s backwards}
+@keyframes zeile{from{opacity:0;transform:scaleX(.15)}to{opacity:1;transform:none}}
+@keyframes zhoch{from{transform:translateY(374px)}to{transform:none}}
+@media (max-width:860px){.zeichnung-block{grid-template-columns:1fr}.zt{font-size:23px}}
+@media (prefers-reduced-motion:reduce){.zeichnung.pre .zl,.zeichnung.pre .zduese,.zeichnung.pre .zmass{opacity:1}.zeichnung.run .zl,.zeichnung.run .zduese,.zeichnung.run .zmass{animation:none}}
+
+/* Bestellübersicht direkt vor dem Bestellknopf (§ 312j BGB) */
+.bestelluebersicht{background:var(--surface-2);padding:16px;margin:12px 0 16px}
+.bestelluebersicht h3{margin:0 0 .5em}
+.bestelluebersicht ul{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
+.bestelluebersicht dl{display:grid;grid-template-columns:1fr auto;gap:4px 16px;margin:0;font-variant-numeric:tabular-nums}
+.bestelluebersicht dd{margin:0;text-align:right;font-weight:600}
+.bestelluebersicht dt:last-of-type,.bestelluebersicht dd:last-of-type{font-weight:700;font-size:var(--t-1)}
+
+/* Härtetest: Wunschtext in maximaler Länge ohne Leerzeichen */
+.cart-item{grid-template-columns:84px minmax(0,1fr) auto}
+.cart-layout>*,.cart-item>*{min-width:0}
+.cart-item *,.bestelluebersicht li{overflow-wrap:anywhere}

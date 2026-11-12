@@ -295,6 +295,20 @@ def main():
         h = h.resize((1200, 1200), Image.LANCZOS)
         h.save(os.path.join(ROOT, "assets", "img", "hero.webp"), "WEBP", quality=82, method=6)
         h.resize((800, 800), Image.LANCZOS).save(os.path.join(ROOT, "assets", "img", "hero-800.webp"), "WEBP", quality=80, method=6)
+        # Plakat-Hero: breit für den Desktop, hoch für das Handy (Zuschnitt aus demselben Foto).
+        # Links wird die dunkle Matte weich verlängert, damit der Kürbis rechts sitzt und links Platz für die Überschrift bleibt.
+        from PIL import ImageFilter
+        full = ImageOps.exif_transpose(Image.open(hero_src)).convert("RGB")
+        fw, fh = full.size; pad = 1500
+        # Verlängerung: mittlere Farbe der linken 300 px je Zeile, senkrecht stark geglättet (keine Streifen)
+        strip = full.crop((0, 0, 300, fh)).resize((1, fh), Image.BOX).resize((pad, fh), Image.NEAREST).filter(ImageFilter.GaussianBlur(120)).point(lambda v: int(v * 0.7))
+        canvas = Image.new("RGB", (fw + pad, fh)); canvas.paste(strip, (0, 0))
+        ramp = Image.frombytes("L", (600, 1), bytes(int(255 * x / 599) for x in range(600))).resize((600, fh))   # 0 links, 255 rechts
+        alpha = Image.new("L", (fw, fh), 255); alpha.paste(ramp, (0, 0))
+        canvas.paste(full, (pad, 0), alpha)
+        X0, Y0, W_, H_ = 1112, 701, 2800, 1458
+        canvas.crop((X0, Y0, X0 + W_, Y0 + H_)).resize((1920, 1000), Image.LANCZOS).save(os.path.join(ROOT, "assets", "img", "hero-w.webp"), "WEBP", quality=78, method=6)
+        full.crop((610, 750, 2310, 2875)).resize((900, 1125), Image.LANCZOS).save(os.path.join(ROOT, "assets", "img", "hero-m.webp"), "WEBP", quality=78, method=6)
     # Gutschein-Karte
     gs = frame('<rect x="190" y="170" width="420" height="270" rx="18" fill="#1f4d3a"/>'
                '<rect x="190" y="170" width="420" height="270" rx="18" fill="none" stroke="#f1e6d2" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 6" transform="translate(10 10) scale(.952)"/>'
