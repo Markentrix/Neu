@@ -110,14 +110,14 @@
   function cardHtml(p, h) {
     h = h || "h3"; var href = hrefOf(p);
     var notes = []; if (p.text) notes.push("Mit Wunschtext"); if (p.farben.length > 1) notes.push("in " + p.farben.length + " Farben");
-    var action = p.text ? '<a class="btn btn-primary" href="' + esc(href) + '">Text und Farbe wählen</a>' : '<button class="btn btn-primary" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
+    var action = p.text ? '<a class="btn btn-card" href="' + esc(href) + '">Text und Farbe wählen</a>' : '<button class="btn btn-card" type="button" data-add="' + esc(p.id) + '">In den Warenkorb</button>';
     var tags = p.tags.concat(p.text && p.tags.indexOf("personalisiert") < 0 ? ["personalisiert"] : []).join(" ");
     return '<article class="card" data-kat="' + esc(p.kat) + '" data-tags="' + esc(tags) + '" data-preis="' + p.preis + '" data-name="' + esc(p.name) + '" data-pos="' + (p._pos || 0) + '" data-id="' + esc(p.id) + '" data-suche="' + esc([p.name, p.kurz, p.material].join(" ").toLowerCase()) + '">' +
       '<a class="card-img" href="' + esc(href) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(imgOf(p)) + '" width="' + imgDim(p).w + '" height="' + imgDim(p).h + '" alt="" loading="lazy"></a>' +
       '<div class="card-body"><' + h + '><a href="' + esc(href) + '">' + esc(p.name) + '</a></' + h + '>' +
-      '<p class="small">' + esc(p.kurz) + '</p><div class="price">' + EUR(p.preis) + '</div>' +
-      (notes.length ? '<span class="card-note">' + esc(notes.join(", ")) + '</span>' : "") + action +
-      '<a class="card-more" href="' + esc(href) + '">Details ansehen</a></div></article>';
+      '<p class="small">' + esc(p.kurz) + '</p>' +
+      (notes.length ? '<span class="card-note">' + esc(notes.join(", ")) + '</span>' : "") +
+      '<div class="card-foot"><span class="price">' + EUR(p.preis) + '</span>' + action + '</div></div></article>';
   }
 
   /* ---------- Produktseite (Kaufformular) ---------- */
@@ -631,14 +631,15 @@
     var abh = CFG.abholung === false ? "" : ", oder Abholung in Celle";
     host.innerHTML = '<nav aria-label="Pfad" class="crumbs"><a href="' + ROOT + 'index.html">Start</a> › <a href="' + ROOT + 'shop.html">Shop</a> › ' + esc(KAT[p.kat] || "Artikel") + '</nav>' +
       '<div class="product"><div><div class="product-media"><img id="pd-img" src="' + esc(/^(\/|https?:)/.test(mainUrl) ? mainUrl : ROOT + mainUrl) + '" width="' + ((main && main.w) || 1200) + '" height="' + ((main && main.h) || 900) + '" alt="' + esc(mainAlt) + '"></div>' + thumbs + '</div>' +
-      '<div class="product-info"><h1>' + esc(p.name) + '</h1>' +
+      '<div class="product-info"><h1>' + esc(p.name) + '</h1><div class="kaufbox">' +
       '<p class="price">' + EUR(p.preis) + ' <small>' + esc(CFG.preishinweis || "") + ', zzgl. <a href="' + ROOT + 'versand.html">Versand</a></small></p><p>' + esc(p.kurz) + '</p>' +
       '<form id="kaufen" data-id="' + esc(p.id) + '" novalidate>' + (p.farben.length ? '<fieldset style="border:0;padding:0;margin:0 0 14px"><legend style="font-weight:600;margin-bottom:8px">Farbe</legend><div class="swatches">' + sw + '</div></fieldset>' : "") + textField +
       '<div class="buyrow"><span class="qty"><button type="button" data-d="-1" aria-label="Menge verringern">−</button><input type="number" id="menge" name="menge" min="1" max="99" value="1" aria-label="Menge"><button type="button" data-d="1" aria-label="Menge erhöhen">+</button></span><button class="btn btn-primary" type="submit">In den Warenkorb</button></div>' +
       '<p class="added" role="status">Liegt im Warenkorb. <a href="' + ROOT + 'warenkorb.html">Zum Warenkorb</a> oder <a href="' + ROOT + 'shop.html">weiter stöbern</a>.</p></form>' +
       '<p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>' +
-      '<dl class="konditionen"><dt>Versand</dt><dd>' + EUR(CFG.versandPauschale) + ', ab ' + EUR(CFG.versandfreiAb) + ' kostenlos</dd>' + (CFG.abholung === false ? "" : '<dt>Abholung</dt><dd>Celle, kostenlos, nach Terminabsprache</dd>') + '<dt>Zahlung</dt><dd>PayPal' + (CFG.abholung === false ? "" : " oder bei Abholung") + '</dd><dt>Rückgabe</dt><dd>' + (p.text ? "ausgeschlossen, weil nach Ihrem Text gefertigt" : "14 Tage") + '</dd></dl>' +
-      '<dl class="specs">' + specs + '</dl><h2 class="sub">Beschreibung</h2>' + desc +
+      '</div><details class="faq-item" open><summary>Maße und Material</summary><dl class="specs">' + specs + '</dl></details>' +
+      '<details class="faq-item"><summary>Versand, Zahlung und Rückgabe</summary><dl class="konditionen"><dt>Versand</dt><dd>' + EUR(CFG.versandPauschale) + ', ab ' + EUR(CFG.versandfreiAb) + ' kostenlos</dd>' + (CFG.abholung === false ? "" : '<dt>Abholung</dt><dd>Celle, kostenlos, nach Terminabsprache</dd>') + '<dt>Zahlung</dt><dd>PayPal' + (CFG.abholung === false ? "" : " oder bei Abholung") + '</dd><dt>Rückgabe</dt><dd>' + (p.text ? "ausgeschlossen, weil nach Ihrem Text gefertigt" : "14 Tage") + '</dd></dl></details>' +
+      '<h2 class="sub">Beschreibung</h2>' + desc +
       '<p class="small muted">Hinweis: 3D-gedruckte Teile zeigen feine Schichtlinien, das ist Teil des Verfahrens. Farben können je nach Filamentcharge leicht abweichen.</p>' +
       (p.text ? '<p class="small muted">Personalisierter Artikel: Nach Ihrer Freigabe des Textes ist der Kauf vom Widerruf ausgenommen (§ 312g Abs. 2 Nr. 1 BGB). <a href="' + ROOT + 'widerruf.html">Mehr dazu</a>.</p>' : "") + '</div></div>' +
       (related.length ? '<h2 style="margin-top:56px">Weitere Artikel</h2><div class="grid">' + related.map(function (q) { return cardHtml(q, "h3"); }).join("") + "</div>" : "");

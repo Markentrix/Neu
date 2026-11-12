@@ -73,6 +73,7 @@ def header(rel, current=""):
       {nav("materialien.html", "Materialien", "material")}
       {nav("faq.html", "FAQ", "faq")}
       {nav("ueber-uns.html", "Über uns", "ueber")}
+      <a class="nav-cta" href="{rel}kontakt.html">Angebot anfordern</a>
     </nav>
     <a class="cart-link" href="{rel}warenkorb.html" aria-label="Warenkorb">{SVG_CART}<span class="cart-badge" aria-live="polite"></span></a>
   </div>
@@ -85,6 +86,7 @@ def footer(rel):
     return f"""</main>
 <footer class="site-footer">
   <div class="wrap">
+    <p class="footer-sign">Schicht für Schicht.</p>
     <div class="footer-top">
       <div>
         <a class="lockup-link" href="{rel}index.html" aria-label="{E(C.MARKE)} Startseite">{LOCKUP_FOOTER}</a>
@@ -155,17 +157,15 @@ def card(p, rel, pos, h="h3"):
     if p.get("text"): notes.append("Mit Wunschtext")
     if len(p["farben"]) > 1: notes.append(f"in {len(p['farben'])} Farben")
     note = f'<span class="card-note">{E(", ".join(notes))}</span>' if notes else ""
-    action = (f'<a class="btn btn-primary" href="{href}">Text und Farbe wählen</a>' if p.get("text")
-              else f'<button class="btn btn-primary" type="button" data-add="{p["id"]}">In den Warenkorb</button>')
+    action = (f'<a class="btn btn-card" href="{href}">Text und Farbe wählen</a>' if p.get("text")
+              else f'<button class="btn btn-card" type="button" data-add="{p["id"]}">In den Warenkorb</button>')
     return f"""<article class="card" data-kat="{p['kat']}" data-tags="{' '.join(p['tags'])}" data-preis="{p['preis']}" data-name="{E(p['name'])}" data-pos="{pos}" data-id="{E(p['id'])}" data-suche="{E(' '.join([p['name'], p['kurz'], p.get('material', '')]).lower())}">
   <a class="card-img" href="{href}" tabindex="-1" aria-hidden="true"><img src="{bild(p, rel)[0]}" width="{bild(p, rel)[1]}" height="{bild(p, rel)[2]}" alt="" loading="lazy"></a>
   <div class="card-body">
     <{h}><a href="{href}">{E(p['name'])}</a></{h}>
     <p class="small">{E(p['kurz'])}</p>
-    <div class="price">{EUR(p['preis'])}</div>
     {note}
-    {action}
-    <a class="card-more" href="{href}">Details ansehen</a>
+    <div class="card-foot"><span class="price">{EUR(p['preis'])}</span>{action}</div>
   </div>
 </article>"""
 
@@ -205,7 +205,7 @@ def build_index():
 </section>
 <div class="schichtkante" aria-hidden="true"></div>
 
-<section class="section">
+<section class="section"{"" if AKTIV else " hidden"}>
   <div class="wrap shop-block">
     <div class="side">
       <h2>Im Shop</h2>
@@ -257,6 +257,7 @@ def build_shop():
     chips = '<button class="chip" type="button" data-kat="alle" aria-pressed="true">Alle</button>' + "".join(
         f'<button class="chip" type="button" data-kat="{k}" aria-pressed="false">{E(v)}</button>' for k, v in KAT_AKTIV.items()) + ('<button class="chip" type="button" data-kat="personalisiert" aria-pressed="false">Mit Wunschtext</button>' if any(p.get("text") for p in AKTIV) else "")
     cards = "\n".join(card(p, "", i, "h2") for i, p in enumerate(AKTIV))
+    skel = "" if AKTIV else '<div class="card-skel" aria-hidden="true"><i></i><b></b><b></b></div>' * 3
     body = f"""<section class="page-head">
   <div class="wrap">
     <h1>Alle Artikel</h1>
@@ -274,7 +275,7 @@ def build_shop():
     </div>
     <p class="small muted" id="treffer" aria-live="polite">{str(len(AKTIV)) + " Artikel" if AKTIV else ""}</p>
     <p id="keine-treffer" hidden>Dazu haben wir nichts gefunden. <button type="button" class="textlink" id="suche-zurueck">Suche zurücksetzen</button> oder <a href="kontakt.html">fragen Sie uns nach Ihrem Wunsch</a>.</p>
-    <div class="grid" id="shop-grid">{cards}{gutschein_card("", "h2")}</div>
+    <div class="grid" id="shop-grid">{cards}{skel}{gutschein_card("", "h2")}</div>
     <div id="zuletzt-host"></div>
   </div>
 </section>
@@ -316,6 +317,7 @@ def build_products():
       <div><div class="product-media"><img src="{bild(p, rel)[0]}" width="{bild(p, rel)[1]}" height="{bild(p, rel)[2]}" alt="{E(((p.get('bilder') or [{}])[0].get('alt')) or (p['name'] + (', gedruckt in ' + FARBEN[p['farben'][0]][0] if p.get('foto') and p['farben'] else ', Illustration' if not p.get('foto') else '')))}"></div>{thumbs}</div>
       <div class="product-info">
         <h1>{E(p['name'])}</h1>
+        <div class="kaufbox">
         <p class="price">{EUR(p['preis'])} <small>{'inkl. MwSt.' if not C.KLEINUNTERNEHMER else 'Endpreis, keine Umsatzsteuer nach § 19 UStG'}, zzgl. <a href="../versand.html">Versand</a></small></p>
         <p>{E(p['kurz'])}</p>
         <form id="kaufen" data-id="{p['id']}" novalidate>
@@ -328,11 +330,16 @@ def build_products():
           <p class="added" role="status">Liegt im Warenkorb. <a href="../warenkorb.html">Zum Warenkorb</a> oder <a href="../shop.html">weiter stöbern</a>.</p>
         </form>
         <p class="delivery" data-delivery>Bestellen Sie heute, Lieferung voraussichtlich <strong data-delivery-range></strong>.</p>
-        <dl class="konditionen"><dt>Versand</dt><dd>{EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos</dd><dt>Abholung</dt><dd>Celle, kostenlos, nach Terminabsprache</dd><dt>Zahlung</dt><dd>PayPal oder bei Abholung</dd><dt>Rückgabe</dt><dd>{'ausgeschlossen, weil nach Ihrem Text gefertigt' if p.get('text') else '14 Tage'}</dd></dl>
+        </div>
+        <details class="faq-item" open><summary>Maße und Material</summary>
         <dl class="specs">
           {"".join(f"<dt>{k}</dt><dd>{E(v)}</dd>" for k, v in (("Maße", p["masse"]), ("Material", p["material"]), ("Gewicht", p["gewicht"])) if v)}
           <dt>Fertigung</dt><dd>Druck in {E(C.PRODUKTIONSZEIT)}, dann Versand</dd>
         </dl>
+        </details>
+        <details class="faq-item"><summary>Versand, Zahlung und Rückgabe</summary>
+        <dl class="konditionen"><dt>Versand</dt><dd>{EUR(VERSAND_PAUSCHALE)}, ab {EUR(VERSANDFREI_AB)} kostenlos</dd><dt>Abholung</dt><dd>Celle, kostenlos, nach Terminabsprache</dd><dt>Zahlung</dt><dd>PayPal oder bei Abholung</dd><dt>Rückgabe</dt><dd>{'ausgeschlossen, weil nach Ihrem Text gefertigt' if p.get('text') else '14 Tage'}</dd></dl>
+        </details>
         <h2 class="sub">Beschreibung</h2>
         <p>{E(p['lang'])}</p>
         <p class="small muted">Hinweis: 3D-gedruckte Teile zeigen feine Schichtlinien, das ist Teil des Verfahrens. Farben können je nach Filamentcharge leicht abweichen.{'' if p.get('foto') else ' Die Abbildung ist eine Illustration des Artikels.'}</p>
@@ -380,9 +387,7 @@ def gutschein_card(rel, h="h3"):
   <div class="card-body">
     <{h}><a href="{rel}gutschein.html">Geschenkgutschein</a></{h}>
     <p class="small muted" style="margin:0">Wunschbetrag ab 10 €, als Karte per Post oder zum Ausdrucken per E-Mail. 3 Jahre gültig.</p>
-    <div class="price">ab 10,00 €</div>
-    <a class="btn btn-primary" href="{rel}gutschein.html">Gutschein wählen</a>
-    <a class="card-more" href="{rel}gutschein.html">Details ansehen</a>
+    <div class="card-foot"><span class="price">ab 10,00 €</span><a class="btn btn-card" href="{rel}gutschein.html">Gutschein wählen</a></div>
   </div>
 </article>"""
 

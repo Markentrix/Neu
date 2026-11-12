@@ -136,3 +136,10 @@ Bewusst nicht umgesetzt, weil nicht belegt oder gewollt:
 - Aufbau beim Scrollen an jeder Seite: Auf Wunsch des Kunden mehr Bewegung, deshalb ein Wortschatz (Stufen mit clip-path) statt eines Fade-up.
 
 Domain: `schichtatelier.de`. Der normale Export bleibt ohne feste Domain (Uploader-Regel). `python3 build/build.py --live` erzeugt für den Livegang kanonische Adressen, absolute Sitemap, `Sitemap:` in der robots.txt, og:url, og:image und absolute Adressen in den strukturierten Daten und der llms.txt.
+
+## Ruhigere Oberfläche (12.11.2026)
+
+- Karten: Preis links, ein kleiner Umrissknopf rechts, kein zweiter Link. Kupfer bleibt für Hero, die große Startkarte, die Produktseite und die Kasse. Dadurch bleibt ein Raster mit 10 bis 25 Artikeln ruhig.
+- Produktseite: Preis, Farbe, Menge, Knopf und Lieferdatum in einer hinterlegten Kaufbox. Maße und Material sowie Versand und Zahlung klappen auf.
+- Kopfzeile mit genau einer Aktion (Angebot anfordern), Fußzeile mit dem Schlusssatz „Schicht für Schicht.“.
+- Platzhalterkacheln im Shop, solange der Katalog lädt.

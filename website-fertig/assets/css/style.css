@@ -604,3 +604,32 @@ textarea{min-height:140px;resize:vertical}
 h1,h2{overflow-wrap:break-word;hyphens:auto}
 .product>*{min-width:0}
 @media (max-width:420px){.product-info .price small{display:block;margin-top:2px}}
+
+/* ===== Ruhigere Karten, Kaufbox, Kopfzeilen-Aktion, Schlusssatz ===== */
+.card-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding-top:10px}
+.card .card-foot .price{margin:0;padding:0}
+.btn-card{min-height:44px;padding:.5em 1em;border:2px solid var(--ink);background:transparent;color:var(--ink);font-size:var(--t-s);font-weight:650}
+@media (hover:hover) and (pointer:fine){.btn-card:hover{background:var(--ink);color:var(--bg)}}
+#featured-grid .card:first-child .btn-card{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:var(--t-0);padding:.7em 1.3em}
+@media (hover:hover) and (pointer:fine){#featured-grid .card:first-child .btn-card:hover{background:#8a5428;border-color:#8a5428;color:var(--accent-ink)}}
+@media (max-width:640px){.card-foot .btn-card{flex:1 1 100%}}
+
+.card-skel{display:flex;flex-direction:column;gap:12px}
+.card-skel i{display:block;aspect-ratio:4/3;background:var(--surface-2)}
+.card-skel b{display:block;height:14px;width:70%;background:var(--surface-2)}
+.card-skel b+b{width:45%}
+.empty ~ .card-skel,.grid:has(.empty) .card-skel{display:none}
+
+.kaufbox{background:var(--surface-2);padding:clamp(16px,2.4vw,28px);margin:0 0 22px}
+.kaufbox .price{margin-top:0}
+.kaufbox .delivery{margin:16px 0 0;padding:0;background:none}
+.kaufbox .qty{background:var(--surface)}
+.product-info .faq-item .specs,.product-info .faq-item .konditionen{margin:0 0 18px}
+
+.nav a.nav-cta{display:inline-flex;align-items:center;min-height:44px;margin-left:6px;padding:0 16px;border:2px solid var(--ink);border-radius:var(--r);font-weight:650;color:var(--ink);text-decoration:none}
+@media (hover:hover) and (pointer:fine){.nav a.nav-cta:hover{background:var(--ink)!important;color:var(--bg)!important}}
+.nav a.nav-cta[aria-current="page"]{background:var(--ink);color:var(--bg)}
+@media (max-width:860px){.nav a.nav-cta{margin:10px 0 0;justify-content:center;padding:0 16px}}
+
+.footer-sign{margin:0 0 clamp(36px,6vw,72px);font-family:var(--font-display);font-size:clamp(2.6rem,8vw,6.2rem);line-height:.98;letter-spacing:-.01em;color:var(--on-deep)}
+@media (forced-colors:active){.nav-cta,.btn-card{border:2px solid ButtonText}}
