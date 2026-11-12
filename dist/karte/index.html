@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unsere Kunden in der Region | Markentrix</title>
+<meta name="description" content="Interaktive Karte der Kunden von Markentrix in Celle und der Region, nur mit Zustimmung der Betriebe."><meta name="robots" content="noindex,follow">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/karte/karte.css">
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#05070B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6l8 9 8-9v13"/></svg></div>
+  <div><h1><span>Markentrix</span> <span id="ttl" style="-webkit-text-fill-color:#fff;color:#fff;background:none">Betriebe in der Region</span></h1><div class="sub" id="sub">Unsere Partnerbetriebe · Hub Celle</div></div>
+  <div class="badge" id="badge" style="display:none">Beispieldaten</div><button id="modeToggle">Intern-Ansicht (Demo)</button>
+</header>
+<div class="stats">
+  <div class="stat"><b id="s1">0</b><small id="s1l">Betriebe</small></div>
+  <div class="stat"><b id="s2">0</b><small id="s2l">Branchen</small></div>
+  <div class="stat"><b id="s3">0 km</b><small id="s3l">größter Radius</small></div>
+</div>
+<div class="search" id="searchBox">
+  <input id="q" type="search" placeholder="Ort oder PLZ eingeben" autocomplete="off" aria-label="Ort oder PLZ">
+  <button id="go">Suchen</button>
+  <div class="sugg" id="sugg"></div>
+</div>
+<div class="chips" id="chips"></div>
+<div class="chips" id="layers" style="display:none"></div>
+<div class="wrap">
+  <svg id="map" role="img" aria-label="Karte der Betriebe"></svg>
+  <div class="legend"><span class="mk">M</span><span><b id="lgn">0</b> Betriebe in der Region<small><span id="lgs"></span>PLZ-Daten: GeoNames, CC BY 4.0</small><span id="lgb"></span><span class="lgr"><button id="tour" type="button">▶ Kunden entdecken</button><a id="lgc" href="https://markentrix.de/kontakt" target="_top" rel="noopener">Ihr Betrieb hier? <i>→</i></a></span></span></div>
+  <div class="zoom"><button id="zin" aria-label="Hineinzoomen">+</button><button id="zout" aria-label="Herauszoomen">−</button><button id="zhome" aria-label="Zurücksetzen">⌂</button><button id="heat" aria-label="Dichte-Ansicht" title="Dichte-Ansicht">◍</button></div>
+  <div class="card idle" id="card"></div>
+</div>
+<div class="tl" id="tl"><button id="play" aria-label="Abspielen">▶</button><input id="range" type="range" min="0" max="0" value="0" aria-label="Zeitverlauf"><div class="lab" id="tlab"></div></div>
+<div class="note" id="note">Nur Betriebe, die der Anzeige ausdrücklich zugestimmt haben. · Postleitzahlen: <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0)</div>
+</div>
+
+<script src="/karte/karte.js" defer></script>
+</body>
+</html>

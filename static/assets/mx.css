@@ -1566,3 +1566,8 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
 /* ── Paketkarten: Preis wird im Erstgespräch genannt (Text statt Zahl, daher kleiner) ── */
 .price-card .price{font-size:clamp(1.25rem,1.05rem + .7vw,1.6rem);letter-spacing:-.02em;line-height:1.15}
 .pick-price b{font-size:clamp(1.7rem,1.3rem + 1.4vw,2.3rem)}
+
+/* ── Kundenkarte (Referenzen) ── */
+.karte-wrap{max-width:1040px;margin:0 auto;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#05070B;box-shadow:var(--shadow-lg)}
+.karte-frame{display:block;width:100%;height:860px;border:0;background:#05070B}
+@media (min-width:820px){.karte-frame{height:760px}}
