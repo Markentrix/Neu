@@ -77,4 +77,4 @@ und `brand/schichtatelier-wortmarke*.svg` (ohne Zeile und Signatur). Die Wortmar
 ## Suchmaschinen und KI-Auffindbarkeit
 
 `python3 build/build.py` erzeugt Open Graph, strukturierte Daten (Betrieb, Website, Breadcrumbs, FAQ), `llms.txt` und das Teilen-Bild `assets/img/teilen.jpg`. Ohne Domain bleiben alle Adressen relativ.
-Für den Livegang mit fester Domain: `python3 build/build.py --domain https://IHRE-DOMAIN` setzt zusätzlich kanonische Adressen, absolute Sitemap-Einträge, `Sitemap:` in der robots.txt, og:url und og:image. Danach `website-fertig/` hochladen.
+Für den Livegang: `python3 build/build.py --live` (Domain `schichtatelier.de` steht in `build/config.py`) oder `--domain https://IHRE-DOMAIN` setzt zusätzlich kanonische Adressen, absolute Sitemap-Einträge, `Sitemap:` in der robots.txt, og:url und og:image. Danach `website-fertig/` hochladen.

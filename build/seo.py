@@ -1,6 +1,7 @@
 """Suchmaschinen- und KI-Auffindbarkeit: Open Graph, strukturierte Daten, llms.txt, Teilen-Bild.
 
 Ohne Domain bleibt alles relativ (Upload auf beliebige Domain). Für den Livegang mit fester Domain:
+  python3 build/build.py --live                      (Domain aus build/config.py)
   python3 build/build.py --domain https://schichtatelier.de
 setzt zusätzlich kanonische Adressen, absolute Sitemap, og:url und og:image.
 """
@@ -13,6 +14,8 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", "website-fertig"))
 
 
 def site_url():
+    if "--live" in sys.argv:
+        return getattr(C, "DOMAIN", "").rstrip("/")
     for i, a in enumerate(sys.argv):
         if a == "--domain" and i + 1 < len(sys.argv):
             return sys.argv[i + 1].rstrip("/")

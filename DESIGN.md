@@ -122,3 +122,17 @@ Austauschtest: Mit dem Namen einer Bäckerei oder Kanzlei passt nichts davon: Dr
 ## Text
 
 Konkret, Hand-Werk-Ton, Siezen. Buttons nennen die Handlung („Im Shop ansehen“, „Angebot für meine Datei anfordern“, „In den Warenkorb“). Keine Gedankenstriche im Fließtext, keine Dreier-Slogans, keine Floskeln der Verbotsliste.
+
+## Prüfstand (Stand 12.11.2026) und bewusste Abweichungen
+
+Gemessen: Barrierefreiheit (axe, hell und dunkel, 10 Seiten) ohne Befund, Tastatur-Durchlauf mit sichtbarem Fokus, kein seitliches Scrollen bei 640, 390 und 320 px, Lighthouse mobil Performance 95 bis 97, LCP 2,4 s, CLS bis 0,08 (Labor, kein Feldwert).
+Bewegung nach den Regeln: nur transform, opacity und clip-path, Hover nur mit `(hover:hover) and (pointer:fine)`, Dauer der Rückmeldungen unter 300 ms, Aufbau beim Scrollen 0,35 bis 0,6 s, Staffel 60 ms.
+
+Bewusst nicht umgesetzt, weil nicht belegt oder gewollt:
+- Hero-Überschrift mit 4 Zeilen bei 1440 px: Display-Schrift in Plakatgröße ist die Idee der Startseite.
+- Haarlinien an Kopfzeile, FAQ-Zeilen und Materialliste: Sie trennen Listenzeilen zum Überfliegen. Der Kopf braucht eine Kante zum scrollenden Inhalt.
+- Fußzeile mit zwei Linklisten: Die Seite hat rund 20 Seiten, die Rechtstexte müssen verlinkt sein.
+- Weniger als 4 echte Bilder pro Seite: Es gibt ein echtes Foto. Weitere Fotos kommen vom Betrieb (OFFEN).
+- Aufbau beim Scrollen an jeder Seite: Auf Wunsch des Kunden mehr Bewegung, deshalb ein Wortschatz (Stufen mit clip-path) statt eines Fade-up.
+
+Domain: `schichtatelier.de`. Der normale Export bleibt ohne feste Domain (Uploader-Regel). `python3 build/build.py --live` erzeugt für den Livegang kanonische Adressen, absolute Sitemap, `Sitemap:` in der robots.txt, og:url, og:image und absolute Adressen in den strukturierten Daten und der llms.txt.

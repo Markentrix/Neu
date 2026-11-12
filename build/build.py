@@ -198,7 +198,7 @@ def build_index():
       </div>
     </div>
     <figure class="hero-photo">
-      <img src="assets/img/hero.webp" width="1200" height="1200" alt="Kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett eines Bambu Lab X1 Carbon, im Hintergrund weitere frisch gedruckte Kürbisse" fetchpriority="high">
+      <img src="assets/img/hero.webp" srcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" sizes="(max-width: 860px) 100vw, 50vw" width="1200" height="1200" alt="Kleiner Kürbis aus orangefarbenem Silk-PLA auf dem Druckbett eines Bambu Lab X1 Carbon, im Hintergrund weitere frisch gedruckte Kürbisse" fetchpriority="high">
       <figcaption>Kleiner Kürbis aus Orange Silk, frisch vom Druckbett des Bambu Lab X1 Carbon.</figcaption>
     </figure>
   </div>
@@ -249,7 +249,7 @@ def build_index():
   </div>
 </section>
 """
-    page("index.html", f"{C.MARKE} · 3D-Druck aus Celle, Shop und Service", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index", "", seo.ld(seo.organisation()) + seo.ld(seo.website()))
+    page("index.html", f"{C.MARKE} · 3D-Druck aus Celle, Shop und Service", "3D-Druck-Atelier in Celle: Deko, Geschenke und Teile nach eigener Datei, gedruckt nach Bestellung auf einem Bambu Lab X1 Carbon.", body, "index", "", '<link rel="preload" as="image" href="assets/img/hero.webp" imagesrcset="assets/img/hero-800.webp 800w, assets/img/hero.webp 1200w" imagesizes="(max-width: 860px) 100vw, 50vw" type="image/webp" fetchpriority="high">\n' + seo.ld(seo.organisation()) + seo.ld(seo.website()))
 
 
 # ---------------------------------------------------------------- Shop
@@ -548,7 +548,7 @@ def build_contact():
 def build_about():
     body = f"""<section class="page-head">
   <div class="wrap">
-    <h1>Das Atelier von {E(C.INHABER)} in Celle.</h1>
+    <h1>Das Atelier von {E(C.INHABER)}</h1>
     <p class="lead">{E(C.MARKE)} druckt kleine Dinge erst dann, wenn jemand sie bestellt. Gedruckt wird auf einem Bambu Lab X1 Carbon.</p>
   </div>
 </section>
@@ -846,7 +846,7 @@ def build_materials():
     trs = "".join(f'<tr><th scope="row">{E(k)}</th>' + "".join(f"<td>{E(vals[m['id']])}</td>" for m in MATERIALIEN) + "</tr>" for k, vals in VERGLEICH)
     body = f"""<section class="page-head">
   <div class="wrap">
-    <h1>Welches Material passt zu Ihrem Teil?</h1>
+    <h1>Welches Material passt?</h1>
     <p class="lead">Vier Kunststoffe decken fast alles ab, was im Alltag gedruckt wird. Hier steht, wofür welcher taugt und wo seine Grenzen liegen.</p>
   </div>
 </section>
@@ -936,7 +936,7 @@ def build_service():
 </section>
 <section class="section">
   <div class="wrap shop-block">
-    <div class="side"><h2>Was sich drucken lässt</h2></div>
+    <div class="side"><h2>Was möglich ist</h2></div>
     <dl class="spaltenliste">
       <div><dt>Größe</dt><dd>Bis 25 cm Kantenlänge am Stück. Größeres besprechen wir einzeln.</dd></div>
       <div><dt>Material</dt><dd>{mats}. Der <a href="materialien.html">Vergleich</a> zeigt, was wofür taugt.</dd></div>
@@ -960,7 +960,7 @@ def build_service():
 </section>
 <section class="section">
   <div class="wrap shop-block">
-    <div class="side"><h2>Was wir nicht drucken</h2></div>
+    <div class="side"><h2>Nicht im Angebot</h2></div>
     <p class="prose" style="margin:0">Keine Waffen oder Waffenteile, keine markengeschützten Teile zum Weiterverkauf und keine Teile, deren Versagen Menschen gefährden kann, etwa tragende Fahrzeugteile oder Druckbehälter.</p>
   </div>
 </section>

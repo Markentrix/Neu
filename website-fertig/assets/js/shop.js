@@ -444,7 +444,7 @@
       if (!c.length) { if (prog) prog.hidden = true; if (cs) cs.hidden = true; return; }
       if (prog) {
         prog.hidden = t.abholung; var pct = Math.min(100, Math.round(t.zwischensumme / CFG.versandfreiAb * 100));
-        $("#ship-fill").style.width = pct + "%"; prog.classList.toggle("done", t.versand === 0);
+        $("#ship-fill").style.setProperty("--p", pct / 100); prog.classList.toggle("done", t.versand === 0);
         $("#ship-text").innerHTML = t.versand === 0 ? "<strong>Versandkostenfrei.</strong> Sie sparen " + EUR(CFG.versandPauschale) + "." : "Noch <strong>" + EUR(CFG.versandfreiAb - t.zwischensumme) + "</strong> bis zum kostenlosen Versand.";
       }
       if (cs) {
@@ -865,7 +865,7 @@
         var r = el.getBoundingClientRect();
         if (r.bottom < 0) { el.classList.remove("pre"); return false; }  // übersprungen (Sprungmarke): sofort zeigen
         if (r.top > lim) return true;                                     // noch unterhalb: warten
-        el.style.setProperty("--d", Math.min(n++, 4) * 0.09 + "s");
+        el.style.setProperty("--d", Math.min(n++, 4) * 0.06 + "s");
         el.classList.remove("pre"); el.classList.add("run"); return false;
       });
       if (!pending.length) { window.removeEventListener("scroll", ask); window.removeEventListener("resize", ask); }

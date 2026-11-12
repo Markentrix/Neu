@@ -294,6 +294,7 @@ def main():
         h = ImageOps.exif_transpose(Image.open(hero_src)).convert("RGB").crop(HERO["crop"])
         h = h.resize((1200, 1200), Image.LANCZOS)
         h.save(os.path.join(ROOT, "assets", "img", "hero.webp"), "WEBP", quality=82, method=6)
+        h.resize((800, 800), Image.LANCZOS).save(os.path.join(ROOT, "assets", "img", "hero-800.webp"), "WEBP", quality=80, method=6)
     # Gutschein-Karte
     gs = frame('<rect x="190" y="170" width="420" height="270" rx="18" fill="#1f4d3a"/>'
                '<rect x="190" y="170" width="420" height="270" rx="18" fill="none" stroke="#f1e6d2" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 6" transform="translate(10 10) scale(.952)"/>'
