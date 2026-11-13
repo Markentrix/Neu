@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Markentrix · Vorschlag 2 in vier Signalfarben</title>
+<style>
+@font-face{font-family:'Inter';font-weight:400;src:url(../src/fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:600;src:url(../src/fonts/inter-latin-600-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:700;src:url(../src/fonts/inter-latin-700-normal.woff2)}
+@font-face{font-family:'Archivo';font-weight:700;src:url(fonts/archivo-latin-700-normal.woff2)}
+@font-face{font-family:'Archivo';font-weight:800;src:url(fonts/archivo-latin-800-normal.woff2)}
+@font-face{font-family:'Source Sans 3';font-weight:400;src:url(fonts/source-sans-3-latin-400-normal.woff2)}
+@font-face{font-family:'Source Sans 3';font-weight:600;src:url(fonts/source-sans-3-latin-600-normal.woff2)}
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box}html,body{margin:0;background:#fff}
+body{font-family:Inter,sans-serif;font-size:10.5px;line-height:1.45;color:#2A2F3A;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:1123px;height:794px;padding:34px 44px 0;position:relative;overflow:hidden;page-break-after:always;background:#FBFBFA}
+.top{display:flex;justify-content:space-between;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7A8090;padding-bottom:9px;border-bottom:1px solid #E4E6EA;margin-bottom:14px}
+.foot{position:absolute;left:44px;right:44px;bottom:18px;display:flex;justify-content:space-between;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7A8090}
+h1{font-size:24px;line-height:1.1;letter-spacing:-.02em;margin:0 0 4px;color:#14171F}
+h2{font-size:13px;margin:0;color:#14171F}h3{font-size:10.5px;margin:0 0 2px;color:#14171F}
+p{margin:0 0 5px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px;margin-top:12px}
+.head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.head i{width:18px;height:18px;border-radius:4px}.head span{font-size:9px;color:#7A8090}
+.row{display:flex;gap:8px}
+.m{border-radius:8px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.09);font-family:'Source Sans 3'}
+.hero{width:316px;height:176px;padding:11px 14px;background:#F4EFE6;color:#3A362F}
+.post{width:176px;height:176px;padding:14px;background:#1E1C19;color:#F4EFE6}
+.nav{display:flex;align-items:center;gap:9px;font-size:6.5px;font-weight:600;color:#1E1C19;margin-bottom:15px}.nav .sp{flex:1}
+.hl{font-family:Archivo;font-weight:800;letter-spacing:-.025em;line-height:1.04;color:#1E1C19}
+.note{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;font-size:9.5px}
+.box{background:#fff;border:1px solid #E4E6EA;border-radius:10px;padding:12px 15px}
+.rec{background:#14171F;color:#fff;border-radius:10px;padding:13px 16px}.rec h2,.rec b{color:#fff}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7A8090;padding:0 8px 6px 0;border-bottom:1px solid #E4E6EA}
+td{padding:7px 8px 7px 0;border-bottom:1px solid #E4E6EA;vertical-align:top}
+ul{margin:0;padding:0;list-style:none}li{position:relative;padding-left:12px;margin-bottom:4px}li:before{content:'';position:absolute;left:0;top:.55em;width:4px;height:4px;border-radius:50%;background:#14171F}
+</style></head><body><div id="root"></div>
+<script>
+const V=[
+ {id:'A',name:'Signalrot',pri:'#C93A17',on:'#fff',dk:'#F0623D',wirkt:'Kräftig, selbstbewusst, sofort sichtbar.',passt:'Passt zu allen Branchen. Nicht an Natur, Technik oder eine Zunft gebunden.',vorsicht:'Rot ist auch die Farbe für Fehler und Rabatte. Fehlermeldungen brauchen dann zusätzlich ein Symbol, und Rot muss sparsam bleiben.'},
+ {id:'B',name:'Senfgelb',pri:'#E3A712',on:'#1E1C19',dk:'#F2BC3A',wirkt:'Warm, freundlich, auffällig wie ein Ladenschild.',passt:'Passt zu allen Branchen und ist bei Agenturen selten. Sehr gut auf dunklem Grund.',vorsicht:'Auf hellem Papier trägt Gelb keinen Text und keine feinen Linien. Mit Schwarz kann es an Baustelle oder Warnschild erinnern.'},
+ {id:'C',name:'Tannengrün',pri:'#1F5A3D',on:'#fff',dk:'#6CC495',wirkt:'Ruhig, verlässlich, bodenständig.',passt:'Stark für Hofladen, Gartenservice, Lohnunternehmen, Reitverein.',vorsicht:'Wirkt schnell nach Bio, Natur oder Umweltthema. Für Kfz-Werkstatt, Autopflege und Fleischer passt das weniger. Als Signal ist es das leiseste.'},
+ {id:'D',name:'Kobaltblau',pri:'#1D4ED8',on:'#fff',dk:'#7FA4FF',wirkt:'Sachlich, vertrauenswürdig, technisch.',passt:'Passt zu allen Branchen und ist dem heutigen Auftritt am nächsten.',vorsicht:'Blau ist die häufigste Agenturfarbe. Der Abstand zu anderen entsteht dann nur noch über Papier und Schrift.'}];
+const mark=(m,a,w)=>`<svg viewBox="0 0 522 447" style="width:${w}px;flex:none;display:block"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="${a}" stroke-width="54" d="M414 107.5 495 27M415 27h80v80.5"/><path stroke="${m}" stroke-width="82" d="M41 406V107.5L227.5 277.5 414 107.5V406"/></g></svg>`;
+const logo=(h,m,a,c)=>`<div style="display:flex;align-items:flex-end;gap:${h*.36}px">${mark(m,a,h*1.168)}<span style="font-family:Archivo;font-weight:800;font-size:${h*.86}px;line-height:1;margin-bottom:${-h*.115}px;letter-spacing:-.02em;color:${c}">Markentrix</span></div>`;
+const arrow=(c,w)=>`<svg viewBox="0 0 240 90" style="width:${w}px;display:block" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 84C80 82 150 62 222 12"/><path d="M194 10h30v30"/></svg>`;
+const btn=(v,t,sec)=>`<span style="display:inline-flex;align-items:center;height:21px;padding:0 9px;border-radius:3px;font-weight:600;font-size:7.5px;white-space:nowrap;${sec?'background:#FFFDF8;border:1px solid #1E1C19;color:#1E1C19':`background:${v.pri};color:${v.on}`}">${t}</span>`;
+const cell=v=>`<div><div class="head"><i style="background:${v.pri}"></i><h2>${v.id} · ${v.name}</h2><span>${v.pri} · auf Dunkel ${v.dk}</span></div>
+ <div class="row">
+  <div class="m hero"><div class="nav">${logo(10.5,'#1E1C19',v.pri,'#1E1C19')}<span class="sp"></span><span>Leistungen</span><span>Preise</span><span>Kontakt</span><span style="background:${v.pri};color:${v.on};padding:4px 7px;border-radius:3px">Termin buchen</span></div>
+   <div class="hl" style="font-size:25px;margin-bottom:7px">Websites, die<br><span style="box-shadow:inset 0 -.14em 0 ${v.pri}">Anfragen</span> bringen.</div>
+   <div style="font-size:8.6px;max-width:200px;margin-bottom:9px">Für Betriebe, die mehr Kunden wollen und keine Zeit für Technik haben.</div>
+   <div style="display:flex;gap:6px">${btn(v,'Website-Check starten')}${btn(v,'Erstgespräch buchen',1)}</div>
+   <div style="position:absolute;right:14px;bottom:14px">${arrow(v.pri,78)}</div></div>
+  <div class="m post"><div class="hl" style="font-size:20px;color:#F4EFE6;margin-bottom:7px">Mehr Anfragen.<br><span style="color:${v.dk}">Weniger Aufwand.</span></div>
+   <div style="font-size:8.2px;max-width:130px">Ihre Website arbeitet, während Sie im Laden stehen.</div>
+   <div style="position:absolute;left:14px;bottom:13px">${logo(11,'#F4EFE6',v.dk,'#F4EFE6')}</div><div style="position:absolute;right:13px;bottom:13px">${arrow(v.dk,48)}</div></div>
+ </div>
+ <div class="note"><div><b>${v.wirkt}</b> ${v.passt}</div><div><b>Vorsicht:</b> ${v.vorsicht}</div></div></div>`;
+document.getElementById('root').innerHTML=`
+<section class="page"><div class="top"><span>Markentrix · Vorschlag 2 „Vor Ort“</span><span>Vier Signalfarben im Vergleich</span></div>
+ <h1>Vorschlag 2 in vier Signalfarben</h1>
+ <p style="font-size:12px;max-width:880px">Papier, Tinte, Schrift und Logoform sind in allen vier Varianten gleich. Es ändert sich nur die eine Signalfarbe für Pfeil, Knopf, Unterstreichung und Aufwärtslinie.</p>
+ <div class="grid">${V.map(cell).join('')}</div>
+ <div class="foot"><span>Zur Freigabe · noch nichts umgesetzt</span><span>1 / 2</span></div></section>
+<section class="page"><div class="top"><span>Markentrix · Vorschlag 2 „Vor Ort“</span><span>Einordnung und Empfehlung</span></div>
+ <h1>Welche Farbe trägt alle Branchen?</h1>
+ <p style="font-size:12px;max-width:880px;margin-bottom:14px">Markentrix baut für jede Branche: Handwerk, Kfz-Werkstatt, Autopflege, Handel, Hofladen, Fleischer, Gartenservice, Lohnunternehmen, Ponyclub, Reitverein. Die Signalfarbe darf deshalb keiner einzelnen Branche gehören.</p>
+ <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px">
+  <div class="box"><table>
+   <tr><th style="width:30%"></th><th>A · Signalrot</th><th>B · Senfgelb</th><th>C · Tannengrün</th><th>D · Kobaltblau</th></tr>
+   <tr><td><b>Neutral über alle Branchen</b></td><td>ja</td><td>ja</td><td>nein, wirkt nach Natur</td><td>ja</td></tr>
+   <tr><td><b>Abstand zu anderen Agenturen</b></td><td>groß</td><td>sehr groß</td><td>mittel</td><td>klein</td></tr>
+   <tr><td><b>Fällt im Feed auf</b></td><td>stark</td><td>stark</td><td>schwach</td><td>mittel</td></tr>
+   <tr><td><b>Weißer Text auf dem Knopf</b></td><td>ja, 5,1:1</td><td>nein, Text muss dunkel sein</td><td>ja, 8,1:1</td><td>ja, 6,7:1</td></tr>
+   <tr><td><b>Trägt Text auf hellem Papier</b></td><td>nur große Schrift</td><td>nein</td><td>ja</td><td>ja</td></tr>
+   <tr><td><b>Druck, Fahrzeug, Stick</b></td><td>sehr gut</td><td>gut, auf Weiß schwach</td><td>sehr gut</td><td>sehr gut</td></tr>
+   <tr><td style="border:0"><b>Größtes Risiko</b></td><td style="border:0">kann laut wirken</td><td style="border:0">Warnschild-Anmutung</td><td style="border:0">Bio-Anmutung</td><td style="border:0">wieder „blaue Agentur“</td></tr></table>
+   <p style="font-size:9px;color:#7A8090;margin:8px 0 0">Kontrastwerte sind berechnet. Alle anderen Angaben sind meine gestalterische Einschätzung.</p></div>
+  <div>
+   <div class="rec"><h2 style="margin-bottom:6px">Meine Empfehlung: A, Signalrot</h2>
+    <p>Rot ist die einzige der vier Farben, die keiner Branche gehört, sich klar von anderen Agenturen abhebt und trotzdem überall funktioniert: als Knopf mit weißem Text, im Druck, auf dem Fahrzeug.</p>
+    <p style="margin:0">Zweite Wahl ist <b>B, Senfgelb</b>. Es ist noch eigenständiger und freundlicher, verlangt aber mehr Disziplin, weil es auf Hell keinen Text trägt.</p></div>
+   <div class="box" style="margin-top:12px"><h2 style="margin-bottom:6px">Wovon ich abrate</h2><ul>
+    <li><b>C, Tannengrün,</b> weil es Markentrix in die Natur-Ecke stellt und für Kfz, Autopflege und Fleischer nicht passt.</li>
+    <li><b>D, Kobaltblau,</b> weil es das eigentliche Problem nicht löst: Markentrix bliebe eine blaue Agentur.</li>
+    <li><b>Eine Farbe je Branche.</b> Die Kundenwebsites bekommen ihre eigenen Farben. Markentrix selbst braucht genau eine.</li></ul></div>
+  </div>
+ </div>
+ <div class="foot"><span>Zur Freigabe · noch nichts umgesetzt</span><span>2 / 2</span></div></section>`;
+</script></body></html>
