@@ -1690,3 +1690,5 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .karte-wrap,.karte-frame{background:var(--kreide)}
 .aufwaerts--hero{position:absolute;right:max(32px,calc((100% - 1180px)/2 + 32px));bottom:250px;width:clamp(140px,17vw,240px);z-index:0}
 @media (max-width:900px){.aufwaerts--hero{display:none}}
+@media (max-width:520px){.brand-logo{width:150px}.nav{gap:10px}}
+.ki-note{font-size:.9375rem}
