@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Markentrix · Farbkombination mit Petrol</title>
+<style>
+@font-face{font-family:'Inter';font-weight:400;src:url(../src/fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:600;src:url(../src/fonts/inter-latin-600-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:700;src:url(../src/fonts/inter-latin-700-normal.woff2)}
+@font-face{font-family:'Archivo';font-weight:700;src:url(fonts/archivo-latin-700-normal.woff2)}
+@font-face{font-family:'Archivo';font-weight:800;src:url(fonts/archivo-latin-800-normal.woff2)}
+@font-face{font-family:'Source Sans 3';font-weight:400;src:url(fonts/source-sans-3-latin-400-normal.woff2)}
+@font-face{font-family:'Source Sans 3';font-weight:600;src:url(fonts/source-sans-3-latin-600-normal.woff2)}
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box}html,body{margin:0;background:#fff}
+body{font-family:Inter,sans-serif;font-size:10px;line-height:1.45;color:#2A2F3A;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:1123px;height:794px;padding:32px 44px 0;position:relative;overflow:hidden;page-break-after:always;background:#FBFBFA}
+.top{display:flex;justify-content:space-between;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7A8090;padding-bottom:9px;border-bottom:1px solid #E4E6EA;margin-bottom:14px}
+.foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7A8090}
+h1{font-size:24px;line-height:1.1;letter-spacing:-.02em;margin:0 0 5px;color:#14171F}
+h2{font-size:13px;margin:0 0 6px;color:#14171F}h3{font-size:10.5px;margin:0 0 2px;color:#14171F}
+p{margin:0 0 5px}.lead{font-size:12px;max-width:900px;margin-bottom:12px}
+.box{background:#fff;border:1px solid #E4E6EA;border-radius:10px;padding:12px 15px}
+.lab{font-size:7.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7A8090;display:block;margin:0 0 5px}
+table{width:100%;border-collapse:collapse}td{padding:5px 8px 5px 0;border-bottom:1px solid #E4E6EA;vertical-align:top}tr:last-child td{border:0}
+ul{margin:0;padding:0;list-style:none}li{position:relative;padding-left:12px;margin-bottom:4px}li:before{content:'';position:absolute;left:0;top:.55em;width:4px;height:4px;border-radius:50%;background:#14171F}
+.bar{display:flex;height:46px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,.1)}
+.bar div{display:flex;align-items:flex-end;padding:5px 7px;font-size:9px;font-weight:700}
+.leg{display:flex;font-size:8.5px;margin-top:4px;color:#555}
+.cc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.sw{height:44px;border-radius:7px;margin-bottom:7px;padding:7px 9px;font-family:Archivo;font-weight:800;font-size:13px;letter-spacing:-.02em;line-height:1.1}
+.sw span{display:block;font-family:Inter;font-weight:600;font-size:8px;letter-spacing:0;opacity:.9}
+.m{border-radius:8px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.09);font-family:'Source Sans 3'}
+.hl{font-family:Archivo;font-weight:800;letter-spacing:-.025em;line-height:1.04;color:#1E1C19}
+.rec{background:#14171F;color:#fff;border-radius:10px;padding:13px 16px}.rec h2,.rec b{color:#fff}
+</style></head><body><div id="root"></div>
+<script>
+const I='#1E1C19',P='#F4EFE6',PET='#0C626D',PETD='#20B0C3';
+const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
+const lum=c=>{const r=c.map(v=>v<=.03928?v/12.92:((v+.055)/1.055)**2.4);return .2126*r[0]+.7152*r[1]+.0722*r[2]};
+const cr=(a,b)=>{const[x,y]=[lum(hx(a)),lum(hx(b))].sort((p,q)=>q-p);return ((x+.05)/(y+.05)).toFixed(1).replace('.',',')+':1'};
+const K={
+ a:{name:'Petrol · Backsteinrot · Sand',acc:'#A1311A',accOn:'#fff',accDk:'#E28876',surf:'#E6DCCA',accName:'Backsteinrot',surfName:'Sand'},
+ b:{name:'Petrol · Senf · Nebel',acc:'#D9A21B',accOn:I,accDk:'#F2BC3A',surf:'#DCE9E8',accName:'Senf',surfName:'Nebel'},
+ c:{name:'Petrol · Hellpetrol · Sand',acc:PET,accOn:'#fff',accDk:PETD,surf:'#E6DCCA',accName:'Hellpetrol',surfName:'Sand',mono:1}};
+const mark=(m,a,w)=>`<svg viewBox="0 0 522 447" style="width:${w}px;flex:none;display:block"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="${a}" stroke-width="54" d="M414 107.5 495 27M415 27h80v80.5"/><path stroke="${m}" stroke-width="82" d="M41 406V107.5L227.5 277.5 414 107.5V406"/></g></svg>`;
+const logo=(h,m,a,c)=>`<div style="display:flex;align-items:flex-end;gap:${h*.36}px">${mark(m,a,h*1.168)}<span style="font-family:Archivo;font-weight:800;font-size:${h*.86}px;line-height:1;margin-bottom:${-h*.115}px;letter-spacing:-.02em;color:${c}">Markentrix</span></div>`;
+const arrow=(c,w)=>`<svg viewBox="0 0 240 90" style="width:${w}px;display:block" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 84C80 82 150 62 222 12"/><path d="M194 10h30v30"/></svg>`;
+function mock(k,z=1){const v=K[k];return `<div style="zoom:${z}"><div style="display:grid;grid-template-columns:1.75fr 1fr;gap:9px">
+ <div class="m" style="background:${P};color:#3A362F;padding:14px 18px;height:236px">
+  <div style="display:flex;align-items:center;gap:12px;font-size:8px;font-weight:600;color:${I};margin-bottom:20px">${logo(13,I,PET,I)}<span style="flex:1"></span><span>Leistungen</span><span>Preise</span><span>Kontakt</span><span style="background:${PET};color:#fff;padding:5px 9px;border-radius:3px">Termin buchen</span></div>
+  <div class="hl" style="font-size:33px;margin-bottom:8px">Websites, die<br><span style="box-shadow:inset 0 -.14em 0 ${v.acc}">Anfragen</span> bringen.</div>
+  <div style="font-size:11.5px;max-width:270px;margin-bottom:11px">Für Betriebe, die mehr Kunden wollen und keine Zeit für Technik haben.</div>
+  <div style="display:flex;gap:8px;align-items:center"><span style="background:${PET};color:#fff;font-weight:600;font-size:9.5px;padding:8px 12px;border-radius:4px">Website-Check starten</span><span style="background:#FFFDF8;border:1px solid ${I};color:${I};font-weight:600;font-size:9.5px;padding:7px 12px;border-radius:4px">Erstgespräch buchen</span></div>
+  <div style="position:absolute;right:18px;bottom:16px">${arrow(PET,96)}</div></div>
+ <div class="m" style="background:${I};color:${P};padding:16px;height:236px">
+  <div class="hl" style="font-size:25px;color:${P};margin-bottom:8px">Mehr Anfragen.<br><span style="color:${PETD}">Weniger Aufwand.</span></div>
+  <div style="font-size:10.5px;max-width:160px">Ihre Website arbeitet, während Sie im Laden stehen.</div>
+  <span style="position:absolute;right:14px;top:14px;background:${v.mono?PETD:v.accDk};color:${I};font-weight:600;font-size:7.5px;padding:3px 7px;border-radius:3px;font-family:Inter">NEU</span>
+  <div style="position:absolute;left:16px;bottom:15px">${logo(14,P,PETD,P)}</div></div>
+ </div>
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:9px">
+  <div class="m" style="background:${v.surf};padding:12px 14px;height:104px;color:#3A362F"><div style="font-family:Inter;font-size:7.5px;font-weight:700;letter-spacing:.08em;color:${PET}">SO LÄUFT ES AB</div><div class="hl" style="font-size:15px;margin:4px 0 4px">In 5 bis 15 Werktagen live.</div><div style="font-size:9.5px;line-height:1.35">Sie brauchen rund 60 Minuten für Briefing und Freigabe.</div></div>
+  <div class="m" style="background:#FFFDF8;padding:12px 14px;height:104px;color:#3A362F"><span style="position:absolute;right:12px;top:12px;background:${v.acc};color:${v.accOn};font-family:Inter;font-weight:600;font-size:7.5px;padding:3px 7px;border-radius:3px">Nur bis 30.11.</span><div style="font-family:Inter;font-size:7.5px;font-weight:700;letter-spacing:.08em;color:#625C53">LANDINGPAGE</div><div style="font-family:Archivo;font-weight:800;font-size:25px;line-height:1.15;color:${I}">599 €</div><span style="display:inline-block;margin-top:5px;background:${PET};color:#fff;font-weight:600;font-size:8.5px;padding:5px 10px;border-radius:3px">Angebot sichern</span></div>
+  <div class="m" style="background:#FFFDF8;padding:12px 14px;height:104px"><div style="font-family:Inter;font-size:7.5px;font-weight:700;letter-spacing:.08em;color:#625C53;margin-bottom:6px">ANFRAGEN JE MONAT</div><svg viewBox="0 0 190 62" style="width:100%"><g fill="${PET}"><rect x="2" y="40" width="26" height="20" rx="2"/><rect x="36" y="32" width="26" height="28" rx="2"/><rect x="70" y="26" width="26" height="34" rx="2"/><rect x="104" y="16" width="26" height="44" rx="2"/></g><rect x="138" y="4" width="26" height="56" rx="2" fill="${v.mono?'#5FB3BD':v.acc}"/><path d="M0 60.5h170" stroke="#B9B2A5"/></svg></div>
+ </div></div>`}
+const bar=(parts)=>`<div class="bar">${parts.map(([w,c,t,n])=>`<div style="width:${w}%;background:${c};color:${t}">${w>=10?w+' %':''}</div>`).join('')}</div>${parts.some(p=>p[3])?`<div class="leg" style="gap:12px;flex-wrap:wrap">${parts.map(([w,c,t,n])=>`<span style="white-space:nowrap"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c};border:1px solid rgba(0,0,0,.15);vertical-align:-1px;margin-right:4px"></i>${n} ${w} %</span>`).join('')}</div>`:''}`;
+const A=K.a;
+document.getElementById('root').innerHTML=`
+<section class="page"><div class="top"><span>Markentrix · Farbkombination</span><span>Empfehlung</span></div>
+ <h1>Petrol, Backsteinrot und Sand</h1>
+ <p class="lead">Drei Farben mit klar getrennten Aufgaben: Petrol führt, Sand gibt Fläche, Backsteinrot hebt genau eine Sache hervor. Dazu kommen die beiden neutralen Töne Papier und Tinte, die den größten Teil jeder Fläche tragen.</p>
+ <div style="display:grid;grid-template-columns:1fr 1.22fr;gap:18px">
+  <div>
+   <div class="box"><span class="lab">Anteile an der ganzen Fläche</span>
+    ${bar([[60,P,I,'Papier und Weiß'],[18,I,'#fff','Tinte'],[12,PET,'#fff','Petrol'],[7,A.surf,I,'Sand'],[3,A.acc,'#fff','Backsteinrot']])}
+    <p style="margin:8px 0 0">Die drei Farben untereinander stehen damit etwa im Verhältnis <b>4 : 2 : 1</b> (Petrol : Sand : Backsteinrot). Backsteinrot nimmt 3 % ein. Text zählt bei Tinte mit.</p></div>
+   <div class="cc">
+    <div class="box" style="padding:10px"><div class="sw" style="background:${PET};color:#fff">Petrol<span>${PET} · 12 %</span></div><h3>Hauptfarbe</h3><p style="margin:0">Logo-Pfeil, Knöpfe, Links, Aufwärtslinie, Diagramme, kleine Überzeilen. Alles, was Markentrix ist oder zu einer Handlung führt.</p></div>
+    <div class="box" style="padding:10px"><div class="sw" style="background:${A.surf};color:${I}">Sand<span>${A.surf} · 7 %</span></div><h3>Flächenfarbe</h3><p style="margin:0">Ruhige Abschnitte, Karten, Tabellenköpfe. Eine Stufe dunkler als das Papier, damit Flächen sich abheben, ohne Rahmen zu brauchen. Trägt nie Text als Farbe.</p></div>
+    <div class="box" style="padding:10px"><div class="sw" style="background:${A.acc};color:#fff">Backsteinrot<span>${A.acc} · 3 %</span></div><h3>Akzentfarbe</h3><p style="margin:0">Der Strich unter dem wichtigsten Wort, ein Hinweis-Abzeichen, der eine hervorgehobene Wert im Diagramm. Höchstens einmal je sichtbarer Fläche.</p></div>
+   </div>
+   <div class="box" style="margin-top:12px"><h2>Warum diese drei</h2><ul>
+    <li><b>Rot ist der Gegenpol zu Petrol.</b> Im Farbkreis liegen sie gegenüber. Ein kleiner roter Akzent neben Petrol fällt deshalb stärker auf als jede andere Farbe und gleicht die einzige Schwäche von Petrol aus: die leise Signalwirkung.</li>
+    <li><b>Sand hält alles warm.</b> Petrol allein auf Weiß wirkt kühl. Sand und Papier sorgen dafür, dass der Auftritt persönlich bleibt.</li>
+    <li><b>Jede Farbe hat genau eine Aufgabe.</b> Das verhindert, was den alten Auftritt beliebig gemacht hat: fünf Akzentfarben ohne Regel.</li>
+    <li><b>Alle drei sind lesbar und druckbar.</b> Weißer Text auf Petrol erreicht ${cr('#FFFFFF',PET)}, auf Backsteinrot ${cr('#FFFFFF',A.acc)}. Tinte auf Sand erreicht ${cr(I,A.surf)}, Petrol auf Sand ${cr(PET,A.surf)}.</li></ul></div>
+  </div>
+  <div><span class="lab">So sieht es zusammen aus</span>${mock('a')}
+   <div class="box" style="margin-top:10px"><h2>Feste Regeln</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px"><ul>
+    <li>Knöpfe sind immer Petrol, nie Rot.</li><li>Rot und Petrol berühren sich nie und stehen nie aufeinander.</li><li>Rot ist nie Fläche, nur Strich, Abzeichen oder einzelner Wert.</li></ul><ul>
+    <li>Auf dunklem Grund gelten die helleren Stufen ${PETD} und ${A.accDk}.</li><li>Fehlermeldungen nutzen Backsteinrot mit Symbol, Erfolgsmeldungen Petrol mit Haken. Weitere Farben gibt es nicht.</li></ul></div></div>
+  </div>
+ </div><div class="foot"><span>Zur Freigabe · noch nichts umgesetzt</span><span>1 / 2</span></div></section>
+<section class="page"><div class="top"><span>Markentrix · Farbkombination</span><span>Zwei Alternativen im Vergleich</span></div>
+ <h1>Zum Vergleich: zwei andere Kombinationen</h1>
+ <p class="lead">Beide sind sauber und möglich. Ich zeige sie, damit du siehst, was die Empfehlung leistet und worauf du bei ihr verzichtest.</p>
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+  ${[['a','Empfehlung','Petrol führt, Rot setzt den einen Akzent, Sand gibt Fläche.','Stärkster Blickfang, warm, klare Rollen.','Rot verlangt Disziplin. Zu viel davon und der Auftritt wird laut.'],
+     ['b','Alternative 1','Petrol führt, Senf setzt Akzente, ein kühles Nebelgrau gibt Fläche.','Freundlich und auffällig, wirkt etwas jünger.','Senf trägt auf Hell keinen Text und keine feinen Linien (${cr("#D9A21B",P)} auf Papier). Petrol mit Senf war zuletzt sehr in Mode und kann schnell datiert wirken.'],
+     ['c','Alternative 2','Nur Petrol in zwei Helligkeiten, dazu Sand. Kein Gegenakzent.','Am ruhigsten und edelsten, am einfachsten einzuhalten.','Nichts sticht hervor. Hinweise und Angebote gehen leichter unter.']].map(([k,t,i,p,m])=>`<div><span class="lab">${t}</span><h2>${K[k].name}</h2>
+   ${bar(k=='a'?[[60,P,I,''],[18,I,'#fff',''],[12,PET,'#fff',''],[7,K.a.surf,I,''],[3,K.a.acc,'#fff','']]:k=='b'?[[60,P,I,''],[18,I,'#fff',''],[12,PET,'#fff',''],[6,K.b.surf,I,''],[4,K.b.acc,I,'']]:[[60,P,I,''],[18,I,'#fff',''],[13,PET,'#fff',''],[4,'#5FB3BD',I,''],[5,K.c.surf,I,'']])}
+   <div style="margin-top:8px">${mock(k,.585)}</div>
+   <p style="margin-top:9px">${i}</p><p><b>Dafür:</b> ${p}</p><p style="margin:0"><b>Dagegen:</b> ${eval('`'+m+'`')}</p></div>`).join('')}
+ </div>
+ <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:16px">
+  <div class="rec"><h2>Ich bleibe bei Petrol, Backsteinrot und Sand</h2><p style="margin:0">Es ist die einzige der drei Kombinationen, in der jede Farbe etwas kann, was die anderen nicht können. Alternative 2 ist die richtige Wahl, falls dir der rote Akzent zu kräftig ist. Dann lässt sich Rot später immer noch ergänzen, umgekehrt ist es schwerer.</p></div>
+  <div class="box"><h2>Was ich von dir brauche</h2><ul><li>Freigabe der Kombination oder eine der Alternativen.</li><li>Danach arbeite ich Logo-Dateien, Farbwerte, Schriftgrößen und die Bild-CI aus und setze das Handbuch neu.</li></ul></div>
+ </div>
+ <div class="foot"><span>Zur Freigabe · noch nichts umgesetzt</span><span>2 / 2</span></div></section>`;
+console.log(['weiß/petrol',cr('#FFFFFF',PET),'weiß/rot',cr('#FFFFFF',A.acc),'tinte/sand',cr(I,A.surf),'petrol/sand',cr(PET,A.surf),'rot/sand',cr(A.acc,A.surf),'senf/papier',cr('#D9A21B',P),'petrolD/tinte',cr(PETD,I),'rotD/tinte',cr(A.accDk,I)].join(' '));
+</script></body></html>
