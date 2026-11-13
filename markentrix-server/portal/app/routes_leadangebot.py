@@ -255,7 +255,7 @@ def ansehen(token: str, request: Request):
             cur.execute("UPDATE belege SET angesehen_am=now() WHERE id=%s", (b["id"],))
             ids = _empfaenger(cur, b)
     if ids:
-        push.senden(ids, "Angebot angesehen", b["lead_firma"] or "", "/admin#lead/" + str(b["lead_id"]), "angebotsreaktion")
+        push.senden(ids, "Angebot angesehen", b["lead_firma"] or (b.get("empfaenger") or {}).get("firma") or "", ("/admin#lead/" + str(b["lead_id"])) if b["lead_id"] else ("/admin#beleg/" + str(b["id"])), "angebotsreaktion")
     return _info(b, f)
 
 

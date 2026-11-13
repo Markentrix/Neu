@@ -6,7 +6,11 @@ import { V, auswahl, fehler, filterKarte, fmtEuro, knopf, kopf, sicher, tabelle 
 
 // ---------------------------------------------------------------- Angebote und Rechnungen
 export const BELEG_ST = { entwurf: '', gestellt: 'warn', versendet: 'warn', angenommen: 'ok', abgelehnt: 'bad', bezahlt: 'ok', storniert: 'bad' };
-export const belegPill = (z) => h('span', { class: 'pill ' + (z.ueberfaellig ? 'bad' : BELEG_ST[z.status] || '') }, z.ueberfaellig ? 'überfällig' : z.status);
+export const belegPill = (z) => {
+  const gesehen = z.angesehen_am && ['gestellt', 'versendet'].includes(z.status) && !z.ueberfaellig;
+  const wann = gesehen ? new Date(z.angesehen_am).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+  return h('span', { class: 'pill ' + (z.ueberfaellig ? 'bad' : gesehen ? 'ok' : BELEG_ST[z.status] || ''), title: gesehen ? 'Vom Empfänger geöffnet am ' + new Date(z.angesehen_am).toLocaleString('de-DE') : '' }, z.ueberfaellig ? 'überfällig' : gesehen ? 'geöffnet ' + wann : z.status);
+};
 export const belegArt = (z) => z.storno_von ? 'Storno' : z.art === 'rechnung' ? 'Rechnung' : 'Angebot';
 export const eurIn = (v) => { const n = Math.round(parseFloat(String(v).replace(/\./g, '').replace(',', '.')) * 100); return Number.isFinite(n) ? n : 0; };
 export const eurOut = (c) => (c / 100).toFixed(2).replace('.', ',');

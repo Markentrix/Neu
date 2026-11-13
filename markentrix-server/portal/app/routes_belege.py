@@ -13,7 +13,7 @@ from .security import audit, require_admin, require_inhaber
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
 
-FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, erinnerungen, erinnert_am, grund_code, grund_text, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
+FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, angesehen_am, erinnerungen, erinnert_am, grund_code, grund_text, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
 UEBERFAELLIG = "(art='rechnung' AND status IN ('gestellt','versendet') AND faellig_am < current_date)"
 
 
@@ -59,7 +59,7 @@ def csv_export(von: str = "", bis: str = "", user: dict = Depends(require_admin)
 def liste(art: str = "", status: str = "", user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         cur.execute(f"""SELECT b.id, b.art, b.nummer, b.status, b.betreff, b.datum, b.faellig_am, b.brutto_cent, b.bezahlt_am, b.mahnstufe, b.storno_von,
-                              b.lead_id, b.kunden_id, coalesce(k.kundennummer, 'Lead') AS kundennummer, coalesce(k.firma, l.firma) AS firma, {UEBERFAELLIG.replace('art', 'b.art').replace('status', 'b.status').replace('faellig_am', 'b.faellig_am')} AS ueberfaellig
+                              b.angesehen_am, b.lead_id, b.kunden_id, coalesce(k.kundennummer, 'Lead') AS kundennummer, coalesce(k.firma, l.firma) AS firma, {UEBERFAELLIG.replace('art', 'b.art').replace('status', 'b.status').replace('faellig_am', 'b.faellig_am')} AS ueberfaellig
                        FROM belege b LEFT JOIN kunden k ON k.id=b.kunden_id LEFT JOIN leads l ON l.id=b.lead_id
                        WHERE (%s='' OR b.art=%s) AND (%s='' OR b.status=%s) ORDER BY b.erstellt_am DESC LIMIT 300""", (art, art, status, status))
         zeilen = cur.fetchall()
@@ -81,7 +81,7 @@ def kunde_belege(kid: str, user: dict = Depends(require_admin)):
             raise HTTPException(404, "Kunde nicht gefunden.")
         if not cur.fetchone():
             raise HTTPException(404, "Kunde nicht gefunden.")
-        cur.execute(f"SELECT id, art, nummer, status, betreff, datum, faellig_am, brutto_cent, storno_von, {UEBERFAELLIG} AS ueberfaellig FROM belege WHERE kunden_id=%s ORDER BY erstellt_am DESC LIMIT 100", (kid,))
+        cur.execute(f"SELECT id, art, nummer, status, betreff, datum, faellig_am, brutto_cent, storno_von, angesehen_am, {UEBERFAELLIG} AS ueberfaellig FROM belege WHERE kunden_id=%s ORDER BY erstellt_am DESC LIMIT 100", (kid,))
         return cur.fetchall()
 
 
@@ -428,7 +428,7 @@ def pdf_admin(bid: str, user: dict = Depends(require_admin)):
 @kunde_router.get("/belege")
 def kunde_liste(user: dict = Depends(require_inhaber)):
     with tx("kunde", user["kunden_id"]) as cur:
-        cur.execute(f"""SELECT id, art, nummer, status, betreff, datum, faellig_am, brutto_cent, storno_von, {UEBERFAELLIG} AS ueberfaellig
+        cur.execute(f"""SELECT id, art, nummer, status, betreff, datum, faellig_am, brutto_cent, storno_von, angesehen_am, {UEBERFAELLIG} AS ueberfaellig
                         FROM belege WHERE status <> 'entwurf' ORDER BY datum DESC, erstellt_am DESC LIMIT 200""")
         return cur.fetchall()
 
