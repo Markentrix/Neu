@@ -27,7 +27,7 @@ function ereignisse(d, offen) {
   for (const l of d.wiedervorlagen) liste.push({ tag: l.wiedervorlage_am, sort: '99:99', text: '↻ ' + l.name, art: 'wv', klick: () => { location.hash = '#lead/' + l.id; } });
   return liste.sort((a, b) => a.sort.localeCompare(b.sort));
 }
-const ART = { gespraech: ['Erstgespräch', '#0e7490'], termin: ['Eigener Termin', '#4338ca'], sperre: ['Gesperrt', '#b42318'], wv: ['Wiedervorlage', '#475467'] };
+const ART = { gespraech: ['Erstgespräch', '#045268'], termin: ['Eigener Termin', '#0C2128'], sperre: ['Gesperrt', '#B3261E'], wv: ['Wiedervorlage', '#4E5C5F'] };
 const chip = (ev, voll) => h('button', { class: 'kalchip', type: 'button', onclick: ev.klick, style: 'border-left:4px solid ' + ART[ev.art][1], title: ART[ev.art][0] + ': ' + ev.text, 'aria-label': ART[ev.art][0] + ': ' + ev.text }, voll ? ev.text : ev.text.slice(0, 22));
 
 function eintragDialog(e, danach) {

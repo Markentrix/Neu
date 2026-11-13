@@ -84,7 +84,7 @@ export function anrufModus(cfg) {
         vibriere([30, 60, 30, 60, 90]); toast('🎉 Tagesziel erreicht: ' + ist + ' Anrufe heute. Stark!', 'ok');
       }
     }).catch(() => {});
-    return h('div', { class: 'card', style: 'border-left:4px solid var(--akzent, #1E9BFF)' }, h('div', { class: 'row', style: 'align-items:center;gap:8px;flex-wrap:wrap' },
+    return h('div', { class: 'card', style: 'border-left:4px solid var(--akzent, #045268)' }, h('div', { class: 'row', style: 'align-items:center;gap:8px;flex-wrap:wrap' },
       h('b', {}, '📞 Anruf-Modus'), stand, h('span', { class: 'small muted grow' }, TEXT[mo.modus] + ' · ' + mo.erledigt.length + ' abgearbeitet · ← wischen: nächster, → zurück'),
       h('button', { class: 'btn sec small', onclick: () => naechster(lid) }, 'Überspringen'),
       h('button', { class: 'btn sec small', onclick: () => { schreiben(null); location.hash = cfg.heimHash; } }, 'Beenden')));

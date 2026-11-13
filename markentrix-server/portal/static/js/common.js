@@ -9,7 +9,7 @@ export function h(tag, attrs, ...kids) {
     else if (v === true) e.setAttribute(k, '');
     else e.setAttribute(k, v);
   }
-  for (const c of kids.flat()) {
+  for (const c of kids.flat(Infinity)) {
     if (c === null || c === undefined || c === false) continue;
     e.append(c.nodeType ? c : document.createTextNode(String(c)));
   }
@@ -140,7 +140,7 @@ export function startFehler(wurzel, e) {
     h('p', {}, (e && e.message) || 'Unbekannter Fehler.'),
     h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => location.reload() }, 'Neu laden'), h('button', { class: 'btn sec', onclick: abmelden }, 'Abmelden'))));
 }
-export function sparkline(werte, farbe = '#8B5CF6') {
+export function sparkline(werte, farbe = '#045268') {
   const ns = 'http://www.w3.org/2000/svg', w = 280, hh = 46, max = Math.max(1, ...werte);
   const svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('viewBox', `0 0 ${w} ${hh}`); svg.setAttribute('class', 'spark'); svg.setAttribute('preserveAspectRatio', 'none');
@@ -473,7 +473,7 @@ export function pushKarte(rolle) {
     h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, tagZeile, install);
 }
 
-const LEER_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><path d="M10 28h14l3 6h10l3-6h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".35"/><circle cx="48" cy="16" r="7" fill="#8B5CF6" opacity=".9"/><path d="M45 16l2 2 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const LEER_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><path d="M10 28h14l3 6h10l3-6h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".35"/><circle cx="48" cy="16" r="7" fill="#045268" opacity=".9"/><path d="M45 16l2 2 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 /** Freundlicher leerer Zustand: kleine Illustration, ein Satz, optional ein nächster Schritt. */
 export function leerZustand(text, aktion) {
   const bild = h('span', { 'aria-hidden': 'true' });

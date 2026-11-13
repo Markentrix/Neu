@@ -72,7 +72,7 @@ export function gerüst(aktiv, inhalt) {
   const k = start.kunde;
   return h('div', { class: 'shell mobilleiste' },
     h('aside', { class: 'side' },
-      h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, 'M'), k.logo_vorhanden ? k.firma : 'Markentrix'),
+      h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-bildmarke-farbe-dunkel.svg', alt: '', width: 32, height: 28 })), k.logo_vorhanden ? k.firma : 'Markentrix'),
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
       navGruppen(GRUPPEN.map(([titel, ids, offen]) => [titel, sichtbar().filter(s => ids.includes(s[0])).map(s => [s[0], s[1], zaehler(s[0])]), offen]), aktiv, 'kunde'),
       h('div', { class: 'grow' }),
@@ -89,10 +89,10 @@ export function gerüst(aktiv, inhalt) {
 export function karten() {
   const a = h('div', { class: 'card' }, h('h3', {}, 'Anfragen'),
     h('div', { class: 'stat' }, h('b', {}, start.neue_anfragen), h('span', { class: 'muted small' }, 'neu · letzte 14 Tage')),
-    sparkline(start.anfragen_14d, '#28C7F7'));
+    sparkline(start.anfragen_14d, '#C67432'));
   const t = h('div', { class: 'card' }, h('h3', {}, 'Termine'),
     h('div', { class: 'stat' }, h('b', {}, start.kommende_termine), h('span', { class: 'muted small' }, 'kommend · nächste 14 Tage')),
-    sparkline(start.termine_14d, '#8B5CF6'));
+    sparkline(start.termine_14d, '#045268'));
   const w = start.website;
   const web = h('div', { class: 'card' }, h('h3', {}, 'Website & Landingpages'),
     w ? h('p', {}, w.domain, ' ', h('span', { class: 'pill ' + (w.status === 'live' ? 'ok' : 'warn') }, w.status)) : h('p', { class: 'muted small' }, 'Noch keine Website verknüpft.'));

@@ -231,7 +231,7 @@ export async function onboardingKarte(kid) {
 export function brandingKarte(kid, k) {
   const m = h('div'); let logoB64 = null;
   const datei = h('input', { type: 'file', accept: 'image/png,image/jpeg', onchange: (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { logoB64 = r.result; }; r.readAsDataURL(f); } });
-  const farbe = h('input', { type: 'color', value: k.branding_farbe || '#4f46e5', style: 'width:60px;padding:2px' });
+  const farbe = h('input', { type: 'color', value: k.branding_farbe || '#045268', style: 'width:60px;padding:2px' });
   let farbeGesetzt = !!k.branding_farbe;
   farbe.addEventListener('input', () => { farbeGesetzt = true; });
   const senden = async (extra) => { try { await api('/api/admin/kunden/' + kid + '/branding', { method: 'PUT', body: { farbe: farbeGesetzt ? farbe.value : null, logo_base64: logoB64, ...extra } }); melde(m, 'Gespeichert. Der Kunde sieht es beim nächsten Laden.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { fehler(m, x); } };

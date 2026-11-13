@@ -142,7 +142,7 @@ V.shop = async () => {
     const m = h('div');
     const zeile = (z) => {
       const name = h('input', { value: z ? z.name : '', maxlength: 80, placeholder: titel === 'Farben' ? 'z. B. Orange Silk (glänzend)' : 'z. B. Wohnen & Deko' });
-      const hex = h('input', { type: 'color', value: z ? z.hex : '#e07a2a', style: 'width:48px;padding:0;height:36px' });
+      const hex = h('input', { type: 'color', value: z ? z.hex : '#C67432', style: 'width:48px;padding:0;height:36px' });
       const sort = h('input', { type: 'number', min: '0', value: z ? String(z.sort) : '100', style: 'width:80px', 'aria-label': 'Reihenfolge' });
       const speichern = async () => {
         if (!name.value.trim()) { melde(m, 'Bitte einen Namen angeben.'); return; }

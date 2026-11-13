@@ -98,7 +98,7 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
     absender = " · ".join(x for x in [f["name"], f["strasse"], f"{f['plz']} {f['ort']}".strip()] if x)
     inhalt += [pdf.p(absender, pdf.KLEIN)]
     adr = "\n".join(x for x in [emp.get("firma"), emp.get("ansprechpartner"), emp.get("strasse"), f"{emp.get('plz') or ''} {emp.get('ort') or ''}".strip()] if x)
-    info = ([["Kundennummer", emp["kundennummer"]]] if emp.get("kundennummer") else []) + [["Nummer", nr], ["Datum", pdf.datum(b["datum"]) or "–"]]
+    info = ([["Kundennummer", emp["kundennummer"]]] if emp.get("kundennummer") else []) + [["Nummer", nr], ["Datum", pdf.datum(b["datum"] or date.today())]]
     if ist_re and b["faellig_am"]:
         info.append(["Zahlbar bis", pdf.datum(b["faellig_am"])])
     if not ist_re and b["faellig_am"]:

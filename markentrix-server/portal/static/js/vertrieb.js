@@ -19,7 +19,7 @@ const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], [
 function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]);
   return h('div', { class: 'shell mobilleiste kompakt' },
-    h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, 'M'), 'Partnerportal'),
+    h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-bildmarke-farbe-dunkel.svg', alt: '', width: 32, height: 28 })), 'Partnerportal'),
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
       navGruppen(gruppen, aktiv, 'vertrieb'),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
@@ -164,7 +164,7 @@ V.uebung = async () => {
   const zeigen = (u) => wahl.replaceChildren(h('div', { class: 'card' },
     h('h2', {}, u.firma), h('p', { class: 'small muted' }, [u.ansprechpartner, u.branche, u.ort].join(' · ')),
     h('p', {}, u.lage), h('p', {}, h('b', {}, u.ziel)),
-    h('p', {}, h('span', { class: 'btn small', style: 'opacity:.6' }, '📞 ' + u.tel + ' (Übung, kein Anruf)')),
+    h('p', {}, h('span', { class: 'btn sec small', style: 'pointer-events:none' }, '📞 ' + u.tel + ' (Übung, kein Anruf)')),
     h('h3', {}, 'Was könnte der Kunde sagen? Klicke an, um die passende Antwort zu sehen:'),
     u.antworten.map(([frage, antwort]) => { const box = h('div', { class: 'msg ok', hidden: true }, antwort);
       return h('div', {}, h('button', { class: 'btn sec', style: 'margin:4px 0', onclick: () => { box.hidden = !box.hidden; } }, frage), box); }),
