@@ -19,7 +19,7 @@ const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], [
 function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]);
   return h('div', { class: 'shell mobilleiste kompakt' },
-    h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-bildmarke-farbe-dunkel.svg', alt: '', width: 32, height: 28 })), 'Partnerportal'),
+    h('aside', { class: 'side' }, h('div', { class: 'brand' }, h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-logo-farbe-dunkel.svg', alt: 'Markentrix', width: 160, height: 26 })), 'Partnerportal'),
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
       navGruppen(gruppen, aktiv, 'vertrieb'),
       h('div', { class: 'grow' }), h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),

@@ -29,7 +29,7 @@ export function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids, offen]) => [titel, NAV.filter(n => ids.includes(n[0]) && erlaubt(n[0])).map(n => [n[0], n[1], zaehlerAdmin[n[0]] || 0]), offen]);
   return h('div', { class: 'shell mobilleiste kompakt' },
     h('aside', { class: 'side' },
-      h('div', { class: 'brand' }, h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-bildmarke-farbe-dunkel.svg', alt: '', width: 32, height: 28 })), 'Admin'),
+      h('div', { class: 'brand' }, h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-logo-farbe-dunkel.svg', alt: 'Markentrix', width: 160, height: 26 })), 'Admin'),
       h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke(), themeKnopf()),
       h('div', { class: 'neuzeile' }, neuKnopf()),
       navGruppen(gruppen, aktiv, 'admin'),

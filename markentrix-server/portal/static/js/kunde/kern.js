@@ -72,7 +72,7 @@ export function gerüst(aktiv, inhalt) {
   const k = start.kunde;
   return h('div', { class: 'shell mobilleiste' },
     h('aside', { class: 'side' },
-      h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-bildmarke-farbe-dunkel.svg', alt: '', width: 32, height: 28 })), k.logo_vorhanden ? k.firma : 'Markentrix'),
+      h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-logo-farbe-dunkel.svg', alt: 'Markentrix', width: 160, height: 26 })), k.logo_vorhanden ? k.firma : ''),
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
       navGruppen(GRUPPEN.map(([titel, ids, offen]) => [titel, sichtbar().filter(s => ids.includes(s[0])).map(s => [s[0], s[1], zaehler(s[0])]), offen]), aktiv, 'kunde'),
       h('div', { class: 'grow' }),
