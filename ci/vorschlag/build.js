@@ -1,7 +1,7 @@
 // node build.js [screenshot-ordner]  →  ../Markentrix_CI_Vorschlaege.pdf
 const { chromium } = require('playwright'); const path = require('path');
 (async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1123, height: 794 } });
-  await p.goto('file://' + path.join(__dirname, process.argv[3]||'vorschlag.html'), { waitUntil: 'networkidle' }); await p.evaluate(() => document.fonts.ready);
+  p.on('console', m => console.log('WERTE:', m.text())); await p.goto('file://' + path.join(__dirname, process.argv[3]||'vorschlag.html'), { waitUntil: 'networkidle' }); await p.evaluate(() => document.fonts.ready);
   const over = await p.evaluate(() => [...document.querySelectorAll('.page')].map((pg, i) => { const f = pg.querySelector('.foot').getBoundingClientRect().top; let m = 0; pg.querySelectorAll('.box,.m,.rec,p,h1').forEach(e => m = Math.max(m, e.getBoundingClientRect().bottom)); return [i + 1, Math.round(f - m)]; }));
   console.log('frei bis Fußzeile:', JSON.stringify(over));
   await p.pdf({ path: path.join(__dirname, '..', process.argv[4]||'Markentrix_CI_Vorschlaege.pdf'), width: '1123px', height: '794px', printBackground: true });

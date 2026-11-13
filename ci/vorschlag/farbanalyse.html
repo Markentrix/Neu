@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Markentrix · Farbanalyse: fünf Kandidaten</title>
+<style>
+@font-face{font-family:'Inter';font-weight:400;src:url(../src/fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:600;src:url(../src/fonts/inter-latin-600-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:700;src:url(../src/fonts/inter-latin-700-normal.woff2)}
+@font-face{font-family:'Archivo';font-weight:700;src:url(fonts/archivo-latin-700-normal.woff2)}
+@font-face{font-family:'Archivo';font-weight:800;src:url(fonts/archivo-latin-800-normal.woff2)}
+@font-face{font-family:'Source Sans 3';font-weight:400;src:url(fonts/source-sans-3-latin-400-normal.woff2)}
+@font-face{font-family:'Source Sans 3';font-weight:600;src:url(fonts/source-sans-3-latin-600-normal.woff2)}
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box}html,body{margin:0;background:#fff}
+body{font-family:Inter,sans-serif;font-size:10px;line-height:1.45;color:#2A2F3A;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:1123px;height:794px;padding:32px 44px 0;position:relative;overflow:hidden;page-break-after:always;background:#FBFBFA}
+.top{display:flex;justify-content:space-between;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7A8090;padding-bottom:9px;border-bottom:1px solid #E4E6EA;margin-bottom:14px}
+.foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7A8090}
+h1{font-size:24px;line-height:1.1;letter-spacing:-.02em;margin:0 0 5px;color:#14171F}
+h2{font-size:13px;margin:0 0 6px;color:#14171F}h3{font-size:10px;margin:0 0 2px;color:#14171F}
+p{margin:0 0 5px}.lead{font-size:12px;max-width:900px;margin-bottom:12px}
+.box{background:#fff;border:1px solid #E4E6EA;border-radius:10px;padding:12px 15px}
+.lab{font-size:7.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7A8090;display:block;margin:7px 0 3px}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:#7A8090;padding:0 8px 6px 0;border-bottom:1px solid #E4E6EA;vertical-align:bottom}
+td{padding:5px 8px 5px 0;border-bottom:1px solid #E4E6EA;vertical-align:top}
+ul{margin:0;padding:0;list-style:none}li{position:relative;padding-left:12px;margin-bottom:4px}li:before{content:'';position:absolute;left:0;top:.55em;width:4px;height:4px;border-radius:50%;background:#14171F}
+.c5{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}
+.sw{height:54px;border-radius:8px;padding:9px 11px;color:#fff;font-family:Archivo;font-weight:800;font-size:15px;letter-spacing:-.02em;line-height:1.1}
+.sw span{display:block;font-family:Inter;font-weight:600;font-size:8.5px;letter-spacing:0;opacity:.9;margin-top:2px}
+.mh{background:#F4EFE6;border:1px solid rgba(0,0,0,.09);border-radius:7px;padding:9px 10px;margin-top:6px;font-family:'Source Sans 3';color:#3A362F}
+.md{background:#1E1C19;border-radius:7px;padding:9px 10px;margin-top:5px}
+.hl{font-family:Archivo;font-weight:800;letter-spacing:-.025em;line-height:1.05;color:#1E1C19}
+.kv{display:flex;justify-content:space-between;border-bottom:1px solid #E4E6EA;padding:2.5px 0;font-size:9px}.kv b{color:#14171F}
+.dots{white-space:nowrap}.dots i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#D9DCE2;margin-right:2px}.dots i.on{background:#14171F}
+.rec{background:#14171F;color:#fff;border-radius:10px;padding:13px 16px}.rec h2,.rec b{color:#fff}
+.x i{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1.5px;margin-right:5px}
+</style></head><body><div id="root"></div>
+<script>
+const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
+const lum=c=>{const r=c.map(v=>v<=.03928?v/12.92:((v+.055)/1.055)**2.4);return .2126*r[0]+.7152*r[1]+.0722*r[2]};
+const cr=(a,b)=>{const[x,y]=[lum(hx(a)),lum(hx(b))].sort((p,q)=>q-p);return (x+.05)/(y+.05)};
+const f=n=>n.toFixed(1).replace('.',',')+':1';
+const cmyk=h=>{const[r,g,b]=hx(h),k=1-Math.max(r,g,b);return [(1-r-k)/(1-k),(1-g-k)/(1-k),(1-b-k)/(1-k),k].map(v=>Math.round(v*100)).join(' · ')};
+const P='#F4EFE6',W='#FFFFFF',I='#1E1C19';
+const C=[
+ {id:'A',name:'Backsteinrot',h:'#A1311A',dk:'#E28876',
+  wirkt:'Aktiviert und fällt auf. Rot lenkt den Blick stärker als jede andere Farbe und steht für Tatkraft. Der tiefe, erdige Ton erinnert an norddeutschen Backstein: solide, gebaut, von hier.',
+  plus:'Stärkste Signalwirkung auf Knöpfen. Sehr stabil im Druck. Warm zusammen mit dem Papierton.',
+  minus:'Rot ist auch Fehler, Warnung und Rabatt. Als längerer Text ermüdet es. Fehlermeldungen auf der Website brauchen zusätzlich ein Symbol.',
+  s:[3,4,5,5,5,4,5]},
+ {id:'B',name:'Petrol',h:'#0C626D',dk:'#20B0C3',
+  wirkt:'Verbindet die Verlässlichkeit von Blau mit der Ruhe von Grün. Wirkt besonnen, kompetent und hochwertig, ohne kühl zu sein. Zum warmen Papier bildet es den natürlichen Gegenpol, das wirkt ausgewogen.',
+  plus:'Als Text, Linie und Fläche gleich gut lesbar. Gehört keiner Branche. Bei Agenturen selten. Kein Konflikt mit Fehlerrot.',
+  minus:'Weniger laut als Rot, ein Knopf springt nicht ganz so stark ins Auge. Der Ton kann je nach Drucker leicht ins Grüne oder Blaue kippen und braucht einen Andruck.',
+  s:[5,5,5,4,5,4,3]},
+ {id:'C',name:'Tintenblau',h:'#2A52B2',dk:'#85A0DD',
+  wirkt:'Blau ist die beliebteste Farbe überhaupt und steht für Vertrauen und Sachlichkeit. Der Ton erinnert an Füllertinte auf Papier: klassisch, seriös.',
+  plus:'Sehr vertraut, eckt nirgends an. Am nächsten am heutigen Auftritt, Kunden gewöhnen sich sofort um.',
+  minus:'Blau ist die häufigste Agentur- und Technikfarbe. Kräftiges Blau wird im Druck oft matter und leicht violett.',
+  s:[5,4,5,3,5,2,3]},
+ {id:'D',name:'Tannengrün',h:'#216346',dk:'#44B381',
+  wirkt:'Steht für Wachstum, Ruhe und Beständigkeit. Wirkt bodenständig und unaufgeregt.',
+  plus:'Sehr gut lesbar, stabil im Druck. Passt ausgezeichnet zu Hofladen, Gartenservice, Lohnunternehmen und Reitverein.',
+  minus:'Wird schnell als Bio, Natur oder Umwelt gelesen. Für Kfz-Werkstatt, Autopflege und Fleischer ist das die falsche Richtung. Schwächste Signalwirkung.',
+  s:[4,4,5,4,2,3,2]},
+ {id:'E',name:'Bordeaux',h:'#7B1E33',dk:'#E0859A',
+  wirkt:'Steht für Wertigkeit, Genuss und Tradition. Wirkt gesetzt und ruhig, ohne die Schärfe von hellem Rot.',
+  plus:'Wirkt am edelsten. Höchster Kontrast aller fünf. Sehr stabil im Druck. Kein Rabatt-Beigeschmack.',
+  minus:'Kann konservativ oder altmodisch wirken, erinnert an Kanzlei, Wein oder Hotel. Neben schwarzem Text hebt es sich am wenigsten ab.',
+  s:[4,5,5,5,4,4,3]}];
+const K=['Schafft Vertrauen','Wirkt hochwertig','Lesbar am Bildschirm','Lesbar auf Papier','Passt zu jeder Branche','Eigenständig','Signalwirkung'];
+const d=n=>`<span class="dots">${[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>`;
+const mark=(m,a,w)=>`<svg viewBox="0 0 522 447" style="width:${w}px;flex:none;display:block"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="${a}" stroke-width="54" d="M414 107.5 495 27M415 27h80v80.5"/><path stroke="${m}" stroke-width="82" d="M41 406V107.5L227.5 277.5 414 107.5V406"/></g></svg>`;
+const logo=(h,m,a,c)=>`<div style="display:flex;align-items:flex-end;gap:${h*.36}px">${mark(m,a,h*1.168)}<span style="font-family:Archivo;font-weight:800;font-size:${h*.86}px;line-height:1;margin-bottom:${-h*.115}px;letter-spacing:-.02em;color:${c}">Markentrix</span></div>`;
+const arrow=(c,w)=>`<svg viewBox="0 0 240 90" style="width:${w}px;display:block" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 84C80 82 150 62 222 12"/><path d="M194 10h30v30"/></svg>`;
+const col=v=>`<div>
+ <div class="sw" style="background:${v.h}">${v.id} · ${v.name}<span>${v.h}</span></div>
+ <div class="mh">${logo(9,I,v.h,I)}
+  <div class="hl" style="font-size:17px;margin:9px 0 5px">Websites, die<br><span style="box-shadow:inset 0 -.14em 0 ${v.h}">Anfragen</span> bringen.</div>
+  <div style="display:flex;align-items:center;gap:8px"><span style="background:${v.h};color:#fff;font-weight:600;font-size:7.5px;padding:5px 8px;border-radius:3px">Termin buchen</span><span style="color:${v.h};font-weight:600;font-size:8.5px">Alle Referenzen →</span></div>
+  <div style="font-size:8.5px;line-height:1.35;color:${v.h};margin-top:6px">So liest sich Fließtext in dieser Farbe auf dem Papierton, hier in kleiner Schrift.</div></div>
+ <div class="md"><div class="hl" style="font-size:13px;color:#F4EFE6">Mehr Anfragen. <span style="color:${v.dk}">Weniger Aufwand.</span></div></div>
+ <span class="lab">Gemessen</span>
+ <div class="kv"><span>Text auf Papierton</span><b>${f(cr(v.h,P))}</b></div>
+ <div class="kv"><span>Text auf Weiß</span><b>${f(cr(v.h,W))}</b></div>
+ <div class="kv"><span>Weißer Text auf Farbe</span><b>${f(cr(W,v.h))}</b></div>
+ <div class="kv"><span>Abstand zu schwarzem Text</span><b>${f(cr(v.h,I))}</b></div>
+ <div class="kv"><span>CMYK-Richtwert</span><b>${cmyk(v.h)}</b></div>
+ <span class="lab">Wirkung</span><p>${v.wirkt}</p>
+ <span class="lab">Dafür spricht</span><p>${v.plus}</p>
+ <span class="lab">Dagegen spricht</span><p style="margin:0">${v.minus}</p></div>`;
+const sum=v=>v.s.reduce((a,b)=>a+b,0), core=v=>v.s[0]+v.s[1]+v.s[2]+v.s[3];
+const R=C[1];
+document.getElementById('root').innerHTML=`
+<section class="page"><div class="top"><span>Markentrix · Farbanalyse</span><span>Wonach die Farbe ausgewählt wird</span></div>
+ <h1>Welche Farbe ist die richtige?</h1>
+ <p class="lead">„Perfekt“ ist eine Farbe nur für einen bestimmten Zweck. Der Zweck hier: eine einzige Signalfarbe auf warmem Papier und Tinte, die Vertrauen schafft, hochwertig wirkt und am Bildschirm wie auf Papier lesbar bleibt, für eine Agentur, die für jede Branche baut.</p>
+ <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:16px">
+  <div>
+   <div class="box"><h2>Die sieben Prüfungen</h2><table>
+    <tr><td style="width:30%"><b>Schafft Vertrauen</b></td><td>Inhaber sind Agenturen gegenüber vorsichtig. Die Farbe soll ruhig und verlässlich wirken, nicht drängen.</td></tr>
+    <tr><td><b>Wirkt hochwertig</b></td><td>Billig wirken Farben, die grell und hell zugleich sind: Neon, Orange, reines Gelb, wie auf Rabatt-Prospekten. Hochwertig wirken tiefe, leicht gedämpfte Töne.</td></tr>
+    <tr><td><b>Lesbar am Bildschirm</b></td><td>Messbar. Als Text braucht die Farbe mindestens 4,5:1 auf Papierton und Weiß, weißer Text auf einem Knopf ebenfalls.</td></tr>
+    <tr><td><b>Lesbar auf Papier</b></td><td>Die Farbe muss im Vierfarbdruck erreichbar sein und auch auf einem Schwarz-Weiß-Drucker dunkel genug bleiben.</td></tr>
+    <tr><td><b>Passt zu jeder Branche</b></td><td>Von der Kfz-Werkstatt bis zum Reitverein. Die Farbe darf keiner Branche gehören.</td></tr>
+    <tr><td><b>Eigenständig</b></td><td>Abstand zur üblichen blauen oder dunklen Agentur-Optik.</td></tr>
+    <tr><td style="border:0"><b>Signalwirkung</b></td><td style="border:0">Ein Knopf in dieser Farbe muss auffallen.</td></tr></table></div>
+   <div class="box" style="margin-top:12px"><h2>Wie belastbar ist Farbpsychologie?</h2><p style="margin:0">Ehrlich gesagt: begrenzt. Es gibt keine Farbe, die nachweislich mehr Anfragen bringt. Belegt sind Verknüpfungen, die Menschen in unserem Kulturraum gelernt haben, etwa Blau mit Vertrauen, Rot mit Aufmerksamkeit und Warnung, Grün mit Natur. Darauf stützt sich die Bewertung. Die Kontrastwerte sind dagegen gerechnet, nicht geschätzt.</p></div>
+  </div>
+  <div>
+   <div class="box"><h2>Diese Farben scheiden vorab aus</h2><table class="x">
+    <tr><td style="width:40%"><i style="background:#C93A17"></i><b>Signalrot</b> #C93A17</td><td>Mein erster Vorschlag. Erreicht als Text auf Papierton nur 4,5:1 und kippt ins Orange. Backsteinrot ist die verbesserte Fassung.</td></tr>
+    <tr><td><i style="background:#E3A712"></i><b>Senfgelb, Gelb</b></td><td>Auf Hell nicht lesbar (1,9:1). Verschwindet auf dem Schwarz-Weiß-Drucker.</td></tr>
+    <tr><td><i style="background:#F07A1A"></i><b>Orange</b></td><td>Wird am häufigsten mit „günstig“ verbunden. Als Text zu hell.</td></tr>
+    <tr><td><i style="background:#28C7F7"></i><b>Cyan, Hellblau</b></td><td>Als Text nicht lesbar (2,0:1). Das ist der heutige Look.</td></tr>
+    <tr><td><i style="background:#8B5CF6"></i><b>Violett</b></td><td>Das Erkennungszeichen für KI-Produkte. Im Druck nicht treffbar.</td></tr>
+    <tr><td style="border:0"><i style="background:#AB3675"></i><b>Pink, Beere</b></td><td style="border:0">Wird als Mode und Kosmetik gelesen, passt nicht zu Werkstatt und Lohnunternehmen.</td></tr></table></div>
+   <div class="box" style="margin-top:12px"><h2>So sind die fünf Kandidaten gebaut</h2><p style="margin:0">Jeder Farbton ist so dunkel eingestellt, dass er als Text mindestens 6:1 auf dem Papierton erreicht. Damit bleibt er auch in kleiner Schrift und im Ausdruck lesbar. Für dunkle Flächen gibt es je eine hellere Stufe desselben Tons.</p></div>
+  </div>
+ </div><div class="foot"><span>Zur Freigabe · noch nichts umgesetzt</span><span>1 / 3</span></div></section>
+<section class="page"><div class="top"><span>Markentrix · Farbanalyse</span><span>Fünf Kandidaten</span></div>
+ <div class="c5">${C.map(col).join('')}</div>
+ <div class="foot"><span>Zur Freigabe · noch nichts umgesetzt</span><span>2 / 3</span></div></section>
+<section class="page"><div class="top"><span>Markentrix · Farbanalyse</span><span>Bewertung und Empfehlung</span></div>
+ <h1>Bewertung und Empfehlung</h1>
+ <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:12px">
+  <div>
+   <div class="box"><table>
+    <tr><th style="width:25%"></th>${C.map(v=>`<th><span style="display:block;width:22px;height:5px;border-radius:2px;background:${v.h};margin-bottom:4px"></span>${v.name}</th>`).join('')}</tr>
+    ${K.map((k,i)=>`<tr><td><b>${k}</b></td>${C.map(v=>`<td>${d(v.s[i])}</td>`).join('')}</tr>`).join('')}
+    <tr><td><b>Deine vier Kriterien</b><br><span style="font-size:8.5px;color:#7A8090">die ersten vier Zeilen, von 20</span></td>${C.map(v=>`<td><b style="font-size:13px">${core(v)}</b></td>`).join('')}</tr>
+    <tr><td style="border:0"><b>Alle sieben</b><br><span style="font-size:8.5px;color:#7A8090">von 35</span></td>${C.map(v=>`<td style="border:0"><b style="font-size:13px">${sum(v)}</b></td>`).join('')}</tr></table>
+    <p style="font-size:8.5px;color:#7A8090;margin:8px 0 0">Lesbarkeit am Bildschirm ist gerechnet. Die Lesbarkeit auf Papier beruht auf Erfahrungswerten zum Vierfarbdruck, nicht auf einem Andruck. Alle übrigen Punkte sind meine Einschätzung.</p></div>
+   <div class="box" style="margin-top:12px;background:#F4EFE6;border-color:rgba(0,0,0,.09);font-family:'Source Sans 3';color:#3A362F;position:relative;padding:16px 18px">
+    <div style="display:flex;align-items:center;gap:14px;font-size:8px;font-weight:600;color:${I};margin-bottom:11px">${logo(13,I,R.h,I)}<span style="flex:1"></span><span>Leistungen</span><span>Preise</span><span>Referenzen</span><span>Kontakt</span><span style="background:${R.h};color:#fff;padding:5px 9px;border-radius:3px">Termin buchen</span></div>
+    <div class="hl" style="font-size:27px;margin-bottom:6px">Websites, die <span style="box-shadow:inset 0 -.14em 0 ${R.h}">Anfragen</span> bringen.</div>
+    <div style="font-size:11.5px;max-width:330px;margin-bottom:11px">Für Betriebe, die mehr Kunden wollen und keine Zeit für Technik haben.</div>
+    <div style="display:flex;gap:8px;align-items:center"><span style="background:${R.h};color:#fff;font-weight:600;font-size:10px;padding:8px 13px;border-radius:4px">Website-Check starten</span><span style="background:#FFFDF8;border:1px solid ${I};color:${I};font-weight:600;font-size:10px;padding:7px 13px;border-radius:4px">Erstgespräch buchen</span><span style="color:${R.h};font-weight:600;font-size:10px;margin-left:6px">Alle Referenzen →</span></div>
+    <div style="position:absolute;right:18px;bottom:16px">${arrow(R.h,110)}</div></div>
+  </div>
+  <div>
+   <div class="rec"><h2>Meine Empfehlung: B, Petrol ${R.h}</h2>
+    <p>Bei deinen vier Kriterien liegen Petrol und Bordeaux gleichauf vorn. Petrol gewinnt, weil es zusätzlich zu jeder Branche passt, eigenständiger ist und sich neben schwarzem Text besser abhebt.</p>
+    <p>Dazu kommt ein Vorteil, den kein anderer Kandidat hat: Petrol ist der Gegenpol zum warmen Papierton. Die beiden steigern sich gegenseitig, ohne dass eine von beiden laut werden muss.</p>
+    <p style="margin:0">Das ändert meine frühere Empfehlung für Rot. Damals habe ich vor allem auf Auffälligkeit geachtet. Mit „darf nicht billig wirken“ und „muss als Text lesbar sein“ als festen Bedingungen liegt Petrol vorn.</p></div>
+   <div class="box" style="margin-top:12px"><h2>Die Alternativen</h2><ul>
+    <li><b>E, Bordeaux,</b> wenn es noch edler und wärmer sein soll. Gleichauf bei deinen vier Kriterien, aber konservativer und weniger eigenständig.</li>
+    <li><b>A, Backsteinrot,</b> wenn Auffälligkeit wichtiger ist als Ruhe. Stärkster Knopf, schwächer beim Vertrauen.</li>
+    <li><b>C und D</b> empfehle ich nicht: Blau hebt euch nicht ab, Grün legt euch auf Natur fest.</li></ul></div>
+   <div class="box" style="margin-top:12px"><h2>Was offen bleibt</h2><ul>
+    <li>Der genaue Druckton wird einmal per Andruck mit der Druckerei festgelegt. Das gilt für jede der fünf Farben.</li>
+    <li>Am sichersten ist ein Blick auf zwei Geräten und ein Ausdruck von Seite 2, bevor du entscheidest.</li></ul></div>
+  </div>
+ </div><div class="foot"><span>Zur Freigabe · noch nichts umgesetzt</span><span>3 / 3</span></div></section>`;
+console.log(C.map(v=>[v.name,v.h,f(cr(v.h,P)),f(cr(v.h,W)),f(cr(v.dk,I)),core(v),sum(v)].join(' ')).join(' | '));
+</script></body></html>
