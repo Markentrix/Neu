@@ -73,11 +73,11 @@ def _d(t) -> str:
     return t.astimezone(webbetrieb.TZ).strftime("%d.%m.%Y %H:%M") if isinstance(t, datetime) else ""
 
 
-SEITE = """<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+SEITE = """<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="/static/css/ci-schrift.css">
 <title>Status – {firma}</title><style>
-:root{{--bg:#f6f7fb;--fg:#0B1020;--card:#fff;--mut:#5b6480;--ok:#14803c;--bad:#b42318;--warn:#a15c07;--line:#e3e6ef}}
-@media(prefers-color-scheme:dark){{:root{{--bg:#0B1020;--fg:#eef0f8;--card:#141b33;--mut:#9aa4c7;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24;--line:#26304f}}}}
-body{{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}}main{{max-width:720px;margin:0 auto;padding:24px 16px 48px}}
+:root{{--bg:#F7F4EE;--fg:#0C2128;--card:#fff;--mut:#4E5C5F;--ok:#045268;--bad:#B3261E;--warn:#964F08;--line:#EAE2D3}}
+@media(prefers-color-scheme:dark){{:root{{--bg:#0C2128;--fg:#F7F4EE;--card:#14303A;--mut:#C9CFCB;--ok:#62B2D0;--bad:#F1A268;--warn:#F1A268;--line:#2A4852}}}}
+body{{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 MXText,system-ui,sans-serif}}main{{max-width:720px;margin:0 auto;padding:24px 16px 48px}}
 h1{{font-size:24px;margin:0 0 4px}}h2{{font-size:17px;margin:0 0 8px}}.mut{{color:var(--mut);font-size:14px}}
 .card{{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}}
 .dot{{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}}

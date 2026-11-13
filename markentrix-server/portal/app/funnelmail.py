@@ -6,10 +6,10 @@ import re
 from html import escape
 
 MARKE = "⁣ERGEBNIS⁣"   # unsichtbarer Platzhalter: an dieser Stelle steht in der HTML-Mail die Ergebnis-Karte
-NAVY, TEXT, MUT, LINIE, HELL, CYAN, BLAU = "#0B1020", "#1F2937", "#667085", "#E6E9F3", "#F8FAFC", "#28C7F7", "#1E9BFF"
-SCHRIFT = "Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
-AMPEL = {"gruen": ("#16A34A", "#DCFCE7", "Gut aufgestellt"), "gelb": ("#B45309", "#FEF3C7", "Ausbaufähig"), "rot": ("#DC2626", "#FEE2E2", "Handlungsbedarf")}
-CHIP = {"gut": ("gut", "#166534", "#DCFCE7"), "mittel": ("teilweise", "#92400E", "#FEF3C7"), "schlecht": ("fehlt", "#991B1B", "#FEE2E2")}
+NAVY, TEXT, MUT, LINIE, HELL, CYAN, BLAU = "#0C2128", "#0C2128", "#4E5C5F", "#EAE2D3", "#F7F4EE", "#045268", "#045268"   # CI 2026 v3: Tiefsee, Nebentext, Leinen, Kreide, Pfauenblau
+SCHRIFT = "'Source Sans 3',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+AMPEL = {"gruen": ("#045268", "#E1F0F6", "Gut aufgestellt"), "gelb": ("#964F08", "#F7F4EE", "Ausbaufähig"), "rot": ("#B3261E", "#F7F4EE", "Handlungsbedarf")}
+CHIP = {"gut": ("gut", "#045268", "#E1F0F6"), "mittel": ("teilweise", "#964F08", "#F7F4EE"), "schlecht": ("fehlt", "#B3261E", "#F7F4EE")}
 URL = re.compile(r"https?://[^\s<>\"']+")
 
 
@@ -27,9 +27,9 @@ def _links(t: str) -> str:
 def _knopf(url: str) -> str:
     beschriftung = "15-Minuten-Termin wählen" if url.rstrip("/").endswith("/buchen") else "Link öffnen"
     return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 22px"><tr>'
-            f'<td bgcolor="{CYAN}" style="border-radius:12px;background:{CYAN};background-image:linear-gradient(135deg,{CYAN},{BLAU})">'
+            f'<td bgcolor="{CYAN}" style="border-radius:4px;background:{CYAN};">'
             f'<a href="{escape(url, quote=True)}" style="display:inline-block;padding:15px 26px;font-family:{SCHRIFT};font-size:16px;font-weight:700;'
-            f'color:{NAVY};text-decoration:none;border-radius:12px">{escape(beschriftung)} &rarr;</a></td></tr></table>')
+            f'color:#FFFFFF;text-decoration:none;border-radius:4px">{escape(beschriftung)} &rarr;</a></td></tr></table>')
 
 
 def _p(inhalt: str) -> str:
@@ -147,8 +147,8 @@ def html_mail(text: str, firma: dict, abmelden: str, impressum: str, ergebnis: d
         f'<td valign="middle">{logo}</td><td valign="middle" style="padding-left:{10 if logo else 0}px;font-family:{SCHRIFT};font-size:20px;font-weight:800;letter-spacing:-.02em;color:{NAVY}">{escape(name)}</td>'
         f'</tr></table></td></tr>'
         # Karte
-        f'<tr><td style="background:#FFFFFF;border:1px solid {LINIE};border-radius:18px;overflow:hidden">'
-        f'<div style="height:4px;line-height:4px;font-size:0;background:{CYAN};background-image:linear-gradient(90deg,{CYAN},{BLAU})">&nbsp;</div>'
+        f'<tr><td style="background:#FFFFFF;border:1px solid {LINIE};border-radius:8px;overflow:hidden">'
+        f'<div style="height:4px;line-height:4px;font-size:0;background:{CYAN};">&nbsp;</div>'
         f'<div style="padding:26px 22px 24px">{_koerper(text, ergebnis)}'
         f'<p style="margin:8px 0 2px;font-family:{SCHRIFT};font-size:16px;color:{TEXT}">Viele Grüße</p>'
         f'<p style="margin:0;font-family:{SCHRIFT};font-size:16px;font-weight:700;color:{NAVY}">Ihr {escape(name)}-Team</p>'

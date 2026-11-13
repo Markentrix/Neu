@@ -312,9 +312,9 @@ def _seite(text: str) -> HTMLResponse:
 
 
 def _seite_html(titel: str, inhalt: str, kopf: str = "") -> HTMLResponse:
-    return HTMLResponse('<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(titel) + '</title>'
-                        '<body style="margin:0;background:#f3f4f6;font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0B1020;line-height:1.5">'
-                        '<main style="max-width:560px;margin:6vh auto;padding:0 16px"><div style="background:#fff;border-radius:12px;padding:24px 26px;box-shadow:0 1px 3px rgba(0,0,0,.08)">'
+    return HTMLResponse('<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(titel) + '</title><link rel="stylesheet" href="/static/css/ci-schrift.css">'
+                        '<body style="margin:0;background:#F7F4EE;font:17px/1.55 MXText,system-ui,sans-serif;color:#0C2128">'
+                        '<main style="max-width:560px;margin:6vh auto;padding:0 16px"><div style="background:#fff;border:1px solid #EAE2D3;border-radius:8px;padding:24px 26px">'
                         + kopf + inhalt + '</div></main></body></html>')
 
 
@@ -340,7 +340,7 @@ def oeff_logo(site_id: str, request: Request):
 
 
 def _knopf_stil() -> str:
-    return "font:inherit;padding:10px 18px;border-radius:8px;border:1px solid #0B1020;background:#0B1020;color:#fff;cursor:pointer;margin:4px 6px 4px 0"
+    return "font:inherit;padding:10px 18px;border-radius:4px;border:1px solid #045268;background:#045268;color:#fff;cursor:pointer;margin:4px 6px 4px 0"
 
 
 def _buchung_zu_token(cur, site_id: str, t: str):

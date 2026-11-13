@@ -150,7 +150,7 @@ def avv_pdf(kunde: dict, firma: dict, unter: list, bestaetigung: dict | None = N
             text = text.replace("[Beschreibung]", a["sonstiges"] or "[Beschreibung]")
         zeilen.append([pdf.kaestchen(schluessel in a["module"], 6 * einzug), p(text)])
     t = Table(zeilen, colWidths=[12 * pdf.mm, 158 * pdf.mm], hAlign="LEFT")
-    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3), ("LINEBELOW", (0, 0), (-1, -1), 0.25, pdf.colors.HexColor("#E6E9F3"))]
+    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3), ("LINEBELOW", (0, 0), (-1, -1), 0.25, pdf.colors.HexColor("#EAE2D3"))]
                           + [("LEFTPADDING", (0, 0), (0, -1), 0)]))
     inhalt.append(t)
     inhalt += [pdf.PageBreak(), p("Anlage 2: Technische und organisatorische Maßnahmen (Art. 32 DSGVO)", H1), Spacer(1, 6),

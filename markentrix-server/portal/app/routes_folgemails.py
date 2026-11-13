@@ -64,15 +64,15 @@ def token_fuer(cur, lid) -> str:
 
 
 def _seite(text: str) -> HTMLResponse:
-    return HTMLResponse(f'<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title>'
-                        f'<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><h2>Markentrix</h2><p>{escape(text)}</p></body>')
+    return HTMLResponse(f'<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title><link rel="stylesheet" href="/static/css/ci-schrift.css">'
+                        f'<body style="font:17px/1.55 MXText,system-ui,sans-serif;max-width:520px;margin:12vh auto;padding:0 20px;color:#0C2128"><h2>Markentrix</h2><p>{escape(text)}</p></body>')
 
 
 def _bestaetigen(text: str, knopf: str, t: str) -> HTMLResponse:
     """Erst ein Klick auf den Knopf löst die Aktion aus (Mail-Scanner rufen Links vorab ab und würden sonst ungewollt abmelden)."""
-    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title>'
-                        f'<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><h2>Markentrix</h2><p>{escape(text)}</p>'
-                        f'<form method="post"><input type="hidden" name="t" value="{escape(t)}"><button style="font:inherit;padding:10px 18px;border-radius:8px;border:0;background:#0B1020;color:#fff;cursor:pointer">{escape(knopf)}</button></form></body>')
+    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title><link rel="stylesheet" href="/static/css/ci-schrift.css">'
+                        f'<body style="font:17px/1.55 MXText,system-ui,sans-serif;max-width:520px;margin:12vh auto;padding:0 20px;color:#0C2128"><h2>Markentrix</h2><p>{escape(text)}</p>'
+                        f'<form method="post"><input type="hidden" name="t" value="{escape(t)}"><button style="font:inherit;padding:10px 18px;border-radius:4px;border:0;background:#045268;color:#fff;cursor:pointer">{escape(knopf)}</button></form></body>')
 
 
 @router.get("/public/abmelden")

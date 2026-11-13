@@ -105,7 +105,7 @@ chk("Check gespeichert (fertig, grün, Kampagne)",sql(f"select status||'|'||ampe
 time.sleep(1)
 tm=[x for x in mails() if betreff(x).startswith("Neuer Lead:") and "bitte jetzt anrufen" in betreff(x)]
 thm=(teil(tm[-1],"text/html") or b"").decode("utf-8","replace") if tm else ""
-chk("Mail ans Team im CI: Logo, Verlaufsbalken, Angaben als Tabelle, Telefon anklickbar, Knopf ins Portal",bool(tm) and "linear-gradient(90deg,#28C7F7" in thm and "cid:logo@mail" in thm
+chk("Mail ans Team im CI: Logo, Akzentbalken, Angaben als Tabelle, Telefon anklickbar, Knopf ins Portal",bool(tm) and "background:#C67432" in thm and "cid:logo@mail" in thm
     and 'href="tel:' in thm and "Im Portal öffnen" in thm and "5 Minuten" in thm,[betreff(x) for x in mails()][-5:])
 chk("Aufgabe „innerhalb einer Stunde anrufen“ bleibt",int(sql(f"select count(*) from aufgaben where auto_schluessel like 'lead-funnel-{lid}-%'"))==1)
 time.sleep(1.5)

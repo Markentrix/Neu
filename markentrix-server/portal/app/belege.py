@@ -124,7 +124,7 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
         summen_zeilen.append([f"Umsatzsteuer {float(b['ust_satz']):g} %".replace(".", ","), pdf.euro(b["ust_cent"])])
     summen_zeilen.append(["Gesamtbetrag" if not b["kleinunternehmer"] else "Gesamtbetrag (ohne USt)", pdf.euro(b["brutto_cent"])])
     t = Table([[pdf.p(a, pdf.RECHTS_FETT if i == len(summen_zeilen) - 1 else pdf.RECHTS), pdf.p(c, pdf.RECHTS_FETT if i == len(summen_zeilen) - 1 else pdf.RECHTS)] for i, (a, c) in enumerate(summen_zeilen)], colWidths=[130 * pdf.mm, 40 * pdf.mm])
-    t.setStyle(TableStyle([("LINEABOVE", (0, -1), (-1, -1), 0.8, pdf.colors.HexColor("#111827"))]))
+    t.setStyle(TableStyle([("LINEABOVE", (0, -1), (-1, -1), 0.8, pdf.colors.HexColor("#0C2128"))]))
     inhalt += [pdf.Spacer(1, 6), t]
     if b["kleinunternehmer"]:
         inhalt += [pdf.Spacer(1, 6), pdf.p(KLEIN_HINWEIS, pdf.KLEIN)]

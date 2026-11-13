@@ -40,9 +40,9 @@ def eintraege(cur) -> list:
 
 
 SEITE = """<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{titel}</title>
-<style>body{{margin:0;font:16px/1.6 system-ui,sans-serif;background:#f6f7fc;color:#0b1020}}main{{max-width:820px;margin:0 auto;padding:32px 16px}}h1{{font-size:28px;margin:0 0 6px}}
-.k{{background:#fff;border-radius:14px;padding:18px 20px;margin:14px 0;box-shadow:0 1px 3px #0001}}blockquote{{margin:8px 0;padding-left:12px;border-left:3px solid #6d3fe0;font-style:italic}}
-.n{{font-weight:700}}.m{{color:#6b7390}}a{{color:#6d3fe0}}</style></head><body><main><h1>{titel}</h1><p class="m">{intro}</p>{karten}</main></body></html>"""
+<link rel="stylesheet" href="/static/css/ci-schrift.css"><style>body{{margin:0;font:17px/1.6 MXText,system-ui,sans-serif;background:#F7F4EE;color:#0C2128}}main{{max-width:820px;margin:0 auto;padding:32px 16px}}h1{{font-size:28px;margin:0 0 6px}}
+.k{{background:#fff;border:1px solid #EAE2D3;border-radius:8px;padding:18px 20px;margin:14px 0}}blockquote{{margin:8px 0;padding-left:12px;border-left:3px solid #045268;font-style:italic}}
+.n{{font-weight:700}}.m{{color:#4E5C5F}}a{{color:#045268}}</style></head><body><main><h1>{titel}</h1><p class="m">{intro}</p>{karten}</main></body></html>"""
 
 
 def _karte(e: dict) -> str:

@@ -458,9 +458,9 @@ def _ring_bild(score: int):
     from reportlab.lib import colors
     from reportlab.lib.units import mm
     d, r, m = Drawing(30 * mm, 30 * mm), 14 * mm, 15 * mm
-    d.add(Circle(m, m, r, fillColor=colors.HexColor("#E6E9F3"), strokeColor=None))
+    d.add(Circle(m, m, r, fillColor=colors.HexColor("#EAE2D3"), strokeColor=None))
     if score > 0:
-        d.add(Wedge(m, m, r, 90 - 3.6 * min(score, 99.9), 90, fillColor=colors.HexColor("#1E9BFF"), strokeColor=None))
+        d.add(Wedge(m, m, r, 90 - 3.6 * min(score, 99.9), 90, fillColor=colors.HexColor("#045268"), strokeColor=None))
     d.add(Circle(m, m, r - 3 * mm, fillColor=colors.white, strokeColor=None))
     d.add(String(m, m - 3 * mm, str(score), fontName=pdf.F_TITEL, fontSize=20, fillColor=pdf.NAVY, textAnchor="middle"))
     return d
@@ -471,7 +471,7 @@ def _punkt_bild(status: str):
     from reportlab.lib import colors
     from reportlab.lib.units import mm
     d = Drawing(5 * mm, 5 * mm)
-    d.add(Circle(2.5 * mm, 2.2 * mm, 1.9 * mm, fillColor=colors.HexColor({"gut": "#16A34A", "mittel": "#D97706"}.get(status, "#DC2626")), strokeColor=None))
+    d.add(Circle(2.5 * mm, 2.2 * mm, 1.9 * mm, fillColor=colors.HexColor({"gut": "#045268", "mittel": "#C67432"}.get(status, "#B3261E")), strokeColor=None))
     return d
 
 
@@ -492,7 +492,7 @@ def pdf_bauen(e: dict, firma: dict) -> bytes:
     zeilen = []
     for x in e["punkte"]:
         zeilen.append([_punkt_bild(x["status"]), Paragraph(pdf.esc(x["titel"]), fett),
-                       Paragraph(pdf.esc(x["text"]) + (f"<br/><font color='#6B7390'>Tipp: {pdf.esc(x['tipp'])}</font>" if x.get("tipp") else ""), pdf.TXT)])
+                       Paragraph(pdf.esc(x["text"]) + (f"<br/><font color='#4E5C5F'>Tipp: {pdf.esc(x['tipp'])}</font>" if x.get("tipp") else ""), pdf.TXT)])
     inhalt.append(pdf.tabelle(["", "Prüfpunkt", "Ergebnis"], zeilen, breiten=[9 * mm, 48 * mm, 113 * mm]))
     inhalt.append(pdf.p("Grün = gut, Orange = teilweise, Rot = fehlt.", pdf.KLEIN))
     nach = {x["id"]: x for x in e["punkte"]}

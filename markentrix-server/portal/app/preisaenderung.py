@@ -163,8 +163,8 @@ def abbrechen(pid: str, user: dict = Depends(require_admin)):
 
 # ---------------------------------------------------------------- Öffentliche Seite für den Kunden
 SEITE = ('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Preisanpassung</title>'
-         '<style>body{{font:16px/1.5 system-ui,sans-serif;max-width:560px;margin:8vh auto;padding:0 18px;color:#0B1020}}textarea{{width:100%;min-height:90px;font:inherit}}'
-         'button{{font:inherit;padding:10px 16px;border-radius:10px;border:1px solid #0B1020;background:#0B1020;color:#fff;cursor:pointer;margin-right:8px}}button.s{{background:#fff;color:#0B1020}}</style></head><body>{inhalt}</body></html>')
+         '<link rel="stylesheet" href="/static/css/ci-schrift.css"><style>body{{font:17px/1.55 MXText,system-ui,sans-serif;max-width:560px;margin:8vh auto;padding:0 18px;color:#0C2128}}textarea{{width:100%;min-height:90px;font:inherit}}'
+         'button{{font:inherit;padding:10px 16px;border-radius:4px;border:1px solid #045268;background:#045268;color:#fff;cursor:pointer;margin-right:8px}}button.s{{background:#fff;color:#045268}}</style></head><body>{inhalt}</body></html>')
 KOPF = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "Referrer-Policy": "no-referrer"}
 
 

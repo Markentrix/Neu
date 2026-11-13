@@ -18,8 +18,8 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `fehlerhilfe` | 1 | 142 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
 | `mailer` | 1 | 492 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 35 weitere |
-| `mailvorlage` | 1 | 310 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
-| `pdf` | 1 | 156 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
+| `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
+| `pdf` | 1 | 236 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
 | `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
 | `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 78 weitere |
 | `zustellung` | 1 | 114 | `jobs`, `mailer`, `routes_betriebplus`, `sitedienste` und 1 weitere |

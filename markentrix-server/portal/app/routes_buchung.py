@@ -205,8 +205,8 @@ def buchen(data: BuchenIn, bg: BackgroundTasks, request: Request):
 
 
 def _seite(text: str) -> HTMLResponse:
-    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title>'
-                        f'<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><h2>Markentrix</h2><p>{escape(text)}</p></body>')
+    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title><link rel="stylesheet" href="/static/css/ci-schrift.css">'
+                        f'<body style="font:17px/1.55 MXText,system-ui,sans-serif;max-width:520px;margin:12vh auto;padding:0 20px;color:#0C2128"><h2>Markentrix</h2><p>{escape(text)}</p></body>')
 
 
 @router.get("/public/buchung/absagen")
@@ -214,9 +214,9 @@ def absagen_frage(t: str):
     """Erst nach Klick auf den Knopf wird abgesagt (Mail-Scanner rufen Links vorab ab)."""
     if len(t) < 10 or len(t) > 100:
         return _seite("Dieser Link ist ungültig.")
-    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title>'
-                        '<body style="font:16px system-ui;max-width:520px;margin:12vh auto;padding:0 20px;color:#0B1020"><h2>Markentrix</h2><p>Möchten Sie Ihr Gespräch absagen?</p>'
-                        f'<form method="post"><input type="hidden" name="t" value="{escape(t)}"><button style="font:inherit;padding:10px 18px;border-radius:8px;border:0;background:#0B1020;color:#fff;cursor:pointer">Ja, Termin absagen</button></form></body>')
+    return HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markentrix</title><link rel="stylesheet" href="/static/css/ci-schrift.css">'
+                        '<body style="font:17px/1.55 MXText,system-ui,sans-serif;max-width:520px;margin:12vh auto;padding:0 20px;color:#0C2128"><h2>Markentrix</h2><p>Möchten Sie Ihr Gespräch absagen?</p>'
+                        f'<form method="post"><input type="hidden" name="t" value="{escape(t)}"><button style="font:inherit;padding:10px 18px;border-radius:4px;border:0;background:#045268;color:#fff;cursor:pointer">Ja, Termin absagen</button></form></body>')
 
 
 @router.post("/public/buchung/absagen")

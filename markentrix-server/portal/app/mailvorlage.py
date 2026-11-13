@@ -101,10 +101,9 @@ def _absatz(zeilen: list[str], html: list[str], ci: bool = False) -> None:
         if m:
             text_aus()
             url = m.group(0)
-            if ci:   # Mail von Markentrix an das eigene Team: Knopf im CI (Cyan → Blau, Schrift Navy)
-                html.append(f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 18px"><tr><td bgcolor="#28C7F7" style="border-radius:12px;background:#28C7F7;'
-                            f'background-image:linear-gradient(135deg,#28C7F7,#1E9BFF)"><a href="{escape(url, quote=True)}" style="display:inline-block;padding:13px 22px;color:#0B1020;'
-                            f'text-decoration:none;font-weight:700;border-radius:12px">{escape(_knopf_text(url, davor))}<span> &rarr;</span></a></td></tr></table>')
+            if ci:   # Mail von Markentrix an das eigene Team: Knopf im CI (Pfauenblau, Schrift weiß)
+                html.append(f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 18px"><tr><td bgcolor="#045268" style="border-radius:4px;background:#045268"><a href="{escape(url, quote=True)}" style="display:inline-block;padding:13px 22px;color:#FFFFFF;'
+                            f'text-decoration:none;font-weight:700;border-radius:4px">{escape(_knopf_text(url, davor))}<span> &rarr;</span></a></td></tr></table>')
             else:
                 html.append(f'<p style="margin:4px 0 18px"><a href="{escape(url, quote=True)}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;'
                             f'padding:11px 20px;border-radius:8px;font-weight:600">{escape(_knopf_text(url, davor))}</a></p>')
@@ -277,18 +276,18 @@ def html_mail(firma: str, text: str, signatur: str | None = None, farbe: str | N
 
 def _intern_html(firma: str, koerper: str, logo_cid: str | None, hinweis: str) -> str:
     """Mails von Markentrix an das eigene Team (neuer Lead, Alarme, Aufgaben) im Markentrix-CI."""
-    schrift = "Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+    schrift = "'Source Sans 3',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
     logo = f'<td valign="middle" style="padding-right:10px"><img src="cid:{logo_cid}" alt="" width="40" height="34" style="display:block;border:0;width:40px;height:34px"></td>' if logo_cid else ""
-    fuss = f'<p style="margin:16px 0 0;font-size:12px;color:#667085">{escape(hinweis)}</p>' if hinweis else ""
+    fuss = f'<p style="margin:16px 0 0;font-size:12px;color:#4E5C5F">{escape(hinweis)}</p>' if hinweis else ""
     return ('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             '<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>'
-            f'<body style="margin:0;padding:0;background:#F8FAFC;font-family:{schrift};font-size:16px">'
-            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC"><tr><td align="center" style="padding:24px 12px">'
+            f'<body style="margin:0;padding:0;background:#F7F4EE;font-family:{schrift};font-size:16px">'
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F4EE"><tr><td align="center" style="padding:24px 12px">'
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px">'
             f'<tr><td style="padding:0 4px 14px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>{logo}'
-            f'<td valign="middle" style="font-family:{schrift};font-size:20px;font-weight:800;letter-spacing:-.02em;color:#0B1020">{escape(firma)}</td></tr></table></td></tr>'
-            '<tr><td style="background:#FFFFFF;border:1px solid #E6E9F3;border-radius:18px;overflow:hidden">'
-            '<div style="height:4px;line-height:4px;font-size:0;background:#28C7F7;background-image:linear-gradient(90deg,#28C7F7,#1E9BFF)">&nbsp;</div>'
+            f'<td valign="middle" style="font-family:{schrift};font-size:20px;font-weight:800;letter-spacing:-.02em;color:#0C2128">{escape(firma)}</td></tr></table></td></tr>'
+            '<tr><td style="background:#FFFFFF;border:1px solid #EAE2D3;border-radius:8px;overflow:hidden">'
+            '<div style="height:4px;line-height:4px;font-size:0;background:#C67432">&nbsp;</div>'
             f'<div style="padding:24px 22px 22px;font-family:{schrift}">{"".join(_bloecke(koerper, firma, True))}{fuss}</div></td></tr>'
             '</table></td></tr></table></body></html>')
 
