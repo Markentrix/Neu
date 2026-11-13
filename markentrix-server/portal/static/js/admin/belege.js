@@ -157,7 +157,10 @@ export async function belegEditor(id, kid, art) {
     const r = await api('/api/admin/kunden/' + kid), v = await api('/api/admin/kunden/' + kid + '/belege-vorlage');
     k = { kundennummer: r.kunde.kundennummer, firma: r.kunde.firma, email: r.kunde.email, referenzkunde: r.kunde.referenzkunde };
     vorschlag = v.positionen;
-    b = { art, status: 'entwurf', betreff: '', einleitung: '', schluss: '', leistungszeitraum: '', positionen: vorschlag, kunden_id: kid };
+    const firma = v.firma || r.kunde.firma, re = art === 'rechnung';
+    b = { art, status: 'entwurf', betreff: '', leistungszeitraum: '', positionen: vorschlag, kunden_id: kid,
+      einleitung: (v.gruss || 'Guten Tag,') + '\n\n' + (re ? 'vielen Dank für die gute Zusammenarbeit mit ' + firma + '. Für unsere Leistungen stellen wir Ihnen Folgendes in Rechnung.' : 'vielen Dank für Ihr Interesse. Hier ist unser Angebot für ' + firma + '.'),
+      schluss: re ? 'Bitte überweisen Sie den Betrag innerhalb der angegebenen Frist unter Angabe der Rechnungsnummer. Bei Fragen melden Sie sich gern. Vielen Dank für Ihr Vertrauen.' : 'Bei Fragen melden Sie sich gern. Wir freuen uns auf die Zusammenarbeit mit ' + firma + '.' };
   }
   const frei = b.status === 'entwurf', m = h('div');
   const zeilen = [...b.positionen];

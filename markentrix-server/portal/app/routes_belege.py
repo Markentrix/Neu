@@ -89,12 +89,14 @@ def kunde_belege(kid: str, user: dict = Depends(require_admin)):
 def vorlage(kid: str, user: dict = Depends(require_admin)):
     """Positionsvorschlag aus den Buchungen des Kunden (Referenzkunden zahlen nichts)."""
     with tx("admin") as cur:
-        cur.execute("SELECT referenzkunde FROM kunden WHERE id=%s", (kid,))
+        cur.execute("SELECT referenzkunde, firma, ansprechpartner FROM kunden WHERE id=%s", (kid,))
         k = cur.fetchone()
         if not k:
             raise HTTPException(404, "Kunde nicht gefunden.")
+        n = (k["ansprechpartner"] or "").strip()
+        gruss = f"Guten Tag {n}," if n else "Guten Tag,"
         if k["referenzkunde"]:
-            return {"referenzkunde": True, "positionen": []}
+            return {"referenzkunde": True, "positionen": [], "gruss": gruss, "firma": k["firma"]}
         cur.execute("""SELECT p.name, b.einrichtung_cent, b.monatlich_cent, b.rabatt_cent, b.status FROM buchungen b JOIN produkte p ON p.code=b.produkt_code
                        WHERE b.kunden_id=%s AND b.status IN ('beauftragt','in_einrichtung','aktiv') ORDER BY b.erstellt_am""", (kid,))
         pos = []
@@ -103,7 +105,7 @@ def vorlage(kid: str, user: dict = Depends(require_admin)):
                 pos.append({"text": f"Einrichtung {b['name']}", "menge": 1, "einheit": "", "preis_cent": int(b["einrichtung_cent"])})
             if b["monatlich_cent"]:
                 pos.append({"text": f"{b['name']} – monatlich", "menge": 1, "einheit": "Monat", "preis_cent": int(b["monatlich_cent"] - (b["rabatt_cent"] or 0))})
-    return {"referenzkunde": False, "positionen": pos}
+    return {"referenzkunde": False, "positionen": pos, "gruss": gruss, "firma": k["firma"]}
 
 
 # ---------------------------------------------------------------- Anlegen und Bearbeiten
@@ -400,9 +402,13 @@ def aus_angebot(bid: str, user: dict = Depends(require_admin)):
             raise HTTPException(400, "Referenzkunden bekommen keine Rechnung.")
         f = rechtstexte.firma(cur)
         s = belege.summen(b["positionen"], f["mwst_satz"], f["kleinunternehmer"])
+        cur.execute("SELECT firma, ansprechpartner FROM kunden WHERE id=%s", (b["kunden_id"],))
+        kk = cur.fetchone() or {}
+        an = (kk.get("ansprechpartner") or "").strip()
+        einl = (f"Guten Tag {an}," if an else "Guten Tag,") + f"\n\nvielen Dank für Ihren Auftrag. Für unsere Leistungen für {kk.get('firma') or 'Ihr Unternehmen'} stellen wir Ihnen Folgendes in Rechnung."
         cur.execute("""INSERT INTO belege (art, kunden_id, betreff, einleitung, schluss, positionen, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id)
-                       VALUES ('rechnung',%s,%s,'',%s,%s::jsonb,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                    (b["kunden_id"], b["betreff"], "", json.dumps(b["positionen"]), s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], bid))
+                       VALUES ('rechnung',%s,%s,%s,%s,%s::jsonb,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                    (b["kunden_id"], b["betreff"], einl, "Bitte überweisen Sie den Betrag innerhalb der angegebenen Frist unter Angabe der Rechnungsnummer. Bei Fragen melden Sie sich gern. Vielen Dank für Ihr Vertrauen.", json.dumps(b["positionen"]), s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], bid))
         rid = cur.fetchone()["id"]
         audit(cur, user, "rechnung_aus_angebot", b["kunden_id"], {"angebot": b["nummer"]})
     return {"id": rid}

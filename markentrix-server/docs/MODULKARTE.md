@@ -121,7 +121,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `vertriebangebot` | 2 | 276 | `main` |
 | `zahlungsabgleich` | 2 | 98 | `routes_belege` |
 | `routes_angebotsplus` | 3 | 122 | `main` |
-| `routes_belege` | 3 | 460 | `main`, `routes_werkzeuge` |
+| `routes_belege` | 3 | 466 | `main`, `routes_werkzeuge` |
 | `routes_leadangebot` | 3 | 320 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `vertriebangebot` und 1 weitere |
 | `routes_pakete` | 3 | 211 | `main`, `tipps` |
 | `routes_provision` | 3 | 181 | `main` |
