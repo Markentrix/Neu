@@ -1,8 +1,7 @@
-/* Markentrix · lokale Webfonts (DSGVO) – keine Verbindung zu Google. WOFF2, Latin-Subset. SIL Open Font License. */
-@font-face{font-family:'Space Grotesk';src:url('space-grotesk-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
-@font-face{font-family:'Space Grotesk';src:url('space-grotesk-700.woff2') format('woff2');font-weight:700 800;font-style:normal;font-display:swap}
-@font-face{font-family:'Inter';src:url('inter-300.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
-@font-face{font-family:'Inter';src:url('inter-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:'Inter';src:url('inter-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
-@font-face{font-family:'Inter';src:url('inter-600.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
-@font-face{font-family:'Inter';src:url('inter-300-italic.woff2') format('woff2');font-weight:300;font-style:italic;font-display:swap}
+/* Markentrix · lokale Webfonts (DSGVO) – keine Verbindung zu Google. WOFF2, Latin-Subset. SIL Open Font License.
+   Archivo (Überschriften) und Source Sans 3 (Text), Markenhandbuch Version 3.0 */
+@font-face{font-family:'Archivo';src:url('archivo-700.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
+@font-face{font-family:'Archivo';src:url('archivo-800.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('source-sans-3-400.woff2') format('woff2');font-weight:300 500;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('source-sans-3-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('source-sans-3-700.woff2') format('woff2');font-weight:700 900;font-style:normal;font-display:swap}

@@ -32,28 +32,30 @@ for (const f of walk(DIST)) {
   pages.push({ name, main, sub, kind });
 }
 
-const LOGO = '<svg viewBox="0 0 48 48" width="74" height="74" fill="none"><defs><linearGradient id="g" x1="9" y1="40" x2="39" y2="9" gradientUnits="userSpaceOnUse"><stop stop-color="#28C7F7"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs><path d="M11 38V13.5L23.5 26.5L31 18.5" stroke="url(#g)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 38V18.5" stroke="url(#g)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 18.5L37 12.5M37 12.5L30.5 12.5M37 12.5L37 19" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const LOGO_FILE = join(ROOT, 'static/img/logo/markentrix-logo-farbe-hell.svg'), LINIE_FILE = join(ROOT, 'static/img/logo/aufwaertslinie.svg');
+// Markenhandbuch Version 3.0: Kreide, Tiefsee, Pfauenblau, Kupfer; Archivo und Source Sans 3; Kupferstrich und Aufwärtslinie
 const html = p => {
-  const big = p.main.length > 44 ? 60 : p.main.length > 28 ? 72 : 84;
+  const big = p.main.length > 44 ? 62 : p.main.length > 28 ? 74 : 86;
+  const words = esc(p.main).split(' '); const last = words.pop();
+  const head = (words.length ? words.join(' ') + ' ' : '') + `<span class="hl">${last}</span>`;
   return `<!doctype html><meta charset="utf-8"><style>
-@font-face{font-family:SG;font-weight:700;src:url("file://${FONTS}/space-grotesk-700.woff2")}
-@font-face{font-family:In;font-weight:400;src:url("file://${FONTS}/inter-400.woff2")}
-@font-face{font-family:In;font-weight:600;src:url("file://${FONTS}/inter-600.woff2")}
+@font-face{font-family:AR;font-weight:800;src:url("file://${FONTS}/archivo-800.woff2")}
+@font-face{font-family:SS;font-weight:400;src:url("file://${FONTS}/source-sans-3-400.woff2")}
+@font-face{font-family:SS;font-weight:700;src:url("file://${FONTS}/source-sans-3-700.woff2")}
 *{box-sizing:border-box;margin:0}
-body{width:1200px;height:630px;position:relative;overflow:hidden;font-family:In,sans-serif;color:#0B1020;background:
- radial-gradient(900px 520px at 100% 0%,rgba(139,92,246,.16),transparent 60%),radial-gradient(900px 560px at 0% 100%,rgba(40,199,247,.20),transparent 60%),#F8FAFD}
-.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(11,16,32,.08) 1.2px,transparent 1.4px);background-size:28px 28px;-webkit-mask-image:linear-gradient(115deg,transparent 35%,#000 100%);mask-image:linear-gradient(115deg,transparent 35%,#000 100%)}
-.top{position:absolute;left:80px;top:72px;display:flex;align-items:center;gap:22px}
-.word{font:600 27px In;letter-spacing:.42em;text-transform:uppercase}
-.kind{position:absolute;right:80px;top:92px;font:600 21px In;letter-spacing:.16em;text-transform:uppercase;color:#6D3FD1}
-.main{position:absolute;left:80px;right:80px;top:200px}
-h1{font:700 ${big}px/1.04 SG;letter-spacing:-.02em;max-width:1010px}
-h2{font:700 ${Math.round(big*0.62)}px/1.1 SG;letter-spacing:-.015em;margin-top:22px;max-width:1010px;background:linear-gradient(90deg,#1F8FD9,#7C4DE0);-webkit-background-clip:text;background-clip:text;color:transparent}
-.pill{position:absolute;left:80px;bottom:62px;padding:14px 28px;border-radius:999px;background:#fff;border:1px solid rgba(11,16,32,.14);font:600 24px In;color:#6D3FD1}
-</style><div class="dots"></div>
-<div class="top">${LOGO}<span class="word">Markentrix</span></div><div class="kind">${esc(p.kind)}</div>
-<div class="main"><h1>${esc(p.main)}</h1>${p.sub ? `<h2>${esc(p.sub)}</h2>` : ''}</div>
-<div class="pill">markentrix.de · Celle</div>`;
+body{width:1200px;height:630px;position:relative;overflow:hidden;font-family:SS,sans-serif;color:#0C2128;background:#F7F4EE}
+.logo{position:absolute;left:80px;top:64px;width:300px;height:auto}
+.kind{position:absolute;right:80px;top:84px;font:700 22px SS;letter-spacing:.09em;text-transform:uppercase;color:#045268}
+.main{position:absolute;left:80px;right:80px;top:196px}
+h1{font:800 ${big}px/1.06 AR;letter-spacing:-.025em;max-width:1000px}
+.hl{background-image:linear-gradient(#C67432,#C67432);background-repeat:no-repeat;background-size:100% .14em;background-position:0 98%;padding-bottom:.06em}
+h2{font:400 ${Math.round(big*0.44)}px/1.3 SS;margin-top:26px;max-width:900px;color:#0C2128}
+.foot{position:absolute;left:80px;bottom:58px;font:600 24px SS;color:#4E5C5F}
+.linie{position:absolute;right:70px;bottom:44px;width:270px;height:auto}
+</style>
+<img class="logo" src="file://${LOGO_FILE}"><div class="kind">${esc(p.kind)}</div>
+<div class="main"><h1>${head}</h1>${p.sub ? `<h2>${esc(p.sub)}</h2>` : ''}</div>
+<div class="foot">markentrix.de · Celle</div><img class="linie" src="file://${LINIE_FILE}">`;
 };
 
 const b = await chromium.launch({ executablePath, headless: true, args: ['--no-sandbox', '--allow-file-access-from-files'] });

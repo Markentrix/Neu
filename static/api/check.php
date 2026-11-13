@@ -670,40 +670,40 @@ function notify_owner(array $r): void {
   $T[] = 'Diese Mail enthält weder eine IP-Adresse noch einen Namen.';
   $text = implode("\n", $T) . "\n";
   // HTML (Tabellenlayout, Stile inline)
-  $col = fn(int $sc): string => $sc >= 80 ? '#15803D' : ($sc >= 55 ? '#D97706' : '#B91C1C');
-  $badge = ['bad' => ['#FBE4E4', '#991B1B'], 'warn' => ['#FDF0DC', '#8A4308']];
-  $imp = ['high' => ['#0B1020', '#FFFFFF'], 'mid' => ['#E3E8F0', '#2C3446'], 'low' => ['#F1F4F9', '#667085']];
+  $col = fn(int $sc): string => $sc >= 80 ? '#045268' : ($sc >= 55 ? '#964F08' : '#B3261E');
+  $badge = ['bad' => ['#EAE2D3', '#B3261E'], 'warn' => ['#EAE2D3', '#964F08']];
+  $imp = ['high' => ['#0C2128', '#FFFFFF'], 'mid' => ['#E1F0F6', '#0C2128'], 'low' => ['#E1F0F6', '#4E5C5F']];
   $chip = fn(string $label, string $bg, string $fg): string => '<span style="display:inline-block;background:' . $bg . ';color:' . $fg . ';font-size:11px;font-weight:bold;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap">' . $h($label) . '</span>';
-  $m = '<!doctype html><html lang="de"><body style="margin:0;background:#F4F6FA;font-family:Arial,Helvetica,sans-serif;color:#2C3446"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:22px 10px">'
-     . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-radius:14px;overflow:hidden">'
-     . '<tr><td style="background:#0B1020;padding:20px 26px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="color:#fff;font-size:15px;letter-spacing:.3em;font-weight:bold">MARKENTRIX</td><td align="right" style="color:#28C7F7;font-size:12px;letter-spacing:.12em;font-weight:bold;text-transform:uppercase">Neuer Website-Check</td></tr></table></td></tr>'
-     . '<tr><td style="height:4px;background:#1E9BFF;background-image:linear-gradient(90deg,#28C7F7,#1E9BFF);font-size:0;line-height:4px">&nbsp;</td></tr>'
-     . '<tr><td style="padding:26px 26px 6px"><p style="margin:0 0 4px;font-size:12px;color:#6D3FD1;letter-spacing:.08em;text-transform:uppercase;font-weight:bold">Geprüfte Adresse</p>'
-     . '<h1 style="margin:0 0 4px;font-size:24px;line-height:1.25;color:#0B1020"><a href="' . $h((string) $r['url']) . '" style="color:#0B1020;text-decoration:none">' . $h((string) $r['host']) . '</a></h1>'
-     . '<p style="margin:0 0 16px;font-size:13px;color:#667085">' . $h($when) . ' · ' . (int) $r['checks'] . ' Merkmale geprüft</p>'
-     . '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:#F8FAFD;border:1px solid #E3E8F0;border-radius:12px"><tr><td style="padding:18px 20px;width:120px;vertical-align:top"><div style="font-size:46px;line-height:1;font-weight:bold;color:' . $col((int) $r['score']) . '">' . (int) $r['score'] . '</div><div style="font-size:12px;color:#667085;margin-top:2px">von 100</div></td>'
-     . '<td style="padding:18px 20px 18px 0;vertical-align:top"><div style="font-size:17px;font-weight:bold;color:#0B1020;margin-bottom:10px">' . $h($gradeTxt) . '</div>'
-     . $chip((int) $r['counts']['ok'] . ' in Ordnung', '#E3F4EA', '#116430') . ' ' . $chip((int) $r['counts']['warn'] . ' auffällig', '#FDF0DC', '#8A4308') . ' ' . $chip((int) $r['counts']['bad'] . ' mangelhaft', '#FBE4E4', '#991B1B')
-     . ($r['cap'] ? '<div style="font-size:13px;margin-top:10px;color:#B91C1C;font-weight:bold">Gedeckelt wegen: ' . $h((string) $r['cap']) . '</div>' : '') . '</td></tr></table></td></tr>'
-     . '<tr><td style="padding:18px 26px 4px"><p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#0B1020">Bereichswerte</p>';
+  $m = '<!doctype html><html lang="de"><body style="margin:0;background:#F7F4EE;font-family:Arial,Helvetica,sans-serif;color:#0C2128"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:22px 10px">'
+     . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#FFFFFF;border-radius:14px;overflow:hidden">'
+     . '<tr><td style="background:#0C2128;padding:20px 26px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="color:#FFFFFF;font-size:15px;letter-spacing:.3em;font-weight:bold">MARKENTRIX</td><td align="right" style="color:#045268;font-size:12px;letter-spacing:.12em;font-weight:bold;text-transform:uppercase">Neuer Website-Check</td></tr></table></td></tr>'
+     . '<tr><td style="height:4px;background:#C67432;font-size:0;line-height:4px">&nbsp;</td></tr>'
+     . '<tr><td style="padding:26px 26px 6px"><p style="margin:0 0 4px;font-size:12px;color:#045268;letter-spacing:.08em;text-transform:uppercase;font-weight:bold">Geprüfte Adresse</p>'
+     . '<h1 style="margin:0 0 4px;font-size:24px;line-height:1.25;color:#0C2128"><a href="' . $h((string) $r['url']) . '" style="color:#0C2128;text-decoration:none">' . $h((string) $r['host']) . '</a></h1>'
+     . '<p style="margin:0 0 16px;font-size:13px;color:#4E5C5F">' . $h($when) . ' · ' . (int) $r['checks'] . ' Merkmale geprüft</p>'
+     . '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:#F7F4EE;border:1px solid #E1F0F6;border-radius:12px"><tr><td style="padding:18px 20px;width:120px;vertical-align:top"><div style="font-size:46px;line-height:1;font-weight:bold;color:' . $col((int) $r['score']) . '">' . (int) $r['score'] . '</div><div style="font-size:12px;color:#4E5C5F;margin-top:2px">von 100</div></td>'
+     . '<td style="padding:18px 20px 18px 0;vertical-align:top"><div style="font-size:17px;font-weight:bold;color:#0C2128;margin-bottom:10px">' . $h($gradeTxt) . '</div>'
+     . $chip((int) $r['counts']['ok'] . ' in Ordnung', '#E1F0F6', '#045268') . ' ' . $chip((int) $r['counts']['warn'] . ' auffällig', '#EAE2D3', '#964F08') . ' ' . $chip((int) $r['counts']['bad'] . ' mangelhaft', '#EAE2D3', '#B3261E')
+     . ($r['cap'] ? '<div style="font-size:13px;margin-top:10px;color:#B3261E;font-weight:bold">Gedeckelt wegen: ' . $h((string) $r['cap']) . '</div>' : '') . '</td></tr></table></td></tr>'
+     . '<tr><td style="padding:18px 26px 4px"><p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#0C2128">Bereichswerte</p>';
   foreach ($open as $o) {
-    $m .= '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:11px"><tr><td style="font-size:13px;padding-bottom:4px">' . $h($o['title']) . ($o['items'] ? '<span style="color:#667085"> · ' . count($o['items']) . ' offen</span>' : '<span style="color:#15803D"> · alles in Ordnung</span>') . '</td><td align="right" style="font-size:13px;font-weight:bold;color:#0B1020;white-space:nowrap">' . $o['score'] . ' / 100</td></tr>'
-        . '<tr><td colspan="2" style="background:#E8ECF3;border-radius:6px;height:8px;line-height:8px;font-size:0"><div style="width:' . max(2, $o['score']) . '%;background:' . $col($o['score']) . ';height:8px;border-radius:6px">&nbsp;</div></td></tr></table>';
+    $m .= '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:11px"><tr><td style="font-size:13px;padding-bottom:4px">' . $h($o['title']) . ($o['items'] ? '<span style="color:#4E5C5F"> · ' . count($o['items']) . ' offen</span>' : '<span style="color:#045268"> · alles in Ordnung</span>') . '</td><td align="right" style="font-size:13px;font-weight:bold;color:#0C2128;white-space:nowrap">' . $o['score'] . ' / 100</td></tr>'
+        . '<tr><td colspan="2" style="background:#E1F0F6;border-radius:6px;height:8px;line-height:8px;font-size:0"><div style="width:' . max(2, $o['score']) . '%;background:' . $col($o['score']) . ';height:8px;border-radius:6px">&nbsp;</div></td></tr></table>';
   }
-  $m .= '</td></tr><tr><td style="padding:14px 26px 4px"><p style="margin:0;font-size:14px;font-weight:bold;color:#0B1020;border-top:1px solid #E3E8F0;padding-top:16px">Offene Punkte <span style="font-weight:normal;color:#667085">· ' . $nOpen . ' insgesamt, ' . $nHigh . ' mit hohem Gewicht</span></p></td></tr>';
+  $m .= '</td></tr><tr><td style="padding:14px 26px 4px"><p style="margin:0;font-size:14px;font-weight:bold;color:#0C2128;border-top:1px solid #E1F0F6;padding-top:16px">Offene Punkte <span style="font-weight:normal;color:#4E5C5F">· ' . $nOpen . ' insgesamt, ' . $nHigh . ' mit hohem Gewicht</span></p></td></tr>';
   foreach ($open as $o) {
     if (!$o['items']) continue;
-    $m .= '<tr><td style="padding:10px 26px 0"><p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#6D3FD1;letter-spacing:.04em;text-transform:uppercase">' . $h($o['title']) . '</p>';
+    $m .= '<tr><td style="padding:10px 26px 0"><p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#045268;letter-spacing:.04em;text-transform:uppercase">' . $h($o['title']) . '</p>';
     foreach ($o['items'] as $i) {
       $b = $badge[$i['status']]; $g = $imp[$i['impact']] ?? $imp['low'];
-      $m .= '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:7px;border:1px solid #E3E8F0;border-left:4px solid ' . $b[1] . ';border-radius:8px"><tr><td style="padding:9px 12px;font-size:14px;color:#0B1020;line-height:1.4">' . $h((string) $i['title'])
+      $m .= '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:7px;border:1px solid #E1F0F6;border-left:4px solid ' . $b[1] . ';border-radius:8px"><tr><td style="padding:9px 12px;font-size:14px;color:#0C2128;line-height:1.4">' . $h((string) $i['title'])
           . '<div style="margin-top:6px">' . $chip($statusTxt[$i['status']], $b[0], $b[1]) . ' ' . $chip('Gewicht ' . ($impactTxt[$i['impact']] ?? ''), $g[0], $g[1]) . '</div></td></tr></table>';
     }
     $m .= '</td></tr>';
   }
-  $m .= '<tr><td style="padding:18px 26px 26px"><div style="background:#F3EFFD;border:1px solid #DCD0F7;border-radius:12px;padding:16px 18px"><p style="margin:0 0 6px;font-size:14px;font-weight:bold;color:#0B1020">Gesprächsgrundlage</p>'
+  $m .= '<tr><td style="padding:18px 26px 26px"><div style="background:#EAE2D3;border:1px solid #EAE2D3;border-radius:12px;padding:16px 18px"><p style="margin:0 0 6px;font-size:14px;font-weight:bold;color:#0C2128">Gesprächsgrundlage</p>'
       . '<p style="margin:0;font-size:13px;line-height:1.55">Der Besucher hat weder Namen noch Kontaktdaten angegeben. Fordert er die Kurzfassung per E-Mail an, kommt eine eigene Mail mit seinen Angaben (Quelle: Website-Check).</p></div></td></tr>'
-      . '<tr><td style="background:#F8FAFD;padding:14px 26px;font-size:12px;line-height:1.5;color:#667085">Diese Mail enthält weder eine IP-Adresse noch einen Namen. Interne Benachrichtigung von markentrix.de.</td></tr>'
+      . '<tr><td style="background:#F7F4EE;padding:14px 26px;font-size:12px;line-height:1.5;color:#4E5C5F">Diese Mail enthält weder eine IP-Adresse noch einen Namen. Interne Benachrichtigung von markentrix.de.</td></tr>'
       . '</table></td></tr></table></body></html>';
   $subject = '[markentrix.de] Website-Check: ' . $r['host'] . ' (' . $r['score'] . ' von 100)';
   $b = 'mx' . bin2hex(random_bytes(8));

@@ -100,14 +100,14 @@ if (count($cur) > 40) $t .= '  … und ' . (count($cur) - 40) . " weitere im Pro
 $t .= "\nDieser Bericht entsteht automatisch aus dem Eingangsprotokoll auf dem Server. Er enthält personenbezogene Daten, bitte vertraulich behandeln und nicht weiterleiten.\n";
 
 // HTML
-$row = fn(string $a, string $b) => '<tr><td style="padding:6px 0;border-bottom:1px solid #E8ECF3">' . $h($a) . '</td><td align="right" style="padding:6px 0;border-bottom:1px solid #E8ECF3;font-weight:bold">' . $h($b) . '</td></tr>';
-$m = '<!doctype html><html lang="de"><body style="margin:0;background:#F4F6FA;font-family:Arial,Helvetica,sans-serif;color:#2C3446"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">'
-   . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-radius:14px;overflow:hidden">'
-   . '<tr><td style="background:#0B1020;padding:20px 28px;color:#fff;font-size:15px;letter-spacing:.3em;font-weight:bold">MARKENTRIX</td></tr>'
-   . '<tr><td style="padding:24px 28px 8px"><p style="margin:0 0 4px;font-size:13px;color:#6D3FD1;letter-spacing:.08em;text-transform:uppercase;font-weight:bold">Wochenbericht · ' . $h($from) . ' bis ' . $h($to) . '</p>'
-   . '<h1 style="margin:0 0 12px;font-size:24px;color:#0B1020">' . $total . ' Anfragen' . ($total === 1 ? '' : '') . '</h1><p style="margin:0 0 14px;font-size:14px">' . $h(pct($total, $totalPrev)) . '. Kontaktwunsch ausdrücklich: ' . $wish . '. Website-Check-Berichte versendet: ' . $reports . ($avg !== null ? ', Durchschnitt der Bewertungen ' . $avg . ' von 100' : '') . '.</p>';
+$row = fn(string $a, string $b) => '<tr><td style="padding:6px 0;border-bottom:1px solid #E1F0F6">' . $h($a) . '</td><td align="right" style="padding:6px 0;border-bottom:1px solid #E1F0F6;font-weight:bold">' . $h($b) . '</td></tr>';
+$m = '<!doctype html><html lang="de"><body style="margin:0;background:#F7F4EE;font-family:Arial,Helvetica,sans-serif;color:#0C2128"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">'
+   . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#FFFFFF;border-radius:14px;overflow:hidden">'
+   . '<tr><td style="background:#0C2128;padding:20px 28px;color:#FFFFFF;font-size:15px;letter-spacing:.3em;font-weight:bold">MARKENTRIX</td></tr>'
+   . '<tr><td style="padding:24px 28px 8px"><p style="margin:0 0 4px;font-size:13px;color:#045268;letter-spacing:.08em;text-transform:uppercase;font-weight:bold">Wochenbericht · ' . $h($from) . ' bis ' . $h($to) . '</p>'
+   . '<h1 style="margin:0 0 12px;font-size:24px;color:#0C2128">' . $total . ' Anfragen' . ($total === 1 ? '' : '') . '</h1><p style="margin:0 0 14px;font-size:14px">' . $h(pct($total, $totalPrev)) . '. Kontaktwunsch ausdrücklich: ' . $wish . '. Website-Check-Berichte versendet: ' . $reports . ($avg !== null ? ', Durchschnitt der Bewertungen ' . $avg . ' von 100' : '') . '.</p>';
 if ($failed) {
-  $m .= '<div style="background:#FBE4E4;border:1px solid #F3BDBD;border-radius:10px;padding:12px 14px;margin:0 0 14px;color:#991B1B;font-size:14px"><b>Achtung:</b> ' . count($failed) . ' Anfrage(n) konnten nicht per E-Mail zugestellt werden und stehen nur im Protokoll:<br>';
+  $m .= '<div style="background:#EAE2D3;border:1px solid #B3261E;border-radius:10px;padding:12px 14px;margin:0 0 14px;color:#B3261E;font-size:14px"><b>Achtung:</b> ' . count($failed) . ' Anfrage(n) konnten nicht per E-Mail zugestellt werden und stehen nur im Protokoll:<br>';
   foreach ($failed as $r) $m .= $h(date('d.m. H:i', $r['_ts']) . '  ' . quelle($r) . '  ' . ($r['name'] ?? '') . '  ' . ($r['email'] ?? '')) . '<br>';
   $m .= '</div>';
 }
@@ -115,20 +115,20 @@ $m .= '</td></tr>';
 $sections = ['Nach Quelle' => $byQ, 'Herkunft' => $byH, 'Seiten' => $byPage, 'Anliegen und Themen' => $byNeed, 'Bewerbungen nach Rolle' => $byRole];
 foreach ($sections as $title => $mm) {
   if (!$mm) continue;
-  $m .= '<tr><td style="padding:8px 28px"><p style="margin:10px 0 4px;font-size:15px;font-weight:bold;color:#0B1020">' . $h($title) . '</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">';
+  $m .= '<tr><td style="padding:8px 28px"><p style="margin:10px 0 4px;font-size:15px;font-weight:bold;color:#0C2128">' . $h($title) . '</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">';
   foreach ($list($mm, 8) as $k => $n) $m .= $row((string) $k, (string) $n);
   $m .= '</table></td></tr>';
 }
-$m .= '<tr><td style="padding:12px 28px 4px"><p style="margin:10px 0 6px;font-size:15px;font-weight:bold;color:#0B1020">Einzelne Eingänge</p>';
+$m .= '<tr><td style="padding:12px 28px 4px"><p style="margin:10px 0 6px;font-size:15px;font-weight:bold;color:#0C2128">Einzelne Eingänge</p>';
 if (!$cur) $m .= '<p style="margin:0;font-size:14px">Keine Anfragen in diesem Zeitraum.</p>';
 foreach (array_slice($cur, 0, 40) as $r) {
   $info = array_filter([$r['rolle'] ?? '', $r['bedarf'] ?? '', $r['thema'] ?? '', $r['website_check'] ?? '']);
-  $m .= '<div style="border:1px solid #E3E8F0;border-radius:8px;padding:9px 12px;margin-bottom:6px;font-size:13px;line-height:1.5"><b style="color:#0B1020">' . $h((string) ($r['name'] ?? '')) . '</b>' . (!empty($r['firma']) ? ' · ' . $h((string) $r['firma']) : '')
-      . ' <span style="color:#5B6478">· ' . $h(date('d.m. H:i', $r['_ts'])) . ' · ' . $h(quelle($r)) . '</span>' . (($r['kontakt_gewuenscht'] ?? '') === 'ja' ? ' <span style="background:#E3F4EA;color:#116430;font-weight:bold;font-size:11px;padding:2px 7px;border-radius:999px">KONTAKTWUNSCH</span>' : '')
-      . '<br>' . $h((string) ($r['email'] ?? '')) . (!empty($r['tel']) ? ' · ' . $h((string) $r['tel']) : '') . ($info ? '<br><span style="color:#5B6478">' . $h(implode(' · ', $info)) . '</span>' : '') . '</div>';
+  $m .= '<div style="border:1px solid #E1F0F6;border-radius:8px;padding:9px 12px;margin-bottom:6px;font-size:13px;line-height:1.5"><b style="color:#0C2128">' . $h((string) ($r['name'] ?? '')) . '</b>' . (!empty($r['firma']) ? ' · ' . $h((string) $r['firma']) : '')
+      . ' <span style="color:#4E5C5F">· ' . $h(date('d.m. H:i', $r['_ts'])) . ' · ' . $h(quelle($r)) . '</span>' . (($r['kontakt_gewuenscht'] ?? '') === 'ja' ? ' <span style="background:#E1F0F6;color:#045268;font-weight:bold;font-size:11px;padding:2px 7px;border-radius:999px">KONTAKTWUNSCH</span>' : '')
+      . '<br>' . $h((string) ($r['email'] ?? '')) . (!empty($r['tel']) ? ' · ' . $h((string) $r['tel']) : '') . ($info ? '<br><span style="color:#4E5C5F">' . $h(implode(' · ', $info)) . '</span>' : '') . '</div>';
 }
 if (count($cur) > 40) $m .= '<p style="font-size:13px">… und ' . (count($cur) - 40) . ' weitere im Protokoll.</p>';
-$m .= '</td></tr><tr><td style="background:#F8FAFD;padding:14px 28px;font-size:12px;line-height:1.5;color:#5B6478">Dieser Bericht entsteht automatisch aus dem Eingangsprotokoll auf dem Server. Er enthält personenbezogene Daten, bitte vertraulich behandeln und nicht weiterleiten.</td></tr></table></td></tr></table></body></html>';
+$m .= '</td></tr><tr><td style="background:#F7F4EE;padding:14px 28px;font-size:12px;line-height:1.5;color:#4E5C5F">Dieser Bericht entsteht automatisch aus dem Eingangsprotokoll auf dem Server. Er enthält personenbezogene Daten, bitte vertraulich behandeln und nicht weiterleiten.</td></tr></table></td></tr></table></body></html>';
 
 if ($dry) { echo $t; exit(0); }
 $b = 'mx' . bin2hex(random_bytes(8));

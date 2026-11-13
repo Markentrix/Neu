@@ -66,10 +66,10 @@
     }
   }
 
-  var F = "'Inter','Segoe UI',system-ui,sans-serif";
-  var BTN = 'flex:1 1 150px;min-height:46px;padding:12px 18px;border-radius:10px;font:600 14.5px ' + F + ';cursor:pointer;';
-  var BTN_A = BTN + 'background:#0B1020;color:#FFFFFF;border:2px solid #0B1020;';
-  var BTN_B = BTN + 'background:#FFFFFF;color:#0B1020;border:2px solid #0B1020;';
+  var F = "'Source Sans 3','Segoe UI',system-ui,sans-serif";
+  var BTN = 'flex:1 1 150px;min-height:46px;padding:12px 18px;border-radius:4px;font:600 16px ' + F + ';cursor:pointer;';
+  var BTN_A = BTN + 'background:#0C2128;color:#FFFFFF;border:2px solid #0C2128;';
+  var BTN_B = BTN + 'background:#FFFFFF;color:#0C2128;border:2px solid #0C2128;';
   var el, lastFocus;
 
   function build() {
@@ -79,20 +79,20 @@
     el.setAttribute('aria-modal', 'false');
     el.setAttribute('aria-labelledby', 'mxc-t');
     el.setAttribute('aria-describedby', 'mxc-d');
-    el.style.cssText = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:10000;max-width:560px;margin:0 auto;background:#FFFFFF;color:#0B1020;border:1px solid rgba(11,16,32,.14);border-radius:16px;box-shadow:0 24px 60px rgba(11,16,32,.22);padding:22px 22px 18px;font:14px/1.6 ' + F + ';max-height:calc(100vh - 32px);overflow:auto';
+    el.style.cssText = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:10000;max-width:560px;margin:0 auto;background:#FFFFFF;color:#0C2128;border:1px solid rgba(12,33,40,.14);border-radius:8px;box-shadow:0 24px 60px rgba(12,33,40,.22);padding:22px 22px 18px;font:15px/1.5 ' + F + ';max-height:calc(100vh - 32px);overflow:auto';
     el.innerHTML =
-      '<h2 id="mxc-t" style="margin:0 0 8px;font:800 18px/1.3 \'Space Grotesk\',\'Futura\',sans-serif;color:#0B1020">Datenschutz-Einstellungen</h2>' +
-      '<p id="mxc-d" style="margin:0 0 14px;color:#47506A">Wir möchten mit <b style="color:#0B1020">Google Analytics</b> und <b style="color:#0B1020">Metricool</b> messen<span class="mxc-rest">, welche Inhalte genutzt werden, um die Website zu verbessern</span>. Das geschieht nur mit Ihrer Einwilligung. <span class="mxc-rest">Dabei werden Cookies gesetzt und Daten an die Anbieter übermittelt (bei Google auch in die USA). Sie können Ihre Wahl jederzeit über „Cookie-Einstellungen“ im Seitenfuß ändern.</span> <a href="' + DS + '" style="color:#0B63C6;text-decoration:underline">Datenschutzerklärung</a><span class="mxc-rest"> · <a href="/impressum" style="color:#0B63C6;text-decoration:underline">Impressum</a></span></p>' +
-      '<div id="mxc-det" hidden style="border:1px solid rgba(11,16,32,.12);border-radius:12px;margin:0 0 14px;overflow:hidden">' +
-        '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid rgba(11,16,32,.08)"><input type="checkbox" id="mxc-n" checked disabled style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#0B1020"><label for="mxc-n" style="flex:1"><b>Notwendig</b> <span style="color:#5B6784">(immer aktiv)</span><br><span style="color:#47506A;font-size:13px">Speichert Ihre Datenschutz-Auswahl, Anzeige- und Barrierefreiheits-Einstellungen lokal im Browser. Keine Übertragung an Dritte.</span></label></div>' +
-        '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px"><input type="checkbox" id="mxc-a" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#0B63C6"><label for="mxc-a" style="flex:1;cursor:pointer"><b>Statistik – Google Analytics 4 &amp; Metricool</b><br><span style="color:#47506A;font-size:13px">Anbieter: Google Ireland Ltd., Dublin (Cookies _ga, _ga_*, bis 14 Monate) und Metricool Software S.L., Spanien. Zweck: Reichweitenmessung. Rechtsgrundlage: Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG).</span></label></div>' +
+      '<h2 id="mxc-t" style="margin:0 0 8px;font:800 18px/1.3 \'Archivo\',\'Arial\',sans-serif;color:#0C2128">Datenschutz-Einstellungen</h2>' +
+      '<p id="mxc-d" style="margin:0 0 14px;color:#4E5C5F">Wir möchten mit <b style="color:#0C2128">Google Analytics</b> und <b style="color:#0C2128">Metricool</b> messen<span class="mxc-rest">, welche Inhalte genutzt werden, um die Website zu verbessern</span>. Das geschieht nur mit Ihrer Einwilligung. <span class="mxc-rest">Dabei werden Cookies gesetzt und Daten an die Anbieter übermittelt (bei Google auch in die USA). Sie können Ihre Wahl jederzeit über „Cookie-Einstellungen“ im Seitenfuß ändern.</span> <a href="' + DS + '" style="color:#045268;text-decoration:underline">Datenschutzerklärung</a><span class="mxc-rest"> · <a href="/impressum" style="color:#045268;text-decoration:underline">Impressum</a></span></p>' +
+      '<div id="mxc-det" hidden style="border:1px solid rgba(12,33,40,.12);border-radius:8px;margin:0 0 14px;overflow:hidden">' +
+        '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid rgba(12,33,40,.08)"><input type="checkbox" id="mxc-n" checked disabled style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#0C2128"><label for="mxc-n" style="flex:1"><b>Notwendig</b> <span style="color:#4E5C5F">(immer aktiv)</span><br><span style="color:#4E5C5F;font-size:13px">Speichert Ihre Datenschutz-Auswahl, Anzeige- und Barrierefreiheits-Einstellungen lokal im Browser. Keine Übertragung an Dritte.</span></label></div>' +
+        '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px"><input type="checkbox" id="mxc-a" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#045268"><label for="mxc-a" style="flex:1;cursor:pointer"><b>Statistik – Google Analytics 4 &amp; Metricool</b><br><span style="color:#4E5C5F;font-size:13px">Anbieter: Google Ireland Ltd., Dublin (Cookies _ga, _ga_*, bis 14 Monate) und Metricool Software S.L., Spanien. Zweck: Reichweitenmessung. Rechtsgrundlage: Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG).</span></label></div>' +
       '</div>' +
       '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
         '<button type="button" id="mxc-no" style="' + BTN_B + '">Nur notwendige</button>' +
         '<button type="button" id="mxc-yes" style="' + BTN_A + '">Alle akzeptieren</button>' +
         '<button type="button" id="mxc-save" hidden style="' + BTN_A + '">Auswahl speichern</button>' +
       '</div>' +
-      '<button type="button" id="mxc-more" aria-expanded="false" aria-controls="mxc-det" style="margin-top:10px;background:none;border:none;padding:6px 0;min-height:36px;color:#0B63C6;font:600 13.5px ' + F + ';text-decoration:underline;cursor:pointer">Einstellungen anpassen</button>';
+      '<button type="button" id="mxc-more" aria-expanded="false" aria-controls="mxc-det" style="margin-top:10px;background:none;border:none;padding:6px 0;min-height:36px;color:#045268;font:600 13.5px ' + F + ';text-decoration:underline;cursor:pointer">Einstellungen anpassen</button>';
     document.body.appendChild(el);
     var $ = function (id) { return el.querySelector('#' + id); };
     $('mxc-yes').onclick = function () { save(true); close(); };

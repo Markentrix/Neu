@@ -171,8 +171,8 @@ function owner_mail_html(array $c, ?array $report, string $quelle, string $conse
   $isJob = $quelle === 'Bewerbung';
   $isCb = $quelle === 'Rückruf';
   $tag = $isJob ? 'Neue Bewerbung' : ($isCb ? 'Rückruf' : ($quelle === 'Checkliste-PDF' ? 'Checkliste' : ($report ? 'Website-Check' : 'Neue Anfrage')));
-  $link = fn(string $href, string $label): string => '<a href="' . mx_h($href) . '" style="color:#0B63C6;text-decoration:underline">' . mx_h($label) . '</a>';
-  $in = mx_title($quelle . ' · ' . $when, $name, mx_chip($quelle) . ($report ? ' ' . mx_chip($report['host'] . ': ' . $report['score'] . ' von 100', '#F3EFFD', '#4B2BA6') : ''));
+  $link = fn(string $href, string $label): string => '<a href="' . mx_h($href) . '" style="color:#045268;text-decoration:underline">' . mx_h($label) . '</a>';
+  $in = mx_title($quelle . ' · ' . $when, $name, mx_chip($quelle) . ($report ? ' ' . mx_chip($report['host'] . ': ' . $report['score'] . ' von 100', '#EAE2D3', '#045268') : ''));
   // Kontakt und Schnellaktionen
   $tel_clean = preg_replace('/[^0-9+]/', '', $tel);
   $in .= mx_section('Kontakt', mx_rows([
@@ -196,18 +196,18 @@ function owner_mail_html(array $c, ?array $report, string $quelle, string $conse
   if ($body !== '') $in .= mx_section($isJob ? 'Bewerbung' : ($isCb ? 'Rückruf' : 'Anliegen'), $body);
   // Website-Check
   if ($report) {
-    $col = fn(int $sc): string => $sc >= 80 ? '#15803D' : ($sc >= 55 ? '#D97706' : '#B91C1C');
-    $h = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFD;border:1px solid #E3E8F0;border-radius:12px;margin-bottom:10px"><tr>'
-       . '<td style="padding:14px 18px;width:90px"><div style="font-size:38px;line-height:1;font-weight:bold;color:' . $col((int) $report['score']) . '">' . (int) $report['score'] . '</div><div style="font-size:12px;color:#5B6478">von 100</div></td>'
-       . '<td style="padding:14px 18px 14px 0;font-size:14px;color:#0B1020"><b>' . mx_h((string) $report['host']) . '</b><br><span style="font-size:13px;color:#5B6478">Note ' . mx_h((string) $report['grade']) . ($report['cap'] ? ', gedeckelt: ' . mx_h((string) $report['cap']) : '') . '</span></td></tr></table>';
+    $col = fn(int $sc): string => $sc >= 80 ? '#045268' : ($sc >= 55 ? '#964F08' : '#B3261E');
+    $h = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F4EE;border:1px solid #E1F0F6;border-radius:12px;margin-bottom:10px"><tr>'
+       . '<td style="padding:14px 18px;width:90px"><div style="font-size:38px;line-height:1;font-weight:bold;color:' . $col((int) $report['score']) . '">' . (int) $report['score'] . '</div><div style="font-size:12px;color:#4E5C5F">von 100</div></td>'
+       . '<td style="padding:14px 18px 14px 0;font-size:14px;color:#0C2128"><b>' . mx_h((string) $report['host']) . '</b><br><span style="font-size:13px;color:#4E5C5F">Note ' . mx_h((string) $report['grade']) . ($report['cap'] ? ', gedeckelt: ' . mx_h((string) $report['cap']) : '') . '</span></td></tr></table>';
     foreach ($report['categories'] as $cat) {
       $sc = (int) $cat['score'];
       $h .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px"><tr><td style="font-size:13px;padding-bottom:3px">' . mx_h((string) $cat['title']) . '</td><td align="right" style="font-size:13px;font-weight:bold;color:' . $col($sc) . '">' . $sc . '</td></tr>'
-          . '<tr><td colspan="2" style="background:#E8ECF3;border-radius:6px;height:8px;line-height:8px;font-size:0"><div style="width:' . max(2, $sc) . '%;background:' . $col($sc) . ';height:8px;border-radius:6px"></div></td></tr></table>';
+          . '<tr><td colspan="2" style="background:#E1F0F6;border-radius:6px;height:8px;line-height:8px;font-size:0"><div style="width:' . max(2, $sc) . '%;background:' . $col($sc) . ';height:8px;border-radius:6px"></div></td></tr></table>';
     }
     $worst = [];
     foreach ($report['categories'] as $cat) foreach ($cat['items'] as $it) if ($it['status'] === 'bad') $worst[] = (string) $it['title'];
-    if ($worst) $h .= '<p style="margin:10px 0 4px;font-size:13px;font-weight:bold;color:#B91C1C">Mangelhaft</p><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:#2C3446">' . implode('', array_map(fn($w) => '<li>' . mx_h($w) . '</li>', array_slice($worst, 0, 12))) . '</ul>';
+    if ($worst) $h .= '<p style="margin:10px 0 4px;font-size:13px;font-weight:bold;color:#B3261E">Mangelhaft</p><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:#0C2128">' . implode('', array_map(fn($w) => '<li>' . mx_h($w) . '</li>', array_slice($worst, 0, 12))) . '</ul>';
     $in .= mx_section('Website-Check', $h);
   }
   // Herkunft
@@ -242,15 +242,15 @@ function confirm_mail(array $c, string $name, string $quelle, string $text): arr
     $isJob ? 'Ihre Bewerbung ist bei uns eingegangen. Wir melden uns zeitnah per E-Mail oder Telefon bei Ihnen.'
            : 'Ihre Anfrage ist bei uns eingegangen. Wir melden uns werktags innerhalb von 24 Stunden persönlich bei Ihnen.');
   $sum = mx_rows($rows);
-  if (!empty($c['nachricht_text'])) $sum .= '<div style="padding-top:12px"><p style="margin:0 0 6px;font-size:13px;color:#5B6478">Ihre Nachricht</p>' . mx_quote(mb_substr((string) $c['nachricht_text'], 0, 400)) . '</div>';
+  if (!empty($c['nachricht_text'])) $sum .= '<div style="padding-top:12px"><p style="margin:0 0 6px;font-size:13px;color:#4E5C5F">Ihre Nachricht</p>' . mx_quote(mb_substr((string) $c['nachricht_text'], 0, 400)) . '</div>';
   if ($sum !== '') $in .= mx_section('Ihre Angaben im Überblick', $sum);
   $in .= mx_section('Wie es weitergeht', mx_steps($steps));
-  $in .= '<tr><td style="padding:8px 26px 24px"><div style="background:#F3EFFD;border:1px solid #DCD0F7;border-radius:12px;padding:18px 20px"><p style="margin:0 0 6px;font-size:16px;font-weight:bold;color:#0B1020">' . ($isJob ? 'Fragen?' : 'Eilig?') . '</p>'
-       . '<p style="margin:0 0 12px;font-size:14px;line-height:1.5">Rufen Sie uns an oder antworten Sie einfach auf diese E-Mail.<br><span style="color:#5B6478;font-size:13px">Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr</span></p>'
+  $in .= '<tr><td style="padding:8px 26px 24px"><div style="background:#EAE2D3;border:1px solid #EAE2D3;border-radius:12px;padding:18px 20px"><p style="margin:0 0 6px;font-size:16px;font-weight:bold;color:#0C2128">' . ($isJob ? 'Fragen?' : 'Eilig?') . '</p>'
+       . '<p style="margin:0 0 12px;font-size:14px;line-height:1.5">Rufen Sie uns an oder antworten Sie einfach auf diese E-Mail.<br><span style="color:#4E5C5F;font-size:13px">Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr</span></p>'
        . mx_btn('tel:+4917620370429', 'Anrufen: 0176 20370429') . mx_btn('mailto:info@markentrix.de', 'Antworten', false) . '</div></td></tr>';
   $foot = 'Diese Nachricht wurde automatisch versendet, weil Sie das ' . ($isJob ? 'Bewerbungsformular' : 'Formular') . ' auf markentrix.de ausgefüllt haben. Ihre Angaben verwenden wir ausschließlich '
         . ($isJob ? 'für das Bewerbungsverfahren und löschen sie spätestens sechs Monate nach Abschluss. ' : 'zur Bearbeitung Ihrer Anfrage. ')
-        . '<a href="https://markentrix.de/datenschutz" style="color:#0B63C6">Hinweise zum Datenschutz</a><br><br>Markentrix · Christian Wien · Celle<br><a href="https://markentrix.de" style="color:#0B63C6">markentrix.de</a> · <a href="mailto:info@markentrix.de" style="color:#0B63C6">info@markentrix.de</a> · <a href="https://markentrix.de/impressum" style="color:#0B63C6">Impressum</a>';
+        . '<a href="https://markentrix.de/datenschutz" style="color:#045268">Hinweise zum Datenschutz</a><br><br>Markentrix · Christian Wien · Celle<br><a href="https://markentrix.de" style="color:#045268">markentrix.de</a> · <a href="mailto:info@markentrix.de" style="color:#045268">info@markentrix.de</a> · <a href="https://markentrix.de/impressum" style="color:#045268">Impressum</a>';
   return [$text, mx_shell($isJob ? 'Bewerbung' : 'Bestätigung', $in, $foot, $isJob ? 'Ihre Bewerbung bei Markentrix ist eingegangen.' : 'Ihre Anfrage bei Markentrix ist eingegangen.')];
 }
 
@@ -267,10 +267,10 @@ function checklist_mail(array $c, string $name): array {
     . "Markentrix · Christian Wien · Celle\nhttps://markentrix.de · info@markentrix.de\nImpressum: https://markentrix.de/impressum\n";
   $in = mx_title('Ihre Checkliste', 'Hier ist Ihre ' . $title . '.', 'Wie gewünscht: ' . $points . ' zum Abhaken, als PDF zum Ausdrucken oder am Bildschirm.');
   $in .= '<tr><td style="padding:18px 26px 6px">' . mx_btn($url, 'PDF herunterladen') . '</td></tr>';
-  $in .= '<tr><td style="padding:6px 26px 24px;font-size:14px;line-height:1.6;color:#47506A">Fragen dazu? Antworten Sie einfach auf diese E-Mail, wir antworten persönlich.</td></tr>';
+  $in .= '<tr><td style="padding:6px 26px 24px;font-size:14px;line-height:1.6;color:#4E5C5F">Fragen dazu? Antworten Sie einfach auf diese E-Mail, wir antworten persönlich.</td></tr>';
   $foot = 'Diese Nachricht ist einmalig. Wir tragen Ihre Adresse in keine Verteilerliste ein und senden Ihnen keine Werbung. '
-        . '<a href="https://markentrix.de/datenschutz" style="color:#0B63C6">Hinweise zum Datenschutz</a><br><br>Markentrix · Christian Wien · Celle<br>'
-        . '<a href="https://markentrix.de" style="color:#0B63C6">markentrix.de</a> · <a href="mailto:info@markentrix.de" style="color:#0B63C6">info@markentrix.de</a> · <a href="https://markentrix.de/impressum" style="color:#0B63C6">Impressum</a>';
+        . '<a href="https://markentrix.de/datenschutz" style="color:#045268">Hinweise zum Datenschutz</a><br><br>Markentrix · Christian Wien · Celle<br>'
+        . '<a href="https://markentrix.de" style="color:#045268">markentrix.de</a> · <a href="mailto:info@markentrix.de" style="color:#045268">info@markentrix.de</a> · <a href="https://markentrix.de/impressum" style="color:#045268">Impressum</a>';
   return [$text, mx_shell('Checkliste', $in, $foot, 'Ihre ' . $title . ' als PDF'), 'Ihre ' . $title . ' als PDF'];
 }
 
@@ -309,30 +309,30 @@ function report_mail(array $r, string $name): array {
       . "Sie erhalten diese Nachricht einmalig, weil Sie die Kurzfassung auf markentrix.de angefordert haben. Weitere Werbe-E-Mails senden wir nur mit Ihrer ausdrücklichen Einwilligung. Hinweise zum Datenschutz: https://markentrix.de/datenschutz\n\n"
       . "Markentrix · Christian Wien · Celle\nhttps://markentrix.de · info@markentrix.de\nImpressum: https://markentrix.de/impressum\n";
   // HTML (Tabellenlayout, Stile inline, wie in E-Mails üblich)
-  $col = fn(int $sc): string => $sc >= 80 ? '#15803D' : ($sc >= 55 ? '#D97706' : '#B91C1C');
-  $m = '<!doctype html><html lang="de"><body style="margin:0;background:#F4F6FA;font-family:Arial,Helvetica,sans-serif;color:#2C3446"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">'
-     . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-radius:14px;overflow:hidden">'
-     . '<tr><td style="background:#0B1020;padding:22px 28px;color:#fff;font-size:15px;letter-spacing:.3em;font-weight:bold">MARKENTRIX</td></tr>'
-     . '<tr><td style="padding:28px 28px 8px"><p style="margin:0 0 6px;font-size:13px;color:#6D3FD1;letter-spacing:.08em;text-transform:uppercase;font-weight:bold">Website-Check · Kurzfassung · ' . $h($r['date']) . '</p>'
-     . '<h1 style="margin:0 0 6px;font-size:24px;line-height:1.25;color:#0B1020">' . $h($r['host']) . '</h1><p style="margin:0 0 14px;font-size:15px">' . $h($hello) . ' hier ist die Kurzfassung Ihres Checks.</p>'
-     . '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:#F8FAFD;border:1px solid #E3E8F0;border-radius:12px"><tr><td style="padding:18px 20px;width:110px"><div style="font-size:44px;line-height:1;font-weight:bold;color:' . $col((int) $r['score']) . '">' . (int) $r['score'] . '</div><div style="font-size:12px;color:#5B6478">von 100</div></td>'
-     . '<td style="padding:18px 20px 18px 0"><div style="font-size:17px;font-weight:bold;color:#0B1020">' . $h($gradeTxt) . '</div><div style="font-size:13px;margin-top:6px">' . (int) $r['checks'] . ' Merkmale geprüft: ' . (int) $r['counts']['ok'] . ' in Ordnung, ' . (int) $r['counts']['warn'] . ' auffällig, ' . (int) $r['counts']['bad'] . ' mangelhaft.</div>'
-     . ($r['cap'] ? '<div style="font-size:13px;margin-top:6px;color:#B91C1C;font-weight:bold">Gedeckelt wegen: ' . $h($r['cap']) . '</div>' : '') . '</td></tr></table></td></tr>'
-     . '<tr><td style="padding:14px 28px 4px"><p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0B1020">Bereichswerte</p>';
+  $col = fn(int $sc): string => $sc >= 80 ? '#045268' : ($sc >= 55 ? '#964F08' : '#B3261E');
+  $m = '<!doctype html><html lang="de"><body style="margin:0;background:#F7F4EE;font-family:Arial,Helvetica,sans-serif;color:#0C2128"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">'
+     . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#FFFFFF;border-radius:14px;overflow:hidden">'
+     . '<tr><td style="background:#0C2128;padding:22px 28px;color:#FFFFFF;font-size:15px;letter-spacing:.3em;font-weight:bold">MARKENTRIX</td></tr>'
+     . '<tr><td style="padding:28px 28px 8px"><p style="margin:0 0 6px;font-size:13px;color:#045268;letter-spacing:.08em;text-transform:uppercase;font-weight:bold">Website-Check · Kurzfassung · ' . $h($r['date']) . '</p>'
+     . '<h1 style="margin:0 0 6px;font-size:24px;line-height:1.25;color:#0C2128">' . $h($r['host']) . '</h1><p style="margin:0 0 14px;font-size:15px">' . $h($hello) . ' hier ist die Kurzfassung Ihres Checks.</p>'
+     . '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:#F7F4EE;border:1px solid #E1F0F6;border-radius:12px"><tr><td style="padding:18px 20px;width:110px"><div style="font-size:44px;line-height:1;font-weight:bold;color:' . $col((int) $r['score']) . '">' . (int) $r['score'] . '</div><div style="font-size:12px;color:#4E5C5F">von 100</div></td>'
+     . '<td style="padding:18px 20px 18px 0"><div style="font-size:17px;font-weight:bold;color:#0C2128">' . $h($gradeTxt) . '</div><div style="font-size:13px;margin-top:6px">' . (int) $r['checks'] . ' Merkmale geprüft: ' . (int) $r['counts']['ok'] . ' in Ordnung, ' . (int) $r['counts']['warn'] . ' auffällig, ' . (int) $r['counts']['bad'] . ' mangelhaft.</div>'
+     . ($r['cap'] ? '<div style="font-size:13px;margin-top:6px;color:#B3261E;font-weight:bold">Gedeckelt wegen: ' . $h($r['cap']) . '</div>' : '') . '</td></tr></table></td></tr>'
+     . '<tr><td style="padding:14px 28px 4px"><p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0C2128">Bereichswerte</p>';
   foreach ($cats as $c) {
-    $m .= '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:10px"><tr><td style="font-size:13px;padding-bottom:3px">' . $h($c['title']) . '<span style="color:#5B6478"> · ' . $h($openTxt($c)) . '</span></td><td align="right" style="font-size:13px;font-weight:bold;color:#0B1020;white-space:nowrap">' . $c['score'] . ' / 100</td></tr>'
-        . '<tr><td colspan="2" style="background:#E8ECF3;border-radius:6px;height:8px;line-height:8px;font-size:0"><div style="width:' . max(2, $c['score']) . '%;background:' . $col($c['score']) . ';height:8px;border-radius:6px"></div></td></tr></table>';
+    $m .= '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:10px"><tr><td style="font-size:13px;padding-bottom:3px">' . $h($c['title']) . '<span style="color:#4E5C5F"> · ' . $h($openTxt($c)) . '</span></td><td align="right" style="font-size:13px;font-weight:bold;color:#0C2128;white-space:nowrap">' . $c['score'] . ' / 100</td></tr>'
+        . '<tr><td colspan="2" style="background:#E1F0F6;border-radius:6px;height:8px;line-height:8px;font-size:0"><div style="width:' . max(2, $c['score']) . '%;background:' . $col($c['score']) . ';height:8px;border-radius:6px"></div></td></tr></table>';
   }
-  $m .= '</td></tr><tr><td style="padding:10px 28px 0"><p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0B1020;border-top:1px solid #E3E8F0;padding-top:14px">Was bei Ihnen schon gut läuft</p>';
+  $m .= '</td></tr><tr><td style="padding:10px 28px 0"><p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0C2128;border-top:1px solid #E1F0F6;padding-top:14px">Was bei Ihnen schon gut läuft</p>';
   foreach ($cats as $c) if ($c['good']) $m .= '<p style="margin:0 0 6px;font-size:13px;line-height:1.5"><b>' . $h($c['title']) . ':</b> ' . $h(implode('; ', $c['good'])) . '</p>';
   if (!$anyGood) $m .= '<p style="margin:0;font-size:13px;line-height:1.5">Hier gibt es noch wenig, auf dem sich gut aufbauen lässt. Das ist ein klarer Ansatzpunkt.</p>';
   $m .= '</td></tr>'
-      . '<tr><td style="padding:16px 28px 28px"><div style="background:#F3EFFD;border:1px solid #DCD0F7;border-radius:12px;padding:20px"><p style="margin:0 0 8px;font-size:17px;font-weight:bold;color:#0B1020">Welche Punkte zuerst, und was bringen sie?</p>'
+      . '<tr><td style="padding:16px 28px 28px"><div style="background:#EAE2D3;border:1px solid #EAE2D3;border-radius:12px;padding:20px"><p style="margin:0 0 8px;font-size:17px;font-weight:bold;color:#0C2128">Welche Punkte zuerst, und was bringen sie?</p>'
       . '<p style="margin:0 0 14px;font-size:14px;line-height:1.5">Die einzelnen Befunde, ihre Reihenfolge und die Umsetzung besprechen wir im kostenlosen Erstgespräch, rund 30 Minuten, unverbindlich.</p>'
-      . '<a href="' . $h($link) . '" style="display:inline-block;background:#1E9BFF;color:#06101F;font-weight:bold;font-size:15px;text-decoration:none;padding:12px 22px;border-radius:10px">Gespräch vereinbaren</a>'
+      . '<a href="' . $h($link) . '" style="display:inline-block;background:#045268;color:#0C2128;font-weight:bold;font-size:15px;text-decoration:none;padding:12px 22px;border-radius:10px">Gespräch vereinbaren</a>'
       . '<p style="margin:14px 0 0;font-size:13px">Oder rufen Sie an: <b>0176 20370429</b> (Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr) oder antworten Sie auf diese E-Mail.</p></div></td></tr>'
-      . '<tr><td style="padding:0 28px 16px"><p style="margin:0;font-size:12px;line-height:1.5;color:#5B6478">So lesen Sie die Kurzfassung: Die Punktzahl ist ein Orientierungswert, keine Messung von Rankings. Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.</p></td></tr>'
-      . '<tr><td style="background:#F8FAFD;padding:16px 28px;font-size:12px;line-height:1.5;color:#5B6478">Sie erhalten diese Nachricht einmalig, weil Sie die Kurzfassung auf markentrix.de angefordert haben. Weitere Werbe-E-Mails senden wir nur mit Ihrer ausdrücklichen Einwilligung. <a href="https://markentrix.de/datenschutz" style="color:#0B63C6">Datenschutz</a> · <a href="https://markentrix.de/impressum" style="color:#0B63C6">Impressum</a><br>Markentrix · Christian Wien · Celle · info@markentrix.de</td></tr>'
+      . '<tr><td style="padding:0 28px 16px"><p style="margin:0;font-size:12px;line-height:1.5;color:#4E5C5F">So lesen Sie die Kurzfassung: Die Punktzahl ist ein Orientierungswert, keine Messung von Rankings. Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.</p></td></tr>'
+      . '<tr><td style="background:#F7F4EE;padding:16px 28px;font-size:12px;line-height:1.5;color:#4E5C5F">Sie erhalten diese Nachricht einmalig, weil Sie die Kurzfassung auf markentrix.de angefordert haben. Weitere Werbe-E-Mails senden wir nur mit Ihrer ausdrücklichen Einwilligung. <a href="https://markentrix.de/datenschutz" style="color:#045268">Datenschutz</a> · <a href="https://markentrix.de/impressum" style="color:#045268">Impressum</a><br>Markentrix · Christian Wien · Celle · info@markentrix.de</td></tr>'
       . '</table></td></tr></table></body></html>';
   return [$t, $m];
 }
