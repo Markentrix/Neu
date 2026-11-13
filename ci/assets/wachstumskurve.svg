@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 220" fill="none" role="img" aria-label="Markentrix Wachstumskurve">
+<g stroke="#B8C0CC" stroke-width="1.2" stroke-dasharray="2 4" stroke-linecap="round"><path d="M152.4 190V212M297.6 141V212M413.1 77V212"/></g>
+<path d="M0 196Q260 186 480 14" stroke="#1E9BFF" stroke-opacity=".14" stroke-width="10" stroke-linecap="round"/>
+<path d="M0 196Q260 186 480 14" stroke="#1E9BFF" stroke-width="2.5" stroke-linecap="round"/>
+<g fill="#fff" stroke-width="2.5"><circle cx="152.4" cy="175.4" r="9" stroke="#28C7F7"/><circle cx="297.6" cy="125.7" r="9" stroke="#1E9BFF"/><circle cx="413.1" cy="62" r="9" stroke="#8B5CF6"/></g>
+<circle cx="152.4" cy="175.4" r="4" fill="#28C7F7"/><circle cx="297.6" cy="125.7" r="4" fill="#1E9BFF"/><circle cx="413.1" cy="62" r="4" fill="#8B5CF6"/>
+</svg>

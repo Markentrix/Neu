@@ -1,0 +1,30 @@
+/* Markentrix Design-Tokens · CI 2026 v2.0 · Quelle: CI-Handbuch + bestehendes CSS von markentrix.de */
+:root{
+  /* Markenfarben */
+  --mx-black:#05070B; --mx-navy:#0B1020; --mx-cyan:#28C7F7; --mx-blue:#1E9BFF; --mx-violet:#8B5CF6; --mx-magenta:#D85CFF;
+  --mx-white:#FFFFFF; --mx-soft:#F8FAFC; --mx-cool:#B8C0CC; --mx-muted:#667085;
+  /* Textfarben (kontrastgeprüft auf Weiß / Soft White) */
+  --mx-text:#2C3446; --mx-text-blue:#003E8A; --mx-text-violet:#4C1D95;
+  /* Status */
+  --mx-ok:#15803D; --mx-warn:#B45309; --mx-danger:#B91C1C;
+  /* Linien */
+  --mx-hairline:#E3E7ED;
+  /* Verläufe */
+  --mx-grad-signature:linear-gradient(110deg,#28C7F7 0%,#1E9BFF 55%,#8B5CF6 100%);
+  --mx-grad-cta:linear-gradient(110deg,#28C7F7 0%,#1E9BFF 100%);
+  /* Schrift */
+  --mx-font-head:'Space Grotesk','Futura','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --mx-font-body:'Inter','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --mx-fs-h1:clamp(2.3rem,1.2rem + 4.2vw,4.7rem); --mx-fs-h2:clamp(1.8rem,1.15rem + 2.4vw,3rem);
+  --mx-fs-h3:clamp(1.2rem,1.05rem + .5vw,1.45rem); --mx-fs-lead:clamp(1.05rem,1rem + .35vw,1.2rem);
+  /* Abstände (Basis 4 px) */
+  --mx-s1:4px; --mx-s2:8px; --mx-s3:12px; --mx-s4:16px; --mx-s5:24px; --mx-s6:32px; --mx-s7:48px; --mx-s8:64px; --mx-s9:96px; --mx-s10:128px;
+  --mx-wrap:1180px; --mx-wrap-narrow:800px; --mx-gutter:clamp(16px,3vw,32px);
+  /* Radien */
+  --mx-r-sm:8px; --mx-r-btn:10px; --mx-r-md:12px; --mx-r-lg:16px; --mx-r-xl:24px;
+  /* Schatten */
+  --mx-shadow-sm:0 1px 2px rgba(11,16,32,.04),0 2px 8px rgba(11,16,32,.04);
+  --mx-shadow-md:0 8px 24px rgba(11,16,32,.08); --mx-shadow-lg:0 24px 60px rgba(11,16,32,.14);
+  /* Bewegung */
+  --mx-ease:cubic-bezier(.2,.7,.3,1); --mx-t:.22s;
+}
