@@ -1692,3 +1692,4 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 @media (max-width:900px){.aufwaerts--hero{display:none}}
 @media (max-width:520px){.brand-logo{width:150px}.nav{gap:10px}}
 .ki-note{font-size:.9375rem}
+@media (max-width:360px){.brand-logo{width:120px}.nav{gap:6px}.nav-partner-pill{padding-left:10px;padding-right:10px;font-size:.875rem}}
