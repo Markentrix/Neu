@@ -1,4 +1,4 @@
-// Baut das CI-Handbuch: node build.js  →  ../Markentrix_CI_2026_v2.pdf
+// Baut das CI-Handbuch: node build.js  →  ../Markentrix_CI_2026_v3.pdf
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
 (async () => {
   const dir = __dirname, parts = path.join(dir, 'parts');
@@ -15,7 +15,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     const last = [...pg.querySelectorAll('.pc > *')].pop().getBoundingClientRect().bottom; return over.length ? { page: i + 1, frei: Math.round(foot - last), over: over.slice(0, 3) } : { page: i + 1, frei: Math.round(foot - last) }; }).filter(Boolean));
   console.log(report.length ? JSON.stringify(report, null, 1) : 'Kein Überlauf.');
   console.log('Schriften:', await p.evaluate(() => [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family + ' ' + f.weight).join(', ')));
-  await p.pdf({ path: path.join(dir, '..', 'Markentrix_CI_2026_v2.pdf'), format: 'A4', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
+  await p.pdf({ path: path.join(dir, '..', 'Markentrix_CI_2026_v3.pdf'), format: 'A4', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
   if (process.argv[2]) { const n = await p.locator('.page').count(); for (let i = 0; i < n; i++) await p.locator('.page').nth(i).screenshot({ path: path.join(process.argv[2], `p${String(i + 1).padStart(2, '0')}.png`) }); }
   await b.close();
 })();

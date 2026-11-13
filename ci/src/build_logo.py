@@ -1,52 +1,43 @@
 """Erzeugt alle Markentrix-Logo-Dateien (SVG) aus der vermessenen Konstruktion.
-Aufruf: python3 build_logo.py <wm.json> <zielordner>"""
+Aufruf: python3 build_logo.py <wortmarke.json> <zielordner>"""
 import json, sys
 wm = json.load(open(sys.argv[1])); out = sys.argv[2]
-NAVY, WHITE, BLACK = '#0B1020', '#FFFFFF', '#05070B'
+TIEFSEE, PFAU, PFAU_HELL, KREIDE, WEISS, SCHWARZ = '#0C2128', '#045268', '#62B2D0', '#F7F4EE', '#FFFFFF', '#000000'
 MW, MH = 522, 447                      # Bildmarke
 C = MH / 1.66                          # Versalhöhe der Wortmarke
 s = C / wm['cap']                      # Skalierung Schrift
 GAP = 0.62 * C
 BASE = MH - 9                          # Grundlinie (Rundungen stehen leicht über)
-GRAD = ('<linearGradient id="mx" gradientUnits="userSpaceOnUse" x1="51" y1="468" x2="469" y2="-30">'
-        '<stop offset="0" stop-color="#28C7F7"/><stop offset=".55" stop-color="#1E9BFF"/>'
-        '<stop offset="1" stop-color="#8B5CF6"/></linearGradient>')
-def mark(paint):
-    return (f'<g fill="none" stroke="{paint}" stroke-linecap="round" stroke-linejoin="round">'
-            '<path stroke-width="82" d="M41 406V107.5L227.5 277.5 414 107.5V406"/>'
-            '<path stroke-width="54" d="M414 107.5 495 27M415 27h80v80.5"/></g>')
-# Wortmarke als Pfade (Space Grotesk Bold, in Kurven)
-import re
+def mark(m, pfeil):
+    # Der Aufstrich des M und der Pfeil bilden zusammen die Aufwärtslinie und liegen oben.
+    return ('<g fill="none" stroke-linecap="round" stroke-linejoin="round">'
+            f'<path stroke="{m}" stroke-width="82" d="M41 406V107.5L227.5 277.5M414 107.5V406"/>'
+            f'<path stroke="{pfeil}" stroke-width="82" d="M227.5 277.5 414 107.5"/>'
+            f'<path stroke="{pfeil}" stroke-width="54" d="M414 107.5 495 27M415 27h80v80.5"/></g>')
 def word(fill, x0):
-    first_lsb = 62  # linker Rand des M in Schrifteinheiten wird unten exakt bestimmt
-    g = ''.join(f'<path transform="translate({x})" d="{d}"/>' for x, d in wm['paths'])
+    g = ''.join(f'<path transform="translate({x:.1f})" d="{d}"/>' for x, d in wm['paths'])
     return f'<g fill="{fill}" transform="translate({x0:.1f} {BASE}) scale({s:.5f} -{s:.5f})">{g}</g>'
-def svg(w, h, body, defs='', pad=0, bg=None):
-    vb = f'{-pad:.0f} {-pad:.0f} {w+2*pad:.0f} {h+2*pad:.0f}'
-    rect = f'<rect x="{-pad}" y="{-pad}" width="{w+2*pad}" height="{h+2*pad}" fill="{bg}"/>' if bg else ''
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" role="img" aria-label="Markentrix">'
-            f'<defs>{defs}</defs>{rect}{body}</svg>\n')
+def svg(w, h, body):
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w:.0f} {h:.0f}" role="img" aria-label="Markentrix">{body}</svg>\n')
 ink_l, ink_r = wm['ink']
 WX = MW + GAP - ink_l * s
 LW = MW + GAP + (ink_r - ink_l) * s
 files = {
- 'markentrix-logo-farbe-hell':  svg(LW, MH, mark('url(#mx)') + word(NAVY, WX), GRAD),
- 'markentrix-logo-farbe-dunkel':svg(LW, MH, mark('url(#mx)') + word(WHITE, WX), GRAD),
- 'markentrix-logo-navy':        svg(LW, MH, mark(NAVY) + word(NAVY, WX)),
- 'markentrix-logo-schwarz':     svg(LW, MH, mark(BLACK) + word(BLACK, WX)),
- 'markentrix-logo-weiss':       svg(LW, MH, mark(WHITE) + word(WHITE, WX)),
- 'markentrix-bildmarke-farbe':  svg(MW, MH, mark('url(#mx)'), GRAD),
- 'markentrix-bildmarke-navy':   svg(MW, MH, mark(NAVY)),
- 'markentrix-bildmarke-weiss':  svg(MW, MH, mark(WHITE)),
+ 'markentrix-logo-farbe-hell':   svg(LW, MH, mark(TIEFSEE, PFAU) + word(TIEFSEE, WX)),
+ 'markentrix-logo-farbe-dunkel': svg(LW, MH, mark(KREIDE, PFAU_HELL) + word(KREIDE, WX)),
+ 'markentrix-logo-tiefsee':      svg(LW, MH, mark(TIEFSEE, TIEFSEE) + word(TIEFSEE, WX)),
+ 'markentrix-logo-schwarz':      svg(LW, MH, mark(SCHWARZ, SCHWARZ) + word(SCHWARZ, WX)),
+ 'markentrix-logo-weiss':        svg(LW, MH, mark(WEISS, WEISS) + word(WEISS, WX)),
+ 'markentrix-bildmarke-farbe-hell':   svg(MW, MH, mark(TIEFSEE, PFAU)),
+ 'markentrix-bildmarke-farbe-dunkel': svg(MW, MH, mark(KREIDE, PFAU_HELL)),
+ 'markentrix-bildmarke-tiefsee': svg(MW, MH, mark(TIEFSEE, TIEFSEE)),
+ 'markentrix-bildmarke-weiss':   svg(MW, MH, mark(WEISS, WEISS)),
 }
-# Profilbild / App-Icon: Bildmarke auf Quadrat, Marke = 56 % der Kantenlänge
-def icon(bg, paint, defs=''):
+def icon(bg, m, pfeil):   # Profilbild: Bildmarke = 56 % der Kantenlänge, mittig
     S = MW / 0.56; ox = (S - MW) / 2; oy = (S - MH) / 2
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {S:.0f} {S:.0f}" role="img" aria-label="Markentrix">'
-            f'<defs>{defs}</defs><rect width="{S:.0f}" height="{S:.0f}" fill="{bg}"/>'
-            f'<g transform="translate({ox:.1f} {oy:.1f})">{mark(paint)}</g></svg>\n')
-files['markentrix-profilbild-hell'] = icon(WHITE, 'url(#mx)', GRAD)
-files['markentrix-profilbild-dunkel'] = icon(NAVY, 'url(#mx)', GRAD)
+            f'<rect width="{S:.0f}" height="{S:.0f}" fill="{bg}"/><g transform="translate({ox:.1f} {oy:.1f})">{mark(m, pfeil)}</g></svg>\n')
+files['markentrix-profilbild-hell'] = icon(KREIDE, TIEFSEE, PFAU)
+files['markentrix-profilbild-dunkel'] = icon(TIEFSEE, KREIDE, PFAU_HELL)
 for n, c in files.items(): open(f'{out}/{n}.svg', 'w').write(c)
-json.dump({'MW': MW, 'MH': MH, 'C': C, 'GAP': GAP, 'LW': LW, 'BASE': BASE}, open(f'{out}/../masse.json', 'w'), indent=1)
-print({k: round(v, 1) for k, v in {'C': C, 'GAP': GAP, 'LW': LW}.items()})
+print({k: round(v, 2) for k, v in {'C': C, 'Abstand': GAP, 'Logobreite': LW, 'Wortmarke_in_C': (ink_r - ink_l) * s / C, 'Logo_Seitenverhaeltnis': LW / MH}.items()})
