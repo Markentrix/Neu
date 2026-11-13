@@ -1693,3 +1693,20 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 @media (max-width:520px){.brand-logo{width:150px}.nav{gap:10px}}
 .ki-note{font-size:.9375rem}
 @media (max-width:360px){.brand-logo{width:120px}.nav{gap:6px}.nav-partner-pill{padding-left:10px;padding-right:10px;font-size:.875rem}}
+
+/* ── Bildbänder auf der Startseite: Foto in voller Breite, Text auf einer Karte ── */
+.photo-band{position:relative;overflow:hidden;background:var(--kreide)}
+.photo-band-img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.photo-band-copy{padding:26px 0 40px;max-width:640px}
+.photo-band-copy h2{margin-bottom:.4em}
+.photo-band-copy p{margin:0 0 1.2em;max-width:52ch}
+.photo-band-tag{position:absolute;left:12px;top:12px;padding:2px 8px;border-radius:4px;background:rgba(12,33,40,.72);color:#FFFFFF;font-size:.8125rem;font-weight:600;letter-spacing:.03em}
+@media (min-width:900px){
+  .photo-band{display:flex;align-items:center;min-height:clamp(440px,42vw,640px)}
+  .photo-band-img{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto}
+  .photo-band-tag{top:auto;bottom:14px;left:14px}
+  .photo-band>.wrap{position:relative;z-index:1;width:100%;padding-top:48px;padding-bottom:48px}
+  .photo-band-copy{margin-left:auto;max-width:500px;padding:32px 34px 34px;background:var(--kreide);border:1px solid var(--leinen);border-radius:8px;box-shadow:var(--shadow-md)}
+}
+.photo-band-img{object-position:center 30%}
+.photo-band--r .photo-band-img{object-position:center 12%}

@@ -94,150 +94,23 @@ ld: |
 
 {{> google-bewertungen}}
 
-<!-- ══ Website-Check ══ -->
-<section class="chk-strip-sec" aria-labelledby="chk-strip-title">
+<!-- ══ Bildband: Kunden vergleichen in Sekunden ══ -->
+<section class="photo-band" aria-labelledby="band-a-title">
+  <img class="photo-band-img" src="/img/band-praxis-1280.webp" srcset="/img/band-praxis-800.webp 800w, /img/band-praxis-1280.webp 1280w, /img/band-praxis-1920.webp 1920w" sizes="100vw" width="1920" height="1080" alt="Physiotherapeutin erklärt einer Patientin in einer hellen Praxis etwas anhand einer Skizze" loading="lazy" decoding="async">
   <div class="wrap">
-    <form class="chk-strip" action="/website-check" method="get">
-      <div class="chk-strip-text">
-        <span class="eyebrow">Kostenloser Website-Check</span>
-        <h2 id="chk-strip-title">Wie sichtbar ist Ihre Website?</h2>
-        <p class="muted">Tippen Sie Ihre Adresse ein. Nach wenigen Sekunden wissen Sie, wie Google, Smartphones und Ihre Kunden Ihre Seite sehen.</p>
-      </div>
-      <div class="chk-strip-field">
-        <label class="sr-only" for="strip-url">Adresse Ihrer Website</label>
-        <input id="strip-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="www.ihre-seite.de" required>
-        <button type="submit" class="btn btn--primary btn--lg">Jetzt prüfen</button>
-      </div>
-    </form>
-  </div>
-</section>
-
-{{> deals}}
-
-<!-- ══ 01 Für wen ══ -->
-<!-- ══ Portal ══ -->
-<section class="sec sec--white portal-sec" id="portal" aria-labelledby="portal-title">
-  <div class="wrap">
-    <div class="grid grid--split">
-      <div>
-        <span class="eyebrow">Im Paket enthalten</span>
-        <h2 id="portal-title">Ihre Website kommt mit dem Portal.</h2>
-        <p class="lead">Jede Anfrage landet an einem Ort, und Sie erfahren es sofort: per E-Mail und als Mitteilung aufs Handy. Dazu Termine, Besucherzahlen und Dokumente, übersichtlich und ohne Zettelwirtschaft.</p>
-        <p class="mt-2"><b>Dazubuchen lässt sich, was Ihr Betrieb braucht:</b></p>
-        <ul class="checks portal-list mt-1">
-          <li><b>Assistenten:</b> WhatsApp, Telefon und E-Mail, ab November 2026. Was sie annehmen, landet bei Ihnen.</li>
-          <li><b>Angebote:</b> Bewertungsanfragen, Newsletter, Google-Postings, Online-Shop und Gutscheine.</li>
-        </ul>
-        <div class="row mt-3"><a class="btn btn--primary btn--lg" href="/portal#dazubuchen">Was sich dazubuchen lässt</a><a class="btn btn--ghost btn--lg" href="/portal">Das Portal im Überblick</a></div>
-      </div>
-      <div class="reveal portal-visual" data-delay="1">{{> portal-beispiel}}
-        <div class="portal-toast" role="status" aria-label="Beispiel: neue Anfrage im Portal">
-          <span class="ic"><svg><use href="#i-mail"/></svg></span>
-          <div><b>Neue Anfrage</b><span>Beispiel: „Heizung prüfen, Celle“ · gerade eben</span></div>
-        </div>
-      </div>
+    <div class="photo-band-copy reveal">
+      <span class="eyebrow">Warum es auf den ersten Eindruck ankommt</span>
+      <h2 id="band-a-title">Wer etwas braucht, vergleicht in Sekunden und ruft den an, bei dem es sich <span class="hl">gut anfühlt</span>.</h2>
+      <p>Ihre Website ist der erste Eindruck. Sie soll in Sekunden zeigen, wer Sie sind und wie man Sie erreicht.</p>
+      <a class="btn btn--primary btn--lg" href="/website-check">Website-Check starten</a>
     </div>
   </div>
-</section>
-
-<!-- ══ Aussage ══ -->
-<section class="claim-band" aria-label="Kernaussage">
-  <div class="wrap">
-    <p class="claim-text reveal">Wer etwas braucht, vergleicht in Sekunden und ruft den an, bei dem es sich <span class="hl">gut anfühlt</span>.</p>
-  </div>
-</section>
-
-<section class="sec has-rail" id="branchen" aria-labelledby="branchen-title">
-  <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">01</span>
-    <div class="sec-head">
-      <span class="eyebrow">Für wen</span>
-      <h2 id="branchen-title">Drei Betriebe, drei Suchanfragen, <span class="hl hl--violet">eine Website</span>, die antwortet.</h2>
-      <p class="lead">Eine Visitenkarte im Netz reicht nicht mehr. Wo erkennen Sie sich wieder?</p>
-    </div>
-    <div class="grid grid--3 swipe" data-swipe>
-      <div class="card branch reveal">
-        {{> photo-handwerk}}
-        <span class="card-step">Handwerk · Werkstatt · Bau</span>
-        <p class="pain">„Kunden suchen ‚Elektriker Celle‘ und finden den Wettbewerb.“</p>
-        <p class="sys">Eine Leistungsseite je Gewerk und Ort, klare Preise und ein Anfrageweg, der auch von der Baustelle aus funktioniert.</p>
-        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="handwerk">Für Handwerk prüfen</a>
-        <a class="link-arrow" href="/website-handwerker">Mehr für Handwerker</a>
-      </div>
-      <div class="card branch reveal" data-delay="1">
-        {{> photo-praxis}}
-        <span class="card-step">Praxis · Kanzlei · Dienstleistung</span>
-        <p class="pain">„Neue Patienten vergleichen Website und Bewertungen, bevor sie anrufen.“</p>
-        <p class="sys">Vertrauen auf den ersten Blick: Team, Leistungen, Öffnungszeiten und eine Terminanfrage, die ohne Warteschleife ankommt.</p>
-        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="praxis">Für Praxen prüfen</a>
-        <a class="link-arrow" href="/website-arztpraxis">Mehr für Praxen und Kanzleien</a>
-      </div>
-      <div class="card branch reveal" data-delay="2">
-        {{> photo-gastro}}
-        <span class="card-step">Gastronomie · Handel</span>
-        <p class="pain">„Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy.“</p>
-        <p class="sys">Alles in zehn Sekunden findbar, dazu ein gepflegtes Google-Profil und Bewertungen, die neue Gäste überzeugen.</p>
-        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="gastro">Für Gastro und Handel prüfen</a>
-        <a class="link-arrow" href="/website-gastronomie">Mehr für Gastronomie und Handel</a>
-      </div>
-    </div>
-    <div class="demo-block reveal">
-      <h3 class="demo-title">Acht Beispielseiten zum Ausprobieren</h3>
-      <p class="muted small center">Fiktive Betriebe, echte Seiten: Branche wählen, zwischen Desktop und Smartphone wechseln, mit „Ganze Seite ansehen“ komplett öffnen.</p>
-        <div class="device-toggle" role="group" aria-label="Ansicht wechseln">
-          <button type="button" data-device="desktop" aria-pressed="true"><svg><use href="#i-layout"/></svg>Desktop</button>
-          <button type="button" data-device="mobile" aria-pressed="false"><svg><use href="#i-chat"/></svg>Smartphone</button>
-        </div>
-        {{> mini-site}}
-      <p class="tiny center mt-2">Beispielseiten für fiktive Betriebe, Formular und Nummer sind nicht aktiv · <a href="/beispiel/elektro-muster/" data-demo-link target="_blank" rel="noopener">In voller Größe öffnen</a></p>
-    </div>
-    <p class="branch-more">Auch für <a href="/website-autowerkstatt">Autowerkstätten</a>, <a href="/website-friseur-beauty">Friseure und Beauty</a>, <a href="/website-hotel-pension">Hotels und Pensionen</a>, <a href="/website-fitness-sport">Fitness und Sport</a> <a href="/website-haus-garten">Reinigung, Garten und Hausservice</a> sowie <a href="/website-b2b-dienstleister">B2B-Dienstleister und Gewerbe</a>. <a class="link-arrow" href="/branchen">Alle Branchen</a></p>
-  </div>
-</section>
-
-<!-- ══ 02 Lösung ══ -->
-<section class="sec sec--white has-rail" id="system" aria-labelledby="system-title">
-  <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">02</span>
-    <div class="grid grid--sidebar-left grid--sticky">
-    <div class="sec-head sticky-head">
-      <span class="eyebrow">Die Lösung</span>
-      <h2 id="system-title">Ein System statt Einzelmaßnahmen.</h2>
-      <p class="lead">Erst werden Sie gefunden. Dann wird aus dem Besuch eine Anfrage. Und ab November nimmt Ihnen der KI-Assistent die Routine ab.</p>
-    </div>
-    <div class="stack-cards swipe" data-swipe>
-      <a href="/leistungen/webdesign" class="card card--hover card--accent reveal">
-        <span class="pill corner">Kern</span>
-        <span class="card-step">Schritt 1 · Website</span>
-        {{> sysmap-web}}
-        <h3>Besucher werden zu Anfragen</h3>
-        <p class="muted">Websites und Landingpages mit klarem Aufbau, schneller Ladezeit und Terminbuchung. SEO- und GEO-Grundlagen und das Kundenportal sind eingebaut.</p>
-        <span class="link-arrow">Webdesign</span>
-      </a>
-      <a href="/leistungen/marketing" class="card card--hover reveal" data-delay="1">
-        <span class="card-step">Schritt 2 · Sichtbarkeit</span>
-        {{> sysmap-ads}}
-        <h3>Vor Ort gefunden werden</h3>
-        <p class="muted">Google-Unternehmensprofil, Bewertungen und Anzeigen bei Meta und Google, nur nach Ihrer Freigabe. Jede Anfrage landet direkt bei Ihnen.</p>
-        <span class="link-arrow">Marketing</span>
-      </a>
-      <a href="/leistungen/ki-automatisierung" class="card card--hover reveal" data-delay="2">
-        <span class="pill pill--soon corner">Ab November 2026</span>
-        <span class="card-step">Schritt 3 · Automatisierung</span>
-        {{> sysmap-ki}}
-        <h3>Anfragen werden zu Terminen</h3>
-        <p class="muted">KI-Assistenten für Telefon, WhatsApp und E-Mail nehmen Anfragen rund um die Uhr an und buchen Termine. Pilotplätze jetzt vormerkbar.</p>
-        <span class="link-arrow">KI-Automatisierung</span>
-      </a>
-    </div>
-    </div>
-  </div>
+  <span class="photo-band-tag">KI-Symbolbild</span>
 </section>
 
 <!-- ══ 03 Leistungen ══ -->
 <section class="sec sec--white has-rail" aria-labelledby="leistungen-title">
   <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">03</span>
     <div class="grid grid--sidebar-left grid--sticky">
       <div class="sticky-head">
         <span class="eyebrow">Leistungen</span>
@@ -281,10 +154,87 @@ ld: |
   </div>
 </section>
 
+<section class="sec has-rail" id="branchen" aria-labelledby="branchen-title">
+  <div class="wrap">
+    <span class="rail-dot reveal" aria-hidden="true">01</span>
+    <div class="sec-head">
+      <span class="eyebrow">Für wen</span>
+      <h2 id="branchen-title">Drei Betriebe, drei Suchanfragen, <span class="hl">eine Website</span>, die antwortet.</h2>
+      <p class="lead">Eine Visitenkarte im Netz reicht nicht mehr. Wo erkennen Sie sich wieder?</p>
+    </div>
+    <div class="grid grid--3 swipe" data-swipe>
+      <div class="card branch reveal">
+        {{> photo-handwerk}}
+        <span class="card-step">Handwerk · Werkstatt · Bau</span>
+        <p class="pain">„Kunden suchen ‚Elektriker Celle‘ und finden den Wettbewerb.“</p>
+        <p class="sys">Eine Leistungsseite je Gewerk und Ort, klare Preise und ein Anfrageweg, der auch von der Baustelle aus funktioniert.</p>
+        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="handwerk">Für Handwerk prüfen</a>
+        <a class="link-arrow" href="/website-handwerker">Mehr für Handwerker</a>
+      </div>
+      <div class="card branch reveal" data-delay="1">
+        {{> photo-praxis}}
+        <span class="card-step">Praxis · Kanzlei · Dienstleistung</span>
+        <p class="pain">„Neue Patienten vergleichen Website und Bewertungen, bevor sie anrufen.“</p>
+        <p class="sys">Vertrauen auf den ersten Blick: Team, Leistungen, Öffnungszeiten und eine Terminanfrage, die ohne Warteschleife ankommt.</p>
+        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="praxis">Für Praxen prüfen</a>
+        <a class="link-arrow" href="/website-arztpraxis">Mehr für Praxen und Kanzleien</a>
+      </div>
+      <div class="card branch reveal" data-delay="2">
+        {{> photo-gastro}}
+        <span class="card-step">Gastronomie · Handel</span>
+        <p class="pain">„Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy.“</p>
+        <p class="sys">Alles in zehn Sekunden findbar, dazu ein gepflegtes Google-Profil und Bewertungen, die neue Gäste überzeugen.</p>
+        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="gastro">Für Gastro und Handel prüfen</a>
+        <a class="link-arrow" href="/website-gastronomie">Mehr für Gastronomie und Handel</a>
+      </div>
+    </div>
+    <p class="branch-more">Auch für <a href="/website-autowerkstatt">Autowerkstätten</a>, <a href="/website-friseur-beauty">Friseure und Beauty</a>, <a href="/website-hotel-pension">Hotels und Pensionen</a>, <a href="/website-fitness-sport">Fitness und Sport</a> <a href="/website-haus-garten">Reinigung, Garten und Hausservice</a> sowie <a href="/website-b2b-dienstleister">B2B-Dienstleister und Gewerbe</a>. <a class="link-arrow" href="/branchen">Alle Branchen</a></p>
+  </div>
+</section>
+
+<!-- ══ Bildband: Handwerk und Technik ══ -->
+<section class="photo-band photo-band--r" aria-labelledby="band-b-title">
+  <img class="photo-band-img" src="/img/band-garten-1280.webp" srcset="/img/band-garten-800.webp 800w, /img/band-garten-1280.webp 1280w, /img/band-garten-1920.webp 1920w" sizes="100vw" width="1920" height="1080" alt="Gärtner in blauer Arbeitsjacke schneidet an einem Morgen eine Buchenhecke" loading="lazy" decoding="async">
+  <div class="wrap">
+    <div class="photo-band-copy reveal">
+      <span class="eyebrow">Für Betriebe, die anpacken</span>
+      <h2 id="band-b-title">Sie machen Ihr Handwerk. Wir kümmern uns <span class="hl">um die Technik</span>.</h2>
+      <p>Website, Auffindbarkeit und Anfrageweg aus einer Hand, mit einem festen Ansprechpartner.</p>
+      <a class="btn btn--secondary btn--lg" href="/branchen">Branchen ansehen</a>
+    </div>
+  </div>
+  <span class="photo-band-tag">KI-Symbolbild</span>
+</section>
+
+<!-- ══ 01 Für wen ══ -->
+<!-- ══ Portal ══ -->
+<section class="sec sec--white portal-sec" id="portal" aria-labelledby="portal-title">
+  <div class="wrap">
+    <div class="grid grid--split">
+      <div>
+        <span class="eyebrow">Im Paket enthalten</span>
+        <h2 id="portal-title">Ihre Website kommt mit dem Portal.</h2>
+        <p class="lead">Jede Anfrage landet an einem Ort, und Sie erfahren es sofort: per E-Mail und als Mitteilung aufs Handy. Dazu Termine, Besucherzahlen und Dokumente, übersichtlich und ohne Zettelwirtschaft.</p>
+        <p class="mt-2"><b>Dazubuchen lässt sich, was Ihr Betrieb braucht:</b></p>
+        <ul class="checks portal-list mt-1">
+          <li><b>Assistenten:</b> WhatsApp, Telefon und E-Mail, ab November 2026. Was sie annehmen, landet bei Ihnen.</li>
+          <li><b>Angebote:</b> Bewertungsanfragen, Newsletter, Google-Postings, Online-Shop und Gutscheine.</li>
+        </ul>
+        <div class="row mt-3"><a class="btn btn--primary btn--lg" href="/portal#dazubuchen">Was sich dazubuchen lässt</a><a class="btn btn--ghost btn--lg" href="/portal">Das Portal im Überblick</a></div>
+      </div>
+      <div class="reveal portal-visual" data-delay="1">{{> portal-beispiel}}
+        <div class="portal-toast" role="status" aria-label="Beispiel: neue Anfrage im Portal">
+          <span class="ic"><svg><use href="#i-mail"/></svg></span>
+          <div><b>Neue Anfrage</b><span>Beispiel: „Heizung prüfen, Celle“ · gerade eben</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══ 04 Prozess ══ -->
 <section class="sec has-rail" aria-labelledby="prozess-title">
   <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">04</span>
     <div class="sec-head">
       <span class="eyebrow">So läuft es ab</span>
       <h2 id="prozess-title">Von der ersten Nachricht bis zum Go-Live.</h2>
@@ -302,46 +252,25 @@ ld: |
   </div>
 </section>
 
-<!-- ══ 05 Warum Markentrix ══ -->
-<section class="sec has-rail" aria-labelledby="why-title">
+<!-- ══ Website-Check ══ -->
+<section class="chk-strip-sec" aria-labelledby="chk-strip-title">
   <div class="wrap">
-    <span class="rail-dot reveal" aria-hidden="true">05</span>
-    <div class="sec-head">
-      <span class="eyebrow">Warum Markentrix</span>
-      <h2 id="why-title">Ein Ansprechpartner. <span class="hl">Kein Agentur-Apparat.</span></h2>
-      <p class="lead">Aus Celle, für Betriebe in Niedersachsen und bundesweit. Persönlich, schnell und verständlich.</p>
-    </div>
-    <div class="value-grid">
-      <div class="value value--cyan reveal"><b>5 bis 15 Werktage</b><span>bis Ihre Website live ist. Kein monatelanges Projekt, kein Hinterherlaufen.</span></div>
-      <div class="value value--violet reveal" data-delay="1"><b>Rechtssicher</b><span>Impressum, Datenschutz, Einwilligungsbanner und lokale Schriften sind von Anfang an dabei.</span></div>
-      <div class="value value--magenta reveal" data-delay="2"><b>Ein fester Mensch</b><span>Kein Ticketsystem, kein Call-Center. Sie erreichen mich direkt, per Telefon, WhatsApp oder E-Mail.</span></div>
-    </div>
-    <div class="row mt-4"><a class="btn btn--secondary" href="/ueber-uns">Über Markentrix</a><a class="btn btn--ghost" href="/kontakt">Persönlich austauschen <svg class="arrow"><use href="#i-arrow"/></svg></a></div>
+    <form class="chk-strip" action="/website-check" method="get">
+      <div class="chk-strip-text">
+        <span class="eyebrow">Kostenloser Website-Check</span>
+        <h2 id="chk-strip-title">Wie sichtbar ist Ihre Website?</h2>
+        <p class="muted">Tippen Sie Ihre Adresse ein. Nach wenigen Sekunden wissen Sie, wie Google, Smartphones und Ihre Kunden Ihre Seite sehen.</p>
+      </div>
+      <div class="chk-strip-field">
+        <label class="sr-only" for="strip-url">Adresse Ihrer Website</label>
+        <input id="strip-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="www.ihre-seite.de" required>
+        <button type="submit" class="btn btn--primary btn--lg">Jetzt prüfen</button>
+      </div>
+    </form>
   </div>
 </section>
 
-<!-- ══ Social Media ══ -->
-<section class="sec sec--white sec--tight" id="social" aria-labelledby="social-title">
-  <div class="wrap">
-    <div class="grid grid--sidebar-left social-row">
-      <div>
-        <span class="eyebrow">Auf Social Media</span>
-        <h2 id="social-title">Tipps und Beispiele, auch zwischendurch.</h2>
-        <p class="lead">Auf Instagram und Facebook zeigen wir kurz und konkret, wie aus einer Website mehr Anfragen werden.</p>
-        <div class="mt-2">{{> social}}</div>
-      </div>
-      <div>
-        <div class="feed reveal" role="group" aria-label="Beispiele aus unserem Instagram-Feed">
-        <a class="feed-item" href="https://www.instagram.com/p/DeeBTx0FXkl/" target="_blank" rel="noopener"><img src="/img/social-website.webp" alt="Beitrag „Noch keine Website? Zeigen Sie, was Sie können“ mit Designbeispiel einer Handwerker-Website" width="560" height="560" loading="lazy" decoding="async"><span class="feed-ig" aria-hidden="true"><svg><use href="#i-instagram"/></svg></span><span class="sr-only"> (Instagram, öffnet in neuem Tab)</span></a>
-        <a class="feed-item" href="https://www.instagram.com/p/Degl7NuknXP/" target="_blank" rel="noopener"><img src="/img/social-redesign.webp" alt="Beitrag „Ihr Betrieb ist modern. Ihre Website auch?“ mit Vorher-Nachher-Designbeispiel" width="560" height="560" loading="lazy" decoding="async"><span class="feed-ig" aria-hidden="true"><svg><use href="#i-instagram"/></svg></span><span class="sr-only"> (Instagram, öffnet in neuem Tab)</span></a>
-        <a class="feed-item" href="https://www.instagram.com/p/DejKm1zCBXs/" target="_blank" rel="noopener"><img src="/img/social-seo.webp" alt="Beitrag „Ihre Kunden suchen. Werden Sie gefunden?“ zu SEO für lokale Sichtbarkeit" width="560" height="560" loading="lazy" decoding="async"><span class="feed-ig" aria-hidden="true"><svg><use href="#i-instagram"/></svg></span><span class="sr-only"> (Instagram, öffnet in neuem Tab)</span></a>
-        <a class="feed-item" href="https://www.instagram.com/p/Delohq8CAwk/" target="_blank" rel="noopener"><img src="/img/social-ki.webp" alt="Beitrag „Kunden fragen KI. Ist Ihr Unternehmen sichtbar?“ zu Sichtbarkeit in KI-Antworten" width="560" height="560" loading="lazy" decoding="async"><span class="feed-ig" aria-hidden="true"><svg><use href="#i-instagram"/></svg></span><span class="sr-only"> (Instagram, öffnet in neuem Tab)</span></a>
-        </div>
-        <p class="tiny mt-2">Beiträge aus unserem Feed, hier als Bild gezeigt. Erst beim Klick öffnet sich Instagram.</p>
-      </div>
-    </div>
-  </div>
-</section>
+{{> deals}}
 
 <!-- ══ Ausblick: KI-Assistenten ══ -->
 <section class="sec sec--white sec--tight" id="ki-ausblick" aria-labelledby="ki-title">
