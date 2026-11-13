@@ -1,0 +1,306 @@
+{
+ "farben": {
+  "Kreide": {
+   "hex": "#F7F4EE",
+   "rgb": [
+    247,
+    244,
+    238
+   ],
+   "oklch": [
+    0.968,
+    0.009,
+    85
+   ],
+   "cmyk_g": [
+    4,
+    4,
+    6,
+    0
+   ],
+   "dE_g": 0.1,
+   "cmyk_u": [
+    3,
+    3,
+    5,
+    0
+   ],
+   "dE_u": 0.0,
+   "proof_u": "#F7F4EE",
+   "grau": 96
+  },
+  "Tiefsee": {
+   "hex": "#0C2128",
+   "rgb": [
+    12,
+    33,
+    40
+   ],
+   "oklch": [
+    0.234,
+    0.03,
+    222
+   ],
+   "cmyk_g": [
+    83,
+    55,
+    41,
+    78
+   ],
+   "dE_g": 0.2,
+   "cmyk_u": [
+    97,
+    52,
+    30,
+    79
+   ],
+   "dE_u": 2.0,
+   "proof_u": "#13221F",
+   "grau": 14
+  },
+  "Pfauenblau": {
+   "hex": "#045268",
+   "rgb": [
+    4,
+    82,
+    104
+   ],
+   "oklch": [
+    0.408,
+    0.075,
+    224
+   ],
+   "cmyk_g": [
+    83,
+    39,
+    26,
+    45
+   ],
+   "dE_g": 0.2,
+   "cmyk_u": [
+    96,
+    30,
+    11,
+    44
+   ],
+   "dE_u": 0.2,
+   "proof_u": "#095268",
+   "grau": 30
+  },
+  "Leinen": {
+   "hex": "#EAE2D3",
+   "rgb": [
+    234,
+    226,
+    211
+   ],
+   "oklch": [
+    0.915,
+    0.022,
+    83
+   ],
+   "cmyk_g": [
+    9,
+    10,
+    16,
+    0
+   ],
+   "dE_g": 0.0,
+   "cmyk_u": [
+    7,
+    7,
+    13,
+    0
+   ],
+   "dE_u": 0.0,
+   "proof_u": "#EAE2D3",
+   "grau": 89
+  },
+  "Kupfer": {
+   "hex": "#C67432",
+   "rgb": [
+    198,
+    116,
+    50
+   ],
+   "oklch": [
+    0.638,
+    0.13,
+    56
+   ],
+   "cmyk_g": [
+    10,
+    56,
+    80,
+    15
+   ],
+   "dE_g": 0.0,
+   "cmyk_u": [
+    5,
+    52,
+    88,
+    13
+   ],
+   "dE_u": 0.1,
+   "proof_u": "#C67431",
+   "grau": 53
+  },
+  "Kupfer dunkel": {
+   "hex": "#964F08",
+   "rgb": [
+    150,
+    79,
+    8
+   ],
+   "oklch": [
+    0.504,
+    0.119,
+    56
+   ],
+   "cmyk_g": [
+    13,
+    64,
+    92,
+    39
+   ],
+   "dE_g": 0.0,
+   "cmyk_u": [
+    7,
+    65,
+    100,
+    33
+   ],
+   "dE_u": 0.9,
+   "proof_u": "#975217",
+   "grau": 38
+  },
+  "Pfauenblau hell": {
+   "hex": "#62B2D0",
+   "rgb": [
+    98,
+    178,
+    208
+   ],
+   "oklch": [
+    0.724,
+    0.09,
+    225
+   ],
+   "cmyk_g": [
+    60,
+    10,
+    10,
+    2
+   ],
+   "dE_g": 0.1,
+   "cmyk_u": [
+    58,
+    6,
+    8,
+    1
+   ],
+   "dE_u": 0.1,
+   "proof_u": "#61B2D0",
+   "grau": 65
+  },
+  "Kupfer hell": {
+   "hex": "#F1A268",
+   "rgb": [
+    241,
+    162,
+    104
+   ],
+   "oklch": [
+    0.778,
+    0.12,
+    56
+   ],
+   "cmyk_g": [
+    2,
+    43,
+    60,
+    0
+   ],
+   "dE_g": 0.1,
+   "cmyk_u": [
+    2,
+    37,
+    60,
+    0
+   ],
+   "dE_u": 0.0,
+   "proof_u": "#F1A268",
+   "grau": 70
+  },
+  "Nebel": {
+   "hex": "#E1F0F6",
+   "rgb": [
+    225,
+    240,
+    246
+   ],
+   "oklch": [
+    0.946,
+    0.018,
+    224
+   ],
+   "cmyk_g": [
+    13,
+    2,
+    2,
+    0
+   ],
+   "dE_g": 0.0,
+   "cmyk_u": [
+    11,
+    1,
+    2,
+    0
+   ],
+   "dE_u": 0.3,
+   "proof_u": "#E1EFF5",
+   "grau": 93
+  }
+ },
+ "kontraste": {
+  "Tiefsee auf Kreide": 15.1,
+  "Tiefsee auf #FFFFFF": 16.6,
+  "Tiefsee auf Leinen": 12.9,
+  "Pfauenblau auf Kreide": 7.9,
+  "Pfauenblau auf #FFFFFF": 8.7,
+  "Pfauenblau auf Leinen": 6.8,
+  "#FFFFFF auf Pfauenblau": 8.7,
+  "Kreide auf Pfauenblau": 7.9,
+  "Kupfer auf Kreide": 3.2,
+  "Kupfer auf #FFFFFF": 3.5,
+  "Kupfer auf Leinen": 2.7,
+  "Tiefsee auf Kupfer": 4.7,
+  "#FFFFFF auf Kupfer": 3.5,
+  "Kupfer dunkel auf Kreide": 5.6,
+  "Kupfer dunkel auf #FFFFFF": 6.1,
+  "Kupfer dunkel auf Leinen": 4.8,
+  "#FFFFFF auf Kupfer dunkel": 6.1,
+  "Kreide auf Tiefsee": 15.1,
+  "Pfauenblau hell auf Tiefsee": 7.0,
+  "Kupfer hell auf Tiefsee": 8.0,
+  "Kupfer auf Tiefsee": 4.7,
+  "Kupfer auf Pfauenblau": 2.5,
+  "Tiefsee auf Nebel": 14.2,
+  "Pfauenblau auf Nebel": 7.5,
+  "Pfauenblau auf Tiefsee": 1.9
+ },
+ "trennung": {
+  "Rotschwäche": 21.3,
+  "Grünschwäche": 30.0,
+  "Blauschwäche": 31.4,
+  "normal": 30.7,
+  "Graustufen": 23.0
+ },
+ "trennung_alt": {
+  "Rotschwäche": 12.5,
+  "Grünschwäche": 14.1,
+  "Blauschwäche": 27.1,
+  "normal": 22.8,
+  "Graustufen": 2.4
+ }
+}
