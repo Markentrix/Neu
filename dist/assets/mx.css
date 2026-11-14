@@ -1763,3 +1763,15 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .hero-person-body{min-width:0}
 .hero-person-body .intro{margin:12px 0 0}
 .hero-person-body .intro-btn{min-height:44px}
+
+/* 38 · Startseite am Handy gestrafft: Projekte und Angebote als Wischleiste, Portal-Beispielbild ausgeblendet */
+@media (max-width:720px){
+  .portal-sec .portal-visual{display:none}
+  .trust-grid.swipe,.deal-grid.swipe{display:flex}
+  .trust-grid.swipe>.card,.deal-grid.swipe>.deal{height:auto}
+  .hero .real-note{display:none}
+  .hero .stats{display:none}
+  .person-photo{max-width:180px}
+  #branchen .branch .sys{display:none}
+  .band .band-sig,.band .social-icons{display:none}
+}
