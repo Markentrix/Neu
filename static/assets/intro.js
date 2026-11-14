@@ -14,7 +14,7 @@
   btn.hidden = false;
   root.classList.add('is-ready');
 
-  var TXT_PLAY = 'Kurz erklärt anhören · 35 Sekunden';
+  var TXT_PLAY = 'Kurz erklärt anhören · 35 Sek.';
   var TXT_PAUSE = 'Pause';
   var TXT_RESUME = 'Weiter anhören';
   var TXT_AGAIN = 'Noch einmal anhören';
