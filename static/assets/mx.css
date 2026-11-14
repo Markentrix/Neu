@@ -1,3 +1,10 @@
+/* Markentrix · lokale Webfonts (DSGVO) – keine Verbindung zu Google. WOFF2, Latin-Subset. SIL Open Font License.
+   Archivo (Überschriften) und Source Sans 3 (Text), Markenhandbuch Version 3.0 */
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-700.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-800.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('/fonts/source-sans-3-400.woff2') format('woff2');font-weight:300 500;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('/fonts/source-sans-3-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('/fonts/source-sans-3-700.woff2') format('woff2');font-weight:700 900;font-style:normal;font-display:swap}
 /* ==========================================================================
    Markentrix · Design-System „White / Light Premium“ · 2026
    Quelle der Wahrheit: docs/brand/Markentrix_CI_2026_White_Light_Premium_MASTER.pdf
