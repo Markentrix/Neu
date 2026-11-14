@@ -712,7 +712,7 @@
     fetch('/api/bewertungen.php', { headers: { Accept: 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        if (!j || !j.ok || !j.bewertungen || !j.bewertungen.length) return;
+        if (!j || !j.ok || !j.bewertungen || !j.bewertungen.length) { fallback(); return; }
         j.bewertungen.slice(0, 6).forEach(function (r) {
           var fig = el('figure', 'card rev-card'), n = Math.max(1, Math.min(5, r.sterne | 0));
           var st = el('span', 'rev-stars'); st.setAttribute('role', 'img'); st.setAttribute('aria-label', n + ' von 5 Sternen'); st.textContent = '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); fig.appendChild(st);
@@ -724,7 +724,15 @@
         if (prof && j.profil) { prof.href = j.profil; prof.hidden = false; }
         sec.hidden = false;
       })
-      .catch(function () { });
+      .catch(function () { fallback(); });
+    /* Ohne Daten von Google (Schlüssel nicht eingerichtet): ehrliche Kurzfassung mit der bestätigten Anzahl und Link zu Google, ohne Sterne und ohne Zitate */
+    function fallback() {
+      var cnt = parseInt(sec.getAttribute('data-rev-count'), 10), read = sec.getAttribute('data-rev-read'); if (!cnt || !sum) return;
+      list.hidden = true; var note = $('[data-rev-note]', sec); if (note) note.hidden = true;
+      sum.textContent = cnt + ' Bewertungen bei Google. Lesen Sie selbst, was Kunden über die Zusammenarbeit schreiben.';
+      if (prof && read) { prof.href = read; prof.textContent = 'Bewertungen auf Google lesen'; prof.hidden = false; }
+      sec.hidden = false;
+    }
   }
 
   function init() { initDanke(); initDeal(); initAktion(); initNav(); initChecklist(); initMini(); initMiniToggle(); initMiniTabs(); initGlow(); initTransitions(); initPick(); initMore(); initSwipe(); initReveal(); initCampaign(); initForms(); initCheck(); initPartner(); initCalendar(); initModal(); initQuickCheck(); initRoi(); initBlogFilter(); initA11y(); initTabbar(); initYear(); initCountUp(); initSysmaps(); initSequence(); initDeviceToggle(); initSeoProof(); initAccordion(); initScroll(); initReviews(); initBooking(); initReal(); }

@@ -34,6 +34,7 @@ Alle Felder erscheinen in der Mail „Neue Anfrage über markentrix.de“ und in
 | `form_start` | Erste Eingabe in einem Formular (Anfrage-Dialog, Kontaktformular, Check-Kurzfassung), einmal je Seitenaufruf. | `location` (Formularquelle) |
 | `modal_open` | Dialog „Erstgespräch buchen“ (Portal-Kalender) geöffnet. | – |
 | `phone_click`, `mail_click` | Klick auf Telefonnummer oder E-Mail-Adresse (getrennt von Formularen). | `location` (Seite) |
+| `audio_intro_start`, `audio_intro_50`, `audio_intro_complete` | Audio „Kurz erklärt“ auf der Startseite: erster Start, Hälfte erreicht, bis zum Ende gehört. Nur normale Ereignisse, nicht als Schlüsselereignis markieren. Auswertung: Anteil `audio_intro_start` an den Seitenaufrufen der Startseite; Entscheidung nach vier Wochen (Richtwert unter 3 %: entfernen oder mit eigener Stimme neu aufnehmen). | `location` |
 
 Auswertung der Terminbuchung: Untersuchen → Trichterauswertung `modal_open` → `generate_lead` mit `lead_type=terminbuchung`. Der Fragenassistent mit Preisangaben (`wizard_step`) wurde am 05.11.2026 durch den Portal-Kalender ersetzt.
 
