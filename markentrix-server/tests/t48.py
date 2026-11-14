@@ -46,6 +46,7 @@ HTML="<!doctype html><html><body><h1>Version {v}</h1></body></html>"
 chk("Kunde darf nicht hochladen",cA.post("/api/admin/websites/upload",files={"datei":("a.zip",b"x","application/zip")},data={"art":"live","name":dom}).status_code==403)
 r=up(zipb({"index.html":HTML.format(v=1)}),dom); chk("Neue Live-Website braucht einen Kunden",r.status_code==400 and "Kunden" in r.text,r.text)
 r=up(zipb({"index.html":HTML.format(v=1)}),"kein domain",kunde=kA); chk("Ungültiger Name",r.status_code==400,r.text)
+r=up(zipb({"index.html":HTML.format(v=1)}),"Anadolu-Market.de",art="demo",kunde=kA); chk("Domain bei Demo: klare Meldung statt „ungültig“",r.status_code==400 and "Live-Website" in r.text,r.text)
 r=up(zipb({"index.html":HTML.format(v=1)}),dom,kunde="00000000-0000-0000-0000-000000000000"); chk("Unbekannter Kunde",r.status_code==400,r.text)
 r=up(b"das ist keine zip",dom,kunde=kA); chk("Keine ZIP",r.status_code==400 and "ZIP" in r.text,r.text)
 r=up(b"x",dom,kunde=kA,fname="seite.rar"); chk("Nur .zip erlaubt",r.status_code==400)

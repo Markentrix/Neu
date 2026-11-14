@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from . import config, livecheck
 from . import sitedienste as sd
 from .db import tx
-from .routes_websites import NAME, auftrag
+from .routes_websites import NAME, auftrag, normalisiere
 from .security import audit, rate_limit, require_admin
 
 router = APIRouter(prefix="/api/admin/websites")
@@ -31,6 +31,9 @@ EGAL = {".ds_store", "thumbs.db", "desktop.ini"}
 
 
 def _ordner_name(art: str, name: str) -> str:
+    name = normalisiere(art, name)
+    if art == "demo" and "." in name:
+        raise HTTPException(400, "Das ist eine Domain. Bitte bei „Art“ die Live-Website wählen. Eine Demo hat nur einen Namen ohne Punkt (z. B. mueller-bau).")
     if art not in NAME or not NAME[art].match(name):
         raise HTTPException(400, "Der Name ist ungültig. Bei einer Live-Website die Domain ohne www (z. B. firma.de), bei einer Demo nur Kleinbuchstaben, Zahlen und Bindestriche.")
     if art == "live":

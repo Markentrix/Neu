@@ -111,6 +111,7 @@ async function uploadKarte(d) {
       if (v.offen.length) setTimeout(ladeVerlauf, 5000);
     } catch { /* Anzeige ist nur eine Hilfe */ }
   };
+  name.addEventListener('input', () => { if (art.value === 'demo' && name.value.includes('.')) art.value = 'live'; });   // eine Domain gehört zur Live-Website
   knopfHoch.addEventListener('click', async () => {
     melde(m, '');
     if (!datei.files.length) { melde(m, 'Bitte eine ZIP-Datei wählen.'); return; }

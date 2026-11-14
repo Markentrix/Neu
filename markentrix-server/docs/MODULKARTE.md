@@ -62,8 +62,8 @@ Website-API, Terminbuchung, Online-Shop, Gutscheine, Upload, Domains, Statusseit
 | `routes_siteapi` | 3 | 579 | `main`, `routes_shop`, `t95.py` |
 | `routes_sitedienste` | 3 | 2273 | `main`, `routes_buchungsvorlagen`, `routes_leistungsfreigabe`, `routes_shop` und 2 weitere |
 | `routes_status` | 3 | 127 | `main`, `routes_plattformstatus` |
-| `routes_websites` | 3 | 252 | `main`, `routes_betriebplus`, `routes_offboarding`, `routes_webupload` |
-| `routes_webupload` | 3 | 496 | `main` |
+| `routes_websites` | 3 | 269 | `main`, `routes_betriebplus`, `routes_offboarding`, `routes_webupload` |
+| `routes_webupload` | 3 | 499 | `main` |
 
 ## Lead-Funnel und Website-Check (`funnel`)
 

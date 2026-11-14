@@ -19,6 +19,23 @@ router = APIRouter(prefix="/api/admin/websites")
 SITES = config.SITES_ROOT
 QUEUE = config.QUEUE_DIR
 NAME = {"live": re.compile(r"^(?=.{4,253}$)([a-z0-9-]{1,63}\.)+[a-z]{2,}$"), "demo": re.compile(r"^[a-z0-9]([a-z0-9-]{0,40}[a-z0-9])?$")}
+_UMLAUT = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"})
+
+
+def normalisiere(art: str, name: str) -> str:
+    """Macht aus Eingaben wie „https://www.Müller-Bau.de/“ einen gültigen Namen: Kleinbuchstaben, ohne Adresszusatz, Umlaute als Punycode (Live)
+    bzw. als ae/oe/ue (Demo), Leerzeichen und Unterstriche als Bindestrich (Demo). Die Prüfung gegen NAME bleibt unverändert."""
+    n = (name or "").strip().lower()
+    n = re.sub(r"^[a-z]+://", "", n).split("/")[0].split("?")[0].split("#")[0].split(":")[0].strip(".")
+    if art == "live":
+        try:
+            n = ".".join(t.encode("idna").decode() if not t.isascii() else t for t in n.split("."))
+        except UnicodeError:
+            pass
+        return n
+    return re.sub(r"-{2,}", "-", re.sub(r"[\s_]+", "-", n.translate(_UMLAUT))).strip("-")
+
+
 TRASH_ID = re.compile(r"^\d{8}-\d{6}__(live|demo)__[A-Za-z0-9.-]{1,253}$")
 
 
