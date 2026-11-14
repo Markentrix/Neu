@@ -19,6 +19,10 @@
   var TXT_RESUME = 'Weiter anhören';
   var TXT_AGAIN = 'Noch einmal anhören';
 
+  // Messung: zählt nur nach Einwilligung zur Statistik (gtag ist ohne Einwilligung inaktiv). Es werden keine Inhalte oder Personendaten übergeben.
+  function track(name, params) { try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch (e) { } }
+  var started = false, half = false;
+
   function set(playing, text) {
     btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
     root.classList.toggle('is-playing', playing);
@@ -34,11 +38,12 @@
       audio.pause();
     }
   });
-  audio.addEventListener('play', function () { set(true, TXT_PAUSE); });
+  audio.addEventListener('play', function () { set(true, TXT_PAUSE); if (!started) { started = true; track('audio_intro_start', { location: location.pathname }); } });
   audio.addEventListener('pause', function () { if (!audio.ended) set(false, audio.currentTime > 0 ? TXT_RESUME : TXT_PLAY); });
-  audio.addEventListener('ended', function () { set(false, TXT_AGAIN); bar.style.width = '0%'; });
+  audio.addEventListener('ended', function () { set(false, TXT_AGAIN); bar.style.width = '0%'; track('audio_intro_complete', { location: location.pathname }); });
   audio.addEventListener('timeupdate', function () {
     if (audio.duration) bar.style.width = (audio.currentTime / audio.duration * 100).toFixed(1) + '%';
+    if (!half && audio.duration && audio.currentTime / audio.duration >= 0.5) { half = true; track('audio_intro_50', { location: location.pathname }); }
   });
   document.addEventListener('visibilitychange', function () { if (document.hidden && !audio.paused) audio.pause(); });
   set(false, TXT_PLAY);

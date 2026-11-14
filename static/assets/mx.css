@@ -1760,3 +1760,6 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .intro-meta .intro-hint{margin:0}
 .intro-meta .intro-text[open]{flex-basis:100%}
 .intro-meta .intro-text summary{font-size:.9375rem}
+.hero-person-body{min-width:0}
+.hero-person-body .intro{margin:12px 0 0}
+.hero-person-body .intro-btn{min-height:44px}
