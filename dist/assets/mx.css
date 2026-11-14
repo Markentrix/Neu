@@ -1736,3 +1736,23 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .ill.mi .hd{fill:none;stroke:#0C2128;stroke-width:10;stroke-linecap:round}
 .ill.mi .hl2{fill:none;stroke:#FFFFFF;stroke-width:4;stroke-linecap:round}
 .ill.mi .aa{font:800 54px 'Archivo','Arial Black',Arial,sans-serif;fill:#0C2128}
+
+/* 37 · Kurz erklärt: Audio-Einführung (Startseite). Startet nie von selbst. */
+.intro{margin:0 0 22px;max-width:520px}
+.intro-btn{display:none;position:relative;align-items:center;gap:14px;width:100%;min-height:56px;padding:10px 18px 12px 12px;background:#FFFFFF;color:var(--navy);border:1px solid var(--tiefsee,#0C2128);border-radius:8px;font:600 1.0625rem/1.25 var(--f-body);text-align:left;cursor:pointer;overflow:hidden}
+.intro.is-ready .intro-btn{display:flex}
+.intro.is-ready .intro-audio{display:none}
+.intro-btn:hover{border-color:var(--blue)}
+.intro-btn:focus-visible{outline:2px solid #964F08;outline-offset:2px}
+.intro-ic{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--blue);color:#FFFFFF}
+.intro-ic svg{width:18px;height:18px;fill:currentColor}
+.intro-ic .i-pause{display:none}
+.intro.is-playing .intro-ic .i-play{display:none}
+.intro.is-playing .intro-ic .i-pause{display:block}
+.intro-bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--leinen,#EAE2D3)}
+.intro-bar i{display:block;height:100%;width:0;background:var(--blue)}
+.intro-audio{width:100%;max-width:520px}
+.intro-hint{margin:8px 0 0;color:var(--muted)}
+.intro-text{margin-top:6px}
+.intro-text summary{cursor:pointer;color:var(--blue);font-weight:600;min-height:44px;display:flex;align-items:center}
+.intro-text p{margin:4px 0 0;color:var(--navy)}

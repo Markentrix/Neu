@@ -20,6 +20,20 @@ ld: |
           <a class="btn btn--primary btn--lg" href="/website-check">Kostenlosen Website-Check starten</a>
           <a class="btn btn--secondary btn--lg" href="/kontakt" data-open-modal>Erstgespräch buchen</a>
         </div>
+        <div class="intro" data-intro>
+          <button type="button" class="intro-btn" data-intro-btn aria-pressed="false" aria-describedby="intro-hint" hidden>
+            <span class="intro-ic" aria-hidden="true"><svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></span>
+            <span class="intro-lb" data-intro-label>Kurz erklärt anhören · 35 Sekunden</span>
+            <span class="intro-bar" aria-hidden="true"><i data-intro-bar></i></span>
+          </button>
+          <audio class="intro-audio" data-intro-audio src="/audio/willkommen.mp3" preload="none" controls aria-label="Kurz erklärt, 35 Sekunden"></audio>
+          <p class="intro-hint tiny" id="intro-hint">Der Ton startet nur auf Ihren Tipp. Vorgelesen mit KI-Stimme.</p>
+          <details class="intro-text">
+            <summary>Text mitlesen</summary>
+            <p>Willkommen bei Markentrix in Celle. Kurz erklärt, was Sie hier finden. Wir bauen Websites für lokale Betriebe, die gefunden werden und bei denen Kunden gern anfragen. Dazu gehören Sichtbarkeit bei Google, ein einfacher Weg zur Anfrage und, ab November, ein KI-Assistent für Telefon, WhatsApp und E-Mail. Weiter unten sehen Sie zwei echte Projekte und Beispiele für Ihre Branche. Mit dem kostenlosen Website-Check sehen Sie, wo Ihre Website heute steht. Und wenn Sie lieber sprechen: Buchen Sie ein kostenloses Erstgespräch. Dort klären wir auch die Preise.</p>
+          </details>
+          <script src="/assets/intro.js?v={{build}}" defer></script>
+        </div>
         <div class="hero-person">
           <img class="avatar avatar--md hero-person-img" src="/img/christian-wien-128.webp" srcset="/img/christian-wien-128.webp 128w, /img/christian-wien-192.webp 192w" sizes="64px" alt="Christian Wien, Inhaber von Markentrix" width="128" height="128" decoding="async">
           <p class="small"><b>Lieber direkt sprechen?</b> Ich bin Christian Wien und nehme mir 30 Minuten Zeit für Ihren Betrieb, kostenlos und ohne Verkaufsdruck. Rufen Sie an: <a href="tel:+4917620370429">0176&nbsp;20370429</a>. <a href="/preise#zusammenarbeit">Ablauf, Zahlung und Laufzeit</a> können Sie vorab nachlesen.</p>
