@@ -182,6 +182,24 @@ def version_beispiele():
         open(page, 'w', encoding='utf-8').write(t)
 
 
+def minify_assets():
+    """Stylesheet und Skripte der Website im Ausgabeordner verkleinern (Quellen unter static/ bleiben lesbar).
+    Benötigt `pip install rcssmin rjsmin`; ohne diese Pakete bleiben die Dateien unverändert."""
+    try:
+        import rcssmin, rjsmin
+    except ImportError:
+        print('Hinweis: rcssmin/rjsmin nicht installiert, Dateien werden nicht verkleinert.')
+        return
+    adir = os.path.join(DIST, 'assets')
+    for name in sorted(os.listdir(adir)):
+        path = os.path.join(adir, name)
+        if name.endswith('.css'): fn = rcssmin.cssmin
+        elif name.endswith('.js'): fn = rjsmin.jsmin
+        else: continue
+        src = open(path, encoding='utf-8').read()
+        open(path, 'w', encoding='utf-8').write(fn(src))
+
+
 def build(check=False):
     layout = open(os.path.join(SRC, 'layout.html'), encoding='utf-8').read()
     layout_lp = open(os.path.join(SRC, 'layout-lp.html'), encoding='utf-8').read()  # schlankes Layout für Anzeigen-Seiten (layout: lp)
@@ -189,6 +207,7 @@ def build(check=False):
     if os.path.isdir(DIST):
         shutil.rmtree(DIST)
     shutil.copytree(STATIC, DIST)
+    minify_assets()
     version_beispiele()
     parsed = []
     for dirpath, _, files in os.walk(os.path.join(SRC, 'pages')):
