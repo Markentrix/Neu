@@ -119,7 +119,13 @@ def seitenuebersicht(pages):
 
 def render(layout, meta, body, partials, overview=''):
     def sub_partials(s):
-        return re.sub(r'\{\{>\s*([\w-]+)\s*\}\}', lambda m: partials.get(m.group(1), f'<!-- partial {m.group(1)} fehlt -->'), s)
+        # bis zu drei Ebenen: ein Baustein darf andere Bausteine einbinden (z. B. Illustration im Vorher-nachher-Regler)
+        for _ in range(3):
+            n = re.sub(r'\{\{>\s*([\w-]+)\s*\}\}', lambda m: partials.get(m.group(1), f'<!-- partial {m.group(1)} fehlt -->'), s)
+            if n == s:
+                break
+            s = n
+        return s
     body = sub_partials(body)
     path = meta.get('path', '/')
     canonical = SITE + ('' if path == '/' else path)
