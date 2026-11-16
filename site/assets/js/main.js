@@ -43,7 +43,9 @@
     entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
   }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
   const lazyReveal = $$('[data-reveal], [data-split]').filter((el) => !el.hasAttribute('data-split-now') && !el.hasAttribute('data-reveal-now'));
-  lazyReveal.forEach((el) => io.observe(el));
+  // Clip-Reveals sind anfangs komplett beschnitten und werden vom Observer nicht erkannt – daher per Scrollposition
+  let clips = lazyReveal.filter((el) => el.dataset.reveal === 'clip');
+  lazyReveal.filter((el) => el.dataset.reveal !== 'clip').forEach((el) => io.observe(el));
 
   /* ---------- Start / Intro ---------- */
   function ready() {
@@ -182,6 +184,13 @@
       const n = hsTrack.children.length;
       hsCount.textContent = String(Math.min(n, Math.floor(p * n) + 1)).padStart(2, '0');
       hsBar.style.setProperty('--p', p.toFixed(3));
+    }
+    if (clips.length) {
+      clips = clips.filter((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < vh * 0.92 && r.bottom > -vh) { el.classList.add('is-in'); return false; }
+        return true;
+      });
     }
     if (mbar) {
       const end = endEl ? endEl.getBoundingClientRect().top : Infinity;

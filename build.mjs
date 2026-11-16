@@ -242,8 +242,8 @@ function home() {
   const marquee = ['Mähen', 'Schwaden', 'Häckseln', 'Düngung', 'Aussaat', 'Forstmulchen', 'Holz rücken', 'Bäume kneifen', 'Wegebau', 'Winterdienst', 'Transport', 'Werkstatt'];
   const mq = marquee.map((t) => `<span>${t}</span><i aria-hidden="true">✳</i>`).join('');
   const panels = [
-    ...sectors.map((s) => ({ nr: s.nr, title: s.title, text: s.teaser, img: s.cardImg, href: `leistungen/${s.id}/`, items: svcOf(s.id) })),
-    { nr: '04', title: 'Werkstatt', text: 'Wir bieten jetzt auch einen Werkstattservice in unserem Hause an – für Land- und Baumaschinen, Kraft- und Nutzfahrzeuge, Industrieanlagen sowie Kleingeräte.', img: 'transport-3', href: 'leistungen/werkstatt/', items: [] },
+    ...sectors.map((s) => ({ nr: s.nr, short: s.short, title: s.title, text: s.teaser, img: s.cardImg, href: `leistungen/${s.id}/`, items: svcOf(s.id) })),
+    { nr: '04', short: 'Werkstatt', title: 'Werkstatt', text: 'Wir bieten jetzt auch einen Werkstattservice in unserem Hause an – für Land- und Baumaschinen, Kraft- und Nutzfahrzeuge, Industrieanlagen sowie Kleingeräte.', img: 'transport-3', href: 'leistungen/werkstatt/', items: [] },
   ];
   const body = `
 <section class="hero" data-hero>
@@ -323,6 +323,9 @@ function home() {
     <div class="wrap hs__head">
       <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Ein Partner. Drei Bereiche.</h2></div>
       <div class="hs__meta"><span class="hs__count"><b>01</b> / 0${panels.length}</span><div class="hs__bar"><i></i></div></div>
+    </div>
+    <div class="wrap quad">
+      ${panels.map((p) => `<a class="quad__item" href="{root}${p.href}"><span class="quad__img">${pic(p.img, { alt: '', sizes: '25vw' })}<i>${p.nr}</i></span><strong>${p.short}</strong></a>`).join('')}
     </div>
     <div class="hs__track">
       ${panels.map((p) => `
