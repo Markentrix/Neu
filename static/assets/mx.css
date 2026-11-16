@@ -1974,3 +1974,11 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .ba-grid>.ba-list{grid-area:list;align-self:start;margin-top:14px}
 .ba-grid>.ba{grid-area:ba;align-self:center}
 @media (max-width:900px){.ba-grid{grid-template-areas:"head" "ba" "list";row-gap:20px}.ba-grid>.ba-head{margin:0}}
+
+/* Startseite: drei Projekte, kompaktere Karten */
+.trust-grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.trust-sec .trust-grid--3>.card{padding:clamp(14px,1.6vw,20px)}
+.trust-sec .trust-grid--3 h3{font-size:clamp(1.05rem,.95rem + .35vw,1.25rem);line-height:1.25}
+.trust-sec .trust-grid--3 .muted{font-size:.9375rem;margin:6px 0 0}
+@media (max-width:1100px) and (min-width:721px){.trust-grid--3{grid-template-columns:repeat(2,minmax(0,1fr))}.trust-grid--3>.card:first-child{grid-column:auto}}
+@media (max-width:720px){.trust-grid--3{grid-template-columns:none}}
