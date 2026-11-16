@@ -24,8 +24,9 @@ for (const s of seiten) { s.neu = asc(s.path); if (s.kind === 'detail' && !s.nam
 const P = p => alle.get(p);
 const benutzt = new Set();
 
-function bild(k, { alt = '', sizes = '100vw', lazy = true, klein = false, cls = '', extra = '' } = {}) {
+function bild(k, { alt = '', sizes = '100vw', lazy = true, klein = false, cls = '', extra = '', xl = false } = {}) {
   const b = bilder[k]; if (!b) return '';
+  if (xl && b.xw) { benutzt.add(k + '-s'); benutzt.add(k + '-l'); benutzt.add(k + '-xl'); return `<img src="/bilder/${k}-l.webp" srcset="/bilder/${k}-s.webp ${b.sw}w, /bilder/${k}-l.webp ${b.w}w, /bilder/${k}-xl.webp ${b.xw}w" sizes="${sizes}" width="${b.xw}" height="${b.xh}" alt="${esc(alt)}"${lazy ? ' loading="lazy" decoding="async"' : ' fetchpriority="high"'}${cls ? ` class="${cls}"` : ''}${extra}>`; }
   benutzt.add(k + '-s'); if (!klein) benutzt.add(k + '-l');
   const zwei = !klein && b.w > b.sw;
   return `<img src="/bilder/${k}-${zwei ? 'l' : 's'}.webp"${zwei ? ` srcset="/bilder/${k}-s.webp ${b.sw}w, /bilder/${k}-l.webp ${b.w}w" sizes="${sizes}"` : ''} width="${zwei ? b.w : b.sw}" height="${zwei ? b.h : b.sh}" alt="${esc(alt)}"${lazy ? ' loading="lazy" decoding="async"' : ' fetchpriority="high"'}${cls ? ` class="${cls}"` : ''}${extra}>`;
@@ -80,7 +81,7 @@ const pfad = kr => kr.length > 1 ? `<nav aria-label="Du bist hier"><ol class="pf
 const NAV = [['Tiere', '/im-waldtierheim-celle.html'], ['Happy End', '/happy-end.html'], ['Helfen', '/deine-hilfe.html'], ['Verein', '/verein.html'], ['Aktuelles', '/aktuelles.html']];
 const wochenTabelle = (kopf = true) => `<table class="woche"><caption class="nur-sr">Öffnungszeiten des Waldtierheims Celle</caption>${kopf ? '<thead><tr><th scope="col">Tag</th><th scope="col">Vormittag</th><th scope="col">Nachmittag</th></tr></thead>' : ''}<tbody>${WOCHE.map(([t, n, v, na]) => `<tr data-tag="${n}"><th scope="row">${t}</th><td>${v}</td><td${na ? '' : ' data-zu'}>${na || 'geschlossen'}</td></tr>`).join('')}</tbody></table>`;
 
-function geruest({ pfad: p, title, desc, body, ld = [], hero, noindex, aktiv, leiste, htmlKlasse = '' }) {
+function geruest({ pfad: p, title, desc, body, ld = [], hero, heroXl = false, noindex, aktiv, leiste, htmlKlasse = '' }) {
   const canon = SITE + (p === '/index.html' ? '/' : p);
   const graph = { '@context': 'https://schema.org', '@graph': ld };
   const bar = leiste || [`<a href="tel:${F.telLink}">Anrufen ${F.tel}</a>`, `<a href="/im-waldtierheim-celle.html">Tiere ansehen</a>`];
@@ -100,7 +101,7 @@ ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" hr
 <meta property="og:description" content="${esc(desc)}">
 ${noindex ? '' : `<meta property="og:url" content="${canon}">`}
 <link rel="preload" href="/schrift/bricolage-800.woff2" as="font" type="font/woff2" crossorigin>
-${hero ? `<link rel="preload" as="image" href="/bilder/${hero}-l.webp" imagesrcset="/bilder/${hero}-s.webp ${bilder[hero].sw}w, /bilder/${hero}-l.webp ${bilder[hero].w}w" imagesizes="(max-width: 60rem) 92vw, 46vw" fetchpriority="high">` : ''}
+${hero ? `<link rel="preload" as="image" href="/bilder/${hero}-l.webp" imagesrcset="/bilder/${hero}-s.webp ${bilder[hero].sw}w, /bilder/${hero}-l.webp ${bilder[hero].w}w${heroXl && bilder[hero].xw ? `, /bilder/${hero}-xl.webp ${bilder[hero].xw}w` : ''}" imagesizes="${heroXl ? '100vw' : '(max-width: 60rem) 92vw, 46vw'}" fetchpriority="high">` : ''}
 <link rel="stylesheet" href="/css/stil.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
@@ -179,10 +180,13 @@ const kontoBlock = `<dl class="konto"><dt>Kontoinhaber</dt><dd>${F.name} – Tie
 <p><button class="kopier" type="button" data-kopiere="${F.iban.replace(/ /g, '')}">IBAN kopieren</button></p>`;
 
 /* ---------- Startseite ---------- */
-const heroTier = tiere.hunde.find(s => s.neu.endsWith('ernie-und-bert.html')) || tiere.hunde[0];
-const HERO_BILD = heroTier.images[HERO_NR()];
-function HERO_NR() { return 1; }
+const heroTier = tiere.hunde.find(s => s.neu.endsWith('/cora.html')) || tiere.hunde[0];
+const HERO_BILD = heroTier.images.find(k => bilder[k] && bilder[k].xw) || heroTier.images[0];
+const festBild = '71a960304db5', helferBild = '01f19cc3905e';
 const laengste = heimtiere.filter(s => s !== heroTier && s.date && s.images.length && !/verwilderte/.test(s.neu)).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 5);
+const kachel = (s, i) => `<a class="kachel enthuellt" href="${s.neu}">${bild(s.images[0], { alt: `${s.name}, ${ART[s.kat][0]} im Waldtierheim Celle`, sizes: i === 0 ? '(max-width: 48rem) 92vw, 46vw' : '(max-width: 48rem) 46vw, 24vw' })}<span class="kachel-text"><span><span class="schild-name">${esc(s.name)}</span><span class="schild-daten">${esc(tierDaten(s)[0] || '')}</span></span><span class="tage" data-seit="${s.date}"><span class="tage-zahl"></span><small></small></span></span></a>`;
+const lauf = heimtiere.filter(s => !/verwilderte|Junghunde|Jungkatzen|Katzenkinder/.test(s.name + s.neu)).map(s => s.name);
+const streifen = [...vermHunde.slice(0, 7), ...vermKatzen.slice(0, 7)].filter(s => s.images[0]);
 const brief = gruesse.find(s => s.neu.endsWith('/quickie.html')) || gruesse[0];
 const FAQ = [
   ['Wann hat das Waldtierheim Celle geöffnet?', 'Vormittags Montag bis Freitag von 8 bis 11 Uhr, Samstag und Sonntag von 10 bis 11 Uhr. Nachmittags zusätzlich Montag, Mittwoch, Freitag und Sonntag von 15 bis 17 Uhr.'],
@@ -196,25 +200,23 @@ const FAQ = [
   ['Sucht ihr Plätze für scheue Katzen?', 'Ja. Für unsere scheuen und verwilderten Katzen suchen wir Bauernhöfe, Reiterhöfe und ähnliche Orte, an denen sie einen geschützten Platz zum Leben finden.']];
 
 function start() {
-  const body = `<section class="hero"><div class="huelle">
-<h1><span>Waldtierheim Celle</span><span>Zuhause gesucht</span></h1>
-<div class="hero-raster">
+  const body = `<section class="hero buehne">
+${bild(HERO_BILD, { alt: `Hündin ${heroTier.name} liegt lachend im Sand des Waldtierheims Celle`, sizes: '100vw', lazy: false, xl: true, cls: 'buehne-bild' })}
+<div class="huelle buehne-innen">
 <div class="hero-text">
-${spur('hundepfote', 5)}
+<h1><span>Waldtierheim Celle</span><span>Zuhause gesucht</span></h1>
 <p class="statement">Im Wald am Rand von Altencelle warten Hunde und Katzen auf ihre Menschen. Sieh dir die Steckbriefe an und komm in den Öffnungszeiten vorbei.</p>
 <div class="hero-aktion"><a class="knopf" href="/im-waldtierheim-celle.html">Tiere kennenlernen</a><a href="tel:${F.telLink}">${F.tel} anrufen</a></div>
 <p class="status" data-status>Geöffnet jeden Vormittag, Mo, Mi, Fr und So auch 15 bis 17 Uhr</p>
 </div>
-<div class="hero-schild">${sittich}<a class="schild schild-gross" href="${heroTier.neu}">
-<div class="schild-bild">${bild(HERO_BILD, { alt: `Deutsche Dogge aus dem Duo ${heroTier.name} mit Spielzeug im Waldtierheim Celle`, sizes: '(max-width: 60rem) 92vw, 27rem', lazy: false })}</div>
-<div class="schild-text"><span class="schild-name">${esc(heroTier.name)}</span><p class="schild-daten">${tierDaten(heroTier).map(esc).join('<br>')}</p><p class="tage" data-seit="${heroTier.date}"><span class="tage-zahl"></span><small></small></p></div>
-</a></div>
-</div></div></section>
+<div class="hero-schild">${sittich}<a class="schild" href="${heroTier.neu}"><div class="schild-text"><span class="schild-name">Das ist ${esc(heroTier.name)}</span><p class="schild-daten">${tierDaten(heroTier).map(esc).join('<br>')}</p><p class="tage" data-seit="${heroTier.date}"><span class="tage-zahl"></span><small></small></p></div></a></div>
+</div></section>
+<div class="lauf" aria-hidden="true"><div class="lauf-band">${[0, 1].map(() => lauf.map(n => `<span>${esc(n)}${zeichen('hundepfote')}</span>`).join('')).join('')}</div></div>
 
 <section class="abschnitt" aria-labelledby="h-warten"><div class="huelle">
-<div class="kopfzeile"><h2 id="h-warten">Diese Tiere warten am längsten</h2><p>Die Zahl auf dem Schild zählt die Tage, seit denen der Steckbrief online ist.</p></div>
-<div class="schilder schilder-start">${laengste.map((s, i) => schild(s, i, { gross: i === 0, sizes: i === 0 ? '(max-width: 60rem) 92vw, 46vw' : undefined })).join('\n')}</div>
-<p style="margin-top:2rem"><a class="knopf knopf-still" href="/im-waldtierheim-celle.html">Alle ${heimtiere.length} Steckbriefe ansehen</a></p>
+<div class="kopfzeile"><h2 id="h-warten">Diese Tiere warten am längsten</h2><p>Die Zahl zählt die Tage, seit denen der Steckbrief online ist.</p></div>
+<div class="mosaik">${laengste.map(kachel).join('\n')}</div>
+<p style="margin-top:2rem;display:flex;flex-wrap:wrap;align-items:center;gap:1.5rem"><a class="knopf knopf-still" href="/im-waldtierheim-celle.html">Alle ${heimtiere.length} Steckbriefe ansehen</a>${spur('hundepfote', 4)}</p>
 </div></section>
 
 <section class="abschnitt dunkel" aria-labelledby="h-besuch"><div class="huelle besuch">
@@ -240,11 +242,11 @@ ${wochenTabelle()}
 <p>„Für uns war es auf jeden Fall die richtige Entscheidung.“</p>
 <footer>${bild(brief.images[0], { alt: 'Katze Quickie in ihrem neuen Zuhause', klein: true })}<p class="klein" style="margin:0">L. R. über Katze Quickie, ${datum(brief.date)}<br><a href="${brief.neu}">Den ganzen Gruß lesen</a> oder <a href="/happy-end/gruesse-vom-neuen-zuhause.html">alle ${gruesse.length} Grüße</a></p></footer>
 </blockquote>
-</div></section>
+</div>
+<ul class="streifen" aria-label="Vermittelte Tiere">${streifen.map(t => `<li><a href="${t.neu}">${bild(t.images[0], { alt: `${t.name}, vermittelt`, klein: true })}<span>${esc(t.name)}</span></a></li>`).join('')}</ul></section>
 
-<section class="abschnitt hilfe" aria-labelledby="h-hilfe"><div class="huelle">
-<div class="kopfzeile"><h2 id="h-hilfe">Vier Wege, wie du hilfst</h2><p>Wir sind ein privater Tierschutzverein und an 365 Tagen im Jahr für die Tiere da. Das geht nur mit Unterstützung.</p></div>
-<ul class="wege">
+<section class="hilfe" aria-labelledby="h-hilfe"><div class="band buehne">${bild(helferBild, { alt: 'Freiwillige schaufeln Erde für Sandsäcke auf dem Gelände des Waldtierheims', sizes: '100vw', xl: true, cls: 'buehne-bild' })}<div class="huelle buehne-innen"><div><h2 id="h-hilfe">Vier Wege, wie du hilfst</h2><p class="statement" style="margin-top:1rem">Wir sind ein privater Tierschutzverein und an 365 Tagen im Jahr für die Tiere da. Das geht nur mit Unterstützung.</p><p class="klein" style="margin:1rem 0 0">Foto: Freiwillige sichern das Waldtierheim gegen Hochwasser, Dezember 2023.</p></div></div></div><div class="huelle" style="padding-bottom:var(--abschnitt)">
+<ul class="wege" style="margin-top:0">
 <li><h3>Gassi gehen</h3><div><p>Unsere Hunde freuen sich über Spaziergänge. Melde dich dafür während der Öffnungszeiten direkt im Waldtierheim.</p></div></li>
 <li><h3>Patenschaft</h3><div><p>Du kannst kein Tier aufnehmen, aber eines liegt dir am Herzen? Unterstütze genau dieses Tier mit Futter, Sachspenden oder einem monatlichen Betrag und besuche es in den Öffnungszeiten.</p><p><a href="/dokumente/patenschaftsvertrag.pdf">Patenschaftsvertrag als PDF (155 KB)</a></p></div></li>
 <li><h3>Mitglied werden</h3><div><p>Den Beitrag bestimmst du selbst, mindestens 20 € im Jahr. Den Aufnahmeantrag bekommst du bei uns im Tierheim.</p></div></li>
@@ -262,7 +264,7 @@ ${wochenTabelle()}
 <li><b>Heute</b><span>Eingetragen beim Amtsgericht Celle, Mitglied im Verband Niedersächsischer Tierschutzvereine, finanziert vor allem über Mitgliedsbeiträge und Spenden.</span></li>
 </ul>
 <p><a class="knopf knopf-still" href="/verein.html">Den Verein kennenlernen</a></p></div>
-<figure>${bild(P('/verein.html').images[0], { alt: 'Hundezwinger aus Holz unter Bäumen im Waldtierheim Celle', sizes: '(max-width: 60rem) 92vw, 42vw' })}<figcaption>Hundezwinger im Waldtierheim Celle</figcaption></figure>
+<figure class="enthuellt">${bild(festBild, { alt: 'Besucherinnen und Besucher zwischen Kiefern beim Tag der offenen Tür im Waldtierheim Celle', sizes: '(max-width: 60rem) 92vw, 46vw', xl: true })}<figcaption>Tag der offenen Tür im Waldtierheim, September 2024</figcaption></figure>
 </div></section>
 
 <section class="abschnitt" style="padding-top:0" aria-labelledby="h-neu"><div class="huelle zwei">
@@ -274,7 +276,7 @@ ${wochenTabelle()}
 <div><h2 id="h-faq">Kurz gefragt</h2><div class="paar" aria-hidden="true">${sittich.replace(' class="sittich"', '')}${sittich.replace(' class="sittich"', '')}</div><div class="ast" aria-hidden="true"></div></div>
 <div class="fragen">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><div><p>${esc(a)}</p></div></details>`).join('\n')}</div>
 </div></section>`;
-  schreibe('/index.html', geruest({ pfad: '/index.html', title: 'Tierheim in Celle | Waldtierheim Celle', desc: 'Waldtierheim Celle: Hunde und Katzen suchen ein Zuhause. Steckbriefe, Öffnungszeiten, Anfahrt nach Altencelle, Spenden und Patenschaft. Telefon 05141 32900.', body, hero: HERO_BILD, htmlKlasse: 'auf',
+  schreibe('/index.html', geruest({ pfad: '/index.html', title: 'Tierheim in Celle | Waldtierheim Celle', desc: 'Waldtierheim Celle: Hunde und Katzen suchen ein Zuhause. Steckbriefe, Öffnungszeiten, Anfahrt nach Altencelle, Spenden und Patenschaft. Telefon 05141 32900.', body, hero: HERO_BILD, heroXl: true, htmlKlasse: 'auf',
     ld: [orgLd(), { '@type': 'WebSite', '@id': SITE + '/#website', url: SITE, name: 'Waldtierheim Celle', inLanguage: 'de', publisher: { '@id': SITE + '/#tierheim' } },
       { '@type': 'FAQPage', mainEntity: FAQ.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] }));
 }

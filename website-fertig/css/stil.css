@@ -328,3 +328,70 @@ dialog.licht button{background:none;border:0;color:var(--sand-hell);font-weight:
 .paar::after{content:"";order:3}
 .ast{height:.4rem;background:var(--tinte);width:9rem;margin-top:-1.35rem;position:relative}
 @media (max-width:60rem){.hero-text .spur{display:none}}
+
+/* Bildbühne (vollflächiges Foto), Laufband, Mosaik, Fotostreifen */
+.buehne{position:relative;isolation:isolate;overflow:hidden;background:var(--tinte);color:var(--sand-hell);display:flex;align-items:flex-end;min-height:min(88svh,56rem)}
+.buehne-bild{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 35%;z-index:-2;background:var(--tinte)}
+.buehne::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(20,16,79,.95) 0%,rgba(20,16,79,.55) 30%,rgba(20,16,79,0) 62%),linear-gradient(to right,rgba(20,16,79,.72),rgba(20,16,79,.25) 45%,rgba(20,16,79,0) 68%)}
+.buehne-innen{width:100%;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:2rem;padding-block:clamp(7rem,18vw,14rem) clamp(1.5rem,4vw,3rem)}
+.hero.buehne{padding-block:0}
+.hero .hero-text{align-self:auto;padding:0;flex:1 1 28rem;max-width:44rem}
+.hero.buehne h1{font-size:min(11vw,6.4rem)}
+.hero .buehne-bild{scale:-1 1;object-position:30% 30%}
+.hero.buehne h1{margin-bottom:clamp(1rem,2.5vw,2rem)}
+.hero.buehne .statement{margin-bottom:1.75rem}
+.hero.buehne .status{margin-top:1.5rem}
+.hero.buehne .hero-aktion a:not(.knopf){color:var(--sand-hell)}
+.hero.buehne .status::before{background:var(--blau-neben)}
+.hero.buehne .status[data-offen="ja"]::before{background:var(--mai)}
+.buehne .hero-schild{flex:0 0 19rem;max-width:19rem;justify-self:auto;color:var(--tinte)}
+.buehne .hero-schild .schild-name{font-size:var(--t-lg)}
+.buehne .hero-schild>.sittich{right:1rem;bottom:calc(100% - 1.3rem)}
+.band{min-height:min(70svh,36rem)}
+.band .buehne-bild{object-position:50% 40%}
+.band h2{color:var(--sand-hell)}
+.band .buehne-innen{padding-bottom:clamp(2rem,5vw,4rem)}
+.lauf{background:var(--tinte);color:var(--sand-hell);overflow:hidden;padding-block:1.1rem 1.4rem}
+.lauf-band{display:flex;width:max-content;font:800 clamp(1.5rem,3.2vw,2.75rem)/1 var(--display);letter-spacing:-.02em;animation:lauf 60s linear infinite}
+.lauf-band span{display:inline-flex;align-items:center;white-space:nowrap}
+.lauf-band .zeichen{width:.7em;height:.7em;margin-inline:.7em;color:var(--mai)}
+@keyframes lauf{to{transform:translateX(-50%)}}
+.mosaik{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:clamp(8.5rem,14.5vw,13.5rem);gap:clamp(.6rem,1.4vw,1.25rem)}
+.kachel{position:relative;isolation:isolate;overflow:hidden;display:block;background:var(--tinte);color:var(--sand-hell);text-decoration:none;grid-column:span 3;grid-row:span 1}
+.kachel:nth-child(1){grid-column:span 6;grid-row:span 3}
+.kachel:nth-child(2),.kachel:nth-child(3){grid-row:span 2}
+.kachel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 25%;z-index:-2;transition:transform .7s var(--ease-out)}
+.kachel::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(20,16,79,.9),rgba(20,16,79,0) 62%)}
+.kachel-text{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;padding:1rem 1.1rem}
+.kachel-text>span:first-child{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.kachel .schild-daten{display:block}
+.kachel:nth-child(1) .schild-name{font-size:var(--t-xl)}
+.kachel:nth-child(1) .tage{font-size:clamp(2.75rem,6vw,5rem)}
+.kachel .tage{font-size:1.9rem}
+@media (hover:hover) and (pointer:fine){.kachel:hover img{transform:scale(1.04)}.kachel:hover .schild-name{text-decoration:underline;text-decoration-thickness:.08em}}
+@media (max-width:60rem){.mosaik{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:11rem}
+  .kachel,.kachel:nth-child(2),.kachel:nth-child(3){grid-column:span 1;grid-row:span 2}
+  .kachel:nth-child(1){grid-column:span 2;grid-row:span 2}
+  .kachel:not(:nth-child(1)) .kachel-text{flex-direction:column;align-items:flex-start;gap:.3rem;padding:.75rem}
+  .kachel:not(:nth-child(1)) .schild-daten{display:none}
+  .kachel:not(:nth-child(1)) .tage{text-align:left;font-size:1.5rem}
+  .buehne .hero-schild{flex:1 1 100%;max-width:none}
+  .hero .buehne-innen{padding-top:72vw}
+  .hero.buehne::after{background:linear-gradient(to top,rgba(20,16,79,.97) 0%,rgba(20,16,79,.85) 42%,rgba(20,16,79,0) 70%)}
+  .buehne .hero-schild>.sittich{display:none}}
+.streifen{list-style:none;display:flex;gap:.6rem;margin:clamp(2.5rem,5vw,4rem) 0 0;padding:0 var(--rand) .5rem;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain}
+.streifen li{flex:0 0 clamp(8rem,13vw,11rem);scroll-snap-align:start}
+.streifen a{display:block;background:var(--sand-hell);text-decoration:none;font-weight:700;line-height:1.2}
+.streifen img{width:100%;aspect-ratio:1;object-fit:cover}
+.streifen span{display:block;padding:.55rem .65rem .65rem}
+.happy+.streifen{scroll-padding-inline:var(--rand)}
+.hilfe .wege li:first-child{margin-top:0}
+@keyframes ruhe{from{transform:scale(1.08)}to{transform:none}}
+.auf .hero .buehne-bild{animation:ruhe 1.8s var(--ease-out) both}
+@supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
+  .enthuellt{animation:enthuelle linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
+  .band .buehne-bild{animation:gleite linear both;animation-timeline:view();animation-range:cover}
+}}
+@keyframes enthuelle{from{clip-path:inset(18% 0 0 0);opacity:.2}to{clip-path:inset(0);opacity:1}}
+@keyframes gleite{from{transform:scale(1.14) translateY(-5%)}to{transform:scale(1.14) translateY(5%)}}
+@media (prefers-reduced-motion:reduce){.lauf-band{animation:none}}

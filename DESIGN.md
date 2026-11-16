@@ -95,3 +95,12 @@ Alles nur transform/opacity/clip-path, reduced motion schaltet Bewegung ab.
 - "Kurz gefragt" (FAQ) auf der Startseite: enthält die Antworten, nach denen Menschen und KI-Suchen fragen (Zeiten, Ablauf, Kosten). Jede Antwort stammt aus der bisherigen Website; dient GEO (FAQPage-Markup).
 - Eine einzelne große Zahl im Happy-End-Abschnitt (380): echte Anzahl der archivierten Vermittlungs-Steckbriefe, keine gerundete Statistik-Leiste.
 - Logo: Die Wortmarke ist in Schrift nachgebaut (grünes "aktiver" wie im Logo), weil das Original nur als 392-px-GIF vorliegt.
+
+## Überarbeitung 16.11.2026: bildgeführte Startseite (Kundenwunsch, Vorbild Linneweh-Entwurf)
+- Hero: vollflächiges Foto von Hündin Cora (einziges Tierfoto in 2048 px), gespiegelt, damit links Platz für die Überschrift bleibt. Nachtblauer Scrim, Schild "Das ist Cora" mit Wartetagen unten rechts.
+- Laufband mit den Namen der wartenden Tiere und Pfoten (Ausnahme von "Marquee als Deko": echte Namen, Kundenwunsch).
+- "Diese Tiere warten am längsten" als Foto-Mosaik mit Name und Wartetagen auf dem Bild.
+- Fotostreifen mit vermittelten Tieren im Happy-End-Abschnitt.
+- Fotoband über "Vier Wege, wie du hilfst": Freiwillige beim Hochwasser-Einsatz 2023. Vereinsabschnitt mit Foto vom Tag der offenen Tür 2024.
+- Bewegung zusätzlich: Bilder decken sich beim Scrollen auf und Fotobänder gleiten leicht (nur CSS, scroll-gesteuert; ohne Unterstützung oder bei reduzierter Bewegung stehen die Bilder einfach da). Leichter Zoom am Mosaik-Hover.
+- Performance-Hinweis: das Helfer-Foto ist als 1920-px-Fassung 435 KB groß (über dem 150-KB-Ziel), lädt aber erst beim Scrollen.
