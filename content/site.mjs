@@ -18,7 +18,7 @@ export const sectors = [
   {
     id: 'landwirtschaft', nr: '01', short: 'Landwirtschaft', swap: 'Ihr Feld',
     title: 'Landwirtschaftliche Dienstleistungen', sub: 'Auf dem Feld für Sie unterwegs.',
-    heroImg: 'grasernte', pageImg: 'ernte-staub', cardImg: 'haeckseln-1',
+    heroImg: 'grasernte', pageImg: 'ernte-staub', cardImg: 'haeckseln-1', bandImg: 'haeckseln-2',
     teaser: 'Ob Mähen, Schwaden, Wenden, der Transport und das Ausbringen von Gärresten, sowie das Pflanzen von Kartoffeln und der mechanische Pflanzenschutz, wir bewirtschaften Ihre Felder für Sie.',
     overview: 'Vom Säen und Pflanzen über das Düngen und den Pflanzenschutz, bis hin zum Roden und Häckseln, wir sind auf Ihren Feldern für Sie unterwegs. Für die Energie und Ernährung von morgen.',
     introTitle: 'Für die Energie und Ernährung von morgen',
@@ -27,7 +27,7 @@ export const sectors = [
   {
     id: 'forstwirtschaft', nr: '02', short: 'Forstwirtschaft', swap: 'Ihren Forst',
     title: 'Forstwirtschaftliche Dienstleistungen', sub: 'In Forst und Wald für Sie unterwegs.',
-    heroImg: 'bagger-forst', pageImg: 'bagger-forst', cardImg: 'flaechenvorbereitung-2',
+    heroImg: 'bagger-forst', pageImg: 'bagger-forst', cardImg: 'baeume-kneifen-1', bandImg: 'baeume-kneifen-2',
     teaser: 'Neben Flächenvorbereitungen mit Forstmulchern und -Fräsen bieten wir auch Baggerräumungen und Rückearbeiten an.',
     overview: 'Ob Holzrücken, -Hacken, -Roden, Bäume Kneifen, Flächenvorbereitung oder Kulturpflege, wir kümmern uns um Ihre Forstflächen. Zusammen für eine grünere Zukunft.',
     introTitle: 'Für eine grünere Zukunft',
@@ -37,7 +37,7 @@ export const sectors = [
   {
     id: 'kommunal', nr: '03', short: 'Kommunal', swap: 'Ihre Kommune',
     title: 'Kommunale Dienstleistungen', sub: 'Wir machen den Weg frei.',
-    heroImg: 'winterdienst-1', pageImg: 'wegebau-4', cardImg: 'wegebau-4',
+    heroImg: 'winterdienst-1', pageImg: 'winterdienst-1', cardImg: 'baufeld-1', bandImg: 'baufeld-2',
     teaser: 'Auch für die Kommunen sind wir da. Mit Wegebau und -pflege, sowie Winterdienst sorgen wir dafür, dass alle sicher an ihr Ziel kommen.',
     overview: 'Mit Wegebau und -Pflege, Winterdienst und Baufeldräumung machen wir für Sie den Weg frei.',
     introTitle: 'Wir machen den Weg frei',
@@ -50,15 +50,15 @@ export const services = [
   { key: 'duengung', slug: 'duengung', sector: 'landwirtschaft', teaser: 'Ausbringen von Gülle und Gärresten zur Förderung des Pflanzenwachstums.', hero: 'duengung-1', gallery: ['duengung-2', 'transport-5'] },
   { key: 'aussaat', slug: 'aussaat', sector: 'landwirtschaft', teaser: 'Aussaat von Kartoffeln, Rüben und Mais.', hero: 'aussaat-3', gallery: ['aussaat-1', 'aussaat-2', 'aussaat-4'] },
   { key: 'pflanzenschutz', slug: 'pflanzenschutz', sector: 'landwirtschaft', teaser: 'Hacken und Ausbringen von Herbiziden zum Schutz der Kulturpflanze vor Beikräutern.', hero: 'hacke-1', gallery: ['hacke-2', 'hacke-3', 'hacke-4'] },
-  { key: 'haeckseln', slug: 'haeckseln', sector: 'landwirtschaft', teaser: 'Häckseln von Mais, Gras und Ganzpflanzensilage (GPS).', hero: 'haeckseln-1', gallery: ['haeckseln-2', 'haeckseln-3', 'maisernte', 'grasernte', 'silo'] },
+  { key: 'haeckseln', slug: 'haeckseln', sector: 'landwirtschaft', teaser: 'Häckseln von Mais, Gras und Ganzpflanzensilage (GPS).', hero: 'haeckseln-1', gallery: ['haeckseln-2', 'maisernte', 'grasernte', 'silo', 'haeckseln-3'] },
   { key: 'gruenland', slug: 'gruenland', sector: 'landwirtschaft', teaser: 'Mähen, Wenden, Schwaden und Pressen von Gras in Rund- und Quaderballen.', hero: 'gruenland-1', gallery: ['maehen', 'schwaden', 'grasernte'] },
-  { key: 'transport', slug: 'transport', sector: 'landwirtschaft', teaser: 'Transport von Stück- und Schüttgut, sowie Paletten- und Flüssigware.', hero: 'transport-1', gallery: ['transport-2', 'transport-3', 'transport-5', 'rueben', 'ernte-staub'] },
-  { key: 'flaechen-vorbereitung', slug: 'flaechenvorbereitung', sector: 'forstwirtschaft', title: 'Flächenvorbereitung', teaser: 'Flächenvorbereitung für Neuanpflanzungen, Neueinsaaten und Aufforstungsmaßnahmen oder die Entfernung von Busch- und Strauchwerk.', hero: 'flaechenvorbereitung-2', gallery: ['flaechenvorbereitung-3', 'flaechenvorbereitung-4', 'flaechenvorbereitung-5', 'forstmulcher-1', 'forstmulcher-2'] },
+  { key: 'transport', slug: 'transport', sector: 'landwirtschaft', teaser: 'Transport von Stück- und Schüttgut, sowie Paletten- und Flüssigware.', hero: 'transport-1', gallery: ['transport-3', 'rueben', 'ernte-staub', 'transport-2', 'transport-5'] },
+  { key: 'flaechen-vorbereitung', slug: 'flaechenvorbereitung', sector: 'forstwirtschaft', title: 'Flächenvorbereitung', teaser: 'Flächenvorbereitung für Neuanpflanzungen, Neueinsaaten und Aufforstungsmaßnahmen oder die Entfernung von Busch- und Strauchwerk.', hero: 'forstmulcher-1', gallery: ['forstmulcher-2', 'flaechenvorbereitung-2', 'flaechenvorbereitung-3', 'flaechenvorbereitung-4', 'flaechenvorbereitung-5'] },
   { key: 'kulturpflege', slug: 'kulturpflege', sector: 'forstwirtschaft', teaser: 'Entfernung von Begleitwuchs und Busch- und Strauchwerk zur Förderung des Pflanzenwachstums.', hero: 'kulturpflege-2', gallery: ['kulturpflege-1', 'kulturpflege-4', 'kulturpflege-5', 'moritz-4', 'moritz-2'] },
   { key: 'holz-ruecken', slug: 'holz-ruecken', sector: 'forstwirtschaft', title: 'Holz rücken', teaser: 'Holzbergung, Rücken und Transport.', hero: 'holz-ruecken-3', gallery: ['holz-ruecken-1', 'holz-ruecken-2', 'holz-ruecken-4', 'holz-ruecken-5'] },
   { key: 'baeume-kneifen', slug: 'baeume-kneifen', sector: 'forstwirtschaft', title: 'Bäume kneifen', teaser: 'Nachhaltiger Waldumbau und Rückegassen-Erstellung mit minimalem Schaden.', hero: 'baeume-kneifen-1', gallery: ['baeume-kneifen-2', 'baeume-kneifen-3', 'bagger-forst'] },
   { key: 'holz-hacken', slug: 'holz-hacken', sector: 'forstwirtschaft', title: 'Holz hacken', teaser: 'Holz hacken und Hackschnitzelherstellung.', hero: 'holz-hacken-3', gallery: ['holz-hacken-2', 'holz-hacken-4', 'holz-hacken-5'] },
-  { key: 'forstfraesen', slug: 'forstfraesen', sector: 'forstwirtschaft', teaser: 'Fräsen von Pflanzflächen und Schneisen.', hero: 'forstfraese-1', gallery: ['forstmulcher-2', 'flaechenvorbereitung-5', 'forst-raupe'] },
+  { key: 'forstfraesen', slug: 'forstfraesen', sector: 'forstwirtschaft', teaser: 'Fräsen von Pflanzflächen und Schneisen.', hero: 'forstmulcher-2', gallery: ['forstfraese-1', 'flaechenvorbereitung-5', 'forst-raupe'] },
   { key: 'pflanzvorbereitungen', slug: 'pflanzvorbereitungen', sector: 'forstwirtschaft', teaser: 'Streifenfräse, TTS Gerät und Waldstreifenpflug.', hero: 'pflanzvorbereitung-1', gallery: ['pflanzvorbereitung-2', 'forst-raupe'] },
   { key: 'wegebau', slug: 'wegebau', sector: 'kommunal', teaser: 'Schotter- und Sandwegebau, sowie Pflege- und Erneuerungsarbeiten.', hero: 'wegebau-4', gallery: ['wegebau-1', 'wegebau-2', 'wegebau-5', 'wegepflege-2', 'wegepflege-1'] },
   { key: 'seitenraender-schlegeln', slug: 'seitenraender-schlegeln', sector: 'kommunal', teaser: 'Beseitigung von Unkraut zur Pflege und Sicherung von Wegen.', hero: 'seitenraender-1', gallery: ['seitenraender-2', 'seitenraender-3', 'seitenraender-4'] },
@@ -210,3 +210,23 @@ export const alts = {
   'seitenraender': 'Traktor mit Seitenmulcher beim Schlegeln von Seitenrändern', 'silo': 'Traktor beim Festwalzen des Silos', 'transport': 'LKW und Traktor beim Transport', 'wegebau': 'Traktor mit Wegepflegemaschine beim Wegebau',
   'wegepflege': 'Wegepflegemaschine HEN WPF 200 und aufbereiteter Weg', 'winterdienst': 'Traktor mit Schneeräumschild im Winterdienst',
 };
+
+// Bildstrecke Startseite – ausschließlich die hochwertigsten Aufnahmen
+export const showcase = [
+  { img: 'haeckseln-2', title: 'Häckseln', sub: 'Mais, Gras & GPS', href: 'leistungen/landwirtschaft/haeckseln/' },
+  { img: 'baeume-kneifen-2', title: 'Bäume kneifen', sub: 'Woodcracker C350', href: 'leistungen/forstwirtschaft/baeume-kneifen/' },
+  { img: 'duengung-1', title: 'Düngung', sub: 'Gülle & Gärreste', href: 'leistungen/landwirtschaft/duengung/' },
+  { img: 'schwaden', title: 'Grünland', sub: 'Mähen, Wenden, Schwaden', href: 'leistungen/landwirtschaft/gruenland/' },
+  { img: 'transport-1', title: 'Transport', sub: 'Stück-, Schütt- & Flüssiggut', href: 'leistungen/landwirtschaft/transport/' },
+  { img: 'forstmulcher-2', title: 'Forstmulchen', sub: 'Flächenvorbereitung', href: 'leistungen/forstwirtschaft/flaechenvorbereitung/' },
+];
+
+// Technik in Zahlen – Werte aus den Maschinendaten der Leistungsseiten
+export const facts = [
+  { n: '2', unit: '×', label: 'Feldhäcksler Fendt Katana 650', href: 'leistungen/landwirtschaft/haeckseln/' },
+  { n: '9,40', unit: 'm', label: 'Arbeitsbreite SaMASZ Schmetterlingskombination', href: 'leistungen/landwirtschaft/gruenland/' },
+  { n: '25', unit: 'm³', label: 'Ladevolumen Güllefass Samson PG 25', href: 'leistungen/landwirtschaft/duengung/' },
+  { n: '12,50', unit: 'm', label: 'Arbeitsbreite CLAAS Liner Vierkreiselschwader', href: 'leistungen/landwirtschaft/gruenland/' },
+  { n: '800', unit: 'mm', label: 'Stammdurchmesser mit dem Jenz Hacker HEM 841 Z', href: 'leistungen/forstwirtschaft/holz-hacken/' },
+  { n: '50', unit: '°', label: 'Steigung befahrbar mit der Forstraupe Moritz', href: 'leistungen/forstwirtschaft/kulturpflege/' },
+];

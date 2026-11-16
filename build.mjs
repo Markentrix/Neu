@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { company as C, sectors, services, values, timeline, agrarmonitor, team, job, news, faqs, alts } from './content/site.mjs';
+import { company as C, sectors, services, values, timeline, agrarmonitor, team, job, news, faqs, alts, showcase, facts } from './content/site.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const ART = process.env.ARTIFACT_OUT; // Vorschau-Variante: Links mit index.html, Startseite als Fragment
@@ -243,7 +243,7 @@ function home() {
   const mq = marquee.map((t) => `<span>${t}</span><i aria-hidden="true">✳</i>`).join('');
   const panels = [
     ...sectors.map((s) => ({ nr: s.nr, title: s.title, text: s.teaser, img: s.cardImg, href: `leistungen/${s.id}/`, items: svcOf(s.id) })),
-    { nr: '04', title: 'Werkstatt', text: 'Wir bieten jetzt auch einen Werkstattservice in unserem Hause an – für Land- und Baumaschinen, Kraft- und Nutzfahrzeuge, Industrieanlagen sowie Kleingeräte.', img: 'holz-ruecken-5', href: 'leistungen/werkstatt/', items: [] },
+    { nr: '04', title: 'Werkstatt', text: 'Wir bieten jetzt auch einen Werkstattservice in unserem Hause an – für Land- und Baumaschinen, Kraft- und Nutzfahrzeuge, Industrieanlagen sowie Kleingeräte.', img: 'transport-3', href: 'leistungen/werkstatt/', items: [] },
   ];
   const body = `
 <section class="hero" data-hero>
@@ -306,6 +306,18 @@ function home() {
   </div>
 </section>
 
+<section class="sec show">
+  <div class="wrap">
+    <div class="sec__head sec__head--row">
+      <div>${label('Im Einsatz')}<h2 class="display" data-split>Starke Technik. Echte Arbeit.</h2></div>
+      <p class="show__note" data-reveal>Aufnahmen aus unserem Arbeitsalltag auf dem Feld, im Forst und auf der Straße.</p>
+    </div>
+    <div class="show__grid">
+      ${showcase.map((x, i) => `<a class="show__item show__item--${'abcdef'[i]}" href="{root}${x.href}" data-reveal="clip" data-cursor="Öffnen">${pic(x.img, { sizes: '(max-width:800px) 100vw, 60vw' })}<span class="show__cap"><small>${x.sub}</small><strong class="display">${x.title}</strong></span></a>`).join('')}
+    </div>
+  </div>
+</section>
+
 <section class="hs" data-hscroll>
   <div class="hs__sticky">
     <div class="wrap hs__head">
@@ -324,6 +336,16 @@ function home() {
           ${btn('{root}' + p.href, 'Zur Leistungsübersicht')}
         </div>
       </article>`).join('')}
+    </div>
+  </div>
+</section>
+
+<section class="facts">
+  <div class="facts__bg" aria-hidden="true">${pic('ernte-staub', { alt: '', sizes: '100vw', attrs: 'data-parallax="0.12"' })}</div>
+  <div class="wrap facts__inner">
+    <div class="sec__head">${label('Technik in Zahlen', 'p', 'label--light')}<h2 class="display" data-split>Modernste Technik für höchste Präzision.</h2></div>
+    <div class="facts__grid" data-stagger>
+      ${facts.map((f) => `<a class="fact" href="{root}${f.href}" data-reveal><strong class="display">${f.n}<i>${f.unit}</i></strong><span>${f.label}</span>${ARROW}</a>`).join('')}
     </div>
   </div>
 </section>
@@ -382,7 +404,7 @@ function newsCard(n) {
 function leistungen() {
   const rows = [
     ...sectors.map((s) => ({ nr: s.nr, title: s.title, text: s.overview, img: s.cardImg, href: `leistungen/${s.id}/`, items: svcOf(s.id) })),
-    { nr: '04', title: 'Werkstatt', text: 'Wir bieten jetzt auch einen Werkstattservice in unserem Hause an.', img: 'holz-ruecken-5', href: 'leistungen/werkstatt/', items: [] },
+    { nr: '04', title: 'Werkstatt', text: 'Wir bieten jetzt auch einen Werkstattservice in unserem Hause an.', img: 'transport-3', href: 'leistungen/werkstatt/', items: [] },
   ];
   const body = `${pageHero({ kicker: 'Leistungsübersicht', title: 'Dienstleistungen', sub: 'Feld, Forst und Kommune – wir stimmen unsere Leistungen speziell auf Ihre Bedürfnisse ab.', img: 'haeckseln-2', crumbs: [['leistungen/', 'Leistungen']] })}
 <section class="sec">
@@ -427,6 +449,10 @@ function sectorPage(s) {
     </div>
   </div>
 </section>
+<figure class="pband">
+  ${pic(s.bandImg, { sizes: '100vw', attrs: 'data-parallax="0.14"' })}
+  <figcaption class="wrap"><span class="label label--light"><span class="label__dot"></span>${s.short}</span><strong class="display" data-split>${s.sub}</strong></figcaption>
+</figure>
 <section class="sec cross">
   <div class="wrap">
     ${label('Weitere Bereiche')}
@@ -514,7 +540,7 @@ function unternehmen() {
   <div class="wrap about__grid">
     <div class="about__media">
       <figure class="frame frame--tall" data-reveal="clip">${pic('haeckseln-1', { sizes: '(max-width:900px) 100vw, 45vw', attrs: 'data-parallax="0.12"' })}</figure>
-      <figure class="frame about__small" data-reveal="clip">${pic('holz-ruecken-5', { sizes: '(max-width:900px) 50vw, 20vw' })}</figure>
+      <figure class="frame about__small" data-reveal="clip">${pic('transport-1', { sizes: '(max-width:900px) 50vw, 20vw' })}</figure>
     </div>
     <div class="about__text">
       ${label('Seit 1973')}
