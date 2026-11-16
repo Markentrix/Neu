@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { company as C, sectors, services, values, timeline, agrarmonitor, team, job, news, faqs, alts } from './content/site.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
-const OUT = join(ROOT, 'site');
+const ART = process.env.ARTIFACT_OUT; // Vorschau-Variante: Links mit index.html, Startseite als Fragment
+const OUT = ART || join(ROOT, 'site');
 const json = (f) => JSON.parse(readFileSync(join(ROOT, 'content', f), 'utf8'));
 const svcData = json('services.json');
 const legal = json('legal.json');
@@ -200,7 +201,15 @@ ${footer()}
 </html>`;
   const file = join(OUT, path, 'index.html');
   mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, html.replaceAll('{root}', root));
+  let out = html.replaceAll('{root}', root);
+  if (ART) {
+    out = out.replace(/href="((?:\.\.?\/)(?:[^"#?]*\/)?)"/g, 'href="$1index.html"');
+    if (!path) {
+      const inner = out.slice(out.indexOf('>', out.indexOf('<body')) + 1, out.indexOf('</body>'));
+      out = `<title>Linneweh Redesign</title>\n<link rel="stylesheet" href="./assets/css/main.css">\n<script>document.documentElement.lang='de';document.documentElement.id='top';document.documentElement.classList.add('js');document.body.className='${cls}';setTimeout(function(){if(!window.__lul)document.documentElement.classList.add('no-anim')},4000);${loader ? "try{if(!sessionStorage.getItem('lul-intro'))document.documentElement.classList.add('intro')}catch(e){}" : ''}</script>\n${inner}`;
+    }
+  }
+  writeFileSync(file, out);
   pages.push(path);
 }
 const pages = [];
