@@ -78,13 +78,13 @@ const orgLd = () => ({ '@type': ['AnimalShelter', 'NGO'], '@id': SITE + '/#tierh
   sameAs: [F.fb], memberOf: { '@type': 'Organization', name: 'Verband Niedersächsischer Tierschutzvereine e.V.', url: F.verband } });
 const pfadLd = kr => ({ '@type': 'BreadcrumbList', itemListElement: kr.map(([n, u], i) => ({ '@type': 'ListItem', position: i + 1, name: n, item: SITE + (u === '/' ? '/' : u) })) });
 const pfad = kr => kr.length > 1 ? `<nav aria-label="Du bist hier"><ol class="pfad">${kr.map(([n, u], i) => i === kr.length - 1 ? `<li aria-current="page">${esc(n)}</li>` : `<li><a href="${u}">${esc(n)}</a></li>`).join('')}</ol></nav>` : '';
-const NAV = [['Tiere', '/im-waldtierheim-celle.html'], ['Happy End', '/happy-end.html'], ['Helfen', '/deine-hilfe.html'], ['Verein', '/verein.html'], ['Aktuelles', '/aktuelles.html']];
+const NAV = [['Tiere', '/im-waldtierheim-celle.html'], ['Happy End', '/happy-end.html'], ['Verein', '/verein.html'], ['Aktuelles', '/aktuelles.html'], ['Kontakt', '/kontakt.html']];
 const wochenTabelle = (kopf = true) => `<table class="woche"><caption class="nur-sr">Öffnungszeiten des Waldtierheims Celle</caption>${kopf ? '<thead><tr><th scope="col">Tag</th><th scope="col">Vormittag</th><th scope="col">Nachmittag</th></tr></thead>' : ''}<tbody>${WOCHE.map(([t, n, v, na]) => `<tr data-tag="${n}"><th scope="row">${t}</th><td>${v}</td><td${na ? '' : ' data-zu'}>${na || 'geschlossen'}</td></tr>`).join('')}</tbody></table>`;
 
 function geruest({ pfad: p, title, desc, body, ld = [], hero, heroXl = false, noindex, aktiv, leiste, htmlKlasse = '' }) {
   const canon = SITE + (p === '/index.html' ? '/' : p);
   const graph = { '@context': 'https://schema.org', '@graph': ld };
-  const bar = leiste || [`<a href="tel:${F.telLink}">Anrufen ${F.tel}</a>`, `<a href="/im-waldtierheim-celle.html">Tiere ansehen</a>`];
+  const bar = leiste || [`<a href="/deine-hilfe.html#spenden">Spenden</a>`, `<a href="/im-waldtierheim-celle.html">Tiere ansehen</a>`];
   return `<!doctype html>
 <html lang="de"${htmlKlasse ? ` class="${htmlKlasse}"` : ''}>
 <head>
@@ -117,7 +117,7 @@ ${ld.length ? `<script type="application/ld+json">${JSON.stringify(graph).replac
 <nav class="nav" id="nav" aria-label="Hauptnavigation">
 <button class="menue-knopf nav-zu" type="button">Schließen</button>
 ${NAV.map(([n, u]) => `<a href="${u}"${aktiv === u ? ' aria-current="page"' : ''}>${n}</a>`).join('\n')}
-<a class="knopf" href="/kontakt.html">Kontakt und Besuch</a>
+<a class="knopf" href="/deine-hilfe.html"${aktiv === '/deine-hilfe.html' ? ' aria-current="page"' : ''}>Spenden und helfen</a>
 </nav>
 </div></header>
 <main id="inhalt">
@@ -195,6 +195,7 @@ const FAQ = [
   ['Werden Katzenkinder einzeln vermittelt?', 'Katzenkinder vermitteln wir mindestens zu zweit oder zu einer bereits vorhandenen, etwa gleichaltrigen Katze. Spielen, Kuscheln und gegenseitiges Putzen mit einem Katzenfreund sind für eine gesunde Entwicklung wichtig.'],
   ['Wie werde ich Gassi-Geher?', 'Melde dich während der Öffnungszeiten direkt im Waldtierheim. Dort besprechen wir alles Weitere mit dir.'],
   ['Was kostet die Mitgliedschaft im Verein?', 'Den Beitrag bestimmst du selbst, mindestens 20 € im Jahr. Den Aufnahmeantrag bekommst du im Tierheim. Einmal im Jahr, im Frühjahr, laden wir zur Mitgliederversammlung ein.'],
+  ['Wofür wird meine Spende verwendet?', 'Für Tierarztkosten wie die medizinische Versorgung bei Krankheit und Kastrationen, für Futter und für die Instandhaltung von Hundezwingern und Katzenhaus. Die Spende kommt direkt den Tieren im Waldtierheim zugute.'],
   ['Bekomme ich eine Spendenbescheinigung?', 'Für Spenden über unseren Partner betterplace.org stellt betterplace die Spendenbescheinigung zu Beginn des folgenden Jahres zu.'],
   ['Ich muss mein Tier privat abgeben. Könnt ihr helfen?', 'Ja, mit der Vermittlungshilfe privat. Wir veröffentlichen eine Anzeige für dein Tier, sie bleibt etwa sechs Wochen aktiv. Das Tier bleibt bei dir, Interessierte melden sich direkt bei dir.'],
   ['Sucht ihr Plätze für scheue Katzen?', 'Ja. Für unsere scheuen und verwilderten Katzen suchen wir Bauernhöfe, Reiterhöfe und ähnliche Orte, an denen sie einen geschützten Platz zum Leben finden.']];
@@ -205,8 +206,8 @@ ${bild(HERO_BILD, { alt: `Hündin ${heroTier.name} liegt lachend im Sand des Wal
 <div class="huelle buehne-innen">
 <div class="hero-text">
 <h1><span>Waldtierheim Celle</span><span>Zuhause gesucht</span></h1>
-<p class="statement">Im Wald am Rand von Altencelle warten Hunde und Katzen auf ihre Menschen. Sieh dir die Steckbriefe an und komm in den Öffnungszeiten vorbei.</p>
-<div class="hero-aktion"><a class="knopf" href="/im-waldtierheim-celle.html">Tiere kennenlernen</a><a href="tel:${F.telLink}">${F.tel} anrufen</a></div>
+<p class="statement">Cora hat vier Jahre in einem Tierheim in Rumänien gelebt. Jetzt wartet sie bei uns im Wald am Rand von Altencelle auf ihre Menschen, so wie viele andere Hunde und Katzen.</p>
+<div class="hero-aktion"><a class="knopf" href="/im-waldtierheim-celle.html">Tiere kennenlernen</a><a href="#spenden">Für die Tiere spenden</a></div>
 <p class="status" data-status>Geöffnet jeden Vormittag, Mo, Mi, Fr und So auch 15 bis 17 Uhr</p>
 </div>
 <div class="hero-schild">${sittich}<a class="schild" href="${heroTier.neu}"><div class="schild-text"><span class="schild-name">Das ist ${esc(heroTier.name)}</span><p class="schild-daten">${tierDaten(heroTier).map(esc).join('<br>')}</p><p class="tage" data-seit="${heroTier.date}"><span class="tage-zahl"></span><small></small></p></div></a></div>
@@ -218,6 +219,15 @@ ${bild(HERO_BILD, { alt: `Hündin ${heroTier.name} liegt lachend im Sand des Wal
 <div class="mosaik">${laengste.map(kachel).join('\n')}</div>
 <p style="margin-top:2rem;display:flex;flex-wrap:wrap;align-items:center;gap:1.5rem"><a class="knopf knopf-still" href="/im-waldtierheim-celle.html">Alle ${heimtiere.length} Steckbriefe ansehen</a>${spur('hundepfote', 4)}</p>
 </div></section>
+
+${(() => { const g = tiere.hunde.find(t => t.neu.endsWith('ernie-und-bert.html')); if (!g) return ''; return `<section class="abschnitt geschichte" aria-labelledby="h-geschichte"><div class="huelle geschichte-raster">
+<div class="geschichte-bilder"><figure class="enthuellt">${bild(g.images[0], { alt: 'Die Doggen-Brüder Ernie und Bert sitzen nebeneinander im Sand', sizes: '(max-width: 60rem) 52vw, 28vw' })}</figure><figure class="enthuellt">${bild(g.images[1], { alt: 'Eine der beiden Doggen trägt ein Stofftier im Maul', sizes: '(max-width: 60rem) 40vw, 22vw' })}</figure></div>
+<div><h2 id="h-geschichte" style="hyphens:manual">Ernie und Bert hatten nur einander</h2>
+<blockquote class="statement">„Als sie zu uns kamen, waren sie nahezu verhungert und körperlich in einem erschreckend schlechten Zustand. Doch sie hatten einander.“</blockquote>
+<p>Die beiden Deutschen Doggen sind Brüder und vier Jahre alt. Gemeinsam haben sie gekämpft, zugenommen und Schritt für Schritt wieder gelernt, Vertrauen zu fassen. Heute suchen die zwei sanften Riesen gemeinsam ein Zuhause.</p>
+<p class="tage" data-seit="${g.date}" style="text-align:left;margin:1.5rem 0"><span class="tage-zahl"></span><small></small></p>
+<p><a class="knopf" href="${g.neu}">Ernie und Bert kennenlernen</a></p></div>
+</div></section>`; })()}
 
 <section class="abschnitt dunkel" aria-labelledby="h-besuch"><div class="huelle besuch">
 <div><h2 id="h-besuch">Komm im Wald vorbei</h2>
@@ -245,12 +255,19 @@ ${wochenTabelle()}
 </div>
 <ul class="streifen" aria-label="Vermittelte Tiere">${streifen.map(t => `<li><a href="${t.neu}">${bild(t.images[0], { alt: `${t.name}, vermittelt`, klein: true })}<span>${esc(t.name)}</span></a></li>`).join('')}</ul></section>
 
-<section class="hilfe" aria-labelledby="h-hilfe"><div class="band buehne">${bild(helferBild, { alt: 'Freiwillige schaufeln Erde für Sandsäcke auf dem Gelände des Waldtierheims', sizes: '100vw', xl: true, cls: 'buehne-bild' })}<div class="huelle buehne-innen"><div><h2 id="h-hilfe">Vier Wege, wie du hilfst</h2><p class="statement" style="margin-top:1rem">Wir sind ein privater Tierschutzverein und an 365 Tagen im Jahr für die Tiere da. Das geht nur mit Unterstützung.</p><p class="klein" style="margin:1rem 0 0">Foto: Freiwillige sichern das Waldtierheim gegen Hochwasser, Dezember 2023.</p></div></div></div><div class="huelle" style="padding-bottom:var(--abschnitt)">
+<section class="hilfe" id="spenden" aria-labelledby="h-hilfe"><div class="band buehne">${bild(helferBild, { alt: 'Freiwillige schaufeln Erde für Sandsäcke auf dem Gelände des Waldtierheims', sizes: '100vw', xl: true, cls: 'buehne-bild' })}<div class="huelle buehne-innen"><div><h2 id="h-hilfe">Deine Spende macht das möglich</h2><p class="statement" style="margin-top:1rem">Wir sind ein privater Tierschutzverein. Tierarzt, Futter und Unterkünfte bezahlen wir aus Mitgliedsbeiträgen und Spenden.</p><p class="klein" style="margin:1rem 0 0">Foto: Freiwillige sichern das Waldtierheim gegen Hochwasser, Dezember 2023.</p></div></div></div>
+<div class="huelle spenden-raster">
+<div><h3>Dafür brauchen wir deine Hilfe</h3>
+<ul class="jahre wofuer"><li><b>Tierarzt</b><span>Medizinische Versorgung bei Krankheit und Kastrationen.</span></li><li><b>Futter</b><span>Die tägliche Versorgung unserer Hunde, Katzen und Kleintiere.</span></li><li><b>Unterkunft</b><span>Instandhaltung von Hundezwingern und Katzenhaus.</span></li></ul>
+<p class="klein neben">Für Spenden über betterplace.org bekommst du zu Beginn des folgenden Jahres eine Spendenbescheinigung von betterplace.</p></div>
+<div class="spendenbox"><h3>Jetzt spenden</h3>${kontoBlock}<p style="margin:0"><a class="knopf" href="${F.spende}" rel="noopener">Online spenden über betterplace.org</a></p></div>
+</div>
+<div class="huelle" style="padding-bottom:var(--abschnitt)">
+<h3 style="margin-bottom:1.5rem">Du kannst auch anders helfen</h3>
 <ul class="wege" style="margin-top:0">
-<li><h3>Gassi gehen</h3><div><p>Unsere Hunde freuen sich über Spaziergänge. Melde dich dafür während der Öffnungszeiten direkt im Waldtierheim.</p></div></li>
 <li><h3>Patenschaft</h3><div><p>Du kannst kein Tier aufnehmen, aber eines liegt dir am Herzen? Unterstütze genau dieses Tier mit Futter, Sachspenden oder einem monatlichen Betrag und besuche es in den Öffnungszeiten.</p><p><a href="/dokumente/patenschaftsvertrag.pdf">Patenschaftsvertrag als PDF (155 KB)</a></p></div></li>
 <li><h3>Mitglied werden</h3><div><p>Den Beitrag bestimmst du selbst, mindestens 20 € im Jahr. Den Aufnahmeantrag bekommst du bei uns im Tierheim.</p></div></li>
-<li><h3>Spenden</h3><div><p>Deine Spende fließt in Tierarztkosten, Futter und die Instandhaltung von Hundezwingern und Katzenhaus.</p>${kontoBlock}<p><a href="${F.spende}" rel="noopener">Online spenden über betterplace.org</a></p></div></li>
+<li><h3>Gassi gehen</h3><div><p>Unsere Hunde freuen sich über Spaziergänge. Melde dich dafür während der Öffnungszeiten direkt im Waldtierheim.</p></div></li>
 </ul>
 <p style="margin-top:2.5rem"><a class="knopf knopf-still" href="/deine-hilfe.html">Alles zur Unterstützung lesen</a></p>
 </div></section>
@@ -316,7 +333,7 @@ ${privat ? '' : `<p style="margin-top:2rem"><a class="knopf" href="#anfrage">${e
 </div>
 </article></div>
 ${privat ? '' : `<section class="abschnitt anfrage" id="anfrage" aria-labelledby="h-anfrage"><div class="huelle anfrage-raster">
-<div><h2 id="h-anfrage">Frag nach ${esc(s.name)}</h2><p style="margin-top:1.5rem">Schreib uns, wer du bist und wie ${esc(s.name)} bei dir leben würde. Wir melden uns per E-Mail oder Telefon.</p><p class="status" data-status>Oder komm in den Öffnungszeiten vorbei</p></div>
+<div><h2 id="h-anfrage">Frag nach ${esc(s.name)}</h2><p style="margin-top:1.5rem">Schreib uns, wer du bist und wie ${esc(s.name)} bei dir leben würde. Wir melden uns per E-Mail oder Telefon.</p><p class="status" data-status>Oder komm in den Öffnungszeiten vorbei</p><p style="margin-top:1.5rem">Du kannst ${esc(s.name)} nicht aufnehmen? Mit einer <a href="/deine-hilfe.html#patenschaft">Patenschaft</a> oder einer <a href="/deine-hilfe.html#spenden">Spende</a> hilfst du trotzdem.</p></div>
 ${formular({ typ: 'kontakt', tier: `${s.name} (${art[0]})`, knopf: 'Anfrage zu ' + esc(s.name) + ' senden', nachricht: 'Deine Nachricht an das Tierheim-Team' })}
 </div></section>`}
 ${lichtDialog}`;

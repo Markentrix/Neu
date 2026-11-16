@@ -395,3 +395,21 @@ dialog.licht button{background:none;border:0;color:var(--sand-hell);font-weight:
 @keyframes enthuelle{from{clip-path:inset(18% 0 0 0);opacity:.2}to{clip-path:inset(0);opacity:1}}
 @keyframes gleite{from{transform:scale(1.14) translateY(-5%)}to{transform:scale(1.14) translateY(5%)}}
 @media (prefers-reduced-motion:reduce){.lauf-band{animation:none}}
+
+/* Geschichte und Spenden */
+.geschichte{background:var(--sand-hell)}
+.geschichte-raster{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:clamp(2rem,6vw,6rem);align-items:center}
+.geschichte-bilder{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:clamp(.6rem,1.4vw,1.25rem);align-items:end}
+.geschichte-bilder img{width:100%;height:100%;object-fit:cover}
+.geschichte-bilder figure:first-child img{aspect-ratio:4/5}
+.geschichte-bilder figure:last-child img{aspect-ratio:1}
+.geschichte blockquote.statement{margin:1.5rem 0;font-size:clamp(1.35rem,2.5vw,2.1rem);max-width:30ch;font-weight:700}
+.geschichte .tage{font-size:clamp(3rem,6vw,5rem)}
+.spenden-raster{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:clamp(2rem,6vw,6rem);align-items:start;padding-block:clamp(2.5rem,6vw,5rem)}
+.wofuer li{grid-template-columns:9.5rem minmax(0,1fr)}
+.spendenbox{background:var(--tinte);color:var(--sand-hell);padding:clamp(1.25rem,3vw,2.5rem)}
+.spendenbox h3{font-size:var(--t-xl);margin-bottom:1.25rem}
+.spendenbox .kopier{background:var(--sand-hell);color:var(--tinte)}
+.spendenbox :focus-visible{outline-color:var(--mai)}
+@media (max-width:60rem){.geschichte-raster,.spenden-raster{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:30rem){.wofuer li{grid-template-columns:minmax(0,1fr);gap:.1rem}}
