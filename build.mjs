@@ -176,8 +176,8 @@ function layout({ path, title, desc, body, cls = '', img = 'grasernte', cta = tr
 <meta property="og:image" content="${SITE_URL}assets/img/${img}-1600.webp">
 <meta name="theme-color" content="#0f2a1c">
 <link rel="icon" href="{root}assets/img/favicon.png" type="image/png">
-<link rel="preload" href="{root}assets/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{root}assets/fonts/instrument-sans-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{root}assets/fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{root}assets/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{root}assets/css/main.css">
 <script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.__lul)document.documentElement.classList.add('no-anim')},4000);${loader ? "try{if(!sessionStorage.getItem('lul-intro'))document.documentElement.classList.add('intro')}catch(e){}" : ''}</script>
 <script type="application/ld+json">${JSON.stringify({
