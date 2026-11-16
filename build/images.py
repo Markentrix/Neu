@@ -301,7 +301,7 @@ def main():
         full = ImageOps.exif_transpose(Image.open(hero_src)).convert("RGB")
         fw, fh = full.size; pad = 1500
         # Verlängerung: mittlere Farbe der linken 300 px je Zeile, senkrecht stark geglättet (keine Streifen)
-        strip = full.crop((0, 0, 300, fh)).resize((1, fh), Image.BOX).resize((pad, fh), Image.NEAREST).filter(ImageFilter.GaussianBlur(120)).point(lambda v: int(v * 0.7))
+        strip = Image.new("RGB", (pad, fh), (8, 12, 10))   # nahezu schwarz wie der Rand der Matte
         canvas = Image.new("RGB", (fw + pad, fh)); canvas.paste(strip, (0, 0))
         ramp = Image.frombytes("L", (600, 1), bytes(int(255 * x / 599) for x in range(600))).resize((600, fh))   # 0 links, 255 rechts
         alpha = Image.new("L", (fw, fh), 255); alpha.paste(ramp, (0, 0))

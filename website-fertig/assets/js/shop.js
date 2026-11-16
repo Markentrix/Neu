@@ -882,6 +882,51 @@
     show(0, true);
   }
 
+  /* ---------- Bewegung der Startseite: Druckstrecke, Stufen-Kanten, Schichtzähler ---------- */
+  (function () {
+    var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var sec = $(".druckstrecke");
+    if (sec && !reduced) {
+      var rects = $$(".zl", sec), duese = $(".zduese", sec), schritte = $$(".ds-schritt", sec), mass = $(".zmass", sec), N = rects.length, tick = false;
+      var update = function () {
+        tick = false;
+        var r = sec.getBoundingClientRect(), total = r.height - window.innerHeight;
+        var p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 1, q = Math.min(1, p / 0.82), n = Math.round(q * N);
+        rects.forEach(function (el, i) { var on = i < n; if (el._an !== on) { el._an = on; el.classList.toggle("an", on); } });
+        if (duese) duese.style.transform = "translateY(" + ((N - n) * 11) + "px)";
+        if (mass) mass.classList.toggle("an", q >= 1);
+        var si = p < 0.34 ? 0 : p < 0.7 ? 1 : 2;
+        schritte.forEach(function (el, i) { el.classList.toggle("an", i === si); });
+      };
+      var ask = function () { if (!tick) { tick = true; requestAnimationFrame(update); } };
+      window.addEventListener("scroll", ask, { passive: true }); window.addEventListener("resize", ask); update();
+    }
+    // Stufen-Kanten wachsen, sobald sie ins Bild kommen
+    var stufen = $$(".stufe, [data-seite=start] .site-footer");
+    if (stufen.length) {
+      var pend = stufen.slice(), tk = false;
+      var chk = function () {
+        tk = false; var lim = window.innerHeight * 0.96;
+        pend = pend.filter(function (el) { var r = el.getBoundingClientRect(); if (r.top < lim + 80) { el.classList.add("an"); return false; } return true; });
+        if (!pend.length) { window.removeEventListener("scroll", ak); window.removeEventListener("resize", ak); }
+      };
+      var ak = function () { if (!tk) { tk = true; requestAnimationFrame(chk); } };
+      window.addEventListener("scroll", ak, { passive: true }); window.addEventListener("resize", ak); chk();
+    }
+    // Schichtzähler: reitet auf der Fortschrittslinie unter der Kopfzeile
+    var head = $(".site-header");
+    if (head && !reduced && window.innerWidth > 860 && CSS && CSS.supports && CSS.supports("animation-timeline: scroll()")) {
+      var tag = document.createElement("span"); tag.className = "schicht-zahl"; tag.setAttribute("aria-hidden", "true"); head.appendChild(tag);
+      var t3 = false;
+      var upd = function () {
+        t3 = false; var h = document.documentElement.scrollHeight - window.innerHeight, p = h > 0 ? Math.min(1, Math.max(0, window.scrollY / h)) : 0;
+        tag.textContent = "Schicht " + ("0000" + Math.round(p * 480)).slice(-4);
+        tag.style.transform = "translateX(" + Math.max(0, p * (window.innerWidth - tag.offsetWidth)) + "px)";
+      };
+      window.addEventListener("scroll", function () { if (!t3) { t3 = true; requestAnimationFrame(upd); } }, { passive: true }); upd();
+    }
+  })();
+
   // Start: Zusatzfunktionen auf statischen Produktseiten und der Shopseite
   if ($("#kaufen") && !$("#produkt-dyn")) {
     initPreview(); initGallery(); addMerkLink($("#kaufen")); trackSeen($("#kaufen").dataset.id);
@@ -896,7 +941,7 @@
   // Aufbau beim Scrollen: markierte Elemente bauen sich einmal in Stufen auf, wenn sie ins Bild kommen
   (function () {
     if (!("IntersectionObserver" in window) || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
-    var SEL = "main .datei, .materialliste li, .ablauf li, .spaltenliste > div";
+    var SEL = "main .datei:not(.stufe), .materialliste li, .ablauf li, .spaltenliste > div, .card .card-img, [data-seite=start] main h2:not(.druckstrecke h2):not(.card h2)";
     // Kein IntersectionObserver: Chrome zählt ein weggeschnittenes Ziel (clip-path) als unsichtbar und löst nie aus
     var pending = [], queued = false;
     function check() {

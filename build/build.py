@@ -52,10 +52,10 @@ def head(title, desc, rel, canonical_name, extra=""):
 <link rel="apple-touch-icon" href="{rel}apple-touch-icon.png">
 <link rel="manifest" href="{rel}site.webmanifest">
 <link rel="preload" href="{rel}assets/fonts/AbrilFatface.woff2" as="font" type="font/woff2" crossorigin>
-<script>try{{if(sessionStorage.getItem("sw_logo"))document.documentElement.classList.add("seen")}}catch(e){{}}</script>
+<script>document.documentElement.classList.add("js");try{{if(sessionStorage.getItem("sw_logo"))document.documentElement.classList.add("seen")}}catch(e){{}}</script>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
 {seo.meta(canonical_name, title, desc, extra)}{extra}</head>
-<body data-root="{rel}">
+<body data-root="{rel}"{' data-seite="start"' if canonical_name == "index.html" else ""}>
 <a class="skip" href="#main">Zum Inhalt springen</a>
 <script>(function(){{try{{var d=new Date();d.setHours(0,0,0,0);var l=new Date(d.getFullYear(),11,23);if(d>l||d.getMonth()<10||/^(warenkorb|danke|404|produkt)/.test(location.pathname.split("/").pop()))return;if(sessionStorage.getItem("sw_aktion_zu"))return;var n=0,t=new Date(l);while(n<9){{t.setDate(t.getDate()-1);var w=t.getDay();if(w!==0&&w!==6)n++}}if(d>t)return;var s=/^shop/.test(location.pathname.split("/").pop());var e=document.createElement("aside");e.className="aktion";e.setAttribute("aria-label","Hinweis zu Weihnachten");var p=document.createElement("p");p.appendChild(document.createTextNode("Als Geschenk zu Weihnachten: Bestellen Sie bis "));var st=document.createElement("strong");st.textContent=t.toLocaleDateString("de-DE",{{weekday:"long",day:"numeric",month:"long"}});p.appendChild(st);p.appendChild(document.createTextNode(", dann kommt es nach unseren Richtwerten rechtzeitig an."));if(!s){{var a=document.createElement("a");a.href="{rel}shop.html";a.textContent="Zum Shop";p.appendChild(document.createTextNode(" "));p.appendChild(a)}}var c=document.createElement("button");c.type="button";c.setAttribute("aria-label","Hinweis schließen");c.textContent="×";c.onclick=function(){{e.remove();try{{sessionStorage.setItem("sw_aktion_zu","1")}}catch(x){{}}}};e.appendChild(p);e.appendChild(c);document.body.insertBefore(e,document.querySelector(".skip").nextSibling)}}catch(x){{}}}})()</script>
 """
@@ -163,8 +163,8 @@ def card(p, rel, pos, h="h3"):
 </article>"""
 
 
-def datei_band(titel, text, knopf, href):
-    return f"""<section class="datei on-deep">
+def datei_band(titel, text, knopf, href, stufe=False):
+    return f"""<section class="datei on-deep{' stufe rev vor-stufe' if stufe else ''}">
   <div class="wrap in">
     <h2>{E(titel)}</h2>
     <div><p>{E(text)}</p><a class="btn btn-primary" href="{href}">{E(knopf)}</a></div>
@@ -224,7 +224,7 @@ def build_index():
 </section>
 <div class="schichtkante" aria-hidden="true"></div>
 
-<section class="section"{"" if AKTIV else " hidden"}>
+<section class="section vor-stufe"{"" if AKTIV else " hidden"}>
   <div class="wrap shop-block">
     <div class="side">
       <h2>Im Shop</h2>
@@ -235,7 +235,7 @@ def build_index():
   </div>
 </section>
 
-<section class="section-tight feld-bronze">
+<section class="section-tight feld-bronze stufe vor-stufe">
   <div class="wrap zeit">
     <div>
       <h2>Wann es bei Ihnen ist</h2>
@@ -247,20 +247,28 @@ def build_index():
     </div>
   </div>
 </section>
-<section class="section feld-flaeche">
-  <div class="wrap zeichnung-block">
-    <div class="zb-text">
-      <h2>So entsteht ein Teil.</h2>
-      <p>Der Drucker legt das Teil Schicht für Schicht aus Filament, von unten nach oben. Jede Schicht ist 0,12 bis 0,28 mm hoch. Feinere Schichten sehen glatter aus und dauern länger. Teile wachsen bis 25 cm Kantenlänge.</p>
-      <p><a class="textlink" href="druckservice.html">Was sich drucken lässt</a></p>
+<section class="druckstrecke feld-flaeche stufe vor-stufe" id="druck" aria-labelledby="ds-h">
+  <div class="ds-spur">
+    <div class="ds-pin">
+      <div class="wrap zeichnung-block">
+        <div class="zb-text">
+          <h2 id="ds-h">So entsteht ein Teil.</h2>
+          <div class="ds-schritte">
+            <p class="ds-schritt an">Die Düse setzt auf und zieht die erste Schicht. Der Drucker baut das Teil von unten nach oben aus Filament.</p>
+            <p class="ds-schritt">Schicht für Schicht wächst es, jede Lage 0,12 bis 0,28 mm hoch. Feinere Schichten sehen glatter aus und dauern länger.</p>
+            <p class="ds-schritt">Fertig sind Teile bis 25 cm Kantenlänge. Gedruckt wird erst nach Ihrer Bestellung, in 2 bis 4 Werktagen.</p>
+          </div>
+          <p><a class="textlink" href="druckservice.html">Was sich drucken lässt</a></p>
+        </div>
+        <figure class="zeichnung-ds">{schicht_zeichnung()}<figcaption class="small muted">Schematisch, nicht maßstäblich. Scrollen baut die Zeichnung auf.</figcaption></figure>
+      </div>
     </div>
-    <figure class="zeichnung">{schicht_zeichnung()}<figcaption class="small muted">Schematisch, nicht maßstäblich.</figcaption></figure>
   </div>
 </section>
 
-{datei_band("Sie haben eine Datei?", "STL, 3MF oder STEP, ein kaputtes Teil als Foto mit Maßen oder nur eine Idee. Schreiben Sie, was Sie brauchen, und Sie bekommen Preis und Lieferzeit.", "Angebot für meine Datei anfordern", "kontakt.html")}
+{datei_band("Sie haben eine Datei?", "STL, 3MF oder STEP, ein kaputtes Teil als Foto mit Maßen oder nur eine Idee. Schreiben Sie, was Sie brauchen, und Sie bekommen Preis und Lieferzeit.", "Angebot für meine Datei anfordern", "kontakt.html", True)}
 
-<section class="section">
+<section class="section stufe">
   <div class="wrap shop-block">
     <div class="side">
       <h2>Welches Material?</h2>

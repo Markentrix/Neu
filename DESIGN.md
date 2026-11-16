@@ -165,3 +165,13 @@ Ideensatz: Auf dieser Seite wird die Schicht des Druckers zu Aufbau, Farbfeldern
 - **Bestellübersicht** direkt vor „Zahlungspflichtig bestellen“ (Artikel, Preise, Versand, Gutschein, Summe).
 - **Offen:** AGB und Widerrufsbelehrung sind selbst formulierte Entwürfe und müssen durch geprüfte Texte ersetzt werden (Skill: nur aus geprüften Bausteinen oder vom Betrieb).
 
+## Bewegung als Markenzeichen (16.11.2026)
+
+Auf Wunsch des Kunden (mehr Bewegung, weniger Baukasten) wird die Schicht zum durchgehenden Bewegungsmuster. Alles läuft in harten Stufen (`steps()`), von unten nach oben, nur mit transform, opacity und clip-path.
+- **Druckstrecke (Startseite):** gepinnte Sektion, 2,9 Bildschirme hoch. Die Zeichnung baut sich mit dem Scrollen Schicht für Schicht auf, die Düse steigt mit, drei Textschritte wechseln (Düse setzt auf, Schicht für Schicht, fertig nach 2 bis 4 Werktagen). Ohne JavaScript oder mit „Bewegung reduzieren“ steht die fertige Zeichnung mit allen drei Texten.
+- **Stufen-Kanten:** Zwischen den Farbfeldern wachsen Treppen, jede Sektion in Gegenrichtung zur vorigen. Sie ersetzen Haarlinien und weiche Übergänge.
+- **Seitenwechsel:** Die neue Seite druckt sich von unten auf (View Transition, Chrome und Safari).
+- **Hero:** Schichtlinien laufen mit dem Druckkopf über das Foto. **Schichtzähler** reitet auf der Fortschrittslinie („Schicht 0000 bis 0480“, reine Dekoration, nicht für Screenreader).
+- **Karten:** Beim Überfahren (nur Maus) läuft eine Druckkopf-Linie über das Bild. Kartenbilder und Überschriften der Startseite bauen sich einmalig auf.
+- Begründung gegenüber dem Skill: Die Regel „ein orchestrierter Moment“ wird auf Kundenwunsch erweitert. Gleiches Vokabular statt eines Effekts je Abschnitt; Fade-up, Bounce, Zoom und hochzählende Zahlen bleiben ausgeschlossen.
+
