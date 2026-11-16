@@ -94,6 +94,7 @@
     document.body.classList.toggle('menu-open', open);
     doc.style.overflow = open ? 'hidden' : '';
     if (open) hdr.classList.remove('is-hidden');
+    if (mbar && open) mbar.classList.remove('is-on');
   }
   toggle.addEventListener('click', () => setMenu(!menu.classList.contains('is-open')));
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.classList.contains('is-open')) { setMenu(false); toggle.focus(); } });
@@ -150,6 +151,8 @@
   const tl = $('[data-progress]');
   const word = $('.ftr__word span');
   const hs = $('[data-hscroll]');
+  const mbar = $('[data-mbar]');
+  const endEl = $('.cta') || $('.ftr');
   let hsDist = 0;
   const hsTrack = hs && $('.hs__track', hs); const hsCount = hs && $('.hs__count b', hs); const hsBar = hs && $('.hs__bar', hs);
   function measure() {
@@ -180,6 +183,10 @@
       hsCount.textContent = String(Math.min(n, Math.floor(p * n) + 1)).padStart(2, '0');
       hsBar.style.setProperty('--p', p.toFixed(3));
     }
+    if (mbar) {
+      const end = endEl ? endEl.getBoundingClientRect().top : Infinity;
+      mbar.classList.toggle('is-on', scrollY > vh * 0.6 && end > vh * 0.9 && !document.body.classList.contains('menu-open'));
+    }
     if (tl) {
       const r = tl.getBoundingClientRect();
       tl.style.setProperty('--p', clamp((vh * 0.62 - r.top) / r.height).toFixed(3));
@@ -188,6 +195,14 @@
       const r = word.getBoundingClientRect();
       if (r.top < vh) word.style.setProperty('--fill', (clamp((vh - r.top) / (r.height * 1.1)) * 100).toFixed(1) + '%');
     }
+  }
+  if (hs) {
+    hsTrack.addEventListener('scroll', () => {
+      if (hsDist) return;
+      const max = hsTrack.scrollWidth - hsTrack.clientWidth; const p = max > 0 ? clamp(hsTrack.scrollLeft / max) : 0; const n = hsTrack.children.length;
+      hsCount.textContent = String(Math.min(n, Math.round(p * (n - 1)) + 1)).padStart(2, '0');
+      hsBar.style.setProperty('--p', Math.max(1 / n, p).toFixed(3));
+    }, { passive: true });
   }
   let ticking = false;
   const req = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };

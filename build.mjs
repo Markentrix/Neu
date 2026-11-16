@@ -194,6 +194,7 @@ ${header(path)}
 ${shy ? shyText(body + (cta ? contactBlock() : '')) : body}
 </main>
 ${footer()}
+<div class="mbar" data-mbar><a class="mbar__call" href="${C.phoneHref}">${ICONS.phone}<span>Anrufen</span></a><a class="mbar__ask" href="${path === 'kontakt/' ? '#f-name' : '{root}kontakt/'}"><span>Anfrage stellen</span>${ARROW}</a></div>
 <dialog class="lb" aria-label="Bildansicht"><button class="lb__x" type="button" aria-label="Schließen">×</button><button class="lb__nav lb__prev" type="button" aria-label="Vorheriges Bild">‹</button><img alt=""><button class="lb__nav lb__next" type="button" aria-label="Nächstes Bild">›</button><p class="lb__cap"></p></dialog>
 <div class="cursor" aria-hidden="true"><span></span></div>
 <script src="{root}assets/js/main.js" defer></script>
