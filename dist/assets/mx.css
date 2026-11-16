@@ -1850,7 +1850,7 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
   .deal-price b{font-size:2.3rem}
   .deal-month{font-size:1rem}
   .deal-month b{font-size:1.1rem}
-  .deal-total{margin:0 0 8px;font-size:.875rem}
+  .deal-total{margin:0 0 8px;font-size:.9375rem}
   .deal-list{margin:0 0 12px}
   .deal-list{display:grid;gap:4px}
   .deal-list li{font-size:.9375rem;line-height:1.3;margin:0;padding-top:2px;padding-bottom:2px}
