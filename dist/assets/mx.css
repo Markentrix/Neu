@@ -1829,3 +1829,14 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .page-home .rail,.page-home .rail-dot{display:none!important}
 .offer-bar-m{display:none}
 @media (max-width:640px){.offer-bar-d{display:none}.offer-bar-m{display:inline}.offer-bar-in{flex-wrap:nowrap;gap:6px}}
+
+/* 40 · Schmale Handys: Knöpfe dürfen umbrechen, Wischkarten sprengen die Breite nicht */
+@media (max-width:720px){
+  .btn{white-space:normal;text-align:center;max-width:100%}
+  .swipe>*{min-width:0}
+  .deal-grid.swipe>.deal,.trust-grid.swipe>.card{min-width:0;max-width:100%;overflow-wrap:anywhere}
+  .deal .btn{width:100%}
+}
+.mobile-cta a.primary{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
+.mobile-cta a.primary svg{color:#FFFFFF}
+.mobile-panel .mp-actions a.btn--primary,.mobile-panel .mp-actions a.btn--primary:hover{color:#FFFFFF}
