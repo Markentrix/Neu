@@ -681,13 +681,14 @@
 
   /* Befristetes Angebot: nach Ablauf (Ende des Tages, Berliner Zeit) verschwindet der Abschnitt von selbst; sonst Hinweis auf die Restzeit */
   function initDeal() {
-    var sec = $('[data-deal-until]'); if (!sec) return;
-    var until = sec.getAttribute('data-deal-until'), m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(until); if (!m) return;
-    var end = new Date(m[1] + '-' + m[2] + '-' + m[3] + 'T23:59:59+01:00'), now = new Date();
-    if (now > end) { sec.parentNode.removeChild(sec); return; }
-    var left = $('[data-deal-left]', sec); if (!left) return;
-    var days = Math.ceil((end - now) / 86400000);
-    left.textContent = days <= 1 ? 'Heute letzter Tag' : 'Noch ' + days + ' Tage';
+    $$('[data-deal-until]').forEach(function (sec) {
+      var until = sec.getAttribute('data-deal-until'), m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(until); if (!m) return;
+      var end = new Date(m[1] + '-' + m[2] + '-' + m[3] + 'T23:59:59+01:00'), now = new Date();
+      if (now > end) { sec.parentNode.removeChild(sec); return; }
+      var left = $('[data-deal-left]', sec); if (!left) return;
+      var days = Math.ceil((end - now) / 86400000);
+      left.textContent = days <= 1 ? 'Heute letzter Tag' : 'Noch ' + days + ' Tage';
+    });
   }
 
   /* Aktionscode aus der Adresse (?aktion=…) in die Formulare übernehmen, damit die Anfrage dem Angebot zugeordnet wird */
