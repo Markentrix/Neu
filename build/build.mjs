@@ -128,7 +128,7 @@ ${body}
 <div class="fuss-raster">
 <div><h2>Besuch</h2><address>${F.name}<br>${F.str}, ${F.plz} ${F.ort}<br>Zufahrt Richtung Osterloh<br><a href="tel:${F.telLink}">Telefon ${F.tel}</a><br><a href="mailto:${F.mail}">${F.mail}</a></address></div>
 <div><h2>Öffnungszeiten</h2><dl><dt>Mo bis Fr</dt><dd>8 bis 11 Uhr</dd><dt>Sa und So</dt><dd>10 bis 11 Uhr</dd><dt>Mo, Mi, Fr, So</dt><dd>auch 15 bis 17 Uhr</dd></dl></div>
-<div><h2>Mehr</h2><ul><li><a href="/im-waldtierheim-celle/vermittlungshilfe-privat.html">Vermittlungshilfe privat</a></li><li><a href="/verein/vorstand.html">Vorstand</a></li><li><a href="/verein/satzung.html">Satzung</a></li><li><a href="/deine-hilfe/danke-an-die-helfer.html">Danke an die Helfer</a></li><li><a href="${F.fb}" rel="noopener">Waldtierheim auf Facebook</a></li><li><a href="${F.verband}" rel="noopener">Mitglied im Verband Niedersächsischer Tierschutzvereine e.V.</a></li></ul></div>
+<div><h2>Mehr</h2><ul><li><a href="/im-waldtierheim-celle/vermittlungshilfe-privat.html">Vermittlungshilfe privat</a></li><li><a href="/verein/vorstand.html">Vorstand</a></li><li><a href="${F.fb}" rel="noopener">Waldtierheim auf Facebook</a></li><li><a href="${F.verband}" rel="noopener">Mitglied im Verband Niedersächsischer Tierschutzvereine e.V.</a></li></ul></div>
 </div>
 <div class="fuss-recht"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a><span data-mk="cookies"></span><span style="padding-block:.6rem">Fotos: Verein aktiver Tierfreunde e.V. und Einsendungen</span></div>
 </div></footer>
@@ -201,79 +201,62 @@ const FAQ = [
   ['Ich muss mein Tier privat abgeben. Könnt ihr helfen?', 'Ja, mit der Vermittlungshilfe privat. Wir veröffentlichen eine Anzeige für dein Tier, sie bleibt etwa sechs Wochen aktiv. Das Tier bleibt bei dir, Interessierte melden sich direkt bei dir.'],
   ['Sucht ihr Plätze für scheue Katzen?', 'Ja. Für unsere scheuen und verwilderten Katzen suchen wir Bauernhöfe, Reiterhöfe und ähnliche Orte, an denen sie einen geschützten Platz zum Leben finden.']];
 
+const FAQ_START = FAQ.filter(f => /geöffnet|kennen|Spende verwendet|Spendenbescheinigung|privat abgeben/.test(f[0]));
 function start() {
+  const g = tiere.hunde.find(t => t.neu.endsWith('ernie-und-bert.html'));
   const body = `<section class="hero buehne">
 ${bild(HERO_BILD, { alt: `Hündin ${heroTier.name} liegt lachend im Sand des Waldtierheims Celle`, sizes: '100vw', lazy: false, xl: true, cls: 'buehne-bild' })}
 <div class="huelle buehne-innen">
 <div class="hero-text">
 <h1><span>Waldtierheim Celle</span><span>Zuhause gesucht</span></h1>
-<p class="statement">Cora hat vier Jahre in einem Tierheim in Rumänien gelebt. Jetzt wartet sie bei uns im Wald am Rand von Altencelle auf ihre Menschen, so wie viele andere Hunde und Katzen.</p>
+<p class="statement">Cora hat vier Jahre in einem Tierheim in Rumänien gelebt. Jetzt wartet sie bei uns im Wald auf ihre Menschen, so wie viele andere Hunde und Katzen.</p>
 <div class="hero-aktion"><a class="knopf" href="/im-waldtierheim-celle.html">Tiere kennenlernen</a><a href="#spenden">Für die Tiere spenden</a></div>
-<p class="status" data-status>Geöffnet jeden Vormittag, Mo, Mi, Fr und So auch 15 bis 17 Uhr</p>
 </div>
 <div class="hero-schild">${sittich}<a class="schild" href="${heroTier.neu}"><div class="schild-text"><span class="schild-name">Das ist ${esc(heroTier.name)}</span><p class="schild-daten">${tierDaten(heroTier).map(esc).join('<br>')}</p><p class="tage" data-seit="${heroTier.date}"><span class="tage-zahl"></span><small></small></p></div></a></div>
 </div></section>
-<div class="lauf" aria-hidden="true"><div class="lauf-band">${[0, 1].map(() => lauf.map(n => `<span>${esc(n)}${zeichen('hundepfote')}</span>`).join('')).join('')}</div></div>
 
 <section class="abschnitt" aria-labelledby="h-warten"><div class="huelle">
-<div class="kopfzeile"><h2 id="h-warten">Diese Tiere warten am längsten</h2><p>Die Zahl zählt die Tage, seit denen der Steckbrief online ist.</p></div>
+<div class="kopfzeile"><h2 id="h-warten">Diese Tiere warten am längsten</h2><p><a class="knopf knopf-still" href="/im-waldtierheim-celle.html">Alle ${heimtiere.length} Steckbriefe ansehen</a></p></div>
 <div class="mosaik">${laengste.map(kachel).join('\n')}</div>
-<p style="margin-top:2rem;display:flex;flex-wrap:wrap;align-items:center;gap:1.5rem"><a class="knopf knopf-still" href="/im-waldtierheim-celle.html">Alle ${heimtiere.length} Steckbriefe ansehen</a>${spur('hundepfote', 4)}</p>
 </div></section>
 
-${(() => { const g = tiere.hunde.find(t => t.neu.endsWith('ernie-und-bert.html')); if (!g) return ''; return `<section class="abschnitt geschichte" aria-labelledby="h-geschichte"><div class="huelle geschichte-raster">
-<div class="geschichte-bilder"><figure class="enthuellt">${bild(g.images[0], { alt: 'Die Doggen-Brüder Ernie und Bert sitzen nebeneinander im Sand', sizes: '(max-width: 60rem) 52vw, 28vw' })}</figure><figure class="enthuellt">${bild(g.images[1], { alt: 'Eine der beiden Doggen trägt ein Stofftier im Maul', sizes: '(max-width: 60rem) 40vw, 22vw' })}</figure></div>
+${g ? `<section class="abschnitt geschichte" aria-labelledby="h-geschichte"><div class="huelle geschichte-raster">
+<figure class="enthuellt">${bild(g.images[0], { alt: 'Die Doggen-Brüder Ernie und Bert sitzen nebeneinander im Sand', sizes: '(max-width: 60rem) 92vw, 36vw' })}</figure>
 <div><h2 id="h-geschichte" style="hyphens:manual;font-size:clamp(1.6rem,3.4vw,2.9rem)">Ernie und Bert hatten nur einander</h2>
-<blockquote class="statement">„Als sie zu uns kamen, waren sie nahezu verhungert und körperlich in einem erschreckend schlechten Zustand. Doch sie hatten einander.“</blockquote>
-<p>Die beiden Deutschen Doggen sind Brüder und vier Jahre alt. Gemeinsam haben sie gekämpft, zugenommen und Schritt für Schritt wieder gelernt, Vertrauen zu fassen. Heute suchen die zwei sanften Riesen gemeinsam ein Zuhause.</p>
-<p class="tage" data-seit="${g.date}" style="text-align:left;margin:1.5rem 0"><span class="tage-zahl"></span><small></small></p>
+<blockquote class="statement">„Als sie zu uns kamen, waren sie nahezu verhungert. Doch sie hatten einander.“</blockquote>
+<p>Heute suchen die Doggen-Brüder gemeinsam ein Zuhause.</p>
 <p><a class="knopf" href="${g.neu}">Ernie und Bert kennenlernen</a></p></div>
-</div></section>`; })()}
+</div></section>` : ''}
 
-<section class="abschnitt" aria-labelledby="h-happy"><div class="huelle happy">
-<div><p class="grosszahl" aria-hidden="true">${happyZahl}</p>
-<h2 id="h-happy">Koffer gepackt und ausgezogen</h2>
-<p style="margin-top:1.25rem;max-width:40ch">${happyZahl} Vermittlungen sind in unserem Archiv mit Steckbrief dokumentiert. Danke an alle frisch gebackenen Dosenöffnerinnen und Dosenöffner.</p>
-<p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p></div>
-<blockquote class="brief">
-<p>„Ich kann nur sagen, dass sie wirklich eine Traumkatze ist und ich wirklich erstaunt bin, wie toll sie das macht. Sie ist total verschmust und genießt ihre Streicheleinheiten, sie kommt mit aufs Sofa und legt sich zu uns.“</p>
-<p>„Für uns war es auf jeden Fall die richtige Entscheidung.“</p>
-<footer>${bild(brief.images[0], { alt: 'Katze Quickie in ihrem neuen Zuhause', klein: true })}<p class="klein" style="margin:0">L. R. über Katze Quickie, ${datum(brief.date)}<br><a href="${brief.neu}">Den ganzen Gruß lesen</a> oder <a href="/happy-end/gruesse-vom-neuen-zuhause.html">alle ${gruesse.length} Grüße</a></p></footer>
-</blockquote>
-</div>
+<section class="abschnitt" aria-labelledby="h-happy"><div class="huelle">
+<div class="kopfzeile"><div><h2 id="h-happy">${happyZahl} Happy Ends im Archiv</h2><p style="margin-top:.75rem">Koffer gepackt und ausgezogen: Diese Tiere haben ihre Familie gefunden.</p></div><p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p></div></div>
 <ul class="streifen" aria-label="Vermittelte Tiere">${streifen.map(t => `<li><a href="${t.neu}">${bild(t.images[0], { alt: `${t.name}, vermittelt`, klein: true })}<span>${esc(t.name)}</span></a></li>`).join('')}</ul></section>
 
-<section class="hilfe" id="spenden" aria-labelledby="h-hilfe"><div class="band buehne">${bild(helferBild, { alt: 'Freiwillige schaufeln Erde für Sandsäcke auf dem Gelände des Waldtierheims', sizes: '100vw', xl: true, cls: 'buehne-bild' })}<div class="huelle buehne-innen"><div><h2 id="h-hilfe">Deine Spende macht das möglich</h2><p class="statement" style="margin-top:1rem">Wir sind ein privater Tierschutzverein. Tierarzt, Futter und Unterkünfte bezahlen wir aus Mitgliedsbeiträgen und Spenden.</p><p class="klein" style="margin:1rem 0 0">Foto: Freiwillige sichern das Waldtierheim gegen Hochwasser, Dezember 2023.</p></div></div></div>
-<div class="huelle spenden-raster">
-<div><h3>Dafür brauchen wir deine Hilfe</h3>
-<ul class="jahre wofuer"><li><b>Tierarzt</b><span>Medizinische Versorgung bei Krankheit und Kastrationen.</span></li><li><b>Futter</b><span>Die tägliche Versorgung unserer Hunde, Katzen und Kleintiere.</span></li><li><b>Unterkunft</b><span>Instandhaltung von Hundezwingern und Katzenhaus.</span></li></ul>
-<p class="klein neben">Für Spenden über betterplace.org bekommst du zu Beginn des folgenden Jahres eine Spendenbescheinigung von betterplace.</p></div>
-<div class="spendenbox"><h3>Jetzt spenden</h3><p><a class="knopf" href="${F.spende}" rel="noopener">Online spenden über betterplace.org</a></p><p class="klein" style="margin:1.75rem 0 .4rem">Oder per Überweisung auf unser Spendenkonto</p>${kontoBlock}</div>
-</div>
-<div class="huelle" style="padding-bottom:var(--abschnitt)">
-<h3 style="margin-bottom:1rem">Du kannst auch anders helfen</h3>
-<ul class="reiter" style="margin:0"><li><a href="/deine-hilfe.html#patenschaft">Patenschaft übernehmen</a></li><li><a href="/deine-hilfe.html#mitgliedschaft">Mitglied werden, ab 20 € im Jahr</a></li><li><a href="/deine-hilfe.html#gassi">Gassi gehen</a></li></ul>
+<section class="abschnitt hilfe" id="spenden" aria-labelledby="h-hilfe"><div class="huelle spenden-raster">
+<div><h2 id="h-hilfe">Deine Spende macht das möglich</h2>
+<p class="statement" style="margin:1.25rem 0 1.75rem">Wir sind ein privater Tierschutzverein. Tierarzt, Futter und Unterkünfte bezahlen wir aus Mitgliedsbeiträgen und Spenden.</p>
+<ul class="reiter" style="margin:0"><li><a href="/deine-hilfe.html#patenschaft">Patenschaft übernehmen</a></li><li><a href="/deine-hilfe.html#mitgliedschaft">Mitglied werden</a></li><li><a href="/deine-hilfe.html#gassi">Gassi gehen</a></li></ul></div>
+<div class="spendenbox"><h3>Jetzt spenden</h3><p><a class="knopf" href="${F.spende}" rel="noopener">Online spenden über betterplace.org</a></p><p class="klein" style="margin:1.5rem 0 .4rem">Oder per Überweisung auf unser Spendenkonto</p>${kontoBlock}</div>
 </div></section>
 
-<section class="abschnitt dunkel" aria-labelledby="h-besuch"><div class="huelle besuch">
+<section class="abschnitt" aria-labelledby="h-besuch"><div class="huelle besuch">
 <div><h2 id="h-besuch">Komm im Wald vorbei</h2>
 <p class="status" data-status style="margin:0 0 1.5rem">Zwei Öffnungsfenster am Tag</p>
-<dl class="zeiten"><dt>Montag bis Freitag</dt><dd>8 bis 11 Uhr</dd><dt>Samstag und Sonntag</dt><dd>10 bis 11 Uhr</dd><dt>Mo, Mi, Fr und So</dt><dd>zusätzlich 15 bis 17 Uhr</dd></dl>
-<p class="klein neben" style="margin-top:1.25rem">In diesen Zeiten ist unser Team vor Ort und beantwortet deine Fragen zu den Tieren.</p></div>
+<dl class="zeiten"><dt>Montag bis Freitag</dt><dd>8 bis 11 Uhr</dd><dt>Samstag und Sonntag</dt><dd>10 bis 11 Uhr</dd><dt>Mo, Mi, Fr und So</dt><dd>zusätzlich 15 bis 17 Uhr</dd></dl></div>
 <div class="anfahrt">
-<address>${F.str}<br>${F.plz} ${F.ort}<br><span class="klein neben">Zufahrt Richtung Osterloh</span></address>
+<address>${F.str}, ${F.plz} ${F.ort}<br><span class="klein neben">Zufahrt Richtung Osterloh</span></address>
 <a class="tel" href="tel:${F.telLink}">${F.tel}</a>
-<p style="margin:0"><a class="knopf" href="${F.route}" rel="noopener">Route in Google Maps öffnen</a></p>
+<p style="margin:0"><a class="knopf knopf-still" href="${F.route}" rel="noopener">Route in Google Maps öffnen</a></p>
 </div>
 </div></section>
 
-<section class="abschnitt" aria-labelledby="h-faq"><div class="huelle zwei">
-<div><h2 id="h-faq">Kurz gefragt</h2><div class="paar" aria-hidden="true">${sittich.replace(' class="sittich"', '')}${sittich.replace(' class="sittich"', '')}</div><div class="ast" aria-hidden="true"></div></div>
-<div class="fragen">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><div><p>${esc(a)}</p></div></details>`).join('\n')}</div>
+<section class="abschnitt" style="padding-top:0" aria-labelledby="h-faq"><div class="huelle zwei">
+<div><h2 id="h-faq">Kurz gefragt</h2><p style="margin-top:1rem"><a href="/kontakt.html#fragen">Alle Fragen und Antworten</a></p></div>
+<div class="fragen">${FAQ_START.map(([q, a]) => `<details><summary>${esc(q)}</summary><div><p>${esc(a)}</p></div></details>`).join('\n')}</div>
 </div></section>`;
   schreibe('/index.html', geruest({ pfad: '/index.html', title: 'Tierheim in Celle | Waldtierheim Celle', desc: 'Waldtierheim Celle: Hunde und Katzen suchen ein Zuhause. Steckbriefe, Öffnungszeiten, Anfahrt nach Altencelle, Spenden und Patenschaft. Telefon 05141 32900.', body, hero: HERO_BILD, heroXl: true, htmlKlasse: 'auf',
     ld: [orgLd(), { '@type': 'WebSite', '@id': SITE + '/#website', url: SITE, name: 'Waldtierheim Celle', inLanguage: 'de', publisher: { '@id': SITE + '/#tierheim' } },
-      { '@type': 'FAQPage', mainEntity: FAQ.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] }));
+      { '@type': 'FAQPage', mainEntity: FAQ_START.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] }));
 }
 
 /* ---------- Tierlisten ---------- */
@@ -357,10 +340,10 @@ ${s.images.length ? `<div class="galerie">${s.images.map((k, i) => `<button type
   schreibe(s.neu, geruest({ pfad: s.neu, title: titel(`${s.name} | Waldtierheim Celle`), desc: kurz(nurText(h) || s.name, 155), body, aktiv,
     ld: [pfadLd(kr), { '@type': 'Article', headline: s.name, ...(s.date ? { datePublished: s.date } : {}), author: { '@id': SITE + '/#tierheim' }, publisher: { '@id': SITE + '/#tierheim' }, mainEntityOfPage: SITE + s.neu }] }));
 }
-function einfach(p, { h1, title, desc, intro = '', inhalt, kr, aktiv, noindex = false, index = true, leiste }) {
+function einfach(p, { h1, title, desc, intro = '', inhalt, kr, aktiv, noindex = false, index = true, leiste, mehrLd = [] }) {
   const body = `<div class="huelle seitenkopf">${pfad(kr || [])}<h1>${h1}</h1>${intro ? `<p class="statement">${intro}</p>` : ''}</div>
 <div class="huelle" style="padding-bottom:var(--abschnitt)">${inhalt}</div>`;
-  schreibe(p, geruest({ pfad: p, title, desc, body, aktiv, noindex, leiste, ld: kr && !noindex ? [pfadLd(kr)] : [] }), index);
+  schreibe(p, geruest({ pfad: p, title, desc, body, aktiv, noindex, leiste, ld: kr && !noindex ? [pfadLd(kr), ...mehrLd] : [] }), index);
 }
 
 /* ---------- Bauen ---------- */
@@ -474,7 +457,9 @@ einfach('/kontakt.html', { h1: 'Kontakt und Besuch', title: 'Kontakt und Öffnun
 <p><a class="knopf knopf-still" href="${F.route}" rel="noopener">Route in Google Maps öffnen</a></p></div></div>
 <section class="anfrage" id="anfrage" style="padding:clamp(1.5rem,5vw,4rem)" aria-labelledby="h-anfrage"><div class="anfrage-raster">
 <div><h2 id="h-anfrage">Schreib uns</h2><p style="margin-top:1.5rem">Fragen zu einem Tier, zur Patenschaft oder zur Vermittlungshilfe? Wir antworten per E-Mail oder rufen zurück.</p></div>
-${formular({ typ: 'kontakt', knopf: 'Nachricht an das Tierheim senden' })}</div></section>` });
+${formular({ typ: 'kontakt', knopf: 'Nachricht an das Tierheim senden' })}</div></section>
+<section id="fragen" style="margin-top:var(--abschnitt)" aria-labelledby="h-fragen"><div class="zwei"><h2 id="h-fragen">Häufige Fragen</h2><div class="fragen">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><div><p>${esc(a)}</p></div></details>`).join('')}</div></div></section>`,
+  mehrLd: [{ '@type': 'FAQPage', mainEntity: FAQ.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] });
 
 // Rechtliches
 einfach('/impressum.html', { h1: 'Impressum', title: 'Impressum | Waldtierheim Celle', desc: 'Impressum des Vereins aktiver Tierfreunde e.V., Im Sande 3, 29227 Celle. Angaben nach § 5 DDG.', kr: [['Start', '/'], ['Impressum', '/impressum.html']],

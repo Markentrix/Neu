@@ -294,7 +294,7 @@ button.steck-haupt,.galerie button{cursor:zoom-in}
 
 /* Lichtbild-Dialog */
 dialog.licht{border:0;padding:0;background:var(--tinte);max-width:min(96vw,75rem);max-height:94svh}
-dialog.licht::backdrop{background:rgba(20,16,79,.85)}
+dialog.licht::backdrop{background:rgba(12,12,18,.8)}
 dialog.licht img{max-height:86svh;width:auto;margin-inline:auto;background:none}
 dialog.licht form{display:flex;justify-content:flex-end}
 dialog.licht button{background:none;border:0;color:var(--sand-hell);font-weight:700;min-height:2.75rem;padding:.5rem 1rem;cursor:pointer}
@@ -435,4 +435,35 @@ dialog.licht button{background:none;border:0;color:var(--sand-hell);font-weight:
   .buehne .hero-schild .schild-text{grid-template-columns:minmax(0,1fr) auto;align-items:end;padding:.9rem 1rem}
   .buehne .hero-schild .tage{text-align:right}
   .band{min-height:22rem}
+}
+
+/* Weniger Blau, kürzere Seite */
+.buehne{background:var(--tinte)}
+.buehne::after{background:linear-gradient(to top,rgba(10,10,16,.78) 0%,rgba(10,10,16,.38) 38%,rgba(10,10,16,0) 66%),linear-gradient(to right,rgba(10,10,16,.42),rgba(10,10,16,0) 58%)}
+.kachel{background:var(--tinte)}
+.kachel::after{background:linear-gradient(to top,rgba(10,10,16,.72),rgba(10,10,16,0) 52%)}
+.spendenbox{background:var(--sand);color:var(--tinte)}
+.spendenbox .kopier{background:var(--tinte);color:var(--sand-hell)}
+.spendenbox :focus-visible{outline-color:var(--tinte)}
+.hilfe .statement{max-width:30ch}
+.spenden-raster{padding-block:0;align-items:center}
+.geschichte-raster figure img{width:100%;aspect-ratio:5/4;object-fit:cover;object-position:50% 30%}
+.geschichte blockquote.statement{margin:1.25rem 0}
+.besuch{align-items:center}
+.besuch h2{margin-bottom:1rem}
+.kopfzeile{align-items:center}
+.fuss{padding-block:clamp(2rem,5vw,4rem) 1.5rem}
+.fuss-name{margin-bottom:clamp(1.25rem,3vw,2.5rem)}
+.fuss li a,.fuss address a{padding-block:.5rem}
+.fuss-recht{margin-top:1.5rem}
+@media (max-width:60rem){.buehne .hero-schild>.sittich{display:none}}
+@media (max-width:48rem){
+  .hero .buehne-innen{padding-top:48vw;gap:1.25rem}
+  .hero.buehne::after{background:linear-gradient(to top,rgba(10,10,16,.86) 0%,rgba(10,10,16,.6) 45%,rgba(10,10,16,0) 78%)}
+  .hero.buehne .statement{margin-bottom:1.25rem}
+  .mosaik .kachel:nth-child(n+4){display:none}
+  .fuss-raster{grid-template-columns:minmax(0,1fr);gap:1.25rem}
+  .fuss ul{display:flex;flex-wrap:wrap;gap:0 1.5rem}
+  .streifen{margin-top:1.25rem}
+  .kopfzeile{margin-bottom:1.25rem}
 }

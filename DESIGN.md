@@ -108,3 +108,8 @@ Alles nur transform/opacity/clip-path, reduced motion schaltet Bewegung ab.
 ## Überarbeitung 16.11.2026: weißer Grund (Kundenwunsch)
 - Grund ist jetzt Weiß (#FFFFFF). Heller Sand (#F4EFE3) bleibt als Fläche für Schilder, Formular und Geschichte, Dunkler Sand (#D8CBA9) nur für Pfotenabdrücke. Nachtblau und Maigrün unverändert.
 - Grund für den Wechsel: Fotos wirken klarer, die Seite insgesamt ruhiger.
+
+## Überarbeitung 16.11.2026: kürzer und weniger Blau (Kundenwunsch)
+- Nachtblau nur noch für Schrift, Knöpfe, Footer und die Handy-Leiste. Besuch-Abschnitt, Spendenkasten und Laufband sind nicht mehr blau; das Laufband entfällt. Scrims auf Fotos sind neutral dunkel statt blau.
+- Startseite: Hero, Tiere (am Handy drei Kacheln), Ernie und Bert (ein Foto, ein Zitat), Happy End (Zahl und Fotostreifen), Spenden (Text, Kasten, drei Links), Besuch (drei Zeilen), fünf Fragen. Alle zehn Fragen stehen mit FAQ-Markup auf der Kontaktseite.
+- Länge am Handy rund 5.900 px (vorher 9.100), am Desktop rund 5.900 px (vorher 8.300).
