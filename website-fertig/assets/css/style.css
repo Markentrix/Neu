@@ -756,8 +756,9 @@ h1,h2,h3,.card a,.crumbs,.cart-item,.kaufbox{overflow-wrap:anywhere}
 .ds-pin{justify-content:center}.ds-pin>.wrap{flex:0 1 auto}
 .zeichnung-ds{margin:0}
 .zeichnung-ds .zsvg{max-height:calc(100svh - 190px);width:100%}
-.ds-schritte{display:grid}
-.ds-schritt{grid-area:1/1;margin:0 0 1em;max-width:30em}
+.ds-schritt{margin:0 0 1em;max-width:30em}
+.js .ds-schritte{display:grid}
+.js .ds-schritt{grid-area:1/1}
 .js .druckstrecke .ds-schritt{opacity:0;transform:translateY(10px);transition:opacity .18s var(--ease-out),transform .18s var(--ease-out)}
 .js .druckstrecke .ds-schritt.an{opacity:1;transform:none}
 .js .druckstrecke .zl{opacity:0}
@@ -768,9 +769,10 @@ h1,h2,h3,.card a,.crumbs,.cart-item,.kaufbox{overflow-wrap:anywhere}
 .druckstrecke .zl{animation:none!important}
 @media (max-width:860px){
   .ds-spur{height:calc(100svh + 150svh)}
-  .ds-pin{padding-top:64px;align-items:flex-start}
-  .druckstrecke .zeichnung-block{gap:12px}
-  .zeichnung-ds .zsvg{max-height:46svh}
+  .ds-pin{padding:76px 0 64px;align-items:center;box-sizing:border-box}
+  .druckstrecke .zeichnung-block{gap:8px}
+  .zeichnung-ds .zsvg{max-height:38svh}
+  .zeichnung-ds figcaption{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   .ds-spur{height:auto}.ds-pin{position:static;height:auto;padding:clamp(64px,10vw,140px) 0}

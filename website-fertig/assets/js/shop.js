@@ -1,5 +1,6 @@
 /* Schichtatelier Shop – Warenkorb, Formulare, Katalog aus dem Portal (Website-API, relative Pfade) */
 (function () {
+  document.documentElement.classList.add("js");   // auch ohne Skript im Kopf (z. B. eingebettete Ansicht)
   "use strict";
   var CFG = window.SW_CONFIG || {};
   var FARBEN = window.SW_FARBEN || {};
@@ -773,7 +774,7 @@
 
   /* ---------- Zusatzfunktionen: Suche, Merkliste, Zuletzt angesehen ---------- */
   var suchterm = "";
-  function plain(t) { t = String(t || "").toLowerCase().replace(/ß/g, "ss"); try { t = t.normalize("NFD").replace(/[̀-ͯ]/g, ""); } catch (e) { /* ältere Browser */ } return t; }
+  function plain(t) { t = String(t || "").toLowerCase().replace(/ß/g, "ss"); try { t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (e) { /* ältere Browser */ } return t; }
   function lsList(k) { try { var l = JSON.parse(localStorage.getItem(k) || "[]"); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
   function lsSave(k, l) { try { localStorage.setItem(k, JSON.stringify(l)); } catch (e) { /* privater Modus */ } }
   function merkIds() { return lsList("sw_merk"); }
