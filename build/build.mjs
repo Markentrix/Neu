@@ -123,7 +123,7 @@ ${NAV.map(([n, u]) => `<a href="${u}"${aktiv === u ? ' aria-current="page"' : ''
 ${body}
 </main>
 <footer class="fuss"><div class="huelle">
-<p class="fuss-name">Waldtierheim Celle</p>
+<p class="fuss-name">Waldtierheim Celle${SITTICH_FUSS}</p>
 <div class="fuss-raster">
 <div><h2>Besuch</h2><address>${F.name}<br>${F.str}, ${F.plz} ${F.ort}<br>Zufahrt Richtung Osterloh<br><a href="tel:${F.telLink}">Telefon ${F.tel}</a><br><a href="mailto:${F.mail}">${F.mail}</a></address></div>
 <div><h2>Öffnungszeiten</h2><dl><dt>Mo bis Fr</dt><dd>8 bis 11 Uhr</dd><dt>Sa und So</dt><dd>10 bis 11 Uhr</dd><dt>Mo, Mi, Fr, So</dt><dd>auch 15 bis 17 Uhr</dd></dl></div>
@@ -136,6 +136,7 @@ ${body}
 </html>
 `;
 }
+const SITTICH_FUSS = '<svg class="sittich" viewBox="0 0 80 124" aria-hidden="true" focusable="false"><use href="/zeichen.svg#sittich"/></svg>';
 const raus = []; // {pfad, index}
 function schreibe(p, html, index = true) { const f = path.join(ZIEL, p); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, html); raus.push({ p, index }); }
 
@@ -170,6 +171,9 @@ ${tier ? `<input type="hidden" name="tier" value="${esc(tier)}">` : ''}
 <p class="klein neben">Lieber direkt? <a href="tel:${F.telLink}">Telefon ${F.tel}</a> oder <a href="mailto:${F.mail}">${F.mail}</a></p>
 </form>`;
 }
+const zeichen = (id, cls = 'zeichen') => `<svg class="${cls}" aria-hidden="true" focusable="false"><use href="/zeichen.svg#${id}"/></svg>`;
+const spur = (id, n) => `<p class="spur" aria-hidden="true">${Array.from({ length: n }, () => `<svg viewBox="0 0 64 64"><use href="/zeichen.svg#${id}"/></svg>`).join('')}</p>`;
+const sittich = `<svg class="sittich" viewBox="0 0 80 124" aria-hidden="true" focusable="false"><use href="/zeichen.svg#sittich"/></svg>`;
 const lichtDialog = `<dialog class="licht" aria-label="Foto in groß"><form method="dialog"><button>Schließen</button></form><img src="" alt="" width="1200" height="900"></dialog>`;
 const kontoBlock = `<dl class="konto"><dt>Kontoinhaber</dt><dd>${F.name} – Tierschutz</dd><dt>IBAN</dt><dd>${F.iban}</dd><dt>BIC</dt><dd>${F.bic}</dd><dt>Bank</dt><dd>${F.bank}</dd></dl>
 <p><button class="kopier" type="button" data-kopiere="${F.iban.replace(/ /g, '')}">IBAN kopieren</button></p>`;
@@ -196,14 +200,15 @@ function start() {
 <h1><span>Waldtierheim Celle</span><span>Zuhause gesucht</span></h1>
 <div class="hero-raster">
 <div class="hero-text">
+${spur('hundepfote', 5)}
 <p class="statement">Im Wald am Rand von Altencelle warten Hunde und Katzen auf ihre Menschen. Sieh dir die Steckbriefe an und komm in den Öffnungszeiten vorbei.</p>
 <div class="hero-aktion"><a class="knopf" href="/im-waldtierheim-celle.html">Tiere kennenlernen</a><a href="tel:${F.telLink}">${F.tel} anrufen</a></div>
 <p class="status" data-status>Geöffnet jeden Vormittag, Mo, Mi, Fr und So auch 15 bis 17 Uhr</p>
 </div>
-<a class="schild schild-gross hero-schild" href="${heroTier.neu}">
+<div class="hero-schild">${sittich}<a class="schild schild-gross" href="${heroTier.neu}">
 <div class="schild-bild">${bild(HERO_BILD, { alt: `Deutsche Dogge aus dem Duo ${heroTier.name} mit Spielzeug im Waldtierheim Celle`, sizes: '(max-width: 60rem) 92vw, 27rem', lazy: false })}</div>
 <div class="schild-text"><span class="schild-name">${esc(heroTier.name)}</span><p class="schild-daten">${tierDaten(heroTier).map(esc).join('<br>')}</p><p class="tage" data-seit="${heroTier.date}"><span class="tage-zahl"></span><small></small></p></div>
-</a>
+</a></div>
 </div></div></section>
 
 <section class="abschnitt" aria-labelledby="h-warten"><div class="huelle">
@@ -229,7 +234,7 @@ ${wochenTabelle()}
 <div><p class="grosszahl" aria-hidden="true">${happyZahl}</p>
 <h2 id="h-happy">Koffer gepackt und ausgezogen</h2>
 <p style="margin-top:1.25rem;max-width:40ch">${happyZahl} Vermittlungen sind in unserem Archiv mit Steckbrief dokumentiert. Danke an alle frisch gebackenen Dosenöffnerinnen und Dosenöffner.</p>
-<p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p></div>
+<p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p>${spur('katzenpfote', 5)}</div>
 <blockquote class="brief">
 <p>„Ich kann nur sagen, dass sie wirklich eine Traumkatze ist und ich wirklich erstaunt bin, wie toll sie das macht. Sie ist total verschmust und genießt ihre Streicheleinheiten, sie kommt mit aufs Sofa und legt sich zu uns.“</p>
 <p>„Für uns war es auf jeden Fall die richtige Entscheidung.“</p>
@@ -266,7 +271,7 @@ ${wochenTabelle()}
 </div></section>
 
 <section class="abschnitt" style="padding-top:0" aria-labelledby="h-faq"><div class="huelle zwei">
-<h2 id="h-faq">Kurz gefragt</h2>
+<div><h2 id="h-faq">Kurz gefragt</h2><div class="paar" aria-hidden="true">${sittich.replace(' class="sittich"', '')}${sittich.replace(' class="sittich"', '')}</div><div class="ast" aria-hidden="true"></div></div>
 <div class="fragen">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><div><p>${esc(a)}</p></div></details>`).join('\n')}</div>
 </div></section>`;
   schreibe('/index.html', geruest({ pfad: '/index.html', title: 'Tierheim in Celle | Waldtierheim Celle', desc: 'Waldtierheim Celle: Hunde und Katzen suchen ein Zuhause. Steckbriefe, Öffnungszeiten, Anfahrt nach Altencelle, Spenden und Patenschaft. Telefon 05141 32900.', body, hero: HERO_BILD, htmlKlasse: 'auf',
@@ -276,7 +281,7 @@ ${wochenTabelle()}
 
 /* ---------- Tierlisten ---------- */
 const reiter = aktiv => `<ul class="reiter">${[['Alle', '/im-waldtierheim-celle.html', heimtiere.length], ['Hunde', '/im-waldtierheim-celle/hunde.html', tiere.hunde.length], ['Katzen', '/im-waldtierheim-celle/katzen.html', tiere.katzen.length], ['Kleintiere', '/im-waldtierheim-celle/kleintiere.html', 0], ['Privat', '/im-waldtierheim-celle/vermittlungshilfe-privat.html', tiere['vermittlungshilfe-privat'].length]]
-  .map(([n, u, z]) => `<li><a href="${u}"${aktiv === u ? ' aria-current="page"' : ''}>${n} (${z})</a></li>`).join('')}</ul>`;
+  .map(([n, u, z]) => `<li><a href="${u}"${aktiv === u ? ' aria-current="page"' : ''}>${n === 'Hunde' ? zeichen('hundepfote') : n === 'Katzen' ? zeichen('katzenpfote') : ''}${n} (${z})</a></li>`).join('')}</ul>`;
 const wilde = `<div class="hinweis"><p><strong>Wir suchen Plätze für unsere „Wilden“.</strong> Für scheue und verwilderte Katzen suchen wir Bauernhöfe, Reiterhöfe und ähnliche Orte, an denen sie geschützt leben können. <a href="/im-waldtierheim-celle/katzen/verwilderte-hauskatzen.html">Zum Steckbrief der verwilderten Hauskatzen</a></p></div>`;
 function tierliste(p, { h1, title, desc, intro, liste, extra = '', leer = '', sort = true, kr }) {
   const body = `<div class="huelle seitenkopf">${pfad(kr)}<h1>${h1}</h1><p class="statement">${intro}</p></div>

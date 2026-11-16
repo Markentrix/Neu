@@ -40,16 +40,21 @@ Signatur: die Wartetage als große Zahl auf dem Schild (z. B. Bruce). Alles ande
 Live-Element: (1) Wartetage werden im Browser aus dem echten Steckbrief-Datum gerechnet, ohne Skript steht das Datum da. (2) Wochenplan der Öffnungszeiten mit Markierung "jetzt geöffnet / öffnet wieder um". Ohne Skript steht der Plan als Tabelle da.
 
 ## Farben (60/30/10)
+Auf Kundenwunsch reduziert (16.11.2026): drei Farbtöne, alles andere sind Tonstufen davon.
 | Name | Hex | Rolle |
 |---|---|---|
 | Sand | #EADFC8 | Grund (60) |
-| Heller Sand | #F7F1E2 | Schilder, Flächen |
-| Kiefer | #1D3A2B | dunkle Fläche Besuch (30) |
-| Nachtblau | #14104F | Tinte, Footer-Fläche (aus dem Logo) |
-| Maigrün | #9BD43A | Akzent: Aktion und die Hilfe-Fläche (10, aus dem Logo) |
-| Rinde | #6B4A2F | Nebennotizen auf Sand |
+| Heller Sand | #F7F1E2 | Schilder, Flächen, Formular |
+| Dunkler Sand | #CFBD96 | nur Pfotenabdrücke im Sand |
+| Nachtblau | #14104F | Tinte, dunkle Flächen Besuch und Footer (30, aus dem Logo) |
+| Maigrün | #9BD43A | Akzent: nur Aktion und Sittich (10, aus dem Logo) |
 
-Keine Verläufe außer einem neutralen Scrim. Nebentext auf Kiefer: #C7D5BD (aus dem Farbton abgeleitet).
+Nebentext: #4B4878 (aufgehelltes Nachtblau). Kiefergrün, Rinde und die grüne Hilfe-Fläche sind entfallen. Keine Verläufe.
+
+## Zeichen (Kundenwunsch)
+- Hundepfote (mit Krallen) und Katzenpfote (rund, ohne Krallen) als Vektoren in `zeichen.svg`: Spur im Hero, Katzenspur im Happy End, Symbol an den Reitern Hunde/Katzen. Die Abdrücke stehen im Ton "Dunkler Sand": Pfoten im Sand, passend zur Adresse Im Sande.
+- Wellensittich als Vektor in Nachtblau, Maigrün und hellem Sand: einer sitzt auf dem Hero-Schild, einer auf dem Namen im Footer, ein Paar auf einem Ast bei "Kurz gefragt".
+- Ausnahme von der VERBOTEN-Liste (Deko-Formen): ausdrücklich vom Kunden gewünscht.
 
 ## Schriften (lokal, 3 Schnitte)
 - Display: Bricolage Grotesque 800. Wirkt wie ein gemaltes Schild, nur für Überschriften und die Wartetage.
