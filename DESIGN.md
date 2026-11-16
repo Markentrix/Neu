@@ -104,3 +104,7 @@ Alles nur transform/opacity/clip-path, reduced motion schaltet Bewegung ab.
 - Fotoband über "Vier Wege, wie du hilfst": Freiwillige beim Hochwasser-Einsatz 2023. Vereinsabschnitt mit Foto vom Tag der offenen Tür 2024.
 - Bewegung zusätzlich: Bilder decken sich beim Scrollen auf und Fotobänder gleiten leicht (nur CSS, scroll-gesteuert; ohne Unterstützung oder bei reduzierter Bewegung stehen die Bilder einfach da). Leichter Zoom am Mosaik-Hover.
 - Performance-Hinweis: das Helfer-Foto ist als 1920-px-Fassung 435 KB groß (über dem 150-KB-Ziel), lädt aber erst beim Scrollen.
+
+## Überarbeitung 16.11.2026: weißer Grund (Kundenwunsch)
+- Grund ist jetzt Weiß (#FFFFFF). Heller Sand (#F4EFE3) bleibt als Fläche für Schilder, Formular und Geschichte, Dunkler Sand (#D8CBA9) nur für Pfotenabdrücke. Nachtblau und Maigrün unverändert.
+- Grund für den Wechsel: Fotos wirken klarer, die Seite insgesamt ruhiger.

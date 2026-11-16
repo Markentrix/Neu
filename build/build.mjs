@@ -93,7 +93,7 @@ function geruest({ pfad: p, title, desc, body, ld = [], hero, heroXl = false, no
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" href="${canon}">`}
-<meta name="theme-color" content="#EADFC8">
+<meta name="theme-color" content="#FFFFFF">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="de_DE">
 <meta property="og:site_name" content="Waldtierheim Celle">
@@ -566,7 +566,7 @@ fs.writeFileSync(path.join(ZIEL, 'llms.txt'), `# Waldtierheim Celle (Verein akti
 ## Häufige Fragen
 ${FAQ.map(([q, a]) => `- ${q} ${a}`).join('\n')}
 `);
-fs.writeFileSync(path.join(ZIEL, 'site.webmanifest'), JSON.stringify({ name: 'Waldtierheim Celle', short_name: 'Waldtierheim', lang: 'de', start_url: '/', display: 'browser', background_color: '#EADFC8', theme_color: '#EADFC8', icons: [{ src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' }] }));
+fs.writeFileSync(path.join(ZIEL, 'site.webmanifest'), JSON.stringify({ name: 'Waldtierheim Celle', short_name: 'Waldtierheim', lang: 'de', start_url: '/', display: 'browser', background_color: "#FFFFFF", theme_color: "#FFFFFF", icons: [{ src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' }] }));
 fs.writeFileSync(path.join(ZIEL, 'favicon.svg'), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#14104F"/><path fill="#9BD43A" d="M16 4l7 10h-4l6 9h-7v5h-4v-5H7l6-9H9z"/></svg>\n`);
 
 /* ---------- Aufräumen, Weiterleitungen ---------- */
