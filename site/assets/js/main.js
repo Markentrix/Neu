@@ -43,9 +43,20 @@
     entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
   }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
   const lazyReveal = $$('[data-reveal], [data-split]').filter((el) => !el.hasAttribute('data-split-now') && !el.hasAttribute('data-reveal-now'));
-  // Clip-Reveals sind anfangs komplett beschnitten und werden vom Observer nicht erkannt – daher per Scrollposition
-  let clips = lazyReveal.filter((el) => el.dataset.reveal === 'clip');
-  lazyReveal.filter((el) => el.dataset.reveal !== 'clip').forEach((el) => io.observe(el));
+  lazyReveal.forEach((el) => io.observe(el));
+  /* Ausweg, falls der IntersectionObserver in eingebetteten Ansichten nicht auslöst */
+  const pending = lazyReveal.slice();
+  function revealCheck() {
+    const vh = innerHeight;
+    for (let i = pending.length - 1; i >= 0; i--) {
+      const el = pending[i];
+      if (el.classList.contains('is-in')) { pending.splice(i, 1); continue; }
+      const box = el.hasAttribute('data-reveal') && el.getAttribute('data-reveal') === 'clip' ? (el.parentElement || el) : el;
+      if (box.getBoundingClientRect().top < vh * 0.96) { el.classList.add('is-in'); io.unobserve(el); pending.splice(i, 1); }
+    }
+    if (!pending.length) clearInterval(revealTimer);
+  }
+  const revealTimer = setInterval(revealCheck, 500);
 
   /* ---------- Start / Intro ---------- */
   function ready() {
@@ -171,6 +182,7 @@
     ticking = false;
     const vh = innerHeight;
     onHeader();
+    revealCheck();
     par.forEach(({ el, f, box }) => {
       const r = box.getBoundingClientRect();
       if (r.bottom < -100 || r.top > vh + 100) return;
@@ -184,13 +196,6 @@
       const n = hsTrack.children.length;
       hsCount.textContent = String(Math.min(n, Math.floor(p * n) + 1)).padStart(2, '0');
       hsBar.style.setProperty('--p', p.toFixed(3));
-    }
-    if (clips.length) {
-      clips = clips.filter((el) => {
-        const r = el.getBoundingClientRect();
-        if (r.top < vh * 0.92 && r.bottom > -vh) { el.classList.add('is-in'); return false; }
-        return true;
-      });
     }
     if (mbar) {
       const end = endEl ? endEl.getBoundingClientRect().top : Infinity;
