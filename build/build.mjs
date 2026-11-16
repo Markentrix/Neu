@@ -176,8 +176,9 @@ const zeichen = (id, cls = 'zeichen') => `<svg class="${cls}" aria-hidden="true"
 const spur = (id, n) => `<p class="spur" aria-hidden="true">${Array.from({ length: n }, () => `<svg viewBox="0 0 64 64"><use href="/zeichen.svg#${id}"/></svg>`).join('')}</p>`;
 const sittich = `<svg class="sittich" viewBox="0 0 80 124" aria-hidden="true" focusable="false"><use href="/zeichen.svg#sittich"/></svg>`;
 const lichtDialog = `<dialog class="licht" aria-label="Foto in groß"><form method="dialog"><button>Schließen</button></form><img src="" alt="" width="1200" height="900"></dialog>`;
-const kontoBlock = `<dl class="konto"><dt>Kontoinhaber</dt><dd>${F.name} – Tierschutz</dd><dt>IBAN</dt><dd>${F.iban}</dd><dt>BIC</dt><dd>${F.bic}</dd><dt>Bank</dt><dd>${F.bank}</dd></dl>
-<p><button class="kopier" type="button" data-kopiere="${F.iban.replace(/ /g, '')}">IBAN kopieren</button></p>`;
+const kontoBlock = `<p class="iban">${F.iban}</p>
+<p><button class="kopier" type="button" data-kopiere="${F.iban.replace(/ /g, '')}">IBAN kopieren</button></p>
+<p class="klein" style="margin:0">Kontoinhaber: ${F.name} – Tierschutz<br>BIC ${F.bic}, ${F.bank}</p>`;
 
 /* ---------- Startseite ---------- */
 const heroTier = tiere.hunde.find(s => s.neu.endsWith('/cora.html')) || tiere.hunde[0];
@@ -222,31 +223,18 @@ ${bild(HERO_BILD, { alt: `Hündin ${heroTier.name} liegt lachend im Sand des Wal
 
 ${(() => { const g = tiere.hunde.find(t => t.neu.endsWith('ernie-und-bert.html')); if (!g) return ''; return `<section class="abschnitt geschichte" aria-labelledby="h-geschichte"><div class="huelle geschichte-raster">
 <div class="geschichte-bilder"><figure class="enthuellt">${bild(g.images[0], { alt: 'Die Doggen-Brüder Ernie und Bert sitzen nebeneinander im Sand', sizes: '(max-width: 60rem) 52vw, 28vw' })}</figure><figure class="enthuellt">${bild(g.images[1], { alt: 'Eine der beiden Doggen trägt ein Stofftier im Maul', sizes: '(max-width: 60rem) 40vw, 22vw' })}</figure></div>
-<div><h2 id="h-geschichte" style="hyphens:manual">Ernie und Bert hatten nur einander</h2>
+<div><h2 id="h-geschichte" style="hyphens:manual;font-size:clamp(1.6rem,3.4vw,2.9rem)">Ernie und Bert hatten nur einander</h2>
 <blockquote class="statement">„Als sie zu uns kamen, waren sie nahezu verhungert und körperlich in einem erschreckend schlechten Zustand. Doch sie hatten einander.“</blockquote>
 <p>Die beiden Deutschen Doggen sind Brüder und vier Jahre alt. Gemeinsam haben sie gekämpft, zugenommen und Schritt für Schritt wieder gelernt, Vertrauen zu fassen. Heute suchen die zwei sanften Riesen gemeinsam ein Zuhause.</p>
 <p class="tage" data-seit="${g.date}" style="text-align:left;margin:1.5rem 0"><span class="tage-zahl"></span><small></small></p>
 <p><a class="knopf" href="${g.neu}">Ernie und Bert kennenlernen</a></p></div>
 </div></section>`; })()}
 
-<section class="abschnitt dunkel" aria-labelledby="h-besuch"><div class="huelle besuch">
-<div><h2 id="h-besuch">Komm im Wald vorbei</h2>
-<p class="status" data-status style="margin:0 0 1.5rem">Zwei Öffnungsfenster am Tag</p>
-${wochenTabelle()}
-<p class="klein neben" style="margin-top:1rem">In diesen Zeiten ist unser Team vor Ort und beantwortet deine Fragen zu den Tieren.</p></div>
-<div class="anfahrt">
-<figure>${bild(P('/kontakt.html').images[0], { alt: 'Einfahrt mit Tor zum Waldtierheim Celle zwischen Kiefern', sizes: '(max-width: 60rem) 92vw, 30vw' })}</figure>
-<address>${F.str}<br>${F.plz} ${F.ort}<br><span class="klein neben">Zufahrt Richtung Osterloh</span></address>
-<a class="tel" href="tel:${F.telLink}">${F.tel}</a>
-<p><a class="knopf" href="${F.route}" rel="noopener">Route in Google Maps öffnen</a></p>
-</div>
-</div></section>
-
 <section class="abschnitt" aria-labelledby="h-happy"><div class="huelle happy">
 <div><p class="grosszahl" aria-hidden="true">${happyZahl}</p>
 <h2 id="h-happy">Koffer gepackt und ausgezogen</h2>
 <p style="margin-top:1.25rem;max-width:40ch">${happyZahl} Vermittlungen sind in unserem Archiv mit Steckbrief dokumentiert. Danke an alle frisch gebackenen Dosenöffnerinnen und Dosenöffner.</p>
-<p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p>${spur('katzenpfote', 5)}</div>
+<p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p></div>
 <blockquote class="brief">
 <p>„Ich kann nur sagen, dass sie wirklich eine Traumkatze ist und ich wirklich erstaunt bin, wie toll sie das macht. Sie ist total verschmust und genießt ihre Streicheleinheiten, sie kommt mit aufs Sofa und legt sich zu uns.“</p>
 <p>„Für uns war es auf jeden Fall die richtige Entscheidung.“</p>
@@ -260,36 +248,26 @@ ${wochenTabelle()}
 <div><h3>Dafür brauchen wir deine Hilfe</h3>
 <ul class="jahre wofuer"><li><b>Tierarzt</b><span>Medizinische Versorgung bei Krankheit und Kastrationen.</span></li><li><b>Futter</b><span>Die tägliche Versorgung unserer Hunde, Katzen und Kleintiere.</span></li><li><b>Unterkunft</b><span>Instandhaltung von Hundezwingern und Katzenhaus.</span></li></ul>
 <p class="klein neben">Für Spenden über betterplace.org bekommst du zu Beginn des folgenden Jahres eine Spendenbescheinigung von betterplace.</p></div>
-<div class="spendenbox"><h3>Jetzt spenden</h3>${kontoBlock}<p style="margin:0"><a class="knopf" href="${F.spende}" rel="noopener">Online spenden über betterplace.org</a></p></div>
+<div class="spendenbox"><h3>Jetzt spenden</h3><p><a class="knopf" href="${F.spende}" rel="noopener">Online spenden über betterplace.org</a></p><p class="klein" style="margin:1.75rem 0 .4rem">Oder per Überweisung auf unser Spendenkonto</p>${kontoBlock}</div>
 </div>
 <div class="huelle" style="padding-bottom:var(--abschnitt)">
-<h3 style="margin-bottom:1.5rem">Du kannst auch anders helfen</h3>
-<ul class="wege" style="margin-top:0">
-<li><h3>Patenschaft</h3><div><p>Du kannst kein Tier aufnehmen, aber eines liegt dir am Herzen? Unterstütze genau dieses Tier mit Futter, Sachspenden oder einem monatlichen Betrag und besuche es in den Öffnungszeiten.</p><p><a href="/dokumente/patenschaftsvertrag.pdf">Patenschaftsvertrag als PDF (155 KB)</a></p></div></li>
-<li><h3>Mitglied werden</h3><div><p>Den Beitrag bestimmst du selbst, mindestens 20 € im Jahr. Den Aufnahmeantrag bekommst du bei uns im Tierheim.</p></div></li>
-<li><h3>Gassi gehen</h3><div><p>Unsere Hunde freuen sich über Spaziergänge. Melde dich dafür während der Öffnungszeiten direkt im Waldtierheim.</p></div></li>
-</ul>
-<p style="margin-top:2.5rem"><a class="knopf knopf-still" href="/deine-hilfe.html">Alles zur Unterstützung lesen</a></p>
+<h3 style="margin-bottom:1rem">Du kannst auch anders helfen</h3>
+<ul class="reiter" style="margin:0"><li><a href="/deine-hilfe.html#patenschaft">Patenschaft übernehmen</a></li><li><a href="/deine-hilfe.html#mitgliedschaft">Mitglied werden, ab 20 € im Jahr</a></li><li><a href="/deine-hilfe.html#gassi">Gassi gehen</a></li></ul>
 </div></section>
 
-<section class="abschnitt" aria-labelledby="h-verein"><div class="huelle verein">
-<div><h2 id="h-verein">Tierschutz in Celle seit 1992</h2>
-<ul class="jahre">
-<li><b>1992</b><span>Gründung am 23. Januar in Celle. Am Anfang steht die Kastration frei lebender Katzen.</span></li>
-<li><b>Bis 2002</b><span>Zehn Jahre ohne feste Bleibe. Die Tiere leben bei Mitgliedern oder in gemieteten Zwingern.</span></li>
-<li><b>2003</b><span>Bezug und Eröffnung des Waldtierheims auf 9 Hektar Wald am Rand von Altencelle.</span></li>
-<li><b>Heute</b><span>Eingetragen beim Amtsgericht Celle, Mitglied im Verband Niedersächsischer Tierschutzvereine, finanziert vor allem über Mitgliedsbeiträge und Spenden.</span></li>
-</ul>
-<p><a class="knopf knopf-still" href="/verein.html">Den Verein kennenlernen</a></p></div>
-<figure class="enthuellt">${bild(festBild, { alt: 'Besucherinnen und Besucher zwischen Kiefern beim Tag der offenen Tür im Waldtierheim Celle', sizes: '(max-width: 60rem) 92vw, 46vw', xl: true })}<figcaption>Tag der offenen Tür im Waldtierheim, September 2024</figcaption></figure>
+<section class="abschnitt dunkel" aria-labelledby="h-besuch"><div class="huelle besuch">
+<div><h2 id="h-besuch">Komm im Wald vorbei</h2>
+<p class="status" data-status style="margin:0 0 1.5rem">Zwei Öffnungsfenster am Tag</p>
+<dl class="zeiten"><dt>Montag bis Freitag</dt><dd>8 bis 11 Uhr</dd><dt>Samstag und Sonntag</dt><dd>10 bis 11 Uhr</dd><dt>Mo, Mi, Fr und So</dt><dd>zusätzlich 15 bis 17 Uhr</dd></dl>
+<p class="klein neben" style="margin-top:1.25rem">In diesen Zeiten ist unser Team vor Ort und beantwortet deine Fragen zu den Tieren.</p></div>
+<div class="anfahrt">
+<address>${F.str}<br>${F.plz} ${F.ort}<br><span class="klein neben">Zufahrt Richtung Osterloh</span></address>
+<a class="tel" href="tel:${F.telLink}">${F.tel}</a>
+<p style="margin:0"><a class="knopf" href="${F.route}" rel="noopener">Route in Google Maps öffnen</a></p>
+</div>
 </div></section>
 
-<section class="abschnitt" style="padding-top:0" aria-labelledby="h-neu"><div class="huelle zwei">
-<div><h2 id="h-neu">Neues aus dem Tierheim</h2><p style="margin-top:1.5rem"><a href="/aktuelles.html">Alle Meldungen</a></p></div>
-<ul class="zeilen">${news.slice(0, 3).map(n => `<li><a class="zeile" href="${n.neu}"><time datetime="${n.date}">${datum(n.date)}</time><h3>${esc(n.name)}</h3></a></li>`).join('')}</ul>
-</div></section>
-
-<section class="abschnitt" style="padding-top:0" aria-labelledby="h-faq"><div class="huelle zwei">
+<section class="abschnitt" aria-labelledby="h-faq"><div class="huelle zwei">
 <div><h2 id="h-faq">Kurz gefragt</h2><div class="paar" aria-hidden="true">${sittich.replace(' class="sittich"', '')}${sittich.replace(' class="sittich"', '')}</div><div class="ast" aria-hidden="true"></div></div>
 <div class="fragen">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><div><p>${esc(a)}</p></div></details>`).join('\n')}</div>
 </div></section>`;

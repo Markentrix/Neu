@@ -413,3 +413,26 @@ dialog.licht button{background:none;border:0;color:var(--sand-hell);font-weight:
 .spendenbox :focus-visible{outline-color:var(--mai)}
 @media (max-width:60rem){.geschichte-raster,.spenden-raster{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:30rem){.wofuer li{grid-template-columns:minmax(0,1fr);gap:.1rem}}
+
+/* Kürzere Startseite, saubere Maße am Handy */
+.zeiten{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.7rem 2rem;margin:0;font-size:1.25rem;align-items:baseline}
+.zeiten dt{font-family:var(--display);font-weight:800;letter-spacing:-.02em}
+.zeiten dd{margin:0}
+.iban{font:800 clamp(.9rem,4.4vw,1.6rem)/1.2 var(--display);letter-spacing:0;white-space:nowrap;margin:0 0 .75rem}
+.hilfe .reiter a{background:var(--sand)}
+.kachel-text .tage{min-width:max-content}
+@media (max-width:60rem){
+  .mosaik{grid-auto-rows:auto}
+  .kachel,.kachel:nth-child(1),.kachel:nth-child(2),.kachel:nth-child(3){grid-row:auto;aspect-ratio:4/5}
+  .kachel:nth-child(1){aspect-ratio:5/4}
+}
+@media (max-width:48rem){
+  :root{--abschnitt:3.25rem}
+  .zeiten{grid-template-columns:minmax(0,1fr);gap:.1rem;font-size:1.125rem}
+  .zeiten dd{margin-bottom:.8rem}
+  .mosaik~.spur,.mosaik~p .spur{display:none}
+  .streifen{margin-top:2rem}
+  .buehne .hero-schild .schild-text{grid-template-columns:minmax(0,1fr) auto;align-items:end;padding:.9rem 1rem}
+  .buehne .hero-schild .tage{text-align:right}
+  .band{min-height:22rem}
+}
