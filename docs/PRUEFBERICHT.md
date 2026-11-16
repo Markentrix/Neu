@@ -292,3 +292,18 @@ Geprüft wurde der Claude-Design-Export `Markentrix.zip` (Ordner `dist/`, identi
 5. **Fallstudie und Kennzahlen** Pony Club Lila erst nach schriftlicher Freigabe der Kundin ergänzen (Vorlage in `src/pages/referenzen.html`). Seit 14.10.2026 erscheint Pony Club Lila nur noch auf der Referenzseite (als „Live“ gekennzeichnet) und im Blogbeitrag „Warum ist eine Website wichtig“; Startseite und Webdesign-Seite zeigen stattdessen eine CSS-Skizze eines fiktiven Betriebs (`src/partials/mock-site.html`). Der frühere Abschnitt 06 „Beweis statt Behauptung“ der Startseite ist entfernt, die Abschnitte sind auf 08 durchnummeriert.
 6. **Hero-Video** bleibt deaktiviert (CI: ruhige Flächen). Das Quellvideo liegt im Claude-Design-Projekt unter `_archive/`.
 7. Lighthouse und PageSpeed nach dem Deploy messen; lokal gibt es keine Netzwerkbedingungen.
+
+## Nachtrag 16.11.2026: Bilddateien sauber benannt
+
+Alle Bilddateien in `static/img` und in den Beispielseiten tragen jetzt sprechende, einheitliche Namen (Kleinbuchstaben, Bindestriche, keine Umlaute, Breite als Endung). Schema: `<bereich>-<motiv>-<breite>.webp`.
+
+| Bereich | Neue Namen (Beispiel) |
+|---|---|
+| Referenzen | `referenz-anadolu-market-{vorher,nachher,vorschau,vorbestellung}-<breite>`, `referenz-pony-club-lila-{desktop,handy}-<breite>`, `referenz-elbdetail-{desktop,handy}-<breite>` |
+| Fotobänder | `fotoband-praxis-<breite>`, `fotoband-garten-<breite>` |
+| Portrait | `christian-wien-portrait-<breite>` |
+| Portal | `portal-ansicht-uebersicht-<breite>`, `portal-ansicht-module-<breite>` |
+| Beispielseiten | je Muster drei Motive statt `1/2/3`, z. B. `wallbox-garagenwand`, `behandlungszimmer-liege`, `gaststube-holztische` |
+| Branchenfotos, Logos, Social-Bilder (`og/`) | unverändert (Schema war schon sauber) |
+
+82 Dateien umbenannt (mit `git mv`, Verlauf bleibt), alle Verweise in Seiten, Stylesheet, Karte, Skripten und Doku angepasst. Die vier ungenutzten Altanzeigen `social-*.webp` (alte Gestaltung) liegen jetzt in `vorlagen/archiv-anzeigen-alt/` und werden nicht mehr ausgeliefert. Geprüft: Build, Linkcheck, SEO-Audit, 1314 Bildverweise in der Auslieferung ohne Fehlstelle, keine defekten Bilder auf Startseite, Referenzen, Portal, Über uns, Blog und drei Beispielseiten. Hinweis: Alte Bildadressen liefern nach dem Einspielen 404, Suchmaschinen und Browser holen die neuen automatisch.
