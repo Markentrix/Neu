@@ -1970,3 +1970,23 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .bk-orte span{border:1px solid var(--leinen);background:#FFFFFF;border-radius:4px;padding:6px 10px;font-size:.9375rem;overflow-wrap:anywhere}
 @media (max-width:900px){.bk{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:420px){.bk-fields{grid-template-columns:minmax(0,1fr)}}
+
+/* Baukasten: mehr Bausteine, kompakt als Auswahl-Chips */
+.bk-opts{gap:6px}
+.bk-chips{display:flex;flex-wrap:wrap;gap:8px}
+.bk-chips .bk-opt{min-height:44px;padding:6px 12px;width:auto}
+.bk-blocks{display:grid;gap:10px;padding:0 18px 18px;background:#F7F4EE;grid-template-columns:repeat(2,minmax(0,1fr))}
+.bk-blocks:not(:has(.bk-block:not([hidden]))){display:none}
+.bk-block{display:grid;gap:4px;align-content:start;padding:12px 14px;background:#FFFFFF;border:1px solid var(--leinen);border-radius:8px;font-size:.9375rem;color:#4E5C5F}
+.bk-block b{color:var(--navy);font-size:1rem}
+.bk-block[hidden]{display:none}
+.bk-block--form{grid-template-columns:minmax(0,1fr);}
+.bk-input{display:block;min-height:40px;padding:8px 10px;border:1px solid var(--navy);border-radius:4px;color:#4E5C5F;background:#FFFFFF}
+.bk-btn--sm{min-height:40px;padding:0 14px;justify-self:start}
+.bk-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.bk-tiles i{display:block;aspect-ratio:4/3;background:var(--leinen);border-radius:4px}
+.bk-tiles i:nth-child(2){background:#E1F0F6}
+.bk-social{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;background:#FFFFFF;border-top:1px solid var(--leinen)}
+.bk-social span{font-weight:600;font-size:.9375rem;color:var(--blue)}
+.bk-social span+span::before{content:"·";margin-right:8px;color:var(--leinen)}
+@media (max-width:560px){.bk-blocks{grid-template-columns:minmax(0,1fr)}}

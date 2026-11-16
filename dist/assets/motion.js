@@ -60,11 +60,15 @@
         if (animate && was && cb.checked && !reduced()) { el.classList.remove('is-new'); void el.offsetWidth; el.classList.add('is-new'); }
       });
     }
+    function count() {
+      var n = bk.querySelectorAll('[data-bk-opt]:checked').length, c = bk.querySelector('[data-bk-count]');
+      if (c) c.textContent = n + (n === 1 ? ' Baustein gewählt.' : ' Bausteine gewählt.');
+    }
     function first() { if (!touched) { touched = true; track('baukasten_use', { location: w.location.pathname }); } }
     what.addEventListener('input', function () { first(); render(); });
     where.addEventListener('input', function () { first(); render(); });
-    bk.addEventListener('change', function (e) { if (e.target && e.target.hasAttribute('data-bk-opt')) { first(); opts(true); } });
-    render(); opts(false);
+    bk.addEventListener('change', function (e) { if (e.target && e.target.hasAttribute('data-bk-opt')) { first(); opts(true); count(); } });
+    render(); opts(false); count();
   })();
 
   /* ── Tiefenwirkung der Bildbänder (nur breite Bildschirme, nicht bei reduzierter Bewegung) ── */
