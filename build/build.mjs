@@ -187,6 +187,8 @@ const festBild = '71a960304db5', helferBild = '01f19cc3905e';
 const laengste = heimtiere.filter(s => s !== heroTier && s.date && s.images.length && !/verwilderte/.test(s.neu)).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 5);
 const kachel = (s, i) => `<a class="kachel enthuellt" href="${s.neu}">${bild(s.images[0], { alt: `${s.name}, ${ART[s.kat][0]} im Waldtierheim Celle`, sizes: i === 0 ? '(max-width: 48rem) 92vw, 46vw' : '(max-width: 48rem) 46vw, 24vw' })}<span class="kachel-text"><span><span class="schild-name">${esc(s.name)}</span><span class="schild-daten">${esc(tierDaten(s)[0] || '')}</span></span><span class="tage" data-seit="${s.date}"><span class="tage-zahl"></span><small></small></span></span></a>`;
 const lauf = heimtiere.filter(s => !/verwilderte|Junghunde|Jungkatzen|Katzenkinder/.test(s.name + s.neu)).map(s => s.name);
+const wandWahl = [12, 14, 10, 20, 2, 28, 34, 39, 56].map(i => gruesse[i]).filter(t => t && t.images[0]);
+const wandName = t => /^(Gr|Hallo)/.test(t.name) || t.name.length > 22 ? '' : t.name.replace(/\s*\(eh\..*$/, '');
 const streifen = [...vermHunde.slice(0, 7), ...vermKatzen.slice(0, 7)].filter(s => s.images[0]);
 const brief = gruesse.find(s => s.neu.endsWith('/quickie.html')) || gruesse[0];
 const FAQ = [
@@ -218,10 +220,11 @@ ${bild(HERO_BILD, { alt: `Hündin ${heroTier.name} liegt lachend im Sand des Wal
 <section class="abschnitt" aria-labelledby="h-warten"><div class="huelle">
 <div class="kopfzeile"><h2 id="h-warten">Diese Tiere warten am längsten</h2><p><a class="knopf knopf-still" href="/im-waldtierheim-celle.html">Alle ${heimtiere.length} Steckbriefe ansehen</a></p></div>
 <div class="mosaik">${laengste.map(kachel).join('\n')}</div>
+<div class="paare">${[['hunde', 'Alle Hunde', tiere.hunde.find(t => /buddy/.test(t.neu)) || tiere.hunde[0]], ['katzen', 'Alle Katzen', tiere.katzen.find(t => /lina-und-milo/.test(t.neu)) || tiere.katzen[0]]].map(([k, t, tier]) => `<a class="kachel enthuellt" href="/im-waldtierheim-celle/${k}.html">${bild(tier.images[k === 'katzen' ? 1 : 0] || tier.images[0], { alt: `${tier.name}, ${ART[k][0]} im Waldtierheim Celle`, sizes: '(max-width: 48rem) 92vw, 46vw' })}<span class="kachel-text"><span><span class="schild-name">${t}</span><span class="schild-daten">${mehrzahl(tiere[k].length, 'Steckbrief', 'Steckbriefe')}</span></span></span></a>`).join('')}</div>
 </div></section>
 
 ${g ? `<section class="abschnitt geschichte" aria-labelledby="h-geschichte"><div class="huelle geschichte-raster">
-<figure class="enthuellt">${bild(g.images[0], { alt: 'Die Doggen-Brüder Ernie und Bert sitzen nebeneinander im Sand', sizes: '(max-width: 60rem) 92vw, 36vw' })}</figure>
+<div class="geschichte-bilder"><figure class="enthuellt">${bild(g.images[0], { alt: 'Die Doggen-Brüder Ernie und Bert sitzen nebeneinander im Sand', sizes: '(max-width: 60rem) 52vw, 28vw' })}</figure><figure class="enthuellt">${bild(g.images[1], { alt: 'Eine der beiden Doggen trägt ein Stofftier im Maul', sizes: '(max-width: 60rem) 40vw, 22vw' })}</figure></div>
 <div><h2 id="h-geschichte" style="hyphens:manual;font-size:clamp(1.6rem,3.4vw,2.9rem)">Ernie und Bert hatten nur einander</h2>
 <blockquote class="statement">„Als sie zu uns kamen, waren sie nahezu verhungert. Doch sie hatten einander.“</blockquote>
 <p>Heute suchen die Doggen-Brüder gemeinsam ein Zuhause.</p>
@@ -229,17 +232,18 @@ ${g ? `<section class="abschnitt geschichte" aria-labelledby="h-geschichte"><div
 </div></section>` : ''}
 
 <section class="abschnitt" aria-labelledby="h-happy"><div class="huelle">
-<div class="kopfzeile"><div><h2 id="h-happy">${happyZahl} Happy Ends im Archiv</h2><p style="margin-top:.75rem">Koffer gepackt und ausgezogen: Diese Tiere haben ihre Familie gefunden.</p></div><p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p></div></div>
-<ul class="streifen" aria-label="Vermittelte Tiere">${streifen.map(t => `<li><a href="${t.neu}">${bild(t.images[0], { alt: `${t.name}, vermittelt`, klein: true })}<span>${esc(t.name)}</span></a></li>`).join('')}</ul></section>
+<div class="kopfzeile"><div><h2 id="h-happy">${happyZahl} Happy Ends im Archiv</h2><p style="margin-top:.75rem">Koffer gepackt und ausgezogen: So leben unsere ehemaligen Schützlinge heute. Die Fotos haben uns ihre neuen Familien geschickt.</p></div><p><a class="knopf knopf-still" href="/happy-end.html">Happy Ends ansehen</a></p></div></div>
+<div class="huelle"><ul class="wand" aria-label="Grüße vom neuen Zuhause">${wandWahl.map((t, i) => `<li><a href="${t.neu}">${bild(t.images[0], { alt: `${wandName(t) || 'Ein ehemaliger Schützling'} im neuen Zuhause`, sizes: i === 0 ? '(max-width: 48rem) 92vw, 46vw' : '(max-width: 48rem) 46vw, 23vw' })}${wandName(t) ? `<span>${esc(wandName(t))}</span>` : ''}</a></li>`).join('')}</ul></div></section>
 
 <section class="abschnitt hilfe" id="spenden" aria-labelledby="h-hilfe"><div class="huelle spenden-raster">
-<div><h2 id="h-hilfe">Deine Spende macht das möglich</h2>
+<div><figure class="enthuellt spendenfoto">${bild(helferBild, { alt: 'Freiwillige schaufeln Erde für Sandsäcke auf dem Gelände des Waldtierheims', sizes: '(max-width: 60rem) 92vw, 46vw', xl: true })}<figcaption>Freiwillige sichern das Waldtierheim gegen Hochwasser, Dezember 2023</figcaption></figure><h2 id="h-hilfe">Deine Spende macht das möglich</h2>
 <p class="statement" style="margin:1.25rem 0 1.75rem">Wir sind ein privater Tierschutzverein. Tierarzt, Futter und Unterkünfte bezahlen wir aus Mitgliedsbeiträgen und Spenden.</p>
 <ul class="reiter" style="margin:0"><li><a href="/deine-hilfe.html#patenschaft">Patenschaft übernehmen</a></li><li><a href="/deine-hilfe.html#mitgliedschaft">Mitglied werden</a></li><li><a href="/deine-hilfe.html#gassi">Gassi gehen</a></li></ul></div>
 <div class="spendenbox"><h3>Jetzt spenden</h3><p><a class="knopf" href="${F.spende}" rel="noopener">Online spenden über betterplace.org</a></p><p class="klein" style="margin:1.5rem 0 .4rem">Oder per Überweisung auf unser Spendenkonto</p>${kontoBlock}</div>
 </div></section>
 
-<section class="abschnitt" aria-labelledby="h-besuch"><div class="huelle besuch">
+<section class="abschnitt" aria-labelledby="h-besuch"><div class="huelle besuch besuch-drei">
+<figure class="enthuellt">${bild(festBild, { alt: 'Besucherinnen und Besucher zwischen Kiefern beim Tag der offenen Tür im Waldtierheim Celle', sizes: '(max-width: 60rem) 92vw, 38vw', xl: true })}<figcaption>Tag der offenen Tür im Waldtierheim, September 2024</figcaption></figure>
 <div><h2 id="h-besuch">Komm im Wald vorbei</h2>
 <p class="status" data-status style="margin:0 0 1.5rem">Zwei Öffnungsfenster am Tag</p>
 <dl class="zeiten"><dt>Montag bis Freitag</dt><dd>8 bis 11 Uhr</dd><dt>Samstag und Sonntag</dt><dd>10 bis 11 Uhr</dd><dt>Mo, Mi, Fr und So</dt><dd>zusätzlich 15 bis 17 Uhr</dd></dl></div>
