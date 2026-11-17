@@ -4,7 +4,7 @@ Italienische Pizzeria in der Altstadt von Celle (Piltzergasse, 29221 Celle). Tel
 
 ## Speisekarte (Preise Stand März 2024, Änderungen vorbehalten)
 ### Pizza
-- Margherita (Tomaten, Mozzarella): 5,50 €
+- Margherita (Tomaten, Mozzarella): 5,50 € [vegetarisch]
 - Funghi (Champignons): 6,50 € [vegetarisch]
 - Prosciutto (Schinken): 7,50 €
 - Hawaii (Schinken, Ananas): 8,00 €
@@ -23,8 +23,8 @@ Italienische Pizzeria in der Altstadt von Celle (Piltzergasse, 29221 Celle). Tel
 - Flammkuchen Spezial (Wechselnde Beläge, auch vegetarisch): bis 11,00 €
 
 ### Salate
-- Insalata Mista (Eisberg, Tomaten, Gurken): 4,50 €
-- Insalata Molise (Oliven, Zwiebeln, Mozzarella, Mais): 7,00 €
+- Insalata Mista (Eisberg, Tomaten, Gurken): 4,50 € [vegetarisch]
+- Insalata Molise (Oliven, Zwiebeln, Mozzarella, Mais): 7,00 € [vegetarisch]
 - Insalata Pollo (Hähnchenbrust, Feta, Rucola, Mais): 7,50 €
 
 ### Antipasti

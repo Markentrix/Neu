@@ -39,7 +39,8 @@
         [
           "Margherita",
           "Tomaten, Mozzarella",
-          "5,50 €"
+          "5,50 €",
+          "vegetarisch"
         ],
         [
           "Funghi",
@@ -132,12 +133,14 @@
         [
           "Insalata Mista",
           "Eisberg, Tomaten, Gurken",
-          "4,50 €"
+          "4,50 €",
+          "vegetarisch"
         ],
         [
           "Insalata Molise",
           "Oliven, Zwiebeln, Mozzarella, Mais",
-          "7,00 €"
+          "7,00 €",
+          "vegetarisch"
         ],
         [
           "Insalata Pollo",
