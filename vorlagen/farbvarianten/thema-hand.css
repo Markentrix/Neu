@@ -80,3 +80,12 @@ html[data-thema="d"] .deal-sec .deal-badge{background:#0C2128;color:#fff}
 html[data-thema="d"] .hl,html[data-thema="d"] .hl--violet,html[data-thema="d"] .hl--cyan{background-image:none;padding:0;color:#C67432}
 html[data-thema="d"] .band .hl,html[data-thema="d"] .ba-sec .hl,html[data-thema="d"] .deal-sec .hl,html[data-thema="d"] .sec--dark .hl,html[data-thema="d"] .site-footer .hl{background-image:none;color:#F1A268}
 html[data-thema="d"] .chk-form .btn--primary,html[data-thema="d"] .chk-strip .btn--primary{background:#C67432;border-color:#C67432;color:#0C2128}
+
+/* D · Feinschliff: Flächen, Kopfzeile, Fokus */
+html[data-thema="d"] .sec--white{background:#FFFFFF}
+html[data-thema="d"] .person-band{background:#EAF1F4}
+html[data-thema="d"] .svc-row{border:1px solid var(--border)}
+html[data-thema="d"] .nav-cta{background:#0C2128;border-color:#0C2128;color:#FFFFFF;box-shadow:none}
+html[data-thema="d"] .nav-cta:hover{background:#045268;border-color:#045268;color:#FFFFFF}
+html[data-thema="d"] :focus-visible{outline:3px solid #0C2128;outline-offset:3px}
+html[data-thema="d"] :is(.band,.ba-sec,.deal-sec,.site-footer) :focus-visible{outline-color:#FFFFFF}
