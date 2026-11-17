@@ -16,16 +16,7 @@ export const company = {
 
 export const sectors = [
   {
-    id: 'landwirtschaft', nr: '01', short: 'Landwirtschaft', swap: 'Ihr Feld',
-    title: 'Landwirtschaftliche Dienstleistungen', sub: 'Auf dem Feld für Sie unterwegs.',
-    heroImg: 'grasernte', pageImg: 'ernte-staub', cardImg: 'haeckseln-1', bandImg: 'haeckseln-2',
-    teaser: 'Ob Mähen, Schwaden, Wenden, der Transport und das Ausbringen von Gärresten, sowie das Pflanzen von Kartoffeln und der mechanische Pflanzenschutz, wir bewirtschaften Ihre Felder für Sie.',
-    overview: 'Vom Säen und Pflanzen über das Düngen und den Pflanzenschutz, bis hin zum Roden und Häckseln, wir sind auf Ihren Feldern für Sie unterwegs. Für die Energie und Ernährung von morgen.',
-    introTitle: 'Für die Energie und Ernährung von morgen',
-    intro: 'Wir unterstützen Sie dabei, auf Ihren Feldern Nahrungsmittel und Energieträger anzubauen, um die Ernährung und Verstromung zu sichern.',
-  },
-  {
-    id: 'forstwirtschaft', nr: '02', short: 'Forstwirtschaft', swap: 'Ihren Forst',
+    id: 'forstwirtschaft', nr: '01', short: 'Forstwirtschaft', swap: 'Ihren Forst',
     title: 'Forstwirtschaftliche Dienstleistungen', sub: 'In Forst und Wald für Sie unterwegs.',
     heroImg: 'bagger-forst', pageImg: 'bagger-forst', cardImg: 'baeume-kneifen-1', bandImg: 'baeume-kneifen-2',
     teaser: 'Neben Flächenvorbereitungen mit Forstmulchern und -Fräsen bieten wir auch Baggerräumungen und Rückearbeiten an.',
@@ -35,13 +26,22 @@ export const sectors = [
     ral: true,
   },
   {
-    id: 'kommunal', nr: '03', short: 'Kommunal', swap: 'Ihre Kommune',
+    id: 'kommunal', nr: '02', short: 'Kommunal', swap: 'Ihre Kommune',
     title: 'Kommunale Dienstleistungen', sub: 'Wir machen den Weg frei.',
     heroImg: 'winterdienst-1', pageImg: 'winterdienst-1', cardImg: 'baufeld-1', bandImg: 'baufeld-2',
     teaser: 'Auch für die Kommunen sind wir da. Mit Wegebau und -pflege, sowie Winterdienst sorgen wir dafür, dass alle sicher an ihr Ziel kommen.',
     overview: 'Mit Wegebau und -Pflege, Winterdienst und Baufeldräumung machen wir für Sie den Weg frei.',
     introTitle: 'Wir machen den Weg frei',
     intro: 'Wir bieten Wegebau und -Pflege, sowie Winterdienst und Baufeldräumung an. Melden Sie sich bei uns, damit Sie immer sicher ans Ziel kommen.',
+  },
+  {
+    id: 'landwirtschaft', nr: '03', short: 'Landwirtschaft', swap: 'Ihr Feld',
+    title: 'Landwirtschaftliche Dienstleistungen', sub: 'Auf dem Feld für Sie unterwegs.',
+    heroImg: 'grasernte', pageImg: 'ernte-staub', cardImg: 'haeckseln-1', bandImg: 'haeckseln-2',
+    teaser: 'Ob Mähen, Schwaden, Wenden, der Transport und das Ausbringen von Gärresten, sowie das Pflanzen von Kartoffeln und der mechanische Pflanzenschutz, wir bewirtschaften Ihre Felder für Sie.',
+    overview: 'Vom Säen und Pflanzen über das Düngen und den Pflanzenschutz, bis hin zum Roden und Häckseln, wir sind auf Ihren Feldern für Sie unterwegs. Für die Energie und Ernährung von morgen.',
+    introTitle: 'Für die Energie und Ernährung von morgen',
+    intro: 'Wir unterstützen Sie dabei, auf Ihren Feldern Nahrungsmittel und Energieträger anzubauen, um die Ernährung und Verstromung zu sichern.',
   },
 ];
 
@@ -213,20 +213,18 @@ export const alts = {
 
 // Bildstrecke Startseite – ausschließlich die hochwertigsten Aufnahmen
 export const showcase = [
-  { img: 'haeckseln-2', title: 'Häckseln', sub: 'Mais, Gras & GPS', href: 'leistungen/landwirtschaft/haeckseln/' },
-  { img: 'baeume-kneifen-2', title: 'Bäume kneifen', sub: 'Woodcracker C350', href: 'leistungen/forstwirtschaft/baeume-kneifen/' },
-  { img: 'duengung-1', title: 'Düngung', sub: 'Gülle & Gärreste', href: 'leistungen/landwirtschaft/duengung/' },
-  { img: 'schwaden', title: 'Grünland', sub: 'Mähen, Wenden, Schwaden', href: 'leistungen/landwirtschaft/gruenland/' },
-  { img: 'transport-1', title: 'Transport', sub: 'Stück-, Schütt- & Flüssiggut', href: 'leistungen/landwirtschaft/transport/' },
   { img: 'forstmulcher-2', title: 'Forstmulchen', sub: 'Flächenvorbereitung', href: 'leistungen/forstwirtschaft/flaechenvorbereitung/' },
+  { img: 'baeume-kneifen-2', title: 'Bäume kneifen', sub: 'Woodcracker C350', href: 'leistungen/forstwirtschaft/baeume-kneifen/' },
+  { img: 'baufeld-1', title: 'Baufeldräumung', sub: 'Kommunal', href: 'leistungen/kommunal/baufeldraeumung/' },
+  { img: 'haeckseln-2', title: 'Häckseln', sub: 'Mais, Gras & GPS', href: 'leistungen/landwirtschaft/haeckseln/' },
 ];
 
 // Technik in Zahlen – Werte aus den Maschinendaten der Leistungsseiten
 export const facts = [
+  { n: '800', unit: 'mm', label: 'Stammdurchmesser mit dem Jenz Hacker HEM 841 Z', href: 'leistungen/forstwirtschaft/holz-hacken/' },
+  { n: '50', unit: '°', label: 'Steigung befahrbar mit der Forstraupe Moritz', href: 'leistungen/forstwirtschaft/kulturpflege/' },
   { n: '2', unit: '×', label: 'Feldhäcksler Fendt Katana 650', href: 'leistungen/landwirtschaft/haeckseln/' },
   { n: '9,40', unit: 'm', label: 'Arbeitsbreite SaMASZ Schmetterlingskombination', href: 'leistungen/landwirtschaft/gruenland/' },
   { n: '25', unit: 'm³', label: 'Ladevolumen Güllefass Samson PG 25', href: 'leistungen/landwirtschaft/duengung/' },
   { n: '12,50', unit: 'm', label: 'Arbeitsbreite CLAAS Liner Vierkreiselschwader', href: 'leistungen/landwirtschaft/gruenland/' },
-  { n: '800', unit: 'mm', label: 'Stammdurchmesser mit dem Jenz Hacker HEM 841 Z', href: 'leistungen/forstwirtschaft/holz-hacken/' },
-  { n: '50', unit: '°', label: 'Steigung befahrbar mit der Forstraupe Moritz', href: 'leistungen/forstwirtschaft/kulturpflege/' },
 ];

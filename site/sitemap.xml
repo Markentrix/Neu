@@ -2,15 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://lu-linneweh.com/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/</loc></url>
-  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/forstwirtschaft/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/kommunal/</loc></url>
-  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/duengung/</loc></url>
-  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/aussaat/</loc></url>
-  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/pflanzenschutz/</loc></url>
-  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/haeckseln/</loc></url>
-  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/gruenland/</loc></url>
-  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/transport/</loc></url>
+  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/forstwirtschaft/flaechenvorbereitung/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/forstwirtschaft/kulturpflege/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/forstwirtschaft/holz-ruecken/</loc></url>
@@ -22,6 +16,12 @@
   <url><loc>https://lu-linneweh.com/leistungen/kommunal/seitenraender-schlegeln/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/kommunal/winterdienst/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/kommunal/baufeldraeumung/</loc></url>
+  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/duengung/</loc></url>
+  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/aussaat/</loc></url>
+  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/pflanzenschutz/</loc></url>
+  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/haeckseln/</loc></url>
+  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/gruenland/</loc></url>
+  <url><loc>https://lu-linneweh.com/leistungen/landwirtschaft/transport/</loc></url>
   <url><loc>https://lu-linneweh.com/leistungen/werkstatt/</loc></url>
   <url><loc>https://lu-linneweh.com/unternehmen/</loc></url>
   <url><loc>https://lu-linneweh.com/karriere/</loc></url>

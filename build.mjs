@@ -64,8 +64,10 @@ const label = (t, tag = 'p', cls = '') => `<${tag} class="label ${cls}"><span cl
 
 /* ------------------------------------------------------------------ Layout */
 const navLinks = [
-  ['leistungen/', 'Leistungen'], ['unternehmen/', 'Unternehmen'], ['karriere/', 'Karriere'], ['news/', 'News'], ['faq/', 'FAQ'],
+  ['leistungen/', 'Leistungen'], ['unternehmen/', 'Unternehmen'], ['karriere/', 'Karriere'], ['news/', 'Aktuelles'],
 ];
+const werkstattArea = { id: 'werkstatt', nr: '04', short: 'Werkstatt', swap: 'Ihre Maschinen', heroImg: 'transport-3' };
+const areas = [...sectors, werkstattArea];
 
 function header(path) {
   const cur = (p) => (path.startsWith(p) ? ' aria-current="page"' : '');
@@ -73,7 +75,7 @@ function header(path) {
 <header class="hdr" data-hdr>
   <a class="hdr__logo" href="{root}" aria-label="${C.name} – Startseite"><img src="{root}assets/img/logo-weiss.png" width="720" height="174" alt="${C.name}"></a>
   <nav class="hdr__nav" aria-label="Hauptnavigation">
-    ${navLinks.map(([p, t]) => `<a href="{root}${p}"${cur(p)}>${t}</a>`).join('')}
+    ${navLinks.map(([p, t]) => (p === 'leistungen/' ? `<div class="hdr__drop"><a href="{root}${p}"${cur(p)} aria-haspopup="true">${t}</a><div class="mega"><div class="wrap mega__in">${sectors.map((x) => `<div><a class="mega__head" href="{root}leistungen/${x.id}/"><small>${x.nr}</small>${x.short}</a><ul>${svcOf(x.id).map((v) => `<li><a href="{root}${v.path}">${v.title}</a></li>`).join('')}</ul></div>`).join('')}<div><a class="mega__head" href="{root}leistungen/werkstatt/"><small>04</small>Werkstatt</a><ul><li><a href="{root}leistungen/werkstatt/">Reparatur, Reifen, Hydraulik &amp; mehr</a></li><li><a href="{root}leistungen/">Alle Leistungen im Überblick</a></li></ul></div></div></div></div>` : `<a href="{root}${p}"${cur(p)}>${t}</a>`)).join('')}
   </nav>
   <a class="hdr__tel" href="${C.phoneHref}">${ICONS.phone}<span>${C.phone}</span></a>
   <a class="btn btn--wheat btn--sm hdr__cta" href="{root}kontakt/"><span>Kontakt</span>${ARROW}</a>
@@ -83,22 +85,22 @@ function header(path) {
   <div class="menu__bg" aria-hidden="true"></div>
   <div class="menu__inner wrap">
     <nav class="menu__main" aria-label="Menü">
-      <a href="{root}" data-img="grasernte"><small>00</small>Start</a>
-      <a href="{root}leistungen/" data-img="haeckseln-1"><small>01</small>Leistungen</a>
+      <a href="{root}" data-img="bagger-forst"><small>00</small>Start</a>
+      <a href="{root}leistungen/" data-img="baeume-kneifen-1"><small>01</small>Leistungen</a>
       <a href="{root}unternehmen/" data-img="gruenland-1"><small>02</small>Unternehmen</a>
       <a href="{root}karriere/" data-img="maehen"><small>03</small>Karriere</a>
-      <a href="{root}news/" data-img="forstmulcher-2"><small>04</small>News</a>
-      <a href="{root}faq/" data-img="agrarmonitor-tablet"><small>05</small>FAQ</a>
-      <a href="{root}kontakt/" data-img="beratung"><small>06</small>Kontakt</a>
+      <a href="{root}news/" data-img="forstmulcher-2"><small>04</small>Aktuelles</a>
+      <a href="{root}kontakt/" data-img="beratung"><small>05</small>Kontakt</a>
     </nav>
     <div class="menu__side">
       <div class="menu__preview" aria-hidden="true">
-        ${['grasernte', 'haeckseln-1', 'gruenland-1', 'maehen', 'forstmulcher-2', 'agrarmonitor-tablet', 'beratung'].map((n, i) => `<img data-name="${n}" src="{root}assets/img/${n}-800.webp" alt="" loading="lazy"${i === 0 ? ' class="is-on"' : ''}>`).join('')}
+        ${['bagger-forst', 'baeume-kneifen-1', 'gruenland-1', 'maehen', 'forstmulcher-2', 'beratung'].map((n, i) => `<img data-name="${n}" src="{root}assets/img/${n}-800.webp" alt="" loading="lazy"${i === 0 ? ' class="is-on"' : ''}>`).join('')}
       </div>
       <div class="menu__cols">
-        ${sectors.map((s) => `<div><a class="label" href="{root}leistungen/${s.id}/">${s.short}</a><ul>${svcOf(s.id).map((x) => `<li><a href="{root}${x.path}">${x.title}</a></li>`).join('')}</ul></div>`).join('')}
+        ${sectors.map((s) => `<div><a class="label" href="{root}leistungen/${s.id}/">${s.short}</a><ul>${svcOf(s.id).map((x) => `<li><a href="{root}${x.path}">${x.title}</a></li>`).join('')}</ul></div>`).join('')}<div><a class="label" href="{root}leistungen/werkstatt/">Werkstatt</a></div>
       </div>
       <div class="menu__foot">
+        <a href="{root}faq/">FAQ</a>
         <a href="${C.phoneHref}">${C.phone}</a><a href="mailto:${C.email}">${C.email}</a>
         <a href="${C.instagram}" target="_blank" rel="noopener">Instagram</a><a href="${C.facebook}" target="_blank" rel="noopener">Facebook</a>
       </div>
@@ -142,7 +144,7 @@ function footer() {
     <nav class="ftr__col" aria-label="Leistungen"><p class="label">Leistungen</p>
       ${sectors.map((s) => `<a href="{root}leistungen/${s.id}/">${s.short}</a>`).join('')}<a href="{root}leistungen/werkstatt/">Werkstatt</a><a href="{root}leistungen/">Alle Leistungen</a></nav>
     <nav class="ftr__col" aria-label="Unternehmen"><p class="label">Unternehmen</p>
-      <a href="{root}unternehmen/">Über uns</a><a href="{root}karriere/">Karriere</a><a href="{root}news/">News</a><a href="{root}faq/">FAQ</a><a href="{root}kontakt/">Kontakt</a></nav>
+      <a href="{root}unternehmen/">Über uns</a><a href="{root}karriere/">Karriere</a><a href="{root}news/">Aktuelles</a><a href="{root}faq/">FAQ</a><a href="{root}kontakt/">Kontakt</a></nav>
     <div class="ftr__col"><p class="label">Kontakt</p>
       <a href="${C.phoneHref}">${C.phone}</a><a href="mailto:${C.email}">${C.email}</a>
       <span>${C.street}<br>${C.city}</span><span>${C.hours}</span></div>
@@ -238,8 +240,8 @@ const gallery = (names, title = 'Einblicke') => names.length ? `
 
 /* ------------------------------------------------------------------ Startseite */
 function home() {
-  const heroSlides = sectors.map((s, i) => `<div class="hero__slide${i === 0 ? ' is-active' : ''}">${pic(s.heroImg, { alt: i === 0 ? altFor(s.heroImg) : '', eager: i === 0, sizes: '100vw' })}</div>`).join('');
-  const marquee = ['Mähen', 'Schwaden', 'Häckseln', 'Düngung', 'Aussaat', 'Forstmulchen', 'Holz rücken', 'Bäume kneifen', 'Wegebau', 'Winterdienst', 'Transport', 'Werkstatt'];
+  const heroSlides = areas.map((s, i) => `<div class="hero__slide${i === 0 ? ' is-active' : ''}">${pic(s.heroImg, { alt: i === 0 ? altFor(s.heroImg) : '', eager: i === 0, sizes: '100vw' })}</div>`).join('');
+  const marquee = ['Forstmulchen', 'Bäume kneifen', 'Holz rücken', 'Wegebau', 'Winterdienst', 'Baufeldräumung', 'Häckseln', 'Düngung', 'Grünland', 'Transport', 'Werkstatt'];
   const mq = marquee.map((t) => `<span>${t}</span><i aria-hidden="true">✳</i>`).join('');
   const panels = [
     ...sectors.map((s) => ({ nr: s.nr, short: s.short, title: s.title, text: s.teaser, img: s.cardImg, href: `leistungen/${s.id}/`, items: svcOf(s.id) })),
@@ -251,9 +253,9 @@ function home() {
   <div class="hero__shade" aria-hidden="true"></div>
   <div class="wrap hero__inner">
     ${label('Land- und forstwirtschaftliche Dienstleistungen · seit 1973', 'h1', 'hero__kicker')}
-    <p class="display hero__title" aria-label="Im Einsatz für Ihr Feld, Ihren Forst und Ihre Kommune">
+    <p class="display hero__title" aria-label="Im Einsatz für Ihren Forst, Ihre Kommune, Ihr Feld und Ihre Maschinen">
       <span class="hero__line" aria-hidden="true"><span>Im Einsatz für</span></span>
-      <span class="hero__line" aria-hidden="true"><span class="hero__swap">${sectors.map((s, i) => `<b${i === 0 ? ' class="is-active"' : ''}>${s.swap}</b>`).join('')}</span></span>
+      <span class="hero__line" aria-hidden="true"><span class="hero__swap">${areas.map((s, i) => `<b${i === 0 ? ' class="is-active"' : ''}>${s.swap}</b>`).join('')}</span></span>
     </p>
     <div class="hero__foot">
       <p class="hero__lead">Das Lohnunternehmen Linneweh bietet Ihnen Dienstleistungen im land- und forstwirtschaftlichen, sowie im kommunalen Sektor an. Gemeinsam mit Ihnen arbeiten wir für eine grünere Zukunft.</p>
@@ -261,7 +263,7 @@ function home() {
     </div>
   </div>
   <div class="hero__tabs" role="tablist" aria-label="Bereiche">
-    ${sectors.map((s, i) => `<button type="button" role="tab" aria-selected="${i === 0}" class="hero__tab${i === 0 ? ' is-active' : ''}"><small>${s.nr}</small><span>${s.short}</span><i aria-hidden="true"></i></button>`).join('')}
+    ${areas.map((s, i) => `<button type="button" role="tab" aria-selected="${i === 0}" class="hero__tab${i === 0 ? ' is-active' : ''}"><small>${s.nr}</small><span>${s.short}</span><i aria-hidden="true"></i></button>`).join('')}
   </div>
   <a class="hero__badge" href="{root}unternehmen/" aria-label="Familienunternehmen seit 1973 – mehr über uns">
     <svg viewBox="0 0 120 120" aria-hidden="true"><defs><path id="circ" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"/></defs><text><textPath href="#circ">Familienunternehmen · seit 1973 · zwei Generationen · </textPath></text></svg>
@@ -271,14 +273,39 @@ function home() {
 
 <div class="marquee" aria-hidden="true"><div class="marquee__track">${mq}${mq}</div></div>
 
-<section class="sec values">
-  <div class="wrap">
-    <div class="sec__head">
-      ${label('Was uns ausmacht')}
-      <h2 class="display" data-split>Kundennah. Effizient. Erfahren.</h2>
+<section class="hs" data-hscroll>
+  <div class="hs__sticky">
+    <div class="wrap hs__head">
+      <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Ein Partner. Vier Bereiche.</h2></div>
+      <div class="hs__meta"><span class="hs__count"><b>01</b> / 0${panels.length}</span><div class="hs__bar"><i></i></div></div>
     </div>
-    <div class="values__grid" data-stagger>
-      ${values.map((v, i) => `<article class="value" data-reveal><div class="value__ico">${ICONS[v.icon]}</div><span class="value__nr">0${i + 1}</span><h3>${v.title}</h3><p>${v.text}</p></article>`).join('')}
+    <div class="wrap quad">
+      ${panels.map((p) => `<a class="quad__item" href="{root}${p.href}"><span class="quad__img">${pic(p.img, { alt: '', sizes: '25vw' })}<i>${p.nr}</i></span><strong>${p.short}</strong></a>`).join('')}
+    </div>
+    <div class="hs__track" data-stagger>
+      ${panels.map((p) => `
+      <article class="panel" data-reveal>
+        <div class="panel__media">${pic(p.img, { sizes: '(max-width:900px) 90vw, 60vw' })}</div>
+        <div class="panel__body">
+          <span class="panel__nr">${p.nr}</span>
+          <h3 class="display">${p.title.replace(' Dienstleistungen', '<br>Dienstleistungen')}</h3>
+          <p>${p.text}</p>
+          ${p.items.length ? `<ul class="chips">${p.items.map((x) => `<li><a href="{root}${x.path}">${x.title}</a></li>`).join('')}</ul>` : ''}
+          ${btn('{root}' + p.href, 'Zur Leistungsübersicht')}
+        </div>
+      </article>`).join('')}
+    </div>
+  </div>
+</section>
+
+<section class="sec show">
+  <div class="wrap">
+    <div class="sec__head sec__head--row">
+      <div>${label('Im Einsatz')}<h2 class="display" data-split>Starke Technik. Echte Arbeit.</h2></div>
+      <p class="show__note" data-reveal>Aufnahmen aus unserem Arbeitsalltag auf dem Feld, im Forst und auf der Straße.</p>
+    </div>
+    <div class="show__grid">
+      ${showcase.map((x, i) => `<a class="show__item show__item--${'abcdef'[i]}" href="{root}${x.href}" data-reveal="clip" data-cursor="Öffnen">${pic(x.img, { sizes: '(max-width:800px) 100vw, 60vw' })}<span class="show__cap"><small>${x.sub}</small><strong class="display">${x.title}</strong></span></a>`).join('')}
     </div>
   </div>
 </section>
@@ -306,43 +333,6 @@ function home() {
   </div>
 </section>
 
-<section class="sec show">
-  <div class="wrap">
-    <div class="sec__head sec__head--row">
-      <div>${label('Im Einsatz')}<h2 class="display" data-split>Starke Technik. Echte Arbeit.</h2></div>
-      <p class="show__note" data-reveal>Aufnahmen aus unserem Arbeitsalltag auf dem Feld, im Forst und auf der Straße.</p>
-    </div>
-    <div class="show__grid">
-      ${showcase.map((x, i) => `<a class="show__item show__item--${'abcdef'[i]}" href="{root}${x.href}" data-reveal="clip" data-cursor="Öffnen">${pic(x.img, { sizes: '(max-width:800px) 100vw, 60vw' })}<span class="show__cap"><small>${x.sub}</small><strong class="display">${x.title}</strong></span></a>`).join('')}
-    </div>
-  </div>
-</section>
-
-<section class="hs" data-hscroll>
-  <div class="hs__sticky">
-    <div class="wrap hs__head">
-      <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Ein Partner. Vier Bereiche.</h2></div>
-      <div class="hs__meta"><span class="hs__count"><b>01</b> / 0${panels.length}</span><div class="hs__bar"><i></i></div></div>
-    </div>
-    <div class="wrap quad">
-      ${panels.map((p) => `<a class="quad__item" href="{root}${p.href}"><span class="quad__img">${pic(p.img, { alt: '', sizes: '25vw' })}<i>${p.nr}</i></span><strong>${p.short}</strong></a>`).join('')}
-    </div>
-    <div class="hs__track" data-stagger>
-      ${panels.map((p) => `
-      <article class="panel" data-reveal>
-        <div class="panel__media">${pic(p.img, { sizes: '(max-width:900px) 90vw, 60vw' })}</div>
-        <div class="panel__body">
-          <span class="panel__nr">${p.nr}</span>
-          <h3 class="display">${p.title.replace(' Dienstleistungen', '<br>Dienstleistungen')}</h3>
-          <p>${p.text}</p>
-          ${p.items.length ? `<ul class="chips">${p.items.map((x) => `<li><a href="{root}${x.path}">${x.title}</a></li>`).join('')}</ul>` : ''}
-          ${btn('{root}' + p.href, 'Zur Leistungsübersicht')}
-        </div>
-      </article>`).join('')}
-    </div>
-  </div>
-</section>
-
 <section class="facts">
   <div class="facts__bg" aria-hidden="true">${pic('ernte-staub', { alt: '', sizes: '100vw', attrs: 'data-parallax="0.12"' })}</div>
   <div class="wrap facts__inner">
@@ -353,20 +343,14 @@ function home() {
   </div>
 </section>
 
-<section class="sec tech">
-  <div class="wrap tech__grid">
-    <div class="tech__text">
-      ${label('Digital organisiert')}
-      <h2 class="display" data-split>Wir arbeiten mit Agrarmonitor.</h2>
-      <p class="lead" data-reveal>AGRARMONITOR ist die führende Software für Lohnunternehmen, Ackerbaubetriebe und Forstbetriebe. Dokumentation in Echtzeit statt nachträglichem Zettelschreiben durch synchronen Datenaustausch zwischen Fahrer und Büro.</p>
-      <ol class="tech__list" data-stagger>
-        ${agrarmonitor.map((a, i) => `<li data-reveal><span>0${i + 1}</span><div><h3>${a.title}</h3><p>${a.text}</p></div></li>`).join('')}
-      </ol>
-      <div data-reveal>${btn('{root}faq/', 'Mehr erfahren', 'dark')}</div>
+<section class="sec values">
+  <div class="wrap">
+    <div class="sec__head">
+      ${label('Was uns ausmacht')}
+      <h2 class="display" data-split>Kundennah. Effizient. Erfahren.</h2>
     </div>
-    <div class="tech__media">
-      <figure class="frame frame--tall" data-reveal="clip">${pic('agrarmonitor-tablet', { sizes: '(max-width:900px) 100vw, 40vw', attrs: 'data-parallax="0.1"' })}</figure>
-      <img class="tech__logo" src="{root}assets/img/agrarmonitor-logo.png" width="700" height="128" alt="AGRARMONITOR" loading="lazy" data-reveal>
+    <div class="values__grid" data-stagger>
+      ${values.map((v, i) => `<article class="value" data-reveal><div class="value__ico">${ICONS[v.icon]}</div><span class="value__nr">0${i + 1}</span><h3>${v.title}</h3><p>${v.text}</p></article>`).join('')}
     </div>
   </div>
 </section>
@@ -374,7 +358,7 @@ function home() {
 <section class="sec newsx">
   <div class="wrap sec__head sec__head--row">
     <div>${label('Unsere Neuigkeiten')}<h2 class="display" data-split>Frisch vom Feld.</h2></div>
-    <div class="newsx__ctrl"><button type="button" class="rbtn" data-prev aria-label="Zurück">${ARROW}</button><button type="button" class="rbtn" data-next aria-label="Weiter">${ARROW}</button>${btn('{root}news/', 'Alle News', 'dark')}</div>
+    <div class="newsx__ctrl"><button type="button" class="rbtn" data-prev aria-label="Zurück">${ARROW}</button><button type="button" class="rbtn" data-next aria-label="Weiter">${ARROW}</button>${btn('{root}news/', 'Alle Beiträge', 'dark')}</div>
   </div>
   <div class="newsx__track" data-drag data-carousel>
     ${news.map((n) => newsCard(n)).join('')}
@@ -392,6 +376,25 @@ function home() {
 </section>`;
   layout({ path: '', title: `${C.name} – Land- und Forstwirtschaftliche Dienstleistungen`, desc: 'Das Lohnunternehmen Linneweh bietet Dienstleistungen im land- und forstwirtschaftlichen sowie im kommunalen Sektor – familiengeführt seit 1973 in Celle.', body, cls: 'p-home', loader: true });
 }
+
+const techSection = () => `
+<section class="sec tech">
+  <div class="wrap tech__grid">
+    <div class="tech__text">
+      ${label('Digital organisiert')}
+      <h2 class="display" data-split>Wir arbeiten mit Agrarmonitor.</h2>
+      <p class="lead" data-reveal>AGRARMONITOR ist die führende Software für Lohnunternehmen, Ackerbaubetriebe und Forstbetriebe. Dokumentation in Echtzeit statt nachträglichem Zettelschreiben durch synchronen Datenaustausch zwischen Fahrer und Büro.</p>
+      <ol class="tech__list" data-stagger>
+        ${agrarmonitor.map((a, i) => `<li data-reveal><span>0${i + 1}</span><div><h3>${a.title}</h3><p>${a.text}</p></div></li>`).join('')}
+      </ol>
+      <div data-reveal>${btn('{root}faq/', 'Mehr erfahren', 'dark')}</div>
+    </div>
+    <div class="tech__media">
+      <figure class="frame frame--tall" data-reveal="clip">${pic('agrarmonitor-tablet', { sizes: '(max-width:900px) 100vw, 40vw', attrs: 'data-parallax="0.1"' })}</figure>
+      <img class="tech__logo" src="{root}assets/img/agrarmonitor-logo.png" width="700" height="128" alt="AGRARMONITOR" loading="lazy" data-reveal>
+    </div>
+  </div>
+</section>`;
 
 function newsCard(n) {
   return `<a class="ncard" href="{root}news/${n.slug}/" data-cursor="Lesen">
@@ -562,6 +565,7 @@ function unternehmen() {
     </ol>
   </div>
 </section>
+${techSection()}
 <section class="sec certs">
   <div class="wrap certs__grid">
     <div>${label('Geprüfte Qualität')}<h2 class="display" data-split>Zertifiziert &amp; organisiert.</h2></div>
@@ -649,19 +653,19 @@ function faq() {
 
 /* ------------------------------------------------------------------ News */
 function newsIndex() {
-  const body = `${pageHero({ kicker: 'Unsere Neuigkeiten', title: 'News', sub: 'Maschinen, Einsätze und Angebote – frisch vom Feld, aus dem Forst und von der Straße.', crumbs: [['news/', 'News']] })}
+  const body = `${pageHero({ kicker: 'Unsere Neuigkeiten', title: 'Aktuelles', sub: 'Maschinen, Einsätze und Angebote – frisch vom Feld, aus dem Forst und von der Straße.', crumbs: [['news/', 'Aktuelles']] })}
 <section class="sec">
   <div class="wrap ngrid" data-stagger>
     ${news.map((n) => newsCard(n).replace('class="ncard"', 'class="ncard" data-reveal')).join('')}
   </div>
 </section>`;
-  layout({ path: 'news/', title: 'News', desc: 'Neuigkeiten vom Lohnunternehmen Linneweh: Maschinen, Einsätze und Angebote aus Land- und Forstwirtschaft sowie dem kommunalen Bereich.', body, img: 'forstmulcher-2' });
+  layout({ path: 'news/', title: 'Aktuelles', desc: 'Neuigkeiten vom Lohnunternehmen Linneweh: Maschinen, Einsätze und Angebote aus Land- und Forstwirtschaft sowie dem kommunalen Bereich.', body, img: 'forstmulcher-2' });
 }
 
 function newsPost(n, i) {
   const next = news[(i + 1) % news.length];
   const bodyHtml = (n.body || []).map((b) => (b.p ? `<p data-reveal>${b.p}</p>` : b.h ? `<h2 class="post__h">${b.h}</h2>` : `<ul class="checks" data-reveal>${b.ul.map((t) => `<li>${t}</li>`).join('')}</ul>`)).join('');
-  const body = `${pageHero({ kicker: `News · ${n.tag}`, title: n.title, img: n.img, crumbs: [['news/', 'News'], [`news/${n.slug}/`, n.title]], tall: true })}
+  const body = `${pageHero({ kicker: `Aktuelles · ${n.tag}`, title: n.title, img: n.img, crumbs: [['news/', 'Aktuelles'], [`news/${n.slug}/`, n.title]], tall: true })}
 <article class="sec post">
   <div class="wrap post__grid">
     <div class="post__body">
