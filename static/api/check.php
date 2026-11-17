@@ -3,7 +3,7 @@
  * Markentrix · Website-Check (Endpunkt für /website-check).
  *
  * Eingang:  POST /api/check.php  mit JSON {"url":"https://beispiel.de"}
- * Ausgang:  JSON mit Gesamtwertung, Bereichswerten und Kurzbefund je Bereich (Anzahl offener Punkte, davon mit hohem Gewicht,
+ * Ausgang:  JSON mit Gesamtwertung, KI-Potenzial (Branche, Reife, Chancen, siehe ki-potenzial.php), Bereichswerten und Kurzbefund je Bereich (Anzahl offener Punkte, davon mit hohem Gewicht,
  *           sowie die Titel dessen, was bereits in Ordnung ist). Die einzelnen Befunde zu offenen Punkten (Titel, Beschreibung)
  *           verlassen den Server nicht: Sie liegen nur im internen Bericht (temporärer Speicher) und gehen an Markentrix.
  *
@@ -668,6 +668,7 @@ function notify_owner(array $r): void {
   }
   $T[] = ''; $T[] = 'Der Besucher hat weder Namen noch Kontaktdaten angegeben. Fordert er die Kurzfassung per E-Mail an, kommt eine eigene Mail mit seinen Angaben (Quelle: Website-Check).';
   $T[] = 'Diese Mail enthält weder eine IP-Adresse noch einen Namen.';
+  if (!empty($r['ki']['chancen'])) { $T[] = ''; $T[] = 'KI-Potenzial' . (!empty($r['ki']['branche']) ? ' (' . $r['ki']['branche'] . ')' : ' (Branche nicht erkannt)') . ', Reife ' . (int) $r['ki']['reife'] . ' von 100:'; foreach ($r['ki']['chancen'] as $ch) $T[] = '  - ' . $ch['titel'] . ' [' . $ch['paket'] . ']'; }
   $text = implode("\n", $T) . "\n";
   // HTML (Tabellenlayout, Stile inline)
   $col = fn(int $sc): string => $sc >= 80 ? '#045268' : ($sc >= 55 ? '#964F08' : '#B3261E');
@@ -713,6 +714,14 @@ function notify_owner(array $r): void {
   deliver($c, $to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
 }
 
+// ── KI-Potenzial (regelbasiert aus der bereits abgerufenen Startseite, kein weiterer Abruf, keine KI-Anfrage) ──
+require_once __DIR__ . '/ki-potenzial.php';
+try {
+  $ki = ki_potenzial(['title' => $P['title'], 'h1' => $P['h1'], 'h2' => $P['h2'], 'desc' => $P['desc'], 'text' => $P['text'], 'lower' => $lower,
+    'hasTel' => $hasTel, 'hasMail' => $hasMail, 'hasWa' => $hasWa, 'hasForm' => $hasForm, 'hasFaq' => ($hasFaqText || $hasFaqLd),
+    'socialCount' => count($social), 'hasEntity' => (bool) $entity, 'viewport' => $P['viewport'], 'https' => $https]);
+} catch (Throwable $e) { $ki = null; }
+
 // ── Auswertung ───────────────────────────────────────────────────────────────
 $cats = []; $totalW = 0.0; $sum = 0.0; $all = [];
 foreach ($CATS as $key => $meta) {
@@ -740,7 +749,7 @@ $samplePublic = array_map(fn($s) => ['path' => (string) (parse_url($s['url'], PH
 // Bericht für die Zusendung per E-Mail: Ergebnis kurzzeitig im temporären Speicher (Zufalls-Token, ohne Personenbezug), höchstens zwei Stunden
 $token = bin2hex(random_bytes(16));
 $report = ['host' => $host, 'url' => $finalUrl, 'score' => $score, 'grade' => $grade, 'cap' => $capReason, 'counts' => $counts, 'checks' => count($all) - $counts['info'],
-           'categories' => $cats, 'sample' => $samplePublic, 'date' => date('d.m.Y'), 'created' => time()];
+           'categories' => $cats, 'sample' => $samplePublic, 'ki' => $ki, 'date' => date('d.m.Y'), 'created' => time()];
 foreach ((array) glob(sys_get_temp_dir() . '/mx-report-*.json') as $old) { if (@filemtime($old) < time() - 7200) @unlink($old); }
 @file_put_contents(sys_get_temp_dir() . '/mx-report-' . $token . '.json', json_encode($report, JSON_UNESCAPED_UNICODE));
 // Öffentliche Kurzfassung: keine Titel oder Beschreibungen zu offenen Punkten, nur Zähler und was bereits in Ordnung ist
@@ -755,7 +764,7 @@ $pubCats = array_map(function ($c) {
 }, $cats);
 $response = [
   'ok' => true, 'token' => $token, 'url' => $finalUrl, 'host' => $host, 'status' => $status, 'score' => $score, 'grade' => $grade, 'cap' => $capReason,
-  'counts' => $counts, 'categories' => $pubCats, 'sample' => $samplePublic, 'checks' => count($all) - $counts['info'],
+  'counts' => $counts, 'categories' => $pubCats, 'sample' => $samplePublic, 'ki' => $ki, 'checks' => count($all) - $counts['info'],
   'seconds' => round(microtime(true) - $T0, 1),
 ];
 http_response_code(200);

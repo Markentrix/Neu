@@ -180,6 +180,34 @@
       found.hidden = false;
     }
     on(d, 'mx:lead', function (e) { if (e.detail && e.detail.quelle === 'Website-Check' && last) { renderFindings(last); if (found.scrollIntoView) found.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' }); } });
+    function renderKi(k) {
+      var box = el('section', 'card card--lg ki-box'); box.setAttribute('aria-labelledby', 'ki-title');
+      var head = el('div', 'ki-head'), left = el('div');
+      left.appendChild(el('span', 'eyebrow', 'KI-Potenzial'));
+      var h = el('h3', null, 'Wo sich bei Ihnen Automatisierung lohnen könnte'); h.id = 'ki-title'; left.appendChild(h);
+      left.appendChild(el('p', 'muted ki-branche', k.branche ? 'Erkannte Branche: ' + k.branche : 'Die Branche ist von außen nicht eindeutig erkennbar. Wir betrachten Ihre Seite allgemein.'));
+      var rb = el('div', 'ki-reife'); rb.appendChild(el('span', 'ki-reife-t', 'Automatisierungs-Reife'));
+      var tr = el('span', 'ki-track'); var f = el('i'); f.style.width = k.reife + '%'; tr.appendChild(f); rb.appendChild(tr);
+      rb.appendChild(el('b', null, k.reife + ' / 100'));
+      head.appendChild(left); head.appendChild(rb); box.appendChild(head);
+      box.appendChild(el('p', 'ki-rt', k.reife_text));
+      if (k.chancen && k.chancen.length) {
+        box.appendChild(el('h4', 'ki-sub', 'Ihre größten Chancen'));
+        var g = el('div', 'ki-grid');
+        k.chancen.forEach(function (c) {
+          var card = el('article', 'ki-card'); card.appendChild(el('h5', null, c.titel)); card.appendChild(el('p', null, c.text));
+          var dl = el('dl', 'ki-facts');
+          var a = el('div'); a.appendChild(el('dt', null, 'Das sehen wir bei Ihnen')); a.appendChild(el('dd', null, c.grund)); dl.appendChild(a);
+          var b = el('div'); b.appendChild(el('dt', null, 'Wirkung')); b.appendChild(el('dd', null, c.wirkung)); dl.appendChild(b);
+          card.appendChild(dl); card.appendChild(el('span', 'ki-paket', c.paket)); g.appendChild(card);
+        });
+        box.appendChild(g);
+      }
+      box.appendChild(el('p', 'tiny ki-note', k.hinweis));
+      var row = el('div', 'row mt-2'); var a1 = el('a', 'btn btn--primary btn--lg', 'Chancen im Erstgespräch besprechen'); a1.href = '/kontakt'; a1.setAttribute('data-open-modal', ''); a1.setAttribute('data-aktion', 'ki-potenzial'); row.appendChild(a1);
+      var a2 = el('a', 'btn btn--secondary btn--lg', 'KI-Automatisierung ansehen'); a2.href = '/leistungen/ki-automatisierung'; row.appendChild(a2); box.appendChild(row);
+      return box;
+    }
     function render(r) {
       out.textContent = '';
       var score = r.score, tone = score >= 80 ? 'good' : score >= 55 ? 'mid' : 'low';
@@ -198,6 +226,7 @@
         row.appendChild(el('b', null, c.score + ' / 100')); bars.appendChild(row);
       });
       out.appendChild(bars);
+      if (r.ki) out.appendChild(renderKi(r.ki));
       last = r; found.textContent = ''; found.hidden = true;
       if (gate) { var gf = $('form', gate), ok = $('#chk-danke', gate); if (gf) { gf.hidden = false; gf.reset(); } if (ok) ok.hidden = true; var offer = $('[data-check-offer]', gate); if (offer) offer.hidden = !(r.score < 100); gate.hidden = false; }
       out.hidden = false; out.focus({ preventScroll: true });
@@ -208,7 +237,10 @@
       var v = input.value.trim(); msg.className = 'chk-msg'; msg.textContent = '';
       if (!v || v.indexOf('.') < 0 && !/^https?:\/\//i.test(v)) { fail(MSG.url); input.focus(); return; }
       busy = true; track('website_check_start'); var orig = btn.textContent; btn.textContent = 'Prüfe …'; btn.disabled = true; form.setAttribute('aria-busy', 'true'); out.hidden = true;
-      msg.textContent = 'Wir prüfen Ihre Seite gründlich. Das dauert bis zu 20 Sekunden.';
+      var STEPS = ['Website wird gelesen …', 'Branche wird erkannt …', 'Möglichkeiten werden eingeordnet …', 'Ergebnis wird zusammengestellt …'], si = 0, stepsEl = $('.chk-steps', form), stepTimer = null;
+      if (!stepsEl) { stepsEl = el('ol', 'chk-steps'); stepsEl.setAttribute('aria-hidden', 'true'); STEPS.forEach(function (s) { stepsEl.appendChild(el('li', null, s)); }); msg.parentNode.insertBefore(stepsEl, msg.nextSibling); }
+      function showStep() { [].forEach.call(stepsEl.children, function (li, i) { li.className = i < si ? 'is-done' : (i === si ? 'is-now' : ''); }); msg.textContent = STEPS[si] + ' Das dauert bis zu 20 Sekunden.'; }
+      stepsEl.hidden = false; showStep(); stepTimer = setInterval(function () { if (si < STEPS.length - 1) { si++; showStep(); } }, 3500);
       var ctrl = ('AbortController' in w) ? new AbortController() : null, timer = ctrl && setTimeout(function () { ctrl.abort(); }, 45000);
       fetch('/api/check.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }), signal: ctrl ? ctrl.signal : undefined })
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'server' }; }).then(function (j) { j.__status = r.status; return j; }); })
@@ -217,7 +249,7 @@
           else fail((j && j.message) || MSG[j && j.error] || MSG.server);
         })
         .catch(function () { fail('Die Prüfung hat zu lange gedauert oder die Verbindung ist abgebrochen. Bitte versuchen Sie es erneut.'); })
-        .then(function () { clearTimeout(timer); busy = false; btn.textContent = orig; btn.disabled = false; form.removeAttribute('aria-busy'); });
+        .then(function () { clearTimeout(timer); clearInterval(stepTimer); if (stepsEl) stepsEl.hidden = true; busy = false; btn.textContent = orig; btn.disabled = false; form.removeAttribute('aria-busy'); });
     });
     if (pre) { try { input.value = decodeURIComponent(pre.replace(/\+/g, ' ')).slice(0, 300); } catch (e) { } if (input.value) setTimeout(function () { form.dispatchEvent(new Event('submit', { cancelable: true })); }, 300); }
   }

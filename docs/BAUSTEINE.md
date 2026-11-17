@@ -81,6 +81,4 @@ Spalte „Zuordnung“: **Standard** = in jeder Website enthalten · **Paket** =
 
 Garantierte Platzierungen, Ergebnis- oder Prozentzahlen, Rechtsberatung für Texte, Bewertungen gegen Gegenleistung. Mehrsprachige Seiten, eigene Apps und Online-Buchung mit Zahlung sind in den Paketen nicht beschrieben und werden bei Bedarf einzeln im Angebot festgelegt.
 
-## Hinweis zur Vorschau auf der Startseite
-
-Die Baukasten-Vorschau (`src/partials/baukasten.html`) zeigt 16 dieser Bausteine als Skizze: Anruf-Knopf, Terminbuchung, WhatsApp, Anfrageformular, KI-Assistent, Google-Profil, Google-Bewertungen, Projekte und Fotos, Häufige Fragen, Seiten je Ort, Karte und Anfahrt, Öffnungszeiten, Ratgeber, Social-Media-Profile, Newsletter, Online-Shop. Sie ist kein Angebot und ersetzt keine Paketzuordnung.
+Hinweis: Eine bedienbare Baukasten-Vorschau gibt es auf der Website bewusst nicht mehr (Stand 17.11.2026). Die Liste dient nur der internen Angebotsarbeit und dem Erstgespräch.

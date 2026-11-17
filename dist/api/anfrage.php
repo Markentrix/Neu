@@ -132,6 +132,7 @@ if ($report) {
   $worst = [];
   foreach ($report['categories'] as $cat) foreach ($cat['items'] as $it) if ($it['status'] === 'bad') $worst[] = '  - ' . $it['title'];
   if ($worst) { $lines[] = 'Mangelhaft:'; foreach (array_slice($worst, 0, 12) as $w) $lines[] = $w; }
+  if (!empty($report['ki']['chancen'])) { $lines[] = 'KI-Potenzial' . (!empty($report['ki']['branche']) ? ' (' . $report['ki']['branche'] . ')' : '') . ', Reife ' . (int) $report['ki']['reife'] . '/100:'; foreach ($report['ki']['chancen'] as $ch) $lines[] = '  - ' . $ch['titel']; }
   $lines[] = '';
 }
 $lines[] = str_pad('einwilligung', 14) . ': ja (' . gmdate('c') . ' UTC, IP-Hash ' . substr(hash('sha256', $ip), 0, 12) . ')';
@@ -208,6 +209,7 @@ function owner_mail_html(array $c, ?array $report, string $quelle, string $conse
     $worst = [];
     foreach ($report['categories'] as $cat) foreach ($cat['items'] as $it) if ($it['status'] === 'bad') $worst[] = (string) $it['title'];
     if ($worst) $h .= '<p style="margin:10px 0 4px;font-size:13px;font-weight:bold;color:#B3261E">Mangelhaft</p><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:#0C2128">' . implode('', array_map(fn($w) => '<li>' . mx_h($w) . '</li>', array_slice($worst, 0, 12))) . '</ul>';
+    if (!empty($report['ki']['chancen'])) $h .= '<p style="margin:10px 0 4px;font-size:13px;font-weight:bold;color:#045268">KI-Potenzial' . (!empty($report['ki']['branche']) ? ' · ' . mx_h((string) $report['ki']['branche']) : '') . ' · Reife ' . (int) $report['ki']['reife'] . ' von 100</p><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:#0C2128">' . implode('', array_map(fn($ch) => '<li>' . mx_h((string) $ch['titel']) . '</li>', $report['ki']['chancen'])) . '</ul>';
     $in .= mx_section('Website-Check', $h);
   }
   // Herkunft
@@ -294,6 +296,23 @@ function report_mail(array $r, string $name): array {
                'high' => count(array_filter($open, fn($i) => $i['impact'] === 'high')), 'good' => array_map(fn($i) => (string) $i['title'], array_slice($good, 0, 4))];
   }
   $openTxt = fn(array $c): string => $c['open'] === 0 ? 'keine offenen Punkte' : $c['open'] . ($c['open'] === 1 ? ' offener Punkt' : ' offene Punkte') . ($c['high'] > 0 ? ', davon ' . $c['high'] . ' mit hohem Gewicht' : '');
+  // KI-Potenzial (nur wenn im Ergebnis vorhanden)
+  $kiT = ''; $kiH = '';
+  if (!empty($r['ki']['chancen'])) {
+    $k = $r['ki'];
+    $kiT = "\nKI-Potenzial" . (!empty($k['branche']) ? ' (erkannte Branche: ' . $k['branche'] . ')' : '') . "\n  Automatisierungs-Reife: " . (int) $k['reife'] . " von 100. " . $k['reife_text'] . "\n";
+    $kiH = '<tr><td style="padding:14px 28px 0"><p style="margin:0 0 6px;font-size:14px;font-weight:bold;color:#0C2128;border-top:1px solid #E1F0F6;padding-top:14px">KI-Potenzial' . (!empty($k['branche']) ? ' · ' . $h($k['branche']) : '') . '</p>'
+         . '<p style="margin:0 0 10px;font-size:13px;line-height:1.5">Automatisierungs-Reife: <b>' . (int) $k['reife'] . ' von 100</b>. ' . $h($k['reife_text']) . '</p>';
+    foreach ($k['chancen'] as $ch) {
+      $kiT .= "  - " . $ch['titel'] . "\n    " . $ch['text'] . "\n    Das sehen wir bei Ihnen: " . $ch['grund'] . "\n    Wirkung: " . $ch['wirkung'] . " (" . $ch['paket'] . ")\n";
+      $kiH .= '<div style="border:1px solid #E1F0F6;border-radius:10px;padding:12px 14px;margin-bottom:8px"><p style="margin:0 0 4px;font-size:14px;font-weight:bold;color:#0C2128">' . $h($ch['titel']) . '</p>'
+           . '<p style="margin:0 0 6px;font-size:13px;line-height:1.5">' . $h($ch['text']) . '</p>'
+           . '<p style="margin:0 0 4px;font-size:12px;line-height:1.5;color:#4E5C5F"><b>Das sehen wir bei Ihnen:</b> ' . $h($ch['grund']) . '</p>'
+           . '<p style="margin:0;font-size:12px;line-height:1.5;color:#4E5C5F"><b>Wirkung:</b> ' . $h($ch['wirkung']) . ' · ' . $h($ch['paket']) . '</p></div>';
+    }
+    $kiT .= '  ' . $k['hinweis'] . "\n";
+    $kiH .= '<p style="margin:0 0 4px;font-size:12px;line-height:1.5;color:#4E5C5F">' . $h($k['hinweis']) . '</p></td></tr>';
+  }
   // Text
   $t = $hello . "\n\nhier ist die Kurzfassung Ihres Website-Checks für " . $r['host'] . " vom " . $r['date'] . ".\n\n"
      . 'Gesamtwertung: ' . $r['score'] . " von 100\n" . $gradeTxt . "\n" . ($r['cap'] ? 'Gedeckelt wegen: ' . $r['cap'] . "\n" : '')
@@ -303,6 +322,7 @@ function report_mail(array $r, string $name): array {
   $anyGood = false;
   foreach ($cats as $c) if ($c['good']) { $anyGood = true; $t .= '  ' . $c['title'] . ': ' . implode('; ', $c['good']) . "\n"; }
   if (!$anyGood) $t .= "  Hier gibt es noch wenig, auf dem sich gut aufbauen lässt. Das ist ein klarer Ansatzpunkt.\n";
+  $t .= $kiT;
   $t .= "\nWie es weitergeht: Welche Punkte zuerst angegangen werden sollten, was sie für Ihren Betrieb bringen und wie sie umgesetzt werden, besprechen wir im kostenlosen Erstgespräch (rund 30 Minuten, unverbindlich). Die einzelnen Befunde gehen wir dort gemeinsam mit Ihnen durch.\n"
       . "Gespräch vereinbaren: " . $link . "\nOder antworten Sie auf diese E-Mail, oder rufen Sie an: 0176 20370429, Mo bis Do 09:00 bis 17:00 Uhr, Fr 09:00 bis 15:00 Uhr.\n\n"
       . "So lesen Sie die Kurzfassung: Die Punktzahl ist ein Orientierungswert, keine Messung von Rankings. Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.\n\n"
@@ -326,7 +346,7 @@ function report_mail(array $r, string $name): array {
   $m .= '</td></tr><tr><td style="padding:10px 28px 0"><p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#0C2128;border-top:1px solid #E1F0F6;padding-top:14px">Was bei Ihnen schon gut läuft</p>';
   foreach ($cats as $c) if ($c['good']) $m .= '<p style="margin:0 0 6px;font-size:13px;line-height:1.5"><b>' . $h($c['title']) . ':</b> ' . $h(implode('; ', $c['good'])) . '</p>';
   if (!$anyGood) $m .= '<p style="margin:0;font-size:13px;line-height:1.5">Hier gibt es noch wenig, auf dem sich gut aufbauen lässt. Das ist ein klarer Ansatzpunkt.</p>';
-  $m .= '</td></tr>'
+  $m .= '</td></tr>' . $kiH
       . '<tr><td style="padding:16px 28px 28px"><div style="background:#EAE2D3;border:1px solid #EAE2D3;border-radius:12px;padding:20px"><p style="margin:0 0 8px;font-size:17px;font-weight:bold;color:#0C2128">Welche Punkte zuerst, und was bringen sie?</p>'
       . '<p style="margin:0 0 14px;font-size:14px;line-height:1.5">Die einzelnen Befunde, ihre Reihenfolge und die Umsetzung besprechen wir im kostenlosen Erstgespräch, rund 30 Minuten, unverbindlich.</p>'
       . '<a href="' . $h($link) . '" style="display:inline-block;background:#045268;color:#0C2128;font-weight:bold;font-size:15px;text-decoration:none;padding:12px 22px;border-radius:10px">Gespräch vereinbaren</a>'

@@ -1,4 +1,4 @@
-/* Bewegung und kleine interaktive Bausteine der Startseite (Vorher-nachher-Regler, Baukasten-Vorschau, Tiefenwirkung der Bildbänder).
+/* Bewegung und kleine interaktive Bausteine der Startseite (Vorher-nachher-Regler, Tiefenwirkung der Bildbänder).
    Alles läuft im Browser, nichts wird gesendet. Bei reduzierter Bewegung gibt es keine Animation, die Bausteine bleiben bedienbar. */
 (function () {
   'use strict';
@@ -33,42 +33,6 @@
       }
       w.requestAnimationFrame(f);
     }
-  })();
-
-  /* ── Baukasten-Vorschau ── */
-  (function () {
-    var bk = d.querySelector('[data-bk]'); if (!bk) return;
-    var what = bk.querySelector('[data-bk-what]'), where = bk.querySelector('[data-bk-where]'), form = bk.querySelector('form');
-    if (!what || !where) return;
-    var touched = false;
-    if (form) form.addEventListener('submit', function (e) { e.preventDefault(); });
-    function clean(v, def) { v = String(v || '').replace(/[<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 32); return v || def; }
-    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-    function text(sel, t) { var e = bk.querySelector(sel); if (e) e.textContent = t; }
-    function render() {
-      var a = cap(clean(what.value, 'Elektriker')), o = cap(clean(where.value, 'Celle'));
-      text('[data-bk-title]', a + ' in ' + o + ' | Ihr Betrieb');
-      text('[data-bk-desc]', a + ' in ' + o + ': Leistungen, Öffnungszeiten und Anfrage auf einen Blick, auch auf dem Handy leicht zu bedienen.');
-      text('[data-bk-h1]', a + ' in ' + o + '.');
-      text('[data-bk-eyebrow]', o + ' und Umgebung');
-      text('[data-bk-o1]', a + ' ' + o); text('[data-bk-o2]', a + ' Umgebung'); text('[data-bk-o3]', a + ' Region');
-    }
-    function opts(animate) {
-      [].forEach.call(bk.querySelectorAll('[data-bk-opt]'), function (cb) {
-        var el = bk.querySelector('[data-bk-show="' + cb.getAttribute('data-bk-opt') + '"]'); if (!el) return;
-        var was = el.hidden; el.hidden = !cb.checked;
-        if (animate && was && cb.checked && !reduced()) { el.classList.remove('is-new'); void el.offsetWidth; el.classList.add('is-new'); }
-      });
-    }
-    function count() {
-      var n = bk.querySelectorAll('[data-bk-opt]:checked').length, c = bk.querySelector('[data-bk-count]');
-      if (c) c.textContent = n + (n === 1 ? ' Baustein gewählt.' : ' Bausteine gewählt.');
-    }
-    function first() { if (!touched) { touched = true; track('baukasten_use', { location: w.location.pathname }); } }
-    what.addEventListener('input', function () { first(); render(); });
-    where.addEventListener('input', function () { first(); render(); });
-    bk.addEventListener('change', function (e) { if (e.target && e.target.hasAttribute('data-bk-opt')) { first(); opts(true); count(); } });
-    render(); opts(false); count();
   })();
 
   /* ── Tiefenwirkung der Bildbänder (nur breite Bildschirme, nicht bei reduzierter Bewegung) ── */
