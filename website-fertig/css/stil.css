@@ -2,7 +2,7 @@
 @font-face{font-family:"Source Sans";src:url(/schrift/sourcesans-400.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Source Sans";src:url(/schrift/sourcesans-700.woff2) format("woff2");font-weight:700;font-display:swap}
 :root{
-  --sand:#FFFFFF;--sand-hell:#F4EFE3;--sand-dunkel:#D8CBA9;--tinte:#14104F;--tinte-hell:#231C7A;--mai:#9BD43A;--neben:#4B4878;--blau-neben:#C9C7E6;--fehler:#9C1C1C;
+  --sand:#FFFFFF;--sand-hell:#EFF5E3;--sand-dunkel:#C6DA9E;--tinte:#14104F;--tinte-hell:#231C7A;--mai:#9BD43A;--neben:#4B4878;--blau-neben:#C9C7E6;--fehler:#9C1C1C;
   --display:"Bricolage","Arial Narrow",sans-serif;--text:"Source Sans","Trebuchet MS",sans-serif;
   --t-xs:.9375rem;--t-base:1.1875rem;--t-lg:1.5rem;--t-xl:clamp(2rem,5vw,3.75rem);--t-hero:min(11vw,9.7rem);
   --rand:clamp(1rem,3.4vw,3rem);--abschnitt:clamp(4.5rem,11vw,10rem);--breit:84rem;

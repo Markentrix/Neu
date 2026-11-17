@@ -117,3 +117,7 @@ Alles nur transform/opacity/clip-path, reduced motion schaltet Bewegung ab.
 ## Überarbeitung 17.11.2026: mehr Bilder (Kundenwunsch)
 - Startseite zeigt 21 Fotos: Hero (1), Mosaik der am längsten wartenden Tiere (5), zwei Kategorie-Kacheln Hunde/Katzen (2), Ernie und Bert (2), Fotowand "Happy End" mit neun Einsendungen aus den Grüßen vom neuen Zuhause (9), Helfer-Foto bei Spenden (1), Tag der offenen Tür bei Besuch (1).
 - Die Fotowand ersetzt den Streifen mit kleinen Vorschaubildern. Jedes Foto verlinkt auf den zugehörigen Gruß.
+
+## Überarbeitung 17.11.2026: kein Cremeton mehr (Kundenwunsch)
+- Der beige Flächenton wirkte wie ein typischer KI-Look. Er ist durch ein sehr helles Grün (#EFF5E3) ersetzt, abgeleitet vom Maigrün des Logos. Pfotenabdrücke stehen in einem etwas kräftigeren Hellgrün (#C6DA9E).
+- Palette jetzt: Weiß (Grund), Hellgrün (Flächen), Nachtblau (Schrift, Knöpfe, Footer), Maigrün (Aktion). Die Variablennamen `--sand*` im CSS sind historisch und bezeichnen diese Töne.
