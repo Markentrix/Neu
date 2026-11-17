@@ -19,17 +19,17 @@ Entfernt, weil nicht belegt: „Bestseller“, „Das bestellen unsere Kunden am
 | Name | Hex | Rolle | Kontrast |
 |---|---|---|---|
 | Papier | `#f3f5f1` | Grund, 60 % | Tinte darauf 14,9:1 |
-| Tiefgrün | `#1f4d3a` | Hauptfarbe: Hero, Bänder, Footer, Links, 30 % | Creme darauf 8,2:1 |
+| Tiefgrün | `#1f4d3a` | Hauptfarbe: Hero, Bänder, Footer, Links, 30 % | Weiß `#f2f5f3` darauf 8,6:1 |
 | Tintengrün | `#15231c` | Text | auf Papier 14,9:1, Sekundärtext `#44544b` 7,3:1 |
 | Kupfer | `#9e6230` | einziger Akzent, nur für Handlung (Kaufen, Anfragen, Fokus) | Weiß darauf 4,95:1, auf Papier 4,5:1 |
-| Kupfer hell | `#e2ae7c` | derselbe Akzent auf Tiefgrün | auf Tiefgrün über 5:1 |
+| Kupfer hell | `#eaa86b` | derselbe Akzent auf Tiefgrün | auf Tiefgrün über 5:1 |
 | Fläche | `#e4eae5` | Bildkacheln, Summenfeld | Tinte darauf 13,3:1 |
 
 Dazu ein Signalton für Fehler (`#b23a2e`, 5,4:1) und das helle Mint `#8fc7ab` ausschließlich im Logo auf dunklem Grund.
 Dunkelmodus nur über `prefers-color-scheme`, nicht als Dauerzustand.
 
 Warum das keine KI-Palette ist: Grund ist kühl grünlich-weiß, nicht Creme. Der Akzent ist Bronze (Kupfer-Filament), nicht Terrakotta. Das Grün trägt Flächen, nicht nur einen Button.
-Die Farben kommen aus dem Logo des Kunden (Grün, Kupfer) und aus dem Material: Silk-PLA in Kupfer auf dunklem Druckbett.
+Text auf Grün ist ein kühles Weiß (`#f2f5f3`), kein warmes Creme. Die Farben kommen aus dem Logo des Kunden (Grün, Kupfer) und aus dem Material: Silk-PLA in Kupfer auf dunklem Druckbett.
 
 ## Schriften
 

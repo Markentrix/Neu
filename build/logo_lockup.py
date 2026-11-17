@@ -18,7 +18,7 @@ PINYON = os.path.join(HERE, "brand-src", "PinyonScript.woff2")
 # Farbwelten: main = "Schicht", acc = "atelier" und Linie, sub = "3D MANUFAKTUR", ink = Zeile, sig = Signatur
 THEMES = {
     "hell": dict(main="#1f4d3a", acc="#9e6230", sub="#2f6b52", ink="#15231c", sig="#9e6230"),
-    "dunkel": dict(main="#f1ede4", acc="#e2ae7c", sub="#8fc7ab", ink="#f1ede4", sig="#e2ae7c"),
+    "dunkel": dict(main="#f2f5f3", acc="#eaa86b", sub="#8fc7ab", ink="#f2f5f3", sig="#eaa86b"),
     "css": dict(main="var(--logo-main)", acc="var(--logo-accent)", sub="var(--logo-sub)", ink="var(--ink)", sig="var(--logo-accent)"),
 }
 
@@ -140,7 +140,7 @@ def main():
         svg = re.sub(r'width="[\d.]+" height="[\d.]+"', f'width="{wpx}" height="{hpx}"', svg, count=1)
         p = os.path.join(tmp, name + ".svg"); open(p, "w").write(svg)
         jobs.append({"svg": p, "png": os.path.join(OUT, name + ".png"), "w": wpx, "h": hpx})
-    job("schichtatelier-logo-voll-2400", svg_file("hell", True, "#f7f4ee"), None)
+    job("schichtatelier-logo-voll-2400", svg_file("hell", True, "#f3f5f1"), None)
     job("schichtatelier-logo-voll-dunkel-2400", svg_file("dunkel", True, "#141a17"), None)
     jf = os.path.join(tmp, "jobs.json"); json.dump(jobs, open(jf, "w"))
     subprocess.run(["node", os.path.join(HERE, "render.js"), jf], check=True)

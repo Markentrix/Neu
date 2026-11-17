@@ -9,8 +9,8 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 OUT = os.path.join(ROOT, "brand")
 FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "website-fertig", "assets", "fonts", "AbrilFatface.woff2")
 FONT_LOCATION = {}
-NAVY, CREAM = "#1f4d3a", "#f1ede4"
-L1, L2, L3 = "#f1e6d2", "#d9a06b", "#b8763f"   # Schichten hell -> dunkel (Sand -> Kupfer)
+NAVY, CREAM = "#1f4d3a", "#f2f5f3"
+L1, L2, L3 = "#e8c39a", "#d9a06b", "#b8763f"   # Schichten hell -> dunkel (helles Kupfer -> Kupfer)
 
 
 def s_path():
