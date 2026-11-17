@@ -162,6 +162,11 @@ for media, sel, decl in rules:
     if not ch: continue
     out.append(wrap(media, sel, 'html[data-thema="c"]', ';'.join(ch))); cn += 1
 print(cn, 'Regeln für Variante C')
-out.append(open(__file__.replace('gen_thema.py', 'thema-hand.css'), encoding='utf-8').read())
+hand = open(__file__.replace('gen_thema.py', 'thema-hand.css'), encoding='utf-8').read()
+hb, _, hd = hand.partition('/* ───────── D')
+bl = [x for x in out if 'data-thema="b"' in x] + [x for x in hb.split('\n') if 'data-thema="b"' in x]
+out.append(hb)
+out.extend(x.replace('data-thema="b"', 'data-thema="d"') for x in bl)
+if hd: out.append('/* ───────── D' + hd)
 open(OUT, 'w', encoding='utf-8').write('\n'.join(out))
 print(len(out), 'Blöcke →', OUT)

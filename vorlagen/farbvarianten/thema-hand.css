@@ -65,3 +65,18 @@ html[data-thema="b"] .site-footer .footer-cta .eyebrow{color:var(--pfau-hell)}
 html[data-thema="b"] .site-footer .footer-cta,html[data-thema="b"] .site-footer .footer-cta .small,html[data-thema="b"] .site-footer .footer-cta .muted{color:rgba(255,255,255,.82)}
 html[data-thema="b"] .site-footer .footer-cta-title,html[data-thema="b"] .site-footer .footer-cta-links a{color:#fff}
 html[data-thema="b"] .site-footer .footer-cta{border-bottom-color:rgba(255,255,255,.16)}
+
+/* ───────── D · Erfolg (B mit Handlungsfarbe) ─────────
+   Idee: Pfauenblau und Tiefsee tragen die Marke, Kupfer ist die eine Farbe für „Jetzt handeln“.
+   Alle Primärknöpfe stehen in Kupfer, Unterstreichungen in Pfauenblau, damit Kupfer nur die Handlung bedeutet. */
+html[data-thema="d"] .btn--primary,html[data-thema="d"] .nav-cta{background:#C67432;border-color:#C67432;color:#0C2128;box-shadow:0 6px 16px rgba(150,79,8,.28)}
+html[data-thema="d"] .btn--primary:hover,html[data-thema="d"] .nav-cta:hover{background:#D4823F;border-color:#D4823F;color:#0C2128}
+html[data-thema="d"] .band .btn--primary,html[data-thema="d"] .ba-sec .btn--primary,html[data-thema="d"] .deal-sec>.wrap .btn--primary:not(.deal .btn--primary){background:#F1A268;border-color:#F1A268;color:#0C2128}
+html[data-thema="d"] .deal-sec .deal .btn--primary{background:#C67432;border-color:#C67432;color:#0C2128}
+html[data-thema="d"] .deal-sec .deal .btn--primary:hover{background:#D4823F;border-color:#D4823F}
+html[data-thema="d"] .mobile-cta a.primary{background:#C67432;border-color:#C67432;color:#0C2128}
+html[data-thema="d"] .mobile-cta a.primary svg{color:#0C2128}
+html[data-thema="d"] .deal-sec .deal-badge{background:#0C2128;color:#fff}
+html[data-thema="d"] .hl,html[data-thema="d"] .hl--violet,html[data-thema="d"] .hl--cyan{background-image:linear-gradient(#045268,#045268)}
+html[data-thema="d"] .band .hl,html[data-thema="d"] .ba-sec .hl,html[data-thema="d"] .deal-sec .hl{background-image:linear-gradient(#F1A268,#F1A268)}
+html[data-thema="d"] .chk-form .btn--primary,html[data-thema="d"] .chk-strip .btn--primary{background:#C67432;border-color:#C67432;color:#0C2128}
