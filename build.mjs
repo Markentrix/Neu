@@ -739,7 +739,7 @@ function legalPage(key, path, title) {
   html = html.replace('Website: https://web.agrarhelden.de/linneweh/', 'Website: https://lu-linneweh.com/');
   const body = `${pageHero({ kicker: 'Rechtliches', title, crumbs: [[path, title]] })}
 <section class="sec"><div class="wrap"><div class="prose">${html}</div>${key === 'impressum' ? `
-  <div class="credit"><p class="label">Design &amp; technische Umsetzung</p><a href="https://www.markentrix.de" target="_blank" rel="noopener" aria-label="Markentrix – zur Website"><img src="{root}assets/img/markentrix-logo.webp" width="640" height="105" alt="Markentrix" loading="lazy"></a><a class="ulink" href="https://www.markentrix.de" target="_blank" rel="noopener">www.markentrix.de</a></div>` : ''}</div></section>`;
+  <div class="credit"><p class="label">Design &amp; technische Umsetzung</p><a href="https://www.markentrix.de" target="_blank" rel="noopener" aria-label="Markentrix – zur Website"><img src="{root}assets/img/markentrix-logo.webp" width="640" height="105" alt="Markentrix" loading="lazy"></a></div>` : ''}</div></section>`;
   layout({ path, title, desc: `${title} der ${C.legal}.`, body, cta: false, shy: false });
 }
 
