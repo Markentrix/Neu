@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'static', 'downloads')
 os.makedirs(OUT, exist_ok=True)
 
-TIEF, PFAU, KUPFER, LEINEN, KREIDE = HexColor('#0C2128'), HexColor('#045268'), HexColor('#C67432'), HexColor('#EAE2D3'), HexColor('#F7F4EE')
+TIEF, PFAU, KUPFER, LEINEN, KREIDE = HexColor('#0C2128'), HexColor('#045268'), HexColor('#C67432'), HexColor('#E0E6E9'), HexColor('#F4F6F7')
 NAVY, CYAN, BLUE, VIOLET = TIEF, PFAU, PFAU, KUPFER
 INK, MUTED, LINE, SOFT = TIEF, HexColor('#4E5C5F'), LEINEN, KREIDE
 

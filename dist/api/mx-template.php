@@ -4,7 +4,7 @@
  * Wird von anfrage.php eingebunden. Caddy führt nur die freigegebenen Endpunkte aus, diese Datei ist von außen nicht aufrufbar.
  *
  * Farben aus der Corporate Identity: Graphite Navy #0C2128, Cyan #045268, Blue #045268, Violet (Akzent) #045268,
- * helle Flächen #F7F4EE und #F7F4EE. Alle Stile stehen inline (E-Mail-Programme ignorieren meist <style>), Layout mit Tabellen.
+ * helle Flächen #F4F6F7 und #F4F6F7. Alle Stile stehen inline (E-Mail-Programme ignorieren meist <style>), Layout mit Tabellen.
  */
 declare(strict_types=1);
 
@@ -15,16 +15,16 @@ function mx_h(string $s): string {
 /** Rahmen (Markenhandbuch 3.0): heller Kopf mit Logo und Kennzeichen, Kupferlinie, weißer Inhalt, Kreide-Fuß. $inner enthält fertiges HTML. */
 function mx_shell(string $tag, string $inner, string $footer, string $preheader = ''): string {
   return '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"></head>'
-    . '<body style="margin:0;padding:0;background:#F7F4EE;font-family:Arial,Helvetica,sans-serif;color:#0C2128;-webkit-text-size-adjust:100%">'
-    . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#F7F4EE">' . mx_h($preheader) . '</div>'
+    . '<body style="margin:0;padding:0;background:#F4F6F7;font-family:Arial,Helvetica,sans-serif;color:#0C2128;-webkit-text-size-adjust:100%">'
+    . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#F4F6F7">' . mx_h($preheader) . '</div>'
     . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:20px 10px">'
     . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#FFFFFF;border-radius:8px;overflow:hidden">'
-    . '<tr><td style="background:#FFFFFF;padding:20px 26px;border-bottom:1px solid #EAE2D3"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
+    . '<tr><td style="background:#FFFFFF;padding:20px 26px;border-bottom:1px solid #E0E6E9"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
     . '<td><img src="https://markentrix.de/img/logo/markentrix-logo-farbe-hell.png" width="160" height="26" alt="Markentrix" style="display:block;border:0;width:160px;height:auto"></td>'
     . '<td align="right" style="color:#045268;font-size:12px;letter-spacing:.09em;font-weight:bold;text-transform:uppercase">' . mx_h($tag) . '</td></tr></table></td></tr>'
     . '<tr><td style="height:3px;background:#C67432;font-size:0;line-height:3px">&nbsp;</td></tr>'
     . $inner
-    . '<tr><td style="background:#F7F4EE;border-top:1px solid #E1F0F6;padding:16px 26px;font-size:12px;line-height:1.6;color:#4E5C5F">' . $footer . '</td></tr>'
+    . '<tr><td style="background:#F4F6F7;border-top:1px solid #E1F0F6;padding:16px 26px;font-size:12px;line-height:1.6;color:#4E5C5F">' . $footer . '</td></tr>'
     . '</table></td></tr></table></body></html>';
 }
 
@@ -53,20 +53,20 @@ function mx_rows(array $rows): string {
 
 /** Hervorgehobener Textkasten (z. B. Nachricht). Zeilenumbrüche bleiben erhalten. */
 function mx_quote(string $text): string {
-  return '<div style="background:#F7F4EE;border:1px solid #E1F0F6;border-left:4px solid #045268;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.6;color:#0C2128;word-break:break-word">'
+  return '<div style="background:#F4F6F7;border:1px solid #E1F0F6;border-left:4px solid #045268;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.6;color:#0C2128;word-break:break-word">'
     . nl2br(mx_h($text), false) . '</div>';
 }
 
-/** Schaltfläche (primär: Cyan-Blau, sekundär: weiß mit Rand). */
+/** Schaltfläche (primär: Kupfer mit Tiefsee-Schrift, sekundär: weiß mit Rand). */
 function mx_btn(string $href, string $label, bool $primary = true): string {
   $style = $primary
-    ? 'background:#045268;color:#0C2128;border:1px solid #045268'
+    ? 'background:#C67432;color:#0C2128;border:1px solid #C67432'
     : 'background:#FFFFFF;color:#0C2128;border:1px solid #62B2D0';
   return '<a href="' . mx_h($href) . '" style="display:inline-block;margin:0 8px 8px 0;' . $style . ';font-weight:bold;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:10px">' . mx_h($label) . '</a>';
 }
 
 /** Kleines Kennzeichen (Chip). */
-function mx_chip(string $text, string $bg = '#F7F4EE', string $fg = '#045268'): string {
+function mx_chip(string $text, string $bg = '#F4F6F7', string $fg = '#045268'): string {
   return '<span style="display:inline-block;background:' . $bg . ';color:' . $fg . ';font-size:12px;font-weight:bold;padding:4px 10px;border-radius:20px">' . mx_h($text) . '</span>';
 }
 

@@ -33,7 +33,7 @@ for (const f of walk(DIST)) {
 }
 
 const LOGO_FILE = join(ROOT, 'static/img/logo/markentrix-logo-farbe-hell.svg'), LINIE_FILE = join(ROOT, 'static/img/logo/aufwaertslinie.svg');
-// Markenhandbuch Version 3.0: Kreide, Tiefsee, Pfauenblau, Kupfer; Archivo und Source Sans 3; Kupferstrich und Aufwärtslinie
+// Markenhandbuch Version 3.1: Salz, Tiefsee, Pfauenblau, Kupfer; Archivo und Source Sans 3; Schlüsselwort in Kupfer, Aufwärtslinie
 const html = p => {
   const big = p.main.length > 44 ? 62 : p.main.length > 28 ? 74 : 86;
   const words = esc(p.main).split(' '); const last = words.pop();
@@ -43,14 +43,14 @@ const html = p => {
 @font-face{font-family:SS;font-weight:400;src:url("file://${FONTS}/source-sans-3-400.woff2")}
 @font-face{font-family:SS;font-weight:700;src:url("file://${FONTS}/source-sans-3-700.woff2")}
 *{box-sizing:border-box;margin:0}
-body{width:1200px;height:630px;position:relative;overflow:hidden;font-family:SS,sans-serif;color:#0C2128;background:#F7F4EE}
+body{width:1200px;height:630px;position:relative;overflow:hidden;font-family:SS,sans-serif;color:#0C2128;background:#F4F6F7}
 .logo{position:absolute;left:80px;top:64px;width:300px;height:auto}
 .kind{position:absolute;right:80px;top:84px;font:700 22px SS;letter-spacing:.09em;text-transform:uppercase;color:#045268}
 .main{position:absolute;left:80px;right:80px;top:196px}
 h1{font:800 ${big}px/1.06 AR;letter-spacing:-.025em;max-width:1000px}
-.hl{background-image:linear-gradient(#C67432,#C67432);background-repeat:no-repeat;background-size:100% .14em;background-position:0 98%;padding-bottom:.06em}
+.hl{color:#C67432}
 h2{font:400 ${Math.round(big*0.44)}px/1.3 SS;margin-top:26px;max-width:900px;color:#0C2128}
-.foot{position:absolute;left:80px;bottom:58px;font:600 24px SS;color:#4E5C5F}
+.foot{position:absolute;left:80px;bottom:58px;font:600 24px SS;color:#465A62}
 .linie{position:absolute;right:70px;bottom:44px;width:270px;height:auto}
 </style>
 <img class="logo" src="file://${LOGO_FILE}"><div class="kind">${esc(p.kind)}</div>

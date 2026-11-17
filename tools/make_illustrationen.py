@@ -171,14 +171,14 @@ SC['gastro'] = '''  <circle class="h" cx="172" cy="124" r="102"/>
 
 CSS = '''
 /* 36 · Eigene Illustrationen im Strichstil (Markenhandbuch 3.0): Tiefsee-Linie, Pfauenblau, genau ein Kupferstrich je Motiv */
-.ill.mi .s{fill:#F7F4EE}
-.ill.mi .h{fill:#EAE2D3}
-.ill.mi .h2{fill:#EAE2D3;stroke:#0C2128;stroke-width:3}
+.ill.mi .s{fill:#F4F6F7}
+.ill.mi .h{fill:#E0E6E9}
+.ill.mi .h2{fill:#E0E6E9;stroke:#0C2128;stroke-width:3}
 .ill.mi .w,.ill.mi .n,.ill.mi .p,.ill.mi .o,.ill.mi .t{stroke:#0C2128;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .ill.mi .w{fill:#FFFFFF}
 .ill.mi .n{fill:#E1F0F6}
 .ill.mi .p{fill:#045268}
-.ill.mi .o{fill:#EAE2D3;stroke-dasharray:6 6}
+.ill.mi .o{fill:#E0E6E9;stroke-dasharray:6 6}
 .ill.mi .t{fill:#0C2128;stroke:none}
 .ill.mi .l,.ill.mi .l4{fill:none;stroke:#0C2128;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .ill.mi .l4{stroke-width:4}
@@ -191,7 +191,7 @@ CSS = '''
 .ill.mi .pt{fill:none;stroke:#FFFFFF;stroke-width:6;stroke-linecap:round}
 .ill.mi .pm{fill:none;stroke:#FFFFFF;stroke-opacity:.6;stroke-width:4;stroke-linecap:round}
 .ill.mi .k{fill:none;stroke:#C67432;stroke-width:5;stroke-linecap:butt}
-.ill.mi .rd{fill:none;stroke:#EAE2D3;stroke-width:10;stroke-linecap:butt}
+.ill.mi .rd{fill:none;stroke:#E0E6E9;stroke-width:10;stroke-linecap:butt}
 .ill.mi .hd{fill:none;stroke:#0C2128;stroke-width:10;stroke-linecap:round}
 .ill.mi .hl2{fill:none;stroke:#FFFFFF;stroke-width:4;stroke-linecap:round}
 .ill.mi .aa{font:800 54px 'Archivo','Arial Black',Arial,sans-serif;fill:#0C2128}

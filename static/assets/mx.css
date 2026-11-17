@@ -1,5 +1,5 @@
 /* Markentrix · lokale Webfonts (DSGVO) – keine Verbindung zu Google. WOFF2, Latin-Subset. SIL Open Font License.
-   Archivo (Überschriften) und Source Sans 3 (Text), Markenhandbuch Version 3.0 */
+   Archivo (Überschriften) und Source Sans 3 (Text), Markenhandbuch Version 3.1 */
 @font-face{font-family:'Archivo';src:url('/fonts/archivo-700.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
 @font-face{font-family:'Archivo';src:url('/fonts/archivo-800.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
 @font-face{font-family:'Source Sans 3';src:url('/fonts/source-sans-3-400.woff2') format('woff2');font-weight:300 500;font-style:normal;font-display:swap}
@@ -13,17 +13,17 @@
 
 /* ─── 1. Tokens ─────────────────────────────────────────────────────────── */
 :root{
-  /* Farben (Markenhandbuch Version 3.0): fünf Töne, alle nach Dingen benannt */
-  --kreide:#F7F4EE;          /* Grund und Weißraum */
+  /* Farben (Markenhandbuch Version 3.1): sechs Töne, alle nach Dingen benannt */
+  --kreide:#F4F6F7;          /* Salz: Grund und Weißraum */
   --tiefsee:#0C2128;         /* Text und dunkle Fläche */
   --pfau:#045268;            /* Hauptfarbe: Knöpfe, Links, Aufwärtslinie */
-  --leinen:#EAE2D3;          /* Flächenfarbe, Rahmen, Trennlinien */
+  --leinen:#E0E6E9;          /* Reif: Flächenfarbe, Trennlinien */
   --kupfer:#C67432;          /* Akzent, höchstens einmal je sichtbarer Fläche */
   --kupfer-dunkel:#964F08;   /* Kupfer als kleiner Text und auf Leinen */
   --kupfer-hell:#F1A268;     /* Kupfer auf Tiefsee und Pfauenblau */
   --pfau-hell:#62B2D0;       /* Pfauenblau auf Tiefsee */
   --nebel:#E1F0F6;           /* zarte Hinweisfläche, selten */
-  --nebentext:#4E5C5F;       /* Bildunterschriften, Hinweise auf Hell */
+  --nebentext:#465A62;       /* Bildunterschriften, Hinweise auf Hell */
   --fehler:#B3261E;          /* nur Fehlermeldungen, immer mit Symbol */
 
   /* bisherige Namen, auf die CI-Töne gelegt */
@@ -35,10 +35,10 @@
   --magenta:#C67432;
   --copper:#C67432;
   --white:#FFFFFF;
-  --soft:#F7F4EE;
-  --linen:#EAE2D3;
-  --cool:#EAE2D3;
-  --muted:#4E5C5F;
+  --soft:#F4F6F7;
+  --linen:#E0E6E9;
+  --cool:#E0E6E9;
+  --muted:#465A62;
   --text:#0C2128;
   --link:#045268;
   --violet-text:#045268;
@@ -50,7 +50,7 @@
   --grad-soft:#E1F0F6;
   --grad-signature:#045268;
 
-  --border:#EAE2D3;
+  --border:#D8DFE3;
   --border-strong:#0C2128;
   --shadow-sm:0 1px 2px rgba(12,33,40,.05),0 2px 6px rgba(12,33,40,.05);
   --shadow-md:0 6px 16px rgba(12,33,40,.10);
@@ -999,7 +999,7 @@ html.no-js .statement p,html.no-js .statement p .dim,html.reduced .statement p,h
 .sec--dark .card-step{color:var(--cyan)}
 .sec--dark .link-arrow{color:#FFFFFF}
 .sec--dark .pill{background:rgba(255,255,255,.12);color:#FFFFFF}
-.sec--dark .pill--soon{background:transparent;border-color:rgba(167,139,250,.7);color:#EAE2D3}
+.sec--dark .pill--soon{background:transparent;border-color:rgba(167,139,250,.7);color:#E0E6E9}
 .sec--dark .sysmap .sm-node circle{fill:#0C2128;stroke:rgba(255,255,255,.22)}
 .sec--dark .sysmap .sm-node text{fill:rgba(255,255,255,.7)}
 .sec--dark .sysmap .sm-node--core circle{fill:var(--cyan);stroke:var(--cyan)}
@@ -1061,10 +1061,10 @@ html.reduced body{transition:none}
 /* 35 · Bildsprache: UI-Szenen (helle Karten, feiner Rahmen, ein Verlaufsakzent je Szene) */
 .sprite{position:absolute;width:0;height:0;overflow:hidden}
 .ill{display:block;width:100%;height:auto}
-.ill .il-stage{fill:#F7F4EE}
+.ill .il-stage{fill:#F4F6F7}
 .ill .il-c{fill:#FFFFFF;stroke:rgba(12,33,40,.12);stroke-width:1}
 .ill .il-c.il-ring{stroke:url(#mxg-a);stroke-width:1.4}
-.ill .il-hit{fill:#F7F4EE;stroke:url(#mxg-a);stroke-width:1.3}
+.ill .il-hit{fill:#F4F6F7;stroke:url(#mxg-a);stroke-width:1.3}
 .ill .il-sh{fill:rgba(12,33,40,.055)}
 .ill .il-l{fill:#E1F0F6}
 .ill .il-m{fill:#62B2D0}
@@ -1214,8 +1214,8 @@ main:focus{outline:none}
 .chk-item p{margin:4px 0 0;font-size:0.9375rem;color:var(--text);overflow-wrap:anywhere}
 .chk-badge{display:inline-block;text-align:center;padding:5px 8px;border-radius:4px;font-size:0.8125rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#E1F0F6;color:#045268}
 .is-ok .chk-badge{background:#E1F0F6;color:#045268}
-.is-warn .chk-badge{background:#EAE2D3;color:#964F08}
-.is-bad .chk-badge{background:#EAE2D3;color:#B3261E}
+.is-warn .chk-badge{background:#E0E6E9;color:#964F08}
+.is-bad .chk-badge{background:#E0E6E9;color:#B3261E}
 .is-bad{border-left:4px solid var(--danger)}
 .is-warn{border-left:4px solid #964F08}
 .is-ok{border-left:4px solid var(--ok)}
@@ -1462,8 +1462,8 @@ html.reduced .slot.is-free{animation:none}
 .value b{font:700 clamp(1.35rem,1.1rem + 1vw,1.85rem)/1.15 var(--f-head)}
 .value span{color:#0C2128;line-height:1.55}
 .value--cyan{background:#FFFFFF;border-color:#62B2D0}
-.value--violet{background:#FFFFFF;border-color:#EAE2D3}
-.value--magenta{background:#FFFFFF;border-color:#EAE2D3}
+.value--violet{background:#FFFFFF;border-color:#E0E6E9}
+.value--magenta{background:#FFFFFF;border-color:#E0E6E9}
 #branchen{background:var(--soft)}
 @media (prefers-reduced-motion:no-preference){.person-photo::before{animation:mx-tilt 9s ease-in-out infinite alternate}@keyframes mx-tilt{from{transform:rotate(-3deg)}to{transform:rotate(-1deg) scale(1.01)}}}
 @media (max-width:860px){.person-grid,.value-grid,.trust-grid--2{grid-template-columns:minmax(0,1fr)}.person-photo{max-width:260px}}
@@ -1471,7 +1471,7 @@ html.reduced .slot.is-free{animation:none}
 
 /* ── Unterseiten: persönlicher Streifen und getönte Seitenköpfe ── */
 .person-strip{padding:clamp(8px,2vw,24px) 0 clamp(20px,3vw,40px)}
-.person-strip-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:center;padding:clamp(20px,3vw,32px);border-radius:12px;border:1px solid #EAE2D3;background:#FFFFFF}
+.person-strip-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:center;padding:clamp(20px,3vw,32px);border-radius:12px;border:1px solid #E0E6E9;background:#FFFFFF}
 .person-strip-img{width:104px;height:104px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 4px #FFFFFF,0 0 0 7px rgba(4,82,104,.45)}
 .person-strip-quote{margin:0;font:500 clamp(1.1rem,.95rem + .7vw,1.4rem)/1.5 var(--f-head);color:var(--navy)}
 .person-strip-sign{margin:10px 0 0;color:var(--muted);font-size:0.95rem}
@@ -1497,7 +1497,7 @@ section[aria-labelledby="page-title"]{}
 .demo-block{max-width:920px;margin:clamp(32px,5vw,56px) auto 0}
 .demo-title{text-align:center;margin:0 0 6px}
 .demo-block .device-toggle{margin:14px auto}
-.claim-band{padding:clamp(44px,7vw,92px) 0;background:var(--linen);border-top:1px solid #EAE2D3;border-bottom:1px solid #E1F0F6}
+.claim-band{padding:clamp(44px,7vw,92px) 0;background:var(--linen);border-top:1px solid #E0E6E9;border-bottom:1px solid #E1F0F6}
 .claim-text{margin:0 auto;max-width:24ch;text-align:center;font:700 clamp(1.7rem,1.1rem + 2.6vw,3.3rem)/1.2 var(--f-head);letter-spacing:-.02em;color:var(--navy)}
 .stats>div{position:relative}
 .stats>div::before{content:"";position:absolute;left:22px;top:0;width:36px;height:4px;border-radius:0 0 4px 4px;background:var(--cyan)}
@@ -1526,12 +1526,12 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
 
 /* ── Rückruf, Checkliste als PDF, Termin nach Anfrage, Anzeigen-Seiten ── */
 .rueckruf-sec{padding:clamp(24px,4vw,56px) 0}
-.rueckruf{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,48px);align-items:start;background:#FFFFFF;border-color:#EAE2D3}
+.rueckruf{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,48px);align-items:start;background:#FFFFFF;border-color:#E0E6E9}
 .rueckruf-copy h2{margin:6px 0 8px}
 .rueckruf .field select,.rueckruf .field input{background:#FFFFFF}
-.pdf-card{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,40px);align-items:start;border-color:#EAE2D3;background:#FFFFFF}
+.pdf-card{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,40px);align-items:start;border-color:#E0E6E9;background:#FFFFFF}
 .pdf-card h2{margin:6px 0 8px;font-size:clamp(1.3rem,1.1rem + .8vw,1.7rem)}
-.book-card{background:#FFFFFF;border-color:#EAE2D3}
+.book-card{background:#FFFFFF;border-color:#E0E6E9}
 .chk-book{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
 .lp-head{background:var(--kreide);border-bottom:1px solid var(--border)}
 .lp-head-in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:14px;padding-bottom:14px}
@@ -1548,13 +1548,13 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
 .deal-head{max-width:760px;margin:0 auto clamp(20px,3vw,32px);text-align:center}
 .deal-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 12px;margin:0 0 10px}
 .deal-badge{display:inline-block;padding:6px 14px;border-radius:4px;background:var(--copper);color:var(--navy);font-weight:700;font-size:0.9375rem;letter-spacing:.04em}
-.deal-left{display:inline-block;padding:6px 14px;border-radius:4px;border:1px solid #EAE2D3;background:#FFFFFF;color:#045268;font-weight:700;font-size:0.9375rem}
+.deal-left{display:inline-block;padding:6px 14px;border-radius:4px;border:1px solid #E0E6E9;background:#FFFFFF;color:#045268;font-weight:700;font-size:0.9375rem}
 .deal-left:empty{display:none}
 .deal-head h2{margin:0 0 8px}
 .deal-head .lead{margin:0 auto}
 .deal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2.4vw,28px);max-width:980px;margin:0 auto}
 .deal{display:flex;flex-direction:column;gap:6px;padding:clamp(22px,3vw,34px);border-radius:12px;border:1px solid var(--border);background:#FFFFFF;box-shadow:var(--shadow-lg)}
-.deal--feat{border-color:#EAE2D3;background:#FFFFFF}
+.deal--feat{border-color:#E0E6E9;background:#FFFFFF}
 .deal h3{margin:2px 0 6px;font-size:clamp(1.2rem,1rem + .8vw,1.55rem)}
 .deal-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:4px 0 0}
 .deal-price b{font:700 clamp(2.8rem,2rem + 3vw,4rem)/1 var(--f-head);letter-spacing:-.03em;color:var(--navy)}
@@ -1593,7 +1593,7 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
 
 
 /* ══════════════════════════════════════════════════════════════════════════
-   Markenhandbuch Version 3.0 (November 2026): Kreide, Tiefsee, Pfauenblau, Leinen, Kupfer.
+   Markenhandbuch Version 3.1 (November 2026): Salz, Reif, Tiefsee, Pfauenblau, Nebel, Kupfer.
    Archivo und Source Sans 3. Kein Verlauf, kein Violett, kein Cyan. Kupfer höchstens einmal je sichtbarer Fläche.
    ══════════════════════════════════════════════════════════════════════════ */
 body{font-size:clamp(1.0625rem,1.03rem + .14vw,1.1875rem);line-height:1.5;color:var(--tiefsee);background:var(--kreide)}
@@ -1615,7 +1615,7 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .skip-link{background:var(--tiefsee)}
 
 /* Kopfzeile */
-.site-header{background:rgba(247,244,238,.96);border-bottom:1px solid var(--leinen)}
+.site-header{background:rgba(244,246,247,.96);border-bottom:1px solid var(--leinen)}
 .brand{gap:0}
 .brand-logo{display:block;width:190px;height:auto;max-width:100%}
 .nav-links a,.nav-links summary{font-size:1rem;font-weight:600;border-radius:4px}
@@ -1676,7 +1676,7 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 /* Dunkle Fläche (höchstens eine je Seite): Kreide, Pfauenblau hell und Kupfer hell */
 .band .eyebrow,.sec--dark .eyebrow{color:var(--pfau-hell)}
 .band .hl,.band .accent,.sec--dark .hl{background-image:linear-gradient(var(--kupfer-hell),var(--kupfer-hell))}
-.band .lead,.band p{color:rgba(247,244,238,.86)}
+.band .lead,.band p{color:rgba(244,246,247,.86)}
 .band-sig{width:min(300px,34%);right:32px;bottom:26px;opacity:1}
 .band-steps li::before{background:var(--kreide);color:var(--tiefsee)}
 .band-contact a{color:var(--kreide)}
@@ -1719,14 +1719,14 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .photo-band--r .photo-band-img{object-position:center 12%}
 
 /* 36 · Eigene Illustrationen im Strichstil (Markenhandbuch 3.0): Tiefsee-Linie, Pfauenblau, genau ein Kupferstrich je Motiv */
-.ill.mi .s{fill:#F7F4EE}
-.ill.mi .h{fill:#EAE2D3}
-.ill.mi .h2{fill:#EAE2D3;stroke:#0C2128;stroke-width:3}
+.ill.mi .s{fill:#F4F6F7}
+.ill.mi .h{fill:#E0E6E9}
+.ill.mi .h2{fill:#E0E6E9;stroke:#0C2128;stroke-width:3}
 .ill.mi .w,.ill.mi .n,.ill.mi .p,.ill.mi .o,.ill.mi .t{stroke:#0C2128;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .ill.mi .w{fill:#FFFFFF}
 .ill.mi .n{fill:#E1F0F6}
 .ill.mi .p{fill:#045268}
-.ill.mi .o{fill:#EAE2D3;stroke-dasharray:6 6}
+.ill.mi .o{fill:#E0E6E9;stroke-dasharray:6 6}
 .ill.mi .t{fill:#0C2128;stroke:none}
 .ill.mi .l,.ill.mi .l4{fill:none;stroke:#0C2128;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .ill.mi .l4{stroke-width:4}
@@ -1739,7 +1739,7 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .ill.mi .pt{fill:none;stroke:#FFFFFF;stroke-width:6;stroke-linecap:round}
 .ill.mi .pm{fill:none;stroke:#FFFFFF;stroke-opacity:.6;stroke-width:4;stroke-linecap:round}
 .ill.mi .k{fill:none;stroke:#C67432;stroke-width:5;stroke-linecap:butt}
-.ill.mi .rd{fill:none;stroke:#EAE2D3;stroke-width:10;stroke-linecap:butt}
+.ill.mi .rd{fill:none;stroke:#E0E6E9;stroke-width:10;stroke-linecap:butt}
 .ill.mi .hd{fill:none;stroke:#0C2128;stroke-width:10;stroke-linecap:round}
 .ill.mi .hl2{fill:none;stroke:#FFFFFF;stroke-width:4;stroke-linecap:round}
 .ill.mi .aa{font:800 54px 'Archivo','Arial Black',Arial,sans-serif;fill:#0C2128}
@@ -1756,7 +1756,7 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .intro-ic .i-pause{display:none}
 .intro.is-playing .intro-ic .i-play{display:none}
 .intro.is-playing .intro-ic .i-pause{display:block}
-.intro-bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--leinen,#EAE2D3)}
+.intro-bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--leinen,#E0E6E9)}
 .intro-bar i{display:block;height:100%;width:0;background:var(--blue)}
 .intro-audio{width:100%;max-width:520px}
 .intro-hint{margin:6px 0 0;color:var(--muted)}
@@ -1957,3 +1957,120 @@ p a:not(.btn):not(.link-arrow),li a:not(.btn):not(.link-arrow),dd a:not(.btn),.t
 .ki-facts dd{margin:0;font-size:.9375rem}
 .ki-paket{margin-top:auto;align-self:flex-start;padding:4px 10px;border-radius:4px;background:var(--nebel);color:var(--tiefsee);font-weight:600;font-size:.875rem}
 .ki-note{margin:0}
+
+/* 44 · Farbwelt 2026-11: Salz und Reif statt Creme, Kupfer als Handlungsfarbe (Variante D) */
+:root{--dk-t:#0C2128;--dk-p:#045268}
+html:root .ba-sec{background:var(--navy);color:rgba(255,255,255,.82)}
+html:root .deal-sec{background:var(--navy);color:rgba(255,255,255,.82)}
+html:root .ba-sec h2,html:root .ba-sec h3{color:#FFFFFF}
+html:root .deal-sec h2,html:root .deal-sec h3{color:#FFFFFF}
+html:root .ba-sec .lead,html:root .ba-sec .muted{color:rgba(255,255,255,.72)}
+html:root .deal-sec .lead,html:root .deal-sec .muted{color:rgba(255,255,255,.72)}
+html:root .ba-sec .eyebrow{color:var(--cyan)}
+html:root .deal-sec .eyebrow{color:var(--cyan)}
+html:root .ba-sec .num small,html:root .ba-sec .num{color:inherit}
+html:root .deal-sec .num small,html:root .deal-sec .num{color:inherit}
+html:root .ba-sec .card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:rgba(255,255,255,.82);box-shadow:none}
+html:root .deal-sec .card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:rgba(255,255,255,.82);box-shadow:none}
+html:root .ba-sec .card--accent{border-color:rgba(4,82,104,.55);background:rgba(4,82,104,.08)}
+html:root .deal-sec .card--accent{border-color:rgba(4,82,104,.55);background:rgba(4,82,104,.08)}
+html:root .ba-sec .card--hover:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.08);transform:translateY(-3px)}
+html:root .deal-sec .card--hover:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.08);transform:translateY(-3px)}
+html:root .ba-sec .card-step{color:var(--cyan)}
+html:root .deal-sec .card-step{color:var(--cyan)}
+html:root .ba-sec .link-arrow{color:#FFFFFF}
+html:root .deal-sec .link-arrow{color:#FFFFFF}
+html:root .ba-sec .pill{background:rgba(255,255,255,.12);color:#FFFFFF}
+html:root .deal-sec .pill{background:rgba(255,255,255,.12);color:#FFFFFF}
+html:root .ba-sec .pill--soon{background:transparent;border-color:rgba(167,139,250,.7);color:#E0E6E9}
+html:root .deal-sec .pill--soon{background:transparent;border-color:rgba(167,139,250,.7);color:#E0E6E9}
+html:root .ba-sec .sysmap .sm-node circle{fill:#0C2128;stroke:rgba(255,255,255,.22)}
+html:root .deal-sec .sysmap .sm-node circle{fill:#0C2128;stroke:rgba(255,255,255,.22)}
+html:root .ba-sec .sysmap .sm-node text{fill:rgba(255,255,255,.7)}
+html:root .deal-sec .sysmap .sm-node text{fill:rgba(255,255,255,.7)}
+html:root .ba-sec .sysmap .sm-node--core circle{fill:var(--cyan);stroke:var(--cyan)}
+html:root .deal-sec .sysmap .sm-node--core circle{fill:var(--cyan);stroke:var(--cyan)}
+html:root .ba-sec .sysmap .sm-node.sm-node--core svg{color:var(--navy)}
+html:root .deal-sec .sysmap .sm-node.sm-node--core svg{color:var(--navy)}
+html:root .ba-sec .sysmap .sm-node--core text{fill:#FFFFFF}
+html:root .deal-sec .sysmap .sm-node--core text{fill:#FFFFFF}
+html:root .ba-sec .sysmap .sm-node svg{color:var(--cyan)}
+html:root .deal-sec .sysmap .sm-node svg{color:var(--cyan)}
+html:root .ba-sec .rail-dot{background:var(--navy);color:#FFFFFF;border-color:rgba(255,255,255,.4)}
+html:root .deal-sec .rail-dot{background:var(--navy);color:#FFFFFF;border-color:rgba(255,255,255,.4)}
+html:root .ba-sec .swipe-dots i{background:rgba(255,255,255,.25)}
+html:root .deal-sec .swipe-dots i{background:rgba(255,255,255,.25)}
+html:root .ba-sec .swipe-dots i.is-on{background:var(--cyan)}
+html:root .deal-sec .swipe-dots i.is-on{background:var(--cyan)}
+@media print{html:root .ba-sec{padding:14px 0!important;background:#FFFFFF!important;color:#0C2128!important}}
+@media print{html:root .deal-sec{padding:14px 0!important;background:#FFFFFF!important;color:#0C2128!important}}
+html:root .ba-sec .btn--primary{background:var(--kreide);color:var(--tiefsee);border-color:var(--kreide)}
+html:root .deal-sec .btn--primary{background:var(--kreide);color:var(--tiefsee);border-color:var(--kreide)}
+html:root .ba-sec .btn--primary:hover{background:#FFFFFF}
+html:root .deal-sec .btn--primary:hover{background:#FFFFFF}
+html:root .ba-sec .btn--secondary{background:transparent;color:var(--kreide);border-color:var(--kreide)}
+html:root .deal-sec .btn--secondary{background:transparent;color:var(--kreide);border-color:var(--kreide)}
+html:root .ba-sec .btn--secondary:hover{background:var(--kreide);color:var(--tiefsee)}
+html:root .deal-sec .btn--secondary:hover{background:var(--kreide);color:var(--tiefsee)}
+html:root .ba-sec .eyebrow{color:var(--pfau-hell)}
+html:root .deal-sec .eyebrow{color:var(--pfau-hell)}
+html:root .ba-sec .hl{background-image:linear-gradient(var(--kupfer-hell),var(--kupfer-hell))}
+html:root .deal-sec .hl{background-image:linear-gradient(var(--kupfer-hell),var(--kupfer-hell))}
+html:root .deal-sec,html:root .page-home .deal-sec{background:var(--dk-p);color:#fff}
+html:root .ba-sec{background:var(--dk-t)}
+html:root .site-footer{background:var(--dk-t);color:rgba(255,255,255,.76);border-top:0}
+html:root .site-footer .footer-col h2,html:root .site-footer .footer-bottom .claim{color:#fff}
+html:root .site-footer .footer-col a,html:root .site-footer a{color:rgba(255,255,255,.82)}
+html:root .site-footer a:hover{color:#fff}
+html:root .site-footer .footer-bottom{border-top-color:rgba(255,255,255,.16)}
+html:root .site-footer .brand-logo{content:url(../img/logo/markentrix-logo-weiss.svg)}
+html:root .deal-sec .deal h3,html:root .deal-sec .deal b,html:root .deal-sec .deal-month{color:var(--dk-t)}
+html:root .deal-sec .deal .eyebrow,html:root .deal-sec .deal .deal-kicker{color:var(--dk-p)}
+html:root .deal-sec .deal .btn--primary{background:var(--dk-p);color:#fff;border-color:var(--dk-p)}
+html:root .deal-sec .deal .btn--primary:hover{background:var(--dk-t);border-color:var(--dk-t)}
+html:root .deal-sec .deal-note,html:root .deal-sec .deal-note *{color:rgba(255,255,255,.86)}
+html:root .deal-sec .deal-note a{color:#fff}
+html:root .deal-sec .deal-head .lead{color:rgba(255,255,255,.9)}
+html:root .deal-sec .eyebrow{color:#fff}
+html:root .deal-sec .deal-badge{background:var(--kupfer);color:var(--dk-t)}
+html:root .ba-sec .checks li{color:rgba(255,255,255,.88)}
+html:root .ba-sec .checks li b{color:#fff}
+html:root .ba-sec .checks li::before{background-color:rgba(98,178,208,.22)}
+html:root .ba-sec .ba-note,html:root .ba-sec .tiny{color:rgba(255,255,255,.78)}
+html:root .ba-sec .ba-note a,html:root .ba-sec .tiny a{color:#fff;text-decoration-color:rgba(255,255,255,.6)}
+html:root .ba-sec .hl{text-decoration-color:var(--kupfer-hell)}
+html:root .site-footer .soc a{background:transparent;border-color:rgba(255,255,255,.34);color:#fff}
+html:root .site-footer .soc a:hover{background:rgba(255,255,255,.1);color:#fff}
+html:root .site-footer .tiny,html:root .site-footer .foot-social .tiny,html:root .site-footer .footer-brand p,html:root .site-footer address,html:root .site-footer .footer-bottom{color:rgba(255,255,255,.76)}
+html:root .site-footer .a11y-bar span{color:rgba(255,255,255,.76)}
+html:root .site-footer .a11y-bar button{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+html:root .site-footer .a11y-bar button[aria-pressed="true"]{background:#fff;color:var(--dk-t)}
+html:root .site-footer address *,html:root .site-footer .footer-col li{color:rgba(255,255,255,.82)}
+html:root .site-footer .footer-cta .eyebrow{color:var(--pfau-hell)}
+html:root .site-footer .footer-cta,html:root .site-footer .footer-cta .small,html:root .site-footer .footer-cta .muted{color:rgba(255,255,255,.82)}
+html:root .site-footer .footer-cta-title,html:root .site-footer .footer-cta-links a{color:#fff}
+html:root .site-footer .footer-cta{border-bottom-color:rgba(255,255,255,.16)}
+/* ───────── D · Erfolg (B mit Handlungsfarbe) ─────────
+   Idee: Pfauenblau und Tiefsee tragen die Marke, Kupfer ist die eine Farbe für „Jetzt handeln“.
+   Alle Primärknöpfe stehen in Kupfer, Hervorgehobene Wörter in Überschriften stehen in Kupfer statt unterstrichen (auf dunklen Flächen in hellem Kupfer). */
+html:root .btn--primary,html:root .nav-cta{background:#C67432;border-color:#C67432;color:#0C2128;box-shadow:0 6px 16px rgba(150,79,8,.28)}
+html:root .btn--primary:hover,html:root .nav-cta:hover{background:#D4823F;border-color:#D4823F;color:#0C2128}
+html:root .band .btn--primary,html:root .ba-sec .btn--primary,html:root .deal-sec>.wrap .btn--primary:not(.deal .btn--primary){background:#F1A268;border-color:#F1A268;color:#0C2128}
+html:root .deal-sec .deal .btn--primary{background:#C67432;border-color:#C67432;color:#0C2128}
+html:root .deal-sec .deal .btn--primary:hover{background:#D4823F;border-color:#D4823F}
+html:root .mobile-cta a.primary{background:#C67432;border-color:#C67432;color:#0C2128}
+html:root .mobile-cta a.primary svg{color:#0C2128}
+html:root .deal-sec .deal-badge{background:#0C2128;color:#fff}
+html:root .hl,html:root .hl--violet,html:root .hl--cyan{background-image:none;padding:0;color:#C67432}
+html:root .band .hl,html:root .ba-sec .hl,html:root .deal-sec .hl,html:root .sec--dark .hl,html:root .site-footer .hl{background-image:none;color:#F1A268}
+html:root .chk-form .btn--primary,html:root .chk-strip .btn--primary{background:#C67432;border-color:#C67432;color:#0C2128}
+
+/* D · Feinschliff: Flächen, Kopfzeile, Fokus */
+html:root .sec--white{background:#FFFFFF}
+html:root .person-band{background:#EAF1F4}
+html:root .svc-row{border:1px solid var(--border)}
+html:root .nav-cta{background:#0C2128;border-color:#0C2128;color:#FFFFFF;box-shadow:none}
+html:root .nav-cta:hover{background:#045268;border-color:#045268;color:#FFFFFF}
+html:root :focus-visible{outline:3px solid #0C2128;outline-offset:3px}
+html:root :is(.band,.ba-sec,.deal-sec,.site-footer) :focus-visible{outline-color:#FFFFFF}
+
