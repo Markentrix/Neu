@@ -321,15 +321,15 @@ function home() {
 <section class="hs" data-hscroll>
   <div class="hs__sticky">
     <div class="wrap hs__head">
-      <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Ein Partner. Drei Bereiche.</h2></div>
+      <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Ein Partner. Vier Bereiche.</h2></div>
       <div class="hs__meta"><span class="hs__count"><b>01</b> / 0${panels.length}</span><div class="hs__bar"><i></i></div></div>
     </div>
     <div class="wrap quad">
       ${panels.map((p) => `<a class="quad__item" href="{root}${p.href}"><span class="quad__img">${pic(p.img, { alt: '', sizes: '25vw' })}<i>${p.nr}</i></span><strong>${p.short}</strong></a>`).join('')}
     </div>
-    <div class="hs__track">
+    <div class="hs__track" data-stagger>
       ${panels.map((p) => `
-      <article class="panel">
+      <article class="panel" data-reveal>
         <div class="panel__media">${pic(p.img, { sizes: '(max-width:900px) 90vw, 60vw' })}</div>
         <div class="panel__body">
           <span class="panel__nr">${p.nr}</span>

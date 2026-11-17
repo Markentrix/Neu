@@ -170,7 +170,8 @@
   const hsTrack = hs && $('.hs__track', hs); const hsCount = hs && $('.hs__count b', hs); const hsBar = hs && $('.hs__bar', hs);
   function measure() {
     if (!hs) return;
-    const pin = innerWidth >= 900 && !reduced && innerHeight >= 620;
+    hs.classList.remove('hs--pin'); hsTrack.style.transform = '';
+    const pin = innerWidth >= 900 && !reduced && innerHeight >= 620 && hsTrack.scrollWidth > hsTrack.clientWidth + 40;
     hs.classList.toggle('hs--pin', pin);
     if (pin) {
       hsTrack.style.transform = 'none';
