@@ -1,0 +1,67 @@
+/* ───────── Gemeinsam ───────── */
+html[data-thema]{--dk-t:#0C2128;--dk-p:#045268}
+
+/* ───────── A · Klarweiß ───────── */
+html[data-thema="a"] body{background:#F6F8F9}
+html[data-thema="a"] .sec--white{background:#FFFFFF}
+html[data-thema="a"] .person-band,html[data-thema="a"] .page-home .deal-sec{background:#EDF3F6}
+
+/* ───────── B · Tiefsee-Rhythmus ───────── */
+html[data-thema="b"] .deal-sec,html[data-thema="b"] .page-home .deal-sec{background:var(--dk-p);color:#fff}
+html[data-thema="b"] .ba-sec{background:var(--dk-t)}
+html[data-thema="b"] .site-footer{background:var(--dk-t);color:rgba(255,255,255,.76);border-top:0}
+html[data-thema="b"] .site-footer .footer-col h2,html[data-thema="b"] .site-footer .footer-bottom .claim{color:#fff}
+html[data-thema="b"] .site-footer .footer-col a,html[data-thema="b"] .site-footer a{color:rgba(255,255,255,.82)}
+html[data-thema="b"] .site-footer a:hover{color:#fff}
+html[data-thema="b"] .site-footer .footer-bottom{border-top-color:rgba(255,255,255,.16)}
+html[data-thema="b"] .site-footer .brand-logo{content:url(../img/logo/markentrix-logo-weiss.svg)}
+
+/* B · Angebotsfläche (Pfauenblau): Karten bleiben hell, Überschrift und Hinweise weiß */
+html[data-thema="b"] .deal-sec .deal h3,html[data-thema="b"] .deal-sec .deal b,html[data-thema="b"] .deal-sec .deal-month{color:var(--dk-t)}
+html[data-thema="b"] .deal-sec .deal .eyebrow,html[data-thema="b"] .deal-sec .deal .deal-kicker{color:var(--dk-p)}
+html[data-thema="b"] .deal-sec .deal .btn--primary{background:var(--dk-p);color:#fff;border-color:var(--dk-p)}
+html[data-thema="b"] .deal-sec .deal .btn--primary:hover{background:var(--dk-t);border-color:var(--dk-t)}
+html[data-thema="b"] .deal-sec .deal-note,html[data-thema="b"] .deal-sec .deal-note *{color:rgba(255,255,255,.86)}
+html[data-thema="b"] .deal-sec .deal-note a{color:#fff}
+html[data-thema="b"] .deal-sec .deal-head .lead{color:rgba(255,255,255,.9)}
+html[data-thema="b"] .deal-sec .eyebrow{color:#fff}
+html[data-thema="b"] .deal-sec .deal-badge{background:var(--kupfer);color:var(--dk-t)}
+/* B · Tiefsee-Flächen: Listen, Hinweise, Links */
+html[data-thema="b"] .ba-sec .checks li{color:rgba(255,255,255,.88)}
+html[data-thema="b"] .ba-sec .checks li b{color:#fff}
+html[data-thema="b"] .ba-sec .checks li::before{background-color:rgba(98,178,208,.22)}
+html[data-thema="b"] .ba-sec .ba-note,html[data-thema="b"] .ba-sec .tiny{color:rgba(255,255,255,.78)}
+html[data-thema="b"] .ba-sec .ba-note a,html[data-thema="b"] .ba-sec .tiny a{color:#fff;text-decoration-color:rgba(255,255,255,.6)}
+html[data-thema="b"] .ba-sec .hl{text-decoration-color:var(--kupfer-hell)}
+/* B · Fuß */
+html[data-thema="b"] .site-footer .soc a{background:transparent;border-color:rgba(255,255,255,.34);color:#fff}
+html[data-thema="b"] .site-footer .soc a:hover{background:rgba(255,255,255,.1);color:#fff}
+html[data-thema="b"] .site-footer .tiny,html[data-thema="b"] .site-footer .foot-social .tiny,html[data-thema="b"] .site-footer .footer-brand p,html[data-thema="b"] .site-footer address,html[data-thema="b"] .site-footer .footer-bottom{color:rgba(255,255,255,.76)}
+html[data-thema="b"] .site-footer .a11y-bar span{color:rgba(255,255,255,.76)}
+html[data-thema="b"] .site-footer .a11y-bar button{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+html[data-thema="b"] .site-footer .a11y-bar button[aria-pressed="true"]{background:#fff;color:var(--dk-t)}
+html[data-thema="b"] .site-footer address *,html[data-thema="b"] .site-footer .footer-col li{color:rgba(255,255,255,.82)}
+
+/* ───────── C · Nacht ───────── */
+html[data-thema="c"] body{background:#0A1A20;color:#EAF2F5}
+html[data-thema="c"] .brand-logo{content:url(../img/logo/markentrix-logo-weiss.svg)}
+html[data-thema="c"] .btn--primary,html[data-thema="c"] .nav-cta{background:var(--pfau-hell);border-color:var(--pfau-hell);color:#0C2128}
+html[data-thema="c"] .btn--primary:hover{background:#9AD2E6;border-color:#9AD2E6}
+html[data-thema="c"] .bk-site{color:#0C2128}
+html[data-thema="c"] .bk-site :is(h1,h2,h3,.bk-logo,.bk-h1,.bk-title){color:#0C2128}
+html[data-thema="c"] .bk-google .bk-desc{color:#B6C9D0}
+html[data-thema="c"] .bk-google .bk-url{color:#9DB4BC}
+html[data-thema="c"] .ill .il-stage,html[data-thema="c"] .ill.mi .s{fill:#0D2730}
+html[data-thema="c"] .ill .il-hit{fill:#0D2730}
+html[data-thema="c"] .ill.mi .h,html[data-thema="c"] .ill.mi .o{fill:#173F4B}
+html[data-thema="c"] .ill.mi .h2{fill:#173F4B;stroke:#7CC3DF}
+html[data-thema="c"] .ill.mi .rd{stroke:#173F4B}
+html[data-thema="c"] .hero .signature .curve,html[data-thema="c"] .hero-curve{stroke:#7CC3DF}
+html[data-thema="c"] :is(p,li,dd,figcaption,.tiny) a:not(.btn):not(.link-arrow){text-decoration:underline;text-decoration-color:rgba(124,195,223,.75)}
+html[data-thema="c"] #mx-consent a{color:#045268}
+html[data-thema="c"] .btn--primary,html[data-thema="c"] .band .btn--primary,html[data-thema="c"] .btn--primary:hover{color:#0C2128}
+html[data-thema="c"] .price-card--featured .pill,html[data-thema="c"] .deal-badge{color:#0C2128}
+html[data-thema="b"] .site-footer .footer-cta .eyebrow{color:var(--pfau-hell)}
+html[data-thema="b"] .site-footer .footer-cta,html[data-thema="b"] .site-footer .footer-cta .small,html[data-thema="b"] .site-footer .footer-cta .muted{color:rgba(255,255,255,.82)}
+html[data-thema="b"] .site-footer .footer-cta-title,html[data-thema="b"] .site-footer .footer-cta-links a{color:#fff}
+html[data-thema="b"] .site-footer .footer-cta{border-bottom-color:rgba(255,255,255,.16)}
