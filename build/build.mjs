@@ -556,7 +556,7 @@ fs.writeFileSync(path.join(ZIEL, 'llms.txt'), `# Waldtierheim Celle (Verein akti
 ${FAQ.map(([q, a]) => `- ${q} ${a}`).join('\n')}
 `);
 fs.writeFileSync(path.join(ZIEL, 'site.webmanifest'), JSON.stringify({ name: 'Waldtierheim Celle', short_name: 'Waldtierheim', lang: 'de', start_url: '/', display: 'browser', background_color: "#FFFFFF", theme_color: "#FFFFFF", icons: [{ src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' }] }));
-fs.writeFileSync(path.join(ZIEL, 'favicon.svg'), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#14104F"/><path fill="#9BD43A" d="M16 4l7 10h-4l6 9h-7v5h-4v-5H7l6-9H9z"/></svg>\n`);
+fs.writeFileSync(path.join(ZIEL, 'favicon.svg'), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#143A29"/><path fill="#9BD43A" d="M16 4l7 10h-4l6 9h-7v5h-4v-5H7l6-9H9z"/></svg>\n`);
 
 /* ---------- Aufräumen, Weiterleitungen ---------- */
 let weg = 0;

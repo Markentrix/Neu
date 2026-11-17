@@ -121,3 +121,7 @@ Alles nur transform/opacity/clip-path, reduced motion schaltet Bewegung ab.
 ## Überarbeitung 17.11.2026: kein Cremeton mehr (Kundenwunsch)
 - Der beige Flächenton wirkte wie ein typischer KI-Look. Er ist durch ein sehr helles Grün (#EFF5E3) ersetzt, abgeleitet vom Maigrün des Logos. Pfotenabdrücke stehen in einem etwas kräftigeren Hellgrün (#C6DA9E).
 - Palette jetzt: Weiß (Grund), Hellgrün (Flächen), Nachtblau (Schrift, Knöpfe, Footer), Maigrün (Aktion). Die Variablennamen `--sand*` im CSS sind historisch und bezeichnen diese Töne.
+
+## Überarbeitung 17.11.2026: Waldgrün statt Nachtblau (Kundenwunsch)
+- Die dunkle Farbe für Schrift, Knöpfe, Footer und Handy-Leiste ist jetzt Waldgrün (#143A29) statt Nachtblau. Palette: Weiß, Hellgrün (#EFF5E3), Waldgrün, Maigrün (#9BD43A).
+- Grund: passt besser zum Waldtierheim. Abweichung vom Logo, dessen Schrift nachtblau ist. Mit dem Verein klären (OFFEN).
