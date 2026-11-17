@@ -304,10 +304,10 @@ function report_mail(array $r, string $name): array {
     $kiH = '<tr><td style="padding:14px 28px 0"><p style="margin:0 0 6px;font-size:14px;font-weight:bold;color:#0C2128;border-top:1px solid #E1F0F6;padding-top:14px">KI-Potenzial' . (!empty($k['branche']) ? ' · ' . $h($k['branche']) : '') . '</p>'
          . '<p style="margin:0 0 10px;font-size:13px;line-height:1.5">Automatisierungs-Reife: <b>' . (int) $k['reife'] . ' von 100</b>. ' . $h($k['reife_text']) . '</p>';
     foreach ($k['chancen'] as $ch) {
-      $kiT .= "  - " . $ch['titel'] . "\n    " . $ch['text'] . "\n    Das sehen wir bei Ihnen: " . $ch['grund'] . "\n    Wirkung: " . $ch['wirkung'] . " (" . $ch['paket'] . ")\n";
+      $kiT .= "  - " . $ch['titel'] . "\n    " . $ch['text'] . "\n    " . ($ch['gl'] ?? 'Das sehen wir bei Ihnen') . ": " . $ch['grund'] . "\n    Wirkung: " . $ch['wirkung'] . " (" . $ch['paket'] . ")\n";
       $kiH .= '<div style="border:1px solid #E1F0F6;border-radius:10px;padding:12px 14px;margin-bottom:8px"><p style="margin:0 0 4px;font-size:14px;font-weight:bold;color:#0C2128">' . $h($ch['titel']) . '</p>'
            . '<p style="margin:0 0 6px;font-size:13px;line-height:1.5">' . $h($ch['text']) . '</p>'
-           . '<p style="margin:0 0 4px;font-size:12px;line-height:1.5;color:#4E5C5F"><b>Das sehen wir bei Ihnen:</b> ' . $h($ch['grund']) . '</p>'
+           . '<p style="margin:0 0 4px;font-size:12px;line-height:1.5;color:#4E5C5F"><b>' . $h($ch['gl'] ?? 'Das sehen wir bei Ihnen') . ':</b> ' . $h($ch['grund']) . '</p>'
            . '<p style="margin:0;font-size:12px;line-height:1.5;color:#4E5C5F"><b>Wirkung:</b> ' . $h($ch['wirkung']) . ' · ' . $h($ch['paket']) . '</p></div>';
     }
     $kiT .= '  ' . $k['hinweis'] . "\n";

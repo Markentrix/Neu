@@ -203,7 +203,7 @@
         k.chancen.forEach(function (c) {
           var card = el('article', 'ki-card'); card.appendChild(el('h5', null, c.titel)); card.appendChild(el('p', null, c.text));
           var dl = el('dl', 'ki-facts');
-          var a = el('div'); a.appendChild(el('dt', null, 'Das sehen wir bei Ihnen')); a.appendChild(el('dd', null, c.grund)); dl.appendChild(a);
+          var a = el('div'); a.appendChild(el('dt', null, c.gl || 'Das sehen wir bei Ihnen')); a.appendChild(el('dd', null, c.grund)); dl.appendChild(a);
           var b = el('div'); b.appendChild(el('dt', null, 'Wirkung')); b.appendChild(el('dd', null, c.wirkung)); dl.appendChild(b);
           card.appendChild(dl); card.appendChild(el('span', 'ki-paket', c.paket)); g.appendChild(card);
         });

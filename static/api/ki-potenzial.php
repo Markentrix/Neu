@@ -11,69 +11,14 @@
  */
 declare(strict_types=1);
 
-/**
- * Branchen: Schlüssel => [Bezeichnung, Anfragen im Alltag, Alltag am Telefon, starke Stichwörter, schwache Stichwörter]
- * Stichwörter sind Wortanfänge (Gartenbau, Gartenpflege), ab sieben Buchstaben auch mitten im Wort (Rundballenpressen).
- */
-function ki_branchen(): array {
-  return [
-    'lohn'     => ['Lohnunternehmen und Landwirtschaft', 'Anfragen zu Einsätzen und Terminen in der Saison', 'auf der Maschine oder im Feld',
-                   'lohnunternehm|lohnarbeit|landlohn|agrarservice|agrardienst|landwirtschaft|landwirt|ackerbau|landtechnik|erntearbeit|ernte|mähdrusch|mähdrescher|häcksel|gülle|gärrest|ausbringung|pflüg|bodenbearbeitung|aussaat|drillen|silage|rundballen|strohpress|schlepper|traktor|biogas|agrar|forstwirtschaft|forstarbeit|holzernte|erdarbeit|tiefbau|stallbau|futterbau|grünland|maisaussaat|körnermais|dienstleistungen für die landwirtschaft|maschinenring|pflanzenschutz|düngung|strohballen|schlepperfahrer|fahrer gesucht',
-                   'maschinenpark|fuhrpark|einsatz|saison|hof|acker|feld|wiese|mähen|pressen|transport|kran|bagger|radlader|container|kies|sand|schotter'],
-    'bau'      => ['Bau, Dach und Ausbau', 'Anfragen für Angebote und Termine vor Ort', 'auf der Baustelle',
-                   'bauunternehm|hochbau|rohbau|dachdeck|zimmerei|zimmerer|dachstuhl|trockenbau|stuckateur|maurer|fliesenleger|malerbetrieb|maler und lackierer|fassade|gerüstbau|sanierung|innenausbau|estrich|abbruch|bauleitung|holzbau|fertigbau|bedachung|dachfenster|spengler',
-                   'baustelle|neubau|umbau|anbau|ausbau|renovier'],
-    'handwerk' => ['Handwerk und Haustechnik', 'Anfragen und Rückrufwünsche', 'auf der Baustelle',
-                   'elektro|elektriker|elektroinstallation|sanitär|heizung|klempner|installateur|tischler|schreiner|schlosser|metallbau|photovoltaik|wallbox|haustechnik|fensterbau|haustür|handwerksbetrieb|wärmepumpe|klimaanlage|smart home|notdienst|kundendienst|rollladen|jalousie|glaserei|sonnenschutz',
-                   'handwerk|installation|montage|reparatur|wartung|meisterbetrieb'],
-    'kfz'      => ['Autowerkstatt und Fahrzeugpflege', 'Terminwünsche und Rückfragen', 'unterm Auto',
-                   'kfz|autowerkstatt|autohaus|autohändler|reifen|reifendienst|tüv|hauptuntersuchung|inspektion|autopflege|aufbereitung|karosserie|autoglas|autoreparatur|autolackier|fahrzeugpflege|fahrzeugaufbereitung|gebrauchtwagen|unfallinstandsetzung|zweirad|motorrad|fahrradwerkstatt|werkstatt',
-                   'fahrzeug|auto |pkw|inspektion|bremsen|ölwechsel'],
-    'transport'=> ['Transport, Umzug und Logistik', 'Anfragen zu Fahrten, Terminen und Preisen', 'auf Tour',
-                   'spedition|umzug|logistik|fuhrunternehm|transportunternehm|kurier|containerdienst|abschlepp|autokran|krandienst|schwertransport|kippertransport|baustofftransport|entrümpelung|haushaltsauflösung|taxi|fahrdienst|krankenfahrt|möbeltransport|busreise|reisebus|personenbeförderung|lkw',
-                   'transport|fahrt|lieferung|abholung'],
-    'beauty'   => ['Friseur und Beauty', 'Terminwünsche', 'am Stuhl',
-                   'friseur|frisör|haarstudio|barber|kosmetik|nagelstudio|nageldesign|wimpern|beautysalon|haarschnitt|fußpflege|podolog|tattoo|piercing|waxing|permanent make|massage|wellness|sonnenstudio|friseursalon|haarverlängerung|visagist',
-                   'beauty|styling|haare|farbe|schnitt|pflege'],
-    'praxis'   => ['Praxis und Gesundheit', 'Terminanfragen und Rückrufe', 'in der Behandlung',
-                   'arztpraxis|zahnarzt|zahnärzt|zahnmedizin|physiotherap|ergotherap|heilpraktik|logopäd|osteopath|tierarzt|tierärzt|orthopäd|hausarzt|kieferorthop|augenarzt|hautarzt|kinderarzt|frauenarzt|psycholog|psychotherap|krankengymnastik|podologie|hörgeräte|optiker|apotheke|sanitätshaus|labor|pflegedienst|tagespflege|seniorenbetreu',
-                   'praxis|patient|behandlung|therapie|sprechzeiten|termin'],
-    'gastro'   => ['Gastronomie', 'Reservierungen und Fragen zu Karte und Zeiten', 'im Service',
-                   'restaurant|gasthaus|gasthof|speisekarte|café|cafe|bistro|imbiss|pizzeria|catering|partyservice|biergarten|bäckerei|konditorei|metzgerei|fleischerei|tischreservierung|gaststätte|eisdiele|kantine|hofcafé|landgasthof|eventlocation|saalvermietung|schlachterei|hofladen',
-                   'speisen|getränke|küche|menü|mittagstisch|frühstück|feier'],
-    'hotel'    => ['Hotel und Pension', 'Zimmeranfragen und Gästefragen', 'an der Rezeption',
-                   'hotel|pension|ferienwohnung|ferienhaus|gästezimmer|übernachtung|unterkunft|bed\s?&\s?breakfast|zimmer buchen|campingplatz|ferienhof|urlaub auf dem bauernhof|gästehaus|herberge|reiterhof|wohnmobilstellplatz',
-                   'gäste|zimmer|buchung|anreise|urlaub|ferien'],
-    'fitness'  => ['Fitness, Sport und Kurse', 'Anfragen zu Probetraining und Kursen', 'im Training',
-                   'fitnessstudio|fitness|sportstudio|yoga|pilates|crossfit|personal trainer|tanzschule|kampfsport|kursplan|probetraining|sportverein|schwimmschule|reitschule|reitunterricht|ponyclub|reitverein|pferdesport|tennis|golf|kletter|musikschule|fahrschule|nachhilfe|sprachschule|volkshochschule|hundeschule|hundetraining|tierpension|tierheim|pferdepension|pensionspferde',
-                   'training|kurs|unterricht|trainer|mitglied|verein'],
-    'garten'   => ['Garten und Hausservice', 'Anfragen zu Einsätzen und Terminen', 'im Einsatz',
-                   'garten|landschaftsbau|landschaftspflege|rasenpflege|heckenschnitt|baumpflege|baumfäll|gärtner|gärtnerei|baumschule|hausmeisterservice|hausmeister|gebäudereinigung|glasreinigung|unterhaltsreinigung|winterdienst|schädlingsbekämpfung|pflasterarbeiten|zaunbau|teichbau|poolbau|gartengestaltung|grünpflege|grünschnitt|reinigungsservice|reinigungsfirma|haushaltshilfe|haushaltsnahe',
-                   'rasen|hecke|pflege|reinigung|service'],
-    'handel'   => ['Einzelhandel und Fachgeschäft', 'Fragen zu Sortiment, Preisen und Öffnungszeiten', 'im Laden',
-                   'supermarkt|einzelhandel|fachgeschäft|boutique|fachhandel|blumenladen|blumengeschäft|floristik|geschenkartikel|onlineshop|online-shop|warenkorb|fleischtheke|feinkost|lebensmittel|wochenmarkt|tabakwaren|schreibwaren|buchhandlung|spielwaren|baumarkt|raumausstatter|möbelhaus|einrichtungshaus|zoofachhandel|futtermittel|landhandel|landmarkt|bauernladen|direktvermarkt|bioladen|reformhaus|schmuck|juwelier|uhren',
-                   'sortiment|angebote der woche|preise|öffnungszeiten|verkauf|kaufen'],
-    'beratung' => ['Beratung und Dienstleistung', 'Erstanfragen', 'im Mandantengespräch',
-                   'steuerberat|kanzlei|rechtsanwalt|unternehmensberat|versicherung|immobilienmakler|immobilien|hausverwaltung|makler|werbeagentur|webdesign|marketing|coaching|buchhaltung|lohnbuchhaltung|finanzberat|architekt|ingenieurbüro|fotograf|fotostudio|übersetz|gutachter|sachverständig|energieberat|bestatter|notar|zahnlabor|druckerei',
-                   'beratung|dienstleist|agentur|büro|mandant|kunden'],
-  ];
-}
-
-/** Zuordnung von schema.org-Typen zu Branchen (stärkstes Signal, wenn die Seite sich selbst so beschreibt). */
-function ki_ld_map(): array {
-  return ['AutoRepair' => 'kfz', 'AutomotiveBusiness' => 'kfz', 'AutoDealer' => 'kfz', 'AutoWash' => 'kfz', 'MotorcycleRepair' => 'kfz', 'Dentist' => 'praxis', 'Physician' => 'praxis', 'MedicalBusiness' => 'praxis', 'MedicalClinic' => 'praxis', 'Pharmacy' => 'praxis', 'Optician' => 'praxis', 'VeterinaryCare' => 'praxis',
-          'Restaurant' => 'gastro', 'FoodEstablishment' => 'gastro', 'Bakery' => 'gastro', 'CafeOrCoffeeShop' => 'gastro', 'BarOrPub' => 'gastro', 'FastFoodRestaurant' => 'gastro', 'Hotel' => 'hotel', 'LodgingBusiness' => 'hotel', 'BedAndBreakfast' => 'hotel', 'Campground' => 'hotel',
-          'HairSalon' => 'beauty', 'BeautySalon' => 'beauty', 'DaySpa' => 'beauty', 'NailSalon' => 'beauty', 'HealthClub' => 'fitness', 'SportsActivityLocation' => 'fitness', 'ExerciseGym' => 'fitness', 'SportsClub' => 'fitness',
-          'Electrician' => 'handwerk', 'Plumber' => 'handwerk', 'HVACBusiness' => 'handwerk', 'Locksmith' => 'handwerk', 'RoofingContractor' => 'bau', 'GeneralContractor' => 'bau', 'HousePainter' => 'bau', 'HomeAndConstructionBusiness' => 'bau',
-          'MovingCompany' => 'transport', 'LegalService' => 'beratung', 'AccountingService' => 'beratung', 'FinancialService' => 'beratung', 'RealEstateAgent' => 'beratung', 'InsuranceAgency' => 'beratung', 'Attorney' => 'beratung', 'Notary' => 'beratung',
-          'Store' => 'handel', 'GroceryStore' => 'handel', 'Florist' => 'handel', 'ClothingStore' => 'handel', 'HardwareStore' => 'handel', 'Butcher' => 'gastro', 'GardenStore' => 'handel'];
-}
+require_once __DIR__ . '/ki-branchen.php';
 
 /** Wandelt eine Stichwortliste in eine Regex: Wortanfang, ab sieben Buchstaben auch mitten im Wort. Liefert das ganze gefundene Wort. */
 function ki_re(string $list): string {
   $parts = [];
   foreach (explode('|', $list) as $w) {
     $w = trim($w); if ($w === '') continue;
+    if (substr($w, -1) === '!') { $parts[] = '(?<![\p{L}])' . substr($w, 0, -1) . '(?![\p{L}])'; continue; }
     $parts[] = (mb_strlen($w) >= 7 ? '' : '(?<![\p{L}])') . $w;
   }
   return '/\p{L}*(?:' . implode('|', $parts) . ')\p{L}*/iu';
@@ -83,7 +28,7 @@ function ki_re(string $list): string {
 function ki_hits(string $text, string $re): array {
   if ($text === '') return [0, []];
   if (!preg_match_all($re, mb_substr($text, 0, 12000), $m)) return [0, []];
-  $w = []; foreach ($m[0] as $x) { $k = mb_strtolower($x); if (mb_strlen($k) >= 4) $w[$k] = true; }
+  $w = []; foreach ($m[0] as $x) { $k = mb_strtolower($x); if (mb_strlen($k) >= 2) $w[$k] = true; }
   return [count($w), array_keys($w)];
 }
 
@@ -103,8 +48,8 @@ function ki_branche(array $d): array {
     $src[] = [3, (string) ($sp['title'] ?? '') . ' ' . (string) ($sp['h1'] ?? '')]; $src[] = [2, implode(' ', (array) ($sp['h2'] ?? [])) . ' ' . (string) ($sp['desc'] ?? '')]; $src[] = [1, (string) ($sp['text'] ?? '')];
   }
   $score = []; $belege = [];
-  foreach (ki_branchen() as $key => $b) {
-    $strong = ki_re($b[3]); $weak = ki_re($b[4]); $s = 0.0;
+  foreach (ki_profile() as $key => $b) {
+    $strong = ki_re($b['strong']); $weak = ki_re($b['weak']); $s = 0.0;
     foreach ($src as [$wt, $tx]) {
       if ($tx === '') continue;
       [$n, $words] = ki_hits($tx, $strong);
@@ -114,9 +59,9 @@ function ki_branche(array $d): array {
     $score[$key] = $s;
   }
   // schema.org-Typen: die Seite nennt ihre Art selbst
-  foreach ((array) ($S['ld_types'] ?? []) as $t) { $m = ki_ld_map(); if (isset($m[$t])) { $score[$m[$t]] = ($score[$m[$t]] ?? 0) + 10; $belege[$m[$t]]['schema.org: ' . $t] = 99; } }
+  foreach ((array) ($S['ld_types'] ?? []) as $t) { $m = ki_ld_map(); if (!empty($m[$t])) { $score[$m[$t]] = ($score[$m[$t]] ?? 0) + 10; $belege[$m[$t]]['schema.org: ' . $t] = 99; } }
   arsort($score); $keys = array_keys($score); $top = $keys[0]; $s1 = $score[$top]; $s2 = $score[$keys[1]] ?? 0;
-  $sicher = $s1 >= 8 && $s1 >= 1.4 * $s2;
+  $sicher = $s1 >= 7 && $s1 >= 1.4 * $s2;
   $vermutet = !$sicher && $s1 >= 4 && $s1 >= 1.6 * $s2;
   if (!$sicher && !$vermutet) return ['key' => null, 'punkte' => $s1, 'sicher' => false, 'belege' => []];
   $bel = $belege[$top] ?? []; arsort($bel);
@@ -131,10 +76,17 @@ function ki_potenzial(array $d): array {
   $text = lc((string) $d['text']);
   $all = $lower . ' ' . $text;
   $br = ki_branche($d); $bk = $br['key'];
-  $B = ki_branchen();
-  $label = $bk ? $B[$bk][0] : null;
-  $anfragen = $bk ? $B[$bk][1] : 'Anfragen';
-  $alltag = $bk ? $B[$bk][2] : 'bei der Arbeit';
+  $PR = ki_profile(); $pf = $bk ? $PR[$bk] : null;
+  $label = $pf['label'] ?? null;
+  $alltag = $pf['alltag'] ?? 'bei der Arbeit';
+  $anliegen = $pf['anliegen'] ?? 'Anfragen von Kunden';
+  $fragen = $pf['fragen'] ?? 'Leistungen, Preise, Öffnungszeiten und Ansprechpartner';
+  $rueckruf = $pf['rueckruf'] ?? 'Name, Anliegen und Rückrufzeit';
+  $termin = $pf['termin'] ?? ['Online-Terminbuchung mit Erinnerung', 'Kunden wählen freie Termine selbst, bekommen eine Bestätigung und eine Erinnerung. Die Termine landen in Ihrem Kalender.'];
+  $bew = $pf['bew'] ?? 'nach Auftrag oder Besuch';
+  $content = $pf['content'] ?? 'Neuigkeiten, Angebote und Aktionen';
+  $extra = $pf['extra'] ?? [];
+  $skip = $pf['skip'] ?? [];
   // Ohne sichere Branche nennen wir, womit sich die Seite selbst vorstellt
   $thema = '';
   if (!$bk) { $thema = trim((string) ($d['h1'][0] ?? '')); if ($thema === '') $thema = trim((string) preg_replace('/\s*[|–—-]\s*[^|–—-]*$/u', '', (string) $d['title'])); $thema = mb_substr($thema, 0, 70); }
@@ -164,49 +116,56 @@ function ki_potenzial(array $d): array {
   $reife = 0; $da = []; $fehlt = [];
   foreach ($pts as $name => [$ok, $w]) { if ($ok) { $reife += $w; $da[] = $name; } else { $fehlt[] = $name; } }
 
-  // Kandidaten mit Gewicht; Branchen-Zuschläge je Kandidat
-  $c = [];
-  $bon = function (array $keys, int $v) use ($bk): int { return $bk && in_array($bk, $keys, true) ? $v : 0; };
-  if (!$wa && !$chat) $c[] = [80 + $bon(['beauty', 'gastro', 'hotel', 'handel', 'fitness', 'kfz', 'lohn', 'bau', 'garten', 'transport'], 10), 'WhatsApp-Assistent für ' . $anfragen,
-    'Ein Assistent beantwortet ' . $anfragen . ' im Chat, schlägt Termine vor und übergibt Unklares an Sie. Antworten kommen aus Texten, die Sie freigegeben haben.',
-    'Auf Ihrer Startseite ist weder ein WhatsApp-Kontakt noch ein Chat zu erkennen.', 'Entlastet Telefon und Postfach. Kunden bekommen eine erste Antwort, auch wenn Sie gerade nicht am Handy sind.', 'ab Paket ONE'];
-  if ($tel) $c[] = [70 + $bon(['handwerk', 'kfz', 'praxis', 'gastro', 'beauty', 'garten', 'lohn', 'bau', 'transport'], 12), 'Telefonassistent für verpasste Anrufe',
-    'Wenn Sie ' . $alltag . ' nicht rangehen können, nimmt der Assistent den Anruf an, gibt Auskunft zu Leistungen und Zeiten und erfasst den Rückrufwunsch samt Terminvorschlag.',
-    'Ihre Telefonnummer ist auf der Startseite als Kontaktweg hinterlegt. Jeder verpasste Anruf ist eine offene Anfrage.', 'Weniger verpasste Anfragen im laufenden Betrieb, Rückrufwünsche liegen geordnet bei Ihnen.', 'ab Paket BUSINESS'];
-  if (($form || $mail) && !$chat) $c[] = [60 + $bon(['beratung', 'handwerk', 'praxis', 'handel', 'lohn', 'bau', 'transport'], 8), 'E-Mail-Assistent für das Postfach',
-    'Der Assistent sortiert eingehende Nachrichten, bereitet Antworten vor und legt Wichtiges zur Freigabe vor. Nichts geht ohne Ihr Ok hinaus.',
-    'Anfragen kommen über ' . ($form && $mail ? 'Formular und E-Mail-Adresse' : ($form ? 'das Formular' : 'die E-Mail-Adresse')) . ' und müssen heute jeweils von Hand gelesen und beantwortet werden.', 'Weniger Sortieren und Tippen, schnellere erste Antwort.', 'ab Paket ONE'];
-  if (!$form && in_array($bk, ['lohn', 'bau', 'garten', 'transport', 'handwerk'], true)) $c[] = [85, 'Einsatzanfrage mit Ort, Umfang und Wunschzeitraum',
-    'Ein Anfrageformular oder ein WhatsApp-Assistent fragt gleich ab, welcher Einsatz gewünscht ist, wo er stattfindet, wie groß er ist und wann. Anfragen kommen vorsortiert bei Ihnen an, Rückfragen entfallen.',
-    'Auf der Startseite ist kein Anfrageformular zu erkennen. Anfragen laufen über Telefon oder E-Mail und beginnen mit Rückfragen.', 'Weniger Rückfragen, schnellere Zu- oder Absage, bessere Einsatzplanung.', 'ab Paket LANDING START'];
-  if (!$booking) $c[] = [75 + $bon(['beauty', 'praxis', 'kfz', 'fitness', 'handwerk', 'gastro', 'hotel'], 12), 'Online-Terminbuchung mit Erinnerung',
-    'Kunden wählen freie Termine selbst, bekommen eine Bestätigung und eine Erinnerung. Die Termine landen in Ihrem Kalender.',
-    'Auf der Startseite ist keine Online-Terminbuchung zu erkennen. Terminwünsche laufen heute über Telefon oder Formular.', 'Weniger Hin und Her bei der Terminfindung, weniger vergessene Termine.', 'ab Paket LANDING'];
-  if (!$faq) $c[] = [65 + $bon(['praxis', 'hotel', 'gastro', 'handel', 'beratung'], 8), 'Fragen und Antworten für Besucher, Google und KI',
-    'Ein Bereich mit den häufigsten Kundenfragen beantwortet vieles, bevor jemand anruft. Er wird für Google und KI-Antworten ausgezeichnet und ist später die Grundlage für einen Chat-Assistenten.',
-    'Auf der Startseite ist kein Bereich mit häufigen Fragen zu finden.', 'Weniger Standardfragen am Telefon, bessere Chance, in KI-Antworten genannt zu werden.', 'in jeder Website möglich'];
-  if (!$reviews) $c[] = [55 + $bon(['handwerk', 'kfz', 'beauty', 'praxis', 'gastro', 'hotel', 'garten', 'bau', 'lohn', 'transport'], 10), 'Bewertungen nach Auftrag oder Besuch anfragen',
-    'Nach Auftrag oder Besuch geht automatisch eine freundliche Bitte um eine Google-Bewertung an den Kunden, mit direktem Link. Sie bestimmen, wer sie bekommt.',
-    'Auf der Startseite sind keine Kundenbewertungen oder Stimmen sichtbar.', 'Mehr sichtbare Bewertungen, ohne dass Sie daran denken müssen.', 'Zusatz, einzeln buchbar'];
-  if ($multi) $c[] = [50 + $bon(['hotel', 'gastro', 'handel'], 10), 'Mehrsprachige Inhalte aktuell halten',
+  // Kandidaten mit Gewicht. Gruppen verschieben die Reihenfolge: Einsatzbetriebe (E), Terminbetriebe (T), Gäste- und Ladenbetriebe (G).
+  $grp = ['E' => ['lohn', 'bau', 'handwerk', 'reinigung', 'garten', 'transport', 'pflege'], 'T' => ['kfz', 'beauty', 'praxis', 'tier', 'fitness', 'bildung', 'foto', 'beratung', 'immobilien', 'agentur'], 'G' => ['gastro', 'bar', 'event', 'hotel', 'freizeit', 'handel', 'verein']];
+  $in = fn(string $g): bool => $bk !== null && in_array($bk, $grp[$g], true);
+  $c = []; $gl0 = 'Das sehen wir bei Ihnen';
+  $cap = fn(string $s): string => mb_strtoupper(mb_substr($s, 0, 1)) . mb_substr($s, 1);
+  if (!$wa && !$chat) $c[] = [80 + ($bk ? 8 : 0), 'WhatsApp-Assistent für Anfragen und Rückfragen',
+    'Der Assistent beantwortet Fragen zu ' . $fragen . ' direkt im Chat und nimmt ' . $anliegen . ' entgegen. Unklares übergibt er an Sie. Antworten kommen aus Texten, die Sie freigegeben haben.',
+    'Auf Ihrer Startseite ist weder ein WhatsApp-Kontakt noch ein Chat zu erkennen.', 'Entlastet Telefon und Postfach. Kunden bekommen eine erste Antwort, auch wenn Sie ' . $alltag . ' nicht am Handy sind.', 'ab Paket ONE', $gl0];
+  if ($tel) $c[] = [70 + ($in('E') ? 14 : ($in('T') ? 10 : ($in('G') ? 4 : 0))), 'Telefonassistent für verpasste Anrufe',
+    'Wenn Sie ' . $alltag . ' nicht rangehen können, nimmt der Assistent den Anruf an, gibt Auskunft zu ' . $fragen . ', erfasst ' . $rueckruf . ' und schlägt einen Termin vor.',
+    'Ihre Telefonnummer ist auf der Startseite als Kontaktweg hinterlegt. Jeder verpasste Anruf ist eine offene Anfrage.', 'Weniger verpasste Anfragen im laufenden Betrieb, Rückrufwünsche liegen geordnet und vollständig bei Ihnen.', 'ab Paket BUSINESS', $gl0];
+  if (($form || $mail) && !$chat) $c[] = [60 + ($in('T') ? 6 : 0), 'E-Mail-Assistent für das Postfach',
+    'Der Assistent sortiert eingehende Nachrichten (' . $anliegen . '), bereitet Antworten vor und legt Wichtiges zur Freigabe vor. Nichts geht ohne Ihr Ok hinaus.',
+    'Anfragen kommen über ' . ($form && $mail ? 'Formular und E-Mail-Adresse' : ($form ? 'das Formular' : 'die E-Mail-Adresse')) . ' und müssen heute jeweils von Hand gelesen und beantwortet werden.', 'Weniger Sortieren und Tippen, schnellere erste Antwort.', 'ab Paket ONE', $gl0];
+  if (!$booking) $c[] = [74 + ($in('T') ? 14 : ($in('G') ? 12 : 4)), $termin[0], $termin[1],
+    'Auf der Startseite ist keine Online-Buchung zu erkennen. Buchungen und Termine laufen heute über Telefon oder Nachricht.', 'Weniger Hin und Her bei der Terminfindung, weniger vergessene Termine.', 'ab Paket LANDING', $gl0];
+  if (!$faq) $c[] = [64 + ($in('G') || in_array($bk, ['praxis', 'beratung'], true) ? 8 : 0), 'Fragen und Antworten: ' . $fragen,
+    'Ein eigener Bereich beantwortet diese Fragen, bevor jemand anruft. Er wird für Google und KI-Antworten ausgezeichnet und ist später die Grundlage für den Chat-Assistenten.',
+    'Auf der Startseite ist kein Bereich mit häufigen Fragen zu finden.', 'Weniger Standardfragen am Telefon, bessere Chance, in KI-Antworten genannt zu werden.', 'in jeder Website möglich', $gl0];
+  if (!$reviews && !in_array('noreviews', $skip, true)) $c[] = [55 + ($bk ? 8 : 0), 'Bewertungen ' . $bew . ' anfragen',
+    'Eine freundliche Bitte um eine Google-Bewertung geht automatisch ' . $bew . ' an den Kunden, mit direktem Link. Sie bestimmen, wer sie bekommt.',
+    'Auf der Startseite sind keine Kundenbewertungen oder Stimmen sichtbar.', 'Mehr sichtbare Bewertungen, ohne dass Sie daran denken müssen.', 'Zusatz, einzeln buchbar', $gl0];
+  if ($multi) $c[] = [50 + ($in('G') ? 10 : 0), 'Mehrsprachige Inhalte aktuell halten',
     'Neue Aktionen, Preise und Öffnungszeiten werden über einen Übersetzungsablauf in alle Sprachen übernommen. Fachliche Freigabe bleibt bei Ihnen.',
-    'Ihre Seite gibt es in mehreren Sprachen. Jede Änderung muss dort mehrfach gepflegt werden.', 'Weniger doppelte Pflege, einheitliche Angaben in allen Sprachen.', 'im Angebot festgelegt'];
-  if (!$social) $c[] = [45 + $bon(['beauty', 'gastro', 'hotel', 'fitness', 'handel', 'kfz'], 10), 'Beiträge für Google-Profil und Social Media',
-    'Ein Redaktionsplan, vorbereitete Beiträge und eine feste Freigabe durch Sie halten Profile aktuell, ohne dass es am Feierabend hängen bleibt.',
-    'Auf der Startseite sind keine Social-Media-Profile verlinkt.', 'Regelmäßige Sichtbarkeit bei Google und in sozialen Netzwerken, planbarer Aufwand.', 'Zusatz, einzeln buchbar'];
-  if (!$newsletter) $c[] = [35 + $bon(['handel', 'gastro', 'beauty', 'fitness', 'hotel'], 10), 'Newsletter für Stammkunden',
-    'Eine Anmeldung auf der Website, Vorlagen und ein fester Rhythmus für Aktionen und Neuigkeiten. Versand und Auswertung laufen mit.',
-    'Auf der Startseite ist keine Newsletter-Anmeldung zu finden.', 'Stammkunden erfahren von Aktionen, ohne dass Sie jedes Mal selbst schreiben.', 'Zusatz, einzeln buchbar'];
-  if (!$shop) $c[] = [33 + $bon(['handel', 'gastro', 'beauty', 'fitness'], 12), 'Gutscheine oder Online-Shop',
-    'Gutscheine und Produkte lassen sich online verkaufen und im Portal pflegen. Bestellungen kommen bei Ihnen an.',
-    'Auf der Startseite ist kein Shop und kein Gutscheinverkauf zu erkennen.', 'Zusätzlicher Verkaufsweg ohne Zusatzaufwand an der Theke.', 'ab Paket BUSINESS WEB'];
+    'Ihre Seite gibt es in mehreren Sprachen. Jede Änderung muss dort mehrfach gepflegt werden.', 'Weniger doppelte Pflege, einheitliche Angaben in allen Sprachen.', 'im Angebot festgelegt', $gl0];
+  if (!$social && !in_array('nosocial', $skip, true)) $c[] = [45 + ($in('G') ? 14 : 4), 'Beiträge zu ' . $content,
+    'Ein Redaktionsplan, vorbereitete Beiträge und eine feste Freigabe durch Sie halten Google-Profil und Social Media aktuell, ohne dass es am Feierabend hängen bleibt.',
+    'Auf der Startseite sind keine Social-Media-Profile verlinkt.', 'Regelmäßige Sichtbarkeit bei Google und in sozialen Netzwerken, planbarer Aufwand.', 'Zusatz, einzeln buchbar', $gl0];
+  if (!$newsletter && !in_array('nonews', $skip, true)) $c[] = [35 + ($in('G') ? 10 : 0), 'Newsletter: ' . $content,
+    'Eine Anmeldung auf der Website, Vorlagen und ein fester Rhythmus. Versand und Auswertung laufen mit.',
+    'Auf der Startseite ist keine Newsletter-Anmeldung zu finden.', 'Stammkunden erfahren Neues, ohne dass Sie jedes Mal selbst schreiben.', 'Zusatz, einzeln buchbar', $gl0];
+  // Chancen, die nur für diese Branche gelten
+  $need = [
+    'noform' => !$form, 'nobooking' => !$booking, 'nowa' => !$wa && !$chat, 'nofaq' => !$faq, 'noreviews' => !$reviews, 'noshop' => !$shop, 'nosocial' => !$social, 'nonews' => !$newsletter, 'hastel' => $tel, 'always' => true];
+  $reason = [
+    'noform' => 'Auf der Startseite ist kein Anfrageformular zu erkennen, das die wichtigsten Angaben gleich abfragt.', 'nobooking' => 'Auf der Startseite ist keine Online-Buchung zu erkennen.',
+    'nowa' => 'Es ist kein WhatsApp-Kontakt zu erkennen.', 'nofaq' => 'Es ist kein Bereich mit häufigen Fragen zu erkennen.', 'noreviews' => 'Es sind keine Kundenbewertungen sichtbar.',
+    'noshop' => 'Auf der Startseite ist kein Shop und kein Gutscheinverkauf zu erkennen.', 'nosocial' => 'Es sind keine Social-Media-Profile verlinkt.', 'nonews' => 'Es ist keine Newsletter-Anmeldung zu erkennen.', 'hastel' => 'Ihre Telefonnummer ist als Kontaktweg hinterlegt.',
+    'always' => 'Für ' . ($label ?? 'Ihren Betrieb') . ' ein üblicher Hebel. Ob und wie Sie das heute schon nutzen, sehen wir von außen nicht und klären es im Gespräch.'];
+  foreach ($extra as [$xt, $xx, $xw, $xp, $xg, $xn]) {
+    if (!($need[$xn] ?? false)) continue;
+    $c[] = [$xg, $xt, $xx, $reason[$xn], $xw, $xp, $xn === 'always' ? 'Warum das zu Ihnen passt' : $gl0];
+  }
   if (count($c) < 3) $c[] = [20, 'Tägliches Briefing statt Postfach durchsuchen',
     'Jeden Morgen eine kurze Zusammenfassung: neue Anfragen, offene Rückrufe, anstehende Termine.',
-    'Mehrere Kontaktwege laufen nebeneinander und sammeln sich an verschiedenen Orten.', 'Ein Blick am Morgen statt mehrerer Postfächer.', 'Teil der KI-Pakete'];
+    'Mehrere Kontaktwege laufen nebeneinander und sammeln sich an verschiedenen Orten.', 'Ein Blick am Morgen statt mehrerer Postfächer.', 'Teil der KI-Pakete', $gl0];
 
   usort($c, fn($a, $b) => $b[0] <=> $a[0]);
   $out = [];
-  foreach (array_slice($c, 0, 4) as $x) $out[] = ['titel' => $x[1], 'text' => $x[2], 'grund' => $x[3], 'wirkung' => $x[4], 'paket' => $x[5]];
+  foreach (array_slice($c, 0, 4) as $x) $out[] = ['titel' => $x[1], 'text' => $x[2], 'grund' => $x[3], 'wirkung' => $x[4], 'paket' => $x[5], 'gl' => $x[6]];
 
   $rt = $reife >= 75 ? 'Viele Voraussetzungen sind schon sichtbar. Automatisierung setzt hier an Feinheiten an.'
       : ($reife >= 45 ? 'Ein Teil der Voraussetzungen ist da. Mit wenigen Bausteinen lassen sich Anfragen spürbar leichter verwalten.'
