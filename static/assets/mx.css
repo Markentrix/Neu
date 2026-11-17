@@ -2074,3 +2074,4 @@ html:root .nav-cta:hover{background:#045268;border-color:#045268;color:#FFFFFF}
 html:root :focus-visible{outline:3px solid #0C2128;outline-offset:3px}
 html:root :is(.band,.ba-sec,.deal-sec,.site-footer) :focus-visible{outline-color:#FFFFFF}
 
+.ki-belege{margin:0}

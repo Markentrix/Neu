@@ -205,6 +205,9 @@ function parse_page(string $html): array {
   if ($b) {
     $c = $b->cloneNode(true);
     foreach (['script', 'style', 'noscript', 'template'] as $tag) { while (($n = $c->getElementsByTagName($tag)->item(0)) !== null) $n->parentNode->removeChild($n); }
+    foreach (['p', 'div', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'article', 'td', 'th', 'tr', 'br', 'dt', 'dd', 'a', 'button', 'label', 'figcaption', 'blockquote', 'address', 'nav', 'header', 'footer'] as $tag) {
+      foreach (iterator_to_array($c->getElementsByTagName($tag)) as $e) { $e->appendChild($doc->createTextNode(' ')); }
+    }
     $text = norm($c->textContent);
   }
   $p['text'] = $text;
@@ -451,25 +454,28 @@ if ($imgTotal > 0) {
   add('tech', $noDim <= $imgTotal * 0.2 ? 'ok' : 'warn', 'mid', $noDim === 0 ? 'Bilder mit Breite und Höhe angegeben' : $noDim . ' von ' . $imgTotal . ' Bildern ohne Größenangabe', $noDim <= $imgTotal * 0.2 ? 'Die Seite springt beim Laden kaum.' : 'Ohne Größenangaben verschiebt sich der Inhalt beim Laden. Das verschlechtert die „Layoutverschiebung“, einen Core Web Vital.', $noDim <= $imgTotal * 0.2 ? '' : 'width und height an jedes Bild schreiben.');
   if ($imgTotal >= 4) add('tech', ($lazy >= 1 && $modern >= $imgTotal * 0.5) ? 'ok' : 'warn', 'low', 'Bildformate und Nachladen', ($lazy >= 1 && $modern >= $imgTotal * 0.5) ? 'Moderne Formate und verzögertes Laden sind im Einsatz.' : 'Moderne Formate (WebP, AVIF) und verzögertes Laden (loading="lazy") sparen auf dem Smartphone viele Sekunden. ' . $modern . ' von ' . $imgTotal . ' Bildern in modernem Format, ' . $lazy . ' mit verzögertem Laden.', ($lazy >= 1 && $modern >= $imgTotal * 0.5) ? '' : 'Bilder als WebP ausliefern und unterhalb des ersten Bildschirms lazy laden.');
 }
-// Stichprobe interner Seiten
+// Stichprobe interner Seiten (bevorzugt Seiten, die erklären, was der Betrieb tut: Leistungen, Angebot, Über uns, Maschinen, Produkte)
 $sample = [];
+$cands = [];
+foreach ($q('//a[@href]') as $a) {
+  $h = trim($a->getAttribute('href'));
+  if ($h === '' || $h[0] === '#' || preg_match('#^(mailto:|tel:|javascript:|whatsapp:|sms:)#i', $h)) continue;
+  $abs = preg_match('#^https?://#i', $h) ? $h : (preg_match('#^//#', $h) ? $scheme . ':' . $h : (($h[0] === '/') ? $origin . $h : $origin . '/' . ltrim($h, './')));
+  $pp = parse_url($abs); if (empty($pp['host']) || preg_replace('/^www\./i', '', strtolower($pp['host'])) !== strtolower($bareHost)) continue;
+  $path = rtrim((string) ($pp['path'] ?? '/'), '/'); if ($path === '' || preg_match('/(impressum|datenschutz|agb|privacy|cookie|login|wp-admin|kontakt|contact)(\.html?|\.php)?$|\.(pdf|jpg|jpeg|png|webp|zip|docx?)$/i', $path)) continue;
+  $lt = lc(norm($a->textContent)) . ' ' . lc(rawurldecode($path));
+  $rank = preg_match('/leistung|angebot|service|dienst|produkt|maschin|fuhrpark|über uns|ueber-uns|ueber_uns|unternehmen|firma|team|wir |about|referenz|tätigkeit|arbeitsbereich|sortiment|portfolio|branche|geschäftsfeld/u', $lt) ? 0 : 1;
+  if (!isset($cands[$path])) $cands[$path] = [$rank, count($cands), $origin . $path];
+}
+uasort($cands, fn($x, $y) => [$x[0], $x[1]] <=> [$y[0], $y[1]]);
+$seen = []; foreach ($cands as $pth => $cv) { $seen[$pth] = $cv[2]; if (count($seen) >= 3) break; }
 if (time_left() > 8) {
-  $seen = [];
-  foreach ($q('//a[@href]') as $a) {
-    $h = trim($a->getAttribute('href'));
-    if ($h === '' || $h[0] === '#' || preg_match('#^(mailto:|tel:|javascript:|whatsapp:|sms:)#i', $h)) continue;
-    $abs = preg_match('#^https?://#i', $h) ? $h : (preg_match('#^//#', $h) ? $scheme . ':' . $h : (($h[0] === '/') ? $origin . $h : $origin . '/' . ltrim($h, './')));
-    $pp = parse_url($abs); if (empty($pp['host']) || preg_replace('/^www\./i', '', strtolower($pp['host'])) !== strtolower($bareHost)) continue;
-    $path = rtrim((string) ($pp['path'] ?? '/'), '/'); if ($path === '' || preg_match('/(impressum|datenschutz|agb|privacy|cookie|login|wp-admin)(\.html?|\.php)?$|\.(pdf|jpg|jpeg|png|webp|zip|docx?)$/i', $path)) continue;
-    if (isset($seen[$path])) continue; $seen[$path] = $origin . $path;
-    if (count($seen) >= 3) break;
-  }
   foreach ($seen as $u) {
     if (time_left() < 5) break;
     $r = safe_fetch($u, 600000, 5);
     if (empty($r['ok']) || $r['status'] >= 400 || stripos($r['headers']['content-type'] ?? 'text/html', 'html') === false) { $sample[] = ['url' => $u, 'bad' => true, 'status' => $r['status'] ?? 0]; continue; }
     $pp = parse_page($r['body']);
-    $sample[] = ['url' => $u, 'title' => $pp['title'], 'desc' => $pp['desc'], 'h1' => $pp['h1'][0] ?? '', 'noindex' => strpos($pp['robots'], 'noindex') !== false, 'words' => $pp['words'], 'ttfb' => $r['ttfb']];
+    $sample[] = ['url' => $u, 'title' => $pp['title'], 'desc' => $pp['desc'], 'h1' => $pp['h1'][0] ?? '', 'h2' => array_slice($pp['h2'], 0, 8), 'text' => cut($pp['text'], 4000), 'noindex' => strpos($pp['robots'], 'noindex') !== false, 'words' => $pp['words'], 'ttfb' => $r['ttfb']];
   }
 }
 if (count($sample) >= 2) {
@@ -714,10 +720,20 @@ function notify_owner(array $r): void {
   deliver($c, $to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
 }
 
-// ── KI-Potenzial (regelbasiert aus der bereits abgerufenen Startseite, kein weiterer Abruf, keine KI-Anfrage) ──
+// ── KI-Potenzial (regelbasiert aus den bereits abgerufenen Seiten, kein weiterer Abruf, keine KI-Anfrage) ──
 require_once __DIR__ . '/ki-potenzial.php';
 try {
-  $ki = ki_potenzial(['title' => $P['title'], 'h1' => $P['h1'], 'h2' => $P['h2'], 'desc' => $P['desc'], 'text' => $P['text'], 'lower' => $lower,
+  $navT = []; foreach (array_merge($q('//nav//a'), $q('//header//a'), $q('//*[contains(@class,"menu") or contains(@class,"nav")]//a')) as $a) { $x = norm($a->textContent); if ($x !== '' && mb_strlen($x) < 60) $navT[$x] = true; if (count($navT) >= 80) break; }
+  $slugs = []; foreach ($q('//a[@href]') as $a) { $h = (string) $a->getAttribute('href'); if ($h === '' || $h[0] === '#' || preg_match('#^(mailto:|tel:|javascript:)#i', $h)) continue; $pp = parse_url($h); $pth = rawurldecode((string) ($pp['path'] ?? '')); if ($pth !== '' && $pth !== '/') $slugs[preg_replace('/[-_\/.]+/', ' ', $pth)] = true; if (count($slugs) >= 120) break; }
+  $alts = []; foreach ($q('//img[@alt]') as $im) { $x = norm((string) $im->getAttribute('alt')); if ($x !== '') $alts[$x] = true; if (count($alts) >= 40) break; }
+  $og = []; foreach (['og:title', 'og:description', 'og:site_name', 'twitter:title', 'twitter:description'] as $pr) { $x = trim((string) (($q('//meta[@property="' . $pr . '"]|//meta[@name="' . $pr . '"]')[0] ?? null)?->getAttribute('content') ?? '')); if ($x !== '') $og[] = $x; }
+  $ldTxt = []; $kiTypes = [];
+  $walk = function ($n) use (&$walk, &$ldTxt, &$kiTypes) { if (!is_array($n)) return; foreach ($n as $k => $v) { if ($k === '@type') { foreach ((array) $v as $tt) if (is_string($tt)) $kiTypes[] = $tt; } elseif (in_array($k, ['name', 'description', 'serviceType', 'knowsAbout', 'keywords', 'slogan', 'alternateName', 'makesOffer', 'itemOffered', 'hasOfferCatalog', 'category', 'industry', 'brand'], true)) { if (is_string($v)) $ldTxt[] = $v; elseif (is_array($v)) { array_walk_recursive($v, function ($z) use (&$ldTxt) { if (is_string($z)) $ldTxt[] = $z; }); } } if (is_array($v)) $walk($v); } };
+  foreach ($ldNodes as $n) $walk($n);
+  $sig = ['host' => preg_replace('/[-_.]+/', ' ', $bareHost), 'nav' => implode(' ', array_keys($navT)), 'slugs' => implode(' ', array_keys($slugs)), 'alts' => implode(' ', array_keys($alts)), 'og' => implode(' ', $og),
+          'ld_text' => implode(' ', array_unique($ldTxt)), 'ld_types' => array_values(array_unique($kiTypes)),
+          'sample' => array_values(array_filter($sample, fn($s) => empty($s['bad'])))];
+  $ki = ki_potenzial(['title' => $P['title'], 'h1' => $P['h1'], 'h2' => $P['h2'], 'desc' => $P['desc'], 'text' => $P['text'], 'lower' => $lower, 'sig' => $sig,
     'hasTel' => $hasTel, 'hasMail' => $hasMail, 'hasWa' => $hasWa, 'hasForm' => $hasForm, 'hasFaq' => ($hasFaqText || $hasFaqLd),
     'socialCount' => count($social), 'hasEntity' => (bool) $entity, 'viewport' => $P['viewport'], 'https' => $https]);
 } catch (Throwable $e) { $ki = null; }

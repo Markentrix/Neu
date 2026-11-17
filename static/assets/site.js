@@ -185,7 +185,13 @@
       var head = el('div', 'ki-head'), left = el('div');
       left.appendChild(el('span', 'eyebrow', 'KI-Potenzial'));
       var h = el('h3', null, 'Wo sich bei Ihnen Automatisierung lohnen könnte'); h.id = 'ki-title'; left.appendChild(h);
-      left.appendChild(el('p', 'muted ki-branche', k.branche ? 'Erkannte Branche: ' + k.branche : 'Die Branche ist von außen nicht eindeutig erkennbar. Wir betrachten Ihre Seite allgemein.'));
+      if (k.branche) {
+        left.appendChild(el('p', 'muted ki-branche', (k.branche_sicher ? 'Erkannte Branche: ' : 'Vermutete Branche: ') + k.branche));
+        if (k.belege && k.belege.length) left.appendChild(el('p', 'tiny ki-belege', 'Erkannt an: ' + k.belege.join(', ') + '.'));
+      } else {
+        left.appendChild(el('p', 'muted ki-branche', 'Ihre Branche ist von außen nicht sicher zu erkennen' + (k.thema ? ' (Ihre Startseite stellt sich mit „' + k.thema + '“ vor).' : '.')));
+        left.appendChild(el('p', 'tiny ki-belege', 'Auf Ihrer Startseite und den geprüften Unterseiten steht zu wenig darüber, was Sie anbieten. Das ist auch für Google und KI-Antworten ein Hinweis. Die Einschätzung unten gilt deshalb allgemein.'));
+      }
       var rb = el('div', 'ki-reife'); rb.appendChild(el('span', 'ki-reife-t', 'Automatisierungs-Reife'));
       var tr = el('span', 'ki-track'); var f = el('i'); f.style.width = k.reife + '%'; tr.appendChild(f); rb.appendChild(tr);
       rb.appendChild(el('b', null, k.reife + ' / 100'));
