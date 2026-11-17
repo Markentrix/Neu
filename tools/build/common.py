@@ -76,7 +76,8 @@ def head(title, desc, jsonld="", img="assets/img/og-image.jpg", noindex=False):
 def header():
     links = "".join(f'<li><a href="{h}">{t}</a></li>' for h,t in NAV)
     mlinks = "".join(f'<li><a href="{h}">{t}</a></li>' for h,t in NAV)
-    return f'''<header class="header">
+    return f'''<div class="progress" aria-hidden="true"></div>
+<header class="header">
   <div class="wrap">
     <a class="brand" href="index.html" title="Zur Startseite"><img class="brand__img" src="assets/img/logo.webp" width="264" height="84" alt="Burnout Celler-Kartbahn" fetchpriority="low"></a>
     <nav class="nav" aria-label="Hauptnavigation"><ul>{links}<li><a class="btn btn--primary btn--sm" href="buchen.html">Jetzt buchen</a></li><li><a class="btn btn--ghost btn--sm" href="gutscheine.html">Gutscheine</a></li></ul></nav>
@@ -249,9 +250,35 @@ def ensure_assets():
             shutil.copy(src + f, OUT + f)
     if os.path.isdir(OUT + "assets/css"): shutil.rmtree(OUT + "assets/css")
 
+def motionize(html):
+    import re as _re
+    # Reveal-Klassen für wiederkehrende Bausteine
+    for pat, cls in [(r'<(div|a) class="card(?![^"]*reveal)', "reveal"), (r'<article class="news', "reveal"), (r'<div class="stat', "reveal--scale reveal"),
+                     (r'<figure>', "reveal--scale reveal"), (r'<div class="notice', "reveal"), (r'<details', "reveal")]:
+        def rep(m, cls=cls):
+            t = m.group(0)
+            if "<figure>" in t: return '<figure class="' + cls + '">'
+            if t.startswith("<details"): return '<details class="' + cls + '"'
+            return t[:-1] + "" if False else t.replace('class="', 'class="' + cls + ' ', 1)
+        html = _re.sub(pat, rep, html)
+    # Split-Bereiche: Bild von der Seite, Text gegenläufig
+    html = _re.sub(r'(<div class="wrap split(?: split--rev)?">\s*)<img ', lambda m: m.group(1) + '<img class="reveal reveal--clip" ', html)
+    html = _re.sub(r'(<div class="wrap split(?: split--rev)?">\s*<img [^>]*>\s*)<div>', lambda m: m.group(1) + '<div class="reveal">', html)
+    html = _re.sub(r'(<div class="wrap split(?: split--rev)?">\s*<picture>.*?</picture>\s*)<div>', lambda m: m.group(1) + '<div class="reveal">', html, flags=_re.S)
+    # Schritte und Fakten
+    html = _re.sub(r'(<ol class="steps">.*?</ol>)', lambda m: m.group(1).replace("<li>", '<li class="reveal">'), html, flags=_re.S)
+    html = _re.sub(r'(<dl class="facts">.*?</dl>)', lambda m: m.group(1).replace("<div><dt>", '<div class="reveal"><dt>'), html, flags=_re.S)
+    # Hero-Überschrift Wort für Wort
+    def words(m):
+        ws = m.group(2).split(" ")
+        return m.group(1) + " ".join('<span class="w" style="--i:%d"><span>%s</span></span>' % (i, w) for i, w in enumerate(ws)) + "</h1>"
+    html = _re.sub(r'(<section class="hero[^"]*">.*?<h1[^>]*>)([^<]+)</h1>', words, html, flags=_re.S)
+    return html
+
 def write(name, html):
     if name.endswith(".html"):
         html = responsive(html)
+        html = motionize(html)
         if DEMO:
             import re as _re
             html = _re.sub(r'<meta name="robots" content="[^"]*">', '<meta name="robots" content="noindex,nofollow,noarchive">', html)

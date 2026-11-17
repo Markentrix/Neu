@@ -36,7 +36,32 @@ html += f'''
     <div class="toc"><strong>Direkt zu:</strong>
       <ol><li><a href="#tickets">Ticketfahrten Sa/So</a></li><li><a href="#spartage">Spartage Mo–Do</a></li><li><a href="#freitag">Freitagsspecial</a></li><li><a href="#doppelsitzer">Doppelsitzer</a></li><li><a href="#neukunden">Neukunden &amp; Rennlizenz</a></li><li><a href="#kids">Kidsparty</a></li><li><a href="#supercup">Supercup / Rennen</a></li><li><a href="#bahnmiete">Bahnmiete</a></li><li><a href="#schule">Schulklassen</a></li><li><a href="#fuehrerschein">Kinderkartführerschein</a></li><li><a href="#racecam">RaceCam</a></li><li><a href="#siegerehrung">Siegerehrung</a></li></ol>
     </div>
-    <p class="notice"><strong>Wer darf fahren?</strong> Kinder ab 8 Jahren und mindestens 1,25 m im Kinderkart. Ins große Kart ab 13 Jahren und 1,55 m (ab 12 Jahren mit Karterfahrung). Kleinere Kids ab 4 Jahren und 1,10 m fahren im <a href="#doppelsitzer">Doppelsitzer</a> mit.</p>
+    <h2 id="preis-check-titel">Preis-Check: Was kostet euer Besuch?</h2>
+    <p class="muted">Tag wählen, Personen eintragen, Fahrten festlegen – der Preis rechnet sofort mit. Ab 5 Personen könnt ihr die Auswahl direkt online reservieren.</p>
+    <form class="calc" id="preis-check" aria-labelledby="preis-check-titel" onsubmit="return false">
+      <div>
+        <div class="field"><span class="hint" style="font-weight:600;color:#fff">Wann wollt ihr fahren?</span>
+          <div class="seg" role="radiogroup" aria-label="Wochentag">
+            <div><input type="radio" name="tag" id="tag-mo" value="mo_do" checked><label for="tag-mo">Mo–Do<br><small>Spartage</small></label></div>
+            <div><input type="radio" name="tag" id="tag-fr" value="fr"><label for="tag-fr">Freitag<br><small>Special</small></label></div>
+            <div><input type="radio" name="tag" id="tag-we" value="sa_so"><label for="tag-we">Sa/So<br><small>Normal</small></label></div>
+          </div>
+        </div>
+        <div class="fields-2">
+          <div class="field"><label for="c-erw">Erwachsene (ab 16 J.)</label><div class="stepper-count"><button type="button" data-dir="-" aria-label="Weniger Erwachsene">−</button><input type="number" id="c-erw" name="erw" min="0" max="60" value="2" inputmode="numeric"><button type="button" data-dir="+" aria-label="Mehr Erwachsene">+</button></div></div>
+          <div class="field"><label for="c-kids">Kinder (8–15 J.)</label><div class="stepper-count"><button type="button" data-dir="-" aria-label="Weniger Kinder">−</button><input type="number" id="c-kids" name="kids" min="0" max="60" value="1" inputmode="numeric"><button type="button" data-dir="+" aria-label="Mehr Kinder">+</button></div></div>
+        </div>
+        <div class="field"><label for="c-fahrten">Fahrten pro Person (je 10 Minuten)</label><div class="stepper-count"><button type="button" data-dir="-" aria-label="Weniger Fahrten">−</button><input type="number" id="c-fahrten" name="fahrten" min="1" max="8" value="3" inputmode="numeric"><button type="button" data-dir="+" aria-label="Mehr Fahrten">+</button></div></div>
+      </div>
+      <div class="calc__result" aria-live="polite">
+        <span class="eyebrow" style="margin:0">Voraussichtlicher Preis</span>
+        <div class="calc__total">0 €</div>
+        <ul class="calc__lines"></ul>
+        <p class="small calc__note" style="margin:0"></p>
+        <a class="btn btn--primary calc__cta" href="buchen.html?angebot=tickets" style="margin-top:auto">Online reservieren</a>
+      </div>
+    </form>
+    <p class="notice" style="margin-top:2rem"><strong>Wer darf fahren?</strong> Kinder ab 8 Jahren und mindestens 1,25 m im Kinderkart. Ins große Kart ab 13 Jahren und 1,55 m (ab 12 Jahren mit Karterfahrung). Kleinere Kids ab 4 Jahren und 1,10 m fahren im <a href="#doppelsitzer">Doppelsitzer</a> mit.</p>
 
     <h2 id="tickets">Ticketfahrten Samstag &amp; Sonntag</h2>
     {ptable("Normalpreise (Sa/So) – je 10 Minuten", [("1 × 10 Min","15,00 €","13,50 €"),("2 × 10 Min","30,00 €","27,00 €"),("3 × 10 Min","43,00 €","36,00 €"),("4 × 10 Min","52,00 €","43,00 €"),("5 × 10 Min","60,00 €","50,00 €"),("jede weitere 10 Min","9,00 €","7,00 €")])}
@@ -161,6 +186,9 @@ html += f'''
 </section>
 <section class="section section--tight">
   <div class="wrap">
+    <ol class="stepper" aria-label="Fortschritt der Buchung">
+      <li class="is-active">Angebot</li><li>Termin</li><li>Teilnehmer</li><li>Kontakt</li>
+    </ol>
     <form id="buchung" class="form" action="danke.html" method="post" autocomplete="on">
       <fieldset>
         <legend>1. Was möchtet ihr buchen?</legend>

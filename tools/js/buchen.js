@@ -54,6 +54,29 @@
   function weekday(s) { return new Date(s + "T12:00:00").getDay(); } /* 0 = So */
   function angebot() { var r = $('[name="angebot"]:checked'); return r ? r.value : ""; }
 
+  /* ---------- Schritt-Anzeige ---------- */
+  var stepper = document.querySelector(".stepper");
+  function setStep(n, done) {
+    if (!stepper) return;
+    $$("li", stepper).forEach(function (li, i) {
+      li.classList.toggle("is-done", i + 1 < n || (done && i + 1 === n));
+      li.classList.toggle("is-active", i + 1 === n && !done);
+    });
+  }
+  function currentStep() {
+    if (!angebot()) return 1;
+    if (!dateIn.value || (!apiDown && !timeIn.value)) return 2;
+    if (!num("teilnehmer")) return 3;
+    var ok = ["vorname", "nachname", "telefon", "email"].every(function (k) { var el = $('[name="' + k + '"]'); return el && el.value.trim(); }) && $('[name="einwilligung"]').checked && $('[name="agb"]').checked;
+    return ok ? 5 : 4;
+  }
+  function refreshStepper() { var c = currentStep(); setStep(Math.min(c, 4), c === 5); }
+  form.addEventListener("input", refreshStepper); form.addEventListener("change", refreshStepper);
+  function revealStep(id) {
+    var fs = $(id); if (!fs || !fs.hidden) return;
+    fs.classList.add("enter"); fs.hidden = false; requestAnimationFrame(function () { requestAnimationFrame(function () { fs.classList.remove("enter"); }); });
+  }
+
   /* ---------- Schritt 1: Angebot -> passende Felder ---------- */
   function updateAngebot() {
     var a = angebot(); var def = ANGEBOTE[a];
@@ -65,11 +88,12 @@
     });
     var teil = $('[name="teilnehmer"]');
     if (def) { teil.min = def.min; teil.max = def.max; $("#teil-hint").textContent = "Mindestens " + def.min + (def.max < 100 ? ", maximal " + def.max : "") + " Personen."; }
-    $("#step2").hidden = !a; $("#step3").hidden = !a; $("#step4").hidden = !a;
+    if (a) { revealStep("#step2"); revealStep("#step3"); revealStep("#step4"); } else { $("#step2").hidden = $("#step3").hidden = $("#step4").hidden = true; }
     if (a === "fuehrerschein") { $("#fs-note").hidden = false; } else { $("#fs-note").hidden = true; }
     updateSummary();
   }
-  $$('[name="angebot"]').forEach(function (r) { r.addEventListener("change", updateAngebot); });
+  $$('[name="angebot"]').forEach(function (r) { r.addEventListener("change", function () { updateAngebot(); refreshStepper();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) setTimeout(function () { $("#step2").scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); }); });
 
   /* ---------- Schritt 2: Datum & Uhrzeit aus dem Portal ---------- */
   var today = new Date(); dateIn.min = iso(today);
@@ -100,7 +124,7 @@
     if (!list || !list.length) { slotHint.textContent = "Für diesen Tag sind keine Startzeiten hinterlegt. Bitte ruft uns an oder schreibt uns."; return; }
     var free = 0;
     list.forEach(function (s) {
-      var b = document.createElement("button"); b.type = "button"; b.className = "slot"; b.textContent = s.zeit;
+      var b = document.createElement("button"); b.type = "button"; b.className = "slot"; b.textContent = s.zeit; b.style.setProperty("--i", slotsBox.children.length);
       b.setAttribute("aria-pressed", "false");
       if (!s.frei) { b.disabled = true; b.title = "bereits vergeben"; } else { free++; }
       b.addEventListener("click", function () {
@@ -263,8 +287,10 @@
   });
 
   /* ---------- Start ---------- */
-  var pre = new URLSearchParams(location.search).get("angebot");
+  var qs = new URLSearchParams(location.search); var pre = qs.get("angebot");
   if (pre && ANGEBOTE[pre]) { var r = $('[name="angebot"][value="' + pre + '"]'); if (r) r.checked = true; }
   updateAngebot();
+  ["teilnehmer", "kinder", "fahrten"].forEach(function (k) { var v = qs.get(k); var el = $('[name="' + k + '"]'); if (v && el && !el.disabled) el.value = v; });
+  updateSummary(); refreshStepper();
   loadAvail().then(function () { if (dateIn.value) loadSlots(); });
 })();

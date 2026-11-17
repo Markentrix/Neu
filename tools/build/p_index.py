@@ -40,10 +40,7 @@ JSONLD = '''<script type="application/ld+json">
    {"@type":"Offer","name":"Supercup Standard – Qualifying + 20 Min Rennen","price":"39.00","priceCurrency":"EUR","url":"/firmen.html"},
    {"@type":"Offer","name":"Bahnmiete 1 Stunde inkl. 10 Karts","price":"650.00","priceCurrency":"EUR","url":"/firmen.html"}]
  },
- {"@type":"WebSite","name":"Burnout Celler-Kartbahn","url":"/","inLanguage":"de-DE","publisher":{"@id":"/#kartbahn"}},
- {"@type":"Event","name":"Flatratefahren Oktober 2026","startDate":"2026-10-30T19:00:00+01:00","eventStatus":"https://schema.org/EventScheduled","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",
-  "location":{"@type":"Place","name":"Burnout Celler-Kartbahn","address":{"@type":"PostalAddress","streetAddress":"Waldweg 100","postalCode":"29221","addressLocality":"Celle","addressCountry":"DE"}},
-  "description":"Flatratefahren in 3 Gruppen mit 12-Minuten-Durchgängen im Wechsel. Ab 22 Uhr Discolicht und Nebel auf der Strecke.","organizer":{"@id":"/#kartbahn"},"offers":{"@type":"Offer","url":"/buchen.html?angebot=event","availability":"https://schema.org/InStock"}}
+ {"@type":"WebSite","name":"Burnout Celler-Kartbahn","url":"/","inLanguage":"de-DE","publisher":{"@id":"/#kartbahn"}}
 ]}
 </script>'''
 
@@ -71,6 +68,9 @@ html += f'''
     </ul>
   </div>
 </section>
+<div class="ticker" role="region" aria-label="Aktuelles in Kürze"><div class="ticker__track">
+  <span class="ticker__item">Neu: 2. Ebene mit Steilkurve in 6 m Höhe</span><span class="ticker__item">Mo–Do: 3 Fahrten zum Preis von 2</span><span class="ticker__item">Kidsparty ab 40 € pro Kind</span><span class="ticker__item">Supercup ab 39 € p.P. – exklusiv auf der Strecke</span><span class="ticker__item">Weihnachtsfeier mit Buffet im Clubraum</span><span class="ticker__item">Gutscheine online kaufen</span><span class="ticker__item">RaceCam: dein Rennen auf Video</span>
+</div></div>
 
 <section class="section section--tight" id="fakten">
   <div class="wrap">
@@ -171,16 +171,16 @@ html += f'''
     <h2>News &amp; Events</h2>
     <div class="grid grid-3">
       <article class="news">
-        <time datetime="2026-10-30">Freitag, 30.10.2026</time>
-        <h3>Flatratefahren Oktober 2026</h3>
-        <p class="muted">Unser beliebtes Flatratefahren: gefahren wird in 3 Gruppen in 12-Minuten-Durchgängen im Wechsel. Ab 22 Uhr gehen die Lichter aus – Discobeleuchtung und Nebel an!</p>
-        <a class="btn btn--primary btn--sm" href="buchen.html?angebot=event">Platz sichern</a>
-      </article>
-      <article class="news">
         <time datetime="2026-12">Weihnachtsfeiern 2026</time>
         <h3>Firmen, Vereine &amp; Gruppen</h3>
-        <p class="muted">Von 6 bis ca. 80 Personen: Supercup bis 17 Teilnehmer, Rennpakete und Meisterschaftsmodus ab 18. Danach Buffet im festlich dekorierten Clubraum.</p>
-        <a class="btn btn--ghost btn--sm" href="firmen.html">Pakete ansehen</a>
+        <p class="muted">Von 6 bis ca. 80 Personen: Supercup bis 17 Teilnehmer, Rennpakete und Meisterschaftsmodus ab 18. Danach Buffet im festlich dekorierten Clubraum. Dezember-Termine werden knapp – früh anfragen.</p>
+        <a class="btn btn--primary btn--sm" href="firmen.html">Pakete ansehen</a>
+      </article>
+      <article class="news">
+        <time>Events</time>
+        <h3>Flatratefahren &amp; Nightrace</h3>
+        <p class="muted">Unsere beliebten Flatrate-Abende: gefahren wird in 3 Gruppen in 12-Minuten-Durchgängen im Wechsel, ab 22 Uhr mit Discolicht und Nebel. Die nächsten Termine geben wir hier und auf Facebook bekannt.</p>
+        <a class="btn btn--ghost btn--sm" href="buchen.html?angebot=event">Platz anfragen</a>
       </article>
       <article class="news">
         <time>Neu</time>

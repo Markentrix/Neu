@@ -279,3 +279,126 @@ tr.total td{background:rgba(225,6,0,.08)}
 .facts>div{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-s);padding:.8rem 1rem}
 .facts dt{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--red-2);font-weight:700;margin-bottom:.2rem}
 .facts dd{margin:0;color:#e6e6ea;font-size:.95rem}
+
+/* ==========================================================================
+   MOTION & INTERAKTION
+   Alle Bewegungen nutzen nur transform/opacity (GPU), respektieren
+   prefers-reduced-motion und greifen erst, wenn JavaScript läuft (html.js).
+   ========================================================================== */
+:root{--ease-out:cubic-bezier(.16,1,.3,1);--ease-io:cubic-bezier(.65,0,.35,1);--dur:.7s}
+
+/* Seitenübergänge (Browser mit View Transitions, sonst normale Navigation) */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-out .22s var(--ease-io) both}
+::view-transition-new(root){animation:vt-in .32s var(--ease-out) both}
+@keyframes vt-out{to{opacity:0;transform:translateY(-8px)}}
+@keyframes vt-in{from{opacity:0;transform:translateY(10px)}}
+.brand__img{view-transition-name:brand}
+.header{view-transition-name:header}
+
+/* Lesefortschritt (rote Linie oben) */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:0 50%;background:linear-gradient(90deg,var(--red),var(--red-2));z-index:60;pointer-events:none}
+.header.is-scrolled{box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.header.is-scrolled .wrap{min-height:56px}
+.header.is-scrolled .brand__img{height:34px}
+.header .wrap,.brand__img{transition:min-height .25s var(--ease-out),height .25s var(--ease-out)}
+
+/* Scroll-Reveal: nur mit JS versteckt, Fallback zeigt alles */
+/* Wisch-Reveal über clip-path: Farben bleiben unverändert (kein Opacity-Blending) */
+.js .reveal{clip-path:inset(0 0 100% 0 round 12px);transform:translateY(18px);transition:clip-path var(--dur) var(--ease-out),transform var(--dur) var(--ease-out);transition-delay:calc(var(--i,0)*60ms);will-change:clip-path,transform}
+.js .reveal.in{clip-path:inset(0 0 0 0 round 12px);transform:none;will-change:auto}
+.js .reveal.no-anim{transition:none!important;animation:none!important}
+.js .reveal--left{clip-path:inset(0 100% 0 0 round 12px);transform:translateX(-18px)}
+.js .reveal--right{clip-path:inset(0 0 0 100% round 12px);transform:translateX(18px)}
+.js .reveal--scale{transform:scale(.94)}
+.js .reveal--clip{clip-path:inset(0 0 100% 0 round 14px);transform:none;transition:clip-path .9s var(--ease-out)}
+.js .reveal--clip.in{clip-path:inset(0 0 0 0 round 14px)}
+
+/* Hero: Headline Wort für Wort, Bild mit langsamem Zoom, Lichtkante */
+.hero h1 .w{display:inline-block;overflow:hidden;vertical-align:bottom}
+.hero h1 .w>span{display:inline-block}
+.js .hero h1 .w>span{transform:translateY(110%);animation:rise .8s var(--ease-out) forwards;animation-delay:calc(var(--i)*60ms + 80ms)}
+@keyframes rise{to{transform:none}}
+.js .hero .eyebrow,.js .hero .lead,.js .hero__actions,.js .hero__facts{opacity:0;animation:fade-up .8s var(--ease-out) forwards}
+.js .hero .lead{animation-delay:.35s}.js .hero__actions{animation-delay:.5s}.js .hero__facts{animation-delay:.65s}
+@keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.js .hero__img{animation:kenburns 14s var(--ease-out) forwards;transform-origin:55% 45%}
+@keyframes kenburns{from{transform:scale(1.08)}to{transform:scale(1)}}
+.hero::before{content:"";position:absolute;inset:-20% -40%;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.14) 50%,transparent 58%);transform:translateX(-70%);z-index:1;pointer-events:none;opacity:0}
+.js .hero::before{animation:sweep 1.6s var(--ease-io) .3s forwards}
+@keyframes sweep{0%{opacity:1;transform:translateX(-70%)}100%{opacity:0;transform:translateX(70%)}}
+
+/* Laufband */
+.ticker{overflow:hidden;background:var(--red);color:#fff;font-weight:700;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(0,0,0,.3)}
+.ticker__track{display:flex;width:max-content;gap:0}
+.ticker__item{padding:.6rem 1.4rem;white-space:nowrap;display:flex;align-items:center;gap:.6rem}
+.ticker__item::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;opacity:.8}
+.js .ticker__track{animation:ticker 38s linear infinite}
+.ticker:hover .ticker__track{animation-play-state:paused}
+@keyframes ticker{to{transform:translateX(-50%)}}
+
+/* Buttons: Lift + Lichtschein, Karten: Mauslicht */
+.btn{position:relative;overflow:hidden;transition:transform .2s var(--ease-out),background .2s,border-color .2s,box-shadow .2s}
+.btn--primary::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s var(--ease-io)}
+.btn--primary:hover::after{transform:translateX(120%)}
+.btn:hover{transform:translateY(-2px)}
+.btn--primary:hover{box-shadow:0 10px 24px rgba(225,6,0,.35)}
+.card--link{position:relative;overflow:hidden}
+.card--link::before{content:"";position:absolute;inset:0;background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(225,6,0,.14),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
+.card--link:hover::before{opacity:1}
+.card--link:hover .card__icon{transform:translateY(-2px) scale(1.06)}
+.card__icon{transition:transform .3s var(--ease-out)}
+.card--link .more{transition:transform .25s var(--ease-out)}
+.card--link:hover .more{transform:translateX(4px)}
+
+/* Zahlen zählen hoch */
+.stat strong{font-variant-numeric:tabular-nums}
+
+/* FAQ: weiche Höhe */
+.faq .faq__body{overflow:hidden}
+.faq details.animating .faq__body{transition:height .35s var(--ease-out)}
+.faq summary::after{transition:transform .3s var(--ease-out)}
+.faq details[open] summary::after{transform:rotate(180deg);content:"+"}
+
+/* Preis-Check (Preise-Seite) */
+.calc{background:linear-gradient(160deg,var(--bg-3),var(--bg-2));border:1px solid var(--line);border-radius:var(--radius);padding:1.4rem;display:grid;gap:1rem}
+@media(min-width:860px){.calc{grid-template-columns:1.1fr 1fr;gap:2rem;padding:1.8rem}}
+.calc__result{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:1.2rem;display:flex;flex-direction:column;gap:.5rem;min-height:100%}
+.calc__total{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3rem);color:#fff;line-height:1;transition:transform .2s var(--ease-out)}
+.calc__total.bump{transform:scale(1.06)}
+.calc__lines{list-style:none;margin:0;padding:0;color:var(--muted);font-size:.92rem;display:grid;gap:.25rem}
+.calc__lines li{display:flex;justify-content:space-between;gap:1rem}
+.calc .fields-2{gap:.4rem .9rem}
+.calc .field{margin-bottom:.4rem}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg label{display:block;text-align:center;border:1px solid #3a3a45;border-radius:10px;padding:.65rem .4rem;cursor:pointer;font-weight:600;font-size:.9rem;background:var(--bg);transition:background .2s,border-color .2s}
+.seg label small{color:inherit;opacity:.78;font-weight:400}
+.seg input:checked+label{background:var(--red);border-color:var(--red);color:#fff}
+.seg input:checked+label small{opacity:1;color:#fff}
+.seg input:focus-visible+label{outline:3px solid #fff;outline-offset:2px}
+.stepper-count{display:flex;align-items:center;gap:.4rem}
+.stepper-count button{width:44px;height:44px;border-radius:10px;border:1px solid #3a3a45;background:var(--bg);color:#fff;font-size:1.3rem;cursor:pointer;font-family:inherit}
+.stepper-count button:hover{border-color:var(--red-2)}
+.stepper-count input{text-align:center;max-width:90px}
+
+/* Buchung: Schritt-Anzeige */
+.stepper{list-style:none;padding:0;margin:0 0 1.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;counter-reset:st}
+.stepper li{counter-increment:st;position:relative;padding:.6rem .2rem .6rem;text-align:center;font-size:.78rem;font-weight:600;color:var(--muted);border-top:3px solid var(--line);transition:border-color .4s,color .4s}
+.stepper li::before{content:counter(st);display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:50%;background:var(--bg-3);color:#fff;font-size:.75rem;margin-right:.35rem;transition:background .4s,transform .4s var(--ease-out)}
+.stepper li.is-active{color:#fff;border-color:var(--red-2)}
+.stepper li.is-active::before{background:var(--red);transform:scale(1.12)}
+.stepper li.is-done{color:#fff;border-color:var(--ok)}
+.stepper li.is-done::before{background:var(--ok);content:"✓"}
+@media(max-width:480px){.stepper li{font-size:.68rem}.stepper li::before{margin-right:.2rem}}
+.form fieldset{transition:opacity .5s var(--ease-out),transform .5s var(--ease-out)}
+.js .form fieldset.enter{opacity:0;transform:translateY(14px)}
+.js .slots .slot{animation:fade-up .4s var(--ease-out) both;animation-delay:calc(var(--i,0)*35ms)}
+
+/* Reduzierte Bewegung: alles sofort sichtbar, keine Animationen */
+@media (prefers-reduced-motion:reduce){
+  .js .reveal{transform:none;transition:none;clip-path:none}
+  .js .hero h1 .w>span,.js .hero .eyebrow,.js .hero .lead,.js .hero__actions,.js .hero__facts,.js .hero__img,.js .hero::before,.js .ticker__track,.js .slots .slot{animation:none;opacity:1;transform:none}
+  .js .form fieldset.enter{opacity:1;transform:none}
+  ::view-transition-old(root),::view-transition-new(root){animation:none}
+}
