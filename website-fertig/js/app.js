@@ -72,7 +72,7 @@
     b.addEventListener('click', function () {
       var liste = $('#' + b.getAttribute('aria-controls')), lang = b.getAttribute('aria-pressed') !== 'true';
       var tun = function () {
-        $$('.schild', liste).sort(function (x, y) {
+        $$('[data-nr]', liste).sort(function (x, y) {
           var a = $('[data-seit]', x), c = $('[data-seit]', y), i = +x.getAttribute('data-nr'), j = +y.getAttribute('data-nr');
           if (!lang) return i - j;
           var s = a ? a.getAttribute('data-seit') : '9', t = c ? c.getAttribute('data-seit') : '9';
