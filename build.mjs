@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { company as C, sectors, services, values, timeline, agrarmonitor, team, job, news, faqs, alts, showcase, facts } from './content/site.mjs';
+import { company as C, sectors, services, values, timeline, agrarmonitor, team, job, news, faqs, alts, showcase, facts, region, redirects } from './content/site.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const ART = process.env.ARTIFACT_OUT; // Vorschau-Variante: Links mit index.html, Startseite als Fragment
@@ -25,7 +25,7 @@ const svcOf = (id) => allSvc.filter((s) => s.sector === id);
 
 // Weiche Trennstellen für lange Komposita in großen Überschriften
 const SHY = [
-  ['Dienstleistung', 'Dienst|leistung'], ['wirtschaftliche', 'wirtschaft|liche'], ['Forstwirtschaft', 'Forst|wirtschaft'], ['Landwirtschaft', 'Land|wirtschaft'],
+  ['Dienstleistung', 'Dienst|leistung'], ['Niedersachsenweit', 'Nieder|sachsen|weit'], ['niedersachsenweit', 'nieder|sachsen|weit'], ['wirtschaftliche', 'wirtschaft|liche'], ['Forstwirtschaft', 'Forst|wirtschaft'], ['Landwirtschaft', 'Land|wirtschaft'],
   ['Flächenvorbereitung', 'Flächen|vor|bereitung'], ['Pflanzvorbereitung', 'Pflanz|vor|bereitung'], ['Bodenvorbereitung', 'Boden|vor|bereitung'], ['Ganzpflanzensilage', 'Ganz|pflanzen|silage'],
   ['Hackschnitzel', 'Hack|schnitzel'], ['Seitenränder', 'Seiten|ränder'], ['Baufeldräumung', 'Baufeld|räumung'], ['Pflanzenschutz', 'Pflanzen|schutz'], ['Pflanzenwachstum', 'Pflanzen|wachstum'],
   ['Winterdienst', 'Winter|dienst'], ['Kulturpflege', 'Kultur|pflege'], ['Wirtschaftsdünger', 'Wirtschafts|dünger'], ['Wegepflegemaschine', 'Wege|pflege|maschine'], ['Baggerarbeiten', 'Bagger|arbeiten'],
@@ -135,7 +135,7 @@ function footer() {
   <div class="wrap ftr__top">
     <div class="ftr__brand">
       <img src="{root}assets/img/logo-weiss.png" width="720" height="174" alt="${C.name}" loading="lazy">
-      <p>${C.claim}.<br>Familiengeführtes Lohnunternehmen seit 1973.</p>
+      <p>${C.claim}.<br>Familiengeführtes Lohnunternehmen seit 1973 – niedersachsenweit im Einsatz.</p>
       <div class="ftr__social">
         <a href="${C.instagram}" target="_blank" rel="noopener" aria-label="Instagram">${ICONS.insta}</a>
         <a href="${C.facebook}" target="_blank" rel="noopener" aria-label="Facebook">${ICONS.fb}</a>
@@ -161,7 +161,7 @@ function footer() {
 function layout({ path, title, desc, body, cls = '', img = 'grasernte', cta = true, loader = false, shy = true }) {
   const depth = path.split('/').filter(Boolean).length;
   const root = depth ? '../'.repeat(depth) : './';
-  const full = path ? `${title} – ${C.name}` : title;
+  const full = path ? `${title} | ${C.name}` : title;
   const html = `<!doctype html>
 <html lang="de" id="top">
 <head>
@@ -185,7 +185,7 @@ function layout({ path, title, desc, body, cls = '', img = 'grasernte', cta = tr
 <script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org', '@type': 'LocalBusiness', name: C.legal, url: SITE_URL, telephone: '+495173924940', email: C.email, foundingDate: '1973',
     address: { '@type': 'PostalAddress', streetAddress: C.street, postalCode: '29227', addressLocality: 'Celle', addressCountry: 'DE' },
-    openingHours: 'Mo-Fr 07:00-19:00', sameAs: [C.instagram, C.facebook],
+    openingHours: 'Mo-Fr 07:00-19:00', areaServed: { '@type': 'State', name: 'Niedersachsen' }, sameAs: [C.instagram, C.facebook],
   })}</script>
 </head>
 <body class="${cls}">
@@ -258,7 +258,7 @@ function home() {
       <span class="hero__line" aria-hidden="true"><span class="hero__swap">${areas.map((s, i) => `<b${i === 0 ? ' class="is-active"' : ''}>${s.swap}</b>`).join('')}</span></span>
     </p>
     <div class="hero__foot">
-      <p class="hero__lead">Das Lohnunternehmen Linneweh bietet Ihnen Dienstleistungen im land- und forstwirtschaftlichen, sowie im kommunalen Sektor an. Gemeinsam mit Ihnen arbeiten wir für eine grünere Zukunft.</p>
+      <p class="hero__lead">Forstmulchen, Wegebau, Winterdienst, Ernte: Das Lohnunternehmen Linneweh aus Celle übernimmt Arbeiten in Forst, Kommune und Landwirtschaft – niedersachsenweit, mit moderner Technik und über 50 Jahren Erfahrung.</p>
       <div class="hero__cta">${btn('{root}kontakt/', 'Kontakt aufnehmen')}${btn('{root}leistungen/', 'Unsere Dienstleistungen', 'ghost')}</div>
     </div>
   </div>
@@ -319,8 +319,8 @@ function home() {
     <div class="about__text">
       ${label('Unser Unternehmen')}
       <h2 class="display" data-split>Familiengeführt. Seit zwei Generationen.</h2>
-      <p class="lead" data-reveal>Die Lohnunternehmen Linneweh GmbH &amp; Co. KG steht Ihnen bei Ihrem Projekt im landwirtschaftlichen, forstwirtschaftlichen und kommunalen Sektor zur Seite. Seit über 50 Jahren agieren wir schon als Lohnunternehmen und haben Erfahrungen gesammelt, um Sie optimal zu unterstützen und zu beraten. Mit modernster Technologie sind wir ein zuverlässiger Partner an Ihrer Seite.</p>
-      <p data-reveal>Als familiengeführtes Lohnunternehmen liegt uns die Zukunft am Herzen, darum unterstützen wir Sie dabei, die Ernährung und Energieversorgung zu sichern und für eine grünere Zukunft zu sorgen.</p>
+      <p class="lead" data-reveal>Ob Forstfläche, Gemeindeweg oder Acker: Die Lohnunternehmen Linneweh GmbH &amp; Co. KG übernimmt die Arbeiten, für die Sie Maschinen, Zeit oder Personal nicht selbst vorhalten möchten – seit über 50 Jahren, als Familienbetrieb und mit Technik auf aktuellem Stand.</p>
+      <p data-reveal>Uns liegt die Zukunft am Herzen. Darum helfen wir, Wälder umzubauen, Wege instand zu halten und die Ernährung und Energieversorgung zu sichern – für eine grünere Zukunft.</p>
       <p class="sign" data-reveal>${C.claim}<br><span>Ihr Lohnunternehmen Linneweh</span></p>
       <div data-reveal>${btn('{root}unternehmen/', 'Mehr erfahren', 'dark')}</div>
     </div>
@@ -342,6 +342,8 @@ function home() {
     </div>
   </div>
 </section>
+
+${regionSection()}
 
 <section class="sec values">
   <div class="wrap">
@@ -374,8 +376,21 @@ function home() {
     <div data-reveal>${btn('{root}karriere/', 'Zu den Stellenangeboten')}</div>
   </div>
 </section>`;
-  layout({ path: '', title: `${C.name} – Land- und Forstwirtschaftliche Dienstleistungen`, desc: 'Das Lohnunternehmen Linneweh bietet Dienstleistungen im land- und forstwirtschaftlichen sowie im kommunalen Sektor – familiengeführt seit 1973 in Celle.', body, cls: 'p-home', loader: true });
+  layout({ path: '', title: `${C.name} – Forst, Kommunal & Landwirtschaft in Niedersachsen`, desc: 'Lohnunternehmen Linneweh aus Celle: Forstmulchen, Holzrücken, Wegebau, Winterdienst, Häckseln und mehr – niedersachsenweit im Einsatz, familiengeführt seit 1973.', body, cls: 'p-home', loader: true });
 }
+
+const regionSection = () => `
+<section class="area">
+  <div class="area__rings" aria-hidden="true"><i></i></div>
+  <div class="wrap area__in">
+    <div>${label('Einsatzgebiet')}<h2 class="display" data-split>${region.title}</h2></div>
+    <div>
+      <p class="lead" data-reveal>${region.text}</p>
+      <ul class="area__list" data-stagger>${region.points.map((t) => `<li data-reveal>${ICONS.pin}<span>${t}</span></li>`).join('')}</ul>
+      <div data-reveal>${btn('{root}kontakt/', 'Einsatz anfragen', 'dark')}</div>
+    </div>
+  </div>
+</section>`;
 
 const techSection = () => `
 <section class="sec tech">
@@ -467,7 +482,7 @@ function sectorPage(s) {
     </div>
   </div>
 </section>`;
-  layout({ path: `leistungen/${s.id}/`, title: s.title, desc: s.overview, body, img: s.pageImg });
+  layout({ path: `leistungen/${s.id}/`, title: `${s.title} in Niedersachsen`, desc: `${s.overview} Lohnunternehmen Linneweh, Celle.`, body, img: s.pageImg });
 }
 
 function mcard(c) {
@@ -513,7 +528,7 @@ ${gallery(x.gallery, 'Im Einsatz')}
   <a class="pn__item" href="{root}${prev.path}"><span class="label label--light">Vorherige Leistung</span><strong class="display">${prev.title}</strong></a>
   <a class="pn__item pn__item--next" href="{root}${next.path}"><span class="label label--light">Nächste Leistung</span><strong class="display">${next.title}</strong></a>
 </nav>`;
-  layout({ path: x.path, title: `${x.title} – ${s.short}`, desc: x.teaser, body, img: x.hero });
+  layout({ path: x.path, title: `${x.seo || x.title} in Niedersachsen`, desc: `${x.teaser} Lohnunternehmen Linneweh aus Celle – niedersachsenweit im Einsatz, weitere Regionen nach Absprache.`, body, img: x.hero });
 }
 
 function werkstatt() {
@@ -565,6 +580,7 @@ function unternehmen() {
     </ol>
   </div>
 </section>
+${regionSection()}
 ${techSection()}
 <section class="sec certs">
   <div class="wrap certs__grid">
@@ -773,5 +789,8 @@ legalPage('impressum', 'impressum/', 'Impressum & AGB');
 legalPage('datenschutz', 'datenschutz/', 'Datenschutz');
 
 writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`).join('\n')}\n</urlset>\n`);
+const allRedirects = [...redirects.filter(([a]) => a !== '/flaechen-vorbereitung'), ...allSvc.map((x) => [`/${x.key}`, `/${x.path}`])];
+writeFileSync(join(OUT, '_redirects'), allRedirects.map(([a, b]) => `${a} ${b} 301\n${a}/ ${b} 301`).join('\n') + '\n/* /404.html 404\n');
+writeFileSync(join(OUT, '.htaccess'), `# Weiterleitungen von den Adressen der bisherigen Website (Apache)\nErrorDocument 404 /404.html\n${allRedirects.map(([a, b]) => `RedirectMatch 301 ^${a}/?$ ${b}`).join('\n')}\n`);
 writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}sitemap.xml\n`);
 console.log(`✔ ${pages.length} Seiten erzeugt in ./site`);

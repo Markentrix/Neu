@@ -694,6 +694,18 @@ a:hover .more .ico-arrow { transform: translateX(6px); }
 .pband figcaption { padding-block: clamp(24px, 4vw, 64px); display: grid; gap: 14px; }
 .pband strong { font-size: clamp(2.2rem, 6.4vw, 6.4rem); }
 
+/* ---------- Einsatzgebiet ---------- */
+.area { position: relative; overflow: hidden; background: var(--paper-2); isolation: isolate; }
+.area__rings { position: absolute; inset: 0; z-index: -1; background: repeating-radial-gradient(circle at 5% 94%, transparent 0 58px, rgba(31, 122, 44, .26) 58px 59px); mask-image: radial-gradient(circle at 5% 94%, #000 0, transparent 72%); }
+.area__rings i { position: absolute; left: 5%; top: 94%; width: 18px; height: 18px; margin: -9px; border-radius: 50%; background: var(--wheat); box-shadow: 0 0 0 6px rgba(255, 204, 0, .3); animation: ping 2.6s var(--ease) infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, .55); } 100% { box-shadow: 0 0 0 46px rgba(255, 204, 0, 0); } }
+.area__in { padding-block: var(--sec); display: grid; gap: clamp(22px, 4vw, 72px); }
+.area__in .display { margin-top: 18px; font-size: clamp(2.4rem, 5vw, 5.2rem); }
+.area__list { display: grid; gap: 0; margin: 26px 0 30px; border-top: 1px solid var(--line); }
+.area__list li { display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); font-weight: 500; }
+.area__list svg { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--leaf-d); stroke-width: 1.7; stroke-linejoin: round; }
+@media (min-width: 900px) { .area__in { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: end; } }
+
 /* ---------- Mobile Feinschliff ---------- */
 .quad { display: none; }
 @media (max-width: 899px) {

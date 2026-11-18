@@ -19,57 +19,57 @@ export const sectors = [
     id: 'forstwirtschaft', nr: '01', short: 'Forstwirtschaft', swap: 'Ihren Forst',
     title: 'Forstwirtschaftliche Dienstleistungen', sub: 'In Forst und Wald für Sie unterwegs.',
     heroImg: 'bagger-forst', pageImg: 'bagger-forst', cardImg: 'baeume-kneifen-1', bandImg: 'baeume-kneifen-2',
-    teaser: 'Neben Flächenvorbereitungen mit Forstmulchern und -Fräsen bieten wir auch Baggerräumungen und Rückearbeiten an.',
-    overview: 'Ob Holzrücken, -Hacken, -Roden, Bäume Kneifen, Flächenvorbereitung oder Kulturpflege, wir kümmern uns um Ihre Forstflächen. Zusammen für eine grünere Zukunft.',
+    teaser: 'Flächen vorbereiten, Kulturen pflegen, Holz rücken und hacken: Wir kommen mit Forstmulcher, Fräse, Baumkneifer und Rückewagen auf Ihre Fläche.',
+    overview: 'Flächenvorbereitung, Kulturpflege, Holzrücken, Bäume kneifen, Hacken und Fräsen: Wir übernehmen die Arbeit auf Ihren Forstflächen – RAL-zertifiziert für Holzernte und Waldverjüngung, in ganz Niedersachsen.',
     introTitle: 'Für eine grünere Zukunft',
-    intro: 'Wir unterstützen Sie dabei, Ihre Forst- und Waldgebiete zu pflegen, um gemeinsam für eine grünere Zukunft zu sorgen.',
+    intro: 'Von der geräumten Fläche bis zur Pflanzung, von der Kulturpflege bis zum Hackschnitzel: Wir bearbeiten Ihre Forst- und Waldflächen mit der passenden Maschine für jedes Gelände – und sorgen gemeinsam mit Ihnen für eine grünere Zukunft.',
     ral: true,
   },
   {
     id: 'kommunal', nr: '02', short: 'Kommunal', swap: 'Ihre Kommune',
     title: 'Kommunale Dienstleistungen', sub: 'Wir machen den Weg frei.',
     heroImg: 'winterdienst-1', pageImg: 'winterdienst-1', cardImg: 'baufeld-1', bandImg: 'baufeld-2',
-    teaser: 'Auch für die Kommunen sind wir da. Mit Wegebau und -pflege, sowie Winterdienst sorgen wir dafür, dass alle sicher an ihr Ziel kommen.',
-    overview: 'Mit Wegebau und -Pflege, Winterdienst und Baufeldräumung machen wir für Sie den Weg frei.',
+    teaser: 'Wege bauen und pflegen, Seitenränder schlegeln, Baufelder räumen, Schnee räumen und streuen: Wir halten Wege und Flächen für Kommunen und Unternehmen instand.',
+    overview: 'Wegebau und Wegepflege, Seitenränder schlegeln, Winterdienst und Baufeldräumung: Wir machen für Kommunen und Unternehmen in Niedersachsen den Weg frei.',
     introTitle: 'Wir machen den Weg frei',
-    intro: 'Wir bieten Wegebau und -Pflege, sowie Winterdienst und Baufeldräumung an. Melden Sie sich bei uns, damit Sie immer sicher ans Ziel kommen.',
+    intro: 'Ob Schotterweg, Radweg oder Gewerbefläche: Wir bauen und pflegen Wege, halten Seitenränder frei, räumen Baufelder und übernehmen den Winterdienst – damit alle sicher ans Ziel kommen.',
   },
   {
     id: 'landwirtschaft', nr: '03', short: 'Landwirtschaft', swap: 'Ihr Feld',
     title: 'Landwirtschaftliche Dienstleistungen', sub: 'Auf dem Feld für Sie unterwegs.',
     heroImg: 'grasernte', pageImg: 'ernte-staub', cardImg: 'haeckseln-1', bandImg: 'haeckseln-2',
-    teaser: 'Ob Mähen, Schwaden, Wenden, der Transport und das Ausbringen von Gärresten, sowie das Pflanzen von Kartoffeln und der mechanische Pflanzenschutz, wir bewirtschaften Ihre Felder für Sie.',
-    overview: 'Vom Säen und Pflanzen über das Düngen und den Pflanzenschutz, bis hin zum Roden und Häckseln, wir sind auf Ihren Feldern für Sie unterwegs. Für die Energie und Ernährung von morgen.',
+    teaser: 'Düngen, säen, hacken, mähen, häckseln, pressen, transportieren: Wir übernehmen einzelne Arbeitsgänge oder die komplette Kette vom Feld bis ins Silo.',
+    overview: 'Düngung, Aussaat, Pflanzenschutz, Häckseln, Grünland und Transport: Wir sind auf Ihren Feldern in Niedersachsen unterwegs – für die Energie und Ernährung von morgen.',
     introTitle: 'Für die Energie und Ernährung von morgen',
-    intro: 'Wir unterstützen Sie dabei, auf Ihren Feldern Nahrungsmittel und Energieträger anzubauen, um die Ernährung und Verstromung zu sichern.',
+    intro: 'Vom Kartoffellegen bis zur Maisernte, von der Gülleausbringung bis zum Ballenpressen: Wir bringen die Technik mit, die sich für den einzelnen Betrieb nicht lohnt, und unterstützen Sie dabei, Ernährung und Energieversorgung zu sichern.',
   },
 ];
 
 // key = Schlüssel in services.json
 export const services = [
-  { key: 'duengung', slug: 'duengung', sector: 'landwirtschaft', teaser: 'Ausbringen von Gülle und Gärresten zur Förderung des Pflanzenwachstums.', hero: 'duengung-1', gallery: ['duengung-2', 'transport-5'] },
+  { key: 'duengung', slug: 'duengung', seo: 'Gülle & Gärreste ausbringen', sector: 'landwirtschaft', teaser: 'Ausbringen von Gülle und Gärresten zur Förderung des Pflanzenwachstums.', hero: 'duengung-1', gallery: ['duengung-2', 'transport-5'] },
   { key: 'aussaat', slug: 'aussaat', sector: 'landwirtschaft', teaser: 'Aussaat von Kartoffeln, Rüben und Mais.', hero: 'aussaat-3', gallery: ['aussaat-1', 'aussaat-2', 'aussaat-4'] },
   { key: 'pflanzenschutz', slug: 'pflanzenschutz', sector: 'landwirtschaft', teaser: 'Hacken und Ausbringen von Herbiziden zum Schutz der Kulturpflanze vor Beikräutern.', hero: 'hacke-1', gallery: ['hacke-2', 'hacke-3', 'hacke-4'] },
-  { key: 'haeckseln', slug: 'haeckseln', sector: 'landwirtschaft', teaser: 'Häckseln von Mais, Gras und Ganzpflanzensilage (GPS).', hero: 'haeckseln-1', gallery: ['haeckseln-2', 'maisernte', 'grasernte', 'silo', 'haeckseln-3'] },
-  { key: 'gruenland', slug: 'gruenland', sector: 'landwirtschaft', teaser: 'Mähen, Wenden, Schwaden und Pressen von Gras in Rund- und Quaderballen.', hero: 'gruenland-1', gallery: ['maehen', 'schwaden', 'grasernte'] },
+  { key: 'haeckseln', slug: 'haeckseln', seo: 'Mais, Gras & GPS häckseln', sector: 'landwirtschaft', teaser: 'Häckseln von Mais, Gras und Ganzpflanzensilage (GPS).', hero: 'haeckseln-1', gallery: ['haeckseln-2', 'maisernte', 'grasernte', 'silo', 'haeckseln-3'] },
+  { key: 'gruenland', slug: 'gruenland', seo: 'Mähen, Schwaden & Ballen pressen', sector: 'landwirtschaft', teaser: 'Mähen, Wenden, Schwaden und Pressen von Gras in Rund- und Quaderballen.', hero: 'gruenland-1', gallery: ['maehen', 'schwaden', 'grasernte'] },
   { key: 'transport', slug: 'transport', sector: 'landwirtschaft', teaser: 'Transport von Stück- und Schüttgut, sowie Paletten- und Flüssigware.', hero: 'transport-1', gallery: ['transport-3', 'rueben', 'ernte-staub', 'transport-2', 'transport-5'] },
-  { key: 'flaechen-vorbereitung', slug: 'flaechenvorbereitung', sector: 'forstwirtschaft', title: 'Flächenvorbereitung', teaser: 'Flächenvorbereitung für Neuanpflanzungen, Neueinsaaten und Aufforstungsmaßnahmen oder die Entfernung von Busch- und Strauchwerk.', hero: 'forstmulcher-1', gallery: ['forstmulcher-2', 'flaechenvorbereitung-2', 'flaechenvorbereitung-3', 'flaechenvorbereitung-4', 'flaechenvorbereitung-5'] },
+  { key: 'flaechen-vorbereitung', slug: 'flaechenvorbereitung', seo: 'Forstmulchen & Flächenvorbereitung', sector: 'forstwirtschaft', title: 'Flächenvorbereitung', teaser: 'Flächenvorbereitung für Neuanpflanzungen, Neueinsaaten und Aufforstungsmaßnahmen oder die Entfernung von Busch- und Strauchwerk.', hero: 'forstmulcher-1', gallery: ['forstmulcher-2', 'flaechenvorbereitung-2', 'flaechenvorbereitung-3', 'flaechenvorbereitung-4', 'flaechenvorbereitung-5'] },
   { key: 'kulturpflege', slug: 'kulturpflege', sector: 'forstwirtschaft', teaser: 'Entfernung von Begleitwuchs und Busch- und Strauchwerk zur Förderung des Pflanzenwachstums.', hero: 'kulturpflege-2', gallery: ['kulturpflege-1', 'kulturpflege-4', 'kulturpflege-5', 'moritz-4', 'moritz-2'] },
-  { key: 'holz-ruecken', slug: 'holz-ruecken', sector: 'forstwirtschaft', title: 'Holz rücken', teaser: 'Holzbergung, Rücken und Transport.', hero: 'holz-ruecken-3', gallery: ['holz-ruecken-1', 'holz-ruecken-2', 'holz-ruecken-4', 'holz-ruecken-5'] },
-  { key: 'baeume-kneifen', slug: 'baeume-kneifen', sector: 'forstwirtschaft', title: 'Bäume kneifen', teaser: 'Nachhaltiger Waldumbau und Rückegassen-Erstellung mit minimalem Schaden.', hero: 'baeume-kneifen-1', gallery: ['baeume-kneifen-2', 'baeume-kneifen-3', 'bagger-forst'] },
-  { key: 'holz-hacken', slug: 'holz-hacken', sector: 'forstwirtschaft', title: 'Holz hacken', teaser: 'Holz hacken und Hackschnitzelherstellung.', hero: 'holz-hacken-3', gallery: ['holz-hacken-2', 'holz-hacken-4', 'holz-hacken-5'] },
+  { key: 'holz-ruecken', slug: 'holz-ruecken', seo: 'Holz rücken & Rückewagen-Vermietung', sector: 'forstwirtschaft', title: 'Holz rücken', teaser: 'Holzbergung, Rücken und Transport.', hero: 'holz-ruecken-3', gallery: ['holz-ruecken-1', 'holz-ruecken-2', 'holz-ruecken-4', 'holz-ruecken-5'] },
+  { key: 'baeume-kneifen', slug: 'baeume-kneifen', seo: 'Bäume kneifen mit dem Woodcracker', sector: 'forstwirtschaft', title: 'Bäume kneifen', teaser: 'Nachhaltiger Waldumbau und Rückegassen-Erstellung mit minimalem Schaden.', hero: 'baeume-kneifen-1', gallery: ['baeume-kneifen-2', 'baeume-kneifen-3', 'bagger-forst'] },
+  { key: 'holz-hacken', slug: 'holz-hacken', seo: 'Holz hacken & Hackschnitzel', sector: 'forstwirtschaft', title: 'Holz hacken', teaser: 'Holz hacken und Hackschnitzelherstellung.', hero: 'holz-hacken-3', gallery: ['holz-hacken-2', 'holz-hacken-4', 'holz-hacken-5'] },
   { key: 'forstfraesen', slug: 'forstfraesen', sector: 'forstwirtschaft', teaser: 'Fräsen von Pflanzflächen und Schneisen.', hero: 'forstmulcher-2', gallery: ['forstfraese-1', 'flaechenvorbereitung-5', 'forst-raupe'] },
   { key: 'pflanzvorbereitungen', slug: 'pflanzvorbereitungen', sector: 'forstwirtschaft', teaser: 'Streifenfräse, TTS Gerät und Waldstreifenpflug.', hero: 'pflanzvorbereitung-1', gallery: ['pflanzvorbereitung-2', 'forst-raupe'] },
-  { key: 'wegebau', slug: 'wegebau', sector: 'kommunal', teaser: 'Schotter- und Sandwegebau, sowie Pflege- und Erneuerungsarbeiten.', hero: 'wegebau-4', gallery: ['wegebau-1', 'wegebau-2', 'wegebau-5', 'wegepflege-2', 'wegepflege-1'] },
-  { key: 'seitenraender-schlegeln', slug: 'seitenraender-schlegeln', sector: 'kommunal', teaser: 'Beseitigung von Unkraut zur Pflege und Sicherung von Wegen.', hero: 'seitenraender-1', gallery: ['seitenraender-2', 'seitenraender-3', 'seitenraender-4'] },
-  { key: 'winterdienst', slug: 'winterdienst', sector: 'kommunal', teaser: 'Streu- und Räumarbeiten auf Wegen und Grundstücken.', hero: 'winterdienst-1', gallery: ['winterdienst-2', 'winterdienst-3'] },
+  { key: 'wegebau', slug: 'wegebau', seo: 'Wegebau & Wegepflege', sector: 'kommunal', teaser: 'Schotter- und Sandwegebau, sowie Pflege- und Erneuerungsarbeiten.', hero: 'wegebau-4', gallery: ['wegebau-1', 'wegebau-2', 'wegebau-5', 'wegepflege-2', 'wegepflege-1'] },
+  { key: 'seitenraender-schlegeln', slug: 'seitenraender-schlegeln', seo: 'Seitenränder schlegeln & Randstreifenpflege', sector: 'kommunal', teaser: 'Beseitigung von Unkraut zur Pflege und Sicherung von Wegen.', hero: 'seitenraender-1', gallery: ['seitenraender-2', 'seitenraender-3', 'seitenraender-4'] },
+  { key: 'winterdienst', slug: 'winterdienst', seo: 'Winterdienst für Kommunen & Unternehmen', sector: 'kommunal', teaser: 'Streu- und Räumarbeiten auf Wegen und Grundstücken.', hero: 'winterdienst-1', gallery: ['winterdienst-2', 'winterdienst-3'] },
   { key: 'baufeldraeumung', slug: 'baufeldraeumung', sector: 'kommunal', teaser: 'Befreiung von Grundstücken von Störfaktoren mit der Fräse.', hero: 'baufeld-1', gallery: ['baufeld-2', 'forstfraese-1'] },
 ];
 
 export const values = [
-  { title: 'kundennah', icon: 'near', text: 'Bei unserer Arbeit ist die Nähe zum Kunden von entscheidender Bedeutung. Wir betreuen Ihre Projekte, beraten Sie gerne bei möglichen Fragen und sind immer für Sie erreichbar.' },
-  { title: 'effizient', icon: 'fast', text: 'Mit modernster land- und forstwirtschaftlicher Technologie arbeiten wir nicht nur schnell, sondern auch mit höchster Präzision.' },
-  { title: 'erfahren', icon: 'rings', text: 'Wir sind seit über 50 Jahren im land- und forstwirtschaftlichen Dienstleistungssektor für Sie da und haben Erfahrung in allen Bereichen gesammelt, um Sie optimal zu unterstützen.' },
+  { title: 'kundennah', icon: 'near', text: 'Wir betreuen Ihr Projekt von der ersten Frage bis zur fertigen Fläche, beraten ehrlich und sind erreichbar, wenn Sie uns brauchen.' },
+  { title: 'effizient', icon: 'fast', text: 'Moderne Maschinen und digital geplante Einsätze: Wir arbeiten zügig und präzise, damit Ihre Flächen zum richtigen Zeitpunkt fertig sind.' },
+  { title: 'erfahren', icon: 'rings', text: 'Seit 1973 arbeiten wir als Lohnunternehmen, heute in zweiter Generation. Diese Erfahrung aus Forst, Kommune und Feld steckt in jedem Auftrag.' },
 ];
 
 export const timeline = [
@@ -227,4 +227,23 @@ export const facts = [
   { n: '9,40', unit: 'm', label: 'Arbeitsbreite SaMASZ Schmetterlingskombination', href: 'leistungen/landwirtschaft/gruenland/' },
   { n: '25', unit: 'm³', label: 'Ladevolumen Güllefass Samson PG 25', href: 'leistungen/landwirtschaft/duengung/' },
   { n: '12,50', unit: 'm', label: 'Arbeitsbreite CLAAS Liner Vierkreiselschwader', href: 'leistungen/landwirtschaft/gruenland/' },
+];
+
+// Einsatzgebiet
+export const region = {
+  title: 'Niedersachsenweit im Einsatz.',
+  text: 'Von unserem Standort in Celle aus arbeiten wir in ganz Niedersachsen – im Forst, für Kommunen und auf dem Feld. Aufträge darüber hinaus übernehmen wir gerne nach Absprache.',
+  points: ['Standort Celle, Bleckenweg 92', 'Einsätze in ganz Niedersachsen', 'Weitere Regionen nach Absprache'],
+};
+
+// Weiterleitungen von den Adressen der bisherigen Website
+export const redirects = [
+  ['/dienstleistungen', '/leistungen/'], ['/forstwirtschaftliche-dienstleistungen', '/leistungen/forstwirtschaft/'], ['/landwirtschaftliche-dienstleistungen', '/leistungen/landwirtschaft/'],
+  ['/kommunale-dienstleistungen', '/leistungen/kommunal/'], ['/werkstatt', '/leistungen/werkstatt/'], ['/faqs', '/faq/'],
+  ['/flaechen-vorbereitung', '/leistungen/forstwirtschaft/flaechenvorbereitung/'],
+  ['/at-vero-eos-et-accusam-et-justo-duo-dolores-et-ea-rebum-2', '/news/gras-und-gps-ernte/'], ['/lorem-ipsum-dolor-sit-amet-consetetur-sadipscing-elitr', '/news/einboeck-chopstar-hacke/'],
+  ['/winterdienst-fuer-kommunen-unternehmen', '/news/winterdienst-fuer-kommunen-und-unternehmen/'], ['/vermietung-eines-rueckewagen-mit-forstkran', '/news/vermietung-rueckewagen-mit-forstkran/'],
+  ['/ausbringung-von-wirtschaftsduenger', '/news/ausbringung-von-wirtschaftsduenger/'], ['/wegepflegemaschine-hen-technologie', '/news/wegepflegemaschine-hen-technologie/'],
+  ['/baggerarbeiten', '/news/baggerarbeiten/'], ['/forstmulchen', '/news/forstmulchen/'], ['/forstraupe-moritz', '/news/forstraupe-moritz/'],
+  ['/feed', '/news/'], ['/author/lena', '/news/'], ['/author/sophie', '/news/'],
 ];
