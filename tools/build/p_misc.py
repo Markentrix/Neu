@@ -7,7 +7,7 @@ html = head("Vielen Dank | Burnout Celler-Kartbahn", "Deine Anfrage ist bei uns 
 html += f'''
 <section class="section"><div class="wrap" style="max-width:760px">
 <span class="eyebrow">Eingangsbestätigung</span>
-<h1 id="danke-title">Danke für deine Nachricht!</h1>
+<h1 id="danke-title">Danke!</h1>
 <div class="card card--accent">
   <p class="muted" style="margin:0">Deine Vorgangsnummer</p>
   <p style="font-family:var(--display);font-size:2rem;font-weight:800;margin:.2rem 0 .6rem;color:#fff" id="ref">–</p>
@@ -26,7 +26,7 @@ html += f'''
   <img class="hero__img" src="assets/img/strecke-reifen.webp" width="800" height="533" alt="Reifenstapel an der Kartbahn" >
   <div class="wrap">
     <span class="eyebrow">Fehler 404</span>
-    <h1>Auslaufzone – diese Seite gibt es nicht</h1>
+    <h1>Seite nicht gefunden</h1>
     <p class="lead">Die Adresse ist falsch oder die Seite wurde verschoben. Zurück auf die Strecke:</p>
     <div class="hero__actions"><a class="btn btn--primary" href="index.html">Startseite</a><a class="btn btn--light" href="buchen.html">Online buchen</a><a class="btn btn--ghost" href="preise.html">Preise</a><a class="btn btn--ghost" href="kontakt.html">Kontakt</a></div>
   </div>
@@ -72,14 +72,14 @@ LLMS = """# Burnout Celler-Kartbahn
 - [Die Kartbahn](/kartbahn.html): Strecke, Karts, Rennlizenz-App, RaceCam, Bistro, Team, Fahrtipps
 - [FAQ](/faq.html): häufige Fragen
 - [Kontakt](/kontakt.html): Anfahrt, Formular
-- [AGB](/agb.html), [Widerruf](/widerruf.html), [Impressum](/impressum.html), [Datenschutz](/datenschutz.html)
+- [AGB](/agb.html), [Vertrag widerrufen](/widerruf.html), [Barrierefreiheit](/barrierefreiheit.html), [Impressum](/impressum.html), [Datenschutz](/datenschutz.html)
 """
 IMAGES = {"index.html":["hero-rennen","zweite-ebene","bistro-theke"],"preise.html":["karts-boxengasse","kids-start"],"kinder.html":["kartflotte","kids-siegerehrung","kids-start"],"firmen.html":["strecke-start","veranstaltungsraum","strecke-boxengasse"],"kartbahn.html":["hero-strecke","kart-sodi-front","karts-boxengasse","bistro-lounge"],"gutscheine.html":["hero-duell","kart-detail"]}
-pages = [("index.html","1.0","weekly"),("buchen.html","0.9","weekly"),("gutscheine.html","0.9","monthly"),("preise.html","0.9","monthly"),("kinder.html","0.8","monthly"),("firmen.html","0.8","monthly"),("buffet.html","0.5","yearly"),("kartbahn.html","0.7","monthly"),("faq.html","0.7","monthly"),("kontakt.html","0.8","monthly"),("agb.html","0.3","yearly"),("widerruf.html","0.2","yearly"),("impressum.html","0.2","yearly"),("datenschutz.html","0.2","yearly")]
+pages = [("index.html","1.0","weekly"),("buchen.html","0.9","weekly"),("gutscheine.html","0.9","monthly"),("preise.html","0.9","monthly"),("kinder.html","0.8","monthly"),("firmen.html","0.8","monthly"),("buffet.html","0.5","yearly"),("kartbahn.html","0.7","monthly"),("faq.html","0.7","monthly"),("kontakt.html","0.8","monthly"),("agb.html","0.3","yearly"),("widerruf.html","0.2","yearly"),("impressum.html","0.2","yearly"),("datenschutz.html","0.2","yearly"),("barrierefreiheit.html","0.2","yearly")]
 today = datetime.date.today().isoformat()
-sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' + "".join(f'  <url><loc>/{p}</loc><lastmod>{today}</lastmod><changefreq>{c}</changefreq><priority>{pr}</priority>' + "".join(f'<image:image><image:loc>/assets/img/{i}.webp</image:loc></image:image>' for i in IMAGES.get(p,[])) + '</url>\n' for p,pr,c in pages) + '</urlset>\n'
+sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' + "".join(f'  <url><loc>{{{{SITE_URL}}}}/{p}</loc><lastmod>{today}</lastmod><changefreq>{c}</changefreq><priority>{pr}</priority>' + "".join(f'<image:image><image:loc>{{{{SITE_URL}}}}/assets/img/{i}.webp</image:loc></image:image>' for i in IMAGES.get(p,[])) + '</url>\n' for p,pr,c in pages) + '</urlset>\n'
 write("sitemap.xml", sm)
-write("robots.txt", "# Burnout Celler-Kartbahn – Suchmaschinen und KI-Assistenten sind willkommen\n" + "".join(f"User-agent: {b}\n" for b in ["*","Googlebot","Bingbot","Google-Extended","GPTBot","OAI-SearchBot","ChatGPT-User","ClaudeBot","Claude-Web","anthropic-ai","PerplexityBot","Perplexity-User","Applebot","Applebot-Extended","DuckDuckBot","CCBot","Amazonbot","meta-externalagent"]) + "Allow: /\nDisallow: /danke.html\nDisallow: /404.html\n\n# Sitemap (vollständige Adresse mit Domain wird vom Hosting ergänzt): /sitemap.xml\n# Kurzfassung für KI-Assistenten: /llms.txt\n")
+write("robots.txt", "# Burnout Celler-Kartbahn – Suchmaschinen und KI-Assistenten sind willkommen\n" + "".join(f"User-agent: {b}\n" for b in ["*","Googlebot","Bingbot","Google-Extended","GPTBot","OAI-SearchBot","ChatGPT-User","ClaudeBot","Claude-Web","anthropic-ai","PerplexityBot","Perplexity-User","Applebot","Applebot-Extended","DuckDuckBot","CCBot","Amazonbot","meta-externalagent"]) + "Allow: /\nDisallow: /danke.html\nDisallow: /404.html\n\nSitemap: {{SITE_URL}}/sitemap.xml\n# Kurzfassung für KI-Assistenten: /llms.txt\n")
 write("llms.txt", LLMS)
 if DEMO: write("robots.txt", "# Demo-Version – nicht für Suchmaschinen\nUser-agent: *\nDisallow: /\n")
 write("site.webmanifest", '{\n  "name": "Burnout Celler-Kartbahn",\n  "short_name": "Kartbahn Celle",\n  "description": "Indoor-Kartbahn in Celle – online buchen, Preise, Gutscheine",\n  "start_url": "/index.html",\n  "display": "standalone",\n  "background_color": "#0b0b0d",\n  "theme_color": "#e10600",\n  "lang": "de",\n  "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"}]\n}\n')

@@ -14,3 +14,10 @@ Die fertige, statische Website liegt in `website-fertig/` und wird so hochgelade
 - Demo-Version mit Markentrix-Wasserzeichen, noindex und gesperrter robots.txt (zum Zeigen beim Kunden):
   `DEMO=1 python3 tools/build/build.py` erzeugt `website-demo/`; ZIP: `cd website-demo && zip -r -X ../celler-kartbahn-demo.zip . -x ".*"`
 - `css/style.css` ist die CSS-Quelle; sie wird beim Build minifiziert in jede Seite eingebettet (keine separate CSS-Datei im Upload).
+
+## Skill-Prüfwerkzeuge (website-mit-portal V4.2, liegen im Wurzelverzeichnis neben website-fertig/)
+- `mock.mjs`: Mock-Server nach Abschnitt 11 (`node mock.mjs`, Port 8787; `HART=1 PORT=8788 node mock.mjs` für den Härtetest).
+- `pruefe.mjs`: Prüfskript nach Abschnitt 18 (`node pruefe.mjs /preise.html`), Screenshots in `shots/`.
+- `formtest.mjs`: Formulartest nach Abschnitt 21 (`node formtest.mjs /kontakt.html`), nur gegen den Mock.
+- `DESIGN.md`, `WEITERLEITUNGEN.md`, `KUNDENMAIL.md`: Designentscheidung, Weiterleitungstabelle für den Relaunch, Mail-Entwurf.
+- Beide Uploads: `celler-kartbahn-website.zip` (Live, ohne Wasserzeichen) und `celler-kartbahn-demo.zip` (Demo mit Wasserzeichen, noindex).

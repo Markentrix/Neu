@@ -21,5 +21,5 @@ Allow: /
 Disallow: /danke.html
 Disallow: /404.html
 
-# Sitemap (vollständige Adresse mit Domain wird vom Hosting ergänzt): /sitemap.xml
+Sitemap: {{SITE_URL}}/sitemap.xml
 # Kurzfassung für KI-Assistenten: /llms.txt

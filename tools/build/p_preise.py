@@ -25,9 +25,9 @@ html += f'''
   <img class="hero__img" src="assets/img/karts-boxengasse.webp" width="1400" height="933" alt="Rote Sodi-Karts in der Boxengasse der Celler Kartbahn" fetchpriority="high">
   <div class="wrap">
     <span class="eyebrow">Preise &amp; Angebote</span>
-    <h1>Preise auf einen Blick</h1>
+    <h1>Preise</h1>
     <p class="lead">Transparent, pro Person, ohne versteckte Kosten. Bezahlung vor Ort in bar oder mit EC-Karte.</p>
-    <div class="hero__actions"><a class="btn btn--primary" href="buchen.html">{ICONS["cal"]}Online buchen</a><a class="btn btn--light" href="gutscheine.html">{ICONS["gift"]}Gutschein kaufen</a></div>
+    <div class="hero__actions"><a class="btn btn--primary" href="#preis-check">Preis-Check starten</a><a class="link" href="gutscheine.html">Gutschein kaufen</a></div>
   </div>
 </section>
 
@@ -36,9 +36,9 @@ html += f'''
     <div class="toc"><strong>Direkt zu:</strong>
       <ol><li><a href="#tickets">Ticketfahrten Sa/So</a></li><li><a href="#spartage">Spartage Mo–Do</a></li><li><a href="#freitag">Freitagsspecial</a></li><li><a href="#doppelsitzer">Doppelsitzer</a></li><li><a href="#neukunden">Neukunden &amp; Rennlizenz</a></li><li><a href="#kids">Kidsparty</a></li><li><a href="#supercup">Supercup / Rennen</a></li><li><a href="#bahnmiete">Bahnmiete</a></li><li><a href="#schule">Schulklassen</a></li><li><a href="#fuehrerschein">Kinderkartführerschein</a></li><li><a href="#racecam">RaceCam</a></li><li><a href="#siegerehrung">Siegerehrung</a></li></ol>
     </div>
-    <h2 id="preis-check-titel">Preis-Check: Was kostet euer Besuch?</h2>
+    <h2 id="preis-check">Preis-Check</h2>
     <p class="muted">Tag wählen, Personen eintragen, Fahrten festlegen – der Preis rechnet sofort mit. Ab 5 Personen könnt ihr die Auswahl direkt online reservieren.</p>
-    <form class="calc" id="preis-check" aria-labelledby="preis-check-titel" onsubmit="return false">
+    <form class="calc" id="preis-check-form" aria-labelledby="preis-check" onsubmit="return false">
       <div>
         <div class="field"><span class="hint" style="font-weight:600;color:#fff">Wann wollt ihr fahren?</span>
           <div class="seg" role="radiogroup" aria-label="Wochentag">
@@ -54,26 +54,26 @@ html += f'''
         <div class="field"><label for="c-fahrten">Fahrten pro Person (je 10 Minuten)</label><div class="stepper-count"><button type="button" data-dir="-" aria-label="Weniger Fahrten">−</button><input type="number" id="c-fahrten" name="fahrten" min="1" max="8" value="3" inputmode="numeric"><button type="button" data-dir="+" aria-label="Mehr Fahrten">+</button></div></div>
       </div>
       <div class="calc__result" aria-live="polite">
-        <span class="eyebrow" style="margin:0">Voraussichtlicher Preis</span>
+        <span class="label">Voraussichtlicher Preis</span>
         <div class="calc__total">0 €</div>
         <ul class="calc__lines"></ul>
         <p class="small calc__note" style="margin:0"></p>
-        <a class="btn btn--primary calc__cta" href="buchen.html?angebot=tickets" style="margin-top:auto">Online reservieren</a>
+        <a class="btn btn--primary calc__cta" href="buchen.html?angebot=tickets" style="margin-top:auto">Fahrten reservieren</a>
       </div>
     </form>
     <p class="notice" style="margin-top:2rem"><strong>Wer darf fahren?</strong> Kinder ab 8 Jahren und mindestens 1,25 m im Kinderkart. Ins große Kart ab 13 Jahren und 1,55 m (ab 12 Jahren mit Karterfahrung). Kleinere Kids ab 4 Jahren und 1,10 m fahren im <a href="#doppelsitzer">Doppelsitzer</a> mit.</p>
 
-    <h2 id="tickets">Ticketfahrten Samstag &amp; Sonntag</h2>
+    <h2 id="tickets">Ticketfahrten Sa und So</h2>
     {ptable("Normalpreise (Sa/So) – je 10 Minuten", [("1 × 10 Min","15,00 €","13,50 €"),("2 × 10 Min","30,00 €","27,00 €"),("3 × 10 Min","43,00 €","36,00 €"),("4 × 10 Min","52,00 €","43,00 €"),("5 × 10 Min","60,00 €","50,00 €"),("jede weitere 10 Min","9,00 €","7,00 €")])}
 
-    <h2 id="spartage" style="margin-top:2.5rem">Spartage Montag bis Donnerstag</h2>
+    <h2 id="spartage" style="margin-top:2.5rem">Spartage Mo bis Do</h2>
     <p class="muted">An diesen Tagen bekommt ihr entweder 3 Tickets zum Preis von 2 oder 5 Tickets zum Preis von 3.</p>
     {ptable("Spartage Mo–Do", [("3 für 2 – 3 × 10 Min","30 €","27 €"),("5 für 3 – 5 × 10 Min","43 €","36 €")])}
 
-    <h2 id="freitag" style="margin-top:2.5rem">Freitagsspecial – je öfter, desto günstiger</h2>
+    <h2 id="freitag" style="margin-top:2.5rem">Freitagsspecial</h2>
     {ptable("Freitag", [("1 × 10 Min","14 €","12 €"),("2 × 10 Min","25 €","21 €"),("3 × 10 Min","34 €","29 €"),("4 × 10 Min","42 €","36 €"),("5 × 10 Min","49 €","41 €"),("jede weitere 10 Min","7 €","6 €")])}
 
-    <h2 id="doppelsitzer" style="margin-top:2.5rem">Doppelsitzer – doppelter Spaß</h2>
+    <h2 id="doppelsitzer" style="margin-top:2.5rem">Doppelsitzer</h2>
     <div class="grid grid-2" style="align-items:start">
       {ptable("Doppelsitzer (Preis für 2 Personen)", [("1 × 10 Min","18 €"),("2 × 10 Min","32 €"),("3 × 10 Min","45 €"),("jede weitere 10 Min","10 €")], cols=("Fahrten","Preis für 2 Personen"))}
       <div class="card">
@@ -89,7 +89,7 @@ html += f'''
       </div>
     </div>
 
-    <h2 id="neukunden" style="margin-top:2.5rem">Neukunden: Registrierung &amp; Rennlizenz</h2>
+    <h2 id="neukunden" style="margin-top:2.5rem">Neukunden: Rennlizenz</h2>
     <div class="grid grid-3">
       <div class="stat"><strong>2,00 €</strong><span>Registrierung inkl. Rennlizenz (einmalig)</span></div>
       <div class="stat"><strong>3,00 €</strong><span>Sturmhaube inkl. Helmleihe</span></div>
@@ -97,7 +97,7 @@ html += f'''
     </div>
     <p class="muted" style="margin-top:1rem">Beim ersten Besuch muss sich jeder Fahrer aus versicherungstechnischen Gründen registrieren. Die Rennlizenz gibt es als Mobillizenz fürs Smartphone: alle Rennen auf einen Blick, Bestzeiten vergleichen, Livetiming und Rennergebnisse direkt aufs Handy. Die Kosten der Rennlizenz entfallen bei Bahnmieten und Kidspartys.</p>
 
-    <h2 id="kids" style="margin-top:2.5rem">Kidsparty &amp; Kindergeburtstag</h2>
+    <h2 id="kids" style="margin-top:2.5rem">Kidsparty</h2>
     <div class="grid grid-2">
       <div class="card card--accent"><span class="badge">Paket F1</span><h3>40,00 € pro Kind</h3><p>3 × 10 Minuten Fahrspaß</p><ul class="checks"><li>Registrierung und Sturmhaube</li><li>Kleines Geschenk für das Geburtstagskind</li><li>Helmleihe</li><li>Partytisch mit Chips &amp; Süßem</li><li>2 Softdrinks 0,2 l</li></ul></div>
       <div class="card card--accent"><span class="badge">Paket F2</span><h3>48,00 € pro Kind</h3><p>Grand-Prix-Modus – insgesamt 40 Minuten Fahrzeit</p><ul class="checks"><li>10 Min Training, 10 Min Qualifying, 20 Min Rennen mit Formel-1-Start</li><li>Registrierung, Sturmhaube und Helmleihe</li><li>Kleines Geschenk für das Geburtstagskind</li><li>Partytisch mit Chips &amp; Süßem, 2 Softdrinks 0,2 l</li></ul></div>
@@ -110,7 +110,7 @@ html += f'''
     </tbody></table><p class="price-hint">Mindestens 6 Teilnehmer. Bezahlung vor Ort in bar oder per EC. Der Kinderkartführerschein ist in Verbindung mit den Kidsparty-Angeboten nicht gültig.</p></div>
     <p style="margin-top:1rem"><a class="btn btn--ghost" href="kinder.html">Alle Infos zur Kidsparty</a></p>
 
-    <h2 id="supercup" style="margin-top:2.5rem">Supercup / Rennen (6–17 Personen)</h2>
+    <h2 id="supercup" style="margin-top:2.5rem">Supercup, 6 bis 17 Personen</h2>
     <p class="muted">Exklusiv – eure Gruppe ist allein auf der Rennstrecke. Mit Qualifying, Ampelstart, Zieleinlauf und Rennauswertung. Bei weniger als 6 Teilnehmern wird der Preis für 6 Teilnehmer berechnet.</p>
     <div class="table-wrap"><table><caption>Supercup</caption><thead><tr><th>Paket</th><th>Qualifying</th><th>Rennen</th><th class="price">Preis p.P.</th></tr></thead><tbody>
       <tr><td>Standard</td><td>10 Min</td><td>20 Min</td><td class="price">39 €</td></tr>
@@ -122,20 +122,20 @@ html += f'''
       <tr><td>Grand Prix Premium</td><td>10 Min Training + 10 Min Qualifying</td><td>30 Min</td><td class="price">59 €</td></tr>
     </tbody></table><p class="price-hint">Nach dem Qualifying kann eine Pause von 15–25 Minuten eingeplant werden – bitte bei der Buchung angeben. Beim Double ist die Startaufstellung im zweiten Rennen der Zieleinlauf des ersten; beim Double Premium ist zwischen den Rennen automatisch eine Pause enthalten. Beim Grand Prix ist immer eine Pause zwischen den Fahrten.</p></div>
 
-    <h2 id="bahnmiete" style="margin-top:2.5rem">Bahnmiete – Firmen &amp; große Gruppen</h2>
+    <h2 id="bahnmiete" style="margin-top:2.5rem">Bahnmiete</h2>
     <div class="table-wrap"><table><caption>Exklusive Bahnmiete (Brutto / Netto)</caption><thead><tr><th>Leistung</th><th class="price">pro Stunde</th><th class="price">jede weitere ½ Stunde</th></tr></thead><tbody>
       <tr><td>Bahnmiete inkl. 10 Karts</td><td class="price">650,00 € / 546,22 €</td><td class="price">325,00 € / 273,11 €</td></tr>
       <tr><td>jedes weitere Kart</td><td class="price">65,00 € / 54,62 €</td><td class="price">32,50 € / 27,31 €</td></tr>
     </tbody></table><p class="price-hint">Mindestmietdauer 1 Stunde, Mindestabnahme 10 Karts, maximal 16 Karts gleichzeitig. Weitere Karts können auch spontan am Veranstaltungstag dazugebucht werden.</p></div>
 
-    <h2 id="schule" style="margin-top:2.5rem">Schulklassen (ab 20 Personen, Mo–Fr)</h2>
+    <h2 id="schule" style="margin-top:2.5rem">Schulklassen ab 20</h2>
     <div class="grid grid-2">
       <div class="card"><span class="badge badge--dark">Angebot 1</span><h3>20 € pro Person</h3><p>20 Minuten Fahrzeit</p><ul class="checks"><li>Registrierung der Fahrer</li><li>Sturmhaube</li><li>Einweisung Kart / Strecke / Regeln</li><li>2 × 10 Min auf Bestzeit pro Gruppe</li></ul></div>
       <div class="card"><span class="badge badge--dark">Angebot 2</span><h3>25 € pro Person</h3><p>30 Minuten Fahrzeit</p><ul class="checks"><li>Registrierung der Fahrer</li><li>Sturmhaube</li><li>Einweisung Kart / Strecke / Regeln</li><li>3 × 10 Min auf Bestzeit pro Gruppe</li><li>1 Softgetränk 0,2 l pro Teilnehmer</li></ul></div>
     </div>
     <p class="small" style="margin-top:.8rem">Lehrkräfte nehmen zu den gleichen Konditionen teil. Auch vormittags möglich.</p>
 
-    <h2 id="fuehrerschein" style="margin-top:2.5rem">Kinderkartführerschein – 45,00 €</h2>
+    <h2 id="fuehrerschein" style="margin-top:2.5rem">Kinderkartführerschein</h2>
     <div class="split">
       <div>
         <p>2–3 Stunden Intensivkurs inkl. Führerscheinlizenz und Sturmhaube: Ideallinie, schwierige Kurven, Hütchenfahren, Bremstest, Flaggentest, Fahrtraining und Theorie. Nach bestandenem Kurs kostet jedes Trainingsticket nur noch 6 € – gültig bis zur Vollendung des 15. Lebensjahres.</p>
@@ -145,12 +145,12 @@ html += f'''
       <img src="assets/img/kids-start.webp" width="400" height="267" alt="Kind mit rotem Helm im Kinderkart am Start" loading="lazy" decoding="async">
     </div>
 
-    <h2 id="racecam" style="margin-top:2.5rem">RaceCam – dein Rennen auf Video</h2>
+    <h2 id="racecam" style="margin-top:2.5rem">RaceCam</h2>
     <div class="table-wrap"><table><caption>RaceCam (erhältlich beim Check-in)</caption><tbody>
       <tr><td>1 Durchgang / Rennen</td><td class="price">5 €</td></tr><tr><td>2 Durchgänge / Rennen</td><td class="price">9 €</td></tr><tr><td>3 Durchgänge / Rennen</td><td class="price">12 €</td></tr><tr><td>jeder weitere Durchgang</td><td class="price">3 €</td></tr>
     </tbody></table><p class="price-hint">Ein Durchgang darf maximal 30 Minuten lang sein; bei längeren Rennen 5 € Aufschlag. Download sofort nach dem Rennen per QR-Code.</p></div>
 
-    <h2 id="siegerehrung" style="margin-top:2.5rem">Siegerehrung – Pokale &amp; Medaillen</h2>
+    <h2 id="siegerehrung" style="margin-top:2.5rem">Siegerehrung</h2>
     <div class="grid grid-3">
       <div class="card"><h3>Pokalsatz 1</h3><p>10–14 cm, inkl. Standardgravur</p><p><strong style="color:#fff;font-size:1.3rem">30 €</strong></p></div>
       <div class="card"><h3>Pokalsatz 2</h3><p>13–18 cm, inkl. Standardgravur</p><p><strong style="color:#fff;font-size:1.3rem">40 €</strong></p></div>
@@ -175,7 +175,7 @@ html += f'''
 <section class="section section--tight">
   <div class="wrap">
     <span class="eyebrow">Online-Buchung</span>
-    <h1 id="form-title">Jetzt online buchen</h1>
+    <h1 id="form-title">Fahrten reservieren</h1>
     <p class="lead">In vier Schritten zur Reservierung. Ihr bekommt sofort eine Eingangsbestätigung mit Vorgangsnummer per E-Mail; verbindlich wird die Buchung mit unserer Buchungsbestätigung (<a href="agb.html">AGB § 2</a>). Bezahlt wird vor Ort in bar oder mit EC-Karte.</p>
     <p id="next-free" class="small"></p>
     <div class="notice" id="self-note" hidden><p>Hinweis: Aktuell nehmen wir Terminwünsche entgegen und melden uns mit einer Bestätigung oder einem Alternativtermin.</p></div>
@@ -186,7 +186,7 @@ html += f'''
 </section>
 <section class="section section--tight">
   <div class="wrap">
-    <ol class="stepper" aria-label="Fortschritt der Buchung">
+    <ol class="ampel" aria-label="Fortschritt der Reservierung, wie ein Ampelstart">
       <li class="is-active">Angebot</li><li>Termin</li><li>Teilnehmer</li><li>Kontakt</li>
     </ol>
     <form id="buchung" class="form" action="danke.html" method="post" autocomplete="on">
@@ -287,7 +287,7 @@ html += f'''
         <div class="field field--check"><input type="checkbox" id="einwilligung" name="einwilligung" value="ja" required><label for="einwilligung">Ich bin damit einverstanden, dass meine Angaben zur Bearbeitung der Buchung gespeichert und verarbeitet werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>. *</label><span class="error"></span></div>
         <div class="form-status" role="alert" aria-live="polite"></div>
         {fallback_box("Online-Buchung gerade nicht möglich? Reserviert direkt bei uns:")}
-        <button class="btn btn--primary btn--block" type="submit" style="margin-top:1rem">Buchungsanfrage senden</button>
+        <button class="btn btn--primary btn--block" type="submit" style="margin-top:1rem">Reservierung senden</button>
         <p class="small center" style="margin-top:.6rem">* Pflichtfelder · Keine Zahlung online · Eingangsbestätigung mit Vorgangsnummer per E-Mail</p>
       </fieldset>
     </form>
@@ -307,7 +307,7 @@ def pp(betrag, titel, desc):
       <h3>{titel}</h3><p>{desc}</p>
       <p><strong style="color:#fff;font-size:1.5rem">{betrag} €</strong></p>
       <div data-mk="paypal" data-betrag="{betrag}" data-titel="Gutschein {titel} – Burnout Celler-Kartbahn" class="mk-slot"></div>
-      <a class="btn btn--ghost btn--sm" href="#bestellen">Ohne PayPal bestellen</a>
+      <a class="link" href="#bestellen">Ohne PayPal bestellen</a>
     </div>'''
 
 html += f'''
@@ -315,13 +315,13 @@ html += f'''
   <img class="hero__img" src="assets/img/hero-duell.webp" width="1260" height="430" alt="Kartfahrer im Rennen auf der Celler Kartbahn – das Motiv für den Gutschein" fetchpriority="high">
   <div class="wrap">
     <span class="eyebrow">Gutscheine &amp; Vorverkauf</span>
-    <h1>Adrenalin verschenken</h1>
-    <p class="lead">Kauft Wertgutscheine oder Fahrt-Tickets bequem vorab. Der Gutschein kommt per E-Mail und wird an der Anmeldung eingelöst – für alle ab 8 Jahren.</p>
+    <h1>Gutscheine</h1>
+    <p class="lead">Wertgutschein oder fertige Fahrten vorab kaufen. Der Gutschein kommt per E-Mail und wird an der Anmeldung eingelöst, für alle ab 8 Jahren.</p>
   </div>
 </section>
 <section class="section">
   <div class="wrap">
-    <h2>Direkt kaufen mit PayPal</h2>
+    <h2>Sofort kaufen mit PayPal</h2>
     <p class="muted">Nach der Zahlung per PayPal erhaltet ihr den Gutschein mit Gutscheincode per E-Mail von uns. Einlösbar für alle Ticketfahrten, Pakete und im Bistro. Ihr seht hier keine Schaltfläche? Dann nutzt bitte die Bestellung weiter unten.</p>
     <div class="grid grid-4">
       {pp("25,00","Wertgutschein 25 €","Zum Beispiel eine Fahrt am Wochenende plus Registrierung.")}
@@ -335,46 +335,60 @@ html += f'''
       {pp("45,00","Kinderkartführerschein","Intensivkurs mit Lizenz, jeden 1. Samstag im Monat.")}
       {pp("59,00","Supercup Premium","Qualifying + 40 Minuten Rennen pro Person (Gruppe 6–17).")}
     </div>
-    <p class="small" style="margin-top:1rem">Gutscheine sind nicht an einen Tag gebunden; Ticketpreise gelten je nach Wochentag (siehe <a href="preise.html">Preise</a>). Ein Wertgutschein wird mit dem jeweils gültigen Preis verrechnet. Für Online-Käufe gilt das <a href="widerruf.html">Widerrufsrecht</a>.</p>
+    <p class="small" style="margin-top:1rem">Gutscheine sind nicht an einen Tag gebunden; Ticketpreise gelten je nach Wochentag (siehe <a href="preise.html">Preise</a>). Ein Wertgutschein wird mit dem jeweils gültigen Preis verrechnet. Für Online-Käufe gilt das <a href="widerruf.html">Widerrufsrecht</a>. Alle Preise inkl. Umsatzsteuer, kein Versand.</p>
   </div>
 </section>
 
-<section class="section section--alt" id="bestellen">
-  <div class="wrap grid grid-2" style="align-items:start">
-    <div>
-      <span class="eyebrow">Individuell</span>
-      <h2>Gutschein bestellen</h2>
-      <p class="muted">Wunschbetrag oder bestimmtes Paket, persönlicher Text, Zahlung per Überweisung oder vor Ort. Wir senden euch die Zahlungsinfos per E-Mail und nach Zahlungseingang den Gutschein als PDF. Den Gutscheincode vergeben wir persönlich.</p>
-      <ul class="checks">
-        <li>Jeder Betrag ab 10 € möglich</li>
-        <li>Mit Widmung – ideal zum Geburtstag, Weihnachten oder Vatertag</li>
-        <li>Abholung vor Ort während der Öffnungszeiten möglich</li>
-      </ul>
-      <img src="assets/img/kart-detail.webp" width="1400" height="934" alt="Nahaufnahme der Startnummer eines Sodi-Karts" loading="lazy" style="border-radius:14px">
+<section class="section section--flaeche" id="bestellen">
+  <div class="wrap">
+    <div class="notice notice--warn" data-gutschein-aus hidden>
+      <p><strong>Gutscheine bestellt ihr gerade direkt bei uns:</strong> per Telefon <a href="{TEL_LINK}">{TEL}</a>, <a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp</a> oder E-Mail an <a href="mailto:{MAIL}">{MAIL}</a>. Wir senden euch den Gutschein nach Zahlungseingang zu.</p>
     </div>
-    <form class="form" data-mk-form="gutschein" action="danke.html" method="post">
-      <fieldset>
-        <legend>Gutschein-Bestellung</legend>
-        <div class="fields-2">
-          <div class="field"><label for="g-betrag">Betrag oder Paket *</label><input type="text" id="g-betrag" name="betrag" required placeholder="z. B. 50 € oder Supercup Premium"><span class="error"></span></div>
-          <div class="field"><label for="g-anzahl">Anzahl</label><input type="number" id="g-anzahl" name="anzahl" min="1" max="50" value="1" inputmode="numeric"></div>
-        </div>
-        <div class="field"><label for="g-fuer">Gutschein für (Name, optional)</label><input type="text" id="g-fuer" name="beschenkter"></div>
-        <div class="field"><label for="g-text">Persönlicher Text</label><textarea id="g-text" name="nachricht" placeholder="z. B. Alles Gute zum 40. – Vollgas, Papa!"></textarea></div>
-        <div class="field"><label for="g-zustellung">Zustellung *</label><select id="g-zustellung" name="zustellung"><option>Per E-Mail als PDF</option><option>Abholung vor Ort</option></select></div>
-        <div class="fields-2">
-          <div class="field"><label for="g-name">Dein Name *</label><input type="text" id="g-name" name="name" autocomplete="name" required><span class="error"></span></div>
-          <div class="field"><label for="g-tel">Telefon</label><input type="tel" id="g-tel" name="telefon" autocomplete="tel" inputmode="tel"></div>
-        </div>
-        <div class="field"><label for="g-email">E-Mail *</label><input type="email" id="g-email" name="email" autocomplete="email" required><span class="error"></span></div>
-        <div class="field hp" aria-hidden="true"><label for="g-website">Website</label><input type="text" id="g-website" name="website" tabindex="-1" autocomplete="off"></div>
-        <div class="field field--check"><input type="checkbox" id="g-einw" name="einwilligung" value="ja" required><label for="g-einw">Ich bin damit einverstanden, dass meine Angaben zur Bearbeitung der Bestellung verarbeitet werden. Es gelten die <a href="agb.html">AGB</a> und das <a href="widerruf.html">Widerrufsrecht</a>. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>. *</label><span class="error"></span></div>
-        <div class="form-status" role="alert" aria-live="polite"></div>
-        {fallback_box("Bestellung gerade nicht möglich? Schreibt uns direkt:")}
-        <button class="btn btn--primary btn--block" type="submit" style="margin-top:1rem">Zahlungspflichtig bestellen</button>
-        <p class="small center" style="margin-top:.6rem">Der Vertrag kommt mit unserer Bestätigung zustande; die Zahlung erfolgt per Überweisung oder vor Ort.</p>
-      </fieldset>
-    </form>
+    <div class="grid grid-2" style="align-items:start" data-gutschein hidden>
+      <div>
+        <h2>Gutschein bestellen</h2>
+        <p>Betrag wählen, Empfänger und Text eintragen. Ihr bekommt die Zahlungsinformationen per E-Mail, nach Zahlungseingang den Gutschein mit Code als PDF oder zur Abholung. <span data-gueltigkeit></span></p>
+        <ul class="checks">
+          <li>Einlösbar für alle Fahrten, Pakete und im Bistro</li>
+          <li>Mit persönlichem Text, zum Geburtstag, zu Weihnachten, zum Vatertag</li>
+          <li>Abholung vor Ort während der Öffnungszeiten möglich</li>
+        </ul>
+        <img src="assets/img/kart-detail.webp" width="1400" height="934" alt="Nahaufnahme der Startnummer eines Sodi-Karts" loading="lazy" decoding="async" class="bank-img">
+      </div>
+      <form class="form" data-mk-form="gutschein" action="danke.html" method="post">
+        <fieldset>
+          <legend>Gutschein bestellen</legend>
+          <div class="fields-2">
+            <div class="field"><label for="g-betrag">Betrag *</label><select id="g-betrag" name="betrag" required><option value="25">25,00 €</option><option value="50">50,00 €</option><option value="100">100,00 €</option><option value="frei">Anderer Betrag</option></select><span class="error"></span></div>
+            <div class="field" hidden><label for="g-frei">Wunschbetrag in Euro *</label><input type="number" id="g-frei" name="betrag_frei" min="10" max="500" step="1" inputmode="numeric"><span class="hint">Zwischen 10 € und 500 €.</span><span class="error"></span></div>
+          </div>
+          <div class="fields-2">
+            <div class="field"><label for="g-empf">Gutschein für (Name) *</label><input type="text" id="g-empf" name="empfaenger" required autocomplete="off"><span class="error"></span></div>
+            <div class="field"><label for="g-abs">Von (Absender) *</label><input type="text" id="g-abs" name="absender" required autocomplete="name"><span class="error"></span></div>
+          </div>
+          <div class="field"><label for="g-text">Persönlicher Text (optional)</label><textarea id="g-text" name="gutscheintext" maxlength="300" placeholder="z. B. Alles Gute zum 40. Geburtstag, Vollgas!"></textarea></div>
+          <div class="field"><label for="g-zust">Zustellung *</label><select id="g-zust" name="zustellung" required><option>Per E-Mail als PDF</option><option>Abholung vor Ort</option></select><span class="error"></span></div>
+          <div class="field"><label for="g-anschrift">Anschrift (nur bei Zustellung per Post)</label><textarea id="g-anschrift" name="anschrift" placeholder="Straße, PLZ, Ort" autocomplete="street-address"></textarea></div>
+          <div class="fields-2">
+            <div class="field"><label for="g-name">Dein Name *</label><input type="text" id="g-name" name="name" autocomplete="name" required><span class="error"></span></div>
+            <div class="field"><label for="g-tel">Telefon</label><input type="tel" id="g-tel" name="telefon" autocomplete="tel" inputmode="tel"></div>
+          </div>
+          <div class="field"><label for="g-email">E-Mail *</label><input type="email" id="g-email" name="email" autocomplete="email" inputmode="email" required enterkeyhint="send"><span class="hint">Dorthin gehen Zahlungsinformationen und Gutschein.</span><span class="error"></span></div>
+          <div class="field hp" aria-hidden="true"><label for="g-website">Website</label><input type="text" id="g-website" name="website" tabindex="-1" autocomplete="off"></div>
+          <div class="summary" data-summary>
+            <h3 style="margin:0 0 .6rem;font-size:1.1rem">Bestellübersicht</h3>
+            <dl><dt>Gutschein</dt><dd data-s-betrag>–</dd><dt>Für</dt><dd data-s-empfaenger>–</dd><dt>Zustellung</dt><dd data-s-zustellung>–</dd><dt>Versand</dt><dd>0,00 €</dd></dl>
+            <div class="sum"><span>Summe</span><span data-s-betrag>–</span></div>
+          </div>
+          <div class="field field--check" style="margin-top:1rem"><input type="checkbox" id="g-agb" name="agb" value="ja" required><label for="g-agb">Ich habe die <a href="agb.html">AGB</a> und die <a href="widerruf.html">Widerrufsbelehrung</a> gelesen und akzeptiere sie. *</label><span class="error"></span></div>
+          <div class="field field--check"><input type="checkbox" id="g-einw" name="einwilligung" value="ja" required><label for="g-einw">Ich bin damit einverstanden, dass meine Angaben zur Bearbeitung der Bestellung verarbeitet werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>. *</label><span class="error"></span></div>
+          <div class="form-status" role="alert" aria-live="polite"></div>
+          {fallback_box("Bestellung gerade nicht möglich? Schreibt uns direkt:")}
+          <button class="btn btn--primary btn--block" type="submit" style="margin-top:1rem">Zahlungspflichtig bestellen</button>
+          <p class="small" style="margin-top:.6rem">Alle Preise inkl. gesetzlicher Umsatzsteuer. Der Vertrag kommt mit unserer Bestätigung zustande. Zahlung per Überweisung oder vor Ort; den Gutscheincode vergeben wir nach Zahlungseingang.</p>
+        </fieldset>
+      </form>
+    </div>
   </div>
 </section>
 ''' + contact_strip() + footer() + end()

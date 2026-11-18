@@ -31,9 +31,9 @@ ICONS = {
 
 LOGO = '<svg class="brand__logo" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#e10600"/><path d="M8 29 20 9l12 20H8z" fill="#fff"/><path d="M14 29l6-10 6 10z" fill="#e10600"/><rect x="8" y="30" width="24" height="3" fill="#fff"/></svg>'
 
-NAV = [("index.html","Startseite"),("preise.html","Preise"),("kinder.html","Kinder"),("firmen.html","Firmen &amp; Gruppen"),("kartbahn.html","Die Kartbahn"),("faq.html","FAQ"),("kontakt.html","Kontakt")]
+NAV = [("preise.html","Preise"),("kinder.html","Kinder"),("firmen.html","Firmen"),("kartbahn.html","Die Kartbahn"),("kontakt.html","Kontakt")]
 
-def head(title, desc, jsonld="", img="assets/img/og-image.jpg", noindex=False):
+def head(title, desc, jsonld="", img="assets/img/og-image.jpg", noindex=False, file="index.html"):
     import re as _re
     title=_re.sub(r"&(?!amp;|#)", "&amp;", title); desc=_re.sub(r"&(?!amp;|#)", "&amp;", desc)
     robots = '<meta name="robots" content="noindex,follow">' if noindex else '<meta name="robots" content="index,follow,max-image-preview:large">'
@@ -55,7 +55,9 @@ def head(title, desc, jsonld="", img="assets/img/og-image.jpg", noindex=False):
 <meta property="og:site_name" content="Burnout Celler-Kartbahn">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<meta property="og:image" content="/{img}">
+<link rel="canonical" href="{{{{SITE_URL}}}}/{{{{FILE}}}}">
+<meta property="og:url" content="{{{{SITE_URL}}}}/{{{{FILE}}}}">
+<meta property="og:image" content="{{{{SITE_URL}}}}/{img}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Kart-Duell auf der Indoor-Strecke der Burnout Celler-Kartbahn">
@@ -66,6 +68,8 @@ def head(title, desc, jsonld="", img="assets/img/og-image.jpg", noindex=False):
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="assets/fonts/barlowcondensed-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css">
 {jsonld}
 </head>
@@ -76,17 +80,16 @@ def head(title, desc, jsonld="", img="assets/img/og-image.jpg", noindex=False):
 def header():
     links = "".join(f'<li><a href="{h}">{t}</a></li>' for h,t in NAV)
     mlinks = "".join(f'<li><a href="{h}">{t}</a></li>' for h,t in NAV)
-    return f'''<div class="progress" aria-hidden="true"></div>
-<header class="header">
+    return f'''<header class="header">
   <div class="wrap">
     <a class="brand" href="index.html" title="Zur Startseite"><img class="brand__img" src="assets/img/logo.webp" width="264" height="84" alt="Burnout Celler-Kartbahn" fetchpriority="low"></a>
-    <nav class="nav" aria-label="Hauptnavigation"><ul>{links}<li><a class="btn btn--primary btn--sm" href="buchen.html">Jetzt buchen</a></li><li><a class="btn btn--ghost btn--sm" href="gutscheine.html">Gutscheine</a></li></ul></nav>
+    <nav class="nav" aria-label="Hauptnavigation"><ul>{links}<li><a class="btn btn--primary btn--sm" href="buchen.html">Fahrten reservieren</a></li></ul></nav>
     <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menü öffnen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </header>
 <nav class="mobile-nav" id="mobile-nav" data-open="false" aria-label="Mobile Navigation">
-  <ul>{mlinks}<li><a href="gutscheine.html">Gutscheine &amp; Tickets vorab</a></li><li><a href="agb.html">AGB</a></li></ul>
-  <a class="btn btn--primary btn--block" href="buchen.html">Jetzt online buchen</a>
+  <ul><li><a href="index.html">Startseite</a></li>{mlinks}<li><a href="faq.html">Häufige Fragen</a></li><li><a href="gutscheine.html">Gutscheine</a></li></ul>
+  <a class="btn btn--primary btn--block" href="buchen.html">Fahrten reservieren</a>
 </nav>
 <main id="main">
 '''
@@ -95,45 +98,34 @@ def footer():
     return f'''</main>
 <footer class="footer">
   <div class="wrap">
-    <div class="grid grid-4">
+    <p class="footer__mark">Burnout<span>Celler-Kartbahn · Waldweg 100 · Celle</span></p>
+    <div class="footer__grid">
       <div>
-        <img class="footer__logo" src="assets/img/logo.webp" width="264" height="84" alt="Burnout Celler-Kartbahn" loading="lazy" decoding="async">
         <h2>Burnout Celler-Kartbahn GmbH</h2>
         <ul>
-          <li>Waldweg 100<br>29221 Celle</li>
-          <li><a href="{TEL_LINK}">Tel. {TEL}</a></li>
+          <li>Waldweg 100, 29221 Celle</li>
+          <li><a href="{TEL_LINK}">Telefon {TEL}</a></li>
           <li><a href="mailto:{MAIL}">{MAIL}</a></li>
-          <li><a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp schreiben</a></li>
+          <li><a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp +49 152 31394662</a></li>
+          <li><a href="https://www.facebook.com/BurnoutCellerKartbahn/" rel="noopener" target="_blank">Facebook</a></li>
         </ul>
       </div>
       <div>
         <h2>Öffnungszeiten</h2>
         <ul>
-          <li>Mo–Fr: ab 15:00 Uhr (Ferien ab 13:00)</li>
-          <li>Samstag: ab 13:00 Uhr</li>
-          <li>Sonntag: ab 11:00 Uhr</li>
-          <li class="small">Open End – Ende je nach Auslastung. Vor spontanem Besuch bitte kurz anrufen.</li>
+          <li>Montag bis Freitag ab 15 Uhr</li>
+          <li>In den Schulferien ab 13 Uhr</li>
+          <li>Samstag ab 13 Uhr, Sonntag ab 11 Uhr</li>
+          <li>Open End, Schluss je nach Auslastung</li>
         </ul>
       </div>
       <div>
-        <h2>Schnell zu</h2>
-        <ul>
-          <li><a href="buchen.html">Online buchen</a></li>
-          <li><a href="gutscheine.html">Gutscheine &amp; Tickets</a></li>
-          <li><a href="preise.html">Preise</a></li>
-          <li><a href="kinder.html">Kindergeburtstage</a></li>
-          <li><a href="firmen.html">Firmenevents</a></li>
-          <li><a href="faq.html">Häufige Fragen</a></li>
-        </ul>
-      </div>
-      <div>
-        <h2>Downloads</h2>
+        <h2>Unterlagen</h2>
         <ul>
           <li><a href="downloads/haftungsausschluss-minderjaehrige.pdf" target="_blank" rel="noopener">Einverständniserklärung für Minderjährige (PDF)</a></li>
           <li><a href="downloads/flyer-burnout-celler-kartbahn.pdf" target="_blank" rel="noopener">Flyer (PDF, 6&nbsp;MB)</a></li>
           <li><a href="buffet.html">Buffetangebot 2026/2027</a></li>
-          <li><a href="https://www.facebook.com/BurnoutCellerKartbahn/" rel="noopener" target="_blank">Facebook</a></li>
-          <li><a href="https://www.dartraum-celle.de" rel="noopener" target="_blank">Dartraum Celle</a></li>
+          <li><a href="https://www.dartraum-celle.de" rel="noopener" target="_blank">Dartraum Celle (Partner)</a></li>
         </ul>
       </div>
     </div>
@@ -142,17 +134,18 @@ def footer():
         <a href="impressum.html">Impressum</a>
         <a href="datenschutz.html">Datenschutz</a>
         <a href="agb.html">AGB</a>
-        <a href="widerruf.html">Widerruf</a>
+        <a href="widerruf.html">Vertrag widerrufen</a>
+        <a href="barrierefreiheit.html">Barrierefreiheit</a>
         <span data-mk="cookies"></span>
       </div>
-      <div>© Burnout Celler-Kartbahn GmbH · Celle</div>
+      <div>Fotos: Burnout Celler-Kartbahn GmbH · Schrift: Barlow (SIL OFL)</div>
     </div>
   </div>
 </footer>
 <div class="actionbar" aria-label="Schnellkontakt">
   <a class="btn btn--ghost" href="{TEL_LINK}">{ICONS["phone"]}Anrufen</a>
   <a class="btn btn--wa" href="{WA_LINK}" rel="noopener" target="_blank">{ICONS["wa"]}WhatsApp</a>
-  <a class="btn btn--primary" href="buchen.html">{ICONS["cal"]}Jetzt buchen</a>
+  <a class="btn btn--primary" href="buchen.html">{ICONS["cal"]}Reservieren</a>
 </div>
 <script src="assets/js/main.js" defer></script>
 '''
@@ -174,21 +167,21 @@ def contact_strip():
     return f'''<section class="cta-band">
   <div class="wrap grid grid-2" style="align-items:center">
     <div>
-      <h2>Fragen? Wir sind da.</h2>
-      <p>Telefonisch während der Öffnungszeiten, per WhatsApp oder E-Mail – wir antworten schnell.</p>
+      <h2>Fragen vor dem Besuch?</h2>
+      <p>Telefon während der Öffnungszeiten, WhatsApp und E-Mail jederzeit. Ihr bekommt eine Antwort von Chris, Conny oder Susi.</p>
     </div>
-    <div class="pill-row" style="justify-content:flex-start">
-      <a class="btn btn--light" href="{TEL_LINK}">{ICONS["phone"]}{TEL}</a>
-      <a class="btn btn--ghost" style="border-color:#fff" href="{WA_LINK}" rel="noopener" target="_blank">{ICONS["wa"]}WhatsApp</a>
-      <a class="btn btn--ghost" style="border-color:#fff" href="mailto:{MAIL}">{ICONS["mail"]}E-Mail</a>
+    <div class="pill-row">
+      <a class="btn btn--primary" href="{TEL_LINK}">{ICONS["phone"]}{TEL} anrufen</a>
+      <a class="btn btn--ghost" href="{WA_LINK}" rel="noopener" target="_blank">{ICONS["wa"]}WhatsApp schreiben</a>
+      <a class="link" href="mailto:{MAIL}">E-Mail an {MAIL}</a>
     </div>
   </div>
 </section>'''
 
 def breadcrumb(name, file):
-    return f'''<script type="application/ld+json">{{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{{"@type":"ListItem","position":1,"name":"Start","item":"/index.html"}},{{"@type":"ListItem","position":2,"name":"{name}","item":"/{file}"}}]}}</script>'''
+    return f'''<script type="application/ld+json">{{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{{"@type":"ListItem","position":1,"name":"Start","item":"{{{{SITE_URL}}}}/index.html"}},{{"@type":"ListItem","position":2,"name":"{name}","item":"{{{{SITE_URL}}}}/{file}"}}]}}</script>'''
 
-HERO_MOBILE = {"hero-rennen":"strecke-start","hero-strecke":"strecke-boxengasse","hero-duell":"kart-detail","karts-boxengasse":"karts-boxengasse","strecke-start":"strecke-start","kartflotte":"karts-boxengasse"}
+HERO_MOBILE = {"strecke-start":"strecke-start","hero-rennen":"strecke-start","hero-strecke":"strecke-boxengasse","hero-duell":"kart-detail","karts-boxengasse":"karts-boxengasse","strecke-start":"strecke-start","kartflotte":"karts-boxengasse"}
 HAS_800 = {"hero-rennen","hero-strecke","hero-duell","kart-sodi-front","anmeldung-theke","bistro-bar","zweite-ebene","kartflotte","karts-boxengasse","kart-detail","kart-motor","strecke-start","strecke-boxengasse","bistro-theke","bistro-lounge","veranstaltungsraum"}
 def responsive(html):
     import re as _re
@@ -215,12 +208,12 @@ def page_jsonld(name, html):
     if not t or not d or name in ("danke.html", "404.html"): return ""
     typ = {"kontakt.html": "ContactPage", "faq.html": "FAQPage", "impressum.html": "AboutPage", "kartbahn.html": "AboutPage"}.get(name, "WebPage")
     if name == "faq.html": return ""
-    obj = {"@context": "https://schema.org", "@type": typ, "@id": "/" + name + "#webpage", "url": "/" + name,
+    obj = {"@context": "https://schema.org", "@type": typ, "@id": "{{SITE_URL}}/" + name + "#webpage", "url": "{{SITE_URL}}/" + name,
            "name": t.group(1).replace("&amp;", "&"), "description": d.group(1).replace("&amp;", "&"), "inLanguage": "de-DE",
-           "isPartOf": {"@type": "WebSite", "name": "Burnout Celler-Kartbahn", "url": "/"},
-           "about": {"@id": "/#kartbahn"}, "publisher": {"@id": "/#kartbahn"},
+           "isPartOf": {"@type": "WebSite", "name": "Burnout Celler-Kartbahn", "url": "{{SITE_URL}}/"},
+           "about": {"@id": "{{SITE_URL}}/#kartbahn"}, "publisher": {"@id": "{{SITE_URL}}/#kartbahn"},
            "datePublished": "2026-10-28", "dateModified": datetime.date.today().isoformat(),
-           "primaryImageOfPage": {"@type": "ImageObject", "url": "/assets/img/og-image.jpg", "width": 1200, "height": 630},
+           "primaryImageOfPage": {"@type": "ImageObject", "url": "{{SITE_URL}}/assets/img/og-image.jpg", "width": 1200, "height": 630},
            "speakable": {"@type": "SpeakableSpecification", "cssSelector": ["h1", ".lead"]}}
     return '<script type="application/ld+json">' + _json.dumps(obj, ensure_ascii=False) + '</script>'
 
@@ -252,31 +245,17 @@ def ensure_assets():
 
 def motionize(html):
     import re as _re
-    # Reveal-Klassen für wiederkehrende Bausteine
-    for pat, cls in [(r'<(div|a) class="card(?![^"]*reveal)', "reveal"), (r'<article class="news', "reveal"), (r'<div class="stat', "reveal--scale reveal"),
-                     (r'<figure>', "reveal--scale reveal"), (r'<div class="notice', "reveal"), (r'<details', "reveal")]:
-        def rep(m, cls=cls):
-            t = m.group(0)
-            if "<figure>" in t: return '<figure class="' + cls + '">'
-            if t.startswith("<details"): return '<details class="' + cls + '"'
-            return t[:-1] + "" if False else t.replace('class="', 'class="' + cls + ' ', 1)
-        html = _re.sub(pat, rep, html)
-    # Split-Bereiche: Bild von der Seite, Text gegenläufig
-    html = _re.sub(r'(<div class="wrap split(?: split--rev)?">\s*)<img ', lambda m: m.group(1) + '<img class="reveal reveal--clip" ', html)
-    html = _re.sub(r'(<div class="wrap split(?: split--rev)?">\s*<img [^>]*>\s*)<div>', lambda m: m.group(1) + '<div class="reveal">', html)
-    html = _re.sub(r'(<div class="wrap split(?: split--rev)?">\s*<picture>.*?</picture>\s*)<div>', lambda m: m.group(1) + '<div class="reveal">', html, flags=_re.S)
-    # Schritte und Fakten
-    html = _re.sub(r'(<ol class="steps">.*?</ol>)', lambda m: m.group(1).replace("<li>", '<li class="reveal">'), html, flags=_re.S)
-    html = _re.sub(r'(<dl class="facts">.*?</dl>)', lambda m: m.group(1).replace("<div><dt>", '<div class="reveal"><dt>'), html, flags=_re.S)
-    # Hero-Überschrift Wort für Wort
-    def words(m):
-        ws = m.group(2).split(" ")
-        return m.group(1) + " ".join('<span class="w" style="--i:%d"><span>%s</span></span>' % (i, w) for i, w in enumerate(ws)) + "</h1>"
-    html = _re.sub(r'(<section class="hero[^"]*">.*?<h1[^>]*>)([^<]+)</h1>', words, html, flags=_re.S)
+    html = _re.sub(r'<span class="eyebrow">[^<]*</span>\s*', '', html)          # ALL-CAPS-Etiketten ohne Information
+    html = html.replace(' →</span>', '</span>').replace(' →</a>', '</a>')       # Pfeile an Links
+    html = _re.sub(r'<div class="card__icon">.*?</div>', '', html, flags=_re.S)  # Icon-Kacheln
+    html = html.replace('<span class="more">', '<span class="more">').replace('<a class="more"', '<a class="more"')
     return html
 
 def write(name, html):
     if name.endswith(".html"):
+        html = html.replace("{{FILE}}", name)
+        if name in ("danke.html", "404.html"):
+            html = html.replace('<link rel="canonical" href="{{SITE_URL}}/' + name + '">\n', "")
         html = responsive(html)
         html = motionize(html)
         if DEMO:

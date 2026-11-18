@@ -35,4 +35,4 @@
 - [Die Kartbahn](/kartbahn.html): Strecke, Karts, Rennlizenz-App, RaceCam, Bistro, Team, Fahrtipps
 - [FAQ](/faq.html): häufige Fragen
 - [Kontakt](/kontakt.html): Anfahrt, Formular
-- [AGB](/agb.html), [Widerruf](/widerruf.html), [Impressum](/impressum.html), [Datenschutz](/datenschutz.html)
+- [AGB](/agb.html), [Vertrag widerrufen](/widerruf.html), [Barrierefreiheit](/barrierefreiheit.html), [Impressum](/impressum.html), [Datenschutz](/datenschutz.html)

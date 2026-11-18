@@ -55,7 +55,7 @@
   function angebot() { var r = $('[name="angebot"]:checked'); return r ? r.value : ""; }
 
   /* ---------- Schritt-Anzeige ---------- */
-  var stepper = document.querySelector(".stepper");
+  var stepper = document.querySelector(".ampel");
   function setStep(n, done) {
     if (!stepper) return;
     $$("li", stepper).forEach(function (li, i) {
@@ -103,7 +103,7 @@
     return fetch("/api/verfuegbarkeit", { headers: { Accept: "application/json" } })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
       .then(function (j) { avail = j; apiDown = false;
-        if (j && j.selfBooking === false) { document.getElementById("form-title").textContent = "Terminwunsch senden"; document.getElementById("self-note").hidden = false; }
+        if (j && j.selfBooking === false) { document.getElementById("form-title").textContent = "Terminwunsch senden"; document.querySelector('#buchung button[type="submit"]').textContent = "Terminwunsch senden"; document.getElementById("self-note").hidden = false; }
         if (j && j.nextFree) { document.getElementById("next-free").textContent = "Nächster freier Tag: " + new Date(j.nextFree + "T12:00:00").toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" }); }
       })
       .catch(function () { apiDown = true; avail = null;
@@ -219,7 +219,7 @@
     var est = estimate(); var d = dateIn.value;
     $("#sum-angebot").textContent = ANGEBOTE[a].name;
     $("#sum-datum").textContent = d ? new Date(d + "T12:00:00").toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" }) + (timeIn.value ? ", " + timeIn.value + " Uhr" : "") : "–";
-    $("#sum-teil").textContent = num("teilnehmer") ? num("teilnehmer") + " Personen" : "–";
+    $("#sum-teil").textContent = num("teilnehmer") ? (num("teilnehmer") === 1 ? "1 Person" : num("teilnehmer") + " Personen") : "–";
     var lines = $("#sum-lines"); lines.innerHTML = "";
     est.lines.forEach(function (l) { var li = document.createElement("li"); li.innerHTML = "<span>" + l[0] + "</span><span>" + euro(l[1]) + "</span>"; lines.appendChild(li); });
     $("#sum-total").textContent = est.total !== null ? euro(est.total) : "nach Preisliste";
@@ -262,13 +262,14 @@
     if (apiDown && data.wunschzeit) payload.uhrzeit_wunsch = data.wunschzeit;
 
     btn.disabled = true; var old = btn.textContent; btn.textContent = "Wird gesendet …";
-    fetch("/api/anfrage", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload) })
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null; var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 10000) : null;
+    fetch("/api/anfrage", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) {
-        if (r.status === 429) throw { soft: "Zu viele Anfragen in kurzer Zeit. Bitte in ein paar Minuten noch einmal versuchen." };
+        if (r.status === 429) throw { soft: "Zu viele Anfragen in kurzer Zeit. Bitte später noch einmal versuchen." };
         return r.json().then(function (j) { return { status: r.status, body: j }; });
       })
       .then(function (res) {
-        if (res.body && res.body.ok && res.body.ref) { location.href = "danke.html?typ=termin&ref=" + encodeURIComponent(res.body.ref); return; }
+        if (res.body && res.body.ok && res.body.ref) { if (window.mkEvent) window.mkEvent("termin_gesendet"); location.href = "danke.html?typ=termin&ref=" + encodeURIComponent(res.body.ref); return; }
         if (res.status === 422 && res.body && res.body.errors) {
           var errs = res.body.errors; var first = null;
           Object.keys(errs).forEach(function (k) { var key = k === "name" ? "vorname" : k; setError(key, errs[k]); if (!first) first = key; });
@@ -283,7 +284,7 @@
         showStatus("error", (e && e.soft) ? e.soft : "Der Server ist gerade nicht erreichbar. Deine Eingaben bleiben erhalten – bitte reserviere per Telefon, WhatsApp oder E-Mail.");
         fallback(true);
       })
-      .finally(function () { btn.disabled = false; btn.textContent = old; });
+      .finally(function () { if (timer) clearTimeout(timer); btn.disabled = false; btn.textContent = old; });
   });
 
   /* ---------- Start ---------- */

@@ -22,9 +22,6 @@ html += f'''
 <p><strong>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:</strong> Christian Sprunk, Waldweg 100, 29221 Celle</p>
 <p>Dieses Impressum gilt auch für unsere Facebook-Seite <a href="https://www.facebook.com/BurnoutCellerKartbahn/" rel="noopener" target="_blank">facebook.com/BurnoutCellerKartbahn</a>.</p>
 
-<h2>Streitbeilegung</h2>
-<p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" rel="noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a>. Unsere E-Mail-Adresse findet ihr oben im Impressum.</p>
-<p>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen (§ 36 VSBG).</p>
 
 <h2>Haftung für Inhalte</h2>
 <p>Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.</p>
@@ -43,7 +40,7 @@ write("impressum.html", html)
 html = head("Datenschutzerklärung | Burnout Celler-Kartbahn GmbH", "Datenschutzerklärung der Burnout Celler-Kartbahn GmbH: Hosting bei Markentrix, Server-Logs, Kontakt- und Buchungsformulare, Gutscheinbestellung, PayPal, Google-Bewertungen, OpenStreetMap-Karte, WhatsApp und Besucherstatistik ohne Cookies.", breadcrumb("Datenschutz","datenschutz.html")) + header()
 html += f'''
 <section class="section"><div class="wrap prose">
-<h1>Datenschutzerklärung</h1>
+<h1>Datenschutz</h1>
 <p class="lead">Wir freuen uns über euren Besuch auf unserer Website. Der Schutz eurer personenbezogenen Daten ist uns wichtig. Nachfolgend informieren wir euch gemäß Art. 13 DSGVO darüber, welche Daten wir verarbeiten, zu welchem Zweck und welche Rechte ihr habt.</p>
 <div class="toc"><strong>Inhalt</strong><ol>
 <li><a href="#verantwortlicher">Verantwortlicher</a></li><li><a href="#hosting">Hosting &amp; Server-Logs</a></li><li><a href="#formulare">Kontakt- und Buchungsformulare</a></li><li><a href="#gutschein">Gutscheinbestellung &amp; Widerruf</a></li><li><a href="#paypal">Zahlung mit PayPal</a></li><li><a href="#statistik">Besucherstatistik &amp; Einwilligung</a></li><li><a href="#karte">Karte (OpenStreetMap)</a></li><li><a href="#bewertungen">Google-Bewertungen</a></li><li><a href="#whatsapp">WhatsApp &amp; externe Links</a></li><li><a href="#rennlizenz">Registrierung vor Ort / Rennlizenz</a></li><li><a href="#rechte">Eure Rechte</a></li><li><a href="#sicherheit">Datensicherheit &amp; Änderungen</a></li></ol></div>
@@ -57,7 +54,7 @@ html += f'''
 <p>Mit dem Hosting-Anbieter besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO. Die Verarbeitung findet auf Servern in Deutschland bzw. der EU statt.</p>
 <p>Schriften, Skripte und Bilder werden ausschließlich von unserem eigenen Server geladen; es werden keine Inhalte von Drittanbietern (z.&nbsp;B. Google Fonts, CDN-Dienste) automatisch nachgeladen.</p>
 
-<h2 id="formulare">3. Kontakt- und Buchungsformulare</h2>
+<h2 id="formulare">3. Formulare</h2>
 <p>Wenn ihr uns über das Kontaktformular, das Online-Buchungsformular oder die Gutscheinbestellung schreibt, verarbeiten wir die von euch eingegebenen Daten (z.&nbsp;B. Name, E-Mail-Adresse, Telefonnummer, Firma, Wunschtermin, Teilnehmerzahl, Alter der Kinder, Nachricht) zur Bearbeitung eurer Anfrage bzw. Buchung und für eventuelle Rückfragen. Die Übermittlung erfolgt verschlüsselt (TLS) an das Markentrix-Portal, über das wir die Anfragen empfangen und bearbeiten. Ihr erhaltet automatisch eine Eingangsbestätigung mit Vorgangsnummer an die angegebene E-Mail-Adresse.</p>
 <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Vertrag bzw. vorvertragliche Maßnahmen) sowie eure Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die ihr über die Checkbox im Formular erteilt und jederzeit mit Wirkung für die Zukunft widerrufen könnt. Zum Schutz vor Spam enthalten die Formulare ein unsichtbares Prüffeld; es werden keine Cookies gesetzt und keine Drittanbieter-Captchas eingebunden.</p>
 <p>Wir speichern die Daten, solange es zur Bearbeitung eurer Anfrage bzw. zur Durchführung der Buchung erforderlich ist. Daten, die Teil einer Buchung oder Rechnung sind, bewahren wir nach den handels- und steuerrechtlichen Vorschriften (§ 147 AO, § 257 HGB) bis zu zehn Jahre auf. Sonstige Anfragen löschen wir spätestens zwölf Monate nach Abschluss der Kommunikation.</p>
@@ -71,7 +68,7 @@ html += f'''
 <h2 id="statistik">6. Besucherstatistik &amp; Einwilligung</h2>
 <p>Zur Verbesserung unseres Angebots erfassen wir über das Markentrix-Portal eine anonyme Reichweitenstatistik (aufgerufene Seite, Zeitpunkt, Bildschirmbreite, Seitentitel). Dabei werden keine Cookies gesetzt, keine Nutzerprofile gebildet und IP-Adressen nicht dauerhaft gespeichert. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Reichweitenmessung). Soweit das Portal eine Einwilligung für Statistik oder weitere Dienste vorsieht, könnt ihr diese über den Link „Statistik-Einstellungen“ in der Fußzeile jederzeit einsehen, erteilen oder widerrufen (Art. 6 Abs. 1 lit. a DSGVO, § 25 TDDDG).</p>
 
-<h2 id="karte">7. Karte (OpenStreetMap) – Zwei-Klick-Lösung</h2>
+<h2 id="karte">7. Karte (OpenStreetMap)</h2>
 <p>Auf den Seiten „Start“ und „Kontakt“ bieten wir eine Anfahrtskarte an. Die Karte wird erst geladen, wenn ihr auf „Karte laden“ klickt (Zwei-Klick-Lösung). Vorher werden keine Daten an Dritte übertragen. Mit dem Klick willigt ihr ein (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG), dass euer Browser eine Verbindung zu den Servern der OpenStreetMap Foundation (St John's Innovation Centre, Cowley Road, Cambridge, CB4 0WS, Großbritannien) aufbaut und dabei eure IP-Adresse sowie Browserdaten übermittelt werden. Für Großbritannien liegt ein Angemessenheitsbeschluss der EU-Kommission vor. Datenschutzhinweise: <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" rel="noopener" target="_blank">wiki.osmfoundation.org/wiki/Privacy_Policy</a>. Die Links „Route planen“ führen zu externen Kartendiensten (Google Maps, OpenStreetMap); dort gelten die jeweiligen Datenschutzhinweise.</p>
 
 <h2 id="bewertungen">8. Google-Bewertungen</h2>
@@ -81,7 +78,7 @@ html += f'''
 <p>Wir bieten euch an, uns per WhatsApp zu kontaktieren. Beim Klick auf den WhatsApp-Link öffnet sich die WhatsApp-App bzw. WhatsApp Web; erst dann werden Daten an WhatsApp Ireland Limited (4 Grand Canal Square, Dublin 2, Irland) übermittelt. Für die Kommunikation gelten die Datenschutzhinweise von WhatsApp: <a href="https://www.whatsapp.com/legal/privacy-policy-eea" rel="noopener" target="_blank">whatsapp.com/legal/privacy-policy-eea</a>. Wir nutzen WhatsApp ausschließlich zur Beantwortung eurer Anfragen (Art. 6 Abs. 1 lit. b und f DSGVO). Bitte sendet uns über WhatsApp keine besonders sensiblen Daten.</p>
 <p>Unsere Website enthält Links zu externen Seiten (z.&nbsp;B. Facebook, Dartraum Celle, Sodikart). Beim Anklicken verlasst ihr unsere Website; für die Datenverarbeitung dort sind die jeweiligen Betreiber verantwortlich.</p>
 
-<h2 id="rennlizenz">10. Registrierung vor Ort / Rennlizenz</h2>
+<h2 id="rennlizenz">10. Rennlizenz vor Ort</h2>
 <p>Beim ersten Besuch registriert sich jeder Fahrer aus versicherungstechnischen Gründen an der Anmeldung und erhält eine Rennlizenz. Die dabei erhobenen Daten (Name, Geburtsdatum, Kontaktdaten, bei Minderjährigen die Einverständniserklärung der Erziehungsberechtigten) und die Rundenzeiten werden in unserem Zeitnahme- und Lizenzsystem verarbeitet, um die Teilnahme zu ermöglichen, Rennergebnisse bereitzustellen und unsere Versicherungspflichten zu erfüllen (Art. 6 Abs. 1 lit. b, c und f DSGVO). Hinweise zur Datenverarbeitung in der Rennlizenz-App erhaltet ihr bei der Registrierung vor Ort.</p>
 
 <h2 id="rechte">11. Eure Rechte</h2>
@@ -96,7 +93,7 @@ html += f'''
 </ul>
 <p>Zur Ausübung eurer Rechte genügt eine formlose Nachricht an <a href="mailto:team@celler-kartbahn.com">team@celler-kartbahn.com</a>. Ihr habt zudem das Recht, euch bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig für uns ist die Landesbeauftragte für den Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover, <a href="https://www.lfd.niedersachsen.de" rel="noopener" target="_blank">www.lfd.niedersachsen.de</a>.</p>
 
-<h2 id="sicherheit">12. Datensicherheit &amp; Änderungen</h2>
+<h2 id="sicherheit">12. Sicherheit und Änderungen</h2>
 <p>Unsere Website nutzt eine SSL/TLS-Verschlüsselung; alle Formulardaten werden verschlüsselt übertragen. Eine Bereitstellung eurer Daten ist weder gesetzlich noch vertraglich vorgeschrieben; ohne die als Pflichtfelder gekennzeichneten Angaben können wir Anfragen und Buchungen jedoch nicht bearbeiten. Eine automatisierte Entscheidungsfindung oder ein Profiling findet nicht statt.</p>
 <p>Wir behalten uns vor, diese Datenschutzerklärung anzupassen, wenn sich die Rechtslage oder unsere Website ändert. Stand: Oktober 2026.</p>
 </div></section>
@@ -107,8 +104,8 @@ write("datenschutz.html", html)
 html = head("AGB | Burnout Celler-Kartbahn GmbH", "Allgemeine Geschäftsbedingungen der Burnout Celler-Kartbahn GmbH: Buchung, Preise, Stornierung, Haftung, Nutzungsbedingungen der Karts und der Kartbahn, Gutscheine.", breadcrumb("AGB","agb.html")) + header()
 html += '''
 <section class="section"><div class="wrap prose">
-<h1>Allgemeine Geschäftsbedingungen (AGB)</h1>
-<p class="lead">der Burnout Celler-Kartbahn GmbH, Waldweg 100, 29221 Celle</p>
+<h1>AGB</h1>
+<p class="lead">Allgemeine Geschäftsbedingungen der Burnout Celler-Kartbahn GmbH, Waldweg 100, 29221 Celle.</p>
 
 <h2>§ 1 Allgemeines – Geltungsbereich</h2>
 <p>(1) Die nachstehenden Allgemeinen Geschäftsbedingungen gelten für alle Angebote, Annahmeerklärungen und Leistungen der Burnout Celler-Kartbahn GmbH, einschließlich Buchungen und Gutscheinbestellungen über unsere Website.</p>
@@ -120,14 +117,14 @@ html += '''
 <p>(3) Den Eingang von Buchungen auf elektronischem Wege (Online-Buchung, E-Mail) bestätigen wir in aller Regel unverzüglich mit einer Vorgangsnummer. Unsere Eingangsbestätigung stellt jedoch noch keine verbindliche Annahme des Vertragsangebots des Kunden dar, sondern erst die nachfolgende Buchungsbestätigung.</p>
 <p>(4) Vertragssprache ist Deutsch. Der Vertragstext wird von uns gespeichert; der Kunde erhält die wesentlichen Vertragsdaten mit der Buchungsbestätigung per E-Mail.</p>
 
-<h2>§ 3 Leistungen, Preise, Zahlung, Aufrechnung</h2>
+<h2>§ 3 Leistungen und Zahlung</h2>
 <p>(1) Wir sind verpflichtet, die vom Kunden gebuchten Leistungen bereitzuhalten und die vereinbarten Leistungen zu erbringen. Die vertraglich vereinbarten Leistungen ergeben sich ausschließlich aus unserer Buchungsbestätigung.</p>
 <p>(2) Überschreitet der Zeitraum zwischen Vertragsabschluss und Leistungserbringung 4 Monate, so behalten wir uns das Recht vor, Preisänderungen auch ohne vorherige Ankündigung vorzunehmen.</p>
 <p>(3) Wir sind berechtigt, bei Vertragsschluss vom Kunden eine angemessene Vorauszahlung oder Sicherheitsleistung in Form einer Kreditkartengarantie, einer Anzahlung oder Ähnlichem zu verlangen.</p>
 <p>(4) Preise für die Nutzung der Kartbahn und die damit in Zusammenhang stehenden Leistungen sind vorab zur Zahlung durch unsere Kunden fällig. Soweit nichts anderes vereinbart ist, erfolgt die Zahlung vor Ort in bar oder per EC-Karte. Alle Preise verstehen sich in Euro inklusive der gesetzlichen Umsatzsteuer.</p>
 <p>(5) Der Kunde kann nur mit einer unstreitigen oder rechtskräftig festgestellten Forderung gegenüber einer Forderung der Burnout Celler-Kartbahn GmbH aufrechnen oder mindern bzw. ein Zurückbehaltungsrecht ausüben.</p>
 
-<h2>§ 4 Stornierung durch den Kunden / Nichtinanspruchnahme der Leistungen</h2>
+<h2>§ 4 Stornierung</h2>
 <p>(1) Für alle zustande gekommenen Buchungen über die Nutzung unserer Kartbahn und damit verbundener Leistungen gewähren wir unseren Kunden grundsätzlich eine Umbuchungs- und Stornierungsmöglichkeit. Der Zeitpunkt der Stornierung bestimmt dabei den Anspruch der Burnout Celler-Kartbahn GmbH auf eine angemessene Vergütung; ersparte Aufwendungen sind damit abgegolten. Es gelten folgende Stornierungsgebühren:</p>
 <div class="table-wrap"><table><tbody>
 <tr><td>bis 28 Tage vor Leistungsbeginn</td><td class="price">25 % des Leistungspreises</td></tr>
@@ -139,7 +136,7 @@ html += '''
 <p>(3) Umbuchungen und/oder Stornierungen haben in Textform zu erfolgen und sind an folgende Adresse zu richten: Burnout Celler-Kartbahn GmbH, Waldweg 100, 29221 Celle, oder <a href="mailto:team@celler-kartbahn.com">team@celler-kartbahn.com</a>.</p>
 <p>(4) Das gesetzliche Widerrufsrecht für Verbraucher bei Fernabsatzverträgen bleibt unberührt; für Freizeitdienstleistungen mit einem festen Termin besteht gemäß § 312g Abs. 2 Nr. 9 BGB kein Widerrufsrecht. Näheres in unserer <a href="widerruf.html">Widerrufsbelehrung</a>.</p>
 
-<h2>§ 5 Rücktritt durch die Burnout Celler-Kartbahn GmbH</h2>
+<h2>§ 5 Rücktritt durch uns</h2>
 <p>(1) Kommt der Kunde seiner Zahlungsverpflichtung nicht nach, so sind wir zum Rücktritt vom Vertrag berechtigt. Das gilt auch für den Fall, dass eine vereinbarte oder gemäß § 3 Abs. 3 von uns verlangte Vorauszahlung auch nach Verstreichen einer von uns gesetzten angemessenen Nachfrist nicht geleistet wird.</p>
 <p>(2) Ferner behalten wir uns das Recht vor, vom Vertrag zurückzutreten, falls</p>
 <ol type="a">
@@ -153,7 +150,7 @@ html += '''
 <p>(2) Im Falle der Verletzung einer vertragswesentlichen Pflicht ist bei einfacher Fahrlässigkeit unsere Haftung auf den vertragstypischen, vorhersehbaren Schaden begrenzt.</p>
 <p>(3) Die Haftung wegen Verletzung des Lebens, des Körpers oder der Gesundheit sowie die Haftung nach dem Produkthaftungsgesetz, die Haftung bei arglistig verschwiegenen Fehlern wie auch die Haftung bei Übernahme einer Garantie für die Beschaffenheit einer Sache bleibt davon unberührt.</p>
 
-<h2>§ 7 Zusatzbedingungen für die Nutzung der Karts / Kartbahn</h2>
+<h2>§ 7 Nutzung der Karts</h2>
 <p>(1) Das Betreten des Geländes und der Aufenthalt auf der Anlage sowie die Benutzung der Karts und das Befahren der Kartbahn sowie die Teilnahme an allen dortigen Aktivitäten geschieht auf eigene Gefahr und eigenes Risiko des Kunden.</p>
 <p>(2) Bei der Benutzung der Karts und dem Befahren der Kartbahn ist den Anweisungen und Benutzungshinweisen unserer Mitarbeiter ausnahmslos Folge zu leisten. Für Schäden, die durch Zuwiderhandlung oder unsachgemäße Benutzung verursacht werden, übernehmen wir keine Haftung, es sei denn, dass der Schaden durch fehlerhafte Benutzungshinweise oder durch einen uns vorwerfbar nicht ordnungsgemäßen Zustand der Karts oder Einrichtungen verursacht worden ist.</p>
 <p>(3) Die Benutzung der Karts ist nur Kunden gestattet, die an keinerlei körperlichen Gebrechen leiden, die nicht unter Alkohol-, Drogen- oder Medikamenteneinfluss stehen und nicht zu einer gesundheitlichen Risikogruppe gehören (z.&nbsp;B. Bluthochdruck, Herzerkrankungen, Schwangerschaft). Auf die besondere Gefährdung der zu diesen Risikogruppen gehörenden Kunden wird hingewiesen. Kunden, die trotz des Verbotes in alkoholisiertem Zustand ein Kart benutzen, werden ausgeschlossen; das Ticket verfällt entschädigungslos. Die Kunden erklären sich mit einer Alkoholkontrolle einverstanden.</p>
@@ -173,7 +170,6 @@ html += '''
 <p>(2) Sofern der Kunde Kaufmann ist, sind der Erfüllungsort und der Gerichtsstand für alle Streitigkeiten zwischen uns und dem Kunden der Sitz der Burnout Celler-Kartbahn GmbH. Dasselbe gilt, wenn der Kunde keinen allgemeinen Gerichtsstand in Deutschland hat oder der Wohnsitz oder der gewöhnliche Aufenthalt im Zeitpunkt der Klageerhebung nicht bekannt sind.</p>
 <p>(3) Abweichende Vereinbarungen oder Nebenabreden, die vor oder bei Vertragsschluss getroffen werden, bedürfen zu ihrer Wirksamkeit der Textform.</p>
 <p>(4) Sollten einzelne Bestimmungen des Vertrages mit dem Kunden – einschließlich dieser Allgemeinen Geschäftsbedingungen – ganz oder teilweise unwirksam sein oder werden, so wird hierdurch die Gültigkeit der übrigen Bestimmungen nicht berührt.</p>
-<p>(5) Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: <a href="https://ec.europa.eu/consumers/odr/" rel="noopener" target="_blank">ec.europa.eu/consumers/odr</a>. Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
 <p class="small">Stand: Oktober 2026</p>
 </div></section>
 ''' + footer() + end()
@@ -197,32 +193,61 @@ html += f'''
 <h2>Ausschluss des Widerrufsrechts</h2>
 <p>Das Widerrufsrecht besteht nicht bei Verträgen zur Erbringung von Dienstleistungen im Zusammenhang mit Freizeitbetätigungen, wenn der Vertrag für die Erbringung einen spezifischen Termin oder Zeitraum vorsieht (§ 312g Abs. 2 Nr. 9 BGB). Das betrifft insbesondere Online-Buchungen von Ticketfahrten, Kidspartys, Rennen, Bahnmieten und Kursen zu einem festen Termin. Für diese Buchungen gelten die Stornierungsbedingungen in <a href="agb.html">§ 4 unserer AGB</a>.</p>
 
-<h2>Muster-Widerrufsformular</h2>
-<p>Wenn Sie den Vertrag widerrufen wollen, füllen Sie bitte dieses Formular aus und senden Sie es ab – oder schicken Sie uns den Text per Brief oder E-Mail.</p>
+<h2 id="formular">Vertrag widerrufen</h2>
+<p>Wenn Sie den Vertrag widerrufen wollen, füllen Sie dieses Formular aus und bestätigen Sie im zweiten Schritt. Sie können den Widerruf auch per Brief oder E-Mail erklären.</p>
 <form class="form" data-mk-form="widerruf" action="danke.html" method="post">
-  <fieldset>
-    <legend>Widerruf erklären</legend>
-    <p>An Burnout Celler-Kartbahn GmbH, Waldweg 100, 29221 Celle, team@celler-kartbahn.com:<br>Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über den Kauf der folgenden Waren (*) / die Erbringung der folgenden Dienstleistung (*):</p>
-    <div class="field"><label for="w-leistung">Bestellte Leistung (z.&nbsp;B. Gutschein 50 €) *</label><input type="text" id="w-leistung" name="leistung" required><span class="error"></span></div>
+  <fieldset data-step1>
+    <legend>Schritt 1: Angaben zum Vertrag</legend>
+    <p>An Burnout Celler-Kartbahn GmbH, Waldweg 100, 29221 Celle, team@celler-kartbahn.com: Hiermit widerrufe ich den von mir abgeschlossenen Vertrag über die folgende Leistung.</p>
+    <div class="field"><label for="w-name">Name *</label><input type="text" id="w-name" name="name" autocomplete="name" required><span class="error"></span></div>
     <div class="fields-2">
-      <div class="field"><label for="w-bestellt">Bestellt am *</label><input type="date" id="w-bestellt" name="bestellt_am" required><span class="error"></span></div>
-      <div class="field"><label for="w-erhalten">Erhalten am</label><input type="date" id="w-erhalten" name="erhalten_am"></div>
+      <div class="field"><label for="w-email">E-Mail *</label><input type="email" id="w-email" name="email" autocomplete="email" inputmode="email" required><span class="hint">Dorthin geht die Eingangsbestätigung.</span><span class="error"></span></div>
+      <div class="field"><label for="w-tel">Telefon</label><input type="tel" id="w-tel" name="telefon" autocomplete="tel" inputmode="tel"></div>
     </div>
-    <div class="field"><label for="w-ref">Vorgangs- oder Gutscheinnummer</label><input type="text" id="w-ref" name="vorgang"></div>
-    <div class="field"><label for="w-name">Name des/der Verbraucher(s) *</label><input type="text" id="w-name" name="name" autocomplete="name" required><span class="error"></span></div>
-    <div class="field"><label for="w-anschrift">Anschrift des/der Verbraucher(s) *</label><textarea id="w-anschrift" name="nachricht" required placeholder="Straße, PLZ, Ort"></textarea><span class="error"></span></div>
-    <div class="fields-2">
-      <div class="field"><label for="w-email">E-Mail *</label><input type="email" id="w-email" name="email" required><span class="error"></span></div>
-      <div class="field"><label for="w-tel">Telefon</label><input type="tel" id="w-tel" name="telefon"></div>
-    </div>
+    <div class="field"><label for="w-ref">Bestell- oder Vorgangsnummer</label><input type="text" id="w-ref" name="vorgang" placeholder="z. B. BK-2026-0042"><span class="hint">Steht in der Eingangsbestätigung per E-Mail.</span></div>
+    <div class="field"><label for="w-nachricht">Was wird widerrufen? *</label><textarea id="w-nachricht" name="nachricht" required placeholder="z. B. Gutschein 50 €, bestellt am 12.11.2026"></textarea><span class="error"></span></div>
     <div class="field hp" aria-hidden="true"><label for="w-website">Website</label><input type="text" id="w-website" name="website" tabindex="-1" autocomplete="off"></div>
     <div class="field field--check"><input type="checkbox" id="w-einw" name="einwilligung" value="ja" required><label for="w-einw">Ich bin damit einverstanden, dass meine Angaben zur Bearbeitung des Widerrufs verarbeitet werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>. *</label><span class="error"></span></div>
     <div class="form-status" role="alert" aria-live="polite"></div>
+    <button class="btn btn--primary" type="button" data-next style="margin-top:1rem">Weiter zur Bestätigung</button>
+  </fieldset>
+  <fieldset data-step2 hidden>
+    <legend>Schritt 2: Widerruf bestätigen</legend>
+    <h3 tabindex="-1" style="font-size:1.2rem">Bitte prüfen</h3>
+    <div class="summary">
+      <dl><dt>Name</dt><dd data-w-name>–</dd><dt>E-Mail</dt><dd data-w-email>–</dd><dt>Vorgang</dt><dd data-w-vorgang>–</dd><dt>Widerruf</dt><dd data-w-nachricht>–</dd></dl>
+    </div>
+    <p class="small" style="margin-top:1rem">Mit dem Klick auf „Widerruf bestätigen“ senden wir deinen Widerruf an die Burnout Celler-Kartbahn GmbH. Du erhältst eine Eingangsbestätigung mit Vorgangsnummer per E-Mail.</p>
     {fallback_box("Formular gerade nicht erreichbar? Widerruf per E-Mail oder Post senden:")}
-    <button class="btn btn--primary" type="submit" style="margin-top:1rem">Widerruf absenden</button>
-    <p class="small" style="margin-top:.6rem">(*) Unzutreffendes streichen. Datum: wird mit dem Absenden erfasst.</p>
+    <div class="pill-row" style="margin-top:1rem">
+      <button class="btn btn--primary" type="submit">Widerruf bestätigen</button>
+      <button class="btn btn--ghost" type="button" data-back>Angaben ändern</button>
+    </div>
   </fieldset>
 </form>
 </div></section>
 ''' + footer() + end()
 write("widerruf.html", html)
+
+# ---------------- BARRIEREFREIHEIT ----------------
+html = head("Erklärung zur Barrierefreiheit | Burnout Celler-Kartbahn", "Erklärung zur Barrierefreiheit der Website der Burnout Celler-Kartbahn GmbH: Stand, bekannte Einschränkungen, Kontakt für Rückmeldungen.", breadcrumb("Barrierefreiheit","barrierefreiheit.html")) + header()
+html += f'''
+<section class="section"><div class="wrap prose">
+<h1>Barrierefreiheit</h1>
+<p class="lead">Die Burnout Celler-Kartbahn GmbH bemüht sich, diese Website barrierefrei zugänglich zu machen. Maßstab sind die Web Content Accessibility Guidelines (WCAG) 2.2, Stufe AA.</p>
+<h2>Stand der Vereinbarkeit</h2>
+<p>Diese Website ist nach unserer eigenen Prüfung mit den WCAG 2.2 AA weitgehend vereinbar. Geprüft wurden alle Seiten mit Tastatur, Screenreader-Semantik, Kontrasten (mindestens 4,5:1), Touch-Zielen ab 44 Pixel, Zoom bis 200 % und der Einstellung „Bewegung reduzieren“. Die Online-Reservierung und die Gutscheinbestellung sind vollständig per Tastatur bedienbar, alle Formularfelder haben sichtbare Beschriftungen und Fehlermeldungen.</p>
+<h2>Nicht barrierefreie Inhalte</h2>
+<ul>
+<li>Die Einverständniserklärung für Minderjährige und der Flyer liegen als PDF vor und sind nicht barrierefrei aufbereitet. Die Inhalte der Einverständniserklärung erhalten Sie auf Anfrage auch in Textform.</li>
+<li>Das Buffetangebot ist ein Bild. Die Speisen und Preise nennen wir Ihnen gern telefonisch oder per E-Mail.</li>
+<li>Die Anfahrtskarte wird von OpenStreetMap bereitgestellt; die Adresse steht zusätzlich als Text auf der Seite.</li>
+<li>Die Bewertungen und die PayPal-Schaltflächen werden vom Markentrix-Portal eingebunden; ihre Barrierefreiheit liegt beim Anbieter.</li>
+</ul>
+<h2>Rückmeldung und Kontakt</h2>
+<p>Ist Ihnen ein Hindernis aufgefallen oder brauchen Sie Inhalte in einer anderen Form? Schreiben Sie an <a href="mailto:team@celler-kartbahn.com">team@celler-kartbahn.com</a> oder rufen Sie an unter <a href="tel:+495141908650">05141 908650</a>. Wir antworten in der Regel innerhalb von zwei Werktagen.</p>
+<h2>Erstellung dieser Erklärung</h2>
+<p>Diese Erklärung wurde am 18. November 2026 auf Grundlage einer Selbstbewertung erstellt.</p>
+</div></section>
+''' + footer() + end()
+write("barrierefreiheit.html", html)

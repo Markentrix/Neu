@@ -10,19 +10,19 @@ html += f'''
   <img class="hero__img" src="assets/img/hero-strecke.webp" width="1260" height="430" alt="Kart in der Kurve der Indoor-Strecke mit Brücke" fetchpriority="high">
   <div class="wrap">
     <span class="eyebrow">Die Kartbahn</span>
-    <h1>600 Meter Indoor-Rennstrecke</h1>
+    <h1>Die Strecke in Celle</h1>
     <p class="lead">Brücke, Tunnel und seit 2023 die zweite Ebene mit Steilkurve in 6 Metern Höhe: Unsere Strecke in Celle ist in Norddeutschland einzigartig.</p>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <div class="grid grid-4">
-      <div class="stat"><strong>600 m</strong><span>Streckenlänge</span></div>
-      <div class="stat"><strong>6 m</strong><span>Höhe der Steilkurve</span></div>
-      <div class="stat"><strong>9 PS</strong><span>Sodi SR5 Rennkarts</span></div>
-      <div class="stat"><strong>13</strong><span>Kinderkarts Sodi LR6</span></div>
-    </div>
+    <ul class="daten" aria-label="Streckendaten">
+      <li><strong>600 m</strong><span>Streckenlänge</span></li>
+      <li><strong>6 m</strong><span>Höhe der Steilkurve</span></li>
+      <li><strong>9 PS</strong><span>Sodi SR5 Rennkarts</span></li>
+      <li><strong>13</strong><span>Kinderkarts Sodi LR6</span></li>
+    </ul>
   </div>
 </section>
 
@@ -31,7 +31,7 @@ html += f'''
     <img src="assets/img/zweite-ebene.webp" width="1600" height="595" alt="Rampe und Steilkurve der zweiten Ebene" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Strecke</span>
-      <h2>Rampe hoch, Steilkurve, Rückenwind bergab</h2>
+      <h2>Zweite Ebene seit 2023</h2>
       <p>Seit Januar 2009 führt ein neues Team die Indoor-Kartbahn in Celle. Auf ca. 600 Metern Asphalt mit Brücke und Tunnel kam 2023 ein neuer Streckenabschnitt dazu: 100 Meter mehr Strecke mit Rampe, Steilkurve und einer Zuschauerplattform, von der ihr hautnah dabei seid.</p>
       <ul class="checks">
         <li>Live-Zeiten auf der Großbildleinwand und dem Zeitenmonitor an der Strecke</li>
@@ -90,7 +90,7 @@ html += f'''
     <img src="assets/img/anmeldung-theke.webp" width="1260" height="430" alt="Anmeldung und Check-in der Celler Kartbahn" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Neukunden</span>
-      <h2>Registrierung &amp; Rennlizenz fürs Smartphone</h2>
+      <h2>Rennlizenz auf dem Handy</h2>
       <p>Beim ersten Besuch muss sich jeder Fahrer aus versicherungstechnischen Gründen registrieren (2 € inkl. Rennlizenz). Die Rennlizenz gibt es nur noch als Mobillizenz auf dem Smartphone – mit vielen Vorteilen:</p>
       <ul class="checks">
         <li>Alle deine Rennen auf einen Blick</li>
@@ -107,7 +107,7 @@ html += f'''
   <div class="wrap grid grid-2" style="align-items:start">
     <div>
       <span class="eyebrow">Neu</span>
-      <h2>RaceCam – dein Rennen. Für immer.</h2>
+      <h2>RaceCam: dein Rennen als Video</h2>
       <p>Direkt nach dem Fahren bekommt ihr euer Rennen per QR-Code zum Download aufs Smartphone: schnell, unkompliziert, in bester Qualität. Teilt euer Rennen mit Freunden und Familie. Erhältlich beim Check-in.</p>
       <div class="table-wrap"><table><tbody>
         <tr><td>1 Durchgang / Rennen</td><td class="price">5 €</td></tr><tr><td>2 Durchgänge</td><td class="price">9 €</td></tr><tr><td>3 Durchgänge</td><td class="price">12 €</td></tr><tr><td>jeder weitere Durchgang</td><td class="price">3 €</td></tr>
@@ -125,7 +125,7 @@ html += f'''
 <section class="section section--alt" id="tipps">
   <div class="wrap">
     <span class="eyebrow">Tipps &amp; Tricks</span>
-    <h2>Schneller werden auf der Strecke</h2>
+    <h2>Schneller auf der Strecke</h2>
     <div class="grid grid-2">
       <div class="card"><h3>Die Ideallinie</h3><p>Der kürzeste und schnellste Weg zur Bestzeit – und für jeden Fahrer etwas anders. Grundprinzip jeder Kurve: von außen nach innen zum Scheitelpunkt und wieder nach außen herausbeschleunigen.</p></div>
       <div class="card"><h3>Wie fahre ich eine Kurve?</h3><p>Rutschen oder Driften kostet Zeit, weil das Kart Geschwindigkeit verliert. Vor der Kurve bremsen, damit ihr in der Kurve nicht mehr bremsen müsst: langsam rein, schnell raus. In den scharfen Kurven gewinnt oder verliert ihr die meiste Zeit.</p></div>
@@ -138,7 +138,7 @@ html += f'''
 <section class="section" id="team">
   <div class="wrap">
     <span class="eyebrow">Über uns</span>
-    <h2>Ein Familienbetrieb mit starkem Serviceteam</h2>
+    <h2>Familienbetrieb seit 2009</h2>
     <p class="muted">Seit Januar 2009 führen wir die Indoor-Kartbahn in Celle. Ob Kindergeburtstag, Firmenevent oder Vereinsfeier – wir erstellen jederzeit ein exklusives Angebot und setzen eure Wünsche schnell um. Ein großes Dankeschön an alle freiwilligen Helfer für die harten Stunden, Tage und Wochen des Umbaus im Bistro und auf der Strecke.</p>
     <div class="grid grid-4">
       <div class="card"><h3>Chris</h3><p><strong>Geschäftsführer</strong> – der Mann für alles, was Strecke, Karts, Marketing, Einkauf, Erneuerung und Planung angeht.</p></div>

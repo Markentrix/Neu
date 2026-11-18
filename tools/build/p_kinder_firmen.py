@@ -15,9 +15,9 @@ html += f'''
   <img class="hero__img" src="assets/img/kartflotte.webp" width="1400" height="934" alt="Die Kartflotte der Celler Kartbahn – bereit für die Kidsparty" fetchpriority="high">
   <div class="wrap">
     <span class="eyebrow">Kinder &amp; Jugend</span>
-    <h1>Kindergeburtstag mit Vollgas</h1>
+    <h1>Kidsparty ab 8 Jahren</h1>
     <p class="lead">Kidsparty exklusiv auf der Strecke, eigener Partytisch, Siegerehrung auf dem Podest – ab 8 Jahren und 1,25 m. Ihr bringt die Kinder, wir den Rest.</p>
-    <div class="hero__actions"><a class="btn btn--primary" href="buchen.html?angebot=kidsparty">{ICONS["cal"]}Kidsparty buchen</a><a class="btn btn--ghost" href="#ablauf">So läuft's ab</a></div>
+    <div class="hero__actions"><a class="btn btn--primary" href="buchen.html?angebot=kidsparty">Kidsparty buchen</a><a class="link" href="#ablauf">So läuft die Party ab</a></div>
   </div>
 </section>
 
@@ -87,7 +87,7 @@ html += f'''
       <h2>13 Kinderkarts Sodi LR6</h2>
       <p>Bahn frei für die Nachwuchs-Piloten: Ab 8 Jahren und 1,25 m geht es im Kinderkart mit 6,5-PS-Honda-Motor, hydraulischer Bremse und 3-Punkt-Sicherheitsgurt auf die Strecke. Sitz, Lenkrad und Pedale sind verstellbar, LED-Beleuchtung und Überrollbügel inklusive.</p>
       <p>Unser geschultes Personal erklärt die Rennregeln, weist in die Bedienung ein und trifft alle Sicherheitsvorkehrungen. Tägliche Checks garantieren Sicherheit, Power und Fahrspaß.</p>
-      <a class="btn btn--ghost" href="kartbahn.html#karts">Technische Daten</a>
+      <a class="link" href="kartbahn.html#karts">Technische Daten der Karts</a>
     </div>
   </div>
 </section>
@@ -114,7 +114,7 @@ html += f'''
         <div class="card"><h3>Angebot 2 · 25 €</h3><p>30 Min Fahrzeit: wie Angebot 1 plus 3 × 10 Min und 1 Softgetränk 0,2 l. Dauer ca. 2,5–3 Stunden.</p></div>
       </div>
       <p class="small" style="margin-top:.8rem">Lehrkräfte fahren zu den gleichen Konditionen. Vom Bahnhof Celle sind es max. 20 Minuten zu Fuß. Eigene Speisen und Getränke sind nicht gestattet – für Schulklassen gibt es Softdrinks für 1,50 € pro Glas und Eis für den kleinen Geldbeutel.</p>
-      <a class="btn btn--ghost" href="buchen.html?angebot=schulklasse">Schulklasse anfragen</a>
+      <a class="btn btn--primary" href="buchen.html?angebot=schulklasse">Schulklasse anfragen</a>
     </div>
   </div>
 </section>
@@ -137,19 +137,20 @@ html += f'''
   <img class="hero__img" src="assets/img/strecke-start.webp" width="1400" height="934" alt="Startaufstellung der Karts vor der Rennleitung der Celler Kartbahn" fetchpriority="high">
   <div class="wrap">
     <span class="eyebrow">Firmen, Vereine &amp; Gruppen</span>
-    <h1>Rennfeeling für euer Team</h1>
+    <h1>Rennen für euer Team</h1>
     <p class="lead">Weihnachtsfeier, Firmenevent, Vereinsfeier oder Junggesellenabschied: von 6 bis ca. 80 Personen ist die Strecke exklusiv für euch. Danach Buffet im Clubraum – oder weiter in den Dartraum.</p>
-    <div class="hero__actions"><a class="btn btn--primary" href="buchen.html?angebot=bahnmiete">{ICONS["cal"]}Event anfragen</a><a class="btn btn--ghost" href="#supercup">Pakete vergleichen</a></div>
+    <div class="hero__actions"><a class="btn btn--primary" href="buchen.html?angebot=bahnmiete">Event anfragen</a><a class="link" href="#supercup">Rennpakete vergleichen</a></div>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <div class="grid grid-3">
-      <div class="stat"><strong>6–17</strong><span>Personen: Supercup-Rennen</span></div>
-      <div class="stat"><strong>ab 18</strong><span>Personen: Rennpakete &amp; Meisterschaft</span></div>
-      <div class="stat"><strong>bis 80</strong><span>Gäste im Veranstaltungsraum</span></div>
-    </div>
+    <ul class="daten" aria-label="Gruppengrößen">
+      <li><strong>6–17</strong><span>Personen: Supercup-Rennen</span></li>
+      <li><strong>ab 18</strong><span>Personen: Rennpakete und Meisterschaft</span></li>
+      <li><strong>bis 80</strong><span>Gäste im Veranstaltungsraum</span></li>
+      <li><strong>16</strong><span>Karts gleichzeitig auf der Strecke</span></li>
+    </ul>
     <p class="muted" style="margin-top:1.25rem">Anfänger und erfahrene Fahrer kommen gleichermaßen auf ihre Kosten. Nach einer ausführlichen Einweisung geht es auf die Rennstrecke: Überholmanöver, Vollgas durch den Tunnel und über die zweite Ebene – Motorsport-Feeling hautnah.</p>
   </div>
 </section>
@@ -157,7 +158,7 @@ html += f'''
 <section class="section section--alt" id="supercup">
   <div class="wrap">
     <span class="eyebrow">6–17 Personen</span>
-    <h2>Supercup – euer exklusives Rennen</h2>
+    <h2>Supercup: euer Rennen</h2>
     <p class="muted">Qualifying, Ampelstart, Zieleinlauf und Rennauswertung. Eure Gruppe ist allein auf der Strecke. Bei weniger als 6 Teilnehmern wird der Preis für 6 Teilnehmer berechnet. Maximal 17 Personen.</p>
     <div class="grid grid-3">
       <div class="card"><span class="badge badge--dark">Standard</span><h3>39 € p.P.</h3><p>10 Min Qualifying + 20 Min Rennen</p></div>
@@ -177,7 +178,7 @@ html += f'''
     <img src="assets/img/strecke-boxengasse.webp" width="1400" height="934" alt="Boxengasse und Reifenstapel der Celler Kartbahn" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">ab 18 Personen</span>
-      <h2>Meisterschaftsmodus &amp; Bahnmiete</h2>
+      <h2>Meisterschaft und Bahnmiete</h2>
       <p><strong>Wer ist der Schnellste in eurer Gruppe?</strong> Zunächst fahren alle Teilnehmer ihr Qualifying – die persönliche Bestzeit zählt. Danach teilen wir die Fahrer in möglichst gleichstarke Gruppen ein. Jede Gruppe fährt ihr eigenes Rennen mit Startaufstellung und direktem Kampf um die Platzierungen. Am Ende werden alle Ergebnisse ausgewertet und der Gesamtsieger ermittelt.</p>
       <p>Bei der <strong>Bahnmiete</strong> bestimmt ihr das Programm selbst – am beliebtesten ist das <strong>Teamrennen</strong>: 2–4 Fahrer pro Team wechseln sich während des Rennens ab, alle verfolgen Rundenzeiten und Ergebnis auf der Großbildleinwand. Anschließend Siegerehrung mit Pokalen und Medaillen – nur die Besten kommen aufs Podest.</p>
       <div class="table-wrap"><table><caption>Bahnmiete (Brutto / Netto)</caption><tbody>
@@ -195,7 +196,7 @@ html += f'''
     <img src="assets/img/veranstaltungsraum.webp" width="1400" height="933" alt="Festlich eingedeckter Veranstaltungsraum der Celler Kartbahn" loading="lazy" decoding="async">
     <div>
       <span class="eyebrow">Nach dem Rennen</span>
-      <h2>Buffet &amp; Clubraum</h2>
+      <h2>Buffet und Clubraum</h2>
       <p>Lasst euren Renntag bei einem leckeren Buffet und Getränken ausklingen. In unserem Veranstaltungsraum finden bis zu 80 Personen Platz; bei einer Buffetbestellung steht der Raum kostenfrei zur Verfügung, und unser Servicepersonal kümmert sich um euer leibliches Wohl. In der Weihnachtszeit ist der Raum passend dekoriert.</p>
       <ul class="checks">
         <li>Buffet möglich ab 20 Personen</li>

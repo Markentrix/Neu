@@ -35,9 +35,9 @@ html += f'''
     <p class="lead">Alles, was ihr vor dem ersten Besuch wissen wollt – kurz und klar. Eure Frage ist nicht dabei? Ruft an unter <a href="{TEL_LINK}">{TEL}</a> oder schreibt per <a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp</a>.</p>
     <div class="faq" style="max-width:860px">{items}</div>
     <div class="pill-row" style="margin-top:1.5rem">
-      <a class="btn btn--primary" href="buchen.html">Jetzt buchen</a>
-      <a class="btn btn--ghost" href="preise.html">Preise</a>
-      <a class="btn btn--ghost" href="kontakt.html">Kontakt</a>
+      <a class="btn btn--primary" href="buchen.html">Fahrten reservieren</a>
+      <a class="link" href="preise.html">Alle Preise</a>
+      <a class="link" href="kontakt.html">Kontakt</a>
     </div>
   </div>
 </section>
@@ -52,7 +52,7 @@ html += f'''
 <section class="section">
   <div class="wrap">
     <span class="eyebrow">Kontakt &amp; Anfahrt</span>
-    <h1>Wir freuen uns auf euch</h1>
+    <h1>Kontakt und Anfahrt</h1>
     <p class="lead">Fragen zu Terminen, Gruppen oder Angeboten? Ruft an, schreibt per WhatsApp oder nutzt das Formular – ihr bekommt eine Eingangsbestätigung mit Vorgangsnummer.</p>
     <h2 class="sr-only">Kontaktwege</h2>
     <div class="grid grid-3">
@@ -74,7 +74,7 @@ html += f'''
           <div class="field"><label for="k-firma">Firma / Verein</label><input type="text" id="k-firma" name="firma" autocomplete="organization"></div>
         </div>
         <div class="fields-2">
-          <div class="field"><label for="k-email">E-Mail *</label><input type="email" id="k-email" name="email" autocomplete="email" required><span class="error"></span></div>
+          <div class="field"><label for="k-email">E-Mail *</label><input type="email" id="k-email" name="email" autocomplete="email" inputmode="email" required><span class="error"></span></div>
           <div class="field"><label for="k-tel">Telefon</label><input type="tel" id="k-tel" name="telefon" autocomplete="tel" inputmode="tel"></div>
         </div>
         <div class="fields-2">
@@ -86,7 +86,7 @@ html += f'''
         <div class="field field--check"><input type="checkbox" id="k-einw" name="einwilligung" value="ja" required><label for="k-einw">Ich bin damit einverstanden, dass meine Angaben zur Beantwortung meiner Anfrage verarbeitet werden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>. *</label><span class="error"></span></div>
         <div class="form-status" role="alert" aria-live="polite"></div>
         {fallback_box()}
-        <button class="btn btn--primary btn--block" type="submit" style="margin-top:1rem">Nachricht senden</button>
+        <button class="btn btn--primary btn--block" type="submit" style="margin-top:1rem">Nachricht an das Team senden</button>
       </fieldset>
     </form>
     <div>
