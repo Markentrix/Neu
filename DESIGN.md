@@ -13,13 +13,21 @@ Die Pizzeria Molise ist ein Lokal mit Straßenfenster in der Celler Altstadt: We
 | Name | Hex | Rolle |
 |---|---|---|
 | Papier | `#fffdf8` | Grund (60 %) |
-| Ofenruß | `#1a1612` | Text, Rahmen, Linien (30 %) |
-| Tomate | `#cd212a` | Hauptfarbe für Handlung: Knöpfe, Hervorhebung der Schlagzeile |
-| Basilikum | `#00793c` | Fläche "Zum Mitnehmen", Status "geöffnet", vegetarisch/vegan (Text auf Weiß 5,6:1) |
-| Butter | `#ffd66b` | Preisaufkleber und Hinweisflächen, sonst nichts |
-| Zettelgrau | `#5b544b` | Fließtext zweiter Ordnung (auf Papier 7,3:1) |
+| Ofenruß | `#1a1612` | Text, Rahmen, Linien, dunkler Vollbreite-Block (30 %) |
+| Tomate | `#cd212a` | **Hauptfarbe, einzige Farbe für Handlung:** Knöpfe, Hervorhebung der Schlagzeile, Reservierungsband |
+| Basilikum | `#00793c` | **nur Zustand und Kennzeichnung:** "geöffnet", vegetarisch/vegan, Häkchen, Trikolore-Streifen (ein Grün, kein zweites) |
+| Butter | `#ffd66b` | **nur der Preisaufkleber im Hero**, sonst nichts |
+| Zettelgrau | `#5b544b` | Fließtext zweiter Ordnung |
+| Hover/Linien | `#f3ecdd`, `#e7dfd0`, `#cfc6b3` | Hilfsflächen und Trennlinien auf Papier |
+
+Kontraste (WCAG): Ruß auf Papier 17,7:1, Zettelgrau auf Papier 7,3:1, Tomate auf Papier 5,4:1, Weiß auf Tomate 5,5:1, Basilikum auf Papier 5,4:1, Ruß auf Butter 12,9:1.
 
 Herkunft: Fahne Italiens (Grün, Weiß, Rot) für einen Italiener, gebrochen durch Papier und Ruß, damit es nach Zettel und nicht nach Flagge aussieht. Verlauf, Glow oder Glas kommen nicht vor.
+
+Regeln aus der Prüfung gegen die Skill-Vorgaben:
+- Eine Hauptfarbe (Rot) mit klarer Aufgabe. Grün konkurriert nicht mehr: Der frühere grüne Vollbreite-Block "Zum Mitnehmen" ist jetzt Ruß.
+- Rot und Grün haben gleiche Helligkeit (1,0:1) und stehen nie als Bedeutungsträger allein nebeneinander: Zustände haben immer Text ("Jetzt geöffnet", "vegetarisch").
+- Keine losen Hex-Werte im CSS, alles über Variablen in `:root`.
 
 ## Schriften (lokal, woff2)
 - Display: **Anton** (Plakatschrift, nur Überschriften, Großbuchstaben, sparsam: eine Überschrift pro Block).
