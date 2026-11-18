@@ -1,5 +1,6 @@
 import { h, api, datum, zeit, euro, melde, dialog } from '../common.js';
 import { knopf } from './kern.js';
+import { terminFelder } from './terminfelder.js';
 import { angebotErinnerungDialog, angebotGrundDialog, angebotVerlaengernDialog, mailFehlerHinweis } from './belege.js';
 
 const zuCent = (t) => { const z = parseFloat(String(t).trim().replace(/\./g, '').replace(',', '.')); return Number.isFinite(z) ? Math.round(z * 100) : null; };
@@ -50,10 +51,11 @@ export async function angebotDialog(lid, danach) {
   const gueltig = h('select', { 'aria-label': 'Gültig für' }, [[14, '14 Tage'], [30, '30 Tage'], [60, '60 Tage']].map(([w, t]) => h('option', { value: w, selected: w === 30 }, t)));
   const an = h('input', { type: 'email', value: v.lead.email || '', placeholder: 'E-Mail des Empfängers', 'aria-label': 'E-Mail des Empfängers' });
   const ergebnis = h('div');
+  const termine = terminFelder({ vorhanden: (v.entwurf && v.entwurf.terminvorschlaege) || [] });
   const speichern = async () => {
     const pos = zeilen.filter(z => z.text.trim()).map(z => ({ text: z.text.trim(), menge: z.menge || 1, einheit: z.einheit || '', preis_cent: z.cent || 0 }));
     const r = await api('/api/admin/leads/' + lid + '/angebote', { method: 'POST', body: { beleg_id: beleg, betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, positionen: pos, leistungen: leist.value.split('\n').map(x => x.trim()).filter(Boolean) } });
-    beleg = r.id; return r;
+    beleg = r.id; await termine.speichern(beleg); return r;
   };
   const vorschau = knopf('PDF-Vorschau', async () => { try { melde(m, ''); await speichern(); window.open('/api/admin/leads/' + lid + '/angebote/' + beleg + '/pdf', '_blank', 'noopener'); } catch (x) { melde(m, x.message); } }, 'sec');
   const senden = async (nurLink) => {
@@ -75,6 +77,7 @@ export async function angebotDialog(lid, danach) {
     h('button', { class: 'btn sec small', type: 'button', onclick: () => { zeilen.push({ text: '', menge: 1, einheit: '', cent: 0 }); zeichnen(); } }, '+ Eigene Position')), summe,
     h('label', {}, 'Das bekommt der Kunde (steht im Angebot)'), leist, h('p', { class: 'small muted' }, 'Kommt aus dem Paket und lässt sich frei ändern. Eine Zeile pro Punkt.'),
     h('details', { style: 'margin:10px 0' }, h('summary', {}, 'Texte anpassen'), h('label', {}, 'Betreff'), betreff, h('label', {}, 'Einleitung'), einl, h('label', {}, 'Schluss'), schluss),
+    termine.el,
     h('div', { class: 'row', style: 'gap:10px;flex-wrap:wrap' }, h('div', { class: 'grow', style: 'min-width:220px' }, h('label', {}, 'An (E-Mail)'), an), h('div', {}, h('label', {}, 'Gültig'), gueltig)),
     m, h('div', { class: 'heuteknoepfe' }, vorschau, v.mail_eingerichtet ? h('button', { class: 'btn', onclick: () => senden(false) }, 'Angebot jetzt senden') : h('button', { class: 'btn', onclick: () => senden(true) }, 'Angebot erstellen und Link kopieren'),
       v.mail_eingerichtet ? h('button', { class: 'btn sec small', onclick: () => senden(true) }, 'Nur Link erstellen (ohne Mail)') : ''),

@@ -148,18 +148,18 @@ def monatsbericht(an: str, firma: str, monat: str, pdf: bytes, dateiname: str, t
     return senden(an, f"Ihr Monatsbericht {monat}", text, (dateiname, pdf, "application/pdf"))
 
 
-def beleg(an: str, art: str, nummer: str, name: str | None, pdf_bytes: bytes, dateiname: str, faellig=None, angebot_link: bool = False) -> tuple[bool, str]:
+def beleg(an: str, art: str, nummer: str, name: str | None, pdf_bytes: bytes, dateiname: str, faellig=None, angebot_link: bool = False, link: str | None = None, termine: str = "") -> tuple[bool, str]:
     hallo = f"Hallo {name}," if name else "Hallo,"
     if art == "angebot":
-        text = (f"{hallo}\n\nanbei unser Angebot {nummer}." + (f"\n\nSie können es im Kundenportal ansehen und dort direkt annehmen: {config.BASE_URL}/app#belege" if angebot_link else "") +
-                "\n\nBei Fragen melden Sie sich gern." + SIGNATUR)
+        ziel = f"\n\nSie können es online ansehen und dort direkt annehmen: {link}" if link else (f"\n\nSie können es im Kundenportal ansehen und dort direkt annehmen: {config.BASE_URL}/app#belege" if angebot_link else "")
+        text = f"{hallo}\n\nanbei unser Angebot {nummer}." + ziel + ("\n\n" + termine.strip() if termine else "") + "\n\nBei Fragen melden Sie sich gern." + SIGNATUR
         return senden(an, f"Angebot {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
     text = (f"{hallo}\n\nanbei erhalten Sie die Rechnung {nummer}." + (f"\nBitte überweisen Sie den Betrag bis zum {faellig:%d.%m.%Y}." if faellig else "") +
             "\n\nBei Fragen melden Sie sich gern." + SIGNATUR)
     return senden(an, f"Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
 
 
-def lead_angebot(an: str, name: str | None, firma: str, nummer: str, pdf_bytes: bytes, dateiname: str, gueltig, link: str, absender: str, erinnerung: bool = False) -> tuple[bool, str]:
+def lead_angebot(an: str, name: str | None, firma: str, nummer: str, pdf_bytes: bytes, dateiname: str, gueltig, link: str, absender: str, erinnerung: bool = False, termine: str = "") -> tuple[bool, str]:
     hallo = f"Guten Tag {name}," if name else "Guten Tag,"
     if erinnerung:
         text = (f"{hallo}\n\nwir wollten kurz nachfragen, ob Sie unser Angebot {nummer} für {firma} schon ansehen konnten. Zur Sicherheit hängen wir es noch einmal an.\n\n"
@@ -169,6 +169,7 @@ def lead_angebot(an: str, name: str | None, firma: str, nummer: str, pdf_bytes: 
         return senden(an, f"Erinnerung: Ihr Angebot {nummer} von {absender}", text, (dateiname, pdf_bytes, "application/pdf"))
     text = (f"{hallo}\n\nvielen Dank für Ihr Interesse. Anbei erhalten Sie unser Angebot {nummer} für {firma} als PDF.\n\n"
             f"Sie können es auch online ansehen und dort direkt annehmen:\n{link}\n\n"
+            + termine
             + (f"Das Angebot ist gültig bis zum {gueltig:%d.%m.%Y}.\n\n" if gueltig else "")
             + "Bei Fragen melden Sie sich gern, wir sprechen alles in Ruhe durch." + SIGNATUR)
     return senden(an, f"Ihr Angebot {nummer} von {absender}", text, (dateiname, pdf_bytes, "application/pdf"))

@@ -6,13 +6,14 @@ import re
 import secrets
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import angebotsfluss, angebotsgrund, belege, config, einstellungen, mailer, push, rechtstexte
+from . import angebotsfluss, angebotsgrund, routes_angebottermin, belege, config, einstellungen, mailer, push, rechtstexte
 from .db import tx
+from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin
 
 router = APIRouter()
@@ -70,10 +71,10 @@ def vorlage(lid: str, user: dict = Depends(require_admin)):
         cur.execute("SELECT paket_code FROM angebotsanfragen WHERE lead_id=%s ORDER BY erstellt_am DESC LIMIT 1", (lid,))
         a = cur.fetchone()
         f = rechtstexte.firma(cur)
-        cur.execute("SELECT id, nummer, status, betreff, einleitung, schluss, positionen, leistungen FROM belege WHERE lead_id=%s AND art='angebot' AND status='entwurf' ORDER BY erstellt_am DESC LIMIT 1", (lid,))
+        cur.execute("SELECT id, nummer, status, betreff, einleitung, schluss, positionen, leistungen, terminvorschlaege FROM belege WHERE lead_id=%s AND art='angebot' AND status='entwurf' ORDER BY erstellt_am DESC LIMIT 1", (lid,))
         entwurf = cur.fetchone()
     return {"lead": {"id": l["id"], "firma": l["firma"], "ansprechpartner": l["ansprechpartner"], "email": l["email"], "status": l["status"], "kunden_id": l["kunden_id"]},
-            "pakete": pakete, "vorschlag_paket": a and a["paket_code"], "entwurf_id": entwurf and entwurf["id"], "entwurf": entwurf and {k: entwurf[k] for k in ("betreff", "einleitung", "schluss", "positionen", "leistungen")},
+            "pakete": pakete, "vorschlag_paket": a and a["paket_code"], "entwurf_id": entwurf and entwurf["id"], "entwurf": entwurf and {k: entwurf[k] for k in ("betreff", "einleitung", "schluss", "positionen", "leistungen", "terminvorschlaege")},
             "gruss": _vorname_gruss(l), "mwst_satz": float(f["mwst_satz"]), "kleinunternehmer": bool(f["kleinunternehmer"]),
             "firma_ok": bool(f["name"] and f["strasse"]), "mail_eingerichtet": mailer.konfiguriert()}
 
@@ -195,7 +196,7 @@ def senden(lid: str, bid: str, data: SendenIn, user: dict = Depends(require_admi
     link = _link(token)
     gesendet, grund = False, ""
     if not data.nur_link:
-        gesendet, grund = mailer.lead_angebot(an, l.get("ansprechpartner"), l["firma"], nummer, daten, name, gueltig, link, f["name"], erinnerung=data.erinnerung and b["status"] != "entwurf")
+        gesendet, grund = mailer.lead_angebot(an, l.get("ansprechpartner"), l["firma"], nummer, daten, name, gueltig, link, f["name"], erinnerung=data.erinnerung and b["status"] != "entwurf", termine=routes_angebottermin.mailtext(b.get("terminvorschlaege") or [], link))
         from . import angebotserinnerung
         angebotserinnerung.mail_ergebnis(bid, gesendet, grund)
     with tx("admin") as cur:
@@ -231,6 +232,19 @@ def _holen(cur, token: str) -> dict:
     return b
 
 
+def link_sicherstellen(cur, bid) -> str:
+    """Online-Link eines Angebots: der vorhandene bleibt gültig, sonst wird einer angelegt (gilt für Lead- und Kunden-Angebote)."""
+    cur.execute("SELECT annahme_hash, annahme_token_enc FROM belege WHERE id=%s", (bid,))
+    b = cur.fetchone()
+    if b["annahme_token_enc"]:
+        alt = einstellungen.entschluesseln(b["annahme_token_enc"])
+        if alt and b["annahme_hash"] == _hash(alt):
+            return _link(alt)
+    token = secrets.token_urlsafe(24)
+    cur.execute("UPDATE belege SET annahme_hash=%s, annahme_token_enc=%s, geaendert_am=now() WHERE id=%s", (_hash(token), einstellungen.verschluesseln(token), bid))
+    return _link(token)
+
+
 def _info(b: dict, firma: dict) -> dict:
     abgelaufen = bool(b["faellig_am"] and b["faellig_am"] < date.today())
     return {"anbieter": firma["name"], "nummer": b["nummer"], "empfaenger": (b["empfaenger"] or {}).get("firma") or b["lead_firma"], "betreff": b["betreff"], "einleitung": b["einleitung"], "schluss": b["schluss"],
@@ -254,9 +268,10 @@ def ansehen(token: str, request: Request):
         if not b["angesehen_am"]:
             cur.execute("UPDATE belege SET angesehen_am=now() WHERE id=%s", (b["id"],))
             ids = _empfaenger(cur, b)
+        termine = routes_angebottermin.zeigen(cur, b)
     if ids:
         push.senden(ids, "Angebot angesehen", b["lead_firma"] or (b.get("empfaenger") or {}).get("firma") or "", ("/admin#lead/" + str(b["lead_id"])) if b["lead_id"] else ("/admin#beleg/" + str(b["id"])), "angebotsreaktion")
-    return _info(b, f)
+    return {**_info(b, f), **termine}
 
 
 @oeffentlich.get("/{token}/pdf")
@@ -290,6 +305,25 @@ def annehmen(token: str, data: AnnahmeIn, request: Request):
         info = angebotsfluss.angenommen(cur, b, name, "online", "Angebotsseite", client_ip(request))
     angebotsfluss.melden(info)
     return {"ok": True}
+
+
+class TerminWahl(BaseModel):
+    start: str = Field(max_length=40)
+
+
+@oeffentlich.post("/{token}/termin")
+def termin_waehlen(token: str, data: TerminWahl, bg: BackgroundTasks, request: Request):
+    """Der Empfänger wählt einen der Terminvorschläge: Gespräch im Admin-Kalender, Einladung per Mail, Hinweis ans Team."""
+    rate_limit("angebottermin:" + client_ip(request), 15, 3600)
+    with tx("system") as cur:
+        b = _holen(cur, token)
+        g = routes_angebottermin.waehlen(cur, b, data.start)
+        an = [x for x in [admin_empfaenger(cur)] if x]
+        ids = _empfaenger(cur, b)
+        audit(cur, None, "angebot_termin_gewaehlt", b["kunden_id"], {"beleg": str(b["id"]), "start": g["start"].isoformat(), "ip": client_ip(request)})
+    push.senden(ids, "Beratungstermin gewählt", f"{b['lead_firma'] or (b.get('empfaenger') or {}).get('firma') or ''}: {routes_angebottermin.lokal(g['start'])}", "/admin#kalender", "buchung")
+    bg.add_task(routes_angebottermin.mails, g, b["nummer"], an)
+    return {"ok": True, "wann": routes_angebottermin.lokal(g["start"])}
 
 
 GRUENDE = {"zu_teuer": "Zu teuer", "spaeter": "Später / gerade kein Thema", "anderer_anbieter": "Anderer Anbieter", "nicht_passend": "Passt nicht zu unserem Bedarf", "sonstiges": "Sonstiges"}

@@ -6,14 +6,14 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import angebotsfluss, angebotsgrund, belege, mailer, rechtstexte, zahlungsabgleich
+from . import angebotsfluss, angebotsgrund, routes_angebottermin, belege, mailer, rechtstexte, zahlungsabgleich
 from .db import tx
 from .security import audit, require_admin, require_inhaber
 
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
 
-FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, angesehen_am, erinnerungen, erinnert_am, grund_code, grund_text, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
+FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, angesehen_am, erinnerungen, erinnert_am, grund_code, grund_text, terminvorschlaege, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
 UEBERFAELLIG = "(art='rechnung' AND status IN ('gestellt','versendet') AND faellig_am < current_date)"
 
 
@@ -159,7 +159,8 @@ def detail(bid: str, user: dict = Depends(require_admin)):
         b = _laden(cur, bid)
         cur.execute("SELECT kundennummer, firma, email, referenzkunde FROM kunden WHERE id=%s", (b["kunden_id"],))
         k = cur.fetchone()
-    return {"beleg": b, "kunde": k}
+        t = routes_angebottermin.gebucht(cur, bid) if b["art"] == "angebot" else None
+    return {"beleg": b, "kunde": k, "termin_gebucht": t and {"id": t["id"], "start": t["start"], "ende": t["ende"]}}
 
 
 @router.put("/belege/{bid}")
@@ -176,6 +177,25 @@ def aendern(bid: str, data: BelegPut, user: dict = Depends(require_admin)):
                     (data.betreff, data.einleitung, data.schluss, data.leistungszeitraum, json.dumps(pos), json.dumps([x.strip()[:300] for x in data.leistungen if x.strip()]), data.notiz, s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], bid))
         audit(cur, user, "beleg_geaendert", b["kunden_id"], {"beleg": bid})
     return {"ok": True}
+
+
+class TermineIn(BaseModel):
+    termine: list[str] = Field(default=[], max_length=5)
+
+
+@router.put("/belege/{bid}/termine")
+def termine_speichern(bid: str, data: TermineIn, user: dict = Depends(require_admin)):
+    """Terminvorschläge für ein Beratungsgespräch am Angebot (Kunden- und Lead-Angebote). Auch nach dem Versand änderbar, solange kein Termin gebucht ist."""
+    with tx("admin") as cur:
+        b = _laden(cur, bid)
+        if b["art"] != "angebot" or b["status"] not in ("entwurf", "gestellt", "versendet", "angenommen"):
+            raise HTTPException(400, "Terminvorschläge gibt es nur an offenen Angeboten.")
+        if routes_angebottermin.gebucht(cur, bid):
+            raise HTTPException(400, "Es ist schon ein Gespräch gebucht. Bitte zuerst im Kalender absagen.")
+        liste = routes_angebottermin.pruefen(cur, data.termine, bid)
+        cur.execute("UPDATE belege SET terminvorschlaege=%s::jsonb, geaendert_am=now() WHERE id=%s", (json.dumps(liste), bid))
+        audit(cur, user, "beleg_terminvorschlaege", b["kunden_id"], {"beleg": bid, "anzahl": len(liste)})
+    return {"ok": True, "termine": liste}
 
 
 @router.delete("/belege/{bid}")
@@ -238,9 +258,14 @@ def senden(bid: str, user: dict = Depends(require_admin)):
         cur.execute("SELECT email, ansprechpartner FROM kunden WHERE id=%s", (b["kunden_id"],))
         k = cur.fetchone()
         daten, name = belege.beleg_pdf(cur, bid)
+        link = None
+        if b["art"] == "angebot":      # Online-Link zum Ansehen, Annehmen und Terminwählen (derselbe Link bleibt bei erneutem Senden gültig)
+            from .routes_leadangebot import link_sicherstellen
+            link = link_sicherstellen(cur, bid)
     if not k["email"]:
         raise HTTPException(400, "Beim Kunden ist keine E-Mail-Adresse hinterlegt.")
-    ok, fehler = mailer.beleg(k["email"], b["art"], b["nummer"], k["ansprechpartner"], daten, name, b["faellig_am"], angebot_link=b["art"] == "angebot")
+    ok, fehler = mailer.beleg(k["email"], b["art"], b["nummer"], k["ansprechpartner"], daten, name, b["faellig_am"], angebot_link=b["art"] == "angebot", link=link,
+                              termine=routes_angebottermin.mailtext(b.get("terminvorschlaege") or [], link))
     if b["art"] == "angebot":
         from . import angebotserinnerung
         angebotserinnerung.mail_ergebnis(bid, ok, fehler)

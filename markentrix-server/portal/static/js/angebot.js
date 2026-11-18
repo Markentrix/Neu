@@ -18,6 +18,22 @@ function leistungen(d) {
     h('ul', {}, d.leistungen.map(x => String(x).startsWith('## ') ? h('li', { class: 'ueber' }, String(x).slice(3)) : h('li', {}, String(x)))));
 }
 
+const wann = (iso) => new Date(iso).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }) + ' Uhr';
+
+function terminBlock(d) {
+  if (d.status === 'abgelehnt') return '';
+  if (d.termin) return h('section', { class: 'msg ok', 'aria-live': 'polite' }, h('b', {}, 'Ihr Beratungsgespräch: '), wann(d.termin.start) + '. Die Kalendereinladung haben wir Ihnen per E-Mail geschickt.', d.termin_ort ? h('div', { class: 'small' }, d.termin_ort) : '');
+  if (!d.termine || !d.termine.length) return '';
+  const fehler = h('div', { 'aria-live': 'polite' });
+  const knoepfe = d.termine.map(t => h('button', { class: 'btn sec', type: 'button', style: 'display:block;width:100%;margin:6px 0;text-align:left', onclick: async (e) => {
+    const alle = [...e.currentTarget.parentNode.querySelectorAll('button')]; alle.forEach(b => { b.disabled = true; }); melde(fehler, '');
+    try { await api('/api/angebot/' + encodeURIComponent(token) + '/termin', { method: 'POST', body: { start: t } }); await laden(); }
+    catch (x) { melde(fehler, x.message); alle.forEach(b => { b.disabled = false; }); }
+  } }, wann(t)));
+  return h('section', { class: 'leistbox', 'aria-labelledby': 'termintitel' }, h('h3', { id: 'termintitel' }, 'Beratungsgespräch: Termin wählen'),
+    h('p', { class: 'small muted' }, 'Suchen Sie sich einen Termin aus (' + d.termin_dauer + ' Minuten). Sie bekommen sofort eine Bestätigung mit Kalendereinladung.'), knoepfe, fehler);
+}
+
 function zeigen(d) {
   titel.textContent = 'Angebot ' + d.nummer;
   const teile = [h('p', { class: 'muted small', style: 'text-align:center;margin-top:-6px' }, 'von ' + d.anbieter + ' für ' + d.empfaenger)];
@@ -27,6 +43,7 @@ function zeigen(d) {
   if (d.schluss) teile.push(h('p', { style: 'white-space:pre-line;margin-top:14px' }, d.schluss));
   if (d.bedingungen) teile.push(h('section', { class: 'bedingungen' }, h('h3', {}, 'Bedingungen'), h('p', { class: 'small muted', style: 'white-space:pre-line' }, d.bedingungen)));
   teile.push(h('p', { class: 'small muted' }, 'Gültig bis ' + datum(d.gueltig_bis) + '. ', h('a', { href: '/api/angebot/' + encodeURIComponent(token) + '/pdf', target: '_blank', rel: 'noopener' }, 'Als PDF öffnen')));
+  teile.push(terminBlock(d));
   if (d.status === 'angenommen') {
     teile.push(h('div', { class: 'msg ok' }, 'Dieses Angebot wurde am ' + datum(d.angenommen_am) + ' angenommen. Vielen Dank! Wir melden uns bei Ihnen zum nächsten Schritt.'));
   } else if (d.status === 'abgelehnt') {

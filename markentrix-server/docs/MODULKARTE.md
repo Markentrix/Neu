@@ -11,13 +11,13 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 |---|---|---|---|
 | `__init__` | 1 | 0 | – |
 | `betrieb` | 1 | 29 | `cli`, `jobs`, `ki`, `mailer` und 2 weitere |
-| `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 46 weitere |
+| `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 47 weitere |
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
 | `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 147 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 37 weitere |
 | `fehlerhilfe` | 1 | 142 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
-| `mailer` | 1 | 492 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 35 weitere |
+| `mailer` | 1 | 493 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
 | `pdf` | 1 | 236 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
 | `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
@@ -93,7 +93,7 @@ Leads, Zuweisung, Sperrliste, Gesprächsleitfaden, Anruf-Modus, Erstgespräche, 
 | `sperre` | 2 | 64 | `funnelcheck`, `jobs`, `leadkontakt`, `leadpruefung` und 5 weitere |
 | `visitenkarte` | 2 | 186 | `main` |
 | `zuweisung` | 2 | 39 | `jobs`, `leadeingang`, `routes_leadimport`, `routes_leadsteuerung` und 2 weitere |
-| `routes_buchung` | 3 | 245 | `jobs`, `main`, `routes_kalender`, `routes_leadtermin` |
+| `routes_buchung` | 3 | 245 | `jobs`, `main`, `routes_angebottermin`, `routes_kalender` und 1 weitere |
 | `routes_kalender` | 3 | 183 | `main` |
 | `routes_leadimport` | 3 | 261 | `main` |
 | `routes_leadsteuerung` | 3 | 70 | `main` |
@@ -113,7 +113,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 |---|---|---|---|
 | `abo` | 2 | 118 | `jobs`, `routes_betriebplus`, `t57.py` |
 | `angebotserinnerung` | 2 | 248 | `jobs`, `main`, `routes_belege`, `routes_leadangebot` |
-| `angebotsfluss` | 2 | 35 | `routes_belege`, `routes_leadangebot` |
+| `angebotsfluss` | 2 | 38 | `routes_belege`, `routes_leadangebot` |
 | `angebotsgrund` | 2 | 51 | `main`, `routes_angebotsplus`, `routes_belege`, `routes_leadangebot` |
 | `belege` | 2 | 180 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 3 weitere |
 | `preisaenderung` | 2 | 257 | `jobs`, `main` |
@@ -121,8 +121,9 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `vertriebangebot` | 2 | 276 | `main` |
 | `zahlungsabgleich` | 2 | 98 | `routes_belege` |
 | `routes_angebotsplus` | 3 | 122 | `main` |
-| `routes_belege` | 3 | 466 | `main`, `routes_werkzeuge` |
-| `routes_leadangebot` | 3 | 320 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `vertriebangebot` und 1 weitere |
+| `routes_angebottermin` | 3 | 129 | `routes_belege`, `routes_leadangebot` |
+| `routes_belege` | 3 | 491 | `main`, `routes_werkzeuge` |
+| `routes_leadangebot` | 3 | 354 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `routes_belege` und 2 weitere |
 | `routes_pakete` | 3 | 211 | `main`, `tipps` |
 | `routes_provision` | 3 | 181 | `main` |
 | `routes_zahlung` | 3 | 312 | `jobs`, `main`, `t25.py` |
@@ -177,7 +178,7 @@ Heute-Seite, Anfragen, Briefing, Onboarding, Zusammenarbeit, Wissen, Berichte, D
 | `routes_vorlagen` | 3 | 54 | `main` |
 | `routes_wert` | 3 | 56 | `main` |
 | `routes_wissen` | 3 | 329 | `main` |
-| `routes_zusammenarbeit` | 3 | 711 | `angebotsfluss`, `jobs`, `main`, `routes_angebotsinhalte` und 18 weitere |
+| `routes_zusammenarbeit` | 3 | 711 | `angebotsfluss`, `jobs`, `main`, `routes_angebotsinhalte` und 19 weitere |
 
 ## Admin und Betrieb (`admin`)
 

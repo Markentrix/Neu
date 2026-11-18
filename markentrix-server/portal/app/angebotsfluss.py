@@ -20,6 +20,9 @@ def angenommen(cur, b: dict, name: str, kanal: str, von: str, ip: str | None = N
         l = cur.fetchone()
         info["ids"] = push.admins(cur) + (push.partner(cur, l["vertriebspartner_id"]) if l and l["vertriebspartner_id"] else [])
         info["an_kunde"] = ((b.get("empfaenger") or {}).get("email") or (l and l["email"]) or "").strip() or None
+    else:       # Angebot an einen bestehenden Kunden (ohne Lead)
+        info["ids"] = push.admins(cur)
+        info["an_kunde"] = ((b.get("empfaenger") or {}).get("email") or "").strip() or None
     audit(cur, user, "lead_angebot_angenommen", None, {"lead": str(b.get("lead_id")), "nummer": b["nummer"], "name": name, "kanal": kanal, "ip": ip})
     info["an_admin"] = admin_empfaenger(cur)
     return info
@@ -28,7 +31,7 @@ def angenommen(cur, b: dict, name: str, kanal: str, von: str, ip: str | None = N
 def melden(info: dict) -> None:
     """Nach dem Commit: Push ans Team und den Vertriebler, Mail ans Team, Bestätigung an den Kunden."""
     link = f"{config.BASE_URL}/admin#lead/{info['lead_id']}" if info["lead_id"] else config.BASE_URL + "/admin"
-    push.senden(info["ids"], "Angebot angenommen 🎉", f"{info['firma']} hat {info['nummer']} angenommen.", "/admin#lead/" + str(info["lead_id"]), "angebotsreaktion")
+    push.senden(info["ids"], "Angebot angenommen 🎉", f"{info['firma']} hat {info['nummer']} angenommen.", ("/admin#lead/" + str(info["lead_id"])) if info["lead_id"] else "/admin#belege", "angebotsreaktion")
     if info["an_admin"]:
         mailer.senden(info["an_admin"], f"Angebot {info['nummer']} wurde angenommen", f"{info['name']} ({info['firma']}) hat das Angebot {info['nummer']} angenommen ({'online' if info['kanal'] == 'online' else 'vom Team erfasst'}).\n\nNächster Schritt: Im Lead „In Kunden umwandeln“ wählen.\n{link}" + mailer.SIGNATUR)
     if info["an_kunde"]:

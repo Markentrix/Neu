@@ -1,6 +1,7 @@
 import { h, api, csvLaden, datum, dialog, euro, melde } from '../common.js';
 import { lastschriftKarte } from './einstellungen.js';
 import { neukundenAngebot } from './leadangebot.js';
+import { terminFelder } from './terminfelder.js';
 import { angebotsAuswertungKarte } from './angebotsplus.js';
 import { V, auswahl, fehler, filterKarte, fmtEuro, knopf, kopf, sicher, tabelle } from './kern.js';
 
@@ -155,8 +156,8 @@ V.belege = async () => {
 };
 
 export async function belegEditor(id, kid, art) {
-  let b, k, vorschlag = [];
-  if (id) { const r = await api('/api/admin/belege/' + id); b = r.beleg; k = r.kunde; if (!k && b.lead_id) { location.hash = '#lead/' + b.lead_id; return h('div'); } }
+  let b, k, vorschlag = [], gebuchtTermin = null;
+  if (id) { const r = await api('/api/admin/belege/' + id); b = r.beleg; k = r.kunde; gebuchtTermin = r.termin_gebucht; if (!k && b.lead_id) { location.hash = '#lead/' + b.lead_id; return h('div'); } }
   else {
     const r = await api('/api/admin/kunden/' + kid), v = await api('/api/admin/kunden/' + kid + '/belege-vorlage');
     k = { kundennummer: r.kunde.kundennummer, firma: r.kunde.firma, email: r.kunde.email, referenzkunde: r.kunde.referenzkunde };
@@ -176,6 +177,7 @@ export async function belegEditor(id, kid, art) {
   const pakete = istAngebot && frei ? await api('/api/admin/katalog/leistungstexte').catch(() => []) : [];
   const paketWahl = h('select', { 'aria-label': 'Leistungen eines Pakets einfügen', style: 'margin-bottom:8px', onchange: () => { const p = pakete.find(x => x.code === paketWahl.value); paketWahl.value = ''; if (p && (p.leistungen || []).length) leist.value = (leist.value.trim() ? leist.value.trim() + '\n' : '') + (leist.value.trim() ? '## ' + p.name + '\n' : '') + p.leistungen.join('\n'); } }, h('option', { value: '' }, '+ Leistungen eines Pakets einfügen …'), pakete.map(p => h('option', { value: p.code }, p.name)));
   const einl = h('textarea', { rows: 3, disabled: !frei }, b.einleitung || ''), schluss = h('textarea', { rows: 3, disabled: !frei }, b.schluss || '');
+  const termine = istAngebot ? terminFelder({ vorhanden: b.terminvorschlaege || [], gebucht: gebuchtTermin, belegId: id, eigenerKnopf: !frei }) : null;
   const rechne = () => { const n = zeilen.reduce((a, z) => a + Math.round(Number(z.menge || 0) * (z.preis_cent || 0)), 0); sum.textContent = 'Zwischensumme netto: ' + euro(n) + (frei ? ' (Umsatzsteuer wird beim Ausstellen nach den Firmendaten berechnet)' : ''); };
   const zeichne = () => {
     box.replaceChildren(...zeilen.map((z, i) => h('div', { class: 'row', style: 'margin-bottom:6px;align-items:center' },
@@ -191,8 +193,8 @@ export async function belegEditor(id, kid, art) {
     if (bestaetigen && !confirm(bestaetigen)) return;
     try { const r = await api(pfad, { method: 'POST', body }); if (ok) ok(r); } catch (x) { fehler(m, x); } }, art);
   const speichern = knopf('Entwurf speichern', async () => { try {
-    if (id) { await api('/api/admin/belege/' + id, { method: 'PUT', body: daten() }); melde(m, 'Gespeichert.', 'ok'); }
-    else { const r = await api('/api/admin/kunden/' + kid + '/belege', { method: 'POST', body: { art, ...daten() } }); location.hash = '#beleg/' + r.id; }
+    if (id) { await api('/api/admin/belege/' + id, { method: 'PUT', body: daten() }); if (termine && !termine.gebucht) await termine.speichern(id); melde(m, 'Gespeichert.', 'ok'); }
+    else { const r = await api('/api/admin/kunden/' + kid + '/belege', { method: 'POST', body: { art, ...daten() } }); if (termine) await termine.speichern(r.id); location.hash = '#beleg/' + r.id; }
   } catch (x) { fehler(m, x); } }, 'btn');
   const neu = () => location.reload();
   const knoepfe = [];
@@ -223,6 +225,7 @@ export async function belegEditor(id, kid, art) {
       !frei ? h('div', { style: 'text-align:right;margin-top:8px' }, h('div', {}, 'Netto ' + fmtEuro(b.netto_cent)), b.kleinunternehmer ? h('div', { class: 'small muted' }, 'Kleinunternehmer – keine Umsatzsteuer') : h('div', {}, 'USt ' + Number(b.ust_satz) + ' % ' + fmtEuro(b.ust_cent)), h('div', {}, h('b', {}, 'Gesamt ' + fmtEuro(b.brutto_cent)))) : '',
       istAngebot ? [h('label', {}, 'Das bekommt der Kunde (steht im Angebot)'), frei ? paketWahl : '', leist] : '',
       h('label', {}, 'Schlusstext (optional)'), schluss,
+      termine ? termine.el : '',
       !frei ? h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Datum ' + datum(b.datum) + ' · ' + (b.art === 'rechnung' ? 'zahlbar bis ' : 'gültig bis ') + datum(b.faellig_am) + (b.versendet_am ? ' · gesendet am ' + datum(b.versendet_am) : '') + (b.bezahlt_am ? ' · bezahlt am ' + datum(b.bezahlt_am) : '') + (b.mahnstufe ? ' · Mahnstufe ' + b.mahnstufe : '')) : ''),
     h('div', { class: 'row' }, knoepfe));
 }

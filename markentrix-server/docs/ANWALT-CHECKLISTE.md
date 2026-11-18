@@ -64,3 +64,7 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 
 ## Sicherungskopie auf dem PC des Inhabers
 - Der Inhaber holt täglich die neueste Server-Sicherung auf seinen Windows-PC (Ordner „Markentrix-Server-Backup“, 30 Tage Aufbewahrung, die 3 neuesten bleiben). Die Sicherung enthält Kundendaten (auch Endkunden-Daten aus Shop und Anfragen) und die Zugangsdaten der `.env`. Zu klären: Passt die Kopie auf dem PC zum Löschkonzept und zum AVV (Anlage 2, Aufbewahrung 30 Tage)? Pflicht zu verschlüsseltem Laufwerk (BitLocker) und keiner Cloud-Synchronisation? Eintrag im Verzeichnis der Verarbeitungstätigkeiten.
+
+## Terminvorschläge im Angebot
+- Der Empfänger wählt im Angebots-Link einen Beratungstermin; das Portal speichert Name und E-Mail im Gespräch und schickt eine Bestätigung mit Kalendereinladung. Prüfen: reicht der Hinweis im Angebot/Datenschutztext als Information, oder braucht es beim Wählen einen Einwilligungshinweis?
+- Bei Angeboten an bestehende Kunden entsteht der Online-Link erst beim Senden (derselbe Link bleibt bei erneutem Senden gültig). Öffnungsmessung nur über den Link, kein Tracking-Pixel.
