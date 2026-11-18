@@ -2079,3 +2079,8 @@ html:root :focus-visible{outline:3px solid #0C2128;outline-offset:3px}
 html:root :is(.band,.ba-sec,.deal-sec,.site-footer) :focus-visible{outline-color:#FFFFFF}
 
 .ki-belege{margin:0}
+
+/* 45 · Kupferwort auch für „accent“ (Unterseiten): kein Strich, das Schlüsselwort steht in Kupfer */
+html:root .accent{background-image:none;padding:0;color:#C67432}
+html:root :is(.band,.ba-sec,.deal-sec,.sec--dark,.site-footer) .accent{color:#F1A268;background-image:none}
+html:root .h1-sub .accent,html:root .h1-sub .hl{color:inherit}
