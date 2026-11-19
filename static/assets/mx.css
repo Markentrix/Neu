@@ -2084,3 +2084,40 @@ html:root :is(.band,.ba-sec,.deal-sec,.site-footer) :focus-visible{outline-color
 html:root .accent{background-image:none;padding:0;color:#C67432}
 html:root :is(.band,.ba-sec,.deal-sec,.sec--dark,.site-footer) .accent{color:#F1A268;background-image:none}
 html:root .h1-sub .accent,html:root .h1-sub .hl{color:inherit}
+
+/* 46 · Startseite ruhiger: Angebote als eine Fläche, Branchen als Bildzeilen, Kopfbereich reduziert */
+html:root .page-home .deal-sec{padding:clamp(48px,6vw,96px) 0}
+html:root .page-home .deal-sec .wrap{display:block}
+.deal-panel{max-width:1080px;margin:0 auto}
+html:root .page-home .deal-head{text-align:left;margin:0 0 clamp(20px,3vw,36px);max-width:760px}
+html:root .page-home .deal-head h2{font-size:clamp(1.9rem,1.2rem + 2.2vw,3rem);line-height:1.06;max-width:18ch}
+html:root .page-home .deal-badges{justify-content:flex-start}
+.offer-rows{border-top:1px solid rgba(255,255,255,.28)}
+.offer-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:20px clamp(20px,4vw,56px);align-items:center;padding:clamp(22px,3vw,34px) 0;border-bottom:1px solid rgba(255,255,255,.28)}
+.offer-txt h3{margin:4px 0 6px;font-size:clamp(1.25rem,1rem + .9vw,1.7rem)}
+.offer-txt p{margin:0;color:rgba(255,255,255,.9)}
+html:root .offer-row .deal-price b{color:#FFFFFF;font-size:clamp(2.6rem,1.8rem + 2.4vw,3.8rem)}
+html:root .offer-row .deal-price span,html:root .offer-row .deal-month,html:root .offer-row .deal-month b,html:root .offer-row .deal-total{color:rgba(255,255,255,.92)}
+.offer-row .deal-price{margin:0}
+.offer-row .deal-total{margin:2px 0 0;font-size:.9375rem}
+html:root .offer-row .btn--primary{background:#C67432;border-color:#C67432;color:#0C2128;white-space:nowrap}
+html:root .offer-row .btn--primary:hover{background:#D4823F;border-color:#D4823F}
+.offer-incl{margin:20px 0 0;color:rgba(255,255,255,.92)}
+html:root .page-home .deal-note{margin:14px 0 0;max-width:none}
+@media (max-width:900px){.offer-row{grid-template-columns:minmax(0,1fr) auto}.offer-txt{grid-column:1/-1}}
+@media (max-width:560px){.offer-row{grid-template-columns:minmax(0,1fr)}.offer-row .btn{width:100%;white-space:normal}}
+
+.branch-rows{display:grid;gap:clamp(32px,5vw,72px)}
+.branch-row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(20px,4vw,64px);align-items:center}
+.branch-row:nth-child(even) .bphoto{order:2}
+.branch-row .bphoto{border-radius:12px;box-shadow:var(--shadow-md)}
+.branch-row-txt{display:flex;flex-direction:column;gap:12px;min-width:0}
+.branch-row .pain{font-family:var(--f-head);font-weight:700;font-size:clamp(1.4rem,1.1rem + 1.2vw,2.1rem);letter-spacing:-.02em;line-height:1.15;color:var(--tiefsee);margin:0}
+.branch-row .sys{margin:0;max-width:46ch;color:var(--nebentext)}
+.branch-row .row{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;margin-top:6px}
+@media (max-width:760px){.branch-row{grid-template-columns:minmax(0,1fr)}.branch-row:nth-child(even) .bphoto{order:0}.branch-row .btn{white-space:normal}}
+
+/* Kopfbereich: nur Überschrift, ein Satz, zwei Knöpfe und das Projektbild; Ansprechpartner und Audio stehen im Abschnitt darunter */
+.person-intro{margin:18px 0 0}
+.person-intro .intro{margin:0}
+html:root .offer-incl b{color:#FFFFFF}

@@ -367,3 +367,12 @@ Geprüft: Build, Linkcheck, SEO-Audit, html-validate, axe auf allen 95 Seiten be
 ## Nachtrag 19.11.2026: Search Console, Prüfung „fehlgeschlagen“
 
 Google meldet für markentrix.de, die angeforderte Prüfung der Fehlerbehebung bei Seitenindexierung sei fehlgeschlagen. Die Beispiele im Bericht „Seite mit Weiterleitung“ sind `http://markentrix.de/`, `http://www.markentrix.de/` und `https://www.markentrix.de/`. Das sind gewollte Weiterleitungen (308 beziehungsweise 301 auf `https://markentrix.de/`, Endstatus 200). Dafür gibt es nichts zu beheben, die Prüfung schlägt bei diesem Meldungstyp immer fehl, solange die Adressen weiterleiten. Geändert: In `robots.txt` ist `/kunden-dashboard` nicht mehr gesperrt, damit Google die Weiterleitung sieht und die alte Adresse aus dem Index nimmt (sonst Meldung „Indexiert, obwohl durch robots.txt-Datei blockiert“). `/api/` und `/downloads/` bleiben gesperrt, sie sind intern nicht verlinkt. Offen auf dem Server (docs/server/markentrix-site.caddy): `/kunden-dashboard` leitet noch auf das alte Portal `markentrix.netlify.app` weiter; besser auf `portal.markentrix.de` oder 410.
+
+## Nachtrag 19.11.2026: Startseite ruhiger (edler, weniger Vorlage)
+
+Auslöser: Einschätzung der Startseite („eher hochwertig als Baukasten, aber teils noch Vorlage“). Umgesetzt:
+1. **Kopfbereich reduziert:** Überschrift, ein Absatz, zwei Knöpfe und das große Projektbild. Entfernt wurden Porträtkarte, Hakenzeilen, die Chat-Blasen unter dem Bild und die Aufwärtslinie (die Kennzahlenleiste darunter sagt dasselbe wie die Hakenzeilen). Der Audio-Knopf „Kurz erklärt“ steht jetzt im Abschnitt „Sie sprechen mit dem, der Ihre Website baut“, mit dem Link zu Ablauf, Zahlung und Laufzeit.
+2. **Angebote als eine ruhige Fläche** statt zwei Karten: Preiszeilen auf Pfauenblau, die gemeinsamen Leistungen einmal unter „In beiden enthalten“. Inhalt, Preise, Links, Zählung und Ablauf der Aktion (30.11.) unverändert; Hinweistext wortgleich.
+3. **Branchen als große Bildzeilen** (Foto und Aussage im Wechsel links und rechts) statt Kartenraster.
+4. **Echte Fotos:** nicht umsetzbar ohne Material, Aufnahmeliste in `docs/FOTO-AUFNAHMELISTE.md`.
+Geprüft bei 320, 390, 768, 1100, 1280, 1440 und 1920 px: axe ohne Verstoß, kein seitlicher Überlauf, kein Skriptfehler, Audio-Knopf funktioniert. Außerdem fehlendes Komma in der Branchenzeile ergänzt.

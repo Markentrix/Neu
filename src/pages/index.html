@@ -12,52 +12,19 @@ ld: |
 
 <!-- ══ Hero ══ -->
 <section class="hero hero--stage" aria-labelledby="hero-title">
-  <img class="aufwaerts aufwaerts--hero" src="/img/logo/aufwaertslinie.svg" alt="" width="240" height="90" aria-hidden="true">
   <div class="wrap">
     <div class="hero-grid">
       <div>
         <span class="eyebrow">Webdesign-Agentur in Celle · SEO und GEO inklusive</span>
         <h1 id="hero-title">Websites, die <span class="hl">Anfragen</span> bringen.<span class="h1-sub">Für Betriebe, die mehr Aufträge wollen und keine Zeit für Technik haben.</span></h1>
-        <p class="lead">Ihre Kunden suchen abends auf dem Handy nach einem Betrieb wie Ihrem. Wir sorgen dafür, dass sie Sie bei Google und in KI-Antworten finden und mit einem Fingertipp anfragen können. Schnelle Website, klarer Weg zur Anfrage, in 5 bis 15 Werktagen live.</p>
+        <p class="lead">Ihre Kunden suchen abends auf dem Handy nach einem Betrieb wie Ihrem. Wir sorgen dafür, dass sie Sie bei Google und in KI-Antworten finden und mit einem Fingertipp anfragen können.</p>
         <div class="hero-actions">
           <a class="btn btn--primary btn--lg" href="/website-check">Kostenlosen Website-Check starten</a>
           <a class="btn btn--secondary btn--lg" href="/kontakt" data-open-modal>Erstgespräch buchen</a>
         </div>
-        <div class="hero-person">
-          <img class="avatar avatar--md hero-person-img" src="/img/christian-wien-portrait-128.webp" srcset="/img/christian-wien-portrait-128.webp 128w, /img/christian-wien-portrait-192.webp 192w" sizes="64px" alt="Christian Wien, Inhaber von Markentrix" width="128" height="128" decoding="async">
-          <div class="hero-person-body">
-          <p class="small"><b>Lieber direkt sprechen?</b> Ich bin Christian Wien und nehme mir 30 Minuten Zeit für Ihren Betrieb, kostenlos und ohne Verkaufsdruck. Rufen Sie an: <a href="tel:+4917620370429">0176&nbsp;20370429</a>. <a href="/preise#zusammenarbeit">Ablauf, Zahlung und Laufzeit</a> können Sie vorab nachlesen.</p>
-            <div class="intro" data-intro>
-              <button type="button" class="intro-btn" data-intro-btn aria-pressed="false" aria-describedby="intro-hint" hidden>
-                <span class="intro-ic" aria-hidden="true"><svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></span>
-                <span class="intro-lb" data-intro-label>Kurz erklärt anhören · 35 Sek.</span>
-                <span class="intro-bar" aria-hidden="true"><i data-intro-bar></i></span>
-              </button>
-              <audio class="intro-audio" data-intro-audio src="/audio/willkommen.mp3" preload="none" controls aria-label="Kurz erklärt, 35 Sekunden"></audio>
-              <div class="intro-meta">
-              <p class="intro-hint tiny" id="intro-hint">Startet nur auf Ihren Tipp · KI-Stimme</p>
-              <details class="intro-text">
-                <summary>Text mitlesen</summary>
-                <p>Willkommen bei Markentrix in Celle. Kurz erklärt, was Sie hier finden. Wir bauen Websites für lokale Betriebe, die gefunden werden und bei denen Kunden gern anfragen. Dazu gehören Sichtbarkeit bei Google, ein einfacher Weg zur Anfrage und jetzt auch ein KI-Assistent für Telefon, WhatsApp und E-Mail. Weiter unten sehen Sie zwei echte Projekte und Beispiele für Ihre Branche. Mit dem kostenlosen Website-Check sehen Sie, wo Ihre Website heute steht. Und wenn Sie lieber sprechen: Buchen Sie ein kostenloses Erstgespräch. Dort klären wir auch die Preise.</p>
-              </details>
-              </div>
-              <script src="/assets/intro.js?v={{build}}" defer></script>
-            </div>
-        </div>
-        </div>
-        <div class="hero-proof" role="group" aria-label="Rahmenbedingungen">
-          <span><svg><use href="#i-check"/></svg>Festpreis-Angebot nach kostenlosem Erstgespräch</span>
-          <span><svg><use href="#i-check"/></svg>Hosting, Pflege und Kundenportal inklusive</span>
-          <span><svg><use href="#i-check"/></svg>Rückmeldung werktags innerhalb von 24 Stunden</span>
-        </div>
       </div>
       <div class="hero-visual reveal" data-delay="1">
         {{> hero-real}}
-        <div class="seq seq--row" role="group" aria-label="Beispielablauf: Anfrage wird zum Termin">
-          <div class="seq-item"><span class="ic"><svg><use href="#i-chat"/></svg></span><div><b>Anfrage per WhatsApp</b><span>„Haben Sie Samstag noch einen Termin?“</span></div><time>21:47</time></div>
-          <div class="seq-item is-ai"><span class="ic"><svg><use href="#i-calendar"/></svg></span><div><b>Termin im Kalender</b><span>Samstag 10:00 Uhr, automatisch eingetragen</span></div><time>21:48</time></div>
-          <div class="seq-item"><span class="ic"><svg><use href="#i-check"/></svg></span><div><b>Bestätigung gesendet</b><span>Erinnerung am Vortag geplant</span></div><time>21:48</time></div>
-        </div>
       </div>
     </div>
     <div class="stats mt-5 reveal" role="group" aria-label="Eckdaten">
@@ -84,8 +51,26 @@ ld: |
         <h2 id="person-title">Sie sprechen mit dem, der Ihre Website baut.</h2>
         <blockquote class="person-quote">Ich kenne den Alltag im lokalen Mittelstand: Das Telefon klingelt, die Kundschaft wartet, und für die Website bleibt abends keine Kraft. Genau dafür bin ich da. Vom Erstgespräch bis zur laufenden Pflege haben Sie mich als festen Ansprechpartner, nicht ein Ticketsystem.</blockquote>
         <p class="person-sign"><b>Christian Wien</b> · Inhaber, Celle</p>
+        <div class="person-intro">
+            <div class="intro" data-intro>
+            <button type="button" class="intro-btn" data-intro-btn aria-pressed="false" aria-describedby="intro-hint" hidden>
+              <span class="intro-ic" aria-hidden="true"><svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></span>
+              <span class="intro-lb" data-intro-label>Kurz erklärt anhören · 35 Sek.</span>
+              <span class="intro-bar" aria-hidden="true"><i data-intro-bar></i></span>
+            </button>
+            <audio class="intro-audio" data-intro-audio src="/audio/willkommen.mp3" preload="none" controls aria-label="Kurz erklärt, 35 Sekunden"></audio>
+            <div class="intro-meta">
+            <p class="intro-hint tiny" id="intro-hint">Startet nur auf Ihren Tipp · KI-Stimme</p>
+            <details class="intro-text">
+              <summary>Text mitlesen</summary>
+              <p>Willkommen bei Markentrix in Celle. Kurz erklärt, was Sie hier finden. Wir bauen Websites für lokale Betriebe, die gefunden werden und bei denen Kunden gern anfragen. Dazu gehören Sichtbarkeit bei Google, ein einfacher Weg zur Anfrage und jetzt auch ein KI-Assistent für Telefon, WhatsApp und E-Mail. Weiter unten sehen Sie zwei echte Projekte und Beispiele für Ihre Branche. Mit dem kostenlosen Website-Check sehen Sie, wo Ihre Website heute steht. Und wenn Sie lieber sprechen: Buchen Sie ein kostenloses Erstgespräch. Dort klären wir auch die Preise.</p>
+            </details>
+            </div>
+            <script src="/assets/intro.js?v={{build}}" defer></script>
+          </div>
+        </div>
         <div class="row mt-3"><a class="btn btn--primary btn--lg" href="/kontakt" data-open-modal>Erstgespräch buchen</a><a class="btn btn--ghost-light btn--lg" href="tel:+4917620370429">0176&nbsp;20370429</a></div>
-        <p class="tiny person-note">Das Erstgespräch dauert rund 30 Minuten und ist kostenlos, per Telefon oder online. Rückmeldung werktags innerhalb von 24 Stunden.</p>
+        <p class="tiny person-note">Das Erstgespräch dauert rund 30 Minuten und ist kostenlos, per Telefon oder online. Rückmeldung werktags innerhalb von 24 Stunden. <a href="/preise#zusammenarbeit">Ablauf, Zahlung und Laufzeit</a> können Sie vorab nachlesen.</p>
       </div>
     </div>
   </div>
@@ -189,33 +174,36 @@ ld: |
       <h2 id="branchen-title">Drei Betriebe, drei Suchanfragen, <span class="hl">eine Website</span>, die antwortet.</h2>
       <p class="lead">Eine Visitenkarte im Netz reicht nicht mehr. Wo erkennen Sie sich wieder?</p>
     </div>
-    <div class="grid grid--3">
-      <div class="card branch reveal">
+    <div class="branch-rows">
+      <article class="branch-row reveal">
         {{> photo-handwerk}}
-        <span class="card-step">Handwerk · Werkstatt · Bau</span>
-        <p class="pain">„Kunden suchen ‚Elektriker Celle‘ und finden den Wettbewerb.“</p>
-        <p class="sys">Eine Leistungsseite je Gewerk und Ort, klare Preise und ein Anfrageweg, der auch von der Baustelle aus funktioniert.</p>
-        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="handwerk">Für Handwerk prüfen</a>
-        <a class="link-arrow" href="/website-handwerker">Mehr für Handwerker</a>
-      </div>
-      <div class="card branch reveal" data-delay="1">
+        <div class="branch-row-txt">
+          <span class="card-step">Handwerk · Werkstatt · Bau</span>
+          <p class="pain">„Kunden suchen ‚Elektriker Celle‘ und finden den Wettbewerb.“</p>
+          <p class="sys">Eine Leistungsseite je Gewerk und Ort, klare Preise und ein Anfrageweg, der auch von der Baustelle aus funktioniert.</p>
+          <div class="row"><a class="btn btn--secondary" href="/kontakt" data-open-modal data-branche="handwerk">Für Handwerk prüfen</a><a class="link-arrow" href="/website-handwerker">Mehr für Handwerker</a></div>
+        </div>
+      </article>
+      <article class="branch-row reveal">
         {{> photo-praxis}}
-        <span class="card-step">Praxis · Kanzlei · Dienstleistung</span>
-        <p class="pain">„Neue Patienten vergleichen Website und Bewertungen, bevor sie anrufen.“</p>
-        <p class="sys">Vertrauen auf den ersten Blick: Team, Leistungen, Öffnungszeiten und eine Terminanfrage, die ohne Warteschleife ankommt.</p>
-        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="praxis">Für Praxen prüfen</a>
-        <a class="link-arrow" href="/website-arztpraxis">Mehr für Praxen und Kanzleien</a>
-      </div>
-      <div class="card branch reveal" data-delay="2">
+        <div class="branch-row-txt">
+          <span class="card-step">Praxis · Kanzlei · Dienstleistung</span>
+          <p class="pain">„Neue Patienten vergleichen Website und Bewertungen, bevor sie anrufen.“</p>
+          <p class="sys">Vertrauen auf den ersten Blick: Team, Leistungen, Öffnungszeiten und eine Terminanfrage, die ohne Warteschleife ankommt.</p>
+          <div class="row"><a class="btn btn--secondary" href="/kontakt" data-open-modal data-branche="praxis">Für Praxen prüfen</a><a class="link-arrow" href="/website-arztpraxis">Mehr für Praxen und Kanzleien</a></div>
+        </div>
+      </article>
+      <article class="branch-row reveal">
         {{> photo-gastro}}
-        <span class="card-step">Gastronomie · Handel</span>
-        <p class="pain">„Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy.“</p>
-        <p class="sys">Alles in zehn Sekunden findbar, dazu ein gepflegtes Google-Profil und Bewertungen, die neue Gäste überzeugen.</p>
-        <a class="btn btn--secondary btn--sm" href="/kontakt" data-open-modal data-branche="gastro">Für Gastro und Handel prüfen</a>
-        <a class="link-arrow" href="/website-gastronomie">Mehr für Gastronomie und Handel</a>
-      </div>
+        <div class="branch-row-txt">
+          <span class="card-step">Gastronomie · Handel</span>
+          <p class="pain">„Gäste suchen Karte, Öffnungszeiten und Reservierung auf dem Handy.“</p>
+          <p class="sys">Alles in zehn Sekunden findbar, dazu ein gepflegtes Google-Profil und Bewertungen, die neue Gäste überzeugen.</p>
+          <div class="row"><a class="btn btn--secondary" href="/kontakt" data-open-modal data-branche="gastro">Für Gastro und Handel prüfen</a><a class="link-arrow" href="/website-gastronomie">Mehr für Gastronomie und Handel</a></div>
+        </div>
+      </article>
     </div>
-    <p class="branch-more">Auch für <a href="/website-autowerkstatt">Autowerkstätten</a>, <a href="/website-friseur-beauty">Friseure und Beauty</a>, <a href="/website-hotel-pension">Hotels und Pensionen</a>, <a href="/website-fitness-sport">Fitness und Sport</a> <a href="/website-haus-garten">Reinigung, Garten und Hausservice</a> sowie <a href="/website-b2b-dienstleister">B2B-Dienstleister und Gewerbe</a>. <a class="link-arrow" href="/branchen">Alle Branchen</a></p>
+    <p class="branch-more">Auch für <a href="/website-autowerkstatt">Autowerkstätten</a>, <a href="/website-friseur-beauty">Friseure und Beauty</a>, <a href="/website-hotel-pension">Hotels und Pensionen</a>, <a href="/website-fitness-sport">Fitness und Sport</a>, <a href="/website-haus-garten">Reinigung, Garten und Hausservice</a> sowie <a href="/website-b2b-dienstleister">B2B-Dienstleister und Gewerbe</a>. <a class="link-arrow" href="/branchen">Alle Branchen</a></p>
   </div>
 </section>
 
