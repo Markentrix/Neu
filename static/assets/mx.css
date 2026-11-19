@@ -2174,3 +2174,19 @@ html:root .stmt .accent{color:#F1A268;background-image:none}
 .sec--check{padding-bottom:clamp(40px,5vw,64px)}
 .sec--after-check{padding-top:clamp(40px,5vw,64px)}
 html:root .sec--dark .card-step{color:var(--pfau-hell)}
+
+/* 50 · Dunkle Flächen auf Unterseiten: Fließtext, Merkmale und Links in lesbaren Farben */
+html:root .sec--dark .feat p,html:root .sec--dark .feat .muted,html:root .sec--dark .measure .muted,html:root .sec--dark .small{color:rgba(255,255,255,.86)}
+html:root .sec--dark .feat h3,html:root .sec--dark .feat h4,html:root .sec--dark .feat b{color:#FFFFFF}
+html:root .sec--dark a:not(.btn){color:#8FD3E6;text-decoration-color:rgba(143,211,230,.6)}
+html:root .sec--dark a:not(.btn):hover{color:#FFFFFF}
+html:root .sec--dark .checks li{color:rgba(255,255,255,.92)}
+html:root .sec--dark .checks li:not(.checks--x li)::before{background:rgba(143,211,230,.2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238FD3E6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5l3.2 3L15 7'/%3E%3C/svg%3E") center/13px no-repeat}
+
+/* 51 · Mobiler Kopf: „Partner werden“ als ruhiger Textlink statt eigenes Feld neben dem Menü */
+@media (max-width:899.98px){html:root .nav-partner-pill{background:transparent;border-radius:6px;padding:0 6px;color:var(--pfau);text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}html:root .nav-partner-pill:hover{background:transparent;color:var(--tiefsee)}}
+html:root .nav-partner-pill{border-color:transparent}
+/* Brotkrumen: eine Zeile, der letzte Punkt wird gekürzt statt mit losem Trenner umzubrechen */
+.breadcrumb{flex-wrap:nowrap;overflow:hidden}
+.breadcrumb li{white-space:nowrap;flex:0 0 auto}
+.breadcrumb li:last-child{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
