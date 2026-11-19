@@ -11,7 +11,7 @@ function initReveal(){var els=$$('.reveal, .statement, .band, .proof-seo, .stats
 var io=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){markIn(en.target);io.unobserve(en.target);}});},{rootMargin:'0px 0px -8% 0px',threshold:0.08});els.forEach(function(e){io.observe(e);});setTimeout(function(){els.forEach(markIn);},4000);}
 function consentOk(){try{var c=JSON.parse(localStorage.getItem('mx-consent'));return!!(c&&c.analytics);}catch(e){return false;}}
 function utmFromUrl(){var o={},q=location.search.replace(/^\?/,'').split('&');q.forEach(function(kv){var p=kv.split('='),k=p[0],v='';try{v=decodeURIComponent((p[1]||'').replace(/\+/g,' '));}catch(e){}if(/^utm_(source|medium|campaign)$/.test(k)&&/^[\w .\-]{1,60}$/.test(v))o[k]=v;});return o;}
-function campaign(){var u=utmFromUrl(),keep=null;try{keep=JSON.parse(sessionStorage.getItem('mx-utm')||'null');}catch(e){}
+function campaign(){if(!consentOk())return{};var u=utmFromUrl(),keep=null;try{keep=JSON.parse(sessionStorage.getItem('mx-utm')||'null');}catch(e){}
 if(Object.keys(u).length){if(consentOk()){try{sessionStorage.setItem('mx-utm',JSON.stringify(u));}catch(e){}}}else if(keep&&consentOk())u=keep;if(!Object.keys(u).length&&d.referrer){try{var h=new URL(d.referrer).hostname;if(h&&h!==location.hostname)u={utm_referrer:h.replace(/^www\./,'')};}catch(e){}}
 return u;}
 function initCampaign(){if(consentOk())campaign();}
@@ -22,7 +22,7 @@ function setError(input,msg){var wrap=fieldWrap(input);if(!wrap)return;wrap.clas
 err.textContent=msg;}
 function clearError(input){var wrap=fieldWrap(input);if(wrap)wrap.classList.remove('has-error');input.removeAttribute('aria-invalid');}
 function validate(form){var first=null;$$('[required]',form).forEach(function(inp){clearError(inp);var v=inp.type==='checkbox'?inp.checked:inp.value.trim();var bad=!v;if(!bad&&inp.type==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim())){bad=true;setError(inp,'Bitte geben Sie eine gültige E-Mail-Adresse an.');}
-else if(bad)setError(inp,inp.type==='checkbox'?'Bitte bestätigen Sie die Datenschutzhinweise.':'Bitte füllen Sie dieses Feld aus.');if(bad&&!first)first=inp;});if(first)first.focus();return!first;}
+else if(bad)setError(inp,inp.type==='checkbox'?(inp.name==='unternehmer'?'Bitte bestätigen Sie, dass Sie als Unternehmer handeln. Das Angebot richtet sich nicht an Verbraucher.':'Bitte bestätigen Sie die Datenschutzhinweise.'):'Bitte füllen Sie dieses Feld aus.');if(bad&&!first)first=inp;});if(first)first.focus();return!first;}
 function initForms(){$$('form[data-lead]').forEach(function(form){var msg=$('.form-msg',form),btn=$('[type=submit]',form),busy=false;$$('input,select,textarea',form).forEach(function(i){on(i,'input',function(){clearError(i);});});var started=false;on(form,'input',function(){if(started)return;started=true;track('form_start',{location:form.getAttribute('data-lead')});});on(form,'submit',function(e){e.preventDefault();if(busy)return;if(msg){msg.className='form-msg';msg.textContent='';}
 if(!validate(form))return;var hp=$('.hp input',form);if(hp&&hp.value){form.reset();showOk();return;}
 var payload={quelle:form.getAttribute('data-lead')||'Formular'};$$('input,select,textarea',form).forEach(function(i){if(!i.name||i.type==='submit'||i.closest('.hp'))return;if(i.type==='radio'&&!i.checked)return;payload[i.name]=i.type==='checkbox'?(i.checked?'ja':'nein'):i.value.trim();});var cal=form.__cal;if(cal&&cal.date&&cal.time){payload.wunschtermin=cal.label();payload.termin_iso=cal.iso();}

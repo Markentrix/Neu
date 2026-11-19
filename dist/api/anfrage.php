@@ -91,6 +91,11 @@ if ($isCallback) {
 if (($clean['einwilligung'] ?? '') !== 'ja') {
   respond(422, ['ok' => false, 'error' => 'consent']);
 }
+// Unternehmer-Bestätigung (§ 14 BGB): Pflicht bei allen Anfrageformularen außer der Checkliste
+$needsBusiness = in_array(($clean['quelle'] ?? ''), ['Kontaktformular', 'Rückruf', 'Website-Check', 'Bewerbung'], true);
+if ($needsBusiness && ($clean['unternehmer'] ?? '') !== 'ja') {
+  respond(422, ['ok' => false, 'error' => 'business']);
+}
 
 // Ratenbegrenzung je IP (einfach, dateibasiert)
 $ip   = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
@@ -116,7 +121,7 @@ foreach ($order as $k) {
   if (isset($clean[$k]) && $clean[$k] !== '') $lines[] = str_pad($k, 14) . ': ' . $clean[$k];
 }
 foreach ($clean as $k => $v) {
-  if (!in_array($k, $order, true) && !in_array($k, ['nachricht', 'form-name', 'einwilligung', 'bericht_token'], true) && $v !== '') $lines[] = str_pad($k, 14) . ': ' . $v;
+  if (!in_array($k, $order, true) && !in_array($k, ['nachricht', 'form-name', 'einwilligung', 'unternehmer', 'bericht_token'], true) && $v !== '') $lines[] = str_pad($k, 14) . ': ' . $v;
 }
 // Website-Check: Bericht aus dem temporären Speicher laden (Token wurde vom Check erzeugt, nicht frei wählbar)
 $report = null; $reportFile = '';
@@ -136,6 +141,7 @@ if ($report) {
   $lines[] = '';
 }
 $lines[] = str_pad('einwilligung', 14) . ': ja (' . gmdate('c') . ' UTC, IP-Hash ' . substr(hash('sha256', $ip), 0, 12) . ')';
+if ($needsBusiness) $lines[] = str_pad('unternehmer', 14) . ': ja, Bestätigung nach § 14 BGB (' . gmdate('c') . ' UTC)';
 $body    = ($quelle === 'Bewerbung' ? "Neue Bewerbung über markentrix.de" : "Neue Anfrage über markentrix.de") . "\n\n" . implode("\n", $lines) . "\n";
 $subject = $CONFIG['subject_prefix'] . $quelle . ': ' . $name;
 
@@ -144,7 +150,7 @@ $fromName = '=?UTF-8?B?' . base64_encode('Markentrix Website') . '?=';
 require_once __DIR__ . '/mx-mail.php';
 require_once __DIR__ . '/mx-template.php';
 
-[$ownerBody, $ownerType] = mx_multipart($body, owner_mail_html($clean, $report, $quelle, 'ja (' . gmdate('c') . ' UTC, IP-Hash ' . substr(hash('sha256', $ip), 0, 12) . ')'));
+[$ownerBody, $ownerType] = mx_multipart($body, owner_mail_html($clean, $report, $quelle, 'ja (' . gmdate('c') . ' UTC, IP-Hash ' . substr(hash('sha256', $ip), 0, 12) . ')' . ($needsBusiness ? ' · Unternehmer nach § 14 BGB bestätigt: ja' : '')));
 $headers  = [
   'From: ' . $fromName . ' <' . $CONFIG['from'] . '>',
   ...($email !== '' ? ['Reply-To: ' . $email] : []),

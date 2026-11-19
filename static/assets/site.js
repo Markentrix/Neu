@@ -71,6 +71,7 @@
     return o;
   }
   function campaign() {
+    if (!consentOk()) return {}; // ohne Einwilligung in die Statistik: weder speichern noch an Formulare anhängen
     var u = utmFromUrl(), keep = null;
     try { keep = JSON.parse(sessionStorage.getItem('mx-utm') || 'null'); } catch (e) { }
     if (Object.keys(u).length) { if (consentOk()) { try { sessionStorage.setItem('mx-utm', JSON.stringify(u)); } catch (e) { } } } else if (keep && consentOk()) u = keep;
@@ -104,7 +105,7 @@
       var v = inp.type === 'checkbox' ? inp.checked : inp.value.trim();
       var bad = !v;
       if (!bad && inp.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim())) { bad = true; setError(inp, 'Bitte geben Sie eine gültige E-Mail-Adresse an.'); }
-      else if (bad) setError(inp, inp.type === 'checkbox' ? 'Bitte bestätigen Sie die Datenschutzhinweise.' : 'Bitte füllen Sie dieses Feld aus.');
+      else if (bad) setError(inp, inp.type === 'checkbox' ? (inp.name === 'unternehmer' ? 'Bitte bestätigen Sie, dass Sie als Unternehmer handeln. Das Angebot richtet sich nicht an Verbraucher.' : 'Bitte bestätigen Sie die Datenschutzhinweise.') : 'Bitte füllen Sie dieses Feld aus.');
       if (bad && !first) first = inp;
     });
     if (first) first.focus();
