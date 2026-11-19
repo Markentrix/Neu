@@ -378,3 +378,9 @@ Auslöser: Einschätzung der Startseite („eher hochwertig als Baukasten, aber 
 Geprüft bei 320, 390, 768, 1100, 1280, 1440 und 1920 px: axe ohne Verstoß, kein seitlicher Überlauf, kein Skriptfehler, Audio-Knopf funktioniert. Außerdem fehlendes Komma in der Branchenzeile ergänzt.
 
 **Nachtrag 19.11.2026, Projektbilder lesbarer:** Die Aufnahmen von Anadolu Market und Pony Club Lila im Kopfbereich, auf der Startseite und der Referenzseite sind jetzt Ausschnitte (Überschrift, Text und Knöpfe des linken Seitenteils, aufgenommen mit 1280 px Breite und doppelter Auflösung) statt der verkleinerten Gesamtansicht. Der Text im Bild ist dadurch etwa 1,6-mal so groß. ElbDetail war bereits ein Ausschnitt. Dateinamen und Bildmaße unverändert. Der Ausschnitt ist im Alt-Text als Über-uns-Seite beziehungsweise Startseite beschrieben.
+
+## Nachtrag 19.11.2026: Mitte der Startseite entzerrt, Bewertungsabschnitt schlanker
+
+1. **Ruhepunkt:** Zwischen „Vier Bereiche“ und „Drei Betriebe“ steht jetzt eine dunkle Fläche mit dem Claim „Mehr Anfragen. Weniger Aufwand.“ in sehr großer Schrift (Schlüsselwort in hellem Kupfer), einem Satz und der Aufwärtslinie. Ohne Knopf, ohne Karten. Am Handy kleiner, die Linie darunter.
+2. **Bewertungen:** Solange keine Live-Daten von Google vorliegen (Schlüssel noch nicht eingerichtet), erscheint „Das sagen Kunden über Markentrix“ als schlanker Streifen in einer Zeile (Überschrift, Satz mit der bestätigten Anzahl, zwei Links) statt eines großen Abschnitts mit viel Leerfläche. Mit Live-Daten erscheint wie bisher der volle Abschnitt mit bis zu sechs Zitaten und Sternen. Der Streifen hat Salz-Grund, damit er sich von der weißen Projektfläche abhebt.
+Geprüft bei 320 bis 1920 px: axe ohne Verstoß, kein Überlauf, kein Skriptfehler.

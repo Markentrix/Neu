@@ -2121,3 +2121,20 @@ html:root .page-home .deal-note{margin:14px 0 0;max-width:none}
 .person-intro{margin:18px 0 0}
 .person-intro .intro{margin:0}
 html:root .offer-incl b{color:#FFFFFF}
+
+/* 47 · Ruhepunkt und schlanker Bewertungsstreifen */
+.quiet{position:relative;background:var(--tiefsee);color:#FFFFFF;padding:clamp(72px,11vw,168px) 0;overflow:hidden}
+.quiet .wrap{position:relative}
+.quiet-claim{margin:0;font-family:var(--f-head);font-weight:800;font-size:clamp(2.5rem,1.2rem + 6vw,6.2rem);line-height:1.02;letter-spacing:-.03em;color:#FFFFFF;max-width:12ch}
+html:root .quiet .accent{color:#F1A268;background-image:none}
+.quiet-sub{margin:clamp(18px,2.4vw,32px) 0 0;max-width:34ch;font-size:clamp(1.05rem,.95rem + .5vw,1.4rem);line-height:1.4;color:rgba(255,255,255,.86)}
+.quiet-line{position:absolute;right:var(--gutter,16px);bottom:-8px;width:clamp(120px,22vw,300px);height:auto;opacity:.9;pointer-events:none}
+@media (max-width:560px){.quiet-line{position:static;display:block;margin-top:28px;width:150px}}
+
+.rev-slim.rev-sec{padding:clamp(26px,3.4vw,44px) 0;background:var(--salz,#F4F6F7);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.rev-slim .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px}
+.rev-slim .sec-head{margin:0;max-width:62ch}
+.rev-slim .sec-head h2{font-size:clamp(1.15rem,1rem + .6vw,1.5rem);margin:2px 0 4px;max-width:none}
+.rev-slim .rev-sum{margin:0}
+.rev-slim .row{margin:0;display:flex;flex-wrap:wrap;gap:6px 24px}
+@media (min-width:900px){.rev-slim .row{flex-direction:column;align-items:flex-start;gap:8px;flex:0 0 auto}.rev-slim .sec-head{flex:1 1 420px}}
