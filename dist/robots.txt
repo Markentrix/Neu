@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /
 
-# Ehemaliger interner Kundenbereich, jetzt Weiterleitung zum externen Portal
-Disallow: /kunden-dashboard
+# Hinweis: /kunden-dashboard ist eine Weiterleitung und hier bewusst nicht gesperrt.
+# Eine Sperre in dieser Datei verhindert, dass Google die Weiterleitung sieht, und die alte Adresse bliebe im Index.
 
 # Technische Endpunkte (Formular, Website-Check)
 Disallow: /api/
