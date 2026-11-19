@@ -1569,7 +1569,7 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
 
 /* ── Cookie-Hinweis: auf dem Handy deutlich kompakter ── */
 @media (max-width:600px){
-  #mx-consent{left:8px!important;right:8px!important;bottom:8px!important;padding:8px 12px 2px!important;border-radius:8px!important;font-size:11.5px!important;line-height:1.36!important;max-height:52vh!important;box-shadow:0 12px 32px rgba(12,33,40,.22)!important}
+  #mx-consent{left:8px!important;right:8px!important;bottom:8px!important;padding:8px 12px 8px!important;border-radius:8px!important;font-size:11.5px!important;line-height:1.36!important;max-height:52vh!important;box-shadow:0 12px 32px rgba(12,33,40,.22)!important}
   #mx-consent #mxc-t{margin:0 0 2px!important;font-size:13px!important;line-height:1.25!important;outline:none!important}
   #mx-consent:not(.mxc-open) #mxc-t{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
   #mx-consent #mxc-d{margin:0 0 6px!important;font-size:11.5px!important}
@@ -1579,7 +1579,7 @@ html.reduced .timeline li::after,html.no-js .timeline li::after{transform:none;t
   #mx-consent #mxc-det>div{padding:8px 10px!important;gap:10px!important}
   #mx-consent #mxc-det span{font-size:11.5px!important}
   #mx-consent button[id^=mxc-]:not(#mxc-more){flex:1 1 0!important;min-height:34px!important;padding:4px 8px!important;font-size:12.5px!important;border-radius:4px!important}
-  #mx-consent #mxc-more{min-height:26px!important;margin-top:0!important;padding:0!important;font-size:11.5px!important}
+  #mx-consent #mxc-more{flex:0 0 auto!important;min-height:34px!important;margin:0!important;padding:0 4px!important;font-size:12.5px!important}
 }
 
 /* ── Paketkarten: Preis wird im Erstgespräch genannt (Text statt Zahl, daher kleiner) ── */
@@ -2190,3 +2190,4 @@ html:root .nav-partner-pill{border-color:transparent}
 .breadcrumb{flex-wrap:nowrap;overflow:hidden}
 .breadcrumb li{white-space:nowrap;flex:0 0 auto}
 .breadcrumb li:last-child{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:360px){#mx-consent button[id^=mxc-]:not(#mxc-more){padding:4px 4px!important;font-size:11.5px!important;white-space:nowrap}#mx-consent #mxc-more{font-size:11.5px!important}}

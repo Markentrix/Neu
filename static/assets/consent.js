@@ -91,8 +91,8 @@
         '<button type="button" id="mxc-no" style="' + BTN_B + '">Nur notwendige</button>' +
         '<button type="button" id="mxc-yes" style="' + BTN_A + '">Alle akzeptieren</button>' +
         '<button type="button" id="mxc-save" hidden style="' + BTN_A + '">Auswahl speichern</button>' +
-      '</div>' +
-      '<button type="button" id="mxc-more" aria-expanded="false" aria-controls="mxc-det" style="margin-top:10px;background:none;border:none;padding:6px 0;min-height:36px;color:#045268;font:600 13.5px ' + F + ';text-decoration:underline;cursor:pointer">Einstellungen anpassen</button>';
+        '<button type="button" id="mxc-more" aria-expanded="false" aria-controls="mxc-det" style="flex:0 0 auto;align-self:center;background:none;border:none;padding:6px 8px;min-height:36px;color:#045268;font:600 13.5px ' + F + ';text-decoration:underline;cursor:pointer">Einstellungen</button>' +
+      '</div>';
     document.body.appendChild(el);
     var $ = function (id) { return el.querySelector('#' + id); };
     $('mxc-yes').onclick = function () { save(true); close(); };
@@ -102,7 +102,7 @@
       var d = $('mxc-det'), open = d.hidden;
       d.hidden = !open; $('mxc-save').hidden = !open; $('mxc-yes').hidden = open; el.classList.toggle('mxc-open', open);
       this.setAttribute('aria-expanded', open ? 'true' : 'false');
-      this.textContent = open ? 'Weniger anzeigen' : 'Einstellungen anpassen';
+      this.textContent = open ? 'Weniger' : 'Einstellungen';
     };
   }
 
