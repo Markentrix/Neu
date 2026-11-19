@@ -2138,3 +2138,39 @@ html:root .quiet .accent{color:#F1A268;background-image:none}
 .rev-slim .rev-sum{margin:0}
 .rev-slim .row{margin:0;display:flex;flex-wrap:wrap;gap:6px 24px}
 @media (min-width:900px){.rev-slim .row{flex-direction:column;align-items:flex-start;gap:8px;flex:0 0 auto}.rev-slim .sec-head{flex:1 1 420px}}
+
+/* 48 · Unterseiten: ruhige dunkle Aussage, Projektstreifen, Preiskarten ohne wiederholtes „Im Erstgespräch“ */
+.stmt{background:var(--tiefsee);color:rgba(255,255,255,.88);padding:clamp(56px,8vw,112px) 0}
+.stmt .eyebrow{color:var(--pfau-hell)}
+.stmt-h{margin:0 0 clamp(14px,2vw,24px);font-family:var(--f-head);font-weight:800;font-size:clamp(2.1rem,1.1rem + 4vw,4.2rem);line-height:1.04;letter-spacing:-.03em;color:#FFFFFF;max-width:16ch}
+html:root .stmt .accent{color:#F1A268;background-image:none}
+.stmt-lead{margin:0;max-width:56ch;font-size:clamp(1.05rem,.95rem + .45vw,1.3rem);line-height:1.5;color:rgba(255,255,255,.9)}
+.stmt-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:0 clamp(18px,3vw,40px);margin-top:clamp(28px,4vw,52px)}
+.stmt-facts>div{border-top:1px solid rgba(255,255,255,.28);padding:14px 0 18px}
+.stmt-facts span{display:block;margin:0 0 6px;font-weight:700;font-size:.8125rem;letter-spacing:.1em;text-transform:uppercase;color:var(--pfau-hell)}
+.stmt-facts b{display:block;font-weight:600;font-size:1.05rem;line-height:1.4;color:#FFFFFF}
+
+.price-card .price{display:none}
+
+.proj-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,24px);margin:clamp(20px,3vw,36px) 0}
+.proj-strip a{display:block;text-decoration:none;color:var(--tiefsee);min-width:0}
+.proj-strip img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border);box-shadow:var(--shadow-md);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.proj-strip b{display:block;margin-top:10px;font:700 1.05rem/1.25 var(--f-head)}
+.proj-strip span{display:block;color:var(--nebentext);font-size:.9375rem}
+.proj-strip a:hover img{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.proj-strip a:focus-visible{outline:3px solid var(--tiefsee);outline-offset:4px;border-radius:10px}
+@media (prefers-reduced-motion:reduce){.proj-strip img{transition:none}.proj-strip a:hover img{transform:none}}
+@media (max-width:700px){.proj-strip{grid-template-columns:minmax(0,1fr)}}
+
+/* 49 · Website-Check: Eingabefeld als Mittelpunkt, Bereiche rücken heran */
+.sec--check .sec-head{max-width:760px}
+.chk-chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:18px 0 0;padding:0}
+.chk-chips li{padding:6px 14px;border:1px solid var(--border);border-radius:999px;background:#FFFFFF;font-weight:600;font-size:.9375rem;color:var(--tiefsee)}
+.chk-stage{margin-top:clamp(20px,3vw,32px)}
+.chk-stage .chk-form{max-width:880px;margin-top:0;padding:clamp(20px,3.2vw,36px);border:1px solid var(--border);border-radius:var(--r-xl);background:#FFFFFF;box-shadow:var(--shadow-lg)}
+.chk-stage .chk-form label{font-size:1.0625rem}
+.chk-stage .chk-row input{min-height:60px;font-size:1.125rem}
+.chk-stage .chk-msg:empty{display:none}
+.sec--check{padding-bottom:clamp(40px,5vw,64px)}
+.sec--after-check{padding-top:clamp(40px,5vw,64px)}
+html:root .sec--dark .card-step{color:var(--pfau-hell)}
