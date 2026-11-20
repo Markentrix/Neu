@@ -189,6 +189,11 @@ footer nav a{display:inline-flex;align-items:center;min-height:44px}
 .cimg>h2{--i:0}.cimg>img{--i:1}.cimg>p{--i:2}
 .it:nth-child(1){--i:2}.it:nth-child(2){--i:3}.it:nth-child(3){--i:4}.it:nth-child(4){--i:5}.it:nth-child(5){--i:6}.it:nth-child(6){--i:7}.it:nth-child(7){--i:8}
 
+/* Lesbarkeit der Display-Schrift: kleine optische Größe, damit die Haarlinien auch am Handy sichtbar bleiben.
+   Muss nach allen font-Kurzschreibweisen stehen, die diese Werte zurücksetzen. */
+h1,h2,h3.cdisp,.logo,.rt,.nav2 .nt,.sticker b,.ctab strong,.linkrow b,.cimg h2,.pgrid h2,.info h2,.take h2,.legal h2,.phero h1{font-optical-sizing:none;font-variation-settings:"opsz" 14;font-weight:600;letter-spacing:-.004em}
+.it h3{font-variation-settings:normal}
+.sticker span{text-transform:none;letter-spacing:0;font-size:.8rem}
 /* Tablet und Handy */
 @media(max-width:860px){
  .bar nav a:not(.btn){display:none}.bar{gap:10px;min-height:56px}.logo{font-size:1.25rem}

@@ -27,7 +27,7 @@ Kontraste (WCAG): Ruß auf Papier 17,7:1, Zettelgrau auf Papier 7,3:1, Weiß auf
 Regeln: Eine Hauptfarbe (Rot) mit klarer Aufgabe. Rot und Grün haben ähnliche Helligkeit, deshalb steht jeder Zustand zusätzlich als Text. Keine losen Hex-Werte im CSS: jede Farbe steht einmal in `:root`.
 
 ## Schriften (lokal, woff2)
-- Display: **Bodoni Moda** (variabel, Gewicht 500 bis 600). Giambattista Bodoni kam aus Parma; die Antiqua mit feinen Haarlinien gibt der Seite Ruhe und Herkunft. Nur für Schlagzeile, Kategorietitel, Abschnittsüberschriften und Logo, nie für Fließtext oder Kleingedrucktes.
+- Display: **Bodoni Moda** (variabel, Gewicht 500 bis 600). Giambattista Bodoni kam aus Parma; die Antiqua mit feinen Haarlinien gibt der Seite Ruhe und Herkunft. Nur für Schlagzeile, Kategorietitel, Abschnittsüberschriften und Logo, nie für Fließtext oder Kleingedrucktes. **Lesbarkeit:** Die optische Größe ist fest auf `opsz 14` gesetzt und das Gewicht auf 600. Die automatische Einstellung macht bei großen Größen die Haarlinien so dünn, dass sich Buchstaben am Handy auflösen.
 - Text: **Instrument Sans** (400 bis 600), Zeilenlänge 55 bis 70 Zeichen.
 - Skala (Mobil / Desktop): Hero 2,3 / 3,9 rem, Abschnittstitel 1,9 / 2,8 rem, Gericht 1,0 / 1,08 rem, Beschreibung 0,88 / 0,92 rem, Beschriftungen 0,75 rem.
 - Die Schlagzeile ist einfarbig, ohne einzelnes hervorgehobenes Wort (Vorgabe der Verboten-Liste).
