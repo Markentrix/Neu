@@ -40,11 +40,8 @@ def business(site):
         "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": o["days"], "opens": o["opens"], "closes": o["closes"]}
                                       for o in s["openingHours"].get("schedule", [])],
         "sameAs": list(s["social"].values()) + ([s["googleMapsUrl"]] if s.get("googlePlaceId") else []),
-        "aggregateRating": {"@type": "AggregateRating", "ratingValue": s["rating"]["value"].replace(",", "."), "bestRating": "5",
-                            "reviewCount": str(s["rating"]["count"])},
-        "review": [{"@type": "Review", "author": {"@type": "Person", "name": r["name"]},
-                    "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"}, "reviewBody": r["text"]}
-                   for r in site.reviews["items"]],
+        # Keine eigenen Bewertungen als strukturierte Daten: Google wertet Bewertungen, die ein Betrieb über sich selbst
+        # auszeichnet, nicht aus (Richtlinie „self-serving reviews“). Die Bewertungen stehen sichtbar auf der Seite.
         "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Fahrzeugaufbereitung Celle",
                             "itemListElement": [{"@type": "OfferCatalog", "name": sv["short"], "url": site.url + "/leistungen/" + sv["slug"] + ".html"}
                                                 for sv in site.services]},

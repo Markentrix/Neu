@@ -13,6 +13,13 @@ const PAGES = [
   "/ratgeber/auto-im-winter-waschen-streusalz.html", "/ratgeber/feuchtigkeit-im-auto-winter.html",
 ];
 
+// Die eigene Anfrage über die Vorgangsnummer aus der Danke-Adresse finden (die andere Geräteklasse sendet parallel)
+async function sentFor(page) {
+  const ref = new URL(page.url()).searchParams.get("ref");
+  const all = await (await page.request.get("/__mock/anfragen")).json();
+  return ref ? all.find((a) => a.ref === ref) : all.pop();
+}
+
 // Desktop und Mobil laufen gleichzeitig gegen dieselbe Portal-Attrappe: je Projekt andere Tage, damit sich Buchungen nicht in die Quere kommen
 const dayShift = (info) => (info.project.name === "mobil" ? 40 : 0);
 function nextWorkday(days) {
@@ -114,7 +121,7 @@ test("Terminbuchung komplett bis zur Danke-Seite", async ({ page }, info) => {
   await expect(page).toHaveURL(/danke\.html\?typ=termin&ref=T/);
   await expect(page.locator("h1")).toContainText("Terminanfrage eingegangen");
   await expect(page.locator("[data-thanks-text]")).toContainText("Vorgangsnummer: T");
-  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  const sent = await sentFor(page);
   expect(sent).toMatchObject({ typ: "termin", paket: "essential", klasse: "suv", uhrzeit: "10:00", email: "e2e@example.com", einwilligung: "ja", agb: "ja", website: "" });
   expect(sent.extras).toContain("Motorraumreinigung");
 });
@@ -220,7 +227,7 @@ test("Fotos vom Fahrzeug: Feld nur bei aktivem Portal, Upload mit Vorschau, Toke
   await page.locator('label[for="k-consent"]').click();
   await page.locator('#contactForm button[type="submit"]').click();
   await expect(page).toHaveURL(/danke\.html\?typ=kontakt/);
-  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  const sent = await sentFor(page);
   expect(sent.fotos).toHaveLength(1);
   expect(sent.fotos[0]).toMatch(/^foto-\d+$/);
   // Portal hat Fotos aus: Feld bleibt verborgen
@@ -238,7 +245,7 @@ test("Widerruf über das Formular geht als typ widerruf an das Portal", async ({
   await page.locator('label[for="w-consent"]').click();
   await page.locator('#widerrufForm button[type="submit"]').click();
   await expect(page).toHaveURL(/danke\.html\?typ=widerruf&ref=W/);
-  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  const sent = await sentFor(page);
   expect(sent).toMatchObject({ typ: "widerruf", vorgang: "T261023-0001", email: "karla@example.com" });
 });
 
@@ -518,7 +525,7 @@ test("EN: Terminbuchung komplett, Anfrage mit sprache=en und deutschen Werten", 
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator("h1")).not.toContainText("eingegangen");
   await expect(page.locator("[data-thanks-text]")).toContainText("T26");
-  const sent = (await (await page.request.get("/__mock/anfragen")).json()).pop();
+  const sent = await sentFor(page);
   expect(sent).toMatchObject({ typ: "termin", paket: "essential", klasse: "suv", uhrzeit: "09:00", sprache: "en", email: "en@example.com" });
   expect(sent.extras).toContain("Motorraumreinigung");
 });

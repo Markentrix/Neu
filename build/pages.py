@@ -106,7 +106,7 @@ def ref_strip(site, prefix=""):
       <div class="ref-strip reveal">
         <p class="ref-strip-label">Auch Unternehmen aus Celle vertrauen uns</p>
         <ul class="ref-strip-list">{items}</ul>
-        <a class="text-link ref-strip-more" href="{prefix}firmenkunden.html">Angebote für Firmen →</a>
+        <a class="text-link ref-strip-more" href="{prefix}firmenkunden.html">Angebote für Firmenkunden</a>
       </div>'''
 
 
@@ -151,7 +151,7 @@ def offers_home(site):
       </div>
       <div class="offer-grid offer-grid--home stagger">{"".join(offer_card(site, o) for o in offers)}
       </div>
-      <p class="section-more"><a class="text-link" href="angebote.html">{"Alle " + str(len(site.offers)) + " Angebote ansehen" if more else "Alle Angebote im Überblick"} →</a></p>
+      <p class="section-more"><a class="text-link" href="angebote.html">{"Alle " + str(len(site.offers)) + " Angebote ansehen" if more else "Alle Angebote im Überblick"}</a></p>
     </div>
   </section>'''
 
@@ -310,7 +310,7 @@ def ceramic_cards(site, prefix=""):
           <span class="cer-price"><small>ab</small> {_eur(price)}{f" <small>{ESC(unit)}</small>" if unit else ""}</span>
           <ul>{"".join(f"<li>{I['check']}{ESC(b)}</li>" for b in pts)}</ul>
           {f'<span class="cer-dur">Standzeit {ESC(dur)}*</span>' if dur else '<span class="cer-dur">Preis je C²Coating-Fahrzeugkategorie</span>'}
-          <span class="cer-more">Mehr erfahren {I["arrow"]}</span>
+          <span class="cer-more">Alles zur {ESC(title)} {I["arrow"]}</span>
         </a>''' for ic, brand, title, price, slug, pts, dur, unit in cards)
     return f'''
       <div class="cer-cards stagger">{html}
@@ -516,7 +516,6 @@ def build_home(site, write):
 
     services_rows = "".join(f'''
         <a class="service-row reveal" href="leistungen/{sv["slug"]}.html">
-          <span class="service-num">{i + 1:02d}</span>
           <span class="service-title">{ESC(sv["short"])}</span>
           <span class="service-desc">{ESC(sv["teaser"])}</span>
           <span class="service-arrow">{I["arrow"]}</span>
@@ -544,7 +543,7 @@ def build_home(site, write):
           <span class="article-cat">{ESC(a.get("category", "Ratgeber"))}</span>
           <h3>{ESC(a["title"])}</h3>
           <p>{ESC(a.get("excerpt", ""))}</p>
-          <span class="more">{a.get("readingTime", 5)} Min. Lesezeit · Weiterlesen →</span>
+          <span class="more">{a.get("readingTime", 5)} Min. Lesezeit</span>
         </a>''' for a in articles)
     ratgeber_section = f'''
   <section id="ratgeber" aria-labelledby="ratgeber-h">
@@ -564,7 +563,6 @@ def build_home(site, write):
 
   <section class="hero{" has-photo" if hero_img else ""}" aria-labelledby="hero-h">
     {hero_img}
-    <div class="hero-bg-grid" aria-hidden="true"></div>
     <div class="container hero-inner">
       <div class="hero-copy">
         <div class="hero-kicker">
@@ -748,7 +746,7 @@ def build_home(site, write):
       <div class="faq-list stagger">
         {core.faq_html(home_faq, first_open=False)}
       </div>
-      <p class="section-more"><a class="text-link" href="preise.html#fragen">Weitere Fragen zu Preisen, Dauer und Bezahlung →</a></p>
+      <p class="section-more"><a class="text-link" href="preise.html#fragen">Weitere Fragen zu Preisen, Dauer und Bezahlung</a></p>
     </div>
   </section>
 
@@ -965,7 +963,7 @@ def build_about(site, write):
       <div class="section-head"><p class="eyebrow">Partner &amp; Qualifikationen</p><h2 id="partner-h" class="display">Profi-Systeme, <em>geschult angewendet.</em></h2>
         <p>Ich arbeite mit professionellen Produkten und Aufbereitungssystemen, die ich kenne und denen ich vertraue.</p></div>
       <div class="usecase-grid">{partners}</div>
-      {('<div class="cert-row stagger">' + "".join(cert_card(site, c, "", compact=True) for c in site.certs) + '</div><p class="section-more"><a class="text-link" href="zertifikate.html">Alle Zertifikate im Detail ansehen →</a></p>') if site.certs else ""}
+      {('<div class="cert-row stagger">' + "".join(cert_card(site, c, "", compact=True) for c in site.certs) + '</div><p class="section-more"><a class="text-link" href="zertifikate.html">Alle Zertifikate im Detail ansehen</a></p>') if site.certs else ""}
     </div>
   </section>
 
