@@ -150,13 +150,17 @@ function tierDaten(s) {
   if (s.date && s.kat !== 'vermittlungshilfe-privat') z.push('Steckbrief seit ' + datum(s.date));
   return z;
 }
-function schild(s, nr, { sizes = '(max-width: 30rem) 46vw, (max-width: 60rem) 30vw, 22vw', lazy = true } = {}) {
+const geburtsjahr = s => { const m = String((s.fields || {}).Geboren || '').match(/(19|20)\d\d/); return m ? m[0] : ''; };
+const groesse = s => { const g = String((s.fields || {})['Größe'] || '').toLowerCase(), z = g.match(/\d{2,3}/g); if (z) { const n = Math.max(...z.map(Number)); return n < 40 ? 'klein' : n < 60 ? 'mittel' : 'gross'; } return /gro/.test(g) ? 'gross' : /mittel/.test(g) ? 'mittel' : /klein/.test(g) ? 'klein' : ''; };
+const herz = '<svg class="merk-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/zeichen.svg#herz"/></svg>';
+function schild(s, nr, { sizes = '(max-width: 30rem) 46vw, (max-width: 60rem) 30vw, 22vw', lazy = true, vt = true } = {}) {
   const k = s.images[0], art = ART[s.kat][0], privat = s.kat === 'vermittlungshilfe-privat';
-  return `<a class="kachel" href="${s.neu}" data-nr="${nr}" style="view-transition-name:${s.id}">${k ? bild(k, { alt: `${s.name}, ${art}${privat ? '' : ' im Waldtierheim Celle'}`, sizes, lazy }) : ''}<span class="kachel-text"><span><span class="schild-name">${esc(s.name)}</span><span class="schild-daten">${esc(tierDaten(s)[0] || '')}</span></span>${s.date && !privat ? `<span class="tage" data-seit="${s.date}"><span class="tage-zahl"></span><small></small></span>` : ''}</span></a>`;
+  return `<div class="karte" data-nr="${nr}" data-jahr="${geburtsjahr(s)}" data-gr="${s.kat === 'hunde' ? groesse(s) : ''}"><a class="kachel" href="${s.neu}"${vt ? ` style="view-transition-name:${s.id}"` : ''}>${k ? bild(k, { alt: `${s.name}, ${art}${privat ? '' : ' im Waldtierheim Celle'}`, sizes, lazy }) : ''}<span class="kachel-text"><span><span class="schild-name">${esc(s.name)}</span><span class="schild-daten">${esc(tierDaten(s)[0] || '')}</span></span>${s.date && !privat ? `<span class="tage" data-seit="${s.date}"><span class="tage-zahl"></span><small></small></span>` : ''}</span></a><button class="merk" type="button" data-merk="${s.neu}" aria-pressed="false" aria-label="${esc(s.name)} merken">${herz}</button></div>`;
 }
-function formular({ typ = 'kontakt', tier = '', knopf, nachricht = 'Deine Nachricht' }) {
+function formular({ typ = 'kontakt', tier = '', knopf, nachricht = 'Deine Nachricht', wahl = '' }) {
   return `<form class="formular" data-anfrage="${typ}" action="/kontakt.html" method="get">
 ${tier ? `<input type="hidden" name="tier" value="${esc(tier)}">` : ''}
+${wahl ? `<fieldset class="wahl"><legend>Worum geht es?</legend><label><input type="radio" name="anliegen" value="Kennenlernen" checked> Ich möchte ${esc(wahl)} kennenlernen</label><label><input type="radio" name="anliegen" value="Patenschaft"> Ich möchte Pate für ${esc(wahl)} werden</label></fieldset>` : ''}
 <div class="zwei-felder">
 <div class="feld"><label for="f-name">Vorname und Name</label><input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="e-name"><p class="fehler" id="e-name" data-fehler="name"></p></div>
 <div class="feld"><label for="f-email">E-Mail (für unsere Antwort)</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby="e-email"><p class="fehler" id="e-email" data-fehler="email"></p></div>
@@ -265,13 +269,14 @@ ${g ? `<section class="abschnitt geschichte" aria-labelledby="h-geschichte"><div
 
 /* ---------- Tierlisten ---------- */
 const reiter = aktiv => `<ul class="reiter">${[['Alle', '/im-waldtierheim-celle.html', heimtiere.length], ['Hunde', '/im-waldtierheim-celle/hunde.html', tiere.hunde.length], ['Katzen', '/im-waldtierheim-celle/katzen.html', tiere.katzen.length], ['Kleintiere', '/im-waldtierheim-celle/kleintiere.html', 0], ['Privat', '/im-waldtierheim-celle/vermittlungshilfe-privat.html', tiere['vermittlungshilfe-privat'].length]]
-  .map(([n, u, z]) => `<li><a href="${u}"${aktiv === u ? ' aria-current="page"' : ''}>${n === 'Hunde' ? zeichen('hundepfote') : n === 'Katzen' ? zeichen('katzenpfote') : ''}${n} (${z})</a></li>`).join('')}</ul>`;
+  .map(([n, u, z]) => `<li><a href="${u}"${aktiv === u ? ' aria-current="page"' : ''}>${n === 'Hunde' ? zeichen('hundepfote') : n === 'Katzen' ? zeichen('katzenpfote') : ''}${n} (${z})</a></li>`).join('')}<li><a href="/merkliste.html" data-merk-zahl>${herz}Merkliste</a></li></ul>`;
 const wilde = `<div class="hinweis"><p><strong>Wir suchen Plätze für unsere „Wilden“.</strong> Für scheue und verwilderte Katzen suchen wir Bauernhöfe, Reiterhöfe und ähnliche Orte, an denen sie geschützt leben können. <a href="/im-waldtierheim-celle/katzen/verwilderte-hauskatzen.html">Zum Steckbrief der verwilderten Hauskatzen</a></p></div>`;
 function tierliste(p, { h1, title, desc, intro, liste, extra = '', leer = '', sort = true, kr }) {
   const body = `<div class="huelle seitenkopf">${pfad(kr)}<h1>${h1}</h1><p class="statement">${intro}</p></div>
 <div class="huelle" style="padding-bottom:var(--abschnitt)">
 <div class="werkzeug">${reiter(p)}${sort && liste.length > 1 ? `<ul class="reiter"><li><button type="button" data-sortiere aria-pressed="false" aria-controls="liste">Längste Suche zuerst</button></li></ul>` : ''}</div>
 ${extra}
+${sort && liste.length > 3 ? `<div class="filter" data-filter="liste" hidden><ul class="reiter" data-gruppe="alter" aria-label="Nach Alter filtern"><li><button type="button" data-wert="" aria-pressed="true">Jedes Alter</button></li><li><button type="button" data-wert="jung" aria-pressed="false">Jung, bis 2 Jahre</button></li><li><button type="button" data-wert="erwachsen" aria-pressed="false">3 bis 7 Jahre</button></li><li><button type="button" data-wert="senior" aria-pressed="false">Ab 8 Jahren</button></li></ul>${liste.some(t => t.kat === 'hunde' && groesse(t)) && liste.every(t => t.kat === 'hunde') ? '<ul class="reiter" data-gruppe="gr" aria-label="Nach Größe filtern"><li><button type="button" data-wert="" aria-pressed="true">Jede Größe</button></li><li><button type="button" data-wert="klein" aria-pressed="false">Klein, unter 40 cm</button></li><li><button type="button" data-wert="mittel" aria-pressed="false">Mittel, 40 bis 59 cm</button></li><li><button type="button" data-wert="gross" aria-pressed="false">Groß, ab 60 cm</button></li></ul>' : ''}<p class="klein neben" data-treffer role="status" style="margin:-1rem 0 1.5rem"></p></div>` : ''}
 ${sort && liste.length ? '<p class="klein neben" style="margin:-.75rem 0 1.5rem">Die Zahl auf jedem Bild zählt die Tage, seit denen der Steckbrief online ist.</p>' : ''}
 ${liste.length ? `<div class="schilder" id="liste">${liste.map((s, i) => schild(s, i, { lazy: i > 3 })).join('\n')}</div>` : `<div class="hinweis">${leer}</div>`}
 </div>`;
@@ -284,24 +289,30 @@ function steckbrief(s) {
   const kr = [['Start', '/'], ['Tiere', '/im-waldtierheim-celle.html'], [art[1], `/im-waldtierheim-celle/${s.kat}.html`], [s.name, s.neu]];
   const imgs = s.images, h = text(s);
   const daten = [['Rasse', f.Rasse], ['Geboren', f.Geboren], ['Größe', f['Größe']], ['Steckbrief seit', datum(s.date)]].filter(x => x[1]);
+  const andere = tiere[s.kat].filter(t => t !== s && t.images.length), stelle = tiere[s.kat].indexOf(s);
+  const aehnlich = privat ? [] : [1, 2, 3].map(n => andere[(stelle + n - 1) % Math.max(andere.length, 1)]).filter((t, n, a) => t && a.indexOf(t) === n);
   const body = `<div class="huelle" style="padding-top:clamp(1rem,3vw,2.5rem)">${pfad(kr)}
-<article class="steck">
-<div class="steck-bilder">
-${imgs.length ? `<button type="button" class="steck-haupt" data-licht aria-label="Foto von ${esc(s.name)} vergrößern" style="view-transition-name:${s.id}">${bild(imgs[0], { alt: `${s.name}, ${art[0]}${privat ? '' : ' im Waldtierheim Celle'}`, sizes: '(max-width: 60rem) 92vw, 46vw', lazy: false })}</button>` : ''}
-${imgs.length > 1 ? `<ul class="leiste" aria-label="Weitere Fotos von ${esc(s.name)}">${imgs.map((k, i) => `<li><button type="button" aria-current="${i === 0}" aria-label="Foto ${i + 1} zeigen">${bild(k, { alt: `${s.name}, Foto ${i + 1}`, klein: true, lazy: i > 4, extra: ` data-gross="/bilder/${k}-l.webp" data-w="${bilder[k].w}" data-h="${bilder[k].h}"` })}</button></li>`).join('')}</ul>` : ''}
-</div>
-<div>
-<div class="steck-kopf"><h1>${esc(s.name)}</h1>${s.date && !privat ? `<p class="tage" data-seit="${s.date}"><span class="tage-zahl"></span><small></small></p>` : ''}</div>
+<article>
+<div class="steck-oben">
+${imgs.length ? `<button type="button" class="steck-haupt" data-licht aria-label="Foto von ${esc(s.name)} vergrößern" style="view-transition-name:${s.id}">${bild(imgs[0], { alt: `${s.name}, ${art[0]}${privat ? '' : ' im Waldtierheim Celle'}`, sizes: '(max-width: 60rem) 92vw, 52vw', lazy: false, extra: ` data-gross="/bilder/${imgs[0]}-l.webp"` })}</button>` : ''}
+<div class="steck-info">
+<h1>${esc(s.name)}</h1>
+${s.date && !privat ? `<p class="tage" data-seit="${s.date}"><span class="tage-zahl"></span><small></small></p>` : ''}
 ${daten.length ? `<dl class="daten">${daten.map(([a, b]) => `<dt>${a}</dt><dd>${esc(b)}</dd>`).join('')}</dl>` : ''}
-${privat ? `<div class="hinweis"><p><strong>Vermittlung von privat.</strong> ${esc(s.name)} lebt nicht im Waldtierheim. Bitte wende dich bei Fragen direkt an die Halterin oder den Halter unter den Kontaktdaten im Text.</p></div>` : ''}
+${privat ? `<p><strong>Vermittlung von privat.</strong> ${esc(s.name)} lebt nicht im Waldtierheim. Bitte wende dich bei Fragen direkt an die Halterin oder den Halter unter den Kontaktdaten im Text.</p>` : ''}
+<div class="steck-knoepfe">${privat ? '' : `<a class="knopf" href="#anfrage" data-anliegen="Kennenlernen">${esc(s.name)} kennenlernen</a><a class="knopf knopf-still" href="#anfrage" data-anliegen="Patenschaft">Pate für ${esc(s.name)} werden</a>`}<button class="merk merk-text" type="button" data-merk="${s.neu}" aria-pressed="false">${herz}<span>Merken</span></button></div>
+</div>
+</div>
+<div class="steck-unten">
 <div class="lesen">${h}</div>
-${privat ? '' : `<p style="margin-top:2rem"><a class="knopf" href="#anfrage">${esc(s.name)} kennenlernen</a></p>`}
+${imgs.length > 1 ? `<ul class="steck-galerie" aria-label="Weitere Fotos von ${esc(s.name)}">${imgs.slice(1).map((k, n) => `<li><button type="button" data-licht aria-label="Foto ${n + 2} vergrößern">${bild(k, { alt: `${s.name}, Foto ${n + 2}`, sizes: '(max-width: 60rem) 46vw, 22vw', extra: ` data-gross="/bilder/${k}-l.webp"` })}</button></li>`).join('')}</ul>` : ''}
 </div>
 </article></div>
 ${privat ? '' : `<section class="abschnitt anfrage" id="anfrage" aria-labelledby="h-anfrage"><div class="huelle anfrage-raster">
-<div><h2 id="h-anfrage">Frag nach ${esc(s.name)}</h2><p style="margin-top:1.5rem">Schreib uns, wer du bist und wie ${esc(s.name)} bei dir leben würde. Wir melden uns per E-Mail oder Telefon.</p><p class="status" data-status>Oder komm in den Öffnungszeiten vorbei</p><p style="margin-top:1.5rem">Du kannst ${esc(s.name)} nicht aufnehmen? Mit einer <a href="/deine-hilfe.html#patenschaft">Patenschaft</a> oder einer <a href="/deine-hilfe.html#spenden">Spende</a> hilfst du trotzdem.</p></div>
-${formular({ typ: 'kontakt', tier: `${s.name} (${art[0]})`, knopf: 'Anfrage zu ' + esc(s.name) + ' senden', nachricht: 'Deine Nachricht an das Tierheim-Team' })}
+<div><h2 id="h-anfrage">Frag nach ${esc(s.name)}</h2><p style="margin-top:1.5rem">Schreib uns, wer du bist und wie ${esc(s.name)} bei dir leben würde. Wir melden uns per E-Mail oder Telefon.</p><p class="status" data-status>Oder komm in den Öffnungszeiten vorbei</p><p style="margin-top:1.5rem">Du kannst ${esc(s.name)} nicht aufnehmen? Als Pate unterstützt du genau dieses Tier mit Futter, Sachspenden oder einem monatlichen Betrag und kannst es in den Öffnungszeiten besuchen. <a href="/dokumente/patenschaftsvertrag.pdf">Patenschaftsvertrag als PDF (155 KB)</a></p></div>
+${formular({ typ: 'kontakt', tier: `${s.name} (${art[0]})`, knopf: 'Anfrage zu ' + esc(s.name) + ' senden', nachricht: 'Deine Nachricht an das Tierheim-Team', wahl: s.name })}
 </div></section>`}
+${aehnlich.length ? `<section class="abschnitt" aria-labelledby="h-mehr"><div class="huelle"><div class="kopfzeile"><h2 id="h-mehr">Diese ${art[1]} warten auch</h2><p><a class="knopf knopf-still" href="/im-waldtierheim-celle/${s.kat}.html">Alle ${art[1]} ansehen</a></p></div><div class="schilder schilder-drei">${aehnlich.map((t, n) => schild(t, n, { vt: false, sizes: '(max-width: 30rem) 46vw, 30vw' })).join('')}</div></div></section>` : ''}
 ${lichtDialog}`;
   schreibe(s.neu, geruest({ pfad: s.neu, title: titel(`${s.name}: ${privat ? 'Vermittlung von privat' : art[0] + ' sucht Zuhause'} | Waldtierheim Celle`), desc: kurz(`${s.name}${f.Rasse ? ', ' + f.Rasse : ''}${f.Geboren ? ', geboren ' + f.Geboren : ''}. ${nurText(h)}`, 155), body, hero: imgs[0], aktiv: '/im-waldtierheim-celle.html',
     leiste: privat ? null : [`<a href="tel:${F.telLink}">Anrufen ${F.tel}</a>`, `<a href="#anfrage">Kennenlernen anfragen</a>`], ld: [pfadLd(kr)] }));
@@ -514,6 +525,12 @@ einfach('/datenschutz.html', { h1: 'Datenschutz', title: 'Datenschutzerklärung 
 <h2>Deine Rechte</h2>
 <p>Du hast das Recht auf Auskunft über deine gespeicherten Daten (Art. 15 DSGVO), auf Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch gegen die Verarbeitung (Art. 21). Eine erteilte Einwilligung kannst du jederzeit mit Wirkung für die Zukunft widerrufen. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren, zum Beispiel bei der Landesbeauftragten für den Datenschutz Niedersachsen.</p>
 </div>` });
+einfach('/merkliste.html', { h1: 'Deine Merkliste', title: 'Merkliste | Waldtierheim Celle', desc: 'Deine gemerkten Tiere aus dem Waldtierheim Celle.', noindex: true, index: false, aktiv: '/im-waldtierheim-celle.html',
+  inhalt: `<p class="statement" id="merk-leer" style="margin-bottom:1.5rem">Du hast noch kein Tier gemerkt. Tippe in der Tierliste auf das Herz an einem Foto, dann findest du das Tier hier wieder.</p>
+<div class="schilder" id="merkliste"></div>
+<p class="klein neben" style="margin-top:1.5rem">Die Merkliste wird nur auf diesem Gerät gespeichert. Sie braucht JavaScript.</p>
+<p style="margin-top:1.5rem"><a class="knopf" href="/im-waldtierheim-celle.html">Tiere ansehen</a></p>` });
+fs.writeFileSync(path.join(ZIEL, 'tiere.json'), JSON.stringify([...heimtiere, ...tiere['vermittlungshilfe-privat']].filter(t => t.images[0]).map(t => ({ p: t.neu, n: t.name, d: tierDaten(t)[0] || '', s: t.kat === 'vermittlungshilfe-privat' ? '' : t.date || '', b: `/bilder/${t.images[0]}-s.webp`, w: bilder[t.images[0]].sw, h: bilder[t.images[0]].sh, a: `${t.name}, ${ART[t.kat][0]}` }))));
 einfach('/danke.html', { h1: 'Danke, deine Nachricht ist da', title: 'Nachricht erhalten | Waldtierheim Celle', desc: 'Deine Nachricht ist beim Waldtierheim Celle angekommen.', noindex: true, index: false,
   inhalt: `<div class="lesen"><p class="statement" style="margin-bottom:1.5rem">Wir haben deine Anfrage erhalten und melden uns per E-Mail oder Telefon. Eine Eingangsbestätigung ist auf dem Weg in dein Postfach.</p>
 <p data-ref-zeile hidden>Deine Vorgangsnummer: <strong data-ref></strong></p>

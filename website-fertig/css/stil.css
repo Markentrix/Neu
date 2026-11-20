@@ -162,11 +162,6 @@ li:nth-child(odd)>.zeile{background:var(--flaeche)}
 button.steck-haupt,.galerie button{cursor:zoom-in}
 .tage-zahl{display:block;min-height:.9em}
 .steck-haupt img{width:100%;max-height:78svh;object-fit:contain}
-.leiste{display:flex;gap:.5rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:.5rem 0;overscroll-behavior-x:contain;list-style:none;margin:0}
-.leiste li{flex:0 0 5.5rem;scroll-snap-align:start}
-.leiste button{display:block;padding:0;border:0;background:none;cursor:pointer;width:5.5rem;height:5.5rem}
-.leiste img{width:100%;height:100%;object-fit:cover}
-.leiste button[aria-current=true]{outline:4px solid var(--wald);outline-offset:-4px}
 .steck h1{font-size:clamp(2.25rem,6vw,5rem);letter-spacing:-.04em;line-height:.92}
 .steck-kopf{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem 2rem;align-items:start;margin-bottom:2rem}
 .steck-kopf .tage{font-size:clamp(3rem,6vw,5rem)}
@@ -409,3 +404,41 @@ body{background:#fff}}
 @media (max-width:30rem){.schilder .kachel .schild-name,.schilder .kachel:nth-child(1) .schild-name{font-size:1.25rem}}
 .schilder .kachel .tage,.schilder .kachel:nth-child(1) .tage{flex-wrap:wrap;gap:0 .45rem;white-space:normal}
 .kachel .schild-daten{align-self:flex-start}
+.steck-oben{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(1rem,2.5vw,2.5rem);align-items:stretch;margin-bottom:clamp(2rem,5vw,4rem)}
+.steck-oben .steck-haupt{height:100%}
+.steck-oben .steck-haupt img{width:100%;height:100%;max-height:none;aspect-ratio:4/3;object-fit:cover;object-position:50% 30%}
+.steck-info{background:var(--flaeche);padding:clamp(1.25rem,3vw,2.5rem);display:flex;flex-direction:column;gap:1.25rem;min-width:0}
+.steck-info h1{font-size:clamp(2.25rem,5vw,4.25rem);letter-spacing:-.04em;line-height:.92}
+.steck-info .tage{text-align:left;font-size:clamp(3rem,6vw,5rem)}
+.steck-info .daten{background:var(--grund);margin:0}
+.steck-info p{margin:0}
+.steck-knoepfe{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:auto}
+.steck-unten{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:clamp(1.5rem,5vw,5rem);align-items:start;padding-bottom:var(--abschnitt)}
+.steck-galerie{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;position:sticky;top:5.5rem}
+.steck-galerie button{display:block;width:100%;padding:0;border:0;background:var(--flaeche);cursor:zoom-in}
+.steck-galerie img{width:100%;aspect-ratio:1;object-fit:cover}
+@media (max-width:60rem){.steck-oben,.steck-unten{grid-template-columns:minmax(0,1fr)}
+.steck-galerie{position:static}}
+.karte{position:relative;min-width:0}
+.karte .kachel{display:block;width:100%}
+.merk{position:absolute;top:.5rem;right:.5rem;width:2.75rem;height:2.75rem;display:grid;place-items:center;padding:0;border:0;background:var(--grund);color:var(--wald);cursor:pointer;transition:transform .16s var(--ease-out)}
+.merk:active{transform:scale(.94)}
+.merk-icon{width:1.4rem;height:1.4rem;fill:none;flex-shrink:0}
+.merk[aria-pressed=true] .merk-icon{fill:currentColor}
+.merk-text{position:static;width:auto;height:auto;min-height:3.25rem;display:inline-flex;align-items:center;gap:.5rem;padding:0 1.1rem;font-weight:700}
+.reiter a .merk-icon{width:1.1rem;height:1.1rem;margin-right:.4rem}
+.schilder-drei{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:30rem){.schilder-drei{grid-template-columns:repeat(2,minmax(0,1fr))}
+.schilder-drei .karte:nth-child(3){display:none}}
+.filter .reiter{margin-bottom:.75rem}
+.filter .reiter:last-of-type{margin-bottom:1.75rem}
+.wahl{border:0;padding:0;margin:0;display:grid;gap:.25rem}
+.wahl legend{font-weight:700;padding:0;margin-bottom:.35rem}
+.wahl label{display:flex;align-items:center;gap:.75rem;min-height:2.75rem;cursor:pointer}
+.wahl input{width:1.5rem;height:1.5rem;margin:0;accent-color:var(--wald);flex-shrink:0}
+.wahl label{position:relative;padding-left:2.25rem}
+.wahl input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.wahl label::before{content:"";position:absolute;left:0;top:50%;width:1.4rem;height:1.4rem;margin-top:-.7rem;border-radius:50%;box-shadow:inset 0 0 0 2px var(--wald);background:var(--grund)}
+.wahl label:has(input:checked)::before{background:var(--wald);box-shadow:inset 0 0 0 2px var(--wald),inset 0 0 0 .35rem var(--grund)}
+.wahl label:has(input:focus-visible){outline:3px solid var(--wald);outline-offset:3px}
+@media (max-width:40rem){.lesen h3{font-size:1.25rem}}

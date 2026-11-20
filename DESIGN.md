@@ -1,6 +1,6 @@
 # DESIGN.md · Waldtierheim Celle (Verein aktiver Tierfreunde e.V.)
 
-Relaunch von tierfreunde-celle.de. Stand 18.11.2026. Dieses Dokument beschreibt den Endstand, nicht den Weg dorthin.
+Relaunch von tierfreunde-celle.de. Stand 20.11.2026. Dieses Dokument beschreibt den Endstand, nicht den Weg dorthin.
 
 ## Ziel
 1. Tiere vermitteln und Emotionen erzeugen.
@@ -43,6 +43,13 @@ Abweichung vom Logo: Das Logo ist nachtblau mit grünem „aktiver“. Die Websi
 ## Startseite (Reihenfolge)
 Hero mit Cora → Tiere, die am längsten warten (Mosaik, Hunde/Katzen) → Ernie und Bert → Happy End (Fotowand) → Spenden → Besuch → fünf Fragen → Footer. 21 Fotos.
 Alle zehn Fragen stehen mit FAQ-Markup auf der Kontaktseite.
+
+## Funktionen
+- **Merkliste:** Herz an jedem Tierfoto in den Listen und am Steckbrief. Gespeichert nur im Browser des Besuchers (localStorage), kein Konto, keine Übertragung. Seite `merkliste.html` (noindex) baut sich aus `tiere.json`.
+- **Filter in der Tierliste:** nach Alter (aus dem Geburtsjahr im Steckbrief), bei Hunden zusätzlich nach Größe (aus der Größenangabe). Ohne Skript bleibt der Filter verborgen und alle Tiere sind sichtbar.
+- **Steckbrief:** großes Foto, Infokarte mit Wartetagen und drei Aktionen (Kennenlernen, Pate werden, Merken), darunter Text und Fotogalerie mit Großansicht, Formular, drei weitere Tiere derselben Art.
+- **Patenschaft am Tier:** Das Formular fragt „Worum geht es?“ (Kennenlernen oder Patenschaft) und sendet das als Feld `anliegen` an das Portal.
+- Ereignisse für die Statistik: `anruf_klick`, `anfrage_gesendet`, `spende_klick`, `iban_kopiert`, `tier_gemerkt`.
 
 ## Zeichen (Kundenwunsch)
 - Pfoten: Hundespur nach den Tieren, Katzenspur nach der Fotowand, Pfote als Symbol an den Reitern „Hunde“ und „Katzen“.
