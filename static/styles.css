@@ -1476,3 +1476,27 @@ blockquote.note p { color: #4d3a0f; }
   .text-link, .contact-line a, .info-row a { display: inline-flex; align-items: center; min-height: 44px; }
   .info-row a { margin-block: -6px; padding-block: 0; }
 }
+
+/* Handy: Startseite kürzer, ohne Inhalt wegzunehmen (alles bleibt im HTML und für Suchmaschinen lesbar) */
+@media (max-width: 759.98px) {
+  /* Leistungen: nur Name und Pfeil, die Beschreibung steht auf der jeweiligen Leistungsseite */
+  .service-row { padding-block: 14px; row-gap: 0; align-items: center; }
+  .service-desc { display: none; }
+  .service-arrow { grid-row: auto; }
+  /* Keramik-Karten zum Wischen statt untereinander, wie die Bewertungen */
+  .cer-cards { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); padding-bottom: 4px; }
+  .cer-cards::-webkit-scrollbar { display: none; }
+  .cer-card { flex: 0 0 82%; scroll-snap-align: start; }
+  .js-anim .cer-cards .reveal { transform: none; clip-path: none; transition: none; opacity: 1; }
+}
+@media (max-width: 520px) {
+  /* Fußbereich: Leistungen und Service nebeneinander, Marke und Kontakt über die volle Breite */
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; row-gap: 28px; }
+  .footer-grid > :first-child, .footer-grid > :last-child { grid-column: 1 / -1; }
+  .footer-grid ul a { font-size: 0.86rem; line-height: 1.25; }
+}
+@media (max-width: 759.98px) {
+  /* Das Zitat im Hero steht am Handy weiter unten bei den Bewertungen; so kommt der Preisrechner früher */
+  .hero-quote { display: none; }
+}
