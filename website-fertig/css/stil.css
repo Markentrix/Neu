@@ -441,4 +441,4 @@ body{background:#fff}}
 .wahl label::before{content:"";position:absolute;left:0;top:50%;width:1.4rem;height:1.4rem;margin-top:-.7rem;border-radius:50%;box-shadow:inset 0 0 0 2px var(--wald);background:var(--grund)}
 .wahl label:has(input:checked)::before{background:var(--wald);box-shadow:inset 0 0 0 2px var(--wald),inset 0 0 0 .35rem var(--grund)}
 .wahl label:has(input:focus-visible){outline:3px solid var(--wald);outline-offset:3px}
-@media (max-width:40rem){.lesen h3{font-size:1.25rem}}
+@media (max-width:40rem){.lesen h3{font-size:1.125rem;letter-spacing:-.01em}}
