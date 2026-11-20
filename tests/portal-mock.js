@@ -13,6 +13,7 @@ const SLOT_TIMES = ["08:00", "09:00", "10:00"];
 const booked = new Set();   // "JJJJ-MM-TT 08:00": vergeben
 const anfragen = [];
 let paypalMe = "";
+let blocked = [];       // gesperrte Tage, wie /api/verfuegbarkeit sie liefert
 let fotos = 0;          // PayPal.me-Name, wie ihn das Portal in /api/verfuegbarkeit liefert
 let n = 0;
 
@@ -25,7 +26,7 @@ function nextFree() {
 function json(res, code, obj) { res.writeHead(code, { "Content-Type": "application/json" }); res.end(JSON.stringify(obj)); }
 
 function api(req, res, url, body) {
-  if (url.pathname === "/api/verfuegbarkeit") return json(res, 200, { blocked: [], closedWeekdays: [0], nextFree: nextFree(), selfBooking: true, slotTimes: SLOT_TIMES, paypalMe });
+  if (url.pathname === "/api/verfuegbarkeit") return json(res, 200, { blocked, closedWeekdays: [0], nextFree: nextFree(), selfBooking: true, slotTimes: SLOT_TIMES, paypalMe });
   if (url.pathname === "/api/slots") {
     const tag = url.searchParams.get("tag") || "";
     return json(res, 200, { tag, slots: SLOT_TIMES.map((z) => ({ zeit: z, frei: !booked.has(tag + " " + z) })) });
@@ -58,6 +59,7 @@ function api(req, res, url, body) {
   // Test-Hilfen
   if (url.pathname === "/__mock/anfragen") return json(res, 200, anfragen);
   if (url.pathname === "/__mock/paypal" && req.method === "POST") { paypalMe = JSON.parse(body || "{}").name || ""; return json(res, 200, { ok: true }); }
+  if (url.pathname === "/__mock/sperren" && req.method === "POST") { blocked = JSON.parse(body || "{}").tage || []; return json(res, 200, { ok: true }); }
   if (url.pathname === "/__mock/belegen" && req.method === "POST") { const d = JSON.parse(body || "{}"); booked.add(d.datum + " " + d.uhrzeit); return json(res, 200, { ok: true }); }
   return json(res, 404, { ok: false });
 }

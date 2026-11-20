@@ -26,7 +26,8 @@ Die Website läuft beim Markentrix-Portal. Abgegeben wird nur der Ordner `websit
 - [ ] Rich-Results-Test für Startseite, eine Leistungsseite und einen Ratgeber-Artikel.
 - [ ] Google-Unternehmensprofil: Website-Link auf `https://www.elbdetail.de/` und Termin-Link auf `/termin.html` setzen (`google-unternehmensprofil.md`).
 - [ ] Branchenverzeichnisse mit identischer Schreibweise anlegen (`branchenverzeichnisse.md`).
-- [ ] Google-Bewertungslink in `content/site.json` → `googleReviewUrl` eintragen, Bewertungsprozess starten (`bewertungs-prozess.md`).
+- [x] Google-Bewertungslink eingetragen (Place-ID aus dem Portal), Kurzadresse `elbdetail.de/bewerten.html` mit QR-Karte. Einmal selbst antippen und prüfen, dass sich das Bewertungsfenster von ElbDetail öffnet. Dann den Bewertungsprozess starten (`bewertungs-prozess.md`).
+- [ ] **Buchungszeitraum im Portal** von 3 Wochen auf mindestens 3 Monate stellen. Bis dahin zeigt die Buchung nach der Grenze einen Hinweis auf Telefon und WhatsApp.
 - [ ] Erste echte Vorher/Nachher-Fotos einbauen (`foto-und-video-shotlist.md`).
 - [ ] Anzeigen nur mit UTM-Parametern starten (`anzeigen-kit.md`).
 

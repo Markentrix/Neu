@@ -131,6 +131,7 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     agb.build_widerruf(site, write)
     pages.build_404(site, write)
     pages.build_danke(site, write)
+    pages.build_bewerten(site, write)
 
     iso = site.s["standIso"]
     sm = [("/", iso, "1.0", "weekly")]

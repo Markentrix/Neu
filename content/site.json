@@ -45,8 +45,10 @@
     "count": 22,
     "asOf": "Oktober 2026"
   },
-  "googleMapsUrl": "https://www.google.com/maps/place/?q=ElbDetail+Celle",
-  "googleReviewUrl": "",
+  "googlePlaceId": "ChIJobsf2oIjsEcRrQsfhSAHkXo",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ElbDetail%2C+Lachteh%C3%A4user+Stra%C3%9Fe+1%2C+29223+Celle&query_place_id=ChIJobsf2oIjsEcRrQsfhSAHkXo",
+  "googleReviewsUrl": "https://search.google.com/local/reviews?placeid=ChIJobsf2oIjsEcRrQsfhSAHkXo",
+  "googleReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJobsf2oIjsEcRrQsfhSAHkXo",
   "social": {
     "instagram": "https://www.instagram.com/elbdetail/",
     "facebook": "https://www.facebook.com/p/ElbDetail-61591214390265/",

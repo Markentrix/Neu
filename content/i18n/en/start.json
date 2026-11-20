@@ -328,5 +328,14 @@
  "{n} Uhrzeiten frei an diesem Tag.": "{n} times available on this day.",
  "{owner} meldet sich telefonisch, sieht sich Ihr Fahrzeug vorab an und bestätigt den Termin. Eine Eingangsbestätigung ist unterwegs an Ihre E-Mail-Adresse.": "{owner} will call you, take a look at your vehicle in advance and confirm the appointment. A confirmation of receipt is on its way to your email address.",
  "{titel} über die Website": "{titel} via the website",
- "{zeit} Uhr": "{zeit}"
+ "{zeit} Uhr": "{zeit}",
+ "Bewertung schreiben": "Write a review",
+ "Online-Anfragen sind bis {datum} möglich. Für spätere Termine rufen Sie uns an ({tel}) oder schreiben Sie per WhatsApp.": "Online requests are possible up to {datum}. For later appointments, please call us ({tel}) or message us on WhatsApp.",
+ "Bewertung abgeben | ElbDetail": "Leave a review | ElbDetail",
+ "Ihre Meinung zählt": "Your opinion matters",
+ "Danke, dass Sie ElbDetail <t1>bewerten.</t1>": "Thank you for <t1>reviewing ElbDetail.</t1>",
+ "Sie werden gleich zu Google weitergeleitet. Dort vergeben Sie Sterne und schreiben in ein paar Sätzen, wie zufrieden Sie waren. Das hilft anderen Autofahrern in Celle bei der Wahl und uns sehr.": "You will be taken to Google in a moment. There you can give a star rating and write a few sentences about how satisfied you were. This helps other drivers in Celle choose, and it helps us a lot.",
+ "Jetzt bei Google bewerten": "Review us on Google now",
+ "Startet die Weiterleitung nicht, tippen Sie auf den Button.": "If the redirect does not start, tap the button.",
+ "Bewerten Sie ElbDetail bei Google: Ihre Erfahrung hilft anderen Autofahrern in Celle.": "Review ElbDetail on Google: your experience helps other drivers in Celle."
 }

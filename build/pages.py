@@ -652,7 +652,8 @@ def build_home(site, write):
         </div>
         <div>
           <p class="review-quote">„{ESC(site.reviews["featuredQuote"])}“</p>
-          <div class="review-cta"><a class="btn btn-line-light btn-sm" href="{s["googleMapsUrl"]}" target="_blank" rel="noopener">Alle Bewertungen auf Google</a></div>
+          <div class="review-cta"><a class="btn btn-line-light btn-sm" href="{s.get("googleReviewsUrl") or s["googleMapsUrl"]}" target="_blank" rel="noopener">Alle Bewertungen auf Google</a>{
+            f'<a class="btn btn-line-light btn-sm" href="{ESC(s["googleReviewUrl"])}" target="_blank" rel="noopener">Bewertung schreiben</a>' if s.get("googleReviewUrl") else ""}</div>
         </div>
       </div>
       <div class="mk-reviews" data-mk="bewertungen"></div>
@@ -1214,3 +1215,29 @@ def build_danke(site, write):
 </main>
 '''
     write("danke.html", core.head(site, "Danke für Ihre Anfrage | ElbDetail", "Ihre Anfrage bei ElbDetail ist eingegangen. Wir melden uns mit Angebot und Terminvorschlag, meist am selben oder nächsten Werktag.", "/danke.html", noindex=True) + core.header(site) + body + core.footer(site))
+
+
+def build_bewerten(site, write):
+    """Kurze Adresse für René (elbdetail.de/bewerten.html, auch als QR-Code): leitet zur Google-Bewertung weiter."""
+    url = site.s.get("googleReviewUrl")
+    if not url:
+        return
+    body = f'''
+<main id="main">
+  <section class="page-hero" aria-labelledby="page-h">
+    <div class="container">
+      <p class="eyebrow">Ihre Meinung zählt</p>
+      <h1 id="page-h">Danke, dass Sie ElbDetail <em>bewerten.</em></h1>
+      <p class="lead">Sie werden gleich zu Google weitergeleitet. Dort vergeben Sie Sterne und schreiben in ein paar Sätzen, wie zufrieden Sie waren. Das hilft anderen Autofahrern in Celle bei der Wahl und uns sehr.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="{ESC(url)}" rel="noopener">{I["gstar"]}Jetzt bei Google bewerten</a>
+        <a class="btn btn-line" href="index.html">Zur Startseite</a>
+      </div>
+      <p class="hint">Startet die Weiterleitung nicht, tippen Sie auf den Button.</p>
+    </div>
+  </section>
+</main>
+'''
+    refresh = f'<meta http-equiv="refresh" content="2;url={ESC(url)}">\n'
+    write("bewerten.html", core.head(site, "Bewertung abgeben | ElbDetail", "Bewerten Sie ElbDetail bei Google: Ihre Erfahrung hilft anderen Autofahrern in Celle.",
+                                     "/bewerten.html", noindex=True, extra=refresh) + core.header(site) + body + core.footer(site))

@@ -522,3 +522,20 @@ test("EN: Terminbuchung komplett, Anfrage mit sprache=en und deutschen Werten", 
   expect(sent).toMatchObject({ typ: "termin", paket: "essential", klasse: "suv", uhrzeit: "09:00", sprache: "en", email: "en@example.com" });
   expect(sent.extras).toContain("Motorraumreinigung");
 });
+
+test("Buchung: hinter dem Buchungszeitraum des Portals freundlicher Hinweis statt „ausgebucht“", async ({ page }, info) => {
+  test.skip(info.project.name === "mobil", "verändert die gemeinsame Portal-Attrappe, daher nur einmal");
+  // Portal mit begrenztem Zeitraum: ab Tag 100 ist alles gesperrt (weit hinter den Tagen der anderen Tests)
+  const tage = []; for (let i = 100; i <= 160; i++) { const d = new Date(); d.setDate(d.getDate() + i); tage.push(d.toISOString().slice(0, 10)); }
+  await page.request.post("/__mock/sperren", { data: { tage } });
+  try {
+    await page.goto("/termin.html?datum=" + tage[10]);  // z. B. über einen Link mit Wunschtag
+    await expect(page.locator("#t-date1")).toHaveAttribute("max", /^\d{4}-\d{2}-\d{2}$/);
+    const max = await page.locator("#t-date1").getAttribute("max");
+    expect(max < tage[0]).toBe(true);
+    await expect(page.locator("#t-date1-msg")).toContainText("Online-Anfragen sind bis");
+    await expect(page.locator("#t-date1-msg")).toContainText("WhatsApp");
+  } finally {
+    await page.request.post("/__mock/sperren", { data: { tage: [] } });
+  }
+});

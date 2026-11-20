@@ -522,6 +522,7 @@
     availability().then(function (j) {
       if (!j) return;
       blocked = j.blocked || []; if (j.closedWeekdays) closedWeekdays = j.closedWeekdays;
+      findLimit();
       /* Direkte Buchung nur, wenn das Portal sie freigibt; sonst bleibt es beim Terminwunsch */
       if (j.selfBooking) $$("[data-sb-text]").forEach(function (el) { el.textContent = el.getAttribute("data-sb-text"); });
       payMe = payMeName(j);
@@ -581,12 +582,28 @@
       var need = !!v && new Date(v + "T12:00:00") < lim;
       vzRow.hidden = !need; var cb = $("input", vzRow); cb.disabled = !need; cb.required = need;
     }
+    /* Buchungszeitraum: Ist im Portal nur ein paar Wochen im Voraus buchbar, sind alle Tage danach gesperrt.
+       Diese Grenze erkennen, im Kalender ausgrauen (max) und statt „ausgebucht“ freundlich auf Telefon und WhatsApp verweisen. */
+    var limitFrom = "", lastOpen = "";
+    function isoOf(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+    function findLimit() {
+      var set = {}; blocked.forEach(function (x) { set[x] = 1; });
+      var sorted = blocked.slice().sort(); if (!sorted.length) return;
+      var d = new Date(sorted[sorted.length - 1] + "T12:00:00"), first = "", n = 0;
+      while (set[isoOf(d)] || closedWeekdays.indexOf(d.getDay()) !== -1) { if (set[isoOf(d)]) first = isoOf(d); n++; d.setDate(d.getDate() - 1); }
+      if (n < 28 || !first) return;  // nur lange Sperren am Ende zählen, keine einzelnen ausgebuchten Tage
+      var o = new Date(first + "T12:00:00"); o.setDate(o.getDate() - 1);
+      while (set[isoOf(o)] || closedWeekdays.indexOf(o.getDay()) !== -1) o.setDate(o.getDate() - 1);
+      limitFrom = first; lastOpen = isoOf(o);
+      if (lastOpen >= todayIso()) ["datum", "datum2"].forEach(function (k) { if (wz[k]) wz[k].max = lastOpen; });
+    }
     function checkDate(el) {
       var msg = $("#" + el.id + "-msg"), v = el.value, txt = "";
       if (v) {
         var d = new Date(v + "T12:00:00");
         if (v < todayIso()) txt = t("Bitte ein Datum ab heute wählen.");
         else if (closedWeekdays.indexOf(d.getDay()) !== -1) txt = t("An Sonntagen sind wir geschlossen. Bitte einen anderen Tag wählen.");
+        else if (limitFrom && v >= limitFrom) txt = t("Online-Anfragen sind bis {datum} möglich. Für spätere Termine rufen Sie uns an ({tel}) oder schreiben Sie per WhatsApp.", { datum: deDate(lastOpen), tel: ELB.phoneDisplay });
         else if (blocked.indexOf(v) !== -1) txt = t("An diesem Tag sind wir leider ausgebucht oder geschlossen.");
       }
       el.setCustomValidity(txt);

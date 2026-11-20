@@ -160,7 +160,9 @@ class Site:
         return f'{a["street"]}, {a["zip"]} {a["city"]}'
 
     def maps_url(self):
-        return "https://www.google.com/maps/place/?q=" + urllib.parse.quote_plus(self.addr_line())
+        """Google-Maps-Link (offizielles URL-Format); mit Place-ID öffnet er direkt das Unternehmensprofil."""
+        q = "https://www.google.com/maps/search/?api=1&query=" + urllib.parse.quote_plus(self.s["name"] + ", " + self.addr_line())
+        return q + ("&query_place_id=" + self.s["googlePlaceId"] if self.s.get("googlePlaceId") else "")
 
     def asset(self, prefix, name):
         v = self.asset_v.get(name)

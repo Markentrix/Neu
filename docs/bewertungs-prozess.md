@@ -123,6 +123,10 @@ Ohne Einverständnis für WhatsApp nur:
 
 ## 4. Den Bewertungslink finden
 
+**Schon eingerichtet:** Der Bewertungslink steht in `content/site.json` unter `googleReviewUrl`. Er nutzt die Place-ID aus dem Markentrix-Portal. Für Kunden gibt es die kurze Adresse **www.elbdetail.de/bewerten.html**. Sie leitet nach zwei Sekunden zu Google weiter, auf Englisch unter `/en/bewerten.html`. Diese Adresse in WhatsApp-Vorlagen und auf der QR-Karte verwenden. Ändert sich der Google-Link, reicht eine Änderung in `site.json`, Karte und Vorlagen bleiben gültig.
+
+Zum Prüfen oder Ersetzen des Links:
+
 1. Mit dem Google-Konto anmelden, das das Unternehmensprofil verwaltet.
 2. In der Google-Suche "ElbDetail Celle" eingeben. Oben erscheint die Verwaltungsansicht des Profils.
 3. Auf **"Rezensionen einholen"** klicken. Je nach Ansicht heißt der Punkt auch "Bewertungsformular teilen" oder steht unter "Kunden" bzw. "Rezensionen".
@@ -143,7 +147,7 @@ Den Link nicht kürzen oder über fremde Dienste umleiten. Den Original-Link von
 
 **Platz im Fahrzeug:** Mittelkonsole oder Getränkehalter. Nicht auf den Fahrersitz und nicht aufs Armaturenbrett, damit nichts beim Fahren stört oder die Pflege verkratzt.
 
-**QR-Code:** Aus dem Original-Bewertungslink einen statischen QR-Code erzeugen. Keinen dynamischen QR-Code eines Drittanbieters, der nach einem Abo abläuft. Vor dem Druck mit zwei Handys testen.
+**QR-Code:** Statischer QR-Code auf `https://www.elbdetail.de/bewerten.html` (Druckvorlage A6 liegt vor). Wird ein neuer erzeugt: statisch, nicht über einen Abo-Dienst. Keinen dynamischen QR-Code eines Drittanbieters, der nach einem Abo abläuft. Vor dem Druck mit zwei Handys testen.
 
 **Text Vorderseite**
 

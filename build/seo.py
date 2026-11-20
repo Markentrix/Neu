@@ -39,7 +39,7 @@ def business(site):
                        "Innenraumreinigung", "Lederpflege", "Lederreparatur", "Geruchsentfernung", "Cabrioverdeckreinigung", "Leasingrückgabe", "Flottenpflege"],
         "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": o["days"], "opens": o["opens"], "closes": o["closes"]}
                                       for o in s["openingHours"].get("schedule", [])],
-        "sameAs": list(s["social"].values()),
+        "sameAs": list(s["social"].values()) + ([s["googleMapsUrl"]] if s.get("googlePlaceId") else []),
         "aggregateRating": {"@type": "AggregateRating", "ratingValue": s["rating"]["value"].replace(",", "."), "bestRating": "5",
                             "reviewCount": str(s["rating"]["count"])},
         "review": [{"@type": "Review", "author": {"@type": "Person", "name": r["name"]},
