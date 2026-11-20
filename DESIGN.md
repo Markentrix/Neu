@@ -13,76 +13,79 @@ Die Pizzeria Molise ist ein Lokal mit Straßenfenster in der Celler Altstadt: We
 | Name | Hex | Rolle |
 |---|---|---|
 | Papier | `#fffdf8` | Grund (60 %) |
-| Ofenruß | `#1a1612` | Text, Rahmen, Linien, dunkler Vollbreite-Block (30 %) |
-| Tomate | `#cd212a` | **Hauptfarbe, einzige Farbe für Handlung:** Knöpfe, Hervorhebung der Schlagzeile, Reservierungsband |
-| Basilikum | `#00793c` | **nur Zustand und Kennzeichnung:** "geöffnet", vegetarisch/vegan, Häkchen, Trikolore-Streifen (ein Grün, kein zweites) |
-| Butter | `#ffd66b` | **nur der Preisaufkleber im Hero**, sonst nichts |
+| Ofenruß | `#1a1612` | Text, Linien, dunkler Vollbreite-Block (30 %) |
+| Tomate | `#b3202c` | **Hauptfarbe, einzige Farbe für Handlung:** Knöpfe, Reservierungsband, Fehlertexte, Fokusrahmen |
+| Zypresse | `#1d5a38` | **nur Zustand und Kennzeichnung:** "geöffnet", vegetarisch/vegan, Häkchen, ein Drittel des Trikolore-Streifens |
+| Butter | `#f0d28a` | **nur der Preisaufkleber im Hero** |
 | Zettelgrau | `#5b544b` | Fließtext zweiter Ordnung |
-| Hover/Linien | `#f3ecdd`, `#e7dfd0`, `#cfc6b3` | Hilfsflächen und Trennlinien auf Papier |
+| Hilfsflächen | `#f3ecdd`, `#e4dccb`, `#cfc6b3` | Hover, feine Linien, Rahmen von Fotos |
 
-Kontraste (WCAG): Ruß auf Papier 17,7:1, Zettelgrau auf Papier 7,3:1, Tomate auf Papier 5,4:1, Weiß auf Tomate 5,5:1, Basilikum auf Papier 5,4:1, Ruß auf Butter 12,9:1.
+Gegenüber der ersten Runde bewusst gedämpft: Das Rot ist von Signalrot zu einem tieferen Pomodoro-Ton gegangen, das Grün von Flaggengrün zu Zypresse. Es bleibt Italien (Grün, Weiß, Rot), wirkt aber nach Trattoria, nicht nach Fahne.
 
-Herkunft: Fahne Italiens (Grün, Weiß, Rot) für einen Italiener, gebrochen durch Papier und Ruß, damit es nach Zettel und nicht nach Flagge aussieht. Verlauf, Glow oder Glas kommen nicht vor.
+Kontraste (WCAG): Ruß auf Papier 17,7:1, Zettelgrau auf Papier 7,3:1, Weiß auf Tomate 6,7:1, Tomate auf Papier 6,5:1, Zypresse auf Papier 8,0:1, Weiß auf Ruß 18,0:1, Ruß auf Butter 12,2:1.
 
-Regeln aus der Prüfung gegen die Skill-Vorgaben:
-- Eine Hauptfarbe (Rot) mit klarer Aufgabe. Grün konkurriert nicht mehr: Der frühere grüne Vollbreite-Block "Zum Mitnehmen" ist jetzt Ruß.
-- Rot und Grün haben gleiche Helligkeit (1,0:1) und stehen nie als Bedeutungsträger allein nebeneinander: Zustände haben immer Text ("Jetzt geöffnet", "vegetarisch").
-- Keine losen Hex-Werte im CSS, alles über Variablen in `:root`.
+Regeln: Eine Hauptfarbe (Rot) mit klarer Aufgabe. Rot und Grün haben ähnliche Helligkeit, deshalb steht jeder Zustand zusätzlich als Text. Keine losen Hex-Werte im CSS: jede Farbe steht einmal in `:root`.
 
 ## Schriften (lokal, woff2)
-- Display: **Anton** (Plakatschrift, nur Überschriften, Großbuchstaben, sparsam: eine Überschrift pro Block).
+- Display: **Bodoni Moda** (variabel, Gewicht 500 bis 600). Giambattista Bodoni kam aus Parma; die Antiqua mit feinen Haarlinien gibt der Seite Ruhe und Herkunft. Nur für Schlagzeile, Kategorietitel, Abschnittsüberschriften und Logo, nie für Fließtext oder Kleingedrucktes.
 - Text: **Instrument Sans** (400 bis 600), Zeilenlänge 55 bis 70 Zeichen.
-- Skala (Mobil / Desktop): Hero 2,7 / 6,2 rem, Abschnittstitel 1,9 / 4 rem, Gericht 1,0 / 1,1 rem, Beschreibung 0,84 / 0,94 rem. Hero mindestens das Dreifache des Fließtexts.
-- Begründung Großbuchstaben: Plakat- und Fensterzettel-Anmutung ist die Idee. Kleine Großbuchstaben-Label über Überschriften gibt es nicht.
+- Skala (Mobil / Desktop): Hero 2,3 / 3,9 rem, Abschnittstitel 1,9 / 2,8 rem, Gericht 1,0 / 1,08 rem, Beschreibung 0,88 / 0,92 rem, Beschriftungen 0,75 rem.
+- Die Schlagzeile ist einfarbig, ohne einzelnes hervorgehobenes Wort (Vorgabe der Verboten-Liste).
 
 ## Layout-Konzept
-Die Seite folgt dem, was ein Gast entscheiden muss: Was gibt es (Foto, Preis), kann ich reservieren, was kostet es, wo ist es.
+Reihenfolge nach den Fragen eines Gastes: Was gibt es, kann ich reservieren, was kostet es, wo ist es.
 
 ```
 +--------------------------------------------------+
-| Kopf: Name   Speisekarte  Mitnehmen  Anfahrt  Tel |  Trikolore-Band
+| Pizzeria Molise   Karte  Mitnehmen  Anfahrt  [Tisch reservieren]
 +--------------------------------------------------+
-| [Status heute]                      __________    |
-| HEUTE SCHON                        |  Foto    |   |  Hero: Text links,
-| PIZZA                              |  Pizza   |(5,50) Foto-Abzug mit
-| GEHABT?                            |__________|   |  Preisaufkleber
+| Pizza, Pasta und                    +----------+  |  Hero: Schlagzeile in Bodoni,
+| Flammkuchen in der                  |  Abzug   |  |  rechts das Foto als Abzug
+| Celler Altstadt                     +----(5,50)+  |  mit Preisaufkleber
+| Lead-Satz.   o Jetzt geöffnet bis 20 Uhr          |
 +--------------------------------------------------+
-| TISCH RESERVIEREN  [Tag][Uhrzeit][Gäste] [Weiter] |  schlanke Leiste
-+==================================================+
-| Pizza | Pasta | Flammkuchen | Salate | Antipasti  |  haftende Kategorienleiste
-| PIZZA                  | Margherita ........ 5,50 |  je Kategorie: Foto links,
-| [Foto]                 | Funghi  ........... 6,50 |  Preisliste rechts
-| ...                                               |
+| Tisch reservieren   [Tag] [Gäste]   [Weiter]      |  schlanke Leiste, danach Zeit-Chips
 +--------------------------------------------------+
-| ################ VOLLE BREITE, GRÜN ############# |  Vollbreite-Moment
-| PIZZA ZUM MITNEHMEN            [Foto Fenster]     |
-+--------------------------------------------------+
+| Pizza   Pasta   Flammkuchen   Salate   Antipasti  |  haftende Textleiste, aktive Kategorie unterstrichen
+| Anzeigen: [Alle] [Vegetarisch] [Vegan]            |
+| ===============================================  |  doppelte Linie je Kategorie
+| Pizza            | Margherita ........... 5,50    |
+| [Foto, Rahmen]   | Funghi ............... 6,50    |
+| ###### DUNKEL, ZARTER TERRAZZO, VOLLE BREITE ###### |  Pizza zum Mitnehmen + Zeichnung
 | Anfahrt | Öffnungszeiten | Gut zu wissen (FAQ)    |
 +--------------------------------------------------+
 ```
 
-Rhythmus: Hero dicht und hoch, Reservierung als schmale Leiste, Karte lang und ruhig, grüner Vollbreite-Block als Bruch, Fuß luftig. Auf dem Handy wird aus der Reihe eine kompakte Karte, die Kategorien bleiben in einer Zeile.
+Rhythmus: Hero mit viel Luft, Reservierung als schmale Leiste, die Karte lang und ruhig mit Führungspunkten, ein dunkler Vollbreite-Moment, Fuß luftig.
 
 ## Signatur (genau eine)
-Der **Foto-Abzug mit Preisaufkleber**: das Pizzafoto liegt leicht schräg wie ein Abzug am Fenster, ein gelber runder Aufkleber nennt den Preis der Margherita. Er kehrt im Mitnehmen-Block nicht wieder, damit er einmalig bleibt. Alles andere ist ruhig und flach.
+Der **Foto-Abzug**: Das Hero-Foto liegt leicht schräg (1,2 Grad) mit weißem Passepartout und feiner Linie, ein runder Preisaufkleber nennt die Margherita. Kategoriebilder tragen denselben Rahmen, aber gerade und flach, damit die Signatur einmalig bleibt.
 
-## Schatten, Rahmen, Radius (Hierarchie)
-- Schweben dürfen nur: Foto-Abzug im Hero (harter Versatzschatten), Preisaufkleber, Reservierungsleiste.
-- Alles andere (Knöpfe, Karten, Kategoriebilder) ist flach: 2 px Rahmen in Ofenruß, keine Schatten.
-- Radius: Knöpfe und Chips rund, Fotos 8 px, Karte 12 px.
+## Linien, Schatten, Radius
+- Linien sind 1 px (Ruß für Bedienelemente, helles Beige für Trennlinien). Kategorien trennt eine doppelte Haarlinie.
+- Schatten gibt es nur für den Foto-Abzug (weich, tief, ein Mal). Knöpfe, Karten, Chips und Rahmen sind flach.
+- Radius: 2 px für Knöpfe, Chips und Felder, 4 px für die Reservierungskarte, Kreis nur für den Aufkleber.
+
+## Zeichnungen
+Straßenfenster und Gastraum sind einfarbige Linienzeichnungen (Quellen: `layouts/restaurant/art/*.svg`) mit Farbe nur an Markise, Lampen und Tischdecken. Sie ersetzen die frühere flache Illustration und werden durch echte Fotos abgelöst. Kategorien-Fotos sind KI-Platzhalter (siehe OFFEN).
+
+## Terrazzo
+Im dunklen Mitnehmen-Block liegen feine Terrazzo-Punkte (Tomate, Zypresse, Papier, geringe Deckkraft), nur oben und unten sichtbar, in der Textzone ausgeblendet. Reines CSS, kein Bild.
 
 ## Bewegung
-Ein orchestrierter Moment beim Laden (Hero-Text steigt nacheinander ein, Foto-Abzug landet, Aufkleber poppt). Rückmeldung bei Aktionen (Reservierungszeile klappt aus, Häkchen beim Absenden, Einblenden der Kategorien nur am Desktop). `prefers-reduced-motion` schaltet alles ab.
+Ein ruhiger Einstieg beim Laden (Schlagzeile, Lead, Status steigen nacheinander ein, Abzug landet, Aufkleber blendet ein), Rückmeldung bei Aktionen (Reservierung klappt aus, Häkchen), Einblenden der Kategorien beim Scrollen mit Sicherung (nach 4 s alles sichtbar). Kein Aufpoppen, kein Federn. `prefers-reduced-motion` schaltet alles ab.
 
 ## Prüfung gegen die Verboten-Liste
 | Muster | Befund | Entscheidung |
 |---|---|---|
-| Pill-Badge über der H1 | Status "Jetzt geöffnet bis 20 Uhr" steht über der Schlagzeile | Bleibt, weil es ein echter Zustand ist (Uhrzeit, Ruhetag), kein Zierchip. |
-| Großbuchstaben | Überschriften in Anton | Bewusste Plakat-Idee, siehe oben, keine Label über Überschriften. |
-| Dreier-Slogans, "Mehr erfahren" | Fanden sich im Text | Entfernt. Knöpfe nennen die Handlung. |
-| Schatten überall | Waren auf Knöpfen und Bildern | Entfernt, nur drei schwebende Elemente behalten. |
+| Pill-Badge über der H1 | Der Status war früher eine Pille über der Schlagzeile | Entfernt. Der Status ist jetzt eine einfache Textzeile mit Punkt unter dem Lead und zeigt einen echten Zustand (Uhrzeit, Ruhetag). |
+| Einzelnes farbiges Wort in der Headline | "Pizza" war rot | Entfernt, Schlagzeile einfarbig. |
+| ALL-CAPS-Label über Überschriften | Frühere Plakatschrift in Großbuchstaben | Entfernt. Großbuchstaben nur noch bei kleinen Beschriftungen (Feldnamen, Kennzeichen, "Anzeigen") mit 0,75 rem. |
+| Dreier-Slogans, "Mehr erfahren" | Standen früher im Text | Entfernt. Knöpfe nennen die Handlung. |
+| Schatten und Rahmen überall | Harte Versatzschatten, 2-px-Rahmen | Entfernt. 1-px-Linien, ein weicher Schatten nur am Foto-Abzug. |
 | Meta-Zeile "A · B · C" | Fußzeile | Ersetzt durch Zeilen. |
-| KI-Fotos | Speisefotos sind KI-generiert | Platzhalter, unter OFFEN gemeldet. Keine KI-Personen. |
+| Zentrierter Hero, Glow, Verläufe, Glas | Nicht vorhanden | Asymmetrischer Hero, keine Effekte. |
 | Standard-Reihenfolge Hero, Logos, Features … | Nicht vorhanden | Abschnitte nach Gästefragen. |
-| Gleiche Fade-ups, Bounce, `transition: all` | Nicht vorhanden | Einmaliger Einstieg, Rest ist Rückmeldung. |
-| Austauschtest | Name gegen Pizzeria in anderer Stadt getauscht | Passt nur mit Piltzergasse, Fensterverkauf und Trikolore-Markise. Mit echten Fotos wird es eindeutiger. |
+| Gleiches Fade-up überall, Bounce, `transition: all` | Nicht vorhanden | Ruhiger Einstieg, Einblenden mit Sicherung, kein Federn. |
+| KI-Fotos | Speisefotos sind KI-generiert (keine Personen) | Platzhalter, unter OFFEN gemeldet. |
+| Austauschtest | Name gegen Pizzeria in anderer Stadt getauscht | Passt nur mit Piltzergasse, Straßenfenster und italienischer Trikolore. Echte Fotos machen es eindeutiger. |

@@ -9,12 +9,7 @@
   "whatsapp": "495141214421",
   "indexable": true,
   "base": "",
-  "headline": [
-    "Heute schon",
-    "Pizza",
-    "gehabt?"
-  ],
-  "highlight": 1,
+  "headline": "Pizza, Pasta und Flammkuchen in der Celler Altstadt",
   "lead": "Frisch aus dem Ofen in der Piltzergasse. Am Tisch essen oder als Handpizza am Fenster mitnehmen.",
   "hours": {
     "open": "11:00",

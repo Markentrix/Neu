@@ -7,7 +7,7 @@ Statische Website für das Markentrix-Portal. Abgabeordner: `website-fertig/` (i
 - `DESIGN.md`: Design-Richtung (Kernidee, Farben, Schriften, Signatur, Prüfung gegen die Verboten-Liste)
 - `layouts/restaurant/config.json`: Inhalte (Zeiten, Karte, FAQ, SEO-Texte). `base` leer lassen, solange die Domain nicht feststeht
 - Reservierung: Variante B (Website-API des Portals): `/api/verfuegbarkeit`, `/api/slots`, `/api/anfrage` (typ "termin")
-- Schriften und Bilder liegen lokal (woff2, webp); keine Fremd-Dienste, kein Cookie-Banner, kein eigenes Analytics
+- Schriften (Bodoni Moda, Instrument Sans) und Bilder liegen lokal (woff2, webp); Zeichnungen: layouts/restaurant/art/*.svg; keine Fremd-Dienste, kein Cookie-Banner, kein eigenes Analytics
 - Statistik/Einwilligung: `<span data-mk="cookies">` im Footer, das Portal fügt das Skript beim Upload ein
 
 ## OFFEN
