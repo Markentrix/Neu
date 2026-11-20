@@ -820,6 +820,7 @@ def ics(uid: str, start: datetime, ende: datetime, titel: str, ort: str, abgesag
 
 
 # ---------------------------------------------------------------- Google-Bewertungen
+_BEW_FEHLER: dict = {}
 PLACE_ID = re.compile(r"^[A-Za-z0-9_-]{10,200}$")
 
 
@@ -837,7 +838,13 @@ def places_holen(api_key: str, place_id: str) -> dict:
         if e.code == 404:
             raise ValueError("Zu dieser Place-ID hat Google keinen Eintrag gefunden.")
         if e.code in (400, 403):
-            raise ValueError("Google lehnt die Abfrage ab (Schlüssel oder Places-API bei Markentrix nicht aktiv).")
+            grund = ""
+            try:       # Googles eigene Begründung (z. B. „Places API (New) has not been used“, „billing“, „API key not valid“) hilft bei der Suche
+                g = json.loads(e.read(4000)).get("error") or {}
+                grund = (g.get("status", "") + ": " + g.get("message", "")).strip(": ")[:300]
+            except (ValueError, OSError, AttributeError):
+                pass
+            raise ValueError("Google lehnt die Abfrage ab (Schlüssel, Abrechnung oder Places-API (New) bei Markentrix nicht aktiv)." + (" Google sagt: " + grund if grund else ""))
         raise ValueError(f"Google meldet einen Fehler ({e.code}).")
     except (urllib.error.URLError, OSError, ValueError):
         raise ValueError("Google ist gerade nicht erreichbar.")
@@ -855,6 +862,8 @@ def bewertungen_fuer(z: dict) -> dict:
     cache = z.get("bew_cache")
     if z.get("bew_place_id"):
         alt = z.get("bew_stand") is None or (datetime.now(timezone.utc) - z["bew_stand"]) > timedelta(hours=12)
+        if alt and (datetime.now(timezone.utc) - _BEW_FEHLER.get(z["kunden_id"], datetime.min.replace(tzinfo=timezone.utc))) < timedelta(minutes=30):
+            alt = False        # nach einem Fehler höchstens alle 30 Minuten neu fragen (nicht bei jedem Seitenaufruf)
         if alt:
             with tx("system") as cur:
                 key = einstellungen.lesen(cur, "places").get("api_key", "")
@@ -864,6 +873,7 @@ def bewertungen_fuer(z: dict) -> dict:
                     with tx("system") as cur:
                         cur.execute("UPDATE website_dienste SET bew_cache=%s::jsonb, bew_stand=now() WHERE kunden_id=%s", (json.dumps(cache), z["kunden_id"]))
                 except ValueError as e:
+                    _BEW_FEHLER[z["kunden_id"]] = datetime.now(timezone.utc)
                     ereignis(z["kunden_id"], "bewertungen", False, str(e))
     if cache:
         return {"sterne": cache["sterne"], "anzahl": cache["anzahl"], "bewertungen": cache["bewertungen"], "schreiben": schreib, "quelle": "google"}
