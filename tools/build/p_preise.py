@@ -160,7 +160,7 @@ html += f'''
     <p class="small">Alle Preise in Euro inkl. gesetzlicher Umsatzsteuer, Stand Oktober 2026. Änderungen vorbehalten.</p>
   </div>
 </section>
-''' + contact_strip() + footer() + end()
+''' + contact_strip("preise") + footer() + end()
 write("preise.html", html)
 
 # ---------------- BUCHEN ----------------

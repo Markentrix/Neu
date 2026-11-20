@@ -163,7 +163,47 @@ def fallback_box(text="Keine Antwort vom Server? Ihr erreicht uns jederzeit dire
   </div>
 </div>'''
 
-def contact_strip():
+def contact_strip(art="allgemein"):
+    if art == "keins": return ""
+    if art == "kinder":
+        return f'''<section class="cta-band">
+  <div class="wrap grid grid-2" style="align-items:center">
+    <div>
+      <h2>Partytermin kurz absprechen?</h2>
+      <p>Vor der Online-Buchung lohnt ein Anruf: Conny sagt euch, welche Startzeit für eure Gruppe am besten passt und ob die 2. Ebene an dem Tag gefahren wird.</p>
+    </div>
+    <div class="pill-row">
+      <a class="btn btn--primary" href="{TEL_LINK}">{ICONS["phone"]}{TEL} anrufen</a>
+      <a class="btn btn--ghost" href="{WA_LINK}" rel="noopener" target="_blank">{ICONS["wa"]}Per WhatsApp fragen</a>
+    </div>
+  </div>
+</section>'''
+    if art == "firmen":
+        return f'''<section class="cta-band">
+  <div class="wrap grid grid-2" style="align-items:center">
+    <div>
+      <h2>Angebot für euer Event</h2>
+      <p>Schreibt uns Personenzahl, Wunschdatum und ob ihr Buffet oder Dartraum dazu wollt. Ihr bekommt in der Regel innerhalb von zwei Werktagen ein Angebot mit Netto-Ausweis.</p>
+    </div>
+    <div class="pill-row">
+      <a class="btn btn--primary" href="kontakt.html">Angebot anfragen</a>
+      <a class="link" href="mailto:{MAIL}">E-Mail an {MAIL}</a>
+    </div>
+  </div>
+</section>'''
+    if art == "preise":
+        return f'''<section class="cta-band">
+  <div class="wrap grid grid-2" style="align-items:center">
+    <div>
+      <h2>Unter 5 Personen?</h2>
+      <p>Dann reserviert ihr telefonisch ab zwei Tage vorher, zum Beispiel donnerstags für Samstag. Ab 5 Personen geht es online.</p>
+    </div>
+    <div class="pill-row">
+      <a class="btn btn--primary" href="{TEL_LINK}">{ICONS["phone"]}{TEL} anrufen</a>
+      <a class="link" href="buchen.html">Ab 5 Personen online reservieren</a>
+    </div>
+  </div>
+</section>'''
     return f'''<section class="cta-band">
   <div class="wrap grid grid-2" style="align-items:center">
     <div>

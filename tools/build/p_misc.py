@@ -5,32 +5,44 @@ import datetime
 # ---------------- DANKE ----------------
 html = head("Vielen Dank | Burnout Celler-Kartbahn", "Deine Anfrage ist bei uns eingegangen. Du erhältst eine Eingangsbestätigung mit Vorgangsnummer per E-Mail.", noindex=True) + header()
 html += f'''
-<section class="section"><div class="wrap" style="max-width:760px">
-<span class="eyebrow">Eingangsbestätigung</span>
+<section class="section"><div class="wrap" style="max-width:820px">
+<ol class="ampel ampel--fertig" aria-label="Alle Schritte erledigt"><li class="is-done">Angebot</li><li class="is-done">Termin</li><li class="is-done">Teilnehmer</li><li class="is-done">Kontakt</li></ol>
 <h1 id="danke-title">Danke!</h1>
-<div class="card card--accent">
-  <p class="muted" style="margin:0">Deine Vorgangsnummer</p>
-  <p style="font-family:var(--display);font-size:2rem;font-weight:800;margin:.2rem 0 .6rem;color:#fff" id="ref">–</p>
-  <p id="danke-text">Wir melden uns so schnell wie möglich bei dir. Eine Eingangsbestätigung mit dieser Vorgangsnummer ist an deine E-Mail-Adresse unterwegs – bitte schau auch im Spam-Ordner nach.</p>
+<div class="tafel" style="margin-top:1.5rem">
+  <p class="small" style="margin:0">Deine Vorgangsnummer</p>
+  <p style="font-family:var(--display);font-size:clamp(2.2rem,8vw,3.5rem);font-weight:800;margin:.1rem 0 .8rem;line-height:1" id="ref">–</p>
+  <p id="danke-text">Wir melden uns so schnell wie möglich bei dir. Eine Eingangsbestätigung mit dieser Vorgangsnummer ist an deine E-Mail-Adresse unterwegs, bitte auch im Spam-Ordner nachsehen.</p>
 </div>
-<p class="muted" style="margin-top:1.25rem">Bitte nenne die Vorgangsnummer bei Rückfragen. Du erreichst uns unter <a href="{TEL_LINK}">{TEL}</a>, per <a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp</a> oder <a href="mailto:{MAIL}">{MAIL}</a>.</p>
-<div class="pill-row"><a class="btn btn--primary" href="index.html">Zur Startseite</a><a class="btn btn--ghost" href="preise.html">Preise ansehen</a><a class="btn btn--ghost" href="faq.html">Häufige Fragen</a></div>
+<h2 style="margin-top:2.5rem;font-size:1.6rem">Bis zum Besuch</h2>
+<ul class="checks">
+  <li>Alle Teilnehmer treffen 30 Minuten vor der Startzeit bei uns im Haus ein (Registrierung, Einweisung).</li>
+  <li>Minderjährige bringen die <a href="downloads/haftungsausschluss-minderjaehrige.pdf" target="_blank" rel="noopener">Einverständniserklärung der Eltern</a> ausgefüllt mit.</li>
+  <li>Festes Schuhwerk; Helme leihen wir, Sturmhauben gibt es für 3 €.</li>
+  <li>Bezahlt wird vor Ort in bar oder mit EC-Karte.</li>
+</ul>
+<p class="muted" style="margin-top:1.25rem">Bitte nenne die Vorgangsnummer bei Rückfragen: <a href="{TEL_LINK}">{TEL}</a>, <a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp</a> oder <a href="mailto:{MAIL}">{MAIL}</a>.</p>
+<div class="pill-row"><a class="btn btn--primary" href="index.html">Zur Startseite</a><a class="link" href="kartbahn.html#tipps">Tipps für schnellere Runden</a></div>
 </div></section>
 ''' + footer() + end()
 write("danke.html", html)
 
 # ---------------- 404 ----------------
-html = head("Seite nicht gefunden | Burnout Celler-Kartbahn", "Diese Seite gibt es nicht mehr. Hier geht es zurück zur Startseite, zu den Preisen oder zur Online-Buchung der Celler Kartbahn.", noindex=True) + header()
+html = head("Seite nicht gefunden | Burnout Celler-Kartbahn", "Diese Seite gibt es nicht mehr. Hier geht es zur Startseite, zu den Preisen oder zur Online-Reservierung der Celler Kartbahn.", noindex=True) + header()
 html += f'''
-<section class="hero hero--sub">
-  <img class="hero__img" src="assets/img/strecke-reifen.webp" width="800" height="533" alt="Reifenstapel an der Kartbahn" >
-  <div class="wrap">
-    <span class="eyebrow">Fehler 404</span>
-    <h1>Seite nicht gefunden</h1>
-    <p class="lead">Die Adresse ist falsch oder die Seite wurde verschoben. Zurück auf die Strecke:</p>
-    <div class="hero__actions"><a class="btn btn--primary" href="index.html">Startseite</a><a class="btn btn--light" href="buchen.html">Online buchen</a><a class="btn btn--ghost" href="preise.html">Preise</a><a class="btn btn--ghost" href="kontakt.html">Kontakt</a></div>
-  </div>
-</section>
+<section class="section"><div class="wrap">
+  <h1>Auslaufzone</h1>
+  <p class="lead">Diese Adresse führt ins Kiesbett: Die Seite gibt es nicht oder sie ist umgezogen. Hier geht es zurück auf die Strecke.</p>
+  <table class="startliste" aria-label="Wegweiser">
+    <tbody>
+      <tr><td class="name"><a href="index.html">Startseite</a><small>Öffnungszeiten, Angebote, Anfahrt</small></td><td class="aktion"><a class="btn btn--primary btn--sm" href="index.html">Zur Startseite</a></td></tr>
+      <tr><td class="name"><a href="preise.html">Preise</a><small>Alle Fahrten und Pakete, Preis-Check</small></td><td class="aktion"><a class="btn btn--ghost btn--sm" href="preise.html">Preise ansehen</a></td></tr>
+      <tr><td class="name"><a href="buchen.html">Reservieren</a><small>Ab 5 Personen online, sonst telefonisch</small></td><td class="aktion"><a class="btn btn--ghost btn--sm" href="buchen.html">Fahrten reservieren</a></td></tr>
+      <tr><td class="name"><a href="kinder.html">Kidsparty</a><small>Kindergeburtstag ab 8 Jahren</small></td><td class="aktion"><a class="btn btn--ghost btn--sm" href="kinder.html">Kinder</a></td></tr>
+      <tr><td class="name"><a href="firmen.html">Firmen und Gruppen</a><small>Supercup, Bahnmiete, Buffet</small></td><td class="aktion"><a class="btn btn--ghost btn--sm" href="firmen.html">Firmen</a></td></tr>
+      <tr><td class="name"><a href="kontakt.html">Kontakt</a><small>Telefon, WhatsApp, Anfahrt</small></td><td class="aktion"><a class="btn btn--ghost btn--sm" href="kontakt.html">Kontakt</a></td></tr>
+    </tbody>
+  </table>
+</div></section>
 ''' + footer() + end()
 write("404.html", html)
 

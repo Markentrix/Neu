@@ -90,12 +90,14 @@ html += f'''
 </section>
 
 <section class="section section--flaeche" id="kinderkarts">
-  <div class="wrap split">
-    <img src="assets/img/karts-boxengasse.webp" width="1400" height="933" alt="Kinderkarts und Rennkarts in der Boxengasse" loading="lazy" decoding="async">
-    <div>
-      <h2>13 Kinderkarts Sodi LR6</h2>
-      <p>Ab 8 Jahren und 1,25 m geht es im Kinderkart mit 6,5-PS-Honda-Motor, hydraulischer Bremse und 3-Punkt-Sicherheitsgurt auf die Strecke. Sitz, Lenkrad und Pedale sind verstellbar, LED-Beleuchtung und Überrollbügel inklusive. Unser Personal erklärt die Regeln, weist in die Bedienung ein und prüft die Karts täglich.</p>
-      <a class="link" href="kartbahn.html#karts">Technische Daten der Karts</a>
+  <div class="wrap">
+    <figure class="stanz">
+      <img src="assets/img/karts-boxengasse.webp" width="1400" height="933" alt="Kinderkarts und Rennkarts in der Boxengasse" loading="lazy" decoding="async">
+      <figcaption class="stanz__etikett"><strong>13 Kinderkarts Sodi LR6</strong><span>6,5 PS, 3-Punkt-Gurt, ab 8 Jahren und 1,25 m</span></figcaption>
+    </figure>
+    <div class="grid grid-2" style="margin-top:1.5rem;align-items:start">
+      <p>Sitz, Lenkrad und Pedale sind verstellbar, LED-Beleuchtung und Überrollbügel inklusive. Unser Personal erklärt die Regeln, weist in die Bedienung ein und prüft die Karts täglich.</p>
+      <p><a class="link" href="kartbahn.html#karts">Technische Daten der Karts</a></p>
     </div>
   </div>
 </section>
@@ -125,7 +127,7 @@ html += f'''
     </div>
   </div>
 </section>
-''' + contact_strip() + footer() + end()
+''' + contact_strip("kinder") + footer() + end()
 write("kinder.html", html)
 
 # ---------------- FIRMEN ----------------
@@ -151,19 +153,9 @@ html += f'''
   </div>
 </section>
 
-<section class="section section--tight">
-  <div class="wrap">
-    <ul class="daten" aria-label="Gruppengrößen">
-      <li><strong>6–17</strong><span>Personen: Supercup-Rennen</span></li>
-      <li><strong>ab 18</strong><span>Personen: Rennpakete und Meisterschaft</span></li>
-      <li><strong>16</strong><span>Karts gleichzeitig auf der Strecke</span></li>
-      <li><strong>80</strong><span>Gäste im Veranstaltungsraum</span></li>
-    </ul>
-  </div>
-</section>
-
 <section class="section" id="supercup">
   <div class="wrap">
+    <ul class="fakten-zeile" aria-label="Gruppengrößen"><li><strong>6 bis 17</strong> Personen: Supercup</li><li><strong>ab 18</strong> Personen: Rennpakete und Meisterschaft</li><li><strong>16</strong> Karts gleichzeitig</li><li><strong>80</strong> Gäste im Clubraum</li></ul>
     <h2>Supercup: euer Rennen</h2>
     <p class="lead">Qualifying, Ampelstart, Zieleinlauf und Rennauswertung auf der Großbildleinwand. Eure Gruppe ist allein auf der Strecke. Anfänger und erfahrene Fahrer starten nach einer ausführlichen Einweisung gemeinsam.</p>
     <table class="startliste">
@@ -198,15 +190,15 @@ html += f'''
   </div>
 </section>
 
-<section class="section" id="buffet">
-  <div class="wrap split split--rev">
-    <img src="assets/img/veranstaltungsraum.webp" width="1400" height="933" alt="Festlich eingedeckter Veranstaltungsraum der Celler Kartbahn" loading="lazy" decoding="async">
-    <div>
-      <h2>Buffet und Clubraum</h2>
-      <p>Nach dem Rennen bleibt ihr: Buffet ab 20 Personen, der Veranstaltungsraum für bis zu 80 Gäste ist bei Buffetbestellung kostenfrei, mit eigenem Servicebereich und Servicekraft. In der Weihnachtszeit ist der Raum dekoriert. Wer danach noch nicht nach Hause will: der <a href="https://www.dartraum-celle.de" rel="noopener" target="_blank">Dartraum Celle</a> liegt nebenan.</p>
-      <div class="pill-row">
-        <a class="btn btn--primary" href="buffet.html">Buffetangebot 2026/2027</a>
-        <a class="link" href="kontakt.html">Individuelles Angebot anfragen</a>
+<section class="ebene ebene--band" id="buffet" aria-labelledby="buffet-h">
+  <img src="assets/img/veranstaltungsraum.webp" width="1400" height="933" alt="Festlich eingedeckter Veranstaltungsraum der Celler Kartbahn" loading="lazy" decoding="async">
+  <div class="ebene__text">
+    <div class="wrap">
+      <p class="hoehe">80<small>Plätze im Clubraum, bei Buffetbestellung kostenfrei</small></p>
+      <div>
+        <h2 id="buffet-h">Buffet und Clubraum</h2>
+        <p>Nach dem Rennen bleibt ihr: Buffet ab 20 Personen, eigener Servicebereich mit Servicekraft, in der Weihnachtszeit dekoriert. Wer danach noch nicht nach Hause will: der <a href="https://www.dartraum-celle.de" rel="noopener" target="_blank">Dartraum Celle</a> liegt nebenan.</p>
+        <div class="pill-row"><a class="btn btn--light" href="buffet.html">Buffetangebot 2026/2027</a></div>
       </div>
     </div>
   </div>
@@ -225,7 +217,7 @@ html += f'''
     </tbody></table></div>
   </div>
 </section>
-''' + contact_strip() + footer() + end()
+''' + contact_strip("firmen") + footer() + end()
 write("firmen.html", html)
 
 # ---------------- BUFFET ----------------

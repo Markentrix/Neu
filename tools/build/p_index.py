@@ -101,20 +101,10 @@ html += f'''
       <div>
         <h2 id="ebene-h">Rampe, Steilkurve, Rückenwind</h2>
         <p>100 Meter mehr Strecke auf der zweiten Ebene, dazu Brücke, Tunnel und eine Zuschauerplattform. Kinder von 8 bis 12 Jahren ohne Karterfahrung fahren die verkürzte Strecke ohne die Steilkurve, das entscheidet das Streckenpersonal.</p>
+        <ul class="ebene__daten" aria-label="Streckendaten"><li><strong>600 m</strong> Strecke</li><li><strong>9 PS</strong> Sodi SR5</li><li><strong>13</strong> Kinderkarts</li><li><strong>80</strong> Plätze im Clubraum</li></ul>
         <a class="btn btn--light" href="kartbahn.html#strecke">Strecke und Karts ansehen</a>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <ul class="daten" aria-label="Streckendaten">
-      <li><strong>600 m</strong><span>Streckenlänge indoor</span></li>
-      <li><strong>9 PS</strong><span>Sodi SR5, seit 09/2023</span></li>
-      <li><strong>13</strong><span>Kinderkarts Sodi LR6 ab 8 Jahren</span></li>
-      <li><strong>80</strong><span>Plätze im Veranstaltungsraum</span></li>
-    </ul>
   </div>
 </section>
 
@@ -178,11 +168,13 @@ html += f'''
   </div>
 </section>
 
-<section class="section section--flaeche">
+<section class="section section--flaeche bewertungen">
   <div class="wrap">
-    <h2>Das sagen unsere Gäste</h2>
-    <div data-mk="bewertungen" class="mk-slot"></div>
-    <p class="small">Ihr wart bei uns? Wir freuen uns über eure Bewertung bei Google und über Feedback per <a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp</a>.</p>
+    <div class="bewertungen__voll">
+      <h2>Das sagen unsere Gäste</h2>
+      <div data-mk="bewertungen" class="mk-slot"></div>
+    </div>
+    <p class="bewertungen__leer"><strong>Ihr wart bei uns?</strong> Eine Bewertung bei Google hilft anderen Familien und Gruppen bei der Wahl. <a href="https://www.google.com/maps/search/?api=1&amp;query=Burnout+Celler-Kartbahn+Waldweg+100+Celle" rel="noopener" target="_blank">Zum Google-Profil</a> oder Feedback direkt per <a href="{WA_LINK}" rel="noopener" target="_blank">WhatsApp</a>.</p>
   </div>
 </section>
 

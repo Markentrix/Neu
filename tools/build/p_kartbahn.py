@@ -17,17 +17,6 @@ html += f'''
   </div>
 </section>
 
-<section class="section section--tight">
-  <div class="wrap">
-    <ul class="daten" aria-label="Streckendaten">
-      <li><strong>600 m</strong><span>Streckenlänge indoor</span></li>
-      <li><strong>6 m</strong><span>Höhe der Steilkurve</span></li>
-      <li><strong>9 PS</strong><span>Sodi SR5 Rennkarts</span></li>
-      <li><strong>13</strong><span>Kinderkarts Sodi LR6</span></li>
-    </ul>
-  </div>
-</section>
-
 <section class="ebene" id="strecke" aria-labelledby="strecke-h">
   <img src="assets/img/zweite-ebene.webp" width="1600" height="595" alt="Rampe und Steilkurve der zweiten Ebene" loading="lazy" decoding="async">
   <div class="ebene__text">
@@ -36,6 +25,7 @@ html += f'''
       <div>
         <h2 id="strecke-h">Zweite Ebene seit 2023</h2>
         <p>Vollgas die Rampe hoch, die Steilkurve in 6 Metern Höhe nehmen und mit Rückenwind bergab in den Tunnel. Rundenzeiten laufen live auf der Großbildleinwand und am Zeitenmonitor an der Strecke. Vor jeder ersten Fahrt gibt es die Einweisung mit Flaggenkunde und Ampelstart.</p>
+        <ul class="ebene__daten" aria-label="Streckendaten"><li><strong>600 m</strong> Strecke</li><li><strong>6 m</strong> Steilkurve</li><li><strong>9 PS</strong> Sodi SR5</li><li><strong>13</strong> Kinderkarts</li></ul>
         <p class="small">Kidskonzept: Für Kinder von 8 bis 12 Jahren ohne Karterfahrung wird die zweite Ebene mit wenigen Handgriffen umfahren. Das entscheidet nur das Streckenpersonal.</p>
       </div>
     </div>
@@ -134,5 +124,5 @@ html += f'''
     <p class="small" style="margin-top:1rem">Danke an alle freiwilligen Helfer für die Stunden, Tage und Wochen des Umbaus im Bistro und auf der Strecke.</p>
   </div>
 </section>
-''' + contact_strip() + footer() + end()
+''' + contact_strip("keins") + footer() + end()
 write("kartbahn.html", html)

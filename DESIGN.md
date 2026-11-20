@@ -82,3 +82,10 @@ Startseite: „Fahrten reservieren“ (buchen.html). Preise: Preis-Check → „
 - Dunkler Grund: Kunden-CI (Logo, Halle, Karts).
 - Ein Etikett über der Hero-Headline: trägt Ort und Live-Öffnungsstatus.
 - „Statistik“-ähnliche Streckendaten: echte Werte aus der alten Website (600 m, 6 m, 9 PS, 13 Kinderkarts), nicht hochgezählt, als Datenblatt statt Leiste.
+
+## Dritter Durchgang (Muster entfernt)
+- Nur noch drei Split-Abschnitte auf der ganzen Website (Start: Bistro, Firmen: Meisterschaft, Kartbahn: Rennlizenz). Buffet ist ein Vollbreite-Band mit Marke „80“, Kinderkarts ein Bild mit eingestanztem Etikett.
+- Kein Zahlenstreifen mehr: Streckendaten stehen als Datenzeile im „+6 m“-Abschnitt, Gruppengrößen als Faktenzeile über der Supercup-Startliste.
+- Kontaktband je Seite anders (Kinder: Termin absprechen, Firmen: Angebot in zwei Werktagen, Preise: unter 5 Personen telefonisch, Kartbahn: keins).
+- Bewertungen erscheinen nur, wenn der Portal-Baustein Inhalt liefert; sonst ein Satz mit Link zum Google-Profil.
+- Danke-Seite mit vier grünen Ampellichtern und den nächsten Schritten, 404 als Wegweiser in Startlisten-Form.

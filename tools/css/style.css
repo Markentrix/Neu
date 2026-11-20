@@ -478,3 +478,28 @@ td.price{font-family:var(--display);font-weight:700;font-size:1.2rem}
 .kontaktwege span{font-size:var(--fs-5);color:var(--kreide-2)}
 .kontaktwege a{font-family:var(--display);font-weight:800;font-size:clamp(1.4rem,2.2vw,1.9rem);text-transform:none;color:var(--kreide);text-decoration:none;line-height:1.1;overflow-wrap:anywhere;display:inline-block;padding:.2rem 0;min-height:44px}
 .kontaktwege small{color:var(--kreide-2)}
+
+/* Zahlen als Datenzeile im Vollbreite-Abschnitt (kein Zahlenstreifen mehr) ------ */
+.ebene__daten{list-style:none;margin:0 0 1.25rem;padding:0;display:flex;flex-wrap:wrap;gap:.4rem 1.5rem;font-size:var(--fs-5);color:var(--kreide)}
+.ebene__daten strong{font-family:var(--display);font-size:1.4rem;font-weight:800;margin-right:.25rem}
+.ebene--band img{height:min(70svh,620px)}
+.ebene--band .hoehe{font-size:clamp(4rem,12vw,8rem)}
+.fakten-zeile{list-style:none;margin:0 0 1.25rem;padding:0 0 1rem;display:flex;flex-wrap:wrap;gap:.4rem 1.75rem;border-bottom:1px solid var(--asphalt-3);color:var(--kreide-2);font-size:var(--fs-5)}
+.fakten-zeile strong{font-family:var(--display);font-size:1.4rem;font-weight:800;color:var(--kreide);margin-right:.25rem}
+
+/* Bild mit eingestanztem Etikett ------------------------------------------- */
+.stanz{position:relative;margin:0}
+.stanz img{width:100%;aspect-ratio:21/9;object-fit:cover;clip-path:var(--bank);border-radius:0 0 var(--r-l) var(--r-l)}
+.stanz__etikett{position:absolute;left:0;bottom:0;background:var(--asphalt-2);padding:1rem 1.5rem 0 0;max-width:min(90%,32rem);border-radius:0 var(--r-m) 0 0}
+.stanz__etikett strong{display:block;font-family:var(--display);font-weight:800;font-size:clamp(1.4rem,3vw,2rem);text-transform:uppercase;line-height:1}
+.stanz__etikett span{display:block;color:var(--kreide-2);font-size:var(--fs-5);margin-top:.3rem}
+@media(max-width:700px){.stanz img{aspect-ratio:4/3}.stanz__etikett{position:static;padding:.9rem 0 0;max-width:none;border-radius:0}}
+
+/* Bewertungen: nur sichtbar, wenn der Baustein Inhalt liefert ------------------- */
+.bewertungen:not(:has(.mk-slot > *)) .bewertungen__voll{display:none}
+.bewertungen:has(.mk-slot > *) .bewertungen__leer{display:none}
+.bewertungen:not(:has(.mk-slot > *)){padding-block:clamp(2rem,4vw,3rem)}
+.bewertungen__leer{margin:0;max-width:none}
+
+/* Danke: fertige Ampel ----------------------------------------------------------- */
+.ampel--fertig{max-width:36rem}
