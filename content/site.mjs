@@ -231,7 +231,7 @@ export const facts = [
 
 // Einsatzgebiet
 export const region = {
-  title: 'Niedersachsenweit im Einsatz.',
+  title: 'Wir kommen zu Ihnen – in ganz Niedersachsen',
   text: 'Von unserem Standort in Celle aus arbeiten wir in ganz Niedersachsen – im Forst, für Kommunen und auf dem Feld. Aufträge darüber hinaus übernehmen wir gerne nach Absprache.',
   points: ['Standort Celle, Bleckenweg 92', 'Einsätze in ganz Niedersachsen', 'Weitere Regionen nach Absprache'],
 };

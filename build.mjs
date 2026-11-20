@@ -115,7 +115,7 @@ function contactBlock() {
   <div class="cta__bg" aria-hidden="true">${pic('gruenland-1', { alt: '', sizes: '100vw', attrs: 'data-parallax="0.12"' })}</div>
   <div class="wrap cta__inner">
     ${label('Kontaktieren Sie uns')}
-    <h2 class="display cta__title" data-split>Interessiert? Lassen Sie sich zu Ihrem Projekt beraten.</h2>
+    <h2 class="display cta__title" data-split>Sprechen wir über Ihr Projekt</h2>
     <div class="cta__row" data-reveal>
       <p>Noch Fragen? Schauen Sie in unsere <a class="ulink" href="{root}faq/">FAQs</a> oder wenden Sie sich an uns, um mehr über unser Dienstleistungsangebot und unsere Arbeitsweise zu erfahren.</p>
       ${btn('{root}kontakt/', 'Kontakt aufnehmen')}
@@ -193,7 +193,7 @@ function layout({ path, title, desc, body, cls = '', img = 'grasernte', cta = tr
 ${loader ? `<div class="loader" aria-hidden="true"><div class="loader__in"><img src="{root}assets/img/logo-weiss.png" width="720" height="174" alt=""><div class="loader__bar"><i></i></div><div class="loader__meta"><span>Seit 1973</span><span class="loader__num">0</span></div></div></div>` : ''}
 ${header(path)}
 <main id="main">
-${shy ? shyText(body + (cta ? contactBlock() : '')) : body}
+${(shy ? shyText(body + (cta ? contactBlock() : '')) : body).replace(/<p class="label[^"]*"><span class="label__dot"><\/span>[^<]*<\/p>\s*(?=<h2)/g, '')}
 </main>
 ${footer()}
 <div class="mbar" data-mbar><a class="mbar__call" href="${C.phoneHref}">${ICONS.phone}<span>Anrufen</span></a><a class="mbar__ask" href="${path === 'kontakt/' ? '#f-name' : '{root}kontakt/'}"><span>Anfrage stellen</span>${ARROW}</a></div>
@@ -265,18 +265,12 @@ function home() {
   <div class="hero__tabs" role="tablist" aria-label="Bereiche">
     ${areas.map((s, i) => `<button type="button" role="tab" aria-selected="${i === 0}" class="hero__tab${i === 0 ? ' is-active' : ''}"><small>${s.nr}</small><span>${s.short}</span><i aria-hidden="true"></i></button>`).join('')}
   </div>
-  <a class="hero__badge" href="{root}unternehmen/" aria-label="Familienunternehmen seit 1973 – mehr über uns">
-    <svg viewBox="0 0 120 120" aria-hidden="true"><defs><path id="circ" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"/></defs><text><textPath href="#circ">Familienunternehmen · seit 1973 · zwei Generationen · </textPath></text></svg>
-    <strong>50+</strong>
-  </a>
 </section>
-
-<div class="marquee" aria-hidden="true"><div class="marquee__track">${mq}${mq}</div></div>
 
 <section class="hs" data-hscroll>
   <div class="hs__sticky">
     <div class="wrap hs__head">
-      <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Ein Partner. Vier Bereiche.</h2></div>
+      <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Was wir für Sie übernehmen</h2></div>
       <div class="hs__meta"><span class="hs__count"><b>01</b> / 0${panels.length}</span><div class="hs__bar"><i></i></div></div>
     </div>
     <div class="wrap quad">
@@ -301,7 +295,7 @@ function home() {
 <section class="sec show">
   <div class="wrap">
     <div class="sec__head sec__head--row">
-      <div>${label('Im Einsatz')}<h2 class="display" data-split>Starke Technik. Echte Arbeit.</h2></div>
+      <div>${label('Im Einsatz')}<h2 class="display" data-split>So sieht unsere Arbeit aus</h2></div>
       <p class="show__note" data-reveal>Aufnahmen aus unserem Arbeitsalltag auf dem Feld, im Forst und auf der Straße.</p>
     </div>
     <div class="show__grid">
@@ -318,48 +312,32 @@ function home() {
     </div>
     <div class="about__text">
       ${label('Unser Unternehmen')}
-      <h2 class="display" data-split>Familiengeführt. Seit zwei Generationen.</h2>
+      <h2 class="display" data-split>Ein Familienbetrieb aus Celle, seit 1973</h2>
       <p class="lead" data-reveal>Ob Forstfläche, Gemeindeweg oder Acker: Die Lohnunternehmen Linneweh GmbH &amp; Co. KG übernimmt die Arbeiten, für die Sie Maschinen, Zeit oder Personal nicht selbst vorhalten möchten – seit über 50 Jahren, als Familienbetrieb und mit Technik auf aktuellem Stand.</p>
       <p data-reveal>Uns liegt die Zukunft am Herzen. Darum helfen wir, Wälder umzubauen, Wege instand zu halten und die Ernährung und Energieversorgung zu sichern – für eine grünere Zukunft.</p>
       <p class="sign" data-reveal>${C.claim}<br><span>Ihr Lohnunternehmen Linneweh</span></p>
       <div data-reveal>${btn('{root}unternehmen/', 'Mehr erfahren', 'dark')}</div>
     </div>
   </div>
-  <div class="wrap stats" data-stagger>
-    <div class="stat" data-reveal><strong data-count="1973" data-plain>1973</strong><span>Gründung durch Günther Linneweh</span></div>
-    <div class="stat" data-reveal><strong><b data-count="50">50</b>+</strong><span>Jahre Erfahrung als Lohnunternehmen</span></div>
-    <div class="stat" data-reveal><strong data-count="2">2</strong><span>Generationen Familienbetrieb</span></div>
-    <div class="stat" data-reveal><strong data-count="${allSvc.length}">${allSvc.length}</strong><span>Leistungen in Feld, Forst &amp; Kommune</span></div>
+  <div class="wrap trio" data-stagger>
+    ${values.map((v) => `<div data-reveal><h3>${v.title[0].toUpperCase() + v.title.slice(1)}</h3><p>${v.text}</p></div>`).join('')}
   </div>
 </section>
 
-<section class="facts">
-  <div class="facts__bg" aria-hidden="true">${pic('ernte-staub', { alt: '', sizes: '100vw', attrs: 'data-parallax="0.12"' })}</div>
-  <div class="wrap facts__inner">
-    <div class="sec__head">${label('Technik in Zahlen', 'p', 'label--light')}<h2 class="display" data-split>Modernste Technik für höchste Präzision.</h2></div>
-    <div class="facts__grid" data-stagger>
-      ${facts.map((f) => `<a class="fact" href="{root}${f.href}" data-reveal><strong class="display">${f.n}<i>${f.unit}</i></strong><span>${f.label}</span>${ARROW}</a>`).join('')}
-    </div>
+<section class="sec specs-sec">
+  <div class="wrap specs-sec__in">
+    <div><h2 class="display" data-split>Was unsere Maschinen leisten</h2><p data-reveal>Ein Auszug aus unserem Maschinenpark. Alle technischen Daten finden Sie auf den Leistungsseiten.</p></div>
+    <ul class="speclist" data-stagger>
+      ${facts.map((f) => `<li data-reveal><a href="{root}${f.href}"><span>${f.label}</span><strong>${f.n} ${f.unit === '×' ? 'Stück' : f.unit}</strong></a></li>`).join('')}
+    </ul>
   </div>
 </section>
 
 ${regionSection()}
 
-<section class="sec values">
-  <div class="wrap">
-    <div class="sec__head">
-      ${label('Was uns ausmacht')}
-      <h2 class="display" data-split>Kundennah. Effizient. Erfahren.</h2>
-    </div>
-    <div class="values__grid" data-stagger>
-      ${values.map((v, i) => `<article class="value" data-reveal><div class="value__ico">${ICONS[v.icon]}</div><span class="value__nr">0${i + 1}</span><h3>${v.title}</h3><p>${v.text}</p></article>`).join('')}
-    </div>
-  </div>
-</section>
-
 <section class="sec newsx">
   <div class="wrap sec__head sec__head--row">
-    <div>${label('Unsere Neuigkeiten')}<h2 class="display" data-split>Frisch vom Feld.</h2></div>
+    <div>${label('Unsere Neuigkeiten')}<h2 class="display" data-split>Aktuelles aus dem Betrieb</h2></div>
     <div class="newsx__ctrl"><button type="button" class="rbtn" data-prev aria-label="Zurück">${ARROW}</button><button type="button" class="rbtn" data-next aria-label="Weiter">${ARROW}</button>${btn('{root}news/', 'Alle Beiträge', 'dark')}</div>
   </div>
   <div class="newsx__track" data-drag data-carousel>
@@ -371,7 +349,7 @@ ${regionSection()}
   <div class="jobs__media" aria-hidden="true">${pic('maehen', { alt: '', sizes: '100vw', attrs: 'data-parallax="0.15"' })}</div>
   <div class="wrap jobs__inner">
     ${label('Karriere', 'p', 'label--light')}
-    <h2 class="display" data-split>Wir suchen Verstärkung.</h2>
+    <h2 class="display" data-split>Wir suchen Verstärkung</h2>
     <p data-reveal>Wenn du dich für die Land- und Forstwirtschaft interessierst, melde dich bei uns.</p>
     <div data-reveal>${btn('{root}karriere/', 'Zu den Stellenangeboten')}</div>
   </div>
@@ -397,7 +375,7 @@ const techSection = () => `
   <div class="wrap tech__grid">
     <div class="tech__text">
       ${label('Digital organisiert')}
-      <h2 class="display" data-split>Wir arbeiten mit Agrarmonitor.</h2>
+      <h2 class="display" data-split>Wir arbeiten mit Agrarmonitor</h2>
       <p class="lead" data-reveal>AGRARMONITOR ist die führende Software für Lohnunternehmen, Ackerbaubetriebe und Forstbetriebe. Dokumentation in Echtzeit statt nachträglichem Zettelschreiben durch synchronen Datenaustausch zwischen Fahrer und Büro.</p>
       <ol class="tech__list" data-stagger>
         ${agrarmonitor.map((a, i) => `<li data-reveal><span>0${i + 1}</span><div><h3>${a.title}</h3><p>${a.text}</p></div></li>`).join('')}
@@ -449,7 +427,7 @@ function leistungen() {
 function sectorPage(s) {
   const list = svcOf(s.id);
   const others = sectors.filter((x) => x.id !== s.id);
-  const body = `${pageHero({ kicker: `${s.nr} — ${s.short}`, title: s.title.replace(' Dienstleistungen', '<br>Dienstleistungen'), sub: s.sub, img: s.pageImg, crumbs: [['leistungen/', 'Leistungen'], [`leistungen/${s.id}/`, s.short]], tall: true })}
+  const body = `${pageHero({ kicker: 'Leistungen', title: s.title.replace(' Dienstleistungen', '<br>Dienstleistungen'), sub: s.sub, img: s.pageImg, crumbs: [['leistungen/', 'Leistungen'], [`leistungen/${s.id}/`, s.short]], tall: true })}
 <section class="sec intro">
   <div class="wrap intro__grid">
     <h2 class="display" data-split>${s.introTitle}</h2>
@@ -504,7 +482,7 @@ function servicePage(x, i, list) {
   const secs = x.sections.map((sec, n) => ({ ...sec, id: sec.title ? slugify(sec.title) : 'ueberblick', label: sec.title || 'Überblick', n }));
   const prev = list[(i - 1 + list.length) % list.length];
   const next = list[(i + 1) % list.length];
-  const body = `${pageHero({ kicker: `${s.short} · Leistung ${String(i + 1).padStart(2, '0')}`, title: x.title, sub: x.sub === x.title ? '' : x.sub, img: x.hero, crumbs: [['leistungen/', 'Leistungen'], [`leistungen/${s.id}/`, s.short], [x.path, x.title]], tall: true })}
+  const body = `${pageHero({ kicker: s.short, title: x.title, sub: x.sub === x.title ? '' : x.sub, img: x.hero, crumbs: [['leistungen/', 'Leistungen'], [`leistungen/${s.id}/`, s.short], [x.path, x.title]], tall: true })}
 <section class="sec svc">
   <div class="wrap svc__grid">
     <aside class="svc__aside">
@@ -534,7 +512,7 @@ ${gallery(x.gallery, 'Im Einsatz')}
 function werkstatt() {
   const w = svcData.werkstatt;
   const items = w.sections[0].cards[0].lists[0].items;
-  const body = `${pageHero({ kicker: '04 — Werkstatt', title: 'Werkstatt', sub: 'Wir haben jetzt auch einen Werkstattservice im Hause.', crumbs: [['leistungen/', 'Leistungen'], ['leistungen/werkstatt/', 'Werkstatt']] })}
+  const body = `${pageHero({ kicker: 'Leistungen', title: 'Werkstatt', sub: 'Wir haben jetzt auch einen Werkstattservice im Hause.', crumbs: [['leistungen/', 'Leistungen'], ['leistungen/werkstatt/', 'Werkstatt']] })}
 <section class="sec intro">
   <div class="wrap intro__grid">
     <h2 class="display" data-split>Service für Maschinen aller Art</h2>
@@ -574,7 +552,7 @@ function unternehmen() {
 </section>
 <section class="sec tl-sec">
   <div class="wrap">
-    <div class="sec__head">${label('Unsere Geschichte', 'p', 'label--light')}<h2 class="display" data-split>Von 1973 bis heute.</h2></div>
+    <div class="sec__head">${label('Unsere Geschichte', 'p', 'label--light')}<h2 class="display" data-split>Unsere Geschichte</h2></div>
     <ol class="tl" data-progress>
       ${timeline.map((t) => `<li class="tl__item" data-reveal><span class="tl__year display">${t.year}</span><div class="tl__text">${t.text ? `<p>${t.text}</p>` : `<ul>${t.list.map((l) => `<li>${l}</li>`).join('')}</ul>`}</div></li>`).join('')}
     </ol>
@@ -584,7 +562,7 @@ ${regionSection()}
 ${techSection()}
 <section class="sec certs">
   <div class="wrap certs__grid">
-    <div>${label('Geprüfte Qualität')}<h2 class="display" data-split>Zertifiziert &amp; organisiert.</h2></div>
+    <div>${label('Geprüfte Qualität')}<h2 class="display" data-split>Geprüft und organisiert</h2></div>
     <div class="certs__items" data-stagger>
       <div class="cert" data-reveal><img src="{root}assets/img/ral-guetezeichen.png" width="200" height="400" alt="RAL Gütezeichen" loading="lazy"><div><h3>RAL Gütezeichen</h3><p>Seit 2021 RAL-zertifiziert durch die Gütegemeinschaft Wald- und Landschaftspflege e.V. – GZ 224/1 Holzernte und GZ 224/3 Waldverjüngung.</p></div></div>
       <div class="cert" data-reveal><img src="{root}assets/img/blu-logo.png" width="258" height="300" alt="Bundesverband Lohnunternehmen e.V." loading="lazy"><div><h3>Mitglied im BLU</h3><p>Als Lohnunternehmen sind wir Mitglied beim Bundesverband Lohnunternehmen e.V., dem Berufsverband und Ansprechpartner für Lohnunternehmen in ganz Deutschland.</p></div></div>
@@ -594,7 +572,7 @@ ${techSection()}
 </section>
 <section class="sec band">
   <div class="wrap band__in">
-    <div>${label('Unsere Leistungen')}<h2 class="display" data-split>Vielfältig. Und auf Sie abgestimmt.</h2></div>
+    <div>${label('Unsere Leistungen')}<h2 class="display" data-split>Unsere Leistungen im Überblick</h2></div>
     <div><p class="lead" data-reveal>Wir bieten Ihnen ein vielfältiges Angebot an land- und forstwirtschaftlichen Dienstleistungen. Wir stimmen unsere Leistungen speziell auf Ihre Bedürfnisse ab.</p><div data-reveal>${btn('{root}leistungen/', 'Zur Leistungsübersicht', 'dark')}</div></div>
   </div>
 </section>`;
@@ -659,7 +637,7 @@ function faq() {
 </section>
 <section class="sec band">
   <div class="wrap band__in">
-    <div>${label('Sie haben Fragen?')}<h2 class="display" data-split>Fragen Sie uns einfach direkt.</h2></div>
+    <div>${label('Sie haben Fragen?')}<h2 class="display" data-split>Fragen Sie uns einfach direkt</h2></div>
     <div><p class="lead" data-reveal>Bei weiteren offenen Fragen wenden Sie sich gerne an uns.</p>
       <ul class="plain" data-reveal><li>${ICONS.mail}<a class="ulink" href="mailto:${C.email}">${C.email}</a></li><li>${ICONS.phone}<a class="ulink" href="${C.phoneHref}">${C.phone}</a></li></ul></div>
   </div>
@@ -740,7 +718,7 @@ function kontakt() {
 </section>
 <section class="sec band">
   <div class="wrap band__in">
-    <div>${label('Unsere Leistungen')}<h2 class="display" data-split>Vielfältig. Und auf Sie abgestimmt.</h2></div>
+    <div>${label('Unsere Leistungen')}<h2 class="display" data-split>Unsere Leistungen im Überblick</h2></div>
     <div><p class="lead" data-reveal>Wir bieten Ihnen ein vielfältiges Angebot an land- und forstwirtschaftlichen Dienstleistungen. Wir stimmen unsere Leistungen speziell auf Ihre Bedürfnisse ab.</p><div data-reveal>${btn('{root}leistungen/', 'Zur Leistungsübersicht', 'dark')}</div></div>
   </div>
 </section>`;

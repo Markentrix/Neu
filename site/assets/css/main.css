@@ -329,7 +329,7 @@ a:hover .more .ico-arrow { transform: translateX(6px); }
 @media (min-width: 900px) { .tech__grid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); } }
 
 /* ---------- News ---------- */
-.newsx { padding-top: 0; overflow: hidden; }
+.newsx { overflow: hidden; }
 .newsx__ctrl { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .newsx__track { display: flex; gap: clamp(16px, 2vw, 28px); padding-inline: max(var(--gut), calc((100vw - 1480px) / 2)); scroll-padding-inline: max(var(--gut), calc((100vw - 1480px) / 2)); overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; cursor: grab; }
 .newsx__track::-webkit-scrollbar, .gal::-webkit-scrollbar { display: none; }
@@ -709,7 +709,7 @@ a:hover .more .ico-arrow { transform: translateX(6px); }
 /* einheitliche Bildstimmung für alle Inhaltsfotos */
 .frame img, .scard__img img, .ncard__img img, .gal__item img, .show__item img, .panel__media img, .row__media img, .quad__img img, .pband img { filter: saturate(.9) contrast(1.04); }
 /* feines Filmkorn auf den dunklen Bildflächen */
-:is(.hero, .phero, .jobs, .facts, .cta, .pband)::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: .09; mix-blend-mode: soft-light; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
 .hero__inner, .hero__tabs, .hero__badge, .phero__inner, .jobs__inner, .facts__inner, .cta__inner, .pband figcaption { position: relative; z-index: 2; }
 .hero__badge { position: absolute; }
 /* ruhigere Details */
@@ -725,6 +725,31 @@ a:hover .more .ico-arrow { transform: translateX(6px); }
 .hero__tab small, .menu__main small, .mega__head small { color: rgba(255, 255, 255, .5); }
 .hero__swap { letter-spacing: -.01em; }
 .btn .ico-arrow { width: 16px; height: 16px; }
+
+/* ---------- Weniger Schablone ---------- */
+.scard__nr, .acc__nr, .tile span, .menu__main small, .cross__item span, .tech__list li > span, .value__nr { display: none; }
+.tech__list li { grid-template-columns: 1fr; }
+.acc__item summary { grid-template-columns: minmax(0, 1fr) auto; }
+.hs__head .display, .band__in .display, .certs__grid .display, .area__in .display { margin-top: 0; }
+[data-split] .w > span { transform: translateY(105%); }
+h2.display { font-size: clamp(2.2rem, 5vw, 4.6rem); line-height: 1; }
+.hs__head .display { font-size: clamp(2.2rem, 4.4vw, 4.2rem); }
+.cta__title { font-size: clamp(2.6rem, 6.4vw, 6.4rem); }
+.jobs .display { font-size: clamp(2.8rem, 7.4vw, 7.4rem); }
+.trio { margin-top: clamp(48px, 6vw, 96px); display: grid; gap: 28px clamp(24px, 4vw, 64px); padding-top: clamp(28px, 3vw, 44px); border-top: 1px solid var(--ink); }
+.trio h3 { font: 700 1.5rem/1.1 'Barlow Condensed', sans-serif; letter-spacing: .02em; margin-bottom: 10px; }
+.trio p { color: var(--muted); max-width: 40ch; }
+@media (min-width: 800px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.specs-sec { padding-top: 0; }
+.specs-sec__in { display: grid; gap: clamp(24px, 4vw, 72px); }
+.specs-sec__in > div p { margin-top: 18px; color: var(--muted); max-width: 38ch; }
+.speclist { border-top: 1px solid var(--ink); }
+.speclist a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line); transition: padding .5s var(--ease), color .3s; }
+.speclist a:hover { padding-inline: 12px; color: var(--leaf-d); }
+.speclist strong { font: 700 clamp(1.5rem, 2.4vw, 2.2rem)/1 'Barlow Condensed', sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (min-width: 900px) { .specs-sec__in { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); align-items: start; } .specs-sec__in > div { position: sticky; top: 110px; } }
+.area__rings i { animation: none; }
+.p-home .about { padding-top: 0; }
 
 /* ---------- Mobile Feinschliff ---------- */
 .quad { display: none; }
