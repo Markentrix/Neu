@@ -143,9 +143,9 @@ def footer():
   </div>
 </footer>
 <div class="actionbar" aria-label="Schnellkontakt">
-  <a class="btn btn--ghost" href="{TEL_LINK}">{ICONS["phone"]}Anrufen</a>
-  <a class="btn btn--wa" href="{WA_LINK}" rel="noopener" target="_blank">{ICONS["wa"]}WhatsApp</a>
-  <a class="btn btn--primary" href="buchen.html">{ICONS["cal"]}Reservieren</a>
+  <a class="btn btn--ghost" href="{TEL_LINK}" aria-label="Anrufen: {TEL}">{ICONS["phone"]}<span class="actionbar__label">Anrufen</span></a>
+  <a class="btn btn--wa" href="{WA_LINK}" rel="noopener" target="_blank" aria-label="WhatsApp schreiben">{ICONS["wa"]}<span class="actionbar__label">WhatsApp</span></a>
+  <a class="btn btn--primary" href="buchen.html">{ICONS["cal"]}<span class="actionbar__word">Fahrten </span>reservieren</a>
 </div>
 <script src="assets/js/main.js" defer></script>
 '''

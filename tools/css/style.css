@@ -399,10 +399,10 @@ td.price{font-family:var(--display);font-weight:700;font-size:1.2rem}
 .footer__logo{height:44px;width:auto;margin-bottom:1rem}
 
 /* Handy-Aktionsleiste ------------------------------------------------------ */
-.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:48;display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:.5rem;padding:.55rem var(--gutter-r) calc(.55rem + env(safe-area-inset-bottom)) var(--gutter);background:var(--asphalt);border-top:1px solid var(--asphalt-3)}
-.actionbar .btn{padding:.6rem .3rem;font-size:1rem;min-height:46px;min-width:0;overflow:hidden;white-space:nowrap}
-@media(max-width:480px){.actionbar{grid-template-columns:1fr 1fr 1.35fr;gap:.4rem}.actionbar .btn{font-size:.95rem;padding:.6rem .2rem}.actionbar .btn svg{display:none}}
-@media(max-width:360px){.actionbar .btn{font-size:.85rem}}
+.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:48;display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:.5rem;padding:.55rem var(--gutter-r) calc(.55rem + env(safe-area-inset-bottom)) var(--gutter);background:var(--asphalt);border-top:1px solid var(--asphalt-3)}
+.actionbar .btn{padding:.6rem .5rem;font-size:1rem;min-height:48px;min-width:0;white-space:nowrap}
+@media(max-width:560px){.actionbar{grid-template-columns:auto auto 1fr;gap:.45rem}.actionbar .btn{padding:.6rem .6rem}.actionbar .btn--ghost,.actionbar .btn--wa{width:56px;padding:.6rem 0;justify-content:center}.actionbar .btn svg{width:22px;height:22px}.actionbar__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}}
+@media(max-width:360px){.actionbar__word{display:none}}
 @media(min-width:1000px){.actionbar{display:none}}
 
 /* Fließtext-Seiten ---------------------------------------------------------- */
