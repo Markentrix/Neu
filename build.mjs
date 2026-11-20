@@ -120,11 +120,8 @@ function contactBlock() {
       <p>Noch Fragen? Schauen Sie in unsere <a class="ulink" href="{root}faq/">FAQs</a> oder wenden Sie sich an uns, um mehr über unser Dienstleistungsangebot und unsere Arbeitsweise zu erfahren.</p>
       ${btn('{root}kontakt/', 'Kontakt aufnehmen')}
     </div>
-    <div class="cta__cards" data-stagger>
-      <a class="ccard" href="mailto:${C.email}" data-reveal>${ICONS.mail}<span class="label">E-Mail</span><strong>${C.email}</strong><small>Melden Sie sich gerne auch per Mail.</small></a>
-      <a class="ccard" href="${C.phoneHref}" data-reveal>${ICONS.phone}<span class="label">Telefon</span><strong>${C.phone}</strong><small>Jederzeit zu erreichen.</small></a>
-      <a class="ccard" href="${C.maps}" target="_blank" rel="noopener" data-reveal>${ICONS.pin}<span class="label">Standort</span><strong>${C.street} · ${C.city}</strong><small>Vor Ort für Sie da: ${C.hours}</small></a>
-    </div>
+    <a class="cta__tel display" href="${C.phoneHref}" data-reveal>${C.phone}</a>
+    <p class="cta__meta" data-reveal><a href="mailto:${C.email}">${C.email}</a><a href="${C.maps}" target="_blank" rel="noopener">${C.street}, ${C.city}</a><span>${C.hours}</span></p>
   </div>
 </section>`;
 }
@@ -217,9 +214,9 @@ ${footer()}
 }
 const pages = [];
 
-function pageHero({ kicker, title, sub, img, crumbs = [], tall = false }) {
+function pageHero({ kicker, title, sub, img, crumbs = [], tall = false, light = false }) {
   return `
-<section class="phero${img ? '' : ' phero--plain'}${tall ? ' phero--tall' : ''}">
+<section class="phero${img ? '' : ' phero--plain'}${tall ? ' phero--tall' : ''}${light ? ' phero--light' : ''}">
   ${img ? `<div class="phero__media" aria-hidden="true">${pic(img, { alt: '', eager: true, sizes: '100vw', attrs: 'data-parallax="0.18"' })}</div>` : '<div class="phero__pattern" aria-hidden="true"></div>'}
   <div class="wrap phero__inner">
     <nav class="crumbs" aria-label="Brotkrumen"><a href="{root}">Start</a>${crumbs.map(([p, t]) => `<span>/</span><a href="{root}${p}">${t}</a>`).join('')}</nav>
@@ -267,26 +264,15 @@ function home() {
   </div>
 </section>
 
-<section class="hs" data-hscroll>
-  <div class="hs__sticky">
-    <div class="wrap hs__head">
-      <div>${label('Unsere Dienstleistungen', 'p', 'label--light')}<h2 class="display" data-split>Was wir für Sie übernehmen</h2></div>
-      <div class="hs__meta"><span class="hs__count"><b>01</b> / 0${panels.length}</span><div class="hs__bar"><i></i></div></div>
-    </div>
-    <div class="wrap quad">
-      ${panels.map((p) => `<a class="quad__item" href="{root}${p.href}"><span class="quad__img">${pic(p.img, { alt: '', sizes: '25vw' })}<i>${p.nr}</i></span><strong>${p.short}</strong></a>`).join('')}
-    </div>
-    <div class="hs__track" data-stagger>
+<section class="idx-sec">
+  <div class="wrap">
+    <h2 class="display" data-split>Was wir für Sie übernehmen</h2>
+    <div class="idx">
       ${panels.map((p) => `
-      <article class="panel" data-reveal>
-        <div class="panel__media">${pic(p.img, { sizes: '(max-width:900px) 90vw, 60vw' })}</div>
-        <div class="panel__body">
-          <span class="panel__nr">${p.nr}</span>
-          <h3 class="display">${p.title.replace(' Dienstleistungen', '<br>Dienstleistungen')}</h3>
-          <p>${p.text}</p>
-          ${p.items.length ? `<ul class="chips">${p.items.map((x) => `<li><a href="{root}${x.path}">${x.title}</a></li>`).join('')}</ul>` : ''}
-          ${btn('{root}' + p.href, 'Zur Leistungsübersicht')}
-        </div>
+      <article class="idx__row" data-reveal>
+        <a class="idx__name display" href="{root}${p.href}"><small>${p.nr}</small>${p.short}</a>
+        <div class="idx__body"><p>${p.text}</p>${p.items.length ? `<p class="idx__links">${p.items.map((x) => `<a href="{root}${x.path}">${x.title}</a>`).join(', ')}</p>` : `<p class="idx__links"><a href="{root}${p.href}">Zum Werkstattservice</a></p>`}</div>
+        <a class="idx__img" href="{root}${p.href}" tabindex="-1" aria-hidden="true">${pic(p.img, { alt: '', sizes: '(max-width:900px) 30vw, 240px' })}</a>
       </article>`).join('')}
     </div>
   </div>
@@ -308,7 +294,6 @@ function home() {
   <div class="wrap about__grid">
     <div class="about__media">
       <figure class="frame frame--tall" data-reveal="clip">${pic('gruenland-1', { sizes: '(max-width:900px) 100vw, 45vw', attrs: 'data-parallax="0.12"' })}</figure>
-      <figure class="frame about__small" data-reveal="clip">${pic('beratung', { sizes: '(max-width:900px) 50vw, 20vw' })}</figure>
     </div>
     <div class="about__text">
       ${label('Unser Unternehmen')}
@@ -335,13 +320,15 @@ function home() {
 
 ${regionSection()}
 
-<section class="sec newsx">
-  <div class="wrap sec__head sec__head--row">
-    <div>${label('Unsere Neuigkeiten')}<h2 class="display" data-split>Aktuelles aus dem Betrieb</h2></div>
-    <div class="newsx__ctrl"><button type="button" class="rbtn" data-prev aria-label="Zurück">${ARROW}</button><button type="button" class="rbtn" data-next aria-label="Weiter">${ARROW}</button>${btn('{root}news/', 'Alle Beiträge', 'dark')}</div>
-  </div>
-  <div class="newsx__track" data-drag data-carousel>
-    ${news.map((n) => newsCard(n)).join('')}
+<section class="sec">
+  <div class="wrap">
+    <div class="sec__head sec__head--row"><h2 class="display" data-split>Aktuelles aus dem Betrieb</h2><div data-reveal>${btn('{root}news/', 'Alle Beiträge', 'dark')}</div></div>
+    <div class="newsf">
+      <a class="newsf__main" href="{root}news/${news[0].slug}/" data-reveal data-cursor="Lesen"><figure class="frame">${pic(news[0].img, { sizes: '(max-width:900px) 100vw, 50vw' })}</figure><span class="tag">${news[0].tag}</span><h3 class="display">${news[0].title}</h3><p>${news[0].lead}</p></a>
+      <div class="newsf__list" data-stagger>
+        ${news.slice(1, 5).map((n) => `<a href="{root}news/${n.slug}/" data-reveal><span class="tag">${n.tag}</span><h3>${n.title}</h3><p>${n.lead}</p></a>`).join('')}
+      </div>
+    </div>
   </div>
 </section>
 
@@ -426,6 +413,9 @@ function leistungen() {
 
 function sectorPage(s) {
   const list = svcOf(s.id);
+  const FEAT = { forstwirtschaft: ['flaechenvorbereitung', 'baeume-kneifen'], kommunal: ['wegebau', 'winterdienst'], landwirtschaft: ['haeckseln', 'gruenland'] }[s.id];
+  const feat = FEAT.map((k) => list.find((x) => x.slug === k));
+  const rest = list.filter((x) => !feat.includes(x));
   const others = sectors.filter((x) => x.id !== s.id);
   const body = `${pageHero({ kicker: 'Leistungen', title: s.title.replace(' Dienstleistungen', '<br>Dienstleistungen'), sub: s.sub, img: s.pageImg, crumbs: [['leistungen/', 'Leistungen'], [`leistungen/${s.id}/`, s.short]], tall: true })}
 <section class="sec intro">
@@ -439,12 +429,11 @@ function sectorPage(s) {
 </section>
 <section class="sec sec--flush">
   <div class="wrap">
-    <div class="scards" data-stagger>
-      ${list.map((x, i) => `
-      <a class="scard" href="{root}${x.path}" data-reveal data-cursor="Öffnen">
-        <figure class="scard__img">${pic(x.hero, { sizes: '(max-width:700px) 100vw, (max-width:1100px) 50vw, 33vw' })}</figure>
-        <div class="scard__body"><span class="scard__nr">${String(i + 1).padStart(2, '0')}</span><h3>${x.title}</h3><p>${x.teaser}</p><span class="more">Mehr erfahren ${ARROW}</span></div>
-      </a>`).join('')}
+    <div class="feat" data-stagger>
+      ${feat.map((x) => `<a class="feat__item" href="{root}${x.path}" data-reveal data-cursor="Öffnen"><figure class="frame">${pic(x.hero, { sizes: '(max-width:800px) 100vw, 50vw' })}</figure><h3 class="display">${x.title}</h3><p>${x.teaser}</p></a>`).join('')}
+    </div>
+    <div class="slist" data-stagger>
+      ${rest.map((x) => `<a href="{root}${x.path}" data-reveal><figure>${pic(x.hero, { alt: '', sizes: '160px' })}</figure><h3>${x.title}</h3><p>${x.teaser}</p>${ARROW}</a>`).join('')}
     </div>
   </div>
 </section>
@@ -469,9 +458,7 @@ function mcard(c) {
     return `<div class="mcard__list">${l.label ? `<h4 class="label">${l.label}</h4>` : ''}<ul class="${spec ? 'specs' : 'checks'}">${l.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul></div>`;
   }).join('');
   return `<article class="mcard${c.lists.length > 1 ? ' mcard--wide' : ''}" data-reveal>
-    ${c.kicker ? `<p class="mcard__kicker">${esc(c.kicker)}</p>` : ''}
-    ${c.title ? `<h3>${esc(c.title)}</h3>` : ''}
-    ${c.paras.map((p) => `<p>${esc(p)}</p>`).join('')}
+    <div class="mcard__head">${c.kicker ? `<p class="mcard__kicker">${esc(c.kicker)}</p>` : ''}${c.title ? `<h3>${esc(c.title)}</h3>` : ''}${c.paras.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
     ${lists ? `<div class="mcard__lists">${lists}</div>` : ''}
   </article>`;
 }
@@ -534,12 +521,11 @@ function werkstatt() {
 
 /* ------------------------------------------------------------------ Unternehmen, Karriere, FAQ */
 function unternehmen() {
-  const body = `${pageHero({ kicker: 'Über das Lohnunternehmen Linneweh', title: 'Unser Unternehmen', sub: C.claim, img: 'gruenland-1', crumbs: [['unternehmen/', 'Unternehmen']], tall: true })}
+  const body = `${pageHero({ kicker: 'Über das Lohnunternehmen Linneweh', title: 'Unser Unternehmen', sub: C.claim, crumbs: [['unternehmen/', 'Unternehmen']], light: true })}
 <section class="sec about">
   <div class="wrap about__grid">
     <div class="about__media">
       <figure class="frame frame--tall" data-reveal="clip">${pic('haeckseln-1', { sizes: '(max-width:900px) 100vw, 45vw', attrs: 'data-parallax="0.12"' })}</figure>
-      <figure class="frame about__small" data-reveal="clip">${pic('transport-1', { sizes: '(max-width:900px) 50vw, 20vw' })}</figure>
     </div>
     <div class="about__text">
       ${label('Seit 1973')}
@@ -576,12 +562,12 @@ ${techSection()}
     <div><p class="lead" data-reveal>Wir bieten Ihnen ein vielfältiges Angebot an land- und forstwirtschaftlichen Dienstleistungen. Wir stimmen unsere Leistungen speziell auf Ihre Bedürfnisse ab.</p><div data-reveal>${btn('{root}leistungen/', 'Zur Leistungsübersicht', 'dark')}</div></div>
   </div>
 </section>`;
-  layout({ path: 'unternehmen/', title: 'Unser Unternehmen', desc: 'Familienunternehmen seit 1973: Das Lohnunternehmen Linneweh arbeitet seit zwei Generationen im land- und forstwirtschaftlichen sowie kommunalen Sektor.', body, img: 'gruenland-1' });
+  layout({ cls: 'p-light', path: 'unternehmen/', title: 'Unser Unternehmen', desc: 'Familienunternehmen seit 1973: Das Lohnunternehmen Linneweh arbeitet seit zwei Generationen im land- und forstwirtschaftlichen sowie kommunalen Sektor.', body, img: 'gruenland-1' });
 }
 
 function karriere() {
   const subject = encodeURIComponent('Bewerbung: ' + job.title);
-  const body = `${pageHero({ kicker: C.claim, title: 'Karriere bei uns', sub: 'Du möchtest Teil unseres Teams werden?', img: 'maehen', crumbs: [['karriere/', 'Karriere']], tall: true })}
+  const body = `${pageHero({ kicker: C.claim, title: 'Karriere bei uns', sub: 'Du möchtest Teil unseres Teams werden?', crumbs: [['karriere/', 'Karriere']], light: true })}
 <section class="sec intro">
   <div class="wrap intro__grid">
     <h2 class="display" data-split>Wir suchen Verstärkung</h2>
@@ -608,11 +594,11 @@ function karriere() {
     </article>
   </div>
 </section>`;
-  layout({ path: 'karriere/', title: 'Karriere', desc: 'Wir suchen Verstärkung: Landwirtschaftliche Aushilfskraft (m/w/d) in Teilzeit – oder bewirb dich initiativ beim Lohnunternehmen Linneweh.', body, img: 'maehen' });
+  layout({ cls: 'p-light', path: 'karriere/', title: 'Karriere', desc: 'Wir suchen Verstärkung: Landwirtschaftliche Aushilfskraft (m/w/d) in Teilzeit – oder bewirb dich initiativ beim Lohnunternehmen Linneweh.', body, img: 'maehen' });
 }
 
 function faq() {
-  const body = `${pageHero({ kicker: 'Antworten & Ansprechpartner', title: 'Häufig gestellte Fragen', sub: 'Sie haben eine Frage zu unserem Unternehmen oder unseren Dienstleistungen? Hier finden Sie Antworten und Ansprechpartner.', crumbs: [['faq/', 'FAQ']] })}
+  const body = `${pageHero({ kicker: 'Antworten & Ansprechpartner', title: 'Häufig gestellte Fragen', sub: 'Sie haben eine Frage zu unserem Unternehmen oder unseren Dienstleistungen? Hier finden Sie Antworten und Ansprechpartner.', crumbs: [['faq/', 'FAQ']], light: true })}
 <section class="sec intro">
   <div class="wrap intro__grid">
     <h2 class="display" data-split>Wir helfen gerne!</h2>
@@ -642,18 +628,18 @@ function faq() {
       <ul class="plain" data-reveal><li>${ICONS.mail}<a class="ulink" href="mailto:${C.email}">${C.email}</a></li><li>${ICONS.phone}<a class="ulink" href="${C.phoneHref}">${C.phone}</a></li></ul></div>
   </div>
 </section>`;
-  layout({ path: 'faq/', title: 'Häufig gestellte Fragen', desc: 'Was ist ein Lohnunternehmen? Was können wir für Sie tun? Antworten auf häufige Fragen zum Lohnunternehmen Linneweh.', body, img: 'agrarmonitor-tablet', cta: false });
+  layout({ cls: 'p-light', path: 'faq/', title: 'Häufig gestellte Fragen', desc: 'Was ist ein Lohnunternehmen? Was können wir für Sie tun? Antworten auf häufige Fragen zum Lohnunternehmen Linneweh.', body, img: 'agrarmonitor-tablet', cta: false });
 }
 
 /* ------------------------------------------------------------------ News */
 function newsIndex() {
-  const body = `${pageHero({ kicker: 'Unsere Neuigkeiten', title: 'Aktuelles', sub: 'Maschinen, Einsätze und Angebote – frisch vom Feld, aus dem Forst und von der Straße.', crumbs: [['news/', 'Aktuelles']] })}
+  const body = `${pageHero({ kicker: 'Unsere Neuigkeiten', title: 'Aktuelles', sub: 'Maschinen, Einsätze und Angebote – frisch vom Feld, aus dem Forst und von der Straße.', crumbs: [['news/', 'Aktuelles']], light: true })}
 <section class="sec">
   <div class="wrap ngrid" data-stagger>
     ${news.map((n) => newsCard(n).replace('class="ncard"', 'class="ncard" data-reveal')).join('')}
   </div>
 </section>`;
-  layout({ path: 'news/', title: 'Aktuelles', desc: 'Neuigkeiten vom Lohnunternehmen Linneweh: Maschinen, Einsätze und Angebote aus Land- und Forstwirtschaft sowie dem kommunalen Bereich.', body, img: 'forstmulcher-2' });
+  layout({ cls: 'p-light', path: 'news/', title: 'Aktuelles', desc: 'Neuigkeiten vom Lohnunternehmen Linneweh: Maschinen, Einsätze und Angebote aus Land- und Forstwirtschaft sowie dem kommunalen Bereich.', body, img: 'forstmulcher-2' });
 }
 
 function newsPost(n, i) {
@@ -680,7 +666,7 @@ ${gallery(n.gallery || [], 'Bilder')}
 
 /* ------------------------------------------------------------------ Kontakt & Rechtliches */
 function kontakt() {
-  const body = `${pageHero({ kicker: 'Wir sind für Sie da', title: 'Kontakt aufnehmen', sub: 'Das Team der Lohnunternehmen Linneweh GmbH &amp; Co. KG steht Ihnen gerne zur Seite.', img: 'beratung', crumbs: [['kontakt/', 'Kontakt']] })}
+  const body = `${pageHero({ kicker: 'Wir sind für Sie da', title: 'Kontakt aufnehmen', sub: 'Das Team der Lohnunternehmen Linneweh GmbH &amp; Co. KG steht Ihnen gerne zur Seite.', crumbs: [['kontakt/', 'Kontakt']], light: true })}
 <section class="sec">
   <div class="wrap kgrid">
     <div class="kinfo">
@@ -722,7 +708,7 @@ function kontakt() {
     <div><p class="lead" data-reveal>Wir bieten Ihnen ein vielfältiges Angebot an land- und forstwirtschaftlichen Dienstleistungen. Wir stimmen unsere Leistungen speziell auf Ihre Bedürfnisse ab.</p><div data-reveal>${btn('{root}leistungen/', 'Zur Leistungsübersicht', 'dark')}</div></div>
   </div>
 </section>`;
-  layout({ path: 'kontakt/', title: 'Kontakt', desc: `Kontakt zum Lohnunternehmen Linneweh: ${C.phone}, ${C.email}, ${C.street}, ${C.city}.`, body, img: 'beratung', cta: false });
+  layout({ cls: 'p-light', path: 'kontakt/', title: 'Kontakt', desc: `Kontakt zum Lohnunternehmen Linneweh: ${C.phone}, ${C.email}, ${C.street}, ${C.city}.`, body, img: 'beratung', cta: false });
 }
 
 function legalPage(key, path, title) {
@@ -735,10 +721,10 @@ function legalPage(key, path, title) {
   }
   if (inList) html += '</ul>';
   html = html.replace('Website: https://web.agrarhelden.de/linneweh/', 'Website: https://lu-linneweh.com/');
-  const body = `${pageHero({ kicker: 'Rechtliches', title, crumbs: [[path, title]] })}
+  const body = `${pageHero({ kicker: 'Rechtliches', title, crumbs: [[path, title]], light: true })}
 <section class="sec"><div class="wrap"><div class="prose">${html}</div>${key === 'impressum' ? `
   <div class="credit"><p class="label">Design &amp; technische Umsetzung</p><a href="https://www.markentrix.de" target="_blank" rel="noopener" aria-label="Markentrix – zur Website"><img src="{root}assets/img/markentrix-logo.webp" width="640" height="105" alt="Markentrix" loading="lazy"></a></div>` : ''}</div></section>`;
-  layout({ path, title, desc: `${title} der ${C.legal}.`, body, cta: false, shy: false });
+  layout({ cls: 'p-light', path, title, desc: `${title} der ${C.legal}.`, body, cta: false, shy: false });
 }
 
 function notFound() {
