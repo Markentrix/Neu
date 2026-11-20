@@ -49,7 +49,7 @@ html += f'''
     <div>
       <p class="etikett" data-open-status><span class="dot"></span><span>Celle, Waldweg 100</span><span aria-hidden="true">·</span><span data-text>Mo–Fr ab 15 Uhr, Sa ab 13, So ab 11</span></p>
       <h1>600 Meter Vollgas in Celle</h1>
-      <p class="lead">Indoor-Kartbahn mit Brücke, Tunnel und Steilkurve in 6 Metern Höhe. 9-PS-Sodi-Karts für Erwachsene, 13 Kinderkarts ab 8 Jahren. Ab 5 Personen reserviert ihr eure Fahrten online, bezahlt wird vor Ort.</p>
+      <p class="lead">Indoor-Kartbahn mit Brücke, Tunnel und Steilkurve in 6 Metern Höhe. Karts ab 8 Jahren. Ab 5 Personen online reservieren, bezahlt wird vor Ort.</p>
       <div class="hero__actions">
         <a class="btn btn--primary" href="buchen.html">{ICONS["cal"]}Fahrten reservieren</a>
         <a class="link" href="preise.html">Preise ab 12 € ansehen</a>

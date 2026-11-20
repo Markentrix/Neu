@@ -55,6 +55,12 @@ Desktop                                      Handy
 Abschnittsfolge Start: Hero (E) → Startliste der Angebote (Tabelle, kein Kartenraster) → Vollbreite-Moment „2. Ebene“ mit Höhenmarke → Preise kurz + Öffnungszeiten als Zeitentafel → Aktuell (eine Fläche in Signalrot) → Bistro/Clubraum (Split) → Bewertungen (Baustein) → Anfahrt (Split mit Karte) → Footer als gestalteter Abschluss (Wortmarke groß).
 Jede Sektion hat eine andere Komposition als ihre Nachbarn. Außenränder gleich, Abschnittsabstand 120–160 px Desktop.
 
+Unterseiten (zweiter Durchgang):
+- Kinder: Hero E → Vergleichstabelle F1/F2 (Zeitnahme-Tafel) → Ablauf als sechs Schritte mit den echten Partyfotos → Checkliste für Eltern neben der Alterstafel → Split Kinderkarts → Führerschein-Tafel neben Schulklassen-Tabelle.
+- Firmen: Hero E → Datenblatt Gruppengrößen → Supercup als Startliste → Split Meisterschaft/Bahnmiete mit Preistafel → Split Buffet → Siegerehrung zweispaltig.
+- Kartbahn: Hero E (Boxengasse) → Datenblatt → Vollbreite „+100 m“ → Karts zweispaltig mit Datenblättern → Split Rennlizenz → RaceCam/Bistro → Tipps als Textspalten → Team mit vier echten Fotos (Chris, Conny, Susi, Speedy).
+- Kontakt: Kontaktwege als Zeitentafel (Nummer groß) → Formular neben Anfahrt und Öffnungszeiten.
+
 ## Gestaltungssysteme
 - Ebenen: Ebene 0 Fläche ohne Schatten; Ebene 1 `--shadow-1` nur für die Vorschaukarte im Hero und den Preis-Check-Ergebnisblock; Ebene 2 `--shadow-2` nur für Mobilmenü. Schatten aus der Tinte getönt, zweilagig.
 - Radien: `--r-s` 2px (Etiketten, Eingaben), `--r-m` 6px (Karten, Ergebnisblock), `--r-l` 10px (Bilder). Voll runde Elemente: keine außer Ampel-Lichtern.

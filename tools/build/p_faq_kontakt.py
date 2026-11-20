@@ -53,13 +53,13 @@ html += f'''
   <div class="wrap">
     <span class="eyebrow">Kontakt &amp; Anfahrt</span>
     <h1>Kontakt und Anfahrt</h1>
-    <p class="lead">Fragen zu Terminen, Gruppen oder Angeboten? Ruft an, schreibt per WhatsApp oder nutzt das Formular – ihr bekommt eine Eingangsbestätigung mit Vorgangsnummer.</p>
+    <p class="lead">Fragen zu Terminen, Gruppen oder Angeboten? Ruft an, schreibt per WhatsApp oder nutzt das Formular. Ihr bekommt eine Eingangsbestätigung mit Vorgangsnummer und eine Antwort von Chris, Conny oder Susi.</p>
     <h2 class="sr-only">Kontaktwege</h2>
-    <div class="grid grid-3">
-      <a class="card card--link" href="{TEL_LINK}"><div class="card__icon">{ICONS["phone"]}</div><h3>Telefon</h3><p>{TEL}<br><span class="small">während der Öffnungszeiten · Fax 05141 908652</span></p></a>
-      <a class="card card--link" href="{WA_LINK}" rel="noopener" target="_blank"><div class="card__icon">{ICONS["wa"]}</div><h3>WhatsApp</h3><p>+49 152 31394662<br><span class="small">Nachricht schreiben, wir antworten schnell</span></p></a>
-      <a class="card card--link" href="mailto:{MAIL}"><div class="card__icon">{ICONS["mail"]}</div><h3>E-Mail</h3><p>{MAIL}<br><span class="small">Terminanfragen, Angebote, Rechnungen</span></p></a>
-    </div>
+    <ul class="kontaktwege" aria-label="Kontaktwege">
+      <li><span>Telefon, während der Öffnungszeiten</span><a href="{TEL_LINK}">{TEL}</a><small>Fax 05141 908652</small></li>
+      <li><span>WhatsApp, jederzeit</span><a href="{WA_LINK}" rel="noopener" target="_blank">+49 152 31394662</a><small>Wir antworten schnell</small></li>
+      <li><span>E-Mail, für Angebote und Rechnungen</span><a href="mailto:{MAIL}">{MAIL}</a><small>Antwort in der Regel innerhalb von zwei Werktagen</small></li>
+    </ul>
   </div>
 </section>
 

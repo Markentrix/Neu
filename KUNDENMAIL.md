@@ -9,7 +9,7 @@ Ihre neue Website ist fertig gebaut und geprüft. Sie läuft auf jedem Handy, l�
 
 **Das brauchen wir noch von Ihnen**
 
-1. Ihr Logo als Originaldatei (Vektor, zum Beispiel SVG, AI oder PDF): Wir haben es aus einer Grafik freigestellt, für Druck und große Bildschirme ist das Original besser.
+1. Ihr Logo als Originaldatei (Vektor, zum Beispiel SVG, AI oder PDF): Wir haben es aus einer Grafik freigestellt, für Druck und große Bildschirme ist das Original besser. Dazu, wenn möglich, neue Fotos: Steilkurve von oben, Kinder beim Ampelstart, Terrasse, Clubraum gedeckt. Die Teamfotos von Ihrer alten Website haben wir übernommen; bitte prüfen Sie, ob alle vier so bleiben sollen.
 2. Freigabe oder Korrektur der Rechtstexte: Die AGB haben wir von Ihrer alten Website übernommen und um einen Absatz zu Gutscheinen ergänzt. Datenschutzerklärung, Widerrufsbelehrung und Barrierefreiheitserklärung sind Entwürfe. Bitte lassen Sie alle vier Texte von Ihrem Anwalt oder Rechtsdienst prüfen.
 3. Die Antwort, ob Sie an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilnehmen möchten. Diesen Satz dürfen wir nur mit Ihrer Angabe ins Impressum setzen.
 4. Angaben zum Kinderkartclub, zum Racingteam, zu Live-Timing und zu Ihrer Rennlizenz-App (Name, Link zu den App-Stores): Diese Bereiche der alten Website konnten wir nicht übernehmen, weil die Inhalte fehlen.
