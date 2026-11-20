@@ -40,7 +40,8 @@ h2{font-size:var(--fs-2)}
 h3{font-size:var(--fs-3);font-weight:700;line-height:1.05}
 h4{font-size:1.1rem;font-family:var(--font);font-weight:600;text-transform:none;letter-spacing:0}
 p{margin:0 0 1em;max-width:68ch;overflow-wrap:break-word}
-p,li,dd,td,address,.summary dd,.calc__lines li{overflow-wrap:anywhere}
+p,li,dd,address,.summary dd,.calc__lines li{overflow-wrap:anywhere}
+td,th{overflow-wrap:break-word}
 h1,h2,h3{overflow-wrap:break-word;hyphens:auto}
 ul,ol{padding-left:1.2em;margin:0 0 1em}
 li{margin:.3em 0}
@@ -234,7 +235,28 @@ td:first-child{white-space:nowrap}
 td.price,th.price{text-align:right;white-space:nowrap}
 td.price{font-family:var(--display);font-weight:700;font-size:1.2rem}
 .price-hint{font-size:var(--fs-5);color:var(--kreide-2);padding:.75rem 1rem 1rem;margin:0}
-@media(max-width:700px){th,td{padding:.6rem .65rem;font-size:.95rem}td:first-child,td.price,th.price{white-space:normal}caption{padding:.8rem .75rem .4rem}.price-hint{padding:.6rem .75rem .8rem}}
+@media(max-width:700px){caption{padding:.8rem .75rem .4rem}.price-hint{padding:.6rem .75rem .8rem}}
+/* Gestapelte Tabellen auf dem Handy: jede Zeile ein Block, Spaltenköpfe als Beschriftung */
+@media(max-width:600px){
+  .table-wrap table:not(.startliste):not(.vergleich){display:block}
+  .table-wrap table:not(.startliste):not(.vergleich) thead{display:none}
+  .table-wrap table:not(.startliste):not(.vergleich) tbody,.table-wrap table:not(.startliste):not(.vergleich) tr{display:block}
+  .table-wrap table:not(.startliste):not(.vergleich) tr{padding:.85rem .9rem;border-top:1px solid var(--asphalt-3)}
+  .table-wrap table:not(.startliste):not(.vergleich) td{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;border:0;padding:.2rem 0;text-align:left;white-space:normal}
+  .table-wrap table:not(.startliste):not(.vergleich) td:first-child{display:block;font-weight:600;padding-bottom:.35rem}
+  .table-wrap table:not(.startliste):not(.vergleich) td[data-label]::before{content:attr(data-label);color:var(--kreide-2);font-size:var(--fs-5);font-weight:400;flex:none}
+  .table-wrap table:not(.startliste):not(.vergleich) td.price{font-size:1.25rem;text-align:right}
+  .table-wrap table:not(.startliste):not(.vergleich) td:not([data-label]):not(:first-child){justify-content:flex-end}
+  .table-wrap table:not(.startliste):not(.vergleich) td:not([data-label]):not(:first-child):not(.price){justify-content:flex-start}
+  .vergleich,.vergleich tbody,.vergleich tr{display:block}
+  .vergleich thead{display:none}
+  .vergleich tr{padding:.85rem .9rem;border-top:1px solid var(--asphalt-3)}
+  .vergleich th[scope="row"]{display:block;width:auto;border:0;padding:0 0 .35rem}
+  .vergleich th[scope="row"]:empty{display:none}
+  .vergleich td{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;border:0;padding:.2rem 0;white-space:normal}
+  .vergleich td::before{content:attr(data-label);color:var(--kreide-2);font-size:var(--fs-5);flex:none}
+  .vergleich td.price{font-size:1.25rem;text-align:right}
+}
 
 /* Split / Listen / Schritte / Galerie ------------------------------------ */
 .split{display:grid;gap:1.5rem;align-items:center}

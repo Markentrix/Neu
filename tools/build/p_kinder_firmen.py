@@ -31,12 +31,12 @@ html += f'''
         <caption>Kidsparty-Pakete, Preis pro Kind</caption>
         <thead><tr><th scope="col"></th><th scope="col">Paket F1</th><th scope="col">Paket F2</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Preis pro Kind</th><td class="price">40,00 €</td><td class="price">48,00 €</td></tr>
-          <tr><th scope="row">Fahrzeit</th><td>3 × 10 Minuten</td><td>40 Minuten im Grand-Prix-Modus</td></tr>
-          <tr><th scope="row">Ablauf</th><td>Drei freie Fahrten auf Bestzeit</td><td>10 Min Training, 10 Min Qualifying, 20 Min Rennen mit Formel-1-Start</td></tr>
-          <tr><th scope="row">Jede weitere 10 Minuten</th><td class="price">8,00 €</td><td class="price">8,00 €</td></tr>
-          <tr><th scope="row">Mindestteilnehmer</th><td>6 Kinder</td><td>6 Kinder</td></tr>
-          <tr><th scope="row"></th><td><a class="btn btn--primary btn--sm" href="buchen.html?angebot=kidsparty">F1 buchen</a></td><td><a class="btn btn--primary btn--sm" href="buchen.html?angebot=kidsparty">F2 buchen</a></td></tr>
+          <tr><th scope="row">Preis pro Kind</th><td data-label="Paket F1" class="price">40,00 €</td><td data-label="Paket F2" class="price">48,00 €</td></tr>
+          <tr><th scope="row">Fahrzeit</th><td data-label="Paket F1">3 × 10 Minuten</td><td data-label="Paket F2">40 Minuten im Grand-Prix-Modus</td></tr>
+          <tr><th scope="row">Ablauf</th><td data-label="Paket F1">Drei freie Fahrten auf Bestzeit</td><td data-label="Paket F2">10 Min Training, 10 Min Qualifying, 20 Min Rennen mit Formel-1-Start</td></tr>
+          <tr><th scope="row">Jede weitere 10 Minuten</th><td data-label="Paket F1" class="price">8,00 €</td><td data-label="Paket F2" class="price">8,00 €</td></tr>
+          <tr><th scope="row">Mindestteilnehmer</th><td data-label="Paket F1">6 Kinder</td><td data-label="Paket F2">6 Kinder</td></tr>
+          <tr><th scope="row"></th><td data-label="Paket F1"><a class="btn btn--primary btn--sm" href="buchen.html?angebot=kidsparty">F1 buchen</a></td><td data-label="Paket F2"><a class="btn btn--primary btn--sm" href="buchen.html?angebot=kidsparty">F2 buchen</a></td></tr>
         </tbody>
       </table>
     </div>

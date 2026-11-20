@@ -243,7 +243,30 @@ def ensure_assets():
             shutil.copy(src + f, OUT + f)
     if os.path.isdir(OUT + "assets/css"): shutil.rmtree(OUT + "assets/css")
 
+def tabellen_labels(html):
+    import re as _re
+    def table(m):
+        t = m.group(0)
+        if 'class="startliste"' in t or 'class="vergleich"' in t: return t
+        th = _re.search(r"<thead>(.*?)</thead>", t, _re.S)
+        if not th: return t
+        labels = [_re.sub(r"<[^>]+>", "", x).strip() for x in _re.findall(r"<th[^>]*>(.*?)</th>", th.group(1), _re.S)]
+        def row(rm):
+            cells = list(_re.finditer(r"<td([^>]*)>", rm.group(0)))
+            out = rm.group(0); off = 0
+            for i, c in enumerate(cells):
+                if i == 0 or i >= len(labels) or not labels[i]: continue
+                ins = ' data-label="%s"' % labels[i].replace('"', "")
+                pos = c.start(1) + off; out = out[:pos] + ins + out[pos:]; off += len(ins)
+            return out
+        body = _re.search(r"<tbody>(.*?)</tbody>", t, _re.S)
+        if not body: return t
+        new_body = _re.sub(r"<tr>.*?</tr>", row, body.group(1), flags=_re.S)
+        return t.replace(body.group(1), new_body)
+    return _re.sub(r"<table[^>]*>.*?</table>", table, html, flags=_re.S)
+
 def motionize(html):
+    html = tabellen_labels(html)
     import re as _re
     html = _re.sub(r'<span class="eyebrow">[^<]*</span>\s*', '', html)          # ALL-CAPS-Etiketten ohne Information
     html = html.replace(' →</span>', '</span>').replace(' →</a>', '</a>')       # Pfeile an Links
