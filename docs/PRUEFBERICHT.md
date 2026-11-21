@@ -421,3 +421,13 @@ Abnahme (lokal, simulierter Browser): Jedes der vier Formulare scheitert ohne Ha
 ## Nachtrag 21.11.2026: Umsetzung des Prüfberichts M01 bis M16
 
 Vollständige Dokumentation mit Status je Aufgabe, Messungen, Entscheidungsvorlagen (AGB-Entwürfe, nicht veröffentlicht) und der Liste der Betreiberangaben: `docs/RECHTSPRUEFUNG-UMSETZUNG-2026-11-21.md`. Umgesetzt im Code und in den Texten: Einwilligungsgültigkeit (M01), GA4- und Metricool-Angaben nach Messung (M02, M03), Leistungsversprechen begrenzt (M07), Aktionstexte und Fristende schon beim Bauen (M08), Impressum (M09), Datenschutz §§ 9, 11, 12, 17 (M10, M11), Pflichtfeldhinweis (M13), Bewertungsstand (M14), Website-Check und Rechner (M15). Geprüft: axe auf allen 93 Seiten, Formulare, Einwilligung in neun Zuständen, Build mit Datum nach Aktionsende. Keine Zusage „rechtssicher“.
+
+## Nachtrag 21.11.2026: Überschriften (H1, H2) geprüft und Keywords ergänzt
+
+Geprüft an allen 94 Seiten: genau eine H1, keine übersprungenen Ebenen im Hauptinhalt, keine leeren und keine doppelten H2 auf einer Seite, keine doppelten H1 oder Titles unter den indexierbaren Seiten. Bis dahin ohne Beanstandung.
+Verbessert:
+1. **Keyword in der H1:** Auf den Hauptseiten stand nur eine Wirkaussage ohne Suchbegriff. Jetzt führt jede H1 den Begriff zuerst, die Wirkaussage bleibt (Kupferwort unverändert): Webdesign, Landingpage, SEO und GEO, KI-Automatisierung, Marketing, Website-Pflege und Hosting, Website-Relaunch, Corporate Identity, Google-Unternehmensprofil, KI-Checkliste, Website-Check, Sparrechner, Ablauf, Blog, Branchen. Startseite: Unterzeile der H1 nennt „Webdesign aus Celle“. Regionalseiten Braunschweig, Gifhorn, Hannover beginnen mit „Webdesign in …“ (passend zum Title). Branchenseiten Handwerker, Hotel/Pension/Ferienwohnung und Autowerkstatt an den Title angeglichen.
+2. **Zwischenüberschriften:** „Passend dazu.“ (66 Seiten), „Kurz beantwortet.“ (30), „Hier können Sie nachlesen.“ (24), „Fragen aus Ihrer Branche“ und „Aus der Praxis, frei erfunden.“ (je 9) tragen jetzt das Thema der Seite (zum Beispiel „Passend zu SEO und GEO.“, „Fragen zu Websites für Handwerker“). Die Anker-IDs sind unverändert.
+3. Beschreibung von `/leistungen/ki-automatisierung` auf 152 Zeichen gekürzt (war durch die Textänderung vom Prüfbericht auf 172 gewachsen).
+Geprüft nach den Änderungen: Build, Linkcheck, SEO-Audit, axe auf allen 93 Seiten bei 390 und 1440 px, Umbruch der längeren H1.
+Offen, bewusst nicht geändert: Startseite und `/leistungen/webdesign/webdesign-celle` zielen beide auf „Webdesign Celle“ (mögliche Konkurrenz um denselben Suchbegriff). Einige Blog-H1 sind mit 71 bis 85 Zeichen lang, das ist unkritisch.
