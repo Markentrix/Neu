@@ -1,7 +1,7 @@
 # ENTWURF: aktualisierter Skill „markentrix-eigene-website“
 
 Dies ist der bestehende Skill-Text (Stand 13.11.2026) mit vier Änderungen: (1) CI auf Markenhandbuch 3.1 (Archivo, Source Sans 3, Salz/Reif/Tiefsee/Pfauenblau/Kupfer), (2) Verweis auf Repository, Regeln und Gate, (3) neuer Abschnitt „PFLICHTREGELN AUS DER PRAXIS“, (4) Gate und Browser-Tests im Abschnitt TESTS.
-Der Skill liegt bei Claude in der Skill-Verwaltung und lässt sich von hier nicht ändern. **Bitte den Text unterhalb der Linie in den Skill einfügen** (Einstellungen → Skills → markentrix-eigene-website, vorhandenen Inhalt ersetzen). Eine offene Abweichung: Der alte Skill verbot „Eyebrow-Labels“, die Seite nutzt sie bewusst; das ist im Text geblieben und sollte entschieden werden.
+Die lokale Skill-Datei in dieser Umgebung ist bereits aktualisiert (Sicherung der alten Fassung: Scratchpad). Ob die Änderung in Ihr Claude-Konto zurückgespielt wird, ist nicht bestätigt. **Falls der Skill in der Skill-Verwaltung noch die alte Fassung zeigt, bitte den Text unterhalb der Linie einfügen** (Einstellungen → Skills → markentrix-eigene-website, vorhandenen Inhalt ersetzen). Die frühere Regel „keine Eyebrow-Labels“ ist angepasst, weil die Seite sie bewusst nutzt.
 
 ---
 
@@ -46,7 +46,7 @@ DESIGN-HANDWERK (innerhalb der bestehenden CI)
 - Tokens: jede Farbe, Schrift, jeder Abstand und Radius als CSS-Variable; keine losen Werte. Alle Seiten nutzen dieselben Tokens, Navigation und Footer.
 - Typografie: Headline zu Fließtext mindestens 3×, höchstens fünf Größen; Überschriften höchstens zwei Zeilen bei jeder Breite; Fließtext 16–20 px, Zeilenhöhe 1,45–1,6, 45–75 Zeichen je Zeile, Kontrast mind. 4,5:1 (großer Text 3:1). Auf Navy heller Text in voller Stärke, kein Grau.
 - Farbe: Tiefsee trägt (Text, dunkle Flächen), Pfauenblau ist die Markenfarbe für Links und Flächen, Kupfer ist die Handlungsfarbe für Hauptknöpfe und das hervorgehobene Wort (nur große Schrift), Salz und Reif sind die hellen Flächen. Keine Cremetöne (wirken wie Standard-KI-Seiten).
-- Layout: erster Bildschirm zeigt wer, was, für wen, welcher Vorteil, was jetzt zu tun ist; genau eine Haupt-Conversion je Seite; Abschnitte unterschiedlich aufgebaut; keine Reihen identischer Icon-Karten, keine Statistik-Leisten mit runden Zahlen, keine Eyebrow-Labels, keine Deko-Nummern.
+- Layout: erster Bildschirm zeigt wer, was, für wen, welcher Vorteil, was jetzt zu tun ist; genau eine Haupt-Conversion je Seite; Abschnitte unterschiedlich aufgebaut; keine Reihen identischer Icon-Karten, keine Statistik-Leisten mit runden Zahlen, Eyebrow-Labels nur als kurze Themenmarke über der Überschrift (die Seite nutzt sie bewusst, nicht entfernen), keine Deko-Nummern.
 - Texte: konkret und belegbar; Knöpfe als Verb plus Gegenstand; verboten sind "Ihr Partner für", "maßgeschneidert", "innovativ", "ganzheitlich", "nahtlos", "auf das nächste Level", Dreier-Slogans und unbelegte Superlative.
 - Bewegung: ein orchestrierter Moment je Seite plus Rückmeldung auf Aktionen; nur transform und opacity; unter 300 ms; ease-out beim Erscheinen, nie ease-in; nie transition: all; prefers-reduced-motion beachten; Hover nur in @media (hover: hover) and (pointer: fine).
 - Handy: Eingabefelder mindestens 16 px, Tippziele mindestens 44 px, nie 100vh (Hero 100svh), Zoom nie sperren, Hauptaktion ständig erreichbar.
