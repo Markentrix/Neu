@@ -375,9 +375,11 @@ def faq_html(items, prefix="", first_open=True):
 
 
 def consent_row(prefix, fid):
+    """Datenschutzhinweis zum Bestätigen. Die Anfrage stützt sich auf Vertrag bzw. Vertragsanbahnung (Art. 6 Abs. 1 lit. b DSGVO),
+    nicht auf eine Einwilligung. Das Feld heißt weiter „einwilligung“, weil das Markentrix-Portal es bei Anfragen erwartet."""
     return f'''<div class="consent-row">
             <input type="checkbox" id="{fid}" name="einwilligung" value="ja" required>
-            <label for="{fid}">Ich habe die <a href="{prefix}datenschutz.html">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert und verwendet werden.*</label>
+            <label for="{fid}">Ich habe die <a href="{prefix}datenschutz.html">Datenschutzhinweise</a> zur Kenntnis genommen. Meine Angaben werden zur Bearbeitung meiner Anfrage verwendet.*</label>
           </div>'''
 
 

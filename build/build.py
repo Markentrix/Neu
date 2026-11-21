@@ -169,6 +169,11 @@ def build(content_dir, out_dir, static_dir, quiet=False):
             continue
         if not L.get(k):
             warnings.append(f"Platzhalter offen: {label}")
+    for k, label in (("avContract", "Auftragsverarbeitungsvertrag mit Markentrix abgeschlossen? Dann legal.avContract = true (Datenschutz nennt ihn erst dann)"),
+                     ("analyticsDpa", "Datenverarbeitungsbedingungen in Google Analytics akzeptiert? Dann legal.analyticsDpa = true"),
+                     ("analyticsRetentionMonths", "Aufbewahrungsdauer der Analysedaten in Google Analytics eintragen (legal.analyticsRetentionMonths: 2 oder 14)")):
+        if not L.get(k):
+            warnings.append("Offen (Datenschutz): " + label)
     if not site.s.get("googleReviewUrl"):
         warnings.append("Google-Bewertungslink fehlt (Grunddaten → googleReviewUrl)")
     if not any(g.get("before") in site.media and g.get("after") in site.media for g in site.gallery):

@@ -40,7 +40,7 @@ def build_agb(site, write):
     <h2 id="leistungen">§ 2 Leistungen</h2>
     <ol class="agb-list">
       <li>Wir bieten die Innen- und Außenaufbereitung von Fahrzeugen an, insbesondere Reinigung, Politur, Wachs- und Lackversiegelung, Keramikversiegelung (C²Coating) sowie Leder- und Innenraumpflege. Der Umfang ergibt sich aus dem gewählten Paket oder Angebot laut Website und aus der Absprache bei der Fahrzeugbesichtigung.</li>
-      <li>Das Ergebnis hängt vom Ausgangszustand des Fahrzeugs ab. Eine Politur kann Kratzer, Hologramme und Waschspuren nur so weit entfernen, wie es die vorhandene Lackschicht zulässt. Tiefe Kratzer, Steinschläge, Lackschäden, alte Verfärbungen, Gerüche oder Flecken lassen sich nicht in jedem Fall vollständig beseitigen. Ein bestimmtes Ergebnis schulden wir nur, wenn es ausdrücklich vereinbart ist.</li>
+      <li>Das Ergebnis hängt vom Ausgangszustand des Fahrzeugs ab. Eine Politur kann Kratzer, Hologramme und Waschspuren nur so weit entfernen, wie es die vorhandene Lackschicht zulässt. Tiefe Kratzer, Steinschläge, Lackschäden, alte Verfärbungen, Gerüche oder Flecken lassen sich nicht in jedem Fall vollständig beseitigen. Wir schulden die fachgerechte Ausführung des vereinbarten Pakets mit dem Ergebnis, das bei diesem Ausgangszustand mit dem vereinbarten Umfang erreichbar ist. Erkennen wir bei der Fahrzeugbesichtigung solche Grenzen, sagen wir das vor Arbeitsbeginn. Die gesetzlichen Mängelrechte (§ 9) bleiben unberührt.</li>
       <li>Angaben zur Haltbarkeit von Versiegelungen und Keramikbeschichtungen sind Herstellerangaben unter optimalen Voraussetzungen. Die tatsächliche Haltbarkeit hängt von Beanspruchung, Witterung und Pflege ab und ist keine Garantie.</li>
       <li>Wir dürfen zur Leistungserbringung geeignete Hilfsmittel und Produkte nach eigener fachlicher Wahl einsetzen.</li>
     </ol>
@@ -77,7 +77,7 @@ def build_agb(site, write):
 
     <h2 id="uebergabe">§ 7 Fahrzeugübergabe und Mitwirkung des Kunden</h2>
     <ol class="agb-list">
-      <li>Der Kunde bringt das Fahrzeug zur vereinbarten Abgabezeit an unseren Standort {ESC(a["street"])}, {ESC(a["zip"])} {ESC(a["city"])}, sofern kein Hol- und Bringservice vereinbart ist. Bei Versiegelung und Keramik bleibt das Fahrzeug in der Regel 3 Tage bei uns, bei anderen Leistungen nach Möglichkeit einen Tag.</li>
+      <li>Der Kunde bringt das Fahrzeug zur vereinbarten Abgabezeit an unseren Standort {ESC(a["street"])}, {ESC(a["zip"])} {ESC(a["city"])}, sofern kein Hol- und Bringservice vereinbart ist. Bei Versiegelung und Keramik für Lack oder Felgen bleibt das Fahrzeug in der Regel 3 Tage bei uns, bei der Scheibenkeramik etwa 1 Stunde, bei anderen Leistungen nach Möglichkeit einen Tag.</li>
       <li>Der Kunde entfernt vor der Übergabe Wertsachen und persönliche Gegenstände aus dem Fahrzeug.</li>
       <li>Der Kunde weist uns vor Beginn auf ihm bekannte Vorschäden und Besonderheiten hin, zum Beispiel Nachlackierungen, Smart-Repair-Stellen, Folierungen, lose Teile, empfindliche Materialien oder Undichtigkeiten.</li>
       <li>Bei der Übergabe sehen wir uns das Fahrzeug gemeinsam an und halten sichtbare Vorschäden auf Wunsch mit Fotos fest.</li>
@@ -153,14 +153,15 @@ def build_widerruf(site, write):
     content = f'''
     <p>Sie möchten einen Vertrag mit uns widerrufen, zum Beispiel eine Online-Buchung oder eine Gutscheinbestellung? Füllen Sie das Formular aus und klicken Sie auf „Widerruf bestätigen“. Sie erhalten eine Eingangsbestätigung mit Vorgangsnummer per E-Mail.</p>
     <p>Alle Infos zu Fristen und Folgen stehen in der <a href="agb.html#widerruf">Widerrufsbelehrung</a>.</p>
-    <form class="widerruf-form js-form" id="widerrufForm" data-form="widerruf" action="/api/anfrage" method="post" novalidate>
+    <form class="widerruf-form js-form" id="widerrufForm" data-form="widerruf" data-one-of="vorgang nachricht" action="/api/anfrage" method="post" novalidate>
       <input type="hidden" name="typ" value="widerruf">
       <div class="form-row"><label for="w-name">Ihr Name*</label><input type="text" id="w-name" name="name" autocomplete="name" required maxlength="120"></div>
       <div class="form-row"><label for="w-email">E-Mail* <span class="hint">(für die Eingangsbestätigung)</span></label><input type="email" id="w-email" name="email" autocomplete="email" required maxlength="160"></div>
-      <div class="form-row"><label for="w-vorgang">Vorgangsnummer oder Gutscheincode* <span class="hint">(steht in Ihrer E-Mail, z. B. T261021-AB12)</span></label><input type="text" id="w-vorgang" name="vorgang" required maxlength="40" autocapitalize="characters"></div>
-      <div class="form-row"><label for="w-msg">Welcher Vertrag, bestellt am <span class="hint">(optional)</span></label><textarea id="w-msg" name="nachricht" rows="3" maxlength="2000" placeholder="z. B. Termin am 12.11. oder Gutschein über 100 €"></textarea></div>
+      <p class="form-note" id="w-either">Bitte die Vorgangsnummer <strong>oder</strong> eine kurze Beschreibung des Vertrags angeben. Eines von beiden genügt.</p>
+      <div class="form-row"><label for="w-vorgang">Vorgangsnummer oder Gutscheincode <span class="hint">(steht in Ihrer E-Mail, z. B. T261021-AB12)</span></label><input type="text" id="w-vorgang" name="vorgang" maxlength="40" autocapitalize="characters" aria-describedby="w-either"></div>
+      <div class="form-row"><label for="w-msg">Welcher Vertrag, bestellt am</label><textarea id="w-msg" name="nachricht" rows="3" maxlength="2000" placeholder="z. B. Termin am 12.11. oder Gutschein über 100 €" aria-describedby="w-either"></textarea></div>
       {core.honeypot("w-website")}
-      {core.consent_row("", "w-consent")}
+      <p class="form-note">Wir verarbeiten Ihre Angaben, um den Widerruf zu bearbeiten und Ihnen den Eingang zu bestätigen (Art. 6 Abs. 1 lit. c DSGVO). Mehr dazu in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
       <button class="btn btn-primary" type="submit">Widerruf bestätigen</button>
       {core.form_status("w-status")}
     </form>

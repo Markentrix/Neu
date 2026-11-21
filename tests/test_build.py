@@ -142,7 +142,11 @@ class TestPortalUpload(unittest.TestCase):
             t = read(p)
             for form in re.findall(r"<form\b[^>]*data-form=.*?</form>", t, re.S):  # Anfrageformulare (der Preisrechner sendet nichts)
                 rel = os.path.relpath(p, SITE)
-                self.assertRegex(form, r'name="einwilligung"[^>]*required', rel)
+                if 'data-form="widerruf"' in form:  # Widerruf: keine Einwilligung als Hürde (A06), dafür Datenschutzhinweis
+                    self.assertNotIn('name="einwilligung"', form, rel)
+                    self.assertIn('data-one-of="vorgang nachricht"', form, rel)
+                else:
+                    self.assertRegex(form, r'name="einwilligung"[^>]*required', rel)
                 self.assertRegex(form, r'name="website"[^>]*tabindex="-1"[^>]*autocomplete="off"', rel)
                 self.assertRegex(form, r'name="email"[^>]*required', rel)
                 self.assertIn('datenschutz.html"', form, rel)

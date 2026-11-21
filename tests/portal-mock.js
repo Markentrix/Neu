@@ -43,7 +43,9 @@ function api(req, res, url, body) {
     if (d.website) return json(res, 200, { ok: true, ref: "OK" });
     const errors = {};
     if (!d.name) errors.name = "Bitte den Namen angeben.";
-    if (d.einwilligung !== "ja") errors.einwilligung = "Bitte die Datenschutzhinweise bestätigen.";
+    // Widerruf braucht keine Einwilligung (gesetzliche Pflicht, Art. 6 Abs. 1 lit. c DSGVO); dafür Vorgangsnummer oder Beschreibung
+    if (d.typ !== "widerruf" && d.einwilligung !== "ja") errors.einwilligung = "Bitte die Datenschutzhinweise bestätigen.";
+    if (d.typ === "widerruf" && !d.vorgang && !d.nachricht) errors.vorgang = "Bitte die Vorgangsnummer oder eine Beschreibung des Vertrags angeben.";
     if (["termin", "kontakt", "gutschein", "firma", "widerruf"].includes(d.typ) && !d.email) errors.email = "Bitte eine E-Mail-Adresse angeben.";
     if (d.typ === "termin") {
       if (!d.datum) errors.datum = "Bitte einen Tag wählen.";

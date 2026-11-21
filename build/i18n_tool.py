@@ -10,6 +10,7 @@
 """
 import argparse
 import collections
+import glob
 import json
 import os
 import shutil
@@ -50,7 +51,12 @@ def main():
         print(f"{len(miss)} Texte ohne Übersetzung")
         return 1 if miss else 0
     table = i18n.load_table(os.path.join(ROOT, "content"))
-    unknown = [k for k in table if k not in r["seen"]]
+    # varianten-*.json: Texte für Schalter in site.json, die erst später erscheinen (z. B. nach Abschluss des AV-Vertrags)
+    spare = set()
+    for p in glob.glob(os.path.join(ROOT, "content", "i18n", "en", "varianten-*.json")):
+        with open(p, encoding="utf-8") as f:
+            spare |= {i18n.norm(k) for k in json.load(f)}
+    unknown = [k for k in table if k not in r["seen"] and k not in spare]
     probs = [w for w in r["warnings"] if "/en/" in w or w.startswith("en/") or "Platzhalter" in w or "Zahlen" in w or "en/" in w]
     for w in probs:
         print("Fehler:", w)

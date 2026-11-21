@@ -4,6 +4,9 @@ Die Website läuft beim Markentrix-Portal. Abgegeben wird nur der Ordner `websit
 
 ## Muss vor dem Livegang erledigt sein
 
+- [ ] **Prüfbericht vom 21.11.2026:** offene Punkte in `pruefbericht-2026-11-umsetzung.md` (A03 Vertragsablauf entscheiden, A10 Ausfallpauschale belegen, A13/A14 Nachweise) und Portal-Aufgaben in `portal-aufgaben.md` (Analytics-Widerruf, Widerruf ohne Einwilligung, Bestätigungsmail) erledigen.
+- [ ] **Datenschutz-Schalter** in `content/site.json → legal` setzen, sobald belegt: `avContract`, `analyticsDpa`, `analyticsRetentionMonths`.
+
 - [ ] **Impressum:** Inhaber, Kleinunternehmer-Hinweis, Verantwortlicher nach § 18 MStV prüfen (`content/site.json` → `legal`). Steuernummer fehlt noch.
 - [ ] **Datenschutz:** Auftragsverarbeitungsvertrag mit Markentrix abschließen (Hetzner Online GmbH, Rechenzentrum Nürnberg, als Unterauftragsverarbeiter darin aufführen). Anschrift von Markentrix ist eingetragen (Heinrich-Hüdig-Straße 1, 29227 Celle). Text anwaltlich prüfen lassen.
 - [ ] **Markentrix-Portal einrichten:** Termine an, feste Uhrzeiten wie auf der Website (8, 9, 10 Uhr; mittwochs ab 9 Uhr), Sonntag geschlossen. Kalender verbinden, falls gewünscht.

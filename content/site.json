@@ -97,7 +97,10 @@
     "smallBusiness": true,
     "hostingAddress": "Heinrich-Hüdig-Straße 1, 29227 Celle",
     "hostingServer": "Hetzner Online GmbH (Industriestr. 25, 91710 Gunzenhausen)",
-    "hostingLocation": "Nürnberg"
+    "hostingLocation": "Nürnberg",
+    "avContract": false,
+    "analyticsDpa": false,
+    "analyticsRetentionMonths": null
   },
   "vouchers": {
     "amounts": [

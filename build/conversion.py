@@ -262,7 +262,9 @@ def build_gutscheine(site, write):
            "offers": {"@type": "AggregateOffer", "priceCurrency": "EUR", "lowPrice": str(v["minAmount"]), "highPrice": str(v["maxAmount"]),
                       "availability": "https://schema.org/InStock", "seller": {"@id": site.url + "/#business"}}}]
     amounts = "".join(f'<label class="choice-pill"><input type="radio" name="betrag" value="{a}"{" checked" if i == 1 else ""}><span><strong>{a} €</strong></span></label>' for i, a in enumerate(v["amounts"]))
-    pkgs = "".join(f'<option value="{p["key"]}">{ESC(p["name"])} (Kompakt, Wert {p["prices"][site.pricing["classes"][0]["key"]]} €)</option>' for p in site.pricing["packages"])
+    small = site.pricing["classes"][0]  # Paketgutscheine gelten laut AGB für einen Kleinwagen
+    pkgs = "".join(f'<option value="{p["key"]}">{ESC(p["name"])} ({ESC(small["name"])}, Wert {p["prices"][small["key"]]} €)</option>' for p in site.pricing["packages"])
+    default_amount = v["amounts"][1]
     body = f'''
 <main id="main">
 {_page_hero("", [("Startseite", "index.html"), ("Gutscheine", None)], "Geschenkidee",
@@ -310,8 +312,18 @@ def build_gutscheine(site, write):
           {core.consent_row("", "g-consent")}
           {core.agb_note()}
         </fieldset>
-        <button class="btn btn-primary btn-lg btn-block" type="submit">{I["gift"]}Gutschein verbindlich bestellen</button>
-        <p class="hint">Sie erhalten die Zahlungsdaten per E-Mail (Überweisung, PayPal oder bei Abholung bar bzw. mit Karte). Nach Zahlungseingang erhalten Sie den Gutschein.</p>
+        <div class="order-summary" id="voucherSummary" aria-live="polite">
+          <h2 class="order-summary-h">Ihre Bestellung</h2>
+          <dl>
+            <div><dt>Gutschein</dt><dd data-os="art">Wertgutschein</dd></div>
+            <div><dt>Leistung</dt><dd data-os="leistung">Fahrzeugaufbereitung nach Wahl</dd></div>
+            <div data-os-row="klasse" hidden><dt>Fahrzeugklasse</dt><dd data-os="klasse">{ESC(small["name"])}</dd></div>
+            <div><dt>Zustellung</dt><dd data-os="zustellung">PDF per E-Mail</dd></div>
+            <div class="order-total"><dt>Gesamtpreis</dt><dd data-os="preis">{default_amount}&nbsp;€</dd></div>
+          </dl>
+          <p class="hint">{"Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. " if s["legal"].get("smallBusiness") else ""}Gültig bis 31.12.{year + 3}. Die Zahlungsdaten erhalten Sie per E-Mail (Überweisung, PayPal oder bei Abholung bar bzw. mit Karte). Nach Zahlungseingang erhalten Sie den Gutschein.</p>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">{I["gift"]}Zahlungspflichtig bestellen</button>
         {core.form_status("g-status")}
       </form>
 

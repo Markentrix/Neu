@@ -378,6 +378,12 @@
   function clearErrors(form) { $$("[data-err]", form).forEach(function (m) { m.remove(); }); }
   function validate(form, scope) {
     var ok = true, first = null;
+    /* Mindestens eines von mehreren Feldern (Widerruf: Vorgangsnummer oder Beschreibung des Vertrags) */
+    var oneOf = (form.getAttribute("data-one-of") || "").split(" ").filter(Boolean).map(function (n) { return form.querySelector('[name="' + n + '"]'); }).filter(Boolean);
+    if (oneOf.length) {
+      var any = oneOf.some(function (el) { return el.value.trim(); });
+      oneOf.forEach(function (el, i) { el.setCustomValidity(any || i ? "" : t("Bitte die Vorgangsnummer oder eine Beschreibung des Vertrags angeben.")); });
+    }
     $$("input, select, textarea", scope || form).forEach(function (el) {
       if (!el.willValidate) return;
       var valid = el.checkValidity();
@@ -667,13 +673,21 @@
     var updateV = function () {
       var art = radio(vf, "art");
       $(".vf-wert", vf).hidden = art !== "wert"; $(".vf-paket", vf).hidden = art !== "paket";
+      /* Bestellübersicht direkt über dem Bestellknopf: Art, Leistung, Fahrzeugklasse, Zustellung und Gesamtpreis (§ 312j BGB) */
+      var setOs = function (k, x) { var el = $('[data-os="' + k + '"]', vf); if (el) el.textContent = x; };
+      var small = ELB.classes[0], osKlasse = $('[data-os-row="klasse"]', vf);
       if (art === "paket") {
-        var p = pkg(vf.paket.value);
-        setVc("value", p ? p.name : t("Paket")); setVc("desc", t("Fahrzeugaufbereitung für einen Kleinwagen") + (p ? " · " + t("Wert {preis}", { preis: eur(p.prices[ELB.classes[0].key]) }) : ""));
+        var p = pkg(vf.paket.value), pv = p ? p.prices[small.key] : null;
+        setVc("value", p ? p.name : t("Paket")); setVc("desc", t("Fahrzeugaufbereitung für einen Kleinwagen") + (p ? " · " + t("Wert {preis}", { preis: eur(pv) }) : ""));
+        setOs("art", t("Paketgutschein")); setOs("leistung", p ? t("Paket {name}", { name: p.name }) : "–");
+        if (osKlasse) osKlasse.hidden = false; setOs("klasse", small.name); setOs("preis", pv != null ? eur(pv) : "–");
       } else {
         var c = vf.wunschbetrag.value ? parseInt(vf.wunschbetrag.value, 10) : parseInt(radio(vf, "betrag") || "0", 10);
         setVc("value", eur(c || 0)); setVc("desc", t("für eine Fahrzeugaufbereitung nach Wahl"));
+        setOs("art", t("Wertgutschein")); setOs("leistung", t("Fahrzeugaufbereitung nach Wahl"));
+        if (osKlasse) osKlasse.hidden = true; setOs("preis", c > 0 ? eur(c) : "–");
       }
+      setOs("zustellung", radio(vf, "zustellung") === "abholung" ? t("Gedruckt zum Abholen in Celle") : t("PDF per E-Mail"));
       setVc("fuer", vf.fuer.value.trim() || "…"); setVc("von", vf.von.value.trim() || "…"); setVc("msg", vf.widmung.value.trim());
     };
     vf.addEventListener("input", updateV); vf.addEventListener("change", function (e) {

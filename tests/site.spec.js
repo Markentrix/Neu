@@ -242,11 +242,44 @@ test("Widerruf über das Formular geht als typ widerruf an das Portal", async ({
   await page.fill("#w-name", "Karla Kunde");
   await page.fill("#w-email", "karla@example.com");
   await page.fill("#w-vorgang", "T261023-0001");
-  await page.locator('label[for="w-consent"]').click();
+  await expect(page.locator("#widerrufForm [name=einwilligung]")).toHaveCount(0);  // keine Einwilligung als Hürde
   await page.locator('#widerrufForm button[type="submit"]').click();
   await expect(page).toHaveURL(/danke\.html\?typ=widerruf&ref=W/);
   const sent = await sentFor(page);
   expect(sent).toMatchObject({ typ: "widerruf", vorgang: "T261023-0001", email: "karla@example.com" });
+  expect(sent.einwilligung).toBeUndefined();
+});
+
+test("Widerruf geht auch ohne Vorgangsnummer, wenn der Vertrag beschrieben ist, aber nicht ganz ohne Angabe", async ({ page }) => {
+  await page.goto("/widerruf.html");
+  await page.fill("#w-name", "Karl Kunde");
+  await page.fill("#w-email", "karl@example.com");
+  await page.locator('#widerrufForm button[type="submit"]').click();
+  await expect(page.locator("#w-vorgang")).toHaveAttribute("aria-invalid", "true");
+  await expect(page).toHaveURL(/widerruf\.html/);
+  await page.fill("#w-msg", "Gutschein über 100 €, bestellt am 20.11.2026");
+  await page.locator('#widerrufForm button[type="submit"]').click();
+  await expect(page).toHaveURL(/danke\.html\?typ=widerruf&ref=W/);
+  const sent = await sentFor(page);
+  expect(sent).toMatchObject({ typ: "widerruf", nachricht: "Gutschein über 100 €, bestellt am 20.11.2026", email: "karl@example.com" });
+});
+
+test("Gutschein: Bestellübersicht vor dem Knopf „Zahlungspflichtig bestellen“ folgt der Auswahl", async ({ page }) => {
+  await page.goto("/gutscheine.html");
+  const sum = page.locator("#voucherSummary");
+  await expect(page.locator('#voucherForm button[type="submit"]')).toContainText("Zahlungspflichtig bestellen");
+  await expect(sum.locator('[data-os="art"]')).toHaveText("Wertgutschein");
+  await expect(sum.locator('[data-os="preis"]')).toContainText("100");
+  await page.fill("#g-custom", "180");
+  await expect(sum.locator('[data-os="preis"]')).toContainText("180");
+  await page.locator('label:has(input[name="art"][value="paket"])').click();
+  await expect(sum.locator('[data-os="art"]')).toHaveText("Paketgutschein");
+  await expect(sum.locator('[data-os="klasse"]')).toHaveText("Kleinwagen");
+  await page.selectOption("#g-paket", "refresh");
+  await expect(sum.locator('[data-os="preis"]')).toContainText("79");
+  await expect(page.locator('#g-paket option[value="refresh"]')).toContainText("Kleinwagen, Wert 79");
+  await page.locator('label:has(input[name="zustellung"][value="abholung"])').click();
+  await expect(sum.locator('[data-os="zustellung"]')).toContainText("Abholen");
 });
 
 test("Kontaktformular zeigt Pflichtfelder an", async ({ page }) => {
