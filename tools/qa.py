@@ -64,7 +64,8 @@ for rel, t in pages.items():
     if len(h1) != 1: err(f'{rel}: {len(h1)} H1')
     else:
         h = h1[0]
-        if re.search(r'[a-zäöüß][.!?][A-ZÄÖÜ][a-zäöüß]', h): err(f'{rel}: H1 ohne Leerzeichen zwischen Sätzen: {h[:60]}')
+        raw = html.unescape(re.sub(r'<[^>]+>', '', re.search(r'<h1[^>]*>(.*?)</h1>', main_of(t), re.S).group(1)))  # wie der Browser: Tags ohne Leerzeichen
+        if re.search(r'[a-zäöüß][.!?][A-ZÄÖÜ][a-zäöüß]', raw): err(f'{rel}: H1 ohne Leerzeichen zwischen Sätzen: {raw[:60]}')
         if len(h) > 90: err(f'{rel}: H1 {len(h)} Zeichen (über 90)')
         elif len(h) > 70 and not rel.startswith('blog/'): note(f'{rel}: H1 {len(h)} Zeichen (über 70)')
     prev = 0

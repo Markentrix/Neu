@@ -456,3 +456,7 @@ Geprüft: Build, Linkcheck, SEO-Audit, axe auf 93 Seiten bei 390 und 1440 px, Da
 ## Nachtrag 21.11.2026: Fehler künftig automatisch abfangen
 
 Auslöser: Viele Befunde der letzten Tage waren vermeidbar. Jetzt: (1) `tools/qa.py` als Qualitäts-Gate (Build, Linkcheck, SEO- und Crawl-Audit, H1-Regeln, Pflichtlinks, Formular-Bestätigung, Wortwahl, Einwilligung nur über `mxConsent`, Aktionsende), wird von `tools/paket.sh` vor dem Packen ausgeführt; (2) Browser-Tests im Repository (`tools/browser_tests/`: axe auf allen Seiten, Einwilligung, Tracking, Formulare); (3) `docs/QUALITAETSREGELN.md` und `CLAUDE.md` mit den festen Regeln; (4) Entwurf für den aktualisierten Skill (`docs/SKILL-ENTWURF-markentrix-eigene-website.md`, muss von Ihnen in die Skill-Verwaltung übernommen werden). Zusätzlich im Build: Karten verlinken nur ihre Überschrift (264 Karten, lange Linktexte von 259 auf 36 Hinweise gesenkt, 17 davon in der Blogliste); „DSGVO-konform und sicher“ auf der KI-Seite ersetzt.
+
+## Nachtrag 21.11.2026: Kundenseiten-Skill aktualisiert, H1-Prüfung korrigiert
+
+Skill „website-mit-portal“ auf V4.3 (Änderungen in `docs/SKILL-AENDERUNGEN-website-mit-portal.md`), tragbares Gate `tools/qa-statisch-kundenseiten.py`. Beim Test fiel auf, dass die Prüfung zusammengeklebter H1-Sätze Tags durch Leerzeichen ersetzte und den Fehler verdeckte. Korrigiert (`tools/qa.py`) und danach zwei echte Reste auf der eigenen Seite behoben: `/preise` und `/ki-checkliste` (Leerzeichen vor `<br>` in der H1).
