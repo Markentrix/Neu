@@ -68,3 +68,7 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 ## Terminvorschläge im Angebot
 - Der Empfänger wählt im Angebots-Link einen Beratungstermin; das Portal speichert Name und E-Mail im Gespräch und schickt eine Bestätigung mit Kalendereinladung. Prüfen: reicht der Hinweis im Angebot/Datenschutztext als Information, oder braucht es beim Wählen einen Einwilligungshinweis?
 - Bei Angeboten an bestehende Kunden entsteht der Online-Link erst beim Senden (derselbe Link bleibt bei erneutem Senden gültig). Öffnungsmessung nur über den Link, kein Tracking-Pixel.
+
+## Statistik-Baustein (site.js) und Widerruf über die Website
+- Cookie-Fenster nennt jetzt Google Analytics, Anbieter Google Ireland Limited, Cookies bis zu 2 Jahre, mögliche Übermittlung in die USA, Widerruf über „Statistik-Einstellungen“ (deutsch und englisch). Wortlaut und die Laufzeitangabe vom Anwalt abnehmen lassen. Ablehnen stoppt Analytics sofort und löscht `_ga`-Cookies.
+- Das Formularfeld `einwilligung` bedeutet „Datenschutzhinweise zur Kenntnis genommen“, nicht Werbe-Einwilligung. Widerruf über `POST /api/anfrage` braucht sie nicht; Pflicht sind Name, E-Mail und Vorgangsnummer oder Beschreibung. Die Bestätigungsmail nennt Name, E-Mail, Vorgang/Angaben sowie Datum und Uhrzeit des Eingangs.

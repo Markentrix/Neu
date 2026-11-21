@@ -368,6 +368,8 @@ def _pruefen(d: dict, z: dict) -> dict:
         fehler["email"] = "Bitte eine E-Mail-Adresse angeben."
     if typ == "kontakt" and not tel and not mail:
         fehler["telefon"] = "Bitte Telefon oder E-Mail angeben."
+    if typ == "widerruf" and not (felder.get("vorgang") or felder.get("nachricht")):
+        fehler["vorgang"] = "Bitte die Vorgangsnummer oder eine kurze Beschreibung angeben."
     if typ != "widerruf" and d.get("einwilligung") not in ("ja", "on", True, "true", "1", 1):
         fehler["einwilligung"] = "Bitte die Datenschutzhinweise bestätigen."
     heute = datetime.now(TZ).date()
@@ -471,8 +473,11 @@ def _mails(kid, z: dict, typ: str, ref: str, felder: dict, firma: str, buchung: 
         if buchung:
             extra += sd.zahlungsabsatz(z, buchung["zeile"].get("anzahlung"))
             extra += f"\nFalls Sie nicht können, sagen Sie bitte hier ab:\n{config.BASE_URL}/site/{z['site_id']}/termin/absagen?t={buchung['zeile']['token']}\n"
+        eingang = ""
+        if typ == "widerruf":      # Nachweis des Eingangs: Name, E-Mail, Datum und Uhrzeit stehen in der Bestätigung
+            eingang = f"\nEingegangen am {datetime.now(TZ):%d.%m.%Y} um {datetime.now(TZ):%H:%M} Uhr von {felder.get('name', '')} ({mail})."
         sd.kundenmail(kid, mail, f"Eingangsbestätigung: {titel} ({ref})",
-                      f"Guten Tag {felder.get('name', '')},\n\nvielen Dank, Ihre {titel} ist bei uns eingegangen. Ihre Vorgangsnummer: {ref}.{extra}\n\nIhre Angaben:\n{text}\n\nMit freundlichen Grüßen\n{firma}",
+                      f"Guten Tag {felder.get('name', '')},\n\nvielen Dank, Ihre {titel} ist bei uns eingegangen. Ihre Vorgangsnummer: {ref}.{extra}{eingang}\n\nIhre Angaben:\n{text}\n\nMit freundlichen Grüßen\n{firma}",
                       art="kontakt")
 
 

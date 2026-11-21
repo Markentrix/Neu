@@ -59,7 +59,7 @@ Website-API, Terminbuchung, Online-Shop, Gutscheine, Upload, Domains, Statusseit
 | `routes_domains` | 3 | 124 | `main` |
 | `routes_referenzseite` | 3 | 91 | `main` |
 | `routes_shop` | 3 | 744 | `main`, `routes_siteapi` |
-| `routes_siteapi` | 3 | 579 | `main`, `routes_shop`, `t95.py` |
+| `routes_siteapi` | 3 | 584 | `main`, `routes_shop`, `t95.py` |
 | `routes_sitedienste` | 3 | 2273 | `main`, `routes_buchungsvorlagen`, `routes_leistungsfreigabe`, `routes_shop` und 2 weitere |
 | `routes_status` | 3 | 127 | `main`, `routes_plattformstatus` |
 | `routes_websites` | 3 | 269 | `main`, `routes_betriebplus`, `routes_offboarding`, `routes_webupload` |

@@ -193,18 +193,42 @@
   var SCHLUESSEL = 'mk_statistik:' + site;
   function wahl() { try { return localStorage.getItem(SCHLUESSEL); } catch (e) { return null; } }
   function merke(w) { try { localStorage.setItem(SCHLUESSEL, w); } catch (e) { /* ohne Speicher: Abfrage kommt beim nächsten Besuch erneut */ } }
+  var EN = /^en\b/i.test(document.documentElement.lang || '');
   function gaLaden(id) {
-    if (window.__mkGa) return; window.__mkGa = true;
+    window['ga-disable-' + id] = false;
+    if (window.__mkGa) { if (window.gtag) window.gtag('consent', 'update', { analytics_storage: 'granted' }); return; }
+    window.__mkGa = true;
     window.dataLayer = window.dataLayer || []; window.gtag = function () { window.dataLayer.push(arguments); };
-    window.gtag('js', new Date()); window.gtag('config', id, { anonymize_ip: true });
+    window.gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    window.gtag('js', new Date()); window.gtag('config', id);
     document.head.appendChild(el('script', { async: true, src: 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id) }));
   }
+  // Ablehnen wirkt sofort: Messung stoppen, Google-Cookies (_ga, _ga_…) löschen
+  function gaStoppen(id) {
+    window['ga-disable-' + id] = true;
+    if (window.gtag) { try { window.gtag('consent', 'update', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' }); } catch (e) { /* egal */ } }
+    var hosts = [location.hostname, '.' + location.hostname, '.' + location.hostname.replace(/^www\./, '')];
+    document.cookie.split(';').forEach(function (c) {
+      var n = c.split('=')[0].trim();
+      if (n !== '_ga' && n.indexOf('_ga_') !== 0 && n !== '_gid' && n.indexOf('_gat') !== 0) return;
+      document.cookie = n + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+      hosts.forEach(function (h) { document.cookie = n + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=' + h; });
+    });
+  }
+  function datenschutzLink(ds) {
+    if (!EN) return ds;
+    var en = skript.getAttribute('data-datenschutz-en'); if (en) return en;
+    var m = /^(.*)\/datenschutz(\.html)?$/.exec(ds); return m ? m[1] + '/en/datenschutz.html' : ds;
+  }
   function banner(id, ds) {
+    var T = EN
+      ? { ja: 'Allow', nein: 'Decline', link: 'privacy policy', text: 'We would like to use Google Analytics (provider: Google Ireland Limited) to measure how our website is used. Cookies are stored for up to 2 years, and data may be transferred to the USA. This only happens with your consent, and you can withdraw it at any time via "Statistics settings". More in our ' }
+      : { ja: 'Erlauben', nein: 'Ablehnen', link: 'Datenschutzerklärung', text: 'Wir möchten mit Google Analytics (Anbieter: Google Ireland Limited) messen, wie unsere Website genutzt wird. Dabei werden Cookies bis zu 2 Jahre gespeichert, Daten können in die USA übermittelt werden. Das geschieht nur mit Ihrer Einwilligung, Sie können sie jederzeit über „Statistik-Einstellungen“ widerrufen. Mehr in der ' };
     var b = el('div', { class: 'mk-box', role: 'dialog', 'aria-label': 'Statistik', style: 'position:fixed;left:12px;right:12px;bottom:12px;max-width:560px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:12px;background:#fff;color:#111;box-shadow:0 6px 28px rgba(0,0,0,.28)' });
-    var ja = el('button', { class: 'mk-btn', type: 'button', style: 'margin-top:10px', text: 'Erlauben' }), nein = el('button', { class: 'mk-btn mk-leise', type: 'button', style: 'margin:10px 0 0 8px;color:#111', text: 'Ablehnen' });
+    var ja = el('button', { class: 'mk-btn', type: 'button', style: 'margin-top:10px', text: T.ja }), nein = el('button', { class: 'mk-btn mk-leise', type: 'button', style: 'margin:10px 0 0 8px;color:#111', text: T.nein });
     ja.addEventListener('click', function () { merke('ja'); b.remove(); gaLaden(id); });
-    nein.addEventListener('click', function () { merke('nein'); b.remove(); });
-    b.appendChild(el('div', {}, 'Wir möchten anonym zählen, wie viele Besucher unsere Website nutzen (Google Analytics). Dabei werden Daten an Google übertragen. Das geschieht nur mit Ihrer Zustimmung, Sie können sie jederzeit widerrufen. Mehr in der ', el('a', { href: ds, target: '_blank', rel: 'noopener', text: 'Datenschutzerklärung' }), '.'));
+    nein.addEventListener('click', function () { merke('nein'); b.remove(); gaStoppen(id); });
+    b.appendChild(el('div', {}, T.text, el('a', { href: datenschutzLink(ds), target: '_blank', rel: 'noopener', text: T.link }), '.'));
     b.appendChild(ja); b.appendChild(nein); document.body.appendChild(b);
   }
   function statistik(cfg) {
@@ -215,8 +239,8 @@
     var ds = skript.getAttribute('data-datenschutz') || '/datenschutz', w = wahl();
     if (w === 'ja') gaLaden(a.id); else if (w !== 'nein') banner(a.id, ds);
     Array.prototype.forEach.call(document.querySelectorAll('[data-mk="cookies"]'), function (c) {
-      var l = el('a', { href: '#', text: c.getAttribute('data-text') || 'Statistik-Einstellungen' });
-      l.addEventListener('click', function (e) { e.preventDefault(); merke('offen'); try { localStorage.removeItem(SCHLUESSEL); } catch (x) { /* egal */ } if (!document.querySelector('[aria-label=Statistik]')) banner(a.id, ds); });
+      var l = el('a', { href: '#', text: c.getAttribute('data-text') || (EN ? 'Statistics settings' : 'Statistik-Einstellungen') });
+      l.addEventListener('click', function (e) { e.preventDefault(); merke('offen'); gaStoppen(a.id); try { localStorage.removeItem(SCHLUESSEL); } catch (x) { /* egal */ } if (!document.querySelector('[aria-label=Statistik]')) banner(a.id, ds); });
       c.textContent = ''; c.appendChild(l);
     });
   }

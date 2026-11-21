@@ -91,3 +91,18 @@ U="/api/kunde/website-dienste/gutscheine/"
 r=cA.post(U+gl[ref1]+"/code",json={"code":"DOPPELT-1"}); chk("Code senden",r.status_code==200,r.text)
 r=cA.post(U+gl[ref3]+"/code",json={"code":"doppelt-1"}); chk("Gleicher Code zweimal: 409",r.status_code==409,r.text)
 r=cA.post(U+gl[ref3]+"/code",json={"code":"DOPPELT-2"}); chk("Anderer Code geht",r.status_code==200,r.text)
+# ---- Widerruf über die Website: ohne Einwilligung, Vorgang oder Beschreibung nötig, Eingangsnachweis in der Mail
+mw=f"wid{sfx}@besucher.de"
+r=pub({"typ":"widerruf","name":"Wilma Widerruf","email":mw}); chk("Widerruf ohne Vorgang und Beschreibung: 422 auf vorgang",r.status_code==422 and "vorgang" in r.json().get("errors",{}),r.text)
+r=pub({"typ":"widerruf","name":"Wilma Widerruf","email":mw,"nachricht":"Ich widerrufe meine Buchung."}); chk("Widerruf mit Beschreibung, ohne Einwilligung: ok",r.status_code==200 and r.json().get("ref","").startswith("W"),r.text)
+m=mail_an(mw,"Eingangsbestätigung")
+chk("Bestätigung nennt Vorgangsnummer, Name, E-Mail, Datum und Uhrzeit",bool(m) and r.json()["ref"] in text(m[-1]) and "Wilma Widerruf" in text(m[-1]) and mw in text(m[-1]) and re.search(r"Eingegangen am \d\d\.\d\d\.\d{4} um \d\d:\d\d Uhr",text(m[-1])),text(m[-1]) if m else "keine Mail")
+r=pub({"typ":"widerruf","name":"Wilma Widerruf","email":mw,"vorgang":"G-123456"}); chk("Widerruf mit Vorgangsnummer: ok",r.status_code==200,r.text)
+r=pub({"typ":"kontakt","name":"Karl Kontakt","email":mw,"nachricht":"Hallo"}); chk("Kontakt ohne Einwilligung bleibt 422",r.status_code==422 and "einwilligung" in r.json().get("errors",{}),r.text)
+# ---- Statistik-Baustein (site.js): Ablehnen stoppt sofort, Text mit Anbieter/Laufzeit/USA, Englisch
+js=open("/home/claude/markentrix-server/portal/static/js/site.js").read()
+chk("site.js: Ablehnen stoppt Google Analytics und löscht _ga-Cookies",all(x in js for x in ("ga-disable-","analytics_storage: 'denied'","'_ga'","_ga_")) and "nein.addEventListener('click', function () { merke('nein'); b.remove(); gaStoppen(id); })" in js)
+chk("site.js: Statistik-Einstellungen stoppt sofort",js.count("gaStoppen(a.id)")==1)
+chk("site.js: anonymize_ip entfernt, alter Satz „anonym zählen“ weg","anonymize_ip" not in js and "anonym zählen" not in js)
+chk("site.js: Text nennt Anbieter, 2 Jahre, USA, Widerruf",all(x in js for x in ("Google Ireland Limited","bis zu 2 Jahre","USA","Statistik-Einstellungen")))
+chk("site.js: englischer Text und englische Datenschutzseite",all(x in js for x in ("document.documentElement.lang","We would like to use Google Analytics","/en/datenschutz.html","data-datenschutz-en")))
