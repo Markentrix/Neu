@@ -431,3 +431,7 @@ Verbessert:
 3. Beschreibung von `/leistungen/ki-automatisierung` auf 152 Zeichen gekürzt (war durch die Textänderung vom Prüfbericht auf 172 gewachsen).
 Geprüft nach den Änderungen: Build, Linkcheck, SEO-Audit, axe auf allen 93 Seiten bei 390 und 1440 px, Umbruch der längeren H1.
 Offen, bewusst nicht geändert: Startseite und `/leistungen/webdesign/webdesign-celle` zielen beide auf „Webdesign Celle“ (mögliche Konkurrenz um denselben Suchbegriff). Einige Blog-H1 sind mit 71 bis 85 Zeichen lang, das ist unkritisch.
+
+## Nachtrag 21.11.2026: Crawl-Audit (wie ein SEO-Crawler)
+
+Ergebnisse je Prüfpunkt in `docs/CRAWL-AUDIT-2026-11-21.md`, Skript `tools/crawl_audit.py`. Behoben: drei veraltete Google-Hilfelinks (Qualitätsfaktor, Beiträge im Unternehmensprofil), zwei zu lange Titles (Startseite, KI-Checkliste), eine ungültige ARIA-Rolle im Projektstreifen auf `/referenzen` (jetzt echte Liste), fehlendes `<main>` auf der Karten-Seite. Nicht möglich: PageSpeed Insights (Schnittstelle ohne Schlüssel ausgeschöpft), vollständige Rechtschreibprüfung (kein Wörterbuch installiert).

@@ -2152,7 +2152,8 @@ html:root .stmt .accent{color:#F1A268;background-image:none}
 
 .price-card .price{display:none}
 
-.proj-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,24px);margin:clamp(20px,3vw,36px) 0}
+.proj-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,24px);margin:clamp(20px,3vw,36px) 0;list-style:none;padding:0}
+.proj-strip li{min-width:0;margin:0}
 .proj-strip a{display:block;text-decoration:none;color:var(--tiefsee);min-width:0}
 .proj-strip img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border);box-shadow:var(--shadow-md);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
 .proj-strip b{display:block;margin-top:10px;font:700 1.05rem/1.25 var(--f-head)}
