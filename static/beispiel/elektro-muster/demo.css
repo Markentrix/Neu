@@ -75,3 +75,5 @@ summary::after{content:"+";float:right;color:var(--amber-d)}details[open] summar
 @media (max-width:480px){.facts b{font-size:1.05rem;overflow-wrap:normal}}
 .hero-grid>*,.hero-in>*,.split>*{min-width:0}
 .ph{position:relative}.ph img{position:absolute;left:0;top:0}
+
+.demo-note{font-size:.875rem;margin:.6rem 0 .2rem;color:inherit;opacity:.85}.demo-note a{color:inherit;text-decoration:underline}

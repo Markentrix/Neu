@@ -298,6 +298,8 @@ def check_links(pages):
             known[p] = f
             if f == 'index.html':
                 known[p[:-len('index.html')]] = f  # Verzeichnis-Link mit Schrägstrich
+                if p != '/index.html':
+                    known[p[:-len('/index.html')]] = f  # Verzeichnis ohne Schrägstrich (der Server liefert sie so aus)
     errors = 0
     for meta, rel, out in pages:
         for href in re.findall(r'(?:href|src)="([^"]+)"', out):

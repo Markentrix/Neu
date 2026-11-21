@@ -69,3 +69,5 @@ summary::after{content:"+";float:right;color:var(--terra-d)}details[open] summar
 @media (max-width:340px){.btn-call svg{display:none}.logo{font-size:.9rem}.top{gap:6px}}
 .hero-grid>*,.hero-in>*,.split>*{min-width:0}
 .ph{position:relative}.ph img{position:absolute;left:0;top:0}
+
+.demo-note{font-size:.875rem;margin:.6rem 0 .2rem;color:inherit;opacity:.85}.demo-note a{color:inherit;text-decoration:underline}

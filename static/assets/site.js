@@ -771,7 +771,7 @@
     /* Ohne Daten von Google (Schlüssel nicht eingerichtet): ehrliche Kurzfassung mit der bestätigten Anzahl und Link zu Google, ohne Sterne und ohne Zitate */
     function fallback() {
       var cnt = parseInt(sec.getAttribute('data-rev-count'), 10), read = sec.getAttribute('data-rev-read'); if (!cnt || !sum) return;
-      list.hidden = true; sec.classList.add('rev-slim'); var note = $('[data-rev-note]', sec); if (note) note.hidden = true;
+      list.hidden = true; sec.classList.add('rev-slim'); var note = $('[data-rev-note]', sec); if (note) note.textContent = 'Die Bewertungen stammen von Google und werden von uns nicht bearbeitet. Ob alle Bewerter Kunden waren, prüfen wir nicht eigenständig.';
       var asof = sec.getAttribute('data-rev-asof'); // Die Anzahl wird von Hand gepflegt: ohne Stand-Angabe wirkt sie dauerhaft aktuell
       sum.textContent = cnt + ' Bewertungen bei Google' + (asof ? ' (Stand ' + asof + ')' : '') + '. Lesen Sie selbst, was Kunden über die Zusammenarbeit schreiben.';
       if (prof && read) { prof.href = read; prof.textContent = 'Bewertungen auf Google lesen'; prof.hidden = false; }

@@ -83,3 +83,5 @@ summary::after{content:"+";float:right;color:var(--rose);font-size:1.3rem;line-h
 .arch img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.arch::before{z-index:1}
 .hero-grid>*,.hero-in>*,.split>*{min-width:0}
 .ph{position:relative}.ph img{position:absolute;left:0;top:0}
+
+.demo-note{font-size:.875rem;margin:.6rem 0 .2rem;color:inherit;opacity:.85}.demo-note a{color:inherit;text-decoration:underline}

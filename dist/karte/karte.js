@@ -285,7 +285,7 @@ function tourToggle(){
 function clearSel(){sel=null;var pins=svg.querySelectorAll(".pin");for(var k=0;k<pins.length;k++)pins[k].classList.remove("sel");idle();}
 function idle(){
   var c=document.getElementById("card");c.className="card idle";
-  c.innerHTML="<div class='acc' style='background:linear-gradient(#28C7F7,#8B5CF6)'></div><h3>Tippe auf einen Pin</h3><div class='meta'>Dann siehst du Details zum Betrieb.</div>";
+  c.innerHTML="<div class='acc' style='background:linear-gradient(#28C7F7,#8B5CF6)'></div><h2>Tippe auf einen Pin</h2><div class='meta'>Dann siehst du Details zum Betrieb.</div>";
 }
 function avatar(d){
   var ini=(d.n||"?").replace(/^(Beispiel|Demo)\s+/i,"").replace(/^Reifen\s*(&|und)\s*Autoservice\s+/i,"").replace(/\s+(GmbH|UG|e\.K\.|GbR)$/i,"").trim().slice(0,2).toUpperCase();
@@ -307,7 +307,7 @@ function show(d){
   if(MODE==="intern"){f.push(["Paket","<span>"+esc(d.paket||"–")+"</span>"]);f.push(["€ / Monat","<span>"+(d.m!=null?esc(d.m):"–")+"</span>"]);}
   var facts="<div class='facts' style='padding:8px 12px;grid-template-columns:repeat("+Math.min(f.length,3)+",1fr)'>"+f.map(function(x){return "<div><small>"+x[0]+"</small>"+(x[1].indexOf("<span")===0?x[1]:"<span>"+x[1]+"</span>")+"</div>";}).join("")+"</div>";
   c.innerHTML="<div class='acc' style='background:"+COL[d.b]+"'></div><button class='x' aria-label='Schließen' id='cx'>✕</button>"+
-   "<div class='hd'>"+avatar(d)+"<div><h3>"+esc(d.n)+"</h3><div class='meta'>"+esc(d.ort)+(dist>=3?" · "+dist+" km von Celle":"")+"</div></div></div>"+
+   "<div class='hd'>"+avatar(d)+"<div><h2>"+esc(d.n)+"</h2><div class='meta'>"+esc(d.ort)+(dist>=3?" · "+dist+" km von Celle":"")+"</div></div></div>"+
    "<div class='prev'>"+(!safeImg(d.foto)?"<div class='photo ph'><div class='bar'><i></i><i></i><i></i><span>"+esc((d.web||"").replace(/^https?:\/\/(www\.)?/,"").replace(/\/$/,""))+"</span></div><div class='phb' style='--c:"+COL[d.b]+"'><b>"+esc(d.n)+"</b><small>"+esc(d.b)+" · "+esc(d.ort)+"</small></div></div>":"")+(safeImg(d.foto)?"<div class='photo'><div class='bar'><i></i><i></i><i></i><span>"+esc((d.web||"").replace(/^https?:\/\/(www\.)?/,"").replace(/\/$/,""))+"</span></div><img src='"+esc(d.foto)+"' alt='Vorschau "+esc(d.n)+"' loading='lazy' onerror=\"this.parentNode.remove()\"></div>":"")+addr(d)+"</div>"+
    (d.txt?"<div class='txt'>"+esc(d.txt)+"</div>":"")+facts+"<div class='btns'>"+btns+"</div>";
   document.getElementById("cx").onclick=function(){clearSel();clearNear();goHome();};
@@ -331,8 +331,8 @@ function doSearch(p){
   vis.sort(function(a,b){return a.km-b.km;});var top=vis.slice(0,3);
   near={name:p.n,lat:p.lat,lon:p.lon,list:top};clearSelSilent();scalPrune();drawNear();applyView();
   var c=document.getElementById("card");c.className="card";
-  if(!top.length){c.innerHTML="<div class='acc' style='background:#c9526c'></div><button class='x' id='cx'>✕</button><h3>Noch kein Betrieb in der Nähe</h3><div class='meta'>Aktuell ist kein Betrieb sichtbar.</div>";document.getElementById("cx").onclick=function(){clearNear();idle();goHome();};return;}
-  c.innerHTML="<div class='acc' style='background:linear-gradient(#28C7F7,#8B5CF6)'></div><button class='x' id='cx'>✕</button><h3>In deiner Nähe · "+esc(p.n)+"</h3><div class='meta'>Die "+top.length+" nächsten Betriebe</div><div class='near'>"+
+  if(!top.length){c.innerHTML="<div class='acc' style='background:#c9526c'></div><button class='x' id='cx'>✕</button><h2>Noch kein Betrieb in der Nähe</h2><div class='meta'>Aktuell ist kein Betrieb sichtbar.</div>";document.getElementById("cx").onclick=function(){clearNear();idle();goHome();};return;}
+  c.innerHTML="<div class='acc' style='background:linear-gradient(#28C7F7,#8B5CF6)'></div><button class='x' id='cx'>✕</button><h2>In deiner Nähe · "+esc(p.n)+"</h2><div class='meta'>Die "+top.length+" nächsten Betriebe</div><div class='near'>"+
    top.map(function(it,k){return "<div class='it' data-i='"+it.i+"'><span class='av' style='width:30px;height:30px;font-size:12px;background:"+COL[it.d.b]+"'>"+(k+1)+"</span><div><b>"+esc(it.d.n)+"</b><small>"+esc(it.d.ort)+" · "+esc(it.d.b)+"</small></div><div class='km'>"+Math.round(it.km)+" km</div></div>";}).join("")+"</div>";
   document.getElementById("cx").onclick=function(){clearNear();idle();goHome();};
   [].forEach.call(c.querySelectorAll(".it"),function(n){n.onclick=function(){selectPin(+n.getAttribute("data-i"),true);};});
@@ -431,11 +431,11 @@ function setData(src,demo){
   if(demo&&MODE==="public")document.getElementById("note").firstChild.textContent="Beispieldaten – keine echten Betriebe. · Postleitzahlen: ";
   filter="Alle";sel=null;near=null;chips();idle();setupTimeline();build(true);
   if(DATA.length&&MODE==="public"){var hv=homeView();flyTo(hv.cx,hv.cy,hv.w,1800);}
-  if(!DATA.length&&MODE==="public"){var c=document.getElementById("card");c.className="card";c.innerHTML="<div class='acc' style='background:linear-gradient(#28C7F7,#8B5CF6)'></div><h3>Noch keine Betriebe freigegeben</h3><div class='meta'>Sobald Betriebe zustimmen, erscheinen sie hier.</div>";}
+  if(!DATA.length&&MODE==="public"){var c=document.getElementById("card");c.className="card";c.innerHTML="<div class='acc' style='background:linear-gradient(#28C7F7,#8B5CF6)'></div><h2>Noch keine Betriebe freigegeben</h2><div class='meta'>Sobald Betriebe zustimmen, erscheinen sie hier.</div>";}
 }
 function fail(){
   setData({customers:[]},false);var c=document.getElementById("card");c.className="card";
-  c.innerHTML="<div class='acc' style='background:#c9526c'></div><h3>Karte wird aktualisiert</h3><div class='meta'>Bitte später erneut versuchen.</div>";
+  c.innerHTML="<div class='acc' style='background:#c9526c'></div><h2>Karte wird aktualisiert</h2><div class='meta'>Bitte später erneut versuchen.</div>";
 }
 function loadData(){
   if(MODE!=="public"&&location.hash==="#demo"){setData(DEMO,true);return;}

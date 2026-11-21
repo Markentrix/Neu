@@ -80,7 +80,7 @@
   .gaplbl{font-size:11px;font-weight:700;fill:#2ee6a6;paint-order:stroke;stroke:#05070B;stroke-width:3.5px}
   .card{position:absolute;left:12px;right:12px;bottom:12px;max-width:400px;max-height:70%;overflow:auto;background:rgba(11,16,32,.9);border:1px solid var(--line);border-radius:16px;padding:13px 15px 14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 40px rgba(0,0,0,.5);transition:.35s}
   .card.idle{max-width:300px}
-  .card h3{font:600 16px Archivo,Arial,sans-serif;padding-right:26px}
+  .card h2{font:600 16px Archivo,Arial,sans-serif;padding-right:26px}
   .card .meta{color:var(--mut);font-size:12px;margin-top:2px}
   .card .acc{position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0}
   .card .x{position:absolute;right:10px;top:9px;width:24px;height:24px;border-radius:8px;border:0;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:13px}

@@ -435,3 +435,7 @@ Offen, bewusst nicht geändert: Startseite und `/leistungen/webdesign/webdesign-
 ## Nachtrag 21.11.2026: Crawl-Audit (wie ein SEO-Crawler)
 
 Ergebnisse je Prüfpunkt in `docs/CRAWL-AUDIT-2026-11-21.md`, Skript `tools/crawl_audit.py`. Behoben: drei veraltete Google-Hilfelinks (Qualitätsfaktor, Beiträge im Unternehmensprofil), zwei zu lange Titles (Startseite, KI-Checkliste), eine ungültige ARIA-Rolle im Projektstreifen auf `/referenzen` (jetzt echte Liste), fehlendes `<main>` auf der Karten-Seite. Nicht möglich: PageSpeed Insights (Schnittstelle ohne Schlüssel ausgeschöpft), vollständige Rechtschreibprüfung (kein Wörterbuch installiert).
+
+## Nachtrag 21.11.2026: Externer Prüfbericht (bericht.pdf) abgearbeitet
+
+Umsetzung, Fehlalarme und Antwortvorschläge zu den 16 Rückfragen: `docs/RUECKFRAGEN-PRUEFBERICHT-2026-11-21.md`. Geändert: Impressum- und Datenschutz-Links und Formularhinweise auf den acht Beispielseiten, Impressum und Datenschutz auf der Karte, Karte ohne Weiterleitung verlinkt und mit korrekter Überschriftenreihenfolge, Hinweis zur Herkunft der Google-Bewertungen, pauschale „Haftung für Links“ im Impressum entfernt, „Rechtssicherheit“-Aussagen abgeschwächt, Budgetfeld „netto“, Schriftlizenzen dokumentiert (`static/fonts/LIZENZEN.md`), Linkcheck kennt Verzeichnisse ohne Schrägstrich, 1 px Überlauf auf der Werkstatt-Beispielseite behoben. Fehlalarm: „YouTube nicht gefunden“ (Profil ist im Fuß verlinkt).
