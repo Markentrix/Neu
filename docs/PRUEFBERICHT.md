@@ -443,3 +443,12 @@ Umsetzung, Fehlalarme und Antwortvorschläge zu den 16 Rückfragen: `docs/RUECKF
 ## Nachtrag 21.11.2026: Sitemap-Vorschlag abgeglichen
 
 Der Vorschlag (`sitemap-vorschlag.xml`) enthält dieselben 90 Adressen wie unsere `sitemap.xml`, aber ohne `lastmod`. Unsere Sitemap bleibt (mit Änderungsdatum je Seite). Einziger Unterschied: Die Startseite steht dort mit Schrägstrich. Wir führen sie jetzt ebenso: Canonical, `og:url` und Sitemap der Startseite lauten `https://markentrix.de/` (passend zu den Kennungen in den strukturierten Daten). `tools/seo_audit.py` und `tools/crawl_audit.py` erwarten die neue Schreibweise.
+
+## Nachtrag 21.11.2026: Seitenanalyse Startseite (Bilder, H1, Überschriften, interne Links)
+
+Befunde eines SEO-Werkzeugs zur Startseite, geprüft am Quelltext:
+1. **H1 zu lang, ohne Leerzeichen (echter Fehler):** Die Unterzeile stand im H1-Element, ohne Leerzeichen („bringen.Webdesign“), 119 Zeichen. Jetzt: H1 „Webdesign aus Celle: Websites, die Anfragen bringen.“ (52 Zeichen, Kicker kleiner gesetzt), Unterzeile als eigener Absatz. Neun weitere H1 auf über 70 Zeichen gekürzt (Regionalseiten, einige Branchenseiten).
+2. **„2 Bilder ohne Alt“:** Gemeint sind die zwei dekorativen Aufwärtslinien mit `alt=""` (korrekt für Zierbilder). Sie sind jetzt Hintergrundbilder per CSS und damit weder ein `img` noch ein Befund.
+3. **Interne Links:** Linktexte von 200 Zeichen (ganze Karten als Link) sind jetzt der Titel der Karte als Link, die ganze Zeile bleibt per Überlagerung klickbar und per Tastatur fokussierbar. Die zwei Aktionslinks mit Parameter tragen `rel="nofollow"`. Doppelte Ankertexte („Zur Referenz“ ×3, „Angebot sichern“ ×2, „Kontaktformular“ ×2) sind eindeutig benannt.
+4. **„29 Überschriften“:** Eine Heuristik des Werkzeugs. Die Struktur ist korrekt (eine H1, 15 H2, 9 H3); ein Zierspruch („Mehr Anfragen. Weniger Aufwand.“) ist jetzt ein Absatz statt H2. Weitere Überschriften wurden bewusst nicht entfernt, sie dienen der Orientierung (auch für Screenreader).
+Geprüft: Build, Linkcheck, SEO-Audit, axe auf 93 Seiten bei 390 und 1440 px, Darstellung der Startseite, Klick auf die Kartenzeilen.

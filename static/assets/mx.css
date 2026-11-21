@@ -2197,3 +2197,16 @@ html:root .nav-partner-pill{border-color:transparent}
 .deal-tax{margin:2px 0 12px;font-size:.9375rem;font-weight:600;color:var(--navy)}
 html:root .offer-row .deal-tax{color:#FFFFFF;margin:2px 0 0}
 .offer-bar small{font-size:.8125rem;font-weight:600;opacity:.95;margin-left:2px}
+
+/* 53 · Startseite: H1 mit Kicker, Unterzeile als Absatz, dekorative Linien als Hintergrund, Kartenzeilen mit Link nur auf dem Titel */
+.h1-kw{display:block;font-size:.4em;font-weight:700;letter-spacing:.01em;line-height:1.2;margin:0 0 .45em;color:var(--pfau)}
+html:root .hero--stage .h1-kw{color:var(--pfau)}
+p.h1-sub{display:block;font-family:var(--f-head);font-weight:600;font-size:clamp(1.2rem,.95rem + 1.1vw,1.85rem);line-height:1.25;letter-spacing:-.01em;margin:.6em 0 .9em;color:var(--tiefsee);max-width:30ch}
+.quiet-line,.band-sig{background:url(/img/logo/aufwaertslinie-hell.svg) no-repeat center/contain}
+.quiet-line{aspect-ratio:240/90}
+.band-sig{aspect-ratio:300/113;height:auto}
+.svc-row .svc-link{color:inherit;text-decoration:none}
+.svc-row .svc-link::after{content:"";position:absolute;inset:0}
+.svc-row .svc-link:focus-visible{outline:none}
+.svc-row .svc-link:focus-visible::after{outline:3px solid var(--tiefsee);outline-offset:-3px;border-radius:6px}
+.svc-row .pill{position:relative;z-index:1}
