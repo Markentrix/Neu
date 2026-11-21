@@ -27,7 +27,7 @@ def _trust_list(site):
           <li>{I["star"]}{ESC(s["rating"]["value"])} ★ bei {s["rating"]["count"]} Google-Bewertungen</li>
           <li>{I["euro"]}Verbindlicher Preis vor dem Termin</li>
           <li>{I["hand"]}100 % Handarbeit, C²Coating Excellence Partner</li>
-          <li>{I["shield"]}Daten bleiben auf unserem Server in Deutschland</li>
+          <li>{I["shield"]}Ihre Anfrage wird auf Servern in Deutschland gespeichert</li>
         </ul>'''
 
 

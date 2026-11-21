@@ -1522,3 +1522,8 @@ blockquote.note p { color: #4d3a0f; }
 .stretched::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
 .stretched:focus-visible { outline: none; }
 :is(.plan-row, .service-row, .cer-card, .article-card):focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Pflichthinweis zu Preisen und Bewertungen über der Fußzeile */
+.footer-legal { margin-top: 40px; }
+.footer-legal p { margin: 0; font-size: 0.8rem; line-height: 1.5; color: var(--muted-on-anthracite); max-width: 90ch; }
+.footer-legal + .footer-bottom { margin-top: 18px; }

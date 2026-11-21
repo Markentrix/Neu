@@ -34,6 +34,7 @@ def business(site):
         "address": {"@type": "PostalAddress", "streetAddress": a["street"], "postalCode": a["zip"], "addressLocality": a["city"],
                     "addressRegion": a["region"], "addressCountry": a["country"]},
         "hasMap": site.maps_url(),
+        **({"geo": {"@type": "GeoCoordinates", "latitude": a["geo"]["lat"], "longitude": a["geo"]["lon"]}} if a.get("geo") else {}),
         "areaServed": [{"@type": "City", "name": a["city"]}] + [{"@type": "City", "name": n} for n in s["areas"]["region"]],
         "knowsAbout": ["Fahrzeugaufbereitung", "Car Detailing", "Keramikversiegelung", "Lackkorrektur", "Lackpolitur", "Lackversiegelung",
                        "Innenraumreinigung", "Lederpflege", "Lederreparatur", "Geruchsentfernung", "Cabrioverdeckreinigung", "Leasingrückgabe", "Flottenpflege"],

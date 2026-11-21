@@ -176,6 +176,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
                      ("analyticsRetentionMonths", "Aufbewahrungsdauer der Analysedaten in Google Analytics eintragen (legal.analyticsRetentionMonths: 2 oder 14)")):
         if not L.get(k):
             warnings.append("Offen (Datenschutz): " + label)
+    if not L.get("legalForm"):
+        warnings.append("Impressum: Rechtsform bestätigen, z. B. „Einzelunternehmen“ (legal.legalForm)")
     if not (L.get("vatId") or L.get("wIdNr")):
         warnings.append("Impressum: USt-IdNr. oder Wirtschafts-Identifikationsnummer eintragen, falls vorhanden (§ 5 DDG; legal.vatId / legal.wIdNr)")
     if not site.s.get("googleReviewUrl"):

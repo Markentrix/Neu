@@ -1084,7 +1084,7 @@ def build_legal(site, write):
            else '<p><span class="legal-placeholder">[USt-IdNr. gemäß § 27a UStG oder W-IdNr. gemäß § 139c AO, falls vorhanden]</span></p>')
     imp = f'''
     <h2>Diensteanbieter</h2>
-    <p>{_ph(L.get("owner"), "Vollständiger Name der Inhaberin / des Inhabers oder Firmenname lt. Gewerbeanmeldung")}<br>
+    <p>{_ph(L.get("owner"), "Vollständiger Name der Inhaberin / des Inhabers oder Firmenname lt. Gewerbeanmeldung")}{f" ({ESC(L['legalForm'])})" if L.get("legalForm") else ""}<br>
       {ESC(s["name"])} – {ESC(s["tagline"])}<br>{ESC(s["address"]["street"])}<br>{ESC(s["address"]["zip"])} {ESC(s["address"]["city"])}<br>Deutschland</p>
     <h2>Kontakt</h2>
     <p>Telefon / WhatsApp: {ESC(s["phoneIntl"])}<br>E-Mail: <a href="mailto:{s["email"]}">{ESC(s["email"])}</a></p>

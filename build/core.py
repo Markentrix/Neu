@@ -338,6 +338,9 @@ def footer(site, prefix="", home=False):
       </address>
     </div>
   </div>
+  <div class="container footer-legal">
+    <p>{"Alle Preise sind Endpreise. Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet. " if (s.get("legal") or {}).get("smallBusiness") else "Alle Preise inklusive gesetzlicher Umsatzsteuer. "}Bewertungen stammen aus unserem Google-Unternehmensprofil. Wir prüfen nicht, ob alle Bewertenden unsere Leistung genutzt haben.</p>
+  </div>
   <div class="container footer-bottom">
     <p>&copy; <span id="year">{s["standIso"][:4]}</span> {ESC(s["name"])} · Fahrzeugaufbereitung {ESC(s["address"]["city"])}</p>
     <ul>
