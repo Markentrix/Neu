@@ -91,6 +91,12 @@ if ($isCallback) {
 if (($clean['einwilligung'] ?? '') !== 'ja') {
   respond(422, ['ok' => false, 'error' => 'consent']);
 }
+// Befristete Aktionen: Anfragen mit einem Aktionscode nach Fristende werden nicht als Aktionsanfrage geführt
+$ACTION_UNTIL = ['landingpage-599' => '2026-11-30', 'website-1099' => '2026-11-30']; // bis einschließlich dieses Tages (Europe/Berlin)
+if (!empty($clean['aktion']) && isset($ACTION_UNTIL[$clean['aktion']])) {
+  $todayBerlin = (new DateTime('now', new DateTimeZone('Europe/Berlin')))->format('Y-m-d');
+  if ($todayBerlin > $ACTION_UNTIL[$clean['aktion']]) $clean['aktion'] = $clean['aktion'] . ' (abgelaufen, Anfrage nach Fristende, kein Aktionspreis)';
+}
 // Unternehmer-Bestätigung (§ 14 BGB): Pflicht bei allen Anfrageformularen außer der Checkliste
 $needsBusiness = in_array(($clean['quelle'] ?? ''), ['Kontaktformular', 'Rückruf', 'Website-Check', 'Bewerbung'], true);
 if ($needsBusiness && ($clean['unternehmer'] ?? '') !== 'ja') {

@@ -64,7 +64,8 @@
   /* ── Formulare ──────────────────────────────────────────────────────── */
   /* Herkunft der Anfrage: Kampagnenparameter (utm_*) aus der Adresse, sonst die verweisende Domain.
      Über Seitenwechsel hinweg wird nur nach Einwilligung in die Reichweitenmessung in der Sitzung gemerkt. */
-  function consentOk() { try { var c = JSON.parse(localStorage.getItem('mx-consent')); return !!(c && c.analytics); } catch (e) { return false; } }
+  /* Gültigkeit (Version, Zeitstempel, Laufzeit) prüft consent.js; ohne dieses Skript gilt: keine Einwilligung. */
+  function consentOk() { try { return !!(w.mxConsent && w.mxConsent.analytics()); } catch (e) { return false; } }
   function utmFromUrl() {
     var o = {}, q = location.search.replace(/^\?/, '').split('&');
     q.forEach(function (kv) { var p = kv.split('='), k = p[0], v = ''; try { v = decodeURIComponent((p[1] || '').replace(/\+/g, ' ')); } catch (e) { } if (/^utm_(source|medium|campaign)$/.test(k) && /^[\w .\-]{1,60}$/.test(v)) o[k] = v; });
@@ -177,7 +178,7 @@
       var row = el('div', 'row mt-2'); var a = el('a', 'btn btn--primary btn--lg', 'Erstgespräch buchen'); a.href = '/kontakt'; a.setAttribute('data-open-modal', ''); a.setAttribute('data-aktion', 'website-check'); row.appendChild(a);
       var b2 = el('a', 'btn btn--secondary btn--lg', 'SEO und GEO ansehen'); b2.href = '/leistungen/seo-geo'; row.appendChild(b2); cta.appendChild(row); found.appendChild(cta);
       var smp = (r.sample && r.sample.length) ? ' Stichprobe interner Seiten: ' + r.sample.map(function (x) { return x.path; }).join(', ') + '.' : '';
-      found.appendChild(el('p', 'tiny mt-3', 'Geprüft wurden Startseite, robots.txt, Sitemap, llms.txt, eine nicht vorhandene Adresse und eine Stichprobe interner Seiten, einmalig, in ' + r.seconds + ' Sekunden.' + smp + ' Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung.'));
+      found.appendChild(el('p', 'tiny mt-3', 'Geprüft wurden Startseite, robots.txt, Sitemap, llms.txt, eine nicht vorhandene Adresse und eine Stichprobe interner Seiten, einmalig, in ' + r.seconds + ' Sekunden.' + smp + ' Nicht geprüft werden Rankings, die tatsächliche Ladezeit auf dem Smartphone, Texte, Backlinks, Google-Bewertungen und die rechtliche Vollständigkeit von Impressum und Datenschutzerklärung. Die Wertung ist eine Einordnung nach unserem Prüfkatalog, kein Google-Ranking, keine Zertifizierung und keine Prognose von Anfragen oder Umsatz.'));
       found.hidden = false;
     }
     on(d, 'mx:lead', function (e) { if (e.detail && e.detail.quelle === 'Website-Check' && last) { renderFindings(last); if (found.scrollIntoView) found.scrollIntoView({ behavior: d.documentElement.classList.contains('reduced') ? 'auto' : 'smooth', block: 'start' }); } });
@@ -734,6 +735,8 @@
   function initAktion() {
     var a = ''; try { a = new URLSearchParams(w.location.search).get('aktion') || ''; } catch (e) { }
     if (!/^[a-z0-9-]{1,40}$/.test(a)) return;
+    var until = { 'landingpage-599': '2026-11-30', 'website-1099': '2026-11-30' }[a]; // Aktionen sind befristet
+    if (until && new Date() > new Date(until + 'T23:59:59+01:00')) return;
     $$('form input[name=aktion]').forEach(function (i) { if (!i.value) i.value = a; });
   }
 
@@ -769,7 +772,8 @@
     function fallback() {
       var cnt = parseInt(sec.getAttribute('data-rev-count'), 10), read = sec.getAttribute('data-rev-read'); if (!cnt || !sum) return;
       list.hidden = true; sec.classList.add('rev-slim'); var note = $('[data-rev-note]', sec); if (note) note.hidden = true;
-      sum.textContent = cnt + ' Bewertungen bei Google. Lesen Sie selbst, was Kunden über die Zusammenarbeit schreiben.';
+      var asof = sec.getAttribute('data-rev-asof'); // Die Anzahl wird von Hand gepflegt: ohne Stand-Angabe wirkt sie dauerhaft aktuell
+      sum.textContent = cnt + ' Bewertungen bei Google' + (asof ? ' (Stand ' + asof + ')' : '') + '. Lesen Sie selbst, was Kunden über die Zusammenarbeit schreiben.';
       if (prof && read) { prof.href = read; prof.textContent = 'Bewertungen auf Google lesen'; prof.hidden = false; }
       sec.hidden = false;
     }

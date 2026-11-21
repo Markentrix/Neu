@@ -14,12 +14,31 @@ Front-Matter-Schlüssel: title, description, path (URL-Pfad, z. B. /preise), rob
 og_type, body_class, lastmod (YYYY-MM-DD), sitemap (true/false), ld (JSON-LD-Block),
 layout (lp = schlankes Layout ohne Menü für Anzeigen-Seiten), head_extra (zusätzliche Head-Zeilen), footer_cta (false blendet den Kontaktblock vor der Fußzeile aus; er entfällt ohnehin, wenn die Seite mit dem Abschlussband id="cta-title" endet).
 """
-import json, os, re, shutil, sys, time, html
+import json, os, re, shutil, sys, time, html, datetime
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover
+    ZoneInfo = None
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC, STATIC, DIST = (os.path.join(ROOT, p) for p in ('src', 'static', 'dist'))
 SITE = 'https://markentrix.de'
 BUILD = time.strftime('%Y%m%d%H%M')
+
+def today_berlin():
+    """Heutiges Datum in Berlin (für befristete Angebote). Zum Testen mit MX_TODAY=JJJJ-MM-TT überschreibbar."""
+    forced = os.environ.get('MX_TODAY')
+    if forced:
+        return datetime.date.fromisoformat(forced)
+    return datetime.datetime.now(ZoneInfo('Europe/Berlin') if ZoneInfo else None).date()
+
+DEAL_RE = re.compile(r'<(a|section)\b[^>]*\bdata-deal-until="(\d{4}-\d{2}-\d{2})"[^>]*>.*?</\1>\s*', re.S)
+
+def expire_deals(s):
+    """Befristete Angebote (data-deal-until, gültig bis einschließlich dieses Tages) werden nach Fristende schon beim Bauen entfernt,
+    nicht nur im Browser per Skript. Das Skript im Browser bleibt als zweite Sicherung für Seiten, die zwischen zwei Builds ablaufen."""
+    today = today_berlin()
+    return DEAL_RE.sub(lambda m: '' if datetime.date.fromisoformat(m.group(2)) < today else m.group(0), s)
 
 LOGO = ('<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="mxg{n}" x1="9" y1="40" x2="39" y2="9" gradientUnits="userSpaceOnUse">'
         '<stop stop-color="#28C7F7"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>'
@@ -126,7 +145,7 @@ def render(layout, meta, body, partials, overview=''):
                 break
             s = n
         return s
-    body = sub_partials(body)
+    body = expire_deals(sub_partials(body))
     path = meta.get('path', '/')
     canonical = SITE + ('' if path == '/' else path)
     ld = meta.get('ld', '').strip()

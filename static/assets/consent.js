@@ -6,13 +6,22 @@
   var KEY = 'mx-consent', VERSION = 2, MAX_AGE = 1000 * 60 * 60 * 24 * 180; // 6 Monate
   var DS = '/datenschutz#s11';
 
+  /* Gültige Einwilligung: richtige Version, Zeitstempel in der Vergangenheit und höchstens 6 Monate alt, Wahl als Wahrheitswert.
+     Alles andere (fehlend, abgelaufen, alte Version, beschädigt) gilt als „keine Entscheidung“; dann fragt das Banner erneut.
+     Ein abgelaufener Eintrag bleibt als Nachweis der früheren Entscheidung gespeichert, er wird nur nicht mehr als Zustimmung gewertet. */
   function read() {
-    try { var c = JSON.parse(localStorage.getItem(KEY)); if (c && c.v === VERSION && Date.now() - c.ts < MAX_AGE) return c; } catch (e) {}
+    try {
+      var c = JSON.parse(localStorage.getItem(KEY)), now = Date.now();
+      if (c && c.v === VERSION && typeof c.ts === 'number' && isFinite(c.ts) && c.ts <= now + 60000 && now - c.ts < MAX_AGE && typeof c.analytics === 'boolean') return c;
+    } catch (e) {}
     return null;
   }
+  /* Optionale Herkunftsdaten (Kampagnenparameter) der Sitzung entfernen: bei Widerruf, Ablehnung, Ablauf oder ungültigem Eintrag. */
+  function purgeOptional() { try { sessionStorage.removeItem('mx-utm'); } catch (e) {} }
   function save(analytics) {
     var c = { v: VERSION, ts: Date.now(), analytics: !!analytics };
     try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {}
+    if (!c.analytics) purgeOptional();
     apply(c);
   }
 
@@ -85,7 +94,7 @@
       '<p id="mxc-d" style="margin:0 0 14px;color:#4E5C5F">Wir möchten mit <b style="color:#0C2128">Google Analytics</b> und <b style="color:#0C2128">Metricool</b> messen<span class="mxc-rest">, welche Inhalte genutzt werden, um die Website zu verbessern</span>. Das geschieht nur mit Ihrer Einwilligung. <span class="mxc-rest">Dabei werden Cookies gesetzt und Daten an die Anbieter übermittelt (bei Google auch in die USA). Sie können Ihre Wahl jederzeit über „Cookie-Einstellungen“ im Seitenfuß ändern.</span> <a href="' + DS + '" style="color:#045268;text-decoration:underline">Datenschutzerklärung</a><span class="mxc-rest"> · <a href="/impressum" style="color:#045268;text-decoration:underline">Impressum</a></span></p>' +
       '<div id="mxc-det" hidden style="border:1px solid rgba(12,33,40,.12);border-radius:8px;margin:0 0 14px;overflow:hidden">' +
         '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid rgba(12,33,40,.08)"><input type="checkbox" id="mxc-n" checked disabled style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#0C2128"><label for="mxc-n" style="flex:1"><b>Notwendig</b> <span style="color:#4E5C5F">(immer aktiv)</span><br><span style="color:#4E5C5F;font-size:13px">Speichert Ihre Datenschutz-Auswahl, Anzeige- und Barrierefreiheits-Einstellungen lokal im Browser. Keine Übertragung an Dritte.</span></label></div>' +
-        '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px"><input type="checkbox" id="mxc-a" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#045268"><label for="mxc-a" style="flex:1;cursor:pointer"><b>Statistik – Google Analytics 4 &amp; Metricool</b><br><span style="color:#4E5C5F;font-size:13px">Anbieter: Google Ireland Ltd., Dublin (Cookies _ga, _ga_*, bis 14 Monate) und Metricool Software S.L., Spanien. Zweck: Reichweitenmessung. Rechtsgrundlage: Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG).</span></label></div>' +
+        '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px"><input type="checkbox" id="mxc-a" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#045268"><label for="mxc-a" style="flex:1;cursor:pointer"><b>Statistik – Google Analytics 4 &amp; Metricool</b><br><span style="color:#4E5C5F;font-size:13px">Anbieter: Google Ireland Ltd., Dublin (Cookies _ga, _ga_*, nach Google-Voreinstellung bis zu zwei Jahre, von Browsern teils gekürzt) und Metricool Software S.L., Spanien. Zweck: Reichweitenmessung. Rechtsgrundlage: Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG).</span></label></div>' +
       '</div>' +
       '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
         '<button type="button" id="mxc-no" style="' + BTN_B + '">Nur notwendige</button>' +
@@ -118,7 +127,7 @@
   }
   function close() { if (el) el.hidden = true; if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true }); }
 
-  window.mxConsent = { open: open, get: read };
+  window.mxConsent = { open: open, get: read, analytics: function () { var c = read(); return !!(c && c.analytics); } };
 
   function addFooterLink() {
     var nav = document.querySelector('footer');
@@ -139,7 +148,7 @@
   function init() {
     addFooterLink();
     var c = read();
-    if (c) apply(c); else open(false);
+    if (c && c.analytics) apply(c); else { purgeOptional(); if (c) apply(c); else open(false); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
