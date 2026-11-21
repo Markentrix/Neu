@@ -35,7 +35,7 @@ Bitte entscheiden. Die Website setzt danach Texte, Danke-Seite und AGB einheitli
 - Nutzungsrechte: Herstellerbilder C²Coating (Hero, Keramik), Logos der 5 Referenzfirmen (Freigabe liegt laut René vor, bitte schriftlich ablegen), Porträt René, Vorher/Nachher-Bilder.
 - Partnerschaft „C²Coating Excellence Partner“ und Koch-Chemie-Schulungen: Zertifikate liegen vor, Stand prüfen.
 - Bewertungszitate: Herkunft (Google-Profil) und Wortlaut belegbar halten, Echtheitshinweis bleibt.
-- Haltbarkeitsangaben (bis 100.000 km, bis 15.000 km): Herstellerangaben belegen. Durchgestrichene Preise der Scheiben-Aktion (149 € → 99 €): nachweisen, dass 149 € tatsächlich verlangt wurde.
+- Haltbarkeitsangaben (bis 100.000 km, bis 15.000 km): Herstellerangaben belegen. Durchgestrichene Preise der Scheiben-Aktion (149 € → 99 €, 179 € → 114 €): laut Betreiber am 21.11.2026 belegbar, Durchstreichung bleibt. Belege (Rechnungen oder Preisliste mit Datum) ablegen. Nach § 11 PAngV muss der gestrichene Preis der niedrigste Preis der 30 Tage vor Aktionsbeginn (21.10.2026) sein.
 - AV-Vertrag mit Markentrix, Datenverarbeitungsbedingungen in Google Analytics, Speicherdauer in GA (siehe A05).
 
 ## Barrierefreiheit (A14)

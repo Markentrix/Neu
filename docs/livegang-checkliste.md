@@ -56,3 +56,4 @@ Die Website läuft beim Markentrix-Portal. Abgegeben wird nur der Ordner `websit
   - Lackpolitur Celle → `/leistungen/lackpolitur-celle.html`
   - Leasingrückgabe Aufbereitung Celle → `/leistungen/leasingrueckgabe-gebrauchtwagen-celle.html`
   Jeder Begriff steht im Seitentitel und in der Hauptüberschrift seiner Seite. Bei Text- oder Titeländerungen beibehalten.
+- **Streichpreise Scheiben-Aktion** (149 € → 99 €, 179 € → 114 €): laut René belegbar, bleiben stehen. Belege mit Datum ablegen. Der gestrichene Preis muss der niedrigste Preis der 30 Tage vor Aktionsbeginn sein (§ 11 PAngV). Bei künftigen Aktionen genauso.
