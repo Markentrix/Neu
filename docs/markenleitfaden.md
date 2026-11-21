@@ -310,23 +310,25 @@ Geprüft nach WCAG 2.1. Ziel: AA (4,5:1 für Fließtext, 3:1 für große Schrift
 
 Zwei Schriften, beide frei lizenziert (SIL OFL) und lokal in der Website eingebunden (keine Google Fonts):
 
-- **Inter** für alles: Überschriften, Fließtext, Preise, Knöpfe. Ruhig, präzise, auf jedem Gerät gleich.
-- **Instrument Serif kursiv** nur als Akzent: das hervorgehobene Wort oder der Halbsatz in einer Überschrift (auf der Website in Blau bzw. Hellblau), die persönliche Nachricht auf Gutscheinen. Nie für Fließtext, nie für ganze Überschriften.
+- **Archivo** für alles: Überschriften, Fließtext, Preise, Knöpfe. Überschriften leicht verbreitert (Breite 104 %), das gibt ihnen einen eigenen, technisch-präzisen Charakter. Fließtext in normaler Breite.
+- **Newsreader kursiv** (Schnitt 500) nur als Akzent: das hervorgehobene Wort oder der Halbsatz in einer Überschrift (auf der Website in Blau bzw. Hellblau), die persönliche Nachricht auf Gutscheinen. Nie für Fließtext, nie für ganze Überschriften.
+
+Das „&“ kommt auf der Website aus Inter (nur dieses eine Zeichen), weil das Archivo-&-Zeichen zu verspielt wirkt. In Grafiken im Zweifel „und“ ausschreiben.
 
 | Rolle | Schrift | Schnitt | Größe Desktop | Größe Mobil | Zeilenhöhe | Hinweise |
 |---|---|---|---|---|---|---|
-| H1 / Hero | Inter | 650 | 56–64 px | 34–40 px | 1,02 | Laufweite −0,03 em, Akzent in Instrument Serif kursiv auf eigener Zeile |
-| H2 / Abschnitt | Inter | 650 | 40–52 px | 31–42 px | 1,1 | Laufweite −0,022 em, Akzent kursiv in Blau |
-| H3 / Karte, Paketname | Inter | 650 | 22–26 px | 20–22 px | 1,2 | Laufweite −0,012 em |
-| Label / Kicker | Inter | 650 | 12 px | 12 px | 1,3 | Großbuchstaben, Laufweite +0,16 em |
-| Preis | Inter | 600 | 32–42 px | 28–34 px | 1 | Ziffern gleich breit (tabular), "ab" klein davor |
-| Fließtext | Inter | 400 | 17 px | 16 px | 1,6 | Max. 70 Zeichen pro Zeile |
-| Klein / Hinweise | Inter | 400 | 14 px | 13–14 px | 1,5 | Nie kleiner als 12 px |
-| Button | Inter | 600 | 17 px | 16 px | 1 | Klickfläche mind. 44 × 44 px |
+| H1 / Hero | Archivo, Breite 104 % | 650 | 56–64 px | 34–40 px | 1,02 | Laufweite −0,03 em, Akzent in Newsreader kursiv |
+| H2 / Abschnitt | Archivo, Breite 104 % | 650 | 40–52 px | 31–42 px | 1,1 | Laufweite −0,03 em, Akzent kursiv in Blau |
+| H3 / Karte, Paketname | Archivo, Breite 104 % | 600–650 | 22–26 px | 20–22 px | 1,2 | Laufweite −0,03 em |
+| Label / Kicker | Archivo | 650 | 12 px | 12 px | 1,3 | Großbuchstaben, Laufweite +0,16 em |
+| Preis | Archivo | 600 | 32–42 px | 28–34 px | 1 | Ziffern gleich breit (tabular), "ab" klein davor |
+| Fließtext | Archivo | 400 | 17 px | 16 px | 1,6 | Max. 70 Zeichen pro Zeile |
+| Klein / Hinweise | Archivo | 400 | 14 px | 13–14 px | 1,5 | Nie kleiner als 12 px |
+| Button | Archivo | 600 | 17 px | 16 px | 1 | Klickfläche mind. 44 × 44 px |
 
 Fettdruck sparsam: 600 bis 650 statt 700 bis 800. Gehobene Marken wirken über Ruhe, nicht über Lautstärke.
 
-Für Social Media und Druck dieselben Schriften verwenden. Beide gibt es kostenlos bei Google Fonts (Inter, Instrument Serif); die Dateien liegen auch unter `static/fonts/` mit Lizenztext.
+Für Social Media und Druck dieselben Schriften verwenden. Beide gibt es kostenlos bei Google Fonts (Archivo, Newsreader), dort in allen Schnitten zum Installieren. Unter `static/fonts/` liegen nur die für die Website verkleinerten Dateien mit Lizenztext.
 
 ### 8.4 Logo
 
@@ -390,10 +392,10 @@ Details zu Motiven und Technik: `docs/foto-und-video-shotlist.md`.
 
 **Regeln:**
 1. **Ein Foto, eine Aussage.** Maximal 8 Wörter Headline auf der Grafik.
-2. **Headline** in Inter 650, ein Akzentwort in Instrument Serif kursiv. Weiß auf Anthrazit oder Anthrazit auf Weiß/Platin.
+2. **Headline** in Archivo 650, ein Akzentwort in Newsreader kursiv. Weiß auf Anthrazit oder Anthrazit auf Weiß/Platin.
 3. **Akzent** nur Blau (auf hell) oder Hellblau (auf dunkel). Kein drittes Akzentfarb-Element.
 4. **Logo** unten links oder unten mittig, mit Schutzzone. Bis zum Vektorlogo nur klein einsetzen.
-5. **Vorher/Nachher-Label:** "VORHER" und "NACHHER" in Inter 650, Weiß auf Anthrazit-Fläche, immer an derselben Position. Trennung links/rechts oder oben/unten, immer gleiche Reihenfolge (vorher zuerst).
+5. **Vorher/Nachher-Label:** "VORHER" und "NACHHER" in Archivo 650, Weiß auf Anthrazit-Fläche, immer an derselben Position. Trennung links/rechts oder oben/unten, immer gleiche Reihenfolge (vorher zuerst).
 6. **Sichere Zone 9:16:** oben ca. 250 px und unten ca. 400 px frei von Text halten. Dort liegen die Bedienelemente der Apps.
 7. **Preise** nur aus der Preisliste und immer mit "ab".
 8. **Bewertungen:** nur echte Zitate aus Google-Rezensionen, mit Einwilligung bzw. als öffentliches Zitat mit Quelle "Google-Rezension". Sterne in `#f5b301` plus Zahl "5,0".
