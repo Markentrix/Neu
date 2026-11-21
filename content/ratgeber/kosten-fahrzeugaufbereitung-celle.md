@@ -9,7 +9,7 @@
   "excerpt": "Von der Handwäsche bis zur Lackpolitur: Hier sehen Sie, was eine Fahrzeugaufbereitung kostet, wovon der Preis abhängt und wie Sie ohne Qualitätsverlust sparen.",
   "service": "aussenaufbereitung-celle",
   "summary": [
-    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:refresh} € bis ab {preis:excellence:suv} €. Sport- und Luxusfahrzeuge sowie Wohnmobile bieten wir individuell an. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.",
+    "Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:refresh} € bis ab {preis:excellence:suv} €. Sport- und Luxusfahrzeuge sowie Wohnmobile bieten wir individuell an. Als Kleinunternehmer nach § 19 Abs. 1 UStG berechnet ElbDetail keine Umsatzsteuer.",
     "Der Preis hängt vor allem von Fahrzeuggröße, Leistungsumfang und Pflegezustand des Autos ab.",
     "Starke Verschmutzung, Tierhaare, Gerüche oder tiefe Lackdefekte erhöhen den Aufwand und damit den Preis.",
     "Bei ElbDetail bekommen Sie vor dem Termin einen verbindlichen Preis, am einfachsten nach Fotos per WhatsApp."
@@ -30,7 +30,7 @@
   ]
 }
 
-Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:refresh} € für eine Handwäsche mit Innenraum-Basis (Paket Refresh, Kleinwagen) bis ab {preis:excellence:suv} € für eine Komplettaufbereitung mit mehrstufiger Lackkorrektur (Paket Excellence, großer SUV oder Van). Alle Angaben sind Ab-Preise für einen normalen Pflegezustand. Als Kleinunternehmer nach § 19 UStG berechnet ElbDetail keine Umsatzsteuer.
+Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:refresh} € für eine Handwäsche mit Innenraum-Basis (Paket Refresh, Kleinwagen) bis ab {preis:excellence:suv} € für eine Komplettaufbereitung mit mehrstufiger Lackkorrektur (Paket Excellence, großer SUV oder Van). Alle Angaben sind Ab-Preise für einen normalen Pflegezustand. Als Kleinunternehmer nach § 19 Abs. 1 UStG berechnet ElbDetail keine Umsatzsteuer.
 
 Die Spanne ergibt sich aus dem Aufwand. In diesem Ratgeber erfahren Sie, welche Faktoren den Preis bestimmen, was die einzelnen Pakete enthalten und wo Sie sinnvoll sparen können, ohne am falschen Ende zu kürzen.
 
@@ -52,7 +52,7 @@ Die Richtpreise gelten für einen normalen Pflegezustand. Starke Verschmutzung, 
 
 ## Pakete und Richtpreise im Überblick
 
-Die folgende Tabelle zeigt die vier Pakete von ElbDetail mit Ab-Preisen je Fahrzeugklasse. Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.
+Die folgende Tabelle zeigt die vier Pakete von ElbDetail mit Ab-Preisen je Fahrzeugklasse. Die Preise gelten bei normalem Pflegezustand. Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet.
 
 | Paket | Kleinwagen (Polo, Corsa) | Kompakt (Golf, A3) | Limousine/Kombi/SUV (Passat, Tiguan) | Großer SUV/Van (X5, Multivan) | Arbeitszeit |
 |---|---|---|---|---|---|

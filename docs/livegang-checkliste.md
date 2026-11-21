@@ -5,6 +5,7 @@ Die Website läuft beim Markentrix-Portal. Abgegeben wird nur der Ordner `websit
 ## Muss vor dem Livegang erledigt sein
 
 - [ ] **Prüfbericht vom 21.11.2026:** offene Punkte in `pruefbericht-2026-11-umsetzung.md` (A03 Vertragsablauf entscheiden, A10 Ausfallpauschale belegen, A13/A14 Nachweise) und Portal-Aufgaben in `portal-aufgaben.md` (Analytics-Widerruf, Widerruf ohne Einwilligung, Bestätigungsmail) erledigen.
+- [ ] **Impressum:** USt-IdNr. oder Wirtschafts-Identifikationsnummer (W-IdNr., vom BZSt seit November 2024 zugeteilt) von René erfragen und in `content/site.json → legal.vatId` bzw. `legal.wIdNr` eintragen, falls vorhanden (§ 5 DDG). Kleinunternehmer-Hinweis steht jetzt als § 19 Abs. 1 UStG.
 - [ ] **Datenschutz-Schalter** in `content/site.json → legal` setzen, sobald belegt: `avContract`, `analyticsDpa`, `analyticsRetentionMonths`.
 
 - [ ] **Impressum:** Inhaber, Kleinunternehmer-Hinweis, Verantwortlicher nach § 18 MStV prüfen (`content/site.json` → `legal`). Steuernummer fehlt noch.

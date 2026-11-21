@@ -307,11 +307,11 @@ def footer(site, prefix="", home=False):
       </div>
     </div>
     <div>
-      <h2 class="footer-h">Leistungen</h2>
+      <p class="footer-h">Leistungen</p>
       <ul>{services}</ul>
     </div>
     <div>
-      <h2 class="footer-h">Service</h2>
+      <p class="footer-h">Service</p>
       <ul>
         <li><a href="{prefix}termin.html">Termin online anfragen</a></li>
         <li><a href="{prefix}preise.html">Pakete &amp; Preise</a></li>
@@ -326,7 +326,7 @@ def footer(site, prefix="", home=False):
       </ul>
     </div>
     <div>
-      <h2 class="footer-h">Kontakt</h2>
+      <p class="footer-h">Kontakt</p>
       <address>
         {ESC(s["name"])}<br>
         {ESC(s["address"]["street"])}<br>
@@ -508,3 +508,27 @@ def review_cards(site):
           <blockquote>{ESC(r["text"])}</blockquote>
           <figcaption>{ESC(r["name"])} <span>· {ESC(r.get("source", "Google"))}-Rezension</span></figcaption>
         </figure>''' for r in site.reviews["items"])
+
+
+SECTION_HEAD = re.compile(r'<p class="eyebrow">([^<]*(?:<(?!/p>)[^<]*)*)</p>(\s*)<h2([^>]*)>(.*?)</h2>', re.S)
+
+
+def semantic_heads(page):
+    """Abschnittsköpfe: Das Thema (bisher die kleine Zeile über dem Slogan) wird die Überschrift h2, der große Slogan
+    wird Anzeigetext. Optik bleibt gleich; Suchmaschinen und Screenreader sehen „Aktuelle Angebote“ statt „Gerade besonders lohnend.“."""
+    def rep(m):
+        topic, gap, attrs, slogan = m.groups()
+        hid = re.search(r'\sid="[^"]*"', attrs)
+        cls = re.search(r'class="([^"]*)"', attrs)
+        return (f'<h2{hid.group(0) if hid else ""} class="eyebrow">{topic}</h2>{gap}'
+                f'<div class="{cls.group(1) if cls else "display"}">{slogan}</div>')
+    return SECTION_HEAD.sub(rep, page)
+
+
+INTERNAL_PARAM_LINK = re.compile(r'<a (?![^>]*\brel=)([^>]*\bhref="(?![a-z]+:|//|#)[^"]*\?[^"]*"[^>]*)>')
+
+
+def nofollow_params(page):
+    """Interne Links mit Parametern (z. B. termin.html?paket=essential) als nofollow markieren:
+    Sie führen auf dieselbe Seite wie ohne Parameter, Suchmaschinen sollen sie nicht als eigene Adressen sammeln."""
+    return INTERNAL_PARAM_LINK.sub(r'<a \1 rel="nofollow">', page)

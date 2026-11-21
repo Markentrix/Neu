@@ -173,7 +173,7 @@ def llms(site, full=False):
 - Regelmäßige Pflege: ElbDetail Care, individuell auf Anfrage für Privatkunden, Unternehmen und Flotten: {site.url}/elbdetail-care.html
 - Gewerbekunden: Autohäuser und Händler, Fahrschulen, Pflegedienste, Handwerksbetriebe, Unternehmen mit Dienstwagen, Leasing- und Fuhrparkunternehmen; Konditionen auf Anfrage: {site.url}/firmenkunden.html
 - Gewerbliche Referenzen: {', '.join(r['name'] if isinstance(r, dict) else r for r in site.s.get('references', [])) or 'auf Anfrage'}
-- Umsatzsteuer: Kleinunternehmer nach § 19 UStG, es wird keine Umsatzsteuer berechnet
+- Umsatzsteuer: Kleinunternehmer nach § 19 Abs. 1 UStG, es wird keine Umsatzsteuer berechnet
 - Bezahlung: bar, Karte, PayPal oder Überweisung
 - Gutscheine: {site.url}/gutscheine.html
 - Firmenkunden und Flotten: {site.url}/firmenkunden.html
@@ -186,7 +186,7 @@ def llms(site, full=False):
     for sv in site.services:
         t += f"- {sv['short']}: {sv['teaser']} → {site.url}/leistungen/{sv['slug']}.html\n"
     t += "- Einzeln buchbar (Preis auf Anfrage): " + ", ".join(site.pricing["extras"]) + "\n\n"
-    t += f"## Pakete und Einstiegspreise (Endpreise, gemäß § 19 UStG ohne Umsatzsteuer, normaler Pflegezustand, Stand {s['stand']})\n\n"
+    t += f"## Pakete und Einstiegspreise (Endpreise, gemäß § 19 Abs. 1 UStG ohne Umsatzsteuer, normaler Pflegezustand, Stand {s['stand']})\n\n"
     t += "| Paket | " + " | ".join(c["name"] for c in cls) + " | Dauer |\n|---|" + "---|" * (len(cls) + 1) + "\n"
     for p in site.pricing["packages"]:
         inc = ", ".join(f["text"] for f in p["features"] if f.get("included"))

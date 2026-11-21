@@ -53,7 +53,7 @@ Sinnvoll ist vor allem eine gründliche Reinigung von Innenraum, Lack, Felgen un
 | Lack matt oder leicht verkratzt | Signature mit Glanzpolitur | {preis:signature:kompakt} € / {preis:signature:mittel} € / {preis:signature:suv} € |
 | Älteres Auto mit geringem Restwert | Refresh oder gründliche Eigenreinigung | {preis:refresh:kompakt} € / {preis:refresh:mittel} € / {preis:refresh:suv} € |
 
-Die Preise gelten bei normalem Pflegezustand. Für Kleinwagen beginnen die Pakete bei {ab:refresh} € (Refresh) und {ab:essential} € (Essential). Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Vor dem Termin bekommen Sie einen verbindlichen Preis.
+Die Preise gelten bei normalem Pflegezustand. Für Kleinwagen beginnen die Pakete bei {ab:refresh} € (Refresh) und {ab:essential} € (Essential). Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet. Vor dem Termin bekommen Sie einen verbindlichen Preis.
 
 ### Innenraum
 

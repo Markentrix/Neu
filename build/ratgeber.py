@@ -32,12 +32,12 @@ def build_index(site, write):
     chips = '<button type="button" class="chip is-active" data-filter="">Alle</button>' + "".join(
         f'<button type="button" class="chip" data-filter="{ESC(c)}">{ESC(c)}</button>' for c in cats)
     cards = "".join(f'''
-        <a class="article-card" href="{a["slug"]}.html" data-cat="{ESC(a.get("category", ""))}">
+        <article class="article-card" data-cat="{ESC(a.get("category", ""))}">
           <span class="article-cat">{ESC(a.get("category", "Ratgeber"))}</span>
-          <h2>{ESC(a["title"])}</h2>
+          <h2><a class="stretched" href="{a["slug"]}.html">{ESC(a["title"])}</a></h2>
           <p>{ESC(a.get("excerpt", ""))}</p>
           <span class="more">{a.get("readingTime", 5)} Min. · aktualisiert {de_date(a.get("updated") or a.get("date"))}</span>
-        </a>''' for a in site.articles)
+        </article>''' for a in site.articles)
     winter = [a for a in site.articles if "winter" in a.get("category", "").lower()]
     winter_band = ""
     if winter:
@@ -91,12 +91,12 @@ def build_winter_hub(site, write, winter):
            "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{site.url}/ratgeber/{a['slug']}.html", "name": a["title"]}
                                for i, a in enumerate(winter)]}]
     cards = "".join(f'''
-        <a class="article-card" href="{a["slug"]}.html">
+        <article class="article-card">
           <span class="article-cat">{ESC(a.get("category", "Winter"))}</span>
-          <h2>{ESC(a["title"])}</h2>
+          <h2><a class="stretched" href="{a["slug"]}.html">{ESC(a["title"])}</a></h2>
           <p>{ESC(a.get("excerpt", ""))}</p>
           <span class="more">{a.get("readingTime", 5)} Min. · aktualisiert {de_date(a.get("updated") or a.get("date"))}</span>
-        </a>''' for a in winter)
+        </article>''' for a in winter)
     tips = "".join(f"<li>{t}</li>" for t in [
         "<strong>Im Herbst versiegeln</strong>, bevor der erste Frost kommt. Dann haften Salz und Schmutz schlechter.",
         "<strong>Salz regelmäßig abspülen</strong>, auch Radkästen, Schweller und Unterboden.",

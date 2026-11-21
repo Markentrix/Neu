@@ -230,7 +230,7 @@ def build_termin(site, write):
             <div><dt>Anzahlung ({dep} %)</dt><dd data-sum="anzahlung">–</dd></div>
           </dl>
           <div class="summary-price"><span>Richtpreis</span><strong data-sum="preis">–</strong></div>
-          <p class="hint">Einstiegspreis für normalen Pflegezustand. Gemäß § 19 UStG ohne Umsatzsteuer. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>
+          <p class="hint">Einstiegspreis für normalen Pflegezustand. Gemäß § 19 Abs. 1 UStG ohne Umsatzsteuer. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>
         </div>
         {_trust_list(site)}
         <p class="summary-alt">Lieber direkt sprechen? <a href="tel:{s["phone"]}">{ESC(s["phoneDisplay"])}</a> oder <a href="{site.wa()}" target="_blank" rel="noopener">WhatsApp</a></p>
@@ -321,7 +321,7 @@ def build_gutscheine(site, write):
             <div><dt>Zustellung</dt><dd data-os="zustellung">PDF per E-Mail</dd></div>
             <div class="order-total"><dt>Gesamtpreis</dt><dd data-os="preis">{default_amount}&nbsp;€</dd></div>
           </dl>
-          <p class="hint">{"Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. " if s["legal"].get("smallBusiness") else ""}Gültig bis 31.12.{year + 3}. Die Zahlungsdaten erhalten Sie per E-Mail (Überweisung, PayPal oder bei Abholung bar bzw. mit Karte). Nach Zahlungseingang erhalten Sie den Gutschein.</p>
+          <p class="hint">{"Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet. " if s["legal"].get("smallBusiness") else ""}Gültig bis 31.12.{year + 3}. Die Zahlungsdaten erhalten Sie per E-Mail (Überweisung, PayPal oder bei Abholung bar bzw. mit Karte). Nach Zahlungseingang erhalten Sie den Gutschein.</p>
         </div>
         <button class="btn btn-primary btn-lg btn-block" type="submit">{I["gift"]}Zahlungspflichtig bestellen</button>
         {core.form_status("g-status")}
@@ -502,7 +502,7 @@ def build_winter(site, write):
         <p class="hint">Ebenfalls zubuchbar: Felgenkeramik ab {site.min_price("felgen")} € und Scheibenkeramik ab {site.min_price("scheiben")} €.</p>
         <h3>Preise nach Fahrzeugklasse</h3>
         <div class="table-scroll" tabindex="0" role="region" aria-label="Preise Winterangebot, seitlich scrollbar"><table class="md-table winter-prices"><thead><tr><th scope="col">Fahrzeugklasse</th><th scope="col" class="num">{ESC(ws["name"])}</th></tr></thead><tbody>{ws_rows}</tbody></table></div>
-        <p class="hint">Ab-Preise bei normalem Pflegezustand. Gemäß § 19 UStG ohne Umsatzsteuer. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>
+        <p class="hint">Ab-Preise bei normalem Pflegezustand. Gemäß § 19 Abs. 1 UStG ohne Umsatzsteuer. Den verbindlichen Preis bestätigen wir vor dem Termin.</p>
         <p class="hero-actions"><a class="btn btn-primary" href="{prefix}termin.html?paket=winter&amp;quelle=winter">{I["cal"]}Mit Wachs buchen</a><a class="btn btn-line" href="{prefix}termin.html?paket=winter&amp;schutz=keramik&amp;quelle=winter">Mit C² CarCeramic buchen</a></p>''' if ws_on else f'''<h2>Unser Winter-Lackschutz</h2>
         <ul class="includes">
           <li>{I["check"]}Gründliche Handwäsche und chemische Dekontamination</li>
@@ -633,7 +633,7 @@ def build_angebote(site, write):
       <h2 id="offers-h" class="visually-hidden">Alle aktuellen Angebote</h2>
       <div class="offer-grid stagger">{cards}
       </div>
-      <p class="price-note">Aktionen gelten, solange freie Termine verfügbar sind. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.</p>
+      <p class="price-note">Aktionen gelten, solange freie Termine verfügbar sind. Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet.</p>
     </div>
   </section>
 </main>

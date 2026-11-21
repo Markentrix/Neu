@@ -91,6 +91,7 @@
   "legal": {
     "owner": "René Triechelt",
     "vatId": "",
+    "wIdNr": "",
     "responsible": "René Triechelt, Lachtehäuser Straße 1, 29223 Celle",
     "mailProvider": "IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Deutschland",
     "hosting": "Markentrix, Inhaber Christian Wien",

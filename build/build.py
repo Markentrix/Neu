@@ -94,6 +94,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
     def write(rel, text):
         p = os.path.join(out_dir, rel)
         os.makedirs(os.path.dirname(p), exist_ok=True)
+        if rel.endswith(".html"):
+            text = core.nofollow_params(core.semantic_heads(text))
         with open(p, "w", encoding="utf-8") as f:
             f.write(text)
         written.append(rel)
@@ -174,6 +176,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
                      ("analyticsRetentionMonths", "Aufbewahrungsdauer der Analysedaten in Google Analytics eintragen (legal.analyticsRetentionMonths: 2 oder 14)")):
         if not L.get(k):
             warnings.append("Offen (Datenschutz): " + label)
+    if not (L.get("vatId") or L.get("wIdNr")):
+        warnings.append("Impressum: USt-IdNr. oder Wirtschafts-Identifikationsnummer eintragen, falls vorhanden (§ 5 DDG; legal.vatId / legal.wIdNr)")
     if not site.s.get("googleReviewUrl"):
         warnings.append("Google-Bewertungslink fehlt (Grunddaten → googleReviewUrl)")
     if not any(g.get("before") in site.media and g.get("after") in site.media for g in site.gallery):

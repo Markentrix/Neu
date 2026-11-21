@@ -21,7 +21,7 @@ def build_agb(site, write):
     pay = ", ".join(s.get("paymentMethods") or ["Bar", "Karte", "PayPal", "Überweisung"])
     anbieter = _anbieter(site)
     kontakt = f'Telefon {ESC(s["phoneIntl"])}, E-Mail <a href="mailto:{s["email"]}">{ESC(s["email"])}</a>'
-    tax = ("Alle Preise sind Endpreise. Als Kleinunternehmer im Sinne von § 19 UStG berechnen wir keine Umsatzsteuer und weisen sie daher auch nicht aus."
+    tax = ("Alle Preise sind Endpreise. Als Kleinunternehmer im Sinne von § 19 Abs. 1 UStG berechnen wir keine Umsatzsteuer und weisen sie daher auch nicht aus."
            if L.get("smallBusiness") else "Alle Preise sind Endpreise inklusive der gesetzlichen Umsatzsteuer.")
     sur = ""
     if sc.get("percent"):

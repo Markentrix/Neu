@@ -2,7 +2,7 @@
   "items": [
     {
       "q": "Was kostet eine Fahrzeugaufbereitung in Celle bei ElbDetail?",
-      "a": "Die Ab-Preise für einen Kleinwagen liegen bei {ab:refresh} € (Refresh), {ab:essential} € (Essential), {ab:signature} € (Signature mit Glanzpolitur) und {ab:excellence} € (Excellence mit mehrstufiger Lackkorrektur). Größere Fahrzeuge, starke Verschmutzung oder intensive Tierhaarentfernung kosten entsprechend mehr. Sport- und Luxusfahrzeuge sowie Wohnmobile bieten wir individuell an. Die C² CarCeramic Keramikversiegelung gibt es für Pkw ab {ab:keramik} €. Als Kleinunternehmer nach § 19 UStG berechnen wir keine Umsatzsteuer. Ein verbindliches Angebot erhalten Sie kostenlos vorab."
+      "a": "Die Ab-Preise für einen Kleinwagen liegen bei {ab:refresh} € (Refresh), {ab:essential} € (Essential), {ab:signature} € (Signature mit Glanzpolitur) und {ab:excellence} € (Excellence mit mehrstufiger Lackkorrektur). Größere Fahrzeuge, starke Verschmutzung oder intensive Tierhaarentfernung kosten entsprechend mehr. Sport- und Luxusfahrzeuge sowie Wohnmobile bieten wir individuell an. Die C² CarCeramic Keramikversiegelung gibt es für Pkw ab {ab:keramik} €. Als Kleinunternehmer nach § 19 Abs. 1 UStG berechnen wir keine Umsatzsteuer. Ein verbindliches Angebot erhalten Sie kostenlos vorab."
     },
     {
       "q": "Wie lange dauert eine Aufbereitung?",

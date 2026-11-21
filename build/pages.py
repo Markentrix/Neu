@@ -207,11 +207,11 @@ def plan_card(site, p, prefix=""):
 def plan_row(site, p, prefix=""):
     featured = p.get("featured")
     return f'''
-        <a class="plan-row{" is-featured" if featured else ""} reveal" href="{prefix}termin.html?paket={p["key"]}">
-          <span class="plan-row-name"><strong>{ESC(p["name"])}</strong>{'<span class="plan-row-badge">Empfehlung</span>' if featured else ""}<small>{ESC(p["for"])}</small></span>
+        <div class="plan-row{" is-featured" if featured else ""} reveal">
+          <span class="plan-row-name"><strong><a class="stretched" href="{prefix}termin.html?paket={p["key"]}">{ESC(p["name"])}</a></strong>{'<span class="plan-row-badge">Empfehlung</span>' if featured else ""}<small>{ESC(p["for"])}</small></span>
           <span class="plan-row-price"><small>ab</small>{site.min_price(p["key"])}&nbsp;€<small>{ESC(p["duration"])}</small></span>
           <span class="service-arrow">{I["arrow"]}</span>
-        </a>'''
+        </div>'''
 
 
 HOME_FAQ = [0, 10, 2, 5, 3]     # Indizes aus faq.json, die auf der Startseite stehen
@@ -303,15 +303,15 @@ def ceramic_cards(site, prefix=""):
     for a in pr["addons"]:
         cards.append((icons.get(a["key"], "shield"), a["name"], a["title"], site.min_price(a["key"]), a["slug"], a["benefits"][:3], a["durability"], a.get("unit", "")))
     html = "".join(f'''
-        <a class="cer-card reveal" href="{prefix}leistungen/{slug}.html">
+        <div class="cer-card reveal">
           <span class="cer-icon">{I[ic]}</span>
           <span class="cer-brand">{ESC(brand)}</span>
-          <h3>{ESC(title)}</h3>
+          <h3><a class="stretched" href="{prefix}leistungen/{slug}.html">{ESC(title)}</a></h3>
           <span class="cer-price"><small>ab</small> {_eur(price)}{f" <small>{ESC(unit)}</small>" if unit else ""}</span>
           <ul>{"".join(f"<li>{I['check']}{ESC(b)}</li>" for b in pts)}</ul>
           {f'<span class="cer-dur">Standzeit {ESC(dur)}*</span>' if dur else '<span class="cer-dur">Preis je C²Coating-Fahrzeugkategorie</span>'}
           <span class="cer-more">Alles zur {ESC(title)} {I["arrow"]}</span>
-        </a>''' for ic, brand, title, price, slug, pts, dur, unit in cards)
+        </div>''' for ic, brand, title, price, slug, pts, dur, unit in cards)
     return f'''
       <div class="cer-cards stagger">{html}
       </div>
@@ -439,7 +439,7 @@ def contact_compact(site, prefix=""):
     return f'''  <section id="kontakt" class="tight" aria-labelledby="kontakt-h">
     <div class="container">
       <div class="cta-band reveal">
-        <p class="eyebrow">Kontakt &amp; Termin</p>
+        <p class="eyebrow">Kontakt und Termin in Celle</p>
         <h2 id="kontakt-h" class="display">Bereit für ein Auto, das sich <em>wieder neu anfühlt?</em></h2>
         <p>Nennen Sie uns Fahrzeug, Wunschpaket und Zeitraum. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert.</p>
         <div class="contact-actions">
@@ -473,8 +473,8 @@ def owner_html(site, prefix=""):
 def build_home(site, write):
     s = site.s
     pr = site.pricing
-    title = f"Fahrzeugaufbereitung in Celle ab {site.min_price('refresh')} € | ElbDetail"
-    desc = (f"Fahrzeugaufbereitung in Celle mit Liebe zum Detail: Lackkorrektur, Keramikversiegelung und Innenraum in Handarbeit. "
+    title = "Fahrzeugaufbereitung & Autoaufbereitung Celle | ElbDetail"
+    desc = (f"Autoaufbereitung in Celle ab {site.min_price('refresh')} €: Lackkorrektur, Keramikversiegelung und Innenreinigung in Handarbeit. "
             f"{s['rating']['value']} ★ bei Google, Festpreis vorab.")
     home_faq = pick(site.faq, HOME_FAQ)
     hi = s.get("heroImage") or {}
@@ -493,7 +493,7 @@ def build_home(site, write):
       <div class="spot reveal">
         <figure class="spot-media">{spot_pic}{f'<figcaption>Bild: {ESC(sp["credit"])}</figcaption>' if sp.get("credit") else ""}</figure>
         <div class="spot-copy">
-          <p class="eyebrow">Unser Schwerpunkt</p>
+          <p class="eyebrow">Keramikversiegelung in Celle</p>
           <h2 id="ker-h" class="display">Keramikversiegelung. <em>Glanz, der bleibt.</em></h2>
           <p>Als offizieller C²Coating Excellence Partner versiegeln wir Lack, Felgen und Scheiben keramisch. Das hält deutlich länger als Wachs oder klassische Versiegelung.</p>
           <ul class="spot-points">
@@ -515,11 +515,11 @@ def build_home(site, write):
           seo.webpage(site, "/", title, {"speakable": {"@type": "SpeakableSpecification", "cssSelector": ["#auf-einen-blick", ".hero-sub"]}})]
 
     services_rows = "".join(f'''
-        <a class="service-row reveal" href="leistungen/{sv["slug"]}.html">
-          <span class="service-title">{ESC(sv["short"])}</span>
+        <div class="service-row reveal">
+          <a class="service-title stretched" href="leistungen/{sv["slug"]}.html">{ESC(sv["short"])}</a>
           <span class="service-desc">{ESC(sv["teaser"])}</span>
           <span class="service-arrow">{I["arrow"]}</span>
-        </a>''' for i, sv in enumerate(site.services))
+        </div>''' for i, sv in enumerate(site.services))
 
     cls_radios = "".join(f'<label><input type="radio" name="qclass" value="{c["key"]}"{" checked" if i == 0 else ""}><span>{ESC(c["short"])}<small>{ESC(c["examples"])}</small></span></label>'
                          for i, c in enumerate(pr["classes"]))
@@ -539,17 +539,17 @@ def build_home(site, write):
 
     articles = site.articles[:3]
     art_cards = "".join(f'''
-        <a class="article-card reveal" href="ratgeber/{a["slug"]}.html">
+        <article class="article-card reveal">
           <span class="article-cat">{ESC(a.get("category", "Ratgeber"))}</span>
-          <h3>{ESC(a["title"])}</h3>
+          <h3><a class="stretched" href="ratgeber/{a["slug"]}.html">{ESC(a["title"])}</a></h3>
           <p>{ESC(a.get("excerpt", ""))}</p>
           <span class="more">{a.get("readingTime", 5)} Min. Lesezeit</span>
-        </a>''' for a in articles)
+        </article>''' for a in articles)
     ratgeber_section = f'''
   <section id="ratgeber" aria-labelledby="ratgeber-h">
     <div class="container">
       <div class="section-head reveal">
-        <p class="eyebrow">Ratgeber</p>
+        <p class="eyebrow">Ratgeber Autopflege</p>
         <h2 id="ratgeber-h" class="display">Wissen aus der <em>Werkstatt.</em></h2>
         <p>Ehrliche Antworten auf die Fragen, die wir täglich hören. Von Preisen über Leasingrückgabe bis zur richtigen Lackpflege im Winter.</p>
       </div>
@@ -603,7 +603,7 @@ def build_home(site, write):
         <li>{I["star"]}<span>{ESC(s["rating"]["value"])} von 5 Sternen<small>{s["rating"]["count"]} Google-Bewertungen</small></span></li>
         <li>{I["hand"]}<span>Handarbeit statt Waschstraße<small>Lackschonende Arbeit</small></span></li>
         <li>{I["euro"]}<span>Festpreis vorab<small>Keine Überraschung bei Abholung</small></span></li>
-        <li><a class="trust-link" href="zertifikate.html">{I["shield"]}<span>C²Coating Excellence Partner<small>Koch-Chemie zertifiziert · Zertifikate ansehen</small></span></a></li>
+        <li>{I["shield"]}<span>C²Coating Excellence Partner<small>Koch-Chemie zertifiziert · <a class="trust-link" href="zertifikate.html">Zertifikate ansehen</a></small></span></li>
       </ul>
     </div>
   </div>
@@ -612,7 +612,7 @@ def build_home(site, write):
   <section id="leistungen" aria-labelledby="leistungen-h">
     <div class="container">
       <div class="section-head reveal">
-        <p class="eyebrow">Leistungen</p>
+        <p class="eyebrow">Leistungen der Autoaufbereitung</p>
         <h2 id="leistungen-h" class="display">Für jedes Auto die <em>passende Pflege.</em></h2>
         <p>Vom Frischekick für den Alltag bis zur mehrstufigen Politur für den Neuwagen. Alle Leistungen auch einzeln buchbar.</p>
       </div>
@@ -626,7 +626,7 @@ def build_home(site, write):
   <section id="vorher-nachher" class="soft" aria-labelledby="vn-h">
     <div class="container">
       <div class="section-head reveal">
-        <p class="eyebrow">Ergebnisse</p>
+        <p class="eyebrow">Ergebnisse vorher und nachher</p>
         <h2 id="vn-h" class="display">Vorher. Nachher. <em>Selbst schieben.</em></h2>
         <p>Ziehen Sie den Regler, um den Unterschied zu sehen.</p>
       </div>
@@ -639,7 +639,7 @@ def build_home(site, write):
   <section id="bewertungen" aria-labelledby="bewertungen-h">
     <div class="container">
       <div class="section-head section-head--tight reveal">
-        <p class="eyebrow">Bewertungen</p>
+        <p class="eyebrow">Bewertungen aus Celle</p>
         <h2 id="bewertungen-h" class="display">Was Kund:innen aus Celle <em>sagen.</em></h2>
       </div>
       <div class="review-block reveal">
@@ -664,7 +664,7 @@ def build_home(site, write):
   <section id="preise" class="soft" aria-labelledby="preise-h">
     <div class="container">
       <div class="section-head reveal">
-        <p class="eyebrow">Pakete &amp; Preise</p>
+        <p class="eyebrow">Preise für die Fahrzeugaufbereitung</p>
         <h2 id="preise-h" class="display">Klare Preise. <em>Bevor wir anfangen.</em></h2>
         <p>Ab-Preise für einen Kleinwagen. Den verbindlichen Preis für Ihr Fahrzeug erhalten Sie vor dem Termin, kostenlos und unverbindlich.</p>
       </div>
@@ -700,10 +700,10 @@ def build_home(site, write):
         </details>
       </div>
       <div class="why-list stagger">{owner_card}
-        <div class="why-item reveal">{I["hand"]}<div><h3>Lackschonende Arbeit</h3><p>Handwäsche mit der Zwei-Eimer-Methode, weiche Mikrofaser und schonende Trocknung. So behandeln wir Ihren Lack so sanft wie möglich.</p></div></div>
-        <div class="why-item reveal">{I["shield"]}<div><h3>Profi-Systeme statt Baumarkt</h3><p>Offizieller C²Coating Excellence Partner für Keramikversiegelungen, Fachschulungen bei Koch-Chemie, Colourlock für Leder. Jedes Material bekommt das passende Mittel.</p></div></div>
-        <div class="why-item reveal">{I["euro"]}<div><h3>Preis vor dem Termin</h3><p>Sie erhalten ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
-        <div class="why-item reveal">{I["clock"]}<div><h3>Termin, wann es Ihnen passt</h3><p>Online buchen oder per WhatsApp anfragen, Montag bis Samstag. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
+        <div class="why-item reveal">{I["hand"]}<div><p class="why-title">Lackschonende Arbeit</p><p>Handwäsche mit der Zwei-Eimer-Methode, weiche Mikrofaser und schonende Trocknung. So behandeln wir Ihren Lack so sanft wie möglich.</p></div></div>
+        <div class="why-item reveal">{I["shield"]}<div><p class="why-title">Profi-Systeme statt Baumarkt</p><p>Offizieller C²Coating Excellence Partner für Keramikversiegelungen, Fachschulungen bei Koch-Chemie, Colourlock für Leder. Jedes Material bekommt das passende Mittel.</p></div></div>
+        <div class="why-item reveal">{I["euro"]}<div><p class="why-title">Preis vor dem Termin</p><p>Sie erhalten ein verbindliches Angebot, bevor wir anfangen. Zusätzliche Arbeiten gibt es nur nach Rücksprache.</p></div></div>
+        <div class="why-item reveal">{I["clock"]}<div><p class="why-title">Termin, wann es Ihnen passt</p><p>Online buchen oder per WhatsApp anfragen, Montag bis Samstag. Auch kurzfristig vor Verkauf oder Rückgabe.</p></div></div>
       </div>
     </div>
   </section>
@@ -711,13 +711,13 @@ def build_home(site, write):
   <section id="ablauf" aria-labelledby="ablauf-h">
     <div class="container">
       <div class="section-head reveal">
-        <p class="eyebrow">Ablauf</p>
+        <p class="eyebrow">Ablauf der Fahrzeugaufbereitung</p>
         <h2 id="ablauf-h" class="display">In drei Schritten zum <em>Auto wie neu.</em></h2>
       </div>
       <div class="process-rail stagger" data-draw>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><h3>Anfrage in 2 Minuten</h3><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><h3>Angebot &amp; Termin</h3><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
-        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><h3>Aufbereitung &amp; Abnahme</h3><p>Handarbeit an unserem Standort in Celle. Optimal ist ein Tag Standzeit bei uns, bei Versiegelung und Keramik sind es 3 Tage, damit alles in Ruhe aushärtet. Danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 01</span><p class="process-title">Anfrage in 2 Minuten</p><p>Online-Terminanfrage oder WhatsApp mit Fahrzeug, Wunschpaket und Wunschtermin. Gern mit Fotos vom Zustand.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 02</span><p class="process-title">Angebot &amp; Termin</p><p>Sie erhalten ein verbindliches Angebot und eine Terminbestätigung. Erst wenn beides passt, geht es los.</p></div>
+        <div class="process-cell reveal"><span class="process-index">SCHRITT 03</span><p class="process-title">Aufbereitung &amp; Abnahme</p><p>Handarbeit an unserem Standort in Celle. Optimal ist ein Tag Standzeit bei uns, bei Versiegelung und Keramik sind es 3 Tage, damit alles in Ruhe aushärtet. Danach gemeinsame Abnahme bei Tageslicht. Bezahlung bar, mit Karte oder per PayPal.</p></div>
       </div>
     </div>
   </section>
@@ -740,7 +740,7 @@ def build_home(site, write):
   <section id="faq" class="soft" aria-labelledby="faq-h">
     <div class="container">
       <div class="section-head reveal">
-        <p class="eyebrow">Häufige Fragen</p>
+        <p class="eyebrow">Häufige Fragen zur Fahrzeugaufbereitung</p>
         <h2 id="faq-h" class="display">Gut zu wissen, <em>bevor Sie anfragen.</em></h2>
       </div>
       <div class="faq-list stagger">
@@ -1076,9 +1076,12 @@ def _ph(v, text):
 def build_legal(site, write):
     s = site.s
     L = s["legal"]
-    vat = ("<p>Kleinunternehmer im Sinne von § 19 UStG. Es wird keine Umsatzsteuer berechnet und daher auch nicht ausgewiesen.</p>" if L.get("smallBusiness")
-           else f"<p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: {ESC(L['vatId'])}</p>" if L.get("vatId")
-           else '<p><span class="legal-placeholder">[USt-IdNr. gemäß § 27a UStG, falls vorhanden – sonst Hinweis auf Kleinunternehmerregelung gemäß § 19 UStG]</span></p>')
+    # § 5 DDG: USt-IdNr. oder Wirtschafts-Identifikationsnummer angeben, sofern vorhanden; Kleinunternehmer nach § 19 Abs. 1 UStG (seit 2025)
+    ids = "".join(f"<br>{label}: {ESC(L[k])}" for k, label in (("vatId", "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG"),
+                                                                ("wIdNr", "Wirtschafts-Identifikationsnummer gemäß § 139c AO")) if L.get(k))
+    vat = (f"<p>Kleinunternehmer gemäß § 19 Abs. 1 UStG. Es wird keine Umsatzsteuer berechnet und ausgewiesen.{ids}</p>" if L.get("smallBusiness")
+           else f"<p>{ids[4:]}</p>" if ids
+           else '<p><span class="legal-placeholder">[USt-IdNr. gemäß § 27a UStG oder W-IdNr. gemäß § 139c AO, falls vorhanden]</span></p>')
     imp = f'''
     <h2>Diensteanbieter</h2>
     <p>{_ph(L.get("owner"), "Vollständiger Name der Inhaberin / des Inhabers oder Firmenname lt. Gewerbeanmeldung")}<br>
@@ -1094,7 +1097,7 @@ def build_legal(site, write):
     <h2>Urheberrecht</h2>
     <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet.</p>
     <h2>Hinweis zu Preisangaben</h2>
-    <p>Alle auf dieser Website genannten Preise sind unverbindliche Einstiegspreise für Fahrzeuge in normalem Pflegezustand{" und Endpreise; gemäß § 19 UStG wird keine Umsatzsteuer berechnet" if L.get("smallBusiness") else " inklusive gesetzlicher Umsatzsteuer"}. Ein verbindliches Angebot erfolgt individuell nach Fahrzeug und Zustand.</p>
+    <p>Alle auf dieser Website genannten Preise sind unverbindliche Einstiegspreise für Fahrzeuge in normalem Pflegezustand{" und Endpreise; gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet" if L.get("smallBusiness") else " inklusive gesetzlicher Umsatzsteuer"}. Ein verbindliches Angebot erfolgt individuell nach Fahrzeug und Zustand.</p>
     <div class="design-credit">
       <span>Designed by</span>
       <a href="https://markentrix.de/" target="_blank" rel="noopener" aria-label="Markentrix, Webdesign aus Celle (öffnet in neuem Tab)"><img src="markentrix-logo.svg" alt="Markentrix" width="147" height="36" loading="lazy"></a>
