@@ -53,7 +53,7 @@ async def main():
         try: await pg.wait_for_selector(".schritt",timeout=8000)
         except Exception: print("DEBUG",pg.url,errs,(await pg.inner_text("body"))[:300]); raise
         chk("Kunde: erster Start zeigt die Anleitung",pg.url.endswith("#willkommen") and "So startest du bei Markentrix" in await pg.locator(".anltitel").inner_text(),pg.url)
-        chk("Kunde: Android-Reiter vorgewählt, 5 Installationsschritte mit Bild",await pg.locator("button[aria-pressed=true]").inner_text()=="Android (Chrome)" and await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt").count()==5 and await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt svg").count()==5)
+        chk("Kunde: Android-Reiter vorgewählt, 5 Installationsschritte mit Bild",await pg.locator("button[aria-pressed=true]").inner_text()=="Android (Chrome)" and await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt").count()==5 and await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt .handybild > svg").count()==5)
         chk("Kunde: Hinweis auf Chrome statt Fremdbrowser",await pg.locator("text=Samsung Internet").count()>=1)
         await pg.click("text=iPhone (Safari)"); chk("Kunde: iPhone-Reiter hat 6 Schritte mit Teilen-Symbol",await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt").count()==6 and await pg.locator("text=Teilen-Symbol antippen").count()==1)
         n=await pg.locator(".card:has-text('2 · So arbeitest du mit dem Portal') .schritt").count(); txt=await pg.locator(".card:has-text('2 · So arbeitest du mit dem Portal')").inner_text()
