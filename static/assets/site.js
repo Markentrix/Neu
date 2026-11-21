@@ -752,22 +752,35 @@
     var sec = $('[data-reviews]'); if (!sec || !('fetch' in w)) return;
     function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
     var list = $('[data-rev-list]', sec), sum = $('[data-rev-sum]', sec), prof = $('[data-rev-profile]', sec); if (!list) return;
+    /* Reihenfolge: 1. Live-Daten von Google über den eigenen Server, 2. von Hand gepflegte, wörtlich übernommene Bewertungen (/data/bewertungen.json), 3. nur Anzahl mit Link */
+    function render(j, manual) {
+      j.bewertungen.slice(0, 6).forEach(function (r) {
+        var fig = el('figure', 'card rev-card'), n = Math.max(1, Math.min(5, r.sterne | 0));
+        var st = el('span', 'rev-stars'); st.setAttribute('role', 'img'); st.setAttribute('aria-label', n + ' von 5 Sternen'); st.textContent = '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); fig.appendChild(st);
+        if (r.text) { var bq = el('blockquote'); bq.appendChild(el('p', null, r.text)); fig.appendChild(bq); }
+        var cap = el('figcaption'); cap.appendChild(el('b', null, r.name || 'Google-Nutzer')); if (r.zeit) cap.appendChild(d.createTextNode(' · ' + r.zeit)); fig.appendChild(cap);
+        list.appendChild(fig);
+      });
+      var note = $('[data-rev-note]', sec);
+      if (manual) {
+        var cnt = j.anzahl || parseInt(sec.getAttribute('data-rev-count'), 10), asof = j.stand || sec.getAttribute('data-rev-asof');
+        if (sum) { sum.textContent = ''; if (j.gesamt) sum.appendChild(el('b', null, String(j.gesamt).replace('.', ',') + ' von 5')); sum.appendChild(d.createTextNode((j.gesamt ? ' bei Google, ' : '') + cnt + ' Bewertungen' + (j.gesamt ? '' : ' bei Google') + ' (Stand ' + asof + ')')); }
+        if (note) note.textContent = 'Auszug aus den Google-Bewertungen (Stand ' + asof + '), wörtlich übernommen. Die Auswahl treffen wir, alle Bewertungen sind auf Google einsehbar. Wir bearbeiten sie nicht und prüfen nicht eigenständig, ob alle Bewerter Kunden waren.';
+      } else if (sum && j.gesamt && j.anzahl) { sum.textContent = ''; sum.appendChild(el('b', null, String(j.gesamt).replace('.', ',') + ' von 5')); sum.appendChild(d.createTextNode(' bei Google, ' + j.anzahl + ' Bewertungen')); }
+      var link = j.profil || (manual && sec.getAttribute('data-rev-read'));
+      if (prof && link) { prof.href = link; prof.hidden = false; }
+      sec.hidden = false;
+    }
+    function manuell() {
+      fetch('/data/bewertungen.json', { headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { if (j && j.bewertungen && j.bewertungen.length) render(j, true); else fallback(); })
+        .catch(function () { fallback(); });
+    }
     fetch('/api/bewertungen.php', { headers: { Accept: 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) {
-        if (!j || !j.ok || !j.bewertungen || !j.bewertungen.length) { fallback(); return; }
-        j.bewertungen.slice(0, 6).forEach(function (r) {
-          var fig = el('figure', 'card rev-card'), n = Math.max(1, Math.min(5, r.sterne | 0));
-          var st = el('span', 'rev-stars'); st.setAttribute('role', 'img'); st.setAttribute('aria-label', n + ' von 5 Sternen'); st.textContent = '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); fig.appendChild(st);
-          if (r.text) { var bq = el('blockquote'); bq.appendChild(el('p', null, r.text)); fig.appendChild(bq); }
-          var cap = el('figcaption'); cap.appendChild(el('b', null, r.name || 'Google-Nutzer')); if (r.zeit) cap.appendChild(d.createTextNode(' · ' + r.zeit)); fig.appendChild(cap);
-          list.appendChild(fig);
-        });
-        if (sum && j.gesamt && j.anzahl) { sum.textContent = ''; sum.appendChild(el('b', null, String(j.gesamt).replace('.', ',') + ' von 5')); sum.appendChild(d.createTextNode(' bei Google, ' + j.anzahl + ' Bewertungen')); }
-        if (prof && j.profil) { prof.href = j.profil; prof.hidden = false; }
-        sec.hidden = false;
-      })
-      .catch(function () { fallback(); });
+      .then(function (j) { if (!j || !j.ok || !j.bewertungen || !j.bewertungen.length) { manuell(); return; } render(j, false); })
+      .catch(function () { manuell(); });
     /* Ohne Daten von Google (Schlüssel nicht eingerichtet): ehrliche Kurzfassung mit der bestätigten Anzahl und Link zu Google, ohne Sterne und ohne Zitate */
     function fallback() {
       var cnt = parseInt(sec.getAttribute('data-rev-count'), 10), read = sec.getAttribute('data-rev-read'); if (!cnt || !sum) return;

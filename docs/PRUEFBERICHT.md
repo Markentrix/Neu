@@ -460,3 +460,7 @@ Auslöser: Viele Befunde der letzten Tage waren vermeidbar. Jetzt: (1) `tools/qa
 ## Nachtrag 21.11.2026: Kundenseiten-Skill aktualisiert, H1-Prüfung korrigiert
 
 Skill „website-mit-portal“ auf V4.3 (Änderungen in `docs/SKILL-AENDERUNGEN-website-mit-portal.md`), tragbares Gate `tools/qa-statisch-kundenseiten.py`. Beim Test fiel auf, dass die Prüfung zusammengeklebter H1-Sätze Tags durch Leerzeichen ersetzte und den Fehler verdeckte. Korrigiert (`tools/qa.py`) und danach zwei echte Reste auf der eigenen Seite behoben: `/preise` und `/ki-checkliste` (Leerzeichen vor `<br>` in der H1).
+
+## Nachtrag 21.11.2026: Bewertungen auf der Startseite
+
+Befund: Der Abschnitt zeigt nur „11 Bewertungen bei Google“, weil auf dem Server der Google-Schlüssel und die Place-ID fehlen (Endpunkt antwortet `{"ok":false}`). Neu: zweiter Weg über `static/data/bewertungen.json` (wörtlich übernommene Bewertungen, mit Hinweis zur Auswahl). Geprüft mit Testdaten in einer temporären Kopie (nicht im Paket): Darstellung bei 1280 und 390 px, kein Skriptfehler; ohne Einträge unverändert. **Die Datei ist leer, es sind keine Bewertungstexte erfunden oder eingetragen.** Anleitung: `docs/BEWERTUNGEN-MANUELL.md`.
