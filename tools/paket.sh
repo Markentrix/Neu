@@ -3,7 +3,8 @@
 # Die ZIP ist das Übergabeformat für veroeffentlichen.bat (docs/server). Aufruf: tools/paket.sh [Zielordner]
 set -euo pipefail
 cd "$(dirname "$0")/.."
-python3 tools/build.py --check
+python3 tools/qa.py   # Qualitäts-Gate: bricht bei Fehlern ab (docs/QUALITAETSREGELN.md)
+python3 tools/build.py   # qa.py baut zwischendurch mit anderem Datum, deshalb zum Schluss normal bauen
 outdir="$(cd "${1:-.}" && pwd)"
 out="$outdir/markentrix-website.zip"
 rm -f "$out"

@@ -2210,3 +2210,12 @@ p.h1-sub{display:block;font-family:var(--f-head);font-weight:600;font-size:clamp
 .svc-row .svc-link:focus-visible{outline:none}
 .svc-row .svc-link:focus-visible::after{outline:3px solid var(--tiefsee);outline-offset:-3px;border-radius:6px}
 .svc-row .pill{position:relative;z-index:1}
+
+/* 54 · Kartenlinks: Link nur auf der Überschrift, die ganze Karte bleibt klickbar (Umbau im Build, tools/build.py card_links) */
+.card--hover{position:relative}
+.card-link{color:inherit;text-decoration:none}
+.card-link::after{content:"";position:absolute;inset:0;z-index:1}
+.card-link:focus-visible{outline:none}
+.card-link:focus-visible::after{outline:3px solid var(--tiefsee);outline-offset:-3px;border-radius:inherit}
+.sec--dark .card-link:focus-visible::after{outline-color:#FFFFFF}
+html:root .sec--dark .card-link,html:root .sec--dark a.card-link{color:inherit}

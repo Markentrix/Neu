@@ -34,6 +34,20 @@ def today_berlin():
 
 DEAL_RE = re.compile(r'<(a|section)\b[^>]*\bdata-deal-until="(\d{4}-\d{2}-\d{2})"[^>]*>.*?</\1>\s*', re.S)
 
+CARD_RE = re.compile(r'<a class="(card card--hover[^"]*)" href="([^"]+)"([^>]*)>(.*?)</a>', re.S)
+
+def card_links(s):
+    """Karten, die als ganzer Block ein Link sind, bekommen den Link nur auf der Überschrift (kurzer, aussagekräftiger Linktext).
+    Die ganze Karte bleibt klickbar (Überlagerung per CSS .card-link::after). Betrifft alle Karten mit genau einer H3."""
+    def conv(m):
+        cls, href, rest, inner = m.group(1), m.group(2), m.group(3), m.group(4)
+        if len(re.findall(r'<h3[ >]', inner)) != 1 or '<a ' in inner: return m.group(0)
+        link_attrs = ''.join(' ' + x for x in re.findall(r'(?:target|rel)="[^"]*"', rest))
+        div_attrs = re.sub(r'\s*(?:target|rel)="[^"]*"', '', rest)
+        inner = re.sub(r'<h3([^>]*)>(.*?)</h3>', lambda h: f'<h3{h.group(1)}><a class="card-link" href="{href}"{link_attrs}>{h.group(2)}</a></h3>', inner, count=1, flags=re.S)
+        return f'<div class="{cls}"{div_attrs}>{inner}</div>'
+    return CARD_RE.sub(conv, s)
+
 def expire_deals(s):
     """Befristete Angebote (data-deal-until, gültig bis einschließlich dieses Tages) werden nach Fristende schon beim Bauen entfernt,
     nicht nur im Browser per Skript. Das Skript im Browser bleibt als zweite Sicherung für Seiten, die zwischen zwei Builds ablaufen."""
@@ -145,7 +159,7 @@ def render(layout, meta, body, partials, overview=''):
                 break
             s = n
         return s
-    body = expire_deals(sub_partials(body))
+    body = card_links(expire_deals(sub_partials(body)))
     path = meta.get('path', '/')
     canonical = SITE + path
     ld = meta.get('ld', '').strip()
