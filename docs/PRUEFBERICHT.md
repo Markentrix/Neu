@@ -439,3 +439,7 @@ Ergebnisse je Prüfpunkt in `docs/CRAWL-AUDIT-2026-11-21.md`, Skript `tools/craw
 ## Nachtrag 21.11.2026: Externer Prüfbericht (bericht.pdf) abgearbeitet
 
 Umsetzung, Fehlalarme und Antwortvorschläge zu den 16 Rückfragen: `docs/RUECKFRAGEN-PRUEFBERICHT-2026-11-21.md`. Geändert: Impressum- und Datenschutz-Links und Formularhinweise auf den acht Beispielseiten, Impressum und Datenschutz auf der Karte, Karte ohne Weiterleitung verlinkt und mit korrekter Überschriftenreihenfolge, Hinweis zur Herkunft der Google-Bewertungen, pauschale „Haftung für Links“ im Impressum entfernt, „Rechtssicherheit“-Aussagen abgeschwächt, Budgetfeld „netto“, Schriftlizenzen dokumentiert (`static/fonts/LIZENZEN.md`), Linkcheck kennt Verzeichnisse ohne Schrägstrich, 1 px Überlauf auf der Werkstatt-Beispielseite behoben. Fehlalarm: „YouTube nicht gefunden“ (Profil ist im Fuß verlinkt).
+
+## Nachtrag 21.11.2026: Sitemap-Vorschlag abgeglichen
+
+Der Vorschlag (`sitemap-vorschlag.xml`) enthält dieselben 90 Adressen wie unsere `sitemap.xml`, aber ohne `lastmod`. Unsere Sitemap bleibt (mit Änderungsdatum je Seite). Einziger Unterschied: Die Startseite steht dort mit Schrägstrich. Wir führen sie jetzt ebenso: Canonical, `og:url` und Sitemap der Startseite lauten `https://markentrix.de/` (passend zu den Kennungen in den strukturierten Daten). `tools/seo_audit.py` und `tools/crawl_audit.py` erwarten die neue Schreibweise.

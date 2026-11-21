@@ -109,7 +109,7 @@ t+= [f'doppelte Description: {v}' for k,v in descs.items() if len(v)>1 and k]
 r=sec('3 Robots/Canonical')
 for u,(f,p) in pages.items():
     if u.startswith('/beispiel/') or u in('/danke','/404'): continue
-    exp=SITE+('' if u=='/' else u)
+    exp=SITE+u
     if not p.canon: r.append(f'{u}: kein Canonical')
     elif p.canon.rstrip('/')!=exp.rstrip('/') : r.append(f'{u}: Canonical {p.canon} weicht ab')
     if p.hreflang: r.append(f'{u}: hreflang {p.hreflang}')
@@ -127,7 +127,7 @@ for l in locs:
 for m in mods:
     if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',m): s.append(f'lastmod-Format: {m}')
 ind={u for u in pages if u not in noindex and not u.startswith('/beispiel/') and u not in('/danke','/404','/karte/')}
-missing=[u for u in ind if (SITE+('' if u=='/' else u)) not in locs]
+missing=[u for u in ind if (SITE+u) not in locs]
 s.append(f'indexierbare Seiten nicht in Sitemap: {missing}')
 # 5 Duplikate
 d=sec('5 Exakte Duplikate (Hauptinhalt)'); hs=collections.defaultdict(list)

@@ -113,7 +113,7 @@ def main():
         if p.canon:
             if len(p.canon) > 1: err.append(f'{u}: mehrere Canonicals')
             c = p.canon[0]
-            exp = SITE + ('' if u == '/' else u)
+            exp = SITE + u
             if not noidx and c != exp: err.append(f'{u}: Canonical {c} != {exp}')
             if not re.fullmatch(r'https://markentrix\.de(/[^?#]*[^/?#.])?', c) and c != SITE + '/' and not noidx:
                 err.append(f'{u}: Canonical nicht normalisiert: {c}')
@@ -213,7 +213,7 @@ def main():
             if s != 200: err.append(f'LIVE {sp}: Status {s}'); continue
             if 'noindex' in (h.get('x-robots-tag', '') or '').lower(): err.append(f'LIVE {sp}: X-Robots-Tag noindex')
             m = re.search(rb'<link rel="canonical" href="([^"]+)"', body)
-            exp = SITE + ('' if sp == '/' else sp)
+            exp = SITE + sp
             if not m or m.group(1).decode() != exp: err.append(f'LIVE {sp}: Canonical {m.group(1).decode() if m else None}')
         print(f'Live geprüft: {len(smpaths)} Sitemap-URLs')
     print(f'{len(pages)} Seiten, {len(smpaths)} Sitemap-URLs, {len(indexable)} indexierbar')

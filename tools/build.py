@@ -147,7 +147,7 @@ def render(layout, meta, body, partials, overview=''):
         return s
     body = expire_deals(sub_partials(body))
     path = meta.get('path', '/')
-    canonical = SITE + ('' if path == '/' else path)
+    canonical = SITE + path
     ld = meta.get('ld', '').strip()
     if ld:
         json.loads(ld)  # validieren
@@ -251,7 +251,7 @@ def build(check=False):
     for meta, rel, _ in pages:
         if meta.get('sitemap', 'true').lower() == 'false' or 'noindex' in meta.get('robots', ''):
             continue
-        loc = SITE + ('' if meta['path'] == '/' else meta['path'])
+        loc = SITE + meta['path']
         urls.append(f'  <url><loc>{loc}</loc><lastmod>{meta.get("lastmod", time.strftime("%Y-%m-%d"))}</lastmod></url>')
     open(os.path.join(DIST, 'sitemap.xml'), 'w', encoding='utf-8').write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + '\n'.join(urls) + '\n</urlset>\n')
