@@ -64,3 +64,10 @@ Kontakt, Termin, Gutschein und Firmenkunden senden weiter `einwilligung: "ja"`. 
 - **Empfänger für Anfragen** eintragen (bisher „Kein Empfänger eingetragen“).
 - **Google-Bewertungen**: Abfrage scheitert („Google lehnt die Abfrage ab“). Places API (New), Abrechnung und Schlüssel-Beschränkung prüfen, Ergebnis zwischenspeichern.
 - **Buchungszeitraum** von 3 Wochen auf mindestens 3 Monate.
+- **Eine Hauptadresse (Prüfbericht vom 21.11.2026, „HTTPS und einheitliche Hauptadresse“):** `https://elbdetail.de/` und `http://…` per 301 auf `https://www.elbdetail.de/` leiten (gleicher Pfad). Canonical, Sitemap und hreflang der Website nennen bereits `https://www.elbdetail.de/`.
+- **Suchbegriffe im Prüf-Profil:** „Fahrzeugaufbereitung & Autoaufbereitung Celle“ ist der Seitentitel, kein Suchbegriff. Besser als zwei Einträge „Fahrzeugaufbereitung Celle“ und „Autoaufbereitung Celle“ führen. Die Website erfüllt seit dem 23.11.2026 trotzdem beide Schreibweisen (Titel und H1 der Startseite).
+
+## 5. Hinweise zum automatischen Prüfbericht
+
+- **„Keine überholten Angaben: Google Maps“** ist ein Fehlalarm. Die Karte steht auf `/kontakt.html` und wird erst nach Klick auf „Karte laden“ eingebunden, deshalb findet der Prüfer sie beim Abruf nicht. Die Datenschutzerklärung nennt jetzt ausdrücklich die Kontaktseite.
+- **„Preise mit Hinweis zur Umsatzsteuer“** betraf nur die englischen Seiten: Der Prüfer erkennt „VAT“ nicht. Seit dem 23.11.2026 steht dort „no VAT (Umsatzsteuer) is charged“ (§ 19 Abs. 1 UStG) im Fußbereich jeder Seite und an den Preisen.

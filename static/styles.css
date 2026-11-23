@@ -1441,7 +1441,7 @@ blockquote.note p { color: #4d3a0f; }
   .eyebrow { font-size: 0.75rem; letter-spacing: 0.14em; }
   /* Lange Wörter (z. B. „Geruchsneutralisation“) dürfen umbrechen, Spalten dürfen schrumpfen */
   body { overflow-wrap: break-word; }
-  h1, h2, h3, .display, summary, .lead { hyphens: auto; }
+  h1, h2, h3, .display, summary, .lead { -webkit-hyphens: auto; hyphens: auto; }
   .container > *, .two-up > *, .why-grid > *, .prose, .prose > *, .facts div > * { min-width: 0; }
 }
 @media (max-width: 359.98px) {

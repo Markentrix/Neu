@@ -569,7 +569,7 @@ def build_home(site, write):
           <a class="hero-badge" href="#bewertungen">{STARS5} <span>{ESC(s["rating"]["value"])} · {s["rating"]["count"]} <span class="hide-xs">Google-</span>Bewertungen</span></a>
           <span class="hero-badge hero-badge-addr">{I["pin"]} {ESC(s["address"]["city"])} · {ESC(s["address"]["street"])}</span>
         </div>
-        <h1 id="hero-h" class="hero-headline">Fahrzeug&shy;aufbereitung in Celle. <em>Mit Liebe zum Detail.</em></h1>
+        <h1 id="hero-h" class="hero-headline">Fahrzeugaufbereitung &amp; Autoaufbereitung in Celle. <em>Mit Liebe zum Detail.</em></h1>
         <p class="hero-sub">Lackaufbereitung, <strong>Keramikversiegelung</strong> und Innenaufbereitung in Handarbeit. Für den Neuwagen, das Liebhaberstück und den Familienwagen, der wieder glänzen soll. Mit Festpreis, bevor wir anfangen.</p>
         <div class="hero-actions">
           <a class="btn btn-primary btn-lg" href="termin.html">{I["cal"]}Termin anfragen</a>
@@ -771,7 +771,7 @@ def build_preise(site, write):
   <section class="page-hero" aria-labelledby="page-h">
     <div class="container">
       {core.breadcrumb("", [("Startseite", "index.html"), ("Pakete & Preise", None)])}
-      <h1 id="page-h">Preise für Fahrzeug&shy;aufbereitung in Celle</h1>
+      <h1 id="page-h">Preise für Fahrzeugaufbereitung in Celle</h1>
       <p class="lead">Vier Pakete, transparente Ab-Preise je Fahrzeugklasse. Den verbindlichen Preis bestätigen wir kostenlos vor dem Termin, Zusatzarbeiten nur nach Rücksprache.</p>
       <div class="keyfacts">{facts}</div>
     </div>
@@ -1136,7 +1136,7 @@ def build_legal(site, write):
     <h2>9. Kontakt per WhatsApp, E-Mail oder Telefon</h2>
     <p>WhatsApp-Links führen zum Messenger-Dienst der WhatsApp Ireland Ltd. / Meta Platforms Ireland Limited, 4 Grand Canal Square, Dublin 2, Irland. Solange der Link nur angezeigt wird, fließen keine Daten an WhatsApp. Klicken Sie ihn an, öffnet sich WhatsApp; dabei erhält WhatsApp Verbindungsdaten wie Ihre IP-Adresse. Den Inhalt Ihrer Nachricht erhält WhatsApp erst, wenn Sie sie absenden. Es gilt die Datenschutzerklärung von WhatsApp, eine Übermittlung in die USA ist nicht auszuschließen. Die Nutzung ist freiwillig, alternativ erreichen Sie uns über das Formular, per E-Mail oder Telefon. Bei Kontakt per E-Mail oder Telefon verarbeiten wir Ihre Angaben zur Bearbeitung der Anfrage (Art. 6 Abs. 1 lit. b, f DSGVO). Unser E-Mail-Postfach liegt bei: {mail}.</p>
     <h2>10. Google Maps</h2>
-    <p>Die Kartendarstellung wird erst nach Ihrem Klick auf „Karte laden“ eingebunden (Zwei-Klick-Lösung). Erst dann wird eine Verbindung zu Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland hergestellt, wobei IP-Adresse und ggf. Cookies übertragen werden können. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Links wie „Route in Google Maps öffnen“, „Alle Bewertungen auf Google“ oder „Bewertung schreiben“ öffnen die Seiten von Google erst mit Ihrem Klick; dabei erhält Google Verbindungsdaten wie Ihre IP-Adresse. Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+    <p>Auf der Kontaktseite wird die Karte von Google Maps erst nach Ihrem Klick auf „Karte laden“ eingebunden (Zwei-Klick-Lösung). Erst dann wird eine Verbindung zu Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland hergestellt, wobei IP-Adresse und ggf. Cookies übertragen werden können. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Links wie „Route in Google Maps öffnen“, „Alle Bewertungen auf Google“ oder „Bewertung schreiben“ öffnen die Seiten von Google erst mit Ihrem Klick; dabei erhält Google Verbindungsdaten wie Ihre IP-Adresse. Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
     <h2>11. Verweise auf soziale Netzwerke</h2>
     <p>Diese Website enthält reine Verlinkungen (keine eingebetteten Plugins) zu Instagram und Facebook (Meta Platforms Ireland Limited) sowie TikTok (TikTok Technology Limited, Irland). Solange die Links nur angezeigt werden, fließen keine Daten an diese Anbieter. Erst mit dem Klick wird die Seite des Anbieters aufgerufen; dabei erhält er Verbindungsdaten wie Ihre IP-Adresse und gegebenenfalls Ihr dort angemeldetes Konto.</p>
     <h2>12. Gutscheine</h2>
