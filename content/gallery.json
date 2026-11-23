@@ -1,11 +1,24 @@
 {
   "items": [
     {
-      "title": "Lackpolitur & Versiegelung",
-      "sub": "Mehrstufige Politur, danach Versiegelung",
-      "before": "",
-      "after": "",
-      "alt": "Lack vor und nach der Politur"
+      "title": "Scheinwerfer aufbereitet",
+      "sub": "Ford Ka: links noch unbehandelt, rechts nach der Aufbereitung",
+      "layout": "pair",
+      "tags": [
+        "Unbehandelt",
+        "Aufbereitet"
+      ],
+      "before": "scheinwerfer-vorher-ford.jpg",
+      "after": "scheinwerfer-nachher-ford.jpg",
+      "alt": "Scheinwerfer eines blauen Ford Ka"
+    },
+    {
+      "title": "Innenraum BMW X3",
+      "sub": "Fußraum, Fußmatten, Leder und Kunststoffe",
+      "layout": "pair",
+      "before": "innen-vorher-bmw-x3.jpg",
+      "after": "innen-nachher-bmw-x3.jpg",
+      "alt": "Fahrerseite eines BMW X3 mit Ledersitz und Fußmatte"
     },
     {
       "title": "Innenraum-Tiefenreinigung",
@@ -15,11 +28,12 @@
       "alt": "Fahrerseite einer Mercedes C-Klasse mit Sitz und Fußraum"
     },
     {
-      "title": "Felgen & Außenaufbereitung",
-      "sub": "Handwäsche, Felgen, Dichtungen",
-      "before": "",
-      "after": "",
-      "alt": "Felge vor und nach der Reinigung"
+      "title": "Innenraum VW Tiguan",
+      "sub": "Gummimatten, Polster und Cockpit",
+      "layout": "pair",
+      "before": "innen-vorher-vw-tiguan.jpg",
+      "after": "innen-nachher-vw-tiguan.jpg",
+      "alt": "Fahrerseite eines VW Tiguan mit Stoffsitz und Gummimatte"
     }
   ]
 }

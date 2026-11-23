@@ -741,6 +741,21 @@ section.dark { background: var(--anthracite); color: var(--on-anthracite); }
 .ba-caption { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 32px 16px 14px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: #fff; font-size: 0.9rem; font-weight: 600; pointer-events: none; }
 .ba-caption span { display: block; font-weight: 400; color: var(--muted-on-anthracite); font-size: 0.8rem; }
 .gallery-note { margin-top: 20px; color: var(--muted); font-size: 0.92rem; max-width: 66ch; }
+/* Vorher/Nachher als Bildpaar (Fotos nicht aus exakt gleichem Winkel) */
+.ba-pair { position: relative; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; aspect-ratio: 3 / 2; border-radius: var(--radius-m); overflow: hidden; background: var(--anthracite); isolation: isolate; }
+.ba-pair-cell { position: relative; min-width: 0; }
+.ba-pair-cell .ba-pair-img, .ba-pair-cell img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ba-grid--home .ba { aspect-ratio: 3 / 2; }
+@media (min-width: 900px) { .ba-grid--home { grid-template-columns: repeat(2, 1fr); gap: 22px; } }
+.ba-single--pair { max-width: 640px; }
+/* Fotoreihe aus der Werkstatt */
+.photo-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); margin: 28px 0 8px; }
+@media (min-width: 900px) { #werkstatt .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
+.prose .photo-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.photo { margin: 0; min-width: 0; }
+.photo .photo-img, .photo img { display: block; width: 100%; }
+.photo img { aspect-ratio: 4 / 5; height: auto; object-fit: cover; border-radius: var(--radius-m); background: var(--soft); }
+.photo figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: var(--muted); }
 
 /* ==========================================================================
    Warum ElbDetail
@@ -1130,6 +1145,8 @@ a.ref-cell:hover .ref-word, a.ref-cell:hover .ref-cell-go, a.ref-cell:focus-visi
   .review-grid { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); padding-bottom: 4px; margin-top: 34px; }
   .review-grid::-webkit-scrollbar { display: none; }
   /* Startseite: Vorher/Nachher und Ratgeber als seitliche Karussells, spart Scrollhöhe */
+  .photo-grid.home-scroll { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); padding-bottom: 4px; }
+  .photo-grid.home-scroll > * { flex-basis: 72%; max-width: 300px; }
   .article-grid.home-scroll { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); padding-bottom: 4px; }
   .home-scroll::-webkit-scrollbar { display: none; }
   .home-scroll > * { flex: 0 0 84%; max-width: 360px; scroll-snap-align: start; }
@@ -1149,6 +1166,7 @@ a.ref-cell:hover .ref-word, a.ref-cell:hover .ref-cell-go, a.ref-cell:focus-visi
   .header-cta .btn-sm { width: 44px; padding: 0; gap: 0; }
   .header-cta .btn-sm svg { width: 22px; height: 22px; }
   .header-cta .btn-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .hero-photo img { object-position: 30% 62%; }
   .hero { padding-block: calc(var(--header-h) + 22px) 64px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), 0 100%); }
   .hero::before { width: 90vw; height: 90vw; right: -34vw; top: 20%; }
   .hero-headline { font-size: clamp(2.2rem, 10.5vw, 3.4rem); line-height: 1; max-width: none; }

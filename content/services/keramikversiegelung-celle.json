@@ -96,5 +96,22 @@
     "alt": "Wasser perlt in dichten Tropfen von einer keramisch versiegelten Motorhaube ab",
     "caption": "Der typische Abperleffekt einer Keramikversiegelung: Wasser und Schmutz finden kaum Halt.",
     "credit": "C²Coating"
-  }
+  },
+  "photos": [
+    {
+      "file": "keramik-bmw-cabrio-c2coating.jpg",
+      "alt": "Hand im Handschuh mit einer Flasche C²Coating Car Ceramic vor einem weißen BMW",
+      "caption": "Versiegeln mit C²Coating Car Ceramic"
+    },
+    {
+      "file": "keramik-tesla-model-y.jpg",
+      "alt": "Weißer Tesla Model Y in der Werkstatt",
+      "caption": "Tesla Model Y in der Halle"
+    },
+    {
+      "file": "werkstatt-audi-rs3-front.jpg",
+      "alt": "Front eines Audi RS 3, im Lack spiegelt sich das Wabenlicht",
+      "caption": "Tiefer Glanz unter dem Wabenlicht"
+    }
+  ]
 }

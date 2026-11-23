@@ -14,7 +14,11 @@
     "region": "Niedersachsen",
     "country": "DE",
     "hint": "Auf dem Gelände der Shell-Tankstelle",
-    "geo": {"lat": 52.6368, "lon": 10.1067, "source": "OpenStreetMap, Shell-Tankstelle Lachtehäuser Straße (way 172915479)"}
+    "geo": {
+      "lat": 52.6368,
+      "lon": 10.1067,
+      "source": "OpenStreetMap, Shell-Tankstelle Lachtehäuser Straße (way 172915479)"
+    }
   },
   "openingHours": {
     "schedule": [
@@ -129,7 +133,24 @@
       "alt": "C²Coating Excellence-Partner-Aufsteller mit Car-Ceramic-Produkten auf einem Mikrofasertuch",
       "caption": "Als Excellence Partner arbeiten wir mit dem Keramiksystem von C²Coating.",
       "credit": "C²Coating"
-    }
+    },
+    "photos": [
+      {
+        "file": "werkstatt-audi-s6-heck.jpg",
+        "alt": "Weißer Audi S6 auf der Hebebühne in der Werkstatt von ElbDetail",
+        "caption": "Unsere Halle an der Lachtehäuser Straße: Im Wabenlicht sieht man jeden Kratzer."
+      },
+      {
+        "file": "keramik-bmw-cabrio-c2coating.jpg",
+        "alt": "Hand im Handschuh mit einer Flasche C²Coating Car Ceramic vor einem weißen BMW",
+        "caption": "Versiegeln mit C²Coating Car Ceramic"
+      },
+      {
+        "file": "innen-audi-q7-lenkrad.jpg",
+        "alt": "Cockpit eines Audi Q7 mit Lenkradschutz von ElbDetail",
+        "caption": "Lenkradschutz und saubere Matten bis zur Übergabe"
+      }
+    ]
   },
   "verification": {
     "google": "",
@@ -195,13 +216,11 @@
     "Überweisung"
   ],
   "heroImage": {
-    "file": "c2-abperleffekt.jpg",
-    "credit": "C²Coating"
+    "file": "werkstatt-audi-s6-front.jpg"
   },
   "spotlightImage": {
-    "file": "c2-car-ceramic.jpg",
-    "alt": "Flasche C²Coating Car Ceramic auf einem frisch versiegelten dunklen Lack",
-    "credit": "C²Coating"
+    "file": "keramik-bmw-cabrio-c2coating.jpg",
+    "alt": "Weißes BMW Cabrio in unserer Werkstatt, davor eine Flasche C²Coating Car Ceramic in der Hand"
   },
   "booking": {
     "hinweis": "Buchung über das Markentrix-Portal: Tage, Uhrzeiten, ob Kunden direkt buchen können und der PayPal.me-Name für die Anzahlung kommen aus dem Portal (/api/verfuegbarkeit, /api/slots). depositPercent: Anzahlung in Prozent des Richtpreises.",
@@ -217,5 +236,47 @@
       ],
       "hinweis": "Zuschlag in Prozent je angeklickter Zustandsangabe; overrides = abweichender Satz (Tierhaare 10 %), exempt = ohne Zuschlag (leder = Ledersitze)."
     }
-  }
+  },
+  "workshopPhotos": [
+    {
+      "file": "werkstatt-audi-s6-heck.jpg",
+      "alt": "Weißer Audi S6 auf der Hebebühne unter dem Wabenlicht der Werkstatt",
+      "caption": "Audi S6 unter unserem Wabenlicht"
+    },
+    {
+      "file": "werkstatt-audi-rs3-front.jpg",
+      "alt": "Front eines Audi RS 3, im Lack spiegelt sich das Wabenlicht",
+      "caption": "Audi RS 3: Glanz, in dem sich das Licht spiegelt"
+    },
+    {
+      "file": "keramik-tesla-model-y.jpg",
+      "alt": "Weißer Tesla Model Y in der Werkstatt",
+      "caption": "Tesla Model Y in der Halle"
+    },
+    {
+      "file": "werkstatt-audi-q3-front.jpg",
+      "alt": "Front eines grauen Audi Q3 mit glänzender Motorhaube",
+      "caption": "Audi Q3, frisch aufbereitet"
+    },
+    {
+      "file": "aussen-audi-q7-seite.jpg",
+      "alt": "Dunkelgrauer Audi Q7 von schräg vorn auf einem Parkplatz",
+      "caption": "Audi Q7, fertig zur Abholung"
+    },
+    {
+      "file": "leder-audi-q7-sitz.jpg",
+      "alt": "Rautengesteppter Ledersitz eines Audi Q7",
+      "caption": "Leder gereinigt und gepflegt"
+    },
+    {
+      "file": "felge-audi-q7.jpg",
+      "alt": "Saubere Felge und Reifen eines Audi Q7",
+      "caption": "Felge und Reifen nach der Reinigung"
+    },
+    {
+      "file": "innen-audi-q7-lenkrad.jpg",
+      "alt": "Cockpit eines Audi Q7 mit Lenkradschutz von ElbDetail",
+      "caption": "Lenkradschutz bis zur Übergabe"
+    }
+  ]
 }

@@ -73,5 +73,17 @@
     "innenaufbereitung-celle",
     "leasingrueckgabe-gebrauchtwagen-celle",
     "keramikversiegelung-celle"
+  ],
+  "image": {
+    "file": "leder-audi-q7-sitz.jpg",
+    "alt": "Rautengesteppter Ledersitz eines Audi Q7",
+    "caption": "Leder gereinigt und gepflegt: seidiger Glanz statt speckiger Stellen."
+  },
+  "photos": [
+    {
+      "file": "leder-audi-q7-fond.jpg",
+      "alt": "Ledersitze im Fond eines Audi Q7",
+      "caption": "Auch die Rückbank gehört dazu"
+    }
   ]
 }

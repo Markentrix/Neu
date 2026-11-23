@@ -74,5 +74,22 @@
     "innenaufbereitung-celle",
     "lackpolitur-celle",
     "aussenaufbereitung-celle"
+  ],
+  "image": {
+    "file": "verkauf-audi-a3-seite.jpg",
+    "alt": "Schwarzer Audi A3 Limousine von schräg vorn in der Abendsonne",
+    "caption": "Bereit für Verkauf oder Rückgabe: Ein gepflegter Gesamteindruck zahlt sich bei der Bewertung aus."
+  },
+  "photos": [
+    {
+      "file": "verkauf-audi-a3-front.jpg",
+      "alt": "Schwarzer Audi A3 von vorn",
+      "caption": "Front und Scheinwerfer klar"
+    },
+    {
+      "file": "innen-audi-a3-cockpit.jpg",
+      "alt": "Cockpit und Vordersitze eines Audi A3",
+      "caption": "Innenraum ohne Gebrauchsspuren"
+    }
   ]
 }

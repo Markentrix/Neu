@@ -80,5 +80,10 @@
     "keramikversiegelung-celle",
     "scheibenversiegelung-celle",
     "aussenaufbereitung-celle"
-  ]
+  ],
+  "image": {
+    "file": "felge-audi-q7.jpg",
+    "alt": "Saubere Felge und Reifen eines Audi Q7",
+    "caption": "Felge und Reifen nach der Reinigung. Eine Felgenversiegelung sorgt dafür, dass Bremsstaub weniger haftet."
+  }
 }

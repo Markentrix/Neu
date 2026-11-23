@@ -74,5 +74,22 @@
     "innenaufbereitung-celle",
     "lackpolitur-celle",
     "lackversiegelung-celle"
+  ],
+  "image": {
+    "file": "aussen-audi-q7-front.jpg",
+    "alt": "Dunkelgrauer Audi Q7 von vorn auf einem Parkplatz",
+    "caption": "Audi Q7 nach der Aufbereitung, kurz vor der Abholung."
+  },
+  "photos": [
+    {
+      "file": "verkauf-audi-a3-seite.jpg",
+      "alt": "Schwarzer Audi A3 Limousine von schräg vorn in der Abendsonne",
+      "caption": "Audi A3, frisch aufbereitet"
+    },
+    {
+      "file": "felge-audi-q7.jpg",
+      "alt": "Saubere Felge und Reifen eines Audi Q7",
+      "caption": "Felgen und Reifen gereinigt"
+    }
   ]
 }

@@ -76,5 +76,10 @@
   "priceCard": {
     "title": "Separat buchbar",
     "text": "Die Lackversiegelung buchen Sie zu den Paketen Signature (ab {ab:signature} €) oder Excellence (ab {ab:excellence} €) dazu. Den Preis nennen wir Ihnen vorab im verbindlichen Angebot."
+  },
+  "image": {
+    "file": "werkstatt-audi-q3-front.jpg",
+    "alt": "Front eines grauen Audi Q3 mit glänzender Motorhaube",
+    "caption": "Glatter, glänzender Lack spiegelt das Hallenlicht klar. Eine Versiegelung hält diesen Zustand über Monate."
   }
 }

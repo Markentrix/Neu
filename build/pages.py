@@ -156,8 +156,36 @@ def offers_home(site):
   </section>'''
 
 
+def ba_pair(site, item, prefix=""):
+    """Vorher und Nachher nebeneinander, wenn die Fotos nicht aus exakt gleichem Winkel stammen (ehrlicher als ein Regler)."""
+    tags = item.get("tags") or ["Vorher", "Nachher"]
+    alt = item.get("alt", item["title"])
+    sizes = "(min-width: 900px) 300px, 46vw"
+    before = picture(site, item["before"], f"{tags[0]}: {alt}", "ba-pair-img", prefix, sizes=sizes)
+    after = picture(site, item["after"], f"{tags[1]}: {alt}", "ba-pair-img", prefix, sizes=sizes)
+    return f'''
+        <figure class="ba-pair reveal">
+          <div class="ba-pair-cell">{before}<span class="ba-tag l">{ESC(tags[0])}</span></div>
+          <div class="ba-pair-cell">{after}<span class="ba-tag r">{ESC(tags[1])}</span></div>
+          <figcaption class="ba-caption">{ESC(item["title"])}<span>{ESC(item.get("sub", ""))}</span></figcaption>
+        </figure>'''
+
+
+def photo_grid(site, photos, prefix="", label="Fotos aus der Werkstatt", scroll=False, sizes="(min-width: 900px) 300px, 46vw"):
+    """Fotoreihe mit kurzen Bildunterschriften. scroll=True: auf dem Handy seitlich wischen statt untereinander."""
+    items = [p for p in (photos or []) if p.get("file") in site.media]
+    if not items:
+        return ""
+    figs = "".join(f'<figure class="photo reveal">{picture(site, p["file"], p.get("alt", ""), "photo-img", prefix, sizes=sizes)}'
+                   + (f'<figcaption>{ESC(p["caption"])}</figcaption>' if p.get("caption") else "") + "</figure>" for p in items)
+    attrs = f' tabindex="0" role="region" aria-label="{ESC(label)}, seitlich wischen"' if scroll else ""
+    return f'<div class="photo-grid{" home-scroll" if scroll else ""} stagger"{attrs}>{figs}</div>'
+
+
 def ba_tile(site, item, n, prefix=""):
     has = item.get("before") in site.media and item.get("after") in site.media
+    if has and item.get("layout") == "pair":
+        return ba_pair(site, item, prefix), True
     if has:
         before = picture(site, item["before"], "Vorher: " + item.get("alt", item["title"]), "ba-art", prefix)
         after = picture(site, item["after"], "Nachher: " + item.get("alt", item["title"]), "ba-art ba-after", prefix)
@@ -179,7 +207,11 @@ def service_ba(site, sv, prefix=""):
     if not it:
         return ""
     tile, has = ba_tile(site, it, 9, prefix)
-    return f'<div class="ba-single" aria-label="Vorher-Nachher-Vergleich">{tile}<p class="hint">Ziehen Sie den Regler, um vorher und nachher zu vergleichen.</p></div>' if has else ""
+    if not has:
+        return ""
+    if it.get("layout") == "pair":
+        return f'<div class="ba-single ba-single--pair">{tile}</div>'
+    return f'<div class="ba-single" aria-label="Vorher-Nachher-Vergleich">{tile}<p class="hint">Ziehen Sie den Regler, um vorher und nachher zu vergleichen.</p></div>'
 
 
 # --------------------------------------------------------------------------- Startseite
@@ -534,8 +566,21 @@ def build_home(site, write):
         h, has = ba_tile(site, it, n + 1)
         tiles.append((h, has)); real += has
     tiles = [t for t, has in tiles if has] if real else [t for t, _ in tiles]  # sobald echte Fotos da sind, keine Platzhalter mehr
-    gallery_note = ("Ziehen Sie den Regler, um den Unterschied zu sehen. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok."
+    gallery_note = ("Alle Fotos stammen aus unserer Werkstatt in Celle, Kennzeichen sind unkenntlich. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok."
                     if real else "Die Darstellungen sind Platzhalter, bis die ersten Vorher-/Nachher-Fotos online sind. Echte Ergebnisse finden Sie jederzeit auf Instagram und TikTok.")
+
+    wp = photo_grid(site, s.get("workshopPhotos"), "", "Fotos aus der Werkstatt", scroll=True)
+    workshop = f'''
+  <section id="werkstatt" aria-labelledby="werkstatt-h">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Einblick in unsere Werkstatt</p>
+        <h2 id="werkstatt-h" class="display">Frisch aus der <em>Halle.</em></h2>
+        <p>Aufbereitet, versiegelt und abholbereit: eine Auswahl der Fahrzeuge, die zuletzt bei uns an der Lachtehäuser Straße waren.</p>
+      </div>
+      {wp}
+    </div>
+  </section>''' if wp else ""
 
     articles = site.articles[:3]
     art_cards = "".join(f'''
@@ -627,15 +672,15 @@ def build_home(site, write):
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Ergebnisse vorher und nachher</p>
-        <h2 id="vn-h" class="display">Vorher. Nachher. <em>Selbst schieben.</em></h2>
-        <p>Ziehen Sie den Regler, um den Unterschied zu sehen.</p>
+        <h2 id="vn-h" class="display">Vorher. Nachher. <em>Echte Ergebnisse.</em></h2>
+        <p>Fahrzeuge unserer Kundinnen und Kunden, fotografiert vor und nach der Aufbereitung. Beim Bild mit Regler können Sie selbst schieben.</p>
       </div>
-      <div class="ba-grid stagger{" ba-grid--few" if len(tiles) < 3 else ""}">{"".join(tiles)}
+      <div class="ba-grid ba-grid--home stagger{" ba-grid--few" if len(tiles) < 3 else ""}">{"".join(tiles)}
       </div>
       <p class="gallery-note">{ESC(gallery_note)} <a class="text-link" href="{s["social"]["instagram"]}" target="_blank" rel="noopener">Instagram</a> · <a class="text-link" href="{s["social"]["tiktok"]}" target="_blank" rel="noopener">TikTok</a></p>
     </div>
   </section>
-
+{workshop}
   <section id="bewertungen" aria-labelledby="bewertungen-h">
     <div class="container">
       <div class="section-head section-head--tight reveal">
@@ -943,6 +988,7 @@ def build_about(site, write):
         <h2>Mein Schwerpunkt: Lack und Keramik</h2>
         <p>Besonders am Herzen liegt mir die professionelle Lackaufbereitung in Verbindung mit hochwertigen <a href="leistungen/keramikversiegelung-celle.html">Keramikversiegelungen</a>. Dabei geht es nicht nur um eine schöne Optik, sondern auch um langfristigen Lackschutz und eine leichtere Pflege. Als offizieller C²Coating Excellence Partner möchte ich ElbDetail zur festen Anlaufstelle für Keramikversiegelungen in Celle und Umgebung machen.</p>
         {figure(site, ab.get("partnerImage"), "")}
+        {photo_grid(site, ab.get("photos"), "", sizes="(min-width: 900px) 260px, 46vw")}
         <p>Genauso wichtig ist mir die Zusammenarbeit mit <a href="firmenkunden.html">Autohäusern, Unternehmen und Flotten</a>, und zwar langfristig und partnerschaftlich. Mein Ziel bleibt dabei immer dasselbe: hochwertige Fahrzeugpflege aus echter Leidenschaft.</p>
       </div>
       <aside class="sticky-aside">
@@ -1031,6 +1077,7 @@ def build_service(site, sv, write):
         {intro}
         {service_ba(site, sv, prefix)}
         {figure(site, sv.get("image"), prefix)}
+        {photo_grid(site, sv.get("photos"), prefix, sizes="(min-width: 900px) 260px, 46vw")}
         <h2 id="enthalten">Das ist enthalten</h2>
         <ul class="includes">{includes}</ul>
         {addon_details(site, site.addon(sv["addon"]), prefix) if sv.get("addon") and site.addon(sv["addon"]) else (ceramic_section(site, prefix) if book == "keramik" else "")}

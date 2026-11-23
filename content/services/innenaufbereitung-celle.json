@@ -75,5 +75,22 @@
     "aussenaufbereitung-celle",
     "leasingrueckgabe-gebrauchtwagen-celle"
   ],
-  "beforeAfter": "Innenraum-Tiefenreinigung"
+  "beforeAfter": "Innenraum-Tiefenreinigung",
+  "photos": [
+    {
+      "file": "innen-audi-q7-cockpit.jpg",
+      "alt": "Cockpit und Fahrersitz eines Audi Q7",
+      "caption": "Audi Q7: Cockpit und Sitze"
+    },
+    {
+      "file": "innen-audi-q7-kofferraum.jpg",
+      "alt": "Gereinigter Kofferraum eines Audi Q7 mit Gummiwanne",
+      "caption": "Kofferraum gesaugt und gereinigt"
+    },
+    {
+      "file": "innen-audi-a3-cockpit.jpg",
+      "alt": "Cockpit und Vordersitze eines Audi A3",
+      "caption": "Audi A3: Innenraum nach der Reinigung"
+    }
+  ]
 }

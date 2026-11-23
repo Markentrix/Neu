@@ -73,5 +73,22 @@
     "keramikversiegelung-celle",
     "lackversiegelung-celle",
     "aussenaufbereitung-celle"
+  ],
+  "image": {
+    "file": "lack-waschkratzer-vorher.jpg",
+    "alt": "Feine Waschkratzer und Hologramme im Streiflicht auf einer blaugrauen Autotür",
+    "caption": "Typischer Ausgangszustand: Waschkratzer und Hologramme, sichtbar im Streiflicht. Genau das entfernt die mehrstufige Politur."
+  },
+  "photos": [
+    {
+      "file": "werkstatt-audi-rs3-front.jpg",
+      "alt": "Front eines Audi RS 3, im Lack spiegelt sich das Wabenlicht",
+      "caption": "So soll es aussehen: klare Spiegelung im Lack"
+    },
+    {
+      "file": "werkstatt-audi-q3-front.jpg",
+      "alt": "Front eines grauen Audi Q3 mit glänzender Motorhaube",
+      "caption": "Audi Q3 im Hallenlicht"
+    }
   ]
 }
