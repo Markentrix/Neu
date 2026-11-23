@@ -156,21 +156,6 @@ def offers_home(site):
   </section>'''
 
 
-def ba_pair(site, item, prefix=""):
-    """Vorher und Nachher nebeneinander, wenn die Fotos nicht aus exakt gleichem Winkel stammen (ehrlicher als ein Regler)."""
-    tags = item.get("tags") or ["Vorher", "Nachher"]
-    alt = item.get("alt", item["title"])
-    sizes = "(min-width: 900px) 300px, 46vw"
-    before = picture(site, item["before"], f"{tags[0]}: {alt}", "ba-pair-img", prefix, sizes=sizes)
-    after = picture(site, item["after"], f"{tags[1]}: {alt}", "ba-pair-img", prefix, sizes=sizes)
-    return f'''
-        <figure class="ba-pair reveal">
-          <div class="ba-pair-cell">{before}<span class="ba-tag l">{ESC(tags[0])}</span></div>
-          <div class="ba-pair-cell">{after}<span class="ba-tag r">{ESC(tags[1])}</span></div>
-          <figcaption class="ba-caption">{ESC(item["title"])}<span>{ESC(item.get("sub", ""))}</span></figcaption>
-        </figure>'''
-
-
 def photo_grid(site, photos, prefix="", label="Fotos aus der Werkstatt", scroll=False, sizes="(min-width: 900px) 300px, 46vw"):
     """Fotoreihe mit kurzen Bildunterschriften. scroll=True: auf dem Handy seitlich wischen statt untereinander."""
     items = [p for p in (photos or []) if p.get("file") in site.media]
@@ -184,17 +169,16 @@ def photo_grid(site, photos, prefix="", label="Fotos aus der Werkstatt", scroll=
 
 def ba_tile(site, item, n, prefix=""):
     has = item.get("before") in site.media and item.get("after") in site.media
-    if has and item.get("layout") == "pair":
-        return ba_pair(site, item, prefix), True
     if has:
-        before = picture(site, item["before"], "Vorher: " + item.get("alt", item["title"]), "ba-art", prefix)
-        after = picture(site, item["after"], "Nachher: " + item.get("alt", item["title"]), "ba-art ba-after", prefix)
+        tags = item.get("tags") or ["Vorher", "Nachher"]
+        before = picture(site, item["before"], f"{tags[0]}: " + item.get("alt", item["title"]), "ba-art", prefix)
+        after = picture(site, item["after"], f"{tags[1]}: " + item.get("alt", item["title"]), "ba-art ba-after", prefix)
     else:
         before, after = _ba_placeholder(n)
     return f'''
         <div class="ba reveal">
           {before}{after}
-          <span class="ba-tag l">Vorher</span><span class="ba-tag r">Nachher</span>
+          <span class="ba-tag l">{ESC(tags[0]) if has else "Vorher"}</span><span class="ba-tag r">{ESC(tags[1]) if has else "Nachher"}</span>
           <div class="ba-handle"></div>
           <label><span class="visually-hidden">Vorher-Nachher-Vergleich: {ESC(item["title"])}</span><input type="range" min="0" max="100" value="50"></label>
           <div class="ba-caption">{ESC(item["title"])}<span>{ESC(item.get("sub", ""))}</span></div>
@@ -209,8 +193,6 @@ def service_ba(site, sv, prefix=""):
     tile, has = ba_tile(site, it, 9, prefix)
     if not has:
         return ""
-    if it.get("layout") == "pair":
-        return f'<div class="ba-single ba-single--pair">{tile}</div>'
     return f'<div class="ba-single" aria-label="Vorher-Nachher-Vergleich">{tile}<p class="hint">Ziehen Sie den Regler, um vorher und nachher zu vergleichen.</p></div>'
 
 
@@ -673,7 +655,7 @@ def build_home(site, write):
       <div class="section-head reveal">
         <p class="eyebrow">Ergebnisse vorher und nachher</p>
         <h2 id="vn-h" class="display">Vorher. Nachher. <em>Echte Ergebnisse.</em></h2>
-        <p>Fahrzeuge unserer Kundinnen und Kunden, fotografiert vor und nach der Aufbereitung. Beim Bild mit Regler können Sie selbst schieben.</p>
+        <p>Fahrzeuge unserer Kundinnen und Kunden, fotografiert vor und nach der Aufbereitung. Ziehen Sie den Regler, um den Unterschied zu sehen.</p>
       </div>
       <div class="ba-grid ba-grid--home stagger{" ba-grid--few" if len(tiles) < 3 else ""}">{"".join(tiles)}
       </div>

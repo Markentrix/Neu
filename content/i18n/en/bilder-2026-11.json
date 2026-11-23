@@ -1,9 +1,7 @@
 {
  "Vorher. Nachher. <t1>Echte Ergebnisse.</t1>": "Before. After. <t1>Real results.</t1>",
- "Fahrzeuge unserer Kundinnen und Kunden, fotografiert vor und nach der Aufbereitung. Beim Bild mit Regler können Sie selbst schieben.": "Our customers' cars, photographed before and after detailing. On the image with the slider, you can drag it yourself.",
  "Unbehandelt": "Untreated",
  "Aufbereitet": "Restored",
- "Scheinwerfer aufbereitet<t1>Ford Ka: links noch unbehandelt, rechts nach der Aufbereitung</t1>": "Headlights restored<t1>Ford Ka: left still untreated, right after restoration</t1>",
  "Innenraum BMW X3<t1>Fußraum, Fußmatten, Leder und Kunststoffe</t1>": "BMW X3 interior<t1>Footwell, floor mats, leather and plastics</t1>",
  "Innenraum VW Tiguan<t1>Gummimatten, Polster und Cockpit</t1>": "VW Tiguan interior<t1>Rubber mats, upholstery and cockpit</t1>",
  "Alle Fotos stammen aus unserer Werkstatt in Celle, Kennzeichen sind unkenntlich. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok. <t1>Instagram</t1> · <t2>TikTok</t2>": "All photos were taken in our workshop in Celle; number plates are not recognisable. We regularly share more recent work on Instagram and TikTok. <t1>Instagram</t1> · <t2>TikTok</t2>",
@@ -63,5 +61,10 @@
  "Ledersitze im Fond eines Audi Q7": "Rear leather seats of an Audi Q7",
  "Unsere Halle an der Lachtehäuser Straße: Im Wabenlicht sieht man jeden Kratzer.": "Our workshop on Lachtehäuser Straße: under the hexagon lighting, every scratch shows.",
  "Lenkradschutz und saubere Matten bis zur Übergabe": "Steering wheel cover and clean mats until handover",
- "Weißer Audi S6 auf der Hebebühne in der Werkstatt von ElbDetail": "White Audi S6 on the lift in the ElbDetail workshop"
+ "Weißer Audi S6 auf der Hebebühne in der Werkstatt von ElbDetail": "White Audi S6 on the lift in the ElbDetail workshop",
+ "Fahrzeuge unserer Kundinnen und Kunden, fotografiert vor und nach der Aufbereitung. Ziehen Sie den Regler, um den Unterschied zu sehen.": "Our customers' cars, photographed before and after detailing. Drag the slider to see the difference.",
+ "Vorher-Nachher-Vergleich: Scheinwerfer aufbereitet": "Before and after comparison: headlights restored",
+ "Scheinwerfer aufbereitet<t1>Ford Ka, gleicher Tag: ein Scheinwerfer unbehandelt, der andere aufbereitet</t1>": "Headlights restored<t1>Ford Ka, same day: one headlight untreated, the other restored</t1>",
+ "Vorher-Nachher-Vergleich: Innenraum BMW X3": "Before and after comparison: BMW X3 interior",
+ "Vorher-Nachher-Vergleich: Innenraum VW Tiguan": "Before and after comparison: VW Tiguan interior"
 }

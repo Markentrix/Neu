@@ -2,8 +2,7 @@
   "items": [
     {
       "title": "Scheinwerfer aufbereitet",
-      "sub": "Ford Ka: links noch unbehandelt, rechts nach der Aufbereitung",
-      "layout": "pair",
+      "sub": "Ford Ka, gleicher Tag: ein Scheinwerfer unbehandelt, der andere aufbereitet",
       "tags": [
         "Unbehandelt",
         "Aufbereitet"
@@ -15,7 +14,6 @@
     {
       "title": "Innenraum BMW X3",
       "sub": "Fußraum, Fußmatten, Leder und Kunststoffe",
-      "layout": "pair",
       "before": "innen-vorher-bmw-x3.jpg",
       "after": "innen-nachher-bmw-x3.jpg",
       "alt": "Fahrerseite eines BMW X3 mit Ledersitz und Fußmatte"
@@ -30,7 +28,6 @@
     {
       "title": "Innenraum VW Tiguan",
       "sub": "Gummimatten, Polster und Cockpit",
-      "layout": "pair",
       "before": "innen-vorher-vw-tiguan.jpg",
       "after": "innen-nachher-vw-tiguan.jpg",
       "alt": "Fahrerseite eines VW Tiguan mit Stoffsitz und Gummimatte"

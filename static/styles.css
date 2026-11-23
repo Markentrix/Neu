@@ -741,13 +741,12 @@ section.dark { background: var(--anthracite); color: var(--on-anthracite); }
 .ba-caption { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 32px 16px 14px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: #fff; font-size: 0.9rem; font-weight: 600; pointer-events: none; }
 .ba-caption span { display: block; font-weight: 400; color: var(--muted-on-anthracite); font-size: 0.8rem; }
 .gallery-note { margin-top: 20px; color: var(--muted); font-size: 0.92rem; max-width: 66ch; }
-/* Vorher/Nachher als Bildpaar (Fotos nicht aus exakt gleichem Winkel) */
-.ba-pair { position: relative; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; aspect-ratio: 3 / 2; border-radius: var(--radius-m); overflow: hidden; background: var(--anthracite); isolation: isolate; }
-.ba-pair-cell { position: relative; min-width: 0; }
-.ba-pair-cell .ba-pair-img, .ba-pair-cell img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.ba-grid--home .ba { aspect-ratio: 3 / 2; }
-@media (min-width: 900px) { .ba-grid--home { grid-template-columns: repeat(2, 1fr); gap: 22px; } }
-.ba-single--pair { max-width: 640px; }
+/* Startseite: vier Regler nebeneinander (Desktop), zwei (Tablet), einer (Handy, quadratisch) */
+.ba-grid--home { grid-template-columns: 1fr; }
+.ba-grid--home .ba { aspect-ratio: 1 / 1; }
+@media (min-width: 600px) { .ba-grid--home { grid-template-columns: repeat(2, 1fr); } .ba-grid--home .ba { aspect-ratio: 4 / 5; } }
+@media (min-width: 1100px) { .ba-grid--home { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
+.ba-grid--home .ba-caption { font-size: 0.86rem; }
 /* Fotoreihe aus der Werkstatt */
 .photo-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); margin: 28px 0 8px; }
 @media (min-width: 900px) { #werkstatt .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
