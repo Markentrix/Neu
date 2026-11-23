@@ -3,6 +3,7 @@
 import core
 import md
 import seo
+import pages
 from core import ESC, I
 
 
@@ -32,7 +33,7 @@ def build_index(site, write):
     chips = '<button type="button" class="chip is-active" data-filter="">Alle</button>' + "".join(
         f'<button type="button" class="chip" data-filter="{ESC(c)}">{ESC(c)}</button>' for c in cats)
     cards = "".join(f'''
-        <article class="article-card" data-cat="{ESC(a.get("category", ""))}">
+        <article class="article-card" data-cat="{ESC(a.get("category", ""))}">{pages.card_img(site, a, prefix)}
           <span class="article-cat">{ESC(a.get("category", "Ratgeber"))}</span>
           <h2><a class="stretched" href="{a["slug"]}.html">{ESC(a["title"])}</a></h2>
           <p>{ESC(a.get("excerpt", ""))}</p>
@@ -91,7 +92,7 @@ def build_winter_hub(site, write, winter):
            "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{site.url}/ratgeber/{a['slug']}.html", "name": a["title"]}
                                for i, a in enumerate(winter)]}]
     cards = "".join(f'''
-        <article class="article-card">
+        <article class="article-card">{pages.card_img(site, a, prefix)}
           <span class="article-cat">{ESC(a.get("category", "Winter"))}</span>
           <h2><a class="stretched" href="{a["slug"]}.html">{ESC(a["title"])}</a></h2>
           <p>{ESC(a.get("excerpt", ""))}</p>
@@ -178,6 +179,7 @@ def build_article(site, a, write):
     <div class="container two-up article-layout">
       <div class="prose">
         <div class="article-summary"><h2 class="as-h">Das Wichtigste in Kürze</h2><ul>{summary}</ul></div>
+        {pages.figure(site, a.get("image"), prefix)}
         {html_body}
         {faq}
         <div class="author-box">{I["shield"]}<div><strong>Über {ESC(site.s["name"])}</strong><p>Fachbetrieb für Fahrzeugaufbereitung in Celle, gegründet von {ESC((site.s.get("about") or {}).get("name") or "dem Inhaber")}. C²Coating Excellence Partner, Koch-Chemie geschult, 100 % Handarbeit, {ESC(site.s["rating"]["value"])} ★ bei {site.s["rating"]["count"]} Google-Bewertungen. Dieser Artikel gibt unsere Erfahrung aus der täglichen Arbeit wieder.</p></div></div>

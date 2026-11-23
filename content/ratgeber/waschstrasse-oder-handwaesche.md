@@ -27,7 +27,12 @@
       "q": "Kann man Swirls im Lack selbst entfernen?",
       "a": "Swirls lassen sich nicht mit Shampoo oder Wachs entfernen, sondern nur mit einer Politur, die eine sehr dünne Schicht Klarlack abträgt. Dafür braucht es Erfahrung, passendes Werkzeug und Wissen über die vorhandene Lackstärke. Eine Lackschichtdickenmessung vor der Politur hilft, Durchpolieren zu vermeiden."
     }
-  ]
+  ],
+  "image": {
+    "file": "lack-waschkratzer-tuer-vorher.jpg",
+    "alt": "Waschkratzer im Lack einer dunkelgrauen Tür",
+    "caption": "Typische Spuren der Waschstraße: feine Kratzer, die im Sonnenlicht sichtbar werden."
+  }
 }
 
 Feine Kratzer im Lack fallen meist erst auf, wenn die Sonne flach auf das Auto scheint. Dann zeigen sich kreisförmige Muster, die wie ein Spinnennetz über Motorhaube und Türen laufen. Fast immer entstehen sie nicht beim Fahren, sondern beim Waschen.

@@ -358,13 +358,17 @@ section.dark { background: var(--anthracite); color: var(--on-anthracite); }
 }
 /* Hero-Foto: dunkles Detailbild, per Verlauf abgedunkelt, damit Text und Preisrechner klar lesbar bleiben */
 .hero-photo { position: absolute; inset: 0; display: block; }
-.hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 40%; opacity: 0.75; }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; }
+/* Oben bleibt das Wabenlicht der Werkstatt sichtbar, nach unten und zur Schrift hin wird es dunkler */
 .hero-photo::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(30,34,41,0.55) 0%, rgba(30,34,41,0.8) 45%, rgba(30,34,41,0.95) 100%);
+  background: linear-gradient(180deg, rgba(30,34,41,0.42) 0%, rgba(30,34,41,0.78) 34%, rgba(30,34,41,0.93) 62%, rgba(30,34,41,0.97) 100%);
 }
 @media (min-width: 980px) {
-  .hero-photo::after { background: linear-gradient(90deg, rgba(30,34,41,0.97) 0%, rgba(30,34,41,0.9) 42%, rgba(30,34,41,0.55) 75%, rgba(30,34,41,0.7) 100%); }
+  .hero-photo img { object-position: 50% 8%; }
+  .hero-photo::after { background:
+    linear-gradient(90deg, rgba(30,34,41,0.86) 0%, rgba(30,34,41,0.66) 48%, rgba(30,34,41,0.3) 100%),
+    linear-gradient(180deg, rgba(30,34,41,0) 0%, rgba(30,34,41,0.2) 30%, rgba(30,34,41,0.82) 58%, rgba(30,34,41,0.95) 100%); }
 }
 .hero-credit { position: absolute; z-index: 1; right: 16px; bottom: 52px; font-size: 0.7rem; color: rgba(244,246,249,0.55); }
 @media (max-width: 899.98px) { .hero-credit { bottom: 34px; } }
@@ -1165,7 +1169,6 @@ a.ref-cell:hover .ref-word, a.ref-cell:hover .ref-cell-go, a.ref-cell:focus-visi
   .header-cta .btn-sm { width: 44px; padding: 0; gap: 0; }
   .header-cta .btn-sm svg { width: 22px; height: 22px; }
   .header-cta .btn-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .hero-photo img { object-position: 30% 62%; }
   .hero { padding-block: calc(var(--header-h) + 22px) 64px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), 0 100%); }
   .hero::before { width: 90vw; height: 90vw; right: -34vw; top: 20%; }
   .hero-headline { font-size: clamp(2.2rem, 10.5vw, 3.4rem); line-height: 1; max-width: none; }
@@ -1547,3 +1550,64 @@ blockquote.note p { color: #4d3a0f; }
 .footer-legal { margin-top: 40px; }
 .footer-legal p { margin: 0; font-size: 0.8rem; line-height: 1.5; color: var(--muted-on-anthracite); max-width: 90ch; }
 .footer-legal + .footer-bottom { margin-top: 18px; }
+
+/* ==========================================================================
+   Fotos vergrößern (Vollbild-Ansicht) und Werkstatt-Galerie
+   ========================================================================== */
+a.zoom { display: block; position: relative; border-radius: var(--radius-m); cursor: zoom-in; }
+a.zoom:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+a.zoom::after {
+  content: ""; position: absolute; right: 10px; bottom: 10px; width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(20,24,31,0.62) url("data:image/svg+xml,%3Csvg xmlns='%68ttp://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") center / 16px no-repeat;
+  opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease;
+}
+a.zoom:hover::after, a.zoom:focus-visible::after { opacity: 1; transform: none; }
+@media (hover: none) { a.zoom::after { opacity: 0.9; transform: none; width: 30px; height: 30px; } }
+.photo a.zoom img, .fig a.zoom img { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@media (hover: hover) { .photo a.zoom:hover img { transform: scale(1.025); } }
+.photo a.zoom, .fig a.zoom { overflow: hidden; }
+
+@media (min-width: 900px) {
+  #werkstatt .photo-grid.has-extra:not(.is-open) .photo.is-extra { display: none; }
+}
+.photo-more { display: none; margin-top: 22px; text-align: center; }
+@media (min-width: 900px) { .photo-more { display: block; } }
+
+dialog.lightbox {
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: rgba(12,14,18,0.96); color: var(--on-anthracite); overflow: hidden;
+}
+dialog.lightbox::backdrop { background: rgba(12,14,18,0.96); }
+html.lb-open { overflow: hidden; }
+.lb-fig { margin: 0; position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 12px; padding: 64px 72px 56px; }
+.lb-img { max-width: 100%; max-height: calc(100dvh - 150px); width: auto; height: auto; object-fit: contain; border-radius: 10px; box-shadow: 0 30px 80px -30px rgba(0,0,0,0.8); background: #111; }
+.lb-cap { max-width: 70ch; text-align: center; font-size: 0.95rem; color: var(--muted-on-anthracite); }
+.lb-count { position: absolute; top: 18px; left: 22px; margin: 0; font-size: 0.86rem; font-weight: 600; letter-spacing: 0.08em; color: var(--muted-on-anthracite); font-variant-numeric: tabular-nums; }
+.lb-btn {
+  position: absolute; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: #fff; cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.lb-btn:hover { background: rgba(255,255,255,0.18); }
+.lb-btn:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: 2px; }
+.lb-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.lb-close { top: 12px; right: 12px; }
+.lb-prev, .lb-next { top: 50%; transform: translateY(-50%); }
+.lb-prev { left: 14px; } .lb-next { right: 14px; }
+.lightbox.is-single .lb-prev, .lightbox.is-single .lb-next { display: none; }
+@media (max-width: 719.98px) {
+  .lb-fig { padding: 60px 10px 92px; }
+  .lb-img { max-height: calc(100dvh - 190px); border-radius: 6px; }
+  .lb-prev, .lb-next { top: auto; bottom: 20px; transform: none; }
+  .lb-prev { left: calc(50% - 60px); } .lb-next { right: calc(50% - 60px); }
+  .lb-cap { padding-inline: 12px; font-size: 0.88rem; }
+}
+@media print { dialog.lightbox, .photo-more { display: none !important; } }
+
+/* Ratgeber-Karten mit Vorschaubild */
+.article-card .article-img { display: block; margin: -24px -24px 6px; overflow: hidden; border-radius: var(--radius-m) var(--radius-m) 0 0; }
+.article-card .article-img img { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@media (hover: hover) and (pointer: fine) { .article-card:hover .article-img img { transform: scale(1.03); } }
+.article-card { overflow: hidden; }
+/* Regler: Schilder und Unterschrift liegen über der Trennlinie (klicken geht weiter durch, pointer-events: none) */
+.ba .ba-tag, .ba .ba-caption { z-index: 4; pointer-events: none; }

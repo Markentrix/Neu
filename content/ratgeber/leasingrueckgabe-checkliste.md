@@ -27,7 +27,12 @@
       "q": "Welches Paket eignet sich für die Leasingrückgabe?",
       "a": "Für die meisten Rückgaben ist das Paket Essential ein guter Ausgangspunkt, weil es Innenraum und Außenbereich gründlich abdeckt. Wirkt der Lack stumpf oder zeigt er feine Kratzer, kann das Paket Signature mit Glanzpolitur sinnvoll sein. Den verbindlichen Preis bekommen Sie bei ElbDetail vor dem Termin."
     }
-  ]
+  ],
+  "image": {
+    "file": "verkauf-audi-a3-front.jpg",
+    "alt": "Schwarzer Audi A3 von vorn",
+    "caption": "Ein gepflegter Gesamteindruck hilft bei der Rückgabe-Begutachtung."
+  }
 }
 
 Sie geben Ihr Leasingauto am besten ohne böse Überraschung zurück, wenn Sie es rechtzeitig prüfen, gründlich reinigen lassen und kleine Gebrauchsspuren vor dem Termin beheben. Ein sauberes Fahrzeug macht echte Schäden nicht unsichtbar. Es sorgt aber dafür, dass Schmutz nicht als Mangel erfasst wird und der Zustand fair beurteilt werden kann.

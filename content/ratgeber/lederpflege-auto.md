@@ -27,7 +27,12 @@
       "q": "Kann ich Alcantara wie Leder pflegen?",
       "a": "Nein, Alcantara ist eine Mikrofaser und kein Leder. Lederpflege oder Cremes verkleben die feinen Fasern. Reinigen Sie Alcantara mit einer weichen Bürste und einem dafür geeigneten Reiniger, und zwar mit möglichst wenig Feuchtigkeit."
     }
-  ]
+  ],
+  "image": {
+    "file": "leder-audi-q7-sitz.jpg",
+    "alt": "Rautengesteppter Ledersitz eines Audi Q7",
+    "caption": "Gepflegtes Leder: seidiger Glanz, keine speckigen Stellen."
+  }
 }
 
 Ledersitze wirken hochwertig und sind angenehm im Alltag. Mit der Zeit setzen ihnen aber Schweiß, Hautfett, Sonnenlicht und Reibung zu. Das Leder wird glänzend, fleckig oder rissig, besonders an der Sitzwange des Fahrersitzes.

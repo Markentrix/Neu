@@ -27,7 +27,12 @@
       "q": "Woran erkenne ich, ob ein Kratzer wegpoliert werden kann?",
       "a": "Fahren Sie mit dem Fingernagel quer über den Kratzer. Gleitet der Nagel darüber, liegt der Kratzer meist im Klarlack und lässt sich oft auspolieren. Bleibt der Nagel hängen oder schimmert heller Untergrund durch, ist der Kratzer in der Regel zu tief für eine Politur."
     }
-  ]
+  ],
+  "image": {
+    "file": "lack-waschkratzer-vorher.jpg",
+    "alt": "Feine Waschkratzer und Hologramme im Streiflicht auf einer blaugrauen Autotür",
+    "caption": "Waschkratzer wie diese entfernt nur eine Politur. Eine Versiegelung schützt danach."
+  }
 }
 
 Eine Lackpolitur korrigiert Schäden im Lack, eine Lackversiegelung schützt ihn. Zeigt Ihr Lack feine Kratzer, Hologramme oder einen grauen Schleier, brauchen Sie zuerst eine Politur. Ist der Lack noch in gutem Zustand und soll vor allem geschützt werden, reicht oft eine Versiegelung.

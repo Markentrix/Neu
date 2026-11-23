@@ -258,7 +258,7 @@ def build_gutscheine(site, write):
     ]
     ld = [seo.webpage(site, path, title), seo.crumbs(site, [("Startseite", "/"), ("Gutscheine", path)]), seo.faq(faq),
           {"@context": "https://schema.org", "@type": "Product", "name": "ElbDetail Gutschein Fahrzeugaufbereitung", "brand": {"@type": "Brand", "name": s["name"]},
-           "description": "Wert- oder Paketgutschein für eine Fahrzeugaufbereitung bei ElbDetail in Celle.", "image": site.url + "/og-image.png",
+           "description": "Wert- oder Paketgutschein für eine Fahrzeugaufbereitung bei ElbDetail in Celle.", "image": site.url + "/og-image.jpg",
            "offers": {"@type": "AggregateOffer", "priceCurrency": "EUR", "lowPrice": str(v["minAmount"]), "highPrice": str(v["maxAmount"]),
                       "availability": "https://schema.org/InStock", "seller": {"@id": site.url + "/#business"}}}]
     amounts = "".join(f'<label class="choice-pill"><input type="radio" name="betrag" value="{a}"{" checked" if i == 1 else ""}><span><strong>{a} €</strong></span></label>' for i, a in enumerate(v["amounts"]))

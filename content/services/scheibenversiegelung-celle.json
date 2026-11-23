@@ -75,5 +75,11 @@
     "keramikversiegelung-celle",
     "felgenversiegelung-celle",
     "aussenaufbereitung-celle"
-  ]
+  ],
+  "image": {
+    "file": "c2-abperleffekt.jpg",
+    "alt": "Wasser perlt in dichten Tropfen von einer keramisch versiegelten Oberfläche ab",
+    "caption": "Der Abperleffekt einer C²Coating-Keramik: Wasser zieht sich zu Tropfen zusammen und läuft ab. Auf der Frontscheibe sorgt das für klare Sicht bei Regen.",
+    "credit": "C²Coating"
+  }
 }

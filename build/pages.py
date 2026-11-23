@@ -29,15 +29,31 @@ def picture(site, name, alt, cls, prefix, sizes="(min-width: 900px) 33vw, 90vw",
             + ('fetchpriority="low" ' if eager else 'loading="lazy" ') + 'decoding="async"></picture>')
 
 
+def zoom(site, name, prefix, inner):
+    """Bild als Link auf die größte Fassung: ohne Skript öffnet es das Bild, mit Skript die Vollbild-Ansicht."""
+    m = site.media.get(name)
+    if not m or not inner:
+        return inner
+    big = (m.get("webp") or m.get("avif") or [m["src"]])[-1].split(" ")[0]
+    return f'<a class="zoom" href="{prefix}{big}" data-zoom>{inner}</a>'
+
+
 def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
     """Bild mit Bildunterschrift und Quellenangabe, z. B. {"file", "alt", "caption", "credit"}."""
     if not img or img.get("file") not in site.media:
         return ""
-    pic = picture(site, img["file"], img.get("alt", ""), "fig-img", prefix, sizes=sizes)
+    pic = zoom(site, img["file"], prefix, picture(site, img["file"], img.get("alt", ""), "fig-img", prefix, sizes=sizes))
     cap = ESC(img.get("caption", ""))
     if img.get("credit"):
         cap += f' <span class="fig-credit">Bild: {ESC(img["credit"])}</span>'
     return f'<figure class="fig">{pic}' + (f"<figcaption>{cap}</figcaption>" if cap else "") + "</figure>"
+
+
+def card_img(site, a, prefix):
+    """Vorschaubild oben in einer Ratgeber-Karte (dekorativ, der Titel trägt den Link)."""
+    img = a.get("image") or {}
+    pic = picture(site, img.get("file", ""), "", "article-img", prefix, sizes="(min-width: 900px) 380px, 84vw")
+    return pic.replace('<picture class="article-img">', '<picture class="article-img" aria-hidden="true">') if pic else ""
 
 
 def _refs(site):
@@ -156,15 +172,21 @@ def offers_home(site):
   </section>'''
 
 
-def photo_grid(site, photos, prefix="", label="Fotos aus der Werkstatt", scroll=False, sizes="(min-width: 900px) 300px, 46vw"):
-    """Fotoreihe mit kurzen Bildunterschriften. scroll=True: auf dem Handy seitlich wischen statt untereinander."""
+def photo_grid(site, photos, prefix="", label="Fotos aus der Werkstatt", scroll=False, sizes="(min-width: 900px) 300px, 46vw", first=0):
+    """Fotoreihe mit kurzen Bildunterschriften. Antippen vergrößert.
+    scroll=True: auf dem Handy seitlich wischen statt untereinander. first=n: am Desktop erst n Fotos, Rest per Knopf."""
     items = [p for p in (photos or []) if p.get("file") in site.media]
     if not items:
         return ""
-    figs = "".join(f'<figure class="photo reveal">{picture(site, p["file"], p.get("alt", ""), "photo-img", prefix, sizes=sizes)}'
-                   + (f'<figcaption>{ESC(p["caption"])}</figcaption>' if p.get("caption") else "") + "</figure>" for p in items)
+    extra = first and len(items) > first
+    figs = "".join(f'<figure class="photo reveal{" is-extra" if extra and i >= first else ""}">'
+                   + zoom(site, p["file"], prefix, picture(site, p["file"], p.get("alt", ""), "photo-img", prefix, sizes=sizes))
+                   + (f'<figcaption>{ESC(p["caption"])}</figcaption>' if p.get("caption") else "") + "</figure>" for i, p in enumerate(items))
     attrs = f' tabindex="0" role="region" aria-label="{ESC(label)}, seitlich wischen"' if scroll else ""
-    return f'<div class="photo-grid{" home-scroll" if scroll else ""} stagger"{attrs}>{figs}</div>'
+    grid = f'<div class="photo-grid{" home-scroll" if scroll else ""}{" has-extra" if extra else ""} stagger"{attrs}>{figs}</div>'
+    if extra:
+        grid += f'<p class="photo-more"><button class="btn btn-line-light" type="button" aria-expanded="false">Alle {len(items)} Fotos ansehen</button></p>'
+    return grid
 
 
 def ba_tile(site, item, n, prefix=""):
@@ -551,7 +573,7 @@ def build_home(site, write):
     gallery_note = ("Alle Fotos stammen aus unserer Werkstatt in Celle, Kennzeichen sind unkenntlich. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok."
                     if real else "Die Darstellungen sind Platzhalter, bis die ersten Vorher-/Nachher-Fotos online sind. Echte Ergebnisse finden Sie jederzeit auf Instagram und TikTok.")
 
-    wp = photo_grid(site, s.get("workshopPhotos"), "", "Fotos aus der Werkstatt", scroll=True)
+    wp = photo_grid(site, s.get("workshopPhotos"), "", "Fotos aus der Werkstatt", scroll=True, first=8)
     workshop = f'''
   <section id="werkstatt" aria-labelledby="werkstatt-h">
     <div class="container">
@@ -566,7 +588,7 @@ def build_home(site, write):
 
     articles = site.articles[:3]
     art_cards = "".join(f'''
-        <article class="article-card reveal">
+        <article class="article-card reveal">{card_img(site, a, "")}
           <span class="article-cat">{ESC(a.get("category", "Ratgeber"))}</span>
           <h3><a class="stretched" href="ratgeber/{a["slug"]}.html">{ESC(a["title"])}</a></h3>
           <p>{ESC(a.get("excerpt", ""))}</p>

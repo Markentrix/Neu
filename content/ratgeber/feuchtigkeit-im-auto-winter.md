@@ -32,7 +32,12 @@
       "q": "Was tun, wenn es im Auto muffig riecht?",
       "a": "Ein muffiger Geruch ist oft ein Zeichen, dass Feuchtigkeit sich im Teppich oder in den Polstern festgesetzt hat. Trocknen allein reicht dann meist nicht. Eine gründliche Innenreinigung mit Nassreinigung, Trocknung und Geruchsneutralisierung beseitigt die Ursache, statt sie zu überdecken."
     }
-  ]
+  ],
+  "image": {
+    "file": "innen-audi-q7-kofferraum.jpg",
+    "alt": "Gereinigter Kofferraum eines Audi Q7 mit Gummiwanne",
+    "caption": "Gummiwannen und -matten halten Nässe aus dem Teppich."
+  }
 }
 
 Feuchtigkeit im Auto entsteht im Winter vor allem durch Schnee und Nässe an Schuhen und Kleidung, durch nasse Fußmatten und durch die Atemluft der Insassen. Am meisten hilft es, Matten regelmäßig zu trocknen, die Innenscheiben sauber zu halten und die Klimaanlage zum Entfeuchten zu nutzen. Bleibt die Feuchtigkeit trotzdem über Wochen im Auto, ist eine gründliche Innenreinigung mit Trocknung der sicherste Weg.

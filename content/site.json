@@ -136,7 +136,7 @@
     },
     "photos": [
       {
-        "file": "werkstatt-audi-s6-heck.jpg",
+        "file": "werkstatt-audi-s6-front.jpg",
         "alt": "Weißer Audi S6 auf der Hebebühne in der Werkstatt von ElbDetail",
         "caption": "Unsere Halle an der Lachtehäuser Straße: Im Wabenlicht sieht man jeden Kratzer."
       },
@@ -216,7 +216,7 @@
     "Überweisung"
   ],
   "heroImage": {
-    "file": "werkstatt-audi-s6-front.jpg"
+    "file": "werkstatt-audi-s6-heck.jpg"
   },
   "spotlightImage": {
     "file": "keramik-bmw-cabrio-c2coating.jpg",
@@ -239,8 +239,8 @@
   },
   "workshopPhotos": [
     {
-      "file": "werkstatt-audi-s6-heck.jpg",
-      "alt": "Weißer Audi S6 auf der Hebebühne unter dem Wabenlicht der Werkstatt",
+      "file": "werkstatt-audi-s6-front.jpg",
+      "alt": "Weißer Audi S6 von vorn auf der Hebebühne, im Lack spiegelt sich das Wabenlicht",
       "caption": "Audi S6 unter unserem Wabenlicht"
     },
     {

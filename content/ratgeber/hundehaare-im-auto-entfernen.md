@@ -27,7 +27,12 @@
       "q": "Was kostet es, Hundehaare im Auto professionell entfernen zu lassen?",
       "a": "Bei ElbDetail in Celle ist die Tiefenreinigung von Polstern und Teppich Teil des Pakets Essential, das bei Kleinwagen ab {ab:essential} € beginnt. Die Richtpreise gelten für einen normalen Pflegezustand. Bei starkem Haarbefall bekommen Sie vor dem Termin einen verbindlichen Preis."
     }
-  ]
+  ],
+  "image": {
+    "file": "tierhaare-rueckbank-vorher.jpg",
+    "alt": "Hundehaare im Stoff einer Rückbank",
+    "caption": "So sieht es vorher aus: Hundehaare haben sich tief in den Sitzstoff gearbeitet."
+  }
 }
 
 Hundehaare im Auto sind hartnäckiger als normaler Schmutz. Wer regelmäßig mit Hund unterwegs ist, kennt das: Nach dem Saugen sieht der Kofferraum kurz sauber aus. Im Gegenlicht stecken aber immer noch feine Haare im Teppich und in den Sitzbezügen.

@@ -27,7 +27,12 @@
       "q": "Wie oft sollte ich mein Auto im Winter waschen?",
       "a": "Waschen Sie Ihr Auto im Winter regelmäßig, vor allem nach Fahrten auf gestreuten Straßen. Wählen Sie dafür möglichst einen Tag mit Temperaturen über dem Gefrierpunkt. Spülen Sie auch Radkästen und Unterboden gründlich ab und trocknen Sie danach die Türdichtungen."
     }
-  ]
+  ],
+  "image": {
+    "file": "keramik-bmw-cabrio-c2coating.jpg",
+    "alt": "Hand im Handschuh mit einer Flasche C²Coating Car Ceramic vor einem weißen BMW",
+    "caption": "Eine Versiegelung vor dem ersten Frost lässt Salz und Schmutz schlechter haften."
+  }
 }
 
 Sie machen Ihr Auto am besten im Herbst winterfest, bevor der erste Frost kommt und die Straßen gestreut werden. Die wichtigsten Schritte sind eine Lackversiegelung, saubere und geschützte Felgen, gepflegte Dichtungen und ein Innenraum, der Nässe gut wegsteckt.

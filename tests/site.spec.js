@@ -579,3 +579,31 @@ test("Buchung: hinter dem Buchungszeitraum des Portals freundlicher Hinweis stat
     await page.request.post("/__mock/sperren", { data: { tage: [] } });
   }
 });
+
+test("Fotos: Vollbild-Ansicht mit Blättern, Schließen per Esc, Fokus zurück", async ({ page }) => {
+  await page.goto("/");
+  const first = page.locator("#werkstatt a.zoom").first();
+  await first.click();
+  const dlg = page.locator("dialog.lightbox");
+  await expect(dlg).toHaveJSProperty("open", true);
+  await expect(page.locator(".lb-count")).toHaveText(/^1 \/ \d+$/);
+  await expect(page.locator(".lb-img")).toHaveJSProperty("complete", true);
+  expect(await page.locator(".lb-img").evaluate((i) => i.naturalWidth)).toBeGreaterThan(400);
+  await page.locator(".lb-next").click();
+  await expect(page.locator(".lb-count")).toHaveText(/^2 \/ /);
+  await page.keyboard.press("Escape");
+  await expect(dlg).toHaveJSProperty("open", false);
+  await expect(first).toBeFocused();
+});
+
+test("Fotos: jede Bildquelle der Startseite und der Leistungsseiten lädt", async ({ page }) => {
+  for (const path of ["/", "/en/", "/leistungen/innenaufbereitung-celle.html", "/ueber-uns.html", "/ratgeber/index.html"]) {
+    await page.goto(path);
+    const srcs = await page.$$eval("a[data-zoom]", (as) => as.map((a) => a.getAttribute("href")));
+    const imgs = await page.$$eval("picture img", (is) => is.map((i) => i.getAttribute("src")));
+    for (const s of [...new Set([...srcs, ...imgs])]) {
+      const res = await page.request.get(new URL(s, page.url()).href);
+      expect(res.status(), `${path}: ${s}`).toBe(200);
+    }
+  }
+});

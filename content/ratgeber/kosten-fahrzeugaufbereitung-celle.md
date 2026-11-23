@@ -27,7 +27,12 @@
       "q": "Bekomme ich vorher einen festen Preis?",
       "a": "Ja. ElbDetail nennt Ihnen vor dem Termin einen verbindlichen Preis. Am schnellsten geht das, wenn Sie ein paar Fotos Ihres Autos per WhatsApp an +49 172 7613807 schicken."
     }
-  ]
+  ],
+  "image": {
+    "file": "werkstatt-audi-s6-front.jpg",
+    "alt": "Weißer Audi S6 von vorn auf der Hebebühne, im Lack spiegelt sich das Wabenlicht",
+    "caption": "Was eine Aufbereitung kostet, hängt von Fahrzeug, Zustand und Paket ab."
+  }
 }
 
 Eine Fahrzeugaufbereitung bei ElbDetail in Celle kostet je nach Paket und Fahrzeugklasse ab {ab:refresh} € für eine Handwäsche mit Innenraum-Basis (Paket Refresh, Kleinwagen) bis ab {preis:excellence:suv} € für eine Komplettaufbereitung mit mehrstufiger Lackkorrektur (Paket Excellence, großer SUV oder Van). Alle Angaben sind Ab-Preise für einen normalen Pflegezustand. Als Kleinunternehmer nach § 19 Abs. 1 UStG berechnet ElbDetail keine Umsatzsteuer.

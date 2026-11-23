@@ -209,14 +209,14 @@ def head(site, title, desc, path, prefix="", ld=None, noindex=False, og_type="we
 <meta property="og:title" content="{ESC(title)}">
 <meta property="og:description" content="{ESC(desc)}">
 <meta property="og:url" content="{ESC(url)}">
-<meta property="og:image" content="{site.url}/og-image.png">
+<meta property="og:image" content="{site.url}/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="ElbDetail – Premium Fahrzeugaufbereitung in Celle">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{ESC(title)}">
 <meta name="twitter:description" content="{ESC(desc)}">
-<meta name="twitter:image" content="{site.url}/og-image.png">
+<meta name="twitter:image" content="{site.url}/og-image.jpg">
 <link rel="preload" href="{prefix}fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{prefix}fonts/newsreader-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{site.asset(prefix, "styles.css")}">

@@ -27,7 +27,12 @@
       "q": "Wann sollte ich das Auto vor dem Verkauf aufbereiten lassen?",
       "a": "Am besten kurz bevor Sie die Fotos für Ihr Inserat machen. Dann sehen Sie den gepflegten Zustand direkt in den Bildern. Bis zur Besichtigung reicht danach meist eine kurze Zwischenreinigung."
     }
-  ]
+  ],
+  "image": {
+    "file": "verkauf-audi-a3-seite.jpg",
+    "alt": "Schwarzer Audi A3 Limousine von schräg vorn in der Abendsonne",
+    "caption": "Gepflegt fotografiert, schneller verkauft: Audi A3 nach der Aufbereitung."
+  }
 }
 
 Eine Aufbereitung vor dem Verkauf lohnt sich in den meisten Fällen, weil Käufer ein gepflegtes Auto als Zeichen für sorgfältigen Umgang sehen. Sie macht aus einem Gebrauchtwagen kein neues Auto. Sie sorgt aber dafür, dass der tatsächliche Zustand gut zur Geltung kommt und kleine Mängel nicht den Gesamteindruck bestimmen.

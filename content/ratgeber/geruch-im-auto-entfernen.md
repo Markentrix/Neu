@@ -27,7 +27,12 @@
       "q": "Helfen Duftbäume gegen Geruch im Auto?",
       "a": "Duftbäume helfen nicht gegen die Ursache, sie überdecken den Geruch nur für eine Weile. Die Geruchsquelle bleibt in Polstern, Teppich oder Lüftung erhalten. Oft entsteht dann ein Mischgeruch, der unangenehmer ist als der ursprüngliche."
     }
-  ]
+  ],
+  "image": {
+    "file": "innen-audi-q7-cockpit.jpg",
+    "alt": "Cockpit und Fahrersitz eines Audi Q7",
+    "caption": "Gerüche sitzen in Polstern, Teppich und Lüftung. Eine Tiefenreinigung erreicht alle drei."
+  }
 }
 
 Ein unangenehmer Geruch im Auto ist mehr als ein Schönheitsfehler. Er begleitet Sie auf jeder Fahrt, mindert den Wert beim Verkauf und kann ein Hinweis auf ein technisches Problem sein. Viele greifen dann zum Duftbaum oder Spray. Nach ein paar Tagen ist der Geruch aber wieder da.

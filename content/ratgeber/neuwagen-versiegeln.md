@@ -27,7 +27,12 @@
       "q": "Was ist der Unterschied zwischen Wachs und Versiegelung?",
       "a": "Wachs basiert meist auf natürlichen oder synthetischen Wachsen und bringt einen warmen Glanz, hält aber vergleichsweise kurz. Eine Versiegelung bildet eine widerstandsfähigere Schutzschicht auf dem Lack und hält in der Regel länger. Die tatsächliche Haltbarkeit hängt immer vom Produkt, der Vorbereitung und der Pflege ab."
     }
-  ]
+  ],
+  "image": {
+    "file": "keramik-tesla-model-y.jpg",
+    "alt": "Weißer Tesla Model Y in der Werkstatt",
+    "caption": "Neuwagen sind der beste Zeitpunkt für eine Versiegelung: Der Lack ist noch makellos."
+  }
 }
 
 Ein neues Auto glänzt bei der Übergabe und wirkt makellos. Viele fragen sich deshalb, ob eine Versiegelung überhaupt nötig ist. Schließlich ist der Lack frisch und hat noch keine Spuren des Alltags.

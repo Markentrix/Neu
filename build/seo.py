@@ -26,7 +26,7 @@ def business(site):
         "url": site.url + "/",
         "telephone": s["phone"],
         "email": s["email"],
-        "image": site.url + "/og-image.png",
+        "image": site.url + "/og-image.jpg",
         "logo": site.url + "/logo-512.png",
         "priceRange": "€€",
         "currenciesAccepted": "EUR",
@@ -105,7 +105,7 @@ def article(site, a):
     path = "/ratgeber/" + a["slug"] + ".html"
     return {"@context": "https://schema.org", "@type": "BlogPosting", "@id": site.url + path + "#article", "headline": a["title"],
             "description": a["description"], "datePublished": a.get("date"), "dateModified": a.get("updated") or a.get("date"),
-            "inLanguage": "de-DE", "mainEntityOfPage": site.url + path, "image": site.url + "/og-image.png",
+            "inLanguage": "de-DE", "mainEntityOfPage": site.url + path, "image": site.url + "/og-image.jpg",
             "articleSection": a.get("category", "Ratgeber"), "wordCount": len(md.plain(a["body"]).split()),
             "author": {"@type": "Organization", "name": site.s["name"], "url": site.url + "/"},
             "publisher": {"@type": "Organization", "name": site.s["name"], "logo": {"@type": "ImageObject", "url": site.url + "/logo-512.png", "width": 512, "height": 512}},

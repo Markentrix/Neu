@@ -32,7 +32,12 @@
       "q": "Was bringt eine Versiegelung im Winter?",
       "a": "Eine Versiegelung bildet eine glatte Schutzschicht. Salzlauge und Schmutz haften darauf schlechter, Wasser perlt ab, und das Auto lässt sich mit weniger Reiben reinigen. Am besten lassen Sie sie im Herbst auftragen, bevor der erste Frost kommt."
     }
-  ]
+  ],
+  "image": {
+    "file": "felge-audi-q7.jpg",
+    "alt": "Saubere Felge und Reifen eines Audi Q7",
+    "caption": "Felgen, Radkästen und Schweller bekommen im Winter das meiste Streusalz ab."
+  }
 }
 
 Waschen Sie Ihr Auto im Winter regelmäßig, am besten an einem Tag mit Plusgraden, und spülen Sie das Salz zuerst mit viel Wasser ab, bevor Sie den Lack berühren. Besonders gründlich sollten Sie Radkästen, Schweller, Felgen und Unterboden reinigen, denn dort sammelt sich das meiste Salz. Danach trocknen Sie Dichtungen und Schlösser, damit nichts festfriert.

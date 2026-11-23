@@ -733,6 +733,80 @@
     });
   }
 
+  /* ---------------------------------------------------------------- Fotos vergrößern */
+  /* Links mit data-zoom zeigen auf die größte Bildfassung. Ohne Skript öffnet der Link das Bild, mit Skript eine Vollbild-Ansicht. */
+  var zoomLinks = $$("a[data-zoom]");
+  if (zoomLinks.length && typeof HTMLDialogElement === "function") {
+    var lb = document.createElement("dialog");
+    lb.className = "lightbox";
+    lb.setAttribute("aria-label", t("Foto in groß"));
+    lb.innerHTML = '<figure class="lb-fig"><img class="lb-img" alt=""><figcaption class="lb-cap"></figcaption></figure>' +
+      '<p class="lb-count" aria-live="polite"></p>' +
+      '<button type="button" class="lb-btn lb-close" aria-label="' + t("Schließen") + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+      '<button type="button" class="lb-btn lb-prev" aria-label="' + t("Vorheriges Foto") + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
+      '<button type="button" class="lb-btn lb-next" aria-label="' + t("Nächstes Foto") + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>';
+    document.body.appendChild(lb);
+    var lbImg = $(".lb-img", lb), lbCap = $(".lb-cap", lb), lbCount = $(".lb-count", lb), lbGroup = [], lbIdx = 0, lbFrom = null;
+    var lbShow = function (i) {
+      lbIdx = (i + lbGroup.length) % lbGroup.length;
+      var a = lbGroup[lbIdx], small = $("img", a), fig = a.closest("figure"), fc = fig && fig.querySelector("figcaption");
+      lbImg.src = a.getAttribute("href");
+      lbImg.alt = small ? small.alt : "";
+      lbCap.textContent = fc ? fc.textContent.trim() : "";
+      lbCount.textContent = lbGroup.length > 1 ? (lbIdx + 1) + " / " + lbGroup.length : "";
+      lb.classList.toggle("is-single", lbGroup.length < 2);
+      [lbIdx - 1, lbIdx + 1].forEach(function (k) {
+        var n = lbGroup[(k + lbGroup.length) % lbGroup.length];
+        if (n) { var pre = new Image(); pre.src = n.getAttribute("href"); }
+      });
+    };
+    zoomLinks.forEach(function (a) {
+      a.setAttribute("aria-haspopup", "dialog");
+      a.addEventListener("click", function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        var box = a.closest(".photo-grid") || a.closest(".prose") || a.closest("section") || document;
+        lbGroup = $$("a[data-zoom]", box);
+        lbFrom = a;
+        lbShow(lbGroup.indexOf(a));
+        lb.showModal();
+        document.documentElement.classList.add("lb-open");
+      });
+    });
+    lb.addEventListener("close", function () {
+      document.documentElement.classList.toggle("lb-open", false);
+      lbImg.src = "data:,";
+      if (lbFrom) lbFrom.focus();
+    });
+    $(".lb-close", lb).addEventListener("click", function () { lb.close(); });
+    $(".lb-prev", lb).addEventListener("click", function () { lbShow(lbIdx - 1); });
+    $(".lb-next", lb).addEventListener("click", function () { lbShow(lbIdx + 1); });
+    lb.addEventListener("click", function (e) { if (e.target === lb || e.target.classList.contains("lb-fig")) lb.close(); });
+    lb.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { e.preventDefault(); lbShow(lbIdx - 1); }
+      if (e.key === "ArrowRight") { e.preventDefault(); lbShow(lbIdx + 1); }
+    });
+    var lbX = null, lbY = null;
+    lb.addEventListener("touchstart", function (e) { lbX = e.touches[0].clientX; lbY = e.touches[0].clientY; }, { passive: true });
+    lb.addEventListener("touchend", function (e) {
+      if (lbX === null || lbGroup.length < 2) return;
+      var dx = e.changedTouches[0].clientX - lbX, dy = e.changedTouches[0].clientY - lbY;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) lbShow(lbIdx + (dx < 0 ? 1 : -1));
+      lbX = null;
+    }, { passive: true });
+  }
+  /* Werkstatt-Galerie: am Desktop erst 8 Fotos, der Rest per Knopf */
+  $$(".photo-more button").forEach(function (b) {
+    var grid = b.parentNode.previousElementSibling;
+    if (!grid) return;
+    var label = b.textContent;
+    b.addEventListener("click", function () {
+      var open = grid.classList.toggle("is-open");
+      b.setAttribute("aria-expanded", open ? "true" : "false");
+      b.textContent = open ? t("Weniger Fotos zeigen") : label;
+    });
+  });
+
   /* ---------------------------------------------------------------- Einblenden beim Scrollen */
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!reduce && "IntersectionObserver" in window) {
