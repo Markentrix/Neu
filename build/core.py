@@ -474,11 +474,21 @@ def contact_section(site, prefix=""):
 '''
 
 
+def bg_picture(site, name, prefix, cls):
+    """Dekoratives Hintergrundfoto (responsive, ohne Alternativtext)."""
+    m = getattr(site, "media", {}).get(name or "")
+    if not m:
+        return ""
+    srcs = "".join(f'<source type="image/{t}" srcset="{", ".join(prefix + x for x in m[t])}" sizes="100vw">' for t in ("avif", "webp") if m.get(t))
+    return (f'<picture class="{cls}" aria-hidden="true">{srcs}<img src="{prefix}{m["src"]}" alt="" width="{m["w"]}" height="{m["h"]}" loading="lazy" decoding="async"></picture>')
+
+
 def cta_band(site, prefix="", title="Bereit für ein Auto, das sich wieder neu anfühlt?",
              text="Schreiben Sie uns kurz, welches Fahrzeug es ist und was gemacht werden soll. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert."):
+    bg = bg_picture(site, (site.s.get("pageHeroImages") or {}).get("cta"), prefix, "cta-bg")
     return f'''  <section class="tight" aria-label="Termin anfragen">
     <div class="container">
-      <div class="cta-band reveal">
+      <div class="cta-band reveal{" has-bg" if bg else ""}">{bg}
         <p class="eyebrow">Termine nach Vereinbarung</p>
         <h2 class="display">{ESC(title)}</h2>
         <p>{ESC(text)}</p>

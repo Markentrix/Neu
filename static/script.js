@@ -623,16 +623,21 @@
       steps.forEach(function (s, k) { s.hidden = k !== cur; });
       inds.forEach(function (li, k) { li.className = k < cur ? "done" : (k === cur ? "current" : ""); if (k === cur) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current"); });
       prev.hidden = cur === 0; next.hidden = cur === steps.length - 1; submit.hidden = cur !== steps.length - 1;
+      var bl = $("[data-bar-label]"); if (bl) bl.textContent = cur === steps.length - 1 ? t("Absenden") : t("Weiter") + " (" + (cur + 1) + "/" + steps.length + ")";
       track("Buchung Schritt", { schritt: cur + 1 });
     }
     function go(d) {
       if (d > 0 && !validate(wz, steps[cur])) { setStatus(wz, t("Bitte die markierten Angaben ergänzen."), "error"); return; }
       setStatus(wz, "", "");
       show(cur + d);
-      var lg = $("legend", steps[cur]); if (lg) { lg.setAttribute("tabindex", "-1"); lg.focus(); }
-      var top = wz.getBoundingClientRect().top + window.scrollY - 110; if (window.scrollY > top) window.scrollTo({ top: top, behavior: "smooth" });
+      var lg = $("legend", steps[cur]); if (lg) { lg.setAttribute("tabindex", "-1"); lg.focus({ preventScroll: true }); }
+      var hh = ($(".site-header") || { offsetHeight: 80 }).offsetHeight;
+      var top = wz.getBoundingClientRect().top + window.scrollY - hh - 16; if (window.scrollY > top) window.scrollTo({ top: top, behavior: reduce ? "auto" : "smooth" });
     }
     next.addEventListener("click", function () { go(1); });
+    /* Handy: feste Leiste unten mit Paket, Richtpreis und Weiter (ersetzt dort Anrufen/WhatsApp/Termin) */
+    var barGo = $("[data-bar-go]");
+    if (barGo) barGo.addEventListener("click", function () { if (cur === steps.length - 1) submit.click(); else go(1); });
     prev.addEventListener("click", function () { go(-1); });
     inds.forEach(function (li, k) { li.addEventListener("click", function () { if (k < cur) { cur = k; show(k); } }); });
     steps.forEach(function (s) { s.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "checkbox" && cur < steps.length - 1) { e.preventDefault(); go(1); } }); });
@@ -654,6 +659,9 @@
       set("extras", d.extras && d.extras.length ? shown("extras").join(", ") : t("keine"));
       set("datum", d.datum ? deDate(d.datum) + (d.uhrzeit ? ", " + t("{zeit} Uhr", { zeit: d.uhrzeit }) : "") + (d.datum2 ? " (" + t("alt.") + " " + deDate(d.datum2) + ")" : "") : "–");
       set("preis", v != null ? (sch ? "" : t("ab") + " ") + eur(v) + (wk ? " + " + t("Aufpreis C² CarCeramic") : "") : (SPECIAL[d.paket] ? t("nach Begutachtung") : "–"));
+      var bp = $('[data-bar="paket"]'), bpr = $('[data-bar="preis"]');
+      if (bp) bp.textContent = (p ? p.name : (SPECIAL[d.paket] || "–")) + (c && !sch ? " · " + c.short : "");
+      if (bpr) bpr.textContent = (wz.parentNode.querySelector('[data-sum="preis"]') || {}).textContent || "–";
       var bk = ELB.booking || {}, base = wk ? null : (v != null ? v : (d.paket === "keramik" ? bk.keramikMin : null));
       var anz = base && payMe ? (Math.round(base * (bk.depositPercent || 15)) / 100).toFixed(2) : "";
       if (anz) wz.setAttribute("data-anzahlung", anz); else wz.removeAttribute("data-anzahlung");

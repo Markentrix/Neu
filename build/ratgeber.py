@@ -206,6 +206,7 @@ def build_article(site, a, write):
 </main>
 '''
     title = a.get("seoTitle") or (a["title"] + " | ElbDetail")
+    body = pages.with_bg(body, site, (a.get("image") or {}).get("file"), prefix)
     write(f"ratgeber/{a['slug']}.html", core.head(site, title, a["description"], path, prefix=prefix, ld=ld, og_type="article",
                                                    extra=f'<meta property="article:published_time" content="{ESC(a.get("date", ""))}">\n<meta property="article:modified_time" content="{ESC(a.get("updated") or a.get("date", ""))}">\n')
           + core.header(site, prefix, current="ratgeber/index.html") + body + core.footer(site, prefix))

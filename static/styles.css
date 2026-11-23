@@ -1611,3 +1611,67 @@ html.lb-open { overflow: hidden; }
 .article-card { overflow: hidden; }
 /* Regler: Schilder und Unterschrift liegen über der Trennlinie (klicken geht weiter durch, pointer-events: none) */
 .ba .ba-tag, .ba .ba-caption { z-index: 4; pointer-events: none; }
+
+/* Große Systemschrift am Handy (Android/iOS „Schriftgröße“): nichts darf breiter werden als der Bildschirm.
+   Die Spalten haben eine feste Obergrenze, und die Hauptüberschrift richtet sich zusätzlich nach der
+   Bildschirmbreite, damit „Fahrzeugaufbereitung“ immer in eine Zeile passt. */
+@media (max-width: 979.98px) { .hero-inner { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 959.98px) { .two-up { grid-template-columns: minmax(0, 1fr); } }
+.hero-copy > *, .hero-actions > * { max-width: 100%; }
+.hero-actions .btn { white-space: normal; text-align: center; }
+@media (max-width: 979.98px) {
+  .hero-headline { font-size: min(clamp(1.8rem, 10.5vw, 3.4rem), calc((100vw - 2 * var(--gutter)) / 10.6)); }
+  .page-hero h1 { overflow-wrap: anywhere; }
+}
+
+/* ==========================================================================
+   Terminanfrage am Handy: kompakter, feste Leiste unten mit Preis und „Weiter“
+   ========================================================================== */
+.wz-bar { display: none; }
+@media (max-width: 899.98px) {
+  html.wz-ready .mobile-actionbar { display: none; }
+  html.wz-ready .wz-bar {
+    display: flex; align-items: center; gap: 12px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120;
+    padding: 10px max(var(--gutter), env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(var(--gutter), env(safe-area-inset-left, 0px));
+    background: var(--anthracite); color: var(--on-anthracite); border-top: 1px solid var(--anthracite-line);
+    box-shadow: 0 -12px 30px -18px rgba(0, 0, 0, 0.5);
+  }
+  html.kb-open .wz-bar { display: none !important; }
+  .wz-bar-info { flex: 1; min-width: 0; display: grid; line-height: 1.25; }
+  .wz-bar-info span { font-size: 0.8rem; color: var(--muted-on-anthracite); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wz-bar-info strong { font-family: var(--font-display); font-size: 1.15rem; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wz-bar .btn { flex: none; min-height: 48px; padding-inline: 18px; }
+}
+@media (max-width: 719.98px) {
+  /* Assistent ohne eigenen Rahmen: volle Breite für die Karten */
+  .wizard { border: 0; border-radius: 0; padding: 0; background: transparent; }
+  .wz-progress li { font-size: 0; padding-top: 6px; }
+  .choice-grid { gap: 8px; }
+  .choice-body { padding: 12px 14px 12px 44px; gap: 4px; }
+  .choice-body::before { left: 14px; top: 15px; }
+  .choice-head strong { font-size: 1.05rem; }
+  .choice-price { font-size: 1rem; }
+  .choice-sub { font-size: 0.85rem; line-height: 1.45; }
+  /* Leistungsliste nur beim gewählten Paket, sonst wird Schritt 1 sehr lang */
+  .choice-card input:not(:checked) + .choice-body .choice-feats { display: none; }
+  .summary-card dl div { grid-template-columns: 8.8em 1fr; }
+}
+
+/* ==========================================================================
+   Werkstattfotos als Hintergrund: Seitenköpfe und Abschluss-Band
+   ========================================================================== */
+.page-hero-bg, .cta-bg { position: absolute; inset: 0; display: block; pointer-events: none; }
+.page-hero-bg img, .cta-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+.page-hero-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(30,34,41,0.78) 0%, rgba(30,34,41,0.86) 45%, rgba(30,34,41,0.94) 100%);
+}
+@media (min-width: 900px) {
+  .page-hero-bg::after { background:
+    linear-gradient(90deg, rgba(30,34,41,0.95) 0%, rgba(30,34,41,0.86) 45%, rgba(30,34,41,0.5) 100%),
+    linear-gradient(180deg, rgba(30,34,41,0.2) 0%, rgba(30,34,41,0.55) 100%); }
+}
+.page-hero.has-bg > .container { z-index: 1; }
+.cta-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(30,34,41,0.84) 0%, rgba(30,34,41,0.92) 100%); }
+.cta-band.has-bg > :not(.cta-bg) { position: relative; z-index: 1; }
+@media print { .page-hero-bg, .cta-bg { display: none; } }

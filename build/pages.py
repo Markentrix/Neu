@@ -49,6 +49,26 @@ def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
     return f'<figure class="fig">{pic}' + (f"<figcaption>{cap}</figcaption>" if cap else "") + "</figure>"
 
 
+def hero_bg(site, name, prefix):
+    """Werkstattfoto als Hintergrund eines Seitenkopfs (dekorativ, abgedunkelt)."""
+    pic = picture(site, name or "", "", "page-hero-bg", prefix, sizes="100vw", eager=True)
+    return pic.replace('<picture class="page-hero-bg">', '<picture class="page-hero-bg" aria-hidden="true">') if pic else ""
+
+
+def with_bg(html, site, name, prefix):
+    """Ersten Seitenkopf mit Hintergrundfoto versehen."""
+    bg = hero_bg(site, name, prefix)
+    if not bg:
+        return html
+    for tag in ('<section class="page-hero', '<header class="page-hero'):
+        i = html.find(tag)
+        if i >= 0:
+            j = html.index(">", i) + 1
+            open_tag = html[i:j].replace('class="page-hero', 'class="page-hero has-bg', 1)
+            return html[:i] + open_tag + bg + html[j:]
+    return html
+
+
 def card_img(site, a, prefix):
     """Vorschaubild oben in einer Ratgeber-Karte (dekorativ, der Titel trägt den Link)."""
     img = a.get("image") or {}
@@ -472,9 +492,10 @@ def price_section(site, prefix=""):
 def contact_compact(site, prefix=""):
     """Kurzer Kontaktblock: Termin, WhatsApp, Anrufen. Das ausführliche Formular steht auf kontakt.html."""
     s = site.s
+    bg = core.bg_picture(site, (s.get("pageHeroImages") or {}).get("cta"), prefix, "cta-bg")
     return f'''  <section id="kontakt" class="tight" aria-labelledby="kontakt-h">
     <div class="container">
-      <div class="cta-band reveal">
+      <div class="cta-band reveal{" has-bg" if bg else ""}">{bg}
         <p class="eyebrow">Kontakt und Termin in Celle</p>
         <h2 id="kontakt-h" class="display">Bereit für ein Auto, das sich <em>wieder neu anfühlt?</em></h2>
         <p>Nennen Sie uns Fahrzeug, Wunschpaket und Zeitraum. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert.</p>
@@ -847,6 +868,7 @@ def build_preise(site, write):
 {core.cta_band(site)}
 </main>
 '''
+    body = with_bg(body, site, (site.s.get("pageHeroImages") or {}).get("preise"), "")
     write("preise.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="preise.html") + body + core.footer(site))
 
 
@@ -1020,6 +1042,7 @@ def build_about(site, write):
 {core.cta_band(site, "", "Ihr Auto in den besten Händen.", "Erzählen Sie mir kurz, worum es geht. Sie erhalten ein verbindliches Angebot, bevor irgendetwas passiert.")}
 </main>
 '''
+    body = with_bg(body, site, (site.s.get("pageHeroImages") or {}).get("ueber-uns"), "")
     write("ueber-uns.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="ueber-uns.html") + body + core.footer(site))
 
 
@@ -1115,6 +1138,7 @@ def build_service(site, sv, write):
 {core.cta_band(site, prefix)}
 </main>
 '''
+    body = with_bg(body, site, sv.get("heroImage"), prefix)
     write("leistungen/" + sv["slug"] + ".html",
           core.head(site, sv["seoTitle"], sv["description"], path, prefix=prefix, ld=ld) + core.header(site, prefix) + body + core.footer(site, prefix))
 

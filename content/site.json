@@ -298,5 +298,15 @@
       "alt": "Zertifikat Excellence Partner von C²Coating auf dem Sitz eines Mercedes",
       "caption": "Zertifizierter C²Coating Excellence Partner"
     }
-  ]
+  ],
+  "pageHeroImages": {
+    "preise": "werkstatt-audi-rs3-front.jpg",
+    "ueber-uns": "werkstatt-audi-s6-front.jpg",
+    "termin": "werkstatt-audi-s6-heck.jpg",
+    "gutscheine": "keramik-bmw-cabrio-c2coating.jpg",
+    "firmenkunden": "aussen-audi-q7-seite.jpg",
+    "care": "werkstatt-audi-q3-front.jpg",
+    "angebote": "keramik-tesla-model-y.jpg",
+    "cta": "werkstatt-audi-s6-heck.jpg"
+  }
 }

@@ -3,6 +3,7 @@
 import datetime
 
 import core
+import pages
 import seo
 from pages import offer_card, ref_wall
 from core import ESC, I, STARS5
@@ -215,6 +216,10 @@ def build_termin(site, write):
           <button class="btn btn-primary" type="button" data-wz-next hidden>Weiter {I["arrow"]}</button>
           <button class="btn btn-primary" type="submit" data-wz-submit>{I["cal"]}<span data-sb-text="Termin buchen">Terminwunsch senden</span></button>
         </div>
+        <div class="wz-bar" aria-hidden="true">
+          <span class="wz-bar-info"><span data-bar="paket">–</span><strong data-bar="preis">–</strong></span>
+          <button class="btn btn-primary" type="button" tabindex="-1" data-bar-go><span data-bar-label>Weiter</span>{I["arrow"]}</button>
+        </div>
         <button class="wz-wa" type="button" data-wa-from-form>{I["wa"]}Stattdessen alles per WhatsApp senden</button>
         {core.form_status("t-status")}
       </form>
@@ -239,6 +244,7 @@ def build_termin(site, write):
   </section>
 </main>
 '''
+    body = pages.with_bg(body, site, (site.s.get("pageHeroImages") or {}).get("termin"), "")
     write("termin.html", core.head(site, title, desc, path, ld=ld) + core.header(site) + body + core.footer(site))
 
 
@@ -349,6 +355,7 @@ def build_gutscheine(site, write):
   </section>
 </main>
 '''
+    body = pages.with_bg(body, site, (site.s.get("pageHeroImages") or {}).get("gutscheine"), "")
     write("gutscheine.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="gutscheine.html") + body + core.footer(site))
 
 
@@ -432,6 +439,7 @@ def build_firmen(site, write):
 {core.cta_band(site, "", "Lieber direkt sprechen?", "Rufen Sie an oder schreiben Sie per WhatsApp. Wir klären Umfang und Ablauf in wenigen Minuten.")}
 </main>
 '''
+    body = pages.with_bg(body, site, (site.s.get("pageHeroImages") or {}).get("firmenkunden"), "")
     write("firmenkunden.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="firmenkunden.html") + body + core.footer(site))
 
 
@@ -599,6 +607,7 @@ def build_care(site, write):
 {core.cta_band(site, "", "Ihr Pflegeplan beginnt mit einem Gespräch.", "Schreiben Sie uns kurz, um welches Fahrzeug es geht und wie oft Sie sich Pflege wünschen. Wir melden uns mit einem individuellen Vorschlag.")}
 </main>
 '''
+    body = pages.with_bg(body, site, (site.s.get("pageHeroImages") or {}).get("care"), "")
     write("elbdetail-care.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="elbdetail-care.html") + body + core.footer(site))
 
 
@@ -638,4 +647,5 @@ def build_angebote(site, write):
   </section>
 </main>
 '''
+    body = pages.with_bg(body, site, (site.s.get("pageHeroImages") or {}).get("angebote"), "")
     write("angebote.html", core.head(site, title, desc, path, ld=ld) + core.header(site, current="angebote.html") + body + core.footer(site))
