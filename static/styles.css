@@ -1730,3 +1730,50 @@ html.lb-open { overflow: hidden; }
 .cert-body, .offer, .cer-card, .choice-body, .article-card { grid-template-columns: minmax(0, 1fr); }
 .cert-body > *, .cert-body h3 { min-width: 0; overflow-wrap: break-word; }
 @media (max-width: 719.98px) { .cert-body h3, .offer h3, .cer-card h3, .article-card h3 { -webkit-hyphens: auto; hyphens: auto; } }
+
+/* ==========================================================================
+   Startseite am Handy kürzer: Inhalte bleiben, sind aber knapper oder einen Tipp entfernt
+   ========================================================================== */
+.ba-more { display: none; }
+@media (max-width: 719.98px) {
+  /* Vorher/Nachher: zwei Regler im Querformat, die übrigen per Knopf */
+  .ba-grid--home .ba { aspect-ratio: 4 / 3; }
+  .ba-grid--home:not(.is-open) > :nth-child(n+3) { display: none; }
+  .ba-more { display: block; }
+  /* Keramik: Foto flacher, Aufzählung entfällt (steht auf der Leistungsseite) */
+  .spot-media { min-height: 0; }
+  .spot-media img { aspect-ratio: 16 / 9; position: static; min-height: 0; }
+  .spot-points { display: none; }
+  .cer-note { font-size: 0.74rem; }
+  /* Warum ElbDetail: nur die Überschriften der vier Punkte */
+  .why-item p:not(.why-title) { display: none; }
+  .why-item { padding-block: 10px; align-items: center; }
+  .owner-card blockquote, .owner-card p { font-size: 0.9rem; }
+  /* Ablauf: drei knappe Zeilen */
+  .process-cell > p:not(.process-title) { display: none; }
+  .process-cell { padding-bottom: 16px; }
+  /* Bewertungen: Logos kleiner */
+  .ref-strip { margin-top: 28px; padding-top: 22px; gap: 10px; }
+  .ref-strip-list { gap: 4px 22px; }
+  .ref-strip-list img { max-height: 30px; width: auto; }
+  /* Fußbereich: Ortsliste auf drei Zeilen begrenzt */
+  .footer-areas { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .site-footer { padding-block: 40px 20px; }
+  .footer-grid { row-gap: 22px; }
+  section { padding-block: clamp(44px, 11vw, 64px); }
+}
+@media (max-width: 719.98px) {
+  /* Keramik-Karten als knappe Preisliste: Name, Preis, Pfeil */
+  .cer-cards { gap: 0; border-radius: var(--radius-m); overflow: hidden; }
+  .cer-card { grid-template-columns: minmax(0, 1fr) auto; align-items: center; padding: 14px 16px; border-radius: 0; border-width: 0 0 1px; gap: 0 12px; }
+  .cer-card:last-child { border-bottom: 0; }
+  .cer-card .cer-brand, .cer-card .cer-dur, .cer-card .cer-more { display: none; }
+  .cer-card h3 { font-size: 1.05rem; grid-column: 1; }
+  .cer-card .cer-price { grid-column: 2; grid-row: 1; font-size: 1.05rem; white-space: nowrap; }
+  .cer-card .cer-price small:last-child:not(:first-child) { display: none; }
+  /* Angebote: zwei Karten, der Rest unter „Alle Angebote ansehen“ */
+  .offer-grid--home > :nth-child(n+3) { display: none; }
+  /* Leistungen: Zusatzhinweis entfällt am Handy */
+  .service-more { display: none; }
+  .footer-about { display: none; }
+}

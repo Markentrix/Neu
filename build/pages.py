@@ -701,7 +701,7 @@ def build_home(site, write):
         <p>Fahrzeuge unserer Kundinnen und Kunden, fotografiert vor und nach der Aufbereitung. Ziehen Sie den Regler, um den Unterschied zu sehen.</p>
       </div>
       <div class="ba-grid ba-grid--home stagger{" ba-grid--few" if len(tiles) < 3 else ""}">{"".join(tiles)}
-      </div>
+      </div>{f'<p class="photo-more ba-more"><button class="btn btn-line-light" type="button" aria-expanded="false">Weitere {len(tiles) - 2} Ergebnisse ansehen</button></p>' if len(tiles) > 2 else ""}
       <p class="gallery-note">{ESC(gallery_note)} <a class="text-link" href="{s["social"]["instagram"]}" target="_blank" rel="noopener">Instagram</a> · <a class="text-link" href="{s["social"]["tiktok"]}" target="_blank" rel="noopener">TikTok</a></p>
     </div>
   </section>
