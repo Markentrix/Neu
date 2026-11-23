@@ -54,7 +54,7 @@ V.uebersicht = async () => {
   const karte = (titel, zahl, text, link) => h('a', { class: 'card', href: link, style: 'text-decoration:none;color:inherit' }, h('h3', {}, titel), h('div', { class: 'stat' }, h('b', {}, zahl), h('span', { class: 'muted small' }, text)));
   const zusatz = [
     karte('Nachrichten', z.nachrichten_offen, z.wartet_auf_dich ? z.wartet_auf_dich + ' warten auf dich' : 'offen', '#nachrichten'),
-    karte('Freigaben', z.freigaben_wartend, z.freigaben_wartend ? 'warten auf deine Entscheidung' : 'nichts offen', '#freigaben'),
+    karte('Zur Prüfung', z.freigaben_wartend, z.freigaben_wartend ? 'warten auf deine Entscheidung' : 'nichts offen', '#freigaben'),
     karte('Anfragen', z.anfragen_30d, 'letzte 30 Tage', '#anfragen'),
     z.antwortzeit_h !== null ? h('div', { class: 'card' }, h('h3', {}, 'Antwortzeit des Teams'), h('div', { class: 'stat' }, h('b', {}, String(z.antwortzeit_h).replace('.', ',') + ' h'), h('span', { class: 'muted small' }, 'im Schnitt, letzte 90 Tage'))) : '',
   ];

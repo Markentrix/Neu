@@ -10,11 +10,11 @@ export const hat = (c) => start.module.some(m => m.code === c);
 const SEITEN = [
   ['willkommen', 'So geht’s', null],
   ['heute', 'Heute', null],
-  ['uebersicht', 'Übersicht', null],
-  ['status', 'Status', null],
-  ['briefing', 'Briefing', null],
+  ['uebersicht', 'Mein Monat', null],
+  ['status', 'Statusseite der Website', null],
+  ['briefing', 'Bericht vom Team', null],
   ['nachrichten', 'Nachrichten', null],
-  ['freigaben', 'Freigaben', null],
+  ['freigaben', 'Zur Prüfung', null],
   ['assistent', 'KI-Assistent', 'ki_chat'],
   ['wissen', 'Mein Wissen für den Assistenten', 'ki_chat'],
   ['anfragen', 'Anfragen', 'anfragen_termine'],
@@ -23,18 +23,18 @@ const SEITEN = [
   ['stamm', 'Stammkunden', 'anfragen_termine'],
   ['bewertungen', 'Bewertungen', 'anfragen_termine'],
   ['kontakte', 'Kontakte', 'kontakte_angebote_vertraege'],
-  ['dokumente', 'Meine Angebote an Kunden', 'kontakte_angebote_vertraege'],
+  ['dokumente', 'Angebote an meine Kunden', 'kontakte_angebote_vertraege'],
   ['unterlagen', 'Dateien & Unterlagen', null],
-  ['auswertung', 'Auswertung', null],
+  ['auswertung', 'Zahlen & Verlauf', null],
   ['berichte', 'Monatsberichte', null],
-  ['belege', 'Rechnungen von Markentrix', null],
+  ['belege', 'Meine Rechnungen', null],
   ['anrufe', 'Anrufe', null],
-  ['website', 'Website & Landingpages', 'website'],
-  ['dienste', 'Website-Dienste', 'website'],
+  ['website', 'Meine Website', 'website'],
+  ['dienste', 'Formulare & Buchung', 'website'],
   ['shop', 'Online-Shop', 'shop'],
   ['wochenangebote', 'Wochenangebote', 'wochenangebote'],
   ['werbung', 'Werbung & Berichte', 'werbung_berichte'],
-  ['automationen', 'Automationen', 'automationen'],
+  ['automationen', 'Automatische Abläufe', 'automationen'],
   ['avv', 'Datenschutz-Vertrag', null],
   ['vertraege', 'Referenzvertrag', null],
   ['team', 'Team', null],
@@ -42,12 +42,12 @@ const SEITEN = [
   ['hilfe', 'Hilfe', null],
   ['einstellungen', 'Einstellungen', null],
 ];
-/** Menügruppen: Täglich und Verstehen sind offen, selten Gebrauchtes klappt zu. */
+/** Menügruppen: Täglich und Zahlen & Berichte sind offen, selten Gebrauchtes klappt zu. */
 /** @type {[string, string[], boolean][]} */
 const GRUPPEN = [
   ['Täglich', ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
-  ['Verstehen', ['uebersicht', 'status', 'briefing', 'auswertung', 'berichte'], true],
-  ['Mein Betrieb', ['assistent', 'wissen', 'website', 'dienste', 'shop', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
+  ['Zahlen & Berichte', ['uebersicht', 'briefing', 'auswertung', 'berichte'], true],
+  ['Mein Betrieb', ['assistent', 'wissen', 'website', 'status', 'dienste', 'shop', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
   ['Verwaltung', ['willkommen', 'belege', 'avv', 'vertraege', 'team', 'pakete', 'hilfe', 'einstellungen'], false],
 ];
 export const inhaber = () => start.kunden_rolle === 'inhaber';

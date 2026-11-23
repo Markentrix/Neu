@@ -20,7 +20,7 @@ V.freigaben = async () => {
   const knopf = (t, fn, c) => h('button', { class: c, onclick: fn }, t);
   const zweiStufig = (t, bestaetigung, fn) => { const b = h('button', { class: 'btn', onclick: () => { if (b.dataset.bereit) { b.disabled = true; fn(); return; } b.dataset.bereit = '1'; b.textContent = bestaetigung; setTimeout(() => { delete b.dataset.bereit; b.textContent = t; }, 6000); } }, t); return b; };
   return h('div', { class: 'stack' },
-    h('div', { class: 'card' }, h('h2', {}, 'Freigaben'), h('p', { class: 'small muted' }, 'Hier zeigen wir dir Beiträge, Texte und Entwürfe, bevor sie veröffentlicht werden. Mit deiner Freigabe wird Datum, Uhrzeit und dein Name festgehalten.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Zur Prüfung'), h('p', { class: 'small muted' }, 'Hier zeigen wir dir Beiträge, Texte und Entwürfe, bevor sie veröffentlicht werden. Mit deiner Freigabe wird Datum, Uhrzeit und dein Name festgehalten.')),
     wartend.length ? wartend.map(karte) : h('div', { class: 'card' }, h('p', { class: 'muted' }, 'Aktuell wartet nichts auf deine Freigabe.')),
     erledigt.length ? h('div', { class: 'stack' }, h('h3', {}, 'Bisherige Entscheidungen'), erledigt.map(karte)) : '');
 };
