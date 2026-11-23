@@ -78,6 +78,11 @@
   "beforeAfter": "Innenraum-Tiefenreinigung",
   "photos": [
     {
+      "file": "tierhaare-rueckbank-vorher.jpg",
+      "alt": "Hundehaare im Stoff einer Rückbank",
+      "caption": "Ausgangszustand: Tierhaare in der Rückbank. Wir lösen sie mechanisch, bevor wir saugen."
+    },
+    {
       "file": "innen-audi-q7-cockpit.jpg",
       "alt": "Cockpit und Fahrersitz eines Audi Q7",
       "caption": "Audi Q7: Cockpit und Sitze"
@@ -91,6 +96,21 @@
       "file": "innen-audi-a3-cockpit.jpg",
       "alt": "Cockpit und Vordersitze eines Audi A3",
       "caption": "Audi A3: Innenraum nach der Reinigung"
+    },
+    {
+      "file": "innen-audi-a3-fond.jpg",
+      "alt": "Gereinigte Rücksitze eines Audi A3",
+      "caption": "Audi A3: Fond und Sitzlehnen"
+    },
+    {
+      "file": "innen-opel-meriva-cockpit.jpg",
+      "alt": "Gereinigtes Cockpit und Fahrersitz eines Opel Meriva",
+      "caption": "Opel Meriva: auch ältere Autos werden wieder frisch"
+    },
+    {
+      "file": "innen-audi-q7-tuerverkleidung.jpg",
+      "alt": "Saubere Türverkleidung eines Audi Q7 mit Alcantara",
+      "caption": "Türverkleidung und Ablagen inklusive"
     }
   ]
 }

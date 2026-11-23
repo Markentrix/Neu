@@ -146,9 +146,9 @@
         "caption": "Versiegeln mit C²Coating Car Ceramic"
       },
       {
-        "file": "innen-audi-q7-lenkrad.jpg",
-        "alt": "Cockpit eines Audi Q7 mit Lenkradschutz von ElbDetail",
-        "caption": "Lenkradschutz und saubere Matten bis zur Übergabe"
+        "file": "zertifikat-c2coating-im-fahrzeug.jpg",
+        "alt": "Zertifikat Excellence Partner von C²Coating auf dem Sitz eines Mercedes",
+        "caption": "Zertifizierter C²Coating Excellence Partner"
       }
     ]
   },
@@ -277,6 +277,26 @@
       "file": "innen-audi-q7-lenkrad.jpg",
       "alt": "Cockpit eines Audi Q7 mit Lenkradschutz von ElbDetail",
       "caption": "Lenkradschutz bis zur Übergabe"
+    },
+    {
+      "file": "werkstatt-tesla-model-y-front.jpg",
+      "alt": "Front eines weißen Tesla Model Y, im Lack spiegelt sich das Wabenlicht",
+      "caption": "Tesla Model Y: Spiegelglanz auf Weiß"
+    },
+    {
+      "file": "innen-audi-q7-armaturenbrett.jpg",
+      "alt": "Armaturenbrett und Ledersitze eines Audi Q7 bei geöffneter Beifahrertür",
+      "caption": "Audi Q7: Armaturen und Sitze gepflegt"
+    },
+    {
+      "file": "innen-mercedes-c-amg-cockpit.jpg",
+      "alt": "Cockpit und Fahrersitz eines Mercedes C-Klasse Coupé mit Lenkradschutz",
+      "caption": "Mercedes C-Klasse, bereit zur Übergabe"
+    },
+    {
+      "file": "zertifikat-c2coating-im-fahrzeug.jpg",
+      "alt": "Zertifikat Excellence Partner von C²Coating auf dem Sitz eines Mercedes",
+      "caption": "Zertifizierter C²Coating Excellence Partner"
     }
   ]
 }
