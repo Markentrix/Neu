@@ -594,7 +594,7 @@ def build_home(site, write):
     gallery_note = ("Alle Fotos stammen aus unserer Werkstatt in Celle, Kennzeichen sind unkenntlich. Weitere aktuelle Arbeiten zeigen wir laufend auf Instagram und TikTok."
                     if real else "Die Darstellungen sind Platzhalter, bis die ersten Vorher-/Nachher-Fotos online sind. Echte Ergebnisse finden Sie jederzeit auf Instagram und TikTok.")
 
-    wp = photo_grid(site, s.get("workshopPhotos"), "", "Fotos aus der Werkstatt", scroll=True, first=8)
+    wp = photo_grid(site, s.get("workshopPhotos"), "", "Fotos aus der Werkstatt", first=8)
     workshop = f'''
   <section id="werkstatt" aria-labelledby="werkstatt-h">
     <div class="container">

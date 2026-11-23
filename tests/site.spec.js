@@ -607,3 +607,18 @@ test("Fotos: jede Bildquelle der Startseite und der Leistungsseiten lädt", asyn
     }
   }
 });
+
+test("Handy mit großer Systemschrift (130 %): keine Seite breiter als der Bildschirm", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobil", "nur Handy");
+  for (const path of ["/", "/termin.html", "/ueber-uns.html", "/leistungen/felgenversiegelung-celle.html", "/en/"]) {
+    await page.goto(path);
+    // wie Androids Textskalierung: jede berechnete Schriftgröße x 1,3, auch an die Bildschirmbreite gekoppelte
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      const els = [...document.querySelectorAll("body *")], fs = els.map((e) => parseFloat(getComputedStyle(e).fontSize));
+      els.forEach((e, i) => e.style.setProperty("font-size", fs[i] * 1.3 + "px", "important"));
+    });
+    const w = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+    expect(w[0], path).toBeLessThanOrEqual(w[1]);
+  }
+});
