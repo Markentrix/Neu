@@ -27,6 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import content as C  # noqa: E402
 import content_en as E  # noqa: E402
+import artwork  # noqa: E402
 
 BIZ = dict(C.BIZ)
 AREA = dict(C.AREA)
@@ -183,6 +184,9 @@ SHY = {
     "Gutachterkosten": "Gutachter­kosten",
     "Unfallgeschädigte": "Unfall­geschädigte",
     "Rechtsstreitigkeiten": "Rechtsstreitig­keiten",
+    "Kostenvoranschlag": "Kosten­voran­schlag",
+    "Kostenvoranschlags": "Kosten­voran­schlags",
+    "Unfallgeschädigten": "Unfall­geschädigten",
 }
 _SHY_RE = re.compile("|".join(sorted(map(re.escape, SHY), key=len, reverse=True)))
 _HEAD_RE = re.compile(r"(<(h[123]|strong)\b[^>]*>)(.*?)(</\2>)", re.S)
@@ -297,6 +301,7 @@ ICONS = {
     "tag": '<path d="M20 12.5 12.5 20 4 11.5V4h7.5z"/><circle cx="8" cy="8" r="1.3"/>',
     "euro": '<path d="M17 6.5A5.5 5.5 0 0 0 7.2 9H5v2h1.6a6 6 0 0 0 0 2H5v2h2.2A5.5 5.5 0 0 0 17 17.5"/><path d="M8 11h7M8 13h7"/>',
     "chart": '<path d="M3 17 9 7l4 6 3-4 5 8z"/><path d="M3 21h18"/>',
+    "arrow": '<path d="M4 12h15M13 5.5 19.5 12 13 18.5"/>',
     "camera": '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
 }
 
@@ -398,18 +403,20 @@ def nav_items():
     ]
 
 
-def logo_imgs(d):
-    """Logo als <picture>: im dunklen Modus die helle Schrift, moderne Formate zuerst, PNG als Ersatz."""
+def logo_imgs(d, dark=False):
+    """Logo als <picture>. Im dunklen Modus (oder auf dunklem Grund mit dark=True) die helle Schrift, WebP vor PNG."""
     alt = T("PS Schneider – Sachverständiger für Fahrzeugtechnik", "PS Schneider – vehicle engineering expert")
 
     def srcset(base):
         return ", ".join(f'{asset(f"{base}-{w}.webp", d)} {i}x' for i, w in enumerate((187, 374, 546), 1))
+    img = f'<img class="logo" src="{asset("logo-dark.png" if dark else "logo.png", d)}" alt="{alt}" width="546" height="152" decoding="async">'
+    if dark:
+        return (f'<picture><source type="image/webp" srcset="{srcset("logo-dark")}">{img}</picture>')
     return (f'<picture>'
             f'<source media="(prefers-color-scheme: dark)" type="image/webp" srcset="{srcset("logo-dark")}">'
             f'<source media="(prefers-color-scheme: dark)" srcset="{asset("logo-dark.png", d)}">'
             f'<source type="image/webp" srcset="{srcset("logo")}">'
-            f'<img class="logo" src="{asset("logo.png", d)}" alt="{alt}" width="546" height="152" decoding="async">'
-            f'</picture>')
+            f'{img}</picture>')
 
 
 def portrait_picture(d, alt, lazy=False):
@@ -467,10 +474,10 @@ def header(d, slug, key=None):
 def footer(d):
     svc = "\n      ".join(f'<a href="{u(s["slug"], d)}">{_SHY_RE.sub(lambda w: SHY[w.group(0)], esc(s["short"]))}</a>' for s in SERVICES)
     design = f" · {T('Gestaltung und Umsetzung', 'Design and implementation')} © {TODAY.year} {OWNER}" if DRAFT else ""
-    return f'''<footer class="site-footer">
+    return f'''<footer class="site-footer deep">
   <div class="wrap">
     <div class="col">
-      {logo_imgs(d)}
+      {logo_imgs(d, dark=True)}
       <span>{BIZ["craft"]} {BIZ["person"]}</span>
       <span>{BIZ["street"]} · {BIZ["zip"]} {BIZ["city"]}</span>
     </div>
@@ -571,7 +578,7 @@ def page_html(*, slug, d, title, desc, body, key=None, graph=None, noindex=False
 <link rel="icon" href="{rootfile("favicon.ico", d)}" sizes="48x48">
 <link rel="icon" href="{rootfile("icon-192.png", d)}" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="{rootfile("apple-touch-icon.png", d)}">
-<link rel="preload" href="{asset("fonts/BarlowCondensed-700.woff2", d)}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{asset("fonts/BarlowCondensed-800i.woff2", d)}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{asset("fonts/Barlow-400.woff2", d)}" as="font" type="font/woff2" crossorigin>{head_extra}
 <link rel="stylesheet" href="{asset("site.css", d)}">{draft_css}
 {ld_block}
@@ -702,15 +709,28 @@ def related(slugs, d):
     return f'<ul class="related">{"".join(lis)}</ul>'
 
 
+def sec_head(no, eyebrow, title, lede=None, tid=None, extra=""):
+    """Abschnittskopf: Nummer, Beschriftung, Überschrift und Einleitung."""
+    idattr = f' id="{tid}"' if tid else ""
+    lede_html = f'\n        <p class="lede">{lede}</p>' if lede else ""
+    return f'''<div class="section-head">
+        <p class="eyebrow"><span class="no" aria-hidden="true">{no}</span><span class="lbl">{eyebrow}</span></p>
+        <h2{idattr}>{title}</h2>{lede_html}{extra}
+      </div>'''
+
+
 def service_cards(d):
+    """Leistungsverzeichnis: nummerierte Zeilen statt Karten."""
     out = []
-    for s in SERVICES:
+    for i, s in enumerate(SERVICES, 1):
         out.append(f'''<li class="service">
-          <span class="icon" aria-hidden="true">{svg(s["icon"], "1.8")}</span>
-          <span class="tag">{esc(s["tag"])}</span>
-          <h3><a href="{u(s["slug"], d)}">{esc(s["short"])}</a></h3>
-          <p>{esc(s["card"])}</p>
-          <span class="more" aria-hidden="true">{T("Mehr erfahren →", "Learn more →")}</span>
+          <span class="no" aria-hidden="true">{i:02d}</span>
+          <div class="main">
+            <span class="tag">{esc(s["tag"])}</span>
+            <h3><a href="{u(s["slug"], d)}">{esc(s["short"])}</a></h3>
+            <p>{esc(s["card"])}</p>
+          </div>
+          <span class="go" aria-hidden="true">{svg("arrow", "2.4")}</span>
         </li>''')
     return '<ul class="services">' + "\n".join(out) + "</ul>"
 
@@ -735,19 +755,20 @@ def contact_lede():
 
 def contact_compact(d):
     wa = BIZ["phone_tel"].lstrip("+")
-    return f'''<section class="section section--surface-top contact-compact" id="kontakt" aria-labelledby="kontakt-title">
+    return f'''<section class="section deep contact-compact" id="kontakt" aria-labelledby="kontakt-title">
   <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">{T("Kontakt", "Contact")}</p>
-      <h2 id="kontakt-title">{T("Rufen Sie an oder schreiben Sie", "Call or send a message")}</h2>
-      <p class="lede">{contact_lede()}</p>
-    </div>
-    <div class="contact-compact-grid">
-      <div>{contact_rows()}</div>
-      <div class="contact-actions">
-        <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{BIZ["phone_display"]}</a>
-        <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
-        <a class="btn btn-secondary" href="{u(S("contact"), d)}">{svg("mail")}{T("Anfrage per Formular", "Enquiry via form")}</a>
+    <div class="split">
+      <div class="split-head">
+        {sec_head("09", T("Kontakt", "Contact"), T("Rufen Sie an oder schreiben Sie", "Call or send a message"), contact_lede(), "kontakt-title")}
+      </div>
+      <div class="split-body">
+        <a class="big-phone" href="tel:{BIZ["phone_tel"]}"><small>{T("Direkt anrufen", "Call directly")}</small>{BIZ["phone_display"]}</a>
+        {contact_rows()}
+        <div class="contact-actions">
+          <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{T("Anrufen", "Call")}</a>
+          <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
+          <a class="btn btn-secondary" href="{u(S("contact"), d)}">{svg("mail")}{T("Anfrage per Formular", "Enquiry via form")}</a>
+        </div>
       </div>
     </div>
   </div>
@@ -925,7 +946,6 @@ def build_home():
     d = depth(slug)
     faq = HOME_FAQ
     wa = BIZ["phone_tel"].lstrip("+")
-    trust_zero = T('0<small>€</small>', '€0')
     steps = T(
         [("Kontakt aufnehmen", "Rufen Sie an oder schreiben Sie per WhatsApp. Wir klären kurz den Unfallhergang und was Sie jetzt brauchen."),
          ("Besichtigung", "Termin nach Absprache. Alle Schäden werden schriftlich und mit Fotos erfasst, auch Vor- und Altschäden."),
@@ -948,73 +968,68 @@ def build_home():
                "Unabhängig von Versicherungen und Werkstätten", "Kontinuierliche Weiterbildung, alle Fahrzeugarten"],
               [BIZ["craft"], "17 years as an expert with Germany's largest expert organisation",
                "Independent of insurers and garages", "Continuous training, all types of vehicle"])
-    facts_html = "\n          ".join(f'<li>{svg("check", "2.2")}<span>{f}</span></li>' for f in facts)
+    facts_html = "\n          ".join(f"<li><span>{f}</span></li>" for f in facts)
+    stats = [("30<small>+</small>", T("Jahre Erfahrung im Kraftfahrzeugwesen", "years of experience in the motor vehicle trade")),
+             ("17", T("Jahre Kfz-Sachverständiger bei Europas größter Sachverständigenorganisation", "years as a vehicle expert with Europe's largest expert organisation")),
+             ("100<small>%</small>", T("unabhängig von Versicherungen und Werkstätten", "independent of insurers and garages")),
+             (T("0<small>€</small>", "<small>€</small>0"), T("Kosten für Sie im Haftpflichtfall. Die gegnerische Versicherung zahlt in der Regel.", "cost to you in a liability case. The other party's insurer usually pays."))]
+    stats_html = "\n        ".join(f'<li><span class="num">{n}</span><span class="lbl">{l}</span></li>' for n, l in stats)
+    plan_label = T("Skizze eines Fahrzeugs von oben mit markierter Schadenszone", "Sketch of a vehicle from above with the damage zone marked")
     body = f'''
   <section class="hero" aria-labelledby="hero-title">
     <div class="wrap">
-      <div class="hero-copy">
-        <p class="eyebrow">{T("Unverschuldeter Unfall? Wir beraten Sie gerne.", "Not-at-fault accident? We are happy to advise you.")}</p>
-        <h1 id="hero-title">{T("Kfz-Gutachter in Celle: <em>unabhängig, schnell, auf Ihrer Seite.</em>", "Vehicle expert in Celle: <em>independent, fast, on your side.</em>")}</h1>
-        <p class="lede">{T("Persönliche, kompetente Beratung bei der Schadensabwicklung. Ihr Kfz-Gutachten wird schnell und unkompliziert erstellt und ist unabhängig von jeder Versicherung.",
-                           "Personal, competent advice when settling a claim. Your vehicle report is prepared quickly and without fuss, and is independent of any insurer.")}</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{T("Jetzt anrufen", "Call now")}</a>
-          <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
-          <a class="btn btn-ghost" href="{u(S("services"), d)}">{T("Leistungen ansehen →", "View services →")}</a>
-        </div>
-        <p class="hero-note">{svg("shield")}<span>{T("Bei einem unverschuldeten Unfall trägt in der Regel die Haftpflichtversicherung des Unfallverursachers die Kosten für Ihr Gutachten. Sie haben das Recht, den Sachverständigen frei zu wählen.",
-                                                       "After a not-at-fault accident, the liability insurer of the person at fault usually pays for your report. You have the right to choose the expert freely.")}</span></p>
-      </div>
-      <div class="hero-visual">
-        <figure class="portrait">
-          {portrait_picture(d, T("Patric Schneider, Kfz-Sachverständiger in Celle", "Patric Schneider, vehicle expert in Celle"))}
-        </figure>
-        <div class="id-card">
-          <div>
-            <div class="name">{BIZ["person"]}</div>
-            <div class="role">{BIZ["craft"]} · {BIZ["role"]}</div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="kicker">{T("Unverschuldeter Unfall? Wir beraten Sie gerne.", "Not-at-fault accident? We are happy to advise you.")}</p>
+          <h1 id="hero-title">{T("Kfz-Gutachter in Celle: <em>unabhängig, schnell, auf Ihrer Seite.</em>", "Vehicle expert in Celle: <em>independent, fast, on your side.</em>")}</h1>
+          <p class="lede">{T("Persönliche, kompetente Beratung bei der Schadensabwicklung. Ihr Kfz-Gutachten wird schnell und unkompliziert erstellt und ist unabhängig von jeder Versicherung.",
+                             "Personal, competent advice when settling a claim. Your vehicle report is prepared quickly and without fuss, and is independent of any insurer.")}</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{T("Jetzt anrufen", "Call now")}</a>
+            <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
+            <a class="btn btn-ghost" href="{u(S("services"), d)}">{T("Leistungen ansehen", "View services")}</a>
           </div>
-          <dl>
-            <dt>{T("Telefon", "Phone")}</dt><dd><a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a></dd>
-            <dt>{T("E-Mail", "Email")}</dt><dd><a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a></dd>
-            <dt>{T("Standort", "Location")}</dt><dd>{BIZ["street"]}, {BIZ["zip"]} {BIZ["city"]}</dd>
-          </dl>
+          <p class="hero-note">{T("Bei einem unverschuldeten Unfall trägt in der Regel die Haftpflichtversicherung des Unfallverursachers die Kosten für Ihr Gutachten. Sie haben das Recht, den Sachverständigen frei zu wählen.",
+                                  "After a not-at-fault accident, the liability insurer of the person at fault usually pays for your report. You have the right to choose the expert freely.")}</p>
+        </div>
+        <div class="hero-visual">
+          <div class="portrait-frame">
+            <span class="slab" aria-hidden="true"></span>
+            <figure class="portrait">
+              {portrait_picture(d, T("Patric Schneider, Kfz-Sachverständiger in Celle", "Patric Schneider, vehicle expert in Celle"))}
+            </figure>
+            <div class="id-tag">
+              <strong>{BIZ["person"]}</strong>
+              <span>{BIZ["craft"]}</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <section class="trust" aria-label="{T("Erfahrung und Grundsätze", "Experience and principles")}">
-    <div class="wrap">
-      <ul>
-        <li><span class="num">30<small>+</small></span><span class="lbl">{T("Jahre Erfahrung im Kraftfahrzeugwesen", "years of experience in the motor vehicle trade")}</span></li>
-        <li><span class="num">17</span><span class="lbl">{T("Jahre Kfz-Sachverständiger bei Europas größter Sachverständigenorganisation", "years as a vehicle expert with Europe's largest expert organisation")}</span></li>
-        <li><span class="num">100<small>%</small></span><span class="lbl">{T("unabhängig von Versicherungen und Werkstätten", "independent of insurers and garages")}</span></li>
-        <li><span class="num">{trust_zero}</span><span class="lbl">{T("Kosten für Sie im Haftpflichtfall. Die gegnerische Versicherung zahlt in der Regel.", "cost to you in a liability case. The other party's insurer usually pays.")}</span></li>
+      <ul class="stats" aria-label="{T("Erfahrung und Grundsätze", "Experience and principles")}">
+        {stats_html}
       </ul>
     </div>
   </section>
 
   <section class="section" id="leistungen" aria-labelledby="leistungen-title">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">{T("Leistungen", "Services")}</p>
-        <h2 id="leistungen-title">{T("Kfz-Gutachten in Celle für jede Situation", "Vehicle reports in Celle for every situation")}</h2>
-        <p class="lede">{T("Pkw, Lkw, Nutzfahrzeug, Motorrad, Oldtimer oder E-Bike. Jedes Gutachten wird neutral erstellt und ist vor Gericht anerkannt.",
-                           "Car, lorry, commercial vehicle, motorcycle, classic car or e-bike. Every report is prepared neutrally and is recognised in court.")}</p>
+    <div class="wrap split">
+      <div class="split-head">
+        {sec_head("01", T("Leistungen", "Services"), T("Kfz-Gutachten in Celle für jede Situation", "Vehicle reports in Celle for every situation"),
+                  T("Pkw, Lkw, Nutzfahrzeug, Motorrad, Oldtimer oder E-Bike. Jedes Gutachten wird neutral erstellt und ist vor Gericht anerkannt.",
+                    "Car, lorry, commercial vehicle, motorcycle, classic car or e-bike. Every report is prepared neutrally and is recognised in court."), "leistungen-title")}
       </div>
-      {service_cards(d)}
+      <div class="split-body">
+        {service_cards(d)}
+      </div>
     </div>
   </section>
 
-  <section class="section section--surface" id="ablauf" aria-labelledby="ablauf-title">
+  <section class="section band" id="ablauf" aria-labelledby="ablauf-title">
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">{T("So läuft es ab", "How it works")}</p>
-        <h2 id="ablauf-title">{T("Vom Anruf bis zur Regulierung in vier Schritten", "From the first call to settlement in four steps")}</h2>
-        <p class="lede">{T("Sie kümmern sich um das Wesentliche. Ich übernehme Dokumentation und Bewertung und unterstütze Sie im Umgang mit Versicherung, Werkstatt oder Anwalt.",
-                           "You take care of what matters. I handle documentation and assessment and support you in dealing with the insurer, the garage or your lawyer.")}</p>
-      </div>
+      {sec_head("02", T("So läuft es ab", "How it works"), T("Vom Anruf bis zur Regulierung in vier Schritten", "From the first call to settlement in four steps"),
+                T("Sie kümmern sich um das Wesentliche. Ich übernehme Dokumentation und Bewertung und unterstütze Sie im Umgang mit Versicherung, Werkstatt oder Anwalt.",
+                  "You take care of what matters. I handle documentation and assessment and support you in dealing with the insurer, the garage or your lawyer."), "ablauf-title")}
+      <div class="band-art" aria-hidden="true">{artwork.car_plan()}</div>
       <ol class="steps">
         {steps_html}
       </ol>
@@ -1022,28 +1037,26 @@ def build_home():
   </section>
 
   <section class="section" id="warum" aria-labelledby="warum-title">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">{T("Gutachten statt Kostenvoranschlag", "Expert report instead of repair estimate")}</p>
-        <h2 id="warum-title">{T("Warum ein Kostenvoranschlag nach dem Unfall nicht reicht", "Why a repair estimate is not enough after an accident")}</h2>
-        <p class="lede">{T("Versicherungen akzeptieren gern einen Kostenvoranschlag mit Fotos und behaupten, einen Sachverständigen müssten Sie selbst bezahlen. Im Haftpflichtfall ist das gesetzlich anders geregelt.",
-                           "Insurers like to accept a repair estimate with photos and claim that you would have to pay for an expert yourself. In a liability case the law says otherwise.")}</p>
+    <div class="wrap split">
+      <div class="split-head">
+        {sec_head("03", T("Gutachten statt Kostenvoranschlag", "Expert report instead of repair estimate"), T("Warum ein Kostenvoranschlag nach dem Unfall nicht reicht", "Why a repair estimate is not enough after an accident"),
+                  T("Versicherungen akzeptieren gern einen Kostenvoranschlag mit Fotos und behaupten, einen Sachverständigen müssten Sie selbst bezahlen. Im Haftpflichtfall ist das gesetzlich anders geregelt.",
+                    "Insurers like to accept a repair estimate with photos and claim that you would have to pay for an expert yourself. In a liability case the law says otherwise."), "warum-title",
+                  extra=f'<p class="head-link"><a class="btn btn-secondary" href="{u(S("why"), d)}">{T("Alle Gründe und Vergleich", "All reasons and the comparison")}</a></p>')}
       </div>
-      <div class="reasons">
+      <div class="split-body">
+        <div class="reasons">
         {reasons_html}
+        </div>
       </div>
-      <p><a class="btn btn-secondary" href="{u(S("why"), d)}">{T("Alle Gründe und Vergleich ansehen →", "See all reasons and the comparison →")}</a></p>
     </div>
   </section>
 
   <section class="section deep about" id="ueber-mich" aria-labelledby="about-title">
     <div class="wrap">
-      <figure class="about-photo">
-        {portrait_picture(d, T("Patric Schneider im Porträt", "Portrait of Patric Schneider"), lazy=True)}
-      </figure>
+      <div class="about-seal">{artwork.stamp(300, T("UNABHÄNGIGER SACHVERSTÄNDIGER", "INDEPENDENT VEHICLE EXPERT"), T("CELLE · SEIT ÜBER 30 JAHREN", "CELLE · OVER 30 YEARS"), "PS", T("KFZ", "KFZ"))}</div>
       <div class="about-copy">
-        <p class="eyebrow">{T("Über mich", "About me")}</p>
-        <h2 id="about-title">{T("Ein junges Unternehmen mit über 30 Jahren Erfahrung", "A young business with over 30 years of experience")}</h2>
+        {sec_head("04", T("Über mich", "About me"), T("Ein junges Unternehmen mit über 30 Jahren Erfahrung", "A young business with over 30 years of experience"), None, "about-title")}
         <p>{T(f"Mein Name ist {BIZ['person']}. Ich bin {BIZ['craft']} und {BIZ['role']} in Celle. 17 Jahre lang war ich als Kfz-Sachverständiger bei der größten Sachverständigenorganisation Deutschlands tätig und kenne alle Bereiche der Schadenregulierung aus der Praxis.",
               f"My name is {BIZ['person']}. I am a {BIZ['craft'].lower()} and {BIZ['role'].lower()} in Celle. For 17 years I worked as a vehicle expert for Germany's largest expert organisation, and I know every area of claims settlement from practical experience.")}</p>
         <p>{T("Ob Schadengutachten nach einem Verkehrsunfall, unfallanalytisches Gutachten bei Rechtsstreitigkeiten oder Wertgutachten für Ihren geliebten Oldtimer: Sie bekommen Ihr Gutachten mit dem passenden Sachverstand, zügig und ohne Umwege.",
@@ -1061,56 +1074,56 @@ def build_home():
 
   <section class="section" id="unfall" aria-labelledby="unfall-title">
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">{T("Unfall passiert?", "Had an accident?")}</p>
-        <h2 id="unfall-title">{T("Die ersten Schritte nach einem Unfall", "The first steps after an accident")}</h2>
-        <p class="lede">{T("Ruhe bewahren und der Reihe nach vorgehen. Die vollständige Checkliste zum Abhaken finden Sie auf einer eigenen Seite.",
-                           "Stay calm and work through it step by step. You will find the full checklist to tick off on a page of its own.")}</p>
-      </div>
+      {sec_head("05", T("Unfall passiert?", "Had an accident?"), T("Die ersten Schritte nach einem Unfall", "The first steps after an accident"),
+                T("Ruhe bewahren und der Reihe nach vorgehen. Die vollständige Checkliste zum Abhaken finden Sie auf einer eigenen Seite.",
+                  "Stay calm and work through it step by step. You will find the full checklist to tick off on a page of its own."), "unfall-title")}
       <div class="checklist-grid">
         <div>
           <ol class="first-steps">
             {"".join(f"<li><div><strong>{esc(t)}</strong></div></li>" for t, _ in CHECKLIST)}
           </ol>
-          <p class="checklist-foot"><a class="btn btn-secondary" href="{u(S("checklist"), d)}">{T("Zur Unfall-Checkliste →", "To the accident checklist →")}</a></p>
+          <p class="checklist-foot"><a class="btn btn-secondary" href="{u(S("checklist"), d)}">{T("Zur Unfall-Checkliste", "To the accident checklist")}</a></p>
         </div>
         {emergency_card(d)}
       </div>
     </div>
   </section>
 
-  <section class="section" id="ratgeber" aria-labelledby="ratgeber-title">
+  <section class="section section--paper2" id="ratgeber" aria-labelledby="ratgeber-title">
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">{T("Ratgeber", "Guide")}</p>
-        <h2 id="ratgeber-title">{T("Antworten auf die häufigsten Fragen nach dem Unfall", "Answers to the most common questions after an accident")}</h2>
-        <p class="lede">{T("Wertminderung, Totalschaden, Mietwagen und Kosten verständlich erklärt.", "Diminished value, total loss, rental cars and costs explained clearly.")}</p>
-      </div>
+      {sec_head("06", T("Ratgeber", "Guide"), T("Antworten auf die häufigsten Fragen nach dem Unfall", "Answers to the most common questions after an accident"),
+                T("Wertminderung, Totalschaden, Mietwagen und Kosten verständlich erklärt.", "Diminished value, total loss, rental cars and costs explained clearly."), "ratgeber-title")}
       {related([a["slug"] for a in ARTICLES[:3]], d)}
-      <p class="more-row"><a class="btn btn-secondary" href="{u(S("guide"), d)}">{T("Alle Ratgeber ansehen →", "View the whole guide →")}</a></p>
+      <p class="more-row"><a class="btn btn-secondary" href="{u(S("guide"), d)}">{T("Alle Ratgeber ansehen", "View the whole guide")}</a></p>
     </div>
   </section>
 
-  <section class="section section--surface" id="faq" aria-labelledby="faq-title">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">{T("Häufige Fragen", "Frequently asked questions")}</p>
-        <h2 id="faq-title">{T("Was Unfallgeschädigte am häufigsten fragen", "What accident victims ask most often")}</h2>
+  <section class="section" id="faq" aria-labelledby="faq-title">
+    <div class="wrap split">
+      <div class="split-head">
+        {sec_head("07", T("Häufige Fragen", "Frequently asked questions"), T("Was Unfallgeschädigte am häufigsten fragen", "What accident victims ask most often"), None, "faq-title")}
       </div>
-      {faq_section(faq, d, open_first=True)}
+      <div class="split-body">
+        {faq_section(faq, d, open_first=True)}
+      </div>
     </div>
   </section>
 
-  <section class="section" id="einsatzgebiet" aria-labelledby="gebiet-title">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">{T("Einsatzgebiet", "Service area")}</p>
-        <h2 id="gebiet-title">{T("Im Landkreis Celle und im Umkreis von 50 Kilometern", "In Celle district and within 50 kilometres")}</h2>
-        <p class="lede">{T("Besichtigungstermine nach Absprache, von Celle bis Hannover, Gifhorn, Soltau und Walsrode.",
-                           "Inspection appointments by arrangement, from Celle to Hanover, Gifhorn, Soltau and Walsrode.")}</p>
+  <section class="section section--paper2" id="einsatzgebiet" aria-labelledby="gebiet-title">
+    <div class="wrap split">
+      <div class="split-head">
+        {sec_head("08", T("Einsatzgebiet", "Service area"), T("Im Landkreis Celle und im Umkreis von 50 Kilometern", "In Celle district and within 50 kilometres"),
+                  T("Besichtigungstermine nach Absprache, von Celle bis Hannover, Gifhorn, Soltau und Walsrode.",
+                    "Inspection appointments by arrangement, from Celle to Hanover, Gifhorn, Soltau and Walsrode."), "gebiet-title",
+                  extra=f'<p class="head-link"><a class="btn btn-secondary" href="{u(S("area"), d)}">{T("Alle Orte im Einsatzgebiet", "All places in the service area")}</a></p>')}
       </div>
-      {town_chips([t for t in PAGE_TOWNS], d)}
-      <p class="more-row"><a class="btn btn-secondary" href="{u(S("area"), d)}">{T("Alle Orte im Einsatzgebiet →", "All places in the service area →")}</a></p>
+      <div class="split-body">
+        <figure class="area-map">
+          {area_svg(d)}
+          <figcaption>{T("Schema, keine Landkarte. Die Entfernungen sind Luftlinie ab Celle.", "A diagram, not a map. Distances are straight-line from Celle.")}</figcaption>
+        </figure>
+        {town_chips([t for t in PAGE_TOWNS], d)}
+      </div>
     </div>
   </section>
 

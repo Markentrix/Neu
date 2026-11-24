@@ -85,6 +85,15 @@ Beide Skripte brauchen nur Python 3. Nach jeder Änderung `build.py` ausführen 
 | `/impressum/`, `/datenschutz/` | Rechtliches, nicht in Suchmaschinen indexiert |
 | `/en/…` | Englische Fassung aller Seiten, siehe Abschnitt „Zweisprachig“ |
 
+## Gestaltung
+
+Die Gestaltung heißt „Prüfprotokoll“ und folgt dem Logo: Schwarz und Rot, schräg gestellte Schrift (Barlow Condensed kursiv), diagonal geschnittene Flächen und eckige Formen ohne Rundungen. Wiederkehrende Elemente sind die Schadenskizze (Fahrzeug von oben mit Maßlinie, Schadenszone und Nummernmarken), der runde Prüfstempel, nummerierte Abschnitte und Nummernmarken als Aufzählung.
+
+- Alle Farben, Abstände und der Schrägwinkel stehen als Variablen am Anfang von `public/assets/site.css`. Dunkelmodus ist eingebaut.
+- Die Zeichnungen (Skizze, Stempel) entstehen rechnerisch in `build/artwork.py` und werden beim Bauen in die Seiten geschrieben. Es gibt dafür keine Bilddateien. Die Skizze zeichnet sich beim Sichtbarwerden Linie für Linie, bei „weniger Bewegung“ im System ist sie sofort fertig.
+- Schriften liegen lokal in `public/assets/fonts/` (Barlow 400 und 600, Barlow Condensed 600, 700 kursiv und 800 kursiv).
+- Das Vorschaubild für soziale Netzwerke entsteht mit `node build/make-og.js` im gleichen Stil.
+
 ## Zweisprachig: Deutsch und Englisch
 
 Jede Seite gibt es auch auf Englisch unter `/en/` (zum Beispiel `/en/services/`, `/en/service-area/`, `/en/contact/`). Deutsch bleibt die Hauptsprache im Wurzelverzeichnis, damit die bestehenden Adressen und Weiterleitungen unverändert bleiben.
