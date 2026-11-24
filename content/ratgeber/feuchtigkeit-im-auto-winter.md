@@ -34,9 +34,10 @@
     }
   ],
   "image": {
-    "file": "innen-audi-q7-kofferraum.jpg",
-    "alt": "Gereinigter Kofferraum eines Audi Q7 mit Gummiwanne",
-    "caption": "Gummiwannen und -matten halten Nässe aus dem Teppich."
+    "file": "innen-vorher-vw-tiguan.jpg",
+    "position": "50% 88%",
+    "alt": "Fahrerseite eines VW Tiguan mit nasser, verschmutzter Gummimatte und Salzrändern im Fußraum",
+    "caption": "Typisch im Winter: Schmelzwasser und Salz auf den Fußmatten. Diese Feuchtigkeit verdunstet im Innenraum und lässt die Scheiben beschlagen."
   }
 }
 

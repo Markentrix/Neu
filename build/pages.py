@@ -46,7 +46,8 @@ def figure(site, img, prefix, sizes="(min-width: 900px) 600px, 92vw"):
     cap = ESC(img.get("caption", ""))
     if img.get("credit"):
         cap += f' <span class="fig-credit">Bild: {ESC(img["credit"])}</span>'
-    return f'<figure class="fig">{pic}' + (f"<figcaption>{cap}</figcaption>" if cap else "") + "</figure>"
+    pos = f' style="--fig-pos: {ESC(img["position"])}"' if img.get("position") else ""
+    return f'<figure class="fig"{pos}>{pic}' + (f"<figcaption>{cap}</figcaption>" if cap else "") + "</figure>"
 
 
 def hero_bg(site, name, prefix):

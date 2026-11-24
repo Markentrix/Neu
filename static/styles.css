@@ -1777,3 +1777,4 @@ html.lb-open { overflow: hidden; }
   .service-more { display: none; }
   .footer-about { display: none; }
 }
+.fig .fig-img img { object-position: var(--fig-pos, 50% 50%); }
