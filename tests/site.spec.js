@@ -569,7 +569,8 @@ test("Buchung: hinter dem Buchungszeitraum des Portals freundlicher Hinweis stat
   const tage = []; for (let i = 100; i <= 160; i++) { const d = new Date(); d.setDate(d.getDate() + i); tage.push(d.toISOString().slice(0, 10)); }
   await page.request.post("/__mock/sperren", { data: { tage } });
   try {
-    await page.goto("/termin.html?datum=" + tage[10]);  // z. B. über einen Link mit Wunschtag
+    const wunsch = tage.slice(10).find((t) => new Date(t + "T12:00:00").getDay() !== 0);  // kein Sonntag (Ruhetag hat eigenen Hinweis)
+    await page.goto("/termin.html?datum=" + wunsch);  // z. B. über einen Link mit Wunschtag
     await expect(page.locator("#t-date1")).toHaveAttribute("max", /^\d{4}-\d{2}-\d{2}$/);
     const max = await page.locator("#t-date1").getAttribute("max");
     expect(max < tage[0]).toBe(true);
