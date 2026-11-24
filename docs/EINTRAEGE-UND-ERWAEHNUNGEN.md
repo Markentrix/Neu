@@ -47,7 +47,7 @@ Markentrix ist eine Webdesign-, Marketing- und KI-Agentur aus Celle. Inhaber Chr
 
 ## 5. Verweise von anderen Seiten (stärkster Hebel)
 
-- **Kundenseiten:** Zeile in der Fußzeile jeder Seite: „Website von Markentrix, Webdesign aus Celle“, mit Link auf `https://markentrix.de/`. Heute stehen Links nur im Impressum von ponyclublila.de (dort `noindex`, also kaum wirksam) und elbdetail.de. Bei Anadolu Market den Link zum Livegang einbauen.
+- **Kundenseiten:** Zeile in der Fußzeile jeder Seite: „Website von Markentrix, Webdesign aus Celle“, mit Link auf `https://markentrix.de/`. Heute stehen Links nur im Impressum von ponyclublila.de (dort `noindex`, also kaum wirksam) und elbdetail.de. Bei Anadolu Market (live seit November 2026 unter https://anadolumarket-celle.de/) fehlt der Link noch: Stand 24.11.2026 steht auf Startseite, Impressum und Datenschutz kein Verweis auf markentrix.de. Bitte „Website von Markentrix, Webdesign aus Celle“ mit Link in die Fußzeile aufnehmen.
 - **Weitere Kunden:** Ab sofort bei jedem Projekt standardmäßig mit einbauen, Zustimmung im Vertrag regeln.
 - **Regionale Erwähnungen:** Gastbeitrag oder Vorstellung bei einem Gewerbeverein, der Celler Presse oder einem regionalen Blog. Immer mit Name, Ort und Link.
 
