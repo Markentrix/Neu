@@ -112,24 +112,31 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
     titel = ("Stornorechnung" if storno else "Rechnung") if ist_re else "Angebot"
     nr = b["nummer"] or "Entwurf"
     inhalt = []
-    absender = " · ".join(x for x in [f["name"], f["strasse"], f"{f['plz']} {f['ort']}".strip()] if x)
-    inhalt += [pdf.p(absender, pdf.KLEIN)]
+    absender = " · ".join(x for x in [f["name"] + (" · " + f["inhaber"] if f.get("inhaber") else ""), f["strasse"], f"{f['plz']} {f['ort']}".strip()] if x)
+    inhalt += [pdf.p(titel.upper() + (f" ZU {storno_nr}" if storno_nr else ""), pdf.H1), pdf.p(absender, pdf.KLEIN), pdf.Spacer(1, 14)]
     adr = "\n".join(x for x in [emp.get("firma"), emp.get("ansprechpartner"), emp.get("strasse"), f"{emp.get('plz') or ''} {emp.get('ort') or ''}".strip()] if x)
-    info = ([["Kundennummer", emp["kundennummer"]]] if emp.get("kundennummer") else []) + [["Nummer", nr], ["Datum", pdf.datum(b["datum"] or date.today())]]
+    info = ([["Kundennummer", emp["kundennummer"]]] if emp.get("kundennummer") else []) + [[f"{titel}snummer" if ist_re else "Angebotsnummer", nr], [f"{titel}sdatum" if ist_re else "Angebotsdatum", pdf.datum(b["datum"] or date.today())]]
+    if b["leistungszeitraum"]:
+        info.append(["Leistungsdatum / -zeitraum", b["leistungszeitraum"]])
     if ist_re and b["faellig_am"]:
         info.append(["Zahlbar bis", pdf.datum(b["faellig_am"])])
     if not ist_re and b["faellig_am"]:
         info.append(["Gültig bis", pdf.datum(b["faellig_am"])])
-    if b["leistungszeitraum"]:
-        info.append(["Leistungszeitraum", b["leistungszeitraum"]])
     if ist_re and b.get("kaeufer_referenz"):
-        info.append(["Ihre Referenz", b["kaeufer_referenz"]])
+        info.append(["Ihre Referenz / Leitweg-ID", b["kaeufer_referenz"]])
+    if f.get("steuernummer"):
+        info.append(["Steuernummer", f["steuernummer"]])
+    if f.get("ustid"):
+        info.append(["USt-IdNr.", f["ustid"]])
     from reportlab.platypus import Table, TableStyle
-    kopf = Table([[pdf.p(adr), Table([[pdf.p(k, pdf.KLEIN), pdf.p(v)] for k, v in info], colWidths=[32 * pdf.mm, 48 * pdf.mm])]], colWidths=[90 * pdf.mm, 80 * pdf.mm])
+    label = pdf.ParagraphStyle("lab", parent=pdf.KLEIN, fontName=pdf.F_FETT, fontSize=7.5, leading=10, textColor=pdf.AKZENT, spaceBefore=6)
+    wert = pdf.ParagraphStyle("wert", parent=pdf.TXT, leading=12)
+    rechts = []
+    for k, v in info:
+        rechts += [pdf.Paragraph(pdf.esc(k), label), pdf.p(v, wert)]
+    kopf = Table([[[pdf.Paragraph(("RECHNUNGSEMPFÄNGER" if ist_re else "ANGEBOTSEMPFÄNGER"), label), pdf.p(adr)], rechts]], colWidths=[84 * pdf.mm, 86 * pdf.mm])
     kopf.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
-    inhalt += [pdf.Spacer(1, 8), kopf, pdf.Spacer(1, 18), pdf.p(f"{titel} {nr}" + (f" zu Rechnung {storno_nr}" if storno_nr else ""), pdf.H1)]
-    if b["betreff"]:
-        inhalt += [pdf.p(b["betreff"], pdf.H2)]
+    inhalt += [kopf, pdf.Spacer(1, 16), pdf.p(b["betreff"] or ("Abrechnung der vereinbarten Leistungen" if ist_re else "Unser Angebot"), pdf.H2)]
     if b["einleitung"]:
         inhalt += [pdf.p(b["einleitung"]), pdf.Spacer(1, 8)]
     zeilen = []
@@ -137,32 +144,25 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
         gesamt = runden(Decimal(str(p["menge"])) * p["preis_cent"])
         menge = (f"{p['menge']:g}".replace(".", ",")) + (" " + p["einheit"] if p.get("einheit") else "")
         zeilen.append([str(i), pdf.p(p["text"]), menge, pdf.euro(p["preis_cent"]), pdf.euro(gesamt)])
-    inhalt += [pdf.tabelle(["Pos.", "Beschreibung", "Menge", "Einzelpreis", "Gesamt"], zeilen, breiten=[12 * pdf.mm, 78 * pdf.mm, 24 * pdf.mm, 28 * pdf.mm, 28 * pdf.mm], rechts_ab=2)]
-    summen_zeilen = [["Zwischensumme (netto)", pdf.euro(b["netto_cent"])]]
+    inhalt += [pdf.tabelle(["Pos.", "Leistung / Leistungsumfang", "Menge", "Einzelpreis netto", "Gesamt netto"], zeilen, breiten=[12 * pdf.mm, 78 * pdf.mm, 24 * pdf.mm, 28 * pdf.mm, 28 * pdf.mm], rechts_ab=2)]
+    summen_zeilen = [["Nettobetrag", pdf.euro(b["netto_cent"])]]
     if not b["kleinunternehmer"]:
         summen_zeilen.append([f"Umsatzsteuer {float(b['ust_satz']):g} %".replace(".", ","), pdf.euro(b["ust_cent"])])
-    summen_zeilen.append(["Gesamtbetrag" if not b["kleinunternehmer"] else "Gesamtbetrag (ohne USt)", pdf.euro(b["brutto_cent"])])
-    t = Table([[pdf.p(a, pdf.RECHTS_FETT if i == len(summen_zeilen) - 1 else pdf.RECHTS), pdf.p(c, pdf.RECHTS_FETT if i == len(summen_zeilen) - 1 else pdf.RECHTS)] for i, (a, c) in enumerate(summen_zeilen)], colWidths=[130 * pdf.mm, 40 * pdf.mm])
-    t.setStyle(TableStyle([("LINEABOVE", (0, -1), (-1, -1), 0.8, pdf.colors.HexColor("#0C2128"))]))
+    summen_zeilen.append((("Rechnungsbetrag (brutto)" if ist_re else "Gesamtbetrag (brutto)") if not b["kleinunternehmer"] else "Gesamtbetrag (ohne USt)", pdf.euro(b["brutto_cent"])))
+    t = Table([[pdf.p(a, pdf.RECHTS_FETT if i == len(summen_zeilen) - 1 else pdf.RECHTS), pdf.p(c, pdf.RECHTS_FETT if i == len(summen_zeilen) - 1 else pdf.RECHTS)] for i, (a, c) in enumerate(summen_zeilen)], colWidths=[130 * pdf.mm, 40 * pdf.mm], hAlign="LEFT")
+    t.setStyle(TableStyle([("BACKGROUND", (0, -1), (-1, -1), pdf.LEINEN), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 8)]))
     inhalt += [pdf.Spacer(1, 6), t]
     if b["kleinunternehmer"]:
         inhalt += [pdf.Spacer(1, 6), pdf.p(KLEIN_HINWEIS, pdf.KLEIN)]
     if b.get("leistungen") and not ist_re:
         inhalt += [pdf.Spacer(1, 14), pdf.leistungsbox("Das bekommen Sie", b["leistungen"])]
     if ist_re and not storno:
-        iban = f.get("iban")
-        zahl = ["Bitte überweisen Sie den Betrag" + (f" bis zum {pdf.datum(b['faellig_am'])}" if b["faellig_am"] else "") + f" unter Angabe der Rechnungsnummer {nr}."]
-        if iban:
-            zahl.append(f"Empfänger: {f['name']}\nIBAN: {iban}" + (f"\nBIC: {f['bic']}" if f.get("bic") else "") + (f"\nBank: {f['bank']}" if f.get("bank") else ""))
-        links = pdf.p("\n".join(zahl))
+        zahl = ["Zahlbar bis: " + pdf.datum(b["faellig_am"]) + " · Verwendungszweck: " + nr if b["faellig_am"] else "Verwendungszweck: " + nr,
+                "Bitte überweisen Sie den Rechnungsbetrag auf die unten angegebene Bankverbindung." if f.get("iban") else "Bitte überweisen Sie den Rechnungsbetrag unter Angabe der Rechnungsnummer."]
         qr = _epc_qr(f, b)
-        zelle = [links, Image(qr, 28 * pdf.mm, 28 * pdf.mm) if qr else ""]
-        zt = Table([zelle], colWidths=[132 * pdf.mm, 38 * pdf.mm])
-        zt.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
-        inhalt += [pdf.Spacer(1, 12), KeepTogether([pdf.p("Zahlung", pdf.H2), zt])]
-    if not ist_re and f.get("iban"):
-        bank = f"Empfänger: {f['name']}\nIBAN: {f['iban']}" + (f"\nBIC: {f['bic']}" if f.get("bic") else "") + (f"\nBank: {f['bank']}" if f.get("bank") else "")
-        inhalt += [pdf.Spacer(1, 10), KeepTogether([pdf.p("Bankverbindung", pdf.H2), pdf.p(bank), pdf.p(f"Verwendungszweck bei Beauftragung: {nr}", pdf.KLEIN)])]
+        zt = Table([[pdf.p("\n".join(zahl)), Image(qr, 26 * pdf.mm, 26 * pdf.mm) if qr else ""]], colWidths=[134 * pdf.mm, 36 * pdf.mm])
+        zt.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (0, 0), 0)]))
+        inhalt += [pdf.Spacer(1, 12), KeepTogether([pdf.p("Zahlungsinformationen", pdf.H2), zt])]
     if storno:
         inhalt += [pdf.Spacer(1, 8), pdf.p("Diese Stornorechnung hebt die genannte Rechnung auf.", pdf.KLEIN)]
     if b["schluss"]:
@@ -204,4 +204,4 @@ def mahn_pdf(cur, bid, stufe: int) -> tuple[bytes, str]:
                pdf.Spacer(1, 10), pdf.p(f"Bitte überweisen Sie den offenen Betrag bis zum {pdf.datum(frist)} auf folgendes Konto:"),
                pdf.p(f"{f['name']}\nIBAN: {f.get('iban') or '–'}" + (f"\nBIC: {f['bic']}" if f.get("bic") else "") + f"\nVerwendungszweck: {b['nummer']}"), pdf.Spacer(1, 10),
                pdf.p("Sollte sich Ihre Zahlung mit diesem Schreiben überschnitten haben, betrachten Sie es bitte als gegenstandslos." if stufe == 1 else "Bitte melden Sie sich bei Rückfragen oder wenn es ein Problem mit der Rechnung gibt.")]
-    return pdf.dokument(titel, f"{titel} {b['nummer']}", inhalt, f), f"{titel}-{b['nummer']}.pdf".replace(" ", "_")
+    return pdf.dokument(titel, f"{titel} {b['nummer']}", inhalt, f, " · ".join(x for x in [f"Steuernummer: {f['steuernummer']}" if f.get("steuernummer") else "", f"USt-IdNr.: {f['ustid']}" if f.get("ustid") else ""] if x)), f"{titel}-{b['nummer']}.pdf".replace(" ", "_")

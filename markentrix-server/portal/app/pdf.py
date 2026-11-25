@@ -6,7 +6,7 @@ from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle  # noqa: F401
+from reportlab.platypus import BaseDocTemplate, Frame, KeepTogether, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle  # noqa: F401
 
 import os
 
@@ -71,11 +71,11 @@ def tabelle(kopf: list, zeilen: list, breiten=None, rechts_ab=None, summe: list 
     if summe:
         daten.append([c if hasattr(c, "wrap") else p(c, ParagraphStyle("sum", parent=TXT, fontName=F_FETT)) for c in summe])
     t = Table(daten, colWidths=breiten, repeatRows=1)
-    stil = [("BACKGROUND", (0, 0), (-1, 0), NAVY), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    stil = [("BACKGROUND", (0, 0), (-1, 0), AKZENT), ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1 if not summe else -2), [colors.white, HELL]),
             ("LINEBELOW", (0, 0), (-1, -1), 0.25, LEINEN), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]
     if summe:
-        stil += [("LINEABOVE", (0, -1), (-1, -1), 0.8, NAVY)]
+        stil += [("LINEABOVE", (0, -1), (-1, -1), 0.8, AKZENT)]
     if rechts_ab is not None:
         stil.append(("ALIGN", (rechts_ab, 0), (-1, -1), "RIGHT"))
     t.setStyle(TableStyle(stil))
@@ -130,12 +130,12 @@ def leistungsbox(titel: str, punkte: list):
     return t
 
 
-def _logo_zeichnen(c, x, y, hoehe) -> bool:
-    """Zeichnet das Markentrix-Logo (helle Variante für dunklen Grund) aus static/brand unverändert, nur proportional skaliert."""
+def _logo_zeichnen(c, x, y, hoehe, datei="markentrix-logo-farbe-dunkel.svg") -> bool:
+    """Zeichnet das Markentrix-Logo aus static/brand unverändert, nur proportional skaliert."""
     try:
         import re
         import xml.etree.ElementTree as ET
-        pfad = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "brand", "markentrix-logo-farbe-dunkel.svg")
+        pfad = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "brand", datei)
         wurzel = ET.parse(pfad).getroot()
         _, _, vw, vh = [float(v) for v in wurzel.get("viewBox").split()]
         k = hoehe / vh
@@ -208,37 +208,63 @@ def _svg_pfad(pt, d, transform=None):
             break
 
 
+# Seitenmaße nach dem Briefpapier „Markentrix CI v3“ (Punkt, A4): Inhalt von x=65,5 bis x=538,5
+_L, _R = 65.5, 538.5
+CLAIM = "MEHR ANFRAGEN. WENIGER AUFWAND."
+
+
+def _anpassen(fl, breite):
+    """Tabellen, die für 170 mm gebaut wurden, auf die Breite des Briefpapiers verkleinern."""
+    if isinstance(fl, Table) and getattr(fl, "_colWidths", None) and all(isinstance(w, (int, float)) for w in fl._colWidths):
+        summe = sum(fl._colWidths)
+        if summe > breite + 0.5:
+            fl._colWidths = [w * breite / summe for w in fl._colWidths]
+            fl._argW = list(fl._colWidths)
+    for kind in getattr(fl, "_content", None) or []:
+        _anpassen(kind, breite)
+
+
 def dokument(titel: str, kopfzeile: str, inhalt: list, firma: dict, fuss_extra: str = "") -> bytes:
     puffer = BytesIO()
     name = firma.get("name") or "Markentrix"
-    # Fußzeile in drei Spalten: Anschrift | Kontakt | Bank und Steuer (Pflichtangaben stehen auf jeder Seite)
-    iban = " ".join((firma.get("iban") or "").split())
+    iban = " ".join(((firma.get("iban") or "").replace(" ", "")[i:i + 4] for i in range(0, 40, 4))).strip()
+    steuer = [x.strip() for x in fuss_extra.split(" · ") if x.strip()]
+    web = (firma.get("website") or "").replace("https://", "").replace("http://", "").rstrip("/")
+    anschrift = " · ".join(x for x in [firma.get("strasse"), f"{firma.get('plz') or ''} {firma.get('ort') or ''}".strip()] if x)
+    kontakt = " · ".join(x for x in [firma.get("telefon"), firma.get("email")] if x)
     spalten = [
-        [x for x in [name, firma.get("inhaber") and "Inh. " + firma["inhaber"], firma.get("strasse"), f"{firma.get('plz', '')} {firma.get('ort', '')}".strip()] if x],
-        [x for x in [firma.get("telefon") and "Tel. " + firma["telefon"], firma.get("email"), (firma.get("website") or "").replace("https://", "").replace("http://", "").rstrip("/")] if x],
-        [x for x in [firma.get("bank"), iban and "IBAN " + iban, firma.get("bic") and "BIC " + firma["bic"]] if x] + [x.strip() for x in fuss_extra.split(" · ") if x.strip()],
+        ((name + (" · " + firma["inhaber"] if firma.get("inhaber") else "")).upper(), [x for x in [anschrift, kontakt, web] if x]),
+        (("BANKVERBINDUNG" + (" · " + firma["bank"] if firma.get("bank") else "")).upper() if iban else "", [x for x in [iban and "IBAN: " + iban, firma.get("bic") and "BIC: " + firma["bic"], " · ".join(steuer)] if x]),
     ]
+    if not iban and steuer:
+        spalten[1] = ("STEUERLICHE ANGABEN", [" · ".join(steuer)])
 
     def seite(c, doc):
         c.saveState()
-        c.setFillColor(NAVY); c.rect(0, A4[1] - 14 * mm, A4[0], 14 * mm, stroke=0, fill=1)
-        c.setFillColor(KUPFER); c.rect(0, A4[1] - 14.8 * mm, A4[0], 0.8 * mm, stroke=0, fill=1)   # kleiner Kupfer-Akzent unter dem Kopf
-        if not _logo_zeichnen(c, 20 * mm, A4[1] - 10.6 * mm, 7.2 * mm):
-            c.setFillColor(colors.white); c.setFont(F_TITEL, 12); c.drawString(20 * mm, A4[1] - 9 * mm, name)
-        c.setFont(F_TEXT, 8.5); c.setFillColor(LEINEN); c.drawRightString(A4[0] - 20 * mm, A4[1] - 8.7 * mm, kopfzeile)
-        c.setStrokeColor(colors.HexColor("#D5DEE2")); c.setLineWidth(0.4); c.line(20 * mm, 24 * mm, A4[0] - 20 * mm, 24 * mm)
-        c.setFillColor(GRAU); c.setFont(F_TEXT, 7)
-        for i, zeilen in enumerate(spalten):
-            x = (20 + i * 58) * mm
-            for j, z in enumerate(zeilen[:5]):
-                c.drawString(x, (20.8 - j * 2.9) * mm, z[:46])
-        c.drawRightString(A4[0] - 20 * mm, 8 * mm, f"Seite {doc.page}")
+        if not _logo_zeichnen(c, 72, 765, 23.3, "markentrix-logo-farbe-hell.svg"):
+            c.setFillColor(NAVY); c.setFont(F_TITEL, 16); c.drawString(74.5, 770, name)
+        c.setFont(F_FETT, 7.5); c.setFillColor(AKZENT); c.drawRightString(_R - 5, 774.4, CLAIM)
+        c.setStrokeColor(LEINEN); c.setLineWidth(0.75); c.line(70.9, 739.1, _R, 739.1)
+        c.setStrokeColor(KUPFER); c.setLineWidth(2); c.setLineCap(0); c.line(_L, 722.8, 107.95, 722.8)
+        c.setStrokeColor(LEINEN); c.setLineWidth(0.75); c.line(70.9, 74, _R, 74)
+        for i, (kopf, zeilen) in enumerate(spalten):
+            x = _L if i == 0 else 326.35
+            if kopf:
+                c.setFont(F_FETT, 7.5); c.setFillColor(AKZENT); c.drawString(x, 60.6, kopf[:48])
+            c.setFont(F_TEXT, 8); c.setFillColor(GRAU)
+            for j, z in enumerate(zeilen[:3]):
+                c.drawString(x, 47.2 - j * 12.55, z[:62])
+        c.setFont(F_TEXT, 7); c.setFillColor(GRAU); c.drawRightString(_R, 9, f"{kopfzeile} · Seite {doc.page}")
         c.restoreState()
 
-    doc = SimpleDocTemplate(puffer, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=26 * mm, bottomMargin=29 * mm, title=titel, author=name)
-    doc.build(inhalt, onFirstPage=seite, onLaterPages=seite)
+    breite = _R - _L
+    for fl in inhalt:
+        _anpassen(fl, breite)
+    doc = BaseDocTemplate(puffer, pagesize=A4, title=titel, author=name)
+    rahmen = Frame(_L, 88, breite, 708 - 88, leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0, id="inhalt")
+    doc.addPageTemplates([PageTemplate(id="brief", frames=[rahmen], onPage=seite)])
+    doc.build(inhalt)
     return puffer.getvalue()
-
 
 
 # von anderen Modulen als pdf.PageBreak usw. benutzt

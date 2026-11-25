@@ -44,8 +44,8 @@ m=mails()[-1]; chk("mail angebot mit pdf",m["to"]=="rita@rt.de" and m["anh"] and
 import subprocess as _sp
 open("/var/tmp/pt/angebot.pdf","wb").write(m["anh"][0][1])
 _t=_sp.run(["pdftotext","-layout","/var/tmp/pt/angebot.pdf","-"],capture_output=True,text=True).stdout
-chk("angebot: Bankverbindung im Text",all(x in _t for x in ["Bankverbindung","DE89 3704 0044 0532 0130 00".replace(" ","")[:4]]) and "COBADEFFXXX" in _t and "Testbank" in _t,_t[-900:])
-chk("angebot: Fußzeile mit Kontakt und IBAN",_t.count("IBAN")>=2 and "info@markentrix.de" in _t,_t[-600:])
+chk("angebot: Bankverbindung im Text","BANKVERBINDUNG" in _t.upper() and "DE89 3704 0044 0532 0130 00" in _t and "COBADEFFXXX" in _t and "TESTBANK" in _t.upper(),_t[-900:])
+chk("angebot: Fußzeile mit Kontakt und IBAN",_t.count("IBAN")>=1 and "info@markentrix.de" in _t,_t[-600:])
 # Kunde: Zugang
 tok=re.search(r"token=([A-Za-z0-9_-]+)",[x for x in mails()] and "")  # placeholder
 # --- Rechnung aus Angebot
