@@ -5,7 +5,7 @@ const { execFileSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const pub = path.resolve(__dirname, '..', 'public', 'assets');
+const pub = path.resolve(__dirname, '..', 'website-fertig', 'assets');
 const plan = execFileSync('python3', ['-c', "import sys; sys.path.insert(0, r'" + __dirname + "'); import artwork; print(artwork.car_plan())"]).toString();
 const html = `<!doctype html><meta charset="utf-8"><style>
 @font-face{font-family:BC;font-style:italic;font-weight:800;src:url('file://${pub}/fonts/BarlowCondensed-800i.woff2')}

@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build import REDIRECTS, DOMAIN  # noqa: E402
 
-PUBLIC = Path(__file__).resolve().parent.parent / "public"
+PUBLIC = Path(__file__).resolve().parent.parent / "website-fertig"
 errors, warnings = [], []
 
 
@@ -188,6 +188,8 @@ for url, (f, p) in pages.items():
 
     # Links
     for attr, href in p.links:
+        if href.startswith("{{SITE_URL}}"):
+            href = href[len("{{SITE_URL}}"):] or "/"      # Canonical, hreflang und og:url: Ziel muss existieren
         if re.match(r"^(mailto:|tel:|https?://|data:)", href):
             continue
         pu = urlparse(href)
@@ -303,7 +305,7 @@ if draft:
             errors.append(f"{url}: Urheberrechtsvermerk fehlt")
 else:
     for f in PUBLIC.rglob("*.html"):
-        if "Markentrix" in f.read_text(encoding="utf-8"):
+        if f.name not in ("datenschutz.html", "privacy.html") and "Markentrix" in f.read_text(encoding="utf-8"):
             errors.append(f"Endversion enthält noch 'Markentrix': {f.relative_to(PUBLIC)}")
 
 # Weiterleitungen
@@ -316,6 +318,63 @@ if draft and "Disallow: /" not in rob:
     errors.append("Entwurfsmodus, aber robots.txt erlaubt Suchmaschinen")
 if not draft and "Sitemap:" not in rob:
     errors.append("robots.txt ohne Sitemap")
+# ---------------------------------------------------------------- Export für das Portal (Abschnitt 2 und 12 des Skills)
+ALLOWED = {"html", "css", "js", "json", "xml", "txt", "ico", "png", "jpg", "webp", "avif", "gif", "svg", "woff", "woff2",
+           "ttf", "otf", "webmanifest", "pdf", "mp4", "webm", "mp3"}
+total = 0
+for f in PUBLIC.rglob("*"):
+    rel = f.relative_to(PUBLIC).as_posix()
+    if f.is_symlink():
+        errors.append(f"Export: Symlink {rel}")
+    if f.is_dir():
+        continue
+    total += f.stat().st_size
+    if any(part.startswith(".") for part in f.relative_to(PUBLIC).parts):
+        errors.append(f"Export: versteckte Datei {rel}")
+    if f.suffix.lower().lstrip(".") not in ALLOWED:
+        errors.append(f"Export: Dateityp nicht erlaubt: {rel}")
+    if f.stat().st_size > 1_500_000 and f.suffix.lower() in (".jpg", ".png", ".webp", ".avif"):
+        errors.append(f"Export: Bild über 1,5 MB: {rel}")
+if total > 120 * 1024 * 1024:
+    errors.append("Export: mehr als 120 MB")
+if not (PUBLIC / "index.html").is_file():
+    errors.append("Export: index.html fehlt im Wurzelordner")
+for need in ("impressum.html", "datenschutz.html", "404.html", "danke.html", "robots.txt", "favicon.ico"):
+    if not (PUBLIC / need).is_file():
+        errors.append(f"Export: Pflichtdatei fehlt: {need}")
+for name in ("404.html", "danke.html", "en/thank-you.html"):
+    pg = pages.get("/" + name)
+    if pg is None:
+        errors.append(f"Export: {name} fehlt")
+    elif "noindex" not in pg[1].meta.get("robots", ""):
+        errors.append(f"Export: {name} ohne noindex")
+
+BAD = re.compile(r"localhost|127\.0\.0\.1|lorem ipsum|fonts\.(googleapis|gstatic)|jsdelivr|cdnjs|unpkg|\.php", re.I)
+for f in PUBLIC.rglob("*"):
+    if f.is_file() and f.suffix in (".html", ".css", ".js", ".xml", ".txt", ".json"):
+        text = f.read_text(encoding="utf-8", errors="ignore")
+        for m in BAD.finditer(text):
+            errors.append(f"Export: verbotener Text '{m.group(0)}' in {f.relative_to(PUBLIC)}")
+        for m in re.finditer(r"http://([^/\"'\s<>]+)", text):
+            if m.group(1) not in ("www.w3.org", "www.sitemaps.org"):
+                errors.append(f"Export: http:// in {f.relative_to(PUBLIC)}: {m.group(0)}")
+        # {{SITE_URL}} nur in Kopfzeilen (Canonical, hreflang, og), JSON-LD, Sitemap und robots.txt
+        if f.suffix == ".html" and "{{SITE_URL}}" in text:
+            body = text.split("<body", 1)[1] if "<body" in text else text
+            body = re.sub(r'<script type="application/ld\+json">.*?</script>', "", body, flags=re.S)
+            if "{{SITE_URL}}" in body:
+                errors.append(f"Export: {{{{SITE_URL}}}} im sichtbaren Teil von {f.relative_to(PUBLIC)}")
+        if f.suffix in (".css", ".js") and "{{SITE_URL}}" in text:
+            errors.append(f"Export: {{{{SITE_URL}}}} in {f.relative_to(PUBLIC)}")
+for url, (f, pg) in pages.items():
+    html_text = f.read_text(encoding="utf-8")
+    if 'id="contact-form"' in html_text and 'data-endpoint="/api/anfrage"' not in html_text:
+        errors.append(f"{url}: Formular ohne Endpunkt /api/anfrage")
+    if 'id="contact-form"' in html_text and 'name="website"' not in html_text:
+        errors.append(f"{url}: Formular ohne Lockfeld 'website'")
+    if "<title>" in html_text and len(pg.title.strip()) > 60:
+        errors.append(f"{url}: Titel mit {len(pg.title.strip())} Zeichen (höchstens 60)")
+
 print("Modus:", "Entwurf (Markentrix)" if draft else "Endversion")
 
 print(f"{len(pages)} Seiten geprüft.")

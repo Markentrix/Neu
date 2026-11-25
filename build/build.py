@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Erzeugt die statische Website in public/ (Deutsch und Englisch).
+"""Erzeugt die statische Website in website-fertig/ (Deutsch und Englisch) für das Markentrix-Portal.
 
-    python3 build/build.py                 # Entwurf nach public/ (mit Markentrix-Vermerk)
+    python3 build/build.py                 # Entwurf nach website-fertig/ (mit Markentrix-Vermerk)
     python3 build/build.py --final         # Endversion ohne Vermerk
     python3 build/build.py --preview DIR   # Vorschau mit relativen Links (zum Ansehen ohne Server)
 
@@ -38,8 +38,8 @@ TOWNS = []
 PAGE_TOWNS = []
 
 ROOT = Path(__file__).resolve().parent.parent
-PUBLIC = ROOT / "public"
-DOMAIN = BIZ["domain"]
+PUBLIC = ROOT / "website-fertig"
+DOMAIN = "{{SITE_URL}}"   # Platzhalter: der Uploader des Portals ersetzt ihn durch die Live-Adresse
 TODAY = datetime.date.today()
 LANGS = ("de", "en")
 LANG = "de"
@@ -71,7 +71,7 @@ def stand():
     return month_year(TODAY.isoformat())
 
 
-# Alte Adresse (psschneider.de bisher) -> neue Adresse. Wird zu 301-Weiterleitungen.
+# Alte Adresse (psschneider.de bisher) -> neue Adresse. Wird zur Liste WEITERLEITUNGEN.md; der Server richtet sie ein.
 REDIRECTS = [
     ("/start/", "/"),
     ("/LEISTUNGEN/", "/leistungen/"),
@@ -82,9 +82,9 @@ REDIRECTS = [
     ("/LEISTUNGEN/Restwertermittlung/", "/leistungen/restwertermittlung/"),
     ("/Gruende-fuer-ein-Gutachten/", "/gruende-fuer-ein-gutachten/"),
     ("/UNFALL-CHECKLISTE/", "/unfall-checkliste/"),
-    ("/kontakt/impressum/", "/impressum/"),
-    ("/kontakt/datenschutz/", "/datenschutz/"),
-    ("/kontakt/datenschutz/index.php/", "/datenschutz/"),
+    ("/kontakt/impressum/", "/impressum.html"),
+    ("/kontakt/datenschutz/", "/datenschutz.html"),
+    ("/kontakt/datenschutz/index.php/", "/datenschutz.html"),
 ]
 
 # ---------------------------------------------------------------- Helfer
@@ -94,10 +94,14 @@ def esc(s):
 
 
 def u(slug, depth):
-    """Adresse einer Seite. Live: /slug/ — Vorschau: relativer Pfad zur index.html."""
+    """Adresse einer Seite. Live: /slug/ oder /seite.html. Vorschau: relativer Pfad zur Datei."""
     if PREVIEW:
         rel = "../" * depth
+        if slug.endswith(".html"):
+            return rel + slug
         return rel + (slug + "/index.html" if slug else "index.html")
+    if slug.endswith(".html"):
+        return "/" + slug
     return "/" + (slug + "/" if slug else "")
 
 
@@ -119,6 +123,8 @@ def rootfile(name, depth):
 
 
 def abs_url(slug):
+    if slug.endswith(".html"):
+        return DOMAIN + "/" + slug
     return DOMAIN + "/" + (slug + "/" if slug else "")
 
 
@@ -127,7 +133,7 @@ def abs_url(slug):
 SLUGS = {
     "de": {"home": "", "services": "leistungen", "guide": "ratgeber", "why": "gruende-fuer-ein-gutachten",
            "checklist": "unfall-checkliste", "contact": "kontakt", "area": "einsatzgebiet",
-           "legal": "impressum", "privacy": "datenschutz"},
+           "legal": "impressum.html", "privacy": "datenschutz.html", "thanks": "danke.html"},
     "en": dict(E.SLUGS_EN),
 }
 
@@ -771,17 +777,14 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
     required = f'<span class="req" aria-hidden="true">*</span>'
     demo = ""
     if PREVIEW:
-        demo = ('<p class="demo-note">' + T("Vorschau: Hier wird nichts gesendet. Auf dem Server geht die Anfrage mit den Fotos per E-Mail an ",
-                                           "Preview: nothing is sent here. On the server the enquiry is emailed with the photos to ") + BIZ["email"] + '.</p>')
+        demo = ('<p class="demo-note">' + T("Vorschau: Hier wird nichts gesendet. Im Portal geht die Anfrage mit den Fotos an ",
+                                           "Preview: nothing is sent here. In the portal the enquiry goes with the photos to ") + BIZ["email"] + '.</p>')
     consent = T(
         f'Ich habe die <a href="{u(S("privacy"), d)}">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben und Fotos zur Bearbeitung meiner Anfrage verwendet werden.',
         f'I have read the <a href="{u(S("privacy"), d)}">privacy policy</a> and agree that my details and photos may be used to process my enquiry.')
     noscript = T(
         f'Zum Senden braucht das Formular JavaScript. Schreiben Sie sonst an <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a> oder rufen Sie an: <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>.',
         f'The form needs JavaScript to send. Otherwise write to <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a> or call: <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>.')
-    success = T(
-        f'Ihre Referenz: <strong id="success-ref"></strong>. Wir melden uns bei Ihnen. Bei einem akuten Schaden rufen Sie bitte direkt an: <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>.',
-        f'Your reference: <strong id="success-ref"></strong>. We will get back to you. For urgent damage, please call directly: <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>.')
     options = "".join(f"<option>{esc(s['short'])}</option>" for s in SERVICES)
     return f'''<section class="{wrap_class}" id="kontakt" aria-labelledby="kontakt-title">
   <div class="wrap">
@@ -794,7 +797,7 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
     </div>
 
     <div class="form-wrap">
-    <form class="form" id="contact-form" novalidate data-endpoint="{"" if PREVIEW else "/api/anfrage.php"}"{' data-demo="true"' if PREVIEW else ""} data-phone="{BIZ["phone_display"]}" data-phone-tel="{BIZ["phone_tel"]}" data-email="{BIZ["email"]}">
+    <form class="form" id="contact-form" novalidate data-endpoint="/api/anfrage" data-thanks="{u(S("thanks"), d)}"{' data-demo="true"' if PREVIEW else ""} data-phone="{BIZ["phone_display"]}" data-phone-tel="{BIZ["phone_tel"]}" data-email="{BIZ["email"]}">
       {demo}
       <div class="form-error" id="form-error" role="alert" hidden></div>
       <div class="row">
@@ -866,7 +869,6 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
         <label for="f-website">{T("Bitte leer lassen", "Please leave empty")}</label>
         <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off">
       </div>
-      <input type="hidden" id="f-token" name="token" value="">
       <div class="field">
         <label class="consent">
           <input type="checkbox" id="f-consent" name="consent" required>
@@ -880,14 +882,6 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
       </div>
       <noscript><p class="notice-js">{noscript}</p></noscript>
     </form>
-    <div class="form-success" id="form-success" tabindex="-1" hidden>
-      <h3>{T("Danke, Ihre Anfrage ist eingegangen.", "Thank you, enquiry received.")}</h3>
-      <p>{success}</p>
-      <p id="success-callback" hidden>{T("Sie haben einen Rückruf gewünscht. Wir rufen Sie unter der angegebenen Nummer an.", "You asked for a call back. We will call you on the number you gave.")}</p>
-      <p id="success-confirmed" hidden>{T("Eine Bestätigung ist unterwegs an Ihre E-Mail-Adresse. Schauen Sie bei Bedarf im Spam-Ordner nach.", "A confirmation is on its way to your email address. Please check your spam folder if you do not see it.")}</p>
-      <p><button class="btn btn-secondary" type="button" id="form-again">{T("Weitere Anfrage senden", "Send another enquiry")}</button></p>
-    </div>
-    </div>
   </div>
 </section>'''
 
@@ -922,8 +916,10 @@ def emergency_card(d):
 # ---------------------------------------------------------------- Seiten
 
 def depth(slug):
-    """Verzeichnistiefe einer Seite (Startseite: 0)."""
-    return slug.count("/") + 1 if slug else 0
+    """Verzeichnistiefe einer Seite (Startseite und Seiten im Wurzelordner: 0)."""
+    if not slug:
+        return 0
+    return slug.count("/") if slug.endswith(".html") else slug.count("/") + 1
 
 
 def sl(*keys):
@@ -1789,21 +1785,16 @@ def build_datenschutz():
       <p>This website does not set cookies and does not use any tracking or analytics services. No third-party content is embedded and no fonts are loaded from external servers. We process personal data when you use the contact form or contact us, and in the form of technically necessary connection data when you visit the site.</p>
 
       <h2>3. Hosting and server log files</h2>
-      <p>This website is operated on a server of Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Germany.</p>
-      <p>When you visit the website, the web server automatically processes information transmitted by your browser: shortened IP address, date and time, page requested, amount of data transferred, browser type and operating system. This data serves the security and stability of the website and is deleted automatically after a short time. The legal basis is Art. 6(1)(f) GDPR (legitimate interest in the secure operation of the site).</p>
+      <p>This website is hosted by Markentrix. When you visit the website, the web server automatically processes information transmitted by your browser: IP address, date and time, page requested, amount of data transferred, browser type and operating system. This data serves the security and stability of the website. The legal basis is Art. 6(1)(f) GDPR (legitimate interest in the secure operation of the site).</p>
 
       <h2>4. Contact form and damage photos</h2>
-      <p>If you use the contact form, we transmit your details to our server in encrypted form (HTTPS): name, email address, topic, message and whether we should reply by email or call you back. Phone number, number plate, insurer and up to five photos are optional. The phone number is only required for a call back. Name, email address, topic and message are required so that we can answer your enquiry.</p>
+      <p>If you use the contact form, we transmit your details in encrypted form (HTTPS) to the portal of Markentrix, through which the website is operated: name, email address, topic, message and whether we should reply by email or call you back. Phone number, number plate, insurer and up to five photos are optional. The phone number is only required for a call back. We need name, email address, topic and message to answer your enquiry.</p>
       <h3>Photos</h3>
-      <p>Photos are already reduced in size in your browser. The server reduces them again and removes metadata such as the location where the photo was taken. Please do not upload photos in which people can be recognised.</p>
-      <h3>Forwarding and deletion</h3>
-      <p>The server forwards your enquiry with the photos by email to our mailbox. The transmission to the mail server is encrypted. After successful delivery, the enquiry and photos are deleted from the server. If delivery fails for technical reasons, the enquiry is kept safe for 14 days at most so that it is not lost, and is then deleted.</p>
-      <h3>Confirmation by email</h3>
-      <p>After you send the form, the server automatically sends a short confirmation with your reference number to the email address you entered. It contains none of your other input. So that nothing is sent to the same address repeatedly, we do not store the address in plain text but only a hash with a secret key, which is deleted after two days at most. The legal basis is Art. 6(1)(b) GDPR.</p>
+      <p>Photos are reduced in size in your browser, and metadata such as the location where the photo was taken is removed. Please do not upload photos in which people can be recognised.</p>
+      <h3>Forwarding</h3>
+      <p>The portal stores your enquiry with the photos, notifies the vehicle expert by email and sends you a confirmation with a reference number to the email address you gave.</p>
       <h3>Protection against abuse</h3>
-      <p>To prevent the form from being abused by automated programs, we limit the number of enquiries per connection. For this we do not store your IP address in plain text but only a hash with a secret key, which is deleted after two days at most. We also check a field that is invisible to people and a time-limited form token. Both work without cookies and without third-party services.</p>
-      <h3>Log</h3>
-      <p>The form log contains only the time, reference number, number of photos and status, but no names or contact details. It is deleted automatically after a short time.</p>
+      <p>To prevent the form from being abused by automated programs, we check a field that is invisible to people, and the portal limits the number of enquiries per connection. This works without cookies and without third-party services.</p>
       <h3>Legal basis</h3>
       <p>Processing takes place to answer your enquiry and to prepare a contract (Art. 6(1)(b) GDPR) and to protect against abuse (Art. 6(1)(f) GDPR). Enquiry data is deleted as soon as it is no longer needed for processing and no statutory retention obligations apply.</p>
 
@@ -1833,7 +1824,7 @@ def build_datenschutz():
       <p>You also have the right to lodge a complaint with a data protection supervisory authority. The competent authority is the State Commissioner for Data Protection of Lower Saxony (Landesbeauftragte für den Datenschutz Niedersachsen), Prinzenstraße 5, 30159 Hanover, Germany.</p>
 
       <h2>9. Data security</h2>
-      <p>The website is delivered encrypted via HTTPS. The configuration of the form is not in the publicly accessible area of the server. We take appropriate technical and organisational measures to protect your data against loss, manipulation and unauthorised access.</p>
+      <p>The website is delivered encrypted via HTTPS. We take appropriate technical and organisational measures to protect your data against loss, manipulation and unauthorised access.</p>
 
       <h2>10. Changes</h2>
       <p>We will amend this privacy policy if the website or the legal requirements change. The version published here at the time applies.</p>
@@ -1848,21 +1839,16 @@ def build_datenschutz():
       <p>Diese Website setzt keine Cookies und verwendet keine Tracking- oder Analyse-Dienste. Es werden keine Inhalte von Drittanbietern eingebunden und keine Schriften von externen Servern geladen. Personenbezogene Daten verarbeiten wir, wenn Sie das Kontaktformular nutzen oder uns kontaktieren, und in Form technisch notwendiger Verbindungsdaten beim Aufruf der Seite.</p>
 
       <h2>3. Hosting und Server-Logfiles</h2>
-      <p>Diese Website wird auf einem Server der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, betrieben.</p>
-      <p>Beim Aufruf der Website verarbeitet der Webserver automatisch Informationen, die Ihr Browser übermittelt: gekürzte IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, übertragene Datenmenge, Browsertyp und Betriebssystem. Diese Daten dienen der Sicherheit und Stabilität der Website und werden nach kurzer Zeit automatisch gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
+      <p>Diese Website wird bei Markentrix gehostet. Beim Aufruf verarbeitet der Webserver automatisch Informationen, die Ihr Browser übermittelt: IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, übertragene Datenmenge, Browsertyp und Betriebssystem. Diese Daten dienen der Sicherheit und Stabilität der Website. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
 
       <h2>4. Kontaktformular und Schadenfotos</h2>
-      <p>Wenn Sie das Kontaktformular nutzen, übertragen wir Ihre Angaben verschlüsselt (HTTPS) an unseren Server: Name, E-Mail-Adresse, Anliegen, Nachricht und die Angabe, ob wir Ihnen per E-Mail antworten oder Sie zurückrufen sollen. Freiwillig sind Telefonnummer, Kennzeichen, Versicherung und bis zu fünf Fotos. Die Telefonnummer ist nur für einen Rückruf erforderlich. Die Angabe von Name, E-Mail-Adresse, Anliegen und Nachricht ist erforderlich, damit wir Ihre Anfrage beantworten können.</p>
+      <p>Wenn Sie das Kontaktformular nutzen, übertragen wir Ihre Angaben verschlüsselt (HTTPS) an das Portal von Markentrix, über das die Website betrieben wird: Name, E-Mail-Adresse, Anliegen, Nachricht und die Angabe, ob wir Ihnen per E-Mail antworten oder Sie zurückrufen sollen. Freiwillig sind Telefonnummer, Kennzeichen, Versicherung und bis zu fünf Fotos. Die Telefonnummer ist nur für einen Rückruf erforderlich. Name, E-Mail-Adresse, Anliegen und Nachricht brauchen wir, um Ihre Anfrage zu beantworten.</p>
       <h3>Fotos</h3>
-      <p>Fotos werden schon in Ihrem Browser verkleinert. Der Server verkleinert sie erneut und entfernt dabei Metadaten wie den Aufnahmeort. Bitte laden Sie keine Fotos hoch, auf denen Personen erkennbar sind.</p>
-      <h3>Weiterleitung und Löschung</h3>
-      <p>Der Server leitet Ihre Anfrage mit den Fotos per E-Mail an unser Postfach weiter. Die Übertragung zum Mailserver ist verschlüsselt. Nach erfolgreichem Versand werden Anfrage und Fotos auf dem Server gelöscht. Schlägt der Versand technisch fehl, bleibt die Anfrage höchstens 14 Tage gesichert, damit sie nicht verloren geht, und wird dann gelöscht.</p>
-      <h3>Bestätigung per E-Mail</h3>
-      <p>Nach dem Absenden schickt der Server automatisch eine kurze Bestätigung mit Ihrer Referenznummer an die E-Mail-Adresse, die Sie angegeben haben. Sie enthält keine Ihrer sonstigen Eingaben. Damit an dieselbe Adresse nicht mehrfach versendet wird, speichern wir die Adresse nicht im Klartext, sondern nur einen Hash mit geheimem Schlüssel, der nach höchstens zwei Tagen gelöscht wird. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
+      <p>Fotos werden schon in Ihrem Browser verkleinert, dabei werden Metadaten wie der Aufnahmeort entfernt. Bitte laden Sie keine Fotos hoch, auf denen Personen erkennbar sind.</p>
+      <h3>Weiterleitung</h3>
+      <p>Das Portal speichert Ihre Anfrage samt Fotos, benachrichtigt den Sachverständigen per E-Mail und sendet Ihnen eine Eingangsbestätigung mit einer Vorgangsnummer an die angegebene E-Mail-Adresse.</p>
       <h3>Schutz vor Missbrauch</h3>
-      <p>Damit das Formular nicht von automatischen Programmen missbraucht wird, begrenzen wir die Zahl der Anfragen pro Verbindung. Dafür speichern wir Ihre IP-Adresse nicht im Klartext, sondern nur einen Hash mit geheimem Schlüssel, der nach höchstens zwei Tagen gelöscht wird. Außerdem prüfen wir ein für Menschen unsichtbares Feld und ein zeitlich begrenztes Formular-Token. Beides arbeitet ohne Cookies und ohne Dienste Dritter.</p>
-      <h3>Protokoll</h3>
-      <p>Das Protokoll des Formulars enthält nur Zeitpunkt, Referenznummer, Anzahl der Fotos und Status, aber keine Namen oder Kontaktdaten. Es wird nach kurzer Zeit automatisch gelöscht.</p>
+      <p>Damit das Formular nicht von automatischen Programmen missbraucht wird, prüfen wir ein für Menschen unsichtbares Feld, und das Portal begrenzt die Zahl der Anfragen je Verbindung. Das geschieht ohne Cookies und ohne Dienste Dritter.</p>
       <h3>Rechtsgrundlage</h3>
       <p>Die Verarbeitung erfolgt zur Beantwortung Ihrer Anfrage und zur Anbahnung eines Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie zum Schutz vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO). Anfragedaten werden gelöscht, sobald sie für die Bearbeitung nicht mehr erforderlich sind und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
 
@@ -1892,12 +1878,40 @@ def build_datenschutz():
       <p>Sie haben zudem das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig ist die Landesbeauftragte für den Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover.</p>
 
       <h2>9. Datensicherheit</h2>
-      <p>Die Website wird über HTTPS verschlüsselt ausgeliefert. Die Konfiguration des Formulars liegt nicht im öffentlich erreichbaren Bereich des Servers. Wir treffen angemessene technische und organisatorische Maßnahmen, um Ihre Daten gegen Verlust, Manipulation und unbefugten Zugriff zu schützen.</p>
+      <p>Die Website wird über HTTPS verschlüsselt ausgeliefert. Wir treffen angemessene technische und organisatorische Maßnahmen, um Ihre Daten gegen Verlust, Manipulation und unbefugten Zugriff zu schützen.</p>
 
       <h2>10. Änderungen</h2>
       <p>Wir passen diese Datenschutzerklärung an, wenn sich die Website oder die rechtlichen Anforderungen ändern. Es gilt die jeweils hier veröffentlichte Fassung.</p>
 '''
     return legal_page("privacy", "Datenschutzerklärung | PS Schneider Kfz-Gutachter Celle", f"Stand: {stand()}", "Datenschutzerklärung", inner)
+
+
+def build_danke():
+    """Zielseite nach dem Senden. Die Vorgangsnummer kommt per Adresse (?ref=) und wird nur als Text eingesetzt."""
+    slug = S("thanks")
+    d = depth(slug)
+    body = f'''
+  <section class="section thanks-wrap">
+    <div class="wrap">
+      <div class="thanks">
+        <h1>{T("Danke, Ihre Anfrage ist eingegangen.", "Thank you, enquiry received.")}</h1>
+        <p class="lede">{T("Wir melden uns bei Ihnen, per E-Mail oder, wenn Sie das gewünscht haben, per Rückruf. Eine Eingangsbestätigung geht an Ihre E-Mail-Adresse. Schauen Sie bei Bedarf im Spam-Ordner nach.",
+                           "We will get back to you, by email or, if you asked for it, by phone. A confirmation is sent to your email address. Please check your spam folder if you do not see it.")}</p>
+        <p class="ref">{T("Ihre Vorgangsnummer", "Your reference")}: <strong data-ref>{T("wird geladen", "loading")}</strong></p>
+        <p class="photo-note" data-photo-note hidden>{T("Ihre Fotos konnten nicht mitgesendet werden. Bitte schicken Sie sie kurz per WhatsApp an",
+                                                      "Your photos could not be sent with the enquiry. Please send them briefly on WhatsApp to")} <a href="https://wa.me/{BIZ["phone_tel"].lstrip("+")}" target="_blank" rel="noopener">{BIZ["phone_display"]}</a>.</p>
+        <p>{T("Bei einem akuten Schaden rufen Sie bitte direkt an:", "For urgent damage, please call directly:")} <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="{u(S("home"), d)}">{T("Zur Startseite", "To the home page")}</a>
+          <a class="btn btn-secondary" href="{u(S("checklist"), d)}">{T("Unfall-Checkliste", "Accident checklist")}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+'''
+    return dict(slug=slug, d=d, key="thanks", title=T("Danke für Ihre Anfrage | PS Schneider", "Thank you for your enquiry | PS Schneider"),
+                desc=T("Ihre Anfrage ist eingegangen. Wir melden uns bei Ihnen.", "Your enquiry has been received. We will get back to you."),
+                body=body, graph=None, noindex=True)
 
 
 def build_404():
@@ -1926,198 +1940,6 @@ def build_404():
     return dict(slug="404", d=d, key=None, title="Seite nicht gefunden | PS Schneider", desc="Diese Seite wurde nicht gefunden.",
                 body=body, graph=None, noindex=True)
 # ---------------------------------------------------------------- Serverdateien
-
-def rx(path):
-    """Alte Adresse -> Regex mit optionalem Slash am Ende."""
-    p = path.rstrip("/")
-    p = re.sub(r"([.\[\]()+*?^$|{}\\])", r"\\\1", p)
-    return f"^{p}/?$"
-
-
-def htaccess():
-    lines = [
-        "# PS Schneider – Apache-Konfiguration",
-        "# Diese Datei liegt im Webroot neben index.html. Sie wird von build/build.py erzeugt.",
-        "# Benötigte Module: mod_alias, mod_headers, mod_expires, mod_deflate (sonst Zeilen entfernen).",
-        "",
-        "Options -Indexes",
-        "DirectoryIndex index.html",
-        "ErrorDocument 404 /404.html",
-        "",
-        "# --- PHP: nur der Formular-Endpunkt ist von außen erreichbar, versteckte Dateien sind gesperrt ---",
-        '<FilesMatch "\\.php$">',
-        "  Require all denied",
-        "</FilesMatch>",
-        '<Files "anfrage.php">',
-        "  Require all granted",
-        "</Files>",
-        '<FilesMatch "^\\.(ht|user\\.ini)">',
-        "  Require all denied",
-        "</FilesMatch>",
-        "# Upload-Grenzen für Fotos (bei mod_php; bei php-fpm gilt die Datei .user.ini)",
-        "<IfModule mod_php.c>",
-        "  php_value upload_max_filesize 20M",
-        "  php_value post_max_size 60M",
-        "  php_value max_file_uploads 10",
-        "</IfModule>",
-        "",
-        "# --- HTTPS und eine Domain erzwingen (nach dem Einrichten des Zertifikats einkommentieren) ---",
-        "# <IfModule mod_rewrite.c>",
-        "#   RewriteEngine On",
-        "#   RewriteCond %{HTTPS} !=on [OR]",
-        "#   RewriteCond %{HTTP_HOST} ^www\\. [NC]",
-        f"#   RewriteRule ^ {DOMAIN}%{{REQUEST_URI}} [L,R=301]",
-        "# </IfModule>",
-        "",
-        "# --- Alte Adressen der bisherigen Website: dauerhaft (301) auf die neuen Seiten ---",
-    ]
-    for old, new in REDIRECTS:
-        lines.append(f"RedirectMatch 301 {rx(old)} {new}")
-    lines += [
-        "",
-        "# --- Sicherheit ---",
-        "<IfModule mod_headers.c>",
-        *(['  Header always set X-Robots-Tag "noindex, nofollow, noarchive"'] if DRAFT else []),
-        '  Header always set X-Content-Type-Options "nosniff"',
-        '  Header always set Referrer-Policy "strict-origin-when-cross-origin"',
-        '  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"',
-        '  Header always set X-Frame-Options "SAMEORIGIN"',
-        "  # Alles kommt vom eigenen Server, es gibt keinen Inline-Code:",
-        '  Header always set Content-Security-Policy "default-src \'self\'; img-src \'self\' data: blob:; script-src \'self\'; style-src \'self\'; font-src \'self\'; base-uri \'self\'; form-action \'none\'; frame-ancestors \'self\'"',
-        "  # Erst aktivieren, wenn HTTPS dauerhaft läuft:",
-        '  # Header always set Strict-Transport-Security "max-age=31536000"',
-        "</IfModule>",
-        "",
-        "# --- Komprimierung ---",
-        "<IfModule mod_deflate.c>",
-        "  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json application/xml image/svg+xml text/plain",
-        "</IfModule>",
-        "",
-        "# --- Zwischenspeicher im Browser ---",
-        "<IfModule mod_expires.c>",
-        "  ExpiresActive On",
-        '  ExpiresByType font/woff2 "access plus 1 year"',
-        '  ExpiresByType image/png "access plus 1 month"',
-        '  ExpiresByType image/jpeg "access plus 1 month"',
-        '  ExpiresByType image/webp "access plus 1 month"',
-        '  ExpiresByType image/avif "access plus 1 month"',
-        '  ExpiresByType image/svg+xml "access plus 1 month"',
-        '  ExpiresByType image/x-icon "access plus 1 month"',
-        '  ExpiresByType text/css "access plus 1 week"',
-        '  ExpiresByType application/javascript "access plus 1 week"',
-        '  ExpiresByType text/html "access plus 5 minutes"',
-        "</IfModule>",
-        "",
-        "# Dateien mit ?v=Prüfsumme in der Adresse ändern sich nie unter derselben Adresse: ein Jahr, ohne Nachfrage",
-        "<IfModule mod_setenvif.c>",
-        '  SetEnvIfExpr "%{QUERY_STRING} =~ /^v=[0-9a-f]{8}$/" versioned',
-        "</IfModule>",
-        "<IfModule mod_headers.c>",
-        '  Header onsuccess set Cache-Control "public, max-age=31536000, immutable" env=versioned',
-        "</IfModule>",
-        "",
-    ]
-    return "\n".join(lines)
-
-
-def nginx_conf():
-    red = "\n".join(f"    rewrite {rx(old)} {new} permanent;" for old, new in REDIRECTS)
-    return f'''# PS Schneider – Beispiel für nginx. Pfade und Zertifikate anpassen.
-# Wird von build/build.py erzeugt. Webroot = Inhalt des Ordners public/.
-
-# IP-Adressen im Zugriffsprotokoll kürzen (Datenschutz): letzte Stelle bei IPv4, hinterer Teil bei IPv6
-map $remote_addr $ip_gekuerzt {{
-    ~(?P<ip>\\d+\\.\\d+\\.\\d+)\\.\\d+$  $ip.0;
-    ~(?P<ip>[^:]+:[^:]+):         $ip::;
-    default                       0.0.0.0;
-}}
-# Dateien mit ?v=... in der Adresse: ein Jahr, sonst eine Woche
-map $arg_v $asset_expires {{
-    ""      7d;
-    default 1y;
-}}
-map $arg_v $asset_cache {{
-    ""      "public";
-    default "public, immutable";
-}}
-log_format gekuerzt '$ip_gekuerzt [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
-
-server {{
-    listen 80;
-    server_name psschneider.de www.psschneider.de;
-    return 301 https://psschneider.de$request_uri;
-}}
-
-server {{
-    listen 443 ssl http2;
-    server_name www.psschneider.de;
-    ssl_certificate     /pfad/zum/zertifikat/fullchain.pem;
-    ssl_certificate_key /pfad/zum/zertifikat/privkey.pem;
-    return 301 https://psschneider.de$request_uri;
-}}
-
-server {{
-    listen 443 ssl http2;
-    server_name psschneider.de;
-    ssl_certificate     /pfad/zum/zertifikat/fullchain.pem;
-    ssl_certificate_key /pfad/zum/zertifikat/privkey.pem;
-
-    root /var/www/psschneider.de/public;
-    index index.html;
-    access_log /var/log/nginx/psschneider.access.log gekuerzt;
-    error_page 404 /404.html;
-
-    # Alte Adressen der bisherigen Website: dauerhaft (301) auf die neuen Seiten
-{red}
-
-    # Fotos: bis zu 5 Dateien, großzügige Obergrenze
-    client_max_body_size 60m;
-
-    # PHP nur für den Formular-Endpunkt. Passen Sie Socket und Pfad zu private/ an.
-    location = /api/anfrage.php {{
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PSS_PRIVATE_DIR /var/www/psschneider.de/private;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        fastcgi_read_timeout 90s;
-    }}
-    location ~ \\.php$ {{ return 404; }}
-    location ~ /\\.(?!well-known) {{ deny all; }}
-
-    location / {{
-        try_files $uri $uri/ =404;
-    }}
-
-    location = /404.html {{ internal; }}
-
-    # Sicherheit
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'" always;
-    # add_header Strict-Transport-Security "max-age=31536000" always;
-
-    # Komprimierung
-    gzip on;
-    gzip_types text/css application/javascript application/json image/svg+xml application/xml;
-
-    # Zwischenspeicher im Browser. Dateien mit ?v=Prüfsumme (so erzeugt sie build.py) dürfen ein Jahr liegen bleiben.
-    location ^~ /assets/fonts/ {{ expires 1y; add_header Cache-Control "public, immutable"; }}
-    location ^~ /assets/ {{ expires $asset_expires; add_header Cache-Control $asset_cache; }}
-    location ~* \\.(png|jpg|svg|ico|webp|avif)$ {{ expires 30d; add_header Cache-Control "public"; }}
-}}
-'''
-
-
-USER_INI = """; Von build/build.py erzeugt. Gilt für php-fpm und CGI. Upload-Grenzen für die Schadenfotos.
-upload_max_filesize = 20M
-post_max_size = 60M
-max_file_uploads = 10
-memory_limit = 256M
-max_execution_time = 90
-"""
-
 
 def robots():
     if DRAFT:
@@ -2158,8 +1980,27 @@ def build_pages():
     pages += [build_service(s) for s in SERVICES]
     pages += [build_ratgeber_index()] + [build_article(a) for a in ARTICLES]
     pages += [build_area_hub()] + [build_town(t) for t in PAGE_TOWNS]
-    pages += [build_gruende(), build_checkliste(), build_kontakt(), build_impressum(), build_datenschutz()]
+    pages += [build_gruende(), build_checkliste(), build_kontakt(), build_impressum(), build_datenschutz(), build_danke()]
     return pages
+
+
+def clean_output(out):
+    """Alle erzeugten Seiten entfernen, damit nach geänderten Adressen keine Reste liegen bleiben. assets/ und feste Dateien bleiben."""
+    for f in list(out.rglob("*.html")):
+        if "assets" not in f.relative_to(out).parts:
+            f.unlink()
+    for d in sorted((x for x in out.rglob("*") if x.is_dir()), key=lambda x: len(x.parts), reverse=True):
+        if d.name != "assets" and "assets" not in d.relative_to(out).parts and not any(d.iterdir()):
+            d.rmdir()
+
+
+def write_redirects():
+    rows = "\n".join(f"| `{old}` | `{new}` |" for old, new in REDIRECTS)
+    text = ("# Weiterleitungen von der bisherigen Website\n\n"
+            "Diese Adressen der alten Website müssen dauerhaft (301) auf die neuen Seiten zeigen. Das richtet der Server ein, "
+            "nicht die Seite. Jede alte Adresse hat genau ein Ziel. Adressen, die gleich bleiben, brauchen keine Weiterleitung. "
+            "Wird von `build/build.py` erzeugt.\n\n| Alt | Neu |\n| --- | --- |\n" + rows + "\n")
+    (ROOT / "WEITERLEITUNGEN.md").write_text(text, encoding="utf-8")
 
 
 def main():
@@ -2169,7 +2010,7 @@ def main():
     ap.add_argument("--final", action="store_true", help="Endversion ohne Entwurfsmodus (Urheberrechtsvermerk, Wasserzeichen, Sperren)")
     args = ap.parse_args()
     DRAFT = not args.final
-    # Entwurfsdateien in public/assets bereitstellen oder entfernen
+    # Entwurfsdateien in website-fertig/assets bereitstellen oder entfernen
     for name in ("draft.css", "draft.js"):
         target = PUBLIC / "assets" / name
         if DRAFT:
@@ -2182,14 +2023,11 @@ def main():
         out = Path(args.preview).resolve()
         if out.exists():
             shutil.rmtree(out)
-        shutil.copytree(PUBLIC, out, ignore=shutil.ignore_patterns("*.html", "sitemap.xml", "robots.txt", ".htaccess"))
+        shutil.copytree(PUBLIC, out, ignore=shutil.ignore_patterns("*.html", "sitemap.xml", "robots.txt"))
     else:
         out = PUBLIC
-        # Englische Seiten neu erzeugen, damit keine veralteten Dateien übrig bleiben
-        if (out / "en").exists():
-            shutil.rmtree(out / "en")
+        clean_output(out)
 
-    # Alle Adressen vorab kennen (Sprachumschalter, hreflang): ALT wird beim Import gebaut
     entries, count = [], 0
     for lang in LANGS:
         set_lang(lang)
@@ -2200,24 +2038,28 @@ def main():
             slug = p["slug"]
             html_text = page_html(slug=slug, d=p["d"], title=p["title"], desc=p["desc"], body=p["body"], key=p.get("key"),
                                   graph=p.get("graph"), noindex=p.get("noindex", False), head_extra=p.get("head_extra", ""))
-            rel = "404.html" if slug == "404" else ("index.html" if slug == "" else f"{slug}/index.html")
+            if slug == "404":
+                rel = "404.html"
+            elif slug == "":
+                rel = "index.html"
+            elif slug.endswith(".html"):
+                rel = slug
+            else:
+                rel = f"{slug}/index.html"
             write(out, rel, html_text)
             count += 1
             if not p.get("noindex"):
                 entries.append((p["key"], slug))
     set_lang("de")
 
-    if not PREVIEW and DRAFT:
-        for stale in ("sitemap.xml",):
-            if (out / stale).exists():
-                (out / stale).unlink()
-    if not PREVIEW and not DRAFT:
-        write(out, "sitemap.xml", sitemap(entries))
     if not PREVIEW:
-        write(out, ".user.ini", USER_INI)
+        if DRAFT:
+            if (out / "sitemap.xml").exists():
+                (out / "sitemap.xml").unlink()
+        else:
+            write(out, "sitemap.xml", sitemap(entries))
         write(out, "robots.txt", robots())
-        write(out, ".htaccess", htaccess())
-        write(ROOT / "server", "nginx.conf.example", nginx_conf())
+        write_redirects()
     print(f"{count} Seiten nach {out} geschrieben.")
 
 

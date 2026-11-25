@@ -13,7 +13,7 @@ from pathlib import Path
 
 from PIL import Image
 
-A = Path(__file__).resolve().parent.parent / "public" / "assets"
+A = Path(__file__).resolve().parent.parent / "website-fertig" / "assets"
 total_before = total_after = 0
 
 

@@ -22,8 +22,9 @@ SLUGS_EN = {
     "checklist": "en/accident-checklist",
     "contact": "en/contact",
     "area": "en/service-area",
-    "legal": "en/legal-notice",
-    "privacy": "en/privacy",
+    "legal": "en/legal-notice.html",
+    "privacy": "en/privacy.html",
+    "thanks": "en/thank-you.html",
 }
 
 SERVICES = [
