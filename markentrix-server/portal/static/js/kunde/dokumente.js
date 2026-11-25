@@ -38,7 +38,7 @@ V.unterlagen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Dokumente'), h('p', { class: 'small muted' }, 'Verträge, Briefings, Logos und Material an einem sicheren Ort, für Sie und das Markentrix-Team. Bitte laden Sie hier keine Passwörter hoch, die schicken Sie uns nicht per Datei.'),
       darfSchreiben() ? h('div', {}, m, h('div', { class: 'row' }, kat, datei, h('button', { class: 'btn', onclick: hoch }, 'Hochladen'))) : '',
       tabelle([['Datei', z => h('a', { href: '/api/kunde/dateien/' + z.id, target: '_blank', rel: 'noopener' }, z.name)], ['Art', z => d.kategorien[z.kategorie] || '–'], ['Größe', z => groesse(z.groesse)], ['Von', z => z.von === 'team' ? 'Markentrix' : 'Ihnen'], ['Datum', z => zeit(z.erstellt_am)],
-        ['', z => darfSchreiben() && z.von === 'kunde' ? h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen') : '']], d.dateien, 'Noch keine Dokumente. Hier erscheinen Dateien, die Sie oder Ihr Team hochladen, zum Beispiel Preislisten oder Verträge.')));
+        ['', z => darfSchreiben() && z.von === 'kunde' ? h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen') : '']], d.dateien, 'Noch keine Dokumente. Hier erscheinen Dateien, die Sie oder Ihr Team hochladen, zum Beispiel Preislisten oder Verträge.', darfSchreiben() ? h('button', { class: 'btn small', onclick: () => { datei.scrollIntoView({ block: 'center' }); datei.click(); } }, 'Datei hochladen') : undefined)));
 };
 
 V.dokumente = async () => {

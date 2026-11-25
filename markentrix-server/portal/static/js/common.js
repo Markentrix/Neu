@@ -501,14 +501,26 @@ export function nutzung(seite) {
 }
 
 /** Menü in einklappbaren Gruppen. gruppen: [[Titel, [[id, Text, Zähler], ...], standardOffen]]. Die Gruppe der aktuellen Seite ist immer offen; der Zustand wird je Gerät gemerkt. */
-export function navGruppen(gruppen, aktiv, schluessel) {
+/**
+ * @param {any[]} gruppen [Titel, [[id, Name, Zähler]], standardOffen]
+ * @param {string} aktiv
+ * @param {string} schluessel
+ * @param {{ ist: (id: string) => boolean, umschalten: (id: string) => void }} [stern] optional: Favoriten per Stern
+ */
+export function navGruppen(gruppen, aktiv, schluessel, stern) {
   const lies = (k) => { try { return localStorage.getItem('mk-nav-' + schluessel + '-' + k); } catch { return null; } };
   return gruppen.filter(g => g[1].length).map(([titel, punkte, standard]) => {
     const enthaelt = punkte.some(p => p[0] === aktiv);
     const gemerkt = lies(titel);
     let offen = enthaelt || (gemerkt === null ? standard !== false : gemerkt === '1');
     const summe = punkte.reduce((n, p) => n + (p[2] || 0), 0);
-    const liste = h('div', { class: 'navliste', hidden: !offen }, punkte.map(p => h('a', { class: 'nav' + (p[0] === aktiv ? ' on' : ''), href: '#' + p[0] }, p[1], p[2] ? h('span', { class: 'badge' }, p[2]) : '')));
+    const eintrag = (p) => {
+      const a = h('a', { class: 'nav' + (p[0] === aktiv ? ' on' : ''), href: '#' + p[0] }, p[1], p[2] ? h('span', { class: 'badge' }, p[2]) : '');
+      if (!stern) return a;
+      const an = stern.ist(p[0]);
+      return h('div', { class: 'navzeile' }, a, h('button', { type: 'button', class: 'sternknopf' + (an ? ' an' : ''), 'aria-pressed': String(an), 'aria-label': p[1] + (an ? ' aus den Favoriten entfernen' : ' zu den Favoriten'), title: an ? 'Aus Favoriten entfernen' : 'Zu Favoriten', onclick: () => stern.umschalten(p[0]) }, an ? '★' : '☆'));
+    };
+    const liste = h('div', { class: 'navliste', hidden: !offen }, punkte.map(eintrag));
     const kopf = h('button', { type: 'button', class: 'navkopf', 'aria-expanded': String(offen) }, h('span', {}, titel), h('span', { class: 'navrechts' }, summe && !offen ? h('span', { class: 'badge' }, summe) : '', h('span', { class: 'pfeil', 'aria-hidden': 'true' }, '▾')));
     kopf.addEventListener('click', () => {
       offen = !offen; liste.hidden = !offen; kopf.setAttribute('aria-expanded', String(offen));
@@ -751,10 +763,19 @@ export function vibriere(muster = 15) {
   try { if (navigator.vibrate && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) navigator.vibrate(muster); } catch { /* ohne Vibration */ }
 }
 
-export function toast(text, art = 'bad') {
+/**
+ * Kurze Meldung unten. Mit `aktion` bekommt sie einen Folgeschritt als Knopf (bleibt dann länger stehen).
+ * @param {string} text
+ * @param {string} [art]
+ * @param {{text: string, fn?: () => void, href?: string}} [aktion]
+ */
+export function toast(text, art = 'bad', aktion) {
   vibriere(art === 'ok' ? 15 : [30, 50, 30]);
   const t = h('div', { class: 'toast ' + art, role: 'status', 'aria-live': 'polite' }, text);
-  document.body.append(t); setTimeout(() => t.remove(), 6000);
+  if (aktion) t.append(' ', aktion.href
+    ? h('a', { class: 'toastaktion', href: aktion.href, onclick: () => t.remove() }, aktion.text)
+    : h('button', { type: 'button', class: 'toastaktion', onclick: () => { t.remove(); if (aktion.fn) aktion.fn(); } }, aktion.text));
+  document.body.append(t); setTimeout(() => t.remove(), aktion ? 10000 : 6000);
 }
 
 // ---------------------------------------------------------------- Zurück zur Liste (Filter, Suche, Seite und Scrollstand bleiben erhalten)

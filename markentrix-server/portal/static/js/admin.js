@@ -1,7 +1,7 @@
 import { anrufNachfrage, toast, h, api, nutzung, zweiFaktorKarte, stapelTabellen, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
 stapelTabellen();
 import { belegEditor } from './admin/belege.js';
-import {V, gerüst, zaehlerAdmin, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
+import {V, gerüst, zaehlerAdmin, systemAmpel, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
 import { kundeDetail } from './admin/kunden.js';
 import { leadDetail, partnerDetail, modus as anrufmodus } from './admin/vertrieb.js';
 import './admin/start.js';
@@ -56,6 +56,11 @@ anrufNachfrage({ leadApi: '/api/admin/leads/', leadHash: '#lead/' });
     setzeIch(me);
     setzePakete((await katP).produkte);
     try { const z = (await api('/api/admin/uebersicht')).zusammenarbeit; zaehlerAdmin.postfach = z.tickets_ungelesen; zaehlerAdmin.freigaben = z.freigaben_wartend; zaehlerAdmin.aufgaben = z.aufgaben_ueberfaellig; } catch (e) { /* Zähler sind optional */ }
+    try {
+      const hh = await api('/api/admin/heute', { leise: true });
+      zaehlerAdmin.leads = (hh.leads_gesamt || 0) + (hh.wiedervorlagen || []).length; zaehlerAdmin.belege = (hh.rechnungen || []).length; zaehlerAdmin.onboarding = (hh.onboarding || []).length;
+    } catch (e) { /* Zähler sind optional */ }
+    try { const sy = await api('/api/admin/systemstatus', { leise: true }); systemAmpel.gesamt = sy.gesamt; const bad = (sy.ampel || []).filter(p => p.status === 'bad' || p.status === 'warn'); systemAmpel.text = bad.length ? bad.map(p => p.titel).join(', ') : ''; } catch (e) { /* Ampel ist optional */ }
   } catch (e) { startFehler(root, e); return; }
   window.addEventListener('hashchange', seiteZeigen);
   seiteZeigen();

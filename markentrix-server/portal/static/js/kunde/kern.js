@@ -130,8 +130,9 @@ export function karten() {
   return [hat('anfragen_termine') && a, hat('anfragen_termine') && t, hat('website') && web];
 }
 
-export function tabelle(spalten, zeilen, leer = 'Noch nichts vorhanden.') {
-  if (!zeilen.length) return leerZustand(leer);
+/** @param {any} [aktion] Knopf oder Link für den leeren Zustand („Ersten Eintrag anlegen“) */
+export function tabelle(spalten, zeilen, leer = 'Noch nichts vorhanden.', aktion) {
+  if (!zeilen.length) return leerZustand(leer, aktion);
   return h('div', { class: 'tablewrap' }, h('table', {},
     h('thead', {}, h('tr', {}, spalten.map(s => h('th', {}, s[0])))),
     h('tbody', {}, zeilen.map(z => h('tr', {}, spalten.map(s => h('td', {}, s[1](z))))))));

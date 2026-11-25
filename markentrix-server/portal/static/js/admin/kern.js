@@ -15,6 +15,17 @@ const NAV_GRUPPEN = [
   ['System', ['protokoll', 'einstellungen'], false],
 ];
 export let paketListe = [], ich = null;
+/** Gesamtstand der Betriebs-Ampel (ok / warn / bad / unbekannt) und kurzer Text, für den Punkt neben der Glocke. */
+export const systemAmpel = { gesamt: '', text: '' };
+const FAV = 'mk-admin-favoriten';
+const favoriten = () => { try { const l = JSON.parse(localStorage.getItem(FAV) || '[]'); return Array.isArray(l) ? l.filter(x => typeof x === 'string') : []; } catch { return []; } };
+const favSetzen = (l) => { try { localStorage.setItem(FAV, JSON.stringify(l)); } catch { /* ohne Speicher gelten Favoriten nur bis zum Neuladen */ } };
+const ampelText = { ok: 'Alles in Ordnung', warn: 'Hinweis im Betrieb', bad: 'Störung im Betrieb', unbekannt: 'Betriebsstand unbekannt' };
+function ampelPunkt() {
+  if (!systemAmpel.gesamt) return '';
+  const t = systemAmpel.text || ampelText[systemAmpel.gesamt] || '';
+  return h('a', { class: 'ampelpunkt ' + systemAmpel.gesamt, href: '#uebersicht', title: t, 'aria-label': 'Betriebs-Ampel: ' + t }, h('span', { 'aria-hidden': 'true' }));
+}
 export const zaehlerAdmin = {};
 
 export const NAV_RECHT = { kalender: 'leads', postfach: 'nachrichten', freigaben: 'kunden', kennzahlen: 'finanzen', kunden: 'kunden', onboarding: 'kunden', vertraege: 'kunden', zufriedenheit: 'kunden', pipeline: 'leads', neu: 'kunden', vertrieb: 'leads', leads: 'leads', auswertung: 'leads', websites: 'kunden', belege: 'finanzen', preise: 'finanzen', compliance: 'einstellungen', funnel: 'leads', dsgvo: 'einstellungen', katalog: 'finanzen', einstellungen: 'einstellungen', protokoll: 'einstellungen' };
@@ -34,18 +45,21 @@ function appleiste(aktiv) {
 }
 
 export function gerüst(aktiv, inhalt) {
-  const gruppen = NAV_GRUPPEN.map(([titel, ids, offen]) => [titel, NAV.filter(n => ids.includes(n[0]) && erlaubt(n[0])).map(n => [n[0], n[1], zaehlerAdmin[n[0]] || 0]), offen]);
+  const gruppen0 = NAV_GRUPPEN.map(([titel, ids, offen]) => [titel, NAV.filter(n => ids.includes(n[0]) && erlaubt(n[0])).map(n => [n[0], n[1], zaehlerAdmin[n[0]] || 0]), offen]);
+  const fav = favoriten().filter(id => NAV.some(n => n[0] === id) && erlaubt(id));
+  const gruppen = fav.length ? [['Favoriten', fav.map(id => [id, NAV.find(n => n[0] === id)[1], zaehlerAdmin[id] || 0]), true], ...gruppen0] : gruppen0;
+  const stern = { ist: (id) => favoriten().includes(id), umschalten: (id) => { const l = favoriten(); favSetzen(l.includes(id) ? l.filter(x => x !== id) : [...l, id]); zeige(); } };
   return h('div', { class: 'shell mobilleiste kompakt kundeapp adminapp' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-logo-farbe-dunkel.svg', alt: 'Markentrix', width: 160, height: 26 })), 'Admin'),
-      h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke(), themeKnopf()),
+      h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke(), ampelPunkt(), themeKnopf()),
       h('div', { class: 'neuzeile' }, neuKnopf()),
-      navGruppen(gruppen, aktiv, 'admin'),
+      navGruppen(gruppen, aktiv, 'admin', stern),
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' }, appleiste(aktiv), hilfeSuche('admin'), ich && !ich.zwei_faktor && !zweiFaktorWeg() ? h('div', { class: 'msg info row small', style: 'align-items:center;gap:8px;padding:6px 10px' }, h('span', { class: 'grow' }, 'Noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten')), h('button', { class: 'btn sec small', 'aria-label': 'Hinweis ausblenden', onclick: (e) => { try { sessionStorage.setItem('mk-2fa-weg', '1'); } catch { /* egal */ } e.target.closest('.msg').remove(); } }, '×')) : '', inhalt, rechtFuss()),
-    mobilLeiste({ aktiv, gruppen, feste: ['meintag', 'postfach', 'kunden', 'leads'], kachel: true, icons: { meintag: '⌂', postfach: '✉', kunden: '▦', leads: '☎', freigaben: '✔', aufgaben: '☑' }, kurz: { meintag: 'Heute', postfach: 'Nachrichten' }, schluessel: 'admin' }));
+    mobilLeiste({ aktiv, gruppen: gruppen0, feste: ['meintag', 'postfach', 'kunden', 'leads'], kachel: true, icons: { meintag: '⌂', postfach: '✉', kunden: '▦', leads: '☎', freigaben: '✔', aufgaben: '☑' }, kurz: { meintag: 'Heute', postfach: 'Nachrichten' }, schluessel: 'admin' }));
 }
 export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
   if (!zeilen.length) return leerZustand(leer);

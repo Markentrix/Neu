@@ -575,3 +575,15 @@ details.abschnitt>.abschnittinhalt{padding:0 16px 16px}
   .adminapp .side .navliste a.nav[href="#einstellungen"]::before{content:"🔧" / ""}
   .adminapp .side .navliste a.nav[href="#protokoll"]::before{content:"📜" / ""}
 }
+
+/* Meldung mit Folgeschritt */
+.toast .toastaktion{margin-left:8px;padding:4px 10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;display:inline-block}
+
+/* Admin: Favoriten-Stern im Menü und Betriebs-Ampel neben der Glocke */
+.navzeile{display:flex;align-items:center;gap:2px}.navzeile a.nav{flex:1;min-width:0}
+.sternknopf{background:transparent;border:0;color:#EAE2D3;font-size:15px;line-height:1;padding:4px 6px;border-radius:8px;cursor:pointer;opacity:0}
+.navzeile:hover .sternknopf,.sternknopf.an,.sternknopf:focus-visible{opacity:1}.sternknopf.an{color:#F1A268}
+.ampelpunkt{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;text-decoration:none}
+.ampelpunkt span{width:11px;height:11px;border-radius:50%;background:#8a8f98}
+.ampelpunkt.ok span{background:#3bb273}.ampelpunkt.warn span{background:#e0a526}.ampelpunkt.bad span{background:#e5484d}
+@media(max-width:900px){.sternknopf{display:none}}

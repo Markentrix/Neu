@@ -237,7 +237,15 @@ export async function belegEditor(id, kid, art) {
   const neu = () => location.reload();
   const knoepfe = [];
   if (id) {
-    knoepfe.push(h('a', { class: 'btn sec small', href: '/api/admin/belege/' + id + '/pdf', target: '_blank', rel: 'noopener' }, 'PDF ansehen'));
+    const pdfUrl = '/api/admin/belege/' + id + '/pdf';
+    // Beim Entwurf zuerst speichern, damit die Vorschau die aktuellen Eingaben (z. B. Zahlungsfrist) zeigt
+    knoepfe.push(b.status === 'entwurf'
+      ? h('button', { type: 'button', class: 'btn sec small', onclick: async () => {
+        const w = window.open('', '_blank');
+        try { await api('/api/admin/belege/' + id, { method: 'PUT', body: daten() }); if (termine && !termine.gebucht) await termine.speichern(id); if (w) w.location.href = pdfUrl; else location.href = pdfUrl; }
+        catch (x) { if (w) w.close(); fehler(m, x); }
+      } }, 'PDF ansehen')
+      : h('a', { class: 'btn sec small', href: pdfUrl, target: '_blank', rel: 'noopener' }, 'PDF ansehen'));
     if (b.art === 'angebot') knoepfe.push(aktion('Angebot kopieren', '/api/admin/belege/' + id + '/kopie', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec', 'Neuen Entwurf mit denselben Positionen und Texten anlegen?'));
     if (b.status === 'entwurf') knoepfe.push(speichern, aktion('Ausstellen', '/api/admin/belege/' + id + '/ausstellen', {}, (r) => { melde(m, 'Ausgestellt als ' + r.nummer + '.', 'ok'); setTimeout(neu, 700); }, 'btn',
       'Beleg jetzt ausstellen? Danach bekommt er eine feste Nummer und kann nicht mehr geändert werden.'),

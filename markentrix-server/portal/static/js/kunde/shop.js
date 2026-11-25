@@ -1,4 +1,4 @@
-import { h, api, melde, zeit, toast, groesse } from '../common.js';
+import { h, api, melde, zeit, toast, groesse, leerZustand } from '../common.js';
 import { V, zeige, abschnitte } from './kern.js';
 
 const EUR = (z) => Number(z).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -7,6 +7,14 @@ const feld = (label, el, tipp) => h('div', {}, h('label', {}, label), el, tipp ?
 const haken = (an, text) => { const c = h('input', { type: 'checkbox', checked: !!an, style: 'width:auto' }); return { c, el: h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-weight:400' }, c, text) }; };
 const slug = (t) => String(t).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
 /** @param {HTMLElement} box @param {any} x */
+/** Öffnet das Formular „Neuen Artikel anlegen“ (auch wenn es in einem eingeklappten Abschnitt steckt) und springt hin. */
+const neuerArtikelOeffnen = () => {
+  const d = /** @type {HTMLDetailsElement|null} */ (document.querySelector('[data-neu-artikel]'));
+  if (!d) return;
+  for (let e = /** @type {HTMLElement|null} */ (d); e; e = e.parentElement) if (e instanceof HTMLDetailsElement) e.open = true;
+  d.scrollIntoView({ block: 'start' });
+  const feld = d.querySelector('input'); if (feld) /** @type {HTMLElement} */ (feld).focus();
+};
 const fehler = (box, x) => melde(box, x && x.message ? x.message : String(x));
 
 /** Bild für den Shop: auf 4:3 zuschneiden (1200 × 900), als WebP speichern, möglichst klein. Transparenz wird weiß. @param {File} datei */
@@ -46,7 +54,7 @@ V.shop = async () => {
       .map(([k, v]) => h('option', { value: k, selected: k === b.status }, v[1])));
     const sendung = h('input', { value: b.sendungsnummer, maxlength: 80, placeholder: 'Sendungsnummer' });
     const abholung = h('input', { value: b.abholtermin, maxlength: 120, placeholder: 'z. B. Sa, 14.11., 10 bis 12 Uhr' });
-    const notiz = h('textarea', { rows: 2, maxlength: 1000, placeholder: 'Interne Notiz (sieht nur ihr)' }, b.notiz);
+    const notiz = h('textarea', { rows: 2, maxlength: 1000, placeholder: 'Interne Notiz (nur für Sie sichtbar)' }, b.notiz);
     const mail = haken(true, 'Kundin bzw. Kunden per Mail über den neuen Status informieren');
     const m = h('div');
     const speichern = async () => {
@@ -95,7 +103,7 @@ V.shop = async () => {
       verwandt: verw.value.split(',').map((x) => x.trim()).filter(Boolean), personalisierbar: pers.c.checked, textlabel: tlabel.value, textmax: Number(tmax.value) || 0, sort: Number(sort.value) || 100, aktiv: aktiv.c.checked });
     const speichern = async () => {
       if (!name.value.trim()) { melde(m, 'Bitte einen Namen angeben.'); return; }
-      try { await api('/api/kunde/shop/produkte' + (p ? '/' + p.id : ''), { method: p ? 'PUT' : 'POST', body: body() }); toast('Gespeichert.', 'ok'); neu(); } catch (x) { fehler(m, x); }
+      try { await api('/api/kunde/shop/produkte' + (p ? '/' + p.id : ''), { method: p ? 'PUT' : 'POST', body: body() }); toast(p ? 'Gespeichert.' : 'Artikel angelegt.', 'ok', p ? undefined : { text: 'Weiteren anlegen', fn: neuerArtikelOeffnen }); neu(); } catch (x) { fehler(m, x); }
     };
     const weg = async () => { if (!p || !confirm('„' + p.name + '“ samt Bildern löschen? Bestellungen bleiben erhalten.')) return; try { await api('/api/kunde/shop/produkte/' + p.id, { method: 'DELETE' }); neu(); } catch (x) { fehler(m, x); } };
     // Bilder (nur bei bestehendem Artikel)
@@ -122,7 +130,7 @@ V.shop = async () => {
       })),
       h('div', { class: 'row', style: 'gap:8px;margin-top:8px;flex-wrap:wrap' }, hoch, h('button', { class: 'btn sec', onclick: hochladen }, 'Bild hochladen')),
       h('p', { class: 'small muted' }, 'Das Bild wird automatisch auf 4:3 zugeschnitten und als WebP gespeichert. Höchstens 8 Bilder je Artikel.'), bm) : h('p', { class: 'small muted' }, 'Bilder können Sie hochladen, sobald der Artikel einmal gespeichert ist.');
-    return h('details', { class: 'hilfe', open: !p },
+    return h('details', { class: 'hilfe', open: !p, 'data-neu-artikel': p ? undefined : '1' },
       h('summary', {}, p ? p.name + ' · ' + EUR(p.preis) + (p.kategorie && KAT[p.kategorie] ? ' · ' + KAT[p.kategorie] : '') + (p.aktiv ? '' : ' (Entwurf)') : '+ Neuen Artikel anlegen'),
       h('div', { style: 'margin-top:8px' },
         h('div', { class: 'form2' }, feld('Name', name), feld('Preis in Euro (Endpreis)', preis), feld('Kategorie', kat), feld('Kurzname für die Website', schl, p ? 'Lässt sich nicht mehr ändern.' : 'Nur Kleinbuchstaben, Ziffern, Bindestrich.'),
@@ -134,7 +142,7 @@ V.shop = async () => {
         h('div', { class: 'row', style: 'margin:8px 0' }, h('button', { class: 'btn', onclick: speichern }, p ? 'Speichern' : 'Anlegen'), p ? h('button', { class: 'btn sec', onclick: weg }, 'Löschen') : ''),
         bilder));
   };
-  const artikelKarte = h('div', { class: 'card' }, h('h2', {}, 'Artikel (' + d.produkte.length + ')'), d.produkte.map(artikel), artikel(null),
+  const artikelKarte = h('div', { class: 'card' }, h('h2', {}, 'Artikel (' + d.produkte.length + ')'), d.produkte.length ? '' : leerZustand('Noch kein Artikel. Legen Sie den ersten an, dann erscheint er im Shop auf Ihrer Website.', h('button', { class: 'btn small', onclick: neuerArtikelOeffnen }, 'Ersten Artikel anlegen')), d.produkte.map(artikel), artikel(null),
     h('p', { class: 'small muted' }, 'Bilderspeicher: ' + groesse(d.speicher) + ' von ' + groesse(d.speicher_max) + '.'));
 
   // ------------------------------------------------------------ Farben und Kategorien

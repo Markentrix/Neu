@@ -130,6 +130,10 @@ def e_rechnung_xml(cur, bid, f: dict | None = None) -> tuple[bytes | None, list[
 def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e_rechnung: bool = True) -> tuple[bytes, str]:
     b, f, emp, storno_nr, storno_datum = _lade(cur, bid, f, empfaenger)
     ist_re = b["art"] == "rechnung"
+    if ist_re and b["status"] == "entwurf" and not b["faellig_am"]:   # Entwurf: Zahlungsfrist schon in der Vorschau zeigen (festgeschrieben wird sie erst beim Ausstellen)
+        tage = f.get("zahlungsziel_tage") if b["zahlungsziel_tage"] is None else b["zahlungsziel_tage"]
+        if tage is not None:
+            b = dict(b); b["zahlungsziel_tage"] = tage; b["faellig_am"] = (b["datum"] or date.today()) + timedelta(days=int(tage))
     storno = b["storno_von"] is not None
     titel = ("Stornorechnung" if storno else "Rechnung") if ist_re else "Angebot"
     nr = b["nummer"] or "Entwurf"
@@ -157,7 +161,7 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
     rechts = []
     for k, v in info:
         rechts += [pdf.Paragraph(pdf.esc(k), label), pdf.p(v, wert)]
-    kopf = Table([[[pdf.Paragraph(("RECHNUNGSEMPFÄNGER" if ist_re else "ANGEBOTSEMPFÄNGER"), label), pdf.p(adr)], rechts]], colWidths=[84 * pdf.mm, 86 * pdf.mm])
+    kopf = Table([[[pdf.Paragraph(("RECHNUNGSEMPFÄNGER" if ist_re else "ANGEBOTSEMPFÄNGER"), label), pdf.p(adr)], rechts]], colWidths=[102 * pdf.mm, 68 * pdf.mm])
     kopf.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
     inhalt += [kopf, pdf.Spacer(1, 16), pdf.p(b["betreff"] or ("Abrechnung der vereinbarten Leistungen" if ist_re else "Unser Angebot"), pdf.H2)]
     if b["einleitung"]:
