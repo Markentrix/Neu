@@ -57,7 +57,7 @@ chk("Belege-Route verweigert Lead-Angebot (senden)",a.post(f"/api/admin/belege/{
 # ---- Senden
 r=a.post(f"/api/admin/leads/{L}/angebote/{bid}/senden",json={"gueltig_tage":14}); chk("Senden: 200",r.status_code==200,r.text); j=r.json()
 chk("Senden: Nummer, Mail raus, Link",j["nummer"].startswith("AN-") and j["gesendet"] and "/angebot?t=" in j["link"],j)
-m=mail_an(f"lead{sfx}@angebot.de","Angebot"); chk("Senden: Mail mit PDF-Anhang und Link",bool(m) and any(p.get_content_type()=="application/pdf" for p in m[-1].walk()) and j["link"] in text(m[-1]),len(m))
+m=mail_an(f"lead{sfx}@angebot.de","Angebot"); chk("Senden: Mail nur mit Link, ohne PDF-Anhang",bool(m) and not any(p.get_content_type()=="application/pdf" for p in m[-1].walk()) and j["link"] in text(m[-1]),len(m))
 chk("Senden: Lead steht auf 'angebot', Aktivität vorhanden",sql(f"select status from leads where id='{L}'")=="angebot" and "Angebot "+j["nummer"] in sql(f"select string_agg(inhalt,'|') from lead_aktivitaeten where lead_id='{L}'"))
 chk("Senden: Link nicht im Klartext gespeichert",j["link"].split("t=")[1] not in sql(f"select coalesce(annahme_hash,'')||coalesce(notiz,'') from belege where id='{bid}'"))
 tok=j["link"].split("t=")[1]

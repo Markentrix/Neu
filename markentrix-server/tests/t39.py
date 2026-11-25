@@ -65,7 +65,7 @@ info=httpx.get(B+f"/api/angebot/{tok1}",headers=H).json(); chk("Öffentlich: Bed
 pt=subprocess.run(["pdftotext","-","-"],input=httpx.get(B+f"/api/angebot/{tok1}/pdf",headers=H).content,capture_output=True).stdout.decode()
 chk("PDF: Bedingungen stehen drin",("Bedingungen" in pt and "Es gelten unsere AGB" in pt) if pt else True,pt[:300])
 s2=a.post(f"/api/admin/leads/{L1}/angebote/{bid}/senden",json={"erinnerung":True}); chk("Erinnerung senden",s2.status_code==200 and s2.json()["gesendet"],s2.text)
-m=mail_an(f"alt{sfx}@x.de","Erinnerung"); chk("Erinnerungs-Mail mit neuem Link und Anhang",len(m)>=1 and "/angebot?t=" in text(m[-1]) and any(p.get_filename() for p in m[-1].walk()),[x["Subject"] for x in mails()][-3:])
+m=mail_an(f"alt{sfx}@x.de","Erinnerung"); chk("Erinnerungs-Mail mit neuem Link, ohne Anhang",len(m)>=1 and "/angebot?t=" in text(m[-1]) and not any(p.get_filename() for p in m[-1].walk()),[x["Subject"] for x in mails()][-3:])
 chk("Erinnerung: derselbe Link bleibt gültig",httpx.get(B+f"/api/angebot/{tok1}",headers=H).status_code==200 and tok1 in text(m[-1]))
 s3=a.post(f"/api/admin/leads/{L1}/angebote/{bid}/senden",json={"erinnerung":True,"neuer_link":True}); chk("Ausdrücklich neuer Link: alter ungültig",s3.status_code==200 and httpx.get(B+f"/api/angebot/{tok1}",headers=H).status_code==404 and httpx.get(B+"/api/angebot/"+s3.json()["link"].split("t=")[1],headers=H).status_code==200,s3.text)
 chk("Erinnerung im Verlauf",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{L1}' and inhalt like '%Erinnerung%'"))==2)

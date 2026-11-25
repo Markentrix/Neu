@@ -61,7 +61,7 @@ bid=sql(f"select id from belege where lead_id='{L1}' and art='angebot' order by 
 pos=json.loads(sql(f"select positionen from belege where id='{bid}'"))
 erw=sorted(c for c in (kat["KI_ONE"]["einrichtung_cent"],kat["KI_ONE"]["monatlich_cent"],kat["KI_ONE"]["projekt_cent"]) if c)
 chk("Positionen entsprechen exakt dem Katalog",sorted(p_["preis_cent"] for p_ in pos)==erw,(pos,erw))
-chk("Status versendet, Mail an Lead mit PDF",sql(f"select status from belege where id='{bid}'")=="versendet" and any(f"verta{sfx}@lead.de" in str(x["To"]) and any(q.get_content_type()=="application/pdf" for q in x.walk()) for x in mails()[n0:]))
+chk("Status versendet, Mail an Lead nur mit Link",sql(f"select status from belege where id='{bid}'")=="versendet" and any(f"verta{sfx}@lead.de" in str(x["To"]) and not any(q.get_content_type()=="application/pdf" for q in x.walk()) for x in mails()[n0:]))
 chk("Verlauf und Audit",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{L1}' and inhalt like '%zu Katalogpreisen gesendet%'"))==1 and int(sql("select count(*) from audit_log where aktion='vertriebler_angebot'"))==1)
 # Prüfungen
 chk("Fremder Lead: 404",v.get(f"/api/vertrieb/leads/{lead('b',vertriebspartner_id=None)}/angebot-start").status_code==404)

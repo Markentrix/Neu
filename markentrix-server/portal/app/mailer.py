@@ -152,6 +152,10 @@ def beleg(an: str, art: str, nummer: str, name: str | None, pdf_bytes: bytes, da
     hallo = f"Hallo {name}," if name else "Hallo,"
     if art == "angebot":
         ziel = f"\n\nSie können es online ansehen und dort direkt annehmen: {link}" if link else (f"\n\nSie können es im Kundenportal ansehen und dort direkt annehmen: {config.BASE_URL}/app#belege" if angebot_link else "")
+        if link:   # Nur der Link, ohne PDF-Anhang: So lässt sich nachvollziehen, ob das Angebot geöffnet wurde. Das PDF gibt es auf der Angebotsseite.
+            text = (f"{hallo}\n\nunser Angebot {nummer} liegt für Sie bereit. Hier können Sie es ansehen, als PDF herunterladen und direkt annehmen:\n{link}"
+                    + ("\n\n" + termine.strip() if termine else "") + "\n\nBei Fragen melden Sie sich gern." + SIGNATUR)
+            return senden(an, f"Angebot {nummer}", text)
         text = f"{hallo}\n\nanbei unser Angebot {nummer}." + ziel + ("\n\n" + termine.strip() if termine else "") + "\n\nBei Fragen melden Sie sich gern." + SIGNATUR
         return senden(an, f"Angebot {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
     text = (f"{hallo}\n\nanbei erhalten Sie die Rechnung {nummer}." + (f"\nBitte überweisen Sie den Betrag bis zum {faellig:%d.%m.%Y}." if faellig else "")
@@ -163,17 +167,17 @@ def beleg(an: str, art: str, nummer: str, name: str | None, pdf_bytes: bytes, da
 def lead_angebot(an: str, name: str | None, firma: str, nummer: str, pdf_bytes: bytes, dateiname: str, gueltig, link: str, absender: str, erinnerung: bool = False, termine: str = "") -> tuple[bool, str]:
     hallo = f"Guten Tag {name}," if name else "Guten Tag,"
     if erinnerung:
-        text = (f"{hallo}\n\nwir wollten kurz nachfragen, ob Sie unser Angebot {nummer} für {firma} schon ansehen konnten. Zur Sicherheit hängen wir es noch einmal an.\n\n"
-                f"Hier können Sie es online ansehen und direkt annehmen:\n{link}\n\n"
+        text = (f"{hallo}\n\nwir wollten kurz nachfragen, ob Sie unser Angebot {nummer} für {firma} schon ansehen konnten.\n\n"
+                f"Hier können Sie es online ansehen, als PDF herunterladen und direkt annehmen:\n{link}\n\n"
                 + (f"Das Angebot ist gültig bis zum {gueltig:%d.%m.%Y}.\n\n" if gueltig else "")
                 + "Falls Sie Fragen haben oder etwas angepasst werden soll, antworten Sie einfach auf diese Mail." + SIGNATUR)
-        return senden(an, f"Erinnerung: Ihr Angebot {nummer} von {absender}", text, (dateiname, pdf_bytes, "application/pdf"))
-    text = (f"{hallo}\n\nvielen Dank für Ihr Interesse. Anbei erhalten Sie unser Angebot {nummer} für {firma} als PDF.\n\n"
-            f"Sie können es auch online ansehen und dort direkt annehmen:\n{link}\n\n"
+        return senden(an, f"Erinnerung: Ihr Angebot {nummer} von {absender}", text)
+    text = (f"{hallo}\n\nvielen Dank für Ihr Interesse. Unser Angebot {nummer} für {firma} liegt für Sie bereit.\n\n"
+            f"Hier können Sie es ansehen, als PDF herunterladen und direkt annehmen:\n{link}\n\n"
             + termine
             + (f"Das Angebot ist gültig bis zum {gueltig:%d.%m.%Y}.\n\n" if gueltig else "")
             + "Bei Fragen melden Sie sich gern, wir sprechen alles in Ruhe durch." + SIGNATUR)
-    return senden(an, f"Ihr Angebot {nummer} von {absender}", text, (dateiname, pdf_bytes, "application/pdf"))
+    return senden(an, f"Ihr Angebot {nummer} von {absender}", text)
 
 
 def gespraech_erinnerung(an: str, name: str | None, wann: str, absagen: str, ort: str, stunden: int) -> tuple[bool, str]:

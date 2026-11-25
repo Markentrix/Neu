@@ -40,9 +40,9 @@ chk("ausgestellt nicht änderbar",a.put(f"/api/admin/belege/{ang}",json={"betref
 chk("ausgestellt nicht löschbar",a.delete(f"/api/admin/belege/{ang}").status_code==400)
 open("/var/tmp/pt/mails.txt","w").close()
 r=a.post(f"/api/admin/belege/{ang}/senden"); chk("angebot senden",r.json()["gesendet"] is True,r.text)
-m=mails()[-1]; chk("mail angebot mit pdf",m["to"]=="rita@rt.de" and m["anh"] and m["anh"][0][1][:4]==b"%PDF" and "Claude" not in m["body"],m["subject"])
+m=mails()[-1]; chk("mail angebot nur mit Link, ohne PDF-Anhang",m["to"]=="rita@rt.de" and not m["anh"] and "/angebot" in m["body"] and "Claude" not in m["body"],m["subject"])
 import subprocess as _sp
-open("/var/tmp/pt/angebot.pdf","wb").write(m["anh"][0][1])
+open("/var/tmp/pt/angebot.pdf","wb").write(a.get(f"/api/admin/belege/{ang}/pdf").content)
 _t=_sp.run(["pdftotext","-layout","/var/tmp/pt/angebot.pdf","-"],capture_output=True,text=True).stdout
 chk("angebot: Bankverbindung im Text","BANKVERBINDUNG" in _t.upper() and "DE89 3704 0044 0532 0130 00" in _t and "COBADEFFXXX" in _t and "TESTBANK" in _t.upper(),_t[-900:])
 chk("angebot: Fußzeile mit Kontakt und IBAN",_t.count("IBAN")>=1 and "info@markentrix.de" in _t,_t[-600:])
@@ -87,7 +87,7 @@ mv=_mustang("/var/tmp/pt/rechnung.pdf")
 if mv is not None: chk("E-Rechnung: Mustang-Prüfung (PDF/A-3b und EN 16931)",mv)
 r=a.get(f"/api/admin/belege/{re_id}/xml"); _k=([i for i,(p,q) in enumerate(zip(r.content,x)) if p!=q] or [60])[0]; chk("E-Rechnung: XML-Download",r.status_code==200 and r.content==_xml(a.get(f"/api/admin/belege/{re_id}/pdf").content) and "xml" in r.headers["content-type"],(r.status_code,r.content[_k-80:_k+40],x[_k-80:_k+40]))
 chk("E-Rechnung: Detail meldet nichts Fehlendes",a.get(f"/api/admin/belege/{re_id}").json()["e_rechnung"]=={"fehlt":[]})
-chk("Angebot ist kein ZUGFeRD",_xml(m["anh"][0][1]) is None and a.get(f"/api/admin/belege/{ang}/xml").status_code==400)
+chk("Angebot ist kein ZUGFeRD",_xml(a.get(f"/api/admin/belege/{ang}/pdf").content) is None and a.get(f"/api/admin/belege/{ang}/xml").status_code==400)
 # GiroCode: aus dem PDF wieder auslesen (nur wenn OpenCV da ist)
 try:
     import cv2 as _cv, glob as _gl
