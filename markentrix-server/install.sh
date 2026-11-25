@@ -104,7 +104,7 @@ cp "$SRC/templates/Caddyfile" "$BASE/Caddyfile"
 rm -rf "$BASE/panel" && cp -r "$SRC/panel" "$BASE/panel"
 rm -rf "$BASE/db" && cp -r "$SRC/db" "$BASE/db"
 rm -rf "$BASE/portal" && cp -r "$SRC/portal" "$BASE/portal"
-install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$SRC/bin/selbsttest.sh" "$SRC/bin/haerten.sh" "$SRC/bin/backup-abholen.sh" "$BASE/bin/"
+install -m 755 "$SRC/bin/backup.sh" "$SRC/bin/mkctl" "$SRC/bin/worker.py" "$SRC/bin/offsite.sh" "$SRC/bin/restore-test.sh" "$SRC/bin/watchdog.sh" "$SRC/bin/selbsttest.sh" "$SRC/bin/haerten.sh" "$SRC/bin/backup-abholen.sh" "$SRC/bin/update-schutz.sh" "$BASE/bin/"
 ln -sf "$BASE/bin/mkctl" /usr/local/bin/mkctl
 [ -f "$BASE/caddy/sites/00-platzhalter.caddy" ] || echo "# Hier liegen die Kunden-Websites (mkctl site-add)" > "$BASE/caddy/sites/00-platzhalter.caddy"
 echo "$CADDY_MODE" > "$BASE/mode"
@@ -179,12 +179,17 @@ if ! grep -q '^N8N_VERSION=' "$BASE/.env"; then
     warn "n8n-Version konnte nicht ermittelt werden (n8n läuft noch nicht?). Nach dem Start festlegen mit: mkctl n8n-version <Version>"
   fi
 fi
+# shellcheck disable=SC1091
+. "$BASE/bin/update-schutz.sh"
+portal_version_merken && ok "Laufende Portal-Version für den Rückweg gemerkt" || true
 if [ "$CADDY_MODE" = own ]; then
   docker compose --project-directory "$BASE" -f "$BASE/docker-compose.yml" --profile own-caddy up -d --build
 else
   docker compose --project-directory "$BASE" -f "$BASE/docker-compose.yml" up -d --build
 fi
 ok "Dienste gestartet"
+update_pruefen_oder_zurueck "docker compose --project-directory $BASE -f $BASE/docker-compose.yml" && ok "Update geprüft" \
+  || warn "Das Update wurde zurückgenommen oder das Portal läuft nicht (Details oben). Der Rest der Installation läuft weiter."
 
 if [ "$CADDY_MODE" = docker ]; then
   docker network connect markentrix_net "$EXISTING" 2>/dev/null || true

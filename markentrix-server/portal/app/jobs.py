@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import date, datetime, timedelta, timezone
 
-from . import abo, aufgabendetail, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push, security
+from . import abo, alarme, aufgabendetail, berichte, config, betrieb, domaincheck, preisaenderung, webbetrieb, zustellung, einstellungen, mailer, pdf, push, security
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 
@@ -415,7 +415,7 @@ def veroeffentlichung_wacht(cfg):
         return
     with tx("system") as cur:
         for m in meldungen:
-            cur.execute("INSERT INTO alarme (stufe, quelle, titel, details) VALUES ('kritisch','veroeffentlichung',%s,'{}'::jsonb)", (m[:200],))
+            alarme.eintragen(cur, "kritisch", "veroeffentlichung", m[:200], {})
         ids = push.admins(cur)
         cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
         r = cur.fetchone()

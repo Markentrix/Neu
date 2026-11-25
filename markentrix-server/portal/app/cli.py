@@ -5,7 +5,7 @@ import sys
 
 import json
 
-from . import db, einstellungen, mailer
+from . import alarme, db, einstellungen, mailer
 from .security import EMAIL_RE, audit, hash_password
 
 
@@ -45,8 +45,10 @@ def alarm_mail(stufe: str, titel: str, text: str):
             cur.execute("SELECT email FROM benutzer WHERE rolle='admin' AND aktiv ORDER BY erstellt_am LIMIT 1")
             r = cur.fetchone()
             an = r and r["email"]
-        cur.execute("INSERT INTO alarme (stufe, quelle, titel, details, kanaele_gesendet) VALUES (%s,'wachdienst',%s,%s::jsonb,%s)",
-                    (stufe, titel[:200], json.dumps({"text": text[:2000]}), ["mail"] if an else []))
+        if stufe == "info" and "wieder in Ordnung" in titel:   # Problem behoben: die offenen Alarme des Wachdienstes schließen sich selbst
+            alarme.schliessen(cur, "wachdienst")
+        else:
+            alarme.eintragen(cur, stufe, "wachdienst", titel, {"text": text[:2000]}, ["mail"] if an else [], text=text)
     if not an:
         sys.exit("Kein Empfänger für Alarme gefunden.")
     ok, fehler = mailer.senden(an, titel, text + "\n\n(automatische Meldung der Serverüberwachung)")

@@ -1,6 +1,7 @@
 """Systemstatus im Admin: liest die Ergebnisse der Server-Überwachung (watchdog.sh) und meldet, wenn die Überwachung selbst verstummt."""
 import json
 import os
+import re
 import time
 from pathlib import Path
 
@@ -14,12 +15,61 @@ from .security import require_admin
 
 router = APIRouter(prefix="/api")
 DATEI = Path(os.environ.get("BACKUP_DIR", "/backups")) / "system.json"
+VERFUEGBARKEIT = DATEI.with_name("verfuegbarkeit.log")
+LUECKE = 900   # Sekunden: der Wachdienst meldet sich alle 5 Minuten, länger Stille gilt als Ausfall des Servers
+
+
+def verfuegbarkeit(zeilen: list[tuple[float, int]], jetzt: float, tage: int = 30) -> dict | None:
+    """Anteil der Zeit, in der Dienste und Portal liefen, aus den Wachdienst-Meldungen (Zeit, 1 = ok, 0 = Problem).
+    Eine Stille von über 15 Minuten zählt als Ausfall. Gibt None zurück, wenn noch gar keine Meldung da ist."""
+    ab = jetzt - tage * 86400
+    z = sorted(x for x in zeilen if x[0] >= ab - LUECKE)
+    if not z:
+        return None
+    start = max(z[0][0], ab)
+    gesamt = jetzt - start
+    if gesamt < 3600:
+        return {"prozent": None, "tage_daten": 0, "letzter_ausfall": None}
+    ausfall, letzter = 0.0, None   # letzter = (Beginn, Ende)
+    def zaehle(von, bis):
+        nonlocal ausfall, letzter
+        von = max(von, start)
+        if bis > von:
+            ausfall += bis - von
+            if letzter and von - letzter[1] < LUECKE:
+                letzter = (letzter[0], bis)
+            else:
+                letzter = (von, bis)
+    for (t0, ok0), (t1, _ok1) in zip(z, z[1:]):
+        if t1 - t0 > LUECKE:
+            zaehle(t0 + 300, t1)
+        elif not ok0:
+            zaehle(t0, t1)
+    t_last, ok_last = z[-1]
+    if jetzt - t_last > LUECKE:
+        zaehle(t_last + 300, jetzt)
+    elif not ok_last:
+        zaehle(t_last, jetzt)
+    return {"prozent": round(100 * (1 - ausfall / gesamt), 2), "tage_daten": round(gesamt / 86400, 1),
+            "letzter_ausfall": {"von": letzter[0], "minuten": max(1, round((letzter[1] - letzter[0]) / 60))} if letzter else None}
+
+
+def _verfuegbarkeit_lesen(jetzt: float) -> dict | None:
+    try:
+        zeilen = []
+        for zeile in VERFUEGBARKEIT.read_text().splitlines():
+            t, _, ok = zeile.partition(" ")
+            zeilen.append((float(t), int(ok or 0)))
+        return verfuegbarkeit(zeilen, jetzt)
+    except (OSError, ValueError):
+        return None
 
 
 def lesen_status() -> dict | None:
     try:
         d = json.loads(DATEI.read_text())
         d["alter_minuten"] = int((time.time() - float(d.get("zeit", 0))) / 60)
+        d["verfuegbarkeit"] = _verfuegbarkeit_lesen(time.time())
         return d
     except (OSError, ValueError):
         return None
@@ -54,6 +104,19 @@ def ampel(d: dict | None, smtp: dict, jobs: dict | None, mail: dict | None, kist
         out.append(_punkt("zertifikat", "Zertifikat (HTTPS)", "unbekannt" if c < 0 else ("ok" if c >= 14 else "bad"), "nicht geprüft" if c < 0 else f"läuft in {c} Tagen ab"))
         p = d.get("platte_prozent", 0)
         out.append(_punkt("platte", "Speicherplatz", "ok" if p < 80 else ("warn" if p < 90 else "bad"), f"{p} % belegt"))
+        v = d.get("verfuegbarkeit")
+        if v and v.get("prozent") is not None:
+            la = v.get("letzter_ausfall")
+            txt = f"{str(v['prozent']).replace('.', ',')} % in den letzten {min(30, int(v['tage_daten']) or 1)} Tagen. " + (
+                "Letzter Ausfall: " + time.strftime("%d.%m. %H:%M", time.localtime(la["von"])) + f", {la['minuten']} Min." if la else "Kein Ausfall.")
+            out.append(_punkt("verfuegbarkeit", "Verfügbarkeit", "ok" if v["prozent"] >= 99.5 else ("warn" if v["prozent"] >= 98 else "bad"), txt))
+        elif v:
+            out.append(_punkt("verfuegbarkeit", "Verfügbarkeit", "unbekannt", "Die Messung läuft, aussagekräftig ab etwa einer Stunde."))
+        h = [x for x in (d.get("heilung") or []) if x]
+        if h:
+            m = re.match(r"(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)\S* (\S+) ", h[-1])
+            wann = f"{m.group(3)}.{m.group(2)}. {m.group(4)}" if m else ""
+            out.append(_punkt("heilung", "Selbstheilung", "warn", f"{m.group(5) if m else 'Ein Dienst'} wurde automatisch neu gestartet ({wann})" + (f", dazu {len(h) - 1} weitere Male" if len(h) > 1 else "") + ". Das ist ein Hinweis, kein Ausfall."))
     if os.environ.get("PORTAL_JOBS", "1") == "0":
         out.append(_punkt("jobs", "Hintergrundjobs", "warn", "ausgeschaltet (Erinnerungen, Berichte und Mails laufen nicht)"))
     elif not jobs:

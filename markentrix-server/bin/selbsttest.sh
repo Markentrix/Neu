@@ -64,6 +64,25 @@ USE="$(df --output=pcent / | tail -1 | tr -dc 0-9)"; [ "${USE:-0}" -lt 85 ] && z
 [ -f /var/run/reboot-required ] && z warn "Neustart des Servers nötig (Systemupdate eingespielt). In einem ruhigen Moment: reboot"
 dpkg -s unattended-upgrades >/dev/null 2>&1 || z warn "Automatische Sicherheitsupdates fehlen: mkctl haerten --anwenden"
 systemctl is-active --quiet fail2ban 2>/dev/null || z warn "fail2ban läuft nicht: mkctl haerten --anwenden"
+# 8) Zugang von außen: SSH nur mit Schlüssel? Lauschen nur erwartete Ports nach außen? (nur Hinweise)
+PW="$(sshd -T 2>/dev/null | awk '/^passwordauthentication/{print $2}')"
+[ "$PW" = yes ] && z warn "SSH erlaubt noch die Anmeldung mit Passwort. Sicherer nur mit Schlüssel (erst Schlüssel-Anmeldung testen, dann: mkctl ssh-haerten)"
+SSHP="$(sshd -T 2>/dev/null | awk '/^port /{print $2; exit}')"; SSHP="${SSHP:-22}"
+UNERWARTET=""
+while read -r ADR; do
+  PORT="${ADR##*:}"
+  case "$ADR" in 127.*|"[::1]"*|"::1"*) continue;; esac
+  case "$PORT" in 80|443|"$SSHP") ;; *) UNERWARTET="$UNERWARTET $PORT";; esac
+done < <(ss -H -tln 2>/dev/null | awk '{print $4}' | sort -u)
+UNERWARTET="$(echo "$UNERWARTET" | tr ' ' '\n' | sort -un | tr '\n' ' ')"
+[ -z "${UNERWARTET// /}" ] && z ok "Nach außen lauschen nur SSH, 80 und 443" || z warn "Nach außen offene Ports ausser SSH, 80, 443: ${UNERWARTET}(gewollt? Sonst Hetzner-Firewall oder mkctl haerten --firewall)"
+# 9) Arbeitsspeicher und Absturzschleifen
+RAM="$(awk '/^MemTotal/{t=$2}/^MemAvailable/{a=$2}END{if(t>0)print int(a*100/t); else print 100}' /proc/meminfo 2>/dev/null || echo 100)"
+[ "${RAM:-100}" -ge 8 ] && z ok "Arbeitsspeicher: ${RAM} % frei" || z fehler "Arbeitsspeicher fast voll (nur ${RAM} % frei)"
+for c in mk-db mk-n8n-db mk-n8n mk-panel mk-portal; do
+  RC="$(docker inspect -f '{{.RestartCount}}' "$c" 2>/dev/null || echo 0)"
+  [[ "${RC:-0}" =~ ^[0-9]+$ ]] && [ "${RC:-0}" -ge 5 ] && z warn "Container $c wurde seit dem letzten Neubau ${RC}-mal von Docker neu gestartet (Log: docker logs $c --tail 100)"
+done
 echo
 if [ "$FEHLER" -eq 0 ]; then echo "Ergebnis: alles in Ordnung."; exit 0; fi
 echo "Ergebnis: $FEHLER Fehler."

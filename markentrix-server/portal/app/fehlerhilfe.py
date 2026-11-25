@@ -4,7 +4,6 @@ Zentrale Stelle für alle Fehler im Portal (unerwartete Fehler, Hintergrundjobs,
 Die Regeln sind bewusst eine einfache Liste: erste passende Regel gewinnt, am Ende steht ein allgemeiner Hinweis.
 Gespeichert wird nie mehr als ein kurzer, von Zugangsdaten bereinigter Text.
 """
-import json
 import logging
 import re
 import secrets
@@ -132,12 +131,11 @@ def melden(quelle: str, exc_oder_text, titel: str | None = None, stufe: str = "w
         if jetzt - _letzte.get(schluessel, 0) < sperre_sek:
             return nr
         _letzte[schluessel] = jetzt
-        from . import push
+        from . import alarme, push
         from .db import tx
         with tx("system") as cur:
             details = {"fehler_nr": nr, "text": bereinigen(text), "erklaerung": {k: e[k] for k in ("id", "titel", "ursache", "schritte", "wer")}}
-            cur.execute("INSERT INTO alarme (stufe, quelle, titel, details) VALUES (%s,%s,%s,%s::jsonb)",
-                        (stufe if stufe in ("info", "warnung", "kritisch") else "warnung", quelle[:60], (titel or e["titel"])[:200], json.dumps(details)))
+            alarme.eintragen(cur, stufe if stufe in ("info", "warnung", "kritisch") else "warnung", quelle[:60], (titel or e["titel"])[:200], details)
             if push_senden:
                 push.senden(push.admins(cur), e["titel"], e["schritte"][0][:140] + " (Admin → Datenschutz & Qualität → Alarme)", "/admin#compliance", "fehler")
     except Exception:  # noqa: BLE001 - die Fehlerhilfe darf nie selbst einen Fehler auslösen

@@ -100,6 +100,6 @@ async def ui():
             await pg.click("button:has-text('Jetzt alles prüfen')"); await pg.wait_for_selector("b:text-is('Datenbank')",timeout=20000); chk(f"Prüfung zeigt Ergebnis @{breite}",True)
             chk(f"Letzte Fehler mit Erklärung @{breite}",await pg.locator("summary:has-text('Nr. ')").count()>=1)
             ueber=await pg.evaluate("document.documentElement.scrollWidth-document.documentElement.clientWidth"); chk(f"Kein seitliches Überlaufen @{breite}",ueber<=0,ueber)
-        await pg.goto(B+"/admin#compliance"); await pg.reload(); await pg.wait_for_selector("th:has-text('Ursache und Vorschlag')",timeout=10000); chk("Alarmliste zeigt Ursache und Vorschlag",True)
+        await pg.goto(B+"/admin#compliance"); await pg.reload(); await pg.wait_for_selector("th:has-text('Meldung')",timeout=10000); chk("Alarmliste zeigt Meldung und Vorschlag",True)
         chk("Keine JavaScript-Fehler",not errs,errs); await br.close()
 asyncio.run(ui())

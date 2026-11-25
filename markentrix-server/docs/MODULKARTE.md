@@ -10,12 +10,13 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | Modul | Schicht | Zeilen | Genutzt von |
 |---|---|---|---|
 | `__init__` | 1 | 0 | – |
+| `alarme` | 1 | 24 | `cli`, `fehlerhilfe`, `jobs` |
 | `betrieb` | 1 | 29 | `cli`, `jobs`, `ki`, `mailer` und 2 weitere |
 | `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 47 weitere |
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
 | `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 148 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 37 weitere |
-| `fehlerhilfe` | 1 | 145 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
+| `fehlerhilfe` | 1 | 143 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
 | `mailer` | 1 | 498 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
@@ -196,7 +197,7 @@ Kunden- und Systemverwaltung, Einstellungen, Dashboard, Werkzeuge, Systemstatus 
 | `routes_nutzung` | 3 | 52 | `jobs`, `main` |
 | `routes_plattformstatus` | 3 | 182 | `main` |
 | `routes_push` | 3 | 64 | `main` |
-| `routes_system` | 3 | 231 | `jobs`, `main`, `t73.py` |
+| `routes_system` | 3 | 294 | `jobs`, `main`, `t142.py`, `t73.py` |
 | `routes_verwaltung` | 3 | 786 | `jobs`, `main` |
 | `routes_werkzeuge` | 3 | 319 | `main` |
 
@@ -206,7 +207,7 @@ Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werde
 
 | Modul | Schicht | Zeilen | Genutzt von |
 |---|---|---|---|
-| `cli` | 4 | 182 | `install.sh`, `mkctl`, `selbsttest.sh`, `t29.py` und 2 weitere |
+| `cli` | 4 | 184 | `install.sh`, `mkctl`, `selbsttest.sh`, `t142.py` und 4 weitere |
 | `jobs` | 4 | 1309 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 8 weitere |
 | `main` | 4 | 314 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
 

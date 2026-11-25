@@ -224,9 +224,11 @@ SQL
     need_root
     echo "Vor dem Update läuft eine Sicherung ..."; "$BASE/bin/backup.sh"
     "${COMPOSE[@]}" pull --ignore-buildable n8n n8n-db mk-db
+    # shellcheck disable=SC1091
+    . "$BASE/bin/update-schutz.sh"; portal_version_merken || true
     if [ "$MODE" = own ]; then "${COMPOSE[@]}" pull caddy; "${COMPOSE[@]}" --profile own-caddy up -d --build; else "${COMPOSE[@]}" up -d --build; fi
     "$BASE/bin/mkctl" migrate
-    echo "Update fertig."
+    if update_pruefen_oder_zurueck "${COMPOSE[*]}"; then echo "Update fertig."; else die "Update zurückgenommen oder Portal nicht in Ordnung (Details oben)."; fi
     ;;
 
   offsite-setup)
