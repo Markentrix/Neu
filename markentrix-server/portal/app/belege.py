@@ -141,6 +141,9 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
         zt = Table([zelle], colWidths=[132 * pdf.mm, 38 * pdf.mm])
         zt.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
         inhalt += [pdf.Spacer(1, 12), KeepTogether([pdf.p("Zahlung", pdf.H2), zt])]
+    if not ist_re and f.get("iban"):
+        bank = f"Empfänger: {f['name']}\nIBAN: {f['iban']}" + (f"\nBIC: {f['bic']}" if f.get("bic") else "") + (f"\nBank: {f['bank']}" if f.get("bank") else "")
+        inhalt += [pdf.Spacer(1, 10), KeepTogether([pdf.p("Bankverbindung", pdf.H2), pdf.p(bank), pdf.p(f"Verwendungszweck bei Beauftragung: {nr}", pdf.KLEIN)])]
     if storno:
         inhalt += [pdf.Spacer(1, 8), pdf.p("Diese Stornorechnung hebt die genannte Rechnung auf.", pdf.KLEIN)]
     if b["schluss"]:

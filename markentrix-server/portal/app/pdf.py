@@ -211,7 +211,13 @@ def _svg_pfad(pt, d, transform=None):
 def dokument(titel: str, kopfzeile: str, inhalt: list, firma: dict, fuss_extra: str = "") -> bytes:
     puffer = BytesIO()
     name = firma.get("name") or "Markentrix"
-    fuss = " · ".join(x for x in [name, firma.get("strasse"), f"{firma.get('plz', '')} {firma.get('ort', '')}".strip(), firma.get("email"), firma.get("telefon")] if x)
+    # Fußzeile in drei Spalten: Anschrift | Kontakt | Bank und Steuer (Pflichtangaben stehen auf jeder Seite)
+    iban = " ".join((firma.get("iban") or "").split())
+    spalten = [
+        [x for x in [name, firma.get("inhaber") and "Inh. " + firma["inhaber"], firma.get("strasse"), f"{firma.get('plz', '')} {firma.get('ort', '')}".strip()] if x],
+        [x for x in [firma.get("telefon") and "Tel. " + firma["telefon"], firma.get("email"), (firma.get("website") or "").replace("https://", "").replace("http://", "").rstrip("/")] if x],
+        [x for x in [firma.get("bank"), iban and "IBAN " + iban, firma.get("bic") and "BIC " + firma["bic"]] if x] + [x.strip() for x in fuss_extra.split(" · ") if x.strip()],
+    ]
 
     def seite(c, doc):
         c.saveState()
@@ -220,13 +226,16 @@ def dokument(titel: str, kopfzeile: str, inhalt: list, firma: dict, fuss_extra: 
         if not _logo_zeichnen(c, 20 * mm, A4[1] - 10.6 * mm, 7.2 * mm):
             c.setFillColor(colors.white); c.setFont(F_TITEL, 12); c.drawString(20 * mm, A4[1] - 9 * mm, name)
         c.setFont(F_TEXT, 8.5); c.setFillColor(LEINEN); c.drawRightString(A4[0] - 20 * mm, A4[1] - 8.7 * mm, kopfzeile)
-        c.setFillColor(GRAU); c.setFont(F_TEXT, 7.5)
-        c.drawString(20 * mm, 12 * mm, fuss[:120]); c.drawRightString(A4[0] - 20 * mm, 12 * mm, f"Seite {doc.page}")
-        if fuss_extra:
-            c.drawString(20 * mm, 8 * mm, fuss_extra[:140])
+        c.setStrokeColor(colors.HexColor("#D5DEE2")); c.setLineWidth(0.4); c.line(20 * mm, 24 * mm, A4[0] - 20 * mm, 24 * mm)
+        c.setFillColor(GRAU); c.setFont(F_TEXT, 7)
+        for i, zeilen in enumerate(spalten):
+            x = (20 + i * 58) * mm
+            for j, z in enumerate(zeilen[:5]):
+                c.drawString(x, (20.8 - j * 2.9) * mm, z[:46])
+        c.drawRightString(A4[0] - 20 * mm, 8 * mm, f"Seite {doc.page}")
         c.restoreState()
 
-    doc = SimpleDocTemplate(puffer, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=26 * mm, bottomMargin=20 * mm, title=titel, author=name)
+    doc = SimpleDocTemplate(puffer, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=26 * mm, bottomMargin=29 * mm, title=titel, author=name)
     doc.build(inhalt, onFirstPage=seite, onLaterPages=seite)
     return puffer.getvalue()
 
