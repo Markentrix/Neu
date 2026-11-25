@@ -9,19 +9,7 @@
     ? { copied: 'copied', copy: 'copy', done: ' done', of: ' of ', well: '. Well done.' }
     : { copied: 'kopiert', copy: 'kopieren', done: ' erledigt', of: ' von ', well: '. Gut gemacht.' };
 
-  /* Die Zeichnung im dunklen Band wird erst gezeichnet, wenn sie sichtbar wird */
   document.documentElement.classList.add('js');
-  var plans = $$('.plan');
-  if (plans.length) {
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); } });
-      }, { threshold: 0.3 });
-      plans.forEach(function (p) { io.observe(p); });
-    } else {
-      plans.forEach(function (p) { p.classList.add('in-view'); });
-    }
-  }
 
   /* Danke-Seite: Vorgangsnummer aus der Adresse, nur als Text eingesetzt */
   var refEl = $('[data-ref]');

@@ -1,71 +1,103 @@
-# DESIGN.md – PS Schneider, Sachverständiger für Fahrzeugtechnik, Celle
+# Gestaltung – PS Schneider, Kfz-Sachverständiger in Celle
 
-Diese Datei dokumentiert die Gestaltungsentscheidungen. Sie liegt neben dem Webroot `public/` und gehört nicht in den Upload.
+Diese Datei liegt neben `website-fertig/` und gehört nicht in den Upload.
 
 ## Kernidee
 
-Eine Seite, die aussieht wie ein Gutachten: Schadenskizze, Maßlinie, Prüfstempel. Die Schrift steht schräg wie die Buchstaben im Logo, Flächen werden im selben Winkel diagonal geschnitten.
+**Vermessung.** Ein Sachverständiger nimmt ein Fahrzeug auf, markiert den Schaden, misst und belegt. Die Seite arbeitet genauso: Sie zeigt eine technische Zeichnung statt eines Stockfotos, setzt Maßlinien statt Dekor und benutzt Rot nur dort, wo etwas beschädigt ist oder sofort gehandelt werden muss.
 
-**Ideensatz:** Auf dieser Seite wird das **Logo des Betriebs (schräg gestelltes Schwarz-Rot) und die Schadenskizze eines Gutachtens** zu **Schrägwinkel, Parallelogramm-Schaltflächen und einer gezeichneten Fahrzeugskizze mit Nummernmarken**.
+**Ideensatz:** Auf dieser Seite wird die Schadensaufnahme des Sachverständigen (Fahrzeug von der Seite, Schaden rot eingekreist, Bremsspur, Beschriftungen mit Leitlinien) zur Navigation: Jede Stelle am Fahrzeug führt zum passenden Gutachten.
 
-Austauschtest: Ein anderer Sachverständiger hätte weder dieses Logo noch diese Skizze mit Maßlinie und Schadenszone. Mit getauschtem Namen und Logo wäre die Seite für einen anderen Betrieb sichtbar falsch (Skizze, Stempel, Logo-Winkel).
+Austauschtest: Der Betrieb zwei Straßen weiter ist ein Autohaus oder eine Werkstatt. Eine Zeichnung, in der Bremsspur, Schadenszone und Radachse auf Gutachten-Arten zeigen, passt nur zu einem Sachverständigen. Der Test ist bestanden.
 
-**Signatur:** die rote Schrägfläche (Parallelogramm, 12 Grad wie die Schrift im Logo). Sie kehrt wieder in der Seitenkopf-Marke, im Porträtrahmen, auf Schaltflächen und Trennern. Alles andere bleibt ruhig.
+**Lebendige Sache:** die Schadenszeichnung im Kopfbereich. Ab Tablet-Breite führt jede Beschriftung zur Leistungsseite, der rote Kreis wird beim Laden einmal gezeichnet (nur ohne reduzierte Bewegung). Ohne Skript und auf dem Handy folgt die gleiche Auswahl als Liste direkt darunter. Dazu die Unfall-Checkliste, deren Haken im Browser bleiben.
 
-**Lebendiges Element:** die Schadenskizze im dunklen Band „So läuft es ab“. Sie zeichnet sich beim Sichtbarwerden Linie für Linie (einmal, nur transform- und opacity-nahe Eigenschaften, bei „weniger Bewegung“ sofort fertig).
+## Verworfene Richtungen
 
-Verworfene Richtungen: (1) Foto-Vollbild mit riesigem Wort (es gibt nur ein Porträtfoto), (2) helle Handwerker-Seite mit Icon-Karten (Standard, austauschbar).
-
-## Farben (Kunden-CI aus dem Logo)
-
-| Rolle | Hex |
+| Richtung | Grund |
 | --- | --- |
-| Grund | `#FFFFFF` |
-| Flächenwechsel | `#F1F1F2` |
-| Tinte und dunkle Flächen | `#0D0E10` |
-| Text gedämpft | `#40434A` |
-| Akzent (Aktion, Signatur) | `#D71A21` (auf Dunkel `#EF3B42`) |
-| Linie | `#DADADD` |
+| „Prüfprotokoll“: schwarze Bänder, diagonale Schnitte, schräge Schmalschrift in Versalien, Prüfstempel | Sah aus wie jede Auto-Vorlage mit Schwarz und Rot. Die Diagonalen und der Stempel waren Dekor ohne Aussage. |
+| Fahrzeugschein-Raster (Feldnummern wie in der Zulassungsbescheinigung) | Zu verspielt, die Feldnummern würden Zahlen ohne echte Reihenfolge einführen. |
+| Plakatseite mit Vollflächen in Rot | Rot verliert seine Bedeutung, wenn es überall steht. |
+| Telefonnummer als Kennzeichen | Gimmick, der von der Aufgabe (anrufen) ablenkt. |
 
-Verteilung etwa 60/30/10: Weiß, Schwarz, Rot. Im Dunkelmodus (nach Systemeinstellung) Grund `#121416`, Flächen `#191B1E`, tiefe Flächen `#050506`.
+## Farben
 
-**Begründete Ausnahme von der VERBOTEN-Liste:** „Fast-Schwarz plus Zinnober“ steht auf der Liste. Hier ist es die echte CI: Das Logo ist schwarz und rot (`#D71A21`). Beige/Creme wurde dagegen entfernt, der Grund ist Reinweiß.
+Ableitung: Das Logo ist Schwarz und Rot. Ein Sachverständiger arbeitet neutral, deshalb sind die Flächen neutral. Rot kommt aus dem Logo und bleibt für Befund und Alarm reserviert. Verteilung grob 70 / 25 / 5.
 
-## Schriften (lokal, woff2, vier Schnitte)
+| Name | Wert | Rolle |
+| --- | --- | --- |
+| Papier | `#FFFFFF` | Grund der Seite |
+| Grundierung | `#ECEDEF` | Bühne der Zeichnung, abgesetzte Abschnitte, Hinweisflächen |
+| Tinte | `#101114` | Text, Linien, Zeichnung, dunkle Flächen |
+| Befund-Rot | `#D71A21` | Schadenszone, Hauptknopf, Notruf-Fläche, kleine Marker |
+| Rot, dunkel | `#B5141A` | Rot als Text auf hellem Grund, Hover des Knopfes |
+| Grau, Text | `#494C53` | Einleitungen, Beschriftungen |
 
-- Barlow Condensed Kursiv 800: Überschriften H1/H2 (Großbuchstaben)
-- Barlow Condensed Kursiv 700: H3, Schaltflächen, Navigation
-- Barlow 400: Fließtext
-- Barlow 600: Beschriftungen, Etiketten
+Der Dunkelmodus (Systemeinstellung des Besuchers) tauscht Grund und Tinte, Rot wird heller. Ein fester Dunkelmodus ohne Grund ist nicht eingebaut.
 
-Zwei Familien, vier Schnitte. Zahlen mit Tabellenziffern. Fließtext 16,5 bis 17 Pixel, Zeilenhöhe 1,6, Überschrift zu Text mindestens 3:1.
+## Schriften
+
+Eine Familie, lokal als woff2: **Epilogue** in 400, 600 und 800. Überschriften in Groß- und Kleinschreibung, 800, eng gesetzt (−0,035 bis −0,045 em). Fließtext 400, Beschriftungen und Knöpfe 600. Zahlen mit Tabellenziffern. Lange Fachwörter werden an Silbengrenzen getrennt (`soften()` in `build/build.py`).
+
+Typo-Skala: Hero-Überschrift bis 90 px, Seitenüberschrift bis 78 px, Abschnittsüberschrift 28 bis 54 px, Zwischenüberschrift 21 bis 27 px, Einleitung 18 bis 21 px, Text 17 px, Beschriftung 13 bis 15 px.
 
 ## Layout
 
-Hero (Komposition B): links Text mit zwei Zeilen Headline, Stützsatz und Aktion, rechts das Porträt im Parallelogramm mit rotem Block dahinter. Darunter zwei Belege des Kunden (30 und 17 Jahre).
+Zwölf Spalten bei 1240 px, Ränder 18 bis 44 px. Jeder Abschnitt hat eine andere Komposition als sein Nachbar:
 
-Danach wechseln die Abschnitte: Leistungsverzeichnis als Zeilen (Überschrift links, Liste rechts), dunkles Band mit Fahrbahnmarkierung und Skizze, Gründe als drei gleich schwere Blöcke, dunkler Abschnitt mit Prüfstempel, helle Schritte mit Notruf-Karte, Ratgeber, Fragen, Einsatzgebiet, Kontakt mit großer Telefonnummer.
+```
+Kopf        Überschrift groß links | Einleitung + Knöpfe rechts
+Bühne       grauer Streifen über volle Breite: Fahrzeug von der Seite, 6 Beschriftungen mit Leitlinien
+Leistungen  Tabelle: Art | Leistung | Beschreibung, dicke Linie oben, Hover tönt die Zeile
+Ablauf      Maßkette: vier Stationen auf einer Linie, Nummer = echte Reihenfolge
+Gründe      dunkle Fläche: Überschrift links (klebt), drei Begründungen rechts
+Über mich   Porträt mit Maßstab am Rand | Datenblatt mit fünf Zeilen
+Unfall      Liste der ersten Schritte | rote Notruf-Fläche mit 110 und 112
+Ratgeber    Zeilen: Titel links, Kurztext rechts
+Fragen      Überschrift links (klebt) | Fragen rechts
+Gebiet      Ringschema 25 und 50 km | Ortsliste
+Kontakt     dunkel, Telefonnummer in Schriftgröße bis 148 px, darunter Angaben und Wege
+Fuß         Schriftfeld wie auf einer technischen Zeichnung, vier Felder
+```
 
-Unterseiten: dunkler Kopf mit roter Schrägfläche, helle Textfläche mit Seitenleiste.
+Unterseiten: Brotkrumen, Überschrift über die volle Breite (bis 78 px, höchstens zwei Zeilen), darunter Einleitung links und Verfasserzeile rechts, dicke Linie. Danach Text mit Zwischenüberschriften (dicke Linie darüber) und rechts der dunkle Kontaktkasten, am Ende ein dunkles Band.
+
+Handy: Menü in einer oder zwei Zeilen unter dem Logo, alle Punkte sichtbar. Die Zeichnung wird größer gezogen und beschnitten, die Beschriftungen entfallen, darunter folgt die Leistungsliste. Aktionsleiste unten mit Anrufen, WhatsApp und Anfrage.
+
+## Signatur
+
+Die Schadenszeichnung: Pkw von der Seite mit zerknitterter Front (gestrichelt die unbeschädigte Kontur), roter Schraffur, mit rotem Stift eingekreist, und Bremsspur auf der Fahrbahn. Gezeichnet im Code (`build/artwork.py`), keine Bilddatei. Alles drumherum bleibt ruhig: Text, Linien, Tabellen.
+
+Zweite, kleinere Handschrift: das Schriftfeld im Fuß und der Maßstab am Porträt, beide aus der technischen Zeichnung.
 
 ## Gestaltungssysteme
 
-- **Ebenen:** alle Flächen flach (Ebene 0). Es gibt genau einen Schattenwert: den harten Fokusschatten an Formularfeldern (`--shadow-1`).
-- **Radien:** 0 für alles, 50 % nur für die runde Nummernmarke in der Schadenskizze und in Aufzählungen mit echter Reihenfolge.
-- **Bildform:** Parallelogramm (Porträt, Schaltflächen, Chips, Stempel-Block). Auf allen Seiten gleich.
-- **Belege:** höchstens zwei im ersten Bildschirm, wie geliefert: „über 30 Jahre Erfahrung“ und „17 Jahre Sachverständiger bei Europas größter Sachverständigenorganisation“ (Quelle: bisherige Website und Angaben des Kunden). Keine Zahlen ohne Quelle.
-- **Etiketten über Überschriften:** nur dort, wo sie etwas Eigenes sagen (Leistungsbereich der Leistungsseiten, Einleitungsfrage im Hero). Keine Nummern ohne echte Reihenfolge; Nummern stehen nur beim Ablauf, bei den ersten Schritten und in der Checkliste.
-- **Rundes Aktionselement:** keines.
-- **Pfeile:** keine Pfeile an Links.
+- Hero-Komposition: eigene, nahe an F (Überschrift mit Bild als Bühne darunter): große Überschrift, Zeichnung als Bühne über die volle Breite, Beleg („Wer zahlt?“) direkt darunter.
+- Schatten: keine. Tiefe entsteht durch Flächen (Grundierung, Tinte).
+- Radien: 0. Alle Ecken eckig, ohne Ausnahme.
+- Linien: drei Stärken mit Bedeutung. 3 px für Abschnitts- und Tabellenköpfe, 1 px für Zeilentrenner innerhalb von Listen, 2 px für Zeichnung und Schriftfeld.
+- Bildform: Porträt als Rechteck mit Maßstab. Es gibt nur ein echtes Foto.
+- Belege im ersten Bildschirm: Kostenfrage („Wer zahlt?“), Rufnummer im Kopf, die sechs Gutachten als Beschriftungen.
 
 ## Haupt-Conversion
 
-Anruf (Telefon `0172 517 81 50`), danach WhatsApp und Anfrageformular mit Schadenfotos. Rückmeldung nach dem Senden: Referenznummer und Bestätigungsmail.
+Anrufen (`tel:`), Nebenwege WhatsApp und Formular. Der Knopf „Jetzt anrufen“ ist der einzige rote Knopf im Kopfbereich. Rückmeldung nach dem Formular: eigene Seite `danke.html` mit Vorgangsnummer und, falls Fotos nicht angenommen wurden, Hinweis auf WhatsApp.
+
+## Vertrauensbelege
+
+Aus dem Auftrag und der alten Website: Kfz-Techniker-Meister, über 30 Jahre im Kraftfahrzeugwesen, 17 Jahre als Sachverständiger in Deutschlands größter Sachverständigenorganisation, Unabhängigkeit von Versicherungen und Werkstätten. Alles steht im Datenblatt der Über-mich-Fläche, keine erfundenen Zahlen, keine Siegel, keine Kundenstimmen.
 
 ## Bewegung
 
-Ein orchestrierter Moment (die Skizze zeichnet sich). Sonst nur Rückmeldung: Farbe und Fläche bei Hover (nur mit Maus), Druckrückmeldung an Schaltflächen. Alle Übergänge kürzer als 300 ms, nie `transition: all`, bei „weniger Bewegung“ keine Animation.
+Eine einzige: der rote Kreis wird beim Laden in gut einer Sekunde gezeichnet. Er zeigt, wohin der Blick gehen soll. Mit reduzierter Bewegung steht er sofort. Das Plus bei den Fragen dreht sich, sonst gibt es nur Farbwechsel beim Darüberfahren (nur mit Maus). Kein Einblenden von Abschnitten, kein Zählen von Zahlen.
 
-## Offene Punkte
+## Ausnahmen von der Verbotsliste
 
-Siehe README, Abschnitt „Vor dem Livegang ausfüllen und prüfen“, und den Bericht zum Skill-Durchlauf.
+- Rot und Schwarz als Grundpalette: Es sind die Farben des Logos (Vorrang der Kunden-CI).
+- Eine Rot-Fläche (Notruf) trägt weißen Text: Rot bedeutet hier Alarm, wie im Straßenverkehr.
+- Die Überschrift der Startseite hat zwei Zeilen und kein hervorgehobenes Wort.
+
+## Technik
+
+Eine Stylesheet-Datei `website-fertig/assets/site.css`, alle Farben und Maße als Variablen am Anfang. Keine Verläufe, keine Schatten, keine Fremdschriften. Hover nur in `@media (hover: hover) and (pointer: fine)`. Zeichnungen aus `build/artwork.py` (Fahrzeug, Maßstab), das Ringschema des Einsatzgebiets aus `build/build.py`. Vorschaubild: `node build/make-og.js`.

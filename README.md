@@ -65,9 +65,9 @@ Siehe `WEITERLEITUNGEN.md` (wird erzeugt). Der Server richtet sie als 301 ein, d
 
 ## Gestaltung
 
-Siehe `DESIGN.md`. Kurz: Schwarz und Rot nach dem Logo, schräg gestellte Schrift, diagonale Flächen, Schadenskizze und Prüfstempel als gezeichnete Elemente (`build/artwork.py`, keine Bilddateien). Alle Farben und Maße stehen als Variablen am Anfang von `website-fertig/assets/site.css`, der Dunkelmodus ist eingebaut.
+Siehe `DESIGN.md`. Kurz: „Vermessung“. Eine technische Zeichnung (Fahrzeug von der Seite mit Schadenszone und Bremsspur, gezeichnet in `build/artwork.py`, keine Bilddatei) ist zugleich die Navigation zu den sechs Gutachten. Schwarz, Weiß und Grundierungsgrau, Rot nur für Schaden und Notruf, Maßlinien und ein Schriftfeld im Fuß. Alle Farben und Maße stehen als Variablen am Anfang von `website-fertig/assets/site.css`, der Dunkelmodus ist eingebaut.
 
-- Schriften lokal (`website-fertig/assets/fonts/`): Barlow 400 und 600, Barlow Condensed 700 kursiv und 800 kursiv.
+- Schrift lokal (`website-fertig/assets/fonts/`): Epilogue 400, 600 und 800.
 - Bilder: Porträt und Logos als AVIF, WebP und Ersatzformat (`python3 build/make-images.py`, braucht Pillow). Vorschaubild für soziale Netzwerke: `node build/make-og.js`.
 - Dateien in `assets/` erhalten beim Bauen eine Prüfsumme in der Adresse (`site.css?v=…`), damit Änderungen sofort ankommen und lange gecacht werden dürfen.
 

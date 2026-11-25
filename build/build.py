@@ -426,7 +426,7 @@ def logo_imgs(d, dark=False):
 
 def portrait_picture(d, alt, lazy=False):
     """Porträt in AVIF, WebP und JPEG, in zwei Breiten."""
-    sizes = "(max-width: 820px) 100vw, 430px"
+    sizes = "(max-width: 820px) 100vw, 480px"
 
     def ss(ext):
         return f'{asset(f"portrait-360.{ext}", d)} 360w, {asset(f"portrait-543.{ext}", d)} 543w'
@@ -480,16 +480,26 @@ def footer(d):
     design = f" · {T('Gestaltung und Umsetzung', 'Design and implementation')} © {TODAY.year} {OWNER}" if DRAFT else ""
     return f'''<footer class="site-footer deep">
   <div class="wrap">
-    <div class="col">
-      {logo_imgs(d, dark=True)}
-      <span>{BIZ["craft"]} {BIZ["person"]}</span>
-      <span>{BIZ["street"]} · {BIZ["zip"]} {BIZ["city"]}</span>
-    </div>
-    <div class="col">
-      <strong>{T("Kontakt", "Contact")}</strong>
-      <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>
-      <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a>
-      <a href="https://wa.me/{BIZ["phone_tel"].lstrip("+")}" target="_blank" rel="noopener">WhatsApp</a>
+    <div class="titleblock">
+      <div class="cell cell--brand">
+        {logo_imgs(d, dark=True)}
+      </div>
+      <div class="cell">
+        <span class="k">{T("Sachverständiger", "Expert")}</span>
+        <span>{BIZ["person"]}</span>
+        <span>{BIZ["craft"]}</span>
+      </div>
+      <div class="cell">
+        <span class="k">{T("Anschrift", "Address")}</span>
+        <span>{BIZ["street"]}</span>
+        <span>{BIZ["zip"]} {BIZ["city"]}</span>
+      </div>
+      <div class="cell">
+        <span class="k">{T("Erreichbar", "Contact")}</span>
+        <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>
+        <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a>
+        <a href="https://wa.me/{BIZ["phone_tel"].lstrip("+")}" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
     </div>
     <div class="legal">
       <span>© <span data-year>{TODAY.year}</span> {BIZ["person"]}{design}</span>
@@ -568,13 +578,13 @@ def page_html(*, slug, d, title, desc, body, key=None, graph=None, noindex=False
 <meta name="description" content="{esc(desc)}">
 <meta name="robots" content="{robots}">
 {canon_tag}{hreflang}
-<meta name="theme-color" content="#D71A21">
+<meta name="theme-color" content="#101114">
 <meta name="format-detection" content="telephone=no">{draft_meta}{og_tags}
 <link rel="icon" href="{rootfile("favicon.ico", d)}" sizes="48x48">
 <link rel="icon" href="{rootfile("icon-192.png", d)}" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="{rootfile("apple-touch-icon.png", d)}">
-<link rel="preload" href="{asset("fonts/BarlowCondensed-800i.woff2", d)}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{asset("fonts/Barlow-400.woff2", d)}" as="font" type="font/woff2" crossorigin>{head_extra}
+<link rel="preload" href="{asset("fonts/Epilogue-800.woff2", d)}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{asset("fonts/Epilogue-400.woff2", d)}" as="font" type="font/woff2" crossorigin>{head_extra}
 <link rel="stylesheet" href="{asset("site.css", d)}">{draft_css}
 {ld_block}
 </head>
@@ -753,18 +763,14 @@ def contact_compact(d):
     wa = BIZ["phone_tel"].lstrip("+")
     return f'''<section class="section deep contact-compact" id="kontakt" aria-labelledby="kontakt-title">
   <div class="wrap">
-    <div class="split">
-      <div class="split-head">
-        {sec_head("", "", T("Anrufen oder schreiben", "Call or write"), contact_lede(), "kontakt-title")}
-      </div>
-      <div class="split-body">
-        <a class="big-phone" href="tel:{BIZ["phone_tel"]}"><small>{T("Direkt anrufen", "Call directly")}</small>{BIZ["phone_display"]}</a>
-        {contact_rows()}
-        <div class="contact-actions">
-          <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{T("Anrufen", "Call")}</a>
-          <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
-          <a class="btn btn-secondary" href="{u(S("contact"), d)}">{svg("mail")}{T("Anfrage per Formular", "Enquiry via form")}</a>
-        </div>
+    {sec_head("", "", T("Anrufen oder schreiben", "Call or write"), contact_lede(), "kontakt-title")}
+    <a class="big-phone" href="tel:{BIZ["phone_tel"]}"><small>{T("Direkt anrufen", "Call directly")}</small>{BIZ["phone_display"]}</a>
+    <div class="contact-split">
+      {contact_rows()}
+      <div class="contact-actions">
+        <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{T("Anrufen", "Call")}</a>
+        <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
+        <a class="btn btn-secondary" href="{u(S("contact"), d)}">{svg("mail")}{T("Anfrage per Formular", "Enquiry via form")}</a>
       </div>
     </div>
   </div>
@@ -927,6 +933,30 @@ def sl(*keys):
     return [S(k) for k in keys]
 
 
+CALLOUT_KEYS = {"haftpflicht": "haftpflicht", "beweis": "beweissicherung", "leasing": "leasingruecknahme",
+                "wert": "wertgutachten", "restwert": "restwert", "analyse": "unfallanalytisch"}
+
+
+def vehicle_figure(d):
+    """Das Fahrzeug von der Seite. Jede Beschriftung führt zur passenden Leistung (nur ab Tablet-Breite, darunter folgt die Liste)."""
+    items = []
+    for s in SERVICES:
+        a = artwork.ANCHORS[CALLOUT_KEYS[s["key"]]]
+        dmg = " is-damage" if a.get("damage") else ""
+        items.append(f'<li class="co co--{a["side"]} co-{CALLOUT_KEYS[s["key"]]}{dmg}">'
+                     f'<a href="{u(s["slug"], d)}"><small>{esc(s["tag"])}</small><strong>{esc(s["short"])}</strong></a></li>')
+    label = T("Zeichnung eines Pkw von der Seite mit verformter Front, roter Schadenszone und Bremsspur",
+              "Drawing of a car from the side with a crumpled front, a red damage zone and a skid mark")
+    cap = T("Jede Beschriftung führt zum passenden Gutachten.", "Every label leads to the matching report.")
+    return f'''<figure class="vehicle">
+        <div class="vehicle-box">
+          {artwork.car_side(label)}
+          <ul class="callouts">{"".join(items)}</ul>
+        </div>
+        <figcaption>{cap}</figcaption>
+      </figure>'''
+
+
 def build_home():
     slug = S("home")
     d = depth(slug)
@@ -950,77 +980,64 @@ def build_home():
          ("Financial security", "Besides the repair costs, the report covers diminished value, repair time and downtime. Only then are your claims fully quantified."),
          ("Evidence", "If the other party's insurer denies responsibility, a report keeps you on the safe side. In a dispute it is recognised in court.")])
     reasons_html = "\n        ".join(f"<article><h3>{esc(h)}</h3><p>{esc(p)}</p></article>" for h, p in reasons)
-    facts = T([BIZ["craft"], "17 Jahre Sachverständiger in Deutschlands größter Sachverständigenorganisation",
-               "Unabhängig von Versicherungen und Werkstätten", "Kontinuierliche Weiterbildung, alle Fahrzeugarten"],
-              [BIZ["craft"], "17 years as an expert with Germany's largest expert organisation",
-               "Independent of insurers and garages", "Continuous training, all types of vehicle"])
-    facts_html = "\n          ".join(f"<li><span>{f}</span></li>" for f in facts)
-    stats = [("30<small>+</small>", T("Jahre Erfahrung im Kraftfahrzeugwesen", "years of experience in the motor vehicle trade")),
-             ("17", T("Jahre Kfz-Sachverständiger bei Europas größter Sachverständigenorganisation", "years as a vehicle expert with Europe's largest expert organisation"))]
-    stats_html = "\n        ".join(f'<li><span class="num">{n}</span><span class="lbl">{l}</span></li>' for n, l in stats)
-    plan_label = T("Skizze eines Fahrzeugs von oben mit markierter Schadenszone", "Sketch of a vehicle from above with the damage zone marked")
+    sheet = T(
+        [("Beruf", BIZ["craft"]),
+         ("Erfahrung", "Über 30 Jahre im Kraftfahrzeugwesen, davon 17 Jahre als Sachverständiger in Deutschlands größter Sachverständigenorganisation"),
+         ("Haltung", "Unabhängig von Versicherungen und Werkstätten"),
+         ("Fahrzeuge", "Pkw, Lkw, Nutzfahrzeug, Motorrad, Oldtimer, E-Bike"),
+         ("Weiterbildung", "Laufend, für alle Fahrzeugarten")],
+        [("Trade", BIZ["craft"]),
+         ("Experience", "Over 30 years in the motor vehicle trade, 17 of them as an expert with Germany's largest expert organisation"),
+         ("Stance", "Independent of insurers and garages"),
+         ("Vehicles", "Cars, lorries, commercial vehicles, motorcycles, classic cars, e-bikes"),
+         ("Training", "Continuous, for all types of vehicle")])
+    sheet_html = "\n          ".join(f"<div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in sheet)
+    portrait_alt = T("Patric Schneider, Kfz-Sachverständiger in Celle", "Patric Schneider, vehicle expert in Celle")
     body = f'''
   <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero-top">
+      <h1 id="hero-title">{T("<span>Kfz-Gutachter</span> <span>in Celle</span>", "<span>Vehicle expert</span> <span>in Celle</span>")}</h1>
+      <div class="hero-side">
+        <p class="lede">{T("Unverschuldeter Unfall? Ihr Kfz-Gutachten wird schnell und unkompliziert erstellt und ist unabhängig von jeder Versicherung.",
+                           "Not-at-fault accident? Your vehicle report is prepared quickly and without fuss, and is independent of any insurer.")}</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{T("Jetzt anrufen", "Call now")}</a>
+          <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <div class="wrap">
+        {vehicle_figure(d)}
+      </div>
+    </div>
+    <div class="wrap hero-foot">
+      <p><strong>{T("Wer zahlt?", "Who pays?")}</strong> {T("Bei einem unverschuldeten Unfall trägt in der Regel die Haftpflichtversicherung des Unfallverursachers die Kosten für Ihr Gutachten. Sie haben das Recht, den Sachverständigen frei zu wählen.",
+                                                         "After a not-at-fault accident, the liability insurer of the person at fault usually pays for your report. You have the right to choose the expert freely.")}</p>
+    </div>
+  </section>
+
+  <section class="section leistungen" id="leistungen" aria-labelledby="leistungen-title">
     <div class="wrap">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="kicker">{T("Unverschuldeter Unfall? Wir beraten Sie gerne.", "Not-at-fault accident? We are happy to advise you.")}</p>
-          <h1 id="hero-title">{T("Kfz-Gutachter <em>in Celle</em>", "Vehicle expert <em>in Celle</em>")}</h1>
-          <p class="lede">{T("Persönliche, kompetente Beratung bei der Schadensabwicklung. Ihr Kfz-Gutachten wird schnell und unkompliziert erstellt und ist unabhängig von jeder Versicherung.",
-                             "Personal, competent advice when settling a claim. Your vehicle report is prepared quickly and without fuss, and is independent of any insurer.")}</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="tel:{BIZ["phone_tel"]}">{svg("phone")}{T("Jetzt anrufen", "Call now")}</a>
-            <a class="btn btn-secondary" href="https://wa.me/{wa}" target="_blank" rel="noopener">{svg("whatsapp")}WhatsApp</a>
-            <a class="btn btn-ghost" href="{u(S("services"), d)}">{T("Leistungen ansehen", "View services")}</a>
-          </div>
-          <p class="hero-note">{T("Bei einem unverschuldeten Unfall trägt in der Regel die Haftpflichtversicherung des Unfallverursachers die Kosten für Ihr Gutachten. Sie haben das Recht, den Sachverständigen frei zu wählen.",
-                                  "After a not-at-fault accident, the liability insurer of the person at fault usually pays for your report. You have the right to choose the expert freely.")}</p>
-        </div>
-        <div class="hero-visual">
-          <div class="portrait-frame">
-            <span class="slab" aria-hidden="true"></span>
-            <figure class="portrait">
-              {portrait_picture(d, T("Patric Schneider, Kfz-Sachverständiger in Celle", "Patric Schneider, vehicle expert in Celle"))}
-            </figure>
-            <div class="id-tag">
-              <strong>{BIZ["person"]}</strong>
-              <span>{BIZ["craft"]}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <ul class="stats" aria-label="{T("Erfahrung und Grundsätze", "Experience and principles")}">
-        {stats_html}
-      </ul>
+      {sec_head("", "", T("Gutachten für jede Situation", "A report for every situation"),
+                T("Pkw, Lkw, Nutzfahrzeug, Motorrad, Oldtimer oder E-Bike. Jedes Gutachten wird neutral erstellt und ist vor Gericht anerkannt.",
+                  "Car, lorry, commercial vehicle, motorcycle, classic car or e-bike. Every report is prepared neutrally and is recognised in court."), "leistungen-title")}
+      {service_cards(d)}
     </div>
   </section>
 
-  <section class="section" id="leistungen" aria-labelledby="leistungen-title">
-    <div class="wrap split">
-      <div class="split-head">
-        {sec_head("", "", T("Gutachten für jede Situation", "A report for every situation"),
-                  T("Pkw, Lkw, Nutzfahrzeug, Motorrad, Oldtimer oder E-Bike. Jedes Gutachten wird neutral erstellt und ist vor Gericht anerkannt.",
-                    "Car, lorry, commercial vehicle, motorcycle, classic car or e-bike. Every report is prepared neutrally and is recognised in court."), "leistungen-title")}
-      </div>
-      <div class="split-body">
-        {service_cards(d)}
-      </div>
-    </div>
-  </section>
-
-  <section class="section band" id="ablauf" aria-labelledby="ablauf-title">
+  <section class="section ablauf" id="ablauf" aria-labelledby="ablauf-title">
     <div class="wrap">
       {sec_head("", "", T("In vier Schritten zur Regulierung", "Four steps to settlement"),
                 T("Sie kümmern sich um das Wesentliche. Ich übernehme Dokumentation und Bewertung und unterstütze Sie im Umgang mit Versicherung, Werkstatt oder Anwalt.",
                   "You take care of what matters. I handle documentation and assessment and support you in dealing with the insurer, the garage or your lawyer."), "ablauf-title")}
-      <div class="band-art" aria-hidden="true">{artwork.car_plan()}</div>
       <ol class="steps">
         {steps_html}
       </ol>
     </div>
   </section>
 
-  <section class="section" id="warum" aria-labelledby="warum-title">
+  <section class="section deep warum" id="warum" aria-labelledby="warum-title">
     <div class="wrap split">
       <div class="split-head">
         {sec_head("", "", T("Warum kein Kostenvoranschlag reicht", "Why an estimate is not enough"),
@@ -1036,18 +1053,22 @@ def build_home():
     </div>
   </section>
 
-  <section class="section deep about" id="ueber-mich" aria-labelledby="about-title">
-    <div class="wrap">
-      <div class="about-seal">{artwork.stamp(300, T("UNABHÄNGIGER SACHVERSTÄNDIGER", "INDEPENDENT VEHICLE EXPERT"), T("CELLE · SEIT ÜBER 30 JAHREN", "CELLE · OVER 30 YEARS"), "PS", T("KFZ", "KFZ"))}</div>
+  <section class="section about" id="ueber-mich" aria-labelledby="about-title">
+    <div class="wrap about-grid">
+      <figure class="about-photo">
+        {portrait_picture(d, portrait_alt, lazy=True)}
+        {artwork.ruler(440)}
+        <figcaption><strong>{BIZ["person"]}</strong><span>{BIZ["craft"]}</span></figcaption>
+      </figure>
       <div class="about-copy">
         {sec_head("", "", T("Über 30 Jahre Erfahrung", "Over 30 years of experience"), None, "about-title")}
         <p>{T(f"Mein Name ist {BIZ['person']}. Ich bin {BIZ['craft']} und {BIZ['role']} in Celle. 17 Jahre lang war ich als Kfz-Sachverständiger bei der größten Sachverständigenorganisation Deutschlands tätig und kenne alle Bereiche der Schadenregulierung aus der Praxis.",
               f"My name is {BIZ['person']}. I am a {BIZ['craft'].lower()} and {BIZ['role'].lower()} in Celle. For 17 years I worked as a vehicle expert for Germany's largest expert organisation, and I know every area of claims settlement from practical experience.")}</p>
         <p>{T("Ob Schadengutachten nach einem Verkehrsunfall, unfallanalytisches Gutachten bei Rechtsstreitigkeiten oder Wertgutachten für Ihren geliebten Oldtimer: Sie bekommen Ihr Gutachten mit dem passenden Sachverstand, zügig und ohne Umwege.",
               "Whether it is a damage report after a road accident, an accident reconstruction for a legal dispute or a valuation report for your beloved classic car: you get your report with the right expertise, promptly and without detours.")}</p>
-        <ul class="facts">
-          {facts_html}
-        </ul>
+        <dl class="datasheet">
+          {sheet_html}
+        </dl>
         <div class="hero-actions">
           <a class="btn btn-primary" href="{u(S("contact"), d)}">{T("Unverbindlich anfragen", "Enquire without obligation")}</a>
           <a class="btn btn-secondary" href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>
@@ -1056,7 +1077,7 @@ def build_home():
     </div>
   </section>
 
-  <section class="section" id="unfall" aria-labelledby="unfall-title">
+  <section class="section unfall" id="unfall" aria-labelledby="unfall-title">
     <div class="wrap">
       {sec_head("", "", T("Die ersten Schritte nach dem Unfall", "First steps after an accident"),
                 T("Ruhe bewahren und der Reihe nach vorgehen. Die vollständige Checkliste zum Abhaken finden Sie auf einer eigenen Seite.",
@@ -1073,7 +1094,7 @@ def build_home():
     </div>
   </section>
 
-  <section class="section section--paper2" id="ratgeber" aria-labelledby="ratgeber-title">
+  <section class="section section--paper2 ratgeber" id="ratgeber" aria-labelledby="ratgeber-title">
     <div class="wrap">
       {sec_head("", "", T("Antworten nach dem Unfall", "Answers after an accident"),
                 T("Wertminderung, Totalschaden, Mietwagen und Kosten verständlich erklärt.", "Diminished value, total loss, rental cars and costs explained clearly."), "ratgeber-title")}
@@ -1096,7 +1117,7 @@ def build_home():
   <section class="section section--paper2" id="einsatzgebiet" aria-labelledby="gebiet-title">
     <div class="wrap split">
       <div class="split-head">
-        {sec_head("", "", T("Landkreis Celle und 50 km Umkreis", "Celle district and 50 km around"),
+        {sec_head("", "", T("Landkreis Celle und 50\u00a0km Umkreis", "Celle district and 50\u00a0km around"),
                   T("Besichtigungstermine nach Absprache, von Celle bis Hannover, Gifhorn, Soltau und Walsrode.",
                     "Inspection appointments by arrangement, from Celle to Hanover, Gifhorn, Soltau and Walsrode."), "gebiet-title",
                   extra=f'<p class="head-link"><a class="btn btn-secondary" href="{u(S("area"), d)}">{T("Alle Orte im Einsatzgebiet", "All places in the service area")}</a></p>')}
@@ -1114,11 +1135,7 @@ def build_home():
   {contact_compact(d)}
 '''
     graph = [business_node(), person_node(), website_node(), faq_node(faq)]
-    # Das große Bild oben gehört zum Wichtigsten beim Laden: früh anfordern (nur Browser mit AVIF)
-    preload = (f'\n<link rel="preload" as="image" type="image/avif" fetchpriority="high" '
-               f'imagesrcset="{asset("portrait-360.avif", d)} 360w, {asset("portrait-543.avif", d)} 543w" '
-               f'imagesizes="(max-width: 820px) 100vw, 430px">')
-    return dict(slug=slug, d=d, key="home", head_extra=preload,
+    return dict(slug=slug, d=d, key="home",
                 title=T("Kfz-Gutachter Celle, unabhängig | PS Schneider",
                         "Vehicle Expert Celle | Independent Expert PS Schneider"),
                 desc=T("Unabhängiger Kfz-Sachverständiger in Celle: Unfallgutachten, Wertgutachten, Beweissicherung, Leasingrückgabe, Restwert. Patric Schneider, Kfz-Meister.",

@@ -1,136 +1,84 @@
 # -*- coding: utf-8 -*-
-"""Gezeichnete Bildelemente der Website als SVG: Schadenskizze (Fahrzeug von oben), Prüfstempel, Messskala.
-
-Alles wird rechnerisch erzeugt, ohne Bilddateien, und passt sich per currentColor und CSS-Variablen an
-Hell- und Dunkelmodus an.
+"""Gezeichnete Bildelemente der Website als SVG: das Fahrzeug von der Seite mit Schadenszone und Bremsspur
+und eine Messskala. Alles wird im Code erzeugt, ohne Bilddateien. Farben kommen aus CSS-Variablen
+(Klassen `v-*`), damit Hell- und Dunkelmodus funktionieren.
 """
+
 import math
 
+VIEW_W, VIEW_H = 1200, 450
 
-def _catmull(points, closed=True):
-    """Glatte Kurve durch Punkte als SVG-Pfad (Catmull-Rom nach kubischem Bezier)."""
-    n = len(points)
-    d = [f"M{points[0][0]:.1f},{points[0][1]:.1f}"]
-    rng = range(n) if closed else range(n - 1)
-    for i in rng:
-        p0 = points[(i - 1) % n] if (closed or i > 0) else points[i]
-        p1 = points[i]
-        p2 = points[(i + 1) % n]
-        p3 = points[(i + 2) % n] if (closed or i + 2 < n) else points[(i + 1) % n]
-        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
-        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
-        d.append(f"C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}")
-    if closed:
-        d.append("Z")
-    return "".join(d)
+# Ankerpunkte der Beschriftungen (x, y im Koordinatensystem der Zeichnung):
+# Linie läuft vom Anker am Fahrzeug zum Rand der Beschriftung. 'top' = Beschriftung oben, 'bottom' = unten.
+ANCHORS = {
+    "leasingruecknahme": {"x": 262, "from": 310, "to": 100, "side": "top"},
+    "wertgutachten": {"x": 590, "from": 147, "to": 100, "side": "top"},
+    "haftpflicht": {"x": 962, "from": 231, "to": 100, "side": "top", "damage": True},
+    "unfallanalytisch": {"x": 170, "from": 364, "to": 398, "side": "bottom"},
+    "beweissicherung": {"x": 598, "from": 336, "to": 398, "side": "bottom"},
+    "restwert": {"x": 960, "from": 338, "to": 398, "side": "bottom", "damage": True},
+}
 
-
-def _mirror(half, cy):
-    """Obere Hälfte (x, Abstand von der Mittellinie) -> geschlossene Kontur um die Mittellinie cy."""
-    top = [(x, cy - w) for x, w in half]
-    bottom = [(x, cy + w) for x, w in reversed(half)]
-    return top + bottom
+BODY = ("M266,334 L262,298 C262,278 266,268 282,264 L352,247 C382,238 412,208 452,172 "
+        "C472,154 492,147 522,147 L668,147 C700,147 724,158 748,180 L808,232 L880,242 L902,234 "
+        "L916,250 L942,256 L930,272 L958,286 L938,302 L960,318 L938,336 "
+        "L921,336 A68,68 0 1 0 799,336 L481,336 A68,68 0 1 0 359,336 L266,334 Z")
+GHOST_FRONT = "M880,242 L968,252 C1000,256 1016,268 1022,290 L1028,322 C1029,332 1022,336 1012,336 L938,336"
 
 
-def car_plan(width=960, height=430, label=""):
-    """Schadenskizze: Pkw von oben, Front nach rechts, mit Maßlinie, Schadenszone und Nummernmarken."""
-    cy = height / 2 - 6
-    # Kontur der oberen Hälfte (x, halbe Breite), Heck links
-    body_half = [(122, 0), (124, 62), (138, 108), (176, 134), (262, 146), (400, 150), (520, 150),
-                 (640, 144), (730, 130), (800, 108), (838, 72), (850, 30), (852, 0)]
-    # Der Mittelpunkt (122,0) und (852,0) doppeln sich beim Spiegeln, daher ohne die Endpunkte spiegeln
-    body_pts = [(x, cy - w) for x, w in body_half[:-1]] + [(852, cy)] + [(x, cy + w) for x, w in reversed(body_half[1:-1])] + [(122, cy)]
-    # Besser: erst oben von hinten nach vorn, dann unten von vorn nach hinten
-    top = [(x, cy - w) for x, w in body_half[1:-1]]
-    bot = [(x, cy + w) for x, w in reversed(body_half[1:-1])]
-    outline = [(122, cy)] + top + [(852, cy)] + bot
-    body = _catmull(outline)
-
-    cab_half = [(300, 0), (306, 60), (340, 96), (440, 106), (540, 104), (606, 90), (628, 58), (632, 0)]
-    cab_top = [(x, cy - w) for x, w in cab_half[1:-1]]
-    cab_bot = [(x, cy + w) for x, w in reversed(cab_half[1:-1])]
-    cabin = _catmull([(300, cy)] + cab_top + [(632, cy)] + cab_bot)
-
-    roof_half = [(372, 0), (376, 46), (420, 74), (500, 76), (560, 70), (578, 44), (580, 0)]
-    r_top = [(x, cy - w) for x, w in roof_half[1:-1]]
-    r_bot = [(x, cy + w) for x, w in reversed(roof_half[1:-1])]
-    roof = _catmull([(372, cy)] + r_top + [(580, cy)] + r_bot)
-
-    def wheel(x, y):
-        return f'<rect x="{x - 42}" y="{y - 19}" width="84" height="38" rx="9"/>'
-    wheels = "".join(wheel(x, y) for x in (268, 676) for y in (cy - 150, cy + 150))
-    # Türfugen, Motorhaube, Kofferraum
-    lines = []
-    for x in (432, 520):
-        lines.append(f'M{x},{cy - 142}L{x},{cy - 100}M{x},{cy + 142}L{x},{cy + 100}')
-    lines.append(f'M640,{cy - 120}Q650,{cy} 640,{cy + 120}')                      # Wasserkasten
-    lines.append(f'M300,{cy - 112}Q290,{cy} 300,{cy + 112}')                      # Heckscheibe zur Klappe
-    lines.append(f'M742,{cy - 70}Q760,{cy} 742,{cy + 70}')                        # Haubenkante
-    # Scheinwerfer, Rückleuchten, Spiegel
-    lights = (f'<path d="M814,{cy - 96}L842,{cy - 56}L812,{cy - 60}Z"/><path d="M814,{cy + 96}L842,{cy + 56}L812,{cy + 60}Z"/>'
-              f'<path d="M132,{cy - 98}L128,{cy - 56}L152,{cy - 70}Z"/><path d="M132,{cy + 98}L128,{cy + 56}L152,{cy + 70}Z"/>')
-    mirrors = f'<path d="M606,{cy - 148}L626,{cy - 168}L636,{cy - 160}L618,{cy - 144}Z"/><path d="M606,{cy + 148}L626,{cy + 168}L636,{cy + 160}L618,{cy + 144}Z"/>'
-
-    # Schadenszone vorn rechts: schraffiertes Feld mit Randlinie
-    dz = (f'M700,{cy + 132}C760,{cy + 134} 826,{cy + 104} 842,{cy + 60}L846,{cy + 14}L792,{cy + 22}L740,{cy + 70}Z')
-    hatch = []
-    for i in range(0, 15):
-        x = 708 + i * 10
-        hatch.append(f'M{x},{cy + 148}L{x + 52},{cy + 30}')
-    # Maßlinie unten: Länge
-    y_dim = height - 34
-    dim = (f'M122,{y_dim}L852,{y_dim}M122,{y_dim - 9}L122,{y_dim + 9}M852,{y_dim - 9}L852,{y_dim + 9}'
-           f'M122,{y_dim}L138,{y_dim - 5}M122,{y_dim}L138,{y_dim + 5}M852,{y_dim}L836,{y_dim - 5}M852,{y_dim}L836,{y_dim + 5}')
-    # Mittellinie
-    axis = f'M70,{cy}L912,{cy}'
-
-    def marker(n, x, y, tx, ty):
-        return (f'<path class="leader" d="M{x},{y}L{tx},{ty}"/><circle class="mk" cx="{tx}" cy="{ty}" r="15"/>'
-                f'<text class="mk-n" x="{tx}" y="{ty + 6}" text-anchor="middle">{n}</text><circle class="dot" cx="{x}" cy="{y}" r="4"/>')
-    marks = marker(1, 832, cy + 34, 900, cy + 80) + marker(2, 728, cy + 144, 770, cy + 192) + marker(3, 142, cy - 30, 84, cy - 96)
-
-    aria = f'role="img" aria-label="{label}"' if label else 'aria-hidden="true"'
-    return f'''<svg class="plan" viewBox="0 0 {width} {height}" {aria} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
-  <path class="axis" d="{axis}"/>
-  <g class="wheels">{wheels}</g>
-  <path class="body" d="{body}" pathLength="1"/>
-  <path class="cabin" d="{cabin}" pathLength="1"/>
-  <path class="roof" d="{roof}" pathLength="1"/>
-  <path class="fine" d="{''.join(lines)}"/>
-  <g class="fine">{lights}{mirrors}</g>
-  <g class="damage"><path class="dz" d="{dz}"/><path class="hatch" d="{''.join(hatch)}" clip-path="url(#dzclip)"/></g>
-  <clipPath id="dzclip"><path d="{dz}"/></clipPath>
-  <path class="dim" d="{dim}"/>
-  <text class="dim-t" x="{(122 + 852) / 2}" y="{y_dim - 10}" text-anchor="middle">4 620 mm</text>
-  {marks}
-</svg>'''
+def _wheel(cx, cy=306):
+    spokes = "".join(
+        f'<line x1="{cx}" y1="{cy}" x2="{cx + 35 * math.cos(a):.1f}" y2="{cy + 35 * math.sin(a):.1f}"/>'
+        for a in [i * 2 * math.pi / 10 - math.pi / 2 for i in range(10)])
+    return (f'<circle class="v-tyre" cx="{cx}" cy="{cy}" r="54"/>'
+            f'<circle class="v-rim" cx="{cx}" cy="{cy}" r="36"/>'
+            f'<g class="v-spoke">{spokes}</g>'
+            f'<circle class="v-disc" cx="{cx}" cy="{cy}" r="15"/>'
+            f'<circle class="v-hub" cx="{cx}" cy="{cy}" r="5"/>')
 
 
-def stamp(size=220, top="UNABHÄNGIGER SACHVERSTÄNDIGER", bottom="CELLE · SEIT ÜBER 30 JAHREN", centre="PS", sub="KFZ"):
-    """Runder Prüfstempel mit Text auf dem Kreis."""
-    font = 'font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="14.5" letter-spacing="1.6"'
-    return f'''<svg class="stamp" viewBox="0 0 220 220" width="{size}" height="{size}" aria-hidden="true" fill="none" stroke="currentColor">
+def car_side(label=""):
+    """Pkw von der Seite, Front rechts: Bremsspur links, verformte Front mit roter Schadenszone und rotem Kreis."""
+    leaders = []
+    for a in ANCHORS.values():
+        cls = "v-lead v-lead--dmg" if a.get("damage") else "v-lead"
+        leaders.append(f'<line class="{cls}" x1="{a["x"]}" y1="{a["from"]}" x2="{a["x"]}" y2="{a["to"]}"/>'
+                       f'<circle class="v-dot{" v-dot--dmg" if a.get("damage") else ""}" cx="{a["x"]}" cy="{a["from"]}" r="5"/>')
+    return f'''<svg class="vehicle-svg" viewBox="0 0 {VIEW_W} {VIEW_H}" role="img" aria-label="{label}" focusable="false" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <path id="st-top" d="M34,110 A76,76 0 0 1 186,110"/>
-    <path id="st-bot" d="M24,110 A86,86 0 0 0 196,110"/>
+    <pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="9" class="v-hatch"/></pattern>
+    <clipPath id="body-clip"><path d="{BODY}"/></clipPath>
   </defs>
-  <circle cx="110" cy="110" r="105" stroke-width="4.5"/>
-  <circle cx="110" cy="110" r="97" stroke-width="1.5"/>
-  <circle cx="110" cy="110" r="64" stroke-width="1.5"/>
-  <text {font} fill="currentColor" stroke="none"><textPath href="#st-top" startOffset="50%" text-anchor="middle">{top}</textPath></text>
-  <text {font} fill="currentColor" stroke="none"><textPath href="#st-bot" startOffset="50%" text-anchor="middle">{bottom}</textPath></text>
-  <text x="110" y="124" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-style="italic" font-size="52" fill="currentColor" stroke="none">{centre}</text>
-  <text x="110" y="146" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="13" letter-spacing="3" fill="currentColor" stroke="none">{sub}</text>
-  <path d="M96,86h28" stroke-width="2.5"/>
-  <path d="M16,110h6M198,110h6" stroke-width="3"/>
+  <line class="v-ground" x1="30" y1="360" x2="1170" y2="360"/>
+  <rect class="v-skid" x="40" y="360" width="150" height="6"/>
+  <rect class="v-skid" x="204" y="360" width="90" height="6"/>
+  <rect class="v-skid" x="308" y="360" width="30" height="6"/>
+  <g class="v-ghost"><path d="{GHOST_FRONT}"/></g>
+  <path class="v-body" d="{BODY}"/>
+  <g clip-path="url(#body-clip)"><rect class="v-hatch-area" x="876" y="226" width="120" height="120" fill="url(#hatch)"/></g>
+  <g class="v-detail">
+    <path class="v-glass" d="M396,228 L462,178 C474,167 486,162 500,162 L584,162 L584,228 Z"/>
+    <path class="v-glass" d="M606,228 L606,162 L672,162 C688,162 700,168 712,178 L772,228 Z"/>
+    <path d="M352,247 L806,232" class="v-belt"/>
+    <path d="M470,232 C474,270 474,306 470,336"/><path d="M598,228 L598,336"/><path d="M742,236 C746,270 746,306 742,336"/>
+    <rect class="v-handle" x="540" y="244" width="30" height="6" rx="3"/><rect class="v-handle" x="690" y="244" width="30" height="6" rx="3"/>
+    <path class="v-glass" d="M782,222 L806,228 L800,238 L778,232 Z"/>
+    <path class="v-lamp" d="M264,282 L286,277 L286,300 L264,303 Z"/>
+    <path class="v-lamp" d="M912,254 L934,252 L930,268 L908,268 Z"/>
+  </g>
+  {_wheel(420)}{_wheel(860)}
+  <path class="v-ring" d="M884,262 C898,222 986,216 1010,268 C1028,314 986,350 936,348 C890,346 868,312 876,276 C880,258 894,244 916,236"/>
+  {"".join(leaders)}
 </svg>'''
 
 
-def ruler(width=600, height=22, step=10, major=5):
-    """Messskala mit langen und kurzen Strichen."""
-    parts = []
-    for i in range(0, width // step + 1):
-        x = i * step
-        h = height if i % major == 0 else height * 0.55
-        parts.append(f"M{x},0L{x},{h}")
-    return f'<svg class="ruler" viewBox="0 0 {width} {height}" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="{"".join(parts)}"/></svg>'
+def ruler(height=440, major=50):
+    """Senkrechte Messskala (Zentimeter-Raster) am Rand eines Fotos."""
+    ticks = []
+    y = 0
+    while y <= height:
+        long = (y // 10) % (major // 10) == 0
+        ticks.append(f'<line x1="{0}" y1="{y}" x2="{22 if long else 12}" y2="{y}"/>')
+        y += 10
+    return (f'<svg class="ruler" viewBox="0 0 24 {height}" width="24" height="{height}" aria-hidden="true" focusable="false" '
+            f'xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">{"".join(ticks)}</svg>')
