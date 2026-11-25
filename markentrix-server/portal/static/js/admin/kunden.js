@@ -122,18 +122,25 @@ V.neu = async () => {
 };
 
 export async function historieKarte(kid) {
-  const l = await api('/api/admin/kunden/' + kid + '/historie');
+  const alle = await api('/api/admin/kunden/' + kid + '/historie');
   const spalten = [['Zeit', z => zeit(z.zeit)], ['Von', z => z.name || z.email || 'System'], ['Aktion', z => z.aktion.replace(/_/g, ' ')], ['Details', z => h('span', { class: 'small muted' }, JSON.stringify(z.details).slice(0, 160))]];
+  const von = (z) => z.name || z.email || 'System';
+  const aktionen = [...new Set(alle.map(z => z.aktion))].sort(), personen = [...new Set(alle.map(von))].sort();
+  const optionen = (liste, alle_text) => [h('option', { value: '' }, alle_text), ...liste.map(x => h('option', { value: x }, x.replace(/_/g, ' ')))];
+  const fAktion = h('select', { 'aria-label': 'Nach Aktion filtern' }, optionen(aktionen, 'Alle Aktionen')), fPerson = h('select', { 'aria-label': 'Nach Person filtern' }, optionen(personen, 'Alle Personen'));
   const box = h('div');
   let sichtbar = 5;
   const zeichnen = () => {
+    const l = alle.filter(z => (!fAktion.value || z.aktion === fAktion.value) && (!fPerson.value || von(z) === fPerson.value));
     const rest = l.length - sichtbar;
-    box.replaceChildren(tabelle(spalten, l.slice(0, sichtbar), 'Noch keine Änderungen.'),
+    box.replaceChildren(tabelle(spalten, l.slice(0, sichtbar), 'Keine Einträge für diesen Filter.'),
       rest > 0 ? h('p', {}, h('button', { class: 'btn sec', type: 'button', onclick: () => { sichtbar += 20; zeichnen(); } }, 'Nächste ' + Math.min(20, rest) + ' anzeigen'), h('span', { class: 'small muted', style: 'margin-left:8px' }, 'noch ' + rest + ' ältere')) : '',
       sichtbar > 5 ? h('p', {}, h('button', { class: 'btn sec small', type: 'button', onclick: () => { sichtbar = 5; zeichnen(); } }, 'Wieder einklappen')) : '');
   };
+  [fAktion, fPerson].forEach(f => f.addEventListener('change', () => { sichtbar = 5; zeichnen(); }));
   zeichnen();
-  return h('div', { class: 'card' }, h('h2', {}, 'Änderungshistorie'), h('p', { class: 'small muted' }, 'Wer hat wann was bei diesem Kunden geändert. Es werden die neuesten 5 gezeigt, ältere bei Bedarf (insgesamt bis zu 150).'), box);
+  return h('div', { class: 'card' }, h('h2', {}, 'Änderungshistorie'), h('p', { class: 'small muted' }, 'Wer hat wann was bei diesem Kunden geändert. Es werden die neuesten 5 gezeigt, ältere bei Bedarf (insgesamt bis zu 150).'),
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin-bottom:8px' }, fAktion, fPerson), box);
 }
 
 /** Aufgabenpaket (z. B. „Neuer Kunde: 8 Schritte“) mit einem Klick beim Kunden anlegen. */

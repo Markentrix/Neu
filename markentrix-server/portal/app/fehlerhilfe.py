@@ -14,6 +14,9 @@ log = logging.getLogger("markentrix.fehlerhilfe")
 
 # (id, Muster, Titel, Ursache, [Schritte], wer behebt es)
 REGELN: list[tuple[str, str, str, str, list[str], str]] = [
+    ("google_places", r"PERMISSION_DENIED|Google lehnt die Abfrage ab|Places API|places\.googleapis",
+     "Google lehnt die Bewertungs-Abfrage ab", "Der Google-API-Schlüssel von Markentrix darf die „Places API (New)“ nicht nutzen (Einschränkung am Schlüssel, API nicht aktiviert oder keine Abrechnung). Das liegt bei Markentrix, nicht beim Kunden.",
+     ["Google Cloud Console → APIs und Dienste → Bibliothek: „Places API (New)“ muss aktiviert sein.", "Anmeldedaten → den Schlüssel öffnen → unter „API-Einschränkungen“ auch „Places API (New)“ erlauben (die alte „Places API“ reicht nicht).", "Abrechnung → ein Rechnungskonto muss mit dem Projekt verknüpft sein.", "Danach im Kundenportal unter Website-Dienste → Google-Bewertungen den Testknopf drücken. Ein anderer Schlüssel wird unter Admin → Einstellungen → „Google-Bewertungen (Places API)“ gespeichert."], "admin"),
     ("smtp_login", r"SMTPAuthenticationError|\b535\b|authentication (failed|unsuccessful)|Username and Password not accepted|BadCredentials",
      "Mail-Anmeldung abgelehnt", "Der Mailserver nimmt Benutzername oder Passwort nicht an.",
      ["Admin → Einstellungen → E-Mail öffnen und Benutzer und Passwort prüfen.", "Bei Gmail: kein normales Passwort, sondern ein App-Passwort verwenden (2-Faktor muss bei Google an sein).", "Danach „Test-Mail senden“ klicken."], "admin"),
