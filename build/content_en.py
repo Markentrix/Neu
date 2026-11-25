@@ -39,7 +39,7 @@ SERVICES = [
         "lede": "After a not-at-fault accident I document all damage, quantify your claims and provide the report you need when dealing with the other party's insurer.",
         "card": "After a not-at-fault accident: all damage documented, including repair time and diminished value. For a total loss with residual and replacement value. The costs are usually paid by the other party's insurer.",
         "sections": [
-            {"h2": "When a liability damage report makes sense", "body": [
+            {"h2": "When a report makes sense", "body": [
                 "If your vehicle was damaged in an accident caused by someone else, your claims are directed against the liability insurer of the person at fault. To have these claims quantified fully and transparently, you need more than a repair estimate.",
                 "An independent report is especially important if the damage goes beyond a minor scratch, if a total loss is likely, if liability is disputed or if the other insurer wants to cut your claim.",
             ]},
@@ -177,7 +177,7 @@ SERVICES = [
         "icon": "tag",
         "title": "Vehicle and Classic Car Valuation Celle | PS Schneider",
         "desc": "Valuation report for cars, lorries, motorcycles, classic cars and e-bikes in Celle: the real market value of your vehicle, objectively documented.",
-        "h1": "Valuation reports for vehicles in Celle",
+        "h1": "Vehicle valuation in Celle",
         "lede": "A valuation report documents the real value of your vehicle. It creates transparency when buying or selling and records equipment as well as previous and old damage.",
         "card": "The real market value of your vehicle, objectively documented. Special equipment as well as previous and old damage are recorded. Ideal when buying or selling, or for your classic car.",
         "sections": [
@@ -222,7 +222,7 @@ SERVICES = [
         "icon": "euro",
         "title": "Residual Value Assessment Celle | PS Schneider",
         "desc": "Residual value assessment after an accident in Celle: regional or Europe-wide, with offers, so you can decide without risk whether to repair or sell.",
-        "h1": "Residual value assessment for accident vehicles in Celle",
+        "h1": "Residual value assessment in Celle",
         "lede": "What is your unrepaired vehicle still worth after the accident? I determine the residual value, obtain offers and you decide whether to repair or sell.",
         "card": "What is the unrepaired vehicle still worth? We determine the residual value regionally or Europe-wide, obtain offers and you decide without risk: repair or sell.",
         "sections": [
@@ -237,7 +237,7 @@ SERVICES = [
                     "You decide: accept an offer, repair or proceed differently.",
                 ]),
             ]},
-            {"h2": "At-fault accident and only third-party liability cover?", "body": [
+            {"h2": "At fault with liability cover only?", "body": [
                 "Did you cause the accident yourself and only have third-party liability insurance? Then I am happy to help you sell the badly damaged vehicle.",
                 "After a not-at-fault accident the residual value is part of the [[en/services/liability-damage-report|liability damage report]].",
             ]},
@@ -260,7 +260,7 @@ SERVICES = [
         "icon": "chart",
         "title": "Accident Reconstruction Report Celle | PS Schneider",
         "desc": "Accident reconstruction report for legal disputes in Celle: technical reconstruction of how the accident happened, as a basis for lawyers, insurers and courts.",
-        "h1": "Accident reconstruction report in Celle",
+        "h1": "Accident reconstruction in Celle",
         "lede": "If how the accident happened is disputed, a technical analysis helps. I evaluate the damage pattern and traces and provide a solid basis for your lawyer, insurer and court.",
         "card": "When the course of events is disputed: technical reconstruction of the accident as a solid basis for lawyers, insurers and courts.",
         "sections": [
@@ -294,7 +294,7 @@ REASONS = [
     ("Free of charge for you",
      ["The costs of a vehicle expert report are usually paid by the liability insurer of the person at fault. Insurers often accept a repair estimate with photos and point out that, as the injured party, you would have to pay for an expert yourself.",
       "The law is clear on this: in a liability case you, as the injured party, have the right to commission an independent expert of your choice. The costs are counted as part of the damage and are paid by the liability insurer of the person at fault."]),
-    ("More detailed costing and greater security",
+    ("Exact costs, more security",
      ["A report records not only the repair costs but also the possible diminished value, the expected repair time and the downtime. This serves your personal financial security.",
       "In addition, unlike a repair estimate, a neutral report is also legally recognised in court."]),
     ("Objective assessment",
@@ -353,7 +353,7 @@ ARTICLES = [
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Diminished Value After an Accident | PS Schneider",
         "desc": "Diminished value (merkantile Wertminderung) after an accident explained: when it arises, who pays and why it should be quantified in the expert report.",
-        "h1": "Diminished value after an accident: what you are entitled to",
+        "h1": "Diminished value after an accident",
         "lede": "Even a perfectly repaired vehicle is often worth less after an accident than before. This loss is part of your damage.",
         "summary": "Diminished value (merkantile Wertminderung) is the loss in value that remains despite a proper repair because buyers rate an accident vehicle lower. After a not-at-fault accident you can claim it from the other party's insurer on top of the repair costs. Whether it arises and how high it is depends on age, mileage and the severity of the damage. The expert report quantifies it.",
         "sections": [
@@ -391,11 +391,11 @@ ARTICLES = [
     {
         "slug": "en/guide/total-loss-residual-and-replacement-value",
         "key": "totalschaden",
-        "short": "Total loss: residual and replacement value",
+        "short": "Total loss and residual value",
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Total Loss: Residual and Replacement Value | PS Schneider",
         "desc": "Total loss after an accident: what residual value and replacement value mean, how the compensation is calculated and when a repair is still possible.",
-        "h1": "Total loss: residual value and replacement value explained",
+        "h1": "Total loss and residual value",
         "lede": "In a total loss two values decide what you receive and which options you have.",
         "summary": "The replacement value (Wiederbeschaffungswert) is the price of an equivalent used vehicle. The residual value (Restwert) is the value of the damaged vehicle. If you keep or sell the vehicle yourself, the compensation as a rule results from the difference between the two values. An expert report determines both values.",
         "sections": [
@@ -434,7 +434,7 @@ ARTICLES = [
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Rental Car or Loss of Use After an Accident | PS Schneider",
         "desc": "Not-at-fault accident: entitlement to a rental car or loss-of-use compensation for the repair period. What applies, who pays and the role of the report.",
-        "h1": "Rental car or loss-of-use compensation after a not-at-fault accident",
+        "h1": "Rental car or loss of use",
         "lede": "While your vehicle is in the workshop or has to be replaced, you are as a rule entitled to compensation.",
         "summary": "After a not-at-fault accident you can either take a rental car or claim loss-of-use compensation (Nutzungsausfallentschädigung) for the duration of the repair or the replacement. The duration results from the expert report. The costs are as a rule paid by the other party's insurer.",
         "sections": [
@@ -474,7 +474,7 @@ ARTICLES = [
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "What Does a Vehicle Expert Report Cost? | PS Schneider",
         "desc": "Cost of a vehicle expert report: who pays in a liability case, what the fee depends on and for which reports you receive an individual quote.",
-        "h1": "What does a vehicle expert report cost and who pays for it?",
+        "h1": "What does an expert report cost?",
         "lede": "The most important answer first: after a not-at-fault accident you generally do not have to pay for the report yourself.",
         "summary": "In a liability case the costs of the report count as part of the damage and are paid by the insurer of the person at fault. For accident damage the fee is often based on the amount of the damage. For valuation, evidence and lease return reports you receive an individual quote in advance.",
         "sections": [
@@ -510,7 +510,7 @@ ARTICLES = [
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Classic Car Valuation Report: When It Pays | PS Schneider",
         "desc": "Valuation report for classic cars: when it makes sense, what it contains and how it helps with buying, selling, insurance and inheritance. Expert in Celle.",
-        "h1": "Classic car valuation report: when it pays off",
+        "h1": "Classic car valuation: worth it?",
         "lede": "The value of a classic car cannot be read off a list. A report makes it traceable.",
         "summary": "A valuation report determines the real market value of your classic car and documents its condition, equipment and previous and old damage. It helps when buying and selling, for protection vis-à-vis the insurer and wherever a documented value is needed.",
         "sections": [

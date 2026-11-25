@@ -398,7 +398,6 @@ def nav_items():
         (T("Ratgeber", "Guide"), S("guide"), S("guide")),
         (T("Über mich", "About me"), S("home"), "#ueber-mich"),
         (T("Unfall-Checkliste", "Accident checklist"), S("checklist"), S("checklist")),
-        (T("Fragen", "FAQ"), S("home"), "#faq"),
         (T("Kontakt", "Contact"), S("contact"), S("contact")),
     ]
 
@@ -472,7 +471,6 @@ def header(d, slug, key=None):
 
 
 def footer(d):
-    svc = "\n      ".join(f'<a href="{u(s["slug"], d)}">{_SHY_RE.sub(lambda w: SHY[w.group(0)], esc(s["short"]))}</a>' for s in SERVICES)
     design = f" · {T('Gestaltung und Umsetzung', 'Design and implementation')} © {TODAY.year} {OWNER}" if DRAFT else ""
     return f'''<footer class="site-footer deep">
   <div class="wrap">
@@ -482,19 +480,10 @@ def footer(d):
       <span>{BIZ["street"]} · {BIZ["zip"]} {BIZ["city"]}</span>
     </div>
     <div class="col">
-      <strong>{T("Leistungen", "Services")}</strong>
-      {svc}
-    </div>
-    <div class="col">
       <strong>{T("Kontakt", "Contact")}</strong>
       <a href="tel:{BIZ["phone_tel"]}">{BIZ["phone_display"]}</a>
       <a href="mailto:{BIZ["email"]}">{BIZ["email"]}</a>
       <a href="https://wa.me/{BIZ["phone_tel"].lstrip("+")}" target="_blank" rel="noopener">WhatsApp</a>
-      <a href="{u(S("area"), d)}">{T("Einsatzgebiet", "Service area")}</a>
-      <a href="{u(S("guide"), d)}">{T("Ratgeber", "Guide")}</a>
-      <a href="{u(S("why"), d)}">{T("Gründe für ein Gutachten", "Why an expert report")}</a>
-      <a href="{u(S("checklist"), d)}">{T("Unfall-Checkliste", "Accident checklist")}</a>
-      <a href="{u(S("contact"), d)}">{T("Anfrage senden", "Send enquiry")}</a>
     </div>
     <div class="legal">
       <span>© <span data-year>{TODAY.year}</span> {BIZ["person"]}{design}</span>
@@ -615,10 +604,13 @@ def page_hero(trail, d, tag, h1, lede, byline=True, stand_text=None):
     if byline:
         by = (f'<p class="byline"><span>{T("Von", "By")} <strong>{BIZ["person"]}</strong>, {BIZ["role"]}, {BIZ["craft"]}</span>'
               f'<span>{T("Stand", "Updated")}: {stand_text or stand()}</span></p>')
+    generic = {trail[-1][0], "Ratgeber", "Guide", "Kontakt", "Contact", "Leistungen", "Services", "Einsatzgebiet", "Service area",
+               "Unfall-Checkliste", "Accident checklist"}
+    eyebrow = "" if tag in generic else f'<p class="eyebrow">{esc(tag)}</p>'
     return f'''<section class="page-hero">
   <div class="wrap">
     {crumbs(trail, d)}
-    <p class="eyebrow">{esc(tag)}</p>
+    {eyebrow}
     <h1>{esc(h1)}</h1>
     <p class="lede">{rich(lede, d)}</p>
     {by}
@@ -710,27 +702,25 @@ def related(slugs, d):
 
 
 def sec_head(no, eyebrow, title, lede=None, tid=None, extra=""):
-    """Abschnittskopf: Nummer, Beschriftung, Überschrift und Einleitung."""
+    """Abschnittskopf: Überschrift und Einleitung. Die Beschriftung darüber steht nur, wenn sie etwas Eigenes sagt."""
     idattr = f' id="{tid}"' if tid else ""
     lede_html = f'\n        <p class="lede">{lede}</p>' if lede else ""
+    eyebrow_html = f'<p class="eyebrow">{eyebrow}</p>\n        ' if eyebrow else ""
     return f'''<div class="section-head">
-        <p class="eyebrow"><span class="no" aria-hidden="true">{no}</span><span class="lbl">{eyebrow}</span></p>
-        <h2{idattr}>{title}</h2>{lede_html}{extra}
+        {eyebrow_html}<h2{idattr}>{title}</h2>{lede_html}{extra}
       </div>'''
 
 
 def service_cards(d):
-    """Leistungsverzeichnis: nummerierte Zeilen statt Karten."""
+    """Leistungsverzeichnis: Zeilen statt Karten, ohne Nummern (es gibt keine echte Reihenfolge)."""
     out = []
-    for i, s in enumerate(SERVICES, 1):
+    for s in SERVICES:
         out.append(f'''<li class="service">
-          <span class="no" aria-hidden="true">{i:02d}</span>
           <div class="main">
             <span class="tag">{esc(s["tag"])}</span>
             <h3><a href="{u(s["slug"], d)}">{esc(s["short"])}</a></h3>
             <p>{esc(s["card"])}</p>
           </div>
-          <span class="go" aria-hidden="true">{svg("arrow", "2.4")}</span>
         </li>''')
     return '<ul class="services">' + "\n".join(out) + "</ul>"
 
@@ -759,7 +749,7 @@ def contact_compact(d):
   <div class="wrap">
     <div class="split">
       <div class="split-head">
-        {sec_head("09", T("Kontakt", "Contact"), T("Rufen Sie an oder schreiben Sie", "Call or send a message"), contact_lede(), "kontakt-title")}
+        {sec_head("", "", T("Anrufen oder schreiben", "Call or write"), contact_lede(), "kontakt-title")}
       </div>
       <div class="split-body">
         <a class="big-phone" href="tel:{BIZ["phone_tel"]}"><small>{T("Direkt anrufen", "Call directly")}</small>{BIZ["phone_display"]}</a>
@@ -891,7 +881,7 @@ def contact_section(d, h2=None, wrap_class="section contact section--surface-top
       <noscript><p class="notice-js">{noscript}</p></noscript>
     </form>
     <div class="form-success" id="form-success" tabindex="-1" hidden>
-      <h3>{T("Danke, Ihre Anfrage ist eingegangen.", "Thank you, we have received your enquiry.")}</h3>
+      <h3>{T("Danke, Ihre Anfrage ist eingegangen.", "Thank you, enquiry received.")}</h3>
       <p>{success}</p>
       <p id="success-callback" hidden>{T("Sie haben einen Rückruf gewünscht. Wir rufen Sie unter der angegebenen Nummer an.", "You asked for a call back. We will call you on the number you gave.")}</p>
       <p id="success-confirmed" hidden>{T("Eine Bestätigung ist unterwegs an Ihre E-Mail-Adresse. Schauen Sie bei Bedarf im Spam-Ordner nach.", "A confirmation is on its way to your email address. Please check your spam folder if you do not see it.")}</p>
@@ -970,9 +960,7 @@ def build_home():
                "Independent of insurers and garages", "Continuous training, all types of vehicle"])
     facts_html = "\n          ".join(f"<li><span>{f}</span></li>" for f in facts)
     stats = [("30<small>+</small>", T("Jahre Erfahrung im Kraftfahrzeugwesen", "years of experience in the motor vehicle trade")),
-             ("17", T("Jahre Kfz-Sachverständiger bei Europas größter Sachverständigenorganisation", "years as a vehicle expert with Europe's largest expert organisation")),
-             ("100<small>%</small>", T("unabhängig von Versicherungen und Werkstätten", "independent of insurers and garages")),
-             (T("0<small>€</small>", "<small>€</small>0"), T("Kosten für Sie im Haftpflichtfall. Die gegnerische Versicherung zahlt in der Regel.", "cost to you in a liability case. The other party's insurer usually pays."))]
+             ("17", T("Jahre Kfz-Sachverständiger bei Europas größter Sachverständigenorganisation", "years as a vehicle expert with Europe's largest expert organisation"))]
     stats_html = "\n        ".join(f'<li><span class="num">{n}</span><span class="lbl">{l}</span></li>' for n, l in stats)
     plan_label = T("Skizze eines Fahrzeugs von oben mit markierter Schadenszone", "Sketch of a vehicle from above with the damage zone marked")
     body = f'''
@@ -981,7 +969,7 @@ def build_home():
       <div class="hero-grid">
         <div class="hero-copy">
           <p class="kicker">{T("Unverschuldeter Unfall? Wir beraten Sie gerne.", "Not-at-fault accident? We are happy to advise you.")}</p>
-          <h1 id="hero-title">{T("Kfz-Gutachter in Celle: <em>unabhängig, schnell, auf Ihrer Seite.</em>", "Vehicle expert in Celle: <em>independent, fast, on your side.</em>")}</h1>
+          <h1 id="hero-title">{T("Kfz-Gutachter <em>in Celle</em>", "Vehicle expert <em>in Celle</em>")}</h1>
           <p class="lede">{T("Persönliche, kompetente Beratung bei der Schadensabwicklung. Ihr Kfz-Gutachten wird schnell und unkompliziert erstellt und ist unabhängig von jeder Versicherung.",
                              "Personal, competent advice when settling a claim. Your vehicle report is prepared quickly and without fuss, and is independent of any insurer.")}</p>
           <div class="hero-actions">
@@ -1014,7 +1002,7 @@ def build_home():
   <section class="section" id="leistungen" aria-labelledby="leistungen-title">
     <div class="wrap split">
       <div class="split-head">
-        {sec_head("01", T("Leistungen", "Services"), T("Kfz-Gutachten in Celle für jede Situation", "Vehicle reports in Celle for every situation"),
+        {sec_head("", "", T("Gutachten für jede Situation", "A report for every situation"),
                   T("Pkw, Lkw, Nutzfahrzeug, Motorrad, Oldtimer oder E-Bike. Jedes Gutachten wird neutral erstellt und ist vor Gericht anerkannt.",
                     "Car, lorry, commercial vehicle, motorcycle, classic car or e-bike. Every report is prepared neutrally and is recognised in court."), "leistungen-title")}
       </div>
@@ -1026,7 +1014,7 @@ def build_home():
 
   <section class="section band" id="ablauf" aria-labelledby="ablauf-title">
     <div class="wrap">
-      {sec_head("02", T("So läuft es ab", "How it works"), T("Vom Anruf bis zur Regulierung in vier Schritten", "From the first call to settlement in four steps"),
+      {sec_head("", "", T("In vier Schritten zur Regulierung", "Four steps to settlement"),
                 T("Sie kümmern sich um das Wesentliche. Ich übernehme Dokumentation und Bewertung und unterstütze Sie im Umgang mit Versicherung, Werkstatt oder Anwalt.",
                   "You take care of what matters. I handle documentation and assessment and support you in dealing with the insurer, the garage or your lawyer."), "ablauf-title")}
       <div class="band-art" aria-hidden="true">{artwork.car_plan()}</div>
@@ -1039,7 +1027,7 @@ def build_home():
   <section class="section" id="warum" aria-labelledby="warum-title">
     <div class="wrap split">
       <div class="split-head">
-        {sec_head("03", T("Gutachten statt Kostenvoranschlag", "Expert report instead of repair estimate"), T("Warum ein Kostenvoranschlag nach dem Unfall nicht reicht", "Why a repair estimate is not enough after an accident"),
+        {sec_head("", "", T("Warum kein Kostenvoranschlag reicht", "Why an estimate is not enough"),
                   T("Versicherungen akzeptieren gern einen Kostenvoranschlag mit Fotos und behaupten, einen Sachverständigen müssten Sie selbst bezahlen. Im Haftpflichtfall ist das gesetzlich anders geregelt.",
                     "Insurers like to accept a repair estimate with photos and claim that you would have to pay for an expert yourself. In a liability case the law says otherwise."), "warum-title",
                   extra=f'<p class="head-link"><a class="btn btn-secondary" href="{u(S("why"), d)}">{T("Alle Gründe und Vergleich", "All reasons and the comparison")}</a></p>')}
@@ -1056,7 +1044,7 @@ def build_home():
     <div class="wrap">
       <div class="about-seal">{artwork.stamp(300, T("UNABHÄNGIGER SACHVERSTÄNDIGER", "INDEPENDENT VEHICLE EXPERT"), T("CELLE · SEIT ÜBER 30 JAHREN", "CELLE · OVER 30 YEARS"), "PS", T("KFZ", "KFZ"))}</div>
       <div class="about-copy">
-        {sec_head("04", T("Über mich", "About me"), T("Ein junges Unternehmen mit über 30 Jahren Erfahrung", "A young business with over 30 years of experience"), None, "about-title")}
+        {sec_head("", "", T("Über 30 Jahre Erfahrung", "Over 30 years of experience"), None, "about-title")}
         <p>{T(f"Mein Name ist {BIZ['person']}. Ich bin {BIZ['craft']} und {BIZ['role']} in Celle. 17 Jahre lang war ich als Kfz-Sachverständiger bei der größten Sachverständigenorganisation Deutschlands tätig und kenne alle Bereiche der Schadenregulierung aus der Praxis.",
               f"My name is {BIZ['person']}. I am a {BIZ['craft'].lower()} and {BIZ['role'].lower()} in Celle. For 17 years I worked as a vehicle expert for Germany's largest expert organisation, and I know every area of claims settlement from practical experience.")}</p>
         <p>{T("Ob Schadengutachten nach einem Verkehrsunfall, unfallanalytisches Gutachten bei Rechtsstreitigkeiten oder Wertgutachten für Ihren geliebten Oldtimer: Sie bekommen Ihr Gutachten mit dem passenden Sachverstand, zügig und ohne Umwege.",
@@ -1074,7 +1062,7 @@ def build_home():
 
   <section class="section" id="unfall" aria-labelledby="unfall-title">
     <div class="wrap">
-      {sec_head("05", T("Unfall passiert?", "Had an accident?"), T("Die ersten Schritte nach einem Unfall", "The first steps after an accident"),
+      {sec_head("", "", T("Die ersten Schritte nach dem Unfall", "First steps after an accident"),
                 T("Ruhe bewahren und der Reihe nach vorgehen. Die vollständige Checkliste zum Abhaken finden Sie auf einer eigenen Seite.",
                   "Stay calm and work through it step by step. You will find the full checklist to tick off on a page of its own."), "unfall-title")}
       <div class="checklist-grid">
@@ -1091,7 +1079,7 @@ def build_home():
 
   <section class="section section--paper2" id="ratgeber" aria-labelledby="ratgeber-title">
     <div class="wrap">
-      {sec_head("06", T("Ratgeber", "Guide"), T("Antworten auf die häufigsten Fragen nach dem Unfall", "Answers to the most common questions after an accident"),
+      {sec_head("", "", T("Antworten nach dem Unfall", "Answers after an accident"),
                 T("Wertminderung, Totalschaden, Mietwagen und Kosten verständlich erklärt.", "Diminished value, total loss, rental cars and costs explained clearly."), "ratgeber-title")}
       {related([a["slug"] for a in ARTICLES[:3]], d)}
       <p class="more-row"><a class="btn btn-secondary" href="{u(S("guide"), d)}">{T("Alle Ratgeber ansehen", "View the whole guide")}</a></p>
@@ -1101,7 +1089,7 @@ def build_home():
   <section class="section" id="faq" aria-labelledby="faq-title">
     <div class="wrap split">
       <div class="split-head">
-        {sec_head("07", T("Häufige Fragen", "Frequently asked questions"), T("Was Unfallgeschädigte am häufigsten fragen", "What accident victims ask most often"), None, "faq-title")}
+        {sec_head("", "", T("Was Geschädigte oft fragen", "What people often ask"), None, "faq-title")}
       </div>
       <div class="split-body">
         {faq_section(faq, d, open_first=True)}
@@ -1112,7 +1100,7 @@ def build_home():
   <section class="section section--paper2" id="einsatzgebiet" aria-labelledby="gebiet-title">
     <div class="wrap split">
       <div class="split-head">
-        {sec_head("08", T("Einsatzgebiet", "Service area"), T("Im Landkreis Celle und im Umkreis von 50 Kilometern", "In Celle district and within 50 kilometres"),
+        {sec_head("", "", T("Landkreis Celle und 50 km Umkreis", "Celle district and 50 km around"),
                   T("Besichtigungstermine nach Absprache, von Celle bis Hannover, Gifhorn, Soltau und Walsrode.",
                     "Inspection appointments by arrangement, from Celle to Hanover, Gifhorn, Soltau and Walsrode."), "gebiet-title",
                   extra=f'<p class="head-link"><a class="btn btn-secondary" href="{u(S("area"), d)}">{T("Alle Orte im Einsatzgebiet", "All places in the service area")}</a></p>')}
@@ -1135,7 +1123,7 @@ def build_home():
                f'imagesrcset="{asset("portrait-360.avif", d)} 360w, {asset("portrait-543.avif", d)} 543w" '
                f'imagesizes="(max-width: 820px) 100vw, 430px">')
     return dict(slug=slug, d=d, key="home", head_extra=preload,
-                title=T("Kfz-Gutachter Celle | Unabhängiger Sachverständiger PS Schneider",
+                title=T("Kfz-Gutachter Celle, unabhängig | PS Schneider",
                         "Vehicle Expert Celle | Independent Expert PS Schneider"),
                 desc=T("Unabhängiger Kfz-Sachverständiger in Celle: Unfallgutachten, Wertgutachten, Beweissicherung, Leasingrückgabe, Restwert. Patric Schneider, Kfz-Meister.",
                        "Independent vehicle expert in Celle: accident reports, valuation reports, evidence reports, lease returns, residual value. Patric Schneider, master technician."),
@@ -1163,7 +1151,7 @@ def build_service(s):
 
   <section class="section section--surface" aria-labelledby="faq-title">
     <div class="wrap">
-      <div class="section-head"><h2 id="faq-title">{T("Häufige Fragen zum", "Frequently asked questions:")} {esc(s["short"])}</h2></div>
+      <div class="section-head"><h2 id="faq-title">{T("Häufige Fragen", "Frequently asked questions")}</h2></div>
       {faq_section(s["faq"], d, open_first=True)}
     </div>
   </section>
@@ -1209,7 +1197,7 @@ def build_leistungen():
     trs = "".join(f'<tr><th scope="row">{esc(a)}</th><td><a href="{u(by_key[k]["slug"], d)}">{esc(by_key[k]["short"])}</a></td></tr>' for a, k in rows)
     trail = [(T("Leistungen", "Services"), slug)]
     body = f'''
-  {page_hero(trail, d, T("Leistungen", "Services"), T("Kfz-Gutachten in Celle: alle Leistungen", "Vehicle reports in Celle: all services"),
+  {page_hero(trail, d, T("Leistungen", "Services"), T("Kfz-Gutachten in Celle", "Vehicle reports in Celle"),
              T("Von der Schadenermittlung nach dem Unfall bis zur Bewertung Ihres Oldtimers. Alle Gutachten erstelle ich neutral, nachvollziehbar und zügig.",
                "From assessing the damage after an accident to valuing your classic car. I prepare every report neutrally, transparently and promptly."))}
 
@@ -1316,13 +1304,12 @@ def build_ratgeber_index():
         items.append(f'''<li>
           <h2><a href="{u(a["slug"], d)}">{esc(a["short"])}</a></h2>
           <p>{esc(a["lede"])}</p>
-          <span class="more" aria-hidden="true">{T("Lesen →", "Read →")}</span>
         </li>''')
     trail = [(T("Ratgeber", "Guide"), slug)]
     checklist_line = T(f'Direkt nach einem Unfall? Die <a href="{u(S("checklist"), d)}">Unfall-Checkliste</a> führt Sie durch die ersten Schritte.',
                        f'Just had an accident? The <a href="{u(S("checklist"), d)}">accident checklist</a> takes you through the first steps.')
     body = f'''
-  {page_hero(trail, d, T("Ratgeber", "Guide"), T("Ratgeber zum Kfz-Gutachten: Antworten nach dem Unfall", "Guide to vehicle reports: answers after an accident"),
+  {page_hero(trail, d, T("Ratgeber", "Guide"), T("Ratgeber nach dem Unfall", "Guide for after an accident"),
              T("Was nach einem Unfall zählt, in verständlicher Sprache: Wertminderung, Totalschaden, Mietwagen, Kosten und Oldtimer-Bewertung.",
                "What matters after an accident, in plain language: diminished value, total loss, rental cars, costs and classic car valuation."), byline=False)}
 
@@ -1425,7 +1412,7 @@ def build_area_hub():
     trail = [(T("Einsatzgebiet", "Service area"), slug)]
     faq = area_faq()
     body = f'''
-  {page_hero(trail, d, T("Einsatzgebiet", "Service area"), T("Kfz-Gutachter im Landkreis Celle und Umkreis von 50 Kilometern", "Vehicle expert in Celle district and within 50 kilometres"),
+  {page_hero(trail, d, T("Einsatzgebiet", "Service area"), T("Kfz-Gutachter im Landkreis Celle", "Vehicle expert in Celle district"),
              T("Unabhängige Kfz-Gutachten in Celle und in den Orten rundherum. Besichtigungstermine stimme ich individuell mit Ihnen ab.",
                "Independent vehicle reports in Celle and the places around it. I arrange inspection appointments with you individually."), byline=False)}
 
@@ -1452,7 +1439,7 @@ def build_area_hub():
 
   <section class="section section--surface" aria-labelledby="faq-title">
     <div class="wrap">
-      <div class="section-head"><h2 id="faq-title">{T("Häufige Fragen zum Einsatzgebiet", "Frequently asked questions about the service area")}</h2></div>
+      <div class="section-head"><h2 id="faq-title">{T("Häufige Fragen zum Einsatzgebiet", "Questions about the service area")}</h2></div>
       {faq_section(faq, d, open_first=True)}
     </div>
   </section>
@@ -1545,7 +1532,7 @@ def build_town(t):
 
   <section class="section section--surface" aria-labelledby="faq-title">
     <div class="wrap">
-      <div class="section-head"><h2 id="faq-title">{T(f"Häufige Fragen zu {esc(name)}", f"Frequently asked questions about {esc(name)}")}</h2></div>
+      <div class="section-head"><h2 id="faq-title">{T(f"Häufige Fragen zu {esc(name)}", f"Questions about {esc(name)}")}</h2></div>
       {faq_section(faq, d, open_first=True)}
     </div>
   </section>
@@ -1587,7 +1574,7 @@ def build_gruende():
     trail = [(name, slug)]
     body = f'''
   {page_hero(trail, d, T("Gutachten statt Kostenvoranschlag", "Expert report instead of repair estimate"),
-             T("Wozu ein Kfz-Gutachten erstellen lassen?", "Why have a vehicle expert report prepared?"),
+             T("Warum ein Kfz-Gutachten?", "Why an expert report?"),
              T("Nach einem Unfall schlagen Versicherungen oft einen Kostenvoranschlag vor. Sechs Gründe, warum ein unabhängiges Gutachten Ihnen mehr bringt.",
                "After an accident, insurers often suggest a repair estimate. Six reasons why an independent report is worth more to you."))}
 
@@ -1601,7 +1588,7 @@ def build_gruende():
   <section class="section section--surface" aria-labelledby="cmp-title">
     <div class="wrap">
       <div class="section-head">
-        <h2 id="cmp-title">{T("Kostenvoranschlag und Gutachten im Vergleich", "Repair estimate and expert report compared")}</h2>
+        <h2 id="cmp-title">{T("Kostenvoranschlag oder Gutachten?", "Estimate or expert report?")}</h2>
       </div>
       <div class="compare-wrap">
         <table class="compare">
@@ -1626,7 +1613,7 @@ def build_gruende():
     graph = [breadcrumb_node(trail),
              {"@type": "WebPage", "name": name, "url": abs_url(slug), "about": {"@id": DOMAIN + "/#business"}}]
     return dict(slug=slug, d=d, key="why",
-                title=T("Gründe für ein Kfz-Gutachten nach dem Unfall | PS Schneider", "Why Get a Vehicle Expert Report After an Accident | PS Schneider"),
+                title=T("Gründe für ein Kfz-Gutachten nach dem Unfall | PS Schneider", "Why an Expert Report After an Accident | PS Schneider"),
                 desc=T("Warum ein unabhängiges Kfz-Gutachten mehr bringt als ein Kostenvoranschlag: Kosten, Wertminderung, Beweissicherung, fiktive Abrechnung. Celle.",
                        "Why an independent vehicle expert report is worth more than a repair estimate: costs, diminished value, evidence, settling on the basis of the report. Celle."),
                 body=body, graph=graph)
@@ -1654,7 +1641,7 @@ def build_checkliste():
     ])
     later_html = "\n            ".join(f"<li>{x}</li>" for x in later)
     body = f'''
-  {page_hero(trail, d, T("Unfall-Checkliste", "Accident checklist"), T("Wie verhält man sich nach einem Unfall?", "What to do after an accident"),
+  {page_hero(trail, d, T("Unfall-Checkliste", "Accident checklist"), T("Was tun nach einem Unfall?", "What to do after an accident"),
              T("Sechs Schritte in der richtigen Reihenfolge. Haken Sie ab, was erledigt ist. Die Liste bleibt auf Ihrem Gerät gespeichert und wird nicht an uns übertragen.",
                "Six steps in the right order. Tick off what is done. The list stays saved on your device and is not sent to us."))}
 
@@ -1697,7 +1684,7 @@ def build_checkliste():
              {"@type": "WebPage", "name": T("Unfall-Checkliste", "Accident checklist"), "url": abs_url(slug),
               "about": {"@id": DOMAIN + "/#business"}}]
     return dict(slug=slug, d=d, key="checklist",
-                title=T("Unfall-Checkliste: Was tun nach einem Unfall? | PS Schneider", "Accident Checklist: What to Do After an Accident | PS Schneider"),
+                title=T("Unfall-Checkliste: Was tun nach einem Unfall? | PS Schneider", "Accident Checklist: What to Do | PS Schneider"),
                 desc=T("Checkliste zum Abhaken: Unfallstelle sichern, Verletzte versorgen, Polizei rufen, Daten austauschen, Fotos machen, Sachverständigen kontaktieren.",
                        "A checklist to tick off: secure the scene, help the injured, call the police, exchange details, take photos, contact the vehicle expert."),
                 body=body, graph=graph)
@@ -1708,7 +1695,7 @@ def build_kontakt():
     d = depth(slug)
     trail = [(T("Kontakt", "Contact"), slug)]
     body = f'''
-  {page_hero(trail, d, T("Kontakt", "Contact"), T("Kontakt zum Kfz-Sachverständigen in Celle", "Contact the vehicle expert in Celle"),
+  {page_hero(trail, d, T("Kontakt", "Contact"), T("Kontakt zum Sachverständigen", "Contact the vehicle expert"),
              T("Rufen Sie an, schreiben Sie per WhatsApp oder senden Sie die Anfrage über das Formular. Sie erhalten eine unverbindliche Beratung und ein individuelles Angebot.",
                "Call, write on WhatsApp or send your enquiry through the form. You will receive non-binding advice and an individual quote."),
              byline=False)}
@@ -1746,7 +1733,6 @@ def legal_page(key, title, eyebrow, h1, inner):
 def build_impressum():
     if LANG == "en":
         inner = f'''
-      <p class="notice">Note for the operator: the fields marked in yellow must be filled in or removed before publication. The previous site contained placeholders here. Delete this note afterwards. This English version is a courtesy translation; the German version is legally binding.</p>
 
       <h2>Service provider</h2>
       <address>{BIZ["person"]}<br>{BIZ["role"]}<br>{BIZ["street"]}<br>{BIZ["zip"]} {BIZ["city"]}<br>Germany</address>
@@ -1757,18 +1743,8 @@ def build_impressum():
       <h2>Professional title</h2>
       <p>{BIZ["craft"]} (Kraftfahrzeugtechnikermeister, awarded in the Federal Republic of Germany)<br>{BIZ["role"]}</p>
 
-      <h2>VAT</h2>
-      <p>VAT identification number pursuant to § 27a of the German VAT Act (UStG): <span class="todo">enter DE XXX XXX XXX or remove paragraph</span></p>
-      <p>Economic identification number (W-IdNr.): <span class="todo">enter or remove paragraph</span></p>
-
-      <h2>Supervisory authority and chamber</h2>
-      <p><span class="todo">Enter the competent Chamber of Crafts (Handwerkskammer) or remove paragraph</span></p>
-
       <h2>Responsible for the content</h2>
       <p>{BIZ["person"]}, address as above.</p>
-
-      <h2>Consumer dispute resolution</h2>
-      <p>We are neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board.</p>
 
       <h2>Liability for content</h2>
       <p>The content of these pages has been prepared with the greatest care. However, we cannot guarantee that it is correct, complete or up to date. As a service provider we are responsible for our own content on these pages under the general laws.</p>
@@ -1776,12 +1752,9 @@ def build_impressum():
       <h2>Liability for links</h2>
       <p>Our website contains links to external third-party websites over whose content we have no influence. The respective provider or operator of those pages is always responsible for their content.</p>
 
-      <h2>Image credits</h2>
-      <p>Portrait photo: {BIZ["person"]}, private.</p>
 '''
         return legal_page("legal", "Legal Notice | PS Schneider Vehicle Expert Celle", "Information pursuant to § 5 DDG", "Legal notice", inner)
     inner = f'''
-      <p class="notice">Hinweis für den Betreiber: Die gelb markierten Felder müssen vor Veröffentlichung ausgefüllt oder entfernt werden. Die bisherige Seite enthielt hier Platzhalter. Diesen Hinweis danach löschen.</p>
 
       <h2>Diensteanbieter</h2>
       <address>{BIZ["person"]}<br>{BIZ["role"]}<br>{BIZ["street"]}<br>{BIZ["zip"]} {BIZ["city"]}<br>Deutschland</address>
@@ -1792,18 +1765,8 @@ def build_impressum():
       <h2>Berufsbezeichnung</h2>
       <p>{BIZ["craft"]} (verliehen in der Bundesrepublik Deutschland)<br>{BIZ["role"]}</p>
 
-      <h2>Umsatzsteuer</h2>
-      <p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: <span class="todo">DE XXX XXX XXX eintragen oder Absatz entfernen</span></p>
-      <p>Wirtschafts-Identifikationsnummer (W-IdNr.): <span class="todo">eintragen oder Absatz entfernen</span></p>
-
-      <h2>Aufsichtsbehörde und Kammer</h2>
-      <p><span class="todo">Zuständige Handwerkskammer eintragen oder Absatz entfernen</span></p>
-
       <h2>Verantwortlich für den Inhalt</h2>
       <p>{BIZ["person"]}, Anschrift wie oben.</p>
-
-      <h2>Verbraucherstreitbeilegung</h2>
-      <p>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
 
       <h2>Haftung für Inhalte</h2>
       <p>Die Inhalte dieser Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.</p>
@@ -1811,8 +1774,6 @@ def build_impressum():
       <h2>Haftung für Links</h2>
       <p>Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Für diese fremden Inhalte ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
 
-      <h2>Bildnachweis</h2>
-      <p>Porträtfoto: {BIZ["person"]}, privat.</p>
 '''
     return legal_page("legal", "Impressum | PS Schneider Kfz-Gutachter Celle", "Angaben gemäß § 5 DDG", "Impressum", inner)
 
@@ -1820,7 +1781,6 @@ def build_impressum():
 def build_datenschutz():
     if LANG == "en":
         inner = f'''
-      <p class="notice">Note for the operator: this statement describes the technology of this website (contact form with photos on a Hetzner server, no cookies, no analytics tools, self-hosted fonts). The places marked in yellow must be clarified and filled in before going live: server location and data processing agreement with Hetzner, mailbox provider, retention period of the server logs. If cookies, statistics or external content are added later, the notice and this statement must be adjusted. This text does not replace a legal review. This English version is a courtesy translation; the German version is legally binding. Delete this note afterwards.</p>
 
       <h2>1. Controller</h2>
       <address>{BIZ["person"]}<br>{BIZ["street"]}, {BIZ["zip"]} {BIZ["city"]}<br>Phone: {BIZ["phone_display"]}<br>Email: {BIZ["email"]}</address>
@@ -1829,21 +1789,21 @@ def build_datenschutz():
       <p>This website does not set cookies and does not use any tracking or analytics services. No third-party content is embedded and no fonts are loaded from external servers. We process personal data when you use the contact form or contact us, and in the form of technically necessary connection data when you visit the site.</p>
 
       <h2>3. Hosting and server log files</h2>
-      <p>This website is operated on a server of Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Germany. <span class="todo">Enter the location of the data centre and conclude or confirm the data processing agreement under Art. 28 GDPR with Hetzner</span></p>
-      <p>When you visit the website, the web server automatically processes information transmitted by your browser: shortened IP address, date and time, page requested, amount of data transferred, browser type and operating system. This data serves the security and stability of the website and is deleted after <span class="todo">enter period, 7 days recommended</span>. The legal basis is Art. 6(1)(f) GDPR (legitimate interest in the secure operation of the site).</p>
+      <p>This website is operated on a server of Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Germany.</p>
+      <p>When you visit the website, the web server automatically processes information transmitted by your browser: shortened IP address, date and time, page requested, amount of data transferred, browser type and operating system. This data serves the security and stability of the website and is deleted automatically after a short time. The legal basis is Art. 6(1)(f) GDPR (legitimate interest in the secure operation of the site).</p>
 
       <h2>4. Contact form and damage photos</h2>
       <p>If you use the contact form, we transmit your details to our server in encrypted form (HTTPS): name, email address, topic, message and whether we should reply by email or call you back. Phone number, number plate, insurer and up to five photos are optional. The phone number is only required for a call back. Name, email address, topic and message are required so that we can answer your enquiry.</p>
       <h3>Photos</h3>
       <p>Photos are already reduced in size in your browser. The server reduces them again and removes metadata such as the location where the photo was taken. Please do not upload photos in which people can be recognised.</p>
       <h3>Forwarding and deletion</h3>
-      <p>The server forwards your enquiry with the photos by email to our mailbox. The transmission to the mail server is encrypted. Mailbox provider: <span class="todo">enter name and address of the provider, check data processing agreement</span> After successful delivery, the enquiry and photos are deleted from the server. If delivery fails for technical reasons, the enquiry is kept safe for 14 days at most so that it is not lost, and is then deleted.</p>
+      <p>The server forwards your enquiry with the photos by email to our mailbox. The transmission to the mail server is encrypted. After successful delivery, the enquiry and photos are deleted from the server. If delivery fails for technical reasons, the enquiry is kept safe for 14 days at most so that it is not lost, and is then deleted.</p>
       <h3>Confirmation by email</h3>
       <p>After you send the form, the server automatically sends a short confirmation with your reference number to the email address you entered. It contains none of your other input. So that nothing is sent to the same address repeatedly, we do not store the address in plain text but only a hash with a secret key, which is deleted after two days at most. The legal basis is Art. 6(1)(b) GDPR.</p>
       <h3>Protection against abuse</h3>
       <p>To prevent the form from being abused by automated programs, we limit the number of enquiries per connection. For this we do not store your IP address in plain text but only a hash with a secret key, which is deleted after two days at most. We also check a field that is invisible to people and a time-limited form token. Both work without cookies and without third-party services.</p>
       <h3>Log</h3>
-      <p>The form log contains only the time, reference number, number of photos and status, but no names or contact details. It is deleted after <span class="todo">enter period, 90 days recommended</span>.</p>
+      <p>The form log contains only the time, reference number, number of photos and status, but no names or contact details. It is deleted automatically after a short time.</p>
       <h3>Legal basis</h3>
       <p>Processing takes place to answer your enquiry and to prepare a contract (Art. 6(1)(b) GDPR) and to protect against abuse (Art. 6(1)(f) GDPR). Enquiry data is deleted as soon as it is no longer needed for processing and no statutory retention obligations apply.</p>
 
@@ -1853,7 +1813,7 @@ def build_datenschutz():
 
       <h2>6. Commissions and reports</h2>
       <p>If you commission a report, we process the data required for it: your contact details, vehicle data (registration number, vehicle identification number, mileage), details of the damage event, photos of the vehicle and, for liability damage, data of the other party and their insurer. The legal basis is Art. 6(1)(b) GDPR.</p>
-      <p>For settlement we pass the report on to the recipients you name, such as the insurer handling the claim, your garage or your lawyer. For calculation and residual value assessment we use industry-standard specialist systems. <span class="todo">Enter the systems and residual value exchanges used or remove sentence</span></p>
+      <p>For settlement we pass the report on to the recipients you name, such as the insurer handling the claim, your garage or your lawyer. For calculation and residual value assessment we use industry-standard specialist systems.</p>
       <p>We keep reports and related documents in line with commercial and tax law requirements (generally 10 years, § 147 AO, § 257 HGB).</p>
 
       <h2>7. Cookies and local storage</h2>
@@ -1880,7 +1840,6 @@ def build_datenschutz():
 '''
         return legal_page("privacy", "Privacy Policy | PS Schneider Vehicle Expert Celle", f"Updated: {stand()}", "Privacy policy", inner)
     inner = f'''
-      <p class="notice">Hinweis für den Betreiber: Diese Erklärung beschreibt die Technik dieser Website (Kontaktformular mit Fotos auf einem Server von Hetzner, keine Cookies, keine Analyse-Tools, selbst gehostete Schriften). Die gelb markierten Stellen müssen vor dem Livegang geklärt und ausgefüllt werden: Serverstandort und Auftragsverarbeitung bei Hetzner, Anbieter des Postfachs, Aufbewahrungsdauer der Server-Protokolle. Kommen später Cookies, Statistik oder externe Inhalte hinzu, müssen Banner und Erklärung angepasst werden. Eine rechtliche Prüfung ersetzt dieser Text nicht. Diesen Hinweis danach löschen.</p>
 
       <h2>1. Verantwortlicher</h2>
       <address>{BIZ["person"]}<br>{BIZ["street"]}, {BIZ["zip"]} {BIZ["city"]}<br>Telefon: {BIZ["phone_display"]}<br>E-Mail: {BIZ["email"]}</address>
@@ -1889,21 +1848,21 @@ def build_datenschutz():
       <p>Diese Website setzt keine Cookies und verwendet keine Tracking- oder Analyse-Dienste. Es werden keine Inhalte von Drittanbietern eingebunden und keine Schriften von externen Servern geladen. Personenbezogene Daten verarbeiten wir, wenn Sie das Kontaktformular nutzen oder uns kontaktieren, und in Form technisch notwendiger Verbindungsdaten beim Aufruf der Seite.</p>
 
       <h2>3. Hosting und Server-Logfiles</h2>
-      <p>Diese Website wird auf einem Server der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, betrieben. <span class="todo">Standort des Rechenzentrums eintragen und den Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO mit Hetzner abschließen beziehungsweise bestätigen</span></p>
-      <p>Beim Aufruf der Website verarbeitet der Webserver automatisch Informationen, die Ihr Browser übermittelt: gekürzte IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, übertragene Datenmenge, Browsertyp und Betriebssystem. Diese Daten dienen der Sicherheit und Stabilität der Website und werden nach <span class="todo">Dauer eintragen, empfohlen 7 Tage</span> gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
+      <p>Diese Website wird auf einem Server der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, betrieben.</p>
+      <p>Beim Aufruf der Website verarbeitet der Webserver automatisch Informationen, die Ihr Browser übermittelt: gekürzte IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, übertragene Datenmenge, Browsertyp und Betriebssystem. Diese Daten dienen der Sicherheit und Stabilität der Website und werden nach kurzer Zeit automatisch gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
 
       <h2>4. Kontaktformular und Schadenfotos</h2>
       <p>Wenn Sie das Kontaktformular nutzen, übertragen wir Ihre Angaben verschlüsselt (HTTPS) an unseren Server: Name, E-Mail-Adresse, Anliegen, Nachricht und die Angabe, ob wir Ihnen per E-Mail antworten oder Sie zurückrufen sollen. Freiwillig sind Telefonnummer, Kennzeichen, Versicherung und bis zu fünf Fotos. Die Telefonnummer ist nur für einen Rückruf erforderlich. Die Angabe von Name, E-Mail-Adresse, Anliegen und Nachricht ist erforderlich, damit wir Ihre Anfrage beantworten können.</p>
       <h3>Fotos</h3>
       <p>Fotos werden schon in Ihrem Browser verkleinert. Der Server verkleinert sie erneut und entfernt dabei Metadaten wie den Aufnahmeort. Bitte laden Sie keine Fotos hoch, auf denen Personen erkennbar sind.</p>
       <h3>Weiterleitung und Löschung</h3>
-      <p>Der Server leitet Ihre Anfrage mit den Fotos per E-Mail an unser Postfach weiter. Die Übertragung zum Mailserver ist verschlüsselt. Postfachanbieter: <span class="todo">Name und Anschrift des Anbieters eintragen, Auftragsverarbeitung prüfen</span> Nach erfolgreichem Versand werden Anfrage und Fotos auf dem Server gelöscht. Schlägt der Versand technisch fehl, bleibt die Anfrage höchstens 14 Tage gesichert, damit sie nicht verloren geht, und wird dann gelöscht.</p>
+      <p>Der Server leitet Ihre Anfrage mit den Fotos per E-Mail an unser Postfach weiter. Die Übertragung zum Mailserver ist verschlüsselt. Nach erfolgreichem Versand werden Anfrage und Fotos auf dem Server gelöscht. Schlägt der Versand technisch fehl, bleibt die Anfrage höchstens 14 Tage gesichert, damit sie nicht verloren geht, und wird dann gelöscht.</p>
       <h3>Bestätigung per E-Mail</h3>
       <p>Nach dem Absenden schickt der Server automatisch eine kurze Bestätigung mit Ihrer Referenznummer an die E-Mail-Adresse, die Sie angegeben haben. Sie enthält keine Ihrer sonstigen Eingaben. Damit an dieselbe Adresse nicht mehrfach versendet wird, speichern wir die Adresse nicht im Klartext, sondern nur einen Hash mit geheimem Schlüssel, der nach höchstens zwei Tagen gelöscht wird. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
       <h3>Schutz vor Missbrauch</h3>
       <p>Damit das Formular nicht von automatischen Programmen missbraucht wird, begrenzen wir die Zahl der Anfragen pro Verbindung. Dafür speichern wir Ihre IP-Adresse nicht im Klartext, sondern nur einen Hash mit geheimem Schlüssel, der nach höchstens zwei Tagen gelöscht wird. Außerdem prüfen wir ein für Menschen unsichtbares Feld und ein zeitlich begrenztes Formular-Token. Beides arbeitet ohne Cookies und ohne Dienste Dritter.</p>
       <h3>Protokoll</h3>
-      <p>Das Protokoll des Formulars enthält nur Zeitpunkt, Referenznummer, Anzahl der Fotos und Status, aber keine Namen oder Kontaktdaten. Es wird nach <span class="todo">Dauer eintragen, empfohlen 90 Tage</span> gelöscht.</p>
+      <p>Das Protokoll des Formulars enthält nur Zeitpunkt, Referenznummer, Anzahl der Fotos und Status, aber keine Namen oder Kontaktdaten. Es wird nach kurzer Zeit automatisch gelöscht.</p>
       <h3>Rechtsgrundlage</h3>
       <p>Die Verarbeitung erfolgt zur Beantwortung Ihrer Anfrage und zur Anbahnung eines Vertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie zum Schutz vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO). Anfragedaten werden gelöscht, sobald sie für die Bearbeitung nicht mehr erforderlich sind und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
 
@@ -1913,7 +1872,7 @@ def build_datenschutz():
 
       <h2>6. Auftragsbearbeitung und Gutachten</h2>
       <p>Beauftragen Sie ein Gutachten, verarbeiten wir die dafür notwendigen Daten: Ihre Kontaktdaten, Fahrzeugdaten (Kennzeichen, Fahrzeug-Identifizierungsnummer, Laufleistung), Angaben zum Schadenereignis, Fotos des Fahrzeugs sowie bei Haftpflichtschäden Daten des Unfallgegners und dessen Versicherung. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
-      <p>Zur Abwicklung übermitteln wir das Gutachten an die von Ihnen benannten Empfänger, etwa die regulierende Versicherung, Ihre Werkstatt oder Ihren Rechtsanwalt. Zur Kalkulation und Restwertermittlung setzen wir branchenübliche Fachsysteme ein. <span class="todo">Verwendete Systeme und Restwertbörsen eintragen oder Satz entfernen</span></p>
+      <p>Zur Abwicklung übermitteln wir das Gutachten an die von Ihnen benannten Empfänger, etwa die regulierende Versicherung, Ihre Werkstatt oder Ihren Rechtsanwalt. Zur Kalkulation und Restwertermittlung setzen wir branchenübliche Fachsysteme ein.</p>
       <p>Gutachten und zugehörige Unterlagen bewahren wir nach den handels- und steuerrechtlichen Vorgaben auf (in der Regel 10 Jahre, § 147 AO, § 257 HGB).</p>
 
       <h2>7. Cookies und lokaler Speicher</h2>

@@ -87,11 +87,11 @@ Beide Skripte brauchen nur Python 3. Nach jeder Änderung `build.py` ausführen 
 
 ## Gestaltung
 
-Die Gestaltung heißt „Prüfprotokoll“ und folgt dem Logo: Schwarz und Rot, schräg gestellte Schrift (Barlow Condensed kursiv), diagonal geschnittene Flächen und eckige Formen ohne Rundungen. Wiederkehrende Elemente sind die Schadenskizze (Fahrzeug von oben mit Maßlinie, Schadenszone und Nummernmarken), der runde Prüfstempel, nummerierte Abschnitte und Nummernmarken als Aufzählung.
+Die Gestaltung heißt „Prüfprotokoll“ und folgt dem Logo: Schwarz und Rot, schräg gestellte Schrift (Barlow Condensed kursiv), diagonal geschnittene Flächen und eckige Formen ohne Rundungen. Wiederkehrende Elemente sind die Schadenskizze (Fahrzeug von oben mit Maßlinie, Schadenszone und Nummernmarken), der runde Prüfstempel und Nummernmarken dort, wo es eine echte Reihenfolge gibt (Ablauf, erste Schritte, Checkliste). Die vollständige Begründung steht in `DESIGN.md`.
 
 - Alle Farben, Abstände und der Schrägwinkel stehen als Variablen am Anfang von `public/assets/site.css`. Dunkelmodus ist eingebaut.
 - Die Zeichnungen (Skizze, Stempel) entstehen rechnerisch in `build/artwork.py` und werden beim Bauen in die Seiten geschrieben. Es gibt dafür keine Bilddateien. Die Skizze zeichnet sich beim Sichtbarwerden Linie für Linie, bei „weniger Bewegung“ im System ist sie sofort fertig.
-- Schriften liegen lokal in `public/assets/fonts/` (Barlow 400 und 600, Barlow Condensed 600, 700 kursiv und 800 kursiv).
+- Schriften liegen lokal in `public/assets/fonts/` (Barlow 400 und 600, Barlow Condensed 700 kursiv und 800 kursiv, zusammen vier Schnitte).
 - Das Vorschaubild für soziale Netzwerke entsteht mit `node build/make-og.js` im gleichen Stil.
 
 ## Zweisprachig: Deutsch und Englisch
@@ -113,12 +113,9 @@ Das Vorschaubild neu erzeugen: `node build/make-og.js` (braucht Playwright).
 ## Vor dem Livegang ausfüllen und prüfen
 
 **Pflicht**
-- `build/build.py`, Funktion `build_impressum`: USt-ID, W-IdNr., Handwerkskammer eintragen oder Absätze entfernen. Hinweisbox löschen.
-- `build/build.py`, Funktion `build_datenschutz`: fünf gelb markierte Stellen klären und eintragen, dann Hinweisbox löschen. Rechtliche Prüfung empfohlen.
-  - Standort des Hetzner-Rechenzentrums und Vertrag zur Auftragsverarbeitung (im Hetzner-Kundenkonto abschließen)
-  - Anbieter des Postfachs, über das die Anfragen laufen, samt Auftragsverarbeitung
-  - Aufbewahrungsdauer der Zugriffsprotokolle (empfohlen 7 Tage) und des Formular-Protokolls (empfohlen 90 Tage), per Logrotate umsetzen
-  - eingesetzte Kalkulationssysteme und Restwertbörsen
+- Impressum und Datenschutzerklärung enthalten keine Platzhalter und keine Hinweise im Text mehr. Folgendes fehlt noch und muss vor dem Livegang geklärt und in `build/build.py` (Funktionen `build_impressum` und `build_datenschutz`) ergänzt werden. Rechtliche Prüfung empfohlen:
+  - Impressum: USt-IdNr., Wirtschafts-IdNr., zuständige Kammer oder Aufsichtsbehörde (falls es sie gibt), Hinweis nach § 36 VSBG nach Angabe des Betriebs, Bildnachweis
+  - Datenschutz: Standort des Hetzner-Rechenzentrums und Vertrag zur Auftragsverarbeitung, Anbieter des Postfachs samt Auftragsverarbeitung, konkrete Aufbewahrungsdauer der Zugriffs- und Formularprotokolle (empfohlen 7 und 90 Tage, per Logrotate umsetzen), eingesetzte Kalkulationssysteme und Restwertbörsen. Im Text steht derzeit „nach kurzer Zeit automatisch gelöscht“.
 - Kontaktformular: `private/config.php` auf dem Server ausfüllen und mit `selftest` prüfen, siehe unten. Ein echtes Testformular mit Foto absenden.
 - Adresse klären: Startseite „Im Röthel 43“, altes Impressum „Am Röthel 43“.
 

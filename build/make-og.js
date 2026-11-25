@@ -10,7 +10,7 @@ const plan = execFileSync('python3', ['-c', "import sys; sys.path.insert(0, r'" 
 const html = `<!doctype html><meta charset="utf-8"><style>
 @font-face{font-family:BC;font-style:italic;font-weight:800;src:url('file://${pub}/fonts/BarlowCondensed-800i.woff2')}
 @font-face{font-family:BC;font-style:italic;font-weight:700;src:url('file://${pub}/fonts/BarlowCondensed-700i.woff2')}
-@font-face{font-family:BC;font-style:normal;font-weight:600;src:url('file://${pub}/fonts/BarlowCondensed-600.woff2')}
+@font-face{font-family:BC;font-style:normal;font-weight:600;src:url('file://${pub}/fonts/Barlow-600.woff2')}
 *{box-sizing:border-box;margin:0}
 body{width:1200px;height:630px;background:#0D0E10;position:relative;overflow:hidden;color:#fff;font-family:BC,sans-serif}
 .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:56px 56px}

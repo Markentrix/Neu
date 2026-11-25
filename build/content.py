@@ -35,7 +35,7 @@ SERVICES = [
         "lede": "Nach einem unverschuldeten Unfall dokumentiere ich alle Schäden, beziffere Ihre Ansprüche und liefere das Gutachten, das Sie gegenüber der gegnerischen Versicherung brauchen.",
         "card": "Nach einem unverschuldeten Unfall: alle Schäden dokumentiert, inklusive Reparaturdauer und Wertminderung. Bei Totalschaden mit Restwert und Wiederbeschaffungswert. Die Kosten trägt in der Regel die gegnerische Versicherung.",
         "sections": [
-            {"h2": "Wann ein Haftpflichtschaden-Gutachten sinnvoll ist", "body": [
+            {"h2": "Wann ein Gutachten sinnvoll ist", "body": [
                 "Wurde Ihr Fahrzeug bei einem Unfall beschädigt, für den ein anderer verantwortlich ist, richten sich Ihre Ansprüche gegen die Haftpflichtversicherung des Unfallverursachers. Damit diese Ansprüche vollständig und nachvollziehbar beziffert sind, brauchen Sie mehr als einen Kostenvoranschlag.",
                 "Ein unabhängiges Gutachten ist besonders wichtig, wenn der Schaden über eine Bagatelle hinausgeht, wenn ein Totalschaden droht, wenn die Haftung strittig ist oder wenn die gegnerische Versicherung Ihre Forderung kürzen will.",
             ]},
@@ -83,7 +83,7 @@ SERVICES = [
         "icon": "search",
         "title": "Beweissicherungsgutachten Kfz Celle | PS Schneider",
         "desc": "Beweissicherungsgutachten in Celle: verschwiegene Vorschäden, mangelhafte Reparatur oder Streit mit Werkstatt und Verkäufer neutral dokumentieren lassen.",
-        "h1": "Beweissicherungsgutachten für Kfz in Celle",
+        "h1": "Beweissicherungsgutachten in Celle",
         "lede": "Nach dem Gebrauchtwagenkauf oder einer Reparatur stimmt etwas nicht? Ich halte den Zustand Ihres Fahrzeugs neutral fest, damit Sie gegenüber Verkäufer oder Werkstatt abgesichert sind.",
         "card": "Zieht das Auto nach links oder stimmen die Spaltmaße nicht? Verschwiegene Vorschäden und mangelhafte Reparaturen werden neutral festgehalten, damit Sie gegenüber Verkäufer oder Werkstatt abgesichert sind.",
         "sections": [
@@ -137,7 +137,7 @@ SERVICES = [
                 "Bei der Rückgabe von Leasingfahrzeugen entstehen häufig Meinungsverschiedenheiten über die Wertminderung. Bedauerlicherweise gibt es keine objektiven Kriterien, die genau festlegen, wann eine übermäßige Abnutzung vorliegt. Deshalb werden oft schon normale Verschleißspuren in die Bewertung einbezogen.",
                 "Verschleißspuren sind keine Schäden. Sie müssen je nach Alter und Laufleistung des Fahrzeugs akzeptiert werden.",
             ]},
-            {"h2": "Was bei einem Gebrauchtwagen normal ist", "body": [
+            {"h2": "Was bei Gebrauchtwagen normal ist", "body": [
                 ("ul", [
                     "Dellen ohne Lackabsplitterungen",
                     "Steinschläge",
@@ -218,7 +218,7 @@ SERVICES = [
         "icon": "euro",
         "title": "Restwertermittlung Kfz Celle | PS Schneider",
         "desc": "Restwertermittlung nach Unfall in Celle: regional oder europaweit, mit Angeboten, damit Sie risikofrei entscheiden, ob Sie reparieren oder verkaufen.",
-        "h1": "Restwertermittlung für Unfallfahrzeuge in Celle",
+        "h1": "Restwertermittlung in Celle",
         "lede": "Was ist Ihr unrepariertes Fahrzeug nach dem Unfall noch wert? Ich ermittle den Restwert, hole Angebote ein und Sie entscheiden, ob Sie reparieren oder verkaufen.",
         "card": "Was ist das unreparierte Fahrzeug noch wert? Wir ermitteln den Restwert regional oder europaweit, holen Angebote ein und Sie entscheiden risikofrei: reparieren oder verkaufen.",
         "sections": [
@@ -233,7 +233,7 @@ SERVICES = [
                     "Sie entscheiden: Angebot annehmen, reparieren oder anders vorgehen.",
                 ]),
             ]},
-            {"h2": "Selbstverschuldeter Unfall und nur Haftpflicht?", "body": [
+            {"h2": "Selbst verschuldet, nur Haftpflicht?", "body": [
                 "Hatten Sie einen selbstverschuldeten Unfall und sind nur haftpflichtversichert? Dann unterstütze ich Sie gern beim Verkauf des stark beschädigten Fahrzeugs.",
                 "Im Haftpflichtfall nach einem unverschuldeten Unfall gehört der Restwert zum [[leistungen/haftpflichtschaden-gutachten|Haftpflichtschaden-Gutachten]].",
             ]},
@@ -291,7 +291,7 @@ REASONS = [
     ("Kostenfreiheit",
      ["Die Kosten für ein Kfz-Gutachten werden in der Regel von der Haftpflichtversicherung des Unfallverursachers getragen. Oft akzeptieren Versicherungen einen Kostenvoranschlag mit Fotos und verweisen darauf, dass Sie als Geschädigter die Kosten für einen Sachverständigen selbst übernehmen müssten.",
       "Gesetzlich ist das eindeutig geregelt: Im Haftpflichtfall haben Sie als Unfallgeschädigter das Recht, einen unabhängigen Sachverständigen Ihrer Wahl zu beauftragen. Die Kosten werden dem entstandenen Schaden zugerechnet und von der Haftpflichtversicherung des Unfallverursachers übernommen."]),
-    ("Detailliertere Kostenerfassung und höhere Sicherheit",
+    ("Genauere Kosten, mehr Sicherheit",
      ["Ein Gutachten erfasst neben den Reparaturkosten auch die mögliche Wertminderung, die voraussichtliche Reparaturdauer und die Ausfallzeiten. Das dient Ihrer persönlichen finanziellen Sicherheit.",
       "Ein neutrales Gutachten wird außerdem im Gegensatz zu einem Kostenvoranschlag auch vor Gericht rechtlich anerkannt."]),
     ("Objektive Bewertung",
@@ -355,7 +355,7 @@ ARTICLES = [
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Wertminderung nach Unfall: Das steht Ihnen zu | PS Schneider",
         "desc": "Merkantile Wertminderung nach einem Unfall erklärt: wann sie entsteht, wer sie zahlt und warum sie im Kfz-Gutachten beziffert werden sollte.",
-        "h1": "Wertminderung nach einem Unfall: Was Ihnen zusteht",
+        "h1": "Wertminderung nach dem Unfall",
         "lede": "Auch ein perfekt repariertes Fahrzeug ist nach einem Unfall oft weniger wert als vorher. Dieser Verlust gehört zu Ihrem Schaden.",
         "summary": "Die merkantile Wertminderung ist der Wertverlust, der trotz fachgerechter Reparatur bleibt, weil Käufer ein Unfallfahrzeug niedriger bewerten. Bei einem unverschuldeten Unfall können Sie sie zusätzlich zu den Reparaturkosten von der gegnerischen Versicherung verlangen. Ob sie anfällt und wie hoch sie ist, hängt von Alter, Laufleistung und Schwere des Schadens ab. Das Gutachten beziffert sie.",
         "sections": [
@@ -393,11 +393,11 @@ ARTICLES = [
     {
         "slug": "ratgeber/totalschaden-restwert-wiederbeschaffungswert",
         "key": "totalschaden",
-        "short": "Totalschaden: Restwert und Wiederbeschaffungswert",
+        "short": "Totalschaden und Restwert",
         "published": "2026-10-11", "modified": "2026-10-11",
-        "title": "Totalschaden: Restwert und Wiederbeschaffungswert | PS Schneider",
+        "title": "Totalschaden: Restwert erklärt | PS Schneider",
         "desc": "Totalschaden nach Unfall: Was Restwert und Wiederbeschaffungswert bedeuten, wie sich der Ersatzbetrag ergibt und wann eine Reparatur trotzdem möglich ist.",
-        "h1": "Totalschaden: Restwert und Wiederbeschaffungswert erklärt",
+        "h1": "Totalschaden und Restwert",
         "lede": "Bei einem Totalschaden entscheiden zwei Werte darüber, was Sie bekommen und welche Möglichkeiten Sie haben.",
         "summary": "Der Wiederbeschaffungswert ist der Preis für ein gleichwertiges gebrauchtes Fahrzeug. Der Restwert ist der Wert des beschädigten Fahrzeugs. Behalten oder verwerten Sie das Fahrzeug selbst, ergibt sich der Ersatzbetrag in der Regel aus der Differenz beider Werte. Ein Gutachten stellt beide Werte fest.",
         "sections": [
@@ -434,9 +434,9 @@ ARTICLES = [
         "key": "mietwagen",
         "short": "Mietwagen oder Nutzungsausfall",
         "published": "2026-10-11", "modified": "2026-10-11",
-        "title": "Mietwagen oder Nutzungsausfall nach einem Unfall | PS Schneider",
+        "title": "Mietwagen oder Nutzungsausfall | PS Schneider",
         "desc": "Unverschuldeter Unfall: Anspruch auf Mietwagen oder Nutzungsausfall für die Reparaturdauer. Was gilt, wer zahlt und welche Rolle das Gutachten spielt.",
-        "h1": "Mietwagen oder Nutzungsausfall nach einem unverschuldeten Unfall",
+        "h1": "Mietwagen oder Nutzungsausfall",
         "lede": "Solange Ihr Fahrzeug in der Werkstatt steht oder ersetzt werden muss, haben Sie in der Regel Anspruch auf einen Ausgleich.",
         "summary": "Nach einem unverschuldeten Unfall können Sie für die Dauer der Reparatur oder der Ersatzbeschaffung entweder einen Mietwagen nehmen oder eine Nutzungsausfallentschädigung verlangen. Die Dauer ergibt sich aus dem Gutachten. Die Kosten trägt in der Regel die gegnerische Versicherung.",
         "sections": [
@@ -474,9 +474,9 @@ ARTICLES = [
         "key": "kosten",
         "short": "Was kostet ein Kfz-Gutachten?",
         "published": "2026-10-11", "modified": "2026-10-11",
-        "title": "Was kostet ein Kfz-Gutachten und wer zahlt es? | PS Schneider",
+        "title": "Was kostet ein Kfz-Gutachten? | PS Schneider",
         "desc": "Kosten eines Kfz-Gutachtens: Wer im Haftpflichtfall zahlt, wovon das Honorar abhängt und bei welchen Gutachten Sie ein individuelles Angebot erhalten.",
-        "h1": "Was kostet ein Kfz-Gutachten und wer zahlt es?",
+        "h1": "Was kostet ein Kfz-Gutachten?",
         "lede": "Die wichtigste Antwort zuerst: Nach einem unverschuldeten Unfall müssen Sie das Gutachten in der Regel nicht selbst bezahlen.",
         "summary": "Im Haftpflichtfall werden die Gutachtenkosten dem Schaden zugerechnet und von der Versicherung des Unfallverursachers getragen. Bei Unfallschäden richtet sich das Honorar häufig nach der Schadenhöhe. Bei Wert-, Beweissicherungs- und Leasingrücknahme-Gutachten erhalten Sie vorab ein individuelles Angebot.",
         "sections": [
@@ -512,7 +512,7 @@ ARTICLES = [
         "published": "2026-10-11", "modified": "2026-10-11",
         "title": "Oldtimer-Wertgutachten: Wann es sich lohnt | PS Schneider",
         "desc": "Wertgutachten für Oldtimer: Wann es sinnvoll ist, was darin steht und wie es bei Kauf, Verkauf, Versicherung und Erbfall hilft. Kfz-Sachverständiger in Celle.",
-        "h1": "Oldtimer-Wertgutachten: Wann es sich lohnt",
+        "h1": "Oldtimer-Wertgutachten: lohnt es sich?",
         "lede": "Der Wert eines Oldtimers lässt sich nicht aus einer Liste ablesen. Ein Gutachten macht ihn nachvollziehbar.",
         "summary": "Ein Wertgutachten ermittelt den realen Marktwert Ihres Oldtimers und dokumentiert Zustand, Ausstattung sowie Vor- und Altschäden. Es hilft beim Kauf und Verkauf, bei der Absicherung gegenüber der Versicherung und überall dort, wo ein belegter Wert gebraucht wird.",
         "sections": [
