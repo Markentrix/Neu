@@ -197,7 +197,7 @@ Kunden- und Systemverwaltung, Einstellungen, Dashboard, Werkzeuge, Systemstatus 
 | `routes_plattformstatus` | 3 | 182 | `main` |
 | `routes_push` | 3 | 64 | `main` |
 | `routes_system` | 3 | 231 | `jobs`, `main`, `t73.py` |
-| `routes_verwaltung` | 3 | 766 | `jobs`, `main` |
+| `routes_verwaltung` | 3 | 786 | `jobs`, `main` |
 | `routes_werkzeuge` | 3 | 319 | `main` |
 
 ## Start und Hintergrund (`start`)
