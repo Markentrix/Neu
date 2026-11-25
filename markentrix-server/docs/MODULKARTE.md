@@ -123,7 +123,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `zugferd` | 2 | 256 | `belege` |
 | `routes_angebotsplus` | 3 | 122 | `main` |
 | `routes_angebottermin` | 3 | 129 | `routes_belege`, `routes_leadangebot` |
-| `routes_belege` | 3 | 507 | `main`, `routes_werkzeuge` |
+| `routes_belege` | 3 | 499 | `main`, `routes_werkzeuge` |
 | `routes_belegexport` | 3 | 111 | `main` |
 | `routes_leadangebot` | 3 | 354 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `routes_belege` und 2 weitere |
 | `routes_pakete` | 3 | 211 | `main`, `tipps` |

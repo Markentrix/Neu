@@ -87,7 +87,7 @@ def kunde_belege(kid: str, user: dict = Depends(require_admin)):
 
 @router.get("/kunden/{kid}/belege-vorlage")
 def vorlage(kid: str, user: dict = Depends(require_admin)):
-    """Positionsvorschlag aus den Buchungen des Kunden (Referenzkunden zahlen nichts)."""
+    """Positionsvorschlag aus den Buchungen des Kunden (Referenzkunden zahlen nichts: ohne Vorschlag, Zusatzbuchungen trägt man von Hand ein)."""
     with tx("admin") as cur:
         cur.execute("SELECT referenzkunde, firma, ansprechpartner FROM kunden WHERE id=%s", (kid,))
         k = cur.fetchone()
@@ -143,8 +143,6 @@ def anlegen(kid: str, data: BelegIn, user: dict = Depends(require_admin)):
         k = cur.fetchone()
         if not k:
             raise HTTPException(404, "Kunde nicht gefunden.")
-        if k["referenzkunde"] and data.art == "rechnung":
-            raise HTTPException(400, "Referenzkunden bekommen keine Rechnung.")
         f = rechtstexte.firma(cur)
         s = belege.summen(pos, f["mwst_satz"], f["kleinunternehmer"])
         cur.execute("""INSERT INTO belege (art, kunden_id, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, kaeufer_referenz, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id)
@@ -244,9 +242,6 @@ def ausstellen(bid: str, data: AusstellenIn | None = None, user: dict = Depends(
         f = rechtstexte.firma(cur)
         if b["art"] == "rechnung":
             belege.firmendaten_pruefen(f)
-            cur.execute("SELECT referenzkunde FROM kunden WHERE id=%s", (b["kunden_id"],))
-            if cur.fetchone()["referenzkunde"]:
-                raise HTTPException(400, "Referenzkunden bekommen keine Rechnung.")
             if b["brutto_cent"] <= 0:
                 raise HTTPException(400, "Eine Rechnung braucht einen Betrag größer 0.")
         elif not (f["name"] and f["strasse"]):
@@ -438,9 +433,6 @@ def aus_angebot(bid: str, user: dict = Depends(require_admin)):
             raise HTTPException(400, "Eine Rechnung kann nur aus einem ausgestellten Angebot erstellt werden.")
         if not b["kunden_id"]:
             raise HTTPException(400, "Das Angebot gehört noch zu einem Lead. Bitte erst den Lead in einen Kunden umwandeln.")
-        cur.execute("SELECT referenzkunde FROM kunden WHERE id=%s", (b["kunden_id"],))
-        if cur.fetchone()["referenzkunde"]:
-            raise HTTPException(400, "Referenzkunden bekommen keine Rechnung.")
         f = rechtstexte.firma(cur)
         s = belege.summen(b["positionen"], f["mwst_satz"], f["kleinunternehmer"])
         cur.execute("SELECT firma, ansprechpartner FROM kunden WHERE id=%s", (b["kunden_id"],))

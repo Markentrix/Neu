@@ -102,7 +102,9 @@ mv=_mustang("/var/tmp/pt/storno.pdf")
 if mv is not None: chk("E-Rechnung Storno: Mustang-Prüfung",mv)
 # Referenzkunde
 rk=a.post("/api/admin/kunden",json={"firma":"Ref Kunde","referenzkunde":True}).json()["id"]
-chk("referenz: keine rechnung",a.post(f"/api/admin/kunden/{rk}/belege",json={"art":"rechnung","positionen":[{"text":"x","menge":1,"preis_cent":100}]}).status_code==400)
+_rr=a.post(f"/api/admin/kunden/{rk}/belege",json={"art":"rechnung","positionen":[{"text":"Zusatzleistung Logo","menge":1,"preis_cent":15000}]})
+chk("referenz: Rechnung für Zusatzleistung möglich",_rr.status_code==200,_rr.text)
+_ra=a.post(f"/api/admin/belege/{_rr.json()['id']}/ausstellen"); chk("referenz: Rechnung ausstellen",_ra.status_code==200 and _ra.json()["nummer"].startswith("RE-"),_ra.text)
 chk("referenz: vorlage leer",a.get(f"/api/admin/kunden/{rk}/belege-vorlage").json()["positionen"]==[])
 chk("referenz: angebot ok",a.post(f"/api/admin/kunden/{rk}/belege",json={"art":"angebot","positionen":[{"text":"Website kostenlos","menge":1,"preis_cent":0}]}).status_code==200)
 # Kleinunternehmer

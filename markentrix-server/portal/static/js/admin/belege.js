@@ -166,7 +166,7 @@ async function neueRechnung() {
   const fuell = () => {
     const q = suche.value.trim().toLowerCase();
     wahl.replaceChildren(...kunden.filter(z => !q || (z.firma + ' ' + (z.kundennummer || '')).toLowerCase().includes(q)).slice(0, 300)
-      .map(z => h('option', { value: z.id, disabled: !!z.referenzkunde }, (z.kundennummer ? z.kundennummer + ' · ' : '') + z.firma + (z.referenzkunde ? ' (Referenzkunde, keine Rechnung möglich)' : ''))));
+      .map(z => h('option', { value: z.id }, (z.kundennummer ? z.kundennummer + ' · ' : '') + z.firma + (z.referenzkunde ? ' (Referenzkunde)' : ''))));
     const frei = [...wahl.options].find(o => !o.disabled); if (frei) frei.selected = true;
   };
   suche.oninput = fuell; fuell();
@@ -174,7 +174,7 @@ async function neueRechnung() {
   const neuForm = h('form', { class: 'stack', hidden: true, onsubmit: (e) => e.preventDefault() },
     h('div', { class: 'form2' }, feld('Firma / Name *', 'firma'), feld('Ansprechpartner', 'ansprechpartner')),
     feld('Straße und Hausnummer', 'strasse'), h('div', { class: 'form2' }, feld('PLZ', 'plz', { maxlength: 10 }), feld('Ort', 'ort')), feld('E-Mail (für den Rechnungsversand)', 'email', { type: 'email' }));
-  const liste = h('div', { class: 'stack' }, h('p', { class: 'small muted' }, kunden.length + ' Kunden. Referenzkunden (kostenlose Website gegen Nennung) sind für Rechnungen gesperrt.'), suche, wahl);
+  const liste = h('div', { class: 'stack' }, h('p', { class: 'small muted' }, kunden.length + ' Kunden. Bei Referenzkunden (kostenlose Website gegen Nennung) trägst du nur Zusatzleistungen ein.'), suche, wahl);
   const umschalter = h('button', { class: 'btn sec', type: 'button' }, '+ Neuen Kunden anlegen');
   let neu = false;
   umschalter.onclick = () => { neu = !neu; neuForm.hidden = !neu; liste.hidden = neu; umschalter.textContent = neu ? '← Zurück zur Kundenliste' : '+ Neuen Kunden anlegen'; weiter.textContent = neu ? 'Kunde anlegen und weiter zur Rechnung' : 'Weiter zum Entwurf'; m.textContent = ''; };
@@ -251,11 +251,11 @@ export async function belegEditor(id, kid, art) {
     if (b.art === 'angebot' && ['gestellt', 'versendet'].includes(b.status)) knoepfe.push(knopf('Gültigkeit verlängern', () => angebotVerlaengernDialog(id), 'sec'));
     if (b.art === 'angebot' && b.status === 'versendet') knoepfe.push(knopf('Erinnerung senden' + (b.erinnerungen ? ' (' + b.erinnerungen + '× erinnert)' : ''), () => angebotErinnerungDialog(id), 'sec'));
     if (b.art === 'angebot' && ['gestellt', 'versendet'].includes(b.status)) knoepfe.push(aktion('Angenommen', '/api/admin/belege/' + id + '/angebot-status', { status: 'angenommen' }, neu), aktion('Abgelehnt', '/api/admin/belege/' + id + '/angebot-status', { status: 'abgelehnt' }, neu, 'sec'));
-    if (b.art === 'angebot' && ['gestellt', 'versendet', 'angenommen'].includes(b.status) && !k.referenzkunde) knoepfe.push(aktion('Rechnung daraus erstellen', '/api/admin/belege/' + id + '/rechnung', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec'));
+    if (b.art === 'angebot' && ['gestellt', 'versendet', 'angenommen'].includes(b.status)) knoepfe.push(aktion('Rechnung daraus erstellen', '/api/admin/belege/' + id + '/rechnung', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec'));
   } else knoepfe.push(speichern);
   const titel = (b.storno_von ? 'Stornorechnung' : art === 'rechnung' || b.art === 'rechnung' ? 'Rechnung' : 'Angebot') + (b.nummer ? ' ' + b.nummer : ' (Entwurf)');
   return h('div', { class: 'stack' }, kopf(titel, belegPill(b), h('a', { class: 'btn sec small', href: '#kunde/' + (b.kunden_id || kid) }, '← ' + k.firma)),
-    k.referenzkunde && (b.art || art) === 'rechnung' ? h('div', { class: 'msg err' }, 'Das ist ein Referenzkunde – Rechnungen sind für Referenzkunden gesperrt.') : '', mailFehlerHinweis(b), m,
+    k.referenzkunde && (b.art || art) === 'rechnung' ? h('div', { class: 'msg' }, 'Referenzkunde: die Website ist kostenlos, bitte nur Zusatzleistungen berechnen.') : '', mailFehlerHinweis(b), m,
     h('div', { class: 'card' }, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Leistungszeitraum'), zeitraum)),
       (b.art || art) === 'rechnung' ? h('div', { style: 'margin-top:8px' }, h('label', {}, 'Käuferreferenz / Leitweg-ID (für die E-Rechnung)'), referenz) : '',
       h('label', {}, 'Einleitung (optional)'), einl, h('h3', { style: 'margin-top:16px' }, 'Positionen'), h('div', { class: 'small muted' }, 'Beschreibung · Menge · Einheit · Einzelpreis netto in €'), box,
