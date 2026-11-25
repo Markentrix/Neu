@@ -733,11 +733,11 @@ export function stapelTabellen() {
  * Feste Menüleiste unten am Handy (Admin und Partnerportal): bis zu vier wichtigste Seiten plus „Mehr“ mit dem ganzen Menü.
  * gruppen: [[Titel, [[id, Name, Zähler]], offen]] wie bei navGruppen; feste: Seiten-IDs in Wunschreihenfolge.
  */
-export function mobilLeiste({ aktiv, gruppen, feste, icons, kurz = {}, schluessel, extra = [] }) {
+export function mobilLeiste({ aktiv, gruppen, feste, icons, kurz = {}, schluessel, extra = [], kachel = false }) {
   const alle = gruppen.flatMap(g => g[1]), ids = alle.map(p => p[0]);
   const fest = feste.filter(i => ids.includes(i)).slice(0, 4), zahl = (i) => (alle.find(p => p[0] === i) || [])[2] || 0;
   const rest = ids.filter(i => !fest.includes(i)), mehrZahl = rest.reduce((n, i) => n + zahl(i), 0);
-  const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt' }, navGruppen(gruppen.map(([titel, p]) => [titel, p, true]), aktiv, schluessel + '-mehr'), extra,
+  const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt' + (kachel ? ' kachel' : '') }, navGruppen(gruppen.map(([titel, p]) => [titel, p, true]), aktiv, schluessel + '-mehr'), extra,
     h('div', { class: 'brandzeile', style: 'margin-top:10px' }, themeKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
   return h('nav', { class: 'tabbar', 'aria-label': 'Hauptmenü' },
     fest.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null },
@@ -844,4 +844,28 @@ export function anrufNachfrage(cfg) {
   }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nachfragen(); });
   window.addEventListener('pageshow', () => { setTimeout(nachfragen, 1200); });
+}
+
+/**
+ * Am Handy (bis 700 px) wird jede Karte mit Überschrift zu einem Abschnitt, der sich mit einem Tipp öffnet; oben stehen Schnellzugriffe.
+ * @param {HTMLElement} wurzel Seite mit Karten als direkten Kindern
+ * @param {string[][]} schnell Symbol, Beschriftung, Anfang der Kartenüberschrift
+ * @param {RegExp|null} offen Karten, die zu Beginn offen sind
+ */
+export function abschnitte(wurzel, schnell = [], offen = null) {
+  if (!window.matchMedia('(max-width: 700px)').matches) return wurzel;
+  const karten = [...wurzel.children].filter(c => c.classList.contains('card') && c.firstElementChild && c.firstElementChild.tagName === 'H2');
+  /** @type {{titel: string, det: HTMLDetailsElement}[]} */
+  const liste = [];
+  karten.forEach(k => {
+    const kopf = k.firstElementChild, titel = (kopf.textContent || '').trim(), rest = h('div', { class: 'abschnittinhalt' }, ...[...k.childNodes].slice(1));
+    const det = /** @type {HTMLDetailsElement} */ (h('details', { class: 'card abschnitt' }, h('summary', {}, kopf), rest));
+    if (offen && offen.test(titel)) det.open = true;
+    if (k.id) det.id = k.id;
+    liste.push({ titel, det }); k.replaceWith(det);
+  });
+  const kacheln = schnell.map(([ic, text, t]) => ({ ic, text, ziel: liste.find(x => x.titel.startsWith(t)) })).filter(x => x.ziel).map(({ ic, text, ziel }) =>
+    h('button', { type: 'button', onclick: () => { if (!ziel) return; ziel.det.open = true; ziel.det.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, h('span', { 'aria-hidden': 'true' }, ic), text));
+  if (kacheln.length) wurzel.children[0].after(h('div', { class: 'schnell' }, kacheln));
+  return wurzel;
 }

@@ -1,4 +1,5 @@
-import { h, leerZustand, themeKnopf, navGruppen, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf, mobilLeiste } from '../common.js';
+import { h, leerZustand, themeKnopf, navGruppen, api, euro, melde, abmelden, rechtFuss, glocke, sucheKnopf, neuKnopf, mobilLeiste, abschnitte } from '../common.js';
+export { abschnitte };
 import { hilfeSuche } from '../hilfe.js';
 
 
@@ -25,9 +26,15 @@ function befehle() {
   return [...ziele.filter(([, s]) => erlaubt(String(s).split('?')[0])).map(([titel, s, neu]) => ({ titel: String(titel), text: neu ? 'Anlegen' : 'Öffnen', link: '#' + s, neu: !!neu })), { titel: 'Abmelden', text: 'Sitzung beenden', aktion: () => abmelden() }];
 }
 
+/** Feste Kopfzeile am Handy: Zurück-Pfeil (außer auf den vier Hauptseiten) und Name des Bereichs. */
+function appleiste(aktiv) {
+  const hauptseiten = ['meintag', 'postfach', 'kunden', 'leads', 'uebersicht'], n = NAV.find(x => x[0] === aktiv);
+  return h('div', { class: 'appleiste' }, hauptseiten.includes(aktiv) && !location.hash.includes('/') ? '' : h('button', { type: 'button', class: 'zurueck', 'aria-label': 'Zurück', onclick: () => { if (history.length > 1) history.back(); else location.hash = '#meintag'; } }, '‹'), h('b', {}, n ? n[1] : 'Admin'));
+}
+
 export function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids, offen]) => [titel, NAV.filter(n => ids.includes(n[0]) && erlaubt(n[0])).map(n => [n[0], n[1], zaehlerAdmin[n[0]] || 0]), offen]);
-  return h('div', { class: 'shell mobilleiste kompakt' },
+  return h('div', { class: 'shell mobilleiste kompakt kundeapp adminapp' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-logo-farbe-dunkel.svg', alt: 'Markentrix', width: 160, height: 26 })), 'Admin'),
       h('div', { class: 'brandzeile' }, sucheKnopf(befehle()), glocke(), themeKnopf()),
@@ -36,8 +43,8 @@ export function gerüst(aktiv, inhalt) {
       h('a', { class: 'nav', href: location.origin.replace('//portal.', '//panel.'), target: '_blank', rel: 'noopener' }, 'Server-Dashboard ↗'),
       h('div', { class: 'grow' }),
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
-    h('main', { class: 'main' }, hilfeSuche('admin'), ich && !ich.zwei_faktor && !zweiFaktorWeg() ? h('div', { class: 'msg info row small', style: 'align-items:center;gap:8px;padding:6px 10px' }, h('span', { class: 'grow' }, 'Noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten')), h('button', { class: 'btn sec small', 'aria-label': 'Hinweis ausblenden', onclick: (e) => { try { sessionStorage.setItem('mk-2fa-weg', '1'); } catch { /* egal */ } e.target.closest('.msg').remove(); } }, '×')) : '', inhalt, rechtFuss()),
-    mobilLeiste({ aktiv, gruppen, feste: ['meintag', 'postfach', 'kunden', 'leads'], icons: { meintag: '⌂', postfach: '✉', kunden: '▦', leads: '☎', freigaben: '✔', aufgaben: '☑' }, kurz: { meintag: 'Heute', postfach: 'Nachrichten' }, schluessel: 'admin' }));
+    h('main', { class: 'main' }, appleiste(aktiv), hilfeSuche('admin'), ich && !ich.zwei_faktor && !zweiFaktorWeg() ? h('div', { class: 'msg info row small', style: 'align-items:center;gap:8px;padding:6px 10px' }, h('span', { class: 'grow' }, 'Noch keine Zwei-Faktor-Anmeldung. ', h('a', { href: '#einstellungen' }, 'Jetzt einrichten')), h('button', { class: 'btn sec small', 'aria-label': 'Hinweis ausblenden', onclick: (e) => { try { sessionStorage.setItem('mk-2fa-weg', '1'); } catch { /* egal */ } e.target.closest('.msg').remove(); } }, '×')) : '', inhalt, rechtFuss()),
+    mobilLeiste({ aktiv, gruppen, feste: ['meintag', 'postfach', 'kunden', 'leads'], kachel: true, icons: { meintag: '⌂', postfach: '✉', kunden: '▦', leads: '☎', freigaben: '✔', aufgaben: '☑' }, kurz: { meintag: 'Heute', postfach: 'Nachrichten' }, schluessel: 'admin' }));
 }
 export function tabelle(spalten, zeilen, leer = 'Nichts vorhanden.') {
   if (!zeilen.length) return leerZustand(leer);

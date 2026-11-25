@@ -1,6 +1,6 @@
 import { listenKnopf, h, api, csvLaden, datum, dialog, zeit, euro, melde, formular, el, rueckgaengig } from '../common.js';
 import { belegeKarte } from './belege.js';
-import { V, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
+import { V, abschnitte, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf, leerzu, mailHinweis, paketListe, pill, select, sicher, tabelle, zeige } from './kern.js';
 import { erklaerungBox } from './fehlerhilfe.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
 import { zeitachseKarte } from './start.js';
@@ -527,7 +527,7 @@ export async function kundeDetail(kid) {
     } catch (x) { melde(mdaten, x.message); }
   }
 
-  return h('div', { class: 'stack' },
+  return abschnitte(h('div', { class: 'stack' },
     kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, listenKnopf('kunden')),
     await websiteProblemKarte(kid),
     await zeitachseKarte(kid),
@@ -562,6 +562,7 @@ export async function kundeDetail(kid) {
     wissenKarte(kid),
     leistungsKarte(kid),
     aufgabenpaketKarte(kid),
-    h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten));
+    h('div', { class: 'card' }, h('h2', {}, 'Daten des Kunden'), tabs, mdaten)),
+    [['👤', 'Stammdaten', 'Stammdaten'], ['🧩', 'Module', 'Module des Kunden'], ['🔑', 'Portal-Zugang', 'Portal-Zugang'], ['📅', 'Buchungen', 'Buchungen'], ['🌐', 'Websites', 'Websites'], ['📑', 'Dokumente', 'Dokumente'], ['🛠️', 'Website-Dienste', 'Website-Dienste'], ['🕘', 'Historie', 'Änderungshistorie']], /^Stammdaten/);
 }
 

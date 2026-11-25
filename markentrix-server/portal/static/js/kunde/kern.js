@@ -1,4 +1,5 @@
-import { h, api, datum, toast, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke } from '../common.js';
+import { h, api, datum, toast, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke, abschnitte } from '../common.js';
+export { abschnitte };
 import { hilfeSuche } from '../hilfe.js';
 import { installBanner } from '../anleitung.js';
 
@@ -171,26 +172,3 @@ export async function zeige() {
 }
 
 
-/**
- * Am Handy (bis 700 px) wird jede Karte mit Überschrift zu einem Abschnitt, der sich mit einem Tipp öffnet; oben stehen Schnellzugriffe.
- * @param {HTMLElement} wurzel Seite mit Karten als direkten Kindern
- * @param {string[][]} schnell Symbol, Beschriftung, Anfang der Kartenüberschrift
- * @param {RegExp|null} offen Karten, die zu Beginn offen sind
- */
-export function abschnitte(wurzel, schnell = [], offen = null) {
-  if (!window.matchMedia('(max-width: 700px)').matches) return wurzel;
-  const karten = [...wurzel.children].filter(c => c.classList.contains('card') && c.firstElementChild && c.firstElementChild.tagName === 'H2');
-  /** @type {{titel: string, det: HTMLDetailsElement}[]} */
-  const liste = [];
-  karten.forEach(k => {
-    const kopf = k.firstElementChild, titel = (kopf.textContent || '').trim(), rest = h('div', { class: 'abschnittinhalt' }, ...[...k.childNodes].slice(1));
-    const det = /** @type {HTMLDetailsElement} */ (h('details', { class: 'card abschnitt' }, h('summary', {}, kopf), rest));
-    if (offen && offen.test(titel)) det.open = true;
-    if (k.id) det.id = k.id;
-    liste.push({ titel, det }); k.replaceWith(det);
-  });
-  const kacheln = schnell.map(([ic, text, t]) => ({ ic, text, ziel: liste.find(x => x.titel.startsWith(t)) })).filter(x => x.ziel).map(({ ic, text, ziel }) =>
-    h('button', { type: 'button', onclick: () => { if (!ziel) return; ziel.det.open = true; ziel.det.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, h('span', { 'aria-hidden': 'true' }, ic), text));
-  if (kacheln.length) wurzel.children[0].after(h('div', { class: 'schnell' }, kacheln));
-  return wurzel;
-}
