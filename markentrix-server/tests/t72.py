@@ -138,11 +138,11 @@ async def main():
             await pg.goto(B+"/"); await pg.fill("#e",mail); await pg.fill("#p",pw_); await pg.click("#b"); await pg.wait_for_url("**/"+ziel+"*")
             await pg.evaluate(TOUR); await pg.wait_for_timeout(400); return pg
         sql(f"insert into kunden_umfragen (kunden_id, art) select '{kB}','quartal' where not exists (select 1 from kunden_umfragen where kunden_id='{kB}' and beantwortet_am is null and not verfallen)")
-        pk=await seite(mB,"InhaberPasswort1","app"); await pk.goto(B+"/app#heute"); await pk.reload(); await pk.wait_for_selector("h2:has-text('Wie zufrieden bist du mit Markentrix?')",timeout=8000)
+        pk=await seite(mB,"InhaberPasswort1","app"); await pk.goto(B+"/app#heute"); await pk.reload(); await pk.wait_for_selector("h2:has-text('Wie zufrieden bist du mit Markentrix?')",state="attached",timeout=8000); await pk.evaluate("document.querySelectorAll('details.heutemehr').forEach(d=>d.open=true)")
         chk("UI Kunde: Umfrage mit 11 Knöpfen auf der Startseite",await pk.locator("button[aria-label$=' von 10']").count()==11)
         await pk.locator("button[aria-label='9 von 10']").click(); await pk.wait_for_selector("h2:has-text('Danke für deine Rückmeldung!')",timeout=5000)
         chk("UI Kunde: Dank mit Bewertungslink bei 9",await pk.get_by_role("link",name="Bewertung schreiben").count()==1)
-        await pk.goto(B+"/app#einstellungen"); await pk.reload(); await pk.wait_for_selector("h2:has-text('Meine Einwilligungen')",timeout=8000)
+        await pk.goto(B+"/app#einstellungen"); await pk.reload(); await pk.wait_for_selector("h2:has-text('Meine Einwilligungen')",state="attached",timeout=8000); await pk.evaluate("document.querySelectorAll('details.abschnitt').forEach(d=>d.open=true)")
         chk("UI Kunde: Einwilligungen mit Referenz-Hinweis",await pk.get_by_text("Zufriedenheitsumfrage").count()>=1 and await pk.get_by_text("Referenz").count()>=1)
         pv=await seite(f"paul{sfx}@v.de","PaulPasswort123456","vertrieb",420); await pv.goto(B+"/vertrieb#konto"); await pv.reload(); await pv.wait_for_selector("h2:has-text('Nachfass-Erinnerung')",timeout=8000)
         chk("UI Vertrieb: Erinnerung schaltbar",await pv.get_by_text("Tägliche Erinnerung per Mail").count()==1)

@@ -55,7 +55,7 @@ async def main():
             errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))
             await pg.goto(B+"/"); await pg.fill("#e",mA); await pg.fill("#p","InhaberPasswort1"); await pg.click("#b"); await pg.wait_for_url("**/app*")
             await pg.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})")
-            await pg.goto(B+"/app#shop"); await pg.wait_for_selector("h1:has-text('Online-Shop')",timeout=8000); await pg.wait_for_timeout(600)
+            await pg.goto(B+"/app#shop"); await pg.wait_for_selector("h1:has-text('Online-Shop')",timeout=8000); await pg.wait_for_timeout(600); await pg.evaluate("document.querySelectorAll('details.abschnitt').forEach(d=>d.open=true)"); await pg.wait_for_timeout(200)
             chk(f"{w}px{' dunkel' if dunkel else ''}: Shop-Seite zeigt Bestellungen und Artikel",await pg.locator("text=Bestellungen (3 offen)").count()==1 and await pg.locator("summary:has-text('Artikel 3')").count()==1)
             chk(f"{w}px{' dunkel' if dunkel else ''}: Entwurf gekennzeichnet",await pg.locator("summary:has-text('(Entwurf)')").count()==2)
             for s in (None,"artikel","bestellung"):

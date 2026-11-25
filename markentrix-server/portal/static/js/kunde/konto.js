@@ -1,5 +1,5 @@
 import { h, api, datum, zeit, melde, passkeyKarte, zweiFaktorKarte, pushKarte, formular, dialog } from '../common.js';
-import { inhaber, tabelle, statusPill, zeige, V, hat } from './kern.js';
+import { inhaber, tabelle, statusPill, zeige, V, hat, abschnitte } from './kern.js';
 import { anleitungSeite } from '../anleitung.js';
 
 function anschriftKarte(k) {
@@ -80,6 +80,8 @@ async function einwilligungenKarte() {
     h('p', {}, ref, ' ', e.referenz ? h('a', { href: '#vertraege' }, 'Ansehen oder widerrufen') : ''));
 }
 
+const SCHNELL_KONTO = [['👤', 'Kontaktdaten', 'Kontaktdaten'], ['🔔', 'Benachrichtigungen', 'E-Mail-Benachrichtigungen'], ['🔑', 'Passwort', 'Passwort'], ['🏖️', 'Vertretung', 'Vertretung'], ['🧾', 'Rechnungsanschrift', 'Rechnungsanschrift'], ['📄', 'Daten & Kündigung', 'Meine Daten']];
+
 V.einstellungen = async () => {
   const p = await api('/api/kunde/profil');
   const vt = await api('/api/kunde/vertretung').catch(() => null), mv = h('div');
@@ -104,7 +106,7 @@ V.einstellungen = async () => {
     h('div', {}, h('label', {}, 'Aktuelles Passwort'), h('input', { name: 'alt', type: 'password', autocomplete: 'current-password', required: true })),
     h('div', {}, h('label', {}, 'Neues Passwort (mind. 10 Zeichen)'), h('input', { name: 'neu', type: 'password', autocomplete: 'new-password', minlength: 10, required: true })),
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Passwort ändern')));
-  return h('div', { class: 'stack' },
+  return abschnitte(h('div', { class: 'stack' },
     h('div', { class: 'card' }, h('h2', {}, 'Dein Konto'), h('p', {}, 'Kundennummer ', h('b', {}, k.kundennummer), ' · Paket ', h('b', {}, k.paket || '–'), ' · Login ', h('b', {}, p.login))),
     h('div', { class: 'card' }, h('h2', {}, 'Kontaktdaten'), m1, f1),
     inhaber() ? anschriftKarte(k) : '',
@@ -115,7 +117,7 @@ V.einstellungen = async () => {
         h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Speichern')))) : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Benachrichtigungen'), h('p', { class: 'small muted' }, 'Wir schreiben dir, wenn etwas Wichtiges passiert.'), m3, f3),
     h('div', { class: 'card' }, h('h2', {}, 'Passwort'), m2, f2), pushKarte('kunde'), passkeyKarte(), zweiFaktorKarte(), inhaber() ? await statusKarte() : '', inhaber() ? await einwilligungenKarte() : '', inhaber() ? datenKarte() : '',
-    h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.')));
+    h('div', { class: 'card' }, h('h2', {}, 'Gebuchte Leistungen'), tabelle([['Leistung', z => z.name], ['Status', z => statusPill(z.status)], ['Beginn', z => datum(z.beginn)], ['Mindestlaufzeit bis', z => datum(z.mindestlaufzeit_ende)]], p.buchungen, 'Noch nichts gebucht.'))), SCHNELL_KONTO, /^Dein Konto/);
 };
 
 V.status = async () => {

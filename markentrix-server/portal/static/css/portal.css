@@ -514,3 +514,9 @@ details.abschnitt[open]>summary::after{transform:rotate(90deg)}
 details.abschnitt>.abschnittinhalt{padding:0 16px 16px}
 @media(max-width:900px){.mehrblatt.kachel a.nav.on{background:var(--grad);color:#fff;border-color:transparent}}
 @media(max-width:900px){.mehrblatt.kachel .navkopf{display:flex;justify-content:space-between;align-items:center}}
+
+/* Feste Speichern-Leiste am Handy: der Hauptknopf eines Abschnitts bleibt über der unteren Leiste sichtbar, solange das Formular im Bild ist */
+@media(max-width:700px){
+  .shell.kundeapp details.abschnitt .abschnittinhalt form>:last-child:has(>button:not(.sec)),
+  .shell.kundeapp details.abschnitt .abschnittinhalt>.row:has(>.btn:not(.sec)){position:sticky;bottom:calc(66px + env(safe-area-inset-bottom));z-index:20;background:var(--surface);padding:8px 0;margin-top:8px;border-top:1px solid var(--line);box-shadow:0 -6px 10px -8px rgba(0,0,0,.25)}
+}

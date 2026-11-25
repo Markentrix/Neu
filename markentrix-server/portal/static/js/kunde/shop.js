@@ -1,5 +1,5 @@
 import { h, api, melde, zeit, toast, groesse } from '../common.js';
-import { V, zeige } from './kern.js';
+import { V, zeige, abschnitte } from './kern.js';
 
 const EUR = (z) => Number(z).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 const STATUS = { eingegangen: ['warn', 'Eingegangen'], bestaetigt: ['ok', 'Bestätigt'], bezahlt: ['ok', 'Bezahlt'], im_druck: ['ok', 'In Produktion'], versendet: ['ok', 'Versendet'], abholbereit: ['ok', 'Abholbereit'], abgeholt: ['', 'Abgeholt'], storniert: ['bad', 'Storniert'] };
@@ -184,5 +184,6 @@ V.shop = async () => {
     h('p', { class: 'small muted' }, 'Gutschein-Bestellungen findest du unter „Website-Dienste“ → Gutscheine, dort sendest du auch den Code. Gesendete Codes können Kundinnen und Kunden an der Kasse des Shops einlösen. Der Rest bleibt stehen, bis der Gutschein abläuft (Gültig-Monate ab dem Versand des Codes).'), em,
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichernE }, 'Speichern')));
 
-  return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, 'Online-Shop')), kopf, bestellungen, artikelKarte, listen, einstellungen);
+  return abschnitte(h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, 'Online-Shop')), kopf, bestellungen, artikelKarte, listen, einstellungen),
+    [['📦', 'Bestellungen', 'Bestellungen'], ['🛍️', 'Artikel', 'Artikel'], ['🎨', 'Farben & Kategorien', 'Farben'], ['🎟️', 'Gutscheine & Versand', 'Einstellungen']], /^Bestellungen \(/);
 };

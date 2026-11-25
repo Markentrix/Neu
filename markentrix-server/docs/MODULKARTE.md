@@ -15,7 +15,7 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
 | `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 148 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 37 weitere |
-| `fehlerhilfe` | 1 | 142 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
+| `fehlerhilfe` | 1 | 145 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
 | `mailer` | 1 | 494 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
@@ -172,7 +172,7 @@ Heute-Seite, Anfragen, Briefing, Onboarding, Zusammenarbeit, Wissen, Berichte, D
 | `routes_fruehwarnung` | 3 | 101 | `jobs`, `main`, `routes_dashboard`, `t67.py` |
 | `routes_hilfe` | 3 | 83 | `main` |
 | `routes_kunde` | 3 | 592 | `main` |
-| `routes_kundenampel` | 3 | 69 | `main` |
+| `routes_kundenampel` | 3 | 72 | `main` |
 | `routes_kundenwerkzeuge` | 3 | 269 | `main` |
 | `routes_onboarding` | 3 | 131 | `main` |
 | `routes_telefon` | 3 | 210 | `main` |
