@@ -161,5 +161,7 @@ V.heute = async () => {
   const hero = h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Schritt'),
     schritt ? [h('h2', {}, schritt.titel), h('p', { class: 'muted' }, schritt.text), schritt.link ? h('a', { class: 'btn', href: schritt.link }, schritt.knopf) : h('button', { class: 'btn', onclick: schritt.tun }, schritt.knopf)]
       : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf dich. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
-  return h('div', { class: 'stack' }, hero, await ersteWocheKarte(), kopf, meld, await umfrageKarte(), karteAnfragen, karteTermine, entscheidungen, bew, await wertKarte());
+  const weitere = [await umfrageKarte(), bew, await wertKarte()].filter(Boolean);
+  const mehr = weitere.length ? h('details', { class: 'heutemehr' }, h('summary', {}, 'Weitere Infos und Rückmeldung'), h('div', { class: 'stack' }, weitere)) : '';
+  return h('div', { class: 'stack' }, hero, await ersteWocheKarte(), meld, entscheidungen, karteAnfragen, karteTermine, kopf, mehr);
 };

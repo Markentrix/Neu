@@ -8,7 +8,7 @@ V.belege = async () => {
   const aktion = (z) => h('span', { class: 'row' }, h('a', { class: 'btn sec small', href: '/api/kunde/belege/' + z.id + '/pdf' }, 'PDF'),
     z.art === 'angebot' && ['gestellt', 'versendet'].includes(z.status) ? h('button', { class: 'btn small', onclick: async () => { if (!confirm('Angebot ' + z.nummer + ' verbindlich annehmen?')) return; try { await api('/api/kunde/belege/' + z.id + '/annehmen', { method: 'POST' }); melde(m, 'Danke! Das Angebot ist angenommen.', 'ok'); setTimeout(() => location.reload(), 900); } catch (x) { melde(m, x.message); } } }, 'Annehmen') : '');
   const mandat = await mandatKarte();
-  return h('div', { class: 'stack' }, mandat, h('div', { class: 'card' }, h('h2', {}, 'Angebote & Rechnungen'), m, tabelle([['Nummer', z => z.nummer], ['Art', art], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => euro(z.brutto_cent)], ['Status', st], ['', aktion]], d, 'Noch keine Angebote oder Rechnungen.')));
+  return h('div', { class: 'stack' }, mandat, h('div', { class: 'card' }, h('h2', {}, 'Angebote & Rechnungen'), m, tabelle([['Nummer', z => z.nummer], ['Art', art], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => euro(z.brutto_cent)], ['Status', st], ['', aktion]], d, 'Noch keine Rechnungen oder Angebote von Markentrix. Neue Belege erscheinen hier und kommen auch per E-Mail.')));
 };
 
 async function mandatKarte() {

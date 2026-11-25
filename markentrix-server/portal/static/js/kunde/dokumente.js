@@ -38,12 +38,12 @@ V.unterlagen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Dokumente'), h('p', { class: 'small muted' }, 'Verträge, Briefings, Logos und Material an einem sicheren Ort, für dich und das Markentrix-Team. Bitte lade hier keine Passwörter hoch, die schickst du uns nicht per Datei.'),
       darfSchreiben() ? h('div', {}, m, h('div', { class: 'row' }, kat, datei, h('button', { class: 'btn', onclick: hoch }, 'Hochladen'))) : '',
       tabelle([['Datei', z => h('a', { href: '/api/kunde/dateien/' + z.id, target: '_blank', rel: 'noopener' }, z.name)], ['Art', z => d.kategorien[z.kategorie] || '–'], ['Größe', z => groesse(z.groesse)], ['Von', z => z.von === 'team' ? 'Markentrix' : 'Dir'], ['Datum', z => zeit(z.erstellt_am)],
-        ['', z => darfSchreiben() && z.von === 'kunde' ? h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen') : '']], d.dateien, 'Noch keine Dokumente.')));
+        ['', z => darfSchreiben() && z.von === 'kunde' ? h('button', { class: 'btn bad small', onclick: () => weg(z) }, 'Löschen') : '']], d.dateien, 'Noch keine Dokumente. Hier erscheinen Dateien, die du oder dein Team hochladen, zum Beispiel Preislisten oder Verträge.')));
 };
 
 V.dokumente = async () => {
   const d = await api('/api/kunde/dokumente');
   return h('div', { class: 'stack' },
-    h('div', { class: 'card' }, h('h2', {}, 'Angebote'), tabelle([['Nummer', z => z.nummer], ['Titel', z => z.titel], ['Betrag', z => euro(z.betrag_cent)], ['Gültig bis', z => datum(z.gueltig_bis)], ['Status', z => statusPill(z.status)]], d.angebote, 'Keine Angebote.')),
-    h('div', { class: 'card' }, h('h2', {}, 'Verträge'), tabelle([['Titel', z => z.titel], ['Beginn', z => datum(z.beginn)], ['Ende', z => datum(z.ende)], ['Status', z => statusPill(z.status)]], d.vertraege, 'Keine Verträge.')));
+    h('div', { class: 'card' }, h('h2', {}, 'Angebote'), tabelle([['Nummer', z => z.nummer], ['Titel', z => z.titel], ['Betrag', z => euro(z.betrag_cent)], ['Gültig bis', z => datum(z.gueltig_bis)], ['Status', z => statusPill(z.status)]], d.angebote, 'Noch keine Angebote. Angebote, die du an deine Kunden schickst, siehst du hier mit Status.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Verträge'), tabelle([['Titel', z => z.titel], ['Beginn', z => datum(z.beginn)], ['Ende', z => datum(z.ende)], ['Status', z => statusPill(z.status)]], d.vertraege, 'Keine Verträge hinterlegt.')));
 };

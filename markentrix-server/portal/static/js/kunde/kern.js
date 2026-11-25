@@ -50,6 +50,33 @@ const GRUPPEN = [
   ['Mein Betrieb', ['assistent', 'wissen', 'website', 'status', 'dienste', 'shop', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
   ['Verwaltung', ['willkommen', 'belege', 'avv', 'vertraege', 'team', 'pakete', 'hilfe', 'einstellungen'], false],
 ];
+/** Ein Satz „Wozu ist das hier?“ unter der Kopfzeile jeder Seite. */
+const HINWEISE = {
+  heute: 'Hier steht, was jetzt von dir gebraucht wird. Erledige die Karte oben, den Rest kannst du später ansehen.',
+  uebersicht: 'Dein Monat in Zahlen: was Markentrix für dich erreicht hat.',
+  briefing: 'Der Bericht deines Teams: was zuletzt passiert ist und was als Nächstes geplant ist.',
+  nachrichten: 'Hier schreibst du direkt mit dem Markentrix-Team. Antworten kommen auch per E-Mail.',
+  freigaben: 'Texte und Beiträge, die wir für dich vorbereitet haben. Du bestätigst sie, erst dann wird veröffentlicht.',
+  anfragen: 'Alle Nachrichten und Rückrufwünsche von Kunden. Beantworte sie und hake sie dann ab.',
+  termine: 'Gebuchte und eingetragene Termine als Liste.',
+  kalender: 'Dieselben Termine im Kalender, mit Sperrzeiten und Urlaub.',
+  stamm: 'Deine Kunden, die schon öfter bei dir waren.',
+  bewertungen: 'Google-Bewertungen: bitte zufriedene Kunden darum und sieh, was angekommen ist.',
+  dokumente: 'Angebote und Verträge, die du an deine Kunden geschickt hast.',
+  unterlagen: 'Dateien, die du und das Team hier ablegen, zum Beispiel Logos, Preislisten, Verträge.',
+  auswertung: 'Zahlen und Verlauf der letzten Monate, auch zum Ausdrucken.',
+  berichte: 'Monatsberichte zum Herunterladen.',
+  belege: 'Rechnungen und Angebote von Markentrix an dich.',
+  anrufe: 'Anrufe, die dein Telefon-Assistent angenommen hat.',
+  website: 'Deine Website und die Inhalte, die du selbst ändern kannst.',
+  dienste: 'Kontaktformular, Terminbuchung und Statistik auf deiner Website: hier stellst du sie ein.',
+  shop: 'Bestellungen, Artikel und Einstellungen deines Online-Shops.',
+  avv: 'Der Vertrag zum Datenschutz zwischen dir und Markentrix. Bitte einmal prüfen und bestätigen.',
+  team: 'Wer in deinem Betrieb das Portal nutzen darf, und was jeder sehen kann.',
+  pakete: 'Dein aktuelles Paket und was du dazubuchen kannst.',
+  hilfe: 'Antworten auf häufige Fragen. Findest du nichts, schreib uns.',
+  einstellungen: 'Dein Passwort, Benachrichtigungen und Sicherheit.',
+};
 export const inhaber = () => start.kunden_rolle === 'inhaber';
 const EMPFANG = ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'nachrichten', 'hilfe', 'einstellungen'];
 export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'dienste', 'shop', 'vertraege', 'wissen', 'pakete'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
@@ -82,7 +109,7 @@ export function gerüst(aktiv, inhalt) {
         h('h1', {}, k.firma),
         h('span', { class: 'pill' }, 'Kundennr. ' + k.kundennummer),
         h('span', { class: 'pill ok' }, '● Online')),
-      hilfeSuche('kunde'), installBanner(), inhalt, rechtFuss()),
+      hilfeSuche('kunde'), installBanner(), HINWEISE[aktiv] ? h('p', { class: 'seitenhinweis small muted' }, HINWEISE[aktiv]) : '', inhalt, rechtFuss()),
     tabbar(aktiv));
 }
 

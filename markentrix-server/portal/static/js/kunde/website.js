@@ -8,7 +8,7 @@ V.website = async () => {
     h('ol', {}, h('li', {}, 'Melde dich bei deinem Domain-Anbieter an und öffne die DNS-Einstellungen deiner Domain.'), h('li', {}, 'Wir schicken dir die genauen Werte (A-Eintrag für „@“ und „www“) auf Wunsch per Nachricht.'), h('li', {}, 'Trage sie dort ein und gib uns Bescheid. Die Umstellung kann bis zu einigen Stunden dauern, wir prüfen sie automatisch.')),
     h('p', {}, h('a', { class: 'btn', href: '#nachrichten' }, 'Anleitung anfordern oder Hilfe holen')), h('p', { class: 'small muted' }, 'Du kannst dich auch einfach melden, dann übernehmen wir das gemeinsam am Telefon.'));
   return h('div', { class: 'stack' }, domainKarte,
-    h('div', { class: 'card' }, h('h2', {}, 'Websites'), tabelle([['Domain', z => h('a', { href: 'https://' + z.domain, target: '_blank', rel: 'noopener' }, z.domain)], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Zuletzt aktualisiert', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Noch keine Website.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Websites'), tabelle([['Domain', z => h('a', { href: 'https://' + z.domain, target: '_blank', rel: 'noopener' }, z.domain)], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Zuletzt aktualisiert', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Noch keine Website verknüpft. Dein Team richtet sie mit dir ein, schreib uns einfach über „Nachrichten“.')),
     h('div', { class: 'card' }, h('h2', {}, 'Projekte'), tabelle([['Titel', z => z.titel], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Link', z => z.url && h('a', { href: z.url, target: '_blank', rel: 'noopener' }, 'Öffnen')]], d.projekte, 'Keine Projekte.')));
 };
 
@@ -79,5 +79,5 @@ V.wochenangebote = async () => {
 
 V.werbung = async () => {
   const d = await api('/api/kunde/berichte');
-  return h('div', { class: 'card' }, h('h2', {}, 'Werbung & Berichte'), tabelle([['Zeitraum', z => [datum(z.zeitraum_von), ' – ', datum(z.zeitraum_bis)].join('')], ['Titel', z => z.titel], ['Art', z => z.art], ['Erstellt', z => datum(z.erstellt_am)]], d, 'Noch keine Berichte.'));
+  return h('div', { class: 'card' }, h('h2', {}, 'Werbung & Berichte'), tabelle([['Zeitraum', z => [datum(z.zeitraum_von), ' – ', datum(z.zeitraum_bis)].join('')], ['Titel', z => z.titel], ['Art', z => z.art], ['Erstellt', z => datum(z.erstellt_am)]], d, 'Noch keine Berichte. Sobald Werbung läuft, bekommst du hier jeden Monat einen Bericht.'));
 };

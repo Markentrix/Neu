@@ -70,7 +70,7 @@ V.shop = async () => {
           h('a', { class: 'btn sec', href: 'mailto:' + b.email + '?subject=' + encodeURIComponent('Ihre Bestellung ' + b.ref) }, 'Mail schreiben'))));
   };
   const bestellungen = h('div', { class: 'card' }, h('h2', {}, 'Bestellungen' + (offen ? ' (' + offen + ' offen)' : '')),
-    d.bestellungen.length ? d.bestellungen.map(bestellung) : h('p', { class: 'muted' }, 'Noch keine Bestellung eingegangen.'),
+    d.bestellungen.length ? d.bestellungen.map(bestellung) : h('p', { class: 'muted' }, 'Noch keine Bestellung. Sobald jemand im Shop bestellt, erscheint sie hier und du bekommst eine E-Mail.'),
     h('p', { class: 'small muted' }, 'Bei einer neuen Bestellung bekommst du eine Meldung und eine Mail. Zahlung per PayPal prüfst du selbst in deinem PayPal-Konto und stellst die Bestellung dann auf „Bezahlt“. Ist alles mit einem Gutschein bezahlt, steht sie schon auf „Bezahlt“. Storniert ein Betrieb eine Bestellung, bekommt ein eingelöster Gutschein sein Guthaben zurück.'));
 
   // ------------------------------------------------------------ Artikel

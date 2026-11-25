@@ -448,3 +448,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid #964F08;outline-offset
 .side .brand .kundenlogo{background:#F7F4EE;padding:2px 4px}
 .leer{padding:10px 12px}.leer svg{width:32px;height:32px;margin:0 auto 4px}.leer b{font-size:14px;margin-bottom:2px}.leer .small,.leer p{font-size:13px;margin:0}
 @media(max-width:900px){.side .brand{flex-direction:row;align-items:center;padding:0 8px}}
+
+/* Seitenhinweis und eingeklappte Zusatzkarten */
+.seitenhinweis{margin:0 0 12px;max-width:62ch}
+.heutemehr>summary{cursor:pointer;padding:10px 4px;font-weight:600;color:var(--ink)}
+.heutemehr[open]>summary{margin-bottom:8px}

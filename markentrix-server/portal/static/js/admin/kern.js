@@ -10,7 +10,7 @@ const NAV_GRUPPEN = [
   ['Kunden', ['kunden', 'onboarding', 'vertraege', 'zufriedenheit', 'neu', 'websites'], true],
   ['Vertrieb', ['vertrieb', 'leads', 'pipeline', 'auswertung', 'funnel'], true],
   ['Geld & Zahlen', ['kennzahlen', 'belege', 'preise', 'katalog'], false],
-  ['System', ['compliance', 'dsgvo', 'einstellungen', 'protokoll'], false],
+  ['Recht & Sicherheit', ['compliance', 'dsgvo', 'protokoll', 'einstellungen'], false],
 ];
 export let paketListe = [], ich = null;
 export const zaehlerAdmin = {};

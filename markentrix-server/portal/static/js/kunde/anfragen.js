@@ -30,7 +30,7 @@ V.anfragen = async () => {
   const box = h('div');
   const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/anfragen/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { toast(x.message); } } },
     ['neu', 'in_bearbeitung', 'beantwortet', 'erledigt', 'spam'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
-  box.append(tabelle([['Eingang', z => zeit(z.erstellt_am)], ['Name', z => z.name], ['Kontakt', z => z.kontakt], ['Nachricht', z => h('div', {}, z.nachricht, fotoReihe(z.fotos))], ['Quelle', z => z.quelle], ['Status', status], ['', z => h('button', { class: 'btn small', onclick: () => antwortDialog(z.id, () => location.reload()) }, 'Antworten')]], daten, 'Noch keine Anfragen.'));
+  box.append(tabelle([['Eingang', z => zeit(z.erstellt_am)], ['Name', z => z.name], ['Kontakt', z => z.kontakt], ['Nachricht', z => h('div', {}, z.nachricht, fotoReihe(z.fotos))], ['Quelle', z => z.quelle], ['Status', status], ['', z => h('button', { class: 'btn small', onclick: () => antwortDialog(z.id, () => location.reload()) }, 'Antworten')]], daten, 'Noch keine Anfragen. Sobald jemand über deine Website oder das Telefon schreibt, erscheint die Anfrage hier und du bekommst eine Benachrichtigung.'));
   return h('div', { class: 'card' }, h('h2', {}, 'Anfragen'), box);
 };
 
@@ -54,7 +54,7 @@ V.termine = async () => {
   const status = (z) => h('select', { onchange: async (e) => { try { await api('/api/kunde/termine/' + z.id, { method: 'PATCH', body: { status: e.target.value } }); } catch (x) { toast(x.message); } } },
     ['geplant', 'bestaetigt', 'abgesagt', 'erledigt', 'nicht_erschienen'].map(s => h('option', { value: s, selected: s === z.status }, s.replace('_', ' '))));
   return h('div', { class: 'stack' },
-    h('div', { class: 'card' }, h('h2', {}, 'Termine'), tabelle([['Wann', z => zeit(z.beginn)], ['Titel', z => z.titel], ['Kontakt', z => z.kontakt_name], ['Notiz', z => h('div', {}, z.notiz, fotoReihe(z.fotos))], ['Status', status]], daten, 'Keine Termine.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Termine'), tabelle([['Wann', z => zeit(z.beginn)], ['Titel', z => z.titel], ['Kontakt', z => z.kontakt_name], ['Notiz', z => h('div', {}, z.notiz, fotoReihe(z.fotos))], ['Status', status]], daten, 'Noch keine Termine. Neue Buchungen von deiner Website und selbst eingetragene Termine stehen hier.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Termin'), m, f));
 };
 
@@ -70,7 +70,7 @@ V.kontakte = async () => {
     h('div', {}, h('label', {}, ' '), h('button', { class: 'btn' }, 'Kontakt speichern')));
   const loesch = (z) => h('button', { class: 'btn small bad', onclick: async () => { if (!confirm('Kontakt löschen?')) return; try { await api('/api/kunde/kontakte/' + z.id, { method: 'DELETE' }); location.reload(); } catch (x) { toast(x.message); } } }, 'Löschen');
   return h('div', { class: 'stack' },
-    h('div', { class: 'card' }, h('h2', {}, 'Kontakte'), tabelle([['Name', z => z.name], ['Firma', z => z.firma], ['E-Mail', z => z.email], ['Telefon', z => z.telefon], ['Notiz', z => z.notiz], ['', loesch]], daten, 'Noch keine Kontakte.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Kontakte'), tabelle([['Name', z => z.name], ['Firma', z => z.firma], ['E-Mail', z => z.email], ['Telefon', z => z.telefon], ['Notiz', z => z.notiz], ['', loesch]], daten, 'Noch keine Kontakte. Wer dir schreibt oder bucht, wird hier automatisch gesammelt.')),
     h('div', { class: 'card' }, h('h2', {}, 'Neuer Kontakt'), m, f));
 };
 

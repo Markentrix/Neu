@@ -14,7 +14,7 @@ let start = null;
 const NAV = [['willkommen', 'So geht’s'], ['heute', 'Heute anrufen'], ['uebersicht', 'Meine Zahlen'], ['leads', 'Meine Leads'], ['pipeline', 'Pipeline'], ['angebote', 'Angebotsanfragen'], ['leitfaden', 'Leitfaden'], ['uebung', 'Übungsmodus'], ['vertrag', 'Mein Vertrag'], ['kunden', 'Meine Kunden'], ['provisionen', 'Provisionen'], ['konto', 'Konto']];
 
 /** @type {[string, string[]][]} */
-const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Wissen', ['uebersicht', 'leitfaden', 'uebung']], ['Kunden & Geld', ['kunden', 'provisionen', 'vertrag', 'konto', 'willkommen']]];
+const NAV_GRUPPEN = [['Mein Tag', ['heute', 'leads', 'pipeline', 'angebote']], ['Zahlen & Lernen', ['uebersicht', 'leitfaden', 'uebung']], ['Kunden & Geld', ['kunden', 'provisionen', 'vertrag', 'konto', 'willkommen']]];
 
 function gerüst(aktiv, inhalt) {
   const gruppen = NAV_GRUPPEN.map(([titel, ids]) => [titel, NAV.filter(n => ids.includes(n[0])), true]);
@@ -79,14 +79,31 @@ V.heute = async () => {
         h('button', { class: 'btn sec small', onclick: () => gespraechDialog(l, opt.filter(o => o.code !== 'anruf_nicht_erreicht'), 'anruf_erreicht', (r) => erledigt(el, r, true)) }, 'Gesprochen …'),
         h('button', { class: 'btn sec small', onclick: () => gespraechDialog(l, opt, 'termin', (r) => erledigt(el, r, false)) }, 'Termin …'),
         h('button', { class: 'btn sec small', onclick: () => { if (confirm(l.firma + ': Kein Interesse eintragen? Der Lead wird nicht mehr angerufen.')) schnell(l, 'kein_interesse', el); } }, 'Kein Interesse'),
+        ['termin', 'antwort', 'angebot', 'kontaktiert'].includes(l.status) ? h('button', { class: 'btn sec small', onclick: () => angebotSchnell(l) }, 'Angebot anfragen …') : '',
         h('a', { class: 'btn sec small', href: '#lead/' + l.id }, 'Öffnen')));
     return el;
   };
+  /** Angebot direkt aus der Anrufliste anfragen: Paket wählen, Notiz, fertig. Markentrix bekommt die Anfrage. */
+  const angebotSchnell = async (l) => {
+    const pk = await api('/api/vertrieb/pakete'), m = h('div');
+    const paket = h('select', { 'aria-label': 'Paket' }, h('option', { value: '' }, 'Noch offen, Markentrix berät'), pk.map(p => h('option', { value: p.code }, p.name)));
+    const notiz = h('textarea', { rows: 3, maxlength: 1500, 'aria-label': 'Notiz für Markentrix', placeholder: 'Was hat der Kunde gesagt? Wunschtermin, Besonderheiten …' });
+    dialog('Angebot anfragen: ' + l.firma, h('div', {}, h('label', {}, 'Paket'), paket, h('label', {}, 'Notiz'), notiz, m,
+      h('p', {}, h('button', { class: 'btn', onclick: async (e) => { e.target.disabled = true;
+        try { await api('/api/vertrieb/leads/' + l.id + '/angebotsanfrage', { method: 'POST', body: { paket_code: paket.value || null, notiz: notiz.value || null } }); melde(m, 'Anfrage ist bei Markentrix angekommen.', 'ok'); }
+        catch (x) { melde(m, x.message); e.target.disabled = false; } } }, 'Anfrage senden'))));
+  };
   const block = (titel, liste, leer) => h('div', { class: 'card' }, h('h2', {}, titel, liste.length ? h('span', { class: 'badge', style: 'margin-left:8px' }, liste.length) : ''), liste.length ? liste.map(zeile) : h('p', { class: 'muted' }, leer));
-  return h('div', { class: 'stack' }, anrufModusKarte(meldung), kopfKarte, meldung,
-    block('Wiedervorlage fällig', d.wiedervorlagen, 'Keine Wiedervorlagen für heute.'),
-    block('🔥 Heiße Leads: jetzt anrufen', d.heiss, 'Keine heißen Leads offen.'),
-    block('Neu zugewiesen', d.neu, 'Keine neuen Leads.'));
+  // Der nächste Anruf steht ganz oben, dann die Provision, dann die Listen
+  const erster = d.wiedervorlagen[0] || d.heiss[0] || d.neu[0], ohne = (liste) => liste.filter(x => !erster || x.id !== erster.id);
+  const hero = erster ? h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Anruf'), zeile(erster)) : h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Anruf'), h('h2', {}, 'Die Liste ist leer'), h('p', { class: 'muted' }, 'Sobald Leads fällig sind, stehen sie hier. Neue Leads bekommst du von Markentrix.'));
+  const prov = z.provision ? h('div', { class: 'card' }, h('h2', {}, 'Meine Provision'),
+    h('p', {}, 'Diesen Monat berechnet: ', h('b', {}, euro(z.provision.monat_cent)), ' · noch nicht ausgezahlt: ', h('b', {}, euro(z.provision.offen_cent))),
+    h('p', { class: 'small' }, h('a', { href: '#provisionen' }, 'Alle Provisionen ansehen'))) : '';
+  return h('div', { class: 'stack' }, anrufModusKarte(meldung), hero, meldung, kopfKarte, prov,
+    block('Wiedervorlage fällig', ohne(d.wiedervorlagen), 'Keine weiteren Wiedervorlagen für heute.'),
+    block('🔥 Heiße Leads: jetzt anrufen', ohne(d.heiss), 'Keine weiteren heißen Leads offen.'),
+    block('Neu zugewiesen', ohne(d.neu), 'Keine weiteren neuen Leads.'));
 };
 
 /** „Meine Woche“: Anrufe, Erreicht, Termine, Abschlüsse mit Wochenziel; dazu Quoten und Provisions-Rechenbeispiel. */

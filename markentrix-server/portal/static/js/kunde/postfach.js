@@ -30,7 +30,7 @@ V.nachrichten = async (id) => {
   return h('div', { class: 'stack' },
     darfSchreiben() ? h('div', { class: 'card' }, h('h2', {}, 'Neue Nachricht an Markentrix'), h('p', { class: 'small muted' }, 'Fragen, Aufträge oder Änderungswünsche, z. B. neue Öffnungszeiten, ein Foto für die Website, ein Problem. Wir antworten hier und per E-Mail.'), m, form) : '',
     h('div', { class: 'card' }, h('h2', {}, 'Deine Nachrichten'),
-      tabelle([['Nr.', z => h('a', { href: '#nachrichten/' + z.id }, z.nr)], ['Betreff', z => h('a', { href: '#nachrichten/' + z.id }, (z.kunde_ungelesen ? '● ' : '') + z.betreff)], ['Art', z => ARTEN[z.art] || z.art], ['Status', z => tstatus(z.status)], ['Frist', z => z.status === 'erledigt' ? (z.erledigt_am ? 'erledigt am ' + new Date(z.erledigt_am).toLocaleDateString('de-DE') : '') : (z.frist ? 'bis ' + new Date(z.frist).toLocaleDateString('de-DE') : '')], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Noch keine Nachrichten.')));
+      tabelle([['Nr.', z => h('a', { href: '#nachrichten/' + z.id }, z.nr)], ['Betreff', z => h('a', { href: '#nachrichten/' + z.id }, (z.kunde_ungelesen ? '● ' : '') + z.betreff)], ['Art', z => ARTEN[z.art] || z.art], ['Status', z => tstatus(z.status)], ['Frist', z => z.status === 'erledigt' ? (z.erledigt_am ? 'erledigt am ' + new Date(z.erledigt_am).toLocaleDateString('de-DE') : '') : (z.frist ? 'bis ' + new Date(z.frist).toLocaleDateString('de-DE') : '')], ['Zuletzt', z => zeit(z.geaendert_am)]], liste, 'Noch keine Nachrichten. Hier schreibst du direkt mit dem Markentrix-Team, über „Neue Nachricht“ stellst du eine Frage.')));
 };
 
 async function nachrichtDetail(id) {
