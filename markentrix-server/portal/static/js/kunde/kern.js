@@ -90,7 +90,7 @@ function tabbar(aktiv) {
   const ids = sichtbar().map(x => x[0]), feste = [...new Set(['heute', ids.includes('anfragen') ? 'anfragen' : 'nachrichten', ids.includes('termine') ? 'termine' : 'uebersicht', 'nachrichten'])].filter(i => i === 'heute' || ids.includes(i)).slice(0, 4);
   const ICON = { heute: '⌂', anfragen: '☎', termine: '▦', nachrichten: '✉', uebersicht: '◔' };
   const rest = ids.filter(i => !feste.includes(i)), mehrZahl = rest.reduce((n, i) => n + zaehler(i), 0);
-  const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt' }, navGruppen(GRUPPEN.map(([titel, g]) => [titel, sichtbar().filter(x => g.includes(x[0])).map(x => [x[0], x[1], zaehler(x[0])]), true]), aktiv, 'kunde-mehr'),
+  const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt kachel' }, navGruppen(GRUPPEN.map(([titel, g]) => [titel, sichtbar().filter(x => g.includes(x[0])).map(x => [x[0], x[1], zaehler(x[0])]), true]), aktiv, 'kunde-mehr'),
     h('div', { class: 'brandzeile', style: 'margin-top:10px' }, themeKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
   return h('nav', { class: 'tabbar', 'aria-label': 'Schnellzugriff' },
     feste.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null }, h('span', { class: 'ic', 'aria-hidden': 'true' }, ICON[id] || '•', zaehler(id) ? h('span', { class: 'badge' }, zaehler(id)) : ''), h('span', {}, (SEITEN.find(x => x[0] === id) || [id, id])[1].replace('Angebote & Rechnungen', 'Rechnungen')))),
@@ -99,7 +99,7 @@ function tabbar(aktiv) {
 
 export function gerüst(aktiv, inhalt) {
   const k = start.kunde;
-  return h('div', { class: 'shell mobilleiste' },
+  return h('div', { class: 'shell mobilleiste kundeapp' },
     h('aside', { class: 'side' },
       h('div', { class: 'brand' }, k.logo_vorhanden ? h('img', { class: 'kundenlogo', src: '/api/kunde/logo', alt: '' }) : h('div', { class: 'logo' }, h('img', { class: 'markelogo', src: '/static/brand/markentrix-logo-farbe-dunkel.svg', alt: 'Markentrix', width: 160, height: 26 })), k.logo_vorhanden ? k.firma : ''),
       h('div', { class: 'brandzeile' }, glocke(), themeKnopf()),
@@ -108,6 +108,7 @@ export function gerüst(aktiv, inhalt) {
       h('a', { class: 'nav', href: '#', onclick: (e) => { e.preventDefault(); abmelden(); } }, 'Abmelden')),
     h('main', { class: 'main' },
       h('div', { class: 'top' },
+        aktiv === 'heute' ? '' : h('button', { type: 'button', class: 'zurueck', 'aria-label': 'Zurück', onclick: () => { if (history.length > 1) history.back(); else location.hash = '#heute'; } }, '‹'),
         h('h1', {}, k.firma),
         h('span', { class: 'pill' }, 'Kundennr. ' + k.kundennummer),
         h('span', { class: 'pill ok' }, '● Online')),

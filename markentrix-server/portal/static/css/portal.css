@@ -453,3 +453,64 @@ input:focus,select:focus,textarea:focus{outline:2px solid #964F08;outline-offset
 .seitenhinweis{margin:0 0 12px;max-width:62ch}
 .heutemehr>summary{cursor:pointer;padding:10px 4px;font-weight:600;color:var(--ink)}
 .heutemehr[open]>summary{margin-bottom:8px}
+
+/* ===== App-Optik am Handy ===== */
+.zurueck{display:none}
+.mehrblatt.kachel a.nav::before{content:"•";font-size:26px;line-height:1}
+@media(max-width:900px){
+  .shell.kundeapp .main>.top:first-child{position:sticky;top:0;z-index:30;background:var(--surface);margin:-12px -12px 10px;padding:8px 12px;border-bottom:1px solid var(--line);flex-wrap:nowrap;align-items:center;gap:8px}
+  .shell.kundeapp .main>.top:first-child h1{flex:1 1 auto;min-width:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .shell.kundeapp .main>.top:first-child .pill:not(.ok){display:none}
+  .zurueck{display:inline-flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;margin-left:-6px;border:0;border-radius:12px;background:var(--tint);color:var(--link);font:600 26px/1 system-ui;cursor:pointer}
+  .mehrblatt.kachel .navliste,.mehrblatt.kachel .navliste[hidden]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:6px 0 4px}
+  .mehrblatt.kachel a.nav{position:relative;flex-direction:column;justify-content:center;gap:6px;min-height:92px;padding:10px 6px;text-align:center;font-size:12.5px;line-height:1.25;overflow-wrap:anywhere;background:var(--tint);border:1px solid var(--tintline);border-radius:16px}
+  .mehrblatt.kachel a.nav .badge{position:absolute;top:6px;right:8px}
+  .mehrblatt.kachel .navkopf{padding-top:14px}
+}
+.mehrblatt.kachel a.nav[href="#willkommen"]::before{content:"👋" / ""}
+.mehrblatt.kachel a.nav[href="#heute"]::before{content:"🏠" / ""}
+.mehrblatt.kachel a.nav[href="#anfragen"]::before,.mehrblatt.kachel a.nav[href="#anrufe"]::before{content:"📞" / ""}
+.mehrblatt.kachel a.nav[href="#termine"]::before{content:"📅" / ""}
+.mehrblatt.kachel a.nav[href="#kalender"]::before{content:"🗓️" / ""}
+.mehrblatt.kachel a.nav[href="#stamm"]::before{content:"⭐" / ""}
+.mehrblatt.kachel a.nav[href="#bewertungen"]::before{content:"💬" / ""}
+.mehrblatt.kachel a.nav[href="#nachrichten"]::before{content:"✉️" / ""}
+.mehrblatt.kachel a.nav[href="#freigaben"]::before{content:"✅" / ""}
+.mehrblatt.kachel a.nav[href="#uebersicht"]::before{content:"📊" / ""}
+.mehrblatt.kachel a.nav[href="#briefing"]::before{content:"📰" / ""}
+.mehrblatt.kachel a.nav[href="#auswertung"]::before{content:"📈" / ""}
+.mehrblatt.kachel a.nav[href="#berichte"]::before{content:"📄" / ""}
+.mehrblatt.kachel a.nav[href="#assistent"]::before{content:"🤖" / ""}
+.mehrblatt.kachel a.nav[href="#wissen"]::before{content:"📚" / ""}
+.mehrblatt.kachel a.nav[href="#website"]::before{content:"🌐" / ""}
+.mehrblatt.kachel a.nav[href="#einrichten"]::before{content:"🚀" / ""}
+.mehrblatt.kachel a.nav[href="#status"]::before{content:"🟢" / ""}
+.mehrblatt.kachel a.nav[href="#dienste"]::before{content:"🎟️" / ""}
+.mehrblatt.kachel a.nav[href="#shop"]::before{content:"🛒" / ""}
+.mehrblatt.kachel a.nav[href="#wochenangebote"]::before{content:"🏷️" / ""}
+.mehrblatt.kachel a.nav[href="#werbung"]::before{content:"📣" / ""}
+.mehrblatt.kachel a.nav[href="#automationen"]::before{content:"⚙️" / ""}
+.mehrblatt.kachel a.nav[href="#kontakte"]::before{content:"👥" / ""}
+.mehrblatt.kachel a.nav[href="#dokumente"]::before{content:"📑" / ""}
+.mehrblatt.kachel a.nav[href="#unterlagen"]::before{content:"📁" / ""}
+.mehrblatt.kachel a.nav[href="#belege"]::before{content:"💶" / ""}
+.mehrblatt.kachel a.nav[href="#avv"]::before{content:"🔒" / ""}
+.mehrblatt.kachel a.nav[href="#vertraege"]::before{content:"📝" / ""}
+.mehrblatt.kachel a.nav[href="#team"]::before{content:"🧑‍🤝‍🧑" / ""}
+.mehrblatt.kachel a.nav[href="#pakete"]::before{content:"📦" / ""}
+.mehrblatt.kachel a.nav[href="#hilfe"]::before{content:"❓" / ""}
+.mehrblatt.kachel a.nav[href="#einstellungen"]::before{content:"🔧" / ""}
+
+/* Abschnitte, die sich am Handy einzeln aufklappen (Formulare & Buchung) */
+.schnell{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.schnell button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:84px;padding:10px 6px;border:1px solid var(--tintline);border-radius:16px;background:var(--tint);color:var(--txt);font:600 13px "Source Sans 3",sans-serif;text-align:center;cursor:pointer}
+.schnell button span{font-size:26px;line-height:1}
+details.abschnitt{padding:0}
+details.abschnitt>summary{display:flex;align-items:center;gap:8px;padding:14px 16px;min-height:52px;cursor:pointer;list-style:none}
+details.abschnitt>summary::-webkit-details-marker{display:none}
+details.abschnitt>summary h2{margin:0;flex:1;font-size:16px}
+details.abschnitt>summary::after{content:"›";font-size:24px;line-height:1;color:var(--mut);transition:transform .15s}
+details.abschnitt[open]>summary::after{transform:rotate(90deg)}
+details.abschnitt>.abschnittinhalt{padding:0 16px 16px}
+@media(max-width:900px){.mehrblatt.kachel a.nav.on{background:var(--grad);color:#fff;border-color:transparent}}
+@media(max-width:900px){.mehrblatt.kachel .navkopf{display:flex;justify-content:space-between;align-items:center}}

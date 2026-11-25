@@ -19,13 +19,32 @@ function statusZeile(s, art, wort) {
 V.dienste = async () => {
   const d = await api('/api/kunde/website-dienste');
   const neu = () => zeige();
-  return h('div', { class: 'stack' },
+  return abschnitte(h('div', { class: 'stack' },
     h('div', { class: 'top' }, h('h1', {}, 'Website-Dienste')),
     h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
       h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
       d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    startKarte(d.start), await domainKarte(), mailKarte(d, neu), fotoKarte(d), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d));
+    startKarte(d.start), await domainKarte(), mailKarte(d, neu), fotoKarte(d), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d)));
 };
+
+// ---------------------------------------------------------------- Handy: Abschnitte einzeln aufklappen
+const SCHNELL = [['🎟️', 'Gutscheine', 'Gutschein-Anfragen'], ['📅', 'Buchungen', 'Buchungen über die Website'], ['🏖️', 'Urlaub & Sperrtage', 'Urlaub und Sperrtage'], ['✂️', 'Leistungen & Team', 'Leistungen und Mitarbeiter'], ['✉️', 'Kontaktformular', 'Kontaktformular: Anfragen per E-Mail'], ['💳', 'PayPal', 'PayPal']];
+/** Am Handy wird jede Karte zu einem Abschnitt, der sich mit einem Tipp öffnet; oben stehen Schnellzugriffe. Am Desktop bleibt alles wie es ist. */
+function abschnitte(wurzel) {
+  if (!window.matchMedia('(max-width: 700px)').matches) return wurzel;
+  const karten = [...wurzel.children].filter(c => c.classList.contains('card') && c.firstElementChild && c.firstElementChild.tagName === 'H2');
+  const nach = new Map();
+  karten.forEach(k => {
+    const kopf = k.firstElementChild, titel = kopf.textContent.trim(), rest = h('div', { class: 'abschnittinhalt' }, ...[...k.childNodes].slice(1));
+    const det = h('details', { class: 'card abschnitt' }, h('summary', {}, kopf), rest);
+    if (/^So startet deine Website/.test(titel)) det.open = true;
+    if (k.id) det.id = k.id;
+    nach.set(titel, det); k.replaceWith(det);
+  });
+  const kacheln = SCHNELL.filter(([, , t]) => nach.has(t)).map(([ic, text, t]) => h('button', { type: 'button', onclick: () => { const det = nach.get(t); det.open = true; det.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, h('span', { 'aria-hidden': 'true' }, ic), text));
+  if (kacheln.length) wurzel.children[0].after(h('div', { class: 'schnell' }, kacheln));
+  return wurzel;
+}
 
 // ---------------------------------------------------------------- Domain-Stand
 /** Wo steht meine Website? Wartet sie noch auf die Domain-Umstellung, steht hier in einfachen Worten, was zu tun ist. */

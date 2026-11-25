@@ -405,6 +405,8 @@ Das Portal ist eine installierbare Web-App. Es gibt keine eigene APK-Datei und k
 ## Website-Dienste: Formular, Termine, PayPal, Bewertungen (Stand Oktober 2026)
 Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nutzen vier Dienste. Der Kunde (Inhaber) trägt seine Daten unter **Website-Dienste** im Kundenportal ein, wir bauen die Bausteine ein.
 
+**App-Optik am Handy (Kundenportal, bis 900 px):** „Mehr“ in der unteren Leiste öffnet ein Kachel-Menü mit Symbolen (3 Spalten). Unterseiten haben in der festen Kopfzeile einen Zurück-Pfeil. „Formulare & Buchung“ klappt am Handy (bis 700 px) jede Karte einzeln auf und hat oben Schnellzugriffe (Gutscheine, Buchungen, Urlaub, Leistungen, Kontaktformular, PayPal). Am Desktop und im Vertriebsportal ändert sich nichts. Test t134.
+
 **Einrichtungs-Assistent (Kundenportal → „Website einrichten“, Karte auf „Heute“):** führt den Inhaber Schritt für Schritt durch Anfragen-Adresse, Logo (Upload durch den Kunden, PNG/JPG bis 400 KB), Signatur (Vorschlag aus den Firmendaten), Testmail und Testanfrage. Zeigt immer nur den nächsten offenen Schritt; „Später“ überspringt. Die Karte verschwindet, wenn die Start-Checkliste fertig ist.
 
 **Leistungen, Anzahlung, Zahlungsstand, Excel (Kundenportal → Website-Dienste):**
