@@ -40,7 +40,7 @@ def business(site):
                        "Innenraumreinigung", "Lederpflege", "Lederreparatur", "Geruchsentfernung", "Cabrioverdeckreinigung", "Leasingrückgabe", "Flottenpflege"],
         "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": o["days"], "opens": o["opens"], "closes": o["closes"]}
                                       for o in s["openingHours"].get("schedule", [])],
-        "sameAs": list(s["social"].values()) + ([s["googleMapsUrl"]] if s.get("googlePlaceId") else []),
+        "sameAs": list(s["social"].values()) + [u for u in (s.get("googleKgUrl"), s.get("googleMapsUrl") if s.get("googlePlaceId") else None) if u],
         # Keine eigenen Bewertungen als strukturierte Daten: Google wertet Bewertungen, die ein Betrieb über sich selbst
         # auszeichnet, nicht aus (Richtlinie „self-serving reviews“). Die Bewertungen stehen sichtbar auf der Seite.
         "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Fahrzeugaufbereitung Celle",

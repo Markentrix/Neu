@@ -282,6 +282,7 @@ def header(site, prefix="", home=False, current=None):
       <a class="social-btn" href="{site.s["social"]["instagram"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Instagram">{I["insta"]}</a>
       <a class="social-btn" href="{site.s["social"]["facebook"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Facebook">{I["fb"]}</a>
       <a class="social-btn" href="{site.s["social"]["tiktok"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf TikTok">{I["tiktok"]}</a>
+      <a class="social-btn" href="{site.s.get("googleProfileUrl") or site.s["googleMapsUrl"]}" target="_blank" rel="noopener" aria-label="ElbDetail bei Google">{I["gstar"]}</a>
       <span>@elbdetail</span>
     </div>
   </nav>
@@ -303,7 +304,7 @@ def footer(site, prefix="", home=False):
         <a class="social-btn" href="{s["social"]["instagram"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Instagram">{I["insta"]}</a>
         <a class="social-btn" href="{s["social"]["facebook"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf Facebook">{I["fb"]}</a>
         <a class="social-btn" href="{s["social"]["tiktok"]}" target="_blank" rel="noopener" aria-label="ElbDetail auf TikTok">{I["tiktok"]}</a>
-        <a class="social-btn" href="{s["googleMapsUrl"]}" target="_blank" rel="noopener" aria-label="ElbDetail bei Google">{I["gstar"]}</a>
+        <a class="social-btn" href="{s.get("googleProfileUrl") or s["googleMapsUrl"]}" target="_blank" rel="noopener" aria-label="ElbDetail bei Google">{I["gstar"]}</a>
       </div>
     </div>
     <div>
