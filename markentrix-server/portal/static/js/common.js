@@ -819,6 +819,10 @@ export function eingabeHilfen(wurzel = document) {
     else if (/plz|postleitzahl/.test(n) && !i.inputMode) { i.inputMode = 'numeric'; i.setAttribute('autocomplete', 'postal-code'); }
     else if (i.type === 'number' && !i.inputMode) i.inputMode = 'decimal';
     else if (i.type === 'url' && !i.inputMode) { i.inputMode = 'url'; i.autocapitalize = 'none'; }
+    if (!i.enterKeyHint && !['checkbox', 'radio', 'file', 'date', 'datetime-local', 'time', 'color', 'range', 'hidden'].includes(i.type)) {
+      const form = i.form, felder = form ? [...form.querySelectorAll('input:not([type=hidden]), textarea')] : [];
+      i.enterKeyHint = i.type === 'search' ? 'search' : form && felder[felder.length - 1] !== i ? 'next' : form ? 'done' : 'enter';
+    }
   });
 }
 if (typeof document !== 'undefined') {
@@ -889,4 +893,108 @@ export function abschnitte(wurzel, schnell = [], offen = null) {
     h('button', { type: 'button', onclick: () => { if (!ziel) return; ziel.det.open = true; ziel.det.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, h('span', { 'aria-hidden': 'true' }, ic), text));
   if (kacheln.length) wurzel.children[0].after(h('div', { class: 'schnell' }, kacheln));
   return wurzel;
+}
+
+// ---------------------------------------------------------------- App-Stil am Handy: Wischen in Listen, Schnell-Knopf „+“, weiche Seitenwechsel
+const WISCH_SCHWELLE = 70;
+/**
+ * Wischen in Listenzeilen (.heutezeile): nach rechts löst den Knopf mit data-wisch="rechts" aus, nach links den mit data-wisch="links".
+ * Der Hinweistext kommt aus data-wisch-text des Knopfs. Senkrechtes Scrollen bleibt unberührt.
+ */
+function wischZeilen() {
+  /** @type {{el: HTMLElement, x: number, y: number, dx: number, aktiv: boolean} | null} */
+  let z = null;
+  const knopf = (el, richtung) => /** @type {HTMLElement|null} */ (el.querySelector('[data-wisch="' + richtung + '"]'));
+  const zurueck = (el) => { el.style.transform = ''; el.classList.remove('wischt', 'wischt-rechts', 'wischt-links', 'wischt-bereit'); el.removeAttribute('data-wisch-hinweis'); };
+  document.addEventListener('touchstart', (e) => {
+    const t = e.target instanceof Element ? e.target : null;
+    const el = t && /** @type {HTMLElement|null} */ (t.closest('.heutezeile'));
+    if (!el || e.touches.length !== 1 || (t && t.closest('input, textarea, select, .dlg'))) { z = null; return; }
+    if (!knopf(el, 'rechts') && !knopf(el, 'links')) { z = null; return; }
+    z = { el, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, aktiv: false };
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (!z) return;
+    const dx = e.touches[0].clientX - z.x, dy = e.touches[0].clientY - z.y;
+    if (!z.aktiv) {
+      if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) { z = null; return; }
+      if (Math.abs(dx) < 14 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      z.aktiv = true;
+    }
+    const richtung = dx > 0 ? 'rechts' : 'links', k = knopf(z.el, richtung);
+    z.el.classList.remove('wischt-rechts', 'wischt-links');
+    if (!k) { z.el.style.transform = ''; z.el.removeAttribute('data-wisch-hinweis'); z.dx = 0; return; }
+    z.dx = dx;
+    z.el.classList.add('wischt', 'wischt-' + richtung); z.el.classList.toggle('wischt-bereit', Math.abs(dx) >= WISCH_SCHWELLE);
+    z.el.setAttribute('data-wisch-hinweis', (k.getAttribute('data-wisch-text') || k.textContent || '').trim());
+    z.el.style.transform = 'translateX(' + Math.max(-90, Math.min(90, dx * 0.4)) + 'px)';
+  }, { passive: true });
+  const ende = () => {
+    if (!z) return;
+    const { el, dx, aktiv } = z; z = null;
+    const k = aktiv && Math.abs(dx) >= WISCH_SCHWELLE ? knopf(el, dx > 0 ? 'rechts' : 'links') : null;
+    zurueck(el);
+    if (k) { vibriere([15, 30, 15]); k.click(); }
+  };
+  document.addEventListener('touchend', ende);
+  document.addEventListener('touchcancel', () => { if (z) { zurueck(z.el); z = null; } });
+}
+
+/**
+ * Schwebender Schnell-Knopf (nur am Handy) für die wichtigste Aktion der aktuellen Seite.
+ * @param {(seite: string) => ({text: string, href?: string, zielText?: string, ereignis?: string} | null)} regel
+ */
+function schnellKnopf(regel) {
+  const root = document.getElementById('app');
+  if (!root) return;
+  /** @type {HTMLElement|null} */
+  let knopf = null;
+  const aktualisieren = () => {
+    const seite = (location.hash || '').slice(1).split(/[/?]/)[0];
+    let r = null; try { r = regel(seite); } catch { r = null; }
+    if (!r || !document.querySelector('.main')) { if (knopf) { knopf.remove(); knopf = null; } return; }
+    if (!knopf) { knopf = h('button', { type: 'button', class: 'fab' }); document.body.append(knopf); }
+    knopf.textContent = r.text; knopf.setAttribute('aria-label', r.text.replace(/^[+＋]\s*/, 'Neu: '));
+    knopf.onclick = () => {
+      vibriere(12);
+      if (r.ereignis) { document.dispatchEvent(new CustomEvent(r.ereignis, { detail: { nurNeu: true } })); return; }
+      if (r.zielText) {
+        const ziel = [...document.querySelectorAll('.main h2, .main h3, .main summary')].find(x => (x.textContent || '').trim().startsWith(r.zielText || ''));
+        if (ziel) {
+          for (let e = /** @type {HTMLElement|null} */ (ziel); e; e = e.parentElement) if (e instanceof HTMLDetailsElement) e.open = true;
+          ziel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          const feld = (ziel.closest('.card, details') || ziel).querySelector('input, select, textarea');
+          if (feld) setTimeout(() => /** @type {HTMLElement} */ (feld).focus({ preventScroll: true }), 350);
+          return;
+        }
+      }
+      if (r.href) location.hash = r.href;
+    };
+  };
+  let t = 0;
+  new MutationObserver(() => { clearTimeout(t); t = window.setTimeout(aktualisieren, 60); }).observe(root, { childList: true });
+  window.addEventListener('hashchange', () => setTimeout(aktualisieren, 80));
+  aktualisieren();
+}
+
+/**
+ * Gemeinsamer App-Stil für Kunden-, Vertriebs- und Admin-Portal.
+ * @param {{ fab?: (seite: string) => ({text: string, href?: string, zielText?: string, ereignis?: string} | null) }} [opt]
+ */
+export function appStil(opt = {}) {
+  if (typeof document === 'undefined') return;
+  wischZeilen();
+  if (opt.fab) schnellKnopf(opt.fab);
+  const root = document.getElementById('app');
+  if (!root) return;
+  // Seitenwechsel: bis die neue Seite da ist, wirkt die alte gedimmt mit Platzhaltern; die neue gleitet sanft ein
+  let frist = 0;
+  window.addEventListener('hashchange', () => {
+    const m = document.querySelector('.main'); if (!m) return;
+    m.classList.add('laedt'); clearTimeout(frist); frist = window.setTimeout(() => m.classList.remove('laedt'), 6000);
+  });
+  new MutationObserver(() => {
+    const m = document.querySelector('.main:not(.angezeigt)');
+    if (m) { m.classList.add('angezeigt', 'seiteneu'); window.setTimeout(() => m.classList.remove('seiteneu'), 400); }
+  }).observe(root, { childList: true });
 }

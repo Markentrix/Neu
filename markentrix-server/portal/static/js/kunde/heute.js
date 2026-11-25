@@ -121,8 +121,8 @@ V.heute = async () => {
       a.kontakt && !String(a.kontakt).includes('@') ? h('a', { class: 'btn small', href: telLink(a.kontakt) }, '📞 Anrufen') : ''),
       a.nachricht ? h('p', { class: 'small' }, a.nachricht) : '',
       h('div', { class: 'heuteknoepfe' },
-        h('button', { class: 'btn small', onclick: () => antwortDialog(a.id, () => erledigt(z, 'Als beantwortet markiert.')) }, 'Antworten'),
-        h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'erledigt' } }); erledigt(z, 'Als erledigt markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Erledigt'),
+        h('button', { class: 'btn small', 'data-wisch': 'links', 'data-wisch-text': '↩ Antworten', onclick: () => antwortDialog(a.id, () => erledigt(z, 'Als beantwortet markiert.')) }, 'Antworten'),
+        h('button', { class: 'btn sec small', 'data-wisch': 'rechts', 'data-wisch-text': '✓ Erledigt', onclick: async () => { try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'erledigt' } }); erledigt(z, 'Als erledigt markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Erledigt'),
         h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Als Spam markieren?')) return; try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'spam' } }); erledigt(z, 'Als Spam markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Spam')));
     return z;
   };
@@ -131,8 +131,8 @@ V.heute = async () => {
     z.append(h('div', { class: 'heutekopf' }, h('div', { class: 'grow' }, h('b', {}, new Date(t.beginn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr · ' + t.titel), h('div', { class: 'small muted' }, (t.kontakt_name || '') + (t.status === 'bestaetigt' ? ' · bestätigt' : ''))),
       t.kontakt_info && !String(t.kontakt_info).includes('@') ? h('a', { class: 'btn small', href: telLink(t.kontakt_info) }, '📞 Anrufen') : ''),
       h('div', { class: 'heuteknoepfe' },
-        t.status !== 'bestaetigt' ? h('button', { class: 'btn small', onclick: () => setze('bestaetigt', 'Termin bestätigt.') }, 'Bestätigen') : '',
-        heute ? h('button', { class: 'btn sec small', onclick: () => setze('erledigt', 'Termin erledigt.') }, 'Erledigt') : '',
+        t.status !== 'bestaetigt' ? h('button', { class: 'btn small', 'data-wisch': 'rechts', 'data-wisch-text': '✓ Bestätigen', onclick: () => setze('bestaetigt', 'Termin bestätigt.') }, 'Bestätigen') : '',
+        heute ? h('button', { class: 'btn sec small', ...(t.status === 'bestaetigt' ? { 'data-wisch': 'rechts', 'data-wisch-text': '✓ Erledigt' } : {}), onclick: () => setze('erledigt', 'Termin erledigt.') }, 'Erledigt') : '',
         heute ? h('button', { class: 'btn sec small', onclick: () => setze('nicht_erschienen', 'Als nicht erschienen markiert.') }, 'Nicht erschienen') : '',
         h('button', { class: 'btn sec small', onclick: () => { if (confirm('Termin absagen?')) setze('abgesagt', 'Termin abgesagt.'); } }, 'Absagen')));
     return z;

@@ -587,3 +587,37 @@ details.abschnitt>.abschnittinhalt{padding:0 16px 16px}
 .ampelpunkt span{width:11px;height:11px;border-radius:50%;background:#8a8f98}
 .ampelpunkt.ok span{background:#3bb273}.ampelpunkt.warn span{background:#e0a526}.ampelpunkt.bad span{background:#e5484d}
 @media(max-width:900px){.sternknopf{display:none}}
+
+/* App-Stil am Handy: weiche Seitenwechsel, Lade-Platzhalter, Wischen in Listen, Schnell-Knopf */
+@keyframes seiteein{from{transform:translateY(10px)}to{transform:none}}
+@keyframes platzpuls{from{opacity:.45}to{opacity:.9}}
+.main.seiteneu{animation:seiteein .22s ease-out}
+.main.laedt{position:relative}
+@keyframes dimmen{to{opacity:.4}}
+.main.laedt>*{animation:dimmen .12s .3s forwards;pointer-events:none}
+.main.laedt::after{content:"";opacity:0;position:fixed;left:16px;right:16px;top:84px;height:132px;border-radius:12px;pointer-events:none;
+  background:linear-gradient(var(--line),var(--line)) 0 0/62% 18px no-repeat,linear-gradient(var(--line),var(--line)) 0 34px/100% 14px no-repeat,linear-gradient(var(--line),var(--line)) 0 58px/88% 14px no-repeat,linear-gradient(var(--line),var(--line)) 0 82px/94% 14px no-repeat;animation:platzpuls .7s .3s ease-in-out infinite alternate}
+.heutezeile{position:relative;transition:transform .15s ease,box-shadow .15s}
+.heutezeile.wischt{transition:none}
+.heutezeile.wischt-rechts{box-shadow:inset 6px 0 0 #3bb273}.heutezeile.wischt-links{box-shadow:inset -6px 0 0 #3a86d6}
+.heutezeile.wischt::after{content:attr(data-wisch-hinweis);position:absolute;top:50%;transform:translateY(-50%);font-weight:700;font-size:14px;color:var(--txt);background:var(--surface);padding:4px 10px;border-radius:999px;border:1px solid var(--line);opacity:.85}
+.heutezeile.wischt-rechts::after{left:8px}.heutezeile.wischt-links::after{right:8px}
+.heutezeile.wischt-bereit::after{opacity:1;border-color:currentColor}
+.fab{display:none}
+@media(max-width:900px){
+  .fab{display:inline-flex;align-items:center;justify-content:center;position:fixed;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:45;min-height:52px;padding:0 20px;border:0;border-radius:999px;background:var(--grad);color:#fff;font:inherit;font-weight:700;font-size:16px;box-shadow:0 6px 20px #0C212840;cursor:pointer}
+  .fab:active{transform:scale(.96)}
+  select,summary{min-height:44px}
+  details>summary{display:flex;align-items:center}
+  input:not([type=checkbox]):not([type=radio]),select,textarea{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){.main.seiteneu,.main.laedt::after{animation:none}.heutezeile{transition:none}}
+
+/* Handy: Tabellenzeilen als Karten, erste Zelle als Titel */
+@media(max-width:700px){
+  table.stapel tbody tr{box-shadow:0 1px 3px #0C212812;transition:background .12s}
+  table.stapel tbody tr:active{background:var(--tint)}
+  table.stapel td:first-child{font-weight:700;font-size:15px}
+  table.stapel td:first-child::before{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  table.stapel td:first-child{display:block}
+}

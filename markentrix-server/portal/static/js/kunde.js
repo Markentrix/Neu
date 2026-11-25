@@ -1,6 +1,14 @@
-import { api, stapelTabellen, h, zweiFaktorKarte, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
+import { api, stapelTabellen, appStil, h, zweiFaktorKarte, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
 stapelTabellen();
-import { setzeStart, zeige } from './kunde/kern.js';
+appStil({ fab: (seite) => {
+  if (!darfSchreiben()) return null;
+  if (seite === 'termine' && hat('anfragen_termine')) return { text: '＋ Termin', zielText: 'Neuer Termin' };
+  if (seite === 'nachrichten') return { text: '＋ Nachricht', zielText: 'Neue Nachricht' };
+  if (['heute', 'anfragen', 'kalender'].includes(seite)) return { text: '＋ Nachricht', href: '#nachrichten' };
+  return null;
+} });
+import { setzeStart, zeige, hat } from './kunde/kern.js';
+import { darfSchreiben } from './kunde/postfach.js';
 import './kunde/uebersicht.js';
 import './kunde/anfragen.js';
 import './kunde/heute.js';
