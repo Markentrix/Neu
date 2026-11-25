@@ -3,6 +3,7 @@ import { lastschriftKarte } from './einstellungen.js';
 import { neukundenAngebot } from './leadangebot.js';
 import { terminFelder } from './terminfelder.js';
 import { angebotsAuswertungKarte } from './angebotsplus.js';
+import { rechnungenJahrKarte } from './rechnungsjahr.js';
 import { V, auswahl, fehler, filterKarte, fmtEuro, knopf, kopf, sicher, tabelle } from './kern.js';
 
 // ---------------------------------------------------------------- Angebote und Rechnungen
@@ -143,6 +144,7 @@ V.belege = async () => {
   if (q.get('erinnerung')) setTimeout(() => erinnerungsDialog(), 200);
   return h('div', { class: 'stack' }, kopf('Angebote & Rechnungen', knopf('+ Angebot an Neukunden', () => neukundenAngebot(), 'btn'), s.ueberfaellig_n ? knopf('Zahlungserinnerungen prüfen (' + s.ueberfaellig_n + ')', () => erinnerungsDialog(), 'btn') : ''),
     h('p', { class: 'small' }, h('a', { href: '/api/admin/belege-export.csv', target: '_blank', rel: 'noopener' }, 'Rechnungen als CSV exportieren (Buchhaltung/sevDesk)')),
+    await sicher(rechnungenJahrKarte),
     await sicher(angebotsAuswertungKarte),
     await abgleichKarte(),
     await sicher(lastschriftKarte),

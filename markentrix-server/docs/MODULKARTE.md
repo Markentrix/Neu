@@ -13,7 +13,7 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `betrieb` | 1 | 29 | `cli`, `jobs`, `ki`, `mailer` und 2 weitere |
 | `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 47 weitere |
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
-| `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 147 weitere |
+| `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 148 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 37 weitere |
 | `fehlerhilfe` | 1 | 142 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
@@ -21,7 +21,7 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
 | `pdf` | 1 | 271 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
 | `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
-| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 78 weitere |
+| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 79 weitere |
 | `zustellung` | 1 | 114 | `jobs`, `mailer`, `routes_betriebplus`, `sitedienste` und 1 weitere |
 
 ## Anmeldung und Zugänge (`zugang`)
@@ -115,7 +115,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `angebotserinnerung` | 2 | 248 | `jobs`, `main`, `routes_belege`, `routes_leadangebot` |
 | `angebotsfluss` | 2 | 38 | `routes_belege`, `routes_leadangebot` |
 | `angebotsgrund` | 2 | 51 | `main`, `routes_angebotsplus`, `routes_belege`, `routes_leadangebot` |
-| `belege` | 2 | 207 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 3 weitere |
+| `belege` | 2 | 207 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 4 weitere |
 | `preisaenderung` | 2 | 257 | `jobs`, `main` |
 | `quittung` | 2 | 26 | `routes_sitedienste` |
 | `vertriebangebot` | 2 | 276 | `main` |
@@ -124,6 +124,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `routes_angebotsplus` | 3 | 122 | `main` |
 | `routes_angebottermin` | 3 | 129 | `routes_belege`, `routes_leadangebot` |
 | `routes_belege` | 3 | 507 | `main`, `routes_werkzeuge` |
+| `routes_belegexport` | 3 | 111 | `main` |
 | `routes_leadangebot` | 3 | 354 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `routes_belege` und 2 weitere |
 | `routes_pakete` | 3 | 211 | `main`, `tipps` |
 | `routes_provision` | 3 | 181 | `main` |
@@ -207,5 +208,5 @@ Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werde
 |---|---|---|---|
 | `cli` | 4 | 182 | `install.sh`, `mkctl`, `selbsttest.sh`, `t29.py` und 2 weitere |
 | `jobs` | 4 | 1309 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 8 weitere |
-| `main` | 4 | 312 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
+| `main` | 4 | 314 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
 

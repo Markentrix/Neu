@@ -116,6 +116,7 @@
     "preisaenderung",
     "quittung",
     "routes_angebotsplus",
+    "routes_belegexport",
     "routes_angebottermin",
     "routes_belege",
     "routes_leadangebot",

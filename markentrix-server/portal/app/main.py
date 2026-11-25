@@ -74,6 +74,7 @@ from .routes_briefing import router as brief_router, kunde_router as brief_kunde
 from .routes_angebotsinhalte import router as ang_router, kunde_router as ang_kunde_router
 from .routes_aufgaben import router as aufgaben_router, kunde_router as aufgaben_kunde_router
 from .routes_angebotsplus import router as angebotsplus_router
+from .routes_belegexport import router as belegexport_router
 from .routes_belege import router as belege_router, kunde_router as belege_kunde_router
 
 
@@ -171,6 +172,7 @@ app.include_router(public_router)
 app.include_router(onboarding_router)
 app.include_router(belege_router)
 app.include_router(angebotsplus_router)
+app.include_router(belegexport_router)
 app.include_router(belege_kunde_router)
 app.include_router(offboarding_router)
 app.include_router(zus_router)
