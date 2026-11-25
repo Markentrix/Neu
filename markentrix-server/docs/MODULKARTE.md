@@ -17,7 +17,7 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 37 weitere |
 | `fehlerhilfe` | 1 | 142 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
-| `mailer` | 1 | 493 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
+| `mailer` | 1 | 494 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
 | `pdf` | 1 | 245 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
 | `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
@@ -115,14 +115,15 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `angebotserinnerung` | 2 | 248 | `jobs`, `main`, `routes_belege`, `routes_leadangebot` |
 | `angebotsfluss` | 2 | 38 | `routes_belege`, `routes_leadangebot` |
 | `angebotsgrund` | 2 | 51 | `main`, `routes_angebotsplus`, `routes_belege`, `routes_leadangebot` |
-| `belege` | 2 | 183 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 3 weitere |
+| `belege` | 2 | 207 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 3 weitere |
 | `preisaenderung` | 2 | 257 | `jobs`, `main` |
 | `quittung` | 2 | 26 | `routes_sitedienste` |
 | `vertriebangebot` | 2 | 276 | `main` |
 | `zahlungsabgleich` | 2 | 98 | `routes_belege` |
+| `zugferd` | 2 | 256 | `belege` |
 | `routes_angebotsplus` | 3 | 122 | `main` |
 | `routes_angebottermin` | 3 | 129 | `routes_belege`, `routes_leadangebot` |
-| `routes_belege` | 3 | 491 | `main`, `routes_werkzeuge` |
+| `routes_belege` | 3 | 507 | `main`, `routes_werkzeuge` |
 | `routes_leadangebot` | 3 | 354 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `routes_belege` und 2 weitere |
 | `routes_pakete` | 3 | 211 | `main`, `tipps` |
 | `routes_provision` | 3 | 181 | `main` |

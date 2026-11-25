@@ -13,7 +13,7 @@ from .security import audit, require_admin, require_inhaber
 router = APIRouter(prefix="/api/admin")
 kunde_router = APIRouter(prefix="/api/kunde")
 
-FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, angesehen_am, erinnerungen, erinnert_am, grund_code, grund_text, terminvorschlaege, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
+FELDER = "id, art, nummer, kunden_id, lead_id, status, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, kaeufer_referenz, datum, faellig_am, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id, storno_von, versendet_am, angesehen_am, erinnerungen, erinnert_am, grund_code, grund_text, terminvorschlaege, bezahlt_am, bezahlt_cent, mahnstufe, mahn_am, notiz, erstellt_am"
 UEBERFAELLIG = "(art='rechnung' AND status IN ('gestellt','versendet') AND faellig_am < current_date)"
 
 
@@ -115,6 +115,7 @@ class BelegIn(BaseModel):
     einleitung: str = Field(default="", max_length=3000)
     schluss: str = Field(default="", max_length=3000)
     leistungszeitraum: str = Field(default="", max_length=100)
+    kaeufer_referenz: str = Field(default="", max_length=100)
     positionen: list[dict] = []
     leistungen: list[str] = Field(default=[], max_length=60)
     angebot_id: str | None = None
@@ -125,6 +126,7 @@ class BelegPut(BaseModel):
     einleitung: str = Field(default="", max_length=3000)
     schluss: str = Field(default="", max_length=3000)
     leistungszeitraum: str = Field(default="", max_length=100)
+    kaeufer_referenz: str = Field(default="", max_length=100)
     positionen: list[dict] = []
     leistungen: list[str] = Field(default=[], max_length=60)
     notiz: str | None = Field(default=None, max_length=2000)
@@ -145,9 +147,9 @@ def anlegen(kid: str, data: BelegIn, user: dict = Depends(require_admin)):
             raise HTTPException(400, "Referenzkunden bekommen keine Rechnung.")
         f = rechtstexte.firma(cur)
         s = belege.summen(pos, f["mwst_satz"], f["kleinunternehmer"])
-        cur.execute("""INSERT INTO belege (art, kunden_id, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id)
-                       VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                    (data.art, kid, data.betreff, data.einleitung, data.schluss, json.dumps(pos), json.dumps([x.strip()[:300] for x in data.leistungen if x.strip()]), data.leistungszeitraum, s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], data.angebot_id))
+        cur.execute("""INSERT INTO belege (art, kunden_id, betreff, einleitung, schluss, positionen, leistungen, leistungszeitraum, kaeufer_referenz, netto_cent, ust_satz, ust_cent, brutto_cent, kleinunternehmer, angebot_id)
+                       VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                    (data.art, kid, data.betreff, data.einleitung, data.schluss, json.dumps(pos), json.dumps([x.strip()[:300] for x in data.leistungen if x.strip()]), data.leistungszeitraum, data.kaeufer_referenz.strip(), s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], data.angebot_id))
         bid = cur.fetchone()["id"]
         audit(cur, user, "beleg_angelegt", kid, {"art": data.art})
     return {"id": bid}
@@ -160,7 +162,21 @@ def detail(bid: str, user: dict = Depends(require_admin)):
         cur.execute("SELECT kundennummer, firma, email, referenzkunde FROM kunden WHERE id=%s", (b["kunden_id"],))
         k = cur.fetchone()
         t = routes_angebottermin.gebucht(cur, bid) if b["art"] == "angebot" else None
-    return {"beleg": b, "kunde": k, "termin_gebucht": t and {"id": t["id"], "start": t["start"], "ende": t["ende"]}}
+        e = None
+        if b["art"] == "rechnung" and b["nummer"]:
+            e = {"fehlt": belege.e_rechnung_xml(cur, bid)[1]}
+    return {"beleg": b, "kunde": k, "termin_gebucht": t and {"id": t["id"], "start": t["start"], "ende": t["ende"]}, "e_rechnung": e}
+
+
+@router.get("/belege/{bid}/xml")
+def e_rechnung_xml(bid: str, user: dict = Depends(require_admin)):
+    """Die maschinenlesbaren Rechnungsdaten (ZUGFeRD/Factur-X, Profil EN 16931) als XML-Datei."""
+    with tx("admin") as cur:
+        b = _laden(cur, bid)
+        xml, fehlt = belege.e_rechnung_xml(cur, bid)
+    if not xml:
+        raise HTTPException(400, "E-Rechnung nicht möglich: " + "; ".join(fehlt))
+    return Response(xml, media_type="application/xml", headers={"Content-Disposition": f'attachment; filename="{b["nummer"]}.xml"'})
 
 
 @router.put("/belege/{bid}")
@@ -172,9 +188,9 @@ def aendern(bid: str, data: BelegPut, user: dict = Depends(require_admin)):
             raise HTTPException(400, "Ausgestellte Belege werden nicht mehr geändert. Bitte stornieren und neu erstellen.")
         f = rechtstexte.firma(cur)
         s = belege.summen(pos, f["mwst_satz"], f["kleinunternehmer"])
-        cur.execute("""UPDATE belege SET betreff=%s, einleitung=%s, schluss=%s, leistungszeitraum=%s, positionen=%s::jsonb, leistungen=%s::jsonb, notiz=coalesce(%s,notiz),
+        cur.execute("""UPDATE belege SET betreff=%s, einleitung=%s, schluss=%s, leistungszeitraum=%s, kaeufer_referenz=%s, positionen=%s::jsonb, leistungen=%s::jsonb, notiz=coalesce(%s,notiz),
                               netto_cent=%s, ust_satz=%s, ust_cent=%s, brutto_cent=%s, kleinunternehmer=%s, geaendert_am=now() WHERE id=%s""",
-                    (data.betreff, data.einleitung, data.schluss, data.leistungszeitraum, json.dumps(pos), json.dumps([x.strip()[:300] for x in data.leistungen if x.strip()]), data.notiz, s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], bid))
+                    (data.betreff, data.einleitung, data.schluss, data.leistungszeitraum, data.kaeufer_referenz.strip(), json.dumps(pos), json.dumps([x.strip()[:300] for x in data.leistungen if x.strip()]), data.notiz, s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], bid))
         audit(cur, user, "beleg_geaendert", b["kunden_id"], {"beleg": bid})
     return {"ok": True}
 

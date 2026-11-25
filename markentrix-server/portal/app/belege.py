@@ -1,5 +1,6 @@
 """Angebote und Rechnungen: Berechnung, Nummernvergabe, PDF, Texte.
 Eine ausgestellte Rechnung wird nie geändert; Korrekturen laufen über eine Storno-Rechnung."""
+import logging
 from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from io import BytesIO
@@ -8,7 +9,7 @@ import segno
 from fastapi import HTTPException
 from reportlab.platypus import Image, KeepTogether
 
-from . import pdf, rechtstexte
+from . import pdf, rechtstexte, zugferd
 
 KLEIN_HINWEIS = "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
 
@@ -78,20 +79,36 @@ def _epc_qr(f: dict, beleg: dict):
     return puffer
 
 
-def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -> tuple[bytes, str]:
+def _lade(cur, bid, f: dict | None, empfaenger: dict | None):
     cur.execute("SELECT * FROM belege WHERE id=%s", (bid,))
     b = cur.fetchone()
     if not b:
         raise LookupError("Beleg nicht gefunden")
     f = f or rechtstexte.firma(cur)
+    emp = empfaenger if (empfaenger and not b["empfaenger"]) else (b["empfaenger"] or (empfaenger_von(cur, b["kunden_id"]) if b["kunden_id"] else {}))
+    storno_nr = storno_datum = None
+    if b["storno_von"] is not None:
+        cur.execute("SELECT nummer, datum FROM belege WHERE id=%s", (b["storno_von"],))
+        r = cur.fetchone()
+        storno_nr, storno_datum = r and r["nummer"], r and r["datum"]
+    return b, f, emp, storno_nr, storno_datum
+
+
+def e_rechnung_xml(cur, bid, f: dict | None = None) -> tuple[bytes | None, list[str]]:
+    """ZUGFeRD-/Factur-X-XML einer ausgestellten Rechnung; ohne XML steht in der Liste, was fehlt."""
+    b, f, emp, storno_nr, storno_datum = _lade(cur, bid, f, None)
+    if b["art"] != "rechnung":
+        return None, ["Nur Rechnungen sind E-Rechnungen."]
+    fehlt = zugferd.pruefen(b, f, emp or {})
+    if fehlt:
+        return None, fehlt
+    return zugferd.xml_erzeugen(b, f, emp, storno_nr, storno_datum), []
+
+
+def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e_rechnung: bool = True) -> tuple[bytes, str]:
+    b, f, emp, storno_nr, storno_datum = _lade(cur, bid, f, empfaenger)
     ist_re = b["art"] == "rechnung"
     storno = b["storno_von"] is not None
-    emp = empfaenger if (empfaenger and not b["empfaenger"]) else (b["empfaenger"] or (empfaenger_von(cur, b["kunden_id"]) if b["kunden_id"] else {}))
-    storno_nr = None
-    if storno:
-        cur.execute("SELECT nummer FROM belege WHERE id=%s", (b["storno_von"],))
-        r = cur.fetchone()
-        storno_nr = r and r["nummer"]
     titel = ("Stornorechnung" if storno else "Rechnung") if ist_re else "Angebot"
     nr = b["nummer"] or "Entwurf"
     inhalt = []
@@ -105,6 +122,8 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
         info.append(["Gültig bis", pdf.datum(b["faellig_am"])])
     if b["leistungszeitraum"]:
         info.append(["Leistungszeitraum", b["leistungszeitraum"]])
+    if ist_re and b.get("kaeufer_referenz"):
+        info.append(["Ihre Referenz", b["kaeufer_referenz"]])
     from reportlab.platypus import Table, TableStyle
     kopf = Table([[pdf.p(adr), Table([[pdf.p(k, pdf.KLEIN), pdf.p(v)] for k, v in info], colWidths=[32 * pdf.mm, 48 * pdf.mm])]], colWidths=[90 * pdf.mm, 80 * pdf.mm])
     kopf.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
@@ -157,6 +176,11 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None) -
     steuer = f"Steuernummer: {f['steuernummer']}" if f.get("steuernummer") else ""
     ust = f"USt-IdNr.: {f['ustid']}" if f.get("ustid") else ""
     daten = pdf.dokument(f"{titel} {nr}", f"{titel} {nr}", inhalt, f, " · ".join(x for x in [steuer, ust] if x))
+    if ist_re and b["nummer"] and e_rechnung and not zugferd.pruefen(b, f, emp or {}):
+        try:   # Rechnungen tragen ihre Daten maschinenlesbar mit (ZUGFeRD); bei einem Fehler geht das normale PDF raus
+            daten = zugferd.einbetten(daten, zugferd.xml_erzeugen(b, f, emp, storno_nr, storno_datum), f"{titel} {nr}", f["name"])
+        except Exception:
+            logging.getLogger(__name__).exception("E-Rechnung konnte nicht eingebettet werden (%s)", nr)
     return daten, f"{titel}-{nr}.pdf".replace(" ", "_")
 
 

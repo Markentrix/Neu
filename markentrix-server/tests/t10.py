@@ -69,6 +69,25 @@ r=a.post(f"/api/admin/belege/{re_id}/mahnung",json={"stufe":1}); chk("zahlungser
 m=mails()[-1]; chk("mahn mail",m["anh"] and "Zahlungserinnerung" in m["subject"]); open("/var/tmp/pt/mahn.pdf","wb").write(m["anh"][0][1])
 chk("stufe nicht doppelt",a.post(f"/api/admin/belege/{re_id}/mahnung",json={"stufe":1}).status_code==400)
 chk("stufe 2",a.post(f"/api/admin/belege/{re_id}/mahnung",json={"stufe":2}).status_code==200)
+
+import io as _io, subprocess as _sp2, os as _os
+from pypdf import PdfReader as _PR
+def _xml(pdfbytes):
+    an=_PR(_io.BytesIO(pdfbytes)).attachments
+    return an.get("factur-x.xml",[None])[0]
+def _mustang(pfad):
+    jar="/tmp/mus/mus.jar"
+    if not _os.path.exists(jar): return None
+    o=_sp2.run(["java","-jar",jar,"--action","validate","--source",pfad,"--disable-file-logging"],capture_output=True,text=True).stdout
+    return ('flavour=3b' in o and 'isCompliant=true' in o) and '<summary status="invalid"/>' not in o
+x=_xml(p.content); chk("E-Rechnung: factur-x.xml im Rechnungs-PDF",bool(x) and b"<ram:ID>RE-" in x and b"urn:cen.eu:en16931:2017" in x and b'<ram:TypeCode>380</ram:TypeCode>' in x and b"DE89370400440532013000" in x,(x or b"")[:200])
+chk("E-Rechnung: Summen im XML",f'<ram:GrandTotalAmount>{d["brutto_cent"]/100:.2f}</ram:GrandTotalAmount>'.encode() in x and f'<ram:TaxBasisTotalAmount>{netto/100:.2f}</ram:TaxBasisTotalAmount>'.encode() in x,x)
+chk("E-Rechnung: Käufer und Steuernummer",b"Ref" in x or b"<ram:Name>" in x and b'schemeID="FC">12/345/67890' in x)
+mv=_mustang("/var/tmp/pt/rechnung.pdf")
+if mv is not None: chk("E-Rechnung: Mustang-Prüfung (PDF/A-3b und EN 16931)",mv)
+r=a.get(f"/api/admin/belege/{re_id}/xml"); _k=([i for i,(p,q) in enumerate(zip(r.content,x)) if p!=q] or [60])[0]; chk("E-Rechnung: XML-Download",r.status_code==200 and r.content==_xml(a.get(f"/api/admin/belege/{re_id}/pdf").content) and "xml" in r.headers["content-type"],(r.status_code,r.content[_k-80:_k+40],x[_k-80:_k+40]))
+chk("E-Rechnung: Detail meldet nichts Fehlendes",a.get(f"/api/admin/belege/{re_id}").json()["e_rechnung"]=={"fehlt":[]})
+chk("Angebot ist kein ZUGFeRD",_xml(m["anh"][0][1]) is None and a.get(f"/api/admin/belege/{ang}/xml").status_code==400)
 # Bezahlt
 r=a.post(f"/api/admin/belege/{re_id}/bezahlt",json={}); chk("bezahlt",r.status_code==200,r.text)
 chk("nicht doppelt bezahlt",a.post(f"/api/admin/belege/{re_id}/bezahlt",json={}).status_code==400)
@@ -77,7 +96,10 @@ r=a.post(f"/api/admin/belege/{re_id}/stornieren"); chk("storno",r.status_code==2
 s=a.get(f"/api/admin/belege/{sid}").json()["beleg"]; o=a.get(f"/api/admin/belege/{re_id}").json()["beleg"]
 chk("storno negativ",s["brutto_cent"]==-o["brutto_cent"] and s["storno_von"]==re_id and o["status"]=="storniert",(s["brutto_cent"],o["brutto_cent"]))
 chk("storno nicht erneut",a.post(f"/api/admin/belege/{re_id}/stornieren").status_code==400 and a.post(f"/api/admin/belege/{sid}/stornieren").status_code==400)
-open("/var/tmp/pt/storno.pdf","wb").write(a.get(f"/api/admin/belege/{sid}/pdf").content)
+_sp=a.get(f"/api/admin/belege/{sid}/pdf").content; open("/var/tmp/pt/storno.pdf","wb").write(_sp)
+_sx=_xml(_sp); chk("E-Rechnung Storno: Gutschrift 381 mit Bezug und positiven Beträgen",bool(_sx) and b"<ram:TypeCode>381</ram:TypeCode>" in _sx and f"<ram:IssuerAssignedID>{renr}</ram:IssuerAssignedID>".encode() in _sx and b"<ram:GrandTotalAmount>-" not in _sx and b"<ram:ChargeAmount>-" not in _sx,(_sx or b"")[-700:])
+mv=_mustang("/var/tmp/pt/storno.pdf")
+if mv is not None: chk("E-Rechnung Storno: Mustang-Prüfung",mv)
 # Referenzkunde
 rk=a.post("/api/admin/kunden",json={"firma":"Ref Kunde","referenzkunde":True}).json()["id"]
 chk("referenz: keine rechnung",a.post(f"/api/admin/kunden/{rk}/belege",json={"art":"rechnung","positionen":[{"text":"x","menge":1,"preis_cent":100}]}).status_code==400)
@@ -87,7 +109,16 @@ chk("referenz: angebot ok",a.post(f"/api/admin/kunden/{rk}/belege",json={"art":"
 a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","strasse":"Teststr. 1","plz":"29221","ort":"Celle","steuernummer":"12/345/67890","kleinunternehmer":True,"mwst_satz":19})
 kb=a.post(f"/api/admin/kunden/{kid}/belege",json={"art":"rechnung","positionen":[{"text":"Leistung","menge":1,"preis_cent":10000}]}).json()["id"]; a.post(f"/api/admin/belege/{kb}/ausstellen")
 d=a.get(f"/api/admin/belege/{kb}").json()["beleg"]; chk("kleinunternehmer ohne USt",d["ust_cent"]==0 and d["brutto_cent"]==10000 and d["kleinunternehmer"])
-open("/var/tmp/pt/klein.pdf","wb").write(a.get(f"/api/admin/belege/{kb}/pdf").content)
+_kp=a.get(f"/api/admin/belege/{kb}/pdf").content; open("/var/tmp/pt/klein.pdf","wb").write(_kp)
+_kx=_xml(_kp); chk("E-Rechnung Kleinunternehmer: Kategorie E mit Grund",bool(_kx) and b"<ram:CategoryCode>E</ram:CategoryCode>" in _kx and "§ 19 UStG".encode() in _kx,(_kx or b"")[-600:])
+mv=_mustang("/var/tmp/pt/klein.pdf")
+if mv is not None: chk("E-Rechnung Kleinunternehmer: Mustang-Prüfung",mv)
+a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","strasse":"Teststr. 1","plz":"29221","ort":"Celle","kleinunternehmer":True,"mwst_satz":19,"steuernummer":"","ustid":""})
+kx=a.post(f"/api/admin/kunden/{kid}/belege",json={"art":"rechnung","kaeufer_referenz":"04011000-1234512345-35","positionen":[{"text":"Leistung","menge":1,"preis_cent":10000}]}).json()["id"]
+chk("Käuferreferenz wird gespeichert",a.get(f"/api/admin/belege/{kx}").json()["beleg"]["kaeufer_referenz"]=="04011000-1234512345-35")
+a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","strasse":"Teststr. 1","plz":"29221","ort":"Celle","steuernummer":"12/345/67890","kleinunternehmer":True,"mwst_satz":19})
+a.post(f"/api/admin/belege/{kx}/ausstellen"); _rx=_xml(a.get(f"/api/admin/belege/{kx}/pdf").content)
+chk("Käuferreferenz steht als BT-10 im XML",bool(_rx) and b"<ram:BuyerReference>04011000-1234512345-35</ram:BuyerReference>" in _rx)
 # Übersicht
 u=a.get("/api/admin/uebersicht").json(); chk("übersicht rechnungen","rechnungen_offen_cent" in u,u.keys())
 # --- Kundenportal

@@ -152,12 +152,12 @@ V.belege = async () => {
       h('div', { class: 'card stat' }, h('span', { class: 'muted small' }, 'Bezahlt diesen Monat'), h('b', {}, euro(s.bezahlt_monat)))),
     h('div', { class: 'card' }, await filterKarte('belege'), h('div', { class: 'tabs' }, f('', '', 'Alle'), f('rechnung', '', 'Rechnungen'), f('angebot', '', 'Angebote'), f('rechnung', 'gestellt', 'Offen'), f('rechnung', 'bezahlt', 'Bezahlt'), f('', 'entwurf', 'Entwürfe')),
       leiste, tabelle([[sel.alle, z => sel.haken(z.id)], ['Nr.', z => h('a', { href: z.kunden_id ? '#beleg/' + z.id : '#lead/' + z.lead_id }, z.nummer || 'Entwurf')], ['Art', belegArt], ['Kunde', z => z.kundennummer + ' ' + z.firma], ['Betreff', z => z.betreff], ['Datum', z => datum(z.datum)], ['Fällig/gültig bis', z => datum(z.faellig_am)], ['Betrag', z => fmtEuro(z.brutto_cent)], ['Status', belegPill]], d.belege, 'Noch keine Belege. Anlegen im jeweiligen Kunden.')),
-    h('p', { class: 'small muted' }, 'Hinweis: Rechnungen werden hier als PDF erstellt. Ab 2027/2028 gelten für Rechnungen zwischen Unternehmen schrittweise Pflichten zur E-Rechnung (z. B. ZUGFeRD/XRechnung). Das ist hier noch nicht umgesetzt; bitte mit der Steuerberatung abstimmen.'));
+    h('p', { class: 'small muted' }, 'Hinweis: Ausgestellte Rechnungen sind E-Rechnungen im Format ZUGFeRD (PDF mit eingebetteten Rechnungsdaten, Profil EN 16931). Ab 2027/2028 gelten für Rechnungen zwischen Unternehmen schrittweise Pflichten zur E-Rechnung; bitte mit der Steuerberatung abstimmen.'));
 };
 
 export async function belegEditor(id, kid, art) {
-  let b, k, vorschlag = [], gebuchtTermin = null;
-  if (id) { const r = await api('/api/admin/belege/' + id); b = r.beleg; k = r.kunde; gebuchtTermin = r.termin_gebucht; if (!k && b.lead_id) { location.hash = '#lead/' + b.lead_id; return h('div'); } }
+  let b, k, vorschlag = [], gebuchtTermin = null, eInfo = null;
+  if (id) { const r = await api('/api/admin/belege/' + id); b = r.beleg; k = r.kunde; gebuchtTermin = r.termin_gebucht; eInfo = r.e_rechnung; if (!k && b.lead_id) { location.hash = '#lead/' + b.lead_id; return h('div'); } }
   else {
     const r = await api('/api/admin/kunden/' + kid), v = await api('/api/admin/kunden/' + kid + '/belege-vorlage');
     k = { kundennummer: r.kunde.kundennummer, firma: r.kunde.firma, email: r.kunde.email, referenzkunde: r.kunde.referenzkunde };
@@ -171,7 +171,7 @@ export async function belegEditor(id, kid, art) {
   const zeilen = [...b.positionen];
   const box = h('div'), sum = h('div', { class: 'small muted', style: 'text-align:right' });
   const feldB = (name, wert, extra = {}) => h('input', { name, value: wert ?? '', disabled: !frei, ...extra });
-  const betreff = feldB('betreff', b.betreff, { placeholder: 'z. B. Website-Paket' }), zeitraum = feldB('leistungszeitraum', b.leistungszeitraum, { placeholder: 'z. B. November 2026' });
+  const betreff = feldB('betreff', b.betreff, { placeholder: 'z. B. Website-Paket' }), zeitraum = feldB('leistungszeitraum', b.leistungszeitraum, { placeholder: 'z. B. November 2026' }), referenz = feldB('kaeufer_referenz', b.kaeufer_referenz, { placeholder: 'nur bei Behörden: Leitweg-ID', maxlength: 100 });
   const istAngebot = (b.art || art) === 'angebot';
   const leist = h('textarea', { rows: 5, disabled: !frei, 'aria-label': 'Das bekommt der Kunde', placeholder: 'Eine Zeile pro Punkt. „## “ davor = Zwischenüberschrift.' }); leist.value = (b.leistungen || []).join('\n');
   const pakete = istAngebot && frei ? await api('/api/admin/katalog/leistungstexte').catch(() => []) : [];
@@ -188,7 +188,7 @@ export async function belegEditor(id, kid, art) {
       frei ? knopf('✕', () => { zeilen.splice(i, 1); zeichne(); }, 'sec') : ''))); rechne();
   };
   zeichne();
-  const daten = () => ({ betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, leistungszeitraum: zeitraum.value, leistungen: istAngebot ? leist.value.split('\n').map(x => x.trim()).filter(Boolean) : [], positionen: zeilen.map(z => ({ text: z.text, menge: z.menge, einheit: z.einheit || '', preis_cent: z.preis_cent })) });
+  const daten = () => ({ betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, leistungszeitraum: zeitraum.value, kaeufer_referenz: referenz.value, leistungen: istAngebot ? leist.value.split('\n').map(x => x.trim()).filter(Boolean) : [], positionen: zeilen.map(z => ({ text: z.text, menge: z.menge, einheit: z.einheit || '', preis_cent: z.preis_cent })) });
   const aktion = (text, pfad, body, ok, art = 'sec', bestaetigen) => knopf(text, async () => {
     if (bestaetigen && !confirm(bestaetigen)) return;
     try { const r = await api(pfad, { method: 'POST', body }); if (ok) ok(r); } catch (x) { fehler(m, x); } }, art);
@@ -220,10 +220,12 @@ export async function belegEditor(id, kid, art) {
   return h('div', { class: 'stack' }, kopf(titel, belegPill(b), h('a', { class: 'btn sec small', href: '#kunde/' + (b.kunden_id || kid) }, '← ' + k.firma)),
     k.referenzkunde && (b.art || art) === 'rechnung' ? h('div', { class: 'msg err' }, 'Das ist ein Referenzkunde – Rechnungen sind für Referenzkunden gesperrt.') : '', mailFehlerHinweis(b), m,
     h('div', { class: 'card' }, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Leistungszeitraum'), zeitraum)),
+      (b.art || art) === 'rechnung' ? h('div', { style: 'margin-top:8px' }, h('label', {}, 'Käuferreferenz / Leitweg-ID (für die E-Rechnung)'), referenz) : '',
       h('label', {}, 'Einleitung (optional)'), einl, h('h3', { style: 'margin-top:16px' }, 'Positionen'), h('div', { class: 'small muted' }, 'Beschreibung · Menge · Einheit · Einzelpreis netto in €'), box,
       frei ? knopf('+ Position', () => { zeilen.push({ text: '', menge: 1, einheit: '', preis_cent: 0 }); zeichne(); }) : '', sum,
       !frei ? h('div', { style: 'text-align:right;margin-top:8px' }, h('div', {}, 'Netto ' + fmtEuro(b.netto_cent)), b.kleinunternehmer ? h('div', { class: 'small muted' }, 'Kleinunternehmer – keine Umsatzsteuer') : h('div', {}, 'USt ' + Number(b.ust_satz) + ' % ' + fmtEuro(b.ust_cent)), h('div', {}, h('b', {}, 'Gesamt ' + fmtEuro(b.brutto_cent)))) : '',
       istAngebot ? [h('label', {}, 'Das bekommt der Kunde (steht im Angebot)'), frei ? paketWahl : '', leist] : '',
+      eInfo ? h('p', { class: 'small ' + (eInfo.fehlt.length ? 'muted' : ''), style: 'margin-top:10px' }, eInfo.fehlt.length ? 'Keine E-Rechnung (ZUGFeRD) im PDF, es fehlt: ' + eInfo.fehlt.join('; ') + '.' : ['E-Rechnung (ZUGFeRD) ist im PDF enthalten. ', h('a', { href: '/api/admin/belege/' + id + '/xml' }, 'Rechnungsdaten als XML herunterladen')]) : '',
       h('label', {}, 'Schlusstext (optional)'), schluss,
       termine ? termine.el : '',
       !frei ? h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Datum ' + datum(b.datum) + ' · ' + (b.art === 'rechnung' ? 'zahlbar bis ' : 'gültig bis ') + datum(b.faellig_am) + (b.versendet_am ? ' · gesendet am ' + datum(b.versendet_am) : '') + (b.bezahlt_am ? ' · bezahlt am ' + datum(b.bezahlt_am) : '') + (b.mahnstufe ? ' · Mahnstufe ' + b.mahnstufe : '')) : ''),

@@ -72,3 +72,9 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 ## Statistik-Baustein (site.js) und Widerruf über die Website
 - Cookie-Fenster nennt jetzt Google Analytics, Anbieter Google Ireland Limited, Cookies bis zu 2 Jahre, mögliche Übermittlung in die USA, Widerruf über „Statistik-Einstellungen“ (deutsch und englisch). Wortlaut und die Laufzeitangabe vom Anwalt abnehmen lassen. Ablehnen stoppt Analytics sofort und löscht `_ga`-Cookies.
 - Das Formularfeld `einwilligung` bedeutet „Datenschutzhinweise zur Kenntnis genommen“, nicht Werbe-Einwilligung. Widerruf über `POST /api/anfrage` braucht sie nicht; Pflicht sind Name, E-Mail und Vorgangsnummer oder Beschreibung. Die Bestätigungsmail nennt Name, E-Mail, Vorgang/Angaben sowie Datum und Uhrzeit des Eingangs.
+
+## E-Rechnung (ZUGFeRD / Factur-X)
+- Technik: Jede ausgestellte Rechnung und Stornorechnung wird als PDF/A-3b mit eingebettetem `factur-x.xml` (Profil EN 16931, Leitfaden `urn:cen.eu:en16931:2017`) ausgeliefert. Geprüft mit dem Mustang-Validator (PDF/A-3b, XML-Schema, EN-16931-Regeln); die XRechnung-Zusatzregeln (z. B. Leitweg-ID Pflicht) werden bewusst nicht verlangt.
+- Für die Steuerberatung: (1) Ab wann das Unternehmen Rechnungen als E-Rechnung versenden muss und ob ein ZUGFeRD-PDF dafür genügt; (2) bei Kleinunternehmern (§ 19 UStG) Steuerkategorie „E“ mit dem Befreiungsgrund im XML; (3) fehlt das Leistungsdatum im XML (nur Freitext „Leistungszeitraum“ als Hinweis), soll das Rechnungsdatum als Leistungsdatum gelten?; (4) Stornorechnung geht als Gutschrift (Typ 381) mit Bezug auf die Ursprungsrechnung; (5) Aufbewahrung: das XML ist der maßgebliche Rechnungsinhalt, das PDF-Bild darf nicht abweichen (beides entsteht aus denselben Daten).
+- Für Behörden als Empfänger: Das Portal erzeugt keine reine XRechnung (nur XML). Leitweg-ID kann als Käuferreferenz mitgegeben werden.
+

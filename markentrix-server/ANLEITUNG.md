@@ -146,7 +146,7 @@ Beim Kunden → Angebote & Rechnungen: Vorlage aus den Buchungen übernehmen, Po
 
 Wichtig:
 - Du hattest dich für **sevDesk** als Buchhaltung entschieden. Das Portal erstellt Rechnungen, die du dort weiterverwenden kannst: Angebote & Rechnungen → „Rechnungen als CSV exportieren". Ob du Rechnungen im Portal oder direkt in sevDesk erstellst, solltest du **einheitlich** halten (gleiche Nummernkreise!).
-- **E-Rechnung:** Für Rechnungen zwischen Unternehmen (B2B) gilt in Deutschland nach und nach eine Pflicht zur strukturierten E-Rechnung (ZUGFeRD/XRechnung). Das Portal erzeugt bisher nur PDF-Rechnungen. Bitte mit der Steuerberatung klären, ab wann das für dich gilt; Kleinunternehmer sind ausgenommen.
+- **E-Rechnung (ZUGFeRD):** Jede ausgestellte Rechnung und Stornorechnung ist ein PDF/A-3-Dokument mit eingebetteten Rechnungsdaten (Format ZUGFeRD/Factur-X, Profil EN 16931). Das PDF sieht aus wie bisher; Buchhaltungsprogramme (sevDesk, DATEV, Lexware …) lesen die Daten aus dem Anhang `factur-x.xml`. Die Rechnung geht wie gewohnt per Mail; ist die E-Rechnung enthalten, steht ein Satz dazu in der Mail. In der Rechnung steht unten, ob sie enthalten ist (sonst: was fehlt, meist Steuernummer/USt-IdNr. oder Empfängerort), dort lädst du auch die reine XML-Datei herunter. Für Rechnungen an Behörden trägst du im Entwurf die **Leitweg-ID** im Feld „Käuferreferenz“ ein. Reines XRechnung-Format (ohne PDF) gibt es nicht. Ab wann du E-Rechnungen verschicken musst, klärst du mit der Steuerberatung (Empfangspflicht seit 2025, Versandpflicht gestuft 2027/2028; Kleinunternehmer sind vom Versand ausgenommen, die Daten werden trotzdem miterzeugt).
 - Referenzkunden bekommen keine Rechnungen.
 
 ## Vertriebler: Abrechnung, Verlängerung, Rückbuchung

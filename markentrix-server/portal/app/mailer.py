@@ -154,7 +154,8 @@ def beleg(an: str, art: str, nummer: str, name: str | None, pdf_bytes: bytes, da
         ziel = f"\n\nSie können es online ansehen und dort direkt annehmen: {link}" if link else (f"\n\nSie können es im Kundenportal ansehen und dort direkt annehmen: {config.BASE_URL}/app#belege" if angebot_link else "")
         text = f"{hallo}\n\nanbei unser Angebot {nummer}." + ziel + ("\n\n" + termine.strip() if termine else "") + "\n\nBei Fragen melden Sie sich gern." + SIGNATUR
         return senden(an, f"Angebot {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
-    text = (f"{hallo}\n\nanbei erhalten Sie die Rechnung {nummer}." + (f"\nBitte überweisen Sie den Betrag bis zum {faellig:%d.%m.%Y}." if faellig else "") +
+    text = (f"{hallo}\n\nanbei erhalten Sie die Rechnung {nummer}." + (f"\nBitte überweisen Sie den Betrag bis zum {faellig:%d.%m.%Y}." if faellig else "")
+            + ("\n\nDie Rechnungsdaten sind im PDF zusätzlich maschinenlesbar enthalten (E-Rechnung im Format ZUGFeRD), Ihre Buchhaltung kann sie direkt einlesen." if b"factur-x.xml" in pdf_bytes else "") +
             "\n\nBei Fragen melden Sie sich gern." + SIGNATUR)
     return senden(an, f"Rechnung {nummer}", text, (dateiname, pdf_bytes, "application/pdf"))
 
