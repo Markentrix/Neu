@@ -3,11 +3,10 @@ Eine ausgestellte Rechnung wird nie geändert; Korrekturen laufen über eine Sto
 import logging
 from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
-from io import BytesIO
 
 import segno
 from fastapi import HTTPException
-from reportlab.platypus import Image, KeepTogether
+from reportlab.platypus import Flowable, KeepTogether
 
 from . import pdf, rechtstexte, zugferd
 
@@ -66,17 +65,40 @@ def firmendaten_pruefen(f: dict):
         raise HTTPException(400, "Bitte zuerst unter Einstellungen → Firmendaten eintragen: " + ", ".join(fehlt) + ".")
 
 
-def _epc_qr(f: dict, beleg: dict):
-    """GiroCode (EPC-QR) zum Bezahlen per Banking-App."""
+def _epc_text(f: dict, beleg: dict):
+    """Inhalt des GiroCodes (EPC-QR, Version 002, UTF-8) für die Banking-App."""
     iban = "".join((f.get("iban") or "").split()).upper()
     if not iban or beleg["brutto_cent"] <= 0:
         return None
-    inhalt = "\n".join(["BCD", "002", "1", "SCT", (f.get("bic") or "").strip(), (f.get("name") or "")[:70], iban,
-                        f"EUR{beleg['brutto_cent'] / 100:.2f}", "", "", f"Rechnung {beleg['nummer']}"[:140]])
-    puffer = BytesIO()
-    segno.make(inhalt, error="m").save(puffer, kind="png", scale=4, border=1)
-    puffer.seek(0)
-    return puffer
+    return "\n".join(["BCD", "002", "1", "SCT", "".join((f.get("bic") or "").split()).upper(), (f.get("name") or "")[:70], iban,
+                      f"EUR{beleg['brutto_cent'] / 100:.2f}", "", "", f"Rechnung {beleg['nummer']}"[:140]])
+
+
+class GiroCode(Flowable):
+    """GiroCode als Vektorgrafik mit Ruhezone (4 Module): bleibt in jedem PDF-Programm scharf und scannt zuverlässig."""
+
+    def __init__(self, inhalt: str, groesse):
+        super().__init__()
+        self.matrix = [list(z) for z in segno.make(inhalt, error="m", micro=False).matrix]
+        self.groesse = groesse
+        self.width = self.height = groesse
+
+    def draw(self):
+        n = len(self.matrix)
+        k = self.groesse / (n + 8)
+        c = self.canv
+        c.setFillColor(pdf.colors.white); c.rect(0, 0, self.groesse, self.groesse, stroke=0, fill=1)
+        c.setFillColor(pdf.colors.black)
+        for y, zeile in enumerate(self.matrix):
+            x = 0
+            while x < n:
+                if zeile[x]:
+                    start = x
+                    while x < n and zeile[x]:
+                        x += 1
+                    c.rect((4 + start) * k, self.groesse - (5 + y) * k, (x - start) * k + 0.02, k + 0.02, stroke=0, fill=1)
+                else:
+                    x += 1
 
 
 def _lade(cur, bid, f: dict | None, empfaenger: dict | None):
@@ -118,8 +140,9 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
     info = ([["Kundennummer", emp["kundennummer"]]] if emp.get("kundennummer") else []) + [[f"{titel}snummer" if ist_re else "Angebotsnummer", nr], [f"{titel}sdatum" if ist_re else "Angebotsdatum", pdf.datum(b["datum"] or date.today())]]
     if b["leistungszeitraum"]:
         info.append(["Leistungsdatum / -zeitraum", b["leistungszeitraum"]])
+    sofort = ist_re and b.get("zahlungsziel_tage") == 0
     if ist_re and b["faellig_am"]:
-        info.append(["Zahlbar bis", pdf.datum(b["faellig_am"])])
+        info.append(["Zahlbar", "sofort, ohne Abzug"] if sofort else ["Zahlbar bis", pdf.datum(b["faellig_am"])])
     if not ist_re and b["faellig_am"]:
         info.append(["Gültig bis", pdf.datum(b["faellig_am"])])
     if ist_re and b.get("kaeufer_referenz"):
@@ -157,10 +180,11 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
     if b.get("leistungen") and not ist_re:
         inhalt += [pdf.Spacer(1, 14), pdf.leistungsbox("Das bekommen Sie", b["leistungen"])]
     if ist_re and not storno:
-        zahl = ["Zahlbar bis: " + pdf.datum(b["faellig_am"]) + " · Verwendungszweck: " + nr if b["faellig_am"] else "Verwendungszweck: " + nr,
-                "Bitte überweisen Sie den Rechnungsbetrag auf die unten angegebene Bankverbindung." if f.get("iban") else "Bitte überweisen Sie den Rechnungsbetrag unter Angabe der Rechnungsnummer."]
-        qr = _epc_qr(f, b)
-        zt = Table([[pdf.p("\n".join(zahl)), Image(qr, 26 * pdf.mm, 26 * pdf.mm) if qr else ""]], colWidths=[134 * pdf.mm, 36 * pdf.mm])
+        epc = _epc_text(f, b)
+        zahl = [("Zahlbar sofort, ohne Abzug" if b.get("zahlungsziel_tage") == 0 else "Zahlbar bis: " + pdf.datum(b["faellig_am"])) + " · Verwendungszweck: " + nr if b["faellig_am"] else "Verwendungszweck: " + nr,
+                "Bitte überweisen Sie den Rechnungsbetrag auf die unten angegebene Bankverbindung." if f.get("iban") else "Bitte überweisen Sie den Rechnungsbetrag unter Angabe der Rechnungsnummer."] + (["Den GiroCode rechts scannen Sie in der Banking-App Ihrer Bank (nicht mit der Kamera)."] if epc else [])
+        qr = GiroCode(epc, 26 * pdf.mm) if epc else ""
+        zt = Table([[pdf.p("\n".join(zahl)), qr]], colWidths=[130 * pdf.mm, 40 * pdf.mm])
         zt.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (0, 0), 0)]))
         inhalt += [pdf.Spacer(1, 12), KeepTogether([pdf.p("Zahlungsinformationen", pdf.H2), zt])]
     if storno:

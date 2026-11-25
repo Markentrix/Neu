@@ -35,3 +35,19 @@ chk("Monatsexport hat Monatsordner",r.status_code==200 and any("/%02d "%time.gmt
 r=a.get(f"/api/admin/belege-export.zip?jahr={j+1}"); z=zipfile.ZipFile(io.BytesIO(r.content))
 chk("Leeres Jahr: ZIP nur mit Liste",r.status_code==200 and len([x for x in z.namelist() if x.endswith('.pdf')])==0 and any(x.endswith('.csv') for x in z.namelist()))
 chk("Export steht im Protokoll",int(subprocess.run(["su","postgres","-c","psql -q -t -A -h /var/tmp/pgtest -p 54329 markentrix -c \"select count(*) from audit_log where aktion='rechnungen_export'\""],capture_output=True,text=True).stdout.strip() or 0)>=3)
+# Zahlungsfrist je Rechnung
+import datetime
+def mit_frist(tage):
+    body={"art":"rechnung","positionen":[{"text":"Frist","menge":1,"preis_cent":1000}]}
+    if tage is not None: body["zahlungsziel_tage"]=tage
+    r=a.post(f"/api/admin/kunden/{k}/belege",json=body).json()["id"]; a.post(f"/api/admin/belege/{r}/ausstellen")
+    return r,a.get(f"/api/admin/belege/{r}").json()["beleg"]
+heute=datetime.date.today()
+_,b7=mit_frist(7); chk("Zahlungsfrist 7 Tage",b7["zahlungsziel_tage"]==7 and b7["faellig_am"]==(heute+datetime.timedelta(days=7)).isoformat(),b7["faellig_am"])
+_,bs=mit_frist(None); chk("Ohne Auswahl gilt der Standard der Einstellungen (14 Tage)",bs["zahlungsziel_tage"] is None and bs["faellig_am"]==(heute+datetime.timedelta(days=14)).isoformat(),bs["faellig_am"])
+rs,b0=mit_frist(0); chk("Sofort: heute fällig",b0["zahlungsziel_tage"]==0 and b0["faellig_am"]==heute.isoformat(),b0["faellig_am"])
+t=subprocess.run(["pdftotext","-layout","-","-"],input=a.get(f"/api/admin/belege/{rs}/pdf").content,capture_output=True).stdout.decode()
+chk("PDF nennt „sofort“ statt Datum",("sofort, ohne Abzug" in t),t[-700:])
+chk("Frist außerhalb 0–90 wird abgelehnt",a.post(f"/api/admin/kunden/{k}/belege",json={"art":"rechnung","zahlungsziel_tage":120,"positionen":[{"text":"x","menge":1,"preis_cent":100}]}).status_code==422)
+r=a.post(f"/api/admin/kunden/{k}/belege",json={"art":"rechnung","positionen":[{"text":"x","menge":1,"preis_cent":100}]}).json()["id"]
+chk("Frist im Entwurf änderbar",a.put(f"/api/admin/belege/{r}",json={"positionen":[{"text":"x","menge":1,"preis_cent":100}],"zahlungsziel_tage":30}).status_code==200 and a.get(f"/api/admin/belege/{r}").json()["beleg"]["zahlungsziel_tage"]==30)

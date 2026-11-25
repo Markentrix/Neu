@@ -208,7 +208,8 @@ export async function belegEditor(id, kid, art) {
   const zeilen = [...b.positionen];
   const box = h('div'), sum = h('div', { class: 'small muted', style: 'text-align:right' });
   const feldB = (name, wert, extra = {}) => h('input', { name, value: wert ?? '', disabled: !frei, ...extra });
-  const betreff = feldB('betreff', b.betreff, { placeholder: 'z. B. Website-Paket' }), zeitraum = feldB('leistungszeitraum', b.leistungszeitraum, { placeholder: 'z. B. November 2026' }), referenz = feldB('kaeufer_referenz', b.kaeufer_referenz, { placeholder: 'nur bei Behörden: Leitweg-ID', maxlength: 100 });
+  const betreff = feldB('betreff', b.betreff, { placeholder: 'z. B. Website-Paket' }), zeitraum = feldB('leistungszeitraum', b.leistungszeitraum, { placeholder: 'z. B. November 2026' }), frist = h('select', { name: 'zahlungsziel_tage', disabled: !frei, 'aria-label': 'Zahlungsfrist' }, [['', 'Standard aus den Einstellungen'], ['0', 'Sofort fällig'], ['7', '7 Tage'], ['14', '14 Tage'], ['21', '21 Tage'], ['30', '30 Tage'], ['60', '60 Tage']].map(([v, t]) => h('option', { value: v, selected: String(b.zahlungsziel_tage ?? '') === v }, t))),
+    referenz = feldB('kaeufer_referenz', b.kaeufer_referenz, { placeholder: 'nur bei Behörden: Leitweg-ID', maxlength: 100 });
   const istAngebot = (b.art || art) === 'angebot';
   const leist = h('textarea', { rows: 5, disabled: !frei, 'aria-label': 'Das bekommt der Kunde', placeholder: 'Eine Zeile pro Punkt. „## “ davor = Zwischenüberschrift.' }); leist.value = (b.leistungen || []).join('\n');
   const pakete = istAngebot && frei ? await api('/api/admin/katalog/leistungstexte').catch(() => []) : [];
@@ -225,7 +226,7 @@ export async function belegEditor(id, kid, art) {
       frei ? knopf('✕', () => { zeilen.splice(i, 1); zeichne(); }, 'sec') : ''))); rechne();
   };
   zeichne();
-  const daten = () => ({ betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, leistungszeitraum: zeitraum.value, kaeufer_referenz: referenz.value, leistungen: istAngebot ? leist.value.split('\n').map(x => x.trim()).filter(Boolean) : [], positionen: zeilen.map(z => ({ text: z.text, menge: z.menge, einheit: z.einheit || '', preis_cent: z.preis_cent })) });
+  const daten = () => ({ betreff: betreff.value, einleitung: einl.value, schluss: schluss.value, leistungszeitraum: zeitraum.value, kaeufer_referenz: referenz.value, zahlungsziel_tage: frist.value === '' ? null : Number(frist.value), leistungen: istAngebot ? leist.value.split('\n').map(x => x.trim()).filter(Boolean) : [], positionen: zeilen.map(z => ({ text: z.text, menge: z.menge, einheit: z.einheit || '', preis_cent: z.preis_cent })) });
   const aktion = (text, pfad, body, ok, art = 'sec', bestaetigen) => knopf(text, async () => {
     if (bestaetigen && !confirm(bestaetigen)) return;
     try { const r = await api(pfad, { method: 'POST', body }); if (ok) ok(r); } catch (x) { fehler(m, x); } }, art);
@@ -257,7 +258,7 @@ export async function belegEditor(id, kid, art) {
   return h('div', { class: 'stack' }, kopf(titel, belegPill(b), h('a', { class: 'btn sec small', href: '#kunde/' + (b.kunden_id || kid) }, '← ' + k.firma)),
     k.referenzkunde && (b.art || art) === 'rechnung' ? h('div', { class: 'msg' }, 'Referenzkunde: die Website ist kostenlos, bitte nur Zusatzleistungen berechnen.') : '', mailFehlerHinweis(b), m,
     h('div', { class: 'card' }, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Leistungszeitraum'), zeitraum)),
-      (b.art || art) === 'rechnung' ? h('div', { style: 'margin-top:8px' }, h('label', {}, 'Käuferreferenz / Leitweg-ID (für die E-Rechnung)'), referenz) : '',
+      (b.art || art) === 'rechnung' ? h('div', { class: 'form2', style: 'margin-top:8px' }, h('div', {}, h('label', {}, 'Zahlungsfrist'), frist), h('div', {}, h('label', {}, 'Käuferreferenz / Leitweg-ID (für die E-Rechnung)'), referenz)) : '',
       h('label', {}, 'Einleitung (optional)'), einl, h('h3', { style: 'margin-top:16px' }, 'Positionen'), h('div', { class: 'small muted' }, 'Beschreibung · Menge · Einheit · Einzelpreis netto in €'), box,
       frei ? knopf('+ Position', () => { zeilen.push({ text: '', menge: 1, einheit: '', preis_cent: 0 }); zeichne(); }) : '', sum,
       !frei ? h('div', { style: 'text-align:right;margin-top:8px' }, h('div', {}, 'Netto ' + fmtEuro(b.netto_cent)), b.kleinunternehmer ? h('div', { class: 'small muted' }, 'Kleinunternehmer – keine Umsatzsteuer') : h('div', {}, 'USt ' + Number(b.ust_satz) + ' % ' + fmtEuro(b.ust_cent)), h('div', {}, h('b', {}, 'Gesamt ' + fmtEuro(b.brutto_cent)))) : '',

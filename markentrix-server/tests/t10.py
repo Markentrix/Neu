@@ -88,6 +88,18 @@ if mv is not None: chk("E-Rechnung: Mustang-Prüfung (PDF/A-3b und EN 16931)",mv
 r=a.get(f"/api/admin/belege/{re_id}/xml"); _k=([i for i,(p,q) in enumerate(zip(r.content,x)) if p!=q] or [60])[0]; chk("E-Rechnung: XML-Download",r.status_code==200 and r.content==_xml(a.get(f"/api/admin/belege/{re_id}/pdf").content) and "xml" in r.headers["content-type"],(r.status_code,r.content[_k-80:_k+40],x[_k-80:_k+40]))
 chk("E-Rechnung: Detail meldet nichts Fehlendes",a.get(f"/api/admin/belege/{re_id}").json()["e_rechnung"]=={"fehlt":[]})
 chk("Angebot ist kein ZUGFeRD",_xml(m["anh"][0][1]) is None and a.get(f"/api/admin/belege/{ang}/xml").status_code==400)
+# GiroCode: aus dem PDF wieder auslesen (nur wenn OpenCV da ist)
+try:
+    import cv2 as _cv, glob as _gl
+    for _f in _gl.glob("/var/tmp/pt/rechnung-qr*.png"): _os.remove(_f)
+    _sp2.run(["pdftoppm","-r","300","-png","/var/tmp/pt/rechnung.pdf","/var/tmp/pt/rechnung-qr"],check=True)
+    _txt=""
+    for _f in sorted(_gl.glob("/var/tmp/pt/rechnung-qr*.png")):
+        _bild=_cv.imread(_f); _h,_w=_bild.shape[:2]
+        _txt=_cv.QRCodeDetector().detectAndDecode(_bild[:, int(_w*0.60):])[0] or _txt
+    chk("GiroCode im PDF ist lesbar und nach EPC-Standard",_txt.split("\n")[:4]==["BCD","002","1","SCT"] and "DE89370400440532013000" in _txt and f"EUR{d['brutto_cent']/100:.2f}" in _txt and f"Rechnung {renr}" in _txt,_txt)
+except ImportError:
+    pass
 # Bezahlt
 r=a.post(f"/api/admin/belege/{re_id}/bezahlt",json={}); chk("bezahlt",r.status_code==200,r.text)
 chk("nicht doppelt bezahlt",a.post(f"/api/admin/belege/{re_id}/bezahlt",json={}).status_code==400)
