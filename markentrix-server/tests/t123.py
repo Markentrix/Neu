@@ -53,7 +53,7 @@ v.put("/api/me/ansicht",json={"tag_zeit":"aus"}); zeit(29,9,5); jobs.tag_pushes(
 v.put("/api/me/ansicht",json={"tag_zeit":"09:00"}); sql(f"update leads set wiedervorlage_am=null, temperatur='kalt' where vertriebspartner_id='{pid}'")
 zeit(30,9,5); jobs.tag_pushes({}); chk("Nichts zu tun: keine Nachricht",eintraege()==1,eintraege())
 # ---------------------------------------------------------------- Texte (Kunde, Admin)
-chk("Kunde: Text mit Anfragen und Freigaben",tagesblick.push_text("kunde",{"anfragen":2,"freigaben":1,"nachrichten":0,"termine":1})==("Dein Tag","2 neue Anfragen · 1 Termin heute · 1 Freigabe wartet"))
+chk("Kunde: Text mit Anfragen und Freigaben",tagesblick.push_text("kunde",{"anfragen":2,"freigaben":1,"nachrichten":0,"termine":1})==("Ihr Tag","2 neue Anfragen · 1 Termin heute · 1 Freigabe wartet"))
 chk("Kunde: ohne Inhalt keine Nachricht",tagesblick.push_text("kunde",{"anfragen":0,"freigaben":0,"nachrichten":0,"termine":0}) is None)
 chk("Zahl am Symbol: Kunde summiert Anfragen, Freigaben, Nachrichten",tagesblick.zahl("kunde",{"anfragen":2,"freigaben":1,"nachrichten":3,"termine":9})==6)
 kid=a.post("/api/admin/kunden",json={"firma":f"Tagkunde {sfx} GmbH","ansprechpartner":"T T","email":f"tk{sfx}@kk.de","telefon":"0511","strasse":"W 1","plz":"29221","ort":"Celle","paket_code":"KI_ONE","einladen":False}).json()["id"]

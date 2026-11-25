@@ -75,7 +75,7 @@ def _entscheiden(kid: str, aid: str, user: dict, uebernehmen: bool, notiz: str):
         cur.execute("UPDATE aufgaben SET status='erledigt', erledigt_am=now(), erledigt_von=%s WHERE auto_schluessel=%s AND status='offen'", (user.get("email"), f"leistung-{aid}"))
         audit(cur, user, "leistung_" + ("uebernommen" if uebernehmen else "abgelehnt"), kid, {"name": a["name"], "aktion": a["aktion"]})
         ids = push.kunde(cur, kid)
-    push.senden(ids, "Deine Leistungs-Änderung" if uebernehmen else "Änderung abgelehnt", f"„{a['name'][:60]}“: " + ("ist jetzt live." if uebernehmen else (notiz.strip()[:120] or "abgelehnt.")), "/app#dienste", "leistung")
+    push.senden(ids, "Ihre Leistungs-Änderung" if uebernehmen else "Änderung abgelehnt", f"„{a['name'][:60]}“: " + ("ist jetzt live." if uebernehmen else (notiz.strip()[:120] or "abgelehnt.")), "/app#dienste", "leistung")
     return {"ok": True}
 
 

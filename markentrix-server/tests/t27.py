@@ -103,7 +103,7 @@ async def main():
                 await pg.click("form button[type=submit], form .btn:not(.sec)"); await pg.wait_for_timeout(1500)
                 r=a.get("/api/admin/kunden",params={"q":"Formular Test"}).json(); chk("Admin: Kunde über das Formular angelegt",len(r)==1,r)
             if name=="kunde":
-                await pg.goto(B+"/app#uebersicht"); await pg.wait_for_selector("text=Ansicht anpassen"); chk("Kunde: Übersicht mit Anpassen-Knopf",True); chk("Kunde: Karte 'Dein Monat mit Markentrix'",await pg.locator("h2:has-text('Dein Monat mit Markentrix')").count()==1 and await pg.locator("text=Dein nächster Schritt").count()==1)
+                await pg.goto(B+"/app#uebersicht"); await pg.wait_for_selector("text=Ansicht anpassen"); chk("Kunde: Übersicht mit Anpassen-Knopf",True); chk("Kunde: Karte 'Ihr Monat mit Markentrix'",await pg.locator("h2:has-text('Ihr Monat mit Markentrix')").count()==1 and await pg.locator("text=Ihr nächster Schritt").count()==1)
                 await pg.goto(B+"/app#einstellungen"); await pg.wait_for_selector("text=App & Benachrichtigungen"); chk("Kunde: Push-Karte mit Anlässen",await pg.locator("text=Neue Anfrage").count()>=1)
             if name=="vertrieb":
                 await pg.goto(B+"/vertrieb#leads"); await pg.wait_for_selector("text=Lead 0 GmbH",timeout=8000); chk("Vertrieb: zugewiesene Leads sichtbar",True)

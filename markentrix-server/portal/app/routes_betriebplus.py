@@ -143,7 +143,7 @@ def vertragsende(cur, kid, wunsch: date | None) -> dict:
     if mind and mind > basis:
         basis, grund = mind, f"Ende der Mindestlaufzeit am {mind:%d.%m.%Y}"
     if wunsch and wunsch > basis:
-        basis, grund = wunsch, "dein Wunschdatum"
+        basis, grund = wunsch, "Ihr Wunschdatum"
     ende = (basis.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)   # Monatsende
     return {"ende": ende, "frist_tage": frist, "mindestlaufzeit_ende": mind, "massgeblich": grund}
 
@@ -176,16 +176,16 @@ def k_kuendigung_senden(data: KuendigungIn, request: Request, user: dict = Depen
     kid = user["kunden_id"]
     rate_limit("kuendigung:" + str(kid), 5, 3600)
     if not data.bestaetigt:
-        raise HTTPException(400, "Bitte bestätige, dass du kündigen möchtest.")
+        raise HTTPException(400, "Bitte bestätigen Sie, dass Sie kündigen möchten.")
     if data.wunschdatum and data.wunschdatum < date.today():
         raise HTTPException(400, "Das Wunschdatum liegt in der Vergangenheit.")
     with tx("system") as cur:
         if _offen(cur, kid):
-            raise HTTPException(400, "Deine Kündigung ist schon eingegangen.")
+            raise HTTPException(400, "Ihre Kündigung ist schon eingegangen.")
         cur.execute("SELECT firma, kundennummer, email, status FROM kunden WHERE id=%s", (kid,))
         k = cur.fetchone()
         if k["status"] in ("gekuendigt", "beendet"):
-            raise HTTPException(400, "Dein Vertrag ist bereits gekündigt.")
+            raise HTTPException(400, "Ihr Vertrag ist bereits gekündigt.")
         v = vertragsende(cur, kid, data.wunschdatum)
         cur.execute("""INSERT INTO kuendigungswuensche (kunden_id, grund, grund_code, wunschdatum, ende_am, von_name, von_email, ip) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id, erstellt_am""",
                     (kid, data.grund.strip() or None, data.grund_code, data.wunschdatum, v["ende"], user.get("name"), user.get("email"), client_ip(request)))
@@ -204,10 +204,10 @@ def k_kuendigung_senden(data: KuendigungIn, request: Request, user: dict = Depen
                           f"Wunschdatum: {data.wunschdatum or 'nicht angegeben'}\nHauptgrund: {GRUENDE.get(data.grund_code, 'nicht angegeben')}\nAnmerkung: {data.grund.strip() or 'keine'}\n\nDie Kündigung ist verbindlich und wurde dem Kunden automatisch bestätigt. Zum Vertragsende wird der Kunde automatisch auf „gekündigt“ gesetzt." + mailer.SIGNATUR)
         ziel = user.get("email") or k["email"]
         if ziel:
-            mailer.senden(ziel, f"Bestätigung deiner Kündigung zum {ende_txt}",
-                          f"Guten Tag,\n\nwir bestätigen den Eingang deiner Kündigung vom {wann}.\n\nDein Vertrag endet am {ende_txt} ({v['massgeblich']}). Bis dahin läuft alles wie gewohnt weiter.\n\n"
-                          f"Deine Daten kannst du jederzeit unter Einstellungen → „Meine Daten herunterladen“ als ZIP sichern. Zum Vertragsende übergeben wir dir außerdem, was dir gehört (z. B. Domains).\n\n"
-                          f"Hast du versehentlich gekündigt? Melde dich innerhalb von {RUECKNAHME_STUNDEN} Stunden im Portal oder per Antwort auf diese Mail." + mailer.SIGNATUR, kunden_id=kid, art="kuendigung")
+            mailer.senden(ziel, f"Bestätigung Ihrer Kündigung zum {ende_txt}",
+                          f"Guten Tag,\n\nwir bestätigen den Eingang Ihrer Kündigung vom {wann}.\n\nIhr Vertrag endet am {ende_txt} ({v['massgeblich']}). Bis dahin läuft alles wie gewohnt weiter.\n\n"
+                          f"Ihre Daten können Sie jederzeit unter Einstellungen → „Meine Daten herunterladen“ als ZIP sichern. Zum Vertragsende übergeben wir Ihnen außerdem, was Ihnen gehört (z. B. Domains).\n\n"
+                          f"Haben Sie versehentlich gekündigt? Melden Sie sich innerhalb von {RUECKNAHME_STUNDEN} Stunden im Portal oder per Antwort auf diese Mail." + mailer.SIGNATUR, kunden_id=kid, art="kuendigung")
     return {"ok": True, "eingegangen": wann, "ende": v["ende"], "massgeblich": v["massgeblich"]}
 
 
@@ -220,7 +220,7 @@ def k_kuendigung_zurueck(user: dict = Depends(require_inhaber)):
         if not o:
             raise HTTPException(404, "Es liegt keine laufende Kündigung vor.")
         if datetime.now(timezone.utc) - o["erstellt_am"] > timedelta(hours=RUECKNAHME_STUNDEN):
-            raise HTTPException(400, f"Eine Rücknahme ist nur in den ersten {RUECKNAHME_STUNDEN} Stunden möglich. Bitte melde dich bei uns.")
+            raise HTTPException(400, f"Eine Rücknahme ist nur in den ersten {RUECKNAHME_STUNDEN} Stunden möglich. Bitte melden Sie sich bei uns.")
         cur.execute("UPDATE kuendigungswuensche SET status='zurueckgenommen', bearbeitet_am=now() WHERE id=%s", (o["id"],))
         audit(cur, user, "kuendigung_zurueckgenommen", kid)
     return {"ok": True}

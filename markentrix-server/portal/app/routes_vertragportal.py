@@ -36,22 +36,22 @@ class Antworten(BaseModel):
 def _bestaetigen(zid: str, art: str, eigen: str, eigen_id, data: Antworten, request: Request, user: dict) -> dict:
     """Gemeinsamer Ablauf: Antworten prüfen, Vertrag ausfüllen, Protokollseite anhängen, ablegen, Team informieren."""
     if not data.akzeptiert:
-        raise HTTPException(400, "Bitte bestätige, dass du den Vertrag gelesen hast und die Angaben stimmen.")
+        raise HTTPException(400, "Bitte bestätigen Sie, dass Sie den Vertrag gelesen haben und die Angaben stimmen.")
     rate_limit("vertragok:" + str(eigen_id), 5, 600)
     name, ort = " ".join(data.name.split()), " ".join(data.ort.split())
     a = data.angaben if isinstance(data.angaben, dict) else {}
     if art == "referenz":
         werte, haken, sauber = vertraege.referenz_online(a, ort, name)
         if not sauber["elemente"] and not sauber["kanaele"]:
-            raise HTTPException(400, "Bitte wähle mindestens ein Element und einen Kanal, oder lehne die Referenz ab, indem du den Vertrag nicht bestätigst.")
+            raise HTTPException(400, "Bitte wählen Sie mindestens ein Element und einen Kanal, oder lehnen Sie die Referenz ab, indem Sie den Vertrag nicht bestätigen.")
         if sauber["elemente"] and not sauber["kanaele"]:
-            raise HTTPException(400, "Bitte wähle mindestens einen Kanal, in dem die Elemente gezeigt werden dürfen.")
+            raise HTTPException(400, "Bitte wählen Sie mindestens einen Kanal, in dem die Elemente gezeigt werden dürfen.")
     else:
         werte, haken, sauber = vertraege.handelsvertreter_online(a, ort, name)
         if not a.get("beauftragung") in ("haupt", "neben"):
-            raise HTTPException(400, "Bitte wähle, ob du im Haupt- oder im Nebenberuf tätig bist.")
+            raise HTTPException(400, "Bitte wählen Sie, ob Sie im Haupt- oder im Nebenberuf tätig sind.")
         if not sauber["strasse"] or not sauber["ort_anschrift"]:
-            raise HTTPException(400, "Bitte trage deine Anschrift (Straße, PLZ und Ort) ein.")
+            raise HTTPException(400, "Bitte tragen Sie Ihre Anschrift (Straße, PLZ und Ort) ein.")
     jetzt = datetime.now(ZoneInfo("Europe/Berlin"))
     zeit = jetzt.strftime("%d.%m.%Y, %H:%M Uhr")
     try:

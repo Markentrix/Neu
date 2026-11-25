@@ -68,7 +68,7 @@ async def ui():
             chk(f"Vertrieb@{w}: Provisionen-Seite lädt",True)
             chk(f"Vertrieb@{w}: keine JS-Fehler",not errs,errs); await ctx.close()
             ctx,pg,errs=await login(br,mk,"InhaberPasswort1","/app",w)
-            await offen(pg,"Wo trage ich meinen PayPal-Link ein","PayPal-Link eintragen","Dein PayPal.Me-Link",f"Kunde@{w}")
+            await offen(pg,"Wo trage ich meinen PayPal-Link ein","PayPal-Link eintragen","Ihr PayPal.Me-Link",f"Kunde@{w}")
             await offen(pg,"Welche Daten muss ich wofür hinterlegen","Welche Daten muss ich wofür hinterlegen?","Kontaktformular",f"Kunde@{w}")
             await offen(pg,"Urlaub eintragen","Urlaub und Sperrtage eintragen","Zeitraum",f"Kunde@{w}")
             chk(f"Kunde@{w}: keine JS-Fehler",not errs,errs); await ctx.close()

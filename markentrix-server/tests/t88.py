@@ -78,7 +78,7 @@ async def ui():
                 pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("response",lambda r: errs.append(f"HTTP {r.status} {r.url}") if r.status>=500 else None)
                 await pg.goto(B+"/"); await pg.fill("#e",m); await pg.fill("#p",pw_); await pg.click("#b"); await pg.wait_for_url("**"+pfad+"*")
                 await pg.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})")
-                await pg.goto(B+pfad+("#heute" if name=="Kunde" else "#uebersicht")); await pg.wait_for_selector(f"h2:has-text('{erwartet}')",timeout=10000)
+                await pg.goto(B+pfad+("#heute" if name=="Kunde" else "#uebersicht")); await pg.wait_for_selector(f"h2:has-text('{erwartet}')",timeout=10000,state='attached')
                 chk(f"{name}@{breite}: Karte „{erwartet}“ sichtbar",True)
                 chk(f"{name}@{breite}: kein seitliches Überlaufen",await pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"))
                 if name=="Admin":

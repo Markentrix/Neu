@@ -10,8 +10,9 @@ const NAV_GRUPPEN = [
   ['Täglich', ['uebersicht', 'meintag', 'kalender', 'postfach', 'freigaben', 'aufgaben'], true],
   ['Kunden', ['kunden', 'onboarding', 'vertraege', 'zufriedenheit', 'neu', 'websites'], true],
   ['Vertrieb', ['vertrieb', 'leads', 'pipeline', 'auswertung', 'funnel'], true],
-  ['Geld & Zahlen', ['kennzahlen', 'belege', 'preise', 'katalog'], false],
-  ['Recht & Sicherheit', ['compliance', 'dsgvo', 'protokoll', 'einstellungen'], false],
+  ['Geld', ['kennzahlen', 'belege', 'preise', 'katalog'], false],
+  ['Recht', ['compliance', 'dsgvo'], false],
+  ['System', ['protokoll', 'einstellungen'], false],
 ];
 export let paketListe = [], ich = null;
 export const zaehlerAdmin = {};

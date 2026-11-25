@@ -21,7 +21,7 @@ KATALOG = """SELECT p.code, p.kategorie, p.name, p.beschreibung, p.abrechnung, p
              WHERE p.aktiv {zusatz} ORDER BY p.sortierung"""
 
 
-HINWEIS_WERBEBUDGET = "Das Werbebudget für Anzeigen (Google, Meta) zahlst du direkt an die Plattform. Es ist nicht im Paketpreis enthalten. Ausgespielt wird nur nach deiner Freigabe."
+HINWEIS_WERBEBUDGET = "Das Werbebudget für Anzeigen (Google, Meta) zahlen Sie direkt an die Plattform. Es ist nicht im Paketpreis enthalten. Ausgespielt wird nur nach Ihrer Freigabe."
 HINWEIS_KATEGORIE = {"lead": HINWEIS_WERBEBUDGET}
 KI_AB_BUSINESS = ("KI_BUSINESS", "KI_KOMPLETT")
 
@@ -122,7 +122,7 @@ def dazubuchen(code: str, data: DazuIn, bg: BackgroundTasks, user: dict = Depend
             raise HTTPException(404, "Dieses Paket gibt es nicht.")
         cur.execute("SELECT status FROM buchungen WHERE kunden_id=%s AND produkt_code=%s AND status = ANY(%s)", (kid, code, list(LAUFEND)))
         if cur.fetchone():
-            raise HTTPException(409, "Dieses Paket hast du schon gebucht oder angefragt.")
+            raise HTTPException(409, "Dieses Paket haben Sie schon gebucht oder angefragt.")
         # Wechsel innerhalb der KI-Pakete: Hinweis für Markentrix, kein automatisches Ersetzen
         wechsel = ""
         if p["kategorie"] == "ki":
@@ -159,7 +159,7 @@ def dazubuchen(code: str, data: DazuIn, bg: BackgroundTasks, user: dict = Depend
     for a in kunde_an:
         bg.add_task(mailer.senden, a, f"Ihre Buchung: {p['name']}",
                     f"Hallo,\n\nvielen Dank. Wir haben Ihre Buchung \"{p['name']}\" erhalten.\nPreis: {preis}\n\nWir prüfen sie kurz, bestätigen Ihnen die Buchung und melden uns zur Einrichtung. Bis dahin entstehen keine Kosten." + mailer.SIGNATUR, None, None, None, kid)
-    return {"ok": True, "id": str(bid), "hinweis": "Danke, wir haben deine Buchung erhalten und bestätigen sie in Kürze."}
+    return {"ok": True, "id": str(bid), "hinweis": "Danke, wir haben Ihre Buchung erhalten und bestätigen sie in Kürze."}
 
 
 # ---------------------------------------------------------------- Admin

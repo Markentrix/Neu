@@ -208,16 +208,16 @@ def require_kunde(request: Request, user: dict = Depends(current_user)) -> dict:
         teile = request.url.path.split("/")      # ["", "api", "kunde", <bereich>, …]
         bereich = teile[3] if len(teile) > 3 else ""
         if bereich not in EMPFANG_ERLAUBT:
-            raise HTTPException(403, "Dein Zugang (Empfang) ist nur für Anfragen, Termine und Nachrichten freigegeben.")
+            raise HTTPException(403, "Ihr Zugang (Empfang) ist nur für Anfragen, Termine und Nachrichten freigegeben.")
     if user["kunden_rolle"] == "nur_lesen" and request.method not in ("GET", "HEAD"):
-        raise HTTPException(403, "Dein Zugang ist nur zum Ansehen freigegeben.")
+        raise HTTPException(403, "Ihr Zugang ist nur zum Ansehen freigegeben.")
     return user
 
 
 def require_inhaber(user: dict = Depends(require_kunde)) -> dict:
     """Team, Rechnungen und Verträge: nur für Inhaber-Zugänge eines Kunden."""
     if user["kunden_rolle"] != "inhaber":
-        raise HTTPException(403, "Dafür brauchst du einen Inhaber-Zugang.")
+        raise HTTPException(403, "Dafür brauchen Sie einen Inhaber-Zugang.")
     return user
 
 

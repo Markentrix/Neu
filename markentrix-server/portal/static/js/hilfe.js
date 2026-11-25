@@ -34,6 +34,10 @@ function artikelKarte(a, frage) {
     a.l ? h('p', {}, h('a', { class: 'btn', href: a.l }, 'Dorthin gehen')) : '', rueckfrage(frage, a.t));
 }
 
+/** Anrede: Kunden werden gesiezt, Vertrieb und Admin geduzt. */
+let sieAnrede = true;
+const za = (sie, du) => sieAnrede ? sie : du;
+
 /** „Hat das geholfen?“ Bei Nein geht die Frage mit Text an den Admin. */
 function rueckfrage(frage, artikel, direkt = false) {
   const box = h('div', { class: 'card', style: 'margin-top:12px' });
@@ -41,13 +45,13 @@ function rueckfrage(frage, artikel, direkt = false) {
     try { await api('/api/hilfe/rueckmeldung', { method: 'POST', body: { frage, artikel: artikel || null, geloest, text: text || null } }); return true; }
     catch (x) { box.append(h('div', { class: 'msg err' }, x.message)); return false; }
   };
-  const start = () => box.replaceChildren(h('b', {}, 'Ist Ihr Problem damit gelöst?'),
+  const start = () => box.replaceChildren(h('b', {}, za('Ist Ihr Problem damit gelöst?', 'Ist dein Problem damit gelöst?')),
     h('p', {}, h('button', { class: 'btn', onclick: async () => { if (await senden(true)) box.replaceChildren(h('div', { class: 'msg ok' }, 'Schön, danke für die Rückmeldung.')); } }, 'Ja, gelöst'), ' ',
       h('button', { class: 'btn sec', onclick: nein }, 'Nein, noch nicht')));
   const nein = () => {
     const t = h('textarea', { rows: 3, style: 'width:100%', 'aria-label': 'Was klappt nicht?', placeholder: 'Was klappt nicht? Bitte kurz beschreiben, dann meldet sich das Team.' });
-    box.replaceChildren(h('b', {}, 'Das tut uns leid.'), h('p', { class: 'small muted' }, 'Wir geben Ihre Frage direkt an das Markentrix-Team weiter.'), t,
-      h('p', {}, h('button', { class: 'btn', onclick: async () => { if (await senden(false, t.value)) box.replaceChildren(h('div', { class: 'msg ok' }, 'Danke, das Team wurde informiert und meldet sich bei Ihnen.')); } }, 'An das Team senden')));
+    box.replaceChildren(h('b', {}, 'Das tut uns leid.'), h('p', { class: 'small muted' }, za('Wir geben Ihre Frage direkt an das Markentrix-Team weiter.', 'Wir geben deine Frage direkt an das Markentrix-Team weiter.')), t,
+      h('p', {}, h('button', { class: 'btn', onclick: async () => { if (await senden(false, t.value)) box.replaceChildren(h('div', { class: 'msg ok' }, za('Danke, das Team wurde informiert und meldet sich bei Ihnen.', 'Danke, das Team wurde informiert und meldet sich bei dir.'))); } }, 'An das Team senden')));
   };
   if (direkt) nein(); else start();
   return box;
@@ -60,11 +64,11 @@ function hilfeKnopf(rolle) {
     const liste = await laden(rolle), seite = location.hash.replace(/^#/, '').split('/')[0] || 'heute';
     const passend = liste.filter(a => (a.l || '').replace(/^#/, '') === seite);
     if (passend.length === 1) { dialog(passend[0].t, artikelKarte(passend[0], passend[0].t)); return; }
-    const feld = h('input', { type: 'search', placeholder: 'Wobei brauchen Sie Hilfe?', 'aria-label': 'Hilfe durchsuchen' }), ergebnis = h('div', { class: 'stack' });
+    const feld = h('input', { type: 'search', placeholder: za('Wobei brauchen Sie Hilfe?', 'Wobei brauchst du Hilfe?'), 'aria-label': 'Hilfe durchsuchen' }), ergebnis = h('div', { class: 'stack' });
     const zeige = () => {
       const t = feld.value.trim() ? suchen(rolle, feld.value) : passend;
       ergebnis.replaceChildren(...(t.length ? t.slice(0, 8).map(a => h('button', { class: 'btn sec', style: 'display:block;width:100%;text-align:left', onclick: () => { d.zu(); dialog(a.t, artikelKarte(a, feld.value.trim() || a.t)); } }, a.t))
-        : [h('p', { class: 'small muted' }, 'Dazu habe ich keine Anleitung gefunden. Versuchen Sie ein anderes Wort.')]));
+        : [h('p', { class: 'small muted' }, za('Dazu habe ich keine Anleitung gefunden. Versuchen Sie ein anderes Wort.', 'Dazu habe ich keine Anleitung gefunden. Versuche ein anderes Wort.'))]));
     };
     feld.addEventListener('input', zeige);
     const d = dialog('Hilfe' + (passend.length ? ' zu dieser Seite' : ''), h('div', { class: 'stack' }, feld, ergebnis, h('p', { class: 'small' }, (rolle === 'admin' ? [['vertrieb', 'Vertrieb'], ['kunde', 'Kunden'], ['admin', 'Admin']] : [[rolle, '']]).map(([r, n]) => h('a', { href: '/api/hilfe/anleitung.pdf?rolle=' + r, target: '_blank', rel: 'noopener', style: 'margin-right:12px' }, '📄 Anleitung' + (n ? ' ' + n : '') + ' als PDF')))));
@@ -75,6 +79,7 @@ function hilfeKnopf(rolle) {
 
 /** Suchfeld für die Kopfzeile eines Portals. rolle: 'vertrieb' | 'kunde' | 'admin'. */
 export function hilfeSuche(rolle) {
+  sieAnrede = rolle === 'kunde';
   laden(rolle); hilfeKnopf(rolle);
   const feld = h('input', { type: 'search', placeholder: 'Hilfe: Frage eingeben, z. B. „Leads anlegen“', 'aria-label': 'Hilfe durchsuchen', style: 'width:100%' });
   const liste = h('div', { class: 'hilfetreffer', role: 'list' });
@@ -88,7 +93,7 @@ export function hilfeSuche(rolle) {
     if (!feld.value.trim()) { liste.replaceChildren(); return; }
     liste.replaceChildren(h('div', { class: 'card', style: 'padding:6px;margin-top:4px' },
       t.length ? t.slice(0, 6).map(a => h('button', { class: 'btn sec', style: 'display:block;width:100%;text-align:left;margin:3px 0', onclick: () => zeigeArtikel(a) }, a.t))
-        : h('div', { style: 'margin:6px' }, h('p', { class: 'small muted' }, 'Dazu habe ich keine Anleitung gefunden. Versuchen Sie ein anderes Wort oder geben Sie die Frage direkt an das Team.'),
+        : h('div', { style: 'margin:6px' }, h('p', { class: 'small muted' }, za('Dazu habe ich keine Anleitung gefunden. Versuchen Sie ein anderes Wort oder geben Sie die Frage direkt an das Team.', 'Dazu habe ich keine Anleitung gefunden. Versuche ein anderes Wort oder gib die Frage direkt an das Team.')),
           h('button', { class: 'btn small', onclick: () => { const frage = feld.value.trim(); liste.replaceChildren(); feld.value = ''; dialog('Frage an das Team', h('div', { class: 'stack' }, h('p', {}, h('b', {}, frage)), rueckfrage(frage, null, true))); } }, 'Frage an das Team senden'))));
   });
   feld.addEventListener('keydown', async (e) => { if (e.key === 'Enter') { await laden(rolle); const t = suchen(rolle, feld.value); if (t[0]) zeigeArtikel(t[0]); } if (e.key === 'Escape') { feld.value = ''; liste.replaceChildren(); } });

@@ -545,3 +545,33 @@ details.abschnitt>.abschnittinhalt{padding:0 16px 16px}
 }
 .mehrblatt.kachel a.nav[href="#aufgaben"]::before{content:"☑️" / ""}
 .mehrblatt.kachel a.nav[href="#postfach"]::before{content:"✉️" / ""}
+
+/* Admin am Desktop: Symbole im Seitenmenü */
+@media(min-width:901px){
+  .adminapp .side .navliste a.nav::before{display:inline-block;width:1.6em;text-align:center;margin-right:4px;opacity:.9}
+  .adminapp .side .navliste a.nav[href="#uebersicht"]::before{content:"📊" / ""}
+  .adminapp .side .navliste a.nav[href="#meintag"]::before{content:"🏠" / ""}
+  .adminapp .side .navliste a.nav[href="#kalender"]::before{content:"🗓️" / ""}
+  .adminapp .side .navliste a.nav[href="#postfach"]::before{content:"✉️" / ""}
+  .adminapp .side .navliste a.nav[href="#freigaben"]::before{content:"✅" / ""}
+  .adminapp .side .navliste a.nav[href="#aufgaben"]::before{content:"☑️" / ""}
+  .adminapp .side .navliste a.nav[href="#kennzahlen"]::before{content:"📈" / ""}
+  .adminapp .side .navliste a.nav[href="#kunden"]::before{content:"👥" / ""}
+  .adminapp .side .navliste a.nav[href="#onboarding"]::before{content:"🚀" / ""}
+  .adminapp .side .navliste a.nav[href="#vertraege"]::before{content:"📝" / ""}
+  .adminapp .side .navliste a.nav[href="#zufriedenheit"]::before{content:"😊" / ""}
+  .adminapp .side .navliste a.nav[href="#neu"]::before{content:"➕" / ""}
+  .adminapp .side .navliste a.nav[href="#vertrieb"]::before{content:"🧑‍💼" / ""}
+  .adminapp .side .navliste a.nav[href="#leads"]::before{content:"☎️" / ""}
+  .adminapp .side .navliste a.nav[href="#pipeline"]::before{content:"🪜" / ""}
+  .adminapp .side .navliste a.nav[href="#auswertung"]::before{content:"📉" / ""}
+  .adminapp .side .navliste a.nav[href="#websites"]::before{content:"🌐" / ""}
+  .adminapp .side .navliste a.nav[href="#belege"]::before{content:"💶" / ""}
+  .adminapp .side .navliste a.nav[href="#preise"]::before{content:"🏷️" / ""}
+  .adminapp .side .navliste a.nav[href="#compliance"]::before{content:"⚖️" / ""}
+  .adminapp .side .navliste a.nav[href="#funnel"]::before{content:"🎯" / ""}
+  .adminapp .side .navliste a.nav[href="#dsgvo"]::before{content:"🔒" / ""}
+  .adminapp .side .navliste a.nav[href="#katalog"]::before{content:"📦" / ""}
+  .adminapp .side .navliste a.nav[href="#einstellungen"]::before{content:"🔧" / ""}
+  .adminapp .side .navliste a.nav[href="#protokoll"]::before{content:"📜" / ""}
+}

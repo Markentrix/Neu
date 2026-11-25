@@ -100,7 +100,7 @@ v=cA.get("/api/kunde/kuendigung/vorschau").json(); chk("Mindestlaufzeit geht vor
 spaet=(heute+datetime.timedelta(days=300)).isoformat()
 v=cA.get("/api/kunde/kuendigung/vorschau?wunschdatum="+spaet).json(); chk("Späterer Wunsch gilt",v["ende"]==monatsende(datetime.date.fromisoformat(spaet)).isoformat(),v)
 r=cA.post("/api/kunde/kuendigung",json={"bestaetigt":True,"grund":"Zu teuer"}); chk("Kündigung verbindlich angenommen, mit Vertragsende",r.status_code==200 and r.json()["ende"]==monatsende(datetime.date.fromisoformat(fern)).isoformat(),r.text); ende=r.json()["ende"]
-m=mail_an(mA,"Bestätigung deiner Kündigung"); chk("Sofort Bestätigung mit Datum an den Kunden",len(m)==1 and datetime.date.fromisoformat(ende).strftime("%d.%m.%Y") in text(m[0]),len(m))
+m=mail_an(mA,"Bestätigung Ihrer Kündigung"); chk("Sofort Bestätigung mit Datum an den Kunden",len(m)==1 and datetime.date.fromisoformat(ende).strftime("%d.%m.%Y") in text(m[0]),len(m))
 chk("Meldung an das Team",len(mail_an("chef@test.de",f"Zua {sfx}"))>=1)
 chk("Zweite Kündigung abgelehnt",cA.post("/api/kunde/kuendigung",json={"bestaetigt":True}).status_code==400)
 o=cA.get("/api/kunde/kuendigung").json()["offen"]; chk("Kunde sieht Ende und Rücknahmefrist",o["ende_am"]==ende and o["grund"]=="Zu teuer" and o["rueckname_bis"],o)

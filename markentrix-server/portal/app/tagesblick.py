@@ -49,7 +49,7 @@ def push_text(rolle: str, d: dict) -> tuple[str, str] | None:
     teile = []
     if rolle == "vertrieb":
         if d["faellig"]:
-            teile.append(_stueck(d["faellig"], "Lead wartet", "Leads warten") + " auf Ihren Anruf")
+            teile.append(_stueck(d["faellig"], "Lead wartet", "Leads warten") + " auf deinen Anruf")
         if d["termine"]:
             teile.append(_stueck(d["termine"], "Erstgespräch", "Erstgespräche") + " heute")
         return ("Dein Tag", " · ".join(teile)) if teile else None
@@ -62,5 +62,5 @@ def push_text(rolle: str, d: dict) -> tuple[str, str] | None:
             teile.append(_stueck(d["freigaben"], "Freigabe wartet", "Freigaben warten"))
         if d["nachrichten"]:
             teile.append(_stueck(d["nachrichten"], "ungelesene Nachricht", "ungelesene Nachrichten"))
-        return ("Dein Tag", " · ".join(teile)) if teile else None
+        return ("Ihr Tag", " · ".join(teile)) if teile else None
     return None
