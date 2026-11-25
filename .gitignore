@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+# Echte Zugangsdaten gehören nie ins Repository
+private/
