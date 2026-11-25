@@ -28,7 +28,7 @@ V.wissen = async () => {
   };
   const offen = new Set(r.vorschlaege.filter(v => v.status === 'offen').map(v => v.schluessel));
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, 'Mein Wissen für den Assistenten')),
-    h('div', { class: 'card' }, h('p', {}, 'Hier steht, was dein KI-Assistent über deinen Betrieb weiß: Leistungen, Preise, Öffnungszeiten und häufige Fragen. Haben sich Preise oder Zeiten geändert, schlage es hier vor. Das Team prüft jede Änderung und schaltet sie frei, damit dein Assistent nichts Falsches weitergibt.'), m),
+    h('div', { class: 'card' }, h('p', {}, 'Hier steht, was Ihr KI-Assistent über Ihren Betrieb weiß: Leistungen, Preise, Öffnungszeiten und häufige Fragen. Haben sich Preise oder Zeiten geändert, schlagen Sie es hier vor. Das Team prüft jede Änderung und schaltet sie frei, damit Ihr Assistent nichts Falsches weitergibt.'), m),
     h('div', { class: 'card' }, h('h2', {}, 'Neues Wissen vorschlagen'), h('div', { class: 'stack' }, titel, text,
       h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, h('button', { class: 'btn', onclick: () => senden({ aktion: 'neu', schluessel: titel.value, wert: text.value }, 'Gesendet. Das Team prüft es.') }, 'Vorschlag senden')),
       h('p', { class: 'small muted' }, 'Oder eine Datei (TXT oder PDF, z. B. Preisliste) senden:'), h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, datei, h('button', { class: 'btn sec', onclick: hoch }, 'Datei senden')))),
@@ -39,8 +39,8 @@ V.wissen = async () => {
     h('div', { class: 'card' }, h('h2', {}, 'Aktuell gespeichert'), r.eintraege.length ? h('div', {}, ...r.eintraege.map(e => h('div', { style: 'margin:10px 0;border-top:1px solid var(--linie, #e5e7eb);padding-top:8px' },
       h('p', {}, h('b', {}, e.schluessel), ' ', h('span', { class: 'pill ' + (e.aktiv ? 'ok' : '') }, e.aktiv ? 'aktiv' : 'aus'), ' ', h('span', { class: 'small muted' }, e.bereich + ' · ' + e.laenge + ' Zeichen')),
       h('p', { class: 'small' }, e.vorschau + (e.laenge > 240 ? ' …' : '')),
-      e.quelle === 'system' ? h('p', { class: 'small muted' }, 'Dieser Eintrag entsteht automatisch aus deinen Leistungen und Preisen. Ändere sie unter Website-Dienste → Leistungen.') : offen.has(e.schluessel) ? h('p', { class: 'small muted' }, 'Es wartet ein Vorschlag auf Prüfung.') : h('div', { class: 'row', style: 'gap:6px' },
+      e.quelle === 'system' ? h('p', { class: 'small muted' }, 'Dieser Eintrag entsteht automatisch aus Ihren Leistungen und Preisen. Ändern Sie sie unter Website-Dienste → Leistungen.') : offen.has(e.schluessel) ? h('p', { class: 'small muted' }, 'Es wartet ein Vorschlag auf Prüfung.') : h('div', { class: 'row', style: 'gap:6px' },
         h('button', { class: 'btn sec small', onclick: () => aendern(e) }, 'Ändern vorschlagen'),
         e.aktiv ? h('button', { class: 'btn sec small', onclick: () => { if (confirm('Soll der Assistent „' + e.schluessel + '“ nicht mehr nutzen? Das Team prüft den Wunsch.')) senden({ aktion: 'ausschalten', wissen_id: e.id }, 'Gesendet. Das Team prüft es.'); } }, 'Nicht mehr nutzen') : ''))))
-      : h('p', { class: 'small muted' }, 'Noch nichts gespeichert. Das Team füllt das mit dir im Aufbau.')), editor);
+      : h('p', { class: 'small muted' }, 'Noch nichts gespeichert. Das Team füllt das mit Ihnen im Aufbau.')), editor);
 };

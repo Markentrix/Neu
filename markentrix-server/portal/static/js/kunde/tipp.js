@@ -7,8 +7,8 @@ export async function tippKarte() {
   if (!d || !d.tipp) return '';
   const t = d.tipp, box = h('div', { class: 'card' });
   const reagiere = async (art, danach) => { try { await api('/api/kunde/tipp/' + t.code + '/reaktion', { method: 'POST', body: { art } }); } catch (e) { /* der Hinweis ist nur ein Angebot */ } danach(); };
-  box.append(h('h2', {}, 'Ein Tipp für dich: ' + t.titel), h('p', {}, t.text),
-    h('p', { class: 'small muted' }, 'Das ist ein unverbindlicher Hinweis. Im nächsten Schritt siehst du Inhalt und Preis des Pakets „' + t.paket + '“. Gebucht wird nichts ohne deine Bestätigung.'),
+  box.append(h('h2', {}, 'Ein Tipp für Sie: ' + t.titel), h('p', {}, t.text),
+    h('p', { class: 'small muted' }, 'Das ist ein unverbindlicher Hinweis. Im nächsten Schritt sehen Sie Inhalt und Preis des Pakets „' + t.paket + '“. Gebucht wird nichts ohne Ihre Bestätigung.'),
     h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => reagiere('interesse', () => { location.hash = '#pakete'; }) }, 'Paket ansehen'),
       h('button', { class: 'btn sec', onclick: () => reagiere('nein', () => box.remove()) }, 'Nein danke')));
   return box;

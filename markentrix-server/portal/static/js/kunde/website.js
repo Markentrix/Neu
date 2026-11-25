@@ -4,11 +4,11 @@ import { tabelle, statusPill, zeige, V } from './kern.js';
 V.website = async () => {
   const d = await api('/api/kunde/website');
   const domainKarte = h('details', { class: 'card' }, h('summary', {}, h('b', {}, 'Meine Domain auf Markentrix umstellen')),
-    h('p', {}, 'Damit deine Website unter deiner eigenen Adresse erreichbar ist, muss bei deinem Domain-Anbieter (z. B. IONOS, Strato, GoDaddy) der Eintrag geändert werden. Das dauert etwa 10 Minuten.'),
-    h('ol', {}, h('li', {}, 'Melde dich bei deinem Domain-Anbieter an und öffne die DNS-Einstellungen deiner Domain.'), h('li', {}, 'Wir schicken dir die genauen Werte (A-Eintrag für „@“ und „www“) auf Wunsch per Nachricht.'), h('li', {}, 'Trage sie dort ein und gib uns Bescheid. Die Umstellung kann bis zu einigen Stunden dauern, wir prüfen sie automatisch.')),
-    h('p', {}, h('a', { class: 'btn', href: '#nachrichten' }, 'Anleitung anfordern oder Hilfe holen')), h('p', { class: 'small muted' }, 'Du kannst dich auch einfach melden, dann übernehmen wir das gemeinsam am Telefon.'));
+    h('p', {}, 'Damit Ihre Website unter Ihrer eigenen Adresse erreichbar ist, muss bei Ihrem Domain-Anbieter (z. B. IONOS, Strato, GoDaddy) der Eintrag geändert werden. Das dauert etwa 10 Minuten.'),
+    h('ol', {}, h('li', {}, 'Melden Sie sich bei Ihrem Domain-Anbieter an und öffnen Sie die DNS-Einstellungen Ihrer Domain.'), h('li', {}, 'Wir schicken Ihnen die genauen Werte (A-Eintrag für „@“ und „www“) auf Wunsch per Nachricht.'), h('li', {}, 'Tragen Sie sie dort ein und geben Sie uns Bescheid. Die Umstellung kann bis zu einigen Stunden dauern, wir prüfen sie automatisch.')),
+    h('p', {}, h('a', { class: 'btn', href: '#nachrichten' }, 'Anleitung anfordern oder Hilfe holen')), h('p', { class: 'small muted' }, 'Sie können sich auch einfach melden, dann übernehmen wir das gemeinsam am Telefon.'));
   return h('div', { class: 'stack' }, domainKarte,
-    h('div', { class: 'card' }, h('h2', {}, 'Websites'), tabelle([['Domain', z => h('a', { href: 'https://' + z.domain, target: '_blank', rel: 'noopener' }, z.domain)], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Zuletzt aktualisiert', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Noch keine Website verknüpft. Dein Team richtet sie mit dir ein, schreib uns einfach über „Nachrichten“.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Websites'), tabelle([['Domain', z => h('a', { href: 'https://' + z.domain, target: '_blank', rel: 'noopener' }, z.domain)], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Zuletzt aktualisiert', z => zeit(z.letzte_veroeffentlichung)]], d.websites, 'Noch keine Website verknüpft. Ihr Team richtet sie mit Ihnen ein, schreiben Sie uns einfach über „Nachrichten“.')),
     h('div', { class: 'card' }, h('h2', {}, 'Projekte'), tabelle([['Titel', z => z.titel], ['Art', z => z.art], ['Status', z => statusPill(z.status)], ['Link', z => z.url && h('a', { href: z.url, target: '_blank', rel: 'noopener' }, 'Öffnen')]], d.projekte, 'Keine Projekte.')));
 };
 
@@ -28,11 +28,11 @@ async function inhalteKarte() {
   const uebersetzen = async (e) => {
     const texte = {}; if (titel.de.value.trim()) texte.titel = titel.de.value; if (text.de.value.trim()) texte.text = text.de.value;
     if (!Object.keys(texte).length) { melde(m, 'Bitte schreibe zuerst den deutschen Titel oder Text.'); return; }
-    const b = e.target; b.disabled = true; b.textContent = 'Übersetze …'; melde(m, '');
+    const b = e.target; b.disabled = true; b.textContent = 'Übersetzen Sie …'; melde(m, '');
     try {
       const r = await api('/api/kunde/angebots-inhalte/uebersetzen', { method: 'POST', body: { texte, ziele } }); let n = 0;
       ziele.forEach(sp => { if (r.uebersetzungen.titel && r.uebersetzungen.titel[sp] && !titel[sp].value.trim()) { titel[sp].value = r.uebersetzungen.titel[sp]; n++; } if (r.uebersetzungen.text && r.uebersetzungen.text[sp] && !text[sp].value.trim()) { text[sp].value = r.uebersetzungen.text[sp]; n++; } });
-      melde(m, n ? r.hinweis : 'Die anderen Felder sind schon ausgefüllt. Leere sie, wenn du neu übersetzen lassen willst.', n ? 'ok' : 'info');
+      melde(m, n ? r.hinweis : 'Die anderen Felder sind schon ausgefüllt. Leere sie, wenn Sie neu übersetzen lassen wollen.', n ? 'ok' : 'info');
     } catch (x) { melde(m, x.message); }
     b.disabled = false; b.textContent = 'Aus Deutsch übersetzen';
   };
@@ -44,7 +44,7 @@ async function inhalteKarte() {
   const weg = async (z) => { if (!confirm('Eintrag wirklich löschen?')) return; try { nachher(await api('/api/kunde/angebots-inhalte/' + z.id, { method: 'DELETE' })); } catch (e) { melde(m, e.message); } };
   const name = (z) => (z.titel.de || Object.values(z.titel)[0] || (z.art === 'geschlossen' ? 'Heute geschlossen' : '–'));
   return h('div', { class: 'card' }, h('h2', {}, 'Texte, Events und Hinweise'),
-    h('p', { class: 'small muted' }, 'Zusätzlich zur Datei: Angebote mit Preis, Veranstaltungen, Hinweise und „heute geschlossen“. Sprachen auf deiner Website: ' + d.sprachen.map(s => d.sprachnamen[s]).join(', ') + '. Ist eine Übersetzung leer, zeigen wir den deutschen Text.'),
+    h('p', { class: 'small muted' }, 'Zusätzlich zur Datei: Angebote mit Preis, Veranstaltungen, Hinweise und „heute geschlossen“. Sprachen auf Ihrer Website: ' + d.sprachen.map(s => d.sprachnamen[s]).join(', ') + '. Ist eine Übersetzung leer, zeigen wir den deutschen Text.'),
     m, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Art'), art), h('div', {}, h('label', {}, 'Preis'), preis), h('div', {}, h('label', {}, 'Gültig von (leer = sofort)'), von), h('div', {}, h('label', {}, 'Gültig bis (leer = unbegrenzt)'), bis)),
     h('div', { class: 'stack', style: 'margin-top:10px' }, felder),
     h('div', { class: 'row', style: 'margin-top:10px' }, ziele.length ? h('button', { class: 'btn sec', type: 'button', onclick: uebersetzen }, 'Aus Deutsch übersetzen') : '', h('button', { class: 'btn', onclick: speichern }, 'Speichern und veröffentlichen')),
@@ -79,5 +79,5 @@ V.wochenangebote = async () => {
 
 V.werbung = async () => {
   const d = await api('/api/kunde/berichte');
-  return h('div', { class: 'card' }, h('h2', {}, 'Werbung & Berichte'), tabelle([['Zeitraum', z => [datum(z.zeitraum_von), ' – ', datum(z.zeitraum_bis)].join('')], ['Titel', z => z.titel], ['Art', z => z.art], ['Erstellt', z => datum(z.erstellt_am)]], d, 'Noch keine Berichte. Sobald Werbung läuft, bekommst du hier jeden Monat einen Bericht.'));
+  return h('div', { class: 'card' }, h('h2', {}, 'Werbung & Berichte'), tabelle([['Zeitraum', z => [datum(z.zeitraum_von), ' – ', datum(z.zeitraum_bis)].join('')], ['Titel', z => z.titel], ['Art', z => z.art], ['Erstellt', z => datum(z.erstellt_am)]], d, 'Noch keine Berichte. Sobald Werbung läuft, bekommen Sie hier jeden Monat einen Bericht.'));
 };

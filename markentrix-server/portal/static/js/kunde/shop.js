@@ -34,8 +34,8 @@ V.shop = async () => {
   const KAT = Object.fromEntries(d.kategorien.map((k) => [k.schluessel, k.name]));
 
   const kopf = h('div', { class: 'card' },
-    h('p', {}, 'Hier pflegst du die Artikel deines Shops und bearbeitest die Bestellungen. Deine Website holt Artikel, Preise und Bilder automatisch von hier.'),
-    d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online ist.'),
+    h('p', {}, 'Hier pflegen Sie die Artikel Ihres Shops und bearbeiten die Bestellungen. Ihre Website holt Artikel, Preise und Bilder automatisch von hier.'),
+    d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für Sie ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald Ihre Seite online ist.'),
     h('p', { class: 'small' }, h('span', { class: 'pill ' + (e.aktiv ? 'ok' : 'warn') }, e.aktiv ? 'Shop ist eingeschaltet' : 'Shop ist ausgeschaltet'), ' ',
       e.aktiv ? '' : 'Bevor Besucher etwas sehen, Artikel auf „aktiv“ stellen und unten in den Einstellungen den Shop einschalten.'),
     d.paypal_bereit ? '' : h('p', { class: 'msg info' }, 'PayPal ist noch nicht eingetragen (Website-Dienste → PayPal). Ohne PayPal.Me-Link bekommen Kundinnen und Kunden keinen Zahlknopf.'));
@@ -70,8 +70,8 @@ V.shop = async () => {
           h('a', { class: 'btn sec', href: 'mailto:' + b.email + '?subject=' + encodeURIComponent('Ihre Bestellung ' + b.ref) }, 'Mail schreiben'))));
   };
   const bestellungen = h('div', { class: 'card' }, h('h2', {}, 'Bestellungen' + (offen ? ' (' + offen + ' offen)' : '')),
-    d.bestellungen.length ? d.bestellungen.map(bestellung) : h('p', { class: 'muted' }, 'Noch keine Bestellung. Sobald jemand im Shop bestellt, erscheint sie hier und du bekommst eine E-Mail.'),
-    h('p', { class: 'small muted' }, 'Bei einer neuen Bestellung bekommst du eine Meldung und eine Mail. Zahlung per PayPal prüfst du selbst in deinem PayPal-Konto und stellst die Bestellung dann auf „Bezahlt“. Ist alles mit einem Gutschein bezahlt, steht sie schon auf „Bezahlt“. Storniert ein Betrieb eine Bestellung, bekommt ein eingelöster Gutschein sein Guthaben zurück.'));
+    d.bestellungen.length ? d.bestellungen.map(bestellung) : h('p', { class: 'muted' }, 'Noch keine Bestellung. Sobald jemand im Shop bestellt, erscheint sie hier und Sie bekommen eine E-Mail.'),
+    h('p', { class: 'small muted' }, 'Bei einer neuen Bestellung bekommen Sie eine Meldung und eine Mail. Zahlung per PayPal prüfen Sie selbst in Ihrem PayPal-Konto und stellen die Bestellung dann auf „Bezahlt“. Ist alles mit einem Gutschein bezahlt, steht sie schon auf „Bezahlt“. Storniert ein Betrieb eine Bestellung, bekommt ein eingelöster Gutschein sein Guthaben zurück.'));
 
   // ------------------------------------------------------------ Artikel
   const artikel = (p) => {
@@ -121,14 +121,14 @@ V.shop = async () => {
             h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Bild löschen?')) return; try { await api('/api/kunde/shop/bilder/' + b.id, { method: 'DELETE' }); neu(); } catch (x) { fehler(bm, x); } } }, 'Löschen')));
       })),
       h('div', { class: 'row', style: 'gap:8px;margin-top:8px;flex-wrap:wrap' }, hoch, h('button', { class: 'btn sec', onclick: hochladen }, 'Bild hochladen')),
-      h('p', { class: 'small muted' }, 'Das Bild wird automatisch auf 4:3 zugeschnitten und als WebP gespeichert. Höchstens 8 Bilder je Artikel.'), bm) : h('p', { class: 'small muted' }, 'Bilder kannst du hochladen, sobald der Artikel einmal gespeichert ist.');
+      h('p', { class: 'small muted' }, 'Das Bild wird automatisch auf 4:3 zugeschnitten und als WebP gespeichert. Höchstens 8 Bilder je Artikel.'), bm) : h('p', { class: 'small muted' }, 'Bilder können Sie hochladen, sobald der Artikel einmal gespeichert ist.');
     return h('details', { class: 'hilfe', open: !p },
       h('summary', {}, p ? p.name + ' · ' + EUR(p.preis) + (p.kategorie && KAT[p.kategorie] ? ' · ' + KAT[p.kategorie] : '') + (p.aktiv ? '' : ' (Entwurf)') : '+ Neuen Artikel anlegen'),
       h('div', { style: 'margin-top:8px' },
         h('div', { class: 'form2' }, feld('Name', name), feld('Preis in Euro (Endpreis)', preis), feld('Kategorie', kat), feld('Kurzname für die Website', schl, p ? 'Lässt sich nicht mehr ändern.' : 'Nur Kleinbuchstaben, Ziffern, Bindestrich.'),
           feld('Material', material), feld('Maße', masse), feld('Gewicht', gewicht), feld('Reihenfolge (kleinere zuerst)', sort)),
         feld('Kurztext (Kachel im Shop)', kurz), feld('Langtext (Artikelseite)', lang),
-        d.farben.length ? h('div', {}, h('label', {}, 'Farben (die erste ist die Vorauswahl)'), h('div', { class: 'row', style: 'gap:10px;flex-wrap:wrap' }, fs.map((x) => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit;font-weight:400' }, x.c, h('span', { style: 'display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #8884;background:' + x.f.hex }), x.f.name)))) : h('p', { class: 'small muted' }, 'Farben legst du weiter unten unter „Farben und Kategorien“ an.'),
+        d.farben.length ? h('div', {}, h('label', {}, 'Farben (die erste ist die Vorauswahl)'), h('div', { class: 'row', style: 'gap:10px;flex-wrap:wrap' }, fs.map((x) => h('label', { style: 'display:flex;gap:4px;align-items:center;color:inherit;font-weight:400' }, x.c, h('span', { style: 'display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #8884;background:' + x.f.hex }), x.f.name)))) : h('p', { class: 'small muted' }, 'Farben legen Sie weiter unten unter „Farben und Kategorien“ an.'),
         h('div', { class: 'form2' }, feld('Kennzeichen (Tags)', tags, 'z. B. neu, bestseller'), feld('Oft zusammen bestellt mit', verw)),
         pers.el, h('div', { class: 'form2' }, feld('Beschriftung des Textfelds', tlabel), feld('Höchstens … Zeichen', tmax)), aktiv.el, m,
         h('div', { class: 'row', style: 'margin:8px 0' }, h('button', { class: 'btn', onclick: speichern }, p ? 'Speichern' : 'Anlegen'), p ? h('button', { class: 'btn sec', onclick: weg }, 'Löschen') : ''),
@@ -155,7 +155,7 @@ V.shop = async () => {
     return h('div', {}, h('h3', {}, titel), zeilen.map(zeile), zeile(null), m);
   };
   const listen = h('div', { class: 'card' }, h('h2', {}, 'Farben und Kategorien'),
-    h('p', { class: 'small muted' }, 'Farben pflegst du hier einmal und wählst sie dann bei den Artikeln aus. Kategorien erscheinen im Shop nur, wenn sie mindestens einen aktiven Artikel haben. Die Zahl rechts bestimmt die Reihenfolge.'),
+    h('p', { class: 'small muted' }, 'Farben pflegen Sie hier einmal und wählen sie dann bei den Artikeln aus. Kategorien erscheinen im Shop nur, wenn sie mindestens einen aktiven Artikel haben. Die Zahl rechts bestimmt die Reihenfolge.'),
     liste('Farben', 'farben', d.farben, true), liste('Kategorien', 'kategorien', d.kategorien, false));
 
   // ------------------------------------------------------------ Einstellungen
@@ -181,7 +181,7 @@ V.shop = async () => {
   const einstellungen = h('div', { class: 'card' }, h('h2', {}, 'Einstellungen'),
     aktivS.el, h('div', { class: 'form2' }, feld('Versandpauschale (Euro)', pausch), feld('Versandkostenfrei ab (Euro)', frei), feld('Produktionszeit', prod), feld('Lieferzeit', lief), feld('Bestellnummer beginnt mit', praef, 'z. B. SA ergibt SA-2026-0001')), abh.el,
     h('h3', {}, 'Geschenkgutscheine'), gAn.el, h('div', { class: 'form2' }, feld('Betragsauswahl (Euro, durch Komma)', gBetr), feld('Kleinster Betrag', gMin), feld('Größter Betrag', gMax), feld('Gültig (Monate)', gMon), feld('Zustellarten', gZu)),
-    h('p', { class: 'small muted' }, 'Gutschein-Bestellungen findest du unter „Website-Dienste“ → Gutscheine, dort sendest du auch den Code. Gesendete Codes können Kundinnen und Kunden an der Kasse des Shops einlösen. Der Rest bleibt stehen, bis der Gutschein abläuft (Gültig-Monate ab dem Versand des Codes).'), em,
+    h('p', { class: 'small muted' }, 'Gutschein-Bestellungen finden Sie unter „Website-Dienste“ → Gutscheine, dort senden Sie auch den Code. Gesendete Codes können Kundinnen und Kunden an der Kasse des Shops einlösen. Der Rest bleibt stehen, bis der Gutschein abläuft (Gültig-Monate ab dem Versand des Codes).'), em,
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichernE }, 'Speichern')));
 
   return abschnitte(h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, 'Online-Shop')), kopf, bestellungen, artikelKarte, listen, einstellungen),

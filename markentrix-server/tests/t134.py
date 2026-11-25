@@ -60,7 +60,7 @@ async def main():
             chk(f"{n}: Abschnitte sind zugeklappt",await pg.locator("details.abschnitt").count()>=5 and await pg.locator("details.abschnitt[open]").count()<=1)
             chk(f"{n}: Schnellzugriff vorhanden",await pg.locator(".schnell button").count()>=3)
             await pg.locator(".schnell button:has-text('Kontaktformular')").click(); await pg.wait_for_timeout(500)
-            chk(f"{n}: Schnellzugriff öffnet den Abschnitt",await pg.locator("details.abschnitt[open]:has(h2:has-text('Kontaktformular'))").count()==1 and await pg.locator("input[placeholder^='info@deinefirma']").first.is_visible())
+            chk(f"{n}: Schnellzugriff öffnet den Abschnitt",await pg.locator("details.abschnitt[open]:has(h2:has-text('Kontaktformular'))").count()==1 and await pg.locator("input[placeholder^='info@ihrefirma']").first.is_visible())
             o=await pg.evaluate("document.documentElement.scrollWidth-document.documentElement.clientWidth"); chk(f"{n}: Dienste ohne seitliches Überlaufen",o<=0,o)
             await pg.add_script_tag(content=AXE)
             v=await pg.evaluate("axe.run(document,{runOnly:['wcag2aa','wcag21aa']}).then(r=>r.violations.map(v=>v.id+' '+v.nodes[0].target.join(' ')))"); chk(f"{n}: Dienste Barrierefreiheit",not v,v[:3])

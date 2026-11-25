@@ -120,7 +120,7 @@ V.kalender = async () => {
     h('button', { class: 'btn sec', 'aria-pressed': String(stand.ansicht === 'woche'), onclick: () => { stand.ansicht = 'woche'; neu(); } }, 'Woche'),
     h('button', { class: 'btn', onclick: () => manuellDialog({ tag: stand.tag }, neu) }, '+ Termin eintragen'));
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, 'Kalender')),
-    h('p', { class: 'small muted' }, 'Alle Termine von der Website und von Hand. Tippe auf einen freien Bereich, um dort einen Termin einzutragen, oder auf einen Termin für Details und Absage. Graue Flächen sind außerhalb der Arbeitszeit oder gesperrt.'),
+    h('p', { class: 'small muted' }, 'Alle Termine von der Website und von Hand. Tippen Sie auf einen freien Bereich, um dort einen Termin einzutragen, oder auf einen Termin für Details und Absage. Graue Flächen sind außerhalb der Arbeitszeit oder gesperrt.'),
     bar,
     h('div', { class: 'card', style: 'padding:8px' },
       h('div', { style: 'overflow-x:auto;max-width:100%' },

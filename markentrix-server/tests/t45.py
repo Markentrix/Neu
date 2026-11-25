@@ -52,12 +52,12 @@ async def main():
         await login(pg,mA,"InhaberPasswort1","app")
         try: await pg.wait_for_selector(".schritt",timeout=8000)
         except Exception: print("DEBUG",pg.url,errs,(await pg.inner_text("body"))[:300]); raise
-        chk("Kunde: erster Start zeigt die Anleitung",pg.url.endswith("#willkommen") and "So startest du bei Markentrix" in await pg.locator(".anltitel").inner_text(),pg.url)
+        chk("Kunde: erster Start zeigt die Anleitung",pg.url.endswith("#willkommen") and "So starten Sie bei Markentrix" in await pg.locator(".anltitel").inner_text(),pg.url)
         chk("Kunde: Android-Reiter vorgewählt, 5 Installationsschritte mit Bild",await pg.locator("button[aria-pressed=true]").inner_text()=="Android (Chrome)" and await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt").count()==5 and await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt .handybild > svg").count()==5)
         chk("Kunde: Hinweis auf Chrome statt Fremdbrowser",await pg.locator("text=Samsung Internet").count()>=1)
         await pg.click("text=iPhone (Safari)"); chk("Kunde: iPhone-Reiter hat 6 Schritte mit Teilen-Symbol",await pg.locator(".card:has-text('1 · App aufs Handy legen') .schritt").count()==6 and await pg.locator("text=Teilen-Symbol antippen").count()==1)
-        n=await pg.locator(".card:has-text('2 · So arbeitest du mit dem Portal') .schritt").count(); txt=await pg.locator(".card:has-text('2 · So arbeitest du mit dem Portal')").inner_text()
-        chk("Kunde: Portal-Schritte mit Bildern, ohne Vertriebsthemen",n>=3 and "Freigaben" in txt and "Provision" not in txt and "Pipeline" not in txt and await pg.locator(".card:has-text('2 · So arbeitest du mit dem Portal') .schritt svg").count()==n,txt[:200])
+        n=await pg.locator(".card:has-text('2 · So arbeiten Sie mit dem Portal') .schritt").count(); txt=await pg.locator(".card:has-text('2 · So arbeiten Sie mit dem Portal')").inner_text()
+        chk("Kunde: Portal-Schritte mit Bildern, ohne Vertriebsthemen",n>=3 and "Freigaben" in txt and "Provision" not in txt and "Pipeline" not in txt and await pg.locator(".card:has-text('2 · So arbeiten Sie mit dem Portal') .schritt svg").count()==n,txt[:200])
         chk("Kunde: Menüpunkt „So geht’s“ erreichbar",await pg.locator(".tabbar").is_visible())
         await pg.screenshot(path="/var/tmp/pt/shots/anleitung_kunde.png",full_page=True)
         chk("Kunde: Banner nicht auf der Anleitung selbst",await pg.locator(".appbanner").count()==0)
@@ -80,7 +80,7 @@ async def main():
         chk("Keine JS-Fehler Vertrieb",not errs,errs); await ctx.close()
         # Samsung-Browser: Warnhinweis
         ctx,pg=await neu(SAMSUNG); await login(pg,mA,"InhaberPasswort1","app"); await pg.goto(B+"/app#einstellungen"); await pg.wait_for_selector("text=App & Benachrichtigungen")
-        chk("Samsung Internet: Hinweis auf Chrome in der App-Karte",await pg.locator("text=Bitte öffne das Portal zum Installieren in Google Chrome").count()==1); await ctx.close()
+        chk("Samsung Internet: Hinweis auf Chrome in der App-Karte",await pg.locator("text=Bitte öffnen Sie das Portal zum Installieren in Google Chrome").count()==1); await ctx.close()
         # Desktop: kein Banner
         ctx=await br.new_context(viewport={"width":1280,"height":900},bypass_csp=True); pg=await ctx.new_page(); await login(pg,mA,"InhaberPasswort1","app"); await pg.goto(B+"/app#heute"); await pg.wait_for_selector("h1")
         chk("Desktop: kein Handy-Banner",await pg.locator(".appbanner").count()==0); await ctx.close()

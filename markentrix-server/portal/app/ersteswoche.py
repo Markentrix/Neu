@@ -1,4 +1,4 @@
-"""„Deine erste Woche“: kurze Checkliste für neue Kunden mit Fortschrittsbalken. Erkennt selbst, was erledigt ist. Erscheint 30 Tage nach dem Start, bis alles erledigt ist oder der Kunde sie ausblendet."""
+"""„Ihre erste Woche“: kurze Checkliste für neue Kunden mit Fortschrittsbalken. Erkennt selbst, was erledigt ist. Erscheint 30 Tage nach dem Start, bis alles erledigt ist oder der Kunde sie ausblendet."""
 from fastapi import APIRouter, Depends
 
 from .db import tx

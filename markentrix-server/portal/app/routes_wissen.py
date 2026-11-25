@@ -120,7 +120,7 @@ def _entscheiden(kid: str, vid: str, user: dict, uebernehmen: bool, notiz: str):
         cur.execute("UPDATE aufgaben SET status='erledigt', erledigt_am=now(), erledigt_von=%s WHERE auto_schluessel=%s AND status='offen'", (user.get("email"), f"wissen-{vid}"))
         audit(cur, user, "wissen_vorschlag_" + ("uebernommen" if uebernehmen else "abgelehnt"), kid, {"schluessel": v["schluessel"][:120], "aktion": v["aktion"]})
         ids = push.kunde(cur, kid)
-    push.senden(ids, "Dein Wissen für den Assistenten" if uebernehmen else "Änderungswunsch abgelehnt", f"„{v['schluessel'][:60]}“: " + ("übernommen." if uebernehmen else (notiz.strip()[:120] or "abgelehnt.")), "/app#wissen", "wissen")
+    push.senden(ids, "Ihr Wissen für den Assistenten" if uebernehmen else "Änderungswunsch abgelehnt", f"„{v['schluessel'][:60]}“: " + ("übernommen." if uebernehmen else (notiz.strip()[:120] or "abgelehnt.")), "/app#wissen", "wissen")
     return {"ok": True}
 
 

@@ -146,7 +146,7 @@ async def main():
             await pg.evaluate(TOUR); await pg.wait_for_timeout(400); return pg
         # Kunde: offener Vertrag -> Formular
         a.post(f"/api/admin/kunden/{kA}/referenzvertrag",json={"projekt":"Zweites Projekt"})
-        pg=await seite(mA,"InhaberPasswort1","app"); await pg.goto(B+"/app#vertraege"); await pg.reload(); await pg.wait_for_selector("h2:has-text('Referenzvertrag: deine Freigabe')",timeout=8000)
+        pg=await seite(mA,"InhaberPasswort1","app"); await pg.goto(B+"/app#vertraege"); await pg.reload(); await pg.wait_for_selector("h2:has-text('Referenzvertrag: Ihre Freigabe')",timeout=8000)
         chk("UI Kunde: Formular mit allen Elementen und Kanälen",await pg.locator("input[type=checkbox]").count()>=16 and await pg.get_by_role("button",name="Freigabe bestätigen").count()==1)
         await pg.get_by_role("button",name="Freigabe bestätigen").click(); await pg.wait_for_selector(".msg",timeout=5000)
         chk("UI Kunde: Fehlermeldung ohne Angaben",await pg.locator(".msg").count()>=1)

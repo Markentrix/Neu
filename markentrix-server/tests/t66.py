@@ -99,7 +99,7 @@ erg=json.dumps({"schritte":["A-Eintrag für "+dom+" auf 203.0.113.5 setzen.","Da
 sqlf(f"insert into domain_pruefung (domain, kunden_id, ok, ergebnis) values ('{dom}','{kA}',false,'{erg}')")
 z={x["domain"]:x for x in cA.get("/api/kunde/website-dienste/domains").json()["domains"]}
 chk("DNS offen: wartet auf Umstellung mit Schritten ohne interne Hinweise",z[dom]["stand"]=="wartet_dns" and len(z[dom]["schritte"])==1 and z[dom]["dns_anbieter"]=="IONOS" and "203.0.113.5" in z[dom]["schritte"][0],z[dom])
-chk("Text in du-Form",all("Ihre" not in z[dom][k] for k in ("titel","text")),z[dom])
+chk("Text in Sie-Form",all(w not in z[dom][k].lower() for k in ("titel","text") for w in (" deine"," dein "," deiner"," du ")) and "Ihre" in z[dom]["text"],z[dom])
 sql(f"update domain_pruefung set ok=true where domain='{dom}'")
 sql(f"insert into website_wacht (domain, kunden_id, ok, fehler) values ('{dom}','{kA}',false,'Startseite nicht erreichbar (kein Zertifikat)')")
 z={x["domain"]:x for x in cA.get("/api/kunde/website-dienste/domains").json()["domains"]}
@@ -160,7 +160,7 @@ async def main():
         await k.goto(B+"/"); await k.fill("#e",mA); await k.fill("#p",KPW); await k.click("#b"); await k.wait_for_url("**/app*")
         await k.evaluate("fetch('/api/me/ansicht',{method:'PUT',headers:{'Content-Type':'application/json','X-MK':'1'},body:JSON.stringify({tour_gesehen:true})})"); await k.goto(B+"/app#dienste")
         await k.wait_for_selector("#domain-stand",state="attached",timeout=8000); await k.evaluate("document.querySelectorAll('details.abschnitt').forEach(d=>d.open=true)")
-        chk("UI Kunde: Domain-Stand mit Anleitung sichtbar",await k.locator("#domain-stand").get_by_text("Wartet auf die Umstellung deiner Domain").count()>=1 and "A-Eintrag für" in await k.inner_text("#domain-stand"))
+        chk("UI Kunde: Domain-Stand mit Anleitung sichtbar",await k.locator("#domain-stand").get_by_text("Wartet auf die Umstellung Ihrer Domain").count()>=1 and "A-Eintrag für" in await k.inner_text("#domain-stand"))
         await k.screenshot(path="/var/tmp/pt/shots/domain_kunde.png",full_page=True)
         chk("Keine JS-Fehler",not errs and not e2,errs+e2); await br.close()
 asyncio.run(main())

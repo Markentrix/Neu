@@ -399,7 +399,7 @@ def kunde_bestaetigen(aid: str, data: BestaetigenIn, request: Request, bg: Backg
     from datetime import datetime
     from zoneinfo import ZoneInfo
     if not data.akzeptiert:
-        raise HTTPException(400, "Bitte bestätige, dass du den Vertrag gelesen hast und vertretungsberechtigt bist.")
+        raise HTTPException(400, "Bitte bestätigen Sie, dass Sie den Vertrag gelesen haben und vertretungsberechtigt bist.")
     rate_limit("avvok:" + str(user["kunden_id"]), 5, 600)
     kid = user["kunden_id"]
     name = " ".join(data.name.split())

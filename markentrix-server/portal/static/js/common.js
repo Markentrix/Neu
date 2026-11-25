@@ -216,8 +216,8 @@ export function notizWerkzeug(feld, m) {
     let gesamt = '';
     erkenner.onresult = (e) => { gesamt = Array.from(e.results).map(r => r[0].transcript).join(' '); feld.value = (vorher + gesamt).slice(0, Number(feld.maxLength) > 0 ? Number(feld.maxLength) : 1500); feld.dispatchEvent(new Event('input')); };
     erkenner.onend = () => { laeuft = false; mik.textContent = '🎤 Diktieren'; mik.setAttribute('aria-pressed', 'false'); };
-    erkenner.onerror = (e) => { melde(m, e.error === 'not-allowed' ? 'Bitte erlaube dem Browser den Zugriff aufs Mikrofon.' : 'Die Spracherkennung hat nicht geklappt. Du kannst auch die Mikrofon-Taste deiner Handy-Tastatur benutzen.'); };
-    try { erkenner.start(); laeuft = true; mik.textContent = '⏹ Fertig'; mik.setAttribute('aria-pressed', 'true'); melde(m, 'Ich höre zu … Sprich jetzt. Nenne keine Gesundheits- oder Zahlungsdaten.', 'info'); } catch { melde(m, 'Das Diktieren konnte nicht starten.'); }
+    erkenner.onerror = (e) => { melde(m, e.error === 'not-allowed' ? 'Bitte erlaube dem Browser den Zugriff aufs Mikrofon.' : 'Die Spracherkennung hat nicht geklappt. Sie können auch die Mikrofon-Taste Ihrer Handy-Tastatur benutzen.'); };
+    try { erkenner.start(); laeuft = true; mik.textContent = '⏹ Fertig'; mik.setAttribute('aria-pressed', 'true'); melde(m, 'Ich höre zu … Sprechen Sie jetzt. Nennen Sie keine Gesundheits- oder Zahlungsdaten.', 'info'); } catch { melde(m, 'Das Diktieren konnte nicht starten.'); }
   } }, '🎤 Diktieren') : '';
   const ki = h('button', { type: 'button', class: 'btn sec small', onclick: async () => {
     if (feld.value.trim().length < 20) { melde(m, 'Die Notiz ist für eine Zusammenfassung noch zu kurz.'); return; }
@@ -230,7 +230,7 @@ export function notizWerkzeug(feld, m) {
 }
 
 export function kontaktKarte(optionen, url, wiedervorlage, extra = {}) {
-  const m = h('div'), notiz = h('textarea', { rows: 2, placeholder: 'Kurze Notiz (freiwillig) – du kannst sie auch diktieren', maxlength: 1500, 'aria-label': 'Notiz' }), wv = wiedervorlageWahl();
+  const m = h('div'), notiz = h('textarea', { rows: 2, placeholder: 'Kurze Notiz (freiwillig) – Sie können sie auch diktieren', maxlength: 1500, 'aria-label': 'Notiz' }), wv = wiedervorlageWahl();
   let wahl = null; const knoepfe = [];
   const speichern = h('button', { class: 'btn', disabled: true }, 'Speichern'), weiter = extra.naechster ? h('button', { class: 'btn sec', disabled: true }, 'Speichern & nächster Lead') : '';
   const grund = h('select', { 'aria-label': 'Grund für die Absage', style: 'display:none;width:auto' }, h('option', { value: '' }, 'Grund wählen …'), Object.entries(extra.verlustgruende || {}).map(([c, t]) => h('option', { value: c }, t)));
@@ -350,7 +350,7 @@ export async function passkeyAnmelden(bleiben = false) {
   try {
     c = await navigator.credentials.get({ publicKey: { challenge: pkBytes(o.challenge), rpId: o.rpId, timeout: o.timeout, userVerification: 'required', allowCredentials: [] } });
   } catch (e) {
-    throw new Error(e && e.name === 'NotAllowedError' ? 'Abgebrochen oder auf diesem Gerät ist kein Passkey vorhanden. Melde dich mit dem Passwort an und richte unter „Konto“ einen Passkey ein.' : 'Die Passkey-Anmeldung hat nicht geklappt.');
+    throw new Error(e && e.name === 'NotAllowedError' ? 'Abgebrochen oder auf diesem Gerät ist kein Passkey vorhanden. Melden Sie sich mit dem Passwort an und richten Sie unter „Konto“ einen Passkey ein.' : 'Die Passkey-Anmeldung hat nicht geklappt.');
   }
   const pc = /** @type {PublicKeyCredential} */ (c), r = /** @type {AuthenticatorAssertionResponse} */ (pc.response);
   const res = await api('/api/passkey/login/fertig', { method: 'POST', body: { id: pkText(pc.rawId), clientDataJSON: pkText(r.clientDataJSON), authenticatorData: pkText(r.authenticatorData), signature: pkText(r.signature) } });
@@ -365,7 +365,7 @@ export async function passkeyEinrichten(name) {
     c = await navigator.credentials.create({ publicKey: { challenge: pkBytes(o.challenge), rp: o.rp, user: { id: pkBytes(o.user.id), name: o.user.name, displayName: o.user.displayName }, pubKeyCredParams: o.pubKeyCredParams,
       excludeCredentials: o.excludeCredentials.map(x => ({ type: 'public-key', id: pkBytes(x.id) })), timeout: o.timeout, attestation: 'none', authenticatorSelection: o.authenticatorSelection } });
   } catch (e) {
-    throw new Error(e && e.name === 'InvalidStateError' ? 'Auf diesem Gerät ist schon ein Passkey eingerichtet.' : e && e.name === 'NotAllowedError' ? 'Abgebrochen. Zum Einrichten bitte das Gerät bestätigen (Fingerabdruck, Gesicht oder PIN).' : 'Das Einrichten hat nicht geklappt. Hat dein Gerät eine Bildschirmsperre?');
+    throw new Error(e && e.name === 'InvalidStateError' ? 'Auf diesem Gerät ist schon ein Passkey eingerichtet.' : e && e.name === 'NotAllowedError' ? 'Abgebrochen. Zum Einrichten bitte das Gerät bestätigen (Fingerabdruck, Gesicht oder PIN).' : 'Das Einrichten hat nicht geklappt. Hat Ihr Gerät eine Bildschirmsperre?');
   }
   const r = /** @type {AuthenticatorAttestationResponse} */ (/** @type {PublicKeyCredential} */ (c).response);
   await api('/api/passkey/registrieren/fertig', { method: 'POST', body: { clientDataJSON: pkText(r.clientDataJSON), attestationObject: pkText(r.attestationObject), name: name || null } });
@@ -384,17 +384,17 @@ export function passkeyKarte() {
       passkeyGeht() ? h('p', {}, h('button', { class: 'btn', onclick: async () => {
         const name = (prompt('Wie soll das Gerät heißen? (zum Beispiel „Mein Handy“)', /iphone|ipad/i.test(navigator.userAgent) ? 'Mein iPhone' : /android/i.test(navigator.userAgent) ? 'Mein Android-Handy' : 'Dieser Computer') || '').trim();
         if (!name) return;
-        try { await passkeyEinrichten(name); melde(m, 'Eingerichtet. Ab jetzt kannst du dich auf der Anmeldeseite mit „Mit Fingerabdruck / Face-ID anmelden“ einloggen.', 'ok'); laden(); } catch (x) { melde(m, x.message); }
-      } }, 'Passkey auf diesem Gerät einrichten')) : h('p', { class: 'small muted' }, 'Dieser Browser unterstützt keine Passkeys. Nutze Chrome oder Safari in einer aktuellen Version.'));
+        try { await passkeyEinrichten(name); melde(m, 'Eingerichtet. Ab jetzt können Sie sich auf der Anmeldeseite mit „Mit Fingerabdruck / Face-ID anmelden“ einloggen.', 'ok'); laden(); } catch (x) { melde(m, x.message); }
+      } }, 'Passkey auf diesem Gerät einrichten')) : h('p', { class: 'small muted' }, 'Dieser Browser unterstützt keine Passkeys. Nutzen Sie Chrome oder Safari in einer aktuellen Version.'));
   };
   laden();
   return h('div', { class: 'card' }, h('h2', {}, 'Anmeldung mit Fingerabdruck oder Face-ID (Passkey)'),
-    h('p', { class: 'small muted' }, 'Kein Passwort mehr eintippen: Du bestätigst die Anmeldung mit Fingerabdruck, Gesicht oder der Gerätesperre. Das ist schneller und sicherer als ein Passwort und zählt als Zwei-Faktor-Anmeldung. Richte es am besten auf jedem Gerät ein, das du benutzt.'), m, box);
+    h('p', { class: 'small muted' }, 'Kein Passwort mehr eintippen: Sie bestätigen die Anmeldung mit Fingerabdruck, Gesicht oder der Gerätesperre. Das ist schneller und sicherer als ein Passwort und zählt als Zwei-Faktor-Anmeldung. Richten Sie es am besten auf jedem Gerät ein, das Sie benutzt.'), m, box);
 }
 
 /** Schaltet Push auf diesem Gerät ein (Erlaubnis, Abo, Speichern). Wirft bei Ablehnung/Fehler einen Error mit verständlichem Text. */
 export async function pushEinschalten() {
-  if (await Notification.requestPermission() !== 'granted') throw new Error('Die Erlaubnis wurde abgelehnt. Du kannst sie später unter „App & Benachrichtigungen“ im Konto einschalten.');
+  if (await Notification.requestPermission() !== 'granted') throw new Error('Die Erlaubnis wurde abgelehnt. Sie können sie später unter „App & Benachrichtigungen“ im Konto einschalten.');
   const reg = await navigator.serviceWorker.ready, st = await api('/api/push/status');
   const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64zuBytes(st.schluessel) });
   const j = neu.toJSON();
@@ -414,8 +414,8 @@ export async function pushNachfrage() {
     if (await reg.pushManager.getSubscription()) return;
     const setze = (v) => { try { localStorage.setItem('mk-pushfrage', v); } catch { /* egal */ } };
     const m = h('div'), inhalt = h('div', {},
-      h('p', {}, 'Möchtest du Benachrichtigungen aufs Handy bekommen? Du erfährst sofort, wenn etwas Wichtiges passiert (zum Beispiel eine neue Nachricht, eine Freigabe oder eine Anfrage).'),
-      h('p', { class: 'small muted' }, 'In den Meldungen stehen keine Namen oder Inhalte, nur der Anlass. Du kannst das jederzeit im Konto unter „App & Benachrichtigungen“ ändern. Gleich fragt dich dein Handy noch einmal, bitte dort „Zulassen“ tippen.'), m,
+      h('p', {}, 'Möchten Sie Benachrichtigungen aufs Handy bekommen? Sie erfahren sofort, wenn etwas Wichtiges passiert (zum Beispiel eine neue Nachricht, eine Freigabe oder eine Anfrage).'),
+      h('p', { class: 'small muted' }, 'In den Meldungen stehen keine Namen oder Inhalte, nur der Anlass. Sie können das jederzeit im Konto unter „App & Benachrichtigungen“ ändern. Gleich fragt Ihr Handy noch einmal nach, bitte dort „Zulassen“ tippen.'), m,
       h('div', { class: 'row' },
         h('button', { class: 'btn', onclick: async () => { try { await pushEinschalten(); setze('ja'); d.zu(); } catch (x) { setze('nein'); melde(m, x.message || 'Das hat nicht geklappt.'); } } }, 'Ja, benachrichtigen'),
         h('button', { class: 'btn sec', onclick: () => { setze('spaeter:' + Date.now()); d.zu(); } }, 'Später'),
@@ -429,14 +429,14 @@ export function pushKarte(rolle) {
   const ios = /iphone|ipad/i.test(navigator.userAgent), standalone = window.matchMedia && matchMedia('(display-mode: standalone)').matches;
   const geht = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   async function zeigen() {
-    if (!geht) { box.replaceChildren(h('p', { class: 'muted small' }, ios && !standalone ? 'Auf dem iPhone geht das erst, wenn du das Portal zum Home-Bildschirm hinzufügst (Teilen → „Zum Home-Bildschirm“) und von dort öffnest.' : 'Dieser Browser unterstützt keine Push-Nachrichten.')); return; }
+    if (!geht) { box.replaceChildren(h('p', { class: 'muted small' }, ios && !standalone ? 'Auf dem iPhone geht das erst, wenn Sie das Portal zum Home-Bildschirm hinzufügen (Teilen → „Zum Home-Bildschirm“) und von dort öffnen.' : 'Dieser Browser unterstützt keine Push-Nachrichten.')); return; }
     const reg = await navigator.serviceWorker.ready, abo = await reg.pushManager.getSubscription();
     if (abo) box.replaceChildren(h('p', {}, h('span', { class: 'pill ok' }, 'an'), ' Benachrichtigungen sind auf diesem Gerät eingeschaltet.'),
       h('div', { class: 'row' }, h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/push/test', { method: 'POST' }); melde(m, 'Testnachricht gesendet.', 'ok'); } catch (x) { melde(m, x.message); } } }, 'Testnachricht'),
         h('button', { class: 'btn sec small', onclick: async () => { try { await api('/api/push/abmelden', { method: 'POST', body: { endpoint: abo.endpoint } }); await abo.unsubscribe(); zeigen(); } catch (x) { melde(m, x.message); } } }, 'Ausschalten')));
     else box.replaceChildren(h('button', { class: 'btn small', onclick: async () => {
       try {
-        if (await Notification.requestPermission() !== 'granted') { melde(m, 'Die Erlaubnis wurde im Browser abgelehnt. Du kannst sie in den Browser-Einstellungen ändern.'); return; }
+        if (await Notification.requestPermission() !== 'granted') { melde(m, 'Die Erlaubnis wurde im Browser abgelehnt. Sie können sie in den Browser-Einstellungen ändern.'); return; }
         const st = await api('/api/push/status');
         const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64zuBytes(st.schluessel) });
         const j = neu.toJSON();
@@ -448,7 +448,7 @@ export function pushKarte(rolle) {
   zeigen().catch(() => {});
   if (rolle && ANLAESSE[rolle]) ladeAnsicht().then(a => {
     const aus = new Set(a.push_aus || []);
-    anlass.replaceChildren(h('h3', {}, 'Wobei soll ich dich benachrichtigen?'), ...ANLAESSE[rolle].map(([tag, name]) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:5px 0' },
+    anlass.replaceChildren(h('h3', {}, 'Wobei soll ich Sie benachrichtigen?'), ...ANLAESSE[rolle].map(([tag, name]) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:5px 0' },
       h('input', { type: 'checkbox', checked: !aus.has(tag), style: 'width:auto', onchange: async (e) => {
         e.target.checked ? aus.delete(tag) : aus.add(tag);
         try { await api('/api/me/ansicht', { method: 'PUT', body: { push_aus: [...aus] } }); a.push_aus = [...aus]; melde(m, ''); } catch (x) { e.target.checked = !e.target.checked; melde(m, x.message); }
@@ -458,19 +458,19 @@ export function pushKarte(rolle) {
   if (rolle === 'vertrieb' || rolle === 'kunde') ladeAnsicht().then(a => {
     const stand = a.tag_zeit || (rolle === 'vertrieb' ? '08:00' : 'aus');
     const zeiten = ['aus', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '10:00'];
-    const sel = h('select', { 'aria-label': 'Uhrzeit für „Dein Tag“', style: 'width:auto' }, zeiten.map(z => h('option', { value: z, selected: z === stand }, z === 'aus' ? 'aus' : z + ' Uhr')));
+    const sel = h('select', { 'aria-label': 'Uhrzeit für „Ihr Tag“', style: 'width:auto' }, zeiten.map(z => h('option', { value: z, selected: z === stand }, z === 'aus' ? 'aus' : z + ' Uhr')));
     sel.onchange = async () => { try { await api('/api/me/ansicht', { method: 'PUT', body: { tag_zeit: sel.value } }); a.tag_zeit = sel.value; melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
-    tagZeile.replaceChildren(h('h3', {}, 'Morgens „Dein Tag“'), h('p', { class: 'small muted' }, rolle === 'vertrieb' ? 'Eine Nachricht pro Werktag mit fälligen Anrufen und Terminen. Ist nichts los, kommt keine.' : 'Eine Nachricht pro Werktag mit neuen Anfragen, Terminen und Freigaben. Ist nichts los, kommt keine.'), h('label', { class: 'row', style: 'gap:8px;align-items:center' }, 'Uhrzeit ', sel));
+    tagZeile.replaceChildren(h('h3', {}, 'Morgens „Ihr Tag“'), h('p', { class: 'small muted' }, rolle === 'vertrieb' ? 'Eine Nachricht pro Werktag mit fälligen Anrufen und Terminen. Ist nichts los, kommt keine.' : 'Eine Nachricht pro Werktag mit neuen Anfragen, Terminen und Freigaben. Ist nichts los, kommt keine.'), h('label', { class: 'row', style: 'gap:8px;align-items:center' }, 'Uhrzeit ', sel));
   }).catch(() => {});
   const ua = navigator.userAgent, android = /android/i.test(ua), fremd = android && /SamsungBrowser|OPR\/|Opera|Vivaldi|Firefox|DuckDuckGo|EdgA|Brave|MiuiBrowser|UCBrowser/i.test(ua);
   if (!standalone) install.replaceChildren(
     installAngebot ? h('p', {}, h('button', { class: 'btn small', onclick: async () => { installAngebot.prompt(); installAngebot = null; install.replaceChildren(); } }, 'Als App installieren')) : '',
-    fremd ? h('div', { class: 'msg info' }, 'Bitte öffne das Portal zum Installieren in Google Chrome. Andere Android-Browser legen teils eine App an, die Google Play Protect als „unsicher“ blockiert.') : '',
+    fremd ? h('div', { class: 'msg info' }, 'Bitte öffnen Sie das Portal zum Installieren in Google Chrome. Andere Android-Browser legen teils eine App an, die Google Play Protect als „unsicher“ blockiert.') : '',
     h('p', { class: 'small muted' }, ios ? 'iPhone: in Safari auf das Teilen-Symbol tippen, dann „Zum Home-Bildschirm“ und „Hinzufügen“.'
       : android ? 'Android: in Google Chrome das Menü ⋮ öffnen, dann „App installieren“ (oder „Zum Startbildschirm hinzufügen“) wählen. Die App ist immer auf dem neuesten Stand, Updates brauchen nichts zu tun.'
         : 'Am Rechner: in Chrome oder Edge in der Adressleiste auf das Installieren-Symbol klicken.'));
   return h('div', { class: 'card' }, h('h2', {}, 'App & Benachrichtigungen'),
-    h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfährst du sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, tagZeile, install);
+    h('p', { class: 'small muted' }, 'Das Portal lässt sich wie eine App aufs Handy legen. Mit Benachrichtigungen erfahren Sie sofort, wenn etwas Wichtiges passiert. Sie enthalten keine Namen oder Inhalte, nur den Anlass.'), m, box, anlass, tagZeile, install);
 }
 
 const LEER_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><path d="M10 28h14l3 6h10l3-6h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".35"/><circle cx="48" cy="16" r="7" fill="#045268" opacity=".9"/><path d="M45 16l2 2 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -537,7 +537,7 @@ export function anpassenKnopf(liste, standard = []) {
   const knopf = h('button', { class: 'btn sec small', onclick: async () => {
     if (panel.style.display === 'block') { panel.style.display = 'none'; return; }
     const a = await ladeAnsicht(), aus = ausgeblendetSet(a, standard);
-    panel.replaceChildren(h('h3', {}, 'Welche Karten möchtest du sehen?'),
+    panel.replaceChildren(h('h3', {}, 'Welche Karten möchten Sie sehen?'),
       ...liste.map(([id, name]) => h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px;margin:6px 0' },
         h('input', { type: 'checkbox', checked: !aus.has(id), style: 'width:auto', onchange: (e) => { e.target.checked ? aus.delete(id) : aus.add(id); } }), name)),
       h('p', {}, h('button', { class: 'btn small', onclick: async () => { await api('/api/me/ansicht', { method: 'PUT', body: { ausgeblendet: [...aus] } }); location.reload(); } }, 'Speichern')));
@@ -576,7 +576,7 @@ export function sucheKnopf(befehle = []) {
   let overlay = null;
   const oeffnen = (nurNeu = false) => {
     if (overlay || document.querySelector('.suchoverlay')) return;
-    const eingabe = h('input', { placeholder: nurNeu ? 'Was möchtest du anlegen?' : 'Suchen oder Aktion eingeben …', autofocus: true, 'aria-label': 'Suche und Aktionen' }), ergebnis = h('div', { class: 'suchtreffer' });
+    const eingabe = h('input', { placeholder: nurNeu ? 'Was möchten Sie anlegen?' : 'Suchen oder Aktion eingeben …', autofocus: true, 'aria-label': 'Suche und Aktionen' }), ergebnis = h('div', { class: 'suchtreffer' });
     let timer = null, treffer = [], pos = -1;
     const schliessen = () => { overlay.remove(); overlay = null; };
     const markieren = () => treffer.forEach((a, i) => a.classList.toggle('auswahl', i === pos));
@@ -589,7 +589,7 @@ export function sucheKnopf(befehle = []) {
     const suchen = async () => {
       const q = eingabe.value.trim();
       treffer = []; pos = -1;
-      if (nurNeu || q.length < 2) { ergebnis.replaceChildren(gruppe(nurNeu ? 'Neu anlegen' : 'Aktionen', passend(q)), nurNeu ? '' : gruppe('Zuletzt geöffnet', zuletztGeoeffnet().map(z => ({ titel: z.titel, text: z.link.slice(1).split('/')[0], link: z.link }))), nurNeu ? '' : h('p', { class: 'muted small', style: 'padding:10px' }, 'Tippe mindestens 2 Zeichen, um Kunden, Leads, Rechnungen und mehr zu suchen.')); return; }
+      if (nurNeu || q.length < 2) { ergebnis.replaceChildren(gruppe(nurNeu ? 'Neu anlegen' : 'Aktionen', passend(q)), nurNeu ? '' : gruppe('Zuletzt geöffnet', zuletztGeoeffnet().map(z => ({ titel: z.titel, text: z.link.slice(1).split('/')[0], link: z.link }))), nurNeu ? '' : h('p', { class: 'muted small', style: 'padding:10px' }, 'Tippen Sie mindestens 2 Zeichen, um Kunden, Leads, Rechnungen und mehr zu suchen.')); return; }
       try {
         const d = await api('/api/admin/suche?q=' + encodeURIComponent(q));
         if (eingabe.value.trim() !== q) return;

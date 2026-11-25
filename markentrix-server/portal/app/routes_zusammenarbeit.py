@@ -201,7 +201,7 @@ def k_bewerten(tid: str, data: BewertungIn, user: dict = Depends(require_kunde))
             if not t:
                 raise nicht_gefunden()
             if t["status"] != "erledigt":
-                raise HTTPException(400, "Bewerten kannst du, sobald die Anfrage erledigt ist.")
+                raise HTTPException(400, "Bewerten können Sie, sobald die Anfrage erledigt ist.")
             try:
                 cur.execute("INSERT INTO zufriedenheit (kunden_id, ticket_id, art, punkte, kommentar, benutzer_id) VALUES (%s,%s,'ticket',%s,%s,%s)",
                             (kid, tid, data.punkte, (data.kommentar or "").strip() or None, user["id"]))
@@ -270,7 +270,7 @@ def k_unterlage_weg(fid: str, user: dict = Depends(require_kunde)):
         with tx("kunde", user["kunden_id"]) as cur:
             cur.execute("DELETE FROM dateien WHERE id=%s AND bereich='dokument' AND von='kunde' RETURNING id", (fid,))
             if not cur.fetchone():
-                raise HTTPException(404, "Nicht gefunden. Dateien vom Markentrix-Team kannst du nicht löschen.")
+                raise HTTPException(404, "Nicht gefunden. Dateien vom Markentrix-Team können Sie nicht löschen.")
             audit(cur, user, "unterlage_geloescht", user["kunden_id"])
     except errors.InvalidTextRepresentation:
         raise nicht_gefunden()

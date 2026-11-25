@@ -28,5 +28,5 @@ def klartext(wochen: list, quellen: dict, wochentage: list, trichter: dict) -> l
         s.append(f"Am häufigsten melden sich Kundinnen und Kunden am {WOCHENTAG[i]} ({wochentage[i]} von {sum(wochentage)}).")
     if trichter["anfragen"]:
         b = prozent(trichter["beantwortet"], trichter["anfragen"])
-        s.append(f"{b} % der Anfragen sind beantwortet oder erledigt." + (" Offene Anfragen findest du unter „Heute“." if b is not None and b < 90 else ""))
+        s.append(f"{b} % der Anfragen sind beantwortet oder erledigt." + (" Offene Anfragen finden Sie unter „Heute“." if b is not None and b < 90 else ""))
     return s

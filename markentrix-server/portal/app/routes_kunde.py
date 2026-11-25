@@ -76,7 +76,7 @@ def _web_erreichbar(domain: str) -> dict:
     return erg
 
 
-T_STATUS_TXT = {"offen": "Eingegangen", "in_arbeit": "In Arbeit", "wartet_auf_kunde": "Wartet auf dich", "erledigt": "Erledigt"}
+T_STATUS_TXT = {"offen": "Eingegangen", "in_arbeit": "In Arbeit", "wartet_auf_kunde": "Wartet auf Sie", "erledigt": "Erledigt"}
 
 
 @router.get("/status")
@@ -149,17 +149,17 @@ def chat_laden(user: dict = Depends(require_kunde)):
 
 def agent_antwort(kunde: dict, text: str, verlauf: list) -> str:
     if not config.CHAT_WEBHOOK_URL:
-        return ("Der Agent ist für dein Konto noch nicht verbunden. Deine Nachricht ist gespeichert, "
-                "das Markentrix-Team sieht sie und meldet sich bei dir.")
+        return ("Der Agent ist für Ihr Konto noch nicht verbunden. Ihre Nachricht ist gespeichert, "
+                "das Markentrix-Team sieht sie und meldet sich bei Ihnen.")
     body = json.dumps({"kundennummer": kunde["kundennummer"], "kunden_id": str(kunde["id"]), "text": text, "verlauf": verlauf}).encode()
     req = urllib.request.Request(config.CHAT_WEBHOOK_URL, data=body, method="POST",
                                  headers={"Content-Type": "application/json", "X-Webhook-Secret": config.CHAT_WEBHOOK_SECRET})
     try:
         with urllib.request.urlopen(req, timeout=25) as r:
             antwort = json.loads(r.read().decode()).get("antwort", "")
-        return antwort[:4000] or "Dazu habe ich gerade keine Antwort. Das Team schaut sich deine Nachricht an."
+        return antwort[:4000] or "Dazu habe ich gerade keine Antwort. Das Team schaut sich Ihre Nachricht an."
     except Exception:
-        return "Der Agent ist gerade nicht erreichbar. Deine Nachricht ist gespeichert, das Team meldet sich bei dir."
+        return "Der Agent ist gerade nicht erreichbar. Ihre Nachricht ist gespeichert, das Team meldet sich bei Ihnen."
 
 
 def ki_antwort(kunde: dict, text: str, verlauf: list, cfg: dict, ctx: dict) -> tuple[str, int, int]:
@@ -194,9 +194,9 @@ def chat_senden(data: ChatIn, user: dict = Depends(require_kunde)):
     elif cfg.get("api_key"):
         try:
             antwort, ein, aus = ki_antwort(kunde, text, verlauf, cfg, {"module": module, "anfragen": anfragen, "termine": termine})
-            antwort = antwort or "Dazu habe ich gerade keine Antwort. Das Markentrix-Team schaut sich deine Nachricht an."
+            antwort = antwort or "Dazu habe ich gerade keine Antwort. Das Markentrix-Team schaut sich Ihre Nachricht an."
         except Exception:
-            antwort, ein, aus = "Der Assistent ist gerade nicht erreichbar. Deine Nachricht ist gespeichert, das Team meldet sich bei dir.", 0, 0
+            antwort, ein, aus = "Der Assistent ist gerade nicht erreichbar. Ihre Nachricht ist gespeichert, das Team meldet sich bei Ihnen.", 0, 0
     else:
         antwort, ein, aus = agent_antwort(kunde, text, verlauf), 0, 0     # Webhook oder Platzhalter
     with tx("kunde", kid) as cur:
@@ -432,7 +432,7 @@ def wochenangebot_hochladen(datei: UploadFile = File(...), gueltig_von: str | No
         uid = cur.fetchone()["id"]
         status, fehler = "hochgeladen", None
         if not web:
-            fehler = "Noch keine Website mit deinem Konto verknüpft. Das Team hat deine Datei und veröffentlicht sie nach der Verknüpfung."
+            fehler = "Noch keine Website mit Ihrem Konto verknüpft. Das Team hat Ihre Datei und veröffentlicht sie nach der Verknüpfung."
         else:
             try:
                 publish.veroeffentlichen(web["domain"], pfad, typ, von, bis, web["sprachen"], inhalte)

@@ -638,7 +638,7 @@ def require_termine(request: Request, user: dict = Depends(current_user)) -> dic
     if user["rolle"] != "kunde" or not user["kunden_id"]:
         raise HTTPException(403, "Nur für Kunden.")
     if user["kunden_rolle"] == "nur_lesen" and request.method not in ("GET", "HEAD"):
-        raise HTTPException(403, "Dein Zugang ist nur zum Ansehen freigegeben.")
+        raise HTTPException(403, "Ihr Zugang ist nur zum Ansehen freigegeben.")
     return user
 
 
@@ -826,7 +826,7 @@ class VorschauIn(BaseModel):
 
 @kunde.post("/mail/vorschau")
 def k_mail_vorschau(data: VorschauIn, user: dict = Depends(require_inhaber)):
-    """So sieht eine Mail an deine Kunden aus (mit den Werten aus dem Formular, auch ungespeichert). Es wird nichts verschickt."""
+    """So sieht eine Mail an Ihre Kunden aus (mit den Werten aus dem Formular, auch ungespeichert). Es wird nichts verschickt."""
     kid = user["kunden_id"]
     rate_limit("mailvorschau:" + str(kid), 60, 600)
     ueber = {"signatur": "\n".join(x.rstrip() for x in data.signatur.strip().splitlines()) or None, "bewertung": data.bewertung,
@@ -952,9 +952,9 @@ def k_paypal(data: PayPalIn, user: dict = Depends(require_inhaber)):
     if cid and not re.match(r"^[A-Za-z0-9_-]{20,140}$", cid):
         raise HTTPException(400, "Die Client-ID sieht ungültig aus. Sie ist eine lange Zeichenfolge, die oft mit „A“ beginnt.")
     if link and not re.match(r"^https://(www\.)?(paypal\.me|paypal\.com/paypalme)/[A-Za-z0-9._/-]{2,80}$", link):
-        raise HTTPException(400, "Der PayPal.Me-Link muss so aussehen: https://paypal.me/deinname")
+        raise HTTPException(400, "Der PayPal.Me-Link muss so aussehen: https://paypal.me/ihrname")
     if data.aktiv and not (cid or link):
-        raise HTTPException(400, "Bitte trage die Client-ID oder deinen PayPal.Me-Link ein.")
+        raise HTTPException(400, "Bitte tragen Sie die Client-ID oder Ihren PayPal.Me-Link ein.")
     with tx("system") as cur:
         sd.zeile(cur, user["kunden_id"])
         cur.execute("UPDATE website_dienste SET pp_aktiv=%s, pp_client_id=%s, pp_waehrung=%s, pp_me_link=%s, geaendert_am=now() WHERE kunden_id=%s",
@@ -1274,7 +1274,7 @@ def k_gutschein_link(gid: str, data: ZahlungslinkIn, user: dict = Depends(requir
         z = sd.zeile(cur, kid)
         me = (z["pp_me_link"] or "").strip().rstrip("/")
         if not (z["pp_aktiv"] and me.startswith("https://")):
-            raise HTTPException(409, "Bitte zuerst oben bei PayPal deinen PayPal.Me-Link eintragen und PayPal einschalten.")
+            raise HTTPException(409, "Bitte zuerst oben bei PayPal Ihren PayPal.Me-Link eintragen und PayPal einschalten.")
         g = _gutschein_holen(cur, gid, kid)
         if data.betrag.strip():
             v = sd.betrag_lesen(data.betrag)
@@ -1332,7 +1332,7 @@ def k_gutschein_code(gid: str, data: GutscheinCodeIn, user: dict = Depends(requi
         g = _gutschein_holen(cur, gid, kid)
         cur.execute("SELECT 1 FROM website_gutscheine WHERE kunden_id=%s AND id<>%s AND lower(code)=lower(%s) AND status='gesendet'", (kid, gid, code))
         if cur.fetchone():
-            raise HTTPException(409, "Diesen Code hast du schon an jemand anderen gesendet. Bitte einen neuen Code wählen.")
+            raise HTTPException(409, "Diesen Code haben Sie schon an jemand anderen gesendet. Bitte einen neuen Code wählen.")
         cur.execute("SELECT firma FROM kunden WHERE id=%s", (kid,))
         firma = cur.fetchone()["firma"]
         cur.execute("SELECT gutschein_monate FROM shop_einstellungen WHERE kunden_id=%s", (kid,))
@@ -2195,15 +2195,15 @@ def k_domains(user: dict = Depends(require_inhaber)):
     for z in zeilen:
         erg = z["ergebnis"] or {}
         if z["seite_ok"]:
-            stand, titel, text = "live", "Deine Website ist online", "Deine Website ist unter dieser Adresse erreichbar und wird laufend überwacht."
+            stand, titel, text = "live", "Ihre Website ist online", "Ihre Website ist unter dieser Adresse erreichbar und wird laufend überwacht."
         elif z["dns_ok"] is None:
-            stand, titel, text = "neu", "Wird gerade eingerichtet", "Wir richten deine Website ein. Sobald sie veröffentlicht ist, siehst du hier den Stand."
+            stand, titel, text = "neu", "Wird gerade eingerichtet", "Wir richten Ihre Website ein. Sobald sie veröffentlicht ist, sehen Sie hier den Stand."
         elif not z["dns_ok"]:
-            stand, titel, text = "wartet_dns", "Wartet auf die Umstellung deiner Domain", "Deine Website ist fertig. Damit sie unter deiner Adresse erscheint, muss die Domain noch auf unseren Server zeigen. Die nötigen Schritte stehen unten, wir helfen gern dabei."
+            stand, titel, text = "wartet_dns", "Wartet auf die Umstellung Ihrer Domain", "Ihre Website ist fertig. Damit sie unter Ihrer Adresse erscheint, muss die Domain noch auf unseren Server zeigen. Die nötigen Schritte stehen unten, wir helfen gern dabei."
         elif z["fehler"] and "Zertifikat" in z["fehler"]:
             stand, titel, text = "zertifikat", "Sicheres HTTPS wird eingerichtet", "Die Domain zeigt auf unseren Server. Das Sicherheitszertifikat (HTTPS) wird gerade ausgestellt. Das dauert meist wenige Minuten."
         else:
-            stand, titel, text = "gestoert", "Wir prüfen deine Website", "Die Website ist im Moment nicht erreichbar. Wir sind informiert und kümmern uns darum."
+            stand, titel, text = "gestoert", "Wir prüfen Ihre Website", "Die Website ist im Moment nicht erreichbar. Wir sind informiert und kümmern uns darum."
         out.append({"domain": z["domain"], "stand": stand, "titel": titel, "text": text, "dns_am": z["dns_am"], "seit": z["seit"] if stand == "live" else None,
                     "schritte": [x for x in (erg.get("schritte") or []) if not x.startswith("Danach")] if stand == "wartet_dns" else [],
                     "dns_anbieter": erg.get("dns_anbieter") if stand == "wartet_dns" else None,

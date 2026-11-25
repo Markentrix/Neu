@@ -84,7 +84,7 @@ def aufgabe_loeschen(aid: str, user: dict = Depends(require_admin)):
         with tx("admin") as cur:
             cur.execute("DELETE FROM aufgaben WHERE id=%s AND quelle='manuell' RETURNING id", (aid,))
             if not cur.fetchone():
-                raise HTTPException(404, "Nicht gefunden. Automatische Aufgaben kannst du nur als erledigt markieren.")
+                raise HTTPException(404, "Nicht gefunden. Automatische Aufgaben können Sie nur als erledigt markieren.")
     except errors.InvalidTextRepresentation:
         raise nicht_gefunden()
     return {"ok": True}
@@ -190,10 +190,10 @@ def k_modul(data: ModulAnfrageIn, bg: BackgroundTasks, user: dict = Depends(requ
             raise HTTPException(404, "Dieses Modul gibt es nicht.")
         cur.execute("SELECT 1 FROM kunden_module WHERE kunden_id=%s AND modul_code=%s AND aktiv", (kid, data.modul_code))
         if cur.fetchone():
-            raise HTTPException(400, "Dieses Modul ist bei dir schon aktiv.")
+            raise HTTPException(400, "Dieses Modul ist bei Ihnen schon aktiv.")
         cur.execute("SELECT id FROM tickets WHERE modul_code=%s AND status <> 'erledigt' LIMIT 1", (data.modul_code,))
         if cur.fetchone():
-            raise HTTPException(400, "Zu diesem Modul gibt es schon eine offene Anfrage. Wir melden uns bei dir.")
+            raise HTTPException(400, "Zu diesem Modul gibt es schon eine offene Anfrage. Wir melden uns bei Ihnen.")
         text = (data.text or "").strip() or f"Ich interessiere mich für das Modul \"{m['name']}\". Bitte meldet euch bei mir mit Details und Preis."
         t = ticket_anlegen(cur, kid, user, f"Zusatzmodul anfragen: {m['name']}", "modul", text, modul=data.modul_code)
         cur.execute("SELECT firma, kundennummer FROM kunden WHERE id=%s", (kid,))

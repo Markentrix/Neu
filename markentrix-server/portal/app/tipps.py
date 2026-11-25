@@ -1,4 +1,4 @@
-"""Hinweise auf passende weitere Pakete im Kundenportal („Ein Tipp für dich“). Ab Werk aus (Admin → Pakete → Hinweise im Kundenportal).
+"""Hinweise auf passende weitere Pakete im Kundenportal („Ein Tipp für Sie“). Ab Werk aus (Admin → Pakete → Hinweise im Kundenportal).
 Die Hinweise beruhen auf Zahlen aus dem eigenen Portal des Kunden, nennen keine Preise und versprechen keine Ergebnisse. Der Kunde kann sie ablehnen (90 Tage Ruhe)
 oder sich die Pakete ansehen; gebucht wird nur über den bekannten Ablauf mit Bestätigung durch Markentrix."""
 from fastapi import APIRouter, Depends, HTTPException
@@ -42,7 +42,7 @@ def kandidaten(cur, kid) -> list[dict]:
                     "text": f"Im letzten Monat wurden {erledigt} Termine erledigt. Automatische Bewertungsanfragen nach dem Termin machen es für zufriedene Kunden leicht, eine Bewertung zu schreiben."})
     if kontakte >= 50 and "NEWSLETTER" not in habe:
         out.append({"code": "NEWSLETTER", "titel": "In Kontakt bleiben",
-                    "text": f"Du hast {kontakte} Kontakte gespeichert. Mit einem Newsletter erinnerst du Stammkunden regelmäßig an dich."})
+                    "text": f"Sie haben {kontakte} Kontakte gespeichert. Mit einem Newsletter erinnern Sie Stammkunden regelmäßig an sich."})
     return out
 
 

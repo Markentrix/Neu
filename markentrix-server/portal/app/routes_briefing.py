@@ -16,10 +16,10 @@ router = APIRouter(prefix="/api/admin")
 
 # (Abschnitt, [(Schlüssel, Frage, Art, Pflicht)])   Art: text | lang | wahl:a|b|c
 BRIEFING = [
-    ("Über dein Unternehmen", [
-        ("beschreibung", "Was macht dein Unternehmen? Beschreibe es in 2 bis 3 Sätzen.", "lang", True),
-        ("zielgruppe", "Wer sind deine Kunden?", "lang", False),
-        ("besonderheit", "Was macht dich besonders, warum kommen Kunden zu dir?", "lang", False),
+    ("Über Ihr Unternehmen", [
+        ("beschreibung", "Was macht Ihr Unternehmen? Beschreiben Sie es in 2 bis 3 Sätzen.", "lang", True),
+        ("zielgruppe", "Wer sind Ihre Kunden?", "lang", False),
+        ("besonderheit", "Was macht Sie besonders, warum kommen Kunden zu Ihnen?", "lang", False),
     ]),
     ("Öffnungszeiten und Kontakt", [
         ("oeffnungszeiten", "Öffnungszeiten (so, wie sie auf der Website stehen sollen)", "lang", True),
@@ -27,19 +27,19 @@ BRIEFING = [
         ("adresse_oeffentlich", "Adresse für die Website (falls abweichend von der Rechnungsanschrift)", "text", False),
     ]),
     ("Auftritt", [
-        ("sprachen", "In welchen Sprachen soll deine Website erscheinen?", "text", False),
-        ("farben", "Farben, Logo und Schrift: Was gibt es schon, was wünschst du dir?", "lang", False),
-        ("vorbilder", "Websites, die dir gefallen (Links)", "lang", False),
-        ("ton", "Wie sollen deine Texte klingen?", "wahl:förmlich|freundlich|locker", False),
+        ("sprachen", "In welchen Sprachen soll Ihre Website erscheinen?", "text", False),
+        ("farben", "Farben, Logo und Schrift: Was gibt es schon, was wünschen Sie sich?", "lang", False),
+        ("vorbilder", "Websites, die Ihnen gefallen (Links)", "lang", False),
+        ("ton", "Wie sollen Ihre Texte klingen?", "wahl:förmlich|freundlich|locker", False),
     ]),
     ("Inhalte", [
-        ("leistungen", "Deine wichtigsten Leistungen oder Produkte", "lang", True),
-        ("aktionen", "Hast du regelmäßig Angebote oder Aktionen (z. B. Wochenangebote)?", "wahl:ja|nein|manchmal", False),
-        ("social", "Links zu deinen Social-Media-Seiten", "lang", False),
-        ("google_profil", "Link zu deinem Google-Unternehmensprofil (falls vorhanden)", "text", False),
+        ("leistungen", "Ihre wichtigsten Leistungen oder Produkte", "lang", True),
+        ("aktionen", "Haben Sie regelmäßig Angebote oder Aktionen (z. B. Wochenangebote)?", "wahl:ja|nein|manchmal", False),
+        ("social", "Links zu Ihren Social-Media-Seiten", "lang", False),
+        ("google_profil", "Link zu Ihrem Google-Unternehmensprofil (falls vorhanden)", "text", False),
     ]),
     ("Ziele", [
-        ("ziele", "Was soll die Zusammenarbeit mit Markentrix für dich bringen?", "lang", False),
+        ("ziele", "Was soll die Zusammenarbeit mit Markentrix für Sie bringen?", "lang", False),
         ("wuensche", "Sonstige Wünsche oder Hinweise", "lang", False),
     ]),
 ]

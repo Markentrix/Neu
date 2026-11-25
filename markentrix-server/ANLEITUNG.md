@@ -795,3 +795,6 @@ Erfassen (auch per Mail/Brief), Frist ein Monat mit Aufgabe und Erinnerung 7 Tag
 - Portal: Website-Dienste → Gutscheine zeigt Gültigkeit und Restguthaben, „Code erzeugen“ liefert einen nicht erratbaren Code (XXXX-XXXX-XXXX). Handgeschriebene kurze Codes bleiben möglich, sind aber leichter zu erraten.
 - Die tägliche Aufräumregel löscht gültige Gutscheine mit Restguthaben nicht mehr nach 400 Tagen.
 - Tests: `t125` (159 Prüfungen, mit Gutschein-Einlösung).
+
+## Anrede im Kundenportal: Sie
+Das Kundenportal (`/app`, `portal/static/js/kunde/`, gemeinsame Texte in `common.js`, `hilfe.js`, Kunden-Anleitung) und alle Texte, die Kunden aus dem Portal sehen (Fehlermeldungen, Briefing, Website-Dienste, Tipps, Wochenrückblick-Push), sprechen mit **Sie**. Admin und Vertrieb bleiben bei **du**. Der Portal-Assistent (`ki.py`) antwortet ebenfalls mit Sie. Noch nicht umgestellt: einzelne Kunden-Mails in `mailer.py`/`routes_betriebplus.py` (z. B. Kündigungsbestätigung); bei Gelegenheit prüfen.

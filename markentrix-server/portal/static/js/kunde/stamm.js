@@ -21,8 +21,8 @@ V.stamm = async () => {
         h('button', { class: 'btn', onclick: () => manuellDialog({ name: p.name, telefon: p.telefon, email: p.email }, zeige) }, 'Termin eintragen')));
   };
   return h('div', { class: 'stack' }, h('div', { class: 'top' }, h('h1', {}, 'Stammkunden')),
-    h('p', { class: 'small muted' }, 'Alle Personen, die bei dir gebucht haben, aus den Terminen zusammengestellt (gleiche E-Mail oder Telefonnummer = dieselbe Person). Die Notizen siehst nur du und dein Team.'),
+    h('p', { class: 'small muted' }, 'Alle Personen, die bei Ihnen gebucht haben, aus den Terminen zusammengestellt (gleiche E-Mail oder Telefonnummer = dieselbe Person). Die Notizen sehen nur Sie und Ihr Team.'),
     m, h('div', { class: 'row', style: 'gap:8px' }, suche, h('button', { class: 'btn', onclick: () => { stand.q = suche.value.trim(); zeige(); } }, 'Suchen')),
-    r.personen.length ? r.personen.map(karte) : h('p', { class: 'muted' }, stand.q ? 'Niemand gefunden.' : 'Noch keine Buchungen. Sobald jemand bei dir bucht oder du einen Termin einträgst, erscheint die Person hier.'),
-    r.gesamt > r.personen.length ? h('p', { class: 'small muted' }, 'Es werden die ersten ' + r.personen.length + ' von ' + r.gesamt + ' angezeigt. Mit der Suche findest du alle.') : '');
+    r.personen.length ? r.personen.map(karte) : h('p', { class: 'muted' }, stand.q ? 'Niemand gefunden.' : 'Noch keine Buchungen. Sobald jemand bei Ihnen bucht oder Sie einen Termin eintragen, erscheint die Person hier.'),
+    r.gesamt > r.personen.length ? h('p', { class: 'small muted' }, 'Es werden die ersten ' + r.personen.length + ' von ' + r.gesamt + ' angezeigt. Mit der Suche finden Sie alle.') : '');
 };

@@ -21,10 +21,10 @@ V.dienste = async () => {
   const neu = () => zeige();
   return abschnitte(h('div', { class: 'stack' },
     h('div', { class: 'top' }, h('h1', {}, 'Website-Dienste')),
-    h('div', { class: 'card' }, h('p', {}, 'Hier trägst du ein, was deine Website braucht: wohin Anfragen gehen, welcher Kalender gilt, dein PayPal und deine Google-Bewertungen. Wir bauen es in deine Website ein und die Dienste laufen über unseren Server.'),
-      h('p', { class: 'small muted' }, 'Deine Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Du kannst sie jederzeit ersetzen oder löschen. Deine Website selbst bekommt nie ein Passwort.'),
-      d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für dich ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald deine Seite online geht.')),
-    startKarte(d.start), await domainKarte(), mailKarte(d, neu), fotoKarte(d), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d)), SCHNELL, /^So startet deine Website/);
+    h('div', { class: 'card' }, h('p', {}, 'Hier tragen Sie ein, was Ihre Website braucht: wohin Anfragen gehen, welcher Kalender gilt, Ihr PayPal und Ihre Google-Bewertungen. Wir bauen es in Ihre Website ein und die Dienste laufen über unseren Server.'),
+      h('p', { class: 'small muted' }, 'Ihre Zugangsdaten werden verschlüsselt gespeichert. Sie sind danach nirgends mehr lesbar, auch nicht für uns. Sie können sie jederzeit ersetzen oder löschen. Ihre Website selbst bekommt nie ein Passwort.'),
+      d.domains.length ? h('p', { class: 'small' }, 'Aktiv für: ', d.domains.join(', ')) : h('p', { class: 'msg info' }, 'Für Sie ist noch keine Website-Adresse hinterlegt. Wir tragen sie ein, sobald Ihre Seite online geht.')),
+    startKarte(d.start), await domainKarte(), mailKarte(d, neu), fotoKarte(d), await zustellKarte(), kalenderKarte(d, neu), await teamKarte(d, neu), await buchungenKarte(d, neu), uebersichtKarte(d), await gutscheineKarte(neu), await sperrtageKarte(d), paypalKarte(d, neu), bewertungKarte(d, neu), analyticsKarte(d), await statistikKarte(d)), SCHNELL, /^So startet Ihre Website/);
 };
 
 const SCHNELL = [['🎟️', 'Gutscheine', 'Gutschein-Anfragen'], ['📅', 'Buchungen', 'Buchungen über die Website'], ['🏖️', 'Urlaub & Sperrtage', 'Urlaub und Sperrtage'], ['✂️', 'Leistungen & Team', 'Leistungen und Mitarbeiter'], ['✉️', 'Kontaktformular', 'Kontaktformular: Anfragen per E-Mail'], ['💳', 'PayPal', 'PayPal']];
@@ -40,7 +40,7 @@ async function domainKarte() {
       h('p', {}, h('span', { class: 'pill ' + (farbe[x.stand] || 'warn') }, x.titel), ' ', h('b', {}, x.domain)),
       h('p', { class: 'small' }, x.text),
       x.stand === 'wartet_dns' && x.schritte.length ? h('div', {}, h('p', { class: 'small' }, h('b', {}, 'Das ist zu tun' + (x.dns_anbieter ? ' (Verwaltung der Domain bei ' + x.dns_anbieter + ')' : '') + ':')), h('ol', { class: 'small' }, ...x.schritte.map(t => h('li', {}, t))),
-        h('p', { class: 'small muted' }, 'Das ändert nur, wohin die Adresse zeigt. Deine E-Mails und andere Einträge bleiben unverändert. Bei Fragen helfen wir gern.')) : '',
+        h('p', { class: 'small muted' }, 'Das ändert nur, wohin die Adresse zeigt. Ihre E-Mails und andere Einträge bleiben unverändert. Bei Fragen helfen wir gern.')) : '',
       x.stand === 'live' && x.seit ? h('p', { class: 'small muted' }, 'Online seit ' + datum(x.seit)) : '')));
 }
 
@@ -48,12 +48,12 @@ async function domainKarte() {
 function mailKarte(d, neu) {
   const m = h('div'), mm = h('div');
   const an = schalter(d.mail.aktiv, 'Kontaktformular einschalten');
-  const emp = h('input', { value: d.mail.empfaenger, placeholder: 'info@deinefirma.de, zweite@…', maxlength: 400 });
+  const emp = h('input', { value: d.mail.empfaenger, placeholder: 'info@ihrefirma.de, zweite@…', maxlength: 400 });
   const betreff = h('input', { value: d.mail.betreff, placeholder: 'Neue Anfrage über die Website', maxlength: 120 });
-  const name = h('input', { value: d.mail.name, placeholder: 'Absendername, z. B. deine Firma', maxlength: 80 });
+  const name = h('input', { value: d.mail.name, placeholder: 'Absendername, z. B. Ihre Firma', maxlength: 80 });
   const sig = h('textarea', { rows: 6, maxlength: 600, placeholder: 'Leer = „Mit freundlichen Grüßen“ und der Firmenname', 'aria-label': 'Signatur' }, d.mail.signatur || '');
-  const fb = h('input', { value: d.mail.facebook, placeholder: 'https://facebook.com/deinefirma', maxlength: 300, 'aria-label': 'Facebook-Link' });
-  const ig = h('input', { value: d.mail.instagram, placeholder: 'https://instagram.com/deinefirma', maxlength: 300, 'aria-label': 'Instagram-Link' });
+  const fb = h('input', { value: d.mail.facebook, placeholder: 'https://facebook.com/ihrefirma', maxlength: 300, 'aria-label': 'Facebook-Link' });
+  const ig = h('input', { value: d.mail.instagram, placeholder: 'https://instagram.com/ihrefirma', maxlength: 300, 'aria-label': 'Instagram-Link' });
   const hin = h('textarea', { rows: 3, maxlength: 600, placeholder: 'z. B. „Diese E-Mail enthält vertrauliche Informationen …“', 'aria-label': 'Hinweistext unter der Signatur' }, d.mail.hinweis || '');
   const speichern = async () => {
     try { await api('/api/kunde/website-dienste/mail', { method: 'PUT', body: { aktiv: an.c.checked, empfaenger: emp.value, betreff: betreff.value, name: name.value, signatur: sig.value, bewertung: false, facebook: fb.value, instagram: ig.value, hinweis: hin.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); }
@@ -70,20 +70,20 @@ function mailKarte(d, neu) {
   };
   const test = async (e) => {
     const b = e.target; b.disabled = true; melde(m, '');
-    try { const r = await api('/api/kunde/website-dienste/mail/test', { method: 'POST', body: { an: emp.value.split(/[,;\s]+/)[0] } }); melde(m, 'Testmail gesendet' + (r.ueber === 'eigen' ? ' (über dein Postfach).' : ' (über Markentrix).') + ' Schau in deinem Posteingang und im Spam-Ordner nach.', 'ok'); } catch (x) { melde(m, x.message); }
+    try { const r = await api('/api/kunde/website-dienste/mail/test', { method: 'POST', body: { an: emp.value.split(/[,;\s]+/)[0] } }); melde(m, 'Testmail gesendet' + (r.ueber === 'eigen' ? ' (über Ihr Postfach).' : ' (über Markentrix).') + ' Schau in Ihrem Posteingang und im Spam-Ordner nach.', 'ok'); } catch (x) { melde(m, x.message); }
     b.disabled = false;
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Kontaktformular: Anfragen per E-Mail'),
-    h('p', { class: 'small muted' }, 'Wer das Formular auf deiner Website ausfüllt, landet hier im Portal unter „Anfragen“ und bekommt zusätzlich per E-Mail bei dir an. Wenn du antwortest, geht die Antwort direkt an die Person.'),
+    h('p', { class: 'small muted' }, 'Wer das Formular auf Ihrer Website ausfüllt, landet hier im Portal unter „Anfragen“ und bekommt zusätzlich per E-Mail bei Ihnen an. Wenn Sie antworten, geht die Antwort direkt an die Person.'),
     m, an.el, h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Wohin sollen die Anfragen? *', emp, 'Bis zu 5 Adressen, mit Komma getrennt.'), feld('Betreff der E-Mail', betreff), feld('Absendername', name)),
-    h('div', { style: 'margin-top:8px' }, feld('Signatur unter Mails an deine Kunden', sig, 'Erscheint am Ende von Bestätigungen und Terminmails. Das Logo im Kopf der Mail kommt aus deinen Firmendaten (Logo bitte beim Team von Markentrix hinterlegen lassen).'),
+    h('div', { style: 'margin-top:8px' }, feld('Signatur unter Mails an Ihre Kunden', sig, 'Erscheint am Ende von Bestätigungen und Terminmails. Das Logo im Kopf der Mail kommt aus Ihren Firmendaten (Logo bitte beim Team von Markentrix hinterlegen lassen).'),
       h('button', { class: 'btn sec', type: 'button', onclick: () => { sig.value = d.mail.signatur_vorschlag || ''; } }, 'Vorschlag aus meinen Firmendaten einfügen'),
       h('p', { class: 'small muted' }, 'Aufbau: erste Zeile „Mit freundlichen Grüßen“, dann Firmenname (fett), darunter Adresse, Telefon, E-Mail, Web. Das Logo steht links neben dem Text.'),
       h('p', { class: 'small muted' }, 'Die Bitte um eine Google-Bewertung steht nicht in der Terminbestätigung. Sie geht separat nach dem Termin raus (siehe „Bewertungen anfragen“ weiter unten).'),
       h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Facebook (optional)', fb), feld('Instagram (optional)', ig)), feld('Hinweistext ganz unten (optional)', hin)),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Testmail senden')),
     h('div', { class: 'row', style: 'margin-top:8px;gap:8px;flex-wrap:wrap' }, h('button', { class: 'btn sec', type: 'button', onclick: () => vorschau('bestaetigung') }, 'Vorschau: Terminbestätigung'), h('button', { class: 'btn sec', type: 'button', onclick: () => vorschau('eingang') }, 'Vorschau: Eingangsbestätigung')),
-    h('p', { class: 'small muted' }, 'Die Vorschau zeigt auch, was du gerade eingetippt, aber noch nicht gespeichert hast. Es wird nichts verschickt.'), vorschauBox,
+    h('p', { class: 'small muted' }, 'Die Vorschau zeigt auch, was Sie gerade eingetippt, aber noch nicht gespeichert haben. Es wird nichts verschickt.'), vorschauBox,
     statusZeile(d.status, 'kontakt', 'Anfragen'),
     smtpBereich(d, mm, neu), mm);
 }
@@ -91,7 +91,7 @@ function mailKarte(d, neu) {
 // ---------------------------------------------------------------- Start-Checkliste
 function startKarte(s) {
   if (!s || s.fertig) return '';
-  return h('div', { class: 'card' }, h('h2', {}, 'So startet deine Website richtig (' + s.erledigt + ' von ' + s.gesamt + ')'),
+  return h('div', { class: 'card' }, h('h2', {}, 'So startet Ihre Website richtig (' + s.erledigt + ' von ' + s.gesamt + ')'),
     h('p', { class: 'small muted' }, 'Diese Punkte prüfen wir laufend. Sobald alles erledigt ist, verschwindet diese Karte.'),
     h('p', {}, h('a', { class: 'btn', href: '#einrichten' }, 'Schritt für Schritt einrichten')),
     s.punkte.map(p => h('div', { style: 'margin:6px 0' }, h('span', { class: 'pill ' + (p.erledigt ? 'ok' : 'warn') }, p.erledigt ? 'erledigt' : 'offen'), ' ', h('b', {}, p.titel), p.erledigt ? '' : h('div', { class: 'small muted' }, p.hinweis))));
@@ -104,19 +104,19 @@ function fotoKarte(d) {
   const tage = h('input', { type: 'number', min: 7, max: 365, value: f.tage, style: 'width:90px', 'aria-label': 'Löschfrist in Tagen' });
   const sp = async () => { try { await api('/api/kunde/website-dienste/fotos', { method: 'PUT', body: { aktiv: an.c.checked, tage: Number(tage.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
   return h('div', { class: 'card' }, h('h2', {}, 'Fotos von Besuchern'),
-    h('p', { class: 'small muted' }, 'Besucher können bis zu 5 Fotos mitschicken, zum Beispiel vom Auto oder von den Haaren, damit du Aufwand und Preis besser einschätzen kannst. Du siehst sie bei „Anfragen“, bei „Termine“ und bei den Buchungen hier und im Anhang der E-Mail. Standortdaten und Kameradaten werden aus den Bildern entfernt.'),
-    h('p', { class: 'small muted' }, 'Die Fotos werden nach der Löschfrist automatisch gelöscht (Standard 90 Tage). Du kannst jedes Foto vorher selbst löschen. Der Besucher sieht den Hinweis zur Löschfrist direkt beim Hochladen. Nimm das Hochladen von Fotos bitte in deine Datenschutzerklärung auf.'),
+    h('p', { class: 'small muted' }, 'Besucher können bis zu 5 Fotos mitschicken, zum Beispiel vom Auto oder von den Haaren, damit Sie Aufwand und Preis besser einschätzen können. Sie sehen sie bei „Anfragen“, bei „Termine“ und bei den Buchungen hier und im Anhang der E-Mail. Standortdaten und Kameradaten werden aus den Bildern entfernt.'),
+    h('p', { class: 'small muted' }, 'Die Fotos werden nach der Löschfrist automatisch gelöscht (Standard 90 Tage). Sie können jedes Foto vorher selbst löschen. Der Besucher sieht den Hinweis zur Löschfrist direkt beim Hochladen. Nehmen Sie das Hochladen von Fotos bitte in Ihre Datenschutzerklärung auf.'),
     m, an.el, h('div', { class: 'row', style: 'margin-top:6px;gap:8px;align-items:center' }, h('span', {}, 'Löschen nach'), tage, h('span', {}, 'Tagen (7 bis 365)'), h('button', { class: 'btn', onclick: sp }, 'Speichern')),
     h('p', { class: 'small muted' }, 'Die Frist gilt für neue Fotos. Schon gespeicherte behalten ihr Löschdatum.'));
 }
 
 function smtpBereich(d, mm, neu) {
   const s = d.mail.smtp || {};
-  const absender = h('input', { type: 'email', value: s.absender || '', placeholder: 'info@deinefirma.de', maxlength: 200 });
-  const host = h('input', { value: s.host || '', placeholder: 'smtp.deinanbieter.de', maxlength: 253 });
+  const absender = h('input', { type: 'email', value: s.absender || '', placeholder: 'info@ihrefirma.de', maxlength: 200 });
+  const host = h('input', { value: s.host || '', placeholder: 'smtp.ihranbieter.de', maxlength: 253 });
   const port = h('input', { type: 'number', value: s.port || 587 });
   const sich = h('select', {}, [['starttls', 'STARTTLS (meist Port 587)'], ['ssl', 'SSL (meist Port 465)']].map(([v, t]) => h('option', { value: v, selected: (s.sicherung || 'starttls') === v }, t)));
-  const benutzer = h('input', { value: s.benutzer || '', placeholder: 'meist deine komplette Adresse', maxlength: 200, autocomplete: 'off' });
+  const benutzer = h('input', { value: s.benutzer || '', placeholder: 'meist Ihre komplette Adresse', maxlength: 200, autocomplete: 'off' });
   const pw = h('input', { type: 'password', placeholder: s.gesetzt ? 'leer lassen = unverändert' : 'Passwort oder App-Passwort', autocomplete: 'new-password', maxlength: 300 });
   const tipp = h('div', { class: 'msg info', style: 'display:none' });
   const vorschlag = async () => {
@@ -130,24 +130,24 @@ function smtpBereich(d, mm, neu) {
   };
   absender.addEventListener('change', vorschlag);
   const speichern = async (e) => {
-    const b = e.target; b.disabled = true; b.textContent = 'Prüfe Verbindung …'; melde(mm, '');
-    try { await api('/api/kunde/website-dienste/smtp', { method: 'PUT', body: { absender: absender.value, host: host.value, port: Number(port.value), sicherung: sich.value, benutzer: benutzer.value, passwort: pw.value } }); melde(mm, 'Verbindung geprüft und gespeichert. Ab jetzt versenden wir die Anfragen über dein Postfach.', 'ok'); setTimeout(neu, 1200); }
+    const b = e.target; b.disabled = true; b.textContent = 'Prüfen Sie Verbindung …'; melde(mm, '');
+    try { await api('/api/kunde/website-dienste/smtp', { method: 'PUT', body: { absender: absender.value, host: host.value, port: Number(port.value), sicherung: sich.value, benutzer: benutzer.value, passwort: pw.value } }); melde(mm, 'Verbindung geprüft und gespeichert. Ab jetzt versenden wir die Anfragen über Ihr Postfach.', 'ok'); setTimeout(neu, 1200); }
     catch (x) { melde(mm, x.message); b.disabled = false; b.textContent = 'Prüfen und speichern'; }
   };
   const weg = async () => { if (!confirm('Eigenes Postfach entfernen? Die Mails laufen dann wieder über Markentrix.')) return; try { await api('/api/kunde/website-dienste/smtp', { method: 'DELETE' }); neu(); } catch (x) { melde(mm, x.message); } };
-  return h('details', { class: 'hilfe', open: !!s.gesetzt, style: 'margin-top:12px' }, h('summary', {}, s.gesetzt ? 'Eigenes Postfach: eingerichtet (' + s.absender + ')' : 'Optional: Mails über dein eigenes Postfach senden (Gmail, GMX, IONOS …)'),
+  return h('details', { class: 'hilfe', open: !!s.gesetzt, style: 'margin-top:12px' }, h('summary', {}, s.gesetzt ? 'Eigenes Postfach: eingerichtet (' + s.absender + ')' : 'Optional: Mails über Ihr eigenes Postfach senden (Gmail, GMX, IONOS …)'),
     h('div', { style: 'margin-top:8px' },
-      h('p', { class: 'small muted' }, 'Ohne diese Einstellung verschicken wir die Anfragen über Markentrix. Das funktioniert sofort und zuverlässig. Wenn die Mails aus deinem eigenen Postfach kommen sollen (und in deinem „Gesendet“-Ordner stehen), trage es hier ein. Wir prüfen die Verbindung, bevor wir speichern. Klappt später etwas nicht, springen wir automatisch auf Markentrix zurück.'),
-      feld('Deine E-Mail-Adresse', absender, 'Wir füllen Server und Port passend zu deinem Anbieter aus.'), tipp,
+      h('p', { class: 'small muted' }, 'Ohne diese Einstellung verschicken wir die Anfragen über Markentrix. Das funktioniert sofort und zuverlässig. Wenn die Mails aus Ihrem eigenen Postfach kommen sollen (und in Ihrem „Gesendet“-Ordner stehen), tragen Sie es hier ein. Wir prüfen die Verbindung, bevor wir speichern. Klappt später etwas nicht, springen wir automatisch auf Markentrix zurück.'),
+      feld('Ihre E-Mail-Adresse', absender, 'Wir füllen Server und Port passend zu Ihrem Anbieter aus.'), tipp,
       h('div', { class: 'form2' }, feld('Server (SMTP)', host), feld('Port', port), feld('Verschlüsselung', sich), feld('Benutzername', benutzer), feld('Passwort', pw)),
       h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Prüfen und speichern'), s.gesetzt ? h('button', { class: 'btn sec', onclick: weg }, 'Entfernen') : ''),
       s.gesetzt && s.geprueft_am ? h('p', { class: 'small muted' }, 'Zuletzt geprüft: ' + datum(s.geprueft_am) + ' ' + ZEIT(s.geprueft_am)) : '',
       hilfe('Wo finde ich das Passwort? (Google, GMX, Telekom …)',
-        h('p', {}, h('b', {}, 'Google Mail: '), 'Google-Konto → Sicherheit → „Bestätigung in zwei Schritten“ einschalten → „App-Passwörter“ → neues erstellen. Das 16-stellige Passwort hier eintragen, nicht dein normales.'),
+        h('p', {}, h('b', {}, 'Google Mail: '), 'Google-Konto → Sicherheit → „Bestätigung in zwei Schritten“ einschalten → „App-Passwörter“ → neues erstellen. Das 16-stellige Passwort hier eintragen, nicht Ihr normales.'),
         h('p', {}, h('b', {}, 'GMX / WEB.DE: '), 'Im Postfach unter Einstellungen → „POP3 und IMAP“ den Zugriff für externe Programme erlauben.'),
         h('p', {}, h('b', {}, 'Telekom: '), 'Im Kundencenter ein eigenes „E-Mail-Passwort“ für externe Programme anlegen.'),
         h('p', {}, h('b', {}, 'Microsoft 365 / Outlook: '), 'Microsoft sperrt das oft. Dann lass es einfach bei Markentrix, das klappt immer.'),
-        h('p', {}, h('b', {}, 'IONOS, STRATO, Hetzner & Co.: '), 'Meist reichen deine normale Adresse und das Postfach-Passwort.'))));
+        h('p', {}, h('b', {}, 'IONOS, STRATO, Hetzner & Co.: '), 'Meist reichen Ihre normale Adresse und das Postfach-Passwort.'))));
 }
 
 // ---------------------------------------------------------------- Kalender
@@ -190,17 +190,17 @@ function kalenderKarte(d, neu) {
   };
   const test = async (e) => {
     const b = e.target; b.disabled = true; melde(m, '');
-    try { const r = await api('/api/kunde/website-dienste/kalender/test', { method: 'POST', body: {} }); melde(m, (r.belegt === null ? 'Kein Kalender verbunden. ' : 'Dein Kalender wurde gelesen (' + r.belegt + ' belegte Zeiten in den nächsten Tagen). ') + r.freie + ' freie Termine werden angeboten' + (r.beispiele.length ? ', zum Beispiel ' + r.beispiele.join(', ') : '') + '.', 'ok'); } catch (x) { melde(m, x.message); }
+    try { const r = await api('/api/kunde/website-dienste/kalender/test', { method: 'POST', body: {} }); melde(m, (r.belegt === null ? 'Kein Kalender verbunden. ' : 'Ihr Kalender wurde gelesen (' + r.belegt + ' belegte Zeiten in den nächsten Tagen). ') + r.freie + ' freie Termine werden angeboten' + (r.beispiele.length ? ', zum Beispiel ' + r.beispiele.join(', ') : '') + '.', 'ok'); } catch (x) { melde(m, x.message); }
     b.disabled = false;
   };
   const weg = async () => { if (!confirm('Kalender-Adresse löschen? Dann werden nur noch über die Website gebuchte Termine berücksichtigt.')) return; try { await api('/api/kunde/website-dienste/kalender-adresse', { method: 'DELETE' }); neu(); } catch (x) { melde(m, x.message); } };
-  return h('div', { class: 'card' }, h('h2', {}, 'Terminbuchung mit deinem Kalender'),
-    h('p', { class: 'small muted' }, 'Besucher wählen auf deiner Website einen freien Termin. Zeiten, in denen du laut Kalender belegt bist, werden nicht angeboten. Beide Seiten bekommen eine E-Mail mit Kalender-Einladung, der Termin steht bei dir unter „Heute“.'),
+  return h('div', { class: 'card' }, h('h2', {}, 'Terminbuchung mit Ihrem Kalender'),
+    h('p', { class: 'small muted' }, 'Besucher wählen auf Ihrer Website einen freien Termin. Zeiten, in denen Sie laut Kalender belegt sind, werden nicht angeboten. Beide Seiten bekommen eine E-Mail mit Kalender-Einladung, der Termin steht bei Ihnen unter „Heute“.'),
     m, an.el,
     h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Geheime Kalender-Adresse (iCal)', url, k.ical_gesetzt ? 'Gespeichert' + (k.ical_geprueft_am ? ' am ' + datum(k.ical_geprueft_am) : '') + '. Aus Sicherheitsgründen zeigen wir sie nicht mehr an.' : 'Funktioniert mit Google, Outlook, Apple, IONOS und vielen mehr. Anleitung unten.'),
       feld('Termin dauert (Minuten)', dauer), feld('Von', von), feld('Bis', bis), feld('So viele Tage im Voraus buchbar (1 bis 180)', tage), feld('Frühestens in … Stunden', vorlauf),
       feld('Ort / Hinweis in der Einladung', ort), feld('Benachrichtigung an', emp),
-      feld('Feste Uhrzeiten (optional)', zeiten, 'Zum Beispiel für Fahrzeugabgabe oder feste Termine. Muss zu den Uhrzeiten auf deiner Website passen.'),
+      feld('Feste Uhrzeiten (optional)', zeiten, 'Zum Beispiel für Fahrzeugabgabe oder feste Termine. Muss zu den Uhrzeiten auf Ihrer Website passen.'),
       feld('Höchstens so viele Buchungen pro Tag (0 = unbegrenzt)', kap), feld('Unbestätigte Reservierung hält … Stunden', halte)),
     h('div', { style: 'margin:8px 0' }, frei.el),
     h('div', { style: 'margin:8px 0' }, erin.el),
@@ -215,7 +215,7 @@ function kalenderKarte(d, neu) {
       h('p', {}, h('b', {}, 'Outlook: '), 'Einstellungen → Kalender → Freigegebene Kalender → Kalender veröffentlichen → „ICS“-Link kopieren.'),
       h('p', {}, h('b', {}, 'Apple iCloud: '), 'Kalender-App → Kalender teilen → „Öffentlicher Kalender“ → Link kopieren (webcal://…).'),
       h('p', {}, h('b', {}, 'Anderer Anbieter: '), 'Suche in den Kalender-Einstellungen nach „iCal“, „ICS“ oder „Abonnieren“.'),
-      h('p', { class: 'muted' }, 'Tipp: Wer die Adresse kennt, kann deinen Kalender lesen. Gib sie niemandem weiter. Sie lässt sich bei Google jederzeit zurücksetzen.')));
+      h('p', { class: 'muted' }, 'Tipp: Wer die Adresse kennt, kann Ihren Kalender lesen. Geben Sie sie niemandem weiter. Sie lässt sich bei Google jederzeit zurücksetzen.')));
 }
 
 // ---------------------------------------------------------------- PayPal
@@ -224,17 +224,17 @@ function paypalKarte(d, neu) {
   const an = schalter(p.aktiv, 'PayPal auf der Website anbieten');
   const cid = h('input', { value: p.client_id, placeholder: 'AaBb…', maxlength: 140, autocomplete: 'off' });
   const waehr = h('select', {}, ['EUR', 'CHF', 'USD', 'GBP', 'PLN', 'CZK', 'DKK', 'SEK', 'NOK'].map(w => h('option', { value: w, selected: w === p.waehrung }, w)));
-  const link = h('input', { value: p.me_link, placeholder: 'https://paypal.me/deinname', maxlength: 200 });
+  const link = h('input', { value: p.me_link, placeholder: 'https://paypal.me/ihrname', maxlength: 200 });
   const speichern = async () => { try { await api('/api/kunde/website-dienste/paypal', { method: 'PUT', body: { aktiv: an.c.checked, client_id: cid.value, waehrung: waehr.value, me_link: link.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
   return h('div', { class: 'card' }, h('h2', {}, 'PayPal'),
-    h('p', { class: 'small muted' }, 'Das Geld geht direkt auf dein PayPal-Konto. Wir verarbeiten keine Zahlungen und sehen kein Geld. PayPal schickt dir und deinen Kunden die übliche Zahlungsmail.'),
-    m, an.el, h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Dein PayPal.Me-Link', link, 'Reicht völlig aus. Dein normales PayPal-Konto genügt.'), feld('Währung', waehr)),
+    h('p', { class: 'small muted' }, 'Das Geld geht direkt auf Ihr PayPal-Konto. Wir verarbeiten keine Zahlungen und sehen kein Geld. PayPal schickt Ihnen und Ihren Kunden die übliche Zahlungsmail.'),
+    m, an.el, h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Ihr PayPal.Me-Link', link, 'Reicht völlig aus. Ihr normales PayPal-Konto genügt.'), feld('Währung', waehr)),
     hilfe('Wo finde ich meinen PayPal.Me-Link? (1 Minute)',
-      h('p', {}, 'PayPal-App öffnen → unten auf „Profil“ bzw. oben auf dein Profilbild → „PayPal.Me“ → Link kopieren und oben einfügen. Er sieht so aus: ', h('b', {}, 'https://paypal.me/deinname'), '.'),
-      h('p', {}, 'Falls du noch keinen hast: dort auf „PayPal.Me-Link erstellen“ tippen und einen Namen wählen.'),
+      h('p', {}, 'PayPal-App öffnen → unten auf „Profil“ bzw. oben auf Ihr Profilbild → „PayPal.Me“ → Link kopieren und oben einfügen. Er sieht so aus: ', h('b', {}, 'https://paypal.me/ihrname'), '.'),
+      h('p', {}, 'Falls Sie noch keinen haben: dort auf „PayPal.Me-Link erstellen“ tippen und einen Namen wählen.'),
       h('p', { class: 'muted' }, 'Auf der Website steht dann ein Knopf „Mit PayPal zahlen“. Ist ein Betrag hinterlegt (z. B. beim Gutschein), ist er schon eingetragen, sonst gibt der Zahler ihn selbst ein.')),
     hilfe('Erweitert: PayPal-Knopf direkt auf der Seite (nur mit Geschäftskonto)',
-      feld('Client-ID (Live)', cid, 'Die Zeichenfolge aus deiner PayPal-App. Ein Secret brauchen wir nicht.'),
+      feld('Client-ID (Live)', cid, 'Die Zeichenfolge aus Ihrer PayPal-App. Ein Secret brauchen wir nicht.'),
       h('p', {}, 'developer.paypal.com → anmelden → „Apps & Credentials“ → oben auf ', h('b', {}, '„Live“'), ' stellen → „Create App“ → Name vergeben → die ', h('b', {}, 'Client-ID'), ' kopieren. Ist sie eingetragen, bezahlen Besucher direkt auf der Seite, ohne zu PayPal zu wechseln.')),
     h('p', {}, h('button', { class: 'btn', onclick: speichern }, 'Speichern')));
 }
@@ -245,7 +245,7 @@ function anfrageBlock(b) {
   const std = h('input', { type: 'number', min: 1, max: 72, value: b.verzoegerung_std ?? 3, style: 'width:80px' });
   const sp = async () => { try { await api('/api/kunde/website-dienste/bewertungen/anfrage', { method: 'PUT', body: { aktiv: an.c.checked, verzoegerung_std: Number(std.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
   return h('div', { style: 'margin-top:14px;border-top:1px solid var(--line,#ddd);padding-top:10px' }, h('h3', {}, 'Bewertungen anfragen'),
-    h('p', { class: 'small muted' }, 'Wenn du einen Termin als „erschienen“ markierst, bekommt der Besucher nach der gewählten Zeit eine freundliche Mail mit deinem Bewertungs-Link. Jede Mail enthält einen Abmeldelink. Schalte das nur ein, wenn deine Besucher bei der Buchung damit rechnen können (Hinweis in deiner Datenschutzerklärung).'),
+    h('p', { class: 'small muted' }, 'Wenn Sie einen Termin als „erschienen“ markieren, bekommt der Besucher nach der gewählten Zeit eine freundliche Mail mit Ihrem Bewertungs-Link. Jede Mail enthält einen Abmeldelink. Schalten Sie das nur ein, wenn Ihre Besucher bei der Buchung damit rechnen können (Hinweis in Ihrer Datenschutzerklärung).'),
     m, an.el, h('div', { class: 'row', style: 'margin-top:6px' }, h('span', {}, 'Mail nach'), std, h('span', {}, 'Stunden (zum Beispiel 24 oder 48)'), h('button', { class: 'btn', onclick: sp }, 'Speichern')));
 }
 
@@ -264,17 +264,17 @@ function bewertungKarte(d, neu) {
     bt.disabled = false;
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Google-Bewertungen'),
-    h('p', { class: 'small muted' }, 'Deine Sterne und die neuesten Bewertungen erscheinen auf der Website, dazu ein Knopf „Jetzt bewerten“. Die Daten holen wir regelmäßig bei Google, die Besucher laden nichts direkt von Google.'),
-    d.places_verfuegbar ? '' : h('p', { class: 'msg info' }, 'Die automatische Anzeige schalten wir gerade frei. Bis dahin kannst du Sterne und Anzahl von Hand eintragen.'),
+    h('p', { class: 'small muted' }, 'Ihre Sterne und die neuesten Bewertungen erscheinen auf der Website, dazu ein Knopf „Jetzt bewerten“. Die Daten holen wir regelmäßig bei Google, die Besucher laden nichts direkt von Google.'),
+    d.places_verfuegbar ? '' : h('p', { class: 'msg info' }, 'Die automatische Anzeige schalten wir gerade frei. Bis dahin können Sie Sterne und Anzahl von Hand eintragen.'),
     m, an.el,
-    h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Place-ID deines Google-Profils', pid, 'Für die automatische Anzeige.'), feld('Link „Rezension schreiben“', link, 'Nur nötig, wenn du keine Place-ID eintragen kannst.'),
+    h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Place-ID Ihres Google-Profils', pid, 'Für die automatische Anzeige.'), feld('Link „Rezension schreiben“', link, 'Nur nötig, wenn Sie keine Place-ID eintragen können.'),
       feld('Oder von Hand: Sterne (z. B. 4,8)', sterne), feld('Anzahl der Bewertungen', anzahl)),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: speichern }, 'Speichern'), h('button', { class: 'btn sec', onclick: test }, 'Bei Google abfragen')),
     anfrageBlock(b),
     b.stand ? h('p', { class: 'small muted' }, 'Zuletzt von Google geholt: ' + datum(b.stand) + ' ' + ZEIT(b.stand)) : '',
     hilfe('Wo finde ich die Place-ID?',
-      h('p', {}, 'Öffne den „Place ID Finder“ von Google (suche im Netz nach „Google Place ID Finder“), gib den Namen deiner Firma ein und kopiere die Kennung, die mit ', h('b', {}, 'ChIJ'), ' beginnt.'),
-      h('p', {}, 'Den Link „Rezension schreiben“ findest du in Google Maps bei deinem Profil unter „Bewertungen“ → „Bewertungen anfordern“ bzw. in deinem Google-Unternehmensprofil.')));
+      h('p', {}, 'Öffnen Sie den „Place ID Finder“ von Google (suchen Sie im Netz nach „Google Place ID Finder“), geben Sie den Namen Ihrer Firma ein und kopieren Sie die Kennung, die mit ', h('b', {}, 'ChIJ'), ' beginnt.'),
+      h('p', {}, 'Den Link „Rezension schreiben“ finden Sie in Google Maps bei Ihrem Profil unter „Bewertungen“ → „Bewertungen anfordern“ bzw. in Ihrem Google-Unternehmensprofil.')));
 }
 
 // ---------------------------------------------------------------- Google Analytics
@@ -284,12 +284,12 @@ function analyticsKarte(d) {
   const gid = h('input', { value: a.id, placeholder: 'G-AB12CD34EF', maxlength: 20, autocomplete: 'off' });
   const speichern = async () => { try { await api('/api/kunde/website-dienste/analytics', { method: 'PUT', body: { aktiv: an.c.checked, id: gid.value } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melde(m, x.message); } };
   return h('div', { class: 'card' }, h('h2', {}, 'Google Analytics'),
-    h('p', { class: 'small muted' }, 'Zeigt dir, wie viele Besucher auf deine Website kommen und woher. Auf der Website erscheint automatisch eine Abfrage („Statistik erlauben?“). Nur wer zustimmt, wird gezählt. Vorher wird nichts an Google gesendet.'),
+    h('p', { class: 'small muted' }, 'Zeigt Ihnen, wie viele Besucher auf Ihre Website kommen und woher. Auf der Website erscheint automatisch eine Abfrage („Statistik erlauben?“). Nur wer zustimmt, wird gezählt. Vorher wird nichts an Google gesendet.'),
     m, an.el, h('div', { class: 'form2', style: 'margin-top:8px' }, feld('Mess-ID', gid, 'Beginnt mit „G-“.')),
     h('p', {}, h('button', { class: 'btn', onclick: speichern }, 'Speichern')),
     hilfe('Wo finde ich die Mess-ID?',
-      h('p', {}, 'analytics.google.com → unten links „Verwalten“ (Zahnrad) → „Datenstreams“ → „Web“ → deinen Stream öffnen → oben rechts steht die ', h('b', {}, 'Mess-ID'), ' (G-…).'),
-      h('p', {}, 'Noch kein Konto? Dort „Messung starten“ wählen, ein Konto und eine „Property“ anlegen und einen Web-Datenstream mit der Adresse deiner Website erstellen. Das dauert etwa 5 Minuten. Wenn du magst, machen wir das gemeinsam am Telefon.')));
+      h('p', {}, 'analytics.google.com → unten links „Verwalten“ (Zahnrad) → „Datenstreams“ → „Web“ → Ihren Stream öffnen → oben rechts steht die ', h('b', {}, 'Mess-ID'), ' (G-…).'),
+      h('p', {}, 'Noch kein Konto? Dort „Messung starten“ wählen, ein Konto und eine „Property“ anlegen und einen Web-Datenstream mit der Adresse Ihrer Website erstellen. Das dauert etwa 5 Minuten. Wenn Sie mögen, machen wir das gemeinsam am Telefon.')));
 }
 
 // ---------------------------------------------------------------- Excel-Übersicht
@@ -300,7 +300,7 @@ function uebersichtKarte(d) {
   const von = h('input', { type: 'date', value: heute, 'aria-label': 'Von' }), bis = h('input', { type: 'date', value: heute, 'aria-label': 'Bis' });
   const link = (text, q) => h('a', { class: 'btn sec', href: '/api/kunde/website-dienste/uebersicht.xlsx?' + q }, text);
   return h('div', { class: 'card' }, h('h2', {}, 'Übersicht als Excel'),
-    h('p', { class: 'small muted' }, 'Alle Termine mit Leistung, Preis, Anzahlung und Zahlungsstand, dazu eine Zusammenfassung und deine Gutschein-Anfragen. Zahlungen stehen nur drin, wenn du sie beim Termin als „Anzahlung erhalten“ oder „Alles bezahlt“ markiert hast.'),
+    h('p', { class: 'small muted' }, 'Alle Termine mit Leistung, Preis, Anzahlung und Zahlungsstand, dazu eine Zusammenfassung und Ihre Gutschein-Anfragen. Zahlungen stehen nur drin, wenn Sie sie beim Termin als „Anzahlung erhalten“ oder „Alles bezahlt“ markiert haben.'),
     h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, link('Diese Woche', 'zeitraum=woche'), link('Letzte Woche', 'zeitraum=vorwoche'), link('Dieser Monat', 'zeitraum=monat'), link('Letzter Monat', 'zeitraum=vormonat')),
     h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px' }, 'Eigener Zeitraum:', von, bis, h('button', { class: 'btn sec', onclick: () => { location.href = '/api/kunde/website-dienste/uebersicht.xlsx?zeitraum=eigen&von=' + von.value + '&bis=' + bis.value; } }, 'Herunterladen')));
 }
@@ -333,8 +333,8 @@ async function gutscheineKarte(neu) {
         offen ? h('button', { class: 'btn sec', onclick: () => { if (confirm('Diese Anfrage stornieren?')) tun('storno', {}, 'Storniert.'); } }, 'Stornieren') : '') : '');
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Gutschein-Anfragen'),
-    h('p', { class: 'small muted' }, 'So läuft es: 1. „Zahlungslink senden“ schickt dem Kunden deinen PayPal.Me-Link mit dem Betrag. 2. Sobald das Geld bei dir angekommen ist, trägst du einen Code ein und klickst „Gutschein senden“. Das Portal sieht deine PayPal-Zahlungen nicht, deshalb prüfst du den Eingang selbst.'),
-    r.paypal_bereit ? '' : h('p', { class: 'msg info' }, 'Für den Zahlungslink trägst du unten bei PayPal deinen PayPal.Me-Link ein und schaltest PayPal ein.'),
+    h('p', { class: 'small muted' }, 'So läuft es: 1. „Zahlungslink senden“ schickt dem Kunden Ihren PayPal.Me-Link mit dem Betrag. 2. Sobald das Geld bei Ihnen angekommen ist, tragen Sie einen Code ein und klicken „Gutschein senden“. Das Portal sieht Ihre PayPal-Zahlungen nicht, deshalb prüfen Sie den Eingang selbst.'),
+    r.paypal_bereit ? '' : h('p', { class: 'msg info' }, 'Für den Zahlungslink tragen Sie unten bei PayPal Ihren PayPal.Me-Link ein und schalten PayPal ein.'),
     m, r.gutscheine.map(zeile));
 }
 
@@ -348,7 +348,7 @@ async function buchungenKarte(d, neu) {
     const info = Object.entries(b.details).filter(([k]) => k !== 'leistung' && k !== 'mitarbeiter').map(([k, v]) => k.replace(/_/g, ' ') + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' · ');
     const tun = async (pfad, body) => { try { await api('/api/kunde/website-dienste/buchungen/' + b.id + '/' + pfad, { method: 'POST', body }); neu(); } catch (x) { melde(m, x.message); } };
     return h('div', { class: 'card', style: 'margin:8px 0' },
-      h('p', {}, h('b', {}, ZEIT(b.start)), ' · ' + b.name, ' ', h('span', { class: 'pill ' + (b.status === 'reserviert' ? 'warn' : 'ok') }, b.status === 'reserviert' ? 'wartet auf dich' : 'bestätigt')),
+      h('p', {}, h('b', {}, ZEIT(b.start)), ' · ' + b.name, ' ', h('span', { class: 'pill ' + (b.status === 'reserviert' ? 'warn' : 'ok') }, b.status === 'reserviert' ? 'wartet auf Sie' : 'bestätigt')),
       (b.leistung || b.mitarbeiter) ? h('p', { class: 'small' }, [b.leistung, b.mitarbeiter ? 'bei ' + b.mitarbeiter : ''].filter(Boolean).join(' · ')) : '',
       h('p', { class: 'small' }, b.email + (b.telefon ? ' · ' + b.telefon : '') + (b.ref ? ' · ' + b.ref : '')),
       info ? h('p', { class: 'small muted' }, info) : '', b.nachricht ? h('p', { class: 'small' }, b.nachricht) : '', fotoReihe(b.fotos),
@@ -365,15 +365,15 @@ async function buchungenKarte(d, neu) {
   try { erst = (await api('/api/kunde/website-dienste/erstattungen')).erstattungen; } catch { /* Karte bleibt ohne Erstattungen */ }
   return h('div', { class: 'card' }, h('h2', {}, 'Buchungen über die Website'),
     h('p', { class: 'small muted' }, r.freigabe
-      ? 'Neue Wünsche sind für den Kunden vorgemerkt, bis du sie bestätigst. Mit „Bestätigen“ bekommt er eine E-Mail mit Kalender-Einladung, auf Wunsch mit PayPal-Link für die Anzahlung.'
-      : 'Buchungen sind sofort gültig. Hier siehst du die kommenden und kannst absagen.'),
+      ? 'Neue Wünsche sind für den Kunden vorgemerkt, bis Sie sie bestätigen. Mit „Bestätigen“ bekommt er eine E-Mail mit Kalender-Einladung, auf Wunsch mit PayPal-Link für die Anzahlung.'
+      : 'Buchungen sind sofort gültig. Hier sehen Sie die kommenden und können absagen.'),
     m, erst.length ? h('div', { class: 'msg warn' }, h('b', {}, 'Anzahlung zurückzahlen'),
-      h('p', { class: 'small' }, 'Diese Termine wurden rechtzeitig abgesagt. Bitte zahle die Anzahlung per PayPal zurück und klicke danach „Erstattet“.'),
+      h('p', { class: 'small' }, 'Diese Termine wurden rechtzeitig abgesagt. Bitte zahle die Anzahlung per PayPal zurück und klicken Sie danach „Erstattet“.'),
       erst.map(e => h('div', { class: 'row', style: 'gap:8px;align-items:center;margin:4px 0' }, h('span', {}, ZEIT(e.start) + ' · ' + e.name + ' · ' + e.betrag.replace('.', ',') + ' €'),
         h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/kunde/website-dienste/buchungen/' + e.id + '/erstattet', { method: 'POST', body: {} }); neu(); } catch (x) { melde(m, x.message); } } }, 'Erstattet')))) : '',
     r.buchungen.length ? r.buchungen.map(zeile) : h('p', { class: 'small muted' }, 'Keine kommenden Buchungen.'),
     r.vergangen.length ? h('div', {}, h('h3', {}, 'Vergangene Termine – hat es geklappt?'),
-      h('p', { class: 'small muted' }, 'Ein Klick genügt. So siehst du, wer öfter nicht kommt, und die Statistik zeigt deine Nichterschienen-Quote.'),
+      h('p', { class: 'small muted' }, 'Ein Klick genügt. So sehen Sie, wer öfter nicht kommt, und die Statistik zeigt Ihre Nichterschienen-Quote.'),
       r.vergangen.map(b => {
         const set = async (erg) => { try { await api('/api/kunde/website-dienste/buchungen/' + b.id + '/ergebnis', { method: 'POST', body: { ergebnis: erg } }); neu(); } catch (x) { melde(m, x.message); } };
         return h('div', { class: 'card', style: 'margin:8px 0' }, h('p', {}, h('b', {}, ZEIT(b.start)), ' · ' + b.name,
@@ -396,7 +396,7 @@ async function sperrtageKarte(d) {
   const add = async () => { melde(m, ''); try { await api('/api/kunde/website-dienste/sperrtage', { method: 'POST', body: { von: von.value, bis: bis.value, grund: grund.value, mitarbeiter_id: wer.value } }); await laden(); von.value = ''; bis.value = ''; grund.value = ''; } catch (x) { melde(m, x.message); } };
   return h('div', { class: 'card' }, h('h2', {}, 'Urlaub und Sperrtage'),
     h('p', { class: 'small muted' }, 'An diesen Tagen kann nicht gebucht werden: für den ganzen Betrieb oder nur für eine Person (z. B. Urlaub).'), m,
-    h('div', { class: 'form2' }, feld('Von', von), feld('Bis (optional)', bis), feld('Gilt für', wer), feld('Grund (nur für dich)', grund)),
+    h('div', { class: 'form2' }, feld('Von', von), feld('Bis (optional)', bis), feld('Gilt für', wer), feld('Grund (nur für Sie)', grund)),
     h('p', {}, h('button', { class: 'btn', onclick: add }, 'Sperren')), liste);
 }
 
@@ -438,7 +438,7 @@ async function teamKarte(d, neu) {
   };
   const fr = h('input', { type: 'number', min: 0, max: 720, value: t.einstellung.frist_std, style: 'max-width:90px', 'aria-label': 'Frist in Stunden' }), st = h('input', { type: 'number', min: 0, max: 168, value: t.einstellung.storno_std, style: 'max-width:90px', 'aria-label': 'Kostenlos absagen bis Stunden vorher' });
   const regeln = h('div', { class: 'card', style: 'margin:8px 0' }, h('h3', {}, 'Anzahlung und Absage'),
-    h('p', { class: 'small muted' }, 'Hat eine Leistung eine Anzahlung, bekommt der Besucher sofort den PayPal-Link in der Mail. Wenn die Zahlung bei dir angekommen ist, klickst du beim Termin „Anzahlung erhalten“.' + (t.einstellung.paypal_bereit ? '' : ' Dafür brauchst du unten bei PayPal deinen PayPal.Me-Link.')),
+    h('p', { class: 'small muted' }, 'Hat eine Leistung eine Anzahlung, bekommt der Besucher sofort den PayPal-Link in der Mail. Wenn die Zahlung bei Ihnen angekommen ist, klicken Sie beim Termin „Anzahlung erhalten“.' + (t.einstellung.paypal_bereit ? '' : ' Dafür brauchen Sie unten bei PayPal Ihren PayPal.Me-Link.')),
     h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end' }, feld('Kostenlos absagen bis (Std. vorher)', st, 'Danach ist der volle Betrag zu zahlen.'), feld('Frist für die Anzahlung (Std., 0 = keine)', fr, 'Kommt bis dahin nichts an, gibt das Portal den Termin frei.'),
       h('button', { class: 'btn sec', onclick: async () => { try { await api('/api/kunde/website-dienste/anzahlung', { method: 'PUT', body: { frist_std: Number(fr.value), storno_std: Number(st.value) } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { melden(x); } } }, 'Speichern')));
   const offen = (await api('/api/kunde/website-dienste/leistungen/aenderungen').catch(() => ({ aenderungen: [] }))).aenderungen;
@@ -470,8 +470,8 @@ async function teamKarte(d, neu) {
           ma ? h('button', { class: 'btn sec', onclick: async () => { if (!confirm(ma.name + ' löschen? Bestehende Termine bleiben erhalten.')) return; try { await api('/api/kunde/website-dienste/mitarbeiter/' + ma.id, { method: 'DELETE' }); neu(); } catch (x) { melden(x); } } }, 'Löschen') : '')));
   };
   return h('div', { class: 'card' }, h('h2', {}, 'Leistungen und Mitarbeiter'),
-    h('p', { class: 'small muted' }, 'Optional, zum Beispiel für Friseur, Kosmetik, Fahrzeugpflege, Werkstatt oder Praxis: Jede Leistung hat ihre eigene Dauer, auf Wunsch eine Anzahlung und ein Häkchen „bestätige ich selbst“ (dann ist der Termin erst nach deiner Bestätigung fest). Wer Mitarbeiter einträgt, bei dem wird ein Termin nur angeboten, wenn die gewünschte Person (oder irgendjemand, wenn der Besucher „egal“ wählt) für die ganze Dauer Zeit hat. Ohne Einträge gilt die Dauer aus der Terminbuchung oben.'), m,
-    frei ? h('p', { class: 'msg info' }, 'Änderungen an Leistungen und Preisen prüft das Team, bevor sie auf deiner Website erscheinen.') : '', wartend, regeln,
+    h('p', { class: 'small muted' }, 'Optional, zum Beispiel für Friseur, Kosmetik, Fahrzeugpflege, Werkstatt oder Praxis: Jede Leistung hat ihre eigene Dauer, auf Wunsch eine Anzahlung und ein Häkchen „bestätige ich selbst“ (dann ist der Termin erst nach Ihrer Bestätigung fest). Wer Mitarbeiter einträgt, bei dem wird ein Termin nur angeboten, wenn die gewünschte Person (oder irgendjemand, wenn der Besucher „egal“ wählt) für die ganze Dauer Zeit hat. Ohne Einträge gilt die Dauer aus der Terminbuchung oben.'), m,
+    frei ? h('p', { class: 'msg info' }, 'Änderungen an Leistungen und Preisen prüft das Team, bevor sie auf Ihrer Website erscheinen.') : '', wartend, regeln,
     h('h3', {}, 'Leistungen'), t.leistungen.map(leistungZeile),
     h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;align-items:end;margin:6px 0' }, feld('Neue Leistung', nName), feld('Dauer (Min.) *', nDauer), feld('Pause danach', nPuffer), feld('Preis (Anzeige)', nPreis), nAnz.el, feld('Zusatzfragen (* = Pflicht)', nFe), nFg.el, h('button', { class: 'btn', onclick: neuL }, 'Hinzufügen')),
     h('h3', {}, 'Mitarbeiter'), t.mitarbeiter.map(maBlock), maBlock(null));
@@ -507,7 +507,7 @@ async function zustellKarte() {
   const k = z.kennzahlen;
   const neuPruefen = async (e) => { e.target.disabled = true; try { await api('/api/kunde/website-dienste/zustellung/pruefen', { method: 'POST', body: {} }); location.reload(); } catch (x) { melde(m, x.message); e.target.disabled = false; } };
   return h('div', { class: 'card' }, h('h2', {}, 'Kommen die Mails an?'),
-    h('p', { class: 'small muted' }, 'Wir zeigen, was der Mailserver beim Versand meldet. Landet eine Mail beim Empfänger im Spam, sieht das niemand – deshalb prüfen wir bei einem eigenen Postfach die Absender-Einträge (SPF, DKIM, DMARC) deiner Domain.'),
+    h('p', { class: 'small muted' }, 'Wir zeigen, was der Mailserver beim Versand meldet. Landet eine Mail beim Empfänger im Spam, sieht das niemand – deshalb prüfen wir bei einem eigenen Postfach die Absender-Einträge (SPF, DKIM, DMARC) Ihrer Domain.'),
     m, h('p', {}, k.gesamt ? [h('b', {}, k.gesamt - k.fehler + ' von ' + k.gesamt), ' Mails der letzten 30 Tage wurden angenommen.', k.fehler ? ' ' + k.fehler + ' nicht' + (k.adresse ? ' (davon ' + k.adresse + ' wegen ungültiger Empfänger-Adresse)' : '') + '.' : ''] : 'In den letzten 30 Tagen wurden keine Mails verschickt.'),
     z.eigenes_postfach && z.dns ? [h('p', { class: 'small' }, 'Absender: ' + z.absender + ' · geprüft ' + zeit(z.dns.geprueft_am)), dnsZeile(z.dns),
       ...['spf', 'dkim', 'dmarc'].filter(n => z.dns[n] === 'fehlt' || z.dns[n] === 'warn').map(n => h('p', { class: 'small' }, (z.dns.details || {})[n])),

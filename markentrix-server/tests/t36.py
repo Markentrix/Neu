@@ -82,7 +82,7 @@ async def main():
         chk("Kunde: Diagramme werden gezeichnet (SVG)",await pg.locator("svg").count()>=3,await pg.locator("svg").count())
         await pg.goto(B+"/app#uebersicht"); await pg.wait_for_timeout(1000); chk("Kunde: Reise-Karte sichtbar",await pg.locator(".reise").count()>=1)
         await pg.goto(B+"/app#heute"); await pg.wait_for_selector(".navkopf"); await pg.wait_for_timeout(500)
-        chk("Kunde: Heute zeigt „Dein nächster Schritt“",await pg.locator(".hero:has-text('Dein nächster Schritt')").count()==1)
+        chk("Kunde: Heute zeigt „Ihr nächster Schritt“",await pg.locator(".hero:has-text('Ihr nächster Schritt')").count()==1)
         chk("Kunde: Menü in 4 Gruppen",await pg.locator(".navgruppe").count()==4,await pg.locator(".navgruppe").count())
         chk("Kunde: selten Genutztes ist zugeklappt, Gruppe der Seite offen",await pg.locator(".navkopf:has-text('Mein Betrieb')").get_attribute("aria-expanded")=="false" and await pg.locator(".navkopf:has-text('Täglich')").get_attribute("aria-expanded")=="true")
         await pg.locator(".navkopf:has-text('Mein Betrieb')").click(); await pg.wait_for_timeout(200)

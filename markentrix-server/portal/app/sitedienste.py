@@ -28,19 +28,19 @@ ERLAUBTE_PORTS = (25, 465, 587, 2525)
 # Voreinstellungen je Anbieter (aus der Domain der E-Mail-Adresse). hinweis = was der Kunde vorher tun muss.
 ANBIETER = {
     "gmail": {"name": "Google Mail", "host": "smtp.gmail.com", "port": 587, "sicherung": "starttls",
-              "hinweis": "Bei Google brauchst du ein „App-Passwort“: Google-Konto → Sicherheit → Bestätigung in zwei Schritten einschalten → App-Passwörter → neues Passwort erstellen. Das 16-stellige Passwort hier eintragen, nicht dein normales."},
+              "hinweis": "Bei Google brauchen Sie ein „App-Passwort“: Google-Konto → Sicherheit → Bestätigung in zwei Schritten einschalten → App-Passwörter → neues Passwort erstellen. Das 16-stellige Passwort hier eintragen, nicht dein normales."},
     "gmx": {"name": "GMX", "host": "mail.gmx.net", "port": 587, "sicherung": "starttls",
             "hinweis": "Bei GMX muss „POP3/IMAP/SMTP“ aktiviert sein: GMX-Postfach → Einstellungen → POP3 und IMAP → Zugriff aktivieren."},
     "web.de": {"name": "WEB.DE", "host": "smtp.web.de", "port": 587, "sicherung": "starttls",
                "hinweis": "Bei WEB.DE muss „POP3/IMAP/SMTP“ aktiviert sein: Einstellungen → POP3 und IMAP → Zugriff aktivieren."},
     "t-online": {"name": "Telekom / T-Online", "host": "securesmtp.t-online.de", "port": 465, "sicherung": "ssl",
-                 "hinweis": "Bei der Telekom brauchst du ein eigenes „E-Mail-Passwort“ (Kundencenter → E-Mail → Passwort für E-Mail-Programme). Benutzername ist die komplette Adresse."},
+                 "hinweis": "Bei der Telekom brauchen Sie ein eigenes „E-Mail-Passwort“ (Kundencenter → E-Mail → Passwort für E-Mail-Programme). Benutzername ist die komplette Adresse."},
     "microsoft": {"name": "Microsoft 365 / Outlook", "host": "smtp.office365.com", "port": 587, "sicherung": "starttls",
                   "hinweis": "Microsoft sperrt den Versand mit Passwort oft. Wenn die Prüfung scheitert, lass den Versand einfach über Markentrix laufen – das funktioniert immer."},
     "ionos": {"name": "IONOS", "host": "smtp.ionos.de", "port": 587, "sicherung": "starttls", "hinweis": "Benutzername ist die komplette Adresse, Passwort wie im Postfach."},
     "strato": {"name": "STRATO", "host": "smtp.strato.de", "port": 465, "sicherung": "ssl", "hinweis": "Benutzername ist die komplette Adresse, Passwort wie im Postfach."},
     "icloud": {"name": "iCloud", "host": "smtp.mail.me.com", "port": 587, "sicherung": "starttls",
-               "hinweis": "Bei Apple brauchst du ein „App-spezifisches Passwort“ (appleid.apple.com → Anmeldung und Sicherheit)."},
+               "hinweis": "Bei Apple brauchen Sie ein „App-spezifisches Passwort“ (appleid.apple.com → Anmeldung und Sicherheit)."},
 }
 DOMAIN_ZU_ANBIETER = {
     "gmail.com": "gmail", "googlemail.com": "gmail", "gmx.de": "gmx", "gmx.net": "gmx", "gmx.at": "gmx", "gmx.ch": "gmx", "web.de": "web.de",
@@ -57,7 +57,7 @@ def vorschlag(email: str) -> dict:
     key = DOMAIN_ZU_ANBIETER.get(teile[1])
     if not key:
         return {"anbieter": "", "benutzer": email.strip(),
-                "hinweis": "Frag deinen E-Mail-Anbieter nach dem „SMTP-Server“. Meist heißt er smtp.%s oder mail.%s, Port 587 (STARTTLS) oder 465 (SSL)." % (teile[1], teile[1])}
+                "hinweis": "Fragen Sie Ihren E-Mail-Anbieter nach dem „SMTP-Server“. Meist heißt er smtp.%s oder mail.%s, Port 587 (STARTTLS) oder 465 (SSL)." % (teile[1], teile[1])}
     a = ANBIETER[key]
     return {"anbieter": a["name"], "host": a["host"], "port": a["port"], "sicherung": a["sicherung"], "benutzer": email.strip(), "hinweis": a["hinweis"], "schluessel": key}
 
@@ -244,7 +244,7 @@ def smtp_fehlertext(e: Exception, schluessel: str = "") -> str:
     if isinstance(e, ssl.SSLError):
         return "Die verschlüsselte Verbindung ist fehlgeschlagen. Probiere den anderen Port: 587 mit STARTTLS oder 465 mit SSL."
     if isinstance(e, smtplib.SMTPSenderRefused):
-        return "Der Anbieter erlaubt diese Absender-Adresse nicht. Nimm die Adresse, mit der du dich anmeldest."
+        return "Der Anbieter erlaubt diese Absender-Adresse nicht. Nehmen Sie die Adresse, mit der Sie sich anmelden."
     if isinstance(e, smtplib.SMTPRecipientsRefused):
         return "Der Anbieter hat den Empfänger abgelehnt."
     if isinstance(e, (smtplib.SMTPServerDisconnected, smtplib.SMTPConnectError)):

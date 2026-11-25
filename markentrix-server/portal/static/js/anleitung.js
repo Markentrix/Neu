@@ -29,10 +29,10 @@ const BILDER = {
     + t(24, 128, 'Kopieren', 7.5) + t(24, 148, 'Lesezeichen', 7.5) + r(18, 156, 124, 20, '#EAE2D3', 6) + t(24, 170, 'Zum Home-Bildschirm  ＋', 7.5, FARBE.text, 700) + t(24, 194, 'Drucken', 7.5) + ring(16, 154, 128, 24), 'Teilen-Menü mit „Zum Home-Bildschirm“'),
   'sa-hinzu': () => handy(r(14, 22, 132, 224, '#fff', 0) + t(24, 42, 'Abbrechen', 7.5, FARBE.akzent) + t(80, 42, 'Zum Home-Bildschirm', 6.5, FARBE.text, 700, 'middle') + t(136, 42, 'Hinzufügen', 7.5, FARBE.akzent, 700, 'end') + ring(92, 30, 52, 18)
     + logo(24, 64, 28) + r(58, 70, 76, 16, FARBE.hell, 5) + t(64, 81, 'Markentrix', 7.5) + zeile(24, 108, 110) + zeile(24, 120, 90), 'Dialog „Zum Home-Bildschirm“ mit „Hinzufügen“'),
-  push: () => handy(r(20, 40, 120, 52, '#fff', 12, `stroke="${FARBE.linie}"`) + logo(28, 48, 22) + t(58, 62, 'Markentrix', 8, FARBE.text, 700) + t(58, 76, 'Neue Nachricht für dich', 7.5) + t(58, 87, 'jetzt', 6.5, '#4E5C5F')
+  push: () => handy(r(20, 40, 120, 52, '#fff', 12, `stroke="${FARBE.linie}"`) + logo(28, 48, 22) + t(58, 62, 'Markentrix', 8, FARBE.text, 700) + t(58, 76, 'Neue Nachricht für Sie', 7.5) + t(58, 87, 'jetzt', 6.5, '#4E5C5F')
     + r(26, 128, 108, 78, '#fff', 12, `stroke="${FARBE.linie}"`) + t(80, 148, 'Benachrichtigungen', 8, FARBE.text, 700, 'middle') + t(80, 160, 'zulassen?', 8, FARBE.text, 700, 'middle') + t(52, 196, 'Nicht jetzt', 7, '#4E5C5F', 500, 'middle') + r(84, 182, 44, 18, FARBE.akzent, 9) + t(106, 194, 'Zulassen', 7.5, '#fff', 700, 'middle') + ring(82, 180, 48, 22), 'Handy fragt, ob Benachrichtigungen erlaubt sein sollen, „Zulassen“ ist markiert'),
   // ---- Kunde
-  heute: () => handy(t(22, 38, 'Heute', 11, FARBE.text, 700) + r(20, 48, 120, 62, FARBE.hell, 10) + t(28, 64, 'Dein nächster Schritt', 7, '#4E5C5F') + t(28, 78, 'Eine Freigabe wartet', 8, FARBE.text, 700) + knopf(28, 88, 70, 'Freigaben prüfen') + r(20, 118, 120, 34, '#fff', 8, `stroke="${FARBE.linie}"`) + t(28, 132, 'Anfragen: keine offen', 7.5) + zeile(28, 140, 60) + r(20, 160, 120, 34, '#fff', 8, `stroke="${FARBE.linie}"`) + t(28, 174, 'Termine heute: 1', 7.5) + zeile(28, 182, 70) + leiste(0, ['Heute', 'Anfragen', 'Termine', 'Menü']), 'Seite Heute mit nächstem Schritt'),
+  heute: () => handy(t(22, 38, 'Heute', 11, FARBE.text, 700) + r(20, 48, 120, 62, FARBE.hell, 10) + t(28, 64, 'Ihr nächster Schritt', 7, '#4E5C5F') + t(28, 78, 'Eine Freigabe wartet', 8, FARBE.text, 700) + knopf(28, 88, 70, 'Freigaben prüfen') + r(20, 118, 120, 34, '#fff', 8, `stroke="${FARBE.linie}"`) + t(28, 132, 'Anfragen: keine offen', 7.5) + zeile(28, 140, 60) + r(20, 160, 120, 34, '#fff', 8, `stroke="${FARBE.linie}"`) + t(28, 174, 'Termine heute: 1', 7.5) + zeile(28, 182, 70) + leiste(0, ['Heute', 'Anfragen', 'Termine', 'Menü']), 'Seite Heute mit nächstem Schritt'),
   freigabe: () => handy(t(22, 38, 'Freigaben', 11, FARBE.text, 700) + r(20, 48, 120, 120, '#fff', 10, `stroke="${FARBE.linie}"`) + t(28, 64, 'Instagram-Beitrag', 8, FARBE.text, 700) + r(28, 70, 40, 12, '#F7F4EE', 6) + t(48, 79, 'wartet', 6.5, '#964F08', 600, 'middle') + r(28, 90, 104, 40, FARBE.hell, 6) + zeile(34, 98, 80) + zeile(34, 108, 60) + zeile(34, 118, 70)
     + knopf(28, 140, 46, 'Freigeben') + r(80, 140, 52, 16, '#fff', 8, `stroke="${FARBE.linie}"`) + t(106, 151, 'Änderung', 7, FARBE.text, 700, 'middle') + ring(26, 138, 50, 20) + leiste(-1, ['Heute', 'Anfragen', 'Termine', 'Menü']), 'Freigabe mit Knöpfen Freigeben und Änderung wünschen'),
   anfragen: () => handy(t(22, 38, 'Anfragen', 11, FARBE.text, 700) + [0, 1, 2].map(i => r(20, 48 + i * 46, 120, 40, '#fff', 8, `stroke="${FARBE.linie}"`) + t(28, 62 + i * 46, ['Familie Berger', 'Tischlerei Hahn', 'M. Schulz'][i], 7.5, FARBE.text, 700) + zeile(28, 70 + i * 46, 70) + (i === 0 ? knopf(98, 74, 36, 'Rückruf') : '')).join('') + ring(94, 72, 44, 20) + leiste(1, ['Heute', 'Anfragen', 'Termine', 'Menü']), 'Liste der Anfragen mit Rückruf-Knopf'),
@@ -62,19 +62,19 @@ export function bild(name) {
 // ---------------------------------------------------------------- Inhalte
 const INSTALL = {
   android: [
-    ['login', 'Portal in Chrome öffnen', 'Öffne das Portal in Google Chrome und melde dich an. Bitte nicht in Samsung Internet, Opera oder einem anderen Browser: Dort angelegte Apps blockiert Google Play Protect teils als „unsicher“.'],
-    ['ch-menue', 'Menü ⋮ öffnen, „App installieren“ wählen', 'Oben rechts auf die drei Punkte tippen. Steht dort „App installieren“, tippe darauf. Alternativ „Zum Startbildschirm hinzufügen“.'],
-    ['ch-install', 'Mit „Installieren“ bestätigen', 'Chrome fragt noch einmal nach. Tippe auf „Installieren“. Das dauert ein paar Sekunden.'],
-    ['home', 'Fertig', 'Das Markentrix-Symbol liegt jetzt auf deinem Startbildschirm. Ab jetzt öffnest du das Portal wie jede andere App. Updates passieren von selbst.'],
-    ['push', 'Benachrichtigungen erlauben', 'Beim ersten Öffnen der App fragt dich Markentrix, ob du Benachrichtigungen aufs Handy bekommen möchtest. Tippe auf „Ja, benachrichtigen“ und danach beim Handy auf „Zulassen“. So erfährst du sofort, wenn etwas Wichtiges passiert. Du kannst das jederzeit unter „Konto“ bzw. „Einstellungen“ → „App & Benachrichtigungen“ ändern.'],
+    ['login', 'Portal in Chrome öffnen', 'Öffnen Sie das Portal in Google Chrome und melden Sie sich an. Bitte nicht in Samsung Internet, Opera oder einem anderen Browser: Dort angelegte Apps blockiert Google Play Protect teils als „unsicher“.'],
+    ['ch-menue', 'Menü ⋮ öffnen, „App installieren“ wählen', 'Oben rechts auf die drei Punkte tippen. Steht dort „App installieren“, tippen Sie darauf. Alternativ „Zum Startbildschirm hinzufügen“.'],
+    ['ch-install', 'Mit „Installieren“ bestätigen', 'Chrome fragt noch einmal nach. Tippen Sie auf „Installieren“. Das dauert ein paar Sekunden.'],
+    ['home', 'Fertig', 'Das Markentrix-Symbol liegt jetzt auf Ihrem Startbildschirm. Ab jetzt öffnen Sie das Portal wie jede andere App. Updates passieren von selbst.'],
+    ['push', 'Benachrichtigungen erlauben', 'Beim ersten Öffnen der App fragt Sie Markentrix, ob Sie Benachrichtigungen aufs Handy bekommen möchten. Tippen Sie auf „Ja, benachrichtigen“ und danach beim Handy auf „Zulassen“. So erfahren Sie sofort, wenn etwas Wichtiges passiert. Sie können das jederzeit unter „Konto“ bzw. „Einstellungen“ → „App & Benachrichtigungen“ ändern.'],
   ],
   iphone: [
-    ['login', 'Portal in Safari öffnen', 'Öffne das Portal in Safari (nicht in Chrome oder in einer anderen App) und melde dich an.'],
+    ['login', 'Portal in Safari öffnen', 'Öffnen Sie das Portal in Safari (nicht in Chrome oder in einer anderen App) und melden Sie sich an.'],
     ['sa-teilen', 'Teilen-Symbol antippen', 'Unten in der Mitte auf das Symbol mit dem Pfeil nach oben tippen.'],
     ['sa-liste', '„Zum Home-Bildschirm“ wählen', 'In der Liste etwas nach unten wischen, bis „Zum Home-Bildschirm“ erscheint, und darauf tippen.'],
     ['sa-hinzu', '„Hinzufügen“ tippen', 'Oben rechts auf „Hinzufügen“ tippen. Der Name „Markentrix“ passt so.'],
-    ['home', 'Fertig', 'Das Symbol liegt auf dem Home-Bildschirm. Erst jetzt, in der App, kannst du auch Benachrichtigungen einschalten (Konto → App & Benachrichtigungen).'],
-    ['push', 'Benachrichtigungen erlauben', 'Öffne die App vom Home-Bildschirm (nicht aus Safari). Dort fragt dich Markentrix, ob du Benachrichtigungen aufs Handy bekommen möchtest. Tippe auf „Ja, benachrichtigen“ und danach beim Handy auf „Zulassen“. So erfährst du sofort, wenn etwas Wichtiges passiert. Du kannst das jederzeit unter „Konto“ bzw. „Einstellungen“ → „App & Benachrichtigungen“ ändern.'],
+    ['home', 'Fertig', 'Das Symbol liegt auf dem Home-Bildschirm. Erst jetzt, in der App, können Sie auch Benachrichtigungen einschalten (Konto → App & Benachrichtigungen).'],
+    ['push', 'Benachrichtigungen erlauben', 'Öffnen Sie die App vom Home-Bildschirm (nicht aus Safari). Dort fragt Markentrix, ob Sie Benachrichtigungen aufs Handy bekommen möchten. Tippen Sie auf „Ja, benachrichtigen“ und danach beim Handy auf „Zulassen“. So erfahren Sie sofort, wenn etwas Wichtiges passiert. Sie können das jederzeit unter „Konto“ bzw. „Einstellungen“ → „App & Benachrichtigungen“ ändern.'],
   ],
 };
 
@@ -82,11 +82,11 @@ const INSTALL = {
 function schritteKunde(hat) {
   return [
     ['heute', 'Heute: das Wichtigste zuerst', 'Hier steht, was jetzt dran ist: offene Freigaben, neue Anfragen, Termine. Was hier nicht steht, ist erledigt.', '#heute', 'Zu „Heute“'],
-    ['freigabe', 'Freigaben: du hast das letzte Wort', 'Bevor wir etwas veröffentlichen, zeigen wir es dir. Du tippst auf „Freigeben“ oder auf „Änderung wünschen“ und schreibst kurz, was anders sein soll. Das geht auch direkt über den Link in der E-Mail, ganz ohne Anmeldung. Datum, Uhrzeit und dein Name werden festgehalten.', '#freigaben', 'Zu den Freigaben'],
+    ['freigabe', 'Freigaben: Sie haben das letzte Wort', 'Bevor wir etwas veröffentlichen, zeigen wir es Ihnen. Sie tippen auf „Freigeben“ oder auf „Änderung wünschen“ und schreiben kurz, was anders sein soll. Das geht auch direkt über den Link in der E-Mail, ganz ohne Anmeldung. Datum, Uhrzeit und Ihr Name werden festgehalten.', '#freigaben', 'Zu den Freigaben'],
     hat('anfragen_termine')
-      ? ['anfragen', 'Anfragen und Termine', 'Neue Anfragen von deiner Website oder per Telefon landen hier. Ruf zurück, solange sie frisch sind, das entscheidet oft über den Auftrag.', '#anfragen', 'Zu den Anfragen']
+      ? ['anfragen', 'Anfragen und Termine', 'Neue Anfragen von Ihrer Website oder per Telefon landen hier. Rufen Sie zurück, solange sie frisch sind, das entscheidet oft über den Auftrag.', '#anfragen', 'Zu den Anfragen']
       : null,
-    ['nachrichten', 'Nachrichten: direkter Draht zu uns', 'Fragen, Wünsche, Änderungen? Schreib uns hier. Du bekommst die Antwort im Portal und per E-Mail. Dateien und Bilder kannst du anhängen.', '#nachrichten', 'Nachricht schreiben'],
+    ['nachrichten', 'Nachrichten: direkter Draht zu uns', 'Fragen, Wünsche, Änderungen? Schreiben Sie uns hier. Sie bekommen die Antwort im Portal und per E-Mail. Dateien und Bilder können Sie anhängen.', '#nachrichten', 'Nachricht schreiben'],
     ['menue', 'Menü: alles andere', 'Unten rechts auf „Mehr“ tippen: Dokumente, Auswertung, Rechnungen, Team, Hilfe und Einstellungen.', '#hilfe', 'Zur Hilfe'],
   ].filter(Boolean);
 }
@@ -124,7 +124,7 @@ export async function anleitungSeite(rolle, hat = () => true) {
   const zeichne = () => {
     liste.replaceChildren(...INSTALL[wahl].map((s, i) => schrittKarte(i + 1, s, false)));
     reiter.replaceChildren(...[['android', 'Android (Chrome)'], ['iphone', 'iPhone (Safari)']].map(([k, n]) => h('button', { type: 'button', class: k === wahl ? 'on' : '', 'aria-pressed': String(k === wahl), onclick: () => { wahl = k; zeichne(); } }, n)));
-    installBox.replaceChildren(standalone() ? h('div', { class: 'msg ok' }, '✔ Du nutzt Markentrix schon als App.')
+    installBox.replaceChildren(standalone() ? h('div', { class: 'msg ok' }, '✔ Sie nutzen Markentrix schon als App.')
       : (wahl === 'android' && installBereit()) ? h('p', {}, h('button', { class: 'btn', onclick: async () => { await installStarten(); zeichne(); } }, 'Jetzt als App installieren')) : '');
   };
   zeichne();
@@ -134,12 +134,12 @@ export async function anleitungSeite(rolle, hat = () => true) {
     location.hash = rolle === 'vertrieb' ? '#heute' : '#heute';
   };
   return h('div', { class: 'stack' },
-    h('h2', { class: 'anltitel', style: 'font-size:20px;margin:0' }, rolle === 'vertrieb' ? 'So startest du im Partnerportal' : 'So startest du bei Markentrix'),
-    h('p', { class: 'muted' }, 'Zwei kurze Teile: erst die App aufs Handy legen (30 Sekunden), dann siehst du, wie du im Portal arbeitest. Du findest diese Seite jederzeit wieder unter „So geht’s“ im Menü.'),
+    h('h2', { class: 'anltitel', style: 'font-size:20px;margin:0' }, rolle === 'vertrieb' ? 'So startest du im Partnerportal' : 'So starten Sie bei Markentrix'),
+    h('p', { class: 'muted' }, 'Zwei kurze Teile: erst die App aufs Handy legen (30 Sekunden), dann sehen Sie, wie Sie im Portal arbeiten. Sie finden diese Seite jederzeit wieder unter „So geht’s“ im Menü.'),
     h('div', { class: 'card' }, h('h2', {}, '1 · App aufs Handy legen'), reiter, installBox, liste),
-    h('div', { class: 'card' }, h('h2', {}, rolle === 'vertrieb' ? '2 · So arbeitest du als Vertriebspartner' : '2 · So arbeitest du mit dem Portal'),
+    h('div', { class: 'card' }, h('h2', {}, rolle === 'vertrieb' ? '2 · So arbeitest du als Vertriebspartner' : '2 · So arbeiten Sie mit dem Portal'),
       h('ol', { class: 'schritte' }, schritte.map((s, i) => schrittKarte(i + 1, s, true)))),
-    h('div', { class: 'card' }, h('h2', {}, 'Fragen?'), h('p', {}, rolle === 'vertrieb' ? 'Melde dich einfach bei Markentrix, wir helfen dir persönlich weiter.' : 'Schreib uns unter „Nachrichten“, wir helfen dir persönlich weiter.'),
+    h('div', { class: 'card' }, h('h2', {}, 'Fragen?'), h('p', {}, rolle === 'vertrieb' ? 'Melde dich einfach bei Markentrix, wir helfen dir persönlich weiter.' : 'Schreiben Sie uns unter „Nachrichten“, wir helfen Ihnen persönlich weiter.'),
       h('button', { class: 'btn', onclick: fertig }, ans.tour_gesehen ? 'Zurück zu „Heute“' : 'Los geht’s')));
 }
 
@@ -164,7 +164,7 @@ export async function qrKarte(rolle, name) {
   const d = await api('/api/admin/portal-qr').catch(() => null);
   if (!d) return '';
   const wer = rolle === 'vertrieb' ? 'Vertriebspartner' : 'Kunden';
-  const text = `Hallo${name ? ' ' + name : ''}, hier ist dein Markentrix-${rolle === 'vertrieb' ? 'Partnerportal' : 'Portal'}: ${d.url}\nAm Handy in Chrome (Android) oder Safari (iPhone) öffnen und anmelden. Danach als App installieren: Android Menü ⋮ → „App installieren“, iPhone Teilen → „Zum Home-Bildschirm“.`;
+  const text = `Hallo${name ? ' ' + name : ''}, hier ist ${rolle === 'vertrieb' ? 'dein' : 'Ihr'} Markentrix-${rolle === 'vertrieb' ? 'Partnerportal' : 'Portal'}: ${d.url}\nAm Handy in Chrome (Android) oder Safari (iPhone) öffnen und anmelden. Danach als App installieren: Android Menü ⋮ → „App installieren“, iPhone Teilen → „Zum Home-Bildschirm“.`;
   const m = h('span', { class: 'small muted' });
   return h('div', { class: 'card' }, h('h2', {}, 'Portal aufs Handy des ' + wer),
     h('p', { class: 'small muted' }, 'Zeig den Code am Bildschirm, der ' + (rolle === 'vertrieb' ? 'Vertriebler' : 'Kunde') + ' scannt ihn mit der Handy-Kamera und landet direkt auf der Anmeldung. Die Anleitung zum Installieren erscheint nach dem ersten Login von selbst.'),

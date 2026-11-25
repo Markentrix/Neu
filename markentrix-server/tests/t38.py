@@ -51,7 +51,7 @@ async def main():
         ctx=await br.new_context(viewport={"width":390,"height":800},bypass_csp=True); pg=await ctx.new_page()
         errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))
         await pg.goto(B+"/"); await pg.fill("#e",mail); await pg.fill("#p",pw); await pg.click("#b"); await pg.wait_for_url("**/app*")
-        await pg.wait_for_selector(".schritt",timeout=6000); chk("Anleitung erscheint beim ersten Start",pg.url.endswith("#willkommen") and await pg.locator(".anltitel").inner_text()=="So startest du bei Markentrix",pg.url)
+        await pg.wait_for_selector(".schritt",timeout=6000); chk("Anleitung erscheint beim ersten Start",pg.url.endswith("#willkommen") and await pg.locator(".anltitel").inner_text()=="So starten Sie bei Markentrix",pg.url)
         await pg.click("text=Los geht’s"); await pg.wait_for_function("location.hash==='#heute'")
         for _ in range(15):
             if c.get("/api/me/ansicht").json()["tour_gesehen"] is True: break

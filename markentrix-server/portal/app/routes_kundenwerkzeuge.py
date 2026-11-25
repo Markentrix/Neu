@@ -55,7 +55,7 @@ def entwuerfe(aid: str, user: dict = Depends(require_kunde)):
     try:
         with tx("kunde", kid) as cur:
             if not modul_aktiv(cur, kid, "anfragen_termine"):
-                raise HTTPException(403, "Dieses Modul ist für dein Konto nicht freigeschaltet.")
+                raise HTTPException(403, "Dieses Modul ist für Ihr Konto nicht freigeschaltet.")
             cur.execute("SELECT id, name, kontakt, nachricht, antwort_am FROM anfragen WHERE id=%s", (aid,))
             a = cur.fetchone()
             if not a:
@@ -112,7 +112,7 @@ def beantwortet(aid: str, data: BeantwortetIn, user: dict = Depends(require_kund
     try:
         with tx("kunde", kid) as cur:
             if not modul_aktiv(cur, kid, "anfragen_termine"):
-                raise HTTPException(403, "Dieses Modul ist für dein Konto nicht freigeschaltet.")
+                raise HTTPException(403, "Dieses Modul ist für Ihr Konto nicht freigeschaltet.")
             cur.execute("UPDATE anfragen SET status='beantwortet', antwort_am=now(), antwort_kanal=%s WHERE id=%s RETURNING id", (data.kanal, aid))
             if not cur.fetchone():
                 raise HTTPException(404, "Anfrage nicht gefunden.")
@@ -186,10 +186,10 @@ def bitte_neu(data: BitteIn, user: dict = Depends(require_kunde)):
     with tx("kunde", kid) as cur:
         e = _einst(cur, kid)
         if not e["bewertungslink"]:
-            raise HTTPException(400, "Bitte hinterlege zuerst deinen Bewertungslink (z. B. den Google-Link).")
+            raise HTTPException(400, "Bitte hinterlegen Sie zuerst Ihren Bewertungslink (z. B. den Google-Link).")
         cur.execute("""SELECT 1 FROM bewertungsanfragen WHERE (name = %s OR empfaenger_kontakt = %s) AND status IN ('geplant','gesendet') AND erstellt_am > now() - interval '90 days'""", (data.name.strip(), data.kontakt.strip()))
         if cur.fetchone():
-            raise HTTPException(409, "Diese Person hast du in den letzten 90 Tagen schon um eine Bewertung gebeten.")
+            raise HTTPException(409, "Diese Person haben Sie in den letzten 90 Tagen schon um eine Bewertung gebeten.")
         text = kw.fuellen(e["bewertungstext"] or kw.STANDARD_BEWERTUNG, name=kw.vorname(data.name), firma=_firma(cur, kid), link=e["bewertungslink"])
         cur.execute("""INSERT INTO bewertungsanfragen (kunden_id, name, empfaenger_kontakt, ausloeser, status, text) VALUES (%s,%s,%s,%s,'geplant',%s) RETURNING id""",
                     (kid, data.name.strip(), data.kontakt.strip(), data.ausloeser, text))
@@ -244,7 +244,7 @@ def ki_vorschlag(aid: str, data: KiVorschlagIn | None = None, user: dict = Depen
     rate_limit(f"ki-vorschlag:{kid}", 40, 86400)
     with tx("kunde", kid) as cur:
         if not modul_aktiv(cur, kid, "anfragen_termine"):
-            raise HTTPException(403, "Dieses Modul ist für dein Konto nicht freigeschaltet.")
+            raise HTTPException(403, "Dieses Modul ist für Ihr Konto nicht freigeschaltet.")
         cur.execute("SELECT name, nachricht FROM anfragen WHERE id=%s", (aid,))
         a = cur.fetchone()
         if not a:

@@ -43,7 +43,7 @@ def bauen(rolle: str, firma: dict) -> bytes:
     inhalt = [p(d["titel"], H1), p(d["untertitel"], KLEIN), pdf.Spacer(1, 8)]
     for t in d["intro"]:
         inhalt += [p(t), pdf.Spacer(1, 4)]
-    inhalt.append(p("So fängst du an", H2))
+    inhalt.append(p("So fangen Sie an", H2))
     inhalt += [p(f"{i}. {s}") for i, s in enumerate(d["start"], 1)]
     inhalt.append(p("Inhalt", H2))
     inhalt += [p(f"{i}. {a['t']}") for i, a in enumerate(d["artikel"], 1)]

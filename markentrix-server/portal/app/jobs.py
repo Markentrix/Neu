@@ -815,7 +815,7 @@ def wochenrueckblick(cfg):
             ids = push.kunde(cur, kid)
             if ids:
                 t = ter.get(kid, 0)
-                push.senden(ids, "Dein Rückblick auf die letzte Woche", "Letzte Woche: " + _trend(a1, a0, "Anfrage", "Anfragen") + (f", {t} Termin" + ("e" if t != 1 else "") if t else "") + ".", "/app#auswertung", "wochenrueckblick")
+                push.senden(ids, "Ihr Rückblick auf die letzte Woche", "Letzte Woche: " + _trend(a1, a0, "Anfrage", "Anfragen") + (f", {t} Termin" + ("e" if t != 1 else "") if t else "") + ".", "/app#auswertung", "wochenrueckblick")
         cur.execute("""SELECT (SELECT count(*) FROM kunden WHERE erstellt_am >= now() - interval '7 days') AS kunden,
                               (SELECT count(*) FROM leads WHERE erstellt_am >= now() - interval '7 days') AS leads,
                               (SELECT count(*) FROM leads WHERE erstellt_am >= now() - interval '14 days' AND erstellt_am < now() - interval '7 days') AS leads0,

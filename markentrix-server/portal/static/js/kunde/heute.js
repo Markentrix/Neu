@@ -33,18 +33,18 @@ export async function antwortDialog(aid, danach) {
   const dlg = dialog('Antworten: ' + (a.name || 'Anfrage'), h('div', {},
     h('p', { class: 'small muted' }, '„' + (a.nachricht || '') + '“'),
     h('p', { class: 'small' }, 'Kontakt: ', h('b', {}, a.kontakt || 'keine Angabe')),
-    h('label', {}, 'Vorlage'), waehler, h('label', {}, 'Text (kannst du anpassen)'), text,
+    h('label', {}, 'Vorlage'), waehler, h('label', {}, 'Text (können Sie anpassen)'), text,
     h('p', {}, h('button', { class: 'btn sec small', type: 'button', onclick: async (e) => {
       const b = /** @type {HTMLButtonElement} */ (e.target); b.disabled = true; b.textContent = 'Der Vorschlag wird geschrieben …';
-      try { const r = await api('/api/kunde/anfragen/' + aid + '/ki-vorschlag', { method: 'POST' }); text.value = r.text; melde(m, 'Das ist ein Entwurf der KI. Bitte lesen und anpassen, bevor du ihn abschickst.', 'info'); } catch (x) { melde(m, x.message); }
+      try { const r = await api('/api/kunde/anfragen/' + aid + '/ki-vorschlag', { method: 'POST' }); text.value = r.text; melde(m, 'Das ist ein Entwurf der KI. Bitte lesen und anpassen, bevor Sie ihn abschicken.', 'info'); } catch (x) { melde(m, x.message); }
       b.disabled = false; b.textContent = '✨ Antwort vorschlagen lassen'; } }, '✨ Antwort vorschlagen lassen')),
     h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px;margin-bottom:6px', role: 'group', 'aria-label': 'Text umschreiben lassen' }, [['kuerzer', 'Kürzer'], ['freundlicher', 'Freundlicher'], ['foermlicher', 'Förmlicher'], ['rueckfrage', 'Mit Rückfrage statt Zusage']].map(([code, name]) =>
       h('button', { class: 'btn sec small', type: 'button', onclick: async (e) => {
         const b = /** @type {HTMLButtonElement} */ (e.target); if (!text.value.trim()) { melde(m, 'Bitte zuerst einen Text wählen oder vorschlagen lassen.', 'info'); return; }
         const davor = text.value; b.disabled = true;
-        try { const r = await api('/api/kunde/anfragen/' + aid + '/ki-vorschlag', { method: 'POST', body: { anweisung: code, text: text.value } }); text.value = r.text; rueck.hidden = false; rueck.onclick = () => { text.value = davor; rueck.hidden = true; }; melde(m, 'Das ist ein Entwurf der KI. Bitte lesen und anpassen, bevor du ihn abschickst.', 'info'); } catch (x) { melde(m, x.message); }
+        try { const r = await api('/api/kunde/anfragen/' + aid + '/ki-vorschlag', { method: 'POST', body: { anweisung: code, text: text.value } }); text.value = r.text; rueck.hidden = false; rueck.onclick = () => { text.value = davor; rueck.hidden = true; }; melde(m, 'Das ist ein Entwurf der KI. Bitte lesen und anpassen, bevor Sie ihn abschicken.', 'info'); } catch (x) { melde(m, x.message); }
         b.disabled = false; } }, name)), rueck), m,
-    h('p', { class: 'small muted' }, 'Das Portal verschickt nichts. Die Schaltflächen öffnen dein eigenes Mail-, WhatsApp- oder SMS-Programm mit dem Text. Danach wird die Anfrage als beantwortet markiert.'),
+    h('p', { class: 'small muted' }, 'Das Portal verschickt nichts. Die Schaltflächen öffnen Ihr eigenes Mail-, WhatsApp- oder SMS-Programm mit dem Text. Danach wird die Anfrage als beantwortet markiert.'),
     h('div', { class: 'heuteknoepfe' },
       a.kontakt ? kanalKnoepfe(a.kontakt, 'Ihre Anfrage', text, markieren) : '',
       a.kontakt && !String(a.kontakt).includes('@') ? h('a', { class: 'btn sec', href: telLink(a.kontakt), onclick: () => { markieren('telefon'); } }, '📞 Anrufen') : '',
@@ -60,8 +60,8 @@ async function umfrageKarte() {
   if (!o.offen) return '';
   const karte = h('div', { class: 'card' }), m = h('div'), kommentar = h('textarea', { rows: 2, maxlength: 1500, placeholder: 'Was läuft gut, was sollten wir besser machen? (freiwillig)', 'aria-label': 'Kommentar' });
   const senden = async (p) => { try { const r = await api('/api/kunde/umfrage/' + o.offen.id, { method: 'POST', body: { punkte: p, kommentar: kommentar.value } });
-    karte.replaceChildren(h('h2', {}, 'Danke für deine Rückmeldung!'), p >= 9 && r.bewertungslink ? h('p', {}, 'Das freut uns sehr. Wenn du magst, hilft uns eine kurze öffentliche Bewertung: ', h('a', { href: r.bewertungslink, target: '_blank', rel: 'noopener' }, 'Bewertung schreiben')) : h('p', { class: 'muted' }, p <= 6 ? 'Wir melden uns persönlich bei dir, um es besser zu machen.' : 'Wir arbeiten weiter daran, noch besser zu werden.')); } catch (x) { melde(m, x.message); } };
-  karte.append(h('h2', {}, 'Wie zufrieden bist du mit Markentrix?'), h('p', { class: 'small muted' }, 'Ein Klick genügt: 0 = gar nicht, 10 = sehr. Das dauert zehn Sekunden.'), m,
+    karte.replaceChildren(h('h2', {}, 'Danke für Ihre Rückmeldung!'), p >= 9 && r.bewertungslink ? h('p', {}, 'Das freut uns sehr. Wenn Sie mögen, hilft uns eine kurze öffentliche Bewertung: ', h('a', { href: r.bewertungslink, target: '_blank', rel: 'noopener' }, 'Bewertung schreiben')) : h('p', { class: 'muted' }, p <= 6 ? 'Wir melden uns persönlich bei Ihnen, um es besser zu machen.' : 'Wir arbeiten weiter daran, noch besser zu werden.')); } catch (x) { melde(m, x.message); } };
+  karte.append(h('h2', {}, 'Wie zufrieden sind Sie mit Markentrix?'), h('p', { class: 'small muted' }, 'Ein Klick genügt: 0 = gar nicht, 10 = sehr. Das dauert zehn Sekunden.'), m,
     h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px;margin:8px 0' }, Array.from({ length: 11 }, (_, i) => h('button', { class: 'btn sec small', style: 'min-width:40px', 'aria-label': i + ' von 10', onclick: () => senden(i) }, String(i)))), kommentar);
   return karte;
 }
@@ -85,7 +85,7 @@ async function wertKarte() {
   const geld = [a.umsatz_erschienen > 0 ? [eur(a.umsatz_erschienen), 'Umsatz aus Terminen, die stattfanden'] : null, a.anzahlungen_summe > 0 ? [eur(a.anzahlungen_summe), 'Anzahlungen erhalten (' + a.anzahlungen_anzahl + ')'] : null].filter(Boolean);
   if (!kacheln.length && !geld.length) return '';
   const kachel = ([zahl, text, vor = 0]) => h('div', { class: 'kachel', style: 'min-width:140px;flex:1' }, h('div', { style: 'font-size:26px;font-weight:700' }, String(zahl)), h('div', { class: 'small' }, text), vor ? h('div', { class: 'small muted' }, 'Vormonat: ' + vor) : '');
-  return h('div', { class: 'card' }, h('h2', {}, 'Das hat Markentrix im ' + w.monat_name + ' für dich getan'),
+  return h('div', { class: 'card' }, h('h2', {}, 'Das hat Markentrix im ' + w.monat_name + ' für Sie getan'),
     h('div', { style: 'display:flex;flex-wrap:wrap;gap:12px' }, geld.map(g => kachel([g[0], g[1]])), kacheln.map(kachel)),
     a.stunden_gespart >= 0.5 ? h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Grobe Schätzung: etwa ' + String(a.stunden_gespart).replace('.', ',') + ' Stunden Arbeit abgenommen (' + w.minuten_je_vorgang + ' Minuten je Vorgang, ' + a.vorgaenge + ' Vorgänge). Mehr dazu unter ', h('a', { href: '#auswertung' }, 'Auswertung'), '.') : '');
 }
@@ -102,7 +102,7 @@ async function ersteWocheKarte() {
     h('div', { class: 'pt' }, h('b', {}, (s.fertig ? '✓ ' : '') + s.titel)), s.fertig ? h('span', { class: 'pill ok' }, 'erledigt') : h('a', { class: 'btn sec small', href: s.link }, s.knopf));
   const geordnet = [...st.filter(x => !x.fertig), ...st.filter(x => x.fertig)], liste = h('ul', { class: 'prio' }, geordnet.slice(0, 3).map(zeile));
   const mehr = geordnet.length > 3 ? h('p', { class: 'small' }, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); liste.replaceChildren(...geordnet.map(zeile)); ev.target.remove(); } }, 'Alle ' + geordnet.length + ' Schritte zeigen')) : '';
-  const karte = h('div', { class: 'card' }, h('h2', {}, 'Deine erste Woche'),
+  const karte = h('div', { class: 'card' }, h('h2', {}, 'Ihre erste Woche'),
     h('p', { class: 'small muted' }, fertig + ' von ' + st.length + ' Schritten erledigt. Jeder dauert nur ein bis zwei Minuten.'),
     h('div', { class: 'fortschritt', role: 'progressbar', 'aria-valuenow': String(pct), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Fortschritt in der ersten Woche' }, h('div', { style: 'width:' + pct + '%' })),
     liste,
@@ -139,28 +139,28 @@ V.heute = async () => {
   };
   const offenA = d.anfragen.length;
   karteAnfragen.append(h('h2', {}, 'Anfragen und Rückrufe', offenA ? h('span', { class: 'badge', style: 'margin-left:8px' }, offenA) : ''),
-    ...(d.modul ? (offenA ? d.anfragen.map(anfrageZeile) : [leerZustand('Alles beantwortet. Neue Anfragen erscheinen hier.')]) : [h('p', { class: 'muted' }, 'Das Modul „Anfragen & Termine“ ist für dein Konto nicht freigeschaltet.')]));
+    ...(d.modul ? (offenA ? d.anfragen.map(anfrageZeile) : [leerZustand('Alles beantwortet. Neue Anfragen erscheinen hier.')]) : [h('p', { class: 'muted' }, 'Das Modul „Anfragen & Termine“ ist für Ihr Konto nicht freigeschaltet.')]));
   karteTermine.append(h('h2', {}, 'Termine heute'), ...(d.termine_heute.length ? d.termine_heute.map(t => terminZeile(t, true)) : [h('p', { class: 'muted' }, 'Heute stehen keine Termine an.')]),
     ...(d.termine_morgen.length ? [h('h3', {}, 'Morgen'), ...d.termine_morgen.map(t => terminZeile(t, false))] : []));
-  const entscheidungen = d.freigaben || d.nachrichten ? h('div', { class: 'card' }, h('h2', {}, 'Wartet auf dich'),
+  const entscheidungen = d.freigaben || d.nachrichten ? h('div', { class: 'card' }, h('h2', {}, 'Wartet auf Sie'),
     d.freigaben ? h('p', {}, h('a', { class: 'btn', href: '#freigaben' }, d.freigaben + (d.freigaben === 1 ? ' Freigabe' : ' Freigaben') + ' prüfen')) : '',
     d.nachrichten ? h('p', {}, h('a', { class: 'btn sec', href: '#nachrichten' }, d.nachrichten + (d.nachrichten === 1 ? ' Nachricht' : ' Nachrichten') + ' vom Team lesen')) : '') : '';
-  const bew = d.bewertung_vorschlaege ? h('div', { class: 'card' }, h('h2', {}, 'Bewertungen'), h('p', {}, d.bewertung_vorschlaege + (d.bewertung_vorschlaege === 1 ? ' Kunde war' : ' Kunden waren') + ' kürzlich bei dir. Du kannst höflich um eine Bewertung bitten.'), h('a', { class: 'btn sec', href: '#bewertungen' }, 'Bitten vorbereiten')) : '';
+  const bew = d.bewertung_vorschlaege ? h('div', { class: 'card' }, h('h2', {}, 'Bewertungen'), h('p', {}, d.bewertung_vorschlaege + (d.bewertung_vorschlaege === 1 ? ' Kunde war' : ' Kunden waren') + ' kürzlich bei Ihnen. Sie können höflich um eine Bewertung bitten.'), h('a', { class: 'btn sec', href: '#bewertungen' }, 'Bitten vorbereiten')) : '';
   const kopf = h('div', { class: 'card' }, h('h2', {}, 'Heute'), h('p', {}, offenA ? h('span', {}, h('b', {}, offenA), (offenA === 1 ? ' Anfrage wartet' : ' Anfragen warten') + ' auf eine Antwort. ') : 'Keine offenen Anfragen. ',
     d.termine_heute.length ? h('span', {}, h('b', {}, d.termine_heute.length), d.termine_heute.length === 1 ? ' Termin heute.' : ' Termine heute.') : 'Heute keine Termine.'),
-    d.rueckrufe.length ? h('p', { class: 'small' }, '📞 ' + d.rueckrufe.length + (d.rueckrufe.length === 1 ? ' Rückruf' : ' Rückrufe') + ' vom Telefon-Assistenten warten auf dich.') : '');
+    d.rueckrufe.length ? h('p', { class: 'small' }, '📞 ' + d.rueckrufe.length + (d.rueckrufe.length === 1 ? ' Rückruf' : ' Rückrufe') + ' vom Telefon-Assistenten warten auf Sie.') : '');
   // Ein einziger nächster Schritt: das Wichtigste zuerst, alles andere steht darunter.
   const aeltesteRueck = d.rueckrufe[0], aeltesteAnfrage = d.anfragen[0];
   const offenTermin = d.termine_heute.find(t => t.status !== 'bestaetigt');
-  const schritt = d.modul && (aeltesteRueck || aeltesteAnfrage) ? { titel: aeltesteRueck ? 'Ruf ' + (aeltesteRueck.name || 'den Kunden') + ' zurück' : 'Beantworte die Anfrage von ' + (aeltesteAnfrage.name || 'einem Interessenten'),
+  const schritt = d.modul && (aeltesteRueck || aeltesteAnfrage) ? { titel: aeltesteRueck ? 'Rufen Sie ' + (aeltesteRueck.name || 'den Kunden') + ' zurück' : 'Beantworten Sie die Anfrage von ' + (aeltesteAnfrage.name || 'einem Interessenten'),
       text: (aeltesteRueck || aeltesteAnfrage).kontakt ? 'Kontakt: ' + (aeltesteRueck || aeltesteAnfrage).kontakt + ' · wartet ' + wartet((aeltesteRueck || aeltesteAnfrage).wartet_h).replace('seit ', '') : 'Die Anfrage wartet auf eine Antwort.', knopf: 'Jetzt antworten', tun: () => antwortDialog((aeltesteRueck || aeltesteAnfrage).id, () => location.reload()) }
-    : offenTermin ? { titel: 'Bestätige den Termin um ' + new Date(offenTermin.beginn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr', text: offenTermin.titel, knopf: 'Zu den Terminen', link: '#termine' }
-    : d.freigaben ? { titel: d.freigaben === 1 ? 'Eine Freigabe wartet auf dich' : d.freigaben + ' Freigaben warten auf dich', text: 'Schau kurz drüber, dann geht es für dich weiter.', knopf: 'Freigaben prüfen', link: '#freigaben' }
-    : d.nachrichten ? { titel: 'Dein Team hat dir geschrieben', text: d.nachrichten + (d.nachrichten === 1 ? ' Nachricht wartet.' : ' Nachrichten warten.'), knopf: 'Nachrichten lesen', link: '#nachrichten' }
-    : d.bewertung_vorschlaege ? { titel: 'Bitte um eine Bewertung', text: d.bewertung_vorschlaege + ' Kunden waren kürzlich bei dir. Eine freundliche Bitte bringt oft eine Bewertung.', knopf: 'Bitten vorbereiten', link: '#bewertungen' } : null;
-  const hero = h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Dein nächster Schritt'),
+    : offenTermin ? { titel: 'Bestätigen Sie den Termin um ' + new Date(offenTermin.beginn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr', text: offenTermin.titel, knopf: 'Zu den Terminen', link: '#termine' }
+    : d.freigaben ? { titel: d.freigaben === 1 ? 'Eine Freigabe wartet auf Sie' : d.freigaben + ' Freigaben warten auf Sie', text: 'Schauen Sie kurz drüber, dann geht es für Sie weiter.', knopf: 'Freigaben prüfen', link: '#freigaben' }
+    : d.nachrichten ? { titel: 'Das Markentrix-Team hat Ihnen geschrieben', text: d.nachrichten + (d.nachrichten === 1 ? ' Nachricht wartet.' : ' Nachrichten warten.'), knopf: 'Nachrichten lesen', link: '#nachrichten' }
+    : d.bewertung_vorschlaege ? { titel: 'Bitte um eine Bewertung', text: d.bewertung_vorschlaege + ' Kunden waren kürzlich bei Ihnen. Eine freundliche Bitte bringt oft eine Bewertung.', knopf: 'Bitten vorbereiten', link: '#bewertungen' } : null;
+  const hero = h('div', { class: 'card hero' }, h('span', { class: 'pill' }, 'Ihr nächster Schritt'),
     schritt ? [h('h2', {}, schritt.titel), h('p', { class: 'muted' }, schritt.text), schritt.link ? h('a', { class: 'btn', href: schritt.link }, schritt.knopf) : h('button', { class: 'btn', onclick: schritt.tun }, schritt.knopf)]
-      : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf dich. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
+      : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf Sie. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
   const weitere = [await umfrageKarte(), bew, await wertKarte()].filter(Boolean);
   const mehr = weitere.length ? h('details', { class: 'heutemehr' }, h('summary', {}, 'Weitere Infos und Rückmeldung'), h('div', { class: 'stack' }, weitere)) : '';
   return h('div', { class: 'stack' }, hero, await einrichtenKarte(), await ersteWocheKarte(), meld, entscheidungen, karteAnfragen, karteTermine, kopf, mehr);
@@ -171,7 +171,7 @@ async function einrichtenKarte() {
   if (!inhaber() || !hat('website')) return '';
   let s; try { s = (await api('/api/kunde/website-dienste')).start; } catch { return ''; }
   if (!s || s.fertig) return '';
-  return h('div', { class: 'card' }, h('h2', {}, 'Deine Website einrichten (' + s.erledigt + ' von ' + s.gesamt + ')'),
-    h('p', { class: 'small muted' }, 'Wir führen dich Schritt für Schritt durch: Anfragen-Adresse, Logo, Signatur und Testmail. Das dauert wenige Minuten.'),
+  return h('div', { class: 'card' }, h('h2', {}, 'Ihre Website einrichten (' + s.erledigt + ' von ' + s.gesamt + ')'),
+    h('p', { class: 'small muted' }, 'Wir führen Sie Schritt für Schritt durch: Anfragen-Adresse, Logo, Signatur und Testmail. Das dauert wenige Minuten.'),
     h('a', { class: 'btn', href: '#einrichten' }, s.erledigt ? 'Weiter einrichten' : 'Jetzt einrichten'));
 }
