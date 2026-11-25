@@ -62,6 +62,10 @@ async def main():
         for w in (390,1280):
             ctx,pg,errs=await login(br,"chef@test.de",ADMPW,"/admin",w)
             await pruefe(pg,"Admin","/admin",ADMIN,w); chk(f"Admin @{w}px: keine JavaScript-Fehler",not errs,errs)
+            # Rechnung aus der Übersicht schreiben
+            await pg.goto(B+"/admin#belege"); await pg.click("button:text-is('+ Rechnung schreiben')"); await pg.wait_for_selector("select[aria-label='Kunde für die Rechnung'] option",timeout=8000)
+            await pg.click("button:text-is('Weiter zum Entwurf')"); await pg.wait_for_function("location.hash.startsWith('#neubeleg/')",timeout=8000); await pg.wait_for_selector("h1",timeout=8000)
+            chk(f"Admin @{w}px: Rechnung schreiben öffnet den Entwurf",location_ok:=await pg.evaluate("location.hash.endsWith('/rechnung')"))
             # Steuerung und Sperrliste
             await pg.goto(B+"/admin#leads"); await pg.wait_for_selector("h2:text('Steuerung und Sperrliste')",timeout=8000)
             chk(f"Admin @{w}px: Steuerungskarte sichtbar",True)

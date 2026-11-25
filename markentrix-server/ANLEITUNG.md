@@ -140,6 +140,8 @@ Beim Anlegen eines Kunden entsteht automatisch eine Checkliste (Vertrag, Zugang,
 
 ## Angebote und Rechnungen
 
+**Rechnung schreiben:** Admin → Angebote & Rechnungen → oben „+ Rechnung schreiben“ (oder beim Kunden unter Angebote & Rechnungen). Kunde wählen, Positionen eintragen, „Ausstellen“ vergibt die Nummer, danach per Mail senden. Rechnungen gibt es nur für Kunden mit Kundenkonto (nicht für Referenzkunden).
+
 **Rechnungen nach Jahr und Steuerberater-Export:** Admin → Angebote & Rechnungen → Karte „Rechnungen nach Jahr“: Umsatz netto/USt/brutto je Monat, bezahlt und offen, Liste aller Rechnungen. „Export für Steuerberater (ZIP)“ liefert den Ordner „Rechnungen <Jahr>“ (oder Monat) mit allen Rechnungen als PDF (Dateiname z. B. `RE-2026-0001_Rechnung_Kundenname.pdf`, mit E-Rechnung) und der Rechnungsliste als CSV. Das ZIP entpackst du in deinen Ordner „Rechnungen 2026“ bzw. „Rechnungen 2027“. Automatisches Ablegen auf dem PC gibt es noch nicht (offen: Abhol-Skript wie bei der Sicherung). Jeder Export steht im Protokoll.
 
 Beim Kunden → Angebote & Rechnungen: Vorlage aus den Buchungen übernehmen, Positionen anpassen, **ausstellen** (vergibt eine lückenlose Nummer, danach nicht mehr änderbar), als PDF herunterladen oder per Mail senden. Rechnungen enthalten einen GiroCode (QR für die Banking-App). Fehler korrigierst du mit einer **Stornorechnung**, nicht durch Ändern. Mahnungen (3 Stufen) gibt es per Knopf, „Bezahlt" setzt du von Hand. Kunden sehen und laden ihre Belege im Portal und können Angebote annehmen.
