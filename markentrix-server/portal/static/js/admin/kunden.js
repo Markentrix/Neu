@@ -123,8 +123,17 @@ V.neu = async () => {
 
 export async function historieKarte(kid) {
   const l = await api('/api/admin/kunden/' + kid + '/historie');
-  return h('div', { class: 'card' }, h('h2', {}, 'Änderungshistorie'), h('p', { class: 'small muted' }, 'Wer hat wann was bei diesem Kunden geändert (letzte 150 Einträge).'),
-    tabelle([['Zeit', z => zeit(z.zeit)], ['Von', z => z.name || z.email || 'System'], ['Aktion', z => z.aktion.replace(/_/g, ' ')], ['Details', z => h('span', { class: 'small muted' }, JSON.stringify(z.details).slice(0, 160))]], l, 'Noch keine Einträge.'));
+  const spalten = [['Zeit', z => zeit(z.zeit)], ['Von', z => z.name || z.email || 'System'], ['Aktion', z => z.aktion.replace(/_/g, ' ')], ['Details', z => h('span', { class: 'small muted' }, JSON.stringify(z.details).slice(0, 160))]];
+  const box = h('div');
+  let sichtbar = 5;
+  const zeichnen = () => {
+    const rest = l.length - sichtbar;
+    box.replaceChildren(tabelle(spalten, l.slice(0, sichtbar), 'Noch keine Änderungen.'),
+      rest > 0 ? h('p', {}, h('button', { class: 'btn sec', type: 'button', onclick: () => { sichtbar += 20; zeichnen(); } }, 'Nächste ' + Math.min(20, rest) + ' anzeigen'), h('span', { class: 'small muted', style: 'margin-left:8px' }, 'noch ' + rest + ' ältere')) : '',
+      sichtbar > 5 ? h('p', {}, h('button', { class: 'btn sec small', type: 'button', onclick: () => { sichtbar = 5; zeichnen(); } }, 'Wieder einklappen')) : '');
+  };
+  zeichnen();
+  return h('div', { class: 'card' }, h('h2', {}, 'Änderungshistorie'), h('p', { class: 'small muted' }, 'Wer hat wann was bei diesem Kunden geändert. Es werden die neuesten 5 gezeigt, ältere bei Bedarf (insgesamt bis zu 150).'), box);
 }
 
 /** Aufgabenpaket (z. B. „Neuer Kunde: 8 Schritte“) mit einem Klick beim Kunden anlegen. */
