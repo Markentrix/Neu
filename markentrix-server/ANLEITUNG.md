@@ -405,6 +405,8 @@ Das Portal ist eine installierbare Web-App. Es gibt keine eigene APK-Datei und k
 ## Website-Dienste: Formular, Termine, PayPal, Bewertungen (Stand Oktober 2026)
 Unsere Kunden-Websites (von uns gebaut, auf unserem Server, Domains bei INWX) nutzen vier Dienste. Der Kunde (Inhaber) trägt seine Daten unter **Website-Dienste** im Kundenportal ein, wir bauen die Bausteine ein.
 
+**Einrichtungs-Assistent (Kundenportal → „Website einrichten“, Karte auf „Heute“):** führt den Inhaber Schritt für Schritt durch Anfragen-Adresse, Logo (Upload durch den Kunden, PNG/JPG bis 400 KB), Signatur (Vorschlag aus den Firmendaten), Testmail und Testanfrage. Zeigt immer nur den nächsten offenen Schritt; „Später“ überspringt. Die Karte verschwindet, wenn die Start-Checkliste fertig ist.
+
 **Leistungen, Anzahlung, Zahlungsstand, Excel (Kundenportal → Website-Dienste):**
 - Je Leistung: Dauer (Pflicht), Pause, Preis, Anzahlung (fester Betrag oder Prozent vom Preis) und das Häkchen „bestätige ich selbst“. Hat die Leistung eine Anzahlung, bekommt der Besucher den PayPal-Link sofort in der Mail, auch bei Sofortbuchung. Bei „bestätige ich selbst“ ist die Zeit nur vorgemerkt, bis der Inhaber bestätigt.
 - „Anzahlung und Absage“: Kostenlos absagen bis X Stunden vorher (Standard 24), danach ist der volle Betrag zu zahlen. Optional eine Frist für die Anzahlung: Ist bis dahin nichts als erhalten markiert, gibt das Portal den Termin frei und informiert Besucher und Betrieb.

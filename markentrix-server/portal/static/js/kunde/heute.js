@@ -1,5 +1,5 @@
 import { h, leerZustand, api, melde, dialog, rueckgaengig, toast } from '../common.js';
-import { V } from './kern.js';
+import { V, hat, inhaber } from './kern.js';
 
 /** Telefonnummer für wa.me: nur Ziffern, deutsche Nummern mit 0 am Anfang bekommen 49. */
 export function whatsappNummer(nr) {
@@ -163,5 +163,15 @@ V.heute = async () => {
       : [h('h2', {}, 'Alles erledigt'), h('p', { class: 'muted' }, 'Es wartet nichts auf dich. Neue Anfragen und Termine erscheinen hier, sobald etwas passiert.'), h('a', { class: 'btn sec', href: '#auswertung' }, 'Meinen Verlauf ansehen')]);
   const weitere = [await umfrageKarte(), bew, await wertKarte()].filter(Boolean);
   const mehr = weitere.length ? h('details', { class: 'heutemehr' }, h('summary', {}, 'Weitere Infos und Rückmeldung'), h('div', { class: 'stack' }, weitere)) : '';
-  return h('div', { class: 'stack' }, hero, await ersteWocheKarte(), meld, entscheidungen, karteAnfragen, karteTermine, kopf, mehr);
+  return h('div', { class: 'stack' }, hero, await einrichtenKarte(), await ersteWocheKarte(), meld, entscheidungen, karteAnfragen, karteTermine, kopf, mehr);
 };
+
+/** Hinweis auf den Einrichtungs-Assistenten, solange die Website noch nicht startklar ist. */
+async function einrichtenKarte() {
+  if (!inhaber() || !hat('website')) return '';
+  let s; try { s = (await api('/api/kunde/website-dienste')).start; } catch { return ''; }
+  if (!s || s.fertig) return '';
+  return h('div', { class: 'card' }, h('h2', {}, 'Deine Website einrichten (' + s.erledigt + ' von ' + s.gesamt + ')'),
+    h('p', { class: 'small muted' }, 'Wir führen dich Schritt für Schritt durch: Anfragen-Adresse, Logo, Signatur und Testmail. Das dauert wenige Minuten.'),
+    h('a', { class: 'btn', href: '#einrichten' }, s.erledigt ? 'Weiter einrichten' : 'Jetzt einrichten'));
+}

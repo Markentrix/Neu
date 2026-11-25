@@ -38,7 +38,7 @@ Einladungen, Passwort-Zurücksetzen, Zwei-Faktor, Passkeys, Anmelde-Links, Team-
 | `routes_loginlink` | 3 | 63 | `main` |
 | `routes_mitarbeiter` | 3 | 71 | `main` |
 | `routes_passkey` | 3 | 128 | `main` |
-| `routes_team` | 3 | 164 | `main` |
+| `routes_team` | 3 | 192 | `main` |
 
 ## Kunden-Websites (`website`)
 

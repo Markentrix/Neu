@@ -162,3 +162,31 @@ def branding(kid: str, data: BrandingIn, user: dict = Depends(require_admin)):
     except errors.InvalidTextRepresentation:
         raise HTTPException(404, "Kunde nicht gefunden.")
     return {"ok": True}
+
+
+class LogoIn(BaseModel):
+    logo_base64: str = Field(min_length=20, max_length=700_000)
+
+
+def _logo_pruefen(b64: str) -> tuple[bytes, str]:
+    try:
+        logo = base64.b64decode(b64.split(",")[-1], validate=True)
+    except Exception:
+        raise HTTPException(400, "Das Logo konnte nicht gelesen werden.")
+    if len(logo) > MAX_LOGO:
+        raise HTTPException(400, "Das Logo ist zu groß (maximal 400 KB).")
+    if logo.startswith(b"\x89PNG\r\n\x1a\n"):
+        return logo, "image/png"
+    if logo.startswith(b"\xff\xd8\xff"):
+        return logo, "image/jpeg"
+    raise HTTPException(400, "Bitte ein Logo als PNG oder JPG hochladen.")
+
+
+@router.put("/website-dienste/logo")
+def kunde_logo(data: LogoIn, user: dict = Depends(require_inhaber)):
+    """Der Inhaber lädt sein Logo für die Mails selbst hoch (PNG oder JPG, bis 400 KB)."""
+    logo, typ = _logo_pruefen(data.logo_base64)
+    with tx("system") as cur:
+        cur.execute("UPDATE kunden SET logo=%s, logo_typ=%s WHERE id=%s", (logo, typ, user["kunden_id"]))
+        audit(cur, user, "website_dienste_logo", user["kunden_id"])
+    return {"ok": True}

@@ -91,6 +91,7 @@ function startKarte(s) {
   if (!s || s.fertig) return '';
   return h('div', { class: 'card' }, h('h2', {}, 'So startet deine Website richtig (' + s.erledigt + ' von ' + s.gesamt + ')'),
     h('p', { class: 'small muted' }, 'Diese Punkte prüfen wir laufend. Sobald alles erledigt ist, verschwindet diese Karte.'),
+    h('p', {}, h('a', { class: 'btn', href: '#einrichten' }, 'Schritt für Schritt einrichten')),
     s.punkte.map(p => h('div', { style: 'margin:6px 0' }, h('span', { class: 'pill ' + (p.erledigt ? 'ok' : 'warn') }, p.erledigt ? 'erledigt' : 'offen'), ' ', h('b', {}, p.titel), p.erledigt ? '' : h('div', { class: 'small muted' }, p.hinweis))));
 }
 
