@@ -157,18 +157,39 @@ V.belege = async () => {
     h('p', { class: 'small muted' }, 'Hinweis: Ausgestellte Rechnungen sind E-Rechnungen im Format ZUGFeRD (PDF mit eingebetteten Rechnungsdaten, Profil EN 16931). Ab 2027/2028 gelten für Rechnungen zwischen Unternehmen schrittweise Pflichten zur E-Rechnung; bitte mit der Steuerberatung abstimmen.'));
 };
 
-/** Rechnung aus der Übersicht schreiben: Kunde wählen, dann öffnet sich der Entwurf mit der Vorlage aus den Buchungen. */
+/** Rechnung aus der Übersicht schreiben: vorhandenen Kunden wählen oder neuen Kunden anlegen, dann öffnet sich der Entwurf. */
 async function neueRechnung() {
-  const kunden = (await api('/api/admin/kunden').catch(() => [])).filter(z => !z.referenzkunde);
+  const kunden = await api('/api/admin/kunden').catch(() => []);
   const m = h('p', { class: 'small', role: 'status' });
   const suche = h('input', { type: 'search', placeholder: 'Kunde suchen (Name oder Nummer)', 'aria-label': 'Kunde suchen', autocomplete: 'off' });
-  const wahl = h('select', { 'aria-label': 'Kunde für die Rechnung', size: 8, style: 'width:100%' });
-  const fuell = () => { const q = suche.value.trim().toLowerCase(); wahl.replaceChildren(...kunden.filter(z => !q || (z.firma + ' ' + (z.kundennummer || '')).toLowerCase().includes(q)).slice(0, 200).map(z => h('option', { value: z.id }, (z.kundennummer ? z.kundennummer + ' · ' : '') + z.firma))); if (wahl.options.length) wahl.selectedIndex = 0; };
+  const wahl = h('select', { 'aria-label': 'Kunde für die Rechnung', size: 9, style: 'width:100%' });
+  const fuell = () => {
+    const q = suche.value.trim().toLowerCase();
+    wahl.replaceChildren(...kunden.filter(z => !q || (z.firma + ' ' + (z.kundennummer || '')).toLowerCase().includes(q)).slice(0, 300)
+      .map(z => h('option', { value: z.id, disabled: !!z.referenzkunde }, (z.kundennummer ? z.kundennummer + ' · ' : '') + z.firma + (z.referenzkunde ? ' (Referenzkunde, keine Rechnung möglich)' : ''))));
+    const frei = [...wahl.options].find(o => !o.disabled); if (frei) frei.selected = true;
+  };
   suche.oninput = fuell; fuell();
+  const feld = (label, name, extra = {}) => h('div', {}, h('label', {}, label), h('input', { name, autocomplete: 'off', ...extra }));
+  const neuForm = h('form', { class: 'stack', hidden: true, onsubmit: (e) => e.preventDefault() },
+    h('div', { class: 'form2' }, feld('Firma / Name *', 'firma'), feld('Ansprechpartner', 'ansprechpartner')),
+    feld('Straße und Hausnummer', 'strasse'), h('div', { class: 'form2' }, feld('PLZ', 'plz', { maxlength: 10 }), feld('Ort', 'ort')), feld('E-Mail (für den Rechnungsversand)', 'email', { type: 'email' }));
+  const liste = h('div', { class: 'stack' }, h('p', { class: 'small muted' }, kunden.length + ' Kunden. Referenzkunden (kostenlose Website gegen Nennung) sind für Rechnungen gesperrt.'), suche, wahl);
+  const umschalter = h('button', { class: 'btn sec', type: 'button' }, '+ Neuen Kunden anlegen');
+  let neu = false;
+  umschalter.onclick = () => { neu = !neu; neuForm.hidden = !neu; liste.hidden = neu; umschalter.textContent = neu ? '← Zurück zur Kundenliste' : '+ Neuen Kunden anlegen'; weiter.textContent = neu ? 'Kunde anlegen und weiter zur Rechnung' : 'Weiter zum Entwurf'; m.textContent = ''; };
+  const weiter = h('button', { class: 'btn', onclick: async (e) => {
+    if (!neu) { if (!wahl.value) { melde(m, 'Bitte einen Kunden wählen.'); return; } location.hash = '#neubeleg/' + wahl.value + '/rechnung'; return; }
+    const d = Object.fromEntries(new FormData(neuForm)); if (!String(d.firma).trim()) { melde(m, 'Bitte Firma oder Name eintragen.'); return; }
+    e.target.disabled = true;
+    try {
+      const r = await api('/api/admin/kunden', { method: 'POST', body: { firma: String(d.firma).trim(), ansprechpartner: d.ansprechpartner || null, strasse: d.strasse || null, plz: d.plz || null, ort: d.ort || null, email: d.email || null } });
+      location.hash = '#neubeleg/' + r.id + '/rechnung';
+    } catch (x) { e.target.disabled = false; melde(m, x.message); }
+  } }, 'Weiter zum Entwurf');
   dialog('Rechnung schreiben', h('div', { class: 'stack' },
-    h('p', { class: 'small muted' }, 'Wähle den Kunden. Danach siehst du den Entwurf: Positionen eintragen, prüfen und ausstellen. Erst beim Ausstellen bekommt die Rechnung ihre Nummer. Für Rechnungen an Personen ohne Kundenkonto lege zuerst unter „Neuer Kunde“ den Kunden an.'),
-    suche, wahl, m,
-    h('button', { class: 'btn', onclick: () => { if (!wahl.value) { melde(m, 'Bitte einen Kunden wählen.'); return; } location.hash = '#neubeleg/' + wahl.value + '/rechnung'; } }, 'Weiter zum Entwurf')));
+    h('p', { class: 'small muted' }, 'Wähle einen Kunden oder lege einen neuen an. Danach siehst du den Entwurf: Positionen eintragen, prüfen und ausstellen. Erst beim Ausstellen bekommt die Rechnung ihre Nummer.'),
+    liste, neuForm, m, umschalter, weiter));
 }
 
 export async function belegEditor(id, kid, art) {
