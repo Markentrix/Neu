@@ -53,7 +53,7 @@ Website-API, Terminbuchung, Online-Shop, Gutscheine, Upload, Domains, Statusseit
 | `livecheck` | 2 | 187 | `routes_webupload`, `webbetrieb` |
 | `publish` | 2 | 221 | `routes_admin`, `routes_angebotsinhalte`, `routes_domains`, `routes_kunde` |
 | `shop` | 2 | 132 | `routes_shop` |
-| `sitedienste` | 2 | 880 | `funnelcheck`, `routes_betriebplus`, `routes_buchungsvorlagen`, `routes_leistungsfreigabe` und 8 weitere |
+| `sitedienste` | 2 | 887 | `funnelcheck`, `routes_betriebplus`, `routes_buchungsvorlagen`, `routes_leistungsfreigabe` und 8 weitere |
 | `webbetrieb` | 2 | 552 | `berichte`, `domaincheck`, `jobs`, `routes_kundenampel` und 6 weitere |
 | `routes_angebotsinhalte` | 3 | 221 | `main` |
 | `routes_buchungsvorlagen` | 3 | 47 | `main` |

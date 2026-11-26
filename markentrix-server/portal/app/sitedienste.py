@@ -203,9 +203,9 @@ def ereignis(kid, art: str, ok: bool, hinweis: str = ""):
             from . import fehlerhilfe
             tipp = fehlerhilfe.kurztipp(hinweis)
             if tipp:
-                hinweis = hinweis[:200].rstrip() + " " + tipp
+                hinweis = hinweis[:260].rstrip() + " " + tipp
         with tx("system") as cur:
-            cur.execute("INSERT INTO website_ereignisse (kunden_id, art, ok, hinweis) VALUES (%s,%s,%s,%s)", (kid, art, ok, hinweis[:300] or None))
+            cur.execute("INSERT INTO website_ereignisse (kunden_id, art, ok, hinweis) VALUES (%s,%s,%s,%s)", (kid, art, ok, hinweis[:420] or None))
             cur.execute("DELETE FROM website_ereignisse WHERE kunden_id=%s AND zeit < now() - interval '90 days'", (kid,))
             cur.execute("DELETE FROM website_termine WHERE kunden_id=%s AND ende < now() - interval '180 days'", (kid,))
             cur.execute("""DELETE FROM website_gutscheine WHERE kunden_id=%s AND erstellt_am < now() - interval '400 days'
@@ -844,7 +844,7 @@ def places_holen(api_key: str, place_id: str) -> dict:
                 grund = (g.get("status", "") + ": " + g.get("message", "")).strip(": ")[:300]
             except (ValueError, OSError, AttributeError):
                 pass
-            raise ValueError("Google lehnt die Abfrage ab (Schlüssel, Abrechnung oder Places-API (New) bei Markentrix nicht aktiv)." + (" Google sagt: " + grund if grund else ""))
+            raise ValueError("Google lehnt die Abfrage ab" + (": " + grund if grund else " (Schlüssel, Abrechnung oder Places-API (New) bei Markentrix nicht aktiv)."))
         raise ValueError(f"Google meldet einen Fehler ({e.code}).")
     except (urllib.error.URLError, OSError, ValueError):
         raise ValueError("Google ist gerade nicht erreichbar.")
@@ -854,6 +854,14 @@ def places_holen(api_key: str, place_id: str) -> dict:
         rev.append({"autor": ((x.get("authorAttribution") or {}).get("displayName") or "Google-Nutzer")[:60], "sterne": int(x.get("rating") or 0),
                     "text": t[:400], "wann": (x.get("relativePublishTimeDescription") or "")[:40]})
     return {"sterne": round(float(d.get("rating") or 0), 1), "anzahl": int(d.get("userRatingCount") or 0), "link": d.get("googleMapsUri") or "", "bewertungen": rev}
+
+
+def bew_speichern(kid, cache: dict):
+    """Google-Daten ablegen und den Erfolg melden; sonst bleibt die Kunden-Ampel nach einer Behebung bis zu 7 Tage rot."""
+    with tx("system") as cur:
+        cur.execute("UPDATE website_dienste SET bew_cache=%s::jsonb, bew_stand=now() WHERE kunden_id=%s", (json.dumps(cache), kid))
+    _BEW_FEHLER.pop(kid, None)
+    ereignis(kid, "bewertungen", True)
 
 
 def bewertungen_fuer(z: dict) -> dict:
@@ -870,8 +878,7 @@ def bewertungen_fuer(z: dict) -> dict:
             if key:
                 try:
                     cache = places_holen(key, z["bew_place_id"])
-                    with tx("system") as cur:
-                        cur.execute("UPDATE website_dienste SET bew_cache=%s::jsonb, bew_stand=now() WHERE kunden_id=%s", (json.dumps(cache), z["kunden_id"]))
+                    bew_speichern(z["kunden_id"], cache)
                 except ValueError as e:
                     _BEW_FEHLER[z["kunden_id"]] = datetime.now(timezone.utc)
                     ereignis(z["kunden_id"], "bewertungen", False, str(e))

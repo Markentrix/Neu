@@ -1041,8 +1041,7 @@ def k_bew_test(user: dict = Depends(require_inhaber)):
         r = sd.places_holen(key, z["bew_place_id"])
     except ValueError as e:
         raise HTTPException(400, str(e))
-    with tx("system") as cur:
-        cur.execute("UPDATE website_dienste SET bew_cache=%s::jsonb, bew_stand=now() WHERE kunden_id=%s", (json.dumps(r), kid))
+    sd.bew_speichern(kid, r)
     return {"ok": True, "sterne": r["sterne"], "anzahl": r["anzahl"]}
 
 
@@ -2264,6 +2263,7 @@ def a_places(data: PlacesIn, user: dict = Depends(require_admin)):
         key = data.api_key.strip() or alt.get("api_key", "")
         einstellungen.schreiben(cur, "places", {"api_key": key})
         audit(cur, user, "einstellungen_places", None, {"gesetzt": bool(key)})
+    sd._BEW_FEHLER.clear()      # neuer Schlüssel: sofort wieder bei Google fragen, nicht erst nach 30 Minuten
     return {"ok": True}
 
 
