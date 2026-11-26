@@ -247,7 +247,7 @@ export async function belegEditor(id, kid, art) {
       } }, 'PDF ansehen')
       : h('a', { class: 'btn sec small', href: pdfUrl, target: '_blank', rel: 'noopener' }, 'PDF ansehen'));
     if (b.art === 'angebot') knoepfe.push(aktion('Angebot kopieren', '/api/admin/belege/' + id + '/kopie', {}, (r) => { location.hash = '#beleg/' + r.id; }, 'sec', 'Neuen Entwurf mit denselben Positionen und Texten anlegen?'));
-    if (b.status === 'entwurf') knoepfe.push(speichern, aktion('Ausstellen', '/api/admin/belege/' + id + '/ausstellen', {}, (r) => { melde(m, 'Ausgestellt als ' + r.nummer + '.', 'ok'); setTimeout(neu, 700); }, 'btn',
+    if (b.status === 'entwurf') knoepfe.push(speichern, aktion('Ausstellen', '/api/admin/belege/' + id + '/ausstellen', {}, (r) => { melde(m, 'Ausgestellt als ' + r.nummer + '.' + (r.hinweis ? ' Achtung: ' + r.hinweis : ''), r.hinweis ? 'warn' : 'ok'); setTimeout(neu, r.hinweis ? 6000 : 700); }, 'btn',
       'Beleg jetzt ausstellen? Danach bekommt er eine feste Nummer und kann nicht mehr geändert werden.'),
       knopf('Entwurf löschen', async () => { if (confirm('Entwurf löschen?')) { try { await api('/api/admin/belege/' + id, { method: 'DELETE' }); location.hash = '#belege'; } catch (x) { fehler(m, x); } } }, 'bad'));
     if (['gestellt', 'versendet'].includes(b.status)) knoepfe.push(aktion(b.versendet_am ? 'Erneut per Mail senden' : 'Per Mail an Kunden senden', '/api/admin/belege/' + id + '/senden', {}, (r) => { melde(m, r.gesendet ? 'Per E-Mail gesendet.' : 'Nicht gesendet: ' + r.grund, r.gesendet ? 'ok' : 'err'); if (r.gesendet) setTimeout(neu, 800); }, 'btn'));

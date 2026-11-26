@@ -257,7 +257,8 @@ def ausstellen(bid: str, data: AusstellenIn | None = None, user: dict = Depends(
                               empfaenger=%s::jsonb, geaendert_am=now() WHERE id=%s""",
                     (nummer, heute, ziel, s["netto_cent"], s["ust_satz"], s["ust_cent"], s["brutto_cent"], f["kleinunternehmer"], json.dumps(belege.empfaenger_von(cur, b["kunden_id"])), bid))
         audit(cur, user, "beleg_ausgestellt", b["kunden_id"], {"nummer": nummer})
-    return {"nummer": nummer}
+    hinweis = belege.firmendaten_hinweis(f) if b["art"] == "rechnung" else None
+    return {"nummer": nummer, **({"hinweis": hinweis} if hinweis else {})}
 
 
 @router.post("/belege/{bid}/senden")

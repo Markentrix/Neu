@@ -51,7 +51,10 @@ tok=re.search(r"token=([A-Za-z0-9_-]+)",[x for x in mails()] and "")  # placehol
 # --- Rechnung aus Angebot
 r=a.post(f"/api/admin/belege/{ang}/rechnung"); chk("rechnung aus angebot",r.status_code==200,r.text); re_id=r.json()["id"]
 # Firmendaten fehlen Steuernummer → blockiert
-r=a.post(f"/api/admin/belege/{re_id}/ausstellen"); chk("ohne Steuernummer blockiert",r.status_code==400 and "Steuernummer" in r.text,r.text)
+a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","zahlungsziel_tage":14,"mwst_satz":19,"kleinunternehmer":False})
+o_id=a.post(f"/api/admin/kunden/{kid}/belege",json={"art":"rechnung","positionen":[{"text":"Ohne Steuernummer","menge":1,"preis_cent":5000}]}).json()["id"]
+r=a.post(f"/api/admin/belege/{o_id}/ausstellen"); chk("ohne Steuernummer nicht blockiert, aber mit Warnhinweis",r.status_code==200 and "Steuernummer" in (r.json().get("hinweis") or ""),r.text)
+chk("ohne Steuernummer: PDF trotzdem erzeugbar",a.get(f"/api/admin/belege/{o_id}/pdf").content[:4]==b"%PDF")
 a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","steuernummer":"12/345/67890","iban":"DE89370400440532013000","bic":"COBADEFFXXX","bank":"Testbank","zahlungsziel_tage":14,"mwst_satz":19,"kleinunternehmer":False})
 r=a.post(f"/api/admin/belege/{re_id}/ausstellen"); jahr=time.strftime("%Y"); chk("rechnung nummer",r.status_code==200 and re.match(rf"RE-{jahr}-\d{{4}}$",r.json()["nummer"]),r.text); renr=r.json()["nummer"]
 d=a.get(f"/api/admin/belege/{re_id}").json()["beleg"]

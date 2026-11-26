@@ -609,7 +609,7 @@
       ],
       "n": [
         "Nicht abgerechnet werden Referenzkunden, nicht aktive Kunden und Kunden nach Vertragsende.",
-        "Voraussetzung sind vollständige Firmendaten inklusive Steuernummer oder USt-IdNr."
+        "Voraussetzung sind Firmenname und Anschrift; Steuernummer oder USt-IdNr. sollten eingetragen sein (sonst Warnhinweis)."
       ]
     },
     {
@@ -840,7 +840,7 @@
         "Export für die Buchhaltung: „Rechnungen als CSV exportieren“ (für sevDesk)."
       ],
       "n": [
-        "Ohne Steuernummer oder USt-IdNr in den Firmendaten lässt das Portal keine Rechnung ausstellen.",
+        "Fehlt die Steuernummer oder USt-IdNr in den Firmendaten, stellt das Portal die Rechnung trotzdem aus, zeigt aber einen Warnhinweis. Die Angabe steht dann nicht auf der Rechnung, und es gibt keine E-Rechnungsdaten (ZUGFeRD). Rechtlich bitte klären lassen.",
         "Entscheide, ob du Rechnungen im Portal oder in sevDesk erstellst, und halte es einheitlich (gleiche Nummernkreise). Referenzkunden bekommen keine Rechnungen.",
         "Das Portal erzeugt PDF-Rechnungen, keine strukturierte E-Rechnung (ZUGFeRD/XRechnung). Ab wann das für dich gilt, klärt die Steuerberatung."
       ]
@@ -1027,7 +1027,7 @@
       "wo": "Menü „Einstellungen“ → „Firmendaten“ und „Impressum und Datenschutz“",
       "l": "#einstellungen",
       "s": [
-        "Trage Name, Inhaber, Anschrift, E-Mail, Telefon, Steuernummer oder USt-IdNr, Bankverbindung (IBAN), Zahlungsziel, Umsatzsteuersatz ein und ob du Kleinunternehmer (§ 19 UStG) bist. Ohne Steuernummer oder USt-IdNr lässt das Portal keine Rechnung ausstellen.",
+        "Trage Name, Inhaber, Anschrift, E-Mail, Telefon, Steuernummer oder USt-IdNr, Bankverbindung (IBAN), Zahlungsziel, Umsatzsteuersatz ein und ob du Kleinunternehmer (§ 19 UStG) bist. Ohne Steuernummer oder USt-IdNr stellt das Portal die Rechnung mit Warnhinweis aus (ohne E-Rechnungsdaten).",
         "Aus diesen Daten entstehen Rechnungen, Angebote, das Impressum (/impressum) und die Datenschutzerklärung (/datenschutz). Beide sind ohne Login erreichbar und in der Anmeldeseite verlinkt.",
         "„Bedingungen unter jedem Angebot“ erscheinen im PDF und auf der Online-Seite des Angebots.",
         "Unter „Impressum und Datenschutz“ kannst du eigene Texte hinterlegen. Hast du eine eigene Datenschutzerklärung, erscheint ein Hinweis mit „Satz am Ende einfügen“, solange die Nutzungsstatistik dort nicht genannt wird.",
@@ -1710,7 +1710,7 @@
     ],
     [
       "Warum kann ich keine Rechnung ausstellen?",
-      "Vermutlich fehlt in den Firmendaten die Steuernummer oder USt-IdNr. Ohne sie lässt das Portal keine Rechnung zu (Einstellungen → „Firmendaten“)."
+      "Vermutlich fehlen in den Firmendaten Firmenname oder Anschrift (Einstellungen → „Firmendaten“). Fehlt nur die Steuernummer oder USt-IdNr., wird die Rechnung mit Warnhinweis ausgestellt."
     ],
     [
       "Wie buche ich einen Zahlungseingang?",

@@ -59,10 +59,17 @@ def firmendaten_pruefen(f: dict):
     fehlt = []
     if not (f["name"] and f["strasse"] and f["plz"] and f["ort"]):
         fehlt.append("Firmenname und Anschrift")
-    if not (f["steuernummer"] or f["ustid"]):
-        fehlt.append("Steuernummer oder USt-IdNr.")
     if fehlt:
         raise HTTPException(400, "Bitte zuerst unter Einstellungen → Firmendaten eintragen: " + ", ".join(fehlt) + ".")
+
+
+STEUER_HINWEIS = ("In den Firmendaten fehlt die Steuernummer oder USt-IdNr. Die Rechnung wurde trotzdem ausgestellt, "
+                  "enthält diese Angabe aber nicht und hat keine E-Rechnungsdaten (ZUGFeRD). Bitte rechtlich klären lassen und die Angabe nachtragen, sobald sie vorliegt.")
+
+
+def firmendaten_hinweis(f: dict) -> str | None:
+    """Warnung statt Sperre: Rechnungen gehen auch ohne Steuernummer/USt-IdNr. durch (z. B. Gründer, deren Nummer noch aussteht)."""
+    return None if (f.get("steuernummer") or f.get("ustid")) else STEUER_HINWEIS
 
 
 def _epc_text(f: dict, beleg: dict):

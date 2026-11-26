@@ -82,3 +82,6 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - [ ] **Spracheingabe** (optional, je Gerät vom Nutzer einzuschalten): Der Browser (Chrome: Google) verarbeitet die Aufnahme. Reicht der Hinweis im Einschalten-Fenster, brauchen Kunden-, Lead- und Vertriebsdaten eine zusätzliche Regelung (AVV, Drittlandübermittlung)? Oder Funktion für Kundenportal sperren?
 - [ ] **Teilen mit Markentrix:** Geteilte Dateien liegen kurz im Zwischenspeicher des Browsers auf dem Gerät und werden nach dem Senden gelöscht. Genügt das als technische Maßnahme?
 
+
+## Rechnungen ohne Steuernummer/USt-IdNr. (26.11.2026)
+Das Portal stellt Rechnungen auch ohne Steuernummer oder USt-IdNr. aus (nur Warnhinweis, keine E-Rechnungsdaten). Zu klären: Ist das zulässig (§ 14 Abs. 4 UStG, Vorsteuerabzug des Empfängers, E-Rechnungspflicht), etwa für Gründer, deren Nummer noch aussteht? Gegebenenfalls Vermerk auf der Rechnung ergänzen.
