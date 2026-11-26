@@ -777,10 +777,24 @@
         .then(function (j) { if (j && j.bewertungen && j.bewertungen.length) render(j, true); else fallback(); })
         .catch(function () { fallback(); });
     }
-    fetch('/api/bewertungen.php', { headers: { Accept: 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { if (!j || !j.ok || !j.bewertungen || !j.bewertungen.length) { manuell(); return; } render(j, false); })
-      .catch(function () { manuell(); });
+    function eigenerServer() {
+      fetch('/api/bewertungen.php', { headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { if (!j || !j.ok || !j.bewertungen || !j.bewertungen.length) { manuell(); return; } render(j, false); })
+        .catch(function () { manuell(); });
+    }
+    /* 1. Quelle: Markentrix-Portal (hält die Google-Bewertungen selbst aktuell). Nur der Abruf der Bewertungen, nicht das ganze Portal-Skript
+       (das brächte ein zweites Statistik-Banner mit). Die Site-ID steht im Abschnitt (data-rev-site), ohne sie wird diese Quelle übersprungen. */
+    var site = sec.getAttribute('data-rev-site');
+    if (site && /^mk_[A-Za-z0-9_-]{4,80}$/.test(site)) {
+      fetch('https://portal.markentrix.de/site/' + encodeURIComponent(site) + '/bewertungen', { credentials: 'omit', headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (q) {
+          if (!q || !q.aktiv || !q.bewertungen || !q.bewertungen.length) { eigenerServer(); return; }
+          render({ gesamt: q.sterne, anzahl: q.anzahl, profil: sec.getAttribute('data-rev-read'), bewertungen: q.bewertungen.map(function (r) { return { name: r.autor, sterne: r.sterne, text: r.text, zeit: r.wann }; }) }, false);
+        })
+        .catch(function () { eigenerServer(); });
+    } else eigenerServer();
     /* Ohne Daten von Google (Schlüssel nicht eingerichtet): ehrliche Kurzfassung mit der bestätigten Anzahl und Link zu Google, ohne Sterne und ohne Zitate */
     function fallback() {
       var cnt = parseInt(sec.getAttribute('data-rev-count'), 10), read = sec.getAttribute('data-rev-read'); if (!cnt || !sum) return;
