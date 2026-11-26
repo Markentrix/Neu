@@ -938,6 +938,78 @@
     });
   });
 
+  /* ---------------------------------------------------------------- Google-Bewertungen live (Portal-Baustein)
+     Das Portal füllt [data-mk="bewertungen"] mit den aktuellen Google-Bewertungen (Places-Schnittstelle, serverseitig).
+     Hier werden die Werte in die Gestaltung der Seite übernommen: Zahlen in [data-mk-bew], Rezensionen als Karten.
+     Nur textContent, kein innerHTML. Liefert das Portal nichts, bleiben feste Zahlen und ausgewählte Rezensionen stehen. */
+  var bewSlots = $$('[data-mk="bewertungen"]');
+  function bewZahl(v) { return EN ? v.toFixed(1) : v.toFixed(1).replace(".", ","); }
+  function bewSetzen(sterne, anzahl) {
+    $$('[data-mk-bew="sterne"]').forEach(function (e) { e.textContent = bewZahl(sterne); });
+    if (anzahl) $$('[data-mk-bew="anzahl"]').forEach(function (e) { e.textContent = String(anzahl); });
+    $$('[data-mk-bew="stand"]').forEach(function (e) { e.hidden = true; });
+  }
+  function bewKarten(slot, box) {
+    var grid = $("#bewertungen .review-grid"), tpl = grid && $(".review-card .stars", grid), karten = [];
+    if (!grid || !tpl) return false;
+    $$(".mk-bew", box).forEach(function (b) {
+      var st = $(".mk-sterne", b), p = $("p", b), wer = $(".mk-klein", b);
+      var text = p ? p.textContent.trim().replace(/^„/, "").replace(/“$/, "").trim() : "";
+      var n = st ? (st.textContent.match(/★/g) || []).length : 0;
+      if (!text || !wer || !n) return;
+      var w = wer.textContent.split(" · "), wann = w.length > 1 ? w.pop() : "";
+      var fig = document.createElement("figure"), stars = tpl.cloneNode(true), q = document.createElement("blockquote"), cap = document.createElement("figcaption"), sp = document.createElement("span");
+      fig.className = "review-card review-card--live";
+      $$("svg", stars).forEach(function (s, i) { if (i >= n) s.classList.add("is-off"); });
+      stars.setAttribute("role", "img"); stars.removeAttribute("aria-hidden");
+      stars.setAttribute("aria-label", t("{n} von 5 Sternen", { n: n }));
+      q.textContent = text;
+      cap.textContent = w.join(" · ") + " ";
+      var nw = document.createElement("span");
+      sp.textContent = "· " + (wann && !EN ? wann + " · " : "");
+      nw.className = "nowrap"; nw.textContent = t("Google-Rezension");
+      sp.appendChild(nw); cap.appendChild(sp);
+      fig.appendChild(stars); fig.appendChild(q); fig.appendChild(cap);
+      karten.push(fig);
+    });
+    if (!karten.length) return false;
+    grid.textContent = "";
+    karten.forEach(function (k) { grid.appendChild(k); });
+    grid.classList.add("is-live");
+    /* Lange Rezensionen: gekürzt mit „Weiterlesen“, damit die Karten ruhig bleiben */
+    karten.forEach(function (k) {
+      var q = $("blockquote", k);
+      if (q.scrollHeight <= q.clientHeight + 2) return;
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "review-more"; b.setAttribute("aria-expanded", "false"); b.textContent = t("Weiterlesen");
+      b.addEventListener("click", function () { var o = k.classList.toggle("is-open"); b.setAttribute("aria-expanded", o ? "true" : "false"); b.textContent = o ? t("Weniger anzeigen") : t("Weiterlesen"); });
+      k.insertBefore(b, $("figcaption", k));
+    });
+    $$("[data-bew-fest]").forEach(function (e) { e.hidden = true; });
+    $$("[data-bew-live]").forEach(function (e) { e.hidden = false; });
+    return true;
+  }
+  function bewLesen(slot) {
+    var box = $(".mk-box", slot);
+    if (!box || slot.getAttribute("data-bew") === "ok") return;
+    var kopf = null;
+    $$("p", box).forEach(function (p) { if (!kopf && !p.closest(".mk-bew") && /von 5/.test(p.textContent)) kopf = p; });
+    var m = kopf && kopf.textContent.match(/([\d]+(?:[.,]\d+)?)\s*von 5(?:\s*·\s*(\d+))?/);
+    var sterne = m ? parseFloat(m[1].replace(",", ".")) : NaN, anzahl = m && m[2] ? parseInt(m[2], 10) : 0;
+    if (!isFinite(sterne) || sterne < 1 || sterne > 5) return;
+    slot.setAttribute("data-bew", "ok");
+    bewSetzen(sterne, anzahl);
+    /* Eigene Karten statt der Standardansicht des Portals; gelingt das nicht, bleibt die Portal-Ansicht sichtbar */
+    if (!slot.hasAttribute("data-bew-nur-zahlen") && bewKarten(slot, box)) slot.classList.add("is-bridged");
+  }
+  bewSlots.forEach(function (slot) {
+    if (!("MutationObserver" in window)) return;
+    var mo = new MutationObserver(function () { bewLesen(slot); if (slot.getAttribute("data-bew") === "ok") mo.disconnect(); });
+    mo.observe(slot, { childList: true, subtree: true });
+    bewLesen(slot);
+    setTimeout(function () { mo.disconnect(); }, 20000);
+  });
+
   /* ---------------------------------------------------------------- Einblenden beim Scrollen */
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!reduce && "IntersectionObserver" in window) {

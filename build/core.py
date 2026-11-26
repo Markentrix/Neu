@@ -53,6 +53,14 @@ I = {
 STARS5 = '<div class="stars" aria-hidden="true">' + I["star"] * 5 + "</div>"
 
 
+def bew(site, key):
+    """Bewertungswert mit Platzhalter fürs Portal (data-mk-bew): der feste Wert bleibt als Rückfall stehen,
+    sobald das Portal aktuelle Google-Zahlen liefert, ersetzt das Skript ihn; „stand“ wird dann ausgeblendet."""
+    r = site.s["rating"]
+    v = {"sterne": ESC(r["value"]), "anzahl": str(r["count"]), "stand": f"(Stand {ESC(r['asOf'])})"}[key]
+    return f'<span data-mk-bew="{key}">{v}</span>'
+
+
 # --------------------------------------------------------------------------- Inhalte
 class Site:
     def __init__(self, content_dir):

@@ -62,7 +62,9 @@ Kontakt, Termin, Gutschein und Firmenkunden senden weiter `einwilligung: "ja"`. 
 ## 4. Weitere Portal-Einstellungen
 
 - **Empfänger für Anfragen** eintragen (bisher „Kein Empfänger eingetragen“).
-- **Google-Bewertungen**: Abfrage scheitert („Google lehnt die Abfrage ab“). Places API (New), Abrechnung und Schlüssel-Beschränkung prüfen, Ergebnis zwischenspeichern.
+- **Google-Bewertungen**: Abfrage läuft (geprüft 26.11.2026: 5,0 Sterne, 27 Bewertungen, 5 Rezensionen mit Text). Die Website übernimmt die Werte des Bausteins `data-mk="bewertungen"` in ihre eigenen Karten und in alle Zahlen mit `data-mk-bew="sterne|anzahl|stand"` (auch Terminseite und Ratgeber, dort über einen unsichtbaren Baustein). Liefert das Portal nichts, bleiben die festen Werte aus `content/site.json` stehen.
+  - Wunsch ans Portal: `data-mk-bew` selbst füllen (wie im Skill beschrieben) und die Werte zusätzlich als Daten liefern (z. B. `data-*`-Attribute am `.mk-box`), dann muss die Website den angezeigten Text nicht auslesen. Die Website-Brücke bleibt damit verträglich.
+  - Rezensionen kommen in der Sprache der Google-Abfrage (Deutsch); die englische Seite zeigt sie im Wortlaut und sagt das im Hinweis.
 - **Buchungszeitraum** von 3 Wochen auf mindestens 3 Monate.
 - **Eine Hauptadresse (Prüfbericht vom 21.11.2026, „HTTPS und einheitliche Hauptadresse“):** `https://elbdetail.de/` und `http://…` per 301 auf `https://www.elbdetail.de/` leiten (gleicher Pfad). Canonical, Sitemap und hreflang der Website nennen bereits `https://www.elbdetail.de/`.
 - **Suchbegriffe im Prüf-Profil:** „Fahrzeugaufbereitung & Autoaufbereitung Celle“ ist der Seitentitel, kein Suchbegriff. Besser als zwei Einträge „Fahrzeugaufbereitung Celle“ und „Autoaufbereitung Celle“ führen. Die Website erfüllt seit dem 23.11.2026 trotzdem beide Schreibweisen (Titel und H1 der Startseite).

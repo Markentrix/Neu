@@ -140,6 +140,14 @@ class TestPortalUpload(unittest.TestCase):
             self.assertIn("data-consent-open", t, p)
             self.assertIsNone(re.search(r'<script[^>]+portal\.markentrix|data-site=', t), p)  # Skript setzt der Upload selbst ein
         self.assertIn('data-mk="bewertungen"', read(os.path.join(SITE, "index.html")))
+        # Bewertungszahlen mit Platzhalter fürs Portal; Seiten mit Zahlen, aber ohne Bewertungsbereich haben einen unsichtbaren Baustein
+        for rel in ("index.html", "termin.html", "ratgeber/lederpflege-auto.html", "en/index.html"):
+            t = read(os.path.join(SITE, rel))
+            self.assertRegex(t, r'<span data-mk-bew="sterne">5[,.]0</span>', rel)
+            self.assertRegex(t, r'<span data-mk-bew="anzahl">\d+</span>', rel)
+            self.assertEqual(t.count('data-mk="bewertungen"'), 1, rel)
+        self.assertIn('data-mk="bewertungen" data-bew-nur-zahlen hidden', read(os.path.join(SITE, "termin.html")))
+        self.assertIn('data-mk-bew="sterne">5.0<', read(os.path.join(SITE, "en", "index.html")))
         cfg = read(os.path.join(SITE, "config.js"))
         self.assertNotIn("ga4", cfg)
         self.assertNotIn("hosts", cfg)

@@ -1804,3 +1804,15 @@ html.lb-open { overflow: hidden; }
   .consent { left: 8px; right: 8px; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); padding: 10px 12px; }
 }
 @media print { .consent { display: none !important; } }
+
+/* Live-Bewertungen: Das Portal liefert die aktuellen Google-Rezensionen, das Skript zeigt sie als Karten der Seite */
+.mk-reviews.is-bridged { display: none; }
+.review-card .stars svg.is-off { opacity: 0.22; }
+.review-card--live blockquote { white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 7; line-clamp: 7; overflow: hidden; }
+.review-card--live.is-open blockquote { display: block; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; }
+.review-more { justify-self: start; min-height: 44px; margin: -12px 0 -8px; padding: 0; border: 0; background: none; font: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+@media (min-width: 720px) {
+  .review-grid.is-live { display: block; columns: 3 280px; column-gap: 18px; }
+  .review-grid.is-live .review-card { break-inside: avoid; margin-bottom: 18px; }
+}
+.review-card figcaption .nowrap { white-space: nowrap; }

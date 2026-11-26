@@ -25,7 +25,7 @@ def _page_hero(prefix, crumbs, eyebrow, h1, lead, actions=""):
 def _trust_list(site):
     s = site.s
     return f'''<ul class="mini-trust">
-          <li>{I["star"]}{ESC(s["rating"]["value"])} ★ bei {s["rating"]["count"]} Google-Bewertungen</li>
+          <li>{I["star"]}{core.bew(site, "sterne")} ★ bei {core.bew(site, "anzahl")} Google-Bewertungen</li>
           <li>{I["euro"]}Verbindlicher Preis vor dem Termin</li>
           <li>{I["hand"]}100 % Handarbeit, C²Coating Excellence Partner</li>
           <li>{I["shield"]}Ihre Anfrage wird auf Servern in Deutschland gespeichert</li>

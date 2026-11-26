@@ -690,3 +690,88 @@ test("Datenschutz-Einstellungen: englische Seite englisch", async ({ page }) => 
   await expect(page.getByRole("dialog", { name: "Privacy" })).toBeVisible();
   await expect(page.locator(".consent [data-c-all]")).toHaveText("Allow all");
 });
+
+// ---------------------------------------------------------------- Google-Bewertungen live über den Portal-Baustein
+// Das echte Portal-Skript (Kopie in tests/fixtures) wird wie beim Hochladen eingesetzt; die Portal-Antworten kommen aus dem Test.
+const fs = require("fs");
+const PORTAL_JS = fs.readFileSync(require("path").join(__dirname, "fixtures", "portal-site.js"), "utf8");
+const BEW_LIVE = {
+  aktiv: true, sterne: 4.9, anzahl: 31, quelle: "google",
+  schreiben: "https://search.google.com/local/writereview?placeid=TEST",
+  bewertungen: [
+    { autor: "Testperson Eins", wann: "vor 2 Wochen", sterne: 5, text: "Sehr gründlich gearbeitet.\nDas Auto sieht aus wie neu. " + "Kraftfahrzeughaftpflichtversicherung ".repeat(30) },
+    { autor: "Dr. Maximiliane von Hohenlohe-Schillingsfürst", wann: "vor einem Monat", sterne: 3, text: "<img src=x onerror=\"window.__xss=1\"> Ganz okay." },
+    { autor: "Jo", wann: "", sterne: 5, text: "" },
+    { autor: "Özgür Şimşek", wann: "vor 3 Monaten", sterne: 5, text: "Top 👍" },
+  ],
+};
+async function mitPortal(page, url, bew, opts = {}) {
+  await page.route("https://portal.markentrix.de/**", (r) => {
+    const u = r.request().url();
+    if (u.endsWith("/static/js/site.js")) return r.fulfill({ contentType: "text/javascript", body: PORTAL_JS });
+    if (u.endsWith("/config")) return r.fulfill({ json: { kontakt: false, termin: { aktiv: false }, paypal: { aktiv: false }, bewertungen: !!bew, analytics: { aktiv: false } } });
+    if (u.endsWith("/bewertungen")) return opts.fehler ? r.fulfill({ status: 503, json: { detail: "aus" } }) : r.fulfill({ json: bew });
+    return r.fulfill({ status: 404, body: "" });
+  });
+  await page.route((u) => u.pathname === new URL(url, "http://x").pathname, async (r) => {
+    const res = await r.fetch();
+    const html = (await res.text()).replace("</body>", '<script src="https://portal.markentrix.de/static/js/site.js" data-site="mk_test" defer></script></body>');
+    await r.fulfill({ response: res, body: html, headers: { ...res.headers(), "content-type": "text/html; charset=utf-8" } });
+  });
+  await page.goto(url);
+}
+
+test("Bewertungen live: Portal-Werte ersetzen Zahlen und Karten, nur als Text", async ({ page }) => {
+  await mitPortal(page, "/index.html", BEW_LIVE);
+  const grid = page.locator("#bewertungen .review-grid");
+  await expect(grid).toHaveClass(/is-live/);
+  await expect(page.locator('[data-mk="bewertungen"]')).toBeHidden();
+  // Zahlen überall live, „Stand“ ausgeblendet
+  await expect(page.locator('[data-mk-bew="sterne"]').first()).toHaveText("4,9");
+  for (const e of await page.locator('[data-mk-bew="anzahl"]').all()) await expect(e).toHaveText("31");
+  for (const e of await page.locator('[data-mk-bew="stand"]').all()) await expect(e).toBeHidden();
+  await expect(page.locator("[data-bew-live]")).toBeVisible();
+  await expect(page.locator("[data-bew-fest]")).toBeHidden();
+  // Karten: nur Rezensionen mit Text, Sterne je Bewertung, eingeschleustes HTML bleibt Text
+  const cards = grid.locator(".review-card--live");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.nth(1).locator(".stars")).toHaveAttribute("aria-label", "3 von 5 Sternen");
+  await expect(cards.nth(1).locator(".stars svg.is-off")).toHaveCount(2);
+  await expect(cards.nth(1).locator("blockquote")).toContainText('<img src=x onerror="window.__xss=1">');
+  expect(await page.evaluate(() => window.__xss)).toBeUndefined();
+  await expect(cards.nth(1).locator("figcaption")).toContainText("Dr. Maximiliane von Hohenlohe-Schillingsfürst");
+  await expect(cards.nth(1).locator("figcaption")).toContainText("vor einem Monat · Google-Rezension");
+  // Lange Rezension: gekürzt, „Weiterlesen“ klappt auf und zu
+  const more = cards.nth(0).locator(".review-more");
+  await expect(more).toHaveAttribute("aria-expanded", "false");
+  const h0 = await cards.nth(0).locator("blockquote").evaluate((q) => q.clientHeight);
+  await more.click();
+  await expect(more).toHaveAttribute("aria-expanded", "true");
+  expect(await cards.nth(0).locator("blockquote").evaluate((q) => q.clientHeight)).toBeGreaterThan(h0);
+  await expect(cards.nth(2).locator(".review-more")).toHaveCount(0);
+  // kein Querscrollen durch lange Wörter
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});
+
+test("Bewertungen live: Seiten ohne Bewertungsbereich bekommen die Zahlen ebenfalls", async ({ page }) => {
+  await mitPortal(page, "/termin.html", BEW_LIVE);
+  await expect(page.locator('[data-mk-bew="anzahl"]').first()).toHaveText("31");
+  await expect(page.locator('[data-mk="bewertungen"]')).toBeHidden();
+});
+
+test("Bewertungen live: englische Seite mit Punkt als Dezimalzeichen", async ({ page }) => {
+  await mitPortal(page, "/en/index.html", BEW_LIVE);
+  await expect(page.locator('#bewertungen .review-grid')).toHaveClass(/is-live/);
+  await expect(page.locator('[data-mk-bew="sterne"]').first()).toHaveText("4.9");
+  await expect(page.locator(".review-card--live").nth(1).locator(".stars")).toHaveAttribute("aria-label", "3 out of 5 stars");
+  await expect(page.locator(".review-card--live").nth(1).locator("figcaption")).not.toContainText("vor einem Monat");
+});
+
+test("Bewertungen live: Portal-Ausfall oder abgeschaltet lässt feste Werte stehen", async ({ page }) => {
+  await mitPortal(page, "/index.html", BEW_LIVE, { fehler: true });
+  await page.waitForTimeout(800);
+  await expect(page.locator("#bewertungen .review-grid")).not.toHaveClass(/is-live/);
+  await expect(page.locator('[data-mk-bew="anzahl"]').first()).toHaveText("27");
+  await expect(page.locator('[data-mk-bew="stand"]').first()).toHaveJSProperty("hidden", false);
+  await expect(page.locator("#bewertungen .review-card")).toHaveCount(3);
+});

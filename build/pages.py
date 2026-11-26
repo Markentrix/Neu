@@ -637,7 +637,7 @@ def build_home(site, write):
     <div class="container hero-inner">
       <div class="hero-copy">
         <div class="hero-kicker">
-          <a class="hero-badge" href="#bewertungen">{STARS5} <span>{ESC(s["rating"]["value"])} · {s["rating"]["count"]} <span class="hide-xs">Google-</span>Bewertungen</span></a>
+          <a class="hero-badge" href="#bewertungen">{STARS5} <span>{core.bew(site, "sterne")} · {core.bew(site, "anzahl")} <span class="hide-xs">Google-</span>Bewertungen</span></a>
           <span class="hero-badge hero-badge-addr">{I["pin"]} {ESC(s["address"]["city"])} · {ESC(s["address"]["street"])}</span>
         </div>
         <h1 id="hero-h" class="hero-headline">Fahrzeugaufbereitung &amp; Autoaufbereitung in Celle. <em>Mit Liebe zum Detail.</em></h1>
@@ -671,7 +671,7 @@ def build_home(site, write):
   <div class="trust-bar" aria-label="Vertrauen">
     <div class="container">
       <ul>
-        <li>{I["star"]}<span>{ESC(s["rating"]["value"])} von 5 Sternen<small>{s["rating"]["count"]} Google-Bewertungen</small></span></li>
+        <li>{I["star"]}<span>{core.bew(site, "sterne")} von 5 Sternen<small>{core.bew(site, "anzahl")} Google-Bewertungen</small></span></li>
         <li>{I["hand"]}<span>Handarbeit statt Waschstraße<small>Lackschonende Arbeit</small></span></li>
         <li>{I["euro"]}<span>Festpreis vorab<small>Keine Überraschung bei Abholung</small></span></li>
         <li>{I["shield"]}<span>C²Coating Excellence Partner<small>Koch-Chemie zertifiziert · <a class="trust-link" href="zertifikate.html">Zertifikate ansehen</a></small></span></li>
@@ -715,9 +715,9 @@ def build_home(site, write):
       </div>
       <div class="review-block reveal">
         <div class="review-score-wrap">
-          <span class="review-score-big">{ESC(s["rating"]["value"])}</span>
+          <span class="review-score-big">{core.bew(site, "sterne")}</span>
           {STARS5}
-          <p>{s["rating"]["count"]} Bewertungen bei Google</p>
+          <p>{core.bew(site, "anzahl")} Bewertungen bei Google</p>
         </div>
         <div>
           <p class="review-quote">„{ESC(site.reviews["featuredQuote"])}“</p>
@@ -728,7 +728,7 @@ def build_home(site, write):
       <div class="mk-reviews" data-mk="bewertungen"></div>
       <div class="review-grid stagger" tabindex="0" role="region" aria-label="Kundenbewertungen">{core.review_cards(site)}
       </div>{ref_strip(site)}
-      <p class="gallery-note">Ausgewählte Google-Rezensionen im Wortlaut, teils gekürzt, ohne Emojis (Stand {ESC(s["rating"]["asOf"])}). <strong>Hinweis zur Echtheit:</strong> Wir prüfen nicht, ob alle Bewertenden unsere Leistung genutzt haben. Google prüft Bewertungen nach eigenen Richtlinien.</p>
+      <p class="gallery-note"><span data-bew-fest>Ausgewählte Google-Rezensionen im Wortlaut, teils gekürzt, ohne Emojis (Stand {ESC(s["rating"]["asOf"])}).</span><span data-bew-live hidden>Aktuelle Google-Rezensionen im Wortlaut, automatisch aus dem Google-Unternehmensprofil übernommen.</span> <strong>Hinweis zur Echtheit:</strong> Wir prüfen nicht, ob alle Bewertenden unsere Leistung genutzt haben. Google prüft Bewertungen nach eigenen Richtlinien.</p>
     </div>
   </section>
 
@@ -765,7 +765,7 @@ def build_home(site, write):
           <div><dt>Inhaber</dt><dd>{ESC((s.get("about") or {}).get("name") or "")} ({ESC((s.get("about") or {}).get("role") or "Inhaber")})</dd></div>
           <div><dt>Partner</dt><dd>Offizieller C²Coating Excellence Partner, Koch-Chemie-Fachschulungen, Colourlock für Leder</dd></div>
           <div><dt>Service</dt><dd>Abhol- und Bringservice nach Vereinbarung, regelmäßige Pflege mit ElbDetail Care</dd></div>
-          <div><dt>Bewertung</dt><dd>{ESC(s["rating"]["value"])} ★ bei {s["rating"]["count"]} Google-Rezensionen (Stand {ESC(s["rating"]["asOf"])})</dd></div>
+          <div><dt>Bewertung</dt><dd>{core.bew(site, "sterne")} ★ bei {core.bew(site, "anzahl")} Google-Rezensionen {core.bew(site, "stand")}</dd></div>
           <div><dt>Termin</dt><dd><a href="termin.html">Online-Terminanfrage</a> oder <a href="{site.wa()}" target="_blank" rel="noopener">WhatsApp {ESC(s["phoneIntl"])}</a></dd></div>
         </dl>
         </details>

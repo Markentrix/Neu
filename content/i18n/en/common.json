@@ -162,7 +162,7 @@
  "Wohnmobil": "Motorhome",
  "Das Wichtigste in Kürze": "Key points at a glance",
  "Über ElbDetail": "About ElbDetail",
- "Fachbetrieb für Fahrzeugaufbereitung in Celle, gegründet von René. C²Coating Excellence Partner, Koch-Chemie geschult, 100 % Handarbeit, 5,0 ★ bei 22 Google-Bewertungen. Dieser Artikel gibt unsere Erfahrung aus der täglichen Arbeit wieder.": "Specialist car detailing business in Celle, founded by René. C²Coating Excellence Partner, Koch-Chemie trained, 100% by hand, 5.0 ★ from 22 Google reviews. This article reflects our experience from our daily work.",
+ "Fachbetrieb für Fahrzeugaufbereitung in Celle, gegründet von René. C²Coating Excellence Partner, Koch-Chemie geschult, 100 % Handarbeit, <t1>5,0</t1> ★ bei <t2>27</t2> Google-Bewertungen. Dieser Artikel gibt unsere Erfahrung aus der täglichen Arbeit wieder.": "Specialist car detailing business in Celle, founded by René. C²Coating Excellence Partner, Koch-Chemie trained, 100% by hand, <t1>5.0</t1> ★ from <t2>27</t2> Google reviews. This article reflects our experience from our daily work.",
  "Inhalt": "Contents",
  "Lieber vom Profi?": "Prefer a professional?",
  "Wir bereiten Ihr Auto in Celle in Handarbeit auf. Verbindlicher Preis vor dem Termin.": "We detail your car by hand in Celle. Binding price before the appointment.",
@@ -189,5 +189,8 @@
  "Hinweis": "Note",
  "Ein Neuwagen glänzt, ist aber nicht automatisch geschützt. Hier erfahren Sie, wann sich eine Versiegelung lohnt und worauf es bei der Vorbereitung ankommt.": "A new car shines, but it is not automatically protected. Find out when sealing is worthwhile and what matters in the preparation.",
  "Politur korrigiert, Versiegelung schützt. Mit drei einfachen Tests finden Sie selbst heraus, was Ihr Lack gerade braucht.": "Polishing corrects, sealing protects. With three simple tests you can find out for yourself what your paint needs right now.",
- "keine": "none"
+ "keine": "none",
+ "{n} von 5 Sternen": "{n} out of 5 stars",
+ "Google-Rezension": "Google review",
+ "Weniger anzeigen": "Show less"
 }

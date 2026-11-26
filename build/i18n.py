@@ -389,6 +389,8 @@ def translate_page(src, rel, tr):
         pos = b
     out.append(src[pos:])
     res = "".join(out)
+    # Bewertungszahl ohne umgebenden Text (großer Wert im Bewertungsbereich): englische Schreibweise 5.0 statt 5,0
+    res = re.sub(r'(data-mk-bew="sterne">)(\d),(\d)<', r"\1\2.\3<", res)
     if os.path.basename(rel) in LEGAL and rel.count("/") == 0:
         res = re.sub(r"(</h1>)", r"\1\n" + LEGAL_NOTE, res, count=1)
     return res

@@ -99,6 +99,8 @@ def build(content_dir, out_dir, static_dir, quiet=False):
         os.makedirs(os.path.dirname(p), exist_ok=True)
         if rel.endswith(".html"):
             text = core.nofollow_params(core.semantic_heads(text))
+            if 'data-mk-bew="' in text and 'data-mk="bewertungen"' not in text and "</main>" in text:
+                text = text.replace("</main>", '<div data-mk="bewertungen" data-bew-nur-zahlen hidden></div>\n</main>', 1)
         with open(p, "w", encoding="utf-8") as f:
             f.write(text)
         written.append(rel)
