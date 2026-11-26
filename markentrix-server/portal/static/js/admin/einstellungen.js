@@ -25,7 +25,7 @@ V.einstellungen = async () => {
   return einklappen(h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    await zustellungKarte(), await vertragKarte(), await angebotErinnerungKarte(), passkeyKarte(), await visitenkarteKarte('/api/admin'), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    await zustellungKarte(), await vertragKarte(), await angebotErinnerungKarte(), passkeyKarte(), await visitenkarteKarte('/api/admin'), await eigeneSeiteKarte(), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk, h('p', {}, knopf('KI-Verbindung testen', async () => { melde(m3, 'Der Test läuft …', 'info'); try { const r = await api('/api/admin/einstellungen/ki-test', { method: 'POST' }); melde(m3, 'Verbindung steht. Modell ' + r.modell + ' hat geantwortet: „' + r.antwort + '“', 'ok'); } catch (x) { melde(m3, x.message); } }, 'sec'))), m3), { 'E-Mail-Versand (SMTP)': [!!(d.smtp.host && d.smtp.absender), d.smtp.host && d.smtp.absender ? 'eingerichtet' : 'fehlt'], 'KI-Assistent im Kunden-Chat': [!!d.ki.key_gesetzt, d.ki.key_gesetzt ? 'Key hinterlegt' : 'Key fehlt'] });
 };
 
@@ -40,6 +40,22 @@ export async function placesKarte() {
     h('p', { class: 'small muted' }, d.key_gesetzt ? 'Schlüssel ist hinterlegt. Die Kunden-Websites können ihre Google-Bewertungen anzeigen.' : 'Noch kein Schlüssel. Ohne ihn tragen Kunden Sterne und Anzahl von Hand ein. Schlüssel: Google Cloud → „Places API (New)“ aktivieren → API-Schlüssel erstellen, auf diese API beschränken. Abgerufen wird je Kunde höchstens alle 12 Stunden, nicht pro Besucher.'),
     m, h('div', { class: 'row' }, key, h('button', { class: 'btn', onclick: speichern }, 'Speichern')),
     h('div', { class: 'row', style: 'margin-top:8px' }, pid, h('button', { class: 'btn sec', onclick: testen }, 'Schlüssel testen')));
+}
+
+export async function eigeneSeiteKarte() {
+  const d = await api('/api/admin/eigene-seite'), m = h('div'), box = h('div');
+  const dom = h('input', { placeholder: 'Domain, z. B. markentrix.de', value: (d.domains || [])[0] || '', maxlength: 253 });
+  const pid = h('input', { placeholder: 'Place-ID von Markentrix (ChIJ…)', value: d.place_id || '', maxlength: 200 });
+  const aktiv = h('input', { type: 'checkbox', checked: !!d.bew_aktiv, style: 'width:auto' });
+  const zeichnen = (z) => box.replaceChildren(z.eingerichtet ? h('div', { class: 'small' }, h('p', {}, 'Einbau-Code für die Seite (vor </body>):'), h('code', { style: 'word-break:break-all;display:block' }, z.einbau),
+    h('p', { class: 'muted' }, z.google && z.google.anzahl ? 'Google meldet zuletzt ' + String(z.google.sterne).replace('.', ',') + ' Sterne, ' + z.google.anzahl + ' Bewertungen.' : 'Noch kein Google-Abruf gespeichert.')) : '');
+  zeichnen(d);
+  const sichern = async () => { try { zeichnen(await api('/api/admin/eigene-seite', { method: 'PUT', body: { domain: dom.value, place_id: pid.value, aktiv: aktiv.checked } })); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } };
+  const testen = async () => { try { const r = await api('/api/admin/einstellungen/places/test', { method: 'POST', body: { place_id: pid.value } }); melde(m, 'Google antwortet: ' + r.sterne + ' Sterne, ' + r.anzahl + ' Bewertungen.', 'ok'); } catch (x) { fehler(m, x); } };
+  return h('div', { class: 'card' }, h('h2', {}, 'Eigene Website (markentrix.de)'),
+    h('p', { class: 'small muted' }, 'Bindet deine eigene Seite an das Portal an, ohne Kundenzugang: Google-Bewertungen live (data-mk-bew), Einbau-Code für das Portal-Skript. Der Eintrag ist unsichtbar in Kundenliste, Rechnungen, Ampel und Karte.'),
+    m, h('div', { class: 'row' }, dom, pid), h('p', {}, h('label', { style: 'display:flex;gap:8px;align-items:center' }, aktiv, 'Google-Bewertungen live anzeigen')),
+    h('div', { class: 'row' }, h('button', { class: 'btn', onclick: sichern }, d.eingerichtet ? 'Speichern' : 'Einrichten'), h('button', { class: 'btn sec', onclick: testen }, 'Place-ID bei Google testen')), box);
 }
 
 export async function websiteCheckKarte() {

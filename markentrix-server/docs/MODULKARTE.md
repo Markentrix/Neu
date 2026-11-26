@@ -12,9 +12,9 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `__init__` | 1 | 0 | – |
 | `alarme` | 1 | 24 | `cli`, `fehlerhilfe`, `jobs` |
 | `betrieb` | 1 | 29 | `cli`, `jobs`, `ki`, `mailer` und 2 weitere |
-| `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 47 weitere |
+| `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 48 weitere |
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
-| `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 148 weitere |
+| `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 149 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 38 weitere |
 | `fehlerhilfe` | 1 | 143 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
@@ -22,7 +22,7 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
 | `pdf` | 1 | 271 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
 | `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
-| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 79 weitere |
+| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 80 weitere |
 | `zustellung` | 1 | 114 | `jobs`, `mailer`, `routes_betriebplus`, `sitedienste` und 1 weitere |
 
 ## Anmeldung und Zugänge (`zugang`)
@@ -51,13 +51,14 @@ Website-API, Terminbuchung, Online-Shop, Gutscheine, Upload, Domains, Statusseit
 | `domaincheck` | 2 | 244 | `jobs`, `routes_websites` |
 | `fotos` | 2 | 212 | `jobs`, `offboarding`, `routes_kunde`, `routes_shop` und 2 weitere |
 | `livecheck` | 2 | 187 | `routes_webupload`, `webbetrieb` |
-| `publish` | 2 | 221 | `routes_admin`, `routes_angebotsinhalte`, `routes_domains`, `routes_kunde` |
+| `publish` | 2 | 221 | `routes_admin`, `routes_angebotsinhalte`, `routes_domains`, `routes_eigeneseite` und 1 weitere |
 | `shop` | 2 | 132 | `routes_shop` |
-| `sitedienste` | 2 | 887 | `funnelcheck`, `routes_betriebplus`, `routes_buchungsvorlagen`, `routes_kundenampel` und 9 weitere |
+| `sitedienste` | 2 | 887 | `funnelcheck`, `routes_betriebplus`, `routes_buchungsvorlagen`, `routes_eigeneseite` und 10 weitere |
 | `webbetrieb` | 2 | 552 | `berichte`, `domaincheck`, `jobs`, `routes_kundenampel` und 6 weitere |
 | `routes_angebotsinhalte` | 3 | 221 | `main` |
 | `routes_buchungsvorlagen` | 3 | 47 | `main` |
 | `routes_domains` | 3 | 124 | `main` |
+| `routes_eigeneseite` | 3 | 63 | `main` |
 | `routes_referenzseite` | 3 | 91 | `main` |
 | `routes_shop` | 3 | 744 | `main`, `routes_siteapi` |
 | `routes_siteapi` | 3 | 584 | `main`, `routes_shop`, `t95.py` |
@@ -209,5 +210,5 @@ Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werde
 |---|---|---|---|
 | `cli` | 4 | 184 | `install.sh`, `mkctl`, `selbsttest.sh`, `t142.py` und 4 weitere |
 | `jobs` | 4 | 1318 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 9 weitere |
-| `main` | 4 | 315 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
+| `main` | 4 | 316 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
 

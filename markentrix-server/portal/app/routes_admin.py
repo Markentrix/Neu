@@ -146,7 +146,7 @@ def kunden_liste(q: str = "", user: dict = Depends(require_admin)):
                               (SELECT count(*) FROM benutzer b WHERE b.kunden_id=k.id AND b.passwort_hash IS NOT NULL) AS zugang_aktiv,
                               EXISTS (SELECT 1 FROM avv a WHERE a.kunden_id=k.id AND a.datei IS NOT NULL AND a.unterschrieben_am IS NOT NULL) AS avv_ok
                        FROM kunden k LEFT JOIN produkte p ON p.code=k.paket_code
-                       WHERE %s = '' OR k.firma ILIKE %s OR k.kundennummer ILIKE %s OR coalesce(k.email,'') ILIKE %s
+                       WHERE k.status <> 'intern' AND (%s = '' OR k.firma ILIKE %s OR k.kundennummer ILIKE %s OR coalesce(k.email,'') ILIKE %s)
                        ORDER BY k.kundennummer DESC LIMIT 500""", (q, f"%{q}%", f"%{q}%", f"%{q}%"))
         rows = cur.fetchall()
         for r in rows:   # Fortschritt der Einrichtung nur für Kunden im Onboarding

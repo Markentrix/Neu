@@ -51,6 +51,7 @@
     "routes_angebotsinhalte",
     "routes_buchungsvorlagen",
     "routes_domains",
+    "routes_eigeneseite",
     "routes_referenzseite",
     "routes_shop",
     "routes_siteapi",
