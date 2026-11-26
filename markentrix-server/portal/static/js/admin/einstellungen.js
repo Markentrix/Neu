@@ -33,10 +33,13 @@ export const kk = (label, wert, set) => h('label', { style: 'display:flex;gap:8p
 export async function placesKarte() {
   const d = await api('/api/admin/einstellungen/places'), m = h('div');
   const key = h('input', { type: 'password', placeholder: d.key_gesetzt ? 'leer lassen = unverändert' : 'API-Schlüssel', autocomplete: 'new-password', maxlength: 300 });
+  const pid = h('input', { placeholder: 'Place-ID zum Testen (leer = die eines Kunden)', maxlength: 200 });
+  const testen = async () => { try { const r = await api('/api/admin/einstellungen/places/test', { method: 'POST', body: { place_id: pid.value } }); melde(m, 'Google antwortet: ' + r.sterne + ' Sterne, ' + r.anzahl + ' Bewertungen. Der Schlüssel funktioniert.', 'ok'); } catch (x) { fehler(m, x); } };
   const speichern = async () => { try { await api('/api/admin/einstellungen/places', { method: 'PUT', body: { api_key: key.value } }); key.value = ''; melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } };
   return h('div', { class: 'card' }, h('h2', {}, 'Google-Bewertungen (Places API)'),
     h('p', { class: 'small muted' }, d.key_gesetzt ? 'Schlüssel ist hinterlegt. Die Kunden-Websites können ihre Google-Bewertungen anzeigen.' : 'Noch kein Schlüssel. Ohne ihn tragen Kunden Sterne und Anzahl von Hand ein. Schlüssel: Google Cloud → „Places API (New)“ aktivieren → API-Schlüssel erstellen, auf diese API beschränken. Abgerufen wird je Kunde höchstens alle 12 Stunden, nicht pro Besucher.'),
-    m, h('div', { class: 'row' }, key, h('button', { class: 'btn', onclick: speichern }, 'Speichern')));
+    m, h('div', { class: 'row' }, key, h('button', { class: 'btn', onclick: speichern }, 'Speichern')),
+    h('div', { class: 'row', style: 'margin-top:8px' }, pid, h('button', { class: 'btn sec', onclick: testen }, 'Schlüssel testen')));
 }
 
 export async function websiteCheckKarte() {

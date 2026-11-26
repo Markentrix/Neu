@@ -1,7 +1,8 @@
 """Kunden-Ampel: pro aktivem Kunde auf einen Blick, ob Website, Mail und Terminbuchung laufen und was beim Team oder Kunden offen ist."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
-from . import webbetrieb
+from . import einstellungen, sitedienste, webbetrieb
 from .db import tx
 from .security import require_admin
 
@@ -70,3 +71,30 @@ def website_probleme(kid: str, user: dict = Depends(require_admin)):
     """Gestörte Websites des Kunden mit Fehlertext, Ursache und Lösungsschritten (Anzeige oben auf der Kundenseite)."""
     with tx("system") as cur:
         return webbetrieb.probleme(cur, kid)
+
+
+class PlacesTestIn(BaseModel):
+    place_id: str = Field(default="", max_length=200)
+
+
+@router.post("/einstellungen/places/test")
+def places_test(data: PlacesTestIn, user: dict = Depends(require_admin)):
+    """Google-Schlüssel prüfen: mit einer eingegebenen Place-ID, sonst mit der eines Kunden (dann wird dessen Ampel gleich aktualisiert)."""
+    with tx("system") as cur:
+        key = einstellungen.lesen(cur, "places").get("api_key", "")
+        pid, kid = data.place_id.strip(), None
+        if not pid:
+            cur.execute("SELECT kunden_id, bew_place_id FROM website_dienste WHERE coalesce(bew_place_id,'')<>'' ORDER BY bew_stand NULLS FIRST LIMIT 1")
+            r = cur.fetchone()
+            pid, kid = (r["bew_place_id"], r["kunden_id"]) if r else ("", None)
+    if not key:
+        raise HTTPException(400, "Es ist noch kein Google-Schlüssel gespeichert.")
+    if not pid:
+        raise HTTPException(400, "Bitte eine Place-ID eintragen (beginnt meist mit „ChIJ“). Kein Kunde hat bisher eine hinterlegt.")
+    try:
+        r = sitedienste.places_holen(key, pid)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    if kid:
+        sitedienste.bew_speichern(kid, r)
+    return {"ok": True, "sterne": r["sterne"], "anzahl": r["anzahl"]}

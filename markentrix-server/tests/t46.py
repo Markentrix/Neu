@@ -155,6 +155,10 @@ chk("Admin setzt Google-Schlüssel",a.put("/api/admin/einstellungen/places",json
 sql(f"INSERT INTO website_ereignisse (kunden_id, art, ok, hinweis) VALUES ('{kA}','bewertungen',false,'Google lehnt die Abfrage ab: PERMISSION_DENIED: alter Fehler')")
 def _amp(): return [x for x in a.get("/api/admin/kunden-ampel").json()["kunden"] if x["id"]==kA][0]
 chk("Alter Bewertungs-Fehler steht mit Googles Begründung in der Ampel",any("PERMISSION_DENIED: alter Fehler" in x for x in _amp()["rot"]),_amp())
+r=a.post("/api/admin/einstellungen/places/test",json={"place_id":"ChIJtestplace12345"}); chk("Admin testet den Schlüssel mit Place-ID",r.status_code==200 and r.json()["sterne"]==4.7,r.text)
+r=a.post("/api/admin/einstellungen/places/test",json={}); chk("Admin testet ohne Place-ID mit der eines Kunden",r.status_code==200 and r.json()["anzahl"]==128,r.text)
+r=a.post("/api/admin/einstellungen/places/test",json={"place_id":"ChIJNichtDa12345"}); chk("Admin-Test: unbekannter Eintrag verständlich",r.status_code==400 and "keinen Eintrag" in r.text,r.text)
+chk("Kunde darf den Admin-Test nicht",cA.post("/api/admin/einstellungen/places/test",json={}).status_code==403)
 r=cA.post("/api/kunde/website-dienste/bewertungen/test"); chk("Google-Abfrage im Test",r.status_code==200 and r.json()["sterne"]==4.7 and r.json()["anzahl"]==128,r.text)
 chk("Nach erfolgreichem Test ist der Bewertungs-Fehler aus der Ampel weg",not any("bewertungen:" in x for x in _amp()["rot"]),_amp())
 b=pub("GET","bewertungen").json(); chk("Google-Daten mit Autoren und Text",b["quelle"]=="google" and b["sterne"]==4.7 and b["anzahl"]==128 and b["bewertungen"][0]["autor"]=="Anna K." and "writereview?placeid=ChIJtestplace12345" in b["schreiben"],b)
