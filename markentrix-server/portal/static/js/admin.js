@@ -1,6 +1,7 @@
 import { appStil, anrufNachfrage, toast, h, api, nutzung, zweiFaktorKarte, stapelTabellen, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
-stapelTabellen();
+stapelTabellen(); appGefuehl();
 appStil({ fab: (seite) => ['uebersicht', 'meintag', 'kunden', 'leads', 'postfach', 'belege'].includes(seite) ? { text: '＋ Neu', ereignis: 'mk-palette' } : null });
+import { appGefuehl } from './appgefuehl.js';
 import { belegEditor } from './admin/belege.js';
 import {V, gerüst, zaehlerAdmin, systemAmpel, setzeIch, setzePakete, setzeZeige } from './admin/kern.js';
 import { kundeDetail } from './admin/kunden.js';

@@ -78,3 +78,7 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 - Für die Steuerberatung: (1) Ab wann das Unternehmen Rechnungen als E-Rechnung versenden muss und ob ein ZUGFeRD-PDF dafür genügt; (2) bei Kleinunternehmern (§ 19 UStG) Steuerkategorie „E“ mit dem Befreiungsgrund im XML; (3) fehlt das Leistungsdatum im XML (nur Freitext „Leistungszeitraum“ als Hinweis), soll das Rechnungsdatum als Leistungsdatum gelten?; (4) Stornorechnung geht als Gutschrift (Typ 381) mit Bezug auf die Ursprungsrechnung; (5) Aufbewahrung: das XML ist der maßgebliche Rechnungsinhalt, das PDF-Bild darf nicht abweichen (beides entsteht aus denselben Daten).
 - Für Behörden als Empfänger: Das Portal erzeugt keine reine XRechnung (nur XML). Leitweg-ID kann als Käuferreferenz mitgegeben werden.
 
+## App-Funktionen am Handy (November 2026)
+- [ ] **Spracheingabe** (optional, je Gerät vom Nutzer einzuschalten): Der Browser (Chrome: Google) verarbeitet die Aufnahme. Reicht der Hinweis im Einschalten-Fenster, brauchen Kunden-, Lead- und Vertriebsdaten eine zusätzliche Regelung (AVV, Drittlandübermittlung)? Oder Funktion für Kundenportal sperren?
+- [ ] **Teilen mit Markentrix:** Geteilte Dateien liegen kurz im Zwischenspeicher des Browsers auf dem Gerät und werden nach dem Senden gelöscht. Genügt das als technische Maßnahme?
+

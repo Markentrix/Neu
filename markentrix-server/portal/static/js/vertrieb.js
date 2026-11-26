@@ -1,10 +1,11 @@
 import { anrufModus } from './anrufmodus.js';
+import { appGefuehl } from './appgefuehl.js';
 import { nummerBereinigen, ortZurVorwahl, ausText } from './vorwahl.js';
 import { bestaetigungKnopf } from './terminbestaetigung.js';
 import { pipelineBoard } from './pipeline.js';
 import { visitenkarteKarte, visitenkarteKnopf } from './visitenkarte.js';
 import { appStil, anrufNachfrage, leitfadenKnopf, vibriere, toast, stapelTabellen, listenKnopf, leadReiter, leadReiterSetzen, mehrMenue, leadDatenAnsicht } from './common.js';
-stapelTabellen();
+stapelTabellen(); appGefuehl();
 appStil({ fab: (seite) => seite === 'leads' ? { text: '＋ Lead', zielText: 'Neuer Lead' } : seite === 'heute' ? { text: '＋ Lead', href: '#leads' } : null });
 import { nutzung, navGruppen, leerZustand, themeKnopf, kontaktKarte, notizWerkzeug, skriptKarte, wiedervorlageWahl, dialog, delta, h, api, datum, zeit, euro, melde, abmelden, passkeyKarte, zweiFaktorKarte, pushKarte, pushNachfrage, rechtFuss, glocke, formular, mobilLeiste, zielFuerRolle, startFehler } from './common.js';
 import { anleitungSeite, erstStart, installBanner } from './anleitung.js';
@@ -76,7 +77,7 @@ V.heute = async () => {
         (l.gruende || []).length ? h('ul', { class: 'small', style: 'margin:4px 0 0;padding-left:18px' }, l.gruende.map(g => h('li', {}, g))) : ''),
         l.telefon ? h('a', { class: 'btn small', 'data-wisch': 'links', 'data-wisch-text': '📞 Anrufen', href: 'tel:' + l.telefon.replace(/[^+\d]/g, ''), 'data-lead': l.id, 'data-firma': l.firma }, '📞 ' + l.telefon) : h('span', { class: 'small muted' }, 'keine Nummer')),
       h('div', { class: 'heuteknoepfe' },
-        h('button', { class: 'btn sec small', 'data-wisch': 'rechts', 'data-wisch-text': '✗ Nicht erreicht', onclick: () => schnell(l, 'anruf_nicht_erreicht', el) }, 'Nicht erreicht'),
+        h('button', { class: 'btn sec small', 'data-wisch': 'rechts', 'data-sofort': '1', 'data-wisch-text': '✗ Nicht erreicht', onclick: () => schnell(l, 'anruf_nicht_erreicht', el) }, 'Nicht erreicht'),
         h('button', { class: 'btn sec small', onclick: () => gespraechDialog(l, opt.filter(o => o.code !== 'anruf_nicht_erreicht'), 'anruf_erreicht', (r) => erledigt(el, r, true)) }, 'Gesprochen …'),
         h('button', { class: 'btn sec small', onclick: () => gespraechDialog(l, opt, 'termin', (r) => erledigt(el, r, false)) }, 'Termin …'),
         h('button', { class: 'btn sec small', onclick: () => { if (confirm(l.firma + ': Kein Interesse eintragen? Der Lead wird nicht mehr angerufen.')) schnell(l, 'kein_interesse', el); } }, 'Kein Interesse'),

@@ -122,7 +122,7 @@ V.heute = async () => {
       a.nachricht ? h('p', { class: 'small' }, a.nachricht) : '',
       h('div', { class: 'heuteknoepfe' },
         h('button', { class: 'btn small', 'data-wisch': 'links', 'data-wisch-text': '↩ Antworten', onclick: () => antwortDialog(a.id, () => erledigt(z, 'Als beantwortet markiert.')) }, 'Antworten'),
-        h('button', { class: 'btn sec small', 'data-wisch': 'rechts', 'data-wisch-text': '✓ Erledigt', onclick: async () => { try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'erledigt' } }); erledigt(z, 'Als erledigt markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Erledigt'),
+        h('button', { class: 'btn sec small', 'data-wisch': 'rechts', 'data-sofort': '1', 'data-wisch-text': '✓ Erledigt', onclick: async () => { try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'erledigt' } }); erledigt(z, 'Als erledigt markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Erledigt'),
         h('button', { class: 'btn sec small', onclick: async () => { if (!confirm('Als Spam markieren?')) return; try { await api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: 'spam' } }); erledigt(z, 'Als Spam markiert.', () => api('/api/kunde/anfragen/' + a.id, { method: 'PATCH', body: { status: a.status } })); } catch (x) { melde(meld, x.message); } } }, 'Spam')));
     return z;
   };

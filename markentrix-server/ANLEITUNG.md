@@ -808,3 +808,15 @@ Das Kundenportal (`/app`, `portal/static/js/kunde/`, gemeinsame Texte in `common
 - **Mehr Prüfungen.** Der Wachdienst meldet jetzt auch: Arbeitsspeicher unter 8 % frei, Dateisystem fast voll an Einträgen (Inodes), Mail-Versand mit mehreren Fehlern bei Anmeldung oder Verbindung ohne anschließenden Erfolg. `mkctl selbsttest` zeigt zusätzlich Hinweise, wenn SSH noch Passwörter erlaubt (dann `mkctl ssh-haerten`, erst nach Schlüssel-Test), wenn außer SSH, 80 und 443 Ports nach außen offen sind und wenn ein Container oft von Docker neu gestartet wurde.
 - **Update mit Rückweg.** Vor dem Neubau merkt sich `install.sh` bzw. `mkctl update` die laufende Portal-Version. Danach prüft ein Kurztest (Portal antwortet, Anmeldung weist falsche Daten ab). Fällt er durch, geht das System automatisch auf die vorherige Version zurück, schickt eine Alarm-Mail und nennt den Befehl für das Log. Neue Datenbank-Einträge bleiben bestehen (sie sind nur ergänzend). Zurückgenommen wird nur das Portal, nicht n8n oder die Datenbank-Images. Der Code in `/root/Neu` bleibt neu: ein erneutes `install.sh` spielt das Update wieder ein, deshalb erst den Fehler beheben.
 - **Verfügbarkeit.** In der Ampel steht „Verfügbarkeit: 99,9 % in den letzten 30 Tagen, letzter Ausfall …“. Grundlage ist eine Zeile je Wachdienst-Lauf (`backup-status/verfuegbarkeit.log`). Stille über 15 Minuten zählt als Ausfall des Servers. Aussagekräftig ab etwa einer Stunde Messzeit. Ein Ausfall von außen sehen Sie damit erst nach der Wiederkehr: ein externer Uptime-Monitor bleibt empfohlen.
+
+## App-Gefühl am Handy (Stand November 2026)
+
+- **Zurück-Taste und Zurück-Wisch** schließen zuerst ein offenes Fenster (Menü, Dialog), erst danach verlässt man die Seite. Nach Zurück steht die Liste wieder an derselben Stelle.
+- **Runterziehen** ganz oben baut die Seite neu auf („✓ Aktualisiert“), ohne die App neu zu laden.
+- **Lang drücken** auf einen Listeneintrag mit mehreren Knöpfen (zum Beispiel Anfrage, Lead, Termin) öffnet ein Menü mit allen Aktionen des Eintrags.
+- **Aktionen ohne Warten:** Knöpfe wie „Erledigt“ und „Nicht erreicht“ blenden den Eintrag sofort aus. Meldet der Server einen Fehler, kommt der Eintrag zurück, mit „Erneut versuchen“. Neue Knöpfe dieser Art bekommen im Code das Attribut `data-sofort`.
+- **Installierte App** öffnet dort, wo man aufgehört hat (bis zu 12 Stunden), nicht immer auf der Startseite.
+- **Teilen mit Markentrix** (Android, installierte App): In anderen Apps „Teilen → Markentrix“. Kunden schicken Text und Dateien als Nachricht an das Team, Admins legen sie intern bei einem Kunden ab, Vertriebler speichern Text als Notiz bei einem Lead. Das iPhone kennt dieses Ziel nicht.
+- **Foto aufnehmen** erscheint am Handy bei allen Dateifeldern für Bilder. **Spracheingabe** ist standardmäßig aus und wird je Gerät im Menü eingeschaltet (mit Hinweis auf die Verarbeitung durch den Browser-Hersteller).
+- **Menü → „Bequem“** vergrößert Schrift, Tippflächen und Abstände auf diesem Gerät.
+- **Push-Meldungen** tragen Schnellaktionen (Android): „Öffnen“ und „In 1 Std. erinnern“. Tippen auf die Meldung springt direkt zur Seite, auch wenn die App schon läuft.

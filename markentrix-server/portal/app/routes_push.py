@@ -18,6 +18,23 @@ def status(user: dict = Depends(current_user)):
     return {"schluessel": k["public"], "geraete": n}
 
 
+class SpaeterIn(BaseModel):
+    titel: str = Field(min_length=1, max_length=200)
+    text: str = Field(default="", max_length=500)
+    url: str = Field(default="/", max_length=300, pattern=r"^/")
+    minuten: int = Field(default=60, ge=5, le=24 * 60)
+
+
+@router.post("/spaeter")
+def spaeter(data: SpaeterIn, user: dict = Depends(current_user)):
+    """„In 1 Stunde erinnern“ in einer Push-Meldung: dieselbe Meldung kommt später noch einmal (nur an den Benutzer selbst)."""
+    rate_limit(f"pushspaeter:{user['id']}", 30, 3600)
+    with tx("system") as cur:
+        cur.execute("INSERT INTO push_spaeter (benutzer_id, titel, text, url, faellig_am) VALUES (%s,%s,%s,%s, now() + make_interval(mins => %s))",
+                    (user["id"], data.titel, data.text, data.url, data.minuten))
+    return {"ok": True}
+
+
 class AboIn(BaseModel):
     endpoint: str = Field(min_length=20, max_length=1000, pattern=r"^https?://")
     p256dh: str = Field(min_length=20, max_length=200)

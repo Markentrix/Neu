@@ -274,6 +274,7 @@ def seite(name):
 
 app.get("/", include_in_schema=False)(seite("login.html"))
 app.get("/app", include_in_schema=False)(seite("kunde.html"))
+app.get("/teilen", include_in_schema=False)(seite("teilen.html"))
 app.get("/admin", include_in_schema=False)(seite("admin.html"))
 app.get("/vertrieb", include_in_schema=False)(seite("vertrieb.html"))
 app.get("/einladung", include_in_schema=False)(seite("einladung.html"))

@@ -491,6 +491,33 @@ export function themeKnopf() {
   return k;
 }
 
+/** Schalter „Bequem“: größere Schrift, größere Tippflächen und mehr Abstand (nur auf diesem Gerät). */
+export function dichteKnopf() {
+  const an = () => document.documentElement.classList.contains('bequem');
+  const k = h('button', { type: 'button', class: 'themeknopf dichteknopf', 'aria-pressed': String(an()) });
+  const zeigen = () => { k.textContent = an() ? 'Bequem: an' : 'Bequem: aus'; k.setAttribute('aria-pressed', String(an())); k.title = 'Größere Schrift und Tippflächen'; };
+  k.addEventListener('click', () => { document.documentElement.classList.toggle('bequem', !an()); try { localStorage.setItem('mk-dichte', an() ? 'bequem' : ''); } catch { /* nur bis zum Neuladen */ } zeigen(); });
+  zeigen(); return k;
+}
+
+/** Schalter „Spracheingabe“: nur auf Wunsch, mit Hinweis, dass der Browser-Hersteller die Aufnahme verarbeitet. Nur wenn der Browser es kann. */
+export function spracheKnopf() {
+  const w = /** @type {any} */ (window);
+  if (!(w.SpeechRecognition || w.webkitSpeechRecognition)) return '';
+  const an = () => { try { return localStorage.getItem('mk-sprache') === '1'; } catch { return false; } };
+  const k = h('button', { type: 'button', class: 'themeknopf spracheknopf', 'aria-pressed': String(an()) });
+  const zeigen = () => { k.textContent = an() ? '🎙 Sprache: an' : '🎙 Sprache: aus'; k.setAttribute('aria-pressed', String(an())); };
+  const setze = (v) => { try { localStorage.setItem('mk-sprache', v ? '1' : '0'); } catch { /* nur bis zum Neuladen */ } zeigen(); };
+  k.addEventListener('click', () => {
+    if (an()) { setze(false); return; }
+    const d = dialog('Spracheingabe einschalten?', h('div', {},
+      h('p', {}, 'Mit der Spracheingabe diktieren Sie Texte in Eingabefelder. Dafür sendet Ihr Browser die Aufnahme an seinen Hersteller (bei Chrome an Google), um sie in Text umzuwandeln. Markentrix speichert keine Aufnahmen.'),
+      h('p', { class: 'small muted' }, 'Bitte diktieren Sie darüber keine vertraulichen Angaben wie Passwörter, Bankdaten oder Gesundheitsdaten.'),
+      h('div', { class: 'row', style: 'gap:8px' }, h('button', { class: 'btn', onclick: () => { setze(true); d.zu(); } }, 'Einschalten'), h('button', { class: 'btn sec', onclick: () => d.zu() }, 'Abbrechen'))));
+  });
+  zeigen(); return k;
+}
+
 /** Meldet eine geöffnete Seite für die Nutzungsstatistik (nur Seitenname, keine Inhalte). Fehler bleiben unbemerkt. */
 let _letzteSeite = '', _letzteZeit = 0;
 export function nutzung(seite) {
@@ -663,13 +690,24 @@ export function delta(jetzt, vorher, gut = true, format = (x) => String(x), zeit
 
 
 /** Dialogfenster (Esc oder Klick daneben schließt). Gibt { zu } zurück. */
+const offeneDialoge = new Set();
+if (typeof window !== 'undefined') {
+  // Seite neu geladen oder Verlauf übrig geblieben: ein Eintrag eines längst geschlossenen Fensters wird übersprungen
+  if (history.state && history.state.mkDlg) history.replaceState(null, '');
+  window.addEventListener('popstate', () => { if (history.state && history.state.mkDlg && !offeneDialoge.has(history.state.mkDlg)) history.back(); });
+}
 export function dialog(titel, inhalt, breit = false) {
-  const zu = () => { ov.remove(); document.removeEventListener('keydown', esc); window.removeEventListener('hashchange', zu); };
+  // Ein Verlaufseintrag je Fenster: Die Zurück-Taste (oder der Zurück-Wisch am Handy) schließt dann das Fenster statt die Seite zu verlassen
+  const id = Math.random().toString(36).slice(2); let offen = true;
+  const aufraeumen = () => { if (!offen) return; offen = false; offeneDialoge.delete(id); ov.remove(); document.removeEventListener('keydown', esc); window.removeEventListener('hashchange', aufraeumen); window.removeEventListener('popstate', pop); };
+  const pop = () => { if (!history.state || history.state.mkDlg !== id) aufraeumen(); };
+  const zu = () => { if (!offen) return; const unser = history.state && history.state.mkDlg === id; aufraeumen(); if (unser) history.back(); };
   const esc = (/** @type {KeyboardEvent} */ e) => { if (e.key === 'Escape') zu(); };
   const ov = h('div', { class: 'dlgoverlay', onclick: (e) => { if (e.target === ov) zu(); } },
     h('div', { class: 'dlg' + (breit ? ' breit' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': titel },
       h('div', { class: 'dlgkopf' }, h('h2', {}, titel), h('button', { class: 'btn sec small', 'aria-label': 'Schließen', onclick: zu }, '✕')), inhalt));
-  document.addEventListener('keydown', esc); window.addEventListener('hashchange', zu); document.body.append(ov);
+  document.addEventListener('keydown', esc); window.addEventListener('hashchange', aufraeumen); window.addEventListener('popstate', pop); document.body.append(ov);
+  try { history.pushState({ mkDlg: id }, ''); offeneDialoge.add(id); } catch { /* ohne Verlauf bleibt es ein normales Fenster */ }
   // Am Handy: Dialog als Blatt von unten, am Kopf nach unten wischen schließt ihn
   const kopf = ov.querySelector('.dlgkopf'), blatt = /** @type {HTMLElement} */ (ov.querySelector('.dlg'));
   let y0 = null;
@@ -750,7 +788,7 @@ export function mobilLeiste({ aktiv, gruppen, feste, icons, kurz = {}, schluesse
   const fest = feste.filter(i => ids.includes(i)).slice(0, 4), zahl = (i) => (alle.find(p => p[0] === i) || [])[2] || 0;
   const rest = ids.filter(i => !fest.includes(i)), mehrZahl = rest.reduce((n, i) => n + zahl(i), 0);
   const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt' + (kachel ? ' kachel' : '') }, navGruppen(gruppen.map(([titel, p]) => [titel, p, true]), aktiv, schluessel + '-mehr'), extra,
-    h('div', { class: 'brandzeile', style: 'margin-top:10px' }, themeKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
+    h('div', { class: 'brandzeile', style: 'margin-top:10px;flex-wrap:wrap;gap:8px' }, themeKnopf(), dichteKnopf(), spracheKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
   return h('nav', { class: 'tabbar', 'aria-label': 'Hauptmenü' },
     fest.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null },
       h('span', { class: 'ic', 'aria-hidden': 'true' }, icons[id] || '•', zahl(id) ? h('span', { class: 'badge' }, zahl(id)) : ''), h('span', {}, kurz[id] || alle.find(p => p[0] === id)[1]))),
@@ -825,6 +863,13 @@ export function eingabeHilfen(wurzel = document) {
     }
   });
 }
+/** Baut die aktuelle Seite neu auf (die Seiten laden bei jedem Wechsel ihre Daten neu); ohne Portal-Seite wird neu geladen. */
+function aktualisieren() {
+  vibriere(12);
+  if (!document.querySelector('.main')) { location.reload(); return; }
+  window.dispatchEvent(new HashChangeEvent('hashchange', { oldURL: location.href, newURL: location.href }));
+  const k = h('div', { class: 'aktualisiert', role: 'status' }, '✓ Aktualisiert'); document.body.append(k); setTimeout(() => k.remove(), 1400);
+}
 if (typeof document !== 'undefined') {
   let t = null;
   new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => eingabeHilfen(), 150); }).observe(document.documentElement, { childList: true, subtree: true });
@@ -833,7 +878,7 @@ if (typeof document !== 'undefined') {
   const ind = () => { let e = document.getElementById('ziehen'); if (!e) { e = document.createElement('div'); e.id = 'ziehen'; e.textContent = '↓ Loslassen zum Aktualisieren'; document.body.append(e); } return e; };
   document.addEventListener('touchstart', (e) => { sy = (window.scrollY <= 0 && !document.querySelector('.dlgoverlay') && e.touches.length === 1) ? e.touches[0].clientY : null; zug = 0; }, { passive: true });
   document.addEventListener('touchmove', (e) => { if (sy === null) return; zug = e.touches[0].clientY - sy; const i = document.getElementById('ziehen'); if (zug > 20) { const x = ind(); x.style.transform = 'translateY(' + Math.min(zug, 90) / 2 + 'px)'; x.classList.toggle('bereit', zug > 90); } else if (i) i.remove(); }, { passive: true });
-  document.addEventListener('touchend', () => { const i = document.getElementById('ziehen'); if (i) i.remove(); if (sy !== null && zug > 90 && !document.querySelector('textarea:focus, input:focus')) location.reload(); sy = null; zug = 0; });
+  document.addEventListener('touchend', () => { const i = document.getElementById('ziehen'); if (i) i.remove(); if (sy !== null && zug > 90 && !document.querySelector('textarea:focus, input:focus')) aktualisieren(); sy = null; zug = 0; });
 }
 
 // ---------------------------------------------------------------- Nach dem Anruf: App fragt „Wie lief es?“ (Vertrieb und Admin)
@@ -901,6 +946,25 @@ const WISCH_SCHWELLE = 70;
  * Wischen in Listenzeilen (.heutezeile): nach rechts löst den Knopf mit data-wisch="rechts" aus, nach links den mit data-wisch="links".
  * Der Hinweistext kommt aus data-wisch-text des Knopfs. Senkrechtes Scrollen bleibt unberührt.
  */
+/** Eintrag sofort ausblenden (Aktion ohne Warten). Meldet der Server einen Fehler, kommt der Eintrag zurück, mit „Erneut versuchen“. */
+function sofortWeg(zeile, knopf) {
+  if (zeile.classList.contains('weg')) return;
+  zeile.classList.add('weg');
+  const ende = () => { ab.disconnect(); clearTimeout(frist); };
+  const ab = new MutationObserver(() => {
+    if (!zeile.isConnected) { ende(); return; }   // Seite wurde neu aufgebaut: die Aktion hat geklappt
+    if (document.querySelector('.toast.bad, .msg.err')) { ende(); zeile.classList.remove('weg'); toast('Das hat nicht geklappt. Der Eintrag ist wieder da.', 'bad', { text: 'Erneut versuchen', fn: () => knopf.click() }); }
+  });
+  ab.observe(document.body, { childList: true, subtree: true });
+  const frist = setTimeout(ende, 12000);
+}
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    const k = e.target instanceof Element ? e.target.closest('[data-sofort]') : null, z = k && k.closest('.heutezeile');
+    if (k && z && !k.hasAttribute('disabled')) sofortWeg(z, k);
+  }, true);
+}
+
 function wischZeilen() {
   /** @type {{el: HTMLElement, x: number, y: number, dx: number, aktiv: boolean} | null} */
   let z = null;

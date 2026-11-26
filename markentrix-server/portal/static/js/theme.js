@@ -8,6 +8,7 @@
     document.documentElement.setAttribute('data-theme', dunkel ? 'dark' : 'light');
   }
   anwenden();
+  try { if (localStorage.getItem('mk-dichte') === 'bequem') document.documentElement.classList.add('bequem'); } catch (e) { /* ohne Speicher: normal */ }
   if (mq && mq.addEventListener) mq.addEventListener('change', anwenden);
   /** @type {any} */ (window).mkTheme = {
     get: function () { return wahl; },

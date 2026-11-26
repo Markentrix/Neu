@@ -196,7 +196,7 @@ Kunden- und Systemverwaltung, Einstellungen, Dashboard, Werkzeuge, Systemstatus 
 | `routes_leistungsfreigabe` | 3 | 89 | `main` |
 | `routes_nutzung` | 3 | 52 | `jobs`, `main` |
 | `routes_plattformstatus` | 3 | 182 | `main` |
-| `routes_push` | 3 | 64 | `main` |
+| `routes_push` | 3 | 81 | `main` |
 | `routes_system` | 3 | 294 | `jobs`, `main`, `t142.py`, `t73.py` |
 | `routes_verwaltung` | 3 | 786 | `jobs`, `main` |
 | `routes_werkzeuge` | 3 | 319 | `main` |
@@ -208,6 +208,6 @@ Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werde
 | Modul | Schicht | Zeilen | Genutzt von |
 |---|---|---|---|
 | `cli` | 4 | 184 | `install.sh`, `mkctl`, `selbsttest.sh`, `t142.py` und 4 weitere |
-| `jobs` | 4 | 1309 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 8 weitere |
-| `main` | 4 | 314 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
+| `jobs` | 4 | 1318 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 9 weitere |
+| `main` | 4 | 315 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
 

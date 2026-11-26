@@ -537,7 +537,7 @@ def vertrag_erinnern(cfg=None):
 
 
 def vertrieb_erinnerung(cfg):
-    """Werktags morgens: erinnert jeden aktiven Vertriebler an Leads mit fälliger Wiedervorlage und an Leads, bei denen seit einer Woche nichts passiert ist (Mail und Push)."""
+    """Werktags morgens: erinnert jeden aktiven Vertriebler an Leads mit faelliger Wiedervorlage und an Leads, bei denen seit einer Woche nichts passiert ist (Mail und Push)."""
     jetzt = datetime.now(timezone.utc)
     if jetzt.hour < 6 or jetzt.weekday() >= 5 or not _marker("vertriebserinnerung-" + jetzt.strftime("%Y-%m-%d")):
         return
@@ -609,9 +609,9 @@ def aufgaben_automatisch(cfg):
             FROM tickets t JOIN kunden k ON k.id = t.kunden_id
             WHERE t.status = 'wartet_auf_kunde' AND t.geaendert_am < now() - interval '7 days'
             ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
-        # Rechnung überfällig
+        # Rechnung überfaellig
         f"""INSERT INTO aufgaben (kunden_id, titel, zustaendig, faellig_am, quelle, auto_schluessel)
-            SELECT b.kunden_id, 'Rechnung ' || b.nummer || ' überfällig: ' || k.firma, {admin}, current_date, 'auto', 'rechnung-' || b.id
+            SELECT b.kunden_id, 'Rechnung ' || b.nummer || ' überfaellig: ' || k.firma, {admin}, current_date, 'auto', 'rechnung-' || b.id
             FROM belege b JOIN kunden k ON k.id = b.kunden_id
             WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL
             ON CONFLICT (auto_schluessel) DO NOTHING RETURNING id, kunden_id, ticket_id, titel""",
@@ -897,7 +897,7 @@ def preisaenderung_anwenden(cfg):
 
 def zahlungsverzug(cfg):
     """Täglich: Kunden mit einer Rechnung, die lange nach der 2. Mahnung unbezahlt ist, bekommen ihren Wartungsplan (und auf Wunsch Formular/Buchung der Website) pausiert.
-    Sobald nichts Überfälliges mehr offen ist, wird alles wieder freigegeben. Der Admin wird jeweils informiert."""
+    Sobald nichts Überfaelliges mehr offen ist, wird alles wieder freigegeben. Der Admin wird jeweils informiert."""
     jetzt = datetime.now(timezone.utc)
     if jetzt.hour < 7 or not _marker(f"verzug-{jetzt.date()}"):
         return
@@ -942,7 +942,7 @@ def zahlungsverzug(cfg):
             if plaene or dienste:
                 cur.execute("INSERT INTO audit_log (kunden_id, aktion, details) VALUES (%s,'zahlungsverzug_aufgehoben',%s::jsonb)", (kid, json.dumps({"plaene": plaene, "dienste": bool(dienste)})))
         if ids:
-            push.senden(ids, "Zahlungsverzug beendet", f"{f}: nichts Überfälliges mehr offen, Pause aufgehoben.", "/admin#kunden", "verzug")
+            push.senden(ids, "Zahlungsverzug beendet", f"{f}: nichts Überfaelliges mehr offen, Pause aufgehoben.", "/admin#kunden", "verzug")
 
 
 def fruehwarnung_woche(cfg):
@@ -980,7 +980,7 @@ def geschaeftszahlen_mail(cfg):
     v = d["reihe"][-2]
     eur = lambda c: f"{c / 100:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " €"
     mailer.senden(an, f"Geschäftszahlen {v['monat']}", f"Zahlen für {v['monat']}:\n\n- Zahlungseingang (brutto): {eur(v['umsatz_cent'])}\n- Neukunden: {v['neukunden']}\n- Kündigungen: {v['kuendigungen']}\n- Neue Leads: {v['leads']}\n\n"
-                  f"Aktuell: {d['aktiv']} aktive Kunden, wiederkehrender Umsatz {eur(d['mrr_cent'])} im Monat, offene Rechnungen {eur(d['offen_cent'])} (davon überfällig {eur(d['ueberfaellig_cent'])}), Kündigungsquote 90 Tage {str(d['churn_prozent']).replace('.', ',')} %." + mailer.SIGNATUR)
+                  f"Aktuell: {d['aktiv']} aktive Kunden, wiederkehrender Umsatz {eur(d['mrr_cent'])} im Monat, offene Rechnungen {eur(d['offen_cent'])} (davon überfaellig {eur(d['ueberfaellig_cent'])}), Kündigungsquote 90 Tage {str(d['churn_prozent']).replace('.', ',')} %." + mailer.SIGNATUR)
 
 
 def tag_pushes(cfg):
@@ -1278,11 +1278,20 @@ def dsgvo_fristen_pruefen() -> int:
     return neu
 
 
+def push_spaeter_senden(cfg):
+    """Meldungen, bei denen jemand „In 1 Stunde erinnern“ gewählt hat, sind jetzt fällig."""
+    with tx("system") as cur:
+        cur.execute("DELETE FROM push_spaeter WHERE faellig_am <= now() RETURNING benutzer_id, titel, text, url")
+        faellig = cur.fetchall()
+    for z in faellig:
+        push.senden([z["benutzer_id"]], "Erinnerung: " + z["titel"], z["text"], z["url"], None, sofort=True)
+
+
 def tick():
     betrieb.notieren("jobs")   # Herzschlag für die Betriebs-Ampel
     with tx("system") as cur:
         cfg = einstellungen_lesen(cur)
-    for job in (tag_pushes, anruf_pushes, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
+    for job in (push_spaeter_senden, tag_pushes, anruf_pushes, anfragen_eskalation, veroeffentlichung_wacht, anrufe_aufraeumen, fotos_aufraeumen, rate_aufraeumen, fristen_loeschen, dsgvo_fristen, betriebs_alarm, wochenrueckblick, website_wacht, website_qualitaet, funnel_checks_nachholen, funnel_plaetze_monat, domain_pruefen, zustellung_pruefen, kuendigungen_vollziehen, zahlungsverzug, preisaenderung_anwenden, abrechnungslauf):
         _lauf(job, cfg)
     if not mailer.konfiguriert():
         return

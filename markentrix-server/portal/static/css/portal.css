@@ -621,3 +621,31 @@ details.abschnitt>.abschnittinhalt{padding:0 16px 16px}
   table.stapel td:first-child::before{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   table.stapel td:first-child{display:block}
 }
+
+/* App-Gefühl: Aktionen ohne Warten, Hinweis nach dem Runterziehen, Fenster-Tasten */
+.heutezeile{transition:max-height .22s ease,margin .22s ease,padding .22s ease,transform .22s ease}
+.heutezeile.weg{transform:translateX(40px);max-height:0;margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;overflow:hidden;border-width:0;pointer-events:none}
+.aktualisiert{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:50%;transform:translateX(-50%);z-index:90;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:6px 14px;font:600 13px "Source Sans 3",sans-serif;color:var(--link);animation:aktuell 1.4s ease forwards}
+@keyframes aktuell{0%{transform:translate(-50%,-14px)}12%,80%{transform:translate(-50%,0)}100%{transform:translate(-50%,-14px)}}
+@media(prefers-reduced-motion:reduce){.heutezeile,.aktualisiert{transition:none;animation:none}}
+
+/* Lang drücken, Foto, Sprache */
+.heutezeile,ul.prio>li,table.stapel tbody tr{-webkit-touch-callout:none}
+.heutezeile{-webkit-user-select:none;user-select:none}
+.langmenue{display:grid;gap:8px;padding:4px 0}
+.langmenue .btn{width:100%;justify-content:center;min-height:48px}
+.fotoknopf,.mikroknopf{margin:6px 6px 0 0}
+.mikroknopf.an{background:var(--bad,#b3261e);color:#fff;border-color:transparent}
+
+/* Bequem: größere Schrift, Tippflächen und Abstände (Schalter im Menü) */
+html.bequem{font-size:112.5%}
+html.bequem .btn,html.bequem button,html.bequem select,html.bequem input:not([type=checkbox]):not([type=radio]){min-height:52px}
+html.bequem .card{padding:20px}
+html.bequem .tabbar a,html.bequem .tabbar button{min-height:62px}
+html.bequem ul.prio>li,html.bequem .heutezeile{padding-top:14px;padding-bottom:14px}
+.dichteknopf,.spracheknopf{width:auto;padding:6px 12px}
+/* Untere Leiste: weiche Auswahl-Pille und Druck-Rückmeldung */
+.tabbar a .ic,.tabbar button .ic{transition:background-color .2s ease,transform .2s ease;border-radius:14px;padding:2px 14px}
+.tabbar a.on .ic,.tabbar button.on .ic{background:var(--tabpille,rgba(4,82,104,.14));transform:translateY(-1px)}
+.tabbar a:active .ic,.tabbar button:active .ic{transform:scale(.92)}
+@media(prefers-reduced-motion:reduce){.tabbar a .ic,.tabbar button .ic{transition:none}}

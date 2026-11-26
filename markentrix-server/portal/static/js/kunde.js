@@ -1,5 +1,5 @@
 import { api, stapelTabellen, appStil, h, zweiFaktorKarte, pushNachfrage, zielFuerRolle, startFehler } from './common.js';
-stapelTabellen();
+stapelTabellen(); appGefuehl();
 appStil({ fab: (seite) => {
   if (!darfSchreiben()) return null;
   if (seite === 'termine' && hat('anfragen_termine')) return { text: '＋ Termin', zielText: 'Neuer Termin' };
@@ -7,6 +7,7 @@ appStil({ fab: (seite) => {
   if (['heute', 'anfragen', 'kalender'].includes(seite)) return { text: '＋ Nachricht', href: '#nachrichten' };
   return null;
 } });
+import { appGefuehl } from './appgefuehl.js';
 import { setzeStart, zeige, hat } from './kunde/kern.js';
 import { darfSchreiben } from './kunde/postfach.js';
 import './kunde/uebersicht.js';

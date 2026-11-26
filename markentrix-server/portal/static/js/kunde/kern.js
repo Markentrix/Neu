@@ -1,4 +1,4 @@
-import { h, api, datum, toast, nutzung, leerZustand, themeKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke, abschnitte } from '../common.js';
+import { h, api, datum, toast, nutzung, leerZustand, themeKnopf, dichteKnopf, spracheKnopf, navGruppen, dialog, abmelden, sparkline, rechtFuss, glocke, abschnitte } from '../common.js';
 export { abschnitte };
 import { hilfeSuche } from '../hilfe.js';
 import { installBanner } from '../anleitung.js';
@@ -92,7 +92,7 @@ function tabbar(aktiv) {
   const ICON = { heute: '⌂', anfragen: '☎', termine: '▦', nachrichten: '✉', uebersicht: '◔' };
   const rest = ids.filter(i => !feste.includes(i)), mehrZahl = rest.reduce((n, i) => n + zaehler(i), 0);
   const mehr = () => dialog('Menü', h('div', { class: 'mehrblatt kachel' }, navGruppen(GRUPPEN.map(([titel, g]) => [titel, sichtbar().filter(x => g.includes(x[0])).map(x => [x[0], x[1], zaehler(x[0])]), true]), aktiv, 'kunde-mehr'),
-    h('div', { class: 'brandzeile', style: 'margin-top:10px' }, themeKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
+    h('div', { class: 'brandzeile', style: 'margin-top:10px;flex-wrap:wrap;gap:8px' }, themeKnopf(), dichteKnopf(), spracheKnopf()), h('button', { class: 'btn sec', style: 'width:100%;margin-top:10px', onclick: () => abmelden() }, 'Abmelden')));
   return h('nav', { class: 'tabbar', 'aria-label': 'Schnellzugriff' },
     feste.map(id => h('a', { href: '#' + id, class: id === aktiv ? 'on' : '', 'aria-current': id === aktiv ? 'page' : null }, h('span', { class: 'ic', 'aria-hidden': 'true' }, ICON[id] || '•', zaehler(id) ? h('span', { class: 'badge' }, zaehler(id)) : ''), h('span', {}, (SEITEN.find(x => x[0] === id) || [id, id])[1].replace('Angebote & Rechnungen', 'Rechnungen')))),
     h('button', { type: 'button', class: !feste.includes(aktiv) ? 'on' : '', onclick: mehr }, h('span', { class: 'ic', 'aria-hidden': 'true' }, '☰', mehrZahl ? h('span', { class: 'badge' }, mehrZahl) : ''), h('span', {}, 'Mehr')));
