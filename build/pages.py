@@ -26,7 +26,7 @@ def picture(site, name, alt, cls, prefix, sizes="(min-width: 900px) 33vw, 90vw",
     if m.get("webp"):
         srcs += f'<source type="image/webp" srcset="{", ".join(prefix + s for s in m["webp"])}" sizes="{sizes}">'
     return (f'<picture class="{cls}">{srcs}<img src="{prefix}{m["src"]}" alt="{ESC(alt)}" width="{m["w"]}" height="{m["h"]}" '
-            + ('fetchpriority="low" ' if eager else 'loading="lazy" ') + 'decoding="async"></picture>')
+            + ('fetchpriority="high" ' if eager else 'loading="lazy" ') + 'decoding="async"></picture>')
 
 
 def zoom(site, name, prefix, inner):

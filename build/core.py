@@ -189,6 +189,7 @@ def head(site, title, desc, path, prefix="", ld=None, noindex=False, og_type="we
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>{ESC(title)}</title>
 <meta name="description" content="{ESC(desc)}">
 <link rel="canonical" href="{ESC(url)}">

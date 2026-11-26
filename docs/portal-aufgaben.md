@@ -81,3 +81,24 @@ Kontakt, Termin, Gutschein und Firmenkunden senden weiter `einwilligung: "ja"`. 
 - **Anrufe** zählt Google über die Anrufzuordnung, dafür ist nichts auf der Website eingebaut.
 - **Hinweis zur Google-Mail „kein Google-Tag gefunden“:** Googles Prüfung sieht das Tag nicht, weil es erst nach Einwilligung lädt. Das ist so gewollt. Prüfen mit Google Tag Assistant: Seite öffnen, „Alle erlauben“, Termin absenden bzw. WhatsApp antippen.
 - **Optional im Portal:** Das Portal-Fenster könnte dieselben zwei Punkte bekommen, damit auch andere Kundenseiten Google Ads sauber nutzen können. Für ElbDetail ist das nicht mehr nötig.
+
+## 7. Sicherheits-Kopfzeilen auf dem Webserver (Prüfbericht 26.11.2026: 0 von 5)
+
+Die Kopfzeilen sendet der Webserver (Caddy), nicht die Website. Die Website setzt nur zusätzlich `<meta name="referrer" content="strict-origin-when-cross-origin">`. Vorschlag für den Caddy-Block der Domain `www.elbdetail.de`. Die CSP zuerst einige Tage als `Content-Security-Policy-Report-Only` laufen lassen und in der Browser-Konsole prüfen (Formulare, Termin, PayPal, Karte, Einwilligung „Alle erlauben“), danach scharf schalten:
+
+```caddy
+header {
+	Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	X-Content-Type-Options "nosniff"
+	X-Frame-Options "SAMEORIGIN"
+	Referrer-Policy "strict-origin-when-cross-origin"
+	Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(self \"https://www.paypal.com\"), interest-cohort=()"
+	Content-Security-Policy "default-src 'self'; script-src 'self' https://portal.markentrix.de https://www.googletagmanager.com https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://portal.markentrix.de https://*.google.com https://*.google.de https://*.googletagmanager.com https://*.google-analytics.com https://*.g.doubleclick.net https://*.paypal.com https://*.paypalobjects.com; connect-src 'self' https://portal.markentrix.de https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://www.google.de https://*.paypal.com; frame-src https://www.google.com https://*.paypal.com; font-src 'self'; form-action 'self' https://portal.markentrix.de; base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
+	-Server
+}
+```
+
+Hinweise:
+- `includeSubDomains` nur, wenn alle Subdomains HTTPS haben. Sonst weglassen.
+- Die Website selbst nutzt keine Inline-Skripte. JSON-LD wird von der CSP nicht blockiert. `'unsafe-inline'` ist nur bei Stilen nötig, weil Portal-Bausteine und einzelne Bildausschnitte `style`-Attribute setzen.
+- Gilt für alle Kundenseiten mit Portal-Skript sinngemäß (Domains anpassen).

@@ -148,18 +148,17 @@
     cBox.setAttribute("aria-labelledby", "consent-h");
     var dl = document.querySelector('.site-footer a[href$="datenschutz.html"]'), ds = dl ? dl.getAttribute("href") : "datenschutz.html";
     cBox.innerHTML =
-      '<p class="consent-h" id="consent-h">' + t("Datenschutz-Einstellungen") + "</p>" +
-      '<p class="consent-text">' + t("Notwendige Funktionen laufen immer. Mit Ihrer Einwilligung nutzen wir zusätzlich:") + "</p>" +
-      '<label class="consent-opt"><input type="checkbox" data-c="s"' + (prev.s ? " checked" : "") + "><span><strong>" + t("Statistik") + "</strong> " +
-        t("Google Analytics zeigt uns, wie die Website genutzt wird. Cookies bis 2 Jahre.") + "</span></label>" +
-      (ADS ? '<label class="consent-opt"><input type="checkbox" data-c="w"' + (prev.w ? " checked" : "") + "><span><strong>" + t("Werbeerfolgsmessung") + "</strong> " +
-        t("Google Ads misst, ob unsere Anzeigen zu Anfragen führen. Cookies bis 90 Tage.") + "</span></label>" : "") +
-      '<p class="consent-small">' + t("Anbieter: Google Ireland Limited. Daten können in die USA übermittelt werden. Widerruf jederzeit über „Datenschutz-Einstellungen“ unten auf jeder Seite.") +
-        ' <a href="' + ds + '">' + t("Mehr in der Datenschutzerklärung") + "</a></p>" +
+      '<p class="consent-text"><strong id="consent-h">' + t("Datenschutz") + ":</strong> " +
+        t("Mit Ihrer Einwilligung nutzen wir Google Analytics (Statistik) und Google Ads (Werbeerfolgsmessung). Dabei können Daten in die USA gelangen.") +
+        ' <a href="' + ds + '">' + t("Mehr") + '</a> · <button type="button" class="consent-link" data-c-more aria-expanded="false">' + t("Einstellungen") + "</button></p>" +
+      '<div class="consent-opts" hidden>' +
+        '<label class="consent-opt"><input type="checkbox" data-c="s"' + (prev.s ? " checked" : "") + "><span>" + t("Statistik (Google Analytics)") + "</span></label>" +
+        (ADS ? '<label class="consent-opt"><input type="checkbox" data-c="w"' + (prev.w ? " checked" : "") + "><span>" + t("Werbeerfolgsmessung (Google Ads)") + "</span></label>" : "") +
+      "</div>" +
       '<div class="consent-btns">' +
-        '<button type="button" class="btn btn-primary btn-sm" data-c-all>' + t("Alle erlauben") + "</button>" +
-        '<button type="button" class="btn btn-line-light btn-sm" data-c-save>' + t("Auswahl speichern") + "</button>" +
         '<button type="button" class="btn btn-line-light btn-sm" data-c-none>' + t("Ablehnen") + "</button>" +
+        '<button type="button" class="btn btn-primary btn-sm" data-c-all>' + t("Alle erlauben") + "</button>" +
+        '<button type="button" class="btn btn-primary btn-sm" data-c-save hidden>' + t("Auswahl speichern") + "</button>" +
       "</div>";
     document.body.appendChild(cBox);
     document.documentElement.classList.add("consent-open");
@@ -168,6 +167,11 @@
     cBox.querySelector("[data-c-all]").addEventListener("click", function () { done({ s: true, w: !!ADS }); });
     cBox.querySelector("[data-c-none]").addEventListener("click", function () { done({ s: false, w: false }); });
     cBox.querySelector("[data-c-save]").addEventListener("click", function () { done({ s: box("s"), w: box("w") }); });
+    cBox.querySelector("[data-c-more]").addEventListener("click", function () {
+      var o = cBox.querySelector(".consent-opts"), open = o.hidden;
+      o.hidden = !open; this.setAttribute("aria-expanded", open ? "true" : "false");
+      cBox.querySelector("[data-c-save]").hidden = !open; cBox.querySelector("[data-c-all]").hidden = open;
+    });
   }
   window.elbConsent = consentBanner;
   (function consentStart() {

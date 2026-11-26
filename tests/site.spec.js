@@ -666,10 +666,12 @@ test("Datenschutz-Einstellungen: Fenster beim ersten Besuch, Ablehnen lädt nich
   page.on("request", (r) => { if (/googletagmanager|google-analytics|googleadservices/.test(r.url())) reqs.push(r.url()); });
   await page.route(/googletagmanager\.com|google-analytics\.com|googleadservices\.com/, (r) => r.abort());
   await page.goto("/");
-  const box = page.getByRole("dialog", { name: "Datenschutz-Einstellungen" });
+  const box = page.getByRole("dialog", { name: "Datenschutz" });
   await expect(box).toBeVisible();
+  await box.getByRole("button", { name: "Einstellungen" }).click();
   await expect(box.getByRole("checkbox")).toHaveCount(2);
   await expect(box.getByRole("checkbox").first()).not.toBeChecked();
+  await expect(box.getByRole("button", { name: "Auswahl speichern" })).toBeVisible();
   const axe = await new AxeBuilder({ page }).include(".consent").analyze();
   expect(axe.violations.filter((v) => ["serious", "critical"].includes(v.impact))).toEqual([]);
   await box.getByRole("button", { name: "Ablehnen" }).click();
@@ -685,6 +687,6 @@ test("Datenschutz-Einstellungen: Fenster beim ersten Besuch, Ablehnen lädt nich
 
 test("Datenschutz-Einstellungen: englische Seite englisch", async ({ page }) => {
   await page.goto("/en/");
-  await expect(page.getByRole("dialog", { name: "Privacy settings" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Privacy" })).toBeVisible();
   await expect(page.locator(".consent [data-c-all]")).toHaveText("Allow all");
 });
