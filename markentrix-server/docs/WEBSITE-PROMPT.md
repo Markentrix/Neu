@@ -35,6 +35,9 @@ automatisch ein (NICHT selbst einbinden, kein data-site eintragen):
   <div data-mk="kontakt"></div>      Kontaktformular
   <div data-mk="termin"></div>       Terminbuchung
   <div data-mk="bewertungen"></div>  Google-Bewertungen
+  Bewertungszahlen im Text (Kopfbereich, Fakten, Siegel) NIE nur fest schreiben, sondern live ersetzen lassen; der feste Text bleibt als Rückfall:
+  <span data-mk-bew="anzahl">22</span> · <span data-mk-bew="sterne">5,0</span> · <span data-mk-bew="symbole">★★★★★</span> · <span data-mk-bew="stand">(Stand Oktober 2026)</span>
+  ("stand" wird ausgeblendet, sobald Live-Zahlen da sind. Voraussetzung: Google-Bewertungen sind beim Kunden aktiviert und die Place-ID hinterlegt.)
   <div data-mk="paypal" data-betrag="49,90" data-titel="Gutschein"></div>
   <div data-mk="preise"></div>      Preisliste, immer aktuell aus dem Portal (nie Preise fest in die Seite schreiben)
   <span data-mk="cookies"></span>    Statistik-Einstellung im Footer

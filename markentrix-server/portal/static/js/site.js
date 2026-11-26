@@ -163,6 +163,17 @@
     }).catch(function () { c.textContent = ''; });
   }
 
+  // Live-Zahlen an beliebigen Stellen der Seite: <span data-mk-bew="anzahl">22</span> (auch "sterne" = 4,7 und "symbole" = ★★★★★).
+  // Der feste Text bleibt als Rückfall stehen. data-mk-bew="stand" (z. B. "Stand Oktober 2026") wird ausgeblendet, sobald Live-Zahlen da sind.
+  function bewZahlen(cfg) {
+    var z = document.querySelectorAll('[data-mk-bew]'); if (!z.length || !cfg.bewertungen) return;
+    anfrage('GET', 'bewertungen').then(function (d) {
+      if (!d.aktiv || !d.sterne) return;
+      var w = { anzahl: d.anzahl ? String(d.anzahl) : '', sterne: Number(d.sterne).toFixed(1).replace('.', ','), symbole: sterne(d.sterne) };
+      Array.prototype.forEach.call(z, function (e) { var a = e.getAttribute('data-mk-bew'); if (a === 'stand') { e.hidden = true; return; } if (w[a]) e.textContent = w[a]; });
+    }).catch(function () { /* fester Text bleibt */ });
+  }
+
   // ------------------------------------------------------------ PayPal
   var sdk = null;
   function paypalLaden(p) {
@@ -294,6 +305,7 @@
     (slots.kontakt || []).forEach(function (c) { if (cfg.kontakt) kontakt(c); else c.textContent = ''; });
     (slots.termin || []).forEach(function (c) { if (cfg.termin.aktiv) termin(c); else c.textContent = ''; });
     (slots.bewertungen || []).forEach(function (c) { if (cfg.bewertungen) bewertungen(c); else c.textContent = ''; });
+    bewZahlen(cfg);
     (slots.preise || []).forEach(function (c) { preise(c); });
     (slots.paypal || []).forEach(function (c) { if (cfg.paypal.aktiv) paypal(c, cfg.paypal); else c.textContent = ''; });
   }).catch(function () { /* Dienst nicht erreichbar: die Seite bleibt ohne die Bausteine nutzbar */ });

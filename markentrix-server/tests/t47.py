@@ -89,7 +89,7 @@ async def main():
         await ctx.close()
         # Website-Skript auf einer Kunden-Domain (Seite wird abgefangen, Skript kommt vom Portal)
         ctx=await br.new_context(viewport={"width":900,"height":900},bypass_csp=True); pg=await ctx.new_page(); errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)))
-        html=f"""<!doctype html><meta charset=utf-8><body><h1>Testfirma</h1><div id=k data-mk="kontakt"></div><div id=t data-mk="termin"></div><div id=b data-mk="bewertungen"></div><div id=p data-mk="paypal" data-betrag="49,90"></div>
+        html=f"""<!doctype html><meta charset=utf-8><body><h1>Testfirma</h1><div id=k data-mk="kontakt"></div><div id=t data-mk="termin"></div><div id=b data-mk="bewertungen"></div><p id=bz><span id=bza data-mk-bew="anzahl">22</span> Bewertungen, <span id=bzs data-mk-bew="sterne">5,0</span> <span id=bzt data-mk-bew="stand">Stand Oktober</span></p><div id=p data-mk="paypal" data-betrag="49,90"></div>
 <script src="{B}/static/js/site.js" data-site="{sid}" defer></script>"""
         await pg.route(f"http://{dom}/",lambda r:r.fulfill(status=200,content_type="text/html",body=html))
         con=[]; pg.on("console",lambda m:con.append(m.text)); pg.on("requestfailed",lambda r:con.append("FAILED "+r.url+" "+str(r.failure)))
@@ -98,6 +98,8 @@ async def main():
         except Exception: print("DEBUG",con,errs,(await pg.inner_text("body"))[:200]); raise
         await pg.wait_for_selector("#k form",timeout=8000); await pg.wait_for_selector("#t .mk-chip",timeout=8000); await pg.wait_for_selector("#b .mk-sterne",timeout=8000)
         chk("Website: Bewertungen mit Sternen und Autor","4,7 von 5" in await pg.locator("#b").inner_text() and "Anna K." in await pg.locator("#b").inner_text())
+        await pg.wait_for_function("document.querySelector('#bza').textContent!=='22'",timeout=8000)
+        chk("Website: feste Zahlen werden durch Live-Zahlen ersetzt, Stand-Hinweis verschwindet",await pg.locator("#bza").inner_text()=="128" and await pg.locator("#bzs").inner_text()=="4,7" and not await pg.locator("#bzt").is_visible())
         chk("Website: Fremdtext wird nicht als HTML gesetzt",await pg.locator("#b b").count()==0 and "<b>Top</b>" in await pg.locator("#b").inner_text())
         chk("Website: Bewerten-Knopf",await pg.locator("#b a[href*='writereview']").count()==1)
         chk("Website: PayPal.Me-Knopf mit Betrag",await pg.locator("#p a[href='https://paypal.me/dienste/49.90EUR']").count()==1,await pg.locator("#p").inner_html())

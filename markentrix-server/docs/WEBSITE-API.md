@@ -92,3 +92,9 @@ Bestellungen (Status eingegangen, bestätigt, bezahlt, in Produktion, versendet,
 
 ### Noch nicht gebaut
 Freistellen von Bildern; automatisch erzeugte Artikelseiten `produkt/<id>.html` mit `sitemap.xml` (die Website nutzt dafür bis auf Weiteres ihre eigenen Seiten oder `produkt.html?id=…`); Rechnung/Quittung zur Bestellung; Einlösen von Gutscheinen an der Ladenkasse außerhalb des Shops (Restguthaben wird nur bei Online-Bestellungen abgebucht, im Geschäft trägt der Inhaber nichts ein); automatische Zahlungsprüfung (der Inhaber setzt „Bezahlt“ selbst nach Blick ins PayPal-Konto).
+
+
+## Live-Bewertungszahlen im Text (data-mk-bew)
+Überall auf der Seite lassen sich Zahlen aus den Google-Bewertungen einsetzen, ohne dass ein ganzer Bewertungsblock nötig ist:
+`<span data-mk-bew="anzahl">22</span>` (Anzahl), `data-mk-bew="sterne"` (z. B. 4,7), `data-mk-bew="symbole"` (★★★★★) und `data-mk-bew="stand"` (wird ausgeblendet, sobald Live-Zahlen da sind, zum Beispiel „Stand Oktober 2026“).
+Der feste Text im Element bleibt als Rückfall stehen, falls Google oder das Portal nicht antwortet. Das Skript `site.js` muss eingebunden sein, und im Kundenportal müssen Google-Bewertungen aktiv sein (Place-ID gespeichert). Strukturierte Daten (JSON-LD `aggregateRating`) im Seitenkopf werden dadurch nicht aktualisiert und müssen von Hand gepflegt werden. Test: t47.
