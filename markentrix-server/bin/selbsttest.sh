@@ -52,7 +52,9 @@ for d in /srv/sites/live/*/; do
   n="$(basename "$d")"; [ -d "$d" ] || continue
   CODE="$(curl -sS -m 12 --resolve "$n:443:127.0.0.1" -o /dev/null -w '%{http_code}' "https://$n/" 2>/dev/null || true)"
   case "$CODE" in
-    2*|3*) z ok "$n: Zertifikat und Seite werden ausgeliefert" ;;
+    2*|3*) z ok "$n: Zertifikat und Seite werden ausgeliefert"
+       KOPF="$(curl -sSI -m 12 --resolve "$n:443:127.0.0.1" "https://$n/" 2>/dev/null | grep -ciE '^(strict-transport-security|content-security-policy|x-frame-options|x-content-type-options|referrer-policy|permissions-policy):' || true)"
+       [ "${KOPF:-0}" -ge 6 ] && z ok "$n: alle 6 Sicherheits-Kopfzeilen werden gesendet" || z warn "$n: nur ${KOPF:-0} von 6 Sicherheits-Kopfzeilen (wurde die Domain-Datei von Hand geändert? Dann import oder die Zeilen aus docs/CADDY-KUNDEN-KOPFZEILEN.md ergänzen)" ;;
     *) DNSIP="$(getent ahostsv4 "$n" 2>/dev/null | awk '{print $1; exit}')"
        if [ -n "$MYIP" ] && [ "$DNSIP" = "$MYIP" ]; then z fehler "$n: DNS stimmt, aber der Webserver liefert keine Seite mit Zertifikat aus (Abhilfe: mkctl caddy-neu, dann Log des Caddy ansehen)"
        else z warn "$n: noch kein Zertifikat, weil die Domain (noch) nicht auf diesen Server zeigt"; fi ;;

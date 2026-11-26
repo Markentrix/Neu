@@ -820,3 +820,9 @@ Das Kundenportal (`/app`, `portal/static/js/kunde/`, gemeinsame Texte in `common
 - **Foto aufnehmen** erscheint am Handy bei allen Dateifeldern für Bilder. **Spracheingabe** ist standardmäßig aus und wird je Gerät im Menü eingeschaltet (mit Hinweis auf die Verarbeitung durch den Browser-Hersteller).
 - **Menü → „Bequem“** vergrößert Schrift, Tippflächen und Abstände auf diesem Gerät.
 - **Push-Meldungen** tragen Schnellaktionen (Android): „Öffnen“ und „In 1 Std. erinnern“. Tippen auf die Meldung springt direkt zur Seite, auch wenn die App schon läuft.
+
+## Sicherheits-Kopfzeilen der Kundenseiten (26.11.2026)
+Alle Kundenseiten senden HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy und eine Content-Security-Policy. Der Block steht in den Domain-Dateien unter `/srv/caddy-sites` (vom Worker erzeugt, bestehende unveränderte Dateien werden automatisch nachgerüstet). Anders als in der PDF-Anleitung gibt es hier kein `systemctl reload caddy`: Caddy läuft im Docker-Container, der Worker lädt ihn selbst neu und behält die alte Datei, falls Caddy die neue ablehnt.
+- Start im Testmodus (Report-Only): nichts wird blockiert. Nach 3 bis 7 Tagen ohne Meldungen in der Browser-Konsole: `mkctl kunden-csp scharf`. Zurück: `mkctl kunden-csp testen`.
+- `mkctl selbsttest` meldet je Kundendomain, ob alle 6 Kopfzeilen ankommen. Von Hand geänderte Domain-Dateien (evtl. elbdetail.de) bekommen den Block nicht und müssen ihn von Hand erhalten.
+- Details und Prüfliste: `docs/CADDY-KUNDEN-KOPFZEILEN.md`. Test: t144.

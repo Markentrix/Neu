@@ -156,6 +156,14 @@ DEMO
     reload_caddy
     ;;
 
+  kunden-csp)
+    # Content-Security-Policy der Kundenseiten: "testen" meldet nur (Standard), "scharf" blockiert Verstöße. Wirkt innerhalb einer Minute.
+    case "${2:-}" in
+      testen|scharf) echo "$2" > "$BASE/kunden-csp"; echo "Kundenseiten: Content-Security-Policy auf '$2' gestellt. Der Webserver bekommt es in etwa einer Minute (Kontrolle: mkctl selbsttest).";;
+      *) echo "Aktuell: $(cat "$BASE/kunden-csp" 2>/dev/null || echo testen)   (ändern: mkctl kunden-csp testen|scharf)";;
+    esac
+    ;;
+
   site-list)
     for kind in live demos; do
       echo "== $kind =="
@@ -372,6 +380,7 @@ mkctl demo-add <name> [--from Ordner]  Neue Demo unter https://demo.$DOMAIN/<nam
 mkctl site-add <domain> [--from Ordner] [--kunde "Name"]
                                        Neue Kunden-Website mit eigener Domain
 mkctl site-list                        Alle Websites und Demos
+mkctl kunden-csp [testen|scharf]       Sicherheits-Richtlinie (CSP) der Kundenseiten anzeigen oder ändern
 mkctl restart <n8n|panel|portal|caddy|mk-db>
 mkctl logs <Containername>             Protokoll eines Dienstes ansehen
 mkctl update                           Sicherung, dann alle Dienste aktualisieren
