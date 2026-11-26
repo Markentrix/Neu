@@ -1,0 +1,13 @@
+# Markentrix: Sicherheits-Kopfzeilen für alle Kundenseiten (Stand 26.11.2026)
+# Ganz oben ins Caddyfile, dann in jedem Kundenseiten-Block: import kunden-header
+(kunden-header) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(self \"https://www.paypal.com\"), interest-cohort=()"
+		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://portal.markentrix.de https://www.googletagmanager.com https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://portal.markentrix.de https://*.google.com https://*.google.de https://*.googletagmanager.com https://*.google-analytics.com https://*.g.doubleclick.net https://*.paypal.com https://*.paypalobjects.com; connect-src 'self' https://portal.markentrix.de https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://www.google.de https://*.paypal.com; frame-src https://www.google.com https://*.paypal.com; font-src 'self'; form-action 'self' https://portal.markentrix.de; base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
+		-Server
+	}
+}

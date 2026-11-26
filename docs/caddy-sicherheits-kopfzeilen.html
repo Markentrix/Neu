@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Caddy: Sicherheits-Kopfzeilen für Kundenseiten</title>
+<style>
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 10pt; line-height: 1.45; color: #1a1d23; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; }
+  .sub { color: #5b6270; margin: 0 0 6mm; }
+  h2 { font-size: 12pt; margin: 6mm 0 2mm; padding-top: 2mm; border-top: 1px solid #dfe3e9; }
+  h2 .n { display: inline-block; width: 7mm; color: #1c4f9c; }
+  p { margin: 0 0 2.5mm; }
+  ul { margin: 0 0 2.5mm; padding-left: 5mm; }
+  li { margin-bottom: 1mm; }
+  pre { font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 7.6pt; line-height: 1.4; background: #f4f5f7; border: 1px solid #dfe3e9; border-radius: 2mm; padding: 3mm 3.5mm; margin: 0 0 3mm; white-space: pre-wrap; word-break: break-all; }
+  code { font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 8.6pt; background: #f4f5f7; padding: 0 1mm; border-radius: 1mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 0 0 3mm; }
+  th, td { text-align: left; vertical-align: top; padding: 1.6mm 2mm; border-bottom: 1px solid #dfe3e9; }
+  th { background: #f4f5f7; }
+  .box { border-left: 3px solid #1c4f9c; background: #f6f9fe; padding: 2.5mm 3.5mm; margin: 0 0 3mm; }
+  .warn { border-left-color: #b3182c; background: #fdf4f5; }
+  .foot { margin-top: 6mm; font-size: 8pt; color: #5b6270; }
+</style>
+</head>
+<body>
+<h1>Caddy: Sicherheits-Kopfzeilen für alle Kundenseiten</h1>
+<p class="sub">Markentrix-Portal · Stand 26.11.2026 · gilt für alle Kundenseiten, die über den gemeinsamen Caddy-Server ausgeliefert werden</p>
+
+<div class="box"><strong>Ausgangslage:</strong> markentrix.de sendet bereits alle Sicherheits-Kopfzeilen. Die Kundenseiten (Beispiel elbdetail.de) senden keine davon (Prüfbericht: „Sicherheits-Kopfzeilen 0 von 5“). Ursache: Im Caddy-Block der Kundendomains fehlt der <code>header</code>-Abschnitt. Eine Änderung an dieser einen Stelle behebt es für alle Kundenseiten, an den Websites selbst ist nichts zu tun.</div>
+
+<h2><span class="n">1</span>Snippet ganz oben ins Caddyfile</h2>
+<pre>(kunden-header) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(self \"https://www.paypal.com\"), interest-cohort=()"
+		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://portal.markentrix.de https://www.googletagmanager.com https://www.paypal.com https://*.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://portal.markentrix.de https://*.google.com https://*.google.de https://*.googletagmanager.com https://*.google-analytics.com https://*.g.doubleclick.net https://*.paypal.com https://*.paypalobjects.com; connect-src 'self' https://portal.markentrix.de https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://www.google.de https://*.paypal.com; frame-src https://www.google.com https://*.paypal.com; font-src 'self'; form-action 'self' https://portal.markentrix.de; base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
+		-Server
+	}
+}</pre>
+
+<div class="box warn"><strong>Wichtig beim Kopieren:</strong> Jeder Wert muss in <em>einer</em> Zeile stehen (im PDF sind die langen Zeilen nur umbrochen). Am sichersten die beiliegende Datei <code>caddy-kunden-header.caddy</code> verwenden, sie enthält genau diesen Block ohne Umbrüche.</div>
+
+<h2><span class="n">2</span>In den Block der Kundenseiten einbinden</h2>
+<p>In jeden Site-Block, der Kundenseiten ausliefert (z. B. der gemeinsame Block mit <code>on_demand</code>-TLS oder je Kundendomain), eine Zeile ergänzen:</p>
+<pre>	import kunden-header</pre>
+<p>Den Block von markentrix.de selbst nicht ändern, er hat bereits eigene Kopfzeilen.</p>
+
+<h2><span class="n">3</span>Prüfen, neu laden, kontrollieren</h2>
+<pre>caddy validate --config /etc/caddy/Caddyfile
+systemctl reload caddy
+curl -sI https://www.KUNDENDOMAIN.de/ | grep -iE "strict-transport|content-security|x-frame|x-content-type|referrer-policy|permissions-policy"</pre>
+<p>Pfad zum Caddyfile ggf. anpassen. Erwartet: sechs Zeilen im Ergebnis. Danach die Prüfung im Portal erneut starten.</p>
+
+<h2><span class="n">4</span>CSP nach 3–7 Tagen scharf schalten</h2>
+<p>Erst ohne Fehler testen, dann im Snippet <code>Content-Security-Policy-Report-Only</code> durch <code>Content-Security-Policy</code> ersetzen, erneut <code>caddy validate</code> und <code>systemctl reload caddy</code>.</p>
+<p>Testen auf einigen Kundenseiten, Browser-Konsole offen (F12), es dürfen keine CSP-Meldungen erscheinen:</p>
+<ul>
+  <li>Kontakt- und Terminformular absenden, Fotos hochladen</li>
+  <li>Bewertungen, Preise und PayPal-Knopf (falls genutzt)</li>
+  <li>Karte auf der Kontaktseite laden</li>
+  <li>Einwilligung „Alle erlauben“ (Google Analytics / Google Ads laden)</li>
+</ul>
+
+<h2><span class="n">5</span>Was die Kopfzeilen bewirken</h2>
+<table>
+  <tr><th>Kopfzeile</th><th>Wirkung</th></tr>
+  <tr><td>Strict-Transport-Security</td><td>Browser nutzt nur noch HTTPS (1 Jahr)</td></tr>
+  <tr><td>X-Content-Type-Options</td><td>keine Umdeutung von Dateitypen</td></tr>
+  <tr><td>X-Frame-Options</td><td>Seite nicht in fremde Seiten einbettbar (Clickjacking)</td></tr>
+  <tr><td>Referrer-Policy</td><td>fremde Seiten sehen nur die Domain, nicht den Pfad</td></tr>
+  <tr><td>Permissions-Policy</td><td>Kamera, Mikrofon, Standort gesperrt; Zahlung nur PayPal</td></tr>
+  <tr><td>Content-Security-Policy</td><td>nur erlaubte Quellen für Skripte, Bilder, Verbindungen</td></tr>
+</table>
+
+<h2><span class="n">6</span>Hinweise</h2>
+<ul>
+  <li><strong>HSTS:</strong> <code>includeSubDomains</code> bewusst weggelassen. Nur ergänzen, wenn alle Subdomains aller Kundendomains HTTPS haben.</li>
+  <li><strong>Zusätzliche Dienste:</strong> Nutzt eine Kundenseite weitere externe Dienste (z. B. Metricool, YouTube, Calendly), deren Domain in den passenden CSP-Eintrag aufnehmen. Am einfachsten über ein zweites Snippet für diesen Kunden statt <code>import kunden-header</code>.</li>
+  <li><strong>Eine Hauptadresse:</strong> Falls noch nicht vorhanden, je Kunde die Domain ohne „www“ dauerhaft weiterleiten:
+<pre style="margin-top:2mm">kundendomain.de {
+	redir https://www.kundendomain.de{uri} 301
+}</pre></li>
+  <li><strong>Rückweg:</strong> Bei Problemen die Zeile <code>import kunden-header</code> entfernen und Caddy neu laden.</li>
+</ul>
+
+<p class="foot">Erstellt für das Markentrix-Portal. Die Werte entsprechen dem Bedarf der Portal-Bausteine (portal.markentrix.de), Google Analytics/Ads, PayPal und Google Maps.</p>
+</body>
+</html>
