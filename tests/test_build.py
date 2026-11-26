@@ -79,8 +79,17 @@ class TestPortalUpload(unittest.TestCase):
         bad = re.compile(r"localhost|127\.0\.0\.1|fonts\.googleapis|fonts\.gstatic|cdnjs|jsdelivr|unpkg|googletagmanager|\.php\b|lorem ipsum", re.I)
         for p in files(".html", ".css", ".js", ".json", ".xml", ".txt", ".svg", ".webmanifest"):
             t = read(p)
+            if p.endswith("script.js"):  # Google-Ads-Tag: nur hier, und nur nach Einwilligung (siehe Test unten)
+                t = t.replace("googletagmanager.com/gtag/js", "")
             self.assertIsNone(bad.search(t), f"{p}: {bad.search(t)}")
             self.assertNotIn("http://", t, p)
+
+    def test_google_tag_only_after_consent(self):
+        js = read(os.path.join(SITE, "script.js"))
+        i = js.index("googletagmanager.com/gtag/js")
+        self.assertIn("function adsLoad", js[max(0, i - 3000):i])  # Tag nur in adsLoad
+        self.assertRegex(js, r"if \(c\.w\) adsLoad\(\)")       # adsLoad nur bei Einwilligung „Werbeerfolgsmessung“
+        self.assertIn("ad_personalization: \"denied\"", js)
 
     def test_relative_paths_only(self):
         for p in files(".html"):
@@ -127,9 +136,8 @@ class TestPortalUpload(unittest.TestCase):
     def test_portal_bausteine_and_no_own_banner(self):
         for p in files(".html"):
             t = read(p)
-            self.assertIn('<span data-mk="cookies"></span>', t, p)
-            tags = " ".join(re.findall(r'(?:class|id|for|data-[a-z-]+)="([^"]*)"', t))  # nur Auszeichnung: im englischen Text steht „consent“
-            self.assertNotIn("consent", re.sub(r"consent-row|t-consent|k-consent|g-consent|f-consent|w-consent", "", tags), p)
+            self.assertIn('<span data-mk="cookies" hidden></span>', t, p)  # Portal-Platz bleibt, sichtbar ist „Datenschutz-Einstellungen“
+            self.assertIn("data-consent-open", t, p)
             self.assertIsNone(re.search(r'<script[^>]+portal\.markentrix|data-site=', t), p)  # Skript setzt der Upload selbst ein
         self.assertIn('data-mk="bewertungen"', read(os.path.join(SITE, "index.html")))
         cfg = read(os.path.join(SITE, "config.js"))

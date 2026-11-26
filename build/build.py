@@ -79,6 +79,9 @@ def config_js(site):
                     "depositPercent": (site.s.get("booking") or {}).get("depositPercent", 15),
                     "surcharge": (site.s.get("booking") or {}).get("conditionSurcharge") or {}, "keramikMin": site.min_price("keramik") if pr.get("ceramic") else None},
     }
+    ga = site.s.get("googleAds") or {}
+    if ga.get("id") and ga.get("conversions"):
+        cfg["ads"] = {"id": ga["id"], "conversions": ga["conversions"], "whatsapp": ga.get("whatsapp", "")}
     return "/* automatisch erzeugt – nicht bearbeiten */\nwindow.ELB=" + json.dumps(cfg, ensure_ascii=False, separators=(",", ":")) + ";\n"
 
 

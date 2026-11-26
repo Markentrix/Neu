@@ -69,15 +69,123 @@
     send({ t: "pv", u: location.pathname, r: ref, w: window.innerWidth,
       utm: { s: Q.utm_source || "", m: Q.utm_medium || "", c: Q.utm_campaign || "" } });
   })();
+  function waConversion() { var w = ELB.ads && ELB.ads.whatsapp; if (w && typeof adsEvent === "function") adsEvent(w); }
   document.addEventListener("click", function (e) {
     var a = e.target.closest ? e.target.closest("a[href]") : null;
     if (!a) return;
     var h = a.getAttribute("href");
-    if (h.indexOf("wa.me/") !== -1) track("WhatsApp-Klick", { ort: a.closest("[id]") ? a.closest("[id]").id : "" });
+    if (h.indexOf("wa.me/") !== -1) { track("WhatsApp-Klick", { ort: a.closest("[id]") ? a.closest("[id]").id : "" }); waConversion(); }
     else if (h.indexOf("tel:") === 0) track("Anruf-Klick");
     else if (h.indexOf("mailto:") === 0) track("E-Mail-Klick");
     else if (/termin\.html/.test(h)) track("Termin-Button", { ziel: h.split("?")[1] || "" });
   });
+
+  /* ---------------------------------------------------------------- Einwilligung: Statistik (Google Analytics) und Werbeerfolgsmessung (Google Ads)
+     Ein Fenster für beides. Das Fenster des Portals (nur Google Analytics) bleibt verborgen; die Statistik-Wahl wird ans Portal weitergegeben
+     (dessen Speicher mk_statistik:<site> bzw. dessen Knöpfe), damit das Portal Google Analytics wie bisher lädt oder nicht.
+     Das Google-Ads-Tag lädt erst nach Einwilligung in die Werbeerfolgsmessung, ohne Personalisierung (ad_personalization: denied). */
+  var CONSENT_KEY = "elb_consent";
+  var ADS = ELB.ads || null;
+  function consentGet() { try { var v = JSON.parse(localStorage.getItem(CONSENT_KEY) || "null"); return v && v.v === 1 ? v : null; } catch (e) { return null; } }
+  function consentSet(v) { try { localStorage.setItem(CONSENT_KEY, JSON.stringify({ v: 1, s: !!v.s, w: !!v.w, t: Date.now() })); } catch (e) { /* ohne Speicher: Abfrage beim nächsten Besuch erneut */ } }
+  function portalSite() { var sc = document.querySelector("script[data-site]"); return sc ? sc.getAttribute("data-site") : ""; }
+  function portalRelay(stats) {
+    var site = portalSite();
+    if (site) { try { localStorage.setItem("mk_statistik:" + site, stats ? "ja" : "nein"); } catch (e) { /* egal */ } }
+    var box = document.querySelector('.mk-box[aria-label="Statistik"]');
+    if (box) { var btns = box.querySelectorAll("button"); var b = btns[stats ? 0 : 1]; if (b) b.click(); }
+  }
+  function adsAllowed() { var c = consentGet(); return !!(ADS && c && c.w); }
+  var adsReady = false;
+  function adsLoad() {
+    if (!ADS || adsReady) return;
+    adsReady = true;
+    window.dataLayer = window.dataLayer || [];
+    if (typeof window.gtag !== "function") window.gtag = function () { window.dataLayer.push(arguments); };
+    var grant = function () { window.gtag("consent", "update", { ad_storage: "granted", ad_user_data: "granted", ad_personalization: "denied" }); };
+    if (!window.__mkGa) {
+      window.gtag("consent", "default", { ad_storage: "granted", ad_user_data: "granted", ad_personalization: "denied", analytics_storage: (consentGet() || {}).s ? "granted" : "denied" });
+      window.gtag("js", new Date());
+    }
+    grant();
+    window.gtag("config", ADS.id);
+    if (!document.querySelector('script[src*="googletagmanager.com/gtag/js?id=' + ADS.id + '"]')) {
+      var sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(ADS.id);
+      document.head.appendChild(sc);
+    }
+    /* Lädt das Portal Google Analytics danach, setzt es eigene Standardwerte (ad_storage: denied): Werbe-Einwilligung danach erneut setzen */
+    var n = 0, iv = setInterval(function () { if (window.__mkGa) { grant(); clearInterval(iv); } else if (++n > 30) clearInterval(iv); }, 500);
+  }
+  function adsStop() {
+    if (typeof window.gtag === "function") { try { window.gtag("consent", "update", { ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" }); } catch (e) { /* egal */ } }
+    if (ADS) window["ga-disable-" + ADS.id] = true;
+    var hosts = [location.hostname, "." + location.hostname.replace(/^www\./, "")];
+    document.cookie.split(";").forEach(function (c) {
+      var n = c.split("=")[0].trim(); if (n.indexOf("_gcl") !== 0) return;
+      document.cookie = n + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+      hosts.forEach(function (h) { document.cookie = n + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=" + h; });
+    });
+  }
+  /* Conversion senden (nur mit Einwilligung und geladenem Tag) */
+  function adsEvent(label, extra) {
+    if (!label || !adsAllowed()) return false;
+    adsLoad();
+    var p = { send_to: ADS.id + "/" + label }; if (extra) Object.keys(extra).forEach(function (k) { p[k] = extra[k]; });
+    window.gtag("event", "conversion", p);
+    return true;
+  }
+  function consentApply(c) {
+    portalRelay(c.s);
+    if (c.w) adsLoad(); else adsStop();
+  }
+  var cBox = null;
+  function consentBanner() {
+    if (cBox) return;
+    var prev = consentGet() || { s: false, w: false };
+    cBox = document.createElement("div");
+    cBox.className = "consent";
+    cBox.setAttribute("role", "dialog");
+    cBox.setAttribute("aria-labelledby", "consent-h");
+    var dl = document.querySelector('.site-footer a[href$="datenschutz.html"]'), ds = dl ? dl.getAttribute("href") : "datenschutz.html";
+    cBox.innerHTML =
+      '<p class="consent-h" id="consent-h">' + t("Datenschutz-Einstellungen") + "</p>" +
+      '<p class="consent-text">' + t("Notwendige Funktionen laufen immer. Mit Ihrer Einwilligung nutzen wir zusätzlich:") + "</p>" +
+      '<label class="consent-opt"><input type="checkbox" data-c="s"' + (prev.s ? " checked" : "") + "><span><strong>" + t("Statistik") + "</strong> " +
+        t("Google Analytics zeigt uns, wie die Website genutzt wird. Cookies bis 2 Jahre.") + "</span></label>" +
+      (ADS ? '<label class="consent-opt"><input type="checkbox" data-c="w"' + (prev.w ? " checked" : "") + "><span><strong>" + t("Werbeerfolgsmessung") + "</strong> " +
+        t("Google Ads misst, ob unsere Anzeigen zu Anfragen führen. Cookies bis 90 Tage.") + "</span></label>" : "") +
+      '<p class="consent-small">' + t("Anbieter: Google Ireland Limited. Daten können in die USA übermittelt werden. Widerruf jederzeit über „Datenschutz-Einstellungen“ unten auf jeder Seite.") +
+        ' <a href="' + ds + '">' + t("Mehr in der Datenschutzerklärung") + "</a></p>" +
+      '<div class="consent-btns">' +
+        '<button type="button" class="btn btn-primary btn-sm" data-c-all>' + t("Alle erlauben") + "</button>" +
+        '<button type="button" class="btn btn-line-light btn-sm" data-c-save>' + t("Auswahl speichern") + "</button>" +
+        '<button type="button" class="btn btn-line-light btn-sm" data-c-none>' + t("Ablehnen") + "</button>" +
+      "</div>";
+    document.body.appendChild(cBox);
+    document.documentElement.classList.add("consent-open");
+    var done = function (c) { consentSet(c); consentApply(c); cBox.remove(); cBox = null; document.documentElement.classList.remove("consent-open"); };
+    var box = function (k) { var i = cBox.querySelector('[data-c="' + k + '"]'); return !!(i && i.checked); };
+    cBox.querySelector("[data-c-all]").addEventListener("click", function () { done({ s: true, w: !!ADS }); });
+    cBox.querySelector("[data-c-none]").addEventListener("click", function () { done({ s: false, w: false }); });
+    cBox.querySelector("[data-c-save]").addEventListener("click", function () { done({ s: box("s"), w: box("w") }); });
+  }
+  window.elbConsent = consentBanner;
+  (function consentStart() {
+    var c = consentGet();
+    if (c) consentApply(c); else consentBanner();
+    /* Link „Statistik-Einstellungen“ des Portals im Fußbereich öffnet dieses Fenster (das Portal setzt seine Wahl dabei selbst zurück) */
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest ? e.target.closest("[data-consent-open]") : null;
+      if (!a) return;
+      e.preventDefault();
+      adsStop();
+      try { localStorage.removeItem(CONSENT_KEY); } catch (x) { /* egal */ }
+      /* Portal: Statistik stoppen und dessen (verborgenes) Fenster bereitstellen, die neue Wahl wird dann dorthin weitergegeben */
+      var pl = document.querySelector('[data-mk="cookies"] a'); if (pl) pl.click();
+      setTimeout(consentBanner, 0);
+    });
+  })();
+
 
   /* ---------------------------------------------------------------- Navigation & Basis */
   function focusTarget(el) {
@@ -462,7 +570,7 @@
   $$("form.js-form").forEach(function (form) {
     var typ = form.getAttribute("data-form");
     $$("[data-wa-from-form]", form).forEach(function (b) {
-      b.addEventListener("click", function () { track("WhatsApp-Klick", { ort: "formular-" + typ }); openWa(waFromForm(form)); });
+      b.addEventListener("click", function () { track("WhatsApp-Klick", { ort: "formular-" + typ }); waConversion(); openWa(waFromForm(form)); });
     });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -716,6 +824,16 @@
     });
   });
 
+  /* Google-Ads-Conversion „Termin angefragt“: nur auf der Danke-Seite nach erfolgreichem Absenden (Vorgangsnummer vorhanden),
+     nur mit Einwilligung in die Werbeerfolgsmessung, je Vorgangsnummer nur einmal (transaction_id entdoppelt zusätzlich bei Google). */
+  function adsConversion() {
+    var label = ADS && ADS.conversions && ADS.conversions[Q.typ];
+    if (!label || !Q.ref || !/^[A-Za-z0-9-]{3,40}$/.test(Q.ref)) return;
+    var mark = "elb_conv:" + Q.ref;
+    try { if (localStorage.getItem(mark)) return; } catch (e) { /* weiter */ }
+    if (adsEvent(label, { transaction_id: Q.ref })) { try { localStorage.setItem(mark, "1"); } catch (e) { /* egal */ } }
+  }
+
   /* Danke-Seite */
   var thanks = $("[data-thanks-title]");
   if (thanks && Q.typ) {
@@ -728,6 +846,7 @@
       widerruf: [t("Ihr Widerruf ist eingegangen."), t("Sie erhalten eine Eingangsbestätigung per E-Mail. Bereits geleistete Zahlungen erstatten wir unverzüglich, spätestens binnen 14 Tagen.")]
     }[Q.typ];
     if (T) { thanks.innerHTML = t("Danke!") + " <em>" + T[0] + "</em>"; var tt = $("[data-thanks-text]"); if (tt) tt.textContent = T[1] + (Q.ref ? " " + t("Ihre Vorgangsnummer: {ref}.", { ref: Q.ref }) : ""); }
+    adsConversion();
     /* Anzahlung per PayPal.me: Betrag steht im Link, die Vorgangsnummer als Verwendungszweck */
     var pay = $("[data-thanks-pay]"), amt = parseFloat(Q.anz || "");
     if (pay && Q.typ === "termin" && amt > 0 && amt < 10000) availability().then(function (j) {

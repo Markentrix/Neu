@@ -310,5 +310,14 @@
     "cta": "werkstatt-audi-s6-heck.jpg"
   },
   "googleProfileUrl": "https://share.google/4u24rzWqw0KdscxL2",
-  "googleKgUrl": "https://www.google.com/search?kgmid=/g/11npr60vsd"
+  "googleKgUrl": "https://www.google.com/search?kgmid=/g/11npr60vsd",
+  "googleAds": {
+    "id": "AW-18502160520",
+    "conversions": {
+      "termin": "w1VICISV_L8dEIihwvZE",
+      "kontakt": "w1VICISV_L8dEIihwvZE"
+    },
+    "whatsapp": "5_ZNCNzz-78dEIihwvZE",
+    "_hinweis": "Google-Tag lädt erst nach Einwilligung „Werbeerfolgsmessung“ im Einstellungsfenster der Website. Termin-Conversion nur auf der Danke-Seite nach erfolgreichem Absenden (Vorgangsnummer), WhatsApp-Conversion bei Klick auf jeden wa.me-Link. Anrufe zählt Google selbst (Anrufzuordnung)."
+  }
 }

@@ -349,7 +349,7 @@ def footer(site, prefix="", home=False):
       <li><a href="{prefix}datenschutz.html">Datenschutz</a></li>
       <li><a href="{prefix}agb.html">AGB</a></li>
       <li><a href="{prefix}widerruf.html">Vertrag widerrufen</a></li>
-      <li class="mk-slot"><span data-mk="cookies"></span></li>
+      <li><a href="#" data-consent-open>Datenschutz-Einstellungen</a><span data-mk="cookies" hidden></span></li>
     </ul>
   </div>
 </footer>

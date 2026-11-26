@@ -1778,3 +1778,28 @@ html.lb-open { overflow: hidden; }
   .footer-about { display: none; }
 }
 .fig .fig-img img { object-position: var(--fig-pos, 50% 50%); }
+
+/* ==========================================================================
+   Datenschutz-Einstellungen (Statistik, Werbeerfolgsmessung)
+   ========================================================================== */
+.mk-box[aria-label="Statistik"] { display: none !important; }  /* Portal-Fenster: Wahl kommt aus diesem Fenster */
+.consent {
+  position: fixed; z-index: 140; left: 16px; right: 16px; bottom: 16px; margin-inline: auto; max-width: 560px;
+  display: grid; gap: 10px; padding: 18px 20px; border-radius: var(--radius-m);
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line); box-shadow: var(--shadow-2);
+  max-height: calc(100dvh - 32px); overflow-y: auto;
+}
+.consent-h { font-family: var(--font-display); font-weight: 650; font-size: 1.1rem; margin: 0; }
+.consent-text, .consent-small { margin: 0; font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+.consent-small { font-size: 0.8rem; }
+.consent-small a { color: var(--blue); }
+.consent-opt { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 0.88rem; line-height: 1.45; cursor: pointer; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-s); }
+.consent-opt input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--blue); }
+.consent-opt strong { color: var(--ink); }
+.consent-opt span { color: var(--muted); }
+.consent-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.consent-btns .btn { flex: 1 1 auto; min-height: 44px; white-space: nowrap; }
+@media (max-width: 899.98px) {
+  .consent { left: 10px; right: 10px; bottom: calc(70px + env(safe-area-inset-bottom, 0px)); padding: 14px 16px; max-height: calc(100dvh - 160px); }
+}
+@media print { .consent { display: none !important; } }

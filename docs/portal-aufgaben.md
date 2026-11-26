@@ -71,3 +71,13 @@ Kontakt, Termin, Gutschein und Firmenkunden senden weiter `einwilligung: "ja"`. 
 
 - **„Keine überholten Angaben: Google Maps“** ist ein Fehlalarm. Die Karte steht auf `/kontakt.html` und wird erst nach Klick auf „Karte laden“ eingebunden, deshalb findet der Prüfer sie beim Abruf nicht. Die Datenschutzerklärung nennt jetzt ausdrücklich die Kontaktseite.
 - **„Preise mit Hinweis zur Umsatzsteuer“** betraf nur die englischen Seiten: Der Prüfer erkennt „VAT“ nicht. Seit dem 23.11.2026 steht dort „no VAT (Umsatzsteuer) is charged“ (§ 19 Abs. 1 UStG) im Fußbereich jeder Seite und an den Preisen.
+
+## 6. Google Ads (Stand 26.11.2026, auf der Website umgesetzt)
+
+- **Einwilligung:** Die Website hat jetzt ein eigenes Fenster „Datenschutz-Einstellungen“ mit zwei getrennten Punkten, „Statistik“ (Google Analytics) und „Werbeerfolgsmessung“ (Google Ads), beide standardmäßig aus. Die Knöpfe sind „Alle erlauben“, „Auswahl speichern“ und „Ablehnen“. Das Fenster des Portals bleibt per CSS verborgen. Die Statistik-Wahl gibt die Website an das Portal weiter (`mk_statistik:<site>` bzw. Klick auf dessen Knöpfe), das Portal lädt Google Analytics also wie bisher. Im Fußbereich steht „Datenschutz-Einstellungen“ statt „Statistik-Einstellungen“.
+- **Google-Tag** `AW-18502160520` lädt erst nach Einwilligung in „Werbeerfolgsmessung“, mit `ad_personalization: denied` (kein Remarketing). Es gibt keinen GTM-Container, nur gtag.
+- **Conversion „Termin angefragt“** (`w1VICISV_L8dEIihwvZE`): auf der Danke-Seite nach erfolgreichem Termin- oder Kontaktformular, nur mit Vorgangsnummer, je Vorgang einmal (`transaction_id`).
+- **Conversion „WhatsApp-Klick“** (`5_ZNCNzz-78dEIihwvZE`): bei Klick auf jeden `wa.me/491727613807`-Link und auf „Stattdessen per WhatsApp senden“.
+- **Anrufe** zählt Google über die Anrufzuordnung, dafür ist nichts auf der Website eingebaut.
+- **Hinweis zur Google-Mail „kein Google-Tag gefunden“:** Googles Prüfung sieht das Tag nicht, weil es erst nach Einwilligung lädt. Das ist so gewollt. Prüfen mit Google Tag Assistant: Seite öffnen, „Alle erlauben“, Termin absenden bzw. WhatsApp antippen.
+- **Optional im Portal:** Das Portal-Fenster könnte dieselben zwei Punkte bekommen, damit auch andere Kundenseiten Google Ads sauber nutzen können. Für ElbDetail ist das nicht mehr nötig.

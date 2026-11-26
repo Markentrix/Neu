@@ -22,6 +22,14 @@ async function sentFor(page) {
 
 // Desktop und Mobil laufen gleichzeitig gegen dieselbe Portal-Attrappe: je Projekt andere Tage, damit sich Buchungen nicht in die Quere kommen
 const dayShift = (info) => (info.project.name === "mobil" ? 40 : 0);
+
+// Datenschutz-Einstellungen: in allen Tests vorab „abgelehnt“, damit das Fenster nichts verdeckt.
+// Tests zum Fenster selbst setzen test.info().annotations „consent-frisch“.
+test.beforeEach(async ({ page }, info) => {
+  if (info.title.includes("Datenschutz-Einstellungen")) return;
+  await page.context().addInitScript(() => { try { if (!localStorage.getItem("elb_consent")) localStorage.setItem("elb_consent", JSON.stringify({ v: 1, s: false, w: false, t: 0 })); } catch (e) {} });
+  await page.route(/googletagmanager\.com|google-analytics\.com|googleadservices\.com/, (r) => r.abort());
+});
 function nextWorkday(days) {
   const d = new Date(); d.setDate(d.getDate() + days);
   while (d.getDay() === 0) d.setDate(d.getDate() + 1);
@@ -622,4 +630,61 @@ test("Handy mit großer Systemschrift (130 %): keine Seite breiter als der Bilds
     const w = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     expect(w[0], path).toBeLessThanOrEqual(w[1]);
   }
+});
+
+test("Google Ads: Termin-Conversion nur auf der Danke-Seite, nur mit Werbe-Einwilligung, je Vorgang einmal; WhatsApp-Klick", async ({ page }, info) => {
+  test.skip(info.project.name === "mobil", "Logik, einmal reicht");
+  const stub = (w) => `window.__calls = []; window.gtag = function () { window.__calls.push([].slice.call(arguments)); };
+    try { localStorage.setItem("elb_consent", JSON.stringify({ v: 1, s: false, w: ${w}, t: 1 })); } catch (e) {}`;
+  const conv = (p) => p.evaluate(() => window.__calls.filter((c) => c[1] === "conversion").map((c) => c[2]));
+  // ohne Werbe-Einwilligung: kein Google-Tag, keine Conversion
+  const p1 = await page.context().newPage();
+  await p1.addInitScript(stub(false));
+  await p1.goto("/danke.html?typ=termin&ref=T26-ADS1"); await p1.waitForTimeout(800);
+  expect(await conv(p1)).toEqual([]);
+  expect(await p1.evaluate(() => !!document.querySelector('script[src*="googletagmanager"]'))).toBe(false);
+  // mit Einwilligung: genau eine Termin-Conversion mit Vorgangsnummer, Google-Tag mit Ads-ID
+  const p2 = await page.context().newPage();
+  await p2.addInitScript(stub(true));
+  await p2.goto("/danke.html?typ=termin&ref=T26-ADS2");
+  await expect.poll(() => conv(p2)).toEqual([{ send_to: "AW-18502160520/w1VICISV_L8dEIihwvZE", transaction_id: "T26-ADS2" }]);
+  expect(await p2.evaluate(() => !!document.querySelector('script[src*="gtag/js?id=AW-18502160520"]'))).toBe(true);
+  expect(await p2.evaluate(() => window.__calls.some((c) => c[0] === "consent" && c[2] && c[2].ad_personalization === "denied"))).toBe(true);
+  // Neuladen zählt nicht doppelt; ohne Vorgangsnummer und beim Gutschein keine Conversion
+  await p2.reload(); await p2.waitForTimeout(800); expect(await conv(p2)).toEqual([]);
+  await p2.goto("/danke.html?typ=termin"); await p2.waitForTimeout(800); expect(await conv(p2)).toEqual([]);
+  await p2.goto("/danke.html?typ=gutschein&ref=G26-ADS3"); await p2.waitForTimeout(800); expect(await conv(p2)).toEqual([]);
+  // WhatsApp-Klick: Conversion
+  await p2.goto("/");
+  await p2.evaluate(() => { document.querySelectorAll('a[href*="wa.me/"]').forEach((a) => a.addEventListener("click", (e) => e.preventDefault())); });
+  await p2.locator('.hero a[href*="wa.me/491727613807"]').first().click();
+  expect(await conv(p2)).toEqual([{ send_to: "AW-18502160520/5_ZNCNzz-78dEIihwvZE" }]);
+});
+
+test("Datenschutz-Einstellungen: Fenster beim ersten Besuch, Ablehnen lädt nichts, Fußlink öffnet erneut", async ({ page }) => {
+  const reqs = [];
+  page.on("request", (r) => { if (/googletagmanager|google-analytics|googleadservices/.test(r.url())) reqs.push(r.url()); });
+  await page.route(/googletagmanager\.com|google-analytics\.com|googleadservices\.com/, (r) => r.abort());
+  await page.goto("/");
+  const box = page.getByRole("dialog", { name: "Datenschutz-Einstellungen" });
+  await expect(box).toBeVisible();
+  await expect(box.getByRole("checkbox")).toHaveCount(2);
+  await expect(box.getByRole("checkbox").first()).not.toBeChecked();
+  const axe = await new AxeBuilder({ page }).include(".consent").analyze();
+  expect(axe.violations.filter((v) => ["serious", "critical"].includes(v.impact))).toEqual([]);
+  await box.getByRole("button", { name: "Ablehnen" }).click();
+  await expect(box).toHaveCount(0);
+  await page.reload(); await page.waitForTimeout(500);
+  await expect(page.locator(".consent")).toHaveCount(0);
+  expect(reqs).toEqual([]);
+  await page.locator(".site-footer [data-consent-open]").click();
+  await expect(page.locator(".consent")).toBeVisible();
+  await page.locator(".consent [data-c-all]").click();
+  await expect.poll(() => reqs.some((u) => u.includes("gtag/js?id=AW-18502160520"))).toBe(true);
+});
+
+test("Datenschutz-Einstellungen: englische Seite englisch", async ({ page }) => {
+  await page.goto("/en/");
+  await expect(page.getByRole("dialog", { name: "Privacy settings" })).toBeVisible();
+  await expect(page.locator(".consent [data-c-all]")).toHaveText("Allow all");
 });
