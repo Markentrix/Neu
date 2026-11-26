@@ -146,7 +146,7 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
     nr = b["nummer"] or "Entwurf"
     inhalt = []
     absender = " · ".join(x for x in [f["name"] + (" · " + f["inhaber"] if f.get("inhaber") else ""), f["strasse"], f"{f['plz']} {f['ort']}".strip()] if x)
-    inhalt += [pdf.p(titel.upper() + (f" ZU {storno_nr}" if storno_nr else ""), pdf.H1), pdf.p(absender, pdf.KLEIN), pdf.Spacer(1, 14)]
+    inhalt += [pdf.p(titel.upper() + (f" ZU {storno_nr}" if storno_nr else ""), pdf.H1), pdf.p(absender, pdf.KLEIN), pdf.Spacer(1, 10)]
     adr = "\n".join(x for x in [emp.get("firma"), emp.get("ansprechpartner"), emp.get("strasse"), f"{emp.get('plz') or ''} {emp.get('ort') or ''}".strip()] if x)
     info = ([["Kundennummer", emp["kundennummer"]]] if emp.get("kundennummer") else []) + [[f"{titel}snummer" if ist_re else "Angebotsnummer", nr], [f"{titel}sdatum" if ist_re else "Angebotsdatum", pdf.datum(b["datum"] or date.today())]]
     if b["leistungszeitraum"]:
@@ -163,14 +163,15 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
     if f.get("ustid"):
         info.append(["USt-IdNr.", f["ustid"]])
     from reportlab.platypus import Table, TableStyle
-    label = pdf.ParagraphStyle("lab", parent=pdf.KLEIN, fontName=pdf.F_FETT, fontSize=7.5, leading=10, textColor=pdf.AKZENT, spaceBefore=6)
-    wert = pdf.ParagraphStyle("wert", parent=pdf.TXT, leading=12)
-    rechts = []
-    for k, v in info:
-        rechts += [pdf.Paragraph(pdf.esc(k), label), pdf.p(v, wert)]
-    kopf = Table([[[pdf.Paragraph(("RECHNUNGSEMPFÄNGER" if ist_re else "ANGEBOTSEMPFÄNGER"), label), pdf.p(adr)], rechts]], colWidths=[102 * pdf.mm, 68 * pdf.mm])
-    kopf.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
-    inhalt += [kopf, pdf.Spacer(1, 16), pdf.p(b["betreff"] or ("Abrechnung der vereinbarten Leistungen" if ist_re else "Unser Angebot"), pdf.H2)]
+    label = pdf.ParagraphStyle("lab", parent=pdf.KLEIN, fontName=pdf.F_FETT, fontSize=7.5, leading=10, textColor=pdf.AKZENT)
+    wert = pdf.ParagraphStyle("wert", parent=pdf.TXT, leading=12, alignment=2)
+    # Angaben rechts als kompakte Tabelle (Bezeichnung links, Wert rechts): spart etwa die halbe Höhe, damit eine Rechnung auf eine Seite passt
+    rechts = Table([[pdf.Paragraph(pdf.esc(k), label), pdf.p(v, wert)] for k, v in info], colWidths=[43 * pdf.mm, 35 * pdf.mm])
+    rechts.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                                ("TOPPADDING", (0, 0), (-1, -1), 1.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5)]))
+    kopf = Table([[[pdf.Paragraph(("RECHNUNGSEMPFÄNGER" if ist_re else "ANGEBOTSEMPFÄNGER"), label), pdf.Spacer(1, 3), pdf.p(adr)], rechts]], colWidths=[92 * pdf.mm, 78 * pdf.mm])
+    kopf.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+    inhalt += [kopf, pdf.Spacer(1, 8), pdf.p(b["betreff"] or ("Abrechnung der vereinbarten Leistungen" if ist_re else "Unser Angebot"), pdf.H2)]
     if b["einleitung"]:
         inhalt += [pdf.p(b["einleitung"]), pdf.Spacer(1, 8)]
     zeilen = []

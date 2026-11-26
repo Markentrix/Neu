@@ -63,6 +63,9 @@ netto=sum(round(p["menge"]*p["preis_cent"]) for p in d["positionen"]); chk("summ
 nr2=a.post(f"/api/admin/kunden/{kid}/belege",json={"art":"rechnung","positionen":[{"text":"Test","menge":1,"preis_cent":10000}]}).json()["id"]; r=a.post(f"/api/admin/belege/{nr2}/ausstellen").json()["nummer"]
 chk("fortlaufend",int(r[-4:])==int(renr[-4:])+1,(r,renr))
 p=a.get(f"/api/admin/belege/{re_id}/pdf"); chk("rechnung pdf",p.status_code==200 and p.content[:4]==b"%PDF",p.status_code); open("/var/tmp/pt/rechnung.pdf","wb").write(p.content)
+from pypdf import PdfReader as _PR0
+import io as _io0
+chk("Rechnung mit mehreren Positionen passt auf eine Seite",len(_PR0(_io0.BytesIO(p.content)).pages)==1,len(_PR0(_io0.BytesIO(p.content)).pages))
 # Überfällig + Mahnung
 chk("mahnung zu früh",a.post(f"/api/admin/belege/{re_id}/mahnung",json={"stufe":1}).status_code==400)
 subprocess.run(["su","postgres","-c",f"psql -q -h /var/tmp/pgtest -p 54329 markentrix -c \"update belege set faellig_am=current_date-10, datum=current_date-24 where id='{re_id}'\""])
