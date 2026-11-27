@@ -88,9 +88,9 @@ abo.lauf(); chk("Vertragsende erreicht: Plan beendet, keine Rechnung",sql(f"sele
 sql(f"update kunden set referenzkunde=true where id='{kB}'")
 r=a.post(f"/api/admin/kunden/{kB}/abrechnungsplaene",json={"titel":"Bb","intervall_monate":1,"aus_buchungen":True,"naechste_am":heute.isoformat()}); chk("Referenzkunde: kein Plan",r.status_code==400)
 # fehlende Firmendaten -> klare Meldung, Lauf bleibt stabil
-a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"Teststr. 1","plz":"29221","ort":"Celle","email":"info@markentrix.de","kleinunternehmer":False,"mwst_satz":19,"steuernummer":"","ustid":""})
+a.put("/api/admin/einstellungen/firma",json={"name":"Markentrix","inhaber":"Christian Wien","strasse":"","plz":"","ort":"","email":"info@markentrix.de","kleinunternehmer":False,"mwst_satz":19,"steuernummer":"12/345/67890","ustid":""})
 sql(f"update abrechnungsplaene set naechste_am=current_date-400 where id='{pid}'")
-r=a.post(f"/api/admin/abrechnungsplaene/{pid}/jetzt"); chk("Ohne Steuernummer: verständliche Meldung",r.status_code==400 and "Steuernummer" in r.text,r.text)
+r=a.post(f"/api/admin/abrechnungsplaene/{pid}/jetzt"); chk("Ohne Anschrift: verständliche Meldung",r.status_code==400 and "Anschrift" in r.text,r.text)
 n=abo.lauf(); chk("Lauf ohne Firmendaten bricht nicht ab",n==0)
 r=a.delete(f"/api/admin/abrechnungsplaene/{pid}"); chk("Plan löschen, Rechnungen bleiben",r.status_code==200 and sql(f"select count(*) from belege where plan_id='{pid}'")=="1")
 # ================= Qualität (Ladezeit, tote Links)

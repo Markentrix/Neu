@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 from fastapi import HTTPException
 
-from . import belege, mailer, push, rechtstexte
+from . import belege, mailer, push, rechtstexte, staffel
 
 log = logging.getLogger("abo")
 
@@ -25,10 +25,28 @@ def zeitraum(start: date, monate: int) -> str:
 def _positionen(cur, plan: dict) -> list:
     if not plan["aus_buchungen"]:
         return belege.positionen_pruefen(plan["positionen"])
-    cur.execute("""SELECT p.name, b.monatlich_cent, b.rabatt_cent FROM buchungen b JOIN produkte p ON p.code = b.produkt_code
+    cur.execute("""SELECT p.name, b.monatlich_cent, b.rabatt_cent, b.staffel, COALESCE(b.beginn, b.erstellt_am::date) AS beginn
+                   FROM buchungen b JOIN produkte p ON p.code = b.produkt_code
                    WHERE b.kunden_id = %s AND b.status IN ('aktiv') AND b.monatlich_cent > 0 ORDER BY b.erstellt_am""", (plan["kunden_id"],))
-    return [{"text": f"{r['name']} – monatlich", "menge": plan["intervall_monate"], "einheit": "Monate", "preis_cent": int(r["monatlich_cent"] - (r["rabatt_cent"] or 0))}
-            for r in cur.fetchall()]
+    pos = []
+    for r in cur.fetchall():
+        rabatt = int(r["rabatt_cent"] or 0)
+        if not r["staffel"]:
+            pos.append({"text": f"{r['name']} – monatlich", "menge": plan["intervall_monate"], "einheit": "Monate", "preis_cent": int(r["monatlich_cent"]) - rabatt})
+            continue
+        # Staffelpreis: je Monat des Zeitraums den Preis des Vertragsmonats, gleiche Preise hintereinander zu einer Position
+        gruppen: list[list] = []
+        for i in range(plan["intervall_monate"]):
+            vm = staffel.monat_nr(r["beginn"], monate_addieren(plan["naechste_am"], i))
+            preis = staffel.preis_im_monat(r["staffel"], int(r["monatlich_cent"]), vm) - rabatt
+            if gruppen and gruppen[-1][0] == preis:
+                gruppen[-1][1] += 1
+            else:
+                gruppen.append([preis, 1, vm])
+        for preis, n, vm in gruppen:
+            if preis > 0:
+                pos.append({"text": f"{r['name']} – monatlich (Vertragsmonat {vm}" + (f"–{vm + n - 1}" if n > 1 else "") + ")", "menge": n, "einheit": "Monate", "preis_cent": preis})
+    return pos
 
 
 def erzeugen(cur, plan: dict, jetzt: bool = False) -> dict | None:

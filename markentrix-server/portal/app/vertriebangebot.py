@@ -24,7 +24,7 @@ def erlaubt(cur) -> bool:
 
 
 def _pakete(cur) -> dict:
-    cur.execute("SELECT v.code, v.name, v.einrichtung_cent, v.monatlich_cent, v.projekt_cent, v.ab_preis, v.nur_auf_anfrage, p.leistungen FROM v_preise_aktuell v JOIN produkte p ON p.code = v.code")
+    cur.execute("SELECT v.code, v.name, v.einrichtung_cent, v.monatlich_cent, v.projekt_cent, v.ab_preis, v.nur_auf_anfrage, v.staffel, p.leistungen FROM v_preise_aktuell v JOIN produkte p ON p.code = v.code")
     return {r["code"]: r for r in cur.fetchall()}
 
 
@@ -47,7 +47,13 @@ def positionen(p: dict, preise: dict) -> list:
     out = []
     if preise["einrichtung_cent"]:
         out.append({"text": "Einrichtung " + p["name"], "menge": 1, "einheit": "", "preis_cent": preise["einrichtung_cent"]})
-    if preise["monatlich_cent"]:
+    st = p.get("staffel")
+    if st and preise["monatlich_cent"] == int(p["monatlich_cent"] or 0):      # Staffelpreis nur beim Katalogpreis, nicht bei geändertem Betrag
+        for i, s in enumerate(st):
+            ende = st[i + 1]["ab_monat"] - 1 if i + 1 < len(st) else None
+            bis = f"Monat {s['ab_monat']}" if ende == s["ab_monat"] else (f"Monat {s['ab_monat']}–{ende}" if ende else f"ab Monat {s['ab_monat']}")
+            out.append({"text": f"{p['name']} – monatlich, {bis}", "menge": 1, "einheit": "Monat", "preis_cent": int(s["cent"])})
+    elif preise["monatlich_cent"]:
         out.append({"text": p["name"] + " – monatlich", "menge": 1, "einheit": "Monat", "preis_cent": preise["monatlich_cent"]})
     if preise["projekt_cent"]:
         out.append({"text": p["name"] + " – Projektpreis", "menge": 1, "einheit": "", "preis_cent": preise["projekt_cent"]})

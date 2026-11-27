@@ -1,4 +1,5 @@
 import { leistungstextKarte } from './angebotsplus.js';
+import { paketeKarte, staffelFeld, staffelLesen } from './pakete.js';
 import { h, api, datum, zeit, euro, melde, formular, dialog } from '../common.js';
 import { V, bestaetigt, cent, fehler, feld, fmtEuro, knopf, kopf, pill, tabelle } from './kern.js';
 
@@ -286,18 +287,22 @@ async function preisaenderungKarte() {
 V.preise = async () => {
   const d = await api('/api/admin/preise'), m = h('div'), mk = h('div'), mr = h('div');
   const heute = new Date().toISOString().slice(0, 10);
+  const pstaffel = staffelFeld();
   const pform = h('form', { onsubmit: (e) => { e.preventDefault(); const o = formular(e.target);
-    const body = { produkt_code: o.produkt_code, gueltig_ab: o.gueltig_ab, einrichtung_cent: cent(o.einrichtung), monatlich_cent: cent(o.monatlich), projekt_cent: cent(o.projekt), ab_preis: !!e.target.ab.checked };
+    let st; try { st = staffelLesen(pstaffel); } catch (x) { return melde(m, x.message); }
+    const body = { staffel: st, produkt_code: o.produkt_code, gueltig_ab: o.gueltig_ab, einrichtung_cent: cent(o.einrichtung), monatlich_cent: cent(o.monatlich), projekt_cent: cent(o.projekt), ab_preis: !!e.target.ab.checked };
     bestaetigt(m, () => api('/api/admin/preise', { method: 'POST', body }), 'Neuer Preis gespeichert. Bestehende Buchungen behalten ihren Preis.'); } },
     h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Produkt'), h('select', { name: 'produkt_code' }, d.aktuell.map(p => h('option', { value: p.code }, p.name + ' (' + p.code + ')')))),
       feld('Gültig ab', 'gueltig_ab', heute, { type: 'date', required: true }), feld('Einrichtung in €', 'einrichtung', '', { type: 'number', step: '0.01', min: '0' }), feld('Monatlich in €', 'monatlich', '', { type: 'number', step: '0.01', min: '0' }), feld('Projekt in €', 'projekt', '', { type: 'number', step: '0.01', min: '0' })),
+    h('div', {}, h('label', {}, 'Staffelpreis pro Monat (optional, ersetzt den Monatspreis)'), pstaffel),
     h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, h('input', { type: 'checkbox', name: 'ab', style: 'width:auto' }), '„ab"-Preis'),
     h('p', {}, h('button', { class: 'btn' }, 'Neuen Preis anlegen')));
   const kond = (z) => { const i = h('input', { value: z.wert_zahl ?? z.wert_text ?? '' }); return h('div', { class: 'row' }, h('div', { class: 'grow' }, i),
     knopf('Speichern', () => { const v = i.value.trim(); const body = /^-?\d+$/.test(v) ? { wert_zahl: Number(v) } : { wert_text: v }; bestaetigt(mk, () => api('/api/admin/konditionen/' + encodeURIComponent(z.schluessel), { method: 'PUT', body })); })); };
   const regelBtn = (z) => z.status === 'entwurf' ? knopf('Freigeben', () => confirm('Regel "' + z.name + '" (' + z.prozent + ' %) freigeben?') && bestaetigt(mr, () => api('/api/admin/provisionsregeln/' + z.id + '/freigeben', { method: 'POST' }), 'Freigegeben.')) : '';
   const lt = await leistungstextKarte().catch(() => '');
-  return h('div', { class: 'stack' }, kopf('Preise & Konditionen'), m, await preisaenderungKarte(),
+  const pk = await paketeKarte().catch(() => '');
+  return h('div', { class: 'stack' }, kopf('Preise & Konditionen'), m, pk, await preisaenderungKarte(),
     h('div', { class: 'card' }, h('h2', {}, 'Aktuelle Preise'), tabelle([['Produkt', z => z.name], ['Einrichtung', z => (z.ab_preis ? 'ab ' : '') + fmtEuro(z.einrichtung_cent)], ['Monatlich', z => fmtEuro(z.monatlich_cent)], ['Projekt', z => fmtEuro(z.projekt_cent)], ['Gültig ab', z => datum(z.gueltig_ab)]], d.aktuell)),
     h('div', { class: 'card' }, h('h2', {}, 'Preis ändern (neue Version)'), h('p', { class: 'small muted' }, 'Alte Preise bleiben im Verlauf. Bestehende Buchungen behalten den Preis, der bei der Buchung galt.'), pform), lt,
     h('div', { class: 'card' }, h('h2', {}, 'Konditionen'), mk, tabelle([['Schlüssel', z => z.schluessel], ['Beschreibung', z => z.beschreibung], ['Wert', kond]], d.konditionen, 'Keine Konditionen.')),

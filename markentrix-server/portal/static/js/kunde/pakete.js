@@ -8,7 +8,8 @@ function preisText(p) {
   const teile = [];
   if (p.projekt_cent) teile.push((p.ab_preis ? 'ab ' : '') + euro(p.projekt_cent) + ' einmalig');
   if (p.einrichtung_cent) teile.push(euro(p.einrichtung_cent) + ' Einrichtung');
-  if (p.monatlich_cent) teile.push(euro(p.monatlich_cent) + (p.abrechnung === 'projekt_pflege' ? ' Pflege pro Monat' : ' pro Monat'));
+  if (p.staffel_text) teile.push(p.staffel_text);
+  else if (p.monatlich_cent) teile.push(euro(p.monatlich_cent) + (p.abrechnung === 'projekt_pflege' ? ' Pflege pro Monat' : ' pro Monat'));
   return teile.length ? teile.join(' + ') : 'kostenfrei';
 }
 

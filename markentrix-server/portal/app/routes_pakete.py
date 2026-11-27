@@ -1,22 +1,23 @@
 """Pakete und Zusatzleistungen: Kunden (auch Referenzkunden) sehen die Preisliste und buchen im Portal dazu.
 Die Buchung entsteht als „angefragt“ mit eingefrorenem Preis. Aktiv wird sie erst, wenn Markentrix im Admin bestätigt."""
+import json
 from datetime import date
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from . import mailer, push
+from . import mailer, push, staffel
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger, kunden_empfaenger
 from .security import audit, require_admin, require_inhaber
 
 router = APIRouter(prefix="/api")
 
-KATEGORIEN = {"ki": "KI-Assistent", "website": "Website", "ci": "Marke und Design (CI)", "sichtbarkeit": "Sichtbarkeit", "personal_branding": "Personal Branding", "lead": "Leads und Werbung"}
+KATEGORIEN = {"ki": "KI-Assistent", "website": "Website", "ci": "Marke und Design (CI)", "sichtbarkeit": "Sichtbarkeit", "personal_branding": "Personal Branding", "lead": "Leads und Werbung", "kombi": "Kombi-Pakete"}
 LAUFEND = ("angefragt", "beauftragt", "in_einrichtung", "aktiv", "pausiert")
 
 KATALOG = """SELECT p.code, p.kategorie, p.name, p.beschreibung, p.abrechnung, p.laufzeit_monate, p.nur_auf_anfrage, p.einzeln_buchbar,
-                    pp.id AS preis_id, pp.einrichtung_cent, pp.monatlich_cent, pp.projekt_cent, pp.ab_preis
+                    pp.id AS preis_id, pp.einrichtung_cent, pp.monatlich_cent, pp.projekt_cent, pp.ab_preis, pp.staffel
              FROM produkte p LEFT JOIN LATERAL (SELECT * FROM produkt_preise x WHERE x.produkt_code=p.code AND x.gueltig_ab<=current_date ORDER BY gueltig_ab DESC LIMIT 1) pp ON true
              WHERE p.aktiv {zusatz} ORDER BY p.sortierung"""
 
@@ -91,6 +92,7 @@ def katalog(user: dict = Depends(require_inhaber)):
         eintrag = {"code": p["code"], "name": p["name"], "beschreibung": p["beschreibung"], "abrechnung": p["abrechnung"], "laufzeit_monate": p["laufzeit_monate"],
                    "auf_anfrage": bool(p["nur_auf_anfrage"] or p["preis_id"] is None), "ab_preis": bool(p["ab_preis"]),
                    "einrichtung_cent": 0 if referenz else n["einrichtung_cent"], "monatlich_cent": 0 if referenz else p["monatlich_cent"], "projekt_cent": 0 if referenz else n["projekt_cent"],
+                   "staffel": None if referenz else p["staffel"], "staffel_text": "" if referenz else staffel.text(p["staffel"]),
                    "nachlaesse": n["liste"], "listenpreis": {"einrichtung_cent": p["einrichtung_cent"], "monatlich_cent": p["monatlich_cent"], "projekt_cent": p["projekt_cent"]} if n["liste"] else None,
                    "hinweis": HINWEIS_KATEGORIE.get(p["kategorie"]),
                    "regulaer": {"einrichtung_cent": p["einrichtung_cent"], "monatlich_cent": p["monatlich_cent"], "projekt_cent": p["projekt_cent"]} if referenz else None,
@@ -135,11 +137,12 @@ def dazubuchen(code: str, data: DazuIn, bg: BackgroundTasks, user: dict = Depend
         n = nachlass(cur, kid, p, bool(k["referenzkunde"]))
         p = {**p, "einrichtung_cent": n["einrichtung_cent"], "projekt_cent": n["projekt_cent"]}
         notiz = (wechsel + "Im Portal dazugebucht. " + (data.notiz or "")).strip()
-        cur.execute("""INSERT INTO buchungen (kunden_id, produkt_code, preis_id, einrichtung_cent, monatlich_cent, projekt_cent, rabatt_cent, rabatt_grund, status, notiz)
-                       VALUES (%s,%s,%s,%s,%s,%s,0,%s,'angefragt',%s) RETURNING id""",
+        cur.execute("""INSERT INTO buchungen (kunden_id, produkt_code, preis_id, einrichtung_cent, monatlich_cent, projekt_cent, rabatt_cent, rabatt_grund, status, notiz, staffel)
+                       VALUES (%s,%s,%s,%s,%s,%s,0,%s,'angefragt',%s,%s::jsonb) RETURNING id""",
                     (kid, code, None if auf_anfrage else p["preis_id"], None if auf_anfrage else (0 if k["referenzkunde"] else p["einrichtung_cent"]),
                      None if auf_anfrage else (0 if k["referenzkunde"] else p["monatlich_cent"]), None if auf_anfrage else (0 if k["referenzkunde"] else p["projekt_cent"]),
-                     "Referenzkunde" if k["referenzkunde"] else n["grund"], notiz))
+                     "Referenzkunde" if k["referenzkunde"] else n["grund"], notiz,
+                     None if auf_anfrage or k["referenzkunde"] or not p["staffel"] else json.dumps(p["staffel"])))
         bid = cur.fetchone()["id"]
         an = admin_empfaenger(cur)
         ids = push.admins(cur)

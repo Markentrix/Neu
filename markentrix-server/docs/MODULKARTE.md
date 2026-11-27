@@ -14,7 +14,7 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `betrieb` | 1 | 29 | `cli`, `jobs`, `ki`, `mailer` und 2 weitere |
 | `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 48 weitere |
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
-| `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 149 weitere |
+| `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 150 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 38 weitere |
 | `fehlerhilfe` | 1 | 143 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
@@ -22,7 +22,7 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
 | `pdf` | 1 | 271 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
 | `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
-| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 80 weitere |
+| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 81 weitere |
 | `zustellung` | 1 | 114 | `jobs`, `mailer`, `routes_betriebplus`, `sitedienste` und 1 weitere |
 
 ## Anmeldung und Zugänge (`zugang`)
@@ -113,14 +113,15 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 
 | Modul | Schicht | Zeilen | Genutzt von |
 |---|---|---|---|
-| `abo` | 2 | 118 | `jobs`, `routes_betriebplus`, `t57.py` |
+| `abo` | 2 | 136 | `jobs`, `routes_betriebplus`, `t146.py`, `t57.py` |
 | `angebotserinnerung` | 2 | 248 | `jobs`, `main`, `routes_belege`, `routes_leadangebot` |
 | `angebotsfluss` | 2 | 38 | `routes_belege`, `routes_leadangebot` |
 | `angebotsgrund` | 2 | 51 | `main`, `routes_angebotsplus`, `routes_belege`, `routes_leadangebot` |
 | `belege` | 2 | 244 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 4 weitere |
-| `preisaenderung` | 2 | 257 | `jobs`, `main` |
+| `preisaenderung` | 2 | 258 | `jobs`, `main` |
 | `quittung` | 2 | 26 | `routes_sitedienste` |
-| `vertriebangebot` | 2 | 276 | `main` |
+| `staffel` | 2 | 53 | `abo`, `preisaenderung`, `routes_pakete`, `routes_paketverwaltung` und 1 weitere |
+| `vertriebangebot` | 2 | 282 | `main` |
 | `zahlungsabgleich` | 2 | 98 | `routes_belege` |
 | `zugferd` | 2 | 256 | `belege` |
 | `routes_angebotsplus` | 3 | 122 | `main` |
@@ -128,7 +129,8 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `routes_belege` | 3 | 502 | `main`, `routes_werkzeuge` |
 | `routes_belegexport` | 3 | 111 | `main` |
 | `routes_leadangebot` | 3 | 354 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `routes_belege` und 2 weitere |
-| `routes_pakete` | 3 | 211 | `main`, `tipps` |
+| `routes_pakete` | 3 | 214 | `main`, `tipps` |
+| `routes_paketverwaltung` | 3 | 189 | `main` |
 | `routes_provision` | 3 | 181 | `main` |
 | `routes_zahlung` | 3 | 312 | `jobs`, `main`, `t25.py` |
 
@@ -190,7 +192,7 @@ Kunden- und Systemverwaltung, Einstellungen, Dashboard, Werkzeuge, Systemstatus 
 
 | Modul | Schicht | Zeilen | Genutzt von |
 |---|---|---|---|
-| `routes_admin` | 3 | 543 | `main`, `routes_verwaltung` |
+| `routes_admin` | 3 | 544 | `main`, `routes_verwaltung` |
 | `routes_betriebplus` | 3 | 541 | `main` |
 | `routes_dashboard` | 3 | 291 | `jobs`, `main` |
 | `routes_einstellungen` | 3 | 195 | `main` |
@@ -199,7 +201,7 @@ Kunden- und Systemverwaltung, Einstellungen, Dashboard, Werkzeuge, Systemstatus 
 | `routes_plattformstatus` | 3 | 182 | `main` |
 | `routes_push` | 3 | 81 | `main` |
 | `routes_system` | 3 | 294 | `jobs`, `main`, `t142.py`, `t73.py` |
-| `routes_verwaltung` | 3 | 786 | `jobs`, `main` |
+| `routes_verwaltung` | 3 | 790 | `jobs`, `main` |
 | `routes_werkzeuge` | 3 | 319 | `main` |
 
 ## Start und Hintergrund (`start`)
@@ -210,5 +212,5 @@ Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werde
 |---|---|---|---|
 | `cli` | 4 | 184 | `install.sh`, `mkctl`, `selbsttest.sh`, `t142.py` und 4 weitere |
 | `jobs` | 4 | 1318 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 9 weitere |
-| `main` | 4 | 316 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
+| `main` | 4 | 317 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
 

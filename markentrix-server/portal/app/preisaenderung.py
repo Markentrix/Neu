@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from . import mailer, push, config
+from . import mailer, push, config, staffel
 from .db import tx
 from .security import audit, client_ip, rate_limit, require_admin
 
@@ -237,9 +237,10 @@ def anwenden(cfg=None) -> int:
                            WHERE k.preisaenderung_id=%s AND k.angewendet_am IS NULL AND k.widerspruch_am IS NULL AND k.benachrichtigt_am IS NOT NULL AND f.status = 'aktiv'""", (p["id"],))
             for r in cur.fetchall():
                 kid = r["kunden_id"]
-                cur.execute("SELECT id, monatlich_cent FROM buchungen WHERE kunden_id=%s AND status='aktiv' AND monatlich_cent > 0", (kid,))
+                cur.execute("SELECT id, monatlich_cent, staffel FROM buchungen WHERE kunden_id=%s AND status='aktiv' AND monatlich_cent > 0", (kid,))
                 for b in cur.fetchall():
-                    cur.execute("UPDATE buchungen SET monatlich_cent=%s WHERE id=%s", (neu_preis(int(b["monatlich_cent"]), p["prozent"]), b["id"]))
+                    st = staffel.skaliert(b["staffel"], lambda c: neu_preis(c, p["prozent"]))   # alle Stufen um denselben Prozentsatz
+                    cur.execute("UPDATE buchungen SET monatlich_cent=%s, staffel=%s::jsonb WHERE id=%s", (neu_preis(int(b["monatlich_cent"]), p["prozent"]), json.dumps(st) if st else None, b["id"]))
                 cur.execute("SELECT id, positionen FROM abrechnungsplaene WHERE kunden_id=%s AND NOT aus_buchungen", (kid,))
                 for pl in cur.fetchall():
                     pos = [{**x, "preis_cent": neu_preis(int(x["preis_cent"]), p["prozent"])} for x in pl["positionen"]]

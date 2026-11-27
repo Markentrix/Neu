@@ -85,3 +85,7 @@ Das Paket enthält Vorlagen und technische Umsetzung, aber **keine geprüften Re
 
 ## Rechnungen ohne Steuernummer/USt-IdNr. (26.11.2026)
 Das Portal stellt Rechnungen auch ohne Steuernummer oder USt-IdNr. aus (nur Warnhinweis, keine E-Rechnungsdaten). Zu klären: Ist das zulässig (§ 14 Abs. 4 UStG, Vorsteuerabzug des Empfängers, E-Rechnungspflicht), etwa für Gründer, deren Nummer noch aussteht? Gegebenenfalls Vermerk auf der Rechnung ergänzen.
+
+## Staffelpreise und frei angelegte Pakete (neu)
+- Staffelpreise (z. B. Monat 1: 149 €, Monat 2: 199 €, ab Monat 3: 249 €): Im Angebot und in der Rechnung müssen die Stufen klar benannt sein. Prüfen, ob die Darstellung für Unternehmerkunden ausreicht (Preisangabe, Laufzeit, Kündigung).
+- Mindestlaufzeit je Paket (1, 3, 6, 12, 24 Monate): Kündigungsfristen und Verlängerung in den AGB regeln.

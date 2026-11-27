@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import errors, sql
 from pydantic import BaseModel, Field
 
-from . import anrufzeiten, config, leadkontakt, leadpruefung, onboarding, push, zugang
+from . import anrufzeiten, config, leadkontakt, leadpruefung, onboarding, push, staffel, zugang
 from .db import tx
 from .security import EMAIL_RE, audit, require_admin
 
@@ -541,6 +541,7 @@ class PreisIn(BaseModel):
     monatlich_cent: int | None = Field(default=None, ge=0)
     projekt_cent: int | None = Field(default=None, ge=0)
     ab_preis: bool = False
+    staffel: list[dict] | None = Field(default=None, max_length=12)
 
 
 @router.get("/preise")
@@ -548,7 +549,7 @@ def preise(user: dict = Depends(require_admin)):
     with tx("admin") as cur:
         cur.execute("SELECT * FROM v_preise_aktuell ORDER BY kategorie, code")
         aktuell = cur.fetchall()
-        cur.execute("SELECT id, produkt_code, gueltig_ab, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, freigegeben_von FROM produkt_preise ORDER BY gueltig_ab DESC, produkt_code LIMIT 200")
+        cur.execute("SELECT id, produkt_code, gueltig_ab, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, staffel, freigegeben_von FROM produkt_preise ORDER BY gueltig_ab DESC, produkt_code LIMIT 200")
         verlauf = cur.fetchall()
         cur.execute("SELECT schluessel, wert_text, wert_zahl, beschreibung FROM konditionen ORDER BY schluessel")
         konditionen = cur.fetchall()
@@ -559,11 +560,14 @@ def preise(user: dict = Depends(require_admin)):
 
 @router.post("/preise")
 def preis_neu(data: PreisIn, user: dict = Depends(require_admin)):
+    stufen = staffel.pruefen(data.staffel)
+    if stufen:
+        data.monatlich_cent = staffel.regelpreis(stufen)   # Regelpreis = letzte Stufe
     try:
         with tx("admin") as cur:
-            cur.execute("""INSERT INTO produkt_preise (produkt_code, gueltig_ab, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, quelle, freigegeben_von)
-                           VALUES (%s,%s,%s,%s,%s,%s,'admin-portal',%s)""",
-                        (data.produkt_code, data.gueltig_ab, data.einrichtung_cent, data.monatlich_cent, data.projekt_cent, data.ab_preis, user["email"]))
+            cur.execute("""INSERT INTO produkt_preise (produkt_code, gueltig_ab, einrichtung_cent, monatlich_cent, projekt_cent, ab_preis, quelle, freigegeben_von, staffel)
+                           VALUES (%s,%s,%s,%s,%s,%s,'admin-portal',%s,%s::jsonb)""",
+                        (data.produkt_code, data.gueltig_ab, data.einrichtung_cent, data.monatlich_cent, data.projekt_cent, data.ab_preis, user["email"], json.dumps(stufen) if stufen else None))
             audit(cur, user, "preis_neu", None, {"produkt": data.produkt_code, "ab": str(data.gueltig_ab)})
     except errors.UniqueViolation:
         raise HTTPException(409, "Für dieses Produkt gibt es zu diesem Datum schon einen Preis.")
@@ -745,7 +749,7 @@ WITH m AS (SELECT %(m)s::date AS tag),
 basis AS (
   SELECT v.id AS pid, v.name AS partner, k.id AS kunden_id, k.kundennummer, k.firma, b.id AS buchung_id,
          ((extract(year FROM m.tag) - extract(year FROM b.beginn)) * 12 + extract(month FROM m.tag) - extract(month FROM b.beginn))::int + 1 AS vm,
-         (b.monatlich_cent - b.rabatt_cent) AS basis_cent
+         (mk_monatspreis(b.staffel, b.monatlich_cent, ((extract(year FROM m.tag) - extract(year FROM b.beginn)) * 12 + extract(month FROM m.tag) - extract(month FROM b.beginn))::int + 1) - b.rabatt_cent) AS basis_cent
   FROM m, buchungen b JOIN kunden k ON k.id = b.kunden_id JOIN vertriebspartner v ON v.id = k.vertriebspartner_id
   WHERE (v.status = 'aktiv' OR (v.status = 'beendet' AND v.beendet_am IS NOT NULL AND m.tag <= v.beendet_am + make_interval(months => %(nachlauf)s))) AND NOT k.referenzkunde AND b.status = 'aktiv' AND b.beginn IS NOT NULL AND b.monatlich_cent > 0
     AND b.beginn < (m.tag + interval '1 month') AND (b.ende IS NULL OR b.ende >= m.tag)

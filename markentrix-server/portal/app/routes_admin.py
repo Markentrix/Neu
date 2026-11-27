@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -317,7 +318,7 @@ def buchung_neu(kid: str, data: BuchungIn, user: dict = Depends(require_admin)):
         if not kr:
             raise HTTPException(404, "Kunde nicht gefunden.")
         referenz = kr["referenzkunde"]
-        cur.execute("""SELECT pp.id AS preis_id, pp.einrichtung_cent, pp.monatlich_cent, pp.projekt_cent, p.laufzeit_monate, p.nur_auf_anfrage
+        cur.execute("""SELECT pp.id AS preis_id, pp.einrichtung_cent, pp.monatlich_cent, pp.projekt_cent, pp.staffel, p.laufzeit_monate, p.nur_auf_anfrage
                        FROM produkte p LEFT JOIN LATERAL (SELECT * FROM produkt_preise x WHERE x.produkt_code=p.code AND x.gueltig_ab<=current_date ORDER BY gueltig_ab DESC LIMIT 1) pp ON true
                        WHERE p.code=%s AND p.aktiv""", (data.produkt_code,))
         p = cur.fetchone()
@@ -327,15 +328,15 @@ def buchung_neu(kid: str, data: BuchungIn, user: dict = Depends(require_admin)):
             raise HTTPException(400, "Für dieses Produkt ist kein Preis hinterlegt.")
         beginn = data.beginn
         if referenz:  # Referenzkunde: Preise auf 0, kein Rabattgrund nötig
-            p = {**p, "einrichtung_cent": 0, "monatlich_cent": 0, "projekt_cent": 0}
+            p = {**p, "einrichtung_cent": 0, "monatlich_cent": 0, "projekt_cent": 0, "staffel": None}
             data.rabatt_cent = 0
             data.rabatt_grund = "Referenzkunde"
         cur.execute("""INSERT INTO buchungen (kunden_id, produkt_code, preis_id, einrichtung_cent, monatlich_cent, projekt_cent, rabatt_cent, rabatt_grund, beginn,
-                                             mindestlaufzeit_ende, status, standort, notiz)
+                                             mindestlaufzeit_ende, status, standort, notiz, staffel)
                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s, CASE WHEN %s::date IS NOT NULL AND %s::int IS NOT NULL THEN (%s::date + make_interval(months=>%s::int))::date END,
-                               'beauftragt',%s,%s) RETURNING id""",
+                               'beauftragt',%s,%s,%s::jsonb) RETURNING id""",
                     (kid, data.produkt_code, p["preis_id"], p["einrichtung_cent"], p["monatlich_cent"], p["projekt_cent"], data.rabatt_cent, data.rabatt_grund, beginn,
-                     beginn, p["laufzeit_monate"], beginn, p["laufzeit_monate"], data.standort, data.notiz))
+                     beginn, p["laufzeit_monate"], beginn, p["laufzeit_monate"], data.standort, data.notiz, json.dumps(p["staffel"]) if p["staffel"] else None))
         b = cur.fetchone()
         cur.execute("""INSERT INTO kunden_module (kunden_id, modul_code, aktiv) SELECT %s, modul_code, true FROM produkt_module WHERE produkt_code=%s
                        ON CONFLICT (kunden_id, modul_code) DO UPDATE SET aktiv=true, geaendert_am=now()""", (kid, data.produkt_code))
