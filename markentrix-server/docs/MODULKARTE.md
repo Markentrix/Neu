@@ -13,17 +13,17 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | `agb` | 1 | 35 | `mailer`, `routes_agb`, `routes_auth`, `routes_leadangebot` |
 | `alarme` | 1 | 24 | `cli`, `fehlerhilfe`, `jobs` |
 | `betrieb` | 1 | 29 | `cli`, `jobs`, `ki`, `mailer` und 2 weitere |
-| `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 48 weitere |
+| `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 49 weitere |
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
-| `db` | 1 | 34 | `abo`, `agb`, `angebotserinnerung`, `angebotsgrund` und 152 weitere |
+| `db` | 1 | 34 | `abo`, `agb`, `angebotserinnerung`, `angebotsgrund` und 153 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 38 weitere |
 | `fehlerhilfe` | 1 | 143 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
-| `mailer` | 1 | 510 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
+| `mailer` | 1 | 510 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 37 weitere |
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
 | `pdf` | 1 | 271 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
-| `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
-| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 82 weitere |
+| `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 27 weitere |
+| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 83 weitere |
 | `zustellung` | 1 | 114 | `jobs`, `mailer`, `routes_betriebplus`, `sitedienste` und 1 weitere |
 
 ## Anmeldung und Zugänge (`zugang`)
@@ -96,7 +96,7 @@ Leads, Zuweisung, Sperrliste, Gesprächsleitfaden, Anruf-Modus, Erstgespräche, 
 | `sperre` | 2 | 64 | `funnelcheck`, `jobs`, `leadkontakt`, `leadpruefung` und 5 weitere |
 | `visitenkarte` | 2 | 186 | `main` |
 | `zuweisung` | 2 | 39 | `jobs`, `leadeingang`, `routes_leadimport`, `routes_leadsteuerung` und 2 weitere |
-| `routes_buchung` | 3 | 245 | `jobs`, `main`, `routes_angebottermin`, `routes_kalender` und 1 weitere |
+| `routes_buchung` | 3 | 245 | `jobs`, `main`, `routes_angebottermin`, `routes_kalender` und 2 weitere |
 | `routes_kalender` | 3 | 183 | `main` |
 | `routes_leadimport` | 3 | 261 | `main` |
 | `routes_leadsteuerung` | 3 | 70 | `main` |
@@ -127,13 +127,14 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `zugferd` | 2 | 256 | `belege` |
 | `routes_agb` | 3 | 126 | `main` |
 | `routes_angebotsplus` | 3 | 122 | `main` |
-| `routes_angebottermin` | 3 | 129 | `routes_belege`, `routes_leadangebot` |
+| `routes_angebottermin` | 3 | 129 | `routes_belege`, `routes_leadangebot`, `routes_terminvorschlag` |
 | `routes_belege` | 3 | 502 | `main`, `routes_werkzeuge` |
 | `routes_belegexport` | 3 | 111 | `main` |
 | `routes_leadangebot` | 3 | 354 | `angebotserinnerung`, `main`, `routes_angebotsplus`, `routes_belege` und 2 weitere |
 | `routes_pakete` | 3 | 214 | `main`, `tipps` |
 | `routes_paketverwaltung` | 3 | 189 | `main` |
 | `routes_provision` | 3 | 181 | `main` |
+| `routes_terminvorschlag` | 3 | 181 | `main` |
 | `routes_zahlung` | 3 | 312 | `jobs`, `main`, `t25.py` |
 
 ## Verträge und Datenschutz (`recht`)
@@ -186,7 +187,7 @@ Heute-Seite, Anfragen, Briefing, Onboarding, Zusammenarbeit, Wissen, Berichte, D
 | `routes_vorlagen` | 3 | 54 | `main` |
 | `routes_wert` | 3 | 56 | `main` |
 | `routes_wissen` | 3 | 329 | `main` |
-| `routes_zusammenarbeit` | 3 | 711 | `angebotsfluss`, `jobs`, `main`, `routes_angebotsinhalte` und 19 weitere |
+| `routes_zusammenarbeit` | 3 | 711 | `angebotsfluss`, `jobs`, `main`, `routes_angebotsinhalte` und 20 weitere |
 
 ## Admin und Betrieb (`admin`)
 
@@ -214,5 +215,5 @@ Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werde
 |---|---|---|---|
 | `cli` | 4 | 184 | `install.sh`, `mkctl`, `selbsttest.sh`, `t142.py` und 4 weitere |
 | `jobs` | 4 | 1318 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 9 weitere |
-| `main` | 4 | 318 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
+| `main` | 4 | 320 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
 

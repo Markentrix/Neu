@@ -2,6 +2,7 @@ import { listenKnopf, listenZiel, leadReiter, mehrMenue, leadDatenAnsicht } from
 import { anrufModus } from '../anrufmodus.js';
 import { bestaetigungKnopf } from '../terminbestaetigung.js';
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
+import { terminvorschlagKarte } from './terminvorschlag.js';
 import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
 import { qrKarte } from '../anleitung.js';
@@ -262,6 +263,7 @@ export async function leadDetail(lid) {
         kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am, { verlustgruende: d.verlustgruende, naechster: modus.aktiv() ? () => modus.naechster(lid) : undefined, kurzwahl: modus.aktiv() }))],
       ['gespraech', 'Gespräch', h('div', { class: 'stack' },
         skriptKarte(l.skript, l.skript_am, '/api/admin/leads/' + lid + '/skript'),
+        gesperrt ? '' : await terminvorschlagKarte({ lead_id: lid }, l.email),
         d.checks && d.checks.length ? h('div', { class: 'card' }, h('h2', {}, 'Website-Check'), d.checks.map(c => h('details', { style: 'margin:6px 0', open: c === d.checks[0] && !!(c.ergebnis && c.ergebnis.punkte) },
       h('summary', {}, zeit(c.erstellt_am) + ' · ' + (c.website || 'ohne Website') + ' · ' + (c.score === null || c.score === undefined ? (c.status === 'laeuft' ? 'läuft noch' : '–') : c.score + ' von 100') + (c.ampel ? ' · ' + AMPEL[c.ampel] : '')),
       c.ergebnis && c.ergebnis.punkte ? h('div', { class: 'stack' }, h('p', {}, c.ergebnis.zusammenfassung),

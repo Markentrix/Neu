@@ -4,6 +4,7 @@ import { V, abschnitte, auswahl, fehler, feld, filterKarte, fmtEuro, knopf, kopf
 import { erklaerungBox } from './fehlerhilfe.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
 import { zeitachseKarte } from './start.js';
+import { terminvorschlagKarte } from './terminvorschlag.js';
 import { referenzKarte } from './vertraege.js';
 import { qrKarte } from '../anleitung.js';
 import { leistungsKarte, wissenKarte } from './wissen.js';
@@ -533,6 +534,7 @@ export async function kundeDetail(kid) {
     kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, listenKnopf('kunden')),
     await websiteProblemKarte(kid),
     await zeitachseKarte(kid),
+    await sicher(() => terminvorschlagKarte({ kunden_id: kid }, k.email)),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
     await onboardingKarte(kid),
     await avvKarte(kid),

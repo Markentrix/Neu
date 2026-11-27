@@ -21,7 +21,7 @@ from .routes_einstellungen import router as einstellungen_router
 from .routes_vertrieb import router as vertrieb_router
 from .routes_2fa import router as zweifaktor_router
 from .routes_public import router as public_router
-from . import routes_agb, routes_paketverwaltung, routes_eigeneseite, routes_vertriebfluss, kalenderabo, routes_dsgvo, routes_funnel, tipps, visitenkarte
+from . import routes_terminvorschlag, routes_agb, routes_paketverwaltung, routes_eigeneseite, routes_vertriebfluss, kalenderabo, routes_dsgvo, routes_funnel, tipps, visitenkarte
 from .routes_onboarding import router as onboarding_router
 from .routes_vertriebqualitaet import router as vqual_router
 from .routes_pakete import router as pakete_router
@@ -217,6 +217,7 @@ app.include_router(routes_referenzseite.admin)
 app.include_router(routes_eigeneseite.router)
 app.include_router(routes_paketverwaltung.router)
 app.include_router(routes_agb.router)
+app.include_router(routes_terminvorschlag.router)
 app.include_router(routes_umfrage.admin)
 app.include_router(routes_leadsteuerung.router)
 app.include_router(routes_leadtermin.router)
@@ -283,6 +284,7 @@ app.get("/vertrieb", include_in_schema=False)(seite("vertrieb.html"))
 app.get("/einladung", include_in_schema=False)(seite("einladung.html"))
 app.get("/buchen", include_in_schema=False)(seite("buchen.html"))
 app.get("/angebot", include_in_schema=False)(seite("angebot.html"))
+app.get("/termin", include_in_schema=False)(seite("termin.html"))
 app.get("/freigabe", include_in_schema=False)(seite("freigabe.html"))
 app.get("/anmelden", include_in_schema=False)(seite("anmelden.html"))
 @app.get("/f/{slug}", include_in_schema=False)

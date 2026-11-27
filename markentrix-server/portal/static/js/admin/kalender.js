@@ -62,6 +62,7 @@ function gespraechDialog(g, danach) {
     h('p', { class: 'small' }, h('a', { href: 'mailto:' + g.email }, g.email), g.telefon ? ' · ' : '', g.telefon ? h('a', { href: 'tel:' + g.telefon }, g.telefon) : ''),
     g.nachricht ? h('p', { class: 'small muted' }, '„' + g.nachricht + '“') : '',
     g.lead_id ? h('p', {}, h('a', { class: 'btn sec small', href: '#lead/' + g.lead_id, onclick: () => dlg.zu() }, 'Lead öffnen')) : '',
+    !g.lead_id && g.kunden_id ? h('p', {}, h('a', { class: 'btn sec small', href: '#kunde/' + g.kunden_id, onclick: () => dlg.zu() }, 'Kunde öffnen')) : '',
     h('h3', {}, 'Verschieben'), feld('Neuer Termin', neu), mailBox,
     h('p', {}, h('button', { class: 'btn', type: 'button', onclick: async () => {
       try { const r = await api('/api/admin/gespraeche/' + g.id + '/verschieben', { method: 'POST', body: { start: neu.value, mail: mail.checked } }); dlg.zu(); toast('Verschoben auf ' + r.wann + '.', 'ok'); danach(); } catch (x) { melde(m, x.message); }

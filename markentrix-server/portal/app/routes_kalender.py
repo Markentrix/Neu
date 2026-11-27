@@ -37,8 +37,8 @@ def kalender(von: str, bis: str, user: dict = Depends(require_admin)):
     a = datetime(v.year, v.month, v.day, tzinfo=TZ).astimezone(timezone.utc)
     e = datetime(b.year, b.month, b.day, tzinfo=TZ).astimezone(timezone.utc) + timedelta(days=1)
     with tx("admin") as cur:
-        cur.execute("""SELECT g.id, g.start, g.ende, g.name, g.email, g.telefon, g.nachricht, g.lead_id, l.firma
-                       FROM gespraechstermine g LEFT JOIN leads l ON l.id=g.lead_id
+        cur.execute("""SELECT g.id, g.start, g.ende, g.name, g.email, g.telefon, g.nachricht, g.lead_id, g.kunden_id, coalesce(l.firma, k.firma) AS firma
+                       FROM gespraechstermine g LEFT JOIN leads l ON l.id=g.lead_id LEFT JOIN kunden k ON k.id=g.kunden_id
                        WHERE g.status='gebucht' AND g.start < %s AND g.ende > %s ORDER BY g.start""", (e, a))
         gespraeche = cur.fetchall()
         cur.execute("SELECT id, art, titel, start, ende, ganztag, notiz FROM kalender_eintraege WHERE start < %s AND ende > %s ORDER BY start", (e, a))
