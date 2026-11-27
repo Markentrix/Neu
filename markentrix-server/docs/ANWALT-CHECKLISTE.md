@@ -94,3 +94,5 @@ Das Portal stellt Rechnungen auch ohne Steuernummer oder USt-IdNr. aus (nur Warn
 - Bestätigung der AGB durch den Inhaber bei der Anmeldung im Kundenportal (Haken, Version, Prüfsumme, Zeit, IP werden gespeichert): Reicht das als Einbeziehung der AGB? Aufbewahrungsfrist des Nachweises festlegen (Tabelle agb_zustimmungen bleibt beim Vertragsende erhalten).
 - AGB als PDF im Anhang von Angebots- und Rechnungs-Mails sowie Link auf der Angebotsseite: Genügt das für die wirksame Einbeziehung vor Vertragsschluss?
 - Neue AGB-Version: Kunden müssen erneut bestätigen. Prüfen, ob Änderungsmitteilungen vorab nötig sind.
+
+- **Neuer Kunde aus Screenshot (Admin):** Das Bild (z. B. Impressum, Visitenkarte) geht zur Texterkennung an den KI-Anbieter (Anthropic), wird nicht gespeichert; nur die vom Büro geprüften Felder landen im Kunden. Prüfen: Auftragsverarbeitung/Drittlandübertragung, Datenschutzerklärung und Verarbeitungsverzeichnis, ob Daten aus fremden Impressen/Screenshots so verarbeitet werden dürfen.

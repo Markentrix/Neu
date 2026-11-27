@@ -5,6 +5,7 @@ import { erklaerungBox } from './fehlerhilfe.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
 import { zeitachseKarte } from './start.js';
 import { terminvorschlagKarte } from './terminvorschlag.js';
+import { bildVorbereiten } from '../bildlesen.js';
 import { referenzKarte } from './vertraege.js';
 import { qrKarte } from '../anleitung.js';
 import { leistungsKarte, wissenKarte } from './wissen.js';
@@ -121,7 +122,34 @@ V.neu = async () => {
       h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, refd, 'Darf als Referenz genannt werden (schriftliches Einverständnis liegt vor)')),
     h('p', {}, h('button', { class: 'btn' }, 'Kunde anlegen')));
   const refbox = f.querySelector('#refbox'); refbox.hidden = true; ref.addEventListener('change', () => { refbox.hidden = !ref.checked; });
-  return h('div', {}, kopf('Neuer Kunde'), h('div', { class: 'card' }, m, f));
+  // Aus Screenshot ausfüllen: Datei wählen, ins Fenster ziehen oder mit Strg+V einfügen. Das Bild wird nicht gespeichert.
+  const lesen = async (bild) => {
+    if (!bild || !/^image\//.test(bild.type)) { melde(m, 'Bitte ein Bild (Screenshot oder Foto) wählen.'); return; }
+    melde(m, 'Das Bild wird gelesen …', 'info');
+    try {
+      const r = await api('/api/admin/kunden/aus-bild', { method: 'POST', body: { typ: 'image/jpeg', daten: await bildVorbereiten(bild) } });
+      const zu = { website: 'domain' };
+      for (const [k, w] of Object.entries(r.felder)) { const el = /** @type {HTMLInputElement|undefined} */ (f.elements.namedItem(zu[k] || k)); if (el && w) el.value = /** @type {string} */ (w); }
+      m.replaceChildren(h('div', { class: 'msg ok' }, r.info), r.hinweis ? h('div', { class: 'msg info' }, 'Achtung: ' + r.hinweis) : '');
+      f.scrollIntoView({ behavior: 'smooth' });
+    } catch (x) { melde(m, x.message); }
+  };
+  const datei = /** @type {HTMLInputElement} */ (h('input', { type: 'file', accept: 'image/*', hidden: true, 'aria-label': 'Screenshot wählen' }));
+  datei.onchange = async () => { await lesen(datei.files && datei.files[0]); datei.value = ''; };
+  const zone = h('div', { class: 'card', style: 'border:2px dashed var(--line,#c8d0dc);text-align:center' },
+    h('p', {}, h('b', {}, 'Aus Screenshot ausfüllen')),
+    h('p', { class: 'small muted' }, 'Impressum, Visitenkarte oder Webseite: Bild hierher ziehen, mit Strg+V einfügen oder auswählen. Die Felder werden vorausgefüllt, Sie prüfen und legen den Kunden selbst an. Das Bild wird nicht gespeichert.'),
+    h('p', {}, h('button', { class: 'btn sec', type: 'button', onclick: () => datei.click() }, 'Bild auswählen')), datei);
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); });
+  zone.addEventListener('drop', (e) => { e.preventDefault(); lesen(e.dataTransfer && e.dataTransfer.files[0]); });
+  const einfuegen = (e) => {
+    const t = /** @type {HTMLElement} */ (e.target), tag = t && t.tagName;
+    const bild = Array.from((e.clipboardData && e.clipboardData.files) || []).find(x => /^image\//.test(x.type));
+    if (bild && tag !== 'TEXTAREA') { e.preventDefault(); lesen(bild); }
+  };
+  document.addEventListener('paste', einfuegen);
+  window.addEventListener('hashchange', () => document.removeEventListener('paste', einfuegen), { once: true });
+  return h('div', {}, kopf('Neuer Kunde'), zone, h('div', { class: 'card' }, m, f));
 };
 
 export async function historieKarte(kid) {
