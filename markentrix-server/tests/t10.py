@@ -43,6 +43,11 @@ r=a.post(f"/api/admin/belege/{ang}/senden"); chk("angebot senden",r.json()["gese
 m=mails()[-1]; chk("mail angebot nur mit Link, ohne PDF-Anhang",m["to"]=="rita@rt.de" and not m["anh"] and "/angebot" in m["body"] and "Claude" not in m["body"],m["subject"])
 import subprocess as _sp
 open("/var/tmp/pt/angebot.pdf","wb").write(a.get(f"/api/admin/belege/{ang}/pdf").content)
+from pypdf import PdfReader as _PRA
+import io as _ioA
+_HW="Unser Angebot richtet sich ausschließlich an Unternehmer (§ 14 BGB). Es gelten die AGB von Markentrix."
+_txt=lambda c: " ".join(p.extract_text() for p in _PRA(_ioA.BytesIO(c)).pages).replace("\n"," ")
+chk("Angebot-PDF enthält den Unternehmer-/AGB-Satz",_HW in _txt(open("/var/tmp/pt/angebot.pdf","rb").read()))
 _t=_sp.run(["pdftotext","-layout","/var/tmp/pt/angebot.pdf","-"],capture_output=True,text=True).stdout
 chk("angebot: Bankverbindung im Text","BANKVERBINDUNG" in _t.upper() and "DE89 3704 0044 0532 0130 00" in _t and "COBADEFFXXX" in _t and "TESTBANK" in _t.upper(),_t[-900:])
 chk("angebot: Fußzeile mit Kontakt und IBAN",_t.count("IBAN")>=1 and "info@markentrix.de" in _t,_t[-600:])
@@ -62,7 +67,7 @@ d=a.get(f"/api/admin/belege/{re_id}").json()["beleg"]
 netto=sum(round(p["menge"]*p["preis_cent"]) for p in d["positionen"]); chk("summen",d["netto_cent"]==netto and d["ust_cent"]==round(netto*0.19) and d["brutto_cent"]==netto+d["ust_cent"],d)
 nr2=a.post(f"/api/admin/kunden/{kid}/belege",json={"art":"rechnung","positionen":[{"text":"Test","menge":1,"preis_cent":10000}]}).json()["id"]; r=a.post(f"/api/admin/belege/{nr2}/ausstellen").json()["nummer"]
 chk("fortlaufend",int(r[-4:])==int(renr[-4:])+1,(r,renr))
-p=a.get(f"/api/admin/belege/{re_id}/pdf"); chk("rechnung pdf",p.status_code==200 and p.content[:4]==b"%PDF",p.status_code); open("/var/tmp/pt/rechnung.pdf","wb").write(p.content)
+p=a.get(f"/api/admin/belege/{re_id}/pdf"); chk("rechnung pdf",p.status_code==200 and p.content[:4]==b"%PDF",p.status_code); chk("Rechnung-PDF enthält den Angebots-Satz nicht",_HW not in _txt(p.content)); open("/var/tmp/pt/rechnung.pdf","wb").write(p.content)
 from pypdf import PdfReader as _PR0
 import io as _io0
 chk("Rechnung mit mehreren Positionen passt auf eine Seite",len(_PR0(_io0.BytesIO(p.content)).pages)==1,len(_PR0(_io0.BytesIO(p.content)).pages))

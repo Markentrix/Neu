@@ -62,6 +62,7 @@ chk("Firmendaten: Bedingungen bleiben beim Lesen erhalten",a.get("/api/admin/ein
 s1=a.post(f"/api/admin/leads/{L1}/angebote/{bid}/senden",json={"gueltig_tage":30}); chk("Senden",s1.status_code==200 and s1.json()["gesendet"],s1.text)
 tok1=s1.json()["link"].split("t=")[1]
 info=httpx.get(B+f"/api/angebot/{tok1}",headers=H).json(); chk("Öffentlich: Bedingungen und Leistungen",info["bedingungen"].startswith("Es gelten") and info["leistungen"]==["Punkt A"],info)
+chk("Öffentlich: Unternehmer-/AGB-Satz wird mitgeliefert","§ 14 BGB" in info["hinweis"] and "AGB von Markentrix" in info["hinweis"],info.get("hinweis"))
 pt=subprocess.run(["pdftotext","-","-"],input=httpx.get(B+f"/api/angebot/{tok1}/pdf",headers=H).content,capture_output=True).stdout.decode()
 chk("PDF: Bedingungen stehen drin",("Bedingungen" in pt and "Es gelten unsere AGB" in pt) if pt else True,pt[:300])
 s2=a.post(f"/api/admin/leads/{L1}/angebote/{bid}/senden",json={"erinnerung":True}); chk("Erinnerung senden",s2.status_code==200 and s2.json()["gesendet"],s2.text)

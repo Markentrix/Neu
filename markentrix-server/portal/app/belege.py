@@ -63,6 +63,7 @@ def firmendaten_pruefen(f: dict):
         raise HTTPException(400, "Bitte zuerst unter Einstellungen → Firmendaten eintragen: " + ", ".join(fehlt) + ".")
 
 
+ANGEBOT_HINWEIS = "Unser Angebot richtet sich ausschließlich an Unternehmer (§ 14 BGB). Es gelten die AGB von Markentrix."
 STEUER_HINWEIS = ("In den Firmendaten fehlt die Steuernummer oder USt-IdNr. Die Rechnung wurde trotzdem ausgestellt, "
                   "enthält diese Angabe aber nicht und hat keine E-Rechnungsdaten (ZUGFeRD). Bitte rechtlich klären lassen und die Angabe nachtragen, sobald sie vorliegt.")
 
@@ -206,7 +207,7 @@ def beleg_pdf(cur, bid, f: dict | None = None, empfaenger: dict | None = None, e
     if not ist_re and (f.get("angebotsbedingungen") or "").strip():
         inhalt += [pdf.Spacer(1, 10), pdf.p("Bedingungen", pdf.H2), pdf.p(f["angebotsbedingungen"].strip(), pdf.KLEIN)]
     if not ist_re:
-        inhalt += [pdf.Spacer(1, 10), pdf.p("Zur Annahme öffnen Sie bitte den Link in unserer E-Mail oder antworten Sie uns kurz per E-Mail." if (b.get("lead_id") and not b["kunden_id"]) else "Zur Annahme dieses Angebots bestätigen Sie es bitte im Kundenportal oder per E-Mail.", pdf.KLEIN)]
+        inhalt += [pdf.Spacer(1, 10), pdf.p(ANGEBOT_HINWEIS, pdf.KLEIN), pdf.Spacer(1, 4), pdf.p("Zur Annahme öffnen Sie bitte den Link in unserer E-Mail oder antworten Sie uns kurz per E-Mail." if (b.get("lead_id") and not b["kunden_id"]) else "Zur Annahme dieses Angebots bestätigen Sie es bitte im Kundenportal oder per E-Mail.", pdf.KLEIN)]
     if f.get("fusszeile"):
         inhalt += [pdf.Spacer(1, 10), pdf.p(f["fusszeile"], pdf.KLEIN)]
     steuer = f"Steuernummer: {f['steuernummer']}" if f.get("steuernummer") else ""

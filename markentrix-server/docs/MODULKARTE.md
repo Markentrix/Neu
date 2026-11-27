@@ -117,7 +117,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `angebotserinnerung` | 2 | 248 | `jobs`, `main`, `routes_belege`, `routes_leadangebot` |
 | `angebotsfluss` | 2 | 38 | `routes_belege`, `routes_leadangebot` |
 | `angebotsgrund` | 2 | 51 | `main`, `routes_angebotsplus`, `routes_belege`, `routes_leadangebot` |
-| `belege` | 2 | 243 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 4 weitere |
+| `belege` | 2 | 244 | `abo`, `angebotserinnerung`, `offboarding`, `routes_belege` und 4 weitere |
 | `preisaenderung` | 2 | 257 | `jobs`, `main` |
 | `quittung` | 2 | 26 | `routes_sitedienste` |
 | `vertriebangebot` | 2 | 276 | `main` |
