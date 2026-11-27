@@ -495,3 +495,7 @@ Auffälligkeiten beim Abgleich mit dem Rest der Seite (keine Änderung vorgenomm
 - Die PDF trägt in der Fußzeile die Telefonnummer 0176 20370429; die Seite nennt sie bereits an anderer Stelle.
 
 **Nicht geprüft:** die rechtliche Wirksamkeit der Klauseln (keine Rechtsberatung). Die Fassung sollte vor dem Einspielen von einer Juristin oder einem Juristen gegengelesen werden, wie schon die früheren Entwürfe.
+
+## Nachtrag 27.11.2026: TikTok-Link korrigiert
+
+Befund: Der Link im Fuß, in „Über uns“, in den strukturierten Daten (sameAs) und in `llms.txt` zeigte auf `https://www.tiktok.com/@markentrix.de`. TikTok antwortet dort mit „Konto nicht gefunden“ (statusCode 10221). Das Konto heißt `@markentrix` (Anzeigename „Markentrix.de“; Abruf liefert statusCode 0). Alle Stellen auf `https://www.tiktok.com/@markentrix` geändert (auch `docs/SOCIAL.md`). Geprüft: Abruf beider Adressen, Gate. **Nicht geprüft:** ob das Konto Inhalte enthält oder öffentlich sichtbar ist (nur Konto vorhanden); Instagram, Facebook und YouTube wurden nicht neu abgerufen.

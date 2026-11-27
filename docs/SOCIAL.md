@@ -7,7 +7,7 @@
 | Instagram | https://www.instagram.com/markentrix.de/ |
 | Facebook | https://www.facebook.com/profile.php?id=1309502148918176 |
 | YouTube | https://www.youtube.com/channel/UCoGsSDfXvUTSb2DbW8F_YPA |
-| TikTok | https://www.tiktok.com/@markentrix.de |
+| TikTok | https://www.tiktok.com/@markentrix |
 
 Auf der Website als reine Links eingebunden, keine Plug-ins, keine Fremdskripte. Die Beispielbeiträge auf der Startseite sind Bilder auf dem eigenen Server (`img/social-*.webp`) mit Link zum Originalbeitrag. Neue Beispiele: Bild als WebP, 560 mal 560 Pixel, in `static/img/` ablegen und in `src/pages/index.html` im Abschnitt `#social` eintauschen.
 
