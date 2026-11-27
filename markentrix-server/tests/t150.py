@@ -1,0 +1,41 @@
+"""Lead: Nächster Schritt, Dubletten erkennen und zusammenführen."""
+import httpx, time, subprocess
+B="http://localhost:8000"; H={"X-MK":"1"}
+def chk(n,c,i=""): print("OK  " if c else "FAIL",n,"" if c else str(i)[:300])
+def sql(q): return subprocess.run(["su","postgres","-c",f"psql -q -t -A -h /var/tmp/pgtest -p 54329 markentrix -c \"{q}\""],capture_output=True,text=True).stdout.strip()
+a=httpx.Client(base_url=B,headers=H); a.post("/api/login",json={"email":"chef@test.de","password":open("/var/tmp/pt/adminpw").read().strip()})
+a.put("/api/admin/einstellungen/smtp",json={"host":"127.0.0.1","port":8025,"sicherung":"keine","absender":"info@markentrix.de"})
+sfx=str(int(time.time()))
+def lead(firma,**kw):
+    o={"firma":firma,"ort":"Celle","plz":"29221","trotzdem":True}; o.update(kw)
+    r=a.post("/api/admin/leads",json=o); return r.json()["id"]
+def schritt(i): return a.get(f"/api/admin/leads/{i}/naechster-schritt").json()["schritt"]
+l1=lead(f"Schritt {sfx}",telefon=f"0511 75{sfx[-5:]}",email=f"s{sfx}@lead.de")
+s=schritt(l1); chk("Neuer Lead: Erster Anruf",s and s["aktion"]=="anrufen" and s["text"]=="Erster Anruf",s)
+r=a.post(f"/api/admin/leads/{l1}/kontakt",json={"ergebnis":"anruf_erreicht"}); chk("Kontakt erfasst",r.status_code==200,r.text)
+sql(f"update leads set wiedervorlage_am=null where id='{l1}'")
+s=schritt(l1); chk("Nach erreichtem Anruf: Termin vorschlagen",s and s["aktion"]=="terminvorschlag",s)
+r=a.post("/api/admin/terminvorschlaege",json={"lead_id":l1,"zeiten":[__import__("datetime").datetime.now(__import__("datetime").timezone.utc).replace(microsecond=0).isoformat().replace("+00:00","Z") if False else (__import__("datetime").datetime.now(__import__("datetime").timezone.utc)+__import__("datetime").timedelta(days=60,hours=3)).isoformat()]}); chk("Vorschlag gesendet",r.status_code==200,r.text)
+s=schritt(l1); chk("Direkt danach: warten",s and s["aktion"]=="warten",s)
+sql(f"update terminvorschlaege set erstellt_am=now()-interval '3 days' where lead_id='{l1}'")
+s=schritt(l1); chk("Nach 3 Tagen: nachfassen per Anruf",s and s["aktion"]=="anrufen" and "nachfassen" in s["text"],s)
+l2=lead(f"Ohne Kontakt {sfx}"); s=schritt(l2); chk("Ohne Telefon und Mail: Daten ergänzen",s and s["aktion"]=="daten",s)
+sql(f"update leads set status='verloren' where id='{l2}'"); chk("Verlorener Lead: kein Schritt",schritt(l2) is None)
+chk("Unbekannte ID 404",a.get("/api/admin/leads/00000000-0000-0000-0000-000000000000/naechster-schritt").status_code==404)
+# Dubletten
+l3=lead(f"Doppelt GmbH {sfx}",email=f"s{sfx}@lead.de",branche="Kfz",ansprechpartner="Frau Doppelt")
+a.post(f"/api/admin/leads/{l3}/aktivitaet",json={"art":"notiz","inhalt":"Alte Notiz vom Doppel"})
+a.post("/api/admin/terminvorschlaege",json={"lead_id":l3,"zeiten":[(__import__("datetime").datetime.now(__import__("datetime").timezone.utc)+__import__("datetime").timedelta(days=61,hours=3)).isoformat()]})
+d=a.get(f"/api/admin/leads/{l1}/dubletten").json(); chk("Dublette gefunden (gleiche Mail)",len(d)==1 and d[0]["id"]==l3 and d[0]["gleiche_mail"],d)
+chk("Lead ohne Dublette: leere Liste",a.get(f"/api/admin/leads/{l2}/dubletten").json()==[])
+chk("Mit sich selbst: 400",a.post(f"/api/admin/leads/{l1}/zusammenfuehren",json={"mit":l1}).status_code==400)
+chk("Unbekannter Lead: 404",a.post(f"/api/admin/leads/{l1}/zusammenfuehren",json={"mit":"00000000-0000-0000-0000-000000000000"}).status_code==404)
+sql(f"update leads set kunden_id=(select id from kunden limit 1) where id='{l2}' and exists (select 1 from kunden)")
+if sql(f"select kunden_id is not null from leads where id='{l2}'")=="t": chk("Lead mit Kunde: 409",a.post(f"/api/admin/leads/{l1}/zusammenfuehren",json={"mit":l2}).status_code==409)
+r=a.post(f"/api/admin/leads/{l1}/zusammenfuehren",json={"mit":l3}); chk("Zusammengeführt",r.status_code==200 and "branche" in r.json()["ergaenzt"],r.text)
+chk("Doppelter Lead ist gelöscht",sql(f"select count(*) from leads where id='{l3}'")=="0")
+chk("Verlauf übernommen",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{l1}' and inhalt like 'Alte Notiz%'"))==1)
+chk("Terminvorschlag umgehängt",sql(f"select count(*) from terminvorschlaege where lead_id='{l1}'")=="2")
+chk("Leere Felder ergänzt",sql(f"select branche||'|'||ansprechpartner from leads where id='{l1}'")=="Kfz|Frau Doppelt")
+chk("Vermerk im Verlauf",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{l1}' and inhalt like 'Zusammengeführt%'"))==1)
+chk("Ohne Anmeldung nicht möglich",httpx.post(B+f"/api/admin/leads/{l1}/zusammenfuehren",headers=H,json={"mit":l3}).status_code in (401,403))

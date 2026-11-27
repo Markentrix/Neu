@@ -98,6 +98,8 @@
     "routes_vertrieb",
     "routes_vertriebfluss",
     "routes_kundenbild",
+    "routes_leadmerge",
+    "leadschritt",
     "routes_vertriebqualitaet",
     "routes_vertriebsplus",
     "routes_vertriebwerkzeuge",

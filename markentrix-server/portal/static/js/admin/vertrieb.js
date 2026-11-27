@@ -4,6 +4,8 @@ import { bestaetigungKnopf } from '../terminbestaetigung.js';
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
 import { terminvorschlagKarte } from './terminvorschlag.js';
 import { bildZone } from './bildzone.js';
+import { dublettenDialog, terminDialog } from './leadmerge.js';
+import { schrittKarte } from '../leadschritt.js';
 import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
 import { qrKarte } from '../anleitung.js';
@@ -247,7 +249,7 @@ function anfragenKarte(liste) {
 export const modus = anrufModus({ schluessel: 'mk-anrufmodus-admin', url: '/api/admin/anrufmodus/naechster', leadHash: '#lead/', heimHash: '#leads' });
 
 export async function leadDetail(lid) {
-  const [d, anfragen] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/leads/' + lid + '/angebotsanfragen')]), l = d.lead, m = h('div');
+  const [d, anfragen, sch] = await Promise.all([api('/api/admin/leads/' + lid), api('/api/admin/leads/' + lid + '/angebotsanfragen'), api('/api/admin/leads/' + lid + '/naechster-schritt').catch(() => ({ schritt: null }))]), l = d.lead, m = h('div');
   const st = h('select', { onchange: (e) => bestaetigt(m, () => api('/api/admin/leads/' + lid, { method: 'PATCH', body: { status: e.target.value } }), 'Status geändert.') }, LEAD_ST.map(s => h('option', { value: s, selected: s === l.status }, s.replace(/_/g, ' '))));
   st.style.width = 'auto';
   const akt = h('form', { onsubmit: (e) => { e.preventDefault(); const o = formular(e.target); bestaetigt(m, () => api('/api/admin/leads/' + lid + '/aktivitaet', { method: 'POST', body: o }), 'Eingetragen.'); } },
@@ -256,10 +258,11 @@ export async function leadDetail(lid) {
   const gesperrt = ['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status);
   const ang = gesperrt ? '' : h('button', { class: 'btn small', onclick: () => angebotDialog(lid, () => location.reload()) }, 'Angebot senden');
   const tw = tempWahl(l, m); tw.style.width = 'auto';
-  const mehr = mehrMenue(gesperrt ? '' : visitenkarteKnopf('/api/admin', lid, l, 'btn sec small'), zuK, leadLoeschen(l, m, () => { location.hash = listenZiel('leads'); }));
+  const mehr = mehrMenue(knopf('Dubletten prüfen', () => dublettenDialog(lid, l.firma), 'sec small'), gesperrt || l.kunden_id ? '' : knopf('📅 Termine vorschlagen', () => terminDialog(lid, l.email), 'sec small'), gesperrt ? '' : visitenkarteKnopf('/api/admin', lid, l, 'btn sec small'), zuK, leadLoeschen(l, m, () => { location.hash = listenZiel('leads'); }));
   return h('div', { class: 'stack' }, modus.leiste(lid), kopf(l.firma, l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', gesperrt ? '' : leitfadenKnopf('/api/admin', lid, l), st, tw, ang, mehr, listenKnopf('leads')), m,
     leadReiter(lid, [
       ['anrufen', 'Anrufen', h('div', { class: 'stack' },
+        schrittKarte(sch.schritt, { anrufen: l.telefon ? 'tel:' + String(l.telefon).replace(/[^+\d]/g, '') : undefined, terminvorschlag: () => terminDialog(lid, l.email) }),
         h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), bestaetigungKnopf('/api/admin', lid, l, d.termin, (ich && (ich.name || ich.email)) || ''), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), leadDatenAnsicht(l, [['Quelle', l.quelle], ['Vertriebler', l.vertriebler]]), d.anrufzeit ? h('p', { class: 'small' }, '🕒 ' + d.anrufzeit.text) : ''),
         kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am, { verlustgruende: d.verlustgruende, naechster: modus.aktiv() ? () => modus.naechster(lid) : undefined, kurzwahl: modus.aktiv() }))],
       ['gespraech', 'Gespräch', h('div', { class: 'stack' },
