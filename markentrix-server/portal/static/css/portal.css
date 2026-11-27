@@ -112,6 +112,7 @@ details.hilfe summary{cursor:pointer;list-style:none}details.hilfe summary::-web
 .wv-faellig{color:var(--warnfg);font-weight:600}
 /* Glocke, Suche, Zeitachse */
 .side .brandzeile{display:flex;align-items:center;gap:6px;padding:0 4px 8px}
+@media(min-width:901px){.side .brandzeile{flex-wrap:wrap;gap:8px;padding:0 4px 12px}.side .brandzeile .suchknopf{flex:1 1 100%;padding:9px 12px}.side .brandzeile>:not(.suchknopf){flex:0 0 auto}}
 .glockewrap{position:relative}
 .glocke{background:rgba(247,244,238,.1);border:0;color:#fff;border-radius:9px;padding:5px 9px;cursor:pointer;font-size:14px;position:relative}
 .glocke .badge{position:absolute;top:-5px;right:-5px;margin:0}

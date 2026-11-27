@@ -58,6 +58,8 @@ r=cA.post(D+"/leistungen",json=L(name="Balayage",preis="180 €",dauer_min=60,fr
 r=cA.post(D+"/leistungen",json=L(name="Falsch",felder=[{"label":"Name"}])); chk("Reservierter Feldname abgelehnt",r.status_code==400,r.text)
 r=cA.post(D+"/leistungen",json=L(name="Doppelt",felder=[{"label":"Farbe"},{"label":"farbe"}])); chk("Doppelte Zusatzfrage abgelehnt",r.status_code==400,r.text)
 ls=W.get(API+"/leistungen",headers={"Origin":"https://"+dom}).json()["leistungen"]; sc={x["key"]:x for x in ls}
+W.get(API+"/leistungen",headers={"Origin":"https://"+dom})
+chk("Abruf der Leistungsliste wird höchstens einmal am Tag vermerkt",sql(f"select count(*) from website_ereignisse where kunden_id='{kA}' and art='leistungen_abruf'")=="1")
 chk("API liefert Zusatzfragen",[f["key"] for f in sc["schnitt"]["felder"]]==["haarlaenge","haarzustand"] and sc["schnitt"]["felder"][0]["pflicht"] is True,sc.get("schnitt"))
 sid=sql(f"select site_id from website_dienste where kunden_id='{kA}'")
 def buchen(tag,uhr,leistung,mail,**extra):

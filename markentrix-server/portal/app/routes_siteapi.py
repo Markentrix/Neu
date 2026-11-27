@@ -178,6 +178,9 @@ def leistungen(request: Request):
         cur.execute("SELECT * FROM website_leistungen WHERE kunden_id=%s AND aktiv ORDER BY sort, name", (z["kunden_id"],))
         l = [{"key": r["schluessel"], "name": r["name"], "beschreibung": r["beschreibung"] or "", "preis": r["preis"] or "", "dauer": r["dauer_min"],
               "freigabe": bool(z["kal_freigabe"] or r["freigabe"]), "felder": r["felder"] or [], "anzahlung": f"{a:.2f}" if (a := sd.anzahlung_berechnen(r)) else ""} for r in cur.fetchall()]
+        # Merken, dass die Website die Leistungsliste nutzt (höchstens einmal am Tag): die Kundenampel warnt sonst nicht vor leeren Leistungen
+        cur.execute("""INSERT INTO website_ereignisse (kunden_id, art, ok) SELECT %s, 'leistungen_abruf', true
+                       WHERE NOT EXISTS (SELECT 1 FROM website_ereignisse WHERE kunden_id=%s AND art='leistungen_abruf' AND zeit > now() - interval '1 day')""", (z["kunden_id"], z["kunden_id"]))
     return _json({"leistungen": l})
 
 

@@ -61,7 +61,7 @@ Website-API, Terminbuchung, Online-Shop, Gutscheine, Upload, Domains, Statusseit
 | `routes_eigeneseite` | 3 | 63 | `main` |
 | `routes_referenzseite` | 3 | 91 | `main` |
 | `routes_shop` | 3 | 744 | `main`, `routes_siteapi` |
-| `routes_siteapi` | 3 | 584 | `main`, `routes_shop`, `t95.py` |
+| `routes_siteapi` | 3 | 587 | `main`, `routes_shop`, `t95.py` |
 | `routes_sitedienste` | 3 | 2273 | `main`, `routes_buchungsvorlagen`, `routes_leistungsfreigabe`, `routes_shop` und 2 weitere |
 | `routes_status` | 3 | 127 | `main`, `routes_plattformstatus` |
 | `routes_websites` | 3 | 269 | `main`, `routes_betriebplus`, `routes_offboarding`, `routes_webupload` |
@@ -176,7 +176,7 @@ Heute-Seite, Anfragen, Briefing, Onboarding, Zusammenarbeit, Wissen, Berichte, D
 | `routes_fruehwarnung` | 3 | 101 | `jobs`, `main`, `routes_dashboard`, `t67.py` |
 | `routes_hilfe` | 3 | 83 | `main` |
 | `routes_kunde` | 3 | 592 | `main` |
-| `routes_kundenampel` | 3 | 100 | `main` |
+| `routes_kundenampel` | 3 | 101 | `main` |
 | `routes_kundenwerkzeuge` | 3 | 269 | `main` |
 | `routes_onboarding` | 3 | 131 | `main` |
 | `routes_telefon` | 3 | 210 | `main` |

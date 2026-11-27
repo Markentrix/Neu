@@ -18,6 +18,7 @@ SELECT k.id, k.firma, k.kundennummer, k.status,
   coalesce(d.mail_aktiv, false) AS mail_aktiv, coalesce(d.kal_aktiv, false) AS kal_aktiv, (d.kunden_id IS NOT NULL) AS hat_dienste,
   (SELECT count(*) FROM website_leistungen l WHERE l.kunden_id=k.id AND l.aktiv) AS leistungen_aktiv,
   (SELECT count(*) FROM website_leistungen l WHERE l.kunden_id=k.id AND NOT l.aktiv) AS leistungen_inaktiv,
+  EXISTS (SELECT 1 FROM website_ereignisse e WHERE e.kunden_id=k.id AND e.art='leistungen_abruf' AND e.zeit > now() - interval '60 days') AS leistungen_genutzt,
   (SELECT count(*) FROM website_termine t WHERE t.kunden_id=k.id AND t.status='reserviert' AND t.erstellt_am < now() - interval '1 day') AS reserviert_alt,
   (SELECT max(t.erstellt_am) FROM website_termine t WHERE t.kunden_id=k.id) AS letzte_buchung,
   (SELECT count(*) FROM website_leistung_aenderungen a WHERE a.kunden_id=k.id AND a.status='offen') AS leistungsaenderungen,
@@ -39,7 +40,7 @@ def bewerten(r: dict) -> dict:
         rot.append(f"{r['mail_fehler']} Mail(s) in den letzten 7 Tagen fehlgeschlagen.")
     if r["status"] == "aktiv" and not r["web_live"]:
         gelb.append("Keine Website ist live geschaltet.")
-    if r["hat_dienste"] and r["kal_aktiv"] and not r["leistungen_aktiv"] and r["leistungen_inaktiv"]:
+    if r["hat_dienste"] and r["kal_aktiv"] and not r["leistungen_aktiv"] and r["leistungen_inaktiv"] and r["leistungen_genutzt"]:   # nur, wenn die Website die Leistungsliste auch abruft
         gelb.append("Terminbuchung ist an, aber alle Leistungen sind noch inaktiv (Preise und Freigabe fehlen).")
     if r["hat_dienste"] and not r["mail_aktiv"] and r["status"] == "aktiv":
         gelb.append("Benachrichtigungen per Mail sind nicht eingerichtet.")

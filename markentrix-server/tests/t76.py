@@ -65,6 +65,10 @@ async def main():
             # Rechnung aus der Übersicht schreiben
             await pg.goto(B+"/admin#belege"); await pg.click("button:text-is('+ Rechnung schreiben')"); await pg.wait_for_selector("select[aria-label='Kunde für die Rechnung'] option:not([disabled])",timeout=8000)
             await pg.click("button:text-is('Weiter zum Entwurf')"); await pg.wait_for_function("location.hash.startsWith('#neubeleg/')",timeout=8000); await pg.wait_for_selector("h1",timeout=8000)
+            sel=pg.locator("select[aria-label='Paket mit Preis als Position einfügen']"); await pg.wait_for_timeout(500)
+            chk(f"Admin @{w}px: Rechnung: Paket aus der Preisliste wählbar",await sel.count()==1 and await sel.locator("option").count()>3)
+            vor=await pg.locator("body").inner_text(); await sel.select_option(index=1); await pg.wait_for_timeout(300)
+            chk(f"Admin @{w}px: Rechnung: Paketwahl füllt Positionen",await pg.locator("body").inner_text()!=vor)
             chk(f"Admin @{w}px: Rechnung schreiben öffnet den Entwurf",location_ok:=await pg.evaluate("location.hash.endsWith('/rechnung')"))
             await pg.goto(B+"/admin#belege"); await pg.click("button:text-is('+ Rechnung schreiben')"); await pg.click("button:text-is('+ Neuen Kunden anlegen')")
             await pg.fill("input[name=firma]",f"Rechnung Neukunde {sfx} {w}"); await pg.click("button:text-is('Kunde anlegen und weiter zur Rechnung')"); await pg.wait_for_function("location.hash.startsWith('#neubeleg/')",timeout=8000)

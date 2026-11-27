@@ -213,6 +213,17 @@ export async function belegEditor(id, kid, art) {
   const istAngebot = (b.art || art) === 'angebot';
   const leist = h('textarea', { rows: 5, disabled: !frei, 'aria-label': 'Das bekommt der Kunde', placeholder: 'Eine Zeile pro Punkt. „## “ davor = Zwischenüberschrift.' }); leist.value = (b.leistungen || []).join('\n');
   const pakete = istAngebot && frei ? await api('/api/admin/katalog/leistungstexte').catch(() => []) : [];
+  const katalog = frei ? ((await api('/api/admin/preise').catch(() => ({ aktuell: [] }))).aktuell || []).filter(p => !p.nur_auf_anfrage && (p.einrichtung_cent || p.monatlich_cent || p.projekt_cent)) : [];
+  const preisWahl = h('select', { 'aria-label': 'Paket mit Preis als Position einfügen', style: 'margin:6px 0', onchange: () => {
+    const p = katalog.find(x => x.code === preisWahl.value); preisWahl.value = ''; if (!p) return;
+    while (zeilen.length && !zeilen[zeilen.length - 1].text.trim() && !Number(zeilen[zeilen.length - 1].preis_cent)) zeilen.pop();   // leere letzte Zeile ersetzen
+    const neu = (text, preis_cent, einheit = '') => zeilen.push({ text, menge: 1, einheit, preis_cent });
+    if (p.einrichtung_cent) neu('Einrichtung ' + p.name, p.einrichtung_cent);
+    if (p.staffel && p.staffel.length > 1) p.staffel.forEach((st, i, l) => { const bis = i + 1 < l.length ? (l[i + 1].ab_monat - 1 === st.ab_monat ? 'Monat ' + st.ab_monat : 'Monat ' + st.ab_monat + '–' + (l[i + 1].ab_monat - 1)) : 'ab Monat ' + st.ab_monat; neu(p.name + ' – monatlich, ' + bis, st.cent, 'Monat'); });
+    else if (p.monatlich_cent) neu(p.name + ' – monatlich', p.monatlich_cent, 'Monat');
+    if (p.projekt_cent) neu(p.name + ' – Projektpreis', p.projekt_cent);
+    zeichne();
+  } }, h('option', { value: '' }, '+ Paket aus der Preisliste als Position einfügen …'), katalog.map(p => h('option', { value: p.code }, p.name + ' (' + [p.einrichtung_cent && 'Einr. ' + euro(p.einrichtung_cent), p.monatlich_cent && euro(p.monatlich_cent) + '/Monat', p.projekt_cent && euro(p.projekt_cent)].filter(Boolean).join(', ') + ')')));
   const paketWahl = h('select', { 'aria-label': 'Leistungen eines Pakets einfügen', style: 'margin-bottom:8px', onchange: () => { const p = pakete.find(x => x.code === paketWahl.value); paketWahl.value = ''; if (p && (p.leistungen || []).length) leist.value = (leist.value.trim() ? leist.value.trim() + '\n' : '') + (leist.value.trim() ? '## ' + p.name + '\n' : '') + p.leistungen.join('\n'); } }, h('option', { value: '' }, '+ Leistungen eines Pakets einfügen …'), pakete.map(p => h('option', { value: p.code }, p.name)));
   const einl = h('textarea', { rows: 3, disabled: !frei }, b.einleitung || ''), schluss = h('textarea', { rows: 3, disabled: !frei }, b.schluss || '');
   const termine = istAngebot ? terminFelder({ vorhanden: b.terminvorschlaege || [], gebucht: gebuchtTermin, belegId: id, eigenerKnopf: !frei }) : null;
@@ -268,7 +279,7 @@ export async function belegEditor(id, kid, art) {
     h('div', { class: 'card' }, h('div', { class: 'form2' }, h('div', {}, h('label', {}, 'Betreff'), betreff), h('div', {}, h('label', {}, 'Leistungszeitraum'), zeitraum)),
       (b.art || art) === 'rechnung' ? h('div', { class: 'form2', style: 'margin-top:8px' }, h('div', {}, h('label', {}, 'Zahlungsfrist'), frist), h('div', {}, h('label', {}, 'Käuferreferenz / Leitweg-ID (für die E-Rechnung)'), referenz)) : '',
       h('label', {}, 'Einleitung (optional)'), einl, h('h3', { style: 'margin-top:16px' }, 'Positionen'), h('div', { class: 'small muted' }, 'Beschreibung · Menge · Einheit · Einzelpreis netto in €'), box,
-      frei ? knopf('+ Position', () => { zeilen.push({ text: '', menge: 1, einheit: '', preis_cent: 0 }); zeichne(); }) : '', sum,
+      frei ? knopf('+ Position', () => { zeilen.push({ text: '', menge: 1, einheit: '', preis_cent: 0 }); zeichne(); }) : '', frei && katalog.length ? [' ', preisWahl] : '', sum,
       !frei ? h('div', { style: 'text-align:right;margin-top:8px' }, h('div', {}, 'Netto ' + fmtEuro(b.netto_cent)), b.kleinunternehmer ? h('div', { class: 'small muted' }, 'Kleinunternehmer – keine Umsatzsteuer') : h('div', {}, 'USt ' + Number(b.ust_satz) + ' % ' + fmtEuro(b.ust_cent)), h('div', {}, h('b', {}, 'Gesamt ' + fmtEuro(b.brutto_cent)))) : '',
       istAngebot ? [h('label', {}, 'Das bekommt der Kunde (steht im Angebot)'), frei ? paketWahl : '', leist] : '',
       eInfo ? h('p', { class: 'small ' + (eInfo.fehlt.length ? 'muted' : ''), style: 'margin-top:10px' }, eInfo.fehlt.length ? 'Keine E-Rechnung (ZUGFeRD) im PDF, es fehlt: ' + eInfo.fehlt.join('; ') + '.' : ['E-Rechnung (ZUGFeRD) ist im PDF enthalten. ', h('a', { href: '/api/admin/belege/' + id + '/xml' }, 'Rechnungsdaten als XML herunterladen')]) : '',
