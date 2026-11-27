@@ -26,6 +26,7 @@ import './kunde/stamm.js';
 import './kunde/pakete.js';
 import './kunde/wissen.js';
 import './kunde/belege.js';
+import './kunde/service.js';
 import './kunde/konto.js';
 import { erstStart } from './anleitung.js';
 

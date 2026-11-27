@@ -29,6 +29,8 @@ const SEITEN = [
   ['auswertung', 'Zahlen & Verlauf', null],
   ['berichte', 'Monatsberichte', null],
   ['belege', 'Meine Rechnungen', null],
+  ['ablage', 'Dokumente von Markentrix', null],
+  ['beratung', 'Beratungsgespräch buchen', null],
   ['anrufe', 'Anrufe', null],
   ['website', 'Meine Website', 'website'],
   ['einrichten', 'Website einrichten', 'website'],
@@ -50,7 +52,7 @@ const GRUPPEN = [
   ['Täglich', ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'bewertungen', 'nachrichten', 'freigaben', 'anrufe'], true],
   ['Zahlen & Berichte', ['uebersicht', 'briefing', 'auswertung', 'berichte'], true],
   ['Mein Betrieb', ['assistent', 'wissen', 'website', 'einrichten', 'status', 'dienste', 'shop', 'wochenangebote', 'werbung', 'automationen', 'kontakte', 'dokumente', 'unterlagen'], false],
-  ['Verwaltung', ['willkommen', 'belege', 'avv', 'vertraege', 'team', 'pakete', 'hilfe', 'einstellungen'], false],
+  ['Verwaltung', ['willkommen', 'belege', 'ablage', 'beratung', 'avv', 'vertraege', 'team', 'pakete', 'hilfe', 'einstellungen'], false],
 ];
 /** Ein Satz „Wozu ist das hier?“ unter der Kopfzeile jeder Seite. */
 const HINWEISE = {
@@ -69,6 +71,8 @@ const HINWEISE = {
   auswertung: 'Zahlen und Verlauf der letzten Monate, auch zum Ausdrucken.',
   berichte: 'Monatsberichte zum Herunterladen.',
   belege: 'Rechnungen und Angebote von Markentrix an Sie.',
+  ablage: 'Rechnungen, Angebote, Datenschutz-Vertrag, Monatsberichte und AGB an einem Ort. Mit Suche.',
+  beratung: 'Wählen Sie eine freie Zeit für ein Gespräch mit uns. Bestätigung und Kalendereinladung kommen per E-Mail.',
   anrufe: 'Anrufe, die Ihr Telefon-Assistent angenommen hat.',
   website: 'Ihre Website und die Inhalte, die Sie selben ändern können.',
   einrichten: 'Schritt für Schritt: Anfragen-Adresse, Logo, Signatur und Testmail für Ihre Website.',
@@ -82,7 +86,7 @@ const HINWEISE = {
 };
 export const inhaber = () => start.kunden_rolle === 'inhaber';
 const EMPFANG = ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'nachrichten', 'hilfe', 'einstellungen'];
-export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'team', 'avv', 'einrichten', 'dienste', 'shop', 'vertraege', 'wissen', 'pakete'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'ablage', 'team', 'avv', 'einrichten', 'dienste', 'shop', 'vertraege', 'wissen', 'pakete'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : id === 'vertraege' ? start.badges.vertraege : 0)) || 0;
 

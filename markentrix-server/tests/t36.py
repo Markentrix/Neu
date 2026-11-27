@@ -31,7 +31,7 @@ import subprocess
 def sql(q): return subprocess.run(["su","postgres","-c",f"psql -q -t -A -h /var/tmp/pgtest -p 54329 markentrix -c \"{q}\""],capture_output=True,text=True).stdout.strip()
 kid=k["id"]
 for i in range(8): sql(f"INSERT INTO anfragen (kunden_id,name,kontakt,nachricht,quelle,status,erstellt_am,benachrichtigt) VALUES ('{kid}','Anfrager {i}','a{i}@x.de','Bitte um Rückruf','{'telefon' if i%3==0 else 'website'}','{'beantwortet' if i<3 else 'neu'}',now()-interval '{i+1} days',true)")
-KUNDE="heute uebersicht status briefing nachrichten freigaben assistent anfragen termine bewertungen kontakte dokumente unterlagen auswertung berichte belege anrufe website wochenangebote werbung automationen avv team hilfe einstellungen".split()
+KUNDE="heute uebersicht status briefing nachrichten freigaben assistent anfragen termine bewertungen kontakte dokumente unterlagen auswertung berichte belege ablage beratung anrufe website wochenangebote werbung automationen avv team hilfe einstellungen".split()
 VERT="heute uebersicht leads pipeline angebote leitfaden uebung kunden provisionen konto".split()
 
 async def login(br,m,pw,pfad,w):
