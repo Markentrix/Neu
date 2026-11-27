@@ -237,6 +237,15 @@ def heute(user: dict = Depends(require_admin)):
         cur.execute("""SELECT b.id, b.nummer, k.firma, k.id AS kunden_id FROM belege b JOIN kunden k ON k.id = b.kunden_id
                        WHERE b.art = 'rechnung' AND b.status IN ('gestellt','versendet') AND b.faellig_am < current_date AND b.nummer IS NOT NULL ORDER BY b.faellig_am LIMIT 6""")
         rechnungen = cur.fetchall()
+        cur.execute("""SELECT g.id, g.start, g.name, g.lead_id, g.kunden_id, coalesce(l.firma, k.firma, g.name) AS firma FROM gespraechstermine g
+                       LEFT JOIN leads l ON l.id = g.lead_id LEFT JOIN kunden k ON k.id = g.kunden_id
+                       WHERE g.status = 'gebucht' AND g.start >= now() - interval '1 hour' AND g.start < now() + interval '36 hours' ORDER BY g.start LIMIT 8""")
+        gespraeche = cur.fetchall()
+        cur.execute("""SELECT v.id, v.name, v.erstellt_am, v.nachfass_anzahl, v.nachgefasst_am, v.lead_id, v.kunden_id, (current_date - v.erstellt_am::date) AS tage FROM terminvorschlaege v
+                       WHERE v.status = 'offen' AND v.gesendet AND v.erstellt_am < now() - interval '2 days'
+                         AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(v.zeiten) z WHERE z::timestamptz > now() + interval '1 hour')
+                       ORDER BY v.erstellt_am LIMIT 8""")
+        vorschlaege = cur.fetchall()
         avv_fehlt = [{"id": r["id"], "firma": r["firma"]} for r in fehlende(cur)][:6]
         avv_veraltet = [{"id": r["id"], "firma": r["firma"]} for r in veraltete(cur)][:6]
         # Angebote im Blick: offene (gesendet, evtl. angesehen) und kürzlich beantwortete, für Leads und Kunden
@@ -249,4 +258,4 @@ def heute(user: dict = Depends(require_admin)):
         angebote = cur.fetchall()
     gesamt = len(nachrichten) + len(aufgaben) + len(wiedervorlagen) + leads_n + len(freigaben) + len(onboarding) + len(rechnungen) + len(avv_fehlt)
     return {"nachrichten": nachrichten, "aufgaben": aufgaben, "leads": leads, "wiedervorlagen": wiedervorlagen, "leads_gesamt": leads_n, "freigaben": freigaben, "freigaben_termin": freigaben_termin,
-            "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "avv_veraltet": avv_veraltet, "angebote": angebote, "gesamt": gesamt}
+            "onboarding": onboarding, "rechnungen": rechnungen, "avv_fehlt": avv_fehlt, "avv_veraltet": avv_veraltet, "angebote": angebote, "gespraeche": gespraeche, "vorschlaege": vorschlaege, "gesamt": gesamt}

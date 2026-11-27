@@ -179,3 +179,26 @@ def _mails(g: dict, an_team: list):
                   f"Guten Tag {g['name']},\n\nvielen Dank, Ihr Beratungsgespräch ist vereinbart: {wann}.\n{g['ort']}\n\nDie Kalendereinladung hängt an. Falls Sie nicht können, sagen Sie bitte hier ab: {absagen}" + mailer.SIGNATUR, anhang)
     for a in an_team:
         mailer.senden(a, f"Beratungsgespräch bestätigt: {g['name']} am {wann}", f"{g['name']} hat den Termin {wann} bestätigt. Er steht im Admin-Kalender: {config.BASE_URL}/admin#kalender", anhang)
+
+
+@router.post("/admin/terminvorschlaege/{vid}/nachfassen")
+def nachfassen(vid: str, user: dict = Depends(require_admin)):
+    """Kurze Erinnerungsmail mit denselben Links, nur auf Knopfdruck. Nur noch zukünftige Zeiten werden genannt; sind keine mehr da, bitte neue Vorschläge senden."""
+    with tx("admin") as cur:
+        cur.execute("SELECT * FROM terminvorschlaege WHERE id=%s", (vid,))
+        v = cur.fetchone()
+        if not v or v["status"] != "offen":
+            raise HTTPException(404, "Kein offener Vorschlag gefunden.")
+        c = lesen(cur)
+        jetzt = datetime.now(timezone.utc) + timedelta(hours=1)
+        zeiten = [x for x in v["zeiten"] if _parse(x) > jetzt]
+        if not zeiten:
+            raise HTTPException(409, "Alle vorgeschlagenen Zeiten liegen in der Vergangenheit. Bitte neue Vorschläge senden.")
+    text = mail_text(v["name"], zeiten, v["token"], "kurze Erinnerung: Wir haben Ihnen vor ein paar Tagen Termine für ein Beratungsgespräch vorgeschlagen. Falls Sie noch Interesse haben, genügt ein Klick.", c["dauer"], c["ort"])
+    ok, grund = mailer.senden(v["email"], "Erinnerung: Terminvorschläge für Ihr Beratungsgespräch mit Markentrix", text, kunden_id=v["kunden_id"], art="terminvorschlag")
+    if not ok:
+        raise HTTPException(502, "Die Mail ging nicht raus: " + (grund or "unbekannter Fehler"))
+    with tx("admin") as cur:
+        cur.execute("UPDATE terminvorschlaege SET nachgefasst_am=now(), nachfass_anzahl=nachfass_anzahl+1 WHERE id=%s", (vid,))
+        audit(cur, user, "terminvorschlag_nachgefasst", v["kunden_id"], {"id": vid})
+    return {"ok": True}

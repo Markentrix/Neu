@@ -67,6 +67,14 @@ s=sql(f"select status from leads where id='{lid}'"); chk("Lead-Status Termin",s=
 chk("Verlauf-Eintrag am Lead",int(sql(f"select count(*) from lead_aktivitaeten where lead_id='{lid}' and art='termin'"))>=2)
 # Rückzug
 r=a.post("/api/admin/terminvorschlaege",json={"kunden_id":kid,"zeiten":[zeit(base+20,10)]}); vid=a.get("/api/admin/terminvorschlaege",params={"kunden_id":kid}).json()[0]["id"]
+sql(f"update terminvorschlaege set erstellt_am=now()-interval '3 days' where id='{vid}'")
+hz=a.get("/api/admin/heute").json(); chk("Mein Tag: Vorschlag ohne Antwort nach 3 Tagen",any(x["id"]==vid and x["tage"]>=3 for x in hz["vorschlaege"]),hz.get("vorschlaege"))
+n0=len(mails_an(f"tv{sfx}@k.de")); r=a.post(f"/api/admin/terminvorschlaege/{vid}/nachfassen"); chk("Nachfassen gesendet",r.status_code==200,r.text)
+m=mails_an(f"tv{sfx}@k.de"); chk("Erinnerungsmail mit Link",len(m)>n0 and "Erinnerung" in text(m[-1]) and "/termin?t=" in text(m[-1]),text(m[-1]) if m else "")
+chk("Nachfass-Zähler",sql(f"select nachfass_anzahl from terminvorschlaege where id='{vid}'")=="1")
+chk("Nachfassen bei fremder ID 404",a.post("/api/admin/terminvorschlaege/00000000-0000-0000-0000-000000000000/nachfassen").status_code==404)
+sql(f"insert into gespraechstermine (start,ende,name,email,status,token,gebucht_von,kunden_id) values (now()+interval '5 hours',now()+interval '5 hours 30 minutes','Heute Gast','heute{sfx}@k.de','gebucht','tk{sfx}','terminvorschlag','{kid}')")
+hz=a.get("/api/admin/heute").json(); chk("Mein Tag: Gespräch in den nächsten 36 Stunden",any(x["name"]=="Heute Gast" for x in hz["gespraeche"]),hz.get("gespraeche"))
 chk("Zurückziehen",a.delete(f"/api/admin/terminvorschlaege/{vid}").status_code==200)
 chk("Zweites Zurückziehen 404",a.delete(f"/api/admin/terminvorschlaege/{vid}").status_code==404)
 # Ohne Anmeldung kein Admin-Zugriff

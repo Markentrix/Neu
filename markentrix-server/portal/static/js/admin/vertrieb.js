@@ -3,6 +3,7 @@ import { anrufModus } from '../anrufmodus.js';
 import { bestaetigungKnopf } from '../terminbestaetigung.js';
 import { angebotDialog, leadAngebotKarte } from './leadangebot.js';
 import { terminvorschlagKarte } from './terminvorschlag.js';
+import { bildZone } from './bildzone.js';
 import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
 import { qrKarte } from '../anleitung.js';
@@ -178,7 +179,7 @@ V.leads = async () => {
     d.leads.length ? h('div', { class: 'tablewrap' }, h('table', { class: 'leadtab' }, h('thead', {}, h('tr', {}, h('th', { class: 'ck' }, alleHaken), ['Firma', 'Kontakt', 'Einstufung', 'Status', 'Vertriebler', 'Angelegt', ''].map(t => h('th', {}, t)))), h('tbody', {}, zeilen))) : h('p', { class: 'muted' }, 'Keine Leads.'), blaettern),
     await leadImportKarte(partner),
     await steuerungKarte(),
-    h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
+    bildZone(f, m, 'den Lead'), h('div', { class: 'card' }, h('h2', {}, 'Neuer Lead'), f));
 };
 
 V.auswertung = async () => {

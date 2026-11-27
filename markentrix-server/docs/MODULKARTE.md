@@ -135,7 +135,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `routes_pakete` | 3 | 214 | `main`, `tipps` |
 | `routes_paketverwaltung` | 3 | 189 | `main` |
 | `routes_provision` | 3 | 181 | `main` |
-| `routes_terminvorschlag` | 3 | 181 | `main` |
+| `routes_terminvorschlag` | 3 | 204 | `main` |
 | `routes_zahlung` | 3 | 312 | `jobs`, `main`, `t25.py` |
 
 ## Verträge und Datenschutz (`recht`)
@@ -173,7 +173,7 @@ Heute-Seite, Anfragen, Briefing, Onboarding, Zusammenarbeit, Wissen, Berichte, D
 | `onboarding` | 2 | 135 | `aufgabendetail`, `routes_admin`, `routes_diagramme`, `routes_kunde` und 3 weitere |
 | `tagesblick` | 2 | 66 | `jobs`, `routes_dashboard` |
 | `tipps` | 2 | 101 | `main` |
-| `routes_aufgaben` | 3 | 252 | `main`, `routes_admin` |
+| `routes_aufgaben` | 3 | 261 | `main`, `routes_admin` |
 | `routes_briefing` | 3 | 181 | `main` |
 | `routes_diagramme` | 3 | 131 | `main` |
 | `routes_freigabelink` | 3 | 78 | `main` |

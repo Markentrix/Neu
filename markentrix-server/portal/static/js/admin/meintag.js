@@ -16,9 +16,15 @@ V.meintag = async () => {
   const erledigt = async (a) => { try { await api('/api/admin/aufgaben/' + a.id, { method: 'PATCH', body: { status: 'erledigt' } }); zeige(); } catch (x) { alert(x.message); } };
   const bezahlt = async (z) => { if (!confirm('Zahlungseingang für Rechnung ' + z.nummer + ' (' + z.firma + ') in voller Höhe bestätigen?')) return; try { await api('/api/admin/belege/' + z.id + '/bezahlt', { method: 'POST', body: {} }); zeige(); } catch (x) { alert(x.message); } };
   const BEREICH = { leads: 'Leads', kunden: 'Kunden', belege: 'Rechnungen' };
-  const summe = meine.length + heute.wiedervorlagen.length + heute.nachrichten.length + heute.rechnungen.length + heute.freigaben.length + heute.avv_fehlt.length;
+  const summe = (heute.gespraeche || []).length + (heute.vorschlaege || []).length + meine.length + heute.wiedervorlagen.length + heute.nachrichten.length + heute.rechnungen.length + heute.freigaben.length + heute.avv_fehlt.length;
   const blocke = [
       block('Meine Aufgaben', meine, a => zeile(a.titel, (a.firma ? a.firma + ' · ' : '') + (a.faellig_am ? 'fällig ' + datum(a.faellig_am) : 'ohne Datum'), () => erledigt(a), 'Erledigt'), 'Keine fälligen Aufgaben für dich.', 'Aufgaben'),
+      block('Beratungsgespräche heute und morgen', heute.gespraeche || [], z => zeile(z.firma, new Date(z.start).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' Uhr', z.lead_id ? '#lead/' + z.lead_id : z.kunden_id ? '#kunde/' + z.kunden_id : '#kalender', 'Öffnen'), 'Keine Gespräche in den nächsten 36 Stunden.', 'Gespräche'),
+      block('Terminvorschläge ohne Antwort', heute.vorschlaege || [], z => zeile(z.name, 'seit ' + z.tage + (z.tage === 1 ? ' Tag' : ' Tagen') + (z.nachfass_anzahl ? ' · ' + z.nachfass_anzahl + '× nachgefasst' : ''), async (e) => {
+        if (!confirm('Erinnerungsmail an ' + z.name + ' senden?')) return;
+        e.target.disabled = true;
+        try { await api('/api/admin/terminvorschlaege/' + z.id + '/nachfassen', { method: 'POST' }); zeige(); } catch (x) { e.target.disabled = false; alert(x.message); }
+      }, 'Nachfassen'), 'Keine offenen Terminvorschläge.', 'Terminvorschläge'),
       block('Anrufen und nachfassen', heute.wiedervorlagen, z => zeile(z.firma, 'Wiedervorlage ' + datum(z.wiedervorlage_am) + (z.vertriebler ? ' · ' + z.vertriebler : ''), '#lead/' + z.id, 'Lead öffnen'), 'Keine Wiedervorlagen fällig.', 'Anrufe'),
       block('Nachrichten, die auf Antwort warten', heute.nachrichten, z => zeile(z.firma, z.betreff, '#postfach/' + z.id, 'Antworten'), 'Keine ungelesenen Nachrichten.', 'Nachrichten'),
       block('Überfällige Rechnungen', heute.rechnungen, z => { const li = zeile(z.firma, 'Rechnung ' + z.nummer, () => erinnerungsDialog(undefined, z.id), 'Erinnerung prüfen'); li.append(h('button', { class: 'btn small', title: 'Zahlungseingang in voller Höhe bestätigen', onclick: () => bezahlt(z) }, 'Bezahlt')); return li; }, 'Keine Rechnung überfällig.', 'Rechnungen'),
