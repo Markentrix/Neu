@@ -366,6 +366,8 @@
       a.addEventListener("click", function (e) {
         e.preventDefault();
         var img = a.querySelector("img");
+        /* Große Fassung ist AVIF; kann der Browser das nicht, das bereits geladene kleine Bild zeigen */
+        lbImg.onerror = function () { lbImg.onerror = null; if (img && img.currentSrc) lbImg.src = img.currentSrc; };
         lbImg.src = a.getAttribute("href"); lbImg.alt = img ? img.alt : "";
         dlg.showModal();
       });
@@ -881,6 +883,7 @@
     var lbShow = function (i) {
       lbIdx = (i + lbGroup.length) % lbGroup.length;
       var a = lbGroup[lbIdx], small = $("img", a), fig = a.closest("figure"), fc = fig && fig.querySelector("figcaption");
+      lbImg.onerror = function () { lbImg.onerror = null; if (small && small.currentSrc) lbImg.src = small.currentSrc; };
       lbImg.src = a.getAttribute("href");
       lbImg.alt = small ? small.alt : "";
       lbCap.textContent = fc ? fc.textContent.trim() : "";
@@ -906,7 +909,7 @@
     });
     lb.addEventListener("close", function () {
       document.documentElement.classList.toggle("lb-open", false);
-      lbImg.src = "data:,";
+      lbImg.onerror = null; lbImg.src = "data:,";
       if (lbFrom) lbFrom.focus();
     });
     $(".lb-close", lb).addEventListener("click", function () { lb.close(); });

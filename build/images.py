@@ -11,6 +11,7 @@ import re
 import shutil
 
 WIDTHS = [480, 800, 1200, 1600]
+SETTINGS = "avif48-v2"  # bei Änderung der Kodierung erhöhen: erzeugt die Bilder neu
 EXT = (".jpg", ".jpeg", ".png", ".webp")
 
 
@@ -38,7 +39,7 @@ def process(media_dir, out_dir, cache_dir):
             continue
         src = os.path.join(media_dir, name)
         st = os.stat(src)
-        key = hashlib.sha1(f"{name}|{st.st_size}|{st.st_mtime_ns}|{has_avif}".encode()).hexdigest()[:12]
+        key = hashlib.sha1(f"{name}|{st.st_size}|{st.st_mtime_ns}|{has_avif}|{SETTINGS}".encode()).hexdigest()[:12]
         slug = _safe(name)
         meta_path = os.path.join(cache_dir, f"{slug}-{key}.json")
         if os.path.exists(meta_path):
@@ -58,8 +59,10 @@ def process(media_dir, out_dir, cache_dir):
                 for w in widths:
                     h = round(H * w / W)
                     r = im.resize((w, h), Image.LANCZOS)
-                    for fmt, lst, kw in (("webp", webp, dict(quality=78, method=5)),
-                                         ("avif", avif if has_avif else None, dict(quality=55))):
+                    # AVIF für alle Breiten; WebP nur, wenn Pillow kein AVIF kann (sonst doppelte Bildmenge im Upload).
+                    # Ältere Browser ohne AVIF bekommen das JPG (Rückfall im <img>).
+                    for fmt, lst, kw in (("webp", None if has_avif else webp, dict(quality=72, method=5)),
+                                         ("avif", avif if has_avif else None, dict(quality=48))):
                         if lst is None:
                             continue
                         fn = f"{slug}-{key}-{w}.{fmt}"

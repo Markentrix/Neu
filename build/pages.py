@@ -34,7 +34,7 @@ def zoom(site, name, prefix, inner):
     m = site.media.get(name)
     if not m or not inner:
         return inner
-    big = (m.get("webp") or m.get("avif") or [m["src"]])[-1].split(" ")[0]
+    big = (m.get("avif") or m.get("webp") or [m["src"]])[-1].split(" ")[0]
     return f'<a class="zoom" href="{prefix}{big}" data-zoom>{inner}</a>'
 
 
@@ -904,7 +904,7 @@ def cert_card(site, c, prefix="", compact=False):
     m = site.media.get(c.get("image", ""))
     alt = f'{c.get("kind") or "Zertifikat"} „{c["title"]}“ für {(site.s.get("about") or {}).get("fullName") or "den Inhaber"}, {c.get("issuer", "")}'
     pic = picture(site, c.get("image", ""), alt, "cert-img", prefix, sizes="(min-width: 900px) 360px, 80vw")
-    big = (prefix + (m["webp"][-1].split(" ")[0] if m.get("webp") else m["src"])) if m else ""
+    big = (prefix + ((m.get("avif") or m.get("webp") or [m["src"]])[-1].split(" ")[0])) if m else ""
     media = (f'<a class="cert-media" href="{big}" data-lightbox aria-label="{ESC(c["title"])} groß ansehen">{pic}'
              f'<span class="cert-zoom">{I["zoom"]}Vergrößern</span></a>') if m else ""
     meta = " · ".join(x for x in [c.get("issuer", ""), c.get("place", ""), _de(c.get("date", ""))] if x)
