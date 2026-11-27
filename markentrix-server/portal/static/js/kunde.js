@@ -34,6 +34,16 @@ import { erstStart } from './anleitung.js';
     const startP = api('/api/kunde/start'); startP.catch(() => {});
     const me = await api('/api/me');
     if (me.rolle === 'admin' || me.rolle === 'vertrieb') { location.href = zielFuerRolle(me.rolle); return; }
+    if (me.agb_offen) {
+      const r = document.getElementById('app'), haken = h('input', { type: 'checkbox', id: 'agbhaken', style: 'width:auto' }), m = h('div');
+      r.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Allgemeine Geschäftsbedingungen'),
+        h('p', {}, 'Bitte lesen und bestätigen Sie unsere AGB (Version ' + me.agb_offen.version + '), damit Sie das Portal nutzen können. Wir halten Ihre Bestätigung mit Datum und Uhrzeit fest.'),
+        h('p', {}, h('a', { class: 'btn sec', href: '/api/agb.pdf', target: '_blank', rel: 'noopener' }, 'AGB als PDF öffnen')),
+        h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:15px' }, haken, 'Ich habe die AGB gelesen und erkenne sie für unser Unternehmen an.'), m,
+        h('p', {}, h('button', { class: 'btn', onclick: async () => { if (!haken.checked) { m.replaceChildren(h('div', { class: 'msg err' }, 'Bitte setzen Sie zuerst den Haken.')); return; }
+          try { await api('/api/kunde/agb/zustimmen', { method: 'POST', body: { bestaetigt: true, agb_id: me.agb_offen.id } }); location.reload(); } catch (x) { m.replaceChildren(h('div', { class: 'msg err' }, x.message)); } } }, 'Bestätigen und weiter'))));
+      return;
+    }
     if (me.zwei_faktor_pflicht) { const r = document.getElementById('app'); r.replaceChildren(h('div', { class: 'card', style: 'max-width:560px;margin:40px auto' }, h('h1', {}, 'Zwei-Faktor-Anmeldung einrichten'), h('p', {}, 'Für Ihren Zugang ist die Zwei-Faktor-Anmeldung Pflicht. Bitte jetzt mit einer Authenticator-App einrichten, danach geht es direkt weiter.'), zweiFaktorKarte(), h('p', {}, h('button', { class: 'btn', onclick: () => location.reload() }, 'Weiter zum Portal')))); return; }
     const start = await startP;
     setzeStart(start);

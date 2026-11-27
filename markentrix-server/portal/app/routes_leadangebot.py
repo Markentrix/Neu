@@ -11,7 +11,7 @@ from fastapi.responses import Response
 from psycopg import errors
 from pydantic import BaseModel, Field
 
-from . import angebotsfluss, angebotsgrund, routes_angebottermin, belege, config, einstellungen, mailer, push, rechtstexte
+from . import agb, angebotsfluss, angebotsgrund, routes_angebottermin, belege, config, einstellungen, mailer, push, rechtstexte
 from .db import tx
 from .routes_zusammenarbeit import admin_empfaenger
 from .security import audit, client_ip, rate_limit, require_admin
@@ -248,7 +248,7 @@ def link_sicherstellen(cur, bid) -> str:
 def _info(b: dict, firma: dict) -> dict:
     abgelaufen = bool(b["faellig_am"] and b["faellig_am"] < date.today())
     return {"anbieter": firma["name"], "nummer": b["nummer"], "empfaenger": (b["empfaenger"] or {}).get("firma") or b["lead_firma"], "betreff": b["betreff"], "einleitung": b["einleitung"], "schluss": b["schluss"],
-            "positionen": b["positionen"], "leistungen": b["leistungen"], "bedingungen": (firma.get("angebotsbedingungen") or "").strip(), "hinweis": belege.ANGEBOT_HINWEIS, "netto_cent": int(b["netto_cent"]), "ust_satz": float(b["ust_satz"]), "ust_cent": int(b["ust_cent"]), "brutto_cent": int(b["brutto_cent"]),
+            "positionen": b["positionen"], "leistungen": b["leistungen"], "bedingungen": (firma.get("angebotsbedingungen") or "").strip(), "hinweis": belege.ANGEBOT_HINWEIS, "agb": agb.vorhanden(), "netto_cent": int(b["netto_cent"]), "ust_satz": float(b["ust_satz"]), "ust_cent": int(b["ust_cent"]), "brutto_cent": int(b["brutto_cent"]),
             "kleinunternehmer": b["kleinunternehmer"], "datum": b["datum"], "gueltig_bis": b["faellig_am"], "status": b["status"], "abgelaufen": abgelaufen,
             "angenommen_am": b["angenommen_am"], "kontakt": {"email": firma.get("email"), "telefon": firma.get("telefon")}}
 

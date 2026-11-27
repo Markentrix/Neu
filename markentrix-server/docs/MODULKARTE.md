@@ -10,19 +10,20 @@ Datenbank, Sicherheit, Einstellungen, Mail, PDF, Dateien, KI und Push. Von allen
 | Modul | Schicht | Zeilen | Genutzt von |
 |---|---|---|---|
 | `__init__` | 1 | 0 | – |
+| `agb` | 1 | 35 | `mailer`, `routes_agb`, `routes_auth`, `routes_leadangebot` |
 | `alarme` | 1 | 24 | `cli`, `fehlerhilfe`, `jobs` |
 | `betrieb` | 1 | 29 | `cli`, `jobs`, `ki`, `mailer` und 2 weitere |
 | `config` | 1 | 31 | `angebotserinnerung`, `angebotsfluss`, `aufgabendetail`, `db` und 48 weitere |
 | `dateien` | 1 | 94 | `routes_freigabelink`, `routes_zusammenarbeit` |
-| `db` | 1 | 34 | `abo`, `angebotserinnerung`, `angebotsgrund`, `betrieb` und 150 weitere |
+| `db` | 1 | 34 | `abo`, `agb`, `angebotserinnerung`, `angebotsgrund` und 152 weitere |
 | `einstellungen` | 1 | 54 | `angebotserinnerung`, `cli`, `domaincheck`, `funnelcheck` und 38 weitere |
 | `fehlerhilfe` | 1 | 143 | `jobs`, `main`, `routes_system`, `sitedienste` und 1 weitere |
 | `ki` | 1 | 257 | `routes_admin`, `routes_angebotsinhalte`, `routes_einstellungen`, `routes_kunde` und 3 weitere |
-| `mailer` | 1 | 498 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
+| `mailer` | 1 | 510 | `abo`, `angebotserinnerung`, `angebotsfluss`, `cli` und 36 weitere |
 | `mailvorlage` | 1 | 309 | `mailer`, `routes_sitedienste`, `sitedienste`, `t95.py` |
 | `pdf` | 1 | 271 | `anleitung_pdf`, `avv`, `belege`, `berichte` und 5 weitere |
 | `push` | 1 | 176 | `abo`, `angebotserinnerung`, `angebotsfluss`, `domaincheck` und 26 weitere |
-| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 81 weitere |
+| `security` | 1 | 247 | `angebotserinnerung`, `angebotsfluss`, `angebotsgrund`, `cli` und 82 weitere |
 | `zustellung` | 1 | 114 | `jobs`, `mailer`, `routes_betriebplus`, `sitedienste` und 1 weitere |
 
 ## Anmeldung und Zugänge (`zugang`)
@@ -35,7 +36,7 @@ Einladungen, Passwort-Zurücksetzen, Zwei-Faktor, Passkeys, Anmelde-Links, Team-
 | `zugang` | 2 | 41 | `routes_admin`, `routes_mitarbeiter`, `routes_team`, `routes_verwaltung` |
 | `zweifaktor` | 2 | 70 | `routes_2fa`, `routes_auth`, `t63.py`, `t8.py` |
 | `routes_2fa` | 3 | 142 | `main` |
-| `routes_auth` | 3 | 147 | `main` |
+| `routes_auth` | 3 | 151 | `main` |
 | `routes_loginlink` | 3 | 63 | `main` |
 | `routes_mitarbeiter` | 3 | 71 | `main` |
 | `routes_passkey` | 3 | 128 | `main` |
@@ -124,6 +125,7 @@ Angebote, Rechnungen, Quittungen, Wartungsverträge, Zahlungsabgleich, SEPA, Pre
 | `vertriebangebot` | 2 | 282 | `main` |
 | `zahlungsabgleich` | 2 | 98 | `routes_belege` |
 | `zugferd` | 2 | 256 | `belege` |
+| `routes_agb` | 3 | 126 | `main` |
 | `routes_angebotsplus` | 3 | 122 | `main` |
 | `routes_angebottermin` | 3 | 129 | `routes_belege`, `routes_leadangebot` |
 | `routes_belege` | 3 | 502 | `main`, `routes_werkzeuge` |
@@ -142,7 +144,7 @@ AVV, Verträge, Datenschutz-Anfragen (DSGVO), Rechtstexte, Unterauftragsverarbei
 |---|---|---|---|
 | `avv` | 2 | 160 | `routes_avv`, `routes_system`, `routes_uav` |
 | `avv_text` | 2 | 192 | `avv` |
-| `offboarding` | 2 | 180 | `routes_betriebplus`, `routes_offboarding` |
+| `offboarding` | 2 | 181 | `routes_betriebplus`, `routes_offboarding` |
 | `rechtstexte` | 2 | 75 | `abo`, `angebotserinnerung`, `belege`, `berichte` und 12 weitere |
 | `vertraege` | 2 | 144 | `routes_vertraege`, `routes_vertragportal` |
 | `routes_avv` | 3 | 426 | `main`, `routes_admin`, `routes_aufgaben`, `routes_system` |
@@ -212,5 +214,5 @@ Programmstart, Kommandozeile und Hintergrundaufgaben. Dürfen alles laden, werde
 |---|---|---|---|
 | `cli` | 4 | 184 | `install.sh`, `mkctl`, `selbsttest.sh`, `t142.py` und 4 weitere |
 | `jobs` | 4 | 1318 | `main`, `routes_admin`, `routes_einstellungen`, `t108.py` und 9 weitere |
-| `main` | 4 | 317 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
+| `main` | 4 | 318 | `smoke.py`, `t16.py`, `t28.py`, `t41.py` und 1 weitere |
 

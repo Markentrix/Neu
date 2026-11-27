@@ -25,7 +25,7 @@ V.einstellungen = async () => {
   return einklappen(h('div', { class: 'stack' }, kopf('Einstellungen'),
     !d.geheimnis_ok ? h('div', { class: 'msg err' }, 'Das Server-Geheimnis (PORTAL_SECRET) fehlt. Bitte install.sh erneut ausführen, sonst können keine Zugangsdaten gespeichert werden.') : '',
     h('div', { class: 'card' }, h('h2', {}, 'E-Mail-Versand (SMTP)'), h('p', { class: 'small muted' }, 'Zugangsdaten deines Postfachs. Damit verschickt das Portal Einladungen und Passwort-Links automatisch. Das Passwort wird verschlüsselt gespeichert und nie wieder angezeigt.'), m1, fs, ft),
-    await zustellungKarte(), await vertragKarte(), await angebotErinnerungKarte(), passkeyKarte(), await visitenkarteKarte('/api/admin'), await eigeneSeiteKarte(), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
+    await zustellungKarte(), await vertragKarte(), await angebotErinnerungKarte(), passkeyKarte(), await visitenkarteKarte('/api/admin'), await eigeneSeiteKarte(), await agbKarte(), zweiFaktorKarte(), await sicherheitKarte(), pushKarte('admin'), await textvorlagenKarte(), await leitfadenKarte(), await zahlungKarte(), await telefonKarte(), await websiteCheckKarte(), await placesKarte(), await firmaKarte(), await benachrKarte(), await rechtKarte(), await avvEinstKarte(), await uavAenderungKarte(), await folgemailsKarte(), await buchungKarte(), ...(ich && ich.admin_rechte ? [] : [await mitarbeiterKarte()]),
     h('div', { class: 'card' }, h('h2', {}, 'KI-Assistent im Kunden-Chat'), h('p', { class: 'small muted' }, d.ki.key_gesetzt ? 'API-Key ist hinterlegt – der Chat antwortet direkt über das Portal.' : 'Noch kein API-Key – der Chat nutzt den n8n-Webhook, falls eingerichtet. Den Key gibt es in der Anthropic-Konsole (console.anthropic.com), getrennt vom Claude-Abo.'), m2, fk, h('p', {}, knopf('KI-Verbindung testen', async () => { melde(m3, 'Der Test läuft …', 'info'); try { const r = await api('/api/admin/einstellungen/ki-test', { method: 'POST' }); melde(m3, 'Verbindung steht. Modell ' + r.modell + ' hat geantwortet: „' + r.antwort + '“', 'ok'); } catch (x) { melde(m3, x.message); } }, 'sec'))), m3), { 'E-Mail-Versand (SMTP)': [!!(d.smtp.host && d.smtp.absender), d.smtp.host && d.smtp.absender ? 'eingerichtet' : 'fehlt'], 'KI-Assistent im Kunden-Chat': [!!d.ki.key_gesetzt, d.ki.key_gesetzt ? 'Key hinterlegt' : 'Key fehlt'] });
 };
 
@@ -40,6 +40,33 @@ export async function placesKarte() {
     h('p', { class: 'small muted' }, d.key_gesetzt ? 'Schlüssel ist hinterlegt. Die Kunden-Websites können ihre Google-Bewertungen anzeigen.' : 'Noch kein Schlüssel. Ohne ihn tragen Kunden Sterne und Anzahl von Hand ein. Schlüssel: Google Cloud → „Places API (New)“ aktivieren → API-Schlüssel erstellen, auf diese API beschränken. Abgerufen wird je Kunde höchstens alle 12 Stunden, nicht pro Besucher.'),
     m, h('div', { class: 'row' }, key, h('button', { class: 'btn', onclick: speichern }, 'Speichern')),
     h('div', { class: 'row', style: 'margin-top:8px' }, pid, h('button', { class: 'btn sec', onclick: testen }, 'Schlüssel testen')));
+}
+
+// ---------------------------------------------------------------- AGB (PDF, Mitsenden, Bestätigung bei der Anmeldung)
+export async function agbKarte() {
+  const d = await api('/api/admin/agb'), m = h('div');
+  const akt = d.versionen.find(v => v.aktiv);
+  const datei = h('input', { type: 'file', accept: 'application/pdf', 'aria-label': 'AGB als PDF' }), ver = h('input', { placeholder: 'Version, z. B. Stand 11/2026', maxlength: 60, 'aria-label': 'Version' });
+  const senden = h('input', { type: 'checkbox', checked: true, style: 'width:auto' }), pflicht = h('input', { type: 'checkbox', checked: true, style: 'width:auto' });
+  const hoch = () => {
+    const f = datei.files[0]; if (!f) return melde(m, 'Bitte zuerst die AGB als PDF wählen.'); if (!ver.value.trim()) return melde(m, 'Bitte eine Version angeben.');
+    if (!confirm('Diese AGB jetzt aktivieren?' + (pflicht.checked ? ' Alle Kunden (Inhaber) müssen sie bei der nächsten Anmeldung bestätigen.' : '') + (senden.checked ? ' Das PDF hängt dann an allen Angebots- und Rechnungs-Mails.' : ''))) return;
+    const r = new FileReader();
+    r.onload = async () => { try { await api('/api/admin/agb', { method: 'POST', body: { version: ver.value.trim(), datei_base64: r.result, datei_name: f.name, mitsenden: senden.checked, login_pflicht: pflicht.checked } }); location.reload(); } catch (x) { fehler(m, x); } };
+    r.readAsDataURL(f);
+  };
+  const schalter = (v, feldName) => h('input', { type: 'checkbox', checked: !!v[feldName], style: 'width:auto', 'aria-label': feldName, onchange: async (e) => { try { await api('/api/admin/agb/' + v.id, { method: 'PUT', body: { [feldName]: e.target.checked } }); melde(m, 'Gespeichert.', 'ok'); } catch (x) { fehler(m, x); } } });
+  const aktivieren = (z) => knopf('Aktivieren', async () => { if (confirm('Diese Version wieder aktivieren?')) { try { await api('/api/admin/agb/' + z.id, { method: 'PUT', body: { aktiv: true } }); location.reload(); } catch (x) { fehler(m, x); } } });
+  return h('div', { class: 'card' }, h('h2', {}, 'AGB'),
+    h('p', { class: 'small muted' }, 'Die aktive AGB hängt als PDF an Angebots- und Rechnungs-Mails und muss vom Inhaber jedes Kunden bei der Anmeldung im Portal bestätigt werden. Die Bestätigung wird mit Datum, Uhrzeit, Version, Prüfsumme und IP gespeichert. Den rechtlichen Text der AGB prüft der Anwalt (siehe Anwalts-Checkliste).'), m,
+    akt ? h('p', {}, h('b', {}, 'Aktiv: ' + akt.version), ' · ' + akt.bestaetigt + ' von ' + d.kunden + ' Kunden bestätigt · ', h('a', { href: '/api/admin/agb/' + akt.id + '/datei', target: '_blank', rel: 'noopener' }, 'PDF ansehen')) : h('p', { class: 'muted' }, 'Noch keine AGB hinterlegt.'),
+    h('h3', {}, 'Neue Version hochladen'), h('div', { class: 'row' }, datei, ver),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, senden, 'Mit Angeboten und Rechnungen als PDF mitsenden'),
+    h('label', { style: 'display:flex;gap:8px;align-items:center;color:inherit;font-size:14px' }, pflicht, 'Bestätigung bei der Anmeldung im Kundenportal verlangen'),
+    h('p', {}, knopf('Hochladen und aktivieren', hoch, 'btn')),
+    d.versionen.length ? tabelle([['Version', z => z.version + (z.aktiv ? ' (aktiv)' : '')], ['Hochgeladen', z => datum(z.erstellt_am)], ['Bestätigt', z => z.bestaetigt], ['Mitsenden', z => schalter(z, 'mitsenden')], ['Bestätigung', z => schalter(z, 'login_pflicht')],
+      ['', z => h('span', { class: 'row' }, h('a', { class: 'btn sec small', href: '/api/admin/agb/' + z.id + '/datei', target: '_blank', rel: 'noopener' }, 'PDF'), z.aktiv ? '' : aktivieren(z))]], d.versionen) : '',
+    d.zustimmungen.length ? [h('h3', {}, 'Letzte Bestätigungen'), tabelle([['Zeit', z => zeit(z.zeit)], ['Kunde', z => z.firma + ' (' + z.kundennummer + ')'], ['Benutzer', z => z.benutzer], ['Version', z => z.version], ['IP', z => z.ip || '–']], d.zustimmungen)] : '');
 }
 
 export async function eigeneSeiteKarte() {

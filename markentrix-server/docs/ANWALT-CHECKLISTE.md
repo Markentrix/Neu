@@ -89,3 +89,8 @@ Das Portal stellt Rechnungen auch ohne Steuernummer oder USt-IdNr. aus (nur Warn
 ## Staffelpreise und frei angelegte Pakete (neu)
 - Staffelpreise (z. B. Monat 1: 149 €, Monat 2: 199 €, ab Monat 3: 249 €): Im Angebot und in der Rechnung müssen die Stufen klar benannt sein. Prüfen, ob die Darstellung für Unternehmerkunden ausreicht (Preisangabe, Laufzeit, Kündigung).
 - Mindestlaufzeit je Paket (1, 3, 6, 12, 24 Monate): Kündigungsfristen und Verlängerung in den AGB regeln.
+
+## AGB-Bestätigung und AGB-Versand (neu)
+- Bestätigung der AGB durch den Inhaber bei der Anmeldung im Kundenportal (Haken, Version, Prüfsumme, Zeit, IP werden gespeichert): Reicht das als Einbeziehung der AGB? Aufbewahrungsfrist des Nachweises festlegen (Tabelle agb_zustimmungen bleibt beim Vertragsende erhalten).
+- AGB als PDF im Anhang von Angebots- und Rechnungs-Mails sowie Link auf der Angebotsseite: Genügt das für die wirksame Einbeziehung vor Vertragsschluss?
+- Neue AGB-Version: Kunden müssen erneut bestätigen. Prüfen, ob Änderungsmitteilungen vorab nötig sind.

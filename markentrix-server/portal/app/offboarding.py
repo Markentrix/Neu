@@ -30,6 +30,7 @@ LOESCH_TABELLEN = ["empfehlungs_praemien", "kunden_tipps", "ticket_nachrichten",
 # Bewusst behalten (gesetzliche Aufbewahrung, Nachweis oder keine Kundeninhalte). Ein Prüftest (t105) verlangt, dass JEDE Tabelle mit kunden_id entweder in LOESCH_TABELLEN
 # oder hier steht, damit neue Tabellen beim Vertragsende nicht vergessen werden. Neue Tabelle: hier mit Begründung eintragen oder in LOESCH_TABELLEN aufnehmen.
 AUFBEWAHREN = {
+    "agb_zustimmungen": "Nachweis der Bestätigung der AGB (Rechenschaftspflicht, Frist vom Anwalt bestätigen lassen)",
     "belege": "Rechnungen und Angebote: gesetzliche Aufbewahrungsfrist (Frist vom Steuerberater/Anwalt bestätigen lassen)",
     "avv": "Auftragsverarbeitungsvertrag: Nachweis",
     "vertragsdokumente": "Verträge: gesetzliche Aufbewahrung und Nachweis",

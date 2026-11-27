@@ -60,7 +60,7 @@ function zeigen(d) {
       catch (x) { melde(m, x.message); ja.disabled = false; }
     } },
       h('label', { for: 'name' }, 'Zur Annahme geben Sie bitte Ihren Namen ein'), name,
-      d.hinweis ? h('p', { class: 'small muted', id: 'unternehmerhinweis' }, d.hinweis) : '',
+      d.hinweis ? h('p', { class: 'small muted', id: 'unternehmerhinweis' }, d.hinweis, d.agb ? [' ', h('a', { href: '/api/agb.pdf', target: '_blank', rel: 'noopener' }, 'AGB als PDF ansehen')] : '') : '',
       h('label', { style: 'display:flex;gap:8px;align-items:flex-start;color:inherit;font-size:13px;margin:10px 0', for: 'ok' }, ok, h('span', {}, 'Ich nehme das Angebot ' + d.nummer + ' im Namen von ' + d.empfaenger + ' verbindlich an.')),
       h('p', {}, ja));
     const nein = h('details', { class: 'small', style: 'margin-top:10px' }, h('summary', {}, 'Kein Interesse oder Rückfragen?'),
