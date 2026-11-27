@@ -53,7 +53,7 @@ async function kundenSammelDialog(aktion, ids) {
 V.kunden = async () => {
   const P = new URLSearchParams(location.hash.split('?')[1] || '');
   const q = h('input', { placeholder: 'Suchen nach Firma, Nummer, E-Mail …', value: P.get('q') || '', 'aria-label': 'Suche' });
-  const status = select('status', [['', 'Alle Status'], 'onboarding', 'aktiv', 'pausiert', 'gekuendigt', 'beendet'], P.get('status') || '', { 'aria-label': 'Status', onchange: () => lade() });
+  const status = select('status', [['', 'Aktive Kunden (ohne Archiv)'], ['alle', 'Alle inkl. Archiv'], 'onboarding', 'aktiv', 'pausiert', 'gekuendigt', ['beendet', 'Archiv (beendete Kunden)']], P.get('status') || '', { 'aria-label': 'Status', onchange: () => lade() });
   const avv = select('avv', [['', 'AVV egal'], ['fehlt', 'AVV fehlt']], P.get('avv') || '', { 'aria-label': 'AVV', onchange: () => lade() });
   const nurRef = h('input', { type: 'checkbox', style: 'width:auto', checked: P.get('ref') === '1', onchange: () => lade() });
   const box = h('div'), leiste = h('div', { class: 'sammelleiste', hidden: true });
@@ -72,10 +72,12 @@ V.kunden = async () => {
     history.replaceState(null, '', '#kunden' + (n.toString() ? '?' + n.toString() : ''));   // Adresse = Filter (Kurzlink), ohne die Seite neu zu zeichnen
     let d = await api('/api/admin/kunden?q=' + encodeURIComponent(q.value.trim()));
     if (nurRef.checked) d = d.filter(z => z.referenzkunde);
-    if (status.value) d = d.filter(z => z.status === status.value);
+    const archiv = d.filter(z => z.status === 'beendet').length;   // beendete Kunden liegen im Archiv und stehen nicht in der normalen Liste
+    if (status.value === '') d = d.filter(z => z.status !== 'beendet');
+    else if (status.value !== 'alle') d = d.filter(z => z.status === status.value);
     if (avv.value === 'fehlt') d = d.filter(z => !z.avv_ok);
     aktuell = d; sel.leeren();
-    box.replaceChildren(h('p', { class: 'small muted' }, d.length + (d.length === 1 ? ' Kunde' : ' Kunden')), tabelle([
+    box.replaceChildren(h('p', { class: 'small muted' }, d.length + (d.length === 1 ? ' Kunde' : ' Kunden'), status.value === '' && archiv ? [' · ', h('a', { href: '#', onclick: (e) => { e.preventDefault(); status.value = 'beendet'; lade(); } }, archiv + ' beendete im Archiv anzeigen')] : ''), tabelle([
       [sel.alle, z => sel.haken(z.id)],
       ['Nr.', z => h('a', { href: '#kunde/' + z.id }, z.kundennummer)], ['Firma', z => h('span', {}, z.firma, z.referenzkunde ? [' ', h('span', { class: 'pill warn' }, 'Referenz')] : '')], ['Paket', z => z.paket || '–'],
       ['Status', z => h('span', {}, pill(z.status), z.onboarding ? h('div', { class: 'small muted' }, 'Start: ' + z.onboarding.fertig + ' von ' + z.onboarding.gesamt) : '')], ['Module', z => modulZelle(z)], ['Zugang', z => z.zugang_aktiv ? 'ja' : 'nein'], ['AVV', z => z.avv_ok ? h('span', { class: 'pill ok' }, 'ja') : h('span', { class: 'pill warn' }, 'fehlt')], ['Domain', z => z.domain]], d, 'Keine Kunden zu diesem Filter.'));
