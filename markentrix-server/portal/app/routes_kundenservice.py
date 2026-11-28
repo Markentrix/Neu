@@ -9,13 +9,13 @@ from . import config, push
 from .db import tx
 from .routes_buchung import TZ, _mails, _slots, lesen
 from .routes_zusammenarbeit import admin_empfaenger
-from .security import audit, rate_limit, require_inhaber, require_kunde
+from .security import audit, rate_limit, require_inhaber
 
 router = APIRouter(prefix="/api/kunde")
 
 
 @router.get("/beratung")
-def beratung(user: dict = Depends(require_kunde)):
+def beratung(user: dict = Depends(require_inhaber)):
     kid = user["kunden_id"]
     with tx("system") as cur:
         c = lesen(cur)
@@ -34,7 +34,7 @@ class BeratungIn(BaseModel):
 
 
 @router.post("/beratung")
-def buchen(data: BeratungIn, bg: BackgroundTasks, user: dict = Depends(require_kunde)):
+def buchen(data: BeratungIn, bg: BackgroundTasks, user: dict = Depends(require_inhaber)):
     kid = user["kunden_id"]
     rate_limit("kberatung:" + str(user["id"]), 10, 3600)
     try:

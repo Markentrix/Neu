@@ -6,6 +6,7 @@ import { terminvorschlagKarte } from './terminvorschlag.js';
 import { bildZone } from './bildzone.js';
 import { dublettenDialog, terminDialog } from './leadmerge.js';
 import { schrittKarte } from '../leadschritt.js';
+import { mailKarte } from '../mailverlauf.js';
 import { visitenkarteKnopf } from '../visitenkarte.js';
 import { steuerungKarte, zuKundeDialog } from './leadsteuerung.js';
 import { qrKarte } from '../anleitung.js';
@@ -262,6 +263,7 @@ export async function leadDetail(lid) {
   return h('div', { class: 'stack' }, modus.leiste(lid), kopf(l.firma, l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', gesperrt ? '' : leitfadenKnopf('/api/admin', lid, l), st, tw, ang, mehr, listenKnopf('leads')), m,
     leadReiter(lid, [
       ['anrufen', 'Anrufen', h('div', { class: 'stack' },
+        await mailKarte('/api/admin/leads/' + lid + '/mails'),
         schrittKarte(sch.schritt, { anrufen: l.telefon ? 'tel:' + String(l.telefon).replace(/[^+\d]/g, '') : undefined, terminvorschlag: () => terminDialog(lid, l.email) }),
         h('div', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Daten'), bestaetigungKnopf('/api/admin', lid, l, d.termin, (ich && (ich.name || ich.email)) || ''), h('button', { class: 'btn sec small', onclick: () => leadDatenDialog(lid, l) }, 'Daten bearbeiten')), leadDatenAnsicht(l, [['Quelle', l.quelle], ['Vertriebler', l.vertriebler]]), d.anrufzeit ? h('p', { class: 'small' }, '🕒 ' + d.anrufzeit.text) : ''),
         kontaktKarte(d.kontakt_optionen, '/api/admin/leads/' + lid + '/kontakt', l.wiedervorlage_am, { verlustgruende: d.verlustgruende, naechster: modus.aktiv() ? () => modus.naechster(lid) : undefined, kurzwahl: modus.aktiv() }))],

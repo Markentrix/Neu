@@ -12,7 +12,7 @@ from .db import tx
 from .routes_angebottermin import MAX, _belegt, _parse, lokal, pruefen
 from .routes_buchung import TZ, EMAIL, ics, lesen
 from .routes_zusammenarbeit import admin_empfaenger
-from .security import audit, client_ip, rate_limit, require_admin
+from .security import audit, client_ip, rate_limit, require_admin, require_vertrieb
 
 router = APIRouter(prefix="/api")
 
@@ -52,9 +52,13 @@ def mail_text(name: str, zeiten: list[str], token: str, nachricht: str, dauer: i
             + zeilen + f"\n\nAlle Vorschläge auf einen Blick: {link(token)}\n\n{ort}\n\nPasst keiner? Antworten Sie einfach auf diese E-Mail." + mailer.SIGNATUR)
 
 
-@router.post("/admin/terminvorschlaege")
-def anlegen(data: VorschlagIn, user: dict = Depends(require_admin)):
+def erstellen(data: VorschlagIn, user: dict, partner_id=None) -> dict:
+    """Gemeinsam für Admin und Vertrieb. Mit partner_id darf nur ein eigener Lead verwendet werden."""
     with tx("admin") as cur:
+        if partner_id:
+            cur.execute("SELECT 1 FROM leads WHERE id=%s AND vertriebspartner_id=%s AND kunden_id IS NULL AND status NOT IN ('gesperrt','consent_ausstehend','tot')", (data.lead_id, partner_id))
+            if not data.lead_id or data.kunden_id or not cur.fetchone():
+                raise HTTPException(404, "Lead nicht gefunden.")
         e = _empfaenger(cur, data)
         zeiten = pruefen(cur, data.zeiten)
         c = lesen(cur)
@@ -68,10 +72,39 @@ def anlegen(data: VorschlagIn, user: dict = Depends(require_admin)):
                         (data.lead_id, "Terminvorschläge gesendet: " + ", ".join(lokal(_parse(x)) for x in zeiten), user["email"]))
         audit(cur, user, "terminvorschlag_gesendet", data.kunden_id, {"zeiten": zeiten})
     ok, grund = mailer.senden(e["email"], "Terminvorschläge für Ihr Beratungsgespräch mit Markentrix", mail_text(e["name"], zeiten, token, data.nachricht, c["dauer"], c["ort"]),
-                              kunden_id=data.kunden_id, art="terminvorschlag")
+                              kunden_id=data.kunden_id, lead_id=data.lead_id, art="termin")
     with tx("admin") as cur:
         cur.execute("UPDATE terminvorschlaege SET gesendet=%s WHERE id=%s", (bool(ok), vid))
     return {"ok": True, "id": str(vid), "gesendet": bool(ok), "grund": None if ok else grund}
+
+
+@router.post("/admin/terminvorschlaege")
+def anlegen(data: VorschlagIn, user: dict = Depends(require_admin)):
+    return erstellen(data, user)
+
+
+class VertriebVorschlagIn(BaseModel):
+    zeiten: list[str] = Field(min_length=1, max_length=MAX)
+    nachricht: str = Field(default="", max_length=1500)
+    an_email: str | None = Field(default=None, max_length=200)
+
+
+@router.post("/vertrieb/leads/{lid}/terminvorschlaege")
+def vertrieb_anlegen(lid: str, d: VertriebVorschlagIn, user: dict = Depends(require_vertrieb)):
+    """Vertriebler schicken Terminvorschläge für ihre eigenen Leads. Die Mail kommt von Markentrix, der Termin landet im gemeinsamen Kalender."""
+    rate_limit("tvv:" + str(user["id"]), 30, 3600)
+    return erstellen(VorschlagIn(lead_id=lid, zeiten=d.zeiten, nachricht=d.nachricht, an_email=d.an_email), user, user["vertriebspartner_id"])
+
+
+@router.get("/vertrieb/leads/{lid}/terminvorschlaege")
+def vertrieb_liste(lid: str, user: dict = Depends(require_vertrieb)):
+    with tx("admin") as cur:
+        cur.execute("SELECT 1 FROM leads WHERE id=%s AND vertriebspartner_id=%s", (lid, user["vertriebspartner_id"]))
+        if not cur.fetchone():
+            raise HTTPException(404, "Lead nicht gefunden.")
+        cur.execute("""SELECT v.id, v.name, v.email, v.zeiten, v.status, v.gesendet, v.erstellt_am, g.start AS gewaehlt, g.status AS gespraech_status FROM terminvorschlaege v
+                       LEFT JOIN gespraechstermine g ON g.id = v.gespraech_id WHERE v.lead_id = %s ORDER BY v.erstellt_am DESC LIMIT 20""", (lid,))
+        return cur.fetchall()
 
 
 @router.get("/admin/terminvorschlaege")
@@ -195,7 +228,7 @@ def nachfassen(vid: str, user: dict = Depends(require_admin)):
         if not zeiten:
             raise HTTPException(409, "Alle vorgeschlagenen Zeiten liegen in der Vergangenheit. Bitte neue Vorschläge senden.")
     text = mail_text(v["name"], zeiten, v["token"], "kurze Erinnerung: Wir haben Ihnen vor ein paar Tagen Termine für ein Beratungsgespräch vorgeschlagen. Falls Sie noch Interesse haben, genügt ein Klick.", c["dauer"], c["ort"])
-    ok, grund = mailer.senden(v["email"], "Erinnerung: Terminvorschläge für Ihr Beratungsgespräch mit Markentrix", text, kunden_id=v["kunden_id"], art="terminvorschlag")
+    ok, grund = mailer.senden(v["email"], "Erinnerung: Terminvorschläge für Ihr Beratungsgespräch mit Markentrix", text, kunden_id=v["kunden_id"], lead_id=v["lead_id"], art="erinnerung")
     if not ok:
         raise HTTPException(502, "Die Mail ging nicht raus: " + (grund or "unbekannter Fehler"))
     with tx("admin") as cur:

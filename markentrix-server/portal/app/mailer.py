@@ -6,7 +6,7 @@ from pathlib import Path
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 
-from . import agb, betrieb, config, einstellungen, mailvorlage, zustellung
+from . import agb, betrieb, config, einstellungen, mailvorlage, verlauf, zustellung
 from .db import tx
 
 
@@ -40,12 +40,13 @@ def anhaenge(anhang) -> list:
 
 
 def senden(an: str, betreff: str, text: str, anhang: tuple[str, bytes, str] | None = None, reply_to: str | None = None,
-           von_name: str | None = None, kunden_id=None, art: str = "system", vorlage: dict | None = None, html: tuple[str, bytes | None] | None = None) -> tuple[bool, str]:
+           von_name: str | None = None, kunden_id=None, art: str = "system", vorlage: dict | None = None, html: tuple[str, bytes | None] | None = None, lead_id=None) -> tuple[bool, str]:
     """Gibt (ok, Fehlertext) zurück. Wirft nie. Das Ergebnis wird für die Betriebs-Ampel und das Zustell-Protokoll festgehalten.
     html = (fertiges HTML, PNG-Logo für cid:logo@mail oder None): eigenes Layout statt der Standard-Mailvorlage."""
     ok, grund = _senden(an, betreff, text, anhang, reply_to, von_name, vorlage, html)
     if grund != "E-Mail-Versand ist noch nicht eingerichtet.":
         zustellung.protokoll(kunden_id, art, an, ok, grund)
+        verlauf.notieren(an, betreff, art, ok, grund, kunden_id, lead_id)
         betrieb.notieren("mail", {"ok_am": betrieb.jetzt()} if ok else {"fehler_am": betrieb.jetzt(), "fehler": grund[:200]})
     return ok, grund
 

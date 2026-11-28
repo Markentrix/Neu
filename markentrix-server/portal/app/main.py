@@ -21,7 +21,7 @@ from .routes_einstellungen import router as einstellungen_router
 from .routes_vertrieb import router as vertrieb_router
 from .routes_2fa import router as zweifaktor_router
 from .routes_public import router as public_router
-from . import routes_kundenservice, routes_leadmerge, routes_kundenbild, routes_terminvorschlag, routes_agb, routes_paketverwaltung, routes_eigeneseite, routes_vertriebfluss, kalenderabo, routes_dsgvo, routes_funnel, tipps, visitenkarte
+from . import routes_mailverlauf, routes_kundenservice, routes_leadmerge, routes_kundenbild, routes_terminvorschlag, routes_agb, routes_paketverwaltung, routes_eigeneseite, routes_vertriebfluss, kalenderabo, routes_dsgvo, routes_funnel, tipps, visitenkarte
 from .routes_onboarding import router as onboarding_router
 from .routes_vertriebqualitaet import router as vqual_router
 from .routes_pakete import router as pakete_router
@@ -165,6 +165,7 @@ app.include_router(diagramme_router)
 app.include_router(routes_kundenbild.router)
 app.include_router(routes_leadmerge.router)
 app.include_router(routes_kundenservice.router)
+app.include_router(routes_mailverlauf.router)
 app.include_router(admin_router)
 app.include_router(websites_router)
 app.include_router(verwaltung_router)

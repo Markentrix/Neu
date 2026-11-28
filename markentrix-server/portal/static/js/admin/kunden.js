@@ -5,6 +5,8 @@ import { erklaerungBox } from './fehlerhilfe.js';
 import { DATEN_TABS, STATI, freigabenKundeKarte, nachrichtenKundeKarte, unterlagenKarte } from './postfach.js';
 import { zeitachseKarte } from './start.js';
 import { terminvorschlagKarte } from './terminvorschlag.js';
+import { mailKarte } from '../mailverlauf.js';
+import { stammdatenKarte } from './stammdatencheck.js';
 import { bildZone } from './bildzone.js';
 import { referenzKarte } from './vertraege.js';
 import { qrKarte } from '../anleitung.js';
@@ -536,6 +538,8 @@ export async function kundeDetail(kid) {
     kopf(k.firma, h('span', { class: 'pill' }, k.kundennummer), pill(k.status), k.referenzkunde ? h('span', { class: 'pill warn' }, 'Referenzkunde') : '', status, listenKnopf('kunden')),
     await websiteProblemKarte(kid),
     await zeitachseKarte(kid),
+    await sicher(() => stammdatenKarte(kid)),
+    await sicher(() => mailKarte('/api/admin/kunden/' + kid + '/mails')),
     await sicher(() => terminvorschlagKarte({ kunden_id: kid }, k.email)),
     h('div', { class: 'card' }, h('h2', {}, 'Stammdaten'), mk, stamm),
     await onboardingKarte(kid),

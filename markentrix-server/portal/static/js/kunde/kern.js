@@ -86,7 +86,7 @@ const HINWEISE = {
 };
 export const inhaber = () => start.kunden_rolle === 'inhaber';
 const EMPFANG = ['heute', 'anfragen', 'termine', 'kalender', 'stamm', 'nachrichten', 'hilfe', 'einstellungen'];
-export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'ablage', 'team', 'avv', 'einrichten', 'dienste', 'shop', 'vertraege', 'wissen', 'pakete'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
+export const sichtbar = () => SEITEN.filter(s => (!s[2] || hat(s[2])) && (!['belege', 'ablage', 'beratung', 'team', 'avv', 'einrichten', 'dienste', 'shop', 'vertraege', 'wissen', 'pakete'].includes(s[0]) || inhaber()) && (s[0] !== 'vertraege' || (start.badges && start.badges.vertraege_da > 0)) && (start.kunden_rolle !== 'empfang' || EMPFANG.includes(s[0])) && (s[0] !== 'stamm' || !start.personengebunden));
 
 const zaehler = (id) => (start.badges && (id === 'nachrichten' ? start.badges.nachrichten : id === 'freigaben' ? start.badges.freigaben : id === 'briefing' ? start.badges.briefing : id === 'avv' ? start.badges.avv : id === 'vertraege' ? start.badges.vertraege : 0)) || 0;
 

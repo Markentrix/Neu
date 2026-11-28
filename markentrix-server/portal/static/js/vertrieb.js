@@ -1,4 +1,6 @@
 import { schrittKarte } from './leadschritt.js';
+import { mailKarte } from './mailverlauf.js';
+import { terminvorschlagKarte } from './admin/terminvorschlag.js';
 import { anrufModus } from './anrufmodus.js';
 import { appGefuehl } from './appgefuehl.js';
 import { nummerBereinigen, ortZurVorwahl, ausText } from './vorwahl.js';
@@ -502,7 +504,7 @@ async function leadDetail(lid) {
   const mehr = mehrMenue(['gesperrt', 'consent_ausstehend', 'tot', 'verloren'].includes(l.status) ? '' : visitenkarteKnopf('/api/vertrieb', lid, l));
   return h('div', { class: 'stack' }, modusLeiste(lid), h('div', { class: 'top' }, h('h1', {}, l.firma), l.telefon && !gesperrt ? h('a', { class: 'btn', href: 'tel:' + String(l.telefon).replace(/[^+\d]/g, ''), 'data-lead': lid, 'data-firma': l.firma }, '📞 Anrufen') : '', gesperrt ? '' : leitfadenKnopf('/api/vertrieb', lid, l, '#leitfaden'), st, mehr, listenKnopf(['leads', 'heute', 'pipeline'])), m,
     leadReiter(lid, [
-      ['anrufen', 'Anrufen', h('div', { class: 'stack' }, schrittKarte(d.schritt, { anrufen: l.telefon && !gesperrt ? 'tel:' + String(l.telefon).replace(/[^+\d]/g, '') : undefined }), datenKarte(lid, l, d, m),
+      ['anrufen', 'Anrufen', h('div', { class: 'stack' }, schrittKarte(d.schritt, { anrufen: l.telefon && !gesperrt ? 'tel:' + String(l.telefon).replace(/[^+\d]/g, '') : undefined, terminvorschlag: gesperrt ? undefined : async () => { dialog('Termine vorschlagen', await terminvorschlagKarte({ lead_id: lid }, l.email, true)); } }), gesperrt ? '' : h('p', {}, h('button', { class: 'btn sec small', type: 'button', onclick: async () => { dialog('Termine vorschlagen', await terminvorschlagKarte({ lead_id: lid }, l.email, true)); } }, '📅 Termine vorschlagen')), await mailKarte('/api/vertrieb/leads/' + lid + '/mails'), datenKarte(lid, l, d, m),
         kontaktKarte(d.kontakt_optionen, '/api/vertrieb/leads/' + lid + '/kontakt', l.wiedervorlage_am, { naechster: () => naechsterLead(lid), verlustgruende: d.verlustgruende, kurzwahl: modus.aktiv() }))],
       ['gespraech', 'Gespräch', h('div', { class: 'stack' }, skriptKarte(l.skript, l.skript_am, '/api/vertrieb/leads/' + lid + '/skript'), branchenKarte(lid), nachgespraechKarte(lid))],
       ['angebot', 'Angebot & Termin', h('div', { class: 'stack' }, terminKarte(lid), h('div', { id: 'angebotbereich', class: 'stack' }, direktAngebotKarte(lid, l), angebotKarte(lid, l)))],
